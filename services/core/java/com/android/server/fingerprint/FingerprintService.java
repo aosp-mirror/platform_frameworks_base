@@ -24,7 +24,9 @@ import android.app.IUserSwitchObserver;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.content.pm.UserInfo;
+import android.hardware.fingerprint.IFingerprintServiceLockoutResetCallback;
 import android.os.Binder;
+import android.os.DeadObjectException;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.IBinder;
@@ -51,7 +53,6 @@ import android.hardware.fingerprint.IFingerprintService;
 import android.hardware.fingerprint.IFingerprintDaemon;
 import android.hardware.fingerprint.IFingerprintDaemonCallback;
 import android.hardware.fingerprint.IFingerprintServiceReceiver;
-import android.view.Display;
 
 import static android.Manifest.permission.MANAGE_FINGERPRINT;
 import static android.Manifest.permission.RESET_FINGERPRINT_LOCKOUT;
@@ -60,6 +61,7 @@ import static android.Manifest.permission.USE_FINGERPRINT;
 import java.io.File;
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -83,6 +85,8 @@ public class FingerprintService extends SystemService implements IBinder.DeathRe
     private ClientMonitor mAuthClient = null;
     private ClientMonitor mEnrollClient = null;
     private ClientMonitor mRemoveClient = null;
+    private final ArrayList<FingerprintServiceLockoutResetMonitor> mLockoutMonitors =
+            new ArrayList<>();
     private final AppOpsManager mAppOps;
 
     private static final long MS_PER_SEC = 1000;
@@ -259,6 +263,7 @@ public class FingerprintService extends SystemService implements IBinder.DeathRe
         // If we're asked to reset failed attempts externally (i.e. from Keyguard), the runnable
         // may still be in the queue; remove it.
         mHandler.removeCallbacks(mLockoutReset);
+        notifyLockoutResetMonitors();
     }
 
     private boolean handleFailedAttempt(ClientMonitor clientMonitor) {
@@ -499,6 +504,23 @@ public class FingerprintService extends SystemService implements IBinder.DeathRe
                 opPackageName) == AppOpsManager.MODE_ALLOWED;
     }
 
+    private void addLockoutResetMonitor(FingerprintServiceLockoutResetMonitor monitor) {
+        if (!mLockoutMonitors.contains(monitor)) {
+            mLockoutMonitors.add(monitor);
+        }
+    }
+
+    private void removeLockoutResetCallback(
+            FingerprintServiceLockoutResetMonitor monitor) {
+        mLockoutMonitors.remove(monitor);
+    }
+
+    private void notifyLockoutResetMonitors() {
+        for (int i = 0; i < mLockoutMonitors.size(); i++) {
+            mLockoutMonitors.get(i).sendLockoutReset();
+        }
+    }
+
     private class ClientMonitor implements IBinder.DeathRecipient {
         IBinder token;
         IFingerprintServiceReceiver receiver;
@@ -614,7 +636,7 @@ public class FingerprintService extends SystemService implements IBinder.DeathRe
                     FingerprintUtils.vibrateFingerprintSuccess(getContext());
                 }
                 result |= true; // we have a valid fingerprint
-                mLockoutReset.run();
+                mHandler.post(mLockoutReset);
             }
             return result;
         }
@@ -652,6 +674,36 @@ public class FingerprintService extends SystemService implements IBinder.DeathRe
             }
             return true; // errors always terminate progress
         }
+    }
+
+    private class FingerprintServiceLockoutResetMonitor {
+
+        private final IFingerprintServiceLockoutResetCallback mCallback;
+
+        public FingerprintServiceLockoutResetMonitor(
+                IFingerprintServiceLockoutResetCallback callback) {
+            mCallback = callback;
+        }
+
+        public void sendLockoutReset() {
+            if (mCallback != null) {
+                try {
+                    mCallback.onLockoutReset(mHalDeviceId);
+                } catch (DeadObjectException e) {
+                    Slog.w(TAG, "Death object while invoking onLockoutReset: ", e);
+                    mHandler.post(mRemoveCallbackRunnable);
+                } catch (RemoteException e) {
+                    Slog.w(TAG, "Failed to invoke onLockoutReset: ", e);
+                }
+            }
+        }
+
+        private final Runnable mRemoveCallbackRunnable = new Runnable() {
+            @Override
+            public void run() {
+                removeLockoutResetCallback(FingerprintServiceLockoutResetMonitor.this);
+            }
+        };
     }
 
     private IFingerprintDaemonCallback mDaemonCallback = new IFingerprintDaemonCallback.Stub() {
@@ -922,7 +974,19 @@ public class FingerprintService extends SystemService implements IBinder.DeathRe
         public void resetTimeout(byte [] token) {
             checkPermission(RESET_FINGERPRINT_LOCKOUT);
             // TODO: confirm security token when we move timeout management into the HAL layer.
-            mLockoutReset.run();
+            mHandler.post(mLockoutReset);
+        }
+
+        @Override
+        public void addLockoutResetCallback(final IFingerprintServiceLockoutResetCallback callback)
+                throws RemoteException {
+            mHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    addLockoutResetMonitor(
+                            new FingerprintServiceLockoutResetMonitor(callback));
+                }
+            });
         }
     }
 
