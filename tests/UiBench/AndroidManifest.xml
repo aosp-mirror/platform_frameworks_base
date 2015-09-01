@@ -83,6 +83,30 @@
                 <category android:name="com.android.test.uibench.TEST" />
             </intent-filter>
         </activity>
+        <activity
+            android:name=".TrivialRecyclerViewActivity"
+            android:label="General/Trivial Recycler ListView" >
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="com.android.test.uibench.TEST" />
+            </intent-filter>
+        </activity>
+        <activity
+            android:name=".ActivityTransition"
+            android:label="Transitions/Activity Transition" >
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="com.android.test.uibench.TEST" />
+            </intent-filter>
+        </activity>
+        <activity
+            android:name=".ActivityTransitionDetails"
+            android:label="Transitions/Activity Transition " >
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <!-- Part of ActivityTransition test above, so not in TEST category -->
+            </intent-filter>
+        </activity>
 
         <!-- Rendering -->
         <activity
