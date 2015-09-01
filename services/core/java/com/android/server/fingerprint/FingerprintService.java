@@ -18,9 +18,12 @@ package com.android.server.fingerprint;
 
 import android.Manifest;
 import android.app.ActivityManager;
+import android.app.ActivityManager.RunningAppProcessInfo;
+import android.app.ActivityManager.RunningTaskInfo;
 import android.app.ActivityManagerNative;
 import android.app.AppOpsManager;
 import android.app.IUserSwitchObserver;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.content.pm.UserInfo;
@@ -54,6 +57,7 @@ import android.hardware.fingerprint.IFingerprintDaemon;
 import android.hardware.fingerprint.IFingerprintDaemonCallback;
 import android.hardware.fingerprint.IFingerprintServiceReceiver;
 
+import static android.app.ActivityManager.RunningAppProcessInfo.IMPORTANCE_FOREGROUND;
 import static android.Manifest.permission.MANAGE_FINGERPRINT;
 import static android.Manifest.permission.RESET_FINGERPRINT_LOCKOUT;
 import static android.Manifest.permission.USE_FINGERPRINT;
@@ -93,6 +97,7 @@ public class FingerprintService extends SystemService implements IBinder.DeathRe
     private static final long FAIL_LOCKOUT_TIMEOUT_MS = 30*1000;
     private static final int MAX_FAILED_ATTEMPTS = 5;
     private static final int FINGERPRINT_ACQUIRED_GOOD = 0;
+    private final String mKeyguardPackage;
 
     Handler mHandler = new Handler() {
         @Override
@@ -125,6 +130,8 @@ public class FingerprintService extends SystemService implements IBinder.DeathRe
     public FingerprintService(Context context) {
         super(context);
         mContext = context;
+        mKeyguardPackage = ComponentName.unflattenFromString(context.getResources().getString(
+                com.android.internal.R.string.config_keyguardComponent)).getPackageName();
         mAppOps = context.getSystemService(AppOpsManager.class);
         mPowerManager = (PowerManager) mContext.getSystemService(Context.POWER_SERVICE);
     }
@@ -498,10 +505,50 @@ public class FingerprintService extends SystemService implements IBinder.DeathRe
         return false;
     }
 
-    private boolean canUseFingerprint(String opPackageName) {
+    private boolean isForegroundActivity(int uid, int pid) {
+        try {
+            List<RunningAppProcessInfo> procs =
+                    ActivityManagerNative.getDefault().getRunningAppProcesses();
+            int N = procs.size();
+            for (int i = 0; i < N; i++) {
+                RunningAppProcessInfo proc = procs.get(i);
+                if (proc.pid == pid && proc.uid == uid
+                        && proc.importance == IMPORTANCE_FOREGROUND) {
+                    return true;
+                }
+            }
+        } catch (RemoteException e) {
+            Slog.w(TAG, "am.getRunningAppProcesses() failed");
+        }
+        return false;
+    }
+
+    /**
+     * @param opPackageName name of package for caller
+     * @param foregroundOnly only allow this call while app is in the foreground
+     * @return true if caller can use fingerprint API
+     */
+    private boolean canUseFingerprint(String opPackageName, boolean foregroundOnly) {
         checkPermission(USE_FINGERPRINT);
-        return mAppOps.noteOp(AppOpsManager.OP_USE_FINGERPRINT, Binder.getCallingUid(),
-                opPackageName) == AppOpsManager.MODE_ALLOWED;
+        final int uid = Binder.getCallingUid();
+        final int pid = Binder.getCallingPid();
+        if (opPackageName.equals(mKeyguardPackage)) {
+            return true; // Keyguard is always allowed
+        }
+        if (!isCurrentUserOrProfile(UserHandle.getCallingUserId())) {
+            Slog.w(TAG,"Rejecting " + opPackageName + " ; not a current user or profile");
+            return false;
+        }
+        if (mAppOps.noteOp(AppOpsManager.OP_USE_FINGERPRINT, uid, opPackageName)
+                != AppOpsManager.MODE_ALLOWED) {
+            Slog.v(TAG, "Rejecting " + opPackageName + " ; permission denied");
+            return false;
+        }
+        if (foregroundOnly && !isForegroundActivity(uid, pid)) {
+            Slog.v(TAG, "Rejecting " + opPackageName + " ; not in foreground");
+            return false;
+        }
+        return true;
     }
 
     private void addLockoutResetMonitor(FingerprintServiceLockoutResetMonitor monitor) {
@@ -834,12 +881,7 @@ public class FingerprintService extends SystemService implements IBinder.DeathRe
         public void authenticate(final IBinder token, final long opId, final int groupId,
                 final IFingerprintServiceReceiver receiver, final int flags,
                 final String opPackageName) {
-            if (!isCurrentUserOrProfile(UserHandle.getCallingUserId())) {
-                Slog.w(TAG, "Can't authenticate non-current user");
-                return;
-            }
-            if (!canUseFingerprint(opPackageName)) {
-                Slog.w(TAG, "Calling not granted permission to use fingerprint");
+            if (!canUseFingerprint(opPackageName, true /* foregroundOnly */)) {
                 return;
             }
 
@@ -859,7 +901,7 @@ public class FingerprintService extends SystemService implements IBinder.DeathRe
 
         @Override // Binder call
         public void cancelAuthentication(final IBinder token, String opPackageName) {
-            if (!canUseFingerprint(opPackageName)) {
+            if (!canUseFingerprint(opPackageName, false /* foregroundOnly */)) {
                 return;
             }
             mHandler.post(new Runnable() {
@@ -890,7 +932,7 @@ public class FingerprintService extends SystemService implements IBinder.DeathRe
 
         @Override // Binder call
         public boolean isHardwareDetected(long deviceId, String opPackageName) {
-            if (!canUseFingerprint(opPackageName)) {
+            if (!canUseFingerprint(opPackageName, false /* foregroundOnly */)) {
                 return false;
             }
             return mHalDeviceId != 0;
@@ -914,7 +956,7 @@ public class FingerprintService extends SystemService implements IBinder.DeathRe
 
         @Override // Binder call
         public List<Fingerprint> getEnrolledFingerprints(int userId, String opPackageName) {
-            if (!canUseFingerprint(opPackageName)) {
+            if (!canUseFingerprint(opPackageName, false /* foregroundOnly */)) {
                 return Collections.emptyList();
             }
             int effectiveUserId = getEffectiveUserId(userId);
@@ -924,7 +966,7 @@ public class FingerprintService extends SystemService implements IBinder.DeathRe
 
         @Override // Binder call
         public boolean hasEnrolledFingerprints(int userId, String opPackageName) {
-            if (!canUseFingerprint(opPackageName)) {
+            if (!canUseFingerprint(opPackageName, false /* foregroundOnly */)) {
                 return false;
             }
 
