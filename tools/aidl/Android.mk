@@ -56,13 +56,14 @@ LOCAL_MODULE := aidl_unittests
 LOCAL_CFLAGS := -g -DUNIT_TEST -Wall -Werror
 LOCAL_SRC_FILES := \
     options_unittest.cpp \
+    test_main.cpp \
     tests/test.cpp \
 
 LOCAL_STATIC_LIBRARIES := \
     libaidl-common \
     libgmock_host \
     libgtest_host \
-    libBionicGtestMain
+
 LOCAL_LDLIBS := -lrt
 include $(BUILD_HOST_NATIVE_TEST)
 
