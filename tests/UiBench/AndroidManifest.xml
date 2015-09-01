@@ -14,11 +14,13 @@
   ~ limitations under the License
   -->
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-        package="com.android.test.uibench">
+    xmlns:tools="http://schemas.android.com/tools"
+    package="com.android.test.uibench">
 
     <application
         android:allowBackup="false"
-        android:theme="@style/Theme.AppCompat.Light.DarkActionBar">
+        android:theme="@style/Theme.AppCompat.Light.DarkActionBar"
+        tools:ignore="MissingApplicationIcon">
         <uses-library android:name="android.test.runner" />
 
         <!-- Root navigation activity -->
@@ -33,6 +35,14 @@
         </activity>
 
         <!-- General -->
+        <activity
+            android:name=".DialogListActivity"
+            android:label="General/Dialog List" >
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="com.android.test.uibench.TEST" />
+            </intent-filter>
+        </activity>
         <activity
             android:name=".GlTextureViewActivity"
             android:label="General/GL TextureView" >
@@ -74,10 +84,28 @@
             </intent-filter>
         </activity>
 
-        <!-- GPU -->
+        <!-- Rendering -->
         <activity
             android:name=".BitmapUploadActivity"
-            android:label="GPU/Bitmap Upload" >
+            android:label="Rendering/Bitmap Upload" >
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="com.android.test.uibench.TEST" />
+            </intent-filter>
+        </activity>
+        <activity
+            android:name=".ShadowGridActivity"
+            android:label="Rendering/Shadow Grid" >
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="com.android.test.uibench.TEST" />
+            </intent-filter>
+        </activity>
+
+        <!-- Inflation -->
+        <activity
+            android:name=".InflatingListActivity"
+            android:label="Inflation/Inflating ListView" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="com.android.test.uibench.TEST" />

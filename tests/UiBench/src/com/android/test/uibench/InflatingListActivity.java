@@ -19,25 +19,21 @@ import android.os.Bundle;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.ListFragment;
 import android.support.v7.app.AppCompatActivity;
+import android.view.View;
+import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
+import android.widget.ListAdapter;
 
-import java.util.Random;
-
-public class TrivialListActivity extends AppCompatActivity {
-    static final int STRING_LENGTH = 10;
-
-    static String[] buildStringList() {
-        String[] strings = new String[200];
-        Random random = new Random(0);
-        for (int i = 0; i < strings.length; i++) {
-            String result = "";
-            for (int j = 0; j < STRING_LENGTH; j++) {
-                // add random letter
-                result += (char)(random.nextInt(26) + 65);
+public class InflatingListActivity extends AppCompatActivity {
+    private ListAdapter createListAdapter() {
+        return new ArrayAdapter<String>(this,
+                android.R.layout.simple_list_item_1, TrivialListActivity.buildStringList()) {
+            @Override
+            public View getView(int position, View convertView, ViewGroup parent) {
+                // pathological getView behavior: drop convertView on the floor to force inflation
+                return super.getView(position, null, parent);
             }
-            strings[i] = result;
-        }
-        return strings;
+        };
     }
 
     @Override
@@ -47,8 +43,7 @@ public class TrivialListActivity extends AppCompatActivity {
         FragmentManager fm = getSupportFragmentManager();
         if (fm.findFragmentById(android.R.id.content) == null) {
             ListFragment listFragment = new ListFragment();
-            listFragment.setListAdapter(new ArrayAdapter<>(this,
-                    android.R.layout.simple_list_item_1, buildStringList()));
+            listFragment.setListAdapter(createListAdapter());
             fm.beginTransaction().add(android.R.id.content, listFragment).commit();
         }
     }

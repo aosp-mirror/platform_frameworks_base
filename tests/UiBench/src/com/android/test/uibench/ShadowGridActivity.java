@@ -19,36 +19,26 @@ import android.os.Bundle;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.ListFragment;
 import android.support.v7.app.AppCompatActivity;
+import android.view.View;
 import android.widget.ArrayAdapter;
 
-import java.util.Random;
-
-public class TrivialListActivity extends AppCompatActivity {
-    static final int STRING_LENGTH = 10;
-
-    static String[] buildStringList() {
-        String[] strings = new String[200];
-        Random random = new Random(0);
-        for (int i = 0; i < strings.length; i++) {
-            String result = "";
-            for (int j = 0; j < STRING_LENGTH; j++) {
-                // add random letter
-                result += (char)(random.nextInt(26) + 65);
-            }
-            strings[i] = result;
-        }
-        return strings;
-    }
-
+public class ShadowGridActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
         FragmentManager fm = getSupportFragmentManager();
         if (fm.findFragmentById(android.R.id.content) == null) {
-            ListFragment listFragment = new ListFragment();
+            ListFragment listFragment = new ListFragment() {
+                @Override
+                public void onViewCreated(View view, Bundle savedInstanceState) {
+                    super.onViewCreated(view, savedInstanceState);
+                    getListView().setDivider(null);
+                }
+            };
+
             listFragment.setListAdapter(new ArrayAdapter<>(this,
-                    android.R.layout.simple_list_item_1, buildStringList()));
+                    R.layout.card_row, R.id.card_text, TrivialListActivity.buildStringList()));
             fm.beginTransaction().add(android.R.id.content, listFragment).commit();
         }
     }
