@@ -421,8 +421,9 @@ public class VolumeDialog {
                         }
                     }
                 } else {
-                    final boolean vmute = row.ss.level == 0;
-                    mController.setStreamVolume(stream, vmute ? row.lastAudibleLevel : 0);
+                    final boolean vmute = row.ss.level == row.ss.levelMin;
+                    mController.setStreamVolume(stream,
+                            vmute ? row.lastAudibleLevel : row.ss.levelMin);
                 }
                 row.userAttempt = 0;  // reset the grace period, slider should update immediately
             }
@@ -1024,6 +1025,7 @@ public class VolumeDialog {
                 final int minProgress = mRow.ss.levelMin * 100;
                 if (progress < minProgress) {
                     seekBar.setProgress(minProgress);
+                    progress = minProgress;
                 }
             }
             final int userLevel = getImpliedLevel(seekBar, progress);
