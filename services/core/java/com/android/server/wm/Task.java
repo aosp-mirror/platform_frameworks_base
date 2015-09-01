@@ -23,7 +23,6 @@ import static android.app.ActivityManager.FREEFORM_WORKSPACE_STACK_ID;
 
 import android.content.res.Configuration;
 import android.graphics.Rect;
-import android.util.DisplayMetrics;
 import android.util.EventLog;
 import android.util.Slog;
 import android.util.SparseArray;
@@ -40,13 +39,6 @@ class Task implements DimLayer.DimLayerUser {
     /** Amount of time in milliseconds to animate the dim surface from one value to another,
      * when no window animation is driving it. */
     private static final int DEFAULT_DIM_DURATION = 200;
-
-    // The amount we divide the height/width of the bounds we are trying to fit the task within
-    // when using the method {@link #fitWithinBounds}.
-    // We always want the task to to be visible in the bounds without affecting its size when
-    // fitting. To make sure this is the case, we don't adjust the task left or top side pass
-    // the input bounds right or bottom side minus the width or height divided by this value.
-    private static final int FIT_WITHIN_BOUNDS_DIVIDER = 3;
 
     TaskStack mStack;
     final AppTokenList mAppTokens = new AppTokenList();
@@ -84,13 +76,13 @@ class Task implements DimLayer.DimLayerUser {
     // of creating a new object per fullscreen task on a display.
     private static final SparseArray<DimLayer> sSharedFullscreenDimLayers = new SparseArray<>();
 
-    Task(int taskId, TaskStack stack, int userId, WindowManagerService service, Rect bounds) {
+    Task(int taskId, TaskStack stack, int userId, WindowManagerService service, Rect bounds,
+            Configuration config) {
         mTaskId = taskId;
         mStack = stack;
         mUserId = userId;
         mService = service;
-        mOverrideConfig = Configuration.EMPTY;
-        setBounds(bounds);
+        setBounds(bounds, config);
     }
 
     DisplayContent getDisplayContent() {
@@ -172,43 +164,18 @@ class Task implements DimLayer.DimLayerUser {
         }
     }
 
-    /** Fits the tasks within the input bounds adjusting the task bounds as needed.
-     *  @param bounds Bounds to fit the task within. Nothing is done if null.
-     *  @return Returns true if the task bounds was adjusted in any way.
-     *  */
-    boolean fitWithinBounds(Rect bounds) {
-        if (bounds == null || bounds.contains(mBounds)) {
-            return false;
-        }
-        mTmpRect2.set(mBounds);
-
-        if (mBounds.left < bounds.left || mBounds.right > bounds.right) {
-            final int maxRight = bounds.right - (bounds.width() / FIT_WITHIN_BOUNDS_DIVIDER);
-            int horizontalDiff = bounds.left - mBounds.left;
-            if ((horizontalDiff < 0 && mBounds.left >= maxRight)
-                    || (mBounds.left + horizontalDiff >= maxRight)) {
-                horizontalDiff = maxRight - mBounds.left;
-            }
-            mTmpRect2.left += horizontalDiff;
-            mTmpRect2.right += horizontalDiff;
-        }
-
-        if (mBounds.top < bounds.top || mBounds.bottom > bounds.bottom) {
-            final int maxBottom = bounds.bottom - (bounds.height() / FIT_WITHIN_BOUNDS_DIVIDER);
-            int verticalDiff = bounds.top - mBounds.top;
-            if ((verticalDiff < 0 && mBounds.top >= maxBottom)
-                    || (mBounds.top + verticalDiff >= maxBottom)) {
-                verticalDiff = maxBottom - mBounds.top;
-            }
-            mTmpRect2.top += verticalDiff;
-            mTmpRect2.bottom += verticalDiff;
-        }
-
-        return setBounds(mTmpRect2);
-    }
-
     /** Set the task bounds. Passing in null sets the bounds to fullscreen. */
-    boolean setBounds(Rect bounds) {
+    boolean setBounds(Rect bounds, Configuration config) {
+        if (config == null) {
+            config = Configuration.EMPTY;
+        }
+        if (bounds == null && !Configuration.EMPTY.equals(config)) {
+            throw new IllegalArgumentException("null bounds but non empty configuration: "
+                    + config);
+        }
+        if (bounds != null && Configuration.EMPTY.equals(config)) {
+            throw new IllegalArgumentException("non null bounds, but empty configuration");
+        }
         boolean oldFullscreen = mFullscreen;
         int rotation = Surface.ROTATION_0;
         final DisplayContent displayContent = mStack.getDisplayContent();
@@ -241,7 +208,7 @@ class Task implements DimLayer.DimLayerUser {
         mBounds.set(bounds);
         mRotation = rotation;
         updateDimLayer();
-        updateOverrideConfiguration();
+        mOverrideConfig = mFullscreen ? Configuration.EMPTY : config;
         return true;
     }
 
@@ -249,36 +216,12 @@ class Task implements DimLayer.DimLayerUser {
         out.set(mBounds);
     }
 
-    private void updateOverrideConfiguration() {
-        final Configuration serviceConfig = mService.mCurConfiguration;
-        if (mFullscreen) {
-            mOverrideConfig = Configuration.EMPTY;
-            return;
-        }
-
-        if (mOverrideConfig == Configuration.EMPTY) {
-            mOverrideConfig  = new Configuration();
-        }
-
-        // TODO(multidisplay): Update Dp to that of display stack is on.
-        final float density = serviceConfig.densityDpi * DisplayMetrics.DENSITY_DEFAULT_SCALE;
-        mOverrideConfig.screenWidthDp =
-                Math.min((int)(mBounds.width() / density), serviceConfig.screenWidthDp);
-        mOverrideConfig.screenHeightDp =
-                Math.min((int)(mBounds.height() / density), serviceConfig.screenHeightDp);
-        mOverrideConfig.smallestScreenWidthDp =
-                Math.min(mOverrideConfig.screenWidthDp, mOverrideConfig.screenHeightDp);
-        mOverrideConfig.orientation =
-                (mOverrideConfig.screenWidthDp <= mOverrideConfig.screenHeightDp)
-                        ? Configuration.ORIENTATION_PORTRAIT : Configuration.ORIENTATION_LANDSCAPE;
-    }
-
     void updateDisplayInfo(final DisplayContent displayContent) {
         if (displayContent == null) {
             return;
         }
         if (mFullscreen) {
-            setBounds(null);
+            setBounds(null, Configuration.EMPTY);
             return;
         }
         final int newRotation = displayContent.getDisplayInfo().rotation;
@@ -313,7 +256,7 @@ class Task implements DimLayer.DimLayerUser {
                 mTmpRect2.bottom = mTmpRect2.top + mBounds.width();
                 break;
         }
-        setBounds(mTmpRect2);
+        setBounds(mTmpRect2, mOverrideConfig);
     }
 
     /** Updates the dim layer bounds, recreating it if needed. */

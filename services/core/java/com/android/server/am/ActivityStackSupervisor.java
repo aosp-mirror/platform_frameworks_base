@@ -97,7 +97,6 @@ import android.service.voice.IVoiceInteractionSession;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.EventLog;
-import android.util.IntArray;
 import android.util.Slog;
 import android.util.SparseArray;
 
@@ -333,6 +332,9 @@ public final class ActivityStackSupervisor implements DisplayListener {
 
     // temp. rect used during resize calculation so we don't need to create a new object each time.
     private final Rect tempRect = new Rect();
+
+    private final SparseArray<Configuration> mTmpConfigs = new SparseArray<>();
+    private final SparseArray<Rect> mTmpBounds = new SparseArray<>();
 
     /**
      * Description of a request to start a new activity, which has been held
@@ -2917,19 +2919,19 @@ public final class ActivityStackSupervisor implements DisplayListener {
         ActivityRecord r = stack.topRunningActivityLocked(null);
         final boolean resizeTasks = r != null && r.task.mResizeable;
 
-        final IntArray changedTaskIds = new IntArray(stack.numTasks());
-        final List<Configuration> newTaskConfigs = new ArrayList<>(stack.numTasks());
-        stack.mFullscreen = mWindowManager.resizeStack(
-                stackId, bounds, resizeTasks, changedTaskIds, newTaskConfigs);
-        for (int i = changedTaskIds.size() - 1; i >= 0; i--) {
-            final TaskRecord task = anyTaskForIdLocked(changedTaskIds.get(i), false);
-            if (task == null) {
-                Slog.wtf(TAG, "Task in WindowManager, but not in ActivityManager???");
-                continue;
+        mTmpBounds.clear();
+        mTmpConfigs.clear();
+        if (resizeTasks) {
+            ArrayList<TaskRecord> tasks = stack.getAllTasks();
+            for (int i = tasks.size() - 1; i >= 0; i--) {
+                TaskRecord task = tasks.get(i);
+                task.updateOverrideConfiguration(stackId, bounds);
+                mTmpConfigs.put(task.taskId, task.mOverrideConfig);
+                mTmpBounds.put(task.taskId, task.mBounds);
             }
-            task.updateOverrideConfiguration(newTaskConfigs.get(i), bounds);
         }
-
+        stack.mFullscreen = mWindowManager.resizeStack(stackId, bounds, resizeTasks, mTmpConfigs,
+                mTmpBounds);
         if (stack.mStackId == DOCKED_STACK_ID) {
             // Dock stack funness...Yay!
             if (stack.mFullscreen) {
@@ -3024,25 +3026,27 @@ public final class ActivityStackSupervisor implements DisplayListener {
             stackId = FREEFORM_WORKSPACE_STACK_ID;
         }
         if (stackId != task.stack.mStackId) {
-            final String reason = "resizeTask";
-            final ActivityStack stack =
-                    moveTaskToStackUncheckedLocked(task, stackId, ON_TOP, !FORCE_FOCUS, reason);
+            moveTaskToStackUncheckedLocked(task, stackId, ON_TOP, !FORCE_FOCUS, "resizeTask");
         }
 
-        final Configuration overrideConfig = mWindowManager.resizeTask(task.taskId, bounds);
-        if (task.updateOverrideConfiguration(overrideConfig, bounds)) {
+        final Configuration overrideConfig =  task.updateOverrideConfiguration(stackId, bounds);
+        // This variable holds information whether the configuration didn't change in a signficant
+        // way and the activity was kept the way it was. If it's false, it means the activity had
+        // to be relaunched due to configuration change.
+        boolean kept = true;
+        if (overrideConfig != null) {
             ActivityRecord r = task.topRunningActivityLocked(null);
             if (r != null) {
                 final ActivityStack stack = task.stack;
-                final boolean updated = stack.ensureActivityConfigurationLocked(r, 0);
-                // And we need to make sure at this point that all other activities
-                // are made visible with the correct configuration.
+                kept = stack.ensureActivityConfigurationLocked(r, 0);
+                // All other activities must be made visible with their correct configuration.
                 ensureActivitiesVisibleLocked(r, 0);
-                if (!updated) {
+                if (!kept) {
                     resumeTopActivitiesLocked(stack, null, null);
                 }
             }
         }
+        mWindowManager.resizeTask(task.taskId, bounds, task.mOverrideConfig, kept);
     }
 
     ActivityStack createStackOnDisplay(int stackId, int displayId, boolean onTop) {

@@ -3975,8 +3975,7 @@ final class ActivityStack {
      * for whatever reason.  Ensures the HistoryRecord is updated with the
      * correct configuration and all other bookkeeping is handled.
      */
-    final boolean ensureActivityConfigurationLocked(ActivityRecord r,
-            int globalChanges) {
+    final boolean ensureActivityConfigurationLocked(ActivityRecord r, int globalChanges) {
         if (mConfigWillChange) {
             if (DEBUG_SWITCH || DEBUG_CONFIGURATION) Slog.v(TAG_CONFIGURATION,
                     "Skipping config check (will change): " + r);
@@ -4589,25 +4588,19 @@ final class ActivityStack {
 
     void addConfigOverride(ActivityRecord r, TaskRecord task) {
         final Rect bounds = task.getLaunchBounds();
-        final Configuration config =
-                mWindowManager.addAppToken(task.mActivities.indexOf(r), r.appToken,
-                        r.task.taskId, mStackId, r.info.screenOrientation, r.fullscreen,
-                        (r.info.flags & ActivityInfo.FLAG_SHOW_FOR_ALL_USERS) != 0, r.userId,
-                        r.info.configChanges, task.voiceSession != null, r.mLaunchTaskBehind,
-                        bounds);
-        if (config != null) {
-            task.updateOverrideConfiguration(config, bounds);
-        }
+        final Configuration config = task.updateOverrideConfiguration(mStackId, bounds);
+        mWindowManager.addAppToken(task.mActivities.indexOf(r), r.appToken,
+                r.task.taskId, mStackId, r.info.screenOrientation, r.fullscreen,
+                (r.info.flags & ActivityInfo.FLAG_SHOW_FOR_ALL_USERS) != 0, r.userId,
+                r.info.configChanges, task.voiceSession != null, r.mLaunchTaskBehind,
+                bounds, config);
         r.taskConfigOverride = task.mOverrideConfig;
     }
 
     private void setAppTask(ActivityRecord r, TaskRecord task) {
         final Rect bounds = task.getLaunchBounds();
-        final Configuration config =
-                mWindowManager.setAppTask(r.appToken, task.taskId, task.getLaunchBounds());
-        if (config != null) {
-            task.updateOverrideConfiguration(config, bounds);
-        }
+        final Configuration config = task.updateOverrideConfiguration(mStackId, bounds);
+        mWindowManager.setAppTask(r.appToken, task.taskId, task.getLaunchBounds(), config);
         r.taskConfigOverride = task.mOverrideConfig;
     }
 

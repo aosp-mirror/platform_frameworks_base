@@ -32,7 +32,7 @@ import junit.framework.TestCase;
  */
 public class WindowManagerPermissionTests extends TestCase {
     IWindowManager mWm;
-    
+
     @Override
     protected void setUp() throws Exception {
         super.setUp();
@@ -51,7 +51,7 @@ public class WindowManagerPermissionTests extends TestCase {
         } catch (RemoteException e) {
             fail("Unexpected remote exception");
         }
-        
+
         try {
             mWm.resumeKeyDispatching(null);
             fail("IWindowManager.resumeKeyDispatching did not throw SecurityException as"
@@ -61,7 +61,7 @@ public class WindowManagerPermissionTests extends TestCase {
         } catch (RemoteException e) {
             fail("Unexpected remote exception");
         }
-        
+
         try {
             mWm.setEventDispatching(true);
             fail("IWindowManager.setEventDispatching did not throw SecurityException as"
@@ -71,7 +71,7 @@ public class WindowManagerPermissionTests extends TestCase {
         } catch (RemoteException e) {
             fail("Unexpected remote exception");
         }
-        
+
         try {
             mWm.addWindowToken(null, 0);
             fail("IWindowManager.addWindowToken did not throw SecurityException as"
@@ -81,7 +81,7 @@ public class WindowManagerPermissionTests extends TestCase {
         } catch (RemoteException e) {
             fail("Unexpected remote exception");
         }
-        
+
         try {
             mWm.removeWindowToken(null);
             fail("IWindowManager.removeWindowToken did not throw SecurityException as"
@@ -91,9 +91,10 @@ public class WindowManagerPermissionTests extends TestCase {
         } catch (RemoteException e) {
             fail("Unexpected remote exception");
         }
-        
+
         try {
-            mWm.addAppToken(0, null, 0, 0, 0, false, false, 0, 0, false, false, null);
+            mWm.addAppToken(0, null, 0, 0, 0, false, false, 0, 0, false, false, null,
+                    Configuration.EMPTY);
             fail("IWindowManager.addAppToken did not throw SecurityException as"
                     + " expected");
         } catch (SecurityException e) {
@@ -101,9 +102,9 @@ public class WindowManagerPermissionTests extends TestCase {
         } catch (RemoteException e) {
             fail("Unexpected remote exception");
         }
-        
+
         try {
-            mWm.setAppTask(null, 0, null);
+            mWm.setAppTask(null, 0, null, null);
             fail("IWindowManager.setAppGroupId did not throw SecurityException as"
                     + " expected");
         } catch (SecurityException e) {
@@ -111,7 +112,7 @@ public class WindowManagerPermissionTests extends TestCase {
         } catch (RemoteException e) {
             fail("Unexpected remote exception");
         }
-        
+
         try {
             mWm.updateOrientationFromAppTokens(new Configuration(), null);
             fail("IWindowManager.updateOrientationFromAppTokens did not throw SecurityException as"
@@ -121,7 +122,7 @@ public class WindowManagerPermissionTests extends TestCase {
         } catch (RemoteException e) {
             fail("Unexpected remote exception");
         }
-        
+
         try {
             mWm.setAppOrientation(null, 0);
             mWm.addWindowToken(null, 0);
@@ -132,7 +133,7 @@ public class WindowManagerPermissionTests extends TestCase {
         } catch (RemoteException e) {
             fail("Unexpected remote exception");
         }
-        
+
         try {
             mWm.setFocusedApp(null, false);
             fail("IWindowManager.setFocusedApp did not throw SecurityException as"
@@ -142,7 +143,7 @@ public class WindowManagerPermissionTests extends TestCase {
         } catch (RemoteException e) {
             fail("Unexpected remote exception");
         }
-        
+
         try {
             mWm.prepareAppTransition(0, false);
             fail("IWindowManager.prepareAppTransition did not throw SecurityException as"
@@ -152,7 +153,7 @@ public class WindowManagerPermissionTests extends TestCase {
         } catch (RemoteException e) {
             fail("Unexpected remote exception");
         }
-        
+
         try {
             mWm.executeAppTransition();
             fail("IWindowManager.executeAppTransition did not throw SecurityException as"
@@ -162,7 +163,7 @@ public class WindowManagerPermissionTests extends TestCase {
         } catch (RemoteException e) {
             fail("Unexpected remote exception");
         }
-        
+
         try {
             mWm.setAppStartingWindow(null, "foo", 0, null, null, 0, 0, 0, 0, null, false);
             fail("IWindowManager.setAppStartingWindow did not throw SecurityException as"
@@ -172,7 +173,7 @@ public class WindowManagerPermissionTests extends TestCase {
         } catch (RemoteException e) {
             fail("Unexpected remote exception");
         }
-        
+
         try {
             mWm.setAppWillBeHidden(null);
             fail("IWindowManager.setAppWillBeHidden did not throw SecurityException as"
@@ -182,7 +183,7 @@ public class WindowManagerPermissionTests extends TestCase {
         } catch (RemoteException e) {
             fail("Unexpected remote exception");
         }
-        
+
         try {
             mWm.setAppVisibility(null, false);
             fail("IWindowManager.setAppVisibility did not throw SecurityException as"
@@ -192,7 +193,7 @@ public class WindowManagerPermissionTests extends TestCase {
         } catch (RemoteException e) {
             fail("Unexpected remote exception");
         }
-        
+
         try {
             mWm.startAppFreezingScreen(null, 0);
             fail("IWindowManager.startAppFreezingScreen did not throw SecurityException as"
@@ -202,7 +203,7 @@ public class WindowManagerPermissionTests extends TestCase {
         } catch (RemoteException e) {
             fail("Unexpected remote exception");
         }
-        
+
         try {
             mWm.stopAppFreezingScreen(null, false);
             fail("IWindowManager.stopAppFreezingScreen did not throw SecurityException as"
@@ -212,7 +213,7 @@ public class WindowManagerPermissionTests extends TestCase {
         } catch (RemoteException e) {
             fail("Unexpected remote exception");
         }
-        
+
         try {
             mWm.removeAppToken(null);
             fail("IWindowManager.removeAppToken did not throw SecurityException as"
@@ -236,7 +237,7 @@ public class WindowManagerPermissionTests extends TestCase {
         } catch (RemoteException e) {
             fail("Unexpected remote exception");
         }
-        
+
         try {
             mWm.reenableKeyguard(token);
             fail("IWindowManager.reenableKeyguard did not throw SecurityException as"
@@ -246,7 +247,7 @@ public class WindowManagerPermissionTests extends TestCase {
         } catch (RemoteException e) {
             fail("Unexpected remote exception");
         }
-        
+
         try {
             mWm.exitKeyguardSecurely(null);
             fail("IWindowManager.exitKeyguardSecurely did not throw SecurityException as"
@@ -257,7 +258,7 @@ public class WindowManagerPermissionTests extends TestCase {
             fail("Unexpected remote exception");
         }
     }
-        
+
     @SmallTest
     public void testSET_ANIMATION_SCALE() {
         try {
@@ -269,7 +270,7 @@ public class WindowManagerPermissionTests extends TestCase {
         } catch (RemoteException e) {
             fail("Unexpected remote exception");
         }
-        
+
         try {
             mWm.setAnimationScales(new float[1]);
             fail("IWindowManager.setAnimationScales did not throw SecurityException as"
@@ -280,7 +281,7 @@ public class WindowManagerPermissionTests extends TestCase {
             fail("Unexpected remote exception");
         }
     }
-    
+
     @SmallTest
     public void testSET_ORIENTATION() {
         try {

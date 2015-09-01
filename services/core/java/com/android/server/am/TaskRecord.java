@@ -20,6 +20,7 @@ import static android.app.ActivityManager.DOCKED_STACK_ID;
 import static android.app.ActivityManager.FREEFORM_WORKSPACE_STACK_ID;
 import static android.app.ActivityManager.FULLSCREEN_WORKSPACE_STACK_ID;
 import static android.app.ActivityManager.HOME_STACK_ID;
+import static android.app.ActivityManager.INVALID_STACK_ID;
 import static android.content.Intent.FLAG_ACTIVITY_NEW_DOCUMENT;
 import static android.content.Intent.FLAG_ACTIVITY_RETAIN_IN_RECENTS;
 import static android.content.pm.ActivityInfo.LOCK_TASK_LAUNCH_MODE_ALWAYS;
@@ -52,6 +53,7 @@ import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.service.voice.IVoiceInteractionSession;
+import android.util.DisplayMetrics;
 import android.util.Slog;
 import com.android.internal.app.IVoiceInteractor;
 import com.android.internal.util.XmlUtils;
@@ -63,6 +65,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.Objects;
 
 final class TaskRecord {
     private static final String TAG = TAG_WITH_CLASS_NAME ? "TaskRecord" : TAG_AM;
@@ -105,6 +108,13 @@ final class TaskRecord {
     static final boolean IGNORE_RETURN_TO_RECENTS = true;
 
     static final int INVALID_TASK_ID = -1;
+
+    // The height/width divide used when fitting a task within a bounds with method
+    // {@link #fitWithinBounds}.
+    // We always want the task to to be visible in the bounds without affecting its size when
+    // fitting. To make sure this is the case, we don't adjust the task left or top side pass
+    // the input bounds right or bottom side minus the width or height divided by this value.
+    private static final int FIT_WITHIN_BOUNDS_DIVIDER = 3;
 
     final int taskId;       // Unique identifier for this task.
     String affinity;        // The affinity name for this task, or null; may change identity.
@@ -218,6 +228,8 @@ final class TaskRecord {
 
     Configuration mOverrideConfig = Configuration.EMPTY;
 
+    private Rect mTmpRect = new Rect();
+
     TaskRecord(ActivityManagerService service, int _taskId, ActivityInfo info, Intent _intent,
             IVoiceInteractionSession _voiceSession, IVoiceInteractor _voiceInteractor) {
         mService = service;
@@ -271,8 +283,7 @@ final class TaskRecord {
             long _firstActiveTime, long _lastActiveTime, long lastTimeMoved,
             boolean neverRelinquishIdentity, TaskDescription _lastTaskDescription,
             int taskAffiliation, int prevTaskId, int nextTaskId, int taskAffiliationColor,
-            int callingUid, String callingPackage, boolean resizeable, boolean privileged,
-            Rect bounds) {
+            int callingUid, String callingPackage, boolean resizeable, boolean privileged) {
         mService = service;
         mFilename = String.valueOf(_taskId) + TASK_THUMBNAIL_SUFFIX +
                 TaskPersister.IMAGE_EXTENSION;
@@ -309,7 +320,6 @@ final class TaskRecord {
         mCallingPackage = callingPackage;
         mResizeable = resizeable;
         mPrivileged = privileged;
-        mBounds = mLastNonFullscreenBounds = bounds;
     }
 
     void touchActiveTime() {
@@ -1163,7 +1173,8 @@ final class TaskRecord {
                 autoRemoveRecents, askedCompatMode, taskType, userId, effectiveUid, lastDescription,
                 activities, firstActiveTime, lastActiveTime, lastTimeOnTop, neverRelinquishIdentity,
                 taskDescription, taskAffiliation, prevTaskId, nextTaskId, taskAffiliationColor,
-                callingUid, callingPackage, resizeable, privileged, bounds);
+                callingUid, callingPackage, resizeable, privileged);
+        task.updateOverrideConfiguration(INVALID_STACK_ID, bounds);
 
         for (int activityNdx = activities.size() - 1; activityNdx >=0; --activityNdx) {
             activities.get(activityNdx).task = task;
@@ -1173,25 +1184,51 @@ final class TaskRecord {
         return task;
     }
 
-    boolean updateOverrideConfiguration(Configuration newConfig, Rect bounds) {
+    /**
+     * Update task's override configuration based on the bounds.
+     * @return Update configuration or null if there is no change.
+     */
+    Configuration updateOverrideConfiguration(int stackId, Rect bounds) {
+        if (stackId == FREEFORM_WORKSPACE_STACK_ID) {
+            // For freeform stack we don't adjust the size of the tasks to match that of the
+            // stack, but we do try to make sure the tasks are still contained with the
+            // bounds of the stack.
+            bounds = fitWithinBounds(bounds);
+        }
+        if (Objects.equals(mBounds, bounds)) {
+            return null;
+        }
         Configuration oldConfig = mOverrideConfig;
-        mOverrideConfig = (newConfig == null) ? Configuration.EMPTY : newConfig;
-        // We override the configuration only when the task's dimensions are different from the
-        // display. In this manner, we know that if the override configuration is empty, the task
-        // is necessarily fullscreen.
-        mFullscreen = Configuration.EMPTY.equals(mOverrideConfig);
+
+        mFullscreen = bounds == null;
         if (mFullscreen) {
             if (mBounds != null && stack.mStackId != DOCKED_STACK_ID) {
                 mLastNonFullscreenBounds = mBounds;
             }
             mBounds = null;
+            mOverrideConfig = Configuration.EMPTY;
         } else {
             mBounds = new Rect(bounds);
             if (stack.mStackId != DOCKED_STACK_ID) {
                 mLastNonFullscreenBounds = mBounds;
             }
+
+            final Configuration serviceConfig = mService.mConfiguration;
+            mOverrideConfig = new Configuration(serviceConfig);
+            // TODO(multidisplay): Update Dp to that of display stack is on.
+            final float density = serviceConfig.densityDpi * DisplayMetrics.DENSITY_DEFAULT_SCALE;
+            mOverrideConfig.screenWidthDp =
+                    Math.min((int)(mBounds.width() / density), serviceConfig.screenWidthDp);
+            mOverrideConfig.screenHeightDp =
+                    Math.min((int)(mBounds.height() / density), serviceConfig.screenHeightDp);
+            mOverrideConfig.smallestScreenWidthDp =
+                    Math.min(mOverrideConfig.screenWidthDp, mOverrideConfig.screenHeightDp);
+            mOverrideConfig.orientation =
+                    (mOverrideConfig.screenWidthDp <= mOverrideConfig.screenHeightDp)
+                            ? Configuration.ORIENTATION_PORTRAIT
+                            : Configuration.ORIENTATION_LANDSCAPE;
         }
-        return !mOverrideConfig.equals(oldConfig);
+        return !mOverrideConfig.equals(oldConfig) ? mOverrideConfig : null;
     }
 
     /** Returns the stack that should be used to launch this task. */
@@ -1225,12 +1262,39 @@ final class TaskRecord {
         return mLastNonFullscreenBounds;
     }
 
-    void setInitialBounds(Rect rect) {
-        if (mBounds == null) {
-            mBounds = new Rect();
+    /** Fits the tasks within the input bounds adjusting the task bounds as needed.
+     *  @param bounds Bounds to fit the task within. Nothing is done if null.
+     *  @return Returns final configuration after updating with the adjusted bounds.
+     *  */
+    Rect fitWithinBounds(Rect bounds) {
+        if (bounds == null || mBounds == null || bounds.contains(mBounds)) {
+            return bounds;
         }
-        mBounds.set(rect);
-        mLastNonFullscreenBounds = mBounds;
+        mTmpRect.set(mBounds);
+
+        if (mBounds.left < bounds.left || mBounds.right > bounds.right) {
+            final int maxRight = bounds.right - (bounds.width() / FIT_WITHIN_BOUNDS_DIVIDER);
+            int horizontalDiff = bounds.left - mBounds.left;
+            if ((horizontalDiff < 0 && mBounds.left >= maxRight)
+                    || (mBounds.left + horizontalDiff >= maxRight)) {
+                horizontalDiff = maxRight - mBounds.left;
+            }
+            mTmpRect.left += horizontalDiff;
+            mTmpRect.right += horizontalDiff;
+        }
+
+        if (mBounds.top < bounds.top || mBounds.bottom > bounds.bottom) {
+            final int maxBottom = bounds.bottom - (bounds.height() / FIT_WITHIN_BOUNDS_DIVIDER);
+            int verticalDiff = bounds.top - mBounds.top;
+            if ((verticalDiff < 0 && mBounds.top >= maxBottom)
+                    || (mBounds.top + verticalDiff >= maxBottom)) {
+                verticalDiff = maxBottom - mBounds.top;
+            }
+            mTmpRect.top += verticalDiff;
+            mTmpRect.bottom += verticalDiff;
+        }
+
+        return mTmpRect;
     }
 
     void dump(PrintWriter pw, String prefix) {
