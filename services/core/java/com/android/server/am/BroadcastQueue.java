@@ -509,7 +509,7 @@ public final class BroadcastQueue {
                     break;
                 }
                 int appOp = AppOpsManager.permissionToOpCode(requiredPermission);
-                if (appOp != r.appOp
+                if (appOp != AppOpsManager.OP_NONE && appOp != r.appOp
                         && mService.mAppOpsService.noteOperation(appOp,
                         filter.receiverList.uid, filter.packageName)
                         != AppOpsManager.MODE_ALLOWED) {
