@@ -74,11 +74,10 @@ public class IWindowManagerImpl implements IWindowManager {
     // ---- unused implementation of IWindowManager ----
 
     @Override
-    public Configuration addAppToken(int arg0, IApplicationToken arg1, int arg2, int arg3, int arg4,
+    public void addAppToken(int arg0, IApplicationToken arg1, int arg2, int arg3, int arg4,
             boolean arg5, boolean arg6, int arg7, int arg8, boolean arg9, boolean arg10,
-            Rect arg11) throws RemoteException {
+            Rect arg11, Configuration arg12) throws RemoteException {
         // TODO Auto-generated method stub
-        return Configuration.EMPTY;
     }
 
     @Override
@@ -315,9 +314,9 @@ public class IWindowManagerImpl implements IWindowManager {
     }
 
     @Override
-    public Configuration setAppTask(IBinder arg0, int arg1, Rect arg2) throws RemoteException {
+    public void setAppTask(IBinder arg0, int arg1, Rect arg2, Configuration arg3)
+            throws RemoteException {
         // TODO Auto-generated method stub
-        return Configuration.EMPTY;
     }
 
     @Override
