@@ -29,6 +29,8 @@ import android.graphics.Rect;
 import android.os.Handler;
 import android.os.SystemClock;
 import android.util.Slog;
+import android.view.InputDevice;
+import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.MotionEvent.PointerCoords;
 import android.view.MotionEvent.PointerProperties;
@@ -253,17 +255,28 @@ class TouchExplorer implements EventStreamTransformation {
         mScaledGestureDetectionVelocity = (int) (GESTURE_DETECTION_VELOCITY_DIP * density);
     }
 
-    public void clear() {
+    @Override
+    public void clearEvents(int inputSource) {
+        if (inputSource == InputDevice.SOURCE_TOUCHSCREEN) {
+            clear();
+        }
+        if (mNext != null) {
+            mNext.clearEvents(inputSource);
+        }
+    }
+
+    @Override
+    public void onDestroy() {
+        clear();
+    }
+
+    private void clear() {
         // If we have not received an event then we are in initial
         // state. Therefore, there is not need to clean anything.
         MotionEvent event = mReceivedPointerTracker.getLastReceivedEvent();
         if (event != null) {
             clear(mReceivedPointerTracker.getLastReceivedEvent(), WindowManagerPolicy.FLAG_TRUSTED);
         }
-    }
-
-    public void onDestroy() {
-        // TODO: Implement
     }
 
     private void clear(MotionEvent event, int policyFlags) {
@@ -304,9 +317,6 @@ class TouchExplorer implements EventStreamTransformation {
         mLongPressingPointerDeltaX = 0;
         mLongPressingPointerDeltaY = 0;
         mCurrentState = STATE_TOUCH_EXPLORING;
-        if (mNext != null) {
-            mNext.clear();
-        }
         mTouchExplorationInProgress = false;
         mAms.onTouchInteractionEnd();
     }
@@ -318,6 +328,13 @@ class TouchExplorer implements EventStreamTransformation {
 
     @Override
     public void onMotionEvent(MotionEvent event, MotionEvent rawEvent, int policyFlags) {
+        if (!event.isFromSource(InputDevice.SOURCE_TOUCHSCREEN)) {
+            if (mNext != null) {
+                mNext.onMotionEvent(event, rawEvent, policyFlags);
+            }
+            return;
+        }
+
         if (DEBUG) {
             Slog.d(LOG_TAG, "Received event: " + event + ", policyFlags=0x"
                     + Integer.toHexString(policyFlags));
@@ -344,6 +361,14 @@ class TouchExplorer implements EventStreamTransformation {
         }
     }
 
+    @Override
+    public void onKeyEvent(KeyEvent event, int policyFlags) {
+        if (mNext != null) {
+            mNext.onKeyEvent(event, policyFlags);
+        }
+    }
+
+    @Override
     public void onAccessibilityEvent(AccessibilityEvent event) {
         final int eventType = event.getEventType();
 
