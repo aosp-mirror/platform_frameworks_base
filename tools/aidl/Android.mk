@@ -6,7 +6,10 @@
 ifeq ($(TARGET_BUILD_APPS)$(filter true,$(TARGET_BUILD_PDK)),)
 
 LOCAL_PATH:= $(call my-dir)
+
+# Logic shared between aidl and its unittests
 include $(CLEAR_VARS)
+LOCAL_MODULE := libaidl-common
 
 LOCAL_CLANG_CFLAGS := -Wall -Werror
 # Tragically, the code is riddled with unused parameters.
@@ -29,21 +32,37 @@ LOCAL_SRC_FILES := \
     generate_java.cpp \
     generate_java_binder.cpp \
     generate_java_rpc.cpp \
-    main.cpp \
     options.cpp \
     search_path.cpp \
 
-LOCAL_MODULE := aidl
-LOCAL_MODULE_HOST_OS := darwin linux windows
+include $(BUILD_HOST_STATIC_LIBRARY)
 
+
+# aidl executable
+include $(CLEAR_VARS)
+LOCAL_MODULE := aidl
+
+LOCAL_MODULE_HOST_OS := darwin linux windows
+LOCAL_CFLAGS := -Wall -Werror
+LOCAL_SRC_FILES := main.cpp
+LOCAL_STATIC_LIBRARIES := libaidl-common
 include $(BUILD_HOST_EXECUTABLE)
+
 
 # Unit tests
 include $(CLEAR_VARS)
 LOCAL_MODULE := aidl_unittests
-LOCAL_CFLAGS := -g -DUNIT_TEST
-LOCAL_SRC_FILES := tests/test.cpp
-LOCAL_STATIC_LIBRARIES := libgmock_host libgtest_host libBionicGtestMain
+
+LOCAL_CFLAGS := -g -DUNIT_TEST -Wall -Werror
+LOCAL_SRC_FILES := \
+    options_unittest.cpp \
+    tests/test.cpp \
+
+LOCAL_STATIC_LIBRARIES := \
+    libaidl-common \
+    libgmock_host \
+    libgtest_host \
+    libBionicGtestMain
 LOCAL_LDLIBS := -lrt
 include $(BUILD_HOST_NATIVE_TEST)
 
