@@ -22,11 +22,13 @@ import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 import org.xmlpull.v1.XmlSerializer;
 
+import android.annotation.Nullable;
 import android.content.pm.ActivityInfo;
 import android.os.Build;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.text.TextUtils;
+import android.util.LocaleList;
 import android.view.View;
 
 import java.io.IOException;
@@ -36,7 +38,7 @@ import java.util.Locale;
 /**
  * This class describes all device configuration information that can
  * impact the resources the application retrieves.  This includes both
- * user-specified configuration options (locale and scaling) as well
+ * user-specified configuration options (locale list and scaling) as well
  * as device configurations (such as input modes, screen size and screen orientation).
  * <p>You can acquire this object from {@link Resources}, using {@link
  * Resources#getConfiguration}. Thus, from an activity, you can get it by chaining the request
@@ -78,8 +80,13 @@ public final class Configuration implements Parcelable, Comparable<Configuration
      * Current user preference for the locale, corresponding to
      * <a href="{@docRoot}guide/topics/resources/providing-resources.html#LocaleQualifier">locale</a>
      * resource qualifier.
+     *
+     * @deprecated Do not set or read this directly. Use {@link #getLocales()} and
+     * {@link #setLocales(LocaleList)}.
      */
-    public Locale locale;
+    @Deprecated public Locale locale;
+
+    private LocaleList mLocaleList;
 
     /**
      * Locale should persist on setting.  This is hidden because it is really
@@ -648,6 +655,15 @@ public final class Configuration implements Parcelable, Comparable<Configuration
         setTo(o);
     }
 
+    /* This brings mLocaleList in sync with locale in case a user of the older API who doesn't know
+     * about setLocales() has changed locale directly. */
+    private void fixUpLocaleList() {
+        if ((locale == null && !mLocaleList.isEmpty()) ||
+                (locale != null && !locale.equals(mLocaleList.getPrimary()))) {
+            mLocaleList = new LocaleList(locale);
+        }
+    }
+
     public void setTo(Configuration o) {
         fontScale = o.fontScale;
         mcc = o.mcc;
@@ -655,6 +671,8 @@ public final class Configuration implements Parcelable, Comparable<Configuration
         if (o.locale != null) {
             locale = (Locale) o.locale.clone();
         }
+        o.fixUpLocaleList();
+        mLocaleList = o.mLocaleList;
         userSetLocale = o.userSetLocale;
         touchscreen = o.touchscreen;
         keyboard = o.keyboard;
@@ -692,11 +710,12 @@ public final class Configuration implements Parcelable, Comparable<Configuration
         } else {
             sb.append("?mnc");
         }
-        if (locale != null) {
+        fixUpLocaleList();
+        if (!mLocaleList.isEmpty()) {
             sb.append(" ");
-            sb.append(locale);
+            sb.append(mLocaleList);
         } else {
-            sb.append(" ?locale");
+            sb.append(" ?localeList");
         }
         int layoutDir = (screenLayout&SCREENLAYOUT_LAYOUTDIR_MASK);
         switch (layoutDir) {
@@ -819,6 +838,7 @@ public final class Configuration implements Parcelable, Comparable<Configuration
     public void setToDefaults() {
         fontScale = 1;
         mcc = mnc = 0;
+        mLocaleList = LocaleList.getEmptyLocaleList();
         locale = null;
         userSetLocale = false;
         touchscreen = TOUCHSCREEN_UNDEFINED;
@@ -864,16 +884,20 @@ public final class Configuration implements Parcelable, Comparable<Configuration
             changed |= ActivityInfo.CONFIG_MNC;
             mnc = delta.mnc;
         }
-        if (delta.locale != null
-                && (locale == null || !locale.equals(delta.locale))) {
+        fixUpLocaleList();
+        delta.fixUpLocaleList();
+        if (!delta.mLocaleList.isEmpty() && !mLocaleList.equals(delta.mLocaleList)) {
             changed |= ActivityInfo.CONFIG_LOCALE;
-            locale = delta.locale != null
-                    ? (Locale) delta.locale.clone() : null;
-            // If locale has changed, then layout direction is also changed ...
-            changed |= ActivityInfo.CONFIG_LAYOUT_DIRECTION;
-            // ... and we need to update the layout direction (represented by the first
-            // 2 most significant bits in screenLayout).
-            setLayoutDirection(locale);
+            mLocaleList = delta.mLocaleList;
+            // delta.locale can't be null, since delta.mLocaleList is not empty.
+            if (!delta.locale.equals(locale)) {
+                locale = (Locale) delta.locale.clone();
+                // If locale has changed, then layout direction is also changed ...
+                changed |= ActivityInfo.CONFIG_LAYOUT_DIRECTION;
+                // ... and we need to update the layout direction (represented by the first
+                // 2 most significant bits in screenLayout).
+                setLayoutDirection(locale);
+            }
         }
         final int deltaScreenLayoutDir = delta.screenLayout & SCREENLAYOUT_LAYOUTDIR_MASK;
         if (deltaScreenLayoutDir != SCREENLAYOUT_LAYOUTDIR_UNDEFINED &&
@@ -1023,8 +1047,9 @@ public final class Configuration implements Parcelable, Comparable<Configuration
         if (delta.mnc != 0 && mnc != delta.mnc) {
             changed |= ActivityInfo.CONFIG_MNC;
         }
-        if (delta.locale != null
-                && (locale == null || !locale.equals(delta.locale))) {
+        fixUpLocaleList();
+        delta.fixUpLocaleList();
+        if (!mLocaleList.equals(delta.mLocaleList)) {
             changed |= ActivityInfo.CONFIG_LOCALE;
             changed |= ActivityInfo.CONFIG_LAYOUT_DIRECTION;
         }
@@ -1146,14 +1171,15 @@ public final class Configuration implements Parcelable, Comparable<Configuration
         dest.writeFloat(fontScale);
         dest.writeInt(mcc);
         dest.writeInt(mnc);
-        if (locale == null) {
-            dest.writeInt(0);
-        } else {
-            dest.writeInt(1);
-            dest.writeString(locale.getLanguage());
-            dest.writeString(locale.getCountry());
-            dest.writeString(locale.getVariant());
+
+        fixUpLocaleList();
+        final int localeListSize = mLocaleList.size();
+        dest.writeInt(localeListSize);
+        for (int i = 0; i < localeListSize; ++i) {
+            final Locale l = mLocaleList.get(i);
+            dest.writeString(l.toLanguageTag());
         }
+
         if(userSetLocale) {
             dest.writeInt(1);
         } else {
@@ -1182,10 +1208,15 @@ public final class Configuration implements Parcelable, Comparable<Configuration
         fontScale = source.readFloat();
         mcc = source.readInt();
         mnc = source.readInt();
-        if (source.readInt() != 0) {
-            locale = new Locale(source.readString(), source.readString(),
-                    source.readString());
+
+        final int localeListSize = source.readInt();
+        final Locale[] localeArray = new Locale[localeListSize];
+        for (int i = 0; i < localeListSize; ++i) {
+            localeArray[i] = Locale.forLanguageTag(source.readString());
         }
+        mLocaleList = new LocaleList(localeArray);
+        locale = mLocaleList.getPrimary();
+
         userSetLocale = (source.readInt()==1);
         touchscreen = source.readInt();
         keyboard = source.readInt();
@@ -1234,18 +1265,33 @@ public final class Configuration implements Parcelable, Comparable<Configuration
         if (n != 0) return n;
         n = this.mnc - that.mnc;
         if (n != 0) return n;
-        if (this.locale == null) {
-            if (that.locale != null) return 1;
-        } else if (that.locale == null) {
+
+        fixUpLocaleList();
+        that.fixUpLocaleList();
+        // for backward compatibility, we consider an empty locale list to be greater
+        // than any non-empty locale list.
+        if (this.mLocaleList.isEmpty()) {
+            if (!that.mLocaleList.isEmpty()) return 1;
+        } else if (that.mLocaleList.isEmpty()) {
             return -1;
         } else {
-            n = this.locale.getLanguage().compareTo(that.locale.getLanguage());
-            if (n != 0) return n;
-            n = this.locale.getCountry().compareTo(that.locale.getCountry());
-            if (n != 0) return n;
-            n = this.locale.getVariant().compareTo(that.locale.getVariant());
+            final int minSize = Math.min(this.mLocaleList.size(), that.mLocaleList.size());
+            for (int i = 0; i < minSize; ++i) {
+                final Locale thisLocale = this.mLocaleList.get(i);
+                final Locale thatLocale = that.mLocaleList.get(i);
+                n = thisLocale.getLanguage().compareTo(thatLocale.getLanguage());
+                if (n != 0) return n;
+                n = thisLocale.getCountry().compareTo(thatLocale.getCountry());
+                if (n != 0) return n;
+                n = thisLocale.getVariant().compareTo(thatLocale.getVariant());
+                if (n != 0) return n;
+                n = thisLocale.toLanguageTag().compareTo(thatLocale.toLanguageTag());
+                if (n != 0) return n;
+            }
+            n = this.mLocaleList.size() - that.mLocaleList.size();
             if (n != 0) return n;
         }
+
         n = this.touchscreen - that.touchscreen;
         if (n != 0) return n;
         n = this.keyboard - that.keyboard;
@@ -1288,13 +1334,13 @@ public final class Configuration implements Parcelable, Comparable<Configuration
         }
         return false;
     }
-    
+
     public int hashCode() {
         int result = 17;
         result = 31 * result + Float.floatToIntBits(fontScale);
         result = 31 * result + mcc;
         result = 31 * result + mnc;
-        result = 31 * result + (locale != null ? locale.hashCode() : 0);
+        result = 31 * result + mLocaleList.hashCode();
         result = 31 * result + touchscreen;
         result = 31 * result + keyboard;
         result = 31 * result + keyboardHidden;
@@ -1312,14 +1358,47 @@ public final class Configuration implements Parcelable, Comparable<Configuration
     }
 
     /**
-     * Set the locale. This is the preferred way for setting up the locale (instead of using the
-     * direct accessor). This will also set the layout direction according to the locale.
+     * Get the locale list. This is the preferred way for getting the locales (instead of using
+     * the direct accessor to {@link #locale}, which would only provide the primary locale).
+     *
+     * @return The locale list.
+     */
+    public LocaleList getLocales() {
+        fixUpLocaleList();
+        return mLocaleList;
+    }
+
+    /**
+     * Set the locale list. This is the preferred way for setting up the locales (instead of using
+     * the direct accessor or {@link #setLocale(Locale)}). This will also set the layout direction
+     * according to the first locale in the list.
+     *
+     * Note that the layout direction will always come from the first locale in the locale list,
+     * even if the locale is not supported by the resources (the resources may only support
+     * another locale further down the list which has a different direction).
+     *
+     * @param locales The locale list. If null, an empty LocaleList will be assigned.
+     */
+    public void setLocales(@Nullable LocaleList locales) {
+        mLocaleList = locales == null ? LocaleList.getEmptyLocaleList() : locales;
+        locale = mLocaleList.getPrimary();
+        setLayoutDirection(locale);
+    }
+
+    /**
+     * Set the locale list to a list of just one locale. This will also set the layout direction
+     * according to the locale.
+     *
+     * Note that after this is run, calling <code>.equals()</code> on the input locale and the
+     * {@link #locale} attribute would return <code>true</code> if they are not null, but there is
+     * no guarantee that they would be the same object.
+     *
+     * See also the note about layout direction in {@link #setLocales(LocaleList)}.
      *
      * @param loc The locale. Can be null.
      */
-    public void setLocale(Locale loc) {
-        locale = loc;
-        setLayoutDirection(locale);
+    public void setLocale(@Nullable Locale loc) {
+        setLocales(new LocaleList(loc));
     }
 
     /**
@@ -1335,19 +1414,19 @@ public final class Configuration implements Parcelable, Comparable<Configuration
     }
 
     /**
-     * Set the layout direction from the Locale.
+     * Set the layout direction from a Locale.
      *
-     * @param locale The Locale. If null will set the layout direction to
+     * @param loc The Locale. If null will set the layout direction to
      * {@link View#LAYOUT_DIRECTION_LTR}. If not null will set it to the layout direction
      * corresponding to the Locale.
      *
      * @see View#LAYOUT_DIRECTION_LTR
      * @see View#LAYOUT_DIRECTION_RTL
      */
-    public void setLayoutDirection(Locale locale) {
+    public void setLayoutDirection(Locale loc) {
         // There is a "1" difference between the configuration values for
         // layout direction and View constants for layout direction, just add "1".
-        final int layoutDirection = 1 + TextUtils.getLayoutDirectionFromLocale(locale);
+        final int layoutDirection = 1 + TextUtils.getLayoutDirectionFromLocale(loc);
         screenLayout = (screenLayout&~SCREENLAYOUT_LAYOUTDIR_MASK)|
                 (layoutDirection << SCREENLAYOUT_LAYOUTDIR_SHIFT);
     }
@@ -1370,21 +1449,21 @@ public final class Configuration implements Parcelable, Comparable<Configuration
      *
      * @hide
      */
-    public static String localeToResourceQualifier(Locale locale) {
+    public static String localeToResourceQualifier(Locale loc) {
         StringBuilder sb = new StringBuilder();
-        boolean l = (locale.getLanguage().length() != 0);
-        boolean c = (locale.getCountry().length() != 0);
-        boolean s = (locale.getScript().length() != 0);
-        boolean v = (locale.getVariant().length() != 0);
-
+        boolean l = (loc.getLanguage().length() != 0);
+        boolean c = (loc.getCountry().length() != 0);
+        boolean s = (loc.getScript().length() != 0);
+        boolean v = (loc.getVariant().length() != 0);
+        // TODO: take script and extensions into account
         if (l) {
-            sb.append(locale.getLanguage());
+            sb.append(loc.getLanguage());
             if (c) {
-                sb.append("-r").append(locale.getCountry());
+                sb.append("-r").append(loc.getCountry());
                 if (s) {
-                    sb.append("-s").append(locale.getScript());
+                    sb.append("-s").append(loc.getScript());
                     if (v) {
-                        sb.append("-v").append(locale.getVariant());
+                        sb.append("-v").append(loc.getVariant());
                     }
                 }
             }
@@ -1409,6 +1488,7 @@ public final class Configuration implements Parcelable, Comparable<Configuration
             }
         }
 
+        // TODO: send the whole locale list
         if (config.locale != null && !config.locale.getLanguage().isEmpty()) {
             parts.add(localeToResourceQualifier(config.locale));
         }
@@ -1646,8 +1726,10 @@ public final class Configuration implements Parcelable, Comparable<Configuration
             delta.mnc = change.mnc;
         }
 
-        if ((base.locale == null && change.locale != null) ||
-                (base.locale != null && !base.locale.equals(change.locale)))  {
+        base.fixUpLocaleList();
+        change.fixUpLocaleList();
+        if (!base.mLocaleList.equals(change.mLocaleList))  {
+            delta.mLocaleList = change.mLocaleList;
             delta.locale = change.locale;
         }
 
@@ -1724,7 +1806,7 @@ public final class Configuration implements Parcelable, Comparable<Configuration
     private static final String XML_ATTR_FONT_SCALE = "fs";
     private static final String XML_ATTR_MCC = "mcc";
     private static final String XML_ATTR_MNC = "mnc";
-    private static final String XML_ATTR_LOCALE = "locale";
+    private static final String XML_ATTR_LOCALES = "locales";
     private static final String XML_ATTR_TOUCHSCREEN = "touch";
     private static final String XML_ATTR_KEYBOARD = "key";
     private static final String XML_ATTR_KEYBOARD_HIDDEN = "keyHid";
@@ -1754,10 +1836,9 @@ public final class Configuration implements Parcelable, Comparable<Configuration
         configOut.mcc = XmlUtils.readIntAttribute(parser, XML_ATTR_MCC, 0);
         configOut.mnc = XmlUtils.readIntAttribute(parser, XML_ATTR_MNC, 0);
 
-        final String localeStr = XmlUtils.readStringAttribute(parser, XML_ATTR_LOCALE);
-        if (localeStr != null) {
-            configOut.locale = Locale.forLanguageTag(localeStr);
-        }
+        final String localesStr = XmlUtils.readStringAttribute(parser, XML_ATTR_LOCALES);
+        configOut.mLocaleList = LocaleList.forLanguageTags(localesStr);
+        configOut.locale = configOut.mLocaleList.getPrimary();
 
         configOut.touchscreen = XmlUtils.readIntAttribute(parser, XML_ATTR_TOUCHSCREEN,
                 TOUCHSCREEN_UNDEFINED);
@@ -1807,8 +1888,9 @@ public final class Configuration implements Parcelable, Comparable<Configuration
         if (config.mnc != 0) {
             XmlUtils.writeIntAttribute(xml, XML_ATTR_MNC, config.mnc);
         }
-        if (config.locale != null) {
-            XmlUtils.writeStringAttribute(xml, XML_ATTR_LOCALE, config.locale.toLanguageTag());
+        config.fixUpLocaleList();
+        if (!config.mLocaleList.isEmpty()) {
+           XmlUtils.writeStringAttribute(xml, XML_ATTR_LOCALES, config.mLocaleList.toLanguageTags());
         }
         if (config.touchscreen != TOUCHSCREEN_UNDEFINED) {
             XmlUtils.writeIntAttribute(xml, XML_ATTR_TOUCHSCREEN, config.touchscreen);

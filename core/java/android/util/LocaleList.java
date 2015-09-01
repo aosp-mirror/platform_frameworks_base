@@ -23,8 +23,8 @@ import java.util.Locale;
 
 // TODO: We don't except too many LocaleLists to exist at the same time, and
 // we need access to the data at native level, so we should pass the data
-// down to the native level, create a mapt of every list seen there, take a
-// pointer back, and just keep that pointed in the Java-level object, so
+// down to the native level, create a map of every list seen there, take a
+// pointer back, and just keep that pointer in the Java-level object, so
 // things could be copied very quickly.
 
 /**
@@ -34,6 +34,7 @@ import java.util.Locale;
 public final class LocaleList {
     private final Locale[] mList;
     private static final Locale[] sEmptyList = new Locale[0];
+    private static final LocaleList sEmptyLocaleList = new LocaleList();
 
     public Locale get(int location) {
         return location < mList.length ? mList[location] : null;
@@ -51,8 +52,75 @@ public final class LocaleList {
         return mList.length;
     }
 
+    @Override
+    public boolean equals(Object other) {
+        if (other == this)
+            return true;
+        if (!(other instanceof LocaleList))
+            return false;
+        final Locale[] otherList = ((LocaleList) other).mList;
+        if (mList.length != otherList.length)
+            return false;
+        for (int i = 0; i < mList.length; ++i) {
+            if (!mList[i].equals(otherList[i]))
+                return false;
+        }
+        return true;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = 1;
+        for (int i = 0; i < mList.length; ++i) {
+            result = 31 * result + mList[i].hashCode();
+        }
+        return result;
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("[");
+        for (int i = 0; i < mList.length; ++i) {
+            sb.append(mList[i]);
+            if (i < mList.length - 1) {
+                sb.append(',');
+            }
+        }
+        sb.append("]");
+        return sb.toString();
+    }
+
+    public String toLanguageTags() {
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < mList.length; ++i) {
+            sb.append(mList[i].toLanguageTag());
+            if (i < mList.length - 1) {
+                sb.append(',');
+            }
+        }
+        return sb.toString();
+    }
+
+    /**
+     * It is almost always better to call {@link #getEmptyLocaleList()} instead which returns
+     * a pre-constructed empty locale list.
+     */
     public LocaleList() {
         mList = sEmptyList;
+    }
+
+    /**
+     * @throws NullPointerException if any of the input locales is <code>null</code>.
+     * @throws IllegalArgumentException if any of the input locales repeat.
+     */
+    public LocaleList(@Nullable Locale locale) {
+        if (locale == null) {
+            mList = sEmptyList;
+        } else {
+            mList = new Locale[1];
+            mList[0] = (Locale) locale.clone();
+        }
     }
 
     /**
@@ -77,6 +145,23 @@ public final class LocaleList {
                 }
             }
             mList = localeList;
+        }
+    }
+
+    public static LocaleList getEmptyLocaleList() {
+        return sEmptyLocaleList;
+    }
+
+    public static LocaleList forLanguageTags(@Nullable String list) {
+        if (list == null || list.equals("")) {
+            return getEmptyLocaleList();
+        } else {
+            final String[] tags = list.split(",");
+            final Locale[] localeArray = new Locale[tags.length];
+            for (int i = 0; i < localeArray.length; ++i) {
+                localeArray[i] = Locale.forLanguageTag(tags[i]);
+            }
+            return new LocaleList(localeArray);
         }
     }
 }
