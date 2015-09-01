@@ -255,6 +255,13 @@ public final class LoadedApk {
         return ai.sharedLibraryFiles;
     }
 
+    /** @hide */
+    public void clearClassLoader() {
+        synchronized (this) {
+            mClassLoader = null;
+        }
+    }
+
     public ClassLoader getClassLoader() {
         synchronized (this) {
             if (mClassLoader != null) {
