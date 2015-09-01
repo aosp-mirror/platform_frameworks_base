@@ -31,7 +31,6 @@ LOCAL_SRC_FILES := \
     aidl_language_y.y \
     generate_java.cpp \
     generate_java_binder.cpp \
-    generate_java_rpc.cpp \
     options.cpp \
     search_path.cpp \
 

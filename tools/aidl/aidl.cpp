@@ -63,11 +63,8 @@ test_document(document_item_type* d)
         }
         else if (d->item_type == USER_DATA_TYPE) {
             user_data_type* b = (user_data_type*)d;
-            if ((b->flattening_methods & PARCELABLE_DATA) != 0) {
+            if (b->parcelable) {
                 printf("parcelable %s %s;\n", b->package, b->name.data);
-            }
-            if ((b->flattening_methods & RPC_DATA) != 0) {
-                printf("flattenable %s %s;\n", b->package, b->name.data);
             }
         }
         else {
@@ -254,8 +251,7 @@ check_filenames(const char* filename, document_item_type* items)
             user_data_type* p = (user_data_type*)items;
             err |= check_filename(filename, p->package, &p->name);
         }
-        else if (items->item_type == INTERFACE_TYPE_BINDER
-                || items->item_type == INTERFACE_TYPE_RPC) {
+        else if (items->item_type == INTERFACE_TYPE_BINDER) {
             interface_type* c = (interface_type*)items;
             err |= check_filename(filename, c->package, &c->name);
         }
@@ -306,11 +302,9 @@ gather_types(const char* filename, document_item_type* items)
         if (items->item_type == USER_DATA_TYPE) {
             user_data_type* p = (user_data_type*)items;
             type = new UserDataType(p->package ? p->package : "", p->name.data,
-                    false, ((p->flattening_methods & PARCELABLE_DATA) != 0),
-                    ((p->flattening_methods & RPC_DATA) != 0), filename, p->name.lineno);
+                    false, p->parcelable, filename, p->name.lineno);
         }
-        else if (items->item_type == INTERFACE_TYPE_BINDER
-                || items->item_type == INTERFACE_TYPE_RPC) {
+        else if (items->item_type == INTERFACE_TYPE_BINDER) {
             interface_type* c = (interface_type*)items;
             type = new InterfaceType(c->package ? c->package : "",
                             c->name.data, false, c->oneway,
@@ -334,29 +328,16 @@ gather_types(const char* filename, document_item_type* items)
                 string name = c->name.data;
                 name += ".Stub";
                 Type* stub = new Type(c->package ? c->package : "",
-                                        name, Type::GENERATED, false, false, false,
+                                        name, Type::GENERATED, false, false,
                                         filename, c->name.lineno);
                 NAMES.Add(stub);
 
                 name = c->name.data;
                 name += ".Stub.Proxy";
                 Type* proxy = new Type(c->package ? c->package : "",
-                                        name, Type::GENERATED, false, false, false,
+                                        name, Type::GENERATED, false, false,
                                         filename, c->name.lineno);
                 NAMES.Add(proxy);
-            }
-            else if (items->item_type == INTERFACE_TYPE_RPC) {
-                // for interfaces, also add the service base type, we don't
-                // bother checking these for duplicates, because the parser
-                // won't let us do it.
-                interface_type* c = (interface_type*)items;
-
-                string name = c->name.data;
-                name += ".ServiceBase";
-                Type* base = new Type(c->package ? c->package : "",
-                                        name, Type::GENERATED, false, false, false,
-                                        filename, c->name.lineno);
-                NAMES.Add(base);
             }
         } else {
             if (old->Kind() == Type::BUILT_IN) {
@@ -409,7 +390,7 @@ matches_keyword(const char* str)
 }
 
 static int
-check_method(const char* filename, int kind, method_type* m)
+check_method(const char* filename, method_type* m)
 {
     int err = 0;
 
@@ -422,19 +403,10 @@ check_method(const char* filename, int kind, method_type* m)
         return err;
     }
 
-    if (returnType == EVENT_FAKE_TYPE) {
-        if (kind != INTERFACE_TYPE_RPC) {
-            fprintf(stderr, "%s:%d event methods only supported for rpc interfaces\n",
-                    filename, m->type.type.lineno);
-            err = 1;
-        }
-    } else {
-        if (!(kind == INTERFACE_TYPE_BINDER ? returnType->CanWriteToParcel()
-                    : returnType->CanWriteToRpcData())) {
-            fprintf(stderr, "%s:%d return type %s can't be marshalled.\n", filename,
+    if (!returnType->CanWriteToParcel()) {
+        fprintf(stderr, "%s:%d return type %s can't be marshalled.\n", filename,
                         m->type.type.lineno, m->type.type.data);
-            err = 1;
-        }
+        err = 1;
     }
 
     if (m->type.dimension > 0 && !returnType->CanBeArray()) {
@@ -467,28 +439,11 @@ check_method(const char* filename, int kind, method_type* m)
             goto next;
         }
 
-        if (t == EVENT_FAKE_TYPE) {
-            fprintf(stderr, "%s:%d parameter %s (%d) event can not be used as a parameter %s\n",
-                    filename, m->type.type.lineno, arg->name.data, index,
-                    arg->type.type.data);
-            err = 1;
-            goto next;
-        }
-        
-        if (!(kind == INTERFACE_TYPE_BINDER ? t->CanWriteToParcel() : t->CanWriteToRpcData())) {
+        if (!t->CanWriteToParcel()) {
             fprintf(stderr, "%s:%d parameter %d: '%s %s' can't be marshalled.\n",
                         filename, m->type.type.lineno, index,
                         arg->type.type.data, arg->name.data);
             err = 1;
-        }
-
-        if (returnType == EVENT_FAKE_TYPE
-                && convert_direction(arg->direction.data) != IN_PARAMETER) {
-            fprintf(stderr, "%s:%d parameter %d: '%s %s' All paremeters on events must be 'in'.\n",
-                    filename, m->type.type.lineno, index,
-                    arg->type.type.data, arg->name.data);
-            err = 1;
-            goto next;
         }
 
         if (arg->direction.data == NULL
@@ -552,8 +507,7 @@ check_types(const char* filename, document_item_type* items)
     int err = 0;
     while (items) {
         // (nothing to check for USER_DATA_TYPE)
-        if (items->item_type == INTERFACE_TYPE_BINDER
-                || items->item_type == INTERFACE_TYPE_RPC) {
+        if (items->item_type == INTERFACE_TYPE_BINDER) {
             map<string,method_type*> methodNames;
             interface_type* c = (interface_type*)items;
 
@@ -562,7 +516,7 @@ check_types(const char* filename, document_item_type* items)
                 if (member->item_type == METHOD_TYPE) {
                     method_type* m = (method_type*)member;
 
-                    err |= check_method(filename, items->item_type, m);
+                    err |= check_method(filename, m);
 
                     // prevent duplicate methods
                     if (methodNames.find(m->name.data) == methodNames.end()) {
@@ -603,9 +557,6 @@ exactly_one_interface(const char* filename, const document_item_type* items, con
         if (next->item_type == INTERFACE_TYPE_BINDER) {
             lineno = ((interface_type*)next)->interface_token.lineno;
         }
-        else if (next->item_type == INTERFACE_TYPE_RPC) {
-            lineno = ((interface_type*)next)->interface_token.lineno;
-        }
         fprintf(stderr, "%s:%d aidl can only handle one interface per file\n",
                             filename, lineno);
         return 1;
@@ -615,9 +566,9 @@ exactly_one_interface(const char* filename, const document_item_type* items, con
         *onlyParcelable = true;
         if (options.failOnParcelable) {
             fprintf(stderr, "%s:%d aidl can only generate code for interfaces, not"
-                            " parcelables or flattenables,\n", filename,
+                            " parcelables,\n", filename,
                             ((user_data_type*)items)->keyword_token.lineno);
-            fprintf(stderr, "%s:%d .aidl files that only declare parcelables or flattenables"
+            fprintf(stderr, "%s:%d .aidl files that only declare parcelables"
                             "may not go in the Makefile.\n", filename,
                             ((user_data_type*)items)->keyword_token.lineno);
             return 1;
@@ -654,7 +605,7 @@ generate_dep_file(const Options& options, const document_item_type* items)
         slash = "";
     }
 
-    if (items->item_type == INTERFACE_TYPE_BINDER || items->item_type == INTERFACE_TYPE_RPC) {
+    if (items->item_type == INTERFACE_TYPE_BINDER) {
         fprintf(to, "%s: \\\n", options.outputFileName.c_str());
     } else {
         // parcelable: there's no output file.
@@ -728,7 +679,7 @@ static string
 generate_outputFileName(const Options& options, const document_item_type* items)
 {
     // items has already been checked to have only one interface.
-    if (items->item_type == INTERFACE_TYPE_BINDER || items->item_type == INTERFACE_TYPE_RPC) {
+    if (items->item_type == INTERFACE_TYPE_BINDER) {
         interface_type* type = (interface_type*)items;
 
         return generate_outputFileName2(options, type->name, type->package);
@@ -815,22 +766,7 @@ parse_preprocessed_file(const string& filename)
             parcl->name.data = strdup(classname);
             parcl->semicolon_token.lineno = lineno;
             parcl->semicolon_token.data = strdup(";");
-            parcl->flattening_methods = PARCELABLE_DATA;
-            doc = (document_item_type*)parcl;
-        }
-        else if (0 == strcmp("flattenable", type)) {
-            user_data_type* parcl = (user_data_type*)malloc(
-                    sizeof(user_data_type));
-            memset(parcl, 0, sizeof(user_data_type));
-            parcl->document_item.item_type = USER_DATA_TYPE;
-            parcl->keyword_token.lineno = lineno;
-            parcl->keyword_token.data = strdup(type);
-            parcl->package = packagename ? strdup(packagename) : NULL;
-            parcl->name.lineno = lineno;
-            parcl->name.data = strdup(classname);
-            parcl->semicolon_token.lineno = lineno;
-            parcl->semicolon_token.data = strdup(";");
-            parcl->flattening_methods = RPC_DATA;
+            parcl->parcelable = true;
             doc = (document_item_type*)parcl;
         }
         else if (0 == strcmp("interface", type)) {
@@ -1084,11 +1020,8 @@ preprocess_aidl(const Options& options)
         string line;
         if (doc->item_type == USER_DATA_TYPE) {
             user_data_type* parcelable = (user_data_type*)doc;
-            if ((parcelable->flattening_methods & PARCELABLE_DATA) != 0) {
+            if (parcelable->parcelable) {
                 line = "parcelable ";
-            }
-            if ((parcelable->flattening_methods & RPC_DATA) != 0) {
-                line = "flattenable ";
             }
             if (parcelable->package) {
                 line += parcelable->package;
