@@ -76,6 +76,15 @@ public class FloatingActionMode extends ActionMode {
         mMenu = new MenuBuilder(context).setDefaultShowAsAction(
                 MenuItem.SHOW_AS_ACTION_IF_ROOM);
         setType(ActionMode.TYPE_FLOATING);
+        mMenu.setCallback(new MenuBuilder.Callback() {
+            @Override
+            public void onMenuModeChange(MenuBuilder menu) {}
+
+            @Override
+            public boolean onMenuItemSelected(MenuBuilder menu, MenuItem item) {
+                return mCallback.onActionItemClicked(FloatingActionMode.this, item);
+            }
+        });
         mContentRect = new Rect();
         mContentRectOnScreen = new Rect();
         mPreviousContentRectOnScreen = new Rect();
@@ -99,7 +108,7 @@ public class FloatingActionMode extends ActionMode {
                 .setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
                         @Override
                     public boolean onMenuItemClick(MenuItem item) {
-                        return mCallback.onActionItemClicked(FloatingActionMode.this, item);
+                        return mMenu.performItemAction(item, 0);
                     }
                 });
         mFloatingToolbarVisibilityHelper = new FloatingToolbarVisibilityHelper(mFloatingToolbar);
