@@ -11588,6 +11588,7 @@ package android.graphics {
     method public void getTextBounds(java.lang.String, int, int, android.graphics.Rect);
     method public void getTextBounds(char[], int, int, android.graphics.Rect);
     method public java.util.Locale getTextLocale();
+    method public android.util.LocaleList getTextLocales();
     method public void getTextPath(char[], int, int, float, float, android.graphics.Path);
     method public void getTextPath(java.lang.String, int, int, float, float, android.graphics.Path);
     method public float getTextScaleX();
@@ -11643,6 +11644,7 @@ package android.graphics {
     method public void setSubpixelText(boolean);
     method public void setTextAlign(android.graphics.Paint.Align);
     method public void setTextLocale(java.util.Locale);
+    method public void setTextLocales(android.util.LocaleList);
     method public void setTextScaleX(float);
     method public void setTextSize(float);
     method public void setTextSkewX(float);
@@ -34207,6 +34209,7 @@ package android.util {
     ctor public LocaleList(java.util.Locale[]);
     method public static android.util.LocaleList forLanguageTags(java.lang.String);
     method public java.util.Locale get(int);
+    method public static android.util.LocaleList getDefault();
     method public static android.util.LocaleList getEmptyLocaleList();
     method public java.util.Locale getPrimary();
     method public boolean isEmpty();
@@ -41719,6 +41722,7 @@ package android.widget {
     method public java.lang.CharSequence getText();
     method public final android.content.res.ColorStateList getTextColors();
     method public java.util.Locale getTextLocale();
+    method public android.util.LocaleList getTextLocales();
     method public float getTextScaleX();
     method public float getTextSize();
     method public int getTotalPaddingBottom();
@@ -41831,6 +41835,7 @@ package android.widget {
     method public final void setTextKeepState(java.lang.CharSequence);
     method public final void setTextKeepState(java.lang.CharSequence, android.widget.TextView.BufferType);
     method public void setTextLocale(java.util.Locale);
+    method public void setTextLocales(android.util.LocaleList);
     method public void setTextScaleX(float);
     method public void setTextSize(float);
     method public void setTextSize(int, float);

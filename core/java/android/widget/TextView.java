@@ -21,6 +21,7 @@ import android.annotation.ColorInt;
 import android.annotation.DrawableRes;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.Size;
 import android.annotation.StringRes;
 import android.annotation.StyleRes;
 import android.annotation.XmlRes;
@@ -103,6 +104,7 @@ import android.text.style.URLSpan;
 import android.text.style.UpdateAppearance;
 import android.text.util.Linkify;
 import android.util.AttributeSet;
+import android.util.LocaleList;
 import android.util.Log;
 import android.util.TypedValue;
 import android.view.AccessibilityIterators.TextSegmentIterator;
@@ -553,7 +555,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     private final TextPaint mTextPaint;
     private boolean mUserSetTextScaleX;
     private Layout mLayout;
-    private boolean mLocaleChanged = false;
+    private boolean mLocalesChanged = false;
 
     @ViewDebug.ExportedProperty(category = "text")
     private int mGravity = Gravity.TOP | Gravity.START;
@@ -2817,32 +2819,58 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     }
 
     /**
-     * Get the default {@link Locale} of the text in this TextView.
-     * @return the default {@link Locale} of the text in this TextView.
+     * Get the default primary {@link Locale} of the text in this TextView. This will always be
+     * the first member of {@link #getTextLocales()}.
+     * @return the default primary {@link Locale} of the text in this TextView.
      */
+    @NonNull
     public Locale getTextLocale() {
         return mTextPaint.getTextLocale();
     }
 
     /**
-     * Set the default {@link Locale} of the text in this TextView to the given value. This value
-     * is used to choose appropriate typefaces for ambiguous characters. Typically used for CJK
-     * locales to disambiguate Hanzi/Kanji/Hanja characters.
+     * Get the default {@link LocaleList} of the text in this TextView.
+     * @return the default {@link LocaleList} of the text in this TextView.
+     */
+    @NonNull @Size(min=1)
+    public LocaleList getTextLocales() {
+        return mTextPaint.getTextLocales();
+    }
+
+    /**
+     * Set the default {@link LocaleList} of the text in this TextView to a one-member list
+     * containing just the given value.
      *
      * @param locale the {@link Locale} for drawing text, must not be null.
      *
-     * @see Paint#setTextLocale
+     * @see #setTextLocales
      */
-    public void setTextLocale(Locale locale) {
-        mLocaleChanged = true;
+    public void setTextLocale(@NonNull Locale locale) {
+        mLocalesChanged = true;
         mTextPaint.setTextLocale(locale);
+    }
+
+    /**
+     * Set the default {@link LocaleList} of the text in this TextView to the given value.
+     *
+     * This value is used to choose appropriate typefaces for ambiguous characters (typically used
+     * for CJK locales to disambiguate Hanzi/Kanji/Hanja characters). It also affects
+     * other aspects of text display, including line breaking.
+     *
+     * @param locales the {@link LocaleList} for drawing text, must not be null or empty.
+     *
+     * @see Paint#setTextLocales
+     */
+    public void setTextLocales(@NonNull @Size(min=1) LocaleList locales) {
+        mLocalesChanged = true;
+        mTextPaint.setTextLocales(locales);
     }
 
     @Override
     protected void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
-        if (!mLocaleChanged) {
-            mTextPaint.setTextLocale(Locale.getDefault());
+        if (!mLocalesChanged) {
+            mTextPaint.setTextLocales(LocaleList.getDefault());
         }
     }
 

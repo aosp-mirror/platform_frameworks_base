@@ -17,10 +17,13 @@
 package android.graphics;
 
 import android.annotation.ColorInt;
+import android.annotation.NonNull;
+import android.annotation.Size;
 import android.text.GraphicsOperations;
 import android.text.SpannableString;
 import android.text.SpannedString;
 import android.text.TextUtils;
+import android.util.LocaleList;
 
 import java.util.Locale;
 
@@ -50,7 +53,7 @@ public class Paint {
     private float       mCompatScaling;
     private float       mInvCompatScaling;
 
-    private Locale      mLocale;
+    private LocaleList  mLocales;
     private String      mFontFeatureSettings;
 
     /**
@@ -434,7 +437,7 @@ public class Paint {
         // setHinting(DisplayMetrics.DENSITY_DEVICE >= DisplayMetrics.DENSITY_TV
         //        ? HINTING_OFF : HINTING_ON);
         mCompatScaling = mInvCompatScaling = 1;
-        setTextLocale(Locale.getDefault());
+        setTextLocales(LocaleList.getDefault());
     }
 
     /**
@@ -474,7 +477,7 @@ public class Paint {
         mInvCompatScaling = 1;
 
         mBidiFlags = BIDI_DEFAULT_LTR;
-        setTextLocale(Locale.getDefault());
+        setTextLocales(LocaleList.getDefault());
         setElegantTextHeight(false);
         mFontFeatureSettings = null;
     }
@@ -512,7 +515,7 @@ public class Paint {
         mInvCompatScaling = paint.mInvCompatScaling;
 
         mBidiFlags = paint.mBidiFlags;
-        mLocale = paint.mLocale;
+        mLocales = paint.mLocales;
         mFontFeatureSettings = paint.mFontFeatureSettings;
     }
 
@@ -1174,47 +1177,80 @@ public class Paint {
     }
 
     /**
-     * Get the text Locale.
+     * Get the text's primary Locale. Note that this is not all of the locale-related information
+     * Paint has. Use {@link #getTextLocales()} to get the complete list.
      *
-     * @return the paint's Locale used for drawing text, never null.
+     * @return the paint's primary Locale used for drawing text, never null.
      */
+    @NonNull
     public Locale getTextLocale() {
-        return mLocale;
+        return mLocales.getPrimary();
     }
 
     /**
-     * Set the text locale.
+     * Get the text locale list.
      *
-     * The text locale affects how the text is drawn for some languages.
+     * @return the paint's LocaleList used for drawing text, never null or empty.
+     */
+    @NonNull @Size(min=1)
+    public LocaleList getTextLocales() {
+        return mLocales;
+    }
+
+    /**
+     * Set the text locale list to a one-member list consisting of just the locale.
      *
-     * For example, if the locale is {@link Locale#CHINESE} or {@link Locale#CHINA},
+     * See {@link #setTextLocales(LocaleList)} for how the locale list affects
+     * the way the text is drawn for some languages.
+     *
+     * @param locale the paint's locale value for drawing text, must not be null.
+     */
+    public void setTextLocale(@NonNull Locale locale) {
+        if (locale == null) {
+            throw new IllegalArgumentException("locale cannot be null");
+        }
+        if (mLocales != null && mLocales.size() == 1 && locale.equals(mLocales.getPrimary())) {
+            return;
+        }
+        mLocales = new LocaleList(locale);
+        native_setTextLocale(mNativePaint, locale.toString());
+    }
+
+    /**
+     * Set the text locale list.
+     *
+     * The text locale list affects how the text is drawn for some languages.
+     *
+     * For example, if the locale list contains {@link Locale#CHINESE} or {@link Locale#CHINA},
      * then the text renderer will prefer to draw text using a Chinese font. Likewise,
-     * if the locale is {@link Locale#JAPANESE} or {@link Locale#JAPAN}, then the text
-     * renderer will prefer to draw text using a Japanese font.
+     * if the locale list contains {@link Locale#JAPANESE} or {@link Locale#JAPAN}, then the text
+     * renderer will prefer to draw text using a Japanese font. If the locale list contains both,
+     * the order those locales appear in the list is considered for deciding the font.
      *
      * This distinction is important because Chinese and Japanese text both use many
      * of the same Unicode code points but their appearance is subtly different for
      * each language.
      *
-     * By default, the text locale is initialized to the system locale (as returned
-     * by {@link Locale#getDefault}). This assumes that the text to be rendered will
-     * most likely be in the user's preferred language.
+     * By default, the text locale list is initialized to a one-member list just containing the
+     * system locale (as returned by {@link LocaleList#getDefault()}). This assumes that the text to
+     * be rendered will most likely be in the user's preferred language.
      *
-     * If the actual language of the text is known, then it can be provided to the
-     * text renderer using this method. The text renderer may attempt to guess the
+     * If the actual language or languages of the text is/are known, then they can be provided to
+     * the text renderer using this method. The text renderer may attempt to guess the
      * language script based on the contents of the text to be drawn independent of
-     * the text locale here. Specifying the text locale just helps it do a better
-     * job in certain ambiguous cases
+     * the text locale here. Specifying the text locales just helps it do a better
+     * job in certain ambiguous cases.
      *
-     * @param locale the paint's locale value for drawing text, must not be null.
+     * @param locales the paint's locale list for drawing text, must not be null or empty.
      */
-    public void setTextLocale(Locale locale) {
-        if (locale == null) {
-            throw new IllegalArgumentException("locale cannot be null");
+    public void setTextLocales(@NonNull @Size(min=1) LocaleList locales) {
+        if (locales == null || locales.isEmpty()) {
+            throw new IllegalArgumentException("locales cannot be null or empty");
         }
-        if (locale.equals(mLocale)) return;
-        mLocale = locale;
-        native_setTextLocale(mNativePaint, locale.toString());
+        if (locales.equals(mLocales)) return;
+        mLocales = locales;
+        // TODO: Pass the whole LocaleList to native code
+        native_setTextLocale(mNativePaint, locales.getPrimary().toString());
     }
 
     /**
