@@ -4090,7 +4090,8 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
 
     @Override
     public void onCameraLaunchGestureDetected() {
-        if (!mNotificationPanel.canCameraGestureBeLaunched()) {
+        if (!mNotificationPanel.canCameraGestureBeLaunched(
+                mStatusBarKeyguardViewManager.isShowing() && mExpandedVisible)) {
             return;
         }
         if (!mDeviceInteractive) {
