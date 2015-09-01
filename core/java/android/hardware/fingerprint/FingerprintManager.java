@@ -392,6 +392,18 @@ public class FingerprintManager {
     };
 
     /**
+     * @hide
+     */
+    public static abstract class LockoutResetCallback {
+
+        /**
+         * Called when lockout period expired and clients are allowed to listen for fingerprint
+         * again.
+         */
+        public void onLockoutReset() { }
+    };
+
+    /**
      * Request authentication of a crypto object. This call warms up the fingerprint hardware
      * and starts scanning for a fingerprint. It terminates when
      * {@link AuthenticationCallback#onAuthenticationError(int, CharSequence)} or
@@ -680,10 +692,37 @@ public class FingerprintManager {
             try {
                 mService.resetTimeout(token);
             } catch (RemoteException e) {
-                Log.v(TAG, "Remote exception in getAuthenticatorId(): ", e);
+                Log.v(TAG, "Remote exception in resetTimeout(): ", e);
             }
         } else {
-            Log.w(TAG, "getAuthenticatorId(): Service not connected!");
+            Log.w(TAG, "resetTimeout(): Service not connected!");
+        }
+    }
+
+    /**
+     * @hide
+     */
+    public void addLockoutResetCallback(final LockoutResetCallback callback) {
+        if (mService != null) {
+            try {
+                mService.addLockoutResetCallback(
+                        new IFingerprintServiceLockoutResetCallback.Stub() {
+
+                    @Override
+                    public void onLockoutReset(long deviceId) throws RemoteException {
+                        mHandler.post(new Runnable() {
+                            @Override
+                            public void run() {
+                                callback.onLockoutReset();
+                            }
+                        });
+                    }
+                });
+            } catch (RemoteException e) {
+                Log.v(TAG, "Remote exception in addLockoutResetCallback(): ", e);
+            }
+        } else {
+            Log.w(TAG, "addLockoutResetCallback(): Service not connected!");
         }
     }
 
