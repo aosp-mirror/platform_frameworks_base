@@ -28,7 +28,6 @@ import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.graphics.Canvas;
 import android.graphics.Matrix;
-import android.graphics.Paint;
 import android.graphics.PixelFormat;
 import android.graphics.Point;
 import android.graphics.PointF;
@@ -131,7 +130,7 @@ public final class ViewRootImpl implements ViewParent,
      */
     static final int MAX_TRACKBALL_DELAY = 250;
 
-    static final ThreadLocal<RunQueue> sRunQueues = new ThreadLocal<RunQueue>();
+    static final ThreadLocal<HandlerActionQueue> sRunQueues = new ThreadLocal<HandlerActionQueue>();
 
     static final ArrayList<Runnable> sFirstDrawHandlers = new ArrayList<Runnable>();
     static boolean sFirstDrawComplete = false;
@@ -6759,87 +6758,14 @@ public final class ViewRootImpl implements ViewParent,
         }
     }
 
-    static RunQueue getRunQueue() {
-        RunQueue rq = sRunQueues.get();
+    static HandlerActionQueue getRunQueue() {
+        HandlerActionQueue rq = sRunQueues.get();
         if (rq != null) {
             return rq;
         }
-        rq = new RunQueue();
+        rq = new HandlerActionQueue();
         sRunQueues.set(rq);
         return rq;
-    }
-
-    /**
-     * The run queue is used to enqueue pending work from Views when no Handler is
-     * attached.  The work is executed during the next call to performTraversals on
-     * the thread.
-     * @hide
-     */
-    static final class RunQueue {
-        private final ArrayList<HandlerAction> mActions = new ArrayList<HandlerAction>();
-
-        void post(Runnable action) {
-            postDelayed(action, 0);
-        }
-
-        void postDelayed(Runnable action, long delayMillis) {
-            HandlerAction handlerAction = new HandlerAction();
-            handlerAction.action = action;
-            handlerAction.delay = delayMillis;
-
-            synchronized (mActions) {
-                mActions.add(handlerAction);
-            }
-        }
-
-        void removeCallbacks(Runnable action) {
-            final HandlerAction handlerAction = new HandlerAction();
-            handlerAction.action = action;
-
-            synchronized (mActions) {
-                final ArrayList<HandlerAction> actions = mActions;
-
-                while (actions.remove(handlerAction)) {
-                    // Keep going
-                }
-            }
-        }
-
-        void executeActions(Handler handler) {
-            synchronized (mActions) {
-                final ArrayList<HandlerAction> actions = mActions;
-                final int count = actions.size();
-
-                for (int i = 0; i < count; i++) {
-                    final HandlerAction handlerAction = actions.get(i);
-                    handler.postDelayed(handlerAction.action, handlerAction.delay);
-                }
-
-                actions.clear();
-            }
-        }
-
-        private static class HandlerAction {
-            Runnable action;
-            long delay;
-
-            @Override
-            public boolean equals(Object o) {
-                if (this == o) return true;
-                if (o == null || getClass() != o.getClass()) return false;
-
-                HandlerAction that = (HandlerAction) o;
-                return !(action != null ? !action.equals(that.action) : that.action != null);
-
-            }
-
-            @Override
-            public int hashCode() {
-                int result = action != null ? action.hashCode() : 0;
-                result = 31 * result + (int) (delay ^ (delay >>> 32));
-                return result;
-            }
-        }
     }
 
     /**

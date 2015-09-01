@@ -3823,6 +3823,12 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     private static SparseArray<String> mAttributeMap;
 
     /**
+     * Queue of pending runnables. Used to postpone calls to post() until this
+     * view is attached and has a handler.
+     */
+    private HandlerActionQueue mRunQueue;
+
+    /**
      * @hide
      */
     String mStartActivityRequestWho;
@@ -13010,6 +13016,18 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     }
 
     /**
+     * Returns the queue of runnable for this view.
+     *
+     * @return the queue of runnables for this view
+     */
+    private HandlerActionQueue getRunQueue() {
+        if (mRunQueue == null) {
+            mRunQueue = new HandlerActionQueue();
+        }
+        return mRunQueue;
+    }
+
+    /**
      * Gets the view root associated with the View.
      * @return The view root, or null if none.
      * @hide
@@ -13046,8 +13064,10 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         if (attachInfo != null) {
             return attachInfo.mHandler.post(action);
         }
-        // Assume that post will succeed later
-        ViewRootImpl.getRunQueue().post(action);
+
+        // Postpone the runnable until we know on which thread it needs to run.
+        // Assume that the runnable will be successfully placed after attach.
+        getRunQueue().post(action);
         return true;
     }
 
@@ -13075,8 +13095,10 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         if (attachInfo != null) {
             return attachInfo.mHandler.postDelayed(action, delayMillis);
         }
-        // Assume that post will succeed later
-        ViewRootImpl.getRunQueue().postDelayed(action, delayMillis);
+
+        // Postpone the runnable until we know on which thread it needs to run.
+        // Assume that the runnable will be successfully placed after attach.
+        getRunQueue().postDelayed(action, delayMillis);
         return true;
     }
 
@@ -13095,8 +13117,9 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             attachInfo.mViewRootImpl.mChoreographer.postCallback(
                     Choreographer.CALLBACK_ANIMATION, action, null);
         } else {
-            // Assume that post will succeed later
-            ViewRootImpl.getRunQueue().post(action);
+            // Postpone the runnable until we know
+            // on which thread it needs to run.
+            getRunQueue().post(action);
         }
     }
 
@@ -13118,8 +13141,9 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             attachInfo.mViewRootImpl.mChoreographer.postCallbackDelayed(
                     Choreographer.CALLBACK_ANIMATION, action, null, delayMillis);
         } else {
-            // Assume that post will succeed later
-            ViewRootImpl.getRunQueue().postDelayed(action, delayMillis);
+            // Postpone the runnable until we know
+            // on which thread it needs to run.
+            getRunQueue().postDelayed(action, delayMillis);
         }
     }
 
@@ -13146,8 +13170,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                 attachInfo.mViewRootImpl.mChoreographer.removeCallbacks(
                         Choreographer.CALLBACK_ANIMATION, action, null);
             }
-            // Assume that post will succeed later
-            ViewRootImpl.getRunQueue().removeCallbacks(action);
+            getRunQueue().removeCallbacks(action);
         }
         return true;
     }
@@ -14565,7 +14588,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      *        this view
      */
     void dispatchAttachedToWindow(AttachInfo info, int visibility) {
-        //System.out.println("Attached! " + this);
         mAttachInfo = info;
         if (mOverlay != null) {
             mOverlay.getOverlayView().dispatchAttachedToWindow(info, visibility);
@@ -14580,6 +14602,11 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         if ((mPrivateFlags&PFLAG_SCROLL_CONTAINER) != 0) {
             mAttachInfo.mScrollContainers.add(this);
             mPrivateFlags |= PFLAG_SCROLL_CONTAINER_ADDED;
+        }
+        // Transfer all pending runnables.
+        if (mRunQueue != null) {
+            mRunQueue.executeActions(info.mHandler);
+            mRunQueue = null;
         }
         performCollectViewAttributes(mAttachInfo, visibility);
         onAttachedToWindow();
@@ -16866,7 +16893,9 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                         Choreographer.CALLBACK_ANIMATION, what, who,
                         Choreographer.subtractFrameDelay(delay));
             } else {
-                ViewRootImpl.getRunQueue().postDelayed(what, delay);
+                // Postpone the runnable until we know
+                // on which thread it needs to run.
+                getRunQueue().postDelayed(what, delay);
             }
         }
     }
@@ -16884,7 +16913,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                 mAttachInfo.mViewRootImpl.mChoreographer.removeCallbacks(
                         Choreographer.CALLBACK_ANIMATION, what, who);
             }
-            ViewRootImpl.getRunQueue().removeCallbacks(what);
+            getRunQueue().removeCallbacks(what);
         }
     }
 
