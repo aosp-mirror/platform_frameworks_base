@@ -17,10 +17,13 @@
 package com.android.internal.view.menu;
 
 import android.content.Context;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.View.MeasureSpec;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.FrameLayout;
+import android.widget.HeaderViewListAdapter;
 import android.widget.ListAdapter;
 import android.widget.PopupWindow;
 
@@ -30,7 +33,8 @@ import android.widget.PopupWindow;
  *
  * @hide
  */
-public abstract class MenuPopup implements ShowableListMenu, MenuPresenter {
+public abstract class MenuPopup implements ShowableListMenu, MenuPresenter,
+        AdapterView.OnItemClickListener {
 
     public abstract void setForceShowIcon(boolean forceShow);
 
@@ -48,6 +52,18 @@ public abstract class MenuPopup implements ShowableListMenu, MenuPresenter {
     public abstract void setGravity(int dropDownGravity);
 
     public abstract void setAnchorView(View anchor);
+
+    public abstract void setHorizontalOffset(int x);
+
+    public abstract void setVerticalOffset(int y);
+
+    /**
+     * Set whether a title entry should be shown in the popup menu (if a title exists for the
+     * menu).
+     *
+     * @param showTitle
+     */
+    public abstract void setShowTitle(boolean showTitle);
 
     /**
      * Set a listener to receive a callback when the popup is dismissed.
@@ -79,6 +95,16 @@ public abstract class MenuPopup implements ShowableListMenu, MenuPresenter {
     @Override
     public int getId() {
         return 0;
+    }
+
+    @Override
+    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+        ListAdapter outerAdapter = (ListAdapter) parent.getAdapter();
+        MenuAdapter wrappedAdapter = toMenuAdapter(outerAdapter);
+
+        // Use the position from the outer adapter so that if a header view was added, we don't get
+        // an off-by-1 error in position.
+        wrappedAdapter.mAdapterMenu.performItemAction((MenuItem) outerAdapter.getItem(position), 0);
     }
 
     /**
@@ -120,5 +146,20 @@ public abstract class MenuPopup implements ShowableListMenu, MenuPresenter {
         }
 
         return maxWidth;
+    }
+
+    /**
+     * Converts the given ListAdapter originating from a menu, to a MenuAdapter, accounting for
+     * the possibility of the parameter adapter actually wrapping the MenuAdapter. (That could
+     * happen if a header view was added on the menu.)
+     *
+     * @param adapter
+     * @return
+     */
+    protected static MenuAdapter toMenuAdapter(ListAdapter adapter) {
+        if (adapter instanceof HeaderViewListAdapter) {
+            return (MenuAdapter) ((HeaderViewListAdapter) adapter).getWrappedAdapter();
+        }
+        return (MenuAdapter) adapter;
     }
 }

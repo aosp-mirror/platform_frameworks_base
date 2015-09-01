@@ -1449,11 +1449,13 @@ public class PopupWindow {
             anchor.getLocationOnScreen(mScreenLocation);
             onTop = (displayFrame.bottom - mScreenLocation[1] - anchorHeight - yoff) <
                     (mScreenLocation[1] - yoff - displayFrame.top);
-            if (onTop) {
-                p.gravity = Gravity.LEFT | Gravity.BOTTOM;
-                p.y = root.getHeight() - mDrawingLocation[1] + yoff;
-            } else {
-                p.y = mDrawingLocation[1] + anchorHeight + yoff;
+            if (!mOverlapAnchor) {
+                if (onTop) {
+                    p.gravity = Gravity.LEFT | Gravity.BOTTOM;
+                    p.y = root.getHeight() - mDrawingLocation[1] + yoff;
+                } else {
+                    p.y = mDrawingLocation[1] + anchorHeight + yoff;
+                }
             }
         }
 
@@ -1469,13 +1471,21 @@ public class PopupWindow {
                 p.width = Math.min(p.width, displayFrameWidth);
             }
 
-            if (onTop) {
-                final int popupTop = mScreenLocation[1] + yoff - mPopupHeight;
-                if (popupTop < 0) {
-                    p.y += popupTop;
+            if (mOverlapAnchor) {
+                final int displayFrameHeight = displayFrame.bottom - displayFrame.top;
+                final int bottom = p.y + p.height;
+                if (bottom > displayFrame.bottom) {
+                    p.y -= bottom - displayFrameHeight;
                 }
             } else {
-                p.y = Math.max(p.y, displayFrame.top);
+                if (onTop) {
+                    final int popupTop = mScreenLocation[1] + yoff - mPopupHeight;
+                    if (popupTop < 0) {
+                        p.y += popupTop;
+                    }
+                } else {
+                    p.y = Math.max(p.y, displayFrame.top);
+                }
             }
         }
 
@@ -1542,7 +1552,13 @@ public class PopupWindow {
             Resources res = anchor.getContext().getResources();
             bottomEdge = res.getDisplayMetrics().heightPixels;
         }
-        final int distanceToBottom = bottomEdge - (anchorPos[1] + anchor.getHeight()) - yOffset;
+
+        final int distanceToBottom;
+        if (mOverlapAnchor) {
+            distanceToBottom = bottomEdge - anchorPos[1] - yOffset;
+        } else {
+            distanceToBottom = bottomEdge - (anchorPos[1] + anchor.getHeight()) - yOffset;
+        }
         final int distanceToTop = anchorPos[1] - displayFrame.top + yOffset;
 
         // anchorPos[1] is distance from anchor to top of screen

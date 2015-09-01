@@ -162,6 +162,9 @@
         <!-- Text color, typeface, size, and style for small text inside of a popup menu. -->
         <attr name="textAppearanceSmallPopupMenu" format="reference" />
 
+        <!-- Text color, typeface, size, and style for header text inside of a popup menu. -->
+        <attr name="textAppearancePopupMenuHeader" format="reference" />
+
         <!-- The underline color and thickness for easy correct suggestion -->
         <attr name="textAppearanceEasyCorrectSuggestion" format="reference" />
 
@@ -729,6 +732,8 @@ i
         <attr name="listPopupWindowStyle" format="reference" />
         <!-- Default PopupMenu style. -->
         <attr name="popupMenuStyle" format="reference" />
+        <!-- Default context menu PopupMenu style. -->
+        <attr name="contextPopupMenuStyle" format="reference" />
         <!-- Default StackView style. -->
         <attr name="stackViewStyle" format="reference" />
 

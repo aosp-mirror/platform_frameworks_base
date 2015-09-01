@@ -17,6 +17,7 @@
 package com.android.internal.view.menu;
 
 import android.content.Context;
+import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.os.IBinder;
 import android.util.EventLog;
@@ -93,4 +94,29 @@ public class ContextMenuBuilder extends MenuBuilder implements ContextMenu {
         return null;
     }
     
+    public MenuPopupHelper showPopup(Context context, View originalView, float x, float y) {
+        if (originalView != null) {
+            // Let relevant views and their populate context listeners populate
+            // the context menu
+            originalView.createContextMenu(this);
+        }
+
+        if (getVisibleItems().size() > 0) {
+            EventLog.writeEvent(50001, 1);
+
+            int location[] = new int[2];
+            originalView.getLocationOnScreen(location);
+
+            final MenuPopupHelper helper = new MenuPopupHelper(
+                    context,
+                    this,
+                    originalView,
+                    false /* overflowOnly */,
+                    com.android.internal.R.attr.contextPopupMenuStyle);
+            helper.show(Math.round(x), Math.round(y));
+            return helper;
+        }
+
+        return null;
+    }
 }

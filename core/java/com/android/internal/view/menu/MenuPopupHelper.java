@@ -39,7 +39,11 @@ public class MenuPopupHelper implements PopupWindow.OnDismissListener {
     private MenuPopup mPopup;
 
     private int mDropDownGravity = Gravity.NO_GRAVITY;
+    private boolean mForceShowIcon;
+    private boolean mShowTitle;
     private Callback mPresenterCallback;
+    private int mInitXOffset;
+    private int mInitYOffset;
 
     public MenuPopupHelper(Context context, MenuBuilder menu) {
         this(context, menu, null, false, com.android.internal.R.attr.popupMenuStyle, 0);
@@ -81,6 +85,7 @@ public class MenuPopupHelper implements PopupWindow.OnDismissListener {
     }
 
     public void setForceShowIcon(boolean forceShow) {
+        mForceShowIcon = forceShow;
         mPopup.setForceShowIcon(forceShow);
     }
 
@@ -95,6 +100,12 @@ public class MenuPopupHelper implements PopupWindow.OnDismissListener {
 
     public void show() {
         if (!tryShow()) {
+            throw new IllegalStateException("MenuPopupHelper cannot be used without an anchor");
+        }
+    }
+
+    public void show(int x, int y) {
+        if (!tryShow(x, y)) {
             throw new IllegalStateException("MenuPopupHelper cannot be used without an anchor");
         }
     }
@@ -118,10 +129,40 @@ public class MenuPopupHelper implements PopupWindow.OnDismissListener {
             return false;
         }
 
+        mInitXOffset = 0;
+        mInitYOffset = 0;
+        mShowTitle = false;
+
+        showPopup();
+        return true;
+    }
+
+    public boolean tryShow(int x, int y) {
+        if (isShowing()) {
+            return true;
+        }
+
+        if (mAnchorView == null) {
+            return false;
+        }
+
+        mInitXOffset = x;
+        mInitYOffset = y;
+        mShowTitle = true;
+
+        showPopup();
+        return true;
+    }
+
+    private void showPopup() {
         mPopup = createMenuPopup();
         mPopup.setAnchorView(mAnchorView);
-        mPopup.setGravity(mDropDownGravity);
         mPopup.setCallback(mPresenterCallback);
+        mPopup.setForceShowIcon(mForceShowIcon);
+        mPopup.setGravity(mDropDownGravity);
+        mPopup.setHorizontalOffset(mInitXOffset);
+        mPopup.setShowTitle(mShowTitle);
+        mPopup.setVerticalOffset(mInitYOffset);
 
         // In order for subclasses of MenuPopupHelper to satisfy the OnDismissedListener interface,
         // we must set the listener to this outer Helper rather than to the inner MenuPopup.
@@ -131,7 +172,6 @@ public class MenuPopupHelper implements PopupWindow.OnDismissListener {
 
         mPopup.addMenu(mMenu);
         mPopup.show();
-        return true;
     }
 
     public void dismiss() {
@@ -148,7 +188,6 @@ public class MenuPopupHelper implements PopupWindow.OnDismissListener {
     public boolean isShowing() {
         return mPopup != null && mPopup.isShowing();
     }
-
 
     public void setCallback(MenuPresenter.Callback cb) {
         mPresenterCallback = cb;

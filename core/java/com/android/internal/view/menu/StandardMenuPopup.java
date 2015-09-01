@@ -6,17 +6,17 @@ import android.os.Parcelable;
 import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.View.OnAttachStateChangeListener;
 import android.view.View.OnKeyListener;
 import android.view.ViewTreeObserver.OnGlobalLayoutListener;
 import android.view.ViewTreeObserver;
-import android.widget.AdapterView;
+import android.widget.FrameLayout;
 import android.widget.ListView;
 import android.widget.MenuPopupWindow;
 import android.widget.PopupWindow;
+import android.widget.TextView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.PopupWindow.OnDismissListener;
 
@@ -92,6 +92,10 @@ final class StandardMenuPopup extends MenuPopup implements OnDismissListener, On
 
     private int mDropDownGravity = Gravity.NO_GRAVITY;
 
+    private int mXOffset;
+    private int mYOffset;
+    private boolean mShowTitle;
+
     public StandardMenuPopup(Context context, MenuBuilder menu, View anchorView, int popupStyleAttr,
             int popupStyleRes, boolean overflowOnly) {
         mContext = Preconditions.checkNotNull(context);
@@ -158,8 +162,28 @@ final class StandardMenuPopup extends MenuPopup implements OnDismissListener, On
 
         mPopup.setContentWidth(mContentWidth);
         mPopup.setInputMethodMode(PopupWindow.INPUT_METHOD_NOT_NEEDED);
+        mPopup.setHorizontalOffset(mXOffset);
+        mPopup.setVerticalOffset(mYOffset);
         mPopup.show();
-        mPopup.getListView().setOnKeyListener(this);
+
+        ListView listView = mPopup.getListView();
+        listView.setOnKeyListener(this);
+
+        if (mShowTitle && mMenu.getHeaderTitle() != null) {
+            FrameLayout titleItemView =
+                    (FrameLayout) LayoutInflater.from(mContext).inflate(
+                            com.android.internal.R.layout.popup_menu_header_item_layout,
+                            listView,
+                            false);
+            TextView titleView = (TextView) titleItemView.findViewById(
+                    com.android.internal.R.id.title);
+            titleView.setText(mMenu.getHeaderTitle());
+            titleItemView.setEnabled(false);
+            listView.addHeaderView(titleItemView, null, false);
+
+            // Update to show the title.
+            mPopup.show();
+        }
         return true;
     }
 
@@ -175,12 +199,6 @@ final class StandardMenuPopup extends MenuPopup implements OnDismissListener, On
         if (isShowing()) {
             mPopup.dismiss();
         }
-    }
-
-    @Override
-    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-        MenuAdapter adapter = mAdapter;
-        adapter.mAdapterMenu.performItemAction(adapter.getItem(position), 0);
     }
 
     @Override
@@ -287,5 +305,21 @@ final class StandardMenuPopup extends MenuPopup implements OnDismissListener, On
     @Override
     public ListView getListView() {
         return mPopup.getListView();
+    }
+
+
+    @Override
+    public void setHorizontalOffset(int x) {
+        mXOffset = x;
+    }
+
+    @Override
+    public void setVerticalOffset(int y) {
+        mYOffset = y;
+    }
+
+    @Override
+    public void setShowTitle(boolean showTitle) {
+        mShowTitle = showTitle;
     }
 }
