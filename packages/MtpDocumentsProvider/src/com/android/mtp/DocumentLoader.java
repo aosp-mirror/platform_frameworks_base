@@ -91,12 +91,16 @@ class DocumentLoader {
         return task.createCursor(mResolver, columnNames);
     }
 
-    synchronized void clearCache(int deviceId) {
+    synchronized void clearTasks(int deviceId) {
         mTaskList.clearTaskForDevice(deviceId);
     }
 
-    synchronized void clearCache() {
+    synchronized void clearCompletedTasks() {
         mTaskList.clearCompletedTask();
+    }
+
+    synchronized void clearTask(Identifier parentIdentifier) {
+        mTaskList.clearTask(parentIdentifier);
     }
 
     private class BackgroundLoaderThread extends Thread {
@@ -176,6 +180,17 @@ class DocumentLoader {
                     remove(i);
                 } else {
                     i++;
+                }
+            }
+        }
+
+        void clearTask(Identifier parentIdentifier) {
+            for (int i = 0; i < size(); i++) {
+                final LoaderTask task = get(i);
+                if (task.mIdentifier.mDeviceId == parentIdentifier.mDeviceId &&
+                        task.mIdentifier.mObjectHandle == parentIdentifier.mObjectHandle) {
+                    remove(i);
+                    return;
                 }
             }
         }

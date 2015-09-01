@@ -174,6 +174,8 @@ public class MtpDocumentsProvider extends DocumentsProvider {
                 case "r":
                     return mPipeManager.readDocument(mMtpManager, identifier);
                 case "w":
+                    // TODO: Clear the parent document loader task (if exists) and call notify
+                    // when writing is completed.
                     return mPipeManager.writeDocument(getContext(), mMtpManager, identifier);
                 default:
                     // TODO: Add support for seekable files.
@@ -208,8 +210,10 @@ public class MtpDocumentsProvider extends DocumentsProvider {
             final int parentHandle =
                     mMtpManager.getParent(identifier.mDeviceId, identifier.mObjectHandle);
             mMtpManager.deleteDocument(identifier.mDeviceId, identifier.mObjectHandle);
-            notifyChildDocumentsChange(new Identifier(
-                    identifier.mDeviceId, identifier.mStorageId, parentHandle).toDocumentId());
+            final Identifier parentIdentifier = new Identifier(
+                    identifier.mDeviceId, identifier.mStorageId, parentHandle);
+            mDocumentLoader.clearTask(parentIdentifier);
+            notifyChildDocumentsChange(parentIdentifier.toDocumentId());
         } catch (IOException error) {
             throw new FileNotFoundException(error.getMessage());
         }
@@ -217,7 +221,7 @@ public class MtpDocumentsProvider extends DocumentsProvider {
 
     @Override
     public void onTrimMemory(int level) {
-        mDocumentLoader.clearCache();
+        mDocumentLoader.clearCompletedTasks();
     }
 
     @Override
@@ -235,8 +239,9 @@ public class MtpDocumentsProvider extends DocumentsProvider {
                             .setFormat(CursorHelper.mimeTypeToFormatType(mimeType))
                             .setName(displayName)
                             .build(), pipe[1]);
-            final String documentId =  new Identifier(parentId.mDeviceId, parentId.mStorageId,
+            final String documentId = new Identifier(parentId.mDeviceId, parentId.mStorageId,
                    objectHandle).toDocumentId();
+            mDocumentLoader.clearTask(parentId);
             notifyChildDocumentsChange(parentDocumentId);
             return documentId;
         } catch (IOException error) {
@@ -252,7 +257,7 @@ public class MtpDocumentsProvider extends DocumentsProvider {
 
     void closeDevice(int deviceId) throws IOException {
         mMtpManager.closeDevice(deviceId);
-        mDocumentLoader.clearCache(deviceId);
+        mDocumentLoader.clearTasks(deviceId);
         mRootScanner.scanNow();
     }
 
@@ -261,7 +266,7 @@ public class MtpDocumentsProvider extends DocumentsProvider {
         for (int deviceId : mMtpManager.getOpenedDeviceIds()) {
             try {
                 mMtpManager.closeDevice(deviceId);
-                mDocumentLoader.clearCache(deviceId);
+                mDocumentLoader.clearTasks(deviceId);
                 closed = true;
             } catch (IOException d) {
                 Log.d(TAG, "Failed to close the MTP device: " + deviceId);
