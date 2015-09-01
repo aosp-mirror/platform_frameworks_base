@@ -262,14 +262,21 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
         return (secure && !canSkipBouncer) ? SECURE_CAMERA_INTENT : INSECURE_CAMERA_INTENT;
     }
 
+    /**
+     * Resolves the intent to launch the camera application.
+     */
+    public ResolveInfo resolveCameraIntent() {
+        return mContext.getPackageManager().resolveActivityAsUser(getCameraIntent(),
+                PackageManager.MATCH_DEFAULT_ONLY,
+                KeyguardUpdateMonitor.getCurrentUser());
+    }
+
     private void updateCameraVisibility() {
         if (mCameraImageView == null) {
             // Things are not set up yet; reply hazy, ask again later
             return;
         }
-        ResolveInfo resolved = mContext.getPackageManager().resolveActivityAsUser(getCameraIntent(),
-                PackageManager.MATCH_DEFAULT_ONLY,
-                KeyguardUpdateMonitor.getCurrentUser());
+        ResolveInfo resolved = resolveCameraIntent();
         boolean visible = !isCameraDisabledByDpm() && resolved != null
                 && getResources().getBoolean(R.bool.config_keyguardShowCameraAffordance)
                 && mUserSetupComplete;
