@@ -62,6 +62,7 @@ import android.os.SystemProperties;
 import android.provider.DocumentsContract;
 import android.provider.DocumentsContract.Document;
 import android.support.annotation.Nullable;
+import android.support.annotation.VisibleForTesting;
 import android.support.design.widget.Snackbar;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
@@ -132,7 +133,7 @@ public class DirectoryFragment extends Fragment {
     private static final String EXTRA_QUERY = "query";
     private static final String EXTRA_IGNORE_STATE = "ignoreState";
 
-    private final Model mModel = new Model();
+    private Model mModel;
 
     private final Handler mHandler = new Handler(Looper.getMainLooper());
 
@@ -304,7 +305,10 @@ public class DirectoryFragment extends Fragment {
                     ? MultiSelectManager.MODE_MULTIPLE
                     : MultiSelectManager.MODE_SINGLE);
         selMgr.addCallback(new SelectionModeListener());
+
+        mModel = new Model(context, selMgr);
         mModel.setSelectionManager(selMgr);
+        mModel.addUpdateListener(mAdapter);
 
         mType = getArguments().getInt(EXTRA_TYPE);
         mStateKey = buildStateKey(root, doc);
@@ -374,9 +378,7 @@ public class DirectoryFragment extends Fragment {
 
                 if (!isAdded()) return;
 
-                // TODO: make the adapter listen to the model
                 mModel.update(result);
-                mAdapter.update();
 
                 // Push latest state up to UI
                 // TODO: if mode change was racing with us, don't overwrite it
@@ -407,9 +409,7 @@ public class DirectoryFragment extends Fragment {
 
             @Override
             public void onLoaderReset(Loader<DirectoryResult> loader) {
-                // TODO: make the adapter listen to the model.
                 mModel.update(null);
-                mAdapter.update();
             }
         };
 
@@ -827,9 +827,9 @@ public class DirectoryFragment extends Fragment {
                                 if (event == Snackbar.Callback.DISMISS_EVENT_ACTION) {
                                     mModel.undoDeletion();
                                 } else {
-                                    mModel.finalizeDeletion();
+                                    // TODO: Use a listener rather than pushing the view.
+                                    mModel.finalizeDeletion(DirectoryFragment.this.getView());
                                 }
-                                ;
                             }
                         })
                 .show();
@@ -953,7 +953,8 @@ public class DirectoryFragment extends Fragment {
         }
     }
 
-    private final class DocumentsAdapter extends RecyclerView.Adapter<DocumentHolder> {
+    private final class DocumentsAdapter extends RecyclerView.Adapter<DocumentHolder>
+            implements Model.UpdateListener {
 
         private final Context mContext;
         private final LayoutInflater mInflater;
@@ -965,24 +966,30 @@ public class DirectoryFragment extends Fragment {
             mInflater = LayoutInflater.from(context);
         }
 
-        public void update() {
+        public void onModelUpdate(Model model) {
             mFooters.clear();
-            if (mModel.info != null) {
-                mFooters.add(new MessageFooter(2, R.drawable.ic_dialog_info, mModel.info));
+            if (model.info != null) {
+                mFooters.add(new MessageFooter(2, R.drawable.ic_dialog_info, model.info));
             }
-            if (mModel.error != null) {
-                mFooters.add(new MessageFooter(3, R.drawable.ic_dialog_alert, mModel.error));
+            if (model.error != null) {
+                mFooters.add(new MessageFooter(3, R.drawable.ic_dialog_alert, model.error));
             }
-            if (mModel.isLoading()) {
+            if (model.isLoading()) {
                 mFooters.add(new LoadingFooter());
             }
 
-            if (mModel.isEmpty()) {
+            if (model.isEmpty()) {
                 mEmptyView.setVisibility(View.VISIBLE);
             } else {
                 mEmptyView.setVisibility(View.GONE);
             }
 
+            notifyDataSetChanged();
+        }
+
+        public void onModelUpdateFailed(Exception e) {
+            String error = getString(R.string.query_error);
+            mFooters.add(new MessageFooter(3, R.drawable.ic_dialog_alert, error));
             notifyDataSetChanged();
         }
 
@@ -1736,14 +1743,22 @@ public class DirectoryFragment extends Fragment {
     /**
      * The data model for the current loaded directory.
      */
-    private final class Model implements DocumentContext {
+    @VisibleForTesting
+    public static final class Model implements DocumentContext {
         private MultiSelectManager mSelectionManager;
+        private Context mContext;
         private int mCursorCount;
         private boolean mIsLoading;
+        private SparseBooleanArray mMarkedForDeletion = new SparseBooleanArray();
+        private UpdateListener mUpdateListener;
         @Nullable private Cursor mCursor;
         @Nullable private String info;
         @Nullable private String error;
-        private SparseBooleanArray mMarkedForDeletion = new SparseBooleanArray();
+
+        Model(Context context, MultiSelectManager selectionManager) {
+            mContext = context;
+            mSelectionManager = selectionManager;
+        }
 
         /**
          * Sets the selection manager used by the model.
@@ -1794,12 +1809,13 @@ public class DirectoryFragment extends Fragment {
                 info = null;
                 error = null;
                 mIsLoading = false;
+                if (mUpdateListener != null)  mUpdateListener.onModelUpdate(this);
                 return;
             }
 
             if (result.exception != null) {
                 Log.e(TAG, "Error while loading directory contents", result.exception);
-                error = getString(R.string.query_error);
+                if (mUpdateListener != null)  mUpdateListener.onModelUpdateFailed(result.exception);
                 return;
             }
 
@@ -1812,13 +1828,15 @@ public class DirectoryFragment extends Fragment {
                 error = extras.getString(DocumentsContract.EXTRA_ERROR);
                 mIsLoading = extras.getBoolean(DocumentsContract.EXTRA_LOADING, false);
             }
+
+            if (mUpdateListener != null)  mUpdateListener.onModelUpdate(this);
         }
 
-        private int getItemCount() {
+        int getItemCount() {
             return mCursorCount - mMarkedForDeletion.size();
         }
 
-        private Cursor getItem(int position) {
+        Cursor getItem(int position) {
             // Items marked for deletion are masked out of the UI.  To do this, for every marked
             // item whose position is less than the requested item position, advance the requested
             // position by 1.
@@ -1859,7 +1877,7 @@ public class DirectoryFragment extends Fragment {
             return getDocuments(sel);
         }
 
-        private List<DocumentInfo> getDocuments(Selection items) {
+        List<DocumentInfo> getDocuments(Selection items) {
             final int size = (items != null) ? items.size() : 0;
 
             final List<DocumentInfo> docs =  new ArrayList<>(size);
@@ -1880,7 +1898,7 @@ public class DirectoryFragment extends Fragment {
             return mCursor;
         }
 
-        private List<DocumentInfo> getDocumentsMarkedForDeletion() {
+        List<DocumentInfo> getDocumentsMarkedForDeletion() {
             final int size = mMarkedForDeletion.size();
             List<DocumentInfo> docs =  new ArrayList<>(size);
 
@@ -1901,7 +1919,7 @@ public class DirectoryFragment extends Fragment {
          *
          * @param selected A selection representing the files to delete.
          */
-        public void markForDeletion(Selection selected) {
+        void markForDeletion(Selection selected) {
             // Only one deletion operation at a time.
             checkState(mMarkedForDeletion.size() == 0);
             // There should never be more to delete than what exists.
@@ -1912,7 +1930,7 @@ public class DirectoryFragment extends Fragment {
                 int position = selected.get(i);
                 if (DEBUG) Log.d(TAG, "Marked position " + position + " for deletion");
                 mMarkedForDeletion.append(position, true);
-                mAdapter.notifyItemRemoved(position);
+                if (mUpdateListener != null)  mUpdateListener.notifyItemRemoved(position);
             }
         }
 
@@ -1920,14 +1938,14 @@ public class DirectoryFragment extends Fragment {
          * Cancels an ongoing deletion operation. All files currently marked for deletion will be
          * unmarked, and restored in the UI.  See {@link #markForDeletion(Selection)}.
          */
-        public void undoDeletion() {
+        void undoDeletion() {
             // Iterate over deleted items, temporarily marking them false in the deletion list, and
             // re-adding them to the UI.
             final int size = mMarkedForDeletion.size();
             for (int i = 0; i < size; ++i) {
                 final int position = mMarkedForDeletion.keyAt(i);
                 mMarkedForDeletion.put(position, false);
-                mAdapter.notifyItemInserted(position);
+                if (mUpdateListener != null)  mUpdateListener.notifyItemInserted(position);
             }
 
             // Then, clear the deletion list.
@@ -1937,11 +1955,26 @@ public class DirectoryFragment extends Fragment {
         /**
          * Finalizes an ongoing deletion operation. All files currently marked for deletion will be
          * deleted.  See {@link #markForDeletion(Selection)}.
+         *
+         * @param view The view which will be used to interact with the user (e.g. surfacing
+         * snackbars) for errors, info, etc.
          */
-        public void finalizeDeletion() {
-            final Context context = getActivity();
-            final ContentResolver resolver = context.getContentResolver();
-            new DeleteFilesTask(resolver).execute();
+        void finalizeDeletion(final View view) {
+            final ContentResolver resolver = mContext.getContentResolver();
+            DeleteFilesTask task = new DeleteFilesTask(
+                    resolver,
+                    new Runnable() {
+                        @Override
+                        public void run() {
+                            Snackbar.make(
+                                    view,
+                                    R.string.toast_failed_delete,
+                                    Snackbar.LENGTH_LONG)
+                                    .show();
+
+                        }
+                    });
+            task.execute();
         }
 
         /**
@@ -1950,9 +1983,16 @@ public class DirectoryFragment extends Fragment {
          */
         private class DeleteFilesTask extends AsyncTask<Void, Void, List<DocumentInfo>> {
             private ContentResolver mResolver;
+            private Runnable mErrorCallback;
 
-            public DeleteFilesTask(ContentResolver resolver) {
+            /**
+             * @param resolver A ContentResolver for performing the actual file deletions.
+             * @param errorCallback A Runnable that is executed in the event that one or more errors
+             *     occured while copying files.  Execution will occur on the UI thread.
+             */
+            public DeleteFilesTask(ContentResolver resolver, Runnable errorCallback) {
                 mResolver = resolver;
+                mErrorCallback = errorCallback;
             }
 
             @Override
@@ -1985,16 +2025,41 @@ public class DirectoryFragment extends Fragment {
                 }
 
                 if (hadTrouble) {
-                    // TODO show which files failed?
-                    Snackbar.make(DirectoryFragment.this.getView(),
-                       R.string.toast_failed_delete,
-                       Snackbar.LENGTH_LONG).show();
+                    // TODO show which files failed? b/23720103
+                    mErrorCallback.run();
                     if (DEBUG) Log.d(TAG, "Deletion task completed.  Some deletions failed.");
                 } else {
                     if (DEBUG) Log.d(TAG, "Deletion task completed successfully.");
                 }
                 mMarkedForDeletion.clear();
             }
+        }
+
+        void addUpdateListener(UpdateListener listener) {
+            checkState(mUpdateListener == null);
+            mUpdateListener = listener;
+        }
+
+        interface UpdateListener {
+            /**
+             * Called when a successful update has occurred.
+             */
+            void onModelUpdate(Model model);
+
+            /**
+             * Called when an update has been attempted but failed.
+             */
+            void onModelUpdateFailed(Exception e);
+
+            /**
+             * Called when an item has been removed from the model.
+             */
+            void notifyItemRemoved(int position);
+
+            /**
+             * Called when an item has been added to the model.
+             */
+            void notifyItemInserted(int position);
         }
     }
 }
