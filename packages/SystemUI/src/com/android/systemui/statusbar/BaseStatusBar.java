@@ -1636,11 +1636,13 @@ public abstract class BaseStatusBar extends SystemUI implements
     protected void handleVisibleToUserChanged(boolean visibleToUser) {
         try {
             if (visibleToUser) {
-                boolean clearNotificationEffects = !isPanelFullyCollapsed() &&
-                    (mShowLockscreenNotifications ||
-                        (mState == StatusBarState.SHADE || mState == StatusBarState.SHADE_LOCKED));
+                boolean pinnedHeadsUp = mHeadsUpManager.hasPinnedHeadsUp();
+                boolean clearNotificationEffects =
+                    ((mShowLockscreenNotifications && mState == StatusBarState.KEYGUARD) ||
+                            (!pinnedHeadsUp && (mState == StatusBarState.SHADE
+                                    || mState == StatusBarState.SHADE_LOCKED)));
                 int notificationLoad = mNotificationData.getActiveNotifications().size();
-                if (mHeadsUpManager.hasPinnedHeadsUp() && isPanelFullyCollapsed())  {
+                if (pinnedHeadsUp && isPanelFullyCollapsed())  {
                     notificationLoad = 1;
                 } else {
                     MetricsLogger.histogram(mContext, "note_load", notificationLoad);
