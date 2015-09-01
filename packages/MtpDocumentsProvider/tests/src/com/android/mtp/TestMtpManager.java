@@ -43,7 +43,6 @@ public class TestMtpManager extends MtpManager {
     private final Map<String, MtpObjectInfo> mObjectInfos = new HashMap<>();
     private final Map<String, int[]> mObjectHandles = new HashMap<>();
     private final Map<String, byte[]> mThumbnailBytes = new HashMap<>();
-    private final Map<String, Integer> mParents = new HashMap<>();
     private final Map<String, byte[]> mImportFileBytes = new HashMap<>();
 
     TestMtpManager(Context context) {
@@ -76,12 +75,6 @@ public class TestMtpManager extends MtpManager {
 
     void setThumbnail(int deviceId, int objectHandle, byte[] bytes) {
         mThumbnailBytes.put(pack(deviceId, objectHandle), bytes);
-    }
-
-    // TODO: Remove this method, as MtpObjectInfo contains information about
-    // parents.
-    void setParent(int deviceId, int objectHandle, int parentObjectHandle) {
-        mParents.put(pack(deviceId, objectHandle), parentObjectHandle);
     }
 
     @Override
@@ -193,10 +186,10 @@ public class TestMtpManager extends MtpManager {
     }
 
     @Override
-    synchronized int getParent(int deviceId, int objectHandle) throws IOException {
+    int getParent(int deviceId, int objectHandle) throws IOException {
         final String key = pack(deviceId, objectHandle);
-        if (mParents.containsKey(key)) {
-            return mParents.get(key);
+        if (mObjectInfos.containsKey(key)) {
+            return mObjectInfos.get(key).getParent();
         } else {
             throw new IOException();
         }

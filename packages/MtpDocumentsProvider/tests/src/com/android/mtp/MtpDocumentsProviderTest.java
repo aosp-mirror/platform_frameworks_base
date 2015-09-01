@@ -324,13 +324,8 @@ public class MtpDocumentsProviderTest extends AndroidTestCase {
     public void testDeleteDocument() throws FileNotFoundException {
         mMtpManager.setObjectInfo(0, new MtpObjectInfo.Builder()
                 .setObjectHandle(1)
-                .setFormat(0x3801)
-                .setName("image.jpg")
-                .setDateModified(1422716400000L)
-                .setCompressedSize(1024 * 1024 * 5)
-                .setThumbCompressedSize(1024 * 50)
+                .setParent(2)
                 .build());
-        mMtpManager.setParent(0, 1, 2);
         mProvider.deleteDocument("0_0_1");
         assertEquals(1, mResolver.getChangeCount(
                 DocumentsContract.buildChildDocumentsUri(
@@ -338,7 +333,9 @@ public class MtpDocumentsProviderTest extends AndroidTestCase {
     }
 
     public void testDeleteDocument_error() {
-        mMtpManager.setParent(0, 1, 2);
+        mMtpManager.setObjectInfo(0, new MtpObjectInfo.Builder()
+                .setObjectHandle(2)
+                .build());
         try {
             mProvider.deleteDocument("0_0_1");
             fail();
