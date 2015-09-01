@@ -575,7 +575,7 @@ public class DirectoryFragment extends Fragment {
         mRecView.setLayoutManager(layout);
         // TODO: Once b/23691541 is resolved, use a listener within MultiSelectManager instead of
         // imperatively calling this function.
-        mSelectionManager.handleLayoutChanged();
+        mModel.mSelectionManager.handleLayoutChanged();
         // setting layout manager automatically invalidates existing ViewHolders.
         mThumbSize = new Point(thumbSize, thumbSize);
     }
