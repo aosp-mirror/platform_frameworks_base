@@ -2976,7 +2976,18 @@ DISTRIBUTE_RESOURCES = DISTRIBUTE_RESOURCES.concat([
     "lang":"en",
     "type":"distribute"
   },
-
+  {
+    "title":"Developing for Android 6.0 (Marshmallow)",
+    "titleFriendly":"",
+    "summary":"This video covers how to get started with the preview, important APIs to test and how to provide feedback on the preview.",
+    "url":"https://www.youtube.com/watch?v=yYU4DHLwoRk",
+    "group":"",
+    "keywords": ["Marshmallow", "Preview"],
+    "tags": [],
+    "image":"http://i1.ytimg.com/vi/yYU4DHLwoRk/maxresdefault.jpg",
+    "lang":"en",
+    "type":"Video"
+  },
 
   {
     "lang": "ja",

@@ -173,12 +173,12 @@ var RESOURCE_COLLECTIONS = {
   "preview/landing/more": {
     "title": "",
     "resources": [
+      "https://www.youtube.com/watch?v=yYU4DHLwoRk",
       "preview/features/runtime-permissions.html",
       "preview/behavior-changes.html",
       "preview/backup/index.html",
       "preview/features/app-linking.html",
-      "preview/testing/guide.html",
-      "preview/testing/performance.html",
+      "preview/testing/guide.html"
     ]
   },
   "distribute/landing/carousel": {
