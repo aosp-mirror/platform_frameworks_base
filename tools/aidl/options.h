@@ -15,15 +15,15 @@ enum {
 // This struct is the parsed version of the command line options
 struct Options
 {
-    int task;
-    bool failOnParcelable;
+    int task{COMPILE_AIDL};
+    bool failOnParcelable{false};
     vector<string> importPaths;
     vector<string> preprocessedFiles;
     string inputFileName;
     string outputFileName;
     string outputBaseFolder;
     string depFileName;
-    bool autoDepFile;
+    bool autoDepFile{false};
 
     vector<string> filesToPreprocess;
 };
