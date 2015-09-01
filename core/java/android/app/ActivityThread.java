@@ -4718,7 +4718,13 @@ public final class ActivityThread {
             mInstrumentedSplitAppDirs = data.info.getSplitAppDirs();
             mInstrumentedLibDir = data.info.getLibDir();
 
-            ApplicationInfo instrApp = new ApplicationInfo();
+            // The app context's info was created against this thread, but
+            // the class loader may have already been loaded and cached with
+            // outdated paths. Clear it so we can load it again using the
+            // instrumentation paths.
+            data.info.clearClassLoader();
+
+            final ApplicationInfo instrApp = new ApplicationInfo();
             instrApp.packageName = ii.packageName;
             instrApp.sourceDir = ii.sourceDir;
             instrApp.publicSourceDir = ii.publicSourceDir;
@@ -4731,6 +4737,7 @@ public final class ActivityThread {
             ContextImpl instrContext = ContextImpl.createAppContext(this, pi);
 
             try {
+
                 java.lang.ClassLoader cl = instrContext.getClassLoader();
                 mInstrumentation = (Instrumentation)
                     cl.loadClass(data.instrumentationName.getClassName()).newInstance();
