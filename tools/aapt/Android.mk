@@ -54,7 +54,6 @@ aaptTests := \
     tests/ResourceFilter_test.cpp \
     tests/ResourceTable_test.cpp
 
-aaptHostLdLibs :=
 aaptHostStaticLibs := \
     libandroidfw \
     libpng \
@@ -68,17 +67,13 @@ aaptHostStaticLibs := \
 aaptCFlags := -DAAPT_VERSION=\"$(BUILD_NUMBER_FROM_FILE)\"
 aaptCFlags += -Wall -Werror
 
-ifeq ($(HOST_OS),linux)
-    aaptHostLdLibs += -lrt -ldl -lpthread
-endif
+aaptHostLdLibs_linux := -lrt -ldl -lpthread
 
 # Statically link libz for MinGW (Win SDK under Linux),
 # and dynamically link for all others.
-ifneq ($(strip $(USE_MINGW)),)
-    aaptHostStaticLibs += libz
-else
-    aaptHostLdLibs += -lz
-endif
+aaptHostStaticLibs_windows := libz
+aaptHostLdLibs_linux += -lz
+aaptHostLdLibs_darwin := -lz
 
 
 # ==========================================================
@@ -87,13 +82,13 @@ endif
 include $(CLEAR_VARS)
 
 LOCAL_MODULE := libaapt
-LOCAL_CFLAGS += -Wno-format-y2k -DSTATIC_ANDROIDFW_FOR_TOOLS $(aaptCFlags)
-LOCAL_CPPFLAGS += $(aaptCppFlags)
-ifeq (darwin,$(HOST_OS))
-LOCAL_CFLAGS += -D_DARWIN_UNLIMITED_STREAMS
-endif
+LOCAL_MODULE_HOST_OS := darwin linux windows
+LOCAL_CFLAGS := -Wno-format-y2k -DSTATIC_ANDROIDFW_FOR_TOOLS $(aaptCFlags)
+LOCAL_CPPFLAGS := $(aaptCppFlags)
+LOCAL_CFLAGS_darwin := -D_DARWIN_UNLIMITED_STREAMS
 LOCAL_SRC_FILES := $(aaptSources)
-LOCAL_STATIC_LIBRARIES += $(aaptHostStaticLibs)
+LOCAL_STATIC_LIBRARIES := $(aaptHostStaticLibs)
+LOCAL_STATIC_LIBRARIES_windows := $(aaptHostStaticLibs_windows)
 
 include $(BUILD_HOST_STATIC_LIBRARY)
 
@@ -103,11 +98,14 @@ include $(BUILD_HOST_STATIC_LIBRARY)
 include $(CLEAR_VARS)
 
 LOCAL_MODULE := aapt
-LOCAL_CFLAGS += $(aaptCFlags)
-LOCAL_CPPFLAGS += $(aaptCppFlags)
-LOCAL_LDLIBS += $(aaptHostLdLibs)
+LOCAL_MODULE_HOST_OS := darwin linux windows
+LOCAL_CFLAGS := $(aaptCFlags)
+LOCAL_CPPFLAGS := $(aaptCppFlags)
+LOCAL_LDLIBS_darwin := $(aaptHostLdLibs_darwin)
+LOCAL_LDLIBS_linux := $(aaptHostLdLibs_linux)
 LOCAL_SRC_FILES := $(aaptMain)
-LOCAL_STATIC_LIBRARIES += libaapt $(aaptHostStaticLibs)
+LOCAL_STATIC_LIBRARIES := libaapt $(aaptHostStaticLibs)
+LOCAL_STATIC_LIBRARIES_windows := $(aaptHostStaticLibs_windows)
 
 include $(BUILD_HOST_EXECUTABLE)
 
@@ -116,15 +114,16 @@ include $(BUILD_HOST_EXECUTABLE)
 # Build the host tests: libaapt_tests
 # ==========================================================
 include $(CLEAR_VARS)
-LOCAL_ADDITIONAL_DEPENDENCIES := $(LOCAL_PATH)/Android.mk
 
 LOCAL_MODULE := libaapt_tests
-LOCAL_CFLAGS += $(aaptCFlags)
-LOCAL_CPPFLAGS += $(aaptCppFlags)
-LOCAL_LDLIBS += $(aaptHostLdLibs)
-LOCAL_SRC_FILES += $(aaptTests)
-LOCAL_C_INCLUDES += $(LOCAL_PATH)
-LOCAL_STATIC_LIBRARIES += libaapt $(aaptHostStaticLibs)
+LOCAL_CFLAGS := $(aaptCFlags)
+LOCAL_CPPFLAGS := $(aaptCppFlags)
+LOCAL_LDLIBS_darwin := $(aaptHostLdLibs_darwin)
+LOCAL_LDLIBS_linux := $(aaptHostLdLibs_linux)
+LOCAL_SRC_FILES := $(aaptTests)
+LOCAL_C_INCLUDES := $(LOCAL_PATH)
+LOCAL_STATIC_LIBRARIES := libaapt $(aaptHostStaticLibs)
+LOCAL_STATIC_LIBRARIES_windows := $(aaptHostStaticLibs_windows)
 
 include $(BUILD_HOST_NATIVE_TEST)
 

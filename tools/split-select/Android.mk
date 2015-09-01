@@ -43,7 +43,6 @@ cIncludes := \
     external/zlib \
     frameworks/base/tools
 
-hostLdLibs :=
 hostStaticLibs := \
     libaapt \
     libandroidfw \
@@ -57,17 +56,13 @@ hostStaticLibs := \
 
 cFlags := -Wall -Werror
 
-ifeq ($(HOST_OS),linux)
-    hostLdLibs += -lrt -ldl -lpthread
-endif
+hostLdLibs_linux := -lrt -ldl -lpthread
 
 # Statically link libz for MinGW (Win SDK under Linux),
 # and dynamically link for all others.
-ifneq ($(strip $(USE_MINGW)),)
-    hostStaticLibs += libz
-else
-    hostLdLibs += -lz
-endif
+hostStaticLibs_windows := libz
+hostLdLibs_darwin := -lz
+hostLdLibs_linux += -lz
 
 
 # ==========================================================
@@ -75,11 +70,12 @@ endif
 # ==========================================================
 include $(CLEAR_VARS)
 LOCAL_MODULE := libsplit-select
+LOCAL_MODULE_HOST_OS := darwin linux windows
 
 LOCAL_SRC_FILES := $(sources)
 
-LOCAL_C_INCLUDES += $(cIncludes)
-LOCAL_CFLAGS += $(cFlags) -D_DARWIN_UNLIMITED_STREAMS
+LOCAL_C_INCLUDES := $(cIncludes)
+LOCAL_CFLAGS := $(cFlags) -D_DARWIN_UNLIMITED_STREAMS
 
 include $(BUILD_HOST_STATIC_LIBRARY)
 
@@ -93,10 +89,12 @@ LOCAL_MODULE_TAGS := tests
 
 LOCAL_SRC_FILES := $(testSources)
 
-LOCAL_C_INCLUDES += $(cIncludes)
-LOCAL_STATIC_LIBRARIES += libsplit-select $(hostStaticLibs)
-LOCAL_LDLIBS += $(hostLdLibs)
-LOCAL_CFLAGS += $(cFlags)
+LOCAL_C_INCLUDES := $(cIncludes)
+LOCAL_STATIC_LIBRARIES := libsplit-select $(hostStaticLibs)
+LOCAL_STATIC_LIBRARIES_windows := $(hostStaticLibs_windows)
+LOCAL_LDLIBS_darwin := $(hostLdLibs_darwin)
+LOCAL_LDLIBS_linux := $(hostLdLibs_linux)
+LOCAL_CFLAGS := $(cFlags)
 
 include $(BUILD_HOST_NATIVE_TEST)
 
@@ -105,13 +103,16 @@ include $(BUILD_HOST_NATIVE_TEST)
 # ==========================================================
 include $(CLEAR_VARS)
 LOCAL_MODULE := split-select
+LOCAL_MODULE_HOST_OS := darwin linux windows
 
 LOCAL_SRC_FILES := $(main)
 
-LOCAL_C_INCLUDES += $(cIncludes)
-LOCAL_STATIC_LIBRARIES += libsplit-select $(hostStaticLibs)
-LOCAL_LDLIBS += $(hostLdLibs)
-LOCAL_CFLAGS += $(cFlags)
+LOCAL_C_INCLUDES := $(cIncludes)
+LOCAL_STATIC_LIBRARIES := libsplit-select $(hostStaticLibs)
+LOCAL_STATIC_LIBRARIES_windows := $(hostStaticLibs_windows)
+LOCAL_LDLIBS_darwin := $(hostLdLibs_darwin)
+LOCAL_LDLIBS_linux := $(hostLdLibs_linux)
+LOCAL_CFLAGS := $(cFlags)
 
 include $(BUILD_HOST_EXECUTABLE)
 
