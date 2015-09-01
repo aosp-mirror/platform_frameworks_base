@@ -754,47 +754,30 @@ uint32_t DirectStripSource::getIfd() const {
 // ----------------------------------------------------------------------------
 
 /**
- * Given a buffer crop rectangle relative to the pixel array size, and the pre-correction active
- * array crop rectangle for the camera characteristics, set the default crop rectangle in the
- * TiffWriter relative to the buffer crop rectangle origin.
+ * Calculate the default crop relative to the "active area" of the image sensor (this active area
+ * will always be the pre-correction active area rectangle), and set this.
  */
 static status_t calculateAndSetCrop(JNIEnv* env, const CameraMetadata& characteristics,
-        uint32_t bufWidth, uint32_t bufHeight, sp<TiffWriter> writer) {
+        sp<TiffWriter> writer) {
 
     camera_metadata_ro_entry entry =
             characteristics.find(ANDROID_SENSOR_INFO_PRE_CORRECTION_ACTIVE_ARRAY_SIZE);
-    uint32_t xmin = static_cast<uint32_t>(entry.data.i32[0]);
-    uint32_t ymin = static_cast<uint32_t>(entry.data.i32[1]);
     uint32_t width = static_cast<uint32_t>(entry.data.i32[2]);
     uint32_t height = static_cast<uint32_t>(entry.data.i32[3]);
 
     const uint32_t margin = 8; // Default margin recommended by Adobe for interpolation.
 
-    // Crop based on pre-correction array for pixel array
-    uint32_t aLeft = xmin;
-    uint32_t aTop = ymin;
-    uint32_t aRight = xmin + width;
-    uint32_t aBottom = ymin + height;
-
-    // 8 pixel border crop for pixel array dimens
-    uint32_t bLeft = margin;
-    uint32_t bTop = margin;
-    uint32_t bRight = bufWidth - margin;
-    uint32_t bBottom = bufHeight - margin;
-
-    // Set the crop to be the intersection of the two rectangles
-    uint32_t defaultCropOrigin[] = {std::max(aLeft, bLeft), std::max(aTop, bTop)};
-    uint32_t defaultCropSize[] = {std::min(aRight, bRight) - defaultCropOrigin[0],
-            std::min(aBottom, bBottom) - defaultCropOrigin[1]};
-
-    // If using buffers with  pre-correction array dimens, switch to 8 pixel border crop
-    // relative to the pixel array dimens
-    if (bufWidth == width && bufHeight == height) {
-        defaultCropOrigin[0] = xmin + margin;
-        defaultCropOrigin[1] = ymin + margin;
-        defaultCropSize[0] = width - margin;
-        defaultCropSize[1] = height - margin;
+    if (width < margin * 2 || height < margin * 2) {
+        ALOGE("%s: Cannot calculate default crop for image, pre-correction active area is too"
+                "small: h=%" PRIu32 ", w=%" PRIu32, __FUNCTION__, height, width);
+        jniThrowException(env, "java/lang/IllegalStateException",
+                "Pre-correction active area is too small.");
+        return BAD_VALUE;
     }
+
+    uint32_t defaultCropOrigin[] = {margin, margin};
+    uint32_t defaultCropSize[] = {width - defaultCropOrigin[0] - margin,
+                                  height - defaultCropOrigin[1] - margin};
 
     BAIL_IF_INVALID_R(writer->addEntry(TAG_DEFAULTCROPORIGIN, 2, defaultCropOrigin,
             TIFF_IFD_0), env, TAG_DEFAULTCROPORIGIN, writer);
@@ -1564,16 +1547,23 @@ static sp<TiffWriter> DngCreator_setup(JNIEnv* env, jobject thiz, uint32_t image
 
     {
         // Set dimensions
-        if (calculateAndSetCrop(env, characteristics, imageWidth, imageHeight, writer) != OK) {
+        if (calculateAndSetCrop(env, characteristics, writer) != OK) {
             return nullptr;
         }
         camera_metadata_entry entry =
                 characteristics.find(ANDROID_SENSOR_INFO_PRE_CORRECTION_ACTIVE_ARRAY_SIZE);
-        BAIL_IF_EMPTY_RET_NULL_SP(entry, env, TAG_DEFAULTCROPSIZE, writer);
+        BAIL_IF_EMPTY_RET_NULL_SP(entry, env, TAG_ACTIVEAREA, writer);
         uint32_t xmin = static_cast<uint32_t>(entry.data.i32[0]);
         uint32_t ymin = static_cast<uint32_t>(entry.data.i32[1]);
         uint32_t width = static_cast<uint32_t>(entry.data.i32[2]);
         uint32_t height = static_cast<uint32_t>(entry.data.i32[3]);
+
+        // If we only have a buffer containing the pre-correction rectangle, ignore the offset
+        // relative to the pixel array.
+        if (imageWidth == width && imageHeight == height) {
+            xmin = 0;
+            ymin = 0;
+        }
 
         uint32_t activeArea[] = {ymin, xmin, ymin + height, xmin + width};
         BAIL_IF_INVALID_RET_NULL_SP(writer->addEntry(TAG_ACTIVEAREA, 4, activeArea, TIFF_IFD_0),
