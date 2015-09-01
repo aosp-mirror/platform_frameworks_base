@@ -258,6 +258,9 @@ public class WifiTracker {
         mScanId++;
         final List<ScanResult> newResults = mWifiManager.getScanResults();
         for (ScanResult newResult : newResults) {
+            if (newResult.SSID == null || newResult.SSID.isEmpty()) {
+                continue;
+            }
             mScanResultCache.put(newResult.BSSID, newResult);
             mSeenBssids.put(newResult.BSSID, mScanId);
         }
