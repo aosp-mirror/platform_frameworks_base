@@ -426,7 +426,7 @@ public class CarrierConfigManager {
      * @hide
      */
     public static final String KEY_ALLOW_NON_EMERGENCY_CALLS_IN_ECM_BOOL =
-            "allowNonEmergencyCallsInEcm";
+            "allow_non_emergency_calls_in_ecm_bool";
 
     /** The default value for every variable. */
     private final static PersistableBundle sDefaults;
