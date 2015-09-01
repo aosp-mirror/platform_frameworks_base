@@ -48,10 +48,6 @@ parse_options(int argc, const char* const* argv, Options *options)
         return 0;
     }
 
-    options->task = COMPILE_AIDL;
-    options->failOnParcelable = false;
-    options->autoDepFile = false;
-
     // OPTIONS
     while (i < argc) {
         const char* s = argv[i];
