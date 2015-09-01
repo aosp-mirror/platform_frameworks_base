@@ -2283,4 +2283,8 @@
     <!-- The OEM specified sensor string type for the gesture to launch camera app, this value
          must match the value of config_cameraLaunchGestureSensorType in OEM's HAL -->
     <string translatable="false" name="config_cameraLaunchGestureSensorStringType"></string>
+
+    <!-- Whether to open UI submenus side by side with the top menu (as opposed to
+         replacing the top menu). -->
+    <bool name="config_enableCascadingSubmenus">false</bool>
 </resources>
