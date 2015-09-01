@@ -29,6 +29,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.database.ContentObserver;
 import android.graphics.Bitmap;
+import android.hardware.fingerprint.Fingerprint;
 import android.hardware.fingerprint.FingerprintManager;
 import android.hardware.fingerprint.FingerprintManager.AuthenticationCallback;
 import android.hardware.fingerprint.FingerprintManager.AuthenticationResult;
@@ -472,6 +473,10 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
         }
     }
 
+    private void handleFingerprintLockoutReset() {
+        updateFingerprintListeningState();
+    }
+
     private void setFingerprintRunningState(int fingerprintRunningState) {
         boolean wasRunning = mFingerprintRunningState == FINGERPRINT_STATE_RUNNING;
         boolean isRunning = fingerprintRunningState == FINGERPRINT_STATE_RUNNING;
@@ -678,6 +683,14 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
                 mStrongAuthNotTimedOut.remove(userId);
                 notifyStrongAuthStateChanged(userId);
             }
+        }
+    };
+
+    private final FingerprintManager.LockoutResetCallback mLockoutResetCallback
+            = new FingerprintManager.LockoutResetCallback() {
+        @Override
+        public void onLockoutReset() {
+            handleFingerprintLockoutReset();
         }
     };
 
@@ -1003,6 +1016,9 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
 
         mFpm = (FingerprintManager) context.getSystemService(Context.FINGERPRINT_SERVICE);
         updateFingerprintListeningState();
+        if (mFpm != null) {
+            mFpm.addLockoutResetCallback(mLockoutResetCallback);
+        }
     }
 
     private void updateFingerprintListeningState() {
