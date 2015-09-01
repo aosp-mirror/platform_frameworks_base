@@ -291,6 +291,7 @@ public final class InputManager {
         }
 
         synchronized (mInputDevicesLock) {
+            populateInputDevicesLocked();
             int index = findInputDeviceListenerLocked(listener);
             if (index < 0) {
                 mInputDeviceListeners.add(new InputDeviceListenerDelegate(listener, handler));
