@@ -209,7 +209,7 @@ public class MtpDocumentsProviderTest extends AndroidTestCase {
     public void testQueryDocument() throws IOException {
         mMtpManager.setObjectInfo(0, new MtpObjectInfo.Builder()
                 .setObjectHandle(2)
-                .setFormat(0x3801)
+                .setFormat(MtpConstants.FORMAT_EXIF_JPEG)
                 .setName("image.jpg")
                 .setDateModified(1422716400000L)
                 .setCompressedSize(1024 * 1024 * 5)
@@ -234,7 +234,7 @@ public class MtpDocumentsProviderTest extends AndroidTestCase {
     public void testQueryDocument_directory() throws IOException {
         mMtpManager.setObjectInfo(0, new MtpObjectInfo.Builder()
                 .setObjectHandle(2)
-                .setFormat(0x3001 /* directory format */)
+                .setFormat(MtpConstants.FORMAT_ASSOCIATION)
                 .setName("directory")
                 .setDateModified(1422716400000L)
                 .build());
@@ -281,7 +281,7 @@ public class MtpDocumentsProviderTest extends AndroidTestCase {
 
         mMtpManager.setObjectInfo(0, new MtpObjectInfo.Builder()
                 .setObjectHandle(1)
-                .setFormat(0x3801 /* JPEG */)
+                .setFormat(MtpConstants.FORMAT_EXIF_JPEG)
                 .setName("image.jpg")
                 .setCompressedSize(1024 * 1024 * 5)
                 .setThumbCompressedSize(5 * 1024)

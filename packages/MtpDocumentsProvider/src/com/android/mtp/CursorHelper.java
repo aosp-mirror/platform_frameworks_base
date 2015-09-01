@@ -17,6 +17,7 @@
 package com.android.mtp;
 
 import android.database.MatrixCursor;
+import android.mtp.MtpConstants;
 import android.mtp.MtpObjectInfo;
 import android.provider.DocumentsContract;
 import android.provider.DocumentsContract.Document;
@@ -72,11 +73,11 @@ final class CursorHelper {
     static String formatTypeToMimeType(int format) {
         // TODO: Add complete list of mime types.
         switch (format) {
-            case 0x3001:
+            case MtpConstants.FORMAT_ASSOCIATION:
                 return DocumentsContract.Document.MIME_TYPE_DIR;
-            case 0x3009:
+            case MtpConstants.FORMAT_MP3:
                 return "audio/mp3";
-            case 0x3801:
+            case MtpConstants.FORMAT_EXIF_JPEG:
                 return "image/jpeg";
             default:
                 return "application/octet-stream";
@@ -87,13 +88,13 @@ final class CursorHelper {
         // TODO: Add complete list of mime types.
         switch (mimeType.toLowerCase()) {
             case Document.MIME_TYPE_DIR:
-                return 0x3001;
+                return MtpConstants.FORMAT_ASSOCIATION;
             case "audio/mp3":
-                return 0x3009;
+                return MtpConstants.FORMAT_MP3;
             case "image/jpeg":
-                return 0x3801;
+                return MtpConstants.FORMAT_EXIF_JPEG;
             default:
-                return 0x3000;  // Undefined object.
+                return MtpConstants.FORMAT_UNDEFINED;
         }
     }
 }
