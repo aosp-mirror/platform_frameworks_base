@@ -1,0 +1,76 @@
+page.title=Working with System Permissions
+page.tags=permissions
+helpoutsWidget=true
+
+@jd:body
+
+<div id="tb-wrapper">
+
+  <div id="tb">
+<!--
+    <h2>Dependencies and Prerequisites</h2>
+    <ul>
+      <li></li>
+    </ul>
+-->
+<h2>You should also read</h2>
+  <ul>
+    <li><a href="{@docRoot}guide/topics/security/permissions.html">
+      System Permissions</a></li>
+    <li><a href="{@docRoot}training/basics/intents/index.html">
+      Interacting with other apps</a></li>
+  </ul>
+  </div>
+</div>
+
+<a class="notice-designers wide"
+  href="https://www.google.com/design/spec/patterns/permissions.html">
+  <div>
+    <h3>Design Patterns</h3>
+    <p>Permissions</p>
+  </div>
+</a>
+
+<p>
+  To protect the system's integrity and the user's privacy, Android runs each
+  app in a limited access sandbox. If the app wants to use resources or
+  information outside of its sandbox, the app has to explicitly request
+  permission. Depending on the type of permission the app requests, the system
+  may grant the permission automatically, or the system may ask the user to
+  grant the permission.
+</p>
+
+<p>
+  This class shows you how to declare and request permissions for your app.
+</p>
+
+<h2>Lessons</h2>
+
+<dl>
+  <dt>
+    <a href="declaring.html">Declaring Permissions</a>
+  </dt>
+
+  <dd>
+    Learn how to declare the permissions you need in your app manifest.
+  </dd>
+
+  <dt>
+    <a href="requesting.html">Requesting Permissions at Run Time</a>
+  </dt>
+
+  <dd>
+    Learn how to request permissions from the user while the app is running.
+    This lesson only applies to apps on devices running Android 6.0 (API level
+    23) and higher.
+  </dd>
+
+  <dt>
+    <a href="best-practices.html">Permissions Best Practices</a>
+  </dt>
+
+  <dd>
+    Guidelines for creating the best user experience in requesting and using
+    permissions.
+  </dd>
+</dl>

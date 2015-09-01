@@ -1,0 +1,115 @@
+page.title=Declaring Permissions
+helpoutsWidget=true
+
+@jd:body
+
+<div id="tb-wrapper">
+  <div id="tb">
+  <h2>This lesson teaches you to</h2>
+  <ul>
+    <li>
+      <a href="#perm-needed">Determine What Permissions Your App Needs</a>
+    </li>
+    <li>
+      <a href="#perm-add">Add Permissions to the Manifest</a>
+    </li>
+  </ul>
+
+<!--
+    <h2>Dependencies and Prerequisites</h2>
+    <ul>
+      <li></li>
+    </ul>
+-->
+
+<h2>You should also read</h2>
+  <ul>
+    <li><a href="{@docRoot}guide/topics/security/permissions.html#permissions">
+      Using Permissions</a></li>  <ul>
+    <li><a href="{@docRoot}guide/topics/security/permissions.html#normal-dangerous">
+      Normal and Dangerous Permissions</a></li>
+  </ul>
+</div>
+</div>
+
+<p>
+  Every Android app runs in a limited-access sandbox. If an app needs to use
+  resources or information outside of its own sandbox, the app has to request
+  the appropriate <i>permission.</i> You declare that your app needs a
+  permission by listing the permission in the <a href=
+  "{@docRoot}guide/topics/manifest/manifest-intro.html">App Manifest</a>.
+</p>
+
+<p>
+  Depending on how sensitive the permission is, the system might grant the
+  permission automatically, or the device user might have to grant
+  the request. For example, if your app requests permission to turn on the
+  device's flashlight, the system grants that permission automatically. But
+  if your app needs to read the user's contacts, the system asks the user
+  to approve that permission. Depending on the platform version, the user
+  grants the permission either when they install the app (on Android 5.1 and
+  lower) or while running the app (on Android 6.0 and higher).
+</p>
+
+<h2 id="perm-needed">Determine What Permissions Your App Needs</h2>
+
+<p>
+  As you develop your app, you should note when your app is using capabilities
+  that require a permission. Typically, an app is going to need permissions
+  whenever it uses information or resources that the app doesn't create, or
+  performs actions that affect the behavior of the device or other apps. For
+  example, if an app needs to access the internet, use the device camera, or
+  turn Wi-Fi on or off, the app needs the appropriate permission. For a list of
+  system permissions, see <a href=
+  "{@docRoot}guide/topics/security/permissions.html#normal-dangerous">Normal
+  and Dangerous Permissions</a>.
+</p>
+
+<p>
+  Your app only needs permissions for actions that it performs directly. Your
+  app does not need permission if it is requesting that another app perform the
+  task or provide the information. For example, if your app needs to read the
+  user's address book, the app needs the {@link
+  android.Manifest.permission#READ_CONTACTS READ_CONTACTS} permission. But if
+  your app uses an <em>intent</em> to request information from the user's
+  Contacts app, your app does not need any permissions, but the
+  Contacts app <em>does</em> need to have that permission. For more
+  information, see <a href="best-practices.html#perms-vs-intents">Consider
+  Using an Intent</a>.
+</p>
+
+<h2 id="perm-add">Add Permissions to the Manifest</h2>
+
+<p>
+  To declare that your app needs a permission, put a <a href=
+  "{@docRoot}guide/topics/manifest/uses-permission-element.html"
+  ><code>&lt;uses-permission&gt;</code></a>
+  element in your <a href=
+  "{@docRoot}guide/topics/manifest/manifest-intro.html">app manifest</a>, as a
+  child of the top-level <a href=
+  "{@docRoot}guide/topics/manifest/manifest-element.html"><code>&lt;manifest&gt;</code></a>
+  element. For example, an app that needs to send SMS messages would have this
+  line in the manifest:
+</p>
+
+<pre>&lt;manifest xmlns:android="http://schemas.android.com/apk/res/android"
+        package="com.example.snazzyapp"&gt;
+
+    <strong>&lt;uses-permission android:name="android.permission.SEND_SMS"/&gt;</strong>
+    <!-- other permissions go here -->
+
+    &lt;application ...&gt;
+        ...
+    &lt;/application&gt;
+
+&lt;/manifest&gt;</pre>
+
+<p>
+  The system's behavior after you declare a permission depends on how sensitive
+  the permission is. If the permission does not affect user privacy, the system
+  grants the permission automatically. If the permission might grant access to
+  sensitive user information, the system asks the user to approve the request.
+  For more information about the different kinds of permissions, see
+  <a href="{@docRoot}guide/topics/security/permissions.html#normal-dangerous">Normal
+  and Dangerous Permissions</a>.
+</p>

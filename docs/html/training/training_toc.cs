@@ -281,6 +281,31 @@ include the action bar on devices running Android 2.1 or higher."
         </ul>
       </li>
 
+      <li class="nav-section">
+        <div class="nav-section-header">
+          <a href="<?cs var:toroot ?>training/permissions/index.html"
+             description=
+             "How to declare that your app needs access to features and
+             resources outside of its 'sandbox', and how to request those
+             privileges at runtime."
+            >Working with System Permissions</a>
+        </div>
+        <ul>
+          <li><a href="<?cs var:toroot ?>training/permissions/declaring.html">
+            Declaring Permissions
+          </a>
+          </li>
+          <li><a href="<?cs var:toroot ?>training/permissions/requesting.html">
+            Requesting Permissions at Run Time
+          </a>
+          </li>
+          <li><a href="<?cs var:toroot ?>training/permissions/best-practices.html">
+            Best Practices for Runtime Permissions
+          </a>
+          </li>
+        </ul>
+      </li>
+
     </ul>
   </li><!-- end getting started -->
     <li class="nav-section">
