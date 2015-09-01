@@ -83,6 +83,14 @@ static void SigChldHandler(int /*signal_number*/) {
   pid_t pid;
   int status;
 
+  // It's necessary to save and restore the errno during this function.
+  // Since errno is stored per thread, changing it here modifies the errno
+  // on the thread on which this signal handler executes. If a signal occurs
+  // between a call and an errno check, it's possible to get the errno set
+  // here.
+  // See b/23572286 for extra information.
+  int saved_errno = errno;
+
   while ((pid = waitpid(-1, &status, WNOHANG)) > 0) {
      // Log process-death status that we care about.  In general it is
      // not safe to call LOG(...) from a signal handler because of
@@ -118,6 +126,8 @@ static void SigChldHandler(int /*signal_number*/) {
   if (pid < 0 && errno != ECHILD) {
     ALOGW("Zygote SIGCHLD error in waitpid: %s", strerror(errno));
   }
+
+  errno = saved_errno;
 }
 
 // Configures the SIGCHLD handler for the zygote process. This is configured
