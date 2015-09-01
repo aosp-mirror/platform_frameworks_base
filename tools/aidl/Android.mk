@@ -49,14 +49,23 @@ LOCAL_STATIC_LIBRARIES := libaidl-common
 include $(BUILD_HOST_EXECUTABLE)
 
 
+# TODO(wiley) Compile these for mac as well after b/22771504
+ifeq ($(HOST_OS),linux)
 # Unit tests
 include $(CLEAR_VARS)
 LOCAL_MODULE := aidl_unittests
 
 LOCAL_CFLAGS := -g -DUNIT_TEST -Wall -Werror
+# Tragically, the code is riddled with unused parameters.
+LOCAL_CLANG_CFLAGS := -Wno-unused-parameter
 LOCAL_SRC_FILES := \
     options_unittest.cpp \
     test_main.cpp \
+    tests/end_to_end_tests.cpp \
+    tests/example_interface_test_data.cpp \
+
+LOCAL_SHARED_LIBRARIES := \
+    libchrome-host \
 
 LOCAL_STATIC_LIBRARIES := \
     libaidl-common \
@@ -66,5 +75,6 @@ LOCAL_STATIC_LIBRARIES := \
 LOCAL_LDLIBS_linux := -lrt
 
 include $(BUILD_HOST_NATIVE_TEST)
+endif # HOST_OS == linux
 
 endif # No TARGET_BUILD_APPS or TARGET_BUILD_PDK
