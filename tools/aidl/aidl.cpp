@@ -933,7 +933,7 @@ check_and_assign_method_ids(const char * filename, interface_item_type* first_it
 }
 
 // ==========================================================
-static int
+int
 compile_aidl(Options& options)
 {
     int err = 0, N;
@@ -1063,7 +1063,7 @@ compile_aidl(Options& options)
     return err;
 }
 
-static int
+int
 preprocess_aidl(const Options& options)
 {
     vector<string> lines;
@@ -1134,25 +1134,4 @@ preprocess_aidl(const Options& options)
 
     close(fd);
     return 0;
-}
-
-// ==========================================================
-int
-main(int argc, const char **argv)
-{
-    Options options;
-    int result = parse_options(argc, argv, &options);
-    if (result) {
-        return result;
-    }
-
-    switch (options.task)
-    {
-        case COMPILE_AIDL:
-            return compile_aidl(options);
-        case PREPROCESS_AIDL:
-            return preprocess_aidl(options);
-    }
-    fprintf(stderr, "aidl: internal error\n");
-    return 1;
 }
