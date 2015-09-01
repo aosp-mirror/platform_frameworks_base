@@ -17,6 +17,7 @@
 package android.widget;
 
 import com.android.internal.R;
+import com.android.internal.view.menu.ShowableListMenu;
 
 import android.annotation.StringRes;
 import android.content.Context;
@@ -37,7 +38,6 @@ import android.view.ViewTreeObserver;
 import android.view.ViewTreeObserver.OnGlobalLayoutListener;
 import android.view.accessibility.AccessibilityNodeInfo;
 import android.widget.ActivityChooserModel.ActivityChooserModelClient;
-import android.widget.ListPopupWindow.ForwardingListener;
 
 /**
  * This class is a view for choosing an activity for handling a given {@link Intent}.
@@ -263,7 +263,7 @@ public class ActivityChooserView extends ViewGroup implements ActivityChooserMod
         });
         expandButton.setOnTouchListener(new ForwardingListener(expandButton) {
             @Override
-            public ListPopupWindow getPopup() {
+            public ShowableListMenu getPopup() {
                 return getListPopupWindow();
             }
 

@@ -29,10 +29,10 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.accessibility.AccessibilityEvent;
 import android.widget.ActionMenuView;
+import android.widget.ForwardingListener;
 import android.widget.ListPopupWindow;
 import android.widget.TextView;
 import android.widget.Toast;
-import android.widget.ListPopupWindow.ForwardingListener;
 
 /**
  * @hide
@@ -320,7 +320,7 @@ public class ActionMenuItemView extends TextView
         }
 
         @Override
-        public ListPopupWindow getPopup() {
+        public ShowableListMenu getPopup() {
             if (mPopupCallback != null) {
                 return mPopupCallback.getPopup();
             }
@@ -331,7 +331,7 @@ public class ActionMenuItemView extends TextView
         protected boolean onForwardingStarted() {
             // Call the invoker, then check if the expected popup is showing.
             if (mItemInvoker != null && mItemInvoker.invokeItem(mItemData)) {
-                final ListPopupWindow popup = getPopup();
+                final ShowableListMenu popup = getPopup();
                 return popup != null && popup.isShowing();
             }
             return false;
@@ -339,7 +339,7 @@ public class ActionMenuItemView extends TextView
 
         @Override
         protected boolean onForwardingStopped() {
-            final ListPopupWindow popup = getPopup();
+            final ShowableListMenu popup = getPopup();
             if (popup != null) {
                 popup.dismiss();
                 return true;
@@ -349,6 +349,6 @@ public class ActionMenuItemView extends TextView
     }
 
     public static abstract class PopupCallback {
-        public abstract ListPopupWindow getPopup();
+        public abstract ShowableListMenu getPopup();
     }
 }
