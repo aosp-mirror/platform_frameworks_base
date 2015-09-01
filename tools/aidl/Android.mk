@@ -8,6 +8,17 @@ ifeq ($(TARGET_BUILD_APPS)$(filter true,$(TARGET_BUILD_PDK)),)
 LOCAL_PATH:= $(call my-dir)
 include $(CLEAR_VARS)
 
+LOCAL_CFLAGS := -g -Wall -Werror
+# Tragically, the code is riddled with unused parameters.
+LOCAL_CFLAGS += -Wno-unused-parameter
+# yacc dumps a lot of code *just in case*.
+LOCAL_CFLAGS += -Wno-unused-function
+LOCAL_CFLAGS += -Wno-unneeded-internal-declaration
+# yacc is a tool from a more civilized age.
+LOCAL_CFLAGS += -Wno-deprecated-register
+# yacc also has a habit of using char* over const char*.
+LOCAL_CFLAGS += -Wno-writable-strings
+
 LOCAL_SRC_FILES := \
 	aidl_language_l.l \
 	aidl_language_y.y \
@@ -21,7 +32,6 @@ LOCAL_SRC_FILES := \
 	generate_java_binder.cpp \
 	generate_java_rpc.cpp
 
-LOCAL_CFLAGS := -g
 LOCAL_MODULE := aidl
 
 include $(BUILD_HOST_EXECUTABLE)
