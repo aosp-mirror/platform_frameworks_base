@@ -121,5 +121,21 @@
                 <category android:name="com.android.test.uibench.TEST" />
             </intent-filter>
         </activity>
+        <activity
+            android:name=".TextCacheLowHitrateActivity"
+            android:label="Text/Layout Cache Low Hitrate" >
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="com.android.test.uibench.TEST" />
+            </intent-filter>
+        </activity>
+        <activity
+            android:name=".TextCacheHighHitrateActivity"
+            android:label="Text/Layout Cache High Hitrate" >
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="com.android.test.uibench.TEST" />
+            </intent-filter>
+        </activity>
     </application>
 </manifest>

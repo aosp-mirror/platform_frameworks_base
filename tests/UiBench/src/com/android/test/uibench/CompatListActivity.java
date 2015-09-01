@@ -19,27 +19,21 @@ import android.os.Bundle;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.ListFragment;
 import android.support.v7.app.AppCompatActivity;
-import android.view.View;
-import android.widget.ArrayAdapter;
+import android.widget.ListAdapter;
 
-public class ShadowGridActivity extends AppCompatActivity {
+public abstract class CompatListActivity extends AppCompatActivity {
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
         FragmentManager fm = getSupportFragmentManager();
         if (fm.findFragmentById(android.R.id.content) == null) {
-            ListFragment listFragment = new ListFragment() {
-                @Override
-                public void onViewCreated(View view, Bundle savedInstanceState) {
-                    super.onViewCreated(view, savedInstanceState);
-                    getListView().setDivider(null);
-                }
-            };
-
-            listFragment.setListAdapter(new ArrayAdapter<>(this,
-                    R.layout.card_row, R.id.card_text, TextUtils.buildSimpleStringList()));
+            ListFragment listFragment = new ListFragment();
+            listFragment.setListAdapter(createListAdapter());
             fm.beginTransaction().add(android.R.id.content, listFragment).commit();
         }
     }
+
+    protected abstract ListAdapter createListAdapter();
 }

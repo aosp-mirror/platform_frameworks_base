@@ -18,10 +18,10 @@ package com.android.test.uibench;
 import android.widget.ArrayAdapter;
 import android.widget.ListAdapter;
 
-public class TrivialListActivity extends CompatListActivity {
+public class TextCacheHighHitrateActivity extends CompatListActivity {
     @Override
     protected ListAdapter createListAdapter() {
         return new ArrayAdapter<>(this, android.R.layout.simple_list_item_1,
-                TextUtils.buildSimpleStringList());
+                TextUtils.buildParagraphListWithHitPercentage(80));
     }
 }
