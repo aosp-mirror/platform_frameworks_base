@@ -726,7 +726,7 @@ public class VectorDrawable extends Drawable {
         Log.v(LOGTAG, indent + "matrix is :" + currentGroup.getLocalMatrix().toString());
         // Then print all the children groups
         for (int i = 0; i < currentGroup.mChildren.size(); i++) {
-            Object child = currentGroup.mChildren.get(i);
+            final VObject child = currentGroup.mChildren.get(i);
             if (child instanceof VGroup) {
                 printGroupTree((VGroup) child, level + 1);
             }
@@ -783,12 +783,6 @@ public class VectorDrawable extends Drawable {
                 mThemeAttrs = copy.mThemeAttrs;
                 mChangingConfigurations = copy.mChangingConfigurations;
                 mVPathRenderer = new VPathRenderer(copy.mVPathRenderer);
-                if (copy.mVPathRenderer.mFillPaint != null) {
-                    mVPathRenderer.mFillPaint = new Paint(copy.mVPathRenderer.mFillPaint);
-                }
-                if (copy.mVPathRenderer.mStrokePaint != null) {
-                    mVPathRenderer.mStrokePaint = new Paint(copy.mVPathRenderer.mStrokePaint);
-                }
                 mTint = copy.mTint;
                 mTintMode = copy.mTintMode;
                 mAutoMirrored = copy.mAutoMirrored;
@@ -913,13 +907,7 @@ public class VectorDrawable extends Drawable {
          */
         // Variables that only used temporarily inside the draw() call, so there
         // is no need for deep copying.
-        private final Path mPath;
-        private final Path mRenderPath;
-        private final Matrix mFinalPathMatrix = new Matrix();
-
-        private Paint mStrokePaint;
-        private Paint mFillPaint;
-        private PathMeasure mPathMeasure;
+        private final TempState mTempState = new TempState();
 
         /////////////////////////////////////////////////////
         // Variables below need to be copied (deep copy if applicable) for mutation.
@@ -935,12 +923,10 @@ public class VectorDrawable extends Drawable {
 
         int mTargetDensity = DisplayMetrics.DENSITY_DEFAULT;
 
-        final ArrayMap<String, Object> mVGTargetsMap = new ArrayMap<String, Object>();
+        final ArrayMap<String, Object> mVGTargetsMap = new ArrayMap<>();
 
         public VPathRenderer() {
             mRootGroup = new VGroup();
-            mPath = new Path();
-            mRenderPath = new Path();
         }
 
         public void setRootAlpha(int alpha) {
@@ -964,8 +950,6 @@ public class VectorDrawable extends Drawable {
 
         public VPathRenderer(VPathRenderer copy) {
             mRootGroup = new VGroup(copy.mRootGroup, mVGTargetsMap);
-            mPath = new Path(copy.mPath);
-            mRenderPath = new Path(copy.mRenderPath);
             mBaseWidth = copy.mBaseWidth;
             mBaseHeight = copy.mBaseHeight;
             mViewportWidth = copy.mViewportWidth;
@@ -981,215 +965,28 @@ public class VectorDrawable extends Drawable {
         }
 
         public boolean canApplyTheme() {
-            // If one of the paths can apply theme, then return true;
-            return recursiveCanApplyTheme(mRootGroup);
-        }
-
-        private boolean recursiveCanApplyTheme(VGroup currentGroup) {
-            // We can do a tree traverse here, if there is one path return true,
-            // then we return true for the whole tree.
-            final ArrayList<Object> children = currentGroup.mChildren;
-
-            for (int i = 0; i < children.size(); i++) {
-                Object child = children.get(i);
-                if (child instanceof VGroup) {
-                    VGroup childGroup = (VGroup) child;
-                    if (childGroup.canApplyTheme()
-                            || recursiveCanApplyTheme(childGroup)) {
-                        return true;
-                    }
-                } else if (child instanceof VPath) {
-                    VPath childPath = (VPath) child;
-                    if (childPath.canApplyTheme()) {
-                        return true;
-                    }
-                }
-            }
-            return false;
+            return mRootGroup.canApplyTheme();
         }
 
         public void applyTheme(Theme t) {
-            // Apply theme to every path of the tree.
-            recursiveApplyTheme(mRootGroup, t);
-        }
-
-        private void recursiveApplyTheme(VGroup currentGroup, Theme t) {
-            // We can do a tree traverse here, apply theme to all paths which
-            // can apply theme.
-            final ArrayList<Object> children = currentGroup.mChildren;
-            for (int i = 0; i < children.size(); i++) {
-                Object child = children.get(i);
-                if (child instanceof VGroup) {
-                    VGroup childGroup = (VGroup) child;
-                    if (childGroup.canApplyTheme()) {
-                        childGroup.applyTheme(t);
-                    }
-                    recursiveApplyTheme(childGroup, t);
-                } else if (child instanceof VPath) {
-                    VPath childPath = (VPath) child;
-                    if (childPath.canApplyTheme()) {
-                        childPath.applyTheme(t);
-                    }
-                }
-            }
-        }
-
-        private void drawGroupTree(VGroup currentGroup, Matrix currentMatrix,
-                Canvas canvas, int w, int h, ColorFilter filter) {
-            // Calculate current group's matrix by preConcat the parent's and
-            // and the current one on the top of the stack.
-            // Basically the Mfinal = Mviewport * M0 * M1 * M2;
-            // Mi the local matrix at level i of the group tree.
-            currentGroup.mStackedMatrix.set(currentMatrix);
-            currentGroup.mStackedMatrix.preConcat(currentGroup.mLocalMatrix);
-
-            // Save the current clip information, which is local to this group.
-            canvas.save();
-            // Draw the group tree in the same order as the XML file.
-            for (int i = 0; i < currentGroup.mChildren.size(); i++) {
-                Object child = currentGroup.mChildren.get(i);
-                if (child instanceof VGroup) {
-                    VGroup childGroup = (VGroup) child;
-                    drawGroupTree(childGroup, currentGroup.mStackedMatrix,
-                            canvas, w, h, filter);
-                } else if (child instanceof VPath) {
-                    VPath childPath = (VPath) child;
-                    drawPath(currentGroup, childPath, canvas, w, h, filter);
-                }
-            }
-            canvas.restore();
+            mRootGroup.applyTheme(t);
         }
 
         public void draw(Canvas canvas, int w, int h, ColorFilter filter) {
-            // Travese the tree in pre-order to draw.
-            drawGroupTree(mRootGroup, Matrix.IDENTITY_MATRIX, canvas, w, h, filter);
-        }
-
-        private void drawPath(VGroup vGroup, VPath vPath, Canvas canvas, int w, int h,
-                ColorFilter filter) {
             final float scaleX = w / mViewportWidth;
             final float scaleY = h / mViewportHeight;
-            final float minScale = Math.min(scaleX, scaleY);
-            final Matrix groupStackedMatrix = vGroup.mStackedMatrix;
-
-            mFinalPathMatrix.set(groupStackedMatrix);
-            mFinalPathMatrix.postScale(scaleX, scaleY);
-
-            final float matrixScale = getMatrixScale(groupStackedMatrix);
-            if (matrixScale == 0) {
-                // When either x or y is scaled to 0, we don't need to draw anything.
-                return;
-            }
-            vPath.toPath(mPath);
-            final Path path = mPath;
-
-            mRenderPath.reset();
-
-            if (vPath.isClipPath()) {
-                mRenderPath.addPath(path, mFinalPathMatrix);
-                canvas.clipPath(mRenderPath);
-            } else {
-                VFullPath fullPath = (VFullPath) vPath;
-                if (fullPath.mTrimPathStart != 0.0f || fullPath.mTrimPathEnd != 1.0f) {
-                    float start = (fullPath.mTrimPathStart + fullPath.mTrimPathOffset) % 1.0f;
-                    float end = (fullPath.mTrimPathEnd + fullPath.mTrimPathOffset) % 1.0f;
-
-                    if (mPathMeasure == null) {
-                        mPathMeasure = new PathMeasure();
-                    }
-                    mPathMeasure.setPath(mPath, false);
-
-                    float len = mPathMeasure.getLength();
-                    start = start * len;
-                    end = end * len;
-                    path.reset();
-                    if (start > end) {
-                        mPathMeasure.getSegment(start, len, path, true);
-                        mPathMeasure.getSegment(0f, end, path, true);
-                    } else {
-                        mPathMeasure.getSegment(start, end, path, true);
-                    }
-                    path.rLineTo(0, 0); // fix bug in measure
-                }
-                mRenderPath.addPath(path, mFinalPathMatrix);
-
-                if (fullPath.mFillColor != Color.TRANSPARENT) {
-                    if (mFillPaint == null) {
-                        mFillPaint = new Paint();
-                        mFillPaint.setStyle(Paint.Style.FILL);
-                        mFillPaint.setAntiAlias(true);
-                    }
-
-                    final Paint fillPaint = mFillPaint;
-                    fillPaint.setColor(applyAlpha(fullPath.mFillColor, fullPath.mFillAlpha));
-                    fillPaint.setColorFilter(filter);
-                    canvas.drawPath(mRenderPath, fillPaint);
-                }
-
-                if (fullPath.mStrokeColor != Color.TRANSPARENT) {
-                    if (mStrokePaint == null) {
-                        mStrokePaint = new Paint();
-                        mStrokePaint.setStyle(Paint.Style.STROKE);
-                        mStrokePaint.setAntiAlias(true);
-                    }
-
-                    final Paint strokePaint = mStrokePaint;
-                    if (fullPath.mStrokeLineJoin != null) {
-                        strokePaint.setStrokeJoin(fullPath.mStrokeLineJoin);
-                    }
-
-                    if (fullPath.mStrokeLineCap != null) {
-                        strokePaint.setStrokeCap(fullPath.mStrokeLineCap);
-                    }
-
-                    strokePaint.setStrokeMiter(fullPath.mStrokeMiterlimit);
-                    strokePaint.setColor(applyAlpha(fullPath.mStrokeColor, fullPath.mStrokeAlpha));
-                    strokePaint.setColorFilter(filter);
-                    final float finalStrokeScale = minScale * matrixScale;
-                    strokePaint.setStrokeWidth(fullPath.mStrokeWidth * finalStrokeScale);
-                    canvas.drawPath(mRenderPath, strokePaint);
-                }
-            }
-        }
-
-        private float getMatrixScale(Matrix groupStackedMatrix) {
-            // Given unit vectors A = (0, 1) and B = (1, 0).
-            // After matrix mapping, we got A' and B'. Let theta = the angel b/t A' and B'.
-            // Therefore, the final scale we want is min(|A'| * sin(theta), |B'| * sin(theta)),
-            // which is (|A'| * |B'| * sin(theta)) / max (|A'|, |B'|);
-            // If  max (|A'|, |B'|) = 0, that means either x or y has a scale of 0.
-            //
-            // For non-skew case, which is most of the cases, matrix scale is computing exactly the
-            // scale on x and y axis, and take the minimal of these two.
-            // For skew case, an unit square will mapped to a parallelogram. And this function will
-            // return the minimal height of the 2 bases.
-            float[] unitVectors = new float[] {0, 1, 1, 0};
-            groupStackedMatrix.mapVectors(unitVectors);
-            float scaleX = MathUtils.mag(unitVectors[0], unitVectors[1]);
-            float scaleY = MathUtils.mag(unitVectors[2], unitVectors[3]);
-            float crossProduct = MathUtils.cross(unitVectors[0], unitVectors[1],
-                    unitVectors[2], unitVectors[3]);
-            float maxScale = MathUtils.max(scaleX, scaleY);
-
-            float matrixScale = 0;
-            if (maxScale > 0) {
-                matrixScale = MathUtils.abs(crossProduct) / maxScale;
-            }
-            if (DBG_VECTOR_DRAWABLE) {
-                Log.d(LOGTAG, "Scale x " + scaleX + " y " + scaleY + " final " + matrixScale);
-            }
-            return matrixScale;
+            mRootGroup.draw(canvas, mTempState, Matrix.IDENTITY_MATRIX, filter, scaleX, scaleY);
         }
     }
 
-    private static class VGroup {
+    private static class VGroup implements VObject {
         // mStackedMatrix is only used temporarily when drawing, it combines all
         // the parents' local matrices with the current one.
         private final Matrix mStackedMatrix = new Matrix();
 
         /////////////////////////////////////////////////////
         // Variables below need to be copied (deep copy if applicable) for mutation.
-        final ArrayList<Object> mChildren = new ArrayList<Object>();
+        final ArrayList<VObject> mChildren = new ArrayList<>();
 
         private float mRotate = 0;
         private float mPivotX = 0;
@@ -1223,14 +1020,14 @@ public class VectorDrawable extends Drawable {
 
             mLocalMatrix.set(copy.mLocalMatrix);
 
-            final ArrayList<Object> children = copy.mChildren;
+            final ArrayList<VObject> children = copy.mChildren;
             for (int i = 0; i < children.size(); i++) {
-                Object copyChild = children.get(i);
+                final VObject copyChild = children.get(i);
                 if (copyChild instanceof VGroup) {
-                    VGroup copyGroup = (VGroup) copyChild;
+                    final VGroup copyGroup = (VGroup) copyChild;
                     mChildren.add(new VGroup(copyGroup, targetsMap));
                 } else {
-                    VPath newPath = null;
+                    final VPath newPath;
                     if (copyChild instanceof VFullPath) {
                         newPath = new VFullPath((VFullPath) copyChild);
                     } else if (copyChild instanceof VClipPath) {
@@ -1257,6 +1054,30 @@ public class VectorDrawable extends Drawable {
             return mLocalMatrix;
         }
 
+        @Override
+        public void draw(Canvas canvas, TempState temp, Matrix currentMatrix,
+                ColorFilter filter, float scaleX, float scaleY) {
+            // Calculate current group's matrix by preConcat the parent's and
+            // and the current one on the top of the stack.
+            // Basically the Mfinal = Mviewport * M0 * M1 * M2;
+            // Mi the local matrix at level i of the group tree.
+            mStackedMatrix.set(currentMatrix);
+            mStackedMatrix.preConcat(mLocalMatrix);
+
+            // Save the current clip information, which is local to this group.
+            canvas.save();
+
+            // Draw the group tree in the same order as the XML file.
+            for (int i = 0, count = mChildren.size(); i < count; i++) {
+                final VObject child = mChildren.get(i);
+                child.draw(canvas, temp, mStackedMatrix, filter, scaleX, scaleY);
+            }
+
+            // Restore the previous clip information.
+            canvas.restore();
+        }
+
+        @Override
         public void inflate(Resources res, AttributeSet attrs, Theme theme) {
             final TypedArray a = obtainAttributes(res, theme, attrs,
                     R.styleable.VectorDrawableGroup);
@@ -1287,18 +1108,39 @@ public class VectorDrawable extends Drawable {
             updateLocalMatrix();
         }
 
+        @Override
         public boolean canApplyTheme() {
-            return mThemeAttrs != null;
-        }
-
-        public void applyTheme(Theme t) {
-            if (mThemeAttrs == null) {
-                return;
+            if (mThemeAttrs != null) {
+                return true;
             }
 
-            final TypedArray a = t.resolveAttributes(mThemeAttrs, R.styleable.VectorDrawableGroup);
-            updateStateFromTypedArray(a);
-            a.recycle();
+            final ArrayList<VObject> children = mChildren;
+            for (int i = 0, count = children.size(); i < count; i++) {
+                final VObject child = children.get(i);
+                if (child.canApplyTheme()) {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        @Override
+        public void applyTheme(Theme t) {
+            if (mThemeAttrs != null) {
+                final TypedArray a = t.resolveAttributes(mThemeAttrs,
+                        R.styleable.VectorDrawableGroup);
+                updateStateFromTypedArray(a);
+                a.recycle();
+            }
+
+            final ArrayList<VObject> children = mChildren;
+            for (int i = 0, count = children.size(); i < count; i++) {
+                final VObject child = children.get(i);
+                if (child.canApplyTheme()) {
+                    child.applyTheme(t);
+                }
+            }
         }
 
         private void updateLocalMatrix() {
@@ -1407,7 +1249,7 @@ public class VectorDrawable extends Drawable {
     /**
      * Common Path information for clip path and normal path.
      */
-    private static class VPath {
+    private static abstract class VPath implements VObject {
         protected PathParser.PathDataNode[] mNodes = null;
         String mPathName;
         int mChangingConfigurations;
@@ -1422,22 +1264,8 @@ public class VectorDrawable extends Drawable {
             mNodes = PathParser.deepCopyNodes(copy.mNodes);
         }
 
-        public void toPath(Path path) {
-            path.reset();
-            if (mNodes != null) {
-                PathParser.PathDataNode.nodesToPath(mNodes, path);
-            }
-        }
-
         public String getPathName() {
             return mPathName;
-        }
-
-        public boolean canApplyTheme() {
-            return false;
-        }
-
-        public void applyTheme(Theme t) {
         }
 
         public boolean isClipPath() {
@@ -1459,6 +1287,79 @@ public class VectorDrawable extends Drawable {
                 PathParser.updateNodes(mNodes, nodes);
             }
         }
+
+        @Override
+        public final void draw(Canvas canvas, TempState temp, Matrix groupStackedMatrix,
+                ColorFilter filter, float scaleX, float scaleY) {
+            final float matrixScale = VPath.getMatrixScale(groupStackedMatrix);
+            if (matrixScale == 0) {
+                // When either x or y is scaled to 0, we don't need to draw anything.
+                return;
+            }
+
+            final Path path = temp.path;
+            path.reset();
+            toPath(temp, path);
+
+            final Matrix pathMatrix = temp.pathMatrix;
+            pathMatrix.set(groupStackedMatrix);
+            pathMatrix.postScale(scaleX, scaleY);
+
+            final Path renderPath = temp.renderPath;
+            renderPath.reset();
+            renderPath.addPath(path, pathMatrix);
+
+            final float minScale = Math.min(scaleX, scaleY);
+            final float strokeScale = minScale * matrixScale;
+            drawPath(temp, renderPath, canvas, filter, strokeScale);
+        }
+
+        /**
+         * Writes the path's nodes to an output Path for rendering.
+         *
+         * @param temp temporary state variables
+         * @param outPath the output path
+         */
+        protected void toPath(TempState temp, Path outPath) {
+            if (mNodes != null) {
+                PathParser.PathDataNode.nodesToPath(mNodes, outPath);
+            }
+        }
+
+        /**
+         * Draws the specified path into the supplied canvas.
+         */
+        protected abstract void drawPath(TempState temp, Path path, Canvas canvas,
+                ColorFilter filter, float strokeScale);
+
+        private static float getMatrixScale(Matrix groupStackedMatrix) {
+            // Given unit vectors A = (0, 1) and B = (1, 0).
+            // After matrix mapping, we got A' and B'. Let theta = the angel b/t A' and B'.
+            // Therefore, the final scale we want is min(|A'| * sin(theta), |B'| * sin(theta)),
+            // which is (|A'| * |B'| * sin(theta)) / max (|A'|, |B'|);
+            // If  max (|A'|, |B'|) = 0, that means either x or y has a scale of 0.
+            //
+            // For non-skew case, which is most of the cases, matrix scale is computing exactly the
+            // scale on x and y axis, and take the minimal of these two.
+            // For skew case, an unit square will mapped to a parallelogram. And this function will
+            // return the minimal height of the 2 bases.
+            float[] unitVectors = new float[] {0, 1, 1, 0};
+            groupStackedMatrix.mapVectors(unitVectors);
+            float scaleX = MathUtils.mag(unitVectors[0], unitVectors[1]);
+            float scaleY = MathUtils.mag(unitVectors[2], unitVectors[3]);
+            float crossProduct = MathUtils.cross(unitVectors[0], unitVectors[1],
+                    unitVectors[2], unitVectors[3]);
+            float maxScale = MathUtils.max(scaleX, scaleY);
+
+            float matrixScale = 0;
+            if (maxScale > 0) {
+                matrixScale = MathUtils.abs(crossProduct) / maxScale;
+            }
+            if (DBG_VECTOR_DRAWABLE) {
+                Log.d(LOGTAG, "Scale x " + scaleX + " y " + scaleY + " final " + matrixScale);
+            }
+            return matrixScale;
+        }
     }
 
     /**
@@ -1473,11 +1374,28 @@ public class VectorDrawable extends Drawable {
             super(copy);
         }
 
+        @Override
+        protected void drawPath(TempState temp, Path renderPath, Canvas canvas, ColorFilter filter,
+                float strokeScale) {
+            canvas.clipPath(renderPath);
+        }
+
+        @Override
         public void inflate(Resources r, AttributeSet attrs, Theme theme) {
             final TypedArray a = obtainAttributes(r, theme, attrs,
                     R.styleable.VectorDrawableClipPath);
             updateStateFromTypedArray(a);
             a.recycle();
+        }
+
+        @Override
+        public boolean canApplyTheme() {
+            return false;
+        }
+
+        @Override
+        public void applyTheme(Theme theme) {
+            // No-op.
         }
 
         private void updateStateFromTypedArray(TypedArray a) {
@@ -1574,10 +1492,104 @@ public class VectorDrawable extends Drawable {
         }
 
         @Override
-        public boolean canApplyTheme() {
-            return mThemeAttrs != null;
+        public void toPath(TempState temp, Path path) {
+            super.toPath(temp, path);
+
+            if (mTrimPathStart != 0.0f || mTrimPathEnd != 1.0f) {
+                VFullPath.applyTrim(temp, path, mTrimPathStart, mTrimPathEnd, mTrimPathOffset);
+            }
         }
 
+        @Override
+        protected void drawPath(TempState temp, Path path, Canvas canvas, ColorFilter filter,
+                float strokeScale) {
+            drawPathFill(temp, path, canvas, filter);
+            drawPathStroke(temp, path, canvas, filter, strokeScale);
+        }
+
+        /**
+         * Draws this path's fill, if necessary.
+         */
+        private void drawPathFill(TempState temp, Path path, Canvas canvas, ColorFilter filter) {
+            if (mFillColor == Color.TRANSPARENT) {
+                return;
+            }
+
+            if (temp.mFillPaint == null) {
+                temp.mFillPaint = new Paint();
+                temp.mFillPaint.setStyle(Paint.Style.FILL);
+                temp.mFillPaint.setAntiAlias(true);
+            }
+
+            final Paint fillPaint = temp.mFillPaint;
+            fillPaint.setColor(applyAlpha(mFillColor, mFillAlpha));
+            fillPaint.setColorFilter(filter);
+            canvas.drawPath(path, fillPaint);
+        }
+
+        /**
+         * Draws this path's stroke, if necessary.
+         */
+        private void drawPathStroke(TempState temp, Path path, Canvas canvas, ColorFilter filter,
+                float strokeScale) {
+            if (mStrokeColor == Color.TRANSPARENT) {
+                return;
+            }
+
+            if (temp.mStrokePaint == null) {
+                temp.mStrokePaint = new Paint();
+                temp.mStrokePaint.setStyle(Paint.Style.STROKE);
+                temp.mStrokePaint.setAntiAlias(true);
+            }
+
+            final Paint strokePaint = temp.mStrokePaint;
+            if (mStrokeLineJoin != null) {
+                strokePaint.setStrokeJoin(mStrokeLineJoin);
+            }
+
+            if (mStrokeLineCap != null) {
+                strokePaint.setStrokeCap(mStrokeLineCap);
+            }
+
+            strokePaint.setStrokeMiter(mStrokeMiterlimit);
+            strokePaint.setColor(applyAlpha(mStrokeColor, mStrokeAlpha));
+            strokePaint.setColorFilter(filter);
+            strokePaint.setStrokeWidth(mStrokeWidth * strokeScale);
+            canvas.drawPath(path, strokePaint);
+        }
+
+        /**
+         * Applies trimming to the specified path.
+         */
+        private static void applyTrim(TempState temp, Path path, float mTrimPathStart,
+                float mTrimPathEnd, float mTrimPathOffset) {
+            if (mTrimPathStart == 0.0f && mTrimPathEnd == 1.0f) {
+                // No trimming necessary.
+                return;
+            }
+
+            if (temp.mPathMeasure == null) {
+                temp.mPathMeasure = new PathMeasure();
+            }
+            final PathMeasure pathMeasure = temp.mPathMeasure;
+            pathMeasure.setPath(path, false);
+
+            final float len = pathMeasure.getLength();
+            final float start = len * ((mTrimPathStart + mTrimPathOffset) % 1.0f);
+            final float end = len * ((mTrimPathEnd + mTrimPathOffset) % 1.0f);
+            path.reset();
+            if (start > end) {
+                pathMeasure.getSegment(start, len, path, true);
+                pathMeasure.getSegment(0, end, path, true);
+            } else {
+                pathMeasure.getSegment(start, end, path, true);
+            }
+
+            // Fix bug in measure.
+            path.rLineTo(0, 0);
+        }
+
+        @Override
         public void inflate(Resources r, AttributeSet attrs, Theme theme) {
             final TypedArray a = obtainAttributes(r, theme, attrs,
                     R.styleable.VectorDrawablePath);
@@ -1624,6 +1636,11 @@ public class VectorDrawable extends Drawable {
                     R.styleable.VectorDrawablePath_trimPathOffset, mTrimPathOffset);
             mTrimPathStart = a.getFloat(
                     R.styleable.VectorDrawablePath_trimPathStart, mTrimPathStart);
+        }
+
+        @Override
+        public boolean canApplyTheme() {
+            return mThemeAttrs != null;
         }
 
         @Override
@@ -1717,5 +1734,23 @@ public class VectorDrawable extends Drawable {
         void setTrimPathOffset(float trimPathOffset) {
             mTrimPathOffset = trimPathOffset;
         }
+    }
+
+    static class TempState {
+        final Matrix pathMatrix = new Matrix();
+        final Path path = new Path();
+        final Path renderPath = new Path();
+
+        PathMeasure mPathMeasure;
+        Paint mFillPaint;
+        Paint mStrokePaint;
+    }
+
+    interface VObject {
+        void draw(Canvas canvas, TempState temp, Matrix currentMatrix,
+                ColorFilter filter, float scaleX, float scaleY);
+        void inflate(Resources r, AttributeSet attrs, Theme theme);
+        boolean canApplyTheme();
+        void applyTheme(Theme t);
     }
 }
