@@ -41,7 +41,7 @@ class Identifier {
 
 
     Identifier(int deviceId, int storageId) {
-        this(deviceId, storageId, MtpDocument.DUMMY_HANDLE_FOR_ROOT);
+        this(deviceId, storageId, CursorHelper.DUMMY_HANDLE_FOR_ROOT);
     }
 
     Identifier(int deviceId, int storageId, int objectHandle) {

@@ -18164,6 +18164,7 @@ package android.mtp {
     method public android.mtp.MtpObjectInfo.Builder setImagePixWidth(int);
     method public android.mtp.MtpObjectInfo.Builder setKeywords(java.lang.String);
     method public android.mtp.MtpObjectInfo.Builder setName(java.lang.String);
+    method public android.mtp.MtpObjectInfo.Builder setObjectHandle(int);
     method public android.mtp.MtpObjectInfo.Builder setParent(int);
     method public android.mtp.MtpObjectInfo.Builder setProtectionStatus(int);
     method public android.mtp.MtpObjectInfo.Builder setSequenceNumber(int);

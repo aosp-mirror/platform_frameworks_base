@@ -40,7 +40,7 @@ public class TestMtpManager extends MtpManager {
     private final Set<Integer> mValidDevices = new HashSet<>();
     private final Set<Integer> mOpenedDevices = new TreeSet<>();
     private final Map<Integer, MtpRoot[]> mRoots = new HashMap<>();
-    private final Map<String, MtpDocument> mDocuments = new HashMap<>();
+    private final Map<String, MtpObjectInfo> mObjectInfos = new HashMap<>();
     private final Map<String, int[]> mObjectHandles = new HashMap<>();
     private final Map<String, byte[]> mThumbnailBytes = new HashMap<>();
     private final Map<String, Integer> mParents = new HashMap<>();
@@ -54,16 +54,16 @@ public class TestMtpManager extends MtpManager {
         mValidDevices.add(deviceId);
     }
 
-    void setObjectHandles(int deviceId, int storageId, int objectHandle, int[] documents) {
-        mObjectHandles.put(pack(deviceId, storageId, objectHandle), documents);
+    void setObjectHandles(int deviceId, int storageId, int parentHandle, int[] objectHandles) {
+        mObjectHandles.put(pack(deviceId, storageId, parentHandle), objectHandles);
     }
 
     void setRoots(int deviceId, MtpRoot[] roots) {
         mRoots.put(deviceId, roots);
     }
 
-    void setDocument(int deviceId, int objectHandle, MtpDocument document) {
-        mDocuments.put(pack(deviceId, objectHandle), document);
+    void setObjectInfo(int deviceId, MtpObjectInfo objectInfo) {
+        mObjectInfos.put(pack(deviceId, objectInfo.getObjectHandle()), objectInfo);
     }
 
     void setImportFileBytes(int deviceId, int objectHandle, byte[] bytes) {
@@ -78,6 +78,8 @@ public class TestMtpManager extends MtpManager {
         mThumbnailBytes.put(pack(deviceId, objectHandle), bytes);
     }
 
+    // TODO: Remove this method, as MtpObjectInfo contains information about
+    // parents.
     void setParent(int deviceId, int objectHandle, int parentObjectHandle) {
         mParents.put(pack(deviceId, objectHandle), parentObjectHandle);
     }
@@ -108,22 +110,13 @@ public class TestMtpManager extends MtpManager {
     }
 
     @Override
-    MtpDocument getDocument(int deviceId, int objectHandle) throws IOException {
-        final String key = pack(deviceId, objectHandle);
-        if (mDocuments.containsKey(key)) {
-            return mDocuments.get(key);
-        } else {
-            throw new IOException("getDocument error: " + key);
-        }
-    }
-
-    @Override
     MtpObjectInfo getObjectInfo(int deviceId, int objectHandle) throws IOException {
-        final MtpDocument document = getDocument(deviceId, objectHandle);
-        // It's impossible to set an object id of MtpObjectInfo at this stage. Also,
-        // it's hard to get any information from MtpDocument, as it's designed to return them
-        // only via cursors. Rework these.
-        return new MtpObjectInfo.Builder().build();
+        final String key = pack(deviceId, objectHandle);
+        if (mObjectInfos.containsKey(key)) {
+            return mObjectInfos.get(key);
+        } else {
+            throw new IOException("getObjectInfo error: " + key);
+        }
     }
 
     @Override
@@ -152,18 +145,9 @@ public class TestMtpManager extends MtpManager {
 
     @Override
     int createDocument(int deviceId, MtpObjectInfo objectInfo) throws IOException {
-        // For simplicity, it allows to create only one document, and it always has the hardcoded
-        // CREATED_DOCUMENT_HANDLE document handle.
         final String key = pack(deviceId, CREATED_DOCUMENT_HANDLE);
-        if (!mDocuments.containsKey(key)) {
-            mDocuments.put(key, new MtpDocument(
-                  CREATED_DOCUMENT_HANDLE,
-                  objectInfo.getFormat(),
-                  objectInfo.getName(),
-                  new Date(objectInfo.getDateModified()),
-                  objectInfo.getCompressedSize(),
-                  objectInfo.getThumbCompressedSize(),
-                  false /* Always writable for testing. */));
+        if (!mObjectInfos.containsKey(key)) {
+            mObjectInfos.put(key, objectInfo);
         } else {
             throw new IOException();
         }
@@ -174,7 +158,7 @@ public class TestMtpManager extends MtpManager {
     void sendObject(int deviceId, int objectHandle, int size, ParcelFileDescriptor source)
             throws IOException {
         final String key = pack(deviceId, objectHandle);
-        if (!mDocuments.containsKey(key)) {
+        if (!mObjectInfos.containsKey(key)) {
             throw new IOException();
         }
 
@@ -201,8 +185,8 @@ public class TestMtpManager extends MtpManager {
     @Override
     void deleteDocument(int deviceId, int objectHandle) throws IOException {
         final String key = pack(deviceId, objectHandle);
-        if (mDocuments.containsKey(key)) {
-            mDocuments.remove(key);
+        if (mObjectInfos.containsKey(key)) {
+            mObjectInfos.remove(key);
         } else {
             throw new IOException();
         }

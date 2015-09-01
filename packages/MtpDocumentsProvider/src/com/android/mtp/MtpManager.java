@@ -108,14 +108,10 @@ class MtpManager {
         return results;
     }
 
-    synchronized MtpObjectInfo getObjectInfo(int deviceId, int objectHandle) throws IOException {
+    synchronized MtpObjectInfo getObjectInfo(int deviceId, int objectHandle)
+            throws IOException {
         final MtpDevice device = getDevice(deviceId);
         return device.getObjectInfo(objectHandle);
-    }
-
-    synchronized MtpDocument getDocument(int deviceId, int objectHandle) throws IOException {
-        final MtpDevice device = getDevice(deviceId);
-        return new MtpDocument(device.getObjectInfo(objectHandle));
     }
 
     synchronized int[] getObjectHandles(int deviceId, int storageId, int parentObjectHandle)
@@ -140,18 +136,6 @@ class MtpManager {
         if (!device.deleteObject(objectHandle)) {
             throw new IOException("Failed to delete document");
         }
-    }
-
-    // TODO: Remove this method.
-    synchronized int createDocument(int deviceId, int storageId, int parentObjectHandle,
-            String mimeType, String name) throws IOException {
-        final MtpObjectInfo objectInfo = new MtpObjectInfo.Builder()
-                .setName(name)
-                .setStorageId(storageId)
-                .setParent(parentObjectHandle)
-                .setFormat(MtpDocument.mimeTypeToFormatType(mimeType))
-                .build();
-        return createDocument(deviceId, objectInfo);
     }
 
     synchronized int createDocument(int deviceId, MtpObjectInfo objectInfo) throws IOException {
