@@ -1332,9 +1332,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
      */
     private void handleKeyguardReset() {
         if (DEBUG) Log.d(TAG, "handleKeyguardReset");
-        if (!isUnlockingWithFingerprintAllowed()) {
-            updateFingerprintListeningState();
-        }
+        updateFingerprintListeningState();
     }
 
     /**
