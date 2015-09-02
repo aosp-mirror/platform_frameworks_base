@@ -253,6 +253,10 @@
   <java-symbol type="bool" name="config_cellBroadcastAppLinks" />
   <java-symbol type="bool" name="config_duplicate_port_omadm_wappush" />
   <java-symbol type="bool" name="config_enableAutoPowerModes" />
+  <java-symbol type="integer" name="config_autoPowerModeThresholdAngle" />
+  <java-symbol type="integer" name="config_autoPowerModeAnyMotionSensor" />
+  <java-symbol type="bool" name="config_autoPowerModePreferWristTilt" />
+  <java-symbol type="bool" name="config_autoPowerModePrefetchLocation" />
   <java-symbol type="bool" name="config_enable_emergency_call_while_sim_locked" />
   <java-symbol type="bool" name="config_enable_puk_unlock_screen" />
   <java-symbol type="bool" name="config_enableBurnInProtection" />
