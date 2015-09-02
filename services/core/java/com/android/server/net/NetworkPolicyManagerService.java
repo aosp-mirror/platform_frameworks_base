@@ -978,13 +978,12 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         }
 
         // TODO: move to NotificationManager once we can mock it
-        // XXX what to do about multi-user?
         try {
             final String packageName = mContext.getPackageName();
             final int[] idReceived = new int[1];
             mNotifManager.enqueueNotificationWithTag(
                     packageName, packageName, tag, 0x0, builder.getNotification(), idReceived,
-                    UserHandle.USER_OWNER);
+                    UserHandle.USER_ALL);
             mActiveNotifs.add(tag);
         } catch (RemoteException e) {
             // ignored; service lives in system_server
@@ -1016,12 +1015,11 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                 PendingIntent.getBroadcast(mContext, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT));
 
         // TODO: move to NotificationManager once we can mock it
-        // XXX what to do about multi-user?
         try {
             final String packageName = mContext.getPackageName();
             final int[] idReceived = new int[1];
             mNotifManager.enqueueNotificationWithTag(packageName, packageName, tag,
-                    0x0, builder.getNotification(), idReceived, UserHandle.USER_OWNER);
+                    0x0, builder.getNotification(), idReceived, UserHandle.USER_ALL);
             mActiveNotifs.add(tag);
         } catch (RemoteException e) {
             // ignored; service lives in system_server
@@ -1030,11 +1028,10 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
 
     private void cancelNotification(String tag) {
         // TODO: move to NotificationManager once we can mock it
-        // XXX what to do about multi-user?
         try {
             final String packageName = mContext.getPackageName();
             mNotifManager.cancelNotificationWithTag(
-                    packageName, tag, 0x0, UserHandle.USER_OWNER);
+                    packageName, tag, 0x0, UserHandle.USER_ALL);
         } catch (RemoteException e) {
             // ignored; service lives in system_server
         }
@@ -1418,7 +1415,8 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                         final int policy = readIntAttribute(in, ATTR_POLICY);
 
                         // TODO: set for other users during upgrade
-                        final int uid = UserHandle.getUid(UserHandle.USER_OWNER, appId);
+                        // app policy is deprecated so this is only used in pre system user split.
+                        final int uid = UserHandle.getUid(UserHandle.USER_SYSTEM, appId);
                         if (UserHandle.isApp(uid)) {
                             setUidPolicyUncheckedLocked(uid, policy, false);
                         } else {
