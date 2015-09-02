@@ -25,6 +25,7 @@ import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.SystemProperties;
 import android.os.UserHandle;
+import android.os.UserManager;
 import android.service.persistentdata.IPersistentDataBlockService;
 import android.util.Slog;
 
@@ -84,7 +85,7 @@ public class PersistentDataBlockService extends SystemService {
         mContext = context;
         mDataBlockFile = SystemProperties.get(PERSISTENT_DATA_BLOCK_PROP);
         mBlockDeviceSize = -1; // Load lazily
-        mAllowedUid = getAllowedUid(UserHandle.USER_OWNER);
+        mAllowedUid = getAllowedUid(UserHandle.USER_SYSTEM);
     }
 
     private int getAllowedUid(int userHandle) {
@@ -131,9 +132,12 @@ public class PersistentDataBlockService extends SystemService {
         }
     }
 
-    private void enforceIsOwner() {
-        if (!Binder.getCallingUserHandle().isOwner()) {
-            throw new SecurityException("Only the Owner is allowed to change OEM unlock state");
+    private void enforceIsAdmin() {
+        final int userId = UserHandle.getCallingUserId();
+        final boolean isAdmin = UserManager.get(mContext).isUserAdmin(userId);
+        if (!isAdmin) {
+            throw new SecurityException(
+                    "Only the Admin user is allowed to change OEM unlock state");
         }
     }
     private int getTotalDataSizeLocked(DataInputStream inputStream) throws IOException {
@@ -434,7 +438,7 @@ public class PersistentDataBlockService extends SystemService {
                 return;
             }
             enforceOemUnlockPermission();
-            enforceIsOwner();
+            enforceIsAdmin();
 
             synchronized (mLock) {
                 doSetOemUnlockEnabledLocked(enabled);
