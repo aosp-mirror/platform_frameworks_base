@@ -165,6 +165,7 @@ LOCAL_STATIC_LIBRARIES := libhwui_static
 LOCAL_CFLAGS := $(hwui_cflags)
 
 LOCAL_SRC_FILES += \
+    unit_tests/CanvasStateTests.cpp \
     unit_tests/ClipAreaTests.cpp \
     unit_tests/DamageAccumulatorTests.cpp \
     unit_tests/LinearAllocatorTests.cpp
