@@ -227,7 +227,7 @@ public class FingerprintUnlockController extends KeyguardUpdateMonitorCallback {
                 return MODE_DISMISS_BOUNCER;
             } else if (unlockingAllowed) {
                 return MODE_UNLOCK;
-            } else {
+            } else if (!mStatusBarKeyguardViewManager.isBouncerShowing()) {
                 return MODE_SHOW_BOUNCER;
             }
         }
