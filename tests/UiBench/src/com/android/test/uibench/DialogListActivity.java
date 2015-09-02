@@ -28,7 +28,7 @@ public class DialogListActivity extends AppCompatActivity {
 
         ListView listView = new ListView(this);
         listView.setAdapter(new ArrayAdapter<>(this, android.R.layout.simple_list_item_1,
-                TrivialListActivity.buildStringList()));
+                TextUtils.buildSimpleStringList()));
 
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle("Dialog");
