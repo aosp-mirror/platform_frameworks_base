@@ -140,7 +140,7 @@ LinearAllocator::~LinearAllocator(void) {
 }
 
 void* LinearAllocator::start(Page* p) {
-    return ALIGN_PTR(((size_t*)p) + sizeof(Page));
+    return ALIGN_PTR((size_t)p + sizeof(Page));
 }
 
 void* LinearAllocator::end(Page* p) {
