@@ -510,7 +510,7 @@ static jlong android_content_AssetManager_getAssetRemainingLength(JNIEnv* env, j
 }
 
 static jint android_content_AssetManager_addAssetPath(JNIEnv* env, jobject clazz,
-                                                       jstring path)
+                                                       jstring path, jboolean appAsLib)
 {
     ScopedUtfChars path8(env, path);
     if (path8.c_str() == NULL) {
@@ -523,7 +523,7 @@ static jint android_content_AssetManager_addAssetPath(JNIEnv* env, jobject clazz
     }
 
     int32_t cookie;
-    bool res = am->addAssetPath(String8(path8.c_str()), &cookie);
+    bool res = am->addAssetPath(String8(path8.c_str()), &cookie, appAsLib);
 
     return (res) ? static_cast<jint>(cookie) : 0;
 }
@@ -2138,7 +2138,7 @@ static JNINativeMethod gAssetManagerMethods[] = {
         (void*) android_content_AssetManager_getAssetLength },
     { "getAssetRemainingLength", "(J)J",
         (void*) android_content_AssetManager_getAssetRemainingLength },
-    { "addAssetPathNative", "(Ljava/lang/String;)I",
+    { "addAssetPathNative", "(Ljava/lang/String;Z)I",
         (void*) android_content_AssetManager_addAssetPath },
     { "addOverlayPathNative",   "(Ljava/lang/String;)I",
         (void*) android_content_AssetManager_addOverlayPath },

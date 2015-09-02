@@ -1505,7 +1505,7 @@ struct ResTable_lib_entry
 class DynamicRefTable
 {
 public:
-    DynamicRefTable(uint8_t packageId);
+    DynamicRefTable(uint8_t packageId, bool appAsLib);
 
     // Loads an unmapped reference table from the package.
     status_t load(const ResTable_lib_header* const header);
@@ -1530,6 +1530,7 @@ private:
     const uint8_t                   mAssignedPackageId;
     uint8_t                         mLookupTable[256];
     KeyedVector<String16, uint8_t>  mEntries;
+    bool                            mAppAsLib;
 };
 
 bool U16StringToInt(const char16_t* s, size_t len, Res_value* outValue);
@@ -1547,10 +1548,11 @@ public:
 
     status_t add(const void* data, size_t size, const int32_t cookie=-1, bool copyData=false);
     status_t add(const void* data, size_t size, const void* idmapData, size_t idmapDataSize,
-            const int32_t cookie=-1, bool copyData=false);
+            const int32_t cookie=-1, bool copyData=false, bool appAsLib=false);
 
     status_t add(Asset* asset, const int32_t cookie=-1, bool copyData=false);
-    status_t add(Asset* asset, Asset* idmapAsset, const int32_t cookie=-1, bool copyData=false);
+    status_t add(Asset* asset, Asset* idmapAsset, const int32_t cookie=-1, bool copyData=false,
+            bool appAsLib=false);
 
     status_t add(ResTable* src);
     status_t addEmpty(const int32_t cookie);
@@ -1858,7 +1860,7 @@ private:
     typedef Vector<Type*> TypeList;
 
     status_t addInternal(const void* data, size_t size, const void* idmapData, size_t idmapDataSize,
-            const int32_t cookie, bool copyData);
+            bool appAsLib, const int32_t cookie, bool copyData);
 
     ssize_t getResourcePackageIndex(uint32_t resID) const;
 
@@ -1871,7 +1873,7 @@ private:
             size_t nameLen, uint32_t* outTypeSpecFlags) const;
 
     status_t parsePackage(
-        const ResTable_package* const pkg, const Header* const header);
+        const ResTable_package* const pkg, const Header* const header, bool appAsLib);
 
     void print_value(const Package* pkg, const Res_value& value) const;
     

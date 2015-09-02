@@ -3080,13 +3080,13 @@ struct ResTable::Package
 // table that defined the package); the ones after are skins on top of it.
 struct ResTable::PackageGroup
 {
-    PackageGroup(ResTable* _owner, const String16& _name, uint32_t _id)
+    PackageGroup(ResTable* _owner, const String16& _name, uint32_t _id, bool appAsLib)
         : owner(_owner)
         , name(_name)
         , id(_id)
         , largestTypeId(0)
         , bags(NULL)
-        , dynamicRefTable(static_cast<uint8_t>(_id))
+        , dynamicRefTable(static_cast<uint8_t>(_id), appAsLib)
     { }
 
     ~PackageGroup() {
@@ -3532,7 +3532,7 @@ ResTable::ResTable(const void* data, size_t size, const int32_t cookie, bool cop
 {
     memset(&mParams, 0, sizeof(mParams));
     memset(mPackageMap, 0, sizeof(mPackageMap));
-    addInternal(data, size, NULL, 0, cookie, copyData);
+    addInternal(data, size, NULL, 0, false, cookie, copyData);
     LOG_FATAL_IF(mError != NO_ERROR, "Error parsing resource table");
     if (kDebugTableSuperNoisy) {
         ALOGI("Creating ResTable %p\n", this);
@@ -3553,12 +3553,12 @@ inline ssize_t ResTable::getResourcePackageIndex(uint32_t resID) const
 }
 
 status_t ResTable::add(const void* data, size_t size, const int32_t cookie, bool copyData) {
-    return addInternal(data, size, NULL, 0, cookie, copyData);
+    return addInternal(data, size, NULL, 0, false, cookie, copyData);
 }
 
 status_t ResTable::add(const void* data, size_t size, const void* idmapData, size_t idmapDataSize,
-        const int32_t cookie, bool copyData) {
-    return addInternal(data, size, idmapData, idmapDataSize, cookie, copyData);
+        const int32_t cookie, bool copyData, bool appAsLib) {
+    return addInternal(data, size, idmapData, idmapDataSize, appAsLib, cookie, copyData);
 }
 
 status_t ResTable::add(Asset* asset, const int32_t cookie, bool copyData) {
@@ -3568,10 +3568,12 @@ status_t ResTable::add(Asset* asset, const int32_t cookie, bool copyData) {
         return UNKNOWN_ERROR;
     }
 
-    return addInternal(data, static_cast<size_t>(asset->getLength()), NULL, 0, cookie, copyData);
+    return addInternal(data, static_cast<size_t>(asset->getLength()), NULL, false, 0, cookie,
+            copyData);
 }
 
-status_t ResTable::add(Asset* asset, Asset* idmapAsset, const int32_t cookie, bool copyData) {
+status_t ResTable::add(Asset* asset, Asset* idmapAsset, const int32_t cookie, bool copyData,
+        bool appAsLib) {
     const void* data = asset->getBuffer(true);
     if (data == NULL) {
         ALOGW("Unable to get buffer of resource asset file");
@@ -3590,7 +3592,7 @@ status_t ResTable::add(Asset* asset, Asset* idmapAsset, const int32_t cookie, bo
     }
 
     return addInternal(data, static_cast<size_t>(asset->getLength()),
-            idmapData, idmapSize, cookie, copyData);
+            idmapData, idmapSize, appAsLib, cookie, copyData);
 }
 
 status_t ResTable::add(ResTable* src)
@@ -3603,7 +3605,7 @@ status_t ResTable::add(ResTable* src)
 
     for (size_t i=0; i<src->mPackageGroups.size(); i++) {
         PackageGroup* srcPg = src->mPackageGroups[i];
-        PackageGroup* pg = new PackageGroup(this, srcPg->name, srcPg->id);
+        PackageGroup* pg = new PackageGroup(this, srcPg->name, srcPg->id, false);
         for (size_t j=0; j<srcPg->packages.size(); j++) {
             pg->packages.add(srcPg->packages[j]);
         }
@@ -3644,7 +3646,7 @@ status_t ResTable::addEmpty(const int32_t cookie) {
 }
 
 status_t ResTable::addInternal(const void* data, size_t dataSize, const void* idmapData, size_t idmapDataSize,
-        const int32_t cookie, bool copyData)
+        bool appAsLib, const int32_t cookie, bool copyData)
 {
     if (!data) {
         return NO_ERROR;
@@ -3747,7 +3749,7 @@ status_t ResTable::addInternal(const void* data, size_t dataSize, const void* id
                 return (mError=BAD_TYPE);
             }
 
-            if (parsePackage((ResTable_package*)chunk, header) != NO_ERROR) {
+            if (parsePackage((ResTable_package*)chunk, header, appAsLib) != NO_ERROR) {
                 return mError;
             }
             curPackage++;
@@ -5935,7 +5937,7 @@ status_t ResTable::getEntry(
 }
 
 status_t ResTable::parsePackage(const ResTable_package* const pkg,
-                                const Header* const header)
+                                const Header* const header, bool appAsLib)
 {
     const uint8_t* base = (const uint8_t*)pkg;
     status_t err = validate_chunk(&pkg->header, sizeof(*pkg) - sizeof(pkg->typeIdOffset),
@@ -5983,7 +5985,7 @@ status_t ResTable::parsePackage(const ResTable_package* const pkg,
     if (id >= 256) {
         LOG_ALWAYS_FATAL("Package id out of range");
         return NO_ERROR;
-    } else if (id == 0) {
+    } else if (id == 0 || appAsLib) {
         // This is a library so assign an ID
         id = mNextPackageId++;
     }
@@ -6016,7 +6018,7 @@ status_t ResTable::parsePackage(const ResTable_package* const pkg,
 
         char16_t tmpName[sizeof(pkg->name)/sizeof(pkg->name[0])];
         strcpy16_dtoh(tmpName, pkg->name, sizeof(pkg->name)/sizeof(pkg->name[0]));
-        group = new PackageGroup(this, String16(tmpName), id);
+        group = new PackageGroup(this, String16(tmpName), id, appAsLib);
         if (group == NULL) {
             delete package;
             return (mError=NO_MEMORY);
@@ -6228,8 +6230,9 @@ status_t ResTable::parsePackage(const ResTable_package* const pkg,
     return NO_ERROR;
 }
 
-DynamicRefTable::DynamicRefTable(uint8_t packageId)
+DynamicRefTable::DynamicRefTable(uint8_t packageId, bool appAsLib)
     : mAssignedPackageId(packageId)
+    , mAppAsLib(appAsLib)
 {
     memset(mLookupTable, 0, sizeof(mLookupTable));
 
@@ -6314,16 +6317,18 @@ status_t DynamicRefTable::lookupResourceId(uint32_t* resId) const {
     uint32_t res = *resId;
     size_t packageId = Res_GETPACKAGE(res) + 1;
 
-    if (packageId == APP_PACKAGE_ID) {
+    if (packageId == APP_PACKAGE_ID && !mAppAsLib) {
         // No lookup needs to be done, app package IDs are absolute.
         return NO_ERROR;
     }
 
-    if (packageId == 0) {
+    if (packageId == 0 || (packageId == APP_PACKAGE_ID && mAppAsLib)) {
         // The package ID is 0x00. That means that a shared library is accessing
-        // its own local resource, so we fix up the resource with the calling
-        // package ID.
-        *resId |= ((uint32_t) mAssignedPackageId) << 24;
+        // its own local resource.
+        // Or if app resource is loaded as shared library, the resource which has
+        // app package Id is local resources.
+        // so we fix up those resources with the calling package ID.
+        *resId = (0xFFFFFF & (*resId)) | (((uint32_t) mAssignedPackageId) << 24);
         return NO_ERROR;
     }
 
@@ -6345,7 +6350,10 @@ status_t DynamicRefTable::lookupResourceId(uint32_t* resId) const {
 }
 
 status_t DynamicRefTable::lookupResourceValue(Res_value* value) const {
-    if (value->dataType != Res_value::TYPE_DYNAMIC_REFERENCE) {
+    if (value->dataType != Res_value::TYPE_DYNAMIC_REFERENCE &&
+        (value->dataType != Res_value::TYPE_REFERENCE || !mAppAsLib)) {
+        // If the package is loaded as shared library, the resource reference
+        // also need to be fixed.
         return NO_ERROR;
     }
 

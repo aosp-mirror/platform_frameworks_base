@@ -176,7 +176,7 @@ AssetManager::~AssetManager(void)
     delete[] mVendor;
 }
 
-bool AssetManager::addAssetPath(const String8& path, int32_t* cookie)
+bool AssetManager::addAssetPath(const String8& path, int32_t* cookie, bool appAsLib)
 {
     AutoMutex _l(mLock);
 
@@ -238,7 +238,7 @@ bool AssetManager::addAssetPath(const String8& path, int32_t* cookie)
 #endif
 
     if (mResources != NULL) {
-        appendPathToResTable(ap);
+        appendPathToResTable(ap, appAsLib);
     }
 
     return true;
@@ -610,7 +610,7 @@ FileType AssetManager::getFileType(const char* fileName)
         return kFileTypeRegular;
 }
 
-bool AssetManager::appendPathToResTable(const asset_path& ap) const {
+bool AssetManager::appendPathToResTable(const asset_path& ap, bool appAsLib) const {
     // skip those ap's that correspond to system overlays
     if (ap.isSystemOverlay) {
         return true;
@@ -685,7 +685,7 @@ bool AssetManager::appendPathToResTable(const asset_path& ap) const {
             mResources->add(sharedRes);
         } else {
             ALOGV("Parsing resources for %s", ap.path.string());
-            mResources->add(ass, idmap, nextEntryIdx + 1, !shared);
+            mResources->add(ass, idmap, nextEntryIdx + 1, !shared, appAsLib);
         }
         onlyEmptyResources = false;
 

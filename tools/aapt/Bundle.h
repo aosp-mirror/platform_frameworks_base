@@ -66,6 +66,7 @@ public:
           mErrorOnMissingConfigEntry(false), mOutputTextSymbols(NULL),
           mSingleCrunchInputFile(NULL), mSingleCrunchOutputFile(NULL),
           mBuildSharedLibrary(false),
+          mBuildAppAsSharedLibrary(false),
           mArgc(0), mArgv(NULL)
         {}
     ~Bundle(void) {}
@@ -206,6 +207,8 @@ public:
     void setSingleCrunchOutputFile(const char* val) { mSingleCrunchOutputFile = val; }
     bool getBuildSharedLibrary() const { return mBuildSharedLibrary; }
     void setBuildSharedLibrary(bool val) { mBuildSharedLibrary = val; }
+    bool getBuildAppAsSharedLibrary() const { return mBuildAppAsSharedLibrary; }
+    void setBuildAppAsSharedLibrary(bool val) { mBuildAppAsSharedLibrary = val; }
     void setNoVersionVectors(bool val) { mNoVersionVectors = val; }
     bool getNoVersionVectors() const { return mNoVersionVectors; }
 
@@ -327,6 +330,7 @@ private:
     const char* mSingleCrunchInputFile;
     const char* mSingleCrunchOutputFile;
     bool        mBuildSharedLibrary;
+    bool        mBuildAppAsSharedLibrary;
     android::String8 mPlatformVersionCode;
     android::String8 mPlatformVersionName;
 
