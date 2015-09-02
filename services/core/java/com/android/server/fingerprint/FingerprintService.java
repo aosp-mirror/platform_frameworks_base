@@ -259,7 +259,7 @@ public class FingerprintService extends SystemService implements IBinder.DeathRe
     }
 
     private boolean inLockoutMode() {
-        return mFailedAttempts > MAX_FAILED_ATTEMPTS;
+        return mFailedAttempts >= MAX_FAILED_ATTEMPTS;
     }
 
     private void resetFailedAttempts() {
@@ -275,7 +275,7 @@ public class FingerprintService extends SystemService implements IBinder.DeathRe
 
     private boolean handleFailedAttempt(ClientMonitor clientMonitor) {
         mFailedAttempts++;
-        if (mFailedAttempts > MAX_FAILED_ATTEMPTS) {
+        if (inLockoutMode()) {
             // Failing multiple times will continue to push out the lockout time.
             mHandler.removeCallbacks(mLockoutReset);
             mHandler.postDelayed(mLockoutReset, FAIL_LOCKOUT_TIMEOUT_MS);
