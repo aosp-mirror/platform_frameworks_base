@@ -339,7 +339,7 @@ public final class MultiSelectManager {
         }
 
         handlePositionChanged(position, metaState);
-        return false;
+        return true;
     }
 
     /**
