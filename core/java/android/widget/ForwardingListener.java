@@ -25,7 +25,7 @@ import android.view.ViewParent;
 import com.android.internal.view.menu.ShowableListMenu;
 
 /**
- * Abstract class that forwards touch events to a {@link ListPopupWindow}.
+ * Abstract class that forwards touch events to a {@link ShowableListMenu}.
  *
  * @hide
  */

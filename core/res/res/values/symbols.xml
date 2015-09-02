@@ -2186,6 +2186,8 @@
   <java-symbol type="string" name="prohibit_manual_network_selection_in_gobal_mode" />
   <java-symbol type="id" name="profile_button" />
 
+  <java-symbol type="bool" name="config_enableCascadingSubmenus" />
+
   <!-- From SignalStrength -->
   <java-symbol type="integer" name="config_LTE_RSRP_threshold_type" />
 
