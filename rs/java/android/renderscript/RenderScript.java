@@ -98,13 +98,6 @@ public class RenderScript {
     */
     public static final int CREATE_FLAG_WAIT_FOR_ATTACH = 0x0008;
 
-    /**
-     * @hide
-     * Context creation flag which specifies that optimization level 0 is
-     * passed to the device compiler upon execution of the RenderScript kernel.
-     * The default optimization level is 3.
-    */
-    public static final int CREATE_FLAG_OPT_LEVEL_0 = 0x0010;
 
     /*
      * Detect the bitness of the VM to allow FieldPacker to do the right thing.
@@ -1369,7 +1362,7 @@ public class RenderScript {
         }
 
         if ((flags & ~(CREATE_FLAG_LOW_LATENCY | CREATE_FLAG_LOW_POWER |
-                       CREATE_FLAG_WAIT_FOR_ATTACH | CREATE_FLAG_OPT_LEVEL_0)) != 0) {
+                       CREATE_FLAG_WAIT_FOR_ATTACH)) != 0) {
             throw new RSIllegalArgumentException("Invalid flags passed.");
         }
 
