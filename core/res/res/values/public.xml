@@ -2684,5 +2684,6 @@
     <public type="id" name="accessibilityActionSetProgress" />
     <public type="attr" name="activityWidth" />
     <public type="attr" name="activityHeight" />
+    <public type="attr" name="resizeableActivity" />
 
 </resources>
