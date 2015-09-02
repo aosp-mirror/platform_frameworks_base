@@ -64,7 +64,8 @@ LOCAL_STATIC_LIBRARIES := \
     libgmock_host \
     libgtest_host \
 
-LOCAL_LDLIBS := -lrt
+LOCAL_LDLIBS_linux := -lrt
+
 include $(BUILD_HOST_NATIVE_TEST)
 
 endif # No TARGET_BUILD_APPS or TARGET_BUILD_PDK
