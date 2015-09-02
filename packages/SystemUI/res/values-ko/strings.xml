@@ -435,4 +435,8 @@
     <string name="activity_not_found" msgid="348423244327799974">"기기에 애플리케이션이 설치되어 있지 않습니다."</string>
     <string name="clock_seconds" msgid="7689554147579179507">"시계 초 단위 표시"</string>
     <string name="clock_seconds_desc" msgid="6282693067130470675">"상태 표시줄에 시계 초 단위를 표시합니다. 배터리 수명에 영향을 줄 수도 있습니다."</string>
+    <string name="qs_rearrange" msgid="8060918697551068765">"빠른 설정 재정렬"</string>
+    <string name="show_brightness" msgid="6613930842805942519">"빠른 설정에서 밝기 표시"</string>
+    <string name="qs_paging" msgid="7020133150248666132">"빠른 설정에서 페이지 레이아웃 사용"</string>
+    <string name="experimental" msgid="6198182315536726162">"베타"</string>
 </resources>

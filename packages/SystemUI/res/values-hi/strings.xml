@@ -435,4 +435,8 @@
     <string name="activity_not_found" msgid="348423244327799974">"ऐप्लिकेशन आपके डिवाइस पर इंस्टॉल नहीं है"</string>
     <string name="clock_seconds" msgid="7689554147579179507">"घड़ी के सेकंड दिखाएं"</string>
     <string name="clock_seconds_desc" msgid="6282693067130470675">"स्थिति बार में घड़ी के सेकंड दिखाएं. इससे बैटरी के जीवनकाल पर प्रभाव पड़ सकता है."</string>
+    <string name="qs_rearrange" msgid="8060918697551068765">"त्वरित सेटिंग को पुन: व्यवस्थित करें"</string>
+    <string name="show_brightness" msgid="6613930842805942519">"त्वरित सेटिंग में स्क्रीन की रोशनी दिखाएं"</string>
+    <string name="qs_paging" msgid="7020133150248666132">"त्वरित सेटिंग में पेजिंग का उपयोग करें"</string>
+    <string name="experimental" msgid="6198182315536726162">"प्रयोगात्मक"</string>
 </resources>

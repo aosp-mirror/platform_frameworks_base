@@ -435,4 +435,8 @@
     <string name="activity_not_found" msgid="348423244327799974">"Aplikasi tidak dipasang di perangkat"</string>
     <string name="clock_seconds" msgid="7689554147579179507">"Tampilkan detik jam"</string>
     <string name="clock_seconds_desc" msgid="6282693067130470675">"Tampilkan detik jam di bilah status. Dapat memengaruhi masa pakai baterai."</string>
+    <string name="qs_rearrange" msgid="8060918697551068765">"Atur Ulang Setelan Cepat"</string>
+    <string name="show_brightness" msgid="6613930842805942519">"Tampilkan kecerahan di Setelan Cepat"</string>
+    <string name="qs_paging" msgid="7020133150248666132">"Gunakan pembagian laman di Setelan Cepat"</string>
+    <string name="experimental" msgid="6198182315536726162">"Eksperimental"</string>
 </resources>

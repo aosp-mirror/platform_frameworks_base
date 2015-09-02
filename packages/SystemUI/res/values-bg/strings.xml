@@ -435,4 +435,8 @@
     <string name="activity_not_found" msgid="348423244327799974">"Приложението не е инсталирано на устройството ви"</string>
     <string name="clock_seconds" msgid="7689554147579179507">"Показване на секундите на часовника"</string>
     <string name="clock_seconds_desc" msgid="6282693067130470675">"Показване на секундите на часовника в лентата на състоянието. Може да се отрази на живота на батерията."</string>
+    <string name="qs_rearrange" msgid="8060918697551068765">"Пренареждане на бързите настройки"</string>
+    <string name="show_brightness" msgid="6613930842805942519">"Показване на яркостта от бързите настройки"</string>
+    <string name="qs_paging" msgid="7020133150248666132">"Използване на разделянето на страници от бързите настройки"</string>
+    <string name="experimental" msgid="6198182315536726162">"Експериментални"</string>
 </resources>

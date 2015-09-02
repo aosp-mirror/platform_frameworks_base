@@ -435,4 +435,8 @@
     <string name="activity_not_found" msgid="348423244327799974">"Uhlelo lokusebenza alufakiwe kudivayisi yakho"</string>
     <string name="clock_seconds" msgid="7689554147579179507">"Bonisa amasekhondi wewashi"</string>
     <string name="clock_seconds_desc" msgid="6282693067130470675">"Bonisa amasekhondi wewashi kubha yesimo. Ingathinta impilo yebhethri."</string>
+    <string name="qs_rearrange" msgid="8060918697551068765">"Hlela kabusha izilungiselelo ezisheshayo"</string>
+    <string name="show_brightness" msgid="6613930842805942519">"Bonisa ukukhanya kuzilungiselelo ezisheshayo"</string>
+    <string name="qs_paging" msgid="7020133150248666132">"Sebenzisa i-paging kuzilungiselelo ezisheshayo"</string>
+    <string name="experimental" msgid="6198182315536726162">"Okokulinga"</string>
 </resources>

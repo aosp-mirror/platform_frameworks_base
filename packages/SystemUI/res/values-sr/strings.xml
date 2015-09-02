@@ -436,4 +436,8 @@
     <string name="activity_not_found" msgid="348423244327799974">"Апликација није инсталирана на уређају"</string>
     <string name="clock_seconds" msgid="7689554147579179507">"Приказуј секунде на сату"</string>
     <string name="clock_seconds_desc" msgid="6282693067130470675">"Секунде на сату се приказују на статусној траци. То може да утиче на трајање батерије."</string>
+    <string name="qs_rearrange" msgid="8060918697551068765">"Преуреди Брза подешавања"</string>
+    <string name="show_brightness" msgid="6613930842805942519">"Прикажи осветљеност у Брзим подешавањима"</string>
+    <string name="qs_paging" msgid="7020133150248666132">"Користи листање страница у Брзим подешавањима"</string>
+    <string name="experimental" msgid="6198182315536726162">"Експериментално"</string>
 </resources>

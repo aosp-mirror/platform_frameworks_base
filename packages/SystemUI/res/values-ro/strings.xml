@@ -436,4 +436,8 @@
     <string name="activity_not_found" msgid="348423244327799974">"Aplicația nu este instalată pe dispozitiv"</string>
     <string name="clock_seconds" msgid="7689554147579179507">"Afișează secundele pe ceas"</string>
     <string name="clock_seconds_desc" msgid="6282693067130470675">"Afișează secundele pe ceas în bara de stare. Poate afecta autonomia bateriei."</string>
+    <string name="qs_rearrange" msgid="8060918697551068765">"Rearanjați Setările rapide"</string>
+    <string name="show_brightness" msgid="6613930842805942519">"Afișați luminozitatea în Setările rapide"</string>
+    <string name="qs_paging" msgid="7020133150248666132">"Folosiți paginarea în Setările rapide"</string>
+    <string name="experimental" msgid="6198182315536726162">"Experimentale"</string>
 </resources>

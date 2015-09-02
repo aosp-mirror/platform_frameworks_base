@@ -435,4 +435,8 @@
     <string name="activity_not_found" msgid="348423244327799974">"ยังไม่ได้ติดตั้งแอปพลิเคชันบนอุปกรณ์ของคุณ"</string>
     <string name="clock_seconds" msgid="7689554147579179507">"แสดงวินาทีของนาฬิกา"</string>
     <string name="clock_seconds_desc" msgid="6282693067130470675">"แสดงวินาทีของนาฬิกาในแถบสถานะ อาจส่งผลต่ออายุแบตเตอรี"</string>
+    <string name="qs_rearrange" msgid="8060918697551068765">"จัดเรียงการตั้งค่าด่วนใหม่"</string>
+    <string name="show_brightness" msgid="6613930842805942519">"แสดงความสว่างในการตั้งค่าด่วน"</string>
+    <string name="qs_paging" msgid="7020133150248666132">"ใช้การแบ่งหน้าในการตั้งค่าด่วน"</string>
+    <string name="experimental" msgid="6198182315536726162">"ทดสอบ"</string>
 </resources>

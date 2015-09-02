@@ -435,4 +435,8 @@
     <string name="activity_not_found" msgid="348423244327799974">"ਐਪਲੀਕੇਸ਼ਨ ਤੁਹਾਡੀ ਡਿਵਾਈਸ ਤੇ ਇੰਸਟੌਲ ਨਹੀਂ ਕੀਤੀ ਗਈ ਹੈ"</string>
     <string name="clock_seconds" msgid="7689554147579179507">"ਘੜੀ ਸਕਿੰਟ ਦਿਖਾਓ"</string>
     <string name="clock_seconds_desc" msgid="6282693067130470675">"ਸਥਿਤੀ ਬਾਰ ਵਿੱਚ ਘੜੀ ਸਕਿੰਟ ਦਿਖਾਓ। ਬੈਟਰੀ ਸਮਰੱਥਾ ਤੇ ਅਸਰ ਪੈ ਸਕਦਾ ਹੈ।"</string>
+    <string name="qs_rearrange" msgid="8060918697551068765">"ਤਤਕਾਲ ਸੈਟਿੰਗਾਂ ਨੂੰ ਦੁਬਾਰਾ ਕ੍ਰਮ ਦਿਓ"</string>
+    <string name="show_brightness" msgid="6613930842805942519">"ਤਤਕਾਲ ਸੈਟਿੰਗਾਂ ਵਿੱਚ ਚਮਕ ਦਿਖਾਓ"</string>
+    <string name="qs_paging" msgid="7020133150248666132">"ਤਤਕਾਲ ਸੈਟਿੰਗਾਂ ਵਿੱਚ ਪੇਜਿੰਗ ਵਰਤੋ"</string>
+    <string name="experimental" msgid="6198182315536726162">"ਪ੍ਰਯੋਗਾਤਮਿਕ"</string>
 </resources>

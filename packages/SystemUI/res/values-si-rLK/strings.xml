@@ -435,4 +435,8 @@
     <string name="activity_not_found" msgid="348423244327799974">"යෙදුම ඔබේ උපාංගය මත ස්ථාපනය කර නැත"</string>
     <string name="clock_seconds" msgid="7689554147579179507">"ඔරලෝසු තත්පර පෙන්වන්න"</string>
     <string name="clock_seconds_desc" msgid="6282693067130470675">"තත්ත්ව තීරුවෙහි ඔරලෝසු තත්පර පෙන්වන්න. බැටරි ආයු කාලයට බලපෑමට හැකිය."</string>
+    <string name="qs_rearrange" msgid="8060918697551068765">"ඉක්මන් සැකසීම් යළි පිළිවෙළට සකසන්න"</string>
+    <string name="show_brightness" msgid="6613930842805942519">"ඉක්මන් සැකසීම්වල දීප්තිය පෙන්වන්න"</string>
+    <string name="qs_paging" msgid="7020133150248666132">"ඉක්මන් සැකසීම්වල පිටු පිරිසැලසුම් භාවිත කරන්න"</string>
+    <string name="experimental" msgid="6198182315536726162">"පරීක්ෂණාත්මක"</string>
 </resources>

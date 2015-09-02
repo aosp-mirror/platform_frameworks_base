@@ -435,4 +435,8 @@
     <string name="activity_not_found" msgid="348423244327799974">"तपाईँको यन्त्रमा अनुप्रयोग स्थापना भएको छैन"</string>
     <string name="clock_seconds" msgid="7689554147579179507">"घडीमा सेकेन्ड देखाउनुहोस्"</string>
     <string name="clock_seconds_desc" msgid="6282693067130470675">"वस्तुस्थिति पट्टीको घडीमा सेकेन्ड देखाउनुहोस्। ब्याट्री आयु प्रभावित हुन सक्छ।"</string>
+    <string name="qs_rearrange" msgid="8060918697551068765">"द्रुत सेटिङहरू पुनः व्यवस्थित गर्नुहोस्"</string>
+    <string name="show_brightness" msgid="6613930842805942519">"द्रुत सेटिङहरूमा उज्यालो देखाउनुहोस्"</string>
+    <string name="qs_paging" msgid="7020133150248666132">"द्रुत सेटिङहरूमा पेजिंग प्रयोग गर्नुहोस्"</string>
+    <string name="experimental" msgid="6198182315536726162">"प्रयोगात्मक"</string>
 </resources>

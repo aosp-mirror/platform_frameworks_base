@@ -435,4 +435,8 @@
     <string name="activity_not_found" msgid="348423244327799974">"നിങ്ങളുടെ ഉപകരണത്തിൽ അപ്ലിക്കേഷൻ ഇൻസ്റ്റാൾ ചെയ്തിട്ടില്ല"</string>
     <string name="clock_seconds" msgid="7689554147579179507">"ക്ലോക്ക് സെക്കൻഡ് കാണിക്കുക"</string>
     <string name="clock_seconds_desc" msgid="6282693067130470675">"സ്റ്റാറ്റസ് ബാറിൽ ക്ലോക്ക് സെക്കൻഡ് കാണിക്കുന്നത് ബാറ്ററിയുടെ ലൈഫിനെ ബാധിക്കാം."</string>
+    <string name="qs_rearrange" msgid="8060918697551068765">"ദ്രുത ക്രമീകരണം പുനഃസജ്ജീകരിക്കുക"</string>
+    <string name="show_brightness" msgid="6613930842805942519">"ദ്രുത ക്രമീകരണത്തിൽ തെളിച്ചം കാണിക്കുക"</string>
+    <string name="qs_paging" msgid="7020133150248666132">"ദ്രുത്ര ക്രമീകരണത്തിൽ പേജിംഗ് ഉപയോഗിക്കുക"</string>
+    <string name="experimental" msgid="6198182315536726162">"പരീക്ഷണാത്മകം!"</string>
 </resources>

@@ -435,4 +435,8 @@
     <string name="activity_not_found" msgid="348423244327799974">"အပလီကေးရှင်းကို သင်၏ ကိရိယာထဲသို့ တပ်ဆင်မပေးရသေးပါ။"</string>
     <string name="clock_seconds" msgid="7689554147579179507">"နာရီ စက္ကန့်များကို ပြရန်"</string>
     <string name="clock_seconds_desc" msgid="6282693067130470675">"အခြေအနေပြနေရာမှာ နာရီ စက္ကန့်များကို ပြပါ။ ဘက်ထရီ သက်တမ်းကို အကျိုးသက်ရောက်နိုင်တယ်။"</string>
+    <string name="qs_rearrange" msgid="8060918697551068765">"အမြန် ဆက်တင်များကို ပြန်စီစဉ်ရန်"</string>
+    <string name="show_brightness" msgid="6613930842805942519">"အမြန် ဆက်တင်များထဲက တောက်ပမှုကို ပြရန်"</string>
+    <string name="qs_paging" msgid="7020133150248666132">"အမြန် ဆက်တင်များထဲတွင် စာမျက်နှာ ပုံစံချမှုကို အသုံးပြုပါ"</string>
+    <string name="experimental" msgid="6198182315536726162">"စမ်းသပ်ရေး"</string>
 </resources>

@@ -437,4 +437,8 @@
     <string name="activity_not_found" msgid="348423244327799974">"Додаток не встановлено на вашому пристрої"</string>
     <string name="clock_seconds" msgid="7689554147579179507">"Показувати секунди на годиннику"</string>
     <string name="clock_seconds_desc" msgid="6282693067130470675">"Показувати секунди на годиннику в рядку стану. Акумулятор може розряджатися швидше."</string>
+    <string name="qs_rearrange" msgid="8060918697551068765">"Упорядкувати швидкі налаштування"</string>
+    <string name="show_brightness" msgid="6613930842805942519">"Показувати панель яскравості у швидких налаштуваннях"</string>
+    <string name="qs_paging" msgid="7020133150248666132">"Показувати швидкі налаштування у вигляді сторінок"</string>
+    <string name="experimental" msgid="6198182315536726162">"Експериментальні налаштування"</string>
 </resources>

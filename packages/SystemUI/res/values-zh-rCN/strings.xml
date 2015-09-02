@@ -437,4 +437,12 @@
     <string name="activity_not_found" msgid="348423244327799974">"您的设备中未安装此应用"</string>
     <string name="clock_seconds" msgid="7689554147579179507">"显示时钟的秒数"</string>
     <string name="clock_seconds_desc" msgid="6282693067130470675">"在状态栏中显示时钟的秒数。这可能会影响电池的续航时间。"</string>
+    <!-- no translation found for qs_rearrange (8060918697551068765) -->
+    <skip />
+    <!-- no translation found for show_brightness (6613930842805942519) -->
+    <skip />
+    <!-- no translation found for qs_paging (7020133150248666132) -->
+    <skip />
+    <!-- no translation found for experimental (6198182315536726162) -->
+    <skip />
 </resources>

@@ -437,4 +437,8 @@
     <string name="activity_not_found" msgid="348423244327799974">"Апликацијата не е инсталирана на уредот"</string>
     <string name="clock_seconds" msgid="7689554147579179507">"Прикажи ги секундите на часовникот"</string>
     <string name="clock_seconds_desc" msgid="6282693067130470675">"Прикажи ги секундите на часовникот на статусната лента. Може да влијае на траењето на батеријата."</string>
+    <string name="qs_rearrange" msgid="8060918697551068765">"Преуредете ги Брзи поставки"</string>
+    <string name="show_brightness" msgid="6613930842805942519">"Прикажете ја осветленоста во Брзи поставки"</string>
+    <string name="qs_paging" msgid="7020133150248666132">"Користете прелистување страници во Брзи поставки"</string>
+    <string name="experimental" msgid="6198182315536726162">"Експериментално"</string>
 </resources>

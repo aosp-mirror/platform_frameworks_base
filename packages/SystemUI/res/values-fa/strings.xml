@@ -435,4 +435,8 @@
     <string name="activity_not_found" msgid="348423244327799974">"برنامه در دستگاه شما نصب نیست"</string>
     <string name="clock_seconds" msgid="7689554147579179507">"نمایش ثانیه‌های ساعت"</string>
     <string name="clock_seconds_desc" msgid="6282693067130470675">"ثانیه‌های ساعت را در نوار وضعیت نشان می‌دهد. ممکن است بر ماندگاری باتری تأثیر بگذارد."</string>
+    <string name="qs_rearrange" msgid="8060918697551068765">"ترتیب مجدد در تنظیمات سریع"</string>
+    <string name="show_brightness" msgid="6613930842805942519">"نمایش روشنایی در تنظیمات سریع"</string>
+    <string name="qs_paging" msgid="7020133150248666132">"استفاده از صفحه‌بندی در تنظیمات سریع"</string>
+    <string name="experimental" msgid="6198182315536726162">"آزمایشی"</string>
 </resources>

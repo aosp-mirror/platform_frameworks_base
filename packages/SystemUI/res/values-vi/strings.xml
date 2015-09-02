@@ -435,4 +435,8 @@
     <string name="activity_not_found" msgid="348423244327799974">"Ứng dụng chưa được cài đặt trên thiết bị của bạn"</string>
     <string name="clock_seconds" msgid="7689554147579179507">"Hiển thị giây đồng hồ"</string>
     <string name="clock_seconds_desc" msgid="6282693067130470675">"Hiển thị giây đồng hồ trong thanh trạng thái. Có thể ảnh hưởng đến thời lượng pin."</string>
+    <string name="qs_rearrange" msgid="8060918697551068765">"Sắp xếp lại Cài đặt nhanh"</string>
+    <string name="show_brightness" msgid="6613930842805942519">"Hiển thị độ sáng trong Cài đặt nhanh"</string>
+    <string name="qs_paging" msgid="7020133150248666132">"Sử dụng đánh số trang trong Cài đặt nhanh"</string>
+    <string name="experimental" msgid="6198182315536726162">"Thử nghiệm"</string>
 </resources>

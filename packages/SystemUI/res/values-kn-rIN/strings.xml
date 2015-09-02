@@ -435,4 +435,8 @@
     <string name="activity_not_found" msgid="348423244327799974">"ನಿಮ್ಮ ಸಾಧನದಲ್ಲಿ ಅಪ್ಲಿಕೇಶನ್ ಅನ್ನು ಸ್ಥಾಪಿಸಲಾಗಿಲ್ಲ"</string>
     <string name="clock_seconds" msgid="7689554147579179507">"ಗಡಿಯಾರದ ಸೆಕೆಂಡುಗಳನ್ನು ತೋರಿಸು"</string>
     <string name="clock_seconds_desc" msgid="6282693067130470675">"ಸ್ಥಿತಿ ಪಟ್ಟಿಯಲ್ಲಿ ಗಡಿಯಾರ ಸೆಕೆಂಡುಗಳನ್ನು ತೋರಿಸು. ಇದಕ್ಕೆ ಬ್ಯಾಟರಿ ಬಾಳಿಕೆಯು ಪರಿಣಾಮಬೀರಬಹುದು."</string>
+    <string name="qs_rearrange" msgid="8060918697551068765">"ತ್ವರಿತ ಸೆಟ್ಟಿಂಗ್‌‌ಗಳನ್ನು ಮರುಹೊಂದಿಸಿ"</string>
+    <string name="show_brightness" msgid="6613930842805942519">"ತ್ವರಿತ ಸೆಟ್ಟಿಂಗ್‌‌ಗಳಲ್ಲಿ ಪ್ರಖರತೆಯನ್ನು ತೋರಿಸಿ"</string>
+    <string name="qs_paging" msgid="7020133150248666132">"ತ್ವರಿತ ಸೆಟ್ಟಿಂಗ್‌‌ಗಳಲ್ಲಿ ಪುಟಗಳನ್ನು ಬಳಸಿ"</string>
+    <string name="experimental" msgid="6198182315536726162">"ಪ್ರಾಯೋಗಿಕ"</string>
 </resources>
