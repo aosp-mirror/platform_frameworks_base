@@ -20,9 +20,6 @@ import static android.Manifest.permission.BIND_VPN_SERVICE;
 import static android.net.ConnectivityManager.NETID_UNSET;
 import static android.net.RouteInfo.RTN_THROW;
 import static android.net.RouteInfo.RTN_UNREACHABLE;
-import static android.os.UserHandle.PER_USER_RANGE;
-import static android.system.OsConstants.AF_INET;
-import static android.system.OsConstants.AF_INET6;
 
 import android.Manifest;
 import android.app.AppGlobals;
@@ -34,13 +31,11 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
-import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.ResolveInfo;
 import android.content.pm.UserInfo;
 import android.net.ConnectivityManager;
-import android.net.IConnectivityManager;
 import android.net.INetworkManagementEventObserver;
 import android.net.IpPrefix;
 import android.net.LinkAddress;
@@ -126,7 +121,6 @@ public class Vpn {
     /* list of users using this VPN. */
     @GuardedBy("this")
     private List<UidRange> mVpnUsers = null;
-    private BroadcastReceiver mUserIntentReceiver = null;
 
     // Handle of user initiating VPN.
     private final int mUserHandle;
@@ -145,31 +139,6 @@ public class Vpn {
             netService.registerObserver(mObserver);
         } catch (RemoteException e) {
             Log.wtf(TAG, "Problem registering observer", e);
-        }
-        // TODO: http://b/22950929
-        if (userHandle == UserHandle.USER_SYSTEM) {
-            // Owner's VPN also needs to handle restricted users
-            mUserIntentReceiver = new BroadcastReceiver() {
-                @Override
-                public void onReceive(Context context, Intent intent) {
-                    final String action = intent.getAction();
-                    final int userHandle = intent.getIntExtra(Intent.EXTRA_USER_HANDLE,
-                            UserHandle.USER_NULL);
-                    if (userHandle == UserHandle.USER_NULL) return;
-
-                    if (Intent.ACTION_USER_ADDED.equals(action)) {
-                        onUserAdded(userHandle);
-                    } else if (Intent.ACTION_USER_REMOVED.equals(action)) {
-                        onUserRemoved(userHandle);
-                    }
-                }
-            };
-
-            IntentFilter intentFilter = new IntentFilter();
-            intentFilter.addAction(Intent.ACTION_USER_ADDED);
-            intentFilter.addAction(Intent.ACTION_USER_REMOVED);
-            mContext.registerReceiverAsUser(
-                    mUserIntentReceiver, UserHandle.ALL, intentFilter, null, null);
         }
 
         mNetworkInfo = new NetworkInfo(ConnectivityManager.TYPE_VPN, 0, NETWORKTYPE, "");
@@ -439,8 +408,8 @@ public class Vpn {
         }
 
         addVpnUserLocked(mUserHandle);
-        // If we are owner assign all Restricted Users to this VPN
-        if (mUserHandle == UserHandle.USER_OWNER) {
+        // If the user can have restricted profiles, assign all its restricted profiles to this VPN
+        if (canHaveRestrictedProfile(mUserHandle)) {
             token = Binder.clearCallingIdentity();
             List<UserInfo> users;
             try {
@@ -449,12 +418,21 @@ public class Vpn {
                 Binder.restoreCallingIdentity(token);
             }
             for (UserInfo user : users) {
-                if (user.isRestricted()) {
+                if (user.isRestricted() && (user.restrictedProfileParentId == mUserHandle)) {
                     addVpnUserLocked(user.id);
                 }
             }
         }
         mNetworkAgent.addUidRanges(mVpnUsers.toArray(new UidRange[mVpnUsers.size()]));
+    }
+
+    private boolean canHaveRestrictedProfile(int userId) {
+        long token = Binder.clearCallingIdentity();
+        try {
+            return UserManager.get(mContext).canHaveRestrictedProfile(userId);
+        } finally {
+            Binder.restoreCallingIdentity(token);
+        }
     }
 
     private void agentDisconnect(NetworkInfo networkInfo, NetworkAgent networkAgent) {
@@ -681,12 +659,11 @@ public class Vpn {
         mStatusIntent = null;
     }
 
-    private void onUserAdded(int userHandle) {
-        // If the user is restricted tie them to the owner's VPN
-        synchronized(Vpn.this) {
-            UserManager mgr = UserManager.get(mContext);
-            UserInfo user = mgr.getUserInfo(userHandle);
-            if (user.isRestricted()) {
+    public void onUserAdded(int userHandle) {
+        // If the user is restricted tie them to the parent user's VPN
+        UserInfo user = UserManager.get(mContext).getUserInfo(userHandle);
+        if (user.isRestricted() && user.restrictedProfileParentId == mUserHandle) {
+            synchronized(Vpn.this) {
                 try {
                     addVpnUserLocked(userHandle);
                     if (mNetworkAgent != null) {
@@ -700,12 +677,11 @@ public class Vpn {
         }
     }
 
-    private void onUserRemoved(int userHandle) {
+    public void onUserRemoved(int userHandle) {
         // clean up if restricted
-        synchronized(Vpn.this) {
-            UserManager mgr = UserManager.get(mContext);
-            UserInfo user = mgr.getUserInfo(userHandle);
-            if (user.isRestricted()) {
+        UserInfo user = UserManager.get(mContext).getUserInfo(userHandle);
+        if (user.isRestricted() && user.restrictedProfileParentId == mUserHandle) {
+            synchronized(Vpn.this) {
                 try {
                     removeVpnUserLocked(userHandle);
                 } catch (Exception e) {
