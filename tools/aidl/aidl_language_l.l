@@ -83,8 +83,6 @@ idvalue     (0|[1-9][0-9]*)
     /* keywords */
 parcelable      { SET_BUFFER(PARCELABLE); return PARCELABLE; }
 interface       { SET_BUFFER(INTERFACE); return INTERFACE; }
-flattenable     { SET_BUFFER(FLATTENABLE); return FLATTENABLE; }
-rpc             { SET_BUFFER(INTERFACE); return RPC; }
 in              { SET_BUFFER(IN); return IN; }
 out             { SET_BUFFER(OUT); return OUT; }
 inout           { SET_BUFFER(INOUT); return INOUT; }
