@@ -40,7 +40,7 @@ import static org.mockito.Mockito.when;
  mmma frameworks/base/services/tests/servicestests/ &&
  adb install \
    -r out/target/product/hammerhead/data/app/FrameworksServicesTests/FrameworksServicesTests.apk &&
- adb shell am instrument -e class com.android.server.devicepolicy.DeviceOwnerTest \
+ adb shell am instrument -e class com.android.server.devicepolicy.OwnersTest \
    -w com.android.frameworks.servicestests/android.support.test.runner.AndroidJUnitRunner
  */
 public class OwnersTest extends DpmTestBase {
