@@ -77,6 +77,8 @@ public final class Trace {
     public static final long TRACE_TAG_POWER = 1L << 17;
     /** @hide */
     public static final long TRACE_TAG_PACKAGE_MANAGER = 1L << 18;
+    /** @hide */
+    public static final long TRACE_TAG_SYSTEM_SERVER = 1L << 19;
 
     private static final long TRACE_TAG_NOT_READY = 1L << 63;
     private static final int MAX_SECTION_NAME_LEN = 127;

@@ -182,8 +182,18 @@ public class ZygoteInit {
 
     static void preload() {
         Log.d(TAG, "begin preload");
-        preloadClasses();
-        preloadResources();
+        try {
+            Trace.traceBegin(Trace.TRACE_TAG_DALVIK, "PreloadClasses");
+            preloadClasses();
+        } finally {
+            Trace.traceEnd(Trace.TRACE_TAG_DALVIK);
+        }
+        try {
+            Trace.traceBegin(Trace.TRACE_TAG_DALVIK, "PreloadResources");
+            preloadResources();
+        } finally {
+            Trace.traceEnd(Trace.TRACE_TAG_DALVIK);
+        }
         preloadOpenGL();
         preloadSharedLibraries();
         // Ask the WebViewFactory to do any initialization that must run in the zygote process,
@@ -264,6 +274,7 @@ public class ZygoteInit {
                 }
 
                 try {
+                    Trace.traceBegin(Trace.TRACE_TAG_DALVIK, "PreloadClass " + line);
                     if (false) {
                         Log.v(TAG, "Preloading " + line + "...");
                     }
@@ -287,6 +298,8 @@ public class ZygoteInit {
                         throw (RuntimeException) t;
                     }
                     throw new RuntimeException(t);
+                } finally {
+                    Trace.traceEnd(Trace.TRACE_TAG_DALVIK);
                 }
             }
 
@@ -300,7 +313,9 @@ public class ZygoteInit {
             runtime.setTargetHeapUtilization(defaultUtilization);
 
             // Fill in dex caches with classes, fields, and methods brought in by preloading.
+            Trace.traceBegin(Trace.TRACE_TAG_DALVIK, "PreloadDexCaches");
             runtime.preloadDexCaches();
+            Trace.traceEnd(Trace.TRACE_TAG_DALVIK);
 
             // Bring back root. We'll need it later if we're in the zygote.
             if (droppedPriviliges) {
@@ -561,41 +576,56 @@ public class ZygoteInit {
 
     public static void main(String argv[]) {
         try {
-            RuntimeInit.enableDdms();
-            // Start profiling the zygote initialization.
-            SamplingProfilerIntegration.start();
-
             boolean startSystemServer = false;
             String socketName = "zygote";
             String abiList = null;
-            for (int i = 1; i < argv.length; i++) {
-                if ("start-system-server".equals(argv[i])) {
-                    startSystemServer = true;
-                } else if (argv[i].startsWith(ABI_LIST_ARG)) {
-                    abiList = argv[i].substring(ABI_LIST_ARG.length());
-                } else if (argv[i].startsWith(SOCKET_NAME_ARG)) {
-                    socketName = argv[i].substring(SOCKET_NAME_ARG.length());
-                } else {
-                    throw new RuntimeException("Unknown command line argument: " + argv[i]);
+            try {
+                Trace.traceBegin(Trace.TRACE_TAG_DALVIK, "ZygoteInit");
+                RuntimeInit.enableDdms();
+                // Start profiling the zygote initialization.
+                SamplingProfilerIntegration.start();
+
+                for (int i = 1; i < argv.length; i++) {
+                    if ("start-system-server".equals(argv[i])) {
+                        startSystemServer = true;
+                    } else if (argv[i].startsWith(ABI_LIST_ARG)) {
+                        abiList = argv[i].substring(ABI_LIST_ARG.length());
+                    } else if (argv[i].startsWith(SOCKET_NAME_ARG)) {
+                        socketName = argv[i].substring(SOCKET_NAME_ARG.length());
+                    } else {
+                        throw new RuntimeException("Unknown command line argument: " + argv[i]);
+                    }
                 }
+
+                if (abiList == null) {
+                    throw new RuntimeException("No ABI list supplied.");
+                }
+
+                registerZygoteSocket(socketName);
+                try {
+                    Trace.traceBegin(Trace.TRACE_TAG_DALVIK, "ZygotePreload");
+                    EventLog.writeEvent(LOG_BOOT_PROGRESS_PRELOAD_START,
+                            SystemClock.uptimeMillis());
+                    preload();
+                    EventLog.writeEvent(LOG_BOOT_PROGRESS_PRELOAD_END,
+                            SystemClock.uptimeMillis());
+                } finally {
+                    Trace.traceEnd(Trace.TRACE_TAG_DALVIK);
+                }
+
+                // Finish profiling the zygote initialization.
+                SamplingProfilerIntegration.writeZygoteSnapshot();
+
+                // Do an initial gc to clean up after startup
+                try {
+                    Trace.traceBegin(Trace.TRACE_TAG_DALVIK, "PostZygoteInitGC");
+                    gcAndFinalize();
+                } finally {
+                    Trace.traceEnd(Trace.TRACE_TAG_DALVIK);
+                }
+            } finally {
+                Trace.traceEnd(Trace.TRACE_TAG_DALVIK);
             }
-
-            if (abiList == null) {
-                throw new RuntimeException("No ABI list supplied.");
-            }
-
-            registerZygoteSocket(socketName);
-            EventLog.writeEvent(LOG_BOOT_PROGRESS_PRELOAD_START,
-                SystemClock.uptimeMillis());
-            preload();
-            EventLog.writeEvent(LOG_BOOT_PROGRESS_PRELOAD_END,
-                SystemClock.uptimeMillis());
-
-            // Finish profiling the zygote initialization.
-            SamplingProfilerIntegration.writeZygoteSnapshot();
-
-            // Do an initial gc to clean up after startup
-            gcAndFinalize();
 
             // Disable tracing so that forked processes do not inherit stale tracing tags from
             // Zygote.
