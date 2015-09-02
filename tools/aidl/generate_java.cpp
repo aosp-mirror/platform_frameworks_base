@@ -66,9 +66,6 @@ generate_java(const string& filename, const string& originalSrc,
     if (iface->document_item.item_type == INTERFACE_TYPE_BINDER) {
         cl = generate_binder_interface_class(iface);
     }
-    else if (iface->document_item.item_type == INTERFACE_TYPE_RPC) {
-        cl = generate_rpc_interface_class(iface);
-    }
 
     Document* document = new Document;
         document->comment = "";

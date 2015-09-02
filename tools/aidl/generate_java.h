@@ -12,7 +12,6 @@ int generate_java(const string& filename, const string& originalSrc,
                 interface_type* iface);
 
 Class* generate_binder_interface_class(const interface_type* iface);
-Class* generate_rpc_interface_class(const interface_type* iface);
 
 string gather_comments(extra_text_type* extra);
 string append(const char* a, const char* b);

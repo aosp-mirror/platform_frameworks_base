@@ -24,9 +24,9 @@ public:
     };
 
                     Type(const string& name, int kind, bool canWriteToParcel,
-                            bool canWriteToRpcData, bool canBeOut);
+                         bool canBeOut);
                     Type(const string& package, const string& name,
-                            int kind, bool canWriteToParcel, bool canWriteToRpcData, bool canBeOut,
+                            int kind, bool canWriteToParcel, bool canBeOut,
                             const string& declFile = "", int declLine = -1);
     virtual         ~Type();
 
@@ -37,12 +37,10 @@ public:
     inline string   DeclFile() const            { return m_declFile; }
     inline int      DeclLine() const            { return m_declLine; }
     inline bool     CanWriteToParcel() const    { return m_canWriteToParcel; }
-    inline bool     CanWriteToRpcData() const   { return m_canWriteToRpcData; }
     inline bool     CanBeOutParameter() const   { return m_canBeOut; }
     
     virtual string  ImportType() const;
     virtual string  CreatorName() const;
-    virtual string  RpcCreatorName() const;
     virtual string  InstantiableName() const;
 
     virtual void    WriteToParcel(StatementBlock* addTo, Variable* v,
@@ -61,11 +59,6 @@ public:
     virtual void    ReadArrayFromParcel(StatementBlock* addTo, Variable* v,
                                     Variable* parcel, Variable** cl);
 
-    virtual void    WriteToRpcData(StatementBlock* addTo, Expression* k, Variable* v,
-                                    Variable* data, int flags);
-    virtual void    CreateFromRpcData(StatementBlock* addTo, Expression* k, Variable* v,
-                                    Variable* data, Variable** cl);
-
 protected:
     void SetQualifiedName(const string& qualified);
     Expression* BuildWriteToParcelFlags(int flags);
@@ -81,7 +74,6 @@ private:
     int m_declLine;
     int m_kind;
     bool m_canWriteToParcel;
-    bool m_canWriteToRpcData;
     bool m_canBeOut;
 };
 
@@ -93,12 +85,7 @@ public:
                               const string& unmarshallParcel,
                               const string& writeArrayParcel,
                               const string& createArrayParcel,
-                              const string& readArrayParcel,
-                              const string& marshallRpc,
-                              const string& unmarshallRpc,
-                              const string& writeArrayRpc,
-                              const string& createArrayRpc,
-                              const string& readArrayRpc);
+                              const string& readArrayParcel);
 
     virtual void    WriteToParcel(StatementBlock* addTo, Variable* v,
                                     Variable* parcel, int flags);
@@ -114,22 +101,12 @@ public:
     virtual void    ReadArrayFromParcel(StatementBlock* addTo, Variable* v,
                                     Variable* parcel, Variable** cl);
 
-    virtual void    WriteToRpcData(StatementBlock* addTo, Expression* k, Variable* v,
-                                    Variable* data, int flags);
-    virtual void    CreateFromRpcData(StatementBlock* addTo, Expression* k, Variable* v,
-                                    Variable* data, Variable** cl);
-
 private:
     string m_marshallParcel;
     string m_unmarshallParcel;
     string m_writeArrayParcel;
     string m_createArrayParcel;
     string m_readArrayParcel;
-    string m_marshallRpc;
-    string m_unmarshallRpc;
-    string m_writeArrayRpc;
-    string m_createArrayRpc;
-    string m_readArrayRpc;
 };
 
 class BooleanType : public Type
@@ -150,11 +127,6 @@ public:
                                     Variable* parcel, Variable** cl);
     virtual void    ReadArrayFromParcel(StatementBlock* addTo, Variable* v,
                                     Variable* parcel, Variable** cl);
-
-    virtual void    WriteToRpcData(StatementBlock* addTo, Expression* k, Variable* v,
-                                    Variable* data, int flags);
-    virtual void    CreateFromRpcData(StatementBlock* addTo, Expression* k, Variable* v,
-                                    Variable* data, Variable** cl);
 };
 
 class CharType : public Type
@@ -175,11 +147,6 @@ public:
                                     Variable* parcel, Variable** cl);
     virtual void    ReadArrayFromParcel(StatementBlock* addTo, Variable* v,
                                     Variable* parcel, Variable** cl);
-
-    virtual void    WriteToRpcData(StatementBlock* addTo, Expression* k, Variable* v,
-                                    Variable* data, int flags);
-    virtual void    CreateFromRpcData(StatementBlock* addTo, Expression* k, Variable* v,
-                                    Variable* data, Variable** cl);
 };
 
 
@@ -203,11 +170,6 @@ public:
                                     Variable* parcel, Variable** cl);
     virtual void    ReadArrayFromParcel(StatementBlock* addTo, Variable* v,
                                     Variable* parcel, Variable** cl);
-
-    virtual void    WriteToRpcData(StatementBlock* addTo, Expression* k, Variable* v,
-                                    Variable* data, int flags);
-    virtual void    CreateFromRpcData(StatementBlock* addTo, Expression* k, Variable* v,
-                                    Variable* data, Variable** cl);
 };
 
 class CharSequenceType : public Type
@@ -344,22 +306,16 @@ public:
                                     Variable* parcel, Variable** cl);
     virtual void    ReadFromParcel(StatementBlock* addTo, Variable* v,
                                     Variable* parcel, Variable** cl);
-
-    virtual void    WriteToRpcData(StatementBlock* addTo, Expression* k, Variable* v,
-                                    Variable* data, int flags);
-    virtual void    CreateFromRpcData(StatementBlock* addTo, Expression* k, Variable* v,
-                                    Variable* data, Variable** cl);
 };
 
 class UserDataType : public Type
 {
 public:
                     UserDataType(const string& package, const string& name,
-                            bool builtIn, bool canWriteToParcel, bool canWriteToRpcData,
+                            bool builtIn, bool canWriteToParcel,
                             const string& declFile = "", int declLine = -1);
 
     virtual string  CreatorName() const;
-    virtual string  RpcCreatorName() const;
 
     virtual void    WriteToParcel(StatementBlock* addTo, Variable* v,
                                     Variable* parcel, int flags);
@@ -376,11 +332,6 @@ public:
                                     Variable* parcel, Variable** cl);
     virtual void    ReadArrayFromParcel(StatementBlock* addTo, Variable* v,
                                     Variable* parcel, Variable** cl);
-
-    virtual void    WriteToRpcData(StatementBlock* addTo, Expression* k, Variable* v,
-                                    Variable* data, int flags);
-    virtual void    CreateFromRpcData(StatementBlock* addTo, Expression* k, Variable* v,
-                                    Variable* data, Variable** cl);
 };
 
 class InterfaceType : public Type
@@ -426,17 +377,6 @@ private:
     vector<Type*> m_args;
 };
 
-class RpcDataType : public UserDataType
-{
-public:
-                    RpcDataType();
-
-    virtual void    WriteToRpcData(StatementBlock* addTo, Expression* k, Variable* v,
-                                    Variable* data, int flags);
-    virtual void    CreateFromRpcData(StatementBlock* addTo, Expression* k, Variable* v,
-                                    Variable* data, Variable** cl);
-};
-
 class ClassLoaderType : public Type
 {
 public:
@@ -459,11 +399,6 @@ public:
     virtual void    ReadFromParcel(StatementBlock* addTo, Variable* v,
                                     Variable* parcel, Variable** cl);
 
-    virtual void    WriteToRpcData(StatementBlock* addTo, Expression* k, Variable* v,
-                                    Variable* data, int flags);
-    virtual void    CreateFromRpcData(StatementBlock* addTo, Expression* k, Variable* v,
-                                    Variable* data, Variable** cl);
-    
 private:
     string m_creator;
 };
@@ -525,11 +460,6 @@ extern Type* PARCEL_TYPE;
 extern Type* PARCELABLE_INTERFACE_TYPE;
 
 extern Type* CONTEXT_TYPE;
-
-extern Type* RPC_DATA_TYPE;
-extern Type* RPC_ERROR_TYPE;
-extern Type* RPC_CONTEXT_TYPE;
-extern Type* EVENT_FAKE_TYPE;
 
 extern Expression* NULL_VALUE;
 extern Expression* THIS_VALUE;
