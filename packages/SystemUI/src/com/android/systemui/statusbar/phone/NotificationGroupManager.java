@@ -78,6 +78,13 @@ public class NotificationGroupManager {
         Notification notif = sbn.getNotification();
         String groupKey = sbn.getGroupKey();
         final NotificationGroup group = mGroupMap.get(groupKey);
+        if (group == null) {
+            // When an app posts 2 different notifications as summary of the same group, then a
+            // cancellation of the first notification removes this group.
+            // This situation is not supported and we will not allow such notifications anymore in
+            // the close future. See b/23676310 for reference.
+            return;
+        }
         if (notif.isGroupSummary()) {
             group.summary = null;
         } else {
