@@ -18,6 +18,7 @@ package com.android.server.wm;
 
 import static android.app.ActivityManager.FREEFORM_WORKSPACE_STACK_ID;
 import static android.view.WindowManager.LayoutParams.FIRST_SUB_WINDOW;
+import static android.view.WindowManager.LayoutParams.FLAG_DIM_BEHIND;
 import static android.view.WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED;
 import static android.view.WindowManager.LayoutParams.LAST_SUB_WINDOW;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_COMPATIBLE_WINDOW;
@@ -1253,6 +1254,20 @@ final class WindowState implements WindowManagerPolicy.WindowState {
         }
 
         mInputWindowHandle.inputChannel = null;
+    }
+
+    void handleFlagDimBehind() {
+        if ((mAttrs.flags & FLAG_DIM_BEHIND) != 0 && isDisplayedLw() && !mExiting) {
+            final Task task = getTask();
+            if (task == null) {
+                return;
+            }
+            task.setContinueDimming();
+            if (!task.isDimming(mWinAnimator)) {
+                if (WindowManagerService.localLOGV) Slog.v(TAG, "Win " + this + " start dimming.");
+                task.startDimmingIfNeeded(mWinAnimator);
+            }
+        }
     }
 
     private class DeathRecipient implements IBinder.DeathRecipient {

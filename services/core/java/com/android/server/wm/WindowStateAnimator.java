@@ -27,8 +27,8 @@ import static com.android.server.wm.WindowManagerService.DEBUG_VISIBILITY;
 import static com.android.server.wm.WindowManagerService.SHOW_LIGHT_TRANSACTIONS;
 import static com.android.server.wm.WindowManagerService.SHOW_SURFACE_ALLOC;
 import static com.android.server.wm.WindowManagerService.localLOGV;
-import static com.android.server.wm.WindowManagerService.LayoutFields.SET_ORIENTATION_CHANGE_COMPLETE;
-import static com.android.server.wm.WindowManagerService.LayoutFields.SET_TURN_ON_SCREEN;
+import static com.android.server.wm.WindowSurfacePlacer.SET_ORIENTATION_CHANGE_COMPLETE;
+import static com.android.server.wm.WindowSurfacePlacer.SET_TURN_ON_SCREEN;
 
 import android.content.Context;
 import android.graphics.Matrix;
@@ -424,8 +424,9 @@ class WindowStateAnimator {
         finishExit();
         final int displayId = mWin.getDisplayId();
         mAnimator.setPendingLayoutChanges(displayId, WindowManagerPolicy.FINISH_LAYOUT_REDO_ANIM);
-        if (WindowManagerService.DEBUG_LAYOUT_REPEATS) mService.debugLayoutRepeats(
-                "WindowStateAnimator", mAnimator.getPendingLayoutChanges(displayId));
+        if (WindowManagerService.DEBUG_LAYOUT_REPEATS)
+            mService.mWindowPlacerLocked.debugLayoutRepeats(
+                    "WindowStateAnimator", mAnimator.getPendingLayoutChanges(displayId));
 
         if (mWin.mAppToken != null) {
             mWin.mAppToken.updateReportedVisibilityLocked();
@@ -1184,7 +1185,7 @@ class WindowStateAnimator {
                     + " screen=" + (screenAnimation ?
                             screenRotationAnimation.getEnterTransformation().getAlpha() : "null"));
             return;
-        } else if (mIsWallpaper && mService.mInnerFields.mWallpaperActionPending) {
+        } else if (mIsWallpaper && mService.mWindowPlacerLocked.mWallpaperActionPending) {
             return;
         }
 
