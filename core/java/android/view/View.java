@@ -6709,10 +6709,10 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * A content description briefly describes the view and is primarily used
      * for accessibility support to determine how a view should be presented to
      * the user. In the case of a view with no textual representation, such as
-     * {@link ImageButton}, a useful content description explains what the view
-     * does. For example, an image button with a phone icon that is used to
-     * place a call may use "Call" as its content description. An image of a
-     * floppy disk that is used to save a file may use "Save".
+     * {@link android.view.ImageButton}, a useful content description explains
+     * what the view does. For example, an image button with a phone icon that
+     * is used to place a call may use "Call" as its content description. An
+     * image of a floppy disk that is used to save a file may use "Save".
      *
      * @param contentDescription The content description.
      * @see #getContentDescription()
