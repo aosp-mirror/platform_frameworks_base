@@ -52,8 +52,6 @@ public class ClipDrawable extends DrawableWrapper {
     public static final int HORIZONTAL = 1;
     public static final int VERTICAL = 2;
 
-    private static final int MAX_LEVEL = 10000;
-
     private final Rect mTmpRect = new Rect();
 
     private ClipState mState;
@@ -143,7 +141,7 @@ public class ClipDrawable extends DrawableWrapper {
     }
 
     @Override
-    protected boolean onLevelChange(int level) {
+    protected boolean onLevelChange(float level) {
         super.onLevelChange(level);
         invalidateSelf();
         return true;
@@ -153,12 +151,12 @@ public class ClipDrawable extends DrawableWrapper {
     public int getOpacity() {
         final Drawable dr = getDrawable();
         final int opacity = dr.getOpacity();
-        if (opacity == PixelFormat.TRANSPARENT || dr.getLevel() == 0) {
+        if (opacity == PixelFormat.TRANSPARENT || dr.getLevelFloat() == 0) {
             return PixelFormat.TRANSPARENT;
         }
 
-        final int level = getLevel();
-        if (level >= MAX_LEVEL) {
+        final float level = getLevelFloat();
+        if (level >= MAX_LEVEL_FLOAT) {
             return dr.getOpacity();
         }
 
@@ -169,24 +167,24 @@ public class ClipDrawable extends DrawableWrapper {
     @Override
     public void draw(Canvas canvas) {
         final Drawable dr = getDrawable();
-        if (dr.getLevel() == 0) {
+        if (dr.getLevelFloat() == 0) {
             return;
         }
 
         final Rect r = mTmpRect;
         final Rect bounds = getBounds();
-        final int level = getLevel();
+        final float level = getLevelFloat();
 
         int w = bounds.width();
-        final int iw = 0; //mState.mDrawable.getIntrinsicWidth();
+        final int iw = 0;
         if ((mState.mOrientation & HORIZONTAL) != 0) {
-            w -= (w - iw) * (MAX_LEVEL - level) / MAX_LEVEL;
+            w -= Math.round((w - iw) * (MAX_LEVEL_FLOAT - level) / MAX_LEVEL_FLOAT);
         }
 
         int h = bounds.height();
-        final int ih = 0; //mState.mDrawable.getIntrinsicHeight();
+        final int ih = 0;
         if ((mState.mOrientation & VERTICAL) != 0) {
-            h -= (h - ih) * (MAX_LEVEL - level) / MAX_LEVEL;
+            h -= Math.round((h - ih) * (MAX_LEVEL_FLOAT - level) / MAX_LEVEL_FLOAT);
         }
 
         final int layoutDirection = getLayoutDirection();
