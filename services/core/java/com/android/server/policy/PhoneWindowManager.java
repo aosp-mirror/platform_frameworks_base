@@ -6633,6 +6633,11 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         if (mForcingShowNavBar && win.getSurfaceLayer() < mForcingShowNavBarLayer) {
             tmpVisibility &= ~PolicyControl.adjustClearableFlags(win, View.SYSTEM_UI_CLEARABLE_FLAGS);
         }
+
+        if (mUiMode == Configuration.UI_MODE_TYPE_CAR) {
+            tmpVisibility |= StatusBarManager.DISABLE_RECENT;
+        }
+
         tmpVisibility = updateLightStatusBarLw(tmpVisibility);
         final int visibility = updateSystemBarsLw(win, mLastSystemUiFlags, tmpVisibility);
         final int diff = visibility ^ mLastSystemUiFlags;
