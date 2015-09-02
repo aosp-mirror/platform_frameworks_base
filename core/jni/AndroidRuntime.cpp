@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+#define ATRACE_TAG ATRACE_TAG_DALVIK
 #define LOG_TAG "AndroidRuntime"
 //#define LOG_NDEBUG 0
 
@@ -23,6 +24,7 @@
 #include <binder/IServiceManager.h>
 #include <utils/Log.h>
 #include <utils/misc.h>
+#include <utils/Trace.h>
 #include <binder/Parcel.h>
 #include <utils/threads.h>
 #include <cutils/properties.h>
@@ -1439,6 +1441,7 @@ static const RegJNIRec gRegJNI[] = {
  */
 /*static*/ int AndroidRuntime::startReg(JNIEnv* env)
 {
+    ATRACE_NAME("RegisterAndroidNatives");
     /*
      * This hook causes all future threads created in this process to be
      * attached to the JavaVM.  (This needs to go away in favor of JNI
