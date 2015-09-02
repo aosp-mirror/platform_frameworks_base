@@ -205,9 +205,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
 
     private final UserManager mUserManager;
 
-    private final LockPatternUtils mLockPatternUtils;
-
-    private int mCurrentUserId = UserHandle.USER_OWNER;
+    private int mCurrentUserId = UserHandle.USER_SYSTEM;
 
     //TODO: Remove this hack
     private boolean mInitialized;
@@ -230,7 +228,6 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
         mUserManager = (UserManager) context.getSystemService(Context.USER_SERVICE);
         mSecurityPolicy = new SecurityPolicy();
         mMainHandler = new MainHandler(mContext.getMainLooper());
-        mLockPatternUtils = new LockPatternUtils(context);
         registerBroadcastReceivers();
         new AccessibilityContentObserver(mMainHandler).register(
                 context.getContentResolver());
@@ -866,17 +863,18 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
     }
 
     // Called only during settings restore; currently supports only the owner user
+    // TODO: http://b/22388012
     void restoreEnabledAccessibilityServicesLocked(String oldSetting, String newSetting) {
         readComponentNamesFromStringLocked(oldSetting, mTempComponentNameSet, false);
         readComponentNamesFromStringLocked(newSetting, mTempComponentNameSet, true);
 
-        UserState userState = getUserStateLocked(UserHandle.USER_OWNER);
+        UserState userState = getUserStateLocked(UserHandle.USER_SYSTEM);
         userState.mEnabledServices.clear();
         userState.mEnabledServices.addAll(mTempComponentNameSet);
         persistComponentNamesToSettingLocked(
                 Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES,
                 userState.mEnabledServices,
-                UserHandle.USER_OWNER);
+                UserHandle.USER_SYSTEM);
         onUserStateChangedLocked(userState);
     }
 
@@ -1644,10 +1642,6 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
 
     private void updateDisplayColorAdjustmentSettingsLocked(UserState userState) {
         DisplayAdjustmentUtils.applyAdjustments(mContext, userState.mUserId);
-    }
-
-    private boolean hasRunningServicesLocked(UserState userState) {
-        return !userState.mBoundServices.isEmpty() || !userState.mBindingServices.isEmpty();
     }
 
     private MagnificationSpec getCompatibleMagnificationSpecLocked(int windowId) {
