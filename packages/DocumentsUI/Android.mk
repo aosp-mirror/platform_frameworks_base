@@ -13,17 +13,21 @@ LOCAL_STATIC_JAVA_LIBRARIES += android-support-design
 LOCAL_STATIC_JAVA_LIBRARIES += android-support-v7-recyclerview
 LOCAL_STATIC_JAVA_LIBRARIES += guava
 
-LOCAL_RESOURCE_DIR := $(LOCAL_PATH)/res 
+LOCAL_RESOURCE_DIR := $(LOCAL_PATH)/res
 # Not quite sure why it is necessary to explicitly pull in resources from the
 # appcompat lib, but the demo code indicates it's necessary (see
 # development/samples/Support7Demos/Android.mk)
-LOCAL_RESOURCE_DIR += frameworks/support/v7/appcompat/res
-LOCAL_RESOURCE_DIR += frameworks/support/design/res
+LOCAL_RESOURCE_DIR += \
+  frameworks/support/v7/appcompat/res \
+  frameworks/support/design/res \
+  frameworks/support/v7/recyclerview/res
 
 # Again, required to pull in appcompat resources.  See abovementioned demo code.
-LOCAL_AAPT_FLAGS := --auto-add-overlay
-LOCAL_AAPT_FLAGS += --extra-packages android.support.v7.appcompat
-LOCAL_AAPT_FLAGS += --extra-packages android.support.design
+LOCAL_AAPT_FLAGS := \
+  --auto-add-overlay \
+  --extra-packages android.support.v7.appcompat \
+  --extra-packages android.support.design \
+  --extra-packages android.support.v7.recyclerview
 
 LOCAL_PACKAGE_NAME := DocumentsUI
 LOCAL_CERTIFICATE := platform
