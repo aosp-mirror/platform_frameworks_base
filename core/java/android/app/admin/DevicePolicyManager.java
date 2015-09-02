@@ -213,7 +213,8 @@ public class DevicePolicyManager {
 
      * @see DeviceAdminReceiver
      * @deprecated Use {@link #EXTRA_PROVISIONING_DEVICE_ADMIN_COMPONENT_NAME}. This extra is still
-     * supported.
+     * supported, but only if there is only one device admin receiver in the package that requires
+     * the permission {@link android.Manifest.permission#BIND_DEVICE_ADMIN}.
      */
     @Deprecated
     public static final String EXTRA_PROVISIONING_DEVICE_ADMIN_PACKAGE_NAME
