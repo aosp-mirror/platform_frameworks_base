@@ -21,9 +21,9 @@ next.link=gcm.html
     </ol>
     <h2>You should also read</h2>
     <ul>
-      <li><a
-        href="http://developer.android.com/guide/topics/data/backup.html">Data
-        Backup</a></li>
+      <li><a href="{@docRoot}guide/topics/data/backup.html">Data Backup</a></li>
+      <li><a href="{@docRoot}training/backup/autosyncapi.html">Configuring Auto Backup for Apps</a>
+      (Android 6.0 (API level 23) and higher)</li>
     </ul>
   </div>
 </div>

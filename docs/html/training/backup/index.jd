@@ -1,4 +1,4 @@
-page.title=Syncing to the Cloud
+page.title=Backing up App Data to the Cloud
 page.tags=cloud,sync,backup
 
 trainingnavtop=true
@@ -16,21 +16,32 @@ startpage=true
 </div>
 </div>
 
-<p>By providing powerful APIs for internet connectivity, the Android framework
-helps you build rich cloud-enabled apps that sync their data to a remote web
-service, making sure all your devices always stay in sync, and your valuable
-data is always backed up to the cloud.</p>
+<p>Users often invest significant time and effort creating data and setting
+preferences within apps. Preserving that data for users if they replace a broken
+device or upgrade to a new one is an important part of ensuring a great user
+experience.</p>
 
-<p>This class covers strategies for backing up data using the cloud so that
-users can restore their data when installing your application on a new device.
-</p>
+<p>This class covers techniques for backing up data to the cloud so that
+users can restore their data when recovering from a data loss (such as a factory
+reset) or installing your application on a new device.</p>
+
+<p>It is important to note that the API for cloud backup changed with the
+release of Android 6.0 (API level 23). For your app to support backup both
+on devices running Android 6.0, and those running Android 5.1 (API level
+22) and lower, you must implement both techniques that this class explains.</p>
 
 <h2>Lessons</h2>
 
 <dl>
+	<dt><strong><a href="autosyncapi.html">Configuring Auto Backup for Apps</a></strong></dt>
+	<dd>This lesson applies to Android 6.0 (API level 23) and higher. Learn how to accomplish
+  seamless app data backup and restore with zero additional lines of application code.</dd>
+</dl>
+
+<dl>
   <dt><strong><a href="backupapi.html">Using the Backup API</a></strong></dt>
-  <dd>Learn how to integrate the Backup API into your Android Application, so
-  that user data such as preferences, notes, and high scores update seamlessly
-  across all of a user's devices</dd>
+  <dd>This lesson applies to Android 5.1 (API level 22) and lower. Learn how to integrate the Backup
+  API into your Android app, so all of that  app's user data, such as preferences, notes, and high
+  scores, updates seamlessly across all devices linked to that Google account.</dd>
 </dl>
 

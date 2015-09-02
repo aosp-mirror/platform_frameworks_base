@@ -676,14 +676,18 @@ include the action bar on devices running Android 2.1 or higher."
 
       <li class="nav-section">
         <div class="nav-section-header">
-          <a href="<?cs var:toroot ?>training/cloudsync/index.html"
+          <a href="<?cs var:toroot ?>training/backup/index.html"
              description=
              "How to sync and back up app and user data to remote web services in the
               cloud and how to restore the data back to multiple devices."
             >Syncing to the Cloud</a>
         </div>
         <ul>
-          <li><a href="<?cs var:toroot ?>training/cloudsync/backupapi.html">
+          <li><a href="<?cs var:toroot ?>training/backup/autosyncapi.html">
+            Configuring Auto Backup for Apps
+          </a>
+          </li>
+          <li><a href="<?cs var:toroot ?>training/backup/backupapi.html">
             Using the Backup API
           </a>
           </li>
