@@ -248,7 +248,7 @@ void CanvasContext::draw() {
     Frame frame = mEglManager.beginFrame(mEglSurface);
     if (frame.width() != mCanvas->getViewportWidth()
             || frame.height() != mCanvas->getViewportHeight()) {
-        mCanvas->setViewport(frame.width(), frame.height());
+        // can't rely on prior content of window if viewport size changes
         dirty.setEmpty();
     } else if (mHaveNewSurface || frame.bufferAge() == 0) {
         // New surface needs a full draw
@@ -295,8 +295,8 @@ void CanvasContext::draw() {
     mDamageHistory.next() = screenDirty;
 
     mEglManager.damageFrame(frame, dirty);
-    mCanvas->prepareDirty(dirty.fLeft, dirty.fTop,
-            dirty.fRight, dirty.fBottom, mOpaque);
+    mCanvas->prepareDirty(frame.width(), frame.height(),
+            dirty.fLeft, dirty.fTop, dirty.fRight, dirty.fBottom, mOpaque);
 
     Rect outBounds;
     mCanvas->drawRenderNode(mRootRenderNode.get(), outBounds);

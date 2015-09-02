@@ -50,8 +50,8 @@ public:
     virtual ~LayerRenderer();
 
     virtual void onViewportInitialized() override { /* do nothing */ }
-    virtual void prepareDirty(float left, float top, float right, float bottom,
-            bool opaque) override;
+    virtual void prepareDirty(int viewportWidth, int viewportHeight,
+            float left, float top, float right, float bottom, bool opaque) override;
     virtual void clear(float left, float top, float right, float bottom, bool opaque) override;
     virtual bool finish() override;
 

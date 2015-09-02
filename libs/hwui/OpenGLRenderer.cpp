@@ -113,10 +113,11 @@ void OpenGLRenderer::onViewportInitialized() {
     glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
 }
 
-void OpenGLRenderer::setupFrameState(float left, float top,
-        float right, float bottom, bool opaque) {
+void OpenGLRenderer::setupFrameState(int viewportWidth, int viewportHeight,
+        float left, float top, float right, float bottom, bool opaque) {
     mCaches.clearGarbage();
-    mState.initializeSaveStack(left, top, right, bottom, mLightCenter);
+    mState.initializeSaveStack(viewportWidth, viewportHeight,
+            left, top, right, bottom, mLightCenter);
     mOpaque = opaque;
     mTilingClip.set(left, top, right, bottom);
 }
@@ -137,10 +138,10 @@ void OpenGLRenderer::startFrame() {
             mTilingClip.right, mTilingClip.bottom, mOpaque);
 }
 
-void OpenGLRenderer::prepareDirty(float left, float top,
-        float right, float bottom, bool opaque) {
+void OpenGLRenderer::prepareDirty(int viewportWidth, int viewportHeight,
+        float left, float top, float right, float bottom, bool opaque) {
 
-    setupFrameState(left, top, right, bottom, opaque);
+    setupFrameState(viewportWidth, viewportHeight, left, top, right, bottom, opaque);
 
     // Layer renderers will start the frame immediately
     // The framebuffer renderer will first defer the display list

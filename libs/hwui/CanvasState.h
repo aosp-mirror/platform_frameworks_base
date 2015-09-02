@@ -71,19 +71,17 @@ public:
  * (getClip/Matrix), but so that quickRejection can also be used.
  */
 
-class ANDROID_API CanvasState {
+class CanvasState {
 public:
     CanvasState(CanvasStateClient& renderer);
-    ~CanvasState();
 
     /**
      * Initializes the first snapshot, computing the projection matrix,
      * and stores the dimensions of the render target.
      */
-    void initializeSaveStack(float clipLeft, float clipTop, float clipRight, float clipBottom,
+    void initializeSaveStack(int viewportWidth, int viewportHeight,
+            float clipLeft, float clipTop, float clipRight, float clipBottom,
             const Vector3& lightCenter);
-
-    void setViewport(int width, int height);
 
     bool hasRectToRectTransform() const {
         return CC_LIKELY(currentTransform()->rectToRect());
@@ -159,16 +157,11 @@ public:
     int getHeight() const { return mHeight; }
     bool clipIsSimple() const { return currentSnapshot()->clipIsSimple(); }
 
-    inline const Snapshot* currentSnapshot() const {
-        return mSnapshot != nullptr ? mSnapshot.get() : mFirstSnapshot.get();
-    }
+    inline const Snapshot* currentSnapshot() const { return mSnapshot.get(); }
     inline Snapshot* writableSnapshot() { return mSnapshot.get(); }
     inline const Snapshot* firstSnapshot() const { return mFirstSnapshot.get(); }
 
 private:
-    /// No default constructor - must supply a CanvasStateClient (mCanvas).
-    CanvasState();
-
     /// indicates that the clip has been changed since the last time it was consumed
     bool mDirtyClip;
 
