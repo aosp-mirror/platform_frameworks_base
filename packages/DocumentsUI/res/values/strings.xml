@@ -139,6 +139,13 @@
         <item quantity="one">Moving <xliff:g id="count" example="1">%1$d</xliff:g> file.</item>
         <item quantity="other">Moving <xliff:g id="count" example="3">%1$d</xliff:g> files.</item>
     </plurals>
+    <!-- Text shown when files are deleted -->
+    <plurals name="deleting">
+        <item quantity="one">Deleting <xliff:g id="count" example="1">%1$d</xliff:g> file.</item>
+        <item quantity="other">Deleting <xliff:g id="count" example="3">%1$d</xliff:g> files.</item>
+    </plurals>
+    <!-- Text shown for the undo button -->
+    <string name="undo">Undo</string>
     <!-- Text shown on the notification while DocumentsUI performs setup in preparation for copying files [CHAR LIMIT=32] -->
     <string name="copy_preparing">Preparing for copy\u2026</string>
     <!-- Text shown on the notification while DocumentsUI performs setup in preparation for moving files [CHAR LIMIT=32] -->
