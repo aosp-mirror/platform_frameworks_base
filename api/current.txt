@@ -992,6 +992,7 @@ package android {
     field public static final int resizeClip = 16843983; // 0x10104cf
     field public static final int resizeMode = 16843619; // 0x1010363
     field public static final int resizeable = 16843405; // 0x101028d
+    field public static final int resizeableActivity = 16844022; // 0x10104f6
     field public static final int resource = 16842789; // 0x1010025
     field public static final int restoreAnyVersion = 16843450; // 0x10102ba
     field public static final deprecated int restoreNeedsApplication = 16843421; // 0x101029d
