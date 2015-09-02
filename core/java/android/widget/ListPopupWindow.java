@@ -69,7 +69,6 @@ public class ListPopupWindow implements ShowableListMenu {
     private static final int EXPAND_LIST_TIMEOUT = 250;
 
     private Context mContext;
-    private PopupWindow mPopup;
     private ListAdapter mAdapter;
     private DropDownListView mDropDownList;
 
@@ -111,6 +110,8 @@ public class ListPopupWindow implements ShowableListMenu {
     private boolean mModal;
 
     private int mLayoutDirection;
+
+    PopupWindow mPopup;
 
     /**
      * The provided prompt view should appear above list content.

@@ -85,6 +85,8 @@ public class ActionMenuPresenter extends BaseMenuPresenter
     private OpenOverflowRunnable mPostedOpenRunnable;
     private ActionMenuPopupCallback mPopupCallback;
 
+    private final boolean mShowCascadingMenus;
+
     final PopupPresenterCallback mPopupPresenterCallback = new PopupPresenterCallback();
     int mOpenSubMenuId;
 
@@ -126,6 +128,9 @@ public class ActionMenuPresenter extends BaseMenuPresenter
     public ActionMenuPresenter(Context context) {
         super(context, com.android.internal.R.layout.action_menu_layout,
                 com.android.internal.R.layout.action_menu_item_layout);
+
+        mShowCascadingMenus = context.getResources().getBoolean(
+                com.android.internal.R.bool.config_enableCascadingSubmenus);
     }
 
     @Override
@@ -500,14 +505,29 @@ public class ActionMenuPresenter extends BaseMenuPresenter
         }
         View anchor = findViewForItem(topSubMenu.getItem());
         if (anchor == null) {
-            if (mOverflowButton == null) return false;
-            anchor = mOverflowButton;
+            // This means the submenu was opened from an overflow menu item, indicating the
+            // MenuPopupHelper will handle opening the submenu via its MenuPopup. Return false to
+            // ensure that the MenuPopup acts as presenter for the submenu, and acts on its
+            // responsibility to display the new submenu.
+            return false;
         }
 
         mOpenSubMenuId = subMenu.getItem().getItemId();
-        mActionButtonPopup = new ActionButtonSubmenu(mContext, subMenu);
-        mActionButtonPopup.setAnchorView(anchor);
+
+        boolean preserveIconSpacing = false;
+        final int count = subMenu.size();
+        for (int i = 0; i < count; i++) {
+            MenuItem childItem = subMenu.getItem(i);
+            if (childItem.isVisible() && childItem.getIcon() != null) {
+                preserveIconSpacing = true;
+                break;
+            }
+        }
+
+        mActionButtonPopup = new ActionButtonSubmenu(mContext, subMenu, anchor);
+        mActionButtonPopup.setForceShowIcon(preserveIconSpacing);
         mActionButtonPopup.show();
+
         super.onSubMenuSelected(subMenu);
         return true;
     }
@@ -926,12 +946,9 @@ public class ActionMenuPresenter extends BaseMenuPresenter
     }
 
     private class ActionButtonSubmenu extends MenuPopupHelper {
-        private SubMenuBuilder mSubMenu;
-
-        public ActionButtonSubmenu(Context context, SubMenuBuilder subMenu) {
-            super(context, subMenu, null, false,
+        public ActionButtonSubmenu(Context context, SubMenuBuilder subMenu, View anchorView) {
+            super(context, subMenu, anchorView, false,
                     com.android.internal.R.attr.actionOverflowMenuStyle);
-            mSubMenu = subMenu;
 
             MenuItemImpl item = (MenuItemImpl) subMenu.getItem();
             if (!item.isActionButton()) {
@@ -940,17 +957,6 @@ public class ActionMenuPresenter extends BaseMenuPresenter
             }
 
             setCallback(mPopupPresenterCallback);
-
-            boolean preserveIconSpacing = false;
-            final int count = subMenu.size();
-            for (int i = 0; i < count; i++) {
-                MenuItem childItem = subMenu.getItem(i);
-                if (childItem.isVisible() && childItem.getIcon() != null) {
-                    preserveIconSpacing = true;
-                    break;
-                }
-            }
-            setForceShowIcon(preserveIconSpacing);
         }
 
         @Override

@@ -43,6 +43,7 @@ public class PopupMenu implements MenuBuilder.Callback, MenuPresenter.Callback {
     private final MenuBuilder mMenu;
     private final View mAnchor;
     private final MenuPopupHelper mPopup;
+    private final boolean mShowCascadingMenus;
 
     private OnMenuItemClickListener mMenuItemClickListener;
     private OnDismissListener mDismissListener;
@@ -107,6 +108,8 @@ public class PopupMenu implements MenuBuilder.Callback, MenuPresenter.Callback {
     public PopupMenu(Context context, View anchor, int gravity, int popupStyleAttr,
             int popupStyleRes) {
         mContext = context;
+        mShowCascadingMenus = context.getResources().getBoolean(
+                com.android.internal.R.bool.config_enableCascadingSubmenus);
         mMenu = new MenuBuilder(context);
         mMenu.setCallback(this);
         mAnchor = anchor;
@@ -273,8 +276,12 @@ public class PopupMenu implements MenuBuilder.Callback, MenuPresenter.Callback {
             return true;
         }
 
-        // Current menu will be dismissed by the normal helper, submenu will be shown in its place.
-        new MenuPopupHelper(mContext, subMenu, mAnchor).show();
+        if (!mShowCascadingMenus) {
+            // Current menu will be dismissed by the normal helper, submenu will be shown in its
+            // place. (If cascading menus are enabled, the cascading implementation will show the
+            // submenu itself).
+            new MenuPopupHelper(mContext, subMenu, mAnchor).show();
+        }
         return true;
     }
 

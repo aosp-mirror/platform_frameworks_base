@@ -25,10 +25,8 @@ import android.animation.ObjectAnimator;
 import android.content.Context;
 import android.graphics.drawable.Drawable;
 import android.util.IntProperty;
-import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
-import android.view.accessibility.AccessibilityManager;
 import android.view.animation.AccelerateDecelerateInterpolator;
 import android.widget.TextView;
 import android.widget.ListView;
@@ -126,6 +124,61 @@ public class DropDownListView extends ListView {
         mHijackFocus = hijackFocus;
         // TODO: Add an API to control this
         setCacheColorHint(0); // Transparent, since the background drawable could be anything.
+    }
+
+    @Override
+    protected boolean shouldShowSelector() {
+        View selectedView = getSelectedView();
+        return selectedView != null && selectedView.isEnabled() || super.shouldShowSelector();
+    }
+
+    protected void clearSelection() {
+        setSelectedPositionInt(-1);
+        setNextSelectedPositionInt(-1);
+    }
+
+    @Override
+    public boolean onHoverEvent(MotionEvent ev) {
+        final int action = ev.getActionMasked();
+        if (action == MotionEvent.ACTION_HOVER_ENTER
+                || action == MotionEvent.ACTION_HOVER_MOVE) {
+            final int position = pointToPosition((int) ev.getX(), (int) ev.getY());
+            if (position != INVALID_POSITION && position != mSelectedPosition) {
+                final View hoveredItem = getChildAt(position - getFirstVisiblePosition());
+                if (hoveredItem.isEnabled()) {
+                    // Force a focus so that the proper selector state gets used when we update.
+                    requestFocus();
+
+                    positionSelector(position, hoveredItem);
+                    setSelectedPositionInt(position);
+                    setNextSelectedPositionInt(position);
+                }
+                updateSelectorState();
+            }
+        } else {
+            // Do not cancel the selected position if the selection is visible by other reasons.
+            if (!super.shouldShowSelector()) {
+                setSelectedPositionInt(INVALID_POSITION);
+            }
+        }
+        return super.onHoverEvent(ev);
+    }
+
+    @Override
+    public boolean onTouchEvent(MotionEvent event) {
+        final int x = (int) event.getX();
+        final int y = (int) event.getY();
+        final int position = pointToPosition(x, y);
+        if (position == INVALID_POSITION) {
+            return super.onTouchEvent(event);
+        }
+
+        if (position != mSelectedPosition) {
+            setSelectedPositionInt(position);
+            setNextSelectedPositionInt(position);
+        }
+
+        return super.onTouchEvent(event);
     }
 
     /**

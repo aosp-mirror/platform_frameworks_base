@@ -17,10 +17,17 @@
 package android.widget;
 
 import android.content.Context;
+import android.content.res.Configuration;
+import android.content.res.Resources;
+import android.transition.Transition;
 import android.util.AttributeSet;
-import android.view.MotionEvent;
+import android.view.KeyEvent;
 import android.view.View;
-import android.view.accessibility.AccessibilityManager;
+import android.view.ViewGroup;
+import android.view.ViewParent;
+
+import com.android.internal.view.menu.ListMenuItemView;
+import com.android.internal.view.menu.MenuAdapter;
 
 /**
  * A MenuPopupWindow represents the popup window for menu.
@@ -40,52 +47,58 @@ public class MenuPopupWindow extends ListPopupWindow {
         return new MenuDropDownListView(context, hijackFocus);
     }
 
-    static class MenuDropDownListView extends DropDownListView {
-        private boolean mHoveredOnDisabledItem = false;
-        private AccessibilityManager mAccessibilityManager;
-
-        MenuDropDownListView(Context context, boolean hijackFocus) {
-            super(context, hijackFocus);
-            mAccessibilityManager = (AccessibilityManager) getContext().getSystemService(
-                    Context.ACCESSIBILITY_SERVICE);
-        }
-
-        @Override
-        protected boolean shouldShowSelector() {
-            return (isHovered() && !mHoveredOnDisabledItem) || super.shouldShowSelector();
-        }
-
-        @Override
-        public boolean onHoverEvent(MotionEvent ev) {
-            mHoveredOnDisabledItem = false;
-
-            // Accessibility system should already handle hover events and selections, menu does
-            // not have to handle it by itself.
-            if (mAccessibilityManager.isTouchExplorationEnabled()) {
-                return super.onHoverEvent(ev);
-            }
-
-            final int action = ev.getActionMasked();
-            if (action == MotionEvent.ACTION_HOVER_ENTER
-                    || action == MotionEvent.ACTION_HOVER_MOVE) {
-                final int position = pointToPosition((int) ev.getX(), (int) ev.getY());
-                if (position != INVALID_POSITION && position != mSelectedPosition) {
-                    final View hoveredItem = getChildAt(position - getFirstVisiblePosition());
-                    if (hoveredItem.isEnabled()) {
-                        positionSelector(position, hoveredItem);
-                        setSelectedPositionInt(position);
-                    } else {
-                        mHoveredOnDisabledItem = true;
-                    }
-                    updateSelectorState();
-                }
-            } else {
-                // Do not cancel the selected position if the selection is visible by other reasons.
-                if (!super.shouldShowSelector()) {
-                    setSelectedPositionInt(INVALID_POSITION);
-                }
-            }
-            return super.onHoverEvent(ev);
-        }
+    public void setEnterTransition(Transition enterTransition) {
+        mPopup.setEnterTransition(enterTransition);
     }
+
+    /**
+     * Set whether this window is touch modal or if outside touches will be sent to
+     * other windows behind it.
+     */
+    public void setTouchModal(boolean touchModal) {
+        mPopup.setTouchModal(touchModal);
+    }
+
+    private static class MenuDropDownListView extends DropDownListView {
+        final int mAdvanceKey;
+        final int mRetreatKey;
+
+        public MenuDropDownListView(Context context, boolean hijackFocus) {
+            super(context, hijackFocus);
+
+            final Resources res = context.getResources();
+            final Configuration config = res.getConfiguration();
+            if (config.getLayoutDirection() == View.LAYOUT_DIRECTION_RTL) {
+                mAdvanceKey = KeyEvent.KEYCODE_DPAD_LEFT;
+                mRetreatKey = KeyEvent.KEYCODE_DPAD_RIGHT;
+            } else {
+                mAdvanceKey = KeyEvent.KEYCODE_DPAD_RIGHT;
+                mRetreatKey = KeyEvent.KEYCODE_DPAD_LEFT;
+            }
+        }
+
+        @Override
+        public boolean onKeyDown(int keyCode, KeyEvent event) {
+            ListMenuItemView selectedItem = (ListMenuItemView) getSelectedView();
+            if (selectedItem != null && keyCode == mAdvanceKey) {
+                if (selectedItem.isEnabled() &&
+                        ((ListMenuItemView) selectedItem).getItemData().hasSubMenu()) {
+                    performItemClick(
+                            selectedItem,
+                            getSelectedItemPosition(),
+                            getSelectedItemId());
+                }
+                return true;
+            } else if (selectedItem != null && keyCode == mRetreatKey) {
+                setSelectedPositionInt(-1);
+                setNextSelectedPositionInt(-1);
+
+                ((MenuAdapter) getAdapter()).getAdapterMenu().close();
+                return true;
+            }
+            return super.onKeyDown(keyCode, event);
+        }
+
+    }
+
 }
