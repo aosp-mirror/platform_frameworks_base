@@ -100,6 +100,16 @@ public class ConnectivityManager {
     public static final String CONNECTIVITY_ACTION = "android.net.conn.CONNECTIVITY_CHANGE";
 
     /**
+     * A temporary hack until SUPL system can get off the legacy APIS.
+     * They do too many network requests and the long list of apps listening
+     * and waking due to the CONNECTIVITY_ACTION bcast makes it expensive.
+     * Use this bcast intent instead for SUPL requests.
+     * @hide
+     */
+    public static final String CONNECTIVITY_ACTION_SUPL =
+            "android.net.conn.CONNECTIVITY_CHANGE_SUPL";
+
+    /**
      * The device has connected to a network that has presented a captive
      * portal, which is blocking Internet connectivity. The user was presented
      * with a notification that network sign in is required,
