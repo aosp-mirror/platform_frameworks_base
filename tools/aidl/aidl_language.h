@@ -68,8 +68,7 @@ typedef struct method_type {
 
 enum {
     USER_DATA_TYPE = 12,
-    INTERFACE_TYPE_BINDER,
-    INTERFACE_TYPE_RPC
+    INTERFACE_TYPE_BINDER
 };
 
 typedef struct document_item_type {
@@ -78,19 +77,13 @@ typedef struct document_item_type {
 } document_item_type;
 
 
-// for user_data_type.flattening_methods
-enum {
-    PARCELABLE_DATA = 0x1,
-    RPC_DATA = 0x2
-};
-
 typedef struct user_data_type {
     document_item_type document_item;
     buffer_type keyword_token; // only the first one
     char* package;
     buffer_type name;
     buffer_type semicolon_token;
-    int flattening_methods;
+    bool parcelable;
 } user_data_type;
 
 typedef struct interface_type {

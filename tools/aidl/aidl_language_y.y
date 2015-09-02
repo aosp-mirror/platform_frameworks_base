@@ -20,8 +20,6 @@ static int count_brackets(const char*);
 %token ARRAY
 %token PARCELABLE
 %token INTERFACE
-%token FLATTENABLE
-%token RPC
 %token IN
 %token OUT
 %token INOUT
@@ -88,7 +86,7 @@ parcelable_decl:
                                                         b->name = $2.buffer;
                                                         b->package = g_currentPackage ? strdup(g_currentPackage) : NULL;
                                                         b->semicolon_token = $3.buffer;
-                                                        b->flattening_methods = PARCELABLE_DATA;
+                                                        b->parcelable = true;
                                                         $$.user_data = b;
                                                     }
     |   PARCELABLE ';'                              {
@@ -101,28 +99,6 @@ parcelable_decl:
                                                                      g_currentFilename, $2.buffer.lineno, $2.buffer.data);
                                                         $$.user_data = NULL;
                                                     }
-    |   FLATTENABLE IDENTIFIER ';'                  {
-                                                        user_data_type* b = (user_data_type*)malloc(sizeof(user_data_type));
-                                                        b->document_item.item_type = USER_DATA_TYPE;
-                                                        b->document_item.next = NULL;
-                                                        b->keyword_token = $1.buffer;
-                                                        b->name = $2.buffer;
-                                                        b->package = g_currentPackage ? strdup(g_currentPackage) : NULL;
-                                                        b->semicolon_token = $3.buffer;
-                                                        b->flattening_methods = PARCELABLE_DATA | RPC_DATA;
-                                                        $$.user_data = b;
-                                                    }
-    |   FLATTENABLE ';'                             {
-                                                        fprintf(stderr, "%s:%d syntax error in flattenable declaration. Expected type name.\n",
-                                                                     g_currentFilename, $1.buffer.lineno);
-                                                        $$.user_data = NULL;
-                                                    }
-    |   FLATTENABLE error ';'                       {
-                                                        fprintf(stderr, "%s:%d syntax error in flattenable declaration. Expected type name, saw \"%s\".\n",
-                                                                     g_currentFilename, $2.buffer.lineno, $2.buffer.data);
-                                                        $$.user_data = NULL;
-                                                    }
-
     ;
 
 interface_header:
@@ -146,21 +122,6 @@ interface_header:
                                                         c->comments_token = &c->oneway_token;
                                                         $$.interface_obj = c;
                                                    }
-    |   RPC                                        {
-                                                        interface_type* c = (interface_type*)malloc(sizeof(interface_type));
-                                                        c->document_item.item_type = INTERFACE_TYPE_RPC;
-                                                        c->document_item.next = NULL;
-                                                        c->interface_token = $1.buffer;
-                                                        c->oneway = false;
-                                                        memset(&c->oneway_token, 0, sizeof(buffer_type));
-                                                        c->comments_token = &c->interface_token;
-                                                        $$.interface_obj = c;
-                                                   }
-    ;
-
-interface_keywords:
-        INTERFACE
-    |   RPC
     ;
 
 interface_decl:
@@ -173,12 +134,12 @@ interface_decl:
                                                         c->close_brace_token = $5.buffer;
                                                         $$.interface_obj = c;
                                                     }
-    |   interface_keywords error '{' interface_items '}'     {
+    |   INTERFACE error '{' interface_items '}'     {
                                                         fprintf(stderr, "%s:%d: syntax error in interface declaration.  Expected type name, saw \"%s\"\n",
                                                                     g_currentFilename, $2.buffer.lineno, $2.buffer.data);
                                                         $$.document_item = NULL;
                                                     }
-    |   interface_keywords error '}'                {
+    |   INTERFACE error '}'                {
                                                         fprintf(stderr, "%s:%d: syntax error in interface declaration.  Expected type name, saw \"%s\"\n",
                                                                     g_currentFilename, $2.buffer.lineno, $2.buffer.data);
                                                         $$.document_item = NULL;
