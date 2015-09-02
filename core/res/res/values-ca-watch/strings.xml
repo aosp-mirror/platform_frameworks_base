@@ -31,7 +31,7 @@
     <string name="permgrouplab_camerawear" msgid="4543951283103407017">"fer fotos i enregistrar vídeos"</string>
     <string name="permgrouplab_phonewear" msgid="134365036753766126">"fer i gestionar trucades telefòniques"</string>
     <string name="permgrouplab_sensorswear" msgid="1429324744329327663">"accedir a les dades del sensor sobre els signes vitals"</string>
-    <string name="permlab_statusBarServicewear" msgid="2469402818964691034">"ser la barra d\'estat"</string>
+    <string name="permlab_statusBarServicewear" msgid="2469402818964691034">"aparèixer a la barra d\'estat"</string>
     <string name="permlab_bodySensorswear" msgid="7857941041202791873">"accedir als sensors corporals (com ara monitors de freqüència cardíaca)"</string>
     <string name="permlab_accessFineLocationwear" msgid="5584423486924377563">"accedir a la ubicació precisa (basada en el GPS i la xarxa)"</string>
     <string name="permlab_accessCoarseLocationwear" msgid="5880746016230166090">"accedir a la ubicació aproximada (basada en la xarxa)"</string>
@@ -40,7 +40,7 @@
     <string name="permlab_manageProfileAndDeviceOwnerswear" msgid="7313340516937821847">"gestionar els propietaris del perfil i del dispositiu"</string>
     <string name="permlab_changeWimaxStatewear" msgid="3828470843939853744">"canviar l\'estat de WiMAX"</string>
     <string name="permlab_handoverStatuswear" msgid="4835786819716499249">"rebre l\'estat de la transferència d\'Android Beam"</string>
-    <string name="permlab_route_media_outputwear" msgid="8737024341474587192">"indicar la ruta de sortida del contingut multimèdia"</string>
+    <string name="permlab_route_media_outputwear" msgid="8737024341474587192">"indicar la sortida del fitxer multimèdia"</string>
     <string name="permlab_readInstallSessionswear" msgid="9059478058685861989">"llegir les sessions d\'instal·lació"</string>
-    <string name="permlab_requestInstallPackageswear" msgid="4982025836783539503">"sol·licitar els paquets d\'instal·lació"</string>
+    <string name="permlab_requestInstallPackageswear" msgid="4982025836783539503">"sol·licitar la instal·lació de paquets"</string>
 </resources>

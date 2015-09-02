@@ -29,7 +29,7 @@
     <string name="permgrouplab_storagewear" msgid="1003807594193602313">"உங்கள் வாட்சில் உள்ள படங்கள், மீடியா மற்றும் கோப்புகளை அணுகும்"</string>
     <string name="permgrouplab_microphonewear" msgid="1047561180980891136">"ஆடியோவைப் பதிவுசெய்யும்"</string>
     <string name="permgrouplab_camerawear" msgid="4543951283103407017">"படங்களை எடுக்கும், வீடியோவைப் பதிவுசெய்யும்"</string>
-    <string name="permgrouplab_phonewear" msgid="134365036753766126">"மொபைல் அழைப்புகளைச் செய்யும், பெறும்"</string>
+    <string name="permgrouplab_phonewear" msgid="134365036753766126">"மொபைல் அழைப்புகளைச் செய்யும், நிர்வகிக்கும்"</string>
     <string name="permgrouplab_sensorswear" msgid="1429324744329327663">"உங்கள் உடலியக்கக் குறிகள் பற்றிய உணர்வித் தரவை அணுகும்"</string>
     <string name="permlab_statusBarServicewear" msgid="2469402818964691034">"நிலைப் பட்டியில் இருக்கும்"</string>
     <string name="permlab_bodySensorswear" msgid="7857941041202791873">"உடல் உணர்விகளை (இதயத் துடிப்பு மானிட்டர்கள் போன்றவை) அணுகும்"</string>

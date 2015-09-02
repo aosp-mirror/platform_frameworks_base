@@ -42,5 +42,5 @@
     <string name="permlab_handoverStatuswear" msgid="4835786819716499249">"λήψη κατάστασης μεταφοράς Android Beam"</string>
     <string name="permlab_route_media_outputwear" msgid="8737024341474587192">"δρομολόγηση εξόδου μέσων"</string>
     <string name="permlab_readInstallSessionswear" msgid="9059478058685861989">"ανάγνωση περιόδων σύνδεσης εγκατάστασης"</string>
-    <string name="permlab_requestInstallPackageswear" msgid="4982025836783539503">"αίτημα εγκατάστασης πακέτων."</string>
+    <string name="permlab_requestInstallPackageswear" msgid="4982025836783539503">"αίτημα εγκατάστασης πακέτων"</string>
 </resources>

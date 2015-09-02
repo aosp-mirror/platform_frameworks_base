@@ -429,7 +429,7 @@
     <string name="fingerprint_error_no_space" msgid="1055819001126053318">"فنگر پرنٹ اسٹور نہیں کیا جا سکتا ہے۔ براہ کرم ایک موجودہ فنگر پرنٹ ہٹائیں۔"</string>
     <string name="fingerprint_error_timeout" msgid="3927186043737732875">"فنگر پرنٹ کی میعاد ختم ہوگئی۔ دوبارہ کوشش کریں۔"</string>
     <string name="fingerprint_error_canceled" msgid="4402024612660774395">"فنگر پرنٹ کی کارروائی منسوخ ہوگئی۔"</string>
-    <string name="fingerprint_error_lockout" msgid="5536934748136933450">"کافی زیادہ کوششیں کی گئیں۔ بعد میں دوباہ کوشش کریں۔"</string>
+    <string name="fingerprint_error_lockout" msgid="5536934748136933450">"کافی زیادہ کوششیں کی گئیں۔ بعد میں دوبارہ کوشش کریں۔"</string>
     <string name="fingerprint_error_unable_to_process" msgid="6107816084103552441">"دوبارہ کوشش کریں۔"</string>
     <string name="fingerprint_name_template" msgid="5870957565512716938">"انگلی <xliff:g id="FINGERID">%d</xliff:g>"</string>
   <string-array name="fingerprint_error_vendor">
