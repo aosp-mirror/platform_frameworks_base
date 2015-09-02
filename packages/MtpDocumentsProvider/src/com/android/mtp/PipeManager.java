@@ -33,7 +33,7 @@ class PipeManager {
     final ExecutorService mExecutor;
 
     PipeManager() {
-        this(Executors.newCachedThreadPool());
+        this(Executors.newSingleThreadExecutor());
     }
 
     PipeManager(ExecutorService executor) {

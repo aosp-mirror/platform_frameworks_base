@@ -91,12 +91,12 @@ class DocumentLoader {
         return task.createCursor(mResolver, columnNames);
     }
 
-    synchronized void clearTasks(int deviceId) {
-        mTaskList.clearTaskForDevice(deviceId);
+    synchronized void clearTasks() {
+        mTaskList.clear();
     }
 
     synchronized void clearCompletedTasks() {
-        mTaskList.clearCompletedTask();
+        mTaskList.clearCompletedTasks();
     }
 
     synchronized void clearTask(Identifier parentIdentifier) {
@@ -162,18 +162,7 @@ class DocumentLoader {
             return null;
         }
 
-        void clearTaskForDevice(int deviceId) {
-            int i = 0;
-            while (i < size()) {
-                if (get(i).mIdentifier.mDeviceId == deviceId) {
-                    remove(i);
-                } else {
-                    i++;
-                }
-            }
-        }
-
-        void clearCompletedTask() {
+        void clearCompletedTasks() {
             int i = 0;
             while (i < size()) {
                 if (get(i).completed()) {

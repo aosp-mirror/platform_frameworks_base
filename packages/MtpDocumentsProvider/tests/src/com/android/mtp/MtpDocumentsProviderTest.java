@@ -39,7 +39,7 @@ public class MtpDocumentsProviderTest extends AndroidTestCase {
     private TestMtpManager mMtpManager;
 
     @Override
-    public void setUp() {
+    public void setUp() throws IOException {
         mResolver = new TestContentResolver();
         mMtpManager = new TestMtpManager(getContext());
         mProvider = new MtpDocumentsProvider();
@@ -207,6 +207,8 @@ public class MtpDocumentsProviderTest extends AndroidTestCase {
     }
 
     public void testQueryDocument() throws IOException {
+        mMtpManager.addValidDevice(0);
+        mProvider.openDevice(0);
         mMtpManager.setObjectInfo(0, new MtpObjectInfo.Builder()
                 .setObjectHandle(2)
                 .setFormat(MtpConstants.FORMAT_EXIF_JPEG)
@@ -232,6 +234,8 @@ public class MtpDocumentsProviderTest extends AndroidTestCase {
     }
 
     public void testQueryDocument_directory() throws IOException {
+        mMtpManager.addValidDevice(0);
+        mProvider.openDevice(0);
         mMtpManager.setObjectInfo(0, new MtpObjectInfo.Builder()
                 .setObjectHandle(2)
                 .setFormat(MtpConstants.FORMAT_ASSOCIATION)
@@ -255,6 +259,8 @@ public class MtpDocumentsProviderTest extends AndroidTestCase {
     }
 
     public void testQueryDocument_forRoot() throws IOException {
+        mMtpManager.addValidDevice(0);
+        mProvider.openDevice(0);
         mMtpManager.setRoots(0, new MtpRoot[] {
                 new MtpRoot(
                         0 /* deviceId */,
@@ -277,6 +283,8 @@ public class MtpDocumentsProviderTest extends AndroidTestCase {
     }
 
     public void testQueryChildDocuments() throws Exception {
+        mMtpManager.addValidDevice(0);
+        mProvider.openDevice(0);
         mMtpManager.setObjectHandles(0, 0, -1, new int[] { 1 });
 
         mMtpManager.setObjectInfo(0, new MtpObjectInfo.Builder()
@@ -303,6 +311,8 @@ public class MtpDocumentsProviderTest extends AndroidTestCase {
     }
 
     public void testQueryChildDocuments_cursorError() throws Exception {
+        mMtpManager.addValidDevice(0);
+        mProvider.openDevice(0);
         try {
             mProvider.queryChildDocuments("0_0_0", null, null);
             fail();
@@ -312,6 +322,8 @@ public class MtpDocumentsProviderTest extends AndroidTestCase {
     }
 
     public void testQueryChildDocuments_documentError() throws Exception {
+        mMtpManager.addValidDevice(0);
+        mProvider.openDevice(0);
         mMtpManager.setObjectHandles(0, 0, -1, new int[] { 1 });
         try {
             mProvider.queryChildDocuments("0_0_0", null, null);
@@ -321,7 +333,9 @@ public class MtpDocumentsProviderTest extends AndroidTestCase {
         }
     }
 
-    public void testDeleteDocument() throws FileNotFoundException {
+    public void testDeleteDocument() throws IOException {
+        mMtpManager.addValidDevice(0);
+        mProvider.openDevice(0);
         mMtpManager.setObjectInfo(0, new MtpObjectInfo.Builder()
                 .setObjectHandle(1)
                 .setParent(2)
@@ -332,7 +346,9 @@ public class MtpDocumentsProviderTest extends AndroidTestCase {
                         MtpDocumentsProvider.AUTHORITY, "0_0_2")));
     }
 
-    public void testDeleteDocument_error() {
+    public void testDeleteDocument_error() throws IOException {
+        mMtpManager.addValidDevice(0);
+        mProvider.openDevice(0);
         mMtpManager.setObjectInfo(0, new MtpObjectInfo.Builder()
                 .setObjectHandle(2)
                 .build());
