@@ -4664,12 +4664,12 @@ public final class ActivityThread {
         /**
          * Initialize the default http proxy in this process for the reasons we set the time zone.
          */
-        IBinder b = ServiceManager.getService(Context.CONNECTIVITY_SERVICE);
+        final IBinder b = ServiceManager.getService(Context.CONNECTIVITY_SERVICE);
         if (b != null) {
             // In pre-boot mode (doing initial launch to collect password), not
             // all system is up.  This includes the connectivity service, so don't
             // crash if we can't get it.
-            IConnectivityManager service = IConnectivityManager.Stub.asInterface(b);
+            final IConnectivityManager service = IConnectivityManager.Stub.asInterface(b);
             try {
                 final ProxyInfo proxyInfo = service.getProxyForNetwork(null);
                 Proxy.setHttpProxySystemProperty(proxyInfo);
@@ -4729,13 +4729,13 @@ public final class ActivityThread {
             instrApp.splitPublicSourceDirs = ii.splitPublicSourceDirs;
             instrApp.dataDir = ii.dataDir;
             instrApp.nativeLibraryDir = ii.nativeLibraryDir;
-            LoadedApk pi = getPackageInfo(instrApp, data.compatInfo,
+
+            final LoadedApk pi = getPackageInfo(instrApp, data.compatInfo,
                     appContext.getClassLoader(), false, true, false);
-            ContextImpl instrContext = ContextImpl.createAppContext(this, pi);
+            final ContextImpl instrContext = ContextImpl.createAppContext(this, pi);
 
             try {
-
-                java.lang.ClassLoader cl = instrContext.getClassLoader();
+                final ClassLoader cl = instrContext.getClassLoader();
                 mInstrumentation = (Instrumentation)
                     cl.loadClass(data.instrumentationName.getClassName()).newInstance();
             } catch (Exception e) {
@@ -4744,18 +4744,17 @@ public final class ActivityThread {
                     + data.instrumentationName + ": " + e.toString(), e);
             }
 
-            mInstrumentation.init(this, instrContext, appContext,
-                   new ComponentName(ii.packageName, ii.name), data.instrumentationWatcher,
-                   data.instrumentationUiAutomationConnection);
+            final ComponentName component = new ComponentName(ii.packageName, ii.name);
+            mInstrumentation.init(this, instrContext, appContext, component,
+                    data.instrumentationWatcher, data.instrumentationUiAutomationConnection);
 
             if (mProfiler.profileFile != null && !ii.handleProfiling
                     && mProfiler.profileFd == null) {
                 mProfiler.handlingProfiling = true;
-                File file = new File(mProfiler.profileFile);
+                final File file = new File(mProfiler.profileFile);
                 file.getParentFile().mkdirs();
                 Debug.startMethodTracing(file.toString(), 8 * 1024 * 1024);
             }
-
         } else {
             mInstrumentation = new Instrumentation();
         }
