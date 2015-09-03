@@ -430,6 +430,76 @@ public class DhcpPacketTest extends TestCase {
     }
 
     @SmallTest
+    public void testBadHwaddrLength() throws Exception {
+        final ByteBuffer packet = ByteBuffer.wrap(HexEncoding.decode((
+            // IP header.
+            "450001518d0600004011144dc0a82b01c0a82bf7" +
+            // UDP header.
+            "00430044013d9ac7" +
+            // BOOTP header.
+            "02010600dfc23d1f0002000000000000c0a82bf7c0a82b0100000000" +
+            // MAC address.
+            "30766ff2a90c00000000000000000000" +
+            // Server name.
+            "0000000000000000000000000000000000000000000000000000000000000000" +
+            "0000000000000000000000000000000000000000000000000000000000000000" +
+            // File.
+            "0000000000000000000000000000000000000000000000000000000000000000" +
+            "0000000000000000000000000000000000000000000000000000000000000000" +
+            "0000000000000000000000000000000000000000000000000000000000000000" +
+            "0000000000000000000000000000000000000000000000000000000000000000" +
+            // Options
+            "638253633501023604c0a82b01330400000e103a04000007083b0400000c4e0104ffffff00" +
+            "1c04c0a82bff0304c0a82b010604c0a82b012b0f414e44524f49445f4d455445524544ff"
+        ).toCharArray(), false));
+        String expectedClientMac = "30766FF2A90C";
+
+        final int hwAddrLenOffset = 20 + 8 + 2;
+        assertEquals(6, packet.get(hwAddrLenOffset));
+
+        // Expect the expected.
+        DhcpPacket offerPacket = DhcpPacket.decodeFullPacket(packet, ENCAP_L3);
+        assertNotNull(offerPacket);
+        assertEquals(6, offerPacket.getClientMac().length);
+        assertEquals(expectedClientMac, HexDump.toHexString(offerPacket.getClientMac()));
+
+        // Reduce the hardware address length and verify that it shortens the client MAC.
+        packet.flip();
+        packet.put(hwAddrLenOffset, (byte) 5);
+        offerPacket = DhcpPacket.decodeFullPacket(packet, ENCAP_L3);
+        assertNotNull(offerPacket);
+        assertEquals(5, offerPacket.getClientMac().length);
+        assertEquals(expectedClientMac.substring(0, 10),
+                HexDump.toHexString(offerPacket.getClientMac()));
+
+        packet.flip();
+        packet.put(hwAddrLenOffset, (byte) 3);
+        offerPacket = DhcpPacket.decodeFullPacket(packet, ENCAP_L3);
+        assertNotNull(offerPacket);
+        assertEquals(3, offerPacket.getClientMac().length);
+        assertEquals(expectedClientMac.substring(0, 6),
+                HexDump.toHexString(offerPacket.getClientMac()));
+
+        // Set the the hardware address length to 0xff and verify that we a) don't treat it as -1
+        // and crash, and b) hardcode it to 6.
+        packet.flip();
+        packet.put(hwAddrLenOffset, (byte) -1);
+        offerPacket = DhcpPacket.decodeFullPacket(packet, ENCAP_L3);
+        assertNotNull(offerPacket);
+        assertEquals(6, offerPacket.getClientMac().length);
+        assertEquals(expectedClientMac, HexDump.toHexString(offerPacket.getClientMac()));
+
+        // Set the the hardware address length to a positive invalid value (> 16) and verify that we
+        // hardcode it to 6.
+        packet.flip();
+        packet.put(hwAddrLenOffset, (byte) 17);
+        offerPacket = DhcpPacket.decodeFullPacket(packet, ENCAP_L3);
+        assertNotNull(offerPacket);
+        assertEquals(6, offerPacket.getClientMac().length);
+        assertEquals(expectedClientMac, HexDump.toHexString(offerPacket.getClientMac()));
+    }
+
+    @SmallTest
     public void testPadAndOverloadedOptionsOffer() throws Exception {
         // A packet observed in the real world that is interesting for two reasons:
         //
