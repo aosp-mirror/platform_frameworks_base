@@ -2319,16 +2319,16 @@ public class PackageManagerService extends IPackageManager.Stub {
             }
             updatePermissionsLPw(null, null, updateFlags);
             ver.sdkVersion = mSdkVersion;
-            // clear only after permissions have been updated
-            mExistingSystemPackages.clear();
-            mPromoteSystemApps = false;
 
-            // If this is the first boot, and it is a normal boot, then
-            // we need to initialize the default preferred apps.
-            if (!mRestoredSettings && !onlyCore) {
-                mSettings.applyDefaultPreferredAppsLPw(this, UserHandle.USER_OWNER);
-                applyFactoryDefaultBrowserLPw(UserHandle.USER_OWNER);
-                primeDomainVerificationsLPw(UserHandle.USER_OWNER);
+            // If this is the first boot or an update from pre-M, and it is a normal
+            // boot, then we need to initialize the default preferred apps across
+            // all defined users.
+            if (!onlyCore && (mPromoteSystemApps || !mRestoredSettings)) {
+                for (UserInfo user : sUserManager.getUsers(true)) {
+                    mSettings.applyDefaultPreferredAppsLPw(this, user.id);
+                    applyFactoryDefaultBrowserLPw(user.id);
+                    primeDomainVerificationsLPw(user.id);
+                }
             }
 
             // If this is first boot after an OTA, and a normal boot, then
@@ -2345,6 +2345,10 @@ public class PackageManagerService extends IPackageManager.Stub {
             }
 
             checkDefaultBrowser();
+
+            // clear only after permissions and other defaults have been updated
+            mExistingSystemPackages.clear();
+            mPromoteSystemApps = false;
 
             // All the changes are done during package scanning.
             ver.databaseVersion = Settings.CURRENT_DATABASE_VERSION;
