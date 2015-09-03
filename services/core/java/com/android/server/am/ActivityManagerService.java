@@ -5647,7 +5647,7 @@ public final class ActivityManagerService extends ActivityManagerNative
     }
 
     private void cleanupDisabledPackageComponentsLocked(
-            String packageName, int userId, String[] changedClasses) {
+            String packageName, int userId, boolean killProcess, String[] changedClasses) {
 
         Set<String> disabledClasses = null;
         boolean packageDisabled = false;
@@ -5717,7 +5717,7 @@ public final class ActivityManagerService extends ActivityManagerNative
 
         // Clean-up disabled services.
         mServices.bringDownDisabledPackageServicesLocked(
-                packageName, disabledClasses, userId, false, true);
+                packageName, disabledClasses, userId, false, killProcess, true);
 
         // Clean-up disabled providers.
         ArrayList<ContentProviderRecord> providers = new ArrayList<>();
@@ -5802,7 +5802,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         }
 
         if (mServices.bringDownDisabledPackageServicesLocked(
-                packageName, null, userId, evenPersistent, doit)) {
+                packageName, null, userId, evenPersistent, true, doit)) {
             if (!doit) {
                 return true;
             }
@@ -16892,7 +16892,9 @@ public final class ActivityManagerService extends ActivityManagerNative
                                 boolean removed = Intent.ACTION_PACKAGE_REMOVED.equals(action);
                                 boolean fullUninstall = removed &&
                                         !intent.getBooleanExtra(Intent.EXTRA_REPLACING, false);
-                                if (!intent.getBooleanExtra(Intent.EXTRA_DONT_KILL_APP, false)) {
+                                final boolean killProcess =
+                                        !intent.getBooleanExtra(Intent.EXTRA_DONT_KILL_APP, false);
+                                if (killProcess) {
                                     forceStopPackageLocked(ssp, UserHandle.getAppId(
                                             intent.getIntExtra(Intent.EXTRA_UID, -1)),
                                             false, true, true, false, fullUninstall, userId,
@@ -16912,7 +16914,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                                         mBatteryStatsService.notePackageUninstalled(ssp);
                                     }
                                 } else {
-                                    cleanupDisabledPackageComponentsLocked(ssp, userId,
+                                    cleanupDisabledPackageComponentsLocked(ssp, userId, killProcess,
                                             intent.getStringArrayExtra(
                                                     Intent.EXTRA_CHANGED_COMPONENT_NAME_LIST));
                                 }

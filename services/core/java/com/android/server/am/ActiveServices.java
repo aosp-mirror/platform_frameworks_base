@@ -2085,7 +2085,8 @@ public final class ActiveServices {
     }
 
     private boolean collectPackageServicesLocked(String packageName, Set<String> filterByClasses,
-            boolean evenPersistent, boolean doit, ArrayMap<ComponentName, ServiceRecord> services) {
+            boolean evenPersistent, boolean doit, boolean killProcess,
+            ArrayMap<ComponentName, ServiceRecord> services) {
         boolean didSomething = false;
         for (int i = services.size() - 1; i >= 0; i--) {
             ServiceRecord service = services.valueAt(i);
@@ -2101,7 +2102,7 @@ public final class ActiveServices {
                 didSomething = true;
                 Slog.i(TAG, "  Force stopping service " + service);
                 if (service.app != null) {
-                    service.app.removed = true;
+                    service.app.removed = killProcess;
                     if (!service.app.persistent) {
                         service.app.services.remove(service);
                     }
@@ -2118,7 +2119,7 @@ public final class ActiveServices {
     }
 
     boolean bringDownDisabledPackageServicesLocked(String packageName, Set<String> filterByClasses,
-            int userId, boolean evenPersistent, boolean doit) {
+            int userId, boolean evenPersistent, boolean killProcess, boolean doit) {
         boolean didSomething = false;
 
         if (mTmpCollectionResults != null) {
@@ -2128,7 +2129,7 @@ public final class ActiveServices {
         if (userId == UserHandle.USER_ALL) {
             for (int i = mServiceMap.size() - 1; i >= 0; i--) {
                 didSomething |= collectPackageServicesLocked(packageName, filterByClasses,
-                        evenPersistent, doit, mServiceMap.valueAt(i).mServicesByName);
+                        evenPersistent, doit, killProcess, mServiceMap.valueAt(i).mServicesByName);
                 if (!doit && didSomething) {
                     return true;
                 }
@@ -2138,7 +2139,7 @@ public final class ActiveServices {
             if (smap != null) {
                 ArrayMap<ComponentName, ServiceRecord> items = smap.mServicesByName;
                 didSomething = collectPackageServicesLocked(packageName, filterByClasses,
-                        evenPersistent, doit, items);
+                        evenPersistent, doit, killProcess, items);
             }
         }
 
