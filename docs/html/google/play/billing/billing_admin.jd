@@ -442,7 +442,7 @@ Merchant Order Number (rather than a Google Order Number) and reports the Mercha
 Order Number as the value of <code>orderID</code>. Here's an
 example:</p>
 
-<pre>"orderId" : "12999556515565155651.5565135565155651"</pre>
+<pre>"orderId" : "GPA.1234-5678-9012-34567"</pre>
 
 <p>For transactions dated previous to 5 December 2012, Google checkout assigned
 a Google Order Number and reported that number as the value of

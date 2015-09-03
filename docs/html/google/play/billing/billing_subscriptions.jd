@@ -453,10 +453,10 @@ payments provides a base Merchant Order Number for all recurrences of the
 subscription and denotes
 each recurring transaction by appending an integer as follows: </p>
 
-<p><span style="color:#777"><code style="color:#777">12999556515565155651.5565135565155651</code> (base order number)</span><br />
-<code>12999556515565155651.5565135565155651..0</code> (first recurrence orderID)<br />
-<code>12999556515565155651.5565135565155651..1</code> (second recurrence orderID)<br />
-<code>12999556515565155651.5565135565155651..2</code> (third recurrence orderID)<br />
+<p><span style="color:#777"><code style="color:#777">GPA.1234-5678-9012-34567</code> (base order number)</span><br />
+<code>GPA.1234-5678-9012-34567..0</code> (first recurrence orderID)<br />
+<code>GPA.1234-5678-9012-34567..1</code> (second recurrence orderID)<br />
+<code>GPA.1234-5678-9012-34567..2</code> (third recurrence orderID)<br />
 ...<br /></p>
 
 <p>Google Play provides the order number as the value of the
