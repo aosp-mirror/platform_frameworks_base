@@ -58,9 +58,6 @@ public class AnyMotionDetector {
     /** Current measurement state. */
     private int mState;
 
-    /** Threshold angle in degrees beyond which the device is considered moving. */
-    private final float THRESHOLD_ANGLE = 2f;
-
     /** Threshold energy above which the device is considered moving. */
     private final float THRESHOLD_ENERGY = 5f;
 
@@ -88,6 +85,9 @@ public class AnyMotionDetector {
     private SensorManager mSensorManager;
     private PowerManager.WakeLock mWakeLock;
 
+    /** Threshold angle in degrees beyond which the device is considered moving. */
+    private final float mThresholdAngle;
+
     /** The minimum number of samples required to detect AnyMotion. */
     private int mNumSufficientSamples;
 
@@ -106,7 +106,7 @@ public class AnyMotionDetector {
     private DeviceIdleCallback mCallback = null;
 
     public AnyMotionDetector(PowerManager pm, Handler handler, SensorManager sm,
-            DeviceIdleCallback callback) {
+            DeviceIdleCallback callback, float thresholdAngle) {
         if (DEBUG) Slog.d(TAG, "AnyMotionDetector instantiated.");
         mWakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, TAG);
         mWakeLock.setReferenceCounted(false);
@@ -116,6 +116,7 @@ public class AnyMotionDetector {
         mMeasurementInProgress = false;
         mState = STATE_INACTIVE;
         mCallback = callback;
+        mThresholdAngle = thresholdAngle;
         mRunningStats = new RunningSignalStats();
         mNumSufficientSamples = (int) Math.ceil(
                 ((double)ORIENTATION_MEASUREMENT_DURATION_MILLIS / SAMPLING_INTERVAL_MILLIS));
@@ -224,8 +225,9 @@ public class AnyMotionDetector {
         Vector3 previousGravityVectorNormalized = mPreviousGravityVector.normalized();
         Vector3 currentGravityVectorNormalized = mCurrentGravityVector.normalized();
         float angle = previousGravityVectorNormalized.angleBetween(currentGravityVectorNormalized);
-        if (DEBUG) Slog.d(TAG, "getStationaryStatus: angle = " + angle);
-        if ((angle < THRESHOLD_ANGLE) && (mRunningStats.getEnergy() < THRESHOLD_ENERGY)) {
+        if (DEBUG) Slog.d(TAG, "getStationaryStatus: angle = " + angle
+                + " energy = " + mRunningStats.getEnergy());
+        if ((angle < mThresholdAngle) && (mRunningStats.getEnergy() < THRESHOLD_ENERGY)) {
             return RESULT_STATIONARY;
         } else if (Float.isNaN(angle)) {
           /**
