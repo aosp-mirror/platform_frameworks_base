@@ -1765,6 +1765,8 @@ class WindowStateAnimator {
                 mWin.mAppToken.updateReportedVisibilityLocked();
             }
 
+            mWin.maybeRemoveReplacedWindow();
+
             return true;
         }
 

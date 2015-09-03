@@ -1270,6 +1270,19 @@ final class WindowState implements WindowManagerPolicy.WindowState {
         }
     }
 
+    void maybeRemoveReplacedWindow() {
+        AppWindowToken token = mAppToken;
+        if (token != null && token.mReplacingWindow) {
+            token.mReplacingWindow = false;
+            for (int i = token.allAppWindows.size() - 1; i >= 0; i--) {
+                WindowState win = token.allAppWindows.get(i);
+                if (win.mExiting) {
+                    mService.removeWindowInnerLocked(win);
+                }
+            }
+        }
+    }
+
     private class DeathRecipient implements IBinder.DeathRecipient {
         @Override
         public void binderDied() {

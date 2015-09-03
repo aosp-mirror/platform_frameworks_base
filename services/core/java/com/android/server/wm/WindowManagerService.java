@@ -2068,6 +2068,15 @@ public class WindowManagerService extends IWindowManager.Stub
         // If the display is frozen, just remove immediately, since the
         // animation wouldn't be seen.
         if (win.mHasSurface && okToDisplay()) {
+            final AppWindowToken appToken = win.mAppToken;
+            if (appToken != null && appToken.mReplacingWindow) {
+                // This window is going to be replaced. We need to kepp it around until the new one
+                // gets added, then we will get rid of this one.
+                if (DEBUG_ADD_REMOVE) Slog.v(TAG, "Preserving " + win + " until the new one is "
+                        + "added");
+                win.mExiting = true;
+                return;
+            }
             // If we are not currently running the exit animation, we
             // need to see about starting one.
             wasVisible = win.isWinVisibleLw();
@@ -2087,7 +2096,6 @@ public class WindowManagerService extends IWindowManager.Stub
                     mAccessibilityController.onWindowTransitionLocked(win, transit);
                 }
             }
-            final AppWindowToken appToken = win.mAppToken;
             final boolean isAnimating = win.mWinAnimator.isAnimating();
             // The starting window is the last window in this app token and it isn't animating.
             // Allow it to be removed now as there is no additional window or animation that will
@@ -9716,6 +9724,17 @@ public class WindowManagerService extends IWindowManager.Stub
     @Override
     public Object getWindowManagerLock() {
         return mWindowMap;
+    }
+
+    public void setReplacingWindow(IBinder token) {
+        synchronized (mWindowMap) {
+            AppWindowToken appWindowToken = findAppWindowToken(token);
+            if (appWindowToken == null) {
+                Slog.w(TAG, "Attempted to set replacing window on non-existing app token " + token);
+                return;
+            }
+            appWindowToken.mReplacingWindow = true;
+        }
     }
 
     private final class LocalService extends WindowManagerInternal {

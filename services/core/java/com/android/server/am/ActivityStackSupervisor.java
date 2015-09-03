@@ -3043,6 +3043,12 @@ public final class ActivityStackSupervisor implements DisplayListener {
                 ensureActivitiesVisibleLocked(r, 0);
                 if (!kept) {
                     resumeTopActivitiesLocked(stack, null, null);
+                    // We are about to relaunch the activity because its configuration changed due
+                    // to size change. The activity will first remove the old window and then add a
+                    // new one. This call will tell window manager about this, so it can preserve
+                    // the old window until the new one is drawn. This prevents having a gap between
+                    // the removal and addition, in which no window is visible.
+                    mWindowManager.setReplacingWindow(r.appToken);
                 }
             }
         }
