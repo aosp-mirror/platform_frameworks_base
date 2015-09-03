@@ -2177,6 +2177,10 @@ public class WindowManagerService extends IWindowManager.Stub
     }
 
     void removeWindowInnerLocked(WindowState win) {
+        removeWindowInnerLocked(win, true);
+    }
+
+    void removeWindowInnerLocked(WindowState win, boolean performLayout) {
         if (win.mRemoved) {
             // Nothing to do.
             return;
@@ -2274,7 +2278,9 @@ public class WindowManagerService extends IWindowManager.Stub
                 if (displayContent != null) {
                     displayContent.layoutNeeded = true;
                 }
-                performLayoutAndPlaceSurfacesLocked();
+                if (performLayout) {
+                    performLayoutAndPlaceSurfacesLocked();
+                }
                 if (win.mAppToken != null) {
                     win.mAppToken.updateReportedVisibilityLocked();
                 }
@@ -4525,7 +4531,9 @@ public class WindowManagerService extends IWindowManager.Stub
     }
 
     public void removeStack(int stackId) {
-        mStackIdToStack.remove(stackId);
+        synchronized (mWindowMap) {
+            mStackIdToStack.remove(stackId);
+        }
     }
 
     public void removeTask(int taskId) {
