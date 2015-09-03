@@ -62,7 +62,7 @@ public abstract class MockAccessibilityService extends AccessibilityService {
      */
     public static AccessibilityServiceInfo createDefaultInfo() {
         AccessibilityServiceInfo defaultInfo = new AccessibilityServiceInfo();
-        defaultInfo.eventTypes = AccessibilityEvent.TYPE_VIEW_CLICKED;
+        defaultInfo.eventTypes = AccessibilityEvent.TYPE_ANNOUNCEMENT;
         defaultInfo.feedbackType = AccessibilityServiceInfo.FEEDBACK_AUDIBLE;
         defaultInfo.flags = 0;
         defaultInfo.notificationTimeout = 0;
