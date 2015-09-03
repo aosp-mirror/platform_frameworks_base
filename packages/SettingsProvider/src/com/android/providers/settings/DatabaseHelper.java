@@ -109,7 +109,7 @@ class DatabaseHelper extends SQLiteOpenHelper {
 
     static String dbNameForUser(final int userHandle) {
         // The owner gets the unadorned db name;
-        if (userHandle == UserHandle.USER_OWNER) {
+        if (userHandle == UserHandle.USER_SYSTEM) {
             return DATABASE_NAME;
         } else {
             // Place the database in the user-specific data tree so that it's
@@ -186,8 +186,8 @@ class DatabaseHelper extends SQLiteOpenHelper {
 
         createSecureTable(db);
 
-        // Only create the global table for the singleton 'owner' user
-        if (mUserHandle == UserHandle.USER_OWNER) {
+        // Only create the global table for the singleton 'owner/system' user
+        if (mUserHandle == UserHandle.USER_SYSTEM) {
             createGlobalTable(db);
         }
 
@@ -1252,7 +1252,7 @@ class DatabaseHelper extends SQLiteOpenHelper {
 
         if (upgradeVersion == 82) {
             // Move to per-user settings dbs
-            if (mUserHandle == UserHandle.USER_OWNER) {
+            if (mUserHandle == UserHandle.USER_SYSTEM) {
 
                 db.beginTransaction();
                 SQLiteStatement stmt = null;
@@ -1306,7 +1306,7 @@ class DatabaseHelper extends SQLiteOpenHelper {
         }
 
         if (upgradeVersion == 84) {
-            if (mUserHandle == UserHandle.USER_OWNER) {
+            if (mUserHandle == UserHandle.USER_SYSTEM) {
                 db.beginTransaction();
                 SQLiteStatement stmt = null;
                 try {
@@ -1331,7 +1331,7 @@ class DatabaseHelper extends SQLiteOpenHelper {
         }
 
         if (upgradeVersion == 85) {
-            if (mUserHandle == UserHandle.USER_OWNER) {
+            if (mUserHandle == UserHandle.USER_SYSTEM) {
                 db.beginTransaction();
                 try {
                     // Fix up the migration, ignoring already-migrated elements, to snap up to
@@ -1348,7 +1348,7 @@ class DatabaseHelper extends SQLiteOpenHelper {
         }
 
         if (upgradeVersion == 86) {
-            if (mUserHandle == UserHandle.USER_OWNER) {
+            if (mUserHandle == UserHandle.USER_SYSTEM) {
                 db.beginTransaction();
                 try {
                     String[] settingsToMove = {
@@ -1367,7 +1367,7 @@ class DatabaseHelper extends SQLiteOpenHelper {
         }
 
         if (upgradeVersion == 87) {
-            if (mUserHandle == UserHandle.USER_OWNER) {
+            if (mUserHandle == UserHandle.USER_SYSTEM) {
                 db.beginTransaction();
                 try {
                     String[] settingsToMove = {
@@ -1386,7 +1386,7 @@ class DatabaseHelper extends SQLiteOpenHelper {
         }
 
         if (upgradeVersion == 88) {
-            if (mUserHandle == UserHandle.USER_OWNER) {
+            if (mUserHandle == UserHandle.USER_SYSTEM) {
                 db.beginTransaction();
                 try {
                     String[] settingsToMove = {
@@ -1432,7 +1432,7 @@ class DatabaseHelper extends SQLiteOpenHelper {
         }
 
         if (upgradeVersion == 89) {
-            if (mUserHandle == UserHandle.USER_OWNER) {
+            if (mUserHandle == UserHandle.USER_SYSTEM) {
                 db.beginTransaction();
                 try {
                     String[] prefixesToMove = {
@@ -1452,7 +1452,7 @@ class DatabaseHelper extends SQLiteOpenHelper {
         }
 
         if (upgradeVersion == 90) {
-            if (mUserHandle == UserHandle.USER_OWNER) {
+            if (mUserHandle == UserHandle.USER_SYSTEM) {
                 db.beginTransaction();
                 try {
                     String[] systemToGlobal = {
@@ -1485,7 +1485,7 @@ class DatabaseHelper extends SQLiteOpenHelper {
         }
 
         if (upgradeVersion == 91) {
-            if (mUserHandle == UserHandle.USER_OWNER) {
+            if (mUserHandle == UserHandle.USER_SYSTEM) {
                 db.beginTransaction();
                 try {
                     // Move ringer mode from system to global settings
@@ -1505,7 +1505,7 @@ class DatabaseHelper extends SQLiteOpenHelper {
             try {
                 stmt = db.compileStatement("INSERT OR IGNORE INTO secure(name,value)"
                         + " VALUES(?,?);");
-                if (mUserHandle == UserHandle.USER_OWNER) {
+                if (mUserHandle == UserHandle.USER_SYSTEM) {
                     // consider existing primary users to have made it through user setup
                     // if the globally-scoped device-provisioned bit is set
                     // (indicating they already made it through setup as primary)
@@ -1526,7 +1526,7 @@ class DatabaseHelper extends SQLiteOpenHelper {
 
         if (upgradeVersion == 93) {
             // Redo this step, since somehow it didn't work the first time for some users
-            if (mUserHandle == UserHandle.USER_OWNER) {
+            if (mUserHandle == UserHandle.USER_SYSTEM) {
                 db.beginTransaction();
                 try {
                     // Migrate now-global settings
@@ -1547,7 +1547,7 @@ class DatabaseHelper extends SQLiteOpenHelper {
 
         if (upgradeVersion == 94) {
             // Add wireless charging started sound setting
-            if (mUserHandle == UserHandle.USER_OWNER) {
+            if (mUserHandle == UserHandle.USER_SYSTEM) {
                 db.beginTransaction();
                 SQLiteStatement stmt = null;
                 try {
@@ -1565,7 +1565,7 @@ class DatabaseHelper extends SQLiteOpenHelper {
         }
 
         if (upgradeVersion == 95) {
-            if (mUserHandle == UserHandle.USER_OWNER) {
+            if (mUserHandle == UserHandle.USER_SYSTEM) {
                 db.beginTransaction();
                 try {
                     String[] settingsToMove = { Settings.Global.BUGREPORT_IN_POWER_MENU };
@@ -1584,7 +1584,7 @@ class DatabaseHelper extends SQLiteOpenHelper {
         }
 
         if (upgradeVersion == 97) {
-            if (mUserHandle == UserHandle.USER_OWNER) {
+            if (mUserHandle == UserHandle.USER_SYSTEM) {
                 db.beginTransaction();
                 SQLiteStatement stmt = null;
                 try {
@@ -1613,7 +1613,7 @@ class DatabaseHelper extends SQLiteOpenHelper {
 
         if (upgradeVersion == 100) {
             // note: LOCK_SCREEN_SHOW_NOTIFICATIONS now handled in version 106
-            if (mUserHandle == UserHandle.USER_OWNER) {
+            if (mUserHandle == UserHandle.USER_SYSTEM) {
                 db.beginTransaction();
                 SQLiteStatement stmt = null;
                 try {
@@ -1631,7 +1631,7 @@ class DatabaseHelper extends SQLiteOpenHelper {
         }
 
         if (upgradeVersion == 101) {
-            if (mUserHandle == UserHandle.USER_OWNER) {
+            if (mUserHandle == UserHandle.USER_SYSTEM) {
                 db.beginTransaction();
                 SQLiteStatement stmt = null;
                 try {
@@ -1653,7 +1653,7 @@ class DatabaseHelper extends SQLiteOpenHelper {
             try {
                 // The INSTALL_NON_MARKET_APPS setting is becoming per-user rather
                 // than device-global.
-                if (mUserHandle == UserHandle.USER_OWNER) {
+                if (mUserHandle == UserHandle.USER_SYSTEM) {
                     // In the owner user, the global table exists so we can migrate the
                     // entry from there to the secure table, preserving its value.
                     String[] globalToSecure = {
@@ -1693,7 +1693,7 @@ class DatabaseHelper extends SQLiteOpenHelper {
         }
 
         if (upgradeVersion < 105) {
-            if (mUserHandle == UserHandle.USER_OWNER) {
+            if (mUserHandle == UserHandle.USER_SYSTEM) {
                 db.beginTransaction();
                 SQLiteStatement stmt = null;
                 try {
@@ -1719,7 +1719,7 @@ class DatabaseHelper extends SQLiteOpenHelper {
                         + " VALUES(?,?);");
                 loadIntegerSetting(stmt, Settings.Secure.LOCK_SCREEN_SHOW_NOTIFICATIONS,
                         R.integer.def_lock_screen_show_notifications);
-                if (mUserHandle == UserHandle.USER_OWNER) {
+                if (mUserHandle == UserHandle.USER_SYSTEM) {
                     final int oldShow = getIntValueFromTable(db,
                             TABLE_GLOBAL, Settings.Secure.LOCK_SCREEN_SHOW_NOTIFICATIONS, -1);
                     if (oldShow >= 0) {
@@ -1741,7 +1741,7 @@ class DatabaseHelper extends SQLiteOpenHelper {
 
         if (upgradeVersion < 107) {
             // Add trusted sound setting
-            if (mUserHandle == UserHandle.USER_OWNER) {
+            if (mUserHandle == UserHandle.USER_SYSTEM) {
                 db.beginTransaction();
                 SQLiteStatement stmt = null;
                 try {
@@ -1816,7 +1816,7 @@ class DatabaseHelper extends SQLiteOpenHelper {
 
         if (upgradeVersion < 111) {
             // reset ringer mode, so it doesn't force zen mode to follow
-            if (mUserHandle == UserHandle.USER_OWNER) {
+            if (mUserHandle == UserHandle.USER_SYSTEM) {
                 db.beginTransaction();
                 SQLiteStatement stmt = null;
                 try {
@@ -1833,7 +1833,7 @@ class DatabaseHelper extends SQLiteOpenHelper {
         }
 
         if (upgradeVersion < 112) {
-            if (mUserHandle == UserHandle.USER_OWNER) {
+            if (mUserHandle == UserHandle.USER_SYSTEM) {
                 // When device name was added, we went with Manufacturer + Model, device name should
                 // actually be Model only.
                 // Update device name to Model if it wasn't modified by user.
@@ -1874,7 +1874,7 @@ class DatabaseHelper extends SQLiteOpenHelper {
         // We skipped 114 to handle a merge conflict with the introduction of theater mode.
 
         if (upgradeVersion < 115) {
-            if (mUserHandle == UserHandle.USER_OWNER) {
+            if (mUserHandle == UserHandle.USER_SYSTEM) {
                 db.beginTransaction();
                 SQLiteStatement stmt = null;
                 try {
@@ -1892,7 +1892,7 @@ class DatabaseHelper extends SQLiteOpenHelper {
         }
 
         if (upgradeVersion < 116) {
-            if (mUserHandle == UserHandle.USER_OWNER) {
+            if (mUserHandle == UserHandle.USER_SYSTEM) {
                 db.beginTransaction();
                 SQLiteStatement stmt = null;
                 try {
@@ -2066,7 +2066,7 @@ class DatabaseHelper extends SQLiteOpenHelper {
                     LockPatternUtils lpu = new LockPatternUtils(mContext);
                     List<LockPatternView.Cell> cellPattern =
                             LockPatternUtils.stringToPattern(lockPattern);
-                    lpu.saveLockPattern(cellPattern, null, UserHandle.USER_OWNER);
+                    lpu.saveLockPattern(cellPattern, null, UserHandle.USER_SYSTEM);
                 } catch (IllegalArgumentException e) {
                     // Don't want corrupted lock pattern to hang the reboot process
                 }
@@ -2343,8 +2343,8 @@ class DatabaseHelper extends SQLiteOpenHelper {
     private void loadSettings(SQLiteDatabase db) {
         loadSystemSettings(db);
         loadSecureSettings(db);
-        // The global table only exists for the 'owner' user
-        if (mUserHandle == UserHandle.USER_OWNER) {
+        // The global table only exists for the 'owner/system' user
+        if (mUserHandle == UserHandle.USER_SYSTEM) {
             loadGlobalSettings(db);
         }
     }

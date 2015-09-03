@@ -18,7 +18,7 @@ package com.android.providers.settings;
 
 import android.Manifest;
 import android.app.ActivityManager;
-import android.app.AppOpsManager;
+import android.app.AppGlobals;
 import android.app.backup.BackupManager;
 import android.content.BroadcastReceiver;
 import android.content.ContentProvider;
@@ -27,6 +27,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.ApplicationInfo;
+import android.content.pm.IPackageManager;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.UserInfo;
@@ -47,6 +48,7 @@ import android.os.Looper;
 import android.os.Message;
 import android.os.ParcelFileDescriptor;
 import android.os.Process;
+import android.os.RemoteException;
 import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.os.UserManager;
@@ -208,13 +210,13 @@ public class SettingsProvider extends ContentProvider {
     private volatile UserManager mUserManager;
 
     // We have to call in the package manager with no lock held,
-    private volatile PackageManager mPackageManager;
+    private volatile IPackageManager mPackageManager;
 
     @Override
     public boolean onCreate() {
         synchronized (mLock) {
-            mUserManager = (UserManager) getContext().getSystemService(Context.USER_SERVICE);
-            mPackageManager = getContext().getPackageManager();
+            mUserManager = UserManager.get(getContext());
+            mPackageManager = AppGlobals.getPackageManager();
             mSettingsRegistry = new SettingsRegistry();
         }
         registerBroadcastReceivers();
@@ -496,7 +498,7 @@ public class SettingsProvider extends ContentProvider {
     }
 
     private void dumpForUser(int userId, PrintWriter pw) {
-        if (userId == UserHandle.USER_OWNER) {
+        if (userId == UserHandle.USER_SYSTEM) {
             pw.println("GLOBAL SETTINGS (user " + userId + ")");
             Cursor globalCursor = getAllGlobalSettings(ALL_COLUMNS);
             dumpSettings(globalCursor, pw);
@@ -547,7 +549,7 @@ public class SettingsProvider extends ContentProvider {
             @Override
             public void onReceive(Context context, Intent intent) {
                 final int userId = intent.getIntExtra(Intent.EXTRA_USER_HANDLE,
-                        UserHandle.USER_OWNER);
+                        UserHandle.USER_SYSTEM);
 
                 switch (intent.getAction()) {
                     case Intent.ACTION_USER_REMOVED: {
@@ -584,7 +586,7 @@ public class SettingsProvider extends ContentProvider {
         synchronized (mLock) {
             // Get the settings.
             SettingsState settingsState = mSettingsRegistry.getSettingsLocked(
-                    SettingsRegistry.SETTINGS_TYPE_GLOBAL, UserHandle.USER_OWNER);
+                    SettingsRegistry.SETTINGS_TYPE_GLOBAL, UserHandle.USER_SYSTEM);
 
             List<String> names = settingsState.getSettingNamesLocked();
 
@@ -612,7 +614,7 @@ public class SettingsProvider extends ContentProvider {
         // Get the value.
         synchronized (mLock) {
             return mSettingsRegistry.getSettingLocked(SettingsRegistry.SETTINGS_TYPE_GLOBAL,
-                    UserHandle.USER_OWNER, name);
+                    UserHandle.USER_SYSTEM, name);
         }
     }
 
@@ -656,19 +658,19 @@ public class SettingsProvider extends ContentProvider {
                 case MUTATION_OPERATION_INSERT: {
                     return mSettingsRegistry
                             .insertSettingLocked(SettingsRegistry.SETTINGS_TYPE_GLOBAL,
-                                    UserHandle.USER_OWNER, name, value, getCallingPackage());
+                                    UserHandle.USER_SYSTEM, name, value, getCallingPackage());
                 }
 
                 case MUTATION_OPERATION_DELETE: {
                     return mSettingsRegistry.deleteSettingLocked(
                             SettingsRegistry.SETTINGS_TYPE_GLOBAL,
-                            UserHandle.USER_OWNER, name);
+                            UserHandle.USER_SYSTEM, name);
                 }
 
                 case MUTATION_OPERATION_UPDATE: {
                     return mSettingsRegistry
                             .updateSettingLocked(SettingsRegistry.SETTINGS_TYPE_GLOBAL,
-                                    UserHandle.USER_OWNER, name, value, getCallingPackage());
+                                    UserHandle.USER_SYSTEM, name, value, getCallingPackage());
                 }
             }
         }
@@ -903,7 +905,7 @@ public class SettingsProvider extends ContentProvider {
         }
 
         // Enforce what the calling package can mutate the system settings.
-        enforceRestrictedSystemSettingsMutationForCallingPackage(operation, name);
+        enforceRestrictedSystemSettingsMutationForCallingPackage(operation, name, runAsUserId);
 
         // Resolve the userId on whose behalf the call is made.
         final int callingUserId = resolveCallingUserIdEnforcingPermissionsLocked(runAsUserId);
@@ -1001,7 +1003,7 @@ public class SettingsProvider extends ContentProvider {
     }
 
     private void enforceRestrictedSystemSettingsMutationForCallingPackage(int operation,
-            String name) {
+            String name, int userId) {
         // System/root/shell can mutate whatever secure settings they want.
         final int callingUid = Binder.getCallingUid();
         if (callingUid == android.os.Process.SYSTEM_UID
@@ -1019,7 +1021,7 @@ public class SettingsProvider extends ContentProvider {
                 }
 
                 // The calling package is already verified.
-                PackageInfo packageInfo = getCallingPackageInfoOrThrow();
+                PackageInfo packageInfo = getCallingPackageInfoOrThrow(userId);
 
                 // Privileged apps can do whatever they want.
                 if ((packageInfo.applicationInfo.privateFlags
@@ -1039,7 +1041,7 @@ public class SettingsProvider extends ContentProvider {
                 }
 
                 // The calling package is already verified.
-                PackageInfo packageInfo = getCallingPackageInfoOrThrow();
+                PackageInfo packageInfo = getCallingPackageInfoOrThrow(userId);
 
                 // Privileged apps can do whatever they want.
                 if ((packageInfo.applicationInfo.privateFlags &
@@ -1053,17 +1055,17 @@ public class SettingsProvider extends ContentProvider {
         }
     }
 
-    private PackageInfo getCallingPackageInfoOrThrow() {
+    private PackageInfo getCallingPackageInfoOrThrow(int userId) {
         try {
-            return mPackageManager.getPackageInfo(getCallingPackage(), 0);
-        } catch (PackageManager.NameNotFoundException e) {
+            return mPackageManager.getPackageInfo(getCallingPackage(), 0, userId);
+        } catch (RemoteException e) {
             throw new IllegalStateException("Calling package doesn't exist");
         }
     }
 
     private int getGroupParentLocked(int userId) {
         // Most frequent use case.
-        if (userId == UserHandle.USER_OWNER) {
+        if (userId == UserHandle.USER_SYSTEM) {
             return userId;
         }
         // We are in the same process with the user manager and the returned
@@ -1401,8 +1403,8 @@ public class SettingsProvider extends ContentProvider {
             migrateLegacySettingsForUserIfNeededLocked(userId);
 
             // Ensure global settings loaded if owner.
-            if (userId == UserHandle.USER_OWNER) {
-                final int globalKey = makeKey(SETTINGS_TYPE_GLOBAL, UserHandle.USER_OWNER);
+            if (userId == UserHandle.USER_SYSTEM) {
+                final int globalKey = makeKey(SETTINGS_TYPE_GLOBAL, UserHandle.USER_SYSTEM);
                 ensureSettingsStateLocked(globalKey);
             }
 
@@ -1541,7 +1543,7 @@ public class SettingsProvider extends ContentProvider {
 
         private void migrateAllLegacySettingsIfNeeded() {
             synchronized (mLock) {
-                final int key = makeKey(SETTINGS_TYPE_GLOBAL, UserHandle.USER_OWNER);
+                final int key = makeKey(SETTINGS_TYPE_GLOBAL, UserHandle.USER_SYSTEM);
                 File globalFile = getSettingsFile(key);
                 if (globalFile.exists()) {
                     return;
@@ -1591,7 +1593,7 @@ public class SettingsProvider extends ContentProvider {
         private void migrateLegacySettingsForUserLocked(DatabaseHelper dbHelper,
                 SQLiteDatabase database, int userId) {
             // Move over the global settings if owner.
-            if (userId == UserHandle.USER_OWNER) {
+            if (userId == UserHandle.USER_SYSTEM) {
                 final int globalKey = makeKey(SETTINGS_TYPE_GLOBAL, userId);
                 ensureSettingsStateLocked(globalKey);
                 SettingsState globalSettings = mSettingsStates.get(globalKey);
@@ -1898,7 +1900,7 @@ public class SettingsProvider extends ContentProvider {
                 }
 
                 // Set the global settings version if owner.
-                if (mUserId == UserHandle.USER_OWNER) {
+                if (mUserId == UserHandle.USER_SYSTEM) {
                     SettingsState globalSettings = getSettingsLocked(
                             SettingsRegistry.SETTINGS_TYPE_GLOBAL, mUserId);
                     globalSettings.setVersionLocked(newVersion);
@@ -1914,7 +1916,7 @@ public class SettingsProvider extends ContentProvider {
             }
 
             private SettingsState getGlobalSettingsLocked() {
-                return getSettingsLocked(SETTINGS_TYPE_GLOBAL, UserHandle.USER_OWNER);
+                return getSettingsLocked(SETTINGS_TYPE_GLOBAL, UserHandle.USER_SYSTEM);
             }
 
             private SettingsState getSecureSettingsLocked(int userId) {
@@ -1960,7 +1962,7 @@ public class SettingsProvider extends ContentProvider {
 
                 // v119: Reset zen + ringer mode.
                 if (currentVersion == 118) {
-                    if (userId == UserHandle.USER_OWNER) {
+                    if (userId == UserHandle.USER_SYSTEM) {
                         final SettingsState globalSettings = getGlobalSettingsLocked();
                         globalSettings.updateSettingLocked(Settings.Global.ZEN_MODE,
                                 Integer.toString(Settings.Global.ZEN_MODE_OFF),
