@@ -185,6 +185,36 @@ public class RadioAccessFamily implements Parcelable {
             case RILConstants.NETWORK_MODE_GLOBAL:
                 raf = GSM | WCDMA | CDMA | EVDO;
                 break;
+            case RILConstants.NETWORK_MODE_TDSCDMA_ONLY:
+                raf = RAF_TD_SCDMA;
+                break;
+            case RILConstants.NETWORK_MODE_TDSCDMA_WCDMA:
+                raf = RAF_TD_SCDMA | WCDMA;
+                break;
+            case RILConstants.NETWORK_MODE_LTE_TDSCDMA:
+                raf = RAF_LTE | RAF_TD_SCDMA;
+                break;
+            case RILConstants.NETWORK_MODE_TDSCDMA_GSM:
+                raf = RAF_TD_SCDMA | GSM;
+                break;
+            case RILConstants.NETWORK_MODE_LTE_TDSCDMA_GSM:
+                raf = RAF_LTE | RAF_TD_SCDMA | GSM;
+                break;
+            case RILConstants.NETWORK_MODE_TDSCDMA_GSM_WCDMA:
+                raf = RAF_TD_SCDMA | GSM | WCDMA;
+                break;
+            case RILConstants.NETWORK_MODE_LTE_TDSCDMA_WCDMA:
+                raf = RAF_LTE | RAF_TD_SCDMA | WCDMA;
+                break;
+            case RILConstants.NETWORK_MODE_LTE_TDSCDMA_GSM_WCDMA:
+                raf = RAF_LTE | RAF_TD_SCDMA | GSM | WCDMA;
+                break;
+            case RILConstants.NETWORK_MODE_TDSCDMA_CDMA_EVDO_GSM_WCDMA:
+                raf = RAF_TD_SCDMA | CDMA | EVDO | GSM | WCDMA;
+                break;
+            case RILConstants.NETWORK_MODE_LTE_TDSCDMA_CDMA_EVDO_GSM_WCDMA:
+                raf = RAF_LTE | RAF_TD_SCDMA | CDMA | EVDO | GSM | WCDMA;
+                break;
             default:
                 raf = RAF_UNKNOWN;
                 break;
@@ -247,6 +277,36 @@ public class RadioAccessFamily implements Parcelable {
                 break;
             case (GSM | WCDMA | CDMA | EVDO):
                 type = RILConstants.NETWORK_MODE_GLOBAL;
+                break;
+            case RAF_TD_SCDMA:
+                type = RILConstants.NETWORK_MODE_TDSCDMA_ONLY;
+                break;
+            case (RAF_TD_SCDMA | WCDMA):
+                type = RILConstants.NETWORK_MODE_TDSCDMA_WCDMA;
+                break;
+            case (RAF_LTE | RAF_TD_SCDMA):
+                type = RILConstants.NETWORK_MODE_LTE_TDSCDMA;
+                break;
+            case (RAF_TD_SCDMA | GSM):
+                type = RILConstants.NETWORK_MODE_TDSCDMA_GSM;
+                break;
+            case (RAF_LTE | RAF_TD_SCDMA | GSM):
+                type = RILConstants.NETWORK_MODE_LTE_TDSCDMA_GSM;
+                break;
+            case (RAF_TD_SCDMA | GSM | WCDMA):
+                type = RILConstants.NETWORK_MODE_TDSCDMA_GSM_WCDMA;
+                break;
+            case (RAF_LTE | RAF_TD_SCDMA | WCDMA):
+                type = RILConstants.NETWORK_MODE_LTE_TDSCDMA_WCDMA;
+                break;
+            case (RAF_LTE | RAF_TD_SCDMA | GSM | WCDMA):
+                type = RILConstants.NETWORK_MODE_LTE_TDSCDMA_GSM_WCDMA;
+                break;
+            case (RAF_TD_SCDMA | CDMA | EVDO | GSM | WCDMA):
+                type = RILConstants.NETWORK_MODE_TDSCDMA_CDMA_EVDO_GSM_WCDMA;
+                break;
+            case (RAF_LTE | RAF_TD_SCDMA | RAF_LTE | CDMA | EVDO | GSM | WCDMA):
+                type = RILConstants.NETWORK_MODE_LTE_TDSCDMA_CDMA_EVDO_GSM_WCDMA;
                 break;
             default:
                 type = RILConstants.PREFERRED_NETWORK_MODE ;
