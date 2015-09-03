@@ -25,4 +25,7 @@
     -->
     <integer name="config_mobile_mtu">1428</integer>
 
+    <!-- Do not set the system language as value of EF LI/EF PL -->
+    <bool name="config_use_sim_language_file">false</bool>
+
 </resources>
