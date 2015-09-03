@@ -19,6 +19,7 @@ package android.hardware.input;
 import android.hardware.input.InputDeviceIdentifier;
 import android.hardware.input.KeyboardLayout;
 import android.hardware.input.IInputDevicesChangedListener;
+import android.hardware.input.ITabletModeChangedListener;
 import android.hardware.input.TouchCalibration;
 import android.os.IBinder;
 import android.view.InputDevice;
@@ -59,6 +60,9 @@ interface IInputManager {
 
     // Registers an input devices changed listener.
     void registerInputDevicesChangedListener(IInputDevicesChangedListener listener);
+
+    // Registers a tablet mode change listener
+    void registerTabletModeChangedListener(ITabletModeChangedListener listener);
 
     // Input device vibrator control.
     void vibrate(int deviceId, in long[] pattern, int repeat, IBinder token);
