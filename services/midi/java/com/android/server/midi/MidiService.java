@@ -27,6 +27,7 @@ import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.content.pm.ServiceInfo;
 import android.content.res.XmlResourceParser;
+import android.media.midi.IBluetoothMidiService;
 import android.media.midi.IMidiDeviceListener;
 import android.media.midi.IMidiDeviceOpenCallback;
 import android.media.midi.IMidiDeviceServer;
@@ -394,7 +395,20 @@ public class MidiService extends IMidiManager.Stub {
                     mServiceConnection = new ServiceConnection() {
                         @Override
                         public void onServiceConnected(ComponentName name, IBinder service) {
-                            IMidiDeviceServer server = IMidiDeviceServer.Stub.asInterface(service);
+                            IMidiDeviceServer server = null;
+                            if (mBluetoothDevice != null) {
+                                IBluetoothMidiService mBluetoothMidiService = IBluetoothMidiService.Stub.asInterface(service);
+                                try {
+                                    // We need to explicitly add the device in a separate method
+                                    // because onBind() is only called once.
+                                    IBinder deviceBinder = mBluetoothMidiService.addBluetoothDevice(mBluetoothDevice);
+                                    server = IMidiDeviceServer.Stub.asInterface(deviceBinder);
+                                } catch(RemoteException e) {
+                                    Log.e(TAG, "Could not call addBluetoothDevice()", e);
+                                }
+                            } else {
+                                server = IMidiDeviceServer.Stub.asInterface(service);
+                            }
                             setDeviceServer(server);
                         }
 
@@ -411,7 +425,6 @@ public class MidiService extends IMidiManager.Stub {
                         intent.setComponent(new ComponentName(
                                 MidiManager.BLUETOOTH_MIDI_SERVICE_PACKAGE,
                                 MidiManager.BLUETOOTH_MIDI_SERVICE_CLASS));
-                        intent.putExtra("device", mBluetoothDevice);
                     } else {
                         intent = new Intent(MidiDeviceService.SERVICE_INTERFACE);
                         intent.setComponent(
