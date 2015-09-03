@@ -64,7 +64,7 @@ public abstract class KeyguardPinBasedInputView extends KeyguardAbsKeyInputView
 
     @Override
     protected void resetState() {
-        mPasswordEntry.setEnabled(true);
+        setPasswordEntryEnabled(true);
     }
 
     @Override
