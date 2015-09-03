@@ -168,7 +168,12 @@ public class AppOpsCommand extends BaseCommand {
         final IPackageManager pm = ActivityThread.getPackageManager();
         final IAppOpsService appOpsService = IAppOpsService.Stub.asInterface(
                 ServiceManager.getService(Context.APP_OPS_SERVICE));
-        final int uid = pm.getPackageUid(packageName, userId);
+        final int uid;
+        if ("root".equals(packageName)) {
+            uid = 0;
+        } else {
+            uid = pm.getPackageUid(packageName, userId);
+        }
         if (uid < 0) {
             System.err.println("Error: No UID for " + packageName + " in user " + userId);
             return;
@@ -211,7 +216,12 @@ public class AppOpsCommand extends BaseCommand {
         final IPackageManager pm = ActivityThread.getPackageManager();
         final IAppOpsService appOpsService = IAppOpsService.Stub.asInterface(
                 ServiceManager.getService(Context.APP_OPS_SERVICE));
-        final int uid = pm.getPackageUid(packageName, userId);
+        final int uid;
+        if ("root".equals(packageName)) {
+            uid = 0;
+        } else {
+            uid = pm.getPackageUid(packageName, userId);
+        }
         if (uid < 0) {
             System.err.println("Error: No UID for " + packageName + " in user " + userId);
             return;
