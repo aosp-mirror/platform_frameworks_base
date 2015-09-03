@@ -16,8 +16,11 @@
 
 package com.android.documentsui;
 
+import android.graphics.Point;
+import android.support.v7.widget.RecyclerView;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
+import android.view.View;
 
 /**
  * Utility code for dealing with MotionEvents.
@@ -54,6 +57,20 @@ final class Events {
     }
 
     /**
+     * Returns true if event was triggered by a finger or stylus touch.
+     */
+    static boolean isActionDown(MotionEvent e) {
+        return e.getActionMasked() == MotionEvent.ACTION_DOWN;
+    }
+
+    /**
+     * Returns true if event was triggered by a finger or stylus touch.
+     */
+    static boolean isActionUp(MotionEvent e) {
+        return e.getActionMasked() == MotionEvent.ACTION_UP;
+    }
+
+    /**
      * Returns true if the shift is pressed.
      */
     boolean isShiftPressed(MotionEvent e) {
@@ -65,5 +82,107 @@ final class Events {
      */
     static boolean hasShiftBit(int metaState) {
         return (metaState & KeyEvent.META_SHIFT_ON) != 0;
+    }
+
+    /**
+     * A facade over MotionEvent primarily designed to permit for unit testing
+     * of related code.
+     */
+    interface InputEvent {
+        boolean isMouseEvent();
+        boolean isPrimaryButtonPressed();
+        boolean isSecondaryButtonPressed();
+        boolean isShiftKeyDown();
+
+        /** Returns true if the action is the initial press of a mouse or touch. */
+        boolean isActionDown();
+
+        /** Returns true if the action is the final release of a mouse or touch. */
+        boolean isActionUp();
+
+        Point getOrigin();
+
+        /** Returns true if the there is an item under the finger/cursor. */
+        boolean isOverItem();
+
+        /** Returns the adapter position of the item under the finger/cursor. */
+        int getItemPosition();
+    }
+
+    static final class MotionInputEvent implements InputEvent {
+        private final MotionEvent mEvent;
+        private final RecyclerView mView;
+        private final int mPosition;
+
+        public MotionInputEvent(MotionEvent event, RecyclerView view) {
+            mEvent = event;
+            mView = view;
+            View child = mView.findChildViewUnder(mEvent.getX(), mEvent.getY());
+            mPosition = (child != null)
+                    ? mView.getChildAdapterPosition(child)
+                    : RecyclerView.NO_POSITION;
+        }
+
+        @Override
+        public boolean isMouseEvent() {
+            return Events.isMouseEvent(mEvent);
+        }
+
+        @Override
+        public boolean isPrimaryButtonPressed() {
+            return mEvent.isButtonPressed(MotionEvent.BUTTON_PRIMARY);
+        }
+
+        @Override
+        public boolean isSecondaryButtonPressed() {
+            return mEvent.isButtonPressed(MotionEvent.BUTTON_SECONDARY);
+        }
+
+        @Override
+        public boolean isShiftKeyDown() {
+            return Events.hasShiftBit(mEvent.getMetaState());
+        }
+
+        @Override
+        public boolean isActionDown() {
+            return mEvent.getActionMasked() == MotionEvent.ACTION_DOWN;
+        }
+
+        @Override
+        public boolean isActionUp() {
+            return mEvent.getActionMasked() == MotionEvent.ACTION_UP;
+        }
+
+        @Override
+        public Point getOrigin() {
+            return new Point((int) mEvent.getX(), (int) mEvent.getY());
+        }
+
+        @Override
+        public boolean isOverItem() {
+            return getItemPosition() != RecyclerView.NO_POSITION;
+        }
+
+        @Override
+        public int getItemPosition() {
+            return mPosition;
+        }
+
+        @Override
+        public String toString() {
+            return new StringBuilder()
+                    .append("MotionInputEvent {")
+                    .append("isMouseEvent=").append(isMouseEvent())
+                    .append(" isPrimaryButtonPressed=").append(isPrimaryButtonPressed())
+                    .append(" isSecondaryButtonPressed=").append(isSecondaryButtonPressed())
+                    .append(" isShiftKeyDown=").append(isShiftKeyDown())
+                    .append(" isActionDown=").append(isActionDown())
+                    .append(" isActionUp=").append(isActionUp())
+                    .append(" getOrigin=").append(getOrigin())
+                    .append(" isOverItem=").append(isOverItem())
+                    .append(" getItemPosition=").append(getItemPosition())
+                    .append("}")
+                    .toString();
+        }
     }
 }

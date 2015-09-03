@@ -16,11 +16,16 @@
 
 package com.android.documentsui;
 
-import static com.android.documentsui.Events.isMouseEvent;
+import static com.android.documentsui.Shared.DEBUG;
 import static com.android.internal.util.Preconditions.checkArgument;
 import static com.android.internal.util.Preconditions.checkNotNull;
 import static com.android.internal.util.Preconditions.checkState;
 
+import android.graphics.Point;
+import android.graphics.Rect;
+import android.graphics.drawable.Drawable;
+import android.support.annotation.Nullable;
+import android.support.annotation.VisibleForTesting;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.RecyclerView.Adapter;
@@ -36,10 +41,9 @@ import android.view.GestureDetector.OnDoubleTapListener;
 import android.view.GestureDetector.OnGestureListener;
 import android.view.MotionEvent;
 import android.view.View;
-import android.graphics.Point;
-import android.graphics.Rect;
-import android.graphics.drawable.Drawable;
-import android.support.annotation.VisibleForTesting;
+
+import com.android.documentsui.Events.InputEvent;
+import com.android.documentsui.Events.MotionInputEvent;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -59,7 +63,6 @@ public final class MultiSelectManager {
     public static final int MODE_SINGLE = 1;
 
     private static final String TAG = "MultiSelectManager";
-    private static final boolean DEBUG = false;
 
     private final Selection mSelection = new Selection();
 
@@ -72,7 +75,7 @@ public final class MultiSelectManager {
     private Adapter<?> mAdapter;
     private MultiSelectHelper mHelper;
     private boolean mSingleSelect;
-    private BandSelectManager mBandSelectManager;
+    private BandSelectManager mBandManager;
 
     /**
      * @param recyclerView
@@ -89,17 +92,19 @@ public final class MultiSelectManager {
                 new RuntimeRecyclerViewHelper(recyclerView),
                 mode);
 
-        mBandSelectManager = new BandSelectManager((RuntimeRecyclerViewHelper) mHelper);
+        mBandManager = new BandSelectManager((RuntimeRecyclerViewHelper) mHelper);
 
         GestureDetector.SimpleOnGestureListener listener =
                 new GestureDetector.SimpleOnGestureListener() {
                     @Override
                     public boolean onSingleTapUp(MotionEvent e) {
-                        return MultiSelectManager.this.onSingleTapUp(e);
+                        return MultiSelectManager.this.onSingleTapUp(
+                                new MotionInputEvent(e, recyclerView));
                     }
                     @Override
                     public void onLongPress(MotionEvent e) {
-                        MultiSelectManager.this.onLongPress(e);
+                        MultiSelectManager.this.onLongPress(
+                                new MotionInputEvent(e, recyclerView));
                     }
                 };
 
@@ -112,17 +117,39 @@ public final class MultiSelectManager {
 
         recyclerView.addOnItemTouchListener(
                 new RecyclerView.OnItemTouchListener() {
+                    @Override
                     public boolean onInterceptTouchEvent(RecyclerView rv, MotionEvent e) {
                         detector.onTouchEvent(e);
 
-                        // Only intercept the event if it was a mouse-based band selection.
-                        return isMouseEvent(e) && (mBandSelectManager.mIsActive ||
-                                e.getActionMasked() != MotionEvent.ACTION_UP);
+                        // b/23793622 notes the fact that we *never* receiver ACTION_DOWN
+                        // events in onTouchEvent. Where it not for this issue, we'd
+                        // push start handling down into handleInputEvent.
+                        if (mBandManager.shouldStart(e)) {
+                            // endBandSelect is handled in handleInputEvent.
+                            mBandManager.startBandSelect(
+                                    new Point((int) e.getX(), (int) e.getY()));
+                        } else if (mBandManager.isActive()
+                                && Events.isMouseEvent(e)
+                                && Events.isActionUp(e)) {
+                            // Same issue here w b/23793622. The ACTION_UP event
+                            // is only evert dispatched to onTouchEvent when
+                            // there is some associated motion. If a user taps
+                            // mouse, but doesn't move, then band select gets
+                            // started BUT not ended. Causing phantom
+                            // bands to appear when the user later clicks to start
+                            // band select.
+                            mBandManager.handleInputEvent(
+                                    new MotionInputEvent(e, recyclerView));
+                        }
+                        return mBandManager.isActive();
                     }
+
+                    @Override
                     public void onTouchEvent(RecyclerView rv, MotionEvent e) {
-                        checkState(isMouseEvent(e));
-                        mBandSelectManager.processMotionEvent(e);
+                        mBandManager.handleInputEvent(
+                                new MotionInputEvent(e, recyclerView));
                     }
+                    @Override
                     public void onRequestDisallowInterceptTouchEvent(boolean disallowIntercept) {}
                 });
     }
@@ -251,7 +278,7 @@ public final class MultiSelectManager {
     }
 
     public void handleLayoutChanged() {
-        mBandSelectManager.handleLayoutChanged();
+        mBandManager.handleLayoutChanged();
     }
 
     /**
@@ -275,70 +302,36 @@ public final class MultiSelectManager {
         }
     }
 
-    private void onLongPress(MotionEvent e) {
+    @VisibleForTesting
+    void onLongPress(InputEvent input) {
         if (DEBUG) Log.d(TAG, "Handling long press event.");
 
-        int position = mHelper.findEventPosition(e);
-        if (position == RecyclerView.NO_POSITION) {
-            if (DEBUG) Log.i(TAG, "View is null. Cannot handle tap event.");
+        if (!input.isOverItem()) {
+            if (DEBUG) Log.i(TAG, "Cannot handle tap. No adapter position available.");
         }
 
-        onLongPress(position, e.getMetaState());
+        handleAdapterEvent(input);
     }
 
-    /**
-     * TODO: Roll this back into {@link #onLongPress(MotionEvent)} once MotionEvent
-     * can be mocked.
-     *
-     * @param position
-     * @param metaState as returned from {@link MotionEvent#getMetaState()}.
-     * @hide
-     */
     @VisibleForTesting
-    void onLongPress(int position, int metaState) {
-        if (position == RecyclerView.NO_POSITION) {
-            if (DEBUG) Log.i(TAG, "View is null. Cannot handle tap event.");
-        }
-
-        handlePositionChanged(position, metaState);
-    }
-
-    /**
-     * @param e
-     * @return true if the event was consumed.
-     */
-    private boolean onSingleTapUp(MotionEvent e) {
-        if (DEBUG) Log.d(TAG, "Handling tap event.");
-        return onSingleTapUp(mHelper.findEventPosition(e), e.getMetaState(), e.getToolType(0));
-    }
-
-    /**
-     * TODO: Roll this into {@link #onSingleTapUp(MotionEvent)} once MotionEvent
-     * can be mocked.
-     *
-     * @param position
-     * @param metaState as returned from {@link MotionEvent#getMetaState()}.
-     * @param toolType
-     * @return true if the event was consumed.
-     * @hide
-     */
-    @VisibleForTesting
-    boolean onSingleTapUp(int position, int metaState, int toolType) {
+    boolean onSingleTapUp(InputEvent input) {
+        if (DEBUG) Log.d(TAG, "Processing tap event.");
         if (mSelection.isEmpty()) {
             // if this is a mouse click on an item, start selection mode.
-            if (position != RecyclerView.NO_POSITION && Events.isMouseType(toolType)) {
-                toggleSelection(position);
+            // TODO:  && input.isPrimaryButtonPressed(), but it is returning false.
+            if (input.isOverItem() && input.isMouseEvent()) {
+                toggleSelection(input.getItemPosition());
             }
             return false;
         }
 
-        if (position == RecyclerView.NO_POSITION) {
-            if (DEBUG) Log.d(TAG, "View is null. Canceling selection.");
+        if (!input.isOverItem()) {
+            if (DEBUG) Log.d(TAG, "Activity has no position. Canceling selection.");
             clearSelection();
             return false;
         }
 
-        handlePositionChanged(position, metaState);
+        handleAdapterEvent(input);
         return true;
     }
 
@@ -347,15 +340,15 @@ public final class MultiSelectManager {
      * held down, this performs a range select; otherwise, it simply toggles the item's selection
      * state.
      */
-    private void handlePositionChanged(int position, int metaState) {
-        if (Events.hasShiftBit(metaState) && mRanger != null) {
-            mRanger.snapSelection(position);
+    private void handleAdapterEvent(InputEvent input) {
+        if (mRanger != null && input.isShiftKeyDown()) {
+            mRanger.snapSelection(input.getItemPosition());
 
             // We're being lazy here notifying even when something might not have changed.
             // To make this more correct, we'd need to update the Ranger class to return
             // information about what has changed.
             notifySelectionChanged();
-        } else if (toggleSelection(position)) {
+        } else if (toggleSelection(input.getItemPosition())) {
             notifySelectionChanged();
         }
     }
@@ -1175,12 +1168,12 @@ public final class MultiSelectManager {
         private static final int NOT_SET = -1;
 
         private final BandManagerHelper mHelper;
+        private final Runnable mModelBuilder;
 
-        private boolean mIsActive;
-        private Point mOrigin;
-        private Point mPointer;
-        private Rect mBounds;
-        private BandSelectModel mModel;
+        @Nullable private Rect mBounds;
+        @Nullable private Point mCurrentPosition;
+        @Nullable private Point mOrigin;
+        @Nullable private BandSelectModel mModel;
 
         // The time at which the current band selection-induced scroll began. If no scroll is in
         // progress, the value is NOT_SET.
@@ -1188,11 +1181,21 @@ public final class MultiSelectManager {
         private final Runnable mViewScroller = new ViewScroller();
 
         public <T extends BandManagerHelper & BandModelHelper>
-                BandSelectManager(T helper) {
+                BandSelectManager(final T helper) {
             mHelper = helper;
             mHelper.addOnScrollListener(this);
-            mModel = new BandSelectModel(helper);
-            mModel.addOnSelectionChangedListener(this);
+
+            mModelBuilder = new Runnable() {
+                @Override
+                public void run() {
+                    mModel = new BandSelectModel(helper);
+                    mModel.addOnSelectionChangedListener(BandSelectManager.this);
+                }
+            };
+        }
+
+        private boolean isActive() {
+            return mModel != null;
         }
 
         /**
@@ -1200,39 +1203,48 @@ public final class MultiSelectManager {
          * a new model which will track the new layout.
          */
         public void handleLayoutChanged() {
-            mModel.removeOnSelectionChangedListener(this);
-            mModel.stopListening();
+            if (mModel != null) {
+                mModel.removeOnSelectionChangedListener(this);
+                mModel.stopListening();
 
-            mModel = new BandSelectModel((RuntimeRecyclerViewHelper) mHelper);
-            mModel.addOnSelectionChangedListener(this);
+                // build a new model, all fresh and happy.
+                mModelBuilder.run();
+            }
+        }
+
+        boolean shouldStart(MotionEvent e) {
+            return !isActive()
+                    && Events.isMouseEvent(e)  // a mouse
+                    && Events.isActionDown(e)  // the initial button press
+                    && mHelper.findEventPosition(e) == RecyclerView.NO_ID;  // in empty space
+        }
+
+        boolean shouldStop(InputEvent input) {
+            return isActive()
+                    && input.isMouseEvent()
+                    && input.isActionUp();
         }
 
         /**
          * Processes a MotionEvent by starting, ending, or resizing the band select overlay.
-         * @param e
+         * @param input
          */
-        private void processMotionEvent(MotionEvent e) {
-            if (!isMouseEvent(e)) {
+        private void handleInputEvent(InputEvent input) {
+            checkArgument(input.isMouseEvent());
+
+            if (shouldStop(input)) {
+                mBandManager.endBandSelect();
                 return;
             }
 
-            if (mIsActive && e.getActionMasked() == MotionEvent.ACTION_UP) {
-                endBandSelect();
+            // We shouldn't get any events in this method when band select is not active,
+            // but it turns some guests show up late to the party.
+            if (!isActive()) {
                 return;
             }
 
-            mPointer = new Point((int) e.getX(), (int) e.getY());
-            if (!mIsActive) {
-                // Only start a band select if the pointer is in margins between items, not
-                // actually within an item's bounds.
-                if (mHelper.findEventPosition(e) != RecyclerView.NO_POSITION) {
-                    return;
-                }
-                startBandSelect();
-            } else {
-                mModel.resizeSelection(mPointer);
-            }
-
+            mCurrentPosition = input.getOrigin();
+            mModel.resizeSelection(input.getOrigin());
             scrollViewIfNecessary();
             resizeBandSelectRectangle();
         }
@@ -1240,12 +1252,11 @@ public final class MultiSelectManager {
         /**
          * Starts band select by adding the drawable to the RecyclerView's overlay.
          */
-        private void startBandSelect() {
-            if (DEBUG) {
-                Log.d(TAG, "Starting band select from (" + mPointer.x + "," + mPointer.y + ").");
-            }
-            mIsActive = true;
-            mOrigin = new Point(mPointer.x, mPointer.y);
+        private void startBandSelect(Point origin) {
+            if (DEBUG) Log.d(TAG, "Starting band select @ " + origin);
+
+            mOrigin = origin;
+            mModelBuilder.run();  // Creates a new selection model.
             mModel.startSelection(mOrigin);
         }
 
@@ -1263,10 +1274,10 @@ public final class MultiSelectManager {
          * two opposite corners of the selection.
          */
         private void resizeBandSelectRectangle() {
-            mBounds = new Rect(Math.min(mOrigin.x, mPointer.x),
-                    Math.min(mOrigin.y, mPointer.y),
-                    Math.max(mOrigin.x, mPointer.x),
-                    Math.max(mOrigin.y, mPointer.y));
+            mBounds = new Rect(Math.min(mOrigin.x, mCurrentPosition.x),
+                    Math.min(mOrigin.y, mCurrentPosition.y),
+                    Math.max(mOrigin.x, mCurrentPosition.x),
+                    Math.max(mOrigin.y, mCurrentPosition.y));
             mHelper.drawBand(mBounds);
         }
 
@@ -1275,14 +1286,20 @@ public final class MultiSelectManager {
          */
         private void endBandSelect() {
             if (DEBUG) Log.d(TAG, "Ending band select.");
-            mIsActive = false;
+
             mHelper.hideBand();
             mSelection.applyProvisionalSelection();
             mModel.endSelection();
             int firstSelected = mModel.getPositionNearestOrigin();
-            if (firstSelected != BandSelectModel.NOT_SET) {
+            if (!mSelection.contains(firstSelected)) {
+                Log.w(TAG, "First selected by band is NOT in selection!");
+                // Sadly this is really happening. Need to figure out what's going on.
+            } else if (firstSelected != BandSelectModel.NOT_SET) {
                 setSelectionFocusBegin(firstSelected);
             }
+
+            mModel = null;
+            mOrigin = null;
         }
 
         @Override
@@ -1311,13 +1328,13 @@ public final class MultiSelectManager {
                 // that one additional pixel is added here so that the view still scrolls when the
                 // pointer is exactly at the top or bottom.
                 int pixelsPastView = 0;
-                if (mPointer.y <= 0) {
-                    pixelsPastView = mPointer.y - 1;
-                } else if (mPointer.y >= mHelper.getHeight() - 1) {
-                    pixelsPastView = mPointer.y - mHelper.getHeight() + 1;
+                if (mCurrentPosition.y <= 0) {
+                    pixelsPastView = mCurrentPosition.y - 1;
+                } else if (mCurrentPosition.y >= mHelper.getHeight() - 1) {
+                    pixelsPastView = mCurrentPosition.y - mHelper.getHeight() + 1;
                 }
 
-                if (!mIsActive || pixelsPastView == 0) {
+                if (!isActive() || pixelsPastView == 0) {
                     // If band selection is inactive, or if it is active but not at the edge of the
                     // view, no scrolling is necessary.
                     mScrollStartTime = NOT_SET;
@@ -1403,7 +1420,7 @@ public final class MultiSelectManager {
 
         @Override
         public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
-            if (!mIsActive) {
+            if (!isActive()) {
                 return;
             }
 
