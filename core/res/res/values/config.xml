@@ -170,6 +170,21 @@
          so that applications can still use their own mechanisms. -->
     <bool name="config_enableAutoPowerModes">false</bool>
 
+    <!-- The threshold angle for any motion detection in auto-power save modes.
+         In hundreths of a degree. -->
+    <integer name="config_autoPowerModeThresholdAngle">200</integer>
+
+    <!-- The sensor id of an "any motion" sensor used in auto-power save modes.
+         0 indicates this sensor is not available. -->
+    <integer name="config_autoPowerModeAnyMotionSensor">0</integer>
+
+    <!-- If an any motion sensor is not available, prefer the wrist tilt detector over the
+         SMD. -->
+    <bool name="config_autoPowerModePreferWristTilt">false</bool>
+
+    <!-- If a location should be pre-fetched when going into device idle. -->
+    <bool name="config_autoPowerModePrefetchLocation">true</bool>
+
     <!-- The duration (in milliseconds) that the radio will scan for a signal
          when there's no network connection. If the scan doesn't timeout, use zero -->
     <integer name="config_radioScanningTimeout">0</integer>
