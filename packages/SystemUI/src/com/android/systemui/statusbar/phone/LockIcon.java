@@ -248,10 +248,10 @@ public class LockIcon extends KeyguardAffordanceView {
             return STATE_FINGERPRINT_ERROR;
         } else if (mUnlockMethodCache.canSkipBouncer()) {
             return STATE_LOCK_OPEN;
-        } else if (fingerprintRunning && unlockingAllowed) {
-            return STATE_FINGERPRINT;
         } else if (mUnlockMethodCache.isFaceUnlockRunning()) {
             return STATE_FACE_UNLOCK;
+        } else if (fingerprintRunning && unlockingAllowed) {
+            return STATE_FINGERPRINT;
         } else {
             return STATE_LOCKED;
         }
