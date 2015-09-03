@@ -1051,6 +1051,7 @@ public class KeyguardViewMediator extends SystemUI {
                 // Without this, settings is not enabled until the lock screen first appears
                 setShowingLocked(false);
                 hideLocked();
+                mUpdateMonitor.reportSuccessfulStrongAuthUnlockAttempt();
                 return;
             }
         }
