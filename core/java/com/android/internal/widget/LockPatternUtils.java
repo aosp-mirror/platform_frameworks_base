@@ -232,7 +232,7 @@ public class LockPatternUtils {
     public void reportFailedPasswordAttempt(int userId) {
         getDevicePolicyManager().reportFailedPasswordAttempt(userId);
         getTrustManager().reportUnlockAttempt(false /* authenticated */, userId);
-        requireCredentialEntry(userId);
+        requireStrongAuth(StrongAuthTracker.SOME_AUTH_REQUIRED_AFTER_WRONG_CREDENTIAL, userId);
     }
 
     public void reportSuccessfulPasswordAttempt(int userId) {
@@ -1290,10 +1290,17 @@ public class LockPatternUtils {
          */
         public static final int STRONG_AUTH_REQUIRED_AFTER_LOCKOUT = 0x8;
 
+        /**
+         * Some authentication is required because the user has entered a wrong credential.
+         */
+        public static final int SOME_AUTH_REQUIRED_AFTER_WRONG_CREDENTIAL = 0x10;
+
         public static final int DEFAULT = STRONG_AUTH_REQUIRED_AFTER_BOOT;
 
-        final SparseIntArray mStrongAuthRequiredForUser = new SparseIntArray();
+        private static final int ALLOWING_FINGERPRINT = STRONG_AUTH_NOT_REQUIRED
+                | SOME_AUTH_REQUIRED_AFTER_WRONG_CREDENTIAL;
 
+        private final SparseIntArray mStrongAuthRequiredForUser = new SparseIntArray();
         private final H mHandler;
 
         public StrongAuthTracker() {
@@ -1332,7 +1339,7 @@ public class LockPatternUtils {
          * current strong authentication requirements.
          */
         public boolean isFingerprintAllowedForUser(int userId) {
-            return getStrongAuthForUser(userId) == STRONG_AUTH_NOT_REQUIRED;
+            return (getStrongAuthForUser(userId) & ~ALLOWING_FINGERPRINT) == 0;
         }
 
         /**
