@@ -4593,27 +4593,6 @@ public final class ActivityThread {
         }
         updateDefaultDensity();
 
-        final ContextImpl appContext = ContextImpl.createAppContext(this, data.info);
-        if (!Process.isIsolated()) {
-            final File cacheDir = appContext.getCacheDir();
-
-            if (cacheDir != null) {
-                // Provide a usable directory for temporary files
-                System.setProperty("java.io.tmpdir", cacheDir.getAbsolutePath());
-            } else {
-                Log.v(TAG, "Unable to initialize \"java.io.tmpdir\" property due to missing cache directory");
-            }
-
-            // Use codeCacheDir to store generated/compiled graphics code
-            final File codeCacheDir = appContext.getCodeCacheDir();
-            if (codeCacheDir != null) {
-                setupGraphicsSupport(data.info, codeCacheDir);
-            } else {
-                Log.e(TAG, "Unable to setupGraphicsSupport due to missing code-cache directory");
-            }
-        }
-
-
         final boolean is24Hr = "24".equals(mCoreSettings.getString(Settings.System.TIME_12_24));
         DateFormat.set24HourTimePref(is24Hr);
 
@@ -4697,17 +4676,16 @@ public final class ActivityThread {
             } catch (RemoteException e) {}
         }
 
+        // Instrumentation info affects the class loader, so load it before
+        // setting up the app context.
+        final InstrumentationInfo ii;
         if (data.instrumentationName != null) {
-            InstrumentationInfo ii = null;
             try {
-                ii = appContext.getPackageManager().
-                    getInstrumentationInfo(data.instrumentationName, 0);
+                ii = new ApplicationPackageManager(null, getPackageManager())
+                        .getInstrumentationInfo(data.instrumentationName, 0);
             } catch (PackageManager.NameNotFoundException e) {
-            }
-            if (ii == null) {
                 throw new RuntimeException(
-                    "Unable to find instrumentation info for: "
-                    + data.instrumentationName);
+                        "Unable to find instrumentation info for: " + data.instrumentationName);
             }
 
             mInstrumentationPackageName = ii.packageName;
@@ -4717,13 +4695,32 @@ public final class ActivityThread {
             mInstrumentedAppDir = data.info.getAppDir();
             mInstrumentedSplitAppDirs = data.info.getSplitAppDirs();
             mInstrumentedLibDir = data.info.getLibDir();
+        } else {
+            ii = null;
+        }
 
-            // The app context's info was created against this thread, but
-            // the class loader may have already been loaded and cached with
-            // outdated paths. Clear it so we can load it again using the
-            // instrumentation paths.
-            data.info.clearClassLoader();
+        final ContextImpl appContext = ContextImpl.createAppContext(this, data.info);
+        if (!Process.isIsolated()) {
+            final File cacheDir = appContext.getCacheDir();
+            if (cacheDir != null) {
+                // Provide a usable directory for temporary files
+                System.setProperty("java.io.tmpdir", cacheDir.getAbsolutePath());
+            } else {
+                Log.v(TAG, "Unable to initialize \"java.io.tmpdir\" property "
+                        + "due to missing cache directory");
+            }
 
+            // Use codeCacheDir to store generated/compiled graphics code
+            final File codeCacheDir = appContext.getCodeCacheDir();
+            if (codeCacheDir != null) {
+                setupGraphicsSupport(data.info, codeCacheDir);
+            } else {
+                Log.e(TAG, "Unable to setupGraphicsSupport due to missing code-cache directory");
+            }
+        }
+
+        // Continue loading instrumentation.
+        if (ii != null) {
             final ApplicationInfo instrApp = new ApplicationInfo();
             instrApp.packageName = ii.packageName;
             instrApp.sourceDir = ii.sourceDir;
