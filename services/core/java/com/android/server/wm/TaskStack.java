@@ -375,7 +375,10 @@ public class TaskStack {
             for (int appNdx = appWindowTokens.size() - 1; appNdx >= 0; --appNdx) {
                 final WindowList appWindows = appWindowTokens.get(appNdx).allAppWindows;
                 for (int winNdx = appWindows.size() - 1; winNdx >= 0; --winNdx) {
-                    mService.removeWindowInnerLocked(appWindows.get(winNdx));
+                    // We are in the middle of changing the state of displays/stacks/tasks. We need
+                    // to finish that, before we let layout interfere with it.
+                    mService.removeWindowInnerLocked(appWindows.get(winNdx),
+                            false /* performLayout */);
                     doAnotherLayoutPass = true;
                 }
             }
