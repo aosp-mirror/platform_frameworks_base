@@ -16,14 +16,11 @@
 
 package com.android.server;
 
-import static org.easymock.EasyMock.createStrictMock;
-import static org.easymock.EasyMock.expect;
-import static org.easymock.EasyMock.replay;
-import static org.easymock.EasyMock.reportMatcher;
-import static org.easymock.EasyMock.reset;
-import static org.easymock.EasyMock.verify;
-
-import org.easymock.IArgumentMatcher;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyInt;
+import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import android.accessibilityservice.AccessibilityServiceInfo;
 import android.os.UserHandle;
@@ -34,6 +31,9 @@ import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityManager;
 import android.view.accessibility.IAccessibilityManager;
 import android.view.accessibility.IAccessibilityManagerClient;
+
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -49,78 +49,65 @@ public class AccessibilityManagerTest extends AndroidTestCase {
      */
     public static final long TIMEOUT_BINDER_CALL = 50;
 
-    /**
-     * The reusable mock {@link IAccessibilityManager}.
-     */
-    private final IAccessibilityManager mMockServiceInterface =
-        createStrictMock(IAccessibilityManager.class);
+    @Mock
+    private IAccessibilityManager mMockService;
 
     @Override
     public void setUp() throws Exception {
-        reset(mMockServiceInterface);
+        MockitoAnnotations.initMocks(this);
+    }
+
+    private AccessibilityManager createManager(boolean enabled) throws Exception {
+        if (enabled) {
+            when(mMockService.addClient(any(IAccessibilityManagerClient.class), anyInt()))
+                    .thenReturn(AccessibilityManager.STATE_FLAG_ACCESSIBILITY_ENABLED);
+        } else {
+            when(mMockService.addClient(any(IAccessibilityManagerClient.class), anyInt()))
+                    .thenReturn(0);
+        }
+
+        AccessibilityManager manager =
+                new AccessibilityManager(mContext, mMockService, UserHandle.USER_CURRENT);
+
+        verify(mMockService).addClient(any(IAccessibilityManagerClient.class), anyInt());
+
+        return manager;
     }
 
     @MediumTest
     public void testGetAccessibilityServiceList() throws Exception {
         // create a list of installed accessibility services the mock service returns
-        List<AccessibilityServiceInfo> expectedServices = new ArrayList<AccessibilityServiceInfo>();
+        List<AccessibilityServiceInfo> expectedServices = new ArrayList<>();
         AccessibilityServiceInfo accessibilityServiceInfo = new AccessibilityServiceInfo();
         accessibilityServiceInfo.packageNames = new String[] { "foo.bar" };
         expectedServices.add(accessibilityServiceInfo);
 
         // configure the mock service behavior
-        IAccessibilityManager mockServiceInterface = mMockServiceInterface;
-        expect(mockServiceInterface.addClient(anyIAccessibilityManagerClient(),
-                UserHandle.USER_OWNER)).andReturn(
-                AccessibilityManager.STATE_FLAG_ACCESSIBILITY_ENABLED);
-        expect(mockServiceInterface.getInstalledAccessibilityServiceList(UserHandle.USER_OWNER))
-                .andReturn(expectedServices);
-        replay(mockServiceInterface);
+        when(mMockService.getInstalledAccessibilityServiceList(anyInt()))
+                .thenReturn(expectedServices);
 
         // invoke the method under test
-        AccessibilityManager manager = new AccessibilityManager(mContext, mockServiceInterface,
-                UserHandle.USER_OWNER);
+        AccessibilityManager manager = createManager(true);
         List<AccessibilityServiceInfo> receivedServices =
-            manager.getInstalledAccessibilityServiceList();
+                manager.getInstalledAccessibilityServiceList();
 
+        verify(mMockService).getInstalledAccessibilityServiceList(UserHandle.USER_CURRENT);
         // check expected result (list equals() compares it contents as well)
-        assertEquals("All expected services must be returned", receivedServices, expectedServices);
-
-        // verify the mock service was properly called
-        verify(mockServiceInterface);
+        assertEquals("All expected services must be returned", expectedServices, receivedServices);
     }
 
     @MediumTest
     public void testInterrupt() throws Exception {
-        // configure the mock service behavior
-        IAccessibilityManager mockServiceInterface = mMockServiceInterface;
-        expect(mockServiceInterface.addClient(anyIAccessibilityManagerClient(),
-                UserHandle.USER_OWNER)).andReturn(
-                        AccessibilityManager.STATE_FLAG_ACCESSIBILITY_ENABLED);
-        mockServiceInterface.interrupt(UserHandle.USER_OWNER);
-        replay(mockServiceInterface);
-
-        // invoke the method under test
-        AccessibilityManager manager = new AccessibilityManager(mContext, mockServiceInterface,
-                UserHandle.USER_OWNER);
+        AccessibilityManager manager = createManager(true);
         manager.interrupt();
 
-        // verify the mock service was properly called
-        verify(mockServiceInterface);
+        verify(mMockService).interrupt(UserHandle.USER_CURRENT);
     }
 
     @LargeTest
     public void testIsEnabled() throws Exception {
-        // configure the mock service behavior
-        IAccessibilityManager mockServiceInterface = mMockServiceInterface;
-        expect(mockServiceInterface.addClient(anyIAccessibilityManagerClient(),
-                UserHandle.USER_OWNER)).andReturn(
-                        AccessibilityManager.STATE_FLAG_ACCESSIBILITY_ENABLED);
-        replay(mockServiceInterface);
-
         // invoke the method under test
-        AccessibilityManager manager = new AccessibilityManager(mContext, mockServiceInterface,
-                UserHandle.USER_OWNER);
+        AccessibilityManager manager = createManager(true);
         boolean isEnabledServiceEnabled = manager.isEnabled();
 
         // check expected result
@@ -138,137 +125,38 @@ public class AccessibilityManagerTest extends AndroidTestCase {
         // check expected result
         assertFalse("Must be disabled since the mock service is disabled",
                 isEnabledServcieDisabled);
-
-        // verify the mock service was properly called
-        verify(mockServiceInterface);
     }
 
     @MediumTest
     public void testSendAccessibilityEvent_AccessibilityEnabled() throws Exception {
-        // create an event to be dispatched
         AccessibilityEvent sentEvent = AccessibilityEvent.obtain();
 
-        // configure the mock service behavior
-        IAccessibilityManager mockServiceInterface = mMockServiceInterface;
-        expect(mockServiceInterface.addClient(anyIAccessibilityManagerClient(),
-                UserHandle.USER_OWNER)).andReturn(
-                        AccessibilityManager.STATE_FLAG_ACCESSIBILITY_ENABLED);
-        expect(mockServiceInterface.sendAccessibilityEvent(eqAccessibilityEvent(sentEvent),
-                UserHandle.USER_OWNER)).andReturn(true);
-        expect(mockServiceInterface.sendAccessibilityEvent(eqAccessibilityEvent(sentEvent),
-                UserHandle.USER_OWNER)).andReturn(false);
-        replay(mockServiceInterface);
+        when(mMockService.sendAccessibilityEvent(eq(sentEvent), anyInt()))
+                .thenReturn(true  /* should recycle event object */)
+                .thenReturn(false /* should not recycle event object */);
 
-        // invoke the method under test (manager and service in different processes)
-        AccessibilityManager manager = new AccessibilityManager(mContext, mockServiceInterface,
-                UserHandle.USER_OWNER);
+        AccessibilityManager manager = createManager(true);
         manager.sendAccessibilityEvent(sentEvent);
 
-        // check expected result
-        AccessibilityEvent nextEventDifferentProcesses = AccessibilityEvent.obtain();
-        assertSame("The manager and the service are in different processes, so the event must be " +
-                "recycled", sentEvent, nextEventDifferentProcesses);
+        assertSame("The event should be recycled.", sentEvent, AccessibilityEvent.obtain());
 
-        // invoke the method under test (manager and service in the same process)
         manager.sendAccessibilityEvent(sentEvent);
 
-        // check expected result
-        AccessibilityEvent nextEventSameProcess = AccessibilityEvent.obtain();
-        assertNotSame("The manager and the service are in the same process, so the event must not" +
-                "be recycled", sentEvent, nextEventSameProcess);
-
-        // verify the mock service was properly called
-        verify(mockServiceInterface);
+        assertNotSame("The event should not be recycled.", sentEvent, AccessibilityEvent.obtain());
     }
 
     @MediumTest
     public void testSendAccessibilityEvent_AccessibilityDisabled() throws Exception {
-        // create an event to be dispatched
         AccessibilityEvent sentEvent = AccessibilityEvent.obtain();
 
-        // configure the mock service behavior
-        IAccessibilityManager mockServiceInterface = mMockServiceInterface;
-        expect(mockServiceInterface.addClient(anyIAccessibilityManagerClient(),
-                UserHandle.USER_OWNER)).andReturn(0);
-        replay(mockServiceInterface);
+        AccessibilityManager manager = createManager(false  /* disabled */);
 
-        // invoke the method under test (accessibility disabled)
-        AccessibilityManager manager = new AccessibilityManager(mContext, mockServiceInterface,
-                UserHandle.USER_OWNER);
         try {
             manager.sendAccessibilityEvent(sentEvent);
             fail("No accessibility events are sent if accessibility is disabled");
         } catch (IllegalStateException ise) {
             // check expected result
             assertEquals("Accessibility off. Did you forget to check that?", ise.getMessage());
-        }
-
-        // verify the mock service was properly called
-        verify(mockServiceInterface);
-    }
-
-    /**
-     * Determines if an {@link AccessibilityEvent} passed as a method argument
-     * matches expectations.
-     *
-     * @param matched The event to check.
-     * @return True if expectations are matched.
-     */
-    private static AccessibilityEvent eqAccessibilityEvent(AccessibilityEvent matched) {
-        reportMatcher(new AccessibilityEventMather(matched));
-        return null;
-    }
-
-    /**
-     * Determines if an {@link IAccessibilityManagerClient} passed as a method argument
-     * matches expectations which in this case are that any instance is accepted.
-     *
-     * @return <code>null</code>.
-     */
-    private static IAccessibilityManagerClient anyIAccessibilityManagerClient() {
-        reportMatcher(new AnyIAccessibilityManagerClientMather());
-        return null;
-    }
-
-    /**
-     * Matcher for {@link AccessibilityEvent}s.
-     */
-    private static class AccessibilityEventMather implements IArgumentMatcher {
-        private AccessibilityEvent mExpectedEvent;
-
-        public AccessibilityEventMather(AccessibilityEvent expectedEvent) {
-            mExpectedEvent = expectedEvent;
-        }
-
-        public boolean matches(Object matched) {
-            if (!(matched instanceof AccessibilityEvent)) {
-                return false;
-            }
-            AccessibilityEvent receivedEvent = (AccessibilityEvent) matched;
-            return mExpectedEvent.getEventType() == receivedEvent.getEventType();
-        }
-
-        public void appendTo(StringBuffer buffer) {
-            buffer.append("sendAccessibilityEvent()");
-            buffer.append(" with event type \"");
-            buffer.append(mExpectedEvent.getEventType());
-            buffer.append("\"");
-        }
-    }
-
-    /**
-     * Matcher for {@link IAccessibilityManagerClient}s.
-     */
-    private static class AnyIAccessibilityManagerClientMather implements IArgumentMatcher {
-        public boolean matches(Object matched) {
-            if (!(matched instanceof IAccessibilityManagerClient)) {
-                return false;
-            }
-            return true;
-        }
-
-        public void appendTo(StringBuffer buffer) {
-            buffer.append("addClient() with any IAccessibilityManagerClient");
         }
     }
 }
