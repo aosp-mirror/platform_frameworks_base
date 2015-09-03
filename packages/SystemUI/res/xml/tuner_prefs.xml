@@ -37,6 +37,10 @@
                 android:key="qs_paged_panel"
                 android:title="@string/qs_paging" />
 
+            <com.android.systemui.tuner.TunerSwitch
+                android:key="qs_allow_customize"
+                android:title="@string/qs_customize" />
+
         </PreferenceCategory>
 
     </PreferenceScreen>

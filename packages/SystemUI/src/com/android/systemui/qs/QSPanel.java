@@ -39,6 +39,7 @@ import com.android.internal.logging.MetricsLogger;
 import com.android.systemui.FontSizeUtils;
 import com.android.systemui.R;
 import com.android.systemui.qs.QSTile.DetailAdapter;
+import com.android.systemui.qs.customize.QSCustomizer;
 import com.android.systemui.settings.BrightnessController;
 import com.android.systemui.settings.ToggleSlider;
 import com.android.systemui.statusbar.phone.QSTileHost;
@@ -54,8 +55,9 @@ public class QSPanel extends FrameLayout implements Tunable {
 
     public static final String QS_SHOW_BRIGHTNESS = "qs_show_brightness";
     public static final String QS_PAGED_PANEL = "qs_paged_panel";
+    public static final String QS_ALLOW_CUSTOMIZE = "qs_allow_customize";
 
-    private final Context mContext;
+    protected final Context mContext;
     protected final ArrayList<TileRecord> mRecords = new ArrayList<TileRecord>();
     private final View mDetail;
     private final ViewGroup mDetailContent;
@@ -79,8 +81,10 @@ public class QSPanel extends FrameLayout implements Tunable {
     private QSFooter mFooter;
     private boolean mGridContentVisible = true;
 
-    private LinearLayout mQsContainer;
-    private QSTileLayout mTileLayout;
+    protected LinearLayout mQsContainer;
+    protected QSTileLayout mTileLayout;
+
+    private QSCustomizer mCustomizePanel;
 
     public QSPanel(Context context) {
         this(context, null);
@@ -131,7 +135,8 @@ public class QSPanel extends FrameLayout implements Tunable {
     @Override
     protected void onAttachedToWindow() {
         super.onAttachedToWindow();
-        TunerService.get(mContext).addTunable(this, QS_SHOW_BRIGHTNESS, QS_PAGED_PANEL);
+        TunerService.get(mContext).addTunable(this,
+                QS_SHOW_BRIGHTNESS, QS_PAGED_PANEL, QS_ALLOW_CUSTOMIZE);
     }
 
     @Override
@@ -159,6 +164,17 @@ public class QSPanel extends FrameLayout implements Tunable {
             mQsContainer.addView((View) mTileLayout, 1 /* Between brightness and footer */);
             for (int i = 0; i < mRecords.size(); i++) {
                 mTileLayout.addTile(mRecords.get(i));
+            }
+        } else if (QS_ALLOW_CUSTOMIZE.equals(key)) {
+            if (newValue != null && Integer.parseInt(newValue) != 0) {
+                mCustomizePanel = (QSCustomizer) LayoutInflater.from(mContext)
+                        .inflate(R.layout.qs_customize_panel, null);
+                mCustomizePanel.setHost(mHost);
+            } else {
+                if (mCustomizePanel != null && mCustomizePanel.isCustomizing()) {
+                    mCustomizePanel.hide();
+                }
+                mCustomizePanel = null;
             }
         }
     }
@@ -222,6 +238,12 @@ public class QSPanel extends FrameLayout implements Tunable {
             }
         }
         mFooter.onConfigurationChanged();
+    }
+
+    public void onCollapse() {
+        if (mCustomizePanel != null && mCustomizePanel.isCustomizing()) {
+            mCustomizePanel.hide();
+        }
     }
 
     public void setExpanded(boolean expanded) {
@@ -307,7 +329,7 @@ public class QSPanel extends FrameLayout implements Tunable {
         r.tileView.onStateChanged(state);
     }
 
-    private void addTile(final QSTile<?> tile) {
+    protected void addTile(final QSTile<?> tile) {
         final TileRecord r = new TileRecord();
         r.tile = tile;
         r.tileView = tile.createTileView(mContext);
@@ -358,7 +380,13 @@ public class QSPanel extends FrameLayout implements Tunable {
         final View.OnLongClickListener longClick = new View.OnLongClickListener() {
             @Override
             public boolean onLongClick(View v) {
-                r.tile.longClick();
+                if (mCustomizePanel != null) {
+                    if (!mCustomizePanel.isCustomizing()) {
+                        mCustomizePanel.show();
+                    }
+                } else {
+                    r.tile.longClick();
+                }
                 return true;
             }
         };
@@ -374,10 +402,16 @@ public class QSPanel extends FrameLayout implements Tunable {
     }
 
     public boolean isShowingDetail() {
-        return mDetailRecord != null;
+        return mDetailRecord != null
+                || (mCustomizePanel != null && mCustomizePanel.isCustomizing());
     }
 
     public void closeDetail() {
+        if (mCustomizePanel != null && mCustomizePanel.isCustomizing()) {
+            // Treat this as a detail panel for now, to make things easy.
+            mCustomizePanel.hide();
+            return;
+        }
         showDetail(false, mDetailRecord);
     }
 
@@ -527,7 +561,7 @@ public class QSPanel extends FrameLayout implements Tunable {
         int y;
     }
 
-    protected static final class TileRecord extends Record {
+    public static final class TileRecord extends Record {
         public QSTile<?> tile;
         public QSTileView tileView;
         public int row;

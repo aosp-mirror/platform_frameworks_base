@@ -54,6 +54,11 @@ public class TileLayout extends ViewGroup implements QSTileLayout {
         removeView(tile.tileView);
     }
 
+    public void removeAllViews() {
+        mRecords.clear();
+        super.removeAllViews();
+    }
+
     @Override
     public void setTileVisibility(TileRecord tile, int visibility) {
         tile.tileView.setVisibility(visibility);

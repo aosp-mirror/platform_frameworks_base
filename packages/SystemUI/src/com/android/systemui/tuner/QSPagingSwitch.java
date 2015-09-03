@@ -8,7 +8,7 @@ import com.android.systemui.statusbar.phone.QSTileHost;
 
 public class QSPagingSwitch extends TunerSwitch {
 
-    private static final String QS_PAGE_TILES =
+    public static final String QS_PAGE_TILES =
             "dwifi,dbt,inversion,dnd,cell,airplane,rotation,flashlight,location,"
              + "hotspot,qwifi,qbt,qrotation,qflashlight,qairplane,cast";
 

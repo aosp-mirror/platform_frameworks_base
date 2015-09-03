@@ -65,6 +65,8 @@ public abstract class QSTile<TState extends State> implements Listenable {
     private TState mTmpState = newTileState();
     private boolean mAnnounceNextStateChange;
 
+    private String mTileSpec;
+
     abstract protected TState newTileState();
     abstract protected void handleClick();
     abstract protected void handleUpdateState(TState state, Object arg);
@@ -83,7 +85,15 @@ public abstract class QSTile<TState extends State> implements Listenable {
         mContext = host.getContext();
         mHandler = new H(host.getLooper());
     }
-    
+
+    public String getTileSpec() {
+        return mTileSpec;
+    }
+
+    public void setTileSpec(String tileSpec) {
+        mTileSpec = tileSpec;
+    }
+
     public int getTileType() {
         return QSTileView.QS_TYPE_NORMAL;
     }

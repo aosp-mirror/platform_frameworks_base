@@ -1156,4 +1156,7 @@
          settings are -->
     <string name="experimental">Experimental</string>
 
+    <string name="save" translatable="false">Save</string>
+    <string name="qs_customize" translatable="false">Allow long-press customize in Quick Settings</string>
+
 </resources>
