@@ -18,7 +18,6 @@ package com.android.server.am;
 
 import static android.app.ActivityManager.DOCKED_STACK_ID;
 import static android.app.ActivityManager.FREEFORM_WORKSPACE_STACK_ID;
-import static android.app.ActivityManager.FULLSCREEN_WORKSPACE_STACK_ID;
 import static android.app.ActivityManager.HOME_STACK_ID;
 import static android.content.pm.ActivityInfo.FLAG_SHOW_FOR_ALL_USERS;
 
@@ -4588,7 +4587,7 @@ final class ActivityStack {
 
     void addConfigOverride(ActivityRecord r, TaskRecord task) {
         final Rect bounds = task.getLaunchBounds();
-        final Configuration config = task.updateOverrideConfiguration(mStackId, bounds);
+        final Configuration config = task.updateOverrideConfiguration(bounds);
         mWindowManager.addAppToken(task.mActivities.indexOf(r), r.appToken,
                 r.task.taskId, mStackId, r.info.screenOrientation, r.fullscreen,
                 (r.info.flags & ActivityInfo.FLAG_SHOW_FOR_ALL_USERS) != 0, r.userId,
@@ -4599,7 +4598,7 @@ final class ActivityStack {
 
     private void setAppTask(ActivityRecord r, TaskRecord task) {
         final Rect bounds = task.getLaunchBounds();
-        final Configuration config = task.updateOverrideConfiguration(mStackId, bounds);
+        final Configuration config = task.updateOverrideConfiguration(bounds);
         mWindowManager.setAppTask(r.appToken, task.taskId, task.getLaunchBounds(), config);
         r.taskConfigOverride = task.mOverrideConfig;
     }
