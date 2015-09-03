@@ -20,7 +20,6 @@ import static android.app.ActivityManager.DOCKED_STACK_ID;
 import static android.app.ActivityManager.FREEFORM_WORKSPACE_STACK_ID;
 import static android.app.ActivityManager.FULLSCREEN_WORKSPACE_STACK_ID;
 import static android.app.ActivityManager.HOME_STACK_ID;
-import static android.app.ActivityManager.INVALID_STACK_ID;
 import static android.content.Intent.FLAG_ACTIVITY_NEW_DOCUMENT;
 import static android.content.Intent.FLAG_ACTIVITY_RETAIN_IN_RECENTS;
 import static android.content.pm.ActivityInfo.LOCK_TASK_LAUNCH_MODE_ALWAYS;
@@ -227,8 +226,6 @@ final class TaskRecord {
     Rect mLastNonFullscreenBounds = null;
 
     Configuration mOverrideConfig = Configuration.EMPTY;
-
-    private Rect mTmpRect = new Rect();
 
     TaskRecord(ActivityManagerService service, int _taskId, ActivityInfo info, Intent _intent,
             IVoiceInteractionSession _voiceSession, IVoiceInteractor _voiceInteractor) {
@@ -1174,7 +1171,7 @@ final class TaskRecord {
                 activities, firstActiveTime, lastActiveTime, lastTimeOnTop, neverRelinquishIdentity,
                 taskDescription, taskAffiliation, prevTaskId, nextTaskId, taskAffiliationColor,
                 callingUid, callingPackage, resizeable, privileged);
-        task.updateOverrideConfiguration(INVALID_STACK_ID, bounds);
+        task.updateOverrideConfiguration(bounds);
 
         for (int activityNdx = activities.size() - 1; activityNdx >=0; --activityNdx) {
             activities.get(activityNdx).task = task;
@@ -1188,12 +1185,12 @@ final class TaskRecord {
      * Update task's override configuration based on the bounds.
      * @return Update configuration or null if there is no change.
      */
-    Configuration updateOverrideConfiguration(int stackId, Rect bounds) {
-        if (stackId == FREEFORM_WORKSPACE_STACK_ID) {
+    Configuration updateOverrideConfiguration(Rect bounds) {
+        if (stack.mStackId == FREEFORM_WORKSPACE_STACK_ID) {
             // For freeform stack we don't adjust the size of the tasks to match that of the
             // stack, but we do try to make sure the tasks are still contained with the
             // bounds of the stack.
-            bounds = fitWithinBounds(bounds);
+            fitWithinBounds(bounds, stack.mBounds);
         }
         if (Objects.equals(mBounds, bounds)) {
             return null;
@@ -1262,39 +1259,43 @@ final class TaskRecord {
         return mLastNonFullscreenBounds;
     }
 
-    /** Fits the tasks within the input bounds adjusting the task bounds as needed.
-     *  @param bounds Bounds to fit the task within. Nothing is done if null.
-     *  @return Returns final configuration after updating with the adjusted bounds.
-     *  */
-    Rect fitWithinBounds(Rect bounds) {
-        if (bounds == null || mBounds == null || bounds.contains(mBounds)) {
-            return bounds;
+    /**
+     * Adjust bounds to stay within stack bounds.
+     *
+     * Since bounds might be outside of stack bounds, this method tries to move the bounds in a way
+     * that keep them unchanged, but be contained within the stack bounds.
+     *
+     * @param bounds Bounds to be adjusted.
+     * @param stackBounds Bounds within which the other bounds should remain.
+     */
+    private static void fitWithinBounds(Rect bounds, Rect stackBounds) {
+        if (stackBounds == null || stackBounds.contains(bounds)) {
+            return;
         }
-        mTmpRect.set(mBounds);
 
-        if (mBounds.left < bounds.left || mBounds.right > bounds.right) {
-            final int maxRight = bounds.right - (bounds.width() / FIT_WITHIN_BOUNDS_DIVIDER);
-            int horizontalDiff = bounds.left - mBounds.left;
-            if ((horizontalDiff < 0 && mBounds.left >= maxRight)
-                    || (mBounds.left + horizontalDiff >= maxRight)) {
-                horizontalDiff = maxRight - mBounds.left;
+        if (bounds.left < stackBounds.left || bounds.right > stackBounds.right) {
+            final int maxRight = stackBounds.right
+                    - (stackBounds.width() / FIT_WITHIN_BOUNDS_DIVIDER);
+            int horizontalDiff = stackBounds.left - bounds.left;
+            if ((horizontalDiff < 0 && bounds.left >= maxRight)
+                    || (bounds.left + horizontalDiff >= maxRight)) {
+                horizontalDiff = maxRight - bounds.left;
             }
-            mTmpRect.left += horizontalDiff;
-            mTmpRect.right += horizontalDiff;
+            bounds.left += horizontalDiff;
+            bounds.right += horizontalDiff;
         }
 
-        if (mBounds.top < bounds.top || mBounds.bottom > bounds.bottom) {
-            final int maxBottom = bounds.bottom - (bounds.height() / FIT_WITHIN_BOUNDS_DIVIDER);
-            int verticalDiff = bounds.top - mBounds.top;
-            if ((verticalDiff < 0 && mBounds.top >= maxBottom)
-                    || (mBounds.top + verticalDiff >= maxBottom)) {
-                verticalDiff = maxBottom - mBounds.top;
+        if (bounds.top < stackBounds.top || bounds.bottom > stackBounds.bottom) {
+            final int maxBottom = stackBounds.bottom
+                    - (stackBounds.height() / FIT_WITHIN_BOUNDS_DIVIDER);
+            int verticalDiff = stackBounds.top - bounds.top;
+            if ((verticalDiff < 0 && bounds.top >= maxBottom)
+                    || (bounds.top + verticalDiff >= maxBottom)) {
+                verticalDiff = maxBottom - bounds.top;
             }
-            mTmpRect.top += verticalDiff;
-            mTmpRect.bottom += verticalDiff;
+            bounds.top += verticalDiff;
+            bounds.bottom += verticalDiff;
         }
-
-        return mTmpRect;
     }
 
     void dump(PrintWriter pw, String prefix) {

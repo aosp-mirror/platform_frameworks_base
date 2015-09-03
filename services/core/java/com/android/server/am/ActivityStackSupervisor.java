@@ -2925,7 +2925,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
             ArrayList<TaskRecord> tasks = stack.getAllTasks();
             for (int i = tasks.size() - 1; i >= 0; i--) {
                 TaskRecord task = tasks.get(i);
-                task.updateOverrideConfiguration(stackId, bounds);
+                task.updateOverrideConfiguration(bounds);
                 mTmpConfigs.put(task.taskId, task.mOverrideConfig);
                 mTmpBounds.put(task.taskId, task.mBounds);
             }
@@ -3029,7 +3029,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
             moveTaskToStackUncheckedLocked(task, stackId, ON_TOP, !FORCE_FOCUS, "resizeTask");
         }
 
-        final Configuration overrideConfig =  task.updateOverrideConfiguration(stackId, bounds);
+        final Configuration overrideConfig =  task.updateOverrideConfiguration(bounds);
         // This variable holds information whether the configuration didn't change in a signficant
         // way and the activity was kept the way it was. If it's false, it means the activity had
         // to be relaunched due to configuration change.
