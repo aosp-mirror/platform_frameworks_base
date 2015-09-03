@@ -5999,12 +5999,6 @@ public class PackageManagerService extends IPackageManager.Stub {
          */
         if (shouldHideSystemApp) {
             synchronized (mPackages) {
-                /*
-                 * We have to grant systems permissions before we hide, because
-                 * grantPermissions will assume the package update is trying to
-                 * expand its permissions.
-                 */
-                grantPermissionsLPw(pkg, true, pkg.packageName);
                 mSettings.disableSystemPackageLPw(pkg.packageName);
             }
         }
