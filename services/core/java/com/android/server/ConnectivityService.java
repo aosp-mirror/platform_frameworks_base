@@ -1524,10 +1524,14 @@ public class ConnectivityService extends IConnectivityManager.Stub
 
             final long ident = Binder.clearCallingIdentity();
             if (ConnectivityManager.CONNECTIVITY_ACTION.equals(intent.getAction())) {
+                final NetworkInfo ni = intent.getParcelableExtra(
+                        ConnectivityManager.EXTRA_NETWORK_INFO);
+                if (ni.getType() == ConnectivityManager.TYPE_MOBILE_SUPL) {
+                    intent.setAction(ConnectivityManager.CONNECTIVITY_ACTION_SUPL);
+                    intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY);
+                }
                 final IBatteryStats bs = BatteryStatsService.getService();
                 try {
-                    NetworkInfo ni = intent.getParcelableExtra(
-                            ConnectivityManager.EXTRA_NETWORK_INFO);
                     bs.noteConnectivityChanged(intent.getIntExtra(
                             ConnectivityManager.EXTRA_NETWORK_TYPE, ConnectivityManager.TYPE_NONE),
                             ni != null ? ni.getState().toString() : "?");
