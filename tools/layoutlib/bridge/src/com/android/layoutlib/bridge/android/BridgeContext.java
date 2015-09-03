@@ -36,8 +36,8 @@ import com.android.util.Pair;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 
-import android.annotation.Nullable;
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.ContentResolver;
@@ -139,8 +139,9 @@ public final class BridgeContext extends Context {
     private Map<StyleResourceValue, Integer> mStyleToDynamicIdMap;
     private int mDynamicIdGenerator = 0x02030000; // Base id for R.style in custom namespace
 
-    // cache for TypedArray generated from IStyleResourceValue object
-    private Map<int[], Map<Integer, BridgeTypedArray>> mTypedArrayCache;
+    // cache for TypedArray generated from StyleResourceValue object
+    private Map<int[], Map<List<StyleResourceValue>, Map<Integer, BridgeTypedArray>>>
+            mTypedArrayCache;
     private BridgeInflater mBridgeInflater;
 
     private BridgeContentResolver mContentResolver;
@@ -621,31 +622,38 @@ public final class BridgeContext extends Context {
             }
         }
 
+        // The map is from
+        // attrs (int[]) -> context's current themes (List<StyleRV>) -> resid (int) -> typed array.
         if (mTypedArrayCache == null) {
-            mTypedArrayCache = new HashMap<int[], Map<Integer,BridgeTypedArray>>();
-
-            Map<Integer, BridgeTypedArray> map = new HashMap<Integer, BridgeTypedArray>();
-            mTypedArrayCache.put(attrs, map);
-
-            BridgeTypedArray ta = createStyleBasedTypedArray(style, attrs);
-            map.put(resid, ta);
-
-            return ta;
+            mTypedArrayCache = new IdentityHashMap<int[],
+                    Map<List<StyleResourceValue>, Map<Integer, BridgeTypedArray>>>();
         }
 
         // get the 2nd map
-        Map<Integer, BridgeTypedArray> map = mTypedArrayCache.get(attrs);
-        if (map == null) {
-            map = new HashMap<Integer, BridgeTypedArray>();
-            mTypedArrayCache.put(attrs, map);
+        Map<List<StyleResourceValue>, Map<Integer, BridgeTypedArray>> map2 =
+                mTypedArrayCache.get(attrs);
+        if (map2 == null) {
+            map2 = new HashMap<List<StyleResourceValue>, Map<Integer, BridgeTypedArray>>();
+            mTypedArrayCache.put(attrs, map2);
         }
 
-        // get the array from the 2nd map
-        BridgeTypedArray ta = map.get(resid);
+        // get the 3rd map
+        List<StyleResourceValue> currentThemes = mRenderResources.getAllThemes();
+        Map<Integer, BridgeTypedArray> map3 = map2.get(currentThemes);
+        if (map3 == null) {
+            map3 = new HashMap<Integer, BridgeTypedArray>();
+            // Create a copy of the list before adding it to the map. This allows reusing the
+            // existing list.
+            currentThemes = new ArrayList<StyleResourceValue>(currentThemes);
+            map2.put(currentThemes, map3);
+        }
+
+        // get the array from the 3rd map
+        BridgeTypedArray ta = map3.get(resid);
 
         if (ta == null) {
             ta = createStyleBasedTypedArray(style, attrs);
-            map.put(resid, ta);
+            map3.put(resid, ta);
         }
 
         return ta;
