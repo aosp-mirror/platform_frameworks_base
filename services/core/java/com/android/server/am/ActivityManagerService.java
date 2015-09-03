@@ -407,6 +407,17 @@ public final class ActivityManagerService extends ActivityManagerNative
     private static final int PERSISTENT_MASK =
             ApplicationInfo.FLAG_SYSTEM|ApplicationInfo.FLAG_PERSISTENT;
 
+
+    // Delay to disable app launch boost
+    static final int APP_BOOST_MESSAGE_DELAY = 3000;
+    // Lower delay than APP_BOOST_MESSAGE_DELAY to disable the boost
+    static final int APP_BOOST_TIMEOUT = 2500;
+
+    private static native int nativeMigrateToBoost();
+    private static native int nativeMigrateFromBoost();
+    private boolean mIsBoosted = false;
+    private long mBoostStartTime = 0;
+
     /** All system services */
     SystemServiceManager mSystemServiceManager;
 
@@ -1368,6 +1379,7 @@ public final class ActivityManagerService extends ActivityManagerNative
     static final int REPORT_TIME_TRACKER_MSG = 55;
     static final int REPORT_USER_SWITCH_COMPLETE_MSG = 56;
     static final int SHUTDOWN_UI_AUTOMATION_CONNECTION_MSG = 57;
+    static final int APP_BOOST_DEACTIVATE_MSG = 58;
 
     static final int FIRST_ACTIVITY_STACK_MSG = 100;
     static final int FIRST_BROADCAST_QUEUE_MSG = 200;
@@ -2047,6 +2059,20 @@ public final class ActivityManagerService extends ActivityManagerNative
                 // Only a UiAutomation can set this flag and now that
                 // it is finished we make sure it is reset to its default.
                 mUserIsMonkey = false;
+            } break;
+            case APP_BOOST_DEACTIVATE_MSG : {
+                synchronized(ActivityManagerService.this) {
+                    if (mIsBoosted) {
+                        if (mBoostStartTime < (SystemClock.uptimeMillis() - APP_BOOST_TIMEOUT)) {
+                            nativeMigrateFromBoost();
+                            mIsBoosted = false;
+                            mBoostStartTime = 0;
+                        } else {
+                            Message newmsg = mHandler.obtainMessage(APP_BOOST_DEACTIVATE_MSG);
+                            mHandler.sendMessageDelayed(newmsg, APP_BOOST_TIMEOUT);
+                        }
+                    }
+                }
             } break;
             }
         }
@@ -3178,6 +3204,16 @@ public final class ActivityManagerService extends ActivityManagerNative
         } else {
             // If this is an isolated process, it can't re-use an existing process.
             app = null;
+        }
+
+        // app launch boost for big.little configurations
+        // use cpusets to migrate freshly launched tasks to big cores
+        synchronized(ActivityManagerService.this) {
+            nativeMigrateToBoost();
+            mIsBoosted = true;
+            mBoostStartTime = SystemClock.uptimeMillis();
+            Message msg = mHandler.obtainMessage(APP_BOOST_DEACTIVATE_MSG);
+            mHandler.sendMessageDelayed(msg, APP_BOOST_MESSAGE_DELAY);
         }
 
         // We don't have to do anything more if:
