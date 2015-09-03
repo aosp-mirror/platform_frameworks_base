@@ -55,6 +55,7 @@ abstract class DhcpPacket {
     public static final int MIN_PACKET_LENGTH_L3 = MIN_PACKET_LENGTH_BOOTP + 20 + 8;
     public static final int MIN_PACKET_LENGTH_L2 = MIN_PACKET_LENGTH_L3 + 14;
 
+    public static final int HWADDR_LEN = 16;
     public static final int MAX_OPTION_LEN = 255;
     /**
      * IP layer definitions.
@@ -399,7 +400,7 @@ abstract class DhcpPacket {
         buf.put(mRelayIp.getAddress());
         buf.put(mClientMac);
         buf.position(buf.position() +
-                     (16 - mClientMac.length) // pad addr to 16 bytes
+                     (HWADDR_LEN - mClientMac.length) // pad addr to 16 bytes
                      + 64     // empty server host name (64 bytes)
                      + 128);  // empty boot file name (128 bytes)
         buf.putInt(0x63825363); // magic number
@@ -786,7 +787,7 @@ abstract class DhcpPacket {
 
         byte type = packet.get();
         byte hwType = packet.get();
-        byte addrLen = packet.get();
+        int addrLen = packet.get() & 0xff;
         byte hops = packet.get();
         transactionId = packet.getInt();
         secs = packet.getShort();
@@ -805,6 +806,16 @@ abstract class DhcpPacket {
             relayIp = (Inet4Address) Inet4Address.getByAddress(ipv4addr);
         } catch (UnknownHostException ex) {
             return null;
+        }
+
+        // Some DHCP servers have been known to announce invalid client hardware address values such
+        // as 0xff. The legacy DHCP client accepted these becuause it does not check the length at
+        // all but only checks that the interface MAC address matches the first bytes of the address
+        // in the packets. We're a bit stricter: if the length is obviously invalid (i.e., bigger
+        // than the size of the field), we fudge it to 6 (Ethernet). http://b/23725795
+        // TODO: evaluate whether to make this test more liberal.
+        if (addrLen > HWADDR_LEN) {
+            addrLen = ETHER_BROADCAST.length;
         }
 
         clientMac = new byte[addrLen];
