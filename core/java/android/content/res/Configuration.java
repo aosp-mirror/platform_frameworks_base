@@ -1049,7 +1049,7 @@ public final class Configuration implements Parcelable, Comparable<Configuration
         }
         fixUpLocaleList();
         delta.fixUpLocaleList();
-        if (!mLocaleList.equals(delta.mLocaleList)) {
+        if (!delta.mLocaleList.isEmpty() && !mLocaleList.equals(delta.mLocaleList)) {
             changed |= ActivityInfo.CONFIG_LOCALE;
             changed |= ActivityInfo.CONFIG_LAYOUT_DIRECTION;
         }
