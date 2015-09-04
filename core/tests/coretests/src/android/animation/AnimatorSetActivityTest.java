@@ -11,6 +11,7 @@ import java.util.ArrayList;
 
 public class AnimatorSetActivityTest extends ActivityInstrumentationTestCase2<AnimatorSetActivity> {
 
+    private static final long POLL_INTERVAL = 100; // ms
     private AnimatorSetActivity mActivity;
     private ObjectAnimator a1,a2,a3;
     private ValueAnimator a4,a5;
@@ -479,6 +480,154 @@ public class AnimatorSetActivityTest extends ActivityInstrumentationTestCase2<An
                 assertFalse(set.isPaused());
             }
         });
+    }
+
+    @SmallTest
+    public void testClone() throws Throwable {
+        // Set up an AnimatorSet and two clones, add one listener to each. When the clones animate,
+        // listeners of both the clone and the animator being cloned should receive animation
+        // lifecycle events.
+        final AnimatorSet s1 = getSequentialSet();
+
+        // Record animators that called their listeners for the corresponding event.
+        final ArrayList<Animator> startedAnimators = new ArrayList<>();
+        final ArrayList<Animator> canceledAnimators = new ArrayList<>();
+        final ArrayList<Animator> endedAnimators = new ArrayList<>();
+
+        final MyListener l1 = new MyListener() {
+            @Override
+            public void onAnimationStart(Animator anim) {
+                super.onAnimationStart(anim);
+                startedAnimators.add(anim);
+            }
+
+            @Override
+            public void onAnimationCancel(Animator anim) {
+                super.onAnimationCancel(anim);
+                canceledAnimators.add(anim);
+            }
+
+            @Override
+            public void onAnimationEnd(Animator anim) {
+                super.onAnimationEnd(anim);
+                endedAnimators.add(anim);
+            }
+
+        };
+        s1.addListener(l1);
+
+        // Start the animation, and make the first clone during its run and the second clone once
+        // it ends.
+        runTestOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                assertFalse(l1.startIsCalled);
+                assertFalse(l1.endIsCalled);
+
+                s1.start();
+            }
+        });
+
+        // Make the first clone, during the animation's run.
+        assertTrue(s1.isStarted());
+        final AnimatorSet s2 = s1.clone();
+        final MyListener l2 = new MyListener();
+        s2.addListener(l2);
+
+        Thread.sleep(POLL_INTERVAL);
+        runTestOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                s1.end();
+            }
+        });
+
+        Thread.sleep(POLL_INTERVAL);
+        runTestOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                assertTrue(l1.startIsCalled);
+                assertTrue(l1.endIsCalled);
+            }
+        });
+        Thread.sleep(POLL_INTERVAL);
+
+        // Make the second clone now.
+        final AnimatorSet s3 = s1.clone();
+        final MyListener l3 = new MyListener();
+        s3.addListener(l3);
+
+        runTestOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                // Checking the fields before animations start.
+                assertFalse(l2.startIsCalled);
+                assertFalse(l2.cancelIsCalled);
+                assertFalse(l2.endIsCalled);
+                assertFalse(l3.startIsCalled);
+                assertFalse(l3.cancelIsCalled);
+                assertFalse(l3.endIsCalled);
+
+                s2.start();
+                s3.start();
+            }
+        });
+
+        Thread.sleep(POLL_INTERVAL);
+        runTestOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                // Make sure the listeners receive the callbacks
+                // At this time only onAnimationStart() should be called.
+                assertTrue(l2.startIsCalled);
+                assertTrue(l3.startIsCalled);
+                assertFalse(l2.endIsCalled);
+                assertFalse(l3.endIsCalled);
+                assertFalse(l2.cancelIsCalled);
+                assertFalse(l3.cancelIsCalled);
+
+                s2.end();
+                s3.cancel();
+            }
+        });
+        Thread.sleep(POLL_INTERVAL);
+        runTestOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                // Check that the new listeners for the new animations gets called for the events.
+                assertTrue(l2.startIsCalled);
+                assertFalse(l2.cancelIsCalled);
+                assertTrue(l2.endIsCalled);
+                assertTrue(l3.startIsCalled);
+                assertTrue(l3.cancelIsCalled);
+                assertTrue(l3.endIsCalled);
+
+                // Check that the listener on the animation that was being clone receive the
+                // animation lifecycle events for the clones.
+                assertTrue(onlyContains(startedAnimators, s1, s2, s3));
+                assertTrue(onlyContains(canceledAnimators, s3));
+                assertTrue(onlyContains(endedAnimators, s1, s2, s3));
+            }
+        });
+
+    }
+
+    /**
+     * Check that the animator list contains exactly the given animators and nothing else.
+     */
+    private boolean onlyContains(ArrayList<Animator> animators, AnimatorSet... sets) {
+        if (sets.length != animators.size()) {
+            return false;
+        }
+
+        for (int i = 0; i < sets.length; i++) {
+            AnimatorSet set = sets[i];
+            if (!animators.contains(set)) {
+                return false;
+            }
+        }
+        return true;
+
     }
 
     // Create an AnimatorSet with all the animators running sequentially
