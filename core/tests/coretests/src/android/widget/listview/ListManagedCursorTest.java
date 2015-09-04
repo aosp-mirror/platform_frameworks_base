@@ -93,7 +93,6 @@ public class ListManagedCursorTest extends ActivityInstrumentationTestCase<ListM
      * we're still scrolled.
      */
     @LargeTest
-    @Suppress  // Flaky
     public void testKeyScrollingToTouchMode() {
         Instrumentation inst = getInstrumentation();
         
@@ -115,6 +114,7 @@ public class ListManagedCursorTest extends ActivityInstrumentationTestCase<ListM
      */
     @FlakyTest(tolerance=3)
     @LargeTest
+    @Suppress  // Flaky
     public void testTouchScrollingToTrackballMode() {
         Instrumentation inst = getInstrumentation();
 
