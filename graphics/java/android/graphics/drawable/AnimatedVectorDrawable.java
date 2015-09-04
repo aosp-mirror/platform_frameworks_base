@@ -217,7 +217,7 @@ public class AnimatedVectorDrawable extends Drawable implements Animatable2 {
     }
 
     @Override
-    protected boolean onLevelChange(int level) {
+    protected boolean onLevelChange(float level) {
         return mAnimatedVectorState.mVectorDrawable.setLevel(level);
     }
 

@@ -12640,6 +12640,7 @@ package android.graphics.drawable {
     method public int getIntrinsicWidth();
     method public int getLayoutDirection();
     method public final int getLevel();
+    method public final float getLevelFloat();
     method public int getMinimumHeight();
     method public int getMinimumWidth();
     method public abstract int getOpacity();
@@ -12659,6 +12660,7 @@ package android.graphics.drawable {
     method protected void onBoundsChange(android.graphics.Rect);
     method public boolean onLayoutDirectionChanged(int);
     method protected boolean onLevelChange(int);
+    method protected boolean onLevelChange(float);
     method protected boolean onStateChange(int[]);
     method public static int resolveOpacity(int, int);
     method public void scheduleSelf(java.lang.Runnable, long);
@@ -12676,12 +12678,15 @@ package android.graphics.drawable {
     method public void setHotspotBounds(int, int, int, int);
     method public final boolean setLayoutDirection(int);
     method public final boolean setLevel(int);
+    method public final boolean setLevel(float);
     method public boolean setState(int[]);
     method public void setTint(int);
     method public void setTintList(android.content.res.ColorStateList);
     method public void setTintMode(android.graphics.PorterDuff.Mode);
     method public boolean setVisible(boolean, boolean);
     method public void unscheduleSelf(java.lang.Runnable);
+    field public static final int MAX_LEVEL = 10000; // 0x2710
+    field public static final float MAX_LEVEL_FLOAT = 10000.0f;
   }
 
   public static abstract interface Drawable.Callback {

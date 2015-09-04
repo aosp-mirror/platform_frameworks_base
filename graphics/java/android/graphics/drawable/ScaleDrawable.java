@@ -50,8 +50,6 @@ import java.io.IOException;
  * @attr ref android.R.styleable#ScaleDrawable_drawable
  */
 public class ScaleDrawable extends DrawableWrapper {
-    private static final int MAX_LEVEL = 10000;
-
     private final Rect mTmpRect = new Rect();
 
     private ScaleState mState;
@@ -170,7 +168,7 @@ public class ScaleDrawable extends DrawableWrapper {
     @Override
     public void draw(Canvas canvas) {
         final Drawable d = getDrawable();
-        if (d != null && d.getLevel() != 0) {
+        if (d != null && d.getLevelFloat() != 0) {
             d.draw(canvas);
         }
     }
@@ -178,12 +176,12 @@ public class ScaleDrawable extends DrawableWrapper {
     @Override
     public int getOpacity() {
         final Drawable d = getDrawable();
-        if (d.getLevel() == 0) {
+        if (d.getLevelFloat() == 0) {
             return PixelFormat.TRANSPARENT;
         }
 
         final int opacity = d.getOpacity();
-        if (opacity == PixelFormat.OPAQUE && d.getLevel() < MAX_LEVEL) {
+        if (opacity == PixelFormat.OPAQUE && d.getLevelFloat() < MAX_LEVEL_FLOAT) {
             return PixelFormat.TRANSLUCENT;
         }
 
@@ -191,7 +189,7 @@ public class ScaleDrawable extends DrawableWrapper {
     }
 
     @Override
-    protected boolean onLevelChange(int level) {
+    protected boolean onLevelChange(float level) {
         super.onLevelChange(level);
         onBoundsChange(getBounds());
         invalidateSelf();
@@ -203,18 +201,20 @@ public class ScaleDrawable extends DrawableWrapper {
         final Drawable d = getDrawable();
         final Rect r = mTmpRect;
         final boolean min = mState.mUseIntrinsicSizeAsMin;
-        final int level = getLevel();
+        final float level = getLevelFloat();
 
         int w = bounds.width();
         if (mState.mScaleWidth > 0) {
             final int iw = min ? d.getIntrinsicWidth() : 0;
-            w -= (int) ((w - iw) * (MAX_LEVEL - level) * mState.mScaleWidth / MAX_LEVEL);
+            w -= (int) ((w - iw) * (MAX_LEVEL_FLOAT - level)
+                    * mState.mScaleWidth / MAX_LEVEL_FLOAT);
         }
 
         int h = bounds.height();
         if (mState.mScaleHeight > 0) {
             final int ih = min ? d.getIntrinsicHeight() : 0;
-            h -= (int) ((h - ih) * (MAX_LEVEL - level) * mState.mScaleHeight / MAX_LEVEL);
+            h -= (int) ((h - ih) * (MAX_LEVEL_FLOAT - level)
+                    * mState.mScaleHeight / MAX_LEVEL_FLOAT);
         }
 
         final int layoutDirection = getLayoutDirection();

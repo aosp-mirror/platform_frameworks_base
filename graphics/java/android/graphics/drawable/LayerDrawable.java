@@ -1400,7 +1400,7 @@ public class LayerDrawable extends Drawable implements Drawable.Callback {
     }
 
     @Override
-    protected boolean onLevelChange(int level) {
+    protected boolean onLevelChange(float level) {
         boolean changed = false;
 
         final ChildDrawable[] array = mLayerState.mChildren;
@@ -1733,7 +1733,7 @@ public class LayerDrawable extends Drawable implements Drawable.Callback {
                 clone.setCallback(owner);
                 clone.setLayoutDirection(dr.getLayoutDirection());
                 clone.setBounds(dr.getBounds());
-                clone.setLevel(dr.getLevel());
+                clone.setLevel(dr.getLevelFloat());
             } else {
                 clone = null;
             }
