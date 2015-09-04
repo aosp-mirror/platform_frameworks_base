@@ -1108,7 +1108,7 @@ public class ActivityManager {
      * of {@link #RECENT_WITH_EXCLUDED} and {@link #RECENT_IGNORE_UNAVAILABLE}.
      *
      * @return Returns a list of RecentTaskInfo records describing each of
-     * the recent tasks.
+     * the recent tasks. Most recently activated tasks go first.
      *
      * @hide
      */
