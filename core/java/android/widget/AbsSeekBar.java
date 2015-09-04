@@ -369,8 +369,9 @@ public abstract class AbsSeekBar extends ProgressBar {
         }
 
         final Drawable thumb = mThumb;
-        if (thumb != null && thumb.isStateful()) {
-            thumb.setState(getDrawableState());
+        if (thumb != null && thumb.isStateful()
+                && thumb.setState(getDrawableState())) {
+            invalidateDrawable(thumb);
         }
     }
 

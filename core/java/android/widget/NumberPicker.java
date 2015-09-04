@@ -1528,10 +1528,10 @@ public class NumberPicker extends LinearLayout {
     protected void drawableStateChanged() {
         super.drawableStateChanged();
 
-        final int[] state = getDrawableState();
-
-        if (mSelectionDivider != null && mSelectionDivider.isStateful()) {
-            mSelectionDivider.setState(state);
+        final Drawable selectionDivider = mSelectionDivider;
+        if (selectionDivider != null && selectionDivider.isStateful()
+                && selectionDivider.setState(getDrawableState())) {
+            invalidateDrawable(selectionDivider);
         }
     }
 

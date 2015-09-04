@@ -753,9 +753,10 @@ public class ViewPager extends ViewGroup {
     @Override
     protected void drawableStateChanged() {
         super.drawableStateChanged();
-        final Drawable d = mMarginDrawable;
-        if (d != null && d.isStateful()) {
-            d.setState(getDrawableState());
+        final Drawable marginDrawable = mMarginDrawable;
+        if (marginDrawable != null && marginDrawable.isStateful()
+                && marginDrawable.setState(getDrawableState())) {
+            invalidateDrawable(marginDrawable);
         }
     }
 

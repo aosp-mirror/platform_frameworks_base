@@ -2777,11 +2777,14 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
     }
 
     void updateSelectorState() {
-        if (mSelector != null) {
+        final Drawable selector = mSelector;
+        if (selector != null && selector.isStateful()) {
             if (shouldShowSelector()) {
-                mSelector.setState(getDrawableStateForSelector());
+                if (selector.setState(getDrawableStateForSelector())) {
+                    invalidateDrawable(selector);
+                }
             } else {
-                mSelector.setState(StateSet.NOTHING);
+                selector.setState(StateSet.NOTHING);
             }
         }
     }

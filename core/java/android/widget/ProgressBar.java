@@ -1746,13 +1746,20 @@ public class ProgressBar extends View {
 
     private void updateDrawableState() {
         final int[] state = getDrawableState();
+        boolean changed = false;
 
-        if (mProgressDrawable != null && mProgressDrawable.isStateful()) {
-            mProgressDrawable.setState(state);
+        final Drawable progressDrawable = mProgressDrawable;
+        if (progressDrawable != null && progressDrawable.isStateful()) {
+            changed |= progressDrawable.setState(state);
         }
 
-        if (mIndeterminateDrawable != null && mIndeterminateDrawable.isStateful()) {
-            mIndeterminateDrawable.setState(state);
+        final Drawable indeterminateDrawable = mIndeterminateDrawable;
+        if (indeterminateDrawable != null && indeterminateDrawable.isStateful()) {
+            changed |= indeterminateDrawable.setState(state);
+        }
+
+        if (changed) {
+            invalidate();
         }
     }
 

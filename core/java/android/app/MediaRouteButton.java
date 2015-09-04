@@ -256,10 +256,10 @@ public class MediaRouteButton extends View {
     protected void drawableStateChanged() {
         super.drawableStateChanged();
 
-        if (mRemoteIndicator != null) {
-            int[] myDrawableState = getDrawableState();
-            mRemoteIndicator.setState(myDrawableState);
-            invalidate();
+        final Drawable remoteIndicator = mRemoteIndicator;
+        if (remoteIndicator != null && remoteIndicator.isStateful()
+                && remoteIndicator.setState(getDrawableState())) {
+            invalidateDrawable(remoteIndicator);
         }
     }
 
