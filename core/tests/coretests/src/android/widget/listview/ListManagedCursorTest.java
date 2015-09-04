@@ -21,6 +21,7 @@ import android.test.ActivityInstrumentationTestCase;
 import android.test.FlakyTest;
 import android.test.suitebuilder.annotation.LargeTest;
 import android.test.suitebuilder.annotation.MediumTest;
+import android.test.suitebuilder.annotation.Suppress;
 import android.view.KeyEvent;
 import android.widget.ListView;
 import android.test.TouchUtils;
@@ -73,6 +74,7 @@ public class ListManagedCursorTest extends ActivityInstrumentationTestCase<ListM
      * Scroll the list using touch, launch new activity, hit back, make sure we're still scrolled.
      */
     @LargeTest
+    @Suppress  // Flaky
     public void testTouchScrolling() {
         Instrumentation inst = getInstrumentation();
         
@@ -91,6 +93,7 @@ public class ListManagedCursorTest extends ActivityInstrumentationTestCase<ListM
      * we're still scrolled.
      */
     @LargeTest
+    @Suppress  // Flaky
     public void testKeyScrollingToTouchMode() {
         Instrumentation inst = getInstrumentation();
         
