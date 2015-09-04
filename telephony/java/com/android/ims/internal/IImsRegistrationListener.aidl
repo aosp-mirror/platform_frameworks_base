@@ -78,7 +78,7 @@ interface IImsRegistrationListener {
      * @param disabledFeatures features disabled as defined in com.android.ims.ImsConfig#FeatureConstants.
      */
     void registrationFeatureCapabilityChanged(int serviceClass,
-            out int[] enabledFeatures, out int[] disabledFeatures);
+            in int[] enabledFeatures, in int[] disabledFeatures);
 
     /**
      * Updates the application with the waiting voice message count.
