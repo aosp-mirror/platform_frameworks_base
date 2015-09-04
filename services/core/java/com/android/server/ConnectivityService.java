@@ -511,7 +511,6 @@ public class ConnectivityService extends IConnectivityManager.Stub
 
             ArrayList<NetworkAgentInfo> list = mTypeLists[type];
             if (list.contains(nai)) {
-                loge("Attempting to register duplicate agent for type " + type + ": " + nai);
                 return;
             }
 
@@ -4290,7 +4289,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
         boolean keep = newNetwork.isVPN();
         boolean isNewDefault = false;
         NetworkAgentInfo oldDefaultNetwork = null;
-        if (DBG) log("rematching " + newNetwork.name());
+        if (VDBG) log("rematching " + newNetwork.name());
         // Find and migrate to this Network any NetworkRequests for
         // which this network is now the best.
         ArrayList<NetworkAgentInfo> affectedNetworks = new ArrayList<NetworkAgentInfo>();
@@ -4327,6 +4326,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
                 }
                 if (currentNetwork == null ||
                         currentNetwork.getCurrentScore() < newNetwork.getCurrentScore()) {
+                    if (DBG) log("rematch for " + newNetwork.name());
                     if (currentNetwork != null) {
                         if (DBG) log("   accepting network in place of " + currentNetwork.name());
                         currentNetwork.networkRequests.remove(nri.request.requestId);
