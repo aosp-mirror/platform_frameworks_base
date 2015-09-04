@@ -611,10 +611,34 @@ static jint com_android_internal_os_Zygote_nativeForkAndSpecialize(
         jint debug_flags, jobjectArray rlimits,
         jint mount_external, jstring se_info, jstring se_name,
         jintArray fdsToClose, jstring instructionSet, jstring appDataDir) {
-    // Grant CAP_WAKE_ALARM to the Bluetooth process.
     jlong capabilities = 0;
     if (uid == AID_BLUETOOTH) {
+        // Grant CAP_WAKE_ALARM and CAP_BLOCK_SUSPEND to the Bluetooth process.
         capabilities |= (1LL << CAP_WAKE_ALARM);
+        capabilities |= (1LL << CAP_BLOCK_SUSPEND);
+
+        // Add the Bluetooth process to the system group.
+        jsize length = env->GetArrayLength(reinterpret_cast<jarray>(gids));
+        jintArray gids_with_system = env->NewIntArray(length + 1);
+        if (!gids_with_system) {
+            ALOGE("could not allocate java array for gids");
+            RuntimeAbort(env);
+        }
+
+        jint *gids_elements = env->GetIntArrayElements(gids, NULL);
+        jint *gids_with_system_elements = env->GetIntArrayElements(gids_with_system, NULL);
+
+        if (!gids_elements || !gids_with_system_elements) {
+            ALOGE("could not allocate arrays for gids");
+            RuntimeAbort(env);
+        }
+
+        gids_with_system_elements[0] = AID_SYSTEM;
+        memcpy(&gids_with_system_elements[1], &gids_elements[0], length * sizeof(jint));
+
+        env->ReleaseIntArrayElements(gids, gids_elements, JNI_ABORT);
+        env->ReleaseIntArrayElements(gids_with_system, gids_with_system_elements, 0);
+        gids = gids_with_system;
     }
 
     return ForkAndSpecializeCommon(env, uid, gid, gids, debug_flags,
