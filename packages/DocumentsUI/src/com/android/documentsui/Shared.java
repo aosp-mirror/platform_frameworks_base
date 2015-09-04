@@ -22,6 +22,7 @@ import android.content.Context;
  * @hide
  */
 public final class Shared {
+    public static final boolean DEBUG = false;
     public static final String TAG = "Documents";
 
     /**
