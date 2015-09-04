@@ -2259,6 +2259,7 @@ public class ConnectivityManager {
         private final AtomicInteger mRefCount;
         private static final String TAG = "ConnectivityManager.CallbackHandler";
         private final ConnectivityManager mCm;
+        private static final boolean DBG = false;
 
         CallbackHandler(Looper looper, HashMap<NetworkRequest, NetworkCallback>callbackMap,
                 AtomicInteger refCount, ConnectivityManager cm) {
@@ -2270,7 +2271,7 @@ public class ConnectivityManager {
 
         @Override
         public void handleMessage(Message message) {
-            Log.d(TAG, "CM callback handler got msg " + message.what);
+            if (DBG) Log.d(TAG, "CM callback handler got msg " + message.what);
             NetworkRequest request = (NetworkRequest) getObject(message, NetworkRequest.class);
             Network network = (Network) getObject(message, Network.class);
             switch (message.what) {
