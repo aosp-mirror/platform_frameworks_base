@@ -338,7 +338,7 @@ public class BackupManagerService {
         @Override
         public void onBootPhase(int phase) {
             if (phase == PHASE_SYSTEM_SERVICES_READY) {
-                sInstance.initialize(UserHandle.USER_OWNER);
+                sInstance.initialize(UserHandle.USER_SYSTEM);
             } else if (phase == PHASE_THIRD_PARTY_APPS_CAN_START) {
                 ContentResolver r = sInstance.mContext.getContentResolver();
                 boolean areEnabled = Settings.Secure.getInt(r,
@@ -934,7 +934,7 @@ public class BackupManagerService {
             case MSG_WIDGET_BROADCAST:
             {
                 final Intent intent = (Intent) msg.obj;
-                mContext.sendBroadcastAsUser(intent, UserHandle.OWNER);
+                mContext.sendBroadcastAsUser(intent, UserHandle.SYSTEM);
                 break;
             }
             }
@@ -1092,8 +1092,9 @@ public class BackupManagerService {
         if (DEBUG) Slog.v(TAG, "Starting with transport " + mCurrentTransport);
 
         // Find all transport hosts and bind to their services
+        // TODO: http://b/22388012
         List<ResolveInfo> hosts = mPackageManager.queryIntentServicesAsUser(
-                mTransportServiceIntent, 0, UserHandle.USER_OWNER);
+                mTransportServiceIntent, 0, UserHandle.USER_SYSTEM);
         if (DEBUG) {
             Slog.v(TAG, "Found transports: " + ((hosts == null) ? "null" : hosts.size()));
         }
@@ -1953,8 +1954,9 @@ public class BackupManagerService {
     void checkForTransportAndBind(PackageInfo pkgInfo) {
         Intent intent = new Intent(mTransportServiceIntent)
                 .setPackage(pkgInfo.packageName);
+        // TODO: http://b/22388012
         List<ResolveInfo> hosts = mPackageManager.queryIntentServicesAsUser(
-                intent, 0, UserHandle.USER_OWNER);
+                intent, 0, UserHandle.USER_SYSTEM);
         if (hosts != null) {
             final int N = hosts.size();
             for (int i = 0; i < N; i++) {
@@ -2002,9 +2004,10 @@ public class BackupManagerService {
                 mContext.unbindService(connection);
             }
         }
+        // TODO: http://b/22388012
         return mContext.bindServiceAsUser(intent,
                 connection, Context.BIND_AUTO_CREATE,
-                UserHandle.OWNER);
+                UserHandle.SYSTEM);
     }
 
     // Add the backup agents in the given packages to our set of known backup participants.
@@ -2853,8 +2856,9 @@ public class BackupManagerService {
 
         private void writeWidgetPayloadIfAppropriate(FileDescriptor fd, String pkgName)
                 throws IOException {
+            // TODO: http://b/22388012
             byte[] widgetState = AppWidgetBackupBridge.getWidgetState(pkgName,
-                    UserHandle.USER_OWNER);
+                    UserHandle.USER_SYSTEM);
             // has the widget state changed since last time?
             final File widgetFile = new File(mStateDir, pkgName + "_widget");
             final boolean priorStateExists = widgetFile.exists();
@@ -3398,8 +3402,9 @@ public class BackupManagerService {
                                 && ((app.flags & ApplicationInfo.FLAG_SYSTEM) == 0 ||
                                 (app.flags & ApplicationInfo.FLAG_UPDATED_SYSTEM_APP) != 0);
 
+                        // TODO: http://b/22388012
                         byte[] widgetBlob = AppWidgetBackupBridge.getWidgetState(pkg.packageName,
-                                UserHandle.USER_OWNER);
+                                UserHandle.USER_SYSTEM);
 
                         final int token = generateToken();
                         FullBackupRunner runner = new FullBackupRunner(pkg, agent, pipes[1],
@@ -3463,7 +3468,8 @@ public class BackupManagerService {
 
             // Save associated .obb content if it exists and we did save the apk
             // check for .obb and save those too
-            final UserEnvironment userEnv = new UserEnvironment(UserHandle.USER_OWNER);
+            // TODO: http://b/22388012
+            final UserEnvironment userEnv = new UserEnvironment(UserHandle.USER_SYSTEM);
             final File obbDir = userEnv.buildExternalStorageAppObbDirs(pkg.packageName)[0];
             if (obbDir != null) {
                 if (MORE_DEBUG) Log.i(TAG, "obb dir: " + obbDir.getAbsolutePath());
@@ -3803,8 +3809,9 @@ public class BackupManagerService {
             // If we're doing widget state as well, ensure that we have all the involved
             // host & provider packages in the set
             if (mDoWidgets) {
+                // TODO: http://b/22388012
                 List<String> pkgs =
-                        AppWidgetBackupBridge.getWidgetParticipants(UserHandle.USER_OWNER);
+                        AppWidgetBackupBridge.getWidgetParticipants(UserHandle.USER_SYSTEM);
                 if (pkgs != null) {
                     if (MORE_DEBUG) {
                         Slog.i(TAG, "Adding widget participants to backup set:");
@@ -7232,7 +7239,8 @@ if (MORE_DEBUG) Slog.v(TAG, "   + got " + nRead + "; now wanting " + (size - soF
     // Used by both incremental and full restore
     void restoreWidgetData(String packageName, byte[] widgetData) {
         // Apply the restored widget state and generate the ID update for the app
-        AppWidgetBackupBridge.restoreWidgetState(packageName, widgetData, UserHandle.USER_OWNER);
+        // TODO: http://b/22388012
+        AppWidgetBackupBridge.restoreWidgetState(packageName, widgetData, UserHandle.USER_SYSTEM);
     }
 
     // *****************************
@@ -7489,7 +7497,8 @@ if (MORE_DEBUG) Slog.v(TAG, "   + got " + nRead + "; now wanting " + (size - soF
 
             // If we're starting a full-system restore, set up to begin widget ID remapping
             if (mIsSystemRestore) {
-                AppWidgetBackupBridge.restoreStarting(UserHandle.USER_OWNER);
+                // TODO: http://b/22388012
+                AppWidgetBackupBridge.restoreStarting(UserHandle.USER_SYSTEM);
             }
 
             try {
@@ -8095,7 +8104,8 @@ if (MORE_DEBUG) Slog.v(TAG, "   + got " + nRead + "; now wanting " + (size - soF
             }
 
             // Kick off any work that may be needed regarding app widget restores
-            AppWidgetBackupBridge.restoreFinished(UserHandle.USER_OWNER);
+            // TODO: http://b/22388012
+            AppWidgetBackupBridge.restoreFinished(UserHandle.USER_SYSTEM);
 
             // If this was a full-system restore, record the ancestral
             // dataset information
@@ -8482,7 +8492,8 @@ if (MORE_DEBUG) Slog.v(TAG, "   + got " + nRead + "; now wanting " + (size - soF
 
     public void dataChanged(final String packageName) {
         final int callingUserHandle = UserHandle.getCallingUserId();
-        if (callingUserHandle != UserHandle.USER_OWNER) {
+        if (callingUserHandle != UserHandle.USER_SYSTEM) {
+            // TODO: http://b/22388012
             // App is running under a non-owner user profile.  For now, we do not back
             // up data from secondary user profiles.
             // TODO: backups for all user profiles although don't add backup for profiles
@@ -8605,7 +8616,8 @@ if (MORE_DEBUG) Slog.v(TAG, "   + got " + nRead + "; now wanting " + (size - soF
         mContext.enforceCallingPermission(android.Manifest.permission.BACKUP, "fullBackup");
 
         final int callingUserHandle = UserHandle.getCallingUserId();
-        if (callingUserHandle != UserHandle.USER_OWNER) {
+        // TODO: http://b/22388012
+        if (callingUserHandle != UserHandle.USER_SYSTEM) {
             throw new IllegalStateException("Backup supported only for the device owner");
         }
 
@@ -8677,7 +8689,8 @@ if (MORE_DEBUG) Slog.v(TAG, "   + got " + nRead + "; now wanting " + (size - soF
                 "fullTransportBackup");
 
         final int callingUserHandle = UserHandle.getCallingUserId();
-        if (callingUserHandle != UserHandle.USER_OWNER) {
+        // TODO: http://b/22388012
+        if (callingUserHandle != UserHandle.USER_SYSTEM) {
             throw new IllegalStateException("Restore supported only for the device owner");
         }
 
@@ -8717,7 +8730,8 @@ if (MORE_DEBUG) Slog.v(TAG, "   + got " + nRead + "; now wanting " + (size - soF
         mContext.enforceCallingPermission(android.Manifest.permission.BACKUP, "fullRestore");
 
         final int callingUserHandle = UserHandle.getCallingUserId();
-        if (callingUserHandle != UserHandle.USER_OWNER) {
+        // TODO: http://b/22388012
+        if (callingUserHandle != UserHandle.USER_SYSTEM) {
             throw new IllegalStateException("Restore supported only for the device owner");
         }
 
