@@ -331,8 +331,6 @@ public class WindowManagerService extends IWindowManager.Stub
 
     final IActivityManager mActivityManager;
 
-    final IBatteryStats mBatteryStats;
-
     final AppOpsManager mAppOps;
 
     final DisplaySettings mDisplaySettings;
@@ -854,7 +852,6 @@ public class WindowManagerService extends IWindowManager.Stub
         mAppTransition.registerListenerLocked(mActivityManagerAppTransitionNotifier);
 
         mActivityManager = ActivityManagerNative.getDefault();
-        mBatteryStats = BatteryStatsService.getService();
         mAppOps = (AppOpsManager)context.getSystemService(Context.APP_OPS_SERVICE);
         AppOpsManager.OnOpChangedInternalListener opListener =
                 new AppOpsManager.OnOpChangedInternalListener() {
