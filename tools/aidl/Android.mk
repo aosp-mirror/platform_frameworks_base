@@ -10,6 +10,7 @@ LOCAL_PATH:= $(call my-dir)
 # Logic shared between aidl and its unittests
 include $(CLEAR_VARS)
 LOCAL_MODULE := libaidl-common
+LOCAL_MODULE_HOST_OS := darwin linux windows
 
 LOCAL_CLANG_CFLAGS := -Wall -Werror
 # Tragically, the code is riddled with unused parameters.
