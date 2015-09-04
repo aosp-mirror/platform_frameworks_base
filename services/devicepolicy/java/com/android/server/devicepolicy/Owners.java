@@ -27,6 +27,7 @@ import android.content.pm.UserInfo;
 import android.os.Environment;
 import android.os.RemoteException;
 import android.os.UserManager;
+import android.util.ArrayMap;
 import android.util.AtomicFile;
 import android.util.Log;
 import android.util.Slog;
@@ -44,7 +45,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintWriter;
 import java.nio.charset.StandardCharsets;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -89,7 +89,7 @@ class Owners {
     private OwnerInfo mDeviceInitializer;
 
     // Internal state for the profile owner packages.
-    private final HashMap<Integer, OwnerInfo> mProfileOwners = new HashMap<Integer, OwnerInfo>();
+    private final ArrayMap<Integer, OwnerInfo> mProfileOwners = new ArrayMap<>();
 
     // Local system update policy controllable by device owner.
     private SystemUpdatePolicy mSystemUpdatePolicy;

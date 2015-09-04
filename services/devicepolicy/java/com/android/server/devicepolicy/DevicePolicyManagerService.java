@@ -96,6 +96,8 @@ import android.security.KeyChain;
 import android.security.KeyChain.KeyChainConnection;
 import android.service.persistentdata.PersistentDataBlockManager;
 import android.text.TextUtils;
+import android.util.ArrayMap;
+import android.util.ArraySet;
 import android.util.Log;
 import android.util.PrintWriterPrinter;
 import android.util.Printer;
@@ -140,8 +142,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -197,7 +197,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
 
     private static final Set<String> DEVICE_OWNER_USER_RESTRICTIONS;
     static {
-        DEVICE_OWNER_USER_RESTRICTIONS = new HashSet();
+        DEVICE_OWNER_USER_RESTRICTIONS = new ArraySet<>();
         DEVICE_OWNER_USER_RESTRICTIONS.add(UserManager.DISALLOW_USB_FILE_TRANSFER);
         DEVICE_OWNER_USER_RESTRICTIONS.add(UserManager.DISALLOW_CONFIG_TETHERING);
         DEVICE_OWNER_USER_RESTRICTIONS.add(UserManager.DISALLOW_NETWORK_RESET);
@@ -218,7 +218,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     // owner and profile owner.
     private static final Set<String> IMMUTABLE_USER_RESTRICTIONS;
     static {
-        IMMUTABLE_USER_RESTRICTIONS = new HashSet();
+        IMMUTABLE_USER_RESTRICTIONS = new ArraySet<>();
         IMMUTABLE_USER_RESTRICTIONS.add(UserManager.DISALLOW_WALLPAPER);
     }
 
@@ -227,16 +227,16 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     private static final Set<String> GLOBAL_SETTINGS_WHITELIST;
     private static final Set<String> GLOBAL_SETTINGS_DEPRECATED;
     static {
-        SECURE_SETTINGS_WHITELIST = new HashSet();
+        SECURE_SETTINGS_WHITELIST = new ArraySet<>();
         SECURE_SETTINGS_WHITELIST.add(Settings.Secure.DEFAULT_INPUT_METHOD);
         SECURE_SETTINGS_WHITELIST.add(Settings.Secure.SKIP_FIRST_USE_HINTS);
         SECURE_SETTINGS_WHITELIST.add(Settings.Secure.INSTALL_NON_MARKET_APPS);
 
-        SECURE_SETTINGS_DEVICEOWNER_WHITELIST = new HashSet();
+        SECURE_SETTINGS_DEVICEOWNER_WHITELIST = new ArraySet<>();
         SECURE_SETTINGS_DEVICEOWNER_WHITELIST.addAll(SECURE_SETTINGS_WHITELIST);
         SECURE_SETTINGS_DEVICEOWNER_WHITELIST.add(Settings.Secure.LOCATION_MODE);
 
-        GLOBAL_SETTINGS_WHITELIST = new HashSet();
+        GLOBAL_SETTINGS_WHITELIST = new ArraySet<>();
         GLOBAL_SETTINGS_WHITELIST.add(Settings.Global.ADB_ENABLED);
         GLOBAL_SETTINGS_WHITELIST.add(Settings.Global.AUTO_TIME);
         GLOBAL_SETTINGS_WHITELIST.add(Settings.Global.AUTO_TIME_ZONE);
@@ -246,7 +246,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         GLOBAL_SETTINGS_WHITELIST.add(Settings.Global.STAY_ON_WHILE_PLUGGED_IN);
         GLOBAL_SETTINGS_WHITELIST.add(Settings.Global.WIFI_DEVICE_OWNER_CONFIGS_LOCKDOWN);
 
-        GLOBAL_SETTINGS_DEPRECATED = new HashSet();
+        GLOBAL_SETTINGS_DEPRECATED = new ArraySet<>();
         GLOBAL_SETTINGS_DEPRECATED.add(Settings.Global.BLUETOOTH_ON);
         GLOBAL_SETTINGS_DEPRECATED.add(Settings.Global.DEVELOPMENT_SETTINGS_ENABLED);
         GLOBAL_SETTINGS_DEPRECATED.add(Settings.Global.MODE_RINGER);
@@ -326,7 +326,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         boolean mUserSetupComplete = false;
         int mPermissionPolicy;
 
-        final HashMap<ComponentName, ActiveAdmin> mAdminMap = new HashMap<>();
+        final ArrayMap<ComponentName, ActiveAdmin> mAdminMap = new ArrayMap<>();
         final ArrayList<ActiveAdmin> mAdminList = new ArrayList<>();
         final ArrayList<ComponentName> mRemovingAdmins = new ArrayList<>();
 
@@ -494,7 +494,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             }
         }
 
-        Set<String> accountTypesWithManagementDisabled = new HashSet<String>();
+        Set<String> accountTypesWithManagementDisabled = new ArraySet<>();
 
         // The list of permitted accessibility services package namesas set by a profile
         // or device owner. Null means all accessibility services are allowed, empty means
@@ -511,7 +511,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         String globalProxySpec = null;
         String globalProxyExclusionList = null;
 
-        HashMap<String, TrustAgentInfo> trustAgentInfos = new HashMap<String, TrustAgentInfo>();
+        ArrayMap<String, TrustAgentInfo> trustAgentInfos = new ArrayMap<>();
 
         List<String> crossProfileWidgetProviders;
 
@@ -834,7 +834,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 throws XmlPullParserException, IOException {
             int outerDepthDAM = parser.getDepth();
             int typeDAM;
-            Set<String> result = new HashSet<String>();
+            Set<String> result = new ArraySet<>();
             while ((typeDAM=parser.next()) != END_DOCUMENT
                     && (typeDAM != END_TAG || parser.getDepth() > outerDepthDAM)) {
                 if (typeDAM == END_TAG || typeDAM == TEXT) {
@@ -850,11 +850,11 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             return result;
         }
 
-        private HashMap<String, TrustAgentInfo> getAllTrustAgentInfos(
+        private ArrayMap<String, TrustAgentInfo> getAllTrustAgentInfos(
                 XmlPullParser parser, String tag) throws XmlPullParserException, IOException {
             int outerDepthDAM = parser.getDepth();
             int typeDAM;
-            HashMap<String, TrustAgentInfo> result = new HashMap<String, TrustAgentInfo>();
+            final ArrayMap<String, TrustAgentInfo> result = new ArrayMap<>();
             while ((typeDAM=parser.next()) != END_DOCUMENT
                     && (typeDAM != END_TAG || parser.getDepth() > outerDepthDAM)) {
                 if (typeDAM == END_TAG || typeDAM == TEXT) {
@@ -1805,14 +1805,14 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         Set<Integer> usersWithData;
         synchronized(this) {
             usersWithProfileOwners = mOwners.getProfileOwnerKeys();
-            usersWithData = new HashSet<Integer>();
+            usersWithData = new ArraySet<>();
             for (int i = 0; i < mUserData.size(); i++) {
                 usersWithData.add(mUserData.keyAt(i));
             }
         }
         List<UserInfo> allUsers = mUserManager.getUsers();
 
-        Set<Integer> deletedUsers = new HashSet<Integer>();
+        Set<Integer> deletedUsers = new ArraySet<>();
         deletedUsers.addAll(usersWithProfileOwners);
         deletedUsers.addAll(usersWithData);
         for (UserInfo userInfo : allUsers) {
@@ -5696,7 +5696,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         synchronized (this) {
             DevicePolicyData policy = getUserData(userId);
             final int N = policy.mAdminList.size();
-            HashSet<String> resultSet = new HashSet<String>();
+            ArraySet<String> resultSet = new ArraySet<>();
             for (int i = 0; i < N; i++) {
                 ActiveAdmin admin = policy.mAdminList.get(i);
                 resultSet.addAll(admin.accountTypesWithManagementDisabled);
