@@ -1,5 +1,5 @@
 page.title=Adding Sign-In
-page.tags=authentication,signin,social,google+
+page.tags=authentication,signin
 page.article=true
 page.trainingcourse=true
 @jd:body
@@ -11,13 +11,13 @@ page.trainingcourse=true
   alt="Google maps sample image">
 
 <p>
-  The Google+ platform for Android lets you authenticate a user with the same credentials they use
-  on Google every day. Once a user signs in with Google, you can create more engaging experiences
-  and drive usage of your app.
+  Google Sign-In for Android lets you authenticate a user with the same credentials they use on 
+  Google. After a user signs in with Google, you can create more engaging experiences and drive 
+  usage of your app.
 </p>
 
 <p>
-  The <a href="https://developers.google.com/+/mobile/android/">Google+ Android API</a> allows
+  The <a href="https://developers.google.com/identity/sign-in/android/">Google Android API</a> allows
   you to integrate sign-in and social features into your app.
 </p>
 
@@ -26,43 +26,27 @@ page.trainingcourse=true
 
 <h4>Trusted authentication</h4>
 <p>
-  Google+ Sign-In is a simple, trusted, and secure way to let people sign in to your app with their
-  Google credentials and bring along their Google+ info.<br>
-  <a href="https://developers.google.com/+/mobile/android/sign-in" class="external-link">Add
-  sign-in</a>.
+  Google Sign-In is a simple, trusted, and secure way to let people sign in to your app with their
+  Google credentials.<br>
+  <a href="https://developers.google.com/identity/sign-in/android/sign-in" class="external-link">Add
+  Sign-in</a>.
 </p>
 
 <h4>Access the profile and social graph</h4>
 <p>
-  Once users have signed in with Google, your app can welcome them by name, display their picture,
-  connect them with friends, and lots more.<br>
-  <a href="https://developers.google.com/+/mobile/android/people" class="external-link">Access the
-  social graph</a>.
-</p>
-
-<h4>Stand out in the stream</h4>
-<p>
-  Interactive posts is a rich way of sharing to Google+. It lets users prompt friends to take
-  specific actions in your app from a Google+ post, like "listen," "RSVP," "check-in," and over 100
-  more actions.<br>
-  <a class="external-link" href="https://developers.google.com/+/mobile/android/share">Post
-  interactive content</a>.
-</p>
-
-<h4>Recommend content</h4>
-<p>
-  Add a native +1 button so users can recommend content from your app. These endorsements can give
-  your app more credibility and help it grow faster.<br>
-  <a class="external-link" href="https://developers.google.com/+/mobile/android/recommend">Add the
-  +1 button</a>.
+  After users have signed in with Google, your app can welcome them by name and display their 
+  picture. If your app requests social scopes, it can connect users with friends, and access  
+  age range, language, and public profile information.<br>
+  <a href="https://developers.google.com/identity/sign-in/android/people" class="external-link">
+  Getting Profile Information</a>.
 </p>
 
 
 <h2 id="start">Get Started</h2>
 <p>
-  The Google+ Android APIs are part of the Google Play services platform. To use Google+ features,
+  The Google Android APIs are part of the Google Play services platform. To use Google features,
   set up the Google Play services SDK in your app development project. For more information, see
   the <a class="external-link" href=
-  "https://developers.google.com/+/mobile/android/getting-started">Getting Started</a> guide for
-  the Google+ Platform for Android
+  "https://developers.google.com/identity/sign-in/android/start-integrating">Start Integrating</a> 
+  guide for Google Sign-In.
 </p>
