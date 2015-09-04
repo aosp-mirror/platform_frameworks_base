@@ -86,6 +86,7 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnLayoutChangeListener;
 import android.view.ViewGroup;
+import android.view.ViewParent;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -1459,7 +1460,7 @@ public class DirectoryFragment extends Fragment {
                     return true;
 
                 case DragEvent.ACTION_DROP:
-                    int dstPosition = mRecView.getChildAdapterPosition(v);
+                    int dstPosition = mRecView.getChildAdapterPosition(getContainingItemView(v));
                     DocumentInfo dstDir = null;
                     if (dstPosition != android.widget.AdapterView.INVALID_POSITION) {
                         Cursor dstCursor = mModel.getItem(dstPosition);
@@ -1473,6 +1474,19 @@ public class DirectoryFragment extends Fragment {
             return false;
         }
     };
+
+    private View getContainingItemView(View view) {
+        while (true) {
+            if (view.getLayoutParams() instanceof RecyclerView.LayoutParams) {
+                return view;
+            }
+            ViewParent parent = view.getParent();
+            if (parent == null || !(parent instanceof View)) {
+                return null;
+            }
+            view = (View) parent;
+        }
+    }
 
     private View.OnLongClickListener mLongClickListener = new View.OnLongClickListener() {
         @Override
@@ -1492,7 +1506,7 @@ public class DirectoryFragment extends Fragment {
     };
 
     private List<DocumentInfo> getDraggableDocuments(View currentItemView) {
-        int position = mRecView.getChildAdapterPosition(currentItemView);
+        int position = mRecView.getChildAdapterPosition(getContainingItemView(currentItemView));
         if (position == android.widget.AdapterView.INVALID_POSITION) {
             return Collections.EMPTY_LIST;
         }
