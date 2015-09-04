@@ -2684,9 +2684,22 @@ public class DevicePolicyManager {
      * @throws IllegalArgumentException if the package name is null or invalid
      * @throws IllegalStateException If the preconditions mentioned are not met.
      */
-    public boolean setDeviceOwner(String packageName) throws IllegalArgumentException,
-            IllegalStateException {
+    public boolean setDeviceOwner(String packageName) {
         return setDeviceOwner(packageName, null);
+    }
+
+    /**
+     * @hide
+     */
+    public boolean setDeviceOwner(String packageName, int userId)  {
+        return setDeviceOwner(packageName, null, userId);
+    }
+
+    /**
+     * @hide
+     */
+    public boolean setDeviceOwner(String packageName, String ownerName) {
+        return setDeviceOwner(packageName, ownerName, UserHandle.USER_SYSTEM);
     }
 
     /**
@@ -2699,15 +2712,16 @@ public class DevicePolicyManager {
      * the caller is the shell uid, and there are no additional users and no accounts.
      * @param packageName the package name of the application to be registered as the device owner.
      * @param ownerName the human readable name of the institution that owns this device.
+     * @param userId ID of the user on which the device owner runs.
      * @return whether the package was successfully registered as the device owner.
      * @throws IllegalArgumentException if the package name is null or invalid
      * @throws IllegalStateException If the preconditions mentioned are not met.
      */
-    public boolean setDeviceOwner(String packageName, String ownerName)
+    public boolean setDeviceOwner(String packageName, String ownerName, int userId)
             throws IllegalArgumentException, IllegalStateException {
         if (mService != null) {
             try {
-                return mService.setDeviceOwner(packageName, ownerName);
+                return mService.setDeviceOwner(packageName, ownerName, userId);
             } catch (RemoteException re) {
                 Log.w(TAG, "Failed to set device owner");
             }

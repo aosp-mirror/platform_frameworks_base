@@ -26,6 +26,7 @@ import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.UserInfo;
 import android.os.Environment;
 import android.os.RemoteException;
+import android.os.UserHandle;
 import android.os.UserManager;
 import android.util.ArrayMap;
 import android.util.AtomicFile;
@@ -71,6 +72,8 @@ class Owners {
     private static final String TAG_DEVICE_OWNER = "device-owner";
     private static final String TAG_DEVICE_INITIALIZER = "device-initializer";
     private static final String TAG_PROFILE_OWNER = "profile-owner";
+    // Holds "context" for device-owner, this must not be show up before device-owner.
+    private static final String TAG_DEVICE_OWNER_CONTEXT = "device-owner-context";
 
     private static final String ATTR_NAME = "name";
     private static final String ATTR_PACKAGE = "package";
@@ -84,6 +87,8 @@ class Owners {
 
     // Internal state for the device owner package.
     private OwnerInfo mDeviceOwner;
+
+    private int mDeviceOwnerUserId = UserHandle.USER_NULL;
 
     // Internal state for the device initializer package.
     private OwnerInfo mDeviceInitializer;
@@ -140,16 +145,26 @@ class Owners {
         return mDeviceOwner != null ? mDeviceOwner.packageName : null;
     }
 
+    int getDeviceOwnerUserId() {
+        return mDeviceOwnerUserId;
+    }
+
     String getDeviceOwnerName() {
         return mDeviceOwner != null ? mDeviceOwner.name : null;
     }
 
-    void setDeviceOwner(String packageName, String ownerName) {
+    void setDeviceOwner(String packageName, String ownerName, int userId) {
+        if (userId < 0) {
+            Slog.e(TAG, "Invalid user id for device owner user: " + userId);
+            return;
+        }
         mDeviceOwner = new OwnerInfo(ownerName, packageName);
+        mDeviceOwnerUserId = userId;
     }
 
     void clearDeviceOwner() {
         mDeviceOwner = null;
+        mDeviceOwnerUserId = UserHandle.USER_NULL;
     }
 
     ComponentName getDeviceInitializerComponent() {
@@ -215,20 +230,6 @@ class Owners {
         return mDeviceOwner != null;
     }
 
-    static boolean isInstalled(String packageName, PackageManager pm) {
-        try {
-            PackageInfo pi;
-            if ((pi = pm.getPackageInfo(packageName, 0)) != null) {
-                if ((pi.applicationInfo.flags) != 0) {
-                    return true;
-                }
-            }
-        } catch (NameNotFoundException nnfe) {
-            Slog.w(TAG, "Device Owner package " + packageName + " not installed.");
-        }
-        return false;
-    }
-
     static boolean isInstalledForUser(String packageName, int userHandle) {
         try {
             PackageInfo pi = (AppGlobals.getPackageManager())
@@ -263,6 +264,7 @@ class Owners {
                     String name = parser.getAttributeValue(null, ATTR_NAME);
                     String packageName = parser.getAttributeValue(null, ATTR_PACKAGE);
                     mDeviceOwner = new OwnerInfo(name, packageName);
+                    mDeviceOwnerUserId = UserHandle.USER_SYSTEM;
                 } else if (tag.equals(TAG_DEVICE_INITIALIZER)) {
                     String packageName = parser.getAttributeValue(null, ATTR_PACKAGE);
                     String initializerComponentStr =
@@ -464,7 +466,11 @@ class Owners {
         void writeInner(XmlSerializer out) throws IOException {
             if (mDeviceOwner != null) {
                 mDeviceOwner.writeToXml(out, TAG_DEVICE_OWNER);
+                out.startTag(null, TAG_DEVICE_OWNER_CONTEXT);
+                out.attribute(null, ATTR_USERID, String.valueOf(mDeviceOwnerUserId));
+                out.endTag(null, TAG_DEVICE_OWNER_CONTEXT);
             }
+
             if (mDeviceInitializer != null) {
                 mDeviceInitializer.writeToXml(out, TAG_DEVICE_INITIALIZER);
             }
@@ -483,7 +489,18 @@ class Owners {
             switch (tag) {
                 case TAG_DEVICE_OWNER:
                     mDeviceOwner = OwnerInfo.readFromXml(parser);
+                    mDeviceOwnerUserId = UserHandle.USER_SYSTEM; // Set default
                     break;
+                case TAG_DEVICE_OWNER_CONTEXT: {
+                    final String userIdString =
+                            parser.getAttributeValue(null, ATTR_USERID);
+                    try {
+                        mDeviceOwnerUserId = Integer.parseInt(userIdString);
+                    } catch (NumberFormatException e) {
+                        Slog.e(TAG, "Error parsing user-id " + userIdString);
+                    }
+                    break;
+                }
                 case TAG_DEVICE_INITIALIZER:
                     mDeviceInitializer = OwnerInfo.readFromXml(parser);
                     break;
@@ -594,7 +611,6 @@ class Owners {
             pw.println(prefix + "admin=" + admin);
             pw.println(prefix + "name=" + name);
             pw.println(prefix + "package=" + packageName);
-            pw.println();
         }
     }
 
@@ -602,6 +618,17 @@ class Owners {
         if (mDeviceOwner != null) {
             pw.println(prefix + "Device Owner: ");
             mDeviceOwner.dump(prefix + "  ", pw);
+            pw.println(prefix + "  User ID: " + mDeviceOwnerUserId);
+            pw.println();
+        }
+        if (mDeviceInitializer != null) {
+            pw.println(prefix + "Device Initializer: ");
+            mDeviceInitializer.dump(prefix + "  ", pw);
+            pw.println();
+        }
+        if (mSystemUpdatePolicy != null) {
+            pw.println(prefix + "System Update Policy: " + mSystemUpdatePolicy);
+            pw.println();
         }
         if (mProfileOwners != null) {
             for (Map.Entry<Integer, OwnerInfo> entry : mProfileOwners.entrySet()) {
