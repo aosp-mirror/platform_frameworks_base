@@ -172,7 +172,7 @@ if (uiModeManager.getCurrentModeType() == Configuration.UI_MODE_TYPE_TELEVISION)
 </pre>
 
 <p class="note"><strong>Note:</strong> Some features have subfeatures like {@code android.hardware.camera.front},
-  as described in the <a href="guide/topics/manifest/uses-feature-element.html#features-reference">
+  as described in the <a href="{@docRoot}guide/topics/manifest/uses-feature-element.html#features-reference">
   Feature Reference</a>. Be sure to mark as {@code required="false"} any subfeatures also used in
   your app.</p>
 
