@@ -5436,7 +5436,9 @@ public class Activity extends ContextThemeWrapper
      * via {@link #requestWindowFeature(int)}.
      *
      * @param visible Whether to show the progress bars in the title.
+     * @deprecated No longer supported starting in API 21.
      */
+    @Deprecated
     public final void setProgressBarVisibility(boolean visible) {
         getWindow().setFeatureInt(Window.FEATURE_PROGRESS, visible ? Window.PROGRESS_VISIBILITY_ON :
             Window.PROGRESS_VISIBILITY_OFF);
@@ -5449,7 +5451,9 @@ public class Activity extends ContextThemeWrapper
      * via {@link #requestWindowFeature(int)}.
      *
      * @param visible Whether to show the progress bars in the title.
+     * @deprecated No longer supported starting in API 21.
      */
+    @Deprecated
     public final void setProgressBarIndeterminateVisibility(boolean visible) {
         getWindow().setFeatureInt(Window.FEATURE_INDETERMINATE_PROGRESS,
                 visible ? Window.PROGRESS_VISIBILITY_ON : Window.PROGRESS_VISIBILITY_OFF);
@@ -5463,7 +5467,9 @@ public class Activity extends ContextThemeWrapper
      * via {@link #requestWindowFeature(int)}.
      *
      * @param indeterminate Whether the horizontal progress bar should be indeterminate.
+     * @deprecated No longer supported starting in API 21.
      */
+    @Deprecated
     public final void setProgressBarIndeterminate(boolean indeterminate) {
         getWindow().setFeatureInt(Window.FEATURE_PROGRESS,
                 indeterminate ? Window.PROGRESS_INDETERMINATE_ON
@@ -5479,7 +5485,9 @@ public class Activity extends ContextThemeWrapper
      * @param progress The progress for the progress bar. Valid ranges are from
      *            0 to 10000 (both inclusive). If 10000 is given, the progress
      *            bar will be completely filled and will fade out.
+     * @deprecated No longer supported starting in API 21.
      */
+    @Deprecated
     public final void setProgress(int progress) {
         getWindow().setFeatureInt(Window.FEATURE_PROGRESS, progress + Window.PROGRESS_START);
     }
@@ -5496,7 +5504,9 @@ public class Activity extends ContextThemeWrapper
      *
      * @param secondaryProgress The secondary progress for the progress bar. Valid ranges are from
      *            0 to 10000 (both inclusive).
+     * @deprecated No longer supported starting in API 21.
      */
+    @Deprecated
     public final void setSecondaryProgress(int secondaryProgress) {
         getWindow().setFeatureInt(Window.FEATURE_PROGRESS,
                 secondaryProgress + Window.PROGRESS_SECONDARY_START);

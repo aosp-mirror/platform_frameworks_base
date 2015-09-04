@@ -58,14 +58,28 @@ public abstract class Window {
     /** Flag for the "no title" feature, turning off the title at the top
      *  of the screen. */
     public static final int FEATURE_NO_TITLE = 1;
-    /** Flag for the progress indicator feature */
+
+    /**
+     * Flag for the progress indicator feature.
+     *
+     * @deprecated No longer supported starting in API 21.
+     */
+    @Deprecated
     public static final int FEATURE_PROGRESS = 2;
+
     /** Flag for having an icon on the left side of the title bar */
     public static final int FEATURE_LEFT_ICON = 3;
     /** Flag for having an icon on the right side of the title bar */
     public static final int FEATURE_RIGHT_ICON = 4;
-    /** Flag for indeterminate progress */
+
+    /**
+     * Flag for indeterminate progress.
+     *
+     * @deprecated No longer supported starting in API 21.
+     */
+    @Deprecated
     public static final int FEATURE_INDETERMINATE_PROGRESS = 5;
+
     /** Flag for the context menu.  This is enabled by default. */
     public static final int FEATURE_CONTEXT_MENU = 6;
     /** Flag for custom title. You cannot combine this feature with other title features. */
@@ -133,21 +147,76 @@ public abstract class Window {
      */
     public static final int FEATURE_MAX = FEATURE_ACTIVITY_TRANSITIONS;
 
-    /** Flag for setting the progress bar's visibility to VISIBLE */
+    /**
+     * Flag for setting the progress bar's visibility to VISIBLE.
+     *
+     * @deprecated {@link #FEATURE_PROGRESS} and related methods are no longer
+     *             supported starting in API 21.
+     */
+    @Deprecated
     public static final int PROGRESS_VISIBILITY_ON = -1;
-    /** Flag for setting the progress bar's visibility to GONE */
+
+    /**
+     * Flag for setting the progress bar's visibility to GONE.
+     *
+     * @deprecated {@link #FEATURE_PROGRESS} and related methods are no longer
+     *             supported starting in API 21.
+     */
+    @Deprecated
     public static final int PROGRESS_VISIBILITY_OFF = -2;
-    /** Flag for setting the progress bar's indeterminate mode on */
+
+    /**
+     * Flag for setting the progress bar's indeterminate mode on.
+     *
+     * @deprecated {@link #FEATURE_INDETERMINATE_PROGRESS} and related methods
+     *             are no longer supported starting in API 21.
+     */
+    @Deprecated
     public static final int PROGRESS_INDETERMINATE_ON = -3;
-    /** Flag for setting the progress bar's indeterminate mode off */
+
+    /**
+     * Flag for setting the progress bar's indeterminate mode off.
+     *
+     * @deprecated {@link #FEATURE_INDETERMINATE_PROGRESS} and related methods
+     *             are no longer supported starting in API 21.
+     */
+    @Deprecated
     public static final int PROGRESS_INDETERMINATE_OFF = -4;
-    /** Starting value for the (primary) progress */
+
+    /**
+     * Starting value for the (primary) progress.
+     *
+     * @deprecated {@link #FEATURE_PROGRESS} and related methods are no longer
+     *             supported starting in API 21.
+     */
+    @Deprecated
     public static final int PROGRESS_START = 0;
-    /** Ending value for the (primary) progress */
+
+    /**
+     * Ending value for the (primary) progress.
+     *
+     * @deprecated {@link #FEATURE_PROGRESS} and related methods are no longer
+     *             supported starting in API 21.
+     */
+    @Deprecated
     public static final int PROGRESS_END = 10000;
-    /** Lowest possible value for the secondary progress */
+
+    /**
+     * Lowest possible value for the secondary progress.
+     *
+     * @deprecated {@link #FEATURE_PROGRESS} and related methods are no longer
+     *             supported starting in API 21.
+     */
+    @Deprecated
     public static final int PROGRESS_SECONDARY_START = 20000;
-    /** Highest possible value for the secondary progress */
+
+    /**
+     * Highest possible value for the secondary progress.
+     *
+     * @deprecated {@link #FEATURE_PROGRESS} and related methods are no longer
+     *             supported starting in API 21.
+     */
+    @Deprecated
     public static final int PROGRESS_SECONDARY_END = 30000;
 
     /**

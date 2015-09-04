@@ -3583,14 +3583,14 @@ package android.app {
     method public void setImmersive(boolean);
     method public void setIntent(android.content.Intent);
     method public final void setMediaController(android.media.session.MediaController);
-    method public final void setProgress(int);
-    method public final void setProgressBarIndeterminate(boolean);
-    method public final void setProgressBarIndeterminateVisibility(boolean);
-    method public final void setProgressBarVisibility(boolean);
+    method public final deprecated void setProgress(int);
+    method public final deprecated void setProgressBarIndeterminate(boolean);
+    method public final deprecated void setProgressBarIndeterminateVisibility(boolean);
+    method public final deprecated void setProgressBarVisibility(boolean);
     method public void setRequestedOrientation(int);
     method public final void setResult(int);
     method public final void setResult(int, android.content.Intent);
-    method public final void setSecondaryProgress(int);
+    method public final deprecated void setSecondaryProgress(int);
     method public void setTaskDescription(android.app.ActivityManager.TaskDescription);
     method public void setTitle(java.lang.CharSequence);
     method public void setTitle(int);
@@ -39673,23 +39673,23 @@ package android.view {
     field public static final int FEATURE_CONTENT_TRANSITIONS = 12; // 0xc
     field public static final int FEATURE_CONTEXT_MENU = 6; // 0x6
     field public static final int FEATURE_CUSTOM_TITLE = 7; // 0x7
-    field public static final int FEATURE_INDETERMINATE_PROGRESS = 5; // 0x5
+    field public static final deprecated int FEATURE_INDETERMINATE_PROGRESS = 5; // 0x5
     field public static final int FEATURE_LEFT_ICON = 3; // 0x3
     field public static final int FEATURE_NO_TITLE = 1; // 0x1
     field public static final int FEATURE_OPTIONS_PANEL = 0; // 0x0
-    field public static final int FEATURE_PROGRESS = 2; // 0x2
+    field public static final deprecated int FEATURE_PROGRESS = 2; // 0x2
     field public static final int FEATURE_RIGHT_ICON = 4; // 0x4
     field public static final int FEATURE_SWIPE_TO_DISMISS = 11; // 0xb
     field public static final int ID_ANDROID_CONTENT = 16908290; // 0x1020002
     field public static final java.lang.String NAVIGATION_BAR_BACKGROUND_TRANSITION_NAME = "android:navigation:background";
-    field public static final int PROGRESS_END = 10000; // 0x2710
-    field public static final int PROGRESS_INDETERMINATE_OFF = -4; // 0xfffffffc
-    field public static final int PROGRESS_INDETERMINATE_ON = -3; // 0xfffffffd
-    field public static final int PROGRESS_SECONDARY_END = 30000; // 0x7530
-    field public static final int PROGRESS_SECONDARY_START = 20000; // 0x4e20
-    field public static final int PROGRESS_START = 0; // 0x0
-    field public static final int PROGRESS_VISIBILITY_OFF = -2; // 0xfffffffe
-    field public static final int PROGRESS_VISIBILITY_ON = -1; // 0xffffffff
+    field public static final deprecated int PROGRESS_END = 10000; // 0x2710
+    field public static final deprecated int PROGRESS_INDETERMINATE_OFF = -4; // 0xfffffffc
+    field public static final deprecated int PROGRESS_INDETERMINATE_ON = -3; // 0xfffffffd
+    field public static final deprecated int PROGRESS_SECONDARY_END = 30000; // 0x7530
+    field public static final deprecated int PROGRESS_SECONDARY_START = 20000; // 0x4e20
+    field public static final deprecated int PROGRESS_START = 0; // 0x0
+    field public static final deprecated int PROGRESS_VISIBILITY_OFF = -2; // 0xfffffffe
+    field public static final deprecated int PROGRESS_VISIBILITY_ON = -1; // 0xffffffff
     field public static final java.lang.String STATUS_BAR_BACKGROUND_TRANSITION_NAME = "android:status:background";
   }
 
