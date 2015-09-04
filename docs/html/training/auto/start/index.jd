@@ -177,7 +177,7 @@ more information, see
      href="https://play.google.com/store/apps/details?id=com.google.android.projection.gearhead&hl=en"
      >Android Auto app</a> on the mobile device.</li>
   <li>Open the <a href="{@docRoot}tools/help/sdk-manager.html">SDK Manager</a> and
-    download the DHU package <strong>Android Auto Desktop Head Unit</strong> from the
+    download the DHU package <strong>Android Auto Desktop Head Unit emulator</strong> from the
     <em>SDK Tools</em> tab. The DHU installs in the <code>&lt;sdk&gt;/extras/google/auto/</code>
     directory.</li>
   <li>If you are running the DHU on Linux, you must also install
