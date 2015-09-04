@@ -1366,7 +1366,8 @@ public class ConnectivityService extends IConnectivityManager.Stub
                 bestRoute = RouteInfo.makeHostRoute(addr, bestRoute.getGateway(), iface);
             }
         }
-        if (DBG) log("Adding " + bestRoute + " for interface " + bestRoute.getInterface());
+        if (DBG) log("Adding legacy route " + bestRoute +
+                " for UID/PID " + uid + "/" + Binder.getCallingPid());
         try {
             mNetd.addLegacyRouteForNetId(netId, bestRoute, uid);
         } catch (Exception e) {
