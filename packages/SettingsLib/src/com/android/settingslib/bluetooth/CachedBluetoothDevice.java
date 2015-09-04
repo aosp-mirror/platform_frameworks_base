@@ -539,10 +539,10 @@ public final class CachedBluetoothDevice implements Comparable<CachedBluetoothDe
          * Otherwise, allow the connect on UUID change.
          */
         if (!mProfiles.isEmpty()
-                && ((mConnectAttempted + timeout) > SystemClock.elapsedRealtime()
-                || (mConnectAttempted == 0))) {
+                && ((mConnectAttempted + timeout) > SystemClock.elapsedRealtime())) {
             connectWithoutResettingTimer(false);
         }
+
         dispatchAttributesChanged();
     }
 
