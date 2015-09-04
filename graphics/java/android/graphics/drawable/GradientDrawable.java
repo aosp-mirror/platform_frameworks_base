@@ -1019,6 +1019,7 @@ public class GradientDrawable extends Drawable {
         inflateChildElements(r, parser, attrs, theme);
 
         mGradientState.computeOpacity();
+        initializeWithState(mGradientState);
     }
 
     @Override
