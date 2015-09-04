@@ -17,15 +17,17 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android">
 
     <style name="DocumentsBaseTheme" parent="@style/Theme.AppCompat.Light.DarkActionBar" />
+    <style name="ActionBarTheme" parent="@*android:style/ThemeOverlay.Material.Dark.ActionBar" />
+    <style name="ActionBarPopupTheme" parent="@*android:style/ThemeOverlay.Material.Light" />
 
     <style name="DocumentsTheme" parent="@style/DocumentsBaseTheme">
         <item name="actionBarWidgetTheme">@null</item>
-        <item name="actionBarTheme">@*android:style/ThemeOverlay.Material.Dark.ActionBar</item>
-        <item name="actionBarPopupTheme">@*android:style/ThemeOverlay.Material.Light</item>
+        <item name="actionBarTheme">@style/ActionBarTheme</item>
+        <item name="actionBarPopupTheme">@style/ActionBarPopupTheme</item>
 
-        <item name="android:colorPrimaryDark">@*android:color/material_blue_grey_900</item>
-        <item name="android:colorPrimary">@*android:color/material_blue_grey_800</item>
-        <item name="android:colorAccent">@*android:color/material_deep_teal_500</item>
+        <item name="android:colorPrimaryDark">@color/primary_dark</item>
+        <item name="android:colorPrimary">@color/primary</item>
+        <item name="android:colorAccent">@color/accent</item>
 
         <item name="android:listDivider">@*android:drawable/list_divider_material</item>
 
@@ -39,8 +41,8 @@
 
     <style name="DocumentsBaseTheme.FullScreen" parent="@style/Theme.AppCompat.Light.DarkActionBar">
         <item name="actionBarWidgetTheme">@null</item>
-        <item name="actionBarTheme">@*android:style/ThemeOverlay.Material.Dark.ActionBar</item>
-        <item name="actionBarPopupTheme">@*android:style/ThemeOverlay.Material.Light</item>
+        <item name="actionBarTheme">@style/ActionBarTheme</item>
+        <item name="actionBarPopupTheme">@style/ActionBarPopupTheme</item>
 
         <item name="android:listDivider">@*android:drawable/list_divider_material</item>
 
@@ -52,9 +54,9 @@
     </style>
 
     <style name="DocumentsNonDialogTheme" parent="@style/DocumentsBaseTheme.FullScreen">
-        <item name="android:colorPrimaryDark">@*android:color/material_blue_grey_900</item>
-        <item name="android:colorPrimary">@*android:color/material_blue_grey_800</item>
-        <item name="android:colorAccent">@*android:color/material_deep_teal_500</item>
+        <item name="android:colorPrimaryDark">@color/primary_dark</item>
+        <item name="android:colorPrimary">@color/primary</item>
+        <item name="android:colorAccent">@color/accent</item>
     </style>
 
     <style name="ActionModeStyle" parent="@android:style/Widget.Material.Light.ActionMode">
@@ -66,7 +68,7 @@
     </style>
 
     <style name="FilesTheme" parent="@style/DocumentsBaseTheme.FullScreen">
-        <item name="android:colorPrimaryDark">@color/status_bar_background</item>
+        <item name="android:colorPrimaryDark">@color/material_blue_700</item>
         <item name="android:colorPrimary">@color/material_blue_500</item>
         <item name="android:colorAccent">@color/material_blue_700</item>
         <item name="android:actionModeStyle">@style/ActionModeStyle</item>

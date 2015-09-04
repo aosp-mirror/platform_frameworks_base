@@ -22,6 +22,10 @@
     <color name="material_blue_700">#ff1976d2</color>
     <color name="material_blue_500">#ff2196f3</color>
 
+    <color name="primary_dark">@*android:color/material_blue_grey_900</color>
+    <color name="primary">@*android:color/material_blue_grey_800</color>
+    <color name="accent">@*android:color/material_deep_teal_500</color>
+
     <color name="directory_background">@color/material_grey_300</color>
     <color name="item_doc_grid_background">#FFFFFFFF</color>
     <color name="item_doc_grid_protect_background">#88000000</color>
