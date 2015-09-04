@@ -390,7 +390,9 @@ final class ActivityStack {
 
     void setBounds(Rect bounds) {
         mBounds = mFullscreen ? null : new Rect(bounds);
-        mTaskPositioner.configure(bounds);
+        if (mTaskPositioner != null) {
+            mTaskPositioner.configure(bounds);
+        }
     }
 
     boolean okToShowLocked(ActivityRecord r) {
