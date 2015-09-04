@@ -75,7 +75,8 @@ public final class MultiSelectManager {
     private Adapter<?> mAdapter;
     private MultiSelectHelper mHelper;
     private boolean mSingleSelect;
-    private BandSelectManager mBandManager;
+
+    @Nullable private BandSelectManager mBandManager;
 
     /**
      * @param recyclerView
@@ -92,7 +93,9 @@ public final class MultiSelectManager {
                 new RuntimeRecyclerViewHelper(recyclerView),
                 mode);
 
-        mBandManager = new BandSelectManager((RuntimeRecyclerViewHelper) mHelper);
+        if (mode == MODE_MULTIPLE) {
+            mBandManager = new BandSelectManager((RuntimeRecyclerViewHelper) mHelper);
+        }
 
         GestureDetector.SimpleOnGestureListener listener =
                 new GestureDetector.SimpleOnGestureListener() {
@@ -121,6 +124,10 @@ public final class MultiSelectManager {
                     public boolean onInterceptTouchEvent(RecyclerView rv, MotionEvent e) {
                         detector.onTouchEvent(e);
 
+                        if (mBandManager == null) {
+                            return false;
+                        }
+
                         // b/23793622 notes the fact that we *never* receiver ACTION_DOWN
                         // events in onTouchEvent. Where it not for this issue, we'd
                         // push start handling down into handleInputEvent.
@@ -141,6 +148,7 @@ public final class MultiSelectManager {
                             mBandManager.handleInputEvent(
                                     new MotionInputEvent(e, recyclerView));
                         }
+
                         return mBandManager.isActive();
                     }
 
@@ -278,7 +286,9 @@ public final class MultiSelectManager {
     }
 
     public void handleLayoutChanged() {
-        mBandManager.handleLayoutChanged();
+        if (mBandManager != null) {
+            mBandManager.handleLayoutChanged();
+        }
     }
 
     /**
@@ -1233,7 +1243,7 @@ public final class MultiSelectManager {
             checkArgument(input.isMouseEvent());
 
             if (shouldStop(input)) {
-                mBandManager.endBandSelect();
+                endBandSelect();
                 return;
             }
 
