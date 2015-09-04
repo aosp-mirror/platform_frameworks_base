@@ -1814,6 +1814,7 @@ i
         <enum name="KEYCODE_MEDIA_SKIP_BACKWARD" value="273" />
         <enum name="KEYCODE_MEDIA_STEP_FORWARD" value="274" />
         <enum name="KEYCODE_MEDIA_STEP_BACKWARD" value="275" />
+        <enum name="KEYCODE_SOFT_SLEEP" value="276" />
     </attr>
 
     <!-- ***************************************************************** -->
