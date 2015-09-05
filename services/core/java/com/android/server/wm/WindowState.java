@@ -1640,7 +1640,7 @@ final class WindowState implements WindowManagerPolicy.WindowState {
             Slog.w(TAG, "Failed to report 'resized' to the client of " + this
                     + ", removing this window.");
             mService.mPendingRemove.add(this);
-            mService.requestTraversalLocked();
+            mService.mWindowPlacerLocked.requestTraversal();
         }
     }
 

@@ -25,7 +25,6 @@ import android.graphics.Rect;
 import android.os.Debug;
 import android.os.RemoteException;
 import android.util.EventLog;
-import android.util.IntArray;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.view.DisplayInfo;
@@ -34,7 +33,6 @@ import com.android.server.EventLogTags;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
-import java.util.List;
 
 public class TaskStack implements DimLayer.DimLayerUser {
 
@@ -414,7 +412,7 @@ public class TaskStack implements DimLayer.DimLayerUser {
             }
         }
         if (doAnotherLayoutPass) {
-            mService.requestTraversalLocked();
+            mService.mWindowPlacerLocked.requestTraversal();
         }
 
         if (mStackId == DOCKED_STACK_ID) {

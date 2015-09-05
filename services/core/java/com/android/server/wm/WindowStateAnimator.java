@@ -1446,7 +1446,7 @@ class WindowStateAnimator {
         updateSurfaceWindowCrop(recoveringMemory);
     }
 
-    public void prepareSurfaceLocked(final boolean recoveringMemory) {
+    void prepareSurfaceLocked(final boolean recoveringMemory) {
         final WindowState w = mWin;
         if (mSurfaceControl == null) {
             if (w.mOrientationChanging) {
@@ -1782,17 +1782,14 @@ class WindowStateAnimator {
      *
      * @return Returns true if the surface was successfully shown.
      */
-    boolean showSurfaceRobustlyLocked() {
+    private boolean showSurfaceRobustlyLocked() {
         try {
-            if (mSurfaceControl != null) {
-                mSurfaceShown = true;
-                mSurfaceControl.show();
-                if (mWin.mTurnOnScreen) {
-                    if (DEBUG_VISIBILITY) Slog.v(TAG,
-                            "Show surface turning screen on: " + mWin);
-                    mWin.mTurnOnScreen = false;
-                    mAnimator.mBulkUpdateParams |= SET_TURN_ON_SCREEN;
-                }
+            mSurfaceShown = true;
+            mSurfaceControl.show();
+            if (mWin.mTurnOnScreen) {
+                if (DEBUG_VISIBILITY) Slog.v(TAG, "Show surface turning screen on: " + mWin);
+                mWin.mTurnOnScreen = false;
+                mAnimator.mBulkUpdateParams |= SET_TURN_ON_SCREEN;
             }
             return true;
         } catch (RuntimeException e) {

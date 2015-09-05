@@ -133,6 +133,7 @@ public class AppTransition implements Dump {
     private static final int DEFAULT_APP_TRANSITION_DURATION = 336;
     private static final int THUMBNAIL_APP_TRANSITION_DURATION = 336;
     private static final int THUMBNAIL_APP_TRANSITION_ALPHA_DURATION = 336;
+    private static final long APP_TRANSITION_TIMEOUT_MS = 5000;
 
     private final Context mContext;
     private final Handler mH;
@@ -242,10 +243,6 @@ public class AppTransition implements Dump {
         return mNextAppTransition != TRANSIT_UNSET;
     }
 
-    boolean isTransitionNone() {
-        return mNextAppTransition == TRANSIT_NONE;
-    }
-
     boolean isTransitionEqual(int transit) {
         return mNextAppTransition == transit;
     }
@@ -254,7 +251,7 @@ public class AppTransition implements Dump {
         return mNextAppTransition;
      }
 
-    void setAppTransition(int transit) {
+    private void setAppTransition(int transit) {
         mNextAppTransition = transit;
     }
 
@@ -299,7 +296,7 @@ public class AppTransition implements Dump {
         return mNextAppTransitionScaleUp;
     }
 
-    boolean prepare() {
+    private boolean prepare() {
         if (!isRunning()) {
             mAppTransitionState = APP_STATE_IDLE;
             notifyAppTransitionPendingLocked();
@@ -1457,5 +1454,35 @@ public class AppTransition implements Dump {
 
     public void setCurrentUser(int newUserId) {
         mCurrentUserId = newUserId;
+    }
+
+    /**
+     * @return true if transition is not running and should not be skipped, false if transition is
+     *         already running
+     */
+    boolean prepareAppTransitionLocked(int transit, boolean alwaysKeepCurrent) {
+        if (DEBUG_APP_TRANSITIONS) Slog.v(TAG, "Prepare app transition:"
+                + " transit=" + appTransitionToString(transit)
+                + " " + this
+                + " alwaysKeepCurrent=" + alwaysKeepCurrent
+                + " Callers=" + Debug.getCallers(3));
+        if (!isTransitionSet() || mNextAppTransition == TRANSIT_NONE) {
+            setAppTransition(transit);
+        } else if (!alwaysKeepCurrent) {
+            if (transit == TRANSIT_TASK_OPEN && isTransitionEqual(TRANSIT_TASK_CLOSE)) {
+                // Opening a new task always supersedes a close for the anim.
+                setAppTransition(transit);
+            } else if (transit == TRANSIT_ACTIVITY_OPEN
+                    && isTransitionEqual(TRANSIT_ACTIVITY_CLOSE)) {
+                // Opening a new activity always supersedes a close for the anim.
+                setAppTransition(transit);
+            }
+        }
+        boolean prepared = prepare();
+        if (isTransitionSet()) {
+            mH.removeMessages(H.APP_TRANSITION_TIMEOUT);
+            mH.sendEmptyMessageDelayed(H.APP_TRANSITION_TIMEOUT, APP_TRANSITION_TIMEOUT_MS);
+        }
+        return prepared;
     }
 }
