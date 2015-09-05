@@ -3092,8 +3092,11 @@ public final class ActivityStackSupervisor implements DisplayListener {
                     // to size change. The activity will first remove the old window and then add a
                     // new one. This call will tell window manager about this, so it can preserve
                     // the old window until the new one is drawn. This prevents having a gap between
-                    // the removal and addition, in which no window is visible.
-                    mWindowManager.setReplacingWindow(r.appToken);
+                    // the removal and addition, in which no window is visible. If we also changed
+                    // the stack to the fullscreen stack, i.e. maximized the window, we will animate
+                    // the transition.
+                    mWindowManager.setReplacingWindow(r.appToken,
+                            stackId == FULLSCREEN_WORKSPACE_STACK_ID /* animate */);
                 }
             }
         }

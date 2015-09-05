@@ -125,7 +125,6 @@ import com.android.server.FgThread;
 import com.android.server.LocalServices;
 import com.android.server.UiThread;
 import com.android.server.Watchdog;
-import com.android.server.am.BatteryStatsService;
 import com.android.server.input.InputManagerService;
 import com.android.server.policy.PhoneWindowManager;
 import com.android.server.power.ShutdownThread;
@@ -289,6 +288,10 @@ public class WindowManagerService extends IWindowManager.Stub
     private static final int MAX_SCREENSHOT_RETRIES = 3;
 
     private static final String PROPERTY_EMULATOR_CIRCULAR = "ro.emulator.circular";
+
+    // Used to indicate that if there is already a transition set, it should be preserved when
+    // trying to apply a new one.
+    private static final boolean ALWAYS_KEEP_CURRENT = true;
 
     final private KeyguardDisableHandler mKeyguardDisableHandler;
 
@@ -1740,6 +1743,7 @@ public class WindowManagerService extends IWindowManager.Stub
 
             boolean addToken = false;
             WindowToken token = mTokenMap.get(attrs.token);
+            AppWindowToken atoken = null;
             if (token == null) {
                 if (type >= FIRST_APPLICATION_WINDOW && type <= LAST_APPLICATION_WINDOW) {
                     Slog.w(TAG, "Attempted to add application window with unknown token "
@@ -1774,7 +1778,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 token = new WindowToken(this, attrs.token, -1, false);
                 addToken = true;
             } else if (type >= FIRST_APPLICATION_WINDOW && type <= LAST_APPLICATION_WINDOW) {
-                AppWindowToken atoken = token.appWindowToken;
+                atoken = token.appWindowToken;
                 if (atoken == null) {
                     Slog.w(TAG, "Attempted to add window with non-application token "
                           + token + ".  Aborting.");
@@ -1920,6 +1924,7 @@ public class WindowManagerService extends IWindowManager.Stub
             final WindowStateAnimator winAnimator = win.mWinAnimator;
             winAnimator.mEnterAnimationPending = true;
             winAnimator.mEnteringAnimation = true;
+            prepareWindowReplacementTransition(atoken);
 
             if (displayContent.isDefaultDisplay) {
                 mPolicy.getInsetHintLw(win.mAttrs, mRotation, outContentInsets, outStableInsets,
@@ -1975,6 +1980,33 @@ public class WindowManagerService extends IWindowManager.Stub
         Binder.restoreCallingIdentity(origId);
 
         return res;
+    }
+
+    private void prepareWindowReplacementTransition(AppWindowToken atoken) {
+        if (atoken == null || !atoken.mReplacingWindow || !atoken.mAnimateReplacingWindow) {
+            return;
+        }
+        atoken.allDrawn = false;
+        WindowState replacedWindow = null;
+        for (int i = atoken.windows.size() - 1; i >= 0 && replacedWindow == null; i--) {
+            WindowState candidate = atoken.windows.get(i);
+            if (candidate.mExiting) {
+                replacedWindow = candidate;
+            }
+        }
+        if (replacedWindow == null) {
+            // We expect to already receive a request to remove the old window. If it did not
+            // happen, let's just simply add a window.
+            return;
+        }
+        Rect frame = replacedWindow.mFrame;
+        // We treat this as if this activity was opening, so we can trigger the app transition
+        // animation and piggy-back on existing transition animation infrastructure.
+        mOpeningApps.add(atoken);
+        prepareAppTransition(AppTransition.TRANSIT_ACTIVITY_RELAUNCH, ALWAYS_KEEP_CURRENT);
+        mAppTransition.overridePendingAppTransitionClipReveal(frame.left, frame.top,
+                frame.width(), frame.height());
+        executeAppTransition();
     }
 
     /**
@@ -2072,6 +2104,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 if (DEBUG_ADD_REMOVE) Slog.v(TAG, "Preserving " + win + " until the new one is "
                         + "added");
                 win.mExiting = true;
+                appToken.mReplacingRemoveRequested = true;
                 return;
             }
             // If we are not currently running the exit animation, we
@@ -2730,6 +2763,7 @@ public class WindowManagerService extends IWindowManager.Stub
         try {
             synchronized (mWindowMap) {
                 WindowState win = windowForClientLocked(session, client, false);
+                if (DEBUG_ADD_REMOVE) Slog.d(TAG, "finishDrawingWindow: " + win);
                 if (win != null && win.mWinAnimator.finishDrawingLocked()) {
                     if ((win.mAttrs.flags & FLAG_SHOW_WALLPAPER) != 0) {
                         getDefaultDisplayContentLocked().pendingLayoutChanges |=
@@ -3426,6 +3460,12 @@ public class WindowManagerService extends IWindowManager.Stub
         }
     }
 
+    /**
+     * @param transit What kind of transition is happening. Use one of the constants
+     *                AppTransition.TRANSIT_*.
+     * @param alwaysKeepCurrent If true and a transition is already set, new transition will NOT
+     *                          be set.
+     */
     @Override
     public void prepareAppTransition(int transit, boolean alwaysKeepCurrent) {
         if (!checkCallingPermission(android.Manifest.permission.MANAGE_APP_TOKENS,
@@ -3822,10 +3862,13 @@ public class WindowManagerService extends IWindowManager.Stub
         }
 
         wtoken.willBeHidden = false;
-        // Allow for state changes and animation to be applied if token is transitioning
-        // visibility state or the token was marked as hidden and is exiting before we had a chance
-        // to play the transition animation.
-        if (wtoken.hidden == visible || (wtoken.hidden && wtoken.mIsExiting)) {
+        // Allow for state changes and animation to be applied if:
+        // * token is transitioning visibility state
+        // * or the token was marked as hidden and is exiting before we had a chance to play the
+        // transition animation
+        // * or this is an opening app and windows are being replaced.
+        if (wtoken.hidden == visible || (wtoken.hidden && wtoken.mIsExiting) ||
+                (visible && wtoken.mReplacingWindow)) {
             boolean changed = false;
             if (DEBUG_APP_TRANSITIONS) Slog.v(
                 TAG, "Changing app " + wtoken + " hidden=" + wtoken.hidden
@@ -9723,7 +9766,7 @@ public class WindowManagerService extends IWindowManager.Stub
         return mWindowMap;
     }
 
-    public void setReplacingWindow(IBinder token) {
+    public void setReplacingWindow(IBinder token, boolean animate) {
         synchronized (mWindowMap) {
             AppWindowToken appWindowToken = findAppWindowToken(token);
             if (appWindowToken == null) {
@@ -9731,6 +9774,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 return;
             }
             appWindowToken.mReplacingWindow = true;
+            appWindowToken.mAnimateReplacingWindow = animate;
         }
     }
 

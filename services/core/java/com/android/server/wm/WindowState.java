@@ -545,6 +545,14 @@ final class WindowState implements WindowManagerPolicy.WindowState {
     @Override
     public void computeFrameLw(Rect pf, Rect df, Rect of, Rect cf, Rect vf, Rect dcf, Rect sf,
             Rect osf) {
+        if (mAppToken != null && mAppToken.mReplacingWindow
+                && (mExiting || !mAppToken.mReplacingRemoveRequested)) {
+            // This window is being replaced and either already got information that it's being
+            // removed or we are still waiting for some information. Because of this we don't
+            // want to apply any more changes to it, so it remains in this state until new window
+            // appears.
+            return;
+        }
         mHaveFrame = true;
 
         final Task task = mAppToken != null ? getTask() : null;
@@ -1274,6 +1282,8 @@ final class WindowState implements WindowManagerPolicy.WindowState {
         AppWindowToken token = mAppToken;
         if (token != null && token.mReplacingWindow) {
             token.mReplacingWindow = false;
+            token.mAnimateReplacingWindow = false;
+            token.mReplacingRemoveRequested = false;
             for (int i = token.allAppWindows.size() - 1; i >= 0; i--) {
                 WindowState win = token.allAppWindows.get(i);
                 if (win.mExiting) {

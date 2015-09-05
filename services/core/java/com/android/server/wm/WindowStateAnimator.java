@@ -1501,6 +1501,7 @@ class WindowStateAnimator {
             w.mLastHScale = w.mHScale;
             w.mLastVScale = w.mVScale;
             if (WindowManagerService.SHOW_TRANSACTIONS) WindowManagerService.logSurface(w,
+                    "control=" + mSurfaceControl +
                     "alpha=" + mShownAlpha + " layer=" + mAnimLayer
                     + " matrix=[" + mDsDx + "*" + w.mHScale
                     + "," + mDtDx + "*" + w.mVScale

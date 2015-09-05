@@ -122,6 +122,8 @@ public class AppTransition implements Dump {
     public static final int TRANSIT_TASK_OPEN_BEHIND = 16;
     /** A window in a task is being animated in-place. */
     public static final int TRANSIT_TASK_IN_PLACE = 17;
+    /** An activity is being relaunched (e.g. due to configuration change). */
+    public static final int TRANSIT_ACTIVITY_RELAUNCH = 18;
 
     /** Fraction of animation at which the recents thumbnail stays completely transparent */
     private static final float RECENTS_THUMBNAIL_FADEIN_FRACTION = 0.5f;
@@ -1004,6 +1006,22 @@ public class AppTransition implements Dump {
         return prepareThumbnailAnimation(a, appWidth, appHeight, transit);
     }
 
+    private Animation createRelaunchAnimation(int appWidth, int appHeight) {
+        getDefaultNextAppTransitionStartRect(mTmpFromClipRect);
+        final int left = mTmpFromClipRect.left;
+        final int top = mTmpFromClipRect.top;
+        mTmpFromClipRect.offset(-left, -top);
+        mTmpToClipRect.set(0, 0, appWidth, appHeight);
+        AnimationSet set = new AnimationSet(true);
+        ClipRectAnimation clip = new ClipRectAnimation(mTmpFromClipRect, mTmpToClipRect);
+        TranslateAnimation translate = new TranslateAnimation(left, 0, top, 0);
+        clip.setInterpolator(mDecelerateInterpolator);
+        set.addAnimation(clip);
+        set.addAnimation(translate);
+        set.setDuration(DEFAULT_APP_TRANSITION_DURATION);
+        return set;
+    }
+
     /**
      * @return true if and only if the first frame of the transition can be skipped, i.e. the first
      *         frame of the transition doesn't change the visuals on screen, so we can start
@@ -1040,6 +1058,8 @@ public class AppTransition implements Dump {
                     "applyAnimation voice:"
                     + " anim=" + a + " transit=" + appTransitionToString(transit)
                     + " isEntrance=" + enter + " Callers=" + Debug.getCallers(3));
+        } else if (transit == TRANSIT_ACTIVITY_RELAUNCH) {
+            a = createRelaunchAnimation(appWidth, appHeight);
         } else if (mNextAppTransitionType == NEXT_TRANSIT_TYPE_CUSTOM) {
             a = loadAnimationRes(mNextAppTransitionPackage, enter ?
                     mNextAppTransitionEnter : mNextAppTransitionExit);
@@ -1325,6 +1345,9 @@ public class AppTransition implements Dump {
             }
             case TRANSIT_TASK_OPEN_BEHIND: {
                 return "TRANSIT_TASK_OPEN_BEHIND";
+            }
+            case TRANSIT_ACTIVITY_RELAUNCH: {
+                return "TRANSIT_ACTIVITY_RELAUNCH";
             }
             default: {
                 return "<UNKNOWN>";

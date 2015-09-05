@@ -116,6 +116,10 @@ class AppWindowToken extends WindowToken {
     // to differentiate between simple removal of a window and replacement. In the latter case it
     // will preserve the old window until the new one is drawn.
     boolean mReplacingWindow;
+    // If true, the replaced window was already requested to be removed.
+    boolean mReplacingRemoveRequested;
+    // Whether the replacement of the window should trigger app transition animation.
+    boolean mAnimateReplacingWindow;
 
     AppWindowToken(WindowManagerService _service, IApplicationToken _token,
             boolean _voiceInteraction) {
@@ -230,16 +234,24 @@ class AppWindowToken extends WindowToken {
     }
 
     WindowState findMainWindow() {
+        WindowState candidate = null;
         int j = windows.size();
         while (j > 0) {
             j--;
             WindowState win = windows.get(j);
             if (win.mAttrs.type == WindowManager.LayoutParams.TYPE_BASE_APPLICATION
                     || win.mAttrs.type == WindowManager.LayoutParams.TYPE_APPLICATION_STARTING) {
-                return win;
+                // In cases where there are multiple windows, we prefer the non-exiting window. This
+                // happens for example when when replacing windows during an activity relaunch. When
+                // constructing the animation, we want the new window, not the exiting one.
+                if (win.mExiting) {
+                    candidate = win;
+                } else {
+                    return win;
+                }
             }
         }
-        return null;
+        return candidate;
     }
 
     boolean isVisible() {

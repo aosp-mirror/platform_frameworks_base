@@ -47,7 +47,6 @@ import android.os.RemoteException;
 import android.os.SystemClock;
 import android.os.Trace;
 import android.provider.Settings;
-import android.util.Log;
 import android.util.Slog;
 import android.view.Display;
 import android.view.DisplayInfo;
@@ -305,9 +304,9 @@ class WindowSurfacePlacer {
                     if (DEBUG_LAYOUT_REPEATS) debugLayoutRepeats(
                             "On entry to LockedInner", displayContent.pendingLayoutChanges);
 
-                    if ((displayContent.pendingLayoutChanges &
-                            FINISH_LAYOUT_REDO_WALLPAPER) != 0 &&
-                            mWallpaperControllerLocked.adjustWallpaperWindows()) {
+                    if ((displayContent.pendingLayoutChanges
+                            & FINISH_LAYOUT_REDO_WALLPAPER) != 0
+                            && mWallpaperControllerLocked.adjustWallpaperWindows()) {
                         mService.assignLayersLocked(windows);
                         displayContent.layoutNeeded = true;
                     }
@@ -430,8 +429,7 @@ class WindowSurfacePlacer {
                     // Moved from updateWindowsAndWallpaperLocked().
                     if (w.mHasSurface) {
                         // Take care of the window being ready to display.
-                        final boolean committed =
-                                winAnimator.commitFinishDrawingLocked();
+                        final boolean committed = winAnimator.commitFinishDrawingLocked();
                         if (isDefaultDisplay && committed) {
                             if (w.mAttrs.type == TYPE_DREAM) {
                                 // HACK: When a dream is shown, it may at that
@@ -447,9 +445,8 @@ class WindowSurfacePlacer {
                                 }
                             }
                             if ((w.mAttrs.flags & FLAG_SHOW_WALLPAPER) != 0) {
-                                if (DEBUG_WALLPAPER_LIGHT)
-                                    Slog.v(TAG,
-                                            "First draw done in potential wallpaper target " + w);
+                                if (DEBUG_WALLPAPER_LIGHT) Slog.v(TAG,
+                                        "First draw done in potential wallpaper target " + w);
                                 mWallpaperMayChange = true;
                                 displayContent.pendingLayoutChanges |=
                                         FINISH_LAYOUT_REDO_WALLPAPER;
@@ -544,7 +541,6 @@ class WindowSurfacePlacer {
             // Give the display manager a chance to adjust properties
             // like display rotation if it needs to.
             mService.mDisplayManagerInternal.performTraversalInTransactionFromWindowManager();
-
         } catch (RuntimeException e) {
             Slog.wtf(TAG, "Unhandled exception in Window Manager", e);
         } finally {
@@ -1461,8 +1457,6 @@ class WindowSurfacePlacer {
                 // open/close animation (only on the way down)
                 anim = mService.mAppTransition.createThumbnailAspectScaleAnimationLocked(appRect,
                         thumbnailHeader, taskId);
-                Log.d(TAG, "assigning thumbnail force above layer: "
-                        + openingLayer + " " + closingLayer);
                 openingAppAnimator.thumbnailForceAboveLayer = Math.max(openingLayer, closingLayer);
                 openingAppAnimator.deferThumbnailDestruction =
                         !mService.mAppTransition.isNextThumbnailTransitionScaleUp();
