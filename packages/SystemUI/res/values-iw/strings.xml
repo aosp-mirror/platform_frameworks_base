@@ -437,12 +437,8 @@
     <string name="activity_not_found" msgid="348423244327799974">"האפליקציה אינה מותקנת במכשיר"</string>
     <string name="clock_seconds" msgid="7689554147579179507">"הצג שניות בשעון"</string>
     <string name="clock_seconds_desc" msgid="6282693067130470675">"הצג שניות בשעון בשורת הסטטוס. פעולה זו עשויה להשפיע על אורך חיי הסוללה."</string>
-    <!-- no translation found for qs_rearrange (8060918697551068765) -->
-    <skip />
-    <!-- no translation found for show_brightness (6613930842805942519) -->
-    <skip />
-    <!-- no translation found for qs_paging (7020133150248666132) -->
-    <skip />
-    <!-- no translation found for experimental (6198182315536726162) -->
-    <skip />
+    <string name="qs_rearrange" msgid="8060918697551068765">"סידור מחדש של הגדרות מהירות"</string>
+    <string name="show_brightness" msgid="6613930842805942519">"הצג בהירות בהגדרות מהירות"</string>
+    <string name="qs_paging" msgid="7020133150248666132">"השתמש באפשרות הדפדוף בהגדרות המהירות"</string>
+    <string name="experimental" msgid="6198182315536726162">"ניסיוניות"</string>
 </resources>
