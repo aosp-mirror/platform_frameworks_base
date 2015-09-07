@@ -436,7 +436,7 @@
     <string name="clock_seconds" msgid="7689554147579179507">"Сааттын секунддары көрсөтүлсүн"</string>
     <string name="clock_seconds_desc" msgid="6282693067130470675">"Абал тилкесинен сааттын секунддары көрсөтүлсүн. Батареянын кубаты көбүрөөк сарпталышы мүмкүн."</string>
     <string name="qs_rearrange" msgid="8060918697551068765">"Ыкчам жөндөөлөрдү кайра коюу"</string>
-    <string name="show_brightness" msgid="6613930842805942519">"Ыкчам жөндөөлөрдөн жарыктыгын көрсөтүү"</string>
+    <string name="show_brightness" msgid="6613930842805942519">"Ыкчам жөндөөлөрдөн жарык деңгээлин көрсөтүү"</string>
     <string name="qs_paging" msgid="7020133150248666132">"Ыкчам жөндөөлөрдөн баракты номерлөөнү колдонуу"</string>
     <string name="experimental" msgid="6198182315536726162">"Сынамык"</string>
 </resources>
