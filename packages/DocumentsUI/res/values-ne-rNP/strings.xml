@@ -73,6 +73,11 @@
       <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> फाइलहरू सार्दै।</item>
       <item quantity="one"><xliff:g id="COUNT_0">%1$d</xliff:g> फाइलहरु सार्दै।</item>
     </plurals>
+    <plurals name="deleting" formatted="false" msgid="5054338566802559411">
+      <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> फाइलहरू मेट्दै।</item>
+      <item quantity="one"><xliff:g id="COUNT_0">%1$d</xliff:g> फाइल मेट्दै।</item>
+    </plurals>
+    <string name="undo" msgid="7905788502491742328">"अनडू गर्नुहोस्"</string>
     <string name="copy_preparing" msgid="3896202461003039386">"प्रतिलिपिको लागि तयारी गर्दै ..."</string>
     <string name="move_preparing" msgid="2772219441375531410">"सार्नको लागि तयारी गर्दै ..."</string>
     <plurals name="copy_error_notification_title" formatted="false" msgid="5267616889076217261">

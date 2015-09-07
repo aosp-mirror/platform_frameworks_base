@@ -73,6 +73,11 @@
       <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> fájl áthelyezése.</item>
       <item quantity="one"><xliff:g id="COUNT_0">%1$d</xliff:g> fájl áthelyezése.</item>
     </plurals>
+    <plurals name="deleting" formatted="false" msgid="5054338566802559411">
+      <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> fájl törlése.</item>
+      <item quantity="one"><xliff:g id="COUNT_0">%1$d</xliff:g> fájl törlése.</item>
+    </plurals>
+    <string name="undo" msgid="7905788502491742328">"Visszavonás"</string>
     <string name="copy_preparing" msgid="3896202461003039386">"Felkészülés a másolásra…"</string>
     <string name="move_preparing" msgid="2772219441375531410">"Áthelyezés előkészítése…"</string>
     <plurals name="copy_error_notification_title" formatted="false" msgid="5267616889076217261">

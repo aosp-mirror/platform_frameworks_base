@@ -73,6 +73,11 @@
       <item quantity="other">正在移动 <xliff:g id="COUNT_1">%1$d</xliff:g> 个文件。</item>
       <item quantity="one">正在移动 <xliff:g id="COUNT_0">%1$d</xliff:g> 个文件。</item>
     </plurals>
+    <plurals name="deleting" formatted="false" msgid="5054338566802559411">
+      <item quantity="other">正在删除 <xliff:g id="COUNT_1">%1$d</xliff:g> 个文件。</item>
+      <item quantity="one">正在删除 <xliff:g id="COUNT_0">%1$d</xliff:g> 个文件。</item>
+    </plurals>
+    <string name="undo" msgid="7905788502491742328">"撤消"</string>
     <string name="copy_preparing" msgid="3896202461003039386">"正在准备复制…"</string>
     <string name="move_preparing" msgid="2772219441375531410">"正在准备移动…"</string>
     <plurals name="copy_error_notification_title" formatted="false" msgid="5267616889076217261">

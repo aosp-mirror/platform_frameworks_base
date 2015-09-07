@@ -73,6 +73,11 @@
       <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> فائلز منتقل کی جا رہی ہیں۔</item>
       <item quantity="one"><xliff:g id="COUNT_0">%1$d</xliff:g> فائل منتقل کی جا رہی ہے۔</item>
     </plurals>
+    <plurals name="deleting" formatted="false" msgid="5054338566802559411">
+      <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> فائلیں حذف ہو رہی ہیں۔</item>
+      <item quantity="one"><xliff:g id="COUNT_0">%1$d</xliff:g> فائل حذف ہو رہی ہے۔</item>
+    </plurals>
+    <string name="undo" msgid="7905788502491742328">"کالعدم کریں"</string>
     <string name="copy_preparing" msgid="3896202461003039386">"کاپی کیلئے تیار ہو رہا ہے…"</string>
     <string name="move_preparing" msgid="2772219441375531410">"منتقلی کیلئے تیار ہو رہی ہیں…"</string>
     <plurals name="copy_error_notification_title" formatted="false" msgid="5267616889076217261">

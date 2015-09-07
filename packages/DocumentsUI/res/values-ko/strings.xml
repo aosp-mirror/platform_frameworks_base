@@ -73,6 +73,11 @@
       <item quantity="other">파일 <xliff:g id="COUNT_1">%1$d</xliff:g>개 이동</item>
       <item quantity="one">파일 <xliff:g id="COUNT_0">%1$d</xliff:g>개 이동</item>
     </plurals>
+    <plurals name="deleting" formatted="false" msgid="5054338566802559411">
+      <item quantity="other">파일 <xliff:g id="COUNT_1">%1$d</xliff:g>개 삭제</item>
+      <item quantity="one">파일 <xliff:g id="COUNT_0">%1$d</xliff:g>개 삭제</item>
+    </plurals>
+    <string name="undo" msgid="7905788502491742328">"실행취소"</string>
     <string name="copy_preparing" msgid="3896202461003039386">"사본 준비 중…"</string>
     <string name="move_preparing" msgid="2772219441375531410">"이동 준비 중…"</string>
     <plurals name="copy_error_notification_title" formatted="false" msgid="5267616889076217261">

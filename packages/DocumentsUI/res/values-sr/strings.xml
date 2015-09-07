@@ -75,6 +75,12 @@
       <item quantity="few">Премештају се <xliff:g id="COUNT_1">%1$d</xliff:g> датотеке.</item>
       <item quantity="other">Премешта се <xliff:g id="COUNT_1">%1$d</xliff:g> датотека.</item>
     </plurals>
+    <plurals name="deleting" formatted="false" msgid="5054338566802559411">
+      <item quantity="one">Брише се <xliff:g id="COUNT_1">%1$d</xliff:g> датотека.</item>
+      <item quantity="few">Бришу се <xliff:g id="COUNT_1">%1$d</xliff:g> датотеке.</item>
+      <item quantity="other">Брише се <xliff:g id="COUNT_1">%1$d</xliff:g> датотека.</item>
+    </plurals>
+    <string name="undo" msgid="7905788502491742328">"Опозови"</string>
     <string name="copy_preparing" msgid="3896202461003039386">"Припрема се копирање…"</string>
     <string name="move_preparing" msgid="2772219441375531410">"Припрема се премештање..."</string>
     <plurals name="copy_error_notification_title" formatted="false" msgid="5267616889076217261">

@@ -73,6 +73,11 @@
       <item quantity="one"><xliff:g id="COUNT_1">%1$d</xliff:g> फाईल हलवित आहे.</item>
       <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> फायली हलवित आहे.</item>
     </plurals>
+    <plurals name="deleting" formatted="false" msgid="5054338566802559411">
+      <item quantity="one"><xliff:g id="COUNT_1">%1$d</xliff:g> फाईल हटवित आहे.</item>
+      <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> फायली हटवित आहे.</item>
+    </plurals>
+    <string name="undo" msgid="7905788502491742328">"पूर्ववत करा"</string>
     <string name="copy_preparing" msgid="3896202461003039386">"कॉपी करण्‍यासाठी तयार करीत आहे…"</string>
     <string name="move_preparing" msgid="2772219441375531410">"हलविण्‍यास तयार होत आहे…"</string>
     <plurals name="copy_error_notification_title" formatted="false" msgid="5267616889076217261">

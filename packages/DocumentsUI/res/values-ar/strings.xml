@@ -81,6 +81,15 @@
       <item quantity="other">جارٍ نقل <xliff:g id="COUNT_1">%1$d</xliff:g> من الملفات.</item>
       <item quantity="one">جارٍ نقل <xliff:g id="COUNT_0">%1$d</xliff:g> ملف واحد.</item>
     </plurals>
+    <plurals name="deleting" formatted="false" msgid="5054338566802559411">
+      <item quantity="zero">جارٍ حذف <xliff:g id="COUNT_1">%1$d</xliff:g> ملف.</item>
+      <item quantity="two">جارٍ حذف ملفين (<xliff:g id="COUNT_1">%1$d</xliff:g>).</item>
+      <item quantity="few">جارٍ حذف <xliff:g id="COUNT_1">%1$d</xliff:g> ملفات.</item>
+      <item quantity="many">جارٍ حذف <xliff:g id="COUNT_1">%1$d</xliff:g> ملفًا.</item>
+      <item quantity="other">جارٍ حذف <xliff:g id="COUNT_1">%1$d</xliff:g> من الملفات.</item>
+      <item quantity="one">جارٍ حذف <xliff:g id="COUNT_0">%1$d</xliff:g> ملف.</item>
+    </plurals>
+    <string name="undo" msgid="7905788502491742328">"تراجع"</string>
     <string name="copy_preparing" msgid="3896202461003039386">"جارٍ التحضير للنسخ ..."</string>
     <string name="move_preparing" msgid="2772219441375531410">"جارٍ التحضير للنقل…"</string>
     <plurals name="copy_error_notification_title" formatted="false" msgid="5267616889076217261">

@@ -73,6 +73,11 @@
       <item quantity="one"><xliff:g id="COUNT_1">%1$d</xliff:g> ફાઇલો ખસેડી રહ્યાં છે.</item>
       <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> ફાઇલો ખસેડી રહ્યાં છે.</item>
     </plurals>
+    <plurals name="deleting" formatted="false" msgid="5054338566802559411">
+      <item quantity="one"><xliff:g id="COUNT_1">%1$d</xliff:g> ફાઇલ કાઢી નાખી રહ્યાં છે.</item>
+      <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> ફાઇલ કાઢી નાખી રહ્યાં છે.</item>
+    </plurals>
+    <string name="undo" msgid="7905788502491742328">"પૂર્વવત્ કરો"</string>
     <string name="copy_preparing" msgid="3896202461003039386">"કૉપિ માટે તૈયારી કરી રહ્યું છે…"</string>
     <string name="move_preparing" msgid="2772219441375531410">"ખસેડવા માટે તૈયાર કરી રહ્યું છે…"</string>
     <plurals name="copy_error_notification_title" formatted="false" msgid="5267616889076217261">

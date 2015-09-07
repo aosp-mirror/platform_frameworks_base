@@ -73,6 +73,11 @@
       <item quantity="other">Skuif tans <xliff:g id="COUNT_1">%1$d</xliff:g> lêers.</item>
       <item quantity="one">Skuif tans <xliff:g id="COUNT_0">%1$d</xliff:g> lêer.</item>
     </plurals>
+    <plurals name="deleting" formatted="false" msgid="5054338566802559411">
+      <item quantity="other">Vee tans <xliff:g id="COUNT_1">%1$d</xliff:g> lêers uit.</item>
+      <item quantity="one">Vee tans <xliff:g id="COUNT_0">%1$d</xliff:g> lêer uit.</item>
+    </plurals>
+    <string name="undo" msgid="7905788502491742328">"Ontdoen"</string>
     <string name="copy_preparing" msgid="3896202461003039386">"Maak tans gereed vir kopieer …"</string>
     <string name="move_preparing" msgid="2772219441375531410">"Berei tans voor vir skuif …"</string>
     <plurals name="copy_error_notification_title" formatted="false" msgid="5267616889076217261">

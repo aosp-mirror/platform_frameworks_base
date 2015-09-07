@@ -73,6 +73,11 @@
       <item quantity="one">ගොනු <xliff:g id="COUNT_1">%1$d</xliff:g> ක් ගෙන යමින්.</item>
       <item quantity="other">ගොනු <xliff:g id="COUNT_1">%1$d</xliff:g> ක් ගෙන යමින්.</item>
     </plurals>
+    <plurals name="deleting" formatted="false" msgid="5054338566802559411">
+      <item quantity="one">ගොනු <xliff:g id="COUNT_1">%1$d</xliff:g>ක් මකමින්.</item>
+      <item quantity="other">ගොනු <xliff:g id="COUNT_1">%1$d</xliff:g>ක් මකමින්.</item>
+    </plurals>
+    <string name="undo" msgid="7905788502491742328">"අස් කරන්න"</string>
     <string name="copy_preparing" msgid="3896202461003039386">"පිටපතක් සඳහා සූදානම් කරමින්..."</string>
     <string name="move_preparing" msgid="2772219441375531410">"ගෙන යාම සඳහා පිළියෙළ කරමින් ..."</string>
     <plurals name="copy_error_notification_title" formatted="false" msgid="5267616889076217261">

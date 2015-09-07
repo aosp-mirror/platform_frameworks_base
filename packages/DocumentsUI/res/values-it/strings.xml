@@ -73,6 +73,11 @@
       <item quantity="other">Spostamento di <xliff:g id="COUNT_1">%1$d</xliff:g> file.</item>
       <item quantity="one">Spostamento di <xliff:g id="COUNT_0">%1$d</xliff:g> file.</item>
     </plurals>
+    <plurals name="deleting" formatted="false" msgid="5054338566802559411">
+      <item quantity="other">Eliminazione di <xliff:g id="COUNT_1">%1$d</xliff:g> file.</item>
+      <item quantity="one">Eliminazione di <xliff:g id="COUNT_0">%1$d</xliff:g> file.</item>
+    </plurals>
+    <string name="undo" msgid="7905788502491742328">"Annulla"</string>
     <string name="copy_preparing" msgid="3896202461003039386">"Preparazione alla copia…"</string>
     <string name="move_preparing" msgid="2772219441375531410">"Preparazione dello spostamento…"</string>
     <plurals name="copy_error_notification_title" formatted="false" msgid="5267616889076217261">

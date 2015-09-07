@@ -73,6 +73,11 @@
       <item quantity="one">Ihambisa amafayela angu-<xliff:g id="COUNT_1">%1$d</xliff:g>.</item>
       <item quantity="other">Ihambisa amafayela angu-<xliff:g id="COUNT_1">%1$d</xliff:g>.</item>
     </plurals>
+    <plurals name="deleting" formatted="false" msgid="5054338566802559411">
+      <item quantity="one">Isusa amafayela angu-<xliff:g id="COUNT_1">%1$d</xliff:g>.</item>
+      <item quantity="other">Isusa amafayela angu-<xliff:g id="COUNT_1">%1$d</xliff:g>.</item>
+    </plurals>
+    <string name="undo" msgid="7905788502491742328">"Hlehlisa"</string>
     <string name="copy_preparing" msgid="3896202461003039386">"Ilungiselela ukukopisha..."</string>
     <string name="move_preparing" msgid="2772219441375531410">"Ilungiselela ukuhambisa…"</string>
     <plurals name="copy_error_notification_title" formatted="false" msgid="5267616889076217261">

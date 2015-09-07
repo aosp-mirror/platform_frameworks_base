@@ -73,6 +73,11 @@
       <item quantity="one"><xliff:g id="COUNT_1">%1$d</xliff:g>টি ফাইল সরানো হচ্ছে৷</item>
       <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g>টি ফাইল সরানো হচ্ছে৷</item>
     </plurals>
+    <plurals name="deleting" formatted="false" msgid="5054338566802559411">
+      <item quantity="one"><xliff:g id="COUNT_1">%1$d</xliff:g>টি ফাইল মোছা হচ্ছে।</item>
+      <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g>টি ফাইল মোছা হচ্ছে।</item>
+    </plurals>
+    <string name="undo" msgid="7905788502491742328">"পূর্বাবস্থায় ফিরুন"</string>
     <string name="copy_preparing" msgid="3896202461003039386">"অনুলিপি করার জন্য প্রস্তুত করা হচ্ছে..."</string>
     <string name="move_preparing" msgid="2772219441375531410">"সরানোর জন্য প্রস্তুত হচ্ছে..."</string>
     <plurals name="copy_error_notification_title" formatted="false" msgid="5267616889076217261">

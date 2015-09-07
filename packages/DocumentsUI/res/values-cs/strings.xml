@@ -77,6 +77,13 @@
       <item quantity="other">Přesouvá se <xliff:g id="COUNT_1">%1$d</xliff:g> souborů.</item>
       <item quantity="one">Přesouvá se <xliff:g id="COUNT_0">%1$d</xliff:g> soubor.</item>
     </plurals>
+    <plurals name="deleting" formatted="false" msgid="5054338566802559411">
+      <item quantity="few">Mazání <xliff:g id="COUNT_1">%1$d</xliff:g> souborů.</item>
+      <item quantity="many">Mazání <xliff:g id="COUNT_1">%1$d</xliff:g> souboru.</item>
+      <item quantity="other">Mazání <xliff:g id="COUNT_1">%1$d</xliff:g> souborů.</item>
+      <item quantity="one">Mazání <xliff:g id="COUNT_0">%1$d</xliff:g> souboru.</item>
+    </plurals>
+    <string name="undo" msgid="7905788502491742328">"Vrátit zpět"</string>
     <string name="copy_preparing" msgid="3896202461003039386">"Příprava na kopírování…"</string>
     <string name="move_preparing" msgid="2772219441375531410">"Příprava na přesunutí…"</string>
     <plurals name="copy_error_notification_title" formatted="false" msgid="5267616889076217261">

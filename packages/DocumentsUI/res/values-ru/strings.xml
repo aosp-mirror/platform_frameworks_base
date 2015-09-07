@@ -77,6 +77,13 @@
       <item quantity="many">Перемещение <xliff:g id="COUNT_1">%1$d</xliff:g> файлов...</item>
       <item quantity="other">Перемещение <xliff:g id="COUNT_1">%1$d</xliff:g> файла...</item>
     </plurals>
+    <plurals name="deleting" formatted="false" msgid="5054338566802559411">
+      <item quantity="one">Удаление <xliff:g id="COUNT_1">%1$d</xliff:g> файла…</item>
+      <item quantity="few">Удаление <xliff:g id="COUNT_1">%1$d</xliff:g> файлов…</item>
+      <item quantity="many">Удаление <xliff:g id="COUNT_1">%1$d</xliff:g> файлов…</item>
+      <item quantity="other">Удаление <xliff:g id="COUNT_1">%1$d</xliff:g> файла…</item>
+    </plurals>
+    <string name="undo" msgid="7905788502491742328">"Отменить"</string>
     <string name="copy_preparing" msgid="3896202461003039386">"Подготовка к копированию…"</string>
     <string name="move_preparing" msgid="2772219441375531410">"Подготовка…"</string>
     <plurals name="copy_error_notification_title" formatted="false" msgid="5267616889076217261">

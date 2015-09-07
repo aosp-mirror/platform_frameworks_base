@@ -75,6 +75,12 @@
       <item quantity="few">Premještanje <xliff:g id="COUNT_1">%1$d</xliff:g> datoteke.</item>
       <item quantity="other">Premještanje <xliff:g id="COUNT_1">%1$d</xliff:g> datoteka.</item>
     </plurals>
+    <plurals name="deleting" formatted="false" msgid="5054338566802559411">
+      <item quantity="one">Brisanje <xliff:g id="COUNT_1">%1$d</xliff:g> datoteke.</item>
+      <item quantity="few">Brisanje <xliff:g id="COUNT_1">%1$d</xliff:g> datoteke.</item>
+      <item quantity="other">Brisanje <xliff:g id="COUNT_1">%1$d</xliff:g> datoteka.</item>
+    </plurals>
+    <string name="undo" msgid="7905788502491742328">"Poništi"</string>
     <string name="copy_preparing" msgid="3896202461003039386">"Priprema za kopiranje…"</string>
     <string name="move_preparing" msgid="2772219441375531410">"Priprema za premještanje…"</string>
     <plurals name="copy_error_notification_title" formatted="false" msgid="5267616889076217261">

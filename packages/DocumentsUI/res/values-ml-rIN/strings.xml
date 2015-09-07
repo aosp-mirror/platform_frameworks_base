@@ -73,6 +73,11 @@
       <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> ഫയലുകൾ നീക്കുന്നു.</item>
       <item quantity="one"><xliff:g id="COUNT_0">%1$d</xliff:g> ഫയൽ നീക്കുന്നു.</item>
     </plurals>
+    <plurals name="deleting" formatted="false" msgid="5054338566802559411">
+      <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> ഫയലുകൾ ഇല്ലാതാക്കുന്നു.</item>
+      <item quantity="one"><xliff:g id="COUNT_0">%1$d</xliff:g> ഫയൽ ഇല്ലാതാക്കുന്നു.</item>
+    </plurals>
+    <string name="undo" msgid="7905788502491742328">"പഴയപടിയാക്കുക"</string>
     <string name="copy_preparing" msgid="3896202461003039386">"പകർപ്പിനായി തയ്യാറെടുക്കുന്നു…"</string>
     <string name="move_preparing" msgid="2772219441375531410">"നീക്കാനൊരുങ്ങുന്നു…"</string>
     <plurals name="copy_error_notification_title" formatted="false" msgid="5267616889076217261">

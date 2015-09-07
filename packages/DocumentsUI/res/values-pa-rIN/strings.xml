@@ -73,6 +73,11 @@
       <item quantity="one"><xliff:g id="COUNT_1">%1$d</xliff:g> ਫ਼ਾਈਲਾਂ ਨੂੰ ਮੂਵ ਕਰਨਾ।</item>
       <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> ਫ਼ਾਈਲਾਂ ਨੂੰ ਮੂਵ ਕਰਨਾ।</item>
     </plurals>
+    <plurals name="deleting" formatted="false" msgid="5054338566802559411">
+      <item quantity="one"><xliff:g id="COUNT_1">%1$d</xliff:g> ਫ਼ਾਈਲਾਂ ਮਿਟਾ ਰਿਹਾ ਹੈ।</item>
+      <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> ਫ਼ਾਈਲਾਂ ਮਿਟਾ ਰਿਹਾ ਹੈ।</item>
+    </plurals>
+    <string name="undo" msgid="7905788502491742328">"ਪਹਿਲਾਂ ਵਰਗਾ ਕਰੋ"</string>
     <string name="copy_preparing" msgid="3896202461003039386">"ਕਾਪੀ ਲਈ ਤਿਆਰ ਕਰ ਰਿਹਾ ਹੈ…"</string>
     <string name="move_preparing" msgid="2772219441375531410">"ਮੂਵ ਲਈ ਤਿਆਰ ਕਰ ਰਿਹਾ ਹੈ..."</string>
     <plurals name="copy_error_notification_title" formatted="false" msgid="5267616889076217261">

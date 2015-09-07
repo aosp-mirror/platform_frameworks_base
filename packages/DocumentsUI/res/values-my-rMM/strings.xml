@@ -73,6 +73,11 @@
       <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> ဖိုင် ရွှေ့နေစဉ်</item>
       <item quantity="one"><xliff:g id="COUNT_0">%1$d</xliff:g> ဖိုင် ရွှေ့နေစဉ်</item>
     </plurals>
+    <plurals name="deleting" formatted="false" msgid="5054338566802559411">
+      <item quantity="other">ဖိုင် <xliff:g id="COUNT_1">%1$d</xliff:g> ခုကိုဖျက်နေသည်။</item>
+      <item quantity="one">ဖိုင် <xliff:g id="COUNT_0">%1$d</xliff:g> ခုကိုဖျက်နေသည်။</item>
+    </plurals>
+    <string name="undo" msgid="7905788502491742328">"ပြန်ဖျက်ရန်"</string>
     <string name="copy_preparing" msgid="3896202461003039386">"မိတ္တူကူးရန်ပြင်ဆင်နေ..."</string>
     <string name="move_preparing" msgid="2772219441375531410">"ရွှေ့ရန် ပြင်ဆင်နေသည်…"</string>
     <plurals name="copy_error_notification_title" formatted="false" msgid="5267616889076217261">

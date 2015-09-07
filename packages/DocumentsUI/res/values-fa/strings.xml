@@ -73,6 +73,11 @@
       <item quantity="one">در حال انتقال <xliff:g id="COUNT_1">%1$d</xliff:g> فایل.</item>
       <item quantity="other">در حال انتقال <xliff:g id="COUNT_1">%1$d</xliff:g> فایل.</item>
     </plurals>
+    <plurals name="deleting" formatted="false" msgid="5054338566802559411">
+      <item quantity="one">در حال حذف <xliff:g id="COUNT_1">%1$d</xliff:g> فایل.</item>
+      <item quantity="other">در حال حذف <xliff:g id="COUNT_1">%1$d</xliff:g> فایل.</item>
+    </plurals>
+    <string name="undo" msgid="7905788502491742328">"لغو"</string>
     <string name="copy_preparing" msgid="3896202461003039386">"در حال آماده‌سازی برای کپی..."</string>
     <string name="move_preparing" msgid="2772219441375531410">"درحال آماده‌سازی برای انتقال…"</string>
     <plurals name="copy_error_notification_title" formatted="false" msgid="5267616889076217261">

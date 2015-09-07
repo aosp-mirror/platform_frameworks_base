@@ -73,6 +73,11 @@
       <item quantity="other">A mover <xliff:g id="COUNT_1">%1$d</xliff:g> ficheiros.</item>
       <item quantity="one">A mover <xliff:g id="COUNT_0">%1$d</xliff:g> ficheiro.</item>
     </plurals>
+    <plurals name="deleting" formatted="false" msgid="5054338566802559411">
+      <item quantity="other">A eliminar <xliff:g id="COUNT_1">%1$d</xliff:g> ficheiros.</item>
+      <item quantity="one">A eliminar <xliff:g id="COUNT_0">%1$d</xliff:g> ficheiro.</item>
+    </plurals>
+    <string name="undo" msgid="7905788502491742328">"Anular"</string>
     <string name="copy_preparing" msgid="3896202461003039386">"A preparar para copiar…"</string>
     <string name="move_preparing" msgid="2772219441375531410">"A preparar para mover…"</string>
     <plurals name="copy_error_notification_title" formatted="false" msgid="5267616889076217261">

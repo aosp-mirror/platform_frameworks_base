@@ -77,6 +77,13 @@
       <item quantity="other">Przenoszę <xliff:g id="COUNT_1">%1$d</xliff:g> pliku.</item>
       <item quantity="one">Przenoszę <xliff:g id="COUNT_0">%1$d</xliff:g> plik.</item>
     </plurals>
+    <plurals name="deleting" formatted="false" msgid="5054338566802559411">
+      <item quantity="few">Usuwam <xliff:g id="COUNT_1">%1$d</xliff:g> pliki.</item>
+      <item quantity="many">Usuwam <xliff:g id="COUNT_1">%1$d</xliff:g> plików.</item>
+      <item quantity="other">Usuwam <xliff:g id="COUNT_1">%1$d</xliff:g> pliku.</item>
+      <item quantity="one">Usuwam <xliff:g id="COUNT_0">%1$d</xliff:g> plik.</item>
+    </plurals>
+    <string name="undo" msgid="7905788502491742328">"Cofnij"</string>
     <string name="copy_preparing" msgid="3896202461003039386">"Przygotowuję do kopiowania…"</string>
     <string name="move_preparing" msgid="2772219441375531410">"Przygotowuję przenoszenie…"</string>
     <plurals name="copy_error_notification_title" formatted="false" msgid="5267616889076217261">

@@ -77,6 +77,13 @@
       <item quantity="other">מעביר <xliff:g id="COUNT_1">%1$d</xliff:g> קבצים.</item>
       <item quantity="one">מעביר קובץ <xliff:g id="COUNT_0">%1$d</xliff:g>.</item>
     </plurals>
+    <plurals name="deleting" formatted="false" msgid="5054338566802559411">
+      <item quantity="two">מוחק <xliff:g id="COUNT_1">%1$d</xliff:g> קבצים.</item>
+      <item quantity="many">מוחק <xliff:g id="COUNT_1">%1$d</xliff:g> קבצים.</item>
+      <item quantity="other">מוחק <xliff:g id="COUNT_1">%1$d</xliff:g> קבצים.</item>
+      <item quantity="one"> מוחק קובץ <xliff:g id="COUNT_0">%1$d</xliff:g>.</item>
+    </plurals>
+    <string name="undo" msgid="7905788502491742328">"בטל"</string>
     <string name="copy_preparing" msgid="3896202461003039386">"מתכונן להעתקה..."</string>
     <string name="move_preparing" msgid="2772219441375531410">"מתכונן להעברה…"</string>
     <plurals name="copy_error_notification_title" formatted="false" msgid="5267616889076217261">

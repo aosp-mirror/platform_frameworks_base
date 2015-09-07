@@ -73,6 +73,11 @@
       <item quantity="other">S\'estan movent <xliff:g id="COUNT_1">%1$d</xliff:g> fitxers.</item>
       <item quantity="one">S\'està movent <xliff:g id="COUNT_0">%1$d</xliff:g> fitxer.</item>
     </plurals>
+    <plurals name="deleting" formatted="false" msgid="5054338566802559411">
+      <item quantity="other">S\'estan suprimint <xliff:g id="COUNT_1">%1$d</xliff:g> fitxers.</item>
+      <item quantity="one">S\'està suprimint <xliff:g id="COUNT_0">%1$d</xliff:g> fitxer.</item>
+    </plurals>
+    <string name="undo" msgid="7905788502491742328">"Desfés"</string>
     <string name="copy_preparing" msgid="3896202461003039386">"S\'està preparant una còpia…"</string>
     <string name="move_preparing" msgid="2772219441375531410">"S\'està preparant per moure\'ls..."</string>
     <plurals name="copy_error_notification_title" formatted="false" msgid="5267616889076217261">
