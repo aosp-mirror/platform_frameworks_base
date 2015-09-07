@@ -951,7 +951,7 @@
     <string name="volume_icon_description_media" msgid="4217311719665194215">"Volume dos elementos multimedia"</string>
     <string name="volume_icon_description_notification" msgid="7044986546477282274">"Volume das notificacións"</string>
     <string name="ringtone_default" msgid="3789758980357696936">"Ton de chamada predeterminado"</string>
-    <string name="ringtone_default_with_actual" msgid="8129563480895990372">"Ton de chamada predeterminado(<xliff:g id="ACTUAL_RINGTONE">%1$s</xliff:g>)"</string>
+    <string name="ringtone_default_with_actual" msgid="8129563480895990372">"Ton de chamada predeterminado (<xliff:g id="ACTUAL_RINGTONE">%1$s</xliff:g>)"</string>
     <string name="ringtone_silent" msgid="7937634392408977062">"Ningún"</string>
     <string name="ringtone_picker_title" msgid="3515143939175119094">"Tons de chamada"</string>
     <string name="ringtone_unknown" msgid="5477919988701784788">"Ton de chamada descoñecido"</string>

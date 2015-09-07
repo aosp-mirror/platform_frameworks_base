@@ -69,8 +69,8 @@
     </plurals>
     <string name="imei" msgid="2625429890869005782">"IMEI"</string>
     <string name="meid" msgid="4841221237681254195">"MEID"</string>
-    <string name="ClipMmi" msgid="6952821216480289285">"Nazwa rozmówcy przy połączeniach przychodzących"</string>
-    <string name="ClirMmi" msgid="7784673673446833091">"Nazwa rozmówcy przy połączeniach wychodzących"</string>
+    <string name="ClipMmi" msgid="6952821216480289285">"ID rozmówcy przy połączeniach przychodzących"</string>
+    <string name="ClirMmi" msgid="7784673673446833091">"ID rozmówcy przy połączeniach wychodzących"</string>
     <string name="ColpMmi" msgid="3065121483740183974">"Identyfikator połączonej linii"</string>
     <string name="ColrMmi" msgid="4996540314421889589">"Ograniczenie identyfikatora połączonej linii"</string>
     <string name="CfMmi" msgid="5123218989141573515">"Przekierowanie połączeń"</string>
@@ -84,12 +84,12 @@
     <string name="RuacMmi" msgid="7827887459138308886">"Odrzucanie niepożądanych, irytujących połączeń"</string>
     <string name="CndMmi" msgid="3116446237081575808">"Dostarczanie numeru telefonującego"</string>
     <string name="DndMmi" msgid="1265478932418334331">"Nie przeszkadzać"</string>
-    <string name="CLIRDefaultOnNextCallOn" msgid="429415409145781923">"Nazwa rozmówcy ustawiona jest domyślnie na „zastrzeżony”. Następne połączenie: zastrzeżony"</string>
-    <string name="CLIRDefaultOnNextCallOff" msgid="3092918006077864624">"Nazwa rozmówcy ustawiona jest domyślnie na „zastrzeżony”. Następne połączenie: nie zastrzeżony"</string>
-    <string name="CLIRDefaultOffNextCallOn" msgid="6179425182856418465">"Nazwa rozmówcy ustawiona jest domyślnie na „nie zastrzeżony”. Następne połączenie: zastrzeżony"</string>
-    <string name="CLIRDefaultOffNextCallOff" msgid="2567998633124408552">"Nazwa rozmówcy ustawiona jest domyślnie na „nie zastrzeżony”. Następne połączenie: nie zastrzeżony"</string>
+    <string name="CLIRDefaultOnNextCallOn" msgid="429415409145781923">"ID rozmówcy ustawiony jest domyślnie na „zastrzeżony”. Następne połączenie: zastrzeżony"</string>
+    <string name="CLIRDefaultOnNextCallOff" msgid="3092918006077864624">"ID rozmówcy ustawiony jest domyślnie na „zastrzeżony”. Następne połączenie: nie zastrzeżony"</string>
+    <string name="CLIRDefaultOffNextCallOn" msgid="6179425182856418465">"ID rozmówcy ustawiony jest domyślnie na „nie zastrzeżony”. Następne połączenie: zastrzeżony"</string>
+    <string name="CLIRDefaultOffNextCallOff" msgid="2567998633124408552">"ID rozmówcy ustawiony jest domyślnie na „nie zastrzeżony”. Następne połączenie: nie zastrzeżony"</string>
     <string name="serviceNotProvisioned" msgid="8614830180508686666">"Usługa nie jest świadczona."</string>
-    <string name="CLIRPermanent" msgid="3377371145926835671">"Nie możesz zmienić ustawienia identyfikatora rozmówcy."</string>
+    <string name="CLIRPermanent" msgid="3377371145926835671">"Nie możesz zmienić ustawienia ID rozmówcy."</string>
     <string name="RestrictedChangedTitle" msgid="5592189398956187498">"Zmieniono ograniczenie dostępu"</string>
     <string name="RestrictedOnData" msgid="8653794784690065540">"Usługa transmisji danych jest zablokowana."</string>
     <string name="RestrictedOnEmergency" msgid="6581163779072833665">"Usługa połączeń alarmowych jest zablokowana."</string>
