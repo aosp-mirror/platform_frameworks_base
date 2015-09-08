@@ -34,6 +34,7 @@ import android.content.IntentFilter;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
+import android.graphics.PixelFormat;
 import android.graphics.Rect;
 import android.os.Bundle;
 import android.os.RemoteException;
@@ -43,10 +44,14 @@ import android.util.AttributeSet;
 import android.util.Slog;
 import android.view.DragEvent;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.WindowManager;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.PopupMenu;
 import android.widget.Toast;
 
 import com.android.internal.content.PackageMonitor;
@@ -78,6 +83,7 @@ class NavigationBarApps extends LinearLayout {
     private final UserManager mUserManager;
     private final LayoutInflater mLayoutInflater;
     private final AppPackageMonitor mAppPackageMonitor;
+    private final WindowManager mWindowManager;
 
 
     // This view has two roles:
@@ -103,11 +109,22 @@ class NavigationBarApps extends LinearLayout {
         }
     };
 
+    // Layout params for the window that contains the anchor for the popup menus.
+    // We need to create a window for a popup menu because the NavBar window is too narrow and can't
+    // contain the menu.
+    private final WindowManager.LayoutParams mPopupAnchorLayoutParams;
+    // View that contains the anchor for popup menus. The view occupies the whole screen, and
+    // has a child that will be moved to make the menu to appear where we need it.
+    private final ViewGroup mPopupAnchor;
+    private final PopupMenu mPopupMenu;
+    private final int [] mClickedIconLocation = new int[2];
+
     public NavigationBarApps(Context context, AttributeSet attrs) {
         super(context, attrs);
         sAppsModel = new NavigationBarAppsModel(context);
         mPackageManager = context.getPackageManager();
-        mUserManager = (UserManager) getContext().getSystemService(Context.USER_SERVICE);
+        mUserManager = (UserManager) context.getSystemService(Context.USER_SERVICE);
+        mWindowManager = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
         mLayoutInflater = LayoutInflater.from(context);
         mAppPackageMonitor = new AppPackageMonitor();
 
@@ -131,6 +148,23 @@ class NavigationBarApps extends LinearLayout {
         } catch (RemoteException e) {
             Slog.e(TAG, "registerTaskStackListener failed", e);
         }
+
+        mPopupAnchorLayoutParams =
+                new WindowManager.LayoutParams(
+                        ViewGroup.LayoutParams.MATCH_PARENT,
+                        ViewGroup.LayoutParams.MATCH_PARENT, 0, 0,
+                        WindowManager.LayoutParams.TYPE_SECURE_SYSTEM_OVERLAY,
+                        WindowManager.LayoutParams.FLAG_FULLSCREEN
+                                | WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED
+                                | WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN,
+                        PixelFormat.TRANSLUCENT);
+        mPopupAnchorLayoutParams.setTitle("ShelfMenuAnchor");
+
+        mPopupAnchor = (ViewGroup) mLayoutInflater.inflate(R.layout.shelf_menu_anchor, null);
+
+        ImageView anchorButton =
+                (ImageView) mPopupAnchor.findViewById(R.id.shelf_menu_anchor_anchor);
+        mPopupMenu = new PopupMenu(context, anchorButton);
     }
 
     // Monitor that catches events like "app uninstalled".
@@ -606,13 +640,11 @@ class NavigationBarApps extends LinearLayout {
             mContext.startActivityAsUser(launchIntent, optsBundle, appInfo.getUser());
         }
 
-        private void activateLatestTask(List<RecentTaskInfo> tasks) {
-            // 'tasks' is guaranteed to be non-empty.
-            int latestTaskPersistentId = tasks.get(0).persistentId;
+        private void activateTask(int taskPersistentId) {
             // Launch or bring the activity to front.
             IActivityManager manager = ActivityManagerNative.getDefault();
             try {
-                manager.startActivityFromRecents(latestTaskPersistentId, null /* options */);
+                manager.startActivityFromRecents(taskPersistentId, null /* options */);
             } catch (RemoteException e) {
                 Slog.e(TAG, "Exception when activating a recent task", e);
             } catch (IllegalArgumentException e) {
@@ -620,14 +652,83 @@ class NavigationBarApps extends LinearLayout {
             }
         }
 
+        /**
+         * Adds to the popup menu items for activating each of tasks in the specified list.
+         */
+        void populateLaunchMenu(List<RecentTaskInfo> tasks) {
+            Menu menu = mPopupMenu.getMenu();
+            int taskCount = tasks.size();
+            for (int i = 0; i < taskCount; ++i) {
+                final RecentTaskInfo taskInfo = tasks.get(i);
+                MenuItem item = menu.add(getActivityForTask(taskInfo).flattenToShortString());
+                item.setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
+                    @java.lang.Override
+                    public boolean onMenuItemClick(MenuItem item) {
+                        activateTask(taskInfo.persistentId);
+                        return true;
+                    }
+                });
+            }
+        }
+
+        /**
+         * Shows a task selection menu for clicked apps that have more than 1 running tasks.
+         */
+        void maybeShowLaunchMenu(ImageView appIcon) {
+            final AppButtonData appButtonData = (AppButtonData) appIcon.getTag();
+
+            if (appButtonData.getTaskCount() <= 1) return;
+
+            // Movable view inside the popup anchor view. It serves as the actual anchor for the
+            // menu.
+            final ImageView anchorButton =
+                    (ImageView) mPopupAnchor.findViewById(R.id.shelf_menu_anchor_anchor);
+            // Set same drawable as for the clicked button to have same size.
+            anchorButton.setImageDrawable(appIcon.getDrawable());
+
+            // Move the anchor button to the position of the app button.
+            appIcon.getLocationOnScreen(mClickedIconLocation);
+            anchorButton.setTranslationX(mClickedIconLocation[0]);
+            anchorButton.setTranslationY(mClickedIconLocation[1]);
+
+            final OnAttachStateChangeListener onAttachStateChangeListener =
+                    new OnAttachStateChangeListener() {
+                        @java.lang.Override
+                        public void onViewAttachedToWindow(View v) {
+                            mPopupMenu.show();
+                        }
+
+                        @java.lang.Override
+                        public void onViewDetachedFromWindow(View v) {}
+                    };
+            anchorButton.addOnAttachStateChangeListener(onAttachStateChangeListener);
+
+            populateLaunchMenu(appButtonData.tasks);
+
+            mPopupMenu.setOnDismissListener(new PopupMenu.OnDismissListener() {
+                @java.lang.Override
+                public void onDismiss(PopupMenu menu) {
+                    mWindowManager.removeView(mPopupAnchor);
+                    anchorButton.removeOnAttachStateChangeListener(onAttachStateChangeListener);
+                    mPopupMenu.setOnDismissListener(null);
+                    mPopupMenu.getMenu().clear();
+                }
+            });
+
+            mWindowManager.addView(mPopupAnchor, mPopupAnchorLayoutParams);
+        }
+
         @Override
         public void onClick(View v) {
-            AppButtonData appButtonData = (AppButtonData)v.getTag();
+            AppButtonData appButtonData = (AppButtonData) v.getTag();
 
-            if (appButtonData.tasks == null || appButtonData.tasks.size() == 0) {
+            if (appButtonData.getTaskCount() == 0) {
                 launchApp(appButtonData.appInfo, v);
             } else {
-                activateLatestTask(appButtonData.tasks);
+                // Activate latest task.
+                activateTask(appButtonData.tasks.get(0).persistentId);
+
+                maybeShowLaunchMenu((ImageView) v);
             }
         }
     }
