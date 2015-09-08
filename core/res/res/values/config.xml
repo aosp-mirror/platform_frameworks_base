@@ -406,6 +406,10 @@
     <!-- Boolean indicating autojoin will prefer 5GHz and choose 5GHz BSSIDs -->
     <bool translatable="true" name="config_wifi_enable_5GHz_preference">true</bool>
 
+    <!-- Boolean indicating whether or not to revert to default country code when cellular
+         radio is unable to find any MCC information to infer wifi country code from -->
+    <bool translatable="false" name="config_wifi_revert_country_code_on_cellular_loss">false</bool>
+
     <!-- Integer specifying the basic autojoin parameters -->
     <integer translatable="false" name="config_wifi_framework_5GHz_preference_boost_threshold">-65</integer>
     <integer translatable="false" name="config_wifi_framework_5GHz_preference_boost_factor">5</integer>
