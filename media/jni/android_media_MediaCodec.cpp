@@ -440,6 +440,12 @@ status_t JMediaCodec::createByteBufferFromABuffer(
     // if this is an ABuffer that doesn't actually hold any accessible memory,
     // use a null ByteBuffer
     *buf = NULL;
+
+    if (buffer == NULL) {
+        ALOGV("createByteBufferFromABuffer - given NULL, returning NULL");
+        return OK;
+    }
+
     if (buffer->base() == NULL) {
         return OK;
     }
