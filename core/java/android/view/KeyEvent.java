@@ -784,10 +784,8 @@ public class KeyEvent extends InputEvent implements Parcelable {
     /** Key code constant: Step backward media key.
      * Steps media backward, one frame at a time. */
     public static final int KEYCODE_MEDIA_STEP_BACKWARD = 275;
-    /** Key code constant: put device to sleep unless a wakelock is held. */
-    public static final int KEYCODE_SOFT_SLEEP = 276;
 
-    private static final int LAST_KEYCODE = KEYCODE_SOFT_SLEEP;
+    private static final int LAST_KEYCODE = KEYCODE_MEDIA_STEP_BACKWARD;
 
     // NOTE: If you add a new keycode here you must also add it to:
     //  isSystem()
