@@ -77,6 +77,7 @@ import android.text.format.Time;
 import android.util.Log;
 import android.util.SparseArray;
 import android.util.SparseBooleanArray;
+import android.util.TypedValue;
 import android.view.ActionMode;
 import android.view.DragEvent;
 import android.view.GestureDetector;
@@ -650,8 +651,12 @@ public class DirectoryFragment extends Fragment {
                 if (mActionMode != null) {
                     mActionMode.finish();
                 }
-                getActivity().getWindow().setStatusBarColor(
-                    getResources().getColor(R.color.status_bar_background));
+                // Obtain the original status bar color from the theme, and restore it.
+                TypedValue color = new TypedValue();
+                getActivity().getTheme().resolveAttribute(
+                    android.R.attr.colorPrimaryDark, color, true);
+                getActivity().getWindow().setStatusBarColor(color.data);
+
             }
 
             if (mActionMode != null) {

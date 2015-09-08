@@ -17,4 +17,5 @@
 <resources>
     <item name="docs_activity" type="layout">@layout/drawer_layout</item>
     <item name="files_activity" type="layout">@layout/drawer_layout</item>
+    <item name="manage_roots_activity" type="layout">@layout/single_pane_layout</item>
 </resources>

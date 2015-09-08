@@ -16,6 +16,13 @@
 
 package com.android.documentsui;
 
+import static com.android.documentsui.BaseActivity.State.ACTION_BROWSE;
+import static com.android.documentsui.BaseActivity.State.ACTION_CREATE;
+import static com.android.documentsui.BaseActivity.State.ACTION_GET_CONTENT;
+import static com.android.documentsui.BaseActivity.State.ACTION_MANAGE;
+import static com.android.documentsui.BaseActivity.State.ACTION_OPEN;
+import static com.android.documentsui.BaseActivity.State.ACTION_OPEN_COPY_DESTINATION;
+import static com.android.documentsui.BaseActivity.State.ACTION_OPEN_TREE;
 import static com.android.documentsui.DirectoryFragment.ANIM_DOWN;
 import static com.android.documentsui.DirectoryFragment.ANIM_NONE;
 import static com.android.documentsui.DirectoryFragment.ANIM_SIDE;
@@ -47,7 +54,6 @@ import android.view.MenuItem;
 import android.view.MenuItem.OnActionExpandListener;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.ViewStub;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemSelectedListener;
 import android.widget.BaseAdapter;
@@ -85,7 +91,6 @@ abstract class BaseActivity extends Activity {
     private int mLayoutId;
     private final String mTag;
 
-    public abstract State getDisplayState();
     public abstract void onDocumentPicked(DocumentInfo doc, @Nullable DocumentContext siblings);
     public abstract void onDocumentsPicked(List<DocumentInfo> docs);
 
@@ -93,7 +98,7 @@ abstract class BaseActivity extends Activity {
     abstract void onDirectoryChanged(int anim);
     abstract void updateActionBar();
     abstract void saveStackBlocking();
-    abstract State buildDefaultState();
+    abstract State buildState();
 
     public BaseActivity(@LayoutRes int layoutId, String tag) {
         mLayoutId = layoutId;
@@ -106,7 +111,7 @@ abstract class BaseActivity extends Activity {
 
         mState = (icicle != null)
                 ? icicle.<State>getParcelable(EXTRA_STATE)
-                        : buildDefaultState();
+                        : buildState();
 
         setContentView(mLayoutId);
 
@@ -154,28 +159,44 @@ abstract class BaseActivity extends Activity {
         final MenuItem sortSize = menu.findItem(R.id.menu_sort_size);
         final MenuItem grid = menu.findItem(R.id.menu_grid);
         final MenuItem list = menu.findItem(R.id.menu_list);
-
         final MenuItem advanced = menu.findItem(R.id.menu_advanced);
         final MenuItem fileSize = menu.findItem(R.id.menu_file_size);
+        final MenuItem settings = menu.findItem(R.id.menu_settings);
 
         mSearchManager.update(root);
 
         // Search uses backend ranking; no sorting
         sort.setVisible(cwd != null && !mSearchManager.isSearching());
 
-        State state = getDisplayState();
-        grid.setVisible(state.derivedMode != State.MODE_GRID);
-        list.setVisible(state.derivedMode != State.MODE_LIST);
-
-        // Only sort by size when visible
-        sortSize.setVisible(state.showSize);
-
         advanced.setTitle(LocalPreferences.getDisplayAdvancedDevices(this)
                 ? R.string.menu_advanced_hide : R.string.menu_advanced_show);
         fileSize.setTitle(LocalPreferences.getDisplayFileSize(this)
                 ? R.string.menu_file_size_hide : R.string.menu_file_size_show);
 
+        State state = getDisplayState();
+
+        sortSize.setVisible(state.showSize); // Only sort by size when visible
+        grid.setVisible(state.derivedMode != State.MODE_GRID);
+        list.setVisible(state.derivedMode != State.MODE_LIST);
+        settings.setVisible((root.flags & Root.FLAG_HAS_SETTINGS) != 0);
+
         return shown;
+    }
+
+    State buildDefaultState() {
+        State state = new State();
+
+        final Intent intent = getIntent();
+        final String action = intent.getAction();
+
+        state.localOnly = intent.getBooleanExtra(Intent.EXTRA_LOCAL_ONLY, false);
+        state.forceAdvanced = intent.getBooleanExtra(DocumentsContract.EXTRA_SHOW_ADVANCED, false);
+        state.showAdvanced = state.forceAdvanced ||
+                LocalPreferences.getDisplayAdvancedDevices(this);
+
+        state.excludedAuthorities = getExcludedAuthorities();
+
+        return state;
     }
 
     void onStackRestored(boolean restored, boolean external) {}
@@ -342,6 +363,10 @@ abstract class BaseActivity extends Activity {
 
     public static BaseActivity get(Fragment fragment) {
         return (BaseActivity) fragment.getActivity();
+    }
+
+    public State getDisplayState() {
+        return mState;
     }
 
     public static abstract class DocumentsIntent {
@@ -661,6 +686,33 @@ abstract class BaseActivity extends Activity {
             getDisplayState().restored = true;
             onCurrentDirectoryChanged(ANIM_NONE);
             onStackRestored(mRestoredStack, mExternal);
+        }
+    }
+
+    final class RestoreRootTask extends AsyncTask<Void, Void, RootInfo> {
+        private Uri mRootUri;
+
+        public RestoreRootTask(Uri rootUri) {
+            mRootUri = rootUri;
+        }
+
+        @Override
+        protected RootInfo doInBackground(Void... params) {
+            final String rootId = DocumentsContract.getRootId(mRootUri);
+            return mRoots.getRootOneshot(mRootUri.getAuthority(), rootId);
+        }
+
+        @Override
+        protected void onPostExecute(RootInfo root) {
+            if (isDestroyed()) return;
+            mState.restored = true;
+
+            if (root != null) {
+                onRootPicked(root);
+            } else {
+                Log.w(mTag, "Failed to find root: " + mRootUri);
+                finish();
+            }
         }
     }
 

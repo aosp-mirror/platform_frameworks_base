@@ -30,7 +30,6 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.DocumentsContract;
-import android.provider.DocumentsContract.Root;
 import android.support.annotation.Nullable;
 import android.util.Log;
 import android.view.KeyEvent;
@@ -58,12 +57,11 @@ import java.util.List;
  */
 public class FilesActivity extends BaseActivity {
 
-    public static final String TAG = "StandaloneFileManagement";
+    public static final String TAG = "FilesActivity";
     static final boolean DEBUG = false;
 
     private Toolbar mToolbar;
     private Spinner mToolbarStack;
-    private Toolbar mRootsToolbar;
     private DirectoryContainerView mDirectoryContainer;
     private ItemSelectedListener mStackListener;
     private BaseAdapter mStackAdapter;
@@ -82,19 +80,11 @@ public class FilesActivity extends BaseActivity {
         mDirectoryContainer = (DirectoryContainerView) findViewById(R.id.container_directory);
 
         mToolbar = (Toolbar) findViewById(R.id.toolbar);
-        mToolbar.setTitleTextAppearance(context,
-                android.R.style.TextAppearance_DeviceDefault_Widget_ActionBar_Title);
 
         mStackAdapter = new StackAdapter();
         mStackListener = new ItemSelectedListener();
         mToolbarStack = (Spinner) findViewById(R.id.stack);
         mToolbarStack.setOnItemSelectedListener(mStackListener);
-
-        mRootsToolbar = (Toolbar) findViewById(R.id.roots_toolbar);
-        if (mRootsToolbar != null) {
-            mRootsToolbar.setTitleTextAppearance(context,
-                    android.R.style.TextAppearance_DeviceDefault_Widget_ActionBar_Title);
-        }
 
         setActionBar(mToolbar);
 
@@ -127,14 +117,14 @@ public class FilesActivity extends BaseActivity {
     }
 
     @Override
-    State buildDefaultState() {
-        State state = new State();
+    State buildState() {
+        State state = buildDefaultState();
 
         final Intent intent = getIntent();
+
         state.action = State.ACTION_BROWSE_ALL;
-        state.acceptMimes = new String[] { "*/*" };
-        state.allowMultiple = true;
         state.acceptMimes = new String[] { intent.getType() };
+        state.allowMultiple = true;
 
         // These options are specific to the DocumentsActivity.
         Preconditions.checkArgument(
@@ -223,8 +213,6 @@ public class FilesActivity extends BaseActivity {
         createDir.setShowAsAction(MenuItem.SHOW_AS_ACTION_NEVER);
         createDir.setVisible(canCreateDir);
 
-        settings.setVisible((getCurrentRoot().flags & Root.FLAG_HAS_SETTINGS) != 0);
-
         pasteFromCb.setVisible(true);
         pasteFromCb.setShowAsAction(MenuItem.SHOW_AS_ACTION_NEVER);
         pasteFromCb.setEnabled(mClipper.hasItemsToPaste());
@@ -243,11 +231,6 @@ public class FilesActivity extends BaseActivity {
         }
 
         return super.onOptionsItemSelected(item);
-    }
-
-    @Override
-    public State getDisplayState() {
-        return mState;
     }
 
     @Override
