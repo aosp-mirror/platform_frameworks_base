@@ -731,7 +731,6 @@ public class ContactsFragment extends Fragment implements
         Define ListView and item layouts.
     </li>
     <li>
-    <li>
         Define a Fragment that displays the list of contacts.
     </li>
     <li>
