@@ -32,6 +32,7 @@ import android.accounts.IAccountManagerResponse;
 import android.app.ActivityManager;
 import android.app.ActivityManagerNative;
 import android.app.AppGlobals;
+import android.app.AppOpsManager;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -122,6 +123,7 @@ public class AccountManagerService
     private final Context mContext;
 
     private final PackageManager mPackageManager;
+    private final AppOpsManager mAppOpsManager;
     private UserManager mUserManager;
 
     private final MessageHandler mMessageHandler;
@@ -266,6 +268,7 @@ public class AccountManagerService
             IAccountAuthenticatorCache authenticatorCache) {
         mContext = context;
         mPackageManager = packageManager;
+        mAppOpsManager = mContext.getSystemService(AppOpsManager.class);
 
         mMessageHandler = new MessageHandler(FgThread.get().getLooper());
 
@@ -510,7 +513,7 @@ public class AccountManagerService
         // Check if there's a shared account that needs to be created as an account
         Account[] sharedAccounts = getSharedAccountsAsUser(userId);
         if (sharedAccounts == null || sharedAccounts.length == 0) return;
-        Account[] accounts = getAccountsAsUser(null, userId);
+        Account[] accounts = getAccountsAsUser(null, userId, mContext.getOpPackageName());
         for (Account sa : sharedAccounts) {
             if (ArrayUtils.contains(accounts, sa)) continue;
             // Account doesn't exist. Copy it now.
@@ -868,7 +871,8 @@ public class AccountManagerService
                     // Confirm that the owner's account still exists before this step.
                     UserAccounts owner = getUserAccounts(UserHandle.USER_OWNER);
                     synchronized (owner.cacheLock) {
-                        for (Account acc : getAccounts(UserHandle.USER_OWNER)) {
+                        for (Account acc : getAccounts(UserHandle.USER_OWNER,
+                                mContext.getOpPackageName())) {
                             if (acc.equals(account)) {
                                 mAuthenticator.addAccountFromCredentials(
                                         this, account, accountCredentials);
@@ -988,7 +992,7 @@ public class AccountManagerService
 
     @Override
     public void hasFeatures(IAccountManagerResponse response,
-            Account account, String[] features) {
+            Account account, String[] features, String opPackageName) {
         int callingUid = Binder.getCallingUid();
         if (Log.isLoggable(TAG, Log.VERBOSE)) {
             Log.v(TAG, "hasFeatures: " + account
@@ -1001,7 +1005,8 @@ public class AccountManagerService
         if (account == null) throw new IllegalArgumentException("account is null");
         if (features == null) throw new IllegalArgumentException("features is null");
         int userId = UserHandle.getCallingUserId();
-        checkReadAccountsPermitted(callingUid, account.type, userId);
+        checkReadAccountsPermitted(callingUid, account.type, userId,
+                opPackageName);
 
         long identityToken = clearCallingIdentity();
         try {
@@ -2507,9 +2512,10 @@ public class AccountManagerService
      * Returns the accounts visible to the client within the context of a specific user
      * @hide
      */
-    public Account[] getAccounts(int userId) {
+    public Account[] getAccounts(int userId, String opPackageName) {
         int callingUid = Binder.getCallingUid();
-        List<String> visibleAccountTypes = getTypesVisibleToCaller(callingUid, userId);
+        List<String> visibleAccountTypes = getTypesVisibleToCaller(callingUid, userId,
+                opPackageName);
         if (visibleAccountTypes.isEmpty()) {
             return new Account[0];
         }
@@ -2571,15 +2577,16 @@ public class AccountManagerService
     }
 
     @Override
-    public Account[] getAccountsAsUser(String type, int userId) {
-        return getAccountsAsUser(type, userId, null, -1);
+    public Account[] getAccountsAsUser(String type, int userId, String opPackageName) {
+        return getAccountsAsUser(type, userId, null, -1, opPackageName);
     }
 
     private Account[] getAccountsAsUser(
             String type,
             int userId,
             String callingPackage,
-            int packageUid) {
+            int packageUid,
+            String opPackageName) {
         int callingUid = Binder.getCallingUid();
         // Only allow the system process to read accounts of other users
         if (userId != UserHandle.getCallingUserId()
@@ -2602,7 +2609,8 @@ public class AccountManagerService
             callingUid = packageUid;
         }
 
-        List<String> visibleAccountTypes = getTypesVisibleToCaller(callingUid, userId);
+        List<String> visibleAccountTypes = getTypesVisibleToCaller(callingUid, userId,
+                opPackageName);
         if (visibleAccountTypes.isEmpty()
                 || (type != null && !visibleAccountTypes.contains(type))) {
             return new Account[0];
@@ -2741,22 +2749,24 @@ public class AccountManagerService
     }
 
     @Override
-    public Account[] getAccounts(String type) {
-        return getAccountsAsUser(type, UserHandle.getCallingUserId());
+    public Account[] getAccounts(String type, String opPackageName) {
+        return getAccountsAsUser(type, UserHandle.getCallingUserId(), opPackageName);
     }
 
     @Override
-    public Account[] getAccountsForPackage(String packageName, int uid) {
+    public Account[] getAccountsForPackage(String packageName, int uid, String opPackageName) {
         int callingUid = Binder.getCallingUid();
         if (!UserHandle.isSameApp(callingUid, Process.myUid())) {
             throw new SecurityException("getAccountsForPackage() called from unauthorized uid "
                     + callingUid + " with uid=" + uid);
         }
-        return getAccountsAsUser(null, UserHandle.getCallingUserId(), packageName, uid);
+        return getAccountsAsUser(null, UserHandle.getCallingUserId(), packageName, uid,
+                opPackageName);
     }
 
     @Override
-    public Account[] getAccountsByTypeForPackage(String type, String packageName) {
+    public Account[] getAccountsByTypeForPackage(String type, String packageName,
+            String opPackageName) {
         int packageUid = -1;
         try {
             packageUid = AppGlobals.getPackageManager().getPackageUid(
@@ -2765,14 +2775,16 @@ public class AccountManagerService
             Slog.e(TAG, "Couldn't determine the packageUid for " + packageName + re);
             return new Account[0];
         }
-        return getAccountsAsUser(type, UserHandle.getCallingUserId(), packageName, packageUid);
+        return getAccountsAsUser(type, UserHandle.getCallingUserId(), packageName,
+                packageUid, opPackageName);
     }
 
     @Override
     public void getAccountsByFeatures(
             IAccountManagerResponse response,
             String type,
-            String[] features) {
+            String[] features,
+            String opPackageName) {
         int callingUid = Binder.getCallingUid();
         if (Log.isLoggable(TAG, Log.VERBOSE)) {
             Log.v(TAG, "getAccounts: accountType " + type
@@ -2785,7 +2797,8 @@ public class AccountManagerService
         if (type == null) throw new IllegalArgumentException("accountType is null");
         int userId = UserHandle.getCallingUserId();
 
-        List<String> visibleAccountTypes = getTypesVisibleToCaller(callingUid, userId);
+        List<String> visibleAccountTypes = getTypesVisibleToCaller(callingUid, userId,
+                opPackageName);
         if (!visibleAccountTypes.contains(type)) {
             Bundle result = new Bundle();
             // Need to return just the accounts that are from matching signatures.
@@ -3685,29 +3698,20 @@ public class AccountManagerService
         }
     }
 
-    private boolean isPermitted(int callingUid, String... permissions) {
+    private boolean isPermitted(String opPackageName, int callingUid, String... permissions) {
         for (String perm : permissions) {
             if (mContext.checkCallingOrSelfPermission(perm) == PackageManager.PERMISSION_GRANTED) {
                 if (Log.isLoggable(TAG, Log.VERBOSE)) {
                     Log.v(TAG, "  caller uid " + callingUid + " has " + perm);
                 }
-                return true;
+                final int opCode = AppOpsManager.permissionToOpCode(perm);
+                if (opCode == AppOpsManager.OP_NONE || mAppOpsManager.noteOp(
+                        opCode, callingUid, opPackageName) == AppOpsManager.MODE_ALLOWED) {
+                    return true;
+                }
             }
         }
         return false;
-    }
-
-    /** Succeeds if any of the specified permissions are granted. */
-    private void checkBinderPermission(String... permissions) {
-        final int callingUid = Binder.getCallingUid();
-        if (isPermitted(callingUid, permissions)) {
-            String msg = String.format(
-                    "caller uid %s  lacks any of %s",
-                    callingUid,
-                    TextUtils.join(",", permissions));
-            Log.w(TAG, "  " + msg);
-            throw new SecurityException(msg);
-        }
     }
 
     private int handleIncomingUser(int userId) {
@@ -3763,11 +3767,13 @@ public class AccountManagerService
         return fromAuthenticator || hasExplicitGrants || isPrivileged;
     }
 
-    private boolean isAccountVisibleToCaller(String accountType, int callingUid, int userId) {
+    private boolean isAccountVisibleToCaller(String accountType, int callingUid, int userId,
+            String opPackageName) {
         if (accountType == null) {
             return false;
         } else {
-            return getTypesVisibleToCaller(callingUid, userId).contains(accountType);
+            return getTypesVisibleToCaller(callingUid, userId,
+                    opPackageName).contains(accountType);
         }
     }
 
@@ -3779,9 +3785,10 @@ public class AccountManagerService
         }
     }
 
-    private List<String> getTypesVisibleToCaller(int callingUid, int userId) {
+    private List<String> getTypesVisibleToCaller(int callingUid, int userId,
+            String opPackageName) {
         boolean isPermitted =
-                isPermitted(callingUid, Manifest.permission.GET_ACCOUNTS,
+                isPermitted(opPackageName, callingUid, Manifest.permission.GET_ACCOUNTS,
                         Manifest.permission.GET_ACCOUNTS_PRIVILEGED);
         Log.i(TAG, String.format("getTypesVisibleToCaller: isPermitted? %s", isPermitted));
         return getTypesForCaller(callingUid, userId, isPermitted);
@@ -3877,8 +3884,9 @@ public class AccountManagerService
     private void checkReadAccountsPermitted(
             int callingUid,
             String accountType,
-            int userId) {
-        if (!isAccountVisibleToCaller(accountType, callingUid, userId)) {
+            int userId,
+            String opPackageName) {
+        if (!isAccountVisibleToCaller(accountType, callingUid, userId, opPackageName)) {
             String msg = String.format(
                     "caller uid %s cannot access %s accounts",
                     callingUid,
