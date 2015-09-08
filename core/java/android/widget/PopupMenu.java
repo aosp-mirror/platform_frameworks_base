@@ -270,25 +270,8 @@ public class PopupMenu implements MenuBuilder.Callback, MenuPresenter.Callback {
      * @hide
      */
     public boolean onOpenSubMenu(MenuBuilder subMenu) {
-        if (subMenu == null) return false;
-
-        if (!subMenu.hasVisibleItems()) {
-            return true;
-        }
-
-        if (!mShowCascadingMenus) {
-            // Current menu will be dismissed by the normal helper, submenu will be shown in its
-            // place. (If cascading menus are enabled, the cascading implementation will show the
-            // submenu itself).
-            new MenuPopupHelper(mContext, subMenu, mAnchor).show();
-        }
-        return true;
-    }
-
-    /**
-     * @hide
-     */
-    public void onCloseSubMenu(SubMenuBuilder menu) {
+        // The menu presenter will handle opening the submenu itself. Nothing to do here.
+        return false;
     }
 
     /**
