@@ -340,7 +340,8 @@ public class SyncManager {
         for (UserInfo user : mUserManager.getUsers(true)) {
             // Skip any partially created/removed users
             if (user.partial) continue;
-            Account[] accountsForUser = AccountManagerService.getSingleton().getAccounts(user.id);
+            Account[] accountsForUser = AccountManagerService.getSingleton().getAccounts(
+                    user.id, mContext.getOpPackageName());
             mSyncStorageEngine.doDatabaseCleanup(accountsForUser, user.id);
         }
     }
@@ -1232,7 +1233,8 @@ public class SyncManager {
         }
 
         // Schedule sync for any accounts under started user
-        final Account[] accounts = AccountManagerService.getSingleton().getAccounts(userId);
+        final Account[] accounts = AccountManagerService.getSingleton().getAccounts(userId,
+                mContext.getOpPackageName());
         for (Account account : accounts) {
             scheduleSync(account, userId, SyncOperation.REASON_USER_START, null, null,
                     0 /* no delay */, 0 /* No flex */,
