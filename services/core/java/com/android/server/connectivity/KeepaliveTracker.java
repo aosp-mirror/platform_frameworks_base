@@ -62,8 +62,7 @@ public class KeepaliveTracker {
     private static final String TAG = "KeepaliveTracker";
     private static final boolean DBG = true;
 
-    // TODO: Change this to a system-only permission.
-    public static final String PERMISSION = android.Manifest.permission.CHANGE_NETWORK_STATE;
+    public static final String PERMISSION = android.Manifest.permission.PACKET_KEEPALIVE_OFFLOAD;
 
     /** Keeps track of keepalive requests. */
     private final HashMap <NetworkAgentInfo, HashMap<Integer, KeepaliveInfo>> mKeepalives =
