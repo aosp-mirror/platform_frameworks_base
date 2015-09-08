@@ -8,7 +8,7 @@
 
     <application
         android:label="@string/app_name">
-        <service android:name="BluetoothMidiService"
+        <service android:name=".BluetoothMidiService"
             android:permission="android.permission.BIND_MIDI_DEVICE_SERVICE">
             <intent-filter>
                 <action android:name="android.media.midi.BluetoothMidiService" />

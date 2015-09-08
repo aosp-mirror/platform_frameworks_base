@@ -348,6 +348,7 @@ LOCAL_SRC_FILES += \
 	media/java/android/media/IRingtonePlayer.aidl \
 	media/java/android/media/IVolumeController.aidl \
 	media/java/android/media/audiopolicy/IAudioPolicyCallback.aidl \
+	media/java/android/media/midi/IBluetoothMidiService.aidl \
 	media/java/android/media/midi/IMidiDeviceListener.aidl \
 	media/java/android/media/midi/IMidiDeviceOpenCallback.aidl \
 	media/java/android/media/midi/IMidiDeviceServer.aidl \
