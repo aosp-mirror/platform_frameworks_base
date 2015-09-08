@@ -811,7 +811,7 @@ include the action bar on devices running Android 2.1 or higher."
     <div class="nav-section-header">
       <a href="<?cs var:toroot ?>training/building-userinfo.html">
       <span class="small">Building Apps with</span><br/>
-              User Info &amp; Sign-In
+              Contacts &amp; Sign-In
       </a>
     </div>
     <ul>
