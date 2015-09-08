@@ -75,8 +75,8 @@ public class PagedTileLayout extends ViewPager implements QSTileLayout {
     @Override
     public void setTileVisibility(TileRecord tile, int visibility) {
         tile.tileView.setVisibility(visibility);
-        // TODO: Do something smarter here.
-        distributeTiles();
+//        // TODO: Do something smarter here.
+//        distributeTiles();
     }
 
     @Override
@@ -183,13 +183,17 @@ public class PagedTileLayout extends ViewPager implements QSTileLayout {
             mAllowDual = false;
         }
 
+        public void setMaxRows(int maxRows) {
+            mMaxRows = maxRows;
+        }
+
         private void clear() {
             if (DEBUG) Log.d(TAG, "Clearing page");
             removeAllViews();
             mRecords.clear();
         }
 
-        private boolean isFull() {
+        public boolean isFull() {
             return mRecords.size() >= mColumns * mMaxRows;
         }
     }
