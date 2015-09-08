@@ -248,8 +248,20 @@ public abstract class Connection extends Conferenceable {
      */
     public static final int CAPABILITY_CONFERENCE_HAS_NO_CHILDREN = 0x00200000;
 
+    /**
+     * Local device supports voice telephony.
+     * @hide
+     */
+    public static final int CAPABILITY_SUPPORTS_DOWNGRADE_TO_VOICE_LOCAL = 0x00400000;
+
+    /**
+      * Remote device supports voice telephony.
+      * @hide
+      */
+    public static final int CAPABILITY_SUPPORTS_DOWNGRADE_TO_VOICE_REMOTE = 0x00800000;
+
     //**********************************************************************************************
-    // Next CAPABILITY value: 0x00400000
+    // Next CAPABILITY value: 0x01000000
     //**********************************************************************************************
 
     /**
@@ -363,6 +375,12 @@ public abstract class Connection extends Conferenceable {
         }
         if (can(capabilities, CAPABILITY_SUPPORTS_VT_REMOTE_BIDIRECTIONAL)) {
             builder.append(" CAPABILITY_SUPPORTS_VT_REMOTE_BIDIRECTIONAL");
+        }
+        if (can(capabilities, CAPABILITY_SUPPORTS_DOWNGRADE_TO_VOICE_LOCAL)) {
+            builder.append(" CAPABILITY_SUPPORTS_DOWNGRADE_TO_VOICE_LOCAL");
+        }
+        if (can(capabilities, CAPABILITY_SUPPORTS_DOWNGRADE_TO_VOICE_REMOTE)) {
+            builder.append(" CAPABILITY_SUPPORTS_DOWNGRADE_TO_VOICE_REMOTE");
         }
         if (can(capabilities, CAPABILITY_HIGH_DEF_AUDIO)) {
             builder.append(" CAPABILITY_HIGH_DEF_AUDIO");
