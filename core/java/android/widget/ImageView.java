@@ -1165,9 +1165,10 @@ public class ImageView extends View {
     protected void drawableStateChanged() {
         super.drawableStateChanged();
 
-        final Drawable d = mDrawable;
-        if (d != null && d.isStateful()) {
-            d.setState(getDrawableState());
+        final Drawable drawable = mDrawable;
+        if (drawable != null && drawable.isStateful()
+                && drawable.setState(getDrawableState())) {
+            invalidateDrawable(drawable);
         }
     }
 

@@ -1339,17 +1339,22 @@ public class Switch extends CompoundButton {
     protected void drawableStateChanged() {
         super.drawableStateChanged();
 
-        final int[] myDrawableState = getDrawableState();
+        final int[] state = getDrawableState();
+        boolean changed = false;
 
-        if (mThumbDrawable != null) {
-            mThumbDrawable.setState(myDrawableState);
+        final Drawable thumbDrawable = mThumbDrawable;
+        if (thumbDrawable != null && thumbDrawable.isStateful()) {
+            changed |= thumbDrawable.setState(state);
         }
 
-        if (mTrackDrawable != null) {
-            mTrackDrawable.setState(myDrawableState);
+        final Drawable trackDrawable = mTrackDrawable;
+        if (trackDrawable != null && trackDrawable.isStateful()) {
+            changed |= trackDrawable.setState(state);
         }
 
-        invalidate();
+        if (changed) {
+            invalidate();
+        }
     }
 
     @Override

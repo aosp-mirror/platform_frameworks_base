@@ -3996,6 +3996,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     @Override
     protected void drawableStateChanged() {
         super.drawableStateChanged();
+
         if (mTextColor != null && mTextColor.isStateful()
                 || (mHintTextColor != null && mHintTextColor.isStateful())
                 || (mLinkTextColor != null && mLinkTextColor.isStateful())) {
@@ -4005,8 +4006,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         if (mDrawables != null) {
             final int[] state = getDrawableState();
             for (Drawable dr : mDrawables.mShowing) {
-                if (dr != null && dr.isStateful()) {
-                    dr.setState(state);
+                if (dr != null && dr.isStateful() && dr.setState(state)) {
+                    invalidateDrawable(dr);
                 }
             }
         }
@@ -4017,9 +4018,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         super.drawableHotspotChanged(x, y);
 
         if (mDrawables != null) {
-            final int[] state = getDrawableState();
             for (Drawable dr : mDrawables.mShowing) {
-                if (dr != null && dr.isStateful()) {
+                if (dr != null) {
                     dr.setHotspot(x, y);
                 }
             }

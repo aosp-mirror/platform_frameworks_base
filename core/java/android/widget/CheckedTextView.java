@@ -425,14 +425,11 @@ public class CheckedTextView extends TextView implements Checkable {
     @Override
     protected void drawableStateChanged() {
         super.drawableStateChanged();
-        
-        if (mCheckMarkDrawable != null) {
-            int[] myDrawableState = getDrawableState();
-            
-            // Set the state of the Drawable
-            mCheckMarkDrawable.setState(myDrawableState);
-            
-            invalidate();
+
+        final Drawable checkMarkDrawable = mCheckMarkDrawable;
+        if (checkMarkDrawable != null && checkMarkDrawable.isStateful()
+                && checkMarkDrawable.setState(getDrawableState())) {
+            invalidateDrawable(checkMarkDrawable);
         }
     }
 

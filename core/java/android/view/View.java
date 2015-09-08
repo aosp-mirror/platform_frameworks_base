@@ -16473,7 +16473,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      */
     void setBackgroundBounds() {
         if (mBackgroundSizeChanged && mBackground != null) {
-            mBackground.setBounds(0, 0,  mRight - mLeft, mBottom - mTop);
+            mBackground.setBounds(0, 0, mRight - mLeft, mBottom - mTop);
             mBackgroundSizeChanged = false;
             rebuildOutline();
         }
@@ -17042,26 +17042,32 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     @CallSuper
     protected void drawableStateChanged() {
         final int[] state = getDrawableState();
+        boolean changed = false;
 
         final Drawable bg = mBackground;
         if (bg != null && bg.isStateful()) {
-            bg.setState(state);
+            changed |= bg.setState(state);
         }
 
         final Drawable fg = mForegroundInfo != null ? mForegroundInfo.mDrawable : null;
         if (fg != null && fg.isStateful()) {
-            fg.setState(state);
+            changed |= fg.setState(state);
         }
 
         if (mScrollCache != null) {
             final Drawable scrollBar = mScrollCache.scrollBar;
             if (scrollBar != null && scrollBar.isStateful()) {
-                scrollBar.setState(state);
+                changed |= scrollBar.setState(state)
+                        && mScrollCache.state != ScrollabilityCache.OFF;
             }
         }
 
         if (mStateListAnimator != null) {
             mStateListAnimator.setState(state);
+        }
+
+        if (changed) {
+            invalidate();
         }
     }
 

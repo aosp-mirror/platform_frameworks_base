@@ -105,9 +105,11 @@ public class QuickContactBadge extends ImageView implements OnClickListener {
     @Override
     protected void drawableStateChanged() {
         super.drawableStateChanged();
-        if (mOverlay != null && mOverlay.isStateful()) {
-            mOverlay.setState(getDrawableState());
-            invalidate();
+
+        final Drawable overlay = mOverlay;
+        if (overlay != null && overlay.isStateful()
+                && overlay.setState(getDrawableState())) {
+            invalidateDrawable(overlay);
         }
     }
 
