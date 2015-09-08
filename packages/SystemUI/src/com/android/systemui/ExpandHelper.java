@@ -112,7 +112,9 @@ public class ExpandHelper implements Gefingerpoken {
         public boolean onScaleBegin(ScaleGestureDetector detector) {
             if (DEBUG_SCALE) Log.v(TAG, "onscalebegin()");
 
-            startExpanding(mResizedView, STRETCH);
+            if (!mOnlyMovements) {
+                startExpanding(mResizedView, STRETCH);
+            }
             return mExpanding;
         }
 
