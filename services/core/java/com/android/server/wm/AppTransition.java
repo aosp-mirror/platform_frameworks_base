@@ -1194,7 +1194,7 @@ public class AppTransition implements Dump {
     }
 
     void overridePendingAppTransition(String packageName, int enterAnim, int exitAnim,
-                                             IRemoteCallback startedCallback) {
+            IRemoteCallback startedCallback) {
         if (isTransitionSet()) {
             mNextAppTransitionType = NEXT_TRANSIT_TYPE_CUSTOM;
             mNextAppTransitionPackage = packageName;
@@ -1269,12 +1269,20 @@ public class AppTransition implements Dump {
             mNextAppTransitionType = scaleUp ? NEXT_TRANSIT_TYPE_THUMBNAIL_ASPECT_SCALE_UP
                     : NEXT_TRANSIT_TYPE_THUMBNAIL_ASPECT_SCALE_DOWN;
             mNextAppTransitionPackage = null;
+            mDefaultNextAppTransitionAnimationSpec = null;
             mNextAppTransitionAnimationsSpecs.clear();
             mNextAppTransitionScaleUp = scaleUp;
             for (int i = 0; i < specs.length; i++) {
                 AppTransitionAnimationSpec spec = specs[i];
                 if (spec != null) {
                     mNextAppTransitionAnimationsSpecs.put(spec.taskId, spec);
+                    if (i == 0) {
+                        // In full screen mode, the transition code depends on the default spec to
+                        // be set.
+                        Rect rect = spec.rect;
+                        putDefaultNextAppTransitionCoordinates(rect.left, rect.top, rect.width(),
+                                rect.height());
+                    }
                 }
             }
             postAnimationCallback();
