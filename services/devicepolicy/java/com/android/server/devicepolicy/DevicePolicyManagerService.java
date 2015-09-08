@@ -303,9 +303,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
 
         @Override
         public void onBootPhase(int phase) {
-            if (phase == PHASE_LOCK_SETTINGS_READY) {
-                mService.systemReady();
-            }
+            mService.systemReady(phase);
         }
     }
 
@@ -1776,10 +1774,21 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         }
     }
 
-    public void systemReady() {
+    public void systemReady(int phase) {
         if (!mHasFeature) {
             return;
         }
+        switch (phase) {
+            case SystemService.PHASE_LOCK_SETTINGS_READY:
+                onLockSettingsReady();
+                break;
+            case SystemService.PHASE_BOOT_COMPLETED:
+                ensureDeviceOwnerUserStarted(); // TODO Consider better place to do this.
+                break;
+        }
+    }
+
+    private void onLockSettingsReady() {
         getUserData(UserHandle.USER_OWNER);
         loadDeviceOwner();
         cleanUpOldUsers();
@@ -1795,6 +1804,26 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             int userHandle = users.get(i).id;
             updateScreenCaptureDisabledInWindowManager(userHandle,
                     getScreenCaptureDisabled(null, userHandle));
+        }
+    }
+
+    private void ensureDeviceOwnerUserStarted() {
+        if (mOwners.hasDeviceOwner()) {
+            final IActivityManager am = ActivityManagerNative.getDefault();
+            final int userId = mOwners.getDeviceOwnerUserId();
+            if (VERBOSE_LOG) {
+                Log.v(LOG_TAG, "Starting non-system DO user: " + userId);
+            }
+            if (userId != UserHandle.USER_SYSTEM) {
+                try {
+                    am.startUserInBackground(userId);
+
+                    // STOPSHIP Prevent the DO user from being killed.
+
+                } catch (RemoteException e) {
+                    Slog.w(LOG_TAG, "Exception starting user", e);
+                }
+            }
         }
     }
 
@@ -4110,17 +4139,17 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     }
 
     @Override
-    public boolean setDeviceOwner(String packageName, String ownerName) {
+    public boolean setDeviceOwner(String packageName, String ownerName, int userId) {
         if (!mHasFeature) {
             return false;
         }
         if (packageName == null
-                || !Owners.isInstalled(packageName, mContext.getPackageManager())) {
+                || !Owners.isInstalledForUser(packageName, userId)) {
             throw new IllegalArgumentException("Invalid package name " + packageName
                     + " for device owner");
         }
         synchronized (this) {
-            enforceCanSetDeviceOwner();
+            enforceCanSetDeviceOwner(userId);
 
             // Shutting down backup manager service permanently.
             long ident = Binder.clearCallingIdentity();
@@ -4134,14 +4163,15 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 Binder.restoreCallingIdentity(ident);
             }
 
-            mOwners.setDeviceOwner(packageName, ownerName);
+            mOwners.setDeviceOwner(packageName, ownerName, userId);
             mOwners.writeDeviceOwner();
             updateDeviceOwnerLocked();
             Intent intent = new Intent(DevicePolicyManager.ACTION_DEVICE_OWNER_CHANGED);
 
             ident = Binder.clearCallingIdentity();
             try {
-                mContext.sendBroadcastAsUser(intent, UserHandle.OWNER);
+                // TODO Send to system too?
+                mContext.sendBroadcastAsUser(intent, new UserHandle(userId));
             } finally {
                 Binder.restoreCallingIdentity(ident);
             }
@@ -4242,10 +4272,12 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         if (!mHasFeature) {
             return false;
         }
-        if (initializer == null || !Owners.isInstalled(
-                initializer.getPackageName(), mContext.getPackageManager())) {
+        if (initializer == null ||
+                !mOwners.hasDeviceOwner() ||
+                !Owners.isInstalledForUser(initializer.getPackageName(),
+                        mOwners.getDeviceOwnerUserId())) {
             throw new IllegalArgumentException("Invalid component name " + initializer
-                    + " for device initializer");
+                    + " for device initializer or no device owner set");
         }
         boolean isInitializerSystemApp;
         try {
@@ -4268,7 +4300,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
 
             mOwners.setDeviceInitializer(initializer);
 
-            addDeviceInitializerToLockTaskPackagesLocked(UserHandle.USER_OWNER);
+            addDeviceInitializerToLockTaskPackagesLocked(mOwners.getDeviceOwnerUserId());
             mOwners.writeDeviceOwner();
             return true;
         }
@@ -4278,7 +4310,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         if (who == null) {
             mContext.enforceCallingOrSelfPermission(
                     android.Manifest.permission.MANAGE_DEVICE_ADMINS, null);
-            if (hasUserSetupCompleted(UserHandle.USER_OWNER)) {
+            if (hasUserSetupCompleted(UserHandle.USER_SYSTEM)) {
                 throw new IllegalStateException(
                         "Trying to set device initializer but device is already provisioned.");
             }
@@ -4648,31 +4680,46 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
      * The device owner can only be set before the setup phase of the primary user has completed,
      * except for adb if no accounts or additional users are present on the device.
      */
-    private void enforceCanSetDeviceOwner() {
-        if (mOwners != null && mOwners.hasDeviceOwner()) {
+    private void enforceCanSetDeviceOwner(int userId) {
+        if (mOwners.hasDeviceOwner()) {
             throw new IllegalStateException("Trying to set the device owner, but device owner "
                     + "is already set.");
         }
+        // STOPSHIP Make sure the DO user is running
         int callingUid = Binder.getCallingUid();
         if (callingUid == Process.SHELL_UID || callingUid == Process.ROOT_UID) {
             if (!hasUserSetupCompleted(UserHandle.USER_OWNER)) {
                 return;
             }
-            if (mUserManager.getUserCount() > 1) {
-                throw new IllegalStateException("Not allowed to set the device owner because there "
-                        + "are already several users on the device");
-            }
-            if (AccountManager.get(mContext).getAccounts().length > 0) {
-                throw new IllegalStateException("Not allowed to set the device owner because there "
-                        + "are already some accounts on the device");
+            // STOPSHIP Do proper check in split user mode
+            if (!UserManager.isSplitSystemUser()) {
+                if (mUserManager.getUserCount() > 1) {
+                    throw new IllegalStateException(
+                            "Not allowed to set the device owner because there "
+                                    + "are already several users on the device");
+                }
+                if (AccountManager.get(mContext).getAccounts().length > 0) {
+                    throw new IllegalStateException(
+                            "Not allowed to set the device owner because there "
+                                    + "are already some accounts on the device");
+                }
             }
             return;
+        } else {
+            // STOPSHIP check the caller UID with userId
         }
+        if (mUserManager.isUserRunning(new UserHandle(userId))) {
+            throw new IllegalStateException("User not running: " + userId);
+        }
+
         mContext.enforceCallingOrSelfPermission(
                 android.Manifest.permission.MANAGE_PROFILE_AND_DEVICE_OWNERS, null);
-        if (hasUserSetupCompleted(UserHandle.USER_OWNER)) {
-            throw new IllegalStateException("Cannot set the device owner if the device is "
-                    + "already set-up");
+        // STOPSHIP Do proper check in split user mode
+        if (!UserManager.isSplitSystemUser()) {
+            if (hasUserSetupCompleted(UserHandle.USER_OWNER)) {
+                throw new IllegalStateException("Cannot set the device owner if the device is "
+                        + "already set-up");
+            }
         }
     }
 
@@ -4686,12 +4733,6 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             mContext.enforceCallingOrSelfPermission(
                     android.Manifest.permission.INTERACT_ACROSS_USERS_FULL, "Must be system or have"
                     + " INTERACT_ACROSS_USERS_FULL permission");
-        }
-    }
-
-    private void enforceSystemProcess(String message) {
-        if (Binder.getCallingUid() != Process.SYSTEM_UID) {
-            throw new SecurityException(message);
         }
     }
 
@@ -6318,7 +6359,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         }
         mContext.sendBroadcastAsUser(
                 new Intent(DevicePolicyManager.ACTION_SYSTEM_UPDATE_POLICY_CHANGED),
-                UserHandle.OWNER);
+                UserHandle.SYSTEM);
     }
 
     @Override
@@ -6355,7 +6396,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 "Only the system update service can broadcast update information");
 
         if (UserHandle.getCallingUserId() != UserHandle.USER_OWNER) {
-            Slog.w(LOG_TAG, "Only the system update service in the primary user" +
+            Slog.w(LOG_TAG, "Only the system update service in the primary user " +
                     "can broadcast update information.");
             return;
         }
@@ -6368,6 +6409,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             if (deviceOwnerPackage == null) {
                 return;
             }
+            final UserHandle deviceOwnerUser = new UserHandle(mOwners.getDeviceOwnerUserId());
 
             ActivityInfo[] receivers = null;
             try {
@@ -6383,7 +6425,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                         if (permission.BIND_DEVICE_ADMIN.equals(receivers[i].permission)) {
                             intent.setComponent(new ComponentName(deviceOwnerPackage,
                                     receivers[i].name));
-                            mContext.sendBroadcastAsUser(intent, UserHandle.OWNER);
+                            mContext.sendBroadcastAsUser(intent, deviceOwnerUser);
                         }
                     }
                 } finally {

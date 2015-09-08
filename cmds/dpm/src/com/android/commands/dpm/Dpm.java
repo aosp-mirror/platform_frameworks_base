@@ -51,7 +51,8 @@ public final class Dpm extends BaseCommand {
         out.println(
                 "usage: dpm [subcommand] [options]\n" +
                 "usage: dpm set-active-admin [ --user <USER_ID> ] <COMPONENT>\n" +
-                "usage: dpm set-device-owner <COMPONENT>\n" +
+                // STOPSHIP Finalize it
+                "usage: dpm set-device-owner [ --user <USER_ID> *EXPERIMENTAL* ] <COMPONENT>\n" +
                 "usage: dpm set-profile-owner [ --user <USER_ID> ] <COMPONENT>\n" +
                 "\n" +
                 "dpm set-active-admin: Sets the given component as active admin" +
@@ -106,22 +107,22 @@ public final class Dpm extends BaseCommand {
     }
 
     private void runSetDeviceOwner() throws RemoteException {
-        ComponentName component = parseComponentName(nextArgRequired());
-        mDevicePolicyManager.setActiveAdmin(component, true /*refreshing*/, UserHandle.USER_SYSTEM);
+        parseArgs(true);
+        mDevicePolicyManager.setActiveAdmin(mComponent, true /*refreshing*/, mUserId);
 
-        String packageName = component.getPackageName();
+        String packageName = mComponent.getPackageName();
         try {
-            if (!mDevicePolicyManager.setDeviceOwner(packageName, null /*ownerName*/)) {
+            if (!mDevicePolicyManager.setDeviceOwner(packageName, null /*ownerName*/, mUserId)) {
                 throw new RuntimeException(
                         "Can't set package " + packageName + " as device owner.");
             }
         } catch (Exception e) {
             // Need to remove the admin that we just added.
-            mDevicePolicyManager.removeActiveAdmin(component, UserHandle.USER_SYSTEM);
+            mDevicePolicyManager.removeActiveAdmin(mComponent, UserHandle.USER_SYSTEM);
             throw e;
         }
         System.out.println("Success: Device owner set to package " + packageName);
-        System.out.println("Active admin set to component " + component.toShortString());
+        System.out.println("Active admin set to component " + mComponent.toShortString());
     }
 
     private void runSetProfileOwner() throws RemoteException {
