@@ -35370,7 +35370,6 @@ package android.view {
     field public static final int KEYCODE_SLEEP = 223; // 0xdf
     field public static final int KEYCODE_SOFT_LEFT = 1; // 0x1
     field public static final int KEYCODE_SOFT_RIGHT = 2; // 0x2
-    field public static final int KEYCODE_SOFT_SLEEP = 276; // 0x114
     field public static final int KEYCODE_SPACE = 62; // 0x3e
     field public static final int KEYCODE_STAR = 17; // 0x11
     field public static final int KEYCODE_STB_INPUT = 180; // 0xb4
