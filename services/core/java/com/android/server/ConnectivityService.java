@@ -1466,7 +1466,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
     }
 
     private void enforceKeepalivePermission() {
-        mContext.enforceCallingPermission(KeepaliveTracker.PERMISSION, "ConnectivityService");
+        mContext.enforceCallingOrSelfPermission(KeepaliveTracker.PERMISSION, "ConnectivityService");
     }
 
     public void sendConnectedBroadcast(NetworkInfo info) {

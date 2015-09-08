@@ -32,8 +32,12 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.net.ConnectivityManager;
 import android.net.ConnectivityManager.NetworkCallback;
+import android.net.ConnectivityManager.PacketKeepalive;
+import android.net.ConnectivityManager.PacketKeepaliveCallback;
 import android.net.INetworkPolicyManager;
 import android.net.INetworkStatsService;
+import android.net.IpPrefix;
+import android.net.LinkAddress;
 import android.net.LinkProperties;
 import android.net.Network;
 import android.net.NetworkAgent;
@@ -50,6 +54,7 @@ import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.INetworkManagementService;
 import android.os.Looper;
+import android.os.Message;
 import android.os.MessageQueue;
 import android.os.MessageQueue.IdleHandler;
 import android.test.AndroidTestCase;
@@ -62,6 +67,7 @@ import com.android.server.connectivity.NetworkMonitor;
 
 import java.net.InetAddress;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -190,6 +196,9 @@ public class ConnectivityServiceTest extends AndroidTestCase {
         private final ConditionVariable mDisconnected = new ConditionVariable();
         private int mScore;
         private NetworkAgent mNetworkAgent;
+        private int mStartKeepaliveError = PacketKeepalive.ERROR_HARDWARE_UNSUPPORTED;
+        private int mStopKeepaliveError = PacketKeepalive.NO_KEEPALIVE;
+        private Integer mExpectedKeepaliveSlot = null;
 
         MockNetworkAgent(int transport) {
             final int type = transportToLegacyType(transport);
@@ -212,7 +221,22 @@ public class ConnectivityServiceTest extends AndroidTestCase {
             mNetworkAgent = new NetworkAgent(mHandlerThread.getLooper(), mServiceContext,
                     "Mock-" + typeName, mNetworkInfo, mNetworkCapabilities,
                     new LinkProperties(), mScore, new NetworkMisc()) {
+                @Override
                 public void unwanted() { mDisconnected.open(); }
+
+                @Override
+                public void startPacketKeepalive(Message msg) {
+                    int slot = msg.arg1;
+                    if (mExpectedKeepaliveSlot != null) {
+                        assertEquals((int) mExpectedKeepaliveSlot, slot);
+                    }
+                    onPacketKeepaliveEvent(slot, mStartKeepaliveError);
+                }
+
+                @Override
+                public void stopPacketKeepalive(Message msg) {
+                    onPacketKeepaliveEvent(msg.arg1, mStopKeepaliveError);
+                }
             };
             // Waits for the NetworkAgent to be registered, which includes the creation of the
             // NetworkMonitor.
@@ -311,6 +335,22 @@ public class ConnectivityServiceTest extends AndroidTestCase {
 
         public WrappedNetworkMonitor getWrappedNetworkMonitor() {
             return mWrappedNetworkMonitor;
+        }
+
+        public void sendLinkProperties(LinkProperties lp) {
+            mNetworkAgent.sendLinkProperties(lp);
+        }
+
+        public void setStartKeepaliveError(int error) {
+            mStartKeepaliveError = error;
+        }
+
+        public void setStopKeepaliveError(int error) {
+            mStopKeepaliveError = error;
+        }
+
+        public void setExpectedKeepaliveSlot(Integer slot) {
+            mExpectedKeepaliveSlot = slot;
         }
     }
 
@@ -1249,5 +1289,213 @@ public class ConnectivityServiceTest extends AndroidTestCase {
         mWiFiNetworkAgent.getWrappedNetworkMonitor().gen204ProbeResult = 500;
         mCm.reportNetworkConnectivity(mWiFiNetworkAgent.getNetwork(), false);
         validatedCallback.expectCallback(CallbackState.LOST);
+    }
+
+    private static class TestKeepaliveCallback extends PacketKeepaliveCallback {
+
+        public static enum CallbackType { ON_STARTED, ON_STOPPED, ON_ERROR };
+
+        private class CallbackValue {
+            public CallbackType callbackType;
+            public int error;
+
+            public CallbackValue(CallbackType type) {
+                this.callbackType = type;
+                this.error = PacketKeepalive.SUCCESS;
+                assertTrue("onError callback must have error", type != CallbackType.ON_ERROR);
+            }
+
+            public CallbackValue(CallbackType type, int error) {
+                this.callbackType = type;
+                this.error = error;
+                assertEquals("error can only be set for onError", type, CallbackType.ON_ERROR);
+            }
+
+            @Override
+            public boolean equals(Object o) {
+                return o instanceof CallbackValue &&
+                        this.callbackType == ((CallbackValue) o).callbackType &&
+                        this.error == ((CallbackValue) o).error;
+            }
+
+            @Override
+            public String toString() {
+                return String.format("%s(%s, %d)", getClass().getSimpleName(), callbackType, error);
+            }
+        }
+
+        private LinkedBlockingQueue<CallbackValue> mCallbacks = new LinkedBlockingQueue<>();
+
+        @Override
+        public void onStarted() {
+            mCallbacks.add(new CallbackValue(CallbackType.ON_STARTED));
+        }
+
+        @Override
+        public void onStopped() {
+            mCallbacks.add(new CallbackValue(CallbackType.ON_STOPPED));
+        }
+
+        @Override
+        public void onError(int error) {
+            mCallbacks.add(new CallbackValue(CallbackType.ON_ERROR, error));
+        }
+
+        private void expectCallback(CallbackValue callbackValue) {
+            try {
+                assertEquals(
+                        callbackValue,
+                        mCallbacks.poll(TIMEOUT_MS, TimeUnit.MILLISECONDS));
+            } catch (InterruptedException e) {
+                fail(callbackValue.callbackType + " callback not seen after " + TIMEOUT_MS + " ms");
+            }
+        }
+
+        public void expectStarted() {
+            expectCallback(new CallbackValue(CallbackType.ON_STARTED));
+        }
+
+        public void expectStopped() {
+            expectCallback(new CallbackValue(CallbackType.ON_STOPPED));
+        }
+
+        public void expectError(int error) {
+            expectCallback(new CallbackValue(CallbackType.ON_ERROR, error));
+        }
+    }
+
+    private Network connectKeepaliveNetwork(LinkProperties lp) {
+        // Ensure the network is disconnected before we do anything.
+        if (mWiFiNetworkAgent != null) {
+            assertNull(mCm.getNetworkCapabilities(mWiFiNetworkAgent.getNetwork()));
+        }
+
+        mWiFiNetworkAgent = new MockNetworkAgent(TRANSPORT_WIFI);
+        ConditionVariable cv = waitForConnectivityBroadcasts(1);
+        mWiFiNetworkAgent.connect(true);
+        waitFor(cv);
+        verifyActiveNetwork(TRANSPORT_WIFI);
+        mWiFiNetworkAgent.sendLinkProperties(lp);
+        mService.waitForIdle();
+        return mWiFiNetworkAgent.getNetwork();
+    }
+
+    public void testPacketKeepalives() throws Exception {
+        InetAddress myIPv4 = InetAddress.getByName("192.0.2.129");
+        InetAddress notMyIPv4 = InetAddress.getByName("192.0.2.35");
+        InetAddress myIPv6 = InetAddress.getByName("2001:db8::1");
+        InetAddress dstIPv4 = InetAddress.getByName("8.8.8.8");
+        InetAddress dstIPv6 = InetAddress.getByName("2001:4860:4860::8888");
+
+        LinkProperties lp = new LinkProperties();
+        lp.setInterfaceName("wlan12");
+        lp.addLinkAddress(new LinkAddress(myIPv6, 64));
+        lp.addLinkAddress(new LinkAddress(myIPv4, 25));
+        lp.addRoute(new RouteInfo(InetAddress.getByName("fe80::1234")));
+        lp.addRoute(new RouteInfo(InetAddress.getByName("192.0.2.254")));
+
+        Network notMyNet = new Network(61234);
+        Network myNet = connectKeepaliveNetwork(lp);
+
+        TestKeepaliveCallback callback = new TestKeepaliveCallback();
+        PacketKeepalive ka;
+
+        // Attempt to start keepalives with invalid parameters and check for errors.
+        ka = mCm.startNattKeepalive(notMyNet, 25, callback, myIPv4, 1234, dstIPv4);
+        callback.expectError(PacketKeepalive.ERROR_INVALID_NETWORK);
+
+        ka = mCm.startNattKeepalive(myNet, 19, callback, notMyIPv4, 1234, dstIPv4);
+        callback.expectError(PacketKeepalive.ERROR_INVALID_INTERVAL);
+
+        ka = mCm.startNattKeepalive(myNet, 25, callback, myIPv4, 1234, dstIPv6);
+        callback.expectError(PacketKeepalive.ERROR_INVALID_IP_ADDRESS);
+
+        ka = mCm.startNattKeepalive(myNet, 25, callback, myIPv6, 1234, dstIPv4);
+        callback.expectError(PacketKeepalive.ERROR_INVALID_IP_ADDRESS);
+
+        ka = mCm.startNattKeepalive(myNet, 25, callback, myIPv6, 1234, dstIPv6);
+        callback.expectError(PacketKeepalive.ERROR_INVALID_IP_ADDRESS);  // NAT-T is IPv4-only.
+
+        ka = mCm.startNattKeepalive(myNet, 25, callback, myIPv4, 123456, dstIPv4);
+        callback.expectError(PacketKeepalive.ERROR_INVALID_PORT);
+
+        ka = mCm.startNattKeepalive(myNet, 25, callback, myIPv4, 123456, dstIPv4);
+        callback.expectError(PacketKeepalive.ERROR_INVALID_PORT);
+
+        ka = mCm.startNattKeepalive(myNet, 25, callback, myIPv4, 12345, dstIPv4);
+        callback.expectError(PacketKeepalive.ERROR_HARDWARE_UNSUPPORTED);
+
+        ka = mCm.startNattKeepalive(myNet, 25, callback, myIPv4, 12345, dstIPv4);
+        callback.expectError(PacketKeepalive.ERROR_HARDWARE_UNSUPPORTED);
+
+        // Check that a started keepalive can be stopped.
+        mWiFiNetworkAgent.setStartKeepaliveError(PacketKeepalive.SUCCESS);
+        ka = mCm.startNattKeepalive(myNet, 25, callback, myIPv4, 12345, dstIPv4);
+        callback.expectStarted();
+        mWiFiNetworkAgent.setStopKeepaliveError(PacketKeepalive.SUCCESS);
+        ka.stop();
+        callback.expectStopped();
+
+        // Check that deleting the IP address stops the keepalive.
+        LinkProperties bogusLp = new LinkProperties(lp);
+        ka = mCm.startNattKeepalive(myNet, 25, callback, myIPv4, 12345, dstIPv4);
+        callback.expectStarted();
+        bogusLp.removeLinkAddress(new LinkAddress(myIPv4, 25));
+        bogusLp.addLinkAddress(new LinkAddress(notMyIPv4, 25));
+        mWiFiNetworkAgent.sendLinkProperties(bogusLp);
+        callback.expectError(PacketKeepalive.ERROR_INVALID_IP_ADDRESS);
+        mWiFiNetworkAgent.sendLinkProperties(lp);
+
+        // Check that a started keepalive is stopped correctly when the network disconnects.
+        ka = mCm.startNattKeepalive(myNet, 25, callback, myIPv4, 12345, dstIPv4);
+        callback.expectStarted();
+        mWiFiNetworkAgent.disconnect();
+        callback.expectError(PacketKeepalive.ERROR_INVALID_NETWORK);
+
+        // ... and that stopping it after that has no adverse effects.
+        assertNull(mCm.getNetworkCapabilities(myNet));
+        ka.stop();
+
+        // Reconnect.
+        myNet = connectKeepaliveNetwork(lp);
+        mWiFiNetworkAgent.setStartKeepaliveError(PacketKeepalive.SUCCESS);
+
+        // Check things work as expected when the keepalive is stopped and the network disconnects.
+        ka = mCm.startNattKeepalive(myNet, 25, callback, myIPv4, 12345, dstIPv4);
+        callback.expectStarted();
+        ka.stop();
+        mWiFiNetworkAgent.disconnect();
+        mService.waitForIdle();
+        callback.expectStopped();
+
+        // Reconnect.
+        myNet = connectKeepaliveNetwork(lp);
+        mWiFiNetworkAgent.setStartKeepaliveError(PacketKeepalive.SUCCESS);
+
+        // Check that keepalive slots start from 1 and increment. The first one gets slot 1.
+        mWiFiNetworkAgent.setExpectedKeepaliveSlot(1);
+        ka = mCm.startNattKeepalive(myNet, 25, callback, myIPv4, 12345, dstIPv4);
+        callback.expectStarted();
+
+        // The second one gets slot 2.
+        mWiFiNetworkAgent.setExpectedKeepaliveSlot(2);
+        TestKeepaliveCallback callback2 = new TestKeepaliveCallback();
+        PacketKeepalive ka2 = mCm.startNattKeepalive(myNet, 25, callback2, myIPv4, 6789, dstIPv4);
+        callback2.expectStarted();
+
+        // Now stop the first one and create a third. This also gets slot 1.
+        ka.stop();
+        callback.expectStopped();
+
+        mWiFiNetworkAgent.setExpectedKeepaliveSlot(1);
+        TestKeepaliveCallback callback3 = new TestKeepaliveCallback();
+        PacketKeepalive ka3 = mCm.startNattKeepalive(myNet, 25, callback3, myIPv4, 9876, dstIPv4);
+        callback3.expectStarted();
+
+        ka2.stop();
+        callback2.expectStopped();
+
+        ka3.stop();
+        callback3.expectStopped();
     }
 }
