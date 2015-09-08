@@ -1,9 +1,9 @@
-page.title=Building Apps with User Info &amp; Location
+page.title=Building Apps with Contacts &amp; Sign-In
 page.trainingcourse=true
 
 @jd:body
 
 
-<p>These classes teach you how to add user personalization to your app. Some of the ways
-you can do this is by identifying users, providing
-information that's relevant to them, and providing information about the world around them.</p>
+<p>These lessons teach you how to include contact information and authenticate users with the same 
+credentials they use for Google. These features allow your app to connect users with people they 
+care about and provide a personalized experience without creating new user accounts.</p>
