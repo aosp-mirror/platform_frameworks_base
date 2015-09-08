@@ -208,6 +208,8 @@ public class KeepaliveTracker {
                 Log.d(TAG, "Stopping keepalive " + mSlot + " on " + mNai.name());
                 mNai.asyncChannel.sendMessage(CMD_STOP_PACKET_KEEPALIVE, mSlot);
             }
+            // TODO: at the moment we unconditionally return failure here. In cases where the
+            // NetworkAgent is alive, should we ask it to reply, so it can return failure?
             notifyMessenger(mSlot, reason);
             unlinkDeathRecipient();
         }
@@ -233,17 +235,14 @@ public class KeepaliveTracker {
             mKeepalives.put(nai, networkKeepalives);
         }
 
-        // Find the lowest-numbered free slot.
+        // Find the lowest-numbered free slot. Slot numbers start from 1, because that's what two
+        // separate chipset implementations independently came up with.
         int slot;
-        for (slot = 0; slot < networkKeepalives.size(); slot++) {
+        for (slot = 1; slot <= networkKeepalives.size(); slot++) {
             if (networkKeepalives.get(slot) == null) {
                 return slot;
             }
         }
-        // No free slot, pick one at the end.
-
-        // HACK for broadcom hardware that does not support slot 0!
-        if (slot == 0) slot = 1;
         return slot;
     }
 
@@ -267,14 +266,15 @@ public class KeepaliveTracker {
     }
 
     public void handleStopKeepalive(NetworkAgentInfo nai, int slot, int reason) {
+        String networkName = (nai == null) ? "(null)" : nai.name();
         HashMap <Integer, KeepaliveInfo> networkKeepalives = mKeepalives.get(nai);
         if (networkKeepalives == null) {
-            Log.e(TAG, "Attempt to stop keepalive on nonexistent network " + nai.name());
+            Log.e(TAG, "Attempt to stop keepalive on nonexistent network " + networkName);
             return;
         }
         KeepaliveInfo ki = networkKeepalives.get(slot);
         if (ki == null) {
-            Log.e(TAG, "Attempt to stop nonexistent keepalive " + slot + " on " + nai.name());
+            Log.e(TAG, "Attempt to stop nonexistent keepalive " + slot + " on " + networkName);
             return;
         }
         ki.stop(reason);
@@ -332,6 +332,11 @@ public class KeepaliveTracker {
 
     public void startNattKeepalive(NetworkAgentInfo nai, int intervalSeconds, Messenger messenger,
             IBinder binder, String srcAddrString, int srcPort, String dstAddrString, int dstPort) {
+        if (nai == null) {
+            notifyMessenger(messenger, NO_KEEPALIVE, ERROR_INVALID_NETWORK);
+            return;
+        }
+
         InetAddress srcAddress, dstAddress;
         try {
             srcAddress = NetworkUtils.numericToInetAddress(srcAddrString);
