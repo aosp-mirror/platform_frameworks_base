@@ -1056,6 +1056,11 @@
     <permission android:name="android.permission.CONNECTIVITY_INTERNAL"
         android:protectionLevel="signature|privileged" />
 
+    <!-- Allows a system application to access hardware packet offload capabilities.
+         @hide -->
+    <permission android:name="android.permission.PACKET_KEEPALIVE_OFFLOAD"
+        android:protectionLevel="signature|privileged" />
+
     <!-- @SystemApi
          @hide -->
     <permission android:name="android.permission.RECEIVE_DATA_ACTIVITY_CHANGE"
