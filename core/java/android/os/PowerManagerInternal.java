@@ -108,6 +108,12 @@ public abstract class PowerManagerInternal {
     public abstract void setUserActivityTimeoutOverrideFromWindowManager(long timeoutMillis);
 
     /**
+     * Used by the window manager to tell the power manager that the user is no longer actively
+     * using the device.
+     */
+    public abstract void setUserInactiveOverrideFromWindowManager();
+
+    /**
      * Used by device administration to set the maximum screen off timeout.
      *
      * This method must only be called by the device administration policy manager.
