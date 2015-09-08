@@ -2301,13 +2301,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
             PhoneWindow win = new PhoneWindow(context);
             win.setIsStartingWindow(true);
-            final TypedArray ta = win.getWindowStyle();
-            if (ta.getBoolean(
-                        com.android.internal.R.styleable.Window_windowDisablePreview, false)
-                || ta.getBoolean(
-                        com.android.internal.R.styleable.Window_windowShowWallpaper,false)) {
-                return null;
-            }
 
             Resources r = context.getResources();
             win.setTitle(r.getText(labelRes, nonLocalizedLabel));
@@ -2361,16 +2354,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
             wm = (WindowManager)context.getSystemService(Context.WINDOW_SERVICE);
             view = win.getDecorView();
-
-            if (win.isFloating()) {
-                // Whoops, there is no way to display an animation/preview
-                // of such a thing!  After all that work...  let's skip it.
-                // (Note that we must do this here because it is in
-                // getDecorView() where the theme is evaluated...  maybe
-                // we should peek the floating attribute from the theme
-                // earlier.)
-                return null;
-            }
 
             if (DEBUG_STARTING_WINDOW) Slog.d(
                 TAG, "Adding starting window for " + packageName
