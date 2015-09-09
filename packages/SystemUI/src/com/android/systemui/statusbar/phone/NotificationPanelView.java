@@ -111,12 +111,6 @@ public class NotificationPanelView extends PanelView implements
     private boolean mQsTracking;
 
     /**
-     * Handles launching the secure camera properly even when other applications may be using the
-     * camera hardware.
-     */
-    private SecureCameraLaunchManager mSecureCameraLaunchManager;
-
-    /**
      * If set, the ongoing touch gesture might both trigger the expansion in {@link PanelView} and
      * the expansion for quick settings.
      */
@@ -262,8 +256,6 @@ public class NotificationPanelView extends PanelView implements
         mKeyguardBottomArea = (KeyguardBottomAreaView) findViewById(R.id.keyguard_bottom_area);
         mQsNavbarScrim = findViewById(R.id.qs_navbar_scrim);
         mAfforanceHelper = new KeyguardAffordanceHelper(this, getContext());
-        mSecureCameraLaunchManager =
-                new SecureCameraLaunchManager(getContext(), mKeyguardBottomArea);
         mLastOrientation = getResources().getConfiguration().orientation;
 
         // recompute internal state when qspanel height changes
@@ -366,16 +358,6 @@ public class NotificationPanelView extends PanelView implements
             mQsContainer.setHeightOverride(mQsContainer.getDesiredHeight());
         }
         updateMaxHeadsUpTranslation();
-    }
-
-    @Override
-    public void onAttachedToWindow() {
-        mSecureCameraLaunchManager.create();
-    }
-
-    @Override
-    public void onDetachedFromWindow() {
-        mSecureCameraLaunchManager.destroy();
     }
 
     private void startQsSizeChangeAnimation(int oldHeight, final int newHeight) {
@@ -1963,7 +1945,7 @@ public class NotificationPanelView extends PanelView implements
         } else {
             EventLogTags.writeSysuiLockscreenGesture(
                     EventLogConstants.SYSUI_LOCKSCREEN_GESTURE_SWIPE_CAMERA, lengthDp, velocityDp);
-            mSecureCameraLaunchManager.startSecureCameraLaunch();
+            mKeyguardBottomArea.launchCamera();
         }
         mStatusBar.startLaunchTransitionTimeout();
         mBlockTouches = true;
@@ -2010,7 +1992,6 @@ public class NotificationPanelView extends PanelView implements
         boolean camera = getLayoutDirection() == LAYOUT_DIRECTION_RTL ? !rightIcon
                 : rightIcon;
         if (camera) {
-            mSecureCameraLaunchManager.onSwipingStarted();
             mKeyguardBottomArea.bindCameraPrewarmService();
         }
         requestDisallowInterceptTouchEvent(true);
