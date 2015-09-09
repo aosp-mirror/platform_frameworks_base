@@ -471,7 +471,6 @@ public class WindowManagerService extends IWindowManager.Stub
     int mSystemDecorLayer = 0;
     final Rect mScreenRect = new Rect();
 
-    boolean mTraversalScheduled = false;
     boolean mDisplayFrozen = false;
     long mDisplayFreezeTime = 0;
     int mLastDisplayFreezeDuration = 0;
@@ -2773,7 +2772,7 @@ public class WindowManagerService extends IWindowManager.Stub
                     if (displayContent != null) {
                         displayContent.layoutNeeded = true;
                     }
-                    requestTraversalLocked();
+                    mWindowPlacerLocked.requestTraversal();
                 }
             }
         } finally {
@@ -3472,34 +3471,11 @@ public class WindowManagerService extends IWindowManager.Stub
                 "prepareAppTransition()")) {
             throw new SecurityException("Requires MANAGE_APP_TOKENS permission");
         }
-
         synchronized(mWindowMap) {
-            if (DEBUG_APP_TRANSITIONS) Slog.v(TAG, "Prepare app transition:"
-                    + " transit=" + AppTransition.appTransitionToString(transit)
-                    + " " + mAppTransition
-                    + " alwaysKeepCurrent=" + alwaysKeepCurrent
-                    + " Callers=" + Debug.getCallers(3));
-            if (!mAppTransition.isTransitionSet() || mAppTransition.isTransitionNone()) {
-                mAppTransition.setAppTransition(transit);
-            } else if (!alwaysKeepCurrent) {
-                if (transit == AppTransition.TRANSIT_TASK_OPEN
-                        && mAppTransition.isTransitionEqual(
-                                AppTransition.TRANSIT_TASK_CLOSE)) {
-                    // Opening a new task always supersedes a close for the anim.
-                    mAppTransition.setAppTransition(transit);
-                } else if (transit == AppTransition.TRANSIT_ACTIVITY_OPEN
-                        && mAppTransition.isTransitionEqual(
-                            AppTransition.TRANSIT_ACTIVITY_CLOSE)) {
-                    // Opening a new activity always supersedes a close for the anim.
-                    mAppTransition.setAppTransition(transit);
-                }
-            }
-            if (okToDisplay() && mAppTransition.prepare()) {
+            boolean prepared = mAppTransition.prepareAppTransitionLocked(
+                    transit, alwaysKeepCurrent);
+            if (prepared && okToDisplay()) {
                 mSkipAppTransitionAnimation = false;
-            }
-            if (mAppTransition.isTransitionSet()) {
-                mH.removeMessages(H.APP_TRANSITION_TIMEOUT);
-                mH.sendEmptyMessageDelayed(H.APP_TRANSITION_TIMEOUT, 5000);
             }
         }
     }
@@ -3836,7 +3812,7 @@ public class WindowManagerService extends IWindowManager.Stub
             if (atoken != null) {
                 atoken.appFullscreen = toOpaque;
                 setWindowOpaqueLocked(token, toOpaque);
-                requestTraversalLocked();
+                mWindowPlacerLocked.requestTraversal();
             }
         }
     }
@@ -4841,7 +4817,7 @@ public class WindowManagerService extends IWindowManager.Stub
             mAnimator.mKeyguardGoingAway = true;
             mAnimator.mKeyguardGoingAwayToNotificationShade = keyguardGoingToNotificationShade;
             mAnimator.mKeyguardGoingAwayDisableWindowAnimations = disableWindowAnimations;
-            requestTraversalLocked();
+            mWindowPlacerLocked.requestTraversal();
         }
     }
 
@@ -7180,7 +7156,6 @@ public class WindowManagerService extends IWindowManager.Stub
 
                 case DO_TRAVERSAL: {
                     synchronized(mWindowMap) {
-                        mTraversalScheduled = false;
                         mWindowPlacerLocked.performSurfacePlacement();
                     }
                 } break;
@@ -8463,14 +8438,7 @@ public class WindowManagerService extends IWindowManager.Stub
 
     void requestTraversal() {
         synchronized (mWindowMap) {
-            requestTraversalLocked();
-        }
-    }
-
-    void requestTraversalLocked() {
-        if (!mTraversalScheduled) {
-            mTraversalScheduled = true;
-            mH.sendEmptyMessage(H.DO_TRAVERSAL);
+            mWindowPlacerLocked.requestTraversal();
         }
     }
 
@@ -9334,6 +9302,7 @@ public class WindowManagerService extends IWindowManager.Stub
             if (mInputMethodWindow != null) {
                 pw.print("  mInputMethodWindow="); pw.println(mInputMethodWindow);
             }
+            mWindowPlacerLocked.dump(pw, "  ");
             mWallpaperControllerLocked.dump(pw, "  ");
             if (mInputMethodAnimLayerAdjustment != 0 ||
                     mWallpaperControllerLocked.getAnimLayerAdjustment() != 0) {
@@ -9369,8 +9338,7 @@ public class WindowManagerService extends IWindowManager.Stub
                     pw.print(" window="); pw.print(mWindowAnimationScaleSetting);
                     pw.print(" transition="); pw.print(mTransitionAnimationScaleSetting);
                     pw.print(" animator="); pw.println(mAnimatorDurationScaleSetting);
-            pw.print("  mTraversalScheduled="); pw.println(mTraversalScheduled);
-            pw.print(" mSkipAppTransitionAnimation="); pw.println(mSkipAppTransitionAnimation);
+            pw.print(" mSkipAppTransitionAnimation=");pw.println(mSkipAppTransitionAnimation);
             pw.println("  mLayoutToAnim:");
             mAppTransition.dump(pw, "    ");
         }
@@ -9728,7 +9696,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 createDisplayContentLocked(display);
                 displayReady(displayId);
             }
-            requestTraversalLocked();
+            mWindowPlacerLocked.requestTraversal();
         }
     }
 
@@ -9751,7 +9719,7 @@ public class WindowManagerService extends IWindowManager.Stub
             }
         }
         mAnimator.removeDisplayLocked(displayId);
-        requestTraversalLocked();
+        mWindowPlacerLocked.requestTraversal();
     }
 
     public void onDisplayChanged(int displayId) {
@@ -9763,7 +9731,7 @@ public class WindowManagerService extends IWindowManager.Stub
         if (displayContent != null) {
             displayContent.updateDisplayInfo();
         }
-        requestTraversalLocked();
+        mWindowPlacerLocked.requestTraversal();
     }
 
     @Override
@@ -9910,7 +9878,7 @@ public class WindowManagerService extends IWindowManager.Stub
                         }
                     }
                 }
-                requestTraversalLocked();
+                mWindowPlacerLocked.requestTraversal();
             }
             mH.removeMessages(H.WAITING_FOR_DRAWN_TIMEOUT);
             if (mWaitingForDrawn.isEmpty()) {

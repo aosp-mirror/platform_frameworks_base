@@ -57,6 +57,7 @@ public class WindowAnimator {
     final WindowManagerService mService;
     final Context mContext;
     final WindowManagerPolicy mPolicy;
+    private final WindowSurfacePlacer mWindowPlacerLocked;
 
     /** Is any window animating? */
     boolean mAnimating;
@@ -112,6 +113,7 @@ public class WindowAnimator {
         mService = service;
         mContext = service.mContext;
         mPolicy = service.mPolicy;
+        mWindowPlacerLocked = service.mWindowPlacerLocked;
 
         mAnimationFrameCallback = new Choreographer.FrameCallback() {
             public void doFrame(long frameTimeNs) {
@@ -300,7 +302,7 @@ public class WindowAnimator {
                     setPendingLayoutChanges(Display.DEFAULT_DISPLAY,
                             WindowManagerPolicy.FINISH_LAYOUT_REDO_WALLPAPER);
                     if (WindowManagerService.DEBUG_LAYOUT_REPEATS) {
-                        mService.mWindowPlacerLocked.debugLayoutRepeats(
+                        mWindowPlacerLocked.debugLayoutRepeats(
                                 "updateWindowsAndWallpaperLocked 2",
                                 getPendingLayoutChanges(Display.DEFAULT_DISPLAY));
                     }
@@ -315,7 +317,7 @@ public class WindowAnimator {
                         setPendingLayoutChanges(displayId,
                                 WindowManagerPolicy.FINISH_LAYOUT_REDO_WALLPAPER);
                         if (WindowManagerService.DEBUG_LAYOUT_REPEATS) {
-                            mService.mWindowPlacerLocked.debugLayoutRepeats(
+                            mWindowPlacerLocked.debugLayoutRepeats(
                                     "updateWindowsAndWallpaperLocked 3",
                                     getPendingLayoutChanges(displayId));
                         }
@@ -410,7 +412,7 @@ public class WindowAnimator {
                         setPendingLayoutChanges(Display.DEFAULT_DISPLAY,
                                 WindowManagerPolicy.FINISH_LAYOUT_REDO_WALLPAPER);
                         if (WindowManagerService.DEBUG_LAYOUT_REPEATS) {
-                            mService.mWindowPlacerLocked.debugLayoutRepeats(
+                            mWindowPlacerLocked.debugLayoutRepeats(
                                     "updateWindowsAndWallpaperLocked 4",
                                     getPendingLayoutChanges(Display.DEFAULT_DISPLAY));
                         }
@@ -435,7 +437,7 @@ public class WindowAnimator {
                         setPendingLayoutChanges(displayId,
                                 WindowManagerPolicy.FINISH_LAYOUT_REDO_ANIM);
                         if (WindowManagerService.DEBUG_LAYOUT_REPEATS) {
-                            mService.mWindowPlacerLocked.debugLayoutRepeats(
+                            mWindowPlacerLocked.debugLayoutRepeats(
                                     "updateWindowsAndWallpaperLocked 5",
                                     getPendingLayoutChanges(displayId));
                         }
@@ -741,15 +743,15 @@ public class WindowAnimator {
 
         boolean doRequest = false;
         if (mBulkUpdateParams != 0) {
-            doRequest = mService.mWindowPlacerLocked.copyAnimToLayoutParamsLocked();
+            doRequest = mWindowPlacerLocked.copyAnimToLayoutParamsLocked();
         }
 
         if (hasPendingLayoutChanges || doRequest) {
-            mService.requestTraversalLocked();
+            mWindowPlacerLocked.requestTraversal();
         }
 
         if (!mAnimating && wasAnimating) {
-            mService.requestTraversalLocked();
+            mWindowPlacerLocked.requestTraversal();
         }
         if (WindowManagerService.DEBUG_WINDOW_TRACE) {
             Slog.i(TAG, "!!! animate: exit mAnimating=" + mAnimating
@@ -850,7 +852,7 @@ public class WindowAnimator {
             if (displayId == windows.get(i).getDisplayId()) {
                 setPendingLayoutChanges(displayId, changes);
                 if (WindowManagerService.DEBUG_LAYOUT_REPEATS) {
-                    mService.mWindowPlacerLocked.debugLayoutRepeats(reason,
+                    mWindowPlacerLocked.debugLayoutRepeats(reason,
                             getPendingLayoutChanges(displayId));
                 }
                 break;
