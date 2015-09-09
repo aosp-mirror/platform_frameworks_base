@@ -34,11 +34,15 @@ class AppButtonData {
         this.pinned = pinned;
     }
 
+    public int getTaskCount() {
+        return tasks == null ? 0 : tasks.size();
+    }
+
     /**
      * Returns true if the button contains no useful information and should be removed.
      */
     public boolean isEmpty() {
-        return !pinned && (tasks == null || tasks.isEmpty());
+        return !pinned && getTaskCount() == 0;
     }
 
     public void addTask(RecentTaskInfo task) {
