@@ -4520,6 +4520,17 @@ public class PackageParser {
             return applicationInfo.isUpdatedSystemApp();
         }
 
+        /**
+         * @hide
+         */
+        public boolean canHaveOatDir() {
+            // The following app types CANNOT have oat directory
+            // - non-updated system apps
+            // - forward-locked apps or apps installed in ASEC containers
+            return (!isSystemApp() || isUpdatedSystemApp())
+                    && !isForwardLocked() && !applicationInfo.isExternalAsec();
+        }
+
         public String toString() {
             return "Package{"
                 + Integer.toHexString(System.identityHashCode(this))
