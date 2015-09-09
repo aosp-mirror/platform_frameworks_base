@@ -274,6 +274,16 @@ public class CarrierConfigManager {
             = "carrier_use_ims_first_for_emergency_bool";
 
     /**
+     * When IMS instant lettering is available for a carrier (see
+     * {@link #KEY_CARRIER_INSTANT_LETTERING_AVAILABLE_BOOL}), determines the list of characters
+     * which may not be contained in messages.  Should be specified as a regular expression suitable
+     * for use with {@link String#matches(String)}.
+     * @hide
+     */
+    public static final String KEY_CARRIER_INSTANT_LETTERING_INVALID_CHARS_STRING =
+            "carrier_instant_lettering_invalid_chars_string";
+
+    /**
      * If Voice Radio Technology is RIL_RADIO_TECHNOLOGY_LTE:14 or RIL_RADIO_TECHNOLOGY_UNKNOWN:0
      * this is the value that should be used instead. A configuration value of
      * RIL_RADIO_TECHNOLOGY_UNKNOWN:0 means there is no replacement value and that the default
@@ -448,6 +458,7 @@ public class CarrierConfigManager {
         sDefaults.putBoolean(KEY_CARRIER_ALLOW_TURNOFF_IMS_BOOL, true);
         sDefaults.putBoolean(KEY_CARRIER_INSTANT_LETTERING_AVAILABLE_BOOL, false);
         sDefaults.putBoolean(KEY_CARRIER_USE_IMS_FIRST_FOR_EMERGENCY_BOOL, true);
+        sDefaults.putString(KEY_CARRIER_INSTANT_LETTERING_INVALID_CHARS_STRING, "");
         sDefaults.putBoolean(KEY_DISABLE_CDMA_ACTIVATION_CODE_BOOL, false);
         sDefaults.putBoolean(KEY_DTMF_TYPE_ENABLED_BOOL, false);
         sDefaults.putBoolean(KEY_ENABLE_DIALER_KEY_VIBRATION_BOOL, true);
