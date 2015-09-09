@@ -23,8 +23,12 @@
 #include <SkXfermode.h>
 #include <memory>
 
+class SkBitmap;
+
 namespace android {
 namespace uirenderer {
+
+class Texture;
 
 class TextureState {
     friend class Caches; // TODO: move to RenderState
@@ -71,6 +75,14 @@ public:
      * Clear the cache of bound textures.
      */
     void unbindTexture(GLuint texture);
+
+    /**
+     * Generates the texture from a bitmap into the specified texture structure.
+     *
+     * @param regenerate If true, the bitmap data is reuploaded into the texture, but
+     *        no new texture is generated.
+     */
+    void generateTexture(const SkBitmap* bitmap, Texture* texture, bool regenerate);
 private:
     // total number of texture units available for use
     static const int kTextureUnitsCount = 4;
