@@ -4612,8 +4612,12 @@ public class WindowManagerService extends IWindowManager.Stub
                 throw new IllegalArgumentException("resizeTask: taskId " + taskId
                         + " not found.");
             }
-            if (task.setBounds(bounds, configuration)) {
-                task.resizeWindows();
+            final int boundsChanged = task.setBounds(bounds, configuration);
+            if (boundsChanged != Task.BOUNDS_CHANGE_NONE) {
+                if ((boundsChanged & Task.BOUNDS_CHANGE_SIZE) == Task.BOUNDS_CHANGE_SIZE) {
+                    task.resizeWindows();
+                }
+
                 if (relayout) {
                     task.getDisplayContent().layoutNeeded = true;
                     mWindowPlacerLocked.performSurfacePlacement();
