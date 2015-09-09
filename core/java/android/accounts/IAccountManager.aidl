@@ -30,12 +30,14 @@ interface IAccountManager {
     String getPassword(in Account account);
     String getUserData(in Account account, String key);
     AuthenticatorDescription[] getAuthenticatorTypes(int userId);
-    Account[] getAccounts(String accountType);
-    Account[] getAccountsForPackage(String packageName, int uid);
-    Account[] getAccountsByTypeForPackage(String type, String packageName);
-    Account[] getAccountsAsUser(String accountType, int userId);
-    void hasFeatures(in IAccountManagerResponse response, in Account account, in String[] features);
-    void getAccountsByFeatures(in IAccountManagerResponse response, String accountType, in String[] features);
+    Account[] getAccounts(String accountType, String opPackageName);
+    Account[] getAccountsForPackage(String packageName, int uid, String opPackageName);
+    Account[] getAccountsByTypeForPackage(String type, String packageName, String opPackageName);
+    Account[] getAccountsAsUser(String accountType, int userId, String opPackageName);
+    void hasFeatures(in IAccountManagerResponse response, in Account account, in String[] features,
+        String opPackageName);
+    void getAccountsByFeatures(in IAccountManagerResponse response, String accountType,
+        in String[] features, String opPackageName);
     boolean addAccountExplicitly(in Account account, String password, in Bundle extras);
     void removeAccount(in IAccountManagerResponse response, in Account account,
         boolean expectActivityLaunch);
