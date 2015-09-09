@@ -47,8 +47,8 @@ static bool approxEqual(const Matrix4& a, const Matrix4& b) {
 
 TEST(CanvasState, gettersAndSetters) {
     CanvasState state(sNullClient);
-    state.setViewport(200, 200);
-    state.initializeSaveStack(0, 0, state.getWidth(), state.getHeight(), Vector3());
+    state.initializeSaveStack(200, 200,
+            0, 0, 200, 200, Vector3());
 
     ASSERT_EQ(state.getWidth(), 200);
     ASSERT_EQ(state.getHeight(), 200);
@@ -65,8 +65,8 @@ TEST(CanvasState, gettersAndSetters) {
 
 TEST(CanvasState, simpleClipping) {
     CanvasState state(sNullClient);
-    state.setViewport(200, 200);
-    state.initializeSaveStack(0, 0, state.getWidth(), state.getHeight(), Vector3());
+    state.initializeSaveStack(200, 200,
+            0, 0, 200, 200, Vector3());
 
     state.clipRect(0, 0, 100, 100, SkRegion::kIntersect_Op);
     ASSERT_EQ(state.getRenderTargetClipBounds(), Rect(0, 0, 100, 100));
@@ -80,8 +80,8 @@ TEST(CanvasState, simpleClipping) {
 
 TEST(CanvasState, complexClipping) {
     CanvasState state(sNullClient);
-    state.setViewport(200, 200);
-    state.initializeSaveStack(0, 0, state.getWidth(), state.getHeight(), Vector3());
+    state.initializeSaveStack(200, 200,
+            0, 0, 200, 200, Vector3());
 
     state.save(SkCanvas::kClip_SaveFlag | SkCanvas::kMatrix_SaveFlag);
     {
@@ -116,8 +116,8 @@ TEST(CanvasState, complexClipping) {
 
 TEST(CanvasState, saveAndRestore) {
     CanvasState state(sNullClient);
-    state.setViewport(200, 200);
-    state.initializeSaveStack(0, 0, state.getWidth(), state.getHeight(), Vector3());
+    state.initializeSaveStack(200, 200,
+            0, 0, 200, 200, Vector3());
 
     state.save(SkCanvas::kClip_SaveFlag);
     {
@@ -140,10 +140,10 @@ TEST(CanvasState, saveAndRestore) {
 
 TEST(CanvasState, saveAndRestoreButNotTooMuch) {
     CanvasState state(sNullClient);
-    state.setViewport(200, 200);
-    state.initializeSaveStack(0, 0, state.getWidth(), state.getHeight(), Vector3());
+    state.initializeSaveStack(200, 200,
+            0, 0, 200, 200, Vector3());
 
-    state.save(SkCanvas::kMatrix_SaveFlag); // Note: clip not saved
+    state.save(SkCanvas::kMatrix_SaveFlag); // NOTE: clip not saved
     {
         state.clipRect(0, 0, 10, 10, SkRegion::kIntersect_Op);
         ASSERT_EQ(state.getRenderTargetClipBounds(), Rect(0, 0, 10, 10));

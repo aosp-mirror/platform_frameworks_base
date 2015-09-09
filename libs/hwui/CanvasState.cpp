@@ -34,31 +34,22 @@ CanvasState::CanvasState(CanvasStateClient& renderer)
 
 }
 
-CanvasState::~CanvasState() {
-
-}
-
-void CanvasState::initializeSaveStack(float clipLeft, float clipTop,
+void CanvasState::initializeSaveStack(
+        int viewportWidth, int viewportHeight,
+        float clipLeft, float clipTop,
         float clipRight, float clipBottom, const Vector3& lightCenter) {
+    if (mWidth != viewportWidth || mHeight != viewportHeight) {
+        mWidth = viewportWidth;
+        mHeight = viewportHeight;
+        mFirstSnapshot->initializeViewport(viewportWidth, viewportHeight);
+        mCanvas.onViewportInitialized();
+    }
+
     mSnapshot = new Snapshot(mFirstSnapshot,
             SkCanvas::kMatrix_SaveFlag | SkCanvas::kClip_SaveFlag);
     mSnapshot->setClip(clipLeft, clipTop, clipRight, clipBottom);
     mSnapshot->fbo = mCanvas.getTargetFbo();
     mSnapshot->setRelativeLightCenter(lightCenter);
-    mSaveCount = 1;
-}
-
-void CanvasState::setViewport(int width, int height) {
-    mWidth = width;
-    mHeight = height;
-    mFirstSnapshot->initializeViewport(width, height);
-    mCanvas.onViewportInitialized();
-
-    // create a temporary 1st snapshot, so old snapshots are released,
-    // and viewport can be queried safely.
-    // TODO: remove, combine viewport + save stack initialization
-    mSnapshot = new Snapshot(mFirstSnapshot,
-            SkCanvas::kMatrix_SaveFlag | SkCanvas::kClip_SaveFlag);
     mSaveCount = 1;
 }
 

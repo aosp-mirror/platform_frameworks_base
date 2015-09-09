@@ -119,15 +119,6 @@ public:
     OpenGLRenderer(RenderState& renderState);
     virtual ~OpenGLRenderer();
 
-    /**
-     * Sets the dimension of the underlying drawing surface. This method must
-     * be called at least once every time the drawing surface changes size.
-     *
-     * @param width The width in pixels of the underlysing surface
-     * @param height The height in pixels of the underlysing surface
-     */
-    void setViewport(int width, int height) { mState.setViewport(width, height); }
-
     void initProperties();
     void initLight(float lightRadius, uint8_t ambientShadowAlpha,
             uint8_t spotShadowAlpha);
@@ -143,21 +134,8 @@ public:
      *               and will not be cleared. If false, the target surface
      *               will be cleared
      */
-    virtual void prepareDirty(float left, float top, float right, float bottom,
-            bool opaque);
-
-    /**
-     * Prepares the renderer to draw a frame. This method must be invoked
-     * at the beginning of each frame. When this method is invoked, the
-     * entire drawing surface is assumed to be redrawn.
-     *
-     * @param opaque If true, the target surface is considered opaque
-     *               and will not be cleared. If false, the target surface
-     *               will be cleared
-     */
-    void prepare(bool opaque) {
-        prepareDirty(0.0f, 0.0f, mState.getWidth(), mState.getHeight(), opaque);
-    }
+    virtual void prepareDirty(int viewportWidth, int viewportHeight,
+            float left, float top, float right, float bottom, bool opaque);
 
     /**
      * Indicates the end of a frame. This method must be invoked whenever
@@ -430,7 +408,8 @@ protected:
      * Perform the setup specific to a frame. This method does not
      * issue any OpenGL commands.
      */
-    void setupFrameState(float left, float top, float right, float bottom, bool opaque);
+    void setupFrameState(int viewportWidth, int viewportHeight,
+            float left, float top, float right, float bottom, bool opaque);
 
     /**
      * Indicates the start of rendering. This method will setup the

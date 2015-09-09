@@ -43,8 +43,8 @@ LayerRenderer::LayerRenderer(RenderState& renderState, Layer* layer)
 LayerRenderer::~LayerRenderer() {
 }
 
-void LayerRenderer::prepareDirty(float left, float top, float right, float bottom,
-        bool opaque) {
+void LayerRenderer::prepareDirty(int viewportWidth, int viewportHeight,
+        float left, float top, float right, float bottom, bool opaque) {
     LAYER_RENDERER_LOGD("Rendering into layer, fbo = %d", mLayer->getFbo());
 
     mRenderState.bindFramebuffer(mLayer->getFbo());
@@ -64,7 +64,8 @@ void LayerRenderer::prepareDirty(float left, float top, float right, float botto
     }
     mLayer->clipRect.set(dirty);
 
-    OpenGLRenderer::prepareDirty(dirty.left, dirty.top, dirty.right, dirty.bottom, opaque);
+    OpenGLRenderer::prepareDirty(viewportWidth, viewportHeight,
+            dirty.left, dirty.top, dirty.right, dirty.bottom, opaque);
 }
 
 void LayerRenderer::clear(float left, float top, float right, float bottom, bool opaque) {
@@ -430,9 +431,8 @@ bool LayerRenderer::copyLayer(RenderState& renderState, Layer* layer, SkBitmap* 
 
         {
             LayerRenderer renderer(renderState, layer);
-            renderer.setViewport(bitmap->width(), bitmap->height());
-            renderer.OpenGLRenderer::prepareDirty(0.0f, 0.0f,
-                    bitmap->width(), bitmap->height(), !layer->isBlend());
+            renderer.OpenGLRenderer::prepareDirty(bitmap->width(), bitmap->height(),
+                    0.0f, 0.0f, bitmap->width(), bitmap->height(), !layer->isBlend());
 
             renderState.scissor().setEnabled(false);
             renderer.translate(0.0f, bitmap->height());

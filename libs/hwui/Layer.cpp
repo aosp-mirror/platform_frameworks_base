@@ -236,8 +236,7 @@ void Layer::defer(const OpenGLRenderer& rootRenderer) {
     DeferStateStruct deferredState(*deferredList, *renderer,
             RenderNode::kReplayFlag_ClipChildren);
 
-    renderer->setViewport(width, height);
-    renderer->setupFrameState(dirtyRect.left, dirtyRect.top,
+    renderer->setupFrameState(width, height, dirtyRect.left, dirtyRect.top,
             dirtyRect.right, dirtyRect.bottom, !isBlend());
 
     renderNode->computeOrdering();
@@ -258,9 +257,8 @@ void Layer::flush() {
         ATRACE_LAYER_WORK("Issue");
         renderer->startMark((renderNode.get() != nullptr) ? renderNode->getName() : "Layer");
 
-        renderer->setViewport(layer.getWidth(), layer.getHeight());
-        renderer->prepareDirty(dirtyRect.left, dirtyRect.top, dirtyRect.right, dirtyRect.bottom,
-                !isBlend());
+        renderer->prepareDirty(layer.getWidth(), layer.getHeight(),
+                dirtyRect.left, dirtyRect.top, dirtyRect.right, dirtyRect.bottom, !isBlend());
 
         deferredList->flush(*renderer, dirtyRect);
 
@@ -277,9 +275,8 @@ void Layer::render(const OpenGLRenderer& rootRenderer) {
     ATRACE_LAYER_WORK("Direct-Issue");
 
     updateLightPosFromRenderer(rootRenderer);
-    renderer->setViewport(layer.getWidth(), layer.getHeight());
-    renderer->prepareDirty(dirtyRect.left, dirtyRect.top, dirtyRect.right, dirtyRect.bottom,
-            !isBlend());
+    renderer->prepareDirty(layer.getWidth(), layer.getHeight(),
+            dirtyRect.left, dirtyRect.top, dirtyRect.right, dirtyRect.bottom, !isBlend());
 
     renderer->drawRenderNode(renderNode.get(), dirtyRect, RenderNode::kReplayFlag_ClipChildren);
 

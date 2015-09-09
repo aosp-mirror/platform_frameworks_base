@@ -54,8 +54,8 @@ void DisplayListCanvas::reset(int width, int height) {
             "prepareDirty called a second time during a recording!");
     mDisplayListData = new DisplayListData();
 
-    mState.setViewport(width, height);
-    mState.initializeSaveStack(0, 0, mState.getWidth(), mState.getHeight(), Vector3());
+    mState.initializeSaveStack(width, height,
+            0, 0, width, height, Vector3());
 
     mDeferredBarrierType = kBarrier_InOrder;
     mState.setDirtyClip(false);
