@@ -71,6 +71,7 @@ public class KeepalivePacketData {
         // Check we have two IP addresses of the same family.
         if (srcAddress == null || dstAddress == null ||
                 !srcAddress.getClass().getName().equals(dstAddress.getClass().getName())) {
+            throw new InvalidPacketException(ERROR_INVALID_IP_ADDRESS);
         }
 
         // Set the protocol.
@@ -102,7 +103,7 @@ public class KeepalivePacketData {
             InetAddress srcAddress, int srcPort,
             InetAddress dstAddress, int dstPort) throws InvalidPacketException {
 
-        if (!(srcAddress instanceof Inet4Address)) {
+        if (!(srcAddress instanceof Inet4Address) || !(dstAddress instanceof Inet4Address)) {
             throw new InvalidPacketException(ERROR_INVALID_IP_ADDRESS);
         }
 

@@ -1243,6 +1243,8 @@ public class ConnectivityManager {
 
         /** The hardware does not support this request. */
         public static final int ERROR_HARDWARE_UNSUPPORTED = -30;
+        /** The hardware returned an error. */
+        public static final int ERROR_HARDWARE_ERROR = -31;
 
         public static final int NATT_PORT = 4500;
 
