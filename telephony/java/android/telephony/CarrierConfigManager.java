@@ -373,6 +373,12 @@ public class CarrierConfigManager {
     public static final String KEY_EDITABLE_ENHANCED_4G_LTE_BOOL = "editable_enhanced_4g_lte_bool";
 
     /**
+     * Determine whether IMS apn can be shown.
+     * @hide
+     */
+    public static final String KEY_HIDE_IMS_APN_BOOL = "hide_ims_apn_bool";
+
+    /**
      * If this is true, the SIM card (through Customer Service Profile EF file) will be able to
      * prevent manual operator selection. If false, this SIM setting will be ignored and manual
      * operator selection will always be available. See CPHS4_2.WW6, CPHS B.4.7.1 for more
@@ -509,6 +515,7 @@ public class CarrierConfigManager {
         sDefaults.putInt(KEY_IMS_DTMF_TONE_DELAY_INT, 0);
         sDefaults.putBoolean(KEY_SUPPORT_CONFERENCE_CALL_BOOL, true);
         sDefaults.putBoolean(KEY_EDITABLE_ENHANCED_4G_LTE_BOOL, true);
+        sDefaults.putBoolean(KEY_HIDE_IMS_APN_BOOL, false);
 
         // MMS defaults
         sDefaults.putBoolean(KEY_MMS_ALIAS_ENABLED_BOOL, false);
