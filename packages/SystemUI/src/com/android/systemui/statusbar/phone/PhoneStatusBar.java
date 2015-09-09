@@ -3575,6 +3575,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         mHandler.removeMessages(MSG_LAUNCH_TRANSITION_TIMEOUT);
         releaseGestureWakeLock();
         mNotificationPanel.onAffordanceLaunchEnded();
+        mNotificationPanel.animate().cancel();
         mNotificationPanel.setAlpha(1f);
         return staying;
     }
