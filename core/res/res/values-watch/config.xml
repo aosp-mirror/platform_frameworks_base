@@ -51,4 +51,7 @@
     <!-- Scale factor threshold used by the screen magnifier to determine when to switch from
          panning to scaling the magnification viewport. -->
     <item name="config_screen_magnification_scaling_threshold" format="float" type="dimen">0.1</item>
+
+    <!-- Do not show the message saying USB is connected in charging mode. -->
+    <bool name="config_usbChargingMessage">false</bool>
 </resources>
