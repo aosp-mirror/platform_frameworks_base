@@ -30,7 +30,7 @@ public class Region implements Parcelable {
     /**
      * @hide
      */
-    public final long mNativeRegion;
+    public long mNativeRegion;
 
     // the native values for these must match up with the enum in SkRegion.h
     public enum Op {
@@ -380,6 +380,7 @@ public class Region implements Parcelable {
     protected void finalize() throws Throwable {
         try {
             nativeDestructor(mNativeRegion);
+            mNativeRegion = 0;
         } finally {
             super.finalize();
         }

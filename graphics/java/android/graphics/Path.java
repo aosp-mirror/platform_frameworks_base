@@ -27,7 +27,7 @@ public class Path {
     /**
      * @hide
      */
-    public final long mNativePath;
+    public long mNativePath;
 
     /**
      * @hide
@@ -746,6 +746,7 @@ public class Path {
     protected void finalize() throws Throwable {
         try {
             finalizer(mNativePath);
+            mNativePath = 0;  //  Other finalizers can still call us.
         } finally {
             super.finalize();
         }
