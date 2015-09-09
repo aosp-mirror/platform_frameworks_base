@@ -147,6 +147,7 @@ public abstract class AndroidKeyStoreKeyPairGeneratorSpi extends KeyPairGenerato
     private KeyGenParameterSpec mSpec;
 
     private String mEntryAlias;
+    private int mEntryUid;
     private boolean mEncryptionAtRestRequired;
     private @KeyProperties.KeyAlgorithmEnum String mJcaKeyAlgorithm;
     private int mKeymasterAlgorithm = -1;
@@ -283,6 +284,7 @@ public abstract class AndroidKeyStoreKeyPairGeneratorSpi extends KeyPairGenerato
             }
 
             mEntryAlias = spec.getKeystoreAlias();
+            mEntryUid = spec.getUid();
             mSpec = spec;
             mKeymasterAlgorithm = keymasterAlgorithm;
             mEncryptionAtRestRequired = encryptionAtRestRequired;
@@ -352,6 +354,7 @@ public abstract class AndroidKeyStoreKeyPairGeneratorSpi extends KeyPairGenerato
 
     private void resetAll() {
         mEntryAlias = null;
+        mEntryUid = KeyStore.UID_SELF;
         mJcaKeyAlgorithm = null;
         mKeymasterAlgorithm = -1;
         mKeymasterPurposes = null;
@@ -470,12 +473,13 @@ public abstract class AndroidKeyStoreKeyPairGeneratorSpi extends KeyPairGenerato
         final String privateKeyAlias = Credentials.USER_PRIVATE_KEY + mEntryAlias;
         boolean success = false;
         try {
-            Credentials.deleteAllTypesForAlias(mKeyStore, mEntryAlias);
+            Credentials.deleteAllTypesForAlias(mKeyStore, mEntryAlias, mEntryUid);
             KeyCharacteristics resultingKeyCharacteristics = new KeyCharacteristics();
             int errorCode = mKeyStore.generateKey(
                     privateKeyAlias,
                     args,
                     additionalEntropy,
+                    mEntryUid,
                     flags,
                     resultingKeyCharacteristics);
             if (errorCode != KeyStore.NO_ERROR) {
@@ -486,7 +490,7 @@ public abstract class AndroidKeyStoreKeyPairGeneratorSpi extends KeyPairGenerato
             KeyPair result;
             try {
                 result = AndroidKeyStoreProvider.loadAndroidKeyStoreKeyPairFromKeystore(
-                        mKeyStore, privateKeyAlias);
+                        mKeyStore, privateKeyAlias, mEntryUid);
             } catch (UnrecoverableKeyException e) {
                 throw new ProviderException("Failed to load generated key pair from keystore", e);
             }
@@ -515,7 +519,7 @@ public abstract class AndroidKeyStoreKeyPairGeneratorSpi extends KeyPairGenerato
             int insertErrorCode = mKeyStore.insert(
                     Credentials.USER_CERTIFICATE + mEntryAlias,
                     certBytes,
-                    KeyStore.UID_SELF,
+                    mEntryUid,
                     flags);
             if (insertErrorCode != KeyStore.NO_ERROR) {
                 throw new ProviderException("Failed to store self-signed certificate",
@@ -526,7 +530,7 @@ public abstract class AndroidKeyStoreKeyPairGeneratorSpi extends KeyPairGenerato
             return result;
         } finally {
             if (!success) {
-                Credentials.deleteAllTypesForAlias(mKeyStore, mEntryAlias);
+                Credentials.deleteAllTypesForAlias(mKeyStore, mEntryAlias, mEntryUid);
             }
         }
     }

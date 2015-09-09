@@ -1918,7 +1918,7 @@ public class AndroidKeyStoreTest extends AndroidTestCase {
         final String privateKeyAlias = Credentials.USER_PRIVATE_KEY + alias;
 
         KeyPair keyPair = AndroidKeyStoreProvider.loadAndroidKeyStoreKeyPairFromKeystore(
-                keyStore, privateKeyAlias);
+                keyStore, privateKeyAlias, KeyStore.UID_SELF);
 
         final X509V3CertificateGenerator certGen = new X509V3CertificateGenerator();
         certGen.setPublicKey(keyPair.getPublic());

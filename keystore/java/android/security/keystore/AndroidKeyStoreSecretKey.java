@@ -25,7 +25,7 @@ import javax.crypto.SecretKey;
  */
 public class AndroidKeyStoreSecretKey extends AndroidKeyStoreKey implements SecretKey {
 
-    public AndroidKeyStoreSecretKey(String alias, String algorithm) {
-        super(alias, algorithm);
+    public AndroidKeyStoreSecretKey(String alias, int uid, String algorithm) {
+        super(alias, uid, algorithm);
     }
 }

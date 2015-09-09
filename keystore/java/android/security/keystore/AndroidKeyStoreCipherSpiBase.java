@@ -249,7 +249,8 @@ abstract class AndroidKeyStoreCipherSpiBase extends CipherSpi implements KeyStor
                 purpose,
                 true, // permit aborting this operation if keystore runs out of resources
                 keymasterInputArgs,
-                additionalEntropy);
+                additionalEntropy,
+                mKey.getUid());
         if (opResult == null) {
             throw new KeyStoreConnectException();
         }

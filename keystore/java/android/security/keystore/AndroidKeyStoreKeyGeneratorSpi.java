@@ -297,11 +297,12 @@ public abstract class AndroidKeyStoreKeyGeneratorSpi extends KeyGeneratorSpi {
         KeyCharacteristics resultingKeyCharacteristics = new KeyCharacteristics();
         boolean success = false;
         try {
-            Credentials.deleteAllTypesForAlias(mKeyStore, spec.getKeystoreAlias());
+            Credentials.deleteAllTypesForAlias(mKeyStore, spec.getKeystoreAlias(), spec.getUid());
             int errorCode = mKeyStore.generateKey(
                     keyAliasInKeystore,
                     args,
                     additionalEntropy,
+                    spec.getUid(),
                     flags,
                     resultingKeyCharacteristics);
             if (errorCode != KeyStore.NO_ERROR) {
@@ -315,12 +316,14 @@ public abstract class AndroidKeyStoreKeyGeneratorSpi extends KeyGeneratorSpi {
             } catch (IllegalArgumentException e) {
                 throw new ProviderException("Failed to obtain JCA secret key algorithm name", e);
             }
-            SecretKey result = new AndroidKeyStoreSecretKey(keyAliasInKeystore, keyAlgorithmJCA);
+            SecretKey result = new AndroidKeyStoreSecretKey(
+                    keyAliasInKeystore, spec.getUid(), keyAlgorithmJCA);
             success = true;
             return result;
         } finally {
             if (!success) {
-                Credentials.deleteAllTypesForAlias(mKeyStore, spec.getKeystoreAlias());
+                Credentials.deleteAllTypesForAlias(
+                        mKeyStore, spec.getKeystoreAlias(), spec.getUid());
             }
         }
     }

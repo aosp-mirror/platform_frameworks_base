@@ -28,15 +28,15 @@ public class AndroidKeyStoreRSAPublicKey extends AndroidKeyStorePublicKey implem
     private final BigInteger mModulus;
     private final BigInteger mPublicExponent;
 
-    public AndroidKeyStoreRSAPublicKey(String alias, byte[] x509EncodedForm, BigInteger modulus,
+    public AndroidKeyStoreRSAPublicKey(String alias, int uid, byte[] x509EncodedForm, BigInteger modulus,
             BigInteger publicExponent) {
-        super(alias, KeyProperties.KEY_ALGORITHM_RSA, x509EncodedForm);
+        super(alias, uid, KeyProperties.KEY_ALGORITHM_RSA, x509EncodedForm);
         mModulus = modulus;
         mPublicExponent = publicExponent;
     }
 
-    public AndroidKeyStoreRSAPublicKey(String alias, RSAPublicKey info) {
-        this(alias, info.getEncoded(), info.getModulus(), info.getPublicExponent());
+    public AndroidKeyStoreRSAPublicKey(String alias, int uid, RSAPublicKey info) {
+        this(alias, uid, info.getEncoded(), info.getModulus(), info.getPublicExponent());
         if (!"X.509".equalsIgnoreCase(info.getFormat())) {
             throw new IllegalArgumentException(
                     "Unsupported key export format: " + info.getFormat());

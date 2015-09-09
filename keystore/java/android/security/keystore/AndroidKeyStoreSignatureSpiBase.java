@@ -204,8 +204,8 @@ abstract class AndroidKeyStoreSignatureSpiBase extends SignatureSpi
                 mSigning ? KeymasterDefs.KM_PURPOSE_SIGN : KeymasterDefs.KM_PURPOSE_VERIFY,
                 true, // permit aborting this operation if keystore runs out of resources
                 keymasterInputArgs,
-                null // no additional entropy for begin -- only finish might need some
-                );
+                null, // no additional entropy for begin -- only finish might need some
+                mKey.getUid());
         if (opResult == null) {
             throw new KeyStoreConnectException();
         }

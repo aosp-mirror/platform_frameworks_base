@@ -62,7 +62,8 @@ public class AndroidKeyStoreKeyFactorySpi extends KeyFactorySpi {
                         "Unsupported key type: " + key.getClass().getName()
                         + ". KeyInfo can be obtained only for Android Keystore private keys");
             }
-            String keyAliasInKeystore = ((AndroidKeyStorePrivateKey) key).getAlias();
+            AndroidKeyStorePrivateKey keystorePrivateKey = (AndroidKeyStorePrivateKey) key;
+            String keyAliasInKeystore = keystorePrivateKey.getAlias();
             String entryAlias;
             if (keyAliasInKeystore.startsWith(Credentials.USER_PRIVATE_KEY)) {
                 entryAlias = keyAliasInKeystore.substring(Credentials.USER_PRIVATE_KEY.length());
@@ -71,7 +72,7 @@ public class AndroidKeyStoreKeyFactorySpi extends KeyFactorySpi {
             }
             @SuppressWarnings("unchecked")
             T result = (T) AndroidKeyStoreSecretKeyFactorySpi.getKeyInfo(
-                    mKeyStore, entryAlias, keyAliasInKeystore);
+                    mKeyStore, entryAlias, keyAliasInKeystore, keystorePrivateKey.getUid());
             return result;
         } else if (X509EncodedKeySpec.class.equals(keySpecClass)) {
             if (!(key instanceof AndroidKeyStorePublicKey)) {
