@@ -15,7 +15,6 @@
  */
 package com.android.systemui.qs.customize;
 
-import android.app.AlertDialog;
 import android.content.ClipData;
 import android.content.Context;
 import android.util.AttributeSet;
@@ -25,6 +24,7 @@ import android.view.DragEvent;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
 import android.widget.Toolbar;
@@ -48,7 +48,7 @@ import java.util.ArrayList;
  * *someday* do fancy animations to get into/out of it.
  */
 public class QSCustomizer extends LinearLayout implements OnMenuItemClickListener, Callback,
-        OnDropListener {
+        OnDropListener, OnClickListener {
 
     private static final int MENU_SAVE = Menu.FIRST;
     private static final int MENU_RESET = Menu.FIRST + 1;
@@ -63,6 +63,7 @@ public class QSCustomizer extends LinearLayout implements OnMenuItemClickListene
     private CustomQSTileHost mHost;
     private DropButton mInfoButton;
     private DropButton mRemoveButton;
+    private FloatingActionButton mFab;
 
     public QSCustomizer(Context context, AttributeSet attrs) {
         super(new ContextThemeWrapper(context, android.R.style.Theme_Material), attrs);
@@ -108,6 +109,10 @@ public class QSCustomizer extends LinearLayout implements OnMenuItemClickListene
         mInfoButton.setOnDropListener(this);
         mRemoveButton = (DropButton) findViewById(R.id.remove_button);
         mRemoveButton.setOnDropListener(this);
+
+        mFab = (FloatingActionButton) findViewById(R.id.fab);
+        mFab.setImageResource(R.drawable.ic_add);
+        mFab.setOnClickListener(this);
     }
 
     public void show() {
@@ -183,6 +188,13 @@ public class QSCustomizer extends LinearLayout implements OnMenuItemClickListene
             dialog.setTitle(mQsPanel.getSpec(data));
             dialog.setPositiveButton(R.string.ok, null);
             dialog.show();
+        }
+    }
+
+    @Override
+    public void onClick(View v) {
+        if (mFab == v) {
+            // TODO: Show list of tiles.
         }
     }
 }

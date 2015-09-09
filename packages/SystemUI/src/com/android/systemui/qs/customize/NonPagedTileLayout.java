@@ -177,7 +177,7 @@ public class NonPagedTileLayout extends LinearLayout implements QSTileLayout, On
     public boolean onTouch(View v, MotionEvent event) {
         switch (event.getAction()) {
             case MotionEvent.ACTION_DOWN:
-                // Stash the current tiles, in case the drop is on info, that we we can restore
+                // Stash the current tiles, in case the drop is on info, that we can restore
                 // the previous state.
                 mPanel.getCustomHost().stashCurrentTiles();
                 mCurrentView = v;

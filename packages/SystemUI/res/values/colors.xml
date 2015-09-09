@@ -143,4 +143,7 @@
     <color name="volume_icon_color">#ffffffff</color>
     <color name="volume_settings_icon_color">#7fffffff</color>
     <color name="volume_slider_inactive">#FFB0BEC5</color><!-- blue grey 200 -->
+
+    <color name="fab_ripple">#1fffffff</color><!-- 12% white -->
+    <color name="fab_shape">#ff009688</color><!-- Teal 500 -->
 </resources>

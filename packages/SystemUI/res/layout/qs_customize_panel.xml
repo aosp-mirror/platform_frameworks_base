@@ -19,6 +19,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
+    android:paddingBottom="@dimen/navigation_bar_size"
     android:background="?android:attr/windowBackground">
 
     <FrameLayout
@@ -76,7 +77,8 @@
 
     <com.android.systemui.tuner.AutoScrollView
         android:layout_width="match_parent"
-        android:layout_height="fill_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
         android:paddingTop="8dp"
         android:paddingBottom="8dp"
         android:elevation="2dp">
@@ -88,5 +90,16 @@
             android:layout_height="wrap_content" />
 
     </com.android.systemui.tuner.AutoScrollView>
+
+    <com.android.systemui.qs.customize.FloatingActionButton
+        android:id="@+id/fab"
+        android:clickable="true"
+        android:layout_width="@dimen/fab_size"
+        android:layout_height="@dimen/fab_size"
+        android:layout_gravity="bottom|end"
+        android:layout_marginEnd="@dimen/fab_margin"
+        android:layout_marginBottom="@dimen/fab_margin"
+        android:elevation="@dimen/fab_elevation"
+        android:background="@drawable/fab_background" />
 
 </com.android.systemui.qs.customize.QSCustomizer>

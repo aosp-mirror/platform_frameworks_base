@@ -98,4 +98,6 @@
          In sw600dp we want the buttons centered so this fills the space,
          (screen_pinning_request_width - 3 * screen_pinning_request_button_width) / 2 -->
     <dimen name="screen_pinning_request_side_width">8dp</dimen>
+
+    <dimen name="fab_margin">24dp</dimen>
 </resources>
