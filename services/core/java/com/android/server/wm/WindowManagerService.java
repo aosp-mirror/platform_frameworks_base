@@ -1790,7 +1790,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 }
                 if (type == TYPE_APPLICATION_STARTING && atoken.firstWindowDrawn) {
                     // No need for this guy!
-                    if (localLOGV) Slog.v(
+                    if (DEBUG_STARTING_WINDOW || localLOGV) Slog.v(
                             TAG, "**** NO NEED TO START: " + attrs.getTitle());
                     return WindowManagerGlobal.ADD_STARTING_NOT_NEEDED;
                 }
