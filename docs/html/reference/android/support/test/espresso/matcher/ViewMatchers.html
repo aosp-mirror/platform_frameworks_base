@@ -126,7 +126,7 @@ type="text/css">
   var metaTags = [];
   var devsite = false;
 </script>
-<script src="../../../../../../assets/js/docs.js?v=5" type="text/javascript"></script>
+<script src="../../../../../../assets/js/docs.js?v=6" type="text/javascript"></script>
 
 
 
@@ -478,6 +478,8 @@ type="text/css">
   <a href="../../../../../../reference/android/support/test/espresso/web/webdriver/package-summary.html">android.support.test.espresso.web.webdriver</a></li>
     <li class="api apilevel-">
   <a href="../../../../../../reference/android/support/test/filters/package-summary.html">android.support.test.filters</a></li>
+    <li class="api apilevel-">
+  <a href="../../../../../../reference/android/support/test/jank/package-summary.html">android.support.test.jank</a></li>
     <li class="api apilevel-">
   <a href="../../../../../../reference/android/support/test/rule/package-summary.html">android.support.test.rule</a></li>
     <li class="api apilevel-">
@@ -846,6 +848,52 @@ Summary:
         <div class="jd-descrdiv">
           Returns a matcher that matches <code><a href="../../../../../../reference/android/view/View.html">View</a></code>s based on the presence of a descendant in its view
  hierarchy.
+
+
+
+        </div>
+
+  </td></tr>
+
+
+
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol"><nobr>
+
+
+
+            static
+
+            Matcher&lt;View&gt;</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="../../../../../../reference/android/support/test/espresso/matcher/ViewMatchers.html#hasErrorText(java.lang.String)">hasErrorText</a></span>(String expectedError)</nobr>
+
+        <div class="jd-descrdiv">
+          Returns a matcher that matches <code><a href="../../../../../../reference/android/widget/EditText.html">EditText</a></code> based on edit text error string value.
+
+
+
+        </div>
+
+  </td></tr>
+
+
+
+    <tr class=" api apilevel-" >
+        <td class="jd-typecol"><nobr>
+
+
+
+            static
+
+            Matcher&lt;View&gt;</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="../../../../../../reference/android/support/test/espresso/matcher/ViewMatchers.html#hasErrorText(org.hamcrest.Matcher<java.lang.String>)">hasErrorText</a></span>(Matcher&lt;String&gt; stringMatcher)</nobr>
+
+        <div class="jd-descrdiv">
+          Returns a matcher that matches <code><a href="../../../../../../reference/android/widget/EditText.html">EditText</a></code> based on edit text error string value.
 
 
 
@@ -1572,6 +1620,29 @@ Summary:
             Matcher&lt;View&gt;</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="../../../../../../reference/android/support/test/espresso/matcher/ViewMatchers.html#withInputType(int)">withInputType</a></span>(int inputType)</nobr>
+
+        <div class="jd-descrdiv">
+          Returns a matcher that matches <code><a href="../../../../../../reference/android/text/InputType.html">InputType</a></code>.
+
+
+
+        </div>
+
+  </td></tr>
+
+
+
+    <tr class=" api apilevel-" >
+        <td class="jd-typecol"><nobr>
+
+
+
+            static
+
+            Matcher&lt;View&gt;</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="../../../../../../reference/android/support/test/espresso/matcher/ViewMatchers.html#withParent(org.hamcrest.Matcher<android.view.View>)">withParent</a></span>(Matcher&lt;View&gt; parentMatcher)</nobr>
 
         <div class="jd-descrdiv">
@@ -1586,7 +1657,7 @@ Summary:
 
 
 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
 
 
@@ -1609,7 +1680,7 @@ Summary:
 
 
 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
 
 
@@ -1633,7 +1704,7 @@ Summary:
 
 
 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
 
 
@@ -1656,7 +1727,7 @@ Summary:
 
 
 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
 
 
@@ -1679,7 +1750,7 @@ Summary:
 
 
 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
 
 
@@ -1702,7 +1773,7 @@ Summary:
 
 
 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
 
 
@@ -1725,7 +1796,7 @@ Summary:
 
 
 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
 
 
@@ -1748,7 +1819,7 @@ Summary:
 
 
 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
 
 
@@ -1771,7 +1842,7 @@ Summary:
 
 
 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
 
 
@@ -2220,6 +2291,74 @@ From class
         </tr>
       </table>
   </div>
+
+    </div>
+</div>
+
+
+<A NAME="hasErrorText(java.lang.String)"></A>
+
+<div class="jd-details api apilevel-">
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public
+        static
+
+
+
+        Matcher&lt;View&gt;
+      </span>
+      <span class="sympad">hasErrorText</span>
+      <span class="normal">(String expectedError)</span>
+    </h4>
+      <div class="api-level">
+        <div></div>
+
+
+
+      </div>
+    <div class="jd-details-descr">
+
+
+
+
+  <div class="jd-tagdata jd-tagdescr"><p>Returns a matcher that matches <code><a href="../../../../../../reference/android/widget/EditText.html">EditText</a></code> based on edit text error string value.
+ <p>
+ Note: Sugar for hasErrorText(is("string")).
+</p></div>
+
+    </div>
+</div>
+
+
+<A NAME="hasErrorText(org.hamcrest.Matcher<java.lang.String>)"></A>
+
+<div class="jd-details api apilevel-">
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public
+        static
+
+
+
+        Matcher&lt;View&gt;
+      </span>
+      <span class="sympad">hasErrorText</span>
+      <span class="normal">(Matcher&lt;String&gt; stringMatcher)</span>
+    </h4>
+      <div class="api-level">
+        <div></div>
+
+
+
+      </div>
+    <div class="jd-details-descr">
+
+
+
+
+  <div class="jd-tagdata jd-tagdescr"><p>Returns a matcher that matches <code><a href="../../../../../../reference/android/widget/EditText.html">EditText</a></code> based on edit text error string value.
+</p></div>
 
     </div>
 </div>
@@ -3397,6 +3536,39 @@ From class
 </div>
 
 
+<A NAME="withInputType(int)"></A>
+
+<div class="jd-details api apilevel-">
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public
+        static
+
+
+
+        Matcher&lt;View&gt;
+      </span>
+      <span class="sympad">withInputType</span>
+      <span class="normal">(int inputType)</span>
+    </h4>
+      <div class="api-level">
+        <div></div>
+
+
+
+      </div>
+    <div class="jd-details-descr">
+
+
+
+
+  <div class="jd-tagdata jd-tagdescr"><p>Returns a matcher that matches <code><a href="../../../../../../reference/android/text/InputType.html">InputType</a></code>.
+</p></div>
+
+    </div>
+</div>
+
+
 <A NAME="withParent(org.hamcrest.Matcher<android.view.View>)"></A>
 
 <div class="jd-details api apilevel-">
@@ -3884,6 +4056,7 @@ From class
           <option value="es">Español</option>
           <option value="ja">日本語</option>
           <option value="ko">한국어</option>
+          <option value="pt-br">Português Brasileiro</option>
           <option value="ru">Русский</option>
           <option value="zh-cn">中文（简体)</option>
           <option value="zh-tw">中文（繁體)</option>

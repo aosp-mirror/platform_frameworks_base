@@ -126,7 +126,7 @@ type="text/css">
   var metaTags = [];
   var devsite = false;
 </script>
-<script src="../../../../../assets/js/docs.js?v=5" type="text/javascript"></script>
+<script src="../../../../../assets/js/docs.js?v=6" type="text/javascript"></script>
 
 
 
@@ -479,6 +479,8 @@ type="text/css">
     <li class="api apilevel-">
   <a href="../../../../../reference/android/support/test/filters/package-summary.html">android.support.test.filters</a></li>
     <li class="api apilevel-">
+  <a href="../../../../../reference/android/support/test/jank/package-summary.html">android.support.test.jank</a></li>
+    <li class="api apilevel-">
   <a href="../../../../../reference/android/support/test/rule/package-summary.html">android.support.test.rule</a></li>
     <li class="selected api apilevel-">
   <a href="../../../../../reference/android/support/test/runner/package-summary.html">android.support.test.runner</a></li>
@@ -751,6 +753,14 @@ Summary:
  -e class com.android.foo.FooTest,com.android.foo.TooTest
  com.android.foo/android.support.test.runner.AndroidJUnitRunner
  <p/>
+ <b>Running all tests except those in a particular class:</b> adb shell am instrument -w
+ -e notClass com.android.foo.FooTest
+ com.android.foo/android.support.test.runner.AndroidJUnitRunner
+ <p/>
+ <b>Running all but a single test:</b> adb shell am instrument -w
+ -e notClass com.android.foo.FooTest#testFoo
+ com.android.foo/android.support.test.runner.AndroidJUnitRunner
+ <p/>
  <b>Running all tests listed in a file:</b> adb shell am instrument -w
  -e testFile /sdcard/tmp/testFile.txt com.android.foo/com.android.test.runner.AndroidJUnitRunner
  The file should contain a list of line separated test classes and optionally methods (expected
@@ -758,6 +768,10 @@ Summary:
  <p/>
  <b>Running all tests in a java package:</b> adb shell am instrument -w
  -e package com.android.foo.bar
+ com.android.foo/android.support.test.runner.AndroidJUnitRunner
+ <p/>
+ <b>Running all tests except a particular package:</b> adb shell am instrument -w
+ -e notPackage com.android.foo.bar
  com.android.foo/android.support.test.runner.AndroidJUnitRunner
  <b>To debug your tests, set a break point in your code and pass:</b>
  -e debug true
@@ -802,11 +816,11 @@ Summary:
  test execution. Useful for quickly obtaining info on the tests to be executed by an
  instrumentation command.
  <p/>
- <b>To generate EMMA code coverage:</b>
+ <b>To generate code coverage files (*.ec) that can be used by EMMA or JaCoCo:</b>
  -e coverage true
- Note: this requires an emma instrumented build. By default, the code coverage results file
- will be saved in a /data/<app>/coverage.ec file, unless overridden by coverageFile flag (see
- below)
+ Note: For this to work, your classes have to be instrumented offline (i.e. at build time) by
+ EMMA/JaCoCo. By default, the code coverage results file will be saved in a
+ /data/data/<app>/files/coverage.ec file, unless overridden by coverageFile flag (see below)
  <p/>
  <b> To specify EMMA code coverage results file path:</b>
  -e coverageFile /sdcard/myFile.ec
@@ -3039,6 +3053,7 @@ From class
           <option value="es">Español</option>
           <option value="ja">日本語</option>
           <option value="ko">한국어</option>
+          <option value="pt-br">Português Brasileiro</option>
           <option value="ru">Русский</option>
           <option value="zh-cn">中文（简体)</option>
           <option value="zh-tw">中文（繁體)</option>

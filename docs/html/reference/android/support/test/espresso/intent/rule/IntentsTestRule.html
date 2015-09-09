@@ -126,7 +126,7 @@ type="text/css">
   var metaTags = [];
   var devsite = false;
 </script>
-<script src="../../../../../../../assets/js/docs.js?v=5" type="text/javascript"></script>
+<script src="../../../../../../../assets/js/docs.js?v=6" type="text/javascript"></script>
 
 
 
@@ -479,6 +479,8 @@ type="text/css">
     <li class="api apilevel-">
   <a href="../../../../../../../reference/android/support/test/filters/package-summary.html">android.support.test.filters</a></li>
     <li class="api apilevel-">
+  <a href="../../../../../../../reference/android/support/test/jank/package-summary.html">android.support.test.jank</a></li>
+    <li class="api apilevel-">
   <a href="../../../../../../../reference/android/support/test/rule/package-summary.html">android.support.test.rule</a></li>
     <li class="api apilevel-">
   <a href="../../../../../../../reference/android/support/test/runner/package-summary.html">android.support.test.runner</a></li>
@@ -725,8 +727,8 @@ Summary:
  <p>
  Espresso-Intents APIs can be used in two ways:
  <ul>
- <li>Intent Verification, using the <code><a href="../../../../../../../reference/android/support/test/espresso/intent/Intents.html#intended(org.hamcrest.Matcher<android.content.Intent>)">intended(Matcher)</a></code> API</li>
- <li>Intent Stubbing, using the <code><a href="../../../../../../../reference/android/support/test/espresso/intent/Intents.html#intending(org.hamcrest.Matcher<android.content.Intent>)">intending(Matcher)</a></code> API</li>
+ <li>Intent Verification, using the <code><a href="../../../../../../../reference/android/support/test/espresso/intent/Intents.html#intended(org.hamcrest.Matcher<android.content.Intent>)">intended(Matcher)</a></code> API<li/>
+ <li>Intent Stubbing, using the <code><a href="../../../../../../../reference/android/support/test/espresso/intent/Intents.html#intending(org.hamcrest.Matcher<android.content.Intent>)">intending(Matcher)</a></code> API<li/>
  </ul></p>
 
 
@@ -810,6 +812,22 @@ Summary:
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="../../../../../../../reference/android/support/test/espresso/intent/rule/IntentsTestRule.html#IntentsTestRule(java.lang.Class<T>, boolean)">IntentsTestRule</a></span>(Class&lt;T&gt; activityClass, boolean initialTouchMode)</nobr>
+
+  </td></tr>
+
+
+
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol"><nobr>
+
+
+
+
+
+            </nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="../../../../../../../reference/android/support/test/espresso/intent/rule/IntentsTestRule.html#IntentsTestRule(java.lang.Class<T>, boolean, boolean)">IntentsTestRule</a></span>(Class&lt;T&gt; activityClass, boolean initialTouchMode, boolean launchActivity)</nobr>
 
   </td></tr>
 
@@ -1491,6 +1509,38 @@ From interface
 </div>
 
 
+<A NAME="IntentsTestRule(java.lang.Class<T>, boolean, boolean)"></A>
+
+<div class="jd-details api apilevel-">
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public
+
+
+
+
+
+      </span>
+      <span class="sympad">IntentsTestRule</span>
+      <span class="normal">(Class&lt;T&gt; activityClass, boolean initialTouchMode, boolean launchActivity)</span>
+    </h4>
+      <div class="api-level">
+        <div></div>
+
+
+
+      </div>
+    <div class="jd-details-descr">
+
+
+
+
+  <div class="jd-tagdata jd-tagdescr"><p></p></div>
+
+    </div>
+</div>
+
+
 
 
 
@@ -1646,6 +1696,7 @@ From interface
           <option value="es">Español</option>
           <option value="ja">日本語</option>
           <option value="ko">한국어</option>
+          <option value="pt-br">Português Brasileiro</option>
           <option value="ru">Русский</option>
           <option value="zh-cn">中文（简体)</option>
           <option value="zh-tw">中文（繁體)</option>

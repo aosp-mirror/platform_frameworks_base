@@ -126,7 +126,7 @@ type="text/css">
   var metaTags = [];
   var devsite = false;
 </script>
-<script src="../../../../../assets/js/docs.js?v=5" type="text/javascript"></script>
+<script src="../../../../../assets/js/docs.js?v=6" type="text/javascript"></script>
 
 
 
@@ -478,6 +478,8 @@ type="text/css">
   <a href="../../../../../reference/android/support/test/espresso/web/webdriver/package-summary.html">android.support.test.espresso.web.webdriver</a></li>
     <li class="api apilevel-">
   <a href="../../../../../reference/android/support/test/filters/package-summary.html">android.support.test.filters</a></li>
+    <li class="api apilevel-">
+  <a href="../../../../../reference/android/support/test/jank/package-summary.html">android.support.test.jank</a></li>
     <li class="selected api apilevel-">
   <a href="../../../../../reference/android/support/test/rule/package-summary.html">android.support.test.rule</a></li>
     <li class="api apilevel-">
@@ -683,12 +685,10 @@ Summary:
  disabled when debugging.
  <p>
  The most illustrative use case is for tests that make use of the
- <a href="http://junit.org/apidocs/org/junit/rules/Timeout.html"><code>Timeout</code></a>
- rule, when ran in debug mode the test may terminate on
+ <code><a href="../../../../../reference/org/junit/rules/Timeout.html">Timeout</a></code> rule, when ran in debug mode the test may terminate on
  timeout abruptly during debugging. Developers may disable the timeout, or
  increase the timeout by making a code change on tests that need debugging and
- remember revert the change afterwards or rules such as
- <a href="http://junit.org/apidocs/org/junit/rules/Timeout.html"><code>Timeout</code></a> that
+ remember revert the change afterwards or rules such as <code><a href="../../../../../reference/org/junit/rules/Timeout.html">Timeout</a></code> that
  may be disabled during debugging may be wrapped in a <code>DisableOnDebug</code>.
  <p>
  The important benefit of this feature is that you can disable such rules
@@ -1335,6 +1335,7 @@ From interface
           <option value="es">Español</option>
           <option value="ja">日本語</option>
           <option value="ko">한국어</option>
+          <option value="pt-br">Português Brasileiro</option>
           <option value="ru">Русский</option>
           <option value="zh-cn">中文（简体)</option>
           <option value="zh-tw">中文（繁體)</option>

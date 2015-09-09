@@ -126,7 +126,7 @@ type="text/css">
   var metaTags = [];
   var devsite = false;
 </script>
-<script src="../../../../../../assets/js/docs.js?v=5" type="text/javascript"></script>
+<script src="../../../../../../assets/js/docs.js?v=6" type="text/javascript"></script>
 
 
 
@@ -479,6 +479,8 @@ type="text/css">
     <li class="api apilevel-">
   <a href="../../../../../../reference/android/support/test/filters/package-summary.html">android.support.test.filters</a></li>
     <li class="api apilevel-">
+  <a href="../../../../../../reference/android/support/test/jank/package-summary.html">android.support.test.jank</a></li>
+    <li class="api apilevel-">
   <a href="../../../../../../reference/android/support/test/rule/package-summary.html">android.support.test.rule</a></li>
     <li class="api apilevel-">
   <a href="../../../../../../reference/android/support/test/runner/package-summary.html">android.support.test.runner</a></li>
@@ -744,13 +746,63 @@ Summary:
 
             static
 
+            <a href="../../../../../../reference/android/support/test/espresso/ViewAction.html">ViewAction</a></nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="../../../../../../reference/android/support/test/espresso/contrib/DrawerActions.html#close(int)">close</a></span>(int gravity)</nobr>
+
+        <div class="jd-descrdiv">
+          Creates an action which closes the <code><a href="../../../../../../reference/android/support/v4/widget/DrawerLayout.html">DrawerLayout</a></code> with the gravity.
+
+
+
+        </div>
+
+  </td></tr>
+
+
+
+    <tr class=" api apilevel-" >
+        <td class="jd-typecol"><nobr>
+
+
+
+            static
+
+            <a href="../../../../../../reference/android/support/test/espresso/ViewAction.html">ViewAction</a></nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="../../../../../../reference/android/support/test/espresso/contrib/DrawerActions.html#close()">close</a></span>()</nobr>
+
+        <div class="jd-descrdiv">
+          Creates an action which closes the <code><a href="../../../../../../reference/android/support/v4/widget/DrawerLayout.html">DrawerLayout</a></code> with gravity START.
+
+
+
+        </div>
+
+  </td></tr>
+
+
+
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol"><nobr>
+
+
+
+            static
+
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="../../../../../../reference/android/support/test/espresso/contrib/DrawerActions.html#closeDrawer(int)">closeDrawer</a></span>(int drawerLayoutId)</nobr>
 
         <div class="jd-descrdiv">
-          Closes the <code><a href="../../../../../../reference/android/support/v4/widget/DrawerLayout.html">DrawerLayout</a></code> with the given id and gravity START.
+          <em>
+      This method is deprecated.
+    Use <code><a href="../../../../../../reference/android/support/test/espresso/contrib/DrawerActions.html#close()">close()</a></code> with <code>perform</code> after matching a view. This method will
+ be removed in the next release.
+</em>
 
 
 
@@ -773,7 +825,57 @@ Summary:
         <span class="sympad"><a href="../../../../../../reference/android/support/test/espresso/contrib/DrawerActions.html#closeDrawer(int, int)">closeDrawer</a></span>(int drawerLayoutId, int gravity)</nobr>
 
         <div class="jd-descrdiv">
-          Closes the <code><a href="../../../../../../reference/android/support/v4/widget/DrawerLayout.html">DrawerLayout</a></code> with the given id and gravity.
+          <em>
+      This method is deprecated.
+    Use <code><a href="../../../../../../reference/android/support/test/espresso/contrib/DrawerActions.html#open(int)">open(int)</a></code> with <code>perform</code> after matching a view. This method will
+ be removed in the next release.
+</em>
+
+
+
+        </div>
+
+  </td></tr>
+
+
+
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol"><nobr>
+
+
+
+            static
+
+            <a href="../../../../../../reference/android/support/test/espresso/ViewAction.html">ViewAction</a></nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="../../../../../../reference/android/support/test/espresso/contrib/DrawerActions.html#open(int)">open</a></span>(int gravity)</nobr>
+
+        <div class="jd-descrdiv">
+          Creates an action which opens the <code><a href="../../../../../../reference/android/support/v4/widget/DrawerLayout.html">DrawerLayout</a></code> drawer with the gravity.
+
+
+
+        </div>
+
+  </td></tr>
+
+
+
+    <tr class=" api apilevel-" >
+        <td class="jd-typecol"><nobr>
+
+
+
+            static
+
+            <a href="../../../../../../reference/android/support/test/espresso/ViewAction.html">ViewAction</a></nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="../../../../../../reference/android/support/test/espresso/contrib/DrawerActions.html#open()">open</a></span>()</nobr>
+
+        <div class="jd-descrdiv">
+          Creates an action which opens the <code><a href="../../../../../../reference/android/support/v4/widget/DrawerLayout.html">DrawerLayout</a></code> drawer with gravity START.
 
 
 
@@ -796,7 +898,11 @@ Summary:
         <span class="sympad"><a href="../../../../../../reference/android/support/test/espresso/contrib/DrawerActions.html#openDrawer(int, int)">openDrawer</a></span>(int drawerLayoutId, int gravity)</nobr>
 
         <div class="jd-descrdiv">
-          Opens the <code><a href="../../../../../../reference/android/support/v4/widget/DrawerLayout.html">DrawerLayout</a></code> with the given id and gravity.
+          <em>
+      This method is deprecated.
+    Use <code><a href="../../../../../../reference/android/support/test/espresso/contrib/DrawerActions.html#open(int)">open(int)</a></code> with <code>perform</code> after matching a view. This method will
+ be removed in the next release.
+</em>
 
 
 
@@ -819,7 +925,11 @@ Summary:
         <span class="sympad"><a href="../../../../../../reference/android/support/test/espresso/contrib/DrawerActions.html#openDrawer(int)">openDrawer</a></span>(int drawerLayoutId)</nobr>
 
         <div class="jd-descrdiv">
-          Opens the <code><a href="../../../../../../reference/android/support/v4/widget/DrawerLayout.html">DrawerLayout</a></code> with the given id and gravity START.
+          <em>
+      This method is deprecated.
+    Use <code><a href="../../../../../../reference/android/support/test/espresso/contrib/DrawerActions.html#open()">open()</a></code> with <code>perform</code> after matching a view. This method will
+ be removed in the next release.
+</em>
 
 
 
@@ -1086,6 +1196,74 @@ From class
 
 
 
+<A NAME="close(int)"></A>
+
+<div class="jd-details api apilevel-">
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public
+        static
+
+
+
+        <a href="../../../../../../reference/android/support/test/espresso/ViewAction.html">ViewAction</a>
+      </span>
+      <span class="sympad">close</span>
+      <span class="normal">(int gravity)</span>
+    </h4>
+      <div class="api-level">
+        <div></div>
+
+
+
+      </div>
+    <div class="jd-details-descr">
+
+
+
+
+  <div class="jd-tagdata jd-tagdescr"><p>Creates an action which closes the <code><a href="../../../../../../reference/android/support/v4/widget/DrawerLayout.html">DrawerLayout</a></code> with the gravity. This method
+ blocks until the drawer is fully closed. No operation if the drawer is already closed.
+</p></div>
+
+    </div>
+</div>
+
+
+<A NAME="close()"></A>
+
+<div class="jd-details api apilevel-">
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public
+        static
+
+
+
+        <a href="../../../../../../reference/android/support/test/espresso/ViewAction.html">ViewAction</a>
+      </span>
+      <span class="sympad">close</span>
+      <span class="normal">()</span>
+    </h4>
+      <div class="api-level">
+        <div></div>
+
+
+
+      </div>
+    <div class="jd-details-descr">
+
+
+
+
+  <div class="jd-tagdata jd-tagdescr"><p>Creates an action which closes the <code><a href="../../../../../../reference/android/support/v4/widget/DrawerLayout.html">DrawerLayout</a></code> with gravity START. This method
+ blocks until the drawer is fully closed. No operation if the drawer is already closed.
+</p></div>
+
+    </div>
+</div>
+
+
 <A NAME="closeDrawer(int)"></A>
 
 <div class="jd-details api apilevel-">
@@ -1111,11 +1289,14 @@ From class
 
 
 
+      <p>
+  <p class="caution"><strong>
+      This method is deprecated.</strong><br/>
+    Use <code><a href="../../../../../../reference/android/support/test/espresso/contrib/DrawerActions.html#close()">close()</a></code> with <code>perform</code> after matching a view. This method will
+ be removed in the next release.
 
-  <div class="jd-tagdata jd-tagdescr"><p>Closes the <code><a href="../../../../../../reference/android/support/v4/widget/DrawerLayout.html">DrawerLayout</a></code> with the given id and gravity START. This method blocks until
- the drawer is fully closed. This method will throw an exception if the drawer is already
- closed.
-</p></div>
+  </p>
+  <div class="jd-tagdata jd-tagdescr"><p></p></div>
 
     </div>
 </div>
@@ -1146,9 +1327,81 @@ From class
 
 
 
+      <p>
+  <p class="caution"><strong>
+      This method is deprecated.</strong><br/>
+    Use <code><a href="../../../../../../reference/android/support/test/espresso/contrib/DrawerActions.html#open(int)">open(int)</a></code> with <code>perform</code> after matching a view. This method will
+ be removed in the next release.
 
-  <div class="jd-tagdata jd-tagdescr"><p>Closes the <code><a href="../../../../../../reference/android/support/v4/widget/DrawerLayout.html">DrawerLayout</a></code> with the given id and gravity. This method blocks until the
- drawer is fully closed. This method will throw an exception if the drawer is already closed.
+  </p>
+  <div class="jd-tagdata jd-tagdescr"><p></p></div>
+
+    </div>
+</div>
+
+
+<A NAME="open(int)"></A>
+
+<div class="jd-details api apilevel-">
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public
+        static
+
+
+
+        <a href="../../../../../../reference/android/support/test/espresso/ViewAction.html">ViewAction</a>
+      </span>
+      <span class="sympad">open</span>
+      <span class="normal">(int gravity)</span>
+    </h4>
+      <div class="api-level">
+        <div></div>
+
+
+
+      </div>
+    <div class="jd-details-descr">
+
+
+
+
+  <div class="jd-tagdata jd-tagdescr"><p>Creates an action which opens the <code><a href="../../../../../../reference/android/support/v4/widget/DrawerLayout.html">DrawerLayout</a></code> drawer with the gravity. This method
+ blocks until the drawer is fully open. No operation if the drawer is already open.
+</p></div>
+
+    </div>
+</div>
+
+
+<A NAME="open()"></A>
+
+<div class="jd-details api apilevel-">
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public
+        static
+
+
+
+        <a href="../../../../../../reference/android/support/test/espresso/ViewAction.html">ViewAction</a>
+      </span>
+      <span class="sympad">open</span>
+      <span class="normal">()</span>
+    </h4>
+      <div class="api-level">
+        <div></div>
+
+
+
+      </div>
+    <div class="jd-details-descr">
+
+
+
+
+  <div class="jd-tagdata jd-tagdescr"><p>Creates an action which opens the <code><a href="../../../../../../reference/android/support/v4/widget/DrawerLayout.html">DrawerLayout</a></code> drawer with gravity START. This method
+ blocks until the drawer is fully open. No operation if the drawer is already open.
 </p></div>
 
     </div>
@@ -1180,10 +1433,14 @@ From class
 
 
 
+      <p>
+  <p class="caution"><strong>
+      This method is deprecated.</strong><br/>
+    Use <code><a href="../../../../../../reference/android/support/test/espresso/contrib/DrawerActions.html#open(int)">open(int)</a></code> with <code>perform</code> after matching a view. This method will
+ be removed in the next release.
 
-  <div class="jd-tagdata jd-tagdescr"><p>Opens the <code><a href="../../../../../../reference/android/support/v4/widget/DrawerLayout.html">DrawerLayout</a></code> with the given id and gravity. This method blocks until the
- drawer is fully open. No operation if the drawer is already open.
-</p></div>
+  </p>
+  <div class="jd-tagdata jd-tagdescr"><p></p></div>
 
     </div>
 </div>
@@ -1214,10 +1471,14 @@ From class
 
 
 
+      <p>
+  <p class="caution"><strong>
+      This method is deprecated.</strong><br/>
+    Use <code><a href="../../../../../../reference/android/support/test/espresso/contrib/DrawerActions.html#open()">open()</a></code> with <code>perform</code> after matching a view. This method will
+ be removed in the next release.
 
-  <div class="jd-tagdata jd-tagdescr"><p>Opens the <code><a href="../../../../../../reference/android/support/v4/widget/DrawerLayout.html">DrawerLayout</a></code> with the given id and gravity START. This method blocks until
- the drawer is fully open. No operation if the drawer is already open.
-</p></div>
+  </p>
+  <div class="jd-tagdata jd-tagdescr"><p></p></div>
 
     </div>
 </div>
@@ -1286,6 +1547,7 @@ From class
           <option value="es">Español</option>
           <option value="ja">日本語</option>
           <option value="ko">한국어</option>
+          <option value="pt-br">Português Brasileiro</option>
           <option value="ru">Русский</option>
           <option value="zh-cn">中文（简体)</option>
           <option value="zh-tw">中文（繁體)</option>

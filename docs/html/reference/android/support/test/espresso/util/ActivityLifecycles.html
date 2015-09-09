@@ -126,7 +126,7 @@ type="text/css">
   var metaTags = [];
   var devsite = false;
 </script>
-<script src="../../../../../../assets/js/docs.js?v=5" type="text/javascript"></script>
+<script src="../../../../../../assets/js/docs.js?v=6" type="text/javascript"></script>
 
 
 
@@ -479,6 +479,8 @@ type="text/css">
     <li class="api apilevel-">
   <a href="../../../../../../reference/android/support/test/filters/package-summary.html">android.support.test.filters</a></li>
     <li class="api apilevel-">
+  <a href="../../../../../../reference/android/support/test/jank/package-summary.html">android.support.test.jank</a></li>
+    <li class="api apilevel-">
   <a href="../../../../../../reference/android/support/test/rule/package-summary.html">android.support.test.rule</a></li>
     <li class="api apilevel-">
   <a href="../../../../../../reference/android/support/test/runner/package-summary.html">android.support.test.runner</a></li>
@@ -749,6 +751,30 @@ Summary:
 
 
     <tr class=" api apilevel-" >
+        <td class="jd-typecol"><nobr>
+
+
+
+            static
+
+            boolean</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="../../../../../../reference/android/support/test/espresso/util/ActivityLifecycles.html#hasTransitioningActivities(android.support.test.runner.lifecycle.ActivityLifecycleMonitor)">hasTransitioningActivities</a></span>(<a href="../../../../../../reference/android/support/test/runner/lifecycle/ActivityLifecycleMonitor.html">ActivityLifecycleMonitor</a> monitor)</nobr>
+
+        <div class="jd-descrdiv">
+          Indicates whether or not an Activity, not in the foreground, exists in our app within the
+ "Visible Lifetime" state.
+
+
+
+        </div>
+
+  </td></tr>
+
+
+
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
 
 
@@ -1080,6 +1106,64 @@ From class
 </div>
 
 
+<A NAME="hasTransitioningActivities(android.support.test.runner.lifecycle.ActivityLifecycleMonitor)"></A>
+
+<div class="jd-details api apilevel-">
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public
+        static
+
+
+
+        boolean
+      </span>
+      <span class="sympad">hasTransitioningActivities</span>
+      <span class="normal">(<a href="../../../../../../reference/android/support/test/runner/lifecycle/ActivityLifecycleMonitor.html">ActivityLifecycleMonitor</a> monitor)</span>
+    </h4>
+      <div class="api-level">
+        <div></div>
+
+
+
+      </div>
+    <div class="jd-details-descr">
+
+
+
+
+  <div class="jd-tagdata jd-tagdescr"><p>Indicates whether or not an Activity, not in the foreground, exists in our app within the
+ "Visible Lifetime" state.
+
+ <p>The "Visible Lifetime" is defined as an activity where the onStart() method has been called
+ but where the onStop() method has not been called.
+
+ <p>During this time, the Activity may be visible to the user, and it may be receiving input
+ from the user. This time is a superset of the "Foreground lifetime" of the activity.
+
+ <p>It may be the case that an application has activities in the "visible lifetime" but none in
+ the "Foreground lifetime." It may be the case that without user input an activity will shortly
+ transition into the "Foreground lifetime" in this state, however it also may not transition
+ without further user interaction.</p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Parameters</h5>
+      <table class="jd-tagtable">
+        <tr>
+          <th>monitor</td>
+          <td>the ActivityLifecycleMonitor to use</td>
+        </tr>
+      </table>
+  </div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Returns</h5>
+      <ul class="nolist"><li>true if any activity exists with a transitioning stage.
+</li></ul>
+  </div>
+
+    </div>
+</div>
+
+
 <A NAME="hasVisibleActivities(android.support.test.runner.lifecycle.ActivityLifecycleMonitor)"></A>
 
 <div class="jd-details api apilevel-">
@@ -1108,11 +1192,11 @@ From class
 
   <div class="jd-tagdata jd-tagdescr"><p>Indicates whether or not an Activity exists in our app within the "Visible Lifetime" state.
 
- <p>The "Visible Lifetime" is defined as an activity who's onStart() method has been called but
- who's onStop() method has not been called.
+ <p>The "Visible Lifetime" is defined as an activity where the onStart() method has been called
+ but where the onStop() method has not been called.
 
  <p>During this time, the Activity may be visible to the user, and it may be receiving input
- from the user. This time is a superset of the "Foreground lifetime' of the activity.
+ from the user. This time is a superset of the "Foreground lifetime" of the activity.
 
  <p>It may be the case that an application has activities in the "visible lifetime" but none in
  the "Foreground lifetime." It may be the case that without user input an activity will shortly
@@ -1200,6 +1284,7 @@ From class
           <option value="es">Español</option>
           <option value="ja">日本語</option>
           <option value="ko">한국어</option>
+          <option value="pt-br">Português Brasileiro</option>
           <option value="ru">Русский</option>
           <option value="zh-cn">中文（简体)</option>
           <option value="zh-tw">中文（繁體)</option>
