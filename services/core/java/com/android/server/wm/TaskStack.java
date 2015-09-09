@@ -93,6 +93,11 @@ public class TaskStack implements DimLayer.DimLayerUser {
         }
     }
 
+    boolean allowTaskResize() {
+        return mStackId == FREEFORM_WORKSPACE_STACK_ID
+                || mStackId == DOCKED_STACK_ID;
+    }
+
     /**
      * Set the bounds of the stack and its containing tasks.
      * @param stackBounds New stack bounds. Passing in null sets the bounds to fullscreen.

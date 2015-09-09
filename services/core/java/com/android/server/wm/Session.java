@@ -347,6 +347,13 @@ final class Session extends IWindowSession.Stub
         return true;    // success!
     }
 
+    public boolean startMovingTask(IWindow window, float startX, float startY) {
+        if (WindowManagerService.DEBUG_TASK_POSITIONING) Slog.d(
+                WindowManagerService.TAG, "startMovingTask: {" + startX + "," + startY + "}");
+
+        return mService.startMovingTask(window, startX, startY);
+    }
+
     public void reportDropResult(IWindow window, boolean consumed) {
         IBinder token = window.asBinder();
         if (WindowManagerService.DEBUG_DRAG) {

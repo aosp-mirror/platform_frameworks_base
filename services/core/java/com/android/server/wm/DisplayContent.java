@@ -21,8 +21,10 @@ import static android.app.ActivityManager.HOME_STACK_ID;
 import static com.android.server.wm.WindowManagerService.DEBUG_VISIBILITY;
 import static com.android.server.wm.WindowManagerService.TAG;
 
+import android.content.res.Configuration;
 import android.graphics.Rect;
 import android.graphics.Region;
+import android.util.DisplayMetrics;
 import android.util.Slog;
 import android.view.Display;
 import android.view.DisplayInfo;
@@ -240,17 +242,85 @@ class DisplayContent {
         return -1;
     }
 
+    /**
+     * Find the id of the task whose outside touch area (for resizing) (x, y)
+     * falls within. Returns -1 if the touch doesn't fall into a resizing area.
+     */
+    int taskIdForControlPoint(int x, int y) {
+        final int delta = calculatePixelFromDp(WindowState.RESIZE_HANDLE_WIDTH_IN_DP);
+        for (int stackNdx = mStacks.size() - 1; stackNdx >= 0; --stackNdx) {
+            TaskStack stack = mStacks.get(stackNdx);
+            if (!stack.allowTaskResize()) {
+                break;
+            }
+            final ArrayList<Task> tasks = stack.getTasks();
+            for (int taskNdx = tasks.size() - 1; taskNdx >= 0; --taskNdx) {
+                final Task task = tasks.get(taskNdx);
+                if (task.isFullscreen()) {
+                    return -1;
+                }
+                task.getBounds(mTmpRect);
+                mTmpRect.inset(-delta, -delta);
+                if (mTmpRect.contains(x, y)) {
+                    mTmpRect.inset(delta, delta);
+                    if (!mTmpRect.contains(x, y)) {
+                        return task.mTaskId;
+                    }
+                    // User touched inside the task. No need to look further,
+                    // focus transfer will be handled in ACTION_UP.
+                    return -1;
+                }
+            }
+        }
+        return -1;
+    }
+
+    private int calculatePixelFromDp(int dp) {
+        final Configuration serviceConfig = mService.mCurConfiguration;
+        // TODO(multidisplay): Update Dp to that of display stack is on.
+        final float density = serviceConfig.densityDpi * DisplayMetrics.DENSITY_DEFAULT_SCALE;
+        return (int)(dp * density);
+    }
+
     void setTouchExcludeRegion(Task focusedTask) {
         mTouchExcludeRegion.set(mBaseDisplayRect);
         WindowList windows = getWindowList();
+        final int delta = calculatePixelFromDp(WindowState.RESIZE_HANDLE_WIDTH_IN_DP);
         for (int i = windows.size() - 1; i >= 0; --i) {
             final WindowState win = windows.get(i);
-            final Task task = win.getTask();
-            if (win.isVisibleLw() && task != null && task != focusedTask) {
-                mTmpRect.set(win.mVisibleFrame);
-                // If no intersection, we need mTmpRect to be unmodified.
-                mTmpRect.intersect(win.mVisibleInsets);
-                mTouchExcludeRegion.op(mTmpRect, Region.Op.DIFFERENCE);
+            final Task task = win.mAppToken != null ? win.getTask() : null;
+            if (win.isVisibleLw() && task != null) {
+                /**
+                 * Exclusion region is the region that TapDetector doesn't care about.
+                 * Here we want to remove all non-focused tasks from the exclusion region.
+                 * We also remove the outside touch area for resizing for all freeform
+                 * tasks (including the focused).
+                 *
+                 * (For freeform focused task, the below logic will first remove the enlarged
+                 * area, then add back the inner area.)
+                 */
+                final boolean isFreeformed = win.inFreeformWorkspace();
+                if (task != focusedTask || isFreeformed) {
+                    mTmpRect.set(win.mVisibleFrame);
+                    mTmpRect.intersect(win.mVisibleInsets);
+                    /**
+                     * If the task is freeformed, enlarge the area to account for outside
+                     * touch area for resize.
+                     */
+                    if (isFreeformed) {
+                        mTmpRect.inset(-delta, -delta);
+                    }
+                    mTouchExcludeRegion.op(mTmpRect, Region.Op.DIFFERENCE);
+                }
+                /**
+                 * If we removed the focused task above, add it back and only leave its
+                 * outside touch area in the exclusion. TapDectector is not interested in
+                 * any touch inside the focused task itself.
+                 */
+                if (task == focusedTask && isFreeformed) {
+                    mTmpRect.inset(delta, delta);
+                    mTouchExcludeRegion.op(mTmpRect, Region.Op.UNION);
+                }
             }
         }
         if (mTapDetector != null) {

@@ -147,7 +147,6 @@ public interface IActivityManager extends IInterface {
     public boolean isInHomeStack(int taskId) throws RemoteException;
     public void setFocusedStack(int stackId) throws RemoteException;
     public int getFocusedStackId() throws RemoteException;
-    public void activateActivity(IBinder token) throws RemoteException;
     public void setFocusedTask(int taskId) throws RemoteException;
     public void registerTaskStackListener(ITaskStackListener listener) throws RemoteException;
     public int getTaskForActivity(IBinder token, boolean onlyRoot) throws RemoteException;
@@ -491,8 +490,6 @@ public interface IActivityManager extends IInterface {
             throws RemoteException;
     public void setTaskResizeable(int taskId, boolean resizeable) throws RemoteException;
     public void resizeTask(int taskId, Rect bounds) throws RemoteException;
-    public void setActivityBounds(IBinder token, Rect bounds) throws RemoteException;
-    public Rect getActivityBounds(IBinder token) throws RemoteException;
 
     public Rect getTaskBounds(int taskId) throws RemoteException;
     public Bitmap getTaskDescriptionIcon(String filename) throws RemoteException;
@@ -891,7 +888,4 @@ public interface IActivityManager extends IInterface {
     int GET_ACTIVITY_STACK_ID_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION + 343;
     int MOVE_ACTIVITY_TO_STACK_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION + 344;
     int REPORT_SIZE_CONFIGURATIONS = IBinder.FIRST_CALL_TRANSACTION + 345;
-    int GET_ACTIVITY_BOUNDS_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION + 346;
-    int SET_ACTIVITY_BOUNDS_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION + 347;
-    int ACTIVATE_ACTIVITY_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION + 348;
 }

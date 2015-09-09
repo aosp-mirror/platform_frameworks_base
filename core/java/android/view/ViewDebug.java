@@ -78,6 +78,12 @@ public class ViewDebug {
     public static final boolean DEBUG_DRAG = false;
 
     /**
+     * Enables detailed logging of task positioning operations.
+     * @hide
+     */
+    public static final boolean DEBUG_POSITIONING = false;
+
+    /**
      * This annotation can be used to mark fields and methods to be dumped by
      * the view server. Only non-void methods with no arguments can be annotated
      * by this annotation.

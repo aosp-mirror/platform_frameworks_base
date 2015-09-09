@@ -2730,52 +2730,23 @@ public final class ActivityManagerService extends ActivityManagerNative
         }
     }
 
-    /**
-     * Activate an activity by bringing it to the top and set the focus on it.
-     * Note: This is only allowed for activities which are on the freeform stack.
-     * @param token The token of the activity calling which will get activated.
-     */
     @Override
-    public void activateActivity(IBinder token) {
-        if (DEBUG_FOCUS) Slog.d(TAG_FOCUS, "ActivateActivity token=" + token);
+    public void setFocusedTask(int taskId) {
+        if (DEBUG_FOCUS) Slog.d(TAG_FOCUS, "setFocusedTask: taskId=" + taskId);
         long callingId = Binder.clearCallingIdentity();
         try {
             synchronized (ActivityManagerService.this) {
-                final ActivityRecord anyTaskRecord = ActivityRecord.isInStackLocked(token);
-                if (anyTaskRecord == null) {
-                    Slog.w(TAG, "ActivateActivity: token=" + token + " not found");
-                    return;
-                }
-                TaskRecord task = anyTaskRecord.task;
-                final boolean runsOnFreeformStack =
-                        task.stack.getStackId() == FREEFORM_WORKSPACE_STACK_ID;
-                if (!runsOnFreeformStack) {
-                    Slog.w(TAG, "Tried to use activateActivity on a non freeform workspace!");
-                } else if (task != null) {
-                    ActivityRecord topTaskRecord = task.topRunningActivityLocked(null);
-                    if (topTaskRecord != null) {
-                        setFocusedActivityLocked(topTaskRecord, "activateActivity");
+                TaskRecord task = mStackSupervisor.anyTaskForIdLocked(taskId);
+                if (task != null) {
+                    ActivityRecord r = task.topRunningActivityLocked(null);
+                    if (r != null) {
+                        setFocusedActivityLocked(r, "setFocusedTask");
                         mStackSupervisor.resumeTopActivitiesLocked(task.stack, null, null);
                     }
                 }
             }
         } finally {
             Binder.restoreCallingIdentity(callingId);
-        }
-    }
-
-    @Override
-    public void setFocusedTask(int taskId) {
-        if (DEBUG_FOCUS) Slog.d(TAG_FOCUS, "setFocusedTask: taskId=" + taskId);
-        synchronized (ActivityManagerService.this) {
-            TaskRecord task = mStackSupervisor.anyTaskForIdLocked(taskId);
-            if (task != null) {
-                ActivityRecord r = task.topRunningActivityLocked(null);
-                if (r != null) {
-                    setFocusedActivityLocked(r, "setFocusedTask");
-                    mStackSupervisor.resumeTopActivitiesLocked(task.stack, null, null);
-                }
-            }
         }
     }
 
@@ -8713,58 +8684,6 @@ public final class ActivityManagerService extends ActivityManagerNative
                     return rect;
                 }
                 mWindowManager.getTaskBounds(task.taskId, rect);
-            }
-        } finally {
-            Binder.restoreCallingIdentity(ident);
-        }
-        return rect;
-    }
-
-    @Override
-    public void setActivityBounds(IBinder token, Rect bounds) {
-        long ident = Binder.clearCallingIdentity();
-        try {
-            synchronized (this) {
-                final ActivityRecord r = ActivityRecord.isInStackLocked(token);
-                if (r == null) {
-                    Slog.w(TAG, "setActivityBounds: token=" + token + " not found");
-                    return;
-                }
-                final TaskRecord task = r.task;
-                if (task == null) {
-                    Slog.e(TAG, "setActivityBounds: No TaskRecord for the ActivityRecord r=" + r);
-                    return;
-                }
-                if (task.stack != null && task.stack.mStackId == DOCKED_STACK_ID) {
-                    mStackSupervisor.resizeStackLocked(task.stack.mStackId, bounds);
-                } else {
-                    mStackSupervisor.resizeTaskLocked(task, bounds);
-                }
-            }
-        } finally {
-            Binder.restoreCallingIdentity(ident);
-        }
-    }
-
-    @Override
-    public Rect getActivityBounds(IBinder token) {
-        long ident = Binder.clearCallingIdentity();
-        Rect rect = null;
-        try {
-            synchronized (this) {
-                final ActivityRecord r = ActivityRecord.isInStackLocked(token);
-                if (r == null) {
-                    Slog.w(TAG, "getActivityBounds: token=" + token + " not found");
-                    return rect;
-                }
-                final TaskRecord task = r.task;
-                if (task == null) {
-                    Slog.e(TAG, "getActivityBounds: No TaskRecord for the ActivityRecord r=" + r);
-                    return rect;
-                }
-                if (task.mBounds != null) {
-                    rect = new Rect(task.mBounds);
-                }
             }
         } finally {
             Binder.restoreCallingIdentity(ident);

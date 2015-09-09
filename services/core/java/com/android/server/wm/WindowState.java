@@ -86,7 +86,7 @@ final class WindowState implements WindowManagerPolicy.WindowState {
 
     // The thickness of a window resize handle outside the window bounds on the free form workspace
     // to capture touch events in that area.
-    private static final int RESIZE_HANDLE_WIDTH_IN_DP = 10;
+    static final int RESIZE_HANDLE_WIDTH_IN_DP = 10;
 
     static final boolean BOUNDS_FOR_TOUCH = true;
 

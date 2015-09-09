@@ -562,28 +562,6 @@ public abstract class Window {
 
         /** Returns the current stack Id for the window. */
         int getWindowStackId() throws RemoteException;
-
-        /**
-         * Returns the bounds of the task that contains this activity.
-         *
-         * @return Rect The bounds that contains the activity.
-         */
-        Rect getActivityBounds() throws RemoteException;
-
-        /**
-         * Sets the bounds (size and position) of the task or stack that contains this
-         * activity.
-         * NOTE: The requested bounds might not the fully honored by the system depending
-         * on the window placement policy.
-         *
-         * @param newBounds The new target bounds of the activity in task or stack.
-         */
-        void setActivityBounds(Rect newBounds) throws RemoteException;
-
-        /**
-         * Activates this activity, hence bringing it to the top and giving it focus.
-         */
-        void activateActivity() throws RemoteException;
     }
 
     public Window(Context context) {

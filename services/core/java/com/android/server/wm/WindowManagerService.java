@@ -207,6 +207,7 @@ public class WindowManagerService extends IWindowManager.Stub
     static final boolean DEBUG_SURFACE_TRACE = false;
     static final boolean DEBUG_WINDOW_TRACE = false;
     static final boolean DEBUG_TASK_MOVEMENT = false;
+    static final boolean DEBUG_TASK_POSITIONING = false;
     static final boolean DEBUG_STACK = false;
     static final boolean DEBUG_DISPLAY = false;
     static final boolean DEBUG_POWER = false;
@@ -598,6 +599,7 @@ public class WindowManagerService extends IWindowManager.Stub
     // Whether or not a layout can cause a wake up when theater mode is enabled.
     boolean mAllowTheaterModeWakeFromLayout;
 
+    TaskPositioner mTaskPositioner;
     DragState mDragState = null;
 
     // For frozen screen animations.
@@ -6817,6 +6819,88 @@ public class WindowManagerService extends IWindowManager.Stub
         }
     }
 
+    boolean startMovingTask(IWindow window, float startX, float startY) {
+        WindowState callingWin = null;
+        synchronized (mWindowMap) {
+            callingWin = windowForClientLocked(null, window, false);
+            if (!startPositioningLocked(callingWin, false /*resize*/, startX, startY)) {
+                return false;
+            }
+        }
+        try {
+            mActivityManager.setFocusedTask(callingWin.getTask().mTaskId);
+        } catch(RemoteException e) {}
+        return true;
+    }
+
+    private void startResizingTask(DisplayContent displayContent, int startX, int startY) {
+        int taskId = -1;
+        AppWindowToken atoken = null;
+        synchronized (mWindowMap) {
+            taskId = displayContent.taskIdForControlPoint(startX, startY);
+            Task task = mTaskIdToTask.get(taskId);
+            if (task == null || task.mAppTokens == null) {
+                return;
+            }
+            AppTokenList tokens = task.mAppTokens;
+            atoken = tokens.get(tokens.size() - 1);
+            WindowState win = atoken.findMainWindow();
+            if (!startPositioningLocked(win, true /*resize*/, startX, startY)) {
+                return;
+            }
+        }
+        try {
+            mActivityManager.setFocusedTask(taskId);
+        } catch(RemoteException e) {}
+    }
+
+    private boolean startPositioningLocked(
+            WindowState win, boolean resize, float startX, float startY) {
+        if (WindowManagerService.DEBUG_TASK_POSITIONING) {
+            Slog.d(TAG, "startPositioningLocked: win=" + win +
+                    ", resize=" + resize + ", {" + startX + ", " + startY + "}");
+        }
+        if (win == null || win.getAppToken() == null || !win.inFreeformWorkspace()) {
+            Slog.w(TAG, "startPositioningLocked: Bad window " + win);
+            return false;
+        }
+
+        final DisplayContent displayContent = win.getDisplayContent();
+        if (displayContent == null) {
+            Slog.w(TAG, "startPositioningLocked: Invalid display content " + win);
+            return false;
+        }
+
+        Display display = displayContent.getDisplay();
+        mTaskPositioner = new TaskPositioner(this);
+        mTaskPositioner.register(display);
+        mInputMonitor.updateInputWindowsLw(true /*force*/);
+        if (!mInputManager.transferTouchFocus(
+                win.mInputChannel, mTaskPositioner.mServerChannel)) {
+            Slog.e(TAG, "startPositioningLocked: Unable to transfer touch focus");
+            mTaskPositioner.unregister();
+            mTaskPositioner = null;
+            mInputMonitor.updateInputWindowsLw(true /*force*/);
+            return false;
+        }
+
+        mTaskPositioner.startDragLocked(win, resize, startX, startY);
+        return true;
+    }
+
+    private void finishPositioning() {
+        if (WindowManagerService.DEBUG_TASK_POSITIONING) {
+            Slog.d(TAG, "finishPositioning");
+        }
+        synchronized (mWindowMap) {
+            if (mTaskPositioner != null) {
+                mTaskPositioner.unregister();
+                mTaskPositioner = null;
+                mInputMonitor.updateInputWindowsLw(true /*force*/);
+            }
+        }
+    }
+
     // -------------------------------------------------------------
     // Drag and drop
     // -------------------------------------------------------------
@@ -7081,6 +7165,9 @@ public class WindowManagerService extends IWindowManager.Stub
         public static final int CHECK_IF_BOOT_ANIMATION_FINISHED = 37;
         public static final int RESET_ANR_MESSAGE = 38;
         public static final int WALLPAPER_DRAW_PENDING_TIMEOUT = 39;
+
+        public static final int TAP_DOWN_OUTSIDE_TASK = 40;
+        public static final int FINISH_TASK_POSITIONING = 41;
 
         @Override
         public void handleMessage(Message msg) {
@@ -7542,6 +7629,17 @@ public class WindowManagerService extends IWindowManager.Stub
                     }
                 }
                 break;
+
+                case TAP_DOWN_OUTSIDE_TASK: {
+                    startResizingTask((DisplayContent)msg.obj, msg.arg1, msg.arg2);
+                }
+                break;
+
+                case FINISH_TASK_POSITIONING: {
+                    finishPositioning();
+                }
+                break;
+
                 case NOTIFY_ACTIVITY_DRAWN:
                     try {
                         mActivityManager.notifyActivityDrawn((IBinder) msg.obj);

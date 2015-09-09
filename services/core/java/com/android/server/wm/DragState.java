@@ -283,11 +283,12 @@ class DragState {
 
         // stop intercepting input
         mService.mDragState.unregister();
-        mService.mInputMonitor.updateInputWindowsLw(true /*force*/);
 
         // free our resources and drop all the object references
         mService.mDragState.reset();
         mService.mDragState = null;
+
+        mService.mInputMonitor.updateInputWindowsLw(true /*force*/);
     }
 
     void notifyMoveLw(float x, float y) {

@@ -752,24 +752,6 @@ public abstract class ActivityManagerNative extends Binder implements IActivityM
             return true;
         }
 
-        case GET_ACTIVITY_BOUNDS_TRANSACTION: {
-            data.enforceInterface(IActivityManager.descriptor);
-            IBinder token = data.readStrongBinder();
-            Rect r = getActivityBounds(token);
-            reply.writeNoException();
-            r.writeToParcel(reply, 0);
-            return true;
-        }
-
-        case SET_ACTIVITY_BOUNDS_TRANSACTION: {
-            data.enforceInterface(IActivityManager.descriptor);
-            IBinder token = data.readStrongBinder();
-            Rect r = Rect.CREATOR.createFromParcel(data);
-            setActivityBounds(token, r);
-            reply.writeNoException();
-            return true;
-        }
-
         case POSITION_TASK_IN_STACK_TRANSACTION: {
             data.enforceInterface(IActivityManager.descriptor);
             int taskId = data.readInt();
@@ -824,14 +806,6 @@ public abstract class ActivityManagerNative extends Binder implements IActivityM
             int focusedStackId = getFocusedStackId();
             reply.writeNoException();
             reply.writeInt(focusedStackId);
-            return true;
-        }
-
-        case ACTIVATE_ACTIVITY_TRANSACTION: {
-            data.enforceInterface(IActivityManager.descriptor);
-            IBinder token = data.readStrongBinder();
-            activateActivity(token);
-            reply.writeNoException();
             return true;
         }
 
@@ -3631,18 +3605,6 @@ class ActivityManagerProxy implements IActivityManager
         return focusedStackId;
     }
     @Override
-    public void activateActivity(IBinder token) throws RemoteException
-    {
-        Parcel data = Parcel.obtain();
-        Parcel reply = Parcel.obtain();
-        data.writeInterfaceToken(IActivityManager.descriptor);
-        data.writeStrongBinder(token);
-        mRemote.transact(ACTIVATE_ACTIVITY_TRANSACTION, data, reply, 0);
-        reply.readException();
-        data.recycle();
-        reply.recycle();
-    }
-    @Override
     public void setFocusedTask(int taskId) throws RemoteException
     {
         Parcel data = Parcel.obtain();
@@ -5933,35 +5895,6 @@ class ActivityManagerProxy implements IActivityManager
         data.writeInterfaceToken(IActivityManager.descriptor);
         data.writeInt(taskId);
         mRemote.transact(GET_TASK_BOUNDS_TRANSACTION, data, reply, 0);
-        reply.readException();
-        Rect rect = Rect.CREATOR.createFromParcel(reply);
-        data.recycle();
-        reply.recycle();
-        return rect;
-    }
-
-    @Override
-    public void setActivityBounds(IBinder token, Rect r) throws RemoteException
-    {
-        Parcel data = Parcel.obtain();
-        Parcel reply = Parcel.obtain();
-        data.writeInterfaceToken(IActivityManager.descriptor);
-        data.writeStrongBinder(token);
-        r.writeToParcel(data, 0);
-        mRemote.transact(SET_ACTIVITY_BOUNDS_TRANSACTION, data, reply, 0);
-        reply.readException();
-        data.recycle();
-        reply.recycle();
-    }
-
-    @Override
-    public Rect getActivityBounds(IBinder token) throws RemoteException
-    {
-        Parcel data = Parcel.obtain();
-        Parcel reply = Parcel.obtain();
-        data.writeInterfaceToken(IActivityManager.descriptor);
-        data.writeStrongBinder(token);
-        mRemote.transact(GET_ACTIVITY_BOUNDS_TRANSACTION, data, reply, 0);
         reply.readException();
         Rect rect = Rect.CREATOR.createFromParcel(reply);
         data.recycle();

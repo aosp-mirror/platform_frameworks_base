@@ -175,8 +175,6 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
     // If the window type does not require such a view, this member might be null.
     NonClientDecorView mNonClientDecorView;
 
-    private boolean mForwardEvents = false;
-
     // The non client decor needs to adapt to the used workspace. Since querying and changing the
     // workspace is expensive, this is the workspace value the window is currently set up for.
     int mWorkspaceId;
@@ -2510,21 +2508,20 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
         @Override
         public boolean onInterceptTouchEvent(MotionEvent event) {
             int action = event.getAction();
-            // Dispatch the event to the non client decor if the window is resizable and
-            // the event was (starting) outside the window.
-            if (mHasNonClientDecor && mNonClientDecorView.mResizable) {
-                if (mForwardEvents) {
-                    // The non client decor is currently processing the (resize) events.
-                    mForwardEvents = mNonClientDecorView.onTouchEvent(event);
-                    return true;
-                }
+            if (mHasNonClientDecor && mNonClientDecorView.mVisible) {
+                // Don't dispatch ACTION_DOWN to the non client decor if the window is
+                // resizable and the event was (starting) outside the window.
+                // Window resizing events should be handled by WindowManager.
+                // TODO: Investigate how to handle the outside touch in window manager
+                //       without generating these events.
+                //       Currently we receive these because we need to enlarge the window's
+                //       touch region so that the monitor channel receives the events
+                //       in the outside touch area.
                 if (action == MotionEvent.ACTION_DOWN) {
                     final int x = (int) event.getX();
                     final int y = (int) event.getY();
                     if (isOutOfInnerBounds(x, y)) {
-                        // Forward this event to the non client decor.
-                        mForwardEvents = mNonClientDecorView.onTouchEvent(event);
-                        return mForwardEvents;
+                        return true;
                     }
                 }
             }

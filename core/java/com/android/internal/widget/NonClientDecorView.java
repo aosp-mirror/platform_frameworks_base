@@ -16,7 +16,6 @@
 
 package com.android.internal.widget;
 
-import android.app.ActivityThread;
 import android.content.Context;
 import android.graphics.Rect;
 import android.os.RemoteException;
@@ -71,33 +70,11 @@ public class NonClientDecorView extends LinearLayout implements View.OnClickList
     // True if the window is being dragged.
     private boolean mDragging = false;
 
-    // The bounds of the window and the absolute mouse pointer coordinates from before we started to
-    // drag the window. They will be used to determine the next window position.
-    private final Rect mWindowOriginalBounds = new Rect();
-    private float mStartDragX;
-    private float mStartDragY;
     // True when the left mouse button got released while dragging.
     private boolean mLeftMouseButtonReleased;
 
-    private static final int NONE = 0;
-    private static final int LEFT = 1;
-    private static final int RIGHT = 2;
-    private static final int TOP = 4;
-    private static final int BOTTOM = 8;
-    private static final int TOP_LEFT = TOP | LEFT;
-    private static final int TOP_RIGHT = TOP | RIGHT;
-    private static final int BOTTOM_LEFT = BOTTOM | LEFT;
-    private static final int BOTTOM_RIGHT = BOTTOM | RIGHT;
-    private int mSizeCorner = NONE;
-
-    // Avoiding re-creation of Rect's by keeping a temporary window drag bound.
-    private final Rect mWindowDragBounds = new Rect();
-
-    // True while the task is resizing itself to avoid overlapping resize operations.
-    private boolean mTaskResizingInProgress = false;
-
     // True if this window is resizable (which is currently only true when the decor is shown).
-    public boolean mResizable = false;
+    public boolean mVisible = false;
 
     // The current focus state of the window for updating the window elevation.
     private boolean mWindowHasFocus = true;
@@ -145,27 +122,14 @@ public class NonClientDecorView extends LinearLayout implements View.OnClickList
                     // When there is no decor we should not react to anything.
                     return false;
                 }
-                // Ensure that the activity is active.
-                activateActivity();
                 // A drag action is started if we aren't dragging already and the starting event is
                 // either a left mouse button or any other input device.
                 if (!mDragging &&
                         (e.getToolType(e.getActionIndex()) != MotionEvent.TOOL_TYPE_MOUSE ||
                                 (e.getButtonState() & MotionEvent.BUTTON_PRIMARY) != 0)) {
                     mDragging = true;
-                    mWindowOriginalBounds.set(getActivityBounds());
                     mLeftMouseButtonReleased = false;
-                    mStartDragX = e.getRawX();
-                    mStartDragY = e.getRawY();
-                    // Determine if this is a resizing user action.
-                    final int x = (int) (e.getX());
-                    final int y = (int) (e.getY());
-                    mSizeCorner = (x < 0 ? LEFT : (x >= getWidth() ? RIGHT : NONE)) |
-                            (y < 0 ? TOP : (y >= getHeight() ? BOTTOM : NONE));
-                    if (mSizeCorner != 0) {
-                        // Suppress any configuration changes for now.
-                        ActivityThread.currentActivityThread().suppressConfigurationChanges(true);
-                    }
+                    startMovingTask(e.getRawX(), e.getRawY());
                 }
                 break;
 
@@ -178,79 +142,16 @@ public class NonClientDecorView extends LinearLayout implements View.OnClickList
                         mLeftMouseButtonReleased = true;
                         break;
                     }
-                    if (mSizeCorner != NONE) {
-                        // Avoid overlapping resizing operations.
-                        if (mTaskResizingInProgress) {
-                            break;
-                        }
-                        mTaskResizingInProgress = true;
-                        // This is a resizing operation.
-                        final int deltaX = Math.round(e.getRawX() - mStartDragX);
-                        final int deltaY = Math.round(e.getRawY() - mStartDragY);
-                        final int minSizeX = (int)(dipToPx(96));
-                        final int minSizeY = (int)(dipToPx(64));
-                        int left = mWindowOriginalBounds.left;
-                        int top = mWindowOriginalBounds.top;
-                        int right = mWindowOriginalBounds.right;
-                        int bottom = mWindowOriginalBounds.bottom;
-                        if ((mSizeCorner & LEFT) != 0) {
-                            left = Math.min(left + deltaX, right - minSizeX);
-                        }
-                        if ((mSizeCorner & TOP) != 0) {
-                            top = Math.min(top + deltaY, bottom - minSizeY);
-                        }
-                        if ((mSizeCorner & RIGHT) != 0) {
-                            right = Math.max(left + minSizeX, right + deltaX);
-                        }
-                        if ((mSizeCorner & BOTTOM) != 0) {
-                            bottom = Math.max(top + minSizeY, bottom + deltaY);
-                        }
-                        mWindowDragBounds.set(left, top, right, bottom);
-                        setActivityBounds(mWindowDragBounds);
-                        mTaskResizingInProgress = false;
-                    } else {
-                        // This is a moving operation.
-                        mWindowDragBounds.set(mWindowOriginalBounds);
-                        mWindowDragBounds.offset(Math.round(e.getRawX() - mStartDragX),
-                                Math.round(e.getRawY() - mStartDragY));
-                        setActivityBounds(mWindowDragBounds);
-                    }
                 }
                 break;
 
             case MotionEvent.ACTION_UP:
-                if (!mDragging) {
-                    break;
-                }
-                // Finsih the dragging now.
-                mDragging = false;
-                if (mSizeCorner == NONE) {
-                    return true;
-                }
-
-                // Allow configuration changes again.
-                ActivityThread.currentActivityThread().suppressConfigurationChanges(false);
-                // Set the same bounds once more - which might trigger a configuration change now.
-                setActivityBounds(mWindowDragBounds);
-                // Tell the DecorView that we are done with out event interception by
-                // returning false.
-                return false;
-
             case MotionEvent.ACTION_CANCEL:
                 if (!mDragging) {
                     break;
                 }
                 // Abort the ongoing dragging.
                 mDragging = false;
-                // Restore the previous bounds.
-                setActivityBounds(mWindowOriginalBounds);
-                if (mSizeCorner != NONE) {
-                    // ALlow configuration changes again.
-                    ActivityThread.currentActivityThread().suppressConfigurationChanges(false);
-                    // Tell the DecorView that we are done with out event interception by
-                    // returning false.
-                    return false;
-                }
                 return true;
         }
         return mDragging;
@@ -323,7 +224,7 @@ public class NonClientDecorView extends LinearLayout implements View.OnClickList
         boolean invisible = isFillingScreen() || !mShowDecor;
         View caption = getChildAt(0);
         caption.setVisibility(invisible ? GONE : VISIBLE);
-        mResizable = !invisible;
+        mVisible = !invisible;
     }
 
     /**
@@ -387,56 +288,6 @@ public class NonClientDecorView extends LinearLayout implements View.OnClickList
                         android.app.ActivityManager.FULLSCREEN_WORKSPACE_STACK_ID);
             } catch (RemoteException ex) {
                 Log.e(TAG, "Cannot change task workspace.");
-            }
-        }
-    }
-
-    /**
-     * Returns the bounds of this activity.
-     * @return Returns bounds of the activity. It will return null if either the window is
-     *     fullscreen or the bounds could not be retrieved.
-     */
-    private Rect getActivityBounds() {
-        Window.WindowControllerCallback callback = mOwner.getWindowControllerCallback();
-        if (callback != null) {
-            try {
-                return callback.getActivityBounds();
-            } catch (RemoteException ex) {
-                Log.e(TAG, "Failed to get the activity bounds.");
-            }
-        }
-        return null;
-    }
-
-    /**
-     * Sets the bounds of this Activity on the stack.
-     * @param newBounds The bounds of the activity. Passing null is not allowed.
-     */
-    private void setActivityBounds(Rect newBounds) {
-        if (newBounds == null) {
-            Log.e(TAG, "Failed to set null bounds to the activity.");
-            return;
-        }
-        Window.WindowControllerCallback callback = mOwner.getWindowControllerCallback();
-        if (callback != null) {
-            try {
-                callback.setActivityBounds(newBounds);
-            } catch (RemoteException ex) {
-                Log.e(TAG, "Failed to set the activity bounds.");
-            }
-        }
-    }
-
-    /**
-     * Activates the activity - means setting the focus and moving it to the top of the stack.
-     */
-    private void activateActivity() {
-        Window.WindowControllerCallback callback = mOwner.getWindowControllerCallback();
-        if (callback != null) {
-            try {
-                callback.activateActivity();
-            } catch (RemoteException ex) {
-                Log.e(TAG, "Failed to activate the activity.");
             }
         }
     }

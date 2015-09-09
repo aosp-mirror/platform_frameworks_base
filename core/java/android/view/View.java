@@ -19750,6 +19750,26 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     }
 
     /**
+     * Starts a move from {startX, startY}, the amount of the movement will be the offset
+     * between {startX, startY} and the new cursor positon.
+     * @param startX horizontal coordinate where the move started.
+     * @param startY vertical coordinate where the move started.
+     * @return whether moving was started successfully.
+     * @hide
+     */
+    public final boolean startMovingTask(float startX, float startY) {
+        if (ViewDebug.DEBUG_POSITIONING) {
+            Log.d(VIEW_LOG_TAG, "startMovingTask: {" + startX + "," + startY + "}");
+        }
+        try {
+            return mAttachInfo.mSession.startMovingTask(mAttachInfo.mWindow, startX, startY);
+        } catch (RemoteException e) {
+            Log.e(VIEW_LOG_TAG, "Unable to start moving", e);
+        }
+        return false;
+    }
+
+    /**
      * Handles drag events sent by the system following a call to
      * {@link android.view.View#startDrag(ClipData,DragShadowBuilder,Object,int) startDrag()}.
      *<p>

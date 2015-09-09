@@ -211,4 +211,12 @@ interface IWindowSession {
      * The assumption is that this method will be called rather infrequently.
      */
     void pokeDrawLock(IBinder window);
+
+    /**
+     * Starts a task window move with {startX, startY} as starting point. The amount of move
+     * will be the offset between {startX, startY} and the new cursor position.
+     *
+     * Returns true if the move started successfully; false otherwise.
+     */
+    boolean startMovingTask(IWindow window, float startX, float startY);
 }

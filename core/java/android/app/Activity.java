@@ -2736,40 +2736,6 @@ public class Activity extends ContextThemeWrapper
     }
 
     /**
-     * Returns the bounds of the task that contains this activity.
-     *
-     * @return Rect The bounds that contains the activity.
-     * @hide
-     */
-    @Override
-    public Rect getActivityBounds() throws RemoteException {
-        return ActivityManagerNative.getDefault().getActivityBounds(mToken);
-    }
-
-    /**
-     * Sets the bounds (size and position) of the task or stack that contains this
-     * activity.
-     * NOTE: The requested bounds might not the fully honored by the system depending
-     * on the window placement policy.
-     *
-     * @param newBounds The new target bounds of the activity in task or stack.
-     * @hide
-     */
-    @Override
-    public void setActivityBounds(Rect newBounds) throws RemoteException {
-        ActivityManagerNative.getDefault().setActivityBounds(mToken, newBounds);
-    }
-
-    /**
-     * Activates this activity, hence bringing it to the top and giving it focus.
-     * Note: This will only work for activities which are located on the freeform desktop.
-     * @hide
-     */
-    public void activateActivity() throws RemoteException {
-        ActivityManagerNative.getDefault().activateActivity(mToken);
-    }
-
-    /**
      * Called to process key events.  You can override this to intercept all
      * key events before they are dispatched to the window.  Be sure to call
      * this implementation for key events that should be handled normally.

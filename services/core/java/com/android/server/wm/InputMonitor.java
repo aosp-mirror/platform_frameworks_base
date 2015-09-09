@@ -64,9 +64,9 @@ final class InputMonitor implements InputManagerService.WindowManagerCallbacks {
     public InputMonitor(WindowManagerService service) {
         mService = service;
     }
-    
+
     /* Notifies the window manager about a broken input channel.
-     * 
+     *
      * Called by the InputManager.
      */
     @Override
@@ -83,10 +83,10 @@ final class InputMonitor implements InputManagerService.WindowManagerCallbacks {
             }
         }
     }
-    
+
     /* Notifies the window manager about an application that is not responding.
      * Returns a new timeout to continue waiting in nanoseconds, or 0 to abort dispatch.
-     * 
+     *
      * Called by the InputManager.
      */
     @Override
@@ -254,6 +254,20 @@ final class InputMonitor implements InputManagerService.WindowManagerCallbacks {
             } else {
                 Slog.w(WindowManagerService.TAG, "Drag is in progress but there is no "
                         + "drag window handle.");
+            }
+        }
+
+        final boolean inPositioning = (mService.mTaskPositioner != null);
+        if (inPositioning) {
+            if (WindowManagerService.DEBUG_TASK_POSITIONING) {
+                Log.d(WindowManagerService.TAG, "Inserting window handle for repositioning");
+            }
+            final InputWindowHandle dragWindowHandle = mService.mTaskPositioner.mDragWindowHandle;
+            if (dragWindowHandle != null) {
+                addInputWindowHandleLw(dragWindowHandle);
+            } else {
+                Slog.e(WindowManagerService.TAG,
+                        "Repositioning is in progress but there is no drag window handle.");
             }
         }
 
@@ -437,56 +451,56 @@ final class InputMonitor implements InputManagerService.WindowManagerCallbacks {
             if (WindowManagerService.DEBUG_INPUT) {
                 Slog.v(WindowManagerService.TAG, "Pausing WindowToken " + window);
             }
-            
+
             window.paused = true;
             updateInputWindowsLw(true /*force*/);
         }
     }
-    
+
     public void resumeDispatchingLw(WindowToken window) {
         if (window.paused) {
             if (WindowManagerService.DEBUG_INPUT) {
                 Slog.v(WindowManagerService.TAG, "Resuming WindowToken " + window);
             }
-            
+
             window.paused = false;
             updateInputWindowsLw(true /*force*/);
         }
     }
-    
+
     public void freezeInputDispatchingLw() {
         if (! mInputDispatchFrozen) {
             if (WindowManagerService.DEBUG_INPUT) {
                 Slog.v(WindowManagerService.TAG, "Freezing input dispatching");
             }
-            
+
             mInputDispatchFrozen = true;
             updateInputDispatchModeLw();
         }
     }
-    
+
     public void thawInputDispatchingLw() {
         if (mInputDispatchFrozen) {
             if (WindowManagerService.DEBUG_INPUT) {
                 Slog.v(WindowManagerService.TAG, "Thawing input dispatching");
             }
-            
+
             mInputDispatchFrozen = false;
             updateInputDispatchModeLw();
         }
     }
-    
+
     public void setEventDispatchingLw(boolean enabled) {
         if (mInputDispatchEnabled != enabled) {
             if (WindowManagerService.DEBUG_INPUT) {
                 Slog.v(WindowManagerService.TAG, "Setting event dispatching to " + enabled);
             }
-            
+
             mInputDispatchEnabled = enabled;
             updateInputDispatchModeLw();
         }
     }
-    
+
     private void updateInputDispatchModeLw() {
         mService.mInputManager.setInputDispatchMode(mInputDispatchEnabled, mInputDispatchFrozen);
     }

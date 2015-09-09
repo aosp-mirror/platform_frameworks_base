@@ -47,12 +47,23 @@ public class TaskTapPointerEventListener implements PointerEventListener {
     public void onPointerEvent(MotionEvent motionEvent) {
         final int action = motionEvent.getAction();
         switch (action & MotionEvent.ACTION_MASK) {
-            case MotionEvent.ACTION_DOWN:
+            case MotionEvent.ACTION_DOWN: {
                 mPointerId = motionEvent.getPointerId(0);
                 mDownX = motionEvent.getX();
                 mDownY = motionEvent.getY();
+
+                final int x = (int) mDownX;
+                final int y = (int) mDownY;
+                synchronized (this) {
+                    if (!mTouchExcludeRegion.contains(x, y)) {
+                        mService.mH.obtainMessage(H.TAP_DOWN_OUTSIDE_TASK, x, y,
+                                mDisplayContent).sendToTarget();
+                    }
+                }
                 break;
-            case MotionEvent.ACTION_MOVE:
+            }
+
+            case MotionEvent.ACTION_MOVE: {
                 if (mPointerId >= 0) {
                     int index = motionEvent.findPointerIndex(mPointerId);
                     if ((motionEvent.getEventTime() - motionEvent.getDownTime()) > TAP_TIMEOUT_MSEC
@@ -63,6 +74,8 @@ public class TaskTapPointerEventListener implements PointerEventListener {
                     }
                 }
                 break;
+            }
+
             case MotionEvent.ACTION_UP:
             case MotionEvent.ACTION_POINTER_UP: {
                 int index = (action & MotionEvent.ACTION_POINTER_INDEX_MASK)
