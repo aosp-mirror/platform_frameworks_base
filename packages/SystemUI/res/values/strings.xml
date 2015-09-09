@@ -1158,5 +1158,7 @@
 
     <string name="save" translatable="false">Save</string>
     <string name="qs_customize" translatable="false">Allow long-press customize in Quick Settings</string>
+    <string name="qs_customize_info" translatable="false">Info</string>
+    <string name="qs_customize_remove" translatable="false">Remove</string>
 
 </resources>

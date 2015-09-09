@@ -37,6 +37,7 @@ public class CustomQSTileHost extends QSTileHost {
     private static final String TAG = "CustomHost";
     private List<String> mTiles;
     private List<String> mSavedTiles;
+    private ArrayList<String> mStash;
 
     public CustomQSTileHost(Context context, QSTileHost host) {
         super(context, null, host.getBluetoothController(), host.getLocationController(),
@@ -70,6 +71,14 @@ public class CustomQSTileHost extends QSTileHost {
                 TextUtils.join(",", mTiles), ActivityManager.getCurrentUser());
     }
 
+    public void stashCurrentTiles() {
+        mStash = new ArrayList<>(mTiles);
+    }
+
+    public void unstashTiles() {
+        setTiles(mStash);
+    }
+
     public void moveTo(String from, String to) {
         int fromIndex = mTiles.indexOf(from);
         if (fromIndex < 0) {
@@ -83,6 +92,13 @@ public class CustomQSTileHost extends QSTileHost {
         }
         mTiles.remove(fromIndex);
         mTiles.add(index, from);
+        super.onTuningChanged(TILES_SETTING, null);
+    }
+
+    public void remove(String spec) {
+        if (!mTiles.remove(spec)) {
+            Log.e(TAG, "Unknown remove spec " + spec);
+        }
         super.onTuningChanged(TILES_SETTING, null);
     }
 

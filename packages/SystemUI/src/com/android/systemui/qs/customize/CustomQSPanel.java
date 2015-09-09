@@ -19,26 +19,21 @@ import android.content.ClipData;
 import android.content.Context;
 import android.util.AttributeSet;
 import android.view.LayoutInflater;
-import android.view.MotionEvent;
 import android.view.View;
-import android.view.View.OnTouchListener;
 
 import com.android.systemui.R;
 import com.android.systemui.qs.QSPanel;
 import com.android.systemui.qs.QSTile;
-import com.android.systemui.qs.QSTileView;
 import com.android.systemui.statusbar.phone.QSTileHost;
 
 /**
  * A version of QSPanel that allows tiles to be dragged around rather than
- * clicked on.  Dragging is started here, receiving is handled in the NonPagedTileLayout,
+ * clicked on.  Dragging starting and receiving is handled in the NonPagedTileLayout,
  * and the saving/ordering is handled by the CustomQSTileHost.
  */
-public class CustomQSPanel extends QSPanel implements OnTouchListener {
+public class CustomQSPanel extends QSPanel {
 
     private CustomQSTileHost mCustomHost;
-    private ClipData mCurrentClip;
-    private View mCurrentView;
 
     public CustomQSPanel(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -62,52 +57,26 @@ public class CustomQSPanel extends QSPanel implements OnTouchListener {
         }
     }
 
-    @Override
-    protected void addTile(QSTile<?> tile) {
-        super.addTile(tile);
-        if (tile.getTileType() != QSTileView.QS_TYPE_QUICK) {
-            TileRecord record = mRecords.get(mRecords.size() - 1);
-            if (record.tileView.getTag() == record.tile) {
-                return;
-            }
-            record.tileView.setTag(record.tile);
-            record.tileView.setVisibility(View.VISIBLE);
-            record.tileView.init(null, null, null);
-            record.tileView.setOnTouchListener(this);
-            if (mCurrentClip != null
-                    && mCurrentClip.getItemAt(0).getText().toString().equals(tile.getTileSpec())) {
-                record.tileView.setAlpha(.3f);
-                mCurrentView = record.tileView;
-            }
-        }
+    public CustomQSTileHost getCustomHost() {
+        return mCustomHost;
     }
 
-    public void tileSelected(View v) {
-        String sourceSpec = mCurrentClip.getItemAt(0).getText().toString();
-        String destSpec = ((QSTile<?>) v.getTag()).getTileSpec();
+    public void tileSelected(QSTile<?> tile, ClipData currentClip) {
+        String sourceSpec = getSpec(currentClip);
+        String destSpec = tile.getTileSpec();
         if (!sourceSpec.equals(destSpec)) {
             mCustomHost.moveTo(sourceSpec, destSpec);
         }
     }
 
-    @Override
-    public boolean onTouch(View v, MotionEvent event) {
-        switch (event.getAction()) {
-            case MotionEvent.ACTION_DOWN:
-                String tileSpec = (String) ((QSTile<?>) v.getTag()).getTileSpec();
-                mCurrentView = v;
-                mCurrentClip = ClipData.newPlainText(tileSpec, tileSpec);
-                View.DragShadowBuilder shadow = new View.DragShadowBuilder(v);
-                ((View) getParent().getParent()).startDrag(mCurrentClip, shadow, null, 0);
-                v.setAlpha(.3f);
-                return true;
-        }
-        return false;
+    public ClipData getClip(QSTile<?> tile) {
+        String tileSpec = tile.getTileSpec();
+        // TODO: Something better than plain text.
+        // TODO: Once using something better than plain text, stop listening to non-QS drag events.
+        return ClipData.newPlainText(tileSpec, tileSpec);
     }
 
-    public void onDragEnded() {
-        mCurrentView.setAlpha(1f);
-        mCurrentView = null;
-        mCurrentClip = null;
+    public String getSpec(ClipData data) {
+        return data.getItemAt(0).getText().toString();
     }
 }
