@@ -235,8 +235,10 @@ public class AppOpsManager {
     public static final int OP_WRITE_EXTERNAL_STORAGE = 60;
     /** @hide Turned on the screen. */
     public static final int OP_TURN_SCREEN_ON = 61;
+    /** @hide Get device accounts. */
+    public static final int OP_GET_ACCOUNTS = 62;
     /** @hide */
-    public static final int _NUM_OP = 62;
+    public static final int _NUM_OP = 63;
 
     /** Access to coarse location information. */
     public static final String OPSTR_COARSE_LOCATION = "android:coarse_location";
@@ -331,6 +333,9 @@ public class AppOpsManager {
     /** Required to write/modify/update system settingss. */
     public static final String OPSTR_WRITE_SETTINGS
             = "android:write_settings";
+    /** @hide Get device accounts. */
+    public static final String OPSTR_GET_ACCOUNTS
+            = "android:get_accounts";
 
     /**
      * This maps each operation to the operation that serves as the
@@ -403,6 +408,7 @@ public class AppOpsManager {
             OP_READ_EXTERNAL_STORAGE,
             OP_WRITE_EXTERNAL_STORAGE,
             OP_TURN_SCREEN_ON,
+            OP_GET_ACCOUNTS,
     };
 
     /**
@@ -472,6 +478,7 @@ public class AppOpsManager {
             OPSTR_READ_EXTERNAL_STORAGE,
             OPSTR_WRITE_EXTERNAL_STORAGE,
             null,
+            OPSTR_GET_ACCOUNTS
     };
 
     /**
@@ -541,6 +548,7 @@ public class AppOpsManager {
             "READ_EXTERNAL_STORAGE",
             "WRITE_EXTERNAL_STORAGE",
             "TURN_ON_SCREEN",
+            "GET_ACCOUNTS",
     };
 
     /**
@@ -610,6 +618,7 @@ public class AppOpsManager {
             Manifest.permission.READ_EXTERNAL_STORAGE,
             Manifest.permission.WRITE_EXTERNAL_STORAGE,
             null, // no permission for turning the screen on
+            Manifest.permission.GET_ACCOUNTS
     };
 
     /**
@@ -680,6 +689,7 @@ public class AppOpsManager {
             null, // READ_EXTERNAL_STORAGE
             null, // WRITE_EXTERNAL_STORAGE
             null, // TURN_ON_SCREEN
+            null, // GET_ACCOUNTS
     };
 
     /**
@@ -749,6 +759,7 @@ public class AppOpsManager {
             false, // READ_EXTERNAL_STORAGE
             false, // WRITE_EXTERNAL_STORAGE
             false, // TURN_ON_SCREEN
+            false, // GET_ACCOUNTS
     };
 
     /**
@@ -817,6 +828,7 @@ public class AppOpsManager {
             AppOpsManager.MODE_ALLOWED,
             AppOpsManager.MODE_ALLOWED,
             AppOpsManager.MODE_ALLOWED,  // OP_TURN_ON_SCREEN
+            AppOpsManager.MODE_ALLOWED,
     };
 
     /**
@@ -889,6 +901,7 @@ public class AppOpsManager {
             false,
             false,
             false,
+            false
     };
 
     /**
