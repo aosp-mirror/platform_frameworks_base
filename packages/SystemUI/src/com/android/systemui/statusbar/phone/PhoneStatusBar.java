@@ -3028,6 +3028,8 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         updateNotifications();
         resetUserSetupObserver();
         setControllerUsers();
+        clearCurrentMediaNotification();
+        updateMediaMetaData(true);
         if (mFullscreenUserSwitcher != null) {
             mFullscreenUserSwitcher.onUserSwitched(newUserId);
         }
