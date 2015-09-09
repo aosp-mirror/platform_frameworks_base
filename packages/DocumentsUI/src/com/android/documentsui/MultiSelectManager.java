@@ -73,10 +73,10 @@ public final class MultiSelectManager {
     private final List<MultiSelectManager.Callback> mCallbacks = new ArrayList<>(1);
 
     private Adapter<?> mAdapter;
-    private MultiSelectHelper mHelper;
+    private ItemFinder mHelper;
     private boolean mSingleSelect;
 
-    @Nullable private BandSelectManager mBandManager;
+    @Nullable private BandController mBandManager;
 
     /**
      * @param recyclerView
@@ -90,11 +90,13 @@ public final class MultiSelectManager {
 
         this(
                 recyclerView.getAdapter(),
-                new RuntimeRecyclerViewHelper(recyclerView),
+                new RuntimeItemFinder(recyclerView),
                 mode);
 
         if (mode == MODE_MULTIPLE) {
-            mBandManager = new BandSelectManager((RuntimeRecyclerViewHelper) mHelper);
+            mBandManager = new BandController(
+                    mHelper,
+                    new RuntimeBandEnvironment(recyclerView));
         }
 
         GestureDetector.SimpleOnGestureListener listener =
@@ -167,7 +169,7 @@ public final class MultiSelectManager {
      * @hide
      */
     @VisibleForTesting
-    MultiSelectManager(Adapter<?> adapter, MultiSelectHelper helper, int mode) {
+    MultiSelectManager(Adapter<?> adapter, ItemFinder helper, int mode) {
         checkNotNull(adapter, "'adapter' cannot be null.");
         checkNotNull(helper, "'helper' cannot be null.");
 
@@ -730,16 +732,6 @@ public final class MultiSelectManager {
             mTotalSelection = mSavedSelection.clone();
         }
 
-        private boolean flip(int position) {
-            if (contains(position)) {
-                remove(position);
-                return false;
-            } else {
-                add(position);
-                return true;
-            }
-        }
-
         /** @hide */
         @VisibleForTesting
         boolean add(int position) {
@@ -873,109 +865,114 @@ public final class MultiSelectManager {
     }
 
     /**
-     * Provides functionality for MultiSelectManager. In practice, use RuntimeRecyclerViewHelper;
-     * this interface exists only for mocking in tests.
+     * Provides functionality for MultiSelectManager. Exists primarily to tests that are
+     * fully isolated from RecyclerView.
      */
-    interface MultiSelectHelper {
-        int findEventPosition(MotionEvent e);
+    interface ItemFinder {
+        int findItemPosition(MotionEvent e);
+    }
+
+    /** ItemFinder implementation backed by good ol' RecyclerView. */
+    private static final class RuntimeItemFinder implements ItemFinder {
+
+        private final RecyclerView mView;
+
+        RuntimeItemFinder(RecyclerView view) {
+            mView = view;
+        }
+
+        @Override
+        public int findItemPosition(MotionEvent e) {
+            View view = mView.findChildViewUnder(e.getX(), e.getY());
+            return view != null
+                    ? mView.getChildAdapterPosition(view)
+                    : RecyclerView.NO_POSITION;
+        }
     }
 
     /**
-     * Provides functionality for BandSelectManager. In practice, use RuntimeRecyclerViewHelper;
-     * this interface exists only for mocking in tests.
+     * Provides functionality for BandController. Exists primarily to tests that are
+     * fully isolated from RecyclerView.
      */
-    interface BandManagerHelper {
-        void drawBand(Rect rect);
-        void addOnScrollListener(RecyclerView.OnScrollListener listener);
-        int findEventPosition(MotionEvent e);
-        int getHeight();
+    interface BandEnvironment {
+        void showBand(Rect rect);
         void hideBand();
-        void invalidateView();
-        void postRunnable(Runnable r);
-        void removeCallback(Runnable r);
-        void scrollBy(int dy);
-    }
-
-    /**
-     * Provides functionality for BandSelectModel. In practice, use RuntimeRecyclerViewHelper;
-     * this interface exists only for mocking in tests.
-     */
-    interface BandModelHelper {
         void addOnScrollListener(RecyclerView.OnScrollListener listener);
+        void removeOnScrollListener(RecyclerView.OnScrollListener listener);
+        void scrollBy(int dy);
+        int getHeight();
+        void invalidateView();
+        void runAtNextFrame(Runnable r);
+        void removeCallback(Runnable r);
         Point createAbsolutePoint(Point relativePoint);
         Rect getAbsoluteRectForChildViewAt(int index);
         int getAdapterPositionAt(int index);
-        int getNumColumns();
-        int getNumRows();
-        int getTotalChildCount();
+        int getColumnCount();
+        int getRowCount();
+        int getChildCount();
         int getVisibleChildCount();
-        void removeOnScrollListener(RecyclerView.OnScrollListener listener);
     }
 
-    /**
-     * Concrete RecyclerViewHelper implementation for use within the Files app.
-     */
-    private static final class RuntimeRecyclerViewHelper implements MultiSelectHelper,
-            BandManagerHelper, BandModelHelper {
+    /** RvFacade implementation backed by good ol' RecyclerView. */
+    private static final class RuntimeBandEnvironment implements BandEnvironment {
 
-        private final RecyclerView mRecyclerView;
-        private final Drawable mBandSelectRect;
+        private final RecyclerView mView;
+        private final Drawable mBand;
 
         private boolean mIsOverlayShown = false;
 
-        RuntimeRecyclerViewHelper(RecyclerView rv) {
-            mRecyclerView = rv;
-            mBandSelectRect = mRecyclerView.getContext().getTheme().getDrawable(
-                    R.drawable.band_select_overlay);
+        RuntimeBandEnvironment(RecyclerView rv) {
+            mView = rv;
+            mBand = mView.getContext().getTheme().getDrawable(R.drawable.band_select_overlay);
         }
 
         @Override
         public int getAdapterPositionAt(int index) {
-            View child = mRecyclerView.getChildAt(index);
-            return mRecyclerView.getChildViewHolder(child).getAdapterPosition();
+            View child = mView.getChildAt(index);
+            return mView.getChildViewHolder(child).getAdapterPosition();
         }
 
         @Override
         public void addOnScrollListener(OnScrollListener listener) {
-            mRecyclerView.addOnScrollListener(listener);
+            mView.addOnScrollListener(listener);
         }
 
         @Override
         public void removeOnScrollListener(OnScrollListener listener) {
-            mRecyclerView.removeOnScrollListener(listener);
+            mView.removeOnScrollListener(listener);
         }
 
         @Override
         public Point createAbsolutePoint(Point relativePoint) {
-            return new Point(relativePoint.x + mRecyclerView.computeHorizontalScrollOffset(),
-                    relativePoint.y + mRecyclerView.computeVerticalScrollOffset());
+            return new Point(relativePoint.x + mView.computeHorizontalScrollOffset(),
+                    relativePoint.y + mView.computeVerticalScrollOffset());
         }
 
         @Override
         public Rect getAbsoluteRectForChildViewAt(int index) {
-            final View child = mRecyclerView.getChildAt(index);
+            final View child = mView.getChildAt(index);
             final Rect childRect = new Rect();
             child.getHitRect(childRect);
-            childRect.left += mRecyclerView.computeHorizontalScrollOffset();
-            childRect.right += mRecyclerView.computeHorizontalScrollOffset();
-            childRect.top += mRecyclerView.computeVerticalScrollOffset();
-            childRect.bottom += mRecyclerView.computeVerticalScrollOffset();
+            childRect.left += mView.computeHorizontalScrollOffset();
+            childRect.right += mView.computeHorizontalScrollOffset();
+            childRect.top += mView.computeVerticalScrollOffset();
+            childRect.bottom += mView.computeVerticalScrollOffset();
             return childRect;
         }
 
         @Override
+        public int getChildCount() {
+            return mView.getAdapter().getItemCount();
+        }
+
+        @Override
         public int getVisibleChildCount() {
-            return mRecyclerView.getChildCount();
+            return mView.getChildCount();
         }
 
         @Override
-        public int getTotalChildCount() {
-            return mRecyclerView.getAdapter().getItemCount();
-        }
-
-        @Override
-        public int getNumColumns() {
-            LayoutManager layoutManager = mRecyclerView.getLayoutManager();
+        public int getColumnCount() {
+            LayoutManager layoutManager = mView.getLayoutManager();
             if (layoutManager instanceof GridLayoutManager) {
                 return ((GridLayoutManager) layoutManager).getSpanCount();
             }
@@ -985,57 +982,49 @@ public final class MultiSelectManager {
         }
 
         @Override
-        public int getNumRows() {
-            int numFullColumns = getTotalChildCount() / getNumColumns();
-            boolean hasPartiallyFullColumn = getTotalChildCount() % getNumColumns() != 0;
+        public int getRowCount() {
+            int numFullColumns = getChildCount() / getColumnCount();
+            boolean hasPartiallyFullColumn = getChildCount() % getColumnCount() != 0;
             return numFullColumns + (hasPartiallyFullColumn ? 1 : 0);
         }
 
         @Override
-        public int findEventPosition(MotionEvent e) {
-            View view = mRecyclerView.findChildViewUnder(e.getX(), e.getY());
-            return view != null
-                    ? mRecyclerView.getChildAdapterPosition(view)
-                    : RecyclerView.NO_POSITION;
-        }
-
-        @Override
         public int getHeight() {
-            return mRecyclerView.getHeight();
+            return mView.getHeight();
         }
 
         @Override
         public void invalidateView() {
-            mRecyclerView.invalidate();
+            mView.invalidate();
         }
 
         @Override
-        public void postRunnable(Runnable r) {
-            mRecyclerView.postOnAnimation(r);
+        public void runAtNextFrame(Runnable r) {
+            mView.postOnAnimation(r);
         }
 
         @Override
         public void removeCallback(Runnable r) {
-            mRecyclerView.removeCallbacks(r);
+            mView.removeCallbacks(r);
         }
 
         @Override
         public void scrollBy(int dy) {
-            mRecyclerView.scrollBy(0, dy);
+            mView.scrollBy(0, dy);
         }
 
         @Override
-        public void drawBand(Rect rect) {
-            mBandSelectRect.setBounds(rect);
+        public void showBand(Rect rect) {
+            mBand.setBounds(rect);
 
             if (!mIsOverlayShown) {
-                mRecyclerView.getOverlay().add(mBandSelectRect);
+                mView.getOverlay().add(mBand);
             }
         }
 
         @Override
         public void hideBand() {
-            mRecyclerView.getOverlay().remove(mBandSelectRect);
+            mView.getOverlay().remove(mBand);
         }
     }
 
@@ -1172,34 +1161,35 @@ public final class MultiSelectManager {
      * and {@link MultiSelectManager}. This class is responsible for rendering the band select
      * overlay and selecting overlaid items via MultiSelectManager.
      */
-    public class BandSelectManager extends RecyclerView.OnScrollListener
-            implements BandSelectModel.OnSelectionChangedListener {
+    public class BandController extends RecyclerView.OnScrollListener
+            implements GridModel.OnSelectionChangedListener {
 
         private static final int NOT_SET = -1;
 
-        private final BandManagerHelper mHelper;
+        private final ItemFinder mItemFinder;
+        private final BandEnvironment mEnvironment;
         private final Runnable mModelBuilder;
 
         @Nullable private Rect mBounds;
         @Nullable private Point mCurrentPosition;
         @Nullable private Point mOrigin;
-        @Nullable private BandSelectModel mModel;
+        @Nullable private GridModel mModel;
 
         // The time at which the current band selection-induced scroll began. If no scroll is in
         // progress, the value is NOT_SET.
         private long mScrollStartTime = NOT_SET;
         private final Runnable mViewScroller = new ViewScroller();
 
-        public <T extends BandManagerHelper & BandModelHelper>
-                BandSelectManager(final T helper) {
-            mHelper = helper;
-            mHelper.addOnScrollListener(this);
+        public BandController(ItemFinder finder, final BandEnvironment environment) {
+            mItemFinder = finder;
+            mEnvironment = environment;
+            mEnvironment.addOnScrollListener(this);
 
             mModelBuilder = new Runnable() {
                 @Override
                 public void run() {
-                    mModel = new BandSelectModel(helper);
-                    mModel.addOnSelectionChangedListener(BandSelectManager.this);
+                    mModel = new GridModel(environment);
+                    mModel.addOnSelectionChangedListener(BandController.this);
                 }
             };
         }
@@ -1226,7 +1216,8 @@ public final class MultiSelectManager {
             return !isActive()
                     && Events.isMouseEvent(e)  // a mouse
                     && Events.isActionDown(e)  // the initial button press
-                    && mHelper.findEventPosition(e) == RecyclerView.NO_ID;  // in empty space
+                    && mAdapter.getItemCount() > 0
+                    && mItemFinder.findItemPosition(e) == RecyclerView.NO_ID;  // in empty space
         }
 
         boolean shouldStop(InputEvent input) {
@@ -1274,9 +1265,9 @@ public final class MultiSelectManager {
          * Scrolls the view if necessary.
          */
         private void scrollViewIfNecessary() {
-            mHelper.removeCallback(mViewScroller);
+            mEnvironment.removeCallback(mViewScroller);
             mViewScroller.run();
-            mHelper.invalidateView();
+            mEnvironment.invalidateView();
         }
 
         /**
@@ -1288,7 +1279,7 @@ public final class MultiSelectManager {
                     Math.min(mOrigin.y, mCurrentPosition.y),
                     Math.max(mOrigin.x, mCurrentPosition.x),
                     Math.max(mOrigin.y, mCurrentPosition.y));
-            mHelper.drawBand(mBounds);
+            mEnvironment.showBand(mBounds);
         }
 
         /**
@@ -1297,14 +1288,14 @@ public final class MultiSelectManager {
         private void endBandSelect() {
             if (DEBUG) Log.d(TAG, "Ending band select.");
 
-            mHelper.hideBand();
+            mEnvironment.hideBand();
             mSelection.applyProvisionalSelection();
             mModel.endSelection();
             int firstSelected = mModel.getPositionNearestOrigin();
             if (!mSelection.contains(firstSelected)) {
                 Log.w(TAG, "First selected by band is NOT in selection!");
                 // Sadly this is really happening. Need to figure out what's going on.
-            } else if (firstSelected != BandSelectModel.NOT_SET) {
+            } else if (firstSelected != GridModel.NOT_SET) {
                 setSelectionFocusBegin(firstSelected);
             }
 
@@ -1340,8 +1331,8 @@ public final class MultiSelectManager {
                 int pixelsPastView = 0;
                 if (mCurrentPosition.y <= 0) {
                     pixelsPastView = mCurrentPosition.y - 1;
-                } else if (mCurrentPosition.y >= mHelper.getHeight() - 1) {
-                    pixelsPastView = mCurrentPosition.y - mHelper.getHeight() + 1;
+                } else if (mCurrentPosition.y >= mEnvironment.getHeight() - 1) {
+                    pixelsPastView = mCurrentPosition.y - mEnvironment.getHeight() + 1;
                 }
 
                 if (!isActive() || pixelsPastView == 0) {
@@ -1360,10 +1351,10 @@ public final class MultiSelectManager {
                 // Compute the number of pixels to scroll, and scroll that many pixels.
                 final int numPixels = computeScrollDistance(
                         pixelsPastView, System.currentTimeMillis() - mScrollStartTime);
-                mHelper.scrollBy(numPixels);
+                mEnvironment.scrollBy(numPixels);
 
-                mHelper.removeCallback(mViewScroller);
-                mHelper.postRunnable(this);
+                mEnvironment.removeCallback(mViewScroller);
+                mEnvironment.runAtNextFrame(this);
             }
 
             /**
@@ -1376,14 +1367,14 @@ public final class MultiSelectManager {
              * @return
              */
             private int computeScrollDistance(int pixelsPastView, long scrollDuration) {
-                final int maxScrollStep = mHelper.getHeight();
+                final int maxScrollStep = mEnvironment.getHeight();
                 final int direction = (int) Math.signum(pixelsPastView);
                 final int absPastView = Math.abs(pixelsPastView);
 
                 // Calculate the ratio of how far out of the view the pointer currently resides to
                 // the entire height of the view.
                 final float outOfBoundsRatio = Math.min(
-                        1.0f, (float) absPastView / mHelper.getHeight());
+                        1.0f, (float) absPastView / mEnvironment.getHeight());
                 // Interpolate this ratio and use it to compute the maximum scroll that should be
                 // possible for this step.
                 final float cappedScrollStep =
@@ -1446,7 +1437,7 @@ public final class MultiSelectManager {
      * RecyclerView to determine where its items are placed; then, once band selection is underway,
      * it alerts listeners of which items are covered by the selections.
      */
-    public static final class BandSelectModel extends RecyclerView.OnScrollListener {
+    public static final class GridModel extends RecyclerView.OnScrollListener {
 
         public static final int NOT_SET = -1;
 
@@ -1460,8 +1451,9 @@ public final class MultiSelectManager {
         private static final int LOWER_LEFT = LOWER | LEFT;
         private static final int LOWER_RIGHT = LOWER | RIGHT;
 
-        private final BandModelHelper mHelper;
-        private final List<OnSelectionChangedListener> mOnSelectionChangedListeners = new ArrayList<>();
+        private final BandEnvironment mHelper;
+        private final List<OnSelectionChangedListener> mOnSelectionChangedListeners =
+                new ArrayList<>();
 
         // Map from the x-value of the left side of a SparseBooleanArray of adapter positions, keyed
         // by their y-offset. For example, if the first column of the view starts at an x-value of 5,
@@ -1469,15 +1461,13 @@ public final class MultiSelectManager {
         // value for key y is the adapter position for the item whose y-offset is y.
         private final SparseArray<SparseIntArray> mColumns = new SparseArray<>();
 
-        // List of limits along the x-axis. For example, if the view has two columns, this list will
-        // have two elements, each of which lists the lower- and upper-limits of the x-values of the
-        // view items. This list is sorted from furthest left to furthest right.
-        private final List<Limits> mXLimitsList = new ArrayList<>();
+        // List of limits along the x-axis (columns).
+        // This list is sorted from furthest left to furthest right.
+        private final List<Limits> mColumnBounds = new ArrayList<>();
 
-        // Like mXLimitsList, but for y-coordinates. Note that this list only contains items which
-        // have been in the viewport. Thus, limits which exist in an area of the view to which the
-        // view has not scrolled are not present in the list.
-        private final List<Limits> mYLimitsList = new ArrayList<>();
+        // List of limits along the y-axis (rows). Note that this list only contains items which
+        // have been in the viewport.
+        private final List<Limits> mRowBounds = new ArrayList<>();
 
         // The adapter positions which have been recorded so far.
         private final SparseBooleanArray mKnownPositions = new SparseBooleanArray();
@@ -1499,7 +1489,7 @@ public final class MultiSelectManager {
         // should expand from when Shift+click is used.
         private int mPositionNearestOrigin = NOT_SET;
 
-        BandSelectModel(BandModelHelper helper) {
+        GridModel(BandEnvironment helper) {
             mHelper = helper;
             mHelper.addOnScrollListener(this);
         }
@@ -1590,16 +1580,16 @@ public final class MultiSelectManager {
          * @param adapterPosition The position of the child view being processed.
          */
         private void recordItemData(Rect absoluteChildRect, int adapterPosition) {
-            if (mXLimitsList.size() != mHelper.getNumColumns()) {
+            if (mColumnBounds.size() != mHelper.getColumnCount()) {
                 // If not all x-limits have been recorded, record this one.
                 recordLimits(
-                        mXLimitsList, new Limits(absoluteChildRect.left, absoluteChildRect.right));
+                        mColumnBounds, new Limits(absoluteChildRect.left, absoluteChildRect.right));
             }
 
-            if (mYLimitsList.size() != mHelper.getNumRows()) {
+            if (mRowBounds.size() != mHelper.getRowCount()) {
                 // If not all y-limits have been recorded, record this one.
                 recordLimits(
-                        mYLimitsList, new Limits(absoluteChildRect.top, absoluteChildRect.bottom));
+                        mRowBounds, new Limits(absoluteChildRect.top, absoluteChildRect.bottom));
             }
 
             SparseIntArray columnList = mColumns.get(absoluteChildRect.left);
@@ -1640,7 +1630,7 @@ public final class MultiSelectManager {
          * Computes the currently-selected items.
          */
         private void computeCurrentSelection() {
-            if (areItemsCoveredBySelection(mRelativePointer, mRelativeOrigin)) {
+            if (areItemsCoveredByBand(mRelativePointer, mRelativeOrigin)) {
                 updateSelection(computeBounds());
             } else {
                 mSelection.clear();
@@ -1664,17 +1654,17 @@ public final class MultiSelectManager {
          */
         private void updateSelection(Rect rect) {
             int columnStartIndex =
-                    Collections.binarySearch(mXLimitsList, new Limits(rect.left, rect.left));
+                    Collections.binarySearch(mColumnBounds, new Limits(rect.left, rect.left));
             checkState(columnStartIndex >= 0);
             int columnEndIndex = columnStartIndex;
 
-            for (int i = columnStartIndex;
-                    i < mXLimitsList.size() && mXLimitsList.get(i).lowerLimit <= rect.right; i++) {
+            for (int i = columnStartIndex; i < mColumnBounds.size()
+                    && mColumnBounds.get(i).lowerLimit <= rect.right; i++) {
                 columnEndIndex = i;
             }
 
             SparseIntArray firstColumn =
-                    mColumns.get(mXLimitsList.get(columnStartIndex).lowerLimit);
+                    mColumns.get(mColumnBounds.get(columnStartIndex).lowerLimit);
             int rowStartIndex = firstColumn.indexOfKey(rect.top);
             if (rowStartIndex < 0) {
                 mPositionNearestOrigin = NOT_SET;
@@ -1698,7 +1688,7 @@ public final class MultiSelectManager {
                 int columnStartIndex, int columnEndIndex, int rowStartIndex, int rowEndIndex) {
             mSelection.clear();
             for (int column = columnStartIndex; column <= columnEndIndex; column++) {
-                SparseIntArray items = mColumns.get(mXLimitsList.get(column).lowerLimit);
+                SparseIntArray items = mColumns.get(mColumnBounds.get(column).lowerLimit);
                 for (int row = rowStartIndex; row <= rowEndIndex; row++) {
                     int position = items.get(items.keyAt(row));
                     mSelection.append(position, true);
@@ -1760,7 +1750,7 @@ public final class MultiSelectManager {
          * of item columns and the top- and bottom sides of item rows so that it can be determined
          * whether the pointer is located within the bounds of an item.
          */
-        private class Limits implements Comparable<Limits> {
+        private static class Limits implements Comparable<Limits> {
             int lowerLimit;
             int upperLimit;
 
@@ -1798,7 +1788,7 @@ public final class MultiSelectManager {
          * selection of items within those Limits as opposed to a search through every item to see if a
          * given coordinate value falls within those Limits.
          */
-        private class RelativeCoordinate
+        private static class RelativeCoordinate
                 implements Comparable<RelativeCoordinate> {
             /**
              * Location describing points after the last known item.
@@ -1849,8 +1839,7 @@ public final class MultiSelectManager {
              * @param value The coordinate value.
              */
             RelativeCoordinate(List<Limits> limitsList, int value) {
-                Limits dummyLimits = new Limits(value, value);
-                int index = Collections.binarySearch(limitsList, dummyLimits);
+                int index = Collections.binarySearch(limitsList, new Limits(value, value));
 
                 if (index >= 0) {
                     this.type = WITHIN_LIMITS;
@@ -1917,8 +1906,8 @@ public final class MultiSelectManager {
             final RelativeCoordinate yLocation;
 
             RelativePoint(Point point) {
-                this.xLocation = new RelativeCoordinate(mXLimitsList, point.x);
-                this.yLocation = new RelativeCoordinate(mYLimitsList, point.y);
+                this.xLocation = new RelativeCoordinate(mColumnBounds, point.x);
+                this.yLocation = new RelativeCoordinate(mRowBounds, point.y);
             }
 
             @Override
@@ -1940,19 +1929,19 @@ public final class MultiSelectManager {
             Rect rect = new Rect();
             rect.left = getCoordinateValue(
                     min(mRelativeOrigin.xLocation, mRelativePointer.xLocation),
-                    mXLimitsList,
+                    mColumnBounds,
                     true);
             rect.right = getCoordinateValue(
                     max(mRelativeOrigin.xLocation, mRelativePointer.xLocation),
-                    mXLimitsList,
+                    mColumnBounds,
                     false);
             rect.top = getCoordinateValue(
                     min(mRelativeOrigin.yLocation, mRelativePointer.yLocation),
-                    mYLimitsList,
+                    mRowBounds,
                     true);
             rect.bottom = getCoordinateValue(
                     max(mRelativeOrigin.yLocation, mRelativePointer.yLocation),
-                    mYLimitsList,
+                    mRowBounds,
                     false);
             return rect;
         }
@@ -2013,7 +2002,7 @@ public final class MultiSelectManager {
             throw new RuntimeException("Invalid coordinate value.");
         }
 
-        private boolean areItemsCoveredBySelection(
+        private boolean areItemsCoveredByBand(
                 RelativePoint first, RelativePoint second) {
             return doesCoordinateLocationCoverItems(first.xLocation, second.xLocation) &&
                     doesCoordinateLocationCoverItems(first.yLocation, second.yLocation);

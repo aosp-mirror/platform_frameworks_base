@@ -16,25 +16,26 @@
 
 package com.android.documentsui;
 
-import static org.junit.Assert.*;
-
-import com.android.documentsui.MultiSelectManager.BandSelectModel;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.support.v7.widget.RecyclerView.OnScrollListener;
 import android.util.SparseBooleanArray;
 
+import com.android.documentsui.MultiSelectManager.GridModel;
+
 import org.junit.After;
 import org.junit.Test;
 
-public class BandSelectModelTest {
+public class MultiSelectManager_GridModelTest {
 
     private static final int VIEW_PADDING_PX = 5;
     private static final int CHILD_VIEW_EDGE_PX = 100;
     private static final int VIEWPORT_HEIGHT = 500;
 
-    private static BandSelectModel model;
+    private static GridModel model;
     private static TestHelper helper;
     private static SparseBooleanArray lastSelection;
     private static int viewWidth;
@@ -42,14 +43,14 @@ public class BandSelectModelTest {
     private static void setUp(int numChildren, int numColumns) {
         helper = new TestHelper(numChildren, numColumns);
         viewWidth = VIEW_PADDING_PX + numColumns * (VIEW_PADDING_PX + CHILD_VIEW_EDGE_PX);
-        model = new BandSelectModel(helper);
-        model.addOnSelectionChangedListener(new BandSelectModel.OnSelectionChangedListener() {
-
-            @Override
-            public void onSelectionChanged(SparseBooleanArray updatedSelection) {
-                lastSelection = updatedSelection;
-            }
-        });
+        model = new GridModel(helper);
+        model.addOnSelectionChangedListener(
+                new GridModel.OnSelectionChangedListener() {
+                    @Override
+                    public void onSelectionChanged(SparseBooleanArray updatedSelection) {
+                        lastSelection = updatedSelection;
+                    }
+                });
     }
 
     @After
@@ -65,7 +66,7 @@ public class BandSelectModelTest {
         model.startSelection(new Point(0, 10));
         model.resizeSelection(new Point(1, 11));
         assertSelected(new int[0]);
-        assertEquals(BandSelectModel.NOT_SET, model.getPositionNearestOrigin());
+        assertEquals(GridModel.NOT_SET, model.getPositionNearestOrigin());
     }
 
     @Test
@@ -74,7 +75,7 @@ public class BandSelectModelTest {
         model.startSelection(new Point(viewWidth - 1, 10));
         model.resizeSelection(new Point(viewWidth - 2, 11));
         assertSelected(new int[0]);
-        assertEquals(BandSelectModel.NOT_SET, model.getPositionNearestOrigin());
+        assertEquals(GridModel.NOT_SET, model.getPositionNearestOrigin());
     }
 
     @Test
@@ -83,7 +84,7 @@ public class BandSelectModelTest {
         model.startSelection(new Point(10, 0));
         model.resizeSelection(new Point(11, 1));
         assertSelected(new int[0]);
-        assertEquals(BandSelectModel.NOT_SET, model.getPositionNearestOrigin());
+        assertEquals(GridModel.NOT_SET, model.getPositionNearestOrigin());
     }
 
     @Test
@@ -92,7 +93,7 @@ public class BandSelectModelTest {
         model.startSelection(new Point(10, VIEWPORT_HEIGHT - 1));
         model.resizeSelection(new Point(11, VIEWPORT_HEIGHT - 2));
         assertSelected(new int[0]);
-        assertEquals(BandSelectModel.NOT_SET, model.getPositionNearestOrigin());
+        assertEquals(GridModel.NOT_SET, model.getPositionNearestOrigin());
     }
 
     @Test
@@ -101,7 +102,7 @@ public class BandSelectModelTest {
         model.startSelection(new Point(106, 0));
         model.resizeSelection(new Point(107, 200));
         assertSelected(new int[0]);
-        assertEquals(BandSelectModel.NOT_SET, model.getPositionNearestOrigin());
+        assertEquals(GridModel.NOT_SET, model.getPositionNearestOrigin());
     }
 
     @Test
@@ -110,7 +111,7 @@ public class BandSelectModelTest {
         model.startSelection(new Point(0, 105));
         model.resizeSelection(new Point(200, 106));
         assertSelected(new int[0]);
-        assertEquals(BandSelectModel.NOT_SET, model.getPositionNearestOrigin());
+        assertEquals(GridModel.NOT_SET, model.getPositionNearestOrigin());
     }
 
     @Test
@@ -141,7 +142,7 @@ public class BandSelectModelTest {
         assertSelected(new int[] {0});
         model.resizeSelection(new Point(0, 0));
         assertSelected(new int[0]);
-        assertEquals(BandSelectModel.NOT_SET, model.getPositionNearestOrigin());
+        assertEquals(GridModel.NOT_SET, model.getPositionNearestOrigin());
     }
 
     @Test
@@ -191,7 +192,7 @@ public class BandSelectModelTest {
         model.onScrolled(null, 0, dy);
     }
 
-    private static final class TestHelper implements MultiSelectManager.BandModelHelper {
+    private static final class TestHelper implements MultiSelectManager.BandEnvironment {
 
         public int horizontalOffset = 0;
         public int verticalOffset = 0;
@@ -269,18 +270,53 @@ public class BandSelectModelTest {
         }
 
         @Override
-        public int getTotalChildCount() {
+        public int getChildCount() {
             return mNumChildren;
         }
 
         @Override
-        public int getNumColumns() {
+        public int getColumnCount() {
             return mNumColumns;
         }
 
         @Override
-        public int getNumRows() {
+        public int getRowCount() {
             return mNumRows;
+        }
+
+        @Override
+        public void showBand(Rect rect) {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public void hideBand() {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public void scrollBy(int dy) {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public int getHeight() {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public void invalidateView() {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public void runAtNextFrame(Runnable r) {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public void removeCallback(Runnable r) {
+            throw new UnsupportedOperationException();
         }
     }
 }
