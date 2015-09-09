@@ -772,7 +772,7 @@ public class FingerprintManager {
             if (mRemovalCallback != null) {
                 int reqFingerId = mRemovalFingerprint.getFingerId();
                 int reqGroupId = mRemovalFingerprint.getGroupId();
-                if (fingerId != reqFingerId) {
+                if (reqFingerId != 0  &&  fingerId != reqFingerId) {
                     Log.w(TAG, "Finger id didn't match: " + fingerId + " != " + reqFingerId);
                 }
                 if (groupId != reqGroupId) {
@@ -962,4 +962,3 @@ public class FingerprintManager {
     };
 
 }
-
