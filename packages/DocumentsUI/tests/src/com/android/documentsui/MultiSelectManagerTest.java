@@ -285,10 +285,10 @@ public class MultiSelectManagerTest {
         assertEquals(selection.toString(), expected, selection.size());
     }
 
-    private static final class EventHelper implements MultiSelectManager.MultiSelectHelper {
+    private static final class EventHelper implements MultiSelectManager.ItemFinder {
 
         @Override
-        public int findEventPosition(MotionEvent e) {
+        public int findItemPosition(MotionEvent e) {
             throw new UnsupportedOperationException();
         }
     }
