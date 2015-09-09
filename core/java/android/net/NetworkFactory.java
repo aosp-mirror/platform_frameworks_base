@@ -169,7 +169,8 @@ public class NetworkFactory extends Handler {
         }
     }
 
-    private void handleAddRequest(NetworkRequest request, int score) {
+    @VisibleForTesting
+    protected void handleAddRequest(NetworkRequest request, int score) {
         NetworkRequestInfo n = mNetworkRequests.get(request.requestId);
         if (n == null) {
             if (DBG) log("got request " + request + " with score " + score);
@@ -184,7 +185,8 @@ public class NetworkFactory extends Handler {
         evalRequest(n);
     }
 
-    private void handleRemoveRequest(NetworkRequest request) {
+    @VisibleForTesting
+    protected void handleRemoveRequest(NetworkRequest request) {
         NetworkRequestInfo n = mNetworkRequests.get(request.requestId);
         if (n != null) {
             mNetworkRequests.remove(request.requestId);
