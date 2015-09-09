@@ -390,7 +390,8 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
                 serviceIntent.setAction(CameraPrewarmService.ACTION_PREWARM);
                 try {
                     if (getContext().bindServiceAsUser(serviceIntent, mPrewarmConnection,
-                            Context.BIND_AUTO_CREATE, new UserHandle(UserHandle.USER_CURRENT))) {
+                            Context.BIND_AUTO_CREATE | Context.BIND_FOREGROUND_SERVICE,
+                            new UserHandle(UserHandle.USER_CURRENT))) {
                         mPrewarmBound = true;
                     }
                 } catch (SecurityException e) {
