@@ -71,7 +71,7 @@ public class NinePatch {
      *
      * @hide
      */
-    public final long mNativeChunk;
+    public long mNativeChunk;
 
     private Paint mPaint;
     private String mSrcName;
@@ -121,6 +121,7 @@ public class NinePatch {
             if (mNativeChunk != 0) {
                 // only attempt to destroy correctly initilized chunks
                 nativeFinalize(mNativeChunk);
+                mNativeChunk = 0;
             }
         } finally {
             super.finalize();

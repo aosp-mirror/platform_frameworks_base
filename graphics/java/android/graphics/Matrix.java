@@ -827,6 +827,7 @@ public class Matrix {
     protected void finalize() throws Throwable {
         try {
             finalizer(native_instance);
+            native_instance = 0;  // Other finalizers can still call us.
         } finally {
             super.finalize();
         }
