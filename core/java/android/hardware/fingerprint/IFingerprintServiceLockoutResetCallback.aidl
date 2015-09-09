@@ -23,6 +23,8 @@ import android.os.UserHandle;
  * Callback when lockout period expired and clients are allowed to authenticate again.
  * @hide
  */
-oneway interface IFingerprintServiceLockoutResetCallback {
+interface IFingerprintServiceLockoutResetCallback {
+
+    /** Method is synchronous so wakelock is held when this is called from a WAKEUP alarm. */
     void onLockoutReset(long deviceId);
 }
