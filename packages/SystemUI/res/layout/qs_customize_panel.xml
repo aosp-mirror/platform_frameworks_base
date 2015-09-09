@@ -21,13 +21,58 @@
     android:orientation="vertical"
     android:background="?android:attr/windowBackground">
 
-    <Toolbar
-        android:id="@*android:id/action_bar"
+    <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:navigationContentDescription="@*android:string/action_bar_up_description"
-        android:background="?android:attr/colorPrimary"
-        style="?android:attr/toolbarStyle" />
+        android:background="?android:attr/colorPrimary">
+
+        <LinearLayout
+            android:id="@+id/drag_buttons"
+            android:layout_width="match_parent"
+            android:layout_height="fill_parent"
+            android:orientation="horizontal">
+            <FrameLayout
+                android:layout_width="0dp"
+                android:layout_height="fill_parent"
+                android:layout_weight="1">
+                <com.android.systemui.qs.customize.DropButton
+                    android:id="@+id/info_button"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:gravity="center"
+                    android:drawableStart="@drawable/ic_info"
+                    android:drawablePadding="10dp"
+                    android:textAppearance="?android:attr/textAppearanceMedium"
+                    android:textColor="@android:color/white"
+                    android:text="@string/qs_customize_info" />
+            </FrameLayout>
+            <FrameLayout
+                android:layout_width="0dp"
+                android:layout_height="fill_parent"
+                android:layout_weight="1">
+                <com.android.systemui.qs.customize.DropButton
+                    android:id="@+id/remove_button"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:gravity="center"
+                    android:drawableStart="@drawable/ic_close_white"
+                    android:drawablePadding="10dp"
+                    android:textAppearance="?android:attr/textAppearanceMedium"
+                    android:textColor="@android:color/white"
+                    android:text="@string/qs_customize_remove" />
+            </FrameLayout>
+        </LinearLayout>
+
+        <Toolbar
+            android:id="@*android:id/action_bar"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:navigationContentDescription="@*android:string/action_bar_up_description"
+            style="?android:attr/toolbarStyle"
+            android:background="?android:attr/colorPrimary" />
+    </FrameLayout>
 
     <com.android.systemui.tuner.AutoScrollView
         android:layout_width="match_parent"
