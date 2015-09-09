@@ -82,7 +82,7 @@ public class AccountManagerServiceTest extends AndroidTestCase {
         mAms.addAccountExplicitly(a31, "p31", null);
         mAms.addAccountExplicitly(a32, "p32", null);
 
-        Account[] accounts = mAms.getAccounts(null);
+        Account[] accounts = mAms.getAccounts(null, mContext.getOpPackageName());
         Arrays.sort(accounts, new AccountSorter());
         assertEquals(6, accounts.length);
         assertEquals(a11, accounts[0]);
@@ -92,7 +92,7 @@ public class AccountManagerServiceTest extends AndroidTestCase {
         assertEquals(a22, accounts[4]);
         assertEquals(a32, accounts[5]);
 
-        accounts = mAms.getAccounts("type1" );
+        accounts = mAms.getAccounts("type1", mContext.getOpPackageName());
         Arrays.sort(accounts, new AccountSorter());
         assertEquals(3, accounts.length);
         assertEquals(a11, accounts[0]);
@@ -101,7 +101,7 @@ public class AccountManagerServiceTest extends AndroidTestCase {
 
         mAms.removeAccountInternal(a21);
 
-        accounts = mAms.getAccounts("type1" );
+        accounts = mAms.getAccounts("type1", mContext.getOpPackageName());
         Arrays.sort(accounts, new AccountSorter());
         assertEquals(2, accounts.length);
         assertEquals(a11, accounts[0]);

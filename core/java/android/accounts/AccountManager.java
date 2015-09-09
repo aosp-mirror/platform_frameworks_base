@@ -426,7 +426,7 @@ public class AccountManager {
     @RequiresPermission(GET_ACCOUNTS)
     public Account[] getAccounts() {
         try {
-            return mService.getAccounts(null);
+            return mService.getAccounts(null, mContext.getOpPackageName());
         } catch (RemoteException e) {
             // won't ever happen
             throw new RuntimeException(e);
@@ -451,7 +451,7 @@ public class AccountManager {
     @RequiresPermission(GET_ACCOUNTS)
     public Account[] getAccountsAsUser(int userId) {
         try {
-            return mService.getAccountsAsUser(null, userId);
+            return mService.getAccountsAsUser(null, userId, mContext.getOpPackageName());
         } catch (RemoteException e) {
             // won't ever happen
             throw new RuntimeException(e);
@@ -468,7 +468,7 @@ public class AccountManager {
      */
     public Account[] getAccountsForPackage(String packageName, int uid) {
         try {
-            return mService.getAccountsForPackage(packageName, uid);
+            return mService.getAccountsForPackage(packageName, uid, mContext.getOpPackageName());
         } catch (RemoteException re) {
             // won't ever happen
             throw new RuntimeException(re);
@@ -485,7 +485,8 @@ public class AccountManager {
      */
     public Account[] getAccountsByTypeForPackage(String type, String packageName) {
         try {
-            return mService.getAccountsByTypeForPackage(type, packageName);
+            return mService.getAccountsByTypeForPackage(type, packageName,
+                    mContext.getOpPackageName());
         } catch (RemoteException re) {
             // won't ever happen
             throw new RuntimeException(re);
@@ -522,7 +523,8 @@ public class AccountManager {
     /** @hide Same as {@link #getAccountsByType(String)} but for a specific user. */
     public Account[] getAccountsByTypeAsUser(String type, UserHandle userHandle) {
         try {
-            return mService.getAccountsAsUser(type, userHandle.getIdentifier());
+            return mService.getAccountsAsUser(type, userHandle.getIdentifier(),
+                    mContext.getOpPackageName());
         } catch (RemoteException e) {
             // won't ever happen
             throw new RuntimeException(e);
@@ -610,7 +612,7 @@ public class AccountManager {
         if (features == null) throw new IllegalArgumentException("features is null");
         return new Future2Task<Boolean>(handler, callback) {
             public void doWork() throws RemoteException {
-                mService.hasFeatures(mResponse, account, features);
+                mService.hasFeatures(mResponse, account, features, mContext.getOpPackageName());
             }
             public Boolean bundleToResult(Bundle bundle) throws AuthenticatorException {
                 if (!bundle.containsKey(KEY_BOOLEAN_RESULT)) {
@@ -662,7 +664,8 @@ public class AccountManager {
         if (type == null) throw new IllegalArgumentException("type is null");
         return new Future2Task<Account[]>(handler, callback) {
             public void doWork() throws RemoteException {
-                mService.getAccountsByFeatures(mResponse, type, features);
+                mService.getAccountsByFeatures(mResponse, type, features,
+                        mContext.getOpPackageName());
             }
             public Account[] bundleToResult(Bundle bundle) throws AuthenticatorException {
                 if (!bundle.containsKey(KEY_ACCOUNTS)) {
