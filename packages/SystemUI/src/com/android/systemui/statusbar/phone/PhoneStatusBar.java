@@ -289,6 +289,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
     private DozeServiceHost mDozeServiceHost;
     private boolean mWakeUpComingFromTouch;
     private PointF mWakeUpTouchLocation;
+    private boolean mScreenTurningOn;
 
     int mPixelFormat;
     Object mQueueLock = new Object();
@@ -3921,6 +3922,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
     }
 
     public void onScreenTurningOn() {
+        mScreenTurningOn = true;
         mNotificationPanel.onScreenTurningOn();
         if (mLaunchCameraOnScreenTurningOn) {
             mNotificationPanel.launchCamera(false);
@@ -3933,6 +3935,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
     }
 
     public void onScreenTurnedOn() {
+        mScreenTurningOn = false;
         mDozeScrimController.onScreenTurnedOn();
     }
 
@@ -4108,7 +4111,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
                 mScrimController.dontAnimateBouncerChangesUntilNextFrame();
                 mGestureWakeLock.acquire(LAUNCH_TRANSITION_TIMEOUT_MS + 1000L);
             }
-            if (mStatusBarKeyguardViewManager.isScreenTurnedOn()) {
+            if (mScreenTurningOn || mStatusBarKeyguardViewManager.isScreenTurnedOn()) {
                 mNotificationPanel.launchCamera(mDeviceInteractive /* animate */);
             } else {
                 // We need to defer the camera launch until the screen comes on, since otherwise
