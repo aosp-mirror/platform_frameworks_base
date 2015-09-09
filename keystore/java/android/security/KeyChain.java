@@ -374,7 +374,7 @@ public final class KeyChain {
                 throw new KeyChainException("keystore had a problem");
             }
             return AndroidKeyStoreProvider.loadAndroidKeyStorePrivateKeyFromKeystore(
-                    KeyStore.getInstance(), keyId);
+                    KeyStore.getInstance(), keyId, KeyStore.UID_SELF);
         } catch (RemoteException e) {
             throw new KeyChainException(e);
         } catch (RuntimeException e) {

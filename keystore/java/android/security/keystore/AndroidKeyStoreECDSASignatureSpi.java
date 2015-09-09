@@ -155,9 +155,9 @@ abstract class AndroidKeyStoreECDSASignatureSpi extends AndroidKeyStoreSignature
 
         KeyCharacteristics keyCharacteristics = new KeyCharacteristics();
         int errorCode = getKeyStore().getKeyCharacteristics(
-                key.getAlias(), null, null, keyCharacteristics);
+                key.getAlias(), null, null, key.getUid(), keyCharacteristics);
         if (errorCode != KeyStore.NO_ERROR) {
-            throw getKeyStore().getInvalidKeyException(key.getAlias(), errorCode);
+            throw getKeyStore().getInvalidKeyException(key.getAlias(), key.getUid(), errorCode);
         }
         long keySizeBits = keyCharacteristics.getUnsignedInt(KeymasterDefs.KM_TAG_KEY_SIZE, -1);
         if (keySizeBits == -1) {

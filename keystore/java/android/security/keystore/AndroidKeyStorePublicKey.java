@@ -28,8 +28,8 @@ public class AndroidKeyStorePublicKey extends AndroidKeyStoreKey implements Publ
 
     private final byte[] mEncoded;
 
-    public AndroidKeyStorePublicKey(String alias, String algorithm, byte[] x509EncodedForm) {
-        super(alias, algorithm);
+    public AndroidKeyStorePublicKey(String alias, int uid, String algorithm, byte[] x509EncodedForm) {
+        super(alias, uid, algorithm);
         mEncoded = ArrayUtils.cloneIfNotEmpty(x509EncodedForm);
     }
 

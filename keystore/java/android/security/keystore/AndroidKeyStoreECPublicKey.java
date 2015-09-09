@@ -30,15 +30,15 @@ public class AndroidKeyStoreECPublicKey extends AndroidKeyStorePublicKey impleme
     private final ECParameterSpec mParams;
     private final ECPoint mW;
 
-    public AndroidKeyStoreECPublicKey(String alias, byte[] x509EncodedForm, ECParameterSpec params,
+    public AndroidKeyStoreECPublicKey(String alias, int uid, byte[] x509EncodedForm, ECParameterSpec params,
             ECPoint w) {
-        super(alias, KeyProperties.KEY_ALGORITHM_EC, x509EncodedForm);
+        super(alias, uid, KeyProperties.KEY_ALGORITHM_EC, x509EncodedForm);
         mParams = params;
         mW = w;
     }
 
-    public AndroidKeyStoreECPublicKey(String alias, ECPublicKey info) {
-        this(alias, info.getEncoded(), info.getParams(), info.getW());
+    public AndroidKeyStoreECPublicKey(String alias, int uid, ECPublicKey info) {
+        this(alias, uid, info.getEncoded(), info.getParams(), info.getW());
         if (!"X.509".equalsIgnoreCase(info.getFormat())) {
             throw new IllegalArgumentException(
                     "Unsupported key export format: " + info.getFormat());

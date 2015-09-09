@@ -29,8 +29,8 @@ public class AndroidKeyStoreRSAPrivateKey extends AndroidKeyStorePrivateKey impl
 
     private final BigInteger mModulus;
 
-    public AndroidKeyStoreRSAPrivateKey(String alias, BigInteger modulus) {
-        super(alias, KeyProperties.KEY_ALGORITHM_RSA);
+    public AndroidKeyStoreRSAPrivateKey(String alias, int uid, BigInteger modulus) {
+        super(alias, uid, KeyProperties.KEY_ALGORITHM_RSA);
         mModulus = modulus;
     }
 

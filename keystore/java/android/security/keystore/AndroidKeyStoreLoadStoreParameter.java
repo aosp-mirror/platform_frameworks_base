@@ -16,16 +16,23 @@
 
 package android.security.keystore;
 
-import java.security.PrivateKey;
+import java.security.KeyStore;
+import java.security.KeyStore.ProtectionParameter;
 
-/**
- * {@link PrivateKey} backed by Android Keystore.
- *
- * @hide
- */
-public class AndroidKeyStorePrivateKey extends AndroidKeyStoreKey implements PrivateKey {
+class AndroidKeyStoreLoadStoreParameter implements KeyStore.LoadStoreParameter {
 
-    public AndroidKeyStorePrivateKey(String alias, int uid, String algorithm) {
-        super(alias, uid, algorithm);
+    private final int mUid;
+
+    AndroidKeyStoreLoadStoreParameter(int uid) {
+        mUid = uid;
+    }
+
+    @Override
+    public ProtectionParameter getProtectionParameter() {
+        return null;
+    }
+
+    int getUid() {
+        return mUid;
     }
 }
