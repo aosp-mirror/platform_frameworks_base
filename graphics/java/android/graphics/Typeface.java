@@ -358,6 +358,7 @@ public class Typeface {
     protected void finalize() throws Throwable {
         try {
             nativeUnref(native_instance);
+            native_instance = 0;  // Other finalizers can still call us.
         } finally {
             super.finalize();
         }
