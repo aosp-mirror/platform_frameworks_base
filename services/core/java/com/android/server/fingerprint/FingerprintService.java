@@ -21,10 +21,15 @@ import android.app.ActivityManager;
 import android.app.ActivityManager.RunningAppProcessInfo;
 import android.app.ActivityManager.RunningTaskInfo;
 import android.app.ActivityManagerNative;
+import android.app.AlarmManager;
 import android.app.AppOpsManager;
 import android.app.IUserSwitchObserver;
+import android.app.PendingIntent;
 import android.content.ComponentName;
+import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.content.pm.UserInfo;
 import android.hardware.fingerprint.IFingerprintServiceLockoutResetCallback;
@@ -85,6 +90,8 @@ public class FingerprintService extends SystemService implements IBinder.DeathRe
     private static final String FINGERPRINTD = "android.hardware.fingerprint.IFingerprintDaemon";
     private static final int MSG_USER_SWITCHING = 10;
     private static final int ENROLLMENT_TIMEOUT_MS = 60 * 1000; // 1 minute
+    private static final String ACTION_LOCKOUT_RESET =
+            "com.android.server.fingerprint.ACTION_LOCKOUT_RESET";
 
     private ClientMonitor mAuthClient = null;
     private ClientMonitor mEnrollClient = null;
@@ -118,9 +125,19 @@ public class FingerprintService extends SystemService implements IBinder.DeathRe
     private long mHalDeviceId;
     private int mFailedAttempts;
     private IFingerprintDaemon mDaemon;
-    private PowerManager mPowerManager;
+    private final PowerManager mPowerManager;
+    private final AlarmManager mAlarmManager;
 
-    private final Runnable mLockoutReset = new Runnable() {
+    private final BroadcastReceiver mLockoutReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if (ACTION_LOCKOUT_RESET.equals(intent.getAction())) {
+                resetFailedAttempts();
+            }
+        }
+    };
+
+    private final Runnable mResetFailedAttemptsRunnable = new Runnable() {
         @Override
         public void run() {
             resetFailedAttempts();
@@ -133,7 +150,10 @@ public class FingerprintService extends SystemService implements IBinder.DeathRe
         mKeyguardPackage = ComponentName.unflattenFromString(context.getResources().getString(
                 com.android.internal.R.string.config_keyguardComponent)).getPackageName();
         mAppOps = context.getSystemService(AppOpsManager.class);
-        mPowerManager = (PowerManager) mContext.getSystemService(Context.POWER_SERVICE);
+        mPowerManager = mContext.getSystemService(PowerManager.class);
+        mAlarmManager = mContext.getSystemService(AlarmManager.class);
+        mContext.registerReceiver(mLockoutReceiver, new IntentFilter(ACTION_LOCKOUT_RESET),
+                RESET_FINGERPRINT_LOCKOUT, null /* handler */);
     }
 
     @Override
@@ -262,14 +282,28 @@ public class FingerprintService extends SystemService implements IBinder.DeathRe
         return mFailedAttempts >= MAX_FAILED_ATTEMPTS;
     }
 
+    private void scheduleLockoutReset() {
+        mAlarmManager.set(AlarmManager.ELAPSED_REALTIME_WAKEUP,
+                SystemClock.elapsedRealtime() + FAIL_LOCKOUT_TIMEOUT_MS, getLockoutResetIntent());
+    }
+
+    private void cancelLockoutReset() {
+        mAlarmManager.cancel(getLockoutResetIntent());
+    }
+
+    private PendingIntent getLockoutResetIntent() {
+        return PendingIntent.getBroadcast(mContext, 0,
+                new Intent(ACTION_LOCKOUT_RESET), PendingIntent.FLAG_UPDATE_CURRENT);
+    }
+
     private void resetFailedAttempts() {
         if (DEBUG && inLockoutMode()) {
             Slog.v(TAG, "Reset fingerprint lockout");
         }
         mFailedAttempts = 0;
-        // If we're asked to reset failed attempts externally (i.e. from Keyguard), the runnable
-        // may still be in the queue; remove it.
-        mHandler.removeCallbacks(mLockoutReset);
+        // If we're asked to reset failed attempts externally (i.e. from Keyguard), the alarm might
+        // still be pending; remove it.
+        cancelLockoutReset();
         notifyLockoutResetMonitors();
     }
 
@@ -277,8 +311,7 @@ public class FingerprintService extends SystemService implements IBinder.DeathRe
         mFailedAttempts++;
         if (inLockoutMode()) {
             // Failing multiple times will continue to push out the lockout time.
-            mHandler.removeCallbacks(mLockoutReset);
-            mHandler.postDelayed(mLockoutReset, FAIL_LOCKOUT_TIMEOUT_MS);
+            scheduleLockoutReset();
             if (clientMonitor != null
                     && !clientMonitor.sendError(FingerprintManager.FINGERPRINT_ERROR_LOCKOUT)) {
                 Slog.w(TAG, "Cannot send lockout message to client");
@@ -683,7 +716,7 @@ public class FingerprintService extends SystemService implements IBinder.DeathRe
                     FingerprintUtils.vibrateFingerprintSuccess(getContext());
                 }
                 result |= true; // we have a valid fingerprint
-                mHandler.post(mLockoutReset);
+                resetFailedAttempts();
             }
             return result;
         }
@@ -1016,7 +1049,7 @@ public class FingerprintService extends SystemService implements IBinder.DeathRe
         public void resetTimeout(byte [] token) {
             checkPermission(RESET_FINGERPRINT_LOCKOUT);
             // TODO: confirm security token when we move timeout management into the HAL layer.
-            mHandler.post(mLockoutReset);
+            mHandler.post(mResetFailedAttemptsRunnable);
         }
 
         @Override
