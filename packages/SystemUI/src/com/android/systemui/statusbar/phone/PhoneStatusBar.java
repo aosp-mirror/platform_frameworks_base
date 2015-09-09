@@ -3929,7 +3929,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
     }
 
     private void vibrateForCameraGesture() {
-        mVibrator.vibrate(1000L);
+        mVibrator.vibrate(750L);
     }
 
     public void onScreenTurnedOn() {
