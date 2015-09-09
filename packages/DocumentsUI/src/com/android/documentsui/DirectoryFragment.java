@@ -1824,7 +1824,7 @@ public class DirectoryFragment extends Fragment {
             // position by 1.
             final int originalPos = position;
             final int size = mMarkedForDeletion.size();
-            for (int i = 0; i <= size; ++i) {
+            for (int i = 0; i < size; ++i) {
                 // It'd be more concise, but less efficient, to iterate over positions while calling
                 // mMarkedForDeletion.get.  Instead, iterate over deleted entries.
                 if (mMarkedForDeletion.keyAt(i) <= position && mMarkedForDeletion.valueAt(i)) {
