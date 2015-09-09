@@ -93,13 +93,14 @@ public:
      * look in multiple places for assets.  It can be either a directory (for
      * finding assets as raw files on the disk) or a ZIP file.  This newly
      * added asset path will be examined first when searching for assets,
-     * before any that were previously added.
+     * before any that were previously added, the assets are added as shared
+     * library if appAsLib is true.
      *
      * Returns "true" on success, "false" on failure.  If 'cookie' is non-NULL,
      * then on success, *cookie is set to the value corresponding to the
      * newly-added asset source.
      */
-    bool addAssetPath(const String8& path, int32_t* cookie);
+    bool addAssetPath(const String8& path, int32_t* cookie, bool appAsLib=false);
     bool addOverlayPath(const String8& path, int32_t* cookie);
 
     /*                                                                       
@@ -280,7 +281,7 @@ private:
     const ResTable* getResTable(bool required = true) const;
     void setLocaleLocked(const char* locale);
     void updateResourceParamsLocked() const;
-    bool appendPathToResTable(const asset_path& ap) const;
+    bool appendPathToResTable(const asset_path& ap, bool appAsLib=false) const;
 
     Asset* openIdmapLocked(const struct asset_path& ap) const;
 

@@ -610,14 +610,28 @@ public final class AssetManager implements AutoCloseable {
      * {@hide}
      */
     public final int addAssetPath(String path) {
+        return  addAssetPathInternal(path, false);
+    }
+
+    /**
+     * Add an application assets to the asset manager and loading it as shared library.
+     * This can be either a directory or ZIP file.  Not for use by applications.  Returns
+     * the cookie of the added asset, or 0 on failure.
+     * {@hide}
+     */
+    public final int addAssetPathAsSharedLibrary(String path) {
+        return addAssetPathInternal(path, true);
+    }
+
+    private final int addAssetPathInternal(String path, boolean appAsLib) {
         synchronized (this) {
-            int res = addAssetPathNative(path);
+            int res = addAssetPathNative(path, appAsLib);
             makeStringBlocks(mStringBlocks);
             return res;
         }
     }
 
-    private native final int addAssetPathNative(String path);
+    private native final int addAssetPathNative(String path, boolean appAsLib);
 
      /**
      * Add a set of assets to overlay an already added set of assets.

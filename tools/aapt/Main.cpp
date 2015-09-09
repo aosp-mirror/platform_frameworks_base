@@ -200,6 +200,9 @@ void usage(void)
         "   --shared-lib\n"
         "       Make a shared library resource package that can be loaded by an application\n"
         "       at runtime to access the libraries resources. Implies --non-constant-id.\n"
+        "   --app-as-shared-lib\n"
+        "       Make an app resource package that also can be loaded as shared library at runtime.\n"
+        "       Implies --non-constant-id.\n"
         "   --error-on-failed-insert\n"
         "       Forces aapt to return an error if it fails to insert values into the manifest\n"
         "       with --debug-mode, --min-sdk-version, --target-sdk-version --version-code\n"
@@ -668,6 +671,9 @@ int main(int argc, char* const argv[])
                 } else if (strcmp(cp, "-shared-lib") == 0) {
                     bundle.setNonConstantId(true);
                     bundle.setBuildSharedLibrary(true);
+                } else if (strcmp(cp, "-app-as-shared-lib") == 0) {
+                    bundle.setNonConstantId(true);
+                    bundle.setBuildAppAsSharedLibrary(true);
                 } else if (strcmp(cp, "-no-crunch") == 0) {
                     bundle.setUseCrunchCache(true);
                 } else if (strcmp(cp, "-ignore-assets") == 0) {
