@@ -22,7 +22,6 @@ import android.animation.ObjectAnimator;
 import android.animation.PropertyValuesHolder;
 import android.animation.ValueAnimator;
 import android.app.ActivityManager;
-import android.app.ActivityManager.RunningTaskInfo;
 import android.content.Context;
 import android.content.pm.ResolveInfo;
 import android.content.res.Configuration;
@@ -50,6 +49,7 @@ import com.android.systemui.DejankUtils;
 import com.android.systemui.EventLogConstants;
 import com.android.systemui.EventLogTags;
 import com.android.systemui.R;
+import com.android.systemui.classifier.FalsingManager;
 import com.android.systemui.qs.QSContainer;
 import com.android.systemui.qs.QSPanel;
 import com.android.systemui.statusbar.ExpandableNotificationRow;
@@ -59,7 +59,6 @@ import com.android.systemui.statusbar.GestureRecorder;
 import com.android.systemui.statusbar.KeyguardAffordanceView;
 import com.android.systemui.statusbar.NotificationData;
 import com.android.systemui.statusbar.StatusBarState;
-import com.android.systemui.analytics.LockedPhoneAnalytics;
 import com.android.systemui.statusbar.policy.HeadsUpManager;
 import com.android.systemui.statusbar.policy.KeyguardUserSwitcher;
 import com.android.systemui.statusbar.stack.NotificationStackScrollLayout;
@@ -204,7 +203,7 @@ public class NotificationPanelView extends PanelView implements
     private boolean mClosingWithAlphaFadeOut;
     private boolean mHeadsUpAnimatingAway;
     private boolean mLaunchingAffordance;
-    private LockedPhoneAnalytics mLockedPhoneAnalytics;
+    private FalsingManager mFalsingManager;
 
     private Runnable mHeadsUpExistenceChangedRunnable = new Runnable() {
         @Override
@@ -221,7 +220,7 @@ public class NotificationPanelView extends PanelView implements
     public NotificationPanelView(Context context, AttributeSet attrs) {
         super(context, attrs);
         setWillNotDraw(!DEBUG);
-        mLockedPhoneAnalytics = LockedPhoneAnalytics.getInstance(context);
+        mFalsingManager = FalsingManager.getInstance(context);
     }
 
     public void setStatusBar(PhoneStatusBar bar) {
@@ -813,7 +812,7 @@ public class NotificationPanelView extends PanelView implements
     private void handleQsDown(MotionEvent event) {
         if (event.getActionMasked() == MotionEvent.ACTION_DOWN
                 && shouldQuickSettingsIntercept(event.getX(), event.getY(), -1)) {
-            mLockedPhoneAnalytics.onQsDown();
+            mFalsingManager.onQsDown();
             mQsTracking = true;
             onQsExpansionStarted();
             mInitialHeightOnTouch = mQsExpansionHeight;
@@ -981,7 +980,7 @@ public class NotificationPanelView extends PanelView implements
             mQsExpanded = expanded;
             updateQsState();
             requestPanelHeightUpdate();
-            mLockedPhoneAnalytics.setQsExpanded(expanded);
+            mFalsingManager.setQsExpanded(expanded);
             mNotificationStackScroller.setInterceptDelegateEnabled(expanded);
             mStatusBar.setQsExpanded(expanded);
             mQsPanel.setExpanded(expanded);
@@ -1308,7 +1307,7 @@ public class NotificationPanelView extends PanelView implements
                     R.string.accessibility_desc_quick_settings));
             mLastAnnouncementWasQuickSettings = true;
         }
-        if (mQsFullyExpanded && mLockedPhoneAnalytics.shouldEnforceBouncer()) {
+        if (mQsFullyExpanded && mFalsingManager.shouldEnforceBouncer()) {
             mStatusBar.executeRunnableDismissingKeyguard(null, null /* cancelAction */,
                     false /* dismissShade */, true /* afterKeyguardGone */);
         }
@@ -1839,7 +1838,7 @@ public class NotificationPanelView extends PanelView implements
 
     @Override
     protected void onTrackingStarted() {
-        mLockedPhoneAnalytics.onTrackingStarted();
+        mFalsingManager.onTrackingStarted();
         super.onTrackingStarted();
         if (mQsFullyExpanded) {
             mQsExpandImmediate = true;
@@ -1853,7 +1852,7 @@ public class NotificationPanelView extends PanelView implements
 
     @Override
     protected void onTrackingStopped(boolean expand) {
-        mLockedPhoneAnalytics.onTrackingStopped();
+        mFalsingManager.onTrackingStopped();
         super.onTrackingStopped(expand);
         if (expand) {
             mNotificationStackScroller.setOverScrolledPixels(
@@ -1953,8 +1952,8 @@ public class NotificationPanelView extends PanelView implements
             EventLogTags.writeSysuiLockscreenGesture(
                     EventLogConstants.SYSUI_LOCKSCREEN_GESTURE_SWIPE_DIALER, lengthDp, velocityDp);
 
-            mLockedPhoneAnalytics.onLeftAffordanceOn();
-            if (mLockedPhoneAnalytics.shouldEnforceBouncer()) {
+            mFalsingManager.onLeftAffordanceOn();
+            if (mFalsingManager.shouldEnforceBouncer()) {
                 mStatusBar.executeRunnableDismissingKeyguard(new Runnable() {
                     @Override
                     public void run() {
@@ -1969,8 +1968,8 @@ public class NotificationPanelView extends PanelView implements
             EventLogTags.writeSysuiLockscreenGesture(
                     EventLogConstants.SYSUI_LOCKSCREEN_GESTURE_SWIPE_CAMERA, lengthDp, velocityDp);
 
-            mLockedPhoneAnalytics.onCameraOn();
-            if (mLockedPhoneAnalytics.shouldEnforceBouncer()) {
+            mFalsingManager.onCameraOn();
+            if (mFalsingManager.shouldEnforceBouncer()) {
                 mStatusBar.executeRunnableDismissingKeyguard(new Runnable() {
                     @Override
                     public void run() {
@@ -2024,7 +2023,7 @@ public class NotificationPanelView extends PanelView implements
 
     @Override
     public void onSwipingStarted(boolean rightIcon) {
-        mLockedPhoneAnalytics.onAffordanceSwipingStarted(rightIcon);
+        mFalsingManager.onAffordanceSwipingStarted(rightIcon);
         boolean camera = getLayoutDirection() == LAYOUT_DIRECTION_RTL ? !rightIcon
                 : rightIcon;
         if (camera) {
@@ -2037,7 +2036,7 @@ public class NotificationPanelView extends PanelView implements
 
     @Override
     public void onSwipingAborted() {
-        mLockedPhoneAnalytics.onAffordanceSwipingAborted();
+        mFalsingManager.onAffordanceSwipingAborted();
         mKeyguardBottomArea.unbindCameraPrewarmService(false /* launched */);
     }
 

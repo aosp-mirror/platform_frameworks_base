@@ -24,7 +24,6 @@ import android.graphics.drawable.AnimatedVectorDrawable;
 import android.graphics.drawable.AnimationDrawable;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
-import android.graphics.drawable.RippleDrawable;
 import android.service.notification.StatusBarNotification;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
@@ -35,7 +34,7 @@ import android.view.animation.LinearInterpolator;
 import android.widget.ImageView;
 
 import com.android.systemui.R;
-import com.android.systemui.analytics.LockedPhoneAnalytics;
+import com.android.systemui.classifier.FalsingManager;
 import com.android.systemui.statusbar.phone.NotificationGroupManager;
 import com.android.systemui.statusbar.phone.PhoneStatusBar;
 import com.android.systemui.statusbar.stack.NotificationChildrenContainer;
@@ -111,7 +110,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
                     !mChildrenExpanded);
         }
     };
-    private LockedPhoneAnalytics mLockedPhoneAnalytics;
+    private FalsingManager mFalsingManager;
 
     private boolean mJustClicked;
 
@@ -327,7 +326,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
 
     public ExpandableNotificationRow(Context context, AttributeSet attrs) {
         super(context, attrs);
-        mLockedPhoneAnalytics = LockedPhoneAnalytics.getInstance(context);
+        mFalsingManager = FalsingManager.getInstance(context);
     }
 
     /**
@@ -515,7 +514,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
      * @param userExpanded whether the user wants this notification to be expanded
      */
     public void setUserExpanded(boolean userExpanded) {
-        mLockedPhoneAnalytics.setNotificationExpanded();
+        mFalsingManager.setNotificationExpanded();
         if (userExpanded && !mExpandable) return;
         final boolean wasExpanded = isExpanded();
         mHasUserChangedExpansion = true;

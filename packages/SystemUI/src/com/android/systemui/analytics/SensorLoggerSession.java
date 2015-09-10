@@ -57,7 +57,7 @@ public class SensorLoggerSession {
         mResult = result;
         mEndTimestampMillis = endTimestampMillis;
 
-        if (LockedPhoneAnalytics.DEBUG) {
+        if (DataCollector.DEBUG) {
             Log.d(TAG, "Ending session result=" + result + " it lasted for " +
                     (float) (mEndTimestampMillis - mStartTimestampMillis) / 1000f + "s");
         }

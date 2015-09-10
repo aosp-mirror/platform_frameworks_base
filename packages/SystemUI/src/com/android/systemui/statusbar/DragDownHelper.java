@@ -29,7 +29,7 @@ import android.view.animation.Interpolator;
 import com.android.systemui.ExpandHelper;
 import com.android.systemui.Gefingerpoken;
 import com.android.systemui.R;
-import com.android.systemui.analytics.LockedPhoneAnalytics;
+import com.android.systemui.classifier.FalsingManager;
 
 /**
  * A utility class to enable the downward swipe on the lockscreen to go to the full shade and expand
@@ -55,7 +55,7 @@ public class DragDownHelper implements Gefingerpoken {
     private ExpandableView mStartingChild;
     private Interpolator mInterpolator;
     private float mLastHeight;
-    private LockedPhoneAnalytics mLockedPhoneAnalytics;
+    private FalsingManager mFalsingManager;
 
     public DragDownHelper(Context context, View host, ExpandHelper.Callback callback,
             DragDownCallback dragDownCallback) {
@@ -67,7 +67,7 @@ public class DragDownHelper implements Gefingerpoken {
         mCallback = callback;
         mDragDownCallback = dragDownCallback;
         mHost = host;
-        mLockedPhoneAnalytics = LockedPhoneAnalytics.getInstance(context);
+        mFalsingManager = FalsingManager.getInstance(context);
     }
 
     @Override
@@ -87,7 +87,7 @@ public class DragDownHelper implements Gefingerpoken {
             case MotionEvent.ACTION_MOVE:
                 final float h = y - mInitialTouchY;
                 if (h > mTouchSlop && h > Math.abs(x - mInitialTouchX)) {
-                    mLockedPhoneAnalytics.onNotificatonStartDraggingDown();
+                    mFalsingManager.onNotificatonStartDraggingDown();
                     mDraggingDown = true;
                     captureStartingChild(mInitialTouchX, mInitialTouchY);
                     mInitialTouchY = y;
@@ -205,7 +205,7 @@ public class DragDownHelper implements Gefingerpoken {
     }
 
     private void stopDragging() {
-        mLockedPhoneAnalytics.onNotificatonStopDraggingDown();
+        mFalsingManager.onNotificatonStopDraggingDown();
         if (mStartingChild != null) {
             cancelExpansion(mStartingChild);
         } else {

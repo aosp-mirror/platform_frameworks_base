@@ -35,6 +35,9 @@ import android.widget.FrameLayout;
 import com.android.systemui.EventLogConstants;
 import com.android.systemui.EventLogTags;
 import com.android.systemui.R;
+import com.android.systemui.classifier.Classifier;
+import com.android.systemui.classifier.FalsingManager;
+import com.android.systemui.classifier.HumanInteractionClassifier;
 import com.android.systemui.doze.DozeLog;
 import com.android.systemui.statusbar.FlingAnimationUtils;
 import com.android.systemui.statusbar.StatusBarState;
@@ -85,6 +88,7 @@ public abstract class PanelView extends FrameLayout {
     private ObjectAnimator mPeekAnimator;
     private VelocityTrackerInterface mVelocityTracker;
     private FlingAnimationUtils mFlingAnimationUtils;
+    private FalsingManager mFalsingManager;
 
     /**
      * Whether an instant expand request is currently pending and we are just waiting for layout.
@@ -190,6 +194,7 @@ public abstract class PanelView extends FrameLayout {
         mLinearOutSlowInInterpolator =
                 AnimationUtils.loadInterpolator(context, android.R.interpolator.linear_out_slow_in);
         mBounceInterpolator = new BounceInterpolator();
+        mFalsingManager = FalsingManager.getInstance(context);
     }
 
     protected void loadDimens() {
@@ -604,6 +609,9 @@ public abstract class PanelView extends FrameLayout {
     private boolean isFalseTouch(float x, float y) {
         if (!mStatusBar.isFalsingThresholdNeeded()) {
             return false;
+        }
+        if (mFalsingManager.isFalseTouch(Classifier.UNLOCK)) {
+            return true;
         }
         if (!mTouchAboveFalsingThreshold) {
             return true;

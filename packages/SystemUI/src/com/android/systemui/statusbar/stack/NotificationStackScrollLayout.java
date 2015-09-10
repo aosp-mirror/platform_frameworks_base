@@ -37,6 +37,7 @@ import android.widget.OverScroller;
 import com.android.systemui.ExpandHelper;
 import com.android.systemui.R;
 import com.android.systemui.SwipeHelper;
+import com.android.systemui.classifier.FalsingManager;
 import com.android.systemui.statusbar.ActivatableNotificationView;
 import com.android.systemui.statusbar.DismissView;
 import com.android.systemui.statusbar.EmptyShadeView;
@@ -47,7 +48,6 @@ import com.android.systemui.statusbar.NotificationOverflowContainer;
 import com.android.systemui.statusbar.SpeedBumpView;
 import com.android.systemui.statusbar.StackScrollerDecorView;
 import com.android.systemui.statusbar.StatusBarState;
-import com.android.systemui.analytics.LockedPhoneAnalytics;
 import com.android.systemui.statusbar.phone.NotificationGroupManager;
 import com.android.systemui.statusbar.phone.PhoneStatusBar;
 import com.android.systemui.statusbar.phone.ScrimController;
@@ -232,7 +232,7 @@ public class NotificationStackScrollLayout extends ViewGroup
     private boolean mForceNoOverlappingRendering;
     private NotificationOverflowContainer mOverflowContainer;
     private final ArrayList<Pair<ExpandableNotificationRow, Boolean>> mTmpList = new ArrayList<>();
-    private LockedPhoneAnalytics mLockedPhoneAnalytics;
+    private FalsingManager mFalsingManager;
 
     public NotificationStackScrollLayout(Context context) {
         this(context, null);
@@ -266,7 +266,7 @@ public class NotificationStackScrollLayout extends ViewGroup
             mDebugPaint.setStrokeWidth(2);
             mDebugPaint.setStyle(Paint.Style.STROKE);
         }
-        mLockedPhoneAnalytics = LockedPhoneAnalytics.getInstance(context);
+        mFalsingManager = FalsingManager.getInstance(context);
     }
 
     @Override
@@ -599,8 +599,8 @@ public class NotificationStackScrollLayout extends ViewGroup
         }
         if (DEBUG) Log.v(TAG, "onChildDismissed: " + v);
 
-        mLockedPhoneAnalytics.onNotificationDismissed();
-        if (mLockedPhoneAnalytics.shouldEnforceBouncer()) {
+        mFalsingManager.onNotificationDismissed();
+        if (mFalsingManager.shouldEnforceBouncer()) {
             mPhoneStatusBar.executeRunnableDismissingKeyguard(null, null /* cancelAction */,
                     false /* dismissShade */, true /* afterKeyguardGone */);
         }
@@ -631,7 +631,7 @@ public class NotificationStackScrollLayout extends ViewGroup
     }
 
     public void onBeginDrag(View v) {
-        mLockedPhoneAnalytics.onNotificatonStartDismissing();
+        mFalsingManager.onNotificatonStartDismissing();
         setSwipingInProgress(true);
         mAmbientState.onBeginDrag(v);
         if (mAnimationsEnabled && (mIsExpanded || !isPinnedHeadsUp(v))) {
@@ -658,7 +658,7 @@ public class NotificationStackScrollLayout extends ViewGroup
     }
 
     public void onDragCancelled(View v) {
-        mLockedPhoneAnalytics.onNotificatonStopDismissing();
+        mFalsingManager.onNotificatonStopDismissing();
         setSwipingInProgress(false);
     }
 
