@@ -18,6 +18,7 @@ package android.content.pm;
 
 import android.graphics.drawable.Drawable;
 import android.os.Parcel;
+import android.os.Parcelable;
 import android.util.Printer;
 
 /**
@@ -160,7 +161,12 @@ public class ComponentInfo extends PackageItemInfo {
     
     public void writeToParcel(Parcel dest, int parcelableFlags) {
         super.writeToParcel(dest, parcelableFlags);
-        applicationInfo.writeToParcel(dest, parcelableFlags);
+        if ((parcelableFlags & Parcelable.PARCELABLE_ELIDE_DUPLICATES) != 0) {
+            dest.writeInt(0);
+        } else {
+            dest.writeInt(1);
+            applicationInfo.writeToParcel(dest, parcelableFlags);
+        }
         dest.writeString(processName);
         dest.writeInt(descriptionRes);
         dest.writeInt(enabled ? 1 : 0);
@@ -169,7 +175,10 @@ public class ComponentInfo extends PackageItemInfo {
     
     protected ComponentInfo(Parcel source) {
         super(source);
-        applicationInfo = ApplicationInfo.CREATOR.createFromParcel(source);
+        final boolean hasApplicationInfo = (source.readInt() != 0);
+        if (hasApplicationInfo) {
+            applicationInfo = ApplicationInfo.CREATOR.createFromParcel(source);
+        }
         processName = source.readString();
         descriptionRes = source.readInt();
         enabled = (source.readInt() != 0);

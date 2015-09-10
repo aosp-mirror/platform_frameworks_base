@@ -305,10 +305,10 @@ public class PackageInfo implements Parcelable {
         dest.writeLong(firstInstallTime);
         dest.writeLong(lastUpdateTime);
         dest.writeIntArray(gids);
-        dest.writeTypedArray(activities, parcelableFlags);
-        dest.writeTypedArray(receivers, parcelableFlags);
-        dest.writeTypedArray(services, parcelableFlags);
-        dest.writeTypedArray(providers, parcelableFlags);
+        dest.writeTypedArray(activities, parcelableFlags | Parcelable.PARCELABLE_ELIDE_DUPLICATES);
+        dest.writeTypedArray(receivers, parcelableFlags | Parcelable.PARCELABLE_ELIDE_DUPLICATES);
+        dest.writeTypedArray(services, parcelableFlags | Parcelable.PARCELABLE_ELIDE_DUPLICATES);
+        dest.writeTypedArray(providers, parcelableFlags | Parcelable.PARCELABLE_ELIDE_DUPLICATES);
         dest.writeTypedArray(instrumentation, parcelableFlags);
         dest.writeTypedArray(permissions, parcelableFlags);
         dest.writeStringArray(requestedPermissions);
@@ -372,5 +372,22 @@ public class PackageInfo implements Parcelable {
         restrictedAccountType = source.readString();
         requiredAccountType = source.readString();
         overlayTarget = source.readString();
+
+        // The component lists were flattened with the redundant ApplicationInfo
+        // instances omitted.  Distribute the canonical one here as appropriate.
+        if (applicationInfo != null) {
+            propagateApplicationInfo(applicationInfo, activities);
+            propagateApplicationInfo(applicationInfo, receivers);
+            propagateApplicationInfo(applicationInfo, services);
+            propagateApplicationInfo(applicationInfo, providers);
+        }
+    }
+
+    private void propagateApplicationInfo(ApplicationInfo appInfo, ComponentInfo[] components) {
+        if (components != null) {
+            for (ComponentInfo ci : components) {
+                ci.applicationInfo = appInfo;
+            }
+        }
     }
 }

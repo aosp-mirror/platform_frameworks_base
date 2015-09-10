@@ -62,7 +62,17 @@ public interface Parcelable {
      * may want to release resources at this point.
      */
     public static final int PARCELABLE_WRITE_RETURN_VALUE = 0x0001;
-    
+
+    /**
+     * Flag for use with {@link #writeToParcel}: a parent object will take
+     * care of managing duplicate state/data that is nominally replicated
+     * across its inner data members.  This flag instructs the inner data
+     * types to omit that data during marshaling.  Exact behavior may vary
+     * on a case by case basis.
+     * @hide
+     */
+    public static final int PARCELABLE_ELIDE_DUPLICATES = 0x0002;
+
     /**
      * Bit masks for use with {@link #describeContents}: each bit represents a
      * kind of object considered to have potential special significance when
