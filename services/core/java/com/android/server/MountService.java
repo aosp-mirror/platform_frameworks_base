@@ -368,11 +368,17 @@ class MountService extends IMountService.Stub
     private boolean shouldBenchmark() {
         final long benchInterval = Settings.Global.getLong(mContext.getContentResolver(),
                 Settings.Global.STORAGE_BENCHMARK_INTERVAL, DateUtils.WEEK_IN_MILLIS);
+        if (benchInterval == -1) {
+            return false;
+        } else if (benchInterval == 0) {
+            return true;
+        }
+
         synchronized (mLock) {
             for (int i = 0; i < mVolumes.size(); i++) {
                 final VolumeInfo vol = mVolumes.valueAt(i);
                 final VolumeRecord rec = mRecords.get(vol.fsUuid);
-                if (vol.isMountedReadable() && rec != null) {
+                if (vol.isMountedWritable() && rec != null) {
                     final long benchAge = System.currentTimeMillis() - rec.lastBenchMillis;
                     if (benchAge >= benchInterval) {
                         return true;
