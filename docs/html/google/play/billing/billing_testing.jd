@@ -26,16 +26,27 @@ implementation:</p>
 
 <ul>
 <li>Test purchases, which let license-test users purchase your published in-app
-    items, but without any actual charges to their accounts.</li>
+    items, without any actual charges to their accounts.</li>
 <li>Static billing responses from Google Play, for testing in early development</p>
 </ul>
 
-<p>To test In-app Billing in an application you must install the application on an Android-powered
-device. You cannot use the Android emulator to test In-app Billing.  The device you use for testing
-must run a standard version of the Android 1.6 or later platform (API level 4 or higher), and have
-the most current version of the Google Play application installed. If a device is not running the
-most current Google Play application, your application won't be able to send In-app Billing
-requests to Google Play. For general information about how to set up a device for use in
+<p>To test in-app billing, you need to publish your app to an <a 
+href="https://support.google.com/googleplay/android-developer/answer/3131213">alpha
+or beta channel in Google Play.</a></p>
+
+<p>After you publish an app to an alpha or beta channel, it can take a few hours
+for the app to be available for testers. The version code of an APK on a test device
+must match the version currently uploaded to the alpha or beta channel on Google Play.</p>
+
+<p class="caution"><strong>Important</strong>: To test in-app products or make in-app
+purchases in your alpha or beta channel app, each tester
+needs to <a href="https://support.google.com/googleplay/android-developer/answer/3131213">opt-in
+to your app’s alpha or beta test</a>. On your test’s opt-in URL, your
+testers will get an explanation of what it means to be a tester and a link to opt-in.</p> 
+
+<p>You can test on any Android-powered hardware device running Android 1.6 or higher.
+The most current version of the Google Play application must be installed on the device.
+For general information about how to set up a device for use in
 developing Android applications, see <a href="{@docRoot}tools/device.html">Using Hardware
 Devices</a>.</p>
 
@@ -45,15 +56,20 @@ Devices</a>.</p>
 
 <ul> <li><strong>Test purchases</strong>, which let your selected license-test
 users purchase your in-app products without any resulting charges to the user.
-Test purchases can be used in alpha/beta releases or in published apps. </li>
+Test purchases can be used in alpha/beta releases only. </li>
 <li><strong>Real purchases</strong>, which let regular users make real purchases
-of your in-app products with actual charges to the user’s payment instruments.
-You can use Google Play’s alpha and beta release groups to manage
-the users who can make live purchases using your implementation.  </li>
+of your in-app products with actual charges to the user’s payment instruments.</li>
+  
 </ul>
 
-<p>The sections below provide more detail about how to use these approaches for
+<p>In either case, you need to publish your app to Google Play's
+<a href="https://support.google.com/googleplay/android-developer/answer/3131213">alpha
+  and beta release channels</a> to manage the users who can make purchases.</p>
+
+  <p>The sections below provide more detail about how to use these approaches for
 testing and validation. </p>
+
+
 
 <h3 id="test-purchases">Test Purchases (In-app Billing Sandbox)</h3>
 
@@ -98,8 +114,14 @@ href="#billing-testing-test">Setting Up for Test Purchases</a>.</p>
 within 15 minutes those users can begin making test purchases of your in-app
 products.</p>
 
-<p class="note"><strong>Note</strong>: To make test purchases, the license test
-account must be on the user’s Android device. If the device has more than one
+<p class="caution"><strong>Important</strong>: After you publish your app
+to an alpha or beta channel, your testers need to <a
+href="https://support.google.com/googleplay/android-developer/answer/3131213">opt-in
+to your app’s alpha or beta test</a> using the provided opt-in URL before they
+can make test purchases. </p>
+
+<p class="note"><strong>Note</strong>: License test accounts
+must be on the user’s Android device. If the device has more than one
 account, the purchase will be made with the account that downloaded the app. If
 none of the accounts has downloaded the app, the purchase is made with the first
 account. Users can confirm the account that is making a purchase by expanding the
@@ -167,6 +189,12 @@ that result in actual charges to their accounts, using any of their normal
 payment methods in Google Play to make purchases. Note that if you include test
 license accounts in your alpha and beta distribution groups, those users will
 only be able to make test purchases. </p>
+
+<p class="caution"><strong>Important</strong>: After you publish your app
+to an alpha or beta channel, your testers need to <a
+href="https://support.google.com/googleplay/android-developer/answer/3131213">opt-in
+to your app’s alpha or beta test</a> using the provided opt-in URL before they
+can make test purchases. </p>
 
 
 <h2 id="billing-testing-static">Testing with Static Responses</h2>
