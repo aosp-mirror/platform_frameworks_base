@@ -335,6 +335,7 @@ class NavigationBarApps extends LinearLayout {
         ImageView button = (ImageView) mLayoutInflater.inflate(
                 R.layout.navigation_bar_app_item, this, false /* attachToRoot */);
         button.setOnClickListener(new AppClickListener());
+        button.setOnContextClickListener(new AppContextClickListener());
         // TODO: Ripple effect. Use either KeyButtonRipple or the default ripple background.
         button.setOnLongClickListener(new AppLongClickListener());
         button.setOnDragListener(new AppIconDragListener());
@@ -614,6 +615,47 @@ class NavigationBarApps extends LinearLayout {
     }
 
     /**
+     * Shows already prepopulated popup menu using appIcon for anchor location.
+     */
+    private void showPopupMenu(ImageView appIcon) {
+        // Movable view inside the popup anchor view. It serves as the actual anchor for the
+        // menu.
+        final ImageView anchorButton =
+                (ImageView) mPopupAnchor.findViewById(R.id.shelf_menu_anchor_anchor);
+        // Set same drawable as for the clicked button to have same size.
+        anchorButton.setImageDrawable(appIcon.getDrawable());
+
+        // Move the anchor button to the position of the app button.
+        appIcon.getLocationOnScreen(mClickedIconLocation);
+        anchorButton.setTranslationX(mClickedIconLocation[0]);
+        anchorButton.setTranslationY(mClickedIconLocation[1]);
+
+        final OnAttachStateChangeListener onAttachStateChangeListener =
+                new OnAttachStateChangeListener() {
+                    @Override
+                    public void onViewAttachedToWindow(View v) {
+                        mPopupMenu.show();
+                    }
+
+                    @Override
+                    public void onViewDetachedFromWindow(View v) {}
+                };
+        anchorButton.addOnAttachStateChangeListener(onAttachStateChangeListener);
+
+        mPopupMenu.setOnDismissListener(new PopupMenu.OnDismissListener() {
+            @Override
+            public void onDismiss(PopupMenu menu) {
+                mWindowManager.removeView(mPopupAnchor);
+                anchorButton.removeOnAttachStateChangeListener(onAttachStateChangeListener);
+                mPopupMenu.setOnDismissListener(null);
+                mPopupMenu.getMenu().clear();
+            }
+        });
+
+        mWindowManager.addView(mPopupAnchor, mPopupAnchorLayoutParams);
+    }
+
+    /**
      * A click listener that launches an activity.
      */
     private class AppClickListener implements View.OnClickListener {
@@ -662,7 +704,7 @@ class NavigationBarApps extends LinearLayout {
                 final RecentTaskInfo taskInfo = tasks.get(i);
                 MenuItem item = menu.add(getActivityForTask(taskInfo).flattenToShortString());
                 item.setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
-                    @java.lang.Override
+                    @Override
                     public boolean onMenuItemClick(MenuItem item) {
                         activateTask(taskInfo.persistentId);
                         return true;
@@ -679,43 +721,8 @@ class NavigationBarApps extends LinearLayout {
 
             if (appButtonData.getTaskCount() <= 1) return;
 
-            // Movable view inside the popup anchor view. It serves as the actual anchor for the
-            // menu.
-            final ImageView anchorButton =
-                    (ImageView) mPopupAnchor.findViewById(R.id.shelf_menu_anchor_anchor);
-            // Set same drawable as for the clicked button to have same size.
-            anchorButton.setImageDrawable(appIcon.getDrawable());
-
-            // Move the anchor button to the position of the app button.
-            appIcon.getLocationOnScreen(mClickedIconLocation);
-            anchorButton.setTranslationX(mClickedIconLocation[0]);
-            anchorButton.setTranslationY(mClickedIconLocation[1]);
-
-            final OnAttachStateChangeListener onAttachStateChangeListener =
-                    new OnAttachStateChangeListener() {
-                        @java.lang.Override
-                        public void onViewAttachedToWindow(View v) {
-                            mPopupMenu.show();
-                        }
-
-                        @java.lang.Override
-                        public void onViewDetachedFromWindow(View v) {}
-                    };
-            anchorButton.addOnAttachStateChangeListener(onAttachStateChangeListener);
-
             populateLaunchMenu(appButtonData.tasks);
-
-            mPopupMenu.setOnDismissListener(new PopupMenu.OnDismissListener() {
-                @java.lang.Override
-                public void onDismiss(PopupMenu menu) {
-                    mWindowManager.removeView(mPopupAnchor);
-                    anchorButton.removeOnAttachStateChangeListener(onAttachStateChangeListener);
-                    mPopupMenu.setOnDismissListener(null);
-                    mPopupMenu.getMenu().clear();
-                }
-            });
-
-            mWindowManager.addView(mPopupAnchor, mPopupAnchorLayoutParams);
+            showPopupMenu(appIcon);
         }
 
         @Override
@@ -730,6 +737,58 @@ class NavigationBarApps extends LinearLayout {
 
                 maybeShowLaunchMenu((ImageView) v);
             }
+        }
+    }
+
+    /**
+     * Context click listener that shows app's context menu.
+     */
+    private class AppContextClickListener implements View.OnContextClickListener {
+        void updateState(ImageView appIcon) {
+            savePinnedApps();
+            if (DEBUG) {
+                AppButtonData appButtonData = (AppButtonData) appIcon.getTag();
+                new GetActivityIconTask(mPackageManager, appIcon).execute(appButtonData);
+            }
+        }
+
+        /**
+         * Adds to the popup menu items for pinning and unpinning the app in the shelf.
+         */
+        void populateContextMenu(final ImageView appIcon) {
+            final AppButtonData appButtonData = (AppButtonData) appIcon.getTag();
+            Menu menu = mPopupMenu.getMenu();
+            if (appButtonData.pinned) {
+                menu.add("Unpin").
+                        setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
+                            @Override
+                            public boolean onMenuItemClick(MenuItem item) {
+                                appButtonData.pinned = false;
+                                if (appButtonData.isEmpty()) {
+                                    removeView(appIcon);
+                                }
+                                updateState(appIcon);
+                                return true;
+                            }
+                        });
+            } else {
+                menu.add("Pin").setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
+                    @Override
+                    public boolean onMenuItemClick(MenuItem item) {
+                        appButtonData.pinned = true;
+                        updateState(appIcon);
+                        return true;
+                    }
+                });
+            }
+        }
+
+        @Override
+        public boolean onContextClick(View v) {
+            ImageView appIcon = (ImageView) v;
+            populateContextMenu(appIcon);
+            showPopupMenu(appIcon);
+            return true;
         }
     }
 
