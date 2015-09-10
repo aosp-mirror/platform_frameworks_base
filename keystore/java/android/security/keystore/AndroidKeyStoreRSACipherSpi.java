@@ -415,9 +415,10 @@ abstract class AndroidKeyStoreRSACipherSpi extends AndroidKeyStoreCipherSpiBase 
 
         KeyCharacteristics keyCharacteristics = new KeyCharacteristics();
         int errorCode = getKeyStore().getKeyCharacteristics(
-                keystoreKey.getAlias(), null, null, keyCharacteristics);
+                keystoreKey.getAlias(), null, null, keystoreKey.getUid(), keyCharacteristics);
         if (errorCode != KeyStore.NO_ERROR) {
-            throw getKeyStore().getInvalidKeyException(keystoreKey.getAlias(), errorCode);
+            throw getKeyStore().getInvalidKeyException(
+                    keystoreKey.getAlias(), keystoreKey.getUid(), errorCode);
         }
         long keySizeBits = keyCharacteristics.getUnsignedInt(KeymasterDefs.KM_TAG_KEY_SIZE, -1);
         if (keySizeBits == -1) {

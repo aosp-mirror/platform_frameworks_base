@@ -22,15 +22,19 @@ import android.security.keymaster.ExportResult;
 import android.security.keymaster.KeyCharacteristics;
 import android.security.keymaster.KeymasterDefs;
 
+import java.io.IOException;
 import java.security.KeyFactory;
 import java.security.KeyPair;
+import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
+import java.security.NoSuchProviderException;
 import java.security.Provider;
 import java.security.ProviderException;
 import java.security.PublicKey;
 import java.security.Security;
 import java.security.Signature;
 import java.security.UnrecoverableKeyException;
+import java.security.cert.CertificateException;
 import java.security.interfaces.ECKey;
 import java.security.interfaces.ECPublicKey;
 import java.security.interfaces.RSAKey;
@@ -167,6 +171,7 @@ public class AndroidKeyStoreProvider extends Provider {
     @NonNull
     public static AndroidKeyStorePublicKey getAndroidKeyStorePublicKey(
             @NonNull String alias,
+            int uid,
             @NonNull @KeyProperties.KeyAlgorithmEnum String keyAlgorithm,
             @NonNull byte[] x509EncodedForm) {
         PublicKey publicKey;
@@ -180,9 +185,9 @@ public class AndroidKeyStoreProvider extends Provider {
             throw new ProviderException("Invalid X.509 encoding of public key", e);
         }
         if (KeyProperties.KEY_ALGORITHM_EC.equalsIgnoreCase(keyAlgorithm)) {
-            return new AndroidKeyStoreECPublicKey(alias, (ECPublicKey) publicKey);
+            return new AndroidKeyStoreECPublicKey(alias, uid, (ECPublicKey) publicKey);
         } else if (KeyProperties.KEY_ALGORITHM_RSA.equalsIgnoreCase(keyAlgorithm)) {
-            return new AndroidKeyStoreRSAPublicKey(alias, (RSAPublicKey) publicKey);
+            return new AndroidKeyStoreRSAPublicKey(alias, uid, (RSAPublicKey) publicKey);
         } else {
             throw new ProviderException("Unsupported Android Keystore public key algorithm: "
                     + keyAlgorithm);
@@ -195,10 +200,10 @@ public class AndroidKeyStoreProvider extends Provider {
         String keyAlgorithm = publicKey.getAlgorithm();
         if (KeyProperties.KEY_ALGORITHM_EC.equalsIgnoreCase(keyAlgorithm)) {
             return new AndroidKeyStoreECPrivateKey(
-                    publicKey.getAlias(), ((ECKey) publicKey).getParams());
+                    publicKey.getAlias(), publicKey.getUid(), ((ECKey) publicKey).getParams());
         } else if (KeyProperties.KEY_ALGORITHM_RSA.equalsIgnoreCase(keyAlgorithm)) {
             return new AndroidKeyStoreRSAPrivateKey(
-                    publicKey.getAlias(), ((RSAKey) publicKey).getModulus());
+                    publicKey.getAlias(), publicKey.getUid(), ((RSAKey) publicKey).getModulus());
         } else {
             throw new ProviderException("Unsupported Android Keystore public key algorithm: "
                     + keyAlgorithm);
@@ -207,18 +212,18 @@ public class AndroidKeyStoreProvider extends Provider {
 
     @NonNull
     public static AndroidKeyStorePublicKey loadAndroidKeyStorePublicKeyFromKeystore(
-            @NonNull KeyStore keyStore, @NonNull String privateKeyAlias)
+            @NonNull KeyStore keyStore, @NonNull String privateKeyAlias, int uid)
             throws UnrecoverableKeyException {
         KeyCharacteristics keyCharacteristics = new KeyCharacteristics();
         int errorCode = keyStore.getKeyCharacteristics(
-                privateKeyAlias, null, null, keyCharacteristics);
+                privateKeyAlias, null, null, uid, keyCharacteristics);
         if (errorCode != KeyStore.NO_ERROR) {
             throw (UnrecoverableKeyException)
                     new UnrecoverableKeyException("Failed to obtain information about private key")
                     .initCause(KeyStore.getKeyStoreException(errorCode));
         }
         ExportResult exportResult = keyStore.exportKey(
-                privateKeyAlias, KeymasterDefs.KM_KEY_FORMAT_X509, null, null);
+                privateKeyAlias, KeymasterDefs.KM_KEY_FORMAT_X509, null, null, uid);
         if (exportResult.resultCode != KeyStore.NO_ERROR) {
             throw (UnrecoverableKeyException)
                     new UnrecoverableKeyException("Failed to obtain X.509 form of public key")
@@ -242,15 +247,15 @@ public class AndroidKeyStoreProvider extends Provider {
         }
 
         return AndroidKeyStoreProvider.getAndroidKeyStorePublicKey(
-                privateKeyAlias, jcaKeyAlgorithm, x509EncodedPublicKey);
+                privateKeyAlias, uid, jcaKeyAlgorithm, x509EncodedPublicKey);
     }
 
     @NonNull
     public static KeyPair loadAndroidKeyStoreKeyPairFromKeystore(
-            @NonNull KeyStore keyStore, @NonNull String privateKeyAlias)
+            @NonNull KeyStore keyStore, @NonNull String privateKeyAlias, int uid)
             throws UnrecoverableKeyException {
         AndroidKeyStorePublicKey publicKey =
-                loadAndroidKeyStorePublicKeyFromKeystore(keyStore, privateKeyAlias);
+                loadAndroidKeyStorePublicKeyFromKeystore(keyStore, privateKeyAlias, uid);
         AndroidKeyStorePrivateKey privateKey =
                 AndroidKeyStoreProvider.getAndroidKeyStorePrivateKey(publicKey);
         return new KeyPair(publicKey, privateKey);
@@ -258,19 +263,19 @@ public class AndroidKeyStoreProvider extends Provider {
 
     @NonNull
     public static AndroidKeyStorePrivateKey loadAndroidKeyStorePrivateKeyFromKeystore(
-            @NonNull KeyStore keyStore, @NonNull String privateKeyAlias)
+            @NonNull KeyStore keyStore, @NonNull String privateKeyAlias, int uid)
             throws UnrecoverableKeyException {
-        KeyPair keyPair = loadAndroidKeyStoreKeyPairFromKeystore(keyStore, privateKeyAlias);
+        KeyPair keyPair = loadAndroidKeyStoreKeyPairFromKeystore(keyStore, privateKeyAlias, uid);
         return (AndroidKeyStorePrivateKey) keyPair.getPrivate();
     }
 
     @NonNull
     public static AndroidKeyStoreSecretKey loadAndroidKeyStoreSecretKeyFromKeystore(
-            @NonNull KeyStore keyStore, @NonNull String secretKeyAlias)
+            @NonNull KeyStore keyStore, @NonNull String secretKeyAlias, int uid)
             throws UnrecoverableKeyException {
         KeyCharacteristics keyCharacteristics = new KeyCharacteristics();
         int errorCode = keyStore.getKeyCharacteristics(
-                secretKeyAlias, null, null, keyCharacteristics);
+                secretKeyAlias, null, null, uid, keyCharacteristics);
         if (errorCode != KeyStore.NO_ERROR) {
             throw (UnrecoverableKeyException)
                     new UnrecoverableKeyException("Failed to obtain information about key")
@@ -301,6 +306,29 @@ public class AndroidKeyStoreProvider extends Provider {
                     new UnrecoverableKeyException("Unsupported secret key type").initCause(e);
         }
 
-        return new AndroidKeyStoreSecretKey(secretKeyAlias, keyAlgorithmString);
+        return new AndroidKeyStoreSecretKey(secretKeyAlias, uid, keyAlgorithmString);
+    }
+
+    /**
+     * Returns an {@code AndroidKeyStore} {@link java.security.KeyStore}} of the specified UID.
+     * The {@code KeyStore} contains keys and certificates owned by that UID. Such cross-UID
+     * access is permitted to a few system UIDs and only to a few other UIDs (e.g., Wi-Fi, VPN)
+     * all of which are system.
+     *
+     * <p>Note: the returned {@code KeyStore} is already initialized/loaded. Thus, there is
+     * no need to invoke {@code load} on it.
+     */
+    @NonNull
+    public static java.security.KeyStore getKeyStoreForUid(int uid)
+            throws KeyStoreException, NoSuchProviderException {
+        java.security.KeyStore result =
+                java.security.KeyStore.getInstance("AndroidKeyStore", PROVIDER_NAME);
+        try {
+            result.load(new AndroidKeyStoreLoadStoreParameter(uid));
+        } catch (NoSuchAlgorithmException | CertificateException | IOException e) {
+            throw new KeyStoreException(
+                    "Failed to load AndroidKeyStore KeyStore for UID " + uid, e);
+        }
+        return result;
     }
 }

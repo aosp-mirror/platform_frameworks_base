@@ -640,7 +640,7 @@ public class KeyStore {
      * {@link KeyStoreException}.
      */
     public InvalidKeyException getInvalidKeyException(
-            String keystoreKeyAlias, KeyStoreException e) {
+            String keystoreKeyAlias, int uid, KeyStoreException e) {
         switch (e.getErrorCode()) {
             case LOCKED:
                 return new UserNotAuthenticatedException();
@@ -658,7 +658,8 @@ public class KeyStore {
                 // to authenticate.
                 KeyCharacteristics keyCharacteristics = new KeyCharacteristics();
                 int getKeyCharacteristicsErrorCode =
-                        getKeyCharacteristics(keystoreKeyAlias, null, null, keyCharacteristics);
+                        getKeyCharacteristics(keystoreKeyAlias, null, null, uid,
+                                keyCharacteristics);
                 if (getKeyCharacteristicsErrorCode != NO_ERROR) {
                     return new InvalidKeyException(
                             "Failed to obtained key characteristics",
@@ -708,7 +709,8 @@ public class KeyStore {
      * Returns an {@link InvalidKeyException} corresponding to the provided keystore/keymaster error
      * code.
      */
-    public InvalidKeyException getInvalidKeyException(String keystoreKeyAlias, int errorCode) {
-        return getInvalidKeyException(keystoreKeyAlias, getKeyStoreException(errorCode));
+    public InvalidKeyException getInvalidKeyException(String keystoreKeyAlias, int uid,
+            int errorCode) {
+        return getInvalidKeyException(keystoreKeyAlias, uid, getKeyStoreException(errorCode));
     }
 }

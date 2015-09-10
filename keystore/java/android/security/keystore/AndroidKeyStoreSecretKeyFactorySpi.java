@@ -59,7 +59,8 @@ public class AndroidKeyStoreSecretKeyFactorySpi extends SecretKeyFactorySpi {
         if (!KeyInfo.class.equals(keySpecClass)) {
             throw new InvalidKeySpecException("Unsupported key spec: " + keySpecClass.getName());
         }
-        String keyAliasInKeystore = ((AndroidKeyStoreKey) key).getAlias();
+        AndroidKeyStoreKey keystoreKey = (AndroidKeyStoreKey) key;
+        String keyAliasInKeystore = keystoreKey.getAlias();
         String entryAlias;
         if (keyAliasInKeystore.startsWith(Credentials.USER_SECRET_KEY)) {
             entryAlias = keyAliasInKeystore.substring(Credentials.USER_SECRET_KEY.length());
@@ -67,13 +68,14 @@ public class AndroidKeyStoreSecretKeyFactorySpi extends SecretKeyFactorySpi {
             throw new InvalidKeySpecException("Invalid key alias: " + keyAliasInKeystore);
         }
 
-        return getKeyInfo(mKeyStore, entryAlias, keyAliasInKeystore);
+        return getKeyInfo(mKeyStore, entryAlias, keyAliasInKeystore, keystoreKey.getUid());
     }
 
-    static KeyInfo getKeyInfo(KeyStore keyStore, String entryAlias, String keyAliasInKeystore) {
+    static KeyInfo getKeyInfo(KeyStore keyStore, String entryAlias, String keyAliasInKeystore,
+            int keyUid) {
         KeyCharacteristics keyCharacteristics = new KeyCharacteristics();
-        int errorCode =
-                keyStore.getKeyCharacteristics(keyAliasInKeystore, null, null, keyCharacteristics);
+        int errorCode = keyStore.getKeyCharacteristics(
+                keyAliasInKeystore, null, null, keyUid, keyCharacteristics);
         if (errorCode != KeyStore.NO_ERROR) {
             throw new ProviderException("Failed to obtain information about key."
                     + " Keystore error: " + errorCode);

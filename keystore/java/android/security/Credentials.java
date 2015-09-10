@@ -217,13 +217,22 @@ public class Credentials {
      * Returns {@code true} if there was at least one of those types.
      */
     public static boolean deleteAllTypesForAlias(KeyStore keystore, String alias) {
+        return deleteAllTypesForAlias(keystore, alias, KeyStore.UID_SELF);
+    }
+
+    /**
+     * Delete all types (private key, certificate, CA certificate) for a
+     * particular {@code alias}. All three can exist for any given alias.
+     * Returns {@code true} if there was at least one of those types.
+     */
+    public static boolean deleteAllTypesForAlias(KeyStore keystore, String alias, int uid) {
         /*
          * Make sure every type is deleted. There can be all three types, so
          * don't use a conditional here.
          */
-        return keystore.delete(Credentials.USER_PRIVATE_KEY + alias)
-                | keystore.delete(Credentials.USER_SECRET_KEY + alias)
-                | deleteCertificateTypesForAlias(keystore, alias);
+        return keystore.delete(Credentials.USER_PRIVATE_KEY + alias, uid)
+                | keystore.delete(Credentials.USER_SECRET_KEY + alias, uid)
+                | deleteCertificateTypesForAlias(keystore, alias, uid);
     }
 
     /**
@@ -232,12 +241,21 @@ public class Credentials {
      * Returns {@code true} if there was at least one of those types.
      */
     public static boolean deleteCertificateTypesForAlias(KeyStore keystore, String alias) {
+        return deleteCertificateTypesForAlias(keystore, alias, KeyStore.UID_SELF);
+    }
+
+    /**
+     * Delete all types (private key, certificate, CA certificate) for a
+     * particular {@code alias}. All three can exist for any given alias.
+     * Returns {@code true} if there was at least one of those types.
+     */
+    public static boolean deleteCertificateTypesForAlias(KeyStore keystore, String alias, int uid) {
         /*
          * Make sure every certificate type is deleted. There can be two types,
          * so don't use a conditional here.
          */
-        return keystore.delete(Credentials.USER_CERTIFICATE + alias)
-                | keystore.delete(Credentials.CA_CERTIFICATE + alias);
+        return keystore.delete(Credentials.USER_CERTIFICATE + alias, uid)
+                | keystore.delete(Credentials.CA_CERTIFICATE + alias, uid);
     }
 
     /**
@@ -245,7 +263,15 @@ public class Credentials {
      * Returns {@code true} if an entry was was deleted.
      */
     static boolean deletePrivateKeyTypeForAlias(KeyStore keystore, String alias) {
-        return keystore.delete(Credentials.USER_PRIVATE_KEY + alias);
+        return deletePrivateKeyTypeForAlias(keystore, alias, KeyStore.UID_SELF);
+    }
+
+    /**
+     * Delete private key for a particular {@code alias}.
+     * Returns {@code true} if an entry was was deleted.
+     */
+    static boolean deletePrivateKeyTypeForAlias(KeyStore keystore, String alias, int uid) {
+        return keystore.delete(Credentials.USER_PRIVATE_KEY + alias, uid);
     }
 
     /**
@@ -253,6 +279,14 @@ public class Credentials {
      * Returns {@code true} if an entry was was deleted.
      */
     public static boolean deleteSecretKeyTypeForAlias(KeyStore keystore, String alias) {
-        return keystore.delete(Credentials.USER_SECRET_KEY + alias);
+        return deleteSecretKeyTypeForAlias(keystore, alias, KeyStore.UID_SELF);
+    }
+
+    /**
+     * Delete secret key for a particular {@code alias}.
+     * Returns {@code true} if an entry was was deleted.
+     */
+    public static boolean deleteSecretKeyTypeForAlias(KeyStore keystore, String alias, int uid) {
+        return keystore.delete(Credentials.USER_SECRET_KEY + alias, uid);
     }
 }

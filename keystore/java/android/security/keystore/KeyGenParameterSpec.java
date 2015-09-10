@@ -21,6 +21,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.KeyguardManager;
 import android.hardware.fingerprint.FingerprintManager;
+import android.security.KeyStore;
 import android.text.TextUtils;
 
 import java.math.BigInteger;
@@ -231,6 +232,7 @@ public final class KeyGenParameterSpec implements AlgorithmParameterSpec {
     private static final Date DEFAULT_CERT_NOT_AFTER = new Date(2461449600000L); // Jan 1 2048
 
     private final String mKeystoreAlias;
+    private final int mUid;
     private final int mKeySize;
     private final AlgorithmParameterSpec mSpec;
     private final X500Principal mCertificateSubject;
@@ -254,6 +256,7 @@ public final class KeyGenParameterSpec implements AlgorithmParameterSpec {
      */
     public KeyGenParameterSpec(
             String keyStoreAlias,
+            int uid,
             int keySize,
             AlgorithmParameterSpec spec,
             X500Principal certificateSubject,
@@ -293,6 +296,7 @@ public final class KeyGenParameterSpec implements AlgorithmParameterSpec {
         }
 
         mKeystoreAlias = keyStoreAlias;
+        mUid = uid;
         mKeySize = keySize;
         mSpec = spec;
         mCertificateSubject = certificateSubject;
@@ -320,6 +324,16 @@ public final class KeyGenParameterSpec implements AlgorithmParameterSpec {
     @NonNull
     public String getKeystoreAlias() {
         return mKeystoreAlias;
+    }
+
+    /**
+     * Returns the UID which will own the key. {@code -1} is an alias for the UID of the current
+     * process.
+     *
+     * @hide
+     */
+    public int getUid() {
+        return mUid;
     }
 
     /**
@@ -531,6 +545,7 @@ public final class KeyGenParameterSpec implements AlgorithmParameterSpec {
         private final String mKeystoreAlias;
         private @KeyProperties.PurposeEnum int mPurposes;
 
+        private int mUid = KeyStore.UID_SELF;
         private int mKeySize = -1;
         private AlgorithmParameterSpec mSpec;
         private X500Principal mCertificateSubject;
@@ -572,6 +587,19 @@ public final class KeyGenParameterSpec implements AlgorithmParameterSpec {
             }
             mKeystoreAlias = keystoreAlias;
             mPurposes = purposes;
+        }
+
+        /**
+         * Sets the UID which will own the key.
+         *
+         * @param uid UID or {@code -1} for the UID of the current process.
+         *
+         * @hide
+         */
+        @NonNull
+        public Builder setUid(int uid) {
+            mUid = uid;
+            return this;
         }
 
         /**
@@ -936,6 +964,7 @@ public final class KeyGenParameterSpec implements AlgorithmParameterSpec {
         public KeyGenParameterSpec build() {
             return new KeyGenParameterSpec(
                     mKeystoreAlias,
+                    mUid,
                     mKeySize,
                     mSpec,
                     mCertificateSubject,

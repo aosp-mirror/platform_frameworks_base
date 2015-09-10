@@ -384,6 +384,7 @@ public class AndroidKeyPairGeneratorTest extends AndroidTestCase {
                 pubKey,
                 AndroidKeyStoreProvider.getAndroidKeyStorePublicKey(
                         Credentials.USER_PRIVATE_KEY + alias,
+                        KeyStore.UID_SELF,
                         x509userCert.getPublicKey().getAlgorithm(),
                         x509userCert.getPublicKey().getEncoded()));
 
