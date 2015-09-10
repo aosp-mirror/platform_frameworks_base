@@ -37,6 +37,8 @@ import android.util.Slog;
 import android.util.TypedValue;
 import android.view.GestureDetector;
 import android.view.GestureDetector.SimpleOnGestureListener;
+import android.view.InputDevice;
+import android.view.KeyEvent;
 import android.view.MagnificationSpec;
 import android.view.MotionEvent;
 import android.view.MotionEvent.PointerCoords;
@@ -325,6 +327,12 @@ public final class ScreenMagnifier implements WindowManagerInternal.Magnificatio
     @Override
     public void onMotionEvent(MotionEvent event, MotionEvent rawEvent,
             int policyFlags) {
+        if (!event.isFromSource(InputDevice.SOURCE_TOUCHSCREEN)) {
+            if (mNext != null) {
+                mNext.onMotionEvent(event, rawEvent, policyFlags);
+            }
+            return;
+        }
         mMagnifiedContentInteractonStateHandler.onMotionEvent(event);
         switch (mCurrentState) {
             case STATE_DELEGATING: {
@@ -348,6 +356,13 @@ public final class ScreenMagnifier implements WindowManagerInternal.Magnificatio
     }
 
     @Override
+    public void onKeyEvent(KeyEvent event, int policyFlags) {
+        if (mNext != null) {
+          mNext.onKeyEvent(event, policyFlags);
+        }
+    }
+
+    @Override
     public void onAccessibilityEvent(AccessibilityEvent event) {
         if (mNext != null) {
             mNext.onAccessibilityEvent(event);
@@ -360,20 +375,28 @@ public final class ScreenMagnifier implements WindowManagerInternal.Magnificatio
     }
 
     @Override
-    public void clear() {
-        mCurrentState = STATE_DETECTING;
-        mDetectingStateHandler.clear();
-        mStateViewportDraggingHandler.clear();
-        mMagnifiedContentInteractonStateHandler.clear();
+    public void clearEvents(int inputSource) {
+        if (inputSource == InputDevice.SOURCE_TOUCHSCREEN) {
+            clear();
+        }
+
         if (mNext != null) {
-            mNext.clear();
+            mNext.clearEvents(inputSource);
         }
     }
 
     @Override
     public void onDestroy() {
+        clear();
         mScreenStateObserver.destroy();
         mWindowManager.setMagnificationCallbacks(null);
+    }
+
+    private void clear() {
+        mCurrentState = STATE_DETECTING;
+        mDetectingStateHandler.clear();
+        mStateViewportDraggingHandler.clear();
+        mMagnifiedContentInteractonStateHandler.clear();
     }
 
     private void handleMotionEventStateDelegating(MotionEvent event,

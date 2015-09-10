@@ -63,6 +63,13 @@ class AccessibilityInputFilter extends InputFilter implements EventStreamTransfo
      */
     static final int FLAG_FEATURE_FILTER_KEY_EVENTS = 0x00000004;
 
+    /**
+     * Flag for enabling "Automatically click on mouse stop" feature.
+     *
+     * @see #setEnabledFeatures(int)
+     */
+    static final int FLAG_FEATURE_AUTOCLICK = 0x00000008;
+
     private final Runnable mProcessBatchedEventsRunnable = new Runnable() {
         @Override
         public void run() {
@@ -88,8 +95,6 @@ class AccessibilityInputFilter extends InputFilter implements EventStreamTransfo
 
     private final Choreographer mChoreographer;
 
-    private int mCurrentTouchDeviceId;
-
     private boolean mInstalled;
 
     private int mEnabledFeatures;
@@ -98,17 +103,19 @@ class AccessibilityInputFilter extends InputFilter implements EventStreamTransfo
 
     private ScreenMagnifier mScreenMagnifier;
 
+    private AutoclickController mAutoclickController;
+
+    private KeyboardInterceptor mKeyboardInterceptor;
+
     private EventStreamTransformation mEventHandler;
 
     private MotionEventHolder mEventQueue;
 
-    private boolean mMotionEventSequenceStarted;
+    private EventStreamState mMouseStreamState;
 
-    private boolean mHoverEventSequenceStarted;
+    private EventStreamState mTouchScreenStreamState;
 
-    private boolean mKeyEventSequenceStarted;
-
-    private boolean mFilterKeyEvents;
+    private EventStreamState mKeyboardStreamState;
 
     AccessibilityInputFilter(Context context, AccessibilityManagerService service) {
         super(context.getMainLooper());
@@ -142,89 +149,95 @@ class AccessibilityInputFilter extends InputFilter implements EventStreamTransfo
     @Override
     public void onInputEvent(InputEvent event, int policyFlags) {
         if (DEBUG) {
-            Slog.d(TAG, "Received event: " + event + ", policyFlags=0x" 
+            Slog.d(TAG, "Received event: " + event + ", policyFlags=0x"
                     + Integer.toHexString(policyFlags));
         }
-        if (event instanceof MotionEvent
-                && event.isFromSource(InputDevice.SOURCE_TOUCHSCREEN)) {
-            MotionEvent motionEvent = (MotionEvent) event;
-            onMotionEvent(motionEvent, policyFlags);
-        } else if (event instanceof KeyEvent
-                && event.isFromSource(InputDevice.SOURCE_KEYBOARD)) {
-            KeyEvent keyEvent = (KeyEvent) event;
-            onKeyEvent(keyEvent, policyFlags);
-        } else {
-            super.onInputEvent(event, policyFlags);
-        }
-    }
 
-    private void onMotionEvent(MotionEvent event, int policyFlags) {
         if (mEventHandler == null) {
             super.onInputEvent(event, policyFlags);
             return;
         }
+
+        EventStreamState state = getEventStreamState(event);
+        if (state == null) {
+            super.onInputEvent(event, policyFlags);
+            return;
+        }
+
+        int eventSource = event.getSource();
         if ((policyFlags & WindowManagerPolicy.FLAG_PASS_TO_USER) == 0) {
-            mMotionEventSequenceStarted = false;
-            mHoverEventSequenceStarted = false;
-            mEventHandler.clear();
+            state.reset();
+            mEventHandler.clearEvents(eventSource);
             super.onInputEvent(event, policyFlags);
             return;
         }
-        final int deviceId = event.getDeviceId();
-        if (mCurrentTouchDeviceId != deviceId) {
-            mCurrentTouchDeviceId = deviceId;
-            mMotionEventSequenceStarted = false;
-            mHoverEventSequenceStarted = false;
-            mEventHandler.clear();
+
+        if (state.updateDeviceId(event.getDeviceId())) {
+            mEventHandler.clearEvents(eventSource);
         }
-        if (mCurrentTouchDeviceId < 0) {
+
+        if (!state.deviceIdValid()) {
             super.onInputEvent(event, policyFlags);
             return;
         }
-        // We do not handle scroll events.
-        if (event.getActionMasked() == MotionEvent.ACTION_SCROLL) {
-            super.onInputEvent(event, policyFlags);
-            return;
+
+        if (event instanceof MotionEvent) {
+            MotionEvent motionEvent = (MotionEvent) event;
+            processMotionEvent(state, motionEvent, policyFlags);
+        } else if (event instanceof KeyEvent) {
+            KeyEvent keyEvent = (KeyEvent) event;
+            processKeyEvent(state, keyEvent, policyFlags);
         }
-        // Wait for a down touch event to start processing.
-        if (event.isTouchEvent()) {
-            if (!mMotionEventSequenceStarted) {
-                if (event.getActionMasked() != MotionEvent.ACTION_DOWN) {
-                    return;
-                }
-                mMotionEventSequenceStarted = true;
-            }
-        } else {
-            // Wait for an enter hover event to start processing.
-            if (!mHoverEventSequenceStarted) {
-                if (event.getActionMasked() != MotionEvent.ACTION_HOVER_ENTER) {
-                    return;
-                }
-                mHoverEventSequenceStarted = true;
-            }
-        }
-        batchMotionEvent((MotionEvent) event, policyFlags);
     }
 
-    private void onKeyEvent(KeyEvent event, int policyFlags) {
-        if (!mFilterKeyEvents) {
+    /**
+     * Gets current event stream state associated with an input event.
+     * @return The event stream state that should be used for the event. Null if the event should
+     *     not be handled by #AccessibilityInputFilter.
+     */
+    private EventStreamState getEventStreamState(InputEvent event) {
+        if (event instanceof MotionEvent) {
+          if (event.isFromSource(InputDevice.SOURCE_TOUCHSCREEN)) {
+              if (mTouchScreenStreamState == null) {
+                  mTouchScreenStreamState = new TouchScreenEventStreamState();
+              }
+              return mTouchScreenStreamState;
+          }
+          if (event.isFromSource(InputDevice.SOURCE_MOUSE)) {
+              if (mMouseStreamState == null) {
+                  mMouseStreamState = new MouseEventStreamState();
+              }
+              return mMouseStreamState;
+          }
+        } else if (event instanceof KeyEvent) {
+          if (event.isFromSource(InputDevice.SOURCE_KEYBOARD)) {
+              if (mKeyboardStreamState == null) {
+                  mKeyboardStreamState = new KeyboardEventStreamState();
+              }
+              return mKeyboardStreamState;
+          }
+        }
+        return null;
+    }
+
+    private void processMotionEvent(EventStreamState state, MotionEvent event, int policyFlags) {
+        if (!state.shouldProcessScroll() && event.getActionMasked() == MotionEvent.ACTION_SCROLL) {
             super.onInputEvent(event, policyFlags);
             return;
         }
-        if ((policyFlags & WindowManagerPolicy.FLAG_PASS_TO_USER) == 0) {
-            mKeyEventSequenceStarted = false;
-            super.onInputEvent(event, policyFlags);
+
+        if (!state.shouldProcessMotionEvent(event)) {
             return;
         }
-        // Wait for a down key event to start processing.
-        if (!mKeyEventSequenceStarted) {
-            if (event.getAction() != KeyEvent.ACTION_DOWN) {
-                super.onInputEvent(event, policyFlags);
-                return;
-            }
-            mKeyEventSequenceStarted = true;
+
+        batchMotionEvent(event, policyFlags);
+    }
+
+    private void processKeyEvent(EventStreamState state, KeyEvent event, int policyFlags) {
+        if (!state.shouldProcessKeyEvent(event)) {
+            return;
         }
-        mAms.notifyKeyEvent(event, policyFlags);
+        mEventHandler.onKeyEvent(event, policyFlags);
     }
 
     private void scheduleProcessBatchedEvents() {
@@ -293,6 +306,11 @@ class AccessibilityInputFilter extends InputFilter implements EventStreamTransfo
     }
 
     @Override
+    public void onKeyEvent(KeyEvent event, int policyFlags) {
+        sendInputEvent(event, policyFlags);
+    }
+
+    @Override
     public void onAccessibilityEvent(AccessibilityEvent event) {
         // TODO Implement this to inject the accessibility event
         //      into the accessibility manager service similarly
@@ -305,7 +323,7 @@ class AccessibilityInputFilter extends InputFilter implements EventStreamTransfo
     }
 
     @Override
-    public void clear() {
+    public void clearEvents(int inputSource) {
         /* do nothing */
     }
 
@@ -329,43 +347,77 @@ class AccessibilityInputFilter extends InputFilter implements EventStreamTransfo
     }
 
     private void enableFeatures() {
-        mMotionEventSequenceStarted = false;
-        mHoverEventSequenceStarted = false;
-        if ((mEnabledFeatures & FLAG_FEATURE_SCREEN_MAGNIFIER) != 0) {
-            mEventHandler = mScreenMagnifier = new ScreenMagnifier(mContext,
-                    Display.DEFAULT_DISPLAY, mAms);
-            mEventHandler.setNext(this);
+        resetStreamState();
+
+        if ((mEnabledFeatures & FLAG_FEATURE_AUTOCLICK) != 0) {
+            mAutoclickController = new AutoclickController(mContext);
+            addFirstEventHandler(mAutoclickController);
         }
+
         if ((mEnabledFeatures & FLAG_FEATURE_TOUCH_EXPLORATION) != 0) {
             mTouchExplorer = new TouchExplorer(mContext, mAms);
-            mTouchExplorer.setNext(this);
-            if (mEventHandler != null) {
-                mEventHandler.setNext(mTouchExplorer);
-            } else {
-                mEventHandler = mTouchExplorer;
-            }
+            addFirstEventHandler(mTouchExplorer);
         }
+
+        if ((mEnabledFeatures & FLAG_FEATURE_SCREEN_MAGNIFIER) != 0) {
+            mScreenMagnifier = new ScreenMagnifier(mContext,
+                    Display.DEFAULT_DISPLAY, mAms);
+            addFirstEventHandler(mScreenMagnifier);
+        }
+
         if ((mEnabledFeatures & FLAG_FEATURE_FILTER_KEY_EVENTS) != 0) {
-            mFilterKeyEvents = true;
+           mKeyboardInterceptor = new KeyboardInterceptor(mAms);
+           addFirstEventHandler(mKeyboardInterceptor);
         }
     }
 
+    /**
+     * Adds an event handler to the event handler chain. The handler is added at the beginning of
+     * the chain.
+     *
+     * @param handler The handler to be added to the event handlers list.
+     */
+    private void addFirstEventHandler(EventStreamTransformation handler) {
+        if (mEventHandler != null) {
+           handler.setNext(mEventHandler);
+        } else {
+            handler.setNext(this);
+        }
+        mEventHandler = handler;
+    }
+
     void disableFeatures() {
+        if (mAutoclickController != null) {
+            mAutoclickController.onDestroy();
+            mAutoclickController = null;
+        }
         if (mTouchExplorer != null) {
-            mTouchExplorer.clear();
             mTouchExplorer.onDestroy();
             mTouchExplorer = null;
         }
         if (mScreenMagnifier != null) {
-            mScreenMagnifier.clear();
             mScreenMagnifier.onDestroy();
             mScreenMagnifier = null;
         }
+        if (mKeyboardInterceptor != null) {
+            mKeyboardInterceptor.onDestroy();
+            mKeyboardInterceptor = null;
+        }
+
         mEventHandler = null;
-        mKeyEventSequenceStarted = false;
-        mMotionEventSequenceStarted = false;
-        mHoverEventSequenceStarted = false;
-        mFilterKeyEvents = false;
+        resetStreamState();
+    }
+
+    void resetStreamState() {
+        if (mTouchScreenStreamState != null) {
+            mTouchScreenStreamState.reset();
+        }
+        if (mMouseStreamState != null) {
+            mMouseStreamState.reset();
+        }
+        if (mKeyboardStreamState != null) {
+            mKeyboardStreamState.reset();
+        }
     }
 
     @Override
@@ -400,6 +452,173 @@ class AccessibilityInputFilter extends InputFilter implements EventStreamTransfo
             next = null;
             previous = null;
             sPool.release(this);
+        }
+    }
+
+    /**
+     * Keeps state of event streams observed for an input device with a certain source.
+     * Provides information about whether motion and key events should be processed by accessibility
+     * #EventStreamTransformations. Base implementation describes behaviour for event sources that
+     * whose events should not be handled by a11y event stream transformations.
+     */
+    private static class EventStreamState {
+        private int mDeviceId;
+
+        EventStreamState() {
+            mDeviceId = -1;
+        }
+
+        /**
+         * Updates the ID of the device associated with the state. If the ID changes, resets
+         * internal state.
+         *
+         * @param deviceId Updated input device ID.
+         * @return Whether the device ID has changed.
+         */
+        public boolean updateDeviceId(int deviceId) {
+            if (mDeviceId == deviceId) {
+                return false;
+            }
+            // Reset clears internal state, so make sure it's called before |mDeviceId| is updated.
+            reset();
+            mDeviceId = deviceId;
+            return true;
+        }
+
+        /**
+         * @return Whether device ID is valid.
+         */
+        public boolean deviceIdValid() {
+            return mDeviceId >= 0;
+        }
+
+        /**
+         * Resets the event stream state.
+         */
+        public void reset() {
+            mDeviceId = -1;
+        }
+
+        /**
+         * @return Whether scroll events for device should be handled by event transformations.
+         */
+        public boolean shouldProcessScroll() {
+            return false;
+        }
+
+        /**
+         * @param event An observed motion event.
+         * @return Whether the event should be handled by event transformations.
+         */
+        public boolean shouldProcessMotionEvent(MotionEvent event) {
+            return false;
+        }
+
+        /**
+         * @param event An observed key event.
+         * @return Whether the event should be handled by event transformations.
+         */
+        public boolean shouldProcessKeyEvent(KeyEvent event) {
+            return false;
+        }
+    }
+
+    /**
+     * Keeps state of stream of events from a mouse device.
+     */
+    private static class MouseEventStreamState extends EventStreamState {
+        private boolean mMotionSequenceStarted;
+
+        public MouseEventStreamState() {
+            reset();
+        }
+
+        @Override
+        final public void reset() {
+            super.reset();
+            mMotionSequenceStarted = false;
+        }
+
+        @Override
+        final public boolean shouldProcessScroll() {
+            return true;
+        }
+
+        @Override
+        final public boolean shouldProcessMotionEvent(MotionEvent event) {
+            if (mMotionSequenceStarted) {
+                return true;
+            }
+            // Wait for down or move event to start processing mouse events.
+            int action = event.getActionMasked();
+            mMotionSequenceStarted =
+                    action == MotionEvent.ACTION_DOWN || action == MotionEvent.ACTION_HOVER_MOVE;
+            return mMotionSequenceStarted;
+        }
+    }
+
+    /**
+     * Keeps state of stream of events from a touch screen device.
+     */
+    private static class TouchScreenEventStreamState extends EventStreamState {
+        private boolean mTouchSequenceStarted;
+        private boolean mHoverSequenceStarted;
+
+        public TouchScreenEventStreamState() {
+            reset();
+        }
+
+        @Override
+        final public void reset() {
+            super.reset();
+            mTouchSequenceStarted = false;
+            mHoverSequenceStarted = false;
+        }
+
+        @Override
+        final public boolean shouldProcessMotionEvent(MotionEvent event) {
+            // Wait for a down touch event to start processing.
+            if (event.isTouchEvent()) {
+                if (mTouchSequenceStarted) {
+                    return true;
+                }
+                mTouchSequenceStarted = event.getActionMasked() == MotionEvent.ACTION_DOWN;
+                return mTouchSequenceStarted;
+            }
+
+            // Wait for an enter hover event to start processing.
+            if (mHoverSequenceStarted) {
+                return true;
+            }
+            mHoverSequenceStarted = event.getActionMasked() == MotionEvent.ACTION_HOVER_ENTER;
+            return mHoverSequenceStarted;
+        }
+    }
+
+    /**
+     * Keeps state of stream of events from a keyboard device.
+     */
+    private static class KeyboardEventStreamState extends EventStreamState {
+        private boolean mEventSequenceStarted;
+
+        public KeyboardEventStreamState() {
+            reset();
+        }
+
+        @Override
+        final public void reset() {
+            super.reset();
+            mEventSequenceStarted = false;
+        }
+
+        @Override
+        final public boolean shouldProcessKeyEvent(KeyEvent event) {
+            // Wait for a down key event to start processing.
+            if (mEventSequenceStarted) {
+                return true;
+            }
+            mEventSequenceStarted = event.getAction() == KeyEvent.ACTION_DOWN;
+            return mEventSequenceStarted;
         }
     }
 }
