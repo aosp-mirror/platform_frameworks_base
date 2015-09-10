@@ -118,6 +118,7 @@ import com.android.internal.R;
 import com.android.internal.statusbar.IStatusBarService;
 import com.android.internal.util.ScreenShapeHelper;
 import com.android.internal.widget.PointerLocationView;
+import com.android.server.GestureLauncherService;
 import com.android.server.LocalServices;
 import com.android.server.policy.keyguard.KeyguardServiceDelegate;
 import com.android.server.policy.keyguard.KeyguardServiceDelegate.DrawnListener;
@@ -126,7 +127,6 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 
@@ -933,10 +933,17 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             }
         }
 
+        GestureLauncherService gestureService = LocalServices.getService(
+                GestureLauncherService.class);
+        boolean gesturedServiceIntercepted = false;
+        if (gestureService != null) {
+            gesturedServiceIntercepted = gestureService.interceptPowerKeyDown(event, interactive);
+        }
+
         // If the power key has still not yet been handled, then detect short
         // press, long press, or multi press and decide what to do.
         mPowerKeyHandled = hungUp || mScreenshotChordVolumeDownKeyTriggered
-                || mScreenshotChordVolumeUpKeyTriggered;
+                || mScreenshotChordVolumeUpKeyTriggered || gesturedServiceIntercepted;
         if (!mPowerKeyHandled) {
             if (interactive) {
                 // When interactive, we're already awake.
