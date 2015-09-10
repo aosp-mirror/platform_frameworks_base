@@ -59,6 +59,7 @@ public class VibratorService extends IVibratorService.Stub
         implements InputManager.InputDeviceListener {
     private static final String TAG = "VibratorService";
     private static final boolean DEBUG = false;
+    private static final String SYSTEM_UI_PACKAGE = "com.android.systemui";
 
     private final LinkedList<Vibration> mVibrations;
     private final LinkedList<VibrationInfo> mPreviousVibrations;
@@ -147,7 +148,8 @@ public class VibratorService extends IVibratorService.Stub
         }
 
         public boolean isSystemHapticFeedback() {
-            return (mUid == Process.SYSTEM_UID || mUid == 0) && mRepeat < 0;
+            return (mUid == Process.SYSTEM_UID || mUid == 0 || SYSTEM_UI_PACKAGE.equals(mOpPkg))
+                    && mRepeat < 0;
         }
     }
 
