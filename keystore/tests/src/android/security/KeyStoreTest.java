@@ -798,38 +798,6 @@ public class KeyStoreTest extends ActivityUnitTestCase<Activity> {
         // TODO: Verify we have an RSA public key that's well formed.
     }
 
-    public void testAesGcmEncryptSuccess() throws Exception {
-        String name = "test";
-        KeymasterArguments args = new KeymasterArguments();
-        args.addInt(KeymasterDefs.KM_TAG_PURPOSE, KeymasterDefs.KM_PURPOSE_ENCRYPT);
-        args.addInt(KeymasterDefs.KM_TAG_PURPOSE, KeymasterDefs.KM_PURPOSE_DECRYPT);
-        args.addInt(KeymasterDefs.KM_TAG_ALGORITHM, KeymasterDefs.KM_ALGORITHM_AES);
-        args.addInt(KeymasterDefs.KM_TAG_PADDING, KeymasterDefs.KM_PAD_NONE);
-        args.addInt(KeymasterDefs.KM_TAG_KEY_SIZE, 256);
-        args.addInt(KeymasterDefs.KM_TAG_BLOCK_MODE, KeymasterDefs.KM_MODE_GCM);
-        args.addInt(KeymasterDefs.KM_TAG_CHUNK_LENGTH, 4096);
-        args.addInt(KeymasterDefs.KM_TAG_MAC_LENGTH, 16);
-        args.addBoolean(KeymasterDefs.KM_TAG_NO_AUTH_REQUIRED);
-
-        KeyCharacteristics outCharacteristics = new KeyCharacteristics();
-        int rc = mKeyStore.generateKey(name, args, null, 0, outCharacteristics);
-        assertEquals("Generate should succeed", KeyStore.NO_ERROR, rc);
-
-        KeymasterArguments out = new KeymasterArguments();
-        args = new KeymasterArguments();
-        args.addInt(KeymasterDefs.KM_TAG_ALGORITHM, KeymasterDefs.KM_ALGORITHM_AES);
-        args.addInt(KeymasterDefs.KM_TAG_BLOCK_MODE, KeymasterDefs.KM_MODE_GCM);
-        args.addInt(KeymasterDefs.KM_TAG_PADDING, KeymasterDefs.KM_PAD_NONE);
-        OperationResult result = mKeyStore.begin(name, KeymasterDefs.KM_PURPOSE_ENCRYPT,
-                true, args, null, out);
-        IBinder token = result.token;
-        assertEquals("Begin should succeed", KeyStore.NO_ERROR, result.resultCode);
-        result = mKeyStore.update(token, null, new byte[] {0x01, 0x02, 0x03, 0x04});
-        assertEquals("Update should succeed", KeyStore.NO_ERROR, result.resultCode);
-        assertEquals("Finish should succeed", KeyStore.NO_ERROR,
-                mKeyStore.finish(token, null, null).resultCode);
-    }
-
     public void testBadToken() throws Exception {
         IBinder token = new Binder();
         OperationResult result = mKeyStore.update(token, null, new byte[] {0x01});

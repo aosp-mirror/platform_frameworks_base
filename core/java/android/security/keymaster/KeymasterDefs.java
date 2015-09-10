@@ -1,11 +1,11 @@
-/**
- * Copyright (c) 2015, The Android Open Source Project
+/*
+ * Copyright (C) 2015 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ *      http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -33,43 +33,43 @@ public final class KeymasterDefs {
     public static final int KM_INVALID = 0 << 28;
     public static final int KM_ENUM = 1 << 28;
     public static final int KM_ENUM_REP = 2 << 28;
-    public static final int KM_INT = 3 << 28;
-    public static final int KM_INT_REP = 4 << 28;
-    public static final int KM_LONG = 5 << 28;
+    public static final int KM_UINT = 3 << 28;
+    public static final int KM_UINT_REP = 4 << 28;
+    public static final int KM_ULONG = 5 << 28;
     public static final int KM_DATE = 6 << 28;
     public static final int KM_BOOL = 7 << 28;
     public static final int KM_BIGNUM = 8 << 28;
     public static final int KM_BYTES = 9 << 28;
-    public static final int KM_LONG_REP = 10 << 28;
+    public static final int KM_ULONG_REP = 10 << 28;
 
     // Tag values.
     public static final int KM_TAG_INVALID = KM_INVALID | 0;
     public static final int KM_TAG_PURPOSE = KM_ENUM_REP | 1;
     public static final int KM_TAG_ALGORITHM = KM_ENUM | 2;
-    public static final int KM_TAG_KEY_SIZE = KM_INT | 3;
+    public static final int KM_TAG_KEY_SIZE = KM_UINT | 3;
     public static final int KM_TAG_BLOCK_MODE = KM_ENUM_REP | 4;
     public static final int KM_TAG_DIGEST = KM_ENUM_REP | 5;
     public static final int KM_TAG_PADDING = KM_ENUM_REP | 6;
-    public static final int KM_TAG_RETURN_UNAUTHED = KM_BOOL | 7;
-    public static final int KM_TAG_CALLER_NONCE = KM_BOOL | 8;
+    public static final int KM_TAG_CALLER_NONCE = KM_BOOL | 7;
+    public static final int KM_TAG_MIN_MAC_LENGTH = KM_UINT | 8;
 
     public static final int KM_TAG_RESCOPING_ADD = KM_ENUM_REP | 101;
     public static final int KM_TAG_RESCOPING_DEL = KM_ENUM_REP | 102;
     public static final int KM_TAG_BLOB_USAGE_REQUIREMENTS = KM_ENUM | 705;
 
-    public static final int KM_TAG_RSA_PUBLIC_EXPONENT = KM_LONG | 200;
+    public static final int KM_TAG_RSA_PUBLIC_EXPONENT = KM_ULONG | 200;
     public static final int KM_TAG_ACTIVE_DATETIME = KM_DATE | 400;
     public static final int KM_TAG_ORIGINATION_EXPIRE_DATETIME = KM_DATE | 401;
     public static final int KM_TAG_USAGE_EXPIRE_DATETIME = KM_DATE | 402;
-    public static final int KM_TAG_MIN_SECONDS_BETWEEN_OPS = KM_INT | 403;
-    public static final int KM_TAG_MAX_USES_PER_BOOT = KM_INT | 404;
+    public static final int KM_TAG_MIN_SECONDS_BETWEEN_OPS = KM_UINT | 403;
+    public static final int KM_TAG_MAX_USES_PER_BOOT = KM_UINT | 404;
 
     public static final int KM_TAG_ALL_USERS = KM_BOOL | 500;
-    public static final int KM_TAG_USER_ID = KM_INT | 501;
-    public static final int KM_TAG_USER_SECURE_ID = KM_LONG_REP | 502;
+    public static final int KM_TAG_USER_ID = KM_UINT | 501;
+    public static final int KM_TAG_USER_SECURE_ID = KM_ULONG_REP | 502;
     public static final int KM_TAG_NO_AUTH_REQUIRED = KM_BOOL | 503;
     public static final int KM_TAG_USER_AUTH_TYPE = KM_ENUM | 504;
-    public static final int KM_TAG_AUTH_TIMEOUT = KM_INT | 505;
+    public static final int KM_TAG_AUTH_TIMEOUT = KM_UINT | 505;
 
     public static final int KM_TAG_ALL_APPLICATIONS = KM_BOOL | 600;
     public static final int KM_TAG_APPLICATION_ID = KM_BYTES | 601;
@@ -82,9 +82,8 @@ public final class KeymasterDefs {
 
     public static final int KM_TAG_ASSOCIATED_DATA = KM_BYTES | 1000;
     public static final int KM_TAG_NONCE = KM_BYTES | 1001;
-    public static final int KM_TAG_CHUNK_LENGTH = KM_INT | 1002;
-    public static final int KM_TAG_AUTH_TOKEN = KM_BYTES | 1003;
-    public static final int KM_TAG_MAC_LENGTH = KM_INT | 1004;
+    public static final int KM_TAG_AUTH_TOKEN = KM_BYTES | 1002;
+    public static final int KM_TAG_MAC_LENGTH = KM_UINT | 1003;
 
     // Algorithm values.
     public static final int KM_ALGORITHM_RSA = 1;
@@ -93,12 +92,10 @@ public final class KeymasterDefs {
     public static final int KM_ALGORITHM_HMAC = 128;
 
     // Block modes.
-    public static final int KM_MODE_FIRST_UNAUTHENTICATED = 1;
-    public static final int KM_MODE_ECB = KM_MODE_FIRST_UNAUTHENTICATED;
+    public static final int KM_MODE_ECB = 1;
     public static final int KM_MODE_CBC = 2;
-    public static final int KM_MODE_CTR = 4;
-    public static final int KM_MODE_FIRST_AUTHENTICATED = 32;
-    public static final int KM_MODE_GCM = KM_MODE_FIRST_AUTHENTICATED;
+    public static final int KM_MODE_CTR = 3;
+    public static final int KM_MODE_GCM = 32;
 
     // Padding modes.
     public static final int KM_PAD_NONE = 1;
@@ -139,6 +136,7 @@ public final class KeymasterDefs {
 
     // User authenticators.
     public static final int HW_AUTH_PASSWORD = 1 << 0;
+    public static final int HW_AUTH_FINGERPRINT = 1 << 1;
 
     // Error codes.
     public static final int KM_ERROR_OK = 0;
@@ -193,9 +191,13 @@ public final class KeymasterDefs {
     public static final int KM_ERROR_UNSUPPORTED_EC_FIELD = -50;
     public static final int KM_ERROR_MISSING_NONCE = -51;
     public static final int KM_ERROR_INVALID_NONCE = -52;
-    public static final int KM_ERROR_UNSUPPORTED_CHUNK_LENGTH = -53;
-    public static final int KM_ERROR_RESCOPABLE_KEY_NOT_USABLE = -54;
+    public static final int KM_ERROR_MISSING_MAC_LENGTH = -53;
+    public static final int KM_ERROR_KEY_RATE_LIMIT_EXCEEDED = -54;
     public static final int KM_ERROR_CALLER_NONCE_PROHIBITED = -55;
+    public static final int KM_ERROR_KEY_MAX_OPS_EXCEEDED = -56;
+    public static final int KM_ERROR_INVALID_MAC_LENGTH = -57;
+    public static final int KM_ERROR_MISSING_MIN_MAC_LENGTH = -58;
+    public static final int KM_ERROR_UNSUPPORTED_MIN_MAC_LENGTH = -59;
     public static final int KM_ERROR_UNIMPLEMENTED = -100;
     public static final int KM_ERROR_VERSION_MISMATCH = -101;
     public static final int KM_ERROR_UNKNOWN_ERROR = -1000;
@@ -237,6 +239,10 @@ public final class KeymasterDefs {
         sErrorCodeToString.put(KM_ERROR_UNSUPPORTED_EC_FIELD, "Unsupported EC field");
         sErrorCodeToString.put(KM_ERROR_MISSING_NONCE, "Required IV missing");
         sErrorCodeToString.put(KM_ERROR_INVALID_NONCE, "Invalid IV");
+        sErrorCodeToString.put(KM_ERROR_CALLER_NONCE_PROHIBITED,
+                "Caller-provided IV not permitted");
+        sErrorCodeToString.put(KM_ERROR_INVALID_MAC_LENGTH,
+                "Invalid MAC or authentication tag length");
         sErrorCodeToString.put(KM_ERROR_UNIMPLEMENTED, "Not implemented");
         sErrorCodeToString.put(KM_ERROR_UNKNOWN_ERROR, "Unknown error");
     }
