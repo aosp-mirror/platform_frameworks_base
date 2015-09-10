@@ -17,10 +17,8 @@
 package com.android.internal.view.menu;
 
 import android.content.Context;
-import android.os.Parcelable;
 import android.view.Gravity;
 import android.view.View;
-import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
 import android.widget.PopupWindow;
 
@@ -30,7 +28,7 @@ import android.widget.PopupWindow;
  * @hide
  */
 public class MenuPopupHelper implements ViewTreeObserver.OnGlobalLayoutListener,
-        PopupWindow.OnDismissListener, View.OnAttachStateChangeListener, MenuPresenter {
+        PopupWindow.OnDismissListener, View.OnAttachStateChangeListener {
     private final Context mContext;
     private final MenuBuilder mMenu;
     private final boolean mOverflowOnly;
@@ -70,9 +68,8 @@ public class MenuPopupHelper implements ViewTreeObserver.OnGlobalLayoutListener,
     private MenuPopup createMenuPopup() {
         if (mContext.getResources().getBoolean(
                 com.android.internal.R.bool.config_enableCascadingSubmenus)) {
-            // TODO: Return a Cascading implementation of MenuPopup instead.
-            return new StandardMenuPopup(
-                    mContext, mMenu, mAnchorView, mPopupStyleAttr, mPopupStyleRes, mOverflowOnly);
+            return new CascadingMenuPopup(mContext, mAnchorView, mPopupStyleAttr, mPopupStyleRes,
+                    mOverflowOnly);
         }
         return new StandardMenuPopup(
                 mContext, mMenu, mAnchorView, mPopupStyleAttr, mPopupStyleRes, mOverflowOnly);
@@ -187,62 +184,7 @@ public class MenuPopupHelper implements ViewTreeObserver.OnGlobalLayoutListener,
         v.removeOnAttachStateChangeListener(this);
     }
 
-    @Override
-    public void initForMenu(Context context, MenuBuilder menu) {
-        // Don't need to do anything; we added as a presenter in the constructor.
-    }
-
-    @Override
-    public MenuView getMenuView(ViewGroup root) {
-        throw new UnsupportedOperationException("MenuPopupHelpers manage their own views");
-    }
-
-    @Override
-    public void updateMenuView(boolean cleared) {
-        mPopup.updateMenuView(cleared);
-    }
-
-    @Override
-    public void setCallback(Callback cb) {
+    public void setCallback(MenuPresenter.Callback cb) {
         mPopup.setCallback(cb);
-    }
-
-    @Override
-    public boolean onSubMenuSelected(SubMenuBuilder subMenu) {
-        return mPopup.onSubMenuSelected(subMenu);
-    }
-
-    @Override
-    public void onCloseMenu(MenuBuilder menu, boolean allMenusAreClosing) {
-        mPopup.onCloseMenu(menu, allMenusAreClosing);
-    }
-
-    @Override
-    public boolean flagActionItems() {
-        return false;
-    }
-
-    @Override
-    public boolean expandItemActionView(MenuBuilder menu, MenuItemImpl item) {
-        return false;
-    }
-
-    @Override
-    public boolean collapseItemActionView(MenuBuilder menu, MenuItemImpl item) {
-        return false;
-    }
-
-    @Override
-    public int getId() {
-        return 0;
-    }
-
-    @Override
-    public Parcelable onSaveInstanceState() {
-        return null;
-    }
-
-    @Override
-    public void onRestoreInstanceState(Parcelable state) {
     }
 }

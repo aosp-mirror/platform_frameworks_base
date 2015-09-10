@@ -64,6 +64,7 @@ public class MenuBuilder implements Menu {
 
     private final Context mContext;
     private final Resources mResources;
+    private final boolean mShowCascadingMenus;
 
     /**
      * Whether the shortcuts should be qwerty-accessible. Use isQwertyMode()
@@ -186,6 +187,8 @@ public class MenuBuilder implements Menu {
     public MenuBuilder(Context context) {
         mContext = context;
         mResources = context.getResources();
+        mShowCascadingMenus = context.getResources().getBoolean(
+                com.android.internal.R.bool.config_enableCascadingSubmenus);
         
         mItems = new ArrayList<MenuItemImpl>();
         
@@ -909,7 +912,9 @@ public class MenuBuilder implements Menu {
             invoked |= itemImpl.expandActionView();
             if (invoked) close(true);
         } else if (itemImpl.hasSubMenu() || providerHasSubMenu) {
-            close(false);
+            if (!mShowCascadingMenus) {
+                close(false);
+            }
 
             if (!itemImpl.hasSubMenu()) {
                 itemImpl.setSubMenu(new SubMenuBuilder(getContext(), this, itemImpl));

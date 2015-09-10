@@ -35,9 +35,11 @@ public abstract class MenuPopup implements ShowableListMenu, MenuPresenter {
     public abstract void setForceShowIcon(boolean forceShow);
 
     /**
-     * Adds the given menu to the popup. If this is the first menu shown it'll be displayed; if it's
-     * a submenu it will be displayed adjacent to the most recent menu (if supported by the
-     * implementation).
+     * Adds the given menu to the popup, if it is capable of displaying submenus within itself.
+     * If menu is the first menu shown, it won't be displayed until show() is called.
+     * If the popup was already showing, adding a submenu via this method will cause that new
+     * submenu to be shown immediately (that is, if this MenuPopup implementation is capable of
+     * showing its own submenus).
      *
      * @param menu
      */
