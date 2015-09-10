@@ -15,6 +15,7 @@ import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewTreeObserver;
 import android.view.View.OnKeyListener;
 import android.widget.AdapterView;
 import android.widget.DropDownListView;
@@ -31,7 +32,8 @@ import com.android.internal.util.Preconditions;
  * @hide
  */
 final class CascadingMenuPopup extends MenuPopup implements AdapterView.OnItemClickListener,
-        MenuPresenter, OnKeyListener, PopupWindow.OnDismissListener {
+        MenuPresenter, OnKeyListener, PopupWindow.OnDismissListener,
+        ViewTreeObserver.OnGlobalLayoutListener, View.OnAttachStateChangeListener{
     @Retention(RetentionPolicy.SOURCE)
     @IntDef({HORIZ_POSITION_LEFT, HORIZ_POSITION_RIGHT})
     public @interface HorizPosition {}
@@ -47,13 +49,15 @@ final class CascadingMenuPopup extends MenuPopup implements AdapterView.OnItemCl
     private final int mLayoutDirection;
 
     private int mDropDownGravity = Gravity.NO_GRAVITY;
-    private View mAnchor;
+    private View mAnchorView;
+    private View mShownAnchorView;
     private List<DropDownListView> mListViews;
     private List<MenuPopupWindow> mPopupWindows;
     private List<int[]> mOffsets;
     private int mPreferredPosition;
     private boolean mForceShowIcon;
     private Callback mPresenterCallback;
+    private ViewTreeObserver mTreeObserver;
     private PopupWindow.OnDismissListener mOnDismissListener;
 
     /**
@@ -64,7 +68,7 @@ final class CascadingMenuPopup extends MenuPopup implements AdapterView.OnItemCl
     public CascadingMenuPopup(Context context, View anchor, int popupStyleAttr,
             int popupStyleRes, boolean overflowOnly) {
         mContext = Preconditions.checkNotNull(context);
-        mAnchor = Preconditions.checkNotNull(anchor);
+        mAnchorView = Preconditions.checkNotNull(anchor);
         mPopupStyleAttr = popupStyleAttr;
         mPopupStyleRes = popupStyleRes;
         mOverflowOnly = overflowOnly;
@@ -94,7 +98,7 @@ final class CascadingMenuPopup extends MenuPopup implements AdapterView.OnItemCl
                 mContext, null, mPopupStyleAttr, mPopupStyleRes);
         popupWindow.setOnItemClickListener(this);
         popupWindow.setOnDismissListener(this);
-        popupWindow.setAnchorView(mAnchor);
+        popupWindow.setAnchorView(mAnchorView);
         popupWindow.setDropDownGravity(mDropDownGravity);
         popupWindow.setModal(true);
         popupWindow.setTouchModal(false);
@@ -115,6 +119,14 @@ final class CascadingMenuPopup extends MenuPopup implements AdapterView.OnItemCl
             MenuPopupWindow popupWindow = mPopupWindows.get(i);
             popupWindow.show();
             mListViews.add((DropDownListView) popupWindow.getListView());
+        }
+
+        mShownAnchorView = mAnchorView;
+        if (mShownAnchorView != null) {
+            final boolean addGlobalListener = mTreeObserver == null;
+            mTreeObserver = mShownAnchorView.getViewTreeObserver(); // Refresh to latest
+            if (addGlobalListener) mTreeObserver.addOnGlobalLayoutListener(this);
+            mShownAnchorView.addOnAttachStateChangeListener(this);
         }
     }
 
@@ -160,7 +172,7 @@ final class CascadingMenuPopup extends MenuPopup implements AdapterView.OnItemCl
         lastListView.getLocationOnScreen(screenLocation);
 
         final Rect displayFrame = new Rect();
-        mAnchor.getWindowVisibleDisplayFrame(displayFrame);
+        mShownAnchorView.getWindowVisibleDisplayFrame(displayFrame);
 
         if (mPreferredPosition == HORIZ_POSITION_RIGHT) {
             final int right = screenLocation[0] + lastListView.getWidth() + nextMenuWidth;
@@ -352,6 +364,13 @@ final class CascadingMenuPopup extends MenuPopup implements AdapterView.OnItemCl
         }
 
         if (mPopupWindows.size() == 0) {
+            if (mTreeObserver != null) {
+                if (!mTreeObserver.isAlive()) mTreeObserver =
+                        mShownAnchorView.getViewTreeObserver();
+                mTreeObserver.removeGlobalOnLayoutListener(this);
+                mTreeObserver = null;
+            }
+            mShownAnchorView.removeOnAttachStateChangeListener(this);
             // If every [sub]menu was dismissed, that means the whole thing was dismissed, so notify
             // the owner.
             mOnDismissListener.onDismiss();
@@ -379,7 +398,7 @@ final class CascadingMenuPopup extends MenuPopup implements AdapterView.OnItemCl
 
     @Override
     public void setAnchorView(View anchor) {
-        mAnchor = anchor;
+        mAnchorView = anchor;
     }
 
     @Override
@@ -390,5 +409,33 @@ final class CascadingMenuPopup extends MenuPopup implements AdapterView.OnItemCl
     @Override
     public ListView getListView() {
         return mListViews.size() > 0 ? mListViews.get(mListViews.size() - 1) : null;
+    }
+
+    @Override
+    public void onGlobalLayout() {
+        if (isShowing()) {
+            final View anchor = mShownAnchorView;
+            if (anchor == null || !anchor.isShown()) {
+                dismiss();
+            } else if (isShowing()) {
+                // Recompute window sizes and positions.
+                for (MenuPopupWindow popup : mPopupWindows) {
+                    popup.show();
+                }
+            }
+        }
+    }
+
+    @Override
+    public void onViewAttachedToWindow(View v) {
+    }
+
+    @Override
+    public void onViewDetachedFromWindow(View v) {
+        if (mTreeObserver != null) {
+            if (!mTreeObserver.isAlive()) mTreeObserver = v.getViewTreeObserver();
+            mTreeObserver.removeGlobalOnLayoutListener(this);
+        }
+        v.removeOnAttachStateChangeListener(this);
     }
 }
