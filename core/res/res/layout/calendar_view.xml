@@ -28,7 +28,7 @@
         android:layout_gravity="center_horizontal"
         android:paddingTop="10dip"
         android:paddingBottom="10dip"
-        style="@android:style/TextAppearance.Medium" />
+        style="?android:attr/textAppearanceMedium" />
 
     <LinearLayout android:id="@+android:id/day_names"
         android:orientation="horizontal"
