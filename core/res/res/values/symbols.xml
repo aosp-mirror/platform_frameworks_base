@@ -2327,6 +2327,7 @@
   <!-- Gesture -->
   <java-symbol type="integer" name="config_cameraLaunchGestureSensorType" />
   <java-symbol type="string" name="config_cameraLaunchGestureSensorStringType" />
+  <java-symbol type="bool" name="config_cameraDoubleTapPowerGestureEnabled" />
 
   <java-symbol type="string" name="config_networkPolicyNotificationComponent" />
   <java-symbol type="drawable" name="platlogo_m" />
