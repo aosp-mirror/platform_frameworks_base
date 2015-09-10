@@ -2607,6 +2607,7 @@ public class AccountManagerService
         // be passed in the original caller's uid here, which is what should be used for filtering.
         if (packageUid != -1 && UserHandle.isSameApp(callingUid, Process.myUid())) {
             callingUid = packageUid;
+            opPackageName = callingPackage;
         }
 
         List<String> visibleAccountTypes = getTypesVisibleToCaller(callingUid, userId,
