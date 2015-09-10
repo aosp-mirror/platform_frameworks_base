@@ -233,7 +233,8 @@ public class UsbDeviceManager {
         final StorageManager storageManager = StorageManager.from(mContext);
         final StorageVolume primary = storageManager.getPrimaryVolume();
         massStorageSupported = primary != null && primary.allowMassStorage();
-        mUseUsbNotification = !massStorageSupported;
+        mUseUsbNotification = !massStorageSupported && mContext.getResources().getBoolean(
+                com.android.internal.R.bool.config_usbChargingMessage);
 
         // make sure the ADB_ENABLED setting value matches the current state
         try {

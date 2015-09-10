@@ -248,7 +248,7 @@
     <integer name="config_networkTransitionTimeout">60000</integer>
 
     <!-- List of regexpressions describing the interface (if any) that represent tetherable
-         USB interfaces.  If the device doesn't want to support tething over USB this should
+         USB interfaces.  If the device doesn't want to support tethering over USB this should
          be empty.  An example would be "usb.*" -->
     <string-array translatable="false" name="config_tether_usb_regexs">
     </string-array>
@@ -542,6 +542,9 @@
 
     <!-- If this is true, the screen will come on when you unplug usb/power/whatever. -->
     <bool name="config_unplugTurnsOnScreen">false</bool>
+
+    <!-- If this is true, the message that USB is only being used for charging will be shown. -->
+    <bool name="config_usbChargingMessage">true</bool>
 
     <!-- Set this true only if the device has separate attention and notification lights. -->
     <bool name="config_useAttentionLight">false</bool>
