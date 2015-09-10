@@ -953,6 +953,9 @@ public class Notification implements Parcelable
         private Action(Icon icon, CharSequence title, PendingIntent intent, Bundle extras,
                 RemoteInput[] remoteInputs) {
             this.mIcon = icon;
+            if (icon != null && icon.getType() == Icon.TYPE_RESOURCE) {
+                this.icon = icon.getResId();
+            }
             this.title = title;
             this.actionIntent = intent;
             this.mExtras = extras != null ? extras : new Bundle();
