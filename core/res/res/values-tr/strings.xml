@@ -350,8 +350,8 @@
     <string name="permdesc_camera" msgid="8497216524735535009">"Uygulamaya kamerayla fotoğraf ve video çekme izni verir. Bu izin, uygulamanın sizin onayınız olmadan istediği zaman kamerayı kullanmasına olanak sağlar."</string>
     <string name="permlab_vibrate" msgid="7696427026057705834">"titreşimi denetleme"</string>
     <string name="permdesc_vibrate" msgid="6284989245902300945">"Uygulamaya, titreşimi denetleme izni verir."</string>
-    <string name="permlab_flashlight" msgid="2155920810121984215">"flaşı denetle"</string>
-    <string name="permdesc_flashlight" msgid="6522284794568368310">"Uygulamaya, flaş ışığını denetleme izni verir."</string>
+    <string name="permlab_flashlight" msgid="2155920810121984215">"el fenerini denetle"</string>
+    <string name="permdesc_flashlight" msgid="6522284794568368310">"Uygulamaya, el fenerini denetleme izni verir."</string>
     <string name="permlab_callPhone" msgid="3925836347681847954">"telefon numaralarına doğrudan çağrı yap"</string>
     <string name="permdesc_callPhone" msgid="3740797576113760827">"Uygulamaya sizin müdahaleniz olmadan telefon numaralarına çağrı yapma izni verir. Bu durum beklenmeyen ödemelere veya çağrılara neden olabilir. Ancak bu iznin, uygulamanın acil numaralara çağrı yapmasına olanak sağlamadığını unutmayın. Kötü amaçlı uygulamalar onayınız olmadan çağrılar yaparak sizi zarara sokabilir."</string>
     <string name="permlab_accessImsCallService" msgid="3574943847181793918">"IMS çağrı hizmetine erişme"</string>
