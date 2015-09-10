@@ -18,6 +18,8 @@ package android.mtp;
 
 import android.hardware.usb.UsbDevice;
 import android.hardware.usb.UsbDeviceConnection;
+import android.os.CancellationSignal;
+import android.os.OperationCanceledException;
 import android.os.ParcelFileDescriptor;
 
 /**
@@ -47,7 +49,7 @@ public final class MtpDevice {
 
     /**
      * Opens the MTP device.  Once the device is open it takes ownership of the
-     * {@link android.hardware.usb.UsbDeviceConnection}.  
+     * {@link android.hardware.usb.UsbDeviceConnection}.
      * The connection will be closed when you call {@link #close()}
      * The connection will also be closed if this method fails.
      *
@@ -278,6 +280,38 @@ public final class MtpDevice {
         return native_send_object_info(info);
     }
 
+    /**
+     * Reads an event from the device. It blocks the current thread until it gets an event.
+     * It throws OperationCanceledException if it is cancelled by signal.
+     *
+     * @param signal signal for cancellation
+     * @return obtained event
+     */
+    public MtpEvent readEvent(CancellationSignal signal) {
+        final int handle = native_submit_event_request();
+
+        if (handle < 0) {
+            throw new IllegalStateException("Other thread is reading an event.");
+        }
+
+        if (signal != null) {
+            signal.setOnCancelListener(new CancellationSignal.OnCancelListener() {
+                @Override
+                public void onCancel() {
+                    native_discard_event_request(handle);
+                }
+            });
+        }
+
+        try {
+            return native_reap_event_request(handle);
+        } finally {
+            if (signal != null) {
+                signal.setOnCancelListener(null);
+            }
+        }
+    }
+
     // used by the JNI code
     private long mNativeContext;
 
@@ -297,4 +331,7 @@ public final class MtpDevice {
     private native boolean native_import_file(int objectHandle, int fd);
     private native boolean native_send_object(int objectHandle, int size, int fd);
     private native MtpObjectInfo native_send_object_info(MtpObjectInfo info);
+    private native int native_submit_event_request();
+    private native MtpEvent native_reap_event_request(int handle);
+    private native void native_discard_event_request(int handle);
 }

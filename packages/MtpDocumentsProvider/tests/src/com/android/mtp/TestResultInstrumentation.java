@@ -45,8 +45,11 @@ public class TestResultInstrumentation extends InstrumentationTestRunner impleme
     }
 
     private void show(String tag, Test test, Throwable t) {
+        String message = "";
+        if (t != null && t.getMessage() != null) {
+            message = t.getMessage();
+        }
         TestResultActivity.show(
-                getContext(),
-                String.format("[%s] %s %s", tag, test.toString(), t != null ? t.getMessage() : ""));
+                getContext(), String.format("[%s] %s %s", tag, test.toString(), message));
     }
 }
