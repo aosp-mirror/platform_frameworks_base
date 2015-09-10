@@ -5719,6 +5719,15 @@ public final class Settings {
         public static final String CAMERA_GESTURE_DISABLED = "camera_gesture_disabled";
 
         /**
+         * Whether the camera launch gesture to double tap the power button when the screen is off
+         * should be disabled.
+         *
+         * @hide
+         */
+        public static final String CAMERA_DOUBLE_TAP_POWER_GESTURE_DISABLED =
+                "camera_double_tap_power_gesture_disabled";
+
+        /**
          * This are the settings to be backed up.
          *
          * NOTE: Settings are backed up and restored in the order they appear
