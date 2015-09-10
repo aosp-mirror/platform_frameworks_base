@@ -205,7 +205,7 @@ class="en">Tools Help</span></a></div>
 <!-- Performance Tools menu-->
   <li class="nav-section">
     <div class="nav-section-header">
-      <a href="<?cs var:toroot ?>tools/performance/index.html">Peformance Tools</a>
+      <a href="<?cs var:toroot ?>tools/performance/index.html">Performance Tools</a>
     </div>
     <ul>
       <li><a href="<?cs var:toroot ?>tools/performance/debug-gpu-overdraw/index.html">
