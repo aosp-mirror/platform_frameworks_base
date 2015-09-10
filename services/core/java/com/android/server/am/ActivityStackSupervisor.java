@@ -205,6 +205,13 @@ public final class ActivityStackSupervisor implements DisplayListener {
     /** Action restriction: launching the activity is restricted by an app op. */
     private static final int ACTIVITY_RESTRICTION_APPOP = 2;
 
+    // The height/width divide used when fitting a task within a bounds with method
+    // {@link #fitWithinBounds}.
+    // We always want the task to to be visible in the bounds without affecting its size when
+    // fitting. To make sure this is the case, we don't adjust the task left or top side pass
+    // the input bounds right or bottom side minus the width or height divided by this value.
+    private static final int FIT_WITHIN_BOUNDS_DIVIDER = 3;
+
     /** Status Bar Service **/
     private IBinder mToken = new Binder();
     private IStatusBarService mStatusBarService;
@@ -330,8 +337,9 @@ public final class ActivityStackSupervisor implements DisplayListener {
     /** Used to keep resumeTopActivityLocked() from being entered recursively */
     boolean inResumeTopActivity;
 
-    // temp. rect used during resize calculation so we don't need to create a new object each time.
+    // temp. rects used during resize calculation so we don't need to create a new object each time.
     private final Rect tempRect = new Rect();
+    private final Rect tempRect2 = new Rect();
 
     private final SparseArray<Configuration> mTmpConfigs = new SparseArray<>();
     private final SparseArray<Rect> mTmpBounds = new SparseArray<>();
@@ -2970,7 +2978,17 @@ public final class ActivityStackSupervisor implements DisplayListener {
             ArrayList<TaskRecord> tasks = stack.getAllTasks();
             for (int i = tasks.size() - 1; i >= 0; i--) {
                 TaskRecord task = tasks.get(i);
-                task.updateOverrideConfiguration(bounds);
+                if (stack.mStackId == FREEFORM_WORKSPACE_STACK_ID) {
+                    // For freeform stack we don't adjust the size of the tasks to match that of
+                    // the stack, but we do try to make sure the tasks are still contained with the
+                    // bounds of the stack.
+                    tempRect2.set(task.mBounds);
+                    fitWithinBounds(tempRect2, bounds);
+                    task.updateOverrideConfiguration(tempRect2);
+                } else {
+                    task.updateOverrideConfiguration(bounds);
+                }
+
                 mTmpConfigs.put(task.taskId, task.mOverrideConfig);
                 mTmpBounds.put(task.taskId, task.mBounds);
             }
@@ -4839,4 +4857,44 @@ public final class ActivityStackSupervisor implements DisplayListener {
 
         return onLeanbackOnly;
     }
+
+    /**
+     * Adjust bounds to stay within stack bounds.
+     *
+     * Since bounds might be outside of stack bounds, this method tries to move the bounds in a way
+     * that keep them unchanged, but be contained within the stack bounds.
+     *
+     * @param bounds Bounds to be adjusted.
+     * @param stackBounds Bounds within which the other bounds should remain.
+     */
+    private static void fitWithinBounds(Rect bounds, Rect stackBounds) {
+        if (stackBounds == null || stackBounds.contains(bounds)) {
+            return;
+        }
+
+        if (bounds.left < stackBounds.left || bounds.right > stackBounds.right) {
+            final int maxRight = stackBounds.right
+                    - (stackBounds.width() / FIT_WITHIN_BOUNDS_DIVIDER);
+            int horizontalDiff = stackBounds.left - bounds.left;
+            if ((horizontalDiff < 0 && bounds.left >= maxRight)
+                    || (bounds.left + horizontalDiff >= maxRight)) {
+                horizontalDiff = maxRight - bounds.left;
+            }
+            bounds.left += horizontalDiff;
+            bounds.right += horizontalDiff;
+        }
+
+        if (bounds.top < stackBounds.top || bounds.bottom > stackBounds.bottom) {
+            final int maxBottom = stackBounds.bottom
+                    - (stackBounds.height() / FIT_WITHIN_BOUNDS_DIVIDER);
+            int verticalDiff = stackBounds.top - bounds.top;
+            if ((verticalDiff < 0 && bounds.top >= maxBottom)
+                    || (bounds.top + verticalDiff >= maxBottom)) {
+                verticalDiff = maxBottom - bounds.top;
+            }
+            bounds.top += verticalDiff;
+            bounds.bottom += verticalDiff;
+        }
+    }
+
 }
