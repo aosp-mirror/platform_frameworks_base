@@ -1132,7 +1132,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         updateScreenCaptureDisabledInWindowManager(userHandle, false /* default value */);
     }
 
-    void loadDeviceOwner() {
+    void loadOwners() {
         synchronized (this) {
             mOwners.load();
             updateDeviceOwnerLocked();
@@ -1790,7 +1790,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
 
     private void onLockSettingsReady() {
         getUserData(UserHandle.USER_OWNER);
-        loadDeviceOwner();
+        loadOwners();
         cleanUpOldUsers();
         // Register an observer for watching for user setup complete.
         new SetupContentObserver(mHandler).register(mContext.getContentResolver());
