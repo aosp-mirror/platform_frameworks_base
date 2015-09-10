@@ -1174,7 +1174,7 @@ public class LockPatternUtils {
      * @param userId either an explicit user id or {@link android.os.UserHandle#USER_ALL}
      */
     public void requireCredentialEntry(int userId) {
-        requireStrongAuth(StrongAuthTracker.STRONG_AUTH_REQUIRED_AFTER_USER_REQUEST, userId);
+        requireStrongAuth(StrongAuthTracker.SOME_AUTH_REQUIRED_AFTER_USER_REQUEST, userId);
     }
 
     /**
@@ -1251,7 +1251,7 @@ public class LockPatternUtils {
                 value = { STRONG_AUTH_NOT_REQUIRED,
                         STRONG_AUTH_REQUIRED_AFTER_BOOT,
                         STRONG_AUTH_REQUIRED_AFTER_DPM_LOCK_NOW,
-                        STRONG_AUTH_REQUIRED_AFTER_USER_REQUEST})
+                        SOME_AUTH_REQUIRED_AFTER_USER_REQUEST})
         @Retention(RetentionPolicy.SOURCE)
         public @interface StrongAuthFlags {}
 
@@ -1266,14 +1266,14 @@ public class LockPatternUtils {
         public static final int STRONG_AUTH_REQUIRED_AFTER_BOOT = 0x1;
 
         /**
-         * Strong authentication is required because a device admin has temporarily requested it.
+         * Strong authentication is required because a device admin has requested it.
          */
         public static final int STRONG_AUTH_REQUIRED_AFTER_DPM_LOCK_NOW = 0x2;
 
         /**
-         * Strong authentication is required because the user has temporarily requested it.
+         * Some authentication is required because the user has temporarily disabled trust.
          */
-        public static final int STRONG_AUTH_REQUIRED_AFTER_USER_REQUEST = 0x4;
+        public static final int SOME_AUTH_REQUIRED_AFTER_USER_REQUEST = 0x4;
 
         /**
          * Strong authentication is required because the user has been locked out after too many
@@ -1289,6 +1289,7 @@ public class LockPatternUtils {
         public static final int DEFAULT = STRONG_AUTH_REQUIRED_AFTER_BOOT;
 
         private static final int ALLOWING_FINGERPRINT = STRONG_AUTH_NOT_REQUIRED
+                | SOME_AUTH_REQUIRED_AFTER_USER_REQUEST
                 | SOME_AUTH_REQUIRED_AFTER_WRONG_CREDENTIAL;
 
         private final SparseIntArray mStrongAuthRequiredForUser = new SparseIntArray();
