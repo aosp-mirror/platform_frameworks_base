@@ -4705,10 +4705,9 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 }
             }
             return;
-        } else {
-            // STOPSHIP check the caller UID with userId
         }
-        if (mUserManager.isUserRunning(new UserHandle(userId))) {
+        // STOPSHIP check the caller UID with userId
+        if (!mUserManager.isUserRunning(new UserHandle(userId))) {
             throw new IllegalStateException("User not running: " + userId);
         }
 
