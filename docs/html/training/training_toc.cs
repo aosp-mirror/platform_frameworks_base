@@ -1388,7 +1388,6 @@ results."
     </div>
     <ul>
 
-
       <li class="nav-section">
         <div class="nav-section-header">
           <a href="<?cs var:toroot ?>training/multiscreen/index.html"
@@ -1420,6 +1419,27 @@ results."
             ja-lang="順応性のある UI フローの実装"
             es-lang="Cómo implementar interfaces de usuario adaptables"
             >Implementing Adaptive UI Flows</a>
+          </li>
+        </ul>
+      </li>
+
+      <li class="nav-section">
+        <div class="nav-section-header">
+          <a href="<?cs var:toroot ?>training/appbar/index.html"
+             description=
+             "How to use the support library's toolbar widget to implement an
+             app bar that displays properly on a wide range of devices."
+            >Adding the App Bar</a>
+        </div>
+        <ul>
+          <li><a href="<?cs var:toroot ?>training/appbar/setting-up.html"
+            >Setting Up the App Bar</a>
+          </li>
+          <li><a href="<?cs var:toroot ?>training/appbar/actions.html"
+            >Adding and Handling Actions</a>
+          </li>
+          <li><a href="<?cs var:toroot ?>training/appbar/up-action.html"
+            >Adding an Up Action</a>
           </li>
         </ul>
       </li>

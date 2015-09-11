@@ -1,0 +1,154 @@
+page.title=Adding and Handling Actions
+page.tags="appbar","actionbar"
+helpoutsWidget=true
+trainingnavtop=true
+
+@jd:body
+
+<div id="tb-wrapper">
+  <div id="tb">
+
+    <h2>This lesson teaches you to</h2>
+
+    <ol>
+      <li><a href="#add-actions">Add Action Buttons</a></li>
+      <li><a href="#handle-actions">Respond to Actions</a></li>
+    </ol>
+
+    <h2>Useful Resources</h2>
+    <ul>
+      <li><a href="https://www.google.com/design/icons/">Material Icons</a></li>
+    </ul>
+
+
+  </div>
+</div>
+
+
+<a class="notice-designers wide" href="{@docRoot}design/patterns/actionbar.html#ActionButtons">
+  <div>
+    <h3>Design Guide</h3>
+    <p>Action Buttons</p>
+  </div>
+</a>
+
+
+<p>
+  The app bar allows you to add buttons for user actions. This feature lets you
+  put the most important <em>actions</em> for the current context right at the
+  top of the app. For example, a photo browsing app might show <em>share</em>
+  and <em>create album</em> buttons at the top when the user is looking at
+  their photo roll; when the user looks at an individual photo, the app might
+  show <em>crop</em> and <em>filter</em> buttons.
+</p>
+
+<p>
+  Space in the app bar is limited. If an app declares more actions than can
+  fit in the app bar, the app bar send the excess actions to an
+  <em>overflow</em> menu. The app can also specify that an action should always
+  be shown in the overflow menu, instead of being displayed on the app bar.
+</p>
+
+<img src="{@docRoot}images/training/appbar/appbar_with_button_2x.png"
+  srcset="{@docRoot}images/training/appbar/appbar_with_button.png 1x,
+      {@docRoot}images/training/appbar/appbar_with_button_2x.png 2x"
+  width="400" alt="">
+
+<p class="img-caption">
+  <strong>Figure 1.</strong> An app bar with a single action button and an
+  overflow menu.
+</p>
+
+<h2 id="add-actions">Add Action Buttons</h2>
+
+<p>
+  All action buttons and other items available in the action overflow are
+  defined in an XML <a href=
+  "{@docRoot}guide/topics/resources/menu-resource.html">menu resource</a>. To
+  add actions to the action bar, create a new XML file in your project's
+  <code>res/menu/</code> directory.
+</p>
+
+<p>
+  Add an <a href=
+  "{@docRoot}guide/topics/resources/menu-resource.html#item-element"><code>&lt;item&gt;</code></a>
+  element for each item you want to include in the action bar, as shown in this
+  code example of a menu XML file:
+</p>
+
+<pre>
+&lt;menu xmlns:android="http://schemas.android.com/apk/res/android" &gt;
+
+    &lt;!-- "Mark Favorite", should appear as action button if possible --&gt;
+    &lt;item
+        android:id="@+id/action_favorite"
+        android:icon="@drawable/ic_favorite_black_48dp"
+        android:title="@string/action_favorite"
+        app:showAsAction="ifRoom"/&gt;
+
+    &lt;!-- Settings, should always be in the overflow --&gt;
+    &lt;item android:id="@+id/action_settings"
+          android:title="@string/action_settings"
+          app:showAsAction="never"/&gt;
+
+&lt;/menu&gt;
+</pre>
+
+<p>
+  The <code>app:showAsAction</code> attribute specifies whether the action
+  should be shown as a button on the app bar. If you set
+  <code>app:showAsAction="ifRoom"</code> (as in the example code's <em>favorite</em> action), the action is displayed as a button
+  if there is room in the app bar for it; if there is not enough room, excess
+  actions are sent to the overflow menu. If you set
+  <code>app:showAsAction="never"</code> (as in the example code's <em>settings</em> action), the action is always listed in the
+  overflow menu, not displayed in the app bar.
+</p>
+
+<p>
+  The system uses the action's icon as the action button if the action is
+  displayed in the app bar. You can find many useful icons on the <a href=
+  "https://www.google.com/design/icons/">Material Icons</a> page.
+</p>
+
+<h2 id="handle-actions">Respond to Actions</h2>
+
+<p>
+  When the user selects one of the app bar items, the system calls your
+  activity's {@link android.app.Activity#onOptionsItemSelected
+  onOptionsItemSelected()} callback method, and passes a {@link
+  android.view.MenuItem} object to indicate which item was clicked. In your
+  implementation of {@link android.app.Activity#onOptionsItemSelected
+  onOptionsItemSelected()}, call the {@link android.view.MenuItem#getItemId
+  MenuItem.getItemId()} method to determine which item was pressed. The ID returned
+  matches the value you declared in the corresponding <a href=
+  "{@docRoot}guide/topics/resources/menu-resource.html#item-element"><code>&lt;item&gt;</code></a>
+  element's <code>android:id</code> attribute.
+</p>
+
+<p>
+  For example, the following code checks to see which action the user selected.
+  If the method does not recognize the user's action, it invokes the superclass
+  method:
+</p>
+
+<pre>
+&#64;Override
+public boolean onOptionsItemSelected(MenuItem item) {
+    switch (item.getItemId()) {
+        case R.id.action_settings:
+            // User chose the "Settings" item, show the app settings UI...
+            return true;
+
+        case R.id.action_favorite:
+            // User chose the "Favorite" action, mark the current item
+            // as a favorite...
+            return true;
+
+        default:
+            // If we got here, the user's action was not recognized.
+            // Invoke the superclass to handle it.
+            return super.onOptionsItemSelected(item);
+
+    }
+}
+</pre>

@@ -122,12 +122,16 @@ Bar. A menu item can appear as an action item only when the activity includes an
 android.app.ActionBar} (introduced in API Level 11). Valid values:
           <table>
             <tr><th>Value</th><th>Description</th></tr>
-            <tr><td><code>ifRoom</code></td><td>Only place this item in the Action Bar if
-there is room for it.</td></tr>
+            <tr><td><code>ifRoom</code></td><td>Only place this item in the
+            Action Bar if there is room for it. If there is not room for all
+            the items marked <code>"ifRoom"</code>, the items with the lowest
+            <code>orderInCategory</code> values are displayed as actions, and
+            the remaining items are displayed in the overflow menu.</td></tr>
             <tr><td><code>withText</code></td><td>Also include the title text (defined
 by {@code android:title}) with the action item. You can include this value along with one
 of the others as a flag set, by separating them with a pipe {@code |}.</td></tr>
-            <tr><td><code>never</code></td><td>Never place this item in the Action Bar.</td></tr>
+            <tr><td><code>never</code></td><td>Never place this item in the Action Bar. Instead, list the item in the Action Bar's overflow
+            menu.</td></tr>
             <tr><td><code>always</code></td><td>Always place this item in the Action Bar.
 Avoid using this unless it's critical that the item always appear in the action
 bar. Setting multiple items to always appear as action items can result in them overlapping
