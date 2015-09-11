@@ -1,0 +1,43 @@
+page.title=디자인
+page.viewport_width=970
+section.landing=true
+meta.tags="beautifulapps, design, ux, patterns, holo, appquality, landing"
+header.hide=1
+footer.hide=1 
+
+@jd:body
+
+<style>
+#landing-graphic-container {
+  position: relative;
+}
+
+#text-overlay {
+  position: absolute;
+  left: 0;
+  top: 42px;
+  width: 266px;
+
+}
+#hero-image {
+  padding-left:68px;
+}
+</style>
+
+<div id="landing-graphic-container">
+  <div id="text-overlay">
+    <span itemprop="description">뛰어난 Android 앱을 디자인하는 방법을 배울 수 있는 <strong>Android 디자인</strong>에 오신 것을 환영합니다.</span>
+    <br><br>
+    <strong>Android 5.0</strong>이 디자이너에게 어떤 기능을 제공하는지 궁금하세요? <a href="{@docRoot}design/patterns/new.html">Android의 새 기능</a>을 참조하세요.<br><br>
+    <a href="/design/get-started/creative-vision.html" class="landing-page-link">크리에이티브 비전</a>
+  </div>
+  <a id="hero-image" href="/design/get-started/creative-vision.html"> <img src="{@docRoot}design/media/index_landing_page.png" width="760" height="600" alt="" srcset="{@docRoot}design/media/index_landing_page_2x.png 2x" /> </a>
+
+<div style="background: hsl(8, 70%, 54%); margin: 0; padding: 20px 20px 10px 20px;color: #fff; position: absolute;top: 255px;width: 179px;">
+<h2 style="color: #fff;margin:0 0 10px; font-size:18px" class="norule">머티어리얼 디자인</h2>
+<p>Android 5.0에서는 종이와 잉크의 질감을 느낄 수 있는 디자인 개념이 도입되었습니다.
+</p>
+<p><a class="white" href="{@docRoot}design/material/index.html">자세히 알아보기</a></p>
+</div>
+
+</div> 
