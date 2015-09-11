@@ -13,16 +13,8 @@
      See the License for the specific language governing permissions and
      limitations under the License.
 -->
-
-<selector xmlns:android="http://schemas.android.com/apk/res/android">
-    <item
-        android:state_activated="true"
-        android:color="?android:attr/colorAccent"
-        android:alpha="0.1" />
-    <item
-        android:state_enabled="false"
-        android:color="?android:attr/colorBackground"
-        android:alpha="0.5" />
-    <item
-        android:color="@android:color/transparent" />
-</selector>
+<resources>
+    <declare-styleable name="DocumentsBaseTheme">
+        <attr name="colorActionMode" format="color"/>
+    </declare-styleable>
+</resources>

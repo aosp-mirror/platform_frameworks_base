@@ -90,10 +90,6 @@ public class FilesActivity extends BaseActivity {
 
         mClipper = new DocumentClipper(this);
         mDrawer = DrawerController.create(this);
-        if (mDrawer.isPresent()) {
-            setTheme(R.style.DocumentsNonDialogTheme);
-        }
-
 
         RootsFragment.show(getFragmentManager(), null);
         if (!mState.restored) {

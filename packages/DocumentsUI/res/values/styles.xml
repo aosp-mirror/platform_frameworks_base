@@ -28,6 +28,7 @@
         <item name="android:colorPrimaryDark">@color/primary_dark</item>
         <item name="android:colorPrimary">@color/primary</item>
         <item name="android:colorAccent">@color/accent</item>
+        <item name="colorActionMode">@color/material_grey_800</item>
 
         <item name="android:listDivider">@*android:drawable/list_divider_material</item>
 
@@ -43,6 +44,7 @@
         <item name="actionBarWidgetTheme">@null</item>
         <item name="actionBarTheme">@style/ActionBarTheme</item>
         <item name="actionBarPopupTheme">@style/ActionBarPopupTheme</item>
+        <item name="colorActionMode">@color/material_grey_800</item>
 
         <item name="android:listDivider">@*android:drawable/list_divider_material</item>
 
@@ -68,16 +70,21 @@
     </style>
 
     <style name="AlertDialogTheme" parent="@android:style/Theme.Material.Light.Dialog.Alert">
-        <item name="android:colorAccent">@color/material_blue_700</item>
+        <item name="android:colorAccent">@color/platform_blue_700</item>
     </style>
 
     <style name="FilesTheme" parent="@style/DocumentsBaseTheme.FullScreen">
-        <item name="android:colorPrimaryDark">@color/material_blue_700</item>
-        <item name="android:colorPrimary">@color/material_blue_500</item>
-        <item name="android:colorAccent">@color/material_blue_700</item>
-        <item name="android:actionModeStyle">@style/ActionModeStyle</item>
+        <item name="android:colorPrimaryDark">@color/platform_blue_700</item>
+        <item name="android:colorPrimary">@color/platform_blue_500</item>
+        <item name="android:colorAccent">@color/platform_blue_700</item>
+        <item name="android:actionModeStyle">@style/FilesActionModeStyle</item>
+        <item name="colorActionMode">@color/platform_blue_700</item>
 
         <item name="android:alertDialogTheme">@style/AlertDialogTheme</item>
     </style>
 
+    <style name="FilesActionModeStyle" parent="@android:style/Widget.Material.Light.ActionMode">
+        <item name="android:background">@color/platform_blue_100</item>
+    </style>
+    
 </resources>
