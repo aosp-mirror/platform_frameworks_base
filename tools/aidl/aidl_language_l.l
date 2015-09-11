@@ -1,6 +1,6 @@
 %{
 #include "aidl_language.h"
-#include "aidl_language_y.h"
+#include "aidl_language_y.hpp"
 #include "search_path.h"
 #include <string.h>
 #include <stdlib.h>
@@ -39,6 +39,7 @@ static void do_package_statement(const char* importText);
 %option noyywrap
 %option reentrant
 %option bison-bridge
+%option bison-locations
 
 %x COPYING LONG_COMMENT
 
@@ -65,13 +66,13 @@ idvalue     (0|[1-9][0-9]*)
 <LONG_COMMENT>\**\/             { BEGIN(INITIAL); }
 
 ^{whitespace}?import{whitespace}[^ \t\r\n]+{whitespace}?;  {
-                                                SET_BUFFER(IMPORT);
-                                                return IMPORT;
+                                                SET_BUFFER(yy::parser::token::IMPORT);
+                                                return yy::parser::token::IMPORT;
                                             }
 ^{whitespace}?package{whitespace}[^ \t\r\n]+{whitespace}?;  {
                                                 do_package_statement(yytext);
-                                                SET_BUFFER(PACKAGE);
-                                                return PACKAGE;
+                                                SET_BUFFER(yy::parser::token::PACKAGE);
+                                                return yy::parser::token::PACKAGE;
                                             }
 <<EOF>>             { yyterminate(); }
 
@@ -90,25 +91,25 @@ idvalue     (0|[1-9][0-9]*)
 =               { SET_BUFFER('='); return '='; }
 
     /* keywords */
-parcelable      { SET_BUFFER(PARCELABLE); return PARCELABLE; }
-interface       { SET_BUFFER(INTERFACE); return INTERFACE; }
-in              { SET_BUFFER(IN); return IN; }
-out             { SET_BUFFER(OUT); return OUT; }
-inout           { SET_BUFFER(INOUT); return INOUT; }
-oneway          { SET_BUFFER(ONEWAY); return ONEWAY; }
+parcelable      { SET_BUFFER(yy::parser::token::PARCELABLE); return yy::parser::token::PARCELABLE; }
+interface       { SET_BUFFER(yy::parser::token::INTERFACE); return yy::parser::token::INTERFACE; }
+in              { SET_BUFFER(yy::parser::token::IN); return yy::parser::token::IN; }
+out             { SET_BUFFER(yy::parser::token::OUT); return yy::parser::token::OUT; }
+inout           { SET_BUFFER(yy::parser::token::INOUT); return yy::parser::token::INOUT; }
+oneway          { SET_BUFFER(yy::parser::token::ONEWAY); return yy::parser::token::ONEWAY; }
 
-{brackets}+     { SET_BUFFER(ARRAY); return ARRAY; }
-{idvalue}       { SET_BUFFER(IDVALUE); return IDVALUE; }
-{identifier}                                        { SET_BUFFER(IDENTIFIER); return IDENTIFIER; }
+{brackets}+     { SET_BUFFER(yy::parser::token::ARRAY); return yy::parser::token::ARRAY; }
+{idvalue}       { SET_BUFFER(yy::parser::token::IDVALUE); return yy::parser::token::IDVALUE; }
+{identifier}                                        { SET_BUFFER(yy::parser::token::IDENTIFIER); return yy::parser::token::IDENTIFIER; }
 {identifier}\<{whitespace}*{identifier}({whitespace}*,{whitespace}*{identifier})*{whitespace}*\>    {
-                                                      SET_BUFFER(GENERIC); return GENERIC; }
+                                                      SET_BUFFER(yy::parser::token::GENERIC); return yy::parser::token::GENERIC; }
 
     /* syntax error! */
 .               { printf("UNKNOWN(%s)", yytext);
                   yylval->buffer.lineno = yylineno;
-                  yylval->buffer.token = IDENTIFIER;
+                  yylval->buffer.token = yy::parser::token::IDENTIFIER;
                   yylval->buffer.data = strdup(yytext);
-                  return IDENTIFIER;
+                  return yy::parser::token::IDENTIFIER;
                 }
 
 %%
