@@ -170,6 +170,10 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
     // This is the top-level view of the window, containing the window decor.
     private DecorView mDecor;
 
+    // When we reuse decor views, we need to recreate the content root. This happens when the decor
+    // view is requested, so we need to force the recreating without introducing an infinite loop.
+    private boolean mForceDecorInstall = false;
+
     // This is the non client decor view for the window, containing the caption and window control
     // buttons. The visibility of this decor depends on the workspace and the window type.
     // If the window type does not require such a view, this member might be null.
@@ -248,6 +252,7 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
 
     private Drawable mBackgroundDrawable;
 
+    private boolean mLoadEleveation = true;
     private float mElevation;
 
     /** Whether window content should be clipped to the background outline. */
@@ -321,6 +326,16 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
     public PhoneWindow(Context context) {
         super(context);
         mLayoutInflater = LayoutInflater.from(context);
+    }
+
+    public PhoneWindow(Context context, Window preservedWindow) {
+        this(context);
+        if (preservedWindow != null) {
+            mDecor = (DecorView) preservedWindow.getDecorView();
+            mElevation = preservedWindow.getElevation();
+            mLoadEleveation = false;
+            mForceDecorInstall = true;
+        }
     }
 
     @Override
@@ -460,6 +475,12 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
         final Callback cb = getCallback();
         if (cb != null && !isDestroyed()) {
             cb.onContentChanged();
+        }
+    }
+
+    public void clearContentView() {
+        if (mNonClientDecorView.getChildCount() > 1) {
+            mNonClientDecorView.removeViewAt(1);
         }
     }
 
@@ -1396,6 +1417,11 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
     }
 
     @Override
+    public float getElevation() {
+        return mElevation;
+    }
+
+    @Override
     public final void setClipToOutline(boolean clipToOutline) {
         mClipToOutline = clipToOutline;
         if (mDecor != null) {
@@ -1992,7 +2018,7 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
 
     @Override
     public final View getDecorView() {
-        if (mDecor == null) {
+        if (mDecor == null || mForceDecorInstall) {
             installDecor();
         }
         return mDecor;
@@ -3960,7 +3986,9 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
                             + Integer.toHexString(mFrameResource));
                 }
             }
-            mElevation = a.getDimension(R.styleable.Window_windowElevation, 0);
+            if (mLoadEleveation) {
+                mElevation = a.getDimension(R.styleable.Window_windowElevation, 0);
+            }
             mClipToOutline = a.getBoolean(R.styleable.Window_windowClipToOutline, false);
             mTextColor = a.getColor(R.styleable.Window_textColor, Color.TRANSPARENT);
         }
@@ -4032,8 +4060,10 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
         mNonClientDecorView = createNonClientDecorView();
         View in = mLayoutInflater.inflate(layoutResource, null);
         if (mNonClientDecorView != null) {
-            decor.addView(mNonClientDecorView,
-                    new ViewGroup.LayoutParams(MATCH_PARENT, MATCH_PARENT));
+            if (mNonClientDecorView.getParent() == null) {
+                decor.addView(mNonClientDecorView,
+                        new ViewGroup.LayoutParams(MATCH_PARENT, MATCH_PARENT));
+            }
             mNonClientDecorView.addView(in, new ViewGroup.LayoutParams(MATCH_PARENT, MATCH_PARENT));
         } else {
             decor.addView(in, new ViewGroup.LayoutParams(MATCH_PARENT, MATCH_PARENT));
@@ -4096,6 +4126,14 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
     // Free floating overlapping windows require a non client decor with a caption and shadow..
     private NonClientDecorView createNonClientDecorView() {
         NonClientDecorView nonClientDecorView = null;
+        for (int i = mDecor.getChildCount() - 1; i >= 0 && nonClientDecorView == null; i--) {
+            View view = mDecor.getChildAt(i);
+            if (view instanceof NonClientDecorView) {
+                // The decor was most likely saved from a relaunch - so reuse it.
+                nonClientDecorView = (NonClientDecorView) view;
+                mDecor.removeViewAt(i);
+            }
+        }
         final WindowManager.LayoutParams attrs = getAttributes();
         boolean isApplication = attrs.type == TYPE_BASE_APPLICATION ||
                 attrs.type == TYPE_APPLICATION;
@@ -4106,21 +4144,22 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
                 mWorkspaceId < FIRST_DYNAMIC_STACK_ID) {
             // Dependent on the brightness of the used title we either use the
             // dark or the light button frame.
-            TypedValue value = new TypedValue();
-            getContext().getTheme().resolveAttribute(R.attr.colorPrimary, value, true);
-            if (Color.luminance(value.data) < 0.5) {
-                nonClientDecorView = (NonClientDecorView) mLayoutInflater.inflate(
-                        R.layout.non_client_decor_dark, null);
-            } else {
-                nonClientDecorView = (NonClientDecorView) mLayoutInflater.inflate(
-                        R.layout.non_client_decor_light, null);
+            if (nonClientDecorView == null) {
+                TypedValue value = new TypedValue();
+                getContext().getTheme().resolveAttribute(R.attr.colorPrimary, value, true);
+                if (Color.luminance(value.data) < 0.5) {
+                    nonClientDecorView = (NonClientDecorView) mLayoutInflater.inflate(
+                            R.layout.non_client_decor_dark, null);
+                } else {
+                    nonClientDecorView = (NonClientDecorView) mLayoutInflater.inflate(
+                            R.layout.non_client_decor_light, null);
+                }
             }
             nonClientDecorView.setPhoneWindow(this, hasNonClientDecor(mWorkspaceId),
                     nonClientDecorHasShadow(mWorkspaceId));
         }
         // Tell the decor if it has a visible non client decor.
-        mDecor.enableNonClientDecor(nonClientDecorView != null &&
-                hasNonClientDecor(mWorkspaceId));
+        mDecor.enableNonClientDecor(nonClientDecorView != null && hasNonClientDecor(mWorkspaceId));
 
         return nonClientDecorView;
     }
@@ -4131,6 +4170,7 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
     }
 
     private void installDecor() {
+        mForceDecorInstall = false;
         if (mDecor == null) {
             mDecor = generateDecor(-1);
             mDecor.setDescendantFocusability(ViewGroup.FOCUS_AFTER_DESCENDANTS);
@@ -5306,5 +5346,10 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
     private boolean nonClientDecorHasShadow(int workspaceId) {
         // TODO(skuhne): Add side by side mode here to add a decor.
         return workspaceId == FREEFORM_WORKSPACE_STACK_ID;
+    }
+
+    @Override
+    public boolean hasNonClientDecorView() {
+        return mNonClientDecorView != null;
     }
 }

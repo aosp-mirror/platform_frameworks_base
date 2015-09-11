@@ -736,7 +736,8 @@ class WallpaperController {
                         insertionIndex = windows.indexOf(wallpaperTarget);
                     }
                 }
-                if (DEBUG_WALLPAPER_LIGHT || DEBUG_WINDOW_MOVEMENT || DEBUG_ADD_REMOVE) Slog.v(TAG,
+                if (DEBUG_WALLPAPER_LIGHT || DEBUG_WINDOW_MOVEMENT
+                        || (DEBUG_ADD_REMOVE && oldIndex != insertionIndex)) Slog.v(TAG,
                         "Moving wallpaper " + wallpaper
                         + " from " + oldIndex + " to " + insertionIndex);
 

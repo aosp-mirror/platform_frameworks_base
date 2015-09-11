@@ -1427,7 +1427,7 @@ final class ActivityStack {
                     // First: if this is not the current activity being started, make
                     // sure it matches the current configuration.
                     if (r != starting) {
-                        ensureActivityConfigurationLocked(r, 0);
+                        ensureActivityConfigurationLocked(r, 0, false);
                     }
 
                     if (r.app == null || r.app.thread == null) {
@@ -3500,7 +3500,7 @@ final class ActivityStack {
     final boolean destroyActivityLocked(ActivityRecord r, boolean removeFromApp, String reason) {
         if (DEBUG_SWITCH || DEBUG_CLEANUP) Slog.v(TAG_SWITCH,
                 "Removing activity from " + reason + ": token=" + r
-                + ", app=" + (r.app != null ? r.app.processName : "(null)"));
+                        + ", app=" + (r.app != null ? r.app.processName : "(null)"));
         EventLog.writeEvent(EventLogTags.AM_DESTROY_ACTIVITY,
                 r.userId, System.identityHashCode(r),
                 r.task.taskId, r.shortComponentName, reason);
@@ -3977,7 +3977,8 @@ final class ActivityStack {
      * for whatever reason.  Ensures the HistoryRecord is updated with the
      * correct configuration and all other bookkeeping is handled.
      */
-    final boolean ensureActivityConfigurationLocked(ActivityRecord r, int globalChanges) {
+    final boolean ensureActivityConfigurationLocked(ActivityRecord r, int globalChanges,
+            boolean preserveWindow) {
         if (mConfigWillChange) {
             if (DEBUG_SWITCH || DEBUG_CONFIGURATION) Slog.v(TAG_CONFIGURATION,
                     "Skipping config check (will change): " + r);
@@ -4062,12 +4063,14 @@ final class ActivityStack {
                 // "restart!".
                 if (DEBUG_SWITCH || DEBUG_CONFIGURATION) Slog.v(TAG_CONFIGURATION,
                         "Config is relaunching resumed " + r);
-                relaunchActivityLocked(r, r.configChangeFlags, true);
+                relaunchActivityLocked(r, r.configChangeFlags, true,
+                        preserveWindow && isResizeOnlyChange(changes));
                 r.configChangeFlags = 0;
             } else {
                 if (DEBUG_SWITCH || DEBUG_CONFIGURATION) Slog.v(TAG_CONFIGURATION,
                         "Config is relaunching non-resumed " + r);
-                relaunchActivityLocked(r, r.configChangeFlags, false);
+                relaunchActivityLocked(r, r.configChangeFlags, false,
+                        preserveWindow && isResizeOnlyChange(changes));
                 r.configChangeFlags = 0;
             }
 
@@ -4160,7 +4163,13 @@ final class ActivityStack {
         return taskChanges;
     }
 
-    private boolean relaunchActivityLocked(ActivityRecord r, int changes, boolean andResume) {
+    private static boolean isResizeOnlyChange(int change) {
+        return (change & ~(ActivityInfo.CONFIG_SCREEN_SIZE
+                | ActivityInfo.CONFIG_SMALLEST_SCREEN_SIZE | ActivityInfo.CONFIG_ORIENTATION)) == 0;
+    }
+
+    private boolean relaunchActivityLocked(ActivityRecord r, int changes, boolean andResume,
+            boolean preserveWindow) {
         List<ResultInfo> results = null;
         List<ReferrerIntent> newIntents = null;
         if (andResume) {
@@ -4169,7 +4178,7 @@ final class ActivityStack {
         }
         if (DEBUG_SWITCH) Slog.v(TAG_SWITCH,
                 "Relaunching: " + r + " with results=" + results + " newIntents=" + newIntents
-                + " andResume=" + andResume);
+                + " andResume=" + andResume + " preserveWindow=" + preserveWindow);
         EventLog.writeEvent(andResume ? EventLogTags.AM_RELAUNCH_RESUME_ACTIVITY
                 : EventLogTags.AM_RELAUNCH_ACTIVITY, r.userId, System.identityHashCode(r),
                 r.task.taskId, r.shortComponentName);
@@ -4184,7 +4193,7 @@ final class ActivityStack {
             r.forceNewConfig = false;
             r.app.thread.scheduleRelaunchActivity(r.appToken, results, newIntents, changes,
                     !andResume, new Configuration(mService.mConfiguration),
-                    new Configuration(r.task.mOverrideConfig));
+                    new Configuration(r.task.mOverrideConfig), preserveWindow);
             // Note: don't need to call pauseIfSleepingLocked() here, because
             // the caller will only pass in 'andResume' if this activity is
             // currently resumed, which implies we aren't sleeping.

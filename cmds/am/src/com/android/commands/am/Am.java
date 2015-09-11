@@ -2266,12 +2266,12 @@ public class Am extends BaseCommand {
             System.err.println("Error: invalid input bounds");
             return;
         }
-        taskResize(taskId, bounds, 0);
+        taskResize(taskId, bounds, 0, false);
     }
 
-    private void taskResize(int taskId, Rect bounds, int delay_ms) {
+    private void taskResize(int taskId, Rect bounds, int delay_ms, boolean pretendUserResize) {
         try {
-            mAm.resizeTask(taskId, bounds);
+            mAm.resizeTask(taskId, bounds, pretendUserResize);
             Thread.sleep(delay_ms);
         } catch (RemoteException e) {
             System.err.println("Error changing task bounds: " + e);
@@ -2354,7 +2354,7 @@ public class Am extends BaseCommand {
                     taskRect.top += maxMove;
                     taskRect.bottom += maxMove;
                 }
-                taskResize(taskId, taskRect, delay_ms);
+                taskResize(taskId, taskRect, delay_ms, false);
             }
         } else {
             while (maxToTravel < 0
@@ -2371,7 +2371,7 @@ public class Am extends BaseCommand {
                     taskRect.top -= maxMove;
                     taskRect.bottom -= maxMove;
                 }
-                taskResize(taskId, taskRect, delay_ms);
+                taskResize(taskId, taskRect, delay_ms, false);
             }
         }
         // Return the remaining distance we didn't travel because we reached the target location.
@@ -2405,7 +2405,7 @@ public class Am extends BaseCommand {
             currentTaskBounds.left -= getStepSize(
                     currentTaskBounds.left, stackBounds.left, stepSize, GREATER_THAN_TARGET);
 
-            taskResize(taskId, currentTaskBounds, delay_ms);
+            taskResize(taskId, currentTaskBounds, delay_ms, true);
         } while (stackBounds.top < currentTaskBounds.top
                 || stackBounds.left < currentTaskBounds.left);
 
@@ -2418,7 +2418,7 @@ public class Am extends BaseCommand {
             currentTaskBounds.left += getStepSize(
                     currentTaskBounds.left, initialTaskBounds.left, stepSize, !GREATER_THAN_TARGET);
 
-            taskResize(taskId, currentTaskBounds, delay_ms);
+            taskResize(taskId, currentTaskBounds, delay_ms, true);
         } while (initialTaskBounds.top > currentTaskBounds.top
                 || initialTaskBounds.left > currentTaskBounds.left);
 
@@ -2431,7 +2431,7 @@ public class Am extends BaseCommand {
             currentTaskBounds.right += getStepSize(
                     currentTaskBounds.right, stackBounds.right, stepSize, !GREATER_THAN_TARGET);
 
-            taskResize(taskId, currentTaskBounds, delay_ms);
+            taskResize(taskId, currentTaskBounds, delay_ms, true);
         } while (stackBounds.top < currentTaskBounds.top
                 || stackBounds.right > currentTaskBounds.right);
 
@@ -2444,7 +2444,7 @@ public class Am extends BaseCommand {
             currentTaskBounds.right -= getStepSize(currentTaskBounds.right, initialTaskBounds.right,
                     stepSize, GREATER_THAN_TARGET);
 
-            taskResize(taskId, currentTaskBounds, delay_ms);
+            taskResize(taskId, currentTaskBounds, delay_ms, true);
         } while (initialTaskBounds.top > currentTaskBounds.top
                 || initialTaskBounds.right < currentTaskBounds.right);
 
@@ -2457,7 +2457,7 @@ public class Am extends BaseCommand {
             currentTaskBounds.left -= getStepSize(
                     currentTaskBounds.left, stackBounds.left, stepSize, GREATER_THAN_TARGET);
 
-            taskResize(taskId, currentTaskBounds, delay_ms);
+            taskResize(taskId, currentTaskBounds, delay_ms, true);
         } while (stackBounds.bottom > currentTaskBounds.bottom
                 || stackBounds.left < currentTaskBounds.left);
 
@@ -2470,7 +2470,7 @@ public class Am extends BaseCommand {
             currentTaskBounds.left += getStepSize(
                     currentTaskBounds.left, initialTaskBounds.left, stepSize, !GREATER_THAN_TARGET);
 
-            taskResize(taskId, currentTaskBounds, delay_ms);
+            taskResize(taskId, currentTaskBounds, delay_ms, true);
         } while (initialTaskBounds.bottom < currentTaskBounds.bottom
                 || initialTaskBounds.left > currentTaskBounds.left);
 
@@ -2483,7 +2483,7 @@ public class Am extends BaseCommand {
             currentTaskBounds.right += getStepSize(
                     currentTaskBounds.right, stackBounds.right, stepSize, !GREATER_THAN_TARGET);
 
-            taskResize(taskId, currentTaskBounds, delay_ms);
+            taskResize(taskId, currentTaskBounds, delay_ms, true);
         } while (stackBounds.bottom > currentTaskBounds.bottom
                 || stackBounds.right > currentTaskBounds.right);
 
@@ -2496,7 +2496,7 @@ public class Am extends BaseCommand {
             currentTaskBounds.right -= getStepSize(currentTaskBounds.right, initialTaskBounds.right,
                     stepSize, GREATER_THAN_TARGET);
 
-            taskResize(taskId, currentTaskBounds, delay_ms);
+            taskResize(taskId, currentTaskBounds, delay_ms, true);
         } while (initialTaskBounds.bottom < currentTaskBounds.bottom
                 || initialTaskBounds.right < currentTaskBounds.right);
     }

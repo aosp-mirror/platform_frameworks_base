@@ -1044,7 +1044,7 @@ public class Instrumentation {
         activity.attach(context, aThread, this, token, 0, application, intent,
                 info, title, parent, id,
                 (Activity.NonConfigurationInstances)lastNonConfigurationInstance,
-                new Configuration(), null, null);
+                new Configuration(), null, null, null);
         return activity;
     }
 

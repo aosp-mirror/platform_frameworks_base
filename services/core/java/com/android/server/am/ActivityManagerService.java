@@ -8650,7 +8650,7 @@ public final class ActivityManagerService extends ActivityManagerNative
     }
 
     @Override
-    public void resizeTask(int taskId, Rect bounds) {
+    public void resizeTask(int taskId, Rect bounds, boolean resizedByUser) {
         enforceCallingPermission(android.Manifest.permission.MANAGE_ACTIVITY_STACKS,
                 "resizeTask()");
         long ident = Binder.clearCallingIdentity();
@@ -8661,7 +8661,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                     Slog.w(TAG, "resizeTask: taskId=" + taskId + " not found");
                     return;
                 }
-                mStackSupervisor.resizeTaskLocked(task, bounds);
+                mStackSupervisor.resizeTaskLocked(task, bounds, resizedByUser);
             }
         } finally {
             Binder.restoreCallingIdentity(ident);
@@ -17660,7 +17660,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             }
 
             if (starting != null) {
-                kept = mainStack.ensureActivityConfigurationLocked(starting, changes);
+                kept = mainStack.ensureActivityConfigurationLocked(starting, changes, false);
                 // And we need to make sure at this point that all other activities
                 // are made visible with the correct configuration.
                 mStackSupervisor.ensureActivitiesVisibleLocked(starting, changes);
