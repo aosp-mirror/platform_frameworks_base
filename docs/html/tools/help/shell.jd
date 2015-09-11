@@ -570,6 +570,7 @@ install [options]  &lt;PATH>
     <li>{@code -s}: Install package on the shared mass storage (such as sdcard).
     <li>{@code -f}: Install package on the internal system memory.
     <li>{@code -d}: Allow version code downgrade.
+    <li>{@code -g}: Grant all permissions listed in the app manifest.
   </ul>
 </td>
 </tr>
@@ -622,21 +623,23 @@ disable-user [options] &lt;PACKAGE_OR_COMPONENT>
 
 <tr>
 <td><code>
-grant &lt;PACKAGE_PERMISSION>
+grant &lt;PACKAGE_NAME&gt; &lt;PERMISSION&gt;
 </code></td>
-<td>Grant permissions
-  to applications.  Only optional permissions the application has
-  declared can be granted.
+<td>Grant a permission to an app. On devices running Android 6.0 (API level 23)
+and higher, may be any permission declared in the app manifest. On devices
+running Android 5.1 (API level 22) and lower, must be an optional permission defined by the
+app.
 </td>
 </tr>
 
 <tr>
 <td><code>
-revoke &lt;PACKAGE_PERMISSION>
+revoke &lt;PACKAGE_NAME&gt; &lt;PERMISSION&gt;
 </code></td>
-<td>Revoke permissions
-  to applications.  Only optional permissions the application has
-  declared can be revoked.
+<td>Revoke a permission from an app. On devices running Android 6.0 (API level
+23) and higher, may be any permission declared in the app manifest. On devices
+running Android 5.1 (API level 22) and lower, must be an optional permission defined by the
+app.
 </td>
 </tr>
 
