@@ -1,6 +1,9 @@
 #ifndef AIDL_AIDL_LANGUAGE_H_
 #define AIDL_AIDL_LANGUAGE_H_
 
+#include <string>
+
+#include "macros.h"
 
 typedef enum {
     NO_EXTRA_TEXT = 0,
@@ -141,12 +144,6 @@ typedef struct ParserCallbacks {
 
 extern ParserCallbacks* g_callbacks;
 
-// true if there was an error parsing, false otherwise
-extern int g_error;
-
-// the name of the file we're currently parsing
-extern char const* g_currentFilename;
-
 // the package name for our current file
 extern char const* g_currentPackage;
 
@@ -156,6 +153,33 @@ typedef enum {
 
 void init_buffer_type(buffer_type* buf, int lineno);
 
+
+class ParseState {
+ public:
+  ParseState();
+  ParseState(const std::string& filename);
+  ~ParseState();
+
+  bool OpenFileFromDisk();
+  int RunParser();
+  void ReportError(const std::string& err);
+
+  bool FoundNoErrors();
+  std::string FileName();
+  std::string Package();
+  void *Scanner();
+
+  void ProcessDocument(const document_item_type& items);
+  void ProcessImport(const buffer_type& statement);
+
+ private:
+  int error_ = 0;
+  std::string filename_;
+  std::string package_;
+  void *scanner_ = nullptr;
+
+  DISALLOW_COPY_AND_ASSIGN(ParseState);
+};
 
 #if __cplusplus
 }
