@@ -3968,12 +3968,27 @@ In rs_fp_relaxed mode, mad() may not do the rounding after multiplicaiton.
         <td>        </td>
       </tr>
       <tr>
+        <td><a href='rs_value_types.html#android_rs:float2'>float2</a> max(<a href='rs_value_types.html#android_rs:float2'>float2</a> a, float b);
+</td>
+        <td>        </td>
+      </tr>
+      <tr>
         <td><a href='rs_value_types.html#android_rs:float2'>float2</a> max(<a href='rs_value_types.html#android_rs:float2'>float2</a> a, <a href='rs_value_types.html#android_rs:float2'>float2</a> b);
 </td>
         <td>        </td>
       </tr>
       <tr>
+        <td><a href='rs_value_types.html#android_rs:float3'>float3</a> max(<a href='rs_value_types.html#android_rs:float3'>float3</a> a, float b);
+</td>
+        <td>        </td>
+      </tr>
+      <tr>
         <td><a href='rs_value_types.html#android_rs:float3'>float3</a> max(<a href='rs_value_types.html#android_rs:float3'>float3</a> a, <a href='rs_value_types.html#android_rs:float3'>float3</a> b);
+</td>
+        <td>        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:float4'>float4</a> max(<a href='rs_value_types.html#android_rs:float4'>float4</a> a, float b);
 </td>
         <td>        </td>
       </tr>
@@ -4172,12 +4187,27 @@ In rs_fp_relaxed mode, mad() may not do the rounding after multiplicaiton.
         <td>        </td>
       </tr>
       <tr>
+        <td><a href='rs_value_types.html#android_rs:float2'>float2</a> min(<a href='rs_value_types.html#android_rs:float2'>float2</a> a, float b);
+</td>
+        <td>        </td>
+      </tr>
+      <tr>
         <td><a href='rs_value_types.html#android_rs:float2'>float2</a> min(<a href='rs_value_types.html#android_rs:float2'>float2</a> a, <a href='rs_value_types.html#android_rs:float2'>float2</a> b);
 </td>
         <td>        </td>
       </tr>
       <tr>
+        <td><a href='rs_value_types.html#android_rs:float3'>float3</a> min(<a href='rs_value_types.html#android_rs:float3'>float3</a> a, float b);
+</td>
+        <td>        </td>
+      </tr>
+      <tr>
         <td><a href='rs_value_types.html#android_rs:float3'>float3</a> min(<a href='rs_value_types.html#android_rs:float3'>float3</a> a, <a href='rs_value_types.html#android_rs:float3'>float3</a> b);
+</td>
+        <td>        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:float4'>float4</a> min(<a href='rs_value_types.html#android_rs:float4'>float4</a> a, float b);
 </td>
         <td>        </td>
       </tr>
