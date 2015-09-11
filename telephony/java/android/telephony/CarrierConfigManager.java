@@ -277,6 +277,17 @@ public class CarrierConfigManager {
             "carrier_instant_lettering_invalid_chars_string";
 
     /**
+     * When IMS instant lettering is available for a carrier (see
+     * {@link #KEY_CARRIER_INSTANT_LETTERING_AVAILABLE_BOOL}), determines a list of characters which
+     * must be escaped with a backslash '\' character.  Should be specified as a string containing
+     * the characters to be escaped.  For example to escape quote and backslash the string would be
+     * a quote and a backslash.
+     * @hide
+     */
+    public static final String KEY_CARRIER_INSTANT_LETTERING_ESCAPED_CHARS_STRING =
+            "carrier_instant_lettering_escaped_chars_string";
+
+    /**
      * If Voice Radio Technology is RIL_RADIO_TECHNOLOGY_LTE:14 or RIL_RADIO_TECHNOLOGY_UNKNOWN:0
      * this is the value that should be used instead. A configuration value of
      * RIL_RADIO_TECHNOLOGY_UNKNOWN:0 means there is no replacement value and that the default
@@ -487,6 +498,7 @@ public class CarrierConfigManager {
         sDefaults.putBoolean(KEY_CARRIER_ALLOW_TURNOFF_IMS_BOOL, true);
         sDefaults.putBoolean(KEY_CARRIER_INSTANT_LETTERING_AVAILABLE_BOOL, false);
         sDefaults.putString(KEY_CARRIER_INSTANT_LETTERING_INVALID_CHARS_STRING, "");
+        sDefaults.putString(KEY_CARRIER_INSTANT_LETTERING_ESCAPED_CHARS_STRING, "");
         sDefaults.putBoolean(KEY_DISABLE_CDMA_ACTIVATION_CODE_BOOL, false);
         sDefaults.putBoolean(KEY_DTMF_TYPE_ENABLED_BOOL, false);
         sDefaults.putBoolean(KEY_ENABLE_DIALER_KEY_VIBRATION_BOOL, true);
