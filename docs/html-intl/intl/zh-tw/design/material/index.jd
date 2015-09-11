@@ -1,0 +1,43 @@
+page.title=Design
+page.viewport_width=970
+section.landing=true
+meta.tags="beautifulapps, design, ux, patterns, holo, appquality, landing"
+header.hide=1
+footer.hide=1 
+
+@jd:body
+
+<style>
+#landing-graphic-container {
+  position: relative;
+}
+
+#text-overlay {
+  position: absolute;
+  left: 0;
+  top: 42px;
+  width: 266px;
+
+}
+#hero-image {
+  padding-left:68px;
+}
+</style>
+
+<div id="landing-graphic-container">
+  <div id="text-overlay">
+    <span itemprop="description">歡迎使用 <strong>Android Design</strong>，您在這裡可以學習如何設計特殊的 Android 應用程式。</span>
+    <br><br>
+    想要知道 <strong>Android 5.0</strong> 提供什麼功能給設計人員嗎？請參閱 <a href="{@docRoot}design/patterns/new.html">Android 中的新功能</a>。<br><br>
+    <a href="/design/get-started/creative-vision.html" class="landing-page-link">創意願景</a>
+  </div>
+  <a id="hero-image" href="/design/get-started/creative-vision.html"> <img src="{@docRoot}design/media/index_landing_page.png" width="760" height="600" alt="" srcset="{@docRoot}design/media/index_landing_page_2x.png 2x" /> </a>
+
+<div style="background: hsl(8, 70%, 54%); margin: 0; padding: 20px 20px 10px 20px;color: #fff; position: absolute;top: 255px;width: 179px;">
+<h2 style="color: #fff;margin:0 0 10px; font-size:18px" class="norule">材料設計</h2>
+<p>Android 5.0 從真實的紙墨獲得靈感，引入一種設計隱喻，能提供栩栩如生的觸感。
+</p>
+<p><a class="white" href="{@docRoot}design/material/index.html">深入了解</a></p>
+</div>
+
+</div> 

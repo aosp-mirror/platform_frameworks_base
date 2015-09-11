@@ -1,0 +1,43 @@
+page.title=設計
+page.viewport_width=970
+section.landing=true
+meta.tags="beautifulapps, design, ux, patterns, holo, appquality, landing"
+header.hide=1
+footer.hide=1
+
+@jd:body
+
+<style>
+#landing-graphic-container {
+  position: relative;
+}
+
+#text-overlay {
+  position: absolute;
+  left: 0;
+  top: 42px;
+  width: 266px;
+
+}
+#hero-image {
+  padding-left:68px;
+}
+</style>
+
+<div id="landing-graphic-container">
+  <div id="text-overlay">
+    <span itemprop="description"><strong>Android デザイン</strong>へようこそ。ここでは、ひときわ優れた Android アプリを設計する方法を学ぶことができます。</span>
+    <br><br>
+    <strong>Android 5.0</strong> が備えるデザイナー向け機能については、<a href="{@docRoot}design/patterns/new.html">New in Android</a> をご確認ください。<br><br>
+    <a href="/design/get-started/creative-vision.html" class="landing-page-link">Creative Vision</a>
+  </div>
+  <a id="hero-image" href="/design/get-started/creative-vision.html"> <img src="{@docRoot}design/media/index_landing_page.png" width="760" height="600" alt="" srcset="{@docRoot}design/media/index_landing_page_2x.png 2x" /> </a>
+
+<div style="background: hsl(8, 70%, 54%); margin: 0; padding: 20px 20px 10px 20px;color: #fff; position: absolute;top: 255px;width: 179px;">
+<h2 style="color: #fff;margin:0 0 10px; font-size:18px" class="norule">マテリアル デザイン</h2>
+<p>Android 5.0 は紙とインクからヒントを得たデザイン メタファーを導入し、ユーザーが安心できる使用感を実現しています。
+</p>
+<p><a class="white" href="{@docRoot}design/material/index.html">詳細を見る</a></p>
+</div>
+
+</div> 
