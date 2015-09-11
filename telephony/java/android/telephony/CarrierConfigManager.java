@@ -357,6 +357,14 @@ public class CarrierConfigManager {
      * successive DTMF tones on the network.
      * @hide
      */
+    public static final String KEY_GSM_DTMF_TONE_DELAY_INT = "gsm_dtmf_tone_delay_int";
+
+    /**
+     * Specifies the amount of gap to be added in millis between DTMF tones. When a non-zero value
+     * is specified, the UE shall wait for the specified amount of time before it sends out
+     * successive DTMF tones on the network.
+     * @hide
+     */
     public static final String KEY_IMS_DTMF_TONE_DELAY_INT = "ims_dtmf_tone_delay_int";
 
     /**
@@ -518,6 +526,7 @@ public class CarrierConfigManager {
         sDefaults.putStringArray(KEY_CDMA_ROAMING_NETWORKS_STRING_ARRAY, null);
         sDefaults.putStringArray(KEY_CDMA_NONROAMING_NETWORKS_STRING_ARRAY, null);
         sDefaults.putBoolean(KEY_FORCE_HOME_NETWORK_BOOL, false);
+        sDefaults.putInt(KEY_GSM_DTMF_TONE_DELAY_INT, 0);
         sDefaults.putInt(KEY_IMS_DTMF_TONE_DELAY_INT, 0);
         sDefaults.putBoolean(KEY_SUPPORT_CONFERENCE_CALL_BOOL, true);
         sDefaults.putBoolean(KEY_EDITABLE_ENHANCED_4G_LTE_BOOL, true);
