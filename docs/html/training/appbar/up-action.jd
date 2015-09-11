@@ -1,0 +1,134 @@
+page.title=Adding an Up Action
+page.tags="appbar","actionbar", "up"
+helpoutsWidget=true
+trainingnavtop=true
+
+@jd:body
+
+<div id="tb-wrapper">
+  <div id="tb">
+
+    <h2>This lesson teaches you to</h2>
+
+    <ol>
+      <li>
+        <a href="#declare-parent">Declare a Parent Activity</a>
+      </li>
+
+      <li>
+        <a href="#enable-up">Enable the Up Button</a>
+      </li>
+    </ol>
+
+    <h2>See Also</h2>
+    <ul>
+      <li><a href="{@docRoot}training/implementing-navigation/ancestral.html">
+          Providing Up Navigation</a></li>
+    </ul>
+
+
+  </div>
+</div>
+
+<p>
+  Your app should make it easy for users to find their way back to the app's
+  main screen. One simple way to do this is to provide an <em>Up</em>
+  button on the app bar for all activities except the main one. When the user
+  selects the <em>Up</em> button, the app navigates to the parent
+  activity.
+</p>
+
+<p>
+  This lesson shows you how to add an <em>Up</em> button to an activity by
+  declaring the activity's parent in the manifest, and enabling the app bar's
+  <em>Up</em> button.
+</p>
+
+<h2 id="declare-parent">Declare a Parent Activity</h2>
+
+<p>
+  To support the up functionality in an activity, you need to declare the
+  activity's parent. You can do this in the app manifest, by setting an
+  <code>android:parentActivityName</code> attribute.
+</p>
+
+<p>
+  The <code>android:parentActivityName</code> attribute
+  was introduced in Android 4.1 (API level 16). To support devices with older
+  versions of Android, define a <a href=
+  "{@docRoot}guide/topics/manifest/meta-data-element.html"><code>&lt;meta-data&gt;</code></a>
+  name-value pair, where the name is
+  <code>"android.support.PARENT_ACTIVITY"</code> and the value is the name of
+  the parent activity.
+</p>
+
+<p>
+  For example, suppose your app has a main activity named
+  <code>MainActivity</code> and a single child activity. The following manifest
+  code declares both activities, and specifies the parent/child relationship:
+</p>
+<pre>
+&lt;application ... &gt;
+    ...
+
+    &lt;!-- The main/home activity (it has no parent activity) --&gt;
+
+    &lt;activity
+        android:name="com.example.myfirstapp.MainActivity" ...&gt;
+        ...
+    &lt;/activity&gt;
+
+    &lt;!-- A child of the main activity --&gt;
+    &lt;activity
+        android:name="com.example.myfirstapp.MyChildActivity"
+        android:label="@string/title_activity_child"
+        <strong>android:parentActivityName="com.example.myfirstapp.MainActivity"</strong> &gt;
+
+        &lt;!-- Parent activity meta-data to support 4.0 and lower --&gt;
+        &lt;meta-data
+            <strong>android:name="android.support.PARENT_ACTIVITY"
+            android:value="com.example.myfirstapp.MainActivity" /&gt;</strong>
+    &lt;/activity&gt;
+&lt;/application&gt;
+</pre>
+
+<h2 id="enable-up">Enable the Up Button</h2>
+
+<p>
+  To enable the <em>Up</em> button for an activity that has a parent
+  activity, call the app bar's {@link
+  android.support.v7.app.ActionBar#setDisplayHomeAsUpEnabled
+  setDisplayHomeAsUpEnabled()} method. Typically, you would do this when the
+  activity is created. For example, the following {@link
+  android.app.Activity#onCreate onCreate()} method sets a {@link
+  android.support.v7.widget.Toolbar} as the app bar for
+  <code>MyChildActivity</code>, then enables that app bar's <em>Up</em> button:
+</p>
+
+<pre>
+&#64;Override
+protected void onCreate(Bundle savedInstanceState) {
+    super.onCreate(savedInstanceState);
+    setContentView(R.layout.activity_my_child);
+
+    // my_child_toolbar is defined in the layout file
+    Toolbar myChildToolbar =
+        (Toolbar) findViewById(R.id.my_child_toolbar);
+    setSupportActionBar(myChildToolbar);
+
+    // Get a support ActionBar corresponding to this toolbar
+    ActionBar ab = getSupportActionBar();
+
+    // Enable the Up button
+    <strong>ab.setDisplayHomeAsUpEnabled(true);</strong>
+}
+</pre>
+
+<p>
+  You do <em>not</em> need to catch the up action in the activity's {@link
+  android.app.Activity#onOptionsItemSelected onOptionsItemSelected()} method.
+  Instead, that method should call its superclass, as shown in <a href=
+  "actions.html#handle-actions">Respond to Actions</a>. The superclass method
+  responds to the <em>Up</em> selection by navigating to the parent
+  activity, as specified in the app manifest.
+</p>
