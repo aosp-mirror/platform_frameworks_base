@@ -36,6 +36,8 @@ using std::set;
 using std::string;
 using std::vector;
 
+ParseState *psGlobal;
+
 static void
 test_document(document_item_type* d)
 {
@@ -114,7 +116,7 @@ main_import_parsed(buffer_type* statement)
 {
     import_info* import = (import_info*)malloc(sizeof(import_info));
     memset(import, 0, sizeof(import_info));
-    import->from = strdup(g_currentFilename);
+    import->from = strdup(psGlobal->FileName().c_str());
     import->statement.lineno = statement->lineno;
     import->statement.data = strdup(statement->data);
     import->statement.extra = NULL;
