@@ -1,26 +1,23 @@
 %{
 #include "aidl_language.h"
+#include "aidl_language_y.hpp"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
-int yyerror(ParseState* ps, char* errstr)
-{
-  ps->ReportError(errstr);
-  return 1;
-}
-
-int yylex(lexer_type *, void *);
+int yylex(lexer_type *, yy::parser::location_type *l, void *);
 
 static int count_brackets(const char*);
 
-#define YYLEX_PARAM ps->Scanner()
+#define lex_scanner ps->Scanner()
 
 %}
 
 %parse-param { ParseState* ps }
+%lex-param { void *lex_scanner }
 
 %pure-parser
+%skeleton "glr.cc"
 
 %token IMPORT
 %token PACKAGE
@@ -338,4 +335,9 @@ static int count_brackets(const char* s)
         s++;
     }
     return n;
+}
+
+void yy::parser::error(const yy::parser::location_type& l, const std::string& errstr)
+{
+  ps->ReportError(errstr);
 }
