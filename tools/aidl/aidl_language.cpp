@@ -5,6 +5,13 @@
 #include <string>
 #include <iostream>
 
+#ifdef _WIN32
+int isatty(int  fd)
+{
+    return (fd == 0);
+}
+#endif
+
 using std::string;
 using std::cerr;
 using std::endl;
