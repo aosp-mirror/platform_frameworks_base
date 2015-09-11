@@ -7,6 +7,13 @@
 
 extern YYSTYPE yylval;
 
+#ifdef _WIN32
+static inline int isatty(int fd)
+{
+  return 0;
+}
+#endif
+
 // comment and whitespace handling
 // these functions save a copy of the buffer
 static void begin_extra_text(unsigned lineno, which_extra_text which);
@@ -20,16 +27,18 @@ static void do_package_statement(const char* importText);
 
 #define SET_BUFFER(t) \
     do { \
-        yylval.buffer.lineno = yylineno; \
-        yylval.buffer.token = (t); \
-        yylval.buffer.data = strdup(yytext); \
-        yylval.buffer.extra = get_extra_text(); \
+        yylval->buffer.lineno = yyget_lineno(yyscanner); \
+        yylval->buffer.token = (t); \
+        yylval->buffer.data = strdup(yytext); \
+        yylval->buffer.extra = get_extra_text(); \
     } while(0)
 
 %}
 
 %option yylineno
 %option noyywrap
+%option reentrant
+%option bison-bridge
 
 %x COPYING LONG_COMMENT
 
@@ -96,9 +105,9 @@ oneway          { SET_BUFFER(ONEWAY); return ONEWAY; }
 
     /* syntax error! */
 .               { printf("UNKNOWN(%s)", yytext);
-                  yylval.buffer.lineno = yylineno;
-                  yylval.buffer.token = IDENTIFIER;
-                  yylval.buffer.data = strdup(yytext);
+                  yylval->buffer.lineno = yylineno;
+                  yylval->buffer.token = IDENTIFIER;
+                  yylval->buffer.data = strdup(yytext);
                   return IDENTIFIER;
                 }
 
@@ -177,36 +186,17 @@ void do_package_statement(const char* importText)
 
 // main parse function
 // ================================================
-char const* g_currentFilename = NULL;
+extern ParseState *psGlobal;
 char const* g_currentPackage = NULL;
 
-int yyparse(void);
+int parse_aidl(char const *filename) {
+  ParseState ps(filename);
+  psGlobal = &ps;
 
-int parse_aidl(char const *filename)
-{
-    yyin = fopen(filename, "r");
-    if (yyin) {
-        char const* oldFilename = g_currentFilename;
-        char const* oldPackage = g_currentPackage;
-        g_currentFilename = strdup(filename);
+  if (!ps.OpenFileFromDisk()) {
+    fprintf(stderr, "aidl: unable to open file for read: %s\n", filename);
+    return 1;
+  }
 
-        g_error = 0;
-        yylineno = 1;
-        int rv = yyparse();
-        if (g_error != 0) {
-            rv = g_error;
-        }
-
-        free((void*)g_currentFilename);
-        g_currentFilename = oldFilename;
-        
-        if (g_currentPackage) free((void*)g_currentPackage);
-        g_currentPackage = oldPackage;
-
-        return rv;
-    } else {
-        fprintf(stderr, "aidl: unable to open file for read: %s\n", filename);
-        return 1;
-    }
+  return ps.RunParser();
 }
-

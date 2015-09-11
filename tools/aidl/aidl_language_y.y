@@ -4,13 +4,23 @@
 #include <stdlib.h>
 #include <string.h>
 
-int yyerror(char* errstr);
-int yylex(void);
-extern int yylineno;
+int yyerror(ParseState* ps, char* errstr)
+{
+  ps->ReportError(errstr);
+  return 1;
+}
+
+int yylex(lexer_type *, void *);
 
 static int count_brackets(const char*);
 
+#define YYLEX_PARAM ps->Scanner()
+
 %}
+
+%parse-param { ParseState* ps }
+
+%pure-parser
 
 %token IMPORT
 %token PACKAGE
@@ -27,8 +37,8 @@ static int count_brackets(const char*);
 
 %%
 document:
-        document_items                          { g_callbacks->document($1.document_item); }
-    |   headers document_items                  { g_callbacks->document($2.document_item); }
+        document_items                          { ps->ProcessDocument(*$1.document_item); }
+    |   headers document_items                  { ps->ProcessDocument(*$2.document_item); }
     ;
 
 headers:
@@ -42,8 +52,8 @@ package:
     ;
 
 imports:
-        IMPORT                                  { g_callbacks->import(&($1.buffer)); }
-    |   IMPORT imports                          { g_callbacks->import(&($1.buffer)); }
+        IMPORT                                  { ps->ProcessImport($1.buffer); }
+    |   IMPORT imports                          { ps->ProcessImport($1.buffer); }
     ;
 
 document_items:
@@ -66,7 +76,8 @@ document_items:
                                                     }
                                                 }
     | document_items error                      {
-                                                    fprintf(stderr, "%s:%d: syntax error don't know what to do with \"%s\"\n", g_currentFilename,
+                                                    fprintf(stderr, "%s:%d: syntax error don't know what to do with \"%s\"\n",
+                                                            ps->FileName().c_str(),
                                                             $2.buffer.lineno, $2.buffer.data);
                                                     $$ = $1;
                                                 }
@@ -84,19 +95,20 @@ parcelable_decl:
                                                         b->document_item.next = NULL;
                                                         b->keyword_token = $1.buffer;
                                                         b->name = $2.buffer;
-                                                        b->package = g_currentPackage ? strdup(g_currentPackage) : NULL;
+                                                        b->package =
+                                                        strdup(ps->Package().c_str());
                                                         b->semicolon_token = $3.buffer;
                                                         b->parcelable = true;
                                                         $$.user_data = b;
                                                     }
     |   PARCELABLE ';'                              {
                                                         fprintf(stderr, "%s:%d syntax error in parcelable declaration. Expected type name.\n",
-                                                                     g_currentFilename, $1.buffer.lineno);
+                                                                     ps->FileName().c_str(), $1.buffer.lineno);
                                                         $$.user_data = NULL;
                                                     }
     |   PARCELABLE error ';'                        {
                                                         fprintf(stderr, "%s:%d syntax error in parcelable declaration. Expected type name, saw \"%s\".\n",
-                                                                     g_currentFilename, $2.buffer.lineno, $2.buffer.data);
+                                                                     ps->FileName().c_str(), $2.buffer.lineno, $2.buffer.data);
                                                         $$.user_data = NULL;
                                                     }
     ;
@@ -128,7 +140,8 @@ interface_decl:
         interface_header IDENTIFIER '{' interface_items '}' { 
                                                         interface_type* c = $1.interface_obj;
                                                         c->name = $2.buffer;
-                                                        c->package = g_currentPackage ? strdup(g_currentPackage) : NULL;
+                                                        c->package =
+                                                        strdup(ps->Package().c_str());
                                                         c->open_brace_token = $3.buffer;
                                                         c->interface_items = $4.interface_item;
                                                         c->close_brace_token = $5.buffer;
@@ -136,12 +149,12 @@ interface_decl:
                                                     }
     |   INTERFACE error '{' interface_items '}'     {
                                                         fprintf(stderr, "%s:%d: syntax error in interface declaration.  Expected type name, saw \"%s\"\n",
-                                                                    g_currentFilename, $2.buffer.lineno, $2.buffer.data);
+                                                                    ps->FileName().c_str(), $2.buffer.lineno, $2.buffer.data);
                                                         $$.document_item = NULL;
                                                     }
     |   INTERFACE error '}'                {
                                                         fprintf(stderr, "%s:%d: syntax error in interface declaration.  Expected type name, saw \"%s\"\n",
-                                                                    g_currentFilename, $2.buffer.lineno, $2.buffer.data);
+                                                                    ps->FileName().c_str(), $2.buffer.lineno, $2.buffer.data);
                                                         $$.document_item = NULL;
                                                     }
 
@@ -163,7 +176,7 @@ interface_items:
                                                     }
     |   interface_items error ';'                   {
                                                         fprintf(stderr, "%s:%d: syntax error before ';' (expected method declaration)\n",
-                                                                    g_currentFilename, $3.buffer.lineno);
+                                                                    ps->FileName().c_str(), $3.buffer.lineno);
                                                         $$ = $1;
                                                     }
     ;
@@ -259,7 +272,8 @@ arg_list:
                                     }
                                 }
     |   error                   {
-                                    fprintf(stderr, "%s:%d: syntax error in parameter list\n", g_currentFilename, $1.buffer.lineno);
+                                    fprintf(stderr, "%s:%d: syntax error in parameter list\n",
+                                            ps->FileName().c_str(), $1.buffer.lineno);
                                     $$.arg = NULL;
                                 }
     ;
@@ -279,7 +293,8 @@ arg:
 type:
         IDENTIFIER              {
                                     $$.type.type = $1.buffer;
-                                    init_buffer_type(&$$.type.array_token, yylineno);
+                                    init_buffer_type(&$$.type.array_token,
+                                      $1.buffer.lineno);
                                     $$.type.dimension = 0;
                                 }
     |   IDENTIFIER ARRAY        {
@@ -289,13 +304,14 @@ type:
                                 }
     |   GENERIC                 {
                                     $$.type.type = $1.buffer;
-                                    init_buffer_type(&$$.type.array_token, yylineno);
+                                    init_buffer_type(&$$.type.array_token,
+                                      $1.buffer.lineno);
                                     $$.type.dimension = 0;
                                 }
     ;
 
 direction:
-                    { init_buffer_type(&$$.buffer, yylineno); }
+                    { init_buffer_type(&$$.buffer, $$.buffer.lineno); }
     |   IN          { $$.buffer = $1.buffer; }
     |   OUT         { $$.buffer = $1.buffer; }
     |   INOUT       { $$.buffer = $1.buffer; }
@@ -305,15 +321,6 @@ direction:
 
 #include <ctype.h>
 #include <stdio.h>
-
-int g_error = 0;
-
-int yyerror(char* errstr)
-{
-    fprintf(stderr, "%s:%d: %s\n", g_currentFilename, yylineno, errstr);
-    g_error = 1;
-    return 1;
-}
 
 void init_buffer_type(buffer_type* buf, int lineno)
 {
