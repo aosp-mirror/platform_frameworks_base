@@ -1,5 +1,7 @@
 package com.android.systemui.assist;
 
+import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.app.ActivityManager;
 import android.app.ActivityOptions;
 import android.app.SearchManager;
@@ -9,9 +11,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
-import android.database.ContentObserver;
 import android.graphics.PixelFormat;
-import android.media.AudioAttributes;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
@@ -21,7 +21,6 @@ import android.provider.Settings;
 import android.service.voice.VoiceInteractionSession;
 import android.util.Log;
 import android.view.Gravity;
-import android.view.HapticFeedbackConstants;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -33,10 +32,6 @@ import com.android.internal.app.IVoiceInteractionSessionShowCallback;
 import com.android.systemui.R;
 import com.android.systemui.statusbar.BaseStatusBar;
 import com.android.systemui.statusbar.CommandQueue;
-import com.android.systemui.statusbar.phone.PhoneStatusBar;
-
-import java.io.FileDescriptor;
-import java.io.PrintWriter;
 
 /**
  * Class to manage everything related to assist in SystemUI.
@@ -57,8 +52,6 @@ public class AssistManager {
     private AssistOrbContainer mView;
     private final BaseStatusBar mBar;
     private final AssistUtils mAssistUtils;
-
-    private ComponentName mAssistComponent;
 
     private IVoiceInteractionSessionShowCallback mShowCallback =
             new IVoiceInteractionSessionShowCallback.Stub() {
@@ -82,23 +75,11 @@ public class AssistManager {
         }
     };
 
-    private final ContentObserver mAssistSettingsObserver = new ContentObserver(new Handler()) {
-        @Override
-        public void onChange(boolean selfChange) {
-            updateAssistInfo();
-        }
-    };
-
     public AssistManager(BaseStatusBar bar, Context context) {
         mContext = context;
         mBar = bar;
         mWindowManager = (WindowManager) mContext.getSystemService(Context.WINDOW_SERVICE);
         mAssistUtils = new AssistUtils(context);
-
-        mContext.getContentResolver().registerContentObserver(
-                Settings.Secure.getUriFor(Settings.Secure.ASSISTANT), false,
-                mAssistSettingsObserver);
-        mAssistSettingsObserver.onChange(false);
         mAssistDisclosure = new AssistDisclosure(context, new Handler());
     }
 
@@ -123,19 +104,19 @@ public class AssistManager {
     }
 
     public void startAssist(Bundle args) {
-        updateAssistInfo();
-        if (mAssistComponent == null) {
+        final ComponentName assistComponent = getAssistInfo();
+        if (assistComponent == null) {
             return;
         }
 
-        final boolean isService = isAssistantService();
+        final boolean isService = assistComponent.equals(getVoiceInteractorComponentName());
         if (!isService || !isVoiceSessionRunning()) {
-            showOrb();
+            showOrb(assistComponent, isService);
             mView.postDelayed(mHideRunnable, isService
                     ? TIMEOUT_SERVICE
                     : TIMEOUT_ACTIVITY);
         }
-        startAssistInternal(args);
+        startAssistInternal(args, assistComponent, isService);
     }
 
     public void hideAssist() {
@@ -161,22 +142,21 @@ public class AssistManager {
         return lp;
     }
 
-    private void showOrb() {
-        maybeSwapSearchIcon();
+    private void showOrb(@NonNull ComponentName assistComponent, boolean isService) {
+        maybeSwapSearchIcon(assistComponent, isService);
         mView.show(true /* show */, true /* animate */);
     }
 
-    private void startAssistInternal(Bundle args) {
-        if (mAssistComponent != null) {
-            if (isAssistantService()) {
-                startVoiceInteractor(args);
-            } else {
-                startAssistActivity(args);
-            }
+    private void startAssistInternal(Bundle args, @NonNull ComponentName assistComponent,
+            boolean isService) {
+        if (isService) {
+            startVoiceInteractor(args);
+        } else {
+            startAssistActivity(args, assistComponent);
         }
     }
 
-    private void startAssistActivity(Bundle args) {
+    private void startAssistActivity(Bundle args, @NonNull ComponentName assistComponent) {
         if (!mBar.isDeviceProvisioned()) {
             return;
         }
@@ -193,9 +173,7 @@ public class AssistManager {
         if (intent == null) {
             return;
         }
-        if (mAssistComponent != null) {
-            intent.setComponent(mAssistComponent);
-        }
+        intent.setComponent(assistComponent);
         intent.putExtras(args);
 
         if (structureEnabled) {
@@ -243,13 +221,9 @@ public class AssistManager {
         mWindowManager.removeViewImmediate(mView);
     }
 
-    private void maybeSwapSearchIcon() {
-        if (mAssistComponent != null) {
-            replaceDrawable(mView.getOrb().getLogo(), mAssistComponent, ASSIST_ICON_METADATA_NAME,
-                    isAssistantService());
-        } else {
-            mView.getOrb().getLogo().setImageDrawable(null);
-        }
+    private void maybeSwapSearchIcon(@NonNull ComponentName assistComponent, boolean isService) {
+        replaceDrawable(mView.getOrb().getLogo(), assistComponent, ASSIST_ICON_METADATA_NAME,
+                isService);
     }
 
     public void replaceDrawable(ImageView v, ComponentName component, String name,
@@ -283,26 +257,13 @@ public class AssistManager {
         v.setImageDrawable(null);
     }
 
-    private boolean isAssistantService() {
-        return mAssistComponent == null ?
-                false : mAssistComponent.equals(getVoiceInteractorComponentName());
-    }
-
-    private void updateAssistInfo() {
-        mAssistComponent = mAssistUtils.getAssistComponentForUser(UserHandle.USER_CURRENT);
-    }
-
-    public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
-        pw.println("AssistManager state:");
-        pw.print("  mAssistComponent="); pw.println(mAssistComponent);
+    @Nullable
+    private ComponentName getAssistInfo() {
+        return mAssistUtils.getAssistComponentForUser(UserHandle.USER_CURRENT);
     }
 
     public void showDisclosure() {
         mAssistDisclosure.postShow();
-    }
-
-    public void onUserSwitched(int newUserId) {
-        updateAssistInfo();
     }
 
     public void onLockscreenShown() {
