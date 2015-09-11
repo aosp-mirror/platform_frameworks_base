@@ -781,7 +781,7 @@ $ adb install -g &lt;path_to_apk&gt;
 </p>
 
 <pre class="no-pretty-print">
-$ adb pm grant &lt;package_name&gt; &lt;permission_name&gt;
+$ adb shell pm grant &lt;package_name&gt; &lt;permission_name&gt;
 </pre>
 
 <p>
@@ -790,7 +790,7 @@ $ adb pm grant &lt;package_name&gt; &lt;permission_name&gt;
 </p>
 
 <pre class="no-pretty-print">
-$ adb pm grant com.example.myapp android.permission.RECORD_AUDIO
+$ adb shell pm grant com.example.myapp android.permission.RECORD_AUDIO
 </pre>
 
 <p>
@@ -798,7 +798,7 @@ $ adb pm grant com.example.myapp android.permission.RECORD_AUDIO
 </p>
 
 <pre class="no-pretty-print">
-$ adb pm revoke &lt;package_name&gt; &lt;permission_name&gt;
+$ adb shell pm revoke &lt;package_name&gt; &lt;permission_name&gt;
 </pre>
 
 <h2 id="best-practices">Best Practices and Usage Notes</h2>
