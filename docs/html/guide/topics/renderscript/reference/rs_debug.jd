@@ -78,6 +78,24 @@ They should not be used in shipping applications.
         <td>        </td>
       </tr>
       <tr>
+        <td>void rsDebug(const char* message, <a href='rs_value_types.html#android_rs:double2'>double2</a> a);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 23</a>
+        </td>
+      </tr>
+      <tr>
+        <td>void rsDebug(const char* message, <a href='rs_value_types.html#android_rs:double3'>double3</a> a);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 23</a>
+        </td>
+      </tr>
+      <tr>
+        <td>void rsDebug(const char* message, <a href='rs_value_types.html#android_rs:double4'>double4</a> a);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 23</a>
+        </td>
+      </tr>
+      <tr>
         <td>void rsDebug(const char* message, float a);
 </td>
         <td>        </td>

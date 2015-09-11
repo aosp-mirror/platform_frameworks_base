@@ -6,6 +6,11 @@ page.title=RenderScript Kernel Invocation Functions and Types
 <h2>Overview</h2>
 <p> The <a href='rs_for_each.html#android_rs:rsForEach'>rsForEach</a>() function can be used to invoke the root kernel of a script.
 </p>
+
+<p> The other functions are used to get the characteristics of the invocation of
+an executing kernel, like dimensions and current indices.  These functions take
+a <a href='rs_for_each.html#android_rs:rs_kernel_context'>rs_kernel_context</a> as argument.
+</p>
 <h2>Summary</h2>
 <table class='jd-sumtable'><tbody>
   <tr><th colspan='2'>Types</th></tr>
@@ -15,6 +20,14 @@ page.title=RenderScript Kernel Invocation Functions and Types
     </td>
     <td class='jd-descrcol' width='100%'>
       Suggested cell processing order
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_for_each.html#android_rs:rs_kernel_context'>rs_kernel_context</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Handle to a kernel invocation context
     </td>
   </tr>
   <tr class='alt-color api apilevel-1'>
@@ -34,6 +47,126 @@ page.title=RenderScript Kernel Invocation Functions and Types
     </td>
     <td class='jd-descrcol' width='100%'>
       Invoke the root kernel of a script
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_for_each.html#android_rs:rsGetArray0'>rsGetArray0</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Index in the Array0 dimension for the specified kernel context
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_for_each.html#android_rs:rsGetArray1'>rsGetArray1</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Index in the Array1 dimension for the specified kernel context
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_for_each.html#android_rs:rsGetArray2'>rsGetArray2</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Index in the Array2 dimension for the specified kernel context
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_for_each.html#android_rs:rsGetArray3'>rsGetArray3</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Index in the Array3 dimension for the specified kernel context
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_for_each.html#android_rs:rsGetDimArray0'>rsGetDimArray0</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Size of the Array0 dimension for the specified kernel context
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_for_each.html#android_rs:rsGetDimArray1'>rsGetDimArray1</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Size of the Array1 dimension for the specified kernel context
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_for_each.html#android_rs:rsGetDimArray2'>rsGetDimArray2</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Size of the Array2 dimension for the specified kernel context
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_for_each.html#android_rs:rsGetDimArray3'>rsGetDimArray3</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Size of the Array3 dimension for the specified kernel context
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_for_each.html#android_rs:rsGetDimHasFaces'>rsGetDimHasFaces</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Presence of more than one face for the specified kernel context
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_for_each.html#android_rs:rsGetDimLod'>rsGetDimLod</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Number of levels of detail for the specified kernel context
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_for_each.html#android_rs:rsGetDimX'>rsGetDimX</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Size of the X dimension for the specified kernel context
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_for_each.html#android_rs:rsGetDimY'>rsGetDimY</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Size of the Y dimension for the specified kernel context
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_for_each.html#android_rs:rsGetDimZ'>rsGetDimZ</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Size of the Z dimension for the specified kernel context
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_for_each.html#android_rs:rsGetFace'>rsGetFace</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Coordinate of the Face for the specified kernel context
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_for_each.html#android_rs:rsGetLod'>rsGetLod</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Index in the Levels of Detail dimension for the specified kernel context
     </td>
   </tr>
 </tbody></table>
@@ -61,6 +194,26 @@ allocations.  This is a hint only.  Implementations may not follow the suggestio
 
 <p> This specification can help the caching behavior of the running kernel, e.g. the cache
 locality when the processing is distributed over multiple cores.
+</p>
+  </div>
+</div>
+
+<a name='android_rs:rs_kernel_context'></a>
+<div class='jd-details'>
+  <h4 class='jd-details-title'>
+    <span class='sympad'>rs_kernel_context</span>
+    <span class='normal'>: Handle to a kernel invocation context</span>
+  </h4>
+  <div class='jd-details-descr'>
+<p>A typedef of: const struct rs_kernel_context_t *&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 23</a>
+</p>
+<p> The kernel context contains common characteristics of the allocations being iterated
+over, like dimensions.  It also contains rarely used indices of the currently processed
+cell, like the Array0 index or the current level of detail.
+</p>
+
+<p> You can access the kernel context by adding a special parameter named "context" of type
+rs_kernel_context to your kernel function.  See <a href='rs_for_each.html#android_rs:rsGetDimX'>rsGetDimX</a>() and <a href='rs_for_each.html#android_rs:rsGetArray0'>rsGetArray0</a>() for examples.
 </p>
   </div>
 </div>
@@ -120,13 +273,13 @@ over cells 4, 5, 6, and 7 in the X dimension, set xStart to 4 and xEnd to 8.
       <tr>
         <td>void rsForEach(<a href='rs_object_types.html#android_rs:rs_script'>rs_script</a> script, <a href='rs_object_types.html#android_rs:rs_allocation'>rs_allocation</a> input, <a href='rs_object_types.html#android_rs:rs_allocation'>rs_allocation</a> output, const void* usrData);
 </td>
-        <td>    Removed from <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 14</a>
+        <td>    Removed from <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 14 and higher</a>
         </td>
       </tr>
       <tr>
         <td>void rsForEach(<a href='rs_object_types.html#android_rs:rs_script'>rs_script</a> script, <a href='rs_object_types.html#android_rs:rs_allocation'>rs_allocation</a> input, <a href='rs_object_types.html#android_rs:rs_allocation'>rs_allocation</a> output, const void* usrData, const <a href='rs_for_each.html#android_rs:rs_script_call_t'>rs_script_call_t</a>* sc);
 </td>
-        <td>    Removed from <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 14</a>
+        <td>    Removed from <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 14 and higher</a>
         </td>
       </tr>
       <tr>
@@ -176,6 +329,439 @@ void specializedProcessing(rs_allocation in) {<br/>
 </p>
 
 <p> If both input and output allocations are specified, they must have the same dimensions.
+</p>
+  </div>
+</div>
+
+<a name='android_rs:rsGetArray0'></a>
+<div class='jd-details'>
+  <h4 class='jd-details-title'>
+    <span class='sympad'>rsGetArray0</span>
+    <span class='normal'>: Index in the Array0 dimension for the specified kernel context</span>
+  </h4>
+  <div class='jd-details-descr'>
+    <table class='jd-tagtable'><tbody>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a> rsGetArray0(<a href='rs_for_each.html#android_rs:rs_kernel_context'>rs_kernel_context</a> context);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 23</a>
+        </td>
+      </tr>
+    </tbody></table>
+  </div>
+  <div class='jd-tagdata jd-tagdescr'>
+<p> Returns the index in the Array0 dimension of the cell being processed, as specified
+by the supplied kernel context.
+</p>
+
+<p> The kernel context contains common characteristics of the allocations being iterated
+over and rarely used indices, like the Array0 index.
+</p>
+
+<p> You can access the kernel context by adding a special parameter named "context" of
+type rs_kernel_context to your kernel function.  E.g.<br/>
+<code>short RS_KERNEL myKernel(short value, uint32_t x, rs_kernel_context context) {<br/>
+&nbsp;&nbsp;// The current index in the common x, y, z dimensions are accessed by<br/>
+&nbsp;&nbsp;// adding these variables as arguments.  For the more rarely used indices<br/>
+&nbsp;&nbsp;// to the other dimensions, extract them from the kernel context:<br/>
+&nbsp;&nbsp;uint32_t index_a0 = rsGetArray0(context);<br/>
+&nbsp;&nbsp;//...<br/>
+}<br/></code>
+</p>
+
+<p> This function returns 0 if the Array0 dimension is not present.
+</p>
+  </div>
+</div>
+
+<a name='android_rs:rsGetArray1'></a>
+<div class='jd-details'>
+  <h4 class='jd-details-title'>
+    <span class='sympad'>rsGetArray1</span>
+    <span class='normal'>: Index in the Array1 dimension for the specified kernel context</span>
+  </h4>
+  <div class='jd-details-descr'>
+    <table class='jd-tagtable'><tbody>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a> rsGetArray1(<a href='rs_for_each.html#android_rs:rs_kernel_context'>rs_kernel_context</a> context);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 23</a>
+        </td>
+      </tr>
+    </tbody></table>
+  </div>
+  <div class='jd-tagdata jd-tagdescr'>
+<p> Returns the index in the Array1 dimension of the cell being processed, as specified
+by the supplied kernel context.  See <a href='rs_for_each.html#android_rs:rsGetArray0'>rsGetArray0</a>() for an explanation of the context.
+</p>
+
+<p> Returns 0 if the Array1 dimension is not present.
+</p>
+  </div>
+</div>
+
+<a name='android_rs:rsGetArray2'></a>
+<div class='jd-details'>
+  <h4 class='jd-details-title'>
+    <span class='sympad'>rsGetArray2</span>
+    <span class='normal'>: Index in the Array2 dimension for the specified kernel context</span>
+  </h4>
+  <div class='jd-details-descr'>
+    <table class='jd-tagtable'><tbody>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a> rsGetArray2(<a href='rs_for_each.html#android_rs:rs_kernel_context'>rs_kernel_context</a> context);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 23</a>
+        </td>
+      </tr>
+    </tbody></table>
+  </div>
+  <div class='jd-tagdata jd-tagdescr'>
+<p> Returns the index in the Array2 dimension of the cell being processed,
+as specified by the supplied kernel context.  See <a href='rs_for_each.html#android_rs:rsGetArray0'>rsGetArray0</a>() for an explanation
+of the context.
+</p>
+
+<p> Returns 0 if the Array2 dimension is not present.
+</p>
+  </div>
+</div>
+
+<a name='android_rs:rsGetArray3'></a>
+<div class='jd-details'>
+  <h4 class='jd-details-title'>
+    <span class='sympad'>rsGetArray3</span>
+    <span class='normal'>: Index in the Array3 dimension for the specified kernel context</span>
+  </h4>
+  <div class='jd-details-descr'>
+    <table class='jd-tagtable'><tbody>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a> rsGetArray3(<a href='rs_for_each.html#android_rs:rs_kernel_context'>rs_kernel_context</a> context);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 23</a>
+        </td>
+      </tr>
+    </tbody></table>
+  </div>
+  <div class='jd-tagdata jd-tagdescr'>
+<p> Returns the index in the Array3 dimension of the cell being processed, as specified
+by the supplied kernel context.  See <a href='rs_for_each.html#android_rs:rsGetArray0'>rsGetArray0</a>() for an explanation of the context.
+</p>
+
+<p> Returns 0 if the Array3 dimension is not present.
+</p>
+  </div>
+</div>
+
+<a name='android_rs:rsGetDimArray0'></a>
+<div class='jd-details'>
+  <h4 class='jd-details-title'>
+    <span class='sympad'>rsGetDimArray0</span>
+    <span class='normal'>: Size of the Array0 dimension for the specified kernel context</span>
+  </h4>
+  <div class='jd-details-descr'>
+    <table class='jd-tagtable'><tbody>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a> rsGetDimArray0(<a href='rs_for_each.html#android_rs:rs_kernel_context'>rs_kernel_context</a> context);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 23</a>
+        </td>
+      </tr>
+    </tbody></table>
+  </div>
+  <div class='jd-tagdata jd-tagdescr'>
+<p> Returns the size of the Array0 dimension for the specified kernel context.
+See <a href='rs_for_each.html#android_rs:rsGetDimX'>rsGetDimX</a>() for an explanation of the context.
+</p>
+
+<p> Returns 0 if the Array0 dimension is not present.
+</p>
+  </div>
+</div>
+
+<a name='android_rs:rsGetDimArray1'></a>
+<div class='jd-details'>
+  <h4 class='jd-details-title'>
+    <span class='sympad'>rsGetDimArray1</span>
+    <span class='normal'>: Size of the Array1 dimension for the specified kernel context</span>
+  </h4>
+  <div class='jd-details-descr'>
+    <table class='jd-tagtable'><tbody>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a> rsGetDimArray1(<a href='rs_for_each.html#android_rs:rs_kernel_context'>rs_kernel_context</a> context);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 23</a>
+        </td>
+      </tr>
+    </tbody></table>
+  </div>
+  <div class='jd-tagdata jd-tagdescr'>
+<p> Returns the size of the Array1 dimension for the specified kernel context.
+See <a href='rs_for_each.html#android_rs:rsGetDimX'>rsGetDimX</a>() for an explanation of the context.
+</p>
+
+<p> Returns 0 if the Array1 dimension is not present.
+</p>
+  </div>
+</div>
+
+<a name='android_rs:rsGetDimArray2'></a>
+<div class='jd-details'>
+  <h4 class='jd-details-title'>
+    <span class='sympad'>rsGetDimArray2</span>
+    <span class='normal'>: Size of the Array2 dimension for the specified kernel context</span>
+  </h4>
+  <div class='jd-details-descr'>
+    <table class='jd-tagtable'><tbody>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a> rsGetDimArray2(<a href='rs_for_each.html#android_rs:rs_kernel_context'>rs_kernel_context</a> context);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 23</a>
+        </td>
+      </tr>
+    </tbody></table>
+  </div>
+  <div class='jd-tagdata jd-tagdescr'>
+<p> Returns the size of the Array2 dimension for the specified kernel context.
+See <a href='rs_for_each.html#android_rs:rsGetDimX'>rsGetDimX</a>() for an explanation of the context.
+</p>
+
+<p> Returns 0 if the Array2 dimension is not present.
+</p>
+  </div>
+</div>
+
+<a name='android_rs:rsGetDimArray3'></a>
+<div class='jd-details'>
+  <h4 class='jd-details-title'>
+    <span class='sympad'>rsGetDimArray3</span>
+    <span class='normal'>: Size of the Array3 dimension for the specified kernel context</span>
+  </h4>
+  <div class='jd-details-descr'>
+    <table class='jd-tagtable'><tbody>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a> rsGetDimArray3(<a href='rs_for_each.html#android_rs:rs_kernel_context'>rs_kernel_context</a> context);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 23</a>
+        </td>
+      </tr>
+    </tbody></table>
+  </div>
+  <div class='jd-tagdata jd-tagdescr'>
+<p> Returns the size of the Array3 dimension for the specified kernel context.
+See <a href='rs_for_each.html#android_rs:rsGetDimX'>rsGetDimX</a>() for an explanation of the context.
+</p>
+
+<p> Returns 0 if the Array3 dimension is not present.
+</p>
+  </div>
+</div>
+
+<a name='android_rs:rsGetDimHasFaces'></a>
+<div class='jd-details'>
+  <h4 class='jd-details-title'>
+    <span class='sympad'>rsGetDimHasFaces</span>
+    <span class='normal'>: Presence of more than one face for the specified kernel context</span>
+  </h4>
+  <div class='jd-details-descr'>
+    <table class='jd-tagtable'><tbody>
+      <tr>
+        <td>bool rsGetDimHasFaces(<a href='rs_for_each.html#android_rs:rs_kernel_context'>rs_kernel_context</a> context);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 23</a>
+        </td>
+      </tr>
+    </tbody></table>
+  </div>
+  <div class='jd-tagdata'>    <h5 class='jd-tagtitle'>Returns</h5>
+    <table class='jd-tagtable'><tbody>
+    <tr><td>Returns true if more than one face is present, false otherwise.</td></tr>
+    </tbody></table>
+  </div>
+  <div class='jd-tagdata jd-tagdescr'>
+<p> If the kernel is iterating over a cubemap, this function returns true if there's more
+than one face present.  In all other cases, it returns false.  See <a href='rs_for_each.html#android_rs:rsGetDimX'>rsGetDimX</a>() for an
+explanation of the context.
+</p>
+
+<p> <a href='rs_object_info.html#android_rs:rsAllocationGetDimFaces'>rsAllocationGetDimFaces</a>() is similar but returns 0 or 1 instead of a bool.
+</p>
+  </div>
+</div>
+
+<a name='android_rs:rsGetDimLod'></a>
+<div class='jd-details'>
+  <h4 class='jd-details-title'>
+    <span class='sympad'>rsGetDimLod</span>
+    <span class='normal'>: Number of levels of detail for the specified kernel context</span>
+  </h4>
+  <div class='jd-details-descr'>
+    <table class='jd-tagtable'><tbody>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a> rsGetDimLod(<a href='rs_for_each.html#android_rs:rs_kernel_context'>rs_kernel_context</a> context);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 23</a>
+        </td>
+      </tr>
+    </tbody></table>
+  </div>
+  <div class='jd-tagdata jd-tagdescr'>
+<p> Returns the number of levels of detail for the specified kernel context.  This is useful
+for mipmaps.  See <a href='rs_for_each.html#android_rs:rsGetDimX'>rsGetDimX</a>() for an explanation of the context.
+</p>
+
+<p> Returns 0 if Level of Detail is not used.
+</p>
+
+<p> <a href='rs_object_info.html#android_rs:rsAllocationGetDimLOD'>rsAllocationGetDimLOD</a>() is similar but returns 0 or 1 instead the actual
+number of levels.
+</p>
+  </div>
+</div>
+
+<a name='android_rs:rsGetDimX'></a>
+<div class='jd-details'>
+  <h4 class='jd-details-title'>
+    <span class='sympad'>rsGetDimX</span>
+    <span class='normal'>: Size of the X dimension for the specified kernel context</span>
+  </h4>
+  <div class='jd-details-descr'>
+    <table class='jd-tagtable'><tbody>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a> rsGetDimX(<a href='rs_for_each.html#android_rs:rs_kernel_context'>rs_kernel_context</a> context);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 23</a>
+        </td>
+      </tr>
+    </tbody></table>
+  </div>
+  <div class='jd-tagdata jd-tagdescr'>
+<p> Returns the size of the X dimension for the specified kernel context.
+</p>
+
+<p> The kernel context contains common characteristics of the allocations being iterated
+over and rarely used indices, like the Array0 index.
+</p>
+
+<p> You can access it by adding a special parameter named "context" of
+type rs_kernel_context to your kernel function.  E.g.<br/>
+<code>int4 RS_KERNEL myKernel(int4 value, rs_kernel_context context) {<br/>
+&nbsp;&nbsp;uint32_t size = rsGetDimX(context); //...<br/></code>
+</p>
+
+<p> To get the dimension of specific allocation, use <a href='rs_object_info.html#android_rs:rsAllocationGetDimX'>rsAllocationGetDimX</a>().
+</p>
+  </div>
+</div>
+
+<a name='android_rs:rsGetDimY'></a>
+<div class='jd-details'>
+  <h4 class='jd-details-title'>
+    <span class='sympad'>rsGetDimY</span>
+    <span class='normal'>: Size of the Y dimension for the specified kernel context</span>
+  </h4>
+  <div class='jd-details-descr'>
+    <table class='jd-tagtable'><tbody>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a> rsGetDimY(<a href='rs_for_each.html#android_rs:rs_kernel_context'>rs_kernel_context</a> context);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 23</a>
+        </td>
+      </tr>
+    </tbody></table>
+  </div>
+  <div class='jd-tagdata jd-tagdescr'>
+<p> Returns the size of the X dimension for the specified kernel context.
+See <a href='rs_for_each.html#android_rs:rsGetDimX'>rsGetDimX</a>() for an explanation of the context.
+</p>
+
+<p> Returns 0 if the Y dimension is not present.
+</p>
+
+<p> To get the dimension of specific allocation, use <a href='rs_object_info.html#android_rs:rsAllocationGetDimY'>rsAllocationGetDimY</a>().
+</p>
+  </div>
+</div>
+
+<a name='android_rs:rsGetDimZ'></a>
+<div class='jd-details'>
+  <h4 class='jd-details-title'>
+    <span class='sympad'>rsGetDimZ</span>
+    <span class='normal'>: Size of the Z dimension for the specified kernel context</span>
+  </h4>
+  <div class='jd-details-descr'>
+    <table class='jd-tagtable'><tbody>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a> rsGetDimZ(<a href='rs_for_each.html#android_rs:rs_kernel_context'>rs_kernel_context</a> context);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 23</a>
+        </td>
+      </tr>
+    </tbody></table>
+  </div>
+  <div class='jd-tagdata jd-tagdescr'>
+<p> Returns the size of the Z dimension for the specified kernel context.
+See <a href='rs_for_each.html#android_rs:rsGetDimX'>rsGetDimX</a>() for an explanation of the context.
+</p>
+
+<p> Returns 0 if the Z dimension is not present.
+</p>
+
+<p> To get the dimension of specific allocation, use <a href='rs_object_info.html#android_rs:rsAllocationGetDimZ'>rsAllocationGetDimZ</a>().
+</p>
+  </div>
+</div>
+
+<a name='android_rs:rsGetFace'></a>
+<div class='jd-details'>
+  <h4 class='jd-details-title'>
+    <span class='sympad'>rsGetFace</span>
+    <span class='normal'>: Coordinate of the Face for the specified kernel context</span>
+  </h4>
+  <div class='jd-details-descr'>
+    <table class='jd-tagtable'><tbody>
+      <tr>
+        <td><a href='rs_object_types.html#android_rs:rs_allocation_cubemap_face'>rs_allocation_cubemap_face</a> rsGetFace(<a href='rs_for_each.html#android_rs:rs_kernel_context'>rs_kernel_context</a> context);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 23</a>
+        </td>
+      </tr>
+    </tbody></table>
+  </div>
+  <div class='jd-tagdata jd-tagdescr'>
+<p> Returns the face on which the cell being processed is found, as specified by the
+supplied kernel context.  See <a href='rs_for_each.html#android_rs:rsGetArray0'>rsGetArray0</a>() for an explanation of the context.
+</p>
+
+<p> Returns RS_ALLOCATION_CUBEMAP_FACE_POSITIVE_X if the face dimension is not
+present.
+</p>
+  </div>
+</div>
+
+<a name='android_rs:rsGetLod'></a>
+<div class='jd-details'>
+  <h4 class='jd-details-title'>
+    <span class='sympad'>rsGetLod</span>
+    <span class='normal'>: Index in the Levels of Detail dimension for the specified kernel context</span>
+  </h4>
+  <div class='jd-details-descr'>
+    <table class='jd-tagtable'><tbody>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a> rsGetLod(<a href='rs_for_each.html#android_rs:rs_kernel_context'>rs_kernel_context</a> context);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 23</a>
+        </td>
+      </tr>
+    </tbody></table>
+  </div>
+  <div class='jd-tagdata jd-tagdescr'>
+<p> Returns the index in the Levels of Detail dimension of the cell being processed,
+as specified by the supplied kernel context.  See <a href='rs_for_each.html#android_rs:rsGetArray0'>rsGetArray0</a>() for an explanation of
+the context.
+</p>
+
+<p> Returns 0 if the Levels of Detail dimension is not present.
 </p>
   </div>
 </div>

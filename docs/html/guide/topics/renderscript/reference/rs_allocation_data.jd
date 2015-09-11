@@ -1365,7 +1365,7 @@ mono dimensional allocations.
 </p>
 
 <p> For efficiency, this function does not validate the inputs.  Trying to wrap the
-X index, exceeding the size of the allocation, or using indexes incompatible
+X index, exceeding the size of the allocation, or using indices incompatible
 with the dimensionality of the allocation yiels undefined results.
 </p>
 
@@ -1576,6 +1576,78 @@ with the dimensionality of the allocation yiels undefined results.
         <td><a href='rs_value_types.html#android_rs:float4'>float4</a> rsGetElementAt_float4(<a href='rs_object_types.html#android_rs:rs_allocation'>rs_allocation</a> a, <a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a> x, <a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a> y, <a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a> z);
 </td>
         <td>        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:half'>half</a> rsGetElementAt_half(<a href='rs_object_types.html#android_rs:rs_allocation'>rs_allocation</a> a, <a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a> x);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 23</a>
+        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:half'>half</a> rsGetElementAt_half(<a href='rs_object_types.html#android_rs:rs_allocation'>rs_allocation</a> a, <a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a> x, <a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a> y);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 23</a>
+        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:half'>half</a> rsGetElementAt_half(<a href='rs_object_types.html#android_rs:rs_allocation'>rs_allocation</a> a, <a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a> x, <a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a> y, <a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a> z);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 23</a>
+        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:half2'>half2</a> rsGetElementAt_half2(<a href='rs_object_types.html#android_rs:rs_allocation'>rs_allocation</a> a, <a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a> x);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 23</a>
+        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:half2'>half2</a> rsGetElementAt_half2(<a href='rs_object_types.html#android_rs:rs_allocation'>rs_allocation</a> a, <a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a> x, <a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a> y);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 23</a>
+        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:half2'>half2</a> rsGetElementAt_half2(<a href='rs_object_types.html#android_rs:rs_allocation'>rs_allocation</a> a, <a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a> x, <a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a> y, <a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a> z);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 23</a>
+        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:half3'>half3</a> rsGetElementAt_half3(<a href='rs_object_types.html#android_rs:rs_allocation'>rs_allocation</a> a, <a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a> x);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 23</a>
+        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:half3'>half3</a> rsGetElementAt_half3(<a href='rs_object_types.html#android_rs:rs_allocation'>rs_allocation</a> a, <a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a> x, <a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a> y);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 23</a>
+        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:half3'>half3</a> rsGetElementAt_half3(<a href='rs_object_types.html#android_rs:rs_allocation'>rs_allocation</a> a, <a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a> x, <a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a> y, <a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a> z);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 23</a>
+        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:half4'>half4</a> rsGetElementAt_half4(<a href='rs_object_types.html#android_rs:rs_allocation'>rs_allocation</a> a, <a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a> x);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 23</a>
+        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:half4'>half4</a> rsGetElementAt_half4(<a href='rs_object_types.html#android_rs:rs_allocation'>rs_allocation</a> a, <a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a> x, <a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a> y);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 23</a>
+        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:half4'>half4</a> rsGetElementAt_half4(<a href='rs_object_types.html#android_rs:rs_allocation'>rs_allocation</a> a, <a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a> x, <a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a> y, <a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a> z);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 23</a>
+        </td>
       </tr>
       <tr>
         <td>int rsGetElementAt_int(<a href='rs_object_types.html#android_rs:rs_allocation'>rs_allocation</a> a, <a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a> x);
@@ -2394,6 +2466,78 @@ use the float2 variant.
         <td>void rsSetElementAt_float4(<a href='rs_object_types.html#android_rs:rs_allocation'>rs_allocation</a> a, <a href='rs_value_types.html#android_rs:float4'>float4</a> val, <a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a> x, <a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a> y, <a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a> z);
 </td>
         <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 18</a>
+        </td>
+      </tr>
+      <tr>
+        <td>void rsSetElementAt_half(<a href='rs_object_types.html#android_rs:rs_allocation'>rs_allocation</a> a, <a href='rs_value_types.html#android_rs:half'>half</a> val, <a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a> x);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 23</a>
+        </td>
+      </tr>
+      <tr>
+        <td>void rsSetElementAt_half(<a href='rs_object_types.html#android_rs:rs_allocation'>rs_allocation</a> a, <a href='rs_value_types.html#android_rs:half'>half</a> val, <a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a> x, <a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a> y);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 23</a>
+        </td>
+      </tr>
+      <tr>
+        <td>void rsSetElementAt_half(<a href='rs_object_types.html#android_rs:rs_allocation'>rs_allocation</a> a, <a href='rs_value_types.html#android_rs:half'>half</a> val, <a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a> x, <a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a> y, <a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a> z);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 23</a>
+        </td>
+      </tr>
+      <tr>
+        <td>void rsSetElementAt_half2(<a href='rs_object_types.html#android_rs:rs_allocation'>rs_allocation</a> a, <a href='rs_value_types.html#android_rs:half2'>half2</a> val, <a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a> x);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 23</a>
+        </td>
+      </tr>
+      <tr>
+        <td>void rsSetElementAt_half2(<a href='rs_object_types.html#android_rs:rs_allocation'>rs_allocation</a> a, <a href='rs_value_types.html#android_rs:half2'>half2</a> val, <a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a> x, <a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a> y);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 23</a>
+        </td>
+      </tr>
+      <tr>
+        <td>void rsSetElementAt_half2(<a href='rs_object_types.html#android_rs:rs_allocation'>rs_allocation</a> a, <a href='rs_value_types.html#android_rs:half2'>half2</a> val, <a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a> x, <a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a> y, <a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a> z);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 23</a>
+        </td>
+      </tr>
+      <tr>
+        <td>void rsSetElementAt_half3(<a href='rs_object_types.html#android_rs:rs_allocation'>rs_allocation</a> a, <a href='rs_value_types.html#android_rs:half3'>half3</a> val, <a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a> x);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 23</a>
+        </td>
+      </tr>
+      <tr>
+        <td>void rsSetElementAt_half3(<a href='rs_object_types.html#android_rs:rs_allocation'>rs_allocation</a> a, <a href='rs_value_types.html#android_rs:half3'>half3</a> val, <a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a> x, <a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a> y);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 23</a>
+        </td>
+      </tr>
+      <tr>
+        <td>void rsSetElementAt_half3(<a href='rs_object_types.html#android_rs:rs_allocation'>rs_allocation</a> a, <a href='rs_value_types.html#android_rs:half3'>half3</a> val, <a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a> x, <a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a> y, <a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a> z);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 23</a>
+        </td>
+      </tr>
+      <tr>
+        <td>void rsSetElementAt_half4(<a href='rs_object_types.html#android_rs:rs_allocation'>rs_allocation</a> a, <a href='rs_value_types.html#android_rs:half4'>half4</a> val, <a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a> x);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 23</a>
+        </td>
+      </tr>
+      <tr>
+        <td>void rsSetElementAt_half4(<a href='rs_object_types.html#android_rs:rs_allocation'>rs_allocation</a> a, <a href='rs_value_types.html#android_rs:half4'>half4</a> val, <a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a> x, <a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a> y);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 23</a>
+        </td>
+      </tr>
+      <tr>
+        <td>void rsSetElementAt_half4(<a href='rs_object_types.html#android_rs:rs_allocation'>rs_allocation</a> a, <a href='rs_value_types.html#android_rs:half4'>half4</a> val, <a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a> x, <a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a> y, <a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a> z);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 23</a>
         </td>
       </tr>
       <tr>

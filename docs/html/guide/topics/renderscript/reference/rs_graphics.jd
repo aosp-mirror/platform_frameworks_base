@@ -4,7 +4,7 @@ page.title=RenderScript Graphics Functions and Types
 
 <div class='renderscript'>
 <h2>Overview</h2>
-<p> The graphics subsystem of RenderScript has been deprecated.
+<p> The graphics subsystem of RenderScript was removed at API level 23.
 </p>
 <h2>Summary</h2>
 <table class='jd-sumtable'><tbody>
@@ -502,7 +502,7 @@ page.title=RenderScript Graphics Functions and Types
   </h4>
   <div class='jd-details-descr'>
 <p>An enum with the following values:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-    When compiling for 32 bits. Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 16</a>
+    When compiling for 32 bits. <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 16 - 22</a>
 </p>
   <table class='jd-tagtable'><tbody>
     <tr><th>RS_BLEND_DST_ZERO = 0</th><td></td></tr>
@@ -527,7 +527,7 @@ page.title=RenderScript Graphics Functions and Types
   </h4>
   <div class='jd-details-descr'>
 <p>An enum with the following values:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-    When compiling for 32 bits. Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 16</a>
+    When compiling for 32 bits. <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 16 - 22</a>
 </p>
   <table class='jd-tagtable'><tbody>
     <tr><th>RS_BLEND_SRC_ZERO = 0</th><td></td></tr>
@@ -553,7 +553,7 @@ page.title=RenderScript Graphics Functions and Types
   </h4>
   <div class='jd-details-descr'>
 <p>An enum with the following values:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-    When compiling for 32 bits. Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 16</a>
+    When compiling for 32 bits. <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 16 - 22</a>
 </p>
   <table class='jd-tagtable'><tbody>
     <tr><th>RS_CULL_BACK = 0</th><td></td></tr>
@@ -573,7 +573,7 @@ page.title=RenderScript Graphics Functions and Types
   </h4>
   <div class='jd-details-descr'>
 <p>An enum with the following values:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-    When compiling for 32 bits. Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 16</a>
+    When compiling for 32 bits. <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 16 - 22</a>
 </p>
   <table class='jd-tagtable'><tbody>
     <tr><th>RS_DEPTH_FUNC_ALWAYS = 0</th><td>Always drawn</td></tr>
@@ -599,7 +599,11 @@ depth to that found in the depth buffer.
     <span class='normal'>: Handle to a Font</span>
   </h4>
   <div class='jd-details-descr'>
-<p>A typedef of: _RS_HANDLE&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;    When compiling for 32 bits. 
+<p>A typedef of: _RS_HANDLE __attribute__((
+#if (defined(RS_VERSION) && (RS_VERSION >= 1))
+deprecated
+#endif
+))&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;    When compiling for 32 bits. Removed from <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 23 and higher</a>
 </p>
     <p><b>Deprecated.</b>  Do not use.</p>
 <p> Opaque handle to a RenderScript font object.
@@ -615,7 +619,11 @@ See: android.renderscript.Font
     <span class='normal'>: Handle to a Mesh</span>
   </h4>
   <div class='jd-details-descr'>
-<p>A typedef of: _RS_HANDLE&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;    When compiling for 32 bits. 
+<p>A typedef of: _RS_HANDLE __attribute__((
+#if (defined(RS_VERSION) && (RS_VERSION >= 1))
+deprecated
+#endif
+))&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;    When compiling for 32 bits. Removed from <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 23 and higher</a>
 </p>
     <p><b>Deprecated.</b>  Do not use.</p>
 <p> Opaque handle to a RenderScript mesh object.
@@ -632,7 +640,7 @@ See: android.renderscript.Mesh
   </h4>
   <div class='jd-details-descr'>
 <p>An enum with the following values:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-    When compiling for 32 bits. Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 16</a>
+    When compiling for 32 bits. <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 16 - 22</a>
 </p>
   <table class='jd-tagtable'><tbody>
     <tr><th>RS_PRIMITIVE_POINT = 0</th><td>Vertex data will be rendered as a series of points</td></tr>
@@ -656,7 +664,11 @@ See: android.renderscript.Mesh
     <span class='normal'>: Handle to a ProgramFragment</span>
   </h4>
   <div class='jd-details-descr'>
-<p>A typedef of: _RS_HANDLE&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;    When compiling for 32 bits. 
+<p>A typedef of: _RS_HANDLE __attribute__((
+#if (defined(RS_VERSION) && (RS_VERSION >= 1))
+deprecated
+#endif
+))&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;    When compiling for 32 bits. Removed from <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 23 and higher</a>
 </p>
     <p><b>Deprecated.</b>  Do not use.</p>
 <p> Opaque handle to a RenderScript ProgramFragment object.
@@ -672,7 +684,11 @@ See: android.renderscript.ProgramFragment
     <span class='normal'>: Handle to a ProgramRaster</span>
   </h4>
   <div class='jd-details-descr'>
-<p>A typedef of: _RS_HANDLE&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;    When compiling for 32 bits. 
+<p>A typedef of: _RS_HANDLE __attribute__((
+#if (defined(RS_VERSION) && (RS_VERSION >= 1))
+deprecated
+#endif
+))&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;    When compiling for 32 bits. Removed from <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 23 and higher</a>
 </p>
     <p><b>Deprecated.</b>  Do not use.</p>
 <p> Opaque handle to a RenderScript ProgramRaster object.
@@ -688,7 +704,11 @@ See: android.renderscript.ProgramRaster
     <span class='normal'>: Handle to a ProgramStore</span>
   </h4>
   <div class='jd-details-descr'>
-<p>A typedef of: _RS_HANDLE&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;    When compiling for 32 bits. 
+<p>A typedef of: _RS_HANDLE __attribute__((
+#if (defined(RS_VERSION) && (RS_VERSION >= 1))
+deprecated
+#endif
+))&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;    When compiling for 32 bits. Removed from <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 23 and higher</a>
 </p>
     <p><b>Deprecated.</b>  Do not use.</p>
 <p> Opaque handle to a RenderScript ProgramStore object.
@@ -704,7 +724,11 @@ See: android.renderscript.ProgramStore
     <span class='normal'>: Handle to a ProgramVertex</span>
   </h4>
   <div class='jd-details-descr'>
-<p>A typedef of: _RS_HANDLE&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;    When compiling for 32 bits. 
+<p>A typedef of: _RS_HANDLE __attribute__((
+#if (defined(RS_VERSION) && (RS_VERSION >= 1))
+deprecated
+#endif
+))&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;    When compiling for 32 bits. Removed from <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 23 and higher</a>
 </p>
     <p><b>Deprecated.</b>  Do not use.</p>
 <p> Opaque handle to a RenderScript ProgramVertex object.
@@ -725,13 +749,13 @@ See: android.renderscript.ProgramVertex
       <tr>
         <td>void rsgAllocationSyncAll(<a href='rs_object_types.html#android_rs:rs_allocation'>rs_allocation</a> alloc);
 </td>
-        <td>    When compiling for 32 bits. 
+        <td>    When compiling for 32 bits. Removed from <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 23 and higher</a>
         </td>
       </tr>
       <tr>
         <td>void rsgAllocationSyncAll(<a href='rs_object_types.html#android_rs:rs_allocation'>rs_allocation</a> alloc, <a href='rs_object_types.html#android_rs:rs_allocation_usage_type'>rs_allocation_usage_type</a> source);
 </td>
-        <td>    When compiling for 32 bits. Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 14</a>
+        <td>    When compiling for 32 bits. <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 14 - 22</a>
         </td>
       </tr>
     </tbody></table>
@@ -761,7 +785,7 @@ memory spaces.
       <tr>
         <td>void rsgBindColorTarget(<a href='rs_object_types.html#android_rs:rs_allocation'>rs_allocation</a> colorTarget, <a href='rs_value_types.html#android_rs:uint'>uint</a> slot);
 </td>
-        <td>    When compiling for 32 bits. Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 14</a>
+        <td>    When compiling for 32 bits. <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 14 - 22</a>
         </td>
       </tr>
     </tbody></table>
@@ -784,13 +808,13 @@ memory spaces.
       <tr>
         <td>void rsgBindConstant(<a href='rs_graphics.html#android_rs:rs_program_fragment'>rs_program_fragment</a> ps, <a href='rs_value_types.html#android_rs:uint'>uint</a> slot, <a href='rs_object_types.html#android_rs:rs_allocation'>rs_allocation</a> c);
 </td>
-        <td>    When compiling for 32 bits. 
+        <td>    When compiling for 32 bits. Removed from <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 23 and higher</a>
         </td>
       </tr>
       <tr>
         <td>void rsgBindConstant(<a href='rs_graphics.html#android_rs:rs_program_vertex'>rs_program_vertex</a> pv, <a href='rs_value_types.html#android_rs:uint'>uint</a> slot, <a href='rs_object_types.html#android_rs:rs_allocation'>rs_allocation</a> c);
 </td>
-        <td>    When compiling for 32 bits. 
+        <td>    When compiling for 32 bits. Removed from <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 23 and higher</a>
         </td>
       </tr>
     </tbody></table>
@@ -822,7 +846,7 @@ The Allocation must be a valid constant input for the Program.
       <tr>
         <td>void rsgBindDepthTarget(<a href='rs_object_types.html#android_rs:rs_allocation'>rs_allocation</a> depthTarget);
 </td>
-        <td>    When compiling for 32 bits. Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 14</a>
+        <td>    When compiling for 32 bits. <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 14 - 22</a>
         </td>
       </tr>
     </tbody></table>
@@ -845,7 +869,7 @@ The Allocation must be a valid constant input for the Program.
       <tr>
         <td>void rsgBindFont(<a href='rs_graphics.html#android_rs:rs_font'>rs_font</a> font);
 </td>
-        <td>    When compiling for 32 bits. 
+        <td>    When compiling for 32 bits. Removed from <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 23 and higher</a>
         </td>
       </tr>
     </tbody></table>
@@ -873,7 +897,7 @@ The Allocation must be a valid constant input for the Program.
       <tr>
         <td>void rsgBindProgramFragment(<a href='rs_graphics.html#android_rs:rs_program_fragment'>rs_program_fragment</a> pf);
 </td>
-        <td>    When compiling for 32 bits. 
+        <td>    When compiling for 32 bits. Removed from <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 23 and higher</a>
         </td>
       </tr>
     </tbody></table>
@@ -896,7 +920,7 @@ The Allocation must be a valid constant input for the Program.
       <tr>
         <td>void rsgBindProgramRaster(<a href='rs_graphics.html#android_rs:rs_program_raster'>rs_program_raster</a> pr);
 </td>
-        <td>    When compiling for 32 bits. 
+        <td>    When compiling for 32 bits. Removed from <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 23 and higher</a>
         </td>
       </tr>
     </tbody></table>
@@ -919,7 +943,7 @@ The Allocation must be a valid constant input for the Program.
       <tr>
         <td>void rsgBindProgramStore(<a href='rs_graphics.html#android_rs:rs_program_store'>rs_program_store</a> ps);
 </td>
-        <td>    When compiling for 32 bits. 
+        <td>    When compiling for 32 bits. Removed from <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 23 and higher</a>
         </td>
       </tr>
     </tbody></table>
@@ -942,7 +966,7 @@ The Allocation must be a valid constant input for the Program.
       <tr>
         <td>void rsgBindProgramVertex(<a href='rs_graphics.html#android_rs:rs_program_vertex'>rs_program_vertex</a> pv);
 </td>
-        <td>    When compiling for 32 bits. 
+        <td>    When compiling for 32 bits. Removed from <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 23 and higher</a>
         </td>
       </tr>
     </tbody></table>
@@ -965,7 +989,7 @@ The Allocation must be a valid constant input for the Program.
       <tr>
         <td>void rsgBindSampler(<a href='rs_graphics.html#android_rs:rs_program_fragment'>rs_program_fragment</a> fragment, <a href='rs_value_types.html#android_rs:uint'>uint</a> slot, <a href='rs_object_types.html#android_rs:rs_sampler'>rs_sampler</a> sampler);
 </td>
-        <td>    When compiling for 32 bits. 
+        <td>    When compiling for 32 bits. Removed from <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 23 and higher</a>
         </td>
       </tr>
     </tbody></table>
@@ -989,7 +1013,7 @@ operate on the texture bound at the matching slot.
       <tr>
         <td>void rsgBindTexture(<a href='rs_graphics.html#android_rs:rs_program_fragment'>rs_program_fragment</a> v, <a href='rs_value_types.html#android_rs:uint'>uint</a> slot, <a href='rs_object_types.html#android_rs:rs_allocation'>rs_allocation</a> alloc);
 </td>
-        <td>    When compiling for 32 bits. 
+        <td>    When compiling for 32 bits. Removed from <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 23 and higher</a>
         </td>
       </tr>
     </tbody></table>
@@ -1015,7 +1039,7 @@ matching slot.
       <tr>
         <td>void rsgClearAllRenderTargets();
 </td>
-        <td>    When compiling for 32 bits. Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 14</a>
+        <td>    When compiling for 32 bits. <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 14 - 22</a>
         </td>
       </tr>
     </tbody></table>
@@ -1039,7 +1063,7 @@ the framebuffer
       <tr>
         <td>void rsgClearColor(float r, float g, float b, float a);
 </td>
-        <td>    When compiling for 32 bits. 
+        <td>    When compiling for 32 bits. Removed from <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 23 and higher</a>
         </td>
       </tr>
     </tbody></table>
@@ -1062,7 +1086,7 @@ the framebuffer
       <tr>
         <td>void rsgClearColorTarget(<a href='rs_value_types.html#android_rs:uint'>uint</a> slot);
 </td>
-        <td>    When compiling for 32 bits. Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 14</a>
+        <td>    When compiling for 32 bits. <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 14 - 22</a>
         </td>
       </tr>
     </tbody></table>
@@ -1085,7 +1109,7 @@ the framebuffer
       <tr>
         <td>void rsgClearDepth(float value);
 </td>
-        <td>    When compiling for 32 bits. 
+        <td>    When compiling for 32 bits. Removed from <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 23 and higher</a>
         </td>
       </tr>
     </tbody></table>
@@ -1108,7 +1132,7 @@ the framebuffer
       <tr>
         <td>void rsgClearDepthTarget();
 </td>
-        <td>    When compiling for 32 bits. Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 14</a>
+        <td>    When compiling for 32 bits. <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 14 - 22</a>
         </td>
       </tr>
     </tbody></table>
@@ -1131,19 +1155,19 @@ the framebuffer
       <tr>
         <td>void rsgDrawMesh(<a href='rs_graphics.html#android_rs:rs_mesh'>rs_mesh</a> ism);
 </td>
-        <td>    When compiling for 32 bits. 
+        <td>    When compiling for 32 bits. Removed from <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 23 and higher</a>
         </td>
       </tr>
       <tr>
         <td>void rsgDrawMesh(<a href='rs_graphics.html#android_rs:rs_mesh'>rs_mesh</a> ism, <a href='rs_value_types.html#android_rs:uint'>uint</a> primitiveIndex);
 </td>
-        <td>    When compiling for 32 bits. 
+        <td>    When compiling for 32 bits. Removed from <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 23 and higher</a>
         </td>
       </tr>
       <tr>
         <td>void rsgDrawMesh(<a href='rs_graphics.html#android_rs:rs_mesh'>rs_mesh</a> ism, <a href='rs_value_types.html#android_rs:uint'>uint</a> primitiveIndex, <a href='rs_value_types.html#android_rs:uint'>uint</a> start, <a href='rs_value_types.html#android_rs:uint'>uint</a> len);
 </td>
-        <td>    When compiling for 32 bits. 
+        <td>    When compiling for 32 bits. Removed from <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 23 and higher</a>
         </td>
       </tr>
     </tbody></table>
@@ -1183,7 +1207,7 @@ the framebuffer
       <tr>
         <td>void rsgDrawQuad(float x1, float y1, float z1, float x2, float y2, float z2, float x3, float y3, float z3, float x4, float y4, float z4);
 </td>
-        <td>    When compiling for 32 bits. 
+        <td>    When compiling for 32 bits. Removed from <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 23 and higher</a>
         </td>
       </tr>
     </tbody></table>
@@ -1207,7 +1231,7 @@ drawing large quantities of geometry.
       <tr>
         <td>void rsgDrawQuadTexCoords(float x1, float y1, float z1, float u1, float v1, float x2, float y2, float z2, float u2, float v2, float x3, float y3, float z3, float u3, float v3, float x4, float y4, float z4, float u4, float v4);
 </td>
-        <td>    When compiling for 32 bits. 
+        <td>    When compiling for 32 bits. Removed from <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 23 and higher</a>
         </td>
       </tr>
     </tbody></table>
@@ -1231,7 +1255,7 @@ for drawing large quantities of geometry.
       <tr>
         <td>void rsgDrawRect(float x1, float y1, float x2, float y2, float z);
 </td>
-        <td>    When compiling for 32 bits. 
+        <td>    When compiling for 32 bits. Removed from <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 23 and higher</a>
         </td>
       </tr>
     </tbody></table>
@@ -1255,7 +1279,7 @@ intended for drawing large quantities of geometry.
       <tr>
         <td>void rsgDrawSpriteScreenspace(float x, float y, float z, float w, float h);
 </td>
-        <td>    When compiling for 32 bits. 
+        <td>    When compiling for 32 bits. Removed from <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 23 and higher</a>
         </td>
       </tr>
     </tbody></table>
@@ -1281,13 +1305,13 @@ for drawing in shipping applications.
       <tr>
         <td>void rsgDrawText(const char* text, int x, int y);
 </td>
-        <td>    When compiling for 32 bits. 
+        <td>    When compiling for 32 bits. Removed from <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 23 and higher</a>
         </td>
       </tr>
       <tr>
         <td>void rsgDrawText(<a href='rs_object_types.html#android_rs:rs_allocation'>rs_allocation</a> alloc, int x, int y);
 </td>
-        <td>    When compiling for 32 bits. 
+        <td>    When compiling for 32 bits. Removed from <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 23 and higher</a>
         </td>
       </tr>
     </tbody></table>
@@ -1310,7 +1334,7 @@ for drawing in shipping applications.
       <tr>
         <td><a href='rs_value_types.html#android_rs:uint'>uint</a> rsgFinish();
 </td>
-        <td>    When compiling for 32 bits. Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 14</a>
+        <td>    When compiling for 32 bits. <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 14 - 22</a>
         </td>
       </tr>
     </tbody></table>
@@ -1333,7 +1357,7 @@ for drawing in shipping applications.
       <tr>
         <td>void rsgFontColor(float r, float g, float b, float a);
 </td>
-        <td>    When compiling for 32 bits. 
+        <td>    When compiling for 32 bits. Removed from <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 23 and higher</a>
         </td>
       </tr>
     </tbody></table>
@@ -1364,7 +1388,7 @@ for drawing in shipping applications.
       <tr>
         <td><a href='rs_value_types.html#android_rs:uint'>uint</a> rsgGetHeight();
 </td>
-        <td>    When compiling for 32 bits. 
+        <td>    When compiling for 32 bits. Removed from <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 23 and higher</a>
         </td>
       </tr>
     </tbody></table>
@@ -1387,7 +1411,7 @@ for drawing in shipping applications.
       <tr>
         <td><a href='rs_value_types.html#android_rs:uint'>uint</a> rsgGetWidth();
 </td>
-        <td>    When compiling for 32 bits. 
+        <td>    When compiling for 32 bits. Removed from <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 23 and higher</a>
         </td>
       </tr>
     </tbody></table>
@@ -1410,13 +1434,13 @@ for drawing in shipping applications.
       <tr>
         <td>void rsgMeasureText(const char* text, int* left, int* right, int* top, int* bottom);
 </td>
-        <td>    When compiling for 32 bits. 
+        <td>    When compiling for 32 bits. Removed from <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 23 and higher</a>
         </td>
       </tr>
       <tr>
         <td>void rsgMeasureText(<a href='rs_object_types.html#android_rs:rs_allocation'>rs_allocation</a> alloc, int* left, int* right, int* top, int* bottom);
 </td>
-        <td>    When compiling for 32 bits. 
+        <td>    When compiling for 32 bits. Removed from <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 23 and higher</a>
         </td>
       </tr>
     </tbody></table>
@@ -1440,13 +1464,13 @@ Any of left, right, top, bottom could be NULL
       <tr>
         <td>void rsgMeshComputeBoundingBox(<a href='rs_graphics.html#android_rs:rs_mesh'>rs_mesh</a> mesh, float* minX, float* minY, float* min, float* maxX, float* maxY, float* maxZ);
 </td>
-        <td>    When compiling for 32 bits. 
+        <td>    When compiling for 32 bits. Removed from <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 23 and higher</a>
         </td>
       </tr>
       <tr>
         <td>void rsgMeshComputeBoundingBox(<a href='rs_graphics.html#android_rs:rs_mesh'>rs_mesh</a> mesh, <a href='rs_value_types.html#android_rs:float3'>float3</a>* bBoxMin, <a href='rs_value_types.html#android_rs:float3'>float3</a>* bBoxMax);
 </td>
-        <td>    When compiling for 32 bits. 
+        <td>    When compiling for 32 bits. Removed from <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 23 and higher</a>
         </td>
       </tr>
     </tbody></table>
@@ -1469,7 +1493,7 @@ Any of left, right, top, bottom could be NULL
       <tr>
         <td><a href='rs_object_types.html#android_rs:rs_allocation'>rs_allocation</a> rsgMeshGetIndexAllocation(<a href='rs_graphics.html#android_rs:rs_mesh'>rs_mesh</a> m, <a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a> index);
 </td>
-        <td>    When compiling for 32 bits. Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 16</a>
+        <td>    When compiling for 32 bits. <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 16 - 22</a>
         </td>
       </tr>
     </tbody></table>
@@ -1504,7 +1528,7 @@ allocation if only the primitive is specified
       <tr>
         <td><a href='rs_graphics.html#android_rs:rs_primitive'>rs_primitive</a> rsgMeshGetPrimitive(<a href='rs_graphics.html#android_rs:rs_mesh'>rs_mesh</a> m, <a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a> index);
 </td>
-        <td>    When compiling for 32 bits. Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 16</a>
+        <td>    When compiling for 32 bits. <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 16 - 22</a>
         </td>
       </tr>
     </tbody></table>
@@ -1539,7 +1563,7 @@ rendered
       <tr>
         <td><a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a> rsgMeshGetPrimitiveCount(<a href='rs_graphics.html#android_rs:rs_mesh'>rs_mesh</a> m);
 </td>
-        <td>    When compiling for 32 bits. Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 16</a>
+        <td>    When compiling for 32 bits. <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 16 - 22</a>
         </td>
       </tr>
     </tbody></table>
@@ -1573,7 +1597,7 @@ the number.
       <tr>
         <td><a href='rs_object_types.html#android_rs:rs_allocation'>rs_allocation</a> rsgMeshGetVertexAllocation(<a href='rs_graphics.html#android_rs:rs_mesh'>rs_mesh</a> m, <a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a> index);
 </td>
-        <td>    When compiling for 32 bits. Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 16</a>
+        <td>    When compiling for 32 bits. <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 16 - 22</a>
         </td>
       </tr>
     </tbody></table>
@@ -1608,7 +1632,7 @@ vertex data, e.g. positions, normals, texcoords
       <tr>
         <td><a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a> rsgMeshGetVertexAllocationCount(<a href='rs_graphics.html#android_rs:rs_mesh'>rs_mesh</a> m);
 </td>
-        <td>    When compiling for 32 bits. Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 16</a>
+        <td>    When compiling for 32 bits. <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 16 - 22</a>
         </td>
       </tr>
     </tbody></table>
@@ -1642,7 +1666,7 @@ vertex data
       <tr>
         <td>void rsgProgramFragmentConstantColor(<a href='rs_graphics.html#android_rs:rs_program_fragment'>rs_program_fragment</a> pf, float r, float g, float b, float a);
 </td>
-        <td>    When compiling for 32 bits. 
+        <td>    When compiling for 32 bits. Removed from <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 23 and higher</a>
         </td>
       </tr>
     </tbody></table>
@@ -1665,7 +1689,7 @@ vertex data
       <tr>
         <td><a href='rs_graphics.html#android_rs:rs_cull_mode'>rs_cull_mode</a> rsgProgramRasterGetCullMode(<a href='rs_graphics.html#android_rs:rs_program_raster'>rs_program_raster</a> pr);
 </td>
-        <td>    When compiling for 32 bits. Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 16</a>
+        <td>    When compiling for 32 bits. <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 16 - 22</a>
         </td>
       </tr>
     </tbody></table>
@@ -1693,7 +1717,7 @@ vertex data
       <tr>
         <td>bool rsgProgramRasterIsPointSpriteEnabled(<a href='rs_graphics.html#android_rs:rs_program_raster'>rs_program_raster</a> pr);
 </td>
-        <td>    When compiling for 32 bits. Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 16</a>
+        <td>    When compiling for 32 bits. <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 16 - 22</a>
         </td>
       </tr>
     </tbody></table>
@@ -1721,7 +1745,7 @@ vertex data
       <tr>
         <td><a href='rs_graphics.html#android_rs:rs_blend_dst_func'>rs_blend_dst_func</a> rsgProgramStoreGetBlendDstFunc(<a href='rs_graphics.html#android_rs:rs_program_store'>rs_program_store</a> ps);
 </td>
-        <td>    When compiling for 32 bits. Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 16</a>
+        <td>    When compiling for 32 bits. <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 16 - 22</a>
         </td>
       </tr>
     </tbody></table>
@@ -1749,7 +1773,7 @@ vertex data
       <tr>
         <td><a href='rs_graphics.html#android_rs:rs_blend_src_func'>rs_blend_src_func</a> rsgProgramStoreGetBlendSrcFunc(<a href='rs_graphics.html#android_rs:rs_program_store'>rs_program_store</a> ps);
 </td>
-        <td>    When compiling for 32 bits. Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 16</a>
+        <td>    When compiling for 32 bits. <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 16 - 22</a>
         </td>
       </tr>
     </tbody></table>
@@ -1777,7 +1801,7 @@ vertex data
       <tr>
         <td><a href='rs_graphics.html#android_rs:rs_depth_func'>rs_depth_func</a> rsgProgramStoreGetDepthFunc(<a href='rs_graphics.html#android_rs:rs_program_store'>rs_program_store</a> ps);
 </td>
-        <td>    When compiling for 32 bits. Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 16</a>
+        <td>    When compiling for 32 bits. <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 16 - 22</a>
         </td>
       </tr>
     </tbody></table>
@@ -1805,7 +1829,7 @@ vertex data
       <tr>
         <td>bool rsgProgramStoreIsColorMaskAlphaEnabled(<a href='rs_graphics.html#android_rs:rs_program_store'>rs_program_store</a> ps);
 </td>
-        <td>    When compiling for 32 bits. Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 16</a>
+        <td>    When compiling for 32 bits. <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 16 - 22</a>
         </td>
       </tr>
     </tbody></table>
@@ -1833,7 +1857,7 @@ vertex data
       <tr>
         <td>bool rsgProgramStoreIsColorMaskBlueEnabled(<a href='rs_graphics.html#android_rs:rs_program_store'>rs_program_store</a> ps);
 </td>
-        <td>    When compiling for 32 bits. Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 16</a>
+        <td>    When compiling for 32 bits. <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 16 - 22</a>
         </td>
       </tr>
     </tbody></table>
@@ -1861,7 +1885,7 @@ vertex data
       <tr>
         <td>bool rsgProgramStoreIsColorMaskGreenEnabled(<a href='rs_graphics.html#android_rs:rs_program_store'>rs_program_store</a> ps);
 </td>
-        <td>    When compiling for 32 bits. Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 16</a>
+        <td>    When compiling for 32 bits. <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 16 - 22</a>
         </td>
       </tr>
     </tbody></table>
@@ -1889,7 +1913,7 @@ vertex data
       <tr>
         <td>bool rsgProgramStoreIsColorMaskRedEnabled(<a href='rs_graphics.html#android_rs:rs_program_store'>rs_program_store</a> ps);
 </td>
-        <td>    When compiling for 32 bits. Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 16</a>
+        <td>    When compiling for 32 bits. <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 16 - 22</a>
         </td>
       </tr>
     </tbody></table>
@@ -1917,7 +1941,7 @@ vertex data
       <tr>
         <td>bool rsgProgramStoreIsDepthMaskEnabled(<a href='rs_graphics.html#android_rs:rs_program_store'>rs_program_store</a> ps);
 </td>
-        <td>    When compiling for 32 bits. Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 16</a>
+        <td>    When compiling for 32 bits. <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 16 - 22</a>
         </td>
       </tr>
     </tbody></table>
@@ -1945,7 +1969,7 @@ vertex data
       <tr>
         <td>bool rsgProgramStoreIsDitherEnabled(<a href='rs_graphics.html#android_rs:rs_program_store'>rs_program_store</a> ps);
 </td>
-        <td>    When compiling for 32 bits. Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 16</a>
+        <td>    When compiling for 32 bits. <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 16 - 22</a>
         </td>
       </tr>
     </tbody></table>
@@ -1973,7 +1997,7 @@ vertex data
       <tr>
         <td>void rsgProgramVertexGetProjectionMatrix(<a href='rs_value_types.html#android_rs:rs_matrix4x4'>rs_matrix4x4</a>* proj);
 </td>
-        <td>    When compiling for 32 bits. 
+        <td>    When compiling for 32 bits. Removed from <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 23 and higher</a>
         </td>
       </tr>
     </tbody></table>
@@ -2003,7 +2027,7 @@ would result in an error.
       <tr>
         <td>void rsgProgramVertexLoadModelMatrix(const <a href='rs_value_types.html#android_rs:rs_matrix4x4'>rs_matrix4x4</a>* model);
 </td>
-        <td>    When compiling for 32 bits. 
+        <td>    When compiling for 32 bits. Removed from <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 23 and higher</a>
         </td>
       </tr>
     </tbody></table>
@@ -2033,7 +2057,7 @@ would result in an error.
       <tr>
         <td>void rsgProgramVertexLoadProjectionMatrix(const <a href='rs_value_types.html#android_rs:rs_matrix4x4'>rs_matrix4x4</a>* proj);
 </td>
-        <td>    When compiling for 32 bits. 
+        <td>    When compiling for 32 bits. Removed from <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 23 and higher</a>
         </td>
       </tr>
     </tbody></table>
@@ -2063,7 +2087,7 @@ would result in an error.
       <tr>
         <td>void rsgProgramVertexLoadTextureMatrix(const <a href='rs_value_types.html#android_rs:rs_matrix4x4'>rs_matrix4x4</a>* tex);
 </td>
-        <td>    When compiling for 32 bits. 
+        <td>    When compiling for 32 bits. Removed from <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 23 and higher</a>
         </td>
       </tr>
     </tbody></table>

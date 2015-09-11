@@ -752,7 +752,7 @@ a vector.
       <tr>
         <td><a href='rs_value_types.html#android_rs:float2'>float2</a> rsMatrixMultiply(<a href='rs_value_types.html#android_rs:rs_matrix2x2'>rs_matrix2x2</a>* m, <a href='rs_value_types.html#android_rs:float2'>float2</a> in);
 </td>
-        <td>    Removed from <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 14</a>
+        <td>    Removed from <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 14 and higher</a>
         </td>
       </tr>
       <tr>
@@ -770,13 +770,13 @@ a vector.
       <tr>
         <td><a href='rs_value_types.html#android_rs:float3'>float3</a> rsMatrixMultiply(<a href='rs_value_types.html#android_rs:rs_matrix3x3'>rs_matrix3x3</a>* m, <a href='rs_value_types.html#android_rs:float2'>float2</a> in);
 </td>
-        <td>    Removed from <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 14</a>
+        <td>    Removed from <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 14 and higher</a>
         </td>
       </tr>
       <tr>
         <td><a href='rs_value_types.html#android_rs:float3'>float3</a> rsMatrixMultiply(<a href='rs_value_types.html#android_rs:rs_matrix3x3'>rs_matrix3x3</a>* m, <a href='rs_value_types.html#android_rs:float3'>float3</a> in);
 </td>
-        <td>    Removed from <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 14</a>
+        <td>    Removed from <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 14 and higher</a>
         </td>
       </tr>
       <tr>
@@ -800,19 +800,19 @@ a vector.
       <tr>
         <td><a href='rs_value_types.html#android_rs:float4'>float4</a> rsMatrixMultiply(<a href='rs_value_types.html#android_rs:rs_matrix4x4'>rs_matrix4x4</a>* m, <a href='rs_value_types.html#android_rs:float2'>float2</a> in);
 </td>
-        <td>    Removed from <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 14</a>
+        <td>    Removed from <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 14 and higher</a>
         </td>
       </tr>
       <tr>
         <td><a href='rs_value_types.html#android_rs:float4'>float4</a> rsMatrixMultiply(<a href='rs_value_types.html#android_rs:rs_matrix4x4'>rs_matrix4x4</a>* m, <a href='rs_value_types.html#android_rs:float3'>float3</a> in);
 </td>
-        <td>    Removed from <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 14</a>
+        <td>    Removed from <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 14 and higher</a>
         </td>
       </tr>
       <tr>
         <td><a href='rs_value_types.html#android_rs:float4'>float4</a> rsMatrixMultiply(<a href='rs_value_types.html#android_rs:rs_matrix4x4'>rs_matrix4x4</a>* m, <a href='rs_value_types.html#android_rs:float4'>float4</a> in);
 </td>
-        <td>    Removed from <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 14</a>
+        <td>    Removed from <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 14 and higher</a>
         </td>
       </tr>
       <tr>
