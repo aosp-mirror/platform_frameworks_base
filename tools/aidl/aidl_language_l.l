@@ -7,13 +7,6 @@
 
 extern YYSTYPE yylval;
 
-#ifdef _WIN32
-static inline int isatty(int fd)
-{
-  return 0;
-}
-#endif
-
 // comment and whitespace handling
 // these functions save a copy of the buffer
 static void begin_extra_text(unsigned lineno, which_extra_text which);
