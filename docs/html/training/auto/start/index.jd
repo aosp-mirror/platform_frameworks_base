@@ -22,6 +22,7 @@ page.image=auto/images/assets/icons/auto_app_in_simulator.png
  <h2>You should also read</h2>
  <ul>
    <li><a href="{@docRoot}design/auto/index.html">Designing for Auto</a></li>
+   <li><a href="{@docRoot}distribute/googleplay/auto.html">Distribute to Android Auto</a></li>
    <li><a href="{@docRoot}training/auto/audio/index.html">Providing Audio Playback with Auto</a></li>
    <li><a href="{@docRoot}training/auto/messaging/index.html">Providing Messaging for Auto</a></li>
  </ul>
