@@ -2120,7 +2120,7 @@ static status_t writeResourceLoadedCallback(
     size_t N = symbols->getSymbols().size();
     for (i=0; i<N; i++) {
         const AaptSymbolEntry& sym = symbols->getSymbols().valueAt(i);
-        if (sym.typeCode == AaptSymbolEntry::TYPE_UNKNOWN) {
+        if (sym.typeCode != AaptSymbolEntry::TYPE_INT32) {
             continue;
         }
         if (!assets->isJavaSymbol(sym, includePrivate)) {
