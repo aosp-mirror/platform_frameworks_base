@@ -4685,7 +4685,10 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             throw new IllegalStateException("Trying to set the device owner, but device owner "
                     + "is already set.");
         }
-        // STOPSHIP Make sure the DO user is running
+        if (!mUserManager.isUserRunning(new UserHandle(userId))) {
+            throw new IllegalStateException("User not running: " + userId);
+        }
+
         int callingUid = Binder.getCallingUid();
         if (callingUid == Process.SHELL_UID || callingUid == Process.ROOT_UID) {
             if (!hasUserSetupCompleted(UserHandle.USER_OWNER)) {
@@ -4707,9 +4710,6 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             return;
         }
         // STOPSHIP check the caller UID with userId
-        if (!mUserManager.isUserRunning(new UserHandle(userId))) {
-            throw new IllegalStateException("User not running: " + userId);
-        }
 
         mContext.enforceCallingOrSelfPermission(
                 android.Manifest.permission.MANAGE_PROFILE_AND_DEVICE_OWNERS, null);
