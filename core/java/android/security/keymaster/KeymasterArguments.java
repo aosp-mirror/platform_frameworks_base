@@ -1,11 +1,11 @@
-/**
- * Copyright (c) 2015, The Android Open Source Project
+/*
+ * Copyright (C) 2015 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ *      http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -101,9 +101,9 @@ public class KeymasterArguments implements Parcelable {
     public int getInt(int tag, int defaultValue) {
         switch (KeymasterDefs.getTagType(tag)) {
             case KeymasterDefs.KM_ENUM:
-            case KeymasterDefs.KM_INT:
+            case KeymasterDefs.KM_UINT:
                 break; // Accepted types
-            case KeymasterDefs.KM_INT_REP:
+            case KeymasterDefs.KM_UINT_REP:
             case KeymasterDefs.KM_ENUM_REP:
                 throw new IllegalArgumentException("Repeatable tags must use getInts: " + tag);
             default:
@@ -118,9 +118,9 @@ public class KeymasterArguments implements Parcelable {
 
     public long getLong(int tag, long defaultValue) {
         switch (KeymasterDefs.getTagType(tag)) {
-            case KeymasterDefs.KM_LONG:
+            case KeymasterDefs.KM_ULONG:
                 break; // Accepted type
-            case KeymasterDefs.KM_LONG_REP:
+            case KeymasterDefs.KM_ULONG_REP:
                 throw new IllegalArgumentException("Repeatable tags must use getLongs: " + tag);
             default:
                 throw new IllegalArgumentException("Tag is not a long type: " + tag);
@@ -171,7 +171,7 @@ public class KeymasterArguments implements Parcelable {
 
     public List<Integer> getInts(int tag) {
         switch (KeymasterDefs.getTagType(tag)) {
-            case KeymasterDefs.KM_INT_REP:
+            case KeymasterDefs.KM_UINT_REP:
             case KeymasterDefs.KM_ENUM_REP:
                 break; // Allowed types.
             default:
@@ -187,7 +187,7 @@ public class KeymasterArguments implements Parcelable {
     }
 
     public List<Long> getLongs(int tag) {
-        if (KeymasterDefs.getTagType(tag) != KeymasterDefs.KM_LONG_REP) {
+        if (KeymasterDefs.getTagType(tag) != KeymasterDefs.KM_ULONG_REP) {
             throw new IllegalArgumentException("Tag is not a repeating long: " + tag);
         }
         List<Long> values = new ArrayList<Long>();
