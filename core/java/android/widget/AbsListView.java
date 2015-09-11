@@ -2395,6 +2395,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
             lp.itemId = mAdapter.getItemId(position);
         }
         lp.viewType = mAdapter.getItemViewType(position);
+        lp.isEnabled = mAdapter.isEnabled(position);
         if (lp != vlp) {
           child.setLayoutParams(lp);
         }
@@ -2416,19 +2417,33 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
             }
 
             final int position = getPositionForView(host);
-            final ListAdapter adapter = getAdapter();
-
-            if ((position == INVALID_POSITION) || (adapter == null)) {
+            if (position == INVALID_POSITION || mAdapter == null) {
                 // Cannot perform actions on invalid items.
                 return false;
             }
 
-            if (!isEnabled() || !adapter.isEnabled(position)) {
-                // Cannot perform actions on disabled items.
+            if (position >= mAdapter.getCount()) {
+                // The position is no longer valid, likely due to a data set
+                // change. We could fail here for all data set changes, since
+                // there is a chance that the data bound to the view may no
+                // longer exist at the same position within the adapter, but
+                // it's more consistent with the standard touch interaction to
+                // click at whatever may have moved into that position.
                 return false;
             }
 
-            final long id = getItemIdAtPosition(position);
+            final boolean isItemEnabled;
+            final ViewGroup.LayoutParams lp = host.getLayoutParams();
+            if (lp instanceof AbsListView.LayoutParams) {
+                isItemEnabled = ((AbsListView.LayoutParams) lp).isEnabled;
+            } else {
+                isItemEnabled = false;
+            }
+
+            if (!isEnabled() || !isItemEnabled) {
+                // Cannot perform actions on disabled items.
+                return false;
+            }
 
             switch (action) {
                 case AccessibilityNodeInfo.ACTION_CLEAR_SELECTION: {
@@ -2445,11 +2460,13 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
                 } return false;
                 case AccessibilityNodeInfo.ACTION_CLICK: {
                     if (isClickable()) {
+                        final long id = getItemIdAtPosition(position);
                         return performItemClick(host, position, id);
                     }
                 } return false;
                 case AccessibilityNodeInfo.ACTION_LONG_CLICK: {
                     if (isLongClickable()) {
+                        final long id = getItemIdAtPosition(position);
                         return performLongPress(host, position, id);
                     }
                 } return false;
@@ -2469,13 +2486,20 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
      */
     public void onInitializeAccessibilityNodeInfoForItem(
             View view, int position, AccessibilityNodeInfo info) {
-        final ListAdapter adapter = getAdapter();
-        if (position == INVALID_POSITION || adapter == null) {
+        if (position == INVALID_POSITION) {
             // The item doesn't exist, so there's not much we can do here.
             return;
         }
 
-        if (!isEnabled() || !adapter.isEnabled(position)) {
+        final boolean isItemEnabled;
+        final ViewGroup.LayoutParams lp = view.getLayoutParams();
+        if (lp instanceof AbsListView.LayoutParams) {
+            isItemEnabled = ((AbsListView.LayoutParams) lp).isEnabled;
+        } else {
+            isItemEnabled = false;
+        }
+
+        if (!isEnabled() || !isItemEnabled) {
             info.setEnabled(false);
             return;
         }
@@ -6315,6 +6339,9 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
          */
         long itemId = -1;
 
+        /** Whether the adapter considers the item enabled. */
+        boolean isEnabled;
+
         public LayoutParams(Context c, AttributeSet attrs) {
             super(c, attrs);
         }
@@ -6340,6 +6367,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
             encoder.addProperty("list:viewType", viewType);
             encoder.addProperty("list:recycledHeaderFooter", recycledHeaderFooter);
             encoder.addProperty("list:forceAdd", forceAdd);
+            encoder.addProperty("list:isEnabled", isEnabled);
         }
     }
 
