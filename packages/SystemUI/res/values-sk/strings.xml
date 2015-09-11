@@ -36,7 +36,7 @@
     <string name="status_bar_latest_events_title" msgid="6594767438577593172">"Upozornenia"</string>
     <string name="battery_low_title" msgid="6456385927409742437">"Batéria je takmer vybitá"</string>
     <string name="battery_low_percent_format" msgid="2900940511201380775">"Zostáva <xliff:g id="PERCENTAGE">%s</xliff:g>"</string>
-    <string name="battery_low_percent_format_saver_started" msgid="6859235584035338833">"Zostáva <xliff:g id="PERCENTAGE">%s</xliff:g>. Úspora batérie je zapnutá."</string>
+    <string name="battery_low_percent_format_saver_started" msgid="6859235584035338833">"Zostáva <xliff:g id="PERCENTAGE">%s</xliff:g>. Šetrič batérie je zapnutý."</string>
     <string name="invalid_charger" msgid="4549105996740522523">"Nabíjanie pomocou rozhrania USB nie je podporované.\nPoužívajte iba nabíjačku, ktorá bola dodaná spolu so zariadením."</string>
     <string name="invalid_charger_title" msgid="3515740382572798460">"Nabíjanie prostredníctvom USB nie je podporované."</string>
     <string name="invalid_charger_text" msgid="5474997287953892710">"Používajte iba originálnu nabíjačku."</string>
