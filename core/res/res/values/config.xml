@@ -2300,6 +2300,9 @@
     <string-array name="config_cell_retries_per_error_code">
     </string-array>
 
+    <!-- Set initial MaxRetry value for operators -->
+    <integer name="config_mdc_initial_max_retry">1</integer>
+
     <!-- The OEM specified sensor type for the gesture to launch the camear app. -->
     <integer name="config_cameraLaunchGestureSensorType">-1</integer>
     <!-- The OEM specified sensor string type for the gesture to launch camera app, this value
