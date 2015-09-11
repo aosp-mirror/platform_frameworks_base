@@ -832,8 +832,18 @@ public class DirectoryFragment extends Fragment {
                                 if (event == Snackbar.Callback.DISMISS_EVENT_ACTION) {
                                     mModel.undoDeletion();
                                 } else {
-                                    // TODO: Use a listener rather than pushing the view.
-                                    mModel.finalizeDeletion(DirectoryFragment.this.getView());
+                                    mModel.finalizeDeletion(
+                                            new Runnable() {
+                                                @Override
+                                                public void run() {
+                                                    Snackbar.make(
+                                                            DirectoryFragment.this.getView(),
+                                                            R.string.toast_failed_delete,
+                                                            Snackbar.LENGTH_LONG)
+                                                            .show();
+
+                                                }
+                                            });
                                 }
                             }
                         })
@@ -1814,13 +1824,13 @@ public class DirectoryFragment extends Fragment {
                 info = null;
                 error = null;
                 mIsLoading = false;
-                if (mUpdateListener != null)  mUpdateListener.onModelUpdate(this);
+                mUpdateListener.onModelUpdate(this);
                 return;
             }
 
             if (result.exception != null) {
                 Log.e(TAG, "Error while loading directory contents", result.exception);
-                if (mUpdateListener != null)  mUpdateListener.onModelUpdateFailed(result.exception);
+                mUpdateListener.onModelUpdateFailed(result.exception);
                 return;
             }
 
@@ -1834,7 +1844,7 @@ public class DirectoryFragment extends Fragment {
                 mIsLoading = extras.getBoolean(DocumentsContract.EXTRA_LOADING, false);
             }
 
-            if (mUpdateListener != null)  mUpdateListener.onModelUpdate(this);
+            mUpdateListener.onModelUpdate(this);
         }
 
         int getItemCount() {
@@ -1935,7 +1945,7 @@ public class DirectoryFragment extends Fragment {
                 int position = selected.get(i);
                 if (DEBUG) Log.d(TAG, "Marked position " + position + " for deletion");
                 mMarkedForDeletion.append(position, true);
-                if (mUpdateListener != null)  mUpdateListener.notifyItemRemoved(position);
+                mUpdateListener.notifyItemRemoved(position);
             }
         }
 
@@ -1950,7 +1960,7 @@ public class DirectoryFragment extends Fragment {
             for (int i = 0; i < size; ++i) {
                 final int position = mMarkedForDeletion.keyAt(i);
                 mMarkedForDeletion.put(position, false);
-                if (mUpdateListener != null)  mUpdateListener.notifyItemInserted(position);
+                mUpdateListener.notifyItemInserted(position);
             }
 
             // Then, clear the deletion list.
@@ -1964,21 +1974,9 @@ public class DirectoryFragment extends Fragment {
          * @param view The view which will be used to interact with the user (e.g. surfacing
          * snackbars) for errors, info, etc.
          */
-        void finalizeDeletion(final View view) {
+        void finalizeDeletion(Runnable errorCallback) {
             final ContentResolver resolver = mContext.getContentResolver();
-            DeleteFilesTask task = new DeleteFilesTask(
-                    resolver,
-                    new Runnable() {
-                        @Override
-                        public void run() {
-                            Snackbar.make(
-                                    view,
-                                    R.string.toast_failed_delete,
-                                    Snackbar.LENGTH_LONG)
-                                    .show();
-
-                        }
-                    });
+            DeleteFilesTask task = new DeleteFilesTask(resolver, errorCallback);
             task.execute();
         }
 
