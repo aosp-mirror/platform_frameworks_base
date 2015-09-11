@@ -1,8 +1,9 @@
 #ifndef AIDL_AIDL_LANGUAGE_H_
 #define AIDL_AIDL_LANGUAGE_H_
 
-#include <base/macros.h>
 #include <string>
+
+#include "macros.h"
 
 typedef enum {
     NO_EXTRA_TEXT = 0,
