@@ -35,6 +35,9 @@ LOCAL_SRC_FILES := \
     options.cpp \
     search_path.cpp \
 
+LOCAL_SHARED_LIBRARIES := \
+    libbase \
+
 include $(BUILD_HOST_STATIC_LIBRARY)
 
 
