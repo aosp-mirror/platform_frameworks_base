@@ -30,7 +30,8 @@
             android:layout_height="?android:attr/actionBarSize"
             android:background="?android:attr/colorPrimary"
             android:elevation="8dp"
-            android:theme="?android:attr/actionBarTheme">
+            android:theme="?actionBarTheme"
+            android:popupTheme="?actionBarPopupTheme">
 
             <Spinner
                 android:id="@+id/stack"
@@ -41,18 +42,7 @@
 
         </com.android.documentsui.DocumentsToolBar>
 
-        <com.android.documentsui.DirectoryContainerView
-            android:id="@+id/container_directory"
-            android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_weight="1" />
-
-        <FrameLayout
-            android:id="@+id/container_save"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:background="@color/material_grey_50"
-            android:elevation="8dp" />
+        <include layout="@layout/directory_cluster"/>
 
     </LinearLayout>
 
@@ -71,7 +61,8 @@
             android:layout_height="?android:attr/actionBarSize"
             android:background="?android:attr/colorPrimary"
             android:elevation="8dp"
-            android:theme="?android:attr/actionBarTheme" />
+            android:theme="?actionBarTheme"
+            android:popupTheme="?actionBarPopupTheme" />
 
         <FrameLayout
             android:id="@+id/container_roots"

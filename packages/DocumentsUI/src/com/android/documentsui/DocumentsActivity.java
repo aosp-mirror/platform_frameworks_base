@@ -19,7 +19,6 @@ package com.android.documentsui;
 import static com.android.documentsui.BaseActivity.State.ACTION_BROWSE;
 import static com.android.documentsui.BaseActivity.State.ACTION_CREATE;
 import static com.android.documentsui.BaseActivity.State.ACTION_GET_CONTENT;
-import static com.android.documentsui.BaseActivity.State.ACTION_MANAGE;
 import static com.android.documentsui.BaseActivity.State.ACTION_OPEN;
 import static com.android.documentsui.BaseActivity.State.ACTION_OPEN_COPY_DESTINATION;
 import static com.android.documentsui.BaseActivity.State.ACTION_OPEN_TREE;
@@ -67,7 +66,7 @@ import java.util.List;
 
 public class DocumentsActivity extends BaseActivity {
     private static final int CODE_FORWARD = 42;
-    public static final String TAG = "Documents";
+    private static final String TAG = "DocumentsActivity";
 
     private boolean mShowAsDialog;
 
@@ -90,8 +89,7 @@ public class DocumentsActivity extends BaseActivity {
         super.onCreate(icicle);
 
         final Resources res = getResources();
-        mShowAsDialog = res.getBoolean(R.bool.show_as_dialog) && mState.action != ACTION_MANAGE &&
-                mState.action != ACTION_BROWSE;
+        mShowAsDialog = res.getBoolean(R.bool.show_as_dialog) && mState.action != ACTION_BROWSE;
 
         if (!mShowAsDialog) {
             setTheme(R.style.DocumentsNonDialogTheme);
@@ -119,8 +117,6 @@ public class DocumentsActivity extends BaseActivity {
         mDirectoryContainer = (DirectoryContainerView) findViewById(R.id.container_directory);
 
         mToolbar = (Toolbar) findViewById(R.id.toolbar);
-        mToolbar.setTitleTextAppearance(context,
-                android.R.style.TextAppearance_DeviceDefault_Widget_ActionBar_Title);
 
         mStackAdapter = new StackAdapter();
         mStackListener = new ItemSelectedListener();
@@ -128,15 +124,11 @@ public class DocumentsActivity extends BaseActivity {
         mToolbarStack.setOnItemSelectedListener(mStackListener);
 
         mRootsToolbar = (Toolbar) findViewById(R.id.roots_toolbar);
-        if (mRootsToolbar != null) {
-            mRootsToolbar.setTitleTextAppearance(context,
-                    android.R.style.TextAppearance_DeviceDefault_Widget_ActionBar_Title);
-        }
 
         setActionBar(mToolbar);
 
         // Hide roots when we're managing a specific root
-        if (mState.action == ACTION_MANAGE || mState.action == ACTION_BROWSE) {
+        if (mState.action == ACTION_BROWSE) {
             mDrawer.lockClosed();
             if (mShowAsDialog) {
                 findViewById(R.id.container_roots).setVisibility(View.GONE);
@@ -168,7 +160,7 @@ public class DocumentsActivity extends BaseActivity {
             // In this case, we set the activity title in AsyncTask.onPostExecute().  To prevent
             // talkback from reading aloud the default title, we clear it here.
             setTitle("");
-            if (mState.action == ACTION_MANAGE || mState.action == ACTION_BROWSE) {
+            if (mState.action == ACTION_BROWSE) {
                 final Uri rootUri = getIntent().getData();
                 new RestoreRootTask(rootUri).executeOnExecutor(getCurrentExecutor());
             } else {
@@ -180,8 +172,8 @@ public class DocumentsActivity extends BaseActivity {
     }
 
     @Override
-    State buildDefaultState() {
-        State state = new State();
+    State buildState() {
+        State state = buildDefaultState();
 
         final Intent intent = getIntent();
         final String action = intent.getAction();
@@ -193,8 +185,6 @@ public class DocumentsActivity extends BaseActivity {
             state.action = ACTION_GET_CONTENT;
         } else if (Intent.ACTION_OPEN_DOCUMENT_TREE.equals(action)) {
             state.action = ACTION_OPEN_TREE;
-        } else if (DocumentsContract.ACTION_MANAGE_ROOT.equals(action)) {
-            state.action = ACTION_MANAGE;
         } else if (DocumentsContract.ACTION_BROWSE_DOCUMENT_ROOT.equals(action)) {
             state.action = ACTION_BROWSE;
         } else if (DocumentsIntent.ACTION_OPEN_COPY_DESTINATION.equals(action)) {
@@ -206,7 +196,7 @@ public class DocumentsActivity extends BaseActivity {
                     Intent.EXTRA_ALLOW_MULTIPLE, false);
         }
 
-        if (state.action == ACTION_MANAGE || state.action == ACTION_BROWSE) {
+        if (state.action == ACTION_BROWSE) {
             state.acceptMimes = new String[] { "*/*" };
             state.allowMultiple = true;
         } else if (intent.hasExtra(Intent.EXTRA_MIME_TYPES)) {
@@ -215,12 +205,7 @@ public class DocumentsActivity extends BaseActivity {
             state.acceptMimes = new String[] { intent.getType() };
         }
 
-        state.localOnly = intent.getBooleanExtra(Intent.EXTRA_LOCAL_ONLY, false);
-        state.forceAdvanced = intent.getBooleanExtra(DocumentsContract.EXTRA_SHOW_ADVANCED, false);
-        state.showAdvanced = state.forceAdvanced
-                | LocalPreferences.getDisplayAdvancedDevices(this);
-
-        if (state.action == ACTION_MANAGE || state.action == ACTION_BROWSE) {
+        if (state.action == ACTION_BROWSE) {
             state.showSize = true;
         } else {
             state.showSize = LocalPreferences.getDisplayFileSize(this);
@@ -232,36 +217,7 @@ public class DocumentsActivity extends BaseActivity {
                     CopyService.TRANSFER_MODE_NONE);
         }
 
-        state.excludedAuthorities = getExcludedAuthorities();
-
         return state;
-    }
-
-    private class RestoreRootTask extends AsyncTask<Void, Void, RootInfo> {
-        private Uri mRootUri;
-
-        public RestoreRootTask(Uri rootUri) {
-            mRootUri = rootUri;
-        }
-
-        @Override
-        protected RootInfo doInBackground(Void... params) {
-            final String rootId = DocumentsContract.getRootId(mRootUri);
-            return mRoots.getRootOneshot(mRootUri.getAuthority(), rootId);
-        }
-
-        @Override
-        protected void onPostExecute(RootInfo root) {
-            if (isDestroyed()) return;
-            mState.restored = true;
-
-            if (root != null) {
-                onRootPicked(root);
-            } else {
-                Log.w(TAG, "Failed to find root: " + mRootUri);
-                finish();
-            }
-        }
     }
 
     @Override
@@ -405,8 +361,11 @@ public class DocumentsActivity extends BaseActivity {
         final MenuItem fileSize = menu.findItem(R.id.menu_file_size);
         final MenuItem settings = menu.findItem(R.id.menu_settings);
 
-        boolean fileSizeVisible = !(mState.action == ACTION_MANAGE
-                || mState.action == ACTION_BROWSE);
+        // File size is locked visible for browse because that is the action triggered by Settings,
+        // where the user is trying to find large files to clean up.
+        // TODO: instead of setting this according to the action, use a local preference, but
+        // provide a @hide extra to let callers like Settings force-enable size visibility.
+        boolean fileSizeVisible = mState.action != ACTION_BROWSE;
         if (mState.action == ACTION_CREATE
                 || mState.action == ACTION_OPEN_TREE
                 || mState.action == ACTION_OPEN_COPY_DESTINATION) {
@@ -428,11 +387,10 @@ public class DocumentsActivity extends BaseActivity {
             createDir.setVisible(false);
         }
 
-        advanced.setVisible(!(mState.action == ACTION_MANAGE || mState.action == ACTION_BROWSE) &&
-                !mState.forceAdvanced);
+        advanced.setVisible(mState.action != ACTION_BROWSE && !mState.forceAdvanced);
         fileSize.setVisible(fileSizeVisible);
 
-        settings.setVisible((mState.action == ACTION_MANAGE || mState.action == ACTION_BROWSE)
+        settings.setVisible(mState.action == ACTION_BROWSE
                 && (root.flags & Root.FLAG_HAS_SETTINGS) != 0);
 
         return true;
@@ -441,11 +399,6 @@ public class DocumentsActivity extends BaseActivity {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         return mDrawer.onOptionsItemSelected(item) || super.onOptionsItemSelected(item);
-    }
-
-    @Override
-    public State getDisplayState() {
-        return mState;
     }
 
     @Override
@@ -523,26 +476,6 @@ public class DocumentsActivity extends BaseActivity {
         } else if (mState.action == ACTION_CREATE) {
             // Replace selected file
             SaveFragment.get(fm).setReplaceTarget(doc);
-        } else if (mState.action == ACTION_MANAGE) {
-            // First try managing the document; we expect manager to filter
-            // based on authority, so we don't grant.
-            final Intent manage = new Intent(DocumentsContract.ACTION_MANAGE_DOCUMENT);
-            manage.setData(doc.derivedUri);
-
-            try {
-                startActivity(manage);
-            } catch (ActivityNotFoundException ex) {
-                // Fall back to viewing
-                final Intent view = new Intent(Intent.ACTION_VIEW);
-                view.setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-                view.setData(doc.derivedUri);
-
-                try {
-                    startActivity(view);
-                } catch (ActivityNotFoundException ex2) {
-                    Toast.makeText(this, R.string.toast_no_application, Toast.LENGTH_SHORT).show();
-                }
-            }
         } else if (mState.action == ACTION_BROWSE) {
             // Go straight to viewing
             final Intent view = new Intent(Intent.ACTION_VIEW);

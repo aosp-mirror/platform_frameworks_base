@@ -36,12 +36,18 @@
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
             <intent-filter>
-                <action android:name="android.provider.action.MANAGE_ROOT" />
+                <action android:name="android.provider.action.BROWSE_DOCUMENT_ROOT" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <data android:mimeType="vnd.android.document/root" />
             </intent-filter>
+        </activity>
+
+        <activity
+            android:name=".ManageRootActivity"
+            android:theme="@style/DocumentsNonDialogTheme"
+            android:icon="@drawable/ic_doc_text">
             <intent-filter>
-                <action android:name="android.provider.action.BROWSE_DOCUMENT_ROOT" />
+                <action android:name="android.provider.action.MANAGE_ROOT" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <data android:mimeType="vnd.android.document/root" />
             </intent-filter>

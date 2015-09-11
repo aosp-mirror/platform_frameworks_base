@@ -222,7 +222,7 @@ public class IconUtils {
                 return context.getDrawable(R.drawable.ic_doc_album);
             }
 
-            if (mode == DocumentsActivity.State.MODE_GRID) {
+            if (mode == BaseActivity.State.MODE_GRID) {
                 return context.getDrawable(R.drawable.ic_grid_folder);
             } else {
                 return context.getDrawable(R.drawable.ic_doc_folder);

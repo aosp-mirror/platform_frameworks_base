@@ -26,7 +26,8 @@
         android:id="@+id/menu_create_dir"
         android:title="@string/menu_create_dir"
         android:icon="@drawable/ic_menu_new_folder"
-        android:showAsAction="always" />
+        android:showAsAction="always"
+        android:visible="false" />
     <item
         android:id="@+id/menu_sort"
         android:title="@string/menu_sort"
@@ -62,10 +63,12 @@
         android:visible="false" />
     <item
         android:id="@+id/menu_advanced"
-        android:showAsAction="never" />
+        android:showAsAction="never"
+        android:visible="false" />
     <item
         android:id="@+id/menu_file_size"
-        android:showAsAction="never" />
+        android:showAsAction="never"
+        android:visible="false" />
     <item
         android:id="@+id/menu_settings"
         android:title="@string/menu_settings"
