@@ -1,4 +1,5 @@
 #include "aidl_language.h"
+#include "aidl_language_y.hpp"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string>
@@ -74,7 +75,7 @@ bool ParseState::OpenFileFromDisk() {
 }
 
 int ParseState::RunParser() {
-  int ret = yyparse(this);
+  int ret = yy::parser(this).parse();
 
   free((void *)g_currentPackage);
   g_currentPackage = NULL;
