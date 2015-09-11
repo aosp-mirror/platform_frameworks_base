@@ -1032,7 +1032,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
     }
 
     private boolean shouldListenForFingerprint() {
-        return (mKeyguardIsVisible || !mDeviceInteractive) && !mSwitchingUser
+        return (mKeyguardIsVisible || !mDeviceInteractive || mBouncer) && !mSwitchingUser
                 && !mFingerprintAlreadyAuthenticated && !isFingerprintDisabled(getCurrentUser());
     }
 
@@ -1365,6 +1365,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
                 cb.onKeyguardBouncerChanged(isBouncer);
             }
         }
+        updateFingerprintListeningState();
     }
 
     /**
