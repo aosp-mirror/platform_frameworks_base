@@ -1495,6 +1495,59 @@ public abstract class BaseStatusBar extends SystemUI implements
         return true;
     }
 
+    public void startPendingIntentDismissingKeyguard(final PendingIntent intent) {
+        if (!isDeviceProvisioned()) return;
+
+        final boolean keyguardShowing = mStatusBarKeyguardViewManager.isShowing();
+        final boolean afterKeyguardGone = intent.isActivity()
+                && PreviewInflater.wouldLaunchResolverActivity(mContext, intent.getIntent(),
+                mCurrentUserId);
+        dismissKeyguardThenExecute(new OnDismissAction() {
+            public boolean onDismiss() {
+                new Thread() {
+                    @Override
+                    public void run() {
+                        try {
+                            if (keyguardShowing && !afterKeyguardGone) {
+                                ActivityManagerNative.getDefault()
+                                        .keyguardWaitingForActivityDrawn();
+                            }
+
+                            // The intent we are sending is for the application, which
+                            // won't have permission to immediately start an activity after
+                            // the user switches to home.  We know it is safe to do at this
+                            // point, so make sure new activity switches are now allowed.
+                            ActivityManagerNative.getDefault().resumeAppSwitches();
+                        } catch (RemoteException e) {
+                        }
+
+                        try {
+                            intent.send();
+                        } catch (PendingIntent.CanceledException e) {
+                            // the stack trace isn't very helpful here.
+                            // Just log the exception message.
+                            Log.w(TAG, "Sending intent failed: " + e);
+
+                            // TODO: Dismiss Keyguard.
+                        }
+                        if (intent.isActivity()) {
+                            mAssistManager.hideAssist();
+                            overrideActivityPendingAppTransition(keyguardShowing
+                                    && !afterKeyguardGone);
+                        }
+                    }
+                }.start();
+
+                // close the shade if it was open
+                animateCollapsePanels(CommandQueue.FLAG_EXCLUDE_RECENTS_PANEL,
+                        true /* force */, true /* delayed */);
+                visibilityChanged(false);
+
+                return true;
+            }
+        }, afterKeyguardGone);
+    }
+
     private final class NotificationClicker implements View.OnClickListener {
         public void onClick(final View v) {
             if (!(v instanceof ExpandableNotificationRow)) {
