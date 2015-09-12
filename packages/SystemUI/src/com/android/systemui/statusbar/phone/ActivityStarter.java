@@ -16,6 +16,7 @@
 
 package com.android.systemui.statusbar.phone;
 
+import android.app.PendingIntent;
 import android.content.Intent;
 
 /**
@@ -24,5 +25,6 @@ import android.content.Intent;
  * Keyguard.
  */
 public interface ActivityStarter {
+    void startPendingIntentDismissingKeyguard(PendingIntent intent);
     public void startActivity(Intent intent, boolean dismissShade);
 }
