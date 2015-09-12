@@ -23,6 +23,8 @@ import com.android.internal.policy.IKeyguardDrawnCallback;
 import com.android.internal.policy.IKeyguardExitCallback;
 import com.android.internal.policy.IKeyguardService;
 
+import java.io.PrintWriter;
+
 /**
  * A local class that keeps a cache of keyguard state that can be restored in the event
  * keyguard crashes. It currently also allows runtime-selectable
@@ -391,6 +393,28 @@ public class KeyguardServiceDelegate {
     public void onActivityDrawn() {
         if (mKeyguardService != null) {
             mKeyguardService.onActivityDrawn();
+        }
+    }
+
+    public void dump(String prefix, PrintWriter pw) {
+        pw.println(prefix + TAG);
+        prefix += "  ";
+        pw.println(prefix + "showing=" + mKeyguardState.showing);
+        pw.println(prefix + "showingAndNotOccluded=" + mKeyguardState.showingAndNotOccluded);
+        pw.println(prefix + "inputRestricted=" + mKeyguardState.inputRestricted);
+        pw.println(prefix + "occluded=" + mKeyguardState.occluded);
+        pw.println(prefix + "secure=" + mKeyguardState.secure);
+        pw.println(prefix + "dreaming=" + mKeyguardState.dreaming);
+        pw.println(prefix + "systemIsReady=" + mKeyguardState.systemIsReady);
+        pw.println(prefix + "deviceHasKeyguard=" + mKeyguardState.deviceHasKeyguard);
+        pw.println(prefix + "enabled=" + mKeyguardState.enabled);
+        pw.println(prefix + "offReason=" + mKeyguardState.offReason);
+        pw.println(prefix + "currentUser=" + mKeyguardState.currentUser);
+        pw.println(prefix + "bootCompleted=" + mKeyguardState.bootCompleted);
+        pw.println(prefix + "screenState=" + mKeyguardState.screenState);
+        pw.println(prefix + "interactiveState=" + mKeyguardState.interactiveState);
+        if (mKeyguardService != null) {
+            mKeyguardService.dump(prefix, pw);
         }
     }
 }

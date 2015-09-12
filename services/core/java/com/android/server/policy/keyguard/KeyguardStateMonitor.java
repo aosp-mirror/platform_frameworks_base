@@ -25,6 +25,8 @@ import com.android.internal.policy.IKeyguardService;
 import com.android.internal.policy.IKeyguardStateCallback;
 import com.android.internal.widget.LockPatternUtils;
 
+import java.io.PrintWriter;
+
 /**
  * Maintains a cached copy of Keyguard's state.
  * @hide
@@ -89,5 +91,14 @@ public class KeyguardStateMonitor extends IKeyguardStateCallback.Stub {
     @Override // Binder interface
     public void onInputRestrictedStateChanged(boolean inputRestricted) {
         mInputRestricted = inputRestricted;
+    }
+
+    public void dump(String prefix, PrintWriter pw) {
+        pw.println(prefix + TAG);
+        prefix += "  ";
+        pw.println(prefix + "mIsShowing=" + mIsShowing);
+        pw.println(prefix + "mSimSecure=" + mSimSecure);
+        pw.println(prefix + "mInputRestricted=" + mInputRestricted);
+        pw.println(prefix + "mCurrentUserId=" + mCurrentUserId);
     }
 }
