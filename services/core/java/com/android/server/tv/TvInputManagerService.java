@@ -445,14 +445,16 @@ public final class TvInputManagerService extends SystemService {
 
         // Unregister all callbacks and unbind all services.
         for (ServiceState serviceState : userState.serviceStateMap.values()) {
-            if (serviceState.callback != null) {
-                try {
-                    serviceState.service.unregisterCallback(serviceState.callback);
-                } catch (RemoteException e) {
-                    Slog.e(TAG, "error in unregisterCallback", e);
+            if (serviceState.service != null) {
+                if (serviceState.callback != null) {
+                    try {
+                        serviceState.service.unregisterCallback(serviceState.callback);
+                    } catch (RemoteException e) {
+                        Slog.e(TAG, "error in unregisterCallback", e);
+                    }
                 }
+                mContext.unbindService(serviceState.connection);
             }
-            mContext.unbindService(serviceState.connection);
         }
         userState.serviceStateMap.clear();
     }
@@ -1974,7 +1976,12 @@ public final class TvInputManagerService extends SystemService {
                 Slog.d(TAG, "onServiceConnected(component=" + component + ")");
             }
             synchronized (mLock) {
-                UserState userState = getOrCreateUserStateLocked(mUserId);
+                UserState userState = mUserStates.get(mUserId);
+                if (userState == null) {
+                    // The user was removed while connecting.
+                    mContext.unbindService(this);
+                    return;
+                }
                 ServiceState serviceState = userState.serviceStateMap.get(mComponent);
                 serviceState.service = ITvInputService.Stub.asInterface(service);
 
