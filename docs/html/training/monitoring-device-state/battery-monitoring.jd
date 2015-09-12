@@ -3,12 +3,14 @@ parent.title=Optimizing Battery Life
 parent.link=index.html
 
 trainingnavtop=true
-next.title=Determining and Monitoring the Docking State and Type
-next.link=docking-monitoring.html
-
+parent.link=index.html
+previous.title=Optimizing for Doze and App Standby
+previous.link=doze-standby.html
+next.title= Determining and Monitoring the Connectivity Status
+next.link=connectivity-monitoring.html
 @jd:body
- 
-<div id="tb-wrapper"> 
+
+<div id="tb-wrapper">
 <div id="tb">
 
 <h2>This lesson teaches you to</h2>
@@ -24,9 +26,9 @@ next.link=docking-monitoring.html
   <li><a href="{@docRoot}guide/components/intents-filters.html">Intents and Intent Filters</a>
 </ul>
 
-</div> 
 </div>
- 
+</div>
+
 <p>When you're altering the frequency of your background updates to reduce the effect of those
 updates on battery life, checking the current battery level and charging state is a good place to
 start.</p>
@@ -41,8 +43,8 @@ prolong the battery life.</p>
 even stopping&mdash;your updates when the battery charge is nearly exhausted.</p>
 
 
-<h2 id="DetermineChargeState">Determine the Current Charging State</h2> 
- 
+<h2 id="DetermineChargeState">Determine the Current Charging State</h2>
+
 <p>Start by determining the current charge status. The {@link android.os.BatteryManager}
 broadcasts all battery and charging details in a sticky {@link android.content.Intent} that includes
 the charging status.</p>
@@ -74,7 +76,7 @@ connected to an AC charger, reduce the rate if the charge is over USB, and lower
 further if the battery is discharging.</p>
 
 
-<h2 id="MonitorChargeState">Monitor Changes in Charging State</h2> 
+<h2 id="MonitorChargeState">Monitor Changes in Charging State</h2>
 
 <p>The charging status can change as easily as a device can be plugged in, so it's important to
 monitor the charging state for changes and alter your refresh rate accordingly.</p>
@@ -99,11 +101,11 @@ the current charging state and method as described in the previous step.</p>
 
 <pre>public class PowerConnectionReceiver extends BroadcastReceiver {
     &#64;Override
-    public void onReceive(Context context, Intent intent) { 
+    public void onReceive(Context context, Intent intent) {
         int status = intent.getIntExtra(BatteryManager.EXTRA_STATUS, -1);
         boolean isCharging = status == BatteryManager.BATTERY_STATUS_CHARGING ||
                             status == BatteryManager.BATTERY_STATUS_FULL;
-    
+
         int chargePlug = intent.getIntExtra(BatteryManager.EXTRA_PLUGGED, -1);
         boolean usbCharge = chargePlug == BatteryManager.BATTERY_PLUGGED_USB;
         boolean acCharge = chargePlug == BatteryManager.BATTERY_PLUGGED_AC;
@@ -111,7 +113,7 @@ the current charging state and method as described in the previous step.</p>
 }</pre>
 
 
-<h2 id="CurrentLevel">Determine the Current Battery Level</h2> 
+<h2 id="CurrentLevel">Determine the Current Battery Level</h2>
 
 <p>In some cases it's also useful to determine the current battery level. You may choose to reduce
 the rate of your background updates if the battery charge is below a certain level.</p>
@@ -125,7 +127,7 @@ int scale = batteryStatus.getIntExtra(BatteryManager.EXTRA_SCALE, -1);
 float batteryPct = level / (float)scale;</pre>
 
 
-<h2 id="MonitorLevel">Monitor Significant Changes in Battery Level</h2> 
+<h2 id="MonitorLevel">Monitor Significant Changes in Battery Level</h2>
 
 <p>You can't easily continually monitor the battery state, but you don't need to.</p>
 
@@ -154,97 +156,6 @@ can make use of it.</p>
 lesson shows you how to determine the current dock state and monitor for changes in device
 docking.</p>
 
-<h2 id="pso"> Power-Saving Optimizations</h2>
 
-<p>Android M Preview helps prolong battery life by introducing new power-saving optimizations:
-<em>Doze</em> mode improves the sleep efficiency of idle devices. <em>App Standby</em> prevents apps
-from eating up power while idle.</p>
 
-<h2 id="behavior-doze">Doze</h2>
-<p>If a user leaves a device unplugged and stationary for a period of time, with the screen off,
-the device enters Doze mode. Doze attempts to keep the system in a sleep state as long as the
-device remains undisturbed. In this mode, devices periodically resume normal operations for brief periods of time so that the system can perform app syncing and any other pending operations.</p>
 
-<p>The following restrictions apply to your apps while in Doze:</p>
-<ul>
-<li>Network access is disabled, unless your app receives a high-priority
-<a href="https://developers.google.com/cloud-messaging/" class="external-link">
-Google Cloud Messaging</a> tickle.</li>
-<li>The system ignores <a href="{@docRoot}reference/android/os/PowerManager.WakeLock.html">
-Wake locks</a>.</li>
-<li>Alarms scheduled using the {@link android.app.AlarmManager} class are deferred, unless you have
-exempted them using the
-{@link android.app.AlarmManager#setAndAllowWhileIdle setAndAllowWhileIdle()} method.</li>
-<li>The system does not perform Wi-Fi scans.</li>
-<li>The system does not permit syncs or jobs for your sync adapters.</li>
-<li>The system does not allow {@link android.app.job.JobScheduler} to run.</li>
-</ul>
-</p>
-<p>When the device exits Doze mode, it executes any jobs and syncs that are pending.</p>
-
-<h3>Testing apps with Doze</h3>
-
-<p>You can test Doze mode by connecting your development host to a device running the M Preview,
-and calling the following commands:
-</p>
-<pre class="no-prettyprint">
-$ adb shell dumpsys battery unplug
-$ adb shell dumpsys deviceidle step
-$ adb shell dumpsys deviceidle -h
-</pre>
-<p class="note"><strong>Note</strong>: As of M Preview 3 release,
-<a href="https://developers.google.com/cloud-messaging/" class="external-link">
-Google Cloud Messaging</a> (GCM) lets you designate
-<a href="https://developers.google.com/cloud-messaging/downstream#setting-the-priority-of-a-message">
-high-priority messages</a>. If your app receives a high-priority GCM message</a>, the system grants
-brief network access even when the device is dozing.
-</p>
-
-<p>See the
-<a href="{@docRoot}preview/testing/guide.html#doze-standby">Testing Guide</a> for tips on how
-to test Doze in your apps. </p>
-
-<h2 id="behavior-app-standby">App Standby</h2>
-<p>App Standby allows the system to determine that an app is idle when the user is not actively
-using it. The system makes this determination when the user does not touch the app for a certain
-period of time, and none of the following conditions applies:</p>
-
-<ul>
-<li>The user explicitly launches the app.</li>
-<li>The app has a process currently in the foreground (either as an activity or foreground service,
-or in use by another activity or foreground service).</li>
-<li>The app generates a notification that users see on the lock screen or in the
-notification tray.</li>
-<li>The user explicitly asks for the app to be exempt from optimizations,
-via the Settings app.</li>
-</ul>
-
-<p>When the user plugs the device into a power supply, the system releases apps from the standby
-state, allowing them to freely access the network and to execute any pending jobs and syncs. If the
-device is idle for long periods of time, the system allows idle apps network access around once a
-day.</p>
-
-<h3>Testing apps with App Standby</h3>
-<p>You can test App Standby by connecting your development host to a device running the M Preview,
-and calling the following commands:
-</p>
-<pre class="no-prettyprint">
-$ adb shell dumpsys battery unplug
-$ adb shell am set-inactive &lt;packageName&gt; true
-$ adb shell am set-inactive &lt;packageName&gt; false
-$ adb shell am get-inactive &lt;packageName&gt;
-</pre>
-
-<p class="note"><strong>Note</strong>:
-As of M Preview 3 release,
-<a href="https://developers.google.com/cloud-messaging/" class="external-link">
-Google Cloud Messaging</a> (GCM) lets you
-designate
-<a href="https://developers.google.com/cloud-messaging/downstream#setting-the-priority-of-a-message">
-high-priority messages</a>. If your app receives high-priority GCM messages, the system grants
-brief network access even when the app is idle.
-</p>
-
-<p>See the
-<a href="{@docRoot}preview/testing/guide.html#doze-standby">Testing Guide</a> for tips on how
-to test App Standby in your apps. </p>
