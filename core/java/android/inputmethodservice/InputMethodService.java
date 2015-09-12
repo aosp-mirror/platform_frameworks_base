@@ -1985,31 +1985,25 @@ public class InputMethodService extends AbstractInputMethodService {
                 // We want our own movement method to handle the key, so the
                 // cursor will properly move in our own word wrapping.
                 if (count == MOVEMENT_DOWN) {
-                    if (movement.onKeyDown(eet,
-                            (Spannable)eet.getText(), keyCode, event)) {
+                    if (movement.onKeyDown(eet, eet.getText(), keyCode, event)) {
                         reportExtractedMovement(keyCode, 1);
                         return true;
                     }
                 } else if (count == MOVEMENT_UP) {
-                    if (movement.onKeyUp(eet,
-                            (Spannable)eet.getText(), keyCode, event)) {
+                    if (movement.onKeyUp(eet, eet.getText(), keyCode, event)) {
                         return true;
                     }
                 } else {
-                    if (movement.onKeyOther(eet, (Spannable)eet.getText(), event)) {
+                    if (movement.onKeyOther(eet, eet.getText(), event)) {
                         reportExtractedMovement(keyCode, count);
                     } else {
                         KeyEvent down = KeyEvent.changeAction(event, KeyEvent.ACTION_DOWN);
-                        if (movement.onKeyDown(eet,
-                                (Spannable)eet.getText(), keyCode, down)) {
+                        if (movement.onKeyDown(eet, eet.getText(), keyCode, down)) {
                             KeyEvent up = KeyEvent.changeAction(event, KeyEvent.ACTION_UP);
-                            movement.onKeyUp(eet,
-                                    (Spannable)eet.getText(), keyCode, up);
+                            movement.onKeyUp(eet, eet.getText(), keyCode, up);
                             while (--count > 0) {
-                                movement.onKeyDown(eet,
-                                        (Spannable)eet.getText(), keyCode, down);
-                                movement.onKeyUp(eet,
-                                        (Spannable)eet.getText(), keyCode, up);
+                                movement.onKeyDown(eet, eet.getText(), keyCode, down);
+                                movement.onKeyUp(eet, eet.getText(), keyCode, up);
                             }
                             reportExtractedMovement(keyCode, count);
                         }
@@ -2125,7 +2119,7 @@ public class InputMethodService extends AbstractInputMethodService {
                 } else {
                     InputConnection ic = getCurrentInputConnection();
                     if (ic != null) {
-                        ic.commitText(String.valueOf((char) charCode), 1);
+                        ic.commitText(String.valueOf(charCode), 1);
                     }
                 }
                 break;
