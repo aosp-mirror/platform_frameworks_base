@@ -7061,5 +7061,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         if (mBurnInProtectionHelper != null) {
             mBurnInProtectionHelper.dump(prefix, pw);
         }
+        if (mKeyguardDelegate != null) {
+            mKeyguardDelegate.dump(prefix, pw);
+        }
     }
 }

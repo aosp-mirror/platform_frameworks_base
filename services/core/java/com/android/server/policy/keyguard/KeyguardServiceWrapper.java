@@ -27,6 +27,8 @@ import com.android.internal.policy.IKeyguardExitCallback;
 import com.android.internal.policy.IKeyguardService;
 import com.android.internal.policy.IKeyguardStateCallback;
 
+import java.io.PrintWriter;
+
 /**
  * A wrapper class for KeyguardService.  It implements IKeyguardService to ensure the interface
  * remains consistent.
@@ -238,5 +240,9 @@ public class KeyguardServiceWrapper implements IKeyguardService {
 
     public boolean isInputRestricted() {
         return mKeyguardStateMonitor.isInputRestricted();
+    }
+
+    public void dump(String prefix, PrintWriter pw) {
+        mKeyguardStateMonitor.dump(prefix, pw);
     }
 }

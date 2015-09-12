@@ -75,6 +75,8 @@ import com.android.systemui.statusbar.phone.ScrimController;
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
 import com.android.systemui.statusbar.phone.StatusBarWindowManager;
 
+import java.io.FileDescriptor;
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -1639,6 +1641,30 @@ public class KeyguardViewMediator extends SystemUI {
     }
     public ViewMediatorCallback getViewMediatorCallback() {
         return mViewMediatorCallback;
+    }
+
+    @Override
+    public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
+        pw.print("  mSystemReady: "); pw.println(mSystemReady);
+        pw.print("  mBootCompleted: "); pw.println(mBootCompleted);
+        pw.print("  mBootSendUserPresent: "); pw.println(mBootSendUserPresent);
+        pw.print("  mExternallyEnabled: "); pw.println(mExternallyEnabled);
+        pw.print("  mNeedToReshowWhenReenabled: "); pw.println(mNeedToReshowWhenReenabled);
+        pw.print("  mShowing: "); pw.println(mShowing);
+        pw.print("  mInputRestricted: "); pw.println(mInputRestricted);
+        pw.print("  mOccluded: "); pw.println(mOccluded);
+        pw.print("  mDelayedShowingSequence: "); pw.println(mDelayedShowingSequence);
+        pw.print("  mExitSecureCallback: "); pw.println(mExitSecureCallback);
+        pw.print("  mDeviceInteractive: "); pw.println(mDeviceInteractive);
+        pw.print("  mGoingToSleep: "); pw.println(mGoingToSleep);
+        pw.print("  mHiding: "); pw.println(mHiding);
+        pw.print("  mWaitingUntilKeyguardVisible: "); pw.println(mWaitingUntilKeyguardVisible);
+        pw.print("  mKeyguardDonePending: "); pw.println(mKeyguardDonePending);
+        pw.print("  mHideAnimationRun: "); pw.println(mHideAnimationRun);
+        pw.print("  mPendingReset: "); pw.println(mPendingReset);
+        pw.print("  mPendingLock: "); pw.println(mPendingLock);
+        pw.print("  mWakeAndUnlocking: "); pw.println(mWakeAndUnlocking);
+        pw.print("  mDrawnCallback: "); pw.println(mDrawnCallback);
     }
 
     private static class StartKeyguardExitAnimParams {
