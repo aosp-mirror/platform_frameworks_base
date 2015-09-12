@@ -148,7 +148,7 @@ public final class BridgeWindowSession implements IWindowSession {
     }
 
     @Override
-    public boolean startMoving(IWindow window, float startX, float startY)
+    public boolean startMovingTask(IWindow window, float startX, float startY)
             throws RemoteException {
         // pass for now
         return false;
