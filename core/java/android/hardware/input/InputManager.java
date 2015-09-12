@@ -757,6 +757,22 @@ public final class InputManager {
         }
     }
 
+    /**
+     * Changes the mouse pointer's icon shape into the specified id.
+     *
+     * @param iconId The id of the pointer graphic, as a value between
+     * {@link PointerIcon.STYLE_ARROW} and {@link PointerIcon.STYLE_GRABBING}.
+     *
+     * @hide
+     */
+    public void setPointerIconShape(int iconId) {
+        try {
+            mIm.setPointerIconShape(iconId);
+        } catch (RemoteException ex) {
+            // Do nothing.
+        }
+    }
+
     private void populateInputDevicesLocked() {
         if (mInputDevicesChangedListener == null) {
             final InputDevicesChangedListener listener = new InputDevicesChangedListener();

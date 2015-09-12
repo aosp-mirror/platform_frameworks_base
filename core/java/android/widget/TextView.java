@@ -116,6 +116,7 @@ import android.view.HapticFeedbackConstants;
 import android.view.KeyCharacterMap;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
+import android.view.PointerIcon;
 import android.view.View;
 import android.view.ViewParent;
 import android.view.ViewStructure;
@@ -5903,6 +5904,17 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     @Override
     protected int getFadeHeight(boolean offsetRequired) {
         return mLayout != null ? mLayout.getHeight() : 0;
+    }
+
+    /**
+     * @hide
+     */
+    @Override
+    public int getPointerShape(MotionEvent event, float x, float y) {
+        if (isTextSelectable() || isTextEditable()) {
+            return PointerIcon.STYLE_TEXT;
+        }
+        return super.getPointerShape(event, x, y);
     }
 
     @Override

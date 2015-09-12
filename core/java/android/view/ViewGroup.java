@@ -1715,6 +1715,36 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         return false;
     }
 
+    /** @hide */
+    @Override
+    public int getPointerShape(MotionEvent event, float x, float y) {
+        // Check what the child under the pointer says about the pointer.
+        final int childrenCount = mChildrenCount;
+        if (childrenCount != 0) {
+            final ArrayList<View> preorderedList = buildOrderedChildList();
+            final boolean customOrder = preorderedList == null
+                    && isChildrenDrawingOrderEnabled();
+            final View[] children = mChildren;
+            for (int i = childrenCount - 1; i >= 0; i--) {
+                final int childIndex = customOrder ? getChildDrawingOrder(childrenCount, i) : i;
+                final View child = (preorderedList == null)
+                        ? children[childIndex] : preorderedList.get(childIndex);
+                PointF point = getLocalPoint();
+                if (isTransformedTouchPointInView(x, y, child, point)) {
+                    final int pointerShape = child.getPointerShape(event, point.x, point.y);
+                    if (pointerShape != PointerIcon.STYLE_NOT_SPECIFIED) {
+                        return pointerShape;
+                    }
+                    break;
+                }
+            }
+        }
+
+        // The pointer is not a child or the child has no preferences, returning the default
+        // implementation.
+        return super.getPointerShape(event, x, y);
+    }
+
     /**
      * {@inheritDoc}
      */

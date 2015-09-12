@@ -48,6 +48,12 @@ public final class PointerIcon implements Parcelable {
     /** Style constant: Null icon.  It has no bitmap. */
     public static final int STYLE_NULL = 0;
 
+    /** Style constant: no icons are specified. If all views uses this, then falls back
+     * to the default style, but this is helpful to distinguish a view explicitly want
+     * to have the default icon.
+     */
+    public static final int STYLE_NOT_SPECIFIED = 1;
+
     /** Style constant: Arrow icon.  (Default mouse pointer) */
     public static final int STYLE_ARROW = 1000;
 
@@ -60,12 +66,74 @@ public final class PointerIcon implements Parcelable {
     /** {@hide} Style constant: Spot anchor icon for touchpads. */
     public static final int STYLE_SPOT_ANCHOR = 2002;
 
+    // Style constants for additional predefined icons for mice.
+    /** Style constant: context-menu. */
+    public static final int STYLE_CONTEXT_MENU = 1001;
+
+    /** Style constant: hand. */
+    public static final int STYLE_HAND = 1002;
+
+    /** Style constant: help. */
+    public static final int STYLE_HELP = 1003;
+
+    /** Style constant: wait. */
+    public static final int STYLE_WAIT = 1004;
+
+    /** Style constant: cell. */
+    public static final int STYLE_CELL = 1006;
+
+    /** Style constant: crosshair. */
+    public static final int STYLE_CROSSHAIR = 1007;
+
+    /** Style constant: text. */
+    public static final int STYLE_TEXT = 1008;
+
+    /** Style constant: vertical-text. */
+    public static final int STYLE_VERTICAL_TEXT = 1009;
+
+    /** Style constant: alias (indicating an alias of/shortcut to something is
+      * to be created. */
+    public static final int STYLE_ALIAS = 1010;
+
+    /** Style constant: copy. */
+    public static final int STYLE_COPY = 1011;
+
+    /** Style constant: no-drop. */
+    public static final int STYLE_NO_DROP = 1012;
+
+    /** Style constant: all-scroll. */
+    public static final int STYLE_ALL_SCROLL = 1013;
+
+    /** Style constant: horizontal double arrow mainly for resizing. */
+    public static final int STYLE_HORIZONTAL_DOUBLE_ARROW = 1014;
+
+    /** Style constant: vertical double arrow mainly for resizing. */
+    public static final int STYLE_VERTICAL_DOUBLE_ARROW = 1015;
+
+    /** Style constant: diagonal double arrow -- top-right to bottom-left. */
+    public static final int STYLE_TOP_RIGHT_DIAGONAL_DOUBLE_ARROW = 1016;
+
+    /** Style constant: diagonal double arrow -- top-left to bottom-right. */
+    public static final int STYLE_TOP_LEFT_DIAGONAL_DOUBLE_ARROW = 1017;
+
+    /** Style constant: zoom-in. */
+    public static final int STYLE_ZOOM_IN = 1018;
+
+    /** Style constant: zoom-out. */
+    public static final int STYLE_ZOOM_OUT = 1019;
+
+    /** Style constant: grab. */
+    public static final int STYLE_GRAB = 1020;
+
+    /** Style constant: grabbing. */
+    public static final int STYLE_GRABBING = 1021;
+
     // OEM private styles should be defined starting at this range to avoid
     // conflicts with any system styles that may be defined in the future.
     private static final int STYLE_OEM_FIRST = 10000;
 
-    // The default pointer icon.
-    private static final int STYLE_DEFAULT = STYLE_ARROW;
+    /** {@hide} The default pointer icon. */
+    public static final int STYLE_DEFAULT = STYLE_ARROW;
 
     private static final PointerIcon gNullIcon = new PointerIcon(STYLE_NULL);
 
@@ -434,6 +502,49 @@ public final class PointerIcon implements Parcelable {
                 return com.android.internal.R.styleable.Pointer_pointerIconSpotTouch;
             case STYLE_SPOT_ANCHOR:
                 return com.android.internal.R.styleable.Pointer_pointerIconSpotAnchor;
+            case STYLE_HAND:
+                return com.android.internal.R.styleable.Pointer_pointerIconHand;
+            case STYLE_CONTEXT_MENU:
+                return com.android.internal.R.styleable.Pointer_pointerIconContextMenu;
+            case STYLE_HELP:
+                return com.android.internal.R.styleable.Pointer_pointerIconHelp;
+            case STYLE_WAIT:
+                // falls back to the default icon because no animation support.
+                return com.android.internal.R.styleable.Pointer_pointerIconArrow;
+            case STYLE_CELL:
+                return com.android.internal.R.styleable.Pointer_pointerIconCell;
+            case STYLE_CROSSHAIR:
+                return com.android.internal.R.styleable.Pointer_pointerIconCrosshair;
+            case STYLE_TEXT:
+                return com.android.internal.R.styleable.Pointer_pointerIconText;
+            case STYLE_VERTICAL_TEXT:
+                return com.android.internal.R.styleable.Pointer_pointerIconVerticalText;
+            case STYLE_ALIAS:
+                return com.android.internal.R.styleable.Pointer_pointerIconAlias;
+            case STYLE_COPY:
+                return com.android.internal.R.styleable.Pointer_pointerIconCopy;
+            case STYLE_ALL_SCROLL:
+                return com.android.internal.R.styleable.Pointer_pointerIconAllScroll;
+            case STYLE_NO_DROP:
+                return com.android.internal.R.styleable.Pointer_pointerIconNodrop;
+            case STYLE_HORIZONTAL_DOUBLE_ARROW:
+                return com.android.internal.R.styleable.Pointer_pointerIconHorizontalDoubleArrow;
+            case STYLE_VERTICAL_DOUBLE_ARROW:
+                return com.android.internal.R.styleable.Pointer_pointerIconVerticalDoubleArrow;
+            case STYLE_TOP_RIGHT_DIAGONAL_DOUBLE_ARROW:
+                return com.android.internal.R.styleable.
+                        Pointer_pointerIconTopRightDiagonalDoubleArrow;
+            case STYLE_TOP_LEFT_DIAGONAL_DOUBLE_ARROW:
+                return com.android.internal.R.styleable.
+                        Pointer_pointerIconTopLeftDiagonalDoubleArrow;
+            case STYLE_ZOOM_IN:
+                return com.android.internal.R.styleable.Pointer_pointerIconZoomIn;
+            case STYLE_ZOOM_OUT:
+                return com.android.internal.R.styleable.Pointer_pointerIconZoomOut;
+            case STYLE_GRAB:
+                return com.android.internal.R.styleable.Pointer_pointerIconGrab;
+            case STYLE_GRABBING:
+                return com.android.internal.R.styleable.Pointer_pointerIconGrabbing;
             default:
                 return 0;
         }

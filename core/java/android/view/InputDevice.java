@@ -766,6 +766,15 @@ public final class InputDevice implements Parcelable {
     }
 
     /**
+     * Sets the current pointer shape.
+     * @param pointerShape the id of the pointer icon.
+     * @hide
+     */
+    public void setPointerShape(int pointerShape) {
+        InputManager.getInstance().setPointerIconShape(pointerShape);
+    }
+
+    /**
      * Provides information about the range of values for a particular {@link MotionEvent} axis.
      *
      * @see InputDevice#getMotionRange(int)
