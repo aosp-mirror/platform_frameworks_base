@@ -40,6 +40,13 @@ class Task implements DimLayer.DimLayerUser {
      * when no window animation is driving it. */
     private static final int DEFAULT_DIM_DURATION = 200;
 
+    // Return value from {@link setBounds} indicating no change was made to the Task bounds.
+    static final int BOUNDS_CHANGE_NONE = 0;
+    // Return value from {@link setBounds} indicating the position of the Task bounds changed.
+    static final int BOUNDS_CHANGE_POSITION = 1;
+    // Return value from {@link setBounds} indicating the size of the Task bounds changed.
+    static final int BOUNDS_CHANGE_SIZE = 1 << 1;
+
     TaskStack mStack;
     final AppTokenList mAppTokens = new AppTokenList();
     final int mTaskId;
@@ -165,7 +172,7 @@ class Task implements DimLayer.DimLayerUser {
     }
 
     /** Set the task bounds. Passing in null sets the bounds to fullscreen. */
-    boolean setBounds(Rect bounds, Configuration config) {
+    int setBounds(Rect bounds, Configuration config) {
         if (config == null) {
             config = Configuration.EMPTY;
         }
@@ -190,7 +197,7 @@ class Task implements DimLayer.DimLayerUser {
                     // ensure bounds are entirely within the display rect
                     if (!bounds.intersect(mTmpRect)) {
                         // Can't set bounds outside the containing display...Sorry!
-                        return false;
+                        return BOUNDS_CHANGE_NONE;
                     }
                 }
                 mFullscreen = mTmpRect.equals(bounds);
@@ -199,17 +206,25 @@ class Task implements DimLayer.DimLayerUser {
 
         if (bounds == null) {
             // Can't set to fullscreen if we don't have a display to get bounds from...
-            return false;
+            return BOUNDS_CHANGE_NONE;
         }
         if (mBounds.equals(bounds) && oldFullscreen == mFullscreen && mRotation == rotation) {
-            return false;
+            return BOUNDS_CHANGE_NONE;
+        }
+
+        int boundsChange = BOUNDS_CHANGE_NONE;
+        if (mBounds.left != bounds.left || mBounds.right != bounds.right) {
+            boundsChange |= BOUNDS_CHANGE_POSITION;
+        }
+        if (mBounds.width() != bounds.width() || mBounds.height() != bounds.height()) {
+            boundsChange |= BOUNDS_CHANGE_SIZE;
         }
 
         mBounds.set(bounds);
         mRotation = rotation;
         updateDimLayer();
         mOverrideConfig = mFullscreen ? Configuration.EMPTY : config;
-        return true;
+        return boundsChange;
     }
 
     void getBounds(Rect out) {
