@@ -58,6 +58,7 @@ public class DirectoryFragmentModelTest extends AndroidTestCase {
         r.cursor = cursor;
 
         model = new Model(mContext, null);
+        model.addUpdateListener(new DummyListener());
         model.update(r);
     }
 
@@ -73,8 +74,12 @@ public class DirectoryFragmentModelTest extends AndroidTestCase {
 
         assertEquals(ITEM_COUNT - 2, model.getItemCount());
 
-        // Finalize the deletion
-        model.finalizeDeletion(null);
+        // Finalize the deletion.  Provide a callback that just ignores errors.
+        model.finalizeDeletion(
+              new Runnable() {
+                  @Override
+                  public void run() {}
+              });
         assertEquals(ITEM_COUNT - 2, model.getItemCount());
     }
 
@@ -154,4 +159,12 @@ public class DirectoryFragmentModelTest extends AndroidTestCase {
         }
         return model.getDocuments(sel);
     }
+
+    private static class DummyListener implements Model.UpdateListener {
+        public void onModelUpdate(Model model) {}
+        public void onModelUpdateFailed(Exception e) {}
+        public void notifyItemRemoved(int position) {}
+        public void notifyItemInserted(int position) {}
+    }
+
 }
