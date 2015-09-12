@@ -2145,6 +2145,7 @@ public class NotificationStackScrollLayout extends ViewGroup
 
             case MotionEvent.ACTION_DOWN: {
                 final int y = (int) ev.getY();
+                mScrolledToTopOnFirstDown = isScrolledToTop();
                 if (getChildAtPosition(ev.getX(), y) == null) {
                     setIsBeingDragged(false);
                     recycleVelocityTracker();
@@ -2158,7 +2159,6 @@ public class NotificationStackScrollLayout extends ViewGroup
                 mLastMotionY = y;
                 mDownX = (int) ev.getX();
                 mActivePointerId = ev.getPointerId(0);
-                mScrolledToTopOnFirstDown = isScrolledToTop();
 
                 initOrResetVelocityTracker();
                 mVelocityTracker.addMovement(ev);
