@@ -1400,16 +1400,14 @@ final class ActivityStack {
         // If the top activity is not fullscreen, then we need to
         // make sure any activities under it are now visible.
         boolean aboveTop = true;
-        boolean behindFullscreen = !isStackVisibleLocked();
+        final boolean stackInvisible = !isStackVisibleLocked();
+        boolean behindFullscreenActivity = stackInvisible;
         boolean noStackActivityResumed = (isInStackLocked(starting) == null);
 
         for (int taskNdx = mTaskHistory.size() - 1; taskNdx >= 0; --taskNdx) {
             final TaskRecord task = mTaskHistory.get(taskNdx);
             final ArrayList<ActivityRecord> activities = task.mActivities;
-            // Set to true if an activity in this task is fullscreen thereby hiding other
-            // activities in the same task. Initialized to the same value as behindFullscreen
-            // which represent if the entire task/stack is behind another fullscreen task/stack.
-            boolean behindFullscreenActivity = behindFullscreen;
+
             for (int activityNdx = activities.size() - 1; activityNdx >= 0; --activityNdx) {
                 final ActivityRecord r = activities.get(activityNdx);
                 if (r.finishing) {
@@ -1507,18 +1505,18 @@ final class ActivityStack {
                         // At this point, nothing else needs to be shown in this task.
                         behindFullscreenActivity = true;
                         if (DEBUG_VISIBILITY) Slog.v(TAG_VISIBILITY, "Fullscreen: at " + r
-                                + " behindFullscreen=" + behindFullscreen
+                                + " stackInvisible=" + stackInvisible
                                 + " behindFullscreenActivity=" + behindFullscreenActivity);
                     } else if (!isHomeStack() && r.frontOfTask && task.isOverHomeStack()) {
                         behindFullscreenActivity = true;
                         if (DEBUG_VISIBILITY) Slog.v(TAG_VISIBILITY, "Showing home: at " + r
-                                + " behindFullscreen=" + behindFullscreen
+                                + " stackInvisible=" + stackInvisible
                                 + " behindFullscreenActivity=" + behindFullscreenActivity);
                     }
                 } else {
                     if (DEBUG_VISIBILITY) Slog.v(TAG_VISIBILITY,
                             "Make invisible? " + r + " finishing=" + r.finishing
-                            + " state=" + r.state + " behindFullscreen=" + behindFullscreen
+                            + " state=" + r.state + " stackInvisible=" + stackInvisible
                             + " behindFullscreenActivity=" + behindFullscreenActivity);
                     // Now for any activities that aren't visible to the user, make
                     // sure they no longer are keeping the screen frozen.
@@ -1566,9 +1564,12 @@ final class ActivityStack {
                     }
                 }
             }
-            // Factoring if the previous task is fullscreen there by affecting the visibility of
-            // task behind it.
-            behindFullscreen |= task.mFullscreen;
+            if (mStackId == FREEFORM_WORKSPACE_STACK_ID) {
+                // The visibility of tasks and the activities they contain in freeform stack are
+                // determined individually unlike other stacks where the visibility or fullscreen
+                // status of an activity in a previous task affects other.
+                behindFullscreenActivity = stackInvisible;
+            }
         }
 
         if (mTranslucentActivityWaiting != null &&
