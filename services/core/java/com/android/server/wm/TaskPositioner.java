@@ -16,13 +16,11 @@
 
 package com.android.server.wm;
 
-import com.android.server.input.InputApplicationHandle;
-import com.android.server.input.InputWindowHandle;
-import com.android.server.wm.WindowManagerService.H;
+import static android.app.ActivityManager.FREEFORM_WORKSPACE_STACK_ID;
+import static android.app.ActivityManager.DOCKED_STACK_ID;
+import static android.content.res.Configuration.ORIENTATION_LANDSCAPE;
 import static com.android.server.wm.WindowManagerService.DEBUG_TASK_POSITIONING;
-
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
+import static com.android.server.wm.WindowManagerService.SHOW_TRANSACTIONS;
 
 import android.annotation.IntDef;
 import android.graphics.Point;
@@ -34,15 +32,28 @@ import android.util.DisplayMetrics;
 import android.util.Slog;
 import android.util.TypedValue;
 import android.view.Display;
+import android.view.DisplayInfo;
 import android.view.InputChannel;
 import android.view.InputDevice;
 import android.view.InputEvent;
 import android.view.InputEventReceiver;
 import android.view.MotionEvent;
+import android.view.SurfaceControl;
 import android.view.WindowManager;
 
-class TaskPositioner {
+import com.android.server.input.InputApplicationHandle;
+import com.android.server.input.InputWindowHandle;
+import com.android.server.wm.WindowManagerService.H;
+
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+
+class TaskPositioner implements DimLayer.DimLayerUser {
     private static final String TAG = "TaskPositioner";
+
+    // The margin the pointer position has to be within the side of the screen to be
+    // considered at the side of the screen.
+    private static final int SIDE_MARGIN_DIP = 5;
 
     @IntDef(flag = true,
             value = {
@@ -65,8 +76,14 @@ class TaskPositioner {
     private WindowPositionerEventReceiver mInputEventReceiver;
     private Display mDisplay;
     private final DisplayMetrics mDisplayMetrics = new DisplayMetrics();
+    private DimLayer mDimLayer;
+    @CtrlType
+    private int mCurrentDimSide;
+    private Rect mTmpRect = new Rect();
+    private int mSideMargin;
 
     private int mTaskId;
+    private TaskStack mStack;
     private final Rect mWindowOriginalBounds = new Rect();
     private final Rect mWindowDragBounds = new Rect();
     private float mStartDragX;
@@ -136,6 +153,10 @@ class TaskPositioner {
                     // Post back to WM to handle clean-ups. We still need the input
                     // event handler for the last finishInputEvent()!
                     mService.mH.sendEmptyMessage(H.FINISH_TASK_POSITIONING);
+                    if (mCurrentDimSide != CTRL_NONE) {
+                        mService.mActivityManager.moveTaskToStack(
+                                mTaskId, DOCKED_STACK_ID, true /*toTop*/);
+                    }
                 }
                 handled = true;
             } catch (Exception e) {
@@ -213,6 +234,9 @@ class TaskPositioner {
             Slog.d(TAG, "Pausing rotation during re-position");
         }
         mService.pauseRotationLocked();
+
+        mDimLayer = new DimLayer(mService, this, mDisplay.getDisplayId());
+        mSideMargin = (int)dipToPx(SIDE_MARGIN_DIP);
     }
 
     void unregister() {
@@ -238,6 +262,12 @@ class TaskPositioner {
         mDragApplicationHandle = null;
         mDisplay = null;
 
+        if (mDimLayer != null) {
+            mDimLayer.destroySurface();
+            mDimLayer = null;
+        }
+        mCurrentDimSide = CTRL_NONE;
+
         // Resume rotations after a drag.
         if (WindowManagerService.DEBUG_ORIENTATION) {
             Slog.d(TAG, "Resuming rotation after re-position");
@@ -246,8 +276,8 @@ class TaskPositioner {
     }
 
     void startDragLocked(WindowState win, boolean resize, float startX, float startY) {
-        if (DEBUG_TASK_POSITIONING) {Slog.d(TAG,
-                "startDragLocked: win=" + win + ", resize=" + resize
+        if (DEBUG_TASK_POSITIONING) {
+            Slog.d(TAG, "startDragLocked: win=" + win + ", resize=" + resize
                 + ", {" + startX + ", " + startY + "}");
         }
         mCtrlType = CTRL_NONE;
@@ -269,6 +299,7 @@ class TaskPositioner {
 
         final Task task = win.getTask();
         mTaskId = task.mTaskId;
+        mStack = task.mStack;
         mStartDragX = startX;
         mStartDragY = startY;
 
@@ -308,9 +339,75 @@ class TaskPositioner {
         } else {
             // This is a moving operation.
             mWindowDragBounds.set(mWindowOriginalBounds);
-            mWindowDragBounds.offset(Math.round(x - mStartDragX),
-                    Math.round(y - mStartDragY));
+            mWindowDragBounds.offset(Math.round(x - mStartDragX), Math.round(y - mStartDragY));
+            updateDimLayerVisibility((int) x);
         }
+    }
+
+    private void updateDimLayerVisibility(int x) {
+        @CtrlType
+        int dimSide = getDimSide(x);
+        if (dimSide == mCurrentDimSide) {
+            return;
+        }
+
+        mCurrentDimSide = dimSide;
+
+        if (SHOW_TRANSACTIONS) Slog.i(TAG, ">>> OPEN TRANSACTION updateDimLayerVisibility");
+        SurfaceControl.openTransaction();
+        if (mCurrentDimSide == CTRL_NONE) {
+            mDimLayer.hide();
+        } else {
+            showDimLayer();
+        }
+        SurfaceControl.closeTransaction();
+    }
+
+    /**
+     * Returns the side of the screen the dim layer should be shown.
+     * @param x horizontal coordinate used to determine if the dim layer should be shown
+     * @return Returns {@link #CTRL_LEFT} if the dim layer should be shown on the left half of the
+     * screen, {@link #CTRL_RIGHT} if on the right side, or {@link #CTRL_NONE} if the dim layer
+     * shouldn't be shown.
+     */
+    private int getDimSide(int x) {
+        if (mStack.mStackId != FREEFORM_WORKSPACE_STACK_ID
+                || !mStack.isFullscreen()
+                || mService.mCurConfiguration.orientation != ORIENTATION_LANDSCAPE) {
+            return CTRL_NONE;
+        }
+
+        mStack.getBounds(mTmpRect);
+        if (x - mSideMargin <= mTmpRect.left) {
+            return CTRL_LEFT;
+        }
+        if (x + mSideMargin >= mTmpRect.right) {
+            return CTRL_RIGHT;
+        }
+
+        return CTRL_NONE;
+    }
+
+    private void showDimLayer() {
+        mStack.getBounds(mTmpRect);
+        if (mCurrentDimSide == CTRL_LEFT) {
+            mTmpRect.right = mTmpRect.centerX();
+        } else if (mCurrentDimSide == CTRL_RIGHT) {
+            mTmpRect.left = mTmpRect.centerX();
+        }
+
+        mDimLayer.setBounds(mTmpRect);
+        mDimLayer.show(getDragLayerLocked(), 0.5f, 0);
+    }
+
+    @Override /** {@link DimLayer.DimLayerUser} */
+    public boolean isFullscreen() {
+        return false;
+    }
+
+    @Override /** {@link DimLayer.DimLayerUser} */
+    public DisplayInfo getDisplayInfo() {
+        return mStack.getDisplayInfo();
     }
 
     private int getDragLayerLocked() {
