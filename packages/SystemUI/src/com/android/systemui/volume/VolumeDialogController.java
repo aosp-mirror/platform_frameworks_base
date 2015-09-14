@@ -284,7 +284,7 @@ public class VolumeDialogController {
         return changed;
     }
 
-    private void onVolumeChangedW(int stream, int flags) {
+    private boolean onVolumeChangedW(int stream, int flags) {
         final boolean showUI = (flags & AudioManager.FLAG_SHOW_UI) != 0;
         final boolean fromKey = (flags & AudioManager.FLAG_FROM_KEY) != 0;
         final boolean showVibrateHint = (flags & AudioManager.FLAG_SHOW_VIBRATE_HINT) != 0;
@@ -311,6 +311,7 @@ public class VolumeDialogController {
         if (changed && fromKey) {
             Events.writeEvent(mContext, Events.EVENT_KEY, stream, lastAudibleStreamVolume);
         }
+        return changed;
     }
 
     private boolean updateActiveStreamW(int activeStream) {
@@ -797,6 +798,7 @@ public class VolumeDialogController {
                 if (D.BUG) Log.d(TAG, "onReceive STREAM_DEVICES_CHANGED_ACTION stream="
                         + stream + " devices=" + devices + " oldDevices=" + oldDevices);
                 changed = checkRoutedToBluetoothW(stream);
+                changed |= onVolumeChangedW(stream, 0);
             } else if (action.equals(AudioManager.RINGER_MODE_CHANGED_ACTION)) {
                 final int rm = intent.getIntExtra(AudioManager.EXTRA_RINGER_MODE, -1);
                 if (D.BUG) Log.d(TAG, "onReceive RINGER_MODE_CHANGED_ACTION rm="
