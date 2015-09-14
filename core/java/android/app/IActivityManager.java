@@ -140,6 +140,8 @@ public interface IActivityManager extends IInterface {
     public boolean moveActivityTaskToBack(IBinder token, boolean nonRoot) throws RemoteException;
     public void moveTaskBackwards(int task) throws RemoteException;
     public void moveTaskToStack(int taskId, int stackId, boolean toTop) throws RemoteException;
+    public void moveTaskToDockedStack(int taskId, int createMode, boolean toTop)
+            throws RemoteException;
     public void resizeStack(int stackId, Rect bounds) throws RemoteException;
     public void positionTaskInStack(int taskId, int stackId, int position) throws RemoteException;
     public List<StackInfo> getAllStackInfos() throws RemoteException;
@@ -888,4 +890,5 @@ public interface IActivityManager extends IInterface {
     int GET_ACTIVITY_STACK_ID_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION + 343;
     int MOVE_ACTIVITY_TO_STACK_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION + 344;
     int REPORT_SIZE_CONFIGURATIONS = IBinder.FIRST_CALL_TRANSACTION + 345;
+    int MOVE_TASK_TO_DOCKED_STACK_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION + 346;
 }

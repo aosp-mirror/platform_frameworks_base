@@ -19,7 +19,6 @@ package com.android.server.am;
 import static android.Manifest.permission.INTERACT_ACROSS_USERS;
 import static android.Manifest.permission.INTERACT_ACROSS_USERS_FULL;
 import static android.Manifest.permission.START_TASKS_FROM_RECENTS;
-import static android.app.ActivityManager.FREEFORM_WORKSPACE_STACK_ID;
 import static android.app.ActivityManager.DOCKED_STACK_ID;
 import static android.app.ActivityManager.HOME_STACK_ID;
 import static android.app.ActivityManager.INVALID_STACK_ID;
@@ -215,7 +214,6 @@ import android.os.ServiceManager;
 import android.os.StrictMode;
 import android.os.SystemClock;
 import android.os.SystemProperties;
-import android.os.Trace;
 import android.os.UpdateLock;
 import android.os.UserHandle;
 import android.os.UserManager;
@@ -9047,6 +9045,35 @@ public final class ActivityManagerService extends ActivityManagerNative
                 if (DEBUG_STACK) Slog.d(TAG_STACK, "moveTaskToStack: moving task=" + taskId
                         + " to stackId=" + stackId + " toTop=" + toTop);
                 mStackSupervisor.moveTaskToStackLocked(taskId, stackId, toTop, !FORCE_FOCUS);
+            } finally {
+                Binder.restoreCallingIdentity(ident);
+            }
+        }
+    }
+
+    /**
+     * Moves the input task to the docked stack.
+     *
+     * @param taskId Id of task to move.
+     * @param createMode The mode the docked stack should be created in if it doesn't exist
+     *                   already. See
+     *                   {@link android.app.ActivityManager#DOCKED_STACK_CREATE_MODE_TOP_OR_LEFT}
+     *                   and
+     *                   {@link android.app.ActivityManager#DOCKED_STACK_CREATE_MODE_BOTTOM_OR_RIGHT}
+     * @param toTop If the task and stack should be moved to the top.
+     */
+    @Override
+    public void moveTaskToDockedStack(int taskId, int createMode, boolean toTop) {
+        enforceCallingPermission(android.Manifest.permission.MANAGE_ACTIVITY_STACKS,
+                "moveTaskToDockedStack()");
+        synchronized (this) {
+            long ident = Binder.clearCallingIdentity();
+            try {
+                if (DEBUG_STACK) Slog.d(TAG_STACK, "moveTaskToDockedStack: moving task=" + taskId
+                        + " to createMode=" + createMode + " toTop=" + toTop);
+                mWindowManager.setDockedStackCreateMode(createMode);
+                mStackSupervisor.moveTaskToStackLocked(
+                        taskId, DOCKED_STACK_ID, toTop, !FORCE_FOCUS);
             } finally {
                 Binder.restoreCallingIdentity(ident);
             }

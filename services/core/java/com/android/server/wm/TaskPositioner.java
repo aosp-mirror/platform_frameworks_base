@@ -16,8 +16,9 @@
 
 package com.android.server.wm;
 
+import static android.app.ActivityManager.DOCKED_STACK_CREATE_MODE_BOTTOM_OR_RIGHT;
+import static android.app.ActivityManager.DOCKED_STACK_CREATE_MODE_TOP_OR_LEFT;
 import static android.app.ActivityManager.FREEFORM_WORKSPACE_STACK_ID;
-import static android.app.ActivityManager.DOCKED_STACK_ID;
 import static android.content.res.Configuration.ORIENTATION_LANDSCAPE;
 import static com.android.server.wm.WindowManagerService.DEBUG_TASK_POSITIONING;
 import static com.android.server.wm.WindowManagerService.SHOW_TRANSACTIONS;
@@ -154,8 +155,11 @@ class TaskPositioner implements DimLayer.DimLayerUser {
                     // event handler for the last finishInputEvent()!
                     mService.mH.sendEmptyMessage(H.FINISH_TASK_POSITIONING);
                     if (mCurrentDimSide != CTRL_NONE) {
-                        mService.mActivityManager.moveTaskToStack(
-                                mTaskId, DOCKED_STACK_ID, true /*toTop*/);
+                        final int createMode = mCurrentDimSide == CTRL_LEFT
+                                ? DOCKED_STACK_CREATE_MODE_TOP_OR_LEFT
+                                : DOCKED_STACK_CREATE_MODE_BOTTOM_OR_RIGHT;
+                        mService.mActivityManager.moveTaskToDockedStack(
+                                mTaskId, createMode, true /*toTop*/);
                     }
                 }
                 handled = true;
