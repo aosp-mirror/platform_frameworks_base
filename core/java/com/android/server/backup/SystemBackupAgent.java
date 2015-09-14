@@ -54,13 +54,15 @@ public class SystemBackupAgent extends BackupAgentHelper {
     private static final String WALLPAPER_INFO_FILENAME = "wallpaper_info.xml";
 
     // TODO: Will need to change if backing up non-primary user's wallpaper
+    // TODO: http://b/22388012
     private static final String WALLPAPER_IMAGE_DIR =
-            Environment.getUserSystemDirectory(UserHandle.USER_OWNER).getAbsolutePath();
+            Environment.getUserSystemDirectory(UserHandle.USER_SYSTEM).getAbsolutePath();
     private static final String WALLPAPER_IMAGE = WallpaperBackupHelper.WALLPAPER_IMAGE;
 
     // TODO: Will need to change if backing up non-primary user's wallpaper
+    // TODO: http://b/22388012
     private static final String WALLPAPER_INFO_DIR =
-            Environment.getUserSystemDirectory(UserHandle.USER_OWNER).getAbsolutePath();
+            Environment.getUserSystemDirectory(UserHandle.USER_SYSTEM).getAbsolutePath();
     private static final String WALLPAPER_INFO = WallpaperBackupHelper.WALLPAPER_INFO;
     // Use old keys to keep legacy data compatibility and avoid writing two wallpapers
     private static final String WALLPAPER_IMAGE_KEY = WallpaperBackupHelper.WALLPAPER_IMAGE_KEY;

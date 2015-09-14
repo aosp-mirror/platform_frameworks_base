@@ -62,7 +62,8 @@ public class Trampoline extends IBackupManager.Stub {
     // internal control API
     public void initialize(final int whichUser) {
         // Note that only the owner user is currently involved in backup/restore
-        if (whichUser == UserHandle.USER_OWNER) {
+        // TODO: http://b/22388012
+        if (whichUser == UserHandle.USER_SYSTEM) {
             // Does this product support backup/restore at all?
             if (mGlobalDisable) {
                 Slog.i(TAG, "Backup/restore not supported");
@@ -91,8 +92,8 @@ public class Trampoline extends IBackupManager.Stub {
             Slog.i(TAG, "Backup/restore not supported");
             return;
         }
-
-        if (userHandle == UserHandle.USER_OWNER) {
+        // TODO: http://b/22388012
+        if (userHandle == UserHandle.USER_SYSTEM) {
             synchronized (this) {
                 if (makeActive != isBackupServiceActive(userHandle)) {
                     Slog.i(TAG, "Making backup "
@@ -120,7 +121,8 @@ public class Trampoline extends IBackupManager.Stub {
      * @return true if the service is active.
      */
     public boolean isBackupServiceActive(final int userHandle) {
-        if (userHandle == UserHandle.USER_OWNER) {
+        // TODO: http://b/22388012
+        if (userHandle == UserHandle.USER_SYSTEM) {
             synchronized (this) {
                 return mService != null;
             }
