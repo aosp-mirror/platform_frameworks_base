@@ -46,6 +46,7 @@ import android.view.DragEvent;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
@@ -334,6 +335,7 @@ class NavigationBarApps extends LinearLayout {
     private ImageView createAppButton(AppButtonData appButtonData) {
         ImageView button = (ImageView) mLayoutInflater.inflate(
                 R.layout.navigation_bar_app_item, this, false /* attachToRoot */);
+        button.setOnHoverListener(new AppHoverListener());
         button.setOnClickListener(new AppClickListener());
         button.setOnContextClickListener(new AppContextClickListener());
         // TODO: Ripple effect. Use either KeyButtonRipple or the default ripple background.
@@ -615,6 +617,17 @@ class NavigationBarApps extends LinearLayout {
     }
 
     /**
+     * Returns true if popup menu code is busy with a popup operation.
+     * Attempting  to show a popup menu or to add menu items while it's returning true will
+     * corrupt/crash the app.
+     */
+    boolean isPopupInUse() {
+        // mPopupAnchor's parent will be set to non-null/null by mWindowManager.add/RemoveView
+        // correspondingly.
+        return mPopupAnchor.getParent() != null;
+    }
+
+    /**
      * Shows already prepopulated popup menu using appIcon for anchor location.
      */
     private void showPopupMenu(ImageView appIcon) {
@@ -655,6 +668,81 @@ class NavigationBarApps extends LinearLayout {
         mWindowManager.addView(mPopupAnchor, mPopupAnchorLayoutParams);
     }
 
+    private void activateTask(int taskPersistentId) {
+        // Launch or bring the activity to front.
+        IActivityManager manager = ActivityManagerNative.getDefault();
+        try {
+            manager.startActivityFromRecents(taskPersistentId, null /* options */);
+        } catch (RemoteException e) {
+            Slog.e(TAG, "Exception when activating a recent task", e);
+        } catch (IllegalArgumentException e) {
+            Slog.e(TAG, "Exception when activating a recent task", e);
+        }
+    }
+
+    /**
+     * Adds to the popup menu items for activating each of tasks in the specified list.
+     */
+    private void populateLaunchMenu(AppButtonData appButtonData) {
+        Menu menu = mPopupMenu.getMenu();
+        int taskCount = appButtonData.getTaskCount();
+        if (taskCount == 0) {
+            menu.add("- TBD MENU ITEM -"); // adding something so that the menu is not empty.
+            return;
+        }
+        for (int i = 0; i < taskCount; ++i) {
+            final RecentTaskInfo taskInfo = appButtonData.tasks.get(i);
+            MenuItem item = menu.add(getActivityForTask(taskInfo).flattenToShortString());
+            item.setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
+                @Override
+                public boolean onMenuItemClick(MenuItem item) {
+                    activateTask(taskInfo.persistentId);
+                    return true;
+                }
+            });
+        }
+    }
+
+    /**
+     * Shows a task selection menu for an apps icon.
+     */
+    private void showLaunchMenu(ImageView appIcon) {
+        AppButtonData appButtonData = (AppButtonData) appIcon.getTag();
+        populateLaunchMenu(appButtonData);
+        showPopupMenu(appIcon);
+    }
+
+    /**
+     * A listener for hovering over an app icon.
+     */
+    private class AppHoverListener implements View.OnHoverListener {
+        private final long DELAY_MILLIS = 1000;
+        private Runnable mShowMenuCallback;
+
+        @Override
+        public boolean onHover(final View v, MotionEvent event) {
+            if (mShowMenuCallback == null) {
+                mShowMenuCallback = new Runnable() {
+                    @Override
+                    public void run() {
+                        if (isPopupInUse()) return;
+                        showLaunchMenu((ImageView) v);
+                    }
+                };
+            }
+
+            switch (event.getAction()) {
+                case MotionEvent.ACTION_HOVER_ENTER:
+                    postDelayed(mShowMenuCallback, DELAY_MILLIS);
+                    break;
+                case MotionEvent.ACTION_HOVER_EXIT:
+                    removeCallbacks(mShowMenuCallback);
+                    break;
+            }
+            return true;
+        }
+    }
+
     /**
      * A click listener that launches an activity.
      */
@@ -682,47 +770,15 @@ class NavigationBarApps extends LinearLayout {
             mContext.startActivityAsUser(launchIntent, optsBundle, appInfo.getUser());
         }
 
-        private void activateTask(int taskPersistentId) {
-            // Launch or bring the activity to front.
-            IActivityManager manager = ActivityManagerNative.getDefault();
-            try {
-                manager.startActivityFromRecents(taskPersistentId, null /* options */);
-            } catch (RemoteException e) {
-                Slog.e(TAG, "Exception when activating a recent task", e);
-            } catch (IllegalArgumentException e) {
-                Slog.e(TAG, "Exception when activating a recent task", e);
-            }
-        }
-
-        /**
-         * Adds to the popup menu items for activating each of tasks in the specified list.
-         */
-        void populateLaunchMenu(List<RecentTaskInfo> tasks) {
-            Menu menu = mPopupMenu.getMenu();
-            int taskCount = tasks.size();
-            for (int i = 0; i < taskCount; ++i) {
-                final RecentTaskInfo taskInfo = tasks.get(i);
-                MenuItem item = menu.add(getActivityForTask(taskInfo).flattenToShortString());
-                item.setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
-                    @Override
-                    public boolean onMenuItemClick(MenuItem item) {
-                        activateTask(taskInfo.persistentId);
-                        return true;
-                    }
-                });
-            }
-        }
-
         /**
          * Shows a task selection menu for clicked apps that have more than 1 running tasks.
          */
         void maybeShowLaunchMenu(ImageView appIcon) {
-            final AppButtonData appButtonData = (AppButtonData) appIcon.getTag();
-
+            if (isPopupInUse()) return;
+            AppButtonData appButtonData = (AppButtonData) appIcon.getTag();
             if (appButtonData.getTaskCount() <= 1) return;
 
-            populateLaunchMenu(appButtonData.tasks);
-            showPopupMenu(appIcon);
+            showLaunchMenu(appIcon);
         }
 
         @Override
@@ -785,6 +841,7 @@ class NavigationBarApps extends LinearLayout {
 
         @Override
         public boolean onContextClick(View v) {
+            if (isPopupInUse()) return true;
             ImageView appIcon = (ImageView) v;
             populateContextMenu(appIcon);
             showPopupMenu(appIcon);
