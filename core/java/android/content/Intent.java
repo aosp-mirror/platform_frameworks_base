@@ -1613,6 +1613,23 @@ public class Intent implements Parcelable, Cloneable {
             = "android.intent.action.GET_PERMISSIONS_COUNT";
 
     /**
+     * Broadcast action that requests list of all apps that have runtime permissions.  It will
+     * respond to the request by sending a broadcast with action defined by
+     * {@link #EXTRA_GET_PERMISSIONS_PACKAGES_RESPONSE_INTENT}. The response will contain
+     * {@link #EXTRA_GET_PERMISSIONS_APP_LIST_RESULT}, as well as
+     * {@link #EXTRA_GET_PERMISSIONS_APP_LABEL_LIST_RESULT}, with contents described below or
+     * a null upon failure.
+     *
+     * <p>{@link #EXTRA_GET_PERMISSIONS_APP_LIST_RESULT} will contain a list of package names of
+     * apps that have runtime permissions. {@link #EXTRA_GET_PERMISSIONS_APP_LABEL_LIST_RESULT}
+     * will contain the list of app labels corresponding ot the apps in the first list.
+     *
+     * @hide
+     */
+    public static final String ACTION_GET_PERMISSIONS_PACKAGES
+            = "android.intent.action.GET_PERMISSIONS_PACKAGES";
+
+    /**
      * Extra included in response to {@link #ACTION_GET_PERMISSIONS_COUNT}.
      * @hide
      */
@@ -1627,11 +1644,32 @@ public class Intent implements Parcelable, Cloneable {
             = "android.intent.extra.GET_PERMISSIONS_GROUP_LIST_RESULT";
 
     /**
+     * String list of apps that have one or more runtime permissions.
+     * @hide
+     */
+    public static final String EXTRA_GET_PERMISSIONS_APP_LIST_RESULT
+            = "android.intent.extra.GET_PERMISSIONS_APP_LIST_RESULT";
+
+    /**
+     * String list of app labels for apps that have one or more runtime permissions.
+     * @hide
+     */
+    public static final String EXTRA_GET_PERMISSIONS_APP_LABEL_LIST_RESULT
+            = "android.intent.extra.GET_PERMISSIONS_APP_LABEL_LIST_RESULT";
+
+    /**
      * Required extra to be sent with {@link #ACTION_GET_PERMISSIONS_COUNT} broadcasts.
      * @hide
      */
     public static final String EXTRA_GET_PERMISSIONS_RESPONSE_INTENT
             = "android.intent.extra.GET_PERMISSIONS_RESONSE_INTENT";
+
+    /**
+     * Required extra to be sent with {@link #ACTION_GET_PERMISSIONS_PACKAGES} broadcasts.
+     * @hide
+     */
+    public static final String EXTRA_GET_PERMISSIONS_PACKAGES_RESPONSE_INTENT
+            = "android.intent.extra.GET_PERMISSIONS_PACKAGES_RESONSE_INTENT";
 
     /**
      * Activity action: Launch UI to manage which apps have a given permission.
