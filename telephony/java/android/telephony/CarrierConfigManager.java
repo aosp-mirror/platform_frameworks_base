@@ -78,6 +78,15 @@ public class CarrierConfigManager {
     public static final String KEY_WORLD_PHONE_BOOL = "world_phone_bool";
 
     /**
+     * Flag to require or skip entitlement checks.
+     * If true, entitlement checks will be executed if device has been configured for it,
+     * If false, entitlement checks will be skipped.
+     * @hide
+     */
+    public static final String
+            KEY_REQUIRE_ENTITLEMENT_CHECKS_BOOL = "require_entitlement_checks_bool";
+
+    /**
      * If true, enable vibration (haptic feedback) for key presses in the EmergencyDialer activity.
      * The pattern is set on a per-platform basis using config_virtualKeyVibePattern. To be
      * consistent with the regular Dialer, this value should agree with the corresponding values
@@ -519,6 +528,7 @@ public class CarrierConfigManager {
         sDefaults.putBoolean(KEY_VOICEMAIL_NOTIFICATION_PERSISTENT_BOOL, false);
         sDefaults.putBoolean(KEY_VOICE_PRIVACY_DISABLE_UI_BOOL, false);
         sDefaults.putBoolean(KEY_WORLD_PHONE_BOOL, false);
+        sDefaults.putBoolean(KEY_REQUIRE_ENTITLEMENT_CHECKS_BOOL, true);
         sDefaults.putInt(KEY_VOLTE_REPLACEMENT_RAT_INT, 0);
         sDefaults.putString(KEY_DEFAULT_SIM_CALL_MANAGER_STRING, "");
         sDefaults.putString(KEY_VVM_DESTINATION_NUMBER_STRING, "");
