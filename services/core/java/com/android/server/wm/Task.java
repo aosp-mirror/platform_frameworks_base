@@ -426,6 +426,10 @@ class Task implements DimLayer.DimLayerUser {
         return (tokensCount != 0) && mAppTokens.get(tokensCount - 1).showForAllUsers;
     }
 
+    boolean inFreeformWorkspace() {
+        return mStack != null && mStack.mStackId == FREEFORM_WORKSPACE_STACK_ID;
+    }
+
     @Override
     public boolean isFullscreen() {
         return mFullscreen;

@@ -85,6 +85,7 @@ class TaskPositioner implements DimLayer.DimLayerUser {
 
     private int mTaskId;
     private TaskStack mStack;
+    private boolean mResizing;
     private final Rect mWindowOriginalBounds = new Rect();
     private final Rect mWindowDragBounds = new Rect();
     private float mStartDragX;
@@ -131,8 +132,8 @@ class TaskPositioner implements DimLayer.DimLayerUser {
                             notifyMoveLocked(newX, newY);
                         }
                         try {
-                            mService.mActivityManager.resizeTask(mTaskId, mWindowDragBounds,
-                                    true /* resizedByUser */);
+                            mService.mActivityManager.resizeTask(
+                                    mTaskId, mWindowDragBounds, true /* resizedByUser */);
                         } catch(RemoteException e) {}
                     } break;
 
@@ -152,6 +153,11 @@ class TaskPositioner implements DimLayer.DimLayerUser {
                 }
 
                 if (endDrag) {
+                    mResizing = false;
+                    try {
+                        mService.mActivityManager.resizeTask(
+                                mTaskId, mWindowDragBounds, true /* resizedByUser */);
+                    } catch(RemoteException e) {}
                     // Post back to WM to handle clean-ups. We still need the input
                     // event handler for the last finishInputEvent()!
                     mService.mH.sendEmptyMessage(H.FINISH_TASK_POSITIONING);
@@ -280,6 +286,10 @@ class TaskPositioner implements DimLayer.DimLayerUser {
         mService.resumeRotationLocked();
     }
 
+    boolean isTaskResizing(final Task task) {
+        return mResizing && task != null && mTaskId == task.mTaskId;
+    }
+
     void startDragLocked(WindowState win, boolean resize, float startX, float startY) {
         if (DEBUG_TASK_POSITIONING) {
             Slog.d(TAG, "startDragLocked: win=" + win + ", resize=" + resize
@@ -300,6 +310,7 @@ class TaskPositioner implements DimLayer.DimLayerUser {
             if (startY > visibleFrame.bottom) {
                 mCtrlType |= CTRL_BOTTOM;
             }
+            mResizing = true;
         }
 
         final Task task = win.getTask();

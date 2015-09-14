@@ -798,8 +798,17 @@ class WindowStateAnimator {
                 width = w.mRequestedWidth;
                 height = w.mRequestedHeight;
             } else {
-                width = w.mCompatFrame.width();
-                height = w.mCompatFrame.height();
+                // When we're doing a drag-resizing, request a surface that's fullscreen size,
+                // so that we don't need to reallocate during the process. This also prevents
+                // buffer drops due to size mismatch.
+                final DisplayInfo displayInfo = w.getDisplayInfo();
+                if (displayInfo != null && w.isDragResizing()) {
+                    width = displayInfo.logicalWidth;
+                    height = displayInfo.logicalHeight;
+                } else {
+                    width = w.mCompatFrame.width();
+                    height = w.mCompatFrame.height();
+                }
             }
 
             // Something is wrong and SurfaceFlinger will not like this,
@@ -1309,9 +1318,15 @@ class WindowStateAnimator {
 
         final boolean fullscreen = w.isFullscreen(displayInfo.appWidth, displayInfo.appHeight);
         final Rect clipRect = mTmpClipRect;
-        // We use the clip rect as provided by the tranformation for non-fullscreen windows to
-        // avoid premature clipping with the system decor rect.
-        clipRect.set((mHasClipRect && !fullscreen) ? mClipRect : w.mSystemDecorRect);
+        if (w.isDragResizing()) {
+            // When we're doing a drag-resizing, the surface is set up to cover full screen.
+            // Set the clip rect to be the same size so that we don't get any scaling.
+            clipRect.set(0, 0, displayInfo.logicalWidth, displayInfo.logicalHeight);
+        } else {
+            // We use the clip rect as provided by the tranformation for non-fullscreen windows to
+            // avoid premature clipping with the system decor rect.
+            clipRect.set((mHasClipRect && !fullscreen) ? mClipRect : w.mSystemDecorRect);
+        }
 
         // Expand the clip rect for surface insets.
         final WindowManager.LayoutParams attrs = w.mAttrs;
@@ -1358,8 +1373,17 @@ class WindowStateAnimator {
             width  = w.mRequestedWidth;
             height = w.mRequestedHeight;
         } else {
-            width = w.mCompatFrame.width();
-            height = w.mCompatFrame.height();
+            // When we're doing a drag-resizing, request a surface that's fullscreen size,
+            // so that we don't need to reallocate during the process. This also prevents
+            // buffer drops due to size mismatch.
+            final DisplayInfo displayInfo = w.getDisplayInfo();
+            if (displayInfo != null && w.isDragResizing()) {
+                width = displayInfo.logicalWidth;
+                height = displayInfo.logicalHeight;
+            } else {
+                width = w.mCompatFrame.width();
+                height = w.mCompatFrame.height();
+            }
         }
 
         // Something is wrong and SurfaceFlinger will not like this,
