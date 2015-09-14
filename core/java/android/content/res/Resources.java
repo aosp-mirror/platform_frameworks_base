@@ -1438,10 +1438,12 @@ public class Resources {
          *              if not already defined in the theme.
          */
         public void applyStyle(int resId, boolean force) {
-            AssetManager.applyThemeStyle(mTheme, resId, force);
+            synchronized (mKey) {
+                AssetManager.applyThemeStyle(mTheme, resId, force);
 
-            mThemeResId = resId;
-            mKey.append(resId, force);
+                mThemeResId = resId;
+                mKey.append(resId, force);
+            }
         }
 
         /**
@@ -1454,10 +1456,14 @@ public class Resources {
          * @param other The existing Theme to copy from.
          */
         public void setTo(Theme other) {
-            AssetManager.copyTheme(mTheme, other.mTheme);
+            synchronized (mKey) {
+                synchronized (other.mKey) {
+                    AssetManager.copyTheme(mTheme, other.mTheme);
 
-            mThemeResId = other.mThemeResId;
-            mKey.setTo(other.getKey());
+                    mThemeResId = other.mThemeResId;
+                    mKey.setTo(other.getKey());
+                }
+            }
         }
 
         /**
@@ -1480,11 +1486,13 @@ public class Resources {
          * @see #obtainStyledAttributes(AttributeSet, int[], int, int)
          */
         public TypedArray obtainStyledAttributes(@StyleableRes int[] attrs) {
-            final int len = attrs.length;
-            final TypedArray array = TypedArray.obtain(Resources.this, len);
-            array.mTheme = this;
-            AssetManager.applyStyle(mTheme, 0, 0, 0, attrs, array.mData, array.mIndices);
-            return array;
+            synchronized (mKey) {
+                final int len = attrs.length;
+                final TypedArray array = TypedArray.obtain(Resources.this, len);
+                array.mTheme = this;
+                AssetManager.applyStyle(mTheme, 0, 0, 0, attrs, array.mData, array.mIndices);
+                return array;
+            }
         }
 
         /**
@@ -1494,7 +1502,7 @@ public class Resources {
          * <p>Be sure to call {@link TypedArray#recycle() TypedArray.recycle()} when you are done
          * with the array.
          * 
-         * @param resid The desired style resource.
+         * @param resId The desired style resource.
          * @param attrs The desired attributes in the style.
          * 
          * @throws NotFoundException Throws NotFoundException if the given ID does not exist.
@@ -1507,39 +1515,15 @@ public class Resources {
          * @see #obtainStyledAttributes(int[])
          * @see #obtainStyledAttributes(AttributeSet, int[], int, int)
          */
-        public TypedArray obtainStyledAttributes(@StyleRes int resid, @StyleableRes int[] attrs)
+        public TypedArray obtainStyledAttributes(@StyleRes int resId, @StyleableRes int[] attrs)
                 throws NotFoundException {
-            final int len = attrs.length;
-            final TypedArray array = TypedArray.obtain(Resources.this, len);
-            array.mTheme = this;
-            if (false) {
-                int[] data = array.mData;
-                
-                System.out.println("**********************************************************");
-                System.out.println("**********************************************************");
-                System.out.println("**********************************************************");
-                System.out.println("Attributes:");
-                String s = "  Attrs:";
-                int i;
-                for (i=0; i<attrs.length; i++) {
-                    s = s + " 0x" + Integer.toHexString(attrs[i]);
-                }
-                System.out.println(s);
-                s = "  Found:";
-                TypedValue value = new TypedValue();
-                for (i=0; i<attrs.length; i++) {
-                    int d = i*AssetManager.STYLE_NUM_ENTRIES;
-                    value.type = data[d+AssetManager.STYLE_TYPE];
-                    value.data = data[d+AssetManager.STYLE_DATA];
-                    value.assetCookie = data[d+AssetManager.STYLE_ASSET_COOKIE];
-                    value.resourceId = data[d+AssetManager.STYLE_RESOURCE_ID];
-                    s = s + " 0x" + Integer.toHexString(attrs[i])
-                        + "=" + value;
-                }
-                System.out.println(s);
+            synchronized (mKey) {
+                final int len = attrs.length;
+                final TypedArray array = TypedArray.obtain(Resources.this, len);
+                array.mTheme = this;
+                AssetManager.applyStyle(mTheme, 0, resId, 0, attrs, array.mData, array.mIndices);
+                return array;
             }
-            AssetManager.applyStyle(mTheme, 0, resid, 0, attrs, array.mData, array.mIndices);
-            return array;
         }
 
         /**
@@ -1592,50 +1576,23 @@ public class Resources {
          */
         public TypedArray obtainStyledAttributes(AttributeSet set,
                 @StyleableRes int[] attrs, @AttrRes int defStyleAttr, @StyleRes int defStyleRes) {
-            final int len = attrs.length;
-            final TypedArray array = TypedArray.obtain(Resources.this, len);
+            synchronized (mKey) {
+                final int len = attrs.length;
+                final TypedArray array = TypedArray.obtain(Resources.this, len);
 
-            // XXX note that for now we only work with compiled XML files.
-            // To support generic XML files we will need to manually parse
-            // out the attributes from the XML file (applying type information
-            // contained in the resources and such).
-            final XmlBlock.Parser parser = (XmlBlock.Parser)set;
-            AssetManager.applyStyle(mTheme, defStyleAttr, defStyleRes,
-                    parser != null ? parser.mParseState : 0, attrs, array.mData, array.mIndices);
+                // XXX note that for now we only work with compiled XML files.
+                // To support generic XML files we will need to manually parse
+                // out the attributes from the XML file (applying type information
+                // contained in the resources and such).
+                final XmlBlock.Parser parser = (XmlBlock.Parser) set;
+                AssetManager.applyStyle(mTheme, defStyleAttr, defStyleRes,
+                        parser != null ? parser.mParseState : 0,
+                        attrs, array.mData, array.mIndices);
+                array.mTheme = this;
+                array.mXml = parser;
 
-            array.mTheme = this;
-            array.mXml = parser;
-
-            if (false) {
-                int[] data = array.mData;
-                
-                System.out.println("Attributes:");
-                String s = "  Attrs:";
-                int i;
-                for (i=0; i<set.getAttributeCount(); i++) {
-                    s = s + " " + set.getAttributeName(i);
-                    int id = set.getAttributeNameResource(i);
-                    if (id != 0) {
-                        s = s + "(0x" + Integer.toHexString(id) + ")";
-                    }
-                    s = s + "=" + set.getAttributeValue(i);
-                }
-                System.out.println(s);
-                s = "  Found:";
-                TypedValue value = new TypedValue();
-                for (i=0; i<attrs.length; i++) {
-                    int d = i*AssetManager.STYLE_NUM_ENTRIES;
-                    value.type = data[d+AssetManager.STYLE_TYPE];
-                    value.data = data[d+AssetManager.STYLE_DATA];
-                    value.assetCookie = data[d+AssetManager.STYLE_ASSET_COOKIE];
-                    value.resourceId = data[d+AssetManager.STYLE_RESOURCE_ID];
-                    s = s + " 0x" + Integer.toHexString(attrs[i])
-                        + "=" + value;
-                }
-                System.out.println(s);
+                return array;
             }
-
-            return array;
         }
 
         /**
@@ -1654,18 +1611,20 @@ public class Resources {
          */
         @NonNull
         public TypedArray resolveAttributes(@NonNull int[] values, @NonNull int[] attrs) {
-            final int len = attrs.length;
-            if (values == null || len != values.length) {
-                throw new IllegalArgumentException(
-                        "Base attribute values must the same length as attrs");
+            synchronized (mKey) {
+                final int len = attrs.length;
+                if (values == null || len != values.length) {
+                    throw new IllegalArgumentException(
+                            "Base attribute values must the same length as attrs");
+                }
+
+                final TypedArray array = TypedArray.obtain(Resources.this, len);
+                AssetManager.resolveAttrs(mTheme, 0, 0, values, attrs, array.mData, array.mIndices);
+                array.mTheme = this;
+                array.mXml = null;
+
+                return array;
             }
-
-            final TypedArray array = TypedArray.obtain(Resources.this, len);
-            AssetManager.resolveAttrs(mTheme, 0, 0, values, attrs, array.mData, array.mIndices);
-            array.mTheme = this;
-            array.mXml = null;
-
-            return array;
         }
 
         /**
@@ -1686,14 +1645,9 @@ public class Resources {
          *         <var>outValue</var> is valid, else false.
          */
         public boolean resolveAttribute(int resid, TypedValue outValue, boolean resolveRefs) {
-            boolean got = mAssets.getThemeValue(mTheme, resid, outValue, resolveRefs);
-            if (false) {
-                System.out.println(
-                    "resolveAttribute #" + Integer.toHexString(resid)
-                    + " got=" + got + ", type=0x" + Integer.toHexString(outValue.type)
-                    + ", data=0x" + Integer.toHexString(outValue.data));
+            synchronized (mKey) {
+                return mAssets.getThemeValue(mTheme, resid, outValue, resolveRefs);
             }
-            return got;
         }
 
         /**
@@ -1739,8 +1693,11 @@ public class Resources {
          * @see ActivityInfo
          */
         public int getChangingConfigurations() {
-            final int nativeChangingConfig = AssetManager.getThemeChangingConfigurations(mTheme);
-            return ActivityInfo.activityInfoConfigNativeToJava(nativeChangingConfig);
+            synchronized (mKey) {
+                final int nativeChangingConfig =
+                        AssetManager.getThemeChangingConfigurations(mTheme);
+                return ActivityInfo.activityInfoConfigNativeToJava(nativeChangingConfig);
+            }
         }
 
         /**
@@ -1751,7 +1708,9 @@ public class Resources {
          * @param prefix Text to prefix each line printed.
          */
         public void dump(int priority, String tag, String prefix) {
-            AssetManager.dumpTheme(mTheme, priority, tag, prefix);
+            synchronized (mKey) {
+                AssetManager.dumpTheme(mTheme, priority, tag, prefix);
+            }
         }
 
         @Override
@@ -1801,19 +1760,21 @@ public class Resources {
          */
         @ViewDebug.ExportedProperty(category = "theme", hasAdjacentMapping = true)
         public String[] getTheme() {
-            final int N = mKey.mCount;
-            final String[] themes = new String[N * 2];
-            for (int i = 0, j = N - 1; i < themes.length; i += 2, --j) {
-                final int resId = mKey.mResId[j];
-                final boolean forced = mKey.mForce[j];
-                try {
-                    themes[i] = getResourceName(resId);
-                } catch (NotFoundException e) {
-                    themes[i] = Integer.toHexString(i);
+            synchronized (mKey) {
+                final int N = mKey.mCount;
+                final String[] themes = new String[N * 2];
+                for (int i = 0, j = N - 1; i < themes.length; i += 2, --j) {
+                    final int resId = mKey.mResId[j];
+                    final boolean forced = mKey.mForce[j];
+                    try {
+                        themes[i] = getResourceName(resId);
+                    } catch (NotFoundException e) {
+                        themes[i] = Integer.toHexString(i);
+                    }
+                    themes[i + 1] = forced ? "forced" : "not forced";
                 }
-                themes[i + 1] = forced ? "forced" : "not forced";
+                return themes;
             }
-            return themes;
         }
 
         /** @hide */
@@ -1834,13 +1795,15 @@ public class Resources {
          * @hide
          */
         public void rebase() {
-            AssetManager.clearTheme(mTheme);
+            synchronized (mKey) {
+                AssetManager.clearTheme(mTheme);
 
-            // Reapply the same styles in the same order.
-            for (int i = 0; i < mKey.mCount; i++) {
-                final int resId = mKey.mResId[i];
-                final boolean force = mKey.mForce[i];
-                AssetManager.applyThemeStyle(mTheme, resId, force);
+                // Reapply the same styles in the same order.
+                for (int i = 0; i < mKey.mCount; i++) {
+                    final int resId = mKey.mResId[i];
+                    final boolean force = mKey.mForce[i];
+                    AssetManager.applyThemeStyle(mTheme, resId, force);
+                }
             }
         }
     }
