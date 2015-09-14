@@ -740,10 +740,6 @@ class NavigationBarApps extends LinearLayout {
     private void populateLaunchMenu(AppButtonData appButtonData) {
         Menu menu = mPopupMenu.getMenu();
         int taskCount = appButtonData.getTaskCount();
-        if (taskCount == 0) {
-            menu.add("- TBD MENU ITEM -"); // adding something so that the menu is not empty.
-            return;
-        }
         for (int i = 0; i < taskCount; ++i) {
             final RecentTaskInfo taskInfo = appButtonData.tasks.get(i);
             MenuItem item = menu.add(getActivityForTask(taskInfo).flattenToShortString());
@@ -758,10 +754,14 @@ class NavigationBarApps extends LinearLayout {
     }
 
     /**
-     * Shows a task selection menu for an apps icon.
+     * Shows a task selection menu for clicked or hovered-over apps that have more than 1 running
+     * tasks.
      */
-    private void showLaunchMenu(ImageView appIcon) {
+    void maybeShowLaunchMenu(ImageView appIcon) {
+        if (isPopupInUse()) return;
         AppButtonData appButtonData = (AppButtonData) appIcon.getTag();
+        if (appButtonData.getTaskCount() <= 1) return;
+
         populateLaunchMenu(appButtonData);
         showPopupMenu(appIcon);
     }
@@ -779,8 +779,7 @@ class NavigationBarApps extends LinearLayout {
                 mShowMenuCallback = new Runnable() {
                     @Override
                     public void run() {
-                        if (isPopupInUse()) return;
-                        showLaunchMenu((ImageView) v);
+                        maybeShowLaunchMenu((ImageView) v);
                     }
                 };
             }
@@ -822,17 +821,6 @@ class NavigationBarApps extends LinearLayout {
             launchIntent.setSourceBounds(sourceBounds);
 
             mContext.startActivityAsUser(launchIntent, optsBundle, appInfo.getUser());
-        }
-
-        /**
-         * Shows a task selection menu for clicked apps that have more than 1 running tasks.
-         */
-        void maybeShowLaunchMenu(ImageView appIcon) {
-            if (isPopupInUse()) return;
-            AppButtonData appButtonData = (AppButtonData) appIcon.getTag();
-            if (appButtonData.getTaskCount() <= 1) return;
-
-            showLaunchMenu(appIcon);
         }
 
         @Override
