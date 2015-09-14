@@ -315,6 +315,9 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
     boolean mLeaveOpenOnKeyguardHide;
     KeyguardIndicationController mKeyguardIndicationController;
 
+    // Keyguard is going away soon.
+    private boolean mKeyguardGoingAway;
+    // Keyguard is actually fading away now.
     private boolean mKeyguardFadingAway;
     private long mKeyguardFadingAwayDelay;
     private long mKeyguardFadingAwayDuration;
@@ -3596,6 +3599,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
 
         // Treat Keyguard exit animation as an app transition to achieve nice transition for status
         // bar.
+        mKeyguardGoingAway = true;
         mIconController.appTransitionPending();
     }
 
@@ -3627,6 +3631,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
      */
     public void finishKeyguardFadingAway() {
         mKeyguardFadingAway = false;
+        mKeyguardGoingAway = false;
     }
 
     public void stopWaitingForKeyguardExit() {
@@ -4137,9 +4142,8 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
     public void appTransitionStarting(long startTime, long duration) {
 
         // Use own timings when Keyguard is going away, see keyguardGoingAway and
-        // setKeyguardFadingAway. When duration is 0, skip this one because no animation is really
-        // playing.
-        if (!mKeyguardFadingAway && duration > 0) {
+        // setKeyguardFadingAway.
+        if (!mKeyguardGoingAway) {
             mIconController.appTransitionStarting(startTime, duration);
         }
         if (mIconPolicy != null) {
