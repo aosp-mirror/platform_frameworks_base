@@ -743,6 +743,16 @@ public abstract class ActivityManagerNative extends Binder implements IActivityM
             return true;
         }
 
+        case MOVE_TASK_TO_DOCKED_STACK_TRANSACTION: {
+            data.enforceInterface(IActivityManager.descriptor);
+            int taskId = data.readInt();
+            int createMode = data.readInt();
+            boolean toTop = data.readInt() != 0;
+            moveTaskToDockedStack(taskId, createMode, toTop);
+            reply.writeNoException();
+            return true;
+        }
+
         case RESIZE_STACK_TRANSACTION: {
             data.enforceInterface(IActivityManager.descriptor);
             int stackId = data.readInt();
@@ -3505,6 +3515,21 @@ class ActivityManagerProxy implements IActivityManager
         data.writeInt(stackId);
         data.writeInt(toTop ? 1 : 0);
         mRemote.transact(MOVE_TASK_TO_STACK_TRANSACTION, data, reply, 0);
+        reply.readException();
+        data.recycle();
+        reply.recycle();
+    }
+    @Override
+    public void moveTaskToDockedStack(int taskId, int createMode, boolean toTop)
+            throws RemoteException
+    {
+        Parcel data = Parcel.obtain();
+        Parcel reply = Parcel.obtain();
+        data.writeInterfaceToken(IActivityManager.descriptor);
+        data.writeInt(taskId);
+        data.writeInt(createMode);
+        data.writeInt(toTop ? 1 : 0);
+        mRemote.transact(MOVE_TASK_TO_DOCKED_STACK_TRANSACTION, data, reply, 0);
         reply.readException();
         data.recycle();
         reply.recycle();

@@ -353,11 +353,13 @@ public class TaskStack implements DimLayer.DimLayerUser {
     private static void getInitialDockedStackBounds(
             Rect displayRect, Rect outBounds, int stackId) {
         // Docked stack start off occupying half the screen space.
-        // TODO(multi-window): Need to support the selecting which half of the screen the
-        // docked stack uses for snapping windows to the edge of the screen.
         final boolean splitHorizontally = displayRect.width() > displayRect.height();
+        final boolean topOrLeftCreateMode =
+                WindowManagerService.sDockedStackCreateMode == DOCKED_STACK_CREATE_MODE_TOP_OR_LEFT;
+        final boolean placeTopOrLeft = (stackId == DOCKED_STACK_ID && topOrLeftCreateMode)
+                || (stackId != DOCKED_STACK_ID && !topOrLeftCreateMode);
         outBounds.set(displayRect);
-        if (stackId == DOCKED_STACK_ID) {
+        if (placeTopOrLeft) {
             if (splitHorizontally) {
                 outBounds.right = displayRect.centerX();
             } else {
