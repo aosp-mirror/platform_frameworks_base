@@ -576,21 +576,20 @@ public final class ViewRootImpl implements ViewParent,
                             // right away, anyway.
                             return;
                         case WindowManagerGlobal.ADD_MULTIPLE_SINGLETON:
-                            throw new WindowManager.BadTokenException(
-                                    "Unable to add window " + mWindow +
-                                    " -- another window of this type already exists");
+                            throw new WindowManager.BadTokenException("Unable to add window "
+                                    + mWindow + " -- another window of type "
+                                    + mWindowAttributes.type + " already exists");
                         case WindowManagerGlobal.ADD_PERMISSION_DENIED:
-                            throw new WindowManager.BadTokenException(
-                                    "Unable to add window " + mWindow +
-                                    " -- permission denied for this window type");
+                            throw new WindowManager.BadTokenException("Unable to add window "
+                                    + mWindow + " -- permission denied for window type "
+                                    + mWindowAttributes.type);
                         case WindowManagerGlobal.ADD_INVALID_DISPLAY:
-                            throw new WindowManager.InvalidDisplayException(
-                                    "Unable to add window " + mWindow +
-                                    " -- the specified display can not be found");
+                            throw new WindowManager.InvalidDisplayException("Unable to add window "
+                                    + mWindow + " -- the specified display can not be found");
                         case WindowManagerGlobal.ADD_INVALID_TYPE:
-                            throw new WindowManager.InvalidDisplayException(
-                                    "Unable to add window " + mWindow
-                                    + " -- the specified window type is not valid");
+                            throw new WindowManager.InvalidDisplayException("Unable to add window "
+                                    + mWindow + " -- the specified window type "
+                                    + mWindowAttributes.type + " is not valid");
                     }
                     throw new RuntimeException(
                             "Unable to add window -- unknown error code " + res);
