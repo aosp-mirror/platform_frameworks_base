@@ -18,22 +18,13 @@
 
 #include "Debug.h"
 #include "Properties.h"
+#include "utils/StringUtils.h"
 
-#include <EGL/egl.h>
-#include <EGL/eglext.h>
 #include <GLES2/gl2ext.h>
 #include <utils/Log.h>
 
 namespace android {
-
-using namespace uirenderer;
-ANDROID_SINGLETON_STATIC_INSTANCE(Extensions);
-
 namespace uirenderer {
-
-///////////////////////////////////////////////////////////////////////////////
-// Defines
-///////////////////////////////////////////////////////////////////////////////
 
 // Debug
 #if DEBUG_EXTENSIONS
@@ -42,20 +33,16 @@ namespace uirenderer {
     #define EXT_LOGD(...)
 #endif
 
-///////////////////////////////////////////////////////////////////////////////
-// Constructors
-///////////////////////////////////////////////////////////////////////////////
 
 Extensions::Extensions() {
-    // Query GL extensions
-    findExtensions((const char*) glGetString(GL_EXTENSIONS), mGlExtensionList);
-    mHasNPot = hasGlExtension("GL_OES_texture_npot");
-    mHasFramebufferFetch = hasGlExtension("GL_NV_shader_framebuffer_fetch");
-    mHasDiscardFramebuffer = hasGlExtension("GL_EXT_discard_framebuffer");
-    mHasDebugMarker = hasGlExtension("GL_EXT_debug_marker");
-    mHas1BitStencil = hasGlExtension("GL_OES_stencil1");
-    mHas4BitStencil = hasGlExtension("GL_OES_stencil4");
-    mHasUnpackSubImage = hasGlExtension("GL_EXT_unpack_subimage");
+    StringCollection extensions((const char*) glGetString(GL_EXTENSIONS));
+    mHasNPot = extensions.has("GL_OES_texture_npot");
+    mHasFramebufferFetch = extensions.has("GL_NV_shader_framebuffer_fetch");
+    mHasDiscardFramebuffer = extensions.has("GL_EXT_discard_framebuffer");
+    mHasDebugMarker = extensions.has("GL_EXT_debug_marker");
+    mHas1BitStencil = extensions.has("GL_OES_stencil1");
+    mHas4BitStencil = extensions.has("GL_OES_stencil4");
+    mHasUnpackSubImage = extensions.has("GL_EXT_unpack_subimage");
 
     const char* version = (const char*) glGetString(GL_VERSION);
 
@@ -76,41 +63,6 @@ Extensions::Extensions() {
         mVersionMajor = 2;
         mVersionMinor = 0;
     }
-}
-
-///////////////////////////////////////////////////////////////////////////////
-// Methods
-///////////////////////////////////////////////////////////////////////////////
-
-bool Extensions::hasGlExtension(const char* extension) const {
-   const String8 s(extension);
-   return mGlExtensionList.indexOf(s) >= 0;
-}
-
-bool Extensions::hasEglExtension(const char* extension) const {
-   const String8 s(extension);
-   return mEglExtensionList.indexOf(s) >= 0;
-}
-
-void Extensions::findExtensions(const char* extensions, SortedVector<String8>& list) const {
-    const char* current = extensions;
-    const char* head = current;
-    EXT_LOGD("Available extensions:");
-    do {
-        head = strchr(current, ' ');
-        String8 s(current, head ? head - current : strlen(current));
-        if (s.length()) {
-            list.add(s);
-            EXT_LOGD("  %s", s.string());
-        }
-        current = head + 1;
-    } while (head);
-}
-
-void Extensions::dump() const {
-   ALOGD("%s", (const char*) glGetString(GL_VERSION));
-   ALOGD("Supported GL extensions:\n%s", (const char*) glGetString(GL_EXTENSIONS));
-   ALOGD("Supported EGL extensions:\n%s", eglQueryString(eglGetCurrentDisplay(), EGL_EXTENSIONS));
 }
 
 }; // namespace uirenderer
