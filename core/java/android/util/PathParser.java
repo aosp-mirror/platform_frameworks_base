@@ -364,18 +364,32 @@ public class PathParser {
             for (int k = 0; k < val.length; k += incr) {
                 switch (cmd) {
                     case 'm': // moveto - Start a new sub-path (relative)
-                        path.rMoveTo(val[k + 0], val[k + 1]);
                         currentX += val[k + 0];
                         currentY += val[k + 1];
-                        currentSegmentStartX = currentX;
-                        currentSegmentStartY = currentY;
+                        if (k > 0) {
+                            // According to the spec, if a moveto is followed by multiple
+                            // pairs of coordinates, the subsequent pairs are treated as
+                            // implicit lineto commands.
+                            path.rLineTo(val[k + 0], val[k + 1]);
+                        } else {
+                            path.rMoveTo(val[k + 0], val[k + 1]);
+                            currentSegmentStartX = currentX;
+                            currentSegmentStartY = currentY;
+                        }
                         break;
                     case 'M': // moveto - Start a new sub-path
-                        path.moveTo(val[k + 0], val[k + 1]);
                         currentX = val[k + 0];
                         currentY = val[k + 1];
-                        currentSegmentStartX = currentX;
-                        currentSegmentStartY = currentY;
+                        if (k > 0) {
+                            // According to the spec, if a moveto is followed by multiple
+                            // pairs of coordinates, the subsequent pairs are treated as
+                            // implicit lineto commands.
+                            path.lineTo(val[k + 0], val[k + 1]);
+                        } else {
+                            path.moveTo(val[k + 0], val[k + 1]);
+                            currentSegmentStartX = currentX;
+                            currentSegmentStartY = currentY;
+                        }
                         break;
                     case 'l': // lineto - Draw a line from the current point (relative)
                         path.rLineTo(val[k + 0], val[k + 1]);
