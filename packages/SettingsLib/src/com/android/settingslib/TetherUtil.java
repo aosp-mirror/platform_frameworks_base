@@ -25,6 +25,7 @@ import android.net.wifi.WifiManager;
 import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.provider.Settings;
+import android.telephony.CarrierConfigManager;
 
 public class TetherUtil {
 
@@ -62,6 +63,13 @@ public class TetherUtil {
         return wifiManager.getWifiApState() == WifiManager.WIFI_AP_STATE_ENABLED;
     }
 
+    private static boolean isEntitlementCheckRequired(Context context) {
+        final CarrierConfigManager configManager = (CarrierConfigManager) context
+             .getSystemService(Context.CARRIER_CONFIG_SERVICE);
+        return configManager.getConfig().getBoolean(CarrierConfigManager
+             .KEY_REQUIRE_ENTITLEMENT_CHECKS_BOOL);
+    }
+
     public static boolean isProvisioningNeeded(Context context) {
         // Keep in sync with other usage of config_mobile_hotspot_provision_app.
         // ConnectivityManager#enforceTetherChangePermission
@@ -69,6 +77,10 @@ public class TetherUtil {
                 com.android.internal.R.array.config_mobile_hotspot_provision_app);
         if (SystemProperties.getBoolean("net.tethering.noprovisioning", false)
                 || provisionApp == null) {
+            return false;
+        }
+        // Check carrier config for entitlement checks
+        if (isEntitlementCheckRequired(context) == false) {
             return false;
         }
         return (provisionApp.length == 2);
