@@ -39,17 +39,17 @@ import static android.net.NetworkPolicy.WARNING_DISABLED;
 import static android.net.NetworkPolicyManager.EXTRA_NETWORK_TEMPLATE;
 import static android.net.NetworkPolicyManager.FIREWALL_CHAIN_DOZABLE;
 import static android.net.NetworkPolicyManager.FIREWALL_CHAIN_STANDBY;
-import static android.net.NetworkPolicyManager.FIREWALL_RULE_DEFAULT;
 import static android.net.NetworkPolicyManager.FIREWALL_RULE_ALLOW;
+import static android.net.NetworkPolicyManager.FIREWALL_RULE_DEFAULT;
 import static android.net.NetworkPolicyManager.FIREWALL_RULE_DENY;
 import static android.net.NetworkPolicyManager.POLICY_ALLOW_BACKGROUND_BATTERY_SAVE;
 import static android.net.NetworkPolicyManager.POLICY_NONE;
 import static android.net.NetworkPolicyManager.POLICY_REJECT_METERED_BACKGROUND;
 import static android.net.NetworkPolicyManager.RULE_ALLOW_ALL;
+import static android.net.NetworkPolicyManager.RULE_REJECT_ALL;
 import static android.net.NetworkPolicyManager.RULE_REJECT_METERED;
+import static android.net.NetworkPolicyManager.RULE_UNKNOWN;
 import static android.net.NetworkPolicyManager.computeLastCycleBoundary;
-import static android.net.NetworkPolicyManager.dumpPolicy;
-import static android.net.NetworkPolicyManager.dumpRules;
 import static android.net.NetworkTemplate.MATCH_MOBILE_3G_LOWER;
 import static android.net.NetworkTemplate.MATCH_MOBILE_4G;
 import static android.net.NetworkTemplate.MATCH_MOBILE_ALL;
@@ -108,6 +108,7 @@ import android.net.LinkProperties;
 import android.net.NetworkIdentity;
 import android.net.NetworkInfo;
 import android.net.NetworkPolicy;
+import android.net.NetworkPolicyManager;
 import android.net.NetworkQuotaInfo;
 import android.net.NetworkState;
 import android.net.NetworkTemplate;
@@ -138,6 +139,7 @@ import android.text.format.Time;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.AtomicFile;
+import android.util.DebugUtils;
 import android.util.Log;
 import android.util.NtpTrustedTime;
 import android.util.Pair;
@@ -147,8 +149,6 @@ import android.util.SparseIntArray;
 import android.util.TrustedTime;
 import android.util.Xml;
 
-import com.android.server.DeviceIdleController;
-import com.android.server.EventLogTags;
 import libcore.io.IoUtils;
 
 import com.android.internal.R;
@@ -156,6 +156,8 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.FastXmlSerializer;
 import com.android.internal.util.IndentingPrintWriter;
+import com.android.server.DeviceIdleController;
+import com.android.server.EventLogTags;
 import com.android.server.LocalServices;
 import com.google.android.collect.Lists;
 
@@ -279,6 +281,10 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
     final SparseIntArray mUidPolicy = new SparseIntArray();
     /** Currently derived rules for each UID. */
     final SparseIntArray mUidRules = new SparseIntArray();
+
+    final SparseIntArray mUidFirewallStandbyRules = new SparseIntArray();
+    final SparseIntArray mUidFirewallDozableRules = new SparseIntArray();
+
     /** Set of states for the child firewall chains. True if the chain is active. */
     final SparseBooleanArray mFirewallChainStates = new SparseBooleanArray();
 
@@ -446,14 +452,8 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
             // read policy from disk
             readPolicyLocked();
 
-            if (mRestrictBackground || mRestrictPower || mDeviceIdleMode) {
-                updateRulesForGlobalChangeLocked(false);
-                updateNotificationsLocked();
-            } else {
-                // If we are not in any special mode, we just need to make sure the current
-                // app idle state is updated.
-                updateRulesForAppIdleLocked();
-            }
+            updateRulesForGlobalChangeLocked(false);
+            updateNotificationsLocked();
         }
 
         updateScreenOn();
@@ -1800,7 +1800,9 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
             if (mDeviceIdleMode != enabled) {
                 mDeviceIdleMode = enabled;
                 if (mSystemReady) {
-                    updateRulesForDeviceIdleLocked();
+                    // Device idle change means we need to rebuild rules for all
+                    // known apps, so do a global refresh.
+                    updateRulesForGlobalChangeLocked(false);
                 }
                 if (enabled) {
                     EventLogTags.writeDeviceIdleOnPhase("net");
@@ -1938,7 +1940,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                 fout.print("UID=");
                 fout.print(uid);
                 fout.print(" policy=");
-                dumpPolicy(fout, policy);
+                fout.print(DebugUtils.flagsToString(NetworkPolicyManager.class, "POLICY_", policy));
                 fout.println();
             }
             fout.decreaseIndent();
@@ -1983,18 +1985,14 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                 fout.print("UID=");
                 fout.print(uid);
 
-                int state = mUidState.get(uid, ActivityManager.PROCESS_STATE_CACHED_EMPTY);
+                final int state = mUidState.get(uid, ActivityManager.PROCESS_STATE_CACHED_EMPTY);
                 fout.print(" state=");
                 fout.print(state);
                 fout.print(state <= ActivityManager.PROCESS_STATE_TOP ? " (fg)" : " (bg)");
 
-                fout.print(" rules=");
-                final int rulesIndex = mUidRules.indexOfKey(uid);
-                if (rulesIndex < 0) {
-                    fout.print("UNKNOWN");
-                } else {
-                    dumpRules(fout, mUidRules.valueAt(rulesIndex));
-                }
+                final int rule = mUidRules.get(uid, RULE_UNKNOWN);
+                fout.print(" rule=");
+                fout.print(DebugUtils.valueToString(NetworkPolicyManager.class, "RULE_", rule));
 
                 fout.println();
             }
@@ -2029,7 +2027,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
             updateRulesForUidStateChangeLocked(uid, oldUidState, uidState);
             if (mDeviceIdleMode && isProcStateAllowedWhileIdle(oldUidState)
                     != isProcStateAllowedWhileIdle(uidState)) {
-                updateRulesForDeviceIdleLocked();
+                updateRuleForDeviceIdleLocked(uid);
             }
         }
     }
@@ -2043,7 +2041,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                 updateRulesForUidStateChangeLocked(uid, oldUidState,
                         ActivityManager.PROCESS_STATE_CACHED_EMPTY);
                 if (mDeviceIdleMode) {
-                    updateRulesForDeviceIdleLocked();
+                    updateRuleForDeviceIdleLocked(uid);
                 }
             }
         }
@@ -2090,7 +2088,8 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         if (mDeviceIdleMode) {
             // sync the whitelists before enable dozable chain.  We don't care about the rules if
             // we are disabling the chain.
-            SparseIntArray uidRules = new SparseIntArray();
+            final SparseIntArray uidRules = mUidFirewallDozableRules;
+            uidRules.clear();
             final List<UserInfo> users = mUserManager.getUsers();
             for (int ui = users.size() - 1; ui >= 0; ui--) {
                 UserInfo user = users.get(ui);
@@ -2114,6 +2113,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
             }
             setUidFirewallRules(FIREWALL_CHAIN_DOZABLE, uidRules);
         }
+
         enableFirewallChainLocked(FIREWALL_CHAIN_DOZABLE, mDeviceIdleMode);
     }
 
@@ -2127,11 +2127,15 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                 setUidFirewallRule(FIREWALL_CHAIN_DOZABLE, uid, FIREWALL_RULE_DEFAULT);
             }
         }
+
+        updateRulesForUidLocked(uid);
     }
 
     void updateRulesForAppIdleLocked() {
+        final SparseIntArray uidRules = mUidFirewallStandbyRules;
+        uidRules.clear();
+
         // Fully update the app idle firewall chain.
-        SparseIntArray uidRules = new SparseIntArray();
         final List<UserInfo> users = mUserManager.getUsers();
         for (int ui = users.size() - 1; ui >= 0; ui--) {
             UserInfo user = users.get(ui);
@@ -2142,6 +2146,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                 }
             }
         }
+
         setUidFirewallRules(FIREWALL_CHAIN_STANDBY, uidRules);
     }
 
@@ -2154,11 +2159,14 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         } else {
             setUidFirewallRule(FIREWALL_CHAIN_STANDBY, uid, FIREWALL_RULE_DEFAULT);
         }
+
+        updateRulesForUidLocked(uid);
     }
 
     void updateRulesForAppIdleParoleLocked() {
         boolean enableChain = !mUsageStats.isAppIdleParoleOn();
         enableFirewallChainLocked(FIREWALL_CHAIN_STANDBY, enableChain);
+        updateRulesForUidsLocked(mUidFirewallStandbyRules);
     }
 
     /**
@@ -2228,6 +2236,12 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         return true;
     }
 
+    void updateRulesForUidsLocked(SparseIntArray uids) {
+        for (int i = 0; i < uids.size(); i++) {
+            updateRulesForUidLocked(uids.keyAt(i));
+        }
+    }
+
     /**
      * Applies network rules to bandwidth and firewall controllers based on uid policy.
      * @param uid The uid for which to apply the latest policy
@@ -2249,8 +2263,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         final int uidPolicy = mUidPolicy.get(uid, POLICY_NONE);
         final boolean uidForeground = isUidForegroundLocked(uid);
 
-        // derive active rules based on policy and active state
-
+        // Derive active rules based on policy and active state
         int appId = UserHandle.getAppId(uid);
         int uidRules = RULE_ALLOW_ALL;
         if (!uidForeground && (uidPolicy & POLICY_REJECT_METERED_BACKGROUND) != 0) {
@@ -2273,20 +2286,27 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
             }
         }
 
-        final int oldRules = mUidRules.get(uid);
+        // Check dozable state, which is whitelist
+        if (mFirewallChainStates.get(FIREWALL_CHAIN_DOZABLE)
+                && mUidFirewallDozableRules.get(uid, FIREWALL_RULE_DEFAULT) != FIREWALL_RULE_ALLOW) {
+            uidRules = RULE_REJECT_ALL;
+        }
 
+        // Check standby state, which is blacklist
+        if (mFirewallChainStates.get(FIREWALL_CHAIN_STANDBY)
+                && mUidFirewallStandbyRules.get(uid, FIREWALL_RULE_DEFAULT) == FIREWALL_RULE_DENY) {
+            uidRules = RULE_REJECT_ALL;
+        }
+
+        final int oldRules = mUidRules.get(uid);
         if (uidRules == RULE_ALLOW_ALL) {
             mUidRules.delete(uid);
         } else {
             mUidRules.put(uid, uidRules);
         }
 
-        // Update bandwidth rules if necessary
-        final boolean oldRejectMetered = (oldRules & RULE_REJECT_METERED) != 0;
-        final boolean rejectMetered = (uidRules & RULE_REJECT_METERED) != 0;
-        if (oldRejectMetered != rejectMetered) {
-            setUidNetworkRules(uid, rejectMetered);
-        }
+        final boolean rejectMetered = (uidRules == RULE_REJECT_METERED);
+        setUidNetworkRules(uid, rejectMetered);
 
         // dispatch changed rule to existing listeners
         if (oldRules != uidRules) {
@@ -2472,6 +2492,12 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
      * Add or remove a uid to the firewall blacklist for all network ifaces.
      */
     private void setUidFirewallRule(int chain, int uid, int rule) {
+        if (chain == FIREWALL_CHAIN_DOZABLE) {
+            mUidFirewallDozableRules.put(uid, rule);
+        } else if (chain == FIREWALL_CHAIN_STANDBY) {
+            mUidFirewallStandbyRules.put(uid, rule);
+        }
+
         try {
             mNetworkManager.setFirewallUidRule(chain, uid, rule);
         } catch (IllegalStateException e) {

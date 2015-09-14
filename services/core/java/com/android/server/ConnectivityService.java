@@ -946,13 +946,13 @@ public class ConnectivityService extends IConnectivityManager.Stub
             uidRules = mUidRules.get(uid, RULE_ALLOW_ALL);
         }
 
-        if ((uidRules & RULE_REJECT_ALL) != 0
-                || (networkCostly && (uidRules & RULE_REJECT_METERED) != 0)) {
+        if (uidRules == RULE_REJECT_ALL) {
             return true;
+        } else if ((uidRules == RULE_REJECT_METERED) && networkCostly) {
+            return true;
+        } else {
+            return false;
         }
-
-        // no restrictive rules; network is visible
-        return false;
     }
 
     /**
@@ -3707,7 +3707,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
             synchronized(mRulesLock) {
                 uidRules = mUidRules.get(uid, RULE_ALLOW_ALL);
             }
-            if ((uidRules & (RULE_REJECT_METERED | RULE_REJECT_ALL)) != 0) {
+            if (uidRules != RULE_ALLOW_ALL) {
                 // we could silently fail or we can filter the available nets to only give
                 // them those they have access to.  Chose the more useful
                 networkCapabilities.addCapability(NET_CAPABILITY_NOT_METERED);
