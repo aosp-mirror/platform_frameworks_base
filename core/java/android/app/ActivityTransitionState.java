@@ -150,7 +150,13 @@ class ActivityTransitionState {
     }
 
     public void setEnterActivityOptions(Activity activity, ActivityOptions options) {
-        if (activity.getWindow().hasFeature(Window.FEATURE_ACTIVITY_TRANSITIONS)
+        final Window window = activity.getWindow();
+        if (window == null) {
+            return;
+        }
+        // ensure Decor View has been created so that the window features are activated
+        window.getDecorView();
+        if (window.hasFeature(Window.FEATURE_ACTIVITY_TRANSITIONS)
                 && options != null && mEnterActivityOptions == null
                 && mEnterTransitionCoordinator == null
                 && options.getAnimationType() == ActivityOptions.ANIM_SCENE_TRANSITION) {
