@@ -359,6 +359,14 @@ public final class DisplayManagerGlobal {
         }
     }
 
+    public void requestColorTransform(int displayId, int colorTransformId) {
+        try {
+            mDm.requestColorTransform(displayId, colorTransformId);
+        } catch (RemoteException ex) {
+            Log.e(TAG, "Failed to request color transform.", ex);
+        }
+    }
+
     public VirtualDisplay createVirtualDisplay(Context context, MediaProjection projection,
             String name, int width, int height, int densityDpi, Surface surface, int flags,
             VirtualDisplay.Callback callback, Handler handler) {

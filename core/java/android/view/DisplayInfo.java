@@ -169,6 +169,15 @@ public final class DisplayInfo implements Parcelable {
      */
     public Display.Mode[] supportedModes = Display.Mode.EMPTY_ARRAY;
 
+    /** The active color transform. */
+    public int colorTransformId;
+
+    /** The default color transform. */
+    public int defaultColorTransformId;
+
+    /** The list of supported color transforms */
+    public Display.ColorTransform[] supportedColorTransforms = Display.ColorTransform.EMPTY_ARRAY;
+
     /**
      * The logical display density which is the basis for density-independent
      * pixels.
@@ -279,6 +288,8 @@ public final class DisplayInfo implements Parcelable {
                 && rotation == other.rotation
                 && modeId == other.modeId
                 && defaultModeId == other.defaultModeId
+                && colorTransformId == other.colorTransformId
+                && defaultColorTransformId == other.defaultColorTransformId
                 && logicalDensityDpi == other.logicalDensityDpi
                 && physicalXDpi == other.physicalXDpi
                 && physicalYDpi == other.physicalYDpi
@@ -317,6 +328,10 @@ public final class DisplayInfo implements Parcelable {
         modeId = other.modeId;
         defaultModeId = other.defaultModeId;
         supportedModes = Arrays.copyOf(other.supportedModes, other.supportedModes.length);
+        colorTransformId = other.colorTransformId;
+        defaultColorTransformId = other.defaultColorTransformId;
+        supportedColorTransforms = Arrays.copyOf(
+                other.supportedColorTransforms, other.supportedColorTransforms.length);
         logicalDensityDpi = other.logicalDensityDpi;
         physicalXDpi = other.physicalXDpi;
         physicalYDpi = other.physicalYDpi;
@@ -352,6 +367,13 @@ public final class DisplayInfo implements Parcelable {
         supportedModes = new Display.Mode[nModes];
         for (int i = 0; i < nModes; i++) {
             supportedModes[i] = Display.Mode.CREATOR.createFromParcel(source);
+        }
+        colorTransformId = source.readInt();
+        defaultColorTransformId = source.readInt();
+        int nColorTransforms = source.readInt();
+        supportedColorTransforms = new Display.ColorTransform[nColorTransforms];
+        for (int i = 0; i < nColorTransforms; i++) {
+            supportedColorTransforms[i] = Display.ColorTransform.CREATOR.createFromParcel(source);
         }
         logicalDensityDpi = source.readInt();
         physicalXDpi = source.readFloat();
@@ -389,6 +411,12 @@ public final class DisplayInfo implements Parcelable {
         dest.writeInt(supportedModes.length);
         for (int i = 0; i < supportedModes.length; i++) {
             supportedModes[i].writeToParcel(dest, flags);
+        }
+        dest.writeInt(colorTransformId);
+        dest.writeInt(defaultColorTransformId);
+        dest.writeInt(supportedColorTransforms.length);
+        for (int i = 0; i < supportedColorTransforms.length; i++) {
+            supportedColorTransforms[i].writeToParcel(dest, flags);
         }
         dest.writeInt(logicalDensityDpi);
         dest.writeFloat(physicalXDpi);
@@ -459,6 +487,24 @@ public final class DisplayInfo implements Parcelable {
             result[i++] = rate;
         }
         return result;
+    }
+
+    public Display.ColorTransform getColorTransform() {
+        return findColorTransform(colorTransformId);
+    }
+
+    public Display.ColorTransform getDefaultColorTransform() {
+        return findColorTransform(defaultColorTransformId);
+    }
+
+    private Display.ColorTransform findColorTransform(int colorTransformId) {
+        for (int i = 0; i < supportedColorTransforms.length; i++) {
+            Display.ColorTransform colorTransform = supportedColorTransforms[i];
+            if (colorTransform.getId() == colorTransformId) {
+                return colorTransform;
+            }
+        }
+        throw new IllegalStateException("Unable to locate color transform: " + colorTransformId);
     }
 
     public void getAppMetrics(DisplayMetrics outMetrics) {
@@ -562,6 +608,12 @@ public final class DisplayInfo implements Parcelable {
         sb.append(defaultModeId);
         sb.append(", modes ");
         sb.append(Arrays.toString(supportedModes));
+        sb.append(", colorTransformId ");
+        sb.append(colorTransformId);
+        sb.append(", defaultColorTransformId ");
+        sb.append(defaultColorTransformId);
+        sb.append(", supportedColorTransforms ");
+        sb.append(Arrays.toString(supportedColorTransforms));
         sb.append(", rotation ");
         sb.append(rotation);
         sb.append(", density ");

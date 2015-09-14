@@ -16,7 +16,10 @@
 
 package android.view;
 
+import android.annotation.RequiresPermission;
+import android.content.Context;
 import android.content.res.CompatibilityInfo;
+import android.content.res.Resources;
 import android.graphics.PixelFormat;
 import android.graphics.Point;
 import android.graphics.Rect;
@@ -29,6 +32,8 @@ import android.util.DisplayMetrics;
 import android.util.Log;
 
 import java.util.Arrays;
+
+import static android.Manifest.permission.CONFIGURE_DISPLAY_COLOR_TRANSFORM;
 
 /**
  * Provides information about the size and density of a logical display.
@@ -679,6 +684,49 @@ public final class Display {
     }
 
     /**
+     * Request the display applies a color transform.
+     * @hide
+     */
+    @RequiresPermission(CONFIGURE_DISPLAY_COLOR_TRANSFORM)
+    public void requestColorTransform(ColorTransform colorTransform) {
+        mGlobal.requestColorTransform(mDisplayId, colorTransform.getId());
+    }
+
+    /**
+     * Returns the active color transform of this display
+     * @hide
+     */
+    public ColorTransform getColorTransform() {
+        synchronized (this) {
+            updateDisplayInfoLocked();
+            return mDisplayInfo.getColorTransform();
+        }
+    }
+
+    /**
+     * Returns the default color transform of this display
+     * @hide
+     */
+    public ColorTransform getDefaultColorTransform() {
+        synchronized (this) {
+            updateDisplayInfoLocked();
+            return mDisplayInfo.getDefaultColorTransform();
+        }
+    }
+
+    /**
+     * Gets the supported color transforms of this device.
+     * @hide
+     */
+    public ColorTransform[] getSupportedColorTransforms() {
+        synchronized (this) {
+            updateDisplayInfoLocked();
+            ColorTransform[] transforms = mDisplayInfo.supportedColorTransforms;
+            return Arrays.copyOf(transforms, transforms.length);
+        }
+    }
+
+    /**
      * Gets the app VSYNC offset, in nanoseconds.  This is a positive value indicating
      * the phase offset of the VSYNC events provided by Choreographer relative to the
      * display refresh.  For example, if Choreographer reports that the refresh occurred
@@ -1051,6 +1099,91 @@ public final class Display {
             @Override
             public Mode[] newArray(int size) {
                 return new Mode[size];
+            }
+        };
+    }
+
+    /**
+     * A color transform supported by a given display.
+     *
+     * @see Display#getSupportedColorTransforms()
+     * @hide
+     */
+    public static final class ColorTransform implements Parcelable {
+        public static final ColorTransform[] EMPTY_ARRAY = new ColorTransform[0];
+
+        private final int mId;
+        private final int mColorTransform;
+
+        public ColorTransform(int id, int colorTransform) {
+            mId = id;
+            mColorTransform = colorTransform;
+        }
+
+        public int getId() {
+            return mId;
+        }
+
+        public int getColorTransform() {
+            return mColorTransform;
+        }
+
+        @Override
+        public boolean equals(Object other) {
+            if (this == other) {
+                return true;
+            }
+            if (!(other instanceof ColorTransform)) {
+                return false;
+            }
+            ColorTransform that = (ColorTransform) other;
+            return mId == that.mId
+                && mColorTransform == that.mColorTransform;
+        }
+
+        @Override
+        public int hashCode() {
+            int hash = 1;
+            hash = hash * 17 + mId;
+            hash = hash * 17 + mColorTransform;
+            return hash;
+        }
+
+        @Override
+        public String toString() {
+            return new StringBuilder("{")
+                    .append("id=").append(mId)
+                    .append(", colorTransform=").append(mColorTransform)
+                    .append("}")
+                    .toString();
+        }
+
+        @Override
+        public int describeContents() {
+            return 0;
+        }
+
+        private ColorTransform(Parcel in) {
+            this(in.readInt(), in.readInt());
+        }
+
+        @Override
+        public void writeToParcel(Parcel out, int parcelableFlags) {
+            out.writeInt(mId);
+            out.writeInt(mColorTransform);
+        }
+
+        @SuppressWarnings("hiding")
+        public static final Parcelable.Creator<ColorTransform> CREATOR
+                = new Parcelable.Creator<ColorTransform>() {
+            @Override
+            public ColorTransform createFromParcel(Parcel in) {
+                return new ColorTransform(in);
+            }
+
+            @Override
+            public ColorTransform[] newArray(int size) {
+                return new ColorTransform[size];
             }
         };
     }
