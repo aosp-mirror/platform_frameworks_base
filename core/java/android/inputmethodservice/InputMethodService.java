@@ -1456,15 +1456,9 @@ public class InputMethodService extends AbstractInputMethodService {
         final int previousImeWindowStatus =
                 (mWindowVisible ? IME_ACTIVE : 0) | (isInputViewShown() ? IME_VISIBLE : 0);
         mWindowVisible = true;
-        if (!mShowInputRequested) {
-            if (mInputStarted) {
-                if (showInput) {
-                    doShowInput = true;
-                    mShowInputRequested = true;
-                }
-            }
-        } else {
-            showInput = true;
+        if (!mShowInputRequested && mInputStarted && showInput) {
+            doShowInput = true;
+            mShowInputRequested = true;
         }
 
         if (DEBUG) Log.v(TAG, "showWindow: updating UI");
