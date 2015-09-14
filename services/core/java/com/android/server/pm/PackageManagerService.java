@@ -4575,7 +4575,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                 // Check for results that need to skip the current profile.
                 ResolveInfo xpResolveInfo  = querySkipCurrentProfileIntents(matchingFilters, intent,
                         resolvedType, flags, userId);
-                if (xpResolveInfo != null && isUserEnabled(xpResolveInfo.targetUserId)) {
+                if (xpResolveInfo != null) {
                     List<ResolveInfo> result = new ArrayList<ResolveInfo>(1);
                     result.add(xpResolveInfo);
                     return filterIfNotSystemUser(result, userId);
@@ -4667,8 +4667,8 @@ public class PackageManagerService extends IPackageManager.Stub {
             int status = (int)(verificationState >> 32);
             if (result == null) {
                 result = new CrossProfileDomainInfo();
-                result.resolveInfo =
-                        createForwardingResolveInfo(new IntentFilter(), sourceUserId, parentUserId);
+                result.resolveInfo = createForwardingResolveInfoUnchecked(new IntentFilter(),
+                        sourceUserId, parentUserId);
                 result.bestDomainVerificationStatus = status;
             } else {
                 result.bestDomainVerificationStatus = bestDomainVerificationStatus(status,
@@ -4922,8 +4922,8 @@ public class PackageManagerService extends IPackageManager.Stub {
                 if ((filter.getFlags() & PackageManager.SKIP_CURRENT_PROFILE) != 0) {
                     // Checking if there are activities in the target user that can handle the
                     // intent.
-                    ResolveInfo resolveInfo = checkTargetCanHandle(filter, intent, resolvedType,
-                            flags, sourceUserId);
+                    ResolveInfo resolveInfo = createForwardingResolveInfo(filter, intent,
+                            resolvedType, flags, sourceUserId);
                     if (resolveInfo != null) {
                         return resolveInfo;
                     }
@@ -4950,8 +4950,8 @@ public class PackageManagerService extends IPackageManager.Stub {
                         && !alreadyTriedUserIds.get(targetUserId)) {
                     // Checking if there are activities in the target user that can handle the
                     // intent.
-                    ResolveInfo resolveInfo = checkTargetCanHandle(filter, intent, resolvedType,
-                            flags, sourceUserId);
+                    ResolveInfo resolveInfo = createForwardingResolveInfo(filter, intent,
+                            resolvedType, flags, sourceUserId);
                     if (resolveInfo != null) return resolveInfo;
                     alreadyTriedUserIds.put(targetUserId, true);
                 }
@@ -4960,17 +4960,24 @@ public class PackageManagerService extends IPackageManager.Stub {
         return null;
     }
 
-    private ResolveInfo checkTargetCanHandle(CrossProfileIntentFilter filter, Intent intent,
+    /**
+     * If the filter's target user can handle the intent and is enabled: returns a ResolveInfo that
+     * will forward the intent to the filter's target user.
+     * Otherwise, returns null.
+     */
+    private ResolveInfo createForwardingResolveInfo(CrossProfileIntentFilter filter, Intent intent,
             String resolvedType, int flags, int sourceUserId) {
+        int targetUserId = filter.getTargetUserId();
         List<ResolveInfo> resultTargetUser = mActivities.queryIntent(intent,
-                resolvedType, flags, filter.getTargetUserId());
-        if (resultTargetUser != null && !resultTargetUser.isEmpty()) {
-            return createForwardingResolveInfo(filter, sourceUserId, filter.getTargetUserId());
+                resolvedType, flags, targetUserId);
+        if (resultTargetUser != null && !resultTargetUser.isEmpty()
+                && isUserEnabled(targetUserId)) {
+            return createForwardingResolveInfoUnchecked(filter, sourceUserId, targetUserId);
         }
         return null;
     }
 
-    private ResolveInfo createForwardingResolveInfo(IntentFilter filter,
+    private ResolveInfo createForwardingResolveInfoUnchecked(IntentFilter filter,
             int sourceUserId, int targetUserId) {
         ResolveInfo forwardingResolveInfo = new ResolveInfo();
         long ident = Binder.clearCallingIdentity();
