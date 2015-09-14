@@ -322,7 +322,7 @@ public class DrawableContainer extends Drawable implements Drawable.Callback {
     }
 
     @Override
-    protected boolean onLevelChange(float level) {
+    protected boolean onLevelChange(int level) {
         if (mLastDrawable != null) {
             return mLastDrawable.setLevel(level);
         }
@@ -510,7 +510,7 @@ public class DrawableContainer extends Drawable implements Drawable.Callback {
         d.setVisible(isVisible(), true);
         d.setDither(mDrawableContainerState.mDither);
         d.setState(getState());
-        d.setLevel(getLevelFloat());
+        d.setLevel(getLevel());
         d.setBounds(getBounds());
         d.setLayoutDirection(getLayoutDirection());
         d.setAutoMirrored(mDrawableContainerState.mAutoMirrored);

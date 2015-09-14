@@ -41,7 +41,6 @@ import android.graphics.Xfermode;
 import android.os.Trace;
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
-import android.util.FloatProperty;
 import android.util.StateSet;
 import android.util.TypedValue;
 import android.util.Xml;
@@ -127,19 +126,12 @@ import java.util.Collection;
  * document.</p></div>
  */
 public abstract class Drawable {
-
     private static final Rect ZERO_BOUNDS_RECT = new Rect();
 
     static final PorterDuff.Mode DEFAULT_TINT_MODE = PorterDuff.Mode.SRC_IN;
 
-    /** The standard maximum value for calls to {@link #setLevel(int)}. */
-    public static final int MAX_LEVEL = 10000;
-
-    /** The standard maximum value for calls to {@link #setLevel(float)}. */
-    public static final float MAX_LEVEL_FLOAT = 10000.0f;
-
     private int[] mStateSet = StateSet.WILD_CARD;
-    private float mLevel = 0.0f;
+    private int mLevel = 0;
     private int mChangingConfigurations = 0;
     private Rect mBounds = ZERO_BOUNDS_RECT;  // lazily becomes a new Rect()
     private WeakReference<Callback> mCallback = null;
@@ -719,63 +711,22 @@ public abstract class Drawable {
     }
 
     /**
-     * Sets the level for the drawable as an integer value where typically the
-     * minimum level is 0 and the maximum is 10000 {@link #MAX_LEVEL}; however,
-     * the range may vary based on the Drawable implementation and is not
-     * clamped.
-     * <p>
-     * This allows a drawable to vary its imagery based on a continuous
-     * controller. For example, it may be used to show progress or volume
-     * level.
-     * <p>
-     * Use #setLevelFloat(float) to set the level as a high-precision
-     * floating-point value.
+     * Specify the level for the drawable.  This allows a drawable to vary its
+     * imagery based on a continuous controller, for example to show progress
+     * or volume level.
      *
-     * @param level the new level, typically between 0 and 10000
-     * @return {@code true} if this change in level has caused the appearance
-     *         of the drawable to change and will require a subsequent call to
-     *         invalidate, {@code false} otherwise
-     * @see #getLevel()
-     * @see #setLevel(float)
-     * @see #onLevelChange(int)
+     * <p>If the new level you are supplying causes the appearance of the
+     * Drawable to change, then it is responsible for calling
+     * {@link #invalidateSelf} in order to have itself redrawn, <em>and</em>
+     * true will be returned from this function.
+     *
+     * @param level The new level, from 0 (minimum) to 10000 (maximum).
+     *
+     * @return Returns true if this change in level has caused the appearance
+     * of the Drawable to change (hence requiring an invalidate), otherwise
+     * returns false.
      */
     public final boolean setLevel(int level) {
-        return setLevel((float) level);
-    }
-
-    /**
-     * Returns the current level as a rounded integer value.
-     * <p>
-     * Use #getLevelFloat() to return the level as a high-precision
-     * floating-point value.
-     *
-     * @return the current level, typically between 0 and 10000
-     * @see #setLevel(int)
-     * @see #getLevelFloat()
-     */
-    public final int getLevel() {
-        return Math.round(mLevel);
-    }
-
-    /**
-     * Sets the level for the drawable as a floating-point value where
-     * typically the minimum level is 0.0 and the maximum is 10000.0
-     * {@link #MAX_LEVEL_FLOAT}; however, the range may vary based on the
-     * Drawable implementation and is not clamped.
-     * <p>
-     * This allows a drawable to vary its imagery based on a continuous
-     * controller. For example, it may be used to show progress or volume
-     * level.
-     *
-     * @param level the new level, typically between 0.0 and 10000.0
-     *              ({@link #MAX_LEVEL_FLOAT})
-     * @return {@code true} if this change in level has caused the appearance
-     *         of the drawable to change and will require a subsequent call to
-     *         invalidate, {@code false} otherwise
-     * @see #getLevelFloat()
-     * @see #onLevelChange(float)
-     */
-    public final boolean setLevel(float level) {
         if (mLevel != level) {
             mLevel = level;
             return onLevelChange(level);
@@ -784,13 +735,11 @@ public abstract class Drawable {
     }
 
     /**
-     * Returns the current level as a floating-point value.
+     * Retrieve the current level.
      *
-     * @return the current level, typically between 0.0 and 10000.0
-     *         ({@link #MAX_LEVEL_FLOAT})
-     * @see #setLevel(float)
+     * @return int Current level, from 0 (minimum) to 10000 (maximum).
      */
-    public final float getLevelFloat() {
+    public final int getLevel() {
         return mLevel;
     }
 
@@ -945,47 +894,14 @@ public abstract class Drawable {
      * last state.
      */
     protected boolean onStateChange(int[] state) { return false; }
-
-    /**
-     * Called when the drawable level changes.
-     * <p>
-     * Override this in your subclass to change appearance if you vary based on
-     * level and do not need floating-point accuracy. To handle changes with
-     * higher accuracy, override {@link #onLevelChange(float)} instead.
-     * <p>
-     * <strong>Note:</strong> Do not override both this method and
-     * {@link #onLevelChange(float)}. Only override one method.
-     *
-     * @param level the level as an integer value, typically between 0
-     *              (minimum) and 10000 ({@link #MAX_LEVEL})
-     * @return {@code true} if the level change has caused the appearance of
-     *         the drawable to change such that it needs to be redrawn, or
-     *         {@code false} if there is no need to redraw
+    /** Override this in your subclass to change appearance if you vary based
+     *  on level.
+     * @return Returns true if the level change has caused the appearance of
+     * the Drawable to change (that is, it needs to be drawn), else false
+     * if it looks the same and there is no need to redraw it since its
+     * last level.
      */
     protected boolean onLevelChange(int level) { return false; }
-
-    /**
-     * Called when the drawable level changes.
-     * <p>
-     * Override this in your subclass to change appearance if you vary based on
-     * level and need floating-point accuracy.
-     * <p>
-     * <strong>Note:</strong> Do not override both this method and
-     * {@link #onLevelChange(int)}. Only override one method. If your app
-     * targets SDK <= 23 ({@link android.os.Build.VERSION_CODES#M M}), you
-     * will need to override {@link #onLevelChange(int)} to receive callbacks
-     * on devices running Android M and below.
-     *
-     * @param level the level as a floating-point value, typically between 0.0
-     *              and 10000.0 ({@link #MAX_LEVEL_FLOAT})
-     * @return {@code true} if the level change has caused the appearance of
-     *         the drawable to change such that it needs to be redrawn, or
-     *         {@code false} if there is no need to redraw
-     */
-    protected boolean onLevelChange(float level) {
-        return onLevelChange(Math.round(level));
-    }
-
     /**
      * Override this in your subclass to change appearance if you vary based on
      * the bounds.
@@ -1410,23 +1326,6 @@ public abstract class Drawable {
         tintFilter.setMode(tintMode);
         return tintFilter;
     }
-
-    /**
-     * Animatable property for Drawable level.
-     *
-     * @hide Until Drawable animations have been cleaned up.
-     */
-    public static final FloatProperty<Drawable> LEVEL = new FloatProperty<Drawable>("levelFloat") {
-        @Override
-        public Float get(Drawable object) {
-            return object.getLevelFloat();
-        }
-
-        @Override
-        public void setValue(Drawable object, float value) {
-            object.setLevel(value);
-        }
-    };
 
     /**
      * Obtains styled attributes from the theme, if available, or unstyled
