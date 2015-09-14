@@ -530,8 +530,8 @@ public class GradientDrawable extends Drawable {
      *                 {@code false} otherwise
      *
      * @see #mutate()
-     * @see #setLevel(float)
-     * @see #getLevelFloat()
+     * @see #setLevel(int)
+     * @see #getLevel()
      * @see #isUseLevel()
      */
     public void setUseLevel(boolean useLevel) {
@@ -764,7 +764,7 @@ public class GradientDrawable extends Drawable {
         if (mRingPath != null && (!st.mUseLevelForShape || !mPathIsDirty)) return mRingPath;
         mPathIsDirty = false;
 
-        float sweep = st.mUseLevelForShape ? (360.0f * getLevelFloat() / MAX_LEVEL_FLOAT) : 360f;
+        float sweep = st.mUseLevelForShape ? (360.0f * getLevel() / 10000.0f) : 360f;
 
         RectF bounds = new RectF(mRect);
 
@@ -990,7 +990,7 @@ public class GradientDrawable extends Drawable {
     }
 
     @Override
-    protected boolean onLevelChange(float level) {
+    protected boolean onLevelChange(int level) {
         super.onLevelChange(level);
         mGradientIsDirty = true;
         mPathIsDirty = true;
@@ -1026,7 +1026,7 @@ public class GradientDrawable extends Drawable {
                 final float x0, x1, y0, y1;
 
                 if (st.mGradient == LINEAR_GRADIENT) {
-                    final float level = st.mUseLevel ? getLevelFloat() / MAX_LEVEL_FLOAT : 1.0f;
+                    final float level = st.mUseLevel ? getLevel() / 10000.0f : 1.0f;
                     switch (st.mOrientation) {
                     case TOP_BOTTOM:
                         x0 = r.left;            y0 = r.top;
@@ -1080,7 +1080,7 @@ public class GradientDrawable extends Drawable {
                     }
 
                     if (st.mUseLevel) {
-                        radius *= getLevelFloat() / MAX_LEVEL_FLOAT;
+                        radius *= getLevel() / 10000.0f;
                     }
 
                     mGradientRadius = radius;
@@ -1115,7 +1115,7 @@ public class GradientDrawable extends Drawable {
                             tempPositions = st.mTempPositions = new float[length + 1];
                         }
 
-                        final float level = getLevelFloat() / MAX_LEVEL_FLOAT;
+                        final float level = getLevel() / 10000.0f;
                         for (int i = 0; i < length; i++) {
                             tempPositions[i] = i * fraction * level;
                         }

@@ -92,7 +92,7 @@ public abstract class DrawableWrapper extends Drawable implements Drawable.Callb
             // Only call setters for data that's stored in the base Drawable.
             dr.setVisible(isVisible(), true);
             dr.setState(getState());
-            dr.setLevel(getLevelFloat());
+            dr.setLevel(getLevel());
             dr.setBounds(getBounds());
             dr.setLayoutDirection(getLayoutDirection());
 
@@ -286,7 +286,7 @@ public abstract class DrawableWrapper extends Drawable implements Drawable.Callb
     }
 
     @Override
-    protected boolean onLevelChange(float level) {
+    protected boolean onLevelChange(int level) {
         return mDrawable != null && mDrawable.setLevel(level);
     }
 

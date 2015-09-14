@@ -303,10 +303,10 @@ public class RotateDrawable extends DrawableWrapper {
     }
 
     @Override
-    protected boolean onLevelChange(float level) {
+    protected boolean onLevelChange(int level) {
         super.onLevelChange(level);
 
-        final float value = level / (float) MAX_LEVEL_FLOAT;
+        final float value = level / (float) MAX_LEVEL;
         final float degrees = MathUtils.lerp(mState.mFromDegrees, mState.mToDegrees, value);
         mState.mCurrentDegrees = degrees;
 

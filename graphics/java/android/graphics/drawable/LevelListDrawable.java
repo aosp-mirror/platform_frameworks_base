@@ -69,16 +69,15 @@ public class LevelListDrawable extends DrawableContainer {
         if (drawable != null) {
             mLevelListState.addLevel(low, high, drawable);
             // in case the new state matches our current state...
-            onLevelChange(getLevelFloat());
+            onLevelChange(getLevel());
         }
     }
 
     // overrides from Drawable
 
     @Override
-    protected boolean onLevelChange(float level) {
-        final int nearestLevel = Math.round(level);
-        final int idx = mLevelListState.indexOfLevel(nearestLevel);
+    protected boolean onLevelChange(int level) {
+        int idx = mLevelListState.indexOfLevel(level);
         if (selectDrawable(idx)) {
             return true;
         }
@@ -142,7 +141,7 @@ public class LevelListDrawable extends DrawableContainer {
             mLevelListState.addLevel(low, high, dr);
         }
 
-        onLevelChange(getLevelFloat());
+        onLevelChange(getLevel());
     }
 
     @Override
@@ -241,7 +240,7 @@ public class LevelListDrawable extends DrawableContainer {
     private LevelListDrawable(LevelListState state, Resources res) {
         final LevelListState as = new LevelListState(state, this, res);
         setConstantState(as);
-        onLevelChange(getLevelFloat());
+        onLevelChange(getLevel());
     }
 }
 
