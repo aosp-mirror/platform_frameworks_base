@@ -18,6 +18,8 @@ package com.android.test.uibench;
 import android.widget.ArrayAdapter;
 import android.widget.ListAdapter;
 
+import com.android.test.uibench.listview.CompatListActivity;
+
 public class TrivialListActivity extends CompatListActivity {
     @Override
     protected ListAdapter createListAdapter() {

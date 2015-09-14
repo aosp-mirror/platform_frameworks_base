@@ -15,15 +15,14 @@
  */
 package com.android.test.uibench;
 
-import android.widget.ArrayAdapter;
-import android.widget.ListAdapter;
+import android.support.v7.widget.RecyclerView;
 
-import com.android.test.uibench.listview.CompatListActivity;
+import com.android.test.uibench.recyclerview.RvArrayAdapter;
+import com.android.test.uibench.recyclerview.RvCompatListActivity;
 
-public class TextCacheLowHitrateActivity extends CompatListActivity {
+public class TrivialRecyclerViewActivity extends RvCompatListActivity {
     @Override
-    protected ListAdapter createListAdapter() {
-        return new ArrayAdapter<>(this, android.R.layout.simple_list_item_1,
-                TextUtils.buildParagraphListWithHitPercentage(20));
+    protected RecyclerView.Adapter createAdapter() {
+        return new RvArrayAdapter(TextUtils.buildSimpleStringList());
     }
 }

@@ -20,6 +20,8 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.ListAdapter;
 
+import com.android.test.uibench.listview.CompatListActivity;
+
 public class InflatingListActivity extends CompatListActivity {
     @Override
     protected ListAdapter createListAdapter() {
