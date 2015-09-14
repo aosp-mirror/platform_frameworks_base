@@ -66,6 +66,8 @@ import java.util.List;
  * to the launcher hotseat. Clicking an icon launches or activates the associated activity. A long
  * click will trigger a drag to allow the icons to be reordered. As an icon is dragged the other
  * icons shift to make space for it to be dropped. These layout changes are animated.
+ * Navigation bar contains both pinned and unpinned apps: pinned in the left part, unpinned in the
+ * right part, with no separator in between.
  */
 class NavigationBarApps extends LinearLayout {
     public final static boolean DEBUG = false;
@@ -463,17 +465,48 @@ class NavigationBarApps extends LinearLayout {
     }
 
     /**
+     * Returns initial index for a new app that doesn't exist in Shelf.
+     * Such apps get created by dragging them into Shelf from other apps or by dragging from Shelf
+     * and then back, or by removing from shelf as an intermediate step of pinning an app via menu.
+     * @param indexHint Initial proposed position for the item.
+     * @param isAppPinned True if the app being dragged is pinned.
+     */
+    int getNewAppIndex(int indexHint, boolean isAppPinned) {
+        int i;
+        if (isAppPinned) {
+            // For a pinned app, find the rightmost position to the left of the target that has a
+            // pinned app. We'll insert to the right of that position.
+            for (i = indexHint; i > 0; --i) {
+                View v = getChildAt(i - 1);
+                AppButtonData targetButtonData = (AppButtonData) v.getTag();
+                if (targetButtonData.pinned) break;
+            }
+        } else {
+            // For an unpinned app, find the leftmost position to the right of the target that has
+            // an unpinned app. We'll insert to the left of that position.
+            int childCount = getChildCount();
+            for (i = indexHint; i < childCount; ++i) {
+                View v = getChildAt(i);
+                AppButtonData targetButtonData = (AppButtonData) v.getTag();
+                if (!targetButtonData.pinned) break;
+            }
+        }
+        return i;
+    }
+
+    /**
      * Handles a drag entering an existing icon. Not implemented in the drag listener because it
      * needs to use LinearLayout/ViewGroup methods.
      */
     private void onDragEnteredIcon(View target) {
         if (DEBUG) Slog.d(TAG, "onDragEntered " + indexOfChild(target));
 
-        // If the drag didn't start from an existing icon, add an invisible placeholder to create
-        // empty space for the user to drag into.
+        int targetIndex = indexOfChild(target);
+
+        // If the drag didn't start from an existing shelf icon, add an invisible placeholder to
+        // create empty space for the user to drag into.
         if (mDragView == null) {
-            int placeholderIndex = indexOfChild(target);
-            mDragView = createPlaceholderDragView(placeholderIndex);
+            mDragView = createPlaceholderDragView(getNewAppIndex(targetIndex, true));
             return;
         }
 
@@ -483,7 +516,28 @@ class NavigationBarApps extends LinearLayout {
         }
 
         // "Move" the dragged app by removing it and adding it back at the target location.
-        int targetIndex = indexOfChild(target);
+        AppButtonData targetButtonData = (AppButtonData) target.getTag();
+        int dragViewIndex = indexOfChild(mDragView);
+        AppButtonData dragViewButtonData = (AppButtonData) mDragView.getTag();
+        // Calculating whether the dragged app is pinned. If the app came from outside if the shelf,
+        // in which case dragViewButtonData == null, it's a new app that we'll pin. Otherwise, the
+        // button data is defined, and we look whether that existing app is pinned.
+        boolean isAppPinned = dragViewButtonData == null || dragViewButtonData.pinned;
+
+        if (dragViewIndex == -1) {
+            // Drag view exists, but is not a child, which means that the drag has started at or
+            // already visited shelf, then left it, and now is entering it again.
+            targetIndex = getNewAppIndex(targetIndex, isAppPinned);
+        } else if (dragViewIndex < targetIndex) {
+            // The dragged app is currently at the left of the view where the drag is.
+            // We shouldn't allow moving a pinned app to the right of the unpinned app.
+            if (!targetButtonData.pinned && isAppPinned) return;
+        } else {
+            // The dragged app is currently at the right of the view where the drag is.
+            // We shouldn't allow moving a unpinned app to the left of the pinned app.
+            if (targetButtonData.pinned && !isAppPinned) return;
+        }
+
         // This works, but is subtle:
         // * If dragViewIndex > targetIndex then the dragged app is moving from right to left and
         //   the dragged app will be added in front of the target.
@@ -820,8 +874,11 @@ class NavigationBarApps extends LinearLayout {
                             @Override
                             public boolean onMenuItemClick(MenuItem item) {
                                 appButtonData.pinned = false;
-                                if (appButtonData.isEmpty()) {
-                                    removeView(appIcon);
+                                removeView(appIcon);
+                                if (!appButtonData.isEmpty()) {
+                                    // If the app has running tasks, re-add it to the end of shelf
+                                    // after unpinning.
+                                    addView(appIcon);
                                 }
                                 updateState(appIcon);
                                 return true;
@@ -832,6 +889,9 @@ class NavigationBarApps extends LinearLayout {
                     @Override
                     public boolean onMenuItemClick(MenuItem item) {
                         appButtonData.pinned = true;
+                        removeView(appIcon);
+                        // Re-add the pinned icon to the end of the pinned list.
+                        addView(appIcon, getNewAppIndex(getChildCount(), true));
                         updateState(appIcon);
                         return true;
                     }
