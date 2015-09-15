@@ -115,6 +115,7 @@ class WindowStateAnimator {
     Rect mClipRect = new Rect();
     Rect mTmpClipRect = new Rect();
     Rect mLastClipRect = new Rect();
+    Rect mTmpStackBounds = new Rect();
 
     // Used to save animation distances between the time they are calculated and when they are
     // used.
@@ -167,6 +168,11 @@ class WindowStateAnimator {
     static final int READY_TO_SHOW = 3;
     /** Set when the window has been shown in the screen the first time. */
     static final int HAS_DRAWN = 4;
+
+    // Surface flinger doesn't support crop rectangles where width or height is non-positive.
+    // However, we need to somehow handle the situation where the cropping would completely hide
+    // the window. We achieve this by explicitly hiding the surface and not letting it be shown.
+    private boolean mHiddenForCrop;
 
     String drawStateToString() {
         switch (mDrawState) {
@@ -1331,12 +1337,20 @@ class WindowStateAnimator {
         // so we need to translate to match the actual surface coordinates.
         clipRect.offset(attrs.surfaceInsets.left, attrs.surfaceInsets.top);
 
+        adjustCropToStackBounds(w, clipRect);
+
         if (!clipRect.equals(mLastClipRect)) {
             mLastClipRect.set(clipRect);
             try {
                 if (WindowManagerService.SHOW_TRANSACTIONS) WindowManagerService.logSurface(w,
                         "CROP " + clipRect.toShortString(), null);
-                mSurfaceControl.setWindowCrop(clipRect);
+                if (clipRect.width() > 0 && clipRect.height() > 0) {
+                    mSurfaceControl.setWindowCrop(clipRect);
+                    mHiddenForCrop = false;
+                } else {
+                    hide();
+                    mHiddenForCrop = true;
+                }
             } catch (RuntimeException e) {
                 Slog.w(TAG, "Error setting crop surface of " + w
                         + " crop=" + clipRect.toShortString(), e);
@@ -1344,6 +1358,25 @@ class WindowStateAnimator {
                     mService.reclaimSomeSurfaceMemoryLocked(this, "crop", true);
                 }
             }
+        }
+    }
+
+    private void adjustCropToStackBounds(WindowState w, Rect clipRect) {
+        if (w.getAttrs().type == LayoutParams.TYPE_BASE_APPLICATION) {
+            TaskStack stack = w.getTask().mStack;
+            stack.getBounds(mTmpStackBounds);
+            final int surfaceX = (int) mSurfaceX;
+            final int surfaceY = (int) mSurfaceY;
+            // We need to do some acrobatics with surface position, because their clip region is
+            // relative to the inside of the surface, but the stack bounds aren't.
+            clipRect.left = Math.max(0,
+                    Math.max(mTmpStackBounds.left, surfaceX + clipRect.left) - surfaceX);
+            clipRect.top = Math.max(0,
+                    Math.max(mTmpStackBounds.top, surfaceY + clipRect.top) - surfaceY);
+            clipRect.right = Math.max(0,
+                    Math.min(mTmpStackBounds.right, surfaceX + clipRect.right) - surfaceX);
+            clipRect.bottom = Math.max(0,
+                    Math.min(mTmpStackBounds.bottom, surfaceY + clipRect.bottom) - surfaceY);
         }
     }
 
@@ -1517,7 +1550,7 @@ class WindowStateAnimator {
                             mDsDx * w.mHScale, mDtDx * w.mVScale,
                             mDsDy * w.mHScale, mDtDy * w.mVScale);
 
-                    if (mLastHidden && mDrawState == HAS_DRAWN) {
+                    if (mLastHidden && mDrawState == HAS_DRAWN && !mHiddenForCrop) {
                         if (WindowManagerService.SHOW_TRANSACTIONS) WindowManagerService.logSurface(w,
                                 "SHOW (performLayout)", null);
                         if (WindowManagerService.DEBUG_VISIBILITY) Slog.v(TAG, "Showing " + w
