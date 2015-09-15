@@ -54,7 +54,7 @@ class TaskPositioner implements DimLayer.DimLayerUser {
 
     // The margin the pointer position has to be within the side of the screen to be
     // considered at the side of the screen.
-    private static final int SIDE_MARGIN_DIP = 5;
+    private static final int SIDE_MARGIN_DIP = 100;
 
     @IntDef(flag = true,
             value = {
