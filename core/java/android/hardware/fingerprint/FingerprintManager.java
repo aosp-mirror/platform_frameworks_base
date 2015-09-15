@@ -775,7 +775,7 @@ public class FingerprintManager {
                 if (fingerId != reqFingerId) {
                     Log.w(TAG, "Finger id didn't match: " + fingerId + " != " + reqFingerId);
                 }
-                if (fingerId != reqFingerId) {
+                if (groupId != reqGroupId) {
                     Log.w(TAG, "Group id didn't match: " + groupId + " != " + reqGroupId);
                 }
                 mRemovalCallback.onRemovalSucceeded(mRemovalFingerprint);
