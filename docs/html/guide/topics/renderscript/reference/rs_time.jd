@@ -78,9 +78,9 @@ system up time.  It is not recommended to call these functions inside of a kerne
     <span class='normal'>: Seconds since January 1, 1970</span>
   </h4>
   <div class='jd-details-descr'>
-<p>A typedef of: int&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;    When compiling for 32 bits. 
+<p>A typedef of: int&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;When compiling for 32 bits.
 </p>
-<p>A typedef of: long&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;    When compiling for 64 bits. 
+<p>A typedef of: long&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;When compiling for 64 bits.
 </p>
 <p> Calendar time interpreted as seconds elapsed since the Epoch (00:00:00 on
 January 1, 1970, Coordinated Universal Time (UTC)).

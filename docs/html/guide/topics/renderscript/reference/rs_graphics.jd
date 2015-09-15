@@ -502,7 +502,7 @@ page.title=RenderScript Graphics Functions and Types
   </h4>
   <div class='jd-details-descr'>
 <p>An enum with the following values:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-    When compiling for 32 bits. <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 16 - 22</a>
+When compiling for 32 bits. <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 16 - 22</a>
 </p>
   <table class='jd-tagtable'><tbody>
     <tr><th>RS_BLEND_DST_ZERO = 0</th><td></td></tr>
@@ -527,7 +527,7 @@ page.title=RenderScript Graphics Functions and Types
   </h4>
   <div class='jd-details-descr'>
 <p>An enum with the following values:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-    When compiling for 32 bits. <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 16 - 22</a>
+When compiling for 32 bits. <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 16 - 22</a>
 </p>
   <table class='jd-tagtable'><tbody>
     <tr><th>RS_BLEND_SRC_ZERO = 0</th><td></td></tr>
@@ -553,7 +553,7 @@ page.title=RenderScript Graphics Functions and Types
   </h4>
   <div class='jd-details-descr'>
 <p>An enum with the following values:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-    When compiling for 32 bits. <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 16 - 22</a>
+When compiling for 32 bits. <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 16 - 22</a>
 </p>
   <table class='jd-tagtable'><tbody>
     <tr><th>RS_CULL_BACK = 0</th><td></td></tr>
@@ -573,7 +573,7 @@ page.title=RenderScript Graphics Functions and Types
   </h4>
   <div class='jd-details-descr'>
 <p>An enum with the following values:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-    When compiling for 32 bits. <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 16 - 22</a>
+When compiling for 32 bits. <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 16 - 22</a>
 </p>
   <table class='jd-tagtable'><tbody>
     <tr><th>RS_DEPTH_FUNC_ALWAYS = 0</th><td>Always drawn</td></tr>
@@ -599,11 +599,7 @@ depth to that found in the depth buffer.
     <span class='normal'>: Handle to a Font</span>
   </h4>
   <div class='jd-details-descr'>
-<p>A typedef of: _RS_HANDLE __attribute__((
-#if (defined(RS_VERSION) && (RS_VERSION >= 1))
-deprecated
-#endif
-))&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;    When compiling for 32 bits. Removed from <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 23 and higher</a>
+<p>When compiling for 32 bits. Removed from <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 23 and higher</a>
 </p>
     <p><b>Deprecated.</b>  Do not use.</p>
 <p> Opaque handle to a RenderScript font object.
@@ -619,11 +615,7 @@ See: android.renderscript.Font
     <span class='normal'>: Handle to a Mesh</span>
   </h4>
   <div class='jd-details-descr'>
-<p>A typedef of: _RS_HANDLE __attribute__((
-#if (defined(RS_VERSION) && (RS_VERSION >= 1))
-deprecated
-#endif
-))&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;    When compiling for 32 bits. Removed from <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 23 and higher</a>
+<p>When compiling for 32 bits. Removed from <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 23 and higher</a>
 </p>
     <p><b>Deprecated.</b>  Do not use.</p>
 <p> Opaque handle to a RenderScript mesh object.
@@ -640,7 +632,7 @@ See: android.renderscript.Mesh
   </h4>
   <div class='jd-details-descr'>
 <p>An enum with the following values:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-    When compiling for 32 bits. <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 16 - 22</a>
+When compiling for 32 bits. <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 16 - 22</a>
 </p>
   <table class='jd-tagtable'><tbody>
     <tr><th>RS_PRIMITIVE_POINT = 0</th><td>Vertex data will be rendered as a series of points</td></tr>
@@ -664,11 +656,7 @@ See: android.renderscript.Mesh
     <span class='normal'>: Handle to a ProgramFragment</span>
   </h4>
   <div class='jd-details-descr'>
-<p>A typedef of: _RS_HANDLE __attribute__((
-#if (defined(RS_VERSION) && (RS_VERSION >= 1))
-deprecated
-#endif
-))&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;    When compiling for 32 bits. Removed from <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 23 and higher</a>
+<p>When compiling for 32 bits. Removed from <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 23 and higher</a>
 </p>
     <p><b>Deprecated.</b>  Do not use.</p>
 <p> Opaque handle to a RenderScript ProgramFragment object.
@@ -684,11 +672,7 @@ See: android.renderscript.ProgramFragment
     <span class='normal'>: Handle to a ProgramRaster</span>
   </h4>
   <div class='jd-details-descr'>
-<p>A typedef of: _RS_HANDLE __attribute__((
-#if (defined(RS_VERSION) && (RS_VERSION >= 1))
-deprecated
-#endif
-))&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;    When compiling for 32 bits. Removed from <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 23 and higher</a>
+<p>When compiling for 32 bits. Removed from <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 23 and higher</a>
 </p>
     <p><b>Deprecated.</b>  Do not use.</p>
 <p> Opaque handle to a RenderScript ProgramRaster object.
@@ -704,11 +688,7 @@ See: android.renderscript.ProgramRaster
     <span class='normal'>: Handle to a ProgramStore</span>
   </h4>
   <div class='jd-details-descr'>
-<p>A typedef of: _RS_HANDLE __attribute__((
-#if (defined(RS_VERSION) && (RS_VERSION >= 1))
-deprecated
-#endif
-))&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;    When compiling for 32 bits. Removed from <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 23 and higher</a>
+<p>When compiling for 32 bits. Removed from <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 23 and higher</a>
 </p>
     <p><b>Deprecated.</b>  Do not use.</p>
 <p> Opaque handle to a RenderScript ProgramStore object.
@@ -724,11 +704,7 @@ See: android.renderscript.ProgramStore
     <span class='normal'>: Handle to a ProgramVertex</span>
   </h4>
   <div class='jd-details-descr'>
-<p>A typedef of: _RS_HANDLE __attribute__((
-#if (defined(RS_VERSION) && (RS_VERSION >= 1))
-deprecated
-#endif
-))&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;    When compiling for 32 bits. Removed from <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 23 and higher</a>
+<p>When compiling for 32 bits. Removed from <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 23 and higher</a>
 </p>
     <p><b>Deprecated.</b>  Do not use.</p>
 <p> Opaque handle to a RenderScript ProgramVertex object.
