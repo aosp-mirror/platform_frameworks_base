@@ -637,27 +637,25 @@ public class DirectoryFragment extends Fragment {
         @Override
         public void onSelectionChanged() {
             mModel.getSelection(mSelected);
+            TypedValue color = new TypedValue();
             if (mSelected.size() > 0) {
                 if (DEBUG) Log.d(TAG, "Maybe starting action mode.");
                 if (mActionMode == null) {
                     if (DEBUG) Log.d(TAG, "Yeah. Starting action mode.");
                     mActionMode = getActivity().startActionMode(this);
-                    getActivity().getWindow().setStatusBarColor(
-                        getResources().getColor(R.color.action_mode_status_bar_background));
                 }
+                getActivity().getTheme().resolveAttribute(
+                    R.attr.colorActionMode, color, true);
                 updateActionMenu();
             } else {
                 if (DEBUG) Log.d(TAG, "Finishing action mode.");
                 if (mActionMode != null) {
                     mActionMode.finish();
                 }
-                // Obtain the original status bar color from the theme, and restore it.
-                TypedValue color = new TypedValue();
                 getActivity().getTheme().resolveAttribute(
                     android.R.attr.colorPrimaryDark, color, true);
-                getActivity().getWindow().setStatusBarColor(color.data);
-
             }
+            getActivity().getWindow().setStatusBarColor(color.data);
 
             if (mActionMode != null) {
                 mActionMode.setTitle(TextUtils.formatSelectedCount(mSelected.size()));
