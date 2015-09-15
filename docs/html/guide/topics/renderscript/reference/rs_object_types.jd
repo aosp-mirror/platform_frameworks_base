@@ -99,7 +99,7 @@ elements, and scripts.  Most of these object are created using the Java RenderSc
     <span class='normal'>: Handle to an allocation</span>
   </h4>
   <div class='jd-details-descr'>
-<p>A typedef of: _RS_HANDLE&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</p>
+<p></p>
 <p> An opaque handle to a RenderScript allocation.
 </p>
 
@@ -116,7 +116,7 @@ elements, and scripts.  Most of these object are created using the Java RenderSc
   </h4>
   <div class='jd-details-descr'>
 <p>An enum with the following values:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 14</a>
+Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 14</a>
 </p>
   <table class='jd-tagtable'><tbody>
     <tr><th>RS_ALLOCATION_CUBEMAP_FACE_POSITIVE_X = 0</th><td></td></tr>
@@ -139,7 +139,7 @@ elements, and scripts.  Most of these object are created using the Java RenderSc
   </h4>
   <div class='jd-details-descr'>
 <p>An enum with the following values:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 14</a>
+Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 14</a>
 </p>
   <table class='jd-tagtable'><tbody>
     <tr><th>RS_ALLOCATION_USAGE_SCRIPT = 0x0001</th><td>Allocation is bound to and accessed by scripts.</td></tr>
@@ -165,7 +165,7 @@ relevant to an allocation or an operation on an allocation.
   </h4>
   <div class='jd-details-descr'>
 <p>An enum with the following values:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 16</a>
+Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 16</a>
 </p>
   <table class='jd-tagtable'><tbody>
     <tr><th>RS_KIND_USER         = 0</th><td>No special interpretation.</td></tr>
@@ -202,7 +202,7 @@ texture formats.
   </h4>
   <div class='jd-details-descr'>
 <p>An enum with the following values:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 16</a>
+Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 16</a>
 </p>
   <table class='jd-tagtable'><tbody>
     <tr><th>RS_TYPE_NONE = 0</th><td>Element is a complex type, i.e. a struct.</td></tr>
@@ -253,7 +253,7 @@ as a single unit for packing and alignment purposes.
     <span class='normal'>: Handle to an element</span>
   </h4>
   <div class='jd-details-descr'>
-<p>A typedef of: _RS_HANDLE&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</p>
+<p></p>
 <p> An opaque handle to a RenderScript element.
 </p>
 
@@ -269,7 +269,7 @@ as a single unit for packing and alignment purposes.
     <span class='normal'>: Handle to a Sampler</span>
   </h4>
   <div class='jd-details-descr'>
-<p>A typedef of: _RS_HANDLE&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</p>
+<p></p>
 <p> An opaque handle to a RenderScript sampler object.
 </p>
 
@@ -286,7 +286,7 @@ as a single unit for packing and alignment purposes.
   </h4>
   <div class='jd-details-descr'>
 <p>An enum with the following values:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 16</a>
+Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 16</a>
 </p>
   <table class='jd-tagtable'><tbody>
     <tr><th>RS_SAMPLER_NEAREST = 0</th><td></td></tr>
@@ -308,7 +308,7 @@ as a single unit for packing and alignment purposes.
     <span class='normal'>: Handle to a Script</span>
   </h4>
   <div class='jd-details-descr'>
-<p>A typedef of: _RS_HANDLE&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</p>
+<p></p>
 <p> An opaque handle to a RenderScript script object.
 </p>
 
@@ -324,7 +324,7 @@ as a single unit for packing and alignment purposes.
     <span class='normal'>: Handle to a Type</span>
   </h4>
   <div class='jd-details-descr'>
-<p>A typedef of: _RS_HANDLE&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</p>
+<p></p>
 <p> An opaque handle to a RenderScript type.
 </p>
 
