@@ -245,6 +245,8 @@ final class DefaultPermissionGrantPolicy {
             if (verifierPackage != null
                     && doesPackageSupportRuntimePermissions(verifierPackage)) {
                 grantRuntimePermissionsLPw(verifierPackage, STORAGE_PERMISSIONS, true, userId);
+                grantRuntimePermissionsLPw(verifierPackage, PHONE_PERMISSIONS, false, userId);
+                grantRuntimePermissionsLPw(verifierPackage, SMS_PERMISSIONS, false, userId);
             }
 
             // SetupWizard
