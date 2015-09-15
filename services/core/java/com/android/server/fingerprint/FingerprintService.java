@@ -337,7 +337,7 @@ public class FingerprintService extends SystemService implements IBinder.DeathRe
             return;
         }
         stopPendingOperations(true);
-        mEnrollClient = new ClientMonitor(token, receiver, groupId, restricted);
+        mEnrollClient = new ClientMonitor(token, receiver, groupId, restricted, token.toString());
         final int timeout = (int) (ENROLLMENT_TIMEOUT_MS / MS_PER_SEC);
         try {
             final int result = daemon.enroll(cryptoToken, groupId, timeout);
@@ -417,14 +417,15 @@ public class FingerprintService extends SystemService implements IBinder.DeathRe
     }
 
     void startAuthentication(IBinder token, long opId, int groupId,
-            IFingerprintServiceReceiver receiver, int flags, boolean restricted) {
+            IFingerprintServiceReceiver receiver, int flags, boolean restricted,
+            String opPackageName) {
         IFingerprintDaemon daemon = getFingerprintDaemon();
         if (daemon == null) {
             Slog.w(TAG, "startAuthentication: no fingeprintd!");
             return;
         }
         stopPendingOperations(true);
-        mAuthClient = new ClientMonitor(token, receiver, groupId, restricted);
+        mAuthClient = new ClientMonitor(token, receiver, groupId, restricted, opPackageName);
         if (inLockoutMode()) {
             Slog.v(TAG, "In lockout mode; disallowing authentication");
             if (!mAuthClient.sendError(FingerprintManager.FINGERPRINT_ERROR_LOCKOUT)) {
@@ -481,7 +482,7 @@ public class FingerprintService extends SystemService implements IBinder.DeathRe
         }
 
         stopPendingOperations(true);
-        mRemoveClient = new ClientMonitor(token, receiver, userId, restricted);
+        mRemoveClient = new ClientMonitor(token, receiver, userId, restricted, token.toString());
         // The fingerprint template ids will be removed when we get confirmation from the HAL
         try {
             final int result = daemon.remove(fingerId, userId);
@@ -574,11 +575,11 @@ public class FingerprintService extends SystemService implements IBinder.DeathRe
         }
         if (mAppOps.noteOp(AppOpsManager.OP_USE_FINGERPRINT, uid, opPackageName)
                 != AppOpsManager.MODE_ALLOWED) {
-            Slog.v(TAG, "Rejecting " + opPackageName + " ; permission denied");
+            Slog.w(TAG, "Rejecting " + opPackageName + " ; permission denied");
             return false;
         }
         if (foregroundOnly && !isForegroundActivity(uid, pid)) {
-            Slog.v(TAG, "Rejecting " + opPackageName + " ; not in foreground");
+            Slog.w(TAG, "Rejecting " + opPackageName + " ; not in foreground");
             return false;
         }
         return true;
@@ -606,13 +607,15 @@ public class FingerprintService extends SystemService implements IBinder.DeathRe
         IFingerprintServiceReceiver receiver;
         int userId;
         boolean restricted; // True if client does not have MANAGE_FINGERPRINT permission
+        String owner;
 
         public ClientMonitor(IBinder token, IFingerprintServiceReceiver receiver, int userId,
-                boolean restricted) {
+                boolean restricted, String owner) {
             this.token = token;
             this.receiver = receiver;
             this.userId = userId;
             this.restricted = restricted;
+            this.owner = owner; // name of the client that owns this - for debugging
             try {
                 token.linkToDeath(this, 0);
             } catch (RemoteException e) {
@@ -695,6 +698,10 @@ public class FingerprintService extends SystemService implements IBinder.DeathRe
                     if (!authenticated) {
                         receiver.onAuthenticationFailed(mHalDeviceId);
                     } else {
+                        if (DEBUG) {
+                            Slog.v(TAG, "onAuthenticated(owner=" + mAuthClient.owner
+                                    + ", id=" + fpId + ", gp=" + groupId + ")");
+                        }
                         Fingerprint fp = !restricted ?
                                 new Fingerprint("" /* TODO */, groupId, fpId, mHalDeviceId) : null;
                         receiver.onAuthenticationSucceeded(mHalDeviceId, fp);
@@ -915,6 +922,7 @@ public class FingerprintService extends SystemService implements IBinder.DeathRe
                 final IFingerprintServiceReceiver receiver, final int flags,
                 final String opPackageName) {
             if (!canUseFingerprint(opPackageName, true /* foregroundOnly */)) {
+                if (DEBUG) Slog.v(TAG, "authenticate(): reject " + opPackageName);
                 return;
             }
 
@@ -927,7 +935,8 @@ public class FingerprintService extends SystemService implements IBinder.DeathRe
                 @Override
                 public void run() {
                     MetricsLogger.histogram(mContext, "fingerprint_token", opId != 0L ? 1 : 0);
-                    startAuthentication(token, opId, effectiveGroupId, receiver, flags, restricted);
+                    startAuthentication(token, opId, effectiveGroupId, receiver, flags, restricted,
+                            opPackageName);
                 }
             });
         }
