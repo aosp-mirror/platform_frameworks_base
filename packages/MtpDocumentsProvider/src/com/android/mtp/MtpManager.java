@@ -42,7 +42,7 @@ class MtpManager {
     private final SparseArray<MtpDevice> mDevices = new SparseArray<>();
 
     MtpManager(Context context) {
-        mManager = (UsbManager)context.getSystemService(Context.USB_SERVICE);
+        mManager = (UsbManager) context.getSystemService(Context.USB_SERVICE);
     }
 
     synchronized void openDevice(int deviceId) throws IOException {
@@ -96,78 +96,96 @@ class MtpManager {
         return result;
     }
 
-    synchronized MtpRoot[] getRoots(int deviceId) throws IOException {
+    MtpRoot[] getRoots(int deviceId) throws IOException {
         final MtpDevice device = getDevice(deviceId);
-        final int[] storageIds = device.getStorageIds();
-        if (storageIds == null) {
-            throw new IOException("Failed to obtain storage IDs.");
+        synchronized (device) {
+            final int[] storageIds = device.getStorageIds();
+            if (storageIds == null) {
+                throw new IOException("Failed to obtain storage IDs.");
+            }
+            final MtpRoot[] results = new MtpRoot[storageIds.length];
+            for (int i = 0; i < storageIds.length; i++) {
+                results[i] = new MtpRoot(deviceId, device.getStorageInfo(storageIds[i]));
+            }
+            return results;
         }
-        final MtpRoot[] results = new MtpRoot[storageIds.length];
-        for (int i = 0; i < storageIds.length; i++) {
-            results[i] = new MtpRoot(deviceId, device.getStorageInfo(storageIds[i]));
-        }
-        return results;
     }
 
-    synchronized MtpObjectInfo getObjectInfo(int deviceId, int objectHandle)
+    MtpObjectInfo getObjectInfo(int deviceId, int objectHandle)
             throws IOException {
         final MtpDevice device = getDevice(deviceId);
-        return device.getObjectInfo(objectHandle);
-    }
-
-    synchronized int[] getObjectHandles(int deviceId, int storageId, int parentObjectHandle)
-            throws IOException {
-        final MtpDevice device = getDevice(deviceId);
-        return device.getObjectHandles(storageId, 0 /* all format */, parentObjectHandle);
-    }
-
-    synchronized byte[] getObject(int deviceId, int objectHandle, int expectedSize)
-            throws IOException {
-        final MtpDevice device = getDevice(deviceId);
-        return device.getObject(objectHandle, expectedSize);
-    }
-
-    synchronized byte[] getThumbnail(int deviceId, int objectHandle) throws IOException {
-        final MtpDevice device = getDevice(deviceId);
-        return device.getThumbnail(objectHandle);
-    }
-
-    synchronized void deleteDocument(int deviceId, int objectHandle) throws IOException {
-        final MtpDevice device = getDevice(deviceId);
-        if (!device.deleteObject(objectHandle)) {
-            throw new IOException("Failed to delete document");
+        synchronized (device) {
+            return device.getObjectInfo(objectHandle);
         }
     }
 
-    synchronized int createDocument(int deviceId, MtpObjectInfo objectInfo,
-            ParcelFileDescriptor source) throws IOException {
+    int[] getObjectHandles(int deviceId, int storageId, int parentObjectHandle)
+            throws IOException {
         final MtpDevice device = getDevice(deviceId);
-        final MtpObjectInfo sendObjectInfoResult = device.sendObjectInfo(objectInfo);
-        if (sendObjectInfoResult == null) {
-            throw new IOException("Failed to create a document");
+        synchronized (device) {
+            return device.getObjectHandles(storageId, 0 /* all format */, parentObjectHandle);
         }
-        if (objectInfo.getFormat() != MtpConstants.FORMAT_ASSOCIATION) {
-            if (!device.sendObject(sendObjectInfoResult.getObjectHandle(),
-                    sendObjectInfoResult.getCompressedSize(), source)) {
-                throw new IOException("Failed to send contents of a document");
+    }
+
+    byte[] getObject(int deviceId, int objectHandle, int expectedSize)
+            throws IOException {
+        final MtpDevice device = getDevice(deviceId);
+        synchronized (device) {
+            return device.getObject(objectHandle, expectedSize);
+        }
+    }
+
+    byte[] getThumbnail(int deviceId, int objectHandle) throws IOException {
+        final MtpDevice device = getDevice(deviceId);
+        synchronized (device) {
+            return device.getThumbnail(objectHandle);
+        }
+    }
+
+    void deleteDocument(int deviceId, int objectHandle) throws IOException {
+        final MtpDevice device = getDevice(deviceId);
+        synchronized (device) {
+            if (!device.deleteObject(objectHandle)) {
+                throw new IOException("Failed to delete document");
             }
         }
-        return sendObjectInfoResult.getObjectHandle();
     }
 
-    synchronized int getParent(int deviceId, int objectHandle) throws IOException {
+    int createDocument(int deviceId, MtpObjectInfo objectInfo,
+            ParcelFileDescriptor source) throws IOException {
         final MtpDevice device = getDevice(deviceId);
-        final int result = (int) device.getParent(objectHandle);
-        if (result < 0) {
-            throw new FileNotFoundException("Not found parent object");
+        synchronized (device) {
+            final MtpObjectInfo sendObjectInfoResult = device.sendObjectInfo(objectInfo);
+            if (sendObjectInfoResult == null) {
+                throw new IOException("Failed to create a document");
+            }
+            if (objectInfo.getFormat() != MtpConstants.FORMAT_ASSOCIATION) {
+                if (!device.sendObject(sendObjectInfoResult.getObjectHandle(),
+                        sendObjectInfoResult.getCompressedSize(), source)) {
+                    throw new IOException("Failed to send contents of a document");
+                }
+            }
+            return sendObjectInfoResult.getObjectHandle();
         }
-        return result;
     }
 
-    synchronized void importFile(int deviceId, int objectHandle, ParcelFileDescriptor target)
+    int getParent(int deviceId, int objectHandle) throws IOException {
+        final MtpDevice device = getDevice(deviceId);
+        synchronized (device) {
+            final int result = (int) device.getParent(objectHandle);
+            if (result < 0) {
+                throw new FileNotFoundException("Not found parent object");
+            }
+            return result;
+        }
+    }
+
+    void importFile(int deviceId, int objectHandle, ParcelFileDescriptor target)
             throws IOException {
         final MtpDevice device = getDevice(deviceId);
-        device.importFile(objectHandle, target);
+        synchronized (device) {
+            device.importFile(objectHandle, target);
+        }
     }
 
     private MtpDevice getDevice(int deviceId) throws IOException {
