@@ -249,9 +249,17 @@ public class CallerInfo {
 
                 // look for the custom ringtone, create from the string stored
                 // in the database.
+                // An empty string ("") in the database indicates a silent ringtone,
+                // and we set contactRingtoneUri = Uri.EMPTY, so that no ringtone will be played.
+                // {null} in the database indicates the default ringtone,
+                // and we set contactRingtoneUri = null, so that default ringtone will be played.
                 columnIndex = cursor.getColumnIndex(PhoneLookup.CUSTOM_RINGTONE);
                 if ((columnIndex != -1) && (cursor.getString(columnIndex) != null)) {
-                    info.contactRingtoneUri = Uri.parse(cursor.getString(columnIndex));
+                    if (TextUtils.isEmpty(cursor.getString(columnIndex))) {
+                        info.contactRingtoneUri = Uri.EMPTY;
+                    } else {
+                        info.contactRingtoneUri = Uri.parse(cursor.getString(columnIndex));
+                    }
                 } else {
                     info.contactRingtoneUri = null;
                 }
