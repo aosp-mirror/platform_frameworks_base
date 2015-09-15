@@ -44,6 +44,10 @@ import java.util.Set;
  * ComponentName.
  */
 class NavigationBarAppsModel {
+    public interface OnAppsChangedListener {
+        void onPinnedAppsChanged();
+    }
+
     private final static String TAG = "NavigationBarAppsModel";
 
     // Default number of apps to load initially.
@@ -78,6 +82,9 @@ class NavigationBarAppsModel {
 
     // Apps are represented as an ordered list of app infos.
     private List<AppInfo> mApps = new ArrayList<AppInfo>();
+
+    private List<OnAppsChangedListener> mOnAppsChangedListeners =
+            new ArrayList<OnAppsChangedListener>();
 
     // Id of the current user.
     private int mCurrentUserId = -1;
@@ -167,6 +174,14 @@ class NavigationBarAppsModel {
         return null;
     }
 
+    public void addOnAppsChangedListener(OnAppsChangedListener listener) {
+        mOnAppsChangedListeners.add(listener);
+    }
+
+    public void removeOnAppsChangedListener(OnAppsChangedListener listener) {
+        mOnAppsChangedListeners.remove(listener);
+    }
+
     /**
      * Reinitializes the model for a new user.
      */
@@ -239,6 +254,11 @@ class NavigationBarAppsModel {
     public void setApps(List<AppInfo> apps) {
         mApps = apps;
         savePrefs();
+
+        int size = mOnAppsChangedListeners.size();
+        for (int i = 0; i < size; ++i) {
+            mOnAppsChangedListeners.get(i).onPinnedAppsChanged();
+        }
     }
 
     /** Saves the current model to disk. */

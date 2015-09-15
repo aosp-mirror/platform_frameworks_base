@@ -69,7 +69,8 @@ import java.util.List;
  * Navigation bar contains both pinned and unpinned apps: pinned in the left part, unpinned in the
  * right part, with no separator in between.
  */
-class NavigationBarApps extends LinearLayout {
+class NavigationBarApps extends LinearLayout
+        implements NavigationBarAppsModel.OnAppsChangedListener {
     public final static boolean DEBUG = false;
     private final static String TAG = "NavigationBarApps";
 
@@ -131,7 +132,9 @@ class NavigationBarApps extends LinearLayout {
 
     public NavigationBarApps(Context context, AttributeSet attrs) {
         super(context, attrs);
-        sAppsModel = new NavigationBarAppsModel(context);
+        if (sAppsModel == null) {
+            sAppsModel = new NavigationBarAppsModel(context);
+        }
         mPackageManager = context.getPackageManager();
         mUserManager = (UserManager) context.getSystemService(Context.USER_SERVICE);
         mWindowManager = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
@@ -285,6 +288,7 @@ class NavigationBarApps extends LinearLayout {
         mContext.registerReceiver(mBroadcastReceiver, filter);
 
         mAppPackageMonitor.register(mContext, null, UserHandle.ALL, true);
+        sAppsModel.addOnAppsChangedListener(this);
     }
 
     @Override
@@ -292,6 +296,7 @@ class NavigationBarApps extends LinearLayout {
         super.onDetachedFromWindow();
         mContext.unregisterReceiver(mBroadcastReceiver);
         mAppPackageMonitor.unregister();
+        sAppsModel.removeOnAppsChangedListener(this);
     }
 
     @Override
@@ -315,6 +320,19 @@ class NavigationBarApps extends LinearLayout {
         new GetActivityIconTask(mPackageManager, button).execute(appButtonData);
     }
 
+    private List<AppInfo> getPinnedApps() {
+        List<AppInfo> apps = new ArrayList<AppInfo>();
+        int childCount = getChildCount();
+        for (int i = 0; i != childCount; ++i) {
+            View child = getChildAt(i);
+            AppButtonData appButtonData = (AppButtonData)child.getTag();
+            if (appButtonData == null) continue;  // Skip the drag placeholder.
+            if(!appButtonData.pinned) continue;
+            apps.add(appButtonData.appInfo);
+        }
+        return apps;
+    }
+
     /**
      * Creates an ImageView icon for each pinned app. Removes any existing icons. May be called
      * to synchronize the current view with the shared data mode.
@@ -335,16 +353,7 @@ class NavigationBarApps extends LinearLayout {
      * Saves pinned apps stored in app icons into the data model.
      */
     private void savePinnedApps() {
-        List<AppInfo> apps = new ArrayList<AppInfo>();
-        int childCount = getChildCount();
-        for (int i = 0; i != childCount; ++i) {
-            View child = getChildAt(i);
-            AppButtonData appButtonData = (AppButtonData)child.getTag();
-            if (appButtonData == null) continue;  // Skip the drag placeholder.
-            if(!appButtonData.pinned) continue;
-            apps.add(appButtonData.appInfo);
-        }
-        sAppsModel.setApps(apps);
+        sAppsModel.setApps(getPinnedApps());
     }
 
     /**
@@ -1101,5 +1110,12 @@ class NavigationBarApps extends LinearLayout {
                 }
             });
         }
+    }
+
+    @Override
+    public void onPinnedAppsChanged() {
+        if (getPinnedApps().equals(sAppsModel.getApps())) return;
+        recreatePinnedAppButtons();
+        updateRecentApps();
     }
 }

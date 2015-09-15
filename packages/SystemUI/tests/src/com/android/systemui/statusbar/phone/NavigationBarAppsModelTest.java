@@ -412,4 +412,19 @@ public class NavigationBarAppsModelTest extends AndroidTestCase {
         verify(mMockEdit).apply();
         verifyNoMoreInteractions(mMockEdit);
     }
+
+    /** Tests the apps-changed listener. */
+    public void testAppsChangedListeners() {
+        NavigationBarAppsModel.OnAppsChangedListener listener =
+                mock(NavigationBarAppsModel.OnAppsChangedListener.class);
+
+        mModel.addOnAppsChangedListener(listener);
+        mModel.setApps(new ArrayList<AppInfo>());
+        verify(listener).onPinnedAppsChanged();
+        verifyNoMoreInteractions(listener);
+
+        mModel.removeOnAppsChangedListener(listener);
+        mModel.setApps(new ArrayList<AppInfo>());
+        verifyNoMoreInteractions(listener);
+    }
 }
