@@ -18,11 +18,11 @@
 #define AAPT_LOGGER_H
 
 #include "Source.h"
+#include "StringPiece.h"
 
 #include <memory>
 #include <ostream>
 #include <string>
-#include <utils/String8.h>
 
 namespace aapt {
 
@@ -70,11 +70,6 @@ public:
 private:
     Source mSource;
 };
-
-inline ::std::ostream& operator<<(::std::ostream& out, const std::u16string& str) {
-    android::String8 utf8(str.data(), str.size());
-    return out.write(utf8.string(), utf8.size());
-}
 
 } // namespace aapt
 

@@ -229,4 +229,9 @@ inline ::std::ostream& operator<<(::std::ostream& out, const BasicStringPiece<ch
 
 } // namespace aapt
 
+inline ::std::ostream& operator<<(::std::ostream& out, const std::u16string& str) {
+    android::String8 utf8(str.data(), str.size());
+    return out.write(utf8.string(), utf8.size());
+}
+
 #endif // AAPT_STRING_PIECE_H
