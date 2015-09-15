@@ -589,6 +589,9 @@ static status_t decode(int fd, int64_t offset, int64_t length,
                     ALOGV("format changed to: %s", AMediaFormat_toString(format));
                 } else if (status == AMEDIACODEC_INFO_TRY_AGAIN_LATER) {
                     ALOGV("no output buffer right now");
+                } else if (status <= AMEDIA_ERROR_BASE) {
+                    ALOGE("decode error: %d", status);
+                    break;
                 } else {
                     ALOGV("unexpected info code: %d", status);
                 }
