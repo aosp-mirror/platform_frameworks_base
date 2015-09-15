@@ -644,7 +644,7 @@ with a 128 bit alignment.
     <span class='normal'>: 16 bit floating point value</span>
   </h4>
   <div class='jd-details-descr'>
-<p>A typedef of: __fp16&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 23</a>
+<p>A typedef of: __fp16&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 23</a>
 </p>
 <p> A 16 bit floating point value.
 </p>
@@ -658,7 +658,7 @@ with a 128 bit alignment.
     <span class='normal'>: Two 16 bit floats</span>
   </h4>
   <div class='jd-details-descr'>
-<p>A typedef of: half __attribute__((ext_vector_type(2)))&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 23</a>
+<p>A typedef of: half __attribute__((ext_vector_type(2)))&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 23</a>
 </p>
 <p> Vector version of the half float type. Provides two half fields packed
 into a single 32 bit field with 32 bit alignment.
@@ -673,7 +673,7 @@ into a single 32 bit field with 32 bit alignment.
     <span class='normal'>: Three 16 bit floats</span>
   </h4>
   <div class='jd-details-descr'>
-<p>A typedef of: half __attribute__((ext_vector_type(3)))&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 23</a>
+<p>A typedef of: half __attribute__((ext_vector_type(3)))&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 23</a>
 </p>
 <p> Vector version of the half float type. Provides three half fields packed
 into a single 64 bit field with 64 bit alignment.
@@ -688,7 +688,7 @@ into a single 64 bit field with 64 bit alignment.
     <span class='normal'>: Four 16 bit floats</span>
   </h4>
   <div class='jd-details-descr'>
-<p>A typedef of: half __attribute__((ext_vector_type(4)))&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 23</a>
+<p>A typedef of: half __attribute__((ext_vector_type(4)))&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 23</a>
 </p>
 <p> Vector version of the half float type. Provides four half fields packed
 into a single 64 bit field with 64 bit alignment.
@@ -771,9 +771,9 @@ with a 128 bit alignment.
     <span class='normal'>: 64 bit signed integer</span>
   </h4>
   <div class='jd-details-descr'>
-<p>A typedef of: long long&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;    Removed from <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 21 and higher</a>
+<p>A typedef of: long long&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Removed from <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 21 and higher</a>
 </p>
-<p>A typedef of: long&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 21</a>
+<p>A typedef of: long&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 21</a>
 </p>
 <p> A 64 bit signed integer type.
 </p>
@@ -960,9 +960,9 @@ with a 64 bit alignment.
     <span class='normal'>: Unsigned size type</span>
   </h4>
   <div class='jd-details-descr'>
-<p>A typedef of: uint64_t&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;    When compiling for 64 bits. 
+<p>A typedef of: uint64_t&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;When compiling for 64 bits.
 </p>
-<p>A typedef of: uint32_t&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;    When compiling for 32 bits. 
+<p>A typedef of: uint32_t&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;When compiling for 32 bits.
 </p>
 <p> Unsigned size type.  The number of bits depend on the compilation flags.
 </p>
@@ -976,9 +976,9 @@ with a 64 bit alignment.
     <span class='normal'>: Signed size type</span>
   </h4>
   <div class='jd-details-descr'>
-<p>A typedef of: int64_t&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;    When compiling for 64 bits. 
+<p>A typedef of: int64_t&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;When compiling for 64 bits.
 </p>
-<p>A typedef of: int32_t&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;    When compiling for 32 bits. 
+<p>A typedef of: int32_t&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;When compiling for 32 bits.
 </p>
 <p> Signed size type.  The number of bits depend on the compilation flags.
 </p>
@@ -1128,9 +1128,9 @@ with a 128 bit alignment.
     <span class='normal'>: 64 bit unsigned integer</span>
   </h4>
   <div class='jd-details-descr'>
-<p>A typedef of: unsigned long long&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;    Removed from <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 21 and higher</a>
+<p>A typedef of: unsigned long long&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Removed from <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 21 and higher</a>
 </p>
-<p>A typedef of: unsigned long&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 21</a>
+<p>A typedef of: unsigned long&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 21</a>
 </p>
 <p> A 64 bit unsigned integer type.
 </p>

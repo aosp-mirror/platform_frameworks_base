@@ -205,7 +205,7 @@ locality when the processing is distributed over multiple cores.
     <span class='normal'>: Handle to a kernel invocation context</span>
   </h4>
   <div class='jd-details-descr'>
-<p>A typedef of: const struct rs_kernel_context_t *&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 23</a>
+<p>A typedef of: const struct rs_kernel_context_t *&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 23</a>
 </p>
 <p> The kernel context contains common characteristics of the allocations being iterated
 over, like dimensions.  It also contains rarely used indices of the currently processed
