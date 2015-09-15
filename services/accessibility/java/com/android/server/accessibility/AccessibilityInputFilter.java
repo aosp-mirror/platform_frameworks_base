@@ -45,28 +45,28 @@ class AccessibilityInputFilter extends InputFilter implements EventStreamTransfo
     /**
      * Flag for enabling the screen magnification feature.
      *
-     * @see #setEnabledFeatures(int)
+     * @see #setUserAndEnabledFeatures(int, int)
      */
     static final int FLAG_FEATURE_SCREEN_MAGNIFIER = 0x00000001;
 
     /**
      * Flag for enabling the touch exploration feature.
      *
-     * @see #setEnabledFeatures(int)
+     * @see #setUserAndEnabledFeatures(int, int)
      */
     static final int FLAG_FEATURE_TOUCH_EXPLORATION = 0x00000002;
 
     /**
      * Flag for enabling the filtering key events feature.
      *
-     * @see #setEnabledFeatures(int)
+     * @see #setUserAndEnabledFeatures(int, int)
      */
     static final int FLAG_FEATURE_FILTER_KEY_EVENTS = 0x00000004;
 
     /**
      * Flag for enabling "Automatically click on mouse stop" feature.
      *
-     * @see #setEnabledFeatures(int)
+     * @see #setUserAndEnabledFeatures(int, int)
      */
     static final int FLAG_FEATURE_AUTOCLICK = 0x00000008;
 
@@ -96,6 +96,8 @@ class AccessibilityInputFilter extends InputFilter implements EventStreamTransfo
     private final Choreographer mChoreographer;
 
     private boolean mInstalled;
+
+    private int mUserId;
 
     private int mEnabledFeatures;
 
@@ -327,13 +329,14 @@ class AccessibilityInputFilter extends InputFilter implements EventStreamTransfo
         /* do nothing */
     }
 
-    void setEnabledFeatures(int enabledFeatures) {
-        if (mEnabledFeatures == enabledFeatures) {
+    void setUserAndEnabledFeatures(int userId, int enabledFeatures) {
+        if (mEnabledFeatures == enabledFeatures && mUserId == userId) {
             return;
         }
         if (mInstalled) {
             disableFeatures();
         }
+        mUserId = userId;
         mEnabledFeatures = enabledFeatures;
         if (mInstalled) {
             enableFeatures();
@@ -350,7 +353,7 @@ class AccessibilityInputFilter extends InputFilter implements EventStreamTransfo
         resetStreamState();
 
         if ((mEnabledFeatures & FLAG_FEATURE_AUTOCLICK) != 0) {
-            mAutoclickController = new AutoclickController(mContext);
+            mAutoclickController = new AutoclickController(mContext, mUserId);
             addFirstEventHandler(mAutoclickController);
         }
 
@@ -360,7 +363,7 @@ class AccessibilityInputFilter extends InputFilter implements EventStreamTransfo
         }
 
         if ((mEnabledFeatures & FLAG_FEATURE_SCREEN_MAGNIFIER) != 0) {
-            mScreenMagnifier = new ScreenMagnifier(mContext,
+            mScreenMagnifier = new ScreenMagnifier(mContext, mUserId,
                     Display.DEFAULT_DISPLAY, mAms);
             addFirstEventHandler(mScreenMagnifier);
         }
@@ -386,7 +389,7 @@ class AccessibilityInputFilter extends InputFilter implements EventStreamTransfo
         mEventHandler = handler;
     }
 
-    void disableFeatures() {
+    private void disableFeatures() {
         if (mAutoclickController != null) {
             mAutoclickController.onDestroy();
             mAutoclickController = null;

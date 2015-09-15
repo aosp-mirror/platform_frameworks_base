@@ -51,6 +51,8 @@ import android.view.accessibility.AccessibilityEvent;
  *
  * It is expected that each instance will receive mouse events from a single mouse device. User of
  * the class should handle cases where multiple mouse devices are present.
+ *
+ * Each instance is associated to a single user (and it does not handle user switch itself).
  */
 public class AutoclickController implements EventStreamTransformation {
 
@@ -60,13 +62,15 @@ public class AutoclickController implements EventStreamTransformation {
 
     private EventStreamTransformation mNext;
     private final Context mContext;
+    private final int mUserId;
 
     // Lazily created on the first mouse motion event.
     private ClickScheduler mClickScheduler;
     private ClickDelayObserver mClickDelayObserver;
 
-    public AutoclickController(Context context) {
+    public AutoclickController(Context context, int userId) {
         mContext = context;
+        mUserId = userId;
     }
 
     @Override
@@ -75,7 +79,7 @@ public class AutoclickController implements EventStreamTransformation {
             if (mClickScheduler == null) {
                 Handler handler = new Handler(mContext.getMainLooper());
                 mClickScheduler = new ClickScheduler(handler, DEFAULT_CLICK_DELAY_MS);
-                mClickDelayObserver = new ClickDelayObserver(handler);
+                mClickDelayObserver = new ClickDelayObserver(mUserId, handler);
                 mClickDelayObserver.start(mContext.getContentResolver(), mClickScheduler);
             }
 
@@ -168,9 +172,11 @@ public class AutoclickController implements EventStreamTransformation {
 
         private ContentResolver mContentResolver;
         private ClickScheduler mClickScheduler;
+        private final int mUserId;
 
-        public ClickDelayObserver(Handler handler) {
+        public ClickDelayObserver(int userId, Handler handler) {
             super(handler);
+            mUserId = userId;
         }
 
         /**
@@ -199,7 +205,7 @@ public class AutoclickController implements EventStreamTransformation {
             mContentResolver = contentResolver;
             mClickScheduler = clickScheduler;
             mContentResolver.registerContentObserver(mAutoclickDelaySettingUri, false, this,
-                    UserHandle.USER_ALL);
+                    mUserId);
 
             // Initialize mClickScheduler's initial delay value.
             onChange(true, mAutoclickDelaySettingUri);
@@ -222,10 +228,9 @@ public class AutoclickController implements EventStreamTransformation {
         @Override
         public void onChange(boolean selfChange, Uri uri) {
             if (mAutoclickDelaySettingUri.equals(uri)) {
-                // TODO: Plumb current user id down to here and use getIntForUser.
-                int delay = Settings.Secure.getInt(
+                int delay = Settings.Secure.getIntForUser(
                         mContentResolver, Settings.Secure.ACCESSIBILITY_AUTOCLICK_DELAY,
-                        DEFAULT_CLICK_DELAY_MS);
+                        DEFAULT_CLICK_DELAY_MS, mUserId);
                 mClickScheduler.updateDelay(delay);
             }
         }

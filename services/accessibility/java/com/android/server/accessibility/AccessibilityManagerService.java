@@ -1296,11 +1296,11 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
                     inputFilter = mInputFilter;
                     setInputFilter = true;
                 }
-                mInputFilter.setEnabledFeatures(flags);
+                mInputFilter.setUserAndEnabledFeatures(userState.mUserId, flags);
             } else {
                 if (mHasInputFilter) {
                     mHasInputFilter = false;
-                    mInputFilter.disableFeatures();
+                    mInputFilter.setUserAndEnabledFeatures(userState.mUserId, 0);
                     inputFilter = null;
                     setInputFilter = true;
                 }
