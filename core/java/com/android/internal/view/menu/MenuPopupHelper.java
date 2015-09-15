@@ -16,10 +16,11 @@
 
 package com.android.internal.view.menu;
 
+import com.android.internal.view.menu.MenuPresenter.Callback;
+
 import android.content.Context;
 import android.view.Gravity;
 import android.view.View;
-import android.view.ViewTreeObserver;
 import android.widget.PopupWindow;
 
 /**
@@ -27,8 +28,7 @@ import android.widget.PopupWindow;
  *
  * @hide
  */
-public class MenuPopupHelper implements ViewTreeObserver.OnGlobalLayoutListener,
-        PopupWindow.OnDismissListener, View.OnAttachStateChangeListener {
+public class MenuPopupHelper implements PopupWindow.OnDismissListener {
     private final Context mContext;
     private final MenuBuilder mMenu;
     private final boolean mOverflowOnly;
@@ -37,9 +37,9 @@ public class MenuPopupHelper implements ViewTreeObserver.OnGlobalLayoutListener,
 
     private View mAnchorView;
     private MenuPopup mPopup;
-    private ViewTreeObserver mTreeObserver;
 
     private int mDropDownGravity = Gravity.NO_GRAVITY;
+    private Callback mPresenterCallback;
 
     public MenuPopupHelper(Context context, MenuBuilder menu) {
         this(context, menu, null, false, com.android.internal.R.attr.popupMenuStyle, 0);
@@ -114,17 +114,14 @@ public class MenuPopupHelper implements ViewTreeObserver.OnGlobalLayoutListener,
             return true;
         }
 
-        final View anchor = mAnchorView;
-        if (anchor != null) {
-            final boolean addGlobalListener = mTreeObserver == null;
-            mTreeObserver = anchor.getViewTreeObserver(); // Refresh to latest
-            if (addGlobalListener) mTreeObserver.addOnGlobalLayoutListener(this);
-            anchor.addOnAttachStateChangeListener(this);
-            mPopup.setAnchorView(anchor);
-            mPopup.setGravity(mDropDownGravity);
-        } else {
+        if (mAnchorView == null) {
             return false;
         }
+
+        mPopup = createMenuPopup();
+        mPopup.setAnchorView(mAnchorView);
+        mPopup.setGravity(mDropDownGravity);
+        mPopup.setCallback(mPresenterCallback);
 
         // In order for subclasses of MenuPopupHelper to satisfy the OnDismissedListener interface,
         // we must set the listener to this outer Helper rather than to the inner MenuPopup.
@@ -146,45 +143,15 @@ public class MenuPopupHelper implements ViewTreeObserver.OnGlobalLayoutListener,
     @Override
     public void onDismiss() {
         mPopup = null;
-        if (mTreeObserver != null) {
-            if (!mTreeObserver.isAlive()) mTreeObserver = mAnchorView.getViewTreeObserver();
-            mTreeObserver.removeGlobalOnLayoutListener(this);
-            mTreeObserver = null;
-        }
-        mAnchorView.removeOnAttachStateChangeListener(this);
     }
 
     public boolean isShowing() {
         return mPopup != null && mPopup.isShowing();
     }
 
-    @Override
-    public void onGlobalLayout() {
-        if (isShowing()) {
-            final View anchor = mAnchorView;
-            if (anchor == null || !anchor.isShown()) {
-                dismiss();
-            } else if (isShowing()) {
-                // Recompute window size and position
-                mPopup.show();
-            }
-        }
-    }
-
-    @Override
-    public void onViewAttachedToWindow(View v) {
-    }
-
-    @Override
-    public void onViewDetachedFromWindow(View v) {
-        if (mTreeObserver != null) {
-            if (!mTreeObserver.isAlive()) mTreeObserver = v.getViewTreeObserver();
-            mTreeObserver.removeGlobalOnLayoutListener(this);
-        }
-        v.removeOnAttachStateChangeListener(this);
-    }
 
     public void setCallback(MenuPresenter.Callback cb) {
+        mPresenterCallback = cb;
         mPopup.setCallback(cb);
     }
 }
