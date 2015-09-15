@@ -3045,7 +3045,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
         stack.setBounds(bounds);
 
         if (r != null) {
-            final boolean updated = stack.ensureActivityConfigurationLocked(r, 0);
+            final boolean updated = stack.ensureActivityConfigurationLocked(r, 0, false);
             // And we need to make sure at this point that all other activities
             // are made visible with the correct configuration.
             ensureActivitiesVisibleLocked(r, 0);
@@ -3055,7 +3055,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
         }
     }
 
-    void resizeTaskLocked(TaskRecord task, Rect bounds) {
+    void resizeTaskLocked(TaskRecord task, Rect bounds, boolean resizedByUser) {
         if (!task.mResizeable) {
             Slog.w(TAG, "resizeTask: task " + task + " not resizeable.");
             return;
@@ -3088,7 +3088,8 @@ public final class ActivityStackSupervisor implements DisplayListener {
                 && stackId != FREEFORM_WORKSPACE_STACK_ID && stackId != DOCKED_STACK_ID) {
             stackId = FREEFORM_WORKSPACE_STACK_ID;
         }
-        if (stackId != task.stack.mStackId) {
+        final boolean changedStacks = stackId != task.stack.mStackId;
+        if (changedStacks) {
             moveTaskToStackUncheckedLocked(task, stackId, ON_TOP, !FORCE_FOCUS, "resizeTask");
         }
 
@@ -3101,20 +3102,22 @@ public final class ActivityStackSupervisor implements DisplayListener {
             ActivityRecord r = task.topRunningActivityLocked(null);
             if (r != null) {
                 final ActivityStack stack = task.stack;
-                kept = stack.ensureActivityConfigurationLocked(r, 0);
+                final boolean preserveWindow = resizedByUser && !changedStacks;
+                kept = stack.ensureActivityConfigurationLocked(r, 0, preserveWindow);
                 // All other activities must be made visible with their correct configuration.
                 ensureActivitiesVisibleLocked(r, 0);
                 if (!kept) {
                     resumeTopActivitiesLocked(stack, null, null);
-                    // We are about to relaunch the activity because its configuration changed due
-                    // to size change. The activity will first remove the old window and then add a
-                    // new one. This call will tell window manager about this, so it can preserve
-                    // the old window until the new one is drawn. This prevents having a gap between
-                    // the removal and addition, in which no window is visible. If we also changed
-                    // the stack to the fullscreen stack, i.e. maximized the window, we will animate
-                    // the transition.
-                    mWindowManager.setReplacingWindow(r.appToken,
-                            stackId == FULLSCREEN_WORKSPACE_STACK_ID /* animate */);
+                    if (changedStacks && stackId == FULLSCREEN_WORKSPACE_STACK_ID) {
+                        // We are about to relaunch the activity because its configuration changed
+                        // due to being maximized, i.e. size change. The activity will first
+                        // remove the old window and then add a new one. This call will tell window
+                        // manager about this, so it can preserve the old window until the new
+                        // one is drawn. This prevents having a gap between the removal and
+                        // addition, in which no window is visible. We also want the entrace of the
+                        // new window to be properly animated.
+                        mWindowManager.setReplacingWindow(r.appToken, true /* animate */);
+                    }
                 }
             }
         }
@@ -3240,12 +3243,12 @@ public final class ActivityStackSupervisor implements DisplayListener {
 
         // Make sure the task has the appropriate bounds/size for the stack it is in.
         if (stackId == FULLSCREEN_WORKSPACE_STACK_ID && task.mBounds != null) {
-            resizeTaskLocked(task, stack.mBounds);
+            resizeTaskLocked(task, stack.mBounds, false);
         } else if (stackId == FREEFORM_WORKSPACE_STACK_ID
                 && task.mBounds == null && task.mLastNonFullscreenBounds != null) {
-            resizeTaskLocked(task, task.mLastNonFullscreenBounds);
+            resizeTaskLocked(task, task.mLastNonFullscreenBounds, false);
         } else if (stackId == DOCKED_STACK_ID) {
-            resizeTaskLocked(task, stack.mBounds);
+            resizeTaskLocked(task, stack.mBounds, false);
         }
 
         // The task might have already been running and its visibility needs to be synchronized with

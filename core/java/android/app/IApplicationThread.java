@@ -65,7 +65,8 @@ public interface IApplicationThread extends IInterface {
             boolean notResumed, boolean isForward, ProfilerInfo profilerInfo) throws RemoteException;
     void scheduleRelaunchActivity(IBinder token, List<ResultInfo> pendingResults,
             List<ReferrerIntent> pendingNewIntents, int configChanges, boolean notResumed,
-            Configuration config, Configuration overrideConfig) throws RemoteException;
+            Configuration config, Configuration overrideConfig, boolean preserveWindow)
+            throws RemoteException;
     void scheduleNewIntent(List<ReferrerIntent> intent, IBinder token) throws RemoteException;
     void scheduleDestroyActivity(IBinder token, boolean finished,
             int configChanges) throws RemoteException;

@@ -131,7 +131,8 @@ class TaskPositioner implements DimLayer.DimLayerUser {
                             notifyMoveLocked(newX, newY);
                         }
                         try {
-                            mService.mActivityManager.resizeTask(mTaskId, mWindowDragBounds);
+                            mService.mActivityManager.resizeTask(mTaskId, mWindowDragBounds,
+                                    true /* resizedByUser */);
                         } catch(RemoteException e) {}
                     } break;
 

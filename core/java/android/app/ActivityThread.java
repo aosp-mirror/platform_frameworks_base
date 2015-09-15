@@ -315,8 +315,9 @@ public final class ActivityThread {
         int pendingConfigChanges;
         boolean onlyLocalRequest;
 
-        View mPendingRemoveWindow;
+        Window mPendingRemoveWindow;
         WindowManager mPendingRemoveWindowManager;
+        boolean mPreserveWindow;
 
         ActivityClientRecord() {
             parent = null;
@@ -670,9 +671,9 @@ public final class ActivityThread {
         public final void scheduleRelaunchActivity(IBinder token,
                 List<ResultInfo> pendingResults, List<ReferrerIntent> pendingNewIntents,
                 int configChanges, boolean notResumed, Configuration config,
-                Configuration overrideConfig) {
+                Configuration overrideConfig, boolean preserveWindow) {
             requestRelaunchActivity(token, pendingResults, pendingNewIntents,
-                    configChanges, notResumed, config, overrideConfig, true);
+                    configChanges, notResumed, config, overrideConfig, true, preserveWindow);
         }
 
         public final void scheduleNewIntent(List<ReferrerIntent> intents, IBinder token) {
@@ -2376,10 +2377,16 @@ public final class ActivityThread {
                 Configuration config = new Configuration(mCompatConfiguration);
                 if (DEBUG_CONFIGURATION) Slog.v(TAG, "Launching activity "
                         + r.activityInfo.name + " with config " + config);
+                Window window = null;
+                if (r.mPendingRemoveWindow != null && r.mPreserveWindow) {
+                    window = r.mPendingRemoveWindow;
+                    r.mPendingRemoveWindow = null;
+                    r.mPendingRemoveWindowManager = null;
+                }
                 activity.attach(appContext, this, getInstrumentation(), r.token,
                         r.ident, app, r.intent, r.activityInfo, title, r.parent,
                         r.embeddedID, r.lastNonConfigurationInstances, config,
-                        r.referrer, r.voiceInteractor);
+                        r.referrer, r.voiceInteractor, window);
 
                 if (customIntent != null) {
                     activity.mIntent = customIntent;
@@ -3191,10 +3198,14 @@ public final class ActivityThread {
         return r;
     }
 
-    static final void cleanUpPendingRemoveWindows(ActivityClientRecord r) {
+    static final void cleanUpPendingRemoveWindows(ActivityClientRecord r, boolean force) {
+        if (r.mPreserveWindow && !force) {
+            return;
+        }
         if (r.mPendingRemoveWindow != null) {
-            r.mPendingRemoveWindowManager.removeViewImmediate(r.mPendingRemoveWindow);
-            IBinder wtoken = r.mPendingRemoveWindow.getWindowToken();
+            r.mPendingRemoveWindowManager.removeViewImmediate(
+                    r.mPendingRemoveWindow.getDecorView());
+            IBinder wtoken = r.mPendingRemoveWindow.getDecorView().getWindowToken();
             if (wtoken != null) {
                 WindowManagerGlobal.getInstance().closeAll(wtoken,
                         r.activity.getClass().getName(), "Activity");
@@ -3245,7 +3256,11 @@ public final class ActivityThread {
                 a.mDecor = decor;
                 l.type = WindowManager.LayoutParams.TYPE_BASE_APPLICATION;
                 l.softInputMode |= forwardBit;
-                if (a.mVisibleFromClient) {
+                if (r.mPreserveWindow) {
+                    a.mWindowAdded = true;
+                    r.mPreserveWindow = false;
+                }
+                if (a.mVisibleFromClient && !a.mWindowAdded) {
                     a.mWindowAdded = true;
                     wm.addView(decor, l);
                 }
@@ -3260,7 +3275,7 @@ public final class ActivityThread {
             }
 
             // Get rid of anything left hanging around.
-            cleanUpPendingRemoveWindows(r);
+            cleanUpPendingRemoveWindows(r, false /* force */);
 
             // The window is now visible if it has been added, we are not
             // simply finishing, and we are not starting another activity.
@@ -3745,7 +3760,8 @@ public final class ActivityThread {
 
             // request all activities to relaunch for the changes to take place
             for (Map.Entry<IBinder, ActivityClientRecord> entry : mActivities.entrySet()) {
-                requestRelaunchActivity(entry.getKey(), null, null, 0, false, null, null, false);
+                requestRelaunchActivity(entry.getKey(), null, null, 0, false, null, null, false,
+                        false /* preserveWindow */);
             }
         }
     }
@@ -3931,7 +3947,7 @@ public final class ActivityThread {
         ActivityClientRecord r = performDestroyActivity(token, finishing,
                 configChanges, getNonConfigInstance);
         if (r != null) {
-            cleanUpPendingRemoveWindows(r);
+            cleanUpPendingRemoveWindows(r, finishing);
             WindowManager wm = r.activity.getWindowManager();
             View v = r.activity.mDecor;
             if (v != null) {
@@ -3940,11 +3956,18 @@ public final class ActivityThread {
                 }
                 IBinder wtoken = v.getWindowToken();
                 if (r.activity.mWindowAdded) {
-                    if (r.onlyLocalRequest) {
+                    boolean reuseForResize = r.window.hasNonClientDecorView() && r.mPreserveWindow;
+                    if (r.onlyLocalRequest || reuseForResize) {
                         // Hold off on removing this until the new activity's
                         // window is being added.
-                        r.mPendingRemoveWindow = v;
+                        r.mPendingRemoveWindow = r.window;
                         r.mPendingRemoveWindowManager = wm;
+                        if (reuseForResize) {
+                            // We can only keep the part of the view hierarchy that we control,
+                            // everything else must be removed, because it might not be able to
+                            // behave properly when activity is relaunching.
+                            r.window.clearContentView();
+                        }
                     } else {
                         wm.removeViewImmediate(v);
                     }
@@ -3986,10 +4009,14 @@ public final class ActivityThread {
         mSomeActivitiesChanged = true;
     }
 
+    /**
+     * @param preserveWindow Whether the activity should try to reuse the window it created,
+     *                        including the decor view after the relaunch.
+     */
     public final void requestRelaunchActivity(IBinder token,
             List<ResultInfo> pendingResults, List<ReferrerIntent> pendingNewIntents,
             int configChanges, boolean notResumed, Configuration config,
-            Configuration overrideConfig, boolean fromServer) {
+            Configuration overrideConfig, boolean fromServer, boolean preserveWindow) {
         ActivityClientRecord target = null;
 
         synchronized (mResourcesManager) {
@@ -4020,6 +4047,7 @@ public final class ActivityThread {
                 target.token = token;
                 target.pendingResults = pendingResults;
                 target.pendingIntents = pendingNewIntents;
+                target.mPreserveWindow = preserveWindow;
                 if (!fromServer) {
                     ActivityClientRecord existing = mActivities.get(token);
                     if (existing != null) {
@@ -4120,6 +4148,7 @@ public final class ActivityThread {
 
         r.activity.mConfigChangeFlags |= configChanges;
         r.onlyLocalRequest = tmp.onlyLocalRequest;
+        r.mPreserveWindow = tmp.mPreserveWindow;
         Intent currentIntent = r.activity.mIntent;
 
         r.activity.mChangingConfigurations = true;

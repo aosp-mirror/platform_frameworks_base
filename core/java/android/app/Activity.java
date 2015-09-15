@@ -4879,7 +4879,8 @@ public class Activity extends ContextThemeWrapper
         if (Looper.myLooper() != mMainThread.getLooper()) {
             throw new IllegalStateException("Must be called from main thread");
         }
-        mMainThread.requestRelaunchActivity(mToken, null, null, 0, false, null, null, false);
+        mMainThread.requestRelaunchActivity(mToken, null, null, 0, false, null, null, false,
+                false /* preserveWindow */);
     }
 
     /**
@@ -6223,12 +6224,13 @@ public class Activity extends ContextThemeWrapper
             Application application, Intent intent, ActivityInfo info,
             CharSequence title, Activity parent, String id,
             NonConfigurationInstances lastNonConfigurationInstances,
-            Configuration config, String referrer, IVoiceInteractor voiceInteractor) {
+            Configuration config, String referrer, IVoiceInteractor voiceInteractor,
+            Window window) {
         attachBaseContext(context);
 
         mFragments.attachHost(null /*parent*/);
 
-        mWindow = new PhoneWindow(this);
+        mWindow = new PhoneWindow(this, window);
         mWindow.setWindowControllerCallback(this);
         mWindow.setCallback(this);
         mWindow.setOnWindowDismissedCallback(this);
@@ -6317,11 +6319,15 @@ public class Activity extends ContextThemeWrapper
     final void performRestart() {
         mFragments.noteStateNotSaved();
 
+        if (mToken != null && mParent == null) {
+            // We might have view roots that were preserved during a relaunch, we need to start them
+            // again. We don't need to check mStopped, the roots will check if they were actually
+            // stopped.
+            WindowManagerGlobal.getInstance().setStoppedState(mToken, false /* stopped */);
+        }
+
         if (mStopped) {
             mStopped = false;
-            if (mToken != null && mParent == null) {
-                WindowManagerGlobal.getInstance().setStoppedState(mToken, false);
-            }
 
             synchronized (mManagedCursors) {
                 final int N = mManagedCursors.size();

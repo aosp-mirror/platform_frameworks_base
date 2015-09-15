@@ -1175,6 +1175,13 @@ public abstract class Window {
     public abstract void addContentView(View view, ViewGroup.LayoutParams params);
 
     /**
+     * Remove the view that was used as the screen content.
+     *
+     * @hide
+     */
+    public abstract void clearContentView();
+
+    /**
      * Return the view in this Window that currently has focus, or null if
      * there are none.  Note that this does not look in any containing
      * Window.
@@ -1237,6 +1244,15 @@ public abstract class Window {
      * @see android.R.styleable#Window_windowElevation
      */
     public void setElevation(float elevation) {}
+
+    /**
+     * Gets the window elevation.
+     *
+     * @hide
+     */
+    public float getElevation() {
+        return 0.0f;
+    }
 
     /**
      * Sets whether window content should be clipped to the outline of the
@@ -1991,5 +2007,13 @@ public abstract class Window {
      */
     public abstract void setNavigationBarColor(@ColorInt int color);
 
-
+    /**
+     * Get information whether the activity has non client decoration view. These views are used in
+     * the multi window environment, to provide dragging handle and maximize/close buttons.
+     *
+     * @hide
+     */
+    public boolean hasNonClientDecorView() {
+        return false;
+    }
 }
