@@ -557,7 +557,7 @@ final class WindowState implements WindowManagerPolicy.WindowState {
 
         final Task task = mAppToken != null ? getTask() : null;
         final boolean nonFullscreenTask = task != null && !task.isFullscreen();
-        final boolean freeformWorkspace = inFreeformWorkspace();
+        final boolean freeformWorkspace = task != null && task.inFreeformWorkspace();
         if (nonFullscreenTask) {
             task.getBounds(mContainingFrame);
             final WindowState imeWin = mService.mInputMethodWindow;
@@ -897,6 +897,11 @@ final class WindowState implements WindowManagerPolicy.WindowState {
         return stack == null ? mDisplayContent : stack.getDisplayContent();
     }
 
+    public DisplayInfo getDisplayInfo() {
+        final DisplayContent displayContent = getDisplayContent();
+        return displayContent != null ? displayContent.getDisplayInfo() : null;
+    }
+
     public int getDisplayId() {
         final DisplayContent displayContent = getDisplayContent();
         if (displayContent == null) {
@@ -935,7 +940,7 @@ final class WindowState implements WindowManagerPolicy.WindowState {
         if (task != null) {
             task.getBounds(bounds);
             if (forTouch == BOUNDS_FOR_TOUCH) {
-                if (inFreeformWorkspace()) {
+                if (task.inFreeformWorkspace()) {
                     final int delta = calculatePixelFromDp(RESIZE_HANDLE_WIDTH_IN_DP);
                     bounds.inset(-delta, -delta);
                 }
@@ -1668,9 +1673,13 @@ final class WindowState implements WindowManagerPolicy.WindowState {
     }
 
     boolean inFreeformWorkspace() {
-        final Task task = getTask();
-        return task != null && task.mStack != null &&
-                task.mStack.mStackId == FREEFORM_WORKSPACE_STACK_ID;
+        final Task task = mAppToken != null ? getTask() : null;
+        return task != null && task.inFreeformWorkspace();
+    }
+
+    boolean isDragResizing() {
+        final Task task = mAppToken != null ? getTask() : null;
+        return mService.mTaskPositioner != null && mService.mTaskPositioner.isTaskResizing(task);
     }
 
     private int calculatePixelFromDp(int dp) {

@@ -234,7 +234,7 @@ class DisplayContent {
             for (int taskNdx = tasks.size() - 1; taskNdx >= 0; --taskNdx) {
                 final Task task = tasks.get(taskNdx);
                 task.getBounds(mTmpRect);
-                if (mTmpRect.contains(x, y)) {
+                if (task.inFreeformWorkspace() && mTmpRect.contains(x, y)) {
                     return task.mTaskId;
                 }
             }
@@ -299,7 +299,7 @@ class DisplayContent {
                  * (For freeform focused task, the below logic will first remove the enlarged
                  * area, then add back the inner area.)
                  */
-                final boolean isFreeformed = win.inFreeformWorkspace();
+                final boolean isFreeformed = task.inFreeformWorkspace();
                 if (task != focusedTask || isFreeformed) {
                     mTmpRect.set(win.mVisibleFrame);
                     mTmpRect.intersect(win.mVisibleInsets);

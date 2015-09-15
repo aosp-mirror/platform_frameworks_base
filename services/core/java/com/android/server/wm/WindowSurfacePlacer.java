@@ -712,7 +712,12 @@ class WindowSurfacePlacer {
                             }
                         }
                     }
-
+                    /*
+                     * Updates the shown frame before we set up the surface. This is needed because
+                     * the resizing could change the top-left position (in addition to size) of the
+                     * window. setSurfaceBoundariesLocked uses mShownFrame to position the surface.
+                     */
+                    winAnimator.computeShownFrameLocked();
                     winAnimator.setSurfaceBoundariesLocked(recoveringMemory);
                 }
 
