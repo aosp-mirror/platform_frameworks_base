@@ -2662,6 +2662,17 @@
 
     <public type="attr" name="listMenuViewStyle" />
     <public type="attr" name="subMenuArrow" />
+    <public type="attr" name="activityWidth" />
+    <public type="attr" name="activityHeight" />
+    <public type="attr" name="resizeableActivity" />
+    <public type="attr" name="titleMargin" />
+    <public type="attr" name="titleMarginStart" />
+    <public type="attr" name="titleMarginEnd" />
+    <public type="attr" name="titleMarginTop" />
+    <public type="attr" name="titleMarginBottom" />
+    <public type="attr" name="maxButtonHeight" />
+    <public type="attr" name="buttonGravity" />
+    <public type="attr" name="collapseIcon" />
 
     <public type="style" name="Theme.Material.DayNight" />
     <public type="style" name="Theme.Material.DayNight.DarkActionBar" />
@@ -2682,8 +2693,5 @@
     <public type="style" name="Theme.Material.DayNight.DialogWhenLarge.DarkActionBar" />
 
     <public type="id" name="accessibilityActionSetProgress" />
-    <public type="attr" name="activityWidth" />
-    <public type="attr" name="activityHeight" />
-    <public type="attr" name="resizeableActivity" />
 
 </resources>

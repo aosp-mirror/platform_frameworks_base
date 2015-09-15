@@ -7769,10 +7769,24 @@ i
         <attr name="title" />
         <attr name="subtitle" />
         <attr name="gravity" />
-        <attr name="titleMargins" format="dimension" />
+        <!--  Specifies extra space on the left, start, right and end sides
+              of the toolbar's title. Margin values should be positive. -->
+        <attr name="titleMargin" format="dimension" />
+        <!--  Specifies extra space on the start side of the toolbar's title.
+              If both this attribute and titleMargin are specified, then this
+              attribute takes precedence. Margin values should be positive. -->
         <attr name="titleMarginStart" format="dimension" />
+        <!--  Specifies extra space on the end side of the toolbar's title.
+              If both this attribute and titleMargin are specified, then this
+              attribute takes precedence. Margin values should be positive. -->
         <attr name="titleMarginEnd" format="dimension" />
+        <!--  Specifies extra space on the top side of the toolbar's title.
+              If both this attribute and titleMargin are specified, then this
+              attribute takes precedence. Margin values should be positive. -->
         <attr name="titleMarginTop" format="dimension" />
+        <!--  Specifies extra space on the bottom side of the toolbar's title.
+              If both this attribute and titleMargin are specified, then this
+              attribute takes precedence. Margin values should be positive. -->
         <attr name="titleMarginBottom" format="dimension" />
         <attr name="contentInsetStart" />
         <attr name="contentInsetEnd" />

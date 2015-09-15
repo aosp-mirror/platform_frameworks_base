@@ -98,6 +98,32 @@ import java.util.List;
  * <p>In modern Android UIs developers should lean more on a visually distinct color scheme for
  * toolbars than on their application icon. The use of application icon plus title as a standard
  * layout is discouraged on API 21 devices and newer.</p>
+ *
+ * @attr ref android.R.styleable#Toolbar_buttonGravity
+ * @attr ref android.R.styleable#Toolbar_collapseContentDescription
+ * @attr ref android.R.styleable#Toolbar_collapseIcon
+ * @attr ref android.R.styleable#Toolbar_contentInsetEnd
+ * @attr ref android.R.styleable#Toolbar_contentInsetLeft
+ * @attr ref android.R.styleable#Toolbar_contentInsetRight
+ * @attr ref android.R.styleable#Toolbar_contentInsetStart
+ * @attr ref android.R.styleable#Toolbar_gravity
+ * @attr ref android.R.styleable#Toolbar_logo
+ * @attr ref android.R.styleable#Toolbar_logoDescription
+ * @attr ref android.R.styleable#Toolbar_maxButtonHeight
+ * @attr ref android.R.styleable#Toolbar_navigationContentDescription
+ * @attr ref android.R.styleable#Toolbar_navigationIcon
+ * @attr ref android.R.styleable#Toolbar_popupTheme
+ * @attr ref android.R.styleable#Toolbar_subtitle
+ * @attr ref android.R.styleable#Toolbar_subtitleTextAppearance
+ * @attr ref android.R.styleable#Toolbar_subtitleTextColor
+ * @attr ref android.R.styleable#Toolbar_title
+ * @attr ref android.R.styleable#Toolbar_titleMargin
+ * @attr ref android.R.styleable#Toolbar_titleMarginBottom
+ * @attr ref android.R.styleable#Toolbar_titleMarginEnd
+ * @attr ref android.R.styleable#Toolbar_titleMarginStart
+ * @attr ref android.R.styleable#Toolbar_titleMarginTop
+ * @attr ref android.R.styleable#Toolbar_titleTextAppearance
+ * @attr ref android.R.styleable#Toolbar_titleTextColor
  */
 public class Toolbar extends ViewGroup {
     private static final String TAG = "Toolbar";
@@ -203,7 +229,7 @@ public class Toolbar extends ViewGroup {
         mGravity = a.getInteger(R.styleable.Toolbar_gravity, mGravity);
         mButtonGravity = a.getInteger(R.styleable.Toolbar_buttonGravity, Gravity.TOP);
         mTitleMarginStart = mTitleMarginEnd = mTitleMarginTop = mTitleMarginBottom =
-                a.getDimensionPixelOffset(R.styleable.Toolbar_titleMargins, 0);
+                a.getDimensionPixelOffset(R.styleable.Toolbar_titleMargin, 0);
 
         final int marginStart = a.getDimensionPixelOffset(R.styleable.Toolbar_titleMarginStart, -1);
         if (marginStart >= 0) {
@@ -319,6 +345,116 @@ public class Toolbar extends ViewGroup {
      */
     public int getPopupTheme() {
         return mPopupTheme;
+    }
+
+    /**
+     * Sets the title margin.
+     *
+     * @param start the starting title margin in pixels
+     * @param top the top title margin in pixels
+     * @param end the ending title margin in pixels
+     * @param bottom the bottom title margin in pixels
+     * @see #getTitleMarginStart()
+     * @see #getTitleMarginTop()
+     * @see #getTitleMarginEnd()
+     * @see #getTitleMarginBottom()
+     * @attr ref android.R.styleable#Toolbar_titleMargin
+     */
+    public void setTitleMargin(int start, int top, int end, int bottom) {
+        mTitleMarginStart = start;
+        mTitleMarginTop = top;
+        mTitleMarginEnd = end;
+        mTitleMarginBottom = bottom;
+
+        requestLayout();
+    }
+
+    /**
+     * @return the starting title margin in pixels
+     * @see #setTitleMarginStart(int)
+     * @attr ref android.R.styleable#Toolbar_titleMarginStart
+     */
+    public int getTitleMarginStart() {
+        return mTitleMarginStart;
+    }
+
+    /**
+     * Sets the starting title margin in pixels.
+     *
+     * @param margin the starting title margin in pixels
+     * @see #getTitleMarginStart()
+     * @attr ref android.R.styleable#Toolbar_titleMarginStart
+     */
+    public void setTitleMarginStart(int margin) {
+        mTitleMarginStart = margin;
+
+        requestLayout();
+    }
+
+    /**
+     * @return the top title margin in pixels
+     * @see #setTitleMarginTop(int)
+     * @attr ref android.R.styleable#Toolbar_titleMarginTop
+     */
+    public int getTitleMarginTop() {
+        return mTitleMarginTop;
+    }
+
+    /**
+     * Sets the top title margin in pixels.
+     *
+     * @param margin the top title margin in pixels
+     * @see #getTitleMarginTop()
+     * @attr ref android.R.styleable#Toolbar_titleMarginTop
+     */
+    public void setTitleMarginTop(int margin) {
+        mTitleMarginTop = margin;
+
+        requestLayout();
+    }
+
+    /**
+     * @return the ending title margin in pixels
+     * @see #setTitleMarginEnd(int)
+     * @attr ref android.R.styleable#Toolbar_titleMarginEnd
+     */
+    public int getTitleMarginEnd() {
+        return mTitleMarginEnd;
+    }
+
+    /**
+     * Sets the ending title margin in pixels.
+     *
+     * @param margin the ending title margin in pixels
+     * @see #getTitleMarginEnd()
+     * @attr ref android.R.styleable#Toolbar_titleMarginEnd
+     */
+    public void setTitleMarginEnd(int margin) {
+        mTitleMarginEnd = margin;
+
+        requestLayout();
+    }
+
+    /**
+     * @return the bottom title margin in pixels
+     * @see #setTitleMarginBottom(int)
+     * @attr ref android.R.styleable#Toolbar_titleMarginBottom
+     */
+    public int getTitleMarginBottom() {
+        return mTitleMarginBottom;
+    }
+
+    /**
+     * Sets the bottom title margin in pixels.
+     *
+     * @param margin the bottom title margin in pixels
+     * @see #getTitleMarginBottom()
+     * @attr ref android.R.styleable#Toolbar_titleMarginBottom
+     */
+    public void setTitleMarginBottom(int margin) {
+        mTitleMarginBottom = margin;
+
+        requestLayout();
     }
 
     @Override
