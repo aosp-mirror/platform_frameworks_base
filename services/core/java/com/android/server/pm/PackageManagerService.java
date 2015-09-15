@@ -76,7 +76,6 @@ import static android.os.Process.SYSTEM_UID;
 import static android.os.Trace.TRACE_TAG_PACKAGE_MANAGER;
 import static android.system.OsConstants.O_CREAT;
 import static android.system.OsConstants.O_RDWR;
-
 import static com.android.internal.app.IntentForwarderActivity.FORWARD_INTENT_TO_MANAGED_PROFILE;
 import static com.android.internal.app.IntentForwarderActivity.FORWARD_INTENT_TO_PARENT;
 import static com.android.internal.content.NativeLibraryHelper.LIB64_DIR_NAME;
@@ -227,6 +226,7 @@ import com.android.internal.util.FastPrintWriter;
 import com.android.internal.util.FastXmlSerializer;
 import com.android.internal.util.IndentingPrintWriter;
 import com.android.internal.util.Preconditions;
+import com.android.internal.util.XmlUtils;
 import com.android.server.EventLogTags;
 import com.android.server.FgThread;
 import com.android.server.IntentResolver;
@@ -978,6 +978,30 @@ public class PackageManagerService extends IPackageManager.Stub {
     private static final String TAG_DEFAULT_APPS = "da";
     private static final String TAG_INTENT_FILTER_VERIFICATION = "iv";
 
+    private static final String TAG_PERMISSION_BACKUP = "perm-grant-backup";
+    private static final String TAG_ALL_GRANTS = "rt-grants";
+    private static final String TAG_GRANT = "grant";
+    private static final String ATTR_PACKAGE_NAME = "pkg";
+
+    private static final String TAG_PERMISSION = "perm";
+    private static final String ATTR_PERMISSION_NAME = "name";
+    private static final String ATTR_IS_GRANTED = "g";
+    private static final String ATTR_USER_SET = "set";
+    private static final String ATTR_USER_FIXED = "fixed";
+    private static final String ATTR_REVOKE_ON_UPGRADE = "rou";
+
+    // System/policy permission grants are not backed up
+    private static final int SYSTEM_RUNTIME_GRANT_MASK =
+            FLAG_PERMISSION_POLICY_FIXED
+            | FLAG_PERMISSION_SYSTEM_FIXED
+            | FLAG_PERMISSION_GRANTED_BY_DEFAULT;
+
+    // And we back up these user-adjusted states
+    private static final int USER_RUNTIME_GRANT_MASK =
+            FLAG_PERMISSION_USER_SET
+            | FLAG_PERMISSION_USER_FIXED
+            | FLAG_PERMISSION_REVOKE_ON_UPGRADE;
+
     final @Nullable String mRequiredVerifierPackage;
     final @Nullable String mRequiredInstallerPackage;
 
@@ -1490,16 +1514,25 @@ public class PackageManagerService extends IPackageManager.Stub {
                                 deleteOld = true;
                             }
 
-                            // If this app is a browser and it's newly-installed for some
-                            // users, clear any default-browser state in those users
+
+                            // Work that needs to happen on first install within each user
                             if (firstUsers.length > 0) {
-                                // the app's nature doesn't depend on the user, so we can just
-                                // check its browser nature in any user and generalize.
-                                if (packageIsBrowser(packageName, firstUsers[0])) {
+                                for (int userId : firstUsers) {
                                     synchronized (mPackages) {
-                                        for (int userId : firstUsers) {
-                                            mSettings.setDefaultBrowserPackageNameLPw(null, userId);
+                                        // If this app is a browser and it's newly-installed for
+                                        // some users, clear any default-browser state in those
+                                        // users.  The app's nature doesn't depend on the user,
+                                        // so we can just check its browser nature in any user
+                                        // and generalize.
+                                        if (packageIsBrowser(packageName, firstUsers[0])) {
+                                            mSettings.setDefaultBrowserPackageNameLPw(
+                                                    null, userId);
                                         }
+
+                                        // We may also need to apply pending (restored) runtime
+                                        // permission grants within these users.
+                                        mSettings.applyPendingPermissionGrantsLPw(
+                                                packageName, userId);
                                     }
                                 }
                             }
@@ -14823,7 +14856,7 @@ public class PackageManagerService extends IPackageManager.Stub {
             }
             return;
         }
-
+Slog.v(TAG, ":: restoreFromXml() : got to tag " + parser.getName());
         // this is supposed to be TAG_PREFERRED_BACKUP
         if (!expectedStartTag.equals(parser.getName())) {
             if (DEBUG_BACKUP) {
@@ -14834,6 +14867,7 @@ public class PackageManagerService extends IPackageManager.Stub {
 
         // skip interfering stuff, then we're aligned with the backing implementation
         while ((type = parser.next()) == XmlPullParser.TEXT) { }
+Slog.v(TAG, ":: stepped forward, applying functor at tag " + parser.getName());
         functor.apply(parser, userId);
     }
 
@@ -15018,6 +15052,192 @@ public class PackageManagerService extends IPackageManager.Stub {
                 Slog.e(TAG, "Exception restoring preferred activities: " + e.getMessage());
             }
         }
+    }
+
+    @Override
+    public byte[] getPermissionGrantBackup(int userId) {
+        if (Binder.getCallingUid() != Process.SYSTEM_UID) {
+            throw new SecurityException("Only the system may call getPermissionGrantBackup()");
+        }
+
+        ByteArrayOutputStream dataStream = new ByteArrayOutputStream();
+        try {
+            final XmlSerializer serializer = new FastXmlSerializer();
+            serializer.setOutput(dataStream, StandardCharsets.UTF_8.name());
+            serializer.startDocument(null, true);
+            serializer.startTag(null, TAG_PERMISSION_BACKUP);
+
+            synchronized (mPackages) {
+                serializeRuntimePermissionGrantsLPr(serializer, userId);
+            }
+
+            serializer.endTag(null, TAG_PERMISSION_BACKUP);
+            serializer.endDocument();
+            serializer.flush();
+        } catch (Exception e) {
+            if (DEBUG_BACKUP) {
+                Slog.e(TAG, "Unable to write default apps for backup", e);
+            }
+            return null;
+        }
+
+        return dataStream.toByteArray();
+    }
+
+    @Override
+    public void restorePermissionGrants(byte[] backup, int userId) {
+        if (Binder.getCallingUid() != Process.SYSTEM_UID) {
+            throw new SecurityException("Only the system may call restorePermissionGrants()");
+        }
+
+        try {
+            final XmlPullParser parser = Xml.newPullParser();
+            parser.setInput(new ByteArrayInputStream(backup), StandardCharsets.UTF_8.name());
+            restoreFromXml(parser, userId, TAG_PERMISSION_BACKUP,
+                    new BlobXmlRestorer() {
+                        @Override
+                        public void apply(XmlPullParser parser, int userId)
+                                throws XmlPullParserException, IOException {
+                            synchronized (mPackages) {
+                                processRestoredPermissionGrantsLPr(parser, userId);
+                            }
+                        }
+                    } );
+        } catch (Exception e) {
+            if (DEBUG_BACKUP) {
+                Slog.e(TAG, "Exception restoring preferred activities: " + e.getMessage());
+            }
+        }
+    }
+
+    private void serializeRuntimePermissionGrantsLPr(XmlSerializer serializer, final int userId)
+            throws IOException {
+        serializer.startTag(null, TAG_ALL_GRANTS);
+
+        final int N = mSettings.mPackages.size();
+        for (int i = 0; i < N; i++) {
+            final PackageSetting ps = mSettings.mPackages.valueAt(i);
+            boolean pkgGrantsKnown = false;
+
+            PermissionsState packagePerms = ps.getPermissionsState();
+
+            for (PermissionState state : packagePerms.getRuntimePermissionStates(userId)) {
+                final int grantFlags = state.getFlags();
+                // only look at grants that are not system/policy fixed
+                if ((grantFlags & SYSTEM_RUNTIME_GRANT_MASK) == 0) {
+                    final boolean isGranted = state.isGranted();
+                    // And only back up the user-twiddled state bits
+                    if (isGranted || (grantFlags & USER_RUNTIME_GRANT_MASK) != 0) {
+                        final String packageName = mSettings.mPackages.keyAt(i);
+                        if (!pkgGrantsKnown) {
+                            serializer.startTag(null, TAG_GRANT);
+                            serializer.attribute(null, ATTR_PACKAGE_NAME, packageName);
+                            pkgGrantsKnown = true;
+                        }
+
+                        final boolean userSet =
+                                (grantFlags & FLAG_PERMISSION_USER_SET) != 0;
+                        final boolean userFixed =
+                                (grantFlags & FLAG_PERMISSION_USER_FIXED) != 0;
+                        final boolean revoke =
+                                (grantFlags & FLAG_PERMISSION_REVOKE_ON_UPGRADE) != 0;
+
+                        serializer.startTag(null, TAG_PERMISSION);
+                        serializer.attribute(null, ATTR_PERMISSION_NAME, state.getName());
+                        if (isGranted) {
+                            serializer.attribute(null, ATTR_IS_GRANTED, "true");
+                        }
+                        if (userSet) {
+                            serializer.attribute(null, ATTR_USER_SET, "true");
+                        }
+                        if (userFixed) {
+                            serializer.attribute(null, ATTR_USER_FIXED, "true");
+                        }
+                        if (revoke) {
+                            serializer.attribute(null, ATTR_REVOKE_ON_UPGRADE, "true");
+                        }
+                        serializer.endTag(null, TAG_PERMISSION);
+                    }
+                }
+            }
+
+            if (pkgGrantsKnown) {
+                serializer.endTag(null, TAG_GRANT);
+            }
+        }
+
+        serializer.endTag(null, TAG_ALL_GRANTS);
+    }
+
+    private void processRestoredPermissionGrantsLPr(XmlPullParser parser, int userId)
+            throws XmlPullParserException, IOException {
+        String pkgName = null;
+        int outerDepth = parser.getDepth();
+        int type;
+        while ((type = parser.next()) != XmlPullParser.END_DOCUMENT
+                && (type != XmlPullParser.END_TAG || parser.getDepth() > outerDepth)) {
+            if (type == XmlPullParser.END_TAG || type == XmlPullParser.TEXT) {
+                continue;
+            }
+
+            final String tagName = parser.getName();
+            if (tagName.equals(TAG_GRANT)) {
+                pkgName = parser.getAttributeValue(null, ATTR_PACKAGE_NAME);
+                if (DEBUG_BACKUP) {
+                    Slog.v(TAG, "+++ Restoring grants for package " + pkgName);
+                }
+            } else if (tagName.equals(TAG_PERMISSION)) {
+
+                final boolean isGranted = "true".equals(parser.getAttributeValue(null, ATTR_IS_GRANTED));
+                final String permName = parser.getAttributeValue(null, ATTR_PERMISSION_NAME);
+
+                int newFlagSet = 0;
+                if ("true".equals(parser.getAttributeValue(null, ATTR_USER_SET))) {
+                    newFlagSet |= FLAG_PERMISSION_USER_SET;
+                }
+                if ("true".equals(parser.getAttributeValue(null, ATTR_USER_FIXED))) {
+                    newFlagSet |= FLAG_PERMISSION_USER_FIXED;
+                }
+                if ("true".equals(parser.getAttributeValue(null, ATTR_REVOKE_ON_UPGRADE))) {
+                    newFlagSet |= FLAG_PERMISSION_REVOKE_ON_UPGRADE;
+                }
+                if (DEBUG_BACKUP) {
+                    Slog.v(TAG, "  + Restoring grant: pkg=" + pkgName + " perm=" + permName
+                            + " granted=" + isGranted + " bits=0x" + Integer.toHexString(newFlagSet));
+                }
+                final PackageSetting ps = mSettings.mPackages.get(pkgName);
+                if (ps != null) {
+                    // Already installed so we apply the grant immediately
+                    if (DEBUG_BACKUP) {
+                        Slog.v(TAG, "        + already installed; applying");
+                    }
+                    PermissionsState perms = ps.getPermissionsState();
+                    BasePermission bp = mSettings.mPermissions.get(permName);
+                    if (bp != null) {
+                        if (isGranted) {
+                            perms.grantRuntimePermission(bp, userId);
+                        }
+                        if (newFlagSet != 0) {
+                            perms.updatePermissionFlags(bp, userId, USER_RUNTIME_GRANT_MASK, newFlagSet);
+                        }
+                    }
+                } else {
+                    // Need to wait for post-restore install to apply the grant
+                    if (DEBUG_BACKUP) {
+                        Slog.v(TAG, "        - not yet installed; saving for later");
+                    }
+                    mSettings.processRestoredPermissionGrantLPr(pkgName, permName,
+                            isGranted, newFlagSet, userId);
+                }
+            } else {
+                PackageManagerService.reportSettingsProblem(Log.WARN,
+                        "Unknown element under <" + TAG_PERMISSION_BACKUP + ">: " + tagName);
+                XmlUtils.skipCurrentTag(parser);
+            }
+        }
+
+        scheduleWriteSettingsLocked();
+        mSettings.writeRuntimePermissionsForUserLPr(userId, false);
     }
 
     @Override
@@ -16030,6 +16250,10 @@ public class PackageManagerService extends IPackageManager.Stub {
 
             if (dumpState.isDumping(DumpState.DUMP_SHARED_USERS)) {
                 mSettings.dumpSharedUsersLPr(pw, packageName, permissionNames, dumpState, checkin);
+            }
+
+            if (!checkin && dumpState.isDumping(DumpState.DUMP_PERMISSIONS) && packageName == null) {
+                mSettings.dumpRestoredPermissionGrantsLPr(pw, dumpState);
             }
 
             if (!checkin && dumpState.isDumping(DumpState.DUMP_INSTALLS) && packageName == null) {
