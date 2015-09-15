@@ -4921,7 +4921,26 @@ public final class Settings {
                 "accessibility_display_daltonizer";
 
         /**
-         * The timout for considering a press to be a long press in milliseconds.
+         * Setting that specifies whether automatic click when the mouse pointer stops moving is
+         * enabled.
+         *
+         * @hide
+         */
+        public static final String ACCESSIBILITY_AUTOCLICK_ENABLED =
+                "accessibility_autoclick_enabled";
+
+        /**
+         * Integer setting specifying amount of time in ms the mouse pointer has to stay still
+         * before performing click when {@link #ACCESSIBILITY_AUTOCLICK_ENABLED} is set.
+         *
+         * @see #ACCESSIBILITY_AUTOCLICK_ENABLED
+         * @hide
+         */
+        public static final String ACCESSIBILITY_AUTOCLICK_DELAY =
+                "accessibility_autoclick_delay";
+
+        /**
+         * The timeout for considering a press to be a long press in milliseconds.
          * @hide
          */
         public static final String LONG_PRESS_TIMEOUT = "long_press_timeout";
@@ -5785,6 +5804,8 @@ public final class Settings {
             SLEEP_TIMEOUT,
             DOUBLE_TAP_TO_WAKE,
             CAMERA_GESTURE_DISABLED,
+            ACCESSIBILITY_AUTOCLICK_ENABLED,
+            ACCESSIBILITY_AUTOCLICK_DELAY
         };
 
         /**
