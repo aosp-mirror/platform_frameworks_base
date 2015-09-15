@@ -997,7 +997,6 @@ public class WindowManagerService extends IWindowManager.Stub
             SurfaceControl.closeTransaction();
         }
 
-        updateCircularDisplayMaskIfNeeded();
         showEmulatorDisplayOverlayIfNeeded();
     }
 
@@ -5949,7 +5948,7 @@ public class WindowManagerService extends IWindowManager.Stub
         }
     }
 
-    public void updateCircularDisplayMaskIfNeeded() {
+    private void updateCircularDisplayMaskIfNeeded() {
         // we're fullscreen and not hosted in an ActivityView
         if (mContext.getResources().getConfiguration().isScreenRound()
                 && mContext.getResources().getBoolean(
@@ -7667,6 +7666,8 @@ public class WindowManagerService extends IWindowManager.Stub
             mActivityManager.updateConfiguration(null);
         } catch (RemoteException e) {
         }
+
+        updateCircularDisplayMaskIfNeeded();
     }
 
     private void displayReady(int displayId) {
