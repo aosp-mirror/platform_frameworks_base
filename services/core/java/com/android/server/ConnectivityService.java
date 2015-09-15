@@ -2270,8 +2270,9 @@ public class ConnectivityService extends IConnectivityManager.Stub
         mNetworkRequestInfoLogs.log("REGISTER " + nri);
         if (!nri.isRequest) {
             for (NetworkAgentInfo network : mNetworkAgentInfos.values()) {
-                if (network.satisfiesImmutableCapabilitiesOf(nri.request)) {
-                    updateSignalStrengthThresholds(network);
+                if (nri.request.networkCapabilities.hasSignalStrength() &&
+                        network.satisfiesImmutableCapabilitiesOf(nri.request)) {
+                    updateSignalStrengthThresholds(network, "REGISTER", nri.request);
                 }
             }
         }
@@ -2388,8 +2389,9 @@ public class ConnectivityService extends IConnectivityManager.Stub
                 // if this listen request applies and remove it.
                 for (NetworkAgentInfo nai : mNetworkAgentInfos.values()) {
                     nai.networkRequests.remove(nri.request.requestId);
-                    if (nai.satisfiesImmutableCapabilitiesOf(nri.request)) {
-                        updateSignalStrengthThresholds(nai);
+                    if (nri.request.networkCapabilities.hasSignalStrength() &&
+                            nai.satisfiesImmutableCapabilitiesOf(nri.request)) {
+                        updateSignalStrengthThresholds(nai, "RELEASE", nri.request);
                     }
                 }
             }
@@ -3639,9 +3641,24 @@ public class ConnectivityService extends IConnectivityManager.Stub
         return new ArrayList<Integer>(thresholds);
     }
 
-    private void updateSignalStrengthThresholds(NetworkAgentInfo nai) {
+    private void updateSignalStrengthThresholds(
+            NetworkAgentInfo nai, String reason, NetworkRequest request) {
+        ArrayList<Integer> thresholdsArray = getSignalStrengthThresholds(nai);
         Bundle thresholds = new Bundle();
-        thresholds.putIntegerArrayList("thresholds", getSignalStrengthThresholds(nai));
+        thresholds.putIntegerArrayList("thresholds", thresholdsArray);
+
+        // TODO: Switch to VDBG.
+        if (DBG) {
+            String detail;
+            if (request != null && request.networkCapabilities.hasSignalStrength()) {
+                detail = reason + " " + request.networkCapabilities.getSignalStrength();
+            } else {
+                detail = reason;
+            }
+            log(String.format("updateSignalStrengthThresholds: %s, sending %s to %s",
+                    detail, Arrays.toString(thresholdsArray.toArray()), nai.name()));
+        }
+
         nai.asyncChannel.sendMessage(
                 android.net.NetworkAgent.CMD_SET_SIGNAL_STRENGTH_THRESHOLDS,
                 0, 0, thresholds);
@@ -4624,7 +4641,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
             // so we could decide to tear it down immediately afterwards. That's fine though - on
             // disconnection NetworkAgents should stop any signal strength monitoring they have been
             // doing.
-            updateSignalStrengthThresholds(networkAgent);
+            updateSignalStrengthThresholds(networkAgent, "CONNECT", null);
 
             // Consider network even though it is not yet validated.
             rematchNetworkAndRequests(networkAgent, ReapUnvalidatedNetworks.REAP);
