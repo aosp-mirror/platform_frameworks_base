@@ -4606,7 +4606,7 @@ final class ActivityStack {
                 r.task.taskId, mStackId, r.info.screenOrientation, r.fullscreen,
                 (r.info.flags & ActivityInfo.FLAG_SHOW_FOR_ALL_USERS) != 0, r.userId,
                 r.info.configChanges, task.voiceSession != null, r.mLaunchTaskBehind,
-                bounds, task.mOverrideConfig);
+                bounds, task.mOverrideConfig, !r.isHomeActivity());
         r.taskConfigOverride = task.mOverrideConfig;
     }
 

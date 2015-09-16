@@ -112,6 +112,9 @@ class AppWindowToken extends WindowToken {
     boolean mLaunchTaskBehind;
     boolean mEnteringAnimation;
 
+    // True if the windows associated with this token should be cropped to their stack bounds.
+    boolean mCropWindowsToStack;
+
     // This application will have its window replaced due to relaunch. This allows window manager
     // to differentiate between simple removal of a window and replacement. In the latter case it
     // will preserve the old window until the new one is drawn.
