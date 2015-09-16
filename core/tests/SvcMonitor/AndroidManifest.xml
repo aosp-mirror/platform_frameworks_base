@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.google.android.experimental.svcmonitor" >
+
+    <uses-permission android:name="android.permission.INTERACT_ACROSS_USERS_FULL"/>
+
+    <uses-sdk
+        android:minSdkVersion="18"
+        android:targetSdkVersion="18"
+        />
+    <application
+        android:allowBackup="false"
+        android:label="@string/app_name" >
+        <service
+            android:name=".SvcMonitor"
+            android:enabled="true"
+            android:exported="true" >
+        </service>
+    </application>
+
+</manifest>
