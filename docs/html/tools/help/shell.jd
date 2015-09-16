@@ -865,7 +865,8 @@ $ adb pull /sdcard/demo.mp4
 <td><code>dumpsys</code></td>
 <td>Dumps system data to the screen.</td>
 <td rowspan=4">The <a href="{@docRoot}tools/debugging/ddms.html">Dalvik Debug Monitor Server</a>
-(DDMS) tool offers integrated debug environment that you may find easier to use.</td>
+(DDMS) tool offers an integrated debug environment that you may find easier to use.
+</td>
 </tr>
 
 <tr>
