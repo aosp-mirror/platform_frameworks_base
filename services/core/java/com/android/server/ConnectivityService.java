@@ -2277,13 +2277,6 @@ public class ConnectivityService extends IConnectivityManager.Stub
             }
         }
         rematchAllNetworksAndRequests(null, 0);
-        if (!nri.isRequest && nri.request.networkCapabilities.hasSignalStrength()) {
-            for (NetworkAgentInfo network : mNetworkAgentInfos.values()) {
-                if (network.satisfiesImmutableCapabilitiesOf(nri.request)) {
-                    updateSignalStrengthThresholds(network);
-                }
-            }
-        }
         if (nri.isRequest && mNetworkForRequestId.get(nri.request.requestId) == null) {
             sendUpdatedScoreToFactories(nri.request, 0);
         }
@@ -4147,9 +4140,6 @@ public class ConnectivityService extends IConnectivityManager.Stub
                 nai.networkCapabilities = networkCapabilities;
             }
             rematchAllNetworksAndRequests(nai, oldScore);
-            // TODO: reduce the number of callbacks where possible. For example, only send signal
-            // strength changes if the NetworkRequest used to register the callback specified a
-            // signalStrength.
             notifyNetworkCallbacks(nai, ConnectivityManager.CALLBACK_CAP_CHANGED);
         }
     }
