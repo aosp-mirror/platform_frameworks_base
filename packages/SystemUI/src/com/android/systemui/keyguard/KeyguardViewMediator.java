@@ -154,6 +154,7 @@ public class KeyguardViewMediator extends SystemUI {
     private static final int NOTIFY_STARTED_WAKING_UP = 21;
     private static final int NOTIFY_SCREEN_TURNED_ON = 22;
     private static final int NOTIFY_SCREEN_TURNED_OFF = 23;
+    private static final int NOTIFY_STARTED_GOING_TO_SLEEP = 24;
 
     /**
      * The default amount of time we stay awake (used for all key input)
@@ -676,6 +677,7 @@ public class KeyguardViewMediator extends SystemUI {
                 playSounds(true);
             }
         }
+        notifyStartedGoingToSleep();
     }
 
     public void onFinishedGoingToSleep(int why) {
@@ -1092,6 +1094,11 @@ public class KeyguardViewMediator extends SystemUI {
         mHandler.sendEmptyMessage(VERIFY_UNLOCK);
     }
 
+    private void notifyStartedGoingToSleep() {
+        if (DEBUG) Log.d(TAG, "notifyStartedGoingToSleep");
+        mHandler.sendEmptyMessage(NOTIFY_STARTED_GOING_TO_SLEEP);
+    }
+
     private void notifyFinishedGoingToSleep() {
         if (DEBUG) Log.d(TAG, "notifyFinishedGoingToSleep");
         mHandler.sendEmptyMessage(NOTIFY_FINISHED_GOING_TO_SLEEP);
@@ -1202,6 +1209,9 @@ public class KeyguardViewMediator extends SystemUI {
                     break;
                 case VERIFY_UNLOCK:
                     handleVerifyUnlock();
+                    break;
+                case NOTIFY_STARTED_GOING_TO_SLEEP:
+                    handleNotifyStartedGoingToSleep();
                     break;
                 case NOTIFY_FINISHED_GOING_TO_SLEEP:
                     handleNotifyFinishedGoingToSleep();
@@ -1527,6 +1537,13 @@ public class KeyguardViewMediator extends SystemUI {
             setShowingLocked(true);
             mStatusBarKeyguardViewManager.verifyUnlock();
             updateActivityLockScreenState();
+        }
+    }
+
+    private void handleNotifyStartedGoingToSleep() {
+        synchronized (KeyguardViewMediator.this) {
+            if (DEBUG) Log.d(TAG, "handleNotifyStartedGoingToSleep");
+            mStatusBarKeyguardViewManager.onStartedGoingToSleep();
         }
     }
 
