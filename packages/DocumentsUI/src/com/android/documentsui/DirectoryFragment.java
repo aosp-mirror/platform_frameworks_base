@@ -17,7 +17,6 @@
 package com.android.documentsui;
 
 import static com.android.documentsui.BaseActivity.State.ACTION_BROWSE;
-import static com.android.documentsui.BaseActivity.State.ACTION_BROWSE_ALL;
 import static com.android.documentsui.BaseActivity.State.ACTION_CREATE;
 import static com.android.documentsui.BaseActivity.State.ACTION_MANAGE;
 import static com.android.documentsui.BaseActivity.State.MODE_GRID;
@@ -101,7 +100,6 @@ import com.android.documentsui.RecentsProvider.StateColumns;
 import com.android.documentsui.model.DocumentInfo;
 import com.android.documentsui.model.DocumentStack;
 import com.android.documentsui.model.RootInfo;
-import com.android.internal.util.Preconditions;
 
 import com.google.common.collect.Lists;
 
@@ -1554,9 +1552,9 @@ public class DirectoryFragment extends Fragment {
     }
 
     private FragmentTuner pickFragmentTuner(final State state) {
-        return state.action == ACTION_BROWSE_ALL
+        return state.action == ACTION_BROWSE
                 ? new FilesTuner()
-                : new DefaultTuner(state);
+                : new DefaultTuner(state.action);
     }
 
     /**
@@ -1593,15 +1591,14 @@ public class DirectoryFragment extends Fragment {
      */
     private static final class DefaultTuner implements FragmentTuner {
 
-        private final State mState;
+        private final boolean mManaging;
 
-        public DefaultTuner(State state) {
-            mState = state;
+        public DefaultTuner(int action) {
+            mManaging = (action == ACTION_MANAGE);
         }
 
         @Override
         public void updateActionMenu(Menu menu, int dirType, boolean canDelete) {
-            Preconditions.checkState(mState.action != ACTION_BROWSE_ALL);
 
             final MenuItem open = menu.findItem(R.id.menu_open);
             final MenuItem share = menu.findItem(R.id.menu_share);
@@ -1610,14 +1607,11 @@ public class DirectoryFragment extends Fragment {
             final MenuItem moveTo = menu.findItem(R.id.menu_move_to);
             final MenuItem copyToClipboard = menu.findItem(R.id.menu_copy_to_clipboard);
 
-            final boolean manageOrBrowse = (mState.action == ACTION_MANAGE
-                    || mState.action == ACTION_BROWSE);
-
-            open.setVisible(!manageOrBrowse);
-            share.setVisible(manageOrBrowse);
-            delete.setVisible(manageOrBrowse && canDelete);
+            open.setVisible(!mManaging);
+            share.setVisible(mManaging);
+            delete.setVisible(mManaging && canDelete);
             // Disable copying from the Recents view.
-            copyTo.setVisible(manageOrBrowse && dirType != TYPE_RECENT_OPEN);
+            copyTo.setVisible(mManaging && dirType != TYPE_RECENT_OPEN);
             moveTo.setVisible(SystemProperties.getBoolean("debug.documentsui.enable_move", false));
 
             // Only shown in files mode.
@@ -1634,6 +1628,7 @@ public class DirectoryFragment extends Fragment {
     private static final class FilesTuner implements FragmentTuner {
         @Override
         public void updateActionMenu(Menu menu, int dirType, boolean canDelete) {
+
             menu.findItem(R.id.menu_share).setVisible(true);
             menu.findItem(R.id.menu_delete).setVisible(canDelete);
             menu.findItem(R.id.menu_copy_to_clipboard).setVisible(true);

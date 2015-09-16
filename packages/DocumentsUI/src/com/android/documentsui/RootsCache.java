@@ -17,6 +17,7 @@
 package com.android.documentsui;
 
 import static com.android.documentsui.Shared.TAG;
+import static com.android.documentsui.Shared.DEBUG;
 
 import android.content.ContentProviderClient;
 import android.content.ContentResolver;
@@ -58,8 +59,6 @@ import java.util.concurrent.TimeUnit;
  * Cache of known storage backends and their roots.
  */
 public class RootsCache {
-    private static final boolean LOGD = false;
-
     public static final Uri sNotificationUri = Uri.parse(
             "content://com.android.documentsui.roots/");
 
@@ -91,7 +90,7 @@ public class RootsCache {
 
         @Override
         public void onChange(boolean selfChange, Uri uri) {
-            if (LOGD) Log.d(TAG, "Updating roots due to change at " + uri);
+            if (DEBUG) Log.d(TAG, "Updating roots due to change at " + uri);
             updateAuthorityAsync(uri.getAuthority());
         }
     }
@@ -148,7 +147,7 @@ public class RootsCache {
         final ContentResolver resolver = mContext.getContentResolver();
         synchronized (mLock) {
             for (String authority : mStoppedAuthorities) {
-                if (LOGD) Log.d(TAG, "Loading stopped authority " + authority);
+                if (DEBUG) Log.d(TAG, "Loading stopped authority " + authority);
                 mRoots.putAll(authority, loadRootsForAuthority(resolver, authority));
             }
             mStoppedAuthorities.clear();
@@ -199,7 +198,8 @@ public class RootsCache {
             }
 
             final long delta = SystemClock.elapsedRealtime() - start;
-            Log.d(TAG, "Update found " + mTaskRoots.size() + " roots in " + delta + "ms");
+            if (DEBUG)
+                Log.d(TAG, "Update found " + mTaskRoots.size() + " roots in " + delta + "ms");
             synchronized (mLock) {
                 mRoots = mTaskRoots;
                 mStoppedAuthorities = mTaskStoppedAuthorities;
@@ -213,7 +213,7 @@ public class RootsCache {
             // Ignore stopped packages for now; we might query them
             // later during UI interaction.
             if ((info.applicationInfo.flags & ApplicationInfo.FLAG_STOPPED) != 0) {
-                if (LOGD) Log.d(TAG, "Ignoring stopped authority " + info.authority);
+                if (DEBUG) Log.d(TAG, "Ignoring stopped authority " + info.authority);
                 mTaskStoppedAuthorities.add(info.authority);
                 return;
             }
@@ -223,7 +223,7 @@ public class RootsCache {
             if (mFilterPackage != null && !mFilterPackage.equals(info.packageName)) {
                 synchronized (mLock) {
                     if (mTaskRoots.putAll(info.authority, mRoots.get(info.authority))) {
-                        if (LOGD) Log.d(TAG, "Used cached roots for " + info.authority);
+                        if (DEBUG) Log.d(TAG, "Used cached roots for " + info.authority);
                         cacheHit = true;
                     }
                 }
@@ -241,7 +241,7 @@ public class RootsCache {
      * Bring up requested provider and query for all active roots.
      */
     private Collection<RootInfo> loadRootsForAuthority(ContentResolver resolver, String authority) {
-        if (LOGD) Log.d(TAG, "Loading roots for " + authority);
+        if (DEBUG) Log.d(TAG, "Loading roots for " + authority);
 
         synchronized (mObservedAuthorities) {
             if (mObservedAuthorities.add(authority)) {
@@ -370,10 +370,15 @@ public class RootsCache {
             // Exclude downloads roots that don't support directory creation
             // TODO: Add flag to check the root supports directory creation or not.
             if (state.directoryCopy && root.isDownloads()) continue;
-            // Only show empty roots when creating
-            if ((state.action != State.ACTION_CREATE ||
+
+            // Only show empty roots when creating, or in browse mode.
+            if (empty && (state.action != State.ACTION_BROWSE ||
+                 state.action != State.ACTION_CREATE ||
                  state.action != State.ACTION_OPEN_TREE ||
-                 state.action != State.ACTION_OPEN_COPY_DESTINATION) && empty) continue;
+                 state.action != State.ACTION_OPEN_COPY_DESTINATION)) {
+                if (DEBUG) Log.i(TAG, "Skipping empty root: " + root);
+                continue;
+            }
 
             // Only include roots that serve requested content
             final boolean overlap =
@@ -385,7 +390,7 @@ public class RootsCache {
 
             // Exclude roots from the calling package.
             if (state.excludedAuthorities.contains(root.authority)) {
-                if (LOGD) Log.d(TAG, "Excluding root " + root.authority + " from calling package.");
+                if (DEBUG) Log.d(TAG, "Excluding root " + root.authority + " from calling package.");
                 continue;
             }
 

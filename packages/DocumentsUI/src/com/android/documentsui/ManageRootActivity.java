@@ -87,7 +87,7 @@ public class ManageRootActivity extends BaseActivity {
             // talkback from reading aloud the default title, we clear it here.
             setTitle("");
             final Uri rootUri = getIntent().getData();
-            new RestoreRootTask(rootUri).executeOnExecutor(getCurrentExecutor());
+            new RestoreRootTask(rootUri).executeOnExecutor(getExecutorForCurrentDirectory());
         } else {
             onCurrentDirectoryChanged(ANIM_NONE);
         }

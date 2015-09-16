@@ -16,8 +16,9 @@
 
 package com.android.documentsui;
 
-import static com.android.documentsui.DirectoryFragment.ANIM_DOWN;
 import static com.android.documentsui.DirectoryFragment.ANIM_NONE;
+import static com.android.documentsui.Shared.DEBUG;
+import static com.android.internal.util.Preconditions.checkArgument;
 
 import android.app.Activity;
 import android.app.FragmentManager;
@@ -25,11 +26,9 @@ import android.content.ActivityNotFoundException;
 import android.content.ClipData;
 import android.content.ContentResolver;
 import android.content.ContentValues;
-import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
-import android.provider.DocumentsContract;
 import android.support.annotation.Nullable;
 import android.util.Log;
 import android.view.KeyEvent;
@@ -46,7 +45,6 @@ import com.android.documentsui.model.DocumentInfo;
 import com.android.documentsui.model.DocumentStack;
 import com.android.documentsui.model.DurableUtils;
 import com.android.documentsui.model.RootInfo;
-import com.android.internal.util.Preconditions;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -58,7 +56,6 @@ import java.util.List;
 public class FilesActivity extends BaseActivity {
 
     public static final String TAG = "FilesActivity";
-    static final boolean DEBUG = false;
 
     private Toolbar mToolbar;
     private Spinner mToolbarStack;
@@ -74,8 +71,6 @@ public class FilesActivity extends BaseActivity {
     public void onCreate(Bundle icicle) {
         super.onCreate(icicle);
 
-        final Context context = this;
-
         mToolbar = (Toolbar) findViewById(R.id.toolbar);
 
         mStackAdapter = new StackAdapter();
@@ -90,7 +85,16 @@ public class FilesActivity extends BaseActivity {
 
         RootsFragment.show(getFragmentManager(), null);
         if (!mState.restored) {
-            new RestoreStackTask().execute();
+            Uri rootUri = getIntent().getData();
+
+            // If we've got a specific root to display, restore that root using a dedicated
+            // authority. That way a misbehaving provider won't result in an ANR.
+            if (rootUri != null) {
+                new RestoreRootTask(rootUri).executeOnExecutor(
+                        ProviderExecutor.forAuthority(rootUri.getAuthority()));
+            } else {
+                new RestoreStackTask().execute();
+            }
 
             // Show a failure dialog if there was a failed operation.
             final Intent intent = getIntent();
@@ -115,22 +119,16 @@ public class FilesActivity extends BaseActivity {
 
         final Intent intent = getIntent();
 
-        state.action = State.ACTION_BROWSE_ALL;
-        state.acceptMimes = new String[] { intent.getType() };
+        state.action = State.ACTION_BROWSE;
         state.allowMultiple = true;
 
-        // These options are specific to the DocumentsActivity.
-        Preconditions.checkArgument(
-                !intent.hasExtra(Intent.EXTRA_LOCAL_ONLY));
-        Preconditions.checkArgument(
-                !intent.hasExtra(DocumentsContract.EXTRA_SHOW_ADVANCED));
-
-        state.showAdvanced = LocalPreferences.getDisplayAdvancedDevices(this);
-        state.showSize = LocalPreferences.getDisplayFileSize(this);
+        // Options specific to the DocumentsActivity.
+        checkArgument(!intent.hasExtra(Intent.EXTRA_LOCAL_ONLY));
 
         final DocumentStack stack = intent.getParcelableExtra(CopyService.EXTRA_STACK);
-        if (stack != null)
+        if (stack != null) {
             state.stack = stack;
+        }
 
         return state;
     }
@@ -139,6 +137,21 @@ public class FilesActivity extends BaseActivity {
     protected void onPostCreate(Bundle savedInstanceState) {
         super.onPostCreate(savedInstanceState);
         updateActionBar();
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+
+        final RootInfo root = getCurrentRoot();
+
+        // If we're browsing a specific root, and that root went away, then we
+        // have no reason to hang around.
+        // TODO: Rather than just disappearing, maybe we should inform
+        // the user what has happened, let them close us. Less surprising.
+        if (mRoots.getRootBlocking(root.authority, root.rootId) == null) {
+            finish();
+        }
     }
 
     @Override
@@ -194,12 +207,8 @@ public class FilesActivity extends BaseActivity {
     public boolean onPrepareOptionsMenu(Menu menu) {
         boolean shown = super.onPrepareOptionsMenu(menu);
 
-        menu.findItem(R.id.menu_file_size).setVisible(true);
-        menu.findItem(R.id.menu_advanced).setVisible(true);
-
         final MenuItem pasteFromCb = menu.findItem(R.id.menu_paste_from_clipboard);
         final MenuItem createDir = menu.findItem(R.id.menu_create_dir);
-        final MenuItem settings = menu.findItem(R.id.menu_settings);
 
         boolean canCreateDir = canCreateDirectory();
 
