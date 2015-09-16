@@ -13628,7 +13628,21 @@ public class PackageManagerService extends IPackageManager.Stub {
         // TODO(multiArch): Extend getSizeInfo to look at *all* instruction sets, not
         // just the primary.
         String[] dexCodeInstructionSets = getDexCodeInstructionSets(getAppDexInstructionSets(ps));
-        int res = mInstaller.getSizeInfo(p.volumeUuid, packageName, userHandle, p.baseCodePath,
+
+        String apkPath;
+        File packageDir = new File(p.codePath);
+
+        if (packageDir.isDirectory() && p.canHaveOatDir()) {
+            apkPath = packageDir.getAbsolutePath();
+            // If libDirRoot is inside a package dir, set it to null to avoid it being counted twice
+            if (libDirRoot != null && libDirRoot.startsWith(apkPath)) {
+                libDirRoot = null;
+            }
+        } else {
+            apkPath = p.baseCodePath;
+        }
+
+        int res = mInstaller.getSizeInfo(p.volumeUuid, packageName, userHandle, apkPath,
                 libDirRoot, publicSrcDir, asecPath, dexCodeInstructionSets, pStats);
         if (res < 0) {
             return false;
