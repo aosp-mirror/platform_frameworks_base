@@ -550,4 +550,38 @@ public class DhcpPacketTest extends TestCase {
                 "209.129.128.3,209.129.148.3,209.129.128.6",
                 "wvm.edu", "10.1.105.252", null, 86400, false, dhcpResults);
     }
+
+    @SmallTest
+    public void testMultipleRouters() throws Exception {
+        final ByteBuffer packet = ByteBuffer.wrap(HexEncoding.decode((
+            // Ethernet header.
+            "fc3d93000000" + "081735000000" + "0800" +
+            // IP header.
+            "45000148c2370000ff117ac2c0a8bd02ffffffff" +
+            // UDP header. TODO: fix invalid checksum (due to MAC address obfuscation).
+            "0043004401343beb" +
+            // BOOTP header.
+            "0201060027f518e20000800000000000c0a8bd310000000000000000" +
+            // MAC address.
+            "fc3d9300000000000000000000000000" +
+            // Server name.
+            "0000000000000000000000000000000000000000000000000000000000000000" +
+            "0000000000000000000000000000000000000000000000000000000000000000" +
+            // File.
+            "0000000000000000000000000000000000000000000000000000000000000000" +
+            "0000000000000000000000000000000000000000000000000000000000000000" +
+            "0000000000000000000000000000000000000000000000000000000000000000" +
+            "0000000000000000000000000000000000000000000000000000000000000000" +
+            // Options.
+            "638253633501023604c0abbd023304000070803a04000038403b04000062700104ffffff00" +
+            "0308c0a8bd01ffffff0006080808080808080404ff000000000000"
+        ).toCharArray(), false));
+
+        DhcpPacket offerPacket = DhcpPacket.decodeFullPacket(packet, ENCAP_L2);
+        assertTrue(offerPacket instanceof DhcpOfferPacket);
+        assertEquals("FC3D93000000", HexDump.toHexString(offerPacket.getClientMac()));
+        DhcpResults dhcpResults = offerPacket.toDhcpResults();
+        assertDhcpResults("192.168.189.49/24", "192.168.189.1", "8.8.8.8,8.8.4.4",
+                null, "192.171.189.2", null, 28800, false, dhcpResults);
+    }
 }

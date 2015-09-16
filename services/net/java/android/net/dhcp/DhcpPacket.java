@@ -128,7 +128,7 @@ abstract class DhcpPacket {
      * DHCP Optional Type: DHCP Router
      */
     protected static final byte DHCP_ROUTER = 3;
-    protected Inet4Address mGateway;
+    protected List <Inet4Address> mGateways;
 
     /**
      * DHCP Optional Type: DHCP DNS Server
@@ -706,8 +706,8 @@ abstract class DhcpPacket {
         Inet4Address nextIp;
         Inet4Address relayIp;
         byte[] clientMac;
-        List<Inet4Address> dnsServers = new ArrayList<Inet4Address>();
-        Inet4Address gateway = null; // aka router
+        List<Inet4Address> dnsServers = new ArrayList<>();
+        List<Inet4Address> gateways = new ArrayList<>();  // aka router
         Inet4Address serverIdentifier = null;
         Inet4Address netMask = null;
         String message = null;
@@ -883,8 +883,9 @@ abstract class DhcpPacket {
                             expectedLen = 4;
                             break;
                         case DHCP_ROUTER:
-                            gateway = readIpAddress(packet);
-                            expectedLen = 4;
+                            for (expectedLen = 0; expectedLen < optionLen; expectedLen += 4) {
+                                gateways.add(readIpAddress(packet));
+                            }
                             break;
                         case DHCP_DNS_SERVER:
                             for (expectedLen = 0; expectedLen < optionLen; expectedLen += 4) {
@@ -1020,7 +1021,7 @@ abstract class DhcpPacket {
         newPacket.mBroadcastAddress = bcAddr;
         newPacket.mDnsServers = dnsServers;
         newPacket.mDomainName = domainName;
-        newPacket.mGateway = gateway;
+        newPacket.mGateways = gateways;
         newPacket.mHostName = hostName;
         newPacket.mLeaseTime = leaseTime;
         newPacket.mMessage = message;
@@ -1076,7 +1077,11 @@ abstract class DhcpPacket {
         } catch (IllegalArgumentException e) {
             return null;
         }
-        results.gateway = mGateway;
+
+        if (mGateways.size() > 0) {
+            results.gateway = mGateways.get(0);
+        }
+
         results.dnsServers.addAll(mDnsServers);
         results.domains = mDomainName;
         results.serverAddress = mServerIdentifier;
@@ -1118,11 +1123,11 @@ abstract class DhcpPacket {
     public static ByteBuffer buildOfferPacket(int encap, int transactionId,
         boolean broadcast, Inet4Address serverIpAddr, Inet4Address clientIpAddr,
         byte[] mac, Integer timeout, Inet4Address netMask, Inet4Address bcAddr,
-        Inet4Address gateway, List<Inet4Address> dnsServers,
+        List<Inet4Address> gateways, List<Inet4Address> dnsServers,
         Inet4Address dhcpServerIdentifier, String domainName) {
         DhcpPacket pkt = new DhcpOfferPacket(
             transactionId, (short) 0, broadcast, serverIpAddr, INADDR_ANY, clientIpAddr, mac);
-        pkt.mGateway = gateway;
+        pkt.mGateways = gateways;
         pkt.mDnsServers = dnsServers;
         pkt.mLeaseTime = timeout;
         pkt.mDomainName = domainName;
@@ -1138,11 +1143,11 @@ abstract class DhcpPacket {
     public static ByteBuffer buildAckPacket(int encap, int transactionId,
         boolean broadcast, Inet4Address serverIpAddr, Inet4Address clientIpAddr,
         byte[] mac, Integer timeout, Inet4Address netMask, Inet4Address bcAddr,
-        Inet4Address gateway, List<Inet4Address> dnsServers,
+        List<Inet4Address> gateways, List<Inet4Address> dnsServers,
         Inet4Address dhcpServerIdentifier, String domainName) {
         DhcpPacket pkt = new DhcpAckPacket(
             transactionId, (short) 0, broadcast, serverIpAddr, INADDR_ANY, clientIpAddr, mac);
-        pkt.mGateway = gateway;
+        pkt.mGateways = gateways;
         pkt.mDnsServers = dnsServers;
         pkt.mLeaseTime = timeout;
         pkt.mDomainName = domainName;
