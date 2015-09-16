@@ -16,8 +16,10 @@
 
 package android.widget;
 
+import static android.widget.espresso.TextViewActions.clickOnTextAtIndex;
 import static android.support.test.espresso.Espresso.onView;
 import static android.support.test.espresso.action.ViewActions.click;
+import static android.support.test.espresso.action.ViewActions.pressKey;
 import static android.support.test.espresso.action.ViewActions.typeTextIntoFocusedView;
 import static android.support.test.espresso.assertion.ViewAssertions.matches;
 import static android.support.test.espresso.matcher.ViewMatchers.withId;
@@ -27,6 +29,7 @@ import com.android.frameworks.coretests.R;
 
 import android.test.ActivityInstrumentationTestCase2;
 import android.test.suitebuilder.annotation.SmallTest;
+import android.view.KeyEvent;
 
 /**
  * Tests the TextView widget from an Activity
@@ -46,5 +49,18 @@ public class TextViewActivityTest extends ActivityInstrumentationTestCase2<TextV
         onView(withId(R.id.textview)).perform(typeTextIntoFocusedView(helloWorld));
 
         onView(withId(R.id.textview)).check(matches(withText(helloWorld)));
+    }
+
+    @SmallTest
+    public void testPositionCursorAtTextAtIndex() throws Exception {
+        getActivity();
+
+        final String helloWorld = "Hello world!";
+        onView(withId(R.id.textview)).perform(typeTextIntoFocusedView(helloWorld));
+        onView(withId(R.id.textview)).perform(clickOnTextAtIndex(helloWorld.indexOf("world")));
+
+        // Delete text at specified index and see if we got the right one.
+        onView(withId(R.id.textview)).perform(pressKey(KeyEvent.KEYCODE_FORWARD_DEL));
+        onView(withId(R.id.textview)).check(matches(withText("Hello orld!")));
     }
 }
