@@ -117,7 +117,7 @@ public class DhcpPacketTest extends TestCase {
 
     private void assertDomainAndVendorInfoParses(
             String expectedDomain, byte[] domainBytes,
-            String expectedVendorInfo, byte[] vendorInfoBytes) {
+            String expectedVendorInfo, byte[] vendorInfoBytes) throws Exception {
         ByteBuffer packet = new TestDhcpPacket(DHCP_MESSAGE_TYPE_OFFER)
                 .setDomainBytes(domainBytes)
                 .setVendorInfoBytes(vendorInfoBytes)
@@ -158,17 +158,25 @@ public class DhcpPacketTest extends TestCase {
     }
 
     private void assertLeaseTimeParses(boolean expectValid, Integer rawLeaseTime,
-                                       long leaseTimeMillis, byte[] leaseTimeBytes) {
+            long leaseTimeMillis, byte[] leaseTimeBytes) throws Exception {
         TestDhcpPacket testPacket = new TestDhcpPacket(DHCP_MESSAGE_TYPE_OFFER);
         if (leaseTimeBytes != null) {
             testPacket.setLeaseTimeBytes(leaseTimeBytes);
         }
         ByteBuffer packet = testPacket.build();
-        DhcpPacket offerPacket = DhcpPacket.decodeFullPacket(packet, ENCAP_BOOTP);
+        DhcpPacket offerPacket = null;
+
         if (!expectValid) {
-            assertNull(offerPacket);
+            try {
+                offerPacket = DhcpPacket.decodeFullPacket(packet, ENCAP_BOOTP);
+                fail("Invalid packet parsed successfully: " + offerPacket);
+            } catch (ParseException expected) {
+            }
             return;
         }
+
+        offerPacket = DhcpPacket.decodeFullPacket(packet, ENCAP_BOOTP);
+        assertNotNull(offerPacket);
         assertEquals(rawLeaseTime, offerPacket.mLeaseTime);
         DhcpResults dhcpResults = offerPacket.toDhcpResults();  // Just check this doesn't crash.
         assertEquals(leaseTimeMillis, offerPacket.getLeaseTimeMillis());
@@ -200,14 +208,14 @@ public class DhcpPacketTest extends TestCase {
     }
 
     private void checkIpAddress(String expected, Inet4Address clientIp, Inet4Address yourIp,
-                                byte[] netmaskBytes) {
+                                byte[] netmaskBytes) throws Exception {
         checkIpAddress(expected, DHCP_MESSAGE_TYPE_OFFER, clientIp, yourIp, netmaskBytes);
         checkIpAddress(expected, DHCP_MESSAGE_TYPE_ACK, clientIp, yourIp, netmaskBytes);
     }
 
     private void checkIpAddress(String expected, byte type,
                                 Inet4Address clientIp, Inet4Address yourIp,
-                                byte[] netmaskBytes) {
+                                byte[] netmaskBytes) throws Exception {
         ByteBuffer packet = new TestDhcpPacket(type, clientIp, yourIp)
                 .setNetmaskBytes(netmaskBytes)
                 .build();
