@@ -5634,7 +5634,7 @@ public class WindowManagerService extends IWindowManager.Stub
                         int right = wf.right - cr.right;
                         int bottom = wf.bottom - cr.bottom;
                         frame.union(left, top, right, bottom);
-                        ws.getTaskBounds(stackBounds, !BOUNDS_FOR_TOUCH);
+                        ws.getStackBounds(stackBounds, !BOUNDS_FOR_TOUCH);
                         if (!frame.intersect(stackBounds)) {
                             // Set frame empty if there's no intersection.
                             frame.setEmpty();
