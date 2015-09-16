@@ -241,17 +241,16 @@ static void SurfaceTexture_init(JNIEnv* env, jobject thiz, jboolean isDetached,
     BufferQueue::createBufferQueue(&producer, &consumer);
 
     if (singleBufferMode) {
-        consumer->disableAsyncBuffer();
-        consumer->setDefaultMaxBufferCount(1);
+        consumer->setMaxBufferCount(1);
     }
 
     sp<GLConsumer> surfaceTexture;
     if (isDetached) {
         surfaceTexture = new GLConsumer(consumer, GL_TEXTURE_EXTERNAL_OES,
-                true, true);
+                true, !singleBufferMode);
     } else {
         surfaceTexture = new GLConsumer(consumer, texName,
-                GL_TEXTURE_EXTERNAL_OES, true, true);
+                GL_TEXTURE_EXTERNAL_OES, true, !singleBufferMode);
     }
 
     if (surfaceTexture == 0) {
