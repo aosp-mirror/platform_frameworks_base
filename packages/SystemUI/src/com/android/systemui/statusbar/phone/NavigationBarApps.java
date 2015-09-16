@@ -120,6 +120,13 @@ class NavigationBarApps extends LinearLayout {
     // has a child that will be moved to make the menu to appear where we need it.
     private final ViewGroup mPopupAnchor;
     private final PopupMenu mPopupMenu;
+
+    /**
+     * True if popup menu code is busy with a popup operation.
+     * Attempting  to show a popup menu or to add menu items while it's returning true will
+     * corrupt/crash the app.
+     */
+    private boolean mIsPopupInUse = false;
     private final int [] mClickedIconLocation = new int[2];
 
     public NavigationBarApps(Context context, AttributeSet attrs) {
@@ -285,6 +292,15 @@ class NavigationBarApps extends LinearLayout {
         super.onDetachedFromWindow();
         mContext.unregisterReceiver(mBroadcastReceiver);
         mAppPackageMonitor.unregister();
+    }
+
+    @Override
+    protected void onVisibilityChanged(View changedView, int visibility) {
+        super.onVisibilityChanged(changedView, visibility);
+        if (mIsPopupInUse && !isShown()) {
+            // Hide the popup if current view became invisible.
+            shutdownPopupMenu();
+        }
     }
 
     private void addAppButton(AppButtonData appButtonData) {
@@ -671,14 +687,12 @@ class NavigationBarApps extends LinearLayout {
     }
 
     /**
-     * Returns true if popup menu code is busy with a popup operation.
-     * Attempting  to show a popup menu or to add menu items while it's returning true will
-     * corrupt/crash the app.
+     * Brings the menu popup to closed state.
+     * Can be called at any stage of the asynchronous process of showing a menu.
      */
-    boolean isPopupInUse() {
-        // mPopupAnchor's parent will be set to non-null/null by mWindowManager.add/RemoveView
-        // correspondingly.
-        return mPopupAnchor.getParent() != null;
+    private void shutdownPopupMenu() {
+        mWindowManager.removeView(mPopupAnchor);
+        mPopupMenu.dismiss();
     }
 
     /**
@@ -712,14 +726,19 @@ class NavigationBarApps extends LinearLayout {
         mPopupMenu.setOnDismissListener(new PopupMenu.OnDismissListener() {
             @Override
             public void onDismiss(PopupMenu menu) {
+                // FYU: thorough testing for closing menu either by the user or via
+                // shutdownPopupMenu() called at various moments of the menu creation, revealed that
+                // 'onDismiss' is guaranteed to be called after each invocation of showPopupMenu.
                 mWindowManager.removeView(mPopupAnchor);
                 anchorButton.removeOnAttachStateChangeListener(onAttachStateChangeListener);
                 mPopupMenu.setOnDismissListener(null);
                 mPopupMenu.getMenu().clear();
+                mIsPopupInUse = false;
             }
         });
 
         mWindowManager.addView(mPopupAnchor, mPopupAnchorLayoutParams);
+        mIsPopupInUse = true;
     }
 
     private void activateTask(int taskPersistentId) {
@@ -758,7 +777,7 @@ class NavigationBarApps extends LinearLayout {
      * tasks.
      */
     void maybeShowLaunchMenu(ImageView appIcon) {
-        if (isPopupInUse()) return;
+        if (mIsPopupInUse) return;
         AppButtonData appButtonData = (AppButtonData) appIcon.getTag();
         if (appButtonData.getTaskCount() <= 1) return;
 
@@ -889,7 +908,7 @@ class NavigationBarApps extends LinearLayout {
 
         @Override
         public boolean onContextClick(View v) {
-            if (isPopupInUse()) return true;
+            if (mIsPopupInUse) return true;
             ImageView appIcon = (ImageView) v;
             populateContextMenu(appIcon);
             showPopupMenu(appIcon);
