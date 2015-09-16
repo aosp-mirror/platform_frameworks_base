@@ -258,7 +258,7 @@ public class BarController {
             vis &= ~View.SYSTEM_UI_FLAG_LOW_PROFILE;  // never show transient bars in low profile
         }
         if ((vis & mTranslucentFlag) != 0 || (oldVis & mTranslucentFlag) != 0 ||
-                ((vis | oldVis) & View.SYSTEM_UI_FLAG_FULLSCREEN) != 0) {
+                ((vis | oldVis) & View.SYSTEM_UI_TRANSPARENT) != 0) {
             mLastTranslucent = SystemClock.uptimeMillis();
         }
         return vis;
