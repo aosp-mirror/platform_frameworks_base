@@ -1488,10 +1488,9 @@ public final class FloatingToolbar {
     private static AnimatorSet createEnterAnimation(View view) {
         AnimatorSet animation =  new AnimatorSet();
         animation.playTogether(
-                ObjectAnimator.ofFloat(view, View.ALPHA, 0, 1).setDuration(200),
+                ObjectAnimator.ofFloat(view, View.ALPHA, 0, 1).setDuration(150),
                 // Make sure that view.x is always fixed throughout the duration of this animation.
                 ObjectAnimator.ofFloat(view, View.X, view.getX(), view.getX()));
-        animation.setStartDelay(50);
         return animation;
     }
 
@@ -1506,7 +1505,7 @@ public final class FloatingToolbar {
             View view, int startDelay, Animator.AnimatorListener listener) {
         AnimatorSet animation =  new AnimatorSet();
         animation.playTogether(
-                ObjectAnimator.ofFloat(view, View.ALPHA, 1, 0).setDuration(200));
+                ObjectAnimator.ofFloat(view, View.ALPHA, 1, 0).setDuration(100));
         animation.setStartDelay(startDelay);
         animation.addListener(listener);
         return animation;
