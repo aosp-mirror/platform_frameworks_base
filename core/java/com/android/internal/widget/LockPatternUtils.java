@@ -1071,12 +1071,22 @@ public class LockPatternUtils {
      *   enter a pattern.
      */
     public long getLockoutAttemptDeadline(int userId) {
-        final long deadline = getLong(LOCKOUT_ATTEMPT_DEADLINE, 0L, userId);
+        long deadline = getLong(LOCKOUT_ATTEMPT_DEADLINE, 0L, userId);
         final long timeoutMs = getLong(LOCKOUT_ATTEMPT_TIMEOUT_MS, 0L, userId);
         final long now = SystemClock.elapsedRealtime();
-        if (deadline < now || deadline > (now + timeoutMs)) {
+        if (deadline < now) {
+            // timeout expired
+            setLong(LOCKOUT_ATTEMPT_DEADLINE, 0, userId);
+            setLong(LOCKOUT_ATTEMPT_TIMEOUT_MS, 0, userId);
             return 0L;
         }
+
+        if (deadline > (now + timeoutMs)) {
+            // device was rebooted, set new deadline
+            deadline = now + timeoutMs;
+            setLong(LOCKOUT_ATTEMPT_DEADLINE, deadline, userId);
+        }
+
         return deadline;
     }
 
