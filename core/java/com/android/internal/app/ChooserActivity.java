@@ -104,6 +104,7 @@ public class ChooserActivity extends ResolverActivity {
                                 sri.resultTargets);
                     }
                     unbindService(sri.connection);
+                    sri.connection.destroy();
                     mServiceConnections.remove(sri.connection);
                     if (mServiceConnections.isEmpty()) {
                         mChooserHandler.removeMessages(CHOOSER_TARGET_SERVICE_WATCHDOG_TIMEOUT);
@@ -208,6 +209,8 @@ public class ChooserActivity extends ResolverActivity {
             mRefinementResultReceiver.destroy();
             mRefinementResultReceiver = null;
         }
+        unbindRemainingServices();
+        mChooserHandler.removeMessages(CHOOSER_TARGET_SERVICE_RESULT);
     }
 
     @Override
@@ -263,6 +266,11 @@ public class ChooserActivity extends ResolverActivity {
     @Override
     boolean shouldGetActivityMetadata() {
         return true;
+    }
+
+    @Override
+    boolean shouldAutoLaunchSingleChoice() {
+        return false;
     }
 
     private void modifyTargetIntent(Intent in) {
@@ -371,7 +379,8 @@ public class ChooserActivity extends ResolverActivity {
                     continue;
                 }
 
-                final ChooserTargetServiceConnection conn = new ChooserTargetServiceConnection(dri);
+                final ChooserTargetServiceConnection conn =
+                        new ChooserTargetServiceConnection(this, dri);
                 if (bindServiceAsUser(serviceIntent, conn, BIND_AUTO_CREATE | BIND_NOT_FOREGROUND,
                         UserHandle.CURRENT)) {
                     if (DEBUG) {
@@ -425,6 +434,7 @@ public class ChooserActivity extends ResolverActivity {
             final ChooserTargetServiceConnection conn = mServiceConnections.get(i);
             if (DEBUG) Log.d(TAG, "unbinding " + conn);
             unbindService(conn);
+            conn.destroy();
         }
         mServiceConnections.clear();
         mChooserHandler.removeMessages(CHOOSER_TARGET_SERVICE_WATCHDOG_TIMEOUT);
@@ -1024,54 +1034,93 @@ public class ChooserActivity extends ResolverActivity {
         }
     }
 
-    class ChooserTargetServiceConnection implements ServiceConnection {
+    static class ChooserTargetServiceConnection implements ServiceConnection {
         private final DisplayResolveInfo mOriginalTarget;
+        private ComponentName mConnectedComponent;
+        private ChooserActivity mChooserActivity;
+        private final Object mLock = new Object();
 
         private final IChooserTargetResult mChooserTargetResult = new IChooserTargetResult.Stub() {
             @Override
             public void sendResult(List<ChooserTarget> targets) throws RemoteException {
-                filterServiceTargets(mOriginalTarget.getResolveInfo().activityInfo.packageName,
-                        targets);
-                final Message msg = Message.obtain();
-                msg.what = CHOOSER_TARGET_SERVICE_RESULT;
-                msg.obj = new ServiceResultInfo(mOriginalTarget, targets,
-                        ChooserTargetServiceConnection.this);
-                mChooserHandler.sendMessage(msg);
+                synchronized (mLock) {
+                    if (mChooserActivity == null) {
+                        Log.e(TAG, "destroyed ChooserTargetServiceConnection received result from "
+                                + mConnectedComponent + "; ignoring...");
+                        return;
+                    }
+                    mChooserActivity.filterServiceTargets(
+                            mOriginalTarget.getResolveInfo().activityInfo.packageName, targets);
+                    final Message msg = Message.obtain();
+                    msg.what = CHOOSER_TARGET_SERVICE_RESULT;
+                    msg.obj = new ServiceResultInfo(mOriginalTarget, targets,
+                            ChooserTargetServiceConnection.this);
+                    mChooserActivity.mChooserHandler.sendMessage(msg);
+                }
             }
         };
 
-        public ChooserTargetServiceConnection(DisplayResolveInfo dri) {
+        public ChooserTargetServiceConnection(ChooserActivity chooserActivity,
+                DisplayResolveInfo dri) {
+            mChooserActivity = chooserActivity;
             mOriginalTarget = dri;
         }
 
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
             if (DEBUG) Log.d(TAG, "onServiceConnected: " + name);
-            final IChooserTargetService icts = IChooserTargetService.Stub.asInterface(service);
-            try {
-                icts.getChooserTargets(mOriginalTarget.getResolvedComponentName(),
-                        mOriginalTarget.getResolveInfo().filter, mChooserTargetResult);
-            } catch (RemoteException e) {
-                Log.e(TAG, "Querying ChooserTargetService " + name + " failed.", e);
-                unbindService(this);
-                mServiceConnections.remove(this);
+            synchronized (mLock) {
+                if (mChooserActivity == null) {
+                    Log.e(TAG, "destroyed ChooserTargetServiceConnection got onServiceConnected");
+                    return;
+                }
+
+                final IChooserTargetService icts = IChooserTargetService.Stub.asInterface(service);
+                try {
+                    icts.getChooserTargets(mOriginalTarget.getResolvedComponentName(),
+                            mOriginalTarget.getResolveInfo().filter, mChooserTargetResult);
+                } catch (RemoteException e) {
+                    Log.e(TAG, "Querying ChooserTargetService " + name + " failed.", e);
+                    mChooserActivity.unbindService(this);
+                    destroy();
+                    mChooserActivity.mServiceConnections.remove(this);
+                }
             }
         }
 
         @Override
         public void onServiceDisconnected(ComponentName name) {
             if (DEBUG) Log.d(TAG, "onServiceDisconnected: " + name);
-            unbindService(this);
-            mServiceConnections.remove(this);
-            if (mServiceConnections.isEmpty()) {
-                mChooserHandler.removeMessages(CHOOSER_TARGET_SERVICE_WATCHDOG_TIMEOUT);
-                sendVoiceChoicesIfNeeded();
+            synchronized (mLock) {
+                if (mChooserActivity == null) {
+                    Log.e(TAG,
+                            "destroyed ChooserTargetServiceConnection got onServiceDisconnected");
+                    return;
+                }
+
+                mChooserActivity.unbindService(this);
+                destroy();
+                mChooserActivity.mServiceConnections.remove(this);
+                if (mChooserActivity.mServiceConnections.isEmpty()) {
+                    mChooserActivity.mChooserHandler.removeMessages(
+                            CHOOSER_TARGET_SERVICE_WATCHDOG_TIMEOUT);
+                    mChooserActivity.sendVoiceChoicesIfNeeded();
+                }
+                mConnectedComponent = null;
+            }
+        }
+
+        public void destroy() {
+            synchronized (mLock) {
+                mChooserActivity = null;
             }
         }
 
         @Override
         public String toString() {
-            return mOriginalTarget.getResolveInfo().activityInfo.toString();
+            return "ChooserTargetServiceConnection{service="
+                    + mConnectedComponent + ", activity="
+                    + mOriginalTarget.getResolveInfo().activityInfo.toString() + "}";
         }
     }
 

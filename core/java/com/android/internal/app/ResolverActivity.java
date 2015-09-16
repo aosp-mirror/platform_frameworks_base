@@ -234,7 +234,9 @@ public class ResolverActivity extends Activity {
 
         mResolverComparator = new ResolverComparator(this, getTargetIntent(), referrerPackage);
 
-        configureContentView(mIntents, initialIntents, rList, alwaysUseOption);
+        if (configureContentView(mIntents, initialIntents, rList, alwaysUseOption)) {
+            return;
+        }
 
         // Prevent the Resolver window from becoming the top fullscreen window and thus from taking
         // control of the system bars.
@@ -794,6 +796,10 @@ public class ResolverActivity extends Activity {
         return false;
     }
 
+    boolean shouldAutoLaunchSingleChoice() {
+        return true;
+    }
+
     void showAppDetails(ResolveInfo ri) {
         Intent in = new Intent().setAction(Settings.ACTION_APPLICATION_DETAILS_SETTINGS)
                 .setData(Uri.fromParts("package", ri.activityInfo.packageName, null))
@@ -808,7 +814,10 @@ public class ResolverActivity extends Activity {
                 launchedFromUid, filterLastUsed);
     }
 
-    void configureContentView(List<Intent> payloadIntents, Intent[] initialIntents,
+    /**
+     * Returns true if the activity is finishing and creation should halt
+     */
+    boolean configureContentView(List<Intent> payloadIntents, Intent[] initialIntents,
             List<ResolveInfo> rList, boolean alwaysUseOption) {
         // The last argument of createAdapter is whether to do special handling
         // of the last used choice to highlight it in the list.  We need to always
@@ -828,7 +837,9 @@ public class ResolverActivity extends Activity {
         mAlwaysUseOption = alwaysUseOption;
 
         int count = mAdapter.getUnfilteredCount();
-        if (count > 1 || (count == 1 && mAdapter.getOtherProfile() != null)) {
+        if ((!shouldAutoLaunchSingleChoice() && count > 0)
+                || count > 1
+                || (count == 1 && mAdapter.getOtherProfile() != null)) {
             setContentView(layoutId);
             mAdapterView = (AbsListView) findViewById(R.id.resolver_list);
             onPrepareAdapterView(mAdapterView, mAdapter, alwaysUseOption);
@@ -837,7 +848,7 @@ public class ResolverActivity extends Activity {
             mPackageMonitor.unregister();
             mRegistered = false;
             finish();
-            return;
+            return true;
         } else {
             setContentView(R.layout.resolver_list);
 
@@ -847,6 +858,7 @@ public class ResolverActivity extends Activity {
             mAdapterView = (AbsListView) findViewById(R.id.resolver_list);
             mAdapterView.setVisibility(View.GONE);
         }
+        return false;
     }
 
     void onPrepareAdapterView(AbsListView adapterView, ResolveListAdapter adapter,
