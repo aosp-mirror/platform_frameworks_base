@@ -215,8 +215,8 @@ public class TaskViewHeader extends FrameLayout {
                 mLightDismissDrawable : mDarkDismissDrawable);
         mDismissButton.setContentDescription(String.format(mDismissContentDescription,
                 t.contentDescription));
-        mMoveTaskButton.setVisibility((mConfig.multiStackEnabled) ? View.VISIBLE : View.INVISIBLE);
-        if (mConfig.multiStackEnabled) {
+        mMoveTaskButton.setVisibility((mConfig.multiWindowEnabled) ? View.VISIBLE : View.INVISIBLE);
+        if (mConfig.multiWindowEnabled) {
             updateResizeTaskBarIcon(t);
         }
     }

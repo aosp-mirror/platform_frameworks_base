@@ -134,7 +134,7 @@ public class RecentsConfiguration {
     public boolean fakeShadows;
 
     /** Dev options and global settings */
-    public boolean multiStackEnabled;
+    public boolean multiWindowEnabled;
     public boolean lockToAppEnabled;
     public boolean developerOptionsEnabled;
     public boolean debugModeEnabled;
@@ -283,7 +283,7 @@ public class RecentsConfiguration {
                 Settings.Global.DEVELOPMENT_SETTINGS_ENABLED) != 0;
         lockToAppEnabled = ssp.getSystemSetting(context,
                 Settings.System.LOCK_TO_APP_ENABLED) != 0;
-        multiStackEnabled = "true".equals(ssp.getSystemProperty("persist.sys.debug.multi_window"));
+        multiWindowEnabled = "true".equals(ssp.getSystemProperty("persist.sys.debug.multi_window"));
     }
 
     /** Called when the configuration has changed, and we want to reset any configuration specific
@@ -320,14 +320,16 @@ public class RecentsConfiguration {
      * Returns the task stack bounds in the current orientation. These bounds do not account for
      * the system insets.
      */
-    public void getAvailableTaskStackBounds(int windowWidth, int windowHeight, int topInset,
+    public void getAvailableTaskStackBounds(Rect windowBounds, int topInset,
             int rightInset, Rect searchBarBounds, Rect taskStackBounds) {
         if (isLandscape && hasTransposedSearchBar) {
             // In landscape, the search bar appears on the left, but we overlay it on top
-            taskStackBounds.set(0, topInset, windowWidth - rightInset, windowHeight);
+            taskStackBounds.set(windowBounds.left, windowBounds.top + topInset,
+                    windowBounds.right - rightInset, windowBounds.bottom);
         } else {
             // In portrait, the search bar appears on the top (which already has the inset)
-            taskStackBounds.set(0, searchBarBounds.bottom, windowWidth, windowHeight);
+            taskStackBounds.set(windowBounds.left, searchBarBounds.bottom,
+                    windowBounds.right, windowBounds.bottom);
         }
     }
 
@@ -335,16 +337,17 @@ public class RecentsConfiguration {
      * Returns the search bar bounds in the current orientation.  These bounds do not account for
      * the system insets.
      */
-    public void getSearchBarBounds(int windowWidth, int windowHeight, int topInset,
-            Rect searchBarSpaceBounds) {
+    public void getSearchBarBounds(Rect windowBounds, int topInset, Rect searchBarSpaceBounds) {
         // Return empty rects if search is not enabled
         int searchBarSize = searchBarSpaceHeightPx;
         if (isLandscape && hasTransposedSearchBar) {
             // In landscape, the search bar appears on the left
-            searchBarSpaceBounds.set(0, topInset, searchBarSize, windowHeight);
+            searchBarSpaceBounds.set(windowBounds.left, windowBounds.top + topInset,
+                    windowBounds.left + searchBarSize, windowBounds.bottom);
         } else {
             // In portrait, the search bar appears on the top
-            searchBarSpaceBounds.set(0, topInset, windowWidth, topInset + searchBarSize);
+            searchBarSpaceBounds.set(windowBounds.left, windowBounds.top + topInset,
+                    windowBounds.right, windowBounds.top + topInset + searchBarSize);
         }
     }
 }

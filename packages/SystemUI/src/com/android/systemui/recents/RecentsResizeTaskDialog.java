@@ -24,7 +24,6 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.graphics.Rect;
 import android.os.Bundle;
-import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
@@ -32,10 +31,7 @@ import com.android.systemui.R;
 import com.android.systemui.recents.misc.SystemServicesProxy;
 import com.android.systemui.recents.model.RecentsTaskLoader;
 import com.android.systemui.recents.model.Task;
-import com.android.systemui.recents.RecentsActivity;
 import com.android.systemui.recents.views.RecentsView;
-
-import java.util.ArrayList;
 
 /**
  * A helper for the dialogs that show when task debugging is on.
@@ -216,7 +212,7 @@ public class RecentsResizeTaskDialog extends DialogFragment {
 
         // In debug mode, we force all task to be resizeable regardless of the
         // current app configuration.
-        if (RecentsConfiguration.getInstance().multiStackEnabled) {
+        if (RecentsConfiguration.getInstance().multiWindowEnabled) {
             for (int i = additionalTasks; i >= 0; --i) {
                 if (mTasks[i] != null) {
                     mSsp.setTaskResizeable(mTasks[i].key.id);

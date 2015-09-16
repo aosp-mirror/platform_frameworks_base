@@ -177,33 +177,15 @@ public class TaskStack {
     // The task offset to apply to a task id as a group affiliation
     static final int IndividualTaskIdOffset = 1 << 16;
 
-    public final int id;
-    public final Rect stackBounds = new Rect();
-    public final Rect displayBounds = new Rect();
-
     FilteredTaskList mTaskList = new FilteredTaskList();
     TaskStackCallbacks mCb;
 
     ArrayList<TaskGrouping> mGroups = new ArrayList<TaskGrouping>();
     HashMap<Integer, TaskGrouping> mAffinitiesGroups = new HashMap<Integer, TaskGrouping>();
 
-    public TaskStack() {
-        this(0);
-    }
-
-    public TaskStack(int stackId) {
-        id = stackId;
-    }
-
     /** Sets the callbacks for this task stack. */
     public void setCallbacks(TaskStackCallbacks cb) {
         mCb = cb;
-    }
-
-    /** Sets the bounds of this stack. */
-    public void setBounds(Rect stackBounds, Rect displayBounds) {
-        this.stackBounds.set(stackBounds);
-        this.displayBounds.set(displayBounds);
     }
 
     /** Resets this TaskStack. */

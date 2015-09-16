@@ -116,7 +116,7 @@ public class Recents extends SystemUI
         /** Preloads the next task */
         public void run() {
             // Temporarily skip this if multi stack is enabled
-            if (mConfig.multiStackEnabled) return;
+            if (mConfig.multiWindowEnabled) return;
 
             RecentsConfiguration config = RecentsConfiguration.getInstance();
             if (config.svelteLevel == RecentsConfiguration.SVELTE_NONE) {
@@ -176,7 +176,6 @@ public class Recents extends SystemUI
 
     // Task launching
     RecentsConfiguration mConfig;
-    Rect mWindowRect = new Rect();
     Rect mTaskStackBounds = new Rect();
     Rect mSystemInsets = new Rect();
     TaskViewTransform mTmpTransform = new TaskViewTransform();
@@ -372,9 +371,9 @@ public class Recents extends SystemUI
         if (topTask != null && !mSystemServicesProxy.isRecentsTopMost(topTask, topTaskHome)) {
             sInstanceLoadPlan.preloadRawTasks(topTaskHome.value);
             loader.preloadTasks(sInstanceLoadPlan, topTaskHome.value);
-            TaskStack top = sInstanceLoadPlan.getAllTaskStacks().get(0);
-            if (top.getTaskCount() > 0) {
-                preCacheThumbnailTransitionBitmapAsync(topTask, top, mDummyStackView,
+            TaskStack stack = sInstanceLoadPlan.getTaskStack();
+            if (stack.getTaskCount() > 0) {
+                preCacheThumbnailTransitionBitmapAsync(topTask, stack, mDummyStackView,
                         topTaskHome.value);
             }
         }
@@ -388,16 +387,10 @@ public class Recents extends SystemUI
     void showRelativeAffiliatedTask(boolean showNextTask) {
         // Return early if there is no focused stack
         int focusedStackId = mSystemServicesProxy.getFocusedStack();
-        TaskStack focusedStack = null;
         RecentsTaskLoader loader = RecentsTaskLoader.getInstance();
         RecentsTaskLoadPlan plan = loader.createLoadPlan(mContext);
         loader.preloadTasks(plan, true /* isTopTaskHome */);
-        if (mConfig.multiStackEnabled) {
-            if (focusedStackId < 0) return;
-            focusedStack = plan.getTaskStack(focusedStackId);
-        } else {
-            focusedStack = plan.getAllTaskStacks().get(0);
-        }
+        TaskStack focusedStack = plan.getTaskStack();
 
         // Return early if there are no tasks in the focused stack
         if (focusedStack == null || focusedStack.getTaskCount() == 0) return;
@@ -502,7 +495,8 @@ public class Recents extends SystemUI
     /** Prepares the header bar layout. */
     void reloadHeaderBarLayout() {
         Resources res = mContext.getResources();
-        mWindowRect = mSystemServicesProxy.getWindowRect();
+        Rect windowRect = mSystemServicesProxy.getWindowRect();
+
         mStatusBarHeight = res.getDimensionPixelSize(com.android.internal.R.dimen.status_bar_height);
         mNavBarHeight = res.getDimensionPixelSize(com.android.internal.R.dimen.navigation_bar_height);
         mNavBarWidth = res.getDimensionPixelSize(com.android.internal.R.dimen.navigation_bar_width);
@@ -513,10 +507,10 @@ public class Recents extends SystemUI
         // have the right thumbnail bounds to animate to.
         // Note: We have to reload the widget id before we get the task stack bounds below
         if (mSystemServicesProxy.getOrBindSearchAppWidget(mContext, mAppWidgetHost) != null) {
-            mConfig.getSearchBarBounds(mWindowRect.width(), mWindowRect.height(),
+            mConfig.getSearchBarBounds(windowRect,
                     mStatusBarHeight, searchBarBounds);
         }
-        mConfig.getAvailableTaskStackBounds(mWindowRect.width(), mWindowRect.height(),
+        mConfig.getAvailableTaskStackBounds(windowRect,
                 mStatusBarHeight, (mConfig.hasTransposedNavBar ? mNavBarWidth : 0), searchBarBounds,
                 mTaskStackBounds);
         if (mConfig.isLandscape && mConfig.hasTransposedNavBar) {
@@ -531,7 +525,7 @@ public class Recents extends SystemUI
         TaskStackViewLayoutAlgorithm algo = mDummyStackView.getStackAlgorithm();
         Rect taskStackBounds = new Rect(mTaskStackBounds);
         taskStackBounds.bottom -= mSystemInsets.bottom;
-        algo.computeRects(mWindowRect.width(), mWindowRect.height(), taskStackBounds);
+        algo.computeRects(windowRect.width(), windowRect.height(), taskStackBounds);
         Rect taskViewSize = algo.getUntransformedTaskViewSize();
         int taskBarHeight = res.getDimensionPixelSize(R.dimen.recents_task_bar_height);
         synchronized (mHeaderBarLock) {
@@ -540,6 +534,7 @@ public class Recents extends SystemUI
             mHeaderBar.measure(
                     View.MeasureSpec.makeMeasureSpec(taskViewSize.width(), View.MeasureSpec.EXACTLY),
                     View.MeasureSpec.makeMeasureSpec(taskBarHeight, View.MeasureSpec.EXACTLY));
+            // TODO: may not be needed
             mHeaderBar.layout(0, 0, taskViewSize.width(), taskBarHeight);
         }
     }
@@ -749,10 +744,9 @@ public class Recents extends SystemUI
 
         // Temporarily skip the transition (use a dummy fade) if multi stack is enabled.
         // For multi-stack we need to figure out where each of the tasks are going.
-        if (mConfig.multiStackEnabled) {
+        if (mConfig.multiWindowEnabled) {
             loader.preloadTasks(sInstanceLoadPlan, true);
-            ArrayList<TaskStack> stacks = sInstanceLoadPlan.getAllTaskStacks();
-            TaskStack stack = stacks.get(0);
+            TaskStack stack = sInstanceLoadPlan.getTaskStack();
             mDummyStackView.updateMinMaxScrollForStack(stack, mTriggeredFromAltTab, true);
             TaskStackViewLayoutAlgorithm.VisibilityReport stackVr =
                     mDummyStackView.computeStackVisibilityReport();
@@ -765,8 +759,7 @@ public class Recents extends SystemUI
         if (!sInstanceLoadPlan.hasTasks()) {
             loader.preloadTasks(sInstanceLoadPlan, isTopTaskHome);
         }
-        ArrayList<TaskStack> stacks = sInstanceLoadPlan.getAllTaskStacks();
-        TaskStack stack = stacks.get(0);
+        TaskStack stack = sInstanceLoadPlan.getTaskStack();
 
         // Prepare the dummy stack for the transition
         mDummyStackView.updateMinMaxScrollForStack(stack, mTriggeredFromAltTab, isTopTaskHome);

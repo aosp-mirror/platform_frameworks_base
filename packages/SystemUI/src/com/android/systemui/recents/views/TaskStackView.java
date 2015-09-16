@@ -80,7 +80,6 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
     ArrayList<TaskViewTransform> mCurrentTaskTransforms = new ArrayList<TaskViewTransform>();
     DozeTrigger mUIDozeTrigger;
     DebugOverlayView mDebugOverlay;
-    Rect mTaskStackBounds = new Rect();
     DismissView mDismissAllButton;
     boolean mDismissAllButtonAnimating;
     int mFocusedTaskIndex = -1;
@@ -93,6 +92,7 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
     boolean mStartEnterAnimationRequestedAfterLayout;
     boolean mStartEnterAnimationCompleted;
     ViewAnimation.TaskViewEnterContext mStartEnterAnimationContext;
+    Rect mTaskStackBounds = new Rect();
     int[] mTmpVisibleRange = new int[2];
     float[] mTmpCoord = new float[2];
     Matrix mTmpMatrix = new Matrix();
@@ -477,11 +477,6 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
         mStackViewsClipDirty = false;
     }
 
-    /** The stack insets to apply to the stack contents */
-    public void setStackInsetRect(Rect r) {
-        mTaskStackBounds.set(r);
-    }
-
     /** Updates the min and max virtual scroll bounds */
     void updateMinMaxScroll(boolean boundScrollToNewMinMax, boolean launchedWithAltTab,
             boolean launchedFromHome) {
@@ -692,11 +687,6 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
         return mTouchHandler.onGenericMotionEvent(ev);
     }
 
-    /** Returns the region that touch gestures can be started in. */
-    Rect getTouchableRegion() {
-        return mTaskStackBounds;
-    }
-
     @Override
     public void computeScroll() {
         mStackScroller.computeScroll();
@@ -736,6 +726,10 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
         return mLayoutAlgorithm.computeStackVisibilityReport(mStack.getTasks());
     }
 
+    public void setTaskStackBounds(Rect taskStackBounds) {
+        mTaskStackBounds.set(taskStackBounds);
+    }
+
     /**
      * This is called with the full window width and height to allow stack view children to
      * perform the full screen transition down.
@@ -746,9 +740,7 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
         int height = MeasureSpec.getSize(heightMeasureSpec);
 
         // Compute our stack/task rects
-        Rect taskStackBounds = new Rect(mTaskStackBounds);
-        taskStackBounds.bottom -= mConfig.systemInsets.bottom;
-        computeRects(width, height, taskStackBounds, mConfig.launchedWithAltTab,
+        computeRects(width, height, mTaskStackBounds, mConfig.launchedWithAltTab,
                 mConfig.launchedFromHome);
 
         // If this is the first layout, then scroll to the front of the stack and synchronize the
@@ -875,7 +867,7 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
         }
 
         // Start dozing
-        if (!mConfig.multiStackEnabled) {
+        if (!mConfig.multiWindowEnabled) {
             mUIDozeTrigger.startDozing();
         }
     }
@@ -1299,7 +1291,7 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
         RecentsTaskLoader.getInstance().loadTaskData(task);
 
         // If the doze trigger has already fired, then update the state for this task view
-        if (mConfig.multiStackEnabled || mUIDozeTrigger.hasTriggered()) {
+        if (mConfig.multiWindowEnabled || mUIDozeTrigger.hasTriggered()) {
             tv.setNoUserInteractionState();
         }
 

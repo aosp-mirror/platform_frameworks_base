@@ -682,7 +682,7 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks,
                 mHeaderView.mApplicationIcon.setOnClickListener(this);
             }
             mHeaderView.mDismissButton.setOnClickListener(this);
-            if (mConfig.multiStackEnabled) {
+            if (mConfig.multiWindowEnabled) {
                 mHeaderView.mMoveTaskButton.setOnClickListener(this);
             }
             mActionButtonView.setOnClickListener(this);
@@ -701,7 +701,7 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks,
             // Unbind any listeners
             mHeaderView.mApplicationIcon.setOnClickListener(null);
             mHeaderView.mDismissButton.setOnClickListener(null);
-            if (mConfig.multiStackEnabled) {
+            if (mConfig.multiWindowEnabled) {
                 mHeaderView.mMoveTaskButton.setOnClickListener(null);
             }
             mActionButtonView.setOnClickListener(null);
