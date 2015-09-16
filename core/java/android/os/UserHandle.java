@@ -90,7 +90,7 @@ public final class UserHandle implements Parcelable {
      * user.
      * @hide
      */
-    public static final boolean isSameUser(int uid1, int uid2) {
+    public static boolean isSameUser(int uid1, int uid2) {
         return getUserId(uid1) == getUserId(uid2);
     }
 
@@ -102,12 +102,12 @@ public final class UserHandle implements Parcelable {
      * @return whether the appId is the same for both uids
      * @hide
      */
-    public static final boolean isSameApp(int uid1, int uid2) {
+    public static boolean isSameApp(int uid1, int uid2) {
         return getAppId(uid1) == getAppId(uid2);
     }
 
     /** @hide */
-    public static final boolean isIsolated(int uid) {
+    public static boolean isIsolated(int uid) {
         if (uid > 0) {
             final int appId = getAppId(uid);
             return appId >= Process.FIRST_ISOLATED_UID && appId <= Process.LAST_ISOLATED_UID;
@@ -130,7 +130,7 @@ public final class UserHandle implements Parcelable {
      * Returns the user id for a given uid.
      * @hide
      */
-    public static final int getUserId(int uid) {
+    public static int getUserId(int uid) {
         if (MU_ENABLED) {
             return uid / PER_USER_RANGE;
         } else {
@@ -139,12 +139,12 @@ public final class UserHandle implements Parcelable {
     }
 
     /** @hide */
-    public static final int getCallingUserId() {
+    public static int getCallingUserId() {
         return getUserId(Binder.getCallingUid());
     }
 
     /** @hide */
-    public static final UserHandle getCallingUserHandle() {
+    public static UserHandle getCallingUserHandle() {
         int userId = getUserId(Binder.getCallingUid());
         UserHandle userHandle = userHandles.get(userId);
         // Intentionally not synchronized to save time
@@ -159,7 +159,7 @@ public final class UserHandle implements Parcelable {
      * Returns the uid that is composed from the userId and the appId.
      * @hide
      */
-    public static final int getUid(int userId, int appId) {
+    public static int getUid(int userId, int appId) {
         if (MU_ENABLED) {
             return userId * PER_USER_RANGE + (appId % PER_USER_RANGE);
         } else {
@@ -171,7 +171,7 @@ public final class UserHandle implements Parcelable {
      * Returns the app id (or base uid) for a given uid, stripping out the user id from it.
      * @hide
      */
-    public static final int getAppId(int uid) {
+    public static int getAppId(int uid) {
         return uid % PER_USER_RANGE;
     }
 
@@ -179,7 +179,7 @@ public final class UserHandle implements Parcelable {
      * Returns the gid shared between all apps with this userId.
      * @hide
      */
-    public static final int getUserGid(int userId) {
+    public static int getUserGid(int userId) {
         return getUid(userId, Process.SHARED_USER_GID);
     }
 
@@ -187,7 +187,7 @@ public final class UserHandle implements Parcelable {
      * Returns the shared app gid for a given uid or appId.
      * @hide
      */
-    public static final int getSharedAppGid(int id) {
+    public static int getSharedAppGid(int id) {
         return Process.FIRST_SHARED_APPLICATION_GID + (id % PER_USER_RANGE)
                 - Process.FIRST_APPLICATION_UID;
     }
@@ -196,7 +196,7 @@ public final class UserHandle implements Parcelable {
      * Returns the app id for a given shared app gid. Returns -1 if the ID is invalid.
      * @hide
      */
-    public static final int getAppIdFromSharedAppGid(int gid) {
+    public static int getAppIdFromSharedAppGid(int gid) {
         final int appId = getAppId(gid) + Process.FIRST_APPLICATION_UID
                 - Process.FIRST_SHARED_APPLICATION_GID;
         if (appId < 0 || appId >= Process.FIRST_SHARED_APPLICATION_GID) {
@@ -272,7 +272,7 @@ public final class UserHandle implements Parcelable {
      * @hide
      */
     @SystemApi
-    public static final int myUserId() {
+    public static int myUserId() {
         return getUserId(Process.myUid());
     }
 
@@ -283,7 +283,7 @@ public final class UserHandle implements Parcelable {
      * TODO: find an alternative to this Api.
      */
     @SystemApi
-    public final boolean isOwner() {
+    public boolean isOwner() {
         return this.equals(OWNER);
     }
 
