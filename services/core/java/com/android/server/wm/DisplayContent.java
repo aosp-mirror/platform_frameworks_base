@@ -20,8 +20,8 @@ import static android.app.ActivityManager.HOME_STACK_ID;
 
 import static com.android.server.wm.WindowManagerService.DEBUG_VISIBILITY;
 import static com.android.server.wm.WindowManagerService.TAG;
+import static com.android.server.wm.WindowState.RESIZE_HANDLE_WIDTH_IN_DP;
 
-import android.content.res.Configuration;
 import android.graphics.Rect;
 import android.graphics.Region;
 import android.util.DisplayMetrics;
@@ -72,6 +72,7 @@ class DisplayContent {
     boolean mDisplayScalingDisabled;
     private final DisplayInfo mDisplayInfo = new DisplayInfo();
     private final Display mDisplay;
+    private final DisplayMetrics mDisplayMetrics = new DisplayMetrics();
 
     Rect mBaseDisplayRect = new Rect();
     Rect mContentRect = new Rect();
@@ -82,11 +83,11 @@ class DisplayContent {
     final boolean isDefaultDisplay;
 
     /** Window tokens that are in the process of exiting, but still on screen for animations. */
-    final ArrayList<WindowToken> mExitingTokens = new ArrayList<WindowToken>();
+    final ArrayList<WindowToken> mExitingTokens = new ArrayList<>();
 
     /** Array containing all TaskStacks on this display.  Array
      * is stored in display order with the current bottom stack at 0. */
-    private final ArrayList<TaskStack> mStacks = new ArrayList<TaskStack>();
+    private final ArrayList<TaskStack> mStacks = new ArrayList<>();
 
     /** A special TaskStack with id==HOME_STACK_ID that moves to the bottom whenever any TaskStack
      * (except a future lockscreen TaskStack) moves to the top. */
@@ -117,6 +118,7 @@ class DisplayContent {
         mDisplay = display;
         mDisplayId = display.getDisplayId();
         display.getDisplayInfo(mDisplayInfo);
+        display.getMetrics(mDisplayMetrics);
         isDefaultDisplay = mDisplayId == Display.DEFAULT_DISPLAY;
         mService = service;
     }
@@ -135,6 +137,10 @@ class DisplayContent {
 
     DisplayInfo getDisplayInfo() {
         return mDisplayInfo;
+    }
+
+    DisplayMetrics getDisplayMetrics() {
+        return mDisplayMetrics;
     }
 
     /**
@@ -174,6 +180,7 @@ class DisplayContent {
 
     void updateDisplayInfo() {
         mDisplay.getDisplayInfo(mDisplayInfo);
+        mDisplay.getMetrics(mDisplayMetrics);
         for (int i = mStacks.size() - 1; i >= 0; --i) {
             mStacks.get(i).updateDisplayInfo(null);
         }
@@ -247,7 +254,7 @@ class DisplayContent {
      * falls within. Returns -1 if the touch doesn't fall into a resizing area.
      */
     int taskIdForControlPoint(int x, int y) {
-        final int delta = calculatePixelFromDp(WindowState.RESIZE_HANDLE_WIDTH_IN_DP);
+        final int delta = mService.dipToPixel(RESIZE_HANDLE_WIDTH_IN_DP, mDisplayMetrics);
         for (int stackNdx = mStacks.size() - 1; stackNdx >= 0; --stackNdx) {
             TaskStack stack = mStacks.get(stackNdx);
             if (!stack.allowTaskResize()) {
@@ -275,17 +282,10 @@ class DisplayContent {
         return -1;
     }
 
-    private int calculatePixelFromDp(int dp) {
-        final Configuration serviceConfig = mService.mCurConfiguration;
-        // TODO(multidisplay): Update Dp to that of display stack is on.
-        final float density = serviceConfig.densityDpi * DisplayMetrics.DENSITY_DEFAULT_SCALE;
-        return (int)(dp * density);
-    }
-
     void setTouchExcludeRegion(Task focusedTask) {
         mTouchExcludeRegion.set(mBaseDisplayRect);
         WindowList windows = getWindowList();
-        final int delta = calculatePixelFromDp(WindowState.RESIZE_HANDLE_WIDTH_IN_DP);
+        final int delta = mService.dipToPixel(RESIZE_HANDLE_WIDTH_IN_DP, mDisplayMetrics);
         for (int i = windows.size() - 1; i >= 0; --i) {
             final WindowState win = windows.get(i);
             final Task task = win.mAppToken != null ? win.getTask() : null;
