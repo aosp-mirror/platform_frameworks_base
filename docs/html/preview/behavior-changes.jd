@@ -308,6 +308,15 @@ implemented. Apps which previously worked that have bad {@code DT_NEEDED} entrie
 {@code dlopen(3)} (as opposed to being referenced by {@code DT_NEEDED} entries).</p>
 </p>
 
+<p>
+On previous versions of Android, if your app requested the system to load a shared library with
+text relocations, the system displayed a warning but still allowed the library to be loaded.
+Beginning in this release, the system rejects this library if your app's target SDK version is 23
+or higher. To help you detect if a library failed to load, your app should log the
+{@code dlopen(3)} failure, and include the problem description text that the {@code dlerror(3)}
+call returns. To learn more about handling text relocations, see this
+<a href="https://wiki.gentoo.org/wiki/Hardened/Textrels_Guide" class="external-link">guide</a>.</p>
+
 <h2 id="behavior-hardware-id">Access to Hardware Identifier</h2>
 <p>To provide users with greater data protection, starting in this release, Android
 removes programmatic access to the device’s local hardware identifier for
