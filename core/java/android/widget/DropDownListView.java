@@ -132,11 +132,6 @@ public class DropDownListView extends ListView {
         return selectedView != null && selectedView.isEnabled() || super.shouldShowSelector();
     }
 
-    protected void clearSelection() {
-        setSelectedPositionInt(-1);
-        setNextSelectedPositionInt(-1);
-    }
-
     @Override
     public boolean onHoverEvent(MotionEvent ev) {
         final int action = ev.getActionMasked();

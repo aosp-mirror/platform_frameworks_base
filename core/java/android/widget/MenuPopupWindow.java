@@ -22,12 +22,12 @@ import android.content.res.Resources;
 import android.transition.Transition;
 import android.util.AttributeSet;
 import android.view.KeyEvent;
+import android.view.MotionEvent;
 import android.view.View;
-import android.view.ViewGroup;
-import android.view.ViewParent;
 
 import com.android.internal.view.menu.ListMenuItemView;
 import com.android.internal.view.menu.MenuAdapter;
+import com.android.internal.view.menu.MenuBuilder;
 
 /**
  * A MenuPopupWindow represents the popup window for menu.
@@ -37,18 +37,30 @@ import com.android.internal.view.menu.MenuAdapter;
  *
  * @hide
  */
-public class MenuPopupWindow extends ListPopupWindow {
+public class MenuPopupWindow extends ListPopupWindow implements MenuItemHoverListener {
+    private MenuItemHoverListener mHoverListener;
+
     public MenuPopupWindow(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
     }
 
     @Override
     DropDownListView createDropDownListView(Context context, boolean hijackFocus) {
-        return new MenuDropDownListView(context, hijackFocus);
+        MenuDropDownListView view = new MenuDropDownListView(context, hijackFocus);
+        view.setHoverListener(this);
+        return view;
     }
 
     public void setEnterTransition(Transition enterTransition) {
         mPopup.setEnterTransition(enterTransition);
+    }
+
+    public void setExitTransition(Transition exitTransition) {
+        mPopup.setExitTransition(exitTransition);
+    }
+
+    public void setHoverListener(MenuItemHoverListener hoverListener) {
+        mHoverListener = hoverListener;
     }
 
     /**
@@ -59,9 +71,22 @@ public class MenuPopupWindow extends ListPopupWindow {
         mPopup.setTouchModal(touchModal);
     }
 
-    private static class MenuDropDownListView extends DropDownListView {
+    @Override
+    public void onItemHovered(MenuBuilder menu, int position) {
+        // Forward up the chain
+        if (mHoverListener != null) {
+            mHoverListener.onItemHovered(menu, position);
+        }
+    }
+
+    /**
+     * @hide
+     */
+    public static class MenuDropDownListView extends DropDownListView {
         final int mAdvanceKey;
         final int mRetreatKey;
+
+        private MenuItemHoverListener mHoverListener;
 
         public MenuDropDownListView(Context context, boolean hijackFocus) {
             super(context, hijackFocus);
@@ -75,6 +100,15 @@ public class MenuPopupWindow extends ListPopupWindow {
                 mAdvanceKey = KeyEvent.KEYCODE_DPAD_RIGHT;
                 mRetreatKey = KeyEvent.KEYCODE_DPAD_LEFT;
             }
+        }
+
+        public void setHoverListener(MenuItemHoverListener hoverListener) {
+            mHoverListener = hoverListener;
+        }
+
+        public void clearSelection() {
+            setSelectedPositionInt(INVALID_POSITION);
+            setNextSelectedPositionInt(INVALID_POSITION);
         }
 
         @Override
@@ -99,6 +133,32 @@ public class MenuPopupWindow extends ListPopupWindow {
             return super.onKeyDown(keyCode, event);
         }
 
+        @Override
+        public boolean onHoverEvent(MotionEvent ev) {
+            boolean dispatchHover = false;
+            final int position = pointToPosition((int) ev.getX(), (int) ev.getY());
+
+            final int action = ev.getActionMasked();
+            if (action == MotionEvent.ACTION_HOVER_ENTER
+                    || action == MotionEvent.ACTION_HOVER_MOVE) {
+                if (position != INVALID_POSITION && position != mSelectedPosition) {
+                    final View hoveredItem = getChildAt(position - getFirstVisiblePosition());
+                    if (hoveredItem.isEnabled()) {
+                        dispatchHover = true;
+                    }
+                }
+            }
+
+            boolean superVal = super.onHoverEvent(ev);
+
+            if (dispatchHover && mHoverListener != null) {
+                mHoverListener.onItemHovered(
+                        ((MenuAdapter) getAdapter()).getAdapterMenu(), position);
+            }
+
+            return superVal;
+        }
     }
+
 
 }

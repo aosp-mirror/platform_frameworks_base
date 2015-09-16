@@ -40,6 +40,10 @@ public class MenuAdapter extends BaseAdapter {
         findExpandedIndex();
     }
 
+    public boolean getForceShowIcon() {
+        return mForceShowIcon;
+    }
+
     public void setForceShowIcon(boolean forceShow) {
         mForceShowIcon = forceShow;
     }
