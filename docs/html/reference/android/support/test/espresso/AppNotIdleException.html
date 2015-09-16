@@ -126,7 +126,7 @@ type="text/css">
   var metaTags = [];
   var devsite = false;
 </script>
-<script src="../../../../../assets/js/docs.js?v=5" type="text/javascript"></script>
+<script src="../../../../../assets/js/docs.js?v=6" type="text/javascript"></script>
 
 
 
@@ -478,6 +478,8 @@ type="text/css">
   <a href="../../../../../reference/android/support/test/espresso/web/webdriver/package-summary.html">android.support.test.espresso.web.webdriver</a></li>
     <li class="api apilevel-">
   <a href="../../../../../reference/android/support/test/filters/package-summary.html">android.support.test.filters</a></li>
+    <li class="api apilevel-">
+  <a href="../../../../../reference/android/support/test/jank/package-summary.html">android.support.test.jank</a></li>
     <li class="api apilevel-">
   <a href="../../../../../reference/android/support/test/rule/package-summary.html">android.support.test.rule</a></li>
     <li class="api apilevel-">
@@ -848,10 +850,36 @@ Summary:
             <a href="../../../../../reference/android/support/test/espresso/AppNotIdleException.html">AppNotIdleException</a></nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="../../../../../reference/android/support/test/espresso/AppNotIdleException.html#create(java.util.List<java.lang.String>, int, int)">create</a></span>(List&lt;String&gt; idleConditions, int loopCount, int seconds)</nobr>
+        <span class="sympad"><a href="../../../../../reference/android/support/test/espresso/AppNotIdleException.html#create(java.util.List<java.lang.String>, java.lang.String)">create</a></span>(List&lt;String&gt; idleConditions, String message)</nobr>
 
         <div class="jd-descrdiv">
           Creates a new AppNotIdleException suitable for erroring out a test case.
+
+
+
+        </div>
+
+  </td></tr>
+
+
+
+    <tr class=" api apilevel-" >
+        <td class="jd-typecol"><nobr>
+
+
+
+            static
+
+            <a href="../../../../../reference/android/support/test/espresso/AppNotIdleException.html">AppNotIdleException</a></nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="../../../../../reference/android/support/test/espresso/AppNotIdleException.html#create(java.util.List<java.lang.String>, int, int)">create</a></span>(List&lt;String&gt; idleConditions, int loopCount, int seconds)</nobr>
+
+        <div class="jd-descrdiv">
+          <em>
+      This method is deprecated.
+    use <code><a href="../../../../../reference/android/support/test/espresso/AppNotIdleException.html#create(java.util.List<java.lang.String>, java.lang.String)">create(List, String)</a></code> instead
+</em>
 
 
 
@@ -1360,6 +1388,59 @@ From class
 
 
 
+<A NAME="create(java.util.List<java.lang.String>, java.lang.String)"></A>
+
+<div class="jd-details api apilevel-">
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public
+        static
+
+
+
+        <a href="../../../../../reference/android/support/test/espresso/AppNotIdleException.html">AppNotIdleException</a>
+      </span>
+      <span class="sympad">create</span>
+      <span class="normal">(List&lt;String&gt; idleConditions, String message)</span>
+    </h4>
+      <div class="api-level">
+        <div></div>
+
+
+
+      </div>
+    <div class="jd-details-descr">
+
+
+
+
+  <div class="jd-tagdata jd-tagdescr"><p>Creates a new AppNotIdleException suitable for erroring out a test case.
+
+ <p>This should be called only from the main thread if the app does not idle out within the
+ specified duration.</p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Parameters</h5>
+      <table class="jd-tagtable">
+        <tr>
+          <th>idleConditions</td>
+          <td>list of idleConditions that failed to become idle.</td>
+        </tr>
+        <tr>
+          <th>message</td>
+          <td>a message about the failure.</td>
+        </tr>
+      </table>
+  </div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Returns</h5>
+      <ul class="nolist"><li>a AppNotIdleException suitable to be thrown on the instrumentation thread.
+</li></ul>
+  </div>
+
+    </div>
+</div>
+
+
 <A NAME="create(java.util.List<java.lang.String>, int, int)"></A>
 
 <div class="jd-details api apilevel-">
@@ -1385,10 +1466,15 @@ From class
 
 
 
+      <p>
+  <p class="caution"><strong>
+      This method is deprecated.</strong><br/>
+    use <code><a href="../../../../../reference/android/support/test/espresso/AppNotIdleException.html#create(java.util.List<java.lang.String>, java.lang.String)">create(List, String)</a></code> instead
 
+  </p>
   <div class="jd-tagdata jd-tagdescr"><p>Creates a new AppNotIdleException suitable for erroring out a test case.
 
- This should be called only from the main thread if the app does not idle out within the
+ <p>This should be called only from the main thread if the app does not idle out within the
  specified duration.</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Parameters</h5>
@@ -1409,8 +1495,7 @@ From class
   </div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Returns</h5>
-      <ul class="nolist"><li>a AppNotIdleException suitable to be thrown on the instrumentation thread.
-</li></ul>
+      <ul class="nolist"><li>a AppNotIdleException suitable to be thrown on the instrumentation thread.</li></ul>
   </div>
 
     </div>
@@ -1480,6 +1565,7 @@ From class
           <option value="es">Español</option>
           <option value="ja">日本語</option>
           <option value="ko">한국어</option>
+          <option value="pt-br">Português Brasileiro</option>
           <option value="ru">Русский</option>
           <option value="zh-cn">中文（简体)</option>
           <option value="zh-tw">中文（繁體)</option>
