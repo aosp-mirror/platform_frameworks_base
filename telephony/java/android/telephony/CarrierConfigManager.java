@@ -319,6 +319,14 @@ public class CarrierConfigManager {
     public static final String KEY_CARRIER_FORCE_DISABLE_ETWS_CMAS_TEST_BOOL =
             "carrier_force_disable_etws_cmas_test_bool";
 
+    /**
+     * The default flag specifying whether "Turn on Notifications" option will be always shown in
+     * Settings->More->Emergency broadcasts menu regardless developer options is turned on or not.
+     * @hide
+     */
+    public static final String KEY_ALWAYS_SHOW_EMERGENCY_ALERT_ONOFF_BOOL =
+            "always_show_emergency_alert_onoff_bool";
+
     /* The following 3 fields are related to carrier visual voicemail. */
 
     /**
@@ -542,6 +550,7 @@ public class CarrierConfigManager {
         sDefaults.putString(KEY_CI_ACTION_ON_SYS_UPDATE_EXTRA_STRING, "");
         sDefaults.putString(KEY_CI_ACTION_ON_SYS_UPDATE_EXTRA_VAL_STRING, "");
         sDefaults.putBoolean(KEY_CSP_ENABLED_BOOL, false);
+        sDefaults.putBoolean(KEY_ALWAYS_SHOW_EMERGENCY_ALERT_ONOFF_BOOL, false);
 
         sDefaults.putStringArray(KEY_GSM_ROAMING_NETWORKS_STRING_ARRAY, null);
         sDefaults.putStringArray(KEY_GSM_NONROAMING_NETWORKS_STRING_ARRAY, null);
