@@ -1560,7 +1560,7 @@ public class AudioService extends IAudioService.Stub {
         } finally {
             Binder.restoreCallingIdentity(ident);
         }
-        return UserHandle.USER_OWNER;
+        return UserHandle.USER_SYSTEM;
     }
 
     // UI update and Broadcast Intent

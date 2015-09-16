@@ -145,7 +145,8 @@ public class LockSettingsService extends ILockSettings.Stub {
         } catch (RemoteException e) {
             Slog.e(TAG, "Failure retrieving IGateKeeperService", e);
         }
-        mStorage.prefetchUser(UserHandle.USER_OWNER);
+        // TODO: maybe skip this for split system user mode.
+        mStorage.prefetchUser(UserHandle.USER_SYSTEM);
     }
 
     private void migrateOldData() {

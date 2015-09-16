@@ -3504,7 +3504,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                 throw new NullPointerException("methodMap is null");
             }
             mMethodMap = methodMap;
-            final File systemDir = userId == UserHandle.USER_OWNER
+            final File systemDir = userId == UserHandle.USER_SYSTEM
                     ? new File(Environment.getDataDirectory(), SYSTEM_PATH)
                     : Environment.getUserSystemDirectory(userId);
             final File inputMethodDir = new File(systemDir, INPUT_METHOD_PATH);

@@ -57,15 +57,15 @@ public final class UserHandle implements Parcelable {
 
     /**
      * @hide A user id constant to indicate the "owner" user of the device
-     * @deprecated Consider using either USER_SYSTEM constant or
-     * UserInfo.isPrimary().
+     * @deprecated Consider using either {@link UserHandle#USER_SYSTEM} constant or
+     * check the target user's flag {@link android.content.pm.UserInfo#isAdmin}.
      */
     public static final int USER_OWNER = 0;
 
     /**
      * @hide A user handle to indicate the primary/owner user of the device
-     * @deprecated Consider using either SYSTEM constant or
-     * UserInfo.isPrimary().
+     * @deprecated Consider using either {@link UserHandle#SYSTEM} constant or
+     * check the target user's flag {@link android.content.pm.UserInfo#isAdmin}.
      */
     public static final UserHandle OWNER = new UserHandle(USER_OWNER);
 
@@ -280,6 +280,7 @@ public final class UserHandle implements Parcelable {
      * Returns true if this UserHandle refers to the owner user; false otherwise.
      * @return true if this UserHandle refers to the owner user; false otherwise.
      * @hide
+     * TODO: find an alternative to this Api.
      */
     @SystemApi
     public final boolean isOwner() {

@@ -1689,7 +1689,7 @@ public class DeviceIdleController extends SystemService
         }
 
         if (args != null) {
-            int userId = UserHandle.USER_OWNER;
+            int userId = UserHandle.USER_SYSTEM;
             for (int i=0; i<args.length; i++) {
                 String arg = args[i];
                 if ("-h".equals(arg)) {
