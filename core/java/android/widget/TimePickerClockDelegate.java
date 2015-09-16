@@ -22,7 +22,6 @@ import android.content.res.ColorStateList;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
-import android.graphics.drawable.Drawable;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.text.SpannableStringBuilder;
@@ -32,7 +31,6 @@ import android.text.style.TtsSpan;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.util.StateSet;
-import android.util.TypedValue;
 import android.view.HapticFeedbackConstants;
 import android.view.KeyCharacterMap;
 import android.view.KeyEvent;
@@ -66,10 +64,8 @@ class TimePickerClockDelegate extends TimePicker.AbstractTimePickerDelegate impl
     // Also NOT a real index, just used for keyboard mode.
     private static final int ENABLE_PICKER_INDEX = 3;
 
-    private static final int[] ATTRS_TEXT_COLOR = new int[] {
-            com.android.internal.R.attr.textColor};
-    private static final int[] ATTRS_DISABLED_ALPHA = new int[] {
-            com.android.internal.R.attr.disabledAlpha};
+    private static final int[] ATTRS_TEXT_COLOR = new int[] {R.attr.textColor};
+    private static final int[] ATTRS_DISABLED_ALPHA = new int[] {R.attr.disabledAlpha};
 
     // LayoutLib relies on these constants. Change TimePickerClockDelegate_Delegate if
     // modifying these.
