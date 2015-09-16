@@ -132,7 +132,7 @@ public class LockSettingsStrongAuth {
     }
 
     public void requireStrongAuth(int strongAuthReason, int userId) {
-        if (userId == UserHandle.USER_ALL || userId >= UserHandle.USER_OWNER) {
+        if (userId == UserHandle.USER_ALL || userId >= UserHandle.USER_SYSTEM) {
             mHandler.obtainMessage(MSG_REQUIRE_STRONG_AUTH, strongAuthReason,
                     userId).sendToTarget();
         } else {

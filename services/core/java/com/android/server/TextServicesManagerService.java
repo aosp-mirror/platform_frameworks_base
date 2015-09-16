@@ -99,7 +99,7 @@ public class TextServicesManagerService extends ITextServicesManager.Stub {
         broadcastFilter.addAction(Intent.ACTION_USER_REMOVED);
         mContext.registerReceiver(new TextServicesBroadcastReceiver(), broadcastFilter);
 
-        int userId = UserHandle.USER_OWNER;
+        int userId = UserHandle.USER_SYSTEM;
         try {
             ActivityManagerNative.getDefault().registerUserSwitchObserver(
                     new IUserSwitchObserver.Stub() {

@@ -271,7 +271,7 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
         int sysUiUid = -1;
         try {
             sysUiUid = mContext.getPackageManager().getPackageUid("com.android.systemui",
-                    UserHandle.USER_OWNER);
+                    UserHandle.USER_SYSTEM);
         } catch (PackageManager.NameNotFoundException e) {
             // Some platforms, such as wearables do not have a system ui.
             Log.w(TAG, "Unable to resolve SystemUI's UID.", e);
