@@ -9863,6 +9863,10 @@ public class WindowManagerService extends IWindowManager.Stub
         }
     }
 
+    static int dipToPixel(int dip, DisplayMetrics displayMetrics) {
+        return (int)TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, dip, displayMetrics);
+    }
+
     private final class LocalService extends WindowManagerInternal {
         @Override
         public void requestTraversalFromDisplayManager() {

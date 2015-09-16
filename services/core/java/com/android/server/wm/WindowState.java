@@ -16,7 +16,6 @@
 
 package com.android.server.wm;
 
-import static android.app.ActivityManager.FREEFORM_WORKSPACE_STACK_ID;
 import static android.view.WindowManager.LayoutParams.FIRST_SUB_WINDOW;
 import static android.view.WindowManager.LayoutParams.FLAG_DIM_BEHIND;
 import static android.view.WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED;
@@ -81,12 +80,14 @@ final class WindowState implements WindowManagerPolicy.WindowState {
     static final String TAG = "WindowState";
 
     // The minimal size of a window within the usable area of the freeform stack.
-    private static final int MINIMUM_VISIBLE_WIDTH_IN_DP = 48;
-    private static final int MINIMUM_VISIBLE_HEIGHT_IN_DP = 32;
+    // TODO(multi-window): fix the min sizes when we have mininum width/height support,
+    //                     use hard-coded min sizes for now.
+    static final int MINIMUM_VISIBLE_WIDTH_IN_DP = 48;
+    static final int MINIMUM_VISIBLE_HEIGHT_IN_DP = 32;
 
     // The thickness of a window resize handle outside the window bounds on the free form workspace
     // to capture touch events in that area.
-    static final int RESIZE_HANDLE_WIDTH_IN_DP = 10;
+    static final int RESIZE_HANDLE_WIDTH_IN_DP = 30;
 
     static final boolean BOUNDS_FOR_TOUCH = true;
 
@@ -689,8 +690,11 @@ final class WindowState implements WindowManagerPolicy.WindowState {
             // into a usable area..
             final int height = Math.min(mFrame.height(), mContentFrame.height());
             final int width = Math.min(mContentFrame.width(), mFrame.width());
-            final int minVisibleHeight = calculatePixelFromDp(MINIMUM_VISIBLE_HEIGHT_IN_DP);
-            final int minVisibleWidth = calculatePixelFromDp(MINIMUM_VISIBLE_WIDTH_IN_DP);
+            final DisplayMetrics displayMetrics = getDisplayContent().getDisplayMetrics();
+            final int minVisibleHeight =
+                    mService.dipToPixel(MINIMUM_VISIBLE_HEIGHT_IN_DP, displayMetrics);
+            final int minVisibleWidth =
+                    mService.dipToPixel(MINIMUM_VISIBLE_WIDTH_IN_DP, displayMetrics);
             final int top = Math.max(mContentFrame.top,
                     Math.min(mFrame.top, mContentFrame.bottom - minVisibleHeight));
             final int left = Math.max(mContentFrame.left + minVisibleWidth - width,
@@ -941,7 +945,9 @@ final class WindowState implements WindowManagerPolicy.WindowState {
             task.getBounds(bounds);
             if (forTouch == BOUNDS_FOR_TOUCH) {
                 if (task.inFreeformWorkspace()) {
-                    final int delta = calculatePixelFromDp(RESIZE_HANDLE_WIDTH_IN_DP);
+                    final DisplayMetrics displayMetrics = getDisplayContent().getDisplayMetrics();
+                    final int delta =
+                            mService.dipToPixel(RESIZE_HANDLE_WIDTH_IN_DP, displayMetrics);
                     bounds.inset(-delta, -delta);
                 }
             }
@@ -1680,13 +1686,6 @@ final class WindowState implements WindowManagerPolicy.WindowState {
     boolean isDragResizing() {
         final Task task = mAppToken != null ? getTask() : null;
         return mService.mTaskPositioner != null && mService.mTaskPositioner.isTaskResizing(task);
-    }
-
-    private int calculatePixelFromDp(int dp) {
-        final Configuration serviceConfig = mService.mCurConfiguration;
-        // TODO(multidisplay): Update Dp to that of display stack is on.
-        final float density = serviceConfig.densityDpi * DisplayMetrics.DENSITY_DEFAULT_SCALE;
-        return (int)(dp * density);
     }
 
     void dump(PrintWriter pw, String prefix, boolean dumpAll) {

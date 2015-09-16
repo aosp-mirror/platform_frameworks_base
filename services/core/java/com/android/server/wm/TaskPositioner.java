@@ -22,6 +22,8 @@ import static android.app.ActivityManager.FREEFORM_WORKSPACE_STACK_ID;
 import static android.content.res.Configuration.ORIENTATION_LANDSCAPE;
 import static com.android.server.wm.WindowManagerService.DEBUG_TASK_POSITIONING;
 import static com.android.server.wm.WindowManagerService.SHOW_TRANSACTIONS;
+import static com.android.server.wm.WindowState.MINIMUM_VISIBLE_HEIGHT_IN_DP;
+import static com.android.server.wm.WindowState.MINIMUM_VISIBLE_WIDTH_IN_DP;
 
 import android.annotation.IntDef;
 import android.graphics.Point;
@@ -31,7 +33,6 @@ import android.os.Process;
 import android.os.RemoteException;
 import android.util.DisplayMetrics;
 import android.util.Slog;
-import android.util.TypedValue;
 import android.view.Display;
 import android.view.DisplayInfo;
 import android.view.InputChannel;
@@ -247,7 +248,7 @@ class TaskPositioner implements DimLayer.DimLayerUser {
         mService.pauseRotationLocked();
 
         mDimLayer = new DimLayer(mService, this, mDisplay.getDisplayId());
-        mSideMargin = (int)dipToPx(SIDE_MARGIN_DIP);
+        mSideMargin = mService.dipToPixel(SIDE_MARGIN_DIP, mDisplayMetrics);
     }
 
     void unregister() {
@@ -331,10 +332,8 @@ class TaskPositioner implements DimLayer.DimLayerUser {
             // This is a resizing operation.
             final int deltaX = Math.round(x - mStartDragX);
             final int deltaY = Math.round(y - mStartDragY);
-            // TODO: fix the min sizes when we have mininum width/height support,
-            //       use hard-coded min sizes for now.
-            final int minSizeX = (int)(dipToPx(96));
-            final int minSizeY = (int)(dipToPx(64));
+            final int minSizeX = mService.dipToPixel(MINIMUM_VISIBLE_WIDTH_IN_DP, mDisplayMetrics);
+            final int minSizeY = mService.dipToPixel(MINIMUM_VISIBLE_HEIGHT_IN_DP, mDisplayMetrics);
             int left = mWindowOriginalBounds.left;
             int top = mWindowOriginalBounds.top;
             int right = mWindowOriginalBounds.right;
@@ -430,9 +429,5 @@ class TaskPositioner implements DimLayer.DimLayerUser {
         return mService.mPolicy.windowTypeToLayerLw(WindowManager.LayoutParams.TYPE_DRAG)
                 * WindowManagerService.TYPE_LAYER_MULTIPLIER
                 + WindowManagerService.TYPE_LAYER_OFFSET;
-    }
-
-    private float dipToPx(float dip) {
-        return TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, dip, mDisplayMetrics);
     }
 }
