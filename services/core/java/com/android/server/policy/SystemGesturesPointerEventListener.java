@@ -17,9 +17,14 @@
 package com.android.server.policy;
 
 import android.content.Context;
+import android.os.Handler;
+import android.os.Looper;
+import android.os.SystemClock;
 import android.util.Slog;
+import android.view.GestureDetector;
 import android.view.MotionEvent;
 import android.view.WindowManagerPolicy.PointerEventListener;
+import android.widget.OverScroller;
 
 /*
  * Listens for system-wide input gestures, firing callbacks when detected.
@@ -31,12 +36,14 @@ public class SystemGesturesPointerEventListener implements PointerEventListener 
     private static final long SWIPE_TIMEOUT_MS = 500;
     private static final int MAX_TRACKED_POINTERS = 32;  // max per input system
     private static final int UNTRACKED_POINTER = -1;
+    private static final int MAX_FLING_TIME_MILLIS = 5000;
 
     private static final int SWIPE_NONE = 0;
     private static final int SWIPE_FROM_TOP = 1;
     private static final int SWIPE_FROM_BOTTOM = 2;
     private static final int SWIPE_FROM_RIGHT = 3;
 
+    private final Context mContext;
     private final int mSwipeStartThreshold;
     private final int mSwipeDistanceThreshold;
     private final Callbacks mCallbacks;
@@ -45,13 +52,18 @@ public class SystemGesturesPointerEventListener implements PointerEventListener 
     private final float[] mDownY = new float[MAX_TRACKED_POINTERS];
     private final long[] mDownTime = new long[MAX_TRACKED_POINTERS];
 
+    private GestureDetector mGestureDetector;
+    private OverScroller mOverscroller;
+
     int screenHeight;
     int screenWidth;
     private int mDownPointers;
     private boolean mSwipeFireable;
     private boolean mDebugFireable;
+    private long mLastFlingTime;
 
     public SystemGesturesPointerEventListener(Context context, Callbacks callbacks) {
+        mContext = context;
         mCallbacks = checkNull("callbacks", callbacks);
         mSwipeStartThreshold = checkNull("context", context).getResources()
                 .getDimensionPixelSize(com.android.internal.R.dimen.status_bar_height);
@@ -67,8 +79,17 @@ public class SystemGesturesPointerEventListener implements PointerEventListener 
         return arg;
     }
 
+    public void systemReady() {
+        Handler h = new Handler(Looper.myLooper());
+        mGestureDetector = new GestureDetector(mContext, new FlingGestureDetector(), h);
+        mOverscroller = new OverScroller(mContext);
+    }
+
     @Override
     public void onPointerEvent(MotionEvent event) {
+        if (mGestureDetector != null) {
+            mGestureDetector.onTouchEvent(event);
+        }
         switch (event.getActionMasked()) {
             case MotionEvent.ACTION_DOWN:
                 mSwipeFireable = true;
@@ -190,10 +211,40 @@ public class SystemGesturesPointerEventListener implements PointerEventListener 
         return SWIPE_NONE;
     }
 
+    private final class FlingGestureDetector extends GestureDetector.SimpleOnGestureListener {
+        @Override
+        public boolean onSingleTapUp(MotionEvent e) {
+            if (!mOverscroller.isFinished()) {
+                mOverscroller.forceFinished(true);
+            }
+            return true;
+        }
+        @Override
+        public boolean onFling(MotionEvent down, MotionEvent up,
+                float velocityX, float velocityY) {
+            mOverscroller.computeScrollOffset();
+            long now = SystemClock.uptimeMillis();
+
+            if (mLastFlingTime != 0 && now > mLastFlingTime + MAX_FLING_TIME_MILLIS) {
+                mOverscroller.forceFinished(true);
+            }
+            mOverscroller.fling(0, 0, (int)velocityX, (int)velocityY,
+                    Integer.MIN_VALUE, Integer.MAX_VALUE, Integer.MIN_VALUE, Integer.MAX_VALUE);
+            int duration = mOverscroller.getDuration();
+            if (duration > MAX_FLING_TIME_MILLIS) {
+                duration = MAX_FLING_TIME_MILLIS;
+            }
+            mLastFlingTime = now;
+            mCallbacks.onFling(duration);
+            return true;
+        }
+    }
+
     interface Callbacks {
         void onSwipeFromTop();
         void onSwipeFromBottom();
         void onSwipeFromRight();
+        void onFling(int durationMs);
         void onDown();
         void onUpOrCancel();
         void onDebug();
