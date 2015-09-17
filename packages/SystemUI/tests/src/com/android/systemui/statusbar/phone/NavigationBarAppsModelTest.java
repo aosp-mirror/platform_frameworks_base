@@ -44,7 +44,6 @@ import java.util.Arrays;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 /** Tests for the data model for the navigation bar app icons. */
@@ -109,8 +108,8 @@ public class NavigationBarAppsModelTest extends AndroidTestCase {
         };
     }
 
-    /** Tests buildAppLaunchIntent(). */
-    public void testBuildAppLaunchIntent() {
+    /** Tests resolveApp(). */
+    public void testResolveApp() {
         ActivityInfo mockNonExportedActivityInfo = new ActivityInfo();
         mockNonExportedActivityInfo.exported = false;
         ActivityInfo mockExportedActivityInfo = new ActivityInfo();
@@ -149,25 +148,27 @@ public class NavigationBarAppsModelTest extends AndroidTestCase {
 
         mModel.setCurrentUser(3);
         // Unlauncheable (for various reasons) apps.
-        assertEquals(null, mModel.buildAppLaunchIntent(
+        assertEquals(null, mModel.resolveApp(
                 new AppInfo(new ComponentName("package0", "class0"), new UserHandle(3))));
         mModel.setCurrentUser(4);
-        assertEquals(null, mModel.buildAppLaunchIntent(
+        assertEquals(null, mModel.resolveApp(
                 new AppInfo(new ComponentName("package1", "class1"), new UserHandle(4))));
         mModel.setCurrentUser(5);
-        assertEquals(null, mModel.buildAppLaunchIntent(
+        assertEquals(null, mModel.resolveApp(
                 new AppInfo(new ComponentName("package2", "class2"), new UserHandle(5))));
         mModel.setCurrentUser(6);
-        assertEquals(null, mModel.buildAppLaunchIntent(
+        assertEquals(null, mModel.resolveApp(
                 new AppInfo(new ComponentName("package3", "class3"), new UserHandle(6))));
 
         // A launcheable app.
         mModel.setCurrentUser(7);
-        Intent intent = mModel.buildAppLaunchIntent(
+        NavigationBarAppsModel.ResolvedApp resolvedApp = mModel.resolveApp(
                 new AppInfo(new ComponentName("package4", "class4"), new UserHandle(7)));
-        assertNotNull(intent);
+        assertNotNull(resolvedApp);
+        Intent intent = resolvedApp.launchIntent;
         assertEquals(new ComponentName("package4", "class4"), intent.getComponent());
         assertEquals("package4", intent.getPackage());
+        assertEquals(ri1, resolvedApp.ri);
     }
 
     /** Initializes the model from SharedPreferences for a few app activites. */

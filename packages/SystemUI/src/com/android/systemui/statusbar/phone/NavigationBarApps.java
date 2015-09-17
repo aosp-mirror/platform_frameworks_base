@@ -31,7 +31,6 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.graphics.PixelFormat;
@@ -247,7 +246,7 @@ class NavigationBarApps extends LinearLayout
             ComponentName appComponentName = appInfo.getComponentName();
             if (!appComponentName.getPackageName().equals(packageName)) continue;
 
-            if (sAppsModel.buildAppLaunchIntent(appInfo) != null) {
+            if (sAppsModel.resolveApp(appInfo) != null) {
                 continue;
             }
 
@@ -309,15 +308,9 @@ class NavigationBarApps extends LinearLayout
     }
 
     private void addAppButton(AppButtonData appButtonData) {
-        ImageView button = createAppButton(appButtonData);
+        ImageView button = createAppButton();
+        updateApp(button, appButtonData);
         addView(button);
-
-        AppInfo app = appButtonData.appInfo;
-        CharSequence appLabel = getAppLabel(mPackageManager, app.getComponentName());
-        button.setContentDescription(appLabel);
-
-        // Load the icon asynchronously.
-        new GetActivityIconTask(mPackageManager, button).execute(appButtonData);
     }
 
     private List<AppInfo> getPinnedApps() {
@@ -359,7 +352,7 @@ class NavigationBarApps extends LinearLayout
     /**
      * Creates a new ImageView for an app, inflated from R.layout.navigation_bar_app_item.
      */
-    private ImageView createAppButton(AppButtonData appButtonData) {
+    private ImageView createAppButton() {
         ImageView button = (ImageView) mLayoutInflater.inflate(
                 R.layout.navigation_bar_app_item, this, false /* attachToRoot */);
         button.setOnHoverListener(new AppHoverListener());
@@ -368,7 +361,6 @@ class NavigationBarApps extends LinearLayout
         // TODO: Ripple effect. Use either KeyButtonRipple or the default ripple background.
         button.setOnLongClickListener(new AppLongClickListener());
         button.setOnDragListener(new AppIconDragListener());
-        button.setTag(appButtonData);
         return button;
     }
 
@@ -387,17 +379,12 @@ class NavigationBarApps extends LinearLayout
      * TODO: Cache the labels, perhaps in an LruCache.
      */
     @Nullable
-    static CharSequence getAppLabel(PackageManager packageManager,
-                                    ComponentName activityName) {
-        String packageName = activityName.getPackageName();
-        ApplicationInfo info;
-        try {
-            info = packageManager.getApplicationInfo(packageName, 0x0 /* flags */);
-        } catch (PackageManager.NameNotFoundException e) {
-            Slog.w(TAG, "Package not found " + packageName);
-            return null;
-        }
-        return packageManager.getApplicationLabel(info);
+    private CharSequence getAppLabel(AppInfo appInfo) {
+        NavigationBarAppsModel.ResolvedApp resolvedApp = sAppsModel.resolveApp(appInfo);
+        if (resolvedApp == null) return null;
+
+        CharSequence unbadgedLabel = resolvedApp.ri.loadLabel(mPackageManager);
+        return mUserManager.getBadgedLabelForUser(unbadgedLabel, appInfo.getUser());
     }
 
     /** Helper function to start dragging an app icon (either pinned or recent). */
@@ -484,7 +471,7 @@ class NavigationBarApps extends LinearLayout
      * Creates a blank icon-sized View to create an empty space during a drag.
      */
     private ImageView createPlaceholderDragView(int index) {
-        ImageView button = createAppButton(null);
+        ImageView button = createAppButton();
         addView(button, index);
         return button;
     }
@@ -637,7 +624,7 @@ class NavigationBarApps extends LinearLayout
             return null;
         }
         AppInfo appInfo = new AppInfo(componentName, appUser);
-        if (sAppsModel.buildAppLaunchIntent(appInfo) == null) {
+        if (sAppsModel.resolveApp(appInfo) == null) {
             return null;
         }
         return appInfo;
@@ -645,6 +632,9 @@ class NavigationBarApps extends LinearLayout
 
     /** Updates the app at a given view index. */
     private void updateApp(ImageView button, AppButtonData appButtonData) {
+        CharSequence appLabel = getAppLabel(appButtonData.appInfo);
+        button.setContentDescription(appLabel);
+
         button.setTag(appButtonData);
         new GetActivityIconTask(mPackageManager, button).execute(appButtonData);
     }
@@ -829,12 +819,14 @@ class NavigationBarApps extends LinearLayout
      */
     private class AppClickListener implements View.OnClickListener {
         private void launchApp(AppInfo appInfo, View anchor) {
-            Intent launchIntent = sAppsModel.buildAppLaunchIntent(appInfo);
-            if (launchIntent == null) {
+            NavigationBarAppsModel.ResolvedApp resolvedApp = sAppsModel.resolveApp(appInfo);
+            if (resolvedApp == null) {
                 Toast.makeText(
                         getContext(), R.string.activity_not_found, Toast.LENGTH_SHORT).show();
                 return;
             }
+
+            Intent launchIntent = resolvedApp.launchIntent;
 
             // Play a scale-up animation while launching the activity.
             // TODO: Consider playing a different animation, or no animation, if the activity is
@@ -1078,7 +1070,7 @@ class NavigationBarApps extends LinearLayout
         UserHandle taskUser = new UserHandle(task.userId);
         AppInfo appInfo = new AppInfo(componentName, taskUser);
 
-        if (sAppsModel.buildAppLaunchIntent(appInfo) == null) {
+        if (sAppsModel.resolveApp(appInfo) == null) {
             // If task's activity is not launcheable, fall back to a launch component of the
             // task's package.
             ComponentName component = getLaunchComponentForPackage(

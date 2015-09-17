@@ -48,6 +48,11 @@ class NavigationBarAppsModel {
         void onPinnedAppsChanged();
     }
 
+    public class ResolvedApp {
+        Intent launchIntent;
+        ResolveInfo ri;
+    }
+
     private final static String TAG = "NavigationBarAppsModel";
 
     // Default number of apps to load initially.
@@ -112,8 +117,8 @@ class NavigationBarAppsModel {
         return AppGlobals.getPackageManager();
     }
 
-    // Returns a launch intent for a given app info, or null if the app info is unlauncheable.
-    public Intent buildAppLaunchIntent(AppInfo appInfo) {
+    // Returns a resolved app info for a given app info, or null if the app info is unlauncheable.
+    public ResolvedApp resolveApp(AppInfo appInfo) {
         ComponentName component = appInfo.getComponentName();
         int appUserId = appInfo.getUser().getIdentifier();
 
@@ -160,13 +165,17 @@ class NavigationBarAppsModel {
                 0 /* flags */, appUserId);
         final int size = apps.size();
         for (int i = 0; i < size; ++i) {
-            ActivityInfo activityInfo = apps.get(i).activityInfo;
+            ResolveInfo ri = apps.get(i);
+            ActivityInfo activityInfo = ri.activityInfo;
             if (activityInfo.packageName.equals(component.getPackageName()) &&
                     activityInfo.name.equals(component.getClassName())) {
                 // Found an activity with category launcher that matches
                 // this component so ok to launch.
                 launchIntent.setComponent(component);
-                return launchIntent;
+                ResolvedApp resolvedApp = new ResolvedApp();
+                resolvedApp.launchIntent = launchIntent;
+                resolvedApp.ri = ri;
+                return resolvedApp;
             }
         }
 
@@ -300,7 +309,7 @@ class NavigationBarAppsModel {
             return null;
         }
         AppInfo appInfo = new AppInfo(componentName, appUser);
-        if (buildAppLaunchIntent(appInfo) == null) {
+        if (resolveApp(appInfo) == null) {
             return null;
         }
         return appInfo;
