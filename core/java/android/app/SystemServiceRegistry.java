@@ -240,7 +240,7 @@ final class SystemServiceRegistry {
                 new CachedServiceFetcher<DevicePolicyManager>() {
             @Override
             public DevicePolicyManager createService(ContextImpl ctx) {
-                return DevicePolicyManager.create(ctx, ctx.mMainThread.getHandler());
+                return DevicePolicyManager.create(ctx);
             }});
 
         registerService(Context.DOWNLOAD_SERVICE, DownloadManager.class,

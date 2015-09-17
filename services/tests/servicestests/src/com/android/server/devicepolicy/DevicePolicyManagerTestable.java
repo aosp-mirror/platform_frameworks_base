@@ -13,35 +13,24 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package com.android.server.devicepolicy;
 
-import android.content.Context;
-import android.test.AndroidTestCase;
+import android.app.admin.DevicePolicyManager;
 
-import java.io.File;
+/**
+ * Overrides {@link #DevicePolicyManager} for dependency injection.
+ */
+public class DevicePolicyManagerTestable extends DevicePolicyManager {
+    public final DevicePolicyManagerServiceTestable dpms;
 
-public class DpmTestBase extends AndroidTestCase {
-    public static final String TAG = "DpmTest";
-
-    protected Context mRealTestContext;
-    protected DpmMockContext mMockContext;
-
-    public File dataDir;
-
-    @Override
-    protected void setUp() throws Exception {
-        super.setUp();
-
-        mRealTestContext = super.getContext();
-        mMockContext = new DpmMockContext(super.getContext());
-
-        dataDir = new File(mRealTestContext.getCacheDir(), "test-data");
-        DpmTestUtils.clearDir(dataDir);
+    public DevicePolicyManagerTestable(DpmMockContext context,
+            DevicePolicyManagerServiceTestable dpms) {
+        super(context, dpms);
+        this.dpms = dpms;
     }
 
     @Override
-    public DpmMockContext getContext() {
-        return mMockContext;
+    public int myUserId() {
+        return DpmMockContext.CALLER_USER_HANDLE;
     }
 }

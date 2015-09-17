@@ -73,8 +73,10 @@ import android.os.Environment;
 import android.os.FileUtils;
 import android.os.Handler;
 import android.os.IBinder;
+import android.os.Looper;
 import android.os.PersistableBundle;
 import android.os.PowerManager;
+import android.os.PowerManager.WakeLock;
 import android.os.PowerManagerInternal;
 import android.os.Process;
 import android.os.RecoverySystem;
@@ -111,6 +113,7 @@ import android.view.inputmethod.InputMethodInfo;
 import android.view.inputmethod.InputMethodManager;
 
 import com.android.internal.R;
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.statusbar.IStatusBarService;
 import com.android.internal.util.FastXmlSerializer;
 import com.android.internal.util.JournaledFile;
@@ -266,16 +269,16 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             | DevicePolicyManager.KEYGUARD_DISABLE_UNREDACTED_NOTIFICATIONS;
 
     final Context mContext;
+    final PackageManager mPackageManager;
     final UserManager mUserManager;
     final PowerManager.WakeLock mWakeLock;
 
     final LocalService mLocalService;
 
-    final PowerManager mPowerManager;
     final PowerManagerInternal mPowerManagerInternal;
 
-    IWindowManager mIWindowManager;
-    NotificationManager mNotificationManager;
+    final IWindowManager mIWindowManager;
+    final NotificationManager mNotificationManager;
 
     // Stores and loads state on device and profile owners.
     private final Owners mOwners;
@@ -346,7 +349,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
 
     final SparseArray<DevicePolicyData> mUserData = new SparseArray<>();
 
-    Handler mHandler = new Handler();
+    final Handler mHandler;
 
     BroadcastReceiver mReceiver = new BroadcastReceiver() {
         @Override
@@ -1036,18 +1039,119 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         }
     }
 
+    /** Unit test will override it to inject a mock. */
+    @VisibleForTesting
+    Owners newOwners() {
+        return new Owners(mContext);
+    }
+
+    /** Unit test will override it to inject a mock. */
+    @VisibleForTesting
+    UserManager getUserManager() {
+        return UserManager.get(mContext);
+    }
+
+    /** Unit test will override it to inject a mock. */
+    @VisibleForTesting
+    PackageManager getPackageManager() {
+        return mContext.getPackageManager();
+    }
+
+    /** Unit test will override it to inject a mock. */
+    @VisibleForTesting
+    NotificationManager getNotificationManager() {
+        return mContext.getSystemService(NotificationManager.class);
+    }
+
+    /** Unit test will override it to inject a mock. */
+    @VisibleForTesting
+    PowerManagerInternal getPowerManagerInternal() {
+        return LocalServices.getService(PowerManagerInternal.class);
+    }
+
+    /** Unit test will override it to inject a mock. */
+    @VisibleForTesting
+    IWindowManager newIWindowManager() {
+        return IWindowManager.Stub.asInterface(ServiceManager.getService(Context.WINDOW_SERVICE));
+    }
+
+    /** Unit test will override it to inject a mock. */
+    @VisibleForTesting
+    IActivityManager getIActivityManager() {
+        return ActivityManagerNative.getDefault();
+    }
+
+    /** Unit test will override it to inject a mock. */
+    @VisibleForTesting
+    LockPatternUtils newLockPatternUtils(Context context) {
+        return new LockPatternUtils(context);
+    }
+
+    /** Unit test will override it to inject. */
+    @VisibleForTesting
+    Looper getMyLooper() {
+        return Looper.myLooper();
+    }
+
+    @VisibleForTesting
+    long binderClearCallingIdentity() {
+        return Binder.clearCallingIdentity();
+    }
+
+    @VisibleForTesting
+    void binderRestoreCallingIdentity(long token) {
+        Binder.restoreCallingIdentity(token);
+    }
+
+    @VisibleForTesting
+    int binderGetCallingUid() {
+        return Binder.getCallingUid();
+    }
+
+    @VisibleForTesting
+    int binderGetCallingPid() {
+        return Binder.getCallingPid();
+    }
+
+    @VisibleForTesting
+    UserHandle binderGetCallingUserHandle() {
+        return Binder.getCallingUserHandle();
+    }
+
+    @VisibleForTesting
+    boolean binderIsCallingUidMyUid() {
+        return getCallingUid() == Process.myUid();
+    }
+
+    @VisibleForTesting
+    File environmentGetUserSystemDirectory(int userId) {
+        return Environment.getUserSystemDirectory(userId);
+    }
+
+    @VisibleForTesting
+    WakeLock powerManagerNewWakeLock(int levelAndFlags, String tag) {
+        return mContext.getSystemService(PowerManager.class).newWakeLock(levelAndFlags, tag);
+    }
+
+    @VisibleForTesting
+    void powerManagerGoToSleep(long time, int reason, int flags) {
+        mContext.getSystemService(PowerManager.class).goToSleep(time, reason, flags);
+    }
+
     /**
      * Instantiates the service.
      */
     public DevicePolicyManagerService(Context context) {
         mContext = context;
-        mOwners = new Owners(mContext);
-        mUserManager = UserManager.get(mContext);
-        mHasFeature = context.getPackageManager().hasSystemFeature(
-                PackageManager.FEATURE_DEVICE_ADMIN);
-        mPowerManager = (PowerManager)context.getSystemService(Context.POWER_SERVICE);
-        mPowerManagerInternal = LocalServices.getService(PowerManagerInternal.class);
-        mWakeLock = mPowerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "DPM");
+        mHandler = new Handler(getMyLooper());
+        mOwners = newOwners();
+        mUserManager = getUserManager();
+        mPackageManager = getPackageManager();
+        mHasFeature = mPackageManager.hasSystemFeature(PackageManager.FEATURE_DEVICE_ADMIN);
+        mPowerManagerInternal = getPowerManagerInternal();
+        mWakeLock = powerManagerNewWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "DPM");
+        mIWindowManager = newIWindowManager();
+        mNotificationManager = getNotificationManager();
         mLocalService = new LocalService();
         if (!mHasFeature) {
             // Skip the rest of the initialization
@@ -1073,6 +1177,15 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         context.registerReceiverAsUser(mReceiver, UserHandle.ALL, filter, null, mHandler);
 
         LocalServices.addService(DevicePolicyManagerInternal.class, mLocalService);
+    }
+
+    /**
+     * We need it for testing to allow accessing context from the test-only subclass while this
+     * class's constructor is still running.
+     */
+    @VisibleForTesting
+    Context getContext() {
+        return mContext;
     }
 
     /**
@@ -1103,11 +1216,11 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
      * @return
      */
     DevicePolicyData getUserDataUnchecked(int userHandle) {
-        long ident = Binder.clearCallingIdentity();
+        long ident = binderClearCallingIdentity();
         try {
             return getUserData(userHandle);
         } finally {
-            Binder.restoreCallingIdentity(ident);
+            binderRestoreCallingIdentity(ident);
         }
     }
 
@@ -1124,7 +1237,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             if (policy != null) {
                 mUserData.remove(userHandle);
             }
-            File policyFile = new File(Environment.getUserSystemDirectory(userHandle),
+            File policyFile = new File(environmentGetUserSystemDirectory(userHandle),
                     DEVICE_POLICIES_XML);
             policyFile.delete();
             Slog.i(LOG_TAG, "Removed device policy file " + policyFile.getAbsolutePath());
@@ -1164,7 +1277,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             alarmTime = now + alarmInterval;
         }
 
-        long token = Binder.clearCallingIdentity();
+        long token = binderClearCallingIdentity();
         try {
             AlarmManager am = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
             PendingIntent pi = PendingIntent.getBroadcastAsUser(context, REQUEST_EXPIRE_PASSWORD,
@@ -1176,24 +1289,8 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 am.set(AlarmManager.RTC, alarmTime, pi);
             }
         } finally {
-            Binder.restoreCallingIdentity(token);
+            binderRestoreCallingIdentity(token);
         }
-    }
-
-    private IWindowManager getWindowManager() {
-        if (mIWindowManager == null) {
-            IBinder b = ServiceManager.getService(Context.WINDOW_SERVICE);
-            mIWindowManager = IWindowManager.Stub.asInterface(b);
-        }
-        return mIWindowManager;
-    }
-
-    private NotificationManager getNotificationManager() {
-        if (mNotificationManager == null) {
-            mNotificationManager =
-                    (NotificationManager) mContext.getSystemService(Context.NOTIFICATION_SERVICE);
-        }
-        return mNotificationManager;
     }
 
     ActiveAdmin getActiveAdminUncheckedLocked(ComponentName who, int userHandle) {
@@ -1208,7 +1305,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
 
     ActiveAdmin getActiveAdminForCallerLocked(ComponentName who, int reqPolicy)
             throws SecurityException {
-        final int callingUid = Binder.getCallingUid();
+        final int callingUid = binderGetCallingUid();
 
         ActiveAdmin result = getActiveAdminWithPolicyForUidLocked(who, reqPolicy, callingUid);
         if (result != null) {
@@ -1232,7 +1329,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                     + admin.info.getTagForPolicy(reqPolicy));
         } else {
             throw new SecurityException("No active admin owned by uid "
-                    + Binder.getCallingUid() + " for policy #" + reqPolicy);
+                    + binderGetCallingUid() + " for policy #" + reqPolicy);
         }
     }
 
@@ -1248,7 +1345,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             }
             if (admin.getUid() != uid) {
                 throw new SecurityException("Admin " + who + " is not owned by uid "
-                        + Binder.getCallingUid());
+                        + binderGetCallingUid());
             }
             if (isActiveAdminWithPolicyForUserLocked(admin, reqPolicy, userId)) {
                 return admin;
@@ -1410,12 +1507,17 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         }
     }
 
-    private static JournaledFile makeJournaledFile(int userHandle) {
-        final String base = userHandle == 0
-                ? "/data/system/" + DEVICE_POLICIES_XML
-                : new File(Environment.getUserSystemDirectory(userHandle), DEVICE_POLICIES_XML)
+    private JournaledFile makeJournaledFile(int userHandle) {
+        final String base = userHandle == UserHandle.USER_SYSTEM
+                ? getDevicePolicyFilePathForSystemUser() + DEVICE_POLICIES_XML
+                : new File(environmentGetUserSystemDirectory(userHandle), DEVICE_POLICIES_XML)
                         .getAbsolutePath();
         return new JournaledFile(new File(base), new File(base + ".tmp"));
+    }
+
+    @VisibleForTesting
+    String getDevicePolicyFilePathForSystemUser() {
+        return "/data/system/";
     }
 
     private void saveSettingsLocked(int userHandle) {
@@ -1513,6 +1615,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             journal.commit();
             sendChangedNotification(userHandle);
         } catch (IOException e) {
+            Slog.w(LOG_TAG, "failed writing file", e);
             try {
                 if (stream != null) {
                     stream.close();
@@ -1527,11 +1630,11 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     private void sendChangedNotification(int userHandle) {
         Intent intent = new Intent(DevicePolicyManager.ACTION_DEVICE_POLICY_MANAGER_STATE_CHANGED);
         intent.setFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY);
-        long ident = Binder.clearCallingIdentity();
+        long ident = binderClearCallingIdentity();
         try {
             mContext.sendBroadcastAsUser(intent, new UserHandle(userHandle));
         } finally {
-            Binder.restoreCallingIdentity(ident);
+            binderRestoreCallingIdentity(ident);
         }
     }
 
@@ -1663,9 +1766,9 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         // sufficiently what is currently set.  Note that this is only
         // a sanity check in case the two get out of sync; this should
         // never normally happen.
-        final long identity = Binder.clearCallingIdentity();
+        final long identity = binderClearCallingIdentity();
         try {
-            LockPatternUtils utils = new LockPatternUtils(mContext);
+            LockPatternUtils utils = newLockPatternUtils(mContext);
             if (utils.getActivePasswordQuality(userHandle) < policy.mActivePasswordQuality) {
                 Slog.w(LOG_TAG, "Active password quality 0x"
                         + Integer.toHexString(policy.mActivePasswordQuality)
@@ -1681,7 +1784,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 policy.mActivePasswordNonLetter = 0;
             }
         } finally {
-            Binder.restoreCallingIdentity(identity);
+            binderRestoreCallingIdentity(identity);
         }
 
         validatePasswordOwnerLocked(policy);
@@ -1695,26 +1798,26 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     }
 
     private void updateLockTaskPackagesLocked(List<String> packages, int userId) {
-        IActivityManager am = ActivityManagerNative.getDefault();
-        long ident = Binder.clearCallingIdentity();
+        IActivityManager am = getIActivityManager();
+        long ident = binderClearCallingIdentity();
         try {
             am.updateLockTaskPackages(userId, packages.toArray(new String[packages.size()]));
         } catch (RemoteException e) {
             // Not gonna happen.
         } finally {
-            Binder.restoreCallingIdentity(ident);
+            binderRestoreCallingIdentity(ident);
         }
     }
 
     private void updateDeviceOwnerLocked() {
-        IActivityManager am = ActivityManagerNative.getDefault();
-        long ident = Binder.clearCallingIdentity();
+        IActivityManager am = getIActivityManager();
+        long ident = binderClearCallingIdentity();
         try {
             am.updateDeviceOwner(getDeviceOwner());
         } catch (RemoteException e) {
             // Not gonna happen.
         } finally {
-            Binder.restoreCallingIdentity(ident);
+            binderRestoreCallingIdentity(ident);
         }
     }
 
@@ -1762,14 +1865,14 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         boolean systemState = SystemProperties.getBoolean(cameraPropertyForUser, false);
         boolean cameraDisabled = getCameraDisabled(null, policy.mUserHandle);
         if (cameraDisabled != systemState) {
-            long token = Binder.clearCallingIdentity();
+            long token = binderClearCallingIdentity();
             try {
                 String value = cameraDisabled ? "1" : "0";
                 if (DBG) Slog.v(LOG_TAG, "Change in camera state ["
                         + cameraPropertyForUser + "] = " + value);
                 SystemProperties.set(cameraPropertyForUser, value);
             } finally {
-                Binder.restoreCallingIdentity(token);
+                binderRestoreCallingIdentity(token);
             }
         }
     }
@@ -1809,7 +1912,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
 
     private void ensureDeviceOwnerUserStarted() {
         if (mOwners.hasDeviceOwner()) {
-            final IActivityManager am = ActivityManagerNative.getDefault();
+            final IActivityManager am = getIActivityManager();
             final int userId = mOwners.getDeviceOwnerUserId();
             if (VERBOSE_LOG) {
                 Log.v(LOG_TAG, "Starting non-system DO user: " + userId);
@@ -1917,7 +2020,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 Log.e(LOG_TAG, "Could not connect to KeyChain service", e);
             }
             if (!hasCert) {
-                getNotificationManager().cancelAsUser(
+                mNotificationManager.cancelAsUser(
                         null, MONITORING_CERT_NOTIFICATION_ID, userHandle);
                 return;
             }
@@ -1962,7 +2065,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                         com.android.internal.R.color.system_notification_accent_color))
                 .build();
 
-            getNotificationManager().notifyAsUser(
+            mNotificationManager.notifyAsUser(
                     null, MONITORING_CERT_NOTIFICATION_ID, noti, userHandle);
         }
     }
@@ -1991,7 +2094,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             throw new IllegalArgumentException("Bad admin: " + adminReceiver);
         }
         synchronized (this) {
-            long ident = Binder.clearCallingIdentity();
+            long ident = binderClearCallingIdentity();
             try {
                 if (!refreshing
                         && getActiveAdminUncheckedLocked(adminReceiver, userHandle) != null) {
@@ -2018,7 +2121,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 sendAdminCommandLocked(newAdmin, DeviceAdminReceiver.ACTION_DEVICE_ADMIN_ENABLED,
                         onEnableData, null);
             } finally {
-                Binder.restoreCallingIdentity(ident);
+                binderRestoreCallingIdentity(ident);
             }
         }
     }
@@ -2112,7 +2215,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             if (admin == null) {
                 return;
             }
-            if (admin.getUid() != Binder.getCallingUid()) {
+            if (admin.getUid() != binderGetCallingUid()) {
                 // Active device owners must remain active admins.
                 if (isDeviceOwner(adminReceiver.getPackageName())) {
                     return;
@@ -2120,11 +2223,11 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 mContext.enforceCallingOrSelfPermission(
                         android.Manifest.permission.MANAGE_DEVICE_ADMINS, null);
             }
-            long ident = Binder.clearCallingIdentity();
+            long ident = binderClearCallingIdentity();
             try {
                 removeActiveAdminLocked(adminReceiver, userHandle);
             } finally {
-                Binder.restoreCallingIdentity(ident);
+                binderRestoreCallingIdentity(ident);
             }
         }
     }
@@ -2394,7 +2497,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                     || activeAdmin.crossProfileWidgetProviders.isEmpty()) {
                 return null;
             }
-            if (Binder.getCallingUid() == Process.myUid()) {
+            if (binderIsCallingUidMyUid()) {
                 return new ArrayList<>(activeAdmin.crossProfileWidgetProviders);
             } else {
                 return activeAdmin.crossProfileWidgetProviders;
@@ -2959,7 +3062,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             }
         }
 
-        int callingUid = Binder.getCallingUid();
+        int callingUid = binderGetCallingUid();
         DevicePolicyData policy = getUserData(userHandle);
         if (policy.mPasswordOwner >= 0 && policy.mPasswordOwner != callingUid) {
             Slog.w(LOG_TAG, "resetPassword: already set by another uid and not entered by user");
@@ -2975,7 +3078,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
 
         // Don't do this with the lock held, because it is going to call
         // back in to the service.
-        long ident = Binder.clearCallingIdentity();
+        long ident = binderClearCallingIdentity();
         try {
             LockPatternUtils utils = new LockPatternUtils(mContext);
             if (!TextUtils.isEmpty(password)) {
@@ -2996,7 +3099,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 }
             }
         } finally {
-            Binder.restoreCallingIdentity(ident);
+            binderRestoreCallingIdentity(ident);
         }
 
         return true;
@@ -3046,7 +3149,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             return;
         }
 
-        long ident = Binder.clearCallingIdentity();
+        long ident = binderClearCallingIdentity();
         try {
             if (timeMs <= 0) {
                 timeMs = Integer.MAX_VALUE;
@@ -3060,7 +3163,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             policy.mLastMaximumTimeToLock = timeMs;
             mPowerManagerInternal.setMaximumScreenOffTimeoutFromDeviceAdmin((int)timeMs);
         } finally {
-            Binder.restoreCallingIdentity(ident);
+            binderRestoreCallingIdentity(ident);
         }
     }
 
@@ -3112,18 +3215,18 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     }
 
     private void lockNowUnchecked() {
-        long ident = Binder.clearCallingIdentity();
+        long ident = binderClearCallingIdentity();
         try {
             // Power off the display
-            mPowerManager.goToSleep(SystemClock.uptimeMillis(),
+            powerManagerGoToSleep(SystemClock.uptimeMillis(),
                     PowerManager.GO_TO_SLEEP_REASON_DEVICE_ADMIN, 0);
             // Ensure the device is locked
             new LockPatternUtils(mContext).requireStrongAuth(
                     STRONG_AUTH_REQUIRED_AFTER_DPM_LOCK_NOW, UserHandle.USER_ALL);
-            getWindowManager().lockNow(null);
+            mIWindowManager.lockNow(null);
         } catch (RemoteException e) {
         } finally {
-            Binder.restoreCallingIdentity(ident);
+            binderRestoreCallingIdentity(ident);
         }
     }
 
@@ -3146,7 +3249,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     }
 
     private boolean isCallerDelegatedCertInstaller() {
-        final int callingUid = Binder.getCallingUid();
+        final int callingUid = binderGetCallingUid();
         final int userHandle = UserHandle.getUserId(callingUid);
         synchronized (this) {
             final DevicePolicyData policy = getUserData(userHandle);
@@ -3181,7 +3284,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         }
 
         final UserHandle userHandle = new UserHandle(UserHandle.getCallingUserId());
-        final long id = Binder.clearCallingIdentity();
+        final long id = binderClearCallingIdentity();
         try {
             final KeyChainConnection keyChainConnection = KeyChain.bindAsUser(mContext, userHandle);
             try {
@@ -3196,7 +3299,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             Log.w(LOG_TAG, "installCaCertsToKeyChain(): ", e1);
             Thread.currentThread().interrupt();
         } finally {
-            Binder.restoreCallingIdentity(id);
+            binderRestoreCallingIdentity(id);
         }
         return false;
     }
@@ -3212,7 +3315,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         enforceCanManageCaCerts(admin);
 
         final UserHandle userHandle = new UserHandle(UserHandle.getCallingUserId());
-        final long id = Binder.clearCallingIdentity();
+        final long id = binderClearCallingIdentity();
         try {
             final KeyChainConnection keyChainConnection = KeyChain.bindAsUser(mContext, userHandle);
             try {
@@ -3228,7 +3331,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             Log.w(LOG_TAG, "CaCertUninstaller: ", ie);
             Thread.currentThread().interrupt();
         } finally {
-            Binder.restoreCallingIdentity(id);
+            binderRestoreCallingIdentity(id);
         }
     }
 
@@ -3244,7 +3347,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             }
         }
         final UserHandle userHandle = new UserHandle(UserHandle.getCallingUserId());
-        final long id = Binder.clearCallingIdentity();
+        final long id = binderClearCallingIdentity();
         try {
           final KeyChainConnection keyChainConnection = KeyChain.bindAsUser(mContext, userHandle);
           try {
@@ -3259,7 +3362,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             Log.w(LOG_TAG, "Interrupted while installing certificate", e);
             Thread.currentThread().interrupt();
         } finally {
-            Binder.restoreCallingIdentity(id);
+            binderRestoreCallingIdentity(id);
         }
         return false;
     }
@@ -3268,11 +3371,11 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     public void choosePrivateKeyAlias(final int uid, final Uri uri, final String alias,
             final IBinder response) {
         // Caller UID needs to be trusted, so we restrict this method to SYSTEM_UID callers.
-        if (UserHandle.getAppId(Binder.getCallingUid()) != Process.SYSTEM_UID) {
+        if (UserHandle.getAppId(binderGetCallingUid()) != Process.SYSTEM_UID) {
             return;
         }
 
-        final UserHandle caller = Binder.getCallingUserHandle();
+        final UserHandle caller = binderGetCallingUserHandle();
         // If there is a profile owner, redirect to that; otherwise query the device owner.
         ComponentName aliasChooser = getProfileOwner(caller.getIdentifier());
         if (aliasChooser == null && caller.isOwner()) {
@@ -3293,7 +3396,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         intent.putExtra(DeviceAdminReceiver.EXTRA_CHOOSE_PRIVATE_KEY_ALIAS, alias);
         intent.putExtra(DeviceAdminReceiver.EXTRA_CHOOSE_PRIVATE_KEY_RESPONSE, response);
 
-        final long id = Binder.clearCallingIdentity();
+        final long id = binderClearCallingIdentity();
         try {
             mContext.sendOrderedBroadcastAsUser(intent, caller, null, new BroadcastReceiver() {
                 @Override
@@ -3303,7 +3406,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 }
             }, null, Activity.RESULT_OK, null, null);
         } finally {
-            Binder.restoreCallingIdentity(id);
+            binderRestoreCallingIdentity(id);
         }
     }
 
@@ -3380,7 +3483,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 source = admin.info.getPackageName();
             }
 
-            long ident = Binder.clearCallingIdentity();
+            long ident = binderClearCallingIdentity();
             try {
                 if ((flags & WIPE_RESET_PROTECTION_DATA) != 0) {
                     boolean ownsInitialization = isDeviceInitializer(admin.info.getPackageName())
@@ -3401,7 +3504,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 wipeDeviceOrUserLocked(wipeExtRequested, userHandle,
                         "DevicePolicyManager.wipeData() from " + source);
             } finally {
-                Binder.restoreCallingIdentity(ident);
+                binderRestoreCallingIdentity(ident);
             }
         }
     }
@@ -3414,7 +3517,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 @Override
                 public void run() {
                     try {
-                        IActivityManager am = ActivityManagerNative.getDefault();
+                        IActivityManager am = getIActivityManager();
                         if (am.getCurrentUser().id == userHandle) {
                             am.switchUser(UserHandle.USER_OWNER);
                         }
@@ -3442,11 +3545,11 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 .setColor(mContext.getColor(R.color.system_notification_accent_color))
                 .setStyle(new Notification.BigTextStyle().bigText(contentText))
                 .build();
-        getNotificationManager().notify(PROFILE_WIPED_NOTIFICATION_ID, notification);
+        mNotificationManager.notify(PROFILE_WIPED_NOTIFICATION_ID, notification);
     }
 
     private void clearWipeProfileNotification() {
-        getNotificationManager().cancel(PROFILE_WIPED_NOTIFICATION_ID);
+        mNotificationManager.cancel(PROFILE_WIPED_NOTIFICATION_ID);
     }
 
     @Override
@@ -3506,7 +3609,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                     || p.mActivePasswordNumeric != numbers
                     || p.mActivePasswordSymbols != symbols
                     || p.mActivePasswordNonLetter != nonletter) {
-                long ident = Binder.clearCallingIdentity();
+                long ident = binderClearCallingIdentity();
                 try {
                     p.mActivePasswordQuality = quality;
                     p.mActivePasswordLength = length;
@@ -3524,7 +3627,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                             DeviceAdminReceiver.ACTION_PASSWORD_CHANGED,
                             DeviceAdminInfo.USES_POLICY_LIMIT_PASSWORD, userHandle);
                 } finally {
-                    Binder.restoreCallingIdentity(ident);
+                    binderRestoreCallingIdentity(ident);
                 }
             }
         }
@@ -3560,7 +3663,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         mContext.enforceCallingOrSelfPermission(
                 android.Manifest.permission.BIND_DEVICE_ADMIN, null);
 
-        long ident = Binder.clearCallingIdentity();
+        long ident = binderClearCallingIdentity();
         try {
             boolean wipeData = false;
             int identifier = 0;
@@ -3591,7 +3694,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                         "reportFailedPasswordAttempt()");
             }
         } finally {
-            Binder.restoreCallingIdentity(ident);
+            binderRestoreCallingIdentity(ident);
         }
     }
 
@@ -3604,7 +3707,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         synchronized (this) {
             DevicePolicyData policy = getUserData(userHandle);
             if (policy.mFailedPasswordAttempts != 0 || policy.mPasswordOwner >= 0) {
-                long ident = Binder.clearCallingIdentity();
+                long ident = binderClearCallingIdentity();
                 try {
                     policy.mFailedPasswordAttempts = 0;
                     policy.mPasswordOwner = -1;
@@ -3615,7 +3718,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                                 DeviceAdminInfo.USES_POLICY_WATCH_LOGIN, userHandle);
                     }
                 } finally {
-                    Binder.restoreCallingIdentity(ident);
+                    binderRestoreCallingIdentity(ident);
                 }
             }
         }
@@ -3666,11 +3769,11 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
 
             // Reset the global proxy accordingly
             // Do this using system permissions, as apps cannot write to secure settings
-            long origId = Binder.clearCallingIdentity();
+            long origId = binderClearCallingIdentity();
             try {
                 resetGlobalProxyLocked(policy);
             } finally {
-                Binder.restoreCallingIdentity(origId);
+                binderRestoreCallingIdentity(origId);
             }
             return null;
         }
@@ -3705,13 +3808,13 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         synchronized (this) {
             getActiveAdminForCallerLocked(who, DeviceAdminInfo.USES_POLICY_DEVICE_OWNER);
         }
-        long token = Binder.clearCallingIdentity();
+        long token = binderClearCallingIdentity();
         try {
             ConnectivityManager connectivityManager = (ConnectivityManager)
                     mContext.getSystemService(Context.CONNECTIVITY_SERVICE);
             connectivityManager.setGlobalProxy(proxyInfo);
         } finally {
-            Binder.restoreCallingIdentity(token);
+            binderRestoreCallingIdentity(token);
         }
     }
 
@@ -3875,13 +3978,13 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     private int getEncryptionStatus() {
         String status = SystemProperties.get("ro.crypto.state", "unsupported");
         if ("encrypted".equalsIgnoreCase(status)) {
-            final long token = Binder.clearCallingIdentity();
+            final long token = binderClearCallingIdentity();
             try {
                 return LockPatternUtils.isDeviceEncrypted()
                         ? DevicePolicyManager.ENCRYPTION_STATUS_ACTIVE
                         : DevicePolicyManager.ENCRYPTION_STATUS_ACTIVE_DEFAULT_KEY;
             } finally {
-                Binder.restoreCallingIdentity(token);
+                binderRestoreCallingIdentity(token);
             }
         } else if ("unencrypted".equalsIgnoreCase(status)) {
             return DevicePolicyManager.ENCRYPTION_STATUS_INACTIVE;
@@ -3946,13 +4049,13 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     }
 
     private void updateScreenCaptureDisabledInWindowManager(int userHandle, boolean disabled) {
-        long ident = Binder.clearCallingIdentity();
+        long ident = binderClearCallingIdentity();
         try {
-            getWindowManager().setScreenCaptureDisabled(userHandle, disabled);
+            mIWindowManager.setScreenCaptureDisabled(userHandle, disabled);
         } catch (RemoteException e) {
             Log.w(LOG_TAG, "Unable to notify WindowManager.", e);
         } finally {
-            Binder.restoreCallingIdentity(ident);
+            binderRestoreCallingIdentity(ident);
         }
     }
 
@@ -3977,12 +4080,12 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
 
         // Turn AUTO_TIME on in settings if it is required
         if (required) {
-            long ident = Binder.clearCallingIdentity();
+            long ident = binderClearCallingIdentity();
             try {
                 Settings.Global.putInt(mContext.getContentResolver(),
                         Settings.Global.AUTO_TIME, 1 /* AUTO_TIME on */);
             } finally {
-                Binder.restoreCallingIdentity(ident);
+                binderRestoreCallingIdentity(ident);
             }
         }
     }
@@ -4091,7 +4194,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             return 0;
         }
         enforceCrossUserPermission(userHandle);
-        long ident = Binder.clearCallingIdentity();
+        long ident = binderClearCallingIdentity();
         try {
             synchronized (this) {
                 if (who != null) {
@@ -4134,7 +4237,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 return which;
             }
         } finally {
-            Binder.restoreCallingIdentity(ident);
+            binderRestoreCallingIdentity(ident);
         }
     }
 
@@ -4152,7 +4255,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             enforceCanSetDeviceOwner(userId);
 
             // Shutting down backup manager service permanently.
-            long ident = Binder.clearCallingIdentity();
+            long ident = binderClearCallingIdentity();
             try {
                 IBackupManager ibm = IBackupManager.Stub.asInterface(
                         ServiceManager.getService(Context.BACKUP_SERVICE));
@@ -4160,7 +4263,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             } catch (RemoteException e) {
                 throw new IllegalStateException("Failed deactivating backup service.", e);
             } finally {
-                Binder.restoreCallingIdentity(ident);
+                binderRestoreCallingIdentity(ident);
             }
 
             mOwners.setDeviceOwner(packageName, ownerName, userId);
@@ -4168,12 +4271,12 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             updateDeviceOwnerLocked();
             Intent intent = new Intent(DevicePolicyManager.ACTION_DEVICE_OWNER_CHANGED);
 
-            ident = Binder.clearCallingIdentity();
+            ident = binderClearCallingIdentity();
             try {
                 // TODO Send to system too?
                 mContext.sendBroadcastAsUser(intent, new UserHandle(userId));
             } finally {
-                Binder.restoreCallingIdentity(ident);
+                binderRestoreCallingIdentity(ident);
             }
             return true;
         }
@@ -4238,7 +4341,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         Preconditions.checkNotNull(packageName, "packageName is null");
         try {
             int uid = mContext.getPackageManager().getPackageUid(packageName, 0);
-            if (uid != Binder.getCallingUid()) {
+            if (uid != binderGetCallingUid()) {
                 throw new SecurityException("Invalid packageName");
             }
         } catch (NameNotFoundException e) {
@@ -4254,7 +4357,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             mOwners.writeDeviceOwner();
             updateDeviceOwnerLocked();
             // Reactivate backup service.
-            long ident = Binder.clearCallingIdentity();
+            long ident = binderClearCallingIdentity();
             try {
                 IBackupManager ibm = IBackupManager.Stub.asInterface(
                         ServiceManager.getService(Context.BACKUP_SERVICE));
@@ -4262,7 +4365,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             } catch (RemoteException e) {
                 throw new IllegalStateException("Failed reactivating backup service.", e);
             } finally {
-                Binder.restoreCallingIdentity(ident);
+                binderRestoreCallingIdentity(ident);
             }
         }
     }
@@ -4282,7 +4385,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         boolean isInitializerSystemApp;
         try {
             isInitializerSystemApp = isSystemApp(AppGlobals.getPackageManager(),
-                    initializer.getPackageName(), Binder.getCallingUserHandle().getIdentifier());
+                    initializer.getPackageName(), binderGetCallingUserHandle().getIdentifier());
         } catch (RemoteException | IllegalArgumentException e) {
             isInitializerSystemApp = false;
             Slog.e(LOG_TAG, "Fail to check if device initialzer is system app.", e);
@@ -4365,9 +4468,9 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
 
         ActiveAdmin admin = getActiveAdminUncheckedLocked(who, UserHandle.getCallingUserId());
 
-        if (admin.getUid() != Binder.getCallingUid()) {
+        if (admin.getUid() != binderGetCallingUid()) {
             throw new SecurityException("Admin " + who + " is not owned by uid "
-                    + Binder.getCallingUid());
+                    + binderGetCallingUid());
         }
 
         if (!isDeviceInitializer(admin.info.getPackageName())
@@ -4376,12 +4479,12 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                     "clearDeviceInitializer can only be called by the device initializer/owner");
         }
         synchronized (this) {
-            long ident = Binder.clearCallingIdentity();
+            long ident = binderClearCallingIdentity();
             try {
                 mOwners.clearDeviceInitializer();
                 mOwners.writeDeviceOwner();
             } finally {
-                Binder.restoreCallingIdentity(ident);
+                binderRestoreCallingIdentity(ident);
             }
         }
     }
@@ -4409,7 +4512,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         if (!mHasFeature) {
             return;
         }
-        UserHandle callingUser = Binder.getCallingUserHandle();
+        UserHandle callingUser = binderGetCallingUserHandle();
         // Check if this is the profile owner who is calling
         getActiveAdminForCallerLocked(who, DeviceAdminInfo.USES_POLICY_PROFILE_OWNER);
         synchronized (this) {
@@ -4429,7 +4532,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         policy.mStatusBarDisabled = false;
         saveSettingsLocked(userId);
 
-        final long ident = Binder.clearCallingIdentity();
+        final long ident = binderClearCallingIdentity();
         try {
             clearUserRestrictions(userHandle);
             AppGlobals.getPackageManager().updatePermissionFlagsForAllApps(
@@ -4437,7 +4540,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                     0  /* flagValues */, userHandle.getIdentifier());
         } catch (RemoteException re) {
         } finally {
-            Binder.restoreCallingIdentity(ident);
+            binderRestoreCallingIdentity(ident);
         }
     }
 
@@ -4497,7 +4600,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                         "This method can only be called by device initializers");
             }
 
-            long id = Binder.clearCallingIdentity();
+            long id = binderClearCallingIdentity();
             try {
                 if (!isDeviceOwner(activeAdmin.info.getPackageName())) {
                     IPackageManager ipm = AppGlobals.getPackageManager();
@@ -4518,7 +4621,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 Log.i(LOG_TAG, "Can't talk to package manager", e);
                 return false;
             } finally {
-                restoreCallingIdentity(id);
+                binderRestoreCallingIdentity(id);
             }
             return true;
         }
@@ -4536,7 +4639,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             getActiveAdminForCallerLocked(who, DeviceAdminInfo.USES_POLICY_PROFILE_OWNER);
             int userId = UserHandle.getCallingUserId();
 
-            long id = Binder.clearCallingIdentity();
+            long id = binderClearCallingIdentity();
             try {
                 mUserManager.setUserEnabled(userId);
                 UserInfo parent = mUserManager.getProfileParent(userId);
@@ -4546,7 +4649,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                         Intent.FLAG_RECEIVER_FOREGROUND);
                 mContext.sendBroadcastAsUser(intent, new UserHandle(parent.id));
             } finally {
-                restoreCallingIdentity(id);
+                binderRestoreCallingIdentity(id);
             }
         }
     }
@@ -4558,11 +4661,11 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         // Check if this is the profile owner (includes device owner).
         getActiveAdminForCallerLocked(who, DeviceAdminInfo.USES_POLICY_PROFILE_OWNER);
 
-        long id = Binder.clearCallingIdentity();
+        long id = binderClearCallingIdentity();
         try {
             mUserManager.setUserName(userId, profileName);
         } finally {
-            restoreCallingIdentity(id);
+            binderRestoreCallingIdentity(id);
         }
     }
 
@@ -4612,7 +4715,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
      * Canonical name for a given package.
      */
     private String getApplicationLabel(String packageName, int userHandle) {
-        long token = Binder.clearCallingIdentity();
+        long token = binderClearCallingIdentity();
         try {
             final Context userContext;
             try {
@@ -4630,7 +4733,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             }
             return result != null ? result.toString() : null;
         } finally {
-            Binder.restoreCallingIdentity(token);
+            binderRestoreCallingIdentity(token);
         }
     }
 
@@ -4656,7 +4759,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             throw new IllegalStateException("Trying to set the profile owner, but profile owner "
                     + "is already set.");
         }
-        int callingUid = Binder.getCallingUid();
+        int callingUid = binderGetCallingUid();
         if (callingUid == Process.SHELL_UID || callingUid == Process.ROOT_UID) {
             if (hasUserSetupCompleted(userHandle) &&
                     AccountManager.get(mContext).getAccountsAsUser(userHandle).length > 0) {
@@ -4689,7 +4792,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             throw new IllegalStateException("User not running: " + userId);
         }
 
-        int callingUid = Binder.getCallingUid();
+        int callingUid = binderGetCallingUid();
         if (callingUid == Process.SHELL_UID || callingUid == Process.ROOT_UID) {
             if (!hasUserSetupCompleted(UserHandle.USER_OWNER)) {
                 return;
@@ -4726,7 +4829,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         if (userHandle < 0) {
             throw new IllegalArgumentException("Invalid userId " + userHandle);
         }
-        final int callingUid = Binder.getCallingUid();
+        final int callingUid = binderGetCallingUid();
         if (userHandle == UserHandle.getUserId(callingUid)) return;
         if (callingUid != Process.SYSTEM_UID && callingUid != 0) {
             mContext.enforceCallingOrSelfPermission(
@@ -4742,20 +4845,20 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     }
 
     private UserInfo getProfileParent(int userHandle) {
-        long ident = Binder.clearCallingIdentity();
+        long ident = binderClearCallingIdentity();
         try {
             return mUserManager.getProfileParent(userHandle);
         } finally {
-            Binder.restoreCallingIdentity(ident);
+            binderRestoreCallingIdentity(ident);
         }
     }
 
     private boolean isManagedProfile(int userHandle) {
-        long ident = Binder.clearCallingIdentity();
+        long ident = binderClearCallingIdentity();
         try {
             return mUserManager.getUserInfo(userHandle).isManagedProfile();
         } finally {
-            Binder.restoreCallingIdentity(ident);
+            binderRestoreCallingIdentity(ident);
         }
     }
 
@@ -4781,8 +4884,8 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 != PackageManager.PERMISSION_GRANTED) {
 
             pw.println("Permission Denial: can't dump DevicePolicyManagerService from from pid="
-                    + Binder.getCallingPid()
-                    + ", uid=" + Binder.getCallingUid());
+                    + binderGetCallingPid()
+                    + ", uid=" + binderGetCallingUid());
             return;
         }
 
@@ -4824,13 +4927,13 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             getActiveAdminForCallerLocked(who, DeviceAdminInfo.USES_POLICY_PROFILE_OWNER);
 
             IPackageManager pm = AppGlobals.getPackageManager();
-            long id = Binder.clearCallingIdentity();
+            long id = binderClearCallingIdentity();
             try {
                 pm.addPersistentPreferredActivity(filter, activity, userHandle);
             } catch (RemoteException re) {
                 // Shouldn't happen
             } finally {
-                restoreCallingIdentity(id);
+                binderRestoreCallingIdentity(id);
             }
         }
     }
@@ -4843,13 +4946,13 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             getActiveAdminForCallerLocked(who, DeviceAdminInfo.USES_POLICY_PROFILE_OWNER);
 
             IPackageManager pm = AppGlobals.getPackageManager();
-            long id = Binder.clearCallingIdentity();
+            long id = binderClearCallingIdentity();
             try {
                 pm.clearPackagePersistentPreferredActivities(packageName, userHandle);
             } catch (RemoteException re) {
                 // Shouldn't happen
             } finally {
-                restoreCallingIdentity(id);
+                binderRestoreCallingIdentity(id);
             }
         }
     }
@@ -4861,11 +4964,11 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         synchronized (this) {
             getActiveAdminForCallerLocked(who, DeviceAdminInfo.USES_POLICY_PROFILE_OWNER);
 
-            long id = Binder.clearCallingIdentity();
+            long id = binderClearCallingIdentity();
             try {
                 mUserManager.setApplicationRestrictions(packageName, settings, userHandle);
             } finally {
-                restoreCallingIdentity(id);
+                binderRestoreCallingIdentity(id);
             }
         }
     }
@@ -4963,7 +5066,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     @Override
     public ComponentName getRestrictionsProvider(int userHandle) {
         synchronized (this) {
-            if (Binder.getCallingUid() != Process.SYSTEM_UID) {
+            if (binderGetCallingUid() != Process.SYSTEM_UID) {
                 throw new SecurityException("Only the system can query the permission provider");
             }
             DevicePolicyData userData = getUserData(userHandle);
@@ -4979,7 +5082,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             getActiveAdminForCallerLocked(who, DeviceAdminInfo.USES_POLICY_PROFILE_OWNER);
 
             IPackageManager pm = AppGlobals.getPackageManager();
-            long id = Binder.clearCallingIdentity();
+            long id = binderClearCallingIdentity();
             try {
                 UserInfo parent = mUserManager.getProfileParent(callingUserId);
                 if (parent == null) {
@@ -4998,7 +5101,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             } catch (RemoteException re) {
                 // Shouldn't happen
             } finally {
-                restoreCallingIdentity(id);
+                binderRestoreCallingIdentity(id);
             }
         }
     }
@@ -5010,7 +5113,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         synchronized (this) {
             getActiveAdminForCallerLocked(who, DeviceAdminInfo.USES_POLICY_PROFILE_OWNER);
             IPackageManager pm = AppGlobals.getPackageManager();
-            long id = Binder.clearCallingIdentity();
+            long id = binderClearCallingIdentity();
             try {
                 UserInfo parent = mUserManager.getProfileParent(callingUserId);
                 if (parent == null) {
@@ -5027,7 +5130,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             } catch (RemoteException re) {
                 // Shouldn't happen
             } finally {
-                restoreCallingIdentity(id);
+                binderRestoreCallingIdentity(id);
             }
         }
     }
@@ -5039,7 +5142,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     private boolean checkPackagesInPermittedListOrSystem(List<String> enabledPackages,
             List<String> permittedList) {
         int userIdToCheck = UserHandle.getCallingUserId();
-        long id = Binder.clearCallingIdentity();
+        long id = binderClearCallingIdentity();
         try {
             // If we have an enabled packages list for a managed profile the packages
             // we should check are installed for the parent user.
@@ -5063,7 +5166,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 }
             }
         } finally {
-            restoreCallingIdentity(id);
+            binderRestoreCallingIdentity(id);
         }
         return true;
     }
@@ -5088,7 +5191,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         if (packageList != null) {
             int userId = UserHandle.getCallingUserId();
             List<AccessibilityServiceInfo> enabledServices = null;
-            long id = Binder.clearCallingIdentity();
+            long id = binderClearCallingIdentity();
             try {
                 UserInfo user = mUserManager.getUserInfo(userId);
                 if (user.isManagedProfile()) {
@@ -5098,7 +5201,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 enabledServices = accessibilityManager.getEnabledAccessibilityServiceList(
                         AccessibilityServiceInfo.FEEDBACK_ALL_MASK);
             } finally {
-                restoreCallingIdentity(id);
+                binderRestoreCallingIdentity(id);
             }
 
             if (enabledServices != null) {
@@ -5169,7 +5272,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
 
             // If we have a permitted list add all system accessibility services.
             if (result != null) {
-                long id = Binder.clearCallingIdentity();
+                long id = binderClearCallingIdentity();
                 try {
                     UserInfo user = mUserManager.getUserInfo(userId);
                     if (user.isManagedProfile()) {
@@ -5191,7 +5294,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                         }
                     }
                 } finally {
-                    restoreCallingIdentity(id);
+                    binderRestoreCallingIdentity(id);
                 }
             }
 
@@ -5201,12 +5304,12 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
 
     private boolean checkCallerIsCurrentUserOrProfile() {
         int callingUserId = UserHandle.getCallingUserId();
-        long token = Binder.clearCallingIdentity();
+        long token = binderClearCallingIdentity();
         try {
             UserInfo currentUser;
             UserInfo callingUser = mUserManager.getUserInfo(callingUserId);
             try {
-                currentUser = ActivityManagerNative.getDefault().getCurrentUser();
+                currentUser = getIActivityManager().getCurrentUser();
             } catch (RemoteException e) {
                 Slog.e(LOG_TAG, "Failed to talk to activity managed.", e);
                 return false;
@@ -5223,7 +5326,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 return false;
             }
         } finally {
-            Binder.restoreCallingIdentity(token);
+            binderRestoreCallingIdentity(token);
         }
         return true;
     }
@@ -5289,7 +5392,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     public List getPermittedInputMethodsForCurrentUser() {
         UserInfo currentUser;
         try {
-            currentUser = ActivityManagerNative.getDefault().getCurrentUser();
+            currentUser = getIActivityManager().getCurrentUser();
         } catch (RemoteException e) {
             Slog.e(LOG_TAG, "Failed to make remote calls to get current user", e);
             // Activity managed is dead, just allow all IMEs
@@ -5327,7 +5430,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 InputMethodManager inputMethodManager = (InputMethodManager) mContext
                         .getSystemService(Context.INPUT_METHOD_SERVICE);
                 List<InputMethodInfo> imes = inputMethodManager.getInputMethodList();
-                long id = Binder.clearCallingIdentity();
+                long id = binderClearCallingIdentity();
                 try {
                     IPackageManager pm = AppGlobals.getPackageManager();
                     if (imes != null) {
@@ -5340,7 +5443,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                         }
                     }
                 } finally {
-                    restoreCallingIdentity(id);
+                    binderRestoreCallingIdentity(id);
                 }
             }
             return result;
@@ -5353,7 +5456,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         synchronized (this) {
             getActiveAdminForCallerLocked(who, DeviceAdminInfo.USES_POLICY_DEVICE_OWNER);
 
-            long id = Binder.clearCallingIdentity();
+            long id = binderClearCallingIdentity();
             try {
                 UserInfo userInfo = mUserManager.createUser(name, 0 /* flags */);
                 if (userInfo != null) {
@@ -5361,7 +5464,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 }
                 return null;
             } finally {
-                restoreCallingIdentity(id);
+                binderRestoreCallingIdentity(id);
             }
         }
     }
@@ -5373,11 +5476,11 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         if (user == null) {
             return null;
         }
-        long id = Binder.clearCallingIdentity();
+        long id = binderClearCallingIdentity();
         try {
             String profileOwnerPkg = profileOwnerComponent.getPackageName();
             final IPackageManager ipm = AppGlobals.getPackageManager();
-            IActivityManager activityManager = ActivityManagerNative.getDefault();
+            IActivityManager activityManager = getIActivityManager();
 
             final int userHandle = user.getIdentifier();
             try {
@@ -5396,7 +5499,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             setProfileOwner(profileOwnerComponent, ownerName, userHandle);
             return user;
         } finally {
-            restoreCallingIdentity(id);
+            binderRestoreCallingIdentity(id);
         }
     }
 
@@ -5406,11 +5509,11 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         synchronized (this) {
             getActiveAdminForCallerLocked(who, DeviceAdminInfo.USES_POLICY_DEVICE_OWNER);
 
-            long id = Binder.clearCallingIdentity();
+            long id = binderClearCallingIdentity();
             try {
                 return mUserManager.removeUser(userHandle.getIdentifier());
             } finally {
-                restoreCallingIdentity(id);
+                binderRestoreCallingIdentity(id);
             }
         }
     }
@@ -5421,18 +5524,18 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         synchronized (this) {
             getActiveAdminForCallerLocked(who, DeviceAdminInfo.USES_POLICY_DEVICE_OWNER);
 
-            long id = Binder.clearCallingIdentity();
+            long id = binderClearCallingIdentity();
             try {
                 int userId = UserHandle.USER_OWNER;
                 if (userHandle != null) {
                     userId = userHandle.getIdentifier();
                 }
-                return ActivityManagerNative.getDefault().switchUser(userId);
+                return getIActivityManager().switchUser(userId);
             } catch (RemoteException e) {
                 Log.e(LOG_TAG, "Couldn't switch user", e);
                 return false;
             } finally {
-                restoreCallingIdentity(id);
+                binderRestoreCallingIdentity(id);
             }
         }
     }
@@ -5445,14 +5548,14 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         synchronized (this) {
             getActiveAdminForCallerLocked(who, DeviceAdminInfo.USES_POLICY_PROFILE_OWNER);
 
-            long id = Binder.clearCallingIdentity();
+            long id = binderClearCallingIdentity();
             try {
                 Bundle bundle = mUserManager.getApplicationRestrictions(packageName, userHandle);
                 // if no restrictions were saved, mUserManager.getApplicationRestrictions
                 // returns null, but DPM method should return an empty Bundle as per JavaDoc
                 return bundle != null ? bundle : Bundle.EMPTY;
             } finally {
-                restoreCallingIdentity(id);
+                binderRestoreCallingIdentity(id);
             }
         }
     }
@@ -5482,7 +5585,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                         ServiceManager.getService(Context.AUDIO_SERVICE));
             }
 
-            long id = Binder.clearCallingIdentity();
+            long id = binderClearCallingIdentity();
             try {
                 if (enabled && !alreadyRestricted) {
                     if (UserManager.DISALLOW_UNMUTE_MICROPHONE.equals(key)) {
@@ -5548,7 +5651,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             } catch (RemoteException re) {
                 Slog.e(LOG_TAG, "Failed to talk to AudioService.", re);
             } finally {
-                restoreCallingIdentity(id);
+                binderRestoreCallingIdentity(id);
             }
             sendChangedNotification(userHandle);
         }
@@ -5562,7 +5665,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         synchronized (this) {
             getActiveAdminForCallerLocked(who, DeviceAdminInfo.USES_POLICY_PROFILE_OWNER);
 
-            long id = Binder.clearCallingIdentity();
+            long id = binderClearCallingIdentity();
             try {
                 IPackageManager pm = AppGlobals.getPackageManager();
                 return pm.setApplicationHiddenSettingAsUser(packageName, hidden, callingUserId);
@@ -5570,7 +5673,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 // shouldn't happen
                 Slog.e(LOG_TAG, "Failed to setApplicationHiddenSetting", re);
             } finally {
-                restoreCallingIdentity(id);
+                binderRestoreCallingIdentity(id);
             }
             return false;
         }
@@ -5583,7 +5686,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         synchronized (this) {
             getActiveAdminForCallerLocked(who, DeviceAdminInfo.USES_POLICY_PROFILE_OWNER);
 
-            long id = Binder.clearCallingIdentity();
+            long id = binderClearCallingIdentity();
             try {
                 IPackageManager pm = AppGlobals.getPackageManager();
                 return pm.getApplicationHiddenSettingAsUser(packageName, callingUserId);
@@ -5591,7 +5694,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 // shouldn't happen
                 Slog.e(LOG_TAG, "Failed to getApplicationHiddenSettingAsUser", re);
             } finally {
-                restoreCallingIdentity(id);
+                binderRestoreCallingIdentity(id);
             }
             return false;
         }
@@ -5606,7 +5709,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             getActiveAdminForCallerLocked(who, DeviceAdminInfo.USES_POLICY_PROFILE_OWNER);
 
             int userId = UserHandle.getCallingUserId();
-            long id = Binder.clearCallingIdentity();
+            long id = binderClearCallingIdentity();
 
             try {
                 if (DBG) {
@@ -5634,7 +5737,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 // shouldn't happen
                 Slog.wtf(LOG_TAG, "Failed to install " + packageName, re);
             } finally {
-                restoreCallingIdentity(id);
+                binderRestoreCallingIdentity(id);
             }
         }
     }
@@ -5648,7 +5751,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             getActiveAdminForCallerLocked(who, DeviceAdminInfo.USES_POLICY_PROFILE_OWNER);
 
             int userId = UserHandle.getCallingUserId();
-            long id = Binder.clearCallingIdentity();
+            long id = binderClearCallingIdentity();
 
             try {
                 UserManager um = UserManager.get(mContext);
@@ -5687,7 +5790,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 Slog.wtf(LOG_TAG, "Failed to resolve intent for: " + intent);
                 return 0;
             } finally {
-                restoreCallingIdentity(id);
+                binderRestoreCallingIdentity(id);
             }
         }
     }
@@ -5753,7 +5856,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         synchronized (this) {
             getActiveAdminForCallerLocked(who, DeviceAdminInfo.USES_POLICY_PROFILE_OWNER);
 
-            long id = Binder.clearCallingIdentity();
+            long id = binderClearCallingIdentity();
             try {
                 IPackageManager pm = AppGlobals.getPackageManager();
                 pm.setBlockUninstallForUser(packageName, uninstallBlocked, userId);
@@ -5761,7 +5864,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 // Shouldn't happen.
                 Slog.e(LOG_TAG, "Failed to setBlockUninstallForUser", re);
             } finally {
-                restoreCallingIdentity(id);
+                binderRestoreCallingIdentity(id);
             }
         }
     }
@@ -5778,7 +5881,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 getActiveAdminForCallerLocked(who, DeviceAdminInfo.USES_POLICY_PROFILE_OWNER);
             }
 
-            long id = Binder.clearCallingIdentity();
+            long id = binderClearCallingIdentity();
             try {
                 IPackageManager pm = AppGlobals.getPackageManager();
                 return pm.getBlockUninstallForUser(packageName, userId);
@@ -5786,7 +5889,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 // Shouldn't happen.
                 Slog.e(LOG_TAG, "Failed to getBlockUninstallForUser", re);
             } finally {
-                restoreCallingIdentity(id);
+                binderRestoreCallingIdentity(id);
             }
         }
         return false;
@@ -5838,7 +5941,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 actualLookupKey, actualContactId, originalIntent);
         final int callingUserId = UserHandle.getCallingUserId();
 
-        final long ident = Binder.clearCallingIdentity();
+        final long ident = binderClearCallingIdentity();
         try {
             synchronized (this) {
                 final int managedUserId = getManagedUserId(callingUserId);
@@ -5856,7 +5959,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                         mContext, intent, new UserHandle(managedUserId));
             }
         } finally {
-            Binder.restoreCallingIdentity(ident);
+            binderRestoreCallingIdentity(ident);
         }
     }
 
@@ -5937,7 +6040,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         synchronized (this) {
             getActiveAdminForCallerLocked(who, DeviceAdminInfo.USES_POLICY_DEVICE_OWNER);
 
-            int userHandle = Binder.getCallingUserHandle().getIdentifier();
+            int userHandle = binderGetCallingUserHandle().getIdentifier();
             setLockTaskPackagesLocked(userHandle, new ArrayList<>(Arrays.asList(packages)));
         }
     }
@@ -5959,7 +6062,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         Preconditions.checkNotNull(who, "ComponentName is null");
         synchronized (this) {
             getActiveAdminForCallerLocked(who, DeviceAdminInfo.USES_POLICY_DEVICE_OWNER);
-            int userHandle = Binder.getCallingUserHandle().getIdentifier();
+            int userHandle = binderGetCallingUserHandle().getIdentifier();
             final List<String> packages = getLockTaskPackagesLocked(userHandle);
             return packages.toArray(new String[packages.size()]);
         }
@@ -5978,7 +6081,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     @Override
     public boolean isLockTaskPermitted(String pkg) {
         // Get current user's devicepolicy
-        int uid = Binder.getCallingUid();
+        int uid = binderGetCallingUid();
         int userHandle = UserHandle.getUserId(uid);
         DevicePolicyData policy = getUserData(userHandle);
         synchronized (this) {
@@ -5997,7 +6100,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
 
     @Override
     public void notifyLockTaskModeChanged(boolean isEnabled, String pkg, int userHandle) {
-        if (Binder.getCallingUid() != Process.SYSTEM_UID) {
+        if (binderGetCallingUid() != Process.SYSTEM_UID) {
             throw new SecurityException("notifyLockTaskModeChanged can only be called by system");
         }
         synchronized (this) {
@@ -6048,11 +6151,11 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 }
             }
 
-            long id = Binder.clearCallingIdentity();
+            long id = binderClearCallingIdentity();
             try {
                 Settings.Global.putString(contentResolver, setting, value);
             } finally {
-                restoreCallingIdentity(id);
+                binderRestoreCallingIdentity(id);
             }
         }
     }
@@ -6077,11 +6180,11 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                         "Permission denial: Profile owners cannot update %1$s", setting));
             }
 
-            long id = Binder.clearCallingIdentity();
+            long id = binderClearCallingIdentity();
             try {
                 Settings.Secure.putStringForUser(contentResolver, setting, value, callingUserId);
             } finally {
-                restoreCallingIdentity(id);
+                binderRestoreCallingIdentity(id);
             }
         }
     }
@@ -6092,7 +6195,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         synchronized (this) {
             getActiveAdminForCallerLocked(who, DeviceAdminInfo.USES_POLICY_PROFILE_OWNER);
             int userId = UserHandle.getCallingUserId();
-            long identity = Binder.clearCallingIdentity();
+            long identity = binderClearCallingIdentity();
             try {
                 IAudioService iAudioService = IAudioService.Stub.asInterface(
                         ServiceManager.getService(Context.AUDIO_SERVICE));
@@ -6100,7 +6203,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             } catch (RemoteException re) {
                 Slog.e(LOG_TAG, "Failed to setMasterMute", re);
             } finally {
-                Binder.restoreCallingIdentity(identity);
+                binderRestoreCallingIdentity(identity);
             }
         }
     }
@@ -6124,11 +6227,11 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             getActiveAdminForCallerLocked(who, DeviceAdminInfo.USES_POLICY_PROFILE_OWNER);
 
             int userId = UserHandle.getCallingUserId();
-            long id = Binder.clearCallingIdentity();
+            long id = binderClearCallingIdentity();
             try {
                 mUserManager.setUserIcon(userId, icon);
             } finally {
-                restoreCallingIdentity(id);
+                binderRestoreCallingIdentity(id);
             }
         }
     }
@@ -6142,7 +6245,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         final int userId = UserHandle.getCallingUserId();
         LockPatternUtils utils = new LockPatternUtils(mContext);
 
-        long ident = Binder.clearCallingIdentity();
+        long ident = binderClearCallingIdentity();
         try {
             // disallow disabling the keyguard if a password is currently set
             if (disabled && utils.isSecure(userId)) {
@@ -6150,7 +6253,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             }
             utils.setLockScreenDisabled(disabled, userId);
         } finally {
-            Binder.restoreCallingIdentity(ident);
+            binderRestoreCallingIdentity(ident);
         }
         return true;
     }
@@ -6173,7 +6276,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     }
 
     private boolean setStatusBarDisabledInternal(boolean disabled, int userId) {
-        long ident = Binder.clearCallingIdentity();
+        long ident = binderClearCallingIdentity();
         try {
             IStatusBarService statusBarService = IStatusBarService.Stub.asInterface(
                     ServiceManager.checkService(Context.STATUS_BAR_SERVICE));
@@ -6187,7 +6290,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         } catch (RemoteException e) {
             Slog.e(LOG_TAG, "Failed to disable the status bar", e);
         } finally {
-            Binder.restoreCallingIdentity(ident);
+            binderRestoreCallingIdentity(ident);
         }
         return false;
     }
@@ -6418,7 +6521,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 Log.e(LOG_TAG, "Cannot find device owner package", e);
             }
             if (receivers != null) {
-                long ident = Binder.clearCallingIdentity();
+                long ident = binderClearCallingIdentity();
                 try {
                     for (int i = 0; i < receivers.length; i++) {
                         if (permission.BIND_DEVICE_ADMIN.equals(receivers[i].permission)) {
@@ -6428,7 +6531,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                         }
                     }
                 } finally {
-                    Binder.restoreCallingIdentity(ident);
+                    binderRestoreCallingIdentity(ident);
                 }
             }
         }
@@ -6459,10 +6562,10 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     @Override
     public boolean setPermissionGrantState(ComponentName admin, String packageName,
             String permission, int grantState) throws RemoteException {
-        UserHandle user = Binder.getCallingUserHandle();
+        UserHandle user = binderGetCallingUserHandle();
         synchronized (this) {
             getActiveAdminForCallerLocked(admin, DeviceAdminInfo.USES_POLICY_PROFILE_OWNER);
-            long ident = Binder.clearCallingIdentity();
+            long ident = binderClearCallingIdentity();
             try {
                 final ApplicationInfo ai = AppGlobals.getPackageManager()
                         .getApplicationInfo(packageName, 0, user.getIdentifier());
@@ -6496,7 +6599,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             } catch (SecurityException se) {
                 return false;
             } finally {
-                Binder.restoreCallingIdentity(ident);
+                binderRestoreCallingIdentity(ident);
             }
         }
     }
@@ -6506,10 +6609,10 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             String permission) throws RemoteException {
         PackageManager packageManager = mContext.getPackageManager();
 
-        UserHandle user = Binder.getCallingUserHandle();
+        UserHandle user = binderGetCallingUserHandle();
         synchronized (this) {
             getActiveAdminForCallerLocked(admin, DeviceAdminInfo.USES_POLICY_PROFILE_OWNER);
-            long ident = Binder.clearCallingIdentity();
+            long ident = binderClearCallingIdentity();
             try {
                 int granted = AppGlobals.getPackageManager().checkPermission(permission,
                         packageName, user.getIdentifier());
@@ -6525,7 +6628,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                             : DevicePolicyManager.PERMISSION_GRANT_STATE_DENIED;
                 }
             } finally {
-                Binder.restoreCallingIdentity(ident);
+                binderRestoreCallingIdentity(ident);
             }
         }
     }
