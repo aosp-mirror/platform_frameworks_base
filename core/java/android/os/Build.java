@@ -577,7 +577,7 @@ public class Build {
         public static final int KITKAT = 19;
 
         /**
-         * Android 4.4W: KitKat for watches, snacks on the run.
+         * June 2014: Android 4.4W. KitKat for watches, snacks on the run.
          *
          * <p>Applications targeting this or a later release will get these
          * new changes in behavior:</p>
@@ -595,7 +595,7 @@ public class Build {
         public static final int L = 21;
 
         /**
-         * Lollipop.  A flat one with beautiful shadows.  But still tasty.
+         * November 2014: Lollipop.  A flat one with beautiful shadows.  But still tasty.
          *
          * <p>Applications targeting this or a later release will get these
          * new changes in behavior:</p>
@@ -626,12 +626,38 @@ public class Build {
         public static final int LOLLIPOP = 21;
 
         /**
-         * Lollipop with an extra sugar coating on the outside!
+         * March 2015: Lollipop with an extra sugar coating on the outside!
          */
         public static final int LOLLIPOP_MR1 = 22;
 
         /**
-         * M comes after L.
+         * M is for Marshmallow!
+         *
+         * <p>Applications targeting this or a later release will get these
+         * new changes in behavior:</p>
+         * <ul>
+         * <li> Runtime permissions.  Dangerous permissions are no longer granted at
+         * install time, but must be requested by the application at runtime through
+         * {@link android.app.Activity#requestPermissions}.</li>
+         * <li> Bluetooth and Wi-Fi scanning now requires holding the location permission.</li>
+         * <li> {@link android.app.AlarmManager#setTimeZone AlarmManager.setTimeZone} will fail if
+         * the given timezone is non-Olson.</li>
+         * <li> Activity transitions will only return shared
+         * elements mapped in the returned view hierarchy back to the calling activity.</li>
+         * <li> {@link android.view.View} allows a number of behaviors that may break
+         * existing apps: Canvas throws an exception if restore() is called too many times,
+         * widgets may return a hint size when returning UNSPECIFIED measure specs, and it
+         * will respect the attributes {@link android.R.attr#foreground},
+         * {@link android.R.attr#foregroundGravity}, {@link android.R.attr#foregroundTint}, and
+         * {@link android.R.attr#foregroundTintMode}.</li>
+         * <li> {@link android.view.MotionEvent#getButtonState MotionEvent.getButtonState}
+         * will no longer report {@link android.view.MotionEvent#BUTTON_PRIMARY}
+         * and {@link android.view.MotionEvent#BUTTON_SECONDARY} as synonyms for
+         * {@link android.view.MotionEvent#BUTTON_STYLUS_PRIMARY} and
+         * {@link android.view.MotionEvent#BUTTON_STYLUS_SECONDARY}.</li>
+         * <li> {@link android.widget.ScrollView} now respects the layout param margins
+         * when measuring.</li>
+         * </ul>
          */
         public static final int M = 23;
     }
