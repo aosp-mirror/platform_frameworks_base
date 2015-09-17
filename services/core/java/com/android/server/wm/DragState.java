@@ -415,7 +415,7 @@ class DragState {
                 continue;
             }
 
-            child.getTaskBounds(mTmpRect, !BOUNDS_FOR_TOUCH);
+            child.getVisibleBounds(mTmpRect, !BOUNDS_FOR_TOUCH);
             if (!mTmpRect.contains(x, y)) {
                 // outside of this window's activity stack == don't tell about drags
                 continue;

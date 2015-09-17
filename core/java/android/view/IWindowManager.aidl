@@ -98,11 +98,12 @@ interface IWindowManager
      * @param taskBounds Bounds to use when creating a new Task with the input task Id if
      *                   the task doesn't exist yet.
      * @param configuration Configuration that is being used with this task.
+     * @param cropWindowsToStack True if the app windows should be cropped to the stack bounds.
      */
     void addAppToken(int addPos, IApplicationToken token, int taskId, int stackId,
             int requestedOrientation, boolean fullscreen, boolean showWhenLocked, int userId,
             int configChanges, boolean voiceInteraction, boolean launchTaskBehind,
-            in Rect taskBounds, in Configuration configuration);
+            in Rect taskBounds, in Configuration configuration, boolean cropWindowsToStack);
     /**
      *
      * @param token The token we are adding to the input task Id.

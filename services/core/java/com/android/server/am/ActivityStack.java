@@ -17,8 +17,11 @@
 package com.android.server.am;
 
 import static android.app.ActivityManager.DOCKED_STACK_ID;
+import static android.app.ActivityManager.FIRST_STATIC_STACK_ID;
 import static android.app.ActivityManager.FREEFORM_WORKSPACE_STACK_ID;
+import static android.app.ActivityManager.FULLSCREEN_WORKSPACE_STACK_ID;
 import static android.app.ActivityManager.HOME_STACK_ID;
+import static android.app.ActivityManager.LAST_STATIC_STACK_ID;
 import static android.content.pm.ActivityInfo.FLAG_SHOW_FOR_ALL_USERS;
 
 import static com.android.server.am.ActivityManagerDebugConfig.*;
@@ -30,7 +33,7 @@ import static com.android.server.am.ActivityStackSupervisor.MOVING;
 
 import android.graphics.Rect;
 import android.util.ArraySet;
-import android.view.IApplicationToken;
+
 import com.android.internal.app.IVoiceInteractor;
 import com.android.internal.content.ReferrerIntent;
 import com.android.internal.os.BatteryStatsImpl;
@@ -1278,28 +1281,27 @@ final class ActivityStack {
         return false;
     }
 
-    /** Return true if this stack is hidden by the presence of a docked stack. */
-    private boolean isHiddenByDockedStack() {
-        final ActivityStack dockedStack = mStackSupervisor.getStack(DOCKED_STACK_ID);
-        if (dockedStack != null) {
-            final int dockedStackIndex = mStacks.indexOf(dockedStack);
-            final int stackIndex = mStacks.indexOf(this);
-            if (dockedStackIndex > stackIndex) {
-                // Fullscreen stacks or stacks with fullscreen task below the docked stack are not
-                // visible. We do this so we don't have the 2 stacks and their tasks overlap.
-                if (mFullscreen) {
-                    return true;
-                }
+    private boolean hasTranslucentActivity(ActivityStack stack) {
+        final ArrayList<TaskRecord> tasks = stack.getAllTasks();
+        for (int taskNdx = tasks.size() - 1; taskNdx >= 0; --taskNdx) {
+            final TaskRecord task = tasks.get(taskNdx);
+            final ArrayList<ActivityRecord> activities = task.mActivities;
+            for (int activityNdx = activities.size() - 1; activityNdx >= 0; --activityNdx) {
+                final ActivityRecord r = activities.get(activityNdx);
 
-                // We need to also check the tasks in the stack because they can be fullscreen
-                // even though their stack isn't due to their root activity not been resizeable
-                // (i.e. doesn't support multi-window mode).
-                if (hasFullscreenTask()) {
-                    return true;
+                // Conditions for an activity to obscure the stack we're
+                // examining:
+                // 1. Not Finishing AND Visible AND:
+                // 2. Either:
+                // - Full Screen Activity OR
+                // - On top of Home and our stack is NOT home
+                if (!r.finishing && r.visible && (r.fullscreen ||
+                        (!isHomeStack() && r.frontOfTask && task.isOverHomeStack()))) {
+                    return false;
                 }
             }
         }
-        return false;
+        return true;
     }
 
     /** Returns true if the stack is considered visible. */
@@ -1320,54 +1322,53 @@ final class ActivityStack {
             return false;
         }
 
-        if (isHiddenByDockedStack()) {
+        final ActivityStack focusedStack = mStackSupervisor.getFocusedStack();
+        final int focusedStackId = focusedStack.mStackId;
+
+        if (mStackId == DOCKED_STACK_ID) {
+            // Docked stack is always visible, except in the case where the home activity
+            // is the top running activity in the focused home stack.
+            if (focusedStackId != HOME_STACK_ID) {
+                return true;
+            }
+            ActivityRecord topHomeActivity = focusedStack.topRunningActivityLocked(null);
+            return topHomeActivity == null || !topHomeActivity.isHomeActivity();
+        }
+
+        if (focusedStackId == DOCKED_STACK_ID
+                && stackIndex == (mStacks.indexOf(focusedStack) - 1)) {
+            // Stacks directly behind the docked stack are always visible.
+            return true;
+        }
+
+        if (mStackId == HOME_STACK_ID && focusedStackId == FULLSCREEN_WORKSPACE_STACK_ID) {
+            // Home stack is always visible behind the fullscreen stack with a translucent activity.
+            // This is done so that the home stack can act as a background to the translucent
+            // activity.
+            return hasTranslucentActivity(focusedStack);
+        }
+
+        if (mStackId >= FIRST_STATIC_STACK_ID && mStackId <= LAST_STATIC_STACK_ID) {
+            // Visibility of any static stack should have been determined by the conditions above.
             return false;
         }
 
-        /**
-         * Start at the task above this one and go up, looking for a visible
-         * fullscreen activity, or a translucent activity that requested the
-         * wallpaper to be shown behind it.
-         */
         for (int i = stackIndex + 1; i < mStacks.size(); i++) {
             final ActivityStack stack = mStacks.get(i);
-            final ArrayList<TaskRecord> tasks = stack.getAllTasks();
 
             if (!stack.mFullscreen && !stack.hasFullscreenTask()) {
                 continue;
             }
 
             if (stack.mStackId == FREEFORM_WORKSPACE_STACK_ID
-                    || stack.mStackId == HOME_STACK_ID) {
-                // The freeform and home stacks can't have any other stack visible behind them
-                // when they are fullscreen since they act as base/cut-off points for visibility.
-                // NOTE: we don't cut-off at the FULLSCREEN_WORKSPACE_STACK_ID because the home
-                // stack sometimes needs to be visible behind it when it is displaying a dialog
-                // activity. We let it fall through to the logic below to determine visibility.
+                    || stack.mStackId == HOME_STACK_ID
+                    || stack.mStackId == FULLSCREEN_WORKSPACE_STACK_ID) {
+                // These stacks can't have any dynamic stacks visible behind them.
                 return false;
             }
 
-            for (int taskNdx = tasks.size() - 1; taskNdx >= 0; --taskNdx) {
-                final TaskRecord task = tasks.get(taskNdx);
-                // task above isn't fullscreen, so, we assume we're still visible.
-                if (!task.mFullscreen) {
-                    continue;
-                }
-                final ArrayList<ActivityRecord> activities = task.mActivities;
-                for (int activityNdx = activities.size() - 1; activityNdx >= 0; --activityNdx) {
-                    final ActivityRecord r = activities.get(activityNdx);
-
-                    // Conditions for an activity to obscure the stack we're
-                    // examining:
-                    // 1. Not Finishing AND Visible AND:
-                    // 2. Either:
-                    // - Full Screen Activity OR
-                    // - On top of Home and our stack is NOT home
-                    if (!r.finishing && r.visible && (r.fullscreen ||
-                            (!isHomeStack() && r.frontOfTask && task.isOverHomeStack()))) {
-                        return false;
-                    }
-                }
+            if (!hasTranslucentActivity(stack)) {
+                return false;
             }
         }
 
@@ -4605,7 +4606,7 @@ final class ActivityStack {
                 r.task.taskId, mStackId, r.info.screenOrientation, r.fullscreen,
                 (r.info.flags & ActivityInfo.FLAG_SHOW_FOR_ALL_USERS) != 0, r.userId,
                 r.info.configChanges, task.voiceSession != null, r.mLaunchTaskBehind,
-                bounds, task.mOverrideConfig);
+                bounds, task.mOverrideConfig, !r.isHomeActivity());
         r.taskConfigOverride = task.mOverrideConfig;
     }
 

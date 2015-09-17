@@ -178,7 +178,7 @@ final class InputMonitor implements InputManagerService.WindowManagerCallbacks {
         if (modal && child.mAppToken != null) {
             // Limit the outer touch to the activity stack region.
             flags |= WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL;
-            child.getTaskBounds(mTmpRect, BOUNDS_FOR_TOUCH);
+            child.getVisibleBounds(mTmpRect, BOUNDS_FOR_TOUCH);
             inputWindowHandle.touchableRegion.set(mTmpRect);
         } else {
             // Not modal or full screen modal

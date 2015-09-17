@@ -1377,7 +1377,8 @@ class WindowStateAnimator {
     }
 
     private void adjustCropToStackBounds(WindowState w, Rect clipRect) {
-        if (w.getAttrs().type == LayoutParams.TYPE_BASE_APPLICATION) {
+        final AppWindowToken appToken = w.mAppToken;
+        if (appToken != null && appToken.mCropWindowsToStack) {
             TaskStack stack = w.getTask().mStack;
             stack.getBounds(mTmpStackBounds);
             final int surfaceX = (int) mSurfaceX;

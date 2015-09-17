@@ -16,6 +16,7 @@
 
 package com.android.server.wm;
 
+import static android.app.ActivityManager.FREEFORM_WORKSPACE_STACK_ID;
 import static android.view.WindowManager.LayoutParams.FIRST_SUB_WINDOW;
 import static android.view.WindowManager.LayoutParams.FLAG_DIM_BEHIND;
 import static android.view.WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED;
@@ -934,26 +935,37 @@ final class WindowState implements WindowManagerPolicy.WindowState {
     }
 
     /**
-     * Retrieves the bounds for a task.
+     * Retrieves the visible bounds of the window.
      * @param bounds The rect which gets the bounds.
      * @param forTouch Pass in BOUNDS_FOR_TOUCH to get touch related bounds, otherwise visible
      *        bounds will be returned.
      */
-    void getTaskBounds(Rect bounds, boolean forTouch) {
-        final Task task = getTask();
-        if (task != null) {
-            task.getBounds(bounds);
-            if (forTouch == BOUNDS_FOR_TOUCH) {
-                if (task.inFreeformWorkspace()) {
-                    final DisplayMetrics displayMetrics = getDisplayContent().getDisplayMetrics();
-                    final int delta =
-                            mService.dipToPixel(RESIZE_HANDLE_WIDTH_IN_DP, displayMetrics);
-                    bounds.inset(-delta, -delta);
-                }
+    void getVisibleBounds(Rect bounds, boolean forTouch) {
+        final boolean useStackBounds = mAppToken != null && mAppToken.mCropWindowsToStack;
+        boolean isFreeform = false;
+        bounds.setEmpty();
+        if (useStackBounds) {
+            final TaskStack stack = getStack();
+            if (stack != null) {
+                stack.getBounds(bounds);
+                isFreeform = stack.mStackId == FREEFORM_WORKSPACE_STACK_ID;
             }
+        } else {
+            final Task task = getTask();
+            if (task != null) {
+                task.getBounds(bounds);
+                isFreeform = task.inFreeformWorkspace();
+            }
+        }
+        if (bounds.isEmpty()) {
+            bounds.set(mFrame);
             return;
         }
-        bounds.set(mFrame);
+        if (forTouch && isFreeform) {
+            final DisplayMetrics displayMetrics = getDisplayContent().getDisplayMetrics();
+            final int delta = mService.dipToPixel(RESIZE_HANDLE_WIDTH_IN_DP, displayMetrics);
+            bounds.inset(-delta, -delta);
+        }
     }
 
     public long getInputDispatchingTimeoutNanos() {
