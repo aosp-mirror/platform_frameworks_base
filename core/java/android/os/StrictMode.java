@@ -1923,7 +1923,7 @@ public final class StrictMode {
             if (LOG_V) Log.d(TAG, "strict mode violation stacks read from binder call.  i=" + i);
             ViolationInfo info = new ViolationInfo(p, !currentlyGathering);
             if (info.crashInfo.stackTrace != null && info.crashInfo.stackTrace.length() > 30000) {
-                String front = info.crashInfo.stackTrace.substring(256);
+                String front = info.crashInfo.stackTrace.substring(0, 256);
                 // 30000 characters is way too large for this to be any sane kind of
                 // strict mode collection of stacks.  We've had a problem where we leave
                 // strict mode violations associated with the thread, and it keeps tacking
