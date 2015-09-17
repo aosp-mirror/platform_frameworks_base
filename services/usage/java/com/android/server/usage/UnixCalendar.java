@@ -15,38 +15,20 @@
  */
 package com.android.server.usage;
 
-import android.app.usage.UsageStatsManager;
-
 /**
  * A handy calendar object that knows nothing of Locale's or TimeZones. This simplifies
  * interval book-keeping. It is *NOT* meant to be used as a user-facing calendar, as it has
  * no concept of Locale or TimeZone.
  */
 public class UnixCalendar {
-    private static final long DAY_IN_MILLIS = 24 * 60 * 60 * 1000;
-    private static final long WEEK_IN_MILLIS = 7 * DAY_IN_MILLIS;
-    private static final long MONTH_IN_MILLIS = 30 * DAY_IN_MILLIS;
-    private static final long YEAR_IN_MILLIS = 365 * DAY_IN_MILLIS;
+    public static final long DAY_IN_MILLIS = 24 * 60 * 60 * 1000;
+    public static final long WEEK_IN_MILLIS = 7 * DAY_IN_MILLIS;
+    public static final long MONTH_IN_MILLIS = 30 * DAY_IN_MILLIS;
+    public static final long YEAR_IN_MILLIS = 365 * DAY_IN_MILLIS;
     private long mTime;
 
     public UnixCalendar(long time) {
         mTime = time;
-    }
-
-    public void truncateToDay() {
-        mTime -= mTime % DAY_IN_MILLIS;
-    }
-
-    public void truncateToWeek() {
-        mTime -= mTime % WEEK_IN_MILLIS;
-    }
-
-    public void truncateToMonth() {
-        mTime -= mTime % MONTH_IN_MILLIS;
-    }
-
-    public void truncateToYear() {
-        mTime -= mTime % YEAR_IN_MILLIS;
     }
 
     public void addDays(int val) {
@@ -71,29 +53,5 @@ public class UnixCalendar {
 
     public long getTimeInMillis() {
         return mTime;
-    }
-
-    public static void truncateTo(UnixCalendar calendar, int intervalType) {
-        switch (intervalType) {
-            case UsageStatsManager.INTERVAL_YEARLY:
-                calendar.truncateToYear();
-                break;
-
-            case UsageStatsManager.INTERVAL_MONTHLY:
-                calendar.truncateToMonth();
-                break;
-
-            case UsageStatsManager.INTERVAL_WEEKLY:
-                calendar.truncateToWeek();
-                break;
-
-            case UsageStatsManager.INTERVAL_DAILY:
-                calendar.truncateToDay();
-                break;
-
-            default:
-                throw new UnsupportedOperationException("Can't truncate date to interval " +
-                        intervalType);
-        }
     }
 }
