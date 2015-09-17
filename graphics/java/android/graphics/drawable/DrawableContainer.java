@@ -420,14 +420,23 @@ public class DrawableContainer extends Drawable implements Drawable.Callback {
         return mCurIndex;
     }
 
-    public boolean selectDrawable(int idx) {
-        if (idx == mCurIndex) {
+    /**
+     * Sets the currently displayed drawable by index.
+     * <p>
+     * If an invalid index is specified, the current drawable will be set to
+     * {@code null} and the index will be set to {@code -1}.
+     *
+     * @param index the index of the drawable to display
+     * @return {@code true} if the drawable changed, {@code false} otherwise
+     */
+    public boolean selectDrawable(int index) {
+        if (index == mCurIndex) {
             return false;
         }
 
         final long now = SystemClock.uptimeMillis();
 
-        if (DEBUG) android.util.Log.i(TAG, toString() + " from " + mCurIndex + " to " + idx
+        if (DEBUG) android.util.Log.i(TAG, toString() + " from " + mCurIndex + " to " + index
                 + ": exit=" + mDrawableContainerState.mExitFadeDuration
                 + " enter=" + mDrawableContainerState.mEnterFadeDuration);
 
@@ -448,10 +457,10 @@ public class DrawableContainer extends Drawable implements Drawable.Callback {
             mCurrDrawable.setVisible(false, false);
         }
 
-        if (idx >= 0 && idx < mDrawableContainerState.mNumChildren) {
-            final Drawable d = mDrawableContainerState.getChild(idx);
+        if (index >= 0 && index < mDrawableContainerState.mNumChildren) {
+            final Drawable d = mDrawableContainerState.getChild(index);
             mCurrDrawable = d;
-            mCurIndex = idx;
+            mCurIndex = index;
             if (d != null) {
                 if (mDrawableContainerState.mEnterFadeDuration > 0) {
                     mEnterAnimationEnd = now + mDrawableContainerState.mEnterFadeDuration;
