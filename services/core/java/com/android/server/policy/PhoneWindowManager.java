@@ -269,6 +269,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     PowerManagerInternal mPowerManagerInternal;
     ActivityManagerInternal mActivityManagerInternal;
     DreamManagerInternal mDreamManagerInternal;
+    PowerManagerInternal mPowerManagerInternal;
     IStatusBarService mStatusBarService;
     boolean mPreloadedRecentApps;
     final Object mServiceAquireLock = new Object();
@@ -1343,6 +1344,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         mWindowManagerInternal = LocalServices.getService(WindowManagerInternal.class);
         mActivityManagerInternal = LocalServices.getService(ActivityManagerInternal.class);
         mDreamManagerInternal = LocalServices.getService(DreamManagerInternal.class);
+        mPowerManagerInternal = LocalServices.getService(PowerManagerInternal.class);
         mAppOpsManager = (AppOpsManager) mContext.getSystemService(Context.APP_OPS_SERVICE);
         mPowerManagerInternal = LocalServices.getService(PowerManagerInternal.class);
 
@@ -1517,6 +1519,13 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     public void onSwipeFromRight() {
                         if (mNavigationBar != null && !mNavigationBarOnBottom) {
                             requestTransientBars(mNavigationBar);
+                        }
+                    }
+                    @Override
+                    public void onFling(int duration) {
+                        if (mPowerManagerInternal != null) {
+                            mPowerManagerInternal.powerHint(
+                                    PowerManagerInternal.POWER_HINT_INTERACTION, duration);
                         }
                     }
                     @Override
@@ -6114,6 +6123,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             mKeyguardDelegate.bindService(mContext);
             mKeyguardDelegate.onBootCompleted();
         }
+        mSystemGestures.systemReady();
     }
 
     /** {@inheritDoc} */
