@@ -40,9 +40,9 @@ import javax.security.auth.x500.X500Principal;
  * {@link KeyGenerator} of the <a href="{@docRoot}training/articles/keystore.html">Android Keystore
  * system</a>. The spec determines authorized uses of the key, such as whether user authentication
  * is required for using the key, what operations are authorized (e.g., signing, but not
- * decryption) and with what parameters (e.g., only with a particular padding scheme or digest), the
- * key's validity start and end dates. Key use authorizations expressed in the spec apply only to
- * secret keys and private keys -- public keys can be used for any supported operations.
+ * decryption), with what parameters (e.g., only with a particular padding scheme or digest), and
+ * the key's validity start and end dates. Key use authorizations expressed in the spec apply
+ * only to secret keys and private keys -- public keys can be used for any supported operations.
  *
  * <p>To generate an asymmetric key pair or a symmetric key, create an instance of this class using
  * the {@link Builder}, initialize a {@code KeyPairGenerator} or a {@code KeyGenerator} of the
@@ -90,13 +90,22 @@ import javax.security.auth.x500.X500Principal;
  *
  * <p>Instances of this class are immutable.
  *
+ * <p><h3>Known issues</h3>
+ * A known bug in Android 6.0 (API Level 23) causes user authentication-related authorizations to be
+ * enforced even for public keys. To work around this issue extract the public key material to use
+ * outside of Android Keystore. For example:
+ * <pre> {@code
+ * PublicKey unrestrictedPublicKey =
+ *         KeyFactory.getInstance(publicKey.getAlgorithm()).generatePublic(
+ *                 new X509EncodedKeySpec(publicKey.getEncoded()));
+ * }</pre>
+ *
  * <p><h3>Example: NIST P-256 EC key pair for signing/verification using ECDSA</h3>
  * This example illustrates how to generate a NIST P-256 (aka secp256r1 aka prime256v1) EC key pair
  * in the Android KeyStore system under alias {@code key1} where the private key is authorized to be
  * used only for signing using SHA-256, SHA-384, or SHA-512 digest and only if the user has been
- * authenticated within the last five minutes. The use of public key is unrestricted, thus
- * permitting signature verification using any padding schemes and digests, and without user
- * authentication.
+ * authenticated within the last five minutes. The use of the public key is unrestricted (See Known
+ * Issues).
  * <pre> {@code
  * KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance(
  *         KeyProperties.KEY_ALGORITHM_EC, "AndroidKeyStore");
@@ -128,8 +137,7 @@ import javax.security.auth.x500.X500Principal;
  * <p><h3>Example: RSA key pair for signing/verification using RSA-PSS</h3>
  * This example illustrates how to generate an RSA key pair in the Android KeyStore system under
  * alias {@code key1} authorized to be used only for signing using the RSA-PSS signature padding
- * scheme with SHA-256 or SHA-512 digests. The use of public key is unrestricted, thus permitting
- * signature verification using any padding schemes and digests.
+ * scheme with SHA-256 or SHA-512 digests. The use of the public key is unrestricted.
  * <pre> {@code
  * KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance(
  *         KeyProperties.KEY_ALGORITHM_RSA, "AndroidKeyStore");
@@ -155,8 +163,8 @@ import javax.security.auth.x500.X500Principal;
  * <p><h3>Example: RSA key pair for encryption/decryption using RSA OAEP</h3>
  * This example illustrates how to generate an RSA key pair in the Android KeyStore system under
  * alias {@code key1} where the private key is authorized to be used only for decryption using RSA
- * OAEP encryption padding scheme with SHA-256 or SHA-512 digests. The use of public key is
- * unrestricted, thus permitting encryption using any padding schemes and digests.
+ * OAEP encryption padding scheme with SHA-256 or SHA-512 digests. The use of the public key is
+ * unrestricted.
  * <pre> {@code
  * KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance(
  *         KeyProperties.KEY_ALGORITHM_RSA, "AndroidKeyStore");
