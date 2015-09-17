@@ -1168,16 +1168,10 @@ public class PackageManagerTests extends AndroidTestCase {
     }
 
     boolean checkMediaState(String desired) {
-        try {
-            String mPath = Environment.getExternalStorageDirectory().getPath();
-            String actual = getMs().getVolumeState(mPath);
-            if (desired.equals(actual)) {
-                return true;
-            } else {
-                return false;
-            }
-        } catch (RemoteException e) {
-            Log.e(TAG, "Exception while checking media state", e);
+        String actual = Environment.getExternalStorageState();
+        if (desired.equals(actual)) {
+            return true;
+        } else {
             return false;
         }
     }
