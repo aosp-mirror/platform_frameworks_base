@@ -126,11 +126,10 @@ public class FalsingManager implements SensorEventListener {
     }
 
     /**
-     * @param type the type of action for which this method is called
      * @return true if the classifier determined that this is not a human interacting with the phone
      */
-    public boolean isFalseTouch(int type) {
-        return mHumanInteractionClassifier.getFalseTouchEvaluation(type) > 0.5;
+    public boolean isFalseTouch() {
+        return mHumanInteractionClassifier.isFalseTouch();
     }
 
     @Override
@@ -189,6 +188,7 @@ public class FalsingManager implements SensorEventListener {
     }
 
     public void onQsDown() {
+        mHumanInteractionClassifier.setType(Classifier.QUICK_SETTINGS);
         mDataCollector.onQsDown();
     }
 
@@ -197,6 +197,7 @@ public class FalsingManager implements SensorEventListener {
     }
 
     public void onTrackingStarted() {
+        mHumanInteractionClassifier.setType(Classifier.UNLOCK);
         mDataCollector.onTrackingStarted();
     }
 
@@ -217,6 +218,7 @@ public class FalsingManager implements SensorEventListener {
     }
 
     public void onNotificatonStartDraggingDown() {
+        mHumanInteractionClassifier.setType(Classifier.NOTIFICATION_DRAG_DOWN);
         mDataCollector.onNotificatonStartDraggingDown();
     }
 
@@ -229,6 +231,7 @@ public class FalsingManager implements SensorEventListener {
     }
 
     public void onNotificatonStartDismissing() {
+        mHumanInteractionClassifier.setType(Classifier.NOTIFICATION_DISMISS);
         mDataCollector.onNotificatonStartDismissing();
     }
 
@@ -245,6 +248,11 @@ public class FalsingManager implements SensorEventListener {
     }
 
     public void onAffordanceSwipingStarted(boolean rightCorner) {
+        if (rightCorner) {
+            mHumanInteractionClassifier.setType(Classifier.RIGHT_AFFORDANCE);
+        } else {
+            mHumanInteractionClassifier.setType(Classifier.LEFT_AFFORDANCE);
+        }
         mDataCollector.onAffordanceSwipingStarted(rightCorner);
     }
 

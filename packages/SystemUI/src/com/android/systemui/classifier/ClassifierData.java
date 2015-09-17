@@ -19,21 +19,26 @@ package com.android.systemui.classifier;
 import android.util.SparseArray;
 import android.view.MotionEvent;
 
+import java.util.ArrayList;
+
 /**
  * Contains data which is used to classify interaction sequences on the lockscreen. It does, for
  * example, provide information on the current touch state.
  */
 public class ClassifierData {
     private SparseArray<Stroke> mCurrentStrokes = new SparseArray<>();
+    private ArrayList<Stroke> mEndingStrokes = new ArrayList<>();
 
     public ClassifierData() {
     }
 
     public void update(MotionEvent event) {
+        mEndingStrokes.clear();
         int action = event.getActionMasked();
         if (action == MotionEvent.ACTION_DOWN) {
             mCurrentStrokes.clear();
         }
+
         for (int i = 0; i < event.getPointerCount(); i++) {
             int id = event.getPointerId(i);
             if (mCurrentStrokes.get(id) == null) {
@@ -41,10 +46,16 @@ public class ClassifierData {
             }
             mCurrentStrokes.get(id).addPoint(event.getX(i), event.getY(i),
                     event.getEventTimeNano());
+
+            if (action == MotionEvent.ACTION_UP || action == MotionEvent.ACTION_CANCEL
+                    || (action == MotionEvent.ACTION_POINTER_UP && i == event.getActionIndex())) {
+                mEndingStrokes.add(getStroke(id));
+            }
         }
     }
 
     public void cleanUp(MotionEvent event) {
+        mEndingStrokes.clear();
         int action = event.getActionMasked();
         for (int i = 0; i < event.getPointerCount(); i++) {
             int id = event.getPointerId(i);
@@ -53,6 +64,13 @@ public class ClassifierData {
                 mCurrentStrokes.remove(id);
             }
         }
+    }
+
+    /**
+     * @return the list of Strokes which are ending in the recently added MotionEvent
+     */
+    public ArrayList<Stroke> getEndingStrokes() {
+        return mEndingStrokes;
     }
 
     /**

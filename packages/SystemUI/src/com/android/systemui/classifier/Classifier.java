@@ -20,7 +20,7 @@ import android.hardware.SensorEvent;
 import android.view.MotionEvent;
 
 /**
- * An interface for classifiers for touch and sensor events.
+ * An abstract class for classifiers for touch and sensor events.
  */
 public abstract class Classifier {
     public static final int QUICK_SETTINGS = 0;
@@ -30,6 +30,7 @@ public abstract class Classifier {
     public static final int UNLOCK = 4;
     public static final int LEFT_AFFORDANCE = 5;
     public static final int RIGHT_AFFORDANCE = 6;
+    public static final int GENERIC = 7;
 
     /**
      * Contains all the information about touch events from which the classifier can query
@@ -47,11 +48,4 @@ public abstract class Classifier {
      */
     public void onSensorChanged(SensorEvent event) {
     }
-
-    /**
-     * @param type the type of action for which this method is called
-     * @return a nonnegative value which is used to determine whether this a false touch. The
-     *         bigger the value the greater the chance that this a false touch.
-     */
-    public abstract float getFalseTouchEvaluation(int type);
 }
