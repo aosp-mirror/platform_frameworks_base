@@ -101,8 +101,8 @@ public class GestureLauncherService extends SystemService {
      * Whether camera double tap power button gesture is currently enabled;
      */
     private boolean mCameraDoubleTapPowerEnabled;
-    private long mLastPowerDownWhileNonInteractive = 0;
-
+    private long mLastPowerDownWhileNonInteractive;
+    private long mLastPowerDownWhileInteractive;
 
     public GestureLauncherService(Context context) {
         super(context);
@@ -251,23 +251,30 @@ public class GestureLauncherService extends SystemService {
 
     public boolean interceptPowerKeyDown(KeyEvent event, boolean interactive) {
         boolean launched = false;
+        boolean intercept = false;
         synchronized (this) {
             if (!mCameraDoubleTapPowerEnabled) {
                 mLastPowerDownWhileNonInteractive = 0;
+                mLastPowerDownWhileInteractive = 0;
                 return false;
             }
             if (event.getEventTime() - mLastPowerDownWhileNonInteractive
                     < CAMERA_POWER_DOUBLE_TAP_TIME_MS) {
                 launched = true;
+                intercept = true;
+            } else if (event.getEventTime() - mLastPowerDownWhileInteractive
+                    < CAMERA_POWER_DOUBLE_TAP_TIME_MS) {
+                launched = true;
             }
             mLastPowerDownWhileNonInteractive = interactive ? 0 : event.getEventTime();
+            mLastPowerDownWhileInteractive = interactive ? event.getEventTime() : 0;
         }
         if (launched) {
             Slog.i(TAG, "Power button double tap gesture detected, launching camera.");
             launched = handleCameraLaunchGesture(false /* useWakelock */,
                     MetricsLogger.ACTION_DOUBLE_TAP_POWER_CAMERA_GESTURE);
         }
-        return launched;
+        return intercept && launched;
     }
 
     /**
