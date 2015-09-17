@@ -116,6 +116,8 @@ public abstract class ConnectionService extends Service {
 
     private boolean mAreAccountsInitialized = false;
     private Conference sNullConference;
+    private Object mIdSyncRoot = new Object();
+    private int mId = 0;
 
     private final IBinder mBinder = new IConnectionService.Stub() {
         @Override
@@ -629,7 +631,8 @@ public abstract class ConnectionService extends Service {
             boolean isIncoming,
             boolean isUnknown) {
         Log.d(this, "createConnection, callManagerAccount: %s, callId: %s, request: %s, " +
-                "isIncoming: %b, isUnknown: %b", callManagerAccount, callId, request, isIncoming,
+                        "isIncoming: %b, isUnknown: %b", callManagerAccount, callId, request,
+                isIncoming,
                 isUnknown);
 
         Connection connection = isUnknown ? onCreateUnknownConnection(callManagerAccount, request)
@@ -641,6 +644,7 @@ public abstract class ConnectionService extends Service {
                     new DisconnectCause(DisconnectCause.ERROR));
         }
 
+        connection.setTelecomCallId(callId);
         if (connection.getState() != Connection.STATE_DISCONNECTED) {
             addConnection(callId, connection);
         }
@@ -953,6 +957,7 @@ public abstract class ConnectionService extends Service {
                     connectionIds.add(mIdByConnection.get(connection));
                 }
             }
+            conference.setTelecomCallId(id);
             ParcelableConference parcelableConference = new ParcelableConference(
                     conference.getPhoneAccountHandle(),
                     conference.getState(),
@@ -989,7 +994,7 @@ public abstract class ConnectionService extends Service {
     public final void addExistingConnection(PhoneAccountHandle phoneAccountHandle,
             Connection connection) {
 
-        String id = addExistingConnectionInternal(connection);
+        String id = addExistingConnectionInternal(phoneAccountHandle, connection);
         if (id != null) {
             List<String> emptyList = new ArrayList<>(0);
 
@@ -1151,18 +1156,29 @@ public abstract class ConnectionService extends Service {
     }
 
     /**
-     * Adds an existing connection to the list of connections, identified by a new UUID.
+     * Adds an existing connection to the list of connections, identified by a new call ID unique
+     * to this connection service.
      *
      * @param connection The connection.
-     * @return The UUID of the connection (e.g. the call-id).
+     * @return The ID of the connection (e.g. the call-id).
      */
-    private String addExistingConnectionInternal(Connection connection) {
-        String id = UUID.randomUUID().toString();
+    private String addExistingConnectionInternal(PhoneAccountHandle handle, Connection connection) {
+        String id;
+        if (handle == null) {
+            // If no phone account handle was provided, we cannot be sure the call ID is unique,
+            // so just use a random UUID.
+            id = UUID.randomUUID().toString();
+        } else {
+            // Phone account handle was provided, so use the ConnectionService class name as a
+            // prefix for a unique incremental call ID.
+            id = handle.getComponentName().getClassName() + "@" + getNextCallId();
+        }
         addConnection(id, connection);
         return id;
     }
 
     private void addConnection(String callId, Connection connection) {
+        connection.setTelecomCallId(callId);
         mConnectionById.put(callId, connection);
         mIdByConnection.put(connection, callId);
         connection.addConnectionListener(mConnectionListener);
@@ -1183,6 +1199,9 @@ public abstract class ConnectionService extends Service {
         if (mIdByConference.containsKey(conference)) {
             Log.w(this, "Re-adding an existing conference: %s.", conference);
         } else if (conference != null) {
+            // Conferences do not (yet) have a PhoneAccountHandle associated with them, so we
+            // cannot determine a ConnectionService class name to associate with the ID, so use
+            // a unique UUID (for now).
             String id = UUID.randomUUID().toString();
             mConferenceById.put(id, conference);
             mIdByConference.put(conference, id);
@@ -1282,6 +1301,17 @@ public abstract class ConnectionService extends Service {
         }
         for (Conference conference : mIdByConference.keySet()) {
             conference.onDisconnect();
+        }
+    }
+
+    /**
+     * Retrieves the next call ID as maintainted by the connection service.
+     *
+     * @return The call ID.
+     */
+    private int getNextCallId() {
+        synchronized(mIdSyncRoot) {
+            return ++mId;
         }
     }
 }
