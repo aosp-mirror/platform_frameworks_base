@@ -83,6 +83,8 @@ class TaskPositioner implements DimLayer.DimLayerUser {
     private int mCurrentDimSide;
     private Rect mTmpRect = new Rect();
     private int mSideMargin;
+    private int mMinVisibleWidth;
+    private int mMinVisibleHeight;
 
     private int mTaskId;
     private TaskStack mStack;
@@ -130,7 +132,7 @@ class TaskPositioner implements DimLayer.DimLayerUser {
                             Slog.w(TAG, "ACTION_MOVE @ {" + newX + ", " + newY + "}");
                         }
                         synchronized (mService.mWindowMap) {
-                            notifyMoveLocked(newX, newY);
+                            endDrag = notifyMoveLocked(newX, newY);
                         }
                         try {
                             mService.mActivityManager.resizeTask(
@@ -249,6 +251,8 @@ class TaskPositioner implements DimLayer.DimLayerUser {
 
         mDimLayer = new DimLayer(mService, this, mDisplay.getDisplayId());
         mSideMargin = mService.dipToPixel(SIDE_MARGIN_DIP, mDisplayMetrics);
+        mMinVisibleWidth = mService.dipToPixel(MINIMUM_VISIBLE_WIDTH_IN_DP, mDisplayMetrics);
+        mMinVisibleHeight = mService.dipToPixel(MINIMUM_VISIBLE_HEIGHT_IN_DP, mDisplayMetrics);
     }
 
     void unregister() {
@@ -323,7 +327,8 @@ class TaskPositioner implements DimLayer.DimLayerUser {
         mService.getTaskBounds(mTaskId, mWindowOriginalBounds);
     }
 
-    private void notifyMoveLocked(float x, float y) {
+    /** Returns true if the move operation should be ended. */
+    private boolean notifyMoveLocked(float x, float y) {
         if (DEBUG_TASK_POSITIONING) {
             Slog.d(TAG, "notifyMoveLw: {" + x + "," + y + "}");
         }
@@ -332,31 +337,37 @@ class TaskPositioner implements DimLayer.DimLayerUser {
             // This is a resizing operation.
             final int deltaX = Math.round(x - mStartDragX);
             final int deltaY = Math.round(y - mStartDragY);
-            final int minSizeX = mService.dipToPixel(MINIMUM_VISIBLE_WIDTH_IN_DP, mDisplayMetrics);
-            final int minSizeY = mService.dipToPixel(MINIMUM_VISIBLE_HEIGHT_IN_DP, mDisplayMetrics);
             int left = mWindowOriginalBounds.left;
             int top = mWindowOriginalBounds.top;
             int right = mWindowOriginalBounds.right;
             int bottom = mWindowOriginalBounds.bottom;
             if ((mCtrlType & CTRL_LEFT) != 0) {
-                left = Math.min(left + deltaX, right - minSizeX);
+                left = Math.min(left + deltaX, right - mMinVisibleWidth);
             }
             if ((mCtrlType & CTRL_TOP) != 0) {
-                top = Math.min(top + deltaY, bottom - minSizeY);
+                top = Math.min(top + deltaY, bottom - mMinVisibleHeight);
             }
             if ((mCtrlType & CTRL_RIGHT) != 0) {
-                right = Math.max(left + minSizeX, right + deltaX);
+                right = Math.max(left + mMinVisibleWidth, right + deltaX);
             }
             if ((mCtrlType & CTRL_BOTTOM) != 0) {
-                bottom = Math.max(top + minSizeY, bottom + deltaY);
+                bottom = Math.max(top + mMinVisibleHeight, bottom + deltaY);
             }
             mWindowDragBounds.set(left, top, right, bottom);
-        } else {
-            // This is a moving operation.
-            mWindowDragBounds.set(mWindowOriginalBounds);
-            mWindowDragBounds.offset(Math.round(x - mStartDragX), Math.round(y - mStartDragY));
-            updateDimLayerVisibility((int) x);
+            return false;
         }
+
+        // This is a moving operation.
+        mStack.getBounds(mTmpRect);
+        mTmpRect.inset(mMinVisibleWidth, mMinVisibleHeight);
+        if (!mTmpRect.contains((int) x, (int) y)) {
+            // We end the moving operation if position is outside the stack bounds.
+            return true;
+        }
+        mWindowDragBounds.set(mWindowOriginalBounds);
+        mWindowDragBounds.offset(Math.round(x - mStartDragX), Math.round(y - mStartDragY));
+        updateDimLayerVisibility((int) x);
+        return false;
     }
 
     private void updateDimLayerVisibility(int x) {
