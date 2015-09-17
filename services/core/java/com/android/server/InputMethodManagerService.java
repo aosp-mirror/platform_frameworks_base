@@ -541,30 +541,14 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             prevSubtypes.addAll(entry.getValue());
         }
 
-        final String mergedImesAndSubtypesString = buildInputMethodsAndSubtypesString(prevMap);
+        final String mergedImesAndSubtypesString =
+                InputMethodUtils.buildInputMethodsAndSubtypesString(prevMap);
         if (DEBUG_RESTORE) {
             Slog.i(TAG, "Merged IME string:");
             Slog.i(TAG, "     " + mergedImesAndSubtypesString);
         }
         Settings.Secure.putString(context.getContentResolver(),
                 Settings.Secure.ENABLED_INPUT_METHODS, mergedImesAndSubtypesString);
-    }
-
-    // TODO: Move this method to InputMethodUtils with adding unit tests.
-    static String buildInputMethodsAndSubtypesString(ArrayMap<String, ArraySet<String>> map) {
-        // we want to use the canonical InputMethodSettings implementation,
-        // so we convert data structures first.
-        List<Pair<String, ArrayList<String>>> imeMap = new ArrayList<>(4);
-        for (ArrayMap.Entry<String, ArraySet<String>> entry : map.entrySet()) {
-            final String imeName = entry.getKey();
-            final ArraySet<String> subtypeSet = entry.getValue();
-            final ArrayList<String> subtypes = new ArrayList<>(2);
-            if (subtypeSet != null) {
-                subtypes.addAll(subtypeSet);
-            }
-            imeMap.add(new Pair<>(imeName, subtypes));
-        }
-        return InputMethodSettings.buildInputMethodsSettingString(imeMap);
     }
 
     class MyPackageMonitor extends PackageMonitor {

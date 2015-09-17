@@ -793,6 +793,24 @@ public class InputMethodUtils {
         return imeMap;
     }
 
+    @NonNull
+    public static String buildInputMethodsAndSubtypesString(
+            @NonNull final ArrayMap<String, ArraySet<String>> map) {
+        // we want to use the canonical InputMethodSettings implementation,
+        // so we convert data structures first.
+        List<Pair<String, ArrayList<String>>> imeMap = new ArrayList<>(4);
+        for (ArrayMap.Entry<String, ArraySet<String>> entry : map.entrySet()) {
+            final String imeName = entry.getKey();
+            final ArraySet<String> subtypeSet = entry.getValue();
+            final ArrayList<String> subtypes = new ArrayList<>(2);
+            if (subtypeSet != null) {
+                subtypes.addAll(subtypeSet);
+            }
+            imeMap.add(new Pair<>(imeName, subtypes));
+        }
+        return InputMethodSettings.buildInputMethodsSettingString(imeMap);
+    }
+
     /**
      * Utility class for putting and getting settings for InputMethod
      * TODO: Move all putters and getters of settings to this class.
