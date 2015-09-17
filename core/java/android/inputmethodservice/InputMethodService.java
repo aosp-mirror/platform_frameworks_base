@@ -436,9 +436,12 @@ public class InputMethodService extends AbstractInputMethodService {
                 try {
                     showWindow(true);
                 } catch (BadTokenException e) {
-                    if (DEBUG) Log.v(TAG, "BadTokenException: IME is done.");
-                    mWindowVisible = false;
-                    mWindowAdded = false;
+                    // We have ignored BadTokenException here since Jelly Bean MR-2 (API Level 18).
+                    // We could ignore BadTokenException in InputMethodService#showWindow() instead,
+                    // but it may break assumptions for those who override #showWindow() that we can
+                    // detect errors in #showWindow() by checking BadTokenException.
+                    // TODO: Investigate its feasibility.  Update JavaDoc of #showWindow() of
+                    // whether it's OK to override #showWindow() or not.
                 }
             }
             clearInsetOfPreviousIme();
@@ -1445,7 +1448,19 @@ public class InputMethodService extends AbstractInputMethodService {
             mWindowWasVisible = mWindowVisible;
             mInShowWindow = true;
             showWindowInner(showInput);
+        } catch (BadTokenException e) {
+            // BadTokenException is a normal consequence in certain situations, e.g., swapping IMEs
+            // while there is a DO_SHOW_SOFT_INPUT message in the IIMethodWrapper queue.
+            if (DEBUG) Log.v(TAG, "BadTokenException: IME is done.");
+            mWindowVisible = false;
+            mWindowAdded = false;
+            // Rethrow the exception to preserve the existing behavior.  Some IMEs may have directly
+            // called this method and relied on this exception for some clean-up tasks.
+            // TODO: Give developers a clear guideline of whether it's OK to call this method or
+            // InputMethodManager#showSoftInputFromInputMethod() should always be used instead.
+            throw e;
         } finally {
+            // TODO: Is it OK to set true when we get BadTokenException?
             mWindowWasVisible = true;
             mInShowWindow = false;
         }
