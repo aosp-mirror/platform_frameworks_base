@@ -493,16 +493,16 @@ namespace PaintGlue {
                 return 0;
             }
         }
-
-        Layout layout;
-        MinikinUtils::doLayout(&layout, paint, bidiFlags, typeface, text, start, count,
-                contextCount);
-        if (advances != NULL) {
-            std::unique_ptr<jfloat> advancesArray(new jfloat[count]);
-            layout.getAdvances(advancesArray.get());
+        std::unique_ptr<jfloat[]> advancesArray;
+        if (advances) {
+            advancesArray.reset(new jfloat[count]);
+        }
+        const float advance = MinikinUtils::measureText(paint, bidiFlags, typeface, text,
+                start, count, contextCount, advancesArray.get());
+        if (advances) {
             env->SetFloatArrayRegion(advances, advancesIndex, count, advancesArray.get());
         }
-        return layout.getAdvance();
+        return advance;
     }
 
     static jfloat getTextAdvances___CIIIII_FI(JNIEnv* env, jobject clazz, jlong paintHandle,
