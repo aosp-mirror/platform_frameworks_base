@@ -288,7 +288,7 @@ class DisplayContent {
         final int delta = mService.dipToPixel(RESIZE_HANDLE_WIDTH_IN_DP, mDisplayMetrics);
         for (int i = windows.size() - 1; i >= 0; --i) {
             final WindowState win = windows.get(i);
-            final Task task = win.mAppToken != null ? win.getTask() : null;
+            final Task task = win.getTask();
             if (win.isVisibleLw() && task != null) {
                 /**
                  * Exclusion region is the region that TapDetector doesn't care about.

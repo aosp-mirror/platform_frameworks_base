@@ -557,7 +557,7 @@ final class WindowState implements WindowManagerPolicy.WindowState {
         }
         mHaveFrame = true;
 
-        final Task task = mAppToken != null ? getTask() : null;
+        final Task task = getTask();
         final boolean nonFullscreenTask = task != null && !task.isFullscreen();
         final boolean freeformWorkspace = task != null && task.inFreeformWorkspace();
         if (nonFullscreenTask) {
@@ -916,12 +916,7 @@ final class WindowState implements WindowManagerPolicy.WindowState {
     }
 
     Task getTask() {
-        AppWindowToken wtoken = mAppToken == null ? mService.mFocusedApp : mAppToken;
-        if (wtoken == null) {
-            return null;
-        }
-        final Task task = wtoken.mTask;
-        return task;
+        return mAppToken != null ? mAppToken.mTask : null;
     }
 
     TaskStack getStack() {
@@ -931,7 +926,7 @@ final class WindowState implements WindowManagerPolicy.WindowState {
                 return task.mStack;
             }
         }
-        return mDisplayContent.getHomeStack();
+        return null;
     }
 
     /**
@@ -1691,12 +1686,12 @@ final class WindowState implements WindowManagerPolicy.WindowState {
     }
 
     boolean inFreeformWorkspace() {
-        final Task task = mAppToken != null ? getTask() : null;
+        final Task task = getTask();
         return task != null && task.inFreeformWorkspace();
     }
 
     boolean isDragResizing() {
-        final Task task = mAppToken != null ? getTask() : null;
+        final Task task = getTask();
         return mService.mTaskPositioner != null && mService.mTaskPositioner.isTaskResizing(task);
     }
 
