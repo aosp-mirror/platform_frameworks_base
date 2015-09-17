@@ -164,6 +164,10 @@ public class StatusBarKeyguardViewManager {
         }
     }
 
+    public void onStartedGoingToSleep() {
+        mPhoneStatusBar.onStartedGoingToSleep();
+    }
+
     public void onFinishedGoingToSleep() {
         mDeviceInteractive = false;
         mPhoneStatusBar.onFinishedGoingToSleep();

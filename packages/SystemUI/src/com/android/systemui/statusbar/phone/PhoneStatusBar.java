@@ -491,11 +491,17 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
     private boolean mLaunchTransitionFadingAway;
     private ExpandableNotificationRow mDraggedDownRow;
     private boolean mLaunchCameraOnScreenTurningOn;
+    private boolean mLaunchCameraOnFinishedGoingToSleep;
     private PowerManager.WakeLock mGestureWakeLock;
     private Vibrator mVibrator;
 
     // Fingerprint (as computed by getLoggingFingerprint() of the last logged state.
     private int mLastLoggedStateFingerprint;
+
+    /**
+     * If set, the device has started going to sleep but isn't fully non-interactive yet.
+     */
+    protected boolean mStartedGoingToSleep;
 
     private static final int VISIBLE_LOCATIONS = StackViewState.LOCATION_FIRST_CARD
             | StackViewState.LOCATION_MAIN_AREA;
@@ -3963,16 +3969,33 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         disable(mDisabledUnmodified1, mDisabledUnmodified2, true /* animate */);
     }
 
+    public void onStartedGoingToSleep() {
+        mStartedGoingToSleep = true;
+    }
+
     public void onFinishedGoingToSleep() {
         mNotificationPanel.onAffordanceLaunchEnded();
         releaseGestureWakeLock();
         mLaunchCameraOnScreenTurningOn = false;
+        mStartedGoingToSleep = false;
         mDeviceInteractive = false;
         mWakeUpComingFromTouch = false;
         mWakeUpTouchLocation = null;
         mLockedPhoneAnalytics.onScreenOff();
         mStackScroller.setAnimationsEnabled(false);
         updateVisibleToUser();
+        if (mLaunchCameraOnFinishedGoingToSleep) {
+            mLaunchCameraOnFinishedGoingToSleep = false;
+
+            // This gets executed before we will show Keyguard, so post it in order that the state
+            // is correct.
+            mHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    onCameraLaunchGestureDetected();
+                }
+            });
+        }
     }
 
     public void onStartedWakingUp() {
@@ -3993,7 +4016,8 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
     }
 
     private void vibrateForCameraGesture() {
-        mVibrator.vibrate(750L);
+        // Make sure to pass -1 for repeat so VibratorService doesn't stop us when going to sleep.
+        mVibrator.vibrate(new long[] { 0, 750L }, -1 /* repeat */);
     }
 
     public void onScreenTurnedOn() {
@@ -4153,6 +4177,10 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
 
     @Override
     public void onCameraLaunchGestureDetected() {
+        if (mStartedGoingToSleep) {
+            mLaunchCameraOnFinishedGoingToSleep = true;
+            return;
+        }
         if (!mNotificationPanel.canCameraGestureBeLaunched(
                 mStatusBarKeyguardViewManager.isShowing() && mExpandedVisible)) {
             return;
