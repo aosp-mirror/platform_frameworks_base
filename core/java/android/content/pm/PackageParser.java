@@ -114,6 +114,12 @@ public class PackageParser {
     /** File name in an APK for the Android manifest. */
     private static final String ANDROID_MANIFEST_FILENAME = "AndroidManifest.xml";
 
+    /**
+     * File name in an APK for bytecode.  There may be additional bytecode files
+     * but this one is always required for an APK that has code.
+     */
+    private static final String BYTECODE_FILENAME = "classes.dex";
+
     /** Path prefix for apps on expanded storage */
     private static final String MNT_EXPAND = "/mnt/expand/";
 
@@ -615,6 +621,7 @@ public class PackageParser {
     public final static int PARSE_IS_PRIVILEGED = 1<<7;
     public final static int PARSE_COLLECT_CERTIFICATES = 1<<8;
     public final static int PARSE_TRUSTED_OVERLAY = 1<<9;
+    public final static int PARSE_ENFORCE_CODE = 1<<10;
 
     private static final Comparator<String> sSplitNameComparator = new SplitNameComparator();
 
@@ -1066,8 +1073,11 @@ public class PackageParser {
 
     private static void collectCertificates(Package pkg, File apkFile, int flags)
             throws PackageParserException {
+        final boolean requireCode = ((flags & PARSE_ENFORCE_CODE) != 0)
+                && ((pkg.applicationInfo.flags & ApplicationInfo.FLAG_HAS_CODE) != 0);
         final String apkPath = apkFile.getAbsolutePath();
 
+        boolean codeFound = false;
         StrictJarFile jarFile = null;
         try {
             jarFile = new StrictJarFile(apkPath);
@@ -1089,11 +1099,21 @@ public class PackageParser {
                     final ZipEntry entry = i.next();
 
                     if (entry.isDirectory()) continue;
-                    if (entry.getName().startsWith("META-INF/")) continue;
-                    if (entry.getName().equals(ANDROID_MANIFEST_FILENAME)) continue;
+
+                    final String entryName = entry.getName();
+                    if (entryName.startsWith("META-INF/")) continue;
+                    if (entryName.equals(ANDROID_MANIFEST_FILENAME)) continue;
+                    if (entryName.equals(BYTECODE_FILENAME)) {
+                        codeFound = true;
+                    }
 
                     toVerify.add(entry);
                 }
+            }
+
+            if (!codeFound && requireCode) {
+                throw new PackageParserException(INSTALL_PARSE_FAILED_MANIFEST_MALFORMED,
+                        "Package " + apkPath + " code is missing");
             }
 
             // Verify that entries are signed consistently with the first entry
