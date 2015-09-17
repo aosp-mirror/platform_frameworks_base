@@ -2412,6 +2412,7 @@ public class WindowManagerService extends IWindowManager.Stub
         boolean inTouchMode;
         boolean configChanged;
         boolean surfaceChanged = false;
+        boolean dragResizing = false;
         boolean animating;
         boolean hasStatusBarPermission =
                 mContext.checkCallingOrSelfPermission(android.Manifest.permission.STATUS_BAR)
@@ -2558,6 +2559,18 @@ public class WindowManagerService extends IWindowManager.Stub
                         winAnimator.destroySurfaceLocked();
                         toBeDisplayed = true;
                         surfaceChanged = true;
+                    }
+                }
+
+                dragResizing = win.isDragResizing();
+                if (win.mDragResizing != dragResizing) {
+                    win.mDragResizing = dragResizing;
+                    if (win.mHasSurface) {
+                        winAnimator.mDestroyPendingSurfaceUponRedraw = true;
+                        winAnimator.mSurfaceDestroyDeferred = true;
+                        winAnimator.destroySurfaceLocked();
+                        startFreezingDisplayLocked(false, 0, 0);
+                        toBeDisplayed = true;
                     }
                 }
                 try {
@@ -2726,7 +2739,8 @@ public class WindowManagerService extends IWindowManager.Stub
 
         return (inTouchMode ? WindowManagerGlobal.RELAYOUT_RES_IN_TOUCH_MODE : 0)
                 | (toBeDisplayed ? WindowManagerGlobal.RELAYOUT_RES_FIRST_TIME : 0)
-                | (surfaceChanged ? WindowManagerGlobal.RELAYOUT_RES_SURFACE_CHANGED : 0);
+                | (surfaceChanged ? WindowManagerGlobal.RELAYOUT_RES_SURFACE_CHANGED : 0)
+                | (dragResizing ? WindowManagerGlobal.RELAYOUT_RES_DRAG_RESIZING : 0);
     }
 
     public void performDeferredDestroyWindow(Session session, IWindow client) {
@@ -8438,15 +8452,18 @@ public class WindowManagerService extends IWindowManager.Stub
                 Slog.v(TAG, "Win " + w + " config changed: "
                         + mCurConfiguration);
             }
+            final boolean dragResizingChanged = w.mDragResizing != w.isDragResizing();
             if (localLOGV) Slog.v(TAG, "Resizing " + w
                     + ": configChanged=" + configChanged
+                    + " dragResizingChanged=" + dragResizingChanged
                     + " last=" + w.mLastFrame + " frame=" + w.mFrame);
             w.mLastFrame.set(w.mFrame);
             if (w.mContentInsetsChanged
                     || w.mVisibleInsetsChanged
                     || winAnimator.mSurfaceResized
                     || w.mOutsetsChanged
-                    || configChanged) {
+                    || configChanged
+                    || dragResizingChanged) {
                 if (DEBUG_RESIZE || DEBUG_ORIENTATION) {
                     Slog.v(TAG, "Resize reasons for w=" + w + ": "
                             + " contentInsetsChanged=" + w.mContentInsetsChanged
@@ -8458,7 +8475,8 @@ public class WindowManagerService extends IWindowManager.Stub
                             + " outsetsChanged=" + w.mOutsetsChanged
                             + " " + w.mOutsets.toShortString()
                             + " surfaceResized=" + winAnimator.mSurfaceResized
-                            + " configChanged=" + configChanged);
+                            + " configChanged=" + configChanged
+                            + " dragResizingChanged=" + dragResizingChanged);
                 }
 
                 w.mLastOverscanInsets.set(w.mOverscanInsets);
@@ -8467,12 +8485,12 @@ public class WindowManagerService extends IWindowManager.Stub
                 w.mLastStableInsets.set(w.mStableInsets);
                 w.mLastOutsets.set(w.mOutsets);
                 makeWindowFreezingScreenIfNeededLocked(w);
-                // If the orientation is changing, then we need to
-                // hold off on unfreezing the display until this
-                // window has been redrawn; to do that, we need
-                // to go through the process of getting informed
-                // by the application when it has finished drawing.
-                if (w.mOrientationChanging) {
+                // If the orientation is changing, or we're starting or ending
+                // a drag resizing action, then we need to hold off on unfreezing
+                // the display until this window has been redrawn; to do that,
+                // we need to go through the process of getting informed by the
+                // application when it has finished drawing.
+                if (w.mOrientationChanging || dragResizingChanged) {
                     if (DEBUG_SURFACE_TRACE || DEBUG_ANIM || DEBUG_ORIENTATION) Slog.v(TAG,
                             "Orientation start waiting for draw mDrawState=DRAW_PENDING in "
                             + w + ", surface " + winAnimator.mSurfaceControl);

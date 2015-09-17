@@ -127,6 +127,7 @@ final class WindowState implements WindowManagerPolicy.WindowState {
     boolean mAppFreezing;
     boolean mAttachedHidden;    // is our parent window hidden?
     boolean mWallpaperVisible;  // for wallpaper, what was last vis report?
+    boolean mDragResizing;
 
     RemoteCallbackList<IWindowFocusObserver> mFocusCallbacks;
 
