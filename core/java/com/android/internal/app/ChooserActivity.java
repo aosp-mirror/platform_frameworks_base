@@ -647,7 +647,8 @@ public class ChooserActivity extends ResolverActivity {
 
         @Override
         public CharSequence getExtendedInfo() {
-            return mSourceInfo != null ? mSourceInfo.getExtendedInfo() : null;
+            // ChooserTargets have badge icons, so we won't show the extended info to disambiguate.
+            return null;
         }
 
         @Override
@@ -740,9 +741,8 @@ public class ChooserActivity extends ResolverActivity {
 
         @Override
         public boolean showsExtendedInfo(TargetInfo info) {
-            // Reserve space to show extended info if any one of the items in the adapter has
-            // extended info. This keeps grid item sizes uniform.
-            return hasExtendedInfo();
+            // We have badges so we don't need this text shown.
+            return false;
         }
 
         @Override
