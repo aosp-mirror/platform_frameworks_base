@@ -321,6 +321,9 @@ public final class ActivityManagerService extends ActivityManagerNative
     // How long we wait for a launched process to attach to the activity manager
     // before we decide it's never going to come up for real.
     static final int PROC_START_TIMEOUT = 10*1000;
+    // How long we wait for an attached process to publish its content providers
+    // before we decide it must be hung.
+    static final int CONTENT_PROVIDER_PUBLISH_TIMEOUT = 10*1000;
 
     // How long we wait for a launched process to attach to the activity manager
     // before we decide it's never going to come up for real, when the process was
@@ -1378,6 +1381,7 @@ public final class ActivityManagerService extends ActivityManagerNative
     static final int REPORT_USER_SWITCH_COMPLETE_MSG = 56;
     static final int SHUTDOWN_UI_AUTOMATION_CONNECTION_MSG = 57;
     static final int APP_BOOST_DEACTIVATE_MSG = 58;
+    static final int CONTENT_PROVIDER_PUBLISH_TIMEOUT_MSG = 59;
 
     static final int FIRST_ACTIVITY_STACK_MSG = 100;
     static final int FIRST_BROADCAST_QUEUE_MSG = 200;
@@ -1712,6 +1716,12 @@ public final class ActivityManagerService extends ActivityManagerNative
                 ProcessRecord app = (ProcessRecord)msg.obj;
                 synchronized (ActivityManagerService.this) {
                     processStartTimedOutLocked(app);
+                }
+            } break;
+            case CONTENT_PROVIDER_PUBLISH_TIMEOUT_MSG: {
+                ProcessRecord app = (ProcessRecord)msg.obj;
+                synchronized (ActivityManagerService.this) {
+                    processContentProviderPublishTimedOutLocked(app);
                 }
             } break;
             case DO_PENDING_ACTIVITY_LAUNCHES_MSG: {
@@ -5962,6 +5972,11 @@ public final class ActivityManagerService extends ActivityManagerNative
         return needRestart;
     }
 
+    private final void processContentProviderPublishTimedOutLocked(ProcessRecord app) {
+        cleanupAppInLaunchingProvidersLocked(app, true);
+        removeProcessLocked(app, false, true, "timeout publishing content providers");
+    }
+
     private final void processStartTimedOutLocked(ProcessRecord app) {
         final int pid = app.pid;
         boolean gone = false;
@@ -5988,7 +6003,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                 mBatteryStatsService.removeIsolatedUid(app.uid, app.info.uid);
             }
             // Take care of any launching providers waiting for this process.
-            checkAppInLaunchingProvidersLocked(app, true);
+            cleanupAppInLaunchingProvidersLocked(app, true);
             // Take care of any services that are waiting for the process.
             mServices.processStartTimedOutLocked(app);
             app.kill("start timeout", true);
@@ -6083,6 +6098,12 @@ public final class ActivityManagerService extends ActivityManagerNative
 
         boolean normalMode = mProcessesReady || isAllowedWhileBooting(app.info);
         List<ProviderInfo> providers = normalMode ? generateApplicationProvidersLocked(app) : null;
+
+        if (providers != null && checkAppInLaunchingProvidersLocked(app)) {
+            Message msg = mHandler.obtainMessage(CONTENT_PROVIDER_PUBLISH_TIMEOUT_MSG);
+            msg.obj = app;
+            mHandler.sendMessageDelayed(msg, CONTENT_PROVIDER_PUBLISH_TIMEOUT);
+        }
 
         if (!normalMode) {
             Slog.i(TAG, "Launching preboot mode app: " + app);
@@ -10049,7 +10070,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             final long origId = Binder.clearCallingIdentity();
 
             final int N = providers.size();
-            for (int i=0; i<N; i++) {
+            for (int i = 0; i < N; i++) {
                 ContentProviderHolder src = providers.get(i);
                 if (src == null || src.info == null || src.provider == null) {
                     continue;
@@ -10064,14 +10085,19 @@ public final class ActivityManagerService extends ActivityManagerNative
                         mProviderMap.putProviderByName(names[j], dst);
                     }
 
-                    int NL = mLaunchingProviders.size();
+                    int launchingCount = mLaunchingProviders.size();
                     int j;
-                    for (j=0; j<NL; j++) {
+                    boolean wasInLaunchingProviders = false;
+                    for (j = 0; j < launchingCount; j++) {
                         if (mLaunchingProviders.get(j) == dst) {
                             mLaunchingProviders.remove(j);
+                            wasInLaunchingProviders = true;
                             j--;
-                            NL--;
+                            launchingCount--;
                         }
+                    }
+                    if (wasInLaunchingProviders) {
+                        mHandler.removeMessages(CONTENT_PROVIDER_PUBLISH_TIMEOUT_MSG, r);
                     }
                     synchronized (dst) {
                         dst.provider = src.provider;
@@ -15743,7 +15769,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         app.pubProviders.clear();
 
         // Take care of any launching providers waiting for this process.
-        if (checkAppInLaunchingProvidersLocked(app, false)) {
+        if (cleanupAppInLaunchingProvidersLocked(app, false)) {
             restart = true;
         }
 
@@ -15865,7 +15891,17 @@ public final class ActivityManagerService extends ActivityManagerNative
         return false;
     }
 
-    boolean checkAppInLaunchingProvidersLocked(ProcessRecord app, boolean alwaysBad) {
+    boolean checkAppInLaunchingProvidersLocked(ProcessRecord app) {
+        for (int i = mLaunchingProviders.size() - 1; i >= 0; i--) {
+            ContentProviderRecord cpr = mLaunchingProviders.get(i);
+            if (cpr.launchingApp == app) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    boolean cleanupAppInLaunchingProvidersLocked(ProcessRecord app, boolean alwaysBad) {
         // Look through the content providers we are waiting to have launched,
         // and if any run in this process then either schedule a restart of
         // the process or kill the client waiting for it if this process has
