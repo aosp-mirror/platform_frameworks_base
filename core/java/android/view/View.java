@@ -8408,11 +8408,14 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      */
     public void clearAccessibilityFocus() {
         clearAccessibilityFocusNoCallbacks();
-        // Clear the global reference of accessibility focus if this
-        // view or any of its descendants had accessibility focus.
-        ViewRootImpl viewRootImpl = getViewRootImpl();
+
+        // Clear the global reference of accessibility focus if this view or
+        // any of its descendants had accessibility focus. This will NOT send
+        // an event or update internal state if focus is cleared from a
+        // descendant view, which may leave views in inconsistent states.
+        final ViewRootImpl viewRootImpl = getViewRootImpl();
         if (viewRootImpl != null) {
-            View focusHost = viewRootImpl.getAccessibilityFocusedHost();
+            final View focusHost = viewRootImpl.getAccessibilityFocusedHost();
             if (focusHost != null && ViewRootImpl.isViewDescendantOf(focusHost, this)) {
                 viewRootImpl.setAccessibilityFocus(null, null);
             }
@@ -8688,6 +8691,18 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     public void setImportantForAccessibility(int mode) {
         final int oldMode = getImportantForAccessibility();
         if (mode != oldMode) {
+            final boolean hideDescendants =
+                    mode == IMPORTANT_FOR_ACCESSIBILITY_NO_HIDE_DESCENDANTS;
+
+            // If this node or its descendants are no longer important, try to
+            // clear accessibility focus.
+            if (mode == IMPORTANT_FOR_ACCESSIBILITY_NO || hideDescendants) {
+                final View focusHost = findAccessibilityFocusHost(hideDescendants);
+                if (focusHost != null) {
+                    focusHost.clearAccessibilityFocus();
+                }
+            }
+
             // If we're moving between AUTO and another state, we might not need
             // to send a subtree changed notification. We'll store the computed
             // importance, since we'll need to check it later to make sure.
@@ -8704,6 +8719,31 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                         AccessibilityEvent.CONTENT_CHANGE_TYPE_UNDEFINED);
             }
         }
+    }
+
+    /**
+     * Returns the view within this view's hierarchy that is hosting
+     * accessibility focus.
+     *
+     * @param searchDescendants whether to search for focus in descendant views
+     * @return the view hosting accessibility focus, or {@code null}
+     */
+    private View findAccessibilityFocusHost(boolean searchDescendants) {
+        if (isAccessibilityFocusedViewOrHost()) {
+            return this;
+        }
+
+        if (searchDescendants) {
+            final ViewRootImpl viewRoot = getViewRootImpl();
+            if (viewRoot != null) {
+                final View focusHost = viewRoot.getAccessibilityFocusedHost();
+                if (focusHost != null && ViewRootImpl.isViewDescendantOf(focusHost, this)) {
+                    return focusHost;
+                }
+            }
+        }
+
+        return null;
     }
 
     /**
