@@ -128,6 +128,8 @@ public class DragEvent implements Parcelable {
     float mX, mY;
     ClipDescription mClipDescription;
     ClipData mClipData;
+    DropPermissionHolder mDropPermissionHolder;
+
     Object mLocalState;
     boolean mDragResult;
 
@@ -253,28 +255,30 @@ public class DragEvent implements Parcelable {
     }
 
     private void init(int action, float x, float y, ClipDescription description, ClipData data,
-            Object localState, boolean result) {
+            DropPermissionHolder dropPermissionHolder, Object localState, boolean result) {
         mAction = action;
         mX = x;
         mY = y;
         mClipDescription = description;
         mClipData = data;
+        mDropPermissionHolder = dropPermissionHolder;
         mLocalState = localState;
         mDragResult = result;
     }
 
     static DragEvent obtain() {
-        return DragEvent.obtain(0, 0f, 0f, null, null, null, false);
+        return DragEvent.obtain(0, 0f, 0f, null, null, null, null, false);
     }
 
     /** @hide */
     public static DragEvent obtain(int action, float x, float y, Object localState,
-            ClipDescription description, ClipData data, boolean result) {
+            ClipDescription description, ClipData data, DropPermissionHolder dropPermissionHolder,
+            boolean result) {
         final DragEvent ev;
         synchronized (gRecyclerLock) {
             if (gRecyclerTop == null) {
                 ev = new DragEvent();
-                ev.init(action, x, y, description, data, localState, result);
+                ev.init(action, x, y, description, data, dropPermissionHolder, localState, result);
                 return ev;
             }
             ev = gRecyclerTop;
@@ -285,7 +289,7 @@ public class DragEvent implements Parcelable {
         ev.mRecycled = false;
         ev.mNext = null;
 
-        ev.init(action, x, y, description, data, localState, result);
+        ev.init(action, x, y, description, data, dropPermissionHolder, localState, result);
 
         return ev;
     }
@@ -293,7 +297,8 @@ public class DragEvent implements Parcelable {
     /** @hide */
     public static DragEvent obtain(DragEvent source) {
         return obtain(source.mAction, source.mX, source.mY, source.mLocalState,
-                source.mClipDescription, source.mClipData, source.mDragResult);
+                source.mClipDescription, source.mClipData, source.mDropPermissionHolder,
+                source.mDragResult);
     }
 
     /**
@@ -355,6 +360,17 @@ public class DragEvent implements Parcelable {
      */
     public ClipDescription getClipDescription() {
         return mClipDescription;
+    }
+
+    /**
+     * Returns the {@link android.view.DropPermissionHolder} object that can be used by the drag
+     * listener to request and release the permissions for the content URIs contained in the
+     * {@link android.content.ClipData} object associated with this event.
+     * This method only returns valid data if the event action is {@link #ACTION_DROP}.
+     * @return The DropPermissionHolder object used to handle content URI permissions.
+     */
+    public DropPermissionHolder getDropPermissionHolder() {
+        return mDropPermissionHolder;
     }
 
     /**
@@ -477,6 +493,12 @@ public class DragEvent implements Parcelable {
             dest.writeInt(1);
             mClipDescription.writeToParcel(dest, flags);
         }
+        if (mDropPermissionHolder == null) {
+            dest.writeInt(0);
+        } else {
+            dest.writeInt(1);
+            mDropPermissionHolder.writeToParcel(dest, flags);
+        }
     }
 
     /**
@@ -495,6 +517,9 @@ public class DragEvent implements Parcelable {
             }
             if (in.readInt() != 0) {
                 event.mClipDescription = ClipDescription.CREATOR.createFromParcel(in);
+            }
+            if (in.readInt() != 0) {
+                event.mDropPermissionHolder = DropPermissionHolder.CREATOR.createFromParcel(in);
             }
             return event;
         }

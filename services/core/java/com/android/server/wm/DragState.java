@@ -27,6 +27,7 @@ import android.content.ClipDescription;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.graphics.Region;
+import android.os.Binder;
 import android.os.IBinder;
 import android.os.Message;
 import android.os.Process;
@@ -34,6 +35,7 @@ import android.os.RemoteException;
 import android.util.Slog;
 import android.view.Display;
 import android.view.DragEvent;
+import android.view.DropPermissionHolder;
 import android.view.InputChannel;
 import android.view.SurfaceControl;
 import android.view.View;
@@ -50,6 +52,7 @@ class DragState {
     SurfaceControl mSurfaceControl;
     int mFlags;
     IBinder mLocalWin;
+    int mUid;
     ClipData mData;
     ClipDescription mDataDescription;
     boolean mDragResult;
@@ -74,6 +77,7 @@ class DragState {
         mSurfaceControl = surface;
         mFlags = flags;
         mLocalWin = localWin;
+        mUid = Binder.getCallingUid();
         mNotifiedWindows = new ArrayList<WindowState>();
     }
 
@@ -225,7 +229,7 @@ class DragState {
 
         if (mDragInProgress && newWin.isPotentialDragTarget()) {
             DragEvent event = obtainDragEvent(newWin, DragEvent.ACTION_DRAG_STARTED,
-                    touchX, touchY, null, desc, null, false);
+                    touchX, touchY, null, desc, null, null, false);
             try {
                 newWin.mClient.dispatchDragEvent(event);
                 // track each window that we've notified that the drag is starting
@@ -265,7 +269,7 @@ class DragState {
             Slog.d(WindowManagerService.TAG, "broadcasting DRAG_ENDED");
         }
         DragEvent evt = DragEvent.obtain(DragEvent.ACTION_DRAG_ENDED,
-                0, 0, null, null, null, mDragResult);
+                0, 0, null, null, null, null, mDragResult);
         for (WindowState ws: mNotifiedWindows) {
             try {
                 ws.mClient.dispatchDragEvent(evt);
@@ -331,7 +335,7 @@ class DragState {
                 }
                 // force DRAG_EXITED_EVENT if appropriate
                 DragEvent evt = obtainDragEvent(mTargetWindow, DragEvent.ACTION_DRAG_EXITED,
-                        x, y, null, null, null, false);
+                        x, y, null, null, null, null, false);
                 mTargetWindow.mClient.dispatchDragEvent(evt);
                 if (myPid != mTargetWindow.mSession.mPid) {
                     evt.recycle();
@@ -342,7 +346,7 @@ class DragState {
                     Slog.d(WindowManagerService.TAG, "sending DRAG_LOCATION to " + touchedWin);
                 }
                 DragEvent evt = obtainDragEvent(touchedWin, DragEvent.ACTION_DRAG_LOCATION,
-                        x, y, null, null, null, false);
+                        x, y, null, null, null, null, false);
                 touchedWin.mClient.dispatchDragEvent(evt);
                 if (myPid != touchedWin.mSession.mPid) {
                     evt.recycle();
@@ -354,11 +358,15 @@ class DragState {
         mTargetWindow = touchedWin;
     }
 
+    WindowState getDropTargetWinLw(float x, float y) {
+        return getTouchedWinAtPointLw(x, y);
+    }
+
     // Tell the drop target about the data.  Returns 'true' if we can immediately
     // dispatch the global drag-ended message, 'false' if we need to wait for a
     // result from the recipient.
-    boolean notifyDropLw(float x, float y) {
-        WindowState touchedWin = getTouchedWinAtPointLw(x, y);
+    boolean notifyDropLw(WindowState touchedWin, DropPermissionHolder dropPermissionHolder,
+            float x, float y) {
         if (touchedWin == null) {
             // "drop" outside a valid window -- no recipient to apply a
             // timeout to, and we can send the drag-ended message immediately.
@@ -372,7 +380,7 @@ class DragState {
         final int myPid = Process.myPid();
         final IBinder token = touchedWin.mClient.asBinder();
         DragEvent evt = obtainDragEvent(touchedWin, DragEvent.ACTION_DROP, x, y,
-                null, null, mData, false);
+                null, null, mData, dropPermissionHolder, false);
         try {
             touchedWin.mClient.dispatchDragEvent(evt);
 
@@ -438,13 +446,16 @@ class DragState {
 
     private static DragEvent obtainDragEvent(WindowState win, int action,
             float x, float y, Object localState,
-            ClipDescription description, ClipData data, boolean result) {
+            ClipDescription description, ClipData data,
+            DropPermissionHolder dropPermissionHolder,
+            boolean result) {
         float winX = x - win.mFrame.left;
         float winY = y - win.mFrame.top;
         if (win.mEnforceSizeCompat) {
             winX *= win.mGlobalScale;
             winY *= win.mGlobalScale;
         }
-        return DragEvent.obtain(action, winX, winY, localState, description, data, result);
+        return DragEvent.obtain(action, winX, winY, localState, description, data,
+                dropPermissionHolder, result);
     }
 }
