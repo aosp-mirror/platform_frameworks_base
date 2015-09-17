@@ -107,6 +107,7 @@ class WindowStateAnimator {
      */
     boolean mSurfaceDestroyDeferred;
 
+    boolean mDestroyPendingSurfaceUponRedraw;
     float mShownAlpha = 0;
     float mAlpha = 0;
     float mLastAlpha = 0;
@@ -546,9 +547,15 @@ class WindowStateAnimator {
             Slog.i(TAG, "commitFinishDrawingLocked: mDrawState=READY_TO_SHOW " + mSurfaceControl);
         }
         mDrawState = READY_TO_SHOW;
+        boolean result = false;
         final AppWindowToken atoken = mWin.mAppToken;
         if (atoken == null || atoken.allDrawn || mWin.mAttrs.type == TYPE_APPLICATION_STARTING) {
-            return performShowLocked();
+            result = performShowLocked();
+        }
+        if (mDestroyPendingSurfaceUponRedraw) {
+            mDestroyPendingSurfaceUponRedraw = false;
+            destroyDeferredSurfaceLocked();
+            mService.stopFreezingDisplayLocked();
         }
         return false;
     }
@@ -796,6 +803,9 @@ class WindowStateAnimator {
                 flags |= SurfaceControl.SECURE;
             }
 
+            float left = w.mFrame.left + w.mXOffset;
+            float top = w.mFrame.top + w.mYOffset;
+
             int width;
             int height;
             if ((attrs.flags & LayoutParams.FLAG_SCALED) != 0) {
@@ -808,7 +818,9 @@ class WindowStateAnimator {
                 // so that we don't need to reallocate during the process. This also prevents
                 // buffer drops due to size mismatch.
                 final DisplayInfo displayInfo = w.getDisplayInfo();
-                if (displayInfo != null && w.isDragResizing()) {
+                if (displayInfo != null && w.mDragResizing) {
+                    left = 0;
+                    top = 0;
                     width = displayInfo.logicalWidth;
                     height = displayInfo.logicalHeight;
                 } else {
@@ -825,9 +837,6 @@ class WindowStateAnimator {
             if (height <= 0) {
                 height = 1;
             }
-
-            float left = w.mFrame.left + w.mXOffset;
-            float top = w.mFrame.top + w.mYOffset;
 
             // Adjust for surface insets.
             width += attrs.surfaceInsets.left + attrs.surfaceInsets.right;
@@ -1324,7 +1333,7 @@ class WindowStateAnimator {
 
         final boolean fullscreen = w.isFullscreen(displayInfo.appWidth, displayInfo.appHeight);
         final Rect clipRect = mTmpClipRect;
-        if (w.isDragResizing()) {
+        if (w.mDragResizing) {
             // When we're doing a drag-resizing, the surface is set up to cover full screen.
             // Set the clip rect to be the same size so that we don't get any scaling.
             clipRect.set(0, 0, displayInfo.logicalWidth, displayInfo.logicalHeight);
@@ -1399,6 +1408,9 @@ class WindowStateAnimator {
     void setSurfaceBoundariesLocked(final boolean recoveringMemory) {
         final WindowState w = mWin;
 
+        float left = w.mShownFrame.left;
+        float top = w.mShownFrame.top;
+
         int width;
         int height;
         if ((w.mAttrs.flags & LayoutParams.FLAG_SCALED) != 0) {
@@ -1411,7 +1423,9 @@ class WindowStateAnimator {
             // so that we don't need to reallocate during the process. This also prevents
             // buffer drops due to size mismatch.
             final DisplayInfo displayInfo = w.getDisplayInfo();
-            if (displayInfo != null && w.isDragResizing()) {
+            if (displayInfo != null && w.mDragResizing) {
+                left = 0;
+                top = 0;
                 width = displayInfo.logicalWidth;
                 height = displayInfo.logicalHeight;
             } else {
@@ -1428,9 +1442,6 @@ class WindowStateAnimator {
         if (height < 1) {
             height = 1;
         }
-
-        float left = w.mShownFrame.left;
-        float top = w.mShownFrame.top;
 
         // Adjust for surface insets.
         final LayoutParams attrs = w.getAttrs();

@@ -191,6 +191,10 @@ public final class ViewRootImpl implements ViewParent,
     Rect mDirty;
     boolean mIsAnimating;
 
+    private boolean mDragResizing;
+    private int mCanvasOffsetX;
+    private int mCanvasOffsetY;
+
     CompatibilityInfo.Translator mTranslator;
 
     final View.AttachInfo mAttachInfo;
@@ -1506,6 +1510,7 @@ public final class ViewRootImpl implements ViewParent,
                         frame.width() < desiredWindowWidth && frame.width() != mWidth)
                 || (lp.height == ViewGroup.LayoutParams.WRAP_CONTENT &&
                         frame.height() < desiredWindowHeight && frame.height() != mHeight));
+        windowShouldResize |= mDragResizing;
 
         // Determine whether to compute insets.
         // If there are no inset listeners remaining then we may still need to compute
@@ -1680,6 +1685,19 @@ public final class ViewRootImpl implements ViewParent,
                         handleOutOfResourcesException(e);
                         return;
                     }
+                }
+
+                final boolean dragResizing = (relayoutResult
+                        & WindowManagerGlobal.RELAYOUT_RES_DRAG_RESIZING) != 0;
+                if (mDragResizing != dragResizing) {
+                    mDragResizing = dragResizing;
+                    mFullRedrawNeeded = true;
+                }
+                if (dragResizing) {
+                    mCanvasOffsetX = mWinFrame.left;
+                    mCanvasOffsetY = mWinFrame.top;
+                } else {
+                    mCanvasOffsetX = mCanvasOffsetY = 0;
                 }
             } catch (RemoteException e) {
             }
@@ -2463,8 +2481,8 @@ public final class ViewRootImpl implements ViewParent,
 
         mAttachInfo.mTreeObserver.dispatchOnDraw();
 
-        int xOffset = 0;
-        int yOffset = curScrollY;
+        int xOffset = -mCanvasOffsetX;
+        int yOffset = -mCanvasOffsetY + curScrollY;
         final WindowManager.LayoutParams params = mWindowAttributes;
         final Rect surfaceInsets = params != null ? params.surfaceInsets : null;
         if (surfaceInsets != null) {

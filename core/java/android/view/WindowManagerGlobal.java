@@ -70,6 +70,13 @@ public final class WindowManagerGlobal {
     public static final int RELAYOUT_RES_SURFACE_CHANGED = 0x4;
 
     /**
+     * The window is being resized by dragging one of the window corners,
+     * in this case the surface would be fullsreen-sized. The client should
+     * render to the actual frame location (instead of (0,curScrollY)).
+     */
+    public static final int RELAYOUT_RES_DRAG_RESIZING = 0x8;
+
+    /**
      * Flag for relayout: the client will be later giving
      * internal insets; as a result, the window will not impact other window
      * layouts until the insets are given.
