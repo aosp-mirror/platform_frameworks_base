@@ -415,6 +415,7 @@ package android {
     field public static final int buttonBarNeutralButtonStyle = 16843914; // 0x101048a
     field public static final int buttonBarPositiveButtonStyle = 16843913; // 0x1010489
     field public static final int buttonBarStyle = 16843566; // 0x101032e
+    field public static final int buttonGravity = 16844029; // 0x10104fd
     field public static final int buttonStyle = 16842824; // 0x1010048
     field public static final int buttonStyleInset = 16842826; // 0x101004a
     field public static final int buttonStyleSmall = 16842825; // 0x1010049
@@ -464,6 +465,7 @@ package android {
     field public static final int codes = 16843330; // 0x1010242
     field public static final int collapseColumns = 16843083; // 0x101014b
     field public static final int collapseContentDescription = 16843984; // 0x10104d0
+    field public static final int collapseIcon = 16844030; // 0x10104fe
     field public static final int color = 16843173; // 0x10101a5
     field public static final int colorAccent = 16843829; // 0x1010435
     field public static final int colorActivatedHighlight = 16843664; // 0x1010390
@@ -901,6 +903,7 @@ package android {
     field public static final int marqueeRepeatLimit = 16843293; // 0x101021d
     field public static final int matchOrder = 16843855; // 0x101044f
     field public static final int max = 16843062; // 0x1010136
+    field public static final int maxButtonHeight = 16844028; // 0x10104fc
     field public static final int maxDate = 16843584; // 0x1010340
     field public static final int maxEms = 16843095; // 0x1010157
     field public static final int maxHeight = 16843040; // 0x1010120
@@ -1380,6 +1383,11 @@ package android {
     field public static final int tintMode = 16843771; // 0x10103fb
     field public static final int title = 16843233; // 0x10101e1
     field public static final int titleCondensed = 16843234; // 0x10101e2
+    field public static final int titleMargin = 16844023; // 0x10104f7
+    field public static final int titleMarginBottom = 16844027; // 0x10104fb
+    field public static final int titleMarginEnd = 16844025; // 0x10104f9
+    field public static final int titleMarginStart = 16844024; // 0x10104f8
+    field public static final int titleMarginTop = 16844026; // 0x10104fa
     field public static final int titleTextAppearance = 16843822; // 0x101042e
     field public static final int titleTextColor = 16844003; // 0x10104e3
     field public static final int titleTextStyle = 16843512; // 0x10102f8
@@ -44554,6 +44562,10 @@ package android.widget {
     method public int getPopupTheme();
     method public java.lang.CharSequence getSubtitle();
     method public java.lang.CharSequence getTitle();
+    method public int getTitleMarginBottom();
+    method public int getTitleMarginEnd();
+    method public int getTitleMarginStart();
+    method public int getTitleMarginTop();
     method public boolean hasExpandedActionView();
     method public boolean hideOverflowMenu();
     method public void inflateMenu(int);
@@ -44579,6 +44591,11 @@ package android.widget {
     method public void setSubtitleTextColor(int);
     method public void setTitle(int);
     method public void setTitle(java.lang.CharSequence);
+    method public void setTitleMargin(int, int, int, int);
+    method public void setTitleMarginBottom(int);
+    method public void setTitleMarginEnd(int);
+    method public void setTitleMarginStart(int);
+    method public void setTitleMarginTop(int);
     method public void setTitleTextAppearance(android.content.Context, int);
     method public void setTitleTextColor(int);
     method public boolean showOverflowMenu();
