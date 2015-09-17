@@ -68,8 +68,8 @@ import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.keyguard.KeyguardUpdateMonitorCallback;
 import com.android.keyguard.ViewMediatorCallback;
 import com.android.systemui.SystemUI;
+import com.android.systemui.classifier.FalsingManager;
 import com.android.systemui.statusbar.phone.FingerprintUnlockController;
-import com.android.systemui.analytics.LockedPhoneAnalytics;
 import com.android.systemui.statusbar.phone.PhoneStatusBar;
 import com.android.systemui.statusbar.phone.ScrimController;
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
@@ -1254,7 +1254,7 @@ public class KeyguardViewMediator extends SystemUI {
                 case START_KEYGUARD_EXIT_ANIM:
                     StartKeyguardExitAnimParams params = (StartKeyguardExitAnimParams) msg.obj;
                     handleStartKeyguardExitAnimation(params.startTime, params.fadeoutDuration);
-                    LockedPhoneAnalytics.getInstance(mContext).onSucccessfulUnlock();
+                    FalsingManager.getInstance(mContext).onSucccessfulUnlock();
                     break;
                 case KEYGUARD_DONE_PENDING_TIMEOUT:
                     Log.w(TAG, "Timeout while waiting for activity drawn!");

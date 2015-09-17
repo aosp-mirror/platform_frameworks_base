@@ -21,7 +21,6 @@ import android.database.ContentObserver;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
-import android.hardware.SensorManager;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Handler;
@@ -29,8 +28,6 @@ import android.os.UserHandle;
 import android.provider.Settings;
 import android.util.Log;
 import android.view.MotionEvent;
-
-import com.android.systemui.statusbar.StatusBarState;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -47,24 +44,29 @@ import static com.android.systemui.statusbar.phone.TouchAnalyticsProto.Session.P
  * A session starts when the screen is turned on.
  * A session ends when the screen is turned off or user unlocks the phone.
  */
-public class LockedPhoneAnalytics implements SensorEventListener {
-    private static final String TAG = "LockedPhoneAnalytics";
-    private static final String ANALYTICS_ENABLE = "locked_phone_analytics_enable";
-    private static final String ENFORCE_BOUNCER = "locked_phone_analytics_enforce_bouncer";
-    private static final String COLLECT_BAD_TOCUHES = "locked_phone_analytics_collect_bad_touches";
+public class DataCollector implements SensorEventListener {
+    private static final String TAG = "DataCollector";
+    private static final String COLLECTOR_ENABLE = "data_collector_enable";
+    private static final String COLLECT_BAD_TOUCHES = "data_collector_collect_bad_touches";
 
     private static final long TIMEOUT_MILLIS = 11000; // 11 seconds.
     public static final boolean DEBUG = false;
 
-    private static final int[] SENSORS = new int[] {
-            Sensor.TYPE_ACCELEROMETER,
-            Sensor.TYPE_GYROSCOPE,
-            Sensor.TYPE_PROXIMITY,
-            Sensor.TYPE_LIGHT,
-            Sensor.TYPE_ROTATION_VECTOR,
-    };
-
     private final Handler mHandler = new Handler();
+    private final Context mContext;
+
+    // Err on the side of caution, so logging is not started after a crash even tough the screen
+    // is off.
+    private SensorLoggerSession mCurrentSession = null;
+
+    private boolean mEnableCollector = false;
+    private boolean mTimeoutActive = false;
+    private boolean mCollectBadTouches = false;
+    private boolean mCornerSwiping = false;
+    private boolean mTrackingStarted = false;
+
+    private static DataCollector sInstance = null;
+
     protected final ContentObserver mSettingsObserver = new ContentObserver(mHandler) {
         @Override
         public void onChange(boolean selfChange) {
@@ -72,69 +74,40 @@ public class LockedPhoneAnalytics implements SensorEventListener {
         }
     };
 
-    private final SensorManager mSensorManager;
-    private final Context mContext;
-
-    // Err on the side of caution, so logging is not started after a crash even tough the screen
-    // is off.
-    private SensorLoggerSession mCurrentSession = null;
-
-    private boolean mEnableAnalytics = false;
-    private boolean mEnforceBouncer = false;
-    private boolean mTimeoutActive = false;
-    private boolean mCollectBadTouches = false;
-    private boolean mBouncerOn = false;
-    private boolean mCornerSwiping = false;
-    private boolean mTrackingStarted = false;
-
-    private int mState = StatusBarState.SHADE;
-
-    private static LockedPhoneAnalytics sInstance = null;
-
-    private LockedPhoneAnalytics(Context context) {
-        mSensorManager = (SensorManager) context.getSystemService(Context.SENSOR_SERVICE);
+    private DataCollector(Context context) {
         mContext = context;
 
         mContext.getContentResolver().registerContentObserver(
-                Settings.Secure.getUriFor(ANALYTICS_ENABLE), false,
+                Settings.Secure.getUriFor(COLLECTOR_ENABLE), false,
                 mSettingsObserver,
                 UserHandle.USER_ALL);
 
         mContext.getContentResolver().registerContentObserver(
-                Settings.Secure.getUriFor(ENFORCE_BOUNCER), false,
-                mSettingsObserver,
-                UserHandle.USER_ALL);
-
-        mContext.getContentResolver().registerContentObserver(
-                Settings.Secure.getUriFor(COLLECT_BAD_TOCUHES), false,
+                Settings.Secure.getUriFor(COLLECT_BAD_TOUCHES), false,
                 mSettingsObserver,
                 UserHandle.USER_ALL);
 
         updateConfiguration();
     }
 
-    public static LockedPhoneAnalytics getInstance(Context context) {
+    public static DataCollector getInstance(Context context) {
         if (sInstance == null) {
-            sInstance = new LockedPhoneAnalytics(context);
+            sInstance = new DataCollector(context);
         }
         return sInstance;
     }
 
     private void updateConfiguration() {
-        mEnableAnalytics = Build.IS_DEBUGGABLE && 0 != Settings.Secure.getInt(
+        mEnableCollector = Build.IS_DEBUGGABLE && 0 != Settings.Secure.getInt(
                 mContext.getContentResolver(),
-                ANALYTICS_ENABLE, 0);
-        mEnforceBouncer = mEnableAnalytics && 0 != Settings.Secure.getInt(
+                COLLECTOR_ENABLE, 0);
+        mCollectBadTouches = mEnableCollector && 0 != Settings.Secure.getInt(
                 mContext.getContentResolver(),
-                ENFORCE_BOUNCER, 0);
-        mCollectBadTouches = mEnableAnalytics && 0 != Settings.Secure.getInt(
-                mContext.getContentResolver(),
-                COLLECT_BAD_TOCUHES, 0);
+                COLLECT_BAD_TOUCHES, 0);
     }
 
     private boolean sessionEntrypoint() {
-        if ((mState == StatusBarState.KEYGUARD || mState == StatusBarState.SHADE_LOCKED)
-                && mEnableAnalytics && mCurrentSession == null) {
+        if (mEnableCollector && mCurrentSession == null) {
             onSessionStart();
             return true;
         }
@@ -142,22 +115,15 @@ public class LockedPhoneAnalytics implements SensorEventListener {
     }
 
     private void sessionExitpoint(int result) {
-        if (mEnableAnalytics && mCurrentSession != null) {
+        if (mEnableCollector && mCurrentSession != null) {
             onSessionEnd(result);
         }
     }
 
     private void onSessionStart() {
-        mBouncerOn = false;
         mCornerSwiping = false;
         mTrackingStarted = false;
         mCurrentSession = new SensorLoggerSession(System.currentTimeMillis(), System.nanoTime());
-        for (int sensorType : SENSORS) {
-            Sensor s = mSensorManager.getDefaultSensor(sensorType);
-            if (s != null) {
-                mSensorManager.registerListener(this, s, SensorManager.SENSOR_DELAY_GAME);
-            }
-        }
     }
 
     private void onSessionEnd(int result) {
@@ -196,10 +162,9 @@ public class LockedPhoneAnalytics implements SensorEventListener {
         });
     }
 
-
     @Override
     public synchronized void onSensorChanged(SensorEvent event) {
-        if (mEnableAnalytics && mCurrentSession != null) {
+        if (mEnableCollector && mCurrentSession != null) {
             mCurrentSession.addSensorEvent(event, System.nanoTime());
             enforceTimeout();
         }
@@ -221,18 +186,14 @@ public class LockedPhoneAnalytics implements SensorEventListener {
     public void onAccuracyChanged(Sensor sensor, int accuracy) {
     }
 
-    public boolean shouldEnforceBouncer() {
-        return mEnforceBouncer;
+    public boolean isEnabled() {
+        return mEnableCollector;
     }
 
-    public void setStatusBarState(int state) {
-        mState = state;
-    }
-
-    public void onScreenOn() {
+    public void onScreenTurningOn() {
         if (sessionEntrypoint()) {
             if (DEBUG) {
-                Log.d(TAG, "onScreenOn");
+                Log.d(TAG, "onScreenTurningOn");
             }
             addEvent(PhoneEvent.ON_SCREEN_ON);
         }
@@ -264,23 +225,17 @@ public class LockedPhoneAnalytics implements SensorEventListener {
     }
 
     public void onBouncerShown() {
-        if (!mBouncerOn) {
-            if (DEBUG) {
-                Log.d(TAG, "onBouncerShown");
-            }
-            mBouncerOn = true;
-            addEvent(PhoneEvent.ON_BOUNCER_SHOWN);
+        if (DEBUG) {
+            Log.d(TAG, "onBouncerShown");
         }
+        addEvent(PhoneEvent.ON_BOUNCER_SHOWN);
     }
 
     public void onBouncerHidden() {
-        if (mBouncerOn) {
-            if (DEBUG) {
-                Log.d(TAG, "onBouncerHidden");
-            }
-            mBouncerOn = false;
-            addEvent(PhoneEvent.ON_BOUNCER_HIDDEN);
+        if (DEBUG) {
+            Log.d(TAG, "onBouncerHidden");
         }
+        addEvent(PhoneEvent.ON_BOUNCER_HIDDEN);
     }
 
     public void onQsDown() {
@@ -433,20 +388,20 @@ public class LockedPhoneAnalytics implements SensorEventListener {
         addEvent(PhoneEvent.ON_LEFT_AFFORDANCE_HINT_STARTED);
     }
 
-    public void onTouchEvent(MotionEvent ev, int width, int height) {
-        if (!mBouncerOn && mCurrentSession != null) {
+    public void onTouchEvent(MotionEvent event, int width, int height) {
+        if (mCurrentSession != null) {
             if (DEBUG) {
                 Log.v(TAG, "onTouchEvent(ev.action="
-                        + MotionEvent.actionToString(ev.getAction()) + ")");
+                        + MotionEvent.actionToString(event.getAction()) + ")");
             }
-            mCurrentSession.addMotionEvent(ev);
+            mCurrentSession.addMotionEvent(event);
             mCurrentSession.setTouchArea(width, height);
             enforceTimeout();
         }
     }
 
     private void addEvent(int eventType) {
-        if (mEnableAnalytics && mCurrentSession != null) {
+        if (mEnableCollector && mCurrentSession != null) {
             mCurrentSession.addPhoneEvent(eventType, System.nanoTime());
         }
     }

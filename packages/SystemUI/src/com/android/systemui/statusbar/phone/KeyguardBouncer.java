@@ -31,7 +31,7 @@ import com.android.keyguard.KeyguardUpdateMonitorCallback;
 import com.android.keyguard.R;
 import com.android.keyguard.ViewMediatorCallback;
 import com.android.systemui.DejankUtils;
-import com.android.systemui.analytics.LockedPhoneAnalytics;
+import com.android.systemui.classifier.FalsingManager;
 
 import static com.android.keyguard.KeyguardHostView.OnDismissAction;
 import static com.android.keyguard.KeyguardSecurityModel.SecurityMode;
@@ -50,7 +50,7 @@ public class KeyguardBouncer {
     private ViewGroup mRoot;
     private boolean mShowingSoon;
     private int mBouncerPromptReason;
-    private LockedPhoneAnalytics mLockedPhoneAnalytics;
+    private FalsingManager mFalsingManager;
     private KeyguardUpdateMonitorCallback mUpdateMonitorCallback =
             new KeyguardUpdateMonitorCallback() {
                 @Override
@@ -68,11 +68,11 @@ public class KeyguardBouncer {
         mContainer = container;
         mWindowManager = windowManager;
         KeyguardUpdateMonitor.getInstance(mContext).registerCallback(mUpdateMonitorCallback);
-        mLockedPhoneAnalytics = LockedPhoneAnalytics.getInstance(mContext);
+        mFalsingManager = FalsingManager.getInstance(mContext);
     }
 
     public void show(boolean resetSecuritySelection) {
-        mLockedPhoneAnalytics.onBouncerShown();
+        mFalsingManager.onBouncerShown();
         ensureView();
         if (resetSecuritySelection) {
             // showPrimarySecurityScreen() updates the current security method. This is needed in
@@ -132,7 +132,7 @@ public class KeyguardBouncer {
     }
 
     public void hide(boolean destroyView) {
-        mLockedPhoneAnalytics.onBouncerHidden();
+        mFalsingManager.onBouncerHidden();
         cancelShowRunnable();
          if (mKeyguardView != null) {
             mKeyguardView.cancelDismissAction();
@@ -162,7 +162,7 @@ public class KeyguardBouncer {
     public void reset() {
         cancelShowRunnable();
         inflateView();
-        mLockedPhoneAnalytics.onBouncerHidden();
+        mFalsingManager.onBouncerHidden();
     }
 
     public void onScreenTurnedOff() {
@@ -250,7 +250,7 @@ public class KeyguardBouncer {
 
             // We need to show it in case it is secure. If not, it will get dismissed in any case.
             mRoot.setVisibility(View.VISIBLE);
-            mLockedPhoneAnalytics.onBouncerShown();
+            mFalsingManager.onBouncerShown();
             mKeyguardView.requestFocus();
             mKeyguardView.onResume();
             return true;

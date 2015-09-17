@@ -36,10 +36,10 @@ import android.view.WindowManagerGlobal;
 import android.widget.FrameLayout;
 
 import com.android.systemui.R;
+import com.android.systemui.classifier.FalsingManager;
 import com.android.systemui.statusbar.BaseStatusBar;
 import com.android.systemui.statusbar.DragDownHelper;
 import com.android.systemui.statusbar.StatusBarState;
-import com.android.systemui.analytics.LockedPhoneAnalytics;
 import com.android.systemui.statusbar.stack.NotificationStackScrollLayout;
 
 
@@ -56,14 +56,14 @@ public class StatusBarWindowView extends FrameLayout {
 
     private PhoneStatusBar mService;
     private final Paint mTransparentSrcPaint = new Paint();
-    private LockedPhoneAnalytics mLockedPhoneAnalytics;
+    private FalsingManager mFalsingManager;
 
     public StatusBarWindowView(Context context, AttributeSet attrs) {
         super(context, attrs);
         setMotionEventSplittingEnabled(false);
         mTransparentSrcPaint.setColor(0);
         mTransparentSrcPaint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.SRC));
-        mLockedPhoneAnalytics = LockedPhoneAnalytics.getInstance(context);
+        mFalsingManager = FalsingManager.getInstance(context);
     }
 
     @Override
@@ -200,7 +200,7 @@ public class StatusBarWindowView extends FrameLayout {
 
     @Override
     public boolean dispatchTouchEvent(MotionEvent ev) {
-        mLockedPhoneAnalytics.onTouchEvent(ev, getWidth(), getHeight());
+        mFalsingManager.onTouchEvent(ev, getWidth(), getHeight());
         if (mBrightnessMirror != null && mBrightnessMirror.getVisibility() == VISIBLE) {
             // Disallow new pointers while the brightness mirror is visible. This is so that you
             // can't touch anything other than the brightness slider while the mirror is showing

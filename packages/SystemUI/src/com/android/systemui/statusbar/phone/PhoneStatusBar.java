@@ -108,6 +108,7 @@ import com.android.systemui.EventLogConstants;
 import com.android.systemui.EventLogTags;
 import com.android.systemui.Prefs;
 import com.android.systemui.R;
+import com.android.systemui.classifier.FalsingManager;
 import com.android.systemui.assist.AssistManager;
 import com.android.systemui.doze.DozeHost;
 import com.android.systemui.doze.DozeLog;
@@ -131,7 +132,6 @@ import com.android.systemui.statusbar.ScrimView;
 import com.android.systemui.statusbar.SignalClusterView;
 import com.android.systemui.statusbar.SpeedBumpView;
 import com.android.systemui.statusbar.StatusBarState;
-import com.android.systemui.analytics.LockedPhoneAnalytics;
 import com.android.systemui.statusbar.phone.UnlockMethodCache.OnUnlockMethodChangedListener;
 import com.android.systemui.statusbar.policy.AccessibilityController;
 import com.android.systemui.statusbar.policy.BatteryController;
@@ -604,7 +604,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
     private HashSet<Entry> mHeadsUpEntriesToRemoveOnSwitch = new HashSet<>();
     private RankingMap mLatestRankingMap;
     private boolean mNoAnimationOnNextBarModeChange;
-    private LockedPhoneAnalytics mLockedPhoneAnalytics;
+    private FalsingManager mFalsingManager;
 
     @Override
     public void start() {
@@ -652,7 +652,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         notifyUserAboutHiddenNotifications();
 
         mScreenPinningRequest = new ScreenPinningRequest(mContext);
-        mLockedPhoneAnalytics = LockedPhoneAnalytics.getInstance(mContext);
+        mFalsingManager = FalsingManager.getInstance(mContext);
     }
 
     // ================================================================================
@@ -3811,7 +3811,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         }
         mState = state;
         mGroupManager.setStatusBarState(state);
-        mLockedPhoneAnalytics.setStatusBarState(state);
+        mFalsingManager.setStatusBarState(state);
         mStatusBarWindowManager.setStatusBarState(state);
         updateDozing();
     }
@@ -3833,7 +3833,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
     }
 
     public void onUnlockHintStarted() {
-        mLockedPhoneAnalytics.onUnlockHintStarted();
+        mFalsingManager.onUnlockHintStarted();
         mKeyguardIndicationController.showTransientIndication(R.string.keyguard_unlock);
     }
 
@@ -3843,17 +3843,17 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
     }
 
     public void onCameraHintStarted() {
-        mLockedPhoneAnalytics.onCameraHintStarted();
+        mFalsingManager.onCameraHintStarted();
         mKeyguardIndicationController.showTransientIndication(R.string.camera_hint);
     }
 
     public void onVoiceAssistHintStarted() {
-        mLockedPhoneAnalytics.onLeftAffordanceHintStarted();
+        mFalsingManager.onLeftAffordanceHintStarted();
         mKeyguardIndicationController.showTransientIndication(R.string.voice_hint);
     }
 
     public void onPhoneHintStarted() {
-        mLockedPhoneAnalytics.onLeftAffordanceHintStarted();
+        mFalsingManager.onLeftAffordanceHintStarted();
         mKeyguardIndicationController.showTransientIndication(R.string.phone_hint);
     }
 
@@ -3928,7 +3928,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
             row.setUserExpanded(true);
         }
         boolean fullShadeNeedsBouncer = !userAllowsPrivateNotificationsInPublic(mCurrentUserId)
-                || !mShowLockscreenNotifications || mLockedPhoneAnalytics.shouldEnforceBouncer();
+                || !mShowLockscreenNotifications || mFalsingManager.shouldEnforceBouncer();
         if (isLockscreenPublicMode() && fullShadeNeedsBouncer) {
             mLeaveOpenOnKeyguardHide = true;
             showBouncer();
@@ -3981,7 +3981,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         mDeviceInteractive = false;
         mWakeUpComingFromTouch = false;
         mWakeUpTouchLocation = null;
-        mLockedPhoneAnalytics.onScreenOff();
+        mFalsingManager.onScreenOff();
         mStackScroller.setAnimationsEnabled(false);
         updateVisibleToUser();
         if (mLaunchCameraOnFinishedGoingToSleep) {
@@ -4003,11 +4003,11 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         mStackScroller.setAnimationsEnabled(true);
         mNotificationPanel.setTouchDisabled(false);
         updateVisibleToUser();
-        mLockedPhoneAnalytics.onScreenOn();
     }
 
     public void onScreenTurningOn() {
         mScreenTurningOn = true;
+        mFalsingManager.onScreenTurningOn();
         mNotificationPanel.onScreenTurningOn();
         if (mLaunchCameraOnScreenTurningOn) {
             mNotificationPanel.launchCamera(false);
@@ -4143,7 +4143,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
             mWakeUpTouchLocation = new PointF(event.getX(), event.getY());
             mNotificationPanel.setTouchDisabled(false);
             mStatusBarKeyguardViewManager.notifyDeviceWakeUpRequested();
-            mLockedPhoneAnalytics.onScreenOnFromTouch();
+            mFalsingManager.onScreenOnFromTouch();
         }
     }
 
