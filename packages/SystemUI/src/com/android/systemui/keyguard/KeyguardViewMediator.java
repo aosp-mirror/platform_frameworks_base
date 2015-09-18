@@ -652,6 +652,7 @@ public class KeyguardViewMediator extends SystemUI {
             final boolean lockImmediately =
                     mLockPatternUtils.getPowerButtonInstantlyLocks(currentUser)
                             || !mLockPatternUtils.isSecure(currentUser);
+            long timeout = getLockTimeout();
 
             if (mExitSecureCallback != null) {
                 if (DEBUG) Log.d(TAG, "pending exit secure callback cancelled");
@@ -666,9 +667,9 @@ public class KeyguardViewMediator extends SystemUI {
                 }
             } else if (mShowing) {
                 mPendingReset = true;
-            } else if (why == WindowManagerPolicy.OFF_BECAUSE_OF_TIMEOUT
+            } else if ((why == WindowManagerPolicy.OFF_BECAUSE_OF_TIMEOUT && timeout > 0)
                     || (why == WindowManagerPolicy.OFF_BECAUSE_OF_USER && !lockImmediately)) {
-                doKeyguardLaterLocked();
+                doKeyguardLaterLocked(timeout);
             } else if (!mLockPatternUtils.isLockScreenDisabled(currentUser)) {
                 mPendingLock = true;
             }
@@ -703,7 +704,7 @@ public class KeyguardViewMediator extends SystemUI {
         KeyguardUpdateMonitor.getInstance(mContext).dispatchFinishedGoingToSleep(why);
     }
 
-    private void doKeyguardLaterLocked() {
+    private long getLockTimeout() {
         // if the screen turned off because of timeout or the user hit the power button
         // and we don't need to lock immediately, set an alarm
         // to enable it a little bit later (i.e, give the user a chance
@@ -732,21 +733,28 @@ public class KeyguardViewMediator extends SystemUI {
         } else {
             timeout = lockAfterTimeout;
         }
+        return timeout;
+    }
 
-        if (timeout <= 0) {
-            // Lock now
+    private void doKeyguardLaterLocked() {
+        long timeout = getLockTimeout();
+        if (timeout == 0) {
             doKeyguardLocked(null);
         } else {
-            // Lock in the future
-            long when = SystemClock.elapsedRealtime() + timeout;
-            Intent intent = new Intent(DELAYED_KEYGUARD_ACTION);
-            intent.putExtra("seq", mDelayedShowingSequence);
-            PendingIntent sender = PendingIntent.getBroadcast(mContext,
-                    0, intent, PendingIntent.FLAG_CANCEL_CURRENT);
-            mAlarmManager.set(AlarmManager.ELAPSED_REALTIME_WAKEUP, when, sender);
-            if (DEBUG) Log.d(TAG, "setting alarm to turn off keyguard, seq = "
-                             + mDelayedShowingSequence);
+            doKeyguardLaterLocked(timeout);
         }
+    }
+
+    private void doKeyguardLaterLocked(long timeout) {
+        // Lock in the future
+        long when = SystemClock.elapsedRealtime() + timeout;
+        Intent intent = new Intent(DELAYED_KEYGUARD_ACTION);
+        intent.putExtra("seq", mDelayedShowingSequence);
+        PendingIntent sender = PendingIntent.getBroadcast(mContext,
+                0, intent, PendingIntent.FLAG_CANCEL_CURRENT);
+        mAlarmManager.set(AlarmManager.ELAPSED_REALTIME_WAKEUP, when, sender);
+        if (DEBUG) Log.d(TAG, "setting alarm to turn off keyguard, seq = "
+                         + mDelayedShowingSequence);
     }
 
     private void cancelDoKeyguardLaterLocked() {
