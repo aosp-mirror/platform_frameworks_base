@@ -149,7 +149,7 @@ public final class MenuItemImpl implements MenuItem {
             return true;
         }
 
-        if (mMenu.dispatchMenuItemSelected(mMenu.getRootMenu(), this)) {
+        if (mMenu.dispatchMenuItemSelected(mMenu, this)) {
             return true;
         }
 
