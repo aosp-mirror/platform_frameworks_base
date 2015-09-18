@@ -20,6 +20,7 @@ import static android.app.ActivityManager.*;
 import static com.android.server.wm.WindowManagerService.DEBUG_TASK_MOVEMENT;
 import static com.android.server.wm.WindowManagerService.TAG;
 
+import android.annotation.IntDef;
 import android.content.res.Configuration;
 import android.graphics.Rect;
 import android.os.Debug;
@@ -32,6 +33,8 @@ import android.view.DisplayInfo;
 import com.android.server.EventLogTags;
 
 import java.io.PrintWriter;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 
 public class TaskStack implements DimLayer.DimLayerUser {
@@ -72,6 +75,20 @@ public class TaskStack implements DimLayer.DimLayerUser {
 
     /** Detach this stack from its display when animation completes. */
     boolean mDeferDetach;
+
+    static final int DOCKED_INVALID = -1;
+    static final int DOCKED_LEFT = 1;
+    static final int DOCKED_TOP = 2;
+    static final int DOCKED_RIGHT = 3;
+    static final int DOCKED_BOTTOM = 4;
+    @IntDef({
+            DOCKED_INVALID,
+            DOCKED_LEFT,
+            DOCKED_TOP,
+            DOCKED_RIGHT,
+            DOCKED_BOTTOM})
+    @Retention(RetentionPolicy.SOURCE)
+    @interface DockSide {}
 
     TaskStack(WindowManagerService service, int stackId) {
         mService = service;
@@ -507,5 +524,37 @@ public class TaskStack implements DimLayer.DimLayerUser {
     @Override
     public String toString() {
         return "{stackId=" + mStackId + " tasks=" + mTasks + "}";
+    }
+
+    /**
+     * For docked workspace provides information which side of the screen was the dock anchored.
+     */
+    @DockSide
+    int getDockSide() {
+        if (mStackId != DOCKED_STACK_ID) {
+            return DOCKED_INVALID;
+        }
+        if (mDisplayContent == null) {
+            return DOCKED_INVALID;
+        }
+        mDisplayContent.getLogicalDisplayRect(mTmpRect);
+        final int orientation = mService.mCurConfiguration.orientation;
+        if (orientation == Configuration.ORIENTATION_PORTRAIT) {
+            // Portrait mode, docked either at the top or the bottom.
+            if (mTmpRect.top - mBounds.top < mTmpRect.bottom - mBounds.bottom) {
+                return DOCKED_TOP;
+            } else {
+                return DOCKED_BOTTOM;
+            }
+        } else if (orientation == Configuration.ORIENTATION_LANDSCAPE) {
+            // Landscape mode, docked either on the left or on the right.
+            if (mTmpRect.left - mBounds.left < mTmpRect.right - mBounds.right) {
+                return DOCKED_LEFT;
+            } else {
+                return DOCKED_RIGHT;
+            }
+        } else {
+            return DOCKED_INVALID;
+        }
     }
 }
