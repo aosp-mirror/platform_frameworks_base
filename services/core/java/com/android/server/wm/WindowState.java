@@ -16,7 +16,6 @@
 
 package com.android.server.wm;
 
-import static android.app.ActivityManager.FREEFORM_WORKSPACE_STACK_ID;
 import static android.view.WindowManager.LayoutParams.FIRST_SUB_WINDOW;
 import static android.view.WindowManager.LayoutParams.FLAG_DIM_BEHIND;
 import static android.view.WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED;
@@ -381,6 +380,8 @@ final class WindowState implements WindowManagerPolicy.WindowState {
      * This lock is only acquired on first use.
      */
     PowerManager.WakeLock mDrawLock;
+
+    final private Rect mTmpRect = new Rect();
 
     WindowState(WindowManagerService service, Session s, IWindow c, WindowToken token,
            WindowState attachedWindow, int appOp, int seq, WindowManager.LayoutParams a,
@@ -937,24 +938,33 @@ final class WindowState implements WindowManagerPolicy.WindowState {
      *        bounds will be returned.
      */
     void getVisibleBounds(Rect bounds, boolean forTouch) {
-        final boolean useStackBounds = mAppToken != null && mAppToken.mCropWindowsToStack;
+        boolean intersectWithStackBounds = mAppToken != null && mAppToken.mCropWindowsToStack;
         boolean isFreeform = false;
         bounds.setEmpty();
-        if (useStackBounds) {
+        mTmpRect.setEmpty();
+        if (intersectWithStackBounds) {
             final TaskStack stack = getStack();
             if (stack != null) {
-                stack.getBounds(bounds);
-                isFreeform = stack.mStackId == FREEFORM_WORKSPACE_STACK_ID;
-            }
-        } else {
-            final Task task = getTask();
-            if (task != null) {
-                task.getBounds(bounds);
-                isFreeform = task.inFreeformWorkspace();
+                stack.getBounds(mTmpRect);
+            } else {
+                intersectWithStackBounds = false;
             }
         }
+
+        final Task task = getTask();
+        if (task != null) {
+            task.getBounds(bounds);
+            isFreeform = task.inFreeformWorkspace();
+            if (intersectWithStackBounds) {
+                bounds.intersect(mTmpRect);
+            }
+        }
+
         if (bounds.isEmpty()) {
             bounds.set(mFrame);
+            if (intersectWithStackBounds) {
+                bounds.intersect(mTmpRect);
+            }
             return;
         }
         if (forTouch && isFreeform) {
