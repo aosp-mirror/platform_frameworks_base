@@ -21,8 +21,8 @@
     <string name="title_save" msgid="2433679664882857999">"ذخیره در"</string>
     <string name="menu_create_dir" msgid="5947289605844398389">"ایجاد پوشه"</string>
     <string name="menu_grid" msgid="6878021334497835259">"نمای جدولی"</string>
-    <string name="menu_list" msgid="7279285939892417279">"نمای فهرست‌وار"</string>
-    <string name="menu_sort" msgid="7677740407158414452">"مرتب‌سازی بر اساس"</string>
+    <string name="menu_list" msgid="7279285939892417279">"نمای فهرستی"</string>
+    <string name="menu_sort" msgid="7677740407158414452">"مرتب‌سازی براساس"</string>
     <string name="menu_search" msgid="3816712084502856974">"جستجو"</string>
     <string name="menu_settings" msgid="6008033148948428823">"تنظیمات"</string>
     <string name="menu_open" msgid="432922957274920903">"باز کردن"</string>
@@ -39,9 +39,9 @@
     <string name="menu_file_size_hide" msgid="8881975928502581042">"پنهان کردن اندازه فایل"</string>
     <string name="button_select" msgid="527196987259139214">"انتخاب"</string>
     <string name="button_copy" msgid="8706475544635021302">"کپی"</string>
-    <string name="sort_name" msgid="9183560467917256779">"بر اساس نام"</string>
-    <string name="sort_date" msgid="586080032956151448">"بر اساس تاریخ اصلاح"</string>
-    <string name="sort_size" msgid="3350681319735474741">"بر اساس اندازه"</string>
+    <string name="sort_name" msgid="9183560467917256779">"براساس نام"</string>
+    <string name="sort_date" msgid="586080032956151448">"براساس تاریخ اصلاح"</string>
+    <string name="sort_size" msgid="3350681319735474741">"براساس اندازه"</string>
     <string name="drawer_open" msgid="4545466532430226949">"نمایش ریشه‌ها"</string>
     <string name="drawer_close" msgid="7602734368552123318">"پنهان کردن ریشه‌ها"</string>
     <string name="save_error" msgid="6167009778003223664">"ذخیره سند انجام نشد"</string>

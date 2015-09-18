@@ -20,7 +20,7 @@
     <string name="title_open" msgid="4353228937663917801">"Բացել այստեղից"</string>
     <string name="title_save" msgid="2433679664882857999">"Պահել այստեղ"</string>
     <string name="menu_create_dir" msgid="5947289605844398389">"Ստեղծել պանակ"</string>
-    <string name="menu_grid" msgid="6878021334497835259">"Ցանցի տեսք"</string>
+    <string name="menu_grid" msgid="6878021334497835259">"Ցանցի տեսքով"</string>
     <string name="menu_list" msgid="7279285939892417279">"Ցուցակի տեսք"</string>
     <string name="menu_sort" msgid="7677740407158414452">"Դասավորել ըստ"</string>
     <string name="menu_search" msgid="3816712084502856974">"Որոնել"</string>
