@@ -707,9 +707,13 @@ interface ITelephony {
      *
      * @param subId the id of the subscription.
      * @param operatorInfo the operator to attach to.
+     * @param persistSelection should the selection persist till reboot or its
+     *        turned off? Will also result in notification being not shown to
+     *        the user if the signal is lost.
      * @return true if the request suceeded.
      */
-    boolean setNetworkSelectionModeManual(int subId, in OperatorInfo operator);
+    boolean setNetworkSelectionModeManual(int subId, in OperatorInfo operator,
+            boolean persistSelection);
 
     /**
      * Set the preferred network type.
