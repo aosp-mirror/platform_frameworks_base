@@ -896,6 +896,7 @@ public class ResolverActivity extends Activity {
         private final ResolveInfo mResolveInfo;
         private final CharSequence mDisplayLabel;
         private Drawable mDisplayIcon;
+        private Drawable mBadge;
         private final CharSequence mExtendedInfo;
         private final Intent mResolvedIntent;
         private final List<Intent> mSourceIntents = new ArrayList<>();
@@ -940,7 +941,25 @@ public class ResolverActivity extends Activity {
         }
 
         public Drawable getBadgeIcon() {
-            return null;
+            // We only expose a badge if we have extended info.
+            // The badge is a higher-priority disambiguation signal
+            // but we don't need one if we wouldn't show extended info at all.
+            if (TextUtils.isEmpty(getExtendedInfo())) {
+                return null;
+            }
+
+            if (mBadge == null && mResolveInfo != null && mResolveInfo.activityInfo != null
+                    && mResolveInfo.activityInfo.applicationInfo != null) {
+                if (mResolveInfo.activityInfo.icon == 0 || mResolveInfo.activityInfo.icon
+                        == mResolveInfo.activityInfo.applicationInfo.icon) {
+                    // Badging an icon with exactly the same icon is silly.
+                    // If the activityInfo icon resid is 0 it will fall back
+                    // to the application's icon, making it a match.
+                    return null;
+                }
+                mBadge = mResolveInfo.activityInfo.applicationInfo.loadIcon(mPm);
+            }
+            return mBadge;
         }
 
         @Override
@@ -1378,8 +1397,8 @@ public class ResolverActivity extends Activity {
             } else {
                 mHasExtendedInfo = true;
                 boolean usePkg = false;
-                CharSequence startApp = ro.getResolveInfoAt(0).activityInfo.applicationInfo
-                        .loadLabel(mPm);
+                final ApplicationInfo ai = ro.getResolveInfoAt(0).activityInfo.applicationInfo;
+                final CharSequence startApp = ai.loadLabel(mPm);
                 if (startApp == null) {
                     usePkg = true;
                 }
