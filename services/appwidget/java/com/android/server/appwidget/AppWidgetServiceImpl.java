@@ -1871,19 +1871,28 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
         return false;
     }
 
-    private void deleteProviderLocked(Provider provider) {
-        int N = provider.widgets.size();
+    // Remove widgets for provider that are hosted in userId.
+    private void deleteWidgetsLocked(Provider provider, int userId) {
+        final int N = provider.widgets.size();
         for (int i = N - 1; i >= 0; i--) {
-            Widget widget = provider.widgets.remove(i);
-            // Call back with empty RemoteViews
-            updateAppWidgetInstanceLocked(widget, null, false);
-            // clear out references to this appWidgetId
-            widget.host.widgets.remove(widget);
-            removeWidgetLocked(widget);
-            widget.provider = null;
-            pruneHostLocked(widget.host);
-            widget.host = null;
+            Widget widget = provider.widgets.get(i);
+            if (userId == UserHandle.USER_ALL
+                    || userId == widget.host.getUserId()) {
+                provider.widgets.remove(i);
+                // Call back with empty RemoteViews
+                updateAppWidgetInstanceLocked(widget, null, false);
+                // clear out references to this appWidgetId
+                widget.host.widgets.remove(widget);
+                removeWidgetLocked(widget);
+                widget.provider = null;
+                pruneHostLocked(widget.host);
+                widget.host = null;
+            }
         }
+    }
+
+    private void deleteProviderLocked(Provider provider) {
+        deleteWidgetsLocked(provider, UserHandle.USER_ALL);
         mProviders.remove(provider);
 
         // no need to send the DISABLE broadcast, since the receiver is gone anyway
@@ -2931,6 +2940,19 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
         return providersUpdated;
     }
 
+    // Remove widgets for provider in userId that are hosted in parentUserId
+    private void removeWidgetsForPackageLocked(String pkgName, int userId, int parentUserId) {
+        final int N = mProviders.size();
+        for (int i = 0; i < N; ++i) {
+            Provider provider = mProviders.get(i);
+            if (pkgName.equals(provider.info.provider.getPackageName())
+                    && provider.getUserId() == userId
+                    && provider.widgets.size() > 0) {
+                deleteWidgetsLocked(provider, parentUserId);
+            }
+        }
+    }
+
     private boolean removeProvidersForPackageLocked(String pkgName, int userId) {
         boolean removed = false;
 
@@ -3042,14 +3064,14 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
                             userId, null);
                 }
 
-                // Some packages are no longer whitelisted.
+                // Remove widgets from hosts in parent user for packages not in the whitelist
                 final int removedCount = previousPackages.size();
                 for (int i = 0; i < removedCount; ++i) {
-                    providersChanged |= removeProvidersForPackageLocked(
-                            previousPackages.valueAt(i), userId);
+                    removeWidgetsForPackageLocked(previousPackages.valueAt(i),
+                            userId, parentId);
                 }
 
-                if (providersChanged) {
+                if (providersChanged || removedCount > 0) {
                     saveGroupStateAsync(userId);
                     scheduleNotifyGroupHostsForProvidersChangedLocked(userId);
                 }
