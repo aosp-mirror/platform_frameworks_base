@@ -34,14 +34,14 @@
     <string name="status_bar_latest_events_title" msgid="6594767438577593172">"اعلان‌ها"</string>
     <string name="battery_low_title" msgid="6456385927409742437">"شارژ باتری کم است"</string>
     <string name="battery_low_percent_format" msgid="2900940511201380775">"<xliff:g id="PERCENTAGE">%s</xliff:g> باقی مانده است"</string>
-    <string name="battery_low_percent_format_saver_started" msgid="6859235584035338833">"<xliff:g id="PERCENTAGE">%s</xliff:g> باقی مانده است. ذخیره کننده باتری روشن است."</string>
+    <string name="battery_low_percent_format_saver_started" msgid="6859235584035338833">"<xliff:g id="PERCENTAGE">%s</xliff:g> باقی مانده است. بهینه‌سازی باتری روشن است."</string>
     <string name="invalid_charger" msgid="4549105996740522523">"‏شارژ USB پشتیبانی نمی‌شود.\nفقط از شارژر ارائه شده استفاده کنید."</string>
     <string name="invalid_charger_title" msgid="3515740382572798460">"‏شارژ با USB پشتیبانی نمی‌شود."</string>
     <string name="invalid_charger_text" msgid="5474997287953892710">"فقط از شارژر ارائه شده استفاده کنید."</string>
     <string name="battery_low_why" msgid="4553600287639198111">"تنظیمات"</string>
-    <string name="battery_saver_confirmation_title" msgid="5299585433050361634">"ذخیره‌کننده باتری روشن شود؟"</string>
+    <string name="battery_saver_confirmation_title" msgid="5299585433050361634">"بهینه‌سازی باتری روشن شود؟"</string>
     <string name="battery_saver_confirmation_ok" msgid="7507968430447930257">"روشن کردن"</string>
-    <string name="battery_saver_start_action" msgid="5576697451677486320">"ذخیره‌کننده باتری را روشن کنید"</string>
+    <string name="battery_saver_start_action" msgid="5576697451677486320">"بهینه‌سازی باتری را روشن کنید"</string>
     <string name="status_bar_settings_settings_button" msgid="3023889916699270224">"تنظیمات"</string>
     <string name="status_bar_settings_wifi_button" msgid="1733928151698311923">"Wi-Fi"</string>
     <string name="status_bar_settings_auto_rotation" msgid="3790482541357798421">"چرخش خودکار صفحه"</string>
@@ -346,9 +346,9 @@
     <string name="guest_notification_remove_action" msgid="8820670703892101990">"حذف مهمان"</string>
     <string name="user_add_user_title" msgid="4553596395824132638">"کاربر جدیدی اضافه می‌کنید؟"</string>
     <string name="user_add_user_message_short" msgid="2161624834066214559">"وقتی کاربر جدیدی را اضافه می‌کنید آن فرد باید فضای خودش را تنظیم کند.\n\nهر کاربری می‌تواند برنامه‌ها را برای همه کاربران دیگر به‌روزرسانی کند."</string>
-    <string name="battery_saver_notification_title" msgid="237918726750955859">"ذخیره کننده باتری روشن است."</string>
+    <string name="battery_saver_notification_title" msgid="237918726750955859">"بهینه‌سازی باتری روشن است."</string>
     <string name="battery_saver_notification_text" msgid="820318788126672692">"عملکرد و اطلاعات پس‌زمینه را کاهش می‌دهد"</string>
-    <string name="battery_saver_notification_action_text" msgid="109158658238110382">"خاموش کردن ذخیره‌کننده باتری"</string>
+    <string name="battery_saver_notification_action_text" msgid="109158658238110382">"بهینه‌سازی باتری را خاموش کنید"</string>
     <string name="notification_hidden_text" msgid="1135169301897151909">"محتواها پنهان هستند"</string>
     <string name="media_projection_dialog_text" msgid="3071431025448218928">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> شروع به ضبط هر چیزی می‌کند که در صفحه‌نمایش شما نمایش داده می‌شود."</string>
     <string name="media_projection_remember_text" msgid="3103510882172746752">"دوباره نشان داده نشود"</string>

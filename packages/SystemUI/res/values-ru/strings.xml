@@ -269,7 +269,7 @@
     <string name="quick_settings_wifi_no_network" msgid="2221993077220856376">"Нет сети"</string>
     <string name="quick_settings_wifi_off_label" msgid="7558778100843885864">"Wi-Fi выкл."</string>
     <string name="quick_settings_wifi_detail_empty_text" msgid="269990350383909226">"Не удалось найти доступные сети Wi-Fi"</string>
-    <string name="quick_settings_cast_title" msgid="7709016546426454729">"Wi-Fi-монитор"</string>
+    <string name="quick_settings_cast_title" msgid="7709016546426454729">"Трансляция"</string>
     <string name="quick_settings_casting" msgid="6601710681033353316">"Передача изображения"</string>
     <string name="quick_settings_cast_device_default_name" msgid="5367253104742382945">"Безымянное устройство"</string>
     <string name="quick_settings_cast_device_default_description" msgid="2484573682378634413">"Готово к передаче"</string>

@@ -203,10 +203,10 @@
     <string name="accessibility_quick_settings_close" msgid="3115847794692516306">"Paneli kapat."</string>
     <string name="accessibility_quick_settings_more_time" msgid="3659274935356197708">"Daha uzun süre."</string>
     <string name="accessibility_quick_settings_less_time" msgid="2404728746293515623">"Daha kısa süre."</string>
-    <string name="accessibility_quick_settings_flashlight_off" msgid="4936432000069786988">"Flaş ışığı kapalı."</string>
-    <string name="accessibility_quick_settings_flashlight_on" msgid="2003479320007841077">"Flaş ışığı açık."</string>
-    <string name="accessibility_quick_settings_flashlight_changed_off" msgid="3303701786768224304">"Flaş ışığı kapatıldı."</string>
-    <string name="accessibility_quick_settings_flashlight_changed_on" msgid="6531793301533894686">"Flaş ışığı açıldı."</string>
+    <string name="accessibility_quick_settings_flashlight_off" msgid="4936432000069786988">"El feneri kapalı."</string>
+    <string name="accessibility_quick_settings_flashlight_on" msgid="2003479320007841077">"El feneri açık."</string>
+    <string name="accessibility_quick_settings_flashlight_changed_off" msgid="3303701786768224304">"El feneri kapatıldı."</string>
+    <string name="accessibility_quick_settings_flashlight_changed_on" msgid="6531793301533894686">"El feneri açıldı."</string>
     <string name="accessibility_quick_settings_color_inversion_changed_off" msgid="4406577213290173911">"Renkleri ters çevirme işlevi kapatıldı."</string>
     <string name="accessibility_quick_settings_color_inversion_changed_on" msgid="6897462320184911126">"Renkleri ters çevirme işlevi açıldı."</string>
     <string name="accessibility_quick_settings_hotspot_changed_off" msgid="5004708003447561394">"Mobil hotspot kapatıldı."</string>

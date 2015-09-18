@@ -88,7 +88,7 @@
     <string name="accessibility_voice_assist_button" msgid="487611083884852965">"音声アシスト"</string>
     <string name="accessibility_unlock_button" msgid="128158454631118828">"ロック解除"</string>
     <string name="accessibility_unlock_button_fingerprint" msgid="8214125623493923751">"ロック解除ボタン、指紋を待っています"</string>
-    <string name="accessibility_unlock_without_fingerprint" msgid="7541705575183694446">"指紋を使用せずにロック解除"</string>
+    <string name="accessibility_unlock_without_fingerprint" msgid="7541705575183694446">"指紋認証を使用せずにロック解除"</string>
     <string name="unlock_label" msgid="8779712358041029439">"ロック解除"</string>
     <string name="phone_label" msgid="2320074140205331708">"電話を起動"</string>
     <string name="voice_assist_label" msgid="3956854378310019854">"音声アシストを開く"</string>
@@ -330,7 +330,7 @@
     <string name="accessibility_multi_user_switch_switcher" msgid="7305948938141024937">"ユーザーを切り替える"</string>
     <string name="accessibility_multi_user_switch_switcher_with_current" msgid="8434880595284601601">"ユーザーを切り替える、現在のユーザーは<xliff:g id="CURRENT_USER_NAME">%s</xliff:g>"</string>
     <string name="accessibility_multi_user_switch_inactive" msgid="1424081831468083402">"現在のユーザー: <xliff:g id="CURRENT_USER_NAME">%s</xliff:g>"</string>
-    <string name="accessibility_multi_user_switch_quick_contact" msgid="3020367729287990475">"プロフィールを表示"</string>
+    <string name="accessibility_multi_user_switch_quick_contact" msgid="3020367729287990475">"プロファイルを表示"</string>
     <string name="user_add_user" msgid="5110251524486079492">"ユーザーを追加"</string>
     <string name="user_new_user_name" msgid="426540612051178753">"新しいユーザー"</string>
     <string name="guest_nickname" msgid="8059989128963789678">"ゲスト"</string>
@@ -358,10 +358,10 @@
     <string name="media_projection_action_text" msgid="8470872969457985954">"今すぐ開始"</string>
     <string name="empty_shade_text" msgid="708135716272867002">"通知はありません"</string>
     <string name="device_owned_footer" msgid="3802752663326030053">"端末が監視されている可能性があります"</string>
-    <string name="profile_owned_footer" msgid="8021888108553696069">"プロフィールが監視されている可能性があります"</string>
+    <string name="profile_owned_footer" msgid="8021888108553696069">"プロファイルが監視されている可能性があります"</string>
     <string name="vpn_footer" msgid="2388611096129106812">"ネットワークが監視されている可能性があります"</string>
     <string name="monitoring_title_device_owned" msgid="7121079311903859610">"端末の監視"</string>
-    <string name="monitoring_title_profile_owned" msgid="6790109874733501487">"プロフィールの監視"</string>
+    <string name="monitoring_title_profile_owned" msgid="6790109874733501487">"プロファイルの監視"</string>
     <string name="monitoring_title" msgid="169206259253048106">"ネットワーク監視"</string>
     <string name="disable_vpn" msgid="4435534311510272506">"VPNを無効にする"</string>
     <string name="disconnect_vpn" msgid="1324915059568548655">"VPNを切断"</string>
