@@ -105,7 +105,7 @@ public final class BatteryStatsImpl extends BatteryStats {
     private static final int MAGIC = 0xBA757475; // 'BATSTATS'
 
     // Current on-disk Parcel version
-    private static final int VERSION = 130 + (USE_OLD_HISTORY ? 1000 : 0);
+    private static final int VERSION = 131 + (USE_OLD_HISTORY ? 1000 : 0);
 
     // Maximum number of items we will record in the history.
     private static final int MAX_HISTORY_ITEMS = 2000;
@@ -117,8 +117,6 @@ public final class BatteryStatsImpl extends BatteryStats {
     // per uid; once the limit is reached, we batch the remaining wakelocks
     // in to one common name.
     private static final int MAX_WAKELOCKS_PER_UID = 100;
-
-    private static int sNumSpeedSteps;
 
     private final JournaledFile mFile;
     public final AtomicFile mCheckinFile;
@@ -133,7 +131,7 @@ public final class BatteryStatsImpl extends BatteryStats {
     private final KernelWakelockStats mTmpWakelockStats = new KernelWakelockStats();
 
     private final KernelUidCpuTimeReader mKernelUidCpuTimeReader = new KernelUidCpuTimeReader();
-    private final KernelCpuSpeedReader mKernelCpuSpeedReader = new KernelCpuSpeedReader();
+    private KernelCpuSpeedReader[] mKernelCpuSpeedReaders;
 
     public interface BatteryCallback {
         public void batteryNeedsCpuUpdate();
@@ -4411,7 +4409,7 @@ public final class BatteryStatsImpl extends BatteryStats {
         LongSamplingCounter mUserCpuTime = new LongSamplingCounter(mOnBatteryTimeBase);
         LongSamplingCounter mSystemCpuTime = new LongSamplingCounter(mOnBatteryTimeBase);
         LongSamplingCounter mCpuPower = new LongSamplingCounter(mOnBatteryTimeBase);
-        LongSamplingCounter[] mSpeedBins;
+        LongSamplingCounter[][] mCpuClusterSpeed;
 
         /**
          * The statistics we have collected for this uid's wake locks.
@@ -4470,7 +4468,6 @@ public final class BatteryStatsImpl extends BatteryStats {
             mWifiMulticastTimer = new StopwatchTimer(Uid.this, WIFI_MULTICAST_ENABLED,
                     mWifiMulticastTimers, mOnBatteryTimeBase);
             mProcessStateTimer = new StopwatchTimer[NUM_PROCESS_STATE];
-            mSpeedBins = new LongSamplingCounter[getCpuSpeedSteps()];
         }
 
         @Override
@@ -5008,10 +5005,18 @@ public final class BatteryStatsImpl extends BatteryStats {
         }
 
         @Override
-        public long getTimeAtCpuSpeed(int step, int which) {
-            if (step >= 0 && step < mSpeedBins.length) {
-                if (mSpeedBins[step] != null) {
-                    return mSpeedBins[step].getCountLocked(which);
+        public long getTimeAtCpuSpeed(int cluster, int step, int which) {
+            if (mCpuClusterSpeed != null) {
+                if (cluster >= 0 && cluster < mCpuClusterSpeed.length) {
+                    final LongSamplingCounter[] cpuSpeeds = mCpuClusterSpeed[cluster];
+                    if (cpuSpeeds != null) {
+                        if (step >= 0 && step < cpuSpeeds.length) {
+                            final LongSamplingCounter c = cpuSpeeds[step];
+                            if (c != null) {
+                                return c.getCountLocked(which);
+                            }
+                        }
+                    }
                 }
             }
             return 0;
@@ -5128,10 +5133,16 @@ public final class BatteryStatsImpl extends BatteryStats {
             mUserCpuTime.reset(false);
             mSystemCpuTime.reset(false);
             mCpuPower.reset(false);
-            for (int i = 0; i < mSpeedBins.length; i++) {
-                LongSamplingCounter c = mSpeedBins[i];
-                if (c != null) {
-                    c.reset(false);
+
+            if (mCpuClusterSpeed != null) {
+                for (LongSamplingCounter[] speeds : mCpuClusterSpeed) {
+                    if (speeds != null) {
+                        for (LongSamplingCounter speed : speeds) {
+                            if (speed != null) {
+                                speed.reset(false);
+                            }
+                        }
+                    }
                 }
             }
 
@@ -5280,10 +5291,16 @@ public final class BatteryStatsImpl extends BatteryStats {
                 mUserCpuTime.detach();
                 mSystemCpuTime.detach();
                 mCpuPower.detach();
-                for (int i = 0; i < mSpeedBins.length; i++) {
-                    LongSamplingCounter c = mSpeedBins[i];
-                    if (c != null) {
-                        c.detach();
+
+                if (mCpuClusterSpeed != null) {
+                    for (LongSamplingCounter[] cpuSpeeds : mCpuClusterSpeed) {
+                        if (cpuSpeeds != null) {
+                            for (LongSamplingCounter c : cpuSpeeds) {
+                                if (c != null) {
+                                    c.detach();
+                                }
+                            }
+                        }
                     }
                 }
             }
@@ -5461,15 +5478,27 @@ public final class BatteryStatsImpl extends BatteryStats {
             mSystemCpuTime.writeToParcel(out);
             mCpuPower.writeToParcel(out);
 
-            out.writeInt(mSpeedBins.length);
-            for (int i = 0; i < mSpeedBins.length; i++) {
-                LongSamplingCounter c = mSpeedBins[i];
-                if (c != null) {
-                    out.writeInt(1);
-                    c.writeToParcel(out);
-                } else {
-                    out.writeInt(0);
+            if (mCpuClusterSpeed != null) {
+                out.writeInt(1);
+                out.writeInt(mCpuClusterSpeed.length);
+                for (LongSamplingCounter[] cpuSpeeds : mCpuClusterSpeed) {
+                    if (cpuSpeeds != null) {
+                        out.writeInt(1);
+                        out.writeInt(cpuSpeeds.length);
+                        for (LongSamplingCounter c : cpuSpeeds) {
+                            if (c != null) {
+                                out.writeInt(1);
+                                c.writeToParcel(out);
+                            } else {
+                                out.writeInt(0);
+                            }
+                        }
+                    } else {
+                        out.writeInt(0);
+                    }
                 }
+            } else {
+                out.writeInt(0);
             }
         }
 
@@ -5653,13 +5682,32 @@ public final class BatteryStatsImpl extends BatteryStats {
             mSystemCpuTime = new LongSamplingCounter(mOnBatteryTimeBase, in);
             mCpuPower = new LongSamplingCounter(mOnBatteryTimeBase, in);
 
-            int bins = in.readInt();
-            int steps = getCpuSpeedSteps();
-            mSpeedBins = new LongSamplingCounter[bins >= steps ? bins : steps];
-            for (int i = 0; i < bins; i++) {
-                if (in.readInt() != 0) {
-                    mSpeedBins[i] = new LongSamplingCounter(mOnBatteryTimeBase, in);
+            if (in.readInt() != 0) {
+                int numCpuClusters = in.readInt();
+                if (mPowerProfile != null && mPowerProfile.getNumCpuClusters() != numCpuClusters) {
+                    throw new ParcelFormatException("Incompatible number of cpu clusters");
                 }
+
+                mCpuClusterSpeed = new LongSamplingCounter[numCpuClusters][];
+                for (int cluster = 0; cluster < numCpuClusters; cluster++) {
+                    if (in.readInt() != 0) {
+                        int numSpeeds = in.readInt();
+                        if (mPowerProfile != null &&
+                                mPowerProfile.getNumSpeedStepsInCpuCluster(cluster) != numSpeeds) {
+                            throw new ParcelFormatException("Incompatible number of cpu speeds");
+                        }
+
+                        final LongSamplingCounter[] cpuSpeeds = new LongSamplingCounter[numSpeeds];
+                        mCpuClusterSpeed[cluster] = cpuSpeeds;
+                        for (int speed = 0; speed < numSpeeds; speed++) {
+                            if (in.readInt() != 0) {
+                                cpuSpeeds[speed] = new LongSamplingCounter(mOnBatteryTimeBase, in);
+                            }
+                        }
+                    }
+                }
+            } else {
+                mCpuClusterSpeed = null;
             }
         }
 
@@ -6874,15 +6922,24 @@ public final class BatteryStatsImpl extends BatteryStats {
     public void setPowerProfile(PowerProfile profile) {
         synchronized (this) {
             mPowerProfile = profile;
+
+            // We need to initialize the KernelCpuSpeedReaders to read from
+            // the first cpu of each core. Once we have the PowerProfile, we have access to this
+            // information.
+            final int numClusters = mPowerProfile.getNumCpuClusters();
+            mKernelCpuSpeedReaders = new KernelCpuSpeedReader[numClusters];
+            int firstCpuOfCluster = 0;
+            for (int i = 0; i < numClusters; i++) {
+                final int numSpeedSteps = mPowerProfile.getNumSpeedStepsInCpuCluster(i);
+                mKernelCpuSpeedReaders[i] = new KernelCpuSpeedReader(firstCpuOfCluster,
+                        numSpeedSteps);
+                firstCpuOfCluster += mPowerProfile.getNumCoresInCpuCluster(i);
+            }
         }
     }
 
     public void setCallback(BatteryCallback cb) {
         mCallback = cb;
-    }
-
-    public void setNumSpeedSteps(int steps) {
-        if (sNumSpeedSteps == 0) sNumSpeedSteps = steps;
     }
 
     public void setRadioScanningTimeout(long timeout) {
@@ -7997,9 +8054,11 @@ public final class BatteryStatsImpl extends BatteryStats {
         // If no app is holding a wakelock, then the distribution is normal.
         final int wakelockWeight = 50;
 
-        // Read the time spent at various cpu frequencies.
-        final int cpuSpeedSteps = getCpuSpeedSteps();
-        final long[] cpuSpeeds = mKernelCpuSpeedReader.readDelta();
+        // Read the time spent for each cluster at various cpu frequencies.
+        final long[][] clusterSpeeds = new long[mKernelCpuSpeedReaders.length][];
+        for (int cluster = 0; cluster < mKernelCpuSpeedReaders.length; cluster++) {
+            clusterSpeeds[cluster] = mKernelCpuSpeedReaders[cluster].readDelta();
+        }
 
         int numWakelocks = 0;
 
@@ -8072,11 +8131,23 @@ public final class BatteryStatsImpl extends BatteryStats {
 
                         // Add the cpu speeds to this UID. These are used as a ratio
                         // for computing the power this UID used.
-                        for (int i = 0; i < cpuSpeedSteps; i++) {
-                            if (u.mSpeedBins[i] == null) {
-                                u.mSpeedBins[i] = new LongSamplingCounter(mOnBatteryTimeBase);
+                        if (u.mCpuClusterSpeed == null) {
+                            u.mCpuClusterSpeed = new LongSamplingCounter[clusterSpeeds.length][];
+                        }
+
+                        for (int cluster = 0; cluster < clusterSpeeds.length; cluster++) {
+                            if (u.mCpuClusterSpeed[cluster] == null) {
+                                u.mCpuClusterSpeed[cluster] =
+                                        new LongSamplingCounter[clusterSpeeds[cluster].length];
                             }
-                            u.mSpeedBins[i].addCountLocked(cpuSpeeds[i]);
+
+                            final LongSamplingCounter[] cpuSpeeds = u.mCpuClusterSpeed[cluster];
+                            for (int speed = 0; speed < clusterSpeeds[cluster].length; speed++) {
+                                if (cpuSpeeds[speed] == null) {
+                                    cpuSpeeds[speed] = new LongSamplingCounter(mOnBatteryTimeBase);
+                                }
+                                cpuSpeeds[speed].addCountLocked(clusterSpeeds[cluster][speed]);
+                            }
                         }
                     }
                 });
@@ -8776,11 +8847,6 @@ public final class BatteryStatsImpl extends BatteryStats {
         }
     }
 
-    @Override
-    public int getCpuSpeedSteps() {
-        return sNumSpeedSteps;
-    }
-
     /**
      * Retrieve the statistics object for a particular uid, creating if needed.
      */
@@ -9216,11 +9282,6 @@ public final class BatteryStatsImpl extends BatteryStats {
             }
         }
 
-        sNumSpeedSteps = in.readInt();
-        if (sNumSpeedSteps < 0 || sNumSpeedSteps > 100) {
-            throw new ParcelFormatException("Bad speed steps in data: " + sNumSpeedSteps);
-        }
-
         final int NU = in.readInt();
         if (NU > 10000) {
             throw new ParcelFormatException("File corrupt: too many uids " + NU);
@@ -9304,17 +9365,33 @@ public final class BatteryStatsImpl extends BatteryStats {
             u.mSystemCpuTime.readSummaryFromParcelLocked(in);
             u.mCpuPower.readSummaryFromParcelLocked(in);
 
-            int NSB = in.readInt();
-            if (NSB > 100) {
-                throw new ParcelFormatException("File corrupt: too many speed bins " + NSB);
-            }
-
-            u.mSpeedBins = new LongSamplingCounter[NSB];
-            for (int i=0; i<NSB; i++) {
-                if (in.readInt() != 0) {
-                    u.mSpeedBins[i] = new LongSamplingCounter(mOnBatteryTimeBase);
-                    u.mSpeedBins[i].readSummaryFromParcelLocked(in);
+            if (in.readInt() != 0) {
+                final int numClusters = in.readInt();
+                if (mPowerProfile != null && mPowerProfile.getNumCpuClusters() != numClusters) {
+                    throw new ParcelFormatException("Incompatible cpu cluster arrangement");
                 }
+
+                u.mCpuClusterSpeed = new LongSamplingCounter[numClusters][];
+                for (int cluster = 0; cluster < numClusters; cluster++) {
+                    int NSB = in.readInt();
+                    if (mPowerProfile != null &&
+                            mPowerProfile.getNumSpeedStepsInCpuCluster(cluster) != NSB) {
+                        throw new ParcelFormatException("File corrupt: too many speed bins " + NSB);
+                    }
+
+                    if (in.readInt() != 0) {
+                        u.mCpuClusterSpeed[cluster] = new LongSamplingCounter[NSB];
+                        for (int speed = 0; speed < NSB; speed++) {
+                            if (in.readInt() != 0) {
+                                u.mCpuClusterSpeed[cluster][speed] = new LongSamplingCounter(
+                                        mOnBatteryTimeBase);
+                                u.mCpuClusterSpeed[cluster][speed].readSummaryFromParcelLocked(in);
+                            }
+                        }
+                    }
+                }
+            } else {
+                u.mCpuClusterSpeed = null;
             }
 
             int NW = in.readInt();
@@ -9531,7 +9608,6 @@ public final class BatteryStatsImpl extends BatteryStats {
             }
         }
 
-        out.writeInt(sNumSpeedSteps);
         final int NU = mUidStats.size();
         out.writeInt(NU);
         for (int iu = 0; iu < NU; iu++) {
@@ -9640,15 +9716,27 @@ public final class BatteryStatsImpl extends BatteryStats {
             u.mSystemCpuTime.writeSummaryFromParcelLocked(out);
             u.mCpuPower.writeSummaryFromParcelLocked(out);
 
-            out.writeInt(u.mSpeedBins.length);
-            for (int i = 0; i < u.mSpeedBins.length; i++) {
-                LongSamplingCounter speedBin = u.mSpeedBins[i];
-                if (speedBin != null) {
-                    out.writeInt(1);
-                    speedBin.writeSummaryFromParcelLocked(out);
-                } else {
-                    out.writeInt(0);
+            if (u.mCpuClusterSpeed != null) {
+                out.writeInt(1);
+                out.writeInt(u.mCpuClusterSpeed.length);
+                for (LongSamplingCounter[] cpuSpeeds : u.mCpuClusterSpeed) {
+                    if (cpuSpeeds != null) {
+                        out.writeInt(1);
+                        out.writeInt(cpuSpeeds.length);
+                        for (LongSamplingCounter c : cpuSpeeds) {
+                            if (c != null) {
+                                out.writeInt(1);
+                                c.writeSummaryFromParcelLocked(out);
+                            } else {
+                                out.writeInt(0);
+                            }
+                        }
+                    } else {
+                        out.writeInt(0);
+                    }
                 }
+            } else {
+                out.writeInt(0);
             }
 
             final ArrayMap<String, Uid.Wakelock> wakeStats = u.mWakelockStats.getMap();
@@ -9897,8 +9985,6 @@ public final class BatteryStatsImpl extends BatteryStats {
         mFlashlightTurnedOnTimers.clear();
         mCameraTurnedOnTimers.clear();
 
-        sNumSpeedSteps = in.readInt();
-
         int numUids = in.readInt();
         mUidStats.clear();
         for (int i = 0; i < numUids; i++) {
@@ -10036,8 +10122,6 @@ public final class BatteryStatsImpl extends BatteryStats {
         } else {
             out.writeInt(0);
         }
-
-        out.writeInt(sNumSpeedSteps);
 
         if (inclUids) {
             int size = mUidStats.size();
