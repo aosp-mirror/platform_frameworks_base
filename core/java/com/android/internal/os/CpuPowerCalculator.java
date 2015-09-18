@@ -22,12 +22,47 @@ import android.util.Log;
 public class CpuPowerCalculator extends PowerCalculator {
     private static final String TAG = "CpuPowerCalculator";
     private static final boolean DEBUG = BatteryStatsHelper.DEBUG;
+    private final PowerProfile mProfile;
+
+    public CpuPowerCalculator(PowerProfile profile) {
+        mProfile = profile;
+    }
 
     @Override
     public void calculateApp(BatterySipper app, BatteryStats.Uid u, long rawRealtimeUs,
                              long rawUptimeUs, int statsType) {
+
         app.cpuTimeMs = (u.getUserCpuTimeUs(statsType) + u.getSystemCpuTimeUs(statsType)) / 1000;
-        app.cpuPowerMah = (double) u.getCpuPowerMaUs(statsType) / (60.0 * 60.0 * 1000.0 * 1000.0);
+
+        // Aggregate total time spent on each cluster.
+        long totalTime = 0;
+        final int numClusters = mProfile.getNumCpuClusters();
+        for (int cluster = 0; cluster < numClusters; cluster++) {
+            final int speedsForCluster = mProfile.getNumSpeedStepsInCpuCluster(cluster);
+            for (int speed = 0; speed < speedsForCluster; speed++) {
+                totalTime += u.getTimeAtCpuSpeed(cluster, speed, statsType);
+            }
+        }
+        totalTime = Math.max(totalTime, 1);
+
+        double cpuPowerMaMs = 0;
+        for (int cluster = 0; cluster < numClusters; cluster++) {
+            final int speedsForCluster = mProfile.getNumSpeedStepsInCpuCluster(cluster);
+            for (int speed = 0; speed < speedsForCluster; speed++) {
+                final double ratio = (double) u.getTimeAtCpuSpeed(cluster, speed, statsType) /
+                        totalTime;
+                final double cpuSpeedStepPower = ratio * app.cpuTimeMs *
+                        mProfile.getAveragePowerForCpu(cluster, speed);
+                if (DEBUG && ratio != 0) {
+                    Log.d(TAG, "UID " + u.getUid() + ": CPU cluster #" + cluster + " step #"
+                            + speed + " ratio=" + BatteryStatsHelper.makemAh(ratio) + " power="
+                            + BatteryStatsHelper.makemAh(cpuSpeedStepPower / (60 * 60 * 1000)));
+                }
+                cpuPowerMaMs += cpuSpeedStepPower;
+            }
+        }
+        app.cpuPowerMah = cpuPowerMaMs / (60 * 60 * 1000);
+
         if (DEBUG && (app.cpuTimeMs != 0 || app.cpuPowerMah != 0)) {
             Log.d(TAG, "UID " + u.getUid() + ": CPU time=" + app.cpuTimeMs + " ms power="
                     + BatteryStatsHelper.makemAh(app.cpuPowerMah));

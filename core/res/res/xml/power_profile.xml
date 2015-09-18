@@ -47,17 +47,38 @@
       <value>0.2</value> <!-- ~2mA -->
       <value>0.1</value> <!-- ~1mA -->
   </array>
-  <!-- Different CPU speeds as reported in
-       /sys/devices/system/cpu/cpu0/cpufreq/stats/time_in_state -->
-  <array name="cpu.speeds">
+
+  <!-- A list of heterogeneous CPU clusters, where the value for each cluster represents the
+       number of CPU cores for that cluster.
+
+       Ex:
+       <array name="cpu.clusters.cores">
+         <value>4</value> // cluster 0 has cpu0, cpu1, cpu2, cpu3
+         <value>2</value> // cluster 1 has cpu4, cpu5
+       </array> -->
+  <array name="cpu.clusters.cores">
+      <value>1</value> <!-- cluster 0 has cpu0 -->
+  </array>
+
+    <!-- Different CPU speeds for cluster 0 as reported in
+       /sys/devices/system/cpu/cpu0/cpufreq/stats/time_in_state.
+
+       There must be one of these for each cluster, labeled:
+       cpu.speeds.cluster0, cpu.speeds.cluster1, etc... -->
+  <array name="cpu.speeds.cluster0">
       <value>400000</value> <!-- 400 MHz CPU speed -->
   </array>
-  <!-- Current when CPU is idle -->
-  <item name="cpu.idle">0.1</item>
-  <!-- Current at each CPU speed, as per 'cpu.speeds' -->
-  <array name="cpu.active">
+
+  <!-- Current at each CPU speed for cluster 0, as per 'cpu.speeds.cluster0'.
+       Like cpu.speeds.cluster0, there must be one of these present for
+       each heterogeneous CPU cluster. -->
+  <array name="cpu.active.cluster0">
       <value>0.1</value>  <!-- ~100mA -->
   </array>
+
+  <!-- Current when CPU is idle -->
+  <item name="cpu.idle">0.1</item>
+
   <!-- This is the battery capacity in mAh (measured at nominal voltage) -->
   <item name="battery.capacity">1000</item>
 
