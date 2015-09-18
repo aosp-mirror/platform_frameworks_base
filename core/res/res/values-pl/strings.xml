@@ -69,8 +69,8 @@
     </plurals>
     <string name="imei" msgid="2625429890869005782">"IMEI"</string>
     <string name="meid" msgid="4841221237681254195">"MEID"</string>
-    <string name="ClipMmi" msgid="6952821216480289285">"Nazwa rozmówcy przy połączeniach przychodzących"</string>
-    <string name="ClirMmi" msgid="7784673673446833091">"Nazwa rozmówcy przy połączeniach wychodzących"</string>
+    <string name="ClipMmi" msgid="6952821216480289285">"ID rozmówcy przy połączeniach przychodzących"</string>
+    <string name="ClirMmi" msgid="7784673673446833091">"ID rozmówcy przy połączeniach wychodzących"</string>
     <string name="ColpMmi" msgid="3065121483740183974">"Identyfikator połączonej linii"</string>
     <string name="ColrMmi" msgid="4996540314421889589">"Ograniczenie identyfikatora połączonej linii"</string>
     <string name="CfMmi" msgid="5123218989141573515">"Przekierowanie połączeń"</string>
@@ -84,12 +84,12 @@
     <string name="RuacMmi" msgid="7827887459138308886">"Odrzucanie niepożądanych, irytujących połączeń"</string>
     <string name="CndMmi" msgid="3116446237081575808">"Dostarczanie numeru telefonującego"</string>
     <string name="DndMmi" msgid="1265478932418334331">"Nie przeszkadzać"</string>
-    <string name="CLIRDefaultOnNextCallOn" msgid="429415409145781923">"Nazwa rozmówcy ustawiona jest domyślnie na „zastrzeżony”. Następne połączenie: zastrzeżony"</string>
-    <string name="CLIRDefaultOnNextCallOff" msgid="3092918006077864624">"Nazwa rozmówcy ustawiona jest domyślnie na „zastrzeżony”. Następne połączenie: nie zastrzeżony"</string>
-    <string name="CLIRDefaultOffNextCallOn" msgid="6179425182856418465">"Nazwa rozmówcy ustawiona jest domyślnie na „nie zastrzeżony”. Następne połączenie: zastrzeżony"</string>
-    <string name="CLIRDefaultOffNextCallOff" msgid="2567998633124408552">"Nazwa rozmówcy ustawiona jest domyślnie na „nie zastrzeżony”. Następne połączenie: nie zastrzeżony"</string>
+    <string name="CLIRDefaultOnNextCallOn" msgid="429415409145781923">"ID rozmówcy ustawiony jest domyślnie na „zastrzeżony”. Następne połączenie: zastrzeżony"</string>
+    <string name="CLIRDefaultOnNextCallOff" msgid="3092918006077864624">"ID rozmówcy ustawiony jest domyślnie na „zastrzeżony”. Następne połączenie: nie zastrzeżony"</string>
+    <string name="CLIRDefaultOffNextCallOn" msgid="6179425182856418465">"ID rozmówcy ustawiony jest domyślnie na „nie zastrzeżony”. Następne połączenie: zastrzeżony"</string>
+    <string name="CLIRDefaultOffNextCallOff" msgid="2567998633124408552">"ID rozmówcy ustawiony jest domyślnie na „nie zastrzeżony”. Następne połączenie: nie zastrzeżony"</string>
     <string name="serviceNotProvisioned" msgid="8614830180508686666">"Usługa nie jest świadczona."</string>
-    <string name="CLIRPermanent" msgid="3377371145926835671">"Nie możesz zmienić ustawienia identyfikatora rozmówcy."</string>
+    <string name="CLIRPermanent" msgid="3377371145926835671">"Nie możesz zmienić ustawienia ID rozmówcy."</string>
     <string name="RestrictedChangedTitle" msgid="5592189398956187498">"Zmieniono ograniczenie dostępu"</string>
     <string name="RestrictedOnData" msgid="8653794784690065540">"Usługa transmisji danych jest zablokowana."</string>
     <string name="RestrictedOnEmergency" msgid="6581163779072833665">"Usługa połączeń alarmowych jest zablokowana."</string>
@@ -421,10 +421,10 @@
     <string name="permlab_useFingerprint" msgid="3150478619915124905">"używanie czytnika linii papilarnych"</string>
     <string name="permdesc_useFingerprint" msgid="9165097460730684114">"Zezwala aplikacji na używanie czytnika linii papilarnych na potrzeby autoryzacji"</string>
     <string name="fingerprint_acquired_partial" msgid="735082772341716043">"Odcisk palca został odczytany tylko częściowo. Spróbuj ponownie."</string>
-    <string name="fingerprint_acquired_insufficient" msgid="4596546021310923214">"Nie udało się przetworzyć linii papilarnych. Spróbuj ponownie."</string>
+    <string name="fingerprint_acquired_insufficient" msgid="4596546021310923214">"Nie udało się przetworzyć odcisku palca. Spróbuj ponownie."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="1087209702421076105">"Czytnik linii papilarnych jest zabrudzony. Wyczyść go i spróbuj ponownie."</string>
-    <string name="fingerprint_acquired_too_fast" msgid="6470642383109155969">"Palec został uniesiony zbyt szybko. Spróbuj ponownie."</string>
-    <string name="fingerprint_acquired_too_slow" msgid="59250885689661653">"Palec został przesunięty zbyt wolno. Spróbuj ponownie."</string>
+    <string name="fingerprint_acquired_too_fast" msgid="6470642383109155969">"Palec został podniesiony zbyt wcześnie. Spróbuj jeszcze raz."</string>
+    <string name="fingerprint_acquired_too_slow" msgid="59250885689661653">"Palec został obrócony zbyt wolno. Spróbuj ponownie."</string>
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
     <string name="fingerprint_error_hw_not_available" msgid="7955921658939936596">"Czytnik linii papilarnych nie jest dostępny."</string>
@@ -433,7 +433,7 @@
     <string name="fingerprint_error_canceled" msgid="4402024612660774395">"Odczyt odcisku palca został anulowany."</string>
     <string name="fingerprint_error_lockout" msgid="5536934748136933450">"Zbyt wiele prób. Spróbuj ponownie później."</string>
     <string name="fingerprint_error_unable_to_process" msgid="6107816084103552441">"Spróbuj ponownie."</string>
-    <string name="fingerprint_name_template" msgid="5870957565512716938">"Palec <xliff:g id="FINGERID">%d</xliff:g>"</string>
+    <string name="fingerprint_name_template" msgid="5870957565512716938">"Odcisk palca <xliff:g id="FINGERID">%d</xliff:g>"</string>
   <string-array name="fingerprint_error_vendor">
   </string-array>
     <string name="fingerprint_icon_content_description" msgid="2340202869968465936">"Ikona odcisku palca"</string>

@@ -1044,7 +1044,7 @@
     <string name="usb_accessory_notification_title" msgid="7848236974087653666">"เชื่อมต่อกับอุปกรณ์เสริม USB แล้ว"</string>
     <string name="usb_notification_message" msgid="7347368030849048437">"แตะเพื่อดูตัวเลือกเพิ่มเติม"</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"เชื่อมต่อการแก้ไขข้อบกพร่อง USB แล้ว"</string>
-    <string name="adb_active_notification_message" msgid="1016654627626476142">"แตะเพื่อปิดใช้งานการแก้ไขข้อบกพร่องของ USB"</string>
+    <string name="adb_active_notification_message" msgid="1016654627626476142">"แตะเพื่อปิดใช้งานการแก้ไขข้อบกพร่อง USB"</string>
     <string name="select_input_method" msgid="8547250819326693584">"เปลี่ยนแป้นพิมพ์"</string>
     <string name="configure_input_methods" msgid="4769971288371946846">"เลือกแป้นพิมพ์"</string>
     <string name="show_ime" msgid="9157568568695230830">"แสดงวิธีการป้อนข้อมูล"</string>

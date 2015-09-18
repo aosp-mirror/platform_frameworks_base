@@ -1167,7 +1167,7 @@
     <string name="sync_really_delete" msgid="2572600103122596243">"আইটেমগুলি মুছুন"</string>
     <string name="sync_undo_deletes" msgid="2941317360600338602">"মোছাগুলিকে পূর্বাবস্থায় ফেরান"</string>
     <string name="sync_do_nothing" msgid="3743764740430821845">"এখন কার মতো কিছু করবেন না"</string>
-    <string name="choose_account_label" msgid="5655203089746423927">"একটি অ্যাকাউন্ট নির্বাচন করুন"</string>
+    <string name="choose_account_label" msgid="5655203089746423927">"একটি অ্যাকাউন্ট বাছুন"</string>
     <string name="add_account_label" msgid="2935267344849993553">"একটি অ্যাকাউন্ট যোগ করুন"</string>
     <string name="add_account_button_label" msgid="3611982894853435874">"অ্যাকাউন্ট যোগ করুন"</string>
     <string name="number_picker_increment_button" msgid="2412072272832284313">"বাড়ান"</string>
