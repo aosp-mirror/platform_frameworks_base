@@ -38,15 +38,22 @@ public class SuggestionsPopupWindowTest extends ActivityInstrumentationTestCase2
     }
 
     @SmallTest
-    public void testTextAndAppearanceInSuggestionsPopup() {
+    public void testTextAppearanceInSuggestionsPopup() {
         final Activity activity = getActivity();
 
         final String sampleText = "abc def ghi";
-        final String[] candidate = {"DEF", "Def"};
-        final SuggestionSpan suggestionSpan = new SuggestionSpan(activity, candidate,
-                SuggestionSpan.FLAG_AUTO_CORRECTION);
-        final int spanStart = 4;
-        final int spanEnd = 7;
+        final String[] singleWordCandidates = {"DEF", "Def"};
+        final SuggestionSpan singleWordSuggestionSpan = new SuggestionSpan(activity,
+                singleWordCandidates, SuggestionSpan.FLAG_AUTO_CORRECTION);
+        final int singleWordSpanStart = 4;
+        final int singleWordSpanEnd = 7;
+
+        final String[] multiWordCandidates = {"ABC DEF GHI", "Abc Def Ghi"};
+        final SuggestionSpan multiWordSuggestionSpan = new SuggestionSpan(activity,
+                multiWordCandidates, SuggestionSpan.FLAG_AUTO_CORRECTION);
+        final int multiWordSpanStart = 0;
+        final int multiWordSpanEnd = 11;
+
         TextAppearanceSpan expectedSpan = new TextAppearanceSpan(activity,
                 android.R.style.TextAppearance_SuggestionHighlight);
         TextPaint tmpTp = new TextPaint();
@@ -62,22 +69,27 @@ public class SuggestionsPopupWindowTest extends ActivityInstrumentationTestCase2
             public void run() {
                 SpannableStringBuilder ssb = new SpannableStringBuilder();
                 ssb.append(sampleText);
-                ssb.setSpan(suggestionSpan, spanStart, spanEnd, Spanned.SPAN_INCLUSIVE_INCLUSIVE);
+                ssb.setSpan(singleWordSuggestionSpan, singleWordSpanStart, singleWordSpanEnd,
+                        Spanned.SPAN_INCLUSIVE_INCLUSIVE);
+                ssb.setSpan(multiWordSuggestionSpan, multiWordSpanStart, multiWordSpanEnd,
+                        Spanned.SPAN_INCLUSIVE_INCLUSIVE);
                 editText.setText(ssb);
 
-                Selection.setSelection(editText.getText(), spanStart, spanEnd);
+                Selection.setSelection(editText.getText(), singleWordSpanStart, singleWordSpanEnd);
                 editText.onTextContextMenuItem(TextView.ID_REPLACE);
             }
         });
         getInstrumentation().waitForIdleSync();
 
         // In this test, the SuggestionsPopupWindow looks like
-        // abc def ghi
-        //   ----------
-        //   | *DEF*  |
-        //   | *Def*  |
-        //   | DELETE |
-        //   ----------
+        //   abc def ghi
+        // -----------------
+        // | abc *DEF* ghi |
+        // | abc *Def* ghi |
+        // | *ABC DEF GHI* |
+        // | *Abc Def Ghi* |
+        // | DELETE        |
+        // -----------------
         // *XX* means that XX is highlighted.
         activity.runOnUiThread(new Runnable() {
             public void run() {
@@ -90,9 +102,10 @@ public class SuggestionsPopupWindowTest extends ActivityInstrumentationTestCase2
 
                 int childNum = listView.getChildCount();
                 // +1 for "DELETE" command.
-                assertEquals(candidate.length + 1, childNum);
+                assertEquals(singleWordCandidates.length + multiWordCandidates.length + 1,
+                        childNum);
 
-                for (int i = 0; i < candidate.length; ++i) {
+                for (int i = 0; i < singleWordCandidates.length; ++i) {
                     TextView textView = (TextView) listView.getChildAt(i);
                     assertNotNull(textView);
 
@@ -100,16 +113,46 @@ public class SuggestionsPopupWindowTest extends ActivityInstrumentationTestCase2
                     assertNotNull(spanned);
 
                     // Check that the suggestion item order is kept.
-                    assertEquals(candidate[i], spanned.toString());
+                    String expectedText = "abc " + singleWordCandidates[i] + " ghi";
+                    assertEquals(expectedText, spanned.toString());
 
                     // Check that the text is highlighted with correct color and text size.
-                    TextAppearanceSpan[] taSpan = spanned.getSpans(0, candidate[i].length(),
-                            TextAppearanceSpan.class);
+                    TextAppearanceSpan[] taSpan = spanned.getSpans(singleWordSpanStart,
+                            singleWordSpanEnd, TextAppearanceSpan.class);
                     assertEquals(1, taSpan.length);
                     TextPaint tp = new TextPaint();
                     taSpan[0].updateDrawState(tp);
                     assertEquals(expectedHighlightTextColor, tp.getColor());
                     assertEquals(expectedHighlightTextSize, tp.getTextSize());
+
+                    // Check only center word is highlighted.
+                    assertEquals(singleWordSpanStart, spanned.getSpanStart(taSpan[0]));
+                    assertEquals(singleWordSpanEnd, spanned.getSpanEnd(taSpan[0]));
+                }
+
+                for (int i = 0; i < multiWordCandidates.length; ++i) {
+                    int indexInListView = singleWordCandidates.length + i;
+                    TextView textView = (TextView) listView.getChildAt(indexInListView);
+                    assertNotNull(textView);
+
+                    Spanned spanned = (Spanned) textView.getText();
+                    assertNotNull(spanned);
+
+                    // Check that the suggestion item order is kept.
+                    assertEquals(multiWordCandidates[i], spanned.toString());
+
+                    // Check that the text is highlighted with correct color and text size.
+                    TextAppearanceSpan[] taSpan = spanned.getSpans(
+                            0, multiWordCandidates[i].length(), TextAppearanceSpan.class);
+                    assertEquals(1, taSpan.length);
+                    TextPaint tp = new TextPaint();
+                    taSpan[0].updateDrawState(tp);
+                    assertEquals(expectedHighlightTextColor, tp.getColor());
+                    assertEquals(expectedHighlightTextSize, tp.getTextSize());
+
+                    // Check the whole text is highlighted.
+                    assertEquals(multiWordSpanStart, spanned.getSpanStart(taSpan[0]));
+                    assertEquals(multiWordSpanEnd, spanned.getSpanEnd(taSpan[0]));
                 }
             }
         });
