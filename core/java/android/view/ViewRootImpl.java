@@ -169,6 +169,16 @@ public final class ViewRootImpl implements ViewParent,
     boolean mAppVisible = true;
     int mOrigWindowType = -1;
 
+    /** Whether the window had focus during the most recent traversal. */
+    boolean mHadWindowFocus;
+
+    /**
+     * Whether the window lost focus during a previous traversal and has not
+     * yet gained it back. Used to determine whether a WINDOW_STATE_CHANGE
+     * accessibility events should be sent during traversal.
+     */
+    boolean mLostWindowFocus;
+
     // Set to true if the owner of this window is in the stopped state,
     // so the window should no longer be active.
     boolean mStopped = false;
@@ -1522,10 +1532,11 @@ public final class ViewRootImpl implements ViewParent,
         boolean insetsPending = false;
         int relayoutResult = 0;
 
+        boolean isViewVisible = viewVisibility == View.VISIBLE;
         if (mFirst || windowShouldResize || insetsChanged ||
                 viewVisibilityChanged || params != null) {
 
-            if (viewVisibility == View.VISIBLE) {
+            if (isViewVisible) {
                 // If this window is giving internal insets to the window
                 // manager, and it is being added or changing its visibility,
                 // then we want to first give the window manager "fake"
@@ -1964,19 +1975,33 @@ public final class ViewRootImpl implements ViewParent,
             mRemainingFrameCount--;
         }
 
+        final boolean changedVisibility = (viewVisibilityChanged || mFirst) && isViewVisible;
+        final boolean hasWindowFocus = mAttachInfo.mHasWindowFocus && isViewVisible;
+        final boolean regainedFocus = hasWindowFocus && mLostWindowFocus;
+        if (regainedFocus) {
+            mLostWindowFocus = false;
+        } else if (!hasWindowFocus && mHadWindowFocus) {
+            mLostWindowFocus = true;
+        }
+
+        if (changedVisibility || regainedFocus) {
+            host.sendAccessibilityEvent(AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED);
+        }
+
         mFirst = false;
         mWillDrawSoon = false;
         mNewSurfaceNeeded = false;
         mViewVisibility = viewVisibility;
+        mHadWindowFocus = hasWindowFocus;
 
-        if (mAttachInfo.mHasWindowFocus && !isInLocalFocusMode()) {
+        if (hasWindowFocus && !isInLocalFocusMode()) {
             final boolean imTarget = WindowManager.LayoutParams
                     .mayUseInputMethod(mWindowAttributes.flags);
             if (imTarget != mLastWasImTarget) {
                 mLastWasImTarget = imTarget;
                 InputMethodManager imm = InputMethodManager.peekInstance();
                 if (imm != null && imTarget) {
-                    imm.onPreWindowFocus(mView, true /* hasWindowFocus */);
+                    imm.onPreWindowFocus(mView, hasWindowFocus);
                     imm.onPostWindowFocus(mView, mView.findFocus(),
                             mWindowAttributes.softInputMode,
                             !mHasHadWindowFocus, mWindowAttributes.flags);
@@ -1989,8 +2014,7 @@ public final class ViewRootImpl implements ViewParent,
             mReportNextDraw = true;
         }
 
-        boolean cancelDraw = mAttachInfo.mTreeObserver.dispatchOnPreDraw() ||
-                viewVisibility != View.VISIBLE;
+        boolean cancelDraw = mAttachInfo.mTreeObserver.dispatchOnPreDraw() || !isViewVisible;
 
         if (!cancelDraw && !newSurface) {
             if (!skipDraw || mReportNextDraw) {
@@ -2004,7 +2028,7 @@ public final class ViewRootImpl implements ViewParent,
                 performDraw();
             }
         } else {
-            if (viewVisibility == View.VISIBLE) {
+            if (isViewVisible) {
                 // Try again
                 scheduleTraversals();
             } else if (mPendingTransitions != null && mPendingTransitions.size() > 0) {
@@ -3312,13 +3336,6 @@ public final class ViewRootImpl implements ViewParent,
                                 .softInputMode &=
                                     ~WindowManager.LayoutParams.SOFT_INPUT_IS_FORWARD_NAVIGATION;
                         mHasHadWindowFocus = true;
-                    }
-
-                    if (mView != null && mAccessibilityManager.isEnabled()) {
-                        if (hasWindowFocus) {
-                            mView.sendAccessibilityEvent(
-                                    AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED);
-                        }
                     }
                 }
             } break;
