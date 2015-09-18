@@ -129,6 +129,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
     private static final int MSG_REPORT_EMERGENCY_CALL_ACTION = 318;
     private static final int MSG_STARTED_WAKING_UP = 319;
     private static final int MSG_FINISHED_GOING_TO_SLEEP = 320;
+    private static final int MSG_STARTED_GOING_TO_SLEEP = 321;
     private static final int MSG_KEYGUARD_BOUNCER_CHANGED = 322;
     private static final int MSG_FACE_UNLOCK_STATE_CHANGED = 327;
     private static final int MSG_SIM_SUBSCRIPTION_INFO_CHANGED = 328;
@@ -170,6 +171,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
      * until the Keyguard has been dismissed.
      */
     private boolean mFingerprintAlreadyAuthenticated;
+    private boolean mGoingToSleep;
     private boolean mBouncer;
     private boolean mBootCompleted;
 
@@ -248,6 +250,9 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
                     break;
                 case MSG_REPORT_EMERGENCY_CALL_ACTION:
                     handleReportEmergencyCallAction();
+                    break;
+                case MSG_STARTED_GOING_TO_SLEEP:
+                    handleStartedGoingToSleep(msg.arg1);
                     break;
                 case MSG_FINISHED_GOING_TO_SLEEP:
                     handleFinishedGoingToSleep(msg.arg1);
@@ -884,8 +889,22 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
         }
     }
 
-    protected void handleFinishedGoingToSleep(int arg1) {
+    protected void handleStartedGoingToSleep(int arg1) {
         clearFingerprintRecognized();
+        final int count = mCallbacks.size();
+        for (int i = 0; i < count; i++) {
+            KeyguardUpdateMonitorCallback cb = mCallbacks.get(i).get();
+            if (cb != null) {
+                cb.onStartedGoingToSleep(arg1);
+            }
+        }
+        mGoingToSleep = true;
+        mFingerprintAlreadyAuthenticated = false;
+        updateFingerprintListeningState();
+    }
+
+    protected void handleFinishedGoingToSleep(int arg1) {
+        mGoingToSleep = false;
         final int count = mCallbacks.size();
         for (int i = 0; i < count; i++) {
             KeyguardUpdateMonitorCallback cb = mCallbacks.get(i).get();
@@ -893,7 +912,6 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
                 cb.onFinishedGoingToSleep(arg1);
             }
         }
-        mFingerprintAlreadyAuthenticated = false;
         updateFingerprintListeningState();
     }
 
@@ -1032,8 +1050,9 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
     }
 
     private boolean shouldListenForFingerprint() {
-        return (mKeyguardIsVisible || !mDeviceInteractive || mBouncer) && !mSwitchingUser
-                && !mFingerprintAlreadyAuthenticated && !isFingerprintDisabled(getCurrentUser());
+        return (mKeyguardIsVisible || !mDeviceInteractive || mBouncer || mGoingToSleep)
+                && !mSwitchingUser && !mFingerprintAlreadyAuthenticated
+                && !isFingerprintDisabled(getCurrentUser());
     }
 
     private void startListeningForFingerprint() {
@@ -1605,6 +1624,10 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
         mHandler.sendEmptyMessage(MSG_STARTED_WAKING_UP);
     }
 
+    public void dispatchStartedGoingToSleep(int why) {
+        mHandler.sendMessage(mHandler.obtainMessage(MSG_STARTED_GOING_TO_SLEEP, why, 0));
+    }
+
     public void dispatchFinishedGoingToSleep(int why) {
         synchronized(this) {
             mDeviceInteractive = false;
@@ -1628,6 +1651,10 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
 
     public boolean isDeviceInteractive() {
         return mDeviceInteractive;
+    }
+
+    public boolean isGoingToSleep() {
+        return mGoingToSleep;
     }
 
     /**

@@ -153,6 +153,12 @@ public class KeyguardUpdateMonitorCallback {
     public void onStartedWakingUp() { }
 
     /**
+     * Called when the device has started going to sleep.
+     * @param why see {@link #onFinishedGoingToSleep(int)}
+     */
+    public void onStartedGoingToSleep(int why) { }
+
+    /**
      * Called when the device has finished going to sleep.
      * @param why either {@link WindowManagerPolicy#OFF_BECAUSE_OF_ADMIN},
      * {@link WindowManagerPolicy#OFF_BECAUSE_OF_USER}, or

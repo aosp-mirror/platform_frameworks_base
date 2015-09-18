@@ -93,6 +93,8 @@ public class FingerprintUnlockController extends KeyguardUpdateMonitorCallback {
     private KeyguardViewMediator mKeyguardViewMediator;
     private ScrimController mScrimController;
     private PhoneStatusBar mPhoneStatusBar;
+    private boolean mGoingToSleep;
+    private int mPendingAuthenticatedUserId = -1;
 
     public FingerprintUnlockController(Context context,
             StatusBarWindowManager statusBarWindowManager,
@@ -161,6 +163,10 @@ public class FingerprintUnlockController extends KeyguardUpdateMonitorCallback {
 
     @Override
     public void onFingerprintAuthenticated(int userId) {
+        if (mUpdateMonitor.isGoingToSleep()) {
+            mPendingAuthenticatedUserId = userId;
+            return;
+        }
         boolean wasDeviceInteractive = mUpdateMonitor.isDeviceInteractive();
         mMode = calculateMode();
         if (!wasDeviceInteractive) {
@@ -203,6 +209,26 @@ public class FingerprintUnlockController extends KeyguardUpdateMonitorCallback {
             mStatusBarWindowManager.setForceDozeBrightness(false);
         }
         mPhoneStatusBar.notifyFpAuthModeChanged();
+    }
+
+    @Override
+    public void onStartedGoingToSleep(int why) {
+        mPendingAuthenticatedUserId = -1;
+    }
+
+    @Override
+    public void onFinishedGoingToSleep(int why) {
+        if (mPendingAuthenticatedUserId != -1) {
+
+            // Post this to make sure it's executed after the device is fully locked.
+            mHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    onFingerprintAuthenticated(mPendingAuthenticatedUserId);
+                }
+            });
+        }
+        mPendingAuthenticatedUserId = -1;
     }
 
     public int getMode() {
