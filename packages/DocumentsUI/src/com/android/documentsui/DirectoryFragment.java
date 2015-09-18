@@ -159,6 +159,8 @@ public class DirectoryFragment extends Fragment {
     private GridLayoutManager mGridLayout;
     private int mColumnCount = 1;  // This will get updated when layout changes.
 
+    private MessageBar mMessageBar;
+
     public static void showNormal(FragmentManager fm, RootInfo root, DocumentInfo doc, int anim) {
         show(fm, TYPE_NORMAL, root, doc, null, anim);
     }
@@ -219,6 +221,8 @@ public class DirectoryFragment extends Fragment {
         final Context context = inflater.getContext();
         final Resources res = context.getResources();
         final View view = inflater.inflate(R.layout.fragment_directory, container, false);
+
+        mMessageBar = MessageBar.create(getChildFragmentManager());
 
         mEmptyView = view.findViewById(android.R.id.empty);
 
@@ -611,7 +615,7 @@ public class DirectoryFragment extends Fragment {
 
         @Override
         public boolean onBeforeItemStateChange(int position, boolean selected) {
-            // Directories and footer items cannot be checked
+            // Directories cannot be checked
             if (selected) {
                 final Cursor cursor = mModel.getItem(position);
                 checkNotNull(cursor, "Cursor cannot be null.");
@@ -880,79 +884,6 @@ public class DirectoryFragment extends Fragment {
         return ((BaseActivity) fragment.getActivity()).getDisplayState();
     }
 
-    private static abstract class Footer {
-        private final int mItemViewType;
-
-        public Footer(int itemViewType) {
-            mItemViewType = itemViewType;
-        }
-
-        public abstract View getView(View convertView, ViewGroup parent);
-
-        public int getItemViewType() {
-            return mItemViewType;
-        }
-    }
-
-    private class LoadingFooter extends Footer {
-        public LoadingFooter() {
-            super(1);
-        }
-
-        @Override
-        public View getView(View convertView, ViewGroup parent) {
-            final Context context = parent.getContext();
-            final State state = getDisplayState(DirectoryFragment.this);
-
-            if (convertView == null) {
-                final LayoutInflater inflater = LayoutInflater.from(context);
-                if (state.derivedMode == MODE_LIST) {
-                    convertView = inflater.inflate(R.layout.item_loading_list, parent, false);
-                } else if (state.derivedMode == MODE_GRID) {
-                    convertView = inflater.inflate(R.layout.item_loading_grid, parent, false);
-                } else {
-                    throw new IllegalStateException();
-                }
-            }
-
-            return convertView;
-        }
-    }
-
-    private class MessageFooter extends Footer {
-        private final int mIcon;
-        private final String mMessage;
-
-        public MessageFooter(int itemViewType, int icon, String message) {
-            super(itemViewType);
-            mIcon = icon;
-            mMessage = message;
-        }
-
-        @Override
-        public View getView(View convertView, ViewGroup parent) {
-            final Context context = parent.getContext();
-            final State state = getDisplayState(DirectoryFragment.this);
-
-            if (convertView == null) {
-                final LayoutInflater inflater = LayoutInflater.from(context);
-                if (state.derivedMode == MODE_LIST) {
-                    convertView = inflater.inflate(R.layout.item_message_list, parent, false);
-                } else if (state.derivedMode == MODE_GRID) {
-                    convertView = inflater.inflate(R.layout.item_message_grid, parent, false);
-                } else {
-                    throw new IllegalStateException();
-                }
-            }
-
-            final ImageView icon = (ImageView) convertView.findViewById(android.R.id.icon);
-            final TextView title = (TextView) convertView.findViewById(android.R.id.title);
-            icon.setImageResource(mIcon);
-            title.setText(mMessage);
-            return convertView;
-        }
-    }
-
     // Provide a reference to the views for each data item
     // Complex data items may need more than one view per item, and
     // you provide access to all the views for a data item in a view holder
@@ -971,24 +902,18 @@ public class DirectoryFragment extends Fragment {
 
         private final Context mContext;
         private final LayoutInflater mInflater;
-        // TODO: Bring back support for footers.
-        private final List<Footer> mFooters = new ArrayList<>();
 
         public DocumentsAdapter(Context context) {
             mContext = context;
             mInflater = LayoutInflater.from(context);
         }
 
+        @Override
         public void onModelUpdate(Model model) {
-            mFooters.clear();
-            if (model.info != null) {
-                mFooters.add(new MessageFooter(2, R.drawable.ic_dialog_info, model.info));
-            }
-            if (model.error != null) {
-                mFooters.add(new MessageFooter(3, R.drawable.ic_dialog_alert, model.error));
-            }
-            if (model.isLoading()) {
-                mFooters.add(new LoadingFooter());
+            if (model.info != null || model.error != null) {
+                mMessageBar.setInfo(model.info);
+                mMessageBar.setError(model.error);
+                mMessageBar.show();
             }
 
             if (model.isEmpty()) {
@@ -1000,9 +925,10 @@ public class DirectoryFragment extends Fragment {
             notifyDataSetChanged();
         }
 
+        @Override
         public void onModelUpdateFailed(Exception e) {
+            // TODO: deal with catastrophic update failures
             String error = getString(R.string.query_error);
-            mFooters.add(new MessageFooter(3, R.drawable.ic_dialog_alert, error));
             notifyDataSetChanged();
         }
 
@@ -1222,19 +1148,8 @@ public class DirectoryFragment extends Fragment {
         @Override
         public int getItemCount() {
             return mModel.getItemCount();
-            // return mCursorCount + mFooters.size();
         }
 
-        @Override
-        public int getItemViewType(int position) {
-            final int itemCount = mModel.getItemCount();
-            if (position < itemCount) {
-                return 0;
-            } else {
-                position -= itemCount;
-                return mFooters.get(position).getItemViewType();
-            }
-        }
     }
 
     private static String formatTime(Context context, long when) {

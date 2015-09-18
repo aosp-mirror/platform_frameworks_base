@@ -18,6 +18,13 @@
     android:layout_height="match_parent"
     android:orientation="vertical">
 
+    <FrameLayout
+        android:id="@+id/container_message_bar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:elevation="8dp"
+        android:background="@color/material_grey_50"/>
+
     <com.android.documentsui.DirectoryContainerView
         android:id="@+id/container_directory"
         android:layout_width="match_parent"
