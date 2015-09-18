@@ -3611,11 +3611,12 @@ public class TelephonyManager {
      *
      * @hide
      */
-    public boolean setNetworkSelectionModeManual(int subId, OperatorInfo operator) {
+    public boolean setNetworkSelectionModeManual(int subId, OperatorInfo operator,
+            boolean persistSelection) {
         try {
             ITelephony telephony = getITelephony();
             if (telephony != null)
-                return telephony.setNetworkSelectionModeManual(subId, operator);
+                return telephony.setNetworkSelectionModeManual(subId, operator, persistSelection);
         } catch (RemoteException ex) {
             Rlog.e(TAG, "setNetworkSelectionModeManual RemoteException", ex);
         } catch (NullPointerException ex) {
