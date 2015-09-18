@@ -1577,6 +1577,13 @@ public final class PowerManagerService extends SystemService
                 }
 
                 if (mUserActivitySummary != USER_ACTIVITY_SCREEN_DREAM && userInactiveOverride) {
+                    if ((mUserActivitySummary &
+                            (USER_ACTIVITY_SCREEN_BRIGHT | USER_ACTIVITY_SCREEN_DIM)) != 0) {
+                      // Device is being kept awake by recent user activity
+                      long savedWakeTimeMs = now - nextTimeout;
+                      EventLog.writeEvent(
+                              EventLogTags.POWER_SOFT_SLEEP_REQUESTED, savedWakeTimeMs);
+                    }
                     mUserActivitySummary = USER_ACTIVITY_SCREEN_DREAM;
                     nextTimeout = -1;
                 }

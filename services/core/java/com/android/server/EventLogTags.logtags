@@ -29,6 +29,9 @@ option java_package com.android.server
 # This is logged when the partial wake lock (keeping the device awake
 # regardless of whether the screen is off) is acquired or released.
 2729 power_partial_wake_state (releasedorAcquired|1|5),(tag|3)
+# The device is being asked to go into a soft sleep (typically by the ungaze gesture).
+# It logs the time remaining before the device would've normally gone to sleep without the request.
+2731 power_soft_sleep_requested (savedwaketimems|2)
 
 #
 # Leave IDs through 2739 for more power logs (2730 used by battery_discharge above)
