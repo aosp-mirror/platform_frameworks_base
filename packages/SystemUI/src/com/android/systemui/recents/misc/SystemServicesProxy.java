@@ -641,12 +641,19 @@ public class SystemServicesProxy {
      */
     public Rect getWindowRect() {
         Rect windowRect = new Rect();
-        if (mWm == null) return windowRect;
+        if (mIam == null) return windowRect;
 
-        Point p = new Point();
-        mWm.getDefaultDisplay().getRealSize(p);
-        windowRect.set(0, 0, p.x, p.y);
-        return windowRect;
+        try {
+            // Use the home stack bounds
+            ActivityManager.StackInfo stackInfo = mIam.getStackInfo(ActivityManager.HOME_STACK_ID);
+            if (stackInfo != null) {
+                windowRect.set(stackInfo.bounds);
+            }
+        } catch (RemoteException e) {
+            e.printStackTrace();
+        } finally {
+            return windowRect;
+        }
     }
 
     /** Starts an activity from recents. */

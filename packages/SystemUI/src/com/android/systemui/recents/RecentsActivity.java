@@ -25,6 +25,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.res.Configuration;
 import android.os.Bundle;
 import android.os.SystemClock;
 import android.os.UserHandle;
@@ -205,10 +206,10 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
         loadOpts.numVisibleTaskThumbnails = mConfig.launchedNumVisibleThumbnails;
         loader.loadTasks(this, plan, loadOpts);
 
-        ArrayList<TaskStack> stacks = plan.getAllTaskStacks();
+        TaskStack stack = plan.getTaskStack();
         mConfig.launchedWithNoRecentTasks = !plan.hasTasks();
         if (!mConfig.launchedWithNoRecentTasks) {
-            mRecentsView.setTaskStacks(stacks);
+            mRecentsView.setTaskStack(stack);
         }
 
         // Create the home intent runnable
@@ -224,20 +225,16 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
                         R.anim.recents_to_launcher_exit));
 
         // Mark the task that is the launch target
-        int taskStackCount = stacks.size();
         int launchTaskIndexInStack = 0;
         if (mConfig.launchedToTaskId != -1) {
-            for (int i = 0; i < taskStackCount; i++) {
-                TaskStack stack = stacks.get(i);
-                ArrayList<Task> tasks = stack.getTasks();
-                int taskCount = tasks.size();
-                for (int j = 0; j < taskCount; j++) {
-                    Task t = tasks.get(j);
-                    if (t.key.id == mConfig.launchedToTaskId) {
-                        t.isLaunchTarget = true;
-                        launchTaskIndexInStack = tasks.size() - j - 1;
-                        break;
-                    }
+            ArrayList<Task> tasks = stack.getTasks();
+            int taskCount = tasks.size();
+            for (int j = 0; j < taskCount; j++) {
+                Task t = tasks.get(j);
+                if (t.key.id == mConfig.launchedToTaskId) {
+                    t.isLaunchTarget = true;
+                    launchTaskIndexInStack = tasks.size() - j - 1;
+                    break;
                 }
             }
         }
@@ -278,11 +275,7 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
             MetricsLogger.count(this, "overview_source_home", 1);
         }
         // Keep track of the total stack task count
-        int taskCount = 0;
-        for (int i = 0; i < stacks.size(); i++) {
-            TaskStack stack = stacks.get(i);
-            taskCount += stack.getTaskCount();
-        }
+        int taskCount = stack.getTaskCount();
         MetricsLogger.histogram(this, "overview_task_count", taskCount);
     }
 
