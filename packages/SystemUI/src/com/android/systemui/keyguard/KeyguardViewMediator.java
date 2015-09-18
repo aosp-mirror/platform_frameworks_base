@@ -679,6 +679,7 @@ public class KeyguardViewMediator extends SystemUI {
                 playSounds(true);
             }
         }
+        KeyguardUpdateMonitor.getInstance(mContext).dispatchStartedGoingToSleep(why);
         notifyStartedGoingToSleep();
     }
 
