@@ -3578,7 +3578,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         final Rect of = mTmpOverscanFrame;
         final Rect vf = mTmpVisibleFrame;
         final Rect dcf = mTmpDecorFrame;
-        final Rect osf = mTmpOutsetFrame;
         pf.left = df.left = of.left = vf.left = mDockLeft;
         pf.top = df.top = of.top = vf.top = mDockTop;
         pf.right = df.right = of.right = vf.right = mDockRight;
@@ -3620,150 +3619,163 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             // then take that into account.
             navVisible |= !canHideNavigationBar();
 
-            boolean updateSysUiVisibility = false;
-            if (mNavigationBar != null) {
-                boolean transientNavBarShowing = mNavigationBarController.isTransientShowing();
-                // Force the navigation bar to its appropriate place and
-                // size.  We need to do this directly, instead of relying on
-                // it to bubble up from the nav bar, because this needs to
-                // change atomically with screen rotations.
-                mNavigationBarOnBottom = (!mNavigationBarCanMove || displayWidth < displayHeight);
-                if (mNavigationBarOnBottom) {
-                    // It's a system nav bar or a portrait screen; nav bar goes on bottom.
-                    int top = displayHeight - overscanBottom
-                            - mNavigationBarHeightForRotation[displayRotation];
-                    mTmpNavigationFrame.set(0, top, displayWidth, displayHeight - overscanBottom);
-                    mStableBottom = mStableFullscreenBottom = mTmpNavigationFrame.top;
-                    if (transientNavBarShowing) {
-                        mNavigationBarController.setBarShowingLw(true);
-                    } else if (navVisible) {
-                        mNavigationBarController.setBarShowingLw(true);
-                        mDockBottom = mTmpNavigationFrame.top;
-                        mRestrictedScreenHeight = mDockBottom - mRestrictedScreenTop;
-                        mRestrictedOverscanScreenHeight = mDockBottom - mRestrictedOverscanScreenTop;
-                    } else {
-                        // We currently want to hide the navigation UI.
-                        mNavigationBarController.setBarShowingLw(false);
-                    }
-                    if (navVisible && !navTranslucent && !navAllowedHidden
-                            && !mNavigationBar.isAnimatingLw()
-                            && !mNavigationBarController.wasRecentlyTranslucent()) {
-                        // If the opaque nav bar is currently requested to be visible,
-                        // and not in the process of animating on or off, then
-                        // we can tell the app that it is covered by it.
-                        mSystemBottom = mTmpNavigationFrame.top;
-                    }
-                } else {
-                    // Landscape screen; nav bar goes to the right.
-                    int left = displayWidth - overscanRight
-                            - mNavigationBarWidthForRotation[displayRotation];
-                    mTmpNavigationFrame.set(left, 0, displayWidth - overscanRight, displayHeight);
-                    mStableRight = mStableFullscreenRight = mTmpNavigationFrame.left;
-                    if (transientNavBarShowing) {
-                        mNavigationBarController.setBarShowingLw(true);
-                    } else if (navVisible) {
-                        mNavigationBarController.setBarShowingLw(true);
-                        mDockRight = mTmpNavigationFrame.left;
-                        mRestrictedScreenWidth = mDockRight - mRestrictedScreenLeft;
-                        mRestrictedOverscanScreenWidth = mDockRight - mRestrictedOverscanScreenLeft;
-                    } else {
-                        // We currently want to hide the navigation UI.
-                        mNavigationBarController.setBarShowingLw(false);
-                    }
-                    if (navVisible && !navTranslucent && !navAllowedHidden
-                            && !mNavigationBar.isAnimatingLw()
-                            && !mNavigationBarController.wasRecentlyTranslucent()) {
-                        // If the nav bar is currently requested to be visible,
-                        // and not in the process of animating on or off, then
-                        // we can tell the app that it is covered by it.
-                        mSystemRight = mTmpNavigationFrame.left;
-                    }
-                }
-                // Make sure the content and current rectangles are updated to
-                // account for the restrictions from the navigation bar.
-                mContentTop = mVoiceContentTop = mCurTop = mDockTop;
-                mContentBottom = mVoiceContentBottom = mCurBottom = mDockBottom;
-                mContentLeft = mVoiceContentLeft = mCurLeft = mDockLeft;
-                mContentRight = mVoiceContentRight = mCurRight = mDockRight;
-                mStatusBarLayer = mNavigationBar.getSurfaceLayer();
-                // And compute the final frame.
-                mNavigationBar.computeFrameLw(mTmpNavigationFrame, mTmpNavigationFrame,
-                        mTmpNavigationFrame, mTmpNavigationFrame, mTmpNavigationFrame, dcf,
-                        mTmpNavigationFrame, mTmpNavigationFrame);
-                if (DEBUG_LAYOUT) Slog.i(TAG, "mNavigationBar frame: " + mTmpNavigationFrame);
-                if (mNavigationBarController.checkHiddenLw()) {
-                    updateSysUiVisibility = true;
-                }
-            }
+            boolean updateSysUiVisibility = layoutNavigationBar(displayWidth, displayHeight,
+                    displayRotation, overscanRight, overscanBottom, dcf, navVisible, navTranslucent,
+                    navAllowedHidden);
             if (DEBUG_LAYOUT) Slog.i(TAG, String.format("mDock rect: (%d,%d - %d,%d)",
                     mDockLeft, mDockTop, mDockRight, mDockBottom));
-
-            // decide where the status bar goes ahead of time
-            if (mStatusBar != null) {
-                // apply any navigation bar insets
-                pf.left = df.left = of.left = mUnrestrictedScreenLeft;
-                pf.top = df.top = of.top = mUnrestrictedScreenTop;
-                pf.right = df.right = of.right = mUnrestrictedScreenWidth + mUnrestrictedScreenLeft;
-                pf.bottom = df.bottom = of.bottom = mUnrestrictedScreenHeight
-                        + mUnrestrictedScreenTop;
-                vf.left = mStableLeft;
-                vf.top = mStableTop;
-                vf.right = mStableRight;
-                vf.bottom = mStableBottom;
-
-                mStatusBarLayer = mStatusBar.getSurfaceLayer();
-
-                // Let the status bar determine its size.
-                mStatusBar.computeFrameLw(pf /* parentFrame */, df /* displayFrame */,
-                        vf /* overlayFrame */, vf /* contentFrame */, vf /* visibleFrame */,
-                        dcf /* decorFrame */, vf /* stableFrame */, vf /* outsetFrame */);
-
-                // For layout, the status bar is always at the top with our fixed height.
-                mStableTop = mUnrestrictedScreenTop + mStatusBarHeight;
-
-                boolean statusBarTransient = (sysui & View.STATUS_BAR_TRANSIENT) != 0;
-                boolean statusBarTranslucent = (sysui
-                        & (View.STATUS_BAR_TRANSLUCENT | View.SYSTEM_UI_TRANSPARENT)) != 0;
-                if (!isKeyguardShowing) {
-                    statusBarTranslucent &= areTranslucentBarsAllowed();
-                }
-
-                // If the status bar is hidden, we don't want to cause
-                // windows behind it to scroll.
-                if (mStatusBar.isVisibleLw() && !statusBarTransient) {
-                    // Status bar may go away, so the screen area it occupies
-                    // is available to apps but just covering them when the
-                    // status bar is visible.
-                    mDockTop = mUnrestrictedScreenTop + mStatusBarHeight;
-
-                    mContentTop = mVoiceContentTop = mCurTop = mDockTop;
-                    mContentBottom = mVoiceContentBottom = mCurBottom = mDockBottom;
-                    mContentLeft = mVoiceContentLeft = mCurLeft = mDockLeft;
-                    mContentRight = mVoiceContentRight = mCurRight = mDockRight;
-
-                    if (DEBUG_LAYOUT) Slog.v(TAG, "Status bar: " +
-                        String.format(
-                            "dock=[%d,%d][%d,%d] content=[%d,%d][%d,%d] cur=[%d,%d][%d,%d]",
-                            mDockLeft, mDockTop, mDockRight, mDockBottom,
-                            mContentLeft, mContentTop, mContentRight, mContentBottom,
-                            mCurLeft, mCurTop, mCurRight, mCurBottom));
-                }
-                if (mStatusBar.isVisibleLw() && !mStatusBar.isAnimatingLw()
-                        && !statusBarTransient && !statusBarTranslucent
-                        && !mStatusBarController.wasRecentlyTranslucent()) {
-                    // If the opaque status bar is currently requested to be visible,
-                    // and not in the process of animating on or off, then
-                    // we can tell the app that it is covered by it.
-                    mSystemTop = mUnrestrictedScreenTop + mStatusBarHeight;
-                }
-                if (mStatusBarController.checkHiddenLw()) {
-                    updateSysUiVisibility = true;
-                }
-            }
+            updateSysUiVisibility |= layoutStatusBar(pf, df, of, vf, dcf, sysui, isKeyguardShowing);
             if (updateSysUiVisibility) {
                 updateSystemUiVisibilityLw();
             }
         }
+    }
+
+    private boolean layoutStatusBar(Rect pf, Rect df, Rect of, Rect vf, Rect dcf, int sysui,
+            boolean isKeyguardShowing) {
+        // decide where the status bar goes ahead of time
+        if (mStatusBar != null) {
+            // apply any navigation bar insets
+            pf.left = df.left = of.left = mUnrestrictedScreenLeft;
+            pf.top = df.top = of.top = mUnrestrictedScreenTop;
+            pf.right = df.right = of.right = mUnrestrictedScreenWidth + mUnrestrictedScreenLeft;
+            pf.bottom = df.bottom = of.bottom = mUnrestrictedScreenHeight
+                    + mUnrestrictedScreenTop;
+            vf.left = mStableLeft;
+            vf.top = mStableTop;
+            vf.right = mStableRight;
+            vf.bottom = mStableBottom;
+
+            mStatusBarLayer = mStatusBar.getSurfaceLayer();
+
+            // Let the status bar determine its size.
+            mStatusBar.computeFrameLw(pf /* parentFrame */, df /* displayFrame */,
+                    vf /* overlayFrame */, vf /* contentFrame */, vf /* visibleFrame */,
+                    dcf /* decorFrame */, vf /* stableFrame */, vf /* outsetFrame */);
+
+            // For layout, the status bar is always at the top with our fixed height.
+            mStableTop = mUnrestrictedScreenTop + mStatusBarHeight;
+
+            boolean statusBarTransient = (sysui & View.STATUS_BAR_TRANSIENT) != 0;
+            boolean statusBarTranslucent = (sysui
+                    & (View.STATUS_BAR_TRANSLUCENT | View.SYSTEM_UI_TRANSPARENT)) != 0;
+            if (!isKeyguardShowing) {
+                statusBarTranslucent &= areTranslucentBarsAllowed();
+            }
+
+            // If the status bar is hidden, we don't want to cause
+            // windows behind it to scroll.
+            if (mStatusBar.isVisibleLw() && !statusBarTransient) {
+                // Status bar may go away, so the screen area it occupies
+                // is available to apps but just covering them when the
+                // status bar is visible.
+                mDockTop = mUnrestrictedScreenTop + mStatusBarHeight;
+
+                mContentTop = mVoiceContentTop = mCurTop = mDockTop;
+                mContentBottom = mVoiceContentBottom = mCurBottom = mDockBottom;
+                mContentLeft = mVoiceContentLeft = mCurLeft = mDockLeft;
+                mContentRight = mVoiceContentRight = mCurRight = mDockRight;
+
+                if (DEBUG_LAYOUT) Slog.v(TAG, "Status bar: " +
+                        String.format(
+                                "dock=[%d,%d][%d,%d] content=[%d,%d][%d,%d] cur=[%d,%d][%d,%d]",
+                                mDockLeft, mDockTop, mDockRight, mDockBottom,
+                                mContentLeft, mContentTop, mContentRight, mContentBottom,
+                                mCurLeft, mCurTop, mCurRight, mCurBottom));
+            }
+            if (mStatusBar.isVisibleLw() && !mStatusBar.isAnimatingLw()
+                    && !statusBarTransient && !statusBarTranslucent
+                    && !mStatusBarController.wasRecentlyTranslucent()) {
+                // If the opaque status bar is currently requested to be visible,
+                // and not in the process of animating on or off, then
+                // we can tell the app that it is covered by it.
+                mSystemTop = mUnrestrictedScreenTop + mStatusBarHeight;
+            }
+            if (mStatusBarController.checkHiddenLw()) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private boolean layoutNavigationBar(int displayWidth, int displayHeight, int displayRotation,
+            int overscanRight, int overscanBottom, Rect dcf, boolean navVisible,
+            boolean navTranslucent, boolean navAllowedHidden) {
+        if (mNavigationBar != null) {
+            boolean transientNavBarShowing = mNavigationBarController.isTransientShowing();
+            // Force the navigation bar to its appropriate place and
+            // size.  We need to do this directly, instead of relying on
+            // it to bubble up from the nav bar, because this needs to
+            // change atomically with screen rotations.
+            mNavigationBarOnBottom = (!mNavigationBarCanMove || displayWidth < displayHeight);
+            if (mNavigationBarOnBottom) {
+                // It's a system nav bar or a portrait screen; nav bar goes on bottom.
+                int top = displayHeight - overscanBottom
+                        - mNavigationBarHeightForRotation[displayRotation];
+                mTmpNavigationFrame.set(0, top, displayWidth, displayHeight - overscanBottom);
+                mStableBottom = mStableFullscreenBottom = mTmpNavigationFrame.top;
+                if (transientNavBarShowing) {
+                    mNavigationBarController.setBarShowingLw(true);
+                } else if (navVisible) {
+                    mNavigationBarController.setBarShowingLw(true);
+                    mDockBottom = mTmpNavigationFrame.top;
+                    mRestrictedScreenHeight = mDockBottom - mRestrictedScreenTop;
+                    mRestrictedOverscanScreenHeight = mDockBottom - mRestrictedOverscanScreenTop;
+                } else {
+                    // We currently want to hide the navigation UI.
+                    mNavigationBarController.setBarShowingLw(false);
+                }
+                if (navVisible && !navTranslucent && !navAllowedHidden
+                        && !mNavigationBar.isAnimatingLw()
+                        && !mNavigationBarController.wasRecentlyTranslucent()) {
+                    // If the opaque nav bar is currently requested to be visible,
+                    // and not in the process of animating on or off, then
+                    // we can tell the app that it is covered by it.
+                    mSystemBottom = mTmpNavigationFrame.top;
+                }
+            } else {
+                // Landscape screen; nav bar goes to the right.
+                int left = displayWidth - overscanRight
+                        - mNavigationBarWidthForRotation[displayRotation];
+                mTmpNavigationFrame.set(left, 0, displayWidth - overscanRight, displayHeight);
+                mStableRight = mStableFullscreenRight = mTmpNavigationFrame.left;
+                if (transientNavBarShowing) {
+                    mNavigationBarController.setBarShowingLw(true);
+                } else if (navVisible) {
+                    mNavigationBarController.setBarShowingLw(true);
+                    mDockRight = mTmpNavigationFrame.left;
+                    mRestrictedScreenWidth = mDockRight - mRestrictedScreenLeft;
+                    mRestrictedOverscanScreenWidth = mDockRight - mRestrictedOverscanScreenLeft;
+                } else {
+                    // We currently want to hide the navigation UI.
+                    mNavigationBarController.setBarShowingLw(false);
+                }
+                if (navVisible && !navTranslucent && !navAllowedHidden
+                        && !mNavigationBar.isAnimatingLw()
+                        && !mNavigationBarController.wasRecentlyTranslucent()) {
+                    // If the nav bar is currently requested to be visible,
+                    // and not in the process of animating on or off, then
+                    // we can tell the app that it is covered by it.
+                    mSystemRight = mTmpNavigationFrame.left;
+                }
+            }
+            // Make sure the content and current rectangles are updated to
+            // account for the restrictions from the navigation bar.
+            mContentTop = mVoiceContentTop = mCurTop = mDockTop;
+            mContentBottom = mVoiceContentBottom = mCurBottom = mDockBottom;
+            mContentLeft = mVoiceContentLeft = mCurLeft = mDockLeft;
+            mContentRight = mVoiceContentRight = mCurRight = mDockRight;
+            mStatusBarLayer = mNavigationBar.getSurfaceLayer();
+            // And compute the final frame.
+            mNavigationBar.computeFrameLw(mTmpNavigationFrame, mTmpNavigationFrame,
+                    mTmpNavigationFrame, mTmpNavigationFrame, mTmpNavigationFrame, dcf,
+                    mTmpNavigationFrame, mTmpNavigationFrame);
+            if (DEBUG_LAYOUT) Slog.i(TAG, "mNavigationBar frame: " + mTmpNavigationFrame);
+            if (mNavigationBarController.checkHiddenLw()) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /** {@inheritDoc} */
