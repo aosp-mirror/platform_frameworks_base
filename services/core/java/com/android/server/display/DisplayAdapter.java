@@ -49,6 +49,13 @@ abstract class DisplayAdapter {
      */
     private static final AtomicInteger NEXT_DISPLAY_MODE_ID = new AtomicInteger(1);  // 0 = no mode.
 
+    /**
+     * Used to generate globally unique color transform ids.
+     *
+     * Valid IDs start at 1 with 0 as the sentinel value for the default mode.
+     */
+    private static final AtomicInteger NEXT_COLOR_TRANSFORM_ID = new AtomicInteger(1);
+
     // Called with SyncRoot lock held.
     public DisplayAdapter(DisplayManagerService.SyncRoot syncRoot,
             Context context, Handler handler, Listener listener, String name) {
@@ -132,6 +139,11 @@ abstract class DisplayAdapter {
     public static Display.Mode createMode(int width, int height, float refreshRate) {
         return new Display.Mode(
                 NEXT_DISPLAY_MODE_ID.getAndIncrement(), width, height, refreshRate);
+    }
+
+    public static Display.ColorTransform createColorTransform(int colorTransform) {
+        return new Display.ColorTransform(
+                NEXT_COLOR_TRANSFORM_ID.getAndIncrement(), colorTransform);
     }
 
     public interface Listener {
