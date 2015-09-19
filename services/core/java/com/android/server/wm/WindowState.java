@@ -129,6 +129,7 @@ final class WindowState implements WindowManagerPolicy.WindowState {
     boolean mAttachedHidden;    // is our parent window hidden?
     boolean mWallpaperVisible;  // for wallpaper, what was last vis report?
     boolean mDragResizing;
+    boolean mDragResizeChanging;
 
     RemoteCallbackList<IWindowFocusObserver> mFocusCallbacks;
 
@@ -1691,9 +1692,18 @@ final class WindowState implements WindowManagerPolicy.WindowState {
         return task != null && task.inFreeformWorkspace();
     }
 
-    boolean isDragResizing() {
+    boolean isDragResizeChanged() {
         final Task task = getTask();
-        return mService.mTaskPositioner != null && mService.mTaskPositioner.isTaskResizing(task);
+        return task != null && mDragResizing != task.isDragResizing();
+    }
+
+    void setDragResizing() {
+        final Task task = getTask();
+        mDragResizing = task != null && task.isDragResizing();
+    }
+
+    boolean isDragResizing() {
+        return mDragResizing;
     }
 
     void dump(PrintWriter pw, String prefix, boolean dumpAll) {

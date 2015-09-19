@@ -2589,9 +2589,13 @@ public class WindowManagerService extends IWindowManager.Stub
                     }
                 }
 
-                dragResizing = win.isDragResizing();
-                if (win.mDragResizing != dragResizing) {
-                    win.mDragResizing = dragResizing;
+                // If we're starting a drag-resize, we'll be changing the surface size as well as
+                // notifying the client to render to with an offset from the surface's top-left.
+                // Do a screen freeze, and keep the old surface until the the first frame drawn to
+                // the new surface comes back, so that we avoid a flash due to mismatching surface
+                // setups on window manager side and client side.
+                if (win.isDragResizeChanged()) {
+                    win.setDragResizing();
                     if (win.mHasSurface) {
                         winAnimator.mDestroyPendingSurfaceUponRedraw = true;
                         winAnimator.mSurfaceDestroyDeferred = true;
@@ -2600,6 +2604,7 @@ public class WindowManagerService extends IWindowManager.Stub
                         toBeDisplayed = true;
                     }
                 }
+                dragResizing = win.isDragResizing();
                 try {
                     if (!win.mHasSurface) {
                         surfaceChanged = true;
@@ -4688,16 +4693,10 @@ public class WindowManagerService extends IWindowManager.Stub
                 throw new IllegalArgumentException("resizeTask: taskId " + taskId
                         + " not found.");
             }
-            final int boundsChanged = task.setBounds(bounds, configuration);
-            if (boundsChanged != Task.BOUNDS_CHANGE_NONE) {
-                if ((boundsChanged & Task.BOUNDS_CHANGE_SIZE) == Task.BOUNDS_CHANGE_SIZE) {
-                    task.resizeWindows();
-                }
 
-                if (relayout) {
-                    task.getDisplayContent().layoutNeeded = true;
-                    mWindowPlacerLocked.performSurfacePlacement();
-                }
+            if (task.resizeLocked(bounds, configuration) && relayout) {
+                task.getDisplayContent().layoutNeeded = true;
+                mWindowPlacerLocked.performSurfacePlacement();
             }
         }
     }
@@ -8480,7 +8479,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 Slog.v(TAG, "Win " + w + " config changed: "
                         + mCurConfiguration);
             }
-            final boolean dragResizingChanged = w.mDragResizing != w.isDragResizing();
+            final boolean dragResizingChanged = w.isDragResizeChanged();
             if (localLOGV) Slog.v(TAG, "Resizing " + w
                     + ": configChanged=" + configChanged
                     + " dragResizingChanged=" + dragResizingChanged

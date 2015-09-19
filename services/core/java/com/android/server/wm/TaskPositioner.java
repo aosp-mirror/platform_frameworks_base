@@ -86,8 +86,7 @@ class TaskPositioner implements DimLayer.DimLayerUser {
     private int mMinVisibleWidth;
     private int mMinVisibleHeight;
 
-    private int mTaskId;
-    private TaskStack mStack;
+    private Task mTask;
     private boolean mResizing;
     private final Rect mWindowOriginalBounds = new Rect();
     private final Rect mWindowDragBounds = new Rect();
@@ -136,7 +135,7 @@ class TaskPositioner implements DimLayer.DimLayerUser {
                         }
                         try {
                             mService.mActivityManager.resizeTask(
-                                    mTaskId, mWindowDragBounds, true /* resizedByUser */);
+                                    mTask.mTaskId, mWindowDragBounds, true /* resizedByUser */);
                         } catch(RemoteException e) {}
                     } break;
 
@@ -156,21 +155,29 @@ class TaskPositioner implements DimLayer.DimLayerUser {
                 }
 
                 if (endDrag) {
-                    mResizing = false;
+                    synchronized (mService.mWindowMap) {
+                        endDragLocked();
+                    }
                     try {
-                        mService.mActivityManager.resizeTask(
-                                mTaskId, mWindowDragBounds, true /* resizedByUser */);
+                        if (mResizing) {
+                            // We were using fullscreen surface during resizing. Request
+                            // resizeTask() one last time to restore surface to window size.
+                            mService.mActivityManager.resizeTask(
+                                    mTask.mTaskId, mWindowDragBounds, true /* resizedByUser */);
+                        }
+
+                        if (mCurrentDimSide != CTRL_NONE) {
+                            final int createMode = mCurrentDimSide == CTRL_LEFT
+                                    ? DOCKED_STACK_CREATE_MODE_TOP_OR_LEFT
+                                    : DOCKED_STACK_CREATE_MODE_BOTTOM_OR_RIGHT;
+                            mService.mActivityManager.moveTaskToDockedStack(
+                                    mTask.mTaskId, createMode, true /*toTop*/);
+                        }
                     } catch(RemoteException e) {}
+
                     // Post back to WM to handle clean-ups. We still need the input
                     // event handler for the last finishInputEvent()!
                     mService.mH.sendEmptyMessage(H.FINISH_TASK_POSITIONING);
-                    if (mCurrentDimSide != CTRL_NONE) {
-                        final int createMode = mCurrentDimSide == CTRL_LEFT
-                                ? DOCKED_STACK_CREATE_MODE_TOP_OR_LEFT
-                                : DOCKED_STACK_CREATE_MODE_BOTTOM_OR_RIGHT;
-                        mService.mActivityManager.moveTaskToDockedStack(
-                                mTaskId, createMode, true /*toTop*/);
-                    }
                 }
                 handled = true;
             } catch (Exception e) {
@@ -291,10 +298,6 @@ class TaskPositioner implements DimLayer.DimLayerUser {
         mService.resumeRotationLocked();
     }
 
-    boolean isTaskResizing(final Task task) {
-        return mResizing && task != null && mTaskId == task.mTaskId;
-    }
-
     void startDragLocked(WindowState win, boolean resize, float startX, float startY) {
         if (DEBUG_TASK_POSITIONING) {
             Slog.d(TAG, "startDragLocked: win=" + win + ", resize=" + resize
@@ -318,13 +321,16 @@ class TaskPositioner implements DimLayer.DimLayerUser {
             mResizing = true;
         }
 
-        final Task task = win.getTask();
-        mTaskId = task.mTaskId;
-        mStack = task.mStack;
+        mTask = win.getTask();
         mStartDragX = startX;
         mStartDragY = startY;
 
-        mService.getTaskBounds(mTaskId, mWindowOriginalBounds);
+        mService.getTaskBounds(mTask.mTaskId, mWindowOriginalBounds);
+    }
+
+    private void endDragLocked() {
+        mResizing = false;
+        mTask.setDragResizing(false);
     }
 
     /** Returns true if the move operation should be ended. */
@@ -354,11 +360,12 @@ class TaskPositioner implements DimLayer.DimLayerUser {
                 bottom = Math.max(top + mMinVisibleHeight, bottom + deltaY);
             }
             mWindowDragBounds.set(left, top, right, bottom);
+            mTask.setDragResizing(true);
             return false;
         }
 
         // This is a moving operation.
-        mStack.getBounds(mTmpRect);
+        mTask.mStack.getBounds(mTmpRect);
         mTmpRect.inset(mMinVisibleWidth, mMinVisibleHeight);
         if (!mTmpRect.contains((int) x, (int) y)) {
             // We end the moving operation if position is outside the stack bounds.
@@ -397,13 +404,13 @@ class TaskPositioner implements DimLayer.DimLayerUser {
      * shouldn't be shown.
      */
     private int getDimSide(int x) {
-        if (mStack.mStackId != FREEFORM_WORKSPACE_STACK_ID
-                || !mStack.isFullscreen()
+        if (mTask.mStack.mStackId != FREEFORM_WORKSPACE_STACK_ID
+                || !mTask.mStack.isFullscreen()
                 || mService.mCurConfiguration.orientation != ORIENTATION_LANDSCAPE) {
             return CTRL_NONE;
         }
 
-        mStack.getBounds(mTmpRect);
+        mTask.mStack.getBounds(mTmpRect);
         if (x - mSideMargin <= mTmpRect.left) {
             return CTRL_LEFT;
         }
@@ -415,7 +422,7 @@ class TaskPositioner implements DimLayer.DimLayerUser {
     }
 
     private void showDimLayer() {
-        mStack.getBounds(mTmpRect);
+        mTask.mStack.getBounds(mTmpRect);
         if (mCurrentDimSide == CTRL_LEFT) {
             mTmpRect.right = mTmpRect.centerX();
         } else if (mCurrentDimSide == CTRL_RIGHT) {
@@ -433,7 +440,7 @@ class TaskPositioner implements DimLayer.DimLayerUser {
 
     @Override /** {@link DimLayer.DimLayerUser} */
     public DisplayInfo getDisplayInfo() {
-        return mStack.getDisplayInfo();
+        return mTask.mStack.getDisplayInfo();
     }
 
     private int getDragLayerLocked() {
