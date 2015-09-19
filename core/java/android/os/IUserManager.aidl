@@ -35,6 +35,7 @@ interface IUserManager {
 
     UserInfo createUser(in String name, int flags);
     UserInfo createProfileForUser(in String name, int flags, int userHandle);
+    UserInfo createRestrictedProfile(String name, int parentUserId);
     void setUserEnabled(int userHandle);
     boolean removeUser(int userHandle);
     void setUserName(int userHandle, String name);

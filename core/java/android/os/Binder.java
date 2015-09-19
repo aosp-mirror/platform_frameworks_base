@@ -157,7 +157,7 @@ public class Binder implements IBinder {
      * incoming transaction, then its own UserHandle is returned.
      */
     public static final UserHandle getCallingUserHandle() {
-        return new UserHandle(UserHandle.getUserId(getCallingUid()));
+        return UserHandle.of(UserHandle.getUserId(getCallingUid()));
     }
 
     /**

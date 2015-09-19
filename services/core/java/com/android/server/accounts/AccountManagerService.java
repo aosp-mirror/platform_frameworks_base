@@ -29,6 +29,7 @@ import android.accounts.IAccountAuthenticator;
 import android.accounts.IAccountAuthenticatorResponse;
 import android.accounts.IAccountManager;
 import android.accounts.IAccountManagerResponse;
+import android.annotation.NonNull;
 import android.app.ActivityManager;
 import android.app.ActivityManagerNative;
 import android.app.AppGlobals;
@@ -2526,6 +2527,7 @@ public class AccountManagerService
      * Returns the accounts visible to the client within the context of a specific user
      * @hide
      */
+    @NonNull
     public Account[] getAccounts(int userId, String opPackageName) {
         int callingUid = Binder.getCallingUid();
         List<String> visibleAccountTypes = getTypesVisibleToCaller(callingUid, userId,
@@ -2551,6 +2553,7 @@ public class AccountManagerService
      *
      * @hide
      */
+    @NonNull
     public AccountAndUser[] getRunningAccounts() {
         final int[] runningUserIds;
         try {
@@ -2563,6 +2566,7 @@ public class AccountManagerService
     }
 
     /** {@hide} */
+    @NonNull
     public AccountAndUser[] getAllAccounts() {
         final List<UserInfo> users = getUserManager().getUsers();
         final int[] userIds = new int[users.size()];
@@ -2572,6 +2576,7 @@ public class AccountManagerService
         return getAccounts(userIds);
     }
 
+    @NonNull
     private AccountAndUser[] getAccounts(int[] userIds) {
         final ArrayList<AccountAndUser> runningAccounts = Lists.newArrayList();
         for (int userId : userIds) {
@@ -2591,10 +2596,12 @@ public class AccountManagerService
     }
 
     @Override
+    @NonNull
     public Account[] getAccountsAsUser(String type, int userId, String opPackageName) {
         return getAccountsAsUser(type, userId, null, -1, opPackageName);
     }
 
+    @NonNull
     private Account[] getAccountsAsUser(
             String type,
             int userId,
@@ -2649,6 +2656,7 @@ public class AccountManagerService
         }
     }
 
+    @NonNull
     private Account[] getAccountsInternal(
             UserAccounts userAccounts,
             int callingUid,
@@ -2672,7 +2680,15 @@ public class AccountManagerService
     }
 
     @Override
-    public boolean addSharedAccountAsUser(Account account, int userId) {
+    public void addSharedAccountsFromParentUser(int parentUserId, int userId) {
+        checkManageUsersPermission("addSharedAccountsFromParentUser");
+        Account[] accounts = getAccountsAsUser(null, parentUserId, mContext.getOpPackageName());
+        for (Account account : accounts) {
+            addSharedAccountAsUser(account, userId);
+        }
+    }
+
+    private boolean addSharedAccountAsUser(Account account, int userId) {
         userId = handleIncomingUser(userId);
         UserAccounts accounts = getUserAccounts(userId);
         SQLiteDatabase db = accounts.openHelper.getWritableDatabase();
@@ -2764,11 +2780,13 @@ public class AccountManagerService
     }
 
     @Override
+    @NonNull
     public Account[] getAccounts(String type, String opPackageName) {
         return getAccountsAsUser(type, UserHandle.getCallingUserId(), opPackageName);
     }
 
     @Override
+    @NonNull
     public Account[] getAccountsForPackage(String packageName, int uid, String opPackageName) {
         int callingUid = Binder.getCallingUid();
         if (!UserHandle.isSameApp(callingUid, Process.myUid())) {
@@ -2780,6 +2798,7 @@ public class AccountManagerService
     }
 
     @Override
+    @NonNull
     public Account[] getAccountsByTypeForPackage(String type, String packageName,
             String opPackageName) {
         int packageUid = -1;
@@ -3842,6 +3861,14 @@ public class AccountManagerService
             }
         }
         return false;
+    }
+
+    private static void checkManageUsersPermission(String message) {
+        if (ActivityManager.checkComponentPermission(
+                android.Manifest.permission.MANAGE_USERS, Binder.getCallingUid(), -1, true)
+                != PackageManager.PERMISSION_GRANTED) {
+            throw new SecurityException("You need MANAGE_USERS permission to: " + message);
+        }
     }
 
     private boolean hasExplicitlyGrantedPermission(Account account, String authTokenType,
