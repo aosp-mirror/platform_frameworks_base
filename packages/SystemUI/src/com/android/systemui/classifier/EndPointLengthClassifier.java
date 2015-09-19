@@ -17,16 +17,14 @@
 package com.android.systemui.classifier;
 
 /**
- * An abstract class for classifiers which classify the whole gesture (all the strokes which
- * occurred from DOWN event to UP/CANCEL event)
+ * A classifier which looks at the distance between the first and the last point from the stroke.
  */
-public abstract class GestureClassifier extends Classifier {
+public class EndPointLengthClassifier extends StrokeClassifier {
+    public EndPointLengthClassifier(ClassifierData classifierData) {
+    }
 
-    /**
-     * @param type the type of action for which this method is called
-     * @return a non-negative value which is used to determine whether the most recent gesture is a
-     *         false interaction; the bigger the value the greater the chance that this a false
-     *         interaction.
-     */
-    public abstract float getFalseTouchEvaluation(int type);
+    @Override
+    public float getFalseTouchEvaluation(int type, Stroke stroke) {
+        return EndPointLengthEvaluator.evaluate(stroke.getEndPointLength());
+    }
 }

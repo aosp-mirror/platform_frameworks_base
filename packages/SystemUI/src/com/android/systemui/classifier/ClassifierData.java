@@ -28,8 +28,12 @@ import java.util.ArrayList;
 public class ClassifierData {
     private SparseArray<Stroke> mCurrentStrokes = new SparseArray<>();
     private ArrayList<Stroke> mEndingStrokes = new ArrayList<>();
+    private float mXdpi;
+    private float mYdpi;
 
-    public ClassifierData() {
+    public ClassifierData(float xdpi, float ydpi) {
+        mXdpi = xdpi;
+        mYdpi = ydpi;
     }
 
     public void update(MotionEvent event) {
@@ -42,7 +46,7 @@ public class ClassifierData {
         for (int i = 0; i < event.getPointerCount(); i++) {
             int id = event.getPointerId(i);
             if (mCurrentStrokes.get(id) == null) {
-                mCurrentStrokes.put(id, new Stroke(event.getEventTimeNano()));
+                mCurrentStrokes.put(id, new Stroke(event.getEventTimeNano(), mXdpi, mYdpi));
             }
             mCurrentStrokes.get(id).addPoint(event.getX(i), event.getY(i),
                     event.getEventTimeNano());

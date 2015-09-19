@@ -100,7 +100,7 @@ public class HistoryEvaluator {
      * For each stroke it holds its initial value and the current weight. Initially the
      * weight is set to 1.0
      */
-    private class Data {
+    private static class Data {
         public float evaluation;
         public float weight;
 

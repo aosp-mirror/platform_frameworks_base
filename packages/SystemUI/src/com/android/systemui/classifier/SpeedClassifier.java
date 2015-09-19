@@ -17,16 +17,21 @@
 package com.android.systemui.classifier;
 
 /**
- * An abstract class for classifiers which classify the whole gesture (all the strokes which
- * occurred from DOWN event to UP/CANCEL event)
+ * A classifier that looks at the speed of the stroke. It calculates the speed of a stroke in
+ * inches per second.
  */
-public abstract class GestureClassifier extends Classifier {
+public class SpeedClassifier extends StrokeClassifier {
+    private final float NANOS_TO_SECONDS = 1e9f;
 
-    /**
-     * @param type the type of action for which this method is called
-     * @return a non-negative value which is used to determine whether the most recent gesture is a
-     *         false interaction; the bigger the value the greater the chance that this a false
-     *         interaction.
-     */
-    public abstract float getFalseTouchEvaluation(int type);
+    public SpeedClassifier(ClassifierData classifierData) {
+    }
+
+    @Override
+    public float getFalseTouchEvaluation(int type, Stroke stroke) {
+        float duration = (float) stroke.getDurationNanos() / NANOS_TO_SECONDS;
+        if (duration == 0.0f) {
+            return SpeedEvaluator.evaluate(0.0f);
+        }
+        return SpeedEvaluator.evaluate(stroke.getTotalLength() / duration);
+    }
 }

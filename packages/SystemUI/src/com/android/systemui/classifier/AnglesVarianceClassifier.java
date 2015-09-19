@@ -29,10 +29,15 @@ import java.util.List;
  * For each stroke it keeps its last three points. If some successive points are the same, it
  * ignores the repetitions. If a new point is added, the classifier calculates the angle between
  * the last three points. After that, it calculates the difference between this angle and the
- * previously calculated angle. The return value of the classifier is the variance of the
- * differences from a stroke. To the differences there is artificially added value 0.0 and the
- * difference between the first angle and PI (angles are in radians). It helps with strokes which
- * have few points and punishes more strokes which are not smooth.
+ * previously calculated angle. Then it calculates the variance of the differences from a stroke.
+ * To the differences there is artificially added value 0.0 and the difference between the first
+ * angle and PI (angles are in radians). It helps with strokes which have few points and punishes
+ * more strokes which are not smooth. This classifier also tries to split the stroke into two parts
+ * int the place in which the biggest angle is. It calculates the angle variance of the two parts
+ * and sums them up. The reason the classifier is doing this, is because some human swipes at the
+ * beginning go for a moment in one direction and then they rapidly change direction for the rest
+ * of the stroke (like a tick). The final result is the minimum of angle variance of the whole
+ * stroke and the sum of angle variances of the two parts split up.
  */
 public class AnglesVarianceClassifier extends StrokeClassifier {
     private HashMap<Stroke, Data> mStrokeMap = new HashMap<>();
@@ -61,21 +66,28 @@ public class AnglesVarianceClassifier extends StrokeClassifier {
 
     @Override
     public float getFalseTouchEvaluation(int type, Stroke stroke) {
-        return mStrokeMap.get(stroke).getAnglesVariance();
+        return AnglesVarianceEvaluator.evaluate(mStrokeMap.get(stroke).getAnglesVariance());
     }
 
-    private class Data {
+    private static class Data {
         private List<Point> mLastThreePoints = new ArrayList<>();
+        private float mFirstAngleVariance;
         private float mPreviousAngle;
+        private float mBiggestAngle;
         private float mSumSquares;
+        private float mSecondSumSquares;
         private float mSum;
+        private float mSecondSum;
         private float mCount;
+        private float mSecondCount;
 
         public Data() {
+            mFirstAngleVariance = 0.0f;
             mPreviousAngle = (float) Math.PI;
-            mSumSquares = 0.0f;
-            mSum = 0.0f;
-            mCount = 1.0f;
+            mBiggestAngle = 0.0f;
+            mSumSquares = mSecondSumSquares = 0.0f;
+            mSum = mSecondSum = 0.0f;
+            mCount = mSecondCount = 1.0f;
         }
 
         public void addPoint(Point point) {
@@ -87,10 +99,26 @@ public class AnglesVarianceClassifier extends StrokeClassifier {
                 if (mLastThreePoints.size() == 4) {
                     mLastThreePoints.remove(0);
 
-                    float angle = getAngle(mLastThreePoints.get(0), mLastThreePoints.get(1),
+                    float angle = mLastThreePoints.get(1).getAngle(mLastThreePoints.get(0),
                             mLastThreePoints.get(2));
 
                     float difference = angle - mPreviousAngle;
+
+                    // If this is the biggest angle of the stroke so then we save the value of
+                    // the angle variance so far and start to count the values for the angle
+                    // variance of the second part.
+                    if (mBiggestAngle < angle) {
+                        mBiggestAngle = angle;
+                        mFirstAngleVariance = getAnglesVariance(mSumSquares, mSum, mCount);
+                        mSecondSumSquares = 0.0f;
+                        mSecondSum = 0.0f;
+                        mSecondCount = 1.0f;
+                    } else {
+                        mSecondSum += difference;
+                        mSecondSumSquares += difference * difference;
+                        mSecondCount += 1.0;
+                    }
+
                     mSum += difference;
                     mSumSquares += difference * difference;
                     mCount += 1.0;
@@ -99,21 +127,14 @@ public class AnglesVarianceClassifier extends StrokeClassifier {
             }
         }
 
-        private float getAngle(Point a, Point b, Point c) {
-            float dist1 = a.dist(b);
-            float dist2 = b.dist(c);
-            float crossProduct = b.crossProduct(a, c);
-            float dotProduct = b.dotProduct(a, c);
-            float cos = Math.min(1.0f, Math.max(-1.0f, dotProduct / dist1 / dist2));
-            float angle = (float) Math.acos(cos);
-            if (crossProduct < 0.0) {
-                angle = 2.0f * (float) Math.PI - angle;
-            }
-            return angle;
+        public float getAnglesVariance(float sumSquares, float sum, float count) {
+            return sumSquares / count - (sum / count) * (sum / count);
         }
 
         public float getAnglesVariance() {
-            return mSumSquares / mCount - (mSum / mCount) * (mSum / mCount);
+            return Math.min(getAnglesVariance(mSumSquares, mSum, mCount),
+                    mFirstAngleVariance + getAnglesVariance(mSecondSumSquares, mSecondSum,
+                            mSecondCount));
         }
     }
 }

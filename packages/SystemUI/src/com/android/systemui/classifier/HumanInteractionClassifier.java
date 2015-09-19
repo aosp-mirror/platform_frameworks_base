@@ -55,10 +55,21 @@ public class HumanInteractionClassifier extends Classifier {
 
     private HumanInteractionClassifier(Context context) {
         mContext = context;
-        mClassifierData = new ClassifierData();
+        mClassifierData = new ClassifierData(mContext.getResources().getDisplayMetrics().xdpi,
+                mContext.getResources().getDisplayMetrics().ydpi);
         mHistoryEvaluator = new HistoryEvaluator();
 
         mStrokeClassifiers.add(new AnglesVarianceClassifier(mClassifierData));
+        mStrokeClassifiers.add(new SpeedClassifier(mClassifierData));
+        mStrokeClassifiers.add(new DurationCountClassifier(mClassifierData));
+        mStrokeClassifiers.add(new EndPointRatioClassifier(mClassifierData));
+        mStrokeClassifiers.add(new EndPointLengthClassifier(mClassifierData));
+        mStrokeClassifiers.add(new AccelerationClassifier(mClassifierData));
+        mStrokeClassifiers.add(new SpeedVarianceClassifier(mClassifierData));
+        mStrokeClassifiers.add(new LengthCountClassifier(mClassifierData));
+
+        mGestureClassifiers.add(new PointerCountClassifier(mClassifierData));
+        mGestureClassifiers.add(new ProximityClassifier(mClassifierData));
 
         mStrokeClassifiersSize = mStrokeClassifiers.size();
         mGestureClassifiersSize = mGestureClassifiers.size();
@@ -128,6 +139,13 @@ public class HumanInteractionClassifier extends Classifier {
 
     @Override
     public void onSensorChanged(SensorEvent event) {
+        for (int i = 0; i < mStrokeClassifiers.size(); i++) {
+            mStrokeClassifiers.get(i).onSensorChanged(event);
+        }
+
+        for (int i = 0; i < mGestureClassifiers.size(); i++) {
+            mGestureClassifiers.get(i).onSensorChanged(event);
+        }
     }
 
     public boolean isFalseTouch() {

@@ -23,17 +23,48 @@ import java.util.ArrayList;
  * DOWN/POINTER_DOWN event till the UP/POINTER_UP/CANCEL event.)
  */
 public class Stroke {
+    private final float NANOS_TO_SECONDS = 1e9f;
+
     private ArrayList<Point> mPoints = new ArrayList<>();
     private long mStartTimeNano;
     private long mEndTimeNano;
+    private float mLength;
+    private float mXdpi;
+    private float mYdpi;
 
-    public Stroke(long eventTimeNano) {
+    public Stroke(long eventTimeNano, float xdpi, float ydpi) {
+        mXdpi = xdpi;
+        mYdpi = ydpi;
         mStartTimeNano = mEndTimeNano = eventTimeNano;
     }
 
     public void addPoint(float x, float y, long eventTimeNano) {
         mEndTimeNano = eventTimeNano;
-        mPoints.add(new Point(x, y, eventTimeNano - mStartTimeNano));
+        Point point = new Point(x / mXdpi, y / mYdpi, eventTimeNano - mStartTimeNano);
+        if (!mPoints.isEmpty()) {
+            mLength += mPoints.get(mPoints.size() - 1).dist(point);
+        }
+        mPoints.add(point);
+    }
+
+    public int getCount() {
+        return mPoints.size();
+    }
+
+    public float getTotalLength() {
+        return mLength;
+    }
+
+    public float getEndPointLength() {
+        return mPoints.get(0).dist(mPoints.get(mPoints.size() - 1));
+    }
+
+    public long getDurationNanos() {
+        return mEndTimeNano - mStartTimeNano;
+    }
+
+    public float getDurationSeconds() {
+        return (float) getDurationNanos() / NANOS_TO_SECONDS;
     }
 
     public ArrayList<Point> getPoints() {

@@ -16,17 +16,14 @@
 
 package com.android.systemui.classifier;
 
-/**
- * An abstract class for classifiers which classify the whole gesture (all the strokes which
- * occurred from DOWN event to UP/CANCEL event)
- */
-public abstract class GestureClassifier extends Classifier {
-
-    /**
-     * @param type the type of action for which this method is called
-     * @return a non-negative value which is used to determine whether the most recent gesture is a
-     *         false interaction; the bigger the value the greater the chance that this a false
-     *         interaction.
-     */
-    public abstract float getFalseTouchEvaluation(int type);
+public class ProximityEvaluator {
+    public static float evaluate(float value, int type) {
+        float evaluation = 0.0f;
+        float threshold = 0.1f;
+        if (type == Classifier.QUICK_SETTINGS) {
+            threshold = 1.0f;
+        }
+        if (value >= threshold) evaluation += 2.0;
+        return evaluation;
+    }
 }
