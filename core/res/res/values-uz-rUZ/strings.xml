@@ -414,18 +414,18 @@
     <string name="permdesc_nfc" msgid="7120611819401789907">"Ilova qisqa masofali aloqa (NFC) texnologiyasi yordamida NFC yorliqlari, kartalar va o‘qish moslamalari bilan ma’lumot almashishi mumkin."</string>
     <string name="permlab_disableKeyguard" msgid="3598496301486439258">"ekran qulfini o‘chirib qo‘yish"</string>
     <string name="permdesc_disableKeyguard" msgid="6034203065077122992">"Ilovaga ekran qulfini va har qanday parol  yordamidagi xavfsizlik himoyalarini o‘chirishga ruxsat beradi. Masalan, kirish qo‘ng‘irog‘ida telefon ekran qulfini o‘chiradi va qo‘ng‘iroq tugashi bilan qulfni yoqadi."</string>
-    <string name="permlab_manageFingerprint" msgid="5640858826254575638">"barmoq izi sensorini boshqarish"</string>
+    <string name="permlab_manageFingerprint" msgid="5640858826254575638">"barmoq izi skanerini boshqarish"</string>
     <string name="permdesc_manageFingerprint" msgid="178208705828055464">"Ilova foydalanish uchun barmoq izi namunalarini qo‘shish va o‘chirish usullarini qo‘llashi mumkin."</string>
     <string name="permlab_useFingerprint" msgid="3150478619915124905">"barmoq izi sensoridan foydalanish"</string>
     <string name="permdesc_useFingerprint" msgid="9165097460730684114">"Ilova haqiqiylikni tekshirish uchun barmoq izi sensoridan foydalanishi mumkin"</string>
     <string name="fingerprint_acquired_partial" msgid="735082772341716043">"Barmoq izi qisman aniqlandi. Qayta urinib ko‘ring."</string>
     <string name="fingerprint_acquired_insufficient" msgid="4596546021310923214">"Barmoq izi aniqlanmadi. Qayta urinib ko‘ring."</string>
-    <string name="fingerprint_acquired_imager_dirty" msgid="1087209702421076105">"Barmoq izi sensori kirlangan. Uni tozalab, keyin qayta urinib ko‘ring."</string>
+    <string name="fingerprint_acquired_imager_dirty" msgid="1087209702421076105">"Barmoq izi skaneri kirlangan. Uni tozalab, keyin qayta urinib ko‘ring."</string>
     <string name="fingerprint_acquired_too_fast" msgid="6470642383109155969">"Barmoq juda tez harakatlandi. Qayta urinib ko‘ring."</string>
     <string name="fingerprint_acquired_too_slow" msgid="59250885689661653">"Barmoq juda sekin harakatlandi. Qayta urinib ko‘ring."</string>
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
-    <string name="fingerprint_error_hw_not_available" msgid="7955921658939936596">"Barmoq izi sensori ish holatida emas."</string>
+    <string name="fingerprint_error_hw_not_available" msgid="7955921658939936596">"Barmoq izi skaneri ish holatida emas."</string>
     <string name="fingerprint_error_no_space" msgid="1055819001126053318">"Barmoq izini saqlab bo‘lmadi. Mavjud barmoq izlaridan birini o‘chirib tashlang."</string>
     <string name="fingerprint_error_timeout" msgid="3927186043737732875">"Barmoq izini aniqlash vaqti tugab qoldi. Qayta urinib ko‘ring."</string>
     <string name="fingerprint_error_canceled" msgid="4402024612660774395">"Barmoq izi tekshiruvi bekor qilindi."</string>
@@ -676,7 +676,7 @@
     <string name="lockscreen_transport_stop_description" msgid="5907083260651210034">"To‘xtatish"</string>
     <string name="lockscreen_transport_rew_description" msgid="6944412838651990410">"Orqaga o‘tkazish"</string>
     <string name="lockscreen_transport_ffw_description" msgid="42987149870928985">"Oldinga o‘tkazish"</string>
-    <string name="emergency_calls_only" msgid="6733978304386365407">"Faqat favqulodda chaqiruvlar"</string>
+    <string name="emergency_calls_only" msgid="6733978304386365407">"Faqat favqulodda qo‘ng‘iroqlar"</string>
     <string name="lockscreen_network_locked_message" msgid="143389224986028501">"Tarmoq qulflangan"</string>
     <string name="lockscreen_sim_puk_locked_message" msgid="7441797339976230">"SIM-karta PUK kod bilan qulflangan."</string>
     <string name="lockscreen_sim_puk_locked_instructions" msgid="8127916255245181063">"Foydalanuvchi qo‘llanmasiga qarang yoki Abonentlarni qo‘llab-quvvatlash markaziga murojaat qiling."</string>
@@ -1042,9 +1042,9 @@
     <string name="usb_ptp_notification_title" msgid="1347328437083192112">"USB orqali rasm o‘tkazish"</string>
     <string name="usb_midi_notification_title" msgid="4850904915889144654">"USB orqali MIDI"</string>
     <string name="usb_accessory_notification_title" msgid="7848236974087653666">"USB jihozga ulangan"</string>
-    <string name="usb_notification_message" msgid="7347368030849048437">"Boshqa variantlar"</string>
-    <string name="adb_active_notification_title" msgid="6729044778949189918">"USB orqali nosozlikni tuzatish"</string>
-    <string name="adb_active_notification_message" msgid="1016654627626476142">"O‘chirib qo‘yish uchun bosing"</string>
+    <string name="usb_notification_message" msgid="7347368030849048437">"Sozlash uchun bosing."</string>
+    <string name="adb_active_notification_title" msgid="6729044778949189918">"USB orqali nosozliklarni tuzatish"</string>
+    <string name="adb_active_notification_message" msgid="1016654627626476142">"O‘chirib qo‘yish uchun bosing."</string>
     <string name="select_input_method" msgid="8547250819326693584">"Klaviaturani o‘zgartirish"</string>
     <string name="configure_input_methods" msgid="4769971288371946846">"Klaviaturani tanlash"</string>
     <string name="show_ime" msgid="9157568568695230830">"Kiritish usulini ko‘rish"</string>

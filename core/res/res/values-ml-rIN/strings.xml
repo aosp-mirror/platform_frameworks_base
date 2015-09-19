@@ -1167,7 +1167,7 @@
     <string name="sync_really_delete" msgid="2572600103122596243">"ഇനങ്ങൾ ഇല്ലാതാക്കുക"</string>
     <string name="sync_undo_deletes" msgid="2941317360600338602">"ഇല്ലാതാക്കിയവ പഴയപടിയാക്കുക"</string>
     <string name="sync_do_nothing" msgid="3743764740430821845">"ഇപ്പോൾ ഒന്നും ചെയ്യേണ്ടതില്ല"</string>
-    <string name="choose_account_label" msgid="5655203089746423927">"ഒരു അക്കൗണ്ട് തിരഞ്ഞെടുക്കുക"</string>
+    <string name="choose_account_label" msgid="5655203089746423927">"അക്കൗണ്ട് തിരഞ്ഞെടുക്കൂ"</string>
     <string name="add_account_label" msgid="2935267344849993553">"ഒരു അക്കൗണ്ട് ചേർക്കുക"</string>
     <string name="add_account_button_label" msgid="3611982894853435874">"അക്കൗണ്ട് ചേർക്കുക"</string>
     <string name="number_picker_increment_button" msgid="2412072272832284313">"വർദ്ധിപ്പിക്കുക"</string>

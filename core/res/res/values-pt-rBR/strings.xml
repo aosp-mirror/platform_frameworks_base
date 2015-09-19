@@ -235,7 +235,7 @@
     <string name="permgrouplab_sms" msgid="228308803364967808">"SMS"</string>
     <string name="permgroupdesc_sms" msgid="4656988620100940350">"enviar e ver mensagens SMS"</string>
     <string name="permgrouplab_storage" msgid="1971118770546336966">"Armazenamento"</string>
-    <string name="permgroupdesc_storage" msgid="637758554581589203">"acesse fotos, mídia e arquivos do seu dispositivo"</string>
+    <string name="permgroupdesc_storage" msgid="637758554581589203">"acesse fotos, mídia e arquivos do dispositivo"</string>
     <string name="permgrouplab_microphone" msgid="171539900250043464">"Microfone"</string>
     <string name="permgroupdesc_microphone" msgid="4988812113943554584">"grave áudio"</string>
     <string name="permgrouplab_camera" msgid="4820372495894586615">"Câmera"</string>

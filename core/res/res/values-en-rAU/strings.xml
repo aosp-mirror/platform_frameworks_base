@@ -223,7 +223,7 @@
     <string name="global_action_lockdown" msgid="8751542514724332873">"Lock now"</string>
     <string name="status_bar_notification_info_overflow" msgid="5301981741705354993">"999+"</string>
     <string name="safeMode" msgid="2788228061547930246">"Safe mode"</string>
-    <string name="android_system_label" msgid="6577375335728551336">"Android System"</string>
+    <string name="android_system_label" msgid="6577375335728551336">"Android system"</string>
     <string name="user_owner_label" msgid="2804351898001038951">"Personal"</string>
     <string name="managed_profile_label" msgid="6260850669674791528">"Work"</string>
     <string name="permgrouplab_contacts" msgid="3657758145679177612">"Contacts"</string>

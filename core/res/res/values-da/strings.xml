@@ -493,8 +493,8 @@
     <string name="permdesc_bindCarrierMessagingService" msgid="2762882888502113944">"Dette giver indehaveren mulighed for at knytte sig til det øverste grænsefladeniveau for et mobilselskabs beskedtjeneste. Dette bør ikke være nødvendigt i normale apps."</string>
     <string name="permlab_bindCarrierServices" msgid="3233108656245526783">"knytte til tjenester fra mobilselskabet"</string>
     <string name="permdesc_bindCarrierServices" msgid="1391552602551084192">"Tillader, at brugeren knytter sig til tjenester fra mobilselskabet. Dette bør aldrig være nødvendigt for almindelige apps."</string>
-    <string name="permlab_access_notification_policy" msgid="4247510821662059671">"Adgang til Vil ikke forstyrres"</string>
-    <string name="permdesc_access_notification_policy" msgid="3296832375218749580">"Giver appen tilladelse til at læse og skrive konfigurationen af Vil ikke forstyrres."</string>
+    <string name="permlab_access_notification_policy" msgid="4247510821662059671">"have adgang til Forstyr ikke"</string>
+    <string name="permdesc_access_notification_policy" msgid="3296832375218749580">"Giver appen tilladelse til at læse og skrive konfigurationen af Forstyr ikke."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Angiv regler for adgangskoder"</string>
     <string name="policydesc_limitPassword" msgid="2502021457917874968">"Kontrollér længden samt tilladte tegn i adgangskoder og pinkoder til skærmlåsen."</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"Overvåg forsøg på oplåsning af skærm"</string>
@@ -1489,10 +1489,10 @@
     </plurals>
     <string name="zen_mode_until" msgid="7336308492289875088">"Indtil <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
     <string name="zen_mode_forever" msgid="7420011936770086993">"Indtil du slår denne indstilling fra"</string>
-    <string name="zen_mode_forever_dnd" msgid="3792132696572189081">"Indtil du slår \"Vil ikke forstyrres\" fra"</string>
+    <string name="zen_mode_forever_dnd" msgid="3792132696572189081">"Indtil du slår \"Forstyr ikke\" fra"</string>
     <string name="zen_mode_rule_name_combination" msgid="191109939968076477">"<xliff:g id="FIRST">%1$s</xliff:g>/<xliff:g id="REST">%2$s</xliff:g>"</string>
     <string name="toolbar_collapse_description" msgid="2821479483960330739">"Skjul"</string>
-    <string name="zen_mode_feature_name" msgid="5254089399895895004">"Vil ikke forstyrres"</string>
+    <string name="zen_mode_feature_name" msgid="5254089399895895004">"Forstyr ikke"</string>
     <string name="zen_mode_downtime_feature_name" msgid="2626974636779860146">"Nedetid"</string>
     <string name="zen_mode_default_weeknights_name" msgid="3081318299464998143">"Hverdagsaften"</string>
     <string name="zen_mode_default_weekends_name" msgid="2786495801019345244">"Weekend"</string>

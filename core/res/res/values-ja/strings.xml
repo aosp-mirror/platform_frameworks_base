@@ -282,8 +282,8 @@
     <string name="permdesc_receiveWapPush" msgid="748232190220583385">"WAPメッセージの受信と処理をアプリに許可します。これにより、アプリが端末に届いたメッセージを表示することなく監視または削除できるようになります。"</string>
     <string name="permlab_getTasks" msgid="6466095396623933906">"実行中のアプリの取得"</string>
     <string name="permdesc_getTasks" msgid="7454215995847658102">"現在実行中または最近実行したタスクに関する情報の取得をアプリに許可します。これにより、その端末でどのアプリを使用しているかをアプリから識別できるようになる可能性があります。"</string>
-    <string name="permlab_manageProfileAndDeviceOwners" msgid="5979288447973722097">"プロフィールの所有者と端末の所有者の管理"</string>
-    <string name="permdesc_manageProfileAndDeviceOwners" msgid="106894851498657169">"プロフィールの所有者と端末の所有者の設定をアプリに許可します。"</string>
+    <string name="permlab_manageProfileAndDeviceOwners" msgid="5979288447973722097">"プロファイルの所有者と端末の所有者の管理"</string>
+    <string name="permdesc_manageProfileAndDeviceOwners" msgid="106894851498657169">"プロファイルの所有者と端末の所有者の設定をアプリに許可します。"</string>
     <string name="permlab_reorderTasks" msgid="2018575526934422779">"実行中のアプリの順序変更"</string>
     <string name="permdesc_reorderTasks" msgid="7734217754877439351">"タスクをフォアグラウンドやバックグラウンドに移動することをアプリに許可します。これにより、アプリがユーザーからの入力なしでこの処理を実行する可能性があります。"</string>
     <string name="permlab_enableCarMode" msgid="5684504058192921098">"運転モードの有効化"</string>

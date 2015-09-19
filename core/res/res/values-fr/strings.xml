@@ -1423,7 +1423,7 @@
     <string name="restr_pin_enter_old_pin" msgid="1462206225512910757">"Code PIN actuel"</string>
     <string name="restr_pin_enter_new_pin" msgid="5959606691619959184">"Nouveau code PIN"</string>
     <string name="restr_pin_confirm_pin" msgid="8501523829633146239">"Confirmer le nouveau code PIN"</string>
-    <string name="restr_pin_create_pin" msgid="8017600000263450337">"Créer un code PIN pour modifier les restrictions"</string>
+    <string name="restr_pin_create_pin" msgid="8017600000263450337">"Créer un code pour modifier les restrictions"</string>
     <string name="restr_pin_error_doesnt_match" msgid="2224214190906994548">"Les codes PIN ne correspondent pas. Veuillez réessayer."</string>
     <string name="restr_pin_error_too_short" msgid="8173982756265777792">"Le code PIN est trop court. Il doit comporter au moins 4 chiffres."</string>
     <plurals name="restr_pin_countdown" formatted="false" msgid="9061246974881224688">

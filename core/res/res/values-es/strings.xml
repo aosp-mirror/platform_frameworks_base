@@ -890,7 +890,7 @@
     <string name="whichHomeApplication" msgid="4307587691506919691">"Selecciona una aplicación de inicio"</string>
     <string name="whichHomeApplicationNamed" msgid="4493438593214760979">"Usar %1$s como aplicación de inicio"</string>
     <string name="alwaysUse" msgid="4583018368000610438">"Usar siempre para esta acción"</string>
-    <string name="use_a_different_app" msgid="8134926230585710243">"Uitliza otra aplicación"</string>
+    <string name="use_a_different_app" msgid="8134926230585710243">"Utiliza otra aplicación"</string>
     <string name="clearDefaultHintMsg" msgid="3252584689512077257">"Para borrar los valores predeterminados, accede a Ajustes del sistema &gt; Aplicaciones &gt; Descargadas."</string>
     <string name="chooseActivity" msgid="7486876147751803333">"Selecciona una acción"</string>
     <string name="chooseUsbActivity" msgid="6894748416073583509">"Elegir una aplicación para el dispositivo USB"</string>
