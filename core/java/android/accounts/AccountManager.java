@@ -16,6 +16,7 @@
 
 package android.accounts;
 
+import android.annotation.NonNull;
 import android.annotation.RequiresPermission;
 import android.annotation.Size;
 import android.app.Activity;
@@ -423,6 +424,7 @@ public class AccountManager {
      * @return An array of {@link Account}, one for each account.  Empty
      *     (never null) if no accounts have been added.
      */
+    @NonNull
     @RequiresPermission(GET_ACCOUNTS)
     public Account[] getAccounts() {
         try {
@@ -448,6 +450,7 @@ public class AccountManager {
      * @return An array of {@link Account}, one for each account.  Empty
      *     (never null) if no accounts have been added.
      */
+    @NonNull
     @RequiresPermission(GET_ACCOUNTS)
     public Account[] getAccountsAsUser(int userId) {
         try {
@@ -466,6 +469,7 @@ public class AccountManager {
      * @param uid the uid of the calling app.
      * @return the accounts that are available to this package and user.
      */
+    @NonNull
     public Account[] getAccountsForPackage(String packageName, int uid) {
         try {
             return mService.getAccountsForPackage(packageName, uid, mContext.getOpPackageName());
@@ -483,6 +487,7 @@ public class AccountManager {
      * @return An array of {@link Account}, one per matching account.  Empty
      *     (never null) if no accounts of the specified type have been added.
      */
+    @NonNull
     public Account[] getAccountsByTypeForPackage(String type, String packageName) {
         try {
             return mService.getAccountsByTypeForPackage(type, packageName,
@@ -515,12 +520,14 @@ public class AccountManager {
      * @return An array of {@link Account}, one per matching account.  Empty
      *     (never null) if no accounts of the specified type have been added.
      */
+    @NonNull
     @RequiresPermission(GET_ACCOUNTS)
     public Account[] getAccountsByType(String type) {
         return getAccountsByTypeAsUser(type, Process.myUserHandle());
     }
 
     /** @hide Same as {@link #getAccountsByType(String)} but for a specific user. */
+    @NonNull
     public Account[] getAccountsByTypeAsUser(String type, UserHandle userHandle) {
         try {
             return mService.getAccountsAsUser(type, userHandle.getIdentifier(),
@@ -1537,23 +1544,22 @@ public class AccountManager {
         }.start();
     }
 
+
     /**
-     * Adds a shared account from the primary user to a secondary user. Adding the shared account
+     * Adds shared accounts from a parent user to a secondary user. Adding the shared account
      * doesn't take effect immediately. When the target user starts up, any pending shared accounts
      * are attempted to be copied to the target user from the primary via calls to the
      * authenticator.
-     * @param account the account to share
-     * @param user the target user
-     * @return
+     * @param parentUser parent user
+     * @param user target user
      * @hide
      */
-    public boolean addSharedAccount(final Account account, UserHandle user) {
+    public void addSharedAccountsFromParentUser(UserHandle parentUser, UserHandle user) {
         try {
-            boolean val = mService.addSharedAccountAsUser(account, user.getIdentifier());
-            return val;
+            mService.addSharedAccountsFromParentUser(parentUser.getIdentifier(),
+                    user.getIdentifier());
         } catch (RemoteException re) {
-            // won't ever happen
-            throw new RuntimeException(re);
+            throw new IllegalStateException(re);
         }
     }
 
