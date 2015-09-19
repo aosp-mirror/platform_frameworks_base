@@ -540,6 +540,17 @@ public final class DisplayManagerService extends SystemService {
         }
     }
 
+    private void requestColorTransformInternal(int displayId, int colorTransformId) {
+        synchronized (mSyncRoot) {
+            LogicalDisplay display = mLogicalDisplays.get(displayId);
+            if (display != null &&
+                    display.getRequestedColorTransformIdLocked() != colorTransformId) {
+                display.setRequestedColorTransformIdLocked(colorTransformId);
+                scheduleTraversalLocked(false);
+            }
+        }
+    }
+
     private int createVirtualDisplayInternal(IVirtualDisplayCallback callback,
             IMediaProjection projection, int callingUid, String packageName,
             String name, int width, int height, int densityDpi, Surface surface, int flags) {
@@ -1334,6 +1345,19 @@ public final class DisplayManagerService extends SystemService {
             final long token = Binder.clearCallingIdentity();
             try {
                 return getWifiDisplayStatusInternal();
+            } finally {
+                Binder.restoreCallingIdentity(token);
+            }
+        }
+
+        @Override // Binder call
+        public void requestColorTransform(int displayId, int colorTransformId) {
+            mContext.enforceCallingOrSelfPermission(
+                    Manifest.permission.CONFIGURE_DISPLAY_COLOR_TRANSFORM,
+                    "Permission required to change the display color transform");
+            final long token = Binder.clearCallingIdentity();
+            try {
+                requestColorTransformInternal(displayId, colorTransformId);
             } finally {
                 Binder.restoreCallingIdentity(token);
             }
