@@ -417,10 +417,9 @@ public class UsbDeviceManager {
         private boolean setUsbConfig(String config) {
             if (DEBUG) Slog.d(TAG, "setUsbConfig(" + config + ")");
             // set the new configuration
-            String oldConfig = SystemProperties.get(USB_CONFIG_PROPERTY);
-            if (!config.equals(oldConfig)) {
-                SystemProperties.set(USB_CONFIG_PROPERTY, config);
-            }
+            // we always set it due to b/23631400, where adbd was getting killed
+            // and not restarted due to property timeouts on some devices
+            SystemProperties.set(USB_CONFIG_PROPERTY, config);
             return waitForState(config);
         }
 
