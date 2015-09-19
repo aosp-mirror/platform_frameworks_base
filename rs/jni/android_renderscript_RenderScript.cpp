@@ -2504,7 +2504,7 @@ nSystemGetPointerSize(JNIEnv *_env, jobject _this) {
 
 static const char *classPathName = "android/renderscript/RenderScript";
 
-static JNINativeMethod methods[] = {
+static const JNINativeMethod methods[] = {
 {"_nInit",                         "()V",                                     (void*)_nInit },
 
 {"nDeviceCreate",                  "()J",                                     (void*)nDeviceCreate },

@@ -71,31 +71,31 @@ public:
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-static JNINativeMethod gPathEffectMethods[] = {
+static const JNINativeMethod gPathEffectMethods[] = {
     { "nativeDestructor", "(J)V", (void*)SkPathEffectGlue::destructor }
 };
 
-static JNINativeMethod gComposePathEffectMethods[] = {
+static const JNINativeMethod gComposePathEffectMethods[] = {
     { "nativeCreate", "(JJ)J", (void*)SkPathEffectGlue::Compose_constructor }
 };
 
-static JNINativeMethod gSumPathEffectMethods[] = {
+static const JNINativeMethod gSumPathEffectMethods[] = {
     { "nativeCreate", "(JJ)J", (void*)SkPathEffectGlue::Sum_constructor }
 };
 
-static JNINativeMethod gDashPathEffectMethods[] = {
+static const JNINativeMethod gDashPathEffectMethods[] = {
     { "nativeCreate", "([FF)J", (void*)SkPathEffectGlue::Dash_constructor }
 };
 
-static JNINativeMethod gPathDashPathEffectMethods[] = {
+static const JNINativeMethod gPathDashPathEffectMethods[] = {
     { "nativeCreate", "(JFFI)J", (void*)SkPathEffectGlue::OneD_constructor }
 };
 
-static JNINativeMethod gCornerPathEffectMethods[] = {
+static const JNINativeMethod gCornerPathEffectMethods[] = {
     { "nativeCreate", "(F)J", (void*)SkPathEffectGlue::Corner_constructor }
 };
 
-static JNINativeMethod gDiscretePathEffectMethods[] = {
+static const JNINativeMethod gDiscretePathEffectMethods[] = {
     { "nativeCreate", "(FF)J", (void*)SkPathEffectGlue::Discrete_constructor }
 };
 

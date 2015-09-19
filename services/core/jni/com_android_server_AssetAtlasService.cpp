@@ -232,7 +232,7 @@ static jboolean com_android_server_AssetAtlasService_upload(JNIEnv* env, jobject
 
 const char* const kClassPathName = "com/android/server/AssetAtlasService";
 
-static JNINativeMethod gMethods[] = {
+static const JNINativeMethod gMethods[] = {
     { "nAcquireAtlasCanvas", "(Landroid/graphics/Canvas;II)J",
             (void*) com_android_server_AssetAtlasService_acquireCanvas },
     { "nReleaseAtlasCanvas", "(Landroid/graphics/Canvas;J)V",

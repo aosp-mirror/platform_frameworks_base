@@ -158,7 +158,7 @@ static void nativeSendPowerHint(JNIEnv *env, jclass clazz, jint hintId, jint dat
 
 // ----------------------------------------------------------------------------
 
-static JNINativeMethod gPowerManagerServiceMethods[] = {
+static const JNINativeMethod gPowerManagerServiceMethods[] = {
     /* name, signature, funcPtr */
     { "nativeInit", "()V",
             (void*) nativeInit },

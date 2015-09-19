@@ -82,7 +82,7 @@ static jlong createLutInterpolator(JNIEnv* env, jobject clazz, jfloatArray jlut)
 
 const char* const kClassPathName = "com/android/internal/view/animation/NativeInterpolatorFactoryHelper";
 
-static JNINativeMethod gMethods[] = {
+static const JNINativeMethod gMethods[] = {
 #ifdef USE_OPENGL_RENDERER
     { "createAccelerateDecelerateInterpolator", "()J", (void*) createAccelerateDecelerateInterpolator },
     { "createAccelerateInterpolator", "(F)J", (void*) createAccelerateInterpolator },

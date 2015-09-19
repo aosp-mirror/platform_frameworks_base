@@ -495,7 +495,7 @@ static jobject socket_get_peer_credentials(JNIEnv *env,
 /*
  * JNI registration.
  */
-static JNINativeMethod gMethods[] = {
+static const JNINativeMethod gMethods[] = {
      /* name, signature, funcPtr */
     {"connectLocal", "(Ljava/io/FileDescriptor;Ljava/lang/String;I)V",
                                                 (void*)socket_connect_local},

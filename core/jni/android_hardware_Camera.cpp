@@ -943,7 +943,7 @@ static void android_hardware_Camera_enableFocusMoveCallback(JNIEnv *env, jobject
 
 //-------------------------------------------------
 
-static JNINativeMethod camMethods[] = {
+static const JNINativeMethod camMethods[] = {
   { "getNumberOfCameras",
     "()I",
     (void *)android_hardware_Camera_getNumberOfCameras },

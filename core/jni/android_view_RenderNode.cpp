@@ -477,7 +477,7 @@ static void android_view_RenderNode_endAllAnimators(JNIEnv* env, jobject clazz,
 
 const char* const kClassPathName = "android/view/RenderNode";
 
-static JNINativeMethod gMethods[] = {
+static const JNINativeMethod gMethods[] = {
 #ifdef USE_OPENGL_RENDERER
     { "nCreate",               "(Ljava/lang/String;)J",    (void*) android_view_RenderNode_create },
     { "nDestroyRenderNode",   "(J)V",   (void*) android_view_RenderNode_destroyRenderNode },

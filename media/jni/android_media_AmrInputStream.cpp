@@ -119,7 +119,7 @@ static void android_media_AmrInputStream_GsmAmrEncoderDelete
 
 // ----------------------------------------------------------------------------
 
-static JNINativeMethod gMethods[] = {
+static const JNINativeMethod gMethods[] = {
     {"GsmAmrEncoderNew",        "()J",        (void*)android_media_AmrInputStream_GsmAmrEncoderNew},
     {"GsmAmrEncoderInitialize", "(J)V",       (void*)android_media_AmrInputStream_GsmAmrEncoderInitialize},
     {"GsmAmrEncoderEncode",     "(J[BI[BI)I", (void*)android_media_AmrInputStream_GsmAmrEncoderEncode},

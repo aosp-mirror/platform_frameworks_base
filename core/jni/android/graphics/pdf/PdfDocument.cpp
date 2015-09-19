@@ -155,7 +155,7 @@ static void nativeClose(JNIEnv* env, jobject thiz, jlong documentPtr) {
     document->close();
 }
 
-static JNINativeMethod gPdfDocument_Methods[] = {
+static const JNINativeMethod gPdfDocument_Methods[] = {
     {"nativeCreateDocument", "()J", (void*) nativeCreateDocument},
     {"nativeStartPage", "(JIIIIII)J", (void*) nativeStartPage},
     {"nativeFinishPage", "(J)V", (void*) nativeFinishPage},

@@ -6152,7 +6152,7 @@ android_glViewport__IIII
 
 static const char *classPathName = "android/opengl/GLES20";
 
-static JNINativeMethod methods[] = {
+static const JNINativeMethod methods[] = {
 {"_nativeClassInit", "()V", (void*)nativeClassInit },
 {"glActiveTexture", "(I)V", (void *) android_glActiveTexture__I },
 {"glAttachShader", "(II)V", (void *) android_glAttachShader__II },

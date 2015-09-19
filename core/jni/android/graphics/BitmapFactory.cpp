@@ -548,7 +548,7 @@ static jboolean nativeIsSeekable(JNIEnv* env, jobject, jobject fileDescriptor) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-static JNINativeMethod gMethods[] = {
+static const JNINativeMethod gMethods[] = {
     {   "nativeDecodeStream",
         "(Ljava/io/InputStream;[BLandroid/graphics/Rect;Landroid/graphics/BitmapFactory$Options;)Landroid/graphics/Bitmap;",
         (void*)nativeDecodeStream
@@ -575,7 +575,7 @@ static JNINativeMethod gMethods[] = {
     },
 };
 
-static JNINativeMethod gOptionsMethods[] = {
+static const JNINativeMethod gOptionsMethods[] = {
     {   "requestCancel", "()V", (void*)nativeRequestCancel }
 };
 

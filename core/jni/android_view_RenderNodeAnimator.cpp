@@ -197,7 +197,7 @@ static void end(JNIEnv* env, jobject clazz, jlong animatorPtr) {
 
 const char* const kClassPathName = "android/view/RenderNodeAnimator";
 
-static JNINativeMethod gMethods[] = {
+static const JNINativeMethod gMethods[] = {
 #ifdef USE_OPENGL_RENDERER
     { "nCreateAnimator", "(IF)J", (void*) createAnimator },
     { "nCreateCanvasPropertyFloatAnimator", "(JF)J", (void*) createCanvasPropertyFloatAnimator },

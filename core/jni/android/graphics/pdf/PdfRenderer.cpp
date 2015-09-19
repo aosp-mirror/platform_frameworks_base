@@ -271,7 +271,7 @@ static void nativeRenderPage(JNIEnv* env, jclass thiz, jlong documentPtr, jlong 
     skBitmap->unlockPixels();
 }
 
-static JNINativeMethod gPdfRenderer_Methods[] = {
+static const JNINativeMethod gPdfRenderer_Methods[] = {
     {"nativeCreate", "(IJ)J", (void*) nativeCreate},
     {"nativeClose", "(J)V", (void*) nativeClose},
     {"nativeGetPageCount", "(J)I", (void*) nativeGetPageCount},

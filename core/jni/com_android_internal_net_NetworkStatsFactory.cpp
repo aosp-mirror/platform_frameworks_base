@@ -284,7 +284,7 @@ static int readNetworkStatsDetail(JNIEnv* env, jclass clazz, jobject stats,
     return 0;
 }
 
-static JNINativeMethod gMethods[] = {
+static const JNINativeMethod gMethods[] = {
         { "nativeReadNetworkStatsDetail",
                 "(Landroid/net/NetworkStats;Ljava/lang/String;I[Ljava/lang/String;I)I",
                 (void*) readNetworkStatsDetail }

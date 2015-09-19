@@ -188,7 +188,7 @@ static jint nativeWaitWakeup(JNIEnv *env, jobject clazz, jintArray outIrqs,
     return first_time ? 0 : i;
 }
 
-static JNINativeMethod method_table[] = {
+static const JNINativeMethod method_table[] = {
     { "nativeWaitWakeup", "([I[Ljava/lang/String;)I", (void*)nativeWaitWakeup },
 };
 

@@ -956,7 +956,7 @@ static jint Image_getHeight(JNIEnv* env, jobject thiz)
 
 // ----------------------------------------------------------------------------
 
-static JNINativeMethod gImageReaderMethods[] = {
+static const JNINativeMethod gImageReaderMethods[] = {
     {"nativeClassInit",        "()V",                        (void*)ImageReader_classInit },
     {"nativeInit",             "(Ljava/lang/Object;IIII)V",  (void*)ImageReader_init },
     {"nativeClose",            "()V",                        (void*)ImageReader_close },
@@ -965,7 +965,7 @@ static JNINativeMethod gImageReaderMethods[] = {
     {"nativeGetSurface",       "()Landroid/view/Surface;",   (void*)ImageReader_getSurface },
 };
 
-static JNINativeMethod gImageMethods[] = {
+static const JNINativeMethod gImageMethods[] = {
     {"nativeImageGetBuffer",   "(II)Ljava/nio/ByteBuffer;",   (void*)Image_getByteBuffer },
     {"nativeCreatePlane",      "(II)Landroid/media/ImageReader$SurfaceImage$SurfacePlane;",
                                                               (void*)Image_createSurfacePlane },

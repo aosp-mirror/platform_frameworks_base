@@ -46,7 +46,7 @@ static void vibratorOff(JNIEnv* /* env */, jobject /* clazz */)
     vibrator_off();
 }
 
-static JNINativeMethod method_table[] = {
+static const JNINativeMethod method_table[] = {
     { "vibratorExists", "()Z", (void*)vibratorExists },
     { "vibratorOn", "(J)V", (void*)vibratorOn },
     { "vibratorOff", "()V", (void*)vibratorOff }

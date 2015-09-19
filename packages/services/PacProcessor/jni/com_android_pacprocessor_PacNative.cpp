@@ -130,7 +130,7 @@ static jstring com_android_pacprocessor_PacNative_makeProxyRequestNativeLocked(J
     return jret;
 }
 
-static JNINativeMethod gMethods[] = {
+static const JNINativeMethod gMethods[] = {
     { "createV8ParserNativeLocked", "()Z",
         (void*)com_android_pacprocessor_PacNative_createV8ParserNativeLocked},
     { "destroyV8ParserNativeLocked", "()Z",

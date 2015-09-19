@@ -56,7 +56,7 @@ static jint runBidi(JNIEnv* env, jobject obj, jint dir, jcharArray chsArray,
     return result;
 }
 
-static JNINativeMethod gMethods[] = {
+static const JNINativeMethod gMethods[] = {
         { "runBidi", "(I[C[BIZ)I", (void*) runBidi }
 };
 

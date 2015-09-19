@@ -150,7 +150,7 @@ static jboolean android_os_MessageQueue_nativeIsIdling(JNIEnv* env, jclass clazz
 
 // ----------------------------------------------------------------------------
 
-static JNINativeMethod gMessageQueueMethods[] = {
+static const JNINativeMethod gMessageQueueMethods[] = {
     /* name, signature, funcPtr */
     { "nativeInit", "()J", (void*)android_os_MessageQueue_nativeInit },
     { "nativeDestroy", "(J)V", (void*)android_os_MessageQueue_nativeDestroy },

@@ -143,7 +143,7 @@ public:
     } 
 };
 
-static JNINativeMethod methods[] = {
+static const JNINativeMethod methods[] = {
     {"native_create",       "(JZ)J",        (void*) SkPathMeasureGlue::create      },
     {"native_setPath",      "(JJZ)V",       (void*) SkPathMeasureGlue::setPath     },
     {"native_getLength",    "(J)F",         (void*) SkPathMeasureGlue::getLength   },

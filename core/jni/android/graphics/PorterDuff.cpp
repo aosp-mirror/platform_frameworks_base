@@ -38,7 +38,7 @@ public:
  
 };
 
-static JNINativeMethod methods[] = {
+static const JNINativeMethod methods[] = {
     {"nativeCreateXfermode","(I)J", (void*) SkPorterDuffGlue::CreateXfermode},
 };
 

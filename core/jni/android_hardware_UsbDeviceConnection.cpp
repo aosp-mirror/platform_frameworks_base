@@ -246,7 +246,7 @@ android_hardware_UsbDeviceConnection_get_serial(JNIEnv *env, jobject thiz)
     return result;
 }
 
-static JNINativeMethod method_table[] = {
+static const JNINativeMethod method_table[] = {
     {"native_open",             "(Ljava/lang/String;Ljava/io/FileDescriptor;)Z",
                                         (void *)android_hardware_UsbDeviceConnection_open},
     {"native_close",            "()V",  (void *)android_hardware_UsbDeviceConnection_close},

@@ -1499,7 +1499,7 @@ static void android_media_MediaCodec_native_finalize(
     android_media_MediaCodec_release(env, thiz);
 }
 
-static JNINativeMethod gMethods[] = {
+static const JNINativeMethod gMethods[] = {
     { "native_release", "()V", (void *)android_media_MediaCodec_release },
 
     { "native_reset", "()V", (void *)android_media_MediaCodec_reset },

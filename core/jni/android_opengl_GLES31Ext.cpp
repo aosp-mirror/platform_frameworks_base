@@ -1443,7 +1443,7 @@ android_glTexBufferRangeEXT__IIIII
 
 static const char *classPathName = "android/opengl/GLES31Ext";
 
-static JNINativeMethod methods[] = {
+static const JNINativeMethod methods[] = {
 {"_nativeClassInit", "()V", (void*)nativeClassInit },
 {"glBlendBarrierKHR", "()V", (void *) android_glBlendBarrierKHR__ },
 {"glDebugMessageControlKHR", "(IIII[IIZ)V", (void *) android_glDebugMessageControlKHR__IIII_3IIZ },

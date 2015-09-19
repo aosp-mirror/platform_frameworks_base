@@ -1343,7 +1343,7 @@ static void nativeMonitor(JNIEnv* /* env */, jclass /* clazz */, jlong ptr) {
 
 // ----------------------------------------------------------------------------
 
-static JNINativeMethod gInputManagerMethods[] = {
+static const JNINativeMethod gInputManagerMethods[] = {
     /* name, signature, funcPtr */
     { "nativeInit",
             "(Lcom/android/server/input/InputManagerService;Landroid/content/Context;Landroid/os/MessageQueue;)J",

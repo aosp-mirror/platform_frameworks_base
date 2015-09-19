@@ -134,7 +134,7 @@ static void movie_destructor(JNIEnv* env, jobject, jlong movieHandle) {
 
 //////////////////////////////////////////////////////////////////////////////////////////////
 
-static JNINativeMethod gMethods[] = {
+static const JNINativeMethod gMethods[] = {
     {   "width",    "()I",  (void*)movie_width  },
     {   "height",   "()I",  (void*)movie_height  },
     {   "isOpaque", "()Z",  (void*)movie_isOpaque  },

@@ -697,7 +697,7 @@ static jint LegacyCameraDevice_nativeGetJpegFooterSize(JNIEnv* env, jobject thiz
 
 } // extern "C"
 
-static JNINativeMethod gCameraDeviceMethods[] = {
+static const JNINativeMethod gCameraDeviceMethods[] = {
     { "nativeDetectSurfaceType",
     "(Landroid/view/Surface;)I",
     (void *)LegacyCameraDevice_nativeDetectSurfaceType },

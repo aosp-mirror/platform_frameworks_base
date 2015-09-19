@@ -1231,7 +1231,7 @@ android_eglCopyBuffers
 
 static const char *classPathName = "android/opengl/EGL14";
 
-static JNINativeMethod methods[] = {
+static const JNINativeMethod methods[] = {
 {"_nativeClassInit", "()V", (void*)nativeClassInit },
 {"eglGetError", "()I", (void *) android_eglGetError },
 {"eglGetDisplay", "(I)Landroid/opengl/EGLDisplay;", (void *) android_eglGetDisplayInt },

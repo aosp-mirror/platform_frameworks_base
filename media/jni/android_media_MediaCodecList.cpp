@@ -265,7 +265,7 @@ static jobject android_media_MediaCodecList_getCodecCapabilities(
 static void android_media_MediaCodecList_native_init(JNIEnv* /* env */) {
 }
 
-static JNINativeMethod gMethods[] = {
+static const JNINativeMethod gMethods[] = {
     { "native_getCodecCount", "()I", (void *)android_media_MediaCodecList_getCodecCount },
     { "getCodecName", "(I)Ljava/lang/String;",
       (void *)android_media_MediaCodecList_getCodecName },

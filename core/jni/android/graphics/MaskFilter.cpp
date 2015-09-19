@@ -61,19 +61,19 @@ public:
     }
 };
 
-static JNINativeMethod gMaskFilterMethods[] = {
+static const JNINativeMethod gMaskFilterMethods[] = {
     { "nativeDestructor",   "(J)V",     (void*)SkMaskFilterGlue::destructor      }
 };
 
-static JNINativeMethod gBlurMaskFilterMethods[] = {
+static const JNINativeMethod gBlurMaskFilterMethods[] = {
     { "nativeConstructor",  "(FI)J",    (void*)SkMaskFilterGlue::createBlur      }
 };
 
-static JNINativeMethod gEmbossMaskFilterMethods[] = {
+static const JNINativeMethod gEmbossMaskFilterMethods[] = {
     { "nativeConstructor",  "([FFFF)J", (void*)SkMaskFilterGlue::createEmboss    }
 };
 
-static JNINativeMethod gTableMaskFilterMethods[] = {
+static const JNINativeMethod gTableMaskFilterMethods[] = {
     { "nativeNewTable", "([B)J", (void*)SkMaskFilterGlue::createTable    },
     { "nativeNewClip",  "(II)J", (void*)SkMaskFilterGlue::createClipTable    },
     { "nativeNewGamma", "(F)J", (void*)SkMaskFilterGlue::createGammaTable    }

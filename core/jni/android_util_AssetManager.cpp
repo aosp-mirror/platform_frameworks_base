@@ -2029,7 +2029,7 @@ static jint android_content_AssetManager_getGlobalAssetManagerCount(JNIEnv* env,
 /*
  * JNI registration.
  */
-static JNINativeMethod gAssetManagerMethods[] = {
+static const JNINativeMethod gAssetManagerMethods[] = {
     /* name, signature, funcPtr */
 
     // Basic asset stuff.

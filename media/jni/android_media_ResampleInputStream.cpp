@@ -107,7 +107,7 @@ static void android_media_ResampleInputStream_fir21(JNIEnv *env, jclass /* clazz
 
 // ----------------------------------------------------------------------------
 
-static JNINativeMethod gMethods[] = {
+static const JNINativeMethod gMethods[] = {
     {"fir21", "([BI[BII)V", (void*)android_media_ResampleInputStream_fir21},
 };
 

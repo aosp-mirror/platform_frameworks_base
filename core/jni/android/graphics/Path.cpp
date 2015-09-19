@@ -477,7 +477,7 @@ public:
     }
 };
 
-static JNINativeMethod methods[] = {
+static const JNINativeMethod methods[] = {
     {"finalizer", "(J)V", (void*) SkPathGlue::finalizer},
     {"init1","()J", (void*) SkPathGlue::init1},
     {"init2","(J)J", (void*) SkPathGlue::init2},

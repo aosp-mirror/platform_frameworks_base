@@ -260,7 +260,7 @@ static jint nativeFlushSensor(JNIEnv *env, jclass clazz, jlong eventQ) {
 
 //----------------------------------------------------------------------------
 
-static JNINativeMethod gSystemSensorManagerMethods[] = {
+static const JNINativeMethod gSystemSensorManagerMethods[] = {
     {"nativeClassInit",
             "()V",
             (void*)nativeClassInit },
@@ -270,7 +270,7 @@ static JNINativeMethod gSystemSensorManagerMethods[] = {
             (void*)nativeGetNextSensor },
 };
 
-static JNINativeMethod gBaseEventQueueMethods[] = {
+static const JNINativeMethod gBaseEventQueueMethods[] = {
     {"nativeInitBaseEventQueue",
             "(Landroid/hardware/SystemSensorManager$BaseEventQueue;Landroid/os/MessageQueue;[F)J",
             (void*)nativeInitSensorEventQueue },

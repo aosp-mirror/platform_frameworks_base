@@ -734,7 +734,7 @@ static jint android_view_MotionEvent_nativeAxisFromString(JNIEnv* env, jclass cl
 
 // ----------------------------------------------------------------------------
 
-static JNINativeMethod gMotionEventMethods[] = {
+static const JNINativeMethod gMotionEventMethods[] = {
     /* name, signature, funcPtr */
     { "nativeInitialize",
             "(JIIIIIIIFFFFJJI[Landroid/view/MotionEvent$PointerProperties;"

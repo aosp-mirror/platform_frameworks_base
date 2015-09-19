@@ -97,11 +97,11 @@ public:
     }
 };
 
-static JNINativeMethod drawfilter_methods[] = {
+static const JNINativeMethod drawfilter_methods[] = {
     {"nativeDestructor", "(J)V", (void*) SkDrawFilterGlue::finalizer}
 };
 
-static JNINativeMethod paintflags_methods[] = {
+static const JNINativeMethod paintflags_methods[] = {
     {"nativeConstructor","(II)J", (void*) SkDrawFilterGlue::CreatePaintFlagsDF}
 };
 

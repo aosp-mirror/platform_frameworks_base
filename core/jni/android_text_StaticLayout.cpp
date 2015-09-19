@@ -97,7 +97,7 @@ static jintArray nLineBreakOpportunities(JNIEnv* env, jclass, jstring javaLocale
     return ret;
 }
 
-static JNINativeMethod gMethods[] = {
+static const JNINativeMethod gMethods[] = {
     {"nLineBreakOpportunities", "(Ljava/lang/String;[CI[I)[I", (void*) nLineBreakOpportunities}
 };
 

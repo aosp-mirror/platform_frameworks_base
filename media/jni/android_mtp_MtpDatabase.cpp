@@ -1173,12 +1173,12 @@ android_mtp_MtpPropertyGroup_format_date_time(JNIEnv *env, jobject /*thiz*/, jlo
 
 // ----------------------------------------------------------------------------
 
-static JNINativeMethod gMtpDatabaseMethods[] = {
+static const JNINativeMethod gMtpDatabaseMethods[] = {
     {"native_setup",            "()V",  (void *)android_mtp_MtpDatabase_setup},
     {"native_finalize",         "()V",  (void *)android_mtp_MtpDatabase_finalize},
 };
 
-static JNINativeMethod gMtpPropertyGroupMethods[] = {
+static const JNINativeMethod gMtpPropertyGroupMethods[] = {
     {"format_date_time",        "(J)Ljava/lang/String;",
                                         (void *)android_mtp_MtpPropertyGroup_format_date_time},
 };

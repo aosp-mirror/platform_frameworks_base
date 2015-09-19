@@ -58,19 +58,19 @@ public:
     }
 };
 
-static JNINativeMethod colorfilter_methods[] = {
+static const JNINativeMethod colorfilter_methods[] = {
     {"destroyFilter", "(J)V", (void*) SkColorFilterGlue::finalizer}
 };
 
-static JNINativeMethod porterduff_methods[] = {
+static const JNINativeMethod porterduff_methods[] = {
     { "native_CreatePorterDuffFilter", "(II)J", (void*) SkColorFilterGlue::CreatePorterDuffFilter   },
 };
 
-static JNINativeMethod lighting_methods[] = {
+static const JNINativeMethod lighting_methods[] = {
     { "native_CreateLightingFilter", "(II)J", (void*) SkColorFilterGlue::CreateLightingFilter   },
 };
 
-static JNINativeMethod colormatrix_methods[] = {
+static const JNINativeMethod colormatrix_methods[] = {
     { "nativeColorMatrixFilter", "([F)J", (void*) SkColorFilterGlue::CreateColorMatrixFilter   },
 };
 
