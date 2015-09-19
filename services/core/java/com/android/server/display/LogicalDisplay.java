@@ -74,6 +74,7 @@ final class LogicalDisplay {
     private boolean mHasContent;
 
     private int mRequestedModeId;
+    private int mRequestedColorTransformId;
 
     // The display offsets to apply to the display projection.
     private int mDisplayOffsetX;
@@ -235,6 +236,11 @@ final class LogicalDisplay {
             mBaseDisplayInfo.defaultModeId = deviceInfo.defaultModeId;
             mBaseDisplayInfo.supportedModes = Arrays.copyOf(
                     deviceInfo.supportedModes, deviceInfo.supportedModes.length);
+            mBaseDisplayInfo.colorTransformId = deviceInfo.colorTransformId;
+            mBaseDisplayInfo.defaultColorTransformId = deviceInfo.defaultColorTransformId;
+            mBaseDisplayInfo.supportedColorTransforms = Arrays.copyOf(
+                    deviceInfo.supportedColorTransforms,
+                    deviceInfo.supportedColorTransforms.length);
             mBaseDisplayInfo.logicalDensityDpi = deviceInfo.densityDpi;
             mBaseDisplayInfo.physicalXDpi = deviceInfo.xDpi;
             mBaseDisplayInfo.physicalYDpi = deviceInfo.yDpi;
@@ -275,11 +281,12 @@ final class LogicalDisplay {
         // Set the layer stack.
         device.setLayerStackInTransactionLocked(isBlanked ? BLANK_LAYER_STACK : mLayerStack);
 
-        // Set the mode.
+        // Set the color transform and mode.
         if (device == mPrimaryDisplayDevice) {
-            device.requestModeInTransactionLocked(mRequestedModeId);
+            device.requestColorTransformAndModeInTransactionLocked(
+                    mRequestedColorTransformId, mRequestedModeId);
         } else {
-            device.requestModeInTransactionLocked(0);  // Revert to default.
+            device.requestColorTransformAndModeInTransactionLocked(0, 0);  // Revert to default.
         }
 
         // Only grab the display info now as it may have been changed based on the requests above.
@@ -383,6 +390,18 @@ final class LogicalDisplay {
     }
 
     /**
+     * Requests the given color transform.
+     */
+    public void setRequestedColorTransformIdLocked(int colorTransformId) {
+        mRequestedColorTransformId = colorTransformId;
+    }
+
+    /** Returns the pending requested color transform. */
+    public int getRequestedColorTransformIdLocked() {
+        return mRequestedColorTransformId;
+    }
+
+    /**
      * Gets the burn-in offset in X.
      */
     public int getDisplayOffsetXLocked() {
@@ -409,6 +428,7 @@ final class LogicalDisplay {
         pw.println("mLayerStack=" + mLayerStack);
         pw.println("mHasContent=" + mHasContent);
         pw.println("mRequestedMode=" + mRequestedModeId);
+        pw.println("mRequestedColorTransformId=" + mRequestedColorTransformId);
         pw.println("mDisplayOffset=(" + mDisplayOffsetX + ", " + mDisplayOffsetY + ")");
         pw.println("mPrimaryDisplayDevice=" + (mPrimaryDisplayDevice != null ?
                 mPrimaryDisplayDevice.getNameLocked() : "null"));
