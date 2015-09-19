@@ -1758,6 +1758,28 @@
     -->
     <bool name="config_enableWifiDisplay">false</bool>
 
+    <!-- The color transform values that correspond to each respective configuration mode for the
+         built-in display, or -1 if the mode is unsupported by the device. The possible
+         configuration modes are:
+            1. Wide-gamut ("Vibrant")
+            2. Adobe RGB ("Natural")
+            3. sRGB ("Standard")
+
+        For example, if a device had Wide-gamut as color transform mode 1, sRGB mode as color
+        transform mode 7, and did not support Adobe RGB at all this would look like:
+
+            <integer-array name="config_colorTransforms">
+                <item>1</item>
+                <item>-1</item>
+                <item>7</item>
+            </integer-array>
+    -->
+    <integer-array name="config_colorTransforms">
+        <item>-1</item>
+        <item>-1</item>
+        <item>-1</item>
+    </integer-array>
+
     <!-- When true use the linux /dev/input/event subsystem to detect the switch changes
          on the headphone/microphone jack. When false use the older uevent framework. -->
     <bool name="config_useDevInputEventForAudioJack">false</bool>
