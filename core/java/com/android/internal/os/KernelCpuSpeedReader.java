@@ -58,7 +58,7 @@ public class KernelCpuSpeedReader {
             TextUtils.SimpleStringSplitter splitter = new TextUtils.SimpleStringSplitter(' ');
             String line;
             int speedIndex = 0;
-            while ((line = reader.readLine()) != null) {
+            while (speedIndex < mLastSpeedTimes.length && (line = reader.readLine()) != null) {
                 splitter.setString(line);
                 Long.parseLong(splitter.next());
 
