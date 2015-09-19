@@ -33,7 +33,7 @@
     <string name="connected_via_wfa" msgid="3805736726317410714">"Wi‑Fiアシスタント経由で接続"</string>
     <string name="connected_via_passpoint" msgid="2826205693803088747">"%1$s経由で接続"</string>
     <string name="available_via_passpoint" msgid="1617440946846329613">"%1$s経由で使用可能"</string>
-    <string name="wifi_connected_no_internet" msgid="3149853966840874992">"接続先はインターネットに接続されていない"</string>
+    <string name="wifi_connected_no_internet" msgid="3149853966840874992">"接続済み、インターネットは利用できません"</string>
     <string name="bluetooth_disconnected" msgid="6557104142667339895">"切断"</string>
     <string name="bluetooth_disconnecting" msgid="8913264760027764974">"切断中..."</string>
     <string name="bluetooth_connecting" msgid="8555009514614320497">"接続中..."</string>
