@@ -24,6 +24,7 @@ hwui_src_files := \
     utils/GLUtils.cpp \
     utils/LinearAllocator.cpp \
     utils/NinePatchImpl.cpp \
+    utils/StringUtils.cpp \
     AmbientShadow.cpp \
     AnimationContext.cpp \
     Animator.cpp \
@@ -168,7 +169,8 @@ LOCAL_SRC_FILES += \
     unit_tests/CanvasStateTests.cpp \
     unit_tests/ClipAreaTests.cpp \
     unit_tests/DamageAccumulatorTests.cpp \
-    unit_tests/LinearAllocatorTests.cpp
+    unit_tests/LinearAllocatorTests.cpp \
+    unit_tests/StringUtilsTests.cpp
 
 include $(BUILD_NATIVE_TEST)
 

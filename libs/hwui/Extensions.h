@@ -50,17 +50,7 @@ public:
     inline int getMajorGlVersion() const { return mVersionMajor; }
     inline int getMinorGlVersion() const { return mVersionMinor; }
 
-    bool hasGlExtension(const char* extension) const;
-    bool hasEglExtension(const char* extension) const;
-
-    void dump() const;
-
 private:
-    void findExtensions(const char* extensions, SortedVector<String8>& list) const;
-
-    SortedVector<String8> mGlExtensionList;
-    SortedVector<String8> mEglExtensionList;
-
     bool mHasNPot;
     bool mHasFramebufferFetch;
     bool mHasDiscardFramebuffer;

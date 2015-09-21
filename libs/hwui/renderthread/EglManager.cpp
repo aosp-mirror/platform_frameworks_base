@@ -20,6 +20,7 @@
 #include "Properties.h"
 #include "RenderThread.h"
 #include "renderstate/RenderState.h"
+#include "utils/StringUtils.h"
 
 #include <cutils/log.h>
 #include <cutils/properties.h>
@@ -133,12 +134,9 @@ void EglManager::initialize() {
 }
 
 void EglManager::initExtensions() {
-    std::string extensions(eglQueryString(mEglDisplay, EGL_EXTENSIONS));
-    auto has = [&](const char* ext) {
-        return extensions.find(ext) != std::string::npos;
-    };
-    EglExtensions.bufferAge = has("EGL_EXT_buffer_age");
-    EglExtensions.setDamage = has("EGL_KHR_partial_update");
+    StringCollection extensions(eglQueryString(mEglDisplay, EGL_EXTENSIONS));
+    EglExtensions.bufferAge = extensions.has("EGL_EXT_buffer_age");
+    EglExtensions.setDamage = extensions.has("EGL_KHR_partial_update");
 }
 
 bool EglManager::hasEglContext() {
