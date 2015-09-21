@@ -3670,12 +3670,8 @@ public class WindowManagerService extends IWindowManager.Stub
                     // pretend like we didn't see that.
                     return;
                 }
-                final boolean windowIsTranslucentDefined = ent.array.hasValue(
-                        com.android.internal.R.styleable.Window_windowIsTranslucent);
                 final boolean windowIsTranslucent = ent.array.getBoolean(
                         com.android.internal.R.styleable.Window_windowIsTranslucent, false);
-                final boolean windowSwipeToDismiss = ent.array.getBoolean(
-                        com.android.internal.R.styleable.Window_windowSwipeToDismiss, false);
                 final boolean windowIsFloating = ent.array.getBoolean(
                         com.android.internal.R.styleable.Window_windowIsFloating, false);
                 final boolean windowShowWallpaper = ent.array.getBoolean(
@@ -3685,7 +3681,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 if (DEBUG_STARTING_WINDOW) Slog.v(TAG, "Translucent=" + windowIsTranslucent
                         + " Floating=" + windowIsFloating
                         + " ShowWallpaper=" + windowShowWallpaper);
-                if (windowIsTranslucent || (!windowIsTranslucentDefined && windowSwipeToDismiss)) {
+                if (windowIsTranslucent) {
                     return;
                 }
                 if (windowIsFloating || windowDisableStarting) {
