@@ -27,7 +27,7 @@ trainingnavtop=true
 
   <ul>
     <li>
-<a href="https://github.com/googlesamples/android-testing/tree/master/unittesting/BasicUnitAndroidTest"
+<a href="https://github.com/googlesamples/android-testing/tree/master/unit/BasicUnitAndroidTest"
 class="external-link">Instrumented Unit Tests Code Samples</a></li>
   </ul>
 </div>
