@@ -4441,13 +4441,8 @@ public class WindowManagerService extends IWindowManager.Stub
                         + " ShowWallpaper="
                         + ent.array.getBoolean(
                                 com.android.internal.R.styleable.Window_windowShowWallpaper, false));
-                final boolean windowIsTranslucentDefined = ent.array.hasValue(
-                        com.android.internal.R.styleable.Window_windowIsTranslucent);
-                final boolean windowIsTranslucent = ent.array.getBoolean(
-                        com.android.internal.R.styleable.Window_windowIsTranslucent, false);
-                final boolean windowSwipeToDismiss = ent.array.getBoolean(
-                        com.android.internal.R.styleable.Window_windowSwipeToDismiss, false);
-                if (windowIsTranslucent || (!windowIsTranslucentDefined && windowSwipeToDismiss)) {
+                if (ent.array.getBoolean(
+                        com.android.internal.R.styleable.Window_windowIsTranslucent, false)) {
                     return;
                 }
                 if (ent.array.getBoolean(
