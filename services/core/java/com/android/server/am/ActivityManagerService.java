@@ -8671,7 +8671,7 @@ public final class ActivityManagerService extends ActivityManagerNative
     }
 
     @Override
-    public void resizeTask(int taskId, Rect bounds, boolean resizedByUser) {
+    public void resizeTask(int taskId, Rect bounds, int resizeMode) {
         enforceCallingPermission(android.Manifest.permission.MANAGE_ACTIVITY_STACKS,
                 "resizeTask()");
         long ident = Binder.clearCallingIdentity();
@@ -8682,7 +8682,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                     Slog.w(TAG, "resizeTask: taskId=" + taskId + " not found");
                     return;
                 }
-                mStackSupervisor.resizeTaskLocked(task, bounds, resizedByUser);
+                mStackSupervisor.resizeTaskLocked(task, bounds, resizeMode);
             }
         } finally {
             Binder.restoreCallingIdentity(ident);

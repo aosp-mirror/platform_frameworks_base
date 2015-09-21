@@ -4682,7 +4682,8 @@ public class WindowManagerService extends IWindowManager.Stub
      * Returns a {@link Configuration} object that contains configurations settings
      * that should be overridden due to the operation.
      */
-    public void resizeTask(int taskId, Rect bounds, Configuration configuration, boolean relayout) {
+    public void resizeTask(int taskId, Rect bounds, Configuration configuration,
+            boolean relayout, boolean forced) {
         synchronized (mWindowMap) {
             Task task = mTaskIdToTask.get(taskId);
             if (task == null) {
@@ -4690,7 +4691,7 @@ public class WindowManagerService extends IWindowManager.Stub
                         + " not found.");
             }
 
-            if (task.resizeLocked(bounds, configuration) && relayout) {
+            if (task.resizeLocked(bounds, configuration, forced) && relayout) {
                 task.getDisplayContent().layoutNeeded = true;
                 mWindowPlacerLocked.performSurfacePlacement();
             }

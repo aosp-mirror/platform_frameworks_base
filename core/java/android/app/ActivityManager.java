@@ -468,6 +468,29 @@ public class ActivityManager {
      */
     public static final int DOCKED_STACK_CREATE_MODE_BOTTOM_OR_RIGHT = 1;
 
+
+    /**
+     * Input parameter to {@link android.app.IActivityManager#resizeTask} which indicates
+     * that the resize is from the window manager (instead of the user).
+     * @hide
+     */
+    public static final int RESIZE_MODE_SYSTEM = 0;
+
+    /**
+     * Input parameter to {@link android.app.IActivityManager#resizeTask} which indicates
+     * that the resize is initiated by the user (most likely via a drag action on the
+     * window's edge or corner).
+     * @hide
+     */
+    public static final int RESIZE_MODE_USER   = 1;
+
+    /**
+     * Input parameter to {@link android.app.IActivityManager#resizeTask} which indicates
+     * that the resize should be performed even if the bounds appears unchanged.
+     * @hide
+     */
+    public static final int RESIZE_MODE_FORCED = 2;
+
     /** @hide */
     public int getFrontActivityScreenCompatMode() {
         try {

@@ -19,6 +19,8 @@ package com.android.server.wm;
 import static android.app.ActivityManager.DOCKED_STACK_CREATE_MODE_BOTTOM_OR_RIGHT;
 import static android.app.ActivityManager.DOCKED_STACK_CREATE_MODE_TOP_OR_LEFT;
 import static android.app.ActivityManager.FREEFORM_WORKSPACE_STACK_ID;
+import static android.app.ActivityManager.RESIZE_MODE_FORCED;
+import static android.app.ActivityManager.RESIZE_MODE_USER;
 import static android.content.res.Configuration.ORIENTATION_LANDSCAPE;
 import static com.android.server.wm.WindowManagerService.DEBUG_TASK_POSITIONING;
 import static com.android.server.wm.WindowManagerService.SHOW_TRANSACTIONS;
@@ -135,7 +137,7 @@ class TaskPositioner implements DimLayer.DimLayerUser {
                         }
                         try {
                             mService.mActivityManager.resizeTask(
-                                    mTask.mTaskId, mWindowDragBounds, true /* resizedByUser */);
+                                    mTask.mTaskId, mWindowDragBounds, RESIZE_MODE_USER);
                         } catch(RemoteException e) {}
                     } break;
 
@@ -163,7 +165,7 @@ class TaskPositioner implements DimLayer.DimLayerUser {
                             // We were using fullscreen surface during resizing. Request
                             // resizeTask() one last time to restore surface to window size.
                             mService.mActivityManager.resizeTask(
-                                    mTask.mTaskId, mWindowDragBounds, true /* resizedByUser */);
+                                    mTask.mTaskId, mWindowDragBounds, RESIZE_MODE_FORCED);
                         }
 
                         if (mCurrentDimSide != CTRL_NONE) {

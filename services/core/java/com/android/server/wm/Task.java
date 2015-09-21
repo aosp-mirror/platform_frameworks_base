@@ -75,9 +75,6 @@ class Task implements DimLayer.DimLayerUser {
     // Whether the task is currently being drag-resized
     private boolean mDragResizing;
 
-    // Whether the task is starting or ending to be drag-resized
-    private boolean mDragResizeChanging;
-
     // The particular window with FLAG_DIM_BEHIND set. If null, hide mDimLayer.
     WindowStateAnimator mDimWinAnimator;
     // Used to support {@link android.view.WindowManager.LayoutParams#FLAG_DIM_BEHIND}
@@ -233,11 +230,10 @@ class Task implements DimLayer.DimLayerUser {
         return boundsChange;
     }
 
-    boolean resizeLocked(Rect bounds, Configuration configuration) {
+    boolean resizeLocked(Rect bounds, Configuration configuration, boolean forced) {
         int boundsChanged = setBounds(bounds, configuration);
-        if (mDragResizeChanging) {
+        if (forced) {
             boundsChanged |= BOUNDS_CHANGE_SIZE;
-            mDragResizeChanging = false;
         }
         if (boundsChanged == BOUNDS_CHANGE_NONE) {
             return false;
@@ -253,7 +249,6 @@ class Task implements DimLayer.DimLayerUser {
     }
 
     void setDragResizing(boolean dragResizing) {
-        mDragResizeChanging = mDragResizing != dragResizing;
         mDragResizing = dragResizing;
     }
 

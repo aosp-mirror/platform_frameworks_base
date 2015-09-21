@@ -2859,7 +2859,8 @@ public final class ActivityStackSupervisor implements DisplayListener {
             if (opts.hasBounds()) {
                 Rect bounds = opts.getBounds();
                 task.updateOverrideConfiguration(bounds);
-                mWindowManager.resizeTask(task.taskId, bounds, task.mOverrideConfig, false);
+                mWindowManager.resizeTask(task.taskId, bounds, task.mOverrideConfig,
+                        false /*relayout*/, false /*forced*/);
                 stackId = task.getLaunchStackId();
             }
         }
@@ -3055,18 +3056,16 @@ public final class ActivityStackSupervisor implements DisplayListener {
         }
     }
 
-    void resizeTaskLocked(TaskRecord task, Rect bounds, boolean resizedByUser) {
+    void resizeTaskLocked(TaskRecord task, Rect bounds, int resizeMode) {
         if (!task.mResizeable) {
             Slog.w(TAG, "resizeTask: task " + task + " not resizeable.");
             return;
         }
 
-        // TODO: change resizedByUser to an enum (or bitmask?) to indicate the origin of
-        //       this resize (eg. systemResize, userResize, forcedResized).
-        // If the resize is a drag-resize by user, let it go through even if the bounds
-        // is not changing, as we might need a relayout due to surface size change
-        // (to/from fullscreen).
-        if (task.mBounds != null && task.mBounds.equals(bounds) && !resizedByUser) {
+        // If this is a forced resize, let it go through even if the bounds is not changing,
+        // as we might need a relayout due to surface size change (to/from fullscreen).
+        final boolean forced = (resizeMode == RESIZE_MODE_FORCED);
+        if (task.mBounds != null && task.mBounds.equals(bounds) && !forced) {
             // Nothing to do here...
             return;
         }
@@ -3107,6 +3106,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
             ActivityRecord r = task.topRunningActivityLocked(null);
             if (r != null) {
                 final ActivityStack stack = task.stack;
+                final boolean resizedByUser = resizeMode == RESIZE_MODE_USER;
                 final boolean preserveWindow = resizedByUser && !changedStacks;
                 kept = stack.ensureActivityConfigurationLocked(r, 0, preserveWindow);
                 // All other activities must be made visible with their correct configuration.
@@ -3126,7 +3126,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
                 }
             }
         }
-        mWindowManager.resizeTask(task.taskId, bounds, task.mOverrideConfig, kept);
+        mWindowManager.resizeTask(task.taskId, bounds, task.mOverrideConfig, kept, forced);
     }
 
     ActivityStack createStackOnDisplay(int stackId, int displayId, boolean onTop) {
@@ -3248,12 +3248,12 @@ public final class ActivityStackSupervisor implements DisplayListener {
 
         // Make sure the task has the appropriate bounds/size for the stack it is in.
         if (stackId == FULLSCREEN_WORKSPACE_STACK_ID && task.mBounds != null) {
-            resizeTaskLocked(task, stack.mBounds, false);
+            resizeTaskLocked(task, stack.mBounds, RESIZE_MODE_SYSTEM);
         } else if (stackId == FREEFORM_WORKSPACE_STACK_ID
                 && task.mBounds == null && task.mLastNonFullscreenBounds != null) {
-            resizeTaskLocked(task, task.mLastNonFullscreenBounds, false);
+            resizeTaskLocked(task, task.mLastNonFullscreenBounds, RESIZE_MODE_SYSTEM);
         } else if (stackId == DOCKED_STACK_ID) {
-            resizeTaskLocked(task, stack.mBounds, false);
+            resizeTaskLocked(task, stack.mBounds, RESIZE_MODE_SYSTEM);
         }
 
         // The task might have already been running and its visibility needs to be synchronized with

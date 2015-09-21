@@ -19,6 +19,8 @@
 package com.android.commands.am;
 
 import static android.app.ActivityManager.DOCKED_STACK_ID;
+import static android.app.ActivityManager.RESIZE_MODE_SYSTEM;
+import static android.app.ActivityManager.RESIZE_MODE_USER;
 
 import android.app.ActivityManager;
 import android.app.ActivityManager.StackInfo;
@@ -2271,7 +2273,8 @@ public class Am extends BaseCommand {
 
     private void taskResize(int taskId, Rect bounds, int delay_ms, boolean pretendUserResize) {
         try {
-            mAm.resizeTask(taskId, bounds, pretendUserResize);
+            final int resizeMode = pretendUserResize ? RESIZE_MODE_USER : RESIZE_MODE_SYSTEM;
+            mAm.resizeTask(taskId, bounds, resizeMode);
             Thread.sleep(delay_ms);
         } catch (RemoteException e) {
             System.err.println("Error changing task bounds: " + e);
