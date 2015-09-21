@@ -5750,7 +5750,7 @@ package android.app.admin {
     method public void onPasswordFailed(android.content.Context, android.content.Intent);
     method public void onPasswordSucceeded(android.content.Context, android.content.Intent);
     method public void onProfileProvisioningComplete(android.content.Context, android.content.Intent);
-    method public void onReadyForUserInitialization(android.content.Context, android.content.Intent);
+    method public deprecated void onReadyForUserInitialization(android.content.Context, android.content.Intent);
     method public void onReceive(android.content.Context, android.content.Intent);
     method public void onSystemUpdatePending(android.content.Context, android.content.Intent, long);
     field public static final java.lang.String ACTION_DEVICE_ADMIN_DISABLED = "android.app.action.DEVICE_ADMIN_DISABLED";
@@ -5792,8 +5792,8 @@ package android.app.admin {
     method public boolean getCrossProfileCallerIdDisabled(android.content.ComponentName);
     method public java.util.List<java.lang.String> getCrossProfileWidgetProviders(android.content.ComponentName);
     method public int getCurrentFailedPasswordAttempts();
-    method public java.lang.String getDeviceInitializerApp();
-    method public android.content.ComponentName getDeviceInitializerComponent();
+    method public deprecated java.lang.String getDeviceInitializerApp();
+    method public deprecated android.content.ComponentName getDeviceInitializerComponent();
     method public java.lang.String getDeviceOwner();
     method public java.util.List<byte[]> getInstalledCaCerts(android.content.ComponentName);
     method public int getKeyguardDisabledFeatures(android.content.ComponentName);

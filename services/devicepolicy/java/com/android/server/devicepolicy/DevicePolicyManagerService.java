@@ -1381,17 +1381,13 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         boolean ownsProfile = (getProfileOwner(userId) != null
                 && getProfileOwner(userId).getPackageName()
                     .equals(admin.info.getPackageName()));
-        boolean ownsInitialization = isDeviceInitializer(admin.info.getPackageName())
-                && !hasUserSetupCompleted(userId);
 
         if (reqPolicy == DeviceAdminInfo.USES_POLICY_DEVICE_OWNER) {
-            if ((userId == UserHandle.USER_SYSTEM && (ownsDevice || ownsInitialization))
-                    || (ownsDevice && ownsProfile)) {
+            if ((userId == UserHandle.USER_SYSTEM && ownsDevice) || (ownsDevice && ownsProfile)) {
                 return true;
             }
         } else if (reqPolicy == DeviceAdminInfo.USES_POLICY_PROFILE_OWNER) {
-            if ((userId == UserHandle.USER_SYSTEM && ownsDevice) || ownsProfile
-                    || ownsInitialization) {
+            if ((userId == UserHandle.USER_SYSTEM && ownsDevice) || ownsProfile) {
                 return true;
             }
         } else {
@@ -1798,7 +1794,6 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         validatePasswordOwnerLocked(policy);
         syncDeviceCapabilitiesLocked(policy);
         updateMaximumTimeToLockLocked(policy);
-        addDeviceInitializerToLockTaskPackagesLocked(userHandle);
         updateLockTaskPackagesLocked(policy.mLockTaskPackages, userHandle);
         if (policy.mStatusBarDisabled) {
             setStatusBarDisabledInternal(policy.mStatusBarDisabled, userHandle);
@@ -3076,7 +3071,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             return false;
         }
 
-        boolean callerIsDeviceOwnerAdmin = isCallerDeviceOwnerOrInitializer(callingUid);
+        boolean callerIsDeviceOwnerAdmin = isCallerDeviceOwner(callingUid);
         boolean doNotAskCredentialsOnBoot =
                 (flags & DevicePolicyManager.RESET_PASSWORD_DO_NOT_ASK_CREDENTIALS_ON_BOOT) != 0;
         if (callerIsDeviceOwnerAdmin && doNotAskCredentialsOnBoot) {
@@ -3484,11 +3479,8 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             long ident = mInjector.binderClearCallingIdentity();
             try {
                 if ((flags & WIPE_RESET_PROTECTION_DATA) != 0) {
-                    boolean ownsInitialization = isDeviceInitializer(admin.info.getPackageName())
-                            && !hasUserSetupCompleted(userHandle);
                     if (userHandle != UserHandle.USER_SYSTEM
-                            || !(isDeviceOwner(admin.info.getPackageName())
-                                    || ownsInitialization)) {
+                            || !isDeviceOwner(admin.info.getPackageName())) {
                         throw new SecurityException(
                                "Only device owner admins can set WIPE_RESET_PROTECTION_DATA");
                     }
@@ -4367,126 +4359,6 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     }
 
     @Override
-    public boolean setDeviceInitializer(ComponentName who, ComponentName initializer) {
-        if (!mHasFeature) {
-            return false;
-        }
-        if (initializer == null ||
-                !mOwners.hasDeviceOwner() ||
-                !isPackageInstalledForUser(initializer.getPackageName(),
-                        mOwners.getDeviceOwnerUserId())) {
-            throw new IllegalArgumentException("Invalid component name " + initializer
-                    + " for device initializer or no device owner set");
-        }
-        boolean isInitializerSystemApp;
-        try {
-            isInitializerSystemApp = isSystemApp(mIPackageManager,
-                    initializer.getPackageName(),
-                    mInjector.binderGetCallingUserHandle().getIdentifier());
-        } catch (RemoteException | IllegalArgumentException e) {
-            isInitializerSystemApp = false;
-            Slog.e(LOG_TAG, "Fail to check if device initialzer is system app.", e);
-        }
-        if (!isInitializerSystemApp) {
-            throw new IllegalArgumentException("Only system app can be set as device initializer.");
-        }
-        synchronized (this) {
-            enforceCanSetDeviceInitializer(who);
-
-            if (mOwners.hasDeviceInitializer()) {
-                throw new IllegalStateException(
-                        "Trying to set device initializer but device initializer is already set.");
-            }
-
-            mOwners.setDeviceInitializer(initializer);
-
-            addDeviceInitializerToLockTaskPackagesLocked(mOwners.getDeviceOwnerUserId());
-            mOwners.writeDeviceOwner();
-            return true;
-        }
-    }
-
-    private void enforceCanSetDeviceInitializer(ComponentName who) {
-        if (who == null) {
-            mContext.enforceCallingOrSelfPermission(
-                    android.Manifest.permission.MANAGE_DEVICE_ADMINS, null);
-            if (hasUserSetupCompleted(UserHandle.USER_SYSTEM)) {
-                throw new IllegalStateException(
-                        "Trying to set device initializer but device is already provisioned.");
-            }
-        } else {
-            getActiveAdminForCallerLocked(who, DeviceAdminInfo.USES_POLICY_DEVICE_OWNER);
-        }
-    }
-
-    @Override
-    public boolean isDeviceInitializer(String packageName) {
-        if (!mHasFeature) {
-            return false;
-        }
-        synchronized (this) {
-            return mOwners.hasDeviceInitializer()
-                    && mOwners.getDeviceInitializerPackageName().equals(packageName);
-        }
-    }
-
-    @Override
-    public String getDeviceInitializer() {
-        if (!mHasFeature) {
-            return null;
-        }
-        synchronized (this) {
-            if (mOwners.hasDeviceInitializer()) {
-                return mOwners.getDeviceInitializerPackageName();
-            }
-        }
-        return null;
-    }
-
-    @Override
-    public ComponentName getDeviceInitializerComponent() {
-        if (!mHasFeature) {
-            return null;
-        }
-        synchronized (this) {
-            if (mOwners.hasDeviceInitializer()) {
-                return mOwners.getDeviceInitializerComponent();
-            }
-        }
-        return null;
-    }
-
-    @Override
-    public void clearDeviceInitializer(ComponentName who) {
-        if (!mHasFeature) {
-            return;
-        }
-        Preconditions.checkNotNull(who, "ComponentName is null");
-
-        ActiveAdmin admin = getActiveAdminUncheckedLocked(who, UserHandle.getCallingUserId());
-
-        if (admin.getUid() != mInjector.binderGetCallingUid()) {
-            throw new SecurityException("Admin " + who + " is not owned by uid "
-                    + mInjector.binderGetCallingUid());
-        }
-
-        if (!isDeviceInitializer(admin.info.getPackageName())
-                && !isDeviceOwner(admin.info.getPackageName())) {
-            throw new SecurityException(
-                    "clearDeviceInitializer can only be called by the device initializer/owner");
-        }
-        synchronized (this) {
-            long ident = mInjector.binderClearCallingIdentity();
-            try {
-                mOwners.clearDeviceInitializer();
-                mOwners.writeDeviceOwner();
-            } finally {
-                mInjector.binderRestoreCallingIdentity(ident);
-            }
-        }
-    }
-
-    @Override
     public boolean setProfileOwner(ComponentName who, String ownerName, int userHandle) {
         if (!mHasFeature) {
             return false;
@@ -4573,50 +4445,6 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             return true;
         }
         return getUserData(userHandle).mUserSetupComplete;
-    }
-
-    @Override
-    public boolean setUserEnabled(ComponentName who) {
-        if (!mHasFeature) {
-            return false;
-        }
-        synchronized (this) {
-            if (who == null) {
-                throw new NullPointerException("ComponentName is null");
-            }
-            int userId = UserHandle.getCallingUserId();
-
-            ActiveAdmin activeAdmin =
-                    getActiveAdminForCallerLocked(who, DeviceAdminInfo.USES_POLICY_PROFILE_OWNER);
-            if (!isDeviceInitializer(activeAdmin.info.getPackageName())) {
-                throw new SecurityException(
-                        "This method can only be called by device initializers");
-            }
-
-            long id = mInjector.binderClearCallingIdentity();
-            try {
-                if (!isDeviceOwner(activeAdmin.info.getPackageName())) {
-                    mIPackageManager.setComponentEnabledSetting(who,
-                            PackageManager.COMPONENT_ENABLED_STATE_DISABLED,
-                            PackageManager.DONT_KILL_APP, userId);
-
-                    removeActiveAdmin(who, userId);
-                }
-
-                if (userId == UserHandle.USER_SYSTEM) {
-                    Settings.Global.putInt(mContext.getContentResolver(),
-                            Settings.Global.DEVICE_PROVISIONED, 1);
-                }
-                Settings.Secure.putIntForUser(mContext.getContentResolver(),
-                        Settings.Secure.USER_SETUP_COMPLETE, 1, userId);
-            } catch (RemoteException e) {
-                Log.i(LOG_TAG, "Can't talk to package manager", e);
-                return false;
-            } finally {
-                mInjector.binderRestoreCallingIdentity(id);
-            }
-            return true;
-        }
     }
 
     @Override
@@ -6288,41 +6116,10 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 if (!policy.mUserSetupComplete) {
                     policy.mUserSetupComplete = true;
                     synchronized (this) {
-                        // The DeviceInitializer was whitelisted but now should be removed.
-                        removeDeviceInitializerFromLockTaskPackages(userHandle);
                         saveSettingsLocked(userHandle);
                     }
                 }
             }
-        }
-    }
-
-    private void addDeviceInitializerToLockTaskPackagesLocked(int userHandle) {
-        if (hasUserSetupCompleted(userHandle)) {
-            return;
-        }
-
-        final String deviceInitializerPackage = getDeviceInitializer();
-        if (deviceInitializerPackage == null) {
-            return;
-        }
-
-        final List<String> packages = getLockTaskPackagesLocked(userHandle);
-        if (!packages.contains(deviceInitializerPackage)) {
-            packages.add(deviceInitializerPackage);
-            setLockTaskPackagesLocked(userHandle, packages);
-        }
-    }
-
-    private void removeDeviceInitializerFromLockTaskPackages(int userHandle) {
-        final String deviceInitializerPackage = getDeviceInitializer();
-        if (deviceInitializerPackage == null) {
-            return;
-        }
-
-        List<String> packages = getLockTaskPackagesLocked(userHandle);
-        if (packages.remove(deviceInitializerPackage)) {
-            setLockTaskPackagesLocked(userHandle, packages);
         }
     }
 
@@ -6450,15 +6247,15 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     }
 
     /**
-     * Checks if the caller of the method is the device owner app or device initialization app.
+     * Checks if the caller of the method is the device owner app.
      *
      * @param callerUid UID of the caller.
-     * @return true if the caller is the device owner app or device initializer.
+     * @return true if the caller is the device owner app
      */
-    private boolean isCallerDeviceOwnerOrInitializer(int callerUid) {
+    private boolean isCallerDeviceOwner(int callerUid) {
         String[] pkgs = mContext.getPackageManager().getPackagesForUid(callerUid);
         for (String pkg : pkgs) {
-            if (isDeviceOwner(pkg) || isDeviceInitializer(pkg)) {
+            if (isDeviceOwner(pkg)) {
                 return true;
             }
         }
