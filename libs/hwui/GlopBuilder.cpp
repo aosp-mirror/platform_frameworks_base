@@ -435,7 +435,6 @@ GlopBuilder& GlopBuilder::setFillLayer(Texture& texture, const SkColorFilter* co
 
     mOutGlop->fill.texture = { &texture,
             GL_TEXTURE_2D, GL_LINEAR, GL_CLAMP_TO_EDGE, nullptr };
-    mOutGlop->fill.color = { alpha, alpha, alpha, alpha };
 
     setFill(SK_ColorWHITE, alpha, mode, modeUsage, nullptr, colorFilter);
 
@@ -449,7 +448,6 @@ GlopBuilder& GlopBuilder::setFillTextureLayer(Layer& layer, float alpha) {
 
     mOutGlop->fill.texture = { &(layer.getTexture()),
             layer.getRenderTarget(), GL_LINEAR, GL_CLAMP_TO_EDGE, &layer.getTexTransform() };
-    mOutGlop->fill.color = { alpha, alpha, alpha, alpha };
 
     setFill(SK_ColorWHITE, alpha, layer.getMode(), Blend::ModeOrderSwap::NoSwap,
             nullptr, layer.getColorFilter());
