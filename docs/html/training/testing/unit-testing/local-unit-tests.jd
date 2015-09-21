@@ -25,7 +25,7 @@ trainingnavtop=true
 
   <ul>
     <li>
-<a href="https://github.com/googlesamples/android-testing/tree/master/unittesting/BasicSample"
+<a href="https://github.com/googlesamples/android-testing/tree/master/unit/BasicSample"
 class="external-link">Local Unit Tests Code Samples</a></li>
   </ul>
 </div>
@@ -234,7 +234,7 @@ To learn more about using the Mockito framework, see the
 <a href="http://site.mockito.org/mockito/docs/current/org/mockito/Mockito.html"
 class="external-link">Mockito API reference</a> and the
 {@code SharedPreferencesHelperTest} class in the
-<a href="https://github.com/googlesamples/android-testing/tree/master/unittesting/BasicSample"
+<a href="https://github.com/googlesamples/android-testing/tree/master/unit/BasicSample"
 class="external-link">sample code</a>.
 </p>
 
