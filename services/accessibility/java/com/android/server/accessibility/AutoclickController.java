@@ -16,9 +16,16 @@
 
 package com.android.server.accessibility;
 
+import android.annotation.NonNull;
+import android.content.ContentResolver;
 import android.content.Context;
+import android.database.ContentObserver;
+import android.net.Uri;
 import android.os.Handler;
 import android.os.SystemClock;
+import android.os.UserHandle;
+import android.provider.Settings;
+import android.util.Slog;
 import android.view.InputDevice;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
@@ -46,16 +53,17 @@ import android.view.accessibility.AccessibilityEvent;
  * the class should handle cases where multiple mouse devices are present.
  */
 public class AutoclickController implements EventStreamTransformation {
+
+    public static final int DEFAULT_CLICK_DELAY_MS = 600;
+
     private static final String LOG_TAG = AutoclickController.class.getSimpleName();
 
-    // TODO: Control click delay via settings.
-    private static final int CLICK_DELAY_MS = 600;
-
     private EventStreamTransformation mNext;
-    private Context mContext;
+    private final Context mContext;
 
     // Lazily created on the first mouse motion event.
     private ClickScheduler mClickScheduler;
+    private ClickDelayObserver mClickDelayObserver;
 
     public AutoclickController(Context context) {
         mContext = context;
@@ -66,7 +74,9 @@ public class AutoclickController implements EventStreamTransformation {
         if (event.isFromSource(InputDevice.SOURCE_MOUSE)) {
             if (mClickScheduler == null) {
                 Handler handler = new Handler(mContext.getMainLooper());
-                mClickScheduler = new ClickScheduler(handler, CLICK_DELAY_MS);
+                mClickScheduler = new ClickScheduler(handler, DEFAULT_CLICK_DELAY_MS);
+                mClickDelayObserver = new ClickDelayObserver(handler);
+                mClickDelayObserver.start(mContext.getContentResolver(), mClickScheduler);
             }
 
             handleMouseMotion(event, policyFlags);
@@ -119,8 +129,13 @@ public class AutoclickController implements EventStreamTransformation {
 
     @Override
     public void onDestroy() {
+        if (mClickDelayObserver != null) {
+            mClickDelayObserver.stop();
+            mClickDelayObserver = null;
+        }
         if (mClickScheduler != null) {
             mClickScheduler.cancel();
+            mClickScheduler = null;
         }
     }
 
@@ -139,6 +154,80 @@ public class AutoclickController implements EventStreamTransformation {
                 break;
             default:
                 mClickScheduler.cancel();
+        }
+    }
+
+    /**
+     * Observes setting value for autoclick delay, and updates ClickScheduler delay whenever the
+     * setting value changes.
+     */
+    final private static class ClickDelayObserver extends ContentObserver {
+        /** URI used to identify the autoclick delay setting with content resolver. */
+        private final Uri mAutoclickDelaySettingUri = Settings.Secure.getUriFor(
+                Settings.Secure.ACCESSIBILITY_AUTOCLICK_DELAY);
+
+        private ContentResolver mContentResolver;
+        private ClickScheduler mClickScheduler;
+
+        public ClickDelayObserver(Handler handler) {
+            super(handler);
+        }
+
+        /**
+         * Starts the observer. And makes sure up-to-date autoclick delay is propagated to
+         * |clickScheduler|.
+         *
+         * @param contentResolver Content resolver that should be observed for setting's value
+         *     changes.
+         * @param clickScheduler ClickScheduler that should be updated when click delay changes.
+         * @throws IllegalStateException If internal state is already setup when the method is
+         *         called.
+         * @throws NullPointerException If any of the arguments is a null pointer.
+         */
+        public void start(@NonNull ContentResolver contentResolver,
+                @NonNull ClickScheduler clickScheduler) {
+            if (mContentResolver != null || mClickScheduler != null) {
+                throw new IllegalStateException("Observer already started.");
+            }
+            if (contentResolver == null) {
+                throw new NullPointerException("contentResolver not set.");
+            }
+            if (clickScheduler == null) {
+                throw new NullPointerException("clickScheduler not set.");
+            }
+
+            mContentResolver = contentResolver;
+            mClickScheduler = clickScheduler;
+            mContentResolver.registerContentObserver(mAutoclickDelaySettingUri, false, this,
+                    UserHandle.USER_ALL);
+
+            // Initialize mClickScheduler's initial delay value.
+            onChange(true, mAutoclickDelaySettingUri);
+        }
+
+        /**
+         * Stops the the observer. Should only be called if the observer has been started.
+         *
+         * @throws IllegalStateException If internal state hasn't yet been initialized by calling
+         *         {@link #start}.
+         */
+        public void stop() {
+            if (mContentResolver == null || mClickScheduler == null) {
+                throw new IllegalStateException("ClickDelayObserver not started.");
+            }
+
+            mContentResolver.unregisterContentObserver(this);
+        }
+
+        @Override
+        public void onChange(boolean selfChange, Uri uri) {
+            if (mAutoclickDelaySettingUri.equals(uri)) {
+                // TODO: Plumb current user id down to here and use getIntForUser.
+                int delay = Settings.Secure.getInt(
+                        mContentResolver, Settings.Secure.ACCESSIBILITY_AUTOCLICK_DELAY,
+                        DEFAULT_CLICK_DELAY_MS);
+                mClickScheduler.updateDelay(delay);
+            }
         }
     }
 
@@ -239,6 +328,15 @@ public class AutoclickController implements EventStreamTransformation {
          */
         public void updateMetaState(int state) {
             mMetaState = state;
+        }
+
+        /**
+         * Updates delay that should be used when scheduling clicks. The delay will be used only for
+         * clicks scheduled after this point (pending click tasks are not affected).
+         * @param delay New delay value.
+         */
+        public void updateDelay(int delay) {
+            mDelay = delay;
         }
 
         /**
