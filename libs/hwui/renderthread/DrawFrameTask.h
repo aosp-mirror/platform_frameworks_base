@@ -57,7 +57,7 @@ public:
     DrawFrameTask();
     virtual ~DrawFrameTask();
 
-    void setContext(RenderThread* thread, CanvasContext* context);
+    void setContext(RenderThread* thread, CanvasContext* context, RenderNode* targetNode);
 
     void pushLayerUpdate(DeferredLayerUpdater* layer);
     void removeLayerUpdate(DeferredLayerUpdater* layer);
@@ -78,6 +78,7 @@ private:
 
     RenderThread* mRenderThread;
     CanvasContext* mContext;
+    RenderNode* mTargetNode = nullptr;
 
     /*********************************************
      *  Single frame data

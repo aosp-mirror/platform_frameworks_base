@@ -38,9 +38,11 @@ DrawFrameTask::DrawFrameTask()
 DrawFrameTask::~DrawFrameTask() {
 }
 
-void DrawFrameTask::setContext(RenderThread* thread, CanvasContext* context) {
+void DrawFrameTask::setContext(RenderThread* thread, CanvasContext* context,
+        RenderNode* targetNode) {
     mRenderThread = thread;
     mContext = context;
+    mTargetNode = targetNode;
 }
 
 void DrawFrameTask::pushLayerUpdate(DeferredLayerUpdater* layer) {
@@ -118,7 +120,7 @@ bool DrawFrameTask::syncFrameState(TreeInfo& info) {
         mContext->processLayerUpdate(mLayers[i].get());
     }
     mLayers.clear();
-    mContext->prepareTree(info, mFrameInfo, mSyncQueued);
+    mContext->prepareTree(info, mFrameInfo, mSyncQueued, mTargetNode);
 
     // This is after the prepareTree so that any pending operations
     // (RenderNode tree state, prefetched layers, etc...) will be flushed.

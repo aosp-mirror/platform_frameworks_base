@@ -108,6 +108,11 @@ public class ThreadedRenderer extends HardwareRenderer {
     private Choreographer mChoreographer;
     private boolean mRootNodeNeedsUpdate;
 
+    // In case of multi threaded render nodes, these bounds indicate the content bounds against
+    // which the backdrop needs to be cropped against.
+    private final Rect mCurrentContentBounds = new Rect();
+    private final Rect mStagedContentBounds = new Rect();
+
     ThreadedRenderer(Context context, boolean translucent) {
         final TypedArray a = context.obtainStyledAttributes(null, R.styleable.Lighting, 0, 0);
         mLightY = a.getDimension(R.styleable.Lighting_lightY, 0);
@@ -307,6 +312,47 @@ public class ThreadedRenderer extends HardwareRenderer {
         Trace.traceEnd(Trace.TRACE_TAG_VIEW);
     }
 
+    /**
+     * Adds a rendernode to the renderer which can be drawn and changed asynchronously to the
+     * rendernode of the UI thread.
+     * @param node The node to add.
+     * @param placeFront If true, the render node will be placed in front of the content node,
+     *                   otherwise behind the content node.
+     */
+    public void addRenderNode(RenderNode node, boolean placeFront) {
+        nAddRenderNode(mNativeProxy, node.mNativeRenderNode, placeFront);
+    }
+
+    /**
+     * Only especially added render nodes can be removed.
+     * @param node The node which was added via addRenderNode which should get removed again.
+     */
+    public void removeRenderNode(RenderNode node) {
+        nRemoveRenderNode(mNativeProxy, node.mNativeRenderNode);
+    }
+
+    /**
+     * Draws a particular render node. If the node is not the content node, only the additional
+     * nodes will get drawn and the content remains untouched.
+     * @param node The node to be drawn.
+     */
+    public void drawRenderNode(RenderNode node) {
+        nDrawRenderNode(mNativeProxy, node.mNativeRenderNode);
+    }
+
+    /**
+     * To avoid unnecessary overdrawing of the main content all additionally passed render nodes
+     * will be prevented to overdraw this area. It will be synchronized with the draw call.
+     * This should be updated in the content view's draw call.
+     * @param left The left side of the protected bounds.
+     * @param top The top side of the protected bounds.
+     * @param right The right side of the protected bounds.
+     * @param bottom The bottom side of the protected bounds.
+     */
+    public void setContentOverdrawProtectionBounds(int left, int top, int right, int bottom) {
+        mStagedContentBounds.set(left, top, right, bottom);
+    }
+
     @Override
     void invalidateRoot() {
         mRootNodeNeedsUpdate = true;
@@ -320,6 +366,14 @@ public class ThreadedRenderer extends HardwareRenderer {
         choreographer.mFrameInfo.markDrawStart();
 
         updateRootDisplayList(view, callbacks);
+        // The main content view was updating the content bounds and we transfer them to the
+        // renderer.
+        if (!mCurrentContentBounds.equals(mStagedContentBounds)) {
+            mCurrentContentBounds.set(mStagedContentBounds);
+            nSetContentOverdrawProtectionBounds(mNativeProxy, mCurrentContentBounds.left,
+                mCurrentContentBounds.top, mCurrentContentBounds.right,
+            mCurrentContentBounds.bottom);
+        }
 
         attachInfo.mIgnoreDirtyState = false;
 
@@ -541,4 +595,11 @@ public class ThreadedRenderer extends HardwareRenderer {
     private static native void nDumpProfileInfo(long nativeProxy, FileDescriptor fd,
             @DumpFlags int dumpFlags);
     private static native void nDumpProfileData(byte[] data, FileDescriptor fd);
+
+    private static native void nAddRenderNode(long nativeProxy, long rootRenderNode,
+             boolean placeFront);
+    private static native void nRemoveRenderNode(long nativeProxy, long rootRenderNode);
+    private static native void nDrawRenderNode(long nativeProxy, long rootRenderNode);
+    private static native void nSetContentOverdrawProtectionBounds(long nativeProxy, int left,
+             int top, int right, int bottom);
 }

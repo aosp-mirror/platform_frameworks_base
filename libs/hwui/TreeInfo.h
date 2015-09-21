@@ -77,7 +77,7 @@ public:
         , canvasContext(clone.canvasContext)
     {}
 
-    const TraversalMode mode;
+    TraversalMode mode;
     // TODO: Remove this? Currently this is used to signal to stop preparing
     // textures if we run out of cache space.
     bool prepareTextures;
