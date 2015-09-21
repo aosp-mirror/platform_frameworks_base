@@ -585,13 +585,13 @@ allAppsButton.clickAndWaitForNewWindow();</pre>
 
   <pre>
 dependencies {
-  androidTestCompile 'com.android.support.test:runner:0.3'
+  androidTestCompile 'com.android.support.test:runner:0.4'
   // Set this dependency to use JUnit 4 rules
-  androidTestCompile 'com.android.support.test:rules:0.3'
+  androidTestCompile 'com.android.support.test:rules:0.4'
   // Set this dependency to build and run Espresso tests
-  androidTestCompile 'com.android.support.test.espresso:espresso-core:2.2'
+  androidTestCompile 'com.android.support.test.espresso:espresso-core:2.2.1'
   // Set this dependency to build and run UI Automator tests
-  androidTestCompile 'com.android.support.test.uiautomator:uiautomator-v18:2.1.1'
+  androidTestCompile 'com.android.support.test.uiautomator:uiautomator-v18:2.1.2'
 }</pre>
 
   <p>To set
