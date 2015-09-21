@@ -98,20 +98,6 @@ Blend::Blend()
     // gl blending off by default
 }
 
-void Blend::enable(SkXfermode::Mode mode, ModeOrderSwap modeUsage) {
-    GLenum srcMode;
-    GLenum dstMode;
-    getFactors(mode, modeUsage, &srcMode, &dstMode);
-    setFactors(srcMode, dstMode);
-}
-
-void Blend::disable() {
-    if (mEnabled) {
-        glDisable(GL_BLEND);
-        mEnabled = false;
-    }
-}
-
 void Blend::invalidate() {
     syncEnabled();
     mSrcMode = mDstMode = GL_ZERO;
@@ -132,8 +118,13 @@ void Blend::getFactors(SkXfermode::Mode mode, ModeOrderSwap modeUsage, GLenum* o
 
 void Blend::setFactors(GLenum srcMode, GLenum dstMode) {
     if (srcMode == GL_ZERO && dstMode == GL_ZERO) {
-        disable();
+        // disable blending
+        if (mEnabled) {
+            glDisable(GL_BLEND);
+            mEnabled = false;
+        }
     } else {
+        // enable blending
         if (!mEnabled) {
             glEnable(GL_BLEND);
             mEnabled = true;

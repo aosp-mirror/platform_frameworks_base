@@ -34,9 +34,6 @@ public:
         NoSwap,
         Swap,
     };
-
-    void enable(SkXfermode::Mode mode, ModeOrderSwap modeUsage);
-    void disable();
     void syncEnabled();
 
     static void getFactors(SkXfermode::Mode mode, ModeOrderSwap modeUsage,
