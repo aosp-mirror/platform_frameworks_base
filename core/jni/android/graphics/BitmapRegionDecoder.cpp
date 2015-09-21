@@ -47,7 +47,7 @@ public:
         fHeight = height;
     }
     ~SkBitmapRegionDecoder() {
-        SkDELETE(fDecoder);
+        delete fDecoder;
     }
 
     bool decodeRegion(SkBitmap* bitmap, const SkIRect& rect,
@@ -72,7 +72,7 @@ static jobject createBitmapRegionDecoder(JNIEnv* env, SkStreamRewindable* stream
     SkImageDecoder* decoder = SkImageDecoder::Factory(stream);
     int width, height;
     if (NULL == decoder) {
-        SkDELETE(stream);
+        delete stream;
         doThrowIOE(env, "Image format not supported");
         return nullObjectReturn("SkImageDecoder::Factory returned null");
     }
@@ -87,7 +87,7 @@ static jobject createBitmapRegionDecoder(JNIEnv* env, SkStreamRewindable* stream
         snprintf(msg, sizeof(msg), "Image failed to decode using %s decoder",
                 decoder->getFormatName());
         doThrowIOE(env, msg);
-        SkDELETE(decoder);
+        delete decoder;
         return nullObjectReturn("decoder->buildTileIndex returned false");
     }
 
