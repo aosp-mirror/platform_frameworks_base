@@ -11,7 +11,7 @@ page.customHeadTag=<meta name="google-site-verification" content="sa-bIAI6GKvct3
 
 <!-- <article class="dac-expand dac-hero dac-invert active" style="background-color: rgb(38, 50, 56);"> -->
 <article class="dac-expand dac-hero dac-invert dac-darken mprev active" style="background-color: #75d1ff;">
-<a href="/preview/index.html">
+<a href="about/versions/marshmallow/index.html">
   <div class="wrap" style="max-width:1100px;margin-top:0">
     <div class="cols dac-hero-content">
       <div class="col-8of16 col-push-6of16 dac-hero-figure mprev">
@@ -24,17 +24,12 @@ page.customHeadTag=<meta name="google-site-verification" content="sa-bIAI6GKvct3
         <div class="col-6of16 col-push-1of16">
         <p class="dac-hero-description" style="color:white"><strong>The
         official Android 6.0 SDK is now available!</strong> Update to
-        Developer Preview 3 and get your apps ready for Android Marshmallow!</p>
+        Android Marshmallow to get the latest features</p>
 
-        <a class="dac-hero-cta" href="/preview/index.html">
+        <a class="dac-hero-cta" href="{@docRoot}about/versions/marshmallow/index.html">
           <span class="dac-sprite dac-auto-chevron"></span>
-          Get started
+          Learn more
         </a><br>
-
-        <a class="dac-hero-cta mprev" href="/preview/support.html">
-          <span class="dac-sprite dac-auto-chevron"></span>
-          Update to Developer Preview 3 (final SDK)
-        </a>
       </div>
       </div>
     </div>

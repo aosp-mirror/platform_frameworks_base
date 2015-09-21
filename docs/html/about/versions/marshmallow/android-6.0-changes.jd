@@ -1,6 +1,6 @@
-page.title=Behavior Changes
-page.keywords=preview,sdk,compatibility
-sdk.platform.apiLevel=MNC
+page.title=Android 6.0 Changes
+page.keywords=androidm,sdk,compatibility,marshmallow
+sdk.platform.apiLevel=23
 @jd:body
 
 <div id="qv-wrapper">
@@ -28,19 +28,19 @@ sdk.platform.apiLevel=MNC
 
 <h2>API Differences</h2>
 <ol>
-<li><a href="{@docRoot}preview/download.html">API level 22 to M Preview &raquo;</a> </li>
+<li><a href="{@docRoot}about/versions/marshmallow/download.html">API level 22 to 23 &raquo;</a> </li>
 </ol>
 
 
 <h2>See Also</h2>
 <ol>
-<li><a href="{@docRoot}preview/api-overview.html">M Developer Preview API Overview</a> </li>
+<li><a href="{@docRoot}about/versions/marshmallow/android-6.0.html">Android 6.0 API Overview</a> </li>
 </ol>
 
 </div>
 </div>
 
-<p>Along with new features and capabilities, the M Developer Preview includes a variety of
+<p>Along with new features and capabilities, Android 6.0 (API level 23) includes a variety of
 system changes and API behavior changes. This document highlights
 some of the key changes that you should understand and account for in your apps.</p>
 
@@ -48,26 +48,26 @@ some of the key changes that you should understand and account for in your apps.
 platform affect your app.</p>
 
 <h2 id="behavior-runtime-permissions">Runtime Permissions</h1>
-<p>This preview introduces a new permissions model, where users can now directly manage
+<p>This release introduces a new permissions model, where users can now directly manage
 app permissions at runtime. This model gives users improved visibility and control over
 permissions, while streamlining the installation and auto-update processes for app developers.
 Users can grant or revoke permissions individually for installed apps. </p>
 
-<p>On your apps that target the M Preview release or higher, make sure to check for and request
+<p>On your apps that target Android 6.0 (API level 23) or higher, make sure to check for and request
 permissions at runtime. To determine if your app has been granted a permission, call the
 new {@link android.content.Context#checkSelfPermission(java.lang.String) checkSelfPermission()}
 method. To request a permission, call the new
 {@link android.app.Activity#requestPermissions(java.lang.String[], int) requestPermissions()}
-method. Even if your app is not targeting the M Preview release, you should test your app under
+method. Even if your app is not targeting Android 6.0 (API level 23), you should test your app under
 the new permissions model.</p>
 
 <p>For details on supporting the new permissions model in your app, see the
-<a href="{@docRoot}preview/features/runtime-permissions.html">
-Permissions</a> developer preview page. For tips on how to assess the impact on your app,
-see the <a href="{@docRoot}preview/testing/guide.html#runtime-permissions">Testing Guide</a></p>
+<a href="{@docRoot}training/permissions/index.html">
+Permissions</a> training page. For tips on how to assess the impact on your app,
+see the <a href="{@docRoot}about/versions/marshmallow/testing.html">Testing Guide</a></p>
 
 <h2 id="behavior-power">Power-Saving Optimizations</h2>
-<p>This preview introduces new power-saving optimizations for idle devices and apps.</p>
+<p>This release introduces new power-saving optimizations for idle devices and apps.</p>
 <ul>
 <li><strong>Doze</strong>: If a user unplugs a device and leaves it stationary, with its screen off,
 for a period of time, the device goes into <em>Doze</em> mode, where it attempts to keep the system
@@ -80,11 +80,12 @@ access and suspends syncs and jobs for the apps it deems idle.</li>
 </ul>
 
 <p>To learn more about these power-saving changes, see
-<a href="{@docRoot}preview/features/power-mgmt.html">Power-Saving Optimizations</a>.</p>
+<a href="{@docRoot}training/monitoring-device-state/battery-monitoring.html">Monitoring the
+Battery Level and Charging State</a>.</p>
 
 <h2 id="behavior-adoptable-storage">Adoptable Storage Devices</h2>
 <p>
-With this preview, users can <em>adopt</em> external storage devices such as SD cards. Adopting an
+With this release, users can <em>adopt</em> external storage devices such as SD cards. Adopting an
 external storage device encrypts and formats the device to behave like internal storage. This
 feature allows users to move both apps and private data of those apps between storage devices. When
 moving apps, the system respects the
@@ -122,7 +123,7 @@ Don’t use hardcoded file paths or persist fully-qualified file paths that were
 </li>
 </ul>
 
-<p>To debug this feature in the developer preview, you can enable adoption of a USB drive that is
+<p>To debug this feature, you can enable adoption of a USB drive that is
 connected to an Android device through a USB On-The-Go (OTG) cable, by running this command:</p>
 
 <pre class="no-prettyprint">
@@ -130,7 +131,7 @@ $ adb shell sm set-force-adoptable true
 </pre>
 
 <h2 id="behavior-apache-http-client">Apache HTTP Client Removal</h2>
-<p>This preview removes support for the Apache HTTP client. If your app is using this client and
+<p>This release removes support for the Apache HTTP client. If your app is using this client and
 targets Android 2.3 (API level 9) or higher, use the {@link java.net.HttpURLConnection} class
 instead. This API is more efficient because it reduces network use through transparent compression
 and response caching, and minimizes power consumption. To continue using the Apache HTTP APIs, you
@@ -176,7 +177,7 @@ in a notification object.</p>
 
 <h2 id="behavior-test-selection">Text Selection</h2>
 
-<img src="{@docRoot}preview/images/text-selection.gif"
+<img src="{@docRoot}images/android-6.0/text-selection.gif"
 style="float:right; margin:0 0 20px 30px" width="360" height="640" />
 
 <p>When users select text in your app, you can now display text selection actions such as
@@ -205,7 +206,7 @@ call the {@link android.view.ActionMode#invalidateContentRect() invalidateConten
 
 <p>If you are using <a href="{@docRoot}tools/support-library/index.html">
 Android Support Library</a> revision 22.2, be aware that floating toolbars are not
-backward-compatible and appcompat takes control over {@link android.view.ActionMode} objects by
+backward-compatible and appcompat takes control over {@link android.view.ActionMode} objects bywith th
 default. This prevents floating toolbars from being displayed. To enable
 {@link android.view.ActionMode} support in an
 {@link android.support.v7.app.AppCompatActivity}, call
@@ -214,12 +215,13 @@ default. This prevents floating toolbars from being displayed. To enable
 setHandleNativeActionModesEnabled()} on the returned
 {@link android.support.v7.app.AppCompatDelegate} object and set the input
 parameter to {@code false}. This call returns control of {@link android.view.ActionMode} objects to
-the framework. In devices running the M Preview, that allows the framework to support
-{@link android.support.v7.app.ActionBar} or floating toolbar modes, while on pre-M Preview devices,
-only the {@link android.support.v7.app.ActionBar} modes are supported.</p>
+the framework. In devices running Android 6.0 (API level 23), that allows the framework to support
+{@link android.support.v7.app.ActionBar} or floating toolbar modes, while on devices running
+Android 5.1 (API level 22) or lower, only the {@link android.support.v7.app.ActionBar} modes are
+supported.</p>
 
 <h2 id="behavior-keystore">Android Keystore Changes</h2>
-<p>With this preview, the
+<p>With this release, the
 <a href="{@docRoot}training/articles/keystore.html">Android Keystore provider</a> no longer supports
 DSA. ECDSA is still supported.</p>
 
@@ -229,7 +231,7 @@ encryption at rest will be deleted during these events.</p>
 
 <h2 id="behavior-network">Wi-Fi and Networking Changes</h2>
 
-<p>This preview introduces the following behavior changes to the Wi-Fi and networking APIs.</p>
+<p>This release introduces the following behavior changes to the Wi-Fi and networking APIs.</p>
 <ul>
 <li>Your apps can now change the state of {@link android.net.wifi.WifiConfiguration} objects only
 if you created these objects. You are not permitted to modify or delete
@@ -239,7 +241,7 @@ if you created these objects. You are not permitted to modify or delete
 Previously, if an app forced the device to connect to a specific Wi-Fi network by using
 {@link android.net.wifi.WifiManager#enableNetwork(int,boolean) enableNetwork()} with the
 {@code disableAllOthers=true} setting, the device disconnected from other networks such as
-cellular data. In this preview, the device no longer disconnects from such other networks. If
+cellular data. In This release, the device no longer disconnects from such other networks. If
 your app’s {@code targetSdkVersion} is {@code “20”} or lower, it is pinned to the selected
 Wi-Fi network. If your app’s {@code targetSdkVersion} is {@code “21”} or higher, use the
 multinetwork APIs (such as
@@ -250,7 +252,7 @@ bindProcessToNetwork()} method) to ensure that its network traffic is sent on th
 </ul>
 
 <h2 id="behavior-camera">Camera Service Changes</h2>
-<p>In this preview, the model for accessing shared resources in the camera service has been changed
+<p>In This release, the model for accessing shared resources in the camera service has been changed
 from the previous “first come, first serve” access model to an access model where high-priority
 processes are favored.  Changes to the service behavior include:</p>
 <ul>
@@ -294,7 +296,7 @@ parameter set to {@code true}. If your app uses the
 you must update your app to use to the latest versions of these libraries. Otherwise, make sure that
 any custom classes referenced from XML are updated so that their class constructors are accessible.</p>
 
-<p>This preview updates the behavior of the dynamic linker. The dynamic linker now understands the
+<p>This release updates the behavior of the dynamic linker. The dynamic linker now understands the
 difference between a library’s {@code soname} and its path
 (<a href="https://code.google.com/p/android/issues/detail?id=6670" class="external-link">
 public bug 6670</a>), and search by {@code soname} is now
@@ -339,7 +341,7 @@ BluetoothLeScanner.startScan()}: Your app must have
 {@link android.Manifest.permission#ACCESS_COARSE_LOCATION} permission.</li>
 </ul>
 
-<p class="note"><strong>Note</strong>: When a device running M Developer Preview initiates a
+<p class="note"><strong>Note</strong>: When a device running Android 6.0 (API level 23) initiates a
 background Wi-Fi or Bluetooth scan, the operation is visible to external devices as
 originating from a randomized MAC address.</p>
 
@@ -356,7 +358,7 @@ consideration that the interaction must be explicitly enabled.
 </p>
 
 <h2 id="behavior-afw">Android for Work Changes</h2>
-<p>This preview includes the following behavior changes for Android for Work:</p>
+<p>This release includes the following behavior changes for Android for Work:</p>
 <ul>
   <li><strong>Work contacts in personal contexts.</strong> The Google Dialer
 Call Log now displays work contacts when the user views past calls.
@@ -410,7 +412,7 @@ now defaults to SHA-256. SHA-1 is still supported for backwards compatibility bu
 in future.
 {@link android.app.admin.DevicePolicyManager#EXTRA_PROVISIONING_DEVICE_ADMIN_SIGNATURE_CHECKSUM}
 now only accepts SHA-256.</li>
-  <li>Device initializer APIs which existed in the M Developer Preview are now removed.</li>
+  <li>Device initializer APIs which existed in the Android 6.0 (API level 23) are now removed.</li>
     <li><code>EXTRA_PROVISIONING_RESET_PROTECTION_PARAMETERS</code> is removed so NFC bump
 provisioning cannot programmatically unlock a factory reset protected device.</li>
 <li>You can now use the {@link android.app.admin.DevicePolicyManager#EXTRA_PROVISIONING_ADMIN_EXTRAS_BUNDLE}
