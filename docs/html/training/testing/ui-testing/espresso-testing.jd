@@ -120,9 +120,9 @@ trainingnavtop=true
 
         <pre>
 dependencies {
-    androidTestCompile 'com.android.support.test:runner:0.3'
-    androidTestCompile 'com.android.support.test:rules:0.3'
-    androidTestCompile 'com.android.support.test.espresso:espresso-core:2.2'
+    androidTestCompile 'com.android.support.test:runner:0.4'
+    androidTestCompile 'com.android.support.test:rules:0.4'
+    androidTestCompile 'com.android.support.test.espresso:espresso-core:2.2.1'
 }
 </pre>
       </li>
@@ -572,9 +572,9 @@ android {
     }
 }</pre>
       </li>
-      <li>Run your tests from the command-line by calling the the {@code connectedCheck}
-        (or {@code cC}) task:
+      <li>Run your tests from the command-line by calling the the {@code connectedAndroidTest}
+        (or {@code cAT}) task:
   <pre>
-./gradlew cC</pre>
+./gradlew cAT</pre>
       </li>
     </ol>
