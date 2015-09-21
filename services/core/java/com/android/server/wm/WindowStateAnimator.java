@@ -818,7 +818,7 @@ class WindowStateAnimator {
                 // so that we don't need to reallocate during the process. This also prevents
                 // buffer drops due to size mismatch.
                 final DisplayInfo displayInfo = w.getDisplayInfo();
-                if (displayInfo != null && w.mDragResizing) {
+                if (displayInfo != null && w.isDragResizing()) {
                     left = 0;
                     top = 0;
                     width = displayInfo.logicalWidth;
@@ -1211,6 +1211,13 @@ class WindowStateAnimator {
             return;
         } else if (mIsWallpaper && mService.mWindowPlacerLocked.mWallpaperActionPending) {
             return;
+        } else if (mWin.isDragResizeChanged()) {
+            // This window is awaiting a relayout because user just started (or ended)
+            // drag-resizing. The shown frame (which affects surface size and pos)
+            // should not be updated until we get next finished draw with the new surface.
+            // Otherwise one or two frames rendered with old settings would be displayed
+            // with new geometry.
+            return;
         }
 
         if (WindowManagerService.localLOGV) Slog.v(
@@ -1333,7 +1340,7 @@ class WindowStateAnimator {
 
         final boolean fullscreen = w.isFullscreen(displayInfo.appWidth, displayInfo.appHeight);
         final Rect clipRect = mTmpClipRect;
-        if (w.mDragResizing) {
+        if (w.isDragResizing()) {
             // When we're doing a drag-resizing, the surface is set up to cover full screen.
             // Set the clip rect to be the same size so that we don't get any scaling.
             clipRect.set(0, 0, displayInfo.logicalWidth, displayInfo.logicalHeight);
@@ -1423,7 +1430,7 @@ class WindowStateAnimator {
             // so that we don't need to reallocate during the process. This also prevents
             // buffer drops due to size mismatch.
             final DisplayInfo displayInfo = w.getDisplayInfo();
-            if (displayInfo != null && w.mDragResizing) {
+            if (displayInfo != null && w.isDragResizing()) {
                 left = 0;
                 top = 0;
                 width = displayInfo.logicalWidth;

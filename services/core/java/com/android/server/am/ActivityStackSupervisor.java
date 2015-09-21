@@ -3061,7 +3061,12 @@ public final class ActivityStackSupervisor implements DisplayListener {
             return;
         }
 
-        if (task.mBounds != null && task.mBounds.equals(bounds)) {
+        // TODO: change resizedByUser to an enum (or bitmask?) to indicate the origin of
+        //       this resize (eg. systemResize, userResize, forcedResized).
+        // If the resize is a drag-resize by user, let it go through even if the bounds
+        // is not changing, as we might need a relayout due to surface size change
+        // (to/from fullscreen).
+        if (task.mBounds != null && task.mBounds.equals(bounds) && !resizedByUser) {
             // Nothing to do here...
             return;
         }
