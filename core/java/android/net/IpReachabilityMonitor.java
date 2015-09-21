@@ -18,6 +18,7 @@ package android.net;
 
 import com.android.internal.annotations.GuardedBy;
 
+import android.content.Context;
 import android.net.LinkAddress;
 import android.net.LinkProperties;
 import android.net.LinkProperties.ProvisioningChange;
@@ -31,6 +32,7 @@ import android.net.netlink.RtNetlinkNeighborMessage;
 import android.net.netlink.StructNdaCacheInfo;
 import android.net.netlink.StructNdMsg;
 import android.net.netlink.StructNlMsgHdr;
+import android.os.PowerManager;
 import android.os.SystemClock;
 import android.system.ErrnoException;
 import android.system.NetlinkSocketAddress;
@@ -74,6 +76,7 @@ public class IpReachabilityMonitor {
     }
 
     private final Object mLock = new Object();
+    private final PowerManager.WakeLock mWakeLock;
     private final String mInterfaceName;
     private final int mInterfaceIndex;
     private final Callback mCallback;
@@ -136,7 +139,8 @@ public class IpReachabilityMonitor {
         return returnValue;
     }
 
-    public IpReachabilityMonitor(String ifName, Callback callback) throws IllegalArgumentException {
+    public IpReachabilityMonitor(Context context, String ifName, Callback callback)
+                throws IllegalArgumentException {
         mInterfaceName = ifName;
         int ifIndex = -1;
         try {
@@ -145,6 +149,8 @@ public class IpReachabilityMonitor {
         } catch (SocketException | NullPointerException e) {
             throw new IllegalArgumentException("invalid interface '" + ifName + "': ", e);
         }
+        mWakeLock = ((PowerManager) context.getSystemService(Context.POWER_SERVICE)).newWakeLock(
+                PowerManager.PARTIAL_WAKE_LOCK, TAG + "." + mInterfaceName);
         mCallback = callback;
         mNetlinkSocketObserver = new NetlinkSocketObserver();
         mObserverThread = new Thread(mNetlinkSocketObserver);
@@ -291,12 +297,39 @@ public class IpReachabilityMonitor {
         synchronized (mLock) {
             ipProbeList.addAll(mIpWatchList.keySet());
         }
+
+        if (!ipProbeList.isEmpty() && stillRunning()) {
+            // Keep the CPU awake long enough to allow all ARP/ND
+            // probes a reasonable chance at success. See b/23197666.
+            //
+            // The wakelock we use is (by default) refcounted, and this version
+            // of acquire(timeout) queues a release message to keep acquisitions
+            // and releases balanced.
+            mWakeLock.acquire(getProbeWakeLockDuration());
+        }
+
         for (InetAddress target : ipProbeList) {
             if (!stillRunning()) {
                 break;
             }
             probeNeighbor(mInterfaceIndex, target);
         }
+    }
+
+    private long getProbeWakeLockDuration() {
+        // Ideally, this would be computed by examining the values of:
+        //
+        //     /proc/sys/net/ipv[46]/neigh/<ifname>/ucast_solicit
+        //
+        // and:
+        //
+        //     /proc/sys/net/ipv[46]/neigh/<ifname>/retrans_time_ms
+        //
+        // For now, just make some assumptions.
+        final long numUnicastProbes = 3;
+        final long retransTimeMs = 1000;
+        final long gracePeriodMs = 500;
+        return (numUnicastProbes * retransTimeMs) + gracePeriodMs;
     }
 
 
