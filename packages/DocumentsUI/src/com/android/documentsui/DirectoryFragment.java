@@ -135,6 +135,7 @@ public class DirectoryFragment extends Fragment {
     private static final String EXTRA_IGNORE_STATE = "ignoreState";
 
     private Model mModel;
+    private Model.UpdateListener mModelUpdateListener = new ModelUpdateListener();
 
     private final Handler mHandler = new Handler(Looper.getMainLooper());
 
@@ -160,6 +161,7 @@ public class DirectoryFragment extends Fragment {
     private int mColumnCount = 1;  // This will get updated when layout changes.
 
     private MessageBar mMessageBar;
+    private View mProgressBar;
 
     public static void showNormal(FragmentManager fm, RootInfo root, DocumentInfo doc, int anim) {
         show(fm, TYPE_NORMAL, root, doc, null, anim);
@@ -223,6 +225,7 @@ public class DirectoryFragment extends Fragment {
         final View view = inflater.inflate(R.layout.fragment_directory, container, false);
 
         mMessageBar = MessageBar.create(getChildFragmentManager());
+        mProgressBar = view.findViewById(R.id.progressbar);
 
         mEmptyView = view.findViewById(android.R.id.empty);
 
@@ -311,9 +314,8 @@ public class DirectoryFragment extends Fragment {
                     : MultiSelectManager.MODE_SINGLE);
         selMgr.addCallback(new SelectionModeListener());
 
-        mModel = new Model(context, selMgr);
-        mModel.setSelectionManager(selMgr);
-        mModel.addUpdateListener(mAdapter);
+        mModel = new Model(context, selMgr, mAdapter);
+        mModel.addUpdateListener(mModelUpdateListener);
 
         mType = getArguments().getInt(EXTRA_TYPE);
         mStateKey = buildStateKey(root, doc);
@@ -897,8 +899,7 @@ public class DirectoryFragment extends Fragment {
         }
     }
 
-    private final class DocumentsAdapter extends RecyclerView.Adapter<DocumentHolder>
-            implements Model.UpdateListener {
+    private final class DocumentsAdapter extends RecyclerView.Adapter<DocumentHolder> {
 
         private final Context mContext;
         private final LayoutInflater mInflater;
@@ -906,30 +907,6 @@ public class DirectoryFragment extends Fragment {
         public DocumentsAdapter(Context context) {
             mContext = context;
             mInflater = LayoutInflater.from(context);
-        }
-
-        @Override
-        public void onModelUpdate(Model model) {
-            if (model.info != null || model.error != null) {
-                mMessageBar.setInfo(model.info);
-                mMessageBar.setError(model.error);
-                mMessageBar.show();
-            }
-
-            if (model.isEmpty()) {
-                mEmptyView.setVisibility(View.VISIBLE);
-            } else {
-                mEmptyView.setVisibility(View.GONE);
-            }
-
-            notifyDataSetChanged();
-        }
-
-        @Override
-        public void onModelUpdateFailed(Exception e) {
-            // TODO: deal with catastrophic update failures
-            String error = getString(R.string.query_error);
-            notifyDataSetChanged();
         }
 
         @Override
@@ -1675,6 +1652,7 @@ public class DirectoryFragment extends Fragment {
     @VisibleForTesting
     public static final class Model implements DocumentContext {
         private MultiSelectManager mSelectionManager;
+        private RecyclerView.Adapter<?> mViewAdapter;
         private Context mContext;
         private int mCursorCount;
         private boolean mIsLoading;
@@ -1684,17 +1662,11 @@ public class DirectoryFragment extends Fragment {
         @Nullable private String info;
         @Nullable private String error;
 
-        Model(Context context, MultiSelectManager selectionManager) {
+        Model(Context context, MultiSelectManager selectionManager,
+                RecyclerView.Adapter<?> viewAdapter) {
             mContext = context;
             mSelectionManager = selectionManager;
-        }
-
-        /**
-         * Sets the selection manager used by the model.
-         * TODO: the model should instantiate the selection manager.  See onActivityCreated.
-         */
-        void setSelectionManager(MultiSelectManager mgr) {
-            mSelectionManager = mgr;
+            mViewAdapter = viewAdapter;
         }
 
         /**
@@ -1859,7 +1831,7 @@ public class DirectoryFragment extends Fragment {
                 int position = selected.get(i);
                 if (DEBUG) Log.d(TAG, "Marked position " + position + " for deletion");
                 mMarkedForDeletion.append(position, true);
-                mUpdateListener.notifyItemRemoved(position);
+                mViewAdapter.notifyItemRemoved(position);
             }
         }
 
@@ -1874,7 +1846,7 @@ public class DirectoryFragment extends Fragment {
             for (int i = 0; i < size; ++i) {
                 final int position = mMarkedForDeletion.keyAt(i);
                 mMarkedForDeletion.put(position, false);
-                mUpdateListener.notifyItemInserted(position);
+                mViewAdapter.notifyItemInserted(position);
             }
 
             // Then, clear the deletion list.
@@ -1957,26 +1929,46 @@ public class DirectoryFragment extends Fragment {
             mUpdateListener = listener;
         }
 
-        interface UpdateListener {
+        static class UpdateListener {
             /**
              * Called when a successful update has occurred.
              */
-            void onModelUpdate(Model model);
+            void onModelUpdate(Model model) {}
 
             /**
              * Called when an update has been attempted but failed.
              */
-            void onModelUpdateFailed(Exception e);
+            void onModelUpdateFailed(Exception e) {}
+        }
+    }
 
-            /**
-             * Called when an item has been removed from the model.
-             */
-            void notifyItemRemoved(int position);
+    private class ModelUpdateListener extends Model.UpdateListener {
+        @Override
+        public void onModelUpdate(Model model) {
+            if (model.info != null || model.error != null) {
+                mMessageBar.setInfo(model.info);
+                mMessageBar.setError(model.error);
+                mMessageBar.show();
+            }
 
-            /**
-             * Called when an item has been added to the model.
-             */
-            void notifyItemInserted(int position);
+            mProgressBar.setVisibility(model.isLoading() ? View.VISIBLE : View.GONE);
+
+            if (model.isEmpty()) {
+                mEmptyView.setVisibility(View.VISIBLE);
+                mRecView.setVisibility(View.GONE);
+            } else {
+                mEmptyView.setVisibility(View.GONE);
+                mRecView.setVisibility(View.VISIBLE);
+            }
+
+            mAdapter.notifyDataSetChanged();
+        }
+
+        @Override
+        public void onModelUpdateFailed(Exception e) {
+            // TODO: deal with catastrophic update failures
+            String error = getString(R.string.query_error);
+            mAdapter.notifyDataSetChanged();
         }
     }
 }
