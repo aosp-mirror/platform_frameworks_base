@@ -4106,8 +4106,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         super.toggleRecents();
     }
 
-    @Override
-    public void onVisibilityChanged(boolean visible) {
+    public void updateRecentsVisibility(boolean visible) {
         // Update the recents visibility flag
         if (visible) {
             mSystemUiVisibility |= View.RECENT_APPS_VISIBLE;

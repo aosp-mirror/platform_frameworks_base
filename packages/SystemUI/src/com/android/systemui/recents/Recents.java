@@ -151,7 +151,8 @@ public class Recents extends SystemUI
         public void onReceive(Context context, Intent intent) {
             switch (intent.getAction()) {
                 case ACTION_PROXY_NOTIFY_RECENTS_VISIBLITY_TO_OWNER:
-                    visibilityChanged(intent.getBooleanExtra(EXTRA_RECENTS_VISIBILITY, false));
+                    visibilityChanged(context,
+                            intent.getBooleanExtra(EXTRA_RECENTS_VISIBILITY, false));
                     break;
                 case ACTION_PROXY_SCREEN_PINNING_REQUEST_TO_OWNER:
                     onStartScreenPinning(context);
@@ -160,7 +161,6 @@ public class Recents extends SystemUI
         }
     }
 
-    static RecentsComponent.Callbacks sRecentsComponentCallbacks;
     static RecentsTaskLoadPlan sInstanceLoadPlan;
     static Recents sInstance;
 
@@ -834,18 +834,12 @@ public class Recents extends SystemUI
         mCanReuseTaskStackViews = true;
     }
 
-    /** Sets the RecentsComponent callbacks. */
-    @Override
-    public void setCallback(RecentsComponent.Callbacks cb) {
-        sRecentsComponentCallbacks = cb;
-    }
-
     /** Notifies the callbacks that the visibility of Recents has changed. */
     @ProxyFromAnyToSystemUser
     public static void notifyVisibilityChanged(Context context, SystemServicesProxy ssp,
             boolean visible) {
         if (ssp.isForegroundUserSystem()) {
-            visibilityChanged(visible);
+            visibilityChanged(context, visible);
         } else {
             Intent intent = createLocalBroadcastIntent(context,
                     ACTION_PROXY_NOTIFY_RECENTS_VISIBLITY_TO_OWNER);
@@ -853,9 +847,13 @@ public class Recents extends SystemUI
             context.sendBroadcastAsUser(intent, UserHandle.SYSTEM);
         }
     }
-    static void visibilityChanged(boolean visible) {
-        if (sRecentsComponentCallbacks != null) {
-            sRecentsComponentCallbacks.onVisibilityChanged(visible);
+    static void visibilityChanged(Context context, boolean visible) {
+        // For the primary user, the context for the SystemUI component is the SystemUIApplication
+        SystemUIApplication app = (SystemUIApplication)
+                getInstanceAndStartIfNeeded(context.getApplicationContext()).mContext;
+        PhoneStatusBar statusBar = app.getComponent(PhoneStatusBar.class);
+        if (statusBar != null) {
+            statusBar.updateRecentsVisibility(visible);
         }
     }
 
@@ -873,7 +871,7 @@ public class Recents extends SystemUI
     static void onStartScreenPinning(Context context) {
         // For the primary user, the context for the SystemUI component is the SystemUIApplication
         SystemUIApplication app = (SystemUIApplication)
-                getInstanceAndStartIfNeeded(context).mContext;
+                getInstanceAndStartIfNeeded(context.getApplicationContext()).mContext;
         PhoneStatusBar statusBar = app.getComponent(PhoneStatusBar.class);
         if (statusBar != null) {
             statusBar.showScreenPinningRequest(false);

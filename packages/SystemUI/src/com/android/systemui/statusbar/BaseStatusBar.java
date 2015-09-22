@@ -115,8 +115,7 @@ import static com.android.keyguard.KeyguardHostView.OnDismissAction;
 
 public abstract class BaseStatusBar extends SystemUI implements
         CommandQueue.Callbacks, ActivatableNotificationView.OnActivatedListener,
-        RecentsComponent.Callbacks, ExpandableNotificationRow.ExpansionLogger,
-        NotificationData.Environment {
+        ExpandableNotificationRow.ExpansionLogger, NotificationData.Environment {
     public static final String TAG = "StatusBar";
     public static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
     public static final boolean MULTIUSER_DEBUG = false;
@@ -577,7 +576,6 @@ public abstract class BaseStatusBar extends SystemUI implements
                 ServiceManager.getService(Context.STATUS_BAR_SERVICE));
 
         mRecents = getComponent(Recents.class);
-        mRecents.setCallback(this);
 
         final Configuration currentConfig = mContext.getResources().getConfiguration();
         mLocale = currentConfig.locale;
@@ -1172,11 +1170,6 @@ public abstract class BaseStatusBar extends SystemUI implements
         if (mRecents != null) {
             mRecents.showPrevAffiliatedTask();
         }
-    }
-
-    @Override
-    public void onVisibilityChanged(boolean visible) {
-        // Do nothing
     }
 
     /**
