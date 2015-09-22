@@ -34,6 +34,8 @@ import android.view.animation.AnimationUtils;
 import android.view.animation.Interpolator;
 import android.view.animation.LinearInterpolator;
 
+import com.android.systemui.classifier.FalsingManager;
+
 public class SwipeHelper implements Gefingerpoken {
     static final String TAG = "com.android.systemui.SwipeHelper";
     private static final boolean DEBUG = false;
@@ -67,6 +69,7 @@ public class SwipeHelper implements Gefingerpoken {
     private Handler mHandler;
     private int mSwipeDirection;
     private VelocityTracker mVelocityTracker;
+    private FalsingManager mFalsingManager;
 
     private float mInitialTouchPos;
     private boolean mDragging;
@@ -97,6 +100,7 @@ public class SwipeHelper implements Gefingerpoken {
                 android.R.interpolator.fast_out_linear_in);
         mFalsingThreshold = context.getResources().getDimensionPixelSize(
                 R.dimen.swipe_helper_falsing_threshold);
+        mFalsingManager = FalsingManager.getInstance(context);
     }
 
     public void setLongPressListener(LongPressListener listener) {
@@ -449,8 +453,13 @@ public class SwipeHelper implements Gefingerpoken {
                     boolean childSwipedFastEnough = (Math.abs(velocity) > escapeVelocity) &&
                             (Math.abs(velocity) > Math.abs(perpendicularVelocity)) &&
                             (velocity > 0) == (getTranslation(mCurrAnimView) > 0);
-                    boolean falsingDetected = mCallback.isAntiFalsingNeeded()
-                            && !mTouchAboveFalsingThreshold;
+                    boolean falsingDetected = mCallback.isAntiFalsingNeeded();
+
+                    if (mFalsingManager.isClassiferEnabled()) {
+                        falsingDetected = falsingDetected && mFalsingManager.isFalseTouch();
+                    } else {
+                        falsingDetected = falsingDetected && !mTouchAboveFalsingThreshold;
+                    }
 
                     boolean dismissChild = mCallback.canChildBeDismissed(mCurrView)
                             && !falsingDetected && (childSwipedFastEnough || childSwipedFarEnough)

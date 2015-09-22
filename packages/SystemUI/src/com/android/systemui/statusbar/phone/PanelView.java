@@ -610,8 +610,8 @@ public abstract class PanelView extends FrameLayout {
         if (!mStatusBar.isFalsingThresholdNeeded()) {
             return false;
         }
-        if (mFalsingManager.isFalseTouch()) {
-            return true;
+        if (mFalsingManager.isClassiferEnabled()) {
+            return mFalsingManager.isFalseTouch();
         }
         if (!mTouchAboveFalsingThreshold) {
             return true;

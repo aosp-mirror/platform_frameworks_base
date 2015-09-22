@@ -149,7 +149,10 @@ public class HumanInteractionClassifier extends Classifier {
     }
 
     public boolean isFalseTouch() {
-        return mHistoryEvaluator.getEvaluation() >= 5.0f;
+        if (mEnableClassifier) {
+            return mHistoryEvaluator.getEvaluation() >= 5.0f;
+        }
+        return false;
     }
 
     public boolean isEnabled() {

@@ -692,7 +692,7 @@ public class NotificationPanelView extends PanelView implements
     }
 
     private boolean flingExpandsQs(float vel) {
-        if (isBelowFalsingThreshold()) {
+        if (isFalseTouch()) {
             return false;
         }
         if (Math.abs(vel) < mFlingAnimationUtils.getMinVelocityPxPerSecond()) {
@@ -702,8 +702,14 @@ public class NotificationPanelView extends PanelView implements
         }
     }
 
-    private boolean isBelowFalsingThreshold() {
-        return !mQsTouchAboveFalsingThreshold && mStatusBarState == StatusBarState.KEYGUARD;
+    private boolean isFalseTouch() {
+        if (mStatusBarState != StatusBarState.KEYGUARD) {
+            return false;
+        }
+        if (mFalsingManager.isClassiferEnabled()) {
+            return mFalsingManager.isFalseTouch();
+        }
+        return !mQsTouchAboveFalsingThreshold;
     }
 
     private float getQsExpansionFraction() {
@@ -1428,7 +1434,7 @@ public class NotificationPanelView extends PanelView implements
             }
             return;
         }
-        boolean belowFalsingThreshold = isBelowFalsingThreshold();
+        boolean belowFalsingThreshold = isFalseTouch();
         if (belowFalsingThreshold) {
             vel = 0;
         }

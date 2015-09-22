@@ -39,7 +39,11 @@ import com.android.systemui.statusbar.StatusBarState;
 public class FalsingManager implements SensorEventListener {
     private static final String ENFORCE_BOUNCER = "falsing_manager_enforce_bouncer";
 
-    private static final int[] SENSORS = new int[] {
+    private static final int[] CLASSIFIER_SENSORS = new int[] {
+            Sensor.TYPE_PROXIMITY,
+    };
+
+    private static final int[] COLLECTOR_SENSORS = new int[] {
             Sensor.TYPE_ACCELEROMETER,
             Sensor.TYPE_GYROSCOPE,
             Sensor.TYPE_PROXIMITY,
@@ -113,12 +117,26 @@ public class FalsingManager implements SensorEventListener {
     private void onSessionStart() {
         mBouncerOn = false;
         mSessionActive = true;
-        for (int sensorType : SENSORS) {
+
+        if (mHumanInteractionClassifier.isEnabled()) {
+            registerSensors(CLASSIFIER_SENSORS);
+        }
+        if (mDataCollector.isEnabled()) {
+            registerSensors(COLLECTOR_SENSORS);
+        }
+    }
+
+    private void registerSensors(int [] sensors) {
+        for (int sensorType : sensors) {
             Sensor s = mSensorManager.getDefaultSensor(sensorType);
             if (s != null) {
                 mSensorManager.registerListener(this, s, SensorManager.SENSOR_DELAY_GAME);
             }
         }
+    }
+
+    public boolean isClassiferEnabled() {
+        return mHumanInteractionClassifier.isEnabled();
     }
 
     private boolean isEnabled() {

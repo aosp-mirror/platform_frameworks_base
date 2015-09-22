@@ -28,6 +28,7 @@ import android.view.animation.AnimationUtils;
 import android.view.animation.Interpolator;
 
 import com.android.systemui.R;
+import com.android.systemui.classifier.FalsingManager;
 import com.android.systemui.statusbar.FlingAnimationUtils;
 import com.android.systemui.statusbar.KeyguardAffordanceView;
 
@@ -62,6 +63,7 @@ public class KeyguardAffordanceHelper {
     private Interpolator mAppearInterpolator;
     private Interpolator mDisappearInterpolator;
     private Animator mSwipeAnimator;
+    private FalsingManager mFalsingManager;
     private int mMinBackgroundRadius;
     private boolean mMotionCancelled;
     private int mTouchTargetSize;
@@ -109,6 +111,7 @@ public class KeyguardAffordanceHelper {
                 android.R.interpolator.linear_out_slow_in);
         mDisappearInterpolator = AnimationUtils.loadInterpolator(mContext,
                 android.R.interpolator.fast_out_linear_in);
+        mFalsingManager = FalsingManager.getInstance(mContext);
     }
 
     private void initIcons() {
@@ -322,7 +325,12 @@ public class KeyguardAffordanceHelper {
         float vel = getCurrentVelocity(lastX, lastY);
 
         // We snap back if the current translation is not far enough
-        boolean snapBack = isBelowFalsingThreshold();
+        boolean snapBack;
+        if (mFalsingManager.isFalseTouch()) {
+            snapBack = mFalsingManager.isFalseTouch();
+        } else {
+            snapBack = isBelowFalsingThreshold();
+        }
 
         // or if the velocity is in the opposite direction.
         boolean velIsInWrongDirection = vel * mTranslation < 0;
