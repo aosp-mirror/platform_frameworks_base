@@ -32,7 +32,6 @@ import android.content.pm.ResolveInfo;
 import android.graphics.Bitmap;
 import android.net.ProxyInfo;
 import android.os.Bundle;
-import android.os.Handler;
 import android.os.PersistableBundle;
 import android.os.Process;
 import android.os.RemoteCallback;
@@ -45,6 +44,7 @@ import android.security.Credentials;
 import android.service.restrictions.RestrictionsReceiver;
 import android.util.Log;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.org.conscrypt.TrustedCertificateStore;
 
 import org.xmlpull.v1.XmlPullParserException;
@@ -87,16 +87,28 @@ public class DevicePolicyManager {
     private final Context mContext;
     private final IDevicePolicyManager mService;
 
-    private DevicePolicyManager(Context context, Handler handler) {
-        mContext = context;
-        mService = IDevicePolicyManager.Stub.asInterface(
-                ServiceManager.getService(Context.DEVICE_POLICY_SERVICE));
+    private DevicePolicyManager(Context context) {
+        this(context, IDevicePolicyManager.Stub.asInterface(
+                        ServiceManager.getService(Context.DEVICE_POLICY_SERVICE)));
     }
 
     /** @hide */
-    public static DevicePolicyManager create(Context context, Handler handler) {
-        DevicePolicyManager me = new DevicePolicyManager(context, handler);
+    @VisibleForTesting
+    protected DevicePolicyManager(Context context, IDevicePolicyManager service) {
+        mContext = context;
+        mService = service;
+    }
+
+    /** @hide */
+    public static DevicePolicyManager create(Context context) {
+        DevicePolicyManager me = new DevicePolicyManager(context);
         return me.mService != null ? me : null;
+    }
+
+    /** @hide test will override it. */
+    @VisibleForTesting
+    protected int myUserId() {
+        return UserHandle.myUserId();
     }
 
     /**
@@ -823,7 +835,7 @@ public class DevicePolicyManager {
      * active (enabled) in the system.
      */
     public boolean isAdminActive(@NonNull ComponentName admin) {
-        return isAdminActiveAsUser(admin, UserHandle.myUserId());
+        return isAdminActiveAsUser(admin, myUserId());
     }
 
     /**
@@ -863,7 +875,7 @@ public class DevicePolicyManager {
      * returned.
      */
     public List<ComponentName> getActiveAdmins() {
-        return getActiveAdminsAsUser(UserHandle.myUserId());
+        return getActiveAdminsAsUser(myUserId());
     }
 
     /**
@@ -889,7 +901,7 @@ public class DevicePolicyManager {
     public boolean packageHasActiveAdmins(String packageName) {
         if (mService != null) {
             try {
-                return mService.packageHasActiveAdmins(packageName, UserHandle.myUserId());
+                return mService.packageHasActiveAdmins(packageName, myUserId());
             } catch (RemoteException e) {
                 Log.w(TAG, "Failed talking with device policy service", e);
             }
@@ -906,7 +918,7 @@ public class DevicePolicyManager {
     public void removeActiveAdmin(@NonNull ComponentName admin) {
         if (mService != null) {
             try {
-                mService.removeActiveAdmin(admin, UserHandle.myUserId());
+                mService.removeActiveAdmin(admin, myUserId());
             } catch (RemoteException e) {
                 Log.w(TAG, "Failed talking with device policy service", e);
             }
@@ -925,7 +937,7 @@ public class DevicePolicyManager {
     public boolean hasGrantedPolicy(@NonNull ComponentName admin, int usesPolicy) {
         if (mService != null) {
             try {
-                return mService.hasGrantedPolicy(admin, usesPolicy, UserHandle.myUserId());
+                return mService.hasGrantedPolicy(admin, usesPolicy, myUserId());
             } catch (RemoteException e) {
                 Log.w(TAG, "Failed talking with device policy service", e);
             }
@@ -1040,7 +1052,7 @@ public class DevicePolicyManager {
      * all admins.
      */
     public int getPasswordQuality(@Nullable ComponentName admin) {
-        return getPasswordQuality(admin, UserHandle.myUserId());
+        return getPasswordQuality(admin, myUserId());
     }
 
     /** @hide per-user version */
@@ -1093,7 +1105,7 @@ public class DevicePolicyManager {
      * all admins.
      */
     public int getPasswordMinimumLength(@Nullable ComponentName admin) {
-        return getPasswordMinimumLength(admin, UserHandle.myUserId());
+        return getPasswordMinimumLength(admin, myUserId());
     }
 
     /** @hide per-user version */
@@ -1154,7 +1166,7 @@ public class DevicePolicyManager {
      *         password.
      */
     public int getPasswordMinimumUpperCase(@Nullable ComponentName admin) {
-        return getPasswordMinimumUpperCase(admin, UserHandle.myUserId());
+        return getPasswordMinimumUpperCase(admin, myUserId());
     }
 
     /** @hide per-user version */
@@ -1215,7 +1227,7 @@ public class DevicePolicyManager {
      *         password.
      */
     public int getPasswordMinimumLowerCase(@Nullable ComponentName admin) {
-        return getPasswordMinimumLowerCase(admin, UserHandle.myUserId());
+        return getPasswordMinimumLowerCase(admin, myUserId());
     }
 
     /** @hide per-user version */
@@ -1273,7 +1285,7 @@ public class DevicePolicyManager {
      * @return The minimum number of letters required in the password.
      */
     public int getPasswordMinimumLetters(@Nullable ComponentName admin) {
-        return getPasswordMinimumLetters(admin, UserHandle.myUserId());
+        return getPasswordMinimumLetters(admin, myUserId());
     }
 
     /** @hide per-user version */
@@ -1332,7 +1344,7 @@ public class DevicePolicyManager {
      * @return The minimum number of numerical digits required in the password.
      */
     public int getPasswordMinimumNumeric(@Nullable ComponentName admin) {
-        return getPasswordMinimumNumeric(admin, UserHandle.myUserId());
+        return getPasswordMinimumNumeric(admin, myUserId());
     }
 
     /** @hide per-user version */
@@ -1390,7 +1402,7 @@ public class DevicePolicyManager {
      * @return The minimum number of symbols required in the password.
      */
     public int getPasswordMinimumSymbols(@Nullable ComponentName admin) {
-        return getPasswordMinimumSymbols(admin, UserHandle.myUserId());
+        return getPasswordMinimumSymbols(admin, myUserId());
     }
 
     /** @hide per-user version */
@@ -1449,7 +1461,7 @@ public class DevicePolicyManager {
      * @return The minimum number of letters required in the password.
      */
     public int getPasswordMinimumNonLetter(@Nullable ComponentName admin) {
-        return getPasswordMinimumNonLetter(admin, UserHandle.myUserId());
+        return getPasswordMinimumNonLetter(admin, myUserId());
     }
 
     /** @hide per-user version */
@@ -1540,7 +1552,7 @@ public class DevicePolicyManager {
     public long getPasswordExpirationTimeout(@Nullable ComponentName admin) {
         if (mService != null) {
             try {
-                return mService.getPasswordExpirationTimeout(admin, UserHandle.myUserId());
+                return mService.getPasswordExpirationTimeout(admin, myUserId());
             } catch (RemoteException e) {
                 Log.w(TAG, "Failed talking with device policy service", e);
             }
@@ -1561,7 +1573,7 @@ public class DevicePolicyManager {
     public long getPasswordExpiration(@Nullable ComponentName admin) {
         if (mService != null) {
             try {
-                return mService.getPasswordExpiration(admin, UserHandle.myUserId());
+                return mService.getPasswordExpiration(admin, myUserId());
             } catch (RemoteException e) {
                 Log.w(TAG, "Failed talking with device policy service", e);
             }
@@ -1577,7 +1589,7 @@ public class DevicePolicyManager {
      * @return The length of the password history
      */
     public int getPasswordHistoryLength(@Nullable ComponentName admin) {
-        return getPasswordHistoryLength(admin, UserHandle.myUserId());
+        return getPasswordHistoryLength(admin, myUserId());
     }
 
     /** @hide per-user version */
@@ -1617,7 +1629,7 @@ public class DevicePolicyManager {
     public boolean isActivePasswordSufficient() {
         if (mService != null) {
             try {
-                return mService.isActivePasswordSufficient(UserHandle.myUserId());
+                return mService.isActivePasswordSufficient(myUserId());
             } catch (RemoteException e) {
                 Log.w(TAG, "Failed talking with device policy service", e);
             }
@@ -1636,7 +1648,7 @@ public class DevicePolicyManager {
     public int getCurrentFailedPasswordAttempts() {
         if (mService != null) {
             try {
-                return mService.getCurrentFailedPasswordAttempts(UserHandle.myUserId());
+                return mService.getCurrentFailedPasswordAttempts(myUserId());
             } catch (RemoteException e) {
                 Log.w(TAG, "Failed talking with device policy service", e);
             }
@@ -1698,7 +1710,7 @@ public class DevicePolicyManager {
      * all admins.
      */
     public int getMaximumFailedPasswordsForWipe(@Nullable ComponentName admin) {
-        return getMaximumFailedPasswordsForWipe(admin, UserHandle.myUserId());
+        return getMaximumFailedPasswordsForWipe(admin, myUserId());
     }
 
     /** @hide per-user version */
@@ -1818,7 +1830,7 @@ public class DevicePolicyManager {
      * all admins if admin is null. Returns 0 if there are no restrictions.
      */
     public long getMaximumTimeToLock(@Nullable ComponentName admin) {
-        return getMaximumTimeToLock(admin, UserHandle.myUserId());
+        return getMaximumTimeToLock(admin, myUserId());
     }
 
     /** @hide per-user version */
@@ -1881,7 +1893,7 @@ public class DevicePolicyManager {
     public void wipeData(int flags) {
         if (mService != null) {
             try {
-                mService.wipeData(flags, UserHandle.myUserId());
+                mService.wipeData(flags, myUserId());
             } catch (RemoteException e) {
                 Log.w(TAG, "Failed talking with device policy service", e);
             }
@@ -1995,7 +2007,7 @@ public class DevicePolicyManager {
     public ComponentName getGlobalProxyAdmin() {
         if (mService != null) {
             try {
-                return mService.getGlobalProxyAdmin(UserHandle.myUserId());
+                return mService.getGlobalProxyAdmin(myUserId());
             } catch (RemoteException e) {
                 Log.w(TAG, "Failed talking with device policy service", e);
             }
@@ -2145,7 +2157,7 @@ public class DevicePolicyManager {
     public boolean getStorageEncryption(@Nullable ComponentName admin) {
         if (mService != null) {
             try {
-                return mService.getStorageEncryption(admin, UserHandle.myUserId());
+                return mService.getStorageEncryption(admin, myUserId());
             } catch (RemoteException e) {
                 Log.w(TAG, "Failed talking with device policy service", e);
             }
@@ -2173,7 +2185,7 @@ public class DevicePolicyManager {
      * or {@link #ENCRYPTION_STATUS_ACTIVE}.
      */
     public int getStorageEncryptionStatus() {
-        return getStorageEncryptionStatus(UserHandle.myUserId());
+        return getStorageEncryptionStatus(myUserId());
     }
 
     /** @hide per-user version */
@@ -2410,7 +2422,7 @@ public class DevicePolicyManager {
      * have disabled the camera
      */
     public boolean getCameraDisabled(@Nullable ComponentName admin) {
-        return getCameraDisabled(admin, UserHandle.myUserId());
+        return getCameraDisabled(admin, myUserId());
     }
 
     /** @hide per-user version */
@@ -2457,7 +2469,7 @@ public class DevicePolicyManager {
      * have disabled screen capture.
      */
     public boolean getScreenCaptureDisabled(@Nullable ComponentName admin) {
-        return getScreenCaptureDisabled(admin, UserHandle.myUserId());
+        return getScreenCaptureDisabled(admin, myUserId());
     }
 
     /** @hide per-user version */
@@ -2557,7 +2569,7 @@ public class DevicePolicyManager {
      * for a list.
      */
     public int getKeyguardDisabledFeatures(@Nullable ComponentName admin) {
-        return getKeyguardDisabledFeatures(admin, UserHandle.myUserId());
+        return getKeyguardDisabledFeatures(admin, myUserId());
     }
 
     /** @hide per-user version */
@@ -2590,7 +2602,7 @@ public class DevicePolicyManager {
      * @hide
      */
     public void setActiveAdmin(@NonNull ComponentName policyReceiver, boolean refreshing) {
-        setActiveAdmin(policyReceiver, refreshing, UserHandle.myUserId());
+        setActiveAdmin(policyReceiver, refreshing, myUserId());
     }
 
     /**
@@ -2627,7 +2639,7 @@ public class DevicePolicyManager {
     public void getRemoveWarning(@Nullable ComponentName admin, RemoteCallback result) {
         if (mService != null) {
             try {
-                mService.getRemoveWarning(admin, result, UserHandle.myUserId());
+                mService.getRemoveWarning(admin, result, myUserId());
             } catch (RemoteException e) {
                 Log.w(TAG, "Failed talking with device policy service", e);
             }
@@ -2956,7 +2968,7 @@ public class DevicePolicyManager {
             throws IllegalArgumentException {
         if (mService != null) {
             try {
-                final int myUserId = UserHandle.myUserId();
+                final int myUserId = myUserId();
                 mService.setActiveAdmin(admin, false, myUserId);
                 return mService.setProfileOwner(admin, ownerName, myUserId);
             } catch (RemoteException re) {
@@ -3301,7 +3313,7 @@ public class DevicePolicyManager {
      */
     public List<PersistableBundle> getTrustAgentConfiguration(@Nullable ComponentName admin,
             @NonNull ComponentName agent) {
-        return getTrustAgentConfiguration(admin, agent, UserHandle.myUserId());
+        return getTrustAgentConfiguration(admin, agent, myUserId());
     }
 
     /** @hide per-user version */
@@ -3927,7 +3939,7 @@ public class DevicePolicyManager {
      * @see #setAccountManagementDisabled
      */
     public String[] getAccountTypesWithManagementDisabled() {
-        return getAccountTypesWithManagementDisabledAsUser(UserHandle.myUserId());
+        return getAccountTypesWithManagementDisabledAsUser(myUserId());
     }
 
     /**

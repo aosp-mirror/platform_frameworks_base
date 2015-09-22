@@ -16,6 +16,8 @@
 
 package com.android.server;
 
+import com.android.internal.annotations.VisibleForTesting;
+
 import android.util.ArrayMap;
 
 /**
@@ -55,6 +57,16 @@ public final class LocalServices {
                 throw new IllegalStateException("Overriding service registration");
             }
             sLocalServiceObjects.put(type, service);
+        }
+    }
+
+    /**
+     * Remove a service instance, must be only used in tests.
+     */
+    @VisibleForTesting
+    public static <T> void removeServiceForTest(Class<T> type) {
+        synchronized (sLocalServiceObjects) {
+            sLocalServiceObjects.remove(type);
         }
     }
 }

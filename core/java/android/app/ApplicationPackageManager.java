@@ -93,8 +93,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
-/*package*/
-final class ApplicationPackageManager extends PackageManager {
+/** @hide */
+public class ApplicationPackageManager extends PackageManager {
     private static final String TAG = "ApplicationPackageManager";
     private final static boolean DEBUG_ICONS = false;
 

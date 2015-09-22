@@ -16,12 +16,11 @@
 
 package com.android.server.devicepolicy;
 
+import com.android.server.devicepolicy.DevicePolicyManagerServiceTestable.OwnersTestable;
+
 import android.content.ComponentName;
-import android.content.Context;
 import android.content.pm.UserInfo;
-import android.os.FileUtils;
 import android.os.UserHandle;
-import android.test.AndroidTestCase;
 import android.util.Log;
 
 import java.io.BufferedReader;
@@ -30,8 +29,6 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
-
-import junit.framework.Assert;
 
 import static org.mockito.Mockito.when;
 
@@ -47,58 +44,11 @@ import static org.mockito.Mockito.when;
  (mmma frameworks/base/services/tests/servicestests/ for non-ninja build)
  */
 public class OwnersTest extends DpmTestBase {
-    private static final String TAG = "DeviceOwnerTest";
-
-    private static final String LEGACY_FILE = "legacy.xml";
-    private static final String DEVICE_OWNER_FILE = "device_owner2.xml";
-    private static final String PROFILE_OWNER_FILE_BASE = "profile_owner.xml";
-
-    private File mDataDir;
-
-    private class OwnersSub extends Owners {
-        final File mLegacyFile;
-        final File mDeviceOwnerFile;
-        final File mProfileOwnerBase;
-
-        public OwnersSub() {
-            super(getContext());
-            mLegacyFile = new File(mDataDir, LEGACY_FILE);
-            mDeviceOwnerFile = new File(mDataDir, DEVICE_OWNER_FILE);
-            mProfileOwnerBase = new File(mDataDir, PROFILE_OWNER_FILE_BASE);
-        }
-
-        @Override
-        File getLegacyConfigFileWithTestOverride() {
-            return mLegacyFile;
-        }
-
-        @Override
-        File getDeviceOwnerFileWithTestOverride() {
-            return mDeviceOwnerFile;
-        }
-
-        @Override
-        File getProfileOwnerFileWithTestOverride(int userId) {
-            return new File(mDeviceOwnerFile.getAbsoluteFile() + "-" + userId);
-        }
-    }
-
-    @Override
-    protected void setUp() throws Exception {
-        super.setUp();
-
-        mDataDir = new File(getContext().getCacheDir(), "OwnersTest");
-        if (mDataDir.exists()) {
-            assertTrue("failed to delete dir", FileUtils.deleteContents(mDataDir));
-        }
-        mDataDir.mkdirs();
-        Log.i(TAG, "Created " + mDataDir);
-    }
-
     private String readAsset(String assetPath) throws IOException {
         final StringBuilder sb = new StringBuilder();
         try (BufferedReader br = new BufferedReader(
-                new InputStreamReader((getContext().getResources().getAssets().open(assetPath))))) {
+                new InputStreamReader(
+                        mRealTestContext.getResources().getAssets().open(assetPath)))) {
             String line;
             while ((line = br.readLine()) != null) {
                 sb.append(line);
@@ -126,7 +76,7 @@ public class OwnersTest extends DpmTestBase {
             ui.id = userId;
             userInfos.add(ui);
         }
-        when(getContext().getMockUserManager().getUsers()).thenReturn(userInfos);
+        when(getContext().userManager.getUsers()).thenReturn(userInfos);
     }
 
     public void testUpgrade01() throws Exception {
@@ -134,9 +84,10 @@ public class OwnersTest extends DpmTestBase {
 
         // First, migrate.
         {
-            final OwnersSub owners = new OwnersSub();
+            final OwnersTestable owners = new OwnersTestable(getContext(), dataDir);
 
-            createLegacyFile(owners.mLegacyFile, readAsset("OwnersTest/test01/input.xml"));
+            createLegacyFile(owners.getLegacyConfigFileWithTestOverride(),
+                    readAsset("OwnersTest/test01/input.xml"));
 
             owners.load();
 
@@ -160,7 +111,7 @@ public class OwnersTest extends DpmTestBase {
 
         // Then re-read and check.
         {
-            final OwnersSub owners = new OwnersSub();
+            final OwnersTestable owners = new OwnersTestable(getContext(), dataDir);
             owners.load();
 
             assertFalse(owners.hasDeviceOwner());
@@ -176,9 +127,10 @@ public class OwnersTest extends DpmTestBase {
 
         // First, migrate.
         {
-            final OwnersSub owners = new OwnersSub();
+            final OwnersTestable owners = new OwnersTestable(getContext(), dataDir);
 
-            createLegacyFile(owners.mLegacyFile, readAsset("OwnersTest/test02/input.xml"));
+            createLegacyFile(owners.getLegacyConfigFileWithTestOverride(),
+                    readAsset("OwnersTest/test02/input.xml"));
 
             owners.load();
 
@@ -204,7 +156,7 @@ public class OwnersTest extends DpmTestBase {
 
         // Then re-read and check.
         {
-            final OwnersSub owners = new OwnersSub();
+            final OwnersTestable owners = new OwnersTestable(getContext(), dataDir);
             owners.load();
 
             assertTrue(owners.hasDeviceOwner());
@@ -223,9 +175,10 @@ public class OwnersTest extends DpmTestBase {
 
         // First, migrate.
         {
-            final OwnersSub owners = new OwnersSub();
+            final OwnersTestable owners = new OwnersTestable(getContext(), dataDir);
 
-            createLegacyFile(owners.mLegacyFile, readAsset("OwnersTest/test03/input.xml"));
+            createLegacyFile(owners.getLegacyConfigFileWithTestOverride(),
+                    readAsset("OwnersTest/test03/input.xml"));
 
             owners.load();
 
@@ -259,7 +212,7 @@ public class OwnersTest extends DpmTestBase {
 
         // Then re-read and check.
         {
-            final OwnersSub owners = new OwnersSub();
+            final OwnersTestable owners = new OwnersTestable(getContext(), dataDir);
             owners.load();
 
             assertFalse(owners.hasDeviceOwner());
@@ -286,9 +239,10 @@ public class OwnersTest extends DpmTestBase {
 
         // First, migrate.
         {
-            final OwnersSub owners = new OwnersSub();
+            final OwnersTestable owners = new OwnersTestable(getContext(), dataDir);
 
-            createLegacyFile(owners.mLegacyFile, readAsset("OwnersTest/test04/input.xml"));
+            createLegacyFile(owners.getLegacyConfigFileWithTestOverride(),
+                    readAsset("OwnersTest/test04/input.xml"));
 
             owners.load();
 
@@ -327,7 +281,7 @@ public class OwnersTest extends DpmTestBase {
 
         // Then re-read and check.
         {
-            final OwnersSub owners = new OwnersSub();
+            final OwnersTestable owners = new OwnersTestable(getContext(), dataDir);
             owners.load();
 
             assertTrue(owners.hasDeviceOwner());
@@ -359,9 +313,10 @@ public class OwnersTest extends DpmTestBase {
 
         // First, migrate.
         {
-            final OwnersSub owners = new OwnersSub();
+            final OwnersTestable owners = new OwnersTestable(getContext(), dataDir);
 
-            createLegacyFile(owners.mLegacyFile, readAsset("OwnersTest/test05/input.xml"));
+            createLegacyFile(owners.getLegacyConfigFileWithTestOverride(),
+                    readAsset("OwnersTest/test05/input.xml"));
 
             owners.load();
 
@@ -386,7 +341,7 @@ public class OwnersTest extends DpmTestBase {
 
         // Then re-read and check.
         {
-            final OwnersSub owners = new OwnersSub();
+            final OwnersTestable owners = new OwnersTestable(getContext(), dataDir);
             owners.load();
 
             assertFalse(owners.hasDeviceOwner());
@@ -405,9 +360,10 @@ public class OwnersTest extends DpmTestBase {
 
         // First, migrate.
         {
-            final OwnersSub owners = new OwnersSub();
+            final OwnersTestable owners = new OwnersTestable(getContext(), dataDir);
 
-            createLegacyFile(owners.mLegacyFile, readAsset("OwnersTest/test06/input.xml"));
+            createLegacyFile(owners.getLegacyConfigFileWithTestOverride(),
+                    readAsset("OwnersTest/test06/input.xml"));
 
             owners.load();
 
@@ -431,7 +387,7 @@ public class OwnersTest extends DpmTestBase {
 
         // Then re-read and check.
         {
-            final OwnersSub owners = new OwnersSub();
+            final OwnersTestable owners = new OwnersTestable(getContext(), dataDir);
             owners.load();
 
             assertFalse(owners.hasDeviceOwner());
@@ -447,10 +403,11 @@ public class OwnersTest extends DpmTestBase {
     public void testRemoveExistingFiles() throws Exception {
         addUsersToUserManager(10, 11, 20, 21);
 
-        final OwnersSub owners = new OwnersSub();
+        final OwnersTestable owners = new OwnersTestable(getContext(), dataDir);
 
         // First, migrate to create new-style config files.
-        createLegacyFile(owners.mLegacyFile, readAsset("OwnersTest/test04/input.xml"));
+        createLegacyFile(owners.getLegacyConfigFileWithTestOverride(),
+                readAsset("OwnersTest/test04/input.xml"));
 
         owners.load();
 
