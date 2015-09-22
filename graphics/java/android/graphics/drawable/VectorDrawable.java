@@ -126,9 +126,13 @@ import java.util.Stack;
  * <dd>Defines path data using exactly same format as "d" attribute
  * in the SVG's path data. This is defined in the viewport space.</dd>
  * <dt><code>android:fillColor</code></dt>
- * <dd>Defines the color to fill the path (none if not present).</dd>
+ * <dd>Specifies the color used to fill the path. May be a color or (SDK 24+ only) a color state
+ * list. If this property is animated, any value set by the animation will override the original
+ * value. No path fill is drawn if this property is not specified.</dd>
  * <dt><code>android:strokeColor</code></dt>
- * <dd>Defines the color to draw the path outline (none if not present).</dd>
+ * <dd>Specifies the color used to draw the path outline. May be a color or (SDK 24+ only) a color
+ * state list. If this property is animated, any value set by the animation will override the
+ * original value. No path outline is drawn if this property is not specified.</dd>
  * <dt><code>android:strokeWidth</code></dt>
  * <dd>The width a path stroke.</dd>
  * <dt><code>android:strokeAlpha</code></dt>
@@ -374,19 +378,24 @@ public class VectorDrawable extends Drawable {
 
     @Override
     public boolean isStateful() {
-        return super.isStateful() || (mVectorState != null && mVectorState.mTint != null
-                && mVectorState.mTint.isStateful());
+        return super.isStateful() || (mVectorState != null && mVectorState.isStateful());
     }
 
     @Override
     protected boolean onStateChange(int[] stateSet) {
+        boolean changed = false;
+
         final VectorDrawableState state = mVectorState;
+        if (state.mVPathRenderer != null && state.mVPathRenderer.onStateChange(stateSet)) {
+            changed = true;
+            state.mCacheDirty = true;
+        }
         if (state.mTint != null && state.mTintMode != null) {
             mTintFilter = updateTintFilter(mTintFilter, state.mTint, state.mTintMode);
-            invalidateSelf();
-            return true;
+            changed = true;
         }
-        return false;
+
+        return changed;
     }
 
     @Override
@@ -664,7 +673,7 @@ public class VectorDrawable extends Drawable {
                 if (SHAPE_PATH.equals(tagName)) {
                     final VFullPath path = new VFullPath();
                     path.inflate(res, attrs, theme);
-                    currentGroup.mChildren.add(path);
+                    currentGroup.addChild(path);
                     if (path.getPathName() != null) {
                         pathRenderer.mVGTargetsMap.put(path.getPathName(), path);
                     }
@@ -673,7 +682,7 @@ public class VectorDrawable extends Drawable {
                 } else if (SHAPE_CLIP_PATH.equals(tagName)) {
                     final VClipPath path = new VClipPath();
                     path.inflate(res, attrs, theme);
-                    currentGroup.mChildren.add(path);
+                    currentGroup.addChild(path);
                     if (path.getPathName() != null) {
                         pathRenderer.mVGTargetsMap.put(path.getPathName(), path);
                     }
@@ -681,7 +690,7 @@ public class VectorDrawable extends Drawable {
                 } else if (SHAPE_GROUP.equals(tagName)) {
                     VGroup newChildGroup = new VGroup();
                     newChildGroup.inflate(res, attrs, theme);
-                    currentGroup.mChildren.add(newChildGroup);
+                    currentGroup.addChild(newChildGroup);
                     groupStack.push(newChildGroup);
                     if (newChildGroup.getGroupName() != null) {
                         pathRenderer.mVGTargetsMap.put(newChildGroup.getGroupName(),
@@ -700,7 +709,7 @@ public class VectorDrawable extends Drawable {
 
         // Print the tree out for debug.
         if (DBG_VECTOR_DRAWABLE) {
-            printGroupTree(pathRenderer.mRootGroup, 0);
+            pathRenderer.printGroupTree();
         }
 
         if (noPathTag) {
@@ -712,24 +721,6 @@ public class VectorDrawable extends Drawable {
             tag.append(SHAPE_PATH);
 
             throw new XmlPullParserException("no " + tag + " defined");
-        }
-    }
-
-    private void printGroupTree(VGroup currentGroup, int level) {
-        String indent = "";
-        for (int i = 0; i < level; i++) {
-            indent += "    ";
-        }
-        // Print the current node
-        Log.v(LOGTAG, indent + "current group is :" + currentGroup.getGroupName()
-                + " rotation is " + currentGroup.mRotate);
-        Log.v(LOGTAG, indent + "matrix is :" + currentGroup.getLocalMatrix().toString());
-        // Then print all the children groups
-        for (int i = 0; i < currentGroup.mChildren.size(); i++) {
-            final VObject child = currentGroup.mChildren.get(i);
-            if (child instanceof VGroup) {
-                printGroupTree((VGroup) child, level + 1);
-            }
         }
     }
 
@@ -890,6 +881,11 @@ public class VectorDrawable extends Drawable {
             return mChangingConfigurations
                     | (mTint != null ? mTint.getChangingConfigurations() : 0);
         }
+
+        public boolean isStateful() {
+            return (mTint != null && mTint.isStateful())
+                    || (mVPathRenderer != null && mVPathRenderer.isStateful());
+        }
     }
 
     private static class VPathRenderer {
@@ -972,21 +968,35 @@ public class VectorDrawable extends Drawable {
             mRootGroup.applyTheme(t);
         }
 
+        public boolean onStateChange(int[] stateSet) {
+            return mRootGroup.onStateChange(stateSet);
+        }
+
+        public boolean isStateful() {
+            return mRootGroup.isStateful();
+        }
+
         public void draw(Canvas canvas, int w, int h, ColorFilter filter) {
             final float scaleX = w / mViewportWidth;
             final float scaleY = h / mViewportHeight;
             mRootGroup.draw(canvas, mTempState, Matrix.IDENTITY_MATRIX, filter, scaleX, scaleY);
         }
+
+        public void printGroupTree() {
+            mRootGroup.printGroupTree("");
+        }
     }
 
     private static class VGroup implements VObject {
+        private static final String GROUP_INDENT = "    ";
+
         // mStackedMatrix is only used temporarily when drawing, it combines all
         // the parents' local matrices with the current one.
         private final Matrix mStackedMatrix = new Matrix();
 
         /////////////////////////////////////////////////////
         // Variables below need to be copied (deep copy if applicable) for mutation.
-        final ArrayList<VObject> mChildren = new ArrayList<>();
+        private final ArrayList<VObject> mChildren = new ArrayList<>();
 
         private float mRotate = 0;
         private float mPivotX = 0;
@@ -995,6 +1005,7 @@ public class VectorDrawable extends Drawable {
         private float mScaleY = 1;
         private float mTranslateX = 0;
         private float mTranslateY = 0;
+        private boolean mIsStateful;
 
         // mLocalMatrix is updated based on the update of transformation information,
         // either parsed from the XML or by animation.
@@ -1011,6 +1022,7 @@ public class VectorDrawable extends Drawable {
             mScaleY = copy.mScaleY;
             mTranslateX = copy.mTranslateX;
             mTranslateY = copy.mTranslateY;
+            mIsStateful = copy.mIsStateful;
             mThemeAttrs = copy.mThemeAttrs;
             mGroupName = copy.mGroupName;
             mChangingConfigurations = copy.mChangingConfigurations;
@@ -1052,6 +1064,12 @@ public class VectorDrawable extends Drawable {
 
         public Matrix getLocalMatrix() {
             return mLocalMatrix;
+        }
+
+        public void addChild(VObject child) {
+            mChildren.add(child);
+
+            mIsStateful |= child.isStateful();
         }
 
         @Override
@@ -1109,6 +1127,26 @@ public class VectorDrawable extends Drawable {
         }
 
         @Override
+        public boolean onStateChange(int[] stateSet) {
+            boolean changed = false;
+
+            final ArrayList<VObject> children = mChildren;
+            for (int i = 0, count = children.size(); i < count; i++) {
+                final VObject child = children.get(i);
+                if (child.isStateful()) {
+                    changed |= child.onStateChange(stateSet);
+                }
+            }
+
+            return changed;
+        }
+
+        @Override
+        public boolean isStateful() {
+            return mIsStateful;
+        }
+
+        @Override
         public boolean canApplyTheme() {
             if (mThemeAttrs != null) {
                 return true;
@@ -1139,6 +1177,9 @@ public class VectorDrawable extends Drawable {
                 final VObject child = children.get(i);
                 if (child.canApplyTheme()) {
                     child.applyTheme(t);
+
+                    // Applying a theme may have made the child stateful.
+                    mIsStateful |= child.isStateful();
                 }
             }
         }
@@ -1151,6 +1192,24 @@ public class VectorDrawable extends Drawable {
             mLocalMatrix.postScale(mScaleX, mScaleY);
             mLocalMatrix.postRotate(mRotate, 0, 0);
             mLocalMatrix.postTranslate(mTranslateX + mPivotX, mTranslateY + mPivotY);
+        }
+
+        public void printGroupTree(String indent) {
+            Log.v(LOGTAG, indent + "group:" + getGroupName() + " rotation is " + mRotate);
+            Log.v(LOGTAG, indent + "matrix:" + getLocalMatrix().toString());
+
+            final int count = mChildren.size();
+            if (count > 0) {
+                indent += GROUP_INDENT;
+            }
+
+            // Then print all the children groups.
+            for (int i = 0; i < count; i++) {
+                final VObject child = mChildren.get(i);
+                if (child instanceof VGroup) {
+                    ((VGroup) child).printGroupTree(indent);
+                }
+            }
         }
 
         /* Setters and Getters, used by animator from AnimatedVectorDrawable. */
@@ -1398,6 +1457,16 @@ public class VectorDrawable extends Drawable {
             // No-op.
         }
 
+        @Override
+        public boolean onStateChange(int[] stateSet) {
+            return false;
+        }
+
+        @Override
+        public boolean isStateful() {
+            return false;
+        }
+
         private void updateStateFromTypedArray(TypedArray a) {
             // Account for any configuration changes.
             mChangingConfigurations |= a.getChangingConfigurations();
@@ -1427,9 +1496,11 @@ public class VectorDrawable extends Drawable {
         // Variables below need to be copied (deep copy if applicable) for mutation.
         private int[] mThemeAttrs;
 
+        ColorStateList mStrokeColors = null;
         int mStrokeColor = Color.TRANSPARENT;
         float mStrokeWidth = 0;
 
+        ColorStateList mFillColors = null;
         int mFillColor = Color.TRANSPARENT;
         float mStrokeAlpha = 1.0f;
         int mFillRule;
@@ -1448,11 +1519,14 @@ public class VectorDrawable extends Drawable {
 
         public VFullPath(VFullPath copy) {
             super(copy);
+
             mThemeAttrs = copy.mThemeAttrs;
 
+            mStrokeColors = copy.mStrokeColors;
             mStrokeColor = copy.mStrokeColor;
             mStrokeWidth = copy.mStrokeWidth;
             mStrokeAlpha = copy.mStrokeAlpha;
+            mFillColors = copy.mFillColors;
             mFillColor = copy.mFillColor;
             mFillRule = copy.mFillRule;
             mFillAlpha = copy.mFillAlpha;
@@ -1489,6 +1563,31 @@ public class VectorDrawable extends Drawable {
                 default:
                     return defValue;
             }
+        }
+
+        @Override
+        public boolean onStateChange(int[] stateSet) {
+            boolean changed = false;
+
+            if (mStrokeColors != null && mStrokeColors.isStateful()) {
+                final int strokeColor = mStrokeColor;
+                mStrokeColor = mStrokeColors.getColorForState(stateSet, strokeColor);
+                changed |= strokeColor != mStrokeColor;
+            }
+
+            if (mFillColors != null && mFillColors.isStateful()) {
+                final int fillColor = mFillColor;
+                mFillColor = mFillColors.getColorForState(stateSet, fillColor);
+                changed |= fillColor != mFillColor;
+            }
+
+            return changed;
+        }
+
+        @Override
+        public boolean isStateful() {
+            return mStrokeColors != null && mStrokeColors.isStateful()
+                    || mFillColors != null && mFillColors.isStateful();
         }
 
         @Override
@@ -1614,8 +1713,20 @@ public class VectorDrawable extends Drawable {
                 mNodes = PathParser.createNodesFromPathData(pathData);
             }
 
-            mFillColor = a.getColor(R.styleable.VectorDrawablePath_fillColor,
-                    mFillColor);
+            final ColorStateList fillColors = a.getColorStateList(
+                    R.styleable.VectorDrawablePath_fillColor);
+            if (fillColors != null) {
+                mFillColors = fillColors;
+                mFillColor = fillColors.getDefaultColor();
+            }
+
+            final ColorStateList strokeColors = a.getColorStateList(
+                    R.styleable.VectorDrawablePath_strokeColor);
+            if (strokeColors != null) {
+                mStrokeColors = strokeColors;
+                mStrokeColor = strokeColors.getDefaultColor();
+            }
+
             mFillAlpha = a.getFloat(R.styleable.VectorDrawablePath_fillAlpha,
                     mFillAlpha);
             mStrokeLineCap = getStrokeLineCap(a.getInt(
@@ -1624,8 +1735,6 @@ public class VectorDrawable extends Drawable {
                     R.styleable.VectorDrawablePath_strokeLineJoin, -1), mStrokeLineJoin);
             mStrokeMiterlimit = a.getFloat(
                     R.styleable.VectorDrawablePath_strokeMiterLimit, mStrokeMiterlimit);
-            mStrokeColor = a.getColor(R.styleable.VectorDrawablePath_strokeColor,
-                    mStrokeColor);
             mStrokeAlpha = a.getFloat(R.styleable.VectorDrawablePath_strokeAlpha,
                     mStrokeAlpha);
             mStrokeWidth = a.getFloat(R.styleable.VectorDrawablePath_strokeWidth,
@@ -1662,6 +1771,7 @@ public class VectorDrawable extends Drawable {
 
         @SuppressWarnings("unused")
         void setStrokeColor(int strokeColor) {
+            mStrokeColors = null;
             mStrokeColor = strokeColor;
         }
 
@@ -1692,6 +1802,7 @@ public class VectorDrawable extends Drawable {
 
         @SuppressWarnings("unused")
         void setFillColor(int fillColor) {
+            mFillColors = null;
             mFillColor = fillColor;
         }
 
@@ -1752,5 +1863,7 @@ public class VectorDrawable extends Drawable {
         void inflate(Resources r, AttributeSet attrs, Theme theme);
         boolean canApplyTheme();
         void applyTheme(Theme t);
+        boolean onStateChange(int[] state);
+        boolean isStateful();
     }
 }

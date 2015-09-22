@@ -21,10 +21,14 @@
 
     <group>
         <path
+            android:name="box0"
+            android:pathData="m0,0l480,0l0,480l-480,0l0-480z"
+            android:fillColor="@android:color/white" />
+        <path
             android:name="box1"
             android:pathData="m20,200l100,90l180-180l-35-35l-145,145l-60-60l-40,40z"
-            android:fillColor="?android:attr/colorControlActivated"
-            android:strokeColor="?android:attr/colorControlActivated"
+            android:fillColor="?android:attr/colorControlNormal"
+            android:strokeColor="?android:attr/colorControlNormal"
             android:strokeLineCap="round"
             android:strokeLineJoin="round" />
     </group>
