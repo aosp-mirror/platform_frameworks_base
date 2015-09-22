@@ -32,9 +32,10 @@ class used in this lesson displays an image for the content along with the media
 Android Leanback sample app</a>, available on GitHub. Use this sample code to start your own
 app.</p>
 
-<img itemprop="image" src="{@docRoot}images/tv/app-browse.png" alt="App main screen"/>
+<img itemprop="image" src="{@docRoot}images/tv/card-view.png" alt="App card view" id="collapsed"/>
 <p class="img-caption"><b>Figure 1.</b> The <a href="https://github.com/googlesamples/androidtv-Leanback">
-Leanback sample app</a> browse fragment with a card presenter displaying card view objects.</p>
+Leanback sample app</a> image card view when selected.</p>
+
 
 <h2 id="presenter">Create a Card Presenter</h2>
 
@@ -147,10 +148,7 @@ and {@link android.view.View#setFocusableInTouchMode(boolean) setFocusableInTouc
 </pre>
 
 <p>When the user selects the {@link android.support.v17.leanback.widget.ImageCardView}, it expands
-to reveal its text area with the background color you specify, as shown in figure 2.</p>
+to reveal its text area with the background color you specify, as shown in figure 1.</p>
 
-<img itemprop="image" src="{@docRoot}images/tv/card-view.png" alt="App card view"/>
-<p class="img-caption"><b>Figure 2.</b> The <a href="https://github.com/googlesamples/androidtv-Leanback">
-Leanback sample app</a> image card view when selected.</p>
 
 

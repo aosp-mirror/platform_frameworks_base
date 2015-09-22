@@ -11,24 +11,34 @@ trainingnavtop=true
   <h2>This lesson teaches you to</h2>
   <ol>
     <li><a href="#layout">Create a Media Browse Layout</a></li>
+    <li><a href="#header">Customize the Header Views</a></li>
     <li><a href="#lists">Display Media Lists</a></li>
     <li><a href="#background">Update the Background</a></li>
   </ol>
+  <h2>Try it out</h2>
+  <ul>
+    <li><a class="external-link" href="https://github.com/googlesamples/androidtv-Leanback">Android
+    Leanback sample app</a></li>
+  </ul>
 
 </div>
 </div>
 
 <p>
-  Media apps that run on TV need to allow users to browse its content offerings, make a
+  A media app that runs on a TV needs to allow users to browse its content offerings, make a
   selection, and start playing content. The content browsing experience for apps of this type
   should be simple and intuitive, as well as visually pleasing and engaging.
 </p>
 
 <p>
   This lesson discusses how to use the classes provided by the <a href=
-  "{@docRoot}tools/support-library/features.html#v17-leanback">v17 leanback support library</a> to
-  implement a user interface for browsing music or videos from your app's media catalog.
+  "{@docRoot}tools/support-library/features.html#v17-leanback">v17 leanback support library</a>
+  to implement a user interface for browsing music or videos from your app's media catalog.
 </p>
+
+<img itemprop="image" src="{@docRoot}images/tv/app-browse.png" alt="App main screen"/>
+<p class="img-caption"><b>Figure 1.</b> The <a href="https://github.com/googlesamples/androidtv-Leanback">
+Leanback sample app</a> browse fragment displays video catalog data.</p>
 
 
 <h2 id="layout">Create a Media Browse Layout</h2>
@@ -37,69 +47,270 @@ trainingnavtop=true
   The {@link android.support.v17.leanback.app.BrowseFragment} class in the leanback library
   allows you to create a primary layout for browsing categories and rows of media items with a
   minimum of code. The following example shows how to create a layout that contains a {@link
-  android.support.v17.leanback.app.BrowseFragment}:
+  android.support.v17.leanback.app.BrowseFragment} object:
 </p>
 
 <pre>
-&lt;LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-  android:layout_width=&quot;match_parent&quot;
-  android:layout_height=&quot;match_parent&quot;
-  android:orientation=&quot;vertical&quot;
-  &gt;
+&lt;FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/main_frame"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"&gt;
 
-  &lt;fragment
-      <strong>android:name="android.support.v17.leanback.app.BrowseFragment"</strong>
-      android:id=&quot;@+id/browse_fragment&quot;
-      android:layout_width=&quot;match_parent&quot;
-      android:layout_height=&quot;match_parent&quot;
-      /&gt;
+    &lt;fragment
+        android:name="com.example.android.tvleanback.ui.MainFragment"
+        android:id="@+id/main_browse_fragment"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" /&gt;
+
+&lt;/FrameLayout&gt;
+</pre>
+
+<p>The application's main activity sets this view, as shown in the following example:</p>
+
+<pre>
+public class MainActivity extends Activity {
+    &#64;Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.main);
+    }
+...
+</pre>
+
+<p>The {@link android.support.v17.leanback.app.BrowseFragment} methods populate the view with the
+video data and UI elements and set the layout parameters such as the icon, title, and whether
+category headers are enabled.</p>
+
+<ul>
+  <li>See <a href="#set-ui">Set UI Elements</a> for more information about setting up UI elements.</li>
+  <li>See <a href="#hide-heads">Hide or Disable Headers</a> for more information about hiding the
+  headers.</li>
+</ul>
+
+<p>The application's subclass that implements the
+{@link android.support.v17.leanback.app.BrowseFragment} methods also sets
+up event listeners for user actions on the UI elements, and prepares the background
+manager, as shown in the following example:</p>
+
+<pre>
+public class MainFragment extends BrowseFragment implements
+        LoaderManager.LoaderCallbacks&lt;HashMap&lt;String, List&lt;Movie&gt;&gt;&gt; {
+
+...
+
+    &#64;Override
+    public void onActivityCreated(Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
+
+        loadVideoData();
+
+        prepareBackgroundManager();
+        setupUIElements();
+        setupEventListeners();
+    }
+...
+
+    private void prepareBackgroundManager() {
+        mBackgroundManager = BackgroundManager.getInstance(getActivity());
+        mBackgroundManager.attach(getActivity().getWindow());
+        mDefaultBackground = getResources()
+            .getDrawable(R.drawable.default_background);
+        mMetrics = new DisplayMetrics();
+        getActivity().getWindowManager().getDefaultDisplay().getMetrics(mMetrics);
+    }
+
+    private void setupUIElements() {
+        setBadgeDrawable(getActivity().getResources()
+            .getDrawable(R.drawable.videos_by_google_banner));
+        // Badge, when set, takes precedent over title
+        setTitle(getString(R.string.browse_title));
+        setHeadersState(HEADERS_ENABLED);
+        setHeadersTransitionOnBackEnabled(true);
+        // set headers background color
+        setBrandColor(getResources().getColor(R.color.fastlane_background));
+        // set search icon color
+        setSearchAffordanceColor(getResources().getColor(R.color.search_opaque));
+    }
+
+    private void loadVideoData() {
+        VideoProvider.setContext(getActivity());
+        mVideosUrl = getActivity().getResources().getString(R.string.catalog_url);
+        getLoaderManager().initLoader(0, null, this);
+    }
+
+    private void setupEventListeners() {
+        setOnSearchClickedListener(new View.OnClickListener() {
+
+            &#64;Override
+            public void onClick(View view) {
+                Intent intent = new Intent(getActivity(), SearchActivity.class);
+                startActivity(intent);
+            }
+        });
+
+        setOnItemViewClickedListener(new ItemViewClickedListener());
+        setOnItemViewSelectedListener(new ItemViewSelectedListener());
+    }
+...
+</pre>
+
+<h3 id="set-ui">Set UI Elements</h2>
+
+<p>In the sample above, the private method <code>setupUIElements()</code> calls several of the
+{@link android.support.v17.leanback.app.BrowseFragment} methods to style the media catalog browser:
+</p>
+
+<ul>
+  <li>{@link android.support.v17.leanback.app.BrowseFragment#setBadgeDrawable(android.graphics.drawable.Drawable) setBadgeDrawable()}
+  places the specified drawable resource in the upper-right corner of the browse fragment, as
+  shown in figures 1 and 2. This method replaces the title string with the
+  drawable resource, if {@code setTitle()} is also called. The drawable resource should be 52dps
+  tall.</li>
+  <li>{@link android.support.v17.leanback.app.BrowseFragment#setTitle(java.lang.String) setTitle()}
+  sets the title string in the upper-right corner of the browse fragment, unless
+  {@code setBadgeDrawable()} is called.</li>
+  <li>{@link android.support.v17.leanback.app.BrowseFragment#setHeadersState(int) setHeadersState()}
+  and {@link android.support.v17.leanback.app.BrowseFragment#setHeadersTransitionOnBackEnabled(boolean) setHeadersTransitionOnBackEnabled()} hide or disable the headers. See
+  <a href="#hide-heads">Hide or Disable Headers</a> for more information.
+  </li>
+  <li>{@link android.support.v17.leanback.app.BrowseFragment#setBrandColor(int) setBrandColor()}
+  sets the background color for UI elements in the browse fragment, specifically the header
+  section background color, with the specified color value.</li>
+  <li>{@link android.support.v17.leanback.app.BrowseFragment#setSearchAffordanceColor(int) setSearchAffordanceColor()}
+  sets the color of the search icon with the specified color value. The search icon
+  appears in the upper-left corner of the browse fragment, as shown in figures 1 and 2.</li>
+</ul>
+
+<h2 id="header">Customize the Header Views</h2>
+
+<p>The browse fragment shown in figure 1 lists the video category names (the row headers) in the
+left pane. Text views display these category names from the video database. You can customize the
+header to include additional views in a more complex layout. The following sections show how to
+include an image view that displays an icon next to the category name, as shown in figure 2.</p>
+
+<img itemprop="image" src="{@docRoot}images/tv/custom-head.png" alt="App main screen"/>
+<p class="img-caption"><b>Figure 2.</b> The row headers in the browse fragment, with both an icon
+and a text label.</p>
+
+<p>The layout for the row header is defined as follows:</p>
+
+<pre>
+&lt;?xml version="1.0" encoding="utf-8"?&gt;
+&lt;LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="horizontal"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"&gt;
+
+    &lt;ImageView
+        android:id="@+id/header_icon"
+        android:layout_width="32dp"
+        android:layout_height="32dp" /&gt;
+    &lt;TextView
+        android:id="@+id/header_label"
+        android:layout_marginTop="6dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" /&gt;
+
 &lt;/LinearLayout&gt;
 </pre>
 
-<p>
-  In order to work with this layout in an activity, retrieve the {@link
-  android.support.v17.leanback.app.BrowseFragment} element from the layout. Use the methods in this
-  class to set display parameters such as the icon, title, and whether category headers are enabled.
-  The following code sample demonstrates how to set the layout parameters for a {@link
-  android.support.v17.leanback.app.BrowseFragment} in a layout:
+<p>Use a {@link android.support.v17.leanback.widget.Presenter} and implement the
+abstract methods to create, bind, and unbind the view holder. The following
+example shows how to bind the viewholder with two views, an
+{@link android.widget.ImageView} and a {@link android.widget.TextView}.
 </p>
 
 <pre>
-public class BrowseMediaActivity extends Activity {
+public class IconHeaderItemPresenter extends Presenter {
+    &#64;Override
+    public ViewHolder onCreateViewHolder(ViewGroup viewGroup) {
+        LayoutInflater inflater = (LayoutInflater) viewGroup.getContext()
+                .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 
-    public static final String TAG ="BrowseActivity";
+        View view = inflater.inflate(R.layout.icon_header_item, null);
 
-    protected BrowseFragment mBrowseFragment;
+        return new ViewHolder(view);
+    }
 
     &#64;Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.browse_fragment);
+    public void onBindViewHolder(ViewHolder viewHolder, Object o) {
+        HeaderItem headerItem = ((ListRow) o).getHeaderItem();
+        View rootView = viewHolder.view;
 
-        final FragmentManager fragmentManager = getFragmentManager();
-        <strong>mBrowseFragment = (BrowseFragment) fragmentManager.findFragmentById(
-                R.id.browse_fragment);</strong>
+        ImageView iconView = (ImageView) rootView.findViewById(R.id.header_icon);
+        Drawable icon = rootView.getResources().getDrawable(R.drawable.ic_action_video, null);
+        iconView.setImageDrawable(icon);
 
-        // Set display parameters for the BrowseFragment
-        mBrowseFragment.setHeadersState(BrowseFragment.HEADERS_ENABLED);
-        mBrowseFragment.setTitle(getString(R.string.app_name));
-        mBrowseFragment.setBadgeDrawable(getResources().getDrawable(
-                R.drawable.ic_launcher));
-        mBrowseFragment.setBrowseParams(params);
+        TextView label = (TextView) rootView.findViewById(R.id.header_label);
+        label.setText(headerItem.getName());
+    }
 
+    &#64;Override
+    public void onUnbindViewHolder(ViewHolder viewHolder) {
+    // no op
     }
 }
 </pre>
 
+<p>This example shows how to define the presenter for a complex layout with
+multiple views, and you could use this pattern to do something even more complex.
+However, an easier way to combine a {@link android.widget.TextView} with a
+drawable resource is to use the <a href="{@docRoot}reference/android/widget/TextView.html#attr_android:drawableLeft">
+{@code TextView.drawableLeft}</a> attribute. Doing it this way, you don't need the
+{@link android.widget.ImageView} shown here.</p>
 
-<h2 id="lists">Displaying Media Lists</h2>
+<p>In the {@link android.support.v17.leanback.app.BrowseFragment} implementation that displays the
+catalog browser, use the {@link android.support.v17.leanback.app.BrowseFragment#setHeaderPresenterSelector(android.support.v17.leanback.widget.PresenterSelector) setHeaderPresenterSelector()}
+method to set the presenter for the row header, as shown in the following example.</p>
+
+<pre>
+setHeaderPresenterSelector(new PresenterSelector() {
+    &#64;Override
+    public Presenter getPresenter(Object o) {
+        return new IconHeaderItemPresenter();
+    }
+});
+</pre>
+
+<h3 id="hide-heads">Hide or Disable Headers</h3>
+
+<p>Sometimes you may not want the row headers to appear: when there aren't enough categories to
+require a scrollable list, for example. Call the {@link android.support.v17.leanback.app.BrowseFragment#setHeadersState(int) BrowseFragment.setHeadersState()}
+method during the fragment's {@link android.app.Fragment#onActivityCreated(android.os.Bundle) onActivityCreated()}
+method to hide or disable the row headers. The {@link android.support.v17.leanback.app.BrowseFragment#setHeadersState(int) setHeadersState()}
+method sets the initial state of the headers in the browse fragment given one of the following
+constants as a parameter:</p>
+
+<ul>
+  <li>{@link android.support.v17.leanback.app.BrowseFragment#HEADERS_ENABLED} - When the browse
+  fragment activity is created, the headers are enabled and shown by default. The headers appear as
+  shown in figures 1 and 2 on this page.</li>
+  <li>{@link android.support.v17.leanback.app.BrowseFragment#HEADERS_HIDDEN} - When the browse
+  fragment activity is created, headers are enabled and hidden by default. The header section of the
+  screen is collapsed, as shown in <a href="{@docRoot}training/tv/playback/card.html#collapsed">
+  figure 1</a> of <a href="{@docRoot}training/tv/playback/card.html">Providing a Card View</a>. The
+  user can select the collapsed header section to expand it.</li>
+  <li>{@link android.support.v17.leanback.app.BrowseFragment#HEADERS_DISABLED} - When the browse
+  fragment activity is created, headers are disabled by default and are never displayed.</li>
+</ul>
+
+<p>If either {@link android.support.v17.leanback.app.BrowseFragment#HEADERS_ENABLED} or
+{@link android.support.v17.leanback.app.BrowseFragment#HEADERS_HIDDEN} is set, you can call
+{@link android.support.v17.leanback.app.BrowseFragment#setHeadersTransitionOnBackEnabled(boolean) setHeadersTransitionOnBackEnabled()}
+to support moving back to the row header from a selected content item in the row. This is enabled by
+default (if you don't call the method), but if you want to handle the back movement yourself, you
+should pass the value <code>false</code> to {@link android.support.v17.leanback.app.BrowseFragment#setHeadersTransitionOnBackEnabled(boolean) setHeadersTransitionOnBackEnabled()}
+and implement your own back stack handling.</p>
+
+<h2 id="lists">Display Media Lists</h2>
 
 <p>
-  The {@link android.support.v17.leanback.app.BrowseFragment} allows you to define and display
-  browsable media content categories and media items from a media catalog using adapters and
-  presenters. Adapters enable you to connect to local or online data sources that contain your
-  media catalog information. Presenters hold data about media items and provide layout information
-  for displaying an item on screen.
+  The {@link android.support.v17.leanback.app.BrowseFragment} class allows you
+  to define and display browsable media content categories and media items from
+  a media catalog using adapters and presenters. Adapters enable you to connect
+  to local or online data sources that contain your media catalog information.
+  Adapters use presenters to create views and bind data to those views for
+  displaying an item on screen.
 </p>
 
 <p>
@@ -131,11 +342,12 @@ public class StringPresenter extends Presenter {
 </pre>
 
 <p>
-  Once you have constructed a presenter class for your media items, you can build and attach an
-  adapter to the {@link android.support.v17.leanback.app.BrowseFragment} to display those items on
-  screen for browsing by the user. The following example code demonstrates how to construct an
-  adapter to display categories and items in those categories using the {@code StringPresenter}
-  class shown in the previous code example:
+  Once you have constructed a presenter class for your media items, you can build
+  an adapter and attach it to the {@link android.support.v17.leanback.app.BrowseFragment}
+  to display those items on screen for browsing by the user. The following example
+  code demonstrates how to construct an adapter to display categories and items
+  in those categories using the {@code StringPresenter} class shown in the
+  previous code example:
 </p>
 
 <pre>
@@ -158,7 +370,7 @@ private void buildRowsAdapter() {
         listRowAdapter.add("Media Item 1");
         listRowAdapter.add("Media Item 2");
         listRowAdapter.add("Media Item 3");
-        HeaderItem header = new HeaderItem(i, "Category " + i, null);
+        HeaderItem header = new HeaderItem(i, "Category " + i);
         mRowsAdapter.add(new ListRow(header, listRowAdapter));
     }
 
@@ -170,15 +382,15 @@ private void buildRowsAdapter() {
   This example shows a static implementation of the adapters. A typical media browsing application
   uses data from an online database or web service. For an example of a browsing application that
   uses data retrieved from the web, see the
-  <a href="http://github.com/googlesamples/androidtv-leanback">Android TV</a> sample app.
+  <a href="http://github.com/googlesamples/androidtv-leanback">Android Leanback sample app</a>.
 </p>
 
 <h2 id="background">Update the Background</h2>
 
 <p>
   In order to add visual interest to a media-browsing app on TV, you can update the background
-  image as users browse through content. This technique can make interaction with your app feel
-  more cinematic and enjoyable for users.
+  image as users browse through content. This technique can make interaction with your app more
+  cinematic and enjoyable.
 </p>
 
 <p>
@@ -211,8 +423,8 @@ protected OnItemViewSelectedListener getDefaultItemViewSelectedListener() {
         &#64;Override
         public void onItemSelected(Object item, Row row) {
             if (item instanceof Movie ) {
-                URI uri = ((Movie)item).getBackdropURI();
-                updateBackground(uri);
+                Drawable background = ((Movie)item).getBackdropDrawable();
+                updateBackground(background);
             } else {
                 clearBackground();
             }
