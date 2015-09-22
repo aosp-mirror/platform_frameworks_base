@@ -23,6 +23,7 @@ import android.util.Printer;
 import org.junit.Assert;
 
 import java.io.File;
+import java.util.List;
 
 public class DpmTestUtils {
     private DpmTestUtils() {
@@ -33,6 +34,11 @@ public class DpmTestUtils {
             Assert.assertTrue("failed to delete dir", FileUtils.deleteContents(dir));
         }
         dir.mkdirs();
+        Log.i(DpmTestBase.TAG, "Created " + dir);
+    }
+
+    public static int getListSizeAllowingNull(List<?> list) {
+        return list == null ? 0 : list.size();
     }
 
     public static Printer LOG_PRINTER = new Printer() {

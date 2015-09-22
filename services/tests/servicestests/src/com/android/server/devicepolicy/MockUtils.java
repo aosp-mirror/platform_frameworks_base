@@ -17,6 +17,8 @@ package com.android.server.devicepolicy;
 
 import com.google.common.base.Objects;
 
+import android.content.ComponentName;
+import android.content.Intent;
 import android.os.UserHandle;
 
 import org.hamcrest.BaseMatcher;
@@ -44,4 +46,35 @@ public class MockUtils {
         return Mockito.argThat(m);
     }
 
+    public static Intent checkIntentComponent(final ComponentName component) {
+        final Matcher<Intent> m = new BaseMatcher<Intent>() {
+            @Override
+            public boolean matches(Object item) {
+                if (item == null) return false;
+                return Objects.equal(((Intent) item).getComponent(), component);
+            }
+
+            @Override
+            public void describeTo(Description description) {
+                description.appendText("Intent: component=\"" + component + "\"");
+            }
+        };
+        return Mockito.argThat(m);
+    }
+
+    public static Intent checkIntentAction(final String action) {
+        final Matcher<Intent> m = new BaseMatcher<Intent>() {
+            @Override
+            public boolean matches(Object item) {
+                if (item == null) return false;
+                return Objects.equal(((Intent) item).getAction(), action);
+            }
+
+            @Override
+            public void describeTo(Description description) {
+                description.appendText("Intent: action=\"" + action + "\"");
+            }
+        };
+        return Mockito.argThat(m);
+    }
 }
