@@ -166,7 +166,7 @@ public class SettingsHelper {
                         .putExtra(Intent.EXTRA_SETTING_NAME, name)
                         .putExtra(Intent.EXTRA_SETTING_NEW_VALUE, value)
                         .putExtra(Intent.EXTRA_SETTING_PREVIOUS_VALUE, oldValue);
-                context.sendBroadcastAsUser(intent, UserHandle.OWNER, null);
+                context.sendBroadcastAsUser(intent, UserHandle.SYSTEM, null);
             }
         }
     }

@@ -305,9 +305,8 @@ public class StatusBarManagerService extends IStatusBarService.Stub {
                 throw new SecurityException("invalid status bar icon slot: " + slot);
             }
 
-            StatusBarIcon icon = new StatusBarIcon(iconPackage, UserHandle.OWNER, iconId,
-                    iconLevel, 0,
-                    contentDescription);
+            StatusBarIcon icon = new StatusBarIcon(iconPackage, UserHandle.SYSTEM, iconId,
+                    iconLevel, 0, contentDescription);
             //Slog.d(TAG, "setIcon slot=" + slot + " index=" + index + " icon=" + icon);
             mIcons.setIcon(index, icon);
 

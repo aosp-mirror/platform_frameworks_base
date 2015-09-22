@@ -170,7 +170,7 @@ public final class DropBoxManagerService extends SystemService {
             @Override
             public void handleMessage(Message msg) {
                 if (msg.what == MSG_SEND_BROADCAST) {
-                    getContext().sendBroadcastAsUser((Intent)msg.obj, UserHandle.OWNER,
+                    getContext().sendBroadcastAsUser((Intent)msg.obj, UserHandle.SYSTEM,
                             android.Manifest.permission.READ_LOGS);
                 }
             }
@@ -488,7 +488,7 @@ public final class DropBoxManagerService extends SystemService {
 
     ///////////////////////////////////////////////////////////////////////////
 
-    /** Chronologically sorted list of {@link #EntryFile} */
+    /** Chronologically sorted list of {@link EntryFile} */
     private static final class FileList implements Comparable<FileList> {
         public int blocks = 0;
         public final TreeSet<EntryFile> contents = new TreeSet<EntryFile>();
@@ -613,7 +613,7 @@ public final class DropBoxManagerService extends SystemService {
 
         /**
          * Creates a EntryFile object with only a timestamp for comparison purposes.
-         * @param timestampMillis to compare with.
+         * @param millis to compare with.
          */
         public EntryFile(long millis) {
             this.tag = null;

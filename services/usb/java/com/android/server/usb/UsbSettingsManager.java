@@ -517,7 +517,7 @@ class UsbSettingsManager {
                 com.android.internal.R.bool.config_disableUsbPermissionDialogs);
 
         synchronized (mLock) {
-            if (UserHandle.OWNER.equals(user)) {
+            if (UserHandle.SYSTEM.equals(user)) {
                 upgradeSingleUserLocked();
             }
             readSettingsLocked();

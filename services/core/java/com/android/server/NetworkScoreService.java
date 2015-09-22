@@ -133,8 +133,8 @@ public class NetworkScoreService extends INetworkScoreService.Stub {
                 filter.addDataSchemeSpecificPart(scorer.mPackageName,
                         PatternMatcher.PATTERN_LITERAL);
                 mReceiver = new ScorerChangedReceiver(scorer.mPackageName);
-                // TODO: Need to update when we support per-user scorers.
-                mContext.registerReceiverAsUser(mReceiver, UserHandle.OWNER, filter, null, null);
+                // TODO: Need to update when we support per-user scorers. http://b/23422763
+                mContext.registerReceiverAsUser(mReceiver, UserHandle.SYSTEM, filter, null, null);
                 if (Log.isLoggable(TAG, Log.VERBOSE)) {
                     Log.v(TAG, "Registered receiver for " + scorer.mPackageName);
                 }

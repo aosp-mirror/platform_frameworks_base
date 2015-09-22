@@ -410,7 +410,7 @@ public class RecoverySystem {
 
         Intent intent = new Intent("android.intent.action.MASTER_CLEAR_NOTIFICATION");
         intent.addFlags(Intent.FLAG_RECEIVER_FOREGROUND);
-        context.sendOrderedBroadcastAsUser(intent, UserHandle.OWNER,
+        context.sendOrderedBroadcastAsUser(intent, UserHandle.SYSTEM,
                 android.Manifest.permission.MASTER_CLEAR,
                 new BroadcastReceiver() {
                     @Override

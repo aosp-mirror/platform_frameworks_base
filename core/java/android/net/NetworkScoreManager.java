@@ -245,7 +245,8 @@ public class NetworkScoreManager {
         intent.putExtra(EXTRA_NETWORKS_TO_SCORE, networks);
         // A scorer should never become active if its package doesn't hold SCORE_NETWORKS, but
         // ensure the package still holds it to be extra safe.
-        mContext.sendBroadcastAsUser(intent, UserHandle.OWNER, Manifest.permission.SCORE_NETWORKS);
+        // TODO: http://b/23422763
+        mContext.sendBroadcastAsUser(intent, UserHandle.SYSTEM, Manifest.permission.SCORE_NETWORKS);
         return true;
     }
 

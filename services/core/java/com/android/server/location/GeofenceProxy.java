@@ -94,7 +94,7 @@ public final class GeofenceProxy {
 
     private void bindHardwareGeofence() {
         mContext.bindServiceAsUser(new Intent(mContext, GeofenceHardwareService.class),
-                mServiceConnection, Context.BIND_AUTO_CREATE, UserHandle.OWNER);
+                mServiceConnection, Context.BIND_AUTO_CREATE, UserHandle.SYSTEM);
     }
 
     private ServiceConnection mServiceConnection = new ServiceConnection() {

@@ -1523,13 +1523,13 @@ public class DeviceIdleController extends SystemService
     private void reportPowerSaveWhitelistChangedLocked() {
         Intent intent = new Intent(PowerManager.ACTION_POWER_SAVE_WHITELIST_CHANGED);
         intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY);
-        getContext().sendBroadcastAsUser(intent, UserHandle.OWNER);
+        getContext().sendBroadcastAsUser(intent, UserHandle.SYSTEM);
     }
 
     private void reportTempWhitelistChangedLocked() {
         Intent intent = new Intent(PowerManager.ACTION_POWER_SAVE_TEMP_WHITELIST_CHANGED);
         intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY);
-        getContext().sendBroadcastAsUser(intent, UserHandle.OWNER);
+        getContext().sendBroadcastAsUser(intent, UserHandle.SYSTEM);
     }
 
     void readConfigFileLocked() {

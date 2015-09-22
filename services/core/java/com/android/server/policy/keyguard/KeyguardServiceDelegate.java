@@ -129,7 +129,7 @@ public class KeyguardServiceDelegate {
         intent.setComponent(keyguardComponent);
 
         if (!context.bindServiceAsUser(intent, mKeyguardConnection,
-                Context.BIND_AUTO_CREATE, UserHandle.OWNER)) {
+                Context.BIND_AUTO_CREATE, UserHandle.SYSTEM)) {
             Log.v(TAG, "*** Keyguard: can't bind to " + keyguardComponent);
             mKeyguardState.showing = false;
             mKeyguardState.showingAndNotOccluded = false;

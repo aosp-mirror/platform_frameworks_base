@@ -57,6 +57,7 @@ import android.content.pm.UserInfo;
 import android.content.res.Configuration;
 import android.util.Log;
 
+
 public class ActivityTestMain extends Activity {
     static final String TAG = "ActivityTest";
 
@@ -315,7 +316,7 @@ public class ActivityTestMain extends Activity {
                         Log.i(TAG, "Service disconnected " + name);
                     }
                 };
-                if (bindServiceAsUser(intent, conn, Context.BIND_AUTO_CREATE, UserHandle.OWNER)) {
+                if (bindServiceAsUser(intent, conn, Context.BIND_AUTO_CREATE, UserHandle.SYSTEM)) {
                     mConnections.add(conn);
                 } else {
                     Toast.makeText(ActivityTestMain.this, "Failed to bind",

@@ -2981,7 +2981,7 @@ class MountService extends IMountService.Stub
 
             Intent service = new Intent().setComponent(DEFAULT_CONTAINER_COMPONENT);
             if (mContext.bindServiceAsUser(service, mDefContainerConn, Context.BIND_AUTO_CREATE,
-                    UserHandle.OWNER)) {
+                    UserHandle.SYSTEM)) {
                 mBound = true;
                 return true;
             }
@@ -3014,7 +3014,6 @@ class MountService extends IMountService.Stub
                     Slog.w(TAG, "Failed to invoke remote methods on default container service. Giving up");
                     mObbActionHandler.sendEmptyMessage(OBB_MCS_UNBIND);
                     handleError();
-                    return;
                 } else {
                     handleExecute();
                     if (DEBUG_OBB)
@@ -3175,8 +3174,6 @@ class MountService extends IMountService.Stub
         public void handleExecute() throws IOException {
             waitForReady();
             warnOnNotMounted();
-
-            final ObbInfo obbInfo = getObbInfo();
 
             final ObbState existingState;
             synchronized (mObbMounts) {
