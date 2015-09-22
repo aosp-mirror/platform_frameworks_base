@@ -100,7 +100,8 @@ class DisplayContent {
     Region mTouchExcludeRegion = new Region();
 
     /** Save allocating when calculating rects */
-    Rect mTmpRect = new Rect();
+    private Rect mTmpRect = new Rect();
+    private Rect mTmpRect2 = new Rect();
 
     /** For gathering Task objects in order. */
     final ArrayList<Task> mTmpTaskHistory = new ArrayList<Task>();
@@ -440,6 +441,35 @@ class DisplayContent {
         if (!animating && mDeferredRemoval) {
             mService.onDisplayRemoved(mDisplayId);
         }
+    }
+
+    void rotateBounds(int oldRotation, int newRotation, Rect bounds) {
+        final int rotationDelta = DisplayContent.deltaRotation(oldRotation, newRotation);
+        getLogicalDisplayRect(mTmpRect);
+        switch (rotationDelta) {
+            case Surface.ROTATION_0:
+                mTmpRect2.set(bounds);
+                break;
+            case Surface.ROTATION_90:
+                mTmpRect2.top = mTmpRect.bottom - bounds.right;
+                mTmpRect2.left = bounds.top;
+                mTmpRect2.right = mTmpRect2.left + bounds.height();
+                mTmpRect2.bottom = mTmpRect2.top + bounds.width();
+                break;
+            case Surface.ROTATION_180:
+                mTmpRect2.top = mTmpRect.bottom - bounds.bottom;
+                mTmpRect2.left = mTmpRect.right - bounds.right;
+                mTmpRect2.right = mTmpRect2.left + bounds.width();
+                mTmpRect2.bottom = mTmpRect2.top + bounds.height();
+                break;
+            case Surface.ROTATION_270:
+                mTmpRect2.top = bounds.left;
+                mTmpRect2.left = mTmpRect.right - bounds.bottom;
+                mTmpRect2.right = mTmpRect2.left + bounds.height();
+                mTmpRect2.bottom = mTmpRect2.top + bounds.width();
+                break;
+        }
+        bounds.set(mTmpRect2);
     }
 
     static int deltaRotation(int oldRotation, int newRotation) {
