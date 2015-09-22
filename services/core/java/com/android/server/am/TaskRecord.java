@@ -1235,7 +1235,7 @@ final class TaskRecord {
         if (stack == null
                 || stack.mStackId == HOME_STACK_ID
                 || stack.mStackId == FULLSCREEN_WORKSPACE_STACK_ID) {
-            return null;
+            return (mResizeable && stack != null) ? stack.mBounds : null;
         } else if (stack.mStackId == DOCKED_STACK_ID) {
             return stack.mBounds;
         }

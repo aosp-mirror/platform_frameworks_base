@@ -4632,12 +4632,11 @@ public class WindowManagerService extends IWindowManager.Stub
      * Re-sizes a stack and its containing tasks.
      * @param stackId Id of stack to resize.
      * @param bounds New stack bounds. Passing in null sets the bounds to fullscreen.
-     * @param resizeTasks If true, the tasks within the stack will also be resized.
      * @param configs Configurations for tasks in the resized stack, keyed by task id.
      * @param taskBounds Bounds for tasks in the resized stack, keyed by task id.
      * @return True if the stack is now fullscreen.
      * */
-    public boolean resizeStack(int stackId, Rect bounds, boolean resizeTasks,
+    public boolean resizeStack(int stackId, Rect bounds,
             SparseArray<Configuration> configs, SparseArray<Rect> taskBounds) {
         synchronized (mWindowMap) {
             final TaskStack stack = mStackIdToStack.get(stackId);
@@ -4645,7 +4644,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 throw new IllegalArgumentException("resizeStack: stackId " + stackId
                         + " not found.");
             }
-            if (stack.setBounds(bounds, resizeTasks, configs, taskBounds)) {
+            if (stack.setBounds(bounds, configs, taskBounds)) {
                 stack.resizeWindows();
                 stack.getDisplayContent().layoutNeeded = true;
                 mWindowPlacerLocked.performSurfacePlacement();

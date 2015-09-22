@@ -4564,6 +4564,8 @@ final class ActivityStack {
         addTask(task, toTop, false);
         if (mTaskPositioner != null) {
             mTaskPositioner.updateDefaultBounds(task, mTaskHistory, info.initialLayout);
+        } else if (mBounds != null && task.mResizeable) {
+            task.updateOverrideConfiguration(mBounds);
         }
         return task;
     }
