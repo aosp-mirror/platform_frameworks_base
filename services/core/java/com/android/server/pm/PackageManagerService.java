@@ -2015,7 +2015,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                             int dexoptNeeded = DexFile.getDexOptNeeded(lib, null, dexCodeInstructionSet, false);
                             if (dexoptNeeded != DexFile.NO_DEXOPT_NEEDED) {
                                 alreadyDexOpted.add(lib);
-                                mInstaller.dexopt(lib, Process.SYSTEM_UID, true, dexCodeInstructionSet, dexoptNeeded);
+                                mInstaller.dexopt(lib, Process.SYSTEM_UID, true, dexCodeInstructionSet, dexoptNeeded, false);
                             }
                         } catch (FileNotFoundException e) {
                             Slog.w(TAG, "Library not found: " + lib);
@@ -2063,7 +2063,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                         try {
                             int dexoptNeeded = DexFile.getDexOptNeeded(path, null, dexCodeInstructionSet, false);
                             if (dexoptNeeded != DexFile.NO_DEXOPT_NEEDED) {
-                                mInstaller.dexopt(path, Process.SYSTEM_UID, true, dexCodeInstructionSet, dexoptNeeded);
+                                mInstaller.dexopt(path, Process.SYSTEM_UID, true, dexCodeInstructionSet, dexoptNeeded, false);
                             }
                         } catch (FileNotFoundException e) {
                             Slog.w(TAG, "Jar not found: " + path);
@@ -2292,7 +2292,8 @@ public class PackageManagerService extends IPackageManager.Stub {
                 // the rest of the commands above) because there's precious little we
                 // can do about it. A settings error is reported, though.
                 adjustCpuAbisForSharedUserLPw(setting.packages, null /* scanned package */,
-                        false /* force dexopt */, false /* defer dexopt */);
+                        false /* force dexopt */, false /* defer dexopt */,
+                        false /* boot complete */);
             }
 
             // Now that we know all the packages we are keeping,
@@ -6281,7 +6282,8 @@ public class PackageManagerService extends IPackageManager.Stub {
         PackageParser.Package p = pkg;
         synchronized (mInstallLock) {
             mPackageDexOptimizer.performDexOpt(p, null /* instruction sets */,
-                    false /* force dex */, false /* defer */, true /* include dependencies */);
+                    false /* force dex */, false /* defer */, true /* include dependencies */,
+                    false /* boot complete */);
         }
     }
 
@@ -6340,7 +6342,8 @@ public class PackageManagerService extends IPackageManager.Stub {
             synchronized (mInstallLock) {
                 final String[] instructionSets = new String[] { targetInstructionSet };
                 int result = mPackageDexOptimizer.performDexOpt(p, instructionSets,
-                        false /* forceDex */, false /* defer */, true /* inclDependencies */);
+                        false /* forceDex */, false /* defer */, true /* inclDependencies */,
+                        true /* boot complete */);
                 return result == PackageDexOptimizer.DEX_OPT_PERFORMED;
             }
         } finally {
@@ -6390,7 +6393,8 @@ public class PackageManagerService extends IPackageManager.Stub {
             Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "dexopt");
 
             final int res = mPackageDexOptimizer.performDexOpt(pkg, instructionSets,
-                    true /*forceDex*/, false /* defer */, true /* inclDependencies */);
+                    true /*forceDex*/, false /* defer */, true /* inclDependencies */,
+                    true /* boot complete */);
 
             Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
             if (res != PackageDexOptimizer.DEX_OPT_PERFORMED) {
@@ -7199,14 +7203,15 @@ public class PackageManagerService extends IPackageManager.Stub {
             // we can avoid redundant dexopts, and also to make sure we've got the
             // code and package path correct.
             adjustCpuAbisForSharedUserLPw(pkgSetting.sharedUser.packages,
-                    pkg, forceDex, (scanFlags & SCAN_DEFER_DEX) != 0);
+                    pkg, forceDex, (scanFlags & SCAN_DEFER_DEX) != 0, true /* boot complete */);
         }
 
         if ((scanFlags & SCAN_NO_DEX) == 0) {
             Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "dexopt");
 
             int result = mPackageDexOptimizer.performDexOpt(pkg, null /* instruction sets */,
-                    forceDex, (scanFlags & SCAN_DEFER_DEX) != 0, false /* inclDependencies */);
+                    forceDex, (scanFlags & SCAN_DEFER_DEX) != 0, false /* inclDependencies */,
+                    (scanFlags & SCAN_BOOTING) == 0);
 
             Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
             if (result == PackageDexOptimizer.DEX_OPT_FAILED) {
@@ -7286,7 +7291,8 @@ public class PackageManagerService extends IPackageManager.Stub {
                         PackageParser.Package clientPkg = clientLibPkgs.get(i);
                         int result = mPackageDexOptimizer.performDexOpt(clientPkg,
                                 null /* instruction sets */, forceDex,
-                                (scanFlags & SCAN_DEFER_DEX) != 0, false);
+                                (scanFlags & SCAN_DEFER_DEX) != 0, false,
+                                (scanFlags & SCAN_BOOTING) == 0);
                         if (result == PackageDexOptimizer.DEX_OPT_FAILED) {
                             throw new PackageManagerException(INSTALL_FAILED_DEXOPT,
                                     "scanPackageLI failed to dexopt clientLibPkgs");
@@ -7842,7 +7848,8 @@ public class PackageManagerService extends IPackageManager.Stub {
      * adds unnecessary complexity.
      */
     private void adjustCpuAbisForSharedUserLPw(Set<PackageSetting> packagesForUser,
-            PackageParser.Package scannedPackage, boolean forceDexOpt, boolean deferDexOpt) {
+            PackageParser.Package scannedPackage, boolean forceDexOpt, boolean deferDexOpt,
+            boolean bootComplete) {
         String requiredInstructionSet = null;
         if (scannedPackage != null && scannedPackage.applicationInfo.primaryCpuAbi != null) {
             requiredInstructionSet = VMRuntime.getInstructionSet(
@@ -7908,7 +7915,8 @@ public class PackageManagerService extends IPackageManager.Stub {
                         Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "dexopt");
 
                         int result = mPackageDexOptimizer.performDexOpt(ps.pkg,
-                                null /* instruction sets */, forceDexOpt, deferDexOpt, true);
+                                null /* instruction sets */, forceDexOpt, deferDexOpt, true,
+                                bootComplete);
 
                         Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
                         if (result == PackageDexOptimizer.DEX_OPT_FAILED) {
@@ -12598,7 +12606,8 @@ public class PackageManagerService extends IPackageManager.Stub {
 
             int result = mPackageDexOptimizer
                     .performDexOpt(pkg, null /* instruction sets */, false /* forceDex */,
-                            false /* defer */, false /* inclDependencies */);
+                            false /* defer */, false /* inclDependencies */,
+                            true /* boot complete */);
 
             Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
             if (result == PackageDexOptimizer.DEX_OPT_FAILED) {
