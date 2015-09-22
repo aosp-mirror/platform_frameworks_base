@@ -118,19 +118,14 @@ public class TaskStack implements DimLayer.DimLayerUser {
     /**
      * Set the bounds of the stack and its containing tasks.
      * @param stackBounds New stack bounds. Passing in null sets the bounds to fullscreen.
-     * @param resizeTasks If true, the tasks within the stack will also be resized.
      * @param configs Configuration for individual tasks, keyed by task id.
      * @param taskBounds Bounds for individual tasks, keyed by task id.
      * @return True if the stack bounds was changed.
      * */
-    boolean setBounds(Rect stackBounds, boolean resizeTasks, SparseArray<Configuration> configs,
-            SparseArray<Rect> taskBounds) {
+    boolean setBounds(
+            Rect stackBounds, SparseArray<Configuration> configs, SparseArray<Rect> taskBounds) {
         if (!setBounds(stackBounds)) {
             return false;
-        }
-
-        if (!resizeTasks) {
-            return true;
         }
 
         // Update bounds of containing tasks.
@@ -139,9 +134,6 @@ public class TaskStack implements DimLayer.DimLayerUser {
             Configuration config = configs.get(task.mTaskId);
             if (config != null) {
                 Rect bounds = taskBounds.get(task.mTaskId);
-                if (bounds == null) {
-                    bounds = stackBounds;
-                }
                 task.setBounds(bounds, config);
             } else {
                 Slog.wtf(TAG, "No config for task: " + task + ", is there a mismatch with AM?");

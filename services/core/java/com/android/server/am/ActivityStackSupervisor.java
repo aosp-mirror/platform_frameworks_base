@@ -2971,31 +2971,29 @@ public final class ActivityStackSupervisor implements DisplayListener {
         }
 
         ActivityRecord r = stack.topRunningActivityLocked(null);
-        final boolean resizeTasks = r != null && r.task.mResizeable;
 
         mTmpBounds.clear();
         mTmpConfigs.clear();
-        if (resizeTasks) {
-            ArrayList<TaskRecord> tasks = stack.getAllTasks();
-            for (int i = tasks.size() - 1; i >= 0; i--) {
-                TaskRecord task = tasks.get(i);
+        ArrayList<TaskRecord> tasks = stack.getAllTasks();
+        for (int i = tasks.size() - 1; i >= 0; i--) {
+            TaskRecord task = tasks.get(i);
+            if (task.mResizeable) {
                 if (stack.mStackId == FREEFORM_WORKSPACE_STACK_ID) {
-                    // For freeform stack we don't adjust the size of the tasks to match that of
-                    // the stack, but we do try to make sure the tasks are still contained with the
-                    // bounds of the stack.
+                    // For freeform stack we don't adjust the size of the tasks to match that
+                    // of the stack, but we do try to make sure the tasks are still contained
+                    // with the bounds of the stack.
                     tempRect2.set(task.mBounds);
                     fitWithinBounds(tempRect2, bounds);
                     task.updateOverrideConfiguration(tempRect2);
                 } else {
                     task.updateOverrideConfiguration(bounds);
                 }
-
-                mTmpConfigs.put(task.taskId, task.mOverrideConfig);
-                mTmpBounds.put(task.taskId, task.mBounds);
             }
+
+            mTmpConfigs.put(task.taskId, task.mOverrideConfig);
+            mTmpBounds.put(task.taskId, task.mBounds);
         }
-        stack.mFullscreen = mWindowManager.resizeStack(stackId, bounds, resizeTasks, mTmpConfigs,
-                mTmpBounds);
+        stack.mFullscreen = mWindowManager.resizeStack(stackId, bounds, mTmpConfigs, mTmpBounds);
         if (stack.mStackId == DOCKED_STACK_ID) {
             // Dock stack funness...Yay!
             if (stack.mFullscreen) {
@@ -3008,7 +3006,6 @@ public final class ActivityStackSupervisor implements DisplayListener {
                     }
                 }
 
-                final ArrayList<TaskRecord> tasks = stack.getAllTasks();
                 final int count = tasks.size();
                 for (int i = 0; i < count; i++) {
                     moveTaskToStackLocked(tasks.get(i).taskId,
