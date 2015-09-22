@@ -41,6 +41,14 @@
         android:orientation="vertical"
         android:animateLayoutChanges="true">
 
+        <ProgressBar
+            android:id="@+id/progressbar"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:indeterminate="true"
+            style="@style/TrimmedHorizontalProgressBar"
+            android:visibility="gone"/>
+
         <FrameLayout
             android:id="@+id/container_message_bar"
             android:layout_width="match_parent"
@@ -48,12 +56,12 @@
             android:elevation="8dp"
             android:background="@color/material_grey_50"
             android:visibility="gone"/>
-      
+
         <!-- This FrameLayout works around b/24189541 -->
         <FrameLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent">
-          
+
             <android.support.v7.widget.RecyclerView
                 android:id="@+id/recyclerView"
                 android:scrollbars="vertical"
@@ -67,9 +75,9 @@
                 android:scrollbarStyle="outsideOverlay"
                 android:drawSelectorOnTop="true"
                 android:background="@color/directory_background" />
-            
+
         </FrameLayout>
-        
+
     </LinearLayout>
 
 </com.android.documentsui.DirectoryView>

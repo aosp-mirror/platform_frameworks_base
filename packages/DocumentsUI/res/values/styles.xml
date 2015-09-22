@@ -77,14 +77,20 @@
         <item name="android:colorPrimaryDark">@color/platform_blue_700</item>
         <item name="android:colorPrimary">@color/platform_blue_500</item>
         <item name="android:colorAccent">@color/platform_blue_700</item>
+        <item name="colorControlActivated">@color/platform_blue_a100</item>
         <item name="android:actionModeStyle">@style/FilesActionModeStyle</item>
         <item name="colorActionMode">@color/platform_blue_700</item>
-
         <item name="android:alertDialogTheme">@style/AlertDialogTheme</item>
     </style>
 
     <style name="FilesActionModeStyle" parent="@android:style/Widget.Material.Light.ActionMode">
         <item name="android:background">@color/platform_blue_100</item>
     </style>
-    
+
+    <style name="TrimmedHorizontalProgressBar" parent="android:Widget.Material.ProgressBar.Horizontal">
+        <item name="android:indeterminateDrawable">@drawable/progress_indeterminate_horizontal_material_trimmed</item>
+        <item name="android:minHeight">3dp</item>
+        <item name="android:maxHeight">3dp</item>    
+    </style>
+
 </resources>

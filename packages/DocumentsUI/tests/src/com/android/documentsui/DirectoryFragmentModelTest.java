@@ -22,9 +22,12 @@ import android.content.ContextWrapper;
 import android.database.Cursor;
 import android.database.MatrixCursor;
 import android.provider.DocumentsContract.Document;
+import android.support.v7.widget.RecyclerView.ViewHolder;
+import android.support.v7.widget.RecyclerView;
 import android.test.AndroidTestCase;
 import android.test.MoreAsserts;
 import android.test.mock.MockContentResolver;
+import android.view.ViewGroup;
 
 import com.android.documentsui.DirectoryFragment.Model;
 import com.android.documentsui.MultiSelectManager.Selection;
@@ -57,7 +60,8 @@ public class DirectoryFragmentModelTest extends AndroidTestCase {
         DirectoryResult r = new DirectoryResult();
         r.cursor = cursor;
 
-        model = new Model(mContext, null);
+        // Instantiate the model with a dummy view adapter and listener that (for now) do nothing.
+        model = new Model(mContext, null, new DummyAdapter());
         model.addUpdateListener(new DummyListener());
         model.update(r);
     }
@@ -160,11 +164,16 @@ public class DirectoryFragmentModelTest extends AndroidTestCase {
         return model.getDocuments(sel);
     }
 
-    private static class DummyListener implements Model.UpdateListener {
+    private static class DummyListener extends Model.UpdateListener {
         public void onModelUpdate(Model model) {}
         public void onModelUpdateFailed(Exception e) {}
-        public void notifyItemRemoved(int position) {}
-        public void notifyItemInserted(int position) {}
     }
 
+    private static class DummyAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
+        public int getItemCount() { return 0; }
+        public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {}
+        public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+            return null;
+        }
+    }
 }

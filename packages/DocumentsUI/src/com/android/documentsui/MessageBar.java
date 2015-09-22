@@ -69,7 +69,7 @@ public class MessageBar extends Fragment {
      * message bar layout will be adjusted accordingly.
      */
     public void setError(@Nullable String error) {
-        View errorView = mView.findViewById(R.id.container_message_bar);
+        View errorView = mView.findViewById(R.id.container_error);
         if (error != null) {
             TextView errorText = (TextView) mView.findViewById(R.id.textview_error);
             errorText.setText(error);
