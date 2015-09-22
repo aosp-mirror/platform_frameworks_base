@@ -22,7 +22,9 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.res.Configuration;
+import android.os.Process;
 import android.os.SystemProperties;
+import android.os.UserHandle;
 import android.util.Log;
 
 import java.util.HashMap;
@@ -51,12 +53,20 @@ public class SystemUIApplication extends Application {
     };
 
     /**
+     * The classes of the stuff to start for each user.  This is a subset of the services listed
+     * above.
+     */
+    private final Class<?>[] SERVICES_PER_USER = new Class[] {
+            com.android.systemui.recents.Recents.class
+    };
+
+    /**
      * Hold a reference on the stuff we start.
      */
     private final SystemUI[] mServices = new SystemUI[SERVICES.length];
     private boolean mServicesStarted;
     private boolean mBootCompleted;
-    private final Map<Class<?>, Object> mComponents = new HashMap<Class<?>, Object>();
+    private final Map<Class<?>, Object> mComponents = new HashMap<>();
 
     @Override
     public void onCreate() {
@@ -66,24 +76,32 @@ public class SystemUIApplication extends Application {
         // the theme set there.
         setTheme(R.style.systemui_theme);
 
-        IntentFilter filter = new IntentFilter(Intent.ACTION_BOOT_COMPLETED);
-        filter.setPriority(IntentFilter.SYSTEM_HIGH_PRIORITY);
-        registerReceiver(new BroadcastReceiver() {
-            @Override
-            public void onReceive(Context context, Intent intent) {
-                if (mBootCompleted) return;
+        if (Process.myUserHandle().equals(UserHandle.SYSTEM)) {
+            IntentFilter filter = new IntentFilter(Intent.ACTION_BOOT_COMPLETED);
+            filter.setPriority(IntentFilter.SYSTEM_HIGH_PRIORITY);
+            registerReceiver(new BroadcastReceiver() {
+                @Override
+                public void onReceive(Context context, Intent intent) {
+                    if (mBootCompleted) return;
 
-                if (DEBUG) Log.v(TAG, "BOOT_COMPLETED received");
-                unregisterReceiver(this);
-                mBootCompleted = true;
-                if (mServicesStarted) {
-                    final int N = mServices.length;
-                    for (int i = 0; i < N; i++) {
-                        mServices[i].onBootCompleted();
+                    if (DEBUG) Log.v(TAG, "BOOT_COMPLETED received");
+                    unregisterReceiver(this);
+                    mBootCompleted = true;
+                    if (mServicesStarted) {
+                        final int N = mServices.length;
+                        for (int i = 0; i < N; i++) {
+                            mServices[i].onBootCompleted();
+                        }
                     }
                 }
-            }
-        }, filter);
+            }, filter);
+        } else {
+            // For a secondary user, boot-completed will never be called because it has already
+            // been broadcasted on startup for the primary SystemUI process.  Instead, for
+            // components which require the SystemUI component to be initialized per-user, we
+            // start those components now for the current non-system user.
+            startServicesIfNeeded(SERVICES_PER_USER);
+        }
     }
 
     /**
@@ -94,6 +112,10 @@ public class SystemUIApplication extends Application {
      * <p>This method must only be called from the main thread.</p>
      */
     public void startServicesIfNeeded() {
+        startServicesIfNeeded(SERVICES);
+    }
+
+    private void startServicesIfNeeded(Class<?>[] services) {
         if (mServicesStarted) {
             return;
         }
@@ -107,13 +129,14 @@ public class SystemUIApplication extends Application {
             }
         }
 
-        Log.v(TAG, "Starting SystemUI services.");
-        final int N = SERVICES.length;
+        Log.v(TAG, "Starting SystemUI services for user " +
+                Process.myUserHandle().getIdentifier() + ".");
+        final int N = services.length;
         for (int i=0; i<N; i++) {
-            Class<?> cl = SERVICES[i];
+            Class<?> cl = services[i];
             if (DEBUG) Log.d(TAG, "loading: " + cl);
             try {
-                mServices[i] = (SystemUI)cl.newInstance();
+                mServices[i] = (SystemUI) cl.newInstance();
             } catch (IllegalAccessException ex) {
                 throw new RuntimeException(ex);
             } catch (InstantiationException ex) {
