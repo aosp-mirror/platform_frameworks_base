@@ -17,6 +17,7 @@
 package com.android.server.am;
 
 import static com.android.server.am.ActivityManagerDebugConfig.*;
+import static com.android.server.am.ActivityStackSupervisor.PRESERVE_WINDOWS;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -347,7 +348,7 @@ public final class CompatModePackages {
                 stack.ensureActivityConfigurationLocked(starting, 0, false);
                 // And we need to make sure at this point that all other activities
                 // are made visible with the correct configuration.
-                stack.ensureActivitiesVisibleLocked(starting, 0);
+                stack.ensureActivitiesVisibleLocked(starting, 0, !PRESERVE_WINDOWS);
             }
         }
     }

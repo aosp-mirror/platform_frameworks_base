@@ -30,6 +30,7 @@ import static com.android.server.am.ActivityRecord.HOME_ACTIVITY_TYPE;
 import static com.android.server.am.ActivityRecord.APPLICATION_ACTIVITY_TYPE;
 
 import static com.android.server.am.ActivityStackSupervisor.MOVING;
+import static com.android.server.am.ActivityStackSupervisor.PRESERVE_WINDOWS;
 
 import android.graphics.Rect;
 import android.util.ArraySet;
@@ -815,7 +816,7 @@ final class ActivityStack {
     }
 
     void goToSleep() {
-        ensureActivitiesVisibleLocked(null, 0);
+        ensureActivitiesVisibleLocked(null, 0, !PRESERVE_WINDOWS);
 
         // Make sure any stopped but visible activities are now sleeping.
         // This ensures that the activity's onStop() is called.
@@ -1379,7 +1380,8 @@ final class ActivityStack {
      * Make sure that all activities that need to be visible (that is, they
      * currently can be seen by the user) actually are.
      */
-    final void ensureActivitiesVisibleLocked(ActivityRecord starting, int configChanges) {
+    final void ensureActivitiesVisibleLocked(ActivityRecord starting, int configChanges,
+            boolean preserveWindows) {
         ActivityRecord top = topRunningActivityLocked(null);
         if (top == null) {
             return;
@@ -1428,7 +1430,7 @@ final class ActivityStack {
                     // First: if this is not the current activity being started, make
                     // sure it matches the current configuration.
                     if (r != starting) {
-                        ensureActivityConfigurationLocked(r, 0, false);
+                        ensureActivityConfigurationLocked(r, 0, preserveWindows);
                     }
 
                     if (r.app == null || r.app.thread == null) {
@@ -2342,7 +2344,7 @@ final class ActivityStack {
                 // Don't do a starting window for mLaunchTaskBehind. More importantly make sure we
                 // tell WindowManager that r is visible even though it is at the back of the stack.
                 mWindowManager.setAppVisibility(r.appToken, true);
-                ensureActivitiesVisibleLocked(null, 0);
+                ensureActivitiesVisibleLocked(null, 0, !PRESERVE_WINDOWS);
             } else if (SHOW_APP_STARTING_PREVIEW && doShow) {
                 // Figure out if we are transitioning from another activity that is
                 // "has the same starting icon" as the next one.  This allows the
@@ -4023,6 +4025,11 @@ final class ActivityStack {
                     "Configuration no differences in " + r);
             return true;
         }
+
+        if (DEBUG_SWITCH || DEBUG_CONFIGURATION) Slog.v(TAG_CONFIGURATION,
+                "Configuration changes for " + r + " ; taskChanges="
+                        + Configuration.configurationDiffToString(taskChanges) + ", allChanges="
+                        + Configuration.configurationDiffToString(changes));
 
         // If the activity isn't currently running, just leave the new
         // configuration and it will pick that up next time it starts.
