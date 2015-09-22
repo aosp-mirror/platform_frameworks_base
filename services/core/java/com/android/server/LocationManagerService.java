@@ -211,8 +211,8 @@ public class LocationManagerService extends ILocationManager.Stub {
             new ArrayList<LocationProviderProxy>();
 
     // current active user on the device - other users are denied location data
-    private int mCurrentUserId = UserHandle.USER_OWNER;
-    private int[] mCurrentUserProfiles = new int[] { UserHandle.USER_OWNER };
+    private int mCurrentUserId = UserHandle.USER_SYSTEM;
+    private int[] mCurrentUserProfiles = new int[] { UserHandle.USER_SYSTEM };
 
     public LocationManagerService(Context context) {
         super();
@@ -1832,7 +1832,8 @@ public class LocationManagerService extends ILocationManager.Stub {
 
         // geo-fence manager uses the public location API, need to clear identity
         int uid = Binder.getCallingUid();
-        if (UserHandle.getUserId(uid) != UserHandle.USER_OWNER) {
+        // TODO: http://b/23822629
+        if (UserHandle.getUserId(uid) != UserHandle.USER_SYSTEM) {
             // temporary measure until geofences work for secondary users
             Log.w(TAG, "proximity alerts are currently available only to the primary user");
             return;

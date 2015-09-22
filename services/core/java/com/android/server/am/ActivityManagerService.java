@@ -2021,7 +2021,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                                 intent, PendingIntent.FLAG_CANCEL_CURRENT, null,
                                 new UserHandle(userId)))
                         .setDeleteIntent(PendingIntent.getBroadcastAsUser(mContext, 0,
-                                deleteIntent, 0, UserHandle.OWNER))
+                                deleteIntent, 0, UserHandle.SYSTEM))
                         .build();
 
                 try {
@@ -2379,8 +2379,8 @@ public final class ActivityManagerService extends ActivityManagerNative
         mGrantFile = new AtomicFile(new File(systemDir, "urigrants.xml"));
 
         // User 0 is the first and only user that runs at boot.
-        mStartedUsers.put(UserHandle.USER_OWNER, new UserState(UserHandle.OWNER, true));
-        mUserLru.add(UserHandle.USER_OWNER);
+        mStartedUsers.put(UserHandle.USER_SYSTEM, new UserState(UserHandle.SYSTEM, true));
+        mUserLru.add(UserHandle.USER_SYSTEM);
         updateStartedUserArrayLocked();
 
         GL_ES_VERSION = SystemProperties.getInt("ro.opengles.version",
@@ -5647,7 +5647,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                 try {
                     // Entire package setting changed
                     enabled = pm.getApplicationEnabledSetting(packageName,
-                            (userId != UserHandle.USER_ALL) ? userId : UserHandle.USER_OWNER);
+                            (userId != UserHandle.USER_ALL) ? userId : UserHandle.USER_SYSTEM);
                 } catch (Exception e) {
                     // No such package/component; probably racing with uninstall.  In any
                     // event it means we have nothing further to do here.
@@ -5665,7 +5665,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                 try {
                     enabled = pm.getComponentEnabledSetting(
                             new ComponentName(packageName, changedClass),
-                            (userId != UserHandle.USER_ALL) ? userId : UserHandle.USER_OWNER);
+                            (userId != UserHandle.USER_ALL) ? userId : UserHandle.USER_SYSTEM);
                 } catch (Exception e) {
                     // As above, probably racing with uninstall.
                     return;
@@ -9392,7 +9392,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                     (ProviderInfo)providers.get(i);
                 boolean singleton = isSingleton(cpi.processName, cpi.applicationInfo,
                         cpi.name, cpi.flags);
-                if (singleton && UserHandle.getUserId(app.uid) != UserHandle.USER_OWNER) {
+                if (singleton && UserHandle.getUserId(app.uid) != UserHandle.USER_SYSTEM) {
                     // This is a singleton provider, but a user besides the
                     // default user is asking to initialize a process it runs
                     // in...  well, no, it doesn't actually run in this process,
@@ -9614,7 +9614,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         }
     }
 
-    private final ContentProviderHolder getContentProviderImpl(IApplicationThread caller,
+    private ContentProviderHolder getContentProviderImpl(IApplicationThread caller,
             String name, IBinder token, boolean stable, int userId) {
         ContentProviderRecord cpr;
         ContentProviderConnection conn = null;
@@ -9642,14 +9642,14 @@ public final class ActivityManagerService extends ActivityManagerNative
             cpr = mProviderMap.getProviderByName(name, userId);
             // If that didn't work, check if it exists for user 0 and then
             // verify that it's a singleton provider before using it.
-            if (cpr == null && userId != UserHandle.USER_OWNER) {
-                cpr = mProviderMap.getProviderByName(name, UserHandle.USER_OWNER);
+            if (cpr == null && userId != UserHandle.USER_SYSTEM) {
+                cpr = mProviderMap.getProviderByName(name, UserHandle.USER_SYSTEM);
                 if (cpr != null) {
                     cpi = cpr.info;
                     if (isSingleton(cpi.processName, cpi.applicationInfo,
                             cpi.name, cpi.flags)
                             && isValidSingletonCall(r.uid, cpi.applicationInfo.uid)) {
-                        userId = UserHandle.USER_OWNER;
+                        userId = UserHandle.USER_SYSTEM;
                         checkCrossUser = false;
                     } else {
                         cpr = null;
@@ -9742,7 +9742,6 @@ public final class ActivityManagerService extends ActivityManagerNative
                 Binder.restoreCallingIdentity(origId);
             }
 
-            boolean singleton;
             if (!providerRunning) {
                 try {
                     checkTime(startTime, "getContentProviderImpl: before resolveContentProvider");
@@ -9759,11 +9758,11 @@ public final class ActivityManagerService extends ActivityManagerNative
                 // (it's a call within the same user || the provider is a
                 // privileged app)
                 // Then allow connecting to the singleton provider
-                singleton = isSingleton(cpi.processName, cpi.applicationInfo,
+                boolean singleton = isSingleton(cpi.processName, cpi.applicationInfo,
                         cpi.name, cpi.flags)
                         && isValidSingletonCall(r.uid, cpi.applicationInfo.uid);
                 if (singleton) {
-                    userId = UserHandle.USER_OWNER;
+                    userId = UserHandle.USER_SYSTEM;
                 }
                 cpi.applicationInfo = getAppInfoForUser(cpi.applicationInfo, userId);
                 checkTime(startTime, "getContentProviderImpl: got app info for user");
@@ -10366,7 +10365,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         }
         final ProcessRecord r = new ProcessRecord(stats, info, proc, uid);
         if (!mBooted && !mBooting
-                && userId == UserHandle.USER_OWNER
+                && userId == UserHandle.USER_SYSTEM
                 && (info.flags & PERSISTENT_MASK) == PERSISTENT_MASK) {
             r.persistent = true;
         }
@@ -11823,12 +11822,12 @@ public final class ActivityManagerService extends ActivityManagerNative
     }
 
     private boolean deliverPreBootCompleted(final Runnable onFinishCallback,
-            ArrayList<ComponentName> doneReceivers, int userId) {
+            ArrayList<ComponentName> doneReceivers) {
         Intent intent = new Intent(Intent.ACTION_PRE_BOOT_COMPLETED);
         List<ResolveInfo> ris = null;
         try {
             ris = AppGlobals.getPackageManager().queryIntentReceivers(
-                    intent, null, 0, userId);
+                    intent, null, 0, UserHandle.USER_SYSTEM);
         } catch (RemoteException e) {
         }
         if (ris == null) {
@@ -11842,22 +11841,18 @@ public final class ActivityManagerService extends ActivityManagerNative
         }
         intent.addFlags(Intent.FLAG_RECEIVER_BOOT_UPGRADE);
 
-        // For User 0, load the version number. When delivering to a new user, deliver
-        // to all receivers.
-        if (userId == UserHandle.USER_OWNER) {
-            ArrayList<ComponentName> lastDoneReceivers = readLastDonePreBootReceivers();
-            for (int i=0; i<ris.size(); i++) {
-                ActivityInfo ai = ris.get(i).activityInfo;
-                ComponentName comp = new ComponentName(ai.packageName, ai.name);
-                if (lastDoneReceivers.contains(comp)) {
-                    // We already did the pre boot receiver for this app with the current
-                    // platform version, so don't do it again...
-                    ris.remove(i);
-                    i--;
-                    // ...however, do keep it as one that has been done, so we don't
-                    // forget about it when rewriting the file of last done receivers.
-                    doneReceivers.add(comp);
-                }
+        ArrayList<ComponentName> lastDoneReceivers = readLastDonePreBootReceivers();
+        for (int i=0; i<ris.size(); i++) {
+            ActivityInfo ai = ris.get(i).activityInfo;
+            ComponentName comp = new ComponentName(ai.packageName, ai.name);
+            if (lastDoneReceivers.contains(comp)) {
+                // We already did the pre boot receiver for this app with the current
+                // platform version, so don't do it again...
+                ris.remove(i);
+                i--;
+                // ...however, do keep it as one that has been done, so we don't
+                // forget about it when rewriting the file of last done receivers.
+                doneReceivers.add(comp);
             }
         }
 
@@ -11865,9 +11860,8 @@ public final class ActivityManagerService extends ActivityManagerNative
             return false;
         }
 
-        // If primary user, send broadcast to all available users, else just to userId
-        final int[] users = userId == UserHandle.USER_OWNER ? getUsersLocked()
-                : new int[] { userId };
+        // TODO: can we still do this with per user encryption?
+        final int[] users = getUsersLocked();
         if (users.length <= 0) {
             return false;
         }
@@ -11918,7 +11912,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                         writeLastDonePreBootReceivers(doneReceivers);
                         systemReady(goingCallback);
                     }
-                }, doneReceivers, UserHandle.USER_OWNER);
+                }, doneReceivers);
 
                 if (mWaitingUpdate) {
                     return;
@@ -20172,7 +20166,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                 }
 
                 if ((userInfo.flags&UserInfo.FLAG_INITIALIZED) == 0) {
-                    if (userId != UserHandle.USER_OWNER) {
+                    if (userId != UserHandle.USER_SYSTEM) {
                         Intent intent = new Intent(Intent.ACTION_USER_INITIALIZE);
                         intent.addFlags(Intent.FLAG_RECEIVER_FOREGROUND);
                         broadcastIntentLocked(null, null, intent, null,
@@ -20410,7 +20404,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             for (int i = 0; i < num; i++) {
                 Integer oldUserId = mUserLru.get(i);
                 UserState oldUss = mStartedUsers.get(oldUserId);
-                if (oldUserId == UserHandle.USER_OWNER || oldUserId == mCurrentUserId
+                if (oldUserId == UserHandle.USER_SYSTEM || oldUserId == mCurrentUserId
                         || oldUss.mState == UserState.STATE_STOPPING
                         || oldUss.mState == UserState.STATE_SHUTDOWN) {
                     continue;
@@ -20495,8 +20489,12 @@ public final class ActivityManagerService extends ActivityManagerNative
                     i++;
                     continue;
                 }
-                if (oldUserId == UserHandle.USER_OWNER || oldUserId == mCurrentUserId) {
-                    // Owner and current can't be stopped, but count as running.
+                if (oldUserId == UserHandle.USER_SYSTEM || oldUserId == mCurrentUserId) {
+                    // Owner/System user and current user can't be stopped. We count it as running
+                    // when it is not a pure system user.
+                    if (UserInfo.isSystemOnly(oldUserId)) {
+                        num--;
+                    }
                     i++;
                     continue;
                 }
@@ -20519,8 +20517,8 @@ public final class ActivityManagerService extends ActivityManagerNative
             Slog.w(TAG, msg);
             throw new SecurityException(msg);
         }
-        if (userId < 0 || userId == UserHandle.USER_OWNER) {
-            throw new IllegalArgumentException("Can't stop primary user " + userId);
+        if (userId < 0 || userId == UserHandle.USER_SYSTEM) {
+            throw new IllegalArgumentException("Can't stop system user " + userId);
         }
         enforceShellRestriction(UserManager.DISALLOW_DEBUGGING_FEATURES, userId);
         synchronized (this) {
