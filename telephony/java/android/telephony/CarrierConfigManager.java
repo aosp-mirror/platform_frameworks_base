@@ -304,6 +304,31 @@ public class CarrierConfigManager {
             "carrier_instant_lettering_escaped_chars_string";
 
     /**
+     * When IMS instant lettering is available for a carrier (see
+     * {@link #KEY_CARRIER_INSTANT_LETTERING_AVAILABLE_BOOL}), determines the character encoding
+     * which will be used when determining the length of messages.  Used in the InCall UI to limit
+     * the number of characters the user may type.  If empty-string, the instant lettering
+     * message size limit will be enforced on a 1:1 basis.  That is, each character will count
+     * towards the messages size limit as a single bye.  If a character encoding is specified, the
+     * message size limit will be based on the number of bytes in the message per the specified
+     * encoding.
+     * @hide
+     */
+    public static final String KEY_CARRIER_INSTANT_LETTERING_ENCODING_STRING =
+            "carrier_instant_lettering_encoding_string";
+
+    /**
+     * When IMS instant lettering is available for a carrier (see
+     * {@link #KEY_CARRIER_INSTANT_LETTERING_AVAILABLE_BOOL}), the length limit for messages.  Used
+     * in the InCall UI to ensure the user cannot enter more characters than allowed by the carrier.
+     * See also {@link #KEY_CARRIER_INSTANT_LETTERING_ENCODING_STRING} for more information on how
+     * the length of the message is calculated.
+     * @hide
+     */
+    public static final String KEY_CARRIER_INSTANT_LETTERING_LENGTH_LIMIT_INT =
+            "carrier_instant_lettering_length_limit_int";
+
+    /**
      * If Voice Radio Technology is RIL_RADIO_TECHNOLOGY_LTE:14 or RIL_RADIO_TECHNOLOGY_UNKNOWN:0
      * this is the value that should be used instead. A configuration value of
      * RIL_RADIO_TECHNOLOGY_UNKNOWN:0 means there is no replacement value and that the default
@@ -508,6 +533,8 @@ public class CarrierConfigManager {
         sDefaults.putBoolean(KEY_CARRIER_USE_IMS_FIRST_FOR_EMERGENCY_BOOL, true);
         sDefaults.putString(KEY_CARRIER_INSTANT_LETTERING_INVALID_CHARS_STRING, "");
         sDefaults.putString(KEY_CARRIER_INSTANT_LETTERING_ESCAPED_CHARS_STRING, "");
+        sDefaults.putString(KEY_CARRIER_INSTANT_LETTERING_ENCODING_STRING, "");
+        sDefaults.putInt(KEY_CARRIER_INSTANT_LETTERING_LENGTH_LIMIT_INT, 64);
         sDefaults.putBoolean(KEY_DISABLE_CDMA_ACTIVATION_CODE_BOOL, false);
         sDefaults.putBoolean(KEY_DTMF_TYPE_ENABLED_BOOL, false);
         sDefaults.putBoolean(KEY_ENABLE_DIALER_KEY_VIBRATION_BOOL, true);
