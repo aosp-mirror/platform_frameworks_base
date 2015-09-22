@@ -17,6 +17,9 @@
 package android.widget;
 
 import static android.widget.espresso.TextViewActions.clickOnTextAtIndex;
+import static android.widget.espresso.TextViewActions.doubleTapAndDragOnText;
+import static android.widget.espresso.TextViewActions.longPressAndDragOnText;
+import static android.widget.espresso.TextViewAssertions.hasSelection;
 import static android.support.test.espresso.Espresso.onView;
 import static android.support.test.espresso.action.ViewActions.click;
 import static android.support.test.espresso.action.ViewActions.pressKey;
@@ -62,5 +65,29 @@ public class TextViewActivityTest extends ActivityInstrumentationTestCase2<TextV
         // Delete text at specified index and see if we got the right one.
         onView(withId(R.id.textview)).perform(pressKey(KeyEvent.KEYCODE_FORWARD_DEL));
         onView(withId(R.id.textview)).check(matches(withText("Hello orld!")));
+    }
+
+    @SmallTest
+    public void testLongPressAndDragToSelect() throws Exception {
+        getActivity();
+
+        final String helloWorld = "Hello little handsome boy!";
+        onView(withId(R.id.textview)).perform(typeTextIntoFocusedView(helloWorld));
+        onView(withId(R.id.textview)).perform(
+                longPressAndDragOnText(helloWorld.indexOf("little"), helloWorld.indexOf(" boy!")));
+
+        onView(withId(R.id.textview)).check(hasSelection("little handsome"));
+    }
+
+    @SmallTest
+    public void testDoubleTapAndDragToSelect() throws Exception {
+        getActivity();
+
+        final String helloWorld = "Hello young beautiful girl!";
+        onView(withId(R.id.textview)).perform(typeTextIntoFocusedView(helloWorld));
+        onView(withId(R.id.textview)).perform(
+                doubleTapAndDragOnText(helloWorld.indexOf("young"), helloWorld.indexOf(" girl!")));
+
+        onView(withId(R.id.textview)).check(hasSelection("young beautiful"));
     }
 }

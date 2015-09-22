@@ -18,7 +18,6 @@ package android.widget.espresso;
 
 import static android.support.test.espresso.action.ViewActions.actionWithAssertions;
 
-import android.content.res.Resources;
 import android.support.test.espresso.PerformException;
 import android.support.test.espresso.ViewAction;
 import android.support.test.espresso.action.CoordinatesProvider;
@@ -27,8 +26,6 @@ import android.support.test.espresso.action.Press;
 import android.support.test.espresso.action.Tap;
 import android.support.test.espresso.util.HumanReadables;
 import android.text.Layout;
-import android.util.DisplayMetrics;
-import android.util.TypedValue;
 import android.view.View;
 import android.widget.TextView;
 
@@ -40,16 +37,60 @@ public final class TextViewActions {
     private TextViewActions() {}
 
     /**
-     * Returns an action that clicks on text at an index on the text view.<br>
+     * Returns an action that clicks on text at an index on the TextView.<br>
      * <br>
      * View constraints:
      * <ul>
-     * <li>must be a text view displayed on screen
+     * <li>must be a TextView displayed on screen
      * <ul>
+     *
+     * @param index The index of the TextView's text to click on.
      */
     public static ViewAction clickOnTextAtIndex(int index) {
         return actionWithAssertions(
                 new GeneralClickAction(Tap.SINGLE, new TextCoordinates(index), Press.FINGER));
+    }
+
+    /**
+     * Returns an action that long presses then drags on text from startIndex to endIndex on the
+     * TextView.<br>
+     * <br>
+     * View constraints:
+     * <ul>
+     * <li>must be a TextView displayed on screen
+     * <ul>
+     *
+     * @param startIndex The index of the TextView's text to start a drag from
+     * @param endIndex The index of the TextView's text to end the drag at
+     */
+    public static ViewAction longPressAndDragOnText(int startIndex, int endIndex) {
+        return actionWithAssertions(
+                new DragOnTextViewActions(
+                        DragOnTextViewActions.Drag.LONG_PRESS,
+                        new TextCoordinates(startIndex),
+                        new TextCoordinates(endIndex),
+                        Press.FINGER));
+    }
+
+    /**
+     * Returns an action that double taps then drags on text from startIndex to endIndex on the
+     * TextView.<br>
+     * <br>
+     * View constraints:
+     * <ul>
+     * <li>must be a TextView displayed on screen
+     * <ul>
+     *
+     * @param startIndex The index of the TextView's text to start a drag from
+     * @param endIndex The index of the TextView's text to end the drag at
+     */
+    public static ViewAction doubleTapAndDragOnText(int startIndex, int endIndex) {
+        return actionWithAssertions(
+                new DragOnTextViewActions(
+                        DragOnTextViewActions.Drag.DOUBLE_TAP,
+                        new TextCoordinates(startIndex),
+                        new TextCoordinates(endIndex),
+                        Press.FINGER));
     }
 
     /**
