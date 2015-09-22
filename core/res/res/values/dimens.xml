@@ -45,6 +45,9 @@
     <!-- Margin at the edge of the screen to ignore touch events for in the windowshade. -->
     <dimen name="status_bar_edge_ignore">5dp</dimen>
 
+    <!-- Width of a divider bar used to resize docked stacks. -->
+    <dimen name="docked_stack_divider_thickness">24dp</dimen>
+
     <!-- Min width for a tablet device -->
     <dimen name="min_xlarge_screen_width">800dp</dimen>
 

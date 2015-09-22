@@ -16,6 +16,7 @@
 
 package com.android.server.wm;
 
+import static android.app.ActivityManager.DOCKED_STACK_ID;
 import static com.android.server.wm.WindowManagerService.TAG;
 import static com.android.server.wm.WindowManagerService.DEBUG_RESIZE;
 import static com.android.server.wm.WindowManagerService.DEBUG_STACK;
@@ -430,6 +431,10 @@ class Task implements DimLayer.DimLayerUser {
 
     boolean inFreeformWorkspace() {
         return mStack != null && mStack.mStackId == FREEFORM_WORKSPACE_STACK_ID;
+    }
+
+    boolean inDockedWorkspace() {
+        return mStack != null && mStack.mStackId == DOCKED_STACK_ID;
     }
 
     @Override

@@ -16,6 +16,7 @@
 
 package com.android.server.wm;
 
+import static android.app.ActivityManager.DOCKED_STACK_ID;
 import static android.app.ActivityManager.HOME_STACK_ID;
 
 import static com.android.server.wm.WindowManagerService.DEBUG_VISIBILITY;
@@ -111,6 +112,8 @@ class DisplayContent {
     /** Remove this display when animation on it has completed. */
     boolean mDeferredRemoval;
 
+    final DockedStackDividerController mDividerControllerLocked;
+
     /**
      * @param display May not be null.
      * @param service You know.
@@ -122,6 +125,7 @@ class DisplayContent {
         display.getMetrics(mDisplayMetrics);
         isDefaultDisplay = mDisplayId == Display.DEFAULT_DISPLAY;
         mService = service;
+        mDividerControllerLocked = new DockedStackDividerController(service.mContext, this);
     }
 
     int getDisplayId() {
@@ -551,5 +555,15 @@ class DisplayContent {
     @Override
     public String toString() {
         return "Display " + mDisplayId + " info=" + mDisplayInfo + " stacks=" + mStacks;
+    }
+
+    TaskStack getDockedStack() {
+        for (int i = mStacks.size() - 1; i >= 0; i--) {
+            TaskStack stack = mStacks.get(i);
+            if (stack.mStackId == DOCKED_STACK_ID) {
+                return stack;
+            }
+        }
+        return null;
     }
 }

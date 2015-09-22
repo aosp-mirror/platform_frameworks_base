@@ -17,6 +17,7 @@
 package com.android.server.wm;
 
 import static android.app.ActivityManager.DOCKED_STACK_CREATE_MODE_TOP_OR_LEFT;
+import static android.app.ActivityManager.DOCKED_STACK_ID;
 import static android.view.WindowManager.LayoutParams.FIRST_APPLICATION_WINDOW;
 import static android.view.WindowManager.LayoutParams.FIRST_SUB_WINDOW;
 import static android.view.WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM;
@@ -33,6 +34,7 @@ import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_STARTING;
 import static android.view.WindowManager.LayoutParams.TYPE_BASE_APPLICATION;
 import static android.view.WindowManager.LayoutParams.TYPE_BOOT_PROGRESS;
+import static android.view.WindowManager.LayoutParams.TYPE_DOCK_DIVIDER;
 import static android.view.WindowManager.LayoutParams.TYPE_DREAM;
 import static android.view.WindowManager.LayoutParams.TYPE_INPUT_METHOD;
 import static android.view.WindowManager.LayoutParams.TYPE_INPUT_METHOD_DIALOG;
@@ -920,6 +922,7 @@ public class WindowManagerService extends IWindowManager.Stub
 
         mAllowTheaterModeWakeFromLayout = context.getResources().getBoolean(
                 com.android.internal.R.bool.config_allowTheaterModeWakeFromWindowLayout);
+
 
         LocalServices.addService(WindowManagerInternal.class, new LocalService());
         initPolicy();
@@ -1853,6 +1856,11 @@ public class WindowManagerService extends IWindowManager.Stub
                     Slog.w(TAG, "Attempted to add Accessibility overlay window with bad token "
                             + attrs.token + ".  Aborting.");
                     return WindowManagerGlobal.ADD_BAD_APP_TOKEN;
+                }
+            } else if (type == TYPE_DOCK_DIVIDER) {
+                if (displayContent.mDividerControllerLocked.hasDivider()) {
+                    Slog.w(TAG, "Attempted to add docked stack divider twice. Aborting.");
+                    return WindowManagerGlobal.ADD_MULTIPLE_SINGLETON;
                 }
             } else if (token.appWindowToken != null) {
                 Slog.w(TAG, "Non-null appWindowToken for system window of type=" + type);
@@ -4521,7 +4529,10 @@ public class WindowManagerService extends IWindowManager.Stub
                     }
                     stack.attachDisplayContent(displayContent);
                     displayContent.attachStack(stack, onTop);
-
+                    if (stack.mStackId == DOCKED_STACK_ID) {
+                        mH.obtainMessage(H.UPDATE_DOCKED_STACK_DIVIDER,
+                                displayContent).sendToTarget();
+                    }
                     moveStackWindowsLocked(displayContent);
                     final WindowList windows = displayContent.getWindowList();
                     for (int winNdx = windows.size() - 1; winNdx >= 0; --winNdx) {
@@ -4544,6 +4555,11 @@ public class WindowManagerService extends IWindowManager.Stub
     void detachStackLocked(DisplayContent displayContent, TaskStack stack) {
         displayContent.detachStack(stack);
         stack.detachDisplay();
+        // We can't directly remove the divider, because only the WM thread can do these operations
+        // and we can be on AM thread.
+        if (stack.mStackId == DOCKED_STACK_ID) {
+            mH.obtainMessage(H.UPDATE_DOCKED_STACK_DIVIDER, displayContent).sendToTarget();
+        }
     }
 
     public void detachStack(int stackId) {
@@ -7220,6 +7236,8 @@ public class WindowManagerService extends IWindowManager.Stub
         public static final int TAP_DOWN_OUTSIDE_TASK = 40;
         public static final int FINISH_TASK_POSITIONING = 41;
 
+        public static final int UPDATE_DOCKED_STACK_DIVIDER = 42;
+
         @Override
         public void handleMessage(Message msg) {
             if (DEBUG_WINDOW_TRACE) {
@@ -7756,6 +7774,13 @@ public class WindowManagerService extends IWindowManager.Stub
                         if (mWallpaperControllerLocked.processWallpaperDrawPendingTimeout()) {
                             mWindowPlacerLocked.performSurfacePlacement();
                         }
+                    }
+                }
+                break;
+                case UPDATE_DOCKED_STACK_DIVIDER: {
+                    DisplayContent content = (DisplayContent) msg.obj;
+                    synchronized (mWindowMap) {
+                        content.mDividerControllerLocked.update();
                     }
                 }
                 break;
