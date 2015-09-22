@@ -28,12 +28,6 @@
         android:visibility="gone"
         style="@android:style/TextAppearance.Material.Subhead" />
 
-    <!-- The 'list' view is still used for RecentsCreateFragment -->
-    <ListView
-        android:id="@+id/list"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent" />
-
     <LinearLayout
         android:id="@+id/content"
         android:layout_width="match_parent"

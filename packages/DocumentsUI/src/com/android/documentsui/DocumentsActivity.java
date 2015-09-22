@@ -75,8 +75,6 @@ public class DocumentsActivity extends BaseActivity {
 
     private Toolbar mRootsToolbar;
 
-    private DirectoryContainerView mDirectoryContainer;
-
     private ItemSelectedListener mStackListener;
     private BaseAdapter mStackAdapter;
 
@@ -113,8 +111,6 @@ public class DocumentsActivity extends BaseActivity {
         } else {
             mDrawer = DrawerController.create(this);
         }
-
-        mDirectoryContainer = (DirectoryContainerView) findViewById(R.id.container_directory);
 
         mToolbar = (Toolbar) findViewById(R.id.toolbar);
 
@@ -406,8 +402,6 @@ public class DocumentsActivity extends BaseActivity {
         final FragmentManager fm = getFragmentManager();
         final RootInfo root = getCurrentRoot();
         final DocumentInfo cwd = getCurrentDirectory();
-
-        mDirectoryContainer.setDrawDisappearingFirst(anim == ANIM_DOWN);
 
         if (cwd == null) {
             // No directory means recents

@@ -62,7 +62,6 @@ public class FilesActivity extends BaseActivity {
 
     private Toolbar mToolbar;
     private Spinner mToolbarStack;
-    private DirectoryContainerView mDirectoryContainer;
     private ItemSelectedListener mStackListener;
     private BaseAdapter mStackAdapter;
     private DocumentClipper mClipper;
@@ -76,8 +75,6 @@ public class FilesActivity extends BaseActivity {
         super.onCreate(icicle);
 
         final Context context = this;
-
-        mDirectoryContainer = (DirectoryContainerView) findViewById(R.id.container_directory);
 
         mToolbar = (Toolbar) findViewById(R.id.toolbar);
 
@@ -234,8 +231,6 @@ public class FilesActivity extends BaseActivity {
         final FragmentManager fm = getFragmentManager();
         final RootInfo root = getCurrentRoot();
         final DocumentInfo cwd = getCurrentDirectory();
-
-        mDirectoryContainer.setDrawDisappearingFirst(anim == ANIM_DOWN);
 
         if (cwd == null) {
             DirectoryFragment.showRecentsOpen(fm, anim);
