@@ -40,6 +40,46 @@ href="http://tools.android.com/knownissues">http://tools.android.com/knownissues
 <div class="toggle-content opened">
   <p><a href="#" onclick="return toggleContent(this)">
     <img src="{@docRoot}assets/images/triangle-opened.png" class="toggle-content-img"
+      alt=""/>Android Plugin for Gradle, Revision 1.3.1</a> <em>(August 2015)</em>
+  </p>
+
+  <div class="toggle-content-toggleme">
+
+    <dl>
+    <dt>Dependencies:</dt>
+
+    <dd>
+      <ul>
+        <li>Gradle 2.2.1 or higher.</li>
+        <li>Build Tools 21.1.1 or higher.</li>
+      </ul>
+    </dd>
+
+    <dt>General Notes:</dt>
+    <dd>
+      <ul>
+      <li>Fixed the <a href="{@docRoot}tools/help/zipalign.html">ZipAlign</a> task to properly
+        consume the output of the previous task when using a customized filename. </li>
+      <li>Fixed <a href="{@docRoot}guide/topics/renderscript/compute.html">Renderscript</a>
+        packaging with the <a href="{@docRoot}tools/sdk/ndk/index.html">NDK</a>. </li>
+      <li>Maintained support for the <code>createDebugCoverageReport</code> build task. </li>  
+      <li>Fixed support for customized use of the <code>archiveBaseName</code> property
+        in the <code>build.gradle</code> build> file. </li>
+      <li>Fixed the <code>Invalid ResourceType</code>
+        <a href="{@docRoot}tools/help/lint.html">lint</a> warning caused by parameter method
+        annotation lookup when running
+        <a href="{@docRoot}tools/help/lint.html">lint</a> outside of Android Studio.</li>
+     </ul>
+    </dd>
+  </div>
+</div>
+
+
+
+
+<div class="toggle-content closed">
+  <p><a href="#" onclick="return toggleContent(this)">
+    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img"
       alt=""/>Android Plugin for Gradle, Revision 1.3.0</a> <em>(July 2015)</em>
   </p>
 
