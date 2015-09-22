@@ -230,20 +230,6 @@ class Owners {
         return mDeviceOwner != null;
     }
 
-    static boolean isInstalledForUser(String packageName, int userHandle) {
-        try {
-            PackageInfo pi = (AppGlobals.getPackageManager())
-                    .getPackageInfo(packageName, 0, userHandle);
-            if (pi != null && pi.applicationInfo.flags != 0) {
-                return true;
-            }
-        } catch (RemoteException re) {
-            throw new RuntimeException("Package manager has died", re);
-        }
-
-        return false;
-    }
-
     private boolean readLegacyOwnerFile(File file) {
         if (!file.exists()) {
             // Already migrated or the device has no owners.

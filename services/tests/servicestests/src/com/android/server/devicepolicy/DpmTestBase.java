@@ -21,7 +21,7 @@ import android.test.AndroidTestCase;
 
 import java.io.File;
 
-public class DpmTestBase extends AndroidTestCase {
+public abstract class DpmTestBase extends AndroidTestCase {
     public static final String TAG = "DpmTest";
 
     protected Context mRealTestContext;

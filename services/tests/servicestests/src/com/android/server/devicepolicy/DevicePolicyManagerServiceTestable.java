@@ -19,11 +19,11 @@ import com.android.internal.widget.LockPatternUtils;
 
 import android.app.IActivityManager;
 import android.app.NotificationManager;
+import android.app.backup.IBackupManager;
 import android.content.Context;
 import android.content.pm.IPackageManager;
-import android.content.pm.PackageManager;
+import android.media.IAudioService;
 import android.os.Looper;
-import android.os.PowerManager.WakeLock;
 import android.os.PowerManagerInternal;
 import android.os.UserHandle;
 import android.os.UserManager;
@@ -73,146 +73,169 @@ public class DevicePolicyManagerServiceTestable extends DevicePolicyManagerServi
         }
     }
 
-    public final File dataDir;
-    public final File systemUserDataDir;
-    public final File secondUserDataDir;
+    public final DpmMockContext context;
 
     public DevicePolicyManagerServiceTestable(DpmMockContext context, File dataDir) {
-        super(context);
-        this.dataDir = dataDir;
-
-        systemUserDataDir = new File(dataDir, "user0");
-        DpmTestUtils.clearDir(dataDir);
-
-        secondUserDataDir = new File(dataDir, "user" + DpmMockContext.CALLER_USER_HANDLE);
-        DpmTestUtils.clearDir(secondUserDataDir);
-
-        when(getContext().environment.getUserSystemDirectory(
-                eq(DpmMockContext.CALLER_USER_HANDLE))).thenReturn(secondUserDataDir);
+        this(new MockInjector(context, dataDir));
     }
 
-    @Override
-    DpmMockContext getContext() {
-        return (DpmMockContext) super.getContext();
+    private DevicePolicyManagerServiceTestable(MockInjector injector) {
+        super(injector);
+        this.context = injector.context;
     }
 
-    @Override
-    Owners newOwners() {
-        return new OwnersTestable(getContext(), dataDir);
-    }
+    private static class MockInjector extends Injector {
 
-    @Override
-    UserManager getUserManager() {
-        return getContext().userManager;
-    }
+        public final DpmMockContext context;
 
-    @Override
-    PackageManager getPackageManager() {
-        return getContext().packageManager;
-    }
+        public final File dataDir;
 
-    @Override
-    PowerManagerInternal getPowerManagerInternal() {
-        return getContext().powerManagerInternal;
-    }
+        public final File systemUserDataDir;
+        public final File secondUserDataDir;
 
-    @Override
-    NotificationManager getNotificationManager() {
-        return getContext().notificationManager;
-    }
+        private MockInjector(DpmMockContext context, File dataDir) {
+            super(context);
+            this.context = context;
+            this.dataDir = dataDir;
 
-    @Override
-    IWindowManager getIWindowManager() {
-        return getContext().iwindowManager;
-    }
+            systemUserDataDir = new File(dataDir, "user0");
+            DpmTestUtils.clearDir(dataDir);
 
-    @Override
-    IActivityManager getIActivityManager() {
-        return getContext().iactivityManager;
-    }
+            secondUserDataDir = new File(dataDir, "user" + DpmMockContext.CALLER_USER_HANDLE);
+            DpmTestUtils.clearDir(secondUserDataDir);
 
-    @Override
-    IPackageManager getIPackageManager() {
-        return getContext().ipackageManager;
-    }
+            when(context.environment.getUserSystemDirectory(
+                    eq(DpmMockContext.CALLER_USER_HANDLE))).thenReturn(secondUserDataDir);
+        }
 
-    @Override
-    LockPatternUtils newLockPatternUtils(Context context) {
-        return getContext().lockPatternUtils;
-    }
+        @Override
+        Owners newOwners() {
+            return new OwnersTestable(context, dataDir);
+        }
 
-    @Override
-    Looper getMyLooper() {
-        return Looper.getMainLooper();
-    }
+        @Override
+        UserManager getUserManager() {
+            return context.userManager;
+        }
 
-    @Override
-    String getDevicePolicyFilePathForSystemUser() {
-        return systemUserDataDir.getAbsolutePath();
-    }
+        @Override
+        PowerManagerInternal getPowerManagerInternal() {
+            return context.powerManagerInternal;
+        }
 
-    @Override
-    long binderClearCallingIdentity() {
-        return getContext().binder.clearCallingIdentity();
-    }
+        @Override
+        NotificationManager getNotificationManager() {
+            return context.notificationManager;
+        }
 
-    @Override
-    void binderRestoreCallingIdentity(long token) {
-        getContext().binder.restoreCallingIdentity(token);
-    }
+        @Override
+        IWindowManager getIWindowManager() {
+            return context.iwindowManager;
+        }
 
-    @Override
-    int binderGetCallingUid() {
-        return getContext().binder.getCallingUid();
-    }
+        @Override
+        IActivityManager getIActivityManager() {
+            return context.iactivityManager;
+        }
 
-    @Override
-    int binderGetCallingPid() {
-        return getContext().binder.getCallingPid();
-    }
+        @Override
+        IPackageManager getIPackageManager() {
+            return context.ipackageManager;
+        }
 
-    @Override
-    UserHandle binderGetCallingUserHandle() {
-        return getContext().binder.getCallingUserHandle();
-    }
+        @Override
+        IBackupManager getIBackupManager() {
+            return context.ibackupManager;
+        }
 
-    @Override
-    boolean binderIsCallingUidMyUid() {
-        return getContext().binder.isCallerUidMyUid();
-    }
+        @Override
+        IAudioService getIAudioService() {
+            return context.iaudioService;
+        }
 
-    @Override
-    File environmentGetUserSystemDirectory(int userId) {
-        return getContext().environment.getUserSystemDirectory(userId);
-    }
+        @Override
+        Looper getMyLooper() {
+            return Looper.getMainLooper();
+        }
 
-    @Override
-    void powerManagerGoToSleep(long time, int reason, int flags) {
-        getContext().powerManager.goToSleep(time, reason, flags);
-    }
+        @Override
+        LockPatternUtils newLockPatternUtils() {
+            return context.lockPatternUtils;
+        }
 
-    @Override
-    boolean systemPropertiesGetBoolean(String key, boolean def) {
-        return getContext().systemProperties.getBoolean(key, def);
-    }
+        @Override
+        String getDevicePolicyFilePathForSystemUser() {
+            return systemUserDataDir.getAbsolutePath();
+        }
 
-    @Override
-    long systemPropertiesGetLong(String key, long def) {
-        return getContext().systemProperties.getLong(key, def);
-    }
+        @Override
+        long binderClearCallingIdentity() {
+            return context.binder.clearCallingIdentity();
+        }
 
-    @Override
-    String systemPropertiesGet(String key, String def) {
-        return getContext().systemProperties.get(key, def);
-    }
+        @Override
+        void binderRestoreCallingIdentity(long token) {
+            context.binder.restoreCallingIdentity(token);
+        }
 
-    @Override
-    String systemPropertiesGet(String key) {
-        return getContext().systemProperties.get(key);
-    }
+        @Override
+        int binderGetCallingUid() {
+            return context.binder.getCallingUid();
+        }
 
-    @Override
-    void systemPropertiesSet(String key, String value) {
-        getContext().systemProperties.set(key, value);
+        @Override
+        int binderGetCallingPid() {
+            return context.binder.getCallingPid();
+        }
+
+        @Override
+        UserHandle binderGetCallingUserHandle() {
+            return context.binder.getCallingUserHandle();
+        }
+
+        @Override
+        boolean binderIsCallingUidMyUid() {
+            return context.binder.isCallerUidMyUid();
+        }
+
+        @Override
+        File environmentGetUserSystemDirectory(int userId) {
+            return context.environment.getUserSystemDirectory(userId);
+        }
+
+        @Override
+        void powerManagerGoToSleep(long time, int reason, int flags) {
+            context.powerManager.goToSleep(time, reason, flags);
+        }
+
+        @Override
+        boolean systemPropertiesGetBoolean(String key, boolean def) {
+            return context.systemProperties.getBoolean(key, def);
+        }
+
+        @Override
+        long systemPropertiesGetLong(String key, long def) {
+            return context.systemProperties.getLong(key, def);
+        }
+
+        @Override
+        String systemPropertiesGet(String key, String def) {
+            return context.systemProperties.get(key, def);
+        }
+
+        @Override
+        String systemPropertiesGet(String key) {
+            return context.systemProperties.get(key);
+        }
+
+        @Override
+        void systemPropertiesSet(String key, String value) {
+            context.systemProperties.set(key, value);
+        }
+
+        @Override
+        boolean userManagerIsSplitSystemUser() {
+            return context.userManagerForMock.isSplitSystemUser();
+        }
     }
 }
