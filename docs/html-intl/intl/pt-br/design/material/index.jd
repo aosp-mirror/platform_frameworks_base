@@ -39,10 +39,10 @@ page.image=design/material/images/MaterialLight.png
 
 
 
-<p itemprop="description">O Material Design é um guia abrangente para design visual, de movimento e de 
+<p itemprop="description">O Material Design é um guia abrangente para design visual, de movimento e de
 interação para diversas plataformas e dispositivos. O Android agora é compatível com
-aplicativos do Material Design. Para usar o Material Design nos aplicativos Android, siga as orientações definidas 
-nas <a href="http://www.google.com/design/spec">especificações do Material Design</a> e use os novos 
+aplicativos do Material Design. Para usar o Material Design nos aplicativos Android, siga as orientações definidas
+nas <a href="http://www.google.com/design/spec">especificações do Material Design</a> e use os novos
 componentes e funcionalidades disponíveis no Android 5.0 (API de nível 21) e em posteriores.</p>
 
 <p>O Android fornece os seguintes elementos para criar aplicativos do Material Design:</p>
@@ -59,7 +59,7 @@ componentes e funcionalidades disponíveis no Android 5.0 (API de nível 21) e e
 
 <h3>Tema do Material</h3>
 
-<p>O tema do Material fornece um novo estilo para o seu aplicativo, widgets de sistema que permitem 
+<p>O tema do Material fornece um novo estilo para o seu aplicativo, widgets de sistema que permitem
 definir a paleta de cores e as animações padrão para feedback de toque e transições de atividades.</p>
 
 <!-- two columns -->
@@ -79,13 +79,13 @@ definir a paleta de cores e as animações padrão para feedback de toque e tran
 <br style="clear:left"/>
 </div>
 
-<p>Para obter mais informações, consulte <a href="{@docRoot}training/material/theme.html">Como usar o tema 
+<p>Para obter mais informações, consulte <a href="{@docRoot}training/material/theme.html">Como usar o tema
 do Material</a>.</p>
 
 
 <h3>Listas e cartões</h3>
 
-<p>O Android fornece dois novos widgets para exibir cartões e listas com estilos e animações do 
+<p>O Android fornece dois novos widgets para exibir cartões e listas com estilos e animações do
 Material Design:</p>
 
 <!-- two columns -->
@@ -97,19 +97,19 @@ Material Design:</p>
 </div>
 <div style="float:left;width:250px;margin-right:0px;">
   <img src="{@docRoot}design/material/images/card_travel.png" width="500" height="426" />
-  <p>O novo widget <code>CardView</code> permite exibir informações importantes dentro de 
+  <p>O novo widget <code>CardView</code> permite exibir informações importantes dentro de
   cartões que têm aparência consistente.</p>
 </div>
 <br style="clear:left"/>
 </div>
 
-<p>Para obter mais informações, consulte <a href="{@docRoot}training/material/lists-cards.html">Como criar 
+<p>Para obter mais informações, consulte <a href="{@docRoot}training/material/lists-cards.html">Como criar
 listas e cartões</a>.</p>
 
 
 <h3>Sombras de vistas</h3>
 
-<p>Além das propriedades X e Y, vistas no Android agora têm uma propriedade 
+<p>Além das propriedades X e Y, vistas no Android agora têm uma propriedade
 Z. Essa nova propriedade representa a elevação de uma vista, que determina:</p>
 
 <ul>
@@ -130,7 +130,7 @@ Z. Essa nova propriedade representa a elevação de uma vista, que determina:</p
   </div>
 </div>
 
-<p>Para obter mais informações, consulte <a href="{@docRoot}training/material/shadows-clipping.html">Como 
+<p>Para obter mais informações, consulte <a href="{@docRoot}training/material/shadows-clipping.html">Como
 definir sombras e recortar visualizações</a>.</p>
 
 
@@ -165,7 +165,7 @@ Exibir animações em <strong>desenháveis da lista de estado</strong> entre mud
 <p>Animações de feedback de toque são integradas em várias vistas padrões, como botões. As novas APIs
 permitem personalizar essas animações e adicioná-las às vistas personalizadas.</p>
 
-<p>Para obter mais informações, consulte <a href="{@docRoot}training/material/animations.html">Como definir 
+<p>Para obter mais informações, consulte <a href="{@docRoot}training/material/animations.html">Como definir
 animações personalizadas</a>.</p>
 
 
@@ -182,5 +182,5 @@ uma cor em tempo de execução.</li>
 imagem de mapa de bits.</li>
 </ul>
 
-<p>Para obter mais informações, consulte <a href="{@docRoot}training/material/drawables.html">Como trabalhar 
+<p>Para obter mais informações, consulte <a href="{@docRoot}training/material/drawables.html">Como trabalhar
 com desenháveis</a>.</p>
