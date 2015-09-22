@@ -1050,11 +1050,7 @@ public class RenderSessionImpl extends RenderAction<SessionParams> {
             }
             if (scrollPos != 0) {
                 view.scrollBy(0, scrollPos);
-            } else {
-                view.scrollBy(0, scrollPos);
             }
-        } else {
-            view.scrollBy(0, scrollPos);
         }
 
         if (!(view instanceof ViewGroup)) {
