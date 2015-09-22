@@ -121,22 +121,4 @@ public class WrapperInit {
         Zygote.appendQuotedShellArgs(command, args);
         Zygote.execShell(command.toString());
     }
-
-    /**
-     * Executes a standalone application with a wrapper command.
-     * This method never returns.
-     *
-     * @param invokeWith The wrapper command.
-     * @param classPath The class path.
-     * @param className The class name to invoke.
-     * @param args Arguments for the main() method of the specified class.
-     */
-    public static void execStandalone(String invokeWith, String classPath, String className,
-            String[] args) {
-        StringBuilder command = new StringBuilder(invokeWith);
-        command.append(" /system/bin/dalvikvm -classpath '").append(classPath);
-        command.append("' ").append(className);
-        Zygote.appendQuotedShellArgs(command, args);
-        Zygote.execShell(command.toString());
-    }
 }
