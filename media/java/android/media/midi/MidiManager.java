@@ -169,6 +169,13 @@ public final class MidiManager {
     /**
      * Registers a callback to receive notifications when MIDI devices are added and removed.
      *
+     * The {@link  DeviceCallback#onDeviceStatusChanged} method will be called immediately
+     * for any devices that have open ports. This allows applications to know which input
+     * ports are already in use and, therefore, unavailable.
+     *
+     * Applications should call {@link #getDevices} before registering the callback
+     * to get a list of devices already added.
+     *
      * @param callback a {@link DeviceCallback} for MIDI device notifications
      * @param handler The {@link android.os.Handler Handler} that will be used for delivering the
      *                device notifications. If handler is null, then the thread used for the
