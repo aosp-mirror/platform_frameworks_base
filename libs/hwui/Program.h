@@ -78,14 +78,12 @@ namespace uirenderer {
 #define PROGRAM_HAS_EXTERNAL_TEXTURE_SHIFT 38
 #define PROGRAM_HAS_TEXTURE_TRANSFORM_SHIFT 39
 
-#define PROGRAM_HAS_GAMMA_CORRECTION 40
+#define PROGRAM_IS_SIMPLE_GRADIENT 40
 
-#define PROGRAM_IS_SIMPLE_GRADIENT 41
+#define PROGRAM_HAS_COLORS 41
 
-#define PROGRAM_HAS_COLORS 42
-
-#define PROGRAM_HAS_DEBUG_HIGHLIGHT 43
-#define PROGRAM_HAS_ROUND_RECT_CLIP 44
+#define PROGRAM_HAS_DEBUG_HIGHLIGHT 42
+#define PROGRAM_HAS_ROUND_RECT_CLIP 43
 
 ///////////////////////////////////////////////////////////////////////////////
 // Types
@@ -157,9 +155,6 @@ struct ProgramDescription {
     SkXfermode::Mode framebufferMode;
     bool swapSrcDst;
 
-    bool hasGammaCorrection;
-    float gamma;
-
     bool hasDebugHighlight;
     bool hasRoundRectClip;
 
@@ -198,9 +193,6 @@ struct ProgramDescription {
 
         framebufferMode = SkXfermode::kClear_Mode;
         swapSrcDst = false;
-
-        hasGammaCorrection = false;
-        gamma = 2.2f;
 
         hasDebugHighlight = false;
         hasRoundRectClip = false;
@@ -266,7 +258,6 @@ struct ProgramDescription {
         if (useShadowAlphaInterp) key |= programid(0x1) << PROGRAM_USE_SHADOW_ALPHA_INTERP_SHIFT;
         if (hasExternalTexture) key |= programid(0x1) << PROGRAM_HAS_EXTERNAL_TEXTURE_SHIFT;
         if (hasTextureTransform) key |= programid(0x1) << PROGRAM_HAS_TEXTURE_TRANSFORM_SHIFT;
-        if (hasGammaCorrection) key |= programid(0x1) << PROGRAM_HAS_GAMMA_CORRECTION;
         if (isSimpleGradient) key |= programid(0x1) << PROGRAM_IS_SIMPLE_GRADIENT;
         if (hasColors) key |= programid(0x1) << PROGRAM_HAS_COLORS;
         if (hasDebugHighlight) key |= programid(0x1) << PROGRAM_HAS_DEBUG_HIGHLIGHT;

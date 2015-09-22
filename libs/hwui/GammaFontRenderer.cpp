@@ -43,10 +43,6 @@ GammaFontRenderer* GammaFontRenderer::createRenderer() {
     if (property_get(PROPERTY_TEXT_GAMMA_METHOD, property, DEFAULT_TEXT_GAMMA_METHOD) > 0) {
         if (!strcasecmp(property, "lookup")) {
             return new LookupGammaFontRenderer();
-        } else if (!strcasecmp(property, "shader")) {
-            return new ShaderGammaFontRenderer(false);
-        } else if (!strcasecmp(property, "shader3")) {
-            return new ShaderGammaFontRenderer(true);
         }
     }
 
@@ -88,50 +84,6 @@ GammaFontRenderer::GammaFontRenderer() {
 }
 
 GammaFontRenderer::~GammaFontRenderer() {
-}
-
-///////////////////////////////////////////////////////////////////////////////
-// Shader-based renderer
-///////////////////////////////////////////////////////////////////////////////
-
-ShaderGammaFontRenderer::ShaderGammaFontRenderer(bool multiGamma)
-        : GammaFontRenderer() {
-    INIT_LOGD("Creating shader gamma font renderer");
-    mRenderer = nullptr;
-    mMultiGamma = multiGamma;
-}
-
-void ShaderGammaFontRenderer::describe(ProgramDescription& description,
-        const SkPaint* paint) const {
-    if (paint->getShader() == nullptr) {
-        if (mMultiGamma) {
-            const int l = luminance(paint);
-
-            if (l <= mBlackThreshold) {
-                description.hasGammaCorrection = true;
-                description.gamma = mGamma;
-            } else if (l >= mWhiteThreshold) {
-                description.hasGammaCorrection = true;
-                description.gamma = 1.0f / mGamma;
-            }
-        } else {
-            description.hasGammaCorrection = true;
-            description.gamma = 1.0f / mGamma;
-        }
-    }
-}
-
-void ShaderGammaFontRenderer::setupProgram(ProgramDescription& description,
-        Program& program) const {
-    if (description.hasGammaCorrection) {
-        glUniform1f(program.getUniform("gamma"), description.gamma);
-    }
-}
-
-void ShaderGammaFontRenderer::endPrecaching() {
-    if (mRenderer) {
-        mRenderer->endPrecaching();
-    }
 }
 
 ///////////////////////////////////////////////////////////////////////////////
