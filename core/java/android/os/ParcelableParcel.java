@@ -16,6 +16,8 @@
 
 package android.os;
 
+import android.util.MathUtils;
+
 /**
  * Parcelable containing a raw Parcel of data.
  * @hide
@@ -33,9 +35,13 @@ public class ParcelableParcel implements Parcelable {
         mParcel = Parcel.obtain();
         mClassLoader = loader;
         int size = src.readInt();
+        if (size < 0) {
+            throw new IllegalArgumentException("Negative size read from parcel");
+        }
+
         int pos = src.dataPosition();
-        mParcel.appendFrom(src, src.dataPosition(), size);
-        src.setDataPosition(pos + size);
+        src.setDataPosition(MathUtils.addOrThrow(pos, size));
+        mParcel.appendFrom(src, pos, size);
     }
 
     public Parcel getParcel() {

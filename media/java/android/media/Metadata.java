@@ -18,6 +18,7 @@ package android.media;
 
 import android.os.Parcel;
 import android.util.Log;
+import android.util.MathUtils;
 
 import java.util.Calendar;
 import java.util.Collections;
@@ -332,7 +333,14 @@ import java.util.TimeZone;
             }
 
             // Skip to the next one.
-            parcel.setDataPosition(start + size);
+            try {
+                parcel.setDataPosition(MathUtils.addOrThrow(start, size));
+            } catch (IllegalArgumentException e) {
+                Log.e(TAG, "Invalid size: " + e.getMessage());
+                error = true;
+                break;
+            }
+
             bytesLeft -= size;
             ++recCount;
         }
