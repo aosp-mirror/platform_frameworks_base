@@ -176,17 +176,6 @@ var RESOURCE_COLLECTIONS = {
       "https://www.udacity.com/course/ud867"
     ]
   },
-  "preview/landing/more": {
-    "title": "",
-    "resources": [
-      "https://www.youtube.com/watch?v=yYU4DHLwoRk",
-      "preview/features/runtime-permissions.html",
-      "preview/behavior-changes.html",
-      "preview/backup/index.html",
-      "preview/features/app-linking.html",
-      "preview/testing/guide.html"
-    ]
-  },
   "distribute/landing/carousel": {
     "title": "",
     "resources": [
@@ -1420,15 +1409,12 @@ var RESOURCE_COLLECTIONS = {
       "https://support.google.com/googleplay/answer/2651410"
     ]
   },
-  "preview/landing/resources": {
+  "marshmallow/landing/resources": {
     "title": "",
     "resources": [
-      "preview/overview.html",
-      "preview/download.html",
-      "preview/setup-sdk.html",
-      "preview/samples.html",
-      "preview/api-overview.html",
-      "preview/support.html"
+      "about/versions/marshmallow/android-6.0.html",
+      "about/versions/marshmallow/download.html",
+      "about/versions/marshmallow/samples.html"
     ]
   },
   "autolanding": {
@@ -1653,5 +1639,24 @@ var RESOURCE_COLLECTIONS = {
        "tools/performance/batterystats-battery-historian/index.html",
        "tools/performance/batterystats-battery-historian/charts.html"
     ]
-  }
+  },
+  "marshmallow/landing/resources": {
+    "title": "",
+    "resources": [
+       "about/versions/marshmallow/android-6.0.html",
+       "about/versions/marshmallow/download.html",
+       "about/versions/marshmallow/samples.html"
+    ]
+  },
+  "marshmallow/landing/more": {
+  "title": "",
+  "resources": [
+      "https://www.youtube.com/watch?v=yYU4DHLwoRk",
+      "about/versions/marshmallow/android-6.0-changes.html",
+      "training/permissions/index.html",
+      "training/backup/auto-backup.html",
+      "training/app-links/app-linking.html",
+      "training/monitoring-device-state/battery-monitoring.html"
+    ]
+  },
 }

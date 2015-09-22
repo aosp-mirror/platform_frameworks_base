@@ -1,4 +1,4 @@
-page.title=Developer Preview 2 Archive
+page.title=M Preview Downloads
 page.image=images/cards/card-download_16-9_2x.png
 
 @jd:body
@@ -164,57 +164,17 @@ This is the Android SDK Preview License Agreement (the “License Agreement”).
   <div id="qv">
     <h2>In this document</h2>
       <ol>
-        <li><a href="#sdk">Developer Preview 2 SDK</a></li>
-        <li><a href="#docs">Developer Documentation</a></li>
         <li><a href="#images">Hardware System Images</a></li>
       </ol>
-
-     <h2>Legacy downloads</h2>
-        <ol>
-           <li><a href="{@docRoot}preview/download_mp1.html">Developer Preview Archive</a></li>
-        </ol>
   </div>
 </div>
 
 
 <p>
-  The Android M Preview SDK includes development tools, Android system files, and library files to
+  The Android M Preview SDK includes development tools, Android system images, and library files to
   help you test your app and the new APIs coming in the next release of the platform. This document
   describes how to get the downloadable components of the preview for testing your app.
 </p>
-
-
-<h2 id="sdk">Developer Preview 2 SDK</h2>
-
-<p>
-  The Preview SDK is available for download through the <a href=
-  "{@docRoot}tools/help/sdk-manager.html">Android SDK Manager</a>. For more information on
-  downloading and configuring the Preview SDK, see <a href=
-  "{@docRoot}preview/setup-sdk.html#downloadSdk">Set Up the Preview SDK</a>.
-</p>
-
-
-<h2 id="docs">Developer Documentation</h2>
-
-<p>
-  The developer documentation download package provides detailed API reference information and an API difference report for the preview.
-</p>
-
-<table>
-  <tr>
-    <th scope="col">Description</th>
-    <th scope="col">Download / Checksums</th>
-  </tr>
-  <tr id="docs-dl">
-    <td>Android M Preview 2<br>Developer Docs</td>
-    <td><a href="#top" onclick="onDownload(this)"
-      >m-preview-2-developer-docs.zip</a><br>
-      MD5: 1db6fff9c722b0339757e1cdf43663a8<br>
-      SHA-1: 5a4ae88d644e63824d21b0e18f8e3977a7665157
-    </td>
-  </tr>
-<table>
-
 
 <h2 id="images">Hardware System Images</h2>
 
@@ -243,34 +203,34 @@ This is the Android SDK Preview License Agreement (the “License Agreement”).
   <tr id="hammerhead">
     <td>Nexus 5 (GSM/LTE) <br>"hammerhead"</td>
     <td><a href="#top" onclick="onDownload(this)"
-      >hammerhead-MPZ79M-preview-b1f4bde4.tgz</a><br>
-      MD5: 2ca9f18bf47a061b339bab52647ceb0d<br>
-      SHA-1: b1f4bde447eccbf8ce5d9b8b8ba954e3eac8e939
+      >hammerhead-MPA44I-preview-2ebbc049.tgz</a><br>
+      MD5: 91a924fb0c9f8e716e3b4c9954fd0dbb<br>
+      SHA-1: 2ebbc049b68c4da8baeee3e42bb94d7a965ba4a3
     </td>
   </tr>
   <tr id="shamu">
     <td>Nexus 6 <br>"shamu"</td>
     <td><a href="#top" onclick="onDownload(this)"
-      >shamu-MPZ79M-preview-e1024040.tgz</a><br>
-      MD5: 24a2118da340b9afedfbdfc026f6ff81<br>
-      SHA-1: e10240408859d5188c4aae140e1c539130ba614b
+      >shamu-MPA44I-preview-62b9c486.tgz</a><br>
+      MD5: ac6e58da86125073d9c395257fd42664<br>
+      SHA-1: 62b9c486fd7a5020e228d53ca5acd5c1857e48ff
     </td>
   </tr>
   <tr id="volantis">
     <td>Nexus 9 <br>"volantis"</td>
     <td><a href="#top" onclick="onDownload(this)"
-      >volantis-MPZ79M-preview-9f305342.tgz</a><br>
-      MD5: 9edabf0a4c61b247f1cbb9dfdc0a899e<br>
-      SHA-1: 9f30534216f10899a6a75495fc7e92408ea333a7
+      >volantis-MPA44I-preview-5c30a6e2.tgz</a><br>
+      MD5: 7f83768757913d3fea945a661020d185<br>
+      SHA-1: 5c30a6e2acd11a81f4105b12d23ff654f534f699
     </td>
   </tr>
 
   <tr id="fugu">
     <td>Nexus Player <br>"fugu"</td>
     <td><a href="#top" onclick="onDownload(this)"
-      >fugu-MPZ79N-preview-fb63af98.tgz</a><br>
-      MD5: e8d081137a20b66df595ee69523314b5<br>
-      SHA-1: fb63af98302dd97be8de9313734d389ccdcce250
+      >fugu-MPA44I-preview-2860040a.tgz</a><br>
+      MD5: 438da8d37da9e341a69cfb16a4001ac5<br>
+      SHA-1: 2860040a326582f1ff5f702bf9a1ef002717fc98
     </td>
   </tr>
 

@@ -1,0 +1,32 @@
+page.title=Android 6.0 Testing Guide
+page.image=images/cards/card-build_16x9_2x.png
+page.keywords=marshmallow,androidm,testing,permissions
+
+@jd:body
+
+<p>
+  Android 6.0 (API level 23) includes a number of APIs and behavior changes that can
+  impact your app, as described in the <a href="{@docRoot}about/versions/marshmallow/android-6.0.html">API
+  Overview</a> and <a href="{@docRoot}about/versions/masrhmallow/android-6.0-changes.html">Behavior Changes</a>.
+  In testing your app with the preview, there are some specific system changes that you should
+  focus on to ensure that users have a good experience.
+</p>
+
+<p>
+  The following resources describe what and how to test Android 6.0 (API level 23) features with
+  your app. You should prioritize testing of these specific Android 6.0 (API level 23) features,
+  due to their high potential impact on your app's behavior:
+</p>
+
+<ul>
+  <li><a href="{@docRoot}training/permissions/index.html">Permissions</a>:
+    Information on the behavior of runtime permissions, of runtime permissions, testing, and best
+    practices.
+  </li>
+  <li><a href="{@docRoot}training/monitoring-device-state/battery-monitoring.html">Doze and App Standby</a>:
+    Information on the behavior of Doze and App Standby, testing, and best practices.
+  </li>
+  <li><a href="{@docRoot}training/backup/auto-backup.html">Auto Backup and Device Identifiers</a>:
+    Information on the behavior of auto backup for apps, testing, and best practices.
+  </li>
+</ul>

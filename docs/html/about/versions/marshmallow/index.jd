@@ -1,0 +1,71 @@
+page.title=Android 6.0
+page.tags="marshmallow",
+meta.tags="marshamallow, M", androidm
+fullpage=true
+section.landing=true
+header.hide=1
+footer.hide=1
+@jd:body
+
+<section class="dac-expand dac-hero dac-light" >
+  <div class="wrap">
+    <div class="cols dac-hero-content">
+      <div class="col-9of16 col-push-7of16 dac-hero-figure">
+        <img class="dac-hero-image" src="{@docRoot}images/home/devices-hero_620px_2x.png"
+             srcset="{@docRoot}images/home/devices-hero_620px.png 1x,
+             {@docRoot}images/home/devices-hero_620px_2x.png 2x">
+      </div>
+      <div class="col-7of16 col-pull-9of16">
+        <h1 class="dac-hero-title">Android 6.0</h1>
+        <p class="dac-hero-description">
+          <strong>The official Android 6.0 SDK is now available!</strong>
+          Explore what's new &mdash; <strong>runtime permissions</strong>,
+          <strong>Doze</strong> and <strong>App Standby</strong> power-saving features, new
+          <strong>assist technology</strong>, and more.
+        </p>
+
+        <a class="dac-hero-cta" href="{@docRoot}about/versions/marshmallow/android-6.0.html">
+          <span class="dac-sprite dac-auto-chevron"></span>
+          Get started
+        </a><br>
+      </div>
+    </div>
+    <div class="dac-section dac-small">
+      <div class="resource-widget resource-flow-layout col-16"
+           data-query="collection:marshmallow/landing/resources"
+           data-cardSizes="6x2"
+           data-maxResults="3">
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="wrap dac-offset-parent">
+  <a class="dac-fab dac-scroll-button" data-scroll-button href="#latest">
+    <i class="dac-sprite dac-arrow-down-gray"></i>
+  </a>
+</div>
+
+<section class="dac-section dac-gray dac-small dac-invert" id="latest"><div class="wrap">
+  <h2 class="norule">Latest</h2>
+  <div class="resource-widget resource-flow-layout col-16"
+      data-query="type:youtube+tag:androidm, type:blog+tag:marshmallow"
+      data-sortOrder="-timestamp"
+      data-cardSizes="6x3"
+      data-maxResults="12"
+      data-initial-results="3"></div>
+</div></section>
+</section>
+
+<section class="dac-section"><div class="wrap">
+  <h1 class="dac-section-title">Resources</h1>
+  <div class="dac-section-subtitle">
+    Essential information to help you get your apps ready for Android 6.0.
+  </div>
+
+  <div class="resource-widget resource-flow-layout col-16"
+       data-query="collection:marshmallow/landing/more"
+       data-cardSizes="6x6"
+       data-maxResults="16"></div>
+  </div>
+</section>

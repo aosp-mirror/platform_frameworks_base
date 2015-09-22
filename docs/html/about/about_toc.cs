@@ -1,5 +1,19 @@
 <ul id="nav">
 
+    <li class="nav-section">
+    <div class="nav-section-header"><a href="<?cs var:toroot ?>about/versions/marshmallow/index.html">
+      <span class="en">Marshmallow</span></a></div>
+      <ul>
+        <li><a href="<?cs var:toroot ?>about/versions/marshmallow/android-6.0.html">
+        Android 6.0 APIs</a></li>
+        <li><a href="<?cs var:toroot ?>about/versions/marshmallow/android-6.0-changes.html">
+        Android 6.0 Changes</a></li>
+        <li><a href="<?cs var:toroot ?>about/versions/marshmallow/testing.html">Testing</a></li>
+        <li><a href="<?cs var:toroot ?>about/versions/marshmallow/samples.html">Samples</a></li>
+        <li><a href="<?cs var:toroot ?>about/versions/marshmallow/download.html">Downloads</a></li>
+  </li>
+      </ul>
+  </li>
   <li class="nav-section">
     <div class="nav-section-header"><a href="<?cs var:toroot ?>about/versions/lollipop.html"
               zh-tw-lang="Lollipop"

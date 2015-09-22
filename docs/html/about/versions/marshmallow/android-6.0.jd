@@ -1,7 +1,7 @@
-page.title=API Overview
-page.keywords=preview,sdk,compatibility
-page.tags=previewresources, androidm
-sdk.platform.apiLevel=22-mnc
+page.title=Android 6.0 APIs
+page.keywords=marshmallow,sdk,compatibility
+page.tags=androidm
+sdk.platform.apiLevel=23
 page.image=images/cards/card-api-overview_16-9_2x.png
 @jd:body
 
@@ -45,63 +45,66 @@ page.image=images/cards/card-api-overview_16-9_2x.png
 
 <h2>API Differences</h2>
 <ol>
-<li><a href="{@docRoot}sdk/api_diff/23/changes.html">API level 22 to 23 (Preview 3) &raquo;</a> </li>
+<li><a href="{@docRoot}sdk/api_diff/23/changes.html">API level 22 to 23 &raquo;</a> </li>
 </ol>
 
 </div>
 </div>
 
-<p>The M Developer Preview gives you an advance look at the upcoming release
-for the Android platform, which offers new features for users and app
-developers. This document provides an introduction to the most notable APIs.</p>
+<p>Android 6.0 (<a href="{@docRoot}reference/android/os/Build.VERSION_CODES.html#MARSHMALLOW">MARSHMALLOW</a>)
+offers new features for users and app developers. This document provides an introduction to the
+most notable APIs.</p>
 
-<p>
-  The M Developer Preview 3 release includes the <strong>final APIs for Android 6.0 (API level
-  23)</strong>. If you are preparing an app for use on Android 6.0,
-  <a href="{@docRoot}preview/setup-sdk.html">download the latest SDK</a> and to complete your
-  final updates and release testing. You can review the final APIs in the
-  <a href="{@docRoot}reference/packages.html">API Reference</a> and see the API differences in
-  the <a href="{@docRoot}sdk/api_diff/23/changes.html">Android API Differences Report</a>.
-</p>
+<h3 id="Start">Start developing</h3>
 
-</p>
+<p>To start building apps for Android 6.0, you must first <a href="{@docRoot}sdk/index.html">get
+the Android SDK</a>. Then use the <a href="{@docRoot}tools/help/sdk-manager.html">SDK Manager</a>
+to download the Android 6.0 SDK Platform and System Images.</p>
 
-<p class="caution"><strong>Important:</strong>
-  You may now publish apps that target Android 6.0 (API level 23) to the Google Play store.
-</p>
 
-<p class="note"><strong>Note:</strong>
-  If you have been working with previous preview releases and want to see the differences
-  between the final API and previous preview versions, download the additional difference
-  reports included in the <a href="{@docRoot}preview/download.html#docs">preview docs
-  reference</a>.
-</p>
+<h3 id="ApiLevel">Update your target API level</h3>
 
+<p>To better optimize your app for devices running Android {@sdkPlatformVersion},
+  set your <a
+href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#target">{@code targetSdkVersion}</a> to
+<code>"{@sdkPlatformApiLevel}"</code>, install your app on an Android
+{@sdkPlatformVersion} system image, test it, then publish the updated app with
+this change.</p>
+
+<p>You can use Android {@sdkPlatformVersion} APIs while also supporting older
+versions by adding conditions to your code that check for the system API level
+before executing APIs not supported by your <a
+href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#min">{@code minSdkVersion}</a>.
+To learn more about maintaining backward compatibility, read <a
+href="{@docRoot}training/basics/supporting-devices/platforms.html">Supporting
+Different Platform Versions</a>.</p>
+
+<p>For more information about how API levels work, read <a
+href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#ApiLevels">What is API
+Level?</a></p>
 <h3>Important behavior changes</h3>
 
 <p>If you have previously published an app for Android, be aware that your app might be affected
 by changes in the platform.</p>
 
-<p>Please see <a href="behavior-changes.html">Behavior Changes</a> for complete information.</p>
+<p>Please see <a href="android-6.0-changes.html">Android 6.0 Changes</a> for complete information.</p>
 
 <h2 id="app-linking">App Linking</h2>
-<p>This preview enhances Android’s intent system by providing more powerful app linking.
+<p>This release enhances Android’s intent system by providing more powerful app linking.
 This feature allows you to associate an app with a web domain you own. Based on this
 association, the platform can determine the default app to use to handle a particular
-web link and skip prompting users to select an app. To learn how to implement this feature, see
-<a href="{@docRoot}preview/features/app-linking.html">App Linking</a>.
+web link and skip prompting users to select an app. To learn how to implement this feature, see the
+<a href="{@docRoot}training/app-links/app-linking.html">App Linking</a> training.
 
 <h2 id="backup">Auto Backup for Apps</h2>
-<p>The system now performs automatic full data backup and restore for apps. For the
-duration of the <a href="{@docRoot}preview/overview.html">M Developer Preview program</a>, all
-apps are backed up, independent of which SDK version they target. After the final M SDK release,
-your app must target M to enable this behavior; you do not need to add any additional code. If users
-delete their Google accounts, their backup data is deleted as well. To learn how this feature
-works and how to configure what to back up on the file system, see
-<a href="{@docRoot}preview/backup/index.html">Auto Backup for Apps</a>.</p>
+<p>The system now performs automatic full data backup and restore for apps. Your app must target
+  Android 6.0 (API level 23) to enable this behavior; you do not need to add any additional code.
+  If users delete their Google accounts, their backup data is deleted as well. To learn how this
+  feature works and how to configure what to back up on the file system, see the
+  <a href="{@docRoot}training/backup/auto-backup.html">Auto Backup for Apps</a> training.</p>
 
 <h2 id="authentication">Authentication</h2>
-<p>This preview offers new APIs to let you authenticate users by using their fingerprint scans on
+<p>This release offers new APIs to let you authenticate users by using their fingerprint scans on
 supported devices, and check how recently the user was last authenticated using a device unlocking
 mechanism (such as a lockscreen password). Use these APIs in conjunction with
 the <a href="{@docRoot}training/articles/keystore.html">Android Keystore system</a>.</p>
@@ -127,8 +130,8 @@ authentication, note that each app must authenticate the user’s fingerprint in
 &lt;uses-permission
         android:name="android.permission.USE_FINGERPRINT" /&gt;
 </pre>
-<img src="{@docRoot}preview/images/fingerprint-screen.png"
-srcset="{@docRoot}preview/images/fingerprint-screen.png 1x, {@docRoot}preview/images/fingerprint-screen_2x.png 2x"
+<img src="{@docRoot}images/android-6.0/fingerprint-screen.png"
+srcset="{@docRoot}images/android-6.0/fingerprint-screen.png 1x, {@docRoot}images/android-6.0/fingerprint-screen_2x.png 2x"
 style="float:right; margin:0 0 10px 20px" width="282" height="476" />
 
 <p>To see an app implementation of fingerprint authentication, refer to the
@@ -179,11 +182,11 @@ method to re-authenticate the user within your app.
 
 <h2 id="direct-share">Direct Share</h2>
 
-<img src="{@docRoot}preview/images/direct-share-screen.png"
-srcset="{@docRoot}preview/images/direct-share-screen.png 1x, {@docRoot}preview/images/direct-share-screen_2x.png 2x"
+<img src="{@docRoot}images/android-6.0/direct-share-screen.png"
+srcset="{@docRoot}images/android-6.0/direct-share-screen.png 1x, {@docRoot}images/android-6.0/direct-share-screen_2x.png 2x"
 style="float:right; margin:0 0 20px 30px" width="312" height="329" />
 
-<p>This preview provides you with APIs to make sharing intuitive and quick for users. You can now
+<p>This release provides you with APIs to make sharing intuitive and quick for users. You can now
 define <em>direct share targets</em> that launch a specific activity in your app. These direct share
 targets are exposed to users via the <em>Share</em> menu. This feature allows users to share
 content to targets, such as contacts, within other apps. For example, the direct share target might
@@ -228,7 +231,7 @@ intent filter using the
 
 <h2 id="voice-interactions">Voice Interactions</h2>
 <p>
-This preview provides a new voice interaction API which, together with
+This release provides a new voice interaction API which, together with
 <a href="https://developers.google.com/voice-actions/" class="external-link">Voice Actions</a>,
 allows you to build conversational voice experiences into your apps. Call the
 {@link android.app.Activity#isVoiceInteraction()} method to determine if a voice action triggered
@@ -251,7 +254,7 @@ class="external-link">Voice Actions developer site</a>.
 
 <h2 id="assist">Assist API</h2>
 <p>
-This preview offers a new way for users to engage with your apps through an assistant. To use this
+This release offers a new way for users to engage with your apps through an assistant. To use this
 feature, the user must enable the assistant to use the current context. Once enabled, the user
 can summon the assistant within any app, by long-pressing on the <strong>Home</strong> button.</p>
 <p>Your app can elect to not share the current context with the assistant by setting the
@@ -273,7 +276,7 @@ callback.
 </ol>
 
 <h2 id="notifications">Notifications</h2>
-<p>This preview adds the following API changes for notifications:</p>
+<p>This release adds the following API changes for notifications:</p>
 <ul>
   <li>New {@link android.app.NotificationManager#INTERRUPTION_FILTER_ALARMS} filter level that
     corresponds to the new <em>Alarms only</em> do not disturb mode.</li>
@@ -296,7 +299,7 @@ callback.
 </ul>
 
 <h2 id="bluetooth-stylus">Bluetooth Stylus Support</h2>
-<p>This preview provides improved support for user input using a Bluetooth stylus. Users can pair
+<p>This release provides improved support for user input using a Bluetooth stylus. Users can pair
 and connect a compatible Bluetooth stylus with their phone or tablet.  While connected, position
 information from the touch screen is fused with pressure and button information from the stylus to
 provide a greater range of expression than with the touch screen alone. Your app can listen for
@@ -310,7 +313,7 @@ interactions:</p>
 <li>If the user touches a stylus with a button on the screen of your app, the
 {@link android.view.MotionEvent#getToolType(int) getTooltype()} method returns
 {@link android.view.MotionEvent#TOOL_TYPE_STYLUS}.</li>
-<li>For apps targeting M Preview, the
+<li>For apps targeting Android 6.0 (API level 23), the
 {@link android.view.MotionEvent#getButtonState() getButtonState()}
 method returns {@link android.view.MotionEvent#BUTTON_STYLUS_PRIMARY} when the user
 presses the primary stylus button. If the stylus has a second button, the same method returns
@@ -336,7 +339,7 @@ approach to scanning is more power-efficient than what’s provided in the previ
 
 <h2 id="hotspot">Hotspot 2.0 Release 1 Support</h2>
 <p>
-This preview adds support for the Hotspot 2.0 Release 1 spec on Nexus 6 and Nexus 9 devices. To
+This release adds support for the Hotspot 2.0 Release 1 spec on Nexus 6 and Nexus 9 devices. To
 provision Hotspot 2.0 credentials in your app, use the new methods of the
 {@link android.net.wifi.WifiEnterpriseConfig} class, such as
 {@link android.net.wifi.WifiEnterpriseConfig#setPlmn(java.lang.String) setPlmn()} and
@@ -364,7 +367,7 @@ mode, the UI continues to be rendered at the original resolution (such as 1080p)
 
 <h2 id="behavior-themeable-colorstatelists">Themeable ColorStateLists</h2>
 <p>Theme attributes are now supported in
-{@link android.content.res.ColorStateList} for devices running the M Preview. The
+{@link android.content.res.ColorStateList} for devices running on Android 6.0 (API level 23). The
 {@link android.content.res.Resources#getColorStateList(int) getColorStateList()} and
 {@link android.content.res.Resources#getColor(int) getColor()} methods have been deprecated. If
 you are calling these APIs, call the new
@@ -374,7 +377,7 @@ available in the v4 appcompat library via {@link android.support.v4.content.Cont
 
 <h2 id="audio">Audio Features</h2>
 
-<p>This preview adds enhancements to audio processing on Android, including: </p>
+<p>This release adds enhancements to audio processing on Android, including: </p>
 <ul>
   <li>Support for the <a href="http://en.wikipedia.org/wiki/MIDI" class="external-link">MIDI</a>
 protocol, with the new {@link android.media.midi} APIs. Use these APIs to send and receive MIDI
@@ -396,7 +399,7 @@ when an audio device connects or disconnects.</li>
 </ul>
 
 <h2 id="video">Video Features</h2>
-<p>This preview adds new capabilities to the video processing APIs, including:</p>
+<p>This release adds new capabilities to the video processing APIs, including:</p>
 <ul>
 <li>New {@link android.media.MediaSync} class which helps applications to synchronously render
 audio and video streams. The audio buffers are submitted in non-blocking fashion and are
@@ -421,7 +424,7 @@ conjunction with the video.</li>
 </ul>
 
 <h2 id="camera">Camera Features</h2>
-<p>This preview includes the following new APIs for accessing the camera’s flashlight and for
+<p>This release includes the following new APIs for accessing the camera’s flashlight and for
 camera reprocessing of images:</p>
 
 <h3 id="flashlight">Flashlight API</h3>
@@ -476,7 +479,7 @@ maintain a circular image queue of {@link android.media.ImageReader} output imag
 more images, and send them to the {@link android.media.ImageWriter} for camera reprocessing.</p>
 
 <h2 id="afw">Android for Work Features</h2>
-<p>This preview includes the following new APIs for Android for Work:</p>
+<p>This release includes the following new APIs for Android for Work:</p>
 <ul>
   <li><strong>Enhanced controls for Corporate-Owned, Single-Use devices:</strong> The Device Owner
 can now control the following settings to improve management of
@@ -534,8 +537,8 @@ uninstallAllUserCaCerts()}</li>
 installKeyPair()}</li>
 </ul>
 </li>
-<img src="{@docRoot}preview/images/work-profile-screen.png"
-srcset="{@docRoot}preview/images/work-profile-screen.png 1x, {@docRoot}preview/images/work-profile-screen_2x.png 2x"
+<img src="{@docRoot}images/android-6.0/work-profile-screen.png"
+srcset="{@docRoot}images/android-6.0/work-profile-screen.png 1x, {@docRoot}images/android-6.0/work-profile-screen_2x.png 2x"
 style="float:right; margin:0 0 10px 20px" width="282" height="476" />
 <li><strong>Data usage tracking.</strong> A Profile or Device Owner can now query for the
 data usage statistics visible in <strong>Settings > Data</strong> usage by using the new
@@ -562,8 +565,3 @@ unlocked directly to the activity of an app in the managed profile, a toast is d
 the user that they are within the work profile.
 </li>
 </ul>
-
-<p class="note">
-  For a detailed view of all API changes in the M Developer Preview, see the <a href=
-  "{@docRoot}preview/download.html">API Differences Report</a>.
-</p>
