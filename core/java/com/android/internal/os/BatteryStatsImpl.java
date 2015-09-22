@@ -8044,6 +8044,10 @@ public final class BatteryStatsImpl extends BatteryStats {
      * wakelocks. If the screen is on, we just assign the actual cpu time an app used.
      */
     public void updateCpuTimeLocked() {
+        if (mPowerProfile == null) {
+            return;
+        }
+
         if (DEBUG_ENERGY_CPU) {
             Slog.d(TAG, "!Cpu updating!");
         }
@@ -8131,14 +8135,19 @@ public final class BatteryStatsImpl extends BatteryStats {
 
                         // Add the cpu speeds to this UID. These are used as a ratio
                         // for computing the power this UID used.
-                        if (u.mCpuClusterSpeed == null) {
-                            u.mCpuClusterSpeed = new LongSamplingCounter[clusterSpeeds.length][];
+                        final int numClusters = mPowerProfile.getNumCpuClusters();
+                        if (u.mCpuClusterSpeed == null || u.mCpuClusterSpeed.length !=
+                                numClusters) {
+                            u.mCpuClusterSpeed = new LongSamplingCounter[numClusters][];
                         }
 
                         for (int cluster = 0; cluster < clusterSpeeds.length; cluster++) {
-                            if (u.mCpuClusterSpeed[cluster] == null) {
+                            final int speedsInCluster = mPowerProfile.getNumSpeedStepsInCpuCluster(
+                                    cluster);
+                            if (u.mCpuClusterSpeed[cluster] == null || speedsInCluster !=
+                                    u.mCpuClusterSpeed[cluster].length) {
                                 u.mCpuClusterSpeed[cluster] =
-                                        new LongSamplingCounter[clusterSpeeds[cluster].length];
+                                        new LongSamplingCounter[speedsInCluster];
                             }
 
                             final LongSamplingCounter[] cpuSpeeds = u.mCpuClusterSpeed[cluster];
