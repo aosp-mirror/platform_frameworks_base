@@ -30,6 +30,7 @@ import android.util.Slog;
 import android.util.SparseArray;
 import android.view.DisplayInfo;
 
+import android.view.Surface;
 import com.android.server.EventLogTags;
 
 import java.io.PrintWriter;
@@ -57,12 +58,16 @@ public class TaskStack implements DimLayer.DimLayerUser {
 
     /** For comparison with DisplayContent bounds. */
     private Rect mTmpRect = new Rect();
+    private Rect TmpRect2 = new Rect();
 
     /** Content limits relative to the DisplayContent this sits in. */
     private Rect mBounds = new Rect();
 
     /** Whether mBounds is fullscreen */
     private boolean mFullscreen = true;
+
+    // Device rotation as of the last time {@link #mBounds} was set.
+    int mRotation;
 
     /** Support for non-zero {@link android.view.animation.Animation#getBackgroundColor()} */
     DimLayer mAnimationBackgroundSurface;
@@ -152,8 +157,10 @@ public class TaskStack implements DimLayer.DimLayerUser {
 
     private boolean setBounds(Rect bounds) {
         boolean oldFullscreen = mFullscreen;
+        int rotation = Surface.ROTATION_0;
         if (mDisplayContent != null) {
             mDisplayContent.getLogicalDisplayRect(mTmpRect);
+            rotation = mDisplayContent.getDisplayInfo().rotation;
             if (bounds == null) {
                 bounds = mTmpRect;
                 mFullscreen = true;
@@ -171,12 +178,13 @@ public class TaskStack implements DimLayer.DimLayerUser {
             // Can't set to fullscreen if we don't have a display to get bounds from...
             return false;
         }
-        if (mBounds.equals(bounds) && oldFullscreen == mFullscreen) {
+        if (mBounds.equals(bounds) && oldFullscreen == mFullscreen && mRotation == rotation) {
             return false;
         }
 
         mAnimationBackgroundSurface.setBounds(bounds);
         mBounds.set(bounds);
+        mRotation = rotation;
         return true;
     }
 
@@ -188,8 +196,13 @@ public class TaskStack implements DimLayer.DimLayerUser {
         if (mDisplayContent != null) {
             if (bounds != null) {
                 setBounds(bounds);
+            } else if (mFullscreen) {
+                setBounds(null);
             } else {
-                setBounds(mFullscreen ? null : mBounds);
+                TmpRect2.set(mBounds);
+                mDisplayContent.rotateBounds(
+                        mRotation, mDisplayContent.getDisplayInfo().rotation, TmpRect2);
+                setBounds(TmpRect2);
             }
             for (int taskNdx = mTasks.size() - 1; taskNdx >= 0; --taskNdx) {
                 mTasks.get(taskNdx).updateDisplayInfo(mDisplayContent);

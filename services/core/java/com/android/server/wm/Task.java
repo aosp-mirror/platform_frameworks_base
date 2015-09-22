@@ -271,31 +271,8 @@ class Task implements DimLayer.DimLayerUser {
 
         // Device rotation changed. We don't want the task to move around on the screen when
         // this happens, so update the task bounds so it stays in the same place.
-        final int rotationDelta = DisplayContent.deltaRotation(mRotation, newRotation);
-        displayContent.getLogicalDisplayRect(mTmpRect);
-        switch (rotationDelta) {
-            case Surface.ROTATION_0:
-                mTmpRect2.set(mBounds);
-                break;
-            case Surface.ROTATION_90:
-                mTmpRect2.top = mTmpRect.bottom - mBounds.right;
-                mTmpRect2.left = mBounds.top;
-                mTmpRect2.right = mTmpRect2.left + mBounds.height();
-                mTmpRect2.bottom = mTmpRect2.top + mBounds.width();
-                break;
-            case Surface.ROTATION_180:
-                mTmpRect2.top = mTmpRect.bottom - mBounds.bottom;
-                mTmpRect2.left = mTmpRect.right - mBounds.right;
-                mTmpRect2.right = mTmpRect2.left + mBounds.width();
-                mTmpRect2.bottom = mTmpRect2.top + mBounds.height();
-                break;
-            case Surface.ROTATION_270:
-                mTmpRect2.top = mBounds.left;
-                mTmpRect2.left = mTmpRect.right - mBounds.bottom;
-                mTmpRect2.right = mTmpRect2.left + mBounds.height();
-                mTmpRect2.bottom = mTmpRect2.top + mBounds.width();
-                break;
-        }
+        mTmpRect2.set(mBounds);
+        displayContent.rotateBounds(mRotation, newRotation, mTmpRect2);
         setBounds(mTmpRect2, mOverrideConfig);
     }
 
