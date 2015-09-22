@@ -72,15 +72,11 @@ public:
 
 class FontRenderer {
 public:
-    FontRenderer();
+    FontRenderer(const uint8_t* gammaTable);
     ~FontRenderer();
 
     void flushLargeCaches(std::vector<CacheTexture*>& cacheTextures);
     void flushLargeCaches();
-
-    void setGammaTable(const uint8_t* gammaTable) {
-        mGammaTable = gammaTable;
-    }
 
     void setFont(const SkPaint* paint, const SkMatrix& matrix);
 

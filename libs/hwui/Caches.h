@@ -21,6 +21,7 @@
 #include "Dither.h"
 #include "Extensions.h"
 #include "FboCache.h"
+#include "GammaFontRenderer.h"
 #include "GradientCache.h"
 #include "LayerCache.h"
 #include "PatchCache.h"
@@ -52,8 +53,6 @@
 
 namespace android {
 namespace uirenderer {
-
-class GammaFontRenderer;
 
 ///////////////////////////////////////////////////////////////////////////////
 // Caches
@@ -156,7 +155,7 @@ public:
     TextDropShadowCache dropShadowCache;
     FboCache fboCache;
 
-    GammaFontRenderer* fontRenderer;
+    GammaFontRenderer fontRenderer;
 
     TaskManager tasks;
 
@@ -178,8 +177,6 @@ public:
     TextureState& textureState() { return *mTextureState; }
 
 private:
-
-    void initFont();
     void initExtensions();
     void initConstraints();
     void initStaticProperties();

@@ -631,7 +631,7 @@ static void replayBatchList(const std::vector<Batch*>& batchList,
 
 void DeferredDisplayList::flush(OpenGLRenderer& renderer, Rect& dirty) {
     ATRACE_NAME("flush drawing commands");
-    Caches::getInstance().fontRenderer->endPrecaching();
+    Caches::getInstance().fontRenderer.endPrecaching();
 
     if (isEmpty()) return; // nothing to flush
     renderer.restoreToCount(1);

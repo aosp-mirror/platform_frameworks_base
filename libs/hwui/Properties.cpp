@@ -33,6 +33,8 @@ bool Properties::swapBuffersWithDamage = true;
 bool Properties::useBufferAge = true;
 bool Properties::enablePartialUpdates = true;
 
+float Properties::textGamma = DEFAULT_TEXT_GAMMA;
+
 DebugLevel Properties::debugLevel = kDebugDisabled;
 OverdrawColorSet Properties::overdrawColorSet = OverdrawColorSet::Default;
 StencilClipDebug Properties::debugStencilClip = StencilClipDebug::Hide;
@@ -46,6 +48,15 @@ int Properties::overrideSpotShadowStrength = -1;
 
 ProfileType Properties::sProfileType = ProfileType::None;
 bool Properties::sDisableProfileBars = false;
+
+static float property_get_float(const char* key, float defaultValue) {
+    char buf[PROPERTY_VALUE_MAX] = {'\0',};
+
+    if (property_get(PROPERTY_PROFILE, buf, "") > 0) {
+        return atof(buf);
+    }
+    return defaultValue;
+}
 
 bool Properties::load() {
     char property[PROPERTY_VALUE_MAX];
@@ -109,6 +120,8 @@ bool Properties::load() {
     swapBuffersWithDamage = property_get_bool(PROPERTY_SWAP_WITH_DAMAGE, true);
     useBufferAge = property_get_bool(PROPERTY_USE_BUFFER_AGE, true);
     enablePartialUpdates = property_get_bool(PROPERTY_ENABLE_PARTIAL_UPDATES, true);
+
+    textGamma = property_get_float(PROPERTY_TEXT_GAMMA, DEFAULT_TEXT_GAMMA);
 
     return (prevDebugLayersUpdates != debugLayersUpdates)
             || (prevDebugOverdraw != debugOverdraw)
