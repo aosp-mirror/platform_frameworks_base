@@ -90,6 +90,7 @@ abstract class BaseActivity extends Activity {
     @LayoutRes
     private int mLayoutId;
     private final String mTag;
+    private DirectoryContainerView mDirectoryContainer;
 
     public abstract void onDocumentPicked(DocumentInfo doc, @Nullable DocumentContext siblings);
     public abstract void onDocumentsPicked(List<DocumentInfo> docs);
@@ -116,6 +117,7 @@ abstract class BaseActivity extends Activity {
         setContentView(mLayoutId);
 
         mRoots = DocumentsApplication.getRootsCache(this);
+        mDirectoryContainer = (DirectoryContainerView) findViewById(R.id.container_directory);
         mSearchManager = new SearchManager();
 
         // Base classes must update result in their onCreate.
@@ -316,6 +318,7 @@ abstract class BaseActivity extends Activity {
      * @param anim
      */
     final void onCurrentDirectoryChanged(int anim) {
+        mDirectoryContainer.setDrawDisappearingFirst(anim == ANIM_DOWN);
         onDirectoryChanged(anim);
 
         final RootsFragment roots = RootsFragment.get(getFragmentManager());

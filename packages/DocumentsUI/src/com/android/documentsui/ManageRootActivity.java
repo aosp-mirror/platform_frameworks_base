@@ -56,8 +56,6 @@ public class ManageRootActivity extends BaseActivity {
     private Toolbar mToolbar;
     private Spinner mToolbarStack;
 
-    private DirectoryContainerView mDirectoryContainer;
-
     private ItemSelectedListener mStackListener;
     private BaseAdapter mStackAdapter;
 
@@ -72,8 +70,6 @@ public class ManageRootActivity extends BaseActivity {
         final Context context = this;
 
         mDrawer = DrawerController.createDummy();
-
-        mDirectoryContainer = (DirectoryContainerView) findViewById(R.id.container_directory);
 
         mToolbar = (Toolbar) findViewById(R.id.toolbar);
         mToolbar.setTitleTextAppearance(context,
@@ -157,7 +153,6 @@ public class ManageRootActivity extends BaseActivity {
         // If started in manage roots mode, there has to be a cwd (i.e. the root dir of the managed
         // root).
         Preconditions.checkNotNull(cwd);
-        mDirectoryContainer.setDrawDisappearingFirst(anim == ANIM_DOWN);
 
         if (mState.currentSearch != null) {
             // Ongoing search
