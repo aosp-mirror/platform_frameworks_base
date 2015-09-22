@@ -1,0 +1,99 @@
+page.title=定義陰影和裁剪檢視
+
+@jd:body
+
+<div id="tb-wrapper">
+<div id="tb">
+<h2>本課程示範</h2>
+<ol>
+  <li><a href="#Elevation">指定檢視的高度</a></li>
+  <li><a href="#Shadows">自訂檢視陰影和外框</a></li>
+  <li><a href="#Clip">裁剪檢視</a></li>
+</ol>
+<h2>您也應該閱讀</h2>
+<ul>
+  <li><a href="http://www.google.com/design/spec">材料設計規格</a></li>
+  <li><a href="{@docRoot}design/material/index.html">Android 上的材料設計</a></li>
+</ul>
+</div>
+</div>
+
+<p>材料設計為 UI 元素引入高度的概念。高度可以幫助使用者了解每個元素的相對重要性，然後讓使用者把焦點放在手邊的工作上。</p>
+
+<p>檢視的高度以 Z 屬性表示，判斷其陰影的視覺外觀：Z 值越高的檢視投射範圍越大，陰影就越柔和。Z 值較高的檢視會遮住 Z 值較低的檢視。不過，檢視的 Z 值不會影響檢視的大小。</p>
+
+<p>陰影是由較高的上層檢視繪製，因此也和標準檢視裁剪一樣，預設由上層檢視裁剪陰影。</p>
+
+<p>當小工具在執行某些操作動作而暫時升高到檢視平面的上方時，高度對於建立動畫也非常有用。</p>
+
+<p>如需有關材料設計高度的詳細資訊，請參閱 <a href="http://www.google.com/design/spec/what-is-material/objects-in-3d-space.html">3D 空間中的物件</a>。</p>
+
+
+<h2 id="Elevation">指派高度到您的檢視</h2>
+
+<p>檢視的 Z 值有兩個部分： <ul>
+<li>高度：靜態部分。</li>
+<li>解譯：用在動畫的動態部分。</li>
+</ul>
+
+<p><code>Z = elevation + translationZ</code></p>
+
+<img src="{@docRoot}training/material/images/shadows-depth.png" width="580" height="261" alt="" />
+<p class="img-caption"><strong>圖 1</strong> - 不同檢視高度的陰影。</p>
+
+<p>如果要在版面配置定義中設定檢視的高度，請使用 <code>android:elevation</code> 屬性。如果要在操作行為的程式碼中設定檢視的高度，請使用 {@link android.view.View#setElevation View.setElevation()} 方法。</p>
+
+<p>如果要設定檢視的解譯，請使用 {@link android.view.View#setTranslationZ View.setTranslationZ()} 方法。</p>
+
+<p>新的 {@link android.view.ViewPropertyAnimator#z ViewPropertyAnimator.z()} 和 {@link android.view.ViewPropertyAnimator#translationZ ViewPropertyAnimator.translationZ()} 方法可以很輕易地賦予檢視高度栩栩如生的質感。如需詳細資訊，請參閱 {@link android.view.ViewPropertyAnimator} 的 API 參考資料和<a href="{@docRoot}guide/topics/graphics/prop-animation.html">屬性動畫</a>開發人員指南。</p>
+
+<p>您也可以使用 {@link android.animation.StateListAnimator} 以宣告的方式指定這些動畫。當狀態變更觸發動畫時 (例如當使用者按下了按鈕)，這會特別有用。如需詳細資訊，請參閱<a href="{@docRoot}training/material/animations.html#ViewState">動畫顯示檢視狀態變更</a>。</p>
+
+<p>Z 值的測量單位為 dp (密度獨立像素)。</p>
+
+
+<h2 id="Shadows">自訂檢視陰影和外框</h2>
+
+<p>檢視背景可繪項目的邊界決定檢視陰影的預設形狀。<strong>外框</strong>代表圖形物件的外部形狀，而且會定義輕觸回饋的漣漪區域。</p>
+
+<p>我們來看看這個使用背景可繪項目定義的檢視：</p>
+
+<pre>
+&lt;TextView
+    android:id="@+id/myview"
+    ...
+    android:elevation="2dp"
+    android:background="@drawable/myrect" />
+</pre>
+
+<p>背景可繪項目定義為有圓形邊角的長方形：</p>
+
+<pre>
+&lt;!-- res/drawable/myrect.xml -->
+&lt;shape xmlns:android="http://schemas.android.com/apk/res/android"
+       android:shape="rectangle">
+    &lt;solid android:color="#42000000" />
+    &lt;corners android:radius="5dp" />
+&lt;/shape>
+</pre>
+
+<p>因為背景可繪項目定義了檢視的外框，所以檢視投射出有圓形邊角的陰影。如果提供自訂的外框，則會覆寫檢視陰影的預設形狀。</p>
+
+<p>在程式碼中定義檢視的自訂外框：<p>
+
+<ol>
+<li>延伸 {@link android.view.ViewOutlineProvider} 類別。</li>
+<li>覆寫 {@link android.view.ViewOutlineProvider#getOutline getOutline()} 方法。</li>
+<li>使用 {@link android.view.View#setOutlineProvider View.setOutlineProvider()} 方法對檢視指定新的外框提供者。</li>
+</ol>
+
+<p>您可以使用 {@link android.graphics.Outline} 類別中的方法，建立橢圓形外框和有圓形邊角的長方形外框。檢視的預設外框提供者會從檢視的背景取得外框。如果要避免檢視投射出陰影，請將檢視的外框提供者設定為 <code>null</code>。</p>
+
+
+<h2 id="Clip">裁剪檢視</h2>
+
+<p>裁剪檢視可以讓您輕鬆地變更檢視的形狀。您可以裁剪檢視，讓檢視與其他設計元素有一致的外觀，或者變更檢視的形狀來回應使用者的輸入。您可以使用 {@link android.view.View#setClipToOutline View.setClipToOutline()} 方法或 <code>android:clipToOutline</code> 屬性，將檢視裁剪為其外框區域。依照 {@link android.graphics.Outline#canClip Outline.canClip()} 方法的定義，只有長方形、圓形和圓角長方形的外框才支援裁剪。</p>
+
+<p>如果要將檢視裁剪為可繪項目的形狀，請將可繪項目設定為檢視的背景 (如上所示)，然後呼叫 {@link android.view.View#setClipToOutline View.setClipToOutline()} 方法。</p>
+
+<p>裁剪檢視是一種耗費資源的操作，所以請不要將您用來裁剪檢視的形狀做成動畫。如果想要達到這種效果，請使用<a href="{@docRoot}training/material/animations.html#Reveal">顯示效果</a>動畫。</p> 
