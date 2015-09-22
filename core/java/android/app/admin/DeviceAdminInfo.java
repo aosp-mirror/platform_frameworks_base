@@ -20,6 +20,7 @@ import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 import org.xmlpull.v1.XmlSerializer;
 
+import android.annotation.NonNull;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.pm.ActivityInfo;
@@ -360,6 +361,7 @@ public final class DeviceAdminInfo implements Parcelable {
     /**
      * Return the component of the receiver that implements this device admin.
      */
+    @NonNull
     public ComponentName getComponent() {
         return new ComponentName(mReceiver.activityInfo.packageName,
                 mReceiver.activityInfo.name);

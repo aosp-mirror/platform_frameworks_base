@@ -1226,7 +1226,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
 
     void removeUserData(int userHandle) {
         synchronized (this) {
-            if (userHandle == UserHandle.USER_OWNER) {
+            if (userHandle == UserHandle.USER_SYSTEM) {
                 Slog.w(LOG_TAG, "Tried to remove device policy file for user 0! Ignoring.");
                 return;
             }
@@ -1372,12 +1372,12 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 && !hasUserSetupCompleted(userId);
 
         if (reqPolicy == DeviceAdminInfo.USES_POLICY_DEVICE_OWNER) {
-            if ((userId == UserHandle.USER_OWNER && (ownsDevice || ownsInitialization))
+            if ((userId == UserHandle.USER_SYSTEM && (ownsDevice || ownsInitialization))
                     || (ownsDevice && ownsProfile)) {
                 return true;
             }
         } else if (reqPolicy == DeviceAdminInfo.USES_POLICY_PROFILE_OWNER) {
-            if ((userId == UserHandle.USER_OWNER && ownsDevice) || ownsProfile
+            if ((userId == UserHandle.USER_SYSTEM && ownsDevice) || ownsProfile
                     || ownsInitialization) {
                 return true;
             }
@@ -1892,7 +1892,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     }
 
     private void onLockSettingsReady() {
-        getUserData(UserHandle.USER_OWNER);
+        getUserData(UserHandle.USER_SYSTEM);
         loadOwners();
         cleanUpOldUsers();
         // Register an observer for watching for user setup complete.
@@ -3107,10 +3107,10 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
 
     private void setDoNotAskCredentialsOnBoot() {
         synchronized (this) {
-            DevicePolicyData policyData = getUserData(UserHandle.USER_OWNER);
+            DevicePolicyData policyData = getUserData(UserHandle.USER_SYSTEM);
             if (!policyData.doNotAskCredentialsOnBoot) {
                 policyData.doNotAskCredentialsOnBoot = true;
-                saveSettingsLocked(UserHandle.USER_OWNER);
+                saveSettingsLocked(UserHandle.USER_SYSTEM);
             }
         }
     }
@@ -3120,7 +3120,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         mContext.enforceCallingOrSelfPermission(
                 android.Manifest.permission.QUERY_DO_NOT_ASK_CREDENTIALS_ON_BOOT, null);
         synchronized (this) {
-            DevicePolicyData policyData = getUserData(UserHandle.USER_OWNER);
+            DevicePolicyData policyData = getUserData(UserHandle.USER_SYSTEM);
             return policyData.doNotAskCredentialsOnBoot;
         }
     }
@@ -3475,20 +3475,14 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             final ActiveAdmin admin = getActiveAdminForCallerLocked(null,
                     DeviceAdminInfo.USES_POLICY_WIPE_DATA);
 
-            final String source;
-            final ComponentName cname = admin.info.getComponent();
-            if (cname != null) {
-                source = cname.flattenToShortString();
-            } else {
-                source = admin.info.getPackageName();
-            }
+            final String source = admin.info.getComponent().flattenToShortString();
 
             long ident = binderClearCallingIdentity();
             try {
                 if ((flags & WIPE_RESET_PROTECTION_DATA) != 0) {
                     boolean ownsInitialization = isDeviceInitializer(admin.info.getPackageName())
                             && !hasUserSetupCompleted(userHandle);
-                    if (userHandle != UserHandle.USER_OWNER
+                    if (userHandle != UserHandle.USER_SYSTEM
                             || !(isDeviceOwner(admin.info.getPackageName())
                                     || ownsInitialization)) {
                         throw new SecurityException(
@@ -3510,7 +3504,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     }
 
     private void wipeDeviceOrUserLocked(boolean wipeExtRequested, final int userHandle, String reason) {
-        if (userHandle == UserHandle.USER_OWNER) {
+        if (userHandle == UserHandle.USER_SYSTEM) {
             wipeDataLocked(wipeExtRequested, reason);
         } else {
             mHandler.post(new Runnable() {
@@ -3519,7 +3513,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                     try {
                         IActivityManager am = getIActivityManager();
                         if (am.getCurrentUser().id == userHandle) {
-                            am.switchUser(UserHandle.USER_OWNER);
+                            am.switchUser(UserHandle.USER_SYSTEM);
                         }
 
                         boolean isManagedProfile = isManagedProfile(userHandle);
@@ -3733,8 +3727,8 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         synchronized(this) {
             Preconditions.checkNotNull(who, "ComponentName is null");
 
-            // Only check if owner has set global proxy. We don't allow other users to set it.
-            DevicePolicyData policy = getUserData(UserHandle.USER_OWNER);
+            // Only check if system user has set global proxy. We don't allow other users to set it.
+            DevicePolicyData policy = getUserData(UserHandle.USER_SYSTEM);
             ActiveAdmin admin = getActiveAdminForCallerLocked(who,
                     DeviceAdminInfo.USES_POLICY_SETS_GLOBAL_PROXY);
 
@@ -3750,8 +3744,8 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 }
             }
 
-            // If the user is not the owner, don't set the global proxy. Fail silently.
-            if (UserHandle.getCallingUserId() != UserHandle.USER_OWNER) {
+            // If the user is not system, don't set the global proxy. Fail silently.
+            if (UserHandle.getCallingUserId() != UserHandle.USER_SYSTEM) {
                 Slog.w(LOG_TAG, "Only the owner is allowed to set the global proxy. User "
                         + UserHandle.getCallingUserId() + " is not permitted.");
                 return null;
@@ -3786,7 +3780,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         }
         enforceCrossUserPermission(userHandle);
         synchronized(this) {
-            DevicePolicyData policy = getUserData(UserHandle.USER_OWNER);
+            DevicePolicyData policy = getUserData(UserHandle.USER_SYSTEM);
             // Scan through active admins and find if anyone has already
             // set the global proxy.
             final int N = policy.mAdminList.size();
@@ -3874,10 +3868,9 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         final int userHandle = UserHandle.getCallingUserId();
         synchronized (this) {
             // Check for permissions
-            // Only owner can set storage encryption
-            if (userHandle != UserHandle.USER_OWNER
-                    || UserHandle.getCallingUserId() != UserHandle.USER_OWNER) {
-                Slog.w(LOG_TAG, "Only owner is allowed to set storage encryption. User "
+            // Only system user can set storage encryption
+            if (userHandle != UserHandle.USER_SYSTEM) {
+                Slog.w(LOG_TAG, "Only owner/system user is allowed to set storage encryption. User "
                         + UserHandle.getCallingUserId() + " is not permitted.");
                 return 0;
             }
@@ -3896,7 +3889,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 saveSettingsLocked(userHandle);
             }
 
-            DevicePolicyData policy = getUserData(UserHandle.USER_OWNER);
+            DevicePolicyData policy = getUserData(UserHandle.USER_SYSTEM);
             // (2) Compute "max" for all admins
             boolean newRequested = false;
             final int N = policy.mAdminList.size();
@@ -4259,7 +4252,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             try {
                 IBackupManager ibm = IBackupManager.Stub.asInterface(
                         ServiceManager.getService(Context.BACKUP_SERVICE));
-                ibm.setBackupServiceActive(UserHandle.USER_OWNER, false);
+                ibm.setBackupServiceActive(UserHandle.USER_SYSTEM, false);
             } catch (RemoteException e) {
                 throw new IllegalStateException("Failed deactivating backup service.", e);
             } finally {
@@ -4314,7 +4307,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 return null;
             }
             String deviceOwnerPackage = mOwners.getDeviceOwnerPackageName();
-            return getApplicationLabel(deviceOwnerPackage, UserHandle.USER_OWNER);
+            return getApplicationLabel(deviceOwnerPackage, UserHandle.USER_SYSTEM);
         }
     }
 
@@ -4325,7 +4318,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             return null;
         }
 
-        DevicePolicyData policy = getUserData(UserHandle.USER_OWNER);
+        DevicePolicyData policy = getUserData(UserHandle.USER_SYSTEM);
         final int n = policy.mAdminList.size();
         for (int i = 0; i < n; i++) {
             ActiveAdmin admin = policy.mAdminList.get(i);
@@ -4351,7 +4344,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             throw new SecurityException("clearDeviceOwner can only be called by the device owner");
         }
         synchronized (this) {
-            clearUserPoliciesLocked(new UserHandle(UserHandle.USER_OWNER));
+            clearUserPoliciesLocked(new UserHandle(UserHandle.USER_SYSTEM));
 
             mOwners.clearDeviceOwner();
             mOwners.writeDeviceOwner();
@@ -4361,7 +4354,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             try {
                 IBackupManager ibm = IBackupManager.Stub.asInterface(
                         ServiceManager.getService(Context.BACKUP_SERVICE));
-                ibm.setBackupServiceActive(UserHandle.USER_OWNER, true);
+                ibm.setBackupServiceActive(UserHandle.USER_SYSTEM, true);
             } catch (RemoteException e) {
                 throw new IllegalStateException("Failed reactivating backup service.", e);
             } finally {
@@ -4611,7 +4604,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                     removeActiveAdmin(who, userId);
                 }
 
-                if (userId == UserHandle.USER_OWNER) {
+                if (userId == UserHandle.USER_SYSTEM) {
                     Settings.Global.putInt(mContext.getContentResolver(),
                             Settings.Global.DEVICE_PROVISIONED, 1);
                 }
@@ -4794,7 +4787,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
 
         int callingUid = binderGetCallingUid();
         if (callingUid == Process.SHELL_UID || callingUid == Process.ROOT_UID) {
-            if (!hasUserSetupCompleted(UserHandle.USER_OWNER)) {
+            if (!hasUserSetupCompleted(UserHandle.USER_SYSTEM)) {
                 return;
             }
             // STOPSHIP Do proper check in split user mode
@@ -4818,7 +4811,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 android.Manifest.permission.MANAGE_PROFILE_AND_DEVICE_OWNERS, null);
         // STOPSHIP Do proper check in split user mode
         if (!UserManager.isSplitSystemUser()) {
-            if (hasUserSetupCompleted(UserHandle.USER_OWNER)) {
+            if (hasUserSetupCompleted(UserHandle.USER_SYSTEM)) {
                 throw new IllegalStateException("Cannot set the device owner if the device is "
                         + "already set-up");
             }
@@ -5526,7 +5519,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
 
             long id = binderClearCallingIdentity();
             try {
-                int userId = UserHandle.USER_OWNER;
+                int userId = UserHandle.USER_SYSTEM;
                 if (userHandle != null) {
                     userId = userHandle.getIdentifier();
                 }
@@ -5563,13 +5556,13 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     @Override
     public void setUserRestriction(ComponentName who, String key, boolean enabled) {
         Preconditions.checkNotNull(who, "ComponentName is null");
-        final UserHandle user = new UserHandle(UserHandle.getCallingUserId());
-        final int userHandle = user.getIdentifier();
+        final int userHandle = UserHandle.getCallingUserId();
+        final UserHandle user = new UserHandle(userHandle);
         synchronized (this) {
             ActiveAdmin activeAdmin =
                     getActiveAdminForCallerLocked(who, DeviceAdminInfo.USES_POLICY_PROFILE_OWNER);
             boolean isDeviceOwner = isDeviceOwner(activeAdmin.info.getPackageName());
-            if (!isDeviceOwner && userHandle != UserHandle.USER_OWNER
+            if (!isDeviceOwner && userHandle != UserHandle.USER_SYSTEM
                     && DEVICE_OWNER_USER_RESTRICTIONS.contains(key)) {
                 throw new SecurityException("Profile owners cannot set user restriction " + key);
             }
@@ -5594,8 +5587,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                     } else if (UserManager.DISALLOW_ADJUST_VOLUME.equals(key)) {
                         iAudioService.setMasterMute(true, 0, mContext.getPackageName(),
                                 userHandle);
-                    }
-                    if (UserManager.DISALLOW_CONFIG_WIFI.equals(key)) {
+                    } else if (UserManager.DISALLOW_CONFIG_WIFI.equals(key)) {
                         Settings.Secure.putIntForUser(mContext.getContentResolver(),
                                 Settings.Secure.WIFI_NETWORKS_AVAILABLE_NOTIFICATION_ON, 0,
                                 userHandle);
@@ -5607,8 +5599,9 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                                 Settings.Secure.LOCATION_PROVIDERS_ALLOWED, "",
                                 userHandle);
                     } else if (UserManager.DISALLOW_DEBUGGING_FEATURES.equals(key)) {
-                        // Only disable adb if changing for primary user, since it is global
-                        if (userHandle == UserHandle.USER_OWNER) {
+                        // Only disable adb if changing for system user, since it is global
+                        // TODO: should this be admin user?
+                        if (userHandle == UserHandle.USER_SYSTEM) {
                             Settings.Global.putStringForUser(mContext.getContentResolver(),
                                     Settings.Global.ADB_ENABLED, "0", userHandle);
                         }
@@ -6497,8 +6490,8 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         mContext.enforceCallingOrSelfPermission(permission.NOTIFY_PENDING_SYSTEM_UPDATE,
                 "Only the system update service can broadcast update information");
 
-        if (UserHandle.getCallingUserId() != UserHandle.USER_OWNER) {
-            Slog.w(LOG_TAG, "Only the system update service in the primary user " +
+        if (UserHandle.getCallingUserId() != UserHandle.USER_SYSTEM) {
+            Slog.w(LOG_TAG, "Only the system update service in the system user " +
                     "can broadcast update information.");
             return;
         }
