@@ -312,10 +312,10 @@ TessellationCache::TessellationCache()
         , mShadowCache(LruCache<ShadowDescription, Task<vertexBuffer_pair_t*>*>::kUnlimitedCapacity) {
     char property[PROPERTY_VALUE_MAX];
     if (property_get(PROPERTY_VERTEX_CACHE_SIZE, property, nullptr) > 0) {
-        INIT_LOGD("  Setting %s cache size to %sMB", name, property);
+        INIT_LOGD("  Setting tessellation cache size to %sMB", property);
         setMaxSize(MB(atof(property)));
     } else {
-        INIT_LOGD("  Using default %s cache size of %.2fMB", name, DEFAULT_VERTEX_CACHE_SIZE);
+        INIT_LOGD("  Using default tessellation cache size of %.2fMB", DEFAULT_VERTEX_CACHE_SIZE);
     }
 
     mCache.setOnEntryRemovedListener(&mBufferRemovedListener);

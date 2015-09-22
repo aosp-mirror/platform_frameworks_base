@@ -37,9 +37,6 @@ public:
     virtual uint32_t getFontRendererCount() const = 0;
     virtual uint32_t getFontRendererSize(uint32_t fontRenderer, GLenum format) const = 0;
 
-    virtual void describe(ProgramDescription& description, const SkPaint* paint) const = 0;
-    virtual void setupProgram(ProgramDescription& description, Program& program) const = 0;
-
     virtual void endPrecaching() = 0;
 
     static GammaFontRenderer* createRenderer();
@@ -51,52 +48,6 @@ protected:
     int mWhiteThreshold;
 
     float mGamma;
-};
-
-class ShaderGammaFontRenderer: public GammaFontRenderer {
-public:
-    ~ShaderGammaFontRenderer() {
-        delete mRenderer;
-    }
-
-    void clear() override {
-        delete mRenderer;
-        mRenderer = nullptr;
-    }
-
-    void flush() override {
-        if (mRenderer) {
-            mRenderer->flushLargeCaches();
-        }
-    }
-
-    FontRenderer& getFontRenderer(const SkPaint* paint) override {
-        if (!mRenderer) {
-            mRenderer = new FontRenderer;
-        }
-        return *mRenderer;
-    }
-
-    uint32_t getFontRendererCount() const override {
-        return 1;
-    }
-
-    uint32_t getFontRendererSize(uint32_t fontRenderer, GLenum format) const override {
-        return mRenderer ? mRenderer->getCacheSize(format) : 0;
-    }
-
-    void describe(ProgramDescription& description, const SkPaint* paint) const override;
-    void setupProgram(ProgramDescription& description, Program& program) const override;
-
-    void endPrecaching() override;
-
-private:
-    ShaderGammaFontRenderer(bool multiGamma);
-
-    FontRenderer* mRenderer;
-    bool mMultiGamma;
-
-    friend class GammaFontRenderer;
 };
 
 class LookupGammaFontRenderer: public GammaFontRenderer {
@@ -132,12 +83,6 @@ public:
         return mRenderer ? mRenderer->getCacheSize(format) : 0;
     }
 
-    void describe(ProgramDescription& description, const SkPaint* paint) const override {
-    }
-
-    void setupProgram(ProgramDescription& description, Program& program) const override {
-    }
-
     void endPrecaching() override;
 
 private:
@@ -166,12 +111,6 @@ public:
         if (!mRenderers[fontRenderer]) return 0;
 
         return mRenderers[fontRenderer]->getCacheSize(format);
-    }
-
-    void describe(ProgramDescription& description, const SkPaint* paint) const override {
-    }
-
-    void setupProgram(ProgramDescription& description, Program& program) const override {
     }
 
     void endPrecaching() override;
