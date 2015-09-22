@@ -3,18 +3,19 @@ page.image=images/cards/card-app-linking_2x.png
 page.keywords=applinking, deeplinks, intents
 @jd:body
 
-<div id="qv-wrapper">
-  <div id="qv">
-    <h2>In this document</h2>
-      <ol>
+<div id="tb-wrapper">
+  <div id="tb">
+    <h2>This lesson teaches you to</h2>
+    <ol>
         <li><a href="#url-handling">Understanding URL Request Handling</a> </li>
         <li><a href="#intent-handler">Create an Intent Handler for URLs</a></li>
         <li><a href="#request-verify">Request App Links Verification</a></li>
         <li><a href="#web-assoc">Declare Website Associations</a></li>
         <li><a href="#testing">Testing App Links</a></li>
-      </ol>
+    </ol>
   </div>
 </div>
+
 
 
 <p>

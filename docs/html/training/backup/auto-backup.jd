@@ -4,17 +4,23 @@ page.keywords=backup, autobackup, preview
 page.image=images/cards/card-auto-backup_2x.png
 @jd:body
 
-<div id="qv-wrapper">
-  <div id="qv">
-    <h2>In this document</h2>
-      <ol>
-        <li><a href="#overview">Overview</a></li>
-        <li><a href="#configuring">Configuring Data Backup</a></li>
-        <li><a href="#testing">Testing Backup Configuration</a></li>
-        <li><a href="#issues">Known Issues</a></li>
-      </ol>
+<div id="tb-wrapper">
+  <div id="tb">
+    <h2>This lesson teaches you to</h2>
+    <ol>
+        <li><a href="#configuring">Configure Data Backup</a></li>
+        <li><a href="#testing">Test Backup Configuration</a></li>
+        <li><a href="#issues">Anticipate Known Issues</a></li>
+    </ol>
+    <h2>You should also read</h2>
+    <ul>
+      <li><a
+        href="http://developer.android.com/guide/topics/data/backup.html">Data
+        Backup</a></li>
+    </ul>
   </div>
 </div>
+
 
 <p>
   Users often invest significant time and effort creating data and setting preferences within
