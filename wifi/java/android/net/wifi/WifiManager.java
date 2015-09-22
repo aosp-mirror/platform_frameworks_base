@@ -1315,6 +1315,30 @@ public class WifiManager {
     }
 
     /**
+     * An augmented version of getScanResults that returns ScanResults as well as OSU information
+     * wrapped in ScanInfo objects.
+     * @return
+     */
+    public List<ScanInfo> getScanInfos() {
+        try {
+            return mService.getScanInfos(mContext.getOpPackageName());
+        } catch (RemoteException e) {
+            return null;
+        }
+    }
+
+    /**
+     * Notify the OSU framework about the currently selected OSU.
+     * @param osuID The OSU ID from ScanInfo.getOsuIdentity()
+     */
+    public void setOsuSelection(int osuID) {
+        try {
+            mService.setOsuSelection(osuID);
+        } catch (RemoteException e) {
+        }
+    }
+
+    /**
      * Check if scanning is always available.
      *
      * If this return {@code true}, apps can issue {@link #startScan} and fetch scan results

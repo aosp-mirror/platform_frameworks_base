@@ -208,6 +208,12 @@ public class ConnectivityManager {
      * {@link android.content.Intent#getParcelableExtra(String)}.
      */
     public static final String EXTRA_CAPTIVE_PORTAL = "android.net.extra.CAPTIVE_PORTAL";
+
+    /**
+     * Key for passing a URL to the captive portal login activity.
+     */
+    public static final String EXTRA_CAPTIVE_PORTAL_URL = "android.net.extra.CAPTIVE_PORTAL_URL";
+
     /**
      * Broadcast action to indicate the change of data activity status
      * (idle or active) on a network in a recent period.
