@@ -73,6 +73,7 @@ import android.view.animation.AccelerateDecelerateInterpolator;
 import android.view.animation.Interpolator;
 import android.view.inputmethod.InputConnection;
 import android.view.inputmethod.InputMethodManager;
+import android.view.WindowCallbacks;
 import android.widget.Scroller;
 
 import com.android.internal.R;
@@ -115,6 +116,12 @@ public final class ViewRootImpl implements ViewParent,
     private static final boolean DEBUG_INPUT_STAGES = false || LOCAL_LOGV;
 
     /**
+     * Set to false if we do not want to use the multi threaded renderer. Note that by disabling
+     * this, WindowCallbacks will not fire.
+     */
+    private static final boolean USE_MT_RENDERER = true;
+
+    /**
      * Set this system property to true to force the view hierarchy to render
      * at 60 Hz. This can be used to measure the potential framerate.
      */
@@ -132,11 +139,11 @@ public final class ViewRootImpl implements ViewParent,
 
     static final ThreadLocal<HandlerActionQueue> sRunQueues = new ThreadLocal<HandlerActionQueue>();
 
-    static final ArrayList<Runnable> sFirstDrawHandlers = new ArrayList<Runnable>();
+    static final ArrayList<Runnable> sFirstDrawHandlers = new ArrayList();
     static boolean sFirstDrawComplete = false;
+    static final ArrayList<WindowCallbacks> sWindowCallbacks = new ArrayList();
 
-    static final ArrayList<ComponentCallbacks> sConfigCallbacks
-            = new ArrayList<ComponentCallbacks>();
+    static final ArrayList<ComponentCallbacks> sConfigCallbacks = new ArrayList();
 
     final Context mContext;
     final IWindowSession mWindowSession;
@@ -414,6 +421,22 @@ public final class ViewRootImpl implements ViewParent,
     public static void addConfigCallback(ComponentCallbacks callback) {
         synchronized (sConfigCallbacks) {
             sConfigCallbacks.add(callback);
+        }
+    }
+
+    public static void addWindowCallbacks(WindowCallbacks callback) {
+        if (USE_MT_RENDERER) {
+            synchronized (sWindowCallbacks) {
+                sWindowCallbacks.add(callback);
+            }
+        }
+    }
+
+    public static void removeWindowCallbacks(WindowCallbacks callback) {
+        if (USE_MT_RENDERER) {
+            synchronized (sWindowCallbacks) {
+                sWindowCallbacks.remove(callback);
+            }
         }
     }
 
@@ -1378,6 +1401,7 @@ public final class ViewRootImpl implements ViewParent,
             mAttachInfo.mWindowVisibility = viewVisibility;
             host.dispatchWindowVisibilityChanged(viewVisibility);
             if (viewVisibility != View.VISIBLE || mNewSurfaceNeeded) {
+                endDragResizing();
                 destroyHardwareResources();
             }
             if (viewVisibility == View.GONE) {
@@ -1701,14 +1725,20 @@ public final class ViewRootImpl implements ViewParent,
                 final boolean dragResizing = (relayoutResult
                         & WindowManagerGlobal.RELAYOUT_RES_DRAG_RESIZING) != 0;
                 if (mDragResizing != dragResizing) {
-                    mDragResizing = dragResizing;
-                    mFullRedrawNeeded = true;
+                    if (dragResizing) {
+                        startDragResizing(frame);
+                    } else {
+                        // We shouldn't come here, but if we come we should end the resize.
+                        endDragResizing();
+                    }
                 }
-                if (dragResizing) {
-                    mCanvasOffsetX = mWinFrame.left;
-                    mCanvasOffsetY = mWinFrame.top;
-                } else {
-                    mCanvasOffsetX = mCanvasOffsetY = 0;
+                if (!USE_MT_RENDERER) {
+                    if (dragResizing) {
+                        mCanvasOffsetX = mWinFrame.left;
+                        mCanvasOffsetY = mWinFrame.top;
+                    } else {
+                        mCanvasOffsetX = mCanvasOffsetY = 0;
+                    }
                 }
             } catch (RemoteException e) {
             }
@@ -6635,6 +6665,15 @@ public final class ViewRootImpl implements ViewParent,
                 Configuration newConfig) {
             final ViewRootImpl viewAncestor = mViewAncestor.get();
             if (viewAncestor != null) {
+                // Tell all listeners that we are resizing the window so that the chrome can get
+                // updated as fast as possible on a separate thread,
+                if (mViewAncestor.get().mDragResizing) {
+                    synchronized (sWindowCallbacks) {
+                        for (int i = sWindowCallbacks.size() - 1; i >= 0; i--) {
+                            sWindowCallbacks.get(i).onWindowSizeIsChanging(frame);
+                        }
+                    }
+                }
                 viewAncestor.dispatchResized(frame, overscanInsets, contentInsets,
                         visibleInsets, stableInsets, outsets, reportDraw, newConfig);
             }
@@ -6801,6 +6840,36 @@ public final class ViewRootImpl implements ViewParent,
         rq = new HandlerActionQueue();
         sRunQueues.set(rq);
         return rq;
+    }
+
+    /**
+     * Start a drag resizing which will inform all listeners that a window resize is taking place.
+     */
+    private void startDragResizing(Rect initialBounds) {
+        if (!mDragResizing) {
+            mDragResizing = true;
+            synchronized (sWindowCallbacks) {
+                for (int i = sWindowCallbacks.size() - 1; i >= 0; i--) {
+                    sWindowCallbacks.get(i).onWindowDragResizeStart(initialBounds);
+                }
+            }
+            mFullRedrawNeeded = true;
+        }
+    }
+
+    /**
+     * End a drag resize which will inform all listeners that a window resize has ended.
+     */
+    private void endDragResizing() {
+        if (mDragResizing) {
+            mDragResizing = false;
+            synchronized (sWindowCallbacks) {
+                for (int i = sWindowCallbacks.size() - 1; i >= 0; i--) {
+                    sWindowCallbacks.get(i).onWindowDragResizeEnd();
+                }
+            }
+            mFullRedrawNeeded = true;
+        }
     }
 
     /**

@@ -188,7 +188,7 @@ public class MultiProducerActivity extends Activity implements OnClickListener {
                 // This call should be done while the rendernode's displaylist is produced.
                 // For simplicity of this test we do this before we kick off the draw.
                 mContent.getLocationInSurface(surfaceOrigin);
-                mRenderer.setContentOverdrawProtectionBounds(surfaceOrigin[0], surfaceOrigin[1],
+                mRenderer.setContentDrawBounds(surfaceOrigin[0], surfaceOrigin[1],
                         surfaceOrigin[0] + mContent.getWidth(),
                         surfaceOrigin[1] + mContent.getHeight());
                 // Determine new position for frame.

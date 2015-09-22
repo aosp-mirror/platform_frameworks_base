@@ -461,10 +461,10 @@ static void android_view_ThreadedRendererd_drawRenderNode(JNIEnv* env, jobject c
     proxy->drawRenderNode(renderNode);
 }
 
-static void android_view_ThreadedRenderer_setContentOverdrawProtectionBounds(JNIEnv* env,
+static void android_view_ThreadedRenderer_setContentDrawBounds(JNIEnv* env,
         jobject clazz, jlong proxyPtr, jint left, jint top, jint right, jint bottom) {
     RenderProxy* proxy = reinterpret_cast<RenderProxy*>(proxyPtr);
-    proxy->setContentOverdrawProtectionBounds(left, top, right, bottom);
+    proxy->setContentDrawBounds(left, top, right, bottom);
 }
 
 // ----------------------------------------------------------------------------
@@ -522,8 +522,7 @@ static const JNINativeMethod gMethods[] = {
     { "nAddRenderNode", "(JJZ)V", (void*) android_view_ThreadedRenderer_addRenderNode},
     { "nRemoveRenderNode", "(JJ)V", (void*) android_view_ThreadedRenderer_removeRenderNode},
     { "nDrawRenderNode", "(JJ)V", (void*) android_view_ThreadedRendererd_drawRenderNode},
-    { "nSetContentOverdrawProtectionBounds", "(JIIII)V",
-                (void*)android_view_ThreadedRenderer_setContentOverdrawProtectionBounds},
+    { "nSetContentDrawBounds", "(JIIII)V", (void*)android_view_ThreadedRenderer_setContentDrawBounds},
 };
 
 int register_android_view_ThreadedRenderer(JNIEnv* env) {
