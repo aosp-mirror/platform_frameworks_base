@@ -483,6 +483,7 @@ aidl_files := \
 	frameworks/base/wifi/java/android/net/wifi/p2p/nsd/WifiP2pServiceInfo.aidl \
 	frameworks/base/wifi/java/android/net/wifi/WpsInfo.aidl \
 	frameworks/base/wifi/java/android/net/wifi/ScanResult.aidl \
+        frameworks/base/wifi/java/android/net/wifi/ScanInfo.aidl \
 	frameworks/base/wifi/java/android/net/wifi/WifiEnterpriseConfig.aidl \
 	frameworks/base/wifi/java/android/net/wifi/WifiConfiguration.aidl \
 	frameworks/base/wifi/java/android/net/wifi/WifiInfo.aidl \

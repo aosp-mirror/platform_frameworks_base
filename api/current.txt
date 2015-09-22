@@ -18250,6 +18250,7 @@ package android.net {
     field public static final java.lang.String CONNECTIVITY_ACTION = "android.net.conn.CONNECTIVITY_CHANGE";
     field public static final deprecated int DEFAULT_NETWORK_PREFERENCE = 1; // 0x1
     field public static final java.lang.String EXTRA_CAPTIVE_PORTAL = "android.net.extra.CAPTIVE_PORTAL";
+    field public static final java.lang.String EXTRA_CAPTIVE_PORTAL_URL = "android.net.extra.CAPTIVE_PORTAL_URL";
     field public static final java.lang.String EXTRA_EXTRA_INFO = "extraInfo";
     field public static final java.lang.String EXTRA_IS_FAILOVER = "isFailover";
     field public static final java.lang.String EXTRA_NETWORK = "android.net.extra.NETWORK";
@@ -19156,6 +19157,22 @@ package android.net.sip {
 
 package android.net.wifi {
 
+  public class ScanInfo implements android.os.Parcelable {
+    ctor public ScanInfo(android.net.wifi.ScanResult);
+    ctor public ScanInfo(long, int, java.lang.String, java.lang.String, java.lang.String, java.lang.String, byte[], int);
+    method public int describeContents();
+    method public long getBssid();
+    method public byte[] getIconData();
+    method public java.lang.String getIconType();
+    method public java.lang.String getName();
+    method public int getOsuIdentity();
+    method public int getRssi();
+    method public android.net.wifi.ScanResult getScanResult();
+    method public java.lang.String getServiceDescription();
+    method public java.lang.String getSsid();
+    method public void writeToParcel(android.os.Parcel, int);
+  }
+
   public class ScanResult implements android.os.Parcelable {
     method public int describeContents();
     method public boolean is80211mcResponder();
@@ -19356,6 +19373,7 @@ package android.net.wifi {
     method public java.util.List<android.net.wifi.WifiConfiguration> getConfiguredNetworks();
     method public android.net.wifi.WifiInfo getConnectionInfo();
     method public android.net.DhcpInfo getDhcpInfo();
+    method public java.util.List<android.net.wifi.ScanInfo> getScanInfos();
     method public java.util.List<android.net.wifi.ScanResult> getScanResults();
     method public int getWifiState();
     method public boolean is5GHzBandSupported();
@@ -19371,6 +19389,7 @@ package android.net.wifi {
     method public boolean reconnect();
     method public boolean removeNetwork(int);
     method public boolean saveConfiguration();
+    method public void setOsuSelection(int);
     method public void setTdlsEnabled(java.net.InetAddress, boolean);
     method public void setTdlsEnabledWithMacAddress(java.lang.String, boolean);
     method public boolean setWifiEnabled(boolean);

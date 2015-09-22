@@ -23,6 +23,7 @@ import android.net.wifi.WifiInfo;
 import android.net.wifi.ScanSettings;
 import android.net.wifi.WifiChannel;
 import android.net.wifi.ScanResult;
+import android.net.wifi.ScanInfo;
 import android.net.wifi.WifiConnectionStatistics;
 import android.net.wifi.WifiActivityEnergyInfo;
 import android.net.Network;
@@ -69,6 +70,10 @@ interface IWifiManager
     List<ScanResult> getScanResults(String callingPackage);
 
     void disconnect();
+
+    List<ScanInfo> getScanInfos(String callingPackage);
+
+    void setOsuSelection(int osuID);
 
     void reconnect();
 
