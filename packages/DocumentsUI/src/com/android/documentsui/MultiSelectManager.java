@@ -45,6 +45,8 @@ import android.view.View;
 import com.android.documentsui.Events.InputEvent;
 import com.android.documentsui.Events.MotionInputEvent;
 
+import com.google.android.collect.Lists;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -113,8 +115,11 @@ public final class MultiSelectManager {
                     }
                 };
 
-        CompositeOnGestureListener<? extends Object> compositeListener =
-                new CompositeOnGestureListener<>(listener, gestureDelegate);
+        CompositeOnGestureListener compositeListener =
+                new CompositeOnGestureListener(
+                        Lists.<OnGestureListener>newArrayList(listener, gestureDelegate),
+                        Lists.<OnDoubleTapListener>newArrayList(listener, gestureDelegate));
+
         final GestureDetector detector =
                 new GestureDetector(recyclerView.getContext(), compositeListener);
 
@@ -1060,21 +1065,23 @@ public final class MultiSelectManager {
      * @template A gestureDelegate that implements both {@link OnGestureListener}
      *     and {@link OnDoubleTapListener}
      */
-    private static final class
-            CompositeOnGestureListener<L extends OnGestureListener & OnDoubleTapListener>
+    private static final class CompositeOnGestureListener
             implements OnGestureListener, OnDoubleTapListener {
 
-        private L[] mListeners;
+        private List<OnGestureListener> mGestureListeners;
+        private List<OnDoubleTapListener> mTapListeners;
 
-        @SafeVarargs
-        public CompositeOnGestureListener(L... listeners) {
-            mListeners = listeners;
+        public CompositeOnGestureListener(
+                List<OnGestureListener> gestureListeners,
+                List<OnDoubleTapListener> tapListeners) {
+            mGestureListeners = gestureListeners;
+            mTapListeners = tapListeners;
         }
 
         @Override
         public boolean onDown(MotionEvent e) {
-            for (int i = 0; i < mListeners.length; i++) {
-                if (mListeners[i].onDown(e)) {
+            for (OnGestureListener l : mGestureListeners) {
+                if (l.onDown(e)) {
                     return true;
                 }
             }
@@ -1083,15 +1090,15 @@ public final class MultiSelectManager {
 
         @Override
         public void onShowPress(MotionEvent e) {
-            for (int i = 0; i < mListeners.length; i++) {
-                mListeners[i].onShowPress(e);
+            for (OnGestureListener l : mGestureListeners) {
+                l.onShowPress(e);
             }
         }
 
         @Override
         public boolean onSingleTapUp(MotionEvent e) {
-            for (int i = 0; i < mListeners.length; i++) {
-                if (mListeners[i].onSingleTapUp(e)) {
+            for (OnGestureListener l : mGestureListeners) {
+                if (l.onSingleTapUp(e)) {
                     return true;
                 }
             }
@@ -1100,8 +1107,8 @@ public final class MultiSelectManager {
 
         @Override
         public boolean onScroll(MotionEvent e1, MotionEvent e2, float distanceX, float distanceY) {
-            for (int i = 0; i < mListeners.length; i++) {
-                if (mListeners[i].onScroll(e1, e2, distanceX, distanceY)) {
+            for (OnGestureListener l : mGestureListeners) {
+                if (l.onScroll(e1, e2, distanceX, distanceY)) {
                     return true;
                 }
             }
@@ -1110,15 +1117,15 @@ public final class MultiSelectManager {
 
         @Override
         public void onLongPress(MotionEvent e) {
-            for (int i = 0; i < mListeners.length; i++) {
-                mListeners[i].onLongPress(e);
+            for (OnGestureListener l : mGestureListeners) {
+                l.onLongPress(e);
             }
         }
 
         @Override
         public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) {
-            for (int i = 0; i < mListeners.length; i++) {
-                if (mListeners[i].onFling(e1, e2, velocityX, velocityY)) {
+            for (OnGestureListener l : mGestureListeners) {
+                if (l.onFling(e1, e2, velocityX, velocityY)) {
                     return true;
                 }
             }
@@ -1127,8 +1134,8 @@ public final class MultiSelectManager {
 
         @Override
         public boolean onSingleTapConfirmed(MotionEvent e) {
-            for (int i = 0; i < mListeners.length; i++) {
-                if (mListeners[i].onSingleTapConfirmed(e)) {
+            for (OnDoubleTapListener listener : mTapListeners) {
+                if (listener.onSingleTapConfirmed(e)) {
                     return true;
                 }
             }
@@ -1137,8 +1144,8 @@ public final class MultiSelectManager {
 
         @Override
         public boolean onDoubleTap(MotionEvent e) {
-            for (int i = 0; i < mListeners.length; i++) {
-                if (mListeners[i].onDoubleTap(e)) {
+            for (OnDoubleTapListener listener : mTapListeners) {
+                if (listener.onDoubleTap(e)) {
                     return true;
                 }
             }
@@ -1147,8 +1154,8 @@ public final class MultiSelectManager {
 
         @Override
         public boolean onDoubleTapEvent(MotionEvent e) {
-            for (int i = 0; i < mListeners.length; i++) {
-                if (mListeners[i].onDoubleTapEvent(e)) {
+            for (OnDoubleTapListener listener : mTapListeners) {
+                if (listener.onDoubleTapEvent(e)) {
                     return true;
                 }
             }
