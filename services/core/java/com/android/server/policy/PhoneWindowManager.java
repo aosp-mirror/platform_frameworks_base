@@ -4388,6 +4388,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         if (attrs.type == TYPE_STATUS_BAR) {
             if ((attrs.privateFlags & PRIVATE_FLAG_KEYGUARD) != 0) {
                 mForceStatusBarFromKeyguard = true;
+                mShowingLockscreen = true;
             }
             if ((attrs.privateFlags & PRIVATE_FLAG_FORCE_STATUS_BAR_VISIBLE_TRANSPARENT) != 0) {
                 mForceStatusBarTransparent = true;
@@ -4407,9 +4408,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 } else {
                     mForceStatusBar = true;
                 }
-            }
-            if ((attrs.privateFlags & PRIVATE_FLAG_KEYGUARD) != 0) {
-                mShowingLockscreen = true;
             }
             if (attrs.type == TYPE_DREAM) {
                 // If the lockscreen was showing when the dream started then wait
