@@ -1477,6 +1477,7 @@
   <java-symbol type="bool" name="config_showNavigationBar" />
   <java-symbol type="bool" name="config_supportAutoRotation" />
   <java-symbol type="bool" name="target_honeycomb_needs_options_menu" />
+  <java-symbol type="dimen" name="docked_stack_divider_thickness" />
   <java-symbol type="dimen" name="navigation_bar_height" />
   <java-symbol type="dimen" name="navigation_bar_height_landscape" />
   <java-symbol type="dimen" name="navigation_bar_width" />
@@ -1719,6 +1720,7 @@
   <java-symbol type="integer" name="config_undockedHdmiRotation" />
   <java-symbol type="integer" name="config_virtualKeyQuietTimeMillis" />
   <java-symbol type="layout" name="am_compat_mode_dialog" />
+  <java-symbol type="layout" name="docked_stack_divider" />
   <java-symbol type="layout" name="launch_warning" />
   <java-symbol type="layout" name="safe_mode" />
   <java-symbol type="layout" name="simple_list_item_2_single_choice" />

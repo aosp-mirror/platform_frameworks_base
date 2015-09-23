@@ -352,7 +352,8 @@ public class TaskStack implements DimLayer.DimLayerUser {
             // the docked stack occupies a dedicated region on screen.
             bounds = new Rect();
             displayContent.getLogicalDisplayRect(mTmpRect);
-            getInitialDockedStackBounds(mTmpRect, bounds, mStackId);
+            getInitialDockedStackBounds(mTmpRect, bounds, mStackId,
+                    mDisplayContent.mDividerControllerLocked.getWidth() / 2);
         }
 
         updateDisplayInfo(bounds);
@@ -371,27 +372,29 @@ public class TaskStack implements DimLayer.DimLayerUser {
      * @param displayRect The bounds of the display the docked stack is on.
      * @param outBounds Output bounds that should be used for the stack.
      * @param stackId Id of stack we are calculating the bounds for.
+     * @param adjustment
      */
-    private static void getInitialDockedStackBounds(
-            Rect displayRect, Rect outBounds, int stackId) {
+    private static void getInitialDockedStackBounds(Rect displayRect, Rect outBounds, int stackId,
+            int adjustment) {
         // Docked stack start off occupying half the screen space.
+        final boolean dockedStack = stackId == DOCKED_STACK_ID;
         final boolean splitHorizontally = displayRect.width() > displayRect.height();
         final boolean topOrLeftCreateMode =
                 WindowManagerService.sDockedStackCreateMode == DOCKED_STACK_CREATE_MODE_TOP_OR_LEFT;
-        final boolean placeTopOrLeft = (stackId == DOCKED_STACK_ID && topOrLeftCreateMode)
-                || (stackId != DOCKED_STACK_ID && !topOrLeftCreateMode);
+        final boolean placeTopOrLeft = (dockedStack && topOrLeftCreateMode)
+                || (!dockedStack && !topOrLeftCreateMode);
         outBounds.set(displayRect);
         if (placeTopOrLeft) {
             if (splitHorizontally) {
-                outBounds.right = displayRect.centerX();
+                outBounds.right = displayRect.centerX() - adjustment;
             } else {
-                outBounds.bottom = displayRect.centerY();
+                outBounds.bottom = displayRect.centerY() - adjustment;
             }
         } else {
             if (splitHorizontally) {
-                outBounds.left = displayRect.centerX();
+                outBounds.left = displayRect.centerX() + adjustment;
             } else {
-                outBounds.top = displayRect.centerY();
+                outBounds.top = displayRect.centerY() + adjustment;
             }
         }
     }
@@ -404,7 +407,8 @@ public class TaskStack implements DimLayer.DimLayerUser {
     private void resizeNonDockedStacks(boolean fullscreen) {
         mDisplayContent.getLogicalDisplayRect(mTmpRect);
         if (!fullscreen) {
-            getInitialDockedStackBounds(mTmpRect, mTmpRect, FULLSCREEN_WORKSPACE_STACK_ID);
+            getInitialDockedStackBounds(mTmpRect, mTmpRect, FULLSCREEN_WORKSPACE_STACK_ID,
+                    mDisplayContent.mDividerControllerLocked.getWidth());
         }
 
         final int count = mService.mStackIdToStack.size();
@@ -546,14 +550,14 @@ public class TaskStack implements DimLayer.DimLayerUser {
         final int orientation = mService.mCurConfiguration.orientation;
         if (orientation == Configuration.ORIENTATION_PORTRAIT) {
             // Portrait mode, docked either at the top or the bottom.
-            if (mTmpRect.top - mBounds.top < mTmpRect.bottom - mBounds.bottom) {
+            if (mBounds.top - mTmpRect.top < mTmpRect.bottom - mBounds.bottom) {
                 return DOCKED_TOP;
             } else {
                 return DOCKED_BOTTOM;
             }
         } else if (orientation == Configuration.ORIENTATION_LANDSCAPE) {
             // Landscape mode, docked either on the left or on the right.
-            if (mTmpRect.left - mBounds.left < mTmpRect.right - mBounds.right) {
+            if (mBounds.left - mTmpRect.left < mTmpRect.right - mBounds.right) {
                 return DOCKED_LEFT;
             } else {
                 return DOCKED_RIGHT;

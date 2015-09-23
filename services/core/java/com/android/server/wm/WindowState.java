@@ -23,6 +23,7 @@ import static android.view.WindowManager.LayoutParams.LAST_SUB_WINDOW;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_COMPATIBLE_WINDOW;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_KEYGUARD;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_STARTING;
+import static android.view.WindowManager.LayoutParams.TYPE_DOCK_DIVIDER;
 import static android.view.WindowManager.LayoutParams.TYPE_INPUT_METHOD;
 import static android.view.WindowManager.LayoutParams.TYPE_INPUT_METHOD_DIALOG;
 import static android.view.WindowManager.LayoutParams.TYPE_WALLPAPER;
@@ -707,6 +708,8 @@ final class WindowState implements WindowManagerPolicy.WindowState {
             mContentFrame.set(mFrame);
             mVisibleFrame.set(mContentFrame);
             mStableFrame.set(mContentFrame);
+        } else if (mAttrs.type == TYPE_DOCK_DIVIDER) {
+            mDisplayContent.mDividerControllerLocked.positionDockedStackedDivider(mFrame);
         } else {
             mContentFrame.set(Math.max(mContentFrame.left, mFrame.left),
                     Math.max(mContentFrame.top, mFrame.top),

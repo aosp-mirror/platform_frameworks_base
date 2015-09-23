@@ -967,8 +967,8 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
 
         List<ResolveInfo> installedServices = mPackageManager.queryIntentServicesAsUser(
                 new Intent(AccessibilityService.SERVICE_INTERFACE),
-                PackageManager.GET_SERVICES 
-                  | PackageManager.GET_META_DATA 
+                PackageManager.GET_SERVICES
+                  | PackageManager.GET_META_DATA
                   | PackageManager.GET_DISABLED_UNTIL_USED_COMPONENTS,
                 mCurrentUserId);
 
@@ -3217,7 +3217,8 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
                 case WindowManager.LayoutParams.TYPE_SYSTEM_ALERT:
                 case WindowManager.LayoutParams.TYPE_SYSTEM_DIALOG:
                 case WindowManager.LayoutParams.TYPE_SYSTEM_ERROR:
-                case WindowManager.LayoutParams.TYPE_SYSTEM_OVERLAY: {
+                case WindowManager.LayoutParams.TYPE_SYSTEM_OVERLAY:
+                case WindowManager.LayoutParams.TYPE_DOCK_DIVIDER: {
                     return AccessibilityWindowInfo.TYPE_SYSTEM;
                 }
 

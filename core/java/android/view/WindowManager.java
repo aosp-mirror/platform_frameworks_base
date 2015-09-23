@@ -226,6 +226,7 @@ public interface WindowManager extends ViewManager {
             @ViewDebug.IntToString(from = TYPE_PRIVATE_PRESENTATION, to = "TYPE_PRIVATE_PRESENTATION"),
             @ViewDebug.IntToString(from = TYPE_VOICE_INTERACTION, to = "TYPE_VOICE_INTERACTION"),
             @ViewDebug.IntToString(from = TYPE_VOICE_INTERACTION_STARTING, to = "TYPE_VOICE_INTERACTION_STARTING"),
+            @ViewDebug.IntToString(from = TYPE_DOCK_DIVIDER, to = "TYPE_DOCK_DIVIDER"),
         })
         public int type;
 
@@ -563,6 +564,13 @@ public interface WindowManager extends ViewManager {
          * @hide
          */
         public static final int TYPE_VOICE_INTERACTION_STARTING = FIRST_SYSTEM_WINDOW+33;
+
+        /**
+         * Window for displaying a handle used for resizing docked stacks. This window is owned
+         * by the system process.
+         * @hide
+         */
+        public static final int TYPE_DOCK_DIVIDER = FIRST_SYSTEM_WINDOW+34;
 
         /**
          * End of types of system windows.
