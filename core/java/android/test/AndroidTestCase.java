@@ -20,6 +20,7 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
+import android.test.suitebuilder.annotation.Suppress;
 
 import junit.framework.TestCase;
 
@@ -44,6 +45,7 @@ public class AndroidTestCase extends TestCase {
         super.tearDown();
     }
 
+    @Suppress
     public void testAndroidTestCaseSetupProperly() {
         assertNotNull("Context is null. setContext should be called before tests are run",
                 mContext);
