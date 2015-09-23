@@ -34,6 +34,7 @@ import static com.android.server.wm.WindowManagerService.DEBUG_POWER;
 import static com.android.server.wm.WindowManagerService.DEBUG_RESIZE;
 import static com.android.server.wm.WindowManagerService.DEBUG_VISIBILITY;
 
+import android.app.ActivityManager;
 import android.app.AppOpsManager;
 import android.os.PowerManager;
 import android.os.RemoteCallbackList;
@@ -129,7 +130,6 @@ final class WindowState implements WindowManagerPolicy.WindowState {
     boolean mAttachedHidden;    // is our parent window hidden?
     boolean mWallpaperVisible;  // for wallpaper, what was last vis report?
     boolean mDragResizing;
-    boolean mDragResizeChanging;
 
     RemoteCallbackList<IWindowFocusObserver> mFocusCallbacks;
 
@@ -1701,13 +1701,23 @@ final class WindowState implements WindowManagerPolicy.WindowState {
     }
 
     boolean isDragResizeChanged() {
+        return mDragResizing != computeDragResizing();
+    }
+
+    private boolean computeDragResizing() {
         final Task task = getTask();
-        return task != null && mDragResizing != task.isDragResizing();
+        if (task == null) {
+            return false;
+        }
+        if (task.isDragResizing()) {
+            return true;
+        }
+        return mDisplayContent.mDividerControllerLocked.isResizing() &&
+                !task.inFreeformWorkspace() && !task.isFullscreen();
     }
 
     void setDragResizing() {
-        final Task task = getTask();
-        mDragResizing = task != null && task.isDragResizing();
+        mDragResizing = computeDragResizing();
     }
 
     boolean isDragResizing() {

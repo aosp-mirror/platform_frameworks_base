@@ -16,6 +16,7 @@
 
 package com.android.server.wm;
 
+import static android.view.WindowManager.LayoutParams.TYPE_DOCK_DIVIDER;
 import static com.android.server.wm.WindowState.BOUNDS_FOR_TOUCH;
 import android.app.ActivityManagerNative;
 import android.graphics.Rect;
@@ -170,7 +171,7 @@ final class InputMonitor implements InputManagerService.WindowManagerCallbacks {
 
     private void addInputWindowHandleLw(final InputWindowHandle inputWindowHandle,
             final WindowState child, int flags, final int type, final boolean isVisible,
-            final boolean hasFocus, final boolean hasWallpaper) {
+            final boolean hasFocus, final boolean hasWallpaper, DisplayContent displayContent) {
         // Add a window to our list of input windows.
         inputWindowHandle.name = child.toString();
         final boolean modal = (flags & (WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL
@@ -202,6 +203,20 @@ final class InputMonitor implements InputManagerService.WindowManagerCallbacks {
         inputWindowHandle.frameTop = frame.top;
         inputWindowHandle.frameRight = frame.right;
         inputWindowHandle.frameBottom = frame.bottom;
+        if (child.mAttrs.type == TYPE_DOCK_DIVIDER) {
+            // We need to determine if the divider is horizontal or vertical and adjust its handle
+            // frame accordingly.
+            int adjustment = displayContent.mDividerControllerLocked.getWidthAdjustment();
+            if (inputWindowHandle.frameRight - inputWindowHandle.frameLeft >
+                    inputWindowHandle.frameTop - inputWindowHandle.frameBottom) {
+                // Horizontal divider.
+                inputWindowHandle.frameTop -= adjustment;
+                inputWindowHandle.frameBottom += adjustment;
+            } else {
+                inputWindowHandle.frameLeft -= adjustment;
+                inputWindowHandle.frameRight += adjustment;
+            }
+        }
 
         if (child.mGlobalScale != 1) {
             // If we are scaling the window, input coordinates need
@@ -277,7 +292,8 @@ final class InputMonitor implements InputManagerService.WindowManagerCallbacks {
         final int numDisplays = mService.mDisplayContents.size();
         final WallpaperController wallpaperController = mService.mWallpaperControllerLocked;
         for (int displayNdx = 0; displayNdx < numDisplays; ++displayNdx) {
-            WindowList windows = mService.mDisplayContents.valueAt(displayNdx).getWindowList();
+            final DisplayContent displayContent = mService.mDisplayContents.valueAt(displayNdx);
+            final WindowList windows = displayContent.getWindowList();
             for (int winNdx = windows.size() - 1; winNdx >= 0; --winNdx) {
                 final WindowState child = windows.get(winNdx);
                 final InputChannel inputChannel = child.mInputChannel;
@@ -315,7 +331,7 @@ final class InputMonitor implements InputManagerService.WindowManagerCallbacks {
                 }
 
                 addInputWindowHandleLw(inputWindowHandle, child, flags, type, isVisible, hasFocus,
-                        hasWallpaper);
+                        hasWallpaper, displayContent);
             }
         }
 
