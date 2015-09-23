@@ -48,7 +48,7 @@ public class WifiTile extends QSTile<QSTile.SignalState> {
     private final WifiDetailAdapter mDetailAdapter;
     private final QSTile.SignalState mStateBeforeClick = newTileState();
 
-    private final WifiSignalCallback mSignalCallback = new WifiSignalCallback();
+    protected final WifiSignalCallback mSignalCallback = new WifiSignalCallback();
 
     private final boolean mAlwaysDetail;
 
@@ -200,7 +200,7 @@ public class WifiTile extends QSTile<QSTile.SignalState> {
         return string;
     }
 
-    private static final class CallbackInfo {
+    protected static final class CallbackInfo {
         boolean enabled;
         boolean connected;
         int wifiSignalIconId;
@@ -223,7 +223,7 @@ public class WifiTile extends QSTile<QSTile.SignalState> {
         }
     }
 
-    private final class WifiSignalCallback extends SignalCallbackAdapter {
+    protected final class WifiSignalCallback extends SignalCallbackAdapter {
         final CallbackInfo mInfo = new CallbackInfo();
 
         @Override

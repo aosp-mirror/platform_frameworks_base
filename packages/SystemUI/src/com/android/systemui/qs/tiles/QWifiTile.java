@@ -17,6 +17,7 @@
 package com.android.systemui.qs.tiles;
 
 import com.android.systemui.qs.QSTileView;
+import com.android.systemui.statusbar.policy.WifiIcons;
 
 /** Quick settings tile: Wifi **/
 public class QWifiTile extends WifiTile {
@@ -28,5 +29,24 @@ public class QWifiTile extends WifiTile {
     @Override
     public int getTileType() {
         return QSTileView.QS_TYPE_QUICK;
+    }
+
+    @Override
+    protected void handleUpdateState(SignalState state, Object arg) {
+        super.handleUpdateState(state, arg);
+
+        CallbackInfo cb = (CallbackInfo) arg;
+        if (cb == null) {
+            cb = mSignalCallback.mInfo;
+        }
+        boolean wifiConnected = cb.enabled && (cb.wifiSignalIconId > 0) && (cb.enabledDesc != null);
+
+        if (state.enabled && wifiConnected) {
+            // Only show full signal here.
+            state.icon = ResourceIcon.get(WifiIcons.QS_WIFI_SIGNAL_STRENGTH[1][4]);
+        }
+        // No activity in the quick toggle.
+        state.activityIn = false;
+        state.activityOut = false;
     }
 }
