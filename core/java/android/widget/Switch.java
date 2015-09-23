@@ -1387,7 +1387,7 @@ public class Switch extends CompoundButton {
             mTrackDrawable.jumpToCurrentState();
         }
 
-        if (mPositionAnimator != null && mPositionAnimator.isRunning()) {
+        if (mPositionAnimator != null && mPositionAnimator.isStarted()) {
             mPositionAnimator.end();
             mPositionAnimator = null;
         }
