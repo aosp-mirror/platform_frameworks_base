@@ -466,7 +466,7 @@ public class StatusBarKeyguardViewManager {
 
         KeyguardUpdateMonitor updateMonitor = KeyguardUpdateMonitor.getInstance(mContext);
         if ((showing && !occluded) != (mLastShowing && !mLastOccluded) || mFirstUpdate) {
-            updateMonitor.sendKeyguardVisibilityChanged(showing && !occluded);
+            updateMonitor.onKeyguardVisibilityChanged(showing && !occluded);
         }
         if (bouncerShowing != mLastBouncerShowing || mFirstUpdate) {
             updateMonitor.sendKeyguardBouncerChanged(bouncerShowing);
