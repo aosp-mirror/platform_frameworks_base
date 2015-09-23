@@ -16,13 +16,6 @@
 
 package com.android.documentsui;
 
-import static com.android.documentsui.BaseActivity.State.ACTION_BROWSE;
-import static com.android.documentsui.BaseActivity.State.ACTION_CREATE;
-import static com.android.documentsui.BaseActivity.State.ACTION_GET_CONTENT;
-import static com.android.documentsui.BaseActivity.State.ACTION_MANAGE;
-import static com.android.documentsui.BaseActivity.State.ACTION_OPEN;
-import static com.android.documentsui.BaseActivity.State.ACTION_OPEN_COPY_DESTINATION;
-import static com.android.documentsui.BaseActivity.State.ACTION_OPEN_TREE;
 import static com.android.documentsui.DirectoryFragment.ANIM_DOWN;
 import static com.android.documentsui.DirectoryFragment.ANIM_NONE;
 import static com.android.documentsui.DirectoryFragment.ANIM_SIDE;
@@ -125,22 +118,6 @@ abstract class BaseActivity extends Activity {
     }
 
     @Override
-    public void onResume() {
-        super.onResume();
-
-        final State state = getDisplayState();
-        final RootInfo root = getCurrentRoot();
-
-        // If we're browsing a specific root, and that root went away, then we
-        // have no reason to hang around
-        if (state.action == State.ACTION_BROWSE && root != null) {
-            if (mRoots.getRootBlocking(root.authority, root.rootId) == null) {
-                finish();
-            }
-        }
-    }
-
-    @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         boolean showMenu = super.onCreateOptionsMenu(menu);
 
@@ -178,8 +155,10 @@ abstract class BaseActivity extends Activity {
         State state = getDisplayState();
 
         sortSize.setVisible(state.showSize); // Only sort by size when visible
+        fileSize.setVisible(!state.showSize);
         grid.setVisible(state.derivedMode != State.MODE_GRID);
         list.setVisible(state.derivedMode != State.MODE_LIST);
+        advanced.setVisible(!mState.showAdvanced);
         settings.setVisible((root.flags & Root.FLAG_HAS_SETTINGS) != 0);
 
         return shown;
@@ -189,13 +168,17 @@ abstract class BaseActivity extends Activity {
         State state = new State();
 
         final Intent intent = getIntent();
-        final String action = intent.getAction();
 
         state.localOnly = intent.getBooleanExtra(Intent.EXTRA_LOCAL_ONLY, false);
-        state.forceAdvanced = intent.getBooleanExtra(DocumentsContract.EXTRA_SHOW_ADVANCED, false);
-        state.showAdvanced = state.forceAdvanced ||
-                LocalPreferences.getDisplayAdvancedDevices(this);
 
+        state.forceSize = intent.getBooleanExtra(DocumentsContract.EXTRA_SHOW_FILESIZE, false);
+        state.showSize = state.forceSize || LocalPreferences.getDisplayFileSize(this);
+
+        state.forceAdvanced = intent.getBooleanExtra(DocumentsContract.EXTRA_SHOW_ADVANCED, false);
+        state.showAdvanced = state.forceAdvanced
+                || LocalPreferences.getDisplayAdvancedDevices(this);
+
+        state.initAcceptMimes(intent);
         state.excludedAuthorities = getExcludedAuthorities();
 
         return state;
@@ -219,7 +202,7 @@ abstract class BaseActivity extends Activity {
         if (mRoots.isRecentsRoot(root)) {
             onCurrentDirectoryChanged(ANIM_SIDE);
         } else {
-            new PickRootTask(root).executeOnExecutor(getCurrentExecutor());
+            new PickRootTask(root).executeOnExecutor(getExecutorForCurrentDirectory());
         }
     }
 
@@ -399,6 +382,7 @@ abstract class BaseActivity extends Activity {
         public int derivedSortOrder = SORT_ORDER_DISPLAY_NAME;
 
         public boolean allowMultiple;
+        public boolean forceSize ;
         public boolean showSize;
         public boolean localOnly ;
         public boolean forceAdvanced ;
@@ -429,7 +413,6 @@ abstract class BaseActivity extends Activity {
         public static final int ACTION_OPEN_TREE = 4;
         public static final int ACTION_MANAGE = 5;
         public static final int ACTION_BROWSE = 6;
-        public static final int ACTION_BROWSE_ALL = 7;
         public static final int ACTION_OPEN_COPY_DESTINATION = 8;
 
         public static final int MODE_UNKNOWN = 0;
@@ -440,6 +423,15 @@ abstract class BaseActivity extends Activity {
         public static final int SORT_ORDER_DISPLAY_NAME = 1;
         public static final int SORT_ORDER_LAST_MODIFIED = 2;
         public static final int SORT_ORDER_SIZE = 3;
+
+        public void initAcceptMimes(Intent intent) {
+            if (intent.hasExtra(Intent.EXTRA_MIME_TYPES)) {
+                acceptMimes = intent.getStringArrayExtra(Intent.EXTRA_MIME_TYPES);
+            } else {
+                String glob = intent.getType();
+                acceptMimes = new String[] { glob != null ? glob : "*/*" };
+            }
+        }
 
         @Override
         public int describeContents() {
@@ -453,6 +445,7 @@ abstract class BaseActivity extends Activity {
             out.writeStringArray(acceptMimes);
             out.writeInt(userSortOrder);
             out.writeInt(allowMultiple ? 1 : 0);
+            out.writeInt(forceSize ? 1 : 0);
             out.writeInt(showSize ? 1 : 0);
             out.writeInt(localOnly ? 1 : 0);
             out.writeInt(forceAdvanced ? 1 : 0);
@@ -475,6 +468,7 @@ abstract class BaseActivity extends Activity {
                 state.acceptMimes = in.readStringArray();
                 state.userSortOrder = in.readInt();
                 state.allowMultiple = in.readInt() != 0;
+                state.forceSize = in.readInt() != 0;
                 state.showSize = in.readInt() != 0;
                 state.localOnly = in.readInt() != 0;
                 state.forceAdvanced = in.readInt() != 0;
@@ -562,7 +556,7 @@ abstract class BaseActivity extends Activity {
         return getDisplayState().stack.peek();
     }
 
-    public Executor getCurrentExecutor() {
+    public Executor getExecutorForCurrentDirectory() {
         final DocumentInfo cwd = getCurrentDirectory();
         if (cwd != null && cwd.authority != null) {
             return ProviderExecutor.forAuthority(cwd.authority);

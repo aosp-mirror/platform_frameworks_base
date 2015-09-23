@@ -93,6 +93,9 @@ public final class DocumentsContract {
     public static final String EXTRA_SHOW_ADVANCED = "android.content.extra.SHOW_ADVANCED";
 
     /** {@hide} */
+    public static final String EXTRA_SHOW_FILESIZE = "android.content.extra.SHOW_FILESIZE";
+
+    /** {@hide} */
     public static final String EXTRA_TARGET_URI = "android.content.extra.TARGET_URI";
 
     /**
@@ -266,7 +269,7 @@ public final class DocumentsContract {
          * writability of a document may change over time, for example due to
          * remote access changes. This flag indicates that a document client can
          * expect {@link ContentResolver#openOutputStream(Uri)} to succeed.
-         * 
+         *
          * @see #COLUMN_FLAGS
          */
         public static final int FLAG_SUPPORTS_WRITE = 1 << 1;
