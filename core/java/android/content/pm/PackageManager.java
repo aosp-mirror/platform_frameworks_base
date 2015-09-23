@@ -2010,7 +2010,7 @@ public abstract class PackageManager {
      *            {@link #GET_RECEIVERS}, {@link #GET_SERVICES},
      *            {@link #GET_SIGNATURES}, {@link #GET_UNINSTALLED_PACKAGES} to
      *            modify the data returned.
-     * @return Returns a PackageInfo object containing information about the
+     * @return A PackageInfo object containing information about the
      *         package. If flag GET_UNINSTALLED_PACKAGES is set and if the
      *         package is not found in the list of installed applications, the
      *         package information is retrieved from the list of uninstalled
@@ -2029,6 +2029,46 @@ public abstract class PackageManager {
      * @see #GET_UNINSTALLED_PACKAGES
      */
     public abstract PackageInfo getPackageInfo(String packageName, int flags)
+            throws NameNotFoundException;
+
+    /**
+     * @hide
+     * Retrieve overall information about an application package that is
+     * installed on the system.
+     * <p>
+     * Throws {@link NameNotFoundException} if a package with the given name can
+     * not be found on the system.
+     *
+     * @param packageName The full name (i.e. com.google.apps.contacts) of the
+     *            desired package.
+     * @param flags Additional option flags. Use any combination of
+     *            {@link #GET_ACTIVITIES}, {@link #GET_GIDS},
+     *            {@link #GET_CONFIGURATIONS}, {@link #GET_INSTRUMENTATION},
+     *            {@link #GET_PERMISSIONS}, {@link #GET_PROVIDERS},
+     *            {@link #GET_RECEIVERS}, {@link #GET_SERVICES},
+     *            {@link #GET_SIGNATURES}, {@link #GET_UNINSTALLED_PACKAGES} to
+     *            modify the data returned.
+     * @param userId The user id.
+     * @return A PackageInfo object containing information about the
+     *         package. If flag GET_UNINSTALLED_PACKAGES is set and if the
+     *         package is not found in the list of installed applications, the
+     *         package information is retrieved from the list of uninstalled
+     *         applications (which includes installed applications as well as
+     *         applications with data directory i.e. applications which had been
+     *         deleted with {@code DONT_DELETE_DATA} flag set).
+     * @see #GET_ACTIVITIES
+     * @see #GET_GIDS
+     * @see #GET_CONFIGURATIONS
+     * @see #GET_INSTRUMENTATION
+     * @see #GET_PERMISSIONS
+     * @see #GET_PROVIDERS
+     * @see #GET_RECEIVERS
+     * @see #GET_SERVICES
+     * @see #GET_SIGNATURES
+     * @see #GET_UNINSTALLED_PACKAGES
+     */
+    @RequiresPermission(Manifest.permission.INTERACT_ACROSS_USERS)
+    public abstract PackageInfo getPackageInfoAsUser(String packageName, int flags, int userId)
             throws NameNotFoundException;
 
     /**
@@ -3689,6 +3729,31 @@ public abstract class PackageManager {
             Uri packageURI, PackageInstallObserver observer,
             int flags, String installerPackageName);
 
+
+    /**
+     * @hide
+     * Install a package. Since this may take a little while, the result will be
+     * posted back to the given observer. An installation will fail if the package named
+     * in the package file's manifest is already installed, or if there's no space
+     * available on the device.
+     * @param packageURI The location of the package file to install. This can be a 'file:' or a
+     * 'content:' URI.
+     * @param observer An observer callback to get notified when the package installation is
+     * complete. {@link PackageInstallObserver#packageInstalled(String, Bundle, int)} will be
+     * called when that happens. This parameter must not be null.
+     * @param flags - possible values: {@link #INSTALL_FORWARD_LOCK},
+     * {@link #INSTALL_REPLACE_EXISTING}, {@link #INSTALL_ALLOW_TEST}.
+     * @param installerPackageName Optional package name of the application that is performing the
+     * installation. This identifies which market the package came from.
+     * @param userId The user id.
+     */
+     @RequiresPermission(anyOf = {
+            Manifest.permission.INSTALL_PACKAGES,
+            Manifest.permission.INTERACT_ACROSS_USERS_FULL})
+    public abstract void installPackageAsUser(
+            Uri packageURI, PackageInstallObserver observer, int flags,
+            String installerPackageName, int userId);
+
     /**
      * Similar to
      * {@link #installPackage(Uri, IPackageInstallObserver, int, String)} but
@@ -3752,7 +3817,17 @@ public abstract class PackageManager {
      * @hide
      */
     // @SystemApi
-    public abstract int installExistingPackage(String packageName)
+    public abstract int installExistingPackage(String packageName) throws NameNotFoundException;
+
+    /**
+     * If there is already an application with the given package name installed
+     * on the system for other users, also install it for the specified user.
+     * @hide
+     */
+     @RequiresPermission(anyOf = {
+            Manifest.permission.INSTALL_PACKAGES,
+            Manifest.permission.INTERACT_ACROSS_USERS_FULL})
+    public abstract int installExistingPackageAsUser(String packageName, int userId)
             throws NameNotFoundException;
 
     /**
@@ -3958,7 +4033,7 @@ public abstract class PackageManager {
      * @param observer An observer callback to get notified when the package deletion is
      * complete. {@link android.content.pm.IPackageDeleteObserver#packageDeleted(boolean)} will be
      * called when that happens.  observer may be null to indicate that no callback is desired.
-     * @param flags - possible values: {@link #DELETE_KEEP_DATA},
+     * @param flags Possible values: {@link #DELETE_KEEP_DATA},
      * {@link #DELETE_ALL_USERS}.
      *
      * @hide
@@ -3966,6 +4041,27 @@ public abstract class PackageManager {
     // @SystemApi
     public abstract void deletePackage(
             String packageName, IPackageDeleteObserver observer, int flags);
+
+    /**
+     * Attempts to delete a package.  Since this may take a little while, the result will
+     * be posted back to the given observer. A deletion will fail if the named package cannot be
+     * found, or if the named package is a "system package".
+     * (TODO: include pointer to documentation on "system packages")
+     *
+     * @param packageName The name of the package to delete
+     * @param observer An observer callback to get notified when the package deletion is
+     * complete. {@link android.content.pm.IPackageDeleteObserver#packageDeleted(boolean)} will be
+     * called when that happens.  observer may be null to indicate that no callback is desired.
+     * @param flags Possible values: {@link #DELETE_KEEP_DATA}, {@link #DELETE_ALL_USERS}.
+     * @param userId The user Id
+     *
+     * @hide
+     */
+     @RequiresPermission(anyOf = {
+            Manifest.permission.DELETE_PACKAGES,
+            Manifest.permission.INTERACT_ACROSS_USERS_FULL})
+    public abstract void deletePackageAsUser(
+            String packageName, IPackageDeleteObserver observer, int flags, int userId);
 
     /**
      * Retrieve the package name of the application that installed a package. This identifies
