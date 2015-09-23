@@ -43558,6 +43558,7 @@ package android.widget {
     method public void setInterpolator(android.view.animation.Interpolator);
     method public synchronized void setMax(int);
     method public synchronized void setProgress(int);
+    method public void setProgress(int, boolean);
     method public void setProgressBackgroundTintList(android.content.res.ColorStateList);
     method public void setProgressBackgroundTintMode(android.graphics.PorterDuff.Mode);
     method public void setProgressDrawable(android.graphics.drawable.Drawable);

@@ -385,17 +385,19 @@ public abstract class AbsSeekBar extends ProgressBar {
     }
 
     @Override
-    void onProgressRefresh(float scale, boolean fromUser, int progress) {
-        super.onProgressRefresh(scale, fromUser, progress);
+    void onVisualProgressChanged(int id, float scale) {
+        super.onVisualProgressChanged(id, scale);
 
-        final Drawable thumb = mThumb;
-        if (thumb != null) {
-            setThumbPos(getWidth(), thumb, scale, Integer.MIN_VALUE);
+        if (id == R.id.progress) {
+            final Drawable thumb = mThumb;
+            if (thumb != null) {
+                setThumbPos(getWidth(), thumb, scale, Integer.MIN_VALUE);
 
-            // Since we draw translated, the drawable's bounds that it signals
-            // for invalidation won't be the actual bounds we want invalidated,
-            // so just invalidate this whole view.
-            invalidate();
+                // Since we draw translated, the drawable's bounds that it signals
+                // for invalidation won't be the actual bounds we want invalidated,
+                // so just invalidate this whole view.
+                invalidate();
+            }
         }
     }
 
@@ -709,8 +711,7 @@ public abstract class AbsSeekBar extends ProgressBar {
                 case KeyEvent.KEYCODE_DPAD_RIGHT:
                     increment = isLayoutRtl() ? -increment : increment;
 
-                    // Let progress bar handle clamping values.
-                    if (setProgress(getProgress() + increment, true)) {
+                    if (setProgressInternal(getProgress() + increment, true, true)) {
                         onKeyChange();
                         return true;
                     }
@@ -764,7 +765,7 @@ public abstract class AbsSeekBar extends ProgressBar {
                 }
                 float value = arguments.getFloat(
                         AccessibilityNodeInfo.ACTION_ARGUMENT_PROGRESS_VALUE);
-                return setProgress((int) value, true);
+                return setProgressInternal((int) value, true, true);
             }
             case AccessibilityNodeInfo.ACTION_SCROLL_FORWARD:
             case AccessibilityNodeInfo.ACTION_SCROLL_BACKWARD: {
@@ -777,7 +778,7 @@ public abstract class AbsSeekBar extends ProgressBar {
                 }
 
                 // Let progress bar handle clamping values.
-                if (setProgress(getProgress() + increment, true)) {
+                if (setProgressInternal(getProgress() + increment, true, true)) {
                     onKeyChange();
                     return true;
                 }
