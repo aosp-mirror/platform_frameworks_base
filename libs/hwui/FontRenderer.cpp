@@ -75,8 +75,8 @@ void TextDrawFunctor::draw(CacheTexture& texture, bool linearFiltering) {
 
 static bool sLogFontRendererCreate = true;
 
-FontRenderer::FontRenderer()
-        : mGammaTable(nullptr)
+FontRenderer::FontRenderer(const uint8_t* gammaTable)
+        : mGammaTable(gammaTable)
         , mCurrentFont(nullptr)
         , mActiveFonts(LruCache<Font::FontDescription, Font*>::kUnlimitedCapacity)
         , mCurrentCacheTexture(nullptr)
@@ -92,27 +92,15 @@ FontRenderer::FontRenderer()
         INIT_LOGD("Creating FontRenderer");
     }
 
-    mSmallCacheWidth = DEFAULT_TEXT_SMALL_CACHE_WIDTH;
-    mSmallCacheHeight = DEFAULT_TEXT_SMALL_CACHE_HEIGHT;
-    mLargeCacheWidth = DEFAULT_TEXT_LARGE_CACHE_WIDTH;
-    mLargeCacheHeight = DEFAULT_TEXT_LARGE_CACHE_HEIGHT;
+    mSmallCacheWidth = property_get_int32(PROPERTY_TEXT_SMALL_CACHE_WIDTH,
+            DEFAULT_TEXT_SMALL_CACHE_WIDTH);
+    mSmallCacheHeight = property_get_int32(PROPERTY_TEXT_SMALL_CACHE_HEIGHT,
+            DEFAULT_TEXT_SMALL_CACHE_HEIGHT);
 
-    char property[PROPERTY_VALUE_MAX];
-    if (property_get(PROPERTY_TEXT_SMALL_CACHE_WIDTH, property, nullptr) > 0) {
-        mSmallCacheWidth = atoi(property);
-    }
-
-    if (property_get(PROPERTY_TEXT_SMALL_CACHE_HEIGHT, property, nullptr) > 0) {
-        mSmallCacheHeight = atoi(property);
-    }
-
-    if (property_get(PROPERTY_TEXT_LARGE_CACHE_WIDTH, property, nullptr) > 0) {
-        mLargeCacheWidth = atoi(property);
-    }
-
-    if (property_get(PROPERTY_TEXT_LARGE_CACHE_HEIGHT, property, nullptr) > 0) {
-        mLargeCacheHeight = atoi(property);
-    }
+    mLargeCacheWidth = property_get_int32(PROPERTY_TEXT_LARGE_CACHE_WIDTH,
+            DEFAULT_TEXT_LARGE_CACHE_WIDTH);
+    mLargeCacheHeight = property_get_int32(PROPERTY_TEXT_LARGE_CACHE_HEIGHT,
+            DEFAULT_TEXT_LARGE_CACHE_HEIGHT);
 
     uint32_t maxTextureSize = (uint32_t) Caches::getInstance().maxTextureSize;
 

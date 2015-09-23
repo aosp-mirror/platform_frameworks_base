@@ -21,182 +21,21 @@
 namespace android {
 namespace uirenderer {
 
-///////////////////////////////////////////////////////////////////////////////
-// Utils
-///////////////////////////////////////////////////////////////////////////////
-
-static int luminance(const SkPaint* paint) {
-    uint32_t c = paint->getColor();
-    const int r = (c >> 16) & 0xFF;
-    const int g = (c >>  8) & 0xFF;
-    const int b = (c      ) & 0xFF;
-    return (r * 2 + g * 5 + b) >> 3;
-}
-
-///////////////////////////////////////////////////////////////////////////////
-// Base class GammaFontRenderer
-///////////////////////////////////////////////////////////////////////////////
-
-GammaFontRenderer* GammaFontRenderer::createRenderer() {
-    // Choose the best renderer
-    char property[PROPERTY_VALUE_MAX];
-    if (property_get(PROPERTY_TEXT_GAMMA_METHOD, property, DEFAULT_TEXT_GAMMA_METHOD) > 0) {
-        if (!strcasecmp(property, "lookup")) {
-            return new LookupGammaFontRenderer();
-        }
-    }
-
-    return new Lookup3GammaFontRenderer();
-}
-
 GammaFontRenderer::GammaFontRenderer() {
-    // Get the renderer properties
-    char property[PROPERTY_VALUE_MAX];
-
-    // Get the gamma
-    mGamma = DEFAULT_TEXT_GAMMA;
-    if (property_get(PROPERTY_TEXT_GAMMA, property, nullptr) > 0) {
-        INIT_LOGD("  Setting text gamma to %s", property);
-        mGamma = atof(property);
-    } else {
-        INIT_LOGD("  Using default text gamma of %.2f", DEFAULT_TEXT_GAMMA);
-    }
-
-    // Get the black gamma threshold
-    mBlackThreshold = DEFAULT_TEXT_BLACK_GAMMA_THRESHOLD;
-    if (property_get(PROPERTY_TEXT_BLACK_GAMMA_THRESHOLD, property, nullptr) > 0) {
-        INIT_LOGD("  Setting text black gamma threshold to %s", property);
-        mBlackThreshold = atoi(property);
-    } else {
-        INIT_LOGD("  Using default text black gamma threshold of %d",
-                DEFAULT_TEXT_BLACK_GAMMA_THRESHOLD);
-    }
-
-    // Get the white gamma threshold
-    mWhiteThreshold = DEFAULT_TEXT_WHITE_GAMMA_THRESHOLD;
-    if (property_get(PROPERTY_TEXT_WHITE_GAMMA_THRESHOLD, property, nullptr) > 0) {
-        INIT_LOGD("  Setting text white gamma threshold to %s", property);
-        mWhiteThreshold = atoi(property);
-    } else {
-        INIT_LOGD("  Using default white black gamma threshold of %d",
-                DEFAULT_TEXT_WHITE_GAMMA_THRESHOLD);
-    }
-}
-
-GammaFontRenderer::~GammaFontRenderer() {
-}
-
-///////////////////////////////////////////////////////////////////////////////
-// Lookup-based renderer
-///////////////////////////////////////////////////////////////////////////////
-
-LookupGammaFontRenderer::LookupGammaFontRenderer()
-        : GammaFontRenderer() {
     INIT_LOGD("Creating lookup gamma font renderer");
 
     // Compute the gamma tables
-    const float gamma = 1.0f / mGamma;
+    const float gamma = 1.0f / Properties::textGamma;
 
     for (uint32_t i = 0; i <= 255; i++) {
         mGammaTable[i] = uint8_t((float)::floor(pow(i / 255.0f, gamma) * 255.0f + 0.5f));
     }
-
-    mRenderer = nullptr;
 }
 
-void LookupGammaFontRenderer::endPrecaching() {
+void GammaFontRenderer::endPrecaching() {
     if (mRenderer) {
         mRenderer->endPrecaching();
     }
-}
-
-///////////////////////////////////////////////////////////////////////////////
-// Lookup-based renderer, using 3 different correction tables
-///////////////////////////////////////////////////////////////////////////////
-
-Lookup3GammaFontRenderer::Lookup3GammaFontRenderer()
-        : GammaFontRenderer() {
-    INIT_LOGD("Creating lookup3 gamma font renderer");
-
-    // Compute the gamma tables
-    const float blackGamma = mGamma;
-    const float whiteGamma = 1.0f / mGamma;
-
-    for (uint32_t i = 0; i <= 255; i++) {
-        const float v = i / 255.0f;
-        const float black = pow(v, blackGamma);
-        const float white = pow(v, whiteGamma);
-
-        mGammaTable[i] = i;
-        mGammaTable[256 + i] = uint8_t((float)::floor(black * 255.0f + 0.5f));
-        mGammaTable[512 + i] = uint8_t((float)::floor(white * 255.0f + 0.5f));
-    }
-
-    memset(mRenderers, 0, sizeof(FontRenderer*) * kGammaCount);
-    memset(mRenderersUsageCount, 0, sizeof(uint32_t) * kGammaCount);
-}
-
-void Lookup3GammaFontRenderer::endPrecaching() {
-    for (int i = 0; i < kGammaCount; i++) {
-        if (mRenderers[i]) {
-            mRenderers[i]->endPrecaching();
-        }
-    }
-}
-
-void Lookup3GammaFontRenderer::clear() {
-    for (int i = 0; i < kGammaCount; i++) {
-        mRenderers[i].release();
-    }
-}
-
-void Lookup3GammaFontRenderer::flush() {
-    int count = 0;
-    int min = -1;
-    uint32_t minCount = UINT_MAX;
-
-    for (int i = 0; i < kGammaCount; i++) {
-        if (mRenderers[i]) {
-            count++;
-            if (mRenderersUsageCount[i] < minCount) {
-                minCount = mRenderersUsageCount[i];
-                min = i;
-            }
-        }
-    }
-
-    if (count <= 1 || min < 0) return;
-
-    mRenderers[min].release();
-
-    // Also eliminate the caches for large glyphs, as they consume significant memory
-    for (int i = 0; i < kGammaCount; ++i) {
-        if (mRenderers[i]) {
-            mRenderers[i]->flushLargeCaches();
-        }
-    }
-}
-
-FontRenderer* Lookup3GammaFontRenderer::getRenderer(Gamma gamma) {
-    if (!mRenderers[gamma]) {
-        mRenderers[gamma].reset(new FontRenderer());
-        mRenderers[gamma]->setGammaTable(&mGammaTable[gamma * 256]);
-    }
-    mRenderersUsageCount[gamma]++;
-    return mRenderers[gamma].get();
-}
-
-FontRenderer& Lookup3GammaFontRenderer::getFontRenderer(const SkPaint* paint) {
-    if (paint->getShader() == nullptr) {
-        const int l = luminance(paint);
-
-        if (l <= mBlackThreshold) {
-            return *getRenderer(kGammaBlack);
-        } else if (l >= mWhiteThreshold) {
-            return *getRenderer(kGammaWhite);
-        }
-    }
-    return *getRenderer(kGammaDefault);
 }
 
 }; // namespace uirenderer

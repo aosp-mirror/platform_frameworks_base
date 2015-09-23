@@ -2014,7 +2014,7 @@ void OpenGLRenderer::drawPosText(const char* text, int bytesCount, int count,
         y = floorf(y + currentTransform()->getTranslateY() + 0.5f);
     }
 
-    FontRenderer& fontRenderer = mCaches.fontRenderer->getFontRenderer(paint);
+    FontRenderer& fontRenderer = mCaches.fontRenderer.getFontRenderer();
     fontRenderer.setFont(paint, SkMatrix::I());
 
     int alpha;
@@ -2166,7 +2166,7 @@ void OpenGLRenderer::drawText(const char* text, int bytesCount, int count, float
     SkXfermode::Mode mode;
     getAlphaAndMode(paint, &alpha, &mode);
 
-    FontRenderer& fontRenderer = mCaches.fontRenderer->getFontRenderer(paint);
+    FontRenderer& fontRenderer = mCaches.fontRenderer.getFontRenderer();
 
     if (CC_UNLIKELY(hasTextShadow(paint))) {
         fontRenderer.setFont(paint, SkMatrix::I());
@@ -2234,7 +2234,7 @@ void OpenGLRenderer::drawTextOnPath(const char* text, int bytesCount, int count,
     // TODO: avoid scissor by calculating maximum bounds using path bounds + font metrics
     mRenderState.scissor().setEnabled(true);
 
-    FontRenderer& fontRenderer = mCaches.fontRenderer->getFontRenderer(paint);
+    FontRenderer& fontRenderer = mCaches.fontRenderer.getFontRenderer();
     fontRenderer.setFont(paint, SkMatrix::I());
     fontRenderer.setTextureFiltering(true);
 

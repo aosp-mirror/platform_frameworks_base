@@ -1246,7 +1246,7 @@ public:
 
     virtual void onDefer(OpenGLRenderer& renderer, DeferInfo& deferInfo,
             const DeferredDisplayState& state) override {
-        FontRenderer& fontRenderer = renderer.getCaches().fontRenderer->getFontRenderer(mPaint);
+        FontRenderer& fontRenderer = renderer.getCaches().fontRenderer.getFontRenderer();
         fontRenderer.precache(mPaint, mText, mCount, SkMatrix::I());
 
         deferInfo.batchId = mPaint->getColor() == SK_ColorBLACK ?
@@ -1311,7 +1311,7 @@ public:
 
     virtual void onDefer(OpenGLRenderer& renderer, DeferInfo& deferInfo,
             const DeferredDisplayState& state) override {
-        FontRenderer& fontRenderer = renderer.getCaches().fontRenderer->getFontRenderer(mPaint);
+        FontRenderer& fontRenderer = renderer.getCaches().fontRenderer.getFontRenderer();
         SkMatrix transform;
         renderer.findBestFontTransform(state.mMatrix, &transform);
         if (mPrecacheTransform != transform) {

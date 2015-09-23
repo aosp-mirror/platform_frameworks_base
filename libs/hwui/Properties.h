@@ -208,30 +208,8 @@ enum DebugLevel {
 #define PROPERTY_TEXT_LARGE_CACHE_WIDTH "ro.hwui.text_large_cache_width"
 #define PROPERTY_TEXT_LARGE_CACHE_HEIGHT "ro.hwui.text_large_cache_height"
 
-// Indicates whether gamma correction should be applied in the shaders
-// or in lookup tables. Accepted values:
-//
-//     - "lookup3", correction based on lookup tables. Gamma correction
-//        is different for black and white text (see thresholds below)
-//
-//     - "lookup", correction based on a single lookup table
-//
-//     - "shader3", correction applied by a GLSL shader. Gamma correction
-//        is different for black and white text (see thresholds below)
-//
-//     - "shader", correction applied by a GLSL shader
-//
-// See PROPERTY_TEXT_GAMMA, PROPERTY_TEXT_BLACK_GAMMA_THRESHOLD and
-// PROPERTY_TEXT_WHITE_GAMMA_THRESHOLD for more control.
-#define PROPERTY_TEXT_GAMMA_METHOD "hwui.text_gamma_correction"
-#define DEFAULT_TEXT_GAMMA_METHOD "lookup"
-
 // Gamma (>= 1.0, <= 10.0)
 #define PROPERTY_TEXT_GAMMA "hwui.text_gamma"
-// Luminance threshold below which black gamma correction is applied. Range: [0..255]
-#define PROPERTY_TEXT_BLACK_GAMMA_THRESHOLD "hwui.text_gamma.black_threshold"
-// Lumincance threshold above which white gamma correction is applied. Range: [0..255]
-#define PROPERTY_TEXT_WHITE_GAMMA_THRESHOLD "hwui.text_gamma.white_threshold"
 
 ///////////////////////////////////////////////////////////////////////////////
 // Default property values
@@ -250,8 +228,6 @@ enum DebugLevel {
 #define DEFAULT_TEXTURE_CACHE_FLUSH_RATE 0.6f
 
 #define DEFAULT_TEXT_GAMMA 1.4f
-#define DEFAULT_TEXT_BLACK_GAMMA_THRESHOLD 64
-#define DEFAULT_TEXT_WHITE_GAMMA_THRESHOLD 192
 
 ///////////////////////////////////////////////////////////////////////////////
 // Misc
@@ -299,6 +275,8 @@ public:
     static bool swapBuffersWithDamage;
     static bool useBufferAge;
     static bool enablePartialUpdates;
+
+    static float textGamma;
 
     static DebugLevel debugLevel;
     static OverdrawColorSet overdrawColorSet;

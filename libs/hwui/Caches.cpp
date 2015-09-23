@@ -54,7 +54,6 @@ Caches::Caches(RenderState& renderState)
         , mInitialized(false) {
     INIT_LOGD("Creating OpenGL renderer caches");
     init();
-    initFont();
     initConstraints();
     initStaticProperties();
     initExtensions();
@@ -78,10 +77,6 @@ bool Caches::init() {
     return true;
 }
 
-void Caches::initFont() {
-    fontRenderer = GammaFontRenderer::createRenderer();
-}
-
 void Caches::initExtensions() {
     if (mExtensions.hasDebugMarker()) {
         eventMark = glInsertEventMarkerEXT;
@@ -100,15 +95,9 @@ void Caches::initConstraints() {
 }
 
 void Caches::initStaticProperties() {
-    gpuPixelBuffersEnabled = false;
-
     // OpenGL ES 3.0+ specific features
-    if (mExtensions.hasPixelBufferObjects()) {
-        char property[PROPERTY_VALUE_MAX];
-        if (property_get(PROPERTY_ENABLE_GPU_PIXEL_BUFFERS, property, "true") > 0) {
-            gpuPixelBuffersEnabled = !strcmp(property, "true");
-        }
-    }
+    gpuPixelBuffersEnabled = mExtensions.hasPixelBufferObjects()
+            && property_get_bool(PROPERTY_ENABLE_GPU_PIXEL_BUFFERS, true);
 }
 
 void Caches::terminate() {
@@ -203,14 +192,14 @@ void Caches::dumpMemoryUsage(String8 &log) {
             dropShadowCache.getMaxSize());
     log.appendFormat("  PatchCache           %8d / %8d\n",
             patchCache.getSize(), patchCache.getMaxSize());
-    for (uint32_t i = 0; i < fontRenderer->getFontRendererCount(); i++) {
-        const uint32_t sizeA8 = fontRenderer->getFontRendererSize(i, GL_ALPHA);
-        const uint32_t sizeRGBA = fontRenderer->getFontRendererSize(i, GL_RGBA);
-        log.appendFormat("  FontRenderer %d A8    %8d / %8d\n", i, sizeA8, sizeA8);
-        log.appendFormat("  FontRenderer %d RGBA  %8d / %8d\n", i, sizeRGBA, sizeRGBA);
-        log.appendFormat("  FontRenderer %d total %8d / %8d\n", i, sizeA8 + sizeRGBA,
-                sizeA8 + sizeRGBA);
-    }
+
+    const uint32_t sizeA8 = fontRenderer.getFontRendererSize(GL_ALPHA);
+    const uint32_t sizeRGBA = fontRenderer.getFontRendererSize(GL_RGBA);
+    log.appendFormat("  FontRenderer A8    %8d / %8d\n", sizeA8, sizeA8);
+    log.appendFormat("  FontRenderer RGBA  %8d / %8d\n", sizeRGBA, sizeRGBA);
+    log.appendFormat("  FontRenderer total %8d / %8d\n", sizeA8 + sizeRGBA,
+            sizeA8 + sizeRGBA);
+
     log.appendFormat("Other:\n");
     log.appendFormat("  FboCache             %8d / %8d\n",
             fboCache.getSize(), fboCache.getMaxSize());
@@ -222,10 +211,8 @@ void Caches::dumpMemoryUsage(String8 &log) {
     total += tessellationCache.getSize();
     total += dropShadowCache.getSize();
     total += patchCache.getSize();
-    for (uint32_t i = 0; i < fontRenderer->getFontRendererCount(); i++) {
-        total += fontRenderer->getFontRendererSize(i, GL_ALPHA);
-        total += fontRenderer->getFontRendererSize(i, GL_RGBA);
-    }
+    total += fontRenderer.getFontRendererSize(GL_ALPHA);
+    total += fontRenderer.getFontRendererSize(GL_RGBA);
 
     log.appendFormat("Total memory usage:\n");
     log.appendFormat("  %d bytes, %.2f MB\n", total, total / 1024.0f / 1024.0f);
@@ -250,12 +237,12 @@ void Caches::flush(FlushMode mode) {
             patchCache.clear();
             dropShadowCache.clear();
             gradientCache.clear();
-            fontRenderer->clear();
+            fontRenderer.clear();
             fboCache.clear();
             dither.clear();
             // fall through
         case FlushMode::Moderate:
-            fontRenderer->flush();
+            fontRenderer.flush();
             textureCache.flush();
             pathCache.clear();
             tessellationCache.clear();
