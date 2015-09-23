@@ -44,14 +44,14 @@ public class State implements android.os.Parcelable {
     public int derivedSortOrder = SORT_ORDER_DISPLAY_NAME;
 
     public boolean allowMultiple;
-    public boolean forceSize ;
+    public boolean forceSize;
     public boolean showSize;
-    public boolean localOnly ;
-    public boolean forceAdvanced ;
-    public boolean showAdvanced ;
-    public boolean stackTouched ;
-    public boolean restored ;
-    public boolean directoryCopy ;
+    public boolean localOnly;
+    public boolean forceAdvanced;
+    public boolean showAdvanced;
+    public boolean stackTouched;
+    public boolean restored;
+    public boolean directoryCopy;
     /** Transfer mode for file copy/move operations. */
     public int transferMode;
 

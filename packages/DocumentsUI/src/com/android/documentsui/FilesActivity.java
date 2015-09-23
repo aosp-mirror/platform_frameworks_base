@@ -19,6 +19,7 @@ package com.android.documentsui;
 import static com.android.documentsui.DirectoryFragment.ANIM_NONE;
 import static com.android.documentsui.Shared.DEBUG;
 import static com.android.internal.util.Preconditions.checkArgument;
+import static com.android.internal.util.Preconditions.checkState;
 
 import android.app.Activity;
 import android.app.FragmentManager;
@@ -85,11 +86,12 @@ public class FilesActivity extends BaseActivity {
 
         RootsFragment.show(getFragmentManager(), null);
         if (!mState.restored) {
-            Uri rootUri = getIntent().getData();
+            Intent intent = getIntent();
+            Uri rootUri = intent.getData();
 
             // If we've got a specific root to display, restore that root using a dedicated
             // authority. That way a misbehaving provider won't result in an ANR.
-            if (rootUri != null) {
+            if (rootUri != null && !LauncherActivity.isLaunchUri(rootUri)) {
                 new RestoreRootTask(rootUri).executeOnExecutor(
                         ProviderExecutor.forAuthority(rootUri.getAuthority()));
             } else {
@@ -97,7 +99,6 @@ public class FilesActivity extends BaseActivity {
             }
 
             // Show a failure dialog if there was a failed operation.
-            final Intent intent = getIntent();
             final DocumentStack dstStack = intent.getParcelableExtra(CopyService.EXTRA_STACK);
             final int failure = intent.getIntExtra(CopyService.EXTRA_FAILURE, 0);
             final int transferMode = intent.getIntExtra(CopyService.EXTRA_TRANSFER_MODE,
@@ -207,16 +208,25 @@ public class FilesActivity extends BaseActivity {
     public boolean onPrepareOptionsMenu(Menu menu) {
         boolean shown = super.onPrepareOptionsMenu(menu);
 
-        final MenuItem pasteFromCb = menu.findItem(R.id.menu_paste_from_clipboard);
+        menu.findItem(R.id.menu_file_size).setVisible(true);
+        menu.findItem(R.id.menu_advanced).setVisible(true);
+
         final MenuItem createDir = menu.findItem(R.id.menu_create_dir);
+        final MenuItem newWindow = menu.findItem(R.id.menu_new_window);
+        final MenuItem pasteFromCb = menu.findItem(R.id.menu_paste_from_clipboard);
 
         boolean canCreateDir = canCreateDirectory();
 
         createDir.setShowAsAction(MenuItem.SHOW_AS_ACTION_NEVER);
         createDir.setVisible(canCreateDir);
+        createDir.setEnabled(canCreateDir);
 
-        pasteFromCb.setVisible(true);
+        newWindow.setShowAsAction(MenuItem.SHOW_AS_ACTION_NEVER);
+        newWindow.setVisible(mProductivityDevice);
+        newWindow.setEnabled(mProductivityDevice);
+
         pasteFromCb.setShowAsAction(MenuItem.SHOW_AS_ACTION_NEVER);
+        pasteFromCb.setVisible(true);
         pasteFromCb.setEnabled(mClipper.hasItemsToPaste());
 
         return shown;
@@ -224,12 +234,19 @@ public class FilesActivity extends BaseActivity {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        final int id = item.getItemId();
-        if (id == R.id.menu_paste_from_clipboard) {
-            DirectoryFragment dir = DirectoryFragment.get(getFragmentManager());
-            dir = DirectoryFragment.get(getFragmentManager());
-            dir.pasteFromClipboard();
-            return true;
+        switch (item.getItemId()) {
+            case R.id.menu_create_dir:
+                checkState(canCreateDirectory());
+                showCreateDirectoryDialog();
+                return true;
+            case R.id.menu_new_window:
+                startActivity(LauncherActivity.createLaunchIntent(this));
+                return true;
+            case R.id.menu_paste_from_clipboard:
+                DirectoryFragment dir = DirectoryFragment.get(getFragmentManager());
+                dir = DirectoryFragment.get(getFragmentManager());
+                dir.pasteFromClipboard();
+                return true;
         }
 
         return super.onOptionsItemSelected(item);
@@ -317,19 +334,13 @@ public class FilesActivity extends BaseActivity {
                 dir = DirectoryFragment.get(getFragmentManager());
                 dir.selectAllFiles();
                 return true;
-            case KeyEvent.KEYCODE_N:
-                if (event.isShiftPressed() && canCreateDirectory()) {
-                    showCreateDirectoryDialog();
-                    return true;
-                }
             case KeyEvent.KEYCODE_C:
                 // TODO: Should be statically bound using alphabeticShortcut. See b/21330356.
                 dir = DirectoryFragment.get(getFragmentManager());
                 dir.copySelectedToClipboard();
-                // TODO: Cancel action mode in directory fragment.
         }
 
-        return super.onKeyUp(keyCode, event);
+        return super.onKeyShortcut(keyCode, event);
     }
 
     @Override
