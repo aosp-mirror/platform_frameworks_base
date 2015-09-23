@@ -101,8 +101,7 @@ public class GestureLauncherService extends SystemService {
      * Whether camera double tap power button gesture is currently enabled;
      */
     private boolean mCameraDoubleTapPowerEnabled;
-    private long mLastPowerDownWhileNonInteractive;
-    private long mLastPowerDownWhileInteractive;
+    private long mLastPowerDown;
 
     public GestureLauncherService(Context context) {
         super(context);
@@ -252,35 +251,32 @@ public class GestureLauncherService extends SystemService {
     public boolean interceptPowerKeyDown(KeyEvent event, boolean interactive) {
         boolean launched = false;
         boolean intercept = false;
+        long doubleTapInterval;
         synchronized (this) {
-            if (!mCameraDoubleTapPowerEnabled) {
-                mLastPowerDownWhileNonInteractive = 0;
-                mLastPowerDownWhileInteractive = 0;
-                return false;
-            }
-            if (event.getEventTime() - mLastPowerDownWhileNonInteractive
-                    < CAMERA_POWER_DOUBLE_TAP_TIME_MS) {
+            doubleTapInterval = event.getEventTime() - mLastPowerDown;
+            if (mCameraDoubleTapPowerEnabled
+                    && doubleTapInterval < CAMERA_POWER_DOUBLE_TAP_TIME_MS) {
                 launched = true;
-                intercept = true;
-            } else if (event.getEventTime() - mLastPowerDownWhileInteractive
-                    < CAMERA_POWER_DOUBLE_TAP_TIME_MS) {
-                launched = true;
+                intercept = interactive;
             }
-            mLastPowerDownWhileNonInteractive = interactive ? 0 : event.getEventTime();
-            mLastPowerDownWhileInteractive = interactive ? event.getEventTime() : 0;
+            mLastPowerDown = event.getEventTime();
         }
         if (launched) {
             Slog.i(TAG, "Power button double tap gesture detected, launching camera.");
-            launched = handleCameraLaunchGesture(false /* useWakelock */,
-                    MetricsLogger.ACTION_DOUBLE_TAP_POWER_CAMERA_GESTURE);
+            launched = handleCameraLaunchGesture(false /* useWakelock */);
+            if (launched) {
+                MetricsLogger.action(mContext, MetricsLogger.ACTION_DOUBLE_TAP_POWER_CAMERA_GESTURE,
+                        (int) doubleTapInterval);
+            }
         }
+        MetricsLogger.histogram(mContext, "power_double_tap_interval", (int) doubleTapInterval);
         return intercept && launched;
     }
 
     /**
      * @return true if camera was launched, false otherwise.
      */
-    private boolean handleCameraLaunchGesture(boolean useWakelock, int logCategory) {
+    private boolean handleCameraLaunchGesture(boolean useWakelock) {
         boolean userSetupComplete = Settings.Secure.getInt(mContext.getContentResolver(),
                 Settings.Secure.USER_SETUP_COMPLETE, 0) != 0;
         if (!userSetupComplete) {
@@ -300,7 +296,6 @@ public class GestureLauncherService extends SystemService {
         StatusBarManagerInternal service = LocalServices.getService(
                 StatusBarManagerInternal.class);
         service.onCameraLaunchGestureDetected();
-        MetricsLogger.action(mContext, logCategory);
         return true;
     }
 
@@ -339,8 +334,8 @@ public class GestureLauncherService extends SystemService {
                     Slog.d(TAG, String.format("Received a camera launch event: " +
                             "values=[%.4f, %.4f, %.4f].", values[0], values[1], values[2]));
                 }
-                if (handleCameraLaunchGesture(true /* useWakelock */,
-                        MetricsLogger.ACTION_WIGGLE_CAMERA_GESTURE)) {
+                if (handleCameraLaunchGesture(true /* useWakelock */)) {
+                    MetricsLogger.action(mContext, MetricsLogger.ACTION_WIGGLE_CAMERA_GESTURE);
                     trackCameraLaunchEvent(event);
                 }
                 return;
