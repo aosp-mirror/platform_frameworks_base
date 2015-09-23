@@ -921,9 +921,27 @@ public class KeyguardViewMediator extends SystemUI {
                 } catch (RemoteException e) {
                     Slog.w(TAG, "Failed to call onKeyguardExitResult(false)", e);
                 }
+            } else if (!isSecure()) {
+
+                // Keyguard is not secure, no need to do anything, and we don't need to reshow
+                // the Keyguard after the client releases the Keyguard lock.
+                mExternallyEnabled = true;
+                mNeedToReshowWhenReenabled = false;
+                updateInputRestricted();
+                try {
+                    callback.onKeyguardExitResult(true);
+                } catch (RemoteException e) {
+                    Slog.w(TAG, "Failed to call onKeyguardExitResult(false)", e);
+                }
             } else {
-                mExitSecureCallback = callback;
-                verifyUnlockLocked();
+
+                // Since we prevent apps from hiding the Keyguard if we are secure, this should be
+                // a no-op as well.
+                try {
+                    callback.onKeyguardExitResult(false);
+                } catch (RemoteException e) {
+                    Slog.w(TAG, "Failed to call onKeyguardExitResult(false)", e);
+                }
             }
         }
     }
