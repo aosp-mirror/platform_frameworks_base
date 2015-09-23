@@ -40,7 +40,7 @@
     <string name="bluetooth_connected" msgid="6038755206916626419">"Conectat"</string>
     <string name="bluetooth_pairing" msgid="1426882272690346242">"Se conectează…"</string>
     <string name="bluetooth_connected_no_headset" msgid="2866994875046035609">"Conectat (fără telefon)"</string>
-    <string name="bluetooth_connected_no_a2dp" msgid="4576188601581440337">"Conectat (fără conţinut media)"</string>
+    <string name="bluetooth_connected_no_a2dp" msgid="4576188601581440337">"Conectat (fără conținut media)"</string>
     <string name="bluetooth_connected_no_map" msgid="6504436917057479986">"Conectat (fără acces la mesaje)"</string>
     <string name="bluetooth_connected_no_headset_no_a2dp" msgid="9195757766755553810">"Conectat (fără telefon sau conţ. media)"</string>
     <string name="bluetooth_profile_a2dp" msgid="2031475486179830674">"Conținut media audio"</string>
@@ -53,23 +53,23 @@
     <string name="bluetooth_profile_pan_nap" msgid="8429049285027482959">"Distribuirea conexiunii la internet"</string>
     <string name="bluetooth_profile_map" msgid="5465271250454324383">"Acces la mesaje"</string>
     <string name="bluetooth_profile_sap" msgid="5764222021851283125">"Acces la SIM"</string>
-    <string name="bluetooth_a2dp_profile_summary_connected" msgid="963376081347721598">"Conectat la profilul pentru conţinut media audio"</string>
+    <string name="bluetooth_a2dp_profile_summary_connected" msgid="963376081347721598">"Conectat la profilul pentru conținut media audio"</string>
     <string name="bluetooth_headset_profile_summary_connected" msgid="7661070206715520671">"Conectat la componenta audio a telefonului"</string>
-    <string name="bluetooth_opp_profile_summary_connected" msgid="2611913495968309066">"Conectat la serverul de transfer de fişiere"</string>
+    <string name="bluetooth_opp_profile_summary_connected" msgid="2611913495968309066">"Conectat la serverul de transfer de fișiere"</string>
     <string name="bluetooth_map_profile_summary_connected" msgid="8191407438851351713">"Conectat la hartă"</string>
     <string name="bluetooth_sap_profile_summary_connected" msgid="8561765057453083838">"Conectat la SAP"</string>
-    <string name="bluetooth_opp_profile_summary_not_connected" msgid="1267091356089086285">"Neconectat la serverul de transfer de fişiere"</string>
+    <string name="bluetooth_opp_profile_summary_not_connected" msgid="1267091356089086285">"Neconectat la serverul de transfer de fișiere"</string>
     <string name="bluetooth_hid_profile_summary_connected" msgid="3381760054215168689">"Conectat la dispozitivul de intrare"</string>
     <string name="bluetooth_pan_user_profile_summary_connected" msgid="4602294638909590612">"Conectat la dispoz. pt. acces internet"</string>
     <string name="bluetooth_pan_nap_profile_summary_connected" msgid="1561383706411975199">"Se permite dispoz. acces la internet local"</string>
-    <string name="bluetooth_pan_profile_summary_use_for" msgid="5664884523822068653">"Utilizaţi pentru acces internet"</string>
+    <string name="bluetooth_pan_profile_summary_use_for" msgid="5664884523822068653">"Utilizați pentru acces internet"</string>
     <string name="bluetooth_map_profile_summary_use_for" msgid="5154200119919927434">"Utilizați pentru hartă"</string>
     <string name="bluetooth_sap_profile_summary_use_for" msgid="7085362712786907993">"Folosiți pentru acces la SIM"</string>
-    <string name="bluetooth_a2dp_profile_summary_use_for" msgid="4630849022250168427">"Utilizaţi pentru profilul pentru conţinut media audio"</string>
-    <string name="bluetooth_headset_profile_summary_use_for" msgid="8705753622443862627">"Utilizaţi pentru componenta audio a telefonului"</string>
-    <string name="bluetooth_opp_profile_summary_use_for" msgid="1255674547144769756">"Utilizaţi pentru transferul de fişiere"</string>
-    <string name="bluetooth_hid_profile_summary_use_for" msgid="232727040453645139">"Utilizaţi pentru introducere date"</string>
-    <string name="bluetooth_pairing_accept" msgid="6163520056536604875">"Asociaţi"</string>
+    <string name="bluetooth_a2dp_profile_summary_use_for" msgid="4630849022250168427">"Utilizați pentru profilul pentru conținut media audio"</string>
+    <string name="bluetooth_headset_profile_summary_use_for" msgid="8705753622443862627">"Utilizați pentru componenta audio a telefonului"</string>
+    <string name="bluetooth_opp_profile_summary_use_for" msgid="1255674547144769756">"Utilizați pentru transferul de fișiere"</string>
+    <string name="bluetooth_hid_profile_summary_use_for" msgid="232727040453645139">"Utilizați pentru introducere date"</string>
+    <string name="bluetooth_pairing_accept" msgid="6163520056536604875">"Asociați"</string>
     <string name="bluetooth_pairing_accept_all_caps" msgid="6061699265220789149">"CONECTAȚI"</string>
     <string name="bluetooth_pairing_decline" msgid="4185420413578948140">"Anulați"</string>
     <string name="bluetooth_pairing_will_share_phonebook" msgid="4982239145676394429">"Asocierea dispozitivelor vă permite accesul la persoanele de contact și la istoricul apelurilor când dispozitivul este conectat."</string>
