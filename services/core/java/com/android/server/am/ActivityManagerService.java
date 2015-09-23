@@ -33,6 +33,7 @@ import static com.android.server.Watchdog.NATIVE_STACKS_OF_INTEREST;
 import static com.android.server.am.ActivityManagerDebugConfig.*;
 import static com.android.server.am.ActivityStackSupervisor.FORCE_FOCUS;
 import static com.android.server.am.ActivityStackSupervisor.ON_TOP;
+import static com.android.server.am.ActivityStackSupervisor.PRESERVE_WINDOWS;
 import static com.android.server.am.TaskRecord.INVALID_TASK_ID;
 import static com.android.server.am.TaskRecord.LOCK_TASK_AUTH_DONT_LOCK;
 import static com.android.server.am.TaskRecord.LOCK_TASK_AUTH_LAUNCHABLE_PRIV;
@@ -4626,7 +4627,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             // is hosted by the process...  then make sure all visible
             // activities are running, taking care of restarting this
             // process.
-            mStackSupervisor.ensureActivitiesVisibleLocked(null, 0);
+            mStackSupervisor.ensureActivitiesVisibleLocked(null, 0, !PRESERVE_WINDOWS);
         }
     }
 
@@ -8664,7 +8665,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             }
             if (task.mResizeable != resizeable) {
                 task.mResizeable = resizeable;
-                mStackSupervisor.ensureActivitiesVisibleLocked(null, 0);
+                mStackSupervisor.ensureActivitiesVisibleLocked(null, 0, !PRESERVE_WINDOWS);
                 mStackSupervisor.resumeTopActivitiesLocked();
             }
         }
@@ -9108,7 +9109,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         long ident = Binder.clearCallingIdentity();
         try {
             synchronized (this) {
-                mStackSupervisor.resizeStackLocked(stackId, bounds);
+                mStackSupervisor.resizeStackLocked(stackId, bounds, !PRESERVE_WINDOWS);
             }
         } finally {
             Binder.restoreCallingIdentity(ident);
@@ -11188,7 +11189,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                 final boolean translucentChanged = r.changeWindowTranslucency(true);
                 if (translucentChanged) {
                     r.task.stack.releaseBackgroundResources(r);
-                    mStackSupervisor.ensureActivitiesVisibleLocked(null, 0);
+                    mStackSupervisor.ensureActivitiesVisibleLocked(null, 0, !PRESERVE_WINDOWS);
                 }
                 mWindowManager.setAppFullscreen(token, true);
                 return translucentChanged;
@@ -11216,7 +11217,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                 if (translucentChanged) {
                     r.task.stack.convertActivityToTranslucent(r);
                 }
-                mStackSupervisor.ensureActivitiesVisibleLocked(null, 0);
+                mStackSupervisor.ensureActivitiesVisibleLocked(null, 0, !PRESERVE_WINDOWS);
                 mWindowManager.setAppFullscreen(token, false);
                 return translucentChanged;
             }
@@ -17699,7 +17700,8 @@ public final class ActivityManagerService extends ActivityManagerNative
                 kept = mainStack.ensureActivityConfigurationLocked(starting, changes, false);
                 // And we need to make sure at this point that all other activities
                 // are made visible with the correct configuration.
-                mStackSupervisor.ensureActivitiesVisibleLocked(starting, changes);
+                mStackSupervisor.ensureActivitiesVisibleLocked(starting, changes,
+                        !PRESERVE_WINDOWS);
             }
         }
 

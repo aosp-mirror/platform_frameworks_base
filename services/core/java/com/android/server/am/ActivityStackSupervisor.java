@@ -175,6 +175,9 @@ public final class ActivityStackSupervisor implements DisplayListener {
     // should be created if it doesn't exist already.
     private static final boolean CREATE_IF_NEEDED = true;
 
+    // Used to indicate that windows of activities should be preserved during the resize.
+    static final boolean PRESERVE_WINDOWS = true;
+
     // Used to indicate if an object (e.g. task) should be moved/created
     // at the top of its container (e.g. stack).
     static final boolean ON_TOP = true;
@@ -189,6 +192,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
     // Activity actions an app cannot start if it uses a permission which is not granted.
     private static final ArrayMap<String, String> ACTION_TO_RUNTIME_PERMISSION =
             new ArrayMap<>();
+
     static {
         ACTION_TO_RUNTIME_PERMISSION.put(MediaStore.ACTION_IMAGE_CAPTURE,
                 Manifest.permission.CAMERA);
@@ -660,7 +664,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
             }
         }
         if (!didSomething) {
-            ensureActivitiesVisibleLocked(null, 0);
+            ensureActivitiesVisibleLocked(null, 0, !PRESERVE_WINDOWS);
         }
         return didSomething;
     }
@@ -2629,7 +2633,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
                 }
                 mLaunchingActivity.release();
             }
-            ensureActivitiesVisibleLocked(null, 0);
+            ensureActivitiesVisibleLocked(null, 0, !PRESERVE_WINDOWS);
         }
 
         // Atomically retrieve all of the other things to do.
@@ -2963,7 +2967,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
         }
     }
 
-    void resizeStackLocked(int stackId, Rect bounds) {
+    void resizeStackLocked(int stackId, Rect bounds, boolean preserveWindows) {
         final ActivityStack stack = getStack(stackId);
         if (stack == null) {
             Slog.w(TAG, "resizeStack: stackId " + stackId + " not found.");
@@ -3002,7 +3006,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
                 // docked stack tasks to the fullscreen stack.
                 for (int i = FIRST_STATIC_STACK_ID; i <= LAST_STATIC_STACK_ID; i++) {
                     if (i != DOCKED_STACK_ID) {
-                        resizeStackLocked(i, null);
+                        resizeStackLocked(i, null, preserveWindows);
                     }
                 }
 
@@ -3033,20 +3037,22 @@ public final class ActivityStackSupervisor implements DisplayListener {
                             tempRect.right -= leftChange;
                             tempRect.top -= bottomChange;
                             tempRect.bottom -= topChange;
-                            resizeStackLocked(i, tempRect);
+                            resizeStackLocked(i, tempRect, PRESERVE_WINDOWS);
                         }
                     }
                 }
-
             }
+            // Since we are resizing the stack, all other operations should strive to preserve
+            // windows.
+            preserveWindows = true;
         }
         stack.setBounds(bounds);
 
         if (r != null) {
-            final boolean updated = stack.ensureActivityConfigurationLocked(r, 0, false);
+            final boolean updated = stack.ensureActivityConfigurationLocked(r, 0, preserveWindows);
             // And we need to make sure at this point that all other activities
             // are made visible with the correct configuration.
-            ensureActivitiesVisibleLocked(r, 0);
+            ensureActivitiesVisibleLocked(r, 0, preserveWindows);
             if (!updated) {
                 resumeTopActivitiesLocked(stack, null, null);
             }
@@ -3107,7 +3113,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
                 final boolean preserveWindow = resizedByUser && !changedStacks;
                 kept = stack.ensureActivityConfigurationLocked(r, 0, preserveWindow);
                 // All other activities must be made visible with their correct configuration.
-                ensureActivitiesVisibleLocked(r, 0);
+                ensureActivitiesVisibleLocked(r, 0, !PRESERVE_WINDOWS);
                 if (!kept) {
                     resumeTopActivitiesLocked(stack, null, null);
                     if (changedStacks && stackId == FULLSCREEN_WORKSPACE_STACK_ID) {
@@ -3255,7 +3261,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
 
         // The task might have already been running and its visibility needs to be synchronized with
         // the visibility of the stack / windows.
-        ensureActivitiesVisibleLocked(null, 0);
+        ensureActivitiesVisibleLocked(null, 0, !PRESERVE_WINDOWS);
         resumeTopActivitiesLocked();
     }
 
@@ -3275,7 +3281,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
         stack.positionTask(task, position, stackChanged);
         // The task might have already been running and its visibility needs to be synchronized with
         // the visibility of the stack / windows.
-        stack.ensureActivitiesVisibleLocked(null, 0);
+        stack.ensureActivitiesVisibleLocked(null, 0, !PRESERVE_WINDOWS);
         resumeTopActivitiesLocked();
     }
 
@@ -3450,7 +3456,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
             mService.updateUsageStats(r, true);
         }
         if (allResumedActivitiesComplete()) {
-            ensureActivitiesVisibleLocked(null, 0);
+            ensureActivitiesVisibleLocked(null, 0, !PRESERVE_WINDOWS);
             mWindowManager.executeAppTransition();
             return true;
         }
@@ -3536,14 +3542,15 @@ public final class ActivityStackSupervisor implements DisplayListener {
         mHandler.obtainMessage(LAUNCH_TASK_BEHIND_COMPLETE, token).sendToTarget();
     }
 
-    void ensureActivitiesVisibleLocked(ActivityRecord starting, int configChanges) {
+    void ensureActivitiesVisibleLocked(ActivityRecord starting, int configChanges,
+            boolean preserveWindows) {
         // First the front stacks. In case any are not fullscreen and are in front of home.
         for (int displayNdx = mActivityDisplays.size() - 1; displayNdx >= 0; --displayNdx) {
             final ArrayList<ActivityStack> stacks = mActivityDisplays.valueAt(displayNdx).mStacks;
             final int topStackNdx = stacks.size() - 1;
             for (int stackNdx = topStackNdx; stackNdx >= 0; --stackNdx) {
                 final ActivityStack stack = stacks.get(stackNdx);
-                stack.ensureActivitiesVisibleLocked(starting, configChanges);
+                stack.ensureActivitiesVisibleLocked(starting, configChanges, preserveWindows);
             }
         }
     }
