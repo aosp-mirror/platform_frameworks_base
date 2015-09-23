@@ -35,19 +35,29 @@ import java.io.IOException;
 
 /**
  * A Drawable that changes the size of another Drawable based on its current
- * level value.  You can control how much the child Drawable changes in width
+ * level value. You can control how much the child Drawable changes in width
  * and height based on the level, as well as a gravity to control where it is
- * placed in its overall container.  Most often used to implement things like
+ * placed in its overall container. Most often used to implement things like
  * progress bars.
- *
- * <p>It can be defined in an XML file with the <code>&lt;scale></code> element. For more
- * information, see the guide to <a
- * href="{@docRoot}guide/topics/resources/drawable-resource.html">Drawable Resources</a>.</p>
+ * <p>
+ * The default level may be specified from XML using the
+ * {@link android.R.styleable#ScaleDrawable_level android:level} property. When
+ * this property is not specified, the default level is 0, which corresponds to
+ * zero height and/or width depending on the values specified for
+ * {@code android.R.styleable#ScaleDrawable_scaleWidth scaleWidth} and
+ * {@code android.R.styleable#ScaleDrawable_scaleHeight scaleHeight}. At run
+ * time, the level may be set via {@link #setLevel(int)}.
+ * <p>
+ * A scale drawable may be defined in an XML file with the {@code &lt;scale>}
+ * element. For more information, see the guide to
+ * <a href="{@docRoot}guide/topics/resources/drawable-resource.html">Drawable
+ * Resources</a>.
  *
  * @attr ref android.R.styleable#ScaleDrawable_scaleWidth
  * @attr ref android.R.styleable#ScaleDrawable_scaleHeight
  * @attr ref android.R.styleable#ScaleDrawable_scaleGravity
  * @attr ref android.R.styleable#ScaleDrawable_drawable
+ * @attr ref android.R.styleable#ScaleDrawable_level
  */
 public class ScaleDrawable extends DrawableWrapper {
     private static final int MAX_LEVEL = 10000;
@@ -92,6 +102,8 @@ public class ScaleDrawable extends DrawableWrapper {
         inflateChildDrawable(r, parser, attrs, theme);
         verifyRequiredAttributes(a);
         a.recycle();
+
+        updateLocalState();
     }
 
     private void verifyRequiredAttributes(TypedArray a) throws XmlPullParserException {
@@ -117,6 +129,8 @@ public class ScaleDrawable extends DrawableWrapper {
                 R.styleable.ScaleDrawable_scaleGravity, state.mGravity);
         state.mUseIntrinsicSizeAsMin = a.getBoolean(
                 R.styleable.ScaleDrawable_useIntrinsicSizeAsMinimum, state.mUseIntrinsicSizeAsMin);
+        state.mInitialLevel = a.getInt(
+                R.styleable.ScaleDrawable_level, state.mInitialLevel);
 
         final Drawable dr = a.getDrawable(R.styleable.ScaleDrawable_drawable);
         if (dr != null) {
@@ -165,6 +179,8 @@ public class ScaleDrawable extends DrawableWrapper {
         // The drawable may have changed as a result of applying the theme, so
         // apply the theme to the wrapped drawable last.
         super.applyTheme(t);
+
+        updateLocalState();
     }
 
     @Override
@@ -239,6 +255,7 @@ public class ScaleDrawable extends DrawableWrapper {
         float mScaleHeight = DO_NOT_SCALE;
         int mGravity = Gravity.LEFT;
         boolean mUseIntrinsicSizeAsMin = false;
+        int mInitialLevel = 0;
 
         ScaleState(ScaleState orig) {
             super(orig);
@@ -248,6 +265,7 @@ public class ScaleDrawable extends DrawableWrapper {
                 mScaleHeight = orig.mScaleHeight;
                 mGravity = orig.mGravity;
                 mUseIntrinsicSizeAsMin = orig.mUseIntrinsicSizeAsMin;
+                mInitialLevel = orig.mInitialLevel;
             }
         }
 
@@ -257,10 +275,23 @@ public class ScaleDrawable extends DrawableWrapper {
         }
     }
 
+    /**
+     * Creates a new ScaleDrawable based on the specified constant state.
+     * <p>
+     * The resulting drawable is guaranteed to have a new constant state.
+     *
+     * @param state constant state from which the drawable inherits
+     */
     private ScaleDrawable(ScaleState state, Resources res) {
         super(state, res);
 
         mState = state;
+
+        updateLocalState();
+    }
+
+    private void updateLocalState() {
+        setLevel(mState.mInitialLevel);
     }
 }
 

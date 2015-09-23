@@ -5550,6 +5550,8 @@ i
             <!-- Push object to the end of its container, not changing its size. -->
             <flag name="end" value="0x00800005" />
         </attr>
+        <!-- Specifies the initial drawable level in the range 0 to 10000. -->
+        <attr name="level" format="integer" />
         <!-- Reference to a drawable resource to draw with the specified scale. -->
         <attr name="drawable" />
         <!-- Use the drawable's intrinsic width and height as minimum size values.

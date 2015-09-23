@@ -871,6 +871,7 @@ package android {
     field public static final int layout_y = 16843136; // 0x1010180
     field public static final int left = 16843181; // 0x10101ad
     field public static final int letterSpacing = 16843958; // 0x10104b6
+    field public static final int level = 16844031; // 0x10104ff
     field public static final int lineSpacingExtra = 16843287; // 0x1010217
     field public static final int lineSpacingMultiplier = 16843288; // 0x1010218
     field public static final int lines = 16843092; // 0x1010154
