@@ -372,10 +372,8 @@ public class RootsCache {
             if (state.directoryCopy && root.isDownloads()) continue;
 
             // Only show empty roots when creating, or in browse mode.
-            if (empty && (state.action != State.ACTION_BROWSE ||
-                 state.action != State.ACTION_CREATE ||
-                 state.action != State.ACTION_OPEN_TREE ||
-                 state.action != State.ACTION_OPEN_COPY_DESTINATION)) {
+            if (empty && (state.action == State.ACTION_OPEN
+                    || state.action == State.ACTION_GET_CONTENT)) {
                 if (DEBUG) Log.i(TAG, "Skipping empty root: " + root);
                 continue;
             }
