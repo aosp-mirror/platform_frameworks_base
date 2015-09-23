@@ -162,4 +162,60 @@ public class PaintTest extends AndroidTestCase {
         } catch (IndexOutOfBoundsException e) {
         }
     }
+
+    public void testMeasureTextBidi() {
+        Paint p = new Paint();
+        {
+            String bidiText = "abc \u0644\u063A\u0629 def";
+            p.setBidiFlags(Paint.BIDI_LTR);
+            float width = p.measureText(bidiText, 0, 4);
+            p.setBidiFlags(Paint.BIDI_RTL);
+            width += p.measureText(bidiText, 4, 7);
+            p.setBidiFlags(Paint.BIDI_LTR);
+            width += p.measureText(bidiText, 7, bidiText.length());
+            assertEquals(width, p.measureText(bidiText), 1.0f);
+        }
+        {
+            String bidiText = "abc \u0644\u063A\u0629 def";
+            p.setBidiFlags(Paint.BIDI_DEFAULT_LTR);
+            float width = p.measureText(bidiText, 0, 4);
+            width += p.measureText(bidiText, 4, 7);
+            width += p.measureText(bidiText, 7, bidiText.length());
+            assertEquals(width, p.measureText(bidiText), 1.0f);
+        }
+        {
+            String bidiText = "abc \u0644\u063A\u0629 def";
+            p.setBidiFlags(Paint.BIDI_FORCE_LTR);
+            float width = p.measureText(bidiText, 0, 4);
+            width += p.measureText(bidiText, 4, 7);
+            width += p.measureText(bidiText, 7, bidiText.length());
+            assertEquals(width, p.measureText(bidiText), 1.0f);
+        }
+        {
+            String bidiText = "\u0644\u063A\u0629 abc \u0644\u063A\u0629";
+            p.setBidiFlags(Paint.BIDI_RTL);
+            float width = p.measureText(bidiText, 0, 4);
+            p.setBidiFlags(Paint.BIDI_LTR);
+            width += p.measureText(bidiText, 4, 7);
+            p.setBidiFlags(Paint.BIDI_RTL);
+            width += p.measureText(bidiText, 7, bidiText.length());
+            assertEquals(width, p.measureText(bidiText), 1.0f);
+        }
+        {
+            String bidiText = "\u0644\u063A\u0629 abc \u0644\u063A\u0629";
+            p.setBidiFlags(Paint.BIDI_DEFAULT_RTL);
+            float width = p.measureText(bidiText, 0, 4);
+            width += p.measureText(bidiText, 4, 7);
+            width += p.measureText(bidiText, 7, bidiText.length());
+            assertEquals(width, p.measureText(bidiText), 1.0f);
+        }
+        {
+            String bidiText = "\u0644\u063A\u0629 abc \u0644\u063A\u0629";
+            p.setBidiFlags(Paint.BIDI_FORCE_RTL);
+            float width = p.measureText(bidiText, 0, 4);
+            width += p.measureText(bidiText, 4, 7);
+            width += p.measureText(bidiText, 7, bidiText.length());
+            assertEquals(width, p.measureText(bidiText), 1.0f);
+        }
+    }
 }
