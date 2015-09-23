@@ -195,7 +195,8 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
             for (int j = 0; j < taskViewCount; j++) {
                 TaskView tv = taskViews.get(j);
                 if (tv.getTask() == task) {
-                    onTaskViewClicked(mTaskStackView, tv, stack, task, false, true, taskBounds);
+                    onTaskViewClicked(mTaskStackView, tv, stack, task, false, taskBounds != null,
+                            taskBounds);
                     return true;
                 }
             }
@@ -604,7 +605,7 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
             opts = ActivityOptions.makeBasic();
         }
         if (boundsValid) {
-            opts.setBounds(bounds);
+            opts.setBounds(bounds.isEmpty() ? null : bounds);
         }
         final ActivityOptions launchOpts = opts;
         final boolean screenPinningRequested = (animStartedListener == null) && lockToTask;

@@ -27,6 +27,20 @@
         android:layout_height="wrap_content"
         android:orientation="horizontal">
         <Button
+            android:id="@+id/place_dock_left"
+            android:layout_width="36dp"
+            android:layout_height="36dp"
+            android:layout_weight="1"
+            android:layout_margin="10dp"
+            android:background="@drawable/vector_drawable_place_dock_left" />
+        <Button
+            android:id="@+id/place_dock_right"
+            android:layout_width="36dp"
+            android:layout_height="36dp"
+            android:layout_weight="1"
+            android:layout_margin="10dp"
+            android:background="@drawable/vector_drawable_place_dock_right" />
+        <Button
             android:id="@+id/place_left"
             android:layout_width="36dp"
             android:layout_height="36dp"
