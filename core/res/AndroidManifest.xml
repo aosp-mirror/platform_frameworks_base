@@ -2712,6 +2712,13 @@
     <permission android:name="android.permission.DISPATCH_NFC_MESSAGE"
                 android:protectionLevel="signature|privileged" />
 
+    <!-- @SystemApi Allows changing day / night mode when system is configured with
+         config_lockDayNightMode set to true. If requesting app does not have permission,
+         it will be ignored.
+        @hide -->
+    <permission android:name="android.permission.MODIFY_DAY_NIGHT_MODE"
+                android:protectionLevel="signature|privileged" />
+
     <!-- The system process is explicitly the only one allowed to launch the
          confirmation UI for full backup/restore -->
     <uses-permission android:name="android.permission.CONFIRM_FULL_BACKUP"/>
