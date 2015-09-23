@@ -100,8 +100,8 @@ srcset="{@docRoot}images/training/geofence.png 1x, {@docRoot}images/training/geo
 <h3>Create geofence objects</h3>
 
 <p>
-    First, use <code><a href="{@docRoot}reference/com/google/android/gms/location/Geofence.Builder.
-    html">Geofence.Builder</a></code> to create a geofence, setting the desired radius, duration, and
+    First, use <code><a href="{@docRoot}reference/com/google/android/gms/location/Geofence.Builder.html">
+    Geofence.Builder</a></code> to create a geofence, setting the desired radius, duration, and
     transition types for the geofence. For example, to populate a list object named
     {@code mGeofenceList}:
     </p>
