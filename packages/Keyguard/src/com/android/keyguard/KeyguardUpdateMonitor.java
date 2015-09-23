@@ -121,7 +121,6 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
     private static final int MSG_DEVICE_PROVISIONED = 308;
     private static final int MSG_DPM_STATE_CHANGED = 309;
     private static final int MSG_USER_SWITCHING = 310;
-    private static final int MSG_KEYGUARD_VISIBILITY_CHANGED = 311;
     private static final int MSG_KEYGUARD_RESET = 312;
     private static final int MSG_BOOT_COMPLETED = 313;
     private static final int MSG_USER_SWITCH_COMPLETE = 314;
@@ -232,9 +231,6 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
                     break;
                 case MSG_USER_SWITCH_COMPLETE:
                     handleUserSwitchComplete(msg.arg1);
-                    break;
-                case MSG_KEYGUARD_VISIBILITY_CHANGED:
-                    handleKeyguardVisibilityChanged(msg.arg1);
                     break;
                 case MSG_KEYGUARD_RESET:
                     handleKeyguardReset();
@@ -1344,19 +1340,20 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
     }
 
     /**
-     * Handle {@link #MSG_KEYGUARD_VISIBILITY_CHANGED}
+     * Notifies that the visibility state of Keyguard has changed.
+     *
+     * <p>Needs to be called from the main thread.
      */
-    private void handleKeyguardVisibilityChanged(int showing) {
-        if (DEBUG) Log.d(TAG, "handleKeyguardVisibilityChanged(" + showing + ")");
-        boolean isShowing = (showing == 1);
-        mKeyguardIsVisible = isShowing;
+    public void onKeyguardVisibilityChanged(boolean showing) {
+        if (DEBUG) Log.d(TAG, "onKeyguardVisibilityChanged(" + showing + ")");
+        mKeyguardIsVisible = showing;
         for (int i = 0; i < mCallbacks.size(); i++) {
             KeyguardUpdateMonitorCallback cb = mCallbacks.get(i).get();
             if (cb != null) {
-                cb.onKeyguardVisibilityChangedRaw(isShowing);
+                cb.onKeyguardVisibilityChangedRaw(showing);
             }
         }
-        if (!isShowing) {
+        if (!showing) {
             mFingerprintAlreadyAuthenticated = false;
         }
         updateFingerprintListeningState();
@@ -1475,13 +1472,6 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
             final SimData state = data.getValue();
             callback.onSimStateChanged(state.subId, state.slotId, state.simState);
         }
-    }
-
-    public void sendKeyguardVisibilityChanged(boolean showing) {
-        if (DEBUG) Log.d(TAG, "sendKeyguardVisibilityChanged(" + showing + ")");
-        Message message = mHandler.obtainMessage(MSG_KEYGUARD_VISIBILITY_CHANGED);
-        message.arg1 = showing ? 1 : 0;
-        message.sendToTarget();
     }
 
     public void sendKeyguardReset() {
