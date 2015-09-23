@@ -126,14 +126,8 @@ public class ApplicationPackageManager extends PackageManager {
     @Override
     public PackageInfo getPackageInfo(String packageName, int flags)
             throws NameNotFoundException {
-        return getPackageInfoAsUser(packageName, flags, mContext.getUserId());
-    }
-
-    @Override
-    public PackageInfo getPackageInfoAsUser(String packageName, int flags, int userId)
-            throws NameNotFoundException {
         try {
-            PackageInfo pi = mPM.getPackageInfo(packageName, flags, userId);
+            PackageInfo pi = mPM.getPackageInfo(packageName, flags, mContext.getUserId());
             if (pi != null) {
                 return pi;
             }
@@ -1341,17 +1335,10 @@ public class ApplicationPackageManager extends PackageManager {
     @Override
     public void installPackage(Uri packageURI, IPackageInstallObserver observer, int flags,
                                String installerPackageName) {
-        installPackageAsUser(packageURI, observer, flags, installerPackageName,
-                UserHandle.myUserId());
-    }
-
-    @Override
-    public void installPackageAsUser(Uri packageURI, IPackageInstallObserver observer, int flags,
-                               String installerPackageName, int userId) {
         final VerificationParams verificationParams = new VerificationParams(null, null,
                 null, VerificationParams.NO_UID, null);
         installCommon(packageURI, new LegacyPackageInstallObserver(observer), flags,
-                installerPackageName, verificationParams, null, userId);
+                installerPackageName, verificationParams, null);
     }
 
     @Override
@@ -1361,7 +1348,7 @@ public class ApplicationPackageManager extends PackageManager {
         final VerificationParams verificationParams = new VerificationParams(verificationURI, null,
                 null, VerificationParams.NO_UID, manifestDigest);
         installCommon(packageURI, new LegacyPackageInstallObserver(observer), flags,
-                installerPackageName, verificationParams, encryptionParams, UserHandle.myUserId());
+                installerPackageName, verificationParams, encryptionParams);
     }
 
     @Override
@@ -1369,7 +1356,7 @@ public class ApplicationPackageManager extends PackageManager {
             IPackageInstallObserver observer, int flags, String installerPackageName,
             VerificationParams verificationParams, ContainerEncryptionParams encryptionParams) {
         installCommon(packageURI, new LegacyPackageInstallObserver(observer), flags,
-                installerPackageName, verificationParams, encryptionParams, UserHandle.myUserId());
+                installerPackageName, verificationParams, encryptionParams);
     }
 
     @Override
@@ -1377,8 +1364,7 @@ public class ApplicationPackageManager extends PackageManager {
             int flags, String installerPackageName) {
         final VerificationParams verificationParams = new VerificationParams(null, null,
                 null, VerificationParams.NO_UID, null);
-        installCommon(packageURI, observer, flags, installerPackageName, verificationParams, null,
-                UserHandle.myUserId());
+        installCommon(packageURI, observer, flags, installerPackageName, verificationParams, null);
     }
 
     @Override
@@ -1389,7 +1375,7 @@ public class ApplicationPackageManager extends PackageManager {
         final VerificationParams verificationParams = new VerificationParams(verificationURI, null,
                 null, VerificationParams.NO_UID, manifestDigest);
         installCommon(packageURI, observer, flags, installerPackageName, verificationParams,
-                encryptionParams, UserHandle.myUserId());
+                encryptionParams);
     }
 
     @Override
@@ -1397,13 +1383,12 @@ public class ApplicationPackageManager extends PackageManager {
             PackageInstallObserver observer, int flags, String installerPackageName,
             VerificationParams verificationParams, ContainerEncryptionParams encryptionParams) {
         installCommon(packageURI, observer, flags, installerPackageName, verificationParams,
-                encryptionParams, UserHandle.myUserId());
+                encryptionParams);
     }
 
     private void installCommon(Uri packageURI,
             PackageInstallObserver observer, int flags, String installerPackageName,
-            VerificationParams verificationParams, ContainerEncryptionParams encryptionParams,
-            int userId) {
+            VerificationParams verificationParams, ContainerEncryptionParams encryptionParams) {
         if (!"file".equals(packageURI.getScheme())) {
             throw new UnsupportedOperationException("Only file:// URIs are supported");
         }
@@ -1413,22 +1398,17 @@ public class ApplicationPackageManager extends PackageManager {
 
         final String originPath = packageURI.getPath();
         try {
-            mPM.installPackageAsUser(originPath, observer.getBinder(), flags, installerPackageName,
-                    verificationParams, null, userId);
+            mPM.installPackage(originPath, observer.getBinder(), flags, installerPackageName,
+                    verificationParams, null);
         } catch (RemoteException ignored) {
         }
     }
 
     @Override
-    public int installExistingPackage(String packageName) throws NameNotFoundException {
-        return installExistingPackageAsUser(packageName, UserHandle.myUserId());
-    }
-
-    @Override
-    public int installExistingPackageAsUser(String packageName, int userId)
+    public int installExistingPackage(String packageName)
             throws NameNotFoundException {
         try {
-            int res = mPM.installExistingPackageAsUser(packageName, userId);
+            int res = mPM.installExistingPackageAsUser(packageName, UserHandle.myUserId());
             if (res == INSTALL_FAILED_INVALID_URI) {
                 throw new NameNotFoundException("Package " + packageName + " doesn't exist");
             }
@@ -1726,14 +1706,8 @@ public class ApplicationPackageManager extends PackageManager {
 
     @Override
     public void deletePackage(String packageName, IPackageDeleteObserver observer, int flags) {
-        deletePackageAsUser(packageName, observer, flags, UserHandle.myUserId());
-    }
-
-    @Override
-    public void deletePackageAsUser(String packageName, IPackageDeleteObserver observer, int flags,
-            int userId) {
         try {
-            mPM.deletePackageAsUser(packageName, observer, userId, flags);
+            mPM.deletePackageAsUser(packageName, observer, UserHandle.myUserId(), flags);
         } catch (RemoteException e) {
             // Should never happen!
         }
