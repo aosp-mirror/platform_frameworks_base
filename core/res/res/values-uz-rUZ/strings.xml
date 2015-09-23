@@ -797,9 +797,9 @@
     <string name="menu_space_shortcut_label" msgid="2410328639272162537">"space"</string>
     <string name="menu_enter_shortcut_label" msgid="2743362785111309668">"enter"</string>
     <string name="menu_delete_shortcut_label" msgid="3658178007202748164">"delete"</string>
-    <string name="search_go" msgid="8298016669822141719">"Izlash"</string>
+    <string name="search_go" msgid="8298016669822141719">"Qidirish"</string>
     <string name="search_hint" msgid="1733947260773056054">"Qidirish…"</string>
-    <string name="searchview_description_search" msgid="6749826639098512120">"Izlash"</string>
+    <string name="searchview_description_search" msgid="6749826639098512120">"Qidirish"</string>
     <string name="searchview_description_query" msgid="5911778593125355124">"Qidiruv so‘rovi"</string>
     <string name="searchview_description_clear" msgid="1330281990951833033">"So‘rovni tozalash"</string>
     <string name="searchview_description_submit" msgid="2688450133297983542">"So‘rov yaratish"</string>
@@ -1100,7 +1100,7 @@
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="4070433208160063538">"Masshtabni o‘zgartirish uchun ikki marta bosing"</string>
     <string name="gadget_host_error_inflating" msgid="4882004314906466162">"Vidjet qo‘shilmadi."</string>
     <string name="ime_action_go" msgid="8320845651737369027">"O‘tish"</string>
-    <string name="ime_action_search" msgid="658110271822807811">"Izlash"</string>
+    <string name="ime_action_search" msgid="658110271822807811">"Qidirish"</string>
     <string name="ime_action_send" msgid="2316166556349314424">"Jo‘natish"</string>
     <string name="ime_action_next" msgid="3138843904009813834">"Keyingi"</string>
     <string name="ime_action_done" msgid="8971516117910934605">"Tayyor"</string>

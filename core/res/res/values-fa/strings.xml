@@ -787,7 +787,7 @@
     <string name="permlab_writeGeolocationPermissions" msgid="5962224158955273932">"تغییر مجوزهای مکان جغرافیایی مرورگر"</string>
     <string name="permdesc_writeGeolocationPermissions" msgid="1083743234522638747">"‏به برنامه اجازه می‎دهد تا مجوزهای جغرافیایی مرورگر را تغییر دهد. برنامه‎های مخرب می‎توانند از آن استفاده کنند تا اطلاعات موقعیت مکانی را به سایت‌های وب کتابخانه بفرستند."</string>
     <string name="save_password_message" msgid="767344687139195790">"می‌خواهید مرورگر این رمز ورود را به خاطر داشته باشد؟"</string>
-    <string name="save_password_notnow" msgid="6389675316706699758">"الآن نه"</string>
+    <string name="save_password_notnow" msgid="6389675316706699758">"اکنون نه"</string>
     <string name="save_password_remember" msgid="6491879678996749466">"به خاطر سپردن"</string>
     <string name="save_password_never" msgid="8274330296785855105">"هیچ‌وقت"</string>
     <string name="open_permission_deny" msgid="7374036708316629800">"شما اجازه بازکردن این صفحه را ندارید."</string>
