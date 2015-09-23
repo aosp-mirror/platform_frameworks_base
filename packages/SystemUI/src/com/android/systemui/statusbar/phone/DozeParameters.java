@@ -33,7 +33,7 @@ public class DozeParameters {
     private static final String TAG = "DozeParameters";
     private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
 
-    private static final int MAX_DURATION = 10 * 1000;
+    private static final int MAX_DURATION = 60 * 1000;
 
     private final Context mContext;
 
