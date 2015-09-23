@@ -76,8 +76,9 @@ public class CaptivePortalLoginActivity extends Activity {
         String server = Settings.Global.getString(getContentResolver(), "captive_portal_server");
         if (server == null) server = DEFAULT_SERVER;
         mCm = ConnectivityManager.from(this);
+        String url = getIntent().getStringExtra(ConnectivityManager.EXTRA_CAPTIVE_PORTAL_URL);
         try {
-            mURL = new URL("http", server, "/generate_204");
+            mURL = url != null ? new URL(url) : new URL("http", server, "/generate_204");
         } catch (MalformedURLException e) {
             // System misconfigured, bail out in a way that at least provides network access.
             Log.e(TAG, "Invalid captive portal URL, server=" + server);
