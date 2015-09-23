@@ -281,8 +281,12 @@ public final class NetworkCapabilities implements Parcelable {
     public void maybeMarkCapabilitiesRestricted() {
         // If all the capabilities are typically provided by restricted networks, conclude that this
         // network is restricted.
-        if ((mNetworkCapabilities & ~(DEFAULT_CAPABILITIES | RESTRICTED_CAPABILITIES)) == 0)
+        if ((mNetworkCapabilities & ~(DEFAULT_CAPABILITIES | RESTRICTED_CAPABILITIES)) == 0 &&
+                // Must have at least some restricted capabilities, otherwise a request for an
+                // internet-less network will get marked restricted.
+                (mNetworkCapabilities & RESTRICTED_CAPABILITIES) != 0) {
             removeCapability(NET_CAPABILITY_NOT_RESTRICTED);
+        }
     }
 
     /**
