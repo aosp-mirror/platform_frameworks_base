@@ -853,7 +853,7 @@
     <string name="Midnight" msgid="5630806906897892201">"Midnatt"</string>
     <string name="elapsed_time_short_format_mm_ss" msgid="4431555943828711473">"<xliff:g id="MINUTES">%1$02d</xliff:g>:<xliff:g id="SECONDS">%2$02d</xliff:g>"</string>
     <string name="elapsed_time_short_format_h_mm_ss" msgid="1846071997616654124">"<xliff:g id="HOURS">%1$d</xliff:g>:<xliff:g id="MINUTES">%2$02d</xliff:g>:<xliff:g id="SECONDS">%3$02d</xliff:g>"</string>
-    <string name="selectAll" msgid="6876518925844129331">"Välj alla"</string>
+    <string name="selectAll" msgid="6876518925844129331">"Markera allt"</string>
     <string name="cut" msgid="3092569408438626261">"Klipp ut"</string>
     <string name="copy" msgid="2681946229533511987">"Kopiera"</string>
     <string name="paste" msgid="5629880836805036433">"Klistra in"</string>
@@ -1208,7 +1208,7 @@
     <string name="action_menu_overflow_description" msgid="2295659037509008453">"Fler alternativ"</string>
     <string name="action_bar_home_description_format" msgid="7965984360903693903">"%1$s, %2$s"</string>
     <string name="action_bar_home_subtitle_description_format" msgid="6985546530471780727">"%1$s, %2$s, %3$s"</string>
-    <string name="storage_internal" msgid="4891916833657929263">"Internminne"</string>
+    <string name="storage_internal" msgid="4891916833657929263">"lagring"</string>
     <string name="storage_sd_card" msgid="3282948861378286745">"SD-kort"</string>
     <string name="storage_sd_card_label" msgid="6347111320774379257">"SD-kort (<xliff:g id="MANUFACTURER">%s</xliff:g>)"</string>
     <string name="storage_usb_drive" msgid="6261899683292244209">"USB-enhet"</string>

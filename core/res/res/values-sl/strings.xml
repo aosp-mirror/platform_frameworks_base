@@ -992,7 +992,7 @@
     <string name="wifi_p2p_failed_message" msgid="3763669677935623084">"Wi-Fi Direct ni bilo mogoče zagnati."</string>
     <string name="wifi_p2p_enabled_notification_title" msgid="2068321881673734886">"Wi-Fi Direct je vklopljen"</string>
     <string name="wifi_p2p_enabled_notification_message" msgid="1638949953993894335">"Dotaknite se za nastavitve"</string>
-    <string name="accept" msgid="1645267259272829559">"Sprejmi"</string>
+    <string name="accept" msgid="1645267259272829559">"Sprejmem"</string>
     <string name="decline" msgid="2112225451706137894">"Zavrni"</string>
     <string name="wifi_p2p_invitation_sent_title" msgid="1318975185112070734">"Povabilo je poslano"</string>
     <string name="wifi_p2p_invitation_to_connect_title" msgid="4958803948658533637">"Povabilo za povezavo"</string>
