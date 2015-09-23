@@ -159,7 +159,9 @@ public class SystemUIApplication extends Application {
         if (mServicesStarted) {
             int len = mServices.length;
             for (int i = 0; i < len; i++) {
-                mServices[i].onConfigurationChanged(newConfig);
+                if (mServices[i] != null) {
+                    mServices[i].onConfigurationChanged(newConfig);
+                }
             }
         }
     }
