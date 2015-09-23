@@ -939,41 +939,6 @@ public class ConnectivityManager {
         return 1;
     }
 
-    /**
-     * Removes the NET_CAPABILITY_NOT_RESTRICTED capability from the given
-     * NetworkCapabilities object if all the capabilities it provides are
-     * typically provided by restricted networks.
-     *
-     * TODO: consider:
-     * - Moving to NetworkCapabilities
-     * - Renaming it to guessRestrictedCapability and make it set the
-     *   restricted capability bit in addition to clearing it.
-     * @hide
-     */
-    public static void maybeMarkCapabilitiesRestricted(NetworkCapabilities nc) {
-        for (int capability : nc.getCapabilities()) {
-            switch (capability) {
-                case NetworkCapabilities.NET_CAPABILITY_CBS:
-                case NetworkCapabilities.NET_CAPABILITY_DUN:
-                case NetworkCapabilities.NET_CAPABILITY_EIMS:
-                case NetworkCapabilities.NET_CAPABILITY_FOTA:
-                case NetworkCapabilities.NET_CAPABILITY_IA:
-                case NetworkCapabilities.NET_CAPABILITY_IMS:
-                case NetworkCapabilities.NET_CAPABILITY_RCS:
-                case NetworkCapabilities.NET_CAPABILITY_XCAP:
-                case NetworkCapabilities.NET_CAPABILITY_NOT_RESTRICTED: //there by default
-                    continue;
-                default:
-                    // At least one capability usually provided by unrestricted
-                    // networks. Conclude that this network is unrestricted.
-                    return;
-            }
-        }
-        // All the capabilities are typically provided by restricted networks.
-        // Conclude that this network is restricted.
-        nc.removeCapability(NetworkCapabilities.NET_CAPABILITY_NOT_RESTRICTED);
-    }
-
     private NetworkCapabilities networkCapabilitiesForFeature(int networkType, String feature) {
         if (networkType == TYPE_MOBILE) {
             int cap = -1;
@@ -996,14 +961,14 @@ public class ConnectivityManager {
             }
             NetworkCapabilities netCap = new NetworkCapabilities();
             netCap.addTransportType(NetworkCapabilities.TRANSPORT_CELLULAR).addCapability(cap);
-            maybeMarkCapabilitiesRestricted(netCap);
+            netCap.maybeMarkCapabilitiesRestricted();
             return netCap;
         } else if (networkType == TYPE_WIFI) {
             if ("p2p".equals(feature)) {
                 NetworkCapabilities netCap = new NetworkCapabilities();
                 netCap.addTransportType(NetworkCapabilities.TRANSPORT_WIFI);
                 netCap.addCapability(NetworkCapabilities.NET_CAPABILITY_WIFI_P2P);
-                maybeMarkCapabilitiesRestricted(netCap);
+                netCap.maybeMarkCapabilitiesRestricted();
                 return netCap;
             }
         }

@@ -37,6 +37,7 @@ public final class NetworkCapabilities implements Parcelable {
      * @hide
      */
     public NetworkCapabilities() {
+        mNetworkCapabilities = DEFAULT_CAPABILITIES;
     }
 
     public NetworkCapabilities(NetworkCapabilities nc) {
@@ -53,8 +54,7 @@ public final class NetworkCapabilities implements Parcelable {
      * Represents the network's capabilities.  If any are specified they will be satisfied
      * by any Network that matches all of them.
      */
-    private long mNetworkCapabilities = (1 << NET_CAPABILITY_NOT_RESTRICTED) |
-            (1 << NET_CAPABILITY_TRUSTED) | (1 << NET_CAPABILITY_NOT_VPN);
+    private long mNetworkCapabilities;
 
     /**
      * Indicates this is a network that has the ability to reach the
@@ -166,6 +166,28 @@ public final class NetworkCapabilities implements Parcelable {
     private static final int MAX_NET_CAPABILITY = NET_CAPABILITY_VALIDATED;
 
     /**
+     * Capabilities that are set by default when the object is constructed.
+     */
+    private static final long DEFAULT_CAPABILITIES =
+            (1 << NET_CAPABILITY_NOT_RESTRICTED) |
+            (1 << NET_CAPABILITY_TRUSTED) |
+            (1 << NET_CAPABILITY_NOT_VPN);
+
+    /**
+     * Capabilities that suggest that a network is restricted.
+     * {@see #maybeMarkCapabilitiesRestricted}.
+     */
+    private static final long RESTRICTED_CAPABILITIES =
+            (1 << NET_CAPABILITY_CBS) |
+            (1 << NET_CAPABILITY_DUN) |
+            (1 << NET_CAPABILITY_EIMS) |
+            (1 << NET_CAPABILITY_FOTA) |
+            (1 << NET_CAPABILITY_IA) |
+            (1 << NET_CAPABILITY_IMS) |
+            (1 << NET_CAPABILITY_RCS) |
+            (1 << NET_CAPABILITY_XCAP);
+
+    /**
      * Adds the given capability to this {@code NetworkCapability} instance.
      * Multiple capabilities may be applied sequentially.  Note that when searching
      * for a network to satisfy a request, all capabilities requested must be satisfied.
@@ -245,6 +267,22 @@ public final class NetworkCapabilities implements Parcelable {
     /** @hide */
     public boolean equalsNetCapabilities(NetworkCapabilities nc) {
         return (nc.mNetworkCapabilities == this.mNetworkCapabilities);
+    }
+
+    /**
+     * Removes the NET_CAPABILITY_NOT_RESTRICTED capability if all the capabilities it provides are
+     * typically provided by restricted networks.
+     *
+     * TODO: consider:
+     * - Renaming it to guessRestrictedCapability and make it set the
+     *   restricted capability bit in addition to clearing it.
+     * @hide
+     */
+    public void maybeMarkCapabilitiesRestricted() {
+        // If all the capabilities are typically provided by restricted networks, conclude that this
+        // network is restricted.
+        if ((mNetworkCapabilities & ~(DEFAULT_CAPABILITIES | RESTRICTED_CAPABILITIES)) == 0)
+            removeCapability(NET_CAPABILITY_NOT_RESTRICTED);
     }
 
     /**
