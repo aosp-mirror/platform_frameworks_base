@@ -46,7 +46,7 @@
     <string name="savetopdf_button" msgid="2976186791686924743">"PDF sifatida saqlash"</string>
     <string name="print_options_expanded" msgid="6944679157471691859">"Chop qilish tanlamalari yoyildi"</string>
     <string name="print_options_collapsed" msgid="7455930445670414332">"Chop qilish tanlamalari yig‘ildi"</string>
-    <string name="search" msgid="5421724265322228497">"Izlash"</string>
+    <string name="search" msgid="5421724265322228497">"Qidirish"</string>
     <string name="all_printers_label" msgid="3178848870161526399">"Barcha printerlar"</string>
     <string name="add_print_service_label" msgid="5356702546188981940">"Xizmat qo‘shish"</string>
     <string name="print_search_box_shown_utterance" msgid="7967404953901376090">"Izlash oynasi ko‘rsatildi"</string>
