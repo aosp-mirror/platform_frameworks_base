@@ -110,7 +110,6 @@ namespace android
             return 0;
         }
         char buf[17];
-        char *curBuf = buf;
         while (fgets(buf, 16, boost_cpuset_file)) {
             //ALOGE("Appending FD %s to fg", buf);
             int i = 0;
