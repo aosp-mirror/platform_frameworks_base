@@ -202,7 +202,7 @@ static void android_view_TextureView_unlockCanvasAndPost(JNIEnv* env, jobject,
 
 const char* const kClassPathName = "android/view/TextureView";
 
-static JNINativeMethod gMethods[] = {
+static const JNINativeMethod gMethods[] = {
     {   "nCreateNativeWindow", "(Landroid/graphics/SurfaceTexture;)V",
             (void*) android_view_TextureView_createNativeWindow },
     {   "nDestroyNativeWindow", "()V",

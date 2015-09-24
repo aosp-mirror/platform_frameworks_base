@@ -37,7 +37,7 @@ static void android_server_SystemServer_nativeInit(JNIEnv* /* env */, jobject /*
 /*
  * JNI registration.
  */
-static JNINativeMethod gMethods[] = {
+static const JNINativeMethod gMethods[] = {
     /* name, signature, funcPtr */
     { "nativeInit", "()V", (void*) android_server_SystemServer_nativeInit },
 };

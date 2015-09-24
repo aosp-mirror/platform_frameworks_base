@@ -477,7 +477,7 @@ static jboolean nativePutNull(JNIEnv* env, jclass clazz, jlong windowPtr,
     return true;
 }
 
-static JNINativeMethod sMethods[] =
+static const JNINativeMethod sMethods[] =
 {
     /* name, signature, funcPtr */
     { "nativeCreate", "(Ljava/lang/String;I)J",

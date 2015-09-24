@@ -343,7 +343,7 @@ static void SurfaceTexture_release(JNIEnv* env, jobject thiz)
 
 // ----------------------------------------------------------------------------
 
-static JNINativeMethod gSurfaceTextureMethods[] = {
+static const JNINativeMethod gSurfaceTextureMethods[] = {
     {"nativeClassInit",            "()V",   (void*)SurfaceTexture_classInit },
     {"nativeInit",                 "(ZIZLjava/lang/ref/WeakReference;)V", (void*)SurfaceTexture_init },
     {"nativeFinalize",             "()V",   (void*)SurfaceTexture_finalize },

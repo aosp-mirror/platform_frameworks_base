@@ -93,7 +93,7 @@ static void android_graphics_Picture_endRecording(JNIEnv* env, jobject, jlong pi
     pict->endRecording();
 }
 
-static JNINativeMethod gMethods[] = {
+static const JNINativeMethod gMethods[] = {
     {"nativeGetWidth", "(J)I", (void*) android_graphics_Picture_getWidth},
     {"nativeGetHeight", "(J)I", (void*) android_graphics_Picture_getHeight},
     {"nativeConstructor", "(J)J", (void*) android_graphics_Picture_newPicture},

@@ -1101,18 +1101,18 @@ static jint etc1_getHeight(JNIEnv *env, jclass clazz,
  * JNI registration
  */
 
-static JNINativeMethod gMatrixMethods[] = {
+static const JNINativeMethod gMatrixMethods[] = {
     { "multiplyMM", "([FI[FI[FI)V", (void*)util_multiplyMM },
     { "multiplyMV", "([FI[FI[FI)V", (void*)util_multiplyMV },
 };
 
-static JNINativeMethod gVisibilityMethods[] = {
+static const JNINativeMethod gVisibilityMethods[] = {
     { "computeBoundingSphere", "([FII[FI)V", (void*)util_computeBoundingSphere },
     { "frustumCullSpheres", "([FI[FII[III)I", (void*)util_frustumCullSpheres },
     { "visibilityTest", "([FI[FI[CII)I", (void*)util_visibilityTest },
 };
 
-static JNINativeMethod gUtilsMethods[] = {
+static const JNINativeMethod gUtilsMethods[] = {
     {"nativeClassInit", "()V",                          (void*)nativeUtilsClassInit },
     { "native_getInternalFormat", "(Landroid/graphics/Bitmap;)I", (void*) util_getInternalFormat },
     { "native_getType", "(Landroid/graphics/Bitmap;)I", (void*) util_getType },
@@ -1121,7 +1121,7 @@ static JNINativeMethod gUtilsMethods[] = {
     { "setTracingLevel", "(I)V",                        (void*)setTracingLevel },
 };
 
-static JNINativeMethod gEtc1Methods[] = {
+static const JNINativeMethod gEtc1Methods[] = {
     { "encodeBlock", "(Ljava/nio/Buffer;ILjava/nio/Buffer;)V", (void*) etc1_encodeBlock },
     { "decodeBlock", "(Ljava/nio/Buffer;Ljava/nio/Buffer;)V", (void*) etc1_decodeBlock },
     { "getEncodedDataSize", "(II)I", (void*) etc1_getEncodedDataSize },
@@ -1135,11 +1135,11 @@ static JNINativeMethod gEtc1Methods[] = {
 
 typedef struct _ClassRegistrationInfo {
     const char* classPath;
-    JNINativeMethod* methods;
+    const JNINativeMethod* methods;
     size_t methodCount;
 } ClassRegistrationInfo;
 
-static ClassRegistrationInfo gClasses[] = {
+static const ClassRegistrationInfo gClasses[] = {
     {"android/opengl/Matrix", gMatrixMethods, NELEM(gMatrixMethods)},
     {"android/opengl/Visibility", gVisibilityMethods, NELEM(gVisibilityMethods)},
     {"android/opengl/GLUtils", gUtilsMethods, NELEM(gUtilsMethods)},
@@ -1151,7 +1151,7 @@ int register_android_opengl_classes(JNIEnv* env)
     nativeClassInitBuffer(env);
     int result = 0;
     for (int i = 0; i < NELEM(gClasses); i++) {
-        ClassRegistrationInfo* cri = &gClasses[i];
+        const ClassRegistrationInfo* cri = &gClasses[i];
         result = RegisterMethodsOrDie(env, cri->classPath, cri->methods, cri->methodCount);
     }
     return result;

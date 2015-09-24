@@ -83,7 +83,7 @@ static jint QTagUid_deleteTagData(JNIEnv* env, jclass,
   return (jint)res;
 }
 
-static JNINativeMethod gQTagUidMethods[] = {
+static const JNINativeMethod gQTagUidMethods[] = {
   { "native_tagSocketFd", "(Ljava/io/FileDescriptor;II)I", (void*)QTagUid_tagSocketFd},
   { "native_untagSocketFd", "(Ljava/io/FileDescriptor;)I", (void*)QTagUid_untagSocketFd},
   { "native_setCounterSet", "(II)I", (void*)QTagUid_setCounterSet},

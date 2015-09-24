@@ -47,15 +47,15 @@ public:
 
 ///////////////////////////////////////////////////////////////////////////////
 
-static JNINativeMethod gXfermodeMethods[] = {
+static const JNINativeMethod gXfermodeMethods[] = {
     {"finalizer", "(J)V", (void*) SkXfermodeGlue::finalizer}
 };
 
-static JNINativeMethod gAvoidMethods[] = {
+static const JNINativeMethod gAvoidMethods[] = {
     {"nativeCreate", "(III)J", (void*) SkXfermodeGlue::avoid_create}
 };
 
-static JNINativeMethod gPixelXorMethods[] = {
+static const JNINativeMethod gPixelXorMethods[] = {
     {"nativeCreate", "(I)J", (void*) SkXfermodeGlue::pixelxor_create}
 };
 

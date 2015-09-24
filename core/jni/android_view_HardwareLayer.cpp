@@ -95,7 +95,7 @@ static jint android_view_HardwareLayer_getTexName(JNIEnv* env, jobject clazz,
 
 const char* const kClassPathName = "android/view/HardwareLayer";
 
-static JNINativeMethod gMethods[] = {
+static const JNINativeMethod gMethods[] = {
 #ifdef USE_OPENGL_RENDERER
 
     { "nPrepare",                "(JIIZ)Z",    (void*) android_view_HardwareLayer_prepare },

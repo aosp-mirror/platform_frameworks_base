@@ -5167,7 +5167,7 @@ android_glGetInternalformativ__IIIILjava_nio_IntBuffer_2
 
 static const char *classPathName = "android/opengl/GLES30";
 
-static JNINativeMethod methods[] = {
+static const JNINativeMethod methods[] = {
 {"_nativeClassInit", "()V", (void*)nativeClassInit },
 {"glReadBuffer", "(I)V", (void *) android_glReadBuffer__I },
 {"glDrawRangeElements", "(IIIIILjava/nio/Buffer;)V", (void *) android_glDrawRangeElements__IIIIILjava_nio_Buffer_2 },

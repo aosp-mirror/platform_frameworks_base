@@ -115,7 +115,7 @@ static jfloat Camera_dotWithNormal(JNIEnv* env, jobject obj,
 /*
  * JNI registration.
  */
-static JNINativeMethod gCameraMethods[] = {
+static const JNINativeMethod gCameraMethods[] = {
     /* name, signature, funcPtr */
 
     { "nativeConstructor",   "()V",    (void*)Camera_constructor   },

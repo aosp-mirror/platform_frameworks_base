@@ -320,7 +320,7 @@ static jboolean native_restorecon(JNIEnv *env, jobject, jstring pathnameStr, jin
 /*
  * JNI registration.
  */
-static JNINativeMethod method_table[] = {
+static const JNINativeMethod method_table[] = {
     /* name,                     signature,                    funcPtr */
     { "checkSELinuxAccess"       , "(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)Z" , (void*)checkSELinuxAccess },
     { "getContext"               , "()Ljava/lang/String;"                         , (void*)getCon           },

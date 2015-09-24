@@ -935,7 +935,7 @@ public:
 
 };
 
-static JNINativeMethod methods[] = {
+static const JNINativeMethod methods[] = {
     {"finalizer", "(J)V", (void*) PaintGlue::finalizer},
     {"native_init","()J", (void*) PaintGlue::init},
     {"native_initWithPaint","(J)J", (void*) PaintGlue::initWithPaint},

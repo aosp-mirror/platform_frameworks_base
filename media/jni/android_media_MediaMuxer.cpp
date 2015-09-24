@@ -219,7 +219,7 @@ static void android_media_MediaMuxer_native_release(
     }
 }
 
-static JNINativeMethod gMethods[] = {
+static const JNINativeMethod gMethods[] = {
 
     { "nativeAddTrack", "(J[Ljava/lang/String;[Ljava/lang/Object;)I",
         (void *)android_media_MediaMuxer_addTrack },

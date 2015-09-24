@@ -69,7 +69,7 @@ static void Typeface_setDefault(JNIEnv *env, jobject, jlong faceHandle) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-static JNINativeMethod gTypefaceMethods[] = {
+static const JNINativeMethod gTypefaceMethods[] = {
     { "nativeCreateFromTypeface", "(JI)J", (void*)Typeface_createFromTypeface },
     { "nativeCreateWeightAlias",  "(JI)J", (void*)Typeface_createWeightAlias },
     { "nativeUnref",              "(J)V",  (void*)Typeface_unref },

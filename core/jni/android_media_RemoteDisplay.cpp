@@ -175,7 +175,7 @@ static void nativeDispose(JNIEnv* env, jobject remoteDisplayObj, jlong ptr) {
 
 // ----------------------------------------------------------------------------
 
-static JNINativeMethod gMethods[] = {
+static const JNINativeMethod gMethods[] = {
     {"nativeListen", "(Ljava/lang/String;)J",
             (void*)nativeListen },
     {"nativeDispose", "(J)V",

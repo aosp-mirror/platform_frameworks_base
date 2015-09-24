@@ -114,7 +114,7 @@ static jboolean FontFamily_addFontFromAsset(JNIEnv* env, jobject, jlong familyPt
 
 ///////////////////////////////////////////////////////////////////////////////
 
-static JNINativeMethod gFontFamilyMethods[] = {
+static const JNINativeMethod gFontFamilyMethods[] = {
     { "nCreateFamily",         "(Ljava/lang/String;I)J", (void*)FontFamily_create },
     { "nUnrefFamily",          "(J)V", (void*)FontFamily_unref },
     { "nAddFont",              "(JLjava/lang/String;)Z", (void*)FontFamily_addFont },

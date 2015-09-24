@@ -644,7 +644,7 @@ static void freeTextLayoutCaches(JNIEnv* env, jobject) {
 
 }; // namespace CanvasJNI
 
-static JNINativeMethod gMethods[] = {
+static const JNINativeMethod gMethods[] = {
     {"finalizer", "(J)V", (void*) CanvasJNI::finalizer},
     {"initRaster", "(J)J", (void*) CanvasJNI::initRaster},
     {"native_setBitmap", "(JJZ)V", (void*) CanvasJNI::setBitmap},

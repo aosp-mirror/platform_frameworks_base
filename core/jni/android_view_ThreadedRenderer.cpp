@@ -419,7 +419,7 @@ static void android_view_ThreadedRenderer_setupShadersDiskCache(JNIEnv* env, job
 
 const char* const kClassPathName = "android/view/ThreadedRenderer";
 
-static JNINativeMethod gMethods[] = {
+static const JNINativeMethod gMethods[] = {
 #ifdef USE_OPENGL_RENDERER
     { "nSetAtlas", "(JLandroid/view/GraphicBuffer;[J)V",   (void*) android_view_ThreadedRenderer_setAtlas },
     { "nCreateRootRenderNode", "()J", (void*) android_view_ThreadedRenderer_createRootRenderNode },

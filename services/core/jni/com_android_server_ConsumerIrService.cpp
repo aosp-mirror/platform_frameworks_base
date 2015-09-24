@@ -100,7 +100,7 @@ static jintArray halGetCarrierFrequencies(JNIEnv *env, jobject /* obj */,
     return freqsOut.getJavaArray();
 }
 
-static JNINativeMethod method_table[] = {
+static const JNINativeMethod method_table[] = {
     { "halOpen", "()J", (void *)halOpen },
     { "halTransmit", "(JI[I)I", (void *)halTransmit },
     { "halGetCarrierFrequencies", "(J)[I", (void *)halGetCarrierFrequencies},

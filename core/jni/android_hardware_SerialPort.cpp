@@ -243,7 +243,7 @@ android_hardware_SerialPort_send_break(JNIEnv *env, jobject thiz)
     tcsendbreak(fd, 0);
 }
 
-static JNINativeMethod method_table[] = {
+static const JNINativeMethod method_table[] = {
     {"native_open",             "(Ljava/io/FileDescriptor;I)V",
                                         (void *)android_hardware_SerialPort_open},
     {"native_close",            "()V",  (void *)android_hardware_SerialPort_close},

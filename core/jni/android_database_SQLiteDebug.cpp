@@ -58,7 +58,7 @@ static void nativeGetPagerStats(JNIEnv *env, jobject clazz, jobject statsObj)
  * JNI registration.
  */
 
-static JNINativeMethod gMethods[] =
+static const JNINativeMethod gMethods[] =
 {
     { "nativeGetPagerStats", "(Landroid/database/sqlite/SQLiteDebug$PagerStats;)V",
             (void*) nativeGetPagerStats },

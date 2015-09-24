@@ -1432,7 +1432,7 @@ static void android_location_GpsLocationProvider_configuration_update(JNIEnv* en
     env->ReleaseStringUTFChars(config_content, data);
 }
 
-static JNINativeMethod sMethods[] = {
+static const JNINativeMethod sMethods[] = {
      /* name, signature, funcPtr */
     {"class_init_native", "()V", (void *)android_location_GpsLocationProvider_class_init_native},
     {"native_is_supported", "()Z", (void*)android_location_GpsLocationProvider_is_supported},

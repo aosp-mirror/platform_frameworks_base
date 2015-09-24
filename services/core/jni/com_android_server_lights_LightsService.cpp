@@ -126,7 +126,7 @@ static void setLight_native(JNIEnv* /* env */, jobject /* clazz */, jlong ptr,
     }
 }
 
-static JNINativeMethod method_table[] = {
+static const JNINativeMethod method_table[] = {
     { "init_native", "()J", (void*)init_native },
     { "finalize_native", "(J)V", (void*)finalize_native },
     { "setLight_native", "(JIIIIII)V", (void*)setLight_native },

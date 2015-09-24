@@ -177,7 +177,7 @@ public:
 
 /////////////////////////////////////////////////////////////////////////////////////////
 
-static JNINativeMethod gNinePatchMethods[] = {
+static const JNINativeMethod gNinePatchMethods[] = {
     { "isNinePatchChunk", "([B)Z",                        (void*) SkNinePatchGlue::isNinePatchChunk },
     { "validateNinePatchChunk", "(J[B)J",                 (void*) SkNinePatchGlue::validateNinePatchChunk },
     { "nativeFinalize", "(J)V",                           (void*) SkNinePatchGlue::finalize },

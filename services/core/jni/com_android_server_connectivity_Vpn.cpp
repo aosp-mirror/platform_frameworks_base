@@ -350,7 +350,7 @@ static bool delAddress(JNIEnv *env, jobject thiz, jstring jName, jstring jAddres
 
 //------------------------------------------------------------------------------
 
-static JNINativeMethod gMethods[] = {
+static const JNINativeMethod gMethods[] = {
     {"jniCreate", "(I)I", (void *)create},
     {"jniGetName", "(I)Ljava/lang/String;", (void *)getName},
     {"jniSetAddresses", "(Ljava/lang/String;Ljava/lang/String;)I", (void *)setAddresses},

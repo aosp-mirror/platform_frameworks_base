@@ -55,7 +55,7 @@ static jobject android_server_SerialService_open(JNIEnv *env, jobject /* thiz */
 }
 
 
-static JNINativeMethod method_table[] = {
+static const JNINativeMethod method_table[] = {
     { "native_open",                "(Ljava/lang/String;)Landroid/os/ParcelFileDescriptor;",
                                     (void*)android_server_SerialService_open },
 };

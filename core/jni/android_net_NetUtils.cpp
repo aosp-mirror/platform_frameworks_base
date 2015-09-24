@@ -253,7 +253,7 @@ static jboolean android_net_utils_protectFromVpn(JNIEnv *env, jobject thiz, jint
 /*
  * JNI registration.
  */
-static JNINativeMethod gNetworkUtilMethods[] = {
+static const JNINativeMethod gNetworkUtilMethods[] = {
     /* name, signature, funcPtr */
     { "resetConnections", "(Ljava/lang/String;I)I",  (void *)android_net_utils_resetConnections },
     { "runDhcp", "(Ljava/lang/String;Landroid/net/DhcpResults;)Z",  (void *)android_net_utils_runDhcp },

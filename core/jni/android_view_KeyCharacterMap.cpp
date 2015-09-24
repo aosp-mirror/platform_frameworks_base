@@ -203,7 +203,7 @@ static jobjectArray nativeGetEvents(JNIEnv *env, jobject clazz, jlong ptr,
  * JNI registration.
  */
 
-static JNINativeMethod g_methods[] = {
+static const JNINativeMethod g_methods[] = {
     /* name, signature, funcPtr */
     { "nativeReadFromParcel", "(Landroid/os/Parcel;)J",
             (void*)nativeReadFromParcel },
