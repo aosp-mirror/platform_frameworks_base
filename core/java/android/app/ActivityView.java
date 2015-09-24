@@ -239,6 +239,8 @@ public class ActivityView extends ViewGroup {
         }
 
         mTextureView.setSurfaceTextureListener(null);
+
+        mThread.quit();
     }
 
     private void attachToSurfaceWhenReady() {
