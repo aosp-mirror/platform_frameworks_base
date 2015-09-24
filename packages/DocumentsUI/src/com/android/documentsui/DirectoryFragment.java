@@ -614,7 +614,6 @@ public class DirectoryFragment extends Fragment {
 
         @Override
         public void onItemStateChanged(int position, boolean selected) {
-
             final Cursor cursor = mModel.getItem(position);
             checkNotNull(cursor, "Cursor cannot be null.");
 
@@ -700,8 +699,9 @@ public class DirectoryFragment extends Fragment {
                 return true;
 
             } else if (id == R.id.menu_delete) {
-                deleteDocuments(selection);
+                // Exit selection mode first, so we avoid deselecting deleted documents.
                 mode.finish();
+                deleteDocuments(selection);
                 return true;
 
             } else if (id == R.id.menu_copy_to) {
@@ -710,8 +710,9 @@ public class DirectoryFragment extends Fragment {
                 return true;
 
             } else if (id == R.id.menu_move_to) {
-                transferDocuments(selection, CopyService.TRANSFER_MODE_MOVE);
+                // Exit selection mode first, so we avoid deselecting deleted documents.
                 mode.finish();
+                transferDocuments(selection, CopyService.TRANSFER_MODE_MOVE);
                 return true;
 
             } else if (id == R.id.menu_copy_to_clipboard) {
