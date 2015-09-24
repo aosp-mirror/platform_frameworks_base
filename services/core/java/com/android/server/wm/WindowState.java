@@ -943,7 +943,6 @@ final class WindowState implements WindowManagerPolicy.WindowState {
      */
     void getVisibleBounds(Rect bounds, boolean forTouch) {
         boolean intersectWithStackBounds = mAppToken != null && mAppToken.mCropWindowsToStack;
-        boolean isFreeform = false;
         bounds.setEmpty();
         mTmpRect.setEmpty();
         if (intersectWithStackBounds) {
@@ -955,13 +954,9 @@ final class WindowState implements WindowManagerPolicy.WindowState {
             }
         }
 
-        final Task task = getTask();
-        if (task != null) {
-            task.getBounds(bounds);
-            isFreeform = task.inFreeformWorkspace();
-            if (intersectWithStackBounds) {
-                bounds.intersect(mTmpRect);
-            }
+        bounds.set(mVisibleFrame);
+        if (intersectWithStackBounds) {
+            bounds.intersect(mTmpRect);
         }
 
         if (bounds.isEmpty()) {
@@ -971,7 +966,7 @@ final class WindowState implements WindowManagerPolicy.WindowState {
             }
             return;
         }
-        if (forTouch && isFreeform) {
+        if (forTouch && inFreeformWorkspace()) {
             final DisplayMetrics displayMetrics = getDisplayContent().getDisplayMetrics();
             final int delta = mService.dipToPixel(RESIZE_HANDLE_WIDTH_IN_DP, displayMetrics);
             bounds.inset(-delta, -delta);

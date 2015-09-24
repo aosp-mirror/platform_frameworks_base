@@ -437,6 +437,11 @@ class Task implements DimLayer.DimLayerUser {
         return mStack != null && mStack.mStackId == DOCKED_STACK_ID;
     }
 
+    WindowState getTopAppMainWindow() {
+        final int tokensCount = mAppTokens.size();
+        return tokensCount > 0 ? mAppTokens.get(tokensCount - 1).findMainWindow() : null;
+    }
+
     @Override
     public boolean isFullscreen() {
         return mFullscreen;

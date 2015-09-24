@@ -22,6 +22,7 @@ import static android.app.ActivityManager.HOME_STACK_ID;
 import static com.android.server.wm.WindowManagerService.DEBUG_VISIBILITY;
 import static com.android.server.wm.WindowManagerService.TAG;
 import static com.android.server.wm.WindowState.RESIZE_HANDLE_WIDTH_IN_DP;
+import static com.android.server.wm.WindowState.BOUNDS_FOR_TOUCH;
 
 import android.graphics.Rect;
 import android.graphics.Region;
@@ -255,10 +256,10 @@ class DisplayContent {
     }
 
     /**
-     * Find the id of the task whose outside touch area (for resizing) (x, y)
-     * falls within. Returns -1 if the touch doesn't fall into a resizing area.
+     * Find the window whose outside touch area (for resizing) (x, y) falls within.
+     * Returns null if the touch doesn't fall into a resizing area.
      */
-    int taskIdForControlPoint(int x, int y) {
+    WindowState findWindowForControlPoint(int x, int y) {
         final int delta = mService.dipToPixel(RESIZE_HANDLE_WIDTH_IN_DP, mDisplayMetrics);
         for (int stackNdx = mStacks.size() - 1; stackNdx >= 0; --stackNdx) {
             TaskStack stack = mStacks.get(stackNdx);
@@ -269,22 +270,31 @@ class DisplayContent {
             for (int taskNdx = tasks.size() - 1; taskNdx >= 0; --taskNdx) {
                 final Task task = tasks.get(taskNdx);
                 if (task.isFullscreen()) {
-                    return -1;
+                    return null;
                 }
-                task.getBounds(mTmpRect);
-                mTmpRect.inset(-delta, -delta);
-                if (mTmpRect.contains(x, y)) {
-                    mTmpRect.inset(delta, delta);
-                    if (!mTmpRect.contains(x, y)) {
-                        return task.mTaskId;
+
+                // We need to use the visible frame on the window for any touch-related
+                // tests. Can't use the task's bounds because the original task bounds
+                // might be adjusted to fit the content frame. (One example is when the
+                // task is put to top-left quadrant, the actual visible frame would not
+                // start at (0,0) after it's adjusted for the status bar.)
+                WindowState win = task.getTopAppMainWindow();
+                if (win != null) {
+                    win.getVisibleBounds(mTmpRect, !BOUNDS_FOR_TOUCH);
+                    mTmpRect.inset(-delta, -delta);
+                    if (mTmpRect.contains(x, y)) {
+                        mTmpRect.inset(delta, delta);
+                        if (!mTmpRect.contains(x, y)) {
+                            return win;
+                        }
+                        // User touched inside the task. No need to look further,
+                        // focus transfer will be handled in ACTION_UP.
+                        return null;
                     }
-                    // User touched inside the task. No need to look further,
-                    // focus transfer will be handled in ACTION_UP.
-                    return -1;
                 }
             }
         }
-        return -1;
+        return null;
     }
 
     void setTouchExcludeRegion(Task focusedTask) {
