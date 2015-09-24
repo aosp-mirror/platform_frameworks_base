@@ -6885,37 +6885,29 @@ public class WindowManagerService extends IWindowManager.Stub
     }
 
     boolean startMovingTask(IWindow window, float startX, float startY) {
-        WindowState callingWin = null;
+        WindowState win = null;
         synchronized (mWindowMap) {
-            callingWin = windowForClientLocked(null, window, false);
-            if (!startPositioningLocked(callingWin, false /*resize*/, startX, startY)) {
+            win = windowForClientLocked(null, window, false);
+            if (!startPositioningLocked(win, false /*resize*/, startX, startY)) {
                 return false;
             }
         }
         try {
-            mActivityManager.setFocusedTask(callingWin.getTask().mTaskId);
+            mActivityManager.setFocusedTask(win.getTask().mTaskId);
         } catch(RemoteException e) {}
         return true;
     }
 
     private void startResizingTask(DisplayContent displayContent, int startX, int startY) {
-        int taskId = -1;
-        AppWindowToken atoken = null;
+        WindowState win = null;
         synchronized (mWindowMap) {
-            taskId = displayContent.taskIdForControlPoint(startX, startY);
-            Task task = mTaskIdToTask.get(taskId);
-            if (task == null || task.mAppTokens == null) {
-                return;
-            }
-            AppTokenList tokens = task.mAppTokens;
-            atoken = tokens.get(tokens.size() - 1);
-            WindowState win = atoken.findMainWindow();
+            win = displayContent.findWindowForControlPoint(startX, startY);
             if (!startPositioningLocked(win, true /*resize*/, startX, startY)) {
                 return;
             }
         }
         try {
-            mActivityManager.setFocusedTask(taskId);
+            mActivityManager.setFocusedTask(win.getTask().mTaskId);
         } catch(RemoteException e) {}
     }
 
