@@ -81,7 +81,8 @@
     <string name="button_move">Move</string>
     <!-- Button label that hides the error bar [CHAR LIMIT=24] -->
     <string name="button_dismiss">Dismiss</string>
-
+    <string name="button_retry">Try Again</string>
+    
     <!-- Mode that sorts documents by their display name alphabetically [CHAR LIMIT=24] -->
     <string name="sort_name">By name</string>
     <!-- Mode that sorts documents by their last modified time in descending order; most recent first [CHAR LIMIT=24] -->

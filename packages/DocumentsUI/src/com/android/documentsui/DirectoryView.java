@@ -18,9 +18,9 @@ package com.android.documentsui;
 
 import android.content.Context;
 import android.util.AttributeSet;
-import android.widget.FrameLayout;
+import android.widget.LinearLayout;
 
-public class DirectoryView extends FrameLayout {
+public class DirectoryView extends LinearLayout {
     private float mPosition = 0f;
 
     private int mWidth;

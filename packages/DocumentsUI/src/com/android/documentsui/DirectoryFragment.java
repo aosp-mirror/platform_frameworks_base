@@ -367,21 +367,6 @@ public class DirectoryFragment extends Fragment {
 
             @Override
             public void onLoadFinished(Loader<DirectoryResult> loader, DirectoryResult result) {
-                if (result == null || result.exception != null) {
-                    // onBackPressed does a fragment transaction, which can't be done inside
-                    // onLoadFinished
-                    mHandler.post(new Runnable() {
-                        @Override
-                        public void run() {
-                            final Activity activity = getActivity();
-                            if (activity != null) {
-                                activity.onBackPressed();
-                            }
-                        }
-                    });
-                    return;
-                }
-
                 if (!isAdded()) return;
 
                 mModel.update(result);
@@ -896,6 +881,29 @@ public class DirectoryFragment extends Fragment {
             super(view);
             this.view = view;
         }
+    }
+
+    void showEmptyView() {
+        mEmptyView.setVisibility(View.VISIBLE);
+        mRecView.setVisibility(View.GONE);
+        TextView msg = (TextView) mEmptyView.findViewById(R.id.message);
+        msg.setText(R.string.empty);
+        // No retry button for the empty view.
+        mEmptyView.findViewById(R.id.button_retry).setVisibility(View.GONE);
+    }
+
+    void showErrorView() {
+        mEmptyView.setVisibility(View.VISIBLE);
+        mRecView.setVisibility(View.GONE);
+        TextView msg = (TextView) mEmptyView.findViewById(R.id.message);
+        msg.setText(R.string.query_error);
+        // TODO: Enable this once the retry button does something.
+        mEmptyView.findViewById(R.id.button_retry).setVisibility(View.GONE);
+    }
+
+    void showRecyclerView() {
+        mEmptyView.setVisibility(View.GONE);
+        mRecView.setVisibility(View.VISIBLE);
     }
 
     private final class DocumentsAdapter extends RecyclerView.Adapter<DocumentHolder> {
@@ -1950,21 +1958,16 @@ public class DirectoryFragment extends Fragment {
             mProgressBar.setVisibility(model.isLoading() ? View.VISIBLE : View.GONE);
 
             if (model.isEmpty()) {
-                mEmptyView.setVisibility(View.VISIBLE);
-                mRecView.setVisibility(View.GONE);
+                showEmptyView();
             } else {
-                mEmptyView.setVisibility(View.GONE);
-                mRecView.setVisibility(View.VISIBLE);
+                showRecyclerView();
+                mAdapter.notifyDataSetChanged();
             }
-
-            mAdapter.notifyDataSetChanged();
         }
 
         @Override
         public void onModelUpdateFailed(Exception e) {
-            // TODO: deal with catastrophic update failures
-            String error = getString(R.string.query_error);
-            mAdapter.notifyDataSetChanged();
+            showErrorView();
         }
     }
 }
