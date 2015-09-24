@@ -16,7 +16,6 @@
 
 package com.android.systemui.classifier;
 
-import android.hardware.SensorEvent;
 import android.view.MotionEvent;
 
 import java.lang.Math;
@@ -27,27 +26,19 @@ import java.util.List;
 
 /**
  * A classifier which calculates the variance of differences between successive angles in a stroke.
- * For each stroke it keeps its last three points. If some successive points are the same, it ignores
- * the repetitions. If a new point is added, the classifier calculates the angle between the last
- * three points. After that it calculates the difference between this angle and the previously
- * calculated angle. The return value of the classifier is the variance of the differences
- * from a stroke. If there are multiple strokes created at once, the classifier sums up the
- * variances of all the strokes. Also the value is multiplied by HISTORY_FACTOR after each
- * INTERVAL milliseconds.
+ * For each stroke it keeps its last three points. If some successive points are the same, it
+ * ignores the repetitions. If a new point is added, the classifier calculates the angle between
+ * the last three points. After that, it calculates the difference between this angle and the
+ * previously calculated angle. The return value of the classifier is the variance of the
+ * differences from a stroke. To the differences there is artificially added value 0.0 and the
+ * difference between the first angle and PI (angles are in radians). It helps with strokes which
+ * have few points and punishes more strokes which are not smooth.
  */
-public class AnglesVarianceClassifier extends Classifier {
-    private final float INTERVAL = 10.0f;
-    private final float CLEAR_HISTORY = 500f;
-    private final float HISTORY_FACTOR = 0.9f;
-
+public class AnglesVarianceClassifier extends StrokeClassifier {
     private HashMap<Stroke, Data> mStrokeMap = new HashMap<>();
-    private float mValue;
-    private long mLastUpdate;
 
     public AnglesVarianceClassifier(ClassifierData classifierData) {
         mClassifierData = classifierData;
-        mValue = 0.0f;
-        mLastUpdate = System.currentTimeMillis();
     }
 
     @Override
@@ -65,40 +56,12 @@ public class AnglesVarianceClassifier extends Classifier {
                 mStrokeMap.put(stroke, new Data());
             }
             mStrokeMap.get(stroke).addPoint(stroke.getPoints().get(stroke.getPoints().size() - 1));
-
-            if (action == MotionEvent.ACTION_UP || action == MotionEvent.ACTION_CANCEL
-                    || (action == MotionEvent.ACTION_POINTER_UP && i == event.getActionIndex())) {
-                decayValue();
-                mValue += mStrokeMap.get(stroke).getAnglesVariance();
-            }
         }
-    }
-
-    /**
-     * Decreases mValue through time
-     */
-    private void decayValue() {
-        long currentTimeMillis = System.currentTimeMillis();
-        if (currentTimeMillis - mLastUpdate > CLEAR_HISTORY) {
-            mValue = 0.0f;
-        } else {
-            mValue *= Math.pow(HISTORY_FACTOR, (float) (currentTimeMillis - mLastUpdate) / INTERVAL);
-        }
-        mLastUpdate = currentTimeMillis;
     }
 
     @Override
-    public void onSensorChanged(SensorEvent event) {
-    }
-
-    @Override
-    public float getFalseTouchEvaluation(int type) {
-        decayValue();
-        float currentValue = 0.0f;
-        for (Data data: mStrokeMap.values()) {
-            currentValue += data.getAnglesVariance();
-        }
-        return (float) (mValue + currentValue);
+    public float getFalseTouchEvaluation(int type, Stroke stroke) {
+        return mStrokeMap.get(stroke).getAnglesVariance();
     }
 
     private class Data {
@@ -150,7 +113,7 @@ public class AnglesVarianceClassifier extends Classifier {
         }
 
         public float getAnglesVariance() {
-            return mSumSquares / mCount + (mSum / mCount) * (mSum / mCount);
+            return mSumSquares / mCount - (mSum / mCount) * (mSum / mCount);
         }
     }
 }

@@ -25,6 +25,8 @@ import android.os.UserHandle;
 import android.provider.Settings;
 import android.view.MotionEvent;
 
+import java.util.ArrayList;
+
 /**
  * An classifier trying to determine whether it is a human interacting with the phone or not.
  */
@@ -35,8 +37,14 @@ public class HumanInteractionClassifier extends Classifier {
     private final Handler mHandler = new Handler();
     private final Context mContext;
 
-    private AnglesVarianceClassifier mAnglesVarianceClassifier;
+    private ArrayList<StrokeClassifier> mStrokeClassifiers = new ArrayList<>();
+    private ArrayList<GestureClassifier> mGestureClassifiers = new ArrayList<>();
+    private final int mStrokeClassifiersSize;
+    private final int mGestureClassifiersSize;
+
+    private HistoryEvaluator mHistoryEvaluator;
     private boolean mEnableClassifier = false;
+    private int mCurrentType = Classifier.GENERIC;
 
     protected final ContentObserver mSettingsObserver = new ContentObserver(mHandler) {
         @Override
@@ -48,7 +56,12 @@ public class HumanInteractionClassifier extends Classifier {
     private HumanInteractionClassifier(Context context) {
         mContext = context;
         mClassifierData = new ClassifierData();
-        mAnglesVarianceClassifier = new AnglesVarianceClassifier(mClassifierData);
+        mHistoryEvaluator = new HistoryEvaluator();
+
+        mStrokeClassifiers.add(new AnglesVarianceClassifier(mClassifierData));
+
+        mStrokeClassifiersSize = mStrokeClassifiers.size();
+        mGestureClassifiersSize = mGestureClassifiers.size();
 
         mContext.getContentResolver().registerContentObserver(
                 Settings.Global.getUriFor(HIC_ENABLE), false,
@@ -71,11 +84,44 @@ public class HumanInteractionClassifier extends Classifier {
                 HIC_ENABLE, 0);
     }
 
+    public void setType(int type) {
+        mCurrentType = type;
+    }
+
     @Override
     public void onTouchEvent(MotionEvent event) {
         if (mEnableClassifier) {
             mClassifierData.update(event);
-            mAnglesVarianceClassifier.onTouchEvent(event);
+
+            for (int i = 0; i < mStrokeClassifiersSize; i++) {
+                mStrokeClassifiers.get(i).onTouchEvent(event);
+            }
+
+            for (int i = 0; i < mGestureClassifiersSize; i++) {
+                mGestureClassifiers.get(i).onTouchEvent(event);
+            }
+
+            int size = mClassifierData.getEndingStrokes().size();
+            for (int i = 0; i < size; i++) {
+                Stroke stroke = mClassifierData.getEndingStrokes().get(i);
+                float evaluation = 0.0f;
+                for (int j = 0; j < mStrokeClassifiersSize; j++) {
+                    evaluation += mStrokeClassifiers.get(j).getFalseTouchEvaluation(
+                            mCurrentType, stroke);
+                }
+                mHistoryEvaluator.addStroke(evaluation);
+            }
+
+            int action = event.getActionMasked();
+            if (action == MotionEvent.ACTION_UP || action == MotionEvent.ACTION_CANCEL) {
+                float evaluation = 0.0f;
+                for (int i = 0; i < mGestureClassifiersSize; i++) {
+                    evaluation += mGestureClassifiers.get(i).getFalseTouchEvaluation(mCurrentType);
+                }
+                mHistoryEvaluator.addGesture(evaluation);
+                setType(Classifier.GENERIC);
+            }
+
             mClassifierData.cleanUp(event);
         }
     }
@@ -84,12 +130,8 @@ public class HumanInteractionClassifier extends Classifier {
     public void onSensorChanged(SensorEvent event) {
     }
 
-    @Override
-    public float getFalseTouchEvaluation(int type) {
-        if (mEnableClassifier) {
-            return mAnglesVarianceClassifier.getFalseTouchEvaluation(type);
-        }
-        return 0.0f;
+    public boolean isFalseTouch() {
+        return mHistoryEvaluator.getEvaluation() >= 5.0f;
     }
 
     public boolean isEnabled() {
