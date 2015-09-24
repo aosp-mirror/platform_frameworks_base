@@ -2682,6 +2682,13 @@ public abstract class ActivityManagerNative extends Binder implements IActivityM
             reportSizeConfigurations(token, horizontal, vertical);
             return true;
         }
+        case SUPPRESS_RESIZE_CONFIG_CHANGES_TRANSACTION: {
+            data.enforceInterface(IActivityManager.descriptor);
+            final boolean suppress = data.readInt() == 1;
+            suppressResizeConfigChanges(suppress);
+            reply.writeNoException();
+            return true;
+        }
         }
 
         return super.onTransact(code, data, reply, flags);
@@ -6211,6 +6218,18 @@ class ActivityManagerProxy implements IActivityManager
             data.writeIntArray(verticalSizeConfigurations);
         }
         mRemote.transact(REPORT_SIZE_CONFIGURATIONS, data, reply, 0);
+        reply.readException();
+        data.recycle();
+        reply.recycle();
+    }
+
+    @Override
+    public void suppressResizeConfigChanges(boolean suppress) throws RemoteException {
+        Parcel data = Parcel.obtain();
+        Parcel reply = Parcel.obtain();
+        data.writeInterfaceToken(IActivityManager.descriptor);
+        data.writeInt(suppress ? 1 : 0);
+        mRemote.transact(SUPPRESS_RESIZE_CONFIG_CHANGES_TRANSACTION, data, reply, 0);
         reply.readException();
         data.recycle();
         reply.recycle();

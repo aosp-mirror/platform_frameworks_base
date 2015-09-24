@@ -994,6 +994,8 @@ public final class ActivityManagerService extends ActivityManagerNative
      */
     int mConfigurationSeq = 0;
 
+    boolean mSuppressResizeConfigChanges = false;
+
     /**
      * Hardware-reported OpenGLES version.
      */
@@ -17512,6 +17514,15 @@ public final class ActivityManagerService extends ActivityManagerNative
             ci.userSetLocale = false;
         }
         return ci;
+    }
+
+    @Override
+    public void suppressResizeConfigChanges(boolean suppress) throws RemoteException {
+        enforceCallingPermission(android.Manifest.permission.MANAGE_ACTIVITY_STACKS,
+                "suppressResizeConfigChanges()");
+        synchronized (this) {
+            mSuppressResizeConfigChanges = suppress;
+        }
     }
 
     @Override
