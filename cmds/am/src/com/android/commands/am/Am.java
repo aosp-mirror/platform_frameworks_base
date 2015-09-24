@@ -163,6 +163,7 @@ public class Am extends BaseCommand {
                 "       am task drag-task-test <TASK_ID> <STEP_SIZE> [DELAY_MS] \n" +
                 "       am task size-task-test <TASK_ID> <STEP_SIZE> [DELAY_MS] \n" +
                 "       am get-config\n" +
+                "       am suppress-resize-config-changes <true|false>\n" +
                 "       am set-inactive [--user <USER_ID>] <PACKAGE> true|false\n" +
                 "       am get-inactive [--user <USER_ID>] <PACKAGE>\n" +
                 "       am send-trim-memory [--user <USER_ID>] <PROCESS>\n" +
@@ -326,6 +327,8 @@ public class Am extends BaseCommand {
                 "\n" +
                 "am get-config: retrieve the configuration and any recent configurations\n" +
                 "  of the device.\n" +
+                "am suppress-resize-config-changes: suppresses configuration changes due to\n" +
+                "  user resizing an activity/task.\n" +
                 "\n" +
                 "am set-inactive: sets the inactive state of an app.\n" +
                 "\n" +
@@ -453,6 +456,8 @@ public class Am extends BaseCommand {
             runTask();
         } else if (op.equals("get-config")) {
             runGetConfig();
+        } else if (op.equals("suppress-resize-config-changes")) {
+            runSuppressResizeConfigChanges();
         } else if (op.equals("set-inactive")) {
             runSetInactive();
         } else if (op.equals("get-inactive")) {
@@ -2603,6 +2608,16 @@ public class Am extends BaseCommand {
             }
 
         } catch (RemoteException e) {
+        }
+    }
+
+    private void runSuppressResizeConfigChanges() throws Exception {
+        boolean suppress = Boolean.valueOf(nextArgRequired());
+
+        try {
+            mAm.suppressResizeConfigChanges(suppress);
+        } catch (RemoteException e) {
+            System.err.println("Error suppressing resize config changes: " + e);
         }
     }
 

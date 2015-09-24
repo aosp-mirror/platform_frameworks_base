@@ -535,6 +535,8 @@ public interface IActivityManager extends IInterface {
     public int getActivityStackId(IBinder token) throws RemoteException;
     public void moveActivityToStack(IBinder token, int stackId) throws RemoteException;
 
+    public void suppressResizeConfigChanges(boolean suppress) throws RemoteException;
+
     /*
      * Private non-Binder interfaces
      */
@@ -891,4 +893,5 @@ public interface IActivityManager extends IInterface {
     int MOVE_ACTIVITY_TO_STACK_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION + 344;
     int REPORT_SIZE_CONFIGURATIONS = IBinder.FIRST_CALL_TRANSACTION + 345;
     int MOVE_TASK_TO_DOCKED_STACK_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION + 346;
+    int SUPPRESS_RESIZE_CONFIG_CHANGES_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION + 347;
 }

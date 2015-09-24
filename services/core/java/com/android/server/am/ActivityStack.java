@@ -4181,8 +4181,12 @@ final class ActivityStack {
                 | ActivityInfo.CONFIG_SMALLEST_SCREEN_SIZE | ActivityInfo.CONFIG_ORIENTATION)) == 0;
     }
 
-    private boolean relaunchActivityLocked(ActivityRecord r, int changes, boolean andResume,
-            boolean preserveWindow) {
+    private void relaunchActivityLocked(
+            ActivityRecord r, int changes, boolean andResume, boolean preserveWindow) {
+        if (mService.mSuppressResizeConfigChanges && preserveWindow) {
+            return;
+        }
+
         List<ResultInfo> results = null;
         List<ReferrerIntent> newIntents = null;
         if (andResume) {
@@ -4222,8 +4226,6 @@ final class ActivityStack {
             mHandler.removeMessages(PAUSE_TIMEOUT_MSG, r);
             r.state = ActivityState.PAUSED;
         }
-
-        return true;
     }
 
     boolean willActivityBeVisibleLocked(IBinder token) {
