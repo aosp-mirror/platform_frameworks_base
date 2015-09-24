@@ -17,7 +17,6 @@
 package com.android.systemui.recents.model;
 
 import android.graphics.Color;
-import android.graphics.Rect;
 import com.android.systemui.recents.Constants;
 import com.android.systemui.recents.RecentsConfiguration;
 import com.android.systemui.recents.misc.NamedCounter;

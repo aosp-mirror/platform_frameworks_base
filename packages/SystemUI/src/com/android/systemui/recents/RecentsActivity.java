@@ -38,14 +38,12 @@ import com.android.internal.logging.MetricsLogger;
 import com.android.systemui.Prefs;
 import com.android.systemui.R;
 import com.android.systemui.recents.misc.Console;
-import com.android.systemui.recents.misc.DebugTrigger;
 import com.android.systemui.recents.misc.ReferenceCountedTrigger;
 import com.android.systemui.recents.misc.SystemServicesProxy;
 import com.android.systemui.recents.model.RecentsTaskLoadPlan;
 import com.android.systemui.recents.model.RecentsTaskLoader;
 import com.android.systemui.recents.model.Task;
 import com.android.systemui.recents.model.TaskStack;
-import com.android.systemui.recents.views.DebugOverlayView;
 import com.android.systemui.recents.views.RecentsView;
 import com.android.systemui.recents.views.SystemBarScrimViews;
 import com.android.systemui.recents.views.ViewAnimation;
@@ -57,8 +55,7 @@ import java.util.ArrayList;
  * The main Recents activity that is started from AlternateRecentsComponent.
  */
 public class RecentsActivity extends Activity implements RecentsView.RecentsViewCallbacks,
-        RecentsAppWidgetHost.RecentsAppWidgetHostCallbacks,
-        DebugOverlayView.DebugOverlayViewCallbacks {
+        RecentsAppWidgetHost.RecentsAppWidgetHostCallbacks {
 
     RecentsConfiguration mConfig;
     long mLastTabKeyEventTime;
@@ -67,9 +64,7 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
     RecentsView mRecentsView;
     SystemBarScrimViews mScrimViews;
     ViewStub mEmptyViewStub;
-    ViewStub mDebugOverlayStub;
     View mEmptyView;
-    DebugOverlayView mDebugOverlay;
 
     // Resize task debug
     RecentsResizeTaskDialog mResizeTaskDebugDialog;
@@ -175,16 +170,6 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
             }
         }
     };
-
-    /**
-     * A custom debug trigger to listen for a debug key chord.
-     */
-    final DebugTrigger mDebugTrigger = new DebugTrigger(new Runnable() {
-        @Override
-        public void run() {
-            onDebugModeTriggered();
-        }
-    });
 
     /** Updates the set of recent tasks */
     void updateRecentsTasks() {
@@ -352,9 +337,7 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
                 View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN |
                 View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION);
         mEmptyViewStub = (ViewStub) findViewById(R.id.empty_view_stub);
-        mDebugOverlayStub = (ViewStub) findViewById(R.id.debug_overlay_stub);
         mScrimViews = new SystemBarScrimViews(this, mConfig);
-        inflateDebugOverlay();
 
         // Bind the search app widget when we first start up
         mSearchWidgetInfo = ssp.getOrBindSearchAppWidget(this, mAppWidgetHost);
@@ -366,27 +349,10 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
         registerReceiver(mSystemBroadcastReceiver, filter);
     }
 
-    /** Inflates the debug overlay if debug mode is enabled. */
-    void inflateDebugOverlay() {
-        if (!Constants.DebugFlags.App.EnableDebugMode) return;
-
-        if (mConfig.debugModeEnabled && mDebugOverlay == null) {
-            // Inflate the overlay and seek bars
-            mDebugOverlay = (DebugOverlayView) mDebugOverlayStub.inflate();
-            mDebugOverlay.setCallbacks(this);
-            mRecentsView.setDebugOverlay(mDebugOverlay);
-        }
-    }
-
     @Override
     protected void onNewIntent(Intent intent) {
         super.onNewIntent(intent);
         setIntent(intent);
-
-        // Clear any debug rects
-        if (mDebugOverlay != null) {
-            mDebugOverlay.clear();
-        }
     }
 
     @Override
@@ -538,8 +504,6 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
             default:
                 break;
         }
-        // Pass through the debug trigger
-        mDebugTrigger.onKeyEvent(keyCode);
         return super.onKeyDown(keyCode, event);
     }
 
@@ -556,33 +520,6 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
         // Dismiss Recents to the focused Task or Home
         dismissRecentsToFocusedTaskOrHome(true);
     }
-
-    /** Called when debug mode is triggered */
-    public void onDebugModeTriggered() {
-        if (mConfig.developerOptionsEnabled) {
-            if (Prefs.getBoolean(this, Prefs.Key.DEBUG_MODE_ENABLED, false /* boolean */)) {
-                // Disable the debug mode
-                Prefs.remove(this, Prefs.Key.DEBUG_MODE_ENABLED);
-                mConfig.debugModeEnabled = false;
-                inflateDebugOverlay();
-                if (mDebugOverlay != null) {
-                    mDebugOverlay.disable();
-                }
-            } else {
-                // Enable the debug mode
-                Prefs.putBoolean(this, Prefs.Key.DEBUG_MODE_ENABLED, true);
-                mConfig.debugModeEnabled = true;
-                inflateDebugOverlay();
-                if (mDebugOverlay != null) {
-                    mDebugOverlay.enable();
-                }
-            }
-            Toast.makeText(this, "Debug mode (" + Constants.Values.App.DebugModeVersion + ") " +
-                (mConfig.debugModeEnabled ? "Enabled" : "Disabled") + ", please restart Recents now",
-                Toast.LENGTH_SHORT).show();
-        }
-    }
-
 
     /**** RecentsResizeTaskDialog ****/
 
@@ -654,17 +591,5 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
         } else {
             mRecentsView.setSearchBar(null);
         }
-    }
-
-    /**** DebugOverlayView.DebugOverlayViewCallbacks ****/
-
-    @Override
-    public void onPrimarySeekBarChanged(float progress) {
-        // Do nothing
-    }
-
-    @Override
-    public void onSecondarySeekBarChanged(float progress) {
-        // Do nothing
     }
 }
