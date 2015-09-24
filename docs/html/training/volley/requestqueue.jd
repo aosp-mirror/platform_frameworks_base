@@ -39,36 +39,11 @@ as a singleton, which makes the {@code RequestQueue} last the lifetime of your a
 of the requests, and a cache to handle caching. There are standard implementations of these
 available in the Volley toolbox: {@code DiskBasedCache} provides a one-file-per-response
 cache with an in-memory index, and {@code BasicNetwork} provides a network transport based
-on your choice of the Apache HTTP client {@code android.net.http.AndroidHttpClient} or
-{@link java.net.HttpURLConnection}.</p>
+on your preferred HTTP client.</p>
 
 <p>{@code BasicNetwork} is Volley's default network implementation. A {@code BasicNetwork}
 must be initialized with the HTTP client your app is using to connect to the network.
-Typically this is a {@link java.net.HttpURLConnection}:</p>
-<ul>
-<li>Use {@code android.net.http.AndroidHttpClient} for apps targeting Android API levels
-lower than API Level 9 (Gingerbread). Prior to Gingerbread, {@link java.net.HttpURLConnection}
-was unreliable. For more discussion of this topic, see
-<a href="http://android-developers.blogspot.com/2011/09/androids-http-clients.html">
-Android's HTTP Clients</a>. </li>
-
-<li>Use {@link java.net.HttpURLConnection} for apps targeting Android API Level 9
-(Gingerbread) and higher.</li>
-</ul>
-<p>To create an app that runs on all versions of Android, you can check the version of
-Android the device is running and choose the appropriate HTTP client, for example:</p>
-
-<pre>
-HttpStack stack;
-...
-// If the device is running a version >= Gingerbread...
-if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.GINGERBREAD) {
-    // ...use HttpURLConnection for stack.
-} else {
-    // ...use AndroidHttpClient for stack.
-}
-Network network = new BasicNetwork(stack);
-</pre>
+Typically this is an {@link java.net.HttpURLConnection}.</p>
 
 <p>This snippet shows you the steps involved in setting up a
 {@code RequestQueue}:</p>
@@ -88,7 +63,7 @@ mRequestQueue = new RequestQueue(cache, network);
 // Start the queue
 mRequestQueue.start();
 
-String url ="http://www.myurl.com";
+String url ="http://www.example.com";
 
 // Formulate the request and handle the response.
 StringRequest stringRequest = new StringRequest(Request.Method.GET, url,
@@ -107,7 +82,8 @@ StringRequest stringRequest = new StringRequest(Request.Method.GET, url,
 
 // Add the request to the RequestQueue.
 mRequestQueue.add(stringRequest);
-...
+
+// ...
 </pre>
 
 <p>If you just need to make a one-time request and don't want to leave the thread pool
@@ -198,7 +174,8 @@ class:</p>
 // Get a RequestQueue
 RequestQueue queue = MySingleton.getInstance(this.getApplicationContext()).
     getRequestQueue();
-...
+
+// ...
 
 // Add a request (in this example, called stringRequest) to your RequestQueue.
 MySingleton.getInstance(this).addToRequestQueue(stringRequest);
