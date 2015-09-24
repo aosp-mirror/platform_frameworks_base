@@ -96,6 +96,7 @@ class TaskPositioner implements DimLayer.DimLayerUser {
     private float mStartDragY;
     @CtrlType
     private int mCtrlType = CTRL_NONE;
+    private boolean mDragEnded = false;
 
     InputChannel mServerChannel;
     InputChannel mClientChannel;
@@ -117,7 +118,14 @@ class TaskPositioner implements DimLayer.DimLayerUser {
             boolean handled = false;
 
             try {
-                boolean endDrag = false;
+                if (mDragEnded) {
+                    // The drag has ended but the clean-up message has not been processed by
+                    // window manager. Drop events that occur after this until window manager
+                    // has a chance to clean-up the input handle.
+                    handled = true;
+                    return;
+                }
+
                 final float newX = motionEvent.getRawX();
                 final float newY = motionEvent.getRawY();
 
@@ -133,7 +141,7 @@ class TaskPositioner implements DimLayer.DimLayerUser {
                             Slog.w(TAG, "ACTION_MOVE @ {" + newX + ", " + newY + "}");
                         }
                         synchronized (mService.mWindowMap) {
-                            endDrag = notifyMoveLocked(newX, newY);
+                            mDragEnded = notifyMoveLocked(newX, newY);
                         }
                         try {
                             mService.mActivityManager.resizeTask(
@@ -145,18 +153,18 @@ class TaskPositioner implements DimLayer.DimLayerUser {
                         if (DEBUG_TASK_POSITIONING) {
                             Slog.w(TAG, "ACTION_UP @ {" + newX + ", " + newY + "}");
                         }
-                        endDrag = true;
+                        mDragEnded = true;
                     } break;
 
                     case MotionEvent.ACTION_CANCEL: {
                         if (DEBUG_TASK_POSITIONING) {
                             Slog.w(TAG, "ACTION_CANCEL @ {" + newX + ", " + newY + "}");
                         }
-                        endDrag = true;
+                        mDragEnded = true;
                     } break;
                 }
 
-                if (endDrag) {
+                if (mDragEnded) {
                     synchronized (mService.mWindowMap) {
                         endDragLocked();
                     }
@@ -262,6 +270,8 @@ class TaskPositioner implements DimLayer.DimLayerUser {
         mSideMargin = mService.dipToPixel(SIDE_MARGIN_DIP, mDisplayMetrics);
         mMinVisibleWidth = mService.dipToPixel(MINIMUM_VISIBLE_WIDTH_IN_DP, mDisplayMetrics);
         mMinVisibleHeight = mService.dipToPixel(MINIMUM_VISIBLE_HEIGHT_IN_DP, mDisplayMetrics);
+
+        mDragEnded = false;
     }
 
     void unregister() {
@@ -292,6 +302,7 @@ class TaskPositioner implements DimLayer.DimLayerUser {
             mDimLayer = null;
         }
         mCurrentDimSide = CTRL_NONE;
+        mDragEnded = true;
 
         // Resume rotations after a drag.
         if (WindowManagerService.DEBUG_ORIENTATION) {
