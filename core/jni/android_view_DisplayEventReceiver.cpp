@@ -259,7 +259,7 @@ static void nativeScheduleVsync(JNIEnv* env, jclass clazz, jlong receiverPtr) {
 }
 
 
-static JNINativeMethod gMethods[] = {
+static const JNINativeMethod gMethods[] = {
     /* name, signature, funcPtr */
     { "nativeInit",
             "(Ljava/lang/ref/WeakReference;Landroid/os/MessageQueue;)J",

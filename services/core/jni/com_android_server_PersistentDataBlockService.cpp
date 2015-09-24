@@ -97,7 +97,7 @@ namespace android {
         return wipe_block_device(fd);
     }
 
-    static JNINativeMethod sMethods[] = {
+    static const JNINativeMethod sMethods[] = {
          /* name, signature, funcPtr */
         {"nativeGetBlockDeviceSize", "(Ljava/lang/String;)J", (void*)com_android_server_PersistentDataBlockService_getBlockDeviceSize},
         {"nativeWipe", "(Ljava/lang/String;)I", (void*)com_android_server_PersistentDataBlockService_wipe},

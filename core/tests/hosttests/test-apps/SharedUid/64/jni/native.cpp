@@ -30,7 +30,7 @@ int result = a + b;
 
 static const char *classPathName = "com/framework/shareduid/bit64/Native";
 
-static JNINativeMethod methods[] = {
+static const JNINativeMethod methods[] = {
   {"add", "(II)I", (void*)add },
 };
 
@@ -38,7 +38,7 @@ static JNINativeMethod methods[] = {
  * Register several native methods for one class.
  */
 static int registerNativeMethods(JNIEnv* env, const char* className,
-    JNINativeMethod* gMethods, int numMethods)
+    const JNINativeMethod* gMethods, int numMethods)
 {
     jclass clazz;
 

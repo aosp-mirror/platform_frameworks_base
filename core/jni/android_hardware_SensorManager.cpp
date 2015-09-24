@@ -343,7 +343,7 @@ static jint nativeInjectSensorData(JNIEnv *env, jclass clazz, jlong eventQ, jint
 }
 //----------------------------------------------------------------------------
 
-static JNINativeMethod gSystemSensorManagerMethods[] = {
+static const JNINativeMethod gSystemSensorManagerMethods[] = {
     {"nativeClassInit",
             "()V",
             (void*)nativeClassInit },
@@ -360,7 +360,7 @@ static JNINativeMethod gSystemSensorManagerMethods[] = {
             (void*)nativeIsDataInjectionEnabled},
 };
 
-static JNINativeMethod gBaseEventQueueMethods[] = {
+static const JNINativeMethod gBaseEventQueueMethods[] = {
     {"nativeInitBaseEventQueue",
              "(JLjava/lang/ref/WeakReference;Landroid/os/MessageQueue;[FLjava/lang/String;ILjava/lang/String;)J",
              (void*)nativeInitSensorEventQueue },

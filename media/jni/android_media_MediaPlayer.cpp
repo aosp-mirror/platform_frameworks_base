@@ -1033,7 +1033,7 @@ android_media_MediaPlayer_setNextMediaPlayer(JNIEnv *env, jobject thiz, jobject 
 
 // ----------------------------------------------------------------------------
 
-static JNINativeMethod gMethods[] = {
+static const JNINativeMethod gMethods[] = {
     {
         "nativeSetDataSource",
         "(Landroid/os/IBinder;Ljava/lang/String;[Ljava/lang/String;"

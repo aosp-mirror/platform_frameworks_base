@@ -460,7 +460,7 @@ static jint android_server_AlarmManagerService_waitForAlarm(JNIEnv*, jobject, jl
     return result;
 }
 
-static JNINativeMethod sMethods[] = {
+static const JNINativeMethod sMethods[] = {
      /* name, signature, funcPtr */
     {"init", "()J", (void*)android_server_AlarmManagerService_init},
     {"close", "(J)V", (void*)android_server_AlarmManagerService_close},

@@ -364,7 +364,7 @@ static void android_content_XmlBlock_nativeDestroy(JNIEnv* env, jobject clazz,
 /*
  * JNI registration.
  */
-static JNINativeMethod gXmlBlockMethods[] = {
+static const JNINativeMethod gXmlBlockMethods[] = {
     /* name, signature, funcPtr */
     { "nativeCreate",               "([BII)J",
             (void*) android_content_XmlBlock_nativeCreate },

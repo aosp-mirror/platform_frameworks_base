@@ -384,7 +384,7 @@ static jboolean nativeIsConnected(JNIEnv* env, jclass clazz, jlong controllerPtr
     return controller->isConnected(port) ? JNI_TRUE : JNI_FALSE ;
 }
 
-static JNINativeMethod sMethods[] = {
+static const JNINativeMethod sMethods[] = {
     /* name, signature, funcPtr */
     { "nativeInit",
       "(Lcom/android/server/hdmi/HdmiCecController;Landroid/os/MessageQueue;)J",

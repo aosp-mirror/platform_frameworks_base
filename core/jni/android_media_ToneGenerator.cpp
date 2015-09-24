@@ -123,7 +123,7 @@ static void android_media_ToneGenerator_native_finalize(JNIEnv *env,
 
 // ----------------------------------------------------------------------------
 
-static JNINativeMethod gMethods[] = {
+static const JNINativeMethod gMethods[] = {
     { "startTone", "(II)Z", (void *)android_media_ToneGenerator_startTone },
     { "stopTone", "()V", (void *)android_media_ToneGenerator_stopTone },
     { "getAudioSessionId", "()I", (void *)android_media_ToneGenerator_getAudioSessionId},

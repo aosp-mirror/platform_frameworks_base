@@ -103,7 +103,7 @@ static void nativeRemoveMatch(JNIEnv* env, jclass clazz, jstring matchStr) {
     }
 }
 
-static JNINativeMethod gMethods[] = {
+static const JNINativeMethod gMethods[] = {
     { "nativeSetup", "()V",
             (void *)nativeSetup },
     { "nativeWaitForNextEvent", "()Ljava/lang/String;",

@@ -120,7 +120,7 @@ static void android_server_InputApplicationHandle_nativeDispose(JNIEnv* env, job
 }
 
 
-static JNINativeMethod gInputApplicationHandleMethods[] = {
+static const JNINativeMethod gInputApplicationHandleMethods[] = {
     /* name, signature, funcPtr */
     { "nativeDispose", "()V",
             (void*) android_server_InputApplicationHandle_nativeDispose },

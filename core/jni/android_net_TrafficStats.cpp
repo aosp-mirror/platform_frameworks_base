@@ -185,7 +185,7 @@ static jlong getUidStat(JNIEnv* env, jclass clazz, jint uid, jint type) {
     }
 }
 
-static JNINativeMethod gMethods[] = {
+static const JNINativeMethod gMethods[] = {
     {"nativeGetTotalStat", "(I)J", (void*) getTotalStat},
     {"nativeGetIfaceStat", "(Ljava/lang/String;I)J", (void*) getIfaceStat},
     {"nativeGetUidStat", "(II)J", (void*) getUidStat},

@@ -395,7 +395,7 @@ android_mtp_MtpDevice_import_file(JNIEnv *env, jobject thiz, jint object_id, jst
 
 // ----------------------------------------------------------------------------
 
-static JNINativeMethod gMethods[] = {
+static const JNINativeMethod gMethods[] = {
     {"native_open",             "(Ljava/lang/String;I)Z",
                                         (void *)android_mtp_MtpDevice_open},
     {"native_close",            "()V",  (void *)android_mtp_MtpDevice_close},

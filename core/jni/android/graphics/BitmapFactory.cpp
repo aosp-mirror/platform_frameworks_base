@@ -542,7 +542,7 @@ jobject decodeBitmap(JNIEnv* env, void* data, size_t size) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-static JNINativeMethod gMethods[] = {
+static const JNINativeMethod gMethods[] = {
     {   "nativeDecodeStream",
         "(Ljava/io/InputStream;[BLandroid/graphics/Rect;Landroid/graphics/BitmapFactory$Options;)Landroid/graphics/Bitmap;",
         (void*)nativeDecodeStream
@@ -569,7 +569,7 @@ static JNINativeMethod gMethods[] = {
     },
 };
 
-static JNINativeMethod gOptionsMethods[] = {
+static const JNINativeMethod gOptionsMethods[] = {
     {   "requestCancel", "()V", (void*)nativeRequestCancel }
 };
 

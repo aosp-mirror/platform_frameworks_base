@@ -3184,7 +3184,7 @@ android_glViewport__IIII
 
 static const char *classPathName = "android/opengl/GLES10";
 
-static JNINativeMethod methods[] = {
+static const JNINativeMethod methods[] = {
 {"_nativeClassInit", "()V", (void*)nativeClassInit },
 {"glActiveTexture", "(I)V", (void *) android_glActiveTexture__I },
 {"glAlphaFunc", "(IF)V", (void *) android_glAlphaFunc__IF },

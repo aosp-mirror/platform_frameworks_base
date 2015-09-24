@@ -36,7 +36,7 @@ static void decStrong(JNIEnv* env, jobject clazz, jlong objPtr) {
 
 const char* const kClassPathName = "com/android/internal/util/VirtualRefBasePtr";
 
-static JNINativeMethod gMethods[] = {
+static const JNINativeMethod gMethods[] = {
     { "nIncStrong", "(J)V", (void*) incStrong },
     { "nDecStrong", "(J)V", (void*) decStrong },
 };

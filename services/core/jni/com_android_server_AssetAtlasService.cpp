@@ -204,7 +204,7 @@ static jboolean com_android_server_AssetAtlasService_upload(JNIEnv* env, jobject
 
 const char* const kClassPathName = "com/android/server/AssetAtlasService";
 
-static JNINativeMethod gMethods[] = {
+static const JNINativeMethod gMethods[] = {
     { "nUploadAtlas", "(Landroid/view/GraphicBuffer;Landroid/graphics/Bitmap;)Z",
             (void*) com_android_server_AssetAtlasService_upload },
 };

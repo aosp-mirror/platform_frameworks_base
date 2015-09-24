@@ -576,7 +576,7 @@ static jboolean nativeGetAnimationFrameStats(JNIEnv* env, jclass clazz, jobject 
 
 // ----------------------------------------------------------------------------
 
-static JNINativeMethod sSurfaceControlMethods[] = {
+static const JNINativeMethod sSurfaceControlMethods[] = {
     {"nativeCreate", "(Landroid/view/SurfaceSession;Ljava/lang/String;IIII)J",
             (void*)nativeCreate },
     {"nativeRelease", "(J)V",

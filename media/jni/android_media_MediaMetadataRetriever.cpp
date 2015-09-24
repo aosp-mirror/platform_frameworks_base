@@ -467,7 +467,7 @@ static void android_media_MediaMetadataRetriever_native_setup(JNIEnv *env, jobje
 }
 
 // JNI mapping between Java methods and native methods
-static JNINativeMethod nativeMethods[] = {
+static const JNINativeMethod nativeMethods[] = {
         {
             "_setDataSource",
             "(Landroid/os/IBinder;Ljava/lang/String;[Ljava/lang/String;[Ljava/lang/String;)V",

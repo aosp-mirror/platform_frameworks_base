@@ -249,7 +249,7 @@ static void android_util_EventLog_readEvents(JNIEnv* env, jobject clazz UNUSED,
 /*
  * JNI registration.
  */
-static JNINativeMethod gRegisterMethods[] = {
+static const JNINativeMethod gRegisterMethods[] = {
     /* name, signature, funcPtr */
     { "writeEvent", "(II)I", (void*) android_util_EventLog_writeEvent_Integer },
     { "writeEvent", "(IJ)I", (void*) android_util_EventLog_writeEvent_Long },

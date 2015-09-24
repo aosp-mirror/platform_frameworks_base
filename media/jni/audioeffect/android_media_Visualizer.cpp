@@ -677,7 +677,7 @@ android_media_setPeriodicCapture(JNIEnv *env, jobject thiz, jint rate, jboolean 
 // ----------------------------------------------------------------------------
 
 // Dalvik VM type signatures
-static JNINativeMethod gMethods[] = {
+static const JNINativeMethod gMethods[] = {
     {"native_init",            "()V",     (void *)android_media_visualizer_native_init},
     {"native_setup",           "(Ljava/lang/Object;I[ILjava/lang/String;)I",
                                           (void *)android_media_visualizer_native_setup},

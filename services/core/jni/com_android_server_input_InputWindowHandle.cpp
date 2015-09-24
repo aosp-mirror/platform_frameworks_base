@@ -210,7 +210,7 @@ static void android_server_InputWindowHandle_nativeDispose(JNIEnv* env, jobject 
 }
 
 
-static JNINativeMethod gInputWindowHandleMethods[] = {
+static const JNINativeMethod gInputWindowHandleMethods[] = {
     /* name, signature, funcPtr */
     { "nativeDispose", "()V",
             (void*) android_server_InputWindowHandle_nativeDispose },

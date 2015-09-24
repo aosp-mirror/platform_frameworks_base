@@ -1253,7 +1253,7 @@ static jint Image_getFormat(JNIEnv* env, jobject thiz, jint readerFormat)
 
 // ----------------------------------------------------------------------------
 
-static JNINativeMethod gImageReaderMethods[] = {
+static const JNINativeMethod gImageReaderMethods[] = {
     {"nativeClassInit",        "()V",                        (void*)ImageReader_classInit },
     {"nativeInit",             "(Ljava/lang/Object;IIII)V",  (void*)ImageReader_init },
     {"nativeClose",            "()V",                        (void*)ImageReader_close },
@@ -1263,7 +1263,7 @@ static JNINativeMethod gImageReaderMethods[] = {
     {"nativeDetachImage",      "(Landroid/media/Image;)I",   (void*)ImageReader_detachImage },
 };
 
-static JNINativeMethod gImageMethods[] = {
+static const JNINativeMethod gImageMethods[] = {
     {"nativeImageGetBuffer",   "(II)Ljava/nio/ByteBuffer;",   (void*)Image_getByteBuffer },
     {"nativeCreatePlane",      "(II)Landroid/media/ImageReader$SurfaceImage$SurfacePlane;",
                                                               (void*)Image_createSurfacePlane },

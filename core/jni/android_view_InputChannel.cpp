@@ -259,7 +259,7 @@ static void android_view_InputChannel_nativeDup(JNIEnv* env, jobject obj, jobjec
 
 // ----------------------------------------------------------------------------
 
-static JNINativeMethod gInputChannelMethods[] = {
+static const JNINativeMethod gInputChannelMethods[] = {
     /* name, signature, funcPtr */
     { "nativeOpenInputChannelPair", "(Ljava/lang/String;)[Landroid/view/InputChannel;",
             (void*)android_view_InputChannel_nativeOpenInputChannelPair },

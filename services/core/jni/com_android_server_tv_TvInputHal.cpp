@@ -662,7 +662,7 @@ static void nativeClose(JNIEnv* env, jclass clazz, jlong ptr) {
     delete tvInputHal;
 }
 
-static JNINativeMethod gTvInputHalMethods[] = {
+static const JNINativeMethod gTvInputHalMethods[] = {
     /* name, signature, funcPtr */
     { "nativeOpen", "(Landroid/os/MessageQueue;)J",
             (void*) nativeOpen },

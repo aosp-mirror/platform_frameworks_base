@@ -104,7 +104,7 @@ static jlong android_os_SystemClock_elapsedRealtimeNano(JNIEnv* env,
 /*
  * JNI registration.
  */
-static JNINativeMethod gMethods[] = {
+static const JNINativeMethod gMethods[] = {
     /* name, signature, funcPtr */
     { "uptimeMillis",      "()J",
             (void*) android_os_SystemClock_uptimeMillis },

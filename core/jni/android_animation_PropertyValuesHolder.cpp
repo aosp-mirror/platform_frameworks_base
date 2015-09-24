@@ -139,7 +139,7 @@ static void android_animation_PropertyValuesHolder_callMultipleIntMethod(
     env->ReleaseIntArrayElements(arg, intValues, JNI_ABORT);
 }
 
-static JNINativeMethod gMethods[] = {
+static const JNINativeMethod gMethods[] = {
     {   "nGetIntMethod", "(Ljava/lang/Class;Ljava/lang/String;)J",
             (void*)android_animation_PropertyValuesHolder_getIntMethod },
     {   "nGetFloatMethod", "(Ljava/lang/Class;Ljava/lang/String;)J",

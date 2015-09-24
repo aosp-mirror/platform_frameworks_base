@@ -75,7 +75,7 @@ static jint nativeReleaseMemory(JNIEnv* env, jclass clazz) {
     return sqlite3_release_memory(SOFT_HEAP_LIMIT);
 }
 
-static JNINativeMethod sMethods[] =
+static const JNINativeMethod sMethods[] =
 {
     /* name, signature, funcPtr */
     { "nativeReleaseMemory", "()I", (void*)nativeReleaseMemory },

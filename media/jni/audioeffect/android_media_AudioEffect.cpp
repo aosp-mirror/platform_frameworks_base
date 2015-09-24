@@ -879,7 +879,7 @@ android_media_AudioEffect_native_queryPreProcessings(JNIEnv *env, jclass clazz _
 // ----------------------------------------------------------------------------
 
 // Dalvik VM type signatures
-static JNINativeMethod gMethods[] = {
+static const JNINativeMethod gMethods[] = {
     {"native_init",          "()V",      (void *)android_media_AudioEffect_native_init},
     {"native_setup",         "(Ljava/lang/Object;Ljava/lang/String;Ljava/lang/String;II[I[Ljava/lang/Object;Ljava/lang/String;)I",
                                          (void *)android_media_AudioEffect_native_setup},

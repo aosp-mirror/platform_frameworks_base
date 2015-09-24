@@ -170,7 +170,7 @@ static jint nativeWaitWakeup(JNIEnv *env, jobject clazz, jobject outBuf)
     return mergedreasonpos - mergedreason;
 }
 
-static JNINativeMethod method_table[] = {
+static const JNINativeMethod method_table[] = {
     { "nativeWaitWakeup", "(Ljava/nio/ByteBuffer;)I", (void*)nativeWaitWakeup },
 };
 

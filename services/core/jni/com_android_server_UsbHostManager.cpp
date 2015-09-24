@@ -186,7 +186,7 @@ static jobject android_server_UsbHostManager_openDevice(JNIEnv *env, jobject /* 
         gParcelFileDescriptorOffsets.mConstructor, fileDescriptor);
 }
 
-static JNINativeMethod method_table[] = {
+static const JNINativeMethod method_table[] = {
     { "monitorUsbHostBus", "()V", (void*)android_server_UsbHostManager_monitorUsbHostBus },
     { "nativeOpenDevice",  "(Ljava/lang/String;)Landroid/os/ParcelFileDescriptor;",
                                   (void*)android_server_UsbHostManager_openDevice },

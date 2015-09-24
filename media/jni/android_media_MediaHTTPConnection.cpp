@@ -154,7 +154,7 @@ static jint android_media_MediaHTTPConnection_native_readAt(
     return n;
 }
 
-static JNINativeMethod gMethods[] = {
+static const JNINativeMethod gMethods[] = {
     { "native_getIMemory", "()Landroid/os/IBinder;",
       (void *)android_media_MediaHTTPConnection_native_getIMemory },
 

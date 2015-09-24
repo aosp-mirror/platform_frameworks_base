@@ -275,7 +275,7 @@ static int flush(JNIEnv* env, jobject obj) {
 }
 
 
-static JNINativeMethod sMethods[] = {
+static const JNINativeMethod sMethods[] = {
     // {"name", "signature", (void*) functionPointer },
     { "nativeClassInit", "()V", (void*) class_init },
     { "nativeInitialize", "()V", (void*) initialize },
