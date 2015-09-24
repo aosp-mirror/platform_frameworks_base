@@ -23,6 +23,7 @@ import com.android.internal.telephony.PhoneConstants;
 
 import android.content.Context;
 import android.content.res.ColorStateList;
+import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.app.AlertDialog;
 import android.app.AlertDialog.Builder;
@@ -93,6 +94,12 @@ public class KeyguardSimPinView extends KeyguardPinBasedInputView {
             mSecurityMessageDisplay.setMessage(msg, true);
             mSimImageView.setImageTintList(ColorStateList.valueOf(color));
         }
+    }
+
+    @Override
+    protected void onConfigurationChanged(Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+        resetState();
     }
 
     @Override
