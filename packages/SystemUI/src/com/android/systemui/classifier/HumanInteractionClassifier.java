@@ -23,8 +23,10 @@ import android.os.Build;
 import android.os.Handler;
 import android.os.UserHandle;
 import android.provider.Settings;
+import android.util.DisplayMetrics;
 import android.view.MotionEvent;
 
+import java.util.ArrayDeque;
 import java.util.ArrayList;
 
 /**
@@ -32,6 +34,7 @@ import java.util.ArrayList;
  */
 public class HumanInteractionClassifier extends Classifier {
     private static final String HIC_ENABLE = "HIC_enable";
+    private static final float FINGER_DISTANCE = 0.1f;
     private static HumanInteractionClassifier sInstance = null;
 
     private final Handler mHandler = new Handler();
@@ -39,11 +42,13 @@ public class HumanInteractionClassifier extends Classifier {
 
     private ArrayList<StrokeClassifier> mStrokeClassifiers = new ArrayList<>();
     private ArrayList<GestureClassifier> mGestureClassifiers = new ArrayList<>();
+    private ArrayDeque<MotionEvent> mBufferedEvents = new ArrayDeque<>();
     private final int mStrokeClassifiersSize;
     private final int mGestureClassifiersSize;
+    private final float mDpi;
 
     private HistoryEvaluator mHistoryEvaluator;
-    private boolean mEnableClassifier = false;
+    private boolean mEnableClassifier = true;
     private int mCurrentType = Classifier.GENERIC;
 
     protected final ContentObserver mSettingsObserver = new ContentObserver(mHandler) {
@@ -55,8 +60,13 @@ public class HumanInteractionClassifier extends Classifier {
 
     private HumanInteractionClassifier(Context context) {
         mContext = context;
-        mClassifierData = new ClassifierData(mContext.getResources().getDisplayMetrics().xdpi,
-                mContext.getResources().getDisplayMetrics().ydpi);
+        DisplayMetrics displayMetrics = mContext.getResources().getDisplayMetrics();
+
+        // If the phone is rotated to landscape, the calculations would be wrong if xdpi and ydpi
+        // were to be used separately. Due negligible differences in xdpi and ydpi we can just
+        // take the average.
+        mDpi = (displayMetrics.xdpi + displayMetrics.ydpi) / 2.0f;
+        mClassifierData = new ClassifierData(mDpi);
         mHistoryEvaluator = new HistoryEvaluator();
 
         mStrokeClassifiers.add(new AnglesVarianceClassifier(mClassifierData));
@@ -101,40 +111,71 @@ public class HumanInteractionClassifier extends Classifier {
 
     @Override
     public void onTouchEvent(MotionEvent event) {
-        if (mEnableClassifier) {
-            mClassifierData.update(event);
+        if (!mEnableClassifier) {
+            return;
+        }
 
-            for (int i = 0; i < mStrokeClassifiersSize; i++) {
-                mStrokeClassifiers.get(i).onTouchEvent(event);
-            }
+        // If the user is dragging down the notification, he might want to drag it down
+        // enough to see the content, read it for a while and then lift the finger to open
+        // the notification. This kind of motion scores very bad in the Classifier so the
+        // MotionEvents which are close to the current position of the finger are not
+        // sent to the classifiers until the finger moves far enough. When the finger if lifted
+        // up, the last MotionEvent which was far enough from the finger is set as the final
+        // MotionEvent and sent to the Classifiers.
+        if (mCurrentType == Classifier.NOTIFICATION_DRAG_DOWN) {
+            mBufferedEvents.add(MotionEvent.obtain(event));
+            Point pointEnd = new Point(event.getX() / mDpi, event.getY() / mDpi);
 
-            for (int i = 0; i < mGestureClassifiersSize; i++) {
-                mGestureClassifiers.get(i).onTouchEvent(event);
-            }
-
-            int size = mClassifierData.getEndingStrokes().size();
-            for (int i = 0; i < size; i++) {
-                Stroke stroke = mClassifierData.getEndingStrokes().get(i);
-                float evaluation = 0.0f;
-                for (int j = 0; j < mStrokeClassifiersSize; j++) {
-                    evaluation += mStrokeClassifiers.get(j).getFalseTouchEvaluation(
-                            mCurrentType, stroke);
-                }
-                mHistoryEvaluator.addStroke(evaluation);
+            while (pointEnd.dist(new Point(mBufferedEvents.getFirst().getX() / mDpi,
+                    mBufferedEvents.getFirst().getY() / mDpi)) > FINGER_DISTANCE) {
+                addTouchEvent(mBufferedEvents.getFirst());
+                mBufferedEvents.remove();
             }
 
             int action = event.getActionMasked();
-            if (action == MotionEvent.ACTION_UP || action == MotionEvent.ACTION_CANCEL) {
-                float evaluation = 0.0f;
-                for (int i = 0; i < mGestureClassifiersSize; i++) {
-                    evaluation += mGestureClassifiers.get(i).getFalseTouchEvaluation(mCurrentType);
-                }
-                mHistoryEvaluator.addGesture(evaluation);
-                setType(Classifier.GENERIC);
+            if (action == MotionEvent.ACTION_UP) {
+                mBufferedEvents.getFirst().setAction(MotionEvent.ACTION_UP);
+                addTouchEvent(mBufferedEvents.getFirst());
+                mBufferedEvents.clear();
             }
-
-            mClassifierData.cleanUp(event);
+        } else {
+            addTouchEvent(event);
         }
+    }
+
+    private void addTouchEvent(MotionEvent event) {
+        mClassifierData.update(event);
+
+        for (int i = 0; i < mStrokeClassifiersSize; i++) {
+            mStrokeClassifiers.get(i).onTouchEvent(event);
+        }
+
+        for (int i = 0; i < mGestureClassifiersSize; i++) {
+            mGestureClassifiers.get(i).onTouchEvent(event);
+        }
+
+        int size = mClassifierData.getEndingStrokes().size();
+        for (int i = 0; i < size; i++) {
+            Stroke stroke = mClassifierData.getEndingStrokes().get(i);
+            float evaluation = 0.0f;
+            for (int j = 0; j < mStrokeClassifiersSize; j++) {
+                evaluation += mStrokeClassifiers.get(j).getFalseTouchEvaluation(
+                        mCurrentType, stroke);
+            }
+            mHistoryEvaluator.addStroke(evaluation);
+        }
+
+        int action = event.getActionMasked();
+        if (action == MotionEvent.ACTION_UP || action == MotionEvent.ACTION_CANCEL) {
+            float evaluation = 0.0f;
+            for (int i = 0; i < mGestureClassifiersSize; i++) {
+                evaluation += mGestureClassifiers.get(i).getFalseTouchEvaluation(mCurrentType);
+            }
+            mHistoryEvaluator.addGesture(evaluation);
+            setType(Classifier.GENERIC);
+        }
+
+        mClassifierData.cleanUp(event);
     }
 
     @Override

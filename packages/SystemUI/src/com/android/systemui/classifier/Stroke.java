@@ -29,18 +29,16 @@ public class Stroke {
     private long mStartTimeNano;
     private long mEndTimeNano;
     private float mLength;
-    private float mXdpi;
-    private float mYdpi;
+    private final float mDpi;
 
-    public Stroke(long eventTimeNano, float xdpi, float ydpi) {
-        mXdpi = xdpi;
-        mYdpi = ydpi;
+    public Stroke(long eventTimeNano, float dpi) {
+        mDpi = dpi;
         mStartTimeNano = mEndTimeNano = eventTimeNano;
     }
 
     public void addPoint(float x, float y, long eventTimeNano) {
         mEndTimeNano = eventTimeNano;
-        Point point = new Point(x / mXdpi, y / mYdpi, eventTimeNano - mStartTimeNano);
+        Point point = new Point(x / mDpi, y / mDpi, eventTimeNano - mStartTimeNano);
         if (!mPoints.isEmpty()) {
             mLength += mPoints.get(mPoints.size() - 1).dist(point);
         }
