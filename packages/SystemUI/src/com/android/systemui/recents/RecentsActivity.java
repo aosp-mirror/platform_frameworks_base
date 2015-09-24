@@ -36,6 +36,7 @@ import com.android.systemui.R;
 import com.android.systemui.recents.misc.Console;
 import com.android.systemui.recents.misc.ReferenceCountedTrigger;
 import com.android.systemui.recents.misc.SystemServicesProxy;
+import com.android.systemui.recents.model.RecentsPackageMonitor;
 import com.android.systemui.recents.model.RecentsTaskLoadPlan;
 import com.android.systemui.recents.model.RecentsTaskLoader;
 import com.android.systemui.recents.model.Task;
@@ -53,7 +54,10 @@ import java.util.ArrayList;
 public class RecentsActivity extends Activity implements RecentsView.RecentsViewCallbacks,
         RecentsAppWidgetHost.RecentsAppWidgetHostCallbacks {
 
+    public final static int EVENT_BUS_PRIORITY = Recents.EVENT_BUS_PRIORITY + 1;
+
     RecentsConfiguration mConfig;
+    RecentsPackageMonitor mPackageMonitor;
     long mLastTabKeyEventTime;
 
     // Top level views
@@ -324,6 +328,7 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
         SystemServicesProxy ssp = RecentsTaskLoader.getInstance().getSystemServicesProxy();
         mConfig = RecentsConfiguration.initialize(this, ssp);
         mConfig.update(this, ssp, ssp.getWindowRect());
+        mPackageMonitor = new RecentsPackageMonitor();
 
         // Initialize the widget host (the host id is static and does not change)
         mAppWidgetHost = new RecentsAppWidgetHost(this, Constants.Values.App.AppWidgetHostId);
@@ -371,7 +376,7 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
         registerReceiver(mServiceBroadcastReceiver, filter);
 
         // Register any broadcast receivers for the task loader
-        loader.registerReceivers(this, mRecentsView);
+        mPackageMonitor.register(this);
 
         // Update the recent tasks
         updateRecentsTasks();
@@ -415,7 +420,7 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
         unregisterReceiver(mServiceBroadcastReceiver);
 
         // Unregister any broadcast receivers for the task loader
-        loader.unregisterReceivers();
+        mPackageMonitor.unregister();
 
         // Workaround for b/22542869, if the RecentsActivity is started again, but without going
         // through SystemUI, we need to reset the config launch flags to ensure that we do not

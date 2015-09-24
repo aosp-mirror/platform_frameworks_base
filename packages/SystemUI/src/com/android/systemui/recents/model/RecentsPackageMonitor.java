@@ -21,6 +21,8 @@ import android.content.Context;
 import android.os.Looper;
 import android.os.UserHandle;
 import com.android.internal.content.PackageMonitor;
+import com.android.systemui.recents.events.EventBus;
+import com.android.systemui.recents.events.activity.PackagesChangedEvent;
 import com.android.systemui.recents.misc.SystemServicesProxy;
 
 import java.util.HashSet;
@@ -31,18 +33,9 @@ import java.util.List;
  * Recents list.
  */
 public class RecentsPackageMonitor extends PackageMonitor {
-    public interface PackageCallbacks {
-        public void onPackagesChanged(RecentsPackageMonitor monitor, String packageName,
-                                      int userId);
-    }
-
-    PackageCallbacks mCb;
-    SystemServicesProxy mSystemServicesProxy;
 
     /** Registers the broadcast receivers with the specified callbacks. */
-    public void register(Context context, PackageCallbacks cb) {
-        mSystemServicesProxy = new SystemServicesProxy(context);
-        mCb = cb;
+    public void register(Context context) {
         try {
             // We register for events from all users, but will cross-reference them with
             // packages for the current user and any profiles they have
@@ -60,17 +53,13 @@ public class RecentsPackageMonitor extends PackageMonitor {
         } catch (IllegalStateException e) {
             e.printStackTrace();
         }
-        mSystemServicesProxy = null;
-        mCb = null;
     }
 
     @Override
     public void onPackageRemoved(String packageName, int uid) {
-        if (mCb == null) return;
-
         // Notify callbacks that a package has changed
         final int eventUserId = getChangingUserId();
-        mCb.onPackagesChanged(this, packageName, eventUserId);
+        EventBus.getDefault().send(new PackagesChangedEvent(this, packageName, eventUserId));
     }
 
     @Override
@@ -81,11 +70,9 @@ public class RecentsPackageMonitor extends PackageMonitor {
 
     @Override
     public void onPackageModified(String packageName) {
-        if (mCb == null) return;
-
         // Notify callbacks that a package has changed
         final int eventUserId = getChangingUserId();
-        mCb.onPackagesChanged(this, packageName, eventUserId);
+        EventBus.getDefault().send(new PackagesChangedEvent(this, packageName, eventUserId));
     }
 
     /**
@@ -108,7 +95,8 @@ public class RecentsPackageMonitor extends PackageMonitor {
                     // If we know that the component still exists in the package, then skip
                     continue;
                 }
-                if (mSystemServicesProxy.getActivityInfo(cn, userId) != null) {
+                SystemServicesProxy ssp = RecentsTaskLoader.getInstance().getSystemServicesProxy();
+                if (ssp.getActivityInfo(cn, userId) != null) {
                     existingComponents.add(cn);
                 } else {
                     removedComponents.add(cn);
