@@ -2,13 +2,6 @@ page.title=Designing for Auto
 page.tags="design","Auto"
 @jd:body
 
-<a class="notice-developers" href="{@docRoot}training/auto/index.html">
-  <div>
-    <h3>Developer Docs</h3>
-    <p>Building Apps for Auto</p>
-  </div>
-</a>
-
 <div class="sidebox-wrapper">
 <div class="sidebox">
   <h2><strong>UI Guidelines</strong></h2>
@@ -25,6 +18,22 @@ page.tags="design","Auto"
  </ul>
 </div>
 </div>
+
+<a class="notice-developers" href="{@docRoot}training/auto/index.html">
+  <div>
+    <h3>Developer Docs</h3>
+    <p>Building Apps for Auto</p>
+  </div>
+</a>
+
+<a href="http://www.youtube.com/watch?v=vG9c5egwEYY"
+        class="notice-developers-video">
+<div>
+    <h3>Video</h3>
+    <p>Designing For Drivers</p>
+</div>
+</a>
+
 
 <p>Android Auto provide a standardized user interface and user interaction
 model that works across vehicles. As a designer, you do not
