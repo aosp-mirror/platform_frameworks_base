@@ -56,4 +56,28 @@ public class Point {
     public float dotProduct(Point a, Point b) {
         return (a.x - x) * (b.x - x) + (a.y - y) * (b.y - y);
     }
+
+    /**
+     * Calculates the angle in radians created by points (a, this, b). If any two of these points
+     * are the same, the method will return 0.0f
+     *
+     * @return the angle in radians
+     */
+    public float getAngle(Point a, Point b) {
+        float dist1 = dist(a);
+        float dist2 = dist(b);
+
+        if (dist1 == 0.0f || dist2 == 0.0f) {
+            return 0.0f;
+        }
+
+        float crossProduct = crossProduct(a, b);
+        float dotProduct = dotProduct(a, b);
+        float cos = Math.min(1.0f, Math.max(-1.0f, dotProduct / dist1 / dist2));
+        float angle = (float) Math.acos(cos);
+        if (crossProduct < 0.0) {
+            angle = 2.0f * (float) Math.PI - angle;
+        }
+        return angle;
+    }
 }
