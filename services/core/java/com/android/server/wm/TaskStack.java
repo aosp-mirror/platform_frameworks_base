@@ -438,8 +438,7 @@ public class TaskStack implements DimLayer.DimLayerUser {
                 for (int winNdx = appWindows.size() - 1; winNdx >= 0; --winNdx) {
                     // We are in the middle of changing the state of displays/stacks/tasks. We need
                     // to finish that, before we let layout interfere with it.
-                    mService.removeWindowInnerLocked(appWindows.get(winNdx),
-                            false /* performLayout */);
+                    mService.removeWindowLocked(appWindows.get(winNdx));
                     doAnotherLayoutPass = true;
                 }
             }
