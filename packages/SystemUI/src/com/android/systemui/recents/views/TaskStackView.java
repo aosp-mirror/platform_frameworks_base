@@ -79,7 +79,6 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
     ViewPool<TaskView, Task> mViewPool;
     ArrayList<TaskViewTransform> mCurrentTaskTransforms = new ArrayList<TaskViewTransform>();
     DozeTrigger mUIDozeTrigger;
-    DebugOverlayView mDebugOverlay;
     DismissView mDismissAllButton;
     boolean mDismissAllButtonAnimating;
     int mFocusedTaskIndex = -1;
@@ -159,11 +158,6 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
     /** Returns the task stack. */
     TaskStack getStack() {
         return mStack;
-    }
-
-    /** Sets the debug overlay */
-    public void setDebugOverlay(DebugOverlayView overlay) {
-        mDebugOverlay = overlay;
     }
 
     /** Updates the list of task views */
@@ -334,9 +328,6 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
             int[] visibleRange = mTmpVisibleRange;
             boolean isValidVisibleRange = updateStackTransforms(mCurrentTaskTransforms, tasks,
                     stackScroll, visibleRange, false);
-            if (mDebugOverlay != null) {
-                mDebugOverlay.setText("vis[" + visibleRange[1] + "-" + visibleRange[0] + "]");
-            }
 
             // Inflate and add the dismiss button if necessary
             if (Constants.DebugFlags.App.EnableDismissAll && mDismissAllButton == null) {

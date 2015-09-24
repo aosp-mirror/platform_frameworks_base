@@ -28,7 +28,6 @@ import android.graphics.RectF;
 import android.graphics.Shader;
 import android.graphics.drawable.Drawable;
 import android.util.Log;
-
 import com.android.systemui.R;
 import com.android.systemui.recents.RecentsConfiguration;
 

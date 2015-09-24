@@ -29,8 +29,6 @@ public class Constants {
     }
 
     public static class DebugFlags {
-        // Enable this with any other debug flag to see more info
-        public static final boolean Verbose = false;
 
         public static class App {
             // Enables debug drawing for the transition thumbnail
@@ -39,10 +37,6 @@ public class Constants {
             public static final boolean EnableTaskFiltering = false;
             // Enables dismiss-all
             public static final boolean EnableDismissAll = false;
-            // Enables debug mode
-            public static final boolean EnableDebugMode = false;
-            // Enables the search bar layout
-            public static final boolean EnableSearchLayout = true;
             // Enables the thumbnail alpha on the front-most task
             public static final boolean EnableThumbnailAlphaOnFrontmost = false;
             // This disables the bitmap and icon caches
@@ -63,7 +57,6 @@ public class Constants {
     public static class Values {
         public static class App {
             public static int AppWidgetHostId = 1024;
-            public static String DebugModeVersion = "A";
         }
 
         public static class TaskStackView {

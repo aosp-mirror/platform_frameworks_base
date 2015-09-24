@@ -78,7 +78,6 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
 
     RecentsConfiguration mConfig;
     LayoutInflater mInflater;
-    DebugOverlayView mDebugOverlay;
 
     ArrayList<TaskStack> mStacks;
     TaskStackView mTaskStackView;
@@ -108,11 +107,6 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
         mCb = cb;
     }
 
-    /** Sets the debug overlay */
-    public void setDebugOverlay(DebugOverlayView overlay) {
-        mDebugOverlay = overlay;
-    }
-
     /** Set/get the bsp root node */
     public void setTaskStack(TaskStack stack) {
         if (mConfig.launchedReuseTaskStackViews) {
@@ -132,11 +126,6 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
             mTaskStackView = new TaskStackView(getContext(), stack);
             mTaskStackView.setCallbacks(this);
             addView(mTaskStackView);
-        }
-
-        // Enable debug mode drawing on all the stacks if necessary
-        if (mConfig.debugModeEnabled) {
-            mTaskStackView.setDebugOverlay(mDebugOverlay);
         }
 
         // Trigger a new layout
