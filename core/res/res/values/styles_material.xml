@@ -471,6 +471,7 @@ please see styles_device_defaults.xml.
     <style name="Widget.Material.Button.Colored">
         <item name="background">@drawable/btn_colored_material</item>
         <item name="textAppearance">@style/TextAppearance.Material.Widget.Button.Inverse</item>
+        <item name="textColor">@color/btn_colored_text_material</item>
     </style>
 
     <!-- Small bordered ink button -->
@@ -487,7 +488,7 @@ please see styles_device_defaults.xml.
 
     <!-- Colored borderless ink button -->
     <style name="Widget.Material.Button.Borderless.Colored">
-        <item name="textColor">@color/btn_colored_text_material</item>
+        <item name="textColor">@color/btn_colored_borderless_text_material</item>
     </style>
 
     <!-- Alert dialog button bar button -->
