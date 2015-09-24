@@ -561,7 +561,7 @@ com_android_internal_content_NativeLibraryHelper_close(JNIEnv *env, jclass, jlon
     delete reinterpret_cast<ZipFileRO*>(apkHandle);
 }
 
-static JNINativeMethod gMethods[] = {
+static const JNINativeMethod gMethods[] = {
     {"nativeOpenApk",
             "(Ljava/lang/String;)J",
             (void *)com_android_internal_content_NativeLibraryHelper_openApk},

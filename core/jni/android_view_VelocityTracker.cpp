@@ -215,7 +215,7 @@ static jboolean android_view_VelocityTracker_nativeGetEstimator(JNIEnv* env, jcl
 
 // --- JNI Registration ---
 
-static JNINativeMethod gVelocityTrackerMethods[] = {
+static const JNINativeMethod gVelocityTrackerMethods[] = {
     /* name, signature, funcPtr */
     { "nativeInitialize",
             "(Ljava/lang/String;)J",

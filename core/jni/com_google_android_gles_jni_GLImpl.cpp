@@ -8490,7 +8490,7 @@ android_glTexGenxv__IILjava_nio_IntBuffer_2
 
 static const char *classPathName = "com/google/android/gles_jni/GLImpl";
 
-static JNINativeMethod methods[] = {
+static const JNINativeMethod methods[] = {
 {"_nativeClassInit", "()V", (void*)nativeClassInit },
 {"glActiveTexture", "(I)V", (void *) android_glActiveTexture__I },
 {"glAlphaFunc", "(IF)V", (void *) android_glAlphaFunc__IF },

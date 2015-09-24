@@ -3065,7 +3065,7 @@ android_glVertexPointer__IIII
 
 static const char *classPathName = "android/opengl/GLES11";
 
-static JNINativeMethod methods[] = {
+static const JNINativeMethod methods[] = {
 {"_nativeClassInit", "()V", (void*)nativeClassInit },
 {"glBindBuffer", "(II)V", (void *) android_glBindBuffer__II },
 {"glBufferData", "(IILjava/nio/Buffer;I)V", (void *) android_glBufferData__IILjava_nio_Buffer_2I },

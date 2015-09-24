@@ -647,7 +647,7 @@ static jint com_android_internal_os_Zygote_nativeForkSystemServer(
   return pid;
 }
 
-static JNINativeMethod gMethods[] = {
+static const JNINativeMethod gMethods[] = {
     { "nativeForkAndSpecialize",
       "(II[II[[IILjava/lang/String;Ljava/lang/String;[ILjava/lang/String;Ljava/lang/String;)I",
       (void *) com_android_internal_os_Zygote_nativeForkAndSpecialize },

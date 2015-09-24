@@ -1455,7 +1455,7 @@ static jbyteArray android_media_MediaDrm_signRSANative(
 }
 
 
-static JNINativeMethod gMethods[] = {
+static const JNINativeMethod gMethods[] = {
     { "release", "()V", (void *)android_media_MediaDrm_release },
     { "native_init", "()V", (void *)android_media_MediaDrm_native_init },
 

@@ -768,14 +768,14 @@ android_hardware_SoundTrigger_stopRecognition(JNIEnv *env, jobject thiz,
     return status;
 }
 
-static JNINativeMethod gMethods[] = {
+static const JNINativeMethod gMethods[] = {
     {"listModules",
         "(Ljava/util/ArrayList;)I",
         (void *)android_hardware_SoundTrigger_listModules},
 };
 
 
-static JNINativeMethod gModuleMethods[] = {
+static const JNINativeMethod gModuleMethods[] = {
     {"native_setup",
         "(Ljava/lang/Object;)V",
         (void *)android_hardware_SoundTrigger_setup},

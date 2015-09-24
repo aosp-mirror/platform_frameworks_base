@@ -44,7 +44,7 @@ android_hardware_UsbDevice_get_device_name(JNIEnv *env, jobject clazz, jint id)
     return result;
 }
 
-static JNINativeMethod method_table[] = {
+static const JNINativeMethod method_table[] = {
     // static methods
     { "native_get_device_id", "(Ljava/lang/String;)I",
                                         (void*)android_hardware_UsbDevice_get_device_id },

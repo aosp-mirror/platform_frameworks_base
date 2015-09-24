@@ -190,7 +190,7 @@ android_hardware_UsbRequest_cancel(JNIEnv *env, jobject thiz)
     return (usb_request_cancel(request) == 0);
 }
 
-static JNINativeMethod method_table[] = {
+static const JNINativeMethod method_table[] = {
     {"native_init",             "(Landroid/hardware/usb/UsbDeviceConnection;IIII)Z",
                                             (void *)android_hardware_UsbRequest_init},
     {"native_close",            "()V",      (void *)android_hardware_UsbRequest_close},

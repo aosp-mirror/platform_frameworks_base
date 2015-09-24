@@ -56,7 +56,7 @@ static void nativeKill(JNIEnv* env, jclass clazz, jlong ptr) {
 }
 
 
-static JNINativeMethod gMethods[] = {
+static const JNINativeMethod gMethods[] = {
     /* name, signature, funcPtr */
     { "nativeCreate", "()J",
             (void*)nativeCreate },

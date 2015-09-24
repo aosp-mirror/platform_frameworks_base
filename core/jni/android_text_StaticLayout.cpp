@@ -172,7 +172,7 @@ static void nGetWidths(JNIEnv* env, jclass, jlong nativePtr, jfloatArray widths)
     env->SetFloatArrayRegion(widths, 0, b->size(), b->charWidths());
 }
 
-static JNINativeMethod gMethods[] = {
+static const JNINativeMethod gMethods[] = {
     // TODO performance: many of these are candidates for fast jni, awaiting guidance
     {"nNewBuilder", "()J", (void*) nNewBuilder},
     {"nFreeBuilder", "(J)V", (void*) nFreeBuilder},

@@ -217,7 +217,7 @@ static void com_android_internal_os_RuntimeInit_nativeSetExitWithoutCleanup(JNIE
 /*
  * JNI registration.
  */
-static JNINativeMethod gMethods[] = {
+static const JNINativeMethod gMethods[] = {
     { "nativeFinishInit", "()V",
         (void*) com_android_internal_os_RuntimeInit_nativeFinishInit },
     { "nativeZygoteInit", "()V",

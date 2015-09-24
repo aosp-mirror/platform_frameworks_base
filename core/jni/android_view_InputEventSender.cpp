@@ -289,7 +289,7 @@ static jboolean nativeSendMotionEvent(JNIEnv* env, jclass clazz, jlong senderPtr
 }
 
 
-static JNINativeMethod gMethods[] = {
+static const JNINativeMethod gMethods[] = {
     /* name, signature, funcPtr */
     { "nativeInit",
             "(Ljava/lang/ref/WeakReference;Landroid/view/InputChannel;Landroid/os/MessageQueue;)J",

@@ -3573,7 +3573,7 @@ android_glGetTexGenxvOES__IILjava_nio_IntBuffer_2
 
 static const char *classPathName = "android/opengl/GLES11Ext";
 
-static JNINativeMethod methods[] = {
+static const JNINativeMethod methods[] = {
 {"_nativeClassInit", "()V", (void*)nativeClassInit },
 {"glBlendEquationSeparateOES", "(II)V", (void *) android_glBlendEquationSeparateOES__II },
 {"glBlendFuncSeparateOES", "(IIII)V", (void *) android_glBlendFuncSeparateOES__IIII },

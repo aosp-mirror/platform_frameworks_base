@@ -2280,7 +2280,7 @@ static void DngCreator_nativeWriteInputStream(JNIEnv* env, jobject thiz, jobject
 
 } /*extern "C" */
 
-static JNINativeMethod gDngCreatorMethods[] = {
+static const JNINativeMethod gDngCreatorMethods[] = {
     {"nativeClassInit",        "()V", (void*) DngCreator_nativeClassInit},
     {"nativeInit", "(Landroid/hardware/camera2/impl/CameraMetadataNative;"
             "Landroid/hardware/camera2/impl/CameraMetadataNative;Ljava/lang/String;)V",

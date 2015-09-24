@@ -166,7 +166,7 @@ static void writeBitmapPixels(JNIEnv* env, jclass /* clazz */, jobject jbitmap, 
     }
 }
 
-static JNINativeMethod sMethods[] = {
+static const JNINativeMethod sMethods[] = {
     {"nativeReadBitmapPixels", "(Landroid/graphics/Bitmap;I)V", (void *) readBitmapPixels},
     {"nativeWriteBitmapPixels", "(Landroid/graphics/Bitmap;I)V", (void *) writeBitmapPixels},
 };

@@ -268,7 +268,7 @@ sp<GraphicBuffer> graphicBufferForJavaObject(JNIEnv* env, jobject obj) {
 
 const char* const kClassPathName = "android/view/GraphicBuffer";
 
-static JNINativeMethod gMethods[] = {
+static const JNINativeMethod gMethods[] = {
     { "nCreateGraphicBuffer",  "(IIII)J", (void*) android_view_GraphiceBuffer_create },
     { "nDestroyGraphicBuffer", "(J)V",    (void*) android_view_GraphiceBuffer_destroy },
 

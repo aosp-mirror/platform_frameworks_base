@@ -302,7 +302,7 @@ public:
     }
  };
 
-static JNINativeMethod methods[] = {
+static const JNINativeMethod methods[] = {
     {"finalizer", "(J)V", (void*) SkMatrixGlue::finalizer},
     {"native_create","(J)J", (void*) SkMatrixGlue::create},
 

@@ -306,13 +306,13 @@ static jboolean RegionIter_next(JNIEnv* env, jobject, jlong pairHandle, jobject 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-static JNINativeMethod gRegionIterMethods[] = {
+static const JNINativeMethod gRegionIterMethods[] = {
     { "nativeConstructor",  "(J)J",                         (void*)RegionIter_constructor   },
     { "nativeDestructor",   "(J)V",                         (void*)RegionIter_destructor    },
     { "nativeNext",         "(JLandroid/graphics/Rect;)Z",  (void*)RegionIter_next          }
 };
 
-static JNINativeMethod gRegionMethods[] = {
+static const JNINativeMethod gRegionMethods[] = {
     // these are static methods
     { "nativeConstructor",      "()J",                              (void*)Region_constructor       },
     { "nativeDestructor",       "(J)V",                             (void*)Region_destructor        },

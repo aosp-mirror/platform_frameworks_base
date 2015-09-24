@@ -22,7 +22,7 @@ static jint checkFunction(JNIEnv*, jclass) {
     return 1;
 }
 
-static JNINativeMethod sMethods[] = {
+static const JNINativeMethod sMethods[] = {
     /* name, signature, funcPtr */
     { "checkFunction", "()I", (void*) checkFunction },
 };

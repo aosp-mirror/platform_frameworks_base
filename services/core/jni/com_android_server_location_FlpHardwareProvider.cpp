@@ -1023,7 +1023,7 @@ static void RemoveGeofences(
   env->ReleaseIntArrayElements(geofenceIdsArray, geofenceIds, 0 /*mode*/);
 }
 
-static JNINativeMethod sMethods[] = {
+static const JNINativeMethod sMethods[] = {
   //{"name", "signature", functionPointer }
   {"nativeClassInit", "()V", reinterpret_cast<void*>(ClassInit)},
   {"nativeInit", "()V", reinterpret_cast<void*>(Init)},

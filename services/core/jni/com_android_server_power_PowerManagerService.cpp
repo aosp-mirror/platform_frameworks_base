@@ -166,7 +166,7 @@ static void nativeSetFeature(JNIEnv *env, jclass clazz, jint featureId, jint dat
 
 // ----------------------------------------------------------------------------
 
-static JNINativeMethod gPowerManagerServiceMethods[] = {
+static const JNINativeMethod gPowerManagerServiceMethods[] = {
     /* name, signature, funcPtr */
     { "nativeInit", "()V",
             (void*) nativeInit },

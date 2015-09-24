@@ -488,7 +488,7 @@ android_media_JetPlayer_clearQueue(JNIEnv *env, jobject thiz)
 
 // ----------------------------------------------------------------------------
 // ----------------------------------------------------------------------------
-static JNINativeMethod gMethods[] = {
+static const JNINativeMethod gMethods[] = {
     // name,               signature,               funcPtr
     {"native_setup",       "(Ljava/lang/Object;II)Z", (void *)android_media_JetPlayer_setup},
     {"native_finalize",    "()V",                   (void *)android_media_JetPlayer_finalize},

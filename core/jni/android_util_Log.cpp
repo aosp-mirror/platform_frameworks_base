@@ -111,7 +111,7 @@ static jint android_util_Log_println_native(JNIEnv* env, jobject clazz,
 /*
  * JNI registration.
  */
-static JNINativeMethod gMethods[] = {
+static const JNINativeMethod gMethods[] = {
     /* name, signature, funcPtr */
     { "isLoggable",      "(Ljava/lang/String;I)Z", (void*) android_util_Log_isLoggable },
     { "println_native",  "(IILjava/lang/String;Ljava/lang/String;)I", (void*) android_util_Log_println_native },

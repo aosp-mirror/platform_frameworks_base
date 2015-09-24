@@ -3175,7 +3175,7 @@ android_glVertexBindingDivisor__II
 
 static const char *classPathName = "android/opengl/GLES31";
 
-static JNINativeMethod methods[] = {
+static const JNINativeMethod methods[] = {
 {"_nativeClassInit", "()V", (void*)nativeClassInit },
 {"glDispatchCompute", "(III)V", (void *) android_glDispatchCompute__III },
 {"glDispatchComputeIndirect", "(J)V", (void *) android_glDispatchComputeIndirect },

@@ -490,7 +490,7 @@ android_mtp_MtpDevice_send_object_info(JNIEnv *env, jobject thiz, jobject info)
 
 // ----------------------------------------------------------------------------
 
-static JNINativeMethod gMethods[] = {
+static const JNINativeMethod gMethods[] = {
     {"native_open",             "(Ljava/lang/String;I)Z",
                                         (void *)android_mtp_MtpDevice_open},
     {"native_close",            "()V",  (void *)android_mtp_MtpDevice_close},

@@ -261,7 +261,7 @@ static void nativeClean(JNIEnv* env, jobject, jlong brdHandle) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-static JNINativeMethod gBitmapRegionDecoderMethods[] = {
+static const JNINativeMethod gBitmapRegionDecoderMethods[] = {
     {   "nativeDecodeRegion",
         "(JIIIILandroid/graphics/BitmapFactory$Options;)Landroid/graphics/Bitmap;",
         (void*)nativeDecodeRegion},

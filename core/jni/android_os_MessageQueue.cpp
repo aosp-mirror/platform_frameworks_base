@@ -209,7 +209,7 @@ static void android_os_MessageQueue_nativeSetFileDescriptorEvents(JNIEnv* env, j
 
 // ----------------------------------------------------------------------------
 
-static JNINativeMethod gMessageQueueMethods[] = {
+static const JNINativeMethod gMessageQueueMethods[] = {
     /* name, signature, funcPtr */
     { "nativeInit", "()J", (void*)android_os_MessageQueue_nativeInit },
     { "nativeDestroy", "(J)V", (void*)android_os_MessageQueue_nativeDestroy },

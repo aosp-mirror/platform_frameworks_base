@@ -316,7 +316,7 @@ static void android_media_MediaCrypto_setMediaDrmSession(
     }
 }
 
-static JNINativeMethod gMethods[] = {
+static const JNINativeMethod gMethods[] = {
     { "release", "()V", (void *)android_media_MediaCrypto_release },
     { "native_init", "()V", (void *)android_media_MediaCrypto_native_init },
 

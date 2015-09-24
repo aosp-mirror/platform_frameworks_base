@@ -240,36 +240,36 @@ static jlong ComposeShader_create2(JNIEnv* env, jobject o,
 
 ///////////////////////////////////////////////////////////////////////////////////////////////
 
-static JNINativeMethod gColorMethods[] = {
+static const JNINativeMethod gColorMethods[] = {
     { "nativeRGBToHSV",     "(III[F)V", (void*)Color_RGBToHSV   },
     { "nativeHSVToColor",   "(I[F)I",   (void*)Color_HSVToColor }
 };
 
-static JNINativeMethod gShaderMethods[] = {
+static const JNINativeMethod gShaderMethods[] = {
     { "nativeDestructor",        "(J)V",    (void*)Shader_destructor        },
     { "nativeSetLocalMatrix",    "(JJ)J",   (void*)Shader_setLocalMatrix    }
 };
 
-static JNINativeMethod gBitmapShaderMethods[] = {
+static const JNINativeMethod gBitmapShaderMethods[] = {
     { "nativeCreate",     "(Landroid/graphics/Bitmap;II)J",  (void*)BitmapShader_constructor },
 };
 
-static JNINativeMethod gLinearGradientMethods[] = {
+static const JNINativeMethod gLinearGradientMethods[] = {
     { "nativeCreate1",     "(FFFF[I[FI)J",  (void*)LinearGradient_create1     },
     { "nativeCreate2",     "(FFFFIII)J",    (void*)LinearGradient_create2     },
 };
 
-static JNINativeMethod gRadialGradientMethods[] = {
+static const JNINativeMethod gRadialGradientMethods[] = {
     { "nativeCreate1",     "(FFF[I[FI)J",  (void*)RadialGradient_create1     },
     { "nativeCreate2",     "(FFFIII)J",    (void*)RadialGradient_create2     },
 };
 
-static JNINativeMethod gSweepGradientMethods[] = {
+static const JNINativeMethod gSweepGradientMethods[] = {
     { "nativeCreate1",     "(FF[I[F)J",  (void*)SweepGradient_create1     },
     { "nativeCreate2",     "(FFII)J",    (void*)SweepGradient_create2     },
 };
 
-static JNINativeMethod gComposeShaderMethods[] = {
+static const JNINativeMethod gComposeShaderMethods[] = {
     { "nativeCreate1",      "(JJJ)J",   (void*)ComposeShader_create1     },
     { "nativeCreate2",      "(JJI)J",   (void*)ComposeShader_create2     },
 };
