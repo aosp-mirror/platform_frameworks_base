@@ -1336,17 +1336,28 @@ final class ActivityStack {
             return topHomeActivity == null || !topHomeActivity.isHomeActivity();
         }
 
-        if (focusedStackId == DOCKED_STACK_ID
-                && stackIndex == (mStacks.indexOf(focusedStack) - 1)) {
+        final int belowFocusedIndex = mStacks.indexOf(focusedStack) - 1;
+        if (focusedStackId == DOCKED_STACK_ID && stackIndex == belowFocusedIndex) {
             // Stacks directly behind the docked stack are always visible.
             return true;
         }
 
-        if (mStackId == HOME_STACK_ID && focusedStackId == FULLSCREEN_WORKSPACE_STACK_ID) {
-            // Home stack is always visible behind the fullscreen stack with a translucent activity.
-            // This is done so that the home stack can act as a background to the translucent
-            // activity.
-            return hasTranslucentActivity(focusedStack);
+        if (focusedStackId == FULLSCREEN_WORKSPACE_STACK_ID
+                && hasTranslucentActivity(focusedStack)) {
+            // Stacks behind the fullscreen stack with a translucent activity are always
+            // visible so they can act as a backdrop to the translucent activity.
+            // For example, dialog activities
+            if (stackIndex == belowFocusedIndex) {
+                return true;
+            }
+            if (belowFocusedIndex >= 0) {
+                final ActivityStack stack = mStacks.get(belowFocusedIndex);
+                if (stack.mStackId == DOCKED_STACK_ID && stackIndex == (belowFocusedIndex - 1)) {
+                    // The stack behind the docked stack is also visible so we can have a complete
+                    // backdrop to the translucent activity when the docked stack is up.
+                    return true;
+                }
+            }
         }
 
         if (mStackId >= FIRST_STATIC_STACK_ID && mStackId <= LAST_STATIC_STACK_ID) {
