@@ -3216,7 +3216,13 @@ public final class ActivityStackSupervisor implements DisplayListener {
         final boolean wasFocused = isFrontStack(task.stack) && (topRunningActivityLocked() == r);
         final boolean wasResumed = wasFocused && (task.stack.mResumedActivity == r);
 
+        final boolean resizeable = task.mResizeable;
+        // Temporarily disable resizeablility of task we are moving. We don't want it to be resized
+        // if a docked stack is created below which will lead to the stack we are moving from and
+        // its resizeable tasks being resized.
+        task.mResizeable = false;
         final ActivityStack stack = getStack(stackId, CREATE_IF_NEEDED, toTop);
+        task.mResizeable = resizeable;
         mWindowManager.moveTaskToStack(task.taskId, stack.mStackId, toTop);
         if (task.stack != null) {
             task.stack.removeTask(task, reason, MOVING);
