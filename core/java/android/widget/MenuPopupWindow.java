@@ -124,8 +124,8 @@ public class MenuPopupWindow extends ListPopupWindow implements MenuItemHoverLis
                 }
                 return true;
             } else if (selectedItem != null && keyCode == mRetreatKey) {
-                setSelectedPositionInt(-1);
-                setNextSelectedPositionInt(-1);
+                setSelectedPositionInt(INVALID_POSITION);
+                setNextSelectedPositionInt(INVALID_POSITION);
 
                 ((MenuAdapter) getAdapter()).getAdapterMenu().close();
                 return true;
@@ -159,6 +159,4 @@ public class MenuPopupWindow extends ListPopupWindow implements MenuItemHoverLis
             return superVal;
         }
     }
-
-
 }
