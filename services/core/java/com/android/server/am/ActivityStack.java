@@ -529,21 +529,15 @@ final class ActivityStack {
      * */
     void moveToFront(String reason, TaskRecord task) {
         if (isAttached()) {
-            final boolean homeStack = isHomeStack()
-                    || (mActivityContainer.mParentActivity != null
-                        && mActivityContainer.mParentActivity.isHomeActivity());
-            ActivityStack lastFocusStack = null;
-            if (!homeStack) {
-                // Need to move this stack to the front before calling
-                // {@link ActivityStackSupervisor#moveHomeStack} below.
-                lastFocusStack = mStacks.get(mStacks.size() - 1);
-                mStacks.remove(this);
-                mStacks.add(this);
-            }
-            // TODO(multi-display): Focus stack currently adjusted in call to move home stack.
-            // Needs to also work if focus is moving to the non-home display.
+            final ActivityStack lastFocusStack = mStacks.get(mStacks.size() - 1);
+            // Need to move this stack to the front before calling
+            // {@link ActivityStackSupervisor#setFocusStack} below.
+            mStacks.remove(this);
+            mStacks.add(this);
+
+            // TODO(multi-display): Needs to also work if focus is moving to the non-home display.
             if (isOnHomeDisplay()) {
-                mStackSupervisor.moveHomeStack(homeStack, reason, lastFocusStack);
+                mStackSupervisor.setFocusStack(reason, lastFocusStack);
             }
             if (task != null) {
                 insertTaskAtTop(task, null);
@@ -4554,18 +4548,17 @@ final class ActivityStack {
 
         if (mTaskHistory.isEmpty()) {
             if (DEBUG_STACK) Slog.i(TAG_STACK, "removeTask: removing stack=" + this);
-            final boolean notHomeStack = !isHomeStack();
             if (isOnHomeDisplay()) {
                 String myReason = reason + " leftTaskHistoryEmpty";
                 if (mFullscreen || !adjustFocusToNextVisibleStackLocked(null, myReason)) {
-                    mStackSupervisor.moveHomeStack(notHomeStack, myReason);
+                    mStackSupervisor.moveHomeStackToFront(myReason);
                 }
             }
             if (mStacks != null) {
                 mStacks.remove(this);
                 mStacks.add(0, this);
             }
-            if (notHomeStack) {
+            if (!isHomeStack()) {
                 mActivityContainer.onTaskListEmptyLocked();
             }
         }

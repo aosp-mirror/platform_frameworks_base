@@ -468,35 +468,22 @@ public final class ActivityStackSupervisor implements DisplayListener {
         return stack == mFocusedStack;
     }
 
-    void moveHomeStack(boolean toFront, String reason) {
-        moveHomeStack(toFront, reason, null);
-    }
-
-    void moveHomeStack(boolean toFront, String reason, ActivityStack lastFocusedStack) {
+    void setFocusStack(String reason, ActivityStack lastFocusedStack) {
         ArrayList<ActivityStack> stacks = mHomeStack.mStacks;
         final int topNdx = stacks.size() - 1;
         if (topNdx <= 0) {
             return;
         }
 
-        // The home stack should either be at the top or bottom of the stack list.
-        if ((toFront && (stacks.get(topNdx) != mHomeStack))
-                || (!toFront && (stacks.get(0) != mHomeStack))) {
-            if (DEBUG_STACK) Slog.d(TAG_STACK, "moveHomeTask: topStack old="
-                    + ((lastFocusedStack != null) ? lastFocusedStack : stacks.get(topNdx))
-                    + " new=" + mFocusedStack);
-            stacks.remove(mHomeStack);
-            stacks.add(toFront ? topNdx : 0, mHomeStack);
-        }
-
+        final ActivityStack topStack = stacks.get(topNdx);
+        mFocusedStack = topStack;
         if (lastFocusedStack != null) {
             mLastFocusedStack = lastFocusedStack;
         }
-        mFocusedStack = stacks.get(topNdx);
 
-        EventLog.writeEvent(EventLogTags.AM_HOME_STACK_MOVED,
-                mCurrentUser, toFront ? 1 : 0, stacks.get(topNdx).getStackId(),
-                mFocusedStack == null ? -1 : mFocusedStack.getStackId(), reason);
+        EventLogTags.writeAmFocusedStack(
+                mCurrentUser, mFocusedStack == null ? -1 : mFocusedStack.getStackId(),
+                mLastFocusedStack == null ? -1 : mLastFocusedStack.getStackId(), reason);
 
         if (mService.mBooting || !mService.mBooted) {
             final ActivityRecord r = topRunningActivityLocked();
@@ -504,6 +491,10 @@ public final class ActivityStackSupervisor implements DisplayListener {
                 checkFinishBootingLocked();
             }
         }
+    }
+
+    void moveHomeStackToFront(String reason) {
+        mHomeStack.moveToFront(reason);
     }
 
     /** Returns true if the focus activity was adjusted to the home stack top activity. */
@@ -3666,11 +3657,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
         }
         final boolean homeInFront = stack.isHomeStack();
         if (stack.isOnHomeDisplay()) {
-            moveHomeStack(homeInFront, "switchUserOnHomeDisplay");
-            TaskRecord task = stack.topTask();
-            if (task != null) {
-                mWindowManager.moveTaskToTop(task.taskId);
-            }
+            stack.moveToFront("switchUserOnHomeDisplay");
         } else {
             // Stack was moved to another display while user was swapped out.
             resumeHomeStackTask(HOME_ACTIVITY_TYPE, null, "switchUserOnOtherDisplay");

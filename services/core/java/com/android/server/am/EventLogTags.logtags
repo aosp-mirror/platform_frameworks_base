@@ -93,8 +93,8 @@ option java_package com.android.server.am
 # Activity focused
 30043 am_focused_activity (User|1|5),(Component Name|3)
 
-# Home Stack brought to front or rear
-30044 am_home_stack_moved (User|1|5),(To Front|1|5),(Top Stack Id|1|5),(Focused Stack Id|1|5),(Reason|3)
+# Stack focus
+30044 am_focused_stack (User|1|5),(Focused Stack Id|1|5),(Last Focused Stack Id|1|5),(Reason|3)
 
 # Running pre boot receiver
 30045 am_pre_boot (User|1|5),(Package|3)
