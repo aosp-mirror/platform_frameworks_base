@@ -179,7 +179,7 @@ android_mtp_MtpServer_remove_storage(JNIEnv *env, jobject thiz, jint storageId)
 
 // ----------------------------------------------------------------------------
 
-static JNINativeMethod gMethods[] = {
+static const JNINativeMethod gMethods[] = {
     {"native_setup",                "(Landroid/mtp/MtpDatabase;Z)V",
                                             (void *)android_mtp_MtpServer_setup},
     {"native_run",                  "()V",  (void *)android_mtp_MtpServer_run},

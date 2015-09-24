@@ -37,7 +37,7 @@ static void android_server_SystemServer_startSensorService(JNIEnv* /* env */, jo
 /*
  * JNI registration.
  */
-static JNINativeMethod gMethods[] = {
+static const JNINativeMethod gMethods[] = {
     /* name, signature, funcPtr */
     { "startSensorService", "()V", (void*) android_server_SystemServer_startSensorService },
 };

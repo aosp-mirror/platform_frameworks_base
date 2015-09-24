@@ -155,7 +155,7 @@ static void android_content_StringBlock_nativeDestroy(JNIEnv* env, jobject clazz
 /*
  * JNI registration.
  */
-static JNINativeMethod gStringBlockMethods[] = {
+static const JNINativeMethod gStringBlockMethods[] = {
     /* name, signature, funcPtr */
     { "nativeCreate",      "([BII)J",
             (void*) android_content_StringBlock_nativeCreate },

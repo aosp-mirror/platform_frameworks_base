@@ -1052,7 +1052,7 @@ static void android_media_AudioTrack_disableDeviceCallback(
 
 // ----------------------------------------------------------------------------
 // ----------------------------------------------------------------------------
-static JNINativeMethod gMethods[] = {
+static const JNINativeMethod gMethods[] = {
     // name,              signature,     funcPtr
     {"native_start",         "()V",      (void *)android_media_AudioTrack_start},
     {"native_stop",          "()V",      (void *)android_media_AudioTrack_stop},

@@ -220,7 +220,7 @@ static void SystemProperties_add_change_callback(JNIEnv *env, jobject clazz)
     }
 }
 
-static JNINativeMethod method_table[] = {
+static const JNINativeMethod method_table[] = {
     { "native_get", "(Ljava/lang/String;)Ljava/lang/String;",
       (void*) SystemProperties_getS },
     { "native_get", "(Ljava/lang/String;Ljava/lang/String;)Ljava/lang/String;",

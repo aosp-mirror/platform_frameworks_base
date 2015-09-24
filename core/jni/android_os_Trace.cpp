@@ -105,7 +105,7 @@ static void android_os_Trace_nativeSetTracingEnabled(JNIEnv* env,
     atrace_set_tracing_enabled(enabled);
 }
 
-static JNINativeMethod gTraceMethods[] = {
+static const JNINativeMethod gTraceMethods[] = {
     /* name, signature, funcPtr */
     { "nativeGetEnabledTags",
             "()J",

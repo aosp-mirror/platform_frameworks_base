@@ -702,7 +702,7 @@ static jobject android_drm_DrmManagerClient_closeConvertSession(
     return status;
 }
 
-static JNINativeMethod nativeMethods[] = {
+static const JNINativeMethod nativeMethods[] = {
 
     {"_initialize", "()I",
                                     (void*)android_drm_DrmManagerClient_initialize},

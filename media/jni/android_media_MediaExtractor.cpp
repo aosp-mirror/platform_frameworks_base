@@ -769,7 +769,7 @@ static void android_media_MediaExtractor_native_finalize(
     android_media_MediaExtractor_release(env, thiz);
 }
 
-static JNINativeMethod gMethods[] = {
+static const JNINativeMethod gMethods[] = {
     { "release", "()V", (void *)android_media_MediaExtractor_release },
 
     { "getTrackCount", "()I", (void *)android_media_MediaExtractor_getTrackCount },

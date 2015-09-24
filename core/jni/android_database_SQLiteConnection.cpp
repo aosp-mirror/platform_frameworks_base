@@ -786,7 +786,7 @@ static void nativeResetCancel(JNIEnv* env, jobject clazz, jlong connectionPtr,
 }
 
 
-static JNINativeMethod sMethods[] =
+static const JNINativeMethod sMethods[] =
 {
     /* name, signature, funcPtr */
     { "nativeOpen", "(Ljava/lang/String;ILjava/lang/String;ZZ)J",

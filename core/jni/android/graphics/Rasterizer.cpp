@@ -61,7 +61,7 @@ public:
     }
 };
 
-static JNINativeMethod gRasterizerMethods[] = {
+static const JNINativeMethod gRasterizerMethods[] = {
     {"finalizer", "(J)V", (void*) SkRasterizerGlue::finalizer}
 };
 
@@ -85,7 +85,7 @@ public:
     }
 };
 
-static JNINativeMethod gLayerRasterizerMethods[] = {
+static const JNINativeMethod gLayerRasterizerMethods[] = {
     { "nativeConstructor",  "()J",      (void*)SkLayerRasterizerGlue::create    },
     { "nativeAddLayer",     "(JJFF)V",  (void*)SkLayerRasterizerGlue::addLayer  }
 };

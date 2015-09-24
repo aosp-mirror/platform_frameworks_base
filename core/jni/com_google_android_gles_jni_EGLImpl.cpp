@@ -532,7 +532,7 @@ static const char *classPathName = "com/google/android/gles_jni/EGLImpl";
 #define OBJECT  "Ljava/lang/Object;"
 #define STRING  "Ljava/lang/String;"
 
-static JNINativeMethod methods[] = {
+static const JNINativeMethod methods[] = {
 {"_nativeClassInit","()V", (void*)nativeClassInit },
 {"eglWaitGL",       "()Z", (void*)jni_eglWaitGL },
 {"eglInitialize",   "(" DISPLAY "[I)Z", (void*)jni_eglInitialize },

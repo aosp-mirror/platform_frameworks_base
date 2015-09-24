@@ -78,7 +78,7 @@ static jlong createLutInterpolator(JNIEnv* env, jobject clazz, jfloatArray jlut)
 
 const char* const kClassPathName = "com/android/internal/view/animation/NativeInterpolatorFactoryHelper";
 
-static JNINativeMethod gMethods[] = {
+static const JNINativeMethod gMethods[] = {
     { "createAccelerateDecelerateInterpolator", "()J", (void*) createAccelerateDecelerateInterpolator },
     { "createAccelerateInterpolator", "(F)J", (void*) createAccelerateInterpolator },
     { "createAnticipateInterpolator", "(F)J", (void*) createAnticipateInterpolator },

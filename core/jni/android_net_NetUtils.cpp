@@ -302,7 +302,7 @@ static jboolean android_net_utils_queryUserAccess(JNIEnv *env, jobject thiz, jin
 /*
  * JNI registration.
  */
-static JNINativeMethod gNetworkUtilMethods[] = {
+static const JNINativeMethod gNetworkUtilMethods[] = {
     /* name, signature, funcPtr */
     { "resetConnections", "(Ljava/lang/String;I)I",  (void *)android_net_utils_resetConnections },
     { "startDhcp", "(Ljava/lang/String;)Z",  (void *)android_net_utils_startDhcp },

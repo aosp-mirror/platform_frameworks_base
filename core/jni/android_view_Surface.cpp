@@ -514,7 +514,7 @@ static void destroy(JNIEnv* env, jclass clazz, jlong rendererPtr) {
 
 namespace hwui = android::uirenderer;
 
-static JNINativeMethod gSurfaceMethods[] = {
+static const JNINativeMethod gSurfaceMethods[] = {
     {"nativeCreateFromSurfaceTexture", "(Landroid/graphics/SurfaceTexture;)J",
             (void*)nativeCreateFromSurfaceTexture },
     {"nativeRelease", "(J)V",

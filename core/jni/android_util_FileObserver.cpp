@@ -127,7 +127,7 @@ static void android_os_fileobserver_stopWatching(JNIEnv* env, jobject object, ji
 #endif
 }
 
-static JNINativeMethod sMethods[] = {
+static const JNINativeMethod sMethods[] = {
      /* name, signature, funcPtr */
     { "init", "()I", (void*)android_os_fileobserver_init },
     { "observe", "(I)V", (void*)android_os_fileobserver_observe },

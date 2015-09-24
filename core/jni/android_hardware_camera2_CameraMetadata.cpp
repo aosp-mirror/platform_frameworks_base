@@ -529,7 +529,7 @@ static void CameraMetadata_writeToParcel(JNIEnv *env, jobject thiz, jobject parc
 
 //-------------------------------------------------
 
-static JNINativeMethod gCameraMetadataMethods[] = {
+static const JNINativeMethod gCameraMetadataMethods[] = {
 // static methods
   { "nativeClassInit",
     "()V",

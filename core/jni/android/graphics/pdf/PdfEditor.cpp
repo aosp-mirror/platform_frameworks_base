@@ -343,7 +343,7 @@ static void nativeSetPageCropBox(JNIEnv* env, jclass thiz, jlong documentPtr, ji
     nativeSetPageBox(env, thiz, documentPtr, pageIndex, PAGE_BOX_CROP, mediaBox);
 }
 
-static JNINativeMethod gPdfEditor_Methods[] = {
+static const JNINativeMethod gPdfEditor_Methods[] = {
     {"nativeOpen", "(IJ)J", (void*) nativeOpen},
     {"nativeClose", "(J)V", (void*) nativeClose},
     {"nativeGetPageCount", "(J)I", (void*) nativeGetPageCount},

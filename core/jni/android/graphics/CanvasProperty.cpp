@@ -39,7 +39,7 @@ static jlong createPaint(JNIEnv* env, jobject clazz, jlong paintPtr) {
 // JNI Glue
 // ----------------------------------------------------------------------------
 
-static JNINativeMethod gMethods[] = {
+static const JNINativeMethod gMethods[] = {
     { "nCreateFloat", "(F)J", (void*) createFloat },
     { "nCreatePaint", "(J)J", (void*) createPaint },
 };

@@ -105,7 +105,7 @@ static jbyteArray DdmHandleNativeHeap_getLeakInfo(JNIEnv* env, jobject) {
     return array;
 }
 
-static JNINativeMethod method_table[] = {
+static const JNINativeMethod method_table[] = {
     { "getLeakInfo", "()[B", (void*) DdmHandleNativeHeap_getLeakInfo },
 };
 

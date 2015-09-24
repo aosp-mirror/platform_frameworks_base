@@ -1616,7 +1616,7 @@ android_media_AudioSystem_systemReady(JNIEnv *env, jobject thiz)
 
 // ----------------------------------------------------------------------------
 
-static JNINativeMethod gMethods[] = {
+static const JNINativeMethod gMethods[] = {
     {"setParameters",        "(Ljava/lang/String;)I", (void *)android_media_AudioSystem_setParameters},
     {"getParameters",        "(Ljava/lang/String;)Ljava/lang/String;", (void *)android_media_AudioSystem_getParameters},
     {"muteMicrophone",      "(Z)I",     (void *)android_media_AudioSystem_muteMicrophone},
@@ -1663,7 +1663,7 @@ static JNINativeMethod gMethods[] = {
 };
 
 
-static JNINativeMethod gEventHandlerMethods[] = {
+static const JNINativeMethod gEventHandlerMethods[] = {
     {"native_setup",
         "(Ljava/lang/Object;)V",
         (void *)android_media_AudioSystem_eventHandlerSetup},

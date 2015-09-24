@@ -72,7 +72,7 @@ static jint Interpolator_timeToValues(JNIEnv* env, jobject clazz, jlong interpHa
 /*
  * JNI registration.
  */
-static JNINativeMethod gInterpolatorMethods[] = {
+static const JNINativeMethod gInterpolatorMethods[] = {
     { "nativeConstructor",      "(II)J",        (void*)Interpolator_constructor     },
     { "nativeDestructor",       "(J)V",         (void*)Interpolator_destructor      },
     { "nativeReset",            "(JII)V",       (void*)Interpolator_reset           },

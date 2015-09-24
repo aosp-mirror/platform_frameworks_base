@@ -301,7 +301,7 @@ android_media_MediaProfiles_native_get_image_encoding_quality_level(JNIEnv *env,
     }
     return static_cast<jint>(levels[index]);
 }
-static JNINativeMethod gMethodsForEncoderCapabilitiesClass[] = {
+static const JNINativeMethod gMethodsForEncoderCapabilitiesClass[] = {
     {"native_init",                            "()V",                    (void *)android_media_MediaProfiles_native_init},
     {"native_get_num_file_formats",            "()I",                    (void *)android_media_MediaProfiles_native_get_num_file_formats},
     {"native_get_file_format",                 "(I)I",                   (void *)android_media_MediaProfiles_native_get_file_format},
@@ -315,7 +315,7 @@ static JNINativeMethod gMethodsForEncoderCapabilitiesClass[] = {
                                                                          (void *)android_media_MediaProfiles_native_get_audio_encoder_cap},
 };
 
-static JNINativeMethod gMethodsForCamcorderProfileClass[] = {
+static const JNINativeMethod gMethodsForCamcorderProfileClass[] = {
     {"native_init",                            "()V",                    (void *)android_media_MediaProfiles_native_init},
     {"native_get_camcorder_profile",           "(II)Landroid/media/CamcorderProfile;",
                                                                          (void *)android_media_MediaProfiles_native_get_camcorder_profile},
@@ -323,7 +323,7 @@ static JNINativeMethod gMethodsForCamcorderProfileClass[] = {
                                                                          (void *)android_media_MediaProfiles_native_has_camcorder_profile},
 };
 
-static JNINativeMethod gMethodsForDecoderCapabilitiesClass[] = {
+static const JNINativeMethod gMethodsForDecoderCapabilitiesClass[] = {
     {"native_init",                            "()V",                    (void *)android_media_MediaProfiles_native_init},
     {"native_get_num_video_decoders",          "()I",                    (void *)android_media_MediaProfiles_native_get_num_video_decoders},
     {"native_get_num_audio_decoders",          "()I",                    (void *)android_media_MediaProfiles_native_get_num_audio_decoders},
@@ -331,7 +331,7 @@ static JNINativeMethod gMethodsForDecoderCapabilitiesClass[] = {
     {"native_get_audio_decoder_type",          "(I)I",                   (void *)android_media_MediaProfiles_native_get_audio_decoder_type},
 };
 
-static JNINativeMethod gMethodsForCameraProfileClass[] = {
+static const JNINativeMethod gMethodsForCameraProfileClass[] = {
     {"native_init",                            "()V",                    (void *)android_media_MediaProfiles_native_init},
     {"native_get_num_image_encoding_quality_levels",
                                                "(I)I",                   (void *)android_media_MediaProfiles_native_get_num_image_encoding_quality_levels},

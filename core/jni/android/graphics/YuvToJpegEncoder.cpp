@@ -243,7 +243,7 @@ static jboolean YuvImage_compressToJpeg(JNIEnv* env, jobject, jbyteArray inYuv,
 }
 ///////////////////////////////////////////////////////////////////////////////
 
-static JNINativeMethod gYuvImageMethods[] = {
+static const JNINativeMethod gYuvImageMethods[] = {
     {   "nativeCompressToJpeg",  "([BIII[I[IILjava/io/OutputStream;[B)Z",
         (void*)YuvImage_compressToJpeg }
 };

@@ -302,7 +302,7 @@ static jlong PerfMeasurement_nativeGetNextGlDuration(JNIEnv* env,
 
 } // extern "C"
 
-static JNINativeMethod gPerfMeasurementMethods[] = {
+static const JNINativeMethod gPerfMeasurementMethods[] = {
     { "nativeCreateContext",
       "(I)J",
       (jlong *)PerfMeasurement_nativeCreateContext },
