@@ -29,6 +29,7 @@ import android.graphics.Rect;
 import android.os.Handler;
 import android.os.SystemClock;
 import android.util.Slog;
+import android.view.GestureDetector;
 import android.view.InputDevice;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
@@ -113,9 +114,6 @@ class TouchExplorer implements EventStreamTransformation {
 
     // Timeout within which we try to detect a tap.
     private final int mTapTimeout;
-
-    // Timeout within which we try to detect a double tap.
-    private final int mDoubleTapTimeout;
 
     // Slop between the down and up tap to be a tap.
     private final int mTouchSlop;
@@ -230,7 +228,6 @@ class TouchExplorer implements EventStreamTransformation {
         mInjectedPointerTracker = new InjectedPointerTracker();
         mTapTimeout = ViewConfiguration.getTapTimeout();
         mDetermineUserIntentTimeout = ViewConfiguration.getDoubleTapTimeout();
-        mDoubleTapTimeout = ViewConfiguration.getDoubleTapTimeout();
         mTouchSlop = ViewConfiguration.get(context).getScaledTouchSlop();
         mDoubleTapSlop = ViewConfiguration.get(context).getScaledDoubleTapSlop();
         mHandler = new Handler(context.getMainLooper());
@@ -248,7 +245,7 @@ class TouchExplorer implements EventStreamTransformation {
         mSendTouchInteractionEndDelayed = new SendAccessibilityEventDelayed(
                 AccessibilityEvent.TYPE_TOUCH_INTERACTION_END,
                 mDetermineUserIntentTimeout);
-        mDoubleTapDetector = new DoubleTapDetector();
+        mDoubleTapDetector = new DoubleTapDetector(mContext);
         final float density = context.getResources().getDisplayMetrics().density;
         mScaledMinPointerDistanceToUseMiddleLocation =
             (int) (MIN_POINTER_DISTANCE_TO_USE_MIDDLE_LOCATION_DIP * density);
@@ -1109,66 +1106,63 @@ class TouchExplorer implements EventStreamTransformation {
         }
     }
 
-    private class DoubleTapDetector {
-        private MotionEvent mDownEvent;
-        private MotionEvent mFirstTapEvent;
+    private class DoubleTapDetector extends GestureDetector.SimpleOnGestureListener {
+        private final GestureDetector mGestureDetector;
+        private boolean mFirstTapDetected;
+        private boolean mDoubleTapDetected;
 
-        public void onMotionEvent(MotionEvent event, int policyFlags) {
-            final int actionIndex = event.getActionIndex();
-            final int action = event.getActionMasked();
-            switch (action) {
-                case MotionEvent.ACTION_DOWN:
-                case MotionEvent.ACTION_POINTER_DOWN: {
-                    if (mFirstTapEvent != null
-                            && !GestureUtils.isSamePointerContext(mFirstTapEvent, event)) {
-                        clear();
-                    }
-                    mDownEvent = MotionEvent.obtain(event);
-                } break;
-                case MotionEvent.ACTION_UP:
-                case MotionEvent.ACTION_POINTER_UP: {
-                    if (mDownEvent == null) {
-                        return;
-                    }
-                    if (!GestureUtils.isSamePointerContext(mDownEvent, event)) {
-                        clear();
-                        return;
-                    }
-                    if (GestureUtils.isTap(mDownEvent, event, mTapTimeout, mTouchSlop,
-                            actionIndex)) {
-                        if (mFirstTapEvent == null || GestureUtils.isTimedOut(mFirstTapEvent,
-                                event, mDoubleTapTimeout)) {
-                            mFirstTapEvent = MotionEvent.obtain(event);
-                            mDownEvent.recycle();
-                            mDownEvent = null;
-                            return;
-                        }
-                        if (GestureUtils.isMultiTap(mFirstTapEvent, event, mDoubleTapTimeout,
-                                mDoubleTapSlop, actionIndex)) {
-                            onDoubleTap(event, policyFlags);
-                            mFirstTapEvent.recycle();
-                            mFirstTapEvent = null;
-                            mDownEvent.recycle();
-                            mDownEvent = null;
-                            return;
-                        }
-                        mFirstTapEvent.recycle();
-                        mFirstTapEvent = null;
-                    } else {
-                        if (mFirstTapEvent != null) {
-                            mFirstTapEvent.recycle();
-                            mFirstTapEvent = null;
-                        }
-                    }
-                    mDownEvent.recycle();
-                    mDownEvent = null;
-                } break;
-            }
+        DoubleTapDetector(Context context) {
+            mGestureDetector = new GestureDetector(context, this);
+            mGestureDetector.setOnDoubleTapListener(this);
         }
 
-        public void onDoubleTap(MotionEvent secondTapUp, int policyFlags) {
+        public void onMotionEvent(MotionEvent event, int policyFlags) {
+            switch (event.getActionMasked()) {
+                case MotionEvent.ACTION_DOWN:
+                    mDoubleTapDetected = false;
+                    break;
+
+                case MotionEvent.ACTION_UP:
+                    maybeFinishDoubleTap(event, policyFlags);
+                    break;
+            }
+            mGestureDetector.onTouchEvent(event);
+        }
+
+        @Override
+        public boolean onDown(MotionEvent event) {
+            return true;
+        }
+
+        @Override
+        public boolean onSingleTapUp(MotionEvent event) {
+            mFirstTapDetected = true;
+            return false;
+        }
+
+        @Override
+        public boolean onSingleTapConfirmed(MotionEvent event) {
+            clear();
+            return false;
+        }
+
+        @Override
+        public boolean onDoubleTap(MotionEvent event) {
+            // The processing of the double tap is deferred until the finger is
+            // lifted, so that we can detect a long press on the second tap.
+            mDoubleTapDetected = true;
+            return true;
+        }
+
+        private void maybeFinishDoubleTap(MotionEvent event, int policyFlags) {
+            if (!mDoubleTapDetected) {
+                return;
+            }
+
+            clear();
+
             // This should never be called when more than two pointers are down.
-            if (secondTapUp.getPointerCount() > 2) {
+            if (event.getPointerCount() > 2) {
                 return;
             }
 
@@ -1184,8 +1178,8 @@ class TouchExplorer implements EventStreamTransformation {
                 mSendTouchInteractionEndDelayed.forceSendAndRemove();
             }
 
-            final int pointerId = secondTapUp.getPointerId(secondTapUp.getActionIndex());
-            final int pointerIndex = secondTapUp.findPointerIndex(pointerId);
+            final int pointerId = event.getPointerId(event.getActionIndex());
+            final int pointerIndex = event.findPointerIndex(pointerId);
 
             Point clickLocation = mTempPoint;
             final int result = computeClickLocation(clickLocation);
@@ -1196,34 +1190,28 @@ class TouchExplorer implements EventStreamTransformation {
             // Do the click.
             PointerProperties[] properties = new PointerProperties[1];
             properties[0] = new PointerProperties();
-            secondTapUp.getPointerProperties(pointerIndex, properties[0]);
+            event.getPointerProperties(pointerIndex, properties[0]);
             PointerCoords[] coords = new PointerCoords[1];
             coords[0] = new PointerCoords();
             coords[0].x = clickLocation.x;
             coords[0].y = clickLocation.y;
-            MotionEvent event = MotionEvent.obtain(secondTapUp.getDownTime(),
-                    secondTapUp.getEventTime(), MotionEvent.ACTION_DOWN, 1, properties,
-                    coords, 0, 0, 1.0f, 1.0f, secondTapUp.getDeviceId(), 0,
-                    secondTapUp.getSource(), secondTapUp.getFlags());
+            MotionEvent click_event = MotionEvent.obtain(event.getDownTime(),
+                    event.getEventTime(), MotionEvent.ACTION_DOWN, 1, properties,
+                    coords, 0, 0, 1.0f, 1.0f, event.getDeviceId(), 0,
+                    event.getSource(), event.getFlags());
             final boolean targetAccessibilityFocus = (result == CLICK_LOCATION_ACCESSIBILITY_FOCUS);
-            sendActionDownAndUp(event, policyFlags, targetAccessibilityFocus);
-            event.recycle();
+            sendActionDownAndUp(click_event, policyFlags, targetAccessibilityFocus);
+            click_event.recycle();
+            return;
         }
 
         public void clear() {
-            if (mDownEvent != null) {
-                mDownEvent.recycle();
-                mDownEvent = null;
-            }
-            if (mFirstTapEvent != null) {
-                mFirstTapEvent.recycle();
-                mFirstTapEvent = null;
-            }
+            mFirstTapDetected = false;
+            mDoubleTapDetected = false;
         }
 
         public boolean firstTapDetected() {
-            return mFirstTapEvent != null
-                && SystemClock.uptimeMillis() - mFirstTapEvent.getEventTime() < mDoubleTapTimeout;
+            return mFirstTapDetected;
         }
     }
 
