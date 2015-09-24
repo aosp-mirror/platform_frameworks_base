@@ -16,8 +16,8 @@
 
 package com.android.documentsui;
 
-import static com.android.documentsui.Shared.TAG;
 import static com.android.documentsui.Shared.DEBUG;
+import static com.android.documentsui.Shared.TAG;
 
 import android.content.ContentProviderClient;
 import android.content.ContentResolver;
@@ -35,12 +35,11 @@ import android.os.Handler;
 import android.os.SystemClock;
 import android.provider.DocumentsContract;
 import android.provider.DocumentsContract.Root;
+import android.support.annotation.VisibleForTesting;
 import android.util.Log;
 
-import com.android.documentsui.BaseActivity.State;
 import com.android.documentsui.model.RootInfo;
 import com.android.internal.annotations.GuardedBy;
-import android.support.annotation.VisibleForTesting;
 
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;

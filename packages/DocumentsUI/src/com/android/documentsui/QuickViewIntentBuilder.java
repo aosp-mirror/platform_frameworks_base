@@ -16,6 +16,8 @@
 
 package com.android.documentsui;
 
+import static com.android.documentsui.Shared.DEBUG;
+import static com.android.documentsui.Shared.TAG;
 import static com.android.documentsui.model.DocumentInfo.getCursorString;
 
 import android.content.ClipData;
@@ -37,9 +39,6 @@ import com.android.documentsui.model.DocumentInfo;
  * Provides support for gather a list of quick-viewable files into a quick view intent.
  */
 final class QuickViewIntentBuilder {
-
-    private static final String TAG = "QvIntentBuilder";
-    private static final boolean DEBUG = false;
 
     private final DocumentInfo mDocument;
     private final DocumentContext mContext;

@@ -16,6 +16,7 @@
 
 package com.android.documentsui;
 
+import static com.android.documentsui.Shared.DEBUG;
 import static com.android.documentsui.model.DocumentInfo.getCursorLong;
 import static com.android.documentsui.model.DocumentInfo.getCursorString;
 
@@ -56,7 +57,6 @@ import java.util.Objects;
 
 public class CopyService extends IntentService {
     public static final String TAG = "CopyService";
-    public static final boolean DEBUG = false;
 
     private static final String EXTRA_CANCEL = "com.android.documentsui.CANCEL";
     public static final String EXTRA_SRC_LIST = "com.android.documentsui.SRC_LIST";

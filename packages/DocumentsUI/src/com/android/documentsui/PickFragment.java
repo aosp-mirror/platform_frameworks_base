@@ -21,15 +21,12 @@ import android.app.Fragment;
 import android.app.FragmentManager;
 import android.app.FragmentTransaction;
 import android.os.Bundle;
-import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 
 import com.android.documentsui.model.DocumentInfo;
-
-import java.util.Locale;
 
 /**
  * Display pick confirmation bar, usually for selecting a directory.
@@ -93,7 +90,7 @@ public class PickFragment extends Fragment {
     };
 
     /**
-     * @param action Which action defined in BaseActivity.State is the picker shown for.
+     * @param action Which action defined in State is the picker shown for.
      */
     public void setPickTarget(int action, int transferMode, DocumentInfo pickTarget) {
         mAction = action;
@@ -109,11 +106,11 @@ public class PickFragment extends Fragment {
      */
     private void updateView() {
         switch (mAction) {
-            case BaseActivity.State.ACTION_OPEN_TREE:
+            case State.ACTION_OPEN_TREE:
                 mPick.setText(R.string.button_select);
                 mCancel.setVisibility(View.GONE);
                 break;
-            case BaseActivity.State.ACTION_OPEN_COPY_DESTINATION:
+            case State.ACTION_OPEN_COPY_DESTINATION:
                 mPick.setText(R.string.button_copy);
                 mCancel.setVisibility(View.VISIBLE);
                 break;
@@ -123,7 +120,7 @@ public class PickFragment extends Fragment {
         }
 
         if (mPickTarget != null && (
-                mAction == BaseActivity.State.ACTION_OPEN_TREE ||
+                mAction == State.ACTION_OPEN_TREE ||
                 mPickTarget.isCreateSupported())) {
             mContainer.setVisibility(View.VISIBLE);
         } else {
