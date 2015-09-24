@@ -16,6 +16,7 @@
 
 package com.android.server.devicepolicy;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.widget.LockPatternUtils;
 
 import android.app.IActivityManager;
@@ -24,11 +25,13 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.pm.IPackageManager;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.PowerManager.WakeLock;
 import android.os.PowerManagerInternal;
+import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.test.mock.MockContext;
@@ -71,27 +74,27 @@ public class DpmMockContext extends MockContext {
     public static final int SYSTEM_PID = 11111;
 
     public static class MockBinder {
-        int mCallingUid = CALLER_UID;
-        int mCallingPid = CALLER_PID;
+        public int callingUid = CALLER_UID;
+        public int callingPid = CALLER_PID;
 
         public long clearCallingIdentity() {
-            final long token = (((long) mCallingUid) << 32) | (mCallingPid);
-            mCallingUid = SYSTEM_UID;
-            mCallingPid = SYSTEM_PID;
+            final long token = (((long) callingUid) << 32) | (callingPid);
+            callingUid = SYSTEM_UID;
+            callingPid = SYSTEM_PID;
             return token;
         }
 
         public void restoreCallingIdentity(long token) {
-            mCallingUid = (int) (token >> 32);
-            mCallingPid = (int) token;
+            callingUid = (int) (token >> 32);
+            callingPid = (int) token;
         }
 
         public int getCallingUid() {
-            return mCallingUid;
+            return callingUid;
         }
 
         public int getCallingPid() {
-            return mCallingPid;
+            return callingPid;
         }
 
         public UserHandle getCallingUserHandle() {
@@ -99,7 +102,7 @@ public class DpmMockContext extends MockContext {
         }
 
         public boolean isCallerUidMyUid() {
-            return mCallingUid == SYSTEM_UID;
+            return callingUid == SYSTEM_UID;
         }
     }
 
@@ -118,6 +121,27 @@ public class DpmMockContext extends MockContext {
         }
     }
 
+    public static class SystemPropertiesForMock {
+        public boolean getBoolean(String key, boolean def) {
+            return false;
+        }
+
+        public long getLong(String key, long def) {
+            return 0;
+        }
+
+        public String get(String key, String def) {
+            return null;
+        }
+
+        public String get(String key) {
+            return null;
+        }
+
+        public void set(String key, String value) {
+        }
+    }
+
     public final Context realTestContext;
 
     /**
@@ -129,12 +153,14 @@ public class DpmMockContext extends MockContext {
 
     public final MockBinder binder;
     public final EnvironmentForMock environment;
+    public final SystemPropertiesForMock systemProperties;
     public final UserManager userManager;
     public final PowerManagerForMock powerManager;
     public final PowerManagerInternal powerManagerInternal;
     public final NotificationManager notificationManager;
     public final IWindowManager iwindowManager;
     public final IActivityManager iactivityManager;
+    public final IPackageManager ipackageManager;
     public final LockPatternUtils lockPatternUtils;
 
     /** Note this is a partial mock, not a real mock. */
@@ -146,12 +172,14 @@ public class DpmMockContext extends MockContext {
         realTestContext = context;
         binder = new MockBinder();
         environment = mock(EnvironmentForMock.class);
+        systemProperties= mock(SystemPropertiesForMock.class);
         userManager = mock(UserManager.class);
         powerManager = mock(PowerManagerForMock.class);
         powerManagerInternal = mock(PowerManagerInternal.class);
         notificationManager = mock(NotificationManager.class);
         iwindowManager = mock(IWindowManager.class);
         iactivityManager = mock(IActivityManager.class);
+        ipackageManager = mock(IPackageManager.class);
         lockPatternUtils = mock(LockPatternUtils.class);
 
         // Package manager is huge, so we use a partial mock instead.

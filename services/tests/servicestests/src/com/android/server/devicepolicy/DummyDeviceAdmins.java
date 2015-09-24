@@ -17,5 +17,11 @@ package com.android.server.devicepolicy;
 
 import android.app.admin.DeviceAdminReceiver;
 
-public class DummyDeviceAdmin extends DeviceAdminReceiver {
+public class DummyDeviceAdmins {
+    public static class Admin1 extends DeviceAdminReceiver {
+    }
+    public static class Admin2 extends DeviceAdminReceiver {
+    }
+    public static class Admin3 extends DeviceAdminReceiver {
+    }
 }

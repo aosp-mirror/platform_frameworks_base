@@ -271,7 +271,6 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     final Context mContext;
     final PackageManager mPackageManager;
     final UserManager mUserManager;
-    final PowerManager.WakeLock mWakeLock;
 
     final LocalService mLocalService;
 
@@ -995,7 +994,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         boolean removed = false;
         if (DBG) Slog.d(LOG_TAG, "Handling package changes for user " + userHandle);
         DevicePolicyData policy = getUserData(userHandle);
-        IPackageManager pm = AppGlobals.getPackageManager();
+        IPackageManager pm = getIPackageManager();
         synchronized (this) {
             for (int i = policy.mAdminList.size() - 1; i >= 0; i--) {
                 ActiveAdmin aa = policy.mAdminList.get(i);
@@ -1071,7 +1070,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
 
     /** Unit test will override it to inject a mock. */
     @VisibleForTesting
-    IWindowManager newIWindowManager() {
+    IWindowManager getIWindowManager() {
         return IWindowManager.Stub.asInterface(ServiceManager.getService(Context.WINDOW_SERVICE));
     }
 
@@ -1079,6 +1078,12 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     @VisibleForTesting
     IActivityManager getIActivityManager() {
         return ActivityManagerNative.getDefault();
+    }
+
+    /** Unit test will override it to inject a mock. */
+    @VisibleForTesting
+    IPackageManager getIPackageManager() {
+        return AppGlobals.getPackageManager();
     }
 
     /** Unit test will override it to inject a mock. */
@@ -1129,13 +1134,33 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     }
 
     @VisibleForTesting
-    WakeLock powerManagerNewWakeLock(int levelAndFlags, String tag) {
-        return mContext.getSystemService(PowerManager.class).newWakeLock(levelAndFlags, tag);
+    void powerManagerGoToSleep(long time, int reason, int flags) {
+        mContext.getSystemService(PowerManager.class).goToSleep(time, reason, flags);
     }
 
     @VisibleForTesting
-    void powerManagerGoToSleep(long time, int reason, int flags) {
-        mContext.getSystemService(PowerManager.class).goToSleep(time, reason, flags);
+    boolean systemPropertiesGetBoolean(String key, boolean def) {
+        return SystemProperties.getBoolean(key, def);
+    }
+
+    @VisibleForTesting
+    long systemPropertiesGetLong(String key, long def) {
+        return SystemProperties.getLong(key, def);
+    }
+
+    @VisibleForTesting
+    String systemPropertiesGet(String key, String def) {
+        return SystemProperties.get(key, def);
+    }
+
+    @VisibleForTesting
+    String systemPropertiesGet(String key) {
+        return SystemProperties.get(key);
+    }
+
+    @VisibleForTesting
+    void systemPropertiesSet(String key, String value) {
+        SystemProperties.set(key, value);
     }
 
     /**
@@ -1145,14 +1170,16 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         mContext = context;
         mHandler = new Handler(getMyLooper());
         mOwners = newOwners();
-        mUserManager = getUserManager();
-        mPackageManager = getPackageManager();
-        mHasFeature = mPackageManager.hasSystemFeature(PackageManager.FEATURE_DEVICE_ADMIN);
-        mPowerManagerInternal = getPowerManagerInternal();
-        mWakeLock = powerManagerNewWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "DPM");
-        mIWindowManager = newIWindowManager();
-        mNotificationManager = getNotificationManager();
+
+        mUserManager = Preconditions.checkNotNull(getUserManager());
+        mPackageManager = Preconditions.checkNotNull(getPackageManager());
+        mPowerManagerInternal = Preconditions.checkNotNull(getPowerManagerInternal());
+        mIWindowManager = Preconditions.checkNotNull(getIWindowManager());
+        mNotificationManager = Preconditions.checkNotNull(getNotificationManager());
+
         mLocalService = new LocalService();
+
+        mHasFeature = mPackageManager.hasSystemFeature(PackageManager.FEATURE_DEVICE_ADMIN);
         if (!mHasFeature) {
             // Skip the rest of the initialization
             return;
@@ -1862,7 +1889,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         // Ensure the status of the camera is synced down to the system. Interested native services
         // should monitor this value and act accordingly.
         String cameraPropertyForUser = SYSTEM_PROP_DISABLE_CAMERA_PREFIX + policy.mUserHandle;
-        boolean systemState = SystemProperties.getBoolean(cameraPropertyForUser, false);
+        boolean systemState = systemPropertiesGetBoolean(cameraPropertyForUser, false);
         boolean cameraDisabled = getCameraDisabled(null, policy.mUserHandle);
         if (cameraDisabled != systemState) {
             long token = binderClearCallingIdentity();
@@ -1870,7 +1897,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 String value = cameraDisabled ? "1" : "0";
                 if (DBG) Slog.v(LOG_TAG, "Change in camera state ["
                         + cameraPropertyForUser + "] = " + value);
-                SystemProperties.set(cameraPropertyForUser, value);
+                systemPropertiesSet(cameraPropertyForUser, value);
             } finally {
                 binderRestoreCallingIdentity(token);
             }
@@ -3231,7 +3258,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     }
 
     private boolean isExtStorageEncrypted() {
-        String state = SystemProperties.get("vold.decrypt");
+        String state = systemPropertiesGet("vold.decrypt");
         return !"".equals(state);
     }
 
@@ -3969,7 +3996,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
      * {@link DevicePolicyManager#ENCRYPTION_STATUS_ACTIVE}.
      */
     private int getEncryptionStatus() {
-        String status = SystemProperties.get("ro.crypto.state", "unsupported");
+        String status = systemPropertiesGet("ro.crypto.state", "unsupported");
         if ("encrypted".equalsIgnoreCase(status)) {
             final long token = binderClearCallingIdentity();
             try {
@@ -4377,7 +4404,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         }
         boolean isInitializerSystemApp;
         try {
-            isInitializerSystemApp = isSystemApp(AppGlobals.getPackageManager(),
+            isInitializerSystemApp = isSystemApp(getIPackageManager(),
                     initializer.getPackageName(), binderGetCallingUserHandle().getIdentifier());
         } catch (RemoteException | IllegalArgumentException e) {
             isInitializerSystemApp = false;
@@ -4528,7 +4555,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         final long ident = binderClearCallingIdentity();
         try {
             clearUserRestrictions(userHandle);
-            AppGlobals.getPackageManager().updatePermissionFlagsForAllApps(
+            getIPackageManager().updatePermissionFlagsForAllApps(
                     PackageManager.FLAG_PERMISSION_POLICY_FIXED,
                     0  /* flagValues */, userHandle.getIdentifier());
         } catch (RemoteException re) {
@@ -4596,7 +4623,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             long id = binderClearCallingIdentity();
             try {
                 if (!isDeviceOwner(activeAdmin.info.getPackageName())) {
-                    IPackageManager ipm = AppGlobals.getPackageManager();
+                    IPackageManager ipm = getIPackageManager();
                     ipm.setComponentEnabledSetting(who,
                             PackageManager.COMPONENT_ENABLED_STATE_DISABLED,
                             PackageManager.DONT_KILL_APP, userId);
@@ -4857,7 +4884,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
 
     private void enableIfNecessary(String packageName, int userId) {
         try {
-            IPackageManager ipm = AppGlobals.getPackageManager();
+            IPackageManager ipm = getIPackageManager();
             ApplicationInfo ai = ipm.getApplicationInfo(packageName,
                     PackageManager.GET_DISABLED_UNTIL_USED_COMPONENTS,
                     userId);
@@ -4919,7 +4946,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         synchronized (this) {
             getActiveAdminForCallerLocked(who, DeviceAdminInfo.USES_POLICY_PROFILE_OWNER);
 
-            IPackageManager pm = AppGlobals.getPackageManager();
+            IPackageManager pm = getIPackageManager();
             long id = binderClearCallingIdentity();
             try {
                 pm.addPersistentPreferredActivity(filter, activity, userHandle);
@@ -4938,7 +4965,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         synchronized (this) {
             getActiveAdminForCallerLocked(who, DeviceAdminInfo.USES_POLICY_PROFILE_OWNER);
 
-            IPackageManager pm = AppGlobals.getPackageManager();
+            IPackageManager pm = getIPackageManager();
             long id = binderClearCallingIdentity();
             try {
                 pm.clearPackagePersistentPreferredActivities(packageName, userHandle);
@@ -5074,7 +5101,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         synchronized (this) {
             getActiveAdminForCallerLocked(who, DeviceAdminInfo.USES_POLICY_PROFILE_OWNER);
 
-            IPackageManager pm = AppGlobals.getPackageManager();
+            IPackageManager pm = getIPackageManager();
             long id = binderClearCallingIdentity();
             try {
                 UserInfo parent = mUserManager.getProfileParent(callingUserId);
@@ -5105,7 +5132,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         int callingUserId = UserHandle.getCallingUserId();
         synchronized (this) {
             getActiveAdminForCallerLocked(who, DeviceAdminInfo.USES_POLICY_PROFILE_OWNER);
-            IPackageManager pm = AppGlobals.getPackageManager();
+            IPackageManager pm = getIPackageManager();
             long id = binderClearCallingIdentity();
             try {
                 UserInfo parent = mUserManager.getProfileParent(callingUserId);
@@ -5144,7 +5171,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 userIdToCheck = user.profileGroupId;
             }
 
-            IPackageManager pm = AppGlobals.getPackageManager();
+            IPackageManager pm = getIPackageManager();
             for (String enabledPackage : enabledPackages) {
                 boolean systemService = false;
                 try {
@@ -5276,7 +5303,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                     List<AccessibilityServiceInfo> installedServices =
                             accessibilityManager.getInstalledAccessibilityServiceList();
 
-                    IPackageManager pm = AppGlobals.getPackageManager();
+                    IPackageManager pm = getIPackageManager();
                     if (installedServices != null) {
                         for (AccessibilityServiceInfo service : installedServices) {
                             ServiceInfo serviceInfo = service.getResolveInfo().serviceInfo;
@@ -5425,7 +5452,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 List<InputMethodInfo> imes = inputMethodManager.getInputMethodList();
                 long id = binderClearCallingIdentity();
                 try {
-                    IPackageManager pm = AppGlobals.getPackageManager();
+                    IPackageManager pm = getIPackageManager();
                     if (imes != null) {
                         for (InputMethodInfo ime : imes) {
                             ServiceInfo serviceInfo = ime.getServiceInfo();
@@ -5472,7 +5499,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         long id = binderClearCallingIdentity();
         try {
             String profileOwnerPkg = profileOwnerComponent.getPackageName();
-            final IPackageManager ipm = AppGlobals.getPackageManager();
+            final IPackageManager ipm = getIPackageManager();
             IActivityManager activityManager = getIActivityManager();
 
             final int userHandle = user.getIdentifier();
@@ -5624,8 +5651,8 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                         // Send out notifications however as some clients may want to reread the
                         // value which actually changed due to a restriction having been applied.
                         final String property = Settings.Secure.SYS_PROP_SETTING_VERSION;
-                        long version = SystemProperties.getLong(property, 0) + 1;
-                        SystemProperties.set(property, Long.toString(version));
+                        long version = systemPropertiesGetLong(property, 0) + 1;
+                        systemPropertiesSet(property, Long.toString(version));
 
                         final String name = Settings.Secure.LOCATION_PROVIDERS_ALLOWED;
                         Uri url = Uri.withAppendedPath(Settings.Secure.CONTENT_URI, name);
@@ -5660,7 +5687,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
 
             long id = binderClearCallingIdentity();
             try {
-                IPackageManager pm = AppGlobals.getPackageManager();
+                IPackageManager pm = getIPackageManager();
                 return pm.setApplicationHiddenSettingAsUser(packageName, hidden, callingUserId);
             } catch (RemoteException re) {
                 // shouldn't happen
@@ -5681,7 +5708,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
 
             long id = binderClearCallingIdentity();
             try {
-                IPackageManager pm = AppGlobals.getPackageManager();
+                IPackageManager pm = getIPackageManager();
                 return pm.getApplicationHiddenSettingAsUser(packageName, callingUserId);
             } catch (RemoteException re) {
                 // shouldn't happen
@@ -5718,7 +5745,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                     primaryUser = um.getUserInfo(userId);
                 }
 
-                IPackageManager pm = AppGlobals.getPackageManager();
+                IPackageManager pm = getIPackageManager();
                 if (!isSystemApp(pm, packageName, primaryUser.id)) {
                     throw new IllegalArgumentException("Only system apps can be enabled this way.");
                 }
@@ -5755,7 +5782,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                     primaryUser = um.getUserInfo(userId);
                 }
 
-                IPackageManager pm = AppGlobals.getPackageManager();
+                IPackageManager pm = getIPackageManager();
                 List<ResolveInfo> activitiesToEnable = pm.queryIntentActivities(intent,
                         intent.resolveTypeIfNeeded(mContext.getContentResolver()),
                         0, // no flags
@@ -5851,7 +5878,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
 
             long id = binderClearCallingIdentity();
             try {
-                IPackageManager pm = AppGlobals.getPackageManager();
+                IPackageManager pm = getIPackageManager();
                 pm.setBlockUninstallForUser(packageName, uninstallBlocked, userId);
             } catch (RemoteException re) {
                 // Shouldn't happen.
@@ -5876,7 +5903,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
 
             long id = binderClearCallingIdentity();
             try {
-                IPackageManager pm = AppGlobals.getPackageManager();
+                IPackageManager pm = getIPackageManager();
                 return pm.getBlockUninstallForUser(packageName, userId);
             } catch (RemoteException re) {
                 // Shouldn't happen.
@@ -6560,7 +6587,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             getActiveAdminForCallerLocked(admin, DeviceAdminInfo.USES_POLICY_PROFILE_OWNER);
             long ident = binderClearCallingIdentity();
             try {
-                final ApplicationInfo ai = AppGlobals.getPackageManager()
+                final ApplicationInfo ai = getIPackageManager()
                         .getApplicationInfo(packageName, 0, user.getIdentifier());
                 final int targetSdkVersion = ai == null ? 0 : ai.targetSdkVersion;
                 if (targetSdkVersion < android.os.Build.VERSION_CODES.M) {
@@ -6607,7 +6634,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             getActiveAdminForCallerLocked(admin, DeviceAdminInfo.USES_POLICY_PROFILE_OWNER);
             long ident = binderClearCallingIdentity();
             try {
-                int granted = AppGlobals.getPackageManager().checkPermission(permission,
+                int granted = getIPackageManager().checkPermission(permission,
                         packageName, user.getIdentifier());
                 int permFlags = packageManager.getPermissionFlags(permission, packageName, user);
                 if ((permFlags & PackageManager.FLAG_PERMISSION_POLICY_FIXED)

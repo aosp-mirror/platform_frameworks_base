@@ -20,6 +20,7 @@ import com.android.internal.widget.LockPatternUtils;
 import android.app.IActivityManager;
 import android.app.NotificationManager;
 import android.content.Context;
+import android.content.pm.IPackageManager;
 import android.content.pm.PackageManager;
 import android.os.Looper;
 import android.os.PowerManager.WakeLock;
@@ -45,9 +46,9 @@ public class DevicePolicyManagerServiceTestable extends DevicePolicyManagerServi
         public static final String DEVICE_OWNER_FILE = "device_owner2.xml";
         public static final String PROFILE_OWNER_FILE_BASE = "profile_owner.xml";
 
-        final private File mLegacyFile;
-        final private File mDeviceOwnerFile;
-        final private File mProfileOwnerBase;
+        private final File mLegacyFile;
+        private final File mDeviceOwnerFile;
+        private final File mProfileOwnerBase;
 
         public OwnersTestable(Context context, File dataDir) {
             super(context);
@@ -96,47 +97,52 @@ public class DevicePolicyManagerServiceTestable extends DevicePolicyManagerServi
     }
 
     @Override
-    protected Owners newOwners() {
+    Owners newOwners() {
         return new OwnersTestable(getContext(), dataDir);
     }
 
     @Override
-    protected UserManager getUserManager() {
+    UserManager getUserManager() {
         return getContext().userManager;
     }
 
     @Override
-    protected PackageManager getPackageManager() {
+    PackageManager getPackageManager() {
         return getContext().packageManager;
     }
 
     @Override
-    protected PowerManagerInternal getPowerManagerInternal() {
+    PowerManagerInternal getPowerManagerInternal() {
         return getContext().powerManagerInternal;
     }
 
     @Override
-    protected NotificationManager getNotificationManager() {
+    NotificationManager getNotificationManager() {
         return getContext().notificationManager;
     }
 
     @Override
-    protected IWindowManager newIWindowManager() {
+    IWindowManager getIWindowManager() {
         return getContext().iwindowManager;
     }
 
     @Override
-    protected IActivityManager getIActivityManager() {
+    IActivityManager getIActivityManager() {
         return getContext().iactivityManager;
     }
 
     @Override
-    protected LockPatternUtils newLockPatternUtils(Context context) {
+    IPackageManager getIPackageManager() {
+        return getContext().ipackageManager;
+    }
+
+    @Override
+    LockPatternUtils newLockPatternUtils(Context context) {
         return getContext().lockPatternUtils;
     }
 
     @Override
-    protected Looper getMyLooper() {
+    Looper getMyLooper() {
         return Looper.getMainLooper();
     }
 
@@ -181,12 +187,32 @@ public class DevicePolicyManagerServiceTestable extends DevicePolicyManagerServi
     }
 
     @Override
-    WakeLock powerManagerNewWakeLock(int levelAndFlags, String tag) {
-        return getContext().powerManager.newWakeLock(levelAndFlags, tag);
+    void powerManagerGoToSleep(long time, int reason, int flags) {
+        getContext().powerManager.goToSleep(time, reason, flags);
     }
 
     @Override
-    void powerManagerGoToSleep(long time, int reason, int flags) {
-        getContext().powerManager.goToSleep(time, reason, flags);
+    boolean systemPropertiesGetBoolean(String key, boolean def) {
+        return getContext().systemProperties.getBoolean(key, def);
+    }
+
+    @Override
+    long systemPropertiesGetLong(String key, long def) {
+        return getContext().systemProperties.getLong(key, def);
+    }
+
+    @Override
+    String systemPropertiesGet(String key, String def) {
+        return getContext().systemProperties.get(key, def);
+    }
+
+    @Override
+    String systemPropertiesGet(String key) {
+        return getContext().systemProperties.get(key);
+    }
+
+    @Override
+    void systemPropertiesSet(String key, String value) {
+        getContext().systemProperties.set(key, value);
     }
 }
