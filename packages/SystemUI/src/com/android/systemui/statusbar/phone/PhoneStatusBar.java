@@ -489,6 +489,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
     private ExpandableNotificationRow mDraggedDownRow;
     private boolean mLaunchCameraOnScreenTurningOn;
     private boolean mLaunchCameraOnFinishedGoingToSleep;
+    private int mLastCameraLaunchSource;
     private PowerManager.WakeLock mGestureWakeLock;
     private Vibrator mVibrator;
 
@@ -3936,7 +3937,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
             mHandler.post(new Runnable() {
                 @Override
                 public void run() {
-                    onCameraLaunchGestureDetected();
+                    onCameraLaunchGestureDetected(mLastCameraLaunchSource);
                 }
             });
         }
@@ -3953,7 +3954,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         mScreenTurningOn = true;
         mNotificationPanel.onScreenTurningOn();
         if (mLaunchCameraOnScreenTurningOn) {
-            mNotificationPanel.launchCamera(false);
+            mNotificationPanel.launchCamera(false, mLastCameraLaunchSource);
             mLaunchCameraOnScreenTurningOn = false;
         }
     }
@@ -4118,7 +4119,8 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
     }
 
     @Override
-    public void onCameraLaunchGestureDetected() {
+    public void onCameraLaunchGestureDetected(int source) {
+        mLastCameraLaunchSource = source;
         if (mStartedGoingToSleep) {
             mLaunchCameraOnFinishedGoingToSleep = true;
             return;
@@ -4144,7 +4146,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
                 mGestureWakeLock.acquire(LAUNCH_TRANSITION_TIMEOUT_MS + 1000L);
             }
             if (mScreenTurningOn || mStatusBarKeyguardViewManager.isScreenTurnedOn()) {
-                mNotificationPanel.launchCamera(mDeviceInteractive /* animate */);
+                mNotificationPanel.launchCamera(mDeviceInteractive /* animate */, source);
             } else {
                 // We need to defer the camera launch until the screen comes on, since otherwise
                 // we will dismiss us too early since we are waiting on an activity to be drawn and
