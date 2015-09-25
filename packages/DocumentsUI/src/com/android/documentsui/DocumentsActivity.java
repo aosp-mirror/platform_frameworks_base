@@ -19,7 +19,7 @@ package com.android.documentsui;
 import static com.android.documentsui.State.ACTION_CREATE;
 import static com.android.documentsui.State.ACTION_GET_CONTENT;
 import static com.android.documentsui.State.ACTION_OPEN;
-import static com.android.documentsui.State.ACTION_OPEN_COPY_DESTINATION;
+import static com.android.documentsui.State.ACTION_PICK_COPY_DESTINATION;
 import static com.android.documentsui.State.ACTION_OPEN_TREE;
 import static com.android.documentsui.dirlist.DirectoryFragment.ANIM_NONE;
 
@@ -123,7 +123,7 @@ public class DocumentsActivity extends BaseActivity {
             final String title = getIntent().getStringExtra(Intent.EXTRA_TITLE);
             SaveFragment.show(getFragmentManager(), mimeType, title);
         } else if (mState.action == ACTION_OPEN_TREE ||
-                   mState.action == ACTION_OPEN_COPY_DESTINATION) {
+                   mState.action == ACTION_PICK_COPY_DESTINATION) {
             PickFragment.show(getFragmentManager());
         }
 
@@ -135,7 +135,7 @@ public class DocumentsActivity extends BaseActivity {
         } else if (mState.action == ACTION_OPEN ||
                    mState.action == ACTION_CREATE ||
                    mState.action == ACTION_OPEN_TREE ||
-                   mState.action == ACTION_OPEN_COPY_DESTINATION) {
+                   mState.action == ACTION_PICK_COPY_DESTINATION) {
             RootsFragment.show(getFragmentManager(), null);
         }
 
@@ -163,8 +163,8 @@ public class DocumentsActivity extends BaseActivity {
             state.action = ACTION_GET_CONTENT;
         } else if (Intent.ACTION_OPEN_DOCUMENT_TREE.equals(action)) {
             state.action = ACTION_OPEN_TREE;
-        } else if (DocumentsIntent.ACTION_OPEN_COPY_DESTINATION.equals(action)) {
-            state.action = ACTION_OPEN_COPY_DESTINATION;
+        } else if (Shared.ACTION_PICK_COPY_DESTINATION.equals(action)) {
+            state.action = ACTION_PICK_COPY_DESTINATION;
         }
 
         if (state.action == ACTION_OPEN || state.action == ACTION_GET_CONTENT) {
@@ -172,9 +172,9 @@ public class DocumentsActivity extends BaseActivity {
                     Intent.EXTRA_ALLOW_MULTIPLE, false);
         }
 
-        if (state.action == ACTION_OPEN_COPY_DESTINATION) {
+        if (state.action == ACTION_PICK_COPY_DESTINATION) {
             state.directoryCopy = intent.getBooleanExtra(
-                    BaseActivity.DocumentsIntent.EXTRA_DIRECTORY_COPY, false);
+                    Shared.EXTRA_DIRECTORY_COPY, false);
             state.transferMode = intent.getIntExtra(CopyService.EXTRA_TRANSFER_MODE,
                     CopyService.TRANSFER_MODE_COPY);
         }
@@ -257,7 +257,7 @@ public class DocumentsActivity extends BaseActivity {
                     mState.action == ACTION_OPEN_TREE) {
                     mRootsToolbar.setTitle(R.string.title_open);
                 } else if (mState.action == ACTION_CREATE ||
-                           mState.action == ACTION_OPEN_COPY_DESTINATION) {
+                           mState.action == ACTION_PICK_COPY_DESTINATION) {
                     mRootsToolbar.setTitle(R.string.title_save);
                 }
             }
@@ -324,7 +324,7 @@ public class DocumentsActivity extends BaseActivity {
         boolean recents = cwd == null;
         boolean picking = mState.action == ACTION_CREATE
                 || mState.action == ACTION_OPEN_TREE
-                || mState.action == ACTION_OPEN_COPY_DESTINATION;
+                || mState.action == ACTION_PICK_COPY_DESTINATION;
 
         createDir.setVisible(picking && !recents && cwd.isCreateSupported());
         mSearchManager.showMenu(!picking);
@@ -361,7 +361,7 @@ public class DocumentsActivity extends BaseActivity {
             // No directory means recents
             if (mState.action == ACTION_CREATE ||
                 mState.action == ACTION_OPEN_TREE ||
-                mState.action == ACTION_OPEN_COPY_DESTINATION) {
+                mState.action == ACTION_PICK_COPY_DESTINATION) {
                 RecentsCreateFragment.show(fm);
             } else {
                 DirectoryFragment.showRecentsOpen(fm, anim);
@@ -391,7 +391,7 @@ public class DocumentsActivity extends BaseActivity {
         }
 
         if (mState.action == ACTION_OPEN_TREE ||
-            mState.action == ACTION_OPEN_COPY_DESTINATION) {
+            mState.action == ACTION_PICK_COPY_DESTINATION) {
             final PickFragment pick = PickFragment.get(fm);
             if (pick != null) {
                 pick.setPickTarget(mState.action, mState.transferMode, cwd);
@@ -444,7 +444,7 @@ public class DocumentsActivity extends BaseActivity {
         if (mState.action == ACTION_OPEN_TREE) {
             result = DocumentsContract.buildTreeDocumentUri(
                     pickTarget.authority, pickTarget.documentId);
-        } else if (mState.action == ACTION_OPEN_COPY_DESTINATION) {
+        } else if (mState.action == ACTION_PICK_COPY_DESTINATION) {
             result = pickTarget.derivedUri;
         } else {
             // Should not be reached.
@@ -461,7 +461,7 @@ public class DocumentsActivity extends BaseActivity {
         final byte[] rawStack = DurableUtils.writeToArrayOrNull(mState.stack);
         if (mState.action == ACTION_CREATE ||
             mState.action == ACTION_OPEN_TREE ||
-            mState.action == ACTION_OPEN_COPY_DESTINATION) {
+            mState.action == ACTION_PICK_COPY_DESTINATION) {
             // Remember stack for last create
             values.clear();
             values.put(RecentColumns.KEY, mState.stack.buildKey());
@@ -500,7 +500,7 @@ public class DocumentsActivity extends BaseActivity {
                     | Intent.FLAG_GRANT_WRITE_URI_PERMISSION
                     | Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION
                     | Intent.FLAG_GRANT_PREFIX_URI_PERMISSION);
-        } else if (mState.action == ACTION_OPEN_COPY_DESTINATION) {
+        } else if (mState.action == ACTION_PICK_COPY_DESTINATION) {
             // Picking a copy destination is only used internally by us, so we
             // don't need to extend permissions to the caller.
             intent.putExtra(Shared.EXTRA_STACK, (Parcelable) mState.stack);

@@ -179,8 +179,7 @@ public class CopyService extends IntentService {
             if (mFailedFiles.size() > 0) {
                 Log.e(TAG, mFailedFiles.size() + " files failed to copy");
                 final Context context = getApplicationContext();
-                final Intent navigateIntent = new Intent(context, FilesActivity.class);
-                navigateIntent.putExtra(Shared.EXTRA_STACK, (Parcelable) stack);
+                final Intent navigateIntent = buildNavigateIntent(context, stack);
                 navigateIntent.putExtra(EXTRA_FAILURE, FAILURE_COPY);
                 navigateIntent.putExtra(EXTRA_TRANSFER_MODE, transferMode);
                 navigateIntent.putParcelableArrayListExtra(EXTRA_SRC_LIST, mFailedFiles);
@@ -228,8 +227,7 @@ public class CopyService extends IntentService {
         mIsCancelled = false;
 
         final Context context = getApplicationContext();
-        final Intent navigateIntent = new Intent(context, FilesActivity.class);
-        navigateIntent.putExtra(Shared.EXTRA_STACK, (Parcelable) stack);
+        final Intent navigateIntent = buildNavigateIntent(context, stack);
 
         final String contentTitle = getString(copying ? R.string.copy_notification_title
                 : R.string.move_notification_title);
@@ -591,5 +589,15 @@ public class CopyService extends IntentService {
                 throw e;
             }
         }
+    }
+
+    /**
+     * Creates an intent for navigating back to the destination directory.
+     */
+    private Intent buildNavigateIntent(Context context, DocumentStack stack) {
+        Intent intent = new Intent(context, FilesActivity.class);
+        intent.setAction(DocumentsContract.ACTION_BROWSE);
+        intent.putExtra(Shared.EXTRA_STACK, (Parcelable) stack);
+        return intent;
     }
 }

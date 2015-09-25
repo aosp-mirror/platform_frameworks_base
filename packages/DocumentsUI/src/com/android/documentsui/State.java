@@ -75,7 +75,7 @@ public class State implements android.os.Parcelable {
     public static final int ACTION_OPEN_TREE = 4;
     public static final int ACTION_MANAGE = 5;
     public static final int ACTION_BROWSE = 6;
-    public static final int ACTION_OPEN_COPY_DESTINATION = 8;
+    public static final int ACTION_PICK_COPY_DESTINATION = 8;
 
     public static final int MODE_UNKNOWN = 0;
     public static final int MODE_LIST = 1;

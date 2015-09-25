@@ -111,8 +111,8 @@ import com.android.documentsui.Snackbars;
 import com.android.documentsui.State;
 import com.android.documentsui.ThumbnailCache;
 import com.android.documentsui.BaseActivity.DocumentContext;
-import com.android.documentsui.BaseActivity.DocumentsIntent;
 import com.android.documentsui.ProviderExecutor.Preemptable;
+import com.android.documentsui.Shared;
 import com.android.documentsui.RecentsProvider.StateColumns;
 import com.android.documentsui.dirlist.MultiSelectManager.Callback;
 import com.android.documentsui.dirlist.MultiSelectManager.Selection;
@@ -897,7 +897,7 @@ public class DirectoryFragment extends Fragment {
         // Pop up a dialog to pick a destination.  This is inadequate but works for now.
         // TODO: Implement a picker that is to spec.
         final Intent intent = new Intent(
-                BaseActivity.DocumentsIntent.ACTION_OPEN_COPY_DESTINATION,
+                Shared.ACTION_PICK_COPY_DESTINATION,
                 Uri.EMPTY,
                 getActivity(),
                 DocumentsActivity.class);
@@ -914,7 +914,7 @@ public class DirectoryFragment extends Fragment {
                         break;
                     }
                 }
-                intent.putExtra(BaseActivity.DocumentsIntent.EXTRA_DIRECTORY_COPY, directoryCopy);
+                intent.putExtra(Shared.EXTRA_DIRECTORY_COPY, directoryCopy);
                 intent.putExtra(CopyService.EXTRA_TRANSFER_MODE, mode);
                 startActivityForResult(intent, REQUEST_COPY_DESTINATION);
             }
