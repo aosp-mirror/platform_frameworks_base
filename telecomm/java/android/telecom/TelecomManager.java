@@ -14,6 +14,7 @@
 
 package android.telecom;
 
+import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
 import android.content.ComponentName;
 import android.content.Context;
@@ -472,9 +473,12 @@ public class TelecomManager {
      * <p>
      * If no {@link PhoneAccount} fits the criteria above, this method will return {@code null}.
      *
+     * Requires permission: {@link android.Manifest.permission#READ_PHONE_STATE}
+     *
      * @param uriScheme The URI scheme.
      * @return The {@link PhoneAccountHandle} corresponding to the account to be used.
      */
+    @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE)
     public PhoneAccountHandle getDefaultOutgoingPhoneAccount(String uriScheme) {
         try {
             if (isServiceConnected()) {
@@ -606,9 +610,12 @@ public class TelecomManager {
      * calls. The returned list includes only those accounts which have been explicitly enabled
      * by the user.
      *
+     * Requires permission: {@link android.Manifest.permission#READ_PHONE_STATE}
+     *
      * @see #EXTRA_PHONE_ACCOUNT_HANDLE
      * @return A list of {@code PhoneAccountHandle} objects.
      */
+    @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE)
     public List<PhoneAccountHandle> getCallCapablePhoneAccounts() {
         return getCallCapablePhoneAccounts(false);
     }
@@ -881,9 +888,12 @@ public class TelecomManager {
      * Return whether a given phone number is the configured voicemail number for a
      * particular phone account.
      *
+     * Requires permission: {@link android.Manifest.permission#READ_PHONE_STATE}
+     *
      * @param accountHandle The handle for the account to check the voicemail number against
      * @param number The number to look up.
      */
+    @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE)
     public boolean isVoiceMailNumber(PhoneAccountHandle accountHandle, String number) {
         try {
             if (isServiceConnected()) {
@@ -899,10 +909,13 @@ public class TelecomManager {
     /**
      * Return the voicemail number for a given phone account.
      *
+     * Requires permission: {@link android.Manifest.permission#READ_PHONE_STATE}
+     *
      * @param accountHandle The handle for the phone account.
      * @return The voicemail number for the phone account, and {@code null} if one has not been
      *         configured.
      */
+    @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE)
     public String getVoiceMailNumber(PhoneAccountHandle accountHandle) {
         try {
             if (isServiceConnected()) {
@@ -918,9 +931,12 @@ public class TelecomManager {
     /**
      * Return the line 1 phone number for given phone account.
      *
+     * Requires permission: {@link android.Manifest.permission#READ_PHONE_STATE}
+     *
      * @param accountHandle The handle for the account retrieve a number for.
      * @return A string representation of the line 1 phone number.
      */
+    @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE)
     public String getLine1Number(PhoneAccountHandle accountHandle) {
         try {
             if (isServiceConnected()) {
@@ -940,6 +956,7 @@ public class TelecomManager {
      * Requires permission: {@link android.Manifest.permission#READ_PHONE_STATE}
      * </p>
      */
+    @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE)
     public boolean isInCall() {
         try {
             if (isServiceConnected()) {
@@ -1031,7 +1048,10 @@ public class TelecomManager {
 
     /**
      * Silences the ringer if a ringing call exists.
+     *
+     * Requires permission: {@link android.Manifest.permission#MODIFY_PHONE_STATE}
      */
+    @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE)
     public void silenceRinger() {
         try {
             if (isServiceConnected()) {
@@ -1136,9 +1156,12 @@ public class TelecomManager {
      * Requires that the method-caller be set as the system dialer app.
      * </p>
      *
+     * Requires permission: {@link android.Manifest.permission#MODIFY_PHONE_STATE}
+     *
      * @param dialString The digits to dial.
      * @return True if the digits were processed as an MMI code, false otherwise.
      */
+    @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE)
     public boolean handleMmi(String dialString) {
         ITelecomService service = getTelecomService();
         if (service != null) {
@@ -1159,10 +1182,13 @@ public class TelecomManager {
      * Requires that the method-caller be set as the system dialer app.
      * </p>
      *
+     * Requires permission: {@link android.Manifest.permission#MODIFY_PHONE_STATE}
+     *
      * @param accountHandle The handle for the account the MMI code should apply to.
      * @param dialString The digits to dial.
      * @return True if the digits were processed as an MMI code, false otherwise.
      */
+    @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE)
     public boolean handleMmi(String dialString, PhoneAccountHandle accountHandle) {
         ITelecomService service = getTelecomService();
         if (service != null) {
@@ -1177,11 +1203,14 @@ public class TelecomManager {
     }
 
     /**
+     * Requires permission: {@link android.Manifest.permission#MODIFY_PHONE_STATE}
+     *
      * @param accountHandle The handle for the account to derive an adn query URI for or
      * {@code null} to return a URI which will use the default account.
      * @return The URI (with the content:// scheme) specific to the specified {@link PhoneAccount}
      * for the the content retrieve.
      */
+    @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE)
     public Uri getAdnUriForPhoneAccount(PhoneAccountHandle accountHandle) {
         ITelecomService service = getTelecomService();
         if (service != null && accountHandle != null) {
@@ -1199,7 +1228,10 @@ public class TelecomManager {
      * <p>
      * Requires that the method-caller be set as the system dialer app.
      * </p>
+     *
+     * Requires permission: {@link android.Manifest.permission#MODIFY_PHONE_STATE}
      */
+    @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE)
     public void cancelMissedCallsNotification() {
         ITelecomService service = getTelecomService();
         if (service != null) {
@@ -1221,6 +1253,7 @@ public class TelecomManager {
      *
      * @param showDialpad Brings up the in-call dialpad as part of showing the in-call screen.
      */
+    @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE)
     public void showInCallScreen(boolean showDialpad) {
         ITelecomService service = getTelecomService();
         if (service != null) {
@@ -1262,6 +1295,7 @@ public class TelecomManager {
      * @param address The address to make the call to.
      * @param extras Bundle of extras to use with the call.
      */
+    @RequiresPermission(android.Manifest.permission.CALL_PHONE)
     public void placeCall(Uri address, Bundle extras) {
         ITelecomService service = getTelecomService();
         if (service != null) {
