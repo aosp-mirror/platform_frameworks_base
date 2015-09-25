@@ -166,7 +166,7 @@ public class RecentsConfiguration {
             sInstance.update(context);
             sPrevConfigurationHashCode = configHashCode;
         }
-        sInstance.updateOnReinitialize(context, ssp);
+        sInstance.reinitializeWithApplicationContext(context.getApplicationContext(), ssp);
         return sInstance;
     }
 
@@ -276,8 +276,8 @@ public class RecentsConfiguration {
         systemInsets.set(insets);
     }
 
-    /** Updates the states that need to be re-read whenever we re-initialize. */
-    void updateOnReinitialize(Context context, SystemServicesProxy ssp) {
+    /** Updates the states that need to be re-read from the application context. */
+    void reinitializeWithApplicationContext(Context context, SystemServicesProxy ssp) {
         // Check if the developer options are enabled
         developerOptionsEnabled = ssp.getGlobalSetting(context,
                 Settings.Global.DEVELOPMENT_SETTINGS_ENABLED) != 0;
