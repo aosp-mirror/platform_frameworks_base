@@ -31,5 +31,7 @@ public class CameraActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.camera_activity);
         Log.i(TAG, "Activity created");
+        Log.i(TAG, "Source: "
+                + getIntent().getStringExtra("com.android.systemui.camera_launch_source"));
     }
 }

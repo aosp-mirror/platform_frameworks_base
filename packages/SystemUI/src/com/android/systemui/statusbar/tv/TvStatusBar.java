@@ -171,7 +171,7 @@ public class TvStatusBar extends BaseStatusBar {
     }
 
     @Override
-    public void onCameraLaunchGestureDetected() {
+    public void onCameraLaunchGestureDetected(int source) {
     }
 
     @Override
