@@ -16,8 +16,9 @@
 
 package com.android.documentsui;
 
-import static com.android.documentsui.BaseActivity.State.SORT_ORDER_LAST_MODIFIED;
+import static com.android.documentsui.Shared.DEBUG;
 import static com.android.documentsui.Shared.TAG;
+import static com.android.documentsui.State.SORT_ORDER_LAST_MODIFIED;
 
 import android.app.ActivityManager;
 import android.content.AsyncTaskLoader;
@@ -34,7 +35,6 @@ import android.provider.DocumentsContract.Root;
 import android.text.format.DateUtils;
 import android.util.Log;
 
-import com.android.documentsui.BaseActivity.State;
 import com.android.documentsui.model.RootInfo;
 
 import com.google.common.util.concurrent.AbstractFuture;
@@ -53,8 +53,6 @@ import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
 
 public class RecentLoader extends AsyncTaskLoader<DirectoryResult> {
-    private static final boolean DEBUG = false;
-
     // TODO: clean up cursor ownership so background thread doesn't traverse
     // previously returned cursors for filtering/sorting; this currently races
     // with the UI thread.

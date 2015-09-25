@@ -16,13 +16,12 @@
 
 package com.android.documentsui;
 
-import static com.android.documentsui.BaseActivity.State.ACTION_CREATE;
-import static com.android.documentsui.BaseActivity.State.ACTION_GET_CONTENT;
-import static com.android.documentsui.BaseActivity.State.ACTION_OPEN;
-import static com.android.documentsui.BaseActivity.State.ACTION_OPEN_COPY_DESTINATION;
-import static com.android.documentsui.BaseActivity.State.ACTION_OPEN_TREE;
-import static com.android.documentsui.DirectoryFragment.ANIM_DOWN;
 import static com.android.documentsui.DirectoryFragment.ANIM_NONE;
+import static com.android.documentsui.State.ACTION_CREATE;
+import static com.android.documentsui.State.ACTION_GET_CONTENT;
+import static com.android.documentsui.State.ACTION_OPEN;
+import static com.android.documentsui.State.ACTION_OPEN_COPY_DESTINATION;
+import static com.android.documentsui.State.ACTION_OPEN_TREE;
 
 import android.app.Activity;
 import android.app.Fragment;

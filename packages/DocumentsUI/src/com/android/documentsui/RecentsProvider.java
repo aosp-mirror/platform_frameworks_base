@@ -39,6 +39,7 @@ import android.util.Log;
 import com.android.documentsui.model.DocumentStack;
 import com.android.documentsui.model.DurableUtils;
 import com.android.internal.util.Predicate;
+
 import com.google.android.collect.Sets;
 
 import libcore.io.IoUtils;

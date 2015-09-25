@@ -45,7 +45,6 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.android.documentsui.BaseActivity.State;
 import com.android.documentsui.RecentsProvider.RecentColumns;
 import com.android.documentsui.model.DocumentStack;
 import com.android.documentsui.model.DurableUtils;

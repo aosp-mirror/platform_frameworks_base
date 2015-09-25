@@ -16,14 +16,15 @@
 
 package com.android.documentsui;
 
-import static com.android.documentsui.BaseActivity.State.ACTION_BROWSE;
-import static com.android.documentsui.BaseActivity.State.ACTION_CREATE;
-import static com.android.documentsui.BaseActivity.State.ACTION_MANAGE;
-import static com.android.documentsui.BaseActivity.State.MODE_GRID;
-import static com.android.documentsui.BaseActivity.State.MODE_LIST;
-import static com.android.documentsui.BaseActivity.State.MODE_UNKNOWN;
-import static com.android.documentsui.BaseActivity.State.SORT_ORDER_UNKNOWN;
+import static com.android.documentsui.Shared.DEBUG;
 import static com.android.documentsui.Shared.TAG;
+import static com.android.documentsui.State.ACTION_BROWSE;
+import static com.android.documentsui.State.ACTION_CREATE;
+import static com.android.documentsui.State.ACTION_MANAGE;
+import static com.android.documentsui.State.MODE_GRID;
+import static com.android.documentsui.State.MODE_LIST;
+import static com.android.documentsui.State.MODE_UNKNOWN;
+import static com.android.documentsui.State.SORT_ORDER_UNKNOWN;
 import static com.android.documentsui.model.DocumentInfo.getCursorInt;
 import static com.android.documentsui.model.DocumentInfo.getCursorLong;
 import static com.android.documentsui.model.DocumentInfo.getCursorString;
@@ -93,7 +94,6 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.android.documentsui.BaseActivity.DocumentContext;
-import com.android.documentsui.BaseActivity.State;
 import com.android.documentsui.MultiSelectManager.Selection;
 import com.android.documentsui.ProviderExecutor.Preemptable;
 import com.android.documentsui.RecentsProvider.StateColumns;
@@ -124,7 +124,6 @@ public class DirectoryFragment extends Fragment {
     public static final int REQUEST_COPY_DESTINATION = 1;
 
     private static final int LOADER_ID = 42;
-    private static final boolean DEBUG = false;
     private static final boolean DEBUG_ENABLE_DND = false;
 
     private static final String EXTRA_TYPE = "type";

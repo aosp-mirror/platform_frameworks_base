@@ -16,9 +16,8 @@
 
 package com.android.documentsui;
 
-import static com.android.documentsui.BaseActivity.State.ACTION_MANAGE;
-import static com.android.documentsui.DirectoryFragment.ANIM_DOWN;
 import static com.android.documentsui.DirectoryFragment.ANIM_NONE;
+import static com.android.documentsui.State.ACTION_MANAGE;
 
 import android.app.Activity;
 import android.app.Fragment;

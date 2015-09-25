@@ -19,7 +19,6 @@ package com.android.documentsui;
 import android.test.AndroidTestCase;
 import android.test.suitebuilder.annotation.SmallTest;
 
-import com.android.documentsui.BaseActivity.State;
 import com.android.documentsui.model.RootInfo;
 
 import com.google.common.collect.Lists;
