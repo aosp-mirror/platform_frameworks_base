@@ -30,15 +30,24 @@ import android.content.pm.IPackageManager;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.os.Bundle;
+import android.content.pm.PackageInfo;
+import android.content.pm.UserInfo;
+import android.os.UserHandle;
+import android.util.Pair;
 
 import org.mockito.ArgumentCaptor;
+import org.mockito.invocation.InvocationOnMock;
+import org.mockito.stubbing.Answer;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Matchers.isNull;
+import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -87,6 +96,8 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         setUpPackageManagerForAdmin(admin3);
 
         setUpApplicationInfo(PackageManager.COMPONENT_ENABLED_STATE_DISABLED_UNTIL_USED);
+        setUpPackageInfo();
+        setUpUserManager();
     }
 
     /**
@@ -132,7 +143,85 @@ public class DevicePolicyManagerTest extends DpmTestBase {
                 eq(DpmMockContext.CALLER_USER_HANDLE));
     }
 
-    public void testHasNoFeature() {
+    /**
+     * Set up a mock result for {@link IPackageManager#getPackageInfo(String, int, int)} for user
+     * {@link DpmMockContext#CALLER_USER_HANDLE} as well as the system user.
+     */
+    private void setUpPackageInfo() throws Exception {
+        final PackageInfo pi = mRealTestContext.getPackageManager().getPackageInfo(
+                admin1.getPackageName(), 0);
+        assertTrue(pi.applicationInfo.flags != 0);
+
+        doReturn(pi).when(mContext.ipackageManager).getPackageInfo(
+                eq(admin1.getPackageName()),
+                eq(0),
+                eq(DpmMockContext.CALLER_USER_HANDLE));
+        doReturn(pi).when(mContext.ipackageManager).getPackageInfo(
+                eq(admin1.getPackageName()),
+                eq(0),
+                eq(UserHandle.USER_SYSTEM));
+    }
+
+    private void setUpUserManager() {
+        // Emulate UserManager.set/getApplicationRestriction().
+        final Map<Pair<String, UserHandle>, Bundle> appRestrictions = new HashMap<>();
+
+        // UM.setApplicationRestrictions() will save to appRestrictions.
+        doAnswer(new Answer<Void>() {
+            @Override
+            public Void answer(InvocationOnMock invocation) throws Throwable {
+                String pkg = (String) invocation.getArguments()[0];
+                Bundle bundle = (Bundle) invocation.getArguments()[1];
+                UserHandle user = (UserHandle) invocation.getArguments()[2];
+
+                appRestrictions.put(Pair.create(pkg, user), bundle);
+
+                return null;
+            }
+        }).when(mContext.userManager).setApplicationRestrictions(
+                anyString(), any(Bundle.class), any(UserHandle.class));
+
+        // UM.getApplicationRestrictions() will read from appRestrictions.
+        doAnswer(new Answer<Bundle>() {
+            @Override
+            public Bundle answer(InvocationOnMock invocation) throws Throwable {
+                String pkg = (String) invocation.getArguments()[0];
+                UserHandle user = (UserHandle) invocation.getArguments()[1];
+
+                return appRestrictions.get(Pair.create(pkg, user));
+            }
+        }).when(mContext.userManager).getApplicationRestrictions(
+                anyString(), any(UserHandle.class));
+
+        // System user is always running.
+        when(mContext.userManager.isUserRunning(MockUtils.checkUserHandle(UserHandle.USER_SYSTEM)))
+                .thenReturn(true);
+
+        // Set up (default) UserInfo for CALLER_USER_HANDLE.
+        final UserInfo uh = new UserInfo(DpmMockContext.CALLER_USER_HANDLE,
+                "user" + DpmMockContext.CALLER_USER_HANDLE, 0);
+
+        when(mContext.userManager.getUserInfo(eq(DpmMockContext.CALLER_USER_HANDLE)))
+                .thenReturn(uh);
+    }
+
+    private void setAsProfileOwner(ComponentName admin) {
+        mContext.callerPermissions.add(permission.MANAGE_DEVICE_ADMINS);
+        mContext.callerPermissions.add(permission.MANAGE_PROFILE_AND_DEVICE_OWNERS);
+
+        final UserInfo uh = new UserInfo(DpmMockContext.CALLER_USER_HANDLE, "user", 0);
+
+        // DO needs to be an DA.
+        dpm.setActiveAdmin(admin, /* replace =*/ false);
+
+        // Fire!
+        assertTrue(dpm.setProfileOwner(admin, "owner-name", DpmMockContext.CALLER_USER_HANDLE));
+
+        // Check
+        assertEquals(admin1, dpm.getProfileOwnerAsUser(DpmMockContext.CALLER_USER_HANDLE));
+    }
+
+    public void testHasNoFeature() throws Exception {
         when(mContext.packageManager.hasSystemFeature(eq(PackageManager.FEATURE_DEVICE_ADMIN)))
                 .thenReturn(false);
 
@@ -399,6 +488,105 @@ public class DevicePolicyManagerTest extends DpmTestBase {
 
         // TODO Check other internal calls.
     }
+
+    /**
+     * Test for: {@link DevicePolicyManager#setDeviceOwner} DO on system user installs
+     * successfully.
+     */
+    public void testSetDeviceOwner() throws Exception {
+        mContext.callerPermissions.add(permission.MANAGE_DEVICE_ADMINS);
+        mContext.callerPermissions.add(permission.MANAGE_PROFILE_AND_DEVICE_OWNERS);
+        mContext.callerPermissions.add(permission.INTERACT_ACROSS_USERS_FULL);
+
+        // Call from a process on the system user.
+        mContext.binder.callingUid = DpmMockContext.CALLER_SYSTEM_USER_UID;
+
+        // DO needs to be an DA.
+        dpm.setActiveAdmin(admin1, /* replace =*/ false);
+
+        // Fire!
+        assertTrue(dpm.setDeviceOwner(admin1.getPackageName(), "owner-name"));
+
+        // Verify internal calls.
+        verify(mContext.iactivityManager, times(1)).updateDeviceOwner(
+                eq(admin1.getPackageName()));
+
+        // TODO We should check if the caller has called clearCallerIdentity().
+        verify(mContext.ibackupManager, times(1)).setBackupServiceActive(
+                eq(UserHandle.USER_SYSTEM), eq(false));
+
+        verify(mContext.spiedContext, times(1)).sendBroadcastAsUser(
+                MockUtils.checkIntentAction(DevicePolicyManager.ACTION_DEVICE_OWNER_CHANGED),
+                MockUtils.checkUserHandle(UserHandle.USER_SYSTEM));
+
+        assertEquals(admin1.getPackageName(), dpm.getDeviceOwner());
+
+        // TODO Test getDeviceOwnerName() too.  To do so, we need to change
+        // DPMS.getApplicationLabel() because Context.createPackageContextAsUser() is not mockable.
+    }
+
+    /**
+     * Test for: {@link DevicePolicyManager#setDeviceOwner} Package doesn't exist.
+     */
+    public void testSetDeviceOwner_noSuchPackage() {
+        mContext.callerPermissions.add(permission.MANAGE_DEVICE_ADMINS);
+        mContext.callerPermissions.add(permission.MANAGE_PROFILE_AND_DEVICE_OWNERS);
+        mContext.callerPermissions.add(permission.INTERACT_ACROSS_USERS_FULL);
+
+        // Call from a process on the system user.
+        mContext.binder.callingUid = DpmMockContext.CALLER_SYSTEM_USER_UID;
+
+        // DO needs to be an DA.
+        dpm.setActiveAdmin(admin1, /* replace =*/ false);
+        try {
+            dpm.setDeviceOwner("a.b.c");
+            fail("Didn't throw IllegalArgumentException");
+        } catch (IllegalArgumentException expected) {
+        }
+    }
+
+    public void testSetDeviceOwner_failures() throws Exception {
+        // TODO Test more failure cases.  Basically test all chacks in enforceCanSetDeviceOwner().
+    }
+
+    public void testSetProfileOwner() throws Exception {
+        setAsProfileOwner(admin1);
+    }
+
+    public void testSetProfileOwner_failures() throws Exception {
+        // TODO Test more failure cases.  Basically test all chacks in enforceCanSetProfileOwner().
+    }
+
+    public void testSetGetApplicationRestriction() {
+        setAsProfileOwner(admin1);
+
+        {
+            Bundle rest = new Bundle();
+            rest.putString("KEY_STRING", "Foo1");
+            dpm.setApplicationRestrictions(admin1, "pkg1", rest);
+        }
+
+        {
+            Bundle rest = new Bundle();
+            rest.putString("KEY_STRING", "Foo2");
+            dpm.setApplicationRestrictions(admin1, "pkg2", rest);
+        }
+
+        {
+            Bundle returned = dpm.getApplicationRestrictions(admin1, "pkg1");
+            assertNotNull(returned);
+            assertEquals(returned.size(), 1);
+            assertEquals(returned.get("KEY_STRING"), "Foo1");
+        }
+
+        {
+            Bundle returned = dpm.getApplicationRestrictions(admin1, "pkg2");
+            assertNotNull(returned);
+            assertEquals(returned.size(), 1);
+            assertEquals(returned.get("KEY_STRING"), "Foo2");
+        }
+
+        dpm.setApplicationRestrictions(admin1, "pkg2", new Bundle());
+        assertEquals(0, dpm.getApplicationRestrictions(admin1, "pkg2").size());
+    }
 }
-
-

@@ -16,26 +16,28 @@
 
 package com.android.server.devicepolicy;
 
-import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.widget.LockPatternUtils;
 
 import android.app.IActivityManager;
 import android.app.NotificationManager;
+import android.app.backup.IBackupManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.IPackageManager;
 import android.content.pm.PackageManager;
+import android.media.IAudioService;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.PowerManager.WakeLock;
 import android.os.PowerManagerInternal;
-import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.test.mock.MockContext;
 import android.view.IWindowManager;
+
+import org.junit.Assert;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -54,9 +56,14 @@ public class DpmMockContext extends MockContext {
     public static final int CALLER_USER_HANDLE = 20;
 
     /**
-     * UID of the caller.
+     * UID corresponding to {@link #CALLER_USER_HANDLE}.
      */
     public static final int CALLER_UID = UserHandle.PER_USER_RANGE * CALLER_USER_HANDLE + 123;
+
+    /**
+     * UID used when a caller is on the system user.
+     */
+    public static final int CALLER_SYSTEM_USER_UID = 123;
 
     /**
      * PID of the caller.
@@ -142,6 +149,12 @@ public class DpmMockContext extends MockContext {
         }
     }
 
+    public static class UserManagerForMock {
+        public boolean isSplitSystemUser() {
+            return false;
+        }
+    }
+
     public final Context realTestContext;
 
     /**
@@ -155,12 +168,15 @@ public class DpmMockContext extends MockContext {
     public final EnvironmentForMock environment;
     public final SystemPropertiesForMock systemProperties;
     public final UserManager userManager;
+    public final UserManagerForMock userManagerForMock;
     public final PowerManagerForMock powerManager;
     public final PowerManagerInternal powerManagerInternal;
     public final NotificationManager notificationManager;
     public final IWindowManager iwindowManager;
     public final IActivityManager iactivityManager;
     public final IPackageManager ipackageManager;
+    public final IBackupManager ibackupManager;
+    public final IAudioService iaudioService;
     public final LockPatternUtils lockPatternUtils;
 
     /** Note this is a partial mock, not a real mock. */
@@ -174,12 +190,15 @@ public class DpmMockContext extends MockContext {
         environment = mock(EnvironmentForMock.class);
         systemProperties= mock(SystemPropertiesForMock.class);
         userManager = mock(UserManager.class);
+        userManagerForMock = mock(UserManagerForMock.class);
         powerManager = mock(PowerManagerForMock.class);
         powerManagerInternal = mock(PowerManagerInternal.class);
         notificationManager = mock(NotificationManager.class);
         iwindowManager = mock(IWindowManager.class);
         iactivityManager = mock(IActivityManager.class);
         ipackageManager = mock(IPackageManager.class);
+        ibackupManager = mock(IBackupManager.class);
+        iaudioService = mock(IAudioService.class);
         lockPatternUtils = mock(LockPatternUtils.class);
 
         // Package manager is huge, so we use a partial mock instead.
@@ -272,6 +291,13 @@ public class DpmMockContext extends MockContext {
 
     @Override
     public void sendBroadcastAsUser(Intent intent, UserHandle user) {
+        if (binder.callingPid != SYSTEM_PID) {
+            // Unless called as the system process, can only call if the target user is the
+            // calling user.
+            // (The actual check is more complex; we may need to change it later.)
+            Assert.assertEquals(UserHandle.getUserId(binder.getCallingUid()), user.getIdentifier());
+        }
+
         spiedContext.sendBroadcastAsUser(intent, user);
     }
 
