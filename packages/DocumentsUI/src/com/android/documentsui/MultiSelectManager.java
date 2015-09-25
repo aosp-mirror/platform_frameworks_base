@@ -365,8 +365,8 @@ public final class MultiSelectManager {
             // To make this more correct, we'd need to update the Ranger class to return
             // information about what has changed.
             notifySelectionChanged();
-        } else if (toggleSelection(input.getItemPosition())) {
-            notifySelectionChanged();
+        } else {
+            toggleSelection(input.getItemPosition());
         }
     }
 
@@ -375,14 +375,13 @@ public final class MultiSelectManager {
      * a new Ranger (range selection manager) at that point is created.
      *
      * @param position
-     * @return True if state changed.
      */
-    private boolean toggleSelection(int position) {
+    private void toggleSelection(int position) {
         // Position may be special "no position" during certain
         // transitional phases. If so, skip handling of the event.
         if (position == RecyclerView.NO_POSITION) {
             if (DEBUG) Log.d(TAG, "Ignoring toggle for element with no position.");
-            return false;
+            return;
         }
 
         boolean changed = false;
@@ -391,7 +390,7 @@ public final class MultiSelectManager {
         } else {
             boolean canSelect = notifyBeforeItemStateChange(position, true);
             if (!canSelect) {
-                return false;
+                return;
             }
             if (mSingleSelect && !mSelection.isEmpty()) {
                 clearSelectionQuietly();
@@ -407,7 +406,9 @@ public final class MultiSelectManager {
             changed = true;
         }
 
-        return changed;
+        if (changed) {
+            notifySelectionChanged();
+        }
     }
 
     /**
