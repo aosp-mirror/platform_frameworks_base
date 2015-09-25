@@ -60,7 +60,6 @@ public class CopyService extends IntentService {
 
     private static final String EXTRA_CANCEL = "com.android.documentsui.CANCEL";
     public static final String EXTRA_SRC_LIST = "com.android.documentsui.SRC_LIST";
-    public static final String EXTRA_STACK = "com.android.documentsui.STACK";
     public static final String EXTRA_FAILURE = "com.android.documentsui.FAILURE";
     public static final String EXTRA_TRANSFER_MODE = "com.android.documentsui.TRANSFER_MODE";
 
@@ -113,7 +112,7 @@ public class CopyService extends IntentService {
         final Intent copyIntent = new Intent(context, CopyService.class);
         copyIntent.putParcelableArrayListExtra(
                 EXTRA_SRC_LIST, new ArrayList<DocumentInfo>(srcDocs));
-        copyIntent.putExtra(EXTRA_STACK, (Parcelable) dstStack);
+        copyIntent.putExtra(Shared.EXTRA_STACK, (Parcelable) dstStack);
         copyIntent.putExtra(EXTRA_TRANSFER_MODE, mode);
 
         int toastMessage = (mode == TRANSFER_MODE_COPY) ? R.plurals.copy_begin
@@ -140,7 +139,7 @@ public class CopyService extends IntentService {
         }
 
         final ArrayList<DocumentInfo> srcs = intent.getParcelableArrayListExtra(EXTRA_SRC_LIST);
-        final DocumentStack stack = intent.getParcelableExtra(EXTRA_STACK);
+        final DocumentStack stack = intent.getParcelableExtra(Shared.EXTRA_STACK);
         // Copy by default.
         final int transferMode = intent.getIntExtra(EXTRA_TRANSFER_MODE, TRANSFER_MODE_COPY);
 
@@ -171,7 +170,7 @@ public class CopyService extends IntentService {
                 Log.e(TAG, mFailedFiles.size() + " files failed to copy");
                 final Context context = getApplicationContext();
                 final Intent navigateIntent = new Intent(context, FilesActivity.class);
-                navigateIntent.putExtra(EXTRA_STACK, (Parcelable) stack);
+                navigateIntent.putExtra(Shared.EXTRA_STACK, (Parcelable) stack);
                 navigateIntent.putExtra(EXTRA_FAILURE, FAILURE_COPY);
                 navigateIntent.putExtra(EXTRA_TRANSFER_MODE, transferMode);
                 navigateIntent.putParcelableArrayListExtra(EXTRA_SRC_LIST, mFailedFiles);
@@ -219,7 +218,7 @@ public class CopyService extends IntentService {
 
         final Context context = getApplicationContext();
         final Intent navigateIntent = new Intent(context, FilesActivity.class);
-        navigateIntent.putExtra(EXTRA_STACK, (Parcelable) stack);
+        navigateIntent.putExtra(Shared.EXTRA_STACK, (Parcelable) stack);
 
         final String contentTitle = getString(copying ? R.string.copy_notification_title
                 : R.string.move_notification_title);

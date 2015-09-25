@@ -424,7 +424,7 @@ public class DirectoryFragment extends Fragment {
         }
 
         CopyService.start(getActivity(), getDisplayState(this).selectedDocumentsForCopy,
-                (DocumentStack) data.getParcelableExtra(CopyService.EXTRA_STACK),
+                (DocumentStack) data.getParcelableExtra(Shared.EXTRA_STACK),
                 data.getIntExtra(CopyService.EXTRA_TRANSFER_MODE, CopyService.TRANSFER_MODE_NONE));
     }
 

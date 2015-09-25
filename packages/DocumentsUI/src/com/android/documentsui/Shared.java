@@ -18,12 +18,11 @@ package com.android.documentsui;
 
 import android.content.Context;
 
-/**
- * @hide
- */
+/** @hide */
 public final class Shared {
     public static final boolean DEBUG = true;
     public static final String TAG = "Documents";
+    public static final String EXTRA_STACK = "com.android.documentsui.STACK";
 
     /**
      * Generates a formatted quantity string.

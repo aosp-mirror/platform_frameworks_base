@@ -425,7 +425,7 @@ public class CopyTest extends ServiceTestCase<CopyService> {
         stack.push(DocumentInfo.fromUri(mResolver, dst));
         final Intent copyIntent = new Intent(mContext, CopyService.class);
         copyIntent.putParcelableArrayListExtra(CopyService.EXTRA_SRC_LIST, srcDocs);
-        copyIntent.putExtra(CopyService.EXTRA_STACK, (Parcelable) stack);
+        copyIntent.putExtra(Shared.EXTRA_STACK, (Parcelable) stack);
 
         // startService(copyIntent);
         return copyIntent;

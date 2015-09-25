@@ -510,7 +510,7 @@ public class DocumentsActivity extends BaseActivity {
         } else if (mState.action == ACTION_OPEN_COPY_DESTINATION) {
             // Picking a copy destination is only used internally by us, so we
             // don't need to extend permissions to the caller.
-            intent.putExtra(CopyService.EXTRA_STACK, (Parcelable) mState.stack);
+            intent.putExtra(Shared.EXTRA_STACK, (Parcelable) mState.stack);
             intent.putExtra(CopyService.EXTRA_TRANSFER_MODE, mState.transferMode);
         } else {
             intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION

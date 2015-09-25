@@ -19,6 +19,7 @@ package android.provider;
 import static android.net.TrafficStats.KB_IN_BYTES;
 import static android.system.OsConstants.SEEK_SET;
 
+import android.annotation.Nullable;
 import android.content.ContentProviderClient;
 import android.content.ContentResolver;
 import android.content.Context;
@@ -761,16 +762,30 @@ public final class DocumentsContract {
      * @see #buildDocumentUri(String, String)
      * @see #buildDocumentUriUsingTree(Uri, String)
      */
-    public static boolean isDocumentUri(Context context, Uri uri) {
-        final List<String> paths = uri.getPathSegments();
-        if (paths.size() == 2 && PATH_DOCUMENT.equals(paths.get(0))) {
-            return isDocumentsProvider(context, uri.getAuthority());
-        }
-        if (paths.size() == 4 && PATH_TREE.equals(paths.get(0))
-                && PATH_DOCUMENT.equals(paths.get(2))) {
-            return isDocumentsProvider(context, uri.getAuthority());
+    public static boolean isDocumentUri(Context context, @Nullable Uri uri) {
+        if (isContentUri(uri) && isDocumentsProvider(context, uri.getAuthority())) {
+            final List<String> paths = uri.getPathSegments();
+            if (paths.size() == 2) {
+                return PATH_DOCUMENT.equals(paths.get(0));
+            } else if (paths.size() == 4) {
+                return PATH_TREE.equals(paths.get(0)) && PATH_DOCUMENT.equals(paths.get(2));
+            }
         }
         return false;
+    }
+
+    /** {@hide} */
+    public static boolean isRootUri(Context context, @Nullable Uri uri) {
+        if (isContentUri(uri) && isDocumentsProvider(context, uri.getAuthority())) {
+            final List<String> paths = uri.getPathSegments();
+            return (paths.size() == 2 && PATH_ROOT.equals(paths.get(0)));
+        }
+        return false;
+    }
+
+    /** {@hide} */
+    public static boolean isContentUri(@Nullable Uri uri) {
+        return uri != null && ContentResolver.SCHEME_CONTENT.equals(uri.getScheme());
     }
 
     /** {@hide} */
