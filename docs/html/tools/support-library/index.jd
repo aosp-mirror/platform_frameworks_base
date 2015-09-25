@@ -665,7 +665,7 @@ page.title=Support Library
           <li>Added support for a Collapse icon description in the {@link android.support.v7.widget.Toolbar}
           class.</li>
           <li>Updated the {@link android.support.v7.widget.SearchView} widget to support displaying
-          the {@link android.support.v7.mediarouter.R.attr#commitIcon}. </li>
+          the {@link android.support.v7.appcompat.R.attr#commitIcon}. </li>
           <li>Removed the <code>buttonGravity</code> attribute from the
           {@link android.support.v7.widget.Toolbar} class. </li>
         </ul>
