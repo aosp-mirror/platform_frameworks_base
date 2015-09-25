@@ -16,6 +16,7 @@
 
 package com.android.server.wm;
 
+import static android.os.Trace.TRACE_TAG_WINDOW_MANAGER;
 import static android.view.WindowManager.LayoutParams.FIRST_SUB_WINDOW;
 import static android.view.WindowManager.LayoutParams.FLAG_DIM_BEHIND;
 import static android.view.WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED;
@@ -38,6 +39,7 @@ import android.app.AppOpsManager;
 import android.os.PowerManager;
 import android.os.RemoteCallbackList;
 import android.os.SystemClock;
+import android.os.Trace;
 import android.os.WorkSource;
 import android.util.DisplayMetrics;
 import android.util.TimeUtils;
@@ -1465,10 +1467,7 @@ final class WindowState implements WindowManagerPolicy.WindowState {
                 // We want the tag name to be somewhat stable so that it is easier to correlate
                 // in wake lock statistics.  So in particular, we don't want to include the
                 // window's hash code as in toString().
-                CharSequence tag = mAttrs.getTitle();
-                if (tag == null) {
-                    tag = mAttrs.packageName;
-                }
+                final CharSequence tag = getWindowTag();
                 mDrawLock = mService.mPowerManager.newWakeLock(
                         PowerManager.DRAW_WAKE_LOCK, "Window:" + tag);
                 mDrawLock.setReferenceCounted(false);
@@ -1605,6 +1604,7 @@ final class WindowState implements WindowManagerPolicy.WindowState {
     }
 
     void reportResized() {
+        Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "wm.reportResized_" + getWindowTag());
         try {
             if (DEBUG_RESIZE || DEBUG_ORIENTATION) Slog.v(TAG, "Reporting new frame to " + this
                     + ": " + mCompatFrame);
@@ -1670,6 +1670,7 @@ final class WindowState implements WindowManagerPolicy.WindowState {
             mService.mPendingRemove.add(this);
             mService.mWindowPlacerLocked.requestTraversal();
         }
+        Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
     }
 
     public void registerFocusObserver(IWindowFocusObserver observer) {
@@ -1901,15 +1902,20 @@ final class WindowState implements WindowManagerPolicy.WindowState {
 
     String makeInputChannelName() {
         return Integer.toHexString(System.identityHashCode(this))
-            + " " + mAttrs.getTitle();
+            + " " + getWindowTag();
+    }
+
+    private CharSequence getWindowTag() {
+        CharSequence tag = mAttrs.getTitle();
+        if (tag == null || tag.length() <= 0) {
+            tag = mAttrs.packageName;
+        }
+        return tag;
     }
 
     @Override
     public String toString() {
-        CharSequence title = mAttrs.getTitle();
-        if (title == null || title.length() <= 0) {
-            title = mAttrs.packageName;
-        }
+        final CharSequence title = getWindowTag();
         if (mStringNameCache == null || mLastTitle != title || mWasExiting != mExiting) {
             mLastTitle = title;
             mWasExiting = mExiting;

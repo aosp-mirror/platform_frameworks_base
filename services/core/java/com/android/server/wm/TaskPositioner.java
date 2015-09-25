@@ -22,6 +22,7 @@ import static android.app.ActivityManager.FREEFORM_WORKSPACE_STACK_ID;
 import static android.app.ActivityManager.RESIZE_MODE_FORCED;
 import static android.app.ActivityManager.RESIZE_MODE_USER;
 import static android.content.res.Configuration.ORIENTATION_LANDSCAPE;
+import static android.os.Trace.TRACE_TAG_WINDOW_MANAGER;
 import static com.android.server.wm.WindowManagerService.DEBUG_TASK_POSITIONING;
 import static com.android.server.wm.WindowManagerService.SHOW_TRANSACTIONS;
 import static com.android.server.wm.WindowState.MINIMUM_VISIBLE_HEIGHT_IN_DP;
@@ -33,6 +34,7 @@ import android.graphics.Rect;
 import android.os.Looper;
 import android.os.Process;
 import android.os.RemoteException;
+import android.os.Trace;
 import android.util.DisplayMetrics;
 import android.util.Slog;
 import android.view.Choreographer;
@@ -145,10 +147,12 @@ class TaskPositioner implements DimLayer.DimLayerUser {
                         synchronized (mService.mWindowMap) {
                             mDragEnded = notifyMoveLocked(newX, newY);
                         }
+                        Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "wm.TaskPositioner.resizeTask");
                         try {
                             mService.mActivityManager.resizeTask(
                                     mTask.mTaskId, mWindowDragBounds, RESIZE_MODE_USER);
                         } catch(RemoteException e) {}
+                        Trace.traceEnd(Trace.TRACE_TAG_WINDOW_MANAGER);
                     } break;
 
                     case MotionEvent.ACTION_UP: {

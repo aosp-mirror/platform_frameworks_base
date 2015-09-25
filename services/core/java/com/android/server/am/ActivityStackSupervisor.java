@@ -24,6 +24,7 @@ import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
 import static android.content.Intent.FLAG_ACTIVITY_TASK_ON_HOME;
 import static android.content.pm.ActivityInfo.FLAG_SHOW_FOR_ALL_USERS;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
+import static android.os.Trace.TRACE_TAG_ACTIVITY_MANAGER;
 import static com.android.server.am.ActivityManagerDebugConfig.*;
 import static com.android.server.am.ActivityManagerService.FIRST_SUPERVISOR_STACK_MSG;
 import static com.android.server.am.ActivityRecord.HOME_ACTIVITY_TYPE;
@@ -87,6 +88,7 @@ import android.os.Process;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.SystemClock;
+import android.os.Trace;
 import android.os.TransactionTooLargeException;
 import android.os.UserHandle;
 import android.os.WorkSource;
@@ -2968,6 +2970,8 @@ public final class ActivityStackSupervisor implements DisplayListener {
             return;
         }
 
+        Trace.traceBegin(TRACE_TAG_ACTIVITY_MANAGER, "am.resizeStack_" + stackId);
+
         ActivityRecord r = stack.topRunningActivityLocked(null);
 
         mTmpBounds.clear();
@@ -3051,6 +3055,8 @@ public final class ActivityStackSupervisor implements DisplayListener {
                 resumeTopActivitiesLocked(stack, null, null);
             }
         }
+
+        Trace.traceEnd(TRACE_TAG_ACTIVITY_MANAGER);
     }
 
     void resizeTaskLocked(TaskRecord task, Rect bounds, int resizeMode) {
@@ -3078,6 +3084,8 @@ public final class ActivityStackSupervisor implements DisplayListener {
             }
             return;
         }
+
+        Trace.traceBegin(TRACE_TAG_ACTIVITY_MANAGER, "am.resizeTask_" + task.taskId);
 
         // The stack of a task is determined by its size (fullscreen vs non-fullscreen).
         // Place the task in the right stack if it isn't there already based on the requested
@@ -3124,6 +3132,8 @@ public final class ActivityStackSupervisor implements DisplayListener {
             }
         }
         mWindowManager.resizeTask(task.taskId, bounds, task.mOverrideConfig, kept, forced);
+
+        Trace.traceEnd(TRACE_TAG_ACTIVITY_MANAGER);
     }
 
     ActivityStack createStackOnDisplay(int stackId, int displayId, boolean onTop) {
