@@ -16,45 +16,6 @@
 */
 -->
 <resources>
-    <!-- Recent Applications parameters -->
-    <!-- Upper width limit for application icon -->
-    <dimen name="status_bar_recents_app_icon_max_width">48dp</dimen>
-    <!-- Upper height limit for application icon -->
-    <dimen name="status_bar_recents_app_icon_max_height">48dp</dimen>
-
-    <!-- Size of application thumbnail -->
-    <dimen name="status_bar_recents_thumbnail_width">164dp</dimen>
-    <dimen name="status_bar_recents_thumbnail_height">145dp</dimen>
-    <dimen name="status_bar_recents_thumbnail_bg_padding">4dp</dimen>
-
-    <!-- Size of application label text -->
-    <dimen name="status_bar_recents_app_label_text_size">14dip</dimen>
-    <!-- Size of application description text -->
-    <dimen name="status_bar_recents_app_description_text_size">14dip</dimen>
-    <!-- Size of fading edge for text -->
-    <dimen name="status_bar_recents_text_fading_edge_length">20dip</dimen>
-    <!-- Size of fading edge for scrolling -->
-    <dimen name="status_bar_recents_scroll_fading_edge_length">10dip</dimen>
-    <!-- Margin between recents container and glow on the right -->
-    <dimen name="status_bar_recents_right_glow_margin">100dip</dimen>
-    <!-- How far the thumbnail for a recent app appears from left edge -->
-    <dimen name="status_bar_recents_thumbnail_left_margin">20dp</dimen>
-    <!-- Padding for text descriptions -->
-    <dimen name="status_bar_recents_text_description_padding">8dp</dimen>
-    <!-- Width of application label text -->
-    <dimen name="status_bar_recents_app_label_width">88dip</dimen>
-    <!-- Left margin of application label text -->
-    <dimen name="status_bar_recents_app_label_left_margin">0dip</dimen>
-    <!-- Padding between recents items -->
-    <dimen name="status_bar_recents_item_padding">0dip</dimen>
-    <!-- When recents first appears, how far the icon and label of the primary activity
-         travel -->
-    <dimen name="status_bar_recents_app_icon_translate_distance">35dip</dimen>
-
-    <!-- Where to place the app icon over the thumbnail -->
-    <dimen name="status_bar_recents_app_icon_left_margin">0dp</dimen>
-    <dimen name="status_bar_recents_app_icon_top_margin">8dp</dimen>
-
     <!-- Amount to offset bottom of notification peek window from top of status bar. -->
     <dimen name="peek_window_y_offset">-12dp</dimen>
 

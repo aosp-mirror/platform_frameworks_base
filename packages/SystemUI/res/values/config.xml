@@ -20,15 +20,6 @@
 <!-- These resources are around just to allow their values to be customized
      for different hardware and product builds. -->
 <resources>
-
-    <!-- Whether we're using the tablet-optimized recents interface (we use this
-     value at runtime for some things) -->
-    <bool name="config_recents_interface_for_tablets">false</bool>
-
-    <!-- Whether recents thumbnails should stretch in both x and y to fill their
-     ImageView -->
-    <bool name="config_recents_thumbnail_image_fits_to_xy">false</bool>
-
     <!-- Whether recents should use hardware layers for its taskviews. This flag can be enabled
     for devices where the java drawing of round rects may be slow -->
     <bool name="config_recents_use_hardware_layers">false</bool>
@@ -45,9 +36,6 @@
     <!-- Whether to clip notification contents with a rounded rectangle. Might be expensive on
          certain GPU's and thus can be turned off with only minimal visual impact. -->
     <bool name="config_notifications_round_rect_clipping">true</bool>
-
-    <!-- The theme to use for RecentsActivity. -->
-    <item type="style" name="config_recents_activity_theme">@style/RecentsTheme.Wallpaper</item>
 
     <!-- Control whether status bar should distinguish HSPA data icon form UMTS
     data icon on devices -->
@@ -91,10 +79,6 @@
 
     <!-- The length of the vibration when the notification pops open. -->
     <integer name="one_finger_pop_duration_ms">10</integer>
-
-    <!-- Whether we're using the tablet-optimized recents interface (we use this
-     value at runtime for some things) -->
-    <integer name="status_bar_recents_bg_gradient_degrees">90</integer>
 
     <!-- decay duration (from size_max -> size), in ms -->
     <integer name="navigation_bar_deadzone_hold">333</integer>

@@ -17,8 +17,6 @@
 -->
 <resources>
     <!-- Recent Applications parameters -->
-    <dimen name="status_bar_recents_app_label_width">190dip</dimen>
-
     <!-- The side padding for the task stack as a percentage of the width. -->
     <item name="recents_stack_width_padding_percentage" format="float" type="dimen">0.25</item>
 

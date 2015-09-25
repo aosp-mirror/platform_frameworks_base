@@ -22,20 +22,6 @@
 <resources>
     <integer name="status_bar_config_maxNotificationIcons">5</integer>
 
-    <!-- Whether we're using the tablet-optimized recents interface (we use this
-     value at runtime for some things) -->
-    <bool name="config_recents_interface_for_tablets">true</bool>
-
-    <!-- Whether recents thumbnails should stretch in both x and y to fill their
-     ImageView -->
-    <bool name="config_recents_thumbnail_image_fits_to_xy">true</bool>
-
-    <!-- Min alpha % that recent items will fade to while being dismissed -->
-    <integer name="config_recent_item_min_alpha">0</integer>
-
-    <!-- Transposes the search bar layout in landscape -->
-    <bool name="recents_transpose_search_layout_with_orientation">false</bool>
-
     <!-- The maximum count of notifications on Keyguard. The rest will be collapsed in an overflow
          card. -->
     <integer name="keyguard_max_notification_count">5</integer>

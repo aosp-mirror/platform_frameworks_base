@@ -19,25 +19,6 @@
     <!-- thickness (width) of the navigation bar on phones that require it -->
     <dimen name="navigation_bar_size">@*android:dimen/navigation_bar_width</dimen>
 
-    <!-- Recent Applications parameters -->
-    <!-- How far the thumbnail for a recent app appears from left edge -->
-    <dimen name="status_bar_recents_thumbnail_left_margin">0dp</dimen>
-    <!-- How far the thumbnail for a recent app appears from top edge -->
-    <dimen name="status_bar_recents_thumbnail_top_margin">28dp</dimen>
-    <!-- Padding for text descriptions -->
-    <dimen name="status_bar_recents_text_description_padding">8dp</dimen>
-    <!-- Width of application label text -->
-    <dimen name="status_bar_recents_app_label_width">156dip</dimen>
-    <!-- Left margin of application label text -->
-    <dimen name="status_bar_recents_app_label_left_margin">12dip</dimen>
-    <!-- Margin between recents container and glow on the right -->
-    <dimen name="status_bar_recents_right_glow_margin">0dip</dimen>
-    <!-- Padding between recents items -->
-    <dimen name="status_bar_recents_item_padding">2dip</dimen>
-    <!-- Where to place the app icon over the thumbnail -->
-    <dimen name="status_bar_recents_app_icon_left_margin">8dp</dimen>
-    <dimen name="status_bar_recents_app_icon_top_margin">8dp</dimen>
-
     <!-- The side padding for the task stack as a percentage of the width. -->
     <item name="recents_stack_width_padding_percentage" format="float" type="dimen">0.26</item>
 

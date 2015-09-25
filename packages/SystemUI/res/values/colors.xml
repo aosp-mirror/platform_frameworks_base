@@ -24,11 +24,8 @@
     <color name="system_bar_background_semi_transparent">#66000000</color> <!-- 40% black -->
     <color name="system_bar_background_transparent">#00000000</color>
     <color name="notification_panel_solid_background">#ff000000</color>
-    <drawable name="status_bar_recents_app_thumbnail_background">#88000000</drawable>
-    <color name="status_bar_recents_app_label_color">#ffffffff</color>
     <drawable name="status_bar_notification_row_background_color">#ff090909</drawable>
     <color name="notification_list_shadow_top">#80000000</color>
-    <drawable name="recents_callout_line">#99ffffff</drawable>
     <drawable name="heads_up_notification_bg_pressed">#ff33B5E5</drawable>
     <color name="batterymeter_frame_color">#4DFFFFFF</color><!-- 30% white -->
     <color name="batterymeter_charge_color">#FFFFFFFF</color>
