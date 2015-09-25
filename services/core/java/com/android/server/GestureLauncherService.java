@@ -17,6 +17,7 @@
 package com.android.server;
 
 import android.app.ActivityManager;
+import android.app.StatusBarManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -263,7 +264,8 @@ public class GestureLauncherService extends SystemService {
         }
         if (launched) {
             Slog.i(TAG, "Power button double tap gesture detected, launching camera.");
-            launched = handleCameraLaunchGesture(false /* useWakelock */);
+            launched = handleCameraLaunchGesture(false /* useWakelock */,
+                    StatusBarManager.CAMERA_LAUNCH_SOURCE_POWER_DOUBLE_TAP);
             if (launched) {
                 MetricsLogger.action(mContext, MetricsLogger.ACTION_DOUBLE_TAP_POWER_CAMERA_GESTURE,
                         (int) doubleTapInterval);
@@ -276,7 +278,7 @@ public class GestureLauncherService extends SystemService {
     /**
      * @return true if camera was launched, false otherwise.
      */
-    private boolean handleCameraLaunchGesture(boolean useWakelock) {
+    private boolean handleCameraLaunchGesture(boolean useWakelock, int source) {
         boolean userSetupComplete = Settings.Secure.getInt(mContext.getContentResolver(),
                 Settings.Secure.USER_SETUP_COMPLETE, 0) != 0;
         if (!userSetupComplete) {
@@ -295,7 +297,7 @@ public class GestureLauncherService extends SystemService {
         }
         StatusBarManagerInternal service = LocalServices.getService(
                 StatusBarManagerInternal.class);
-        service.onCameraLaunchGestureDetected();
+        service.onCameraLaunchGestureDetected(source);
         return true;
     }
 
@@ -334,7 +336,8 @@ public class GestureLauncherService extends SystemService {
                     Slog.d(TAG, String.format("Received a camera launch event: " +
                             "values=[%.4f, %.4f, %.4f].", values[0], values[1], values[2]));
                 }
-                if (handleCameraLaunchGesture(true /* useWakelock */)) {
+                if (handleCameraLaunchGesture(true /* useWakelock */,
+                        StatusBarManager.CAMERA_LAUNCH_SOURCE_WIGGLE)) {
                     MetricsLogger.action(mContext, MetricsLogger.ACTION_WIGGLE_CAMERA_GESTURE);
                     trackCameraLaunchEvent(event);
                 }

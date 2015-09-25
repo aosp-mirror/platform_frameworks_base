@@ -74,7 +74,9 @@ oneway interface IStatusBar
 
     /**
      * Notifies the status bar that a camera launch gesture has been detected.
+     *
+     * @param source the identifier for the gesture, see {@link StatusBarManager}
      */
-    void onCameraLaunchGestureDetected();
+    void onCameraLaunchGestureDetected(int source);
 }
 

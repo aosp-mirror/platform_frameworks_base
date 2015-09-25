@@ -178,10 +178,10 @@ public class StatusBarManagerService extends IStatusBarService.Stub {
         }
 
         @Override
-        public void onCameraLaunchGestureDetected() {
+        public void onCameraLaunchGestureDetected(int source) {
             if (mBar != null) {
                 try {
-                    mBar.onCameraLaunchGestureDetected();
+                    mBar.onCameraLaunchGestureDetected(source);
                 } catch (RemoteException e) {
                 }
             }
