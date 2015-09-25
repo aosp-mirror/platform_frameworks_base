@@ -244,8 +244,9 @@ public class DhcpClient extends BaseDhcpStateMachine {
     private PendingIntent createStateMachineCommandIntent(final String cmdName, final int cmd) {
         String action = DhcpClient.class.getName() + "." + mIfaceName + "." + cmdName;
 
-        Intent intent = new Intent(action, null)
-                .addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT);
+        Intent intent = new Intent(action, null).addFlags(
+                Intent.FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT |
+                Intent.FLAG_RECEIVER_FOREGROUND);
         // TODO: The intent's package covers the whole of the system server, so it's pretty generic.
         // Consider adding some sort of token as well.
         intent.setPackage(mContext.getPackageName());
