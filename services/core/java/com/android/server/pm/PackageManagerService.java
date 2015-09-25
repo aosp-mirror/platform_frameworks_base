@@ -4724,7 +4724,7 @@ public class PackageManagerService extends IPackageManager.Stub {
         synchronized (mInstallLock) {
             mPackageDexOptimizer.performDexOpt(p, null /* instruction sets */,
                     false /* force dex */, false /* defer */, true /* include dependencies */,
-                    false /* boot complete */);
+                    false /* boot complete */, false /*useJit*/);
         }
     }
 
@@ -4767,7 +4767,7 @@ public class PackageManagerService extends IPackageManager.Stub {
             final String[] instructionSets = new String[] { targetInstructionSet };
             int result = mPackageDexOptimizer.performDexOpt(p, instructionSets,
                     false /* forceDex */, false /* defer */, true /* inclDependencies */,
-                    true /* boot complete */);
+                    true /* boot complete */, false /*useJit*/);
             return result == PackageDexOptimizer.DEX_OPT_PERFORMED;
         }
     }
@@ -4812,7 +4812,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                     getPrimaryInstructionSet(pkg.applicationInfo) };
             final int res = mPackageDexOptimizer.performDexOpt(pkg, instructionSets,
                     true /*forceDex*/, false /* defer */, true /* inclDependencies */,
-                    true /* boot complete */);
+                    true /* boot complete */, false /*useJit*/);
             if (res != PackageDexOptimizer.DEX_OPT_PERFORMED) {
                 throw new IllegalStateException("Failed to dexopt: " + res);
             }
@@ -5583,7 +5583,7 @@ public class PackageManagerService extends IPackageManager.Stub {
         if ((scanFlags & SCAN_NO_DEX) == 0) {
             int result = mPackageDexOptimizer.performDexOpt(pkg, null /* instruction sets */,
                     forceDex, (scanFlags & SCAN_DEFER_DEX) != 0, false /* inclDependencies */,
-                    (scanFlags & SCAN_BOOTING) == 0);
+                    (scanFlags & SCAN_BOOTING) == 0, false /*useJit*/);
             if (result == PackageDexOptimizer.DEX_OPT_FAILED) {
                 throw new PackageManagerException(INSTALL_FAILED_DEXOPT, "scanPackageLI");
             }
@@ -5660,7 +5660,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                     int result = mPackageDexOptimizer.performDexOpt(clientPkg,
                             null /* instruction sets */, forceDex,
                             (scanFlags & SCAN_DEFER_DEX) != 0, false,
-                            (scanFlags & SCAN_BOOTING) == 0);
+                            (scanFlags & SCAN_BOOTING) == 0, false /*useJit*/);
                     if (result == PackageDexOptimizer.DEX_OPT_FAILED) {
                         throw new PackageManagerException(INSTALL_FAILED_DEXOPT,
                                 "scanPackageLI failed to dexopt clientLibPkgs");
@@ -6271,7 +6271,7 @@ public class PackageManagerService extends IPackageManager.Stub {
 
                         int result = mPackageDexOptimizer.performDexOpt(ps.pkg,
                                 null /* instruction sets */, forceDexOpt, deferDexOpt, true,
-                                bootComplete);
+                                bootComplete, false /*useJit*/);
                         if (result == PackageDexOptimizer.DEX_OPT_FAILED) {
                             ps.primaryCpuAbiString = null;
                             ps.pkg.applicationInfo.primaryCpuAbi = null;
@@ -10456,7 +10456,7 @@ public class PackageManagerService extends IPackageManager.Stub {
             int result = mPackageDexOptimizer
                     .performDexOpt(pkg, null /* instruction sets */, false /* forceDex */,
                             false /* defer */, false /* inclDependencies */,
-                            true /*bootComplete*/);
+                            true /*bootComplete*/, false /*useJit*/);
             if (result == PackageDexOptimizer.DEX_OPT_FAILED) {
                 res.setError(INSTALL_FAILED_DEXOPT, "Dexopt failed for " + pkg.codePath);
                 return;
