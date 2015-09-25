@@ -54,4 +54,7 @@
 
     <!-- Do not show the message saying USB is connected in charging mode. -->
     <bool name="config_usbChargingMessage">false</bool>
+
+    <!-- Use a custom transition for RemoteViews. -->
+    <bool name="config_overrideRemoteViewsActivityTransition">true</bool>
 </resources>

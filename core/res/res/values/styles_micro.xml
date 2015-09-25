@@ -18,6 +18,7 @@
 
     <style name="Animation.Micro.Activity" parent="Animation.Material.Activity">
         <item name="activityOpenEnterAnimation">@anim/slide_in_micro</item>
+        <item name="activityOpenRemoteViewsEnterAnimation">@anim/slide_in_micro</item>
         <item name="activityOpenExitAnimation">@null</item>
         <item name="activityCloseEnterAnimation">@null</item>
         <item name="activityCloseExitAnimation">@anim/slide_out_micro</item>
