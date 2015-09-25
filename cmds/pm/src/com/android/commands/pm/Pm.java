@@ -22,11 +22,13 @@ import static android.content.pm.PackageManager.INTENT_FILTER_DOMAIN_VERIFICATIO
 import static android.content.pm.PackageManager.INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_ALWAYS_ASK;
 import static android.content.pm.PackageManager.INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_NEVER;
 
+import android.accounts.IAccountManager;
 import android.app.ActivityManager;
 import android.app.ActivityManagerNative;
 import android.app.IActivityManager;
 import android.app.PackageInstallObserver;
 import android.content.ComponentName;
+import android.content.Context;
 import android.content.IIntentReceiver;
 import android.content.IIntentSender;
 import android.content.Intent;
@@ -92,6 +94,7 @@ public final class Pm {
     IPackageManager mPm;
     IPackageInstaller mInstaller;
     IUserManager mUm;
+    IAccountManager mAm;
 
     private WeakHashMap<String, Resources> mResourceCache
             = new WeakHashMap<String, Resources>();
@@ -122,9 +125,10 @@ public final class Pm {
         if (args.length < 1) {
             return showUsage();
         }
-
-        mUm = IUserManager.Stub.asInterface(ServiceManager.getService("user"));
+        mAm = IAccountManager.Stub.asInterface(ServiceManager.getService(Context.ACCOUNT_SERVICE));
+        mUm = IUserManager.Stub.asInterface(ServiceManager.getService(Context.USER_SERVICE));
         mPm = IPackageManager.Stub.asInterface(ServiceManager.getService("package"));
+
         if (mPm == null) {
             System.err.println(PM_NOT_RUNNING_ERR);
             return 1;
@@ -1381,6 +1385,8 @@ public final class Pm {
                 }
             } else if ("--managed".equals(opt)) {
                 flags |= UserInfo.FLAG_MANAGED_PROFILE;
+            } else if ("--restricted".equals(opt)) {
+                flags |= UserInfo.FLAG_RESTRICTED;
             } else {
                 System.err.println("Error: unknown option " + opt);
                 showUsage();
@@ -1394,12 +1400,18 @@ public final class Pm {
         }
         name = arg;
         try {
-            UserInfo info = null;
-            if (userId < 0) {
+            UserInfo info;
+            if ((flags & UserInfo.FLAG_RESTRICTED) != 0) {
+                // In non-split user mode, userId can only be SYSTEM
+                int parentUserId = userId >= 0 ? userId : UserHandle.USER_SYSTEM;
+                info = mUm.createRestrictedProfile(name, parentUserId);
+                mAm.addSharedAccountsFromParentUser(userId, parentUserId);
+            } else if (userId < 0) {
                 info = mUm.createUser(name, flags);
             } else {
                 info = mUm.createProfileForUser(name, flags, userId);
             }
+
             if (info != null) {
                 System.out.println("Success: created user id " + info.id);
                 return 1;
@@ -2122,7 +2134,7 @@ public final class Pm {
         System.err.println("       pm get-install-location");
         System.err.println("       pm set-permission-enforced PERMISSION [true|false]");
         System.err.println("       pm trim-caches DESIRED_FREE_SPACE [internal|UUID]");
-        System.err.println("       pm create-user [--profileOf USER_ID] [--managed] USER_NAME");
+        System.err.println("       pm create-user [--profileOf USER_ID] [--managed] [--restricted] USER_NAME");
         System.err.println("       pm remove-user USER_ID");
         System.err.println("       pm get-max-users");
         System.err.println("");
