@@ -28,14 +28,17 @@ import java.util.List;
  * A classifier which for each point from a stroke, it creates a point on plane with coordinates
  * (timeOffsetNano, distanceCoveredUpToThisPoint) (scaled by DURATION_SCALE and LENGTH_SCALE)
  * and then it calculates the angle variance of these points like the class
- * {@link AnglesVarianceClassifier} (without splitting it into two parts). The classifier ignores
+ * {@link AnglesClassifier} (without splitting it into two parts). The classifier ignores
  * the last point of a stroke because the UP event comes in with some delay and this ruins the
- * smoothness of this curve
+ * smoothness of this curve. Additionally, the classifier classifies calculates the percentage of
+ * angles which value is in [PI - ANGLE_DEVIATION, 2* PI) interval. The reason why the classifier
+ * does that is because the speed of a good stroke is most often increases, so most of these angels
+ * should be in this interval.
  */
-public class SpeedVarianceClassifier extends StrokeClassifier {
+public class SpeedAnglesClassifier extends StrokeClassifier {
     private HashMap<Stroke, Data> mStrokeMap = new HashMap<>();
 
-    public SpeedVarianceClassifier(ClassifierData classifierData) {
+    public SpeedAnglesClassifier(ClassifierData classifierData) {
         mClassifierData = classifierData;
     }
 
@@ -64,12 +67,15 @@ public class SpeedVarianceClassifier extends StrokeClassifier {
 
     @Override
     public float getFalseTouchEvaluation(int type, Stroke stroke) {
-        return SpeedVarianceEvaluator.evaluate(mStrokeMap.get(stroke).getAnglesVariance());
+        Data data = mStrokeMap.get(stroke);
+        return SpeedVarianceEvaluator.evaluate(data.getAnglesVariance())
+                + SpeedAnglesPercentageEvaluator.evaluate(data.getAnglesPercentage());
     }
 
     private static class Data {
         private final float DURATION_SCALE = 1e8f;
         private final float LENGTH_SCALE = 1.0f;
+        private final float ANGLE_DEVIATION = (float) Math.PI / 10.0f;
 
         private List<Point> mLastThreePoints = new ArrayList<>();
         private Point mPreviousPoint;
@@ -78,6 +84,8 @@ public class SpeedVarianceClassifier extends StrokeClassifier {
         private float mSum;
         private float mCount;
         private float mDist;
+        private float mAnglesCount;
+        private float mAcceleratingAngles;
 
         public Data() {
             mPreviousPoint = null;
@@ -86,6 +94,7 @@ public class SpeedVarianceClassifier extends StrokeClassifier {
             mSum = 0.0f;
             mCount = 1.0f;
             mDist = 0.0f;
+            mAnglesCount = mAcceleratingAngles = 0.0f;
         }
 
         public void addPoint(Point point) {
@@ -108,6 +117,11 @@ public class SpeedVarianceClassifier extends StrokeClassifier {
                     float angle = mLastThreePoints.get(1).getAngle(mLastThreePoints.get(0),
                             mLastThreePoints.get(2));
 
+                    mAnglesCount++;
+                    if (angle >= (float) Math.PI - ANGLE_DEVIATION) {
+                        mAcceleratingAngles++;
+                    }
+
                     float difference = angle - mPreviousAngle;
                     mSum += difference;
                     mSumSquares += difference * difference;
@@ -119,6 +133,13 @@ public class SpeedVarianceClassifier extends StrokeClassifier {
 
         public float getAnglesVariance() {
             return mSumSquares / mCount - (mSum / mCount) * (mSum / mCount);
+        }
+
+        public float getAnglesPercentage() {
+            if (mAnglesCount == 0.0f) {
+                return 1.0f;
+            }
+            return (mAcceleratingAngles) / mAnglesCount;
         }
     }
 }
