@@ -135,7 +135,7 @@
     <string name="wfc_mode_wifi_preferred_summary" msgid="1994113411286935263">"Se preferă conexiunea Wi-Fi"</string>
     <string name="wfc_mode_cellular_preferred_summary" msgid="5920549484600758786">"Se preferă conexiunea mobilă"</string>
     <string name="wfc_mode_wifi_only_summary" msgid="2379919155237869320">"Numai Wi-Fi"</string>
-    <string name="cfTemplateNotForwarded" msgid="1683685883841272560">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: neredirecţionată"</string>
+    <string name="cfTemplateNotForwarded" msgid="1683685883841272560">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: neredirecționată"</string>
     <string name="cfTemplateForwarded" msgid="1302922117498590521">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g>"</string>
     <string name="cfTemplateForwardedTime" msgid="9206251736527085256">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g> după <xliff:g id="TIME_DELAY">{2}</xliff:g> (de) secunde"</string>
     <string name="cfTemplateRegistered" msgid="5073237827620166285">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: neredirecţionat"</string>
@@ -232,19 +232,19 @@
     <string name="permgrouplab_location" msgid="7275582855722310164">"Locație"</string>
     <string name="permgroupdesc_location" msgid="1346617465127855033">"acceseze locația acestui dispozitiv"</string>
     <string name="permgrouplab_calendar" msgid="5863508437783683902">"Calendar"</string>
-    <string name="permgroupdesc_calendar" msgid="3889615280211184106">"accesează calendarul"</string>
+    <string name="permgroupdesc_calendar" msgid="3889615280211184106">"acceseze calendarul"</string>
     <string name="permgrouplab_sms" msgid="228308803364967808">"SMS"</string>
-    <string name="permgroupdesc_sms" msgid="4656988620100940350">"trimite și vede mesajele SMS"</string>
+    <string name="permgroupdesc_sms" msgid="4656988620100940350">"trimită și să vadă mesajele SMS"</string>
     <string name="permgrouplab_storage" msgid="1971118770546336966">"Stocare"</string>
     <string name="permgroupdesc_storage" msgid="637758554581589203">"acceseze fotografiile, conținutul media și fișierele de pe dispozitiv"</string>
     <string name="permgrouplab_microphone" msgid="171539900250043464">"Microfonul"</string>
-    <string name="permgroupdesc_microphone" msgid="4988812113943554584">"înregistreze conținut audio"</string>
+    <string name="permgroupdesc_microphone" msgid="4988812113943554584">"înregistreze sunet"</string>
     <string name="permgrouplab_camera" msgid="4820372495894586615">"Camera foto"</string>
-    <string name="permgroupdesc_camera" msgid="3250611594678347720">"fotografieze și să înregistreze videoclipuri"</string>
+    <string name="permgroupdesc_camera" msgid="3250611594678347720">"fotografieze și să înregistreze imagini"</string>
     <string name="permgrouplab_phone" msgid="5229115638567440675">"Telefon"</string>
     <string name="permgroupdesc_phone" msgid="6234224354060641055">"inițieze și să gestioneze apeluri telefonice"</string>
     <string name="permgrouplab_sensors" msgid="416037179223226722">"Senzori corporali"</string>
-    <string name="permgroupdesc_sensors" msgid="7147968539346634043">"accesează datele înregistrate de senzori despre semnele vitale"</string>
+    <string name="permgroupdesc_sensors" msgid="7147968539346634043">"acceseze datele de la senzori despre semnele vitale"</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"Recuperează conținutul ferestrei"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"Inspectează conținutul unei ferestre cu care interacționați."</string>
     <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"Activează funcția Explorați prin atingere"</string>
@@ -270,11 +270,11 @@
     <string name="permlab_receiveMms" msgid="1821317344668257098">"primeşte mesaje text (MMS)"</string>
     <string name="permdesc_receiveMms" msgid="533019437263212260">"Permite aplicației să primească și să proceseze mesaje MMS. Acest lucru înseamnă că aplicația ar putea monitoriza sau șterge mesajele trimise pe dispozitivul dvs. fără a vi le arăta."</string>
     <string name="permlab_readCellBroadcasts" msgid="1598328843619646166">"citeşte mesajele cu transmisie celulară"</string>
-    <string name="permdesc_readCellBroadcasts" msgid="6361972776080458979">"Permite aplicației să citească mesajele primite prin transmisie celulară de dispozitivul dvs. Alertele cu transmisie celulară sunt difuzate în unele locații pentru a vă avertiza cu privire la situaţiile de urgenţă. Aplicaţiile rău intenţionate pot afecta performanţa sau funcţionarea dispozitivului dvs. când este primită o transmisie celulară de urgenţă."</string>
+    <string name="permdesc_readCellBroadcasts" msgid="6361972776080458979">"Permite aplicației să citească mesajele primite prin transmisie celulară de dispozitivul dvs. Alertele cu transmisie celulară sunt difuzate în unele locații pentru a vă avertiza cu privire la situațiile de urgenţă. Aplicaţiile rău intenţionate pot afecta performanţa sau funcționarea dispozitivului dvs. când este primită o transmisie celulară de urgenţă."</string>
     <string name="permlab_subscribedFeedsRead" msgid="4756609637053353318">"citire feeduri abonat"</string>
     <string name="permdesc_subscribedFeedsRead" msgid="5557058907906144505">"Permite aplicației să obţină detalii despre feedurile sincronizate în prezent."</string>
-    <string name="permlab_sendSms" msgid="7544599214260982981">"trimite și vede mesajele SMS"</string>
-    <string name="permdesc_sendSms" msgid="7094729298204937667">"Permite aplicației să trimită mesaje SMS, ceea ce ar putea determina apariţia unor taxe neaşteptate. Aplicaţiile rău intenţionate pot acumula costuri prin trimiterea mesajelor fără confirmarea dvs."</string>
+    <string name="permlab_sendSms" msgid="7544599214260982981">"trimită și să vadă mesajele SMS"</string>
+    <string name="permdesc_sendSms" msgid="7094729298204937667">"Permite aplicației să trimită mesaje SMS, ceea ce ar putea determina apariția unor taxe neaşteptate. Aplicaţiile rău intenţionate pot acumula costuri prin trimiterea mesajelor fără confirmarea dvs."</string>
     <string name="permlab_readSms" msgid="8745086572213270480">"citeşte mesajele text (SMS sau MMS)"</string>
     <string name="permdesc_readSms" product="tablet" msgid="2467981548684735522">"Permite aplicației să citească mesajele SMS stocate pe tabletă sau pe cardul SIM. În acest fel, aplicația poate citi toate mesajele SMS, indiferent de conţinutul sau de gradul de confidenţialitate al acestora."</string>
     <string name="permdesc_readSms" product="tv" msgid="5102425513647038535">"Permite aplicației să citească mesajele SMS stocate pe televizor sau pe cardul SIM. Cu această permisiune, aplicația poate citi toate mesajele SMS, indiferent de conținutul sau de gradul de confidențialitate al acestora."</string>
@@ -292,11 +292,11 @@
     <string name="permlab_killBackgroundProcesses" msgid="3914026687420177202">"închide alte aplicații"</string>
     <string name="permdesc_killBackgroundProcesses" msgid="4593353235959733119">"Permite aplicației să oprească procesele derulate în fundal de alte aplicații. Acest lucru poate face ca respectivele aplicații să nu mai ruleze."</string>
     <string name="permlab_systemAlertWindow" msgid="3543347980839518613">"suprapune elemente vizuale peste alte aplicații"</string>
-    <string name="permdesc_systemAlertWindow" msgid="8584678381972820118">"Permite aplicației să suprapună elemente vizuale peste alte aplicații sau părți ale interfeţei cu utilizatorul. Acestea pot interfera cu utilizarea de către dvs. a interfeţei în orice aplicație sau pot schimba ceea ce credeţi că vedeţi în alte aplicații."</string>
+    <string name="permdesc_systemAlertWindow" msgid="8584678381972820118">"Permite aplicației să suprapună elemente vizuale peste alte aplicații sau părți ale interfeței cu utilizatorul. Acestea pot interfera cu utilizarea de către dvs. a interfeței în orice aplicație sau pot schimba ceea ce credeți că vedeţi în alte aplicații."</string>
     <string name="permlab_persistentActivity" msgid="8841113627955563938">"rulare continuă a aplicației"</string>
-    <string name="permdesc_persistentActivity" product="tablet" msgid="8525189272329086137">"Permite aplicației să declare persistente în memorie anumite părți ale sale. Acest lucru poate limita memoria disponibilă pentru alte aplicații și poate încetini funcţionarea tabletei."</string>
+    <string name="permdesc_persistentActivity" product="tablet" msgid="8525189272329086137">"Permite aplicației să declare persistente în memorie anumite părți ale sale. Acest lucru poate limita memoria disponibilă pentru alte aplicații și poate încetini funcționarea tabletei."</string>
     <string name="permdesc_persistentActivity" product="tv" msgid="5086862529499103587">"Permite aplicației să declare persistente în memorie anumite părți ale sale. Acest lucru poate limita memoria disponibilă pentru alte aplicații și poate încetini funcționarea televizorului."</string>
-    <string name="permdesc_persistentActivity" product="default" msgid="4384760047508278272">"Permite aplicației să declare persistente în memorie anumite părți ale sale. Acest lucru poate limita memoria disponibilă pentru alte aplicații și poate încetini funcţionarea telefonului."</string>
+    <string name="permdesc_persistentActivity" product="default" msgid="4384760047508278272">"Permite aplicației să declare persistente în memorie anumite părți ale sale. Acest lucru poate limita memoria disponibilă pentru alte aplicații și poate încetini funcționarea telefonului."</string>
     <string name="permlab_getPackageSize" msgid="7472921768357981986">"măsurare spaţiu de stocare al aplicației"</string>
     <string name="permdesc_getPackageSize" msgid="3921068154420738296">"Permite aplicației să preia dimensiunile codului, ale datelor și ale memoriei cache"</string>
     <string name="permlab_writeSettings" msgid="2226195290955224730">"modifică setări de sistem"</string>
@@ -310,17 +310,17 @@
     <string name="permdesc_broadcastSticky" product="tv" msgid="6839285697565389467">"Permite aplicației să trimită mesaje difuzate persistente, care se păstrează după terminarea difuzării mesajului. Utilizarea excesivă a acestei funcții poate să încetinească sau să destabilizeze televizorul, determinându-l să utilizeze prea multă memorie."</string>
     <string name="permdesc_broadcastSticky" product="default" msgid="2825803764232445091">"Permite aplicației să trimită mesaje difuzate persistente, care se păstrează după terminarea difuzării mesajului. Utilizarea excesivă a acestei funcții poate să încetinească sau să destabilizeze telefonul, determinându-l să utilizeze prea multă memorie."</string>
     <string name="permlab_readContacts" msgid="8348481131899886131">"citeşte agenda"</string>
-    <string name="permdesc_readContacts" product="tablet" msgid="5294866856941149639">"Permite aplicației să citească datele despre persoanele din agenda stocată pe tabletă, inclusiv frecvenţa cu care aţi apelat, aţi trimis e-mailuri sau aţi comunicat în alte moduri cu anumite persoane. Cu această permisiune aplicația salvează datele dvs. de contact, iar aplicațiile rău intenţionate pot distribui datele de contact fără ştirea dvs."</string>
+    <string name="permdesc_readContacts" product="tablet" msgid="5294866856941149639">"Permite aplicației să citească datele despre persoanele din agenda stocată pe tabletă, inclusiv frecvența cu care aţi apelat, aţi trimis e-mailuri sau aţi comunicat în alte moduri cu anumite persoane. Cu această permisiune aplicația salvează datele dvs. de contact, iar aplicațiile rău intenţionate pot distribui datele de contact fără știrea dvs."</string>
     <string name="permdesc_readContacts" product="tv" msgid="1839238344654834087">"Permite aplicației să citească datele despre persoanele de contact salvate pe televizor, inclusiv frecvența cu care ați apelat, ați trimis e-mailuri sau ați comunicat în alte moduri cu anumite persoane. Cu această permisiune, aplicațiile pot salva datele de contact, iar aplicațiile rău-intenționate pot permite accesul la datele de contact fără cunoștința dvs."</string>
-    <string name="permdesc_readContacts" product="default" msgid="8440654152457300662">"Permite aplicației să citească datele despre persoanele din agenda stocată pe telefon, inclusiv frecvenţa cu care aţi apelat, aţi trimis e-mailuri sau aţi comunicat în alte moduri cu anumite persoane. Cu această permisiune aplicația salvează datele dvs. de contact, iar aplicațiile rău intenţionate pot distribui datele de contact fără ştirea dvs."</string>
+    <string name="permdesc_readContacts" product="default" msgid="8440654152457300662">"Permite aplicației să citească datele despre persoanele din agenda stocată pe telefon, inclusiv frecvența cu care aţi apelat, aţi trimis e-mailuri sau aţi comunicat în alte moduri cu anumite persoane. Cu această permisiune aplicația salvează datele dvs. de contact, iar aplicațiile rău intenţionate pot distribui datele de contact fără știrea dvs."</string>
     <string name="permlab_writeContacts" msgid="5107492086416793544">"modifică agenda"</string>
-    <string name="permdesc_writeContacts" product="tablet" msgid="897243932521953602">"Permite aplicației să modifice datele despre persoanele din agenda stocată pe tabletă, inclusiv frecvenţa cu care aţi apelat, aţi trimis e-mailuri sau aţi comunicat în alte moduri cu anumite persoane din agendă. Cu această permisiune aplicația poate șterge datele de contact."</string>
+    <string name="permdesc_writeContacts" product="tablet" msgid="897243932521953602">"Permite aplicației să modifice datele despre persoanele din agenda stocată pe tabletă, inclusiv frecvența cu care aţi apelat, aţi trimis e-mailuri sau aţi comunicat în alte moduri cu anumite persoane din agendă. Cu această permisiune aplicația poate șterge datele de contact."</string>
     <string name="permdesc_writeContacts" product="tv" msgid="5438230957000018959">"Permite aplicației să modifice datele despre persoanele de contact salvate pe televizor, inclusiv frecvența cu care ați apelat, ați trimis e-mailuri sau ați comunicat în alte moduri cu anumite persoane de contact. Cu această permisiune, aplicația poate șterge datele de contact."</string>
-    <string name="permdesc_writeContacts" product="default" msgid="589869224625163558">"Permite aplicației să modifice datele despre persoanele din agenda stocată pe telefon, inclusiv frecvenţa cu care aţi apelat, aţi trimis e-mailuri sau aţi comunicat în alte moduri cu anumite persoane din agendă. Cu această permisiune aplicația poate șterge datele de contact."</string>
+    <string name="permdesc_writeContacts" product="default" msgid="589869224625163558">"Permite aplicației să modifice datele despre persoanele din agenda stocată pe telefon, inclusiv frecvența cu care aţi apelat, aţi trimis e-mailuri sau aţi comunicat în alte moduri cu anumite persoane din agendă. Cu această permisiune aplicația poate șterge datele de contact."</string>
     <string name="permlab_readCallLog" msgid="3478133184624102739">"citeşte jurnalul de apeluri"</string>
-    <string name="permdesc_readCallLog" product="tablet" msgid="3700645184870760285">"Permite aplicației să citească jurnalul de apeluri al tabletei, inclusiv datele despre apelurile primite și efectuate. Cu această permisiune aplicația salvează datele dvs. din jurnalul de apeluri, iar aplicațiile rău intenţionate pot distribui aceste date fără ştirea dvs."</string>
+    <string name="permdesc_readCallLog" product="tablet" msgid="3700645184870760285">"Permite aplicației să citească jurnalul de apeluri al tabletei, inclusiv datele despre apelurile primite și efectuate. Cu această permisiune aplicația salvează datele dvs. din jurnalul de apeluri, iar aplicațiile rău intenţionate pot distribui aceste date fără știrea dvs."</string>
     <string name="permdesc_readCallLog" product="tv" msgid="5611770887047387926">"Permite aplicației să citească jurnalul de apeluri al televizorului, inclusiv datele despre apelurile primite și efectuate. Cu această permisiune, aplicațiile pot să salveze datele din jurnalul de apeluri, iar aplicațiile rău-intenționate pot permite accesul la datele din jurnalul de apeluri fără cunoștința dvs."</string>
-    <string name="permdesc_readCallLog" product="default" msgid="5777725796813217244">"Permite aplicației să citească jurnalul de apeluri al telefonului, inclusiv datele despre apelurile primite și efectuate. Cu această permisiune aplicația salvează datele dvs. din jurnalul de apeluri, iar aplicațiile rău intenţionate pot distribui aceste date fără ştirea dvs."</string>
+    <string name="permdesc_readCallLog" product="default" msgid="5777725796813217244">"Permite aplicației să citească jurnalul de apeluri al telefonului, inclusiv datele despre apelurile primite și efectuate. Cu această permisiune aplicația salvează datele dvs. din jurnalul de apeluri, iar aplicațiile rău intenţionate pot distribui aceste date fără știrea dvs."</string>
     <string name="permlab_writeCallLog" msgid="8552045664743499354">"scrie jurnalul de apeluri"</string>
     <string name="permdesc_writeCallLog" product="tablet" msgid="6661806062274119245">"Permite aplicației să modifice jurnalul de apeluri al tabletei dvs., inclusiv datele despre apelurile primite sau efectuate. Aplicaţiile rău intenţionate pot utiliza această permisiune pentru a șterge sau pentru a modifica jurnalul dvs. de apeluri."</string>
     <string name="permdesc_writeCallLog" product="tv" msgid="4225034892248398019">"Permite aplicației să modifice jurnalul de apeluri al televizorului, inclusiv datele despre apelurile primite sau efectuate. Aplicațiile rău-intenționate pot utiliza această permisiune pentru a șterge sau pentru a modifica jurnalul de apeluri."</string>
@@ -331,10 +331,10 @@
     <string name="permdesc_readCalendar" product="tablet" msgid="4216462049057658723">"Permite aplicației să citească toate evenimentele din calendar stocate pe tabletă, inclusiv cele ale prietenilor sau colegilor. Acest lucru poate permite aplicației să distribuie sau să salveze datele din calendar, indiferent dacă acestea sunt confidenţiale sau sensibile."</string>
     <string name="permdesc_readCalendar" product="tv" msgid="3191352452242394196">"Permite aplicației să citească toate evenimentele din calendar stocate pe televizor, inclusiv cele ale prietenilor sau colegilor. Cu această permisiune, aplicația poate să permită accesul la datele din calendar sau să le salveze, indiferent dacă acestea sunt confidențiale sau sensibile."</string>
     <string name="permdesc_readCalendar" product="default" msgid="7434548682470851583">"Permite aplicației să citească toate evenimentele din calendar stocate pe telefon, inclusiv cele ale prietenilor sau colegilor. Acest lucru poate permite aplicației să distribuie sau să salveze datele din calendar, indiferent dacă acestea sunt confidenţiale sau sensibile."</string>
-    <string name="permlab_writeCalendar" msgid="8438874755193825647">"adăugarea sau modificarea evenimentelor din calendar și trimiterea de e-mailuri invitaţilor fără ştirea proprietarului"</string>
-    <string name="permdesc_writeCalendar" product="tablet" msgid="6679035520113668528">"Permite aplicației să adauge, să elimine și să modifice evenimentele pe care le puteți modifica pe tabletă, inclusiv cele ale prietenilor sau colegilor dvs. În acest fel, aplicația poate trimite mesaje care par să vină de la proprietarii calendarelor sau să modifice evenimentele fără ştirea proprietarilor."</string>
+    <string name="permlab_writeCalendar" msgid="8438874755193825647">"adăugarea sau modificarea evenimentelor din calendar și trimiterea de e-mailuri invitaților fără știrea proprietarului"</string>
+    <string name="permdesc_writeCalendar" product="tablet" msgid="6679035520113668528">"Permite aplicației să adauge, să elimine și să modifice evenimentele pe care le puteți modifica pe tabletă, inclusiv cele ale prietenilor sau colegilor dvs. În acest fel, aplicația poate trimite mesaje care par să vină de la proprietarii calendarelor sau să modifice evenimentele fără știrea proprietarilor."</string>
     <string name="permdesc_writeCalendar" product="tv" msgid="1273290605500902507">"Permite aplicației să adauge, să elimine și să modifice evenimentele pe care le puteți modifica pe televizor, inclusiv pe cele ale prietenilor sau ale colegilor. Cu această permisiune, aplicația poate să trimită mesaje care par că vin din partea proprietarilor calendarului sau să modifice evenimentele fără cunoștința acestora."</string>
-    <string name="permdesc_writeCalendar" product="default" msgid="2324469496327249376">"Permite aplicației să adauge, să elimine și să modifice evenimentele pe care le puteți modifica pe telefon, inclusiv cele ale prietenilor sau colegilor dvs. În acest fel, aplicația poate trimite mesaje care par să vină de la proprietarii calendarelor sau să modifice evenimentele fără ştirea proprietarilor."</string>
+    <string name="permdesc_writeCalendar" product="default" msgid="2324469496327249376">"Permite aplicației să adauge, să elimine și să modifice evenimentele pe care le puteți modifica pe telefon, inclusiv cele ale prietenilor sau colegilor dvs. În acest fel, aplicația poate trimite mesaje care par să vină de la proprietarii calendarelor sau să modifice evenimentele fără știrea proprietarilor."</string>
     <string name="permlab_accessLocationExtraCommands" msgid="2836308076720553837">"accesare comenzi suplimentare ale furnizorului locației"</string>
     <string name="permdesc_accessLocationExtraCommands" msgid="6078307221056649927">"Permite aplicației să acceseze comenzi suplimentare pentru furnizorul locației. Aplicația ar putea să utilizeze această permisiune pentru a influența operațiile GPS sau ale altor surse de locații."</string>
     <string name="permlab_accessFineLocation" msgid="1191898061965273372">"locaţia exactă (bazată pe rețea și GPS)"</string>
@@ -343,7 +343,7 @@
     <string name="permdesc_accessCoarseLocation" msgid="2538200184373302295">"Permite aplicației să obţină locaţia dvs. aproximativă. Această locație este dedusă de serviciile de localizare utilizând surse de localizare prin rețele, cum ar fi cele prin turn de celule și Wi-Fi. Pentru a fi utilizate de aplicație, aceste servicii de localizare trebuie să fie activate și disponibile pe dispozitivul dvs. Aplicaţiile pot utiliza această permisiune pentru a determina locaţia dvs. aproximativă."</string>
     <string name="permlab_modifyAudioSettings" msgid="6095859937069146086">"modificare setări audio"</string>
     <string name="permdesc_modifyAudioSettings" msgid="3522565366806248517">"Permite aplicației să modifice setările audio globale, cum ar fi volumul și difuzorul care este utilizat pentru ieșire."</string>
-    <string name="permlab_recordAudio" msgid="3876049771427466323">"înregistrare audio"</string>
+    <string name="permlab_recordAudio" msgid="3876049771427466323">"înregistreze sunet"</string>
     <string name="permdesc_recordAudio" msgid="4906839301087980680">"Permite aplicației să efectueze înregistrări audio cu ajutorul microfonului. Cu această permisiune aplicația efectuează oricând înregistrări audio fără confirmare."</string>
     <string name="permlab_sim_communication" msgid="1180265879464893029">"comunicare cu cardul SIM"</string>
     <string name="permdesc_sim_communication" msgid="5725159654279639498">"Permite aplicației să trimită comenzi pe cardul SIM. Această permisiune este foarte periculoasă."</string>
@@ -354,11 +354,11 @@
     <string name="permlab_flashlight" msgid="2155920810121984215">"control lanternă"</string>
     <string name="permdesc_flashlight" msgid="6522284794568368310">"Permite aplicației să controleze lanterna."</string>
     <string name="permlab_callPhone" msgid="3925836347681847954">"apelare directă numere de telefon"</string>
-    <string name="permdesc_callPhone" msgid="3740797576113760827">"Permite aplicației să apeleze numere de telefon fără intervenţia dvs. Acest lucru poate determina apariţia unor taxe sau a unor apeluri neaşteptate. Cu această permisiune aplicația nu poate apela numerele de urgenţă. Aplicaţiile rău intenţionate pot acumula costuri prin efectuarea unor apeluri fără confirmare."</string>
+    <string name="permdesc_callPhone" msgid="3740797576113760827">"Permite aplicației să apeleze numere de telefon fără intervenţia dvs. Acest lucru poate determina apariția unor taxe sau a unor apeluri neaşteptate. Cu această permisiune aplicația nu poate apela numerele de urgenţă. Aplicaţiile rău intenţionate pot acumula costuri prin efectuarea unor apeluri fără confirmare."</string>
     <string name="permlab_accessImsCallService" msgid="3574943847181793918">"accesează serviciul de apelare IMS"</string>
     <string name="permdesc_accessImsCallService" msgid="8992884015198298775">"Permite aplicației să folosească serviciul IMS pentru apeluri, fără intervenția dvs."</string>
     <string name="permlab_readPhoneState" msgid="9178228524507610486">"citeşte starea și identitatea telefonului"</string>
-    <string name="permdesc_readPhoneState" msgid="1639212771826125528">"Permite aplicației să acceseze funcţiile de telefon ale dispozitivului. Cu această permisiune aplicația stabileşte numărul de telefon și ID-urile de dispozitiv, dacă un apel este activ, precum și numărul de la distanţă conectat printr-un apel."</string>
+    <string name="permdesc_readPhoneState" msgid="1639212771826125528">"Permite aplicației să acceseze funcţiile de telefon ale dispozitivului. Cu această permisiune aplicația stabilește numărul de telefon și ID-urile de dispozitiv, dacă un apel este activ, precum și numărul de la distanţă conectat printr-un apel."</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1531731435011495015">"împiedicarea computerului tablet PC să intre în repaus"</string>
     <string name="permlab_wakeLock" product="tv" msgid="2601193288949154131">"împiedică intrarea televizorului în stare de inactivitate"</string>
     <string name="permlab_wakeLock" product="default" msgid="573480187941496130">"împiedicare intrare telefon în repaus"</string>
@@ -756,7 +756,7 @@
     <string name="js_dialog_before_unload_negative_button" msgid="5614861293026099715">"Rămâneți în această pagină"</string>
     <string name="js_dialog_before_unload" msgid="3468816357095378590">"<xliff:g id="MESSAGE">%s</xliff:g>\n\nSigur doriți să părăsiți această pagină?"</string>
     <string name="save_password_label" msgid="6860261758665825069">"Confirmați"</string>
-    <string name="double_tap_toast" msgid="4595046515400268881">"Sfat: măriţi și micşoraţi prin dublă atingere."</string>
+    <string name="double_tap_toast" msgid="4595046515400268881">"Sfat: măriți și micșorați prin dublă atingere."</string>
     <string name="autofill_this_form" msgid="4616758841157816676">"Automat"</string>
     <string name="setup_autofill" msgid="7103495070180590814">"Conf.Compl.auto."</string>
     <string name="autofill_address_name_separator" msgid="6350145154779706772">" "</string>
@@ -767,7 +767,7 @@
     <string name="autofill_postal_code" msgid="4696430407689377108">"Cod poştal"</string>
     <string name="autofill_state" msgid="6988894195520044613">"Stat"</string>
     <string name="autofill_zip_code" msgid="8697544592627322946">"Cod ZIP"</string>
-    <string name="autofill_county" msgid="237073771020362891">"Judeţ"</string>
+    <string name="autofill_county" msgid="237073771020362891">"Județ"</string>
     <string name="autofill_island" msgid="4020100875984667025">"Insulă"</string>
     <string name="autofill_district" msgid="8400735073392267672">"District"</string>
     <string name="autofill_department" msgid="5343279462564453309">"Departament"</string>
@@ -776,11 +776,11 @@
     <string name="autofill_area" msgid="3547409050889952423">"Zonă"</string>
     <string name="autofill_emirate" msgid="2893880978835698818">"Emirat"</string>
     <string name="permlab_readHistoryBookmarks" msgid="3775265775405106983">"citeşte marcajele și istoricul web"</string>
-    <string name="permdesc_readHistoryBookmarks" msgid="8462378226600439658">"Permite aplicației să citească istoricul tuturor adreselor URL accesate de Browser și toate marcajele din Browser. Notă: această permisiune nu poate fi aplicată de browsere terţă parte sau de alte aplicații cu capacităţi de navigare pe web."</string>
+    <string name="permdesc_readHistoryBookmarks" msgid="8462378226600439658">"Permite aplicației să citească istoricul tuturor adreselor URL accesate de Browser și toate marcajele din Browser. Notă: această permisiune nu poate fi aplicată de browsere terţă parte sau de alte aplicații cu capacități de navigare pe web."</string>
     <string name="permlab_writeHistoryBookmarks" msgid="3714785165273314490">"scrie în marcajele și în istoricul web"</string>
-    <string name="permdesc_writeHistoryBookmarks" product="tablet" msgid="6825527469145760922">"Permite aplicației să modifice istoricul Browserului sau marcajele stocate pe tabletă. În acest fel, aplicația poate șterge sau modifica datele din Browser. Notă: această permisiune nu poate fi aplicată de browsere terţă parte sau de alte aplicații cu capacităţi de navigare pe web."</string>
+    <string name="permdesc_writeHistoryBookmarks" product="tablet" msgid="6825527469145760922">"Permite aplicației să modifice istoricul Browserului sau marcajele stocate pe tabletă. În acest fel, aplicația poate șterge sau modifica datele din Browser. Notă: această permisiune nu poate fi aplicată de browsere terţă parte sau de alte aplicații cu capacități de navigare pe web."</string>
     <string name="permdesc_writeHistoryBookmarks" product="tv" msgid="7007393823197766548">"Permite aplicației să modifice istoricul sau marcajele browserului stocate pe televizor. Cu această permisiune, aplicația poate șterge sau modifica datele din browser. Notă: această permisiune nu poate fi aplicată de browsere terță parte sau de alte aplicații cu capacități de navigare pe web."</string>
-    <string name="permdesc_writeHistoryBookmarks" product="default" msgid="8497389531014185509">"Permite aplicației să modifice istoricul Browserului sau marcajele stocate pe telefon. În acest fel, aplicația poate șterge sau modifica datele din Browser. Notă: această permisiune nu poate fi aplicată de browsere terţă parte sau de alte aplicații cu capacităţi de navigare pe web."</string>
+    <string name="permdesc_writeHistoryBookmarks" product="default" msgid="8497389531014185509">"Permite aplicației să modifice istoricul Browserului sau marcajele stocate pe telefon. În acest fel, aplicația poate șterge sau modifica datele din Browser. Notă: această permisiune nu poate fi aplicată de browsere terţă parte sau de alte aplicații cu capacități de navigare pe web."</string>
     <string name="permlab_setAlarm" msgid="1379294556362091814">"setează o alarmă"</string>
     <string name="permdesc_setAlarm" msgid="316392039157473848">"Permite aplicației să seteze o alarmă într-o aplicație de ceas cu alarmă instalată. Este posibil ca unele aplicații de ceas cu alarmă să nu implementeze această funcție."</string>
     <string name="permlab_addVoicemail" msgid="5525660026090959044">"adăugare mesagerie vocală"</string>
@@ -803,11 +803,11 @@
     <string name="searchview_description_search" msgid="6749826639098512120">"Căutați"</string>
     <string name="searchview_description_query" msgid="5911778593125355124">"Interogare de căutare"</string>
     <string name="searchview_description_clear" msgid="1330281990951833033">"Ștergeți interogarea"</string>
-    <string name="searchview_description_submit" msgid="2688450133297983542">"Trimiteţi interogarea"</string>
+    <string name="searchview_description_submit" msgid="2688450133297983542">"Trimiteți interogarea"</string>
     <string name="searchview_description_voice" msgid="2453203695674994440">"Căutare vocală"</string>
-    <string name="enable_explore_by_touch_warning_title" msgid="7460694070309730149">"Activați Exploraţi prin atingere?"</string>
-    <string name="enable_explore_by_touch_warning_message" product="tablet" msgid="8655887539089910577">"<xliff:g id="ACCESSIBILITY_SERVICE_NAME">%1$s</xliff:g> doreşte să activeze funcţia Exploraţi prin atingere. Când această funcție este activată, puteți auzi sau vedea descrieri pentru ceea ce se află sub degetul dvs. sau puteți efectua gesturi pentru a interacţiona cu tableta."</string>
-    <string name="enable_explore_by_touch_warning_message" product="default" msgid="2708199672852373195">"<xliff:g id="ACCESSIBILITY_SERVICE_NAME">%1$s</xliff:g> doreşte să activeze funcţia Exploraţi prin atingere. Când această funcție este activată, puteți auzi sau vedea descrieri pentru ceea ce se află sub degetul dvs. sau puteți efectua gesturi pentru a interacţiona cu telefonul."</string>
+    <string name="enable_explore_by_touch_warning_title" msgid="7460694070309730149">"Activați Explorați prin atingere?"</string>
+    <string name="enable_explore_by_touch_warning_message" product="tablet" msgid="8655887539089910577">"<xliff:g id="ACCESSIBILITY_SERVICE_NAME">%1$s</xliff:g> doreşte să activeze funcţia Explorați prin atingere. Când această funcție este activată, puteți auzi sau vedea descrieri pentru ceea ce se află sub degetul dvs. sau puteți efectua gesturi pentru a interacţiona cu tableta."</string>
+    <string name="enable_explore_by_touch_warning_message" product="default" msgid="2708199672852373195">"<xliff:g id="ACCESSIBILITY_SERVICE_NAME">%1$s</xliff:g> doreşte să activeze funcţia Explorați prin atingere. Când această funcție este activată, puteți auzi sau vedea descrieri pentru ceea ce se află sub degetul dvs. sau puteți efectua gesturi pentru a interacţiona cu telefonul."</string>
     <string name="oneMonthDurationPast" msgid="7396384508953779925">"cu 1 lună în urmă"</string>
     <string name="beforeOneMonthDurationPast" msgid="909134546836499826">"Cu mai mult de 1 lună în urmă"</string>
     <plurals name="last_num_days" formatted="false" msgid="5104533550723932025">
@@ -917,7 +917,7 @@
     <string name="launch_warning_original" msgid="188102023021668683">"<xliff:g id="APP_NAME">%1$s</xliff:g> a fost lansată iniţial."</string>
     <string name="screen_compat_mode_scale" msgid="3202955667675944499">"Scară"</string>
     <string name="screen_compat_mode_show" msgid="4013878876486655892">"Afişaţi întotdeauna"</string>
-    <string name="screen_compat_mode_hint" msgid="1064524084543304459">"Reactivaţi acest mod din Setări de sistem &gt; Aplicații &gt; Descărcate."</string>
+    <string name="screen_compat_mode_hint" msgid="1064524084543304459">"Reactivați acest mod din Setări de sistem &gt; Aplicații &gt; Descărcate."</string>
     <string name="smv_application" msgid="3307209192155442829">"Aplicaţia <xliff:g id="APPLICATION">%1$s</xliff:g> (procesul <xliff:g id="PROCESS">%2$s</xliff:g>) a încălcat propria politică StrictMode."</string>
     <string name="smv_process" msgid="5120397012047462446">"Procesul <xliff:g id="PROCESS">%1$s</xliff:g> a încălcat propria politică StrictMode."</string>
     <string name="android_upgrading_title" msgid="1584192285441405746">"Android trece la o versiune superioară..."</string>
@@ -1001,10 +1001,10 @@
     <string name="sms_control_message" msgid="3867899169651496433">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; trimite un număr mare de mesaje SMS. Permiteți acestei aplicații să trimită în continuare mesaje?"</string>
     <string name="sms_control_yes" msgid="3663725993855816807">"Permiteți"</string>
     <string name="sms_control_no" msgid="625438561395534982">"Refuzaţi"</string>
-    <string name="sms_short_code_confirm_message" msgid="1645436466285310855">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; intenţionează să trimită un mesaj la &lt;b&gt;<xliff:g id="DEST_ADDRESS">%2$s</xliff:g>&lt;/b&gt;."</string>
+    <string name="sms_short_code_confirm_message" msgid="1645436466285310855">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; intenționează să trimită un mesaj la &lt;b&gt;<xliff:g id="DEST_ADDRESS">%2$s</xliff:g>&lt;/b&gt;."</string>
     <string name="sms_short_code_details" msgid="5873295990846059400">"Acest lucru "<b>"poate genera costuri"</b>" în contul dvs. mobil."</string>
     <string name="sms_premium_short_code_details" msgid="7869234868023975"><b>"Acest lucru va genera costuri în contul dvs. mobil."</b></string>
-    <string name="sms_short_code_confirm_allow" msgid="4458878637111023413">"Trimiteţi"</string>
+    <string name="sms_short_code_confirm_allow" msgid="4458878637111023413">"Trimiteți"</string>
     <string name="sms_short_code_confirm_deny" msgid="2927389840209170706">"Anulați"</string>
     <string name="sms_short_code_remember_choice" msgid="5289538592272218136">"Doresc să se reţină opţiunea"</string>
     <string name="sms_short_code_remember_undo_instruction" msgid="4960944133052287484">"Puteți modifica ulterior în Setări &gt; Aplicații"</string>
@@ -1036,8 +1036,8 @@
     <string name="usb_storage_stop_notification_title" msgid="2336058396663516017">"Dezactivați stocarea USB"</string>
     <string name="usb_storage_stop_notification_message" msgid="1656852098555623822">"Atingeți pentru a dezactiva stocarea USB."</string>
     <string name="usb_storage_stop_title" msgid="660129851708775853">"Stocarea USB este în curs de utilizare"</string>
-    <string name="usb_storage_stop_message" product="nosdcard" msgid="4264025280777219521">"Înainte de a dezactiva stocarea USB, demontaţi („extrageţi”) din computer stocarea USB Android."</string>
-    <string name="usb_storage_stop_message" product="default" msgid="8043969782460613114">"Înainte de a dezactiva stocarea USB, demontaţi („extrageţi”) din computer cardul SD Android."</string>
+    <string name="usb_storage_stop_message" product="nosdcard" msgid="4264025280777219521">"Înainte de a dezactiva stocarea USB, demontaţi („extrageți”) din computer stocarea USB Android."</string>
+    <string name="usb_storage_stop_message" product="default" msgid="8043969782460613114">"Înainte de a dezactiva stocarea USB, demontaţi („extrageți”) din computer cardul SD Android."</string>
     <string name="usb_storage_stop_button_mount" msgid="7060218034900696029">"Dezactivați stocarea USB"</string>
     <string name="usb_storage_stop_error_message" msgid="1970374898263063836">"Problemă la dezactivarea stocării USB. Verificaţi dacă aţi demontat dispozitivul gazdă USB, apoi încercaţi din nou."</string>
     <string name="dlg_confirm_kill_storage_users_title" msgid="963039033470478697">"Activați stocarea USB"</string>
@@ -1098,8 +1098,8 @@
     <string name="ext_media_status_formatting" msgid="1085079556538644861">"Se formatează…"</string>
     <string name="ext_media_status_missing" msgid="5638633895221670766">"Nu este introdus"</string>
     <string name="activity_list_empty" msgid="1675388330786841066">"Nu s-a găsit nicio activitate potrivită."</string>
-    <string name="permlab_route_media_output" msgid="1642024455750414694">"Direcţionează rezultatele media"</string>
-    <string name="permdesc_route_media_output" msgid="4932818749547244346">"Permite unei aplicații să direcţioneze rezultate media către alte dispozitive externe."</string>
+    <string name="permlab_route_media_output" msgid="1642024455750414694">"Direcționează rezultatele media"</string>
+    <string name="permdesc_route_media_output" msgid="4932818749547244346">"Permite unei aplicații să direcționeze rezultate media către alte dispozitive externe."</string>
     <string name="permlab_readInstallSessions" msgid="6165432407628065939">"Citirea sesiunilor de instalare"</string>
     <string name="permdesc_readInstallSessions" msgid="2049771699626019849">"Permite unei aplicații accesul la citirea sesiunilor de instalare. Aceasta poate vedea detalii despre instalările de pachete active."</string>
     <string name="permlab_requestInstallPackages" msgid="1772330282283082214">"Solicită instalarea pachetelor"</string>
@@ -1142,7 +1142,7 @@
     <string name="upload_file" msgid="2897957172366730416">"Alegeţi un fişier"</string>
     <string name="no_file_chosen" msgid="6363648562170759465">"Nu au fost găsite fișiere"</string>
     <string name="reset" msgid="2448168080964209908">"Resetaţi"</string>
-    <string name="submit" msgid="1602335572089911941">"Trimiteţi"</string>
+    <string name="submit" msgid="1602335572089911941">"Trimiteți"</string>
     <string name="car_mode_disable_notification_title" msgid="3164768212003864316">"Mod Maşină activat"</string>
     <string name="car_mode_disable_notification_message" msgid="8035230537563503262">"Atingeți pentru a ieşi din modul Maşină."</string>
     <string name="tethered_notification_title" msgid="3146694234398202601">"Tethering sau hotspot activ"</string>
@@ -1178,21 +1178,21 @@
     <string name="choose_account_label" msgid="5655203089746423927">"Alegeţi un cont"</string>
     <string name="add_account_label" msgid="2935267344849993553">"Adăugaţi un cont"</string>
     <string name="add_account_button_label" msgid="3611982894853435874">"Adăugaţi un cont"</string>
-    <string name="number_picker_increment_button" msgid="2412072272832284313">"Creşteţi"</string>
+    <string name="number_picker_increment_button" msgid="2412072272832284313">"Creșteți"</string>
     <string name="number_picker_decrement_button" msgid="476050778386779067">"Reduceţi"</string>
     <string name="number_picker_increment_scroll_mode" msgid="3073101067441638428">"Atingeți și țineți apăsat <xliff:g id="VALUE">%s</xliff:g>."</string>
     <string name="number_picker_increment_scroll_action" msgid="9101473045891835490">"Glisaţi în sus pentru a creşte și în jos pentru a reduce."</string>
-    <string name="time_picker_increment_minute_button" msgid="8865885114028614321">"Creşteţi valoarea pentru minute"</string>
+    <string name="time_picker_increment_minute_button" msgid="8865885114028614321">"Creșteți valoarea pentru minute"</string>
     <string name="time_picker_decrement_minute_button" msgid="6246834937080684791">"Reduceţi valoarea pentru minute"</string>
-    <string name="time_picker_increment_hour_button" msgid="3652056055810223139">"Creşteţi valoarea pentru oră"</string>
+    <string name="time_picker_increment_hour_button" msgid="3652056055810223139">"Creșteți valoarea pentru oră"</string>
     <string name="time_picker_decrement_hour_button" msgid="1377479863429214792">"Reduceţi valoarea pentru oră"</string>
     <string name="time_picker_increment_set_pm_button" msgid="4147590696151230863">"Setaţi valoarea PM"</string>
     <string name="time_picker_decrement_set_am_button" msgid="8302140353539486752">"Setaţi valoarea AM"</string>
-    <string name="date_picker_increment_month_button" msgid="5369998479067934110">"Creşteţi valoarea pentru lună"</string>
+    <string name="date_picker_increment_month_button" msgid="5369998479067934110">"Creșteți valoarea pentru lună"</string>
     <string name="date_picker_decrement_month_button" msgid="1832698995541726019">"Reduceţi valoarea pentru lună"</string>
-    <string name="date_picker_increment_day_button" msgid="7130465412308173903">"Creşteţi valoarea pentru zi"</string>
+    <string name="date_picker_increment_day_button" msgid="7130465412308173903">"Creșteți valoarea pentru zi"</string>
     <string name="date_picker_decrement_day_button" msgid="4131881521818750031">"Reduceţi valoarea pentru zi"</string>
-    <string name="date_picker_increment_year_button" msgid="6318697384310808899">"Creşteţi valoarea pentru an"</string>
+    <string name="date_picker_increment_year_button" msgid="6318697384310808899">"Creșteți valoarea pentru an"</string>
     <string name="date_picker_decrement_year_button" msgid="4482021813491121717">"Reduceţi valoarea pentru an"</string>
     <string name="date_picker_prev_month_button" msgid="2858244643992056505">"Luna trecută"</string>
     <string name="date_picker_next_month_button" msgid="5559507736887605055">"Luna viitoare"</string>
@@ -1263,7 +1263,7 @@
     <string name="default_audio_route_name" product="tablet" msgid="4617053898167127471">"Tabletă"</string>
     <string name="default_audio_route_name" product="tv" msgid="9158088547603019321">"TV"</string>
     <string name="default_audio_route_name" product="default" msgid="4239291273420140123">"Telefon"</string>
-    <string name="default_audio_route_name_headphones" msgid="8119971843803439110">"Căşti"</string>
+    <string name="default_audio_route_name_headphones" msgid="8119971843803439110">"Căști"</string>
     <string name="default_audio_route_name_dock_speakers" msgid="6240602982276591864">"Difuz. dispozit. andocare"</string>
     <string name="default_media_route_name_hdmi" msgid="2450970399023478055">"HDMI"</string>
     <string name="default_audio_route_category_name" msgid="3722811174003886946">"Sistem"</string>
