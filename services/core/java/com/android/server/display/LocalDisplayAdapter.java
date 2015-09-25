@@ -544,7 +544,7 @@ final class LocalDisplayAdapter extends DisplayAdapter {
                     physIndex = findDisplayInfoIndexLocked(colorTransformId, modeId);
                 }
             }
-            if (physIndex > 0 && mActivePhysIndex == physIndex) {
+            if (mActivePhysIndex == physIndex) {
                 return;
             }
             SurfaceControl.setActiveConfig(getDisplayTokenLocked(), physIndex);
