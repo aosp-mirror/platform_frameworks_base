@@ -75,10 +75,11 @@ abstract class BaseActivity extends Activity {
     RootsCache mRoots;
     SearchManager mSearchManager;
     DrawerController mDrawer;
+    boolean mProductivityDevice;
 
+    private final String mTag;
     @LayoutRes
     private int mLayoutId;
-    private final String mTag;
     private DirectoryContainerView mDirectoryContainer;
 
     public abstract void onDocumentPicked(DocumentInfo doc, @Nullable DocumentContext siblings);
@@ -99,6 +100,7 @@ abstract class BaseActivity extends Activity {
     public void onCreate(Bundle icicle) {
         super.onCreate(icicle);
 
+        mProductivityDevice = getResources().getBoolean(R.bool.productivity_device);
         mState = (icicle != null)
                 ? icicle.<State>getParcelable(EXTRA_STATE)
                         : buildState();
@@ -208,6 +210,7 @@ abstract class BaseActivity extends Activity {
             switch (item.getItemId()) {
                 case R.id.menu_advanced:
                 case R.id.menu_file_size:
+                case R.id.menu_new_window:
                     break;
                 default:
                     item.setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS);

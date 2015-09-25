@@ -3,6 +3,7 @@
 
     <uses-permission android:name="android.permission.MANAGE_DOCUMENTS" />
     <uses-permission android:name="android.permission.REMOVE_TASKS" />
+    <uses-permission android:name="android.permission.REORDER_TASKS" />
 
     <application
         android:name=".DocumentsApplication"
@@ -49,14 +50,25 @@
         </activity>
 
         <activity
-            android:name=".FilesActivity"
-            android:theme="@style/FilesTheme"
+            android:name=".LauncherActivity"
+            android:theme="@android:style/Theme.NoDisplay"
             android:icon="@drawable/ic_files_app"
             android:label="@string/files_label"
             android:enabled="@bool/productivity_device">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
+        <activity
+            android:name=".FilesActivity"
+            android:theme="@style/FilesTheme"
+            android:icon="@drawable/ic_files_app"
+            android:label="@string/files_label"
+            android:documentLaunchMode="intoExisting">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
             </intent-filter>
             <intent-filter>
                 <action android:name="android.provider.action.BROWSE_DOCUMENT_ROOT" />

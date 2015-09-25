@@ -54,6 +54,8 @@
     <!-- Menu item title that moves the selected documents [CHAR LIMIT=24] -->
     <string name="menu_move">Move to\u2026</string>
 
+    <!-- Menu item title that creates a new window in the activity [CHAR LIMIT=24] -->
+    <string name="menu_new_window">New window</string>
     <!-- Menu item title that copies the selected documents to clipboard [CHAR LIMIT=24] -->
     <string name="menu_copy_to_clipboard">Copy</string>
     <!-- Menu item title that pastes files from the clipboard [CHAR LIMIT=24] -->
