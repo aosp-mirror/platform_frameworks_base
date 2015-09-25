@@ -400,7 +400,7 @@
     <string name="volumeui_notification_title" msgid="4906770126345910955">"<xliff:g id="APP_NAME">%1$s</xliff:g> és el diàleg de volum"</string>
     <string name="volumeui_notification_text" msgid="1826889705095768656">"Toca per restaurar l\'original."</string>
     <string name="managed_profile_foreground_toast" msgid="5421487114739245972">"Estàs utilitzant el perfil professional"</string>
-    <string name="system_ui_tuner" msgid="708224127392452018">"Configurador de la IU del sistema"</string>
+    <string name="system_ui_tuner" msgid="708224127392452018">"Personalitzador d\'interfície d\'usuari"</string>
     <string name="show_battery_percentage" msgid="5444136600512968798">"Mostra el percentatge de la bateria inserit"</string>
     <string name="show_battery_percentage_summary" msgid="3215025775576786037">"Mostra el percentatge del nivell de bateria dins de la icona de la barra d\'estat quan no s\'estigui carregant"</string>
     <string name="quick_settings" msgid="10042998191725428">"Configuració ràpida"</string>
@@ -422,10 +422,10 @@
     <string name="accessibility_status_bar_hotspot" msgid="4099381329956402865">"Zona Wi-Fi"</string>
     <string name="accessibility_managed_profile" msgid="6613641363112584120">"Perfil professional"</string>
     <string name="tuner_warning_title" msgid="7094689930793031682">"Diversió per a uns quants, però no per a tothom"</string>
-    <string name="tuner_warning" msgid="8730648121973575701">"El Configurador de la IU del sistema presenta opcions addicionals per canviar i personalitzar la interfície d\'usuari d\'Android. És possible que aquestes funcions experimentals canviïn, deixin de funcionar o desapareguin en versions futures. Continua amb precaució."</string>
+    <string name="tuner_warning" msgid="8730648121973575701">"El Personalitzador d\'interfície d\'usuari presenta opcions addicionals per canviar i personalitzar la interfície d\'usuari d\'Android. És possible que aquestes funcions experimentals canviïn, deixin de funcionar o desapareguin en versions futures. Continua amb precaució."</string>
     <string name="tuner_persistent_warning" msgid="8597333795565621795">"És possible que aquestes funcions experimentals canviïn, deixin de funcionar o desapareguin en versions futures. Continua amb precaució."</string>
     <string name="got_it" msgid="2239653834387972602">"D\'acord"</string>
-    <string name="tuner_toast" msgid="603429811084428439">"Enhorabona! El Configurador de la IU del sistema s\'ha afegit a Configuració."</string>
+    <string name="tuner_toast" msgid="603429811084428439">"Enhorabona! El Personalitzador d\'interfície d\'usuari s\'ha afegit a Configuració."</string>
     <string name="remove_from_settings" msgid="8389591916603406378">"Treu de Configuració"</string>
-    <string name="remove_from_settings_prompt" msgid="6069085993355887748">"Vols treure el Configurador de la UI del sistema de Configuració i deixar d\'utilitzar-ne totes les funcions?"</string>
+    <string name="remove_from_settings_prompt" msgid="6069085993355887748">"Vols suprimir el Personalitzador d\'interfície d\'usuari de Configuració i deixar d\'utilitzar-ne totes les funcions?"</string>
 </resources>
