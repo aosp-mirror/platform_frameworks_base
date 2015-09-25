@@ -98,7 +98,7 @@ public class DeviceIdleController extends SystemService
         implements AnyMotionDetector.DeviceIdleCallback {
     private static final String TAG = "DeviceIdleController";
 
-    private static final boolean DEBUG = true;  // STOPSHIP
+    private static final boolean DEBUG = false;
 
     private static final boolean COMPRESS_TIME = false;
 
