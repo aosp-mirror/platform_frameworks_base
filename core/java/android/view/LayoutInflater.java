@@ -72,6 +72,9 @@ public abstract class LayoutInflater {
     private static final String TAG = LayoutInflater.class.getSimpleName();
     private static final boolean DEBUG = false;
 
+    /** Empty stack trace used to avoid log spam in re-throw exceptions. */
+    private static final StackTraceElement[] EMPTY_STACK_TRACE = new StackTraceElement[0];
+
     /**
      * This field should be made private, so it is hidden from the SDK.
      * {@hide}
@@ -532,15 +535,14 @@ public abstract class LayoutInflater {
                 }
 
             } catch (XmlPullParserException e) {
-                InflateException ex = new InflateException(e.getMessage());
-                ex.initCause(e);
-                throw ex;
+                final InflateException ie = new InflateException(e.getMessage(), e);
+                ie.setStackTrace(EMPTY_STACK_TRACE);
+                throw ie;
             } catch (Exception e) {
-                InflateException ex = new InflateException(
-                        parser.getPositionDescription()
-                                + ": " + e.getMessage());
-                ex.initCause(e);
-                throw ex;
+                final InflateException ie = new InflateException(parser.getPositionDescription()
+                        + ": " + e.getMessage(), e);
+                ie.setStackTrace(EMPTY_STACK_TRACE);
+                throw ie;
             } finally {
                 // Don't retain static reference on context.
                 mConstructorArgs[0] = lastContext;
@@ -625,27 +627,25 @@ public abstract class LayoutInflater {
             return view;
 
         } catch (NoSuchMethodException e) {
-            InflateException ie = new InflateException(attrs.getPositionDescription()
-                    + ": Error inflating class "
-                    + (prefix != null ? (prefix + name) : name));
-            ie.initCause(e);
+            final InflateException ie = new InflateException(attrs.getPositionDescription()
+                    + ": Error inflating class " + (prefix != null ? (prefix + name) : name), e);
+            ie.setStackTrace(EMPTY_STACK_TRACE);
             throw ie;
 
         } catch (ClassCastException e) {
             // If loaded class is not a View subclass
-            InflateException ie = new InflateException(attrs.getPositionDescription()
-                    + ": Class is not a View "
-                    + (prefix != null ? (prefix + name) : name));
-            ie.initCause(e);
+            final InflateException ie = new InflateException(attrs.getPositionDescription()
+                    + ": Class is not a View " + (prefix != null ? (prefix + name) : name), e);
+            ie.setStackTrace(EMPTY_STACK_TRACE);
             throw ie;
         } catch (ClassNotFoundException e) {
             // If loadClass fails, we should propagate the exception.
             throw e;
         } catch (Exception e) {
-            InflateException ie = new InflateException(attrs.getPositionDescription()
-                    + ": Error inflating class "
-                    + (clazz == null ? "<unknown>" : clazz.getName()));
-            ie.initCause(e);
+            final InflateException ie = new InflateException(
+                    attrs.getPositionDescription() + ": Error inflating class "
+                            + (clazz == null ? "<unknown>" : clazz.getName()), e);
+            ie.setStackTrace(EMPTY_STACK_TRACE);
             throw ie;
         } finally {
             Trace.traceEnd(Trace.TRACE_TAG_VIEW);
@@ -657,8 +657,7 @@ public abstract class LayoutInflater {
      */
     private void failNotAllowed(String name, String prefix, AttributeSet attrs) {
         throw new InflateException(attrs.getPositionDescription()
-                + ": Class not allowed to be inflated "
-                + (prefix != null ? (prefix + name) : name));
+                + ": Class not allowed to be inflated "+ (prefix != null ? (prefix + name) : name));
     }
 
     /**
@@ -774,14 +773,14 @@ public abstract class LayoutInflater {
 
         } catch (ClassNotFoundException e) {
             final InflateException ie = new InflateException(attrs.getPositionDescription()
-                    + ": Error inflating class " + name);
-            ie.initCause(e);
+                    + ": Error inflating class " + name, e);
+            ie.setStackTrace(EMPTY_STACK_TRACE);
             throw ie;
 
         } catch (Exception e) {
             final InflateException ie = new InflateException(attrs.getPositionDescription()
-                    + ": Error inflating class " + name);
-            ie.initCause(e);
+                    + ": Error inflating class " + name, e);
+            ie.setStackTrace(EMPTY_STACK_TRACE);
             throw ie;
         }
     }
