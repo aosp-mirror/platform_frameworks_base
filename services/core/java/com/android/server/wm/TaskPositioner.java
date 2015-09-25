@@ -35,12 +35,13 @@ import android.os.Process;
 import android.os.RemoteException;
 import android.util.DisplayMetrics;
 import android.util.Slog;
+import android.view.Choreographer;
 import android.view.Display;
 import android.view.DisplayInfo;
 import android.view.InputChannel;
 import android.view.InputDevice;
 import android.view.InputEvent;
-import android.view.InputEventReceiver;
+import android.view.BatchedInputEventReceiver;
 import android.view.MotionEvent;
 import android.view.SurfaceControl;
 import android.view.WindowManager;
@@ -103,9 +104,10 @@ class TaskPositioner implements DimLayer.DimLayerUser {
     InputApplicationHandle mDragApplicationHandle;
     InputWindowHandle mDragWindowHandle;
 
-    private final class WindowPositionerEventReceiver extends InputEventReceiver {
-        public WindowPositionerEventReceiver(InputChannel inputChannel, Looper looper) {
-            super(inputChannel, looper);
+    private final class WindowPositionerEventReceiver extends BatchedInputEventReceiver {
+        public WindowPositionerEventReceiver(
+                InputChannel inputChannel, Looper looper, Choreographer choreographer) {
+            super(inputChannel, looper, choreographer);
         }
 
         @Override
@@ -222,8 +224,8 @@ class TaskPositioner implements DimLayer.DimLayerUser {
         mClientChannel = channels[1];
         mService.mInputManager.registerInputChannel(mServerChannel, null);
 
-        mInputEventReceiver = new WindowPositionerEventReceiver(mClientChannel,
-                mService.mH.getLooper());
+        mInputEventReceiver = new WindowPositionerEventReceiver(
+                mClientChannel, mService.mH.getLooper(), mService.mChoreographer);
 
         mDragApplicationHandle = new InputApplicationHandle(null);
         mDragApplicationHandle.name = TAG;
