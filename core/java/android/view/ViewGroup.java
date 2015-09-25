@@ -767,6 +767,11 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         return mParent != null && mParent.showContextMenuForChild(originalView);
     }
 
+    @Override
+    public boolean showContextMenuForChild(View originalView, float x, float y) {
+        return mParent != null && mParent.showContextMenuForChild(originalView, x, y);
+    }
+
     /**
      * {@inheritDoc}
      */

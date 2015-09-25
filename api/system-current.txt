@@ -506,6 +506,7 @@ package android {
     field public static final int contentInsetRight = 16843862; // 0x1010456
     field public static final int contentInsetStart = 16843859; // 0x1010453
     field public static final int contextClickable = 16844007; // 0x10104e7
+    field public static final int contextPopupMenuStyle = 16844032; // 0x1010500
     field public static final int controlX1 = 16843772; // 0x10103fc
     field public static final int controlX2 = 16843774; // 0x10103fe
     field public static final int controlY1 = 16843773; // 0x10103fd
@@ -1316,6 +1317,7 @@ package android {
     field public static final int textAppearanceListItemSmall = 16843679; // 0x101039f
     field public static final int textAppearanceMedium = 16842817; // 0x1010041
     field public static final int textAppearanceMediumInverse = 16842820; // 0x1010044
+    field public static final int textAppearancePopupMenuHeader = 16844033; // 0x1010501
     field public static final int textAppearanceSearchResultSubtitle = 16843424; // 0x10102a0
     field public static final int textAppearanceSearchResultTitle = 16843425; // 0x10102a1
     field public static final int textAppearanceSmall = 16842818; // 0x1010042
@@ -38835,6 +38837,7 @@ package android.view {
     method public void setY(float);
     method public void setZ(float);
     method public boolean showContextMenu();
+    method public boolean showContextMenu(float, float);
     method public android.view.ActionMode startActionMode(android.view.ActionMode.Callback);
     method public android.view.ActionMode startActionMode(android.view.ActionMode.Callback, int);
     method public void startAnimation(android.view.animation.Animation);
@@ -39301,6 +39304,7 @@ package android.view {
     method public void setTransitionGroup(boolean);
     method public boolean shouldDelayChildPressedState();
     method public boolean showContextMenuForChild(android.view.View);
+    method public boolean showContextMenuForChild(android.view.View, float, float);
     method public android.view.ActionMode startActionModeForChild(android.view.View, android.view.ActionMode.Callback);
     method public android.view.ActionMode startActionModeForChild(android.view.View, android.view.ActionMode.Callback, int);
     method public void startLayoutAnimation();
@@ -39422,6 +39426,7 @@ package android.view {
     method public abstract boolean requestSendAccessibilityEvent(android.view.View, android.view.accessibility.AccessibilityEvent);
     method public abstract void requestTransparentRegion(android.view.View);
     method public abstract boolean showContextMenuForChild(android.view.View);
+    method public abstract boolean showContextMenuForChild(android.view.View, float, float);
     method public abstract android.view.ActionMode startActionModeForChild(android.view.View, android.view.ActionMode.Callback);
     method public abstract android.view.ActionMode startActionModeForChild(android.view.View, android.view.ActionMode.Callback, int);
   }
@@ -47957,10 +47962,7 @@ package java.lang.reflect {
   }
 
   public final class Constructor extends java.lang.reflect.AccessibleObject implements java.lang.reflect.GenericDeclaration java.lang.reflect.Member {
-    method public boolean equals(java.lang.Object);
     method public A getAnnotation(java.lang.Class<A>);
-    method public java.lang.annotation.Annotation[] getAnnotations();
-    method public java.lang.annotation.Annotation[] getDeclaredAnnotations();
     method public java.lang.Class<T> getDeclaringClass();
     method public java.lang.Class<?>[] getExceptionTypes();
     method public java.lang.reflect.Type[] getGenericExceptionTypes();
@@ -47970,7 +47972,6 @@ package java.lang.reflect {
     method public java.lang.annotation.Annotation[][] getParameterAnnotations();
     method public java.lang.Class<?>[] getParameterTypes();
     method public java.lang.reflect.TypeVariable<java.lang.reflect.Constructor<T>>[] getTypeParameters();
-    method public boolean isAnnotationPresent(java.lang.Class<? extends java.lang.annotation.Annotation>);
     method public boolean isSynthetic();
     method public boolean isVarArgs();
     method public T newInstance(java.lang.Object...) throws java.lang.IllegalAccessException, java.lang.IllegalArgumentException, java.lang.InstantiationException, java.lang.reflect.InvocationTargetException;
@@ -48044,10 +48045,7 @@ package java.lang.reflect {
   }
 
   public final class Method extends java.lang.reflect.AccessibleObject implements java.lang.reflect.GenericDeclaration java.lang.reflect.Member {
-    method public boolean equals(java.lang.Object);
     method public A getAnnotation(java.lang.Class<A>);
-    method public java.lang.annotation.Annotation[] getAnnotations();
-    method public java.lang.annotation.Annotation[] getDeclaredAnnotations();
     method public java.lang.Class<?> getDeclaringClass();
     method public java.lang.Object getDefaultValue();
     method public java.lang.Class<?>[] getExceptionTypes();
@@ -48061,7 +48059,6 @@ package java.lang.reflect {
     method public java.lang.Class<?> getReturnType();
     method public java.lang.reflect.TypeVariable<java.lang.reflect.Method>[] getTypeParameters();
     method public java.lang.Object invoke(java.lang.Object, java.lang.Object...) throws java.lang.IllegalAccessException, java.lang.IllegalArgumentException, java.lang.reflect.InvocationTargetException;
-    method public boolean isAnnotationPresent(java.lang.Class<? extends java.lang.annotation.Annotation>);
     method public boolean isBridge();
     method public boolean isSynthetic();
     method public boolean isVarArgs();

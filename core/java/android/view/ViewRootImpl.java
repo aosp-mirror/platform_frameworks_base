@@ -6240,6 +6240,11 @@ public final class ViewRootImpl implements ViewParent,
     }
 
     @Override
+    public boolean showContextMenuForChild(View originalView, float x, float y) {
+        return false;
+    }
+
+    @Override
     public ActionMode startActionModeForChild(View originalView, ActionMode.Callback callback) {
         return null;
     }

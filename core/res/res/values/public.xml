@@ -2674,6 +2674,8 @@
     <public type="attr" name="buttonGravity" />
     <public type="attr" name="collapseIcon" />
     <public type="attr" name="level" />
+    <public type="attr" name="contextPopupMenuStyle" />
+    <public type="attr" name="textAppearancePopupMenuHeader" />
 
     <public type="style" name="Theme.Material.DayNight" />
     <public type="style" name="Theme.Material.DayNight.DarkActionBar" />

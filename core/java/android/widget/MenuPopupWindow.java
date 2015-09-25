@@ -152,8 +152,16 @@ public class MenuPopupWindow extends ListPopupWindow implements MenuItemHoverLis
             boolean superVal = super.onHoverEvent(ev);
 
             if (dispatchHover && mHoverListener != null) {
-                mHoverListener.onItemHovered(
-                        ((MenuAdapter) getAdapter()).getAdapterMenu(), position);
+                ListAdapter adapter = getAdapter();
+                MenuAdapter menuAdapter;
+                if (adapter instanceof HeaderViewListAdapter) {
+                    menuAdapter = (MenuAdapter) ((HeaderViewListAdapter) adapter)
+                            .getWrappedAdapter();
+                } else {
+                    menuAdapter = (MenuAdapter) adapter;
+                }
+
+                mHoverListener.onItemHovered(menuAdapter.getAdapterMenu(), position);
             }
 
             return superVal;

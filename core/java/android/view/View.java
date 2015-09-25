@@ -5388,7 +5388,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     protected boolean performButtonActionOnTouchDown(MotionEvent event) {
         if (event.getToolType(0) == MotionEvent.TOOL_TYPE_MOUSE &&
             (event.getButtonState() & MotionEvent.BUTTON_SECONDARY) != 0) {
-            showContextMenu(event.getX(), event.getY(), event.getMetaState());
+            showContextMenu(event.getX(), event.getY());
             mPrivateFlags |= PFLAG_CANCEL_NEXT_UP_EVENT;
             return true;
         }
@@ -5409,13 +5409,10 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      *
      * @param x The referenced x coordinate.
      * @param y The referenced y coordinate.
-     * @param metaState The keyboard modifiers that were pressed.
      * @return Whether a context menu was displayed.
-     *
-     * @hide
      */
-    public boolean showContextMenu(float x, float y, int metaState) {
-        return showContextMenu();
+    public boolean showContextMenu(float x, float y) {
+        return getParent().showContextMenuForChild(this, x, y);
     }
 
     /**

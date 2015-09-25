@@ -3080,6 +3080,15 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
     }
 
     private class CheckForLongPress extends WindowRunnnable implements Runnable {
+        private static final int INVALID_COORD = -1;
+        private float mX = INVALID_COORD;
+        private float mY = INVALID_COORD;
+
+        private void setCoords(float x, float y) {
+            mX = x;
+            mY = y;
+        }
+
         @Override
         public void run() {
             final int motionPosition = mMotionPosition;
@@ -3090,7 +3099,11 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
 
                 boolean handled = false;
                 if (sameWindow() && !mDataChanged) {
-                    handled = performLongPress(child, longPressPosition, longPressId);
+                    if (mX != INVALID_COORD && mY != INVALID_COORD) {
+                        handled = performLongPress(child, longPressPosition, longPressId, mX, mY);
+                    } else {
+                        handled = performLongPress(child, longPressPosition, longPressId);
+                    }
                 }
                 if (handled) {
                     mTouchMode = TOUCH_MODE_REST;
@@ -3146,6 +3159,16 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
 
     boolean performLongPress(final View child,
             final int longPressPosition, final long longPressId) {
+        return performLongPress(
+                child,
+                longPressPosition,
+                longPressId,
+                CheckForLongPress.INVALID_COORD,
+                CheckForLongPress.INVALID_COORD);
+    }
+
+    boolean performLongPress(final View child,
+            final int longPressPosition, final long longPressId, float x, float y) {
         // CHOICE_MODE_MULTIPLE_MODAL takes over long press.
         if (mChoiceMode == CHOICE_MODE_MULTIPLE_MODAL) {
             if (mChoiceActionMode == null &&
@@ -3163,7 +3186,11 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
         }
         if (!handled) {
             mContextMenuInfo = createContextMenuInfo(child, longPressPosition, longPressId);
-            handled = super.showContextMenuForChild(AbsListView.this);
+            if (x != CheckForLongPress.INVALID_COORD && y != CheckForLongPress.INVALID_COORD) {
+                handled = super.showContextMenuForChild(AbsListView.this, x, y);
+            } else {
+                handled = super.showContextMenuForChild(AbsListView.this);
+            }
         }
         if (handled) {
             performHapticFeedback(HapticFeedbackConstants.LONG_PRESS);
@@ -3178,17 +3205,17 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
 
     /** @hide */
     @Override
-    public boolean showContextMenu(float x, float y, int metaState) {
+    public boolean showContextMenu(float x, float y) {
         final int position = pointToPosition((int)x, (int)y);
         if (position != INVALID_POSITION) {
             final long id = mAdapter.getItemId(position);
             View child = getChildAt(position - mFirstPosition);
             if (child != null) {
                 mContextMenuInfo = createContextMenuInfo(child, position, id);
-                return super.showContextMenuForChild(AbsListView.this);
+                return super.showContextMenuForChild(AbsListView.this, x, y);
             }
         }
-        return super.showContextMenu(x, y, metaState);
+        return super.showContextMenu(x, y);
     }
 
     @Override
@@ -3341,6 +3368,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
                             if (mPendingCheckForLongPress == null) {
                                 mPendingCheckForLongPress = new CheckForLongPress();
                             }
+                            mPendingCheckForLongPress.setCoords(x, y);
                             mPendingCheckForLongPress.rememberWindowAttachCount();
                             postDelayed(mPendingCheckForLongPress, longPressTimeout);
                         } else {

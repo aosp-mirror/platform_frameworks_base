@@ -20,14 +20,16 @@ import android.view.ViewTreeObserver;
 import android.view.View.OnAttachStateChangeListener;
 import android.view.View.OnKeyListener;
 import android.view.ViewTreeObserver.OnGlobalLayoutListener;
-import android.widget.AdapterView;
 import android.widget.DropDownListView;
+import android.widget.FrameLayout;
 import android.widget.MenuItemHoverListener;
+import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.MenuPopupWindow;
 import android.widget.MenuPopupWindow.MenuDropDownListView;
 import android.widget.PopupWindow;
 import android.widget.PopupWindow.OnDismissListener;
+import android.widget.TextView;
 
 import com.android.internal.util.Preconditions;
 
@@ -36,8 +38,8 @@ import com.android.internal.util.Preconditions;
  * side.
  * @hide
  */
-final class CascadingMenuPopup extends MenuPopup implements AdapterView.OnItemClickListener,
-        MenuPresenter, OnKeyListener, PopupWindow.OnDismissListener {
+final class CascadingMenuPopup extends MenuPopup implements MenuPresenter, OnKeyListener,
+        PopupWindow.OnDismissListener {
     @Retention(RetentionPolicy.SOURCE)
     @IntDef({HORIZ_POSITION_LEFT, HORIZ_POSITION_RIGHT})
     public @interface HorizPosition {}
@@ -96,7 +98,7 @@ final class CascadingMenuPopup extends MenuPopup implements AdapterView.OnItemCl
             int menuIndex = -1;
             for (int i = 0; i < mListViews.size(); i++) {
                 final MenuDropDownListView view = (MenuDropDownListView) mListViews.get(i);
-                final MenuAdapter adapter = (MenuAdapter) view.getAdapter();
+                final MenuAdapter adapter = toMenuAdapter(view.getAdapter());
 
                 if (adapter.getAdapterMenu() == menu) {
                     menuIndex = i;
@@ -129,7 +131,7 @@ final class CascadingMenuPopup extends MenuPopup implements AdapterView.OnItemCl
                             int nextIndex = mListViews.indexOf(view) + 1;
                             if (nextIndex < mListViews.size()) {
                                 MenuAdapter nextSubMenuAdapter =
-                                        (MenuAdapter) mListViews.get(nextIndex).getAdapter();
+                                        toMenuAdapter(mListViews.get(nextIndex).getAdapter());
                                 // Disable exit animation, to prevent overlapping fading out
                                 // submenus.
                                 mPopupWindows.get(nextIndex).setExitTransition(null);
@@ -151,7 +153,7 @@ final class CascadingMenuPopup extends MenuPopup implements AdapterView.OnItemCl
 
                 final MenuDropDownListView nextView =
                         (MenuDropDownListView) mListViews.get(menuIndex + 1);
-                final MenuAdapter nextAdapter = (MenuAdapter) nextView.getAdapter();
+                final MenuAdapter nextAdapter = toMenuAdapter(nextView.getAdapter());
 
                 mSubMenuHoverHandler.removeCallbacksAndMessages(null);
                 mSubMenuHoverHandler.postDelayed(new Runnable() {
@@ -184,7 +186,10 @@ final class CascadingMenuPopup extends MenuPopup implements AdapterView.OnItemCl
     private int mLastPosition;
     private List<Integer> mPositions;
     private List<int[]> mOffsets;
+    private int mInitXOffset;
+    private int mInitYOffset;
     private boolean mForceShowIcon;
+    private boolean mShowTitle;
     private Callback mPresenterCallback;
     private ViewTreeObserver mTreeObserver;
     private PopupWindow.OnDismissListener mOnDismissListener;
@@ -248,7 +253,25 @@ final class CascadingMenuPopup extends MenuPopup implements AdapterView.OnItemCl
         for (int i = 0; i < mPopupWindows.size(); i++) {
             MenuPopupWindow popupWindow = mPopupWindows.get(i);
             popupWindow.show();
-            mListViews.add((DropDownListView) popupWindow.getListView());
+            DropDownListView listView = (DropDownListView) popupWindow.getListView();
+            mListViews.add(listView);
+
+            MenuBuilder menu = toMenuAdapter(listView.getAdapter()).getAdapterMenu();
+            if (i == 0 && mShowTitle && menu.getHeaderTitle() != null) {
+                FrameLayout titleItemView =
+                        (FrameLayout) LayoutInflater.from(mContext).inflate(
+                                com.android.internal.R.layout.popup_menu_header_item_layout,
+                                listView,
+                                false);
+                TextView titleView = (TextView) titleItemView.findViewById(
+                        com.android.internal.R.id.title);
+                titleView.setText(menu.getHeaderTitle());
+                titleItemView.setEnabled(false);
+                listView.addHeaderView(titleItemView, null, false);
+
+                // Update to show the title.
+                popupWindow.show();
+            }
         }
 
         mShownAnchorView = mAnchorView;
@@ -272,12 +295,6 @@ final class CascadingMenuPopup extends MenuPopup implements AdapterView.OnItemCl
                 popupWindow.dismiss();
             }
         }
-    }
-
-    @Override
-    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-        MenuAdapter adapter = (MenuAdapter) parent.getAdapter();
-        adapter.mAdapterMenu.performItemAction(adapter.getItem(position), 0);
     }
 
     @Override
@@ -381,6 +398,9 @@ final class CascadingMenuPopup extends MenuPopup implements AdapterView.OnItemCl
 
             y = lastOffset[1] + lastListView.getSelectedView().getTop() -
                     lastListView.getChildAt(0).getTop();
+        } else {
+            x = mInitXOffset;
+            y = mInitYOffset;
         }
 
         popupWindow.setWidth(menuWidth);
@@ -393,7 +413,8 @@ final class CascadingMenuPopup extends MenuPopup implements AdapterView.OnItemCl
         // we deliberately do not yet show the popupWindow, as #show() will do that later.
         if (isShowing()) {
             popupWindow.show();
-            mListViews.add((DropDownListView) popupWindow.getListView());
+            DropDownListView listView = (DropDownListView) popupWindow.getListView();
+            mListViews.add(listView);
         }
 
         int[] offsets = {x, y};
@@ -425,8 +446,9 @@ final class CascadingMenuPopup extends MenuPopup implements AdapterView.OnItemCl
         if (dismissedIndex != -1) {
             for (int i = dismissedIndex; i < mListViews.size(); i++) {
                 ListView view = mListViews.get(i);
-                MenuAdapter adapter = (MenuAdapter) view.getAdapter();
-                adapter.mAdapterMenu.close();
+                ListAdapter adapter = view.getAdapter();
+                MenuAdapter menuAdapter = toMenuAdapter(adapter);
+                menuAdapter.mAdapterMenu.close();
             }
         }
     }
@@ -434,7 +456,7 @@ final class CascadingMenuPopup extends MenuPopup implements AdapterView.OnItemCl
     @Override
     public void updateMenuView(boolean cleared) {
         for (ListView view : mListViews) {
-            ((MenuAdapter) view.getAdapter()).notifyDataSetChanged();
+            toMenuAdapter(view.getAdapter()).notifyDataSetChanged();
         }
     }
 
@@ -447,7 +469,7 @@ final class CascadingMenuPopup extends MenuPopup implements AdapterView.OnItemCl
     public boolean onSubMenuSelected(SubMenuBuilder subMenu) {
         // Don't allow double-opening of the same submenu.
         for (ListView view : mListViews) {
-            if (((MenuAdapter) view.getAdapter()).mAdapterMenu.equals(subMenu)) {
+            if (toMenuAdapter(view.getAdapter()).mAdapterMenu.equals(subMenu)) {
                 // Just re-focus that one.
                 view.requestFocus();
                 return true;
@@ -471,7 +493,7 @@ final class CascadingMenuPopup extends MenuPopup implements AdapterView.OnItemCl
 
         for (int i = 0; i < mListViews.size(); i++) {
             ListView view = mListViews.get(i);
-            MenuAdapter adapter = (MenuAdapter) view.getAdapter();
+            MenuAdapter adapter = toMenuAdapter(view.getAdapter());
 
             if (menuIndex == -1 && menu == adapter.mAdapterMenu) {
                 menuIndex = i;
@@ -557,4 +579,18 @@ final class CascadingMenuPopup extends MenuPopup implements AdapterView.OnItemCl
         return mListViews.size() > 0 ? mListViews.get(mListViews.size() - 1) : null;
     }
 
+    @Override
+    public void setHorizontalOffset(int x) {
+        mInitXOffset = x;
+    }
+
+    @Override
+    public void setVerticalOffset(int y) {
+        mInitYOffset = y;
+    }
+
+    @Override
+    public void setShowTitle(boolean showTitle) {
+        mShowTitle = showTitle;
+    }
 }

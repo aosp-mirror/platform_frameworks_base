@@ -71,6 +71,7 @@ import com.android.internal.view.menu.IconMenuPresenter;
 import com.android.internal.view.menu.ListMenuPresenter;
 import com.android.internal.view.menu.MenuBuilder;
 import com.android.internal.view.menu.MenuDialogHelper;
+import com.android.internal.view.menu.MenuPopupHelper;
 import com.android.internal.view.menu.MenuPresenter;
 import com.android.internal.view.menu.MenuView;
 import com.android.internal.widget.ActionBarContextView;
@@ -274,6 +275,7 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
 
     private ContextMenuBuilder mContextMenu;
     private MenuDialogHelper mContextMenuHelper;
+    private MenuPopupHelper mContextMenuPopupHelper;
     private boolean mClosingActionMenu;
 
     private int mVolumeControlStreamType = AudioManager.USE_DEFAULT_STREAM_TYPE;
@@ -1122,6 +1124,10 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
         if (mContextMenuHelper != null) {
             mContextMenuHelper.dismiss();
             mContextMenuHelper = null;
+        }
+        if (mContextMenuPopupHelper != null) {
+            mContextMenuPopupHelper.dismiss();
+            mContextMenuPopupHelper = null;
         }
     }
 
@@ -2842,6 +2848,29 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
                 mContextMenuHelper.dismiss();
             }
             mContextMenuHelper = helper;
+            return helper != null;
+        }
+
+        @Override
+        public boolean showContextMenuForChild(View originalView, float x, float y) {
+            // Reuse the context menu builder
+            if (mContextMenu == null) {
+                mContextMenu = new ContextMenuBuilder(getContext());
+                mContextMenu.setCallback(mContextMenuCallback);
+            } else {
+                mContextMenu.clearAll();
+            }
+
+            final MenuPopupHelper helper = mContextMenu.showPopup(
+                    getContext(), originalView, x, y);
+            if (helper != null) {
+                helper.setCallback(mContextMenuCallback);
+            } else if (mContextMenuPopupHelper != null) {
+                // No menu to show, but if we have a menu currently showing it just became blank.
+                // Close it.
+                mContextMenuPopupHelper.dismiss();
+            }
+            mContextMenuPopupHelper = helper;
             return helper != null;
         }
 

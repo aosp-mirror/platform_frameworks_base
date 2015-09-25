@@ -182,6 +182,17 @@ public interface ViewParent {
     public boolean showContextMenuForChild(View originalView);
 
     /**
+     * Bring up a context menu for the specified view at the given x/y offset from
+     * the top left corner.
+     *
+     * @param originalView
+     * @param x The x offset at which to open the menu
+     * @param y The y offset at which to open the menu
+     * @return true if a context menu was displayed
+     */
+    public boolean showContextMenuForChild(View originalView, float x, float y);
+
+    /**
      * Have the parent populate the specified context menu if it has anything to
      * add (and then recurse on its parent).
      * 

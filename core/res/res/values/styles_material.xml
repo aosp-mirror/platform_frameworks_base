@@ -307,6 +307,10 @@ please see styles_device_defaults.xml.
     <style name="TextAppearance.Material.Widget.PopupMenu"/>
     <style name="TextAppearance.Material.Widget.PopupMenu.Large" parent="TextAppearance.Material.Menu" />
     <style name="TextAppearance.Material.Widget.PopupMenu.Small" parent="TextAppearance.Material.Menu" />
+    <style name="TextAppearance.Material.Widget.PopupMenu.Header" parent="TextAppearance.Material.Subhead">
+        <item name="fontFamily">@string/font_family_title_material</item>
+        <item name="textSize">@dimen/text_size_menu_header_material</item>
+    </style>
 
     <style name="TextAppearance.Material.Widget.DropDownHint" parent="TextAppearance.Material.Menu" />
 
@@ -861,6 +865,11 @@ please see styles_device_defaults.xml.
     <style name="Widget.Material.PopupMenu.Overflow">
         <item name="overlapAnchor">true</item>
         <item name="dropDownHorizontalOffset">-4dip</item>
+    </style>
+
+    <style name="Widget.Material.ContextPopupMenu" parent="Widget.Material.ListPopupWindow">
+        <item name="overlapAnchor">true</item>
+        <item name="popupEnterTransition">@null</item>
     </style>
 
     <style name="Widget.Material.ActionButton">

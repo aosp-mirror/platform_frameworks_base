@@ -93,6 +93,7 @@ please see themes_device_defaults.xml.
 
         <item name="textAppearanceLargePopupMenu">@style/TextAppearance.Material.Widget.PopupMenu.Large</item>
         <item name="textAppearanceSmallPopupMenu">@style/TextAppearance.Material.Widget.PopupMenu.Small</item>
+        <item name="textAppearancePopupMenuHeader">@style/TextAppearance.Material.Widget.PopupMenu.Header</item>
 
         <!-- Button styles -->
         <item name="buttonStyle">@style/Widget.Material.Button</item>
@@ -283,6 +284,7 @@ please see themes_device_defaults.xml.
         <item name="stackViewStyle">@style/Widget.Material.StackView</item>
         <item name="activityChooserViewStyle">@style/Widget.Material.ActivityChooserView</item>
         <item name="fragmentBreadCrumbsStyle">@style/Widget.Material.FragmentBreadCrumbs</item>
+        <item name="contextPopupMenuStyle">@style/Widget.Material.ContextPopupMenu</item>
 
         <!-- Preference styles -->
         <item name="preferenceScreenStyle">@style/Preference.Material.PreferenceScreen</item>
@@ -449,6 +451,7 @@ please see themes_device_defaults.xml.
 
         <item name="textAppearanceLargePopupMenu">@style/TextAppearance.Material.Widget.PopupMenu.Large</item>
         <item name="textAppearanceSmallPopupMenu">@style/TextAppearance.Material.Widget.PopupMenu.Small</item>
+        <item name="textAppearancePopupMenuHeader">@style/TextAppearance.Material.Widget.PopupMenu.Header</item>
 
         <!-- Button styles -->
         <item name="buttonStyle">@style/Widget.Material.Light.Button</item>
@@ -640,6 +643,7 @@ please see themes_device_defaults.xml.
         <item name="stackViewStyle">@style/Widget.Material.Light.StackView</item>
         <item name="activityChooserViewStyle">@style/Widget.Material.Light.ActivityChooserView</item>
         <item name="fragmentBreadCrumbsStyle">@style/Widget.Material.FragmentBreadCrumbs</item>
+        <item name="contextPopupMenuStyle">@style/Widget.Material.ContextPopupMenu</item>
 
         <!-- Preference styles -->
         <item name="preferenceScreenStyle">@style/Preference.Material.PreferenceScreen</item>
