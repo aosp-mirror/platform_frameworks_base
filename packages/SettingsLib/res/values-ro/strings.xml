@@ -20,7 +20,7 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="wifi_fail_to_scan" msgid="1265540342578081461">"Nu se poate scana pentru reţele"</string>
+    <string name="wifi_fail_to_scan" msgid="1265540342578081461">"Nu se poate scana pentru rețele"</string>
     <string name="wifi_security_none" msgid="7985461072596594400">"Niciuna"</string>
     <string name="wifi_remembered" msgid="4955746899347821096">"Salvată"</string>
     <string name="wifi_disabled_generic" msgid="4259794910584943386">"Dezactivată"</string>
@@ -42,10 +42,10 @@
     <string name="bluetooth_connected_no_headset" msgid="2866994875046035609">"Conectat (fără telefon)"</string>
     <string name="bluetooth_connected_no_a2dp" msgid="4576188601581440337">"Conectat (fără conținut media)"</string>
     <string name="bluetooth_connected_no_map" msgid="6504436917057479986">"Conectat (fără acces la mesaje)"</string>
-    <string name="bluetooth_connected_no_headset_no_a2dp" msgid="9195757766755553810">"Conectat (fără telefon sau conţ. media)"</string>
+    <string name="bluetooth_connected_no_headset_no_a2dp" msgid="9195757766755553810">"Conectat (fără telefon sau conț. media)"</string>
     <string name="bluetooth_profile_a2dp" msgid="2031475486179830674">"Conținut media audio"</string>
     <string name="bluetooth_profile_headset" msgid="8658779596261212609">"Componenta audio a telefonului"</string>
-    <string name="bluetooth_profile_opp" msgid="9168139293654233697">"Transfer de fişiere"</string>
+    <string name="bluetooth_profile_opp" msgid="9168139293654233697">"Transfer de fișiere"</string>
     <string name="bluetooth_profile_hid" msgid="3680729023366986480">"Dispozitiv de intrare"</string>
     <string name="bluetooth_profile_pan" msgid="3391606497945147673">"Acces internet"</string>
     <string name="bluetooth_profile_pbap" msgid="5372051906968576809">"Acces la Agendă"</string>
