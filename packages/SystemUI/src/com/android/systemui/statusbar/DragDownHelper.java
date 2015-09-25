@@ -130,7 +130,7 @@ public class DragDownHelper implements Gefingerpoken {
                 }
                 return true;
             case MotionEvent.ACTION_UP:
-                if (mDraggedFarEnough && mDragDownCallback.onDraggedDown(mStartingChild,
+                if (!isFalseTouch() && mDragDownCallback.onDraggedDown(mStartingChild,
                         (int) (y - mInitialTouchY))) {
                     if (mStartingChild == null) {
                         mDragDownCallback.setEmptyDragAmount(0f);
@@ -146,6 +146,13 @@ public class DragDownHelper implements Gefingerpoken {
                 return false;
         }
         return false;
+    }
+
+    private boolean isFalseTouch() {
+        if (mFalsingManager.isClassiferEnabled()) {
+            return mFalsingManager.isFalseTouch();
+        }
+        return !mDraggedFarEnough;
     }
 
     private void captureStartingChild(float x, float y) {
