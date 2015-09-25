@@ -20,24 +20,19 @@ import android.appwidget.AppWidgetHost;
 import android.appwidget.AppWidgetHostView;
 import android.appwidget.AppWidgetProviderInfo;
 import android.content.Context;
+import com.android.systemui.recents.events.EventBus;
+import com.android.systemui.recents.events.activity.AppWidgetProviderChangedEvent;
 
 /** Our special app widget host for the Search widget */
 public class RecentsAppWidgetHost extends AppWidgetHost {
 
-    /* Callbacks to notify when an app package changes */
-    interface RecentsAppWidgetHostCallbacks {
-        void refreshSearchWidgetView();
-    }
-
-    RecentsAppWidgetHostCallbacks mCb;
     boolean mIsListening;
 
     public RecentsAppWidgetHost(Context context, int hostId) {
         super(context, hostId);
     }
 
-    public void startListening(RecentsAppWidgetHostCallbacks cb) {
-        mCb = cb;
+    public void startListening() {
         if (!mIsListening) {
             mIsListening = true;
             super.startListening();
@@ -47,11 +42,9 @@ public class RecentsAppWidgetHost extends AppWidgetHost {
     @Override
     public void stopListening() {
         if (mIsListening) {
+            mIsListening = false;
             super.stopListening();
         }
-        // Ensure that we release any references to the callbacks
-        mCb = null;
-        mIsListening = false;
     }
 
     @Override
@@ -66,8 +59,8 @@ public class RecentsAppWidgetHost extends AppWidgetHost {
     @Override
     protected void onProviderChanged(int appWidgetId, AppWidgetProviderInfo appWidgetInfo) {
         super.onProviderChanged(appWidgetId, appWidgetInfo);
-        if (mIsListening && mCb != null) {
-            mCb.refreshSearchWidgetView();
+        if (mIsListening) {
+            EventBus.getDefault().send(new AppWidgetProviderChangedEvent());
         }
     }
 }

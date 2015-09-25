@@ -33,6 +33,8 @@ import android.view.View;
 import android.view.ViewStub;
 import com.android.internal.logging.MetricsLogger;
 import com.android.systemui.R;
+import com.android.systemui.recents.events.EventBus;
+import com.android.systemui.recents.events.activity.AppWidgetProviderChangedEvent;
 import com.android.systemui.recents.misc.Console;
 import com.android.systemui.recents.misc.ReferenceCountedTrigger;
 import com.android.systemui.recents.misc.SystemServicesProxy;
@@ -45,14 +47,12 @@ import com.android.systemui.recents.views.RecentsView;
 import com.android.systemui.recents.views.SystemBarScrimViews;
 import com.android.systemui.recents.views.ViewAnimation;
 
-import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 
 /**
  * The main Recents activity that is started from AlternateRecentsComponent.
  */
-public class RecentsActivity extends Activity implements RecentsView.RecentsViewCallbacks,
-        RecentsAppWidgetHost.RecentsAppWidgetHostCallbacks {
+public class RecentsActivity extends Activity implements RecentsView.RecentsViewCallbacks {
 
     public final static int EVENT_BUS_PRIORITY = Recents.EVENT_BUS_PRIORITY + 1;
 
@@ -322,6 +322,10 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        // Register this activity with the event bus
+        EventBus.getDefault().register(this, EVENT_BUS_PRIORITY);
+
         // For the non-primary user, ensure that the SystemServicesProxy and configuration is
         // initialized
         RecentsTaskLoader.initialize(this);
@@ -442,6 +446,7 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
 
         // Stop listening for widget package changes if there was one bound
         mAppWidgetHost.stopListening();
+        EventBus.getDefault().unregister(this);
     }
 
     public void onEnterAnimationTriggered() {
@@ -451,16 +456,12 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
         mRecentsView.startEnterRecentsAnimation(ctx);
 
         if (mSearchWidgetInfo != null) {
-            final WeakReference<RecentsAppWidgetHost.RecentsAppWidgetHostCallbacks> cbRef =
-                    new WeakReference<RecentsAppWidgetHost.RecentsAppWidgetHostCallbacks>(
-                            RecentsActivity.this);
             ctx.postAnimationTrigger.addLastDecrementRunnable(new Runnable() {
                 @Override
                 public void run() {
                     // Start listening for widget package changes if there is one bound
-                    RecentsAppWidgetHost.RecentsAppWidgetHostCallbacks cb = cbRef.get();
-                    if (cb != null) {
-                        mAppWidgetHost.startListening(cb);
+                    if (mAppWidgetHost != null) {
+                        mAppWidgetHost.startListening();
                     }
                 }
             });
@@ -577,10 +578,13 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
         mAfterPauseRunnable = r;
     }
 
-    /**** RecentsAppWidgetHost.RecentsAppWidgetHostCallbacks Implementation ****/
+    /**** EventBus events ****/
 
-    @Override
-    public void refreshSearchWidgetView() {
+    public final void onBusEvent(AppWidgetProviderChangedEvent event) {
+        refreshSearchWidgetView();
+    }
+
+    private void refreshSearchWidgetView() {
         if (mSearchWidgetInfo != null) {
             SystemServicesProxy ssp = RecentsTaskLoader.getInstance().getSystemServicesProxy();
             int searchWidgetId = ssp.getSearchAppWidgetId(this);
