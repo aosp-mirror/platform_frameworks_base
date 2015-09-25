@@ -2524,11 +2524,14 @@ public class AudioService extends IAudioService.Stub {
     }
 
     /** @see AudioManager#setBluetoothScoOn(boolean) */
-    public void setBluetoothScoOn(boolean on){
+    public void setBluetoothScoOn(boolean on) {
         if (!checkAudioSettingsPermission("setBluetoothScoOn()")) {
             return;
         }
+        setBluetoothScoOnInt(on);
+    }
 
+    public void setBluetoothScoOnInt(boolean on) {
         if (on) {
             mForcedUseForComm = AudioSystem.FORCE_BT_SCO;
         } else if (mForcedUseForComm == AudioSystem.FORCE_BT_SCO) {
@@ -2889,6 +2892,8 @@ public class AudioService extends IAudioService.Stub {
             mScoAudioState = SCO_STATE_INACTIVE;
             broadcastScoConnectionState(AudioManager.SCO_AUDIO_STATE_DISCONNECTED);
         }
+        AudioSystem.setParameters("A2dpSuspended=false");
+        setBluetoothScoOnInt(false);
     }
 
     private void broadcastScoConnectionState(int state) {
