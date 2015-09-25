@@ -187,32 +187,41 @@ public class KeyguardIndicationController {
         }
 
         // Try fetching charging time from battery stats.
+        long chargingTimeRemaining = 0;
         try {
-            long chargingTimeRemaining = mBatteryInfo.computeChargeTimeRemaining();
-            if (chargingTimeRemaining > 0) {
-                String chargingTimeFormatted = Formatter.formatShortElapsedTimeRoundingUpToMinutes(
-                        mContext, chargingTimeRemaining);
-                return mContext.getResources().getString(
-                        R.string.keyguard_indication_charging_time, chargingTimeFormatted);
-            }
+            chargingTimeRemaining = mBatteryInfo.computeChargeTimeRemaining();
+
         } catch (RemoteException e) {
             Log.e(TAG, "Error calling IBatteryStats: ", e);
         }
+        final boolean hasChargingTime = chargingTimeRemaining > 0;
 
-        // Fall back to simple charging label.
         int chargingId;
         switch (mChargingSpeed) {
             case KeyguardUpdateMonitor.BatteryStatus.CHARGING_FAST:
-                chargingId = R.string.keyguard_plugged_in_charging_fast;
+                chargingId = hasChargingTime
+                        ? R.string.keyguard_indication_charging_time_fast_if_translated
+                        : R.string.keyguard_plugged_in_charging_fast;
                 break;
             case KeyguardUpdateMonitor.BatteryStatus.CHARGING_SLOWLY:
-                chargingId = R.string.keyguard_plugged_in_charging_slowly;
+                chargingId = hasChargingTime
+                        ? R.string.keyguard_indication_charging_time_slowly_if_translated
+                        : R.string.keyguard_plugged_in_charging_slowly;
                 break;
             default:
-                chargingId = R.string.keyguard_plugged_in;
+                chargingId = hasChargingTime
+                        ? R.string.keyguard_indication_charging_time
+                        : R.string.keyguard_plugged_in;
                 break;
         }
-        return mContext.getResources().getString(chargingId);
+
+        if (hasChargingTime) {
+            String chargingTimeFormatted = Formatter.formatShortElapsedTimeRoundingUpToMinutes(
+                    mContext, chargingTimeRemaining);
+            return mContext.getResources().getString(chargingId, chargingTimeFormatted);
+        } else {
+            return mContext.getResources().getString(chargingId);
+        }
     }
 
     KeyguardUpdateMonitorCallback mUpdateMonitor = new KeyguardUpdateMonitorCallback() {
