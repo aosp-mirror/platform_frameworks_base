@@ -500,6 +500,8 @@ public class Recents extends SystemUI
         mStatusBarHeight = res.getDimensionPixelSize(com.android.internal.R.dimen.status_bar_height);
         mNavBarHeight = res.getDimensionPixelSize(com.android.internal.R.dimen.navigation_bar_height);
         mNavBarWidth = res.getDimensionPixelSize(com.android.internal.R.dimen.navigation_bar_width);
+        // TODO: We can't rely on this anymore since the activity context will yield different
+        //      resources while multiwindow is enabled
         mConfig = RecentsConfiguration.reinitialize(mContext, mSystemServicesProxy);
         mConfig.updateOnConfigurationChange();
         Rect searchBarBounds = new Rect();
@@ -735,7 +737,10 @@ public class Recents extends SystemUI
     /** Starts the recents activity */
     void startRecentsActivity(ActivityManager.RunningTaskInfo topTask, boolean isTopTaskHome) {
         RecentsTaskLoader loader = RecentsTaskLoader.getInstance();
-        RecentsConfiguration.reinitialize(mContext, mSystemServicesProxy);
+        // Don't reinitialize the configuration completely here, since it has the wrong context,
+        // only update the parts that we can get from any context
+        RecentsConfiguration config = RecentsConfiguration.getInstance();
+        config.reinitializeWithApplicationContext(mContext, mSystemServicesProxy);
 
         if (sInstanceLoadPlan == null) {
             // Create a new load plan if onPreloadRecents() was never triggered
