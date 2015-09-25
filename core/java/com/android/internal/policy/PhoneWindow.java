@@ -2292,7 +2292,7 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
         }
     }
 
-    private static final class DecorView extends FrameLayout implements RootViewSurfaceTaker {
+    private final class DecorView extends FrameLayout implements RootViewSurfaceTaker {
 
         /* package */int mDefaultOpacity = PixelFormat.OPAQUE;
 
@@ -2362,8 +2362,6 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
 
         private int mRootScrollY = 0;
 
-        private PhoneWindow mWindow;
-
         public DecorView(Context context, int featureId) {
             super(context);
             mFeatureId = featureId;
@@ -2385,7 +2383,7 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
         @Override
         public void onDraw(Canvas c) {
             super.onDraw(c);
-            mBackgroundFallback.draw(mWindow.mContentRoot, c, mWindow.mContentParent);
+            mBackgroundFallback.draw(mContentRoot, c, mContentParent);
         }
 
         @Override
@@ -2397,7 +2395,7 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
             if (isDown && (event.getRepeatCount() == 0)) {
                 // First handle chording of panel key: if a panel key is held
                 // but not released, try to execute a shortcut in it.
-                if ((mWindow.mPanelChordingKey > 0) && (mWindow.mPanelChordingKey != keyCode)) {
+                if ((mPanelChordingKey > 0) && (mPanelChordingKey != keyCode)) {
                     boolean handled = dispatchKeyShortcutEvent(event);
                     if (handled) {
                         return true;
@@ -2406,15 +2404,15 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
 
                 // If a panel is open, perform a shortcut on it without the
                 // chorded panel key
-                if ((mWindow.mPreparedPanel != null) && mWindow.mPreparedPanel.isOpen) {
-                    if (mWindow.performPanelShortcut(mWindow.mPreparedPanel, keyCode, event, 0)) {
+                if ((mPreparedPanel != null) && mPreparedPanel.isOpen) {
+                    if (performPanelShortcut(mPreparedPanel, keyCode, event, 0)) {
                         return true;
                     }
                 }
             }
 
-            if (!mWindow.isDestroyed()) {
-                final Callback cb = mWindow.getCallback();
+            if (!isDestroyed()) {
+                final Callback cb = getCallback();
                 final boolean handled = cb != null && mFeatureId < 0 ? cb.dispatchKeyEvent(event)
                         : super.dispatchKeyEvent(event);
                 if (handled) {
@@ -2422,28 +2420,28 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
                 }
             }
 
-            return isDown ? mWindow.onKeyDown(mFeatureId, event.getKeyCode(), event)
-                    : mWindow.onKeyUp(mFeatureId, event.getKeyCode(), event);
+            return isDown ? PhoneWindow.this.onKeyDown(mFeatureId, event.getKeyCode(), event)
+                    : PhoneWindow.this.onKeyUp(mFeatureId, event.getKeyCode(), event);
         }
 
         @Override
         public boolean dispatchKeyShortcutEvent(KeyEvent ev) {
             // If the panel is already prepared, then perform the shortcut using it.
             boolean handled;
-            if (mWindow.mPreparedPanel != null) {
-                handled = mWindow.performPanelShortcut(mWindow.mPreparedPanel, ev.getKeyCode(), ev,
+            if (mPreparedPanel != null) {
+                handled = performPanelShortcut(mPreparedPanel, ev.getKeyCode(), ev,
                         Menu.FLAG_PERFORM_NO_CLOSE);
                 if (handled) {
-                    if (mWindow.mPreparedPanel != null) {
-                        mWindow.mPreparedPanel.isHandled = true;
+                    if (mPreparedPanel != null) {
+                        mPreparedPanel.isHandled = true;
                     }
                     return true;
                 }
             }
 
             // Shortcut not handled by the panel.  Dispatch to the view hierarchy.
-            final Callback cb = mWindow.getCallback();
-            handled = cb != null && !mWindow.isDestroyed() && mFeatureId < 0
+            final Callback cb = getCallback();
+            handled = cb != null && !isDestroyed() && mFeatureId < 0
                     ? cb.dispatchKeyShortcutEvent(ev) : super.dispatchKeyShortcutEvent(ev);
             if (handled) {
                 return true;
@@ -2453,10 +2451,10 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
             // combination such as Control+C.  Temporarily prepare the panel then mark it
             // unprepared again when finished to ensure that the panel will again be prepared
             // the next time it is shown for real.
-            PanelFeatureState st = mWindow.getPanelState(FEATURE_OPTIONS_PANEL, false);
-            if (st != null && mWindow.mPreparedPanel == null) {
-                mWindow.preparePanel(st, ev);
-                handled = mWindow.performPanelShortcut(st, ev.getKeyCode(), ev,
+            PanelFeatureState st = getPanelState(FEATURE_OPTIONS_PANEL, false);
+            if (st != null && mPreparedPanel == null) {
+                preparePanel(st, ev);
+                handled = performPanelShortcut(st, ev.getKeyCode(), ev,
                         Menu.FLAG_PERFORM_NO_CLOSE);
                 st.isPrepared = false;
                 if (handled) {
@@ -2468,23 +2466,23 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
 
         @Override
         public boolean dispatchTouchEvent(MotionEvent ev) {
-            final Callback cb = mWindow.getCallback();
-            return cb != null && !mWindow.isDestroyed() && mFeatureId < 0
-                    ? cb.dispatchTouchEvent(ev) : super.dispatchTouchEvent(ev);
+            final Callback cb = getCallback();
+            return cb != null && !isDestroyed() && mFeatureId < 0 ? cb.dispatchTouchEvent(ev)
+                    : super.dispatchTouchEvent(ev);
         }
 
         @Override
         public boolean dispatchTrackballEvent(MotionEvent ev) {
-            final Callback cb = mWindow.getCallback();
-            return cb != null && !mWindow.isDestroyed() && mFeatureId < 0
-                    ? cb.dispatchTrackballEvent(ev) : super.dispatchTrackballEvent(ev);
+            final Callback cb = getCallback();
+            return cb != null && !isDestroyed() && mFeatureId < 0 ? cb.dispatchTrackballEvent(ev)
+                    : super.dispatchTrackballEvent(ev);
         }
 
         @Override
         public boolean dispatchGenericMotionEvent(MotionEvent ev) {
-            final Callback cb = mWindow.getCallback();
-            return cb != null && !mWindow.isDestroyed() && mFeatureId < 0
-                    ? cb.dispatchGenericMotionEvent(ev) : super.dispatchGenericMotionEvent(ev);
+            final Callback cb = getCallback();
+            return cb != null && !isDestroyed() && mFeatureId < 0 ? cb.dispatchGenericMotionEvent(ev)
+                    : super.dispatchGenericMotionEvent(ev);
         }
 
         public boolean superDispatchKeyEvent(KeyEvent event) {
@@ -2536,7 +2534,7 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
         @Override
         public boolean onInterceptTouchEvent(MotionEvent event) {
             int action = event.getAction();
-            if (mHasNonClientDecor && mWindow.mNonClientDecorView.mVisible) {
+            if (mHasNonClientDecor && mNonClientDecorView.mVisible) {
                 // Don't dispatch ACTION_DOWN to the non client decor if the window is
                 // resizable and the event was (starting) outside the window.
                 // Window resizing events should be handled by WindowManager.
@@ -2559,7 +2557,7 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
                     int x = (int)event.getX();
                     int y = (int)event.getY();
                     if (isOutOfBounds(x, y)) {
-                        mWindow.closePanel(mFeatureId);
+                        closePanel(mFeatureId);
                         return true;
                     }
                 }
@@ -2585,7 +2583,7 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
                 if (action == MotionEvent.ACTION_MOVE) {
                     if (y > (mDownY+30)) {
                         Log.i(TAG, "Closing!");
-                        mWindow.closePanel(mFeatureId);
+                        closePanel(mFeatureId);
                         mWatchingForMenu = false;
                         return true;
                     }
@@ -2601,7 +2599,7 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
 
             if (action == MotionEvent.ACTION_DOWN) {
                 int y = (int)event.getY();
-                if (y >= (getHeight()-5) && !mWindow.hasChildren()) {
+                if (y >= (getHeight()-5) && !hasChildren()) {
                     Log.i(TAG, "Watchiing!");
                     mWatchingForMenu = true;
                 }
@@ -2616,7 +2614,7 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
             if (action == MotionEvent.ACTION_MOVE) {
                 if (y < (getHeight()-30)) {
                     Log.i(TAG, "Opening!");
-                    mWindow.openPanel(FEATURE_OPTIONS_PANEL, new KeyEvent(
+                    openPanel(FEATURE_OPTIONS_PANEL, new KeyEvent(
                             KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_MENU));
                     mWatchingForMenu = false;
                     return true;
@@ -2650,8 +2648,8 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
 
         @Override
         public boolean dispatchPopulateAccessibilityEventInternal(AccessibilityEvent event) {
-            final Callback cb = mWindow.getCallback();
-            if (cb != null && !mWindow.isDestroyed()) {
+            final Callback cb = getCallback();
+            if (cb != null && !isDestroyed()) {
                 if (cb.dispatchPopulateAccessibilityEvent(event)) {
                     return true;
                 }
@@ -2688,7 +2686,7 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
 
                 if (SWEEP_OPEN_MENU) {
                     if (mMenuBackground == null && mFeatureId < 0
-                            && mWindow.getAttributes().height
+                            && getAttributes().height
                             == WindowManager.LayoutParams.MATCH_PARENT) {
                         mMenuBackground = getContext().getDrawable(
                                 R.drawable.menu_background);
@@ -2713,8 +2711,7 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
 
             boolean fixedWidth = false;
             if (widthMode == AT_MOST) {
-                final TypedValue tvw = isPortrait ? mWindow.mFixedWidthMinor
-                        : mWindow.mFixedWidthMajor;
+                final TypedValue tvw = isPortrait ? mFixedWidthMinor : mFixedWidthMajor;
                 if (tvw != null && tvw.type != TypedValue.TYPE_NULL) {
                     final int w;
                     if (tvw.type == TypedValue.TYPE_DIMENSION) {
@@ -2735,8 +2732,7 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
             }
 
             if (heightMode == AT_MOST) {
-                final TypedValue tvh = isPortrait ? mWindow.mFixedHeightMajor
-                        : mWindow.mFixedHeightMinor;
+                final TypedValue tvh = isPortrait ? mFixedHeightMajor : mFixedHeightMinor;
                 if (tvh != null && tvh.type != TypedValue.TYPE_NULL) {
                     final int h;
                     if (tvh.type == TypedValue.TYPE_DIMENSION) {
@@ -2754,21 +2750,21 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
                 }
             }
 
-            getOutsets(mWindow.mOutsets);
-            if (mWindow.mOutsets.top > 0 || mWindow.mOutsets.bottom > 0) {
+            getOutsets(mOutsets);
+            if (mOutsets.top > 0 || mOutsets.bottom > 0) {
                 int mode = MeasureSpec.getMode(heightMeasureSpec);
                 if (mode != MeasureSpec.UNSPECIFIED) {
                     int height = MeasureSpec.getSize(heightMeasureSpec);
                     heightMeasureSpec = MeasureSpec.makeMeasureSpec(
-                            height + mWindow.mOutsets.top + mWindow.mOutsets.bottom, mode);
+                            height + mOutsets.top + mOutsets.bottom, mode);
                 }
             }
-            if (mWindow.mOutsets.left > 0 || mWindow.mOutsets.right > 0) {
+            if (mOutsets.left > 0 || mOutsets.right > 0) {
                 int mode = MeasureSpec.getMode(widthMeasureSpec);
                 if (mode != MeasureSpec.UNSPECIFIED) {
                     int width = MeasureSpec.getSize(widthMeasureSpec);
                     widthMeasureSpec = MeasureSpec.makeMeasureSpec(
-                            width + mWindow.mOutsets.left + mWindow.mOutsets.right, mode);
+                            width + mOutsets.left + mOutsets.right, mode);
                 }
             }
 
@@ -2780,7 +2776,7 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
             widthMeasureSpec = MeasureSpec.makeMeasureSpec(width, EXACTLY);
 
             if (!fixedWidth && widthMode == AT_MOST) {
-                final TypedValue tv = isPortrait ? mWindow.mMinWidthMinor : mWindow.mMinWidthMajor;
+                final TypedValue tv = isPortrait ? mMinWidthMinor : mMinWidthMajor;
                 if (tv.type != TypedValue.TYPE_NULL) {
                     final int min;
                     if (tv.type == TypedValue.TYPE_DIMENSION) {
@@ -2808,12 +2804,12 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
         @Override
         protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
             super.onLayout(changed, left, top, right, bottom);
-            getOutsets(mWindow.mOutsets);
-            if (mWindow.mOutsets.left > 0) {
-                offsetLeftAndRight(-mWindow.mOutsets.left);
+            getOutsets(mOutsets);
+            if (mOutsets.left > 0) {
+                offsetLeftAndRight(-mOutsets.left);
             }
-            if (mWindow.mOutsets.top > 0) {
-                offsetTopAndBottom(-mWindow.mOutsets.top);
+            if (mOutsets.top > 0) {
+                offsetTopAndBottom(-mOutsets.top);
             }
         }
 
@@ -2829,23 +2825,23 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
         @Override
         public boolean showContextMenuForChild(View originalView) {
             // Reuse the context menu builder
-            if (mWindow.mContextMenu == null) {
-                mWindow.mContextMenu = new ContextMenuBuilder(getContext());
-                mWindow.mContextMenu.setCallback(mWindow.mContextMenuCallback);
+            if (mContextMenu == null) {
+                mContextMenu = new ContextMenuBuilder(getContext());
+                mContextMenu.setCallback(mContextMenuCallback);
             } else {
-                mWindow.mContextMenu.clearAll();
+                mContextMenu.clearAll();
             }
 
-            final MenuDialogHelper helper = mWindow.mContextMenu.show(originalView,
+            final MenuDialogHelper helper = mContextMenu.show(originalView,
                     originalView.getWindowToken());
             if (helper != null) {
-                helper.setPresenterCallback(mWindow.mContextMenuCallback);
-            } else if (mWindow.mContextMenuHelper != null) {
+                helper.setPresenterCallback(mContextMenuCallback);
+            } else if (mContextMenuHelper != null) {
                 // No menu to show, but if we have a menu currently showing it just became blank.
                 // Close it.
-                mWindow.mContextMenuHelper.dismiss();
+                mContextMenuHelper.dismiss();
             }
-            mWindow.mContextMenuHelper = helper;
+            mContextMenuHelper = helper;
             return helper != null;
         }
 
@@ -2875,15 +2871,14 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
                 View originatingView, ActionMode.Callback callback, int type) {
             ActionMode.Callback2 wrappedCallback = new ActionModeCallback2Wrapper(callback);
             ActionMode mode = null;
-            if (mWindow.getCallback() != null && !mWindow.isDestroyed()) {
+            if (getCallback() != null && !isDestroyed()) {
                 try {
-                    mode = mWindow.getCallback().onWindowStartingActionMode(wrappedCallback, type);
+                    mode = getCallback().onWindowStartingActionMode(wrappedCallback, type);
                 } catch (AbstractMethodError ame) {
                     // Older apps might not implement the typed version of this method.
                     if (type == ActionMode.TYPE_PRIMARY) {
                         try {
-                            mode = mWindow.getCallback().onWindowStartingActionMode(
-                                    wrappedCallback);
+                            mode = getCallback().onWindowStartingActionMode(wrappedCallback);
                         } catch (AbstractMethodError ame2) {
                             // Older apps might not implement this callback method at all.
                         }
@@ -2908,9 +2903,9 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
                     mode = null;
                 }
             }
-            if (mode != null && mWindow.getCallback() != null && !mWindow.isDestroyed()) {
+            if (mode != null && getCallback() != null && !isDestroyed()) {
                 try {
-                    mWindow.getCallback().onActionModeStarted(mode);
+                    getCallback().onActionModeStarted(mode);
                 } catch (AbstractMethodError ame) {
                     // Older apps might not implement this callback method.
                 }
@@ -2999,10 +2994,10 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
         }
 
         private WindowInsets updateColorViews(WindowInsets insets, boolean animate) {
-            WindowManager.LayoutParams attrs = mWindow.getAttributes();
+            WindowManager.LayoutParams attrs = getAttributes();
             int sysUiVisibility = attrs.systemUiVisibility | getWindowSystemUiVisibility();
 
-            if (!mWindow.mIsFloating && ActivityManager.isHighEndGfx()) {
+            if (!mIsFloating && ActivityManager.isHighEndGfx()) {
                 boolean disallowAnimate = !isLaidOut();
                 disallowAnimate |= ((mLastWindowFlags ^ attrs.flags)
                         & FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS) != 0;
@@ -3034,14 +3029,14 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
 
                 boolean navBarToRightEdge = mLastBottomInset == 0 && mLastRightInset > 0;
                 int navBarSize = navBarToRightEdge ? mLastRightInset : mLastBottomInset;
-                updateColorViewInt(mNavigationColorViewState, sysUiVisibility,
-                        mWindow.mNavigationBarColor, navBarSize, navBarToRightEdge,
-                        0 /* rightInset */, animate && !disallowAnimate);
+                updateColorViewInt(mNavigationColorViewState, sysUiVisibility, mNavigationBarColor,
+                        navBarSize, navBarToRightEdge, 0 /* rightInset */,
+                        animate && !disallowAnimate);
 
                 boolean statusBarNeedsRightInset = navBarToRightEdge
                         && mNavigationColorViewState.present;
                 int statusBarRightInset = statusBarNeedsRightInset ? mLastRightInset : 0;
-                updateColorViewInt(mStatusColorViewState, sysUiVisibility, mWindow.mStatusBarColor,
+                updateColorViewInt(mStatusColorViewState, sysUiVisibility, mStatusBarColor,
                         mLastTopInset, false /* matchVertical */, statusBarRightInset,
                         animate && !disallowAnimate);
             }
@@ -3058,13 +3053,13 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
             int consumedRight = consumingNavBar ? mLastRightInset : 0;
             int consumedBottom = consumingNavBar ? mLastBottomInset : 0;
 
-            if (mWindow.mContentRoot != null
-                    && mWindow.mContentRoot.getLayoutParams() instanceof MarginLayoutParams) {
-                MarginLayoutParams lp = (MarginLayoutParams) mWindow.mContentRoot.getLayoutParams();
+            if (mContentRoot != null
+                    && mContentRoot.getLayoutParams() instanceof MarginLayoutParams) {
+                MarginLayoutParams lp = (MarginLayoutParams) mContentRoot.getLayoutParams();
                 if (lp.rightMargin != consumedRight || lp.bottomMargin != consumedBottom) {
                     lp.rightMargin = consumedRight;
                     lp.bottomMargin = consumedBottom;
-                    mWindow.mContentRoot.setLayoutParams(lp);
+                    mContentRoot.setLayoutParams(lp);
 
                     if (insets == null) {
                         // The insets have changed, but we're not currently in the process
@@ -3102,11 +3097,11 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
         private void updateColorViewInt(final ColorViewState state, int sysUiVis, int color,
                 int size, boolean verticalBar, int rightMargin, boolean animate) {
             state.present = size > 0 && (sysUiVis & state.systemUiHideFlag) == 0
-                    && (mWindow.getAttributes().flags & state.hideWindowFlag) == 0
-                    && (mWindow.getAttributes().flags & FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS) != 0;
+                    && (getAttributes().flags & state.hideWindowFlag) == 0
+                    && (getAttributes().flags & FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS) != 0;
             boolean show = state.present
                     && (color & Color.BLACK) != 0
-                    && (mWindow.getAttributes().flags & state.translucentFlag) == 0;
+                    && (getAttributes().flags & state.translucentFlag) == 0;
 
             boolean visibilityChanged = false;
             View view = state.view;
@@ -3198,14 +3193,14 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
                             mPrimaryActionModeView.getLayoutParams();
                     boolean mlpChanged = false;
                     if (mPrimaryActionModeView.isShown()) {
-                        if (mWindow.mTempRect == null) {
-                            mWindow.mTempRect = new Rect();
+                        if (mTempRect == null) {
+                            mTempRect = new Rect();
                         }
-                        final Rect rect = mWindow.mTempRect;
+                        final Rect rect = mTempRect;
 
                         // If the parent doesn't consume the insets, manually
                         // apply the default system window insets.
-                        mWindow.mContentParent.computeSystemWindowInsets(insets, rect);
+                        mContentParent.computeSystemWindowInsets(insets, rect);
                         final int newMargin = rect.top == 0 ? insets.getSystemWindowInsetTop() : 0;
                         if (mlp.topMargin != newMargin) {
                             mlpChanged = true;
@@ -3236,7 +3231,7 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
                         // mode is overlaid on the app content (e.g. it's
                         // sitting in a FrameLayout, see
                         // screen_simple_overlay_action_mode.xml).
-                        final boolean nonOverlay = (mWindow.getLocalFeatures()
+                        final boolean nonOverlay = (getLocalFeatures()
                                 & (1 << FEATURE_ACTION_MODE_OVERLAY)) == 0;
                         insets = insets.consumeSystemWindowInsets(
                                 false, nonOverlay && showStatusGuard /* top */, false, false);
@@ -3260,14 +3255,14 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
 
         private void updateNavigationGuard(WindowInsets insets) {
             // IMEs lay out below the nav bar, but the content view must not (for back compat)
-            if (mWindow.getAttributes().type == WindowManager.LayoutParams.TYPE_INPUT_METHOD) {
+            if (getAttributes().type == WindowManager.LayoutParams.TYPE_INPUT_METHOD) {
                 // prevent the content view from including the nav bar height
-                if (mWindow.mContentParent != null) {
-                    if (mWindow.mContentParent.getLayoutParams() instanceof MarginLayoutParams) {
+                if (mContentParent != null) {
+                    if (mContentParent.getLayoutParams() instanceof MarginLayoutParams) {
                         MarginLayoutParams mlp =
-                                (MarginLayoutParams) mWindow.mContentParent.getLayoutParams();
+                                (MarginLayoutParams) mContentParent.getLayoutParams();
                         mlp.bottomMargin = insets.getSystemWindowInsetBottom();
-                        mWindow.mContentParent.setLayoutParams(mlp);
+                        mContentParent.setLayoutParams(mlp);
                     }
                 }
                 // position the navigation guard view, creating it if necessary
@@ -3349,7 +3344,7 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
 
             mDefaultOpacity = opacity;
             if (mFeatureId < 0) {
-                mWindow.setDefaultWindowFormat(opacity);
+                setDefaultWindowFormat(opacity);
             }
         }
 
@@ -3359,13 +3354,12 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
 
             // If the user is chording a menu shortcut, release the chord since
             // this window lost focus
-            if (mWindow.hasFeature(FEATURE_OPTIONS_PANEL) && !hasWindowFocus
-                    && mWindow.mPanelChordingKey != 0) {
-                mWindow.closePanel(FEATURE_OPTIONS_PANEL);
+            if (hasFeature(FEATURE_OPTIONS_PANEL) && !hasWindowFocus && mPanelChordingKey != 0) {
+                closePanel(FEATURE_OPTIONS_PANEL);
             }
 
-            final Callback cb = mWindow.getCallback();
-            if (cb != null && !mWindow.isDestroyed() && mFeatureId < 0) {
+            final Callback cb = getCallback();
+            if (cb != null && !isDestroyed() && mFeatureId < 0) {
                 cb.onWindowFocusChanged(hasWindowFocus);
             }
 
@@ -3381,8 +3375,8 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
         protected void onAttachedToWindow() {
             super.onAttachedToWindow();
 
-            final Callback cb = mWindow.getCallback();
-            if (cb != null && !mWindow.isDestroyed() && mFeatureId < 0) {
+            final Callback cb = getCallback();
+            if (cb != null && !isDestroyed() && mFeatureId < 0) {
                 cb.onAttachedToWindow();
             }
 
@@ -3394,7 +3388,7 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
                  * menu was open. When the activity is recreated, the menu
                  * should be shown again.
                  */
-                mWindow.openPanelsAfterRestore();
+                openPanelsAfterRestore();
             }
         }
 
@@ -3402,13 +3396,13 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
         protected void onDetachedFromWindow() {
             super.onDetachedFromWindow();
 
-            final Callback cb = mWindow.getCallback();
+            final Callback cb = getCallback();
             if (cb != null && mFeatureId < 0) {
                 cb.onDetachedFromWindow();
             }
 
-            if (mWindow.mDecorContentParent != null) {
-                mWindow.mDecorContentParent.dismissPopups();
+            if (mDecorContentParent != null) {
+                mDecorContentParent.dismissPopups();
             }
 
             if (mPrimaryActionModePopup != null) {
@@ -3423,7 +3417,7 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
                 mFloatingToolbar = null;
             }
 
-            PanelFeatureState st = mWindow.getPanelState(FEATURE_OPTIONS_PANEL, false);
+            PanelFeatureState st = getPanelState(FEATURE_OPTIONS_PANEL, false);
             if (st != null && st.menu != null && mFeatureId < 0) {
                 st.menu.close();
             }
@@ -3432,29 +3426,29 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
         @Override
         public void onCloseSystemDialogs(String reason) {
             if (mFeatureId >= 0) {
-                mWindow.closeAllPanels();
+                closeAllPanels();
             }
         }
 
         public android.view.SurfaceHolder.Callback2 willYouTakeTheSurface() {
-            return mFeatureId < 0 ? mWindow.mTakeSurfaceCallback : null;
+            return mFeatureId < 0 ? mTakeSurfaceCallback : null;
         }
 
         public InputQueue.Callback willYouTakeTheInputQueue() {
-            return mFeatureId < 0 ? mWindow.mTakeInputQueueCallback : null;
+            return mFeatureId < 0 ? mTakeInputQueueCallback : null;
         }
 
         public void setSurfaceType(int type) {
-            mWindow.setType(type);
+            PhoneWindow.this.setType(type);
         }
 
         public void setSurfaceFormat(int format) {
-            mWindow.setFormat(format);
+            PhoneWindow.this.setFormat(format);
         }
 
         public void setSurfaceKeepScreenOn(boolean keepOn) {
-            if (keepOn) mWindow.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
-            else mWindow.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+            if (keepOn) PhoneWindow.this.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+            else PhoneWindow.this.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
         }
 
         @Override
@@ -3486,7 +3480,7 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
             endOnGoingFadeAnimation();
             cleanupPrimaryActionMode();
             if (mPrimaryActionModeView == null) {
-                if (mWindow.isFloating()) {
+                if (isFloating()) {
                     // Use the action bar theme.
                     final TypedValue outValue = new TypedValue();
                     final Theme baseTheme = mContext.getTheme();
@@ -3633,7 +3627,7 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
 
         private void setHandledFloatingActionMode(ActionMode mode) {
             mFloatingActionMode = mode;
-            mFloatingToolbar = new FloatingToolbar(mContext, mWindow);
+            mFloatingToolbar = new FloatingToolbar(mContext, PhoneWindow.this);
             ((FloatingActionMode) mFloatingActionMode).setFloatingToolbar(mFloatingToolbar);
             mFloatingActionMode.invalidate();  // Will show the floating toolbar if necessary.
             mFloatingActionModeOriginatingView.getViewTreeObserver()
@@ -3670,10 +3664,6 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
          **/
         private boolean windowHasShadow() {
             return windowHasNonClientDecor() && getElevation() > 0;
-        }
-
-        void setWindow(PhoneWindow phoneWindow) {
-            mWindow = phoneWindow;
         }
 
         /**
@@ -3764,9 +3754,9 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
                     cleanupFloatingActionModeViews();
                     mFloatingActionMode = null;
                 }
-                if (mWindow.getCallback() != null && !mWindow.isDestroyed()) {
+                if (getCallback() != null && !isDestroyed()) {
                     try {
-                        mWindow.getCallback().onActionModeFinished(mode);
+                        getCallback().onActionModeFinished(mode);
                     } catch (AbstractMethodError ame) {
                         // Older apps might not implement this callback method.
                     }
@@ -3786,14 +3776,7 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
     }
 
     protected DecorView generateDecor(int featureId) {
-        // System process doesn't have application context and in that case we need to directly use
-        // the context we have. Otherwise we want the application context, so we don't cling to the
-        // activity.
-        Context context = getContext().getApplicationContext();
-        if (context == null) {
-            context = getContext();
-        }
-        return new DecorView(context, featureId);
+        return new DecorView(getContext(), featureId);
     }
 
     protected void setFeatureFromAttrs(int featureId, TypedArray attrs,
@@ -4164,17 +4147,11 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
             if (nonClientDecorView == null) {
                 TypedValue value = new TypedValue();
                 getContext().getTheme().resolveAttribute(R.attr.colorPrimary, value, true);
-                // We can't use the application context inside the general inflater, because some
-                // views might depend on the fact that they get Activity or even specific activity.
-                // We control the NonClientDecor, so we know that application context should be
-                // safe enough.
-                LayoutInflater inflater =
-                        mLayoutInflater.cloneInContext(getContext().getApplicationContext());
                 if (Color.luminance(value.data) < 0.5) {
-                    nonClientDecorView = (NonClientDecorView) inflater.inflate(
+                    nonClientDecorView = (NonClientDecorView) mLayoutInflater.inflate(
                             R.layout.non_client_decor_dark, null);
                 } else {
-                    nonClientDecorView = (NonClientDecorView) inflater.inflate(
+                    nonClientDecorView = (NonClientDecorView) mLayoutInflater.inflate(
                             R.layout.non_client_decor_light, null);
                 }
             }
@@ -4196,14 +4173,12 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
         mForceDecorInstall = false;
         if (mDecor == null) {
             mDecor = generateDecor(-1);
-            mDecor.setWindow(this);
             mDecor.setDescendantFocusability(ViewGroup.FOCUS_AFTER_DESCENDANTS);
             mDecor.setIsRootNamespace(true);
             if (!mInvalidatePanelMenuPosted && mInvalidatePanelMenuFeatures != 0) {
                 mDecor.postOnAnimation(mInvalidatePanelMenuRunnable);
             }
         }
-        mDecor.setWindow(this);
         if (mContentParent == null) {
             mContentParent = generateLayout(mDecor);
 
