@@ -19,6 +19,7 @@ package com.android.internal.os;
 import android.net.LocalSocket;
 import android.net.LocalSocketAddress;
 import android.util.Slog;
+
 import libcore.io.IoUtils;
 import libcore.io.Streams;
 
@@ -90,32 +91,29 @@ public class InstallerConnection {
         }
     }
 
-    public int dexopt(String apkPath, int uid, boolean isPublic,
-            String instructionSet, int dexoptNeeded, boolean bootComplete) {
-        return dexopt(apkPath, uid, isPublic, "*", instructionSet, dexoptNeeded,
-                false, false, null, bootComplete);
+    public int dexopt(String apkPath, int uid, String instructionSet,
+            int dexoptNeeded, int dexFlags) {
+        return dexopt(apkPath, uid, "*", instructionSet, dexoptNeeded,
+                null /*outputPath*/, dexFlags);
     }
 
-    public int dexopt(String apkPath, int uid, boolean isPublic, String pkgName,
-            String instructionSet, int dexoptNeeded, boolean vmSafeMode,
-            boolean debuggable, String outputPath, boolean bootComplete) {
+    public int dexopt(String apkPath, int uid, String pkgName, String instructionSet,
+            int dexoptNeeded, String outputPath, int dexFlags) {
         StringBuilder builder = new StringBuilder("dexopt");
         builder.append(' ');
         builder.append(apkPath);
         builder.append(' ');
         builder.append(uid);
-        builder.append(isPublic ? " 1" : " 0");
         builder.append(' ');
         builder.append(pkgName);
         builder.append(' ');
         builder.append(instructionSet);
         builder.append(' ');
         builder.append(dexoptNeeded);
-        builder.append(vmSafeMode ? " 1" : " 0");
-        builder.append(debuggable ? " 1" : " 0");
         builder.append(' ');
         builder.append(outputPath != null ? outputPath : "!");
-        builder.append(bootComplete ? " 1" : " 0");
+        builder.append(' ');
+        builder.append(dexFlags);
         return execute(builder.toString());
     }
 
