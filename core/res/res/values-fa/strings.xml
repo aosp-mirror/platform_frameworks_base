@@ -144,14 +144,14 @@
     <string name="httpErrorOk" msgid="1191919378083472204">"تأیید"</string>
     <string name="httpError" msgid="7956392511146698522">"خطایی در شبکه وجود داشت."</string>
     <string name="httpErrorLookup" msgid="4711687456111963163">"‏URL پیدا نشد."</string>
-    <string name="httpErrorUnsupportedAuthScheme" msgid="6299980280442076799">"‏طرح کلی تأیید اعتبار سایت پشتیبانی نمی‎شود."</string>
+    <string name="httpErrorUnsupportedAuthScheme" msgid="6299980280442076799">"‏طرح کلی تأیید اعتبار سایت پشتیبانی نمی‌‎شود."</string>
     <string name="httpErrorAuth" msgid="1435065629438044534">"تأیید اعتبار انجام نشد."</string>
     <string name="httpErrorProxyAuth" msgid="1788207010559081331">"تأیید اعتبار از طریق سرور پروکسی انجام نشد."</string>
     <string name="httpErrorConnect" msgid="8714273236364640549">"اتصال به سرور انجام نشد."</string>
     <string name="httpErrorIO" msgid="2340558197489302188">"برقراری ارتباط با سرور ممکن نبود. بعداً دوباره امتحان کنید."</string>
     <string name="httpErrorTimeout" msgid="4743403703762883954">"زمان اتصال به سرور تمام شده است."</string>
     <string name="httpErrorRedirectLoop" msgid="8679596090392779516">"این صفحه دارای تعداد بسیار زیادی تغییر مسیر سرور است."</string>
-    <string name="httpErrorUnsupportedScheme" msgid="5015730812906192208">"‏پروتکل پشتیبانی نمی‎شود."</string>
+    <string name="httpErrorUnsupportedScheme" msgid="5015730812906192208">"‏پروتکل پشتیبانی نمی‌‎شود."</string>
     <string name="httpErrorFailedSslHandshake" msgid="96549606000658641">"اتصال امن ایجاد نشد."</string>
     <string name="httpErrorBadUrl" msgid="3636929722728881972">"‏بدلیل نامعتبر بودن URL، باز کردن صفحه ممکن نیست."</string>
     <string name="httpErrorFile" msgid="2170788515052558676">"دسترسی به فایل انجام نشد."</string>
@@ -781,7 +781,7 @@
     <string name="permdesc_writeHistoryBookmarks" product="tv" msgid="7007393823197766548">"به برنامه اجازه می‌دهد تا سابقه یا نشانک‌های ذخیره شده مرورگر در تلویزیون شما را تغییر دهد. شاید به برنامه اجازه دهد تا داده‌های «مرورگر» را پاک کند یا تغییر دهد. توجه: این مجوز شاید توسط مرورگرهای شخص ثالث یا سایر برنامه‌ها با قابلیت‌های مرور وب اجرا شود."</string>
     <string name="permdesc_writeHistoryBookmarks" product="default" msgid="8497389531014185509">"به برنامه اجازه می‌دهد سابقه مرورگر یا نشانک‌های ذخیره شده در تلفن شما را اصلاح کند. این ویژگی ممکن است به برنامه اجازه دهد داده‌های مرورگر را حذف یا اصلاح کند. توجه: این مجوز ممکن است توسط مرورگرهای شخص ثالث یا سایر برنامه‌های دارای قابلیت مرور وب قابل اجرا نباشد."</string>
     <string name="permlab_setAlarm" msgid="1379294556362091814">"تنظیم یک هشدار"</string>
-    <string name="permdesc_setAlarm" msgid="316392039157473848">"‏به برنامه اجازه می‎دهد تا هشداری را در برنامه ساعت زنگدار نصب شده تنظیم کند. برخی از برنامه‎های ساعت زنگدار نمی‎توانند این ویژگی را اعمال کنند."</string>
+    <string name="permdesc_setAlarm" msgid="316392039157473848">"‏به برنامه اجازه می‎دهد تا هشداری را در برنامه ساعت زنگدار نصب شده تنظیم کند. برخی از برنامه‎های ساعت زنگدار نمی‌‎توانند این ویژگی را اعمال کنند."</string>
     <string name="permlab_addVoicemail" msgid="5525660026090959044">"افزودن پست صوتی"</string>
     <string name="permdesc_addVoicemail" msgid="6604508651428252437">"به برنامه اجازه می‌دهد تا پیام‌ها را به صندوق دریافت پست صوتی شما اضافه کند."</string>
     <string name="permlab_writeGeolocationPermissions" msgid="5962224158955273932">"تغییر مجوزهای مکان جغرافیایی مرورگر"</string>
@@ -894,15 +894,15 @@
     <string name="clearDefaultHintMsg" msgid="3252584689512077257">"‏پیش‌فرض را در تنظیمات سیستم&gt; برنامه‎ها&gt; مورد دانلود شده پاک کنید."</string>
     <string name="chooseActivity" msgid="7486876147751803333">"انتخاب عملکرد"</string>
     <string name="chooseUsbActivity" msgid="6894748416073583509">"‏انتخاب برنامه برای دستگاه USB"</string>
-    <string name="noApplications" msgid="2991814273936504689">"‏هیچ برنامه‌ای نمی‎تواند این کار را انجام دهد."</string>
+    <string name="noApplications" msgid="2991814273936504689">"‏هیچ برنامه‌ای نمی‌‎تواند این کار را انجام دهد."</string>
     <string name="aerr_title" msgid="1905800560317137752"></string>
     <string name="aerr_application" msgid="932628488013092776">"متأسفانه، <xliff:g id="APPLICATION">%1$s</xliff:g> متوقف شده است."</string>
     <string name="aerr_process" msgid="4507058997035697579">"متأسفانه، پردازش <xliff:g id="PROCESS">%1$s</xliff:g> متوقف شده است."</string>
     <string name="anr_title" msgid="4351948481459135709"></string>
-    <string name="anr_activity_application" msgid="1904477189057199066">"‏<xliff:g id="APPLICATION">%2$s</xliff:g> پاسخ نمی‎دهد.\n\nآیا می‎خواهید آنرا ببندید؟"</string>
-    <string name="anr_activity_process" msgid="5776209883299089767">"‏فعالیت <xliff:g id="ACTIVITY">%1$s</xliff:g> پاسخ نمی‎دهد.\n\nآیا می‎خواهید آن را ببندید؟"</string>
-    <string name="anr_application_process" msgid="8941757607340481057">"‏<xliff:g id="APPLICATION">%1$s</xliff:g> پاسخ نمی‎دهد. آیا می‎خواهید آن را ببندید؟"</string>
-    <string name="anr_process" msgid="6513209874880517125">"‏روند <xliff:g id="PROCESS">%1$s</xliff:g> پاسخ نمی‎دهد. \n\nآیا می‎خواهید آن را ببندید؟"</string>
+    <string name="anr_activity_application" msgid="1904477189057199066">"‏<xliff:g id="APPLICATION">%2$s</xliff:g> پاسخ نمی‌‎دهد.\n\nآیا می‎خواهید آنرا ببندید؟"</string>
+    <string name="anr_activity_process" msgid="5776209883299089767">"‏فعالیت <xliff:g id="ACTIVITY">%1$s</xliff:g> پاسخ نمی‌‎دهد.\n\nآیا می‎خواهید آن را ببندید؟"</string>
+    <string name="anr_application_process" msgid="8941757607340481057">"‏<xliff:g id="APPLICATION">%1$s</xliff:g> پاسخ نمی‌‎دهد. آیا می‎خواهید آن را ببندید؟"</string>
+    <string name="anr_process" msgid="6513209874880517125">"‏روند <xliff:g id="PROCESS">%1$s</xliff:g> پاسخ نمی‌‎دهد. \n\nآیا می‎خواهید آن را ببندید؟"</string>
     <string name="force_close" msgid="8346072094521265605">"تأیید"</string>
     <string name="report" msgid="4060218260984795706">"گزارش"</string>
     <string name="wait" msgid="7147118217226317732">"منتظر بمانید"</string>

@@ -231,19 +231,19 @@
     <string name="permgrouplab_location" msgid="7275582855722310164">"Joylashuv"</string>
     <string name="permgroupdesc_location" msgid="1346617465127855033">"qurilmaning joylashuvi haqidagi ma’lumotlarga kirish"</string>
     <string name="permgrouplab_calendar" msgid="5863508437783683902">"Taqvim"</string>
-    <string name="permgroupdesc_calendar" msgid="3889615280211184106">"taqvimga kirish"</string>
+    <string name="permgroupdesc_calendar" msgid="3889615280211184106">"taqvim ma’lumotlariga kirish"</string>
     <string name="permgrouplab_sms" msgid="228308803364967808">"SMS"</string>
     <string name="permgroupdesc_sms" msgid="4656988620100940350">"SMS xabarlarni yuborish va ko‘rish"</string>
     <string name="permgrouplab_storage" msgid="1971118770546336966">"Xotira"</string>
-    <string name="permgroupdesc_storage" msgid="637758554581589203">"qurilmangizdagi rasm, media va fayllarga kirish"</string>
+    <string name="permgroupdesc_storage" msgid="637758554581589203">"qurilmangizdagi rasm, multimedia va fayllarga kirish"</string>
     <string name="permgrouplab_microphone" msgid="171539900250043464">"Mikrofon"</string>
     <string name="permgroupdesc_microphone" msgid="4988812113943554584">"ovoz yozib olish"</string>
     <string name="permgrouplab_camera" msgid="4820372495894586615">"Kamera"</string>
-    <string name="permgroupdesc_camera" msgid="3250611594678347720">"rasm va videoga olish"</string>
+    <string name="permgroupdesc_camera" msgid="3250611594678347720">"suratga olish va video yozib olish"</string>
     <string name="permgrouplab_phone" msgid="5229115638567440675">"Telefon"</string>
     <string name="permgroupdesc_phone" msgid="6234224354060641055">"telefon qo‘ng‘iroqlarini amalga oshirish va boshqarish"</string>
     <string name="permgrouplab_sensors" msgid="416037179223226722">"Tana sezgichlari"</string>
-    <string name="permgroupdesc_sensors" msgid="7147968539346634043">"asosiy belgilaringiz haqidagi sezgich ma’lumotlariga kirish"</string>
+    <string name="permgroupdesc_sensors" msgid="7147968539346634043">"organizm holati haqidagi sezgich ma’lumotlariga kirish"</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"Oynadagi kontentni o‘qiydi"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"Joriy oynadagi kontent mazmunini aniqlaydi."</string>
     <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"Teginib o‘rganish xizmatini yoqadi"</string>
@@ -342,7 +342,7 @@
     <string name="permdesc_accessCoarseLocation" msgid="2538200184373302295">"Ilovaga sizning taxminiy joylashuvingizni topishga ruxsat beradi. Ushbu joylashuv Wi-Fi va uyali tarmoq antennalari kabi tarmoq joylashuv manbalaridan foydlanuvchi joylashuv xizmatlari orqali aniqlanadi. Ushbu joylashuv xizmatlari yoqib qo‘yilgan bo‘lishi va qurilmangizdagi ilovaga ulardan foydalanish uchun mavjud bo‘lishi kerak. Ilovalar bundan foydalanib, sizning taxminiy joylashuvingizni aniqlaydi."</string>
     <string name="permlab_modifyAudioSettings" msgid="6095859937069146086">"audio sozlamalaringizni o‘zgartirish"</string>
     <string name="permdesc_modifyAudioSettings" msgid="3522565366806248517">"Ilovalarga tovush va ovoz chiqarish uchun foydalaniladigan karnay kabi global audio sozlamalarini o‘zgartirish uchun ruxsat beradi."</string>
-    <string name="permlab_recordAudio" msgid="3876049771427466323">"audioni yozib olish"</string>
+    <string name="permlab_recordAudio" msgid="3876049771427466323">"ovoz yozib olish"</string>
     <string name="permdesc_recordAudio" msgid="4906839301087980680">"Ilovaga mikrofon yordamida audio yozish uchun ruxsat beradi. Bu huquq ilovaga ruxsatingizsiz audio fayllarni yozib olishga ruxsat beradi."</string>
     <string name="permlab_sim_communication" msgid="1180265879464893029">"sim orqali ulanish"</string>
     <string name="permdesc_sim_communication" msgid="5725159654279639498">"Dasturga SIM kartaga buyruqlar jo‘natishga ruxsat beradi. Bu juda ham xavfli."</string>

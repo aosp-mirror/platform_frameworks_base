@@ -229,7 +229,7 @@
     <string name="permgrouplab_contacts" msgid="3657758145679177612">"સંપર્કો"</string>
     <string name="permgroupdesc_contacts" msgid="6951499528303668046">"તમારા સંપર્કોને ઍક્સેસ કરો"</string>
     <string name="permgrouplab_location" msgid="7275582855722310164">"સ્થાન"</string>
-    <string name="permgroupdesc_location" msgid="1346617465127855033">"આ ઉપકરણના સ્થાનને ઍક્સેસ કરો"</string>
+    <string name="permgroupdesc_location" msgid="1346617465127855033">"આ ઉપકરણના સ્થાનને ઍક્સેસ કરવાની"</string>
     <string name="permgrouplab_calendar" msgid="5863508437783683902">"કેલેન્ડર"</string>
     <string name="permgroupdesc_calendar" msgid="3889615280211184106">"તમારા કેલેન્ડરને ઍક્સેસ કરવાની"</string>
     <string name="permgrouplab_sms" msgid="228308803364967808">"SMS"</string>
