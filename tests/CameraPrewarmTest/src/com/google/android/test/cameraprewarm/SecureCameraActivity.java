@@ -17,6 +17,7 @@
 package com.google.android.test.cameraprewarm;
 
 import android.app.Activity;
+import android.graphics.Camera;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.WindowManager;
@@ -31,5 +32,7 @@ public class SecureCameraActivity extends Activity {
         setContentView(R.layout.camera_activity);
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED);
         Log.i(CameraActivity.TAG, "Activity created");
+        Log.i(CameraActivity.TAG, "Source: "
+                + getIntent().getStringExtra("com.android.systemui.camera_launch_source"));
     }
 }

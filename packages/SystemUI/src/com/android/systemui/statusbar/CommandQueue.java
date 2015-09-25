@@ -110,7 +110,7 @@ public class CommandQueue extends IStatusBar.Stub {
         public void appTransitionStarting(long startTime, long duration);
         public void showAssistDisclosure();
         public void startAssist(Bundle args);
-        public void onCameraLaunchGestureDetected();
+        public void onCameraLaunchGestureDetected(int source);
     }
 
     public CommandQueue(Callbacks callbacks, StatusBarIconList list) {
@@ -296,10 +296,10 @@ public class CommandQueue extends IStatusBar.Stub {
     }
 
     @Override
-    public void onCameraLaunchGestureDetected() {
+    public void onCameraLaunchGestureDetected(int source) {
         synchronized (mList) {
             mHandler.removeMessages(MSG_CAMERA_LAUNCH_GESTURE);
-            mHandler.obtainMessage(MSG_CAMERA_LAUNCH_GESTURE).sendToTarget();
+            mHandler.obtainMessage(MSG_CAMERA_LAUNCH_GESTURE, source, 0).sendToTarget();
         }
     }
 
@@ -402,7 +402,7 @@ public class CommandQueue extends IStatusBar.Stub {
                     mCallbacks.startAssist((Bundle) msg.obj);
                     break;
                 case MSG_CAMERA_LAUNCH_GESTURE:
-                    mCallbacks.onCameraLaunchGestureDetected();
+                    mCallbacks.onCameraLaunchGestureDetected(msg.arg1);
                     break;
             }
         }

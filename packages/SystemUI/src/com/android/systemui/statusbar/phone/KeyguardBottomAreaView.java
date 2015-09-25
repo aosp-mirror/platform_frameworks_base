@@ -77,6 +77,13 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
 
     final static String TAG = "PhoneStatusBar/KeyguardBottomAreaView";
 
+    public static final String CAMERA_LAUNCH_SOURCE_AFFORDANCE = "lockscreen_affordance";
+    public static final String CAMERA_LAUNCH_SOURCE_WIGGLE = "wiggle_gesture";
+    public static final String CAMERA_LAUNCH_SOURCE_POWER_DOUBLE_TAP = "power_double_tap";
+
+    public static final String EXTRA_CAMERA_LAUNCH_SOURCE
+            = "com.android.systemui.camera_launch_source";
+
     private static final Intent SECURE_CAMERA_INTENT =
             new Intent(MediaStore.INTENT_ACTION_STILL_IMAGE_CAMERA_SECURE)
                     .addFlags(Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS);
@@ -170,7 +177,7 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
                             CommandQueue.FLAG_EXCLUDE_RECENTS_PANEL, true /* force */);
                     return true;
                 } else if (host == mCameraImageView) {
-                    launchCamera();
+                    launchCamera(CAMERA_LAUNCH_SOURCE_AFFORDANCE);
                     return true;
                 } else if (host == mLeftAffordanceView) {
                     launchLeftAffordance();
@@ -349,7 +356,7 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
     @Override
     public void onClick(View v) {
         if (v == mCameraImageView) {
-            launchCamera();
+            launchCamera(CAMERA_LAUNCH_SOURCE_AFFORDANCE);
         } else if (v == mLeftAffordanceView) {
             launchLeftAffordance();
         } if (v == mLockIcon) {
@@ -417,8 +424,9 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
         }
     }
 
-    public void launchCamera() {
+    public void launchCamera(String source) {
         final Intent intent = getCameraIntent();
+        intent.putExtra(EXTRA_CAMERA_LAUNCH_SOURCE, source);
         boolean wouldLaunchResolverActivity = PreviewInflater.wouldLaunchResolverActivity(
                 mContext, intent, KeyguardUpdateMonitor.getCurrentUser());
         if (intent == SECURE_CAMERA_INTENT && !wouldLaunchResolverActivity) {
