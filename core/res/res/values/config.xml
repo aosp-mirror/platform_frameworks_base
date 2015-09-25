@@ -2214,6 +2214,10 @@
     <bool name="config_defaultWindowFeatureOptionsPanel">true</bool>
     <bool name="config_defaultWindowFeatureContextMenu">true</bool>
 
+    <!-- If true, the transition for a RemoteViews is read from a resource instead of using the
+         default scale-up transition. -->
+    <bool name="config_overrideRemoteViewsActivityTransition">false</bool>
+
     <!-- This config is used to check if the carrier requires converting destination
          number before sending out a SMS.
          Formats for this configuration as below:

@@ -2150,6 +2150,13 @@ i
               (which is exiting the screen).  The wallpaper remains
               static behind the animation. -->
         <attr name="wallpaperIntraCloseExitAnimation" format="reference" />
+
+        <!--  When opening a new activity from a RemoteViews, this is the
+              animation that is run on the next activity (which is entering the
+              screen). Requires config_overrideRemoteViewsActivityTransition to
+              be true. -->
+        <attr name="activityOpenRemoteViewsEnterAnimation" format="reference" />
+
     </declare-styleable>
 
     <!-- ============================= -->

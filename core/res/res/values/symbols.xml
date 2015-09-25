@@ -2191,6 +2191,7 @@
   <java-symbol type="bool" name="config_sms_force_7bit_encoding" />
   <java-symbol type="bool" name="config_defaultWindowFeatureOptionsPanel" />
   <java-symbol type="bool" name="config_defaultWindowFeatureContextMenu" />
+  <java-symbol type="bool" name="config_overrideRemoteViewsActivityTransition" />
 
   <java-symbol type="layout" name="simple_account_item" />
   <java-symbol type="array" name="config_sms_convert_destination_number_support" />
