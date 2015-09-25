@@ -35,6 +35,10 @@ import java.util.List;
 
 import dalvik.system.DexFile;
 
+import static com.android.server.pm.Installer.DEXOPT_BOOTCOMPLETE;
+import static com.android.server.pm.Installer.DEXOPT_DEBUGGABLE;
+import static com.android.server.pm.Installer.DEXOPT_PUBLIC;
+import static com.android.server.pm.Installer.DEXOPT_SAFEMODE;
 import static com.android.server.pm.InstructionSets.getAppDexInstructionSets;
 import static com.android.server.pm.InstructionSets.getDexCodeInstructionSets;
 
@@ -177,9 +181,13 @@ final class PackageDexOptimizer {
                             + " vmSafeMode=" + vmSafeMode + " debuggable=" + debuggable
                             + " oatDir = " + oatDir + " bootComplete=" + bootComplete);
                     final int sharedGid = UserHandle.getSharedAppGid(pkg.applicationInfo.uid);
+                    final int dexFlags =
+                            (!pkg.isForwardLocked() ? DEXOPT_PUBLIC : 0)
+                            | (vmSafeMode ? DEXOPT_SAFEMODE : 0)
+                            | (debuggable ? DEXOPT_DEBUGGABLE : 0)
+                            | (bootComplete ? DEXOPT_BOOTCOMPLETE : 0);
                     final int ret = mPackageManagerService.mInstaller.dexopt(path, sharedGid,
-                            !pkg.isForwardLocked(), pkg.packageName, dexCodeInstructionSet,
-                            dexoptNeeded, vmSafeMode, debuggable, oatDir, bootComplete);
+                            pkg.packageName, dexCodeInstructionSet, dexoptNeeded, oatDir, dexFlags);
 
                     // Dex2oat might fail due to compiler / verifier errors. We soldier on
                     // regardless, and attempt to interpret the app as a safety net.
