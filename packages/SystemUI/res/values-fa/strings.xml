@@ -275,7 +275,7 @@
     <string name="quick_settings_inversion_label" msgid="8790919884718619648">"برگردان رنگ‌ها"</string>
     <string name="quick_settings_color_space_label" msgid="853443689745584770">"حالت تصحیح رنگ"</string>
     <string name="quick_settings_more_settings" msgid="326112621462813682">"تنظیمات بیشتر"</string>
-    <string name="quick_settings_done" msgid="3402999958839153376">"انجام شد"</string>
+    <string name="quick_settings_done" msgid="3402999958839153376">"تمام"</string>
     <string name="quick_settings_connected" msgid="1722253542984847487">"متصل"</string>
     <string name="quick_settings_connecting" msgid="47623027419264404">"در حال اتصال..."</string>
     <string name="quick_settings_tethering_label" msgid="7153452060448575549">"اتصال به اینترنت با تلفن همراه"</string>

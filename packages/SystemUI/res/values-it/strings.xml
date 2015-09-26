@@ -354,7 +354,7 @@
     <string name="user_remove_user_title" msgid="4681256956076895559">"Rimuovere l\'utente?"</string>
     <string name="user_remove_user_message" msgid="1453218013959498039">"Tutte le app e i dati di questo utente verranno eliminati."</string>
     <string name="user_remove_user_remove" msgid="7479275741742178297">"Rimuovi"</string>
-    <string name="battery_saver_notification_title" msgid="237918726750955859">"Risparmio batteria attivo"</string>
+    <string name="battery_saver_notification_title" msgid="237918726750955859">"Risparmio energetico attivo"</string>
     <string name="battery_saver_notification_text" msgid="820318788126672692">"Riduce le prestazioni e i dati in background"</string>
     <string name="battery_saver_notification_action_text" msgid="109158658238110382">"Disattiva risparmio energetico"</string>
     <string name="notification_hidden_text" msgid="1135169301897151909">"Contenuti nascosti"</string>
