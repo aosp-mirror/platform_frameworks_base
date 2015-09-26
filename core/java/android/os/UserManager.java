@@ -15,7 +15,6 @@
  */
 package android.os;
 
-import android.accounts.AccountManager;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.app.ActivityManager;
@@ -928,8 +927,7 @@ public class UserManager {
     }
 
     /**
-     * Creates a restricted profile with the specified name. This method also sets necessary
-     * restrictions and adds shared accounts.
+     * Creates a restricted profile with the specified name.
      *
      * @param name profile's name
      * @return UserInfo object for the created user, or null if the user could not be created.
@@ -937,14 +935,13 @@ public class UserManager {
      */
     public UserInfo createRestrictedProfile(String name) {
         try {
-            UserHandle parentUserHandle = Process.myUserHandle();
-            UserInfo user = mService.createRestrictedProfile(name,
-                    parentUserHandle.getIdentifier());
-            if (user != null) {
-                AccountManager.get(mContext).addSharedAccountsFromParentUser(parentUserHandle,
-                        UserHandle.of(user.id));
+            if (isSplitSystemUser()) {
+                return mService.createProfileForUser(name, UserInfo.FLAG_RESTRICTED,
+                        UserHandle.getCallingUserId());
+            } else {
+                return mService.createProfileForUser(name, UserInfo.FLAG_RESTRICTED,
+                        UserHandle.USER_SYSTEM);
             }
-            return user;
         } catch (RemoteException e) {
             Log.w(TAG, "Could not create a restricted profile", e);
         }

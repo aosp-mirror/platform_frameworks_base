@@ -1684,7 +1684,7 @@ public class NotificationManagerService extends SystemService {
         public boolean matchesCallFilter(Bundle extras) {
             enforceSystemOrSystemUI("INotificationManager.matchesCallFilter");
             return mZenModeHelper.matchesCallFilter(
-                    Binder.getCallingUserHandle(),
+                    UserHandle.getCallingUserHandle(),
                     extras,
                     mRankingHelper.findExtractor(ValidateNotificationPeople.class),
                     MATCHES_CALL_FILTER_CONTACTS_TIMEOUT_MS,

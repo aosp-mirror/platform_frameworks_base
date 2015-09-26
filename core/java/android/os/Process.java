@@ -797,8 +797,8 @@ public class Process {
      * {@link #myUid()} in that a particular user will have multiple
      * distinct apps running under it each with their own uid.
      */
-    public static UserHandle myUserHandle() {
-        return UserHandle.of(UserHandle.getUserId(myUid()));
+    public static final UserHandle myUserHandle() {
+        return new UserHandle(UserHandle.getUserId(myUid()));
     }
 
     /**

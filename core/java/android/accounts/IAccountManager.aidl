@@ -74,9 +74,9 @@ interface IAccountManager {
         String authTokenType);
 
     /* Shared accounts */
+    boolean addSharedAccountAsUser(in Account account, int userId);
     Account[] getSharedAccountsAsUser(int userId);
     boolean removeSharedAccountAsUser(in Account account, int userId);
-    void addSharedAccountsFromParentUser(int parentUserId, int userId);
 
     /* Account renaming. */
     void renameAccount(in IAccountManagerResponse response, in Account accountToRename, String newName);
