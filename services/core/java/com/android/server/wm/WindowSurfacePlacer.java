@@ -47,6 +47,7 @@ import android.os.RemoteException;
 import android.os.SystemClock;
 import android.os.Trace;
 import android.provider.Settings;
+import android.util.ArraySet;
 import android.util.Slog;
 import android.view.Display;
 import android.view.DisplayInfo;
@@ -1228,11 +1229,15 @@ class WindowSurfacePlacer {
         final WindowState oldWallpaper =
                 mWallpaperControllerLocked.isWallpaperTargetAnimating()
                         ? null : wallpaperTarget;
+        final ArraySet<AppWindowToken> openingApps = mService.mOpeningApps;
+        final ArraySet<AppWindowToken> closingApps = mService.mClosingApps;
         if (DEBUG_APP_TRANSITIONS) Slog.v(TAG,
                 "New wallpaper target=" + wallpaperTarget
                         + ", oldWallpaper=" + oldWallpaper
                         + ", lower target=" + lowerWallpaperTarget
-                        + ", upper target=" + upperWallpaperTarget);
+                        + ", upper target=" + upperWallpaperTarget
+                        + ", openingApps=" + openingApps
+                        + ", closingApps=" + closingApps);
         mService.mAnimateWallpaperWithTarget = false;
         if (closingAppHasWallpaper && openingAppHasWallpaper) {
             if (DEBUG_APP_TRANSITIONS)
@@ -1251,15 +1256,16 @@ class WindowSurfacePlacer {
             }
             if (DEBUG_APP_TRANSITIONS) Slog.v(TAG,
                     "New transit: " + AppTransition.appTransitionToString(transit));
-        } else if ((oldWallpaper != null) && !mService.mOpeningApps.isEmpty()
-                && !mService.mOpeningApps.contains(oldWallpaper.mAppToken)) {
-            // We are transitioning from an activity with
-            // a wallpaper to one without.
+        } else if (oldWallpaper != null && !mService.mOpeningApps.isEmpty()
+                && !openingApps.contains(oldWallpaper.mAppToken)
+                && closingApps.contains(oldWallpaper.mAppToken)) {
+            // We are transitioning from an activity with a wallpaper to one without.
             transit = AppTransition.TRANSIT_WALLPAPER_CLOSE;
             if (DEBUG_APP_TRANSITIONS) Slog.v(TAG,
                     "New transit away from wallpaper: "
                     + AppTransition.appTransitionToString(transit));
-        } else if (wallpaperTarget != null && wallpaperTarget.isVisibleLw()) {
+        } else if (wallpaperTarget != null && wallpaperTarget.isVisibleLw() &&
+                openingApps.contains(wallpaperTarget.mAppToken)) {
             // We are transitioning from an activity without
             // a wallpaper to now showing the wallpaper
             transit = AppTransition.TRANSIT_WALLPAPER_OPEN;

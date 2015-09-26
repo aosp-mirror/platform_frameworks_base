@@ -1350,8 +1350,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
 
         r.launchFailed = false;
         if (stack.updateLRUListLocked(r)) {
-            Slog.w(TAG, "Activity " + r
-                  + " being launched, but already in LRU list");
+            Slog.w(TAG, "Activity " + r + " being launched, but already in LRU list");
         }
 
         if (andResume) {
@@ -3118,16 +3117,6 @@ public final class ActivityStackSupervisor implements DisplayListener {
                 ensureActivitiesVisibleLocked(r, 0, !PRESERVE_WINDOWS);
                 if (!kept) {
                     resumeTopActivitiesLocked(stack, null, null);
-                    if (changedStacks && stackId == FULLSCREEN_WORKSPACE_STACK_ID) {
-                        // We are about to relaunch the activity because its configuration changed
-                        // due to being maximized, i.e. size change. The activity will first
-                        // remove the old window and then add a new one. This call will tell window
-                        // manager about this, so it can preserve the old window until the new
-                        // one is drawn. This prevents having a gap between the removal and
-                        // addition, in which no window is visible. We also want the entrace of the
-                        // new window to be properly animated.
-                        mWindowManager.setReplacingWindow(r.appToken, true /* animate */);
-                    }
                 }
             }
         }
@@ -3256,6 +3245,16 @@ public final class ActivityStackSupervisor implements DisplayListener {
             return;
         }
         final String reason = "moveTaskToStack";
+        if (stackId == DOCKED_STACK_ID || stackId == FULLSCREEN_WORKSPACE_STACK_ID) {
+            // We are about to relaunch the activity because its configuration changed due to
+            // being maximized, i.e. size change. The activity will first remove the old window
+            // and then add a new one. This call will tell window manager about this, so it can
+            // preserve the old window until the new one is drawn. This prevents having a gap
+            // between the removal and addition, in which no window is visible. We also want the
+            // entrace of the new window to be properly animated.
+            ActivityRecord r = task.getTopActivity();
+            mWindowManager.setReplacingWindow(r.appToken, true /* animate */);
+        }
         final ActivityStack stack =
                 moveTaskToStackUncheckedLocked(task, stackId, toTop, forceFocus, reason);
 

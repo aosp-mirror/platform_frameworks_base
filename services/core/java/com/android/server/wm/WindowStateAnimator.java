@@ -1369,7 +1369,12 @@ class WindowStateAnimator {
         // so we need to translate to match the actual surface coordinates.
         clipRect.offset(attrs.surfaceInsets.left, attrs.surfaceInsets.top);
 
-        adjustCropToStackBounds(w, clipRect);
+        // We don't want to clip to stack bounds windows that are currently doing entrance
+        // animation. This is necessary for docking operation, otherwise the window will be
+        // suddenly cut off.
+        if (!mAnimator.mAnimating) {
+            adjustCropToStackBounds(w, clipRect);
+        }
 
         if (!clipRect.equals(mLastClipRect)) {
             mLastClipRect.set(clipRect);

@@ -2206,7 +2206,7 @@ public class WindowManagerService extends IWindowManager.Stub
         removeWindowInnerLocked(win, true);
     }
 
-    void removeWindowInnerLocked(WindowState win, boolean performLayout) {
+    private void removeWindowInnerLocked(WindowState win, boolean performLayout) {
         if (win.mRemoved) {
             // Nothing to do.
             return;
@@ -8317,7 +8317,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 final int numTokens = tokens.size();
                 for (int tokenNdx = 0; tokenNdx < numTokens; ++tokenNdx) {
                     final AppWindowToken wtoken = tokens.get(tokenNdx);
-                    if (wtoken.mIsExiting) {
+                    if (wtoken.mIsExiting && !wtoken.mReplacingWindow) {
                         continue;
                     }
                     i = reAddAppWindowsLocked(displayContent, i, wtoken);
@@ -9909,6 +9909,12 @@ public class WindowManagerService extends IWindowManager.Stub
         return mWindowMap;
     }
 
+    /**
+     * Hint to a token that its activity will relaunch, which will trigger removal and addition of
+     * a window.
+     * @param token Application token for which the activity will be relaunched.
+     * @param animate Whether to animate the addition of the new window.
+     */
     public void setReplacingWindow(IBinder token, boolean animate) {
         synchronized (mWindowMap) {
             AppWindowToken appWindowToken = findAppWindowToken(token);
