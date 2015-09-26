@@ -1321,6 +1321,12 @@ final class WindowState implements WindowManagerPolicy.WindowState {
         }
     }
 
+    void setDisplayLayoutNeeded() {
+        if (mDisplayContent != null) {
+            mDisplayContent.layoutNeeded = true;
+        }
+    }
+
     private class DeathRecipient implements IBinder.DeathRecipient {
         @Override
         public void binderDied() {
