@@ -227,23 +227,23 @@
     <string name="user_owner_label" msgid="2804351898001038951">"Лични"</string>
     <string name="managed_profile_label" msgid="6260850669674791528">"Работа"</string>
     <string name="permgrouplab_contacts" msgid="3657758145679177612">"Контакти"</string>
-    <string name="permgroupdesc_contacts" msgid="6951499528303668046">"пристапи до контактите"</string>
+    <string name="permgroupdesc_contacts" msgid="6951499528303668046">"пристапува до контактите"</string>
     <string name="permgrouplab_location" msgid="7275582855722310164">"Локација"</string>
-    <string name="permgroupdesc_location" msgid="1346617465127855033">"да пристапува до локацијата на овој уред"</string>
+    <string name="permgroupdesc_location" msgid="1346617465127855033">"пристапува до локацијата на овој уред"</string>
     <string name="permgrouplab_calendar" msgid="5863508437783683902">"Календар"</string>
-    <string name="permgroupdesc_calendar" msgid="3889615280211184106">"пристапи до календарот"</string>
+    <string name="permgroupdesc_calendar" msgid="3889615280211184106">"пристапува до календарот"</string>
     <string name="permgrouplab_sms" msgid="228308803364967808">"СМС"</string>
     <string name="permgroupdesc_sms" msgid="4656988620100940350">"испраќа и прикажува СМС-пораки"</string>
     <string name="permgrouplab_storage" msgid="1971118770546336966">"Меморија"</string>
-    <string name="permgroupdesc_storage" msgid="637758554581589203">"пристапува до фотографии, медиуми и датотеки на уредот"</string>
+    <string name="permgroupdesc_storage" msgid="637758554581589203">"пристапува до фотографии, аудио-видео и датотеки на уредот"</string>
     <string name="permgrouplab_microphone" msgid="171539900250043464">"Микрофон"</string>
-    <string name="permgroupdesc_microphone" msgid="4988812113943554584">"снимај аудио"</string>
+    <string name="permgroupdesc_microphone" msgid="4988812113943554584">"снима аудио"</string>
     <string name="permgrouplab_camera" msgid="4820372495894586615">"Фотоапарат"</string>
-    <string name="permgroupdesc_camera" msgid="3250611594678347720">"фотографирај и снимај видео"</string>
+    <string name="permgroupdesc_camera" msgid="3250611594678347720">"фотографира и снима видео"</string>
     <string name="permgrouplab_phone" msgid="5229115638567440675">"Телефон"</string>
-    <string name="permgroupdesc_phone" msgid="6234224354060641055">"повикувај и управувај со телефонски повици"</string>
+    <string name="permgroupdesc_phone" msgid="6234224354060641055">"упатува и управува со телефонски повици"</string>
     <string name="permgrouplab_sensors" msgid="416037179223226722">"Телесни сензори"</string>
-    <string name="permgroupdesc_sensors" msgid="7147968539346634043">"пристапи до податоците од сензорите за виталните знаци"</string>
+    <string name="permgroupdesc_sensors" msgid="7147968539346634043">"пристапува до податоците од сензорите за виталните знаци"</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"Врати содржина на прозорец"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"Провери ја содржината на прозорецот со кој се комуницира."</string>
     <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"Вклучи „Истражувај со допир“"</string>

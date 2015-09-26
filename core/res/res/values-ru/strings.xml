@@ -915,7 +915,7 @@
     <string name="anr_application_process" msgid="8941757607340481057">"Приложение \"<xliff:g id="APPLICATION">%1$s</xliff:g>\" не отвечает. Закрыть его?"</string>
     <string name="anr_process" msgid="6513209874880517125">"Приложение \"<xliff:g id="PROCESS">%1$s</xliff:g>\" не отвечает.\n\nЗакрыть его?"</string>
     <string name="force_close" msgid="8346072094521265605">"ОК"</string>
-    <string name="report" msgid="4060218260984795706">"Отзыв"</string>
+    <string name="report" msgid="4060218260984795706">"Создать отчет"</string>
     <string name="wait" msgid="7147118217226317732">"Подождать"</string>
     <string name="webpage_unresponsive" msgid="3272758351138122503">"Страница не отвечает.\n\nЗакрыть ее?"</string>
     <string name="launch_warning_title" msgid="1547997780506713581">"Приложение перенаправлено"</string>

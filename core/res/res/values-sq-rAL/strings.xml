@@ -229,7 +229,7 @@
     <string name="permgrouplab_contacts" msgid="3657758145679177612">"Kontaktet"</string>
     <string name="permgroupdesc_contacts" msgid="6951499528303668046">"qasu te kontaktet e tua"</string>
     <string name="permgrouplab_location" msgid="7275582855722310164">"Vendndodhja"</string>
-    <string name="permgroupdesc_location" msgid="1346617465127855033">"qasu te vendndodhja e kësaj pajisjeje"</string>
+    <string name="permgroupdesc_location" msgid="1346617465127855033">"qasjen te vendndodhja e kësaj pajisjeje"</string>
     <string name="permgrouplab_calendar" msgid="5863508437783683902">"Kalendari"</string>
     <string name="permgroupdesc_calendar" msgid="3889615280211184106">"qasu te kalendari yt"</string>
     <string name="permgrouplab_sms" msgid="228308803364967808">"SMS"</string>
