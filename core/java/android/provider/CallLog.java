@@ -153,6 +153,18 @@ public class CallLog {
         /**
          * The type of the call (incoming, outgoing or missed).
          * <P>Type: INTEGER (int)</P>
+         *
+         * <p>
+         * Allowed values:
+         * <ul>
+         * <li>{@link #INCOMING_TYPE}</li>
+         * <li>{@link #OUTGOING_TYPE}</li>
+         * <li>{@link #MISSED_TYPE}</li>
+         * <li>{@link #VOICEMAIL_TYPE}</li>
+         * <li>{@link #REJECTED_TYPE}</li>
+         * <li>{@link #BLOCKED_TYPE}</li>
+         * </ul>
+         * </p>
          */
         public static final String TYPE = "type";
 
@@ -164,6 +176,10 @@ public class CallLog {
         public static final int MISSED_TYPE = 3;
         /** Call log type for voicemails. */
         public static final int VOICEMAIL_TYPE = 4;
+        /** Call log type for calls rejected by direct user action. */
+        public static final int REJECTED_TYPE = 5;
+        /** Call log type for calls blocked automatically. */
+        public static final int BLOCKED_TYPE = 6;
 
         /**
          * Bit-mask describing features of the call (e.g. video).

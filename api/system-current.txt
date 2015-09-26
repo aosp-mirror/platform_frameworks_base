@@ -26895,6 +26895,7 @@ package android.provider {
   public static class CallLog.Calls implements android.provider.BaseColumns {
     ctor public CallLog.Calls();
     method public static java.lang.String getLastOutgoingCall(android.content.Context);
+    field public static final int BLOCKED_TYPE = 6; // 0x6
     field public static final java.lang.String CACHED_FORMATTED_NUMBER = "formatted_number";
     field public static final java.lang.String CACHED_LOOKUP_URI = "lookup_uri";
     field public static final java.lang.String CACHED_MATCHED_NUMBER = "matched_number";
@@ -26933,6 +26934,7 @@ package android.provider {
     field public static final int PRESENTATION_PAYPHONE = 4; // 0x4
     field public static final int PRESENTATION_RESTRICTED = 2; // 0x2
     field public static final int PRESENTATION_UNKNOWN = 3; // 0x3
+    field public static final int REJECTED_TYPE = 5; // 0x5
     field public static final java.lang.String TRANSCRIPTION = "transcription";
     field public static final java.lang.String TYPE = "type";
     field public static final int VOICEMAIL_TYPE = 4; // 0x4
