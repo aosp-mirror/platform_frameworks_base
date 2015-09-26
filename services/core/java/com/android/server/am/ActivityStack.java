@@ -1948,7 +1948,6 @@ final class ActivityStack {
                             ? AppTransition.TRANSIT_ACTIVITY_CLOSE
                             : AppTransition.TRANSIT_TASK_CLOSE, false);
                 }
-                mWindowManager.setAppWillBeHidden(prev.appToken);
                 mWindowManager.setAppVisibility(prev.appToken, false);
             } else {
                 if (DEBUG_TRANSITION) Slog.v(TAG_TRANSITION,
@@ -1963,10 +1962,6 @@ final class ActivityStack {
                                     ? AppTransition.TRANSIT_TASK_OPEN_BEHIND
                                     : AppTransition.TRANSIT_TASK_OPEN, false);
                 }
-            }
-            if (false) {
-                mWindowManager.setAppWillBeHidden(prev.appToken);
-                mWindowManager.setAppVisibility(prev.appToken, false);
             }
         } else {
             if (DEBUG_TRANSITION) Slog.v(TAG_TRANSITION, "Prepare open transition: no previous");

@@ -175,16 +175,6 @@ public class WindowManagerPermissionTests extends TestCase {
         }
 
         try {
-            mWm.setAppWillBeHidden(null);
-            fail("IWindowManager.setAppWillBeHidden did not throw SecurityException as"
-                    + " expected");
-        } catch (SecurityException e) {
-            // expected
-        } catch (RemoteException e) {
-            fail("Unexpected remote exception");
-        }
-
-        try {
             mWm.setAppVisibility(null, false);
             fail("IWindowManager.setAppVisibility did not throw SecurityException as"
                     + " expected");
