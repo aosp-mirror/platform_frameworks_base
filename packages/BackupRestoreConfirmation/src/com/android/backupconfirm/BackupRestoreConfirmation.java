@@ -50,7 +50,7 @@ import android.widget.Toast;
  */
 public class BackupRestoreConfirmation extends Activity {
     static final String TAG = "BackupRestoreConfirmation";
-    static final boolean DEBUG = true;
+    static final boolean DEBUG = false;
 
     static final String KEY_DID_ACKNOWLEDGE = "did_acknowledge";
     static final String KEY_TOKEN = "token";

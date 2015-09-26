@@ -35,7 +35,7 @@ import java.io.IOException;
 public final class MutexFileProvider {
     private static final String LOG_TAG = "MutexFileProvider";
 
-    private static final boolean DEBUG = true;
+    private static final boolean DEBUG = false;
 
     private final Object mLock = new Object();
 
