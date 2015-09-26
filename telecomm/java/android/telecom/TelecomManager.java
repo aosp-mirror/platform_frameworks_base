@@ -116,6 +116,15 @@ public class TelecomManager {
             "android.telecom.action.PHONE_ACCOUNT_REGISTERED";
 
     /**
+     * The {@link android.content.Intent} action used indicate that a phone account was
+     * just unregistered.
+     * @hide
+     */
+    @SystemApi
+    public static final String ACTION_PHONE_ACCOUNT_UNREGISTERED =
+            "android.telecom.action.PHONE_ACCOUNT_UNREGISTERED";
+
+    /**
      * Activity action: Shows a dialog asking the user whether or not they want to replace the
      * current default Dialer with the one specified in
      * {@link #EXTRA_CHANGE_DEFAULT_DIALER_PACKAGE_NAME}.
