@@ -1413,8 +1413,8 @@ var RESOURCE_COLLECTIONS = {
     "title": "",
     "resources": [
       "about/versions/marshmallow/android-6.0.html",
-      "about/versions/marshmallow/download.html",
-      "about/versions/marshmallow/samples.html"
+      "about/versions/marshmallow/samples.html",
+      "about/versions/marshmallow/download.html"
     ]
   },
   "autolanding": {
@@ -1648,15 +1648,29 @@ var RESOURCE_COLLECTIONS = {
        "about/versions/marshmallow/samples.html"
     ]
   },
+  "marshmallow/landing/videos": {
+    "title": "",
+    "resources": [
+       "https://www.youtube.com/watch?v=yYU4DHLwoRk",
+       "https://www.youtube.com/watch?v=ndBdf1_oOGA",
+       "https://www.youtube.com/watch?v=C8lUdPVSzDk",
+       "https://www.youtube.com/watch?v=VOn7VrTRlA4",
+       "https://www.youtube.com/watch?v=HXacyy0HSW0",
+       "https://www.youtube.com/watch?v=vcSj8ln-BlE",
+       "https://www.youtube.com/watch?v=OW1A4XFRuyc",
+       "https://www.youtube.com/watch?v=f17qe9vZ8RM",
+       "https://www.youtube.com/watch?v=j3QC6hcpy90"
+    ]
+  },
   "marshmallow/landing/more": {
   "title": "",
   "resources": [
-      "https://www.youtube.com/watch?v=yYU4DHLwoRk",
       "about/versions/marshmallow/android-6.0-changes.html",
-      "training/permissions/index.html",
-      "training/backup/auto-backup.html",
-      "training/app-links/app-linking.html",
-      "training/monitoring-device-state/battery-monitoring.html"
+      "training/permissions/requesting.html",
+      "training/backup/autosyncapi.html",
+      "training/app-links/index.html",
+      "training/monitoring-device-state/battery-optimization.html",
+      "about/versions/marshmallow/testing.html"
     ]
   },
 }
