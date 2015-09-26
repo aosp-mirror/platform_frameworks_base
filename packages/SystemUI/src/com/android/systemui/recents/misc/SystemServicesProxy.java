@@ -32,6 +32,7 @@ import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.content.pm.IPackageManager;
 import android.content.pm.PackageManager;
+import android.content.pm.PackageParser;
 import android.content.pm.ResolveInfo;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
@@ -277,6 +278,30 @@ public class SystemServicesProxy {
 
         try {
             mIam.setTaskResizeable(taskId, true);
+        } catch (RemoteException e) {
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     * Resizes the given task to the new bounds.
+     */
+    public void resizeTask(int taskId, Rect bounds) {
+        if (mIam == null) return;
+
+        try {
+            mIam.resizeTask(taskId, bounds, ActivityManager.RESIZE_MODE_FORCED);
+        } catch (RemoteException e) {
+            e.printStackTrace();
+        }
+    }
+
+    /** Docks a task to the side of the screen. */
+    public void dockTask(int taskId, int createMode) {
+        if (mIam == null) return;
+
+        try {
+            mIam.moveTaskToDockedStack(taskId, createMode, true);
         } catch (RemoteException e) {
             e.printStackTrace();
         }
@@ -634,6 +659,19 @@ public class SystemServicesProxy {
      */
     public String getSystemProperty(String key) {
         return SystemProperties.get(key);
+    }
+
+    /**
+     * Returns the display rect.
+     */
+    public Rect getDisplayRect() {
+        Rect displayRect = new Rect();
+        if (mWm == null) return displayRect;
+
+        Point p = new Point();
+        mWm.getDefaultDisplay().getRealSize(p);
+        displayRect.set(0, 0, p.x, p.y);
+        return displayRect;
     }
 
     /**

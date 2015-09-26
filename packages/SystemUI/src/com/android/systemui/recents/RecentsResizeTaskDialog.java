@@ -16,6 +16,7 @@
 
 package com.android.systemui.recents;
 
+import android.app.ActivityManager;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.DialogFragment;
@@ -27,6 +28,7 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
+import android.widget.Toast;
 import com.android.systemui.R;
 import com.android.systemui.recents.misc.SystemServicesProxy;
 import com.android.systemui.recents.model.RecentsTaskLoader;
@@ -50,10 +52,18 @@ public class RecentsResizeTaskDialog extends DialogFragment {
     private static final int PLACE_BOTTOM_LEFT = 7;
     private static final int PLACE_BOTTOM_RIGHT = 8;
     private static final int PLACE_FULL = 9;
+    private static final int PLACE_DOCK_LEFT = 10;
+    private static final int PLACE_DOCK_RIGHT = 11;
+    private static final int PLACE_DOCK_TOP = 12;
+    private static final int PLACE_DOCK_BOTTOM = 13;
 
     // The button resource ID combined with the arrangement command.
     private static final int[][] BUTTON_DEFINITIONS =
-           {{R.id.place_left, PLACE_LEFT},
+           {{R.id.place_dock_left, PLACE_DOCK_LEFT},
+            {R.id.place_dock_right, PLACE_DOCK_RIGHT},
+            {R.id.place_dock_top, PLACE_DOCK_TOP},
+            {R.id.place_dock_bottom, PLACE_DOCK_BOTTOM},
+            {R.id.place_left, PLACE_LEFT},
             {R.id.place_right, PLACE_RIGHT},
             {R.id.place_top, PLACE_TOP},
             {R.id.place_bottom, PLACE_BOTTOM},
@@ -72,6 +82,12 @@ public class RecentsResizeTaskDialog extends DialogFragment {
     private Rect[] mBounds = {new Rect(), new Rect(), new Rect(), new Rect()};
     private Task[] mTasks = {null, null, null, null};
 
+    /**
+     * Called by FragmentManager
+     */
+    public RecentsResizeTaskDialog() {
+    }
+
     public RecentsResizeTaskDialog(FragmentManager mgr, RecentsActivity activity) {
         mFragmentManager = mgr;
         mRecentsActivity = activity;
@@ -82,13 +98,11 @@ public class RecentsResizeTaskDialog extends DialogFragment {
     void showResizeTaskDialog(Task mainTask, RecentsView rv) {
         mTasks[0] = mainTask;
         mRecentsView = rv;
-
-        show(mFragmentManager, TAG);
+        showAllowingStateLoss(mFragmentManager, TAG);
     }
 
     /** Creates a new resize-task dialog. */
-    private void createResizeTaskDialog(final Context context, LayoutInflater inflater,
-            AlertDialog.Builder builder) {
+    private void createResizeTaskDialog(LayoutInflater inflater, AlertDialog.Builder builder) {
         builder.setTitle(R.string.recents_caption_resize);
         mResizeTaskDialogContent =
                 inflater.inflate(R.layout.recents_task_resize_dialog, null, false);
@@ -100,7 +114,17 @@ public class RecentsResizeTaskDialog extends DialogFragment {
                 b.setOnClickListener(
                         new View.OnClickListener() {
                             public void onClick(View v) {
-                                placeTasks(action);
+                                switch (action) {
+                                    case PLACE_DOCK_LEFT:
+                                    case PLACE_DOCK_RIGHT:
+                                    case PLACE_DOCK_TOP:
+                                    case PLACE_DOCK_BOTTOM:
+                                        placeDockTasks(action);
+                                        break;
+                                    default:
+                                        placeTasks(action);
+                                        break;
+                                }
                             }
                         });
             }
@@ -109,7 +133,7 @@ public class RecentsResizeTaskDialog extends DialogFragment {
         builder.setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
-                dismiss();
+                dismissAllowingStateLoss();
             }
         });
 
@@ -118,7 +142,7 @@ public class RecentsResizeTaskDialog extends DialogFragment {
 
     /** Helper function to place window(s) on the display according to an arrangement request. */
     private void placeTasks(int arrangement) {
-        Rect rect = mSsp.getWindowRect();
+        Rect rect = mSsp.getDisplayRect();
         for (int i = 0; i < mBounds.length; ++i) {
             mBounds[i].set(rect);
             if (i != 0) {
@@ -193,7 +217,7 @@ public class RecentsResizeTaskDialog extends DialogFragment {
                 break;
             case PLACE_FULL:
                 // Nothing to change.
-                mBounds[0] = null;
+                mBounds[0] = new Rect();
                 break;
         }
 
@@ -207,7 +231,7 @@ public class RecentsResizeTaskDialog extends DialogFragment {
         }
 
         // Get rid of the dialog.
-        dismiss();
+        dismissAllowingStateLoss();
         mRecentsActivity.dismissRecentsToHomeWithoutTransitionAnimation();
 
         // In debug mode, we force all task to be resizeable regardless of the
@@ -229,12 +253,44 @@ public class RecentsResizeTaskDialog extends DialogFragment {
         }
     }
 
+    /**
+     * Helper function to place docked window(s) on the display according to an arrangement request.
+     */
+    private void placeDockTasks(int arrangement) {
+        int createMode = ActivityManager.DOCKED_STACK_CREATE_MODE_TOP_OR_LEFT;
+        switch (arrangement) {
+            case PLACE_DOCK_LEFT:
+                createMode = ActivityManager.DOCKED_STACK_CREATE_MODE_TOP_OR_LEFT;
+                break;
+            case PLACE_DOCK_TOP:
+                createMode = ActivityManager.DOCKED_STACK_CREATE_MODE_TOP_OR_LEFT;
+                break;
+            case PLACE_DOCK_RIGHT:
+                createMode = ActivityManager.DOCKED_STACK_CREATE_MODE_BOTTOM_OR_RIGHT;
+                break;
+            case PLACE_DOCK_BOTTOM:
+                createMode = ActivityManager.DOCKED_STACK_CREATE_MODE_BOTTOM_OR_RIGHT;
+                break;
+        }
+
+        // Dismiss the dialog before trying to launch the task
+        dismissAllowingStateLoss();
+
+        if (mTasks[0].key.stackId != ActivityManager.DOCKED_STACK_ID) {
+            int taskId = mTasks[0].key.id;
+            mSsp.setTaskResizeable(taskId);
+            mSsp.dockTask(taskId, createMode);
+            mRecentsView.launchTask(mTasks[0], null);
+        } else {
+            Toast.makeText(getContext(), "Already docked", Toast.LENGTH_SHORT);
+        }
+    }
+
     @Override
     public Dialog onCreateDialog(Bundle args) {
-        final Context context = this.getActivity();
         LayoutInflater inflater = getActivity().getLayoutInflater();
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-        createResizeTaskDialog(context, inflater, builder);
+        createResizeTaskDialog(inflater, builder);
         return builder.create();
     }
 }
