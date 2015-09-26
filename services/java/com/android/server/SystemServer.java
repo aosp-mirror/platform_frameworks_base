@@ -875,6 +875,11 @@ public final class SystemServer {
 
             if (!disableNonCoreServices) {
                 mSystemServiceManager.startService(DockObserver.class);
+
+                if (context.getPackageManager().hasSystemFeature
+                        (PackageManager.FEATURE_WATCH)) {
+                    mSystemServiceManager.startService(ThermalObserver.class);
+                }
             }
 
             traceBeginAndSlog("StartWiredAccessoryManager");
