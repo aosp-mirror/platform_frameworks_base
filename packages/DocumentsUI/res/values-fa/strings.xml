@@ -22,7 +22,7 @@
     <string name="title_save" msgid="2433679664882857999">"ذخیره در"</string>
     <string name="menu_create_dir" msgid="5947289605844398389">"ایجاد پوشه"</string>
     <string name="menu_grid" msgid="6878021334497835259">"نمای جدولی"</string>
-    <string name="menu_list" msgid="7279285939892417279">"نمای فهرست‌وار"</string>
+    <string name="menu_list" msgid="7279285939892417279">"نمای فهرستی"</string>
     <string name="menu_sort" msgid="7677740407158414452">"مرتب‌سازی براساس"</string>
     <string name="menu_search" msgid="3816712084502856974">"جستجو"</string>
     <string name="menu_settings" msgid="6008033148948428823">"تنظیمات"</string>
@@ -44,6 +44,9 @@
     <string name="button_select" msgid="527196987259139214">"انتخاب"</string>
     <string name="button_copy" msgid="8706475544635021302">"کپی"</string>
     <string name="button_move" msgid="2202666023104202232">"انتقال"</string>
+    <string name="button_dismiss" msgid="3714065566893946085">"نپذیرفتن"</string>
+    <!-- no translation found for button_retry (4392027584153752797) -->
+    <skip />
     <string name="sort_name" msgid="9183560467917256779">"براساس نام"</string>
     <string name="sort_date" msgid="586080032956151448">"براساس تاریخ اصلاح"</string>
     <string name="sort_size" msgid="3350681319735474741">"براساس اندازه"</string>

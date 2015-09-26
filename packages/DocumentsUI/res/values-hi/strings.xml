@@ -44,6 +44,8 @@
     <string name="button_select" msgid="527196987259139214">"चुनें"</string>
     <string name="button_copy" msgid="8706475544635021302">"कॉपी करें"</string>
     <string name="button_move" msgid="2202666023104202232">"ले जाएं"</string>
+    <string name="button_dismiss" msgid="3714065566893946085">"ख़ारिज करें"</string>
+    <string name="button_retry" msgid="4392027584153752797">"पुनः प्रयास करें"</string>
     <string name="sort_name" msgid="9183560467917256779">"नाम के अनुसार"</string>
     <string name="sort_date" msgid="586080032956151448">"बदलाव के दिनांक के अनुसार"</string>
     <string name="sort_size" msgid="3350681319735474741">"आकार के अनुसार"</string>
