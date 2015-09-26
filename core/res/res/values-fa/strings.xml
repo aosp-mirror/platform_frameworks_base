@@ -1005,14 +1005,14 @@
     <string name="sms_short_code_confirm_never_allow" msgid="446992765774269673">"همیشه غیرمجاز"</string>
     <string name="sim_removed_title" msgid="6227712319223226185">"سیم کارت برداشته شد"</string>
     <string name="sim_removed_message" msgid="5450336489923274918">"تا زمانی که با یک سیم‌کارت معتبر دوباره راه‌اندازی نکنید شبکه تلفن همراه غیر قابل‌ دسترس خواهد بود."</string>
-    <string name="sim_done_button" msgid="827949989369963775">"انجام شد"</string>
+    <string name="sim_done_button" msgid="827949989369963775">"تمام"</string>
     <string name="sim_added_title" msgid="3719670512889674693">"سیم کارت اضافه شد"</string>
     <string name="sim_added_message" msgid="7797975656153714319">"برای دسترسی به شبکه تلفن همراه، دستگاهتان را مجدداً راه‌اندازی کنید."</string>
     <string name="sim_restart_button" msgid="4722407842815232347">"راه‌اندازی مجدد"</string>
     <string name="time_picker_dialog_title" msgid="8349362623068819295">"تنظیم زمان"</string>
     <string name="date_picker_dialog_title" msgid="5879450659453782278">"تاریخ تنظیم"</string>
     <string name="date_time_set" msgid="5777075614321087758">"تنظیم"</string>
-    <string name="date_time_done" msgid="2507683751759308828">"انجام شد"</string>
+    <string name="date_time_done" msgid="2507683751759308828">"تمام"</string>
     <string name="perms_new_perm_prefix" msgid="8257740710754301407"><font size="12" fgcolor="#ff33b5e5">"جدید: "</font></string>
     <string name="perms_description_app" msgid="5139836143293299417">"ارائه شده توسط <xliff:g id="APP_NAME">%1$s</xliff:g> ."</string>
     <string name="no_permissions" msgid="7283357728219338112">"مجوزی لازم نیست"</string>
@@ -1103,7 +1103,7 @@
     <string name="ime_action_search" msgid="658110271822807811">"جستجو"</string>
     <string name="ime_action_send" msgid="2316166556349314424">"ارسال"</string>
     <string name="ime_action_next" msgid="3138843904009813834">"بعدی"</string>
-    <string name="ime_action_done" msgid="8971516117910934605">"انجام شد"</string>
+    <string name="ime_action_done" msgid="8971516117910934605">"تمام"</string>
     <string name="ime_action_previous" msgid="1443550039250105948">"قبلی"</string>
     <string name="ime_action_default" msgid="2840921885558045721">"اجرا کردن"</string>
     <string name="dial_number_using" msgid="5789176425167573586">"شماره گیری \nبا استفاده از <xliff:g id="NUMBER">%s</xliff:g>"</string>
@@ -1149,7 +1149,7 @@
       <item quantity="one"><xliff:g id="INDEX">%d</xliff:g> از <xliff:g id="TOTAL">%d</xliff:g></item>
       <item quantity="other"><xliff:g id="INDEX">%d</xliff:g> از <xliff:g id="TOTAL">%d</xliff:g></item>
     </plurals>
-    <string name="action_mode_done" msgid="7217581640461922289">"انجام شد"</string>
+    <string name="action_mode_done" msgid="7217581640461922289">"تمام"</string>
     <string name="progress_erasing" product="nosdcard" msgid="4521573321524340058">"‏در حال پاک کردن حافظهٔ USB..."</string>
     <string name="progress_erasing" product="default" msgid="6596988875507043042">"‏در حال پاک کردن کارت SD..."</string>
     <string name="share" msgid="1778686618230011964">"اشتراک‌گذاری"</string>
@@ -1191,7 +1191,7 @@
     <string name="keyboardview_keycode_alt" msgid="4856868820040051939">"Alt"</string>
     <string name="keyboardview_keycode_cancel" msgid="1203984017245783244">"لغو"</string>
     <string name="keyboardview_keycode_delete" msgid="3337914833206635744">"Delete"</string>
-    <string name="keyboardview_keycode_done" msgid="1992571118466679775">"انجام شد"</string>
+    <string name="keyboardview_keycode_done" msgid="1992571118466679775">"تمام"</string>
     <string name="keyboardview_keycode_mode_change" msgid="4547387741906537519">"تغییر حالت"</string>
     <string name="keyboardview_keycode_shift" msgid="2270748814315147690">"Shift"</string>
     <string name="keyboardview_keycode_enter" msgid="2985864015076059467">"Enter"</string>
@@ -1434,7 +1434,7 @@
     <string name="immersive_cling_title" msgid="8394201622932303336">"مشاهده در حالت تمام صفحه"</string>
     <string name="immersive_cling_description" msgid="3482371193207536040">"برای خروج، انگشتتان را از بالای صفحه به پایین بکشید."</string>
     <string name="immersive_cling_positive" msgid="5016839404568297683">"متوجه شدم"</string>
-    <string name="done_label" msgid="2093726099505892398">"انجام شد"</string>
+    <string name="done_label" msgid="2093726099505892398">"تمام"</string>
     <string name="hour_picker_description" msgid="6698199186859736512">"لغزنده دایره‌ای ساعت"</string>
     <string name="minute_picker_description" msgid="8606010966873791190">"لغزنده دایره‌ای دقیقه"</string>
     <string name="select_hours" msgid="6043079511766008245">"انتخاب ساعت"</string>
