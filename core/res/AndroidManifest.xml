@@ -65,6 +65,7 @@
     <protected-broadcast android:name="android.intent.action.NEW_OUTGOING_CALL" />
     <protected-broadcast android:name="android.intent.action.REBOOT" />
     <protected-broadcast android:name="android.intent.action.DOCK_EVENT" />
+    <protected-broadcast android:name="android.intent.action.THERMAL_EVENT" />
     <protected-broadcast android:name="android.intent.action.MASTER_CLEAR_NOTIFICATION" />
     <protected-broadcast android:name="android.intent.action.USER_ADDED" />
     <protected-broadcast android:name="android.intent.action.USER_REMOVED" />
