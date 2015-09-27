@@ -793,6 +793,12 @@
     <!-- Indication on the keyguard that is shown when the device is charging. [CHAR LIMIT=40]-->
     <string name="keyguard_indication_charging_time">Charging (<xliff:g id="charging_time_left" example="4 hours and 2 minutes">%s</xliff:g> until full)</string>
 
+    <!-- Indication on the keyguard that is shown when the device is charging rapidly. Should match keyguard_plugged_in_charging_fast [CHAR LIMIT=40]-->
+    <string name="keyguard_indication_charging_time_fast">Charging rapidly (<xliff:g id="charging_time_left" example="4 hours and 2 minutes">%s</xliff:g> until full)</string>
+
+    <!-- Indication on the keyguard that is shown when the device is charging slowly. Should match keyguard_plugged_in_charging_slowly [CHAR LIMIT=40]-->
+    <string name="keyguard_indication_charging_time_slowly">Charging slowly (<xliff:g id="charging_time_left" example="4 hours and 2 minutes">%s</xliff:g> until full)</string>
+
     <!-- Related to user switcher --><skip/>
 
     <!-- Accessibility label for the button that opens the user switcher. -->
