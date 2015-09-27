@@ -82,7 +82,7 @@
     <string name="accessibility_home" msgid="8217216074895377641">"Uyga"</string>
     <string name="accessibility_menu" msgid="316839303324695949">"Menyu"</string>
     <string name="accessibility_recent" msgid="5208608566793607626">"Umumiy nazar"</string>
-    <string name="accessibility_search_light" msgid="1103867596330271848">"Izlash"</string>
+    <string name="accessibility_search_light" msgid="1103867596330271848">"Qidirish"</string>
     <string name="accessibility_camera_button" msgid="8064671582820358152">"Kamera"</string>
     <string name="accessibility_phone_button" msgid="6738112589538563574">"Telefon"</string>
     <string name="accessibility_voice_assist_button" msgid="487611083884852965">"Ovozli yordam"</string>
@@ -303,7 +303,7 @@
     <string name="expanded_header_battery_charging_with_time" msgid="457559884275395376">"<xliff:g id="CHARGING_TIME">%s</xliff:g>da to‘ladi"</string>
     <string name="expanded_header_battery_not_charging" msgid="4798147152367049732">"Quvvat olmayapti"</string>
     <string name="ssl_ca_cert_warning" msgid="9005954106902053641">"Tarmoq nazorat\nostida bo‘lishi mumkin"</string>
-    <string name="description_target_search" msgid="3091587249776033139">"Izlash"</string>
+    <string name="description_target_search" msgid="3091587249776033139">"Qidirish"</string>
     <string name="description_direction_up" msgid="7169032478259485180">"<xliff:g id="TARGET_DESCRIPTION">%s</xliff:g> uchun yuqoriga suring."</string>
     <string name="description_direction_left" msgid="7207478719805562165">"<xliff:g id="TARGET_DESCRIPTION">%s</xliff:g> uchun chapga suring."</string>
     <string name="zen_priority_introduction" msgid="3070506961866919502">"Turli ovoz va tebranishlar endi sizni bezovta qilmaydi. Biroq uyg‘otkich signallari, eslatmalar, tadbirlar haqidagi bildirishnomalar va siz tanlagan abonentlardan kelgan qo‘ng‘iroqlar bundan mustasno."</string>
