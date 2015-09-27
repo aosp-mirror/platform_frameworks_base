@@ -22,15 +22,15 @@
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="android_upgrading_apk" msgid="1090732262010398759">"Aplic. <xliff:g id="NUMBER_0">%1$d</xliff:g> din <xliff:g id="NUMBER_1">%2$d</xliff:g>."</string>
     <string name="permgrouplab_sensors" msgid="202675452368612754">"Senzori"</string>
-    <string name="permgrouplab_contactswear" msgid="2340286500790908344">"să acceseze persoanele de contact"</string>
+    <string name="permgrouplab_contactswear" msgid="2340286500790908344">"acceseze persoanele de contact"</string>
     <string name="permgrouplab_locationwear" msgid="6275317222482780209">"să acceseze locația acestui ceas"</string>
-    <string name="permgrouplab_calendarwear" msgid="441900844045065081">"să acceseze calendarul"</string>
-    <string name="permgrouplab_smswear" msgid="6849506550342974220">"să trimită și să vadă mesajele SMS"</string>
+    <string name="permgrouplab_calendarwear" msgid="441900844045065081">"acceseze calendarul"</string>
+    <string name="permgrouplab_smswear" msgid="6849506550342974220">"trimită și să vadă mesajele SMS"</string>
     <string name="permgrouplab_storagewear" msgid="1003807594193602313">"să acceseze fotografiile, conținutul media și fișierele de pe ceas"</string>
-    <string name="permgrouplab_microphonewear" msgid="1047561180980891136">"să înregistreze conținut audio"</string>
-    <string name="permgrouplab_camerawear" msgid="4543951283103407017">"să fotografieze și să înregistreze videoclipuri"</string>
-    <string name="permgrouplab_phonewear" msgid="134365036753766126">"să inițieze să și gestioneze apeluri telefonice"</string>
-    <string name="permgrouplab_sensorswear" msgid="1429324744329327663">"să acceseze datele de la senzori despre semnele vitale"</string>
+    <string name="permgrouplab_microphonewear" msgid="1047561180980891136">"înregistreze sunet"</string>
+    <string name="permgrouplab_camerawear" msgid="4543951283103407017">"fotografieze și să înregistreze imagini"</string>
+    <string name="permgrouplab_phonewear" msgid="134365036753766126">"inițieze să și gestioneze apeluri telefonice"</string>
+    <string name="permgrouplab_sensorswear" msgid="1429324744329327663">"acceseze datele de la senzori despre semnele vitale"</string>
     <string name="permlab_statusBarServicewear" msgid="2469402818964691034">"să fie bara de stare"</string>
     <string name="permlab_bodySensorswear" msgid="7857941041202791873">"să acceseze senzorii corporali (cum ar fi monitoarele cardiace)"</string>
     <string name="permlab_accessFineLocationwear" msgid="5584423486924377563">"să acceseze locația exactă (bazată pe GPS și pe rețea)"</string>

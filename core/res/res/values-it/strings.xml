@@ -239,11 +239,11 @@
     <string name="permgrouplab_microphone" msgid="171539900250043464">"Microfono"</string>
     <string name="permgroupdesc_microphone" msgid="4988812113943554584">"registrare audio"</string>
     <string name="permgrouplab_camera" msgid="4820372495894586615">"Fotocamera"</string>
-    <string name="permgroupdesc_camera" msgid="3250611594678347720">"acquisire foto e registrare video"</string>
+    <string name="permgroupdesc_camera" msgid="3250611594678347720">"scattare foto e registrare video"</string>
     <string name="permgrouplab_phone" msgid="5229115638567440675">"Telefono"</string>
     <string name="permgroupdesc_phone" msgid="6234224354060641055">"eseguire e gestire le telefonate"</string>
     <string name="permgrouplab_sensors" msgid="416037179223226722">"Sensori per il corpo"</string>
-    <string name="permgroupdesc_sensors" msgid="7147968539346634043">"accedere ai dati dei sensori sui tuoi parametri vitali"</string>
+    <string name="permgroupdesc_sensors" msgid="7147968539346634043">"accedere ai dati dei sensori relativi ai tuoi parametri vitali"</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"Recuperare contenuti della finestra"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"Esaminare i contenuti di una finestra con cui interagisci."</string>
     <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"Attivare Esplora al tocco"</string>
@@ -272,7 +272,7 @@
     <string name="permdesc_readCellBroadcasts" msgid="6361972776080458979">"Consente all\'applicazione di leggere i messaggi cell broadcast ricevuti dal dispositivo. Gli avvisi cell broadcast vengono trasmessi in alcune località per avvertire di eventuali situazioni di emergenza. Le applicazioni dannose potrebbero interferire con il rendimento o con il funzionamento del dispositivo quando si riceve un messaggio cell broadcast di emergenza."</string>
     <string name="permlab_subscribedFeedsRead" msgid="4756609637053353318">"lettura feed sottoscritti"</string>
     <string name="permdesc_subscribedFeedsRead" msgid="5557058907906144505">"Consente all\'applicazione di ottenere dettagli sui feed attualmente sincronizzati."</string>
-    <string name="permlab_sendSms" msgid="7544599214260982981">"invio e lettura di SMS"</string>
+    <string name="permlab_sendSms" msgid="7544599214260982981">"inviare e visualizzare SMS"</string>
     <string name="permdesc_sendSms" msgid="7094729298204937667">"Consente all\'applicazione di inviare messaggi SMS. Ciò potrebbe comportare costi imprevisti. Applicazioni dannose potrebbero generare dei costi inviando messaggi senza la tua conferma."</string>
     <string name="permlab_readSms" msgid="8745086572213270480">"lettura messaggi di testo personali (SMS o MMS)"</string>
     <string name="permdesc_readSms" product="tablet" msgid="2467981548684735522">"Consente all\'applicazione di leggere i messaggi SMS memorizzati sul tablet o sulla scheda SIM. Ciò consente all\'applicazione di leggere tutti i messaggi SMS, indipendentemente dai contenuti o dal livello di riservatezza."</string>
@@ -342,7 +342,7 @@
     <string name="permdesc_accessCoarseLocation" msgid="2538200184373302295">"Consente all\'applicazione di ottenere la tua posizione approssimativa. Questa posizione viene ottenuta da servizi di localizzazione utilizzando fonti di geolocalizzazione delle reti come ripetitori di telefonia mobile e Wi-Fi. Questi servizi di localizzazione devono essere attivi e disponibili sul dispositivo per poter essere utilizzati dall\'applicazione. Le applicazioni potrebbero utilizzare questa autorizzazione per stabilire la tua posizione approssimativa."</string>
     <string name="permlab_modifyAudioSettings" msgid="6095859937069146086">"modifica impostazioni audio"</string>
     <string name="permdesc_modifyAudioSettings" msgid="3522565366806248517">"Consente all\'applicazione di modificare le impostazioni audio globali, come il volume e quale altoparlante viene utilizzato per l\'uscita."</string>
-    <string name="permlab_recordAudio" msgid="3876049771427466323">"registrazione audio"</string>
+    <string name="permlab_recordAudio" msgid="3876049771427466323">"registrare audio"</string>
     <string name="permdesc_recordAudio" msgid="4906839301087980680">"Consente all\'applicazione di registrare audio con il microfono. Questa autorizzazione consente all\'applicazione di registrare audio in qualsiasi momento senza la tua conferma."</string>
     <string name="permlab_sim_communication" msgid="1180265879464893029">"comunicazione SIM"</string>
     <string name="permdesc_sim_communication" msgid="5725159654279639498">"Consente all\'app di inviare comandi alla SIM. Questo è molto pericoloso."</string>

@@ -144,14 +144,14 @@
     <string name="httpErrorOk" msgid="1191919378083472204">"تأیید"</string>
     <string name="httpError" msgid="7956392511146698522">"خطایی در شبکه وجود داشت."</string>
     <string name="httpErrorLookup" msgid="4711687456111963163">"‏URL پیدا نشد."</string>
-    <string name="httpErrorUnsupportedAuthScheme" msgid="6299980280442076799">"‏طرح کلی تأیید اعتبار سایت پشتیبانی نمی‎شود."</string>
+    <string name="httpErrorUnsupportedAuthScheme" msgid="6299980280442076799">"‏طرح کلی تأیید اعتبار سایت پشتیبانی نمی‌‎شود."</string>
     <string name="httpErrorAuth" msgid="1435065629438044534">"تأیید اعتبار انجام نشد."</string>
     <string name="httpErrorProxyAuth" msgid="1788207010559081331">"تأیید اعتبار از طریق سرور پروکسی انجام نشد."</string>
     <string name="httpErrorConnect" msgid="8714273236364640549">"اتصال به سرور انجام نشد."</string>
     <string name="httpErrorIO" msgid="2340558197489302188">"برقراری ارتباط با سرور ممکن نبود. بعداً دوباره امتحان کنید."</string>
     <string name="httpErrorTimeout" msgid="4743403703762883954">"زمان اتصال به سرور تمام شده است."</string>
     <string name="httpErrorRedirectLoop" msgid="8679596090392779516">"این صفحه دارای تعداد بسیار زیادی تغییر مسیر سرور است."</string>
-    <string name="httpErrorUnsupportedScheme" msgid="5015730812906192208">"‏پروتکل پشتیبانی نمی‎شود."</string>
+    <string name="httpErrorUnsupportedScheme" msgid="5015730812906192208">"‏پروتکل پشتیبانی نمی‌‎شود."</string>
     <string name="httpErrorFailedSslHandshake" msgid="96549606000658641">"اتصال امن ایجاد نشد."</string>
     <string name="httpErrorBadUrl" msgid="3636929722728881972">"‏بدلیل نامعتبر بودن URL، باز کردن صفحه ممکن نیست."</string>
     <string name="httpErrorFile" msgid="2170788515052558676">"دسترسی به فایل انجام نشد."</string>
@@ -781,13 +781,13 @@
     <string name="permdesc_writeHistoryBookmarks" product="tv" msgid="7007393823197766548">"به برنامه اجازه می‌دهد تا سابقه یا نشانک‌های ذخیره شده مرورگر در تلویزیون شما را تغییر دهد. شاید به برنامه اجازه دهد تا داده‌های «مرورگر» را پاک کند یا تغییر دهد. توجه: این مجوز شاید توسط مرورگرهای شخص ثالث یا سایر برنامه‌ها با قابلیت‌های مرور وب اجرا شود."</string>
     <string name="permdesc_writeHistoryBookmarks" product="default" msgid="8497389531014185509">"به برنامه اجازه می‌دهد سابقه مرورگر یا نشانک‌های ذخیره شده در تلفن شما را اصلاح کند. این ویژگی ممکن است به برنامه اجازه دهد داده‌های مرورگر را حذف یا اصلاح کند. توجه: این مجوز ممکن است توسط مرورگرهای شخص ثالث یا سایر برنامه‌های دارای قابلیت مرور وب قابل اجرا نباشد."</string>
     <string name="permlab_setAlarm" msgid="1379294556362091814">"تنظیم یک هشدار"</string>
-    <string name="permdesc_setAlarm" msgid="316392039157473848">"‏به برنامه اجازه می‎دهد تا هشداری را در برنامه ساعت زنگدار نصب شده تنظیم کند. برخی از برنامه‎های ساعت زنگدار نمی‎توانند این ویژگی را اعمال کنند."</string>
+    <string name="permdesc_setAlarm" msgid="316392039157473848">"‏به برنامه اجازه می‎دهد تا هشداری را در برنامه ساعت زنگدار نصب شده تنظیم کند. برخی از برنامه‎های ساعت زنگدار نمی‌‎توانند این ویژگی را اعمال کنند."</string>
     <string name="permlab_addVoicemail" msgid="5525660026090959044">"افزودن پست صوتی"</string>
     <string name="permdesc_addVoicemail" msgid="6604508651428252437">"به برنامه اجازه می‌دهد تا پیام‌ها را به صندوق دریافت پست صوتی شما اضافه کند."</string>
     <string name="permlab_writeGeolocationPermissions" msgid="5962224158955273932">"تغییر مجوزهای مکان جغرافیایی مرورگر"</string>
     <string name="permdesc_writeGeolocationPermissions" msgid="1083743234522638747">"‏به برنامه اجازه می‎دهد تا مجوزهای جغرافیایی مرورگر را تغییر دهد. برنامه‎های مخرب می‎توانند از آن استفاده کنند تا اطلاعات موقعیت مکانی را به سایت‌های وب کتابخانه بفرستند."</string>
     <string name="save_password_message" msgid="767344687139195790">"می‌خواهید مرورگر این رمز ورود را به خاطر داشته باشد؟"</string>
-    <string name="save_password_notnow" msgid="6389675316706699758">"الآن نه"</string>
+    <string name="save_password_notnow" msgid="6389675316706699758">"اکنون نه"</string>
     <string name="save_password_remember" msgid="6491879678996749466">"به خاطر سپردن"</string>
     <string name="save_password_never" msgid="8274330296785855105">"هیچ‌وقت"</string>
     <string name="open_permission_deny" msgid="7374036708316629800">"شما اجازه بازکردن این صفحه را ندارید."</string>
@@ -894,16 +894,16 @@
     <string name="clearDefaultHintMsg" msgid="3252584689512077257">"‏پیش‌فرض را در تنظیمات سیستم&gt; برنامه‎ها&gt; مورد دانلود شده پاک کنید."</string>
     <string name="chooseActivity" msgid="7486876147751803333">"انتخاب عملکرد"</string>
     <string name="chooseUsbActivity" msgid="6894748416073583509">"‏انتخاب برنامه برای دستگاه USB"</string>
-    <string name="noApplications" msgid="2991814273936504689">"‏هیچ برنامه‌ای نمی‎تواند این کار را انجام دهد."</string>
+    <string name="noApplications" msgid="2991814273936504689">"‏هیچ برنامه‌ای نمی‌‎تواند این کار را انجام دهد."</string>
     <string name="aerr_title" msgid="1905800560317137752"></string>
     <string name="aerr_application" msgid="932628488013092776">"متأسفانه، <xliff:g id="APPLICATION">%1$s</xliff:g> متوقف شده است."</string>
     <string name="aerr_process" msgid="4507058997035697579">"متأسفانه، پردازش <xliff:g id="PROCESS">%1$s</xliff:g> متوقف شده است."</string>
     <string name="aerr_process_silence" msgid="4226685530196000222">"تا را‌ه‌اندازی مجدد، خرابی‌ها از <xliff:g id="PROCESS">%1$s</xliff:g> نادیده گرفته شوند."</string>
     <string name="anr_title" msgid="4351948481459135709"></string>
-    <string name="anr_activity_application" msgid="1904477189057199066">"‏<xliff:g id="APPLICATION">%2$s</xliff:g> پاسخ نمی‎دهد.\n\nآیا می‎خواهید آنرا ببندید؟"</string>
-    <string name="anr_activity_process" msgid="5776209883299089767">"‏فعالیت <xliff:g id="ACTIVITY">%1$s</xliff:g> پاسخ نمی‎دهد.\n\nآیا می‎خواهید آن را ببندید؟"</string>
-    <string name="anr_application_process" msgid="8941757607340481057">"‏<xliff:g id="APPLICATION">%1$s</xliff:g> پاسخ نمی‎دهد. آیا می‎خواهید آن را ببندید؟"</string>
-    <string name="anr_process" msgid="6513209874880517125">"‏روند <xliff:g id="PROCESS">%1$s</xliff:g> پاسخ نمی‎دهد. \n\nآیا می‎خواهید آن را ببندید؟"</string>
+    <string name="anr_activity_application" msgid="1904477189057199066">"‏<xliff:g id="APPLICATION">%2$s</xliff:g> پاسخ نمی‌‎دهد.\n\nآیا می‎خواهید آنرا ببندید؟"</string>
+    <string name="anr_activity_process" msgid="5776209883299089767">"‏فعالیت <xliff:g id="ACTIVITY">%1$s</xliff:g> پاسخ نمی‌‎دهد.\n\nآیا می‎خواهید آن را ببندید؟"</string>
+    <string name="anr_application_process" msgid="8941757607340481057">"‏<xliff:g id="APPLICATION">%1$s</xliff:g> پاسخ نمی‌‎دهد. آیا می‎خواهید آن را ببندید؟"</string>
+    <string name="anr_process" msgid="6513209874880517125">"‏روند <xliff:g id="PROCESS">%1$s</xliff:g> پاسخ نمی‌‎دهد. \n\nآیا می‎خواهید آن را ببندید؟"</string>
     <string name="force_close" msgid="8346072094521265605">"تأیید"</string>
     <string name="report" msgid="4060218260984795706">"گزارش"</string>
     <string name="wait" msgid="7147118217226317732">"منتظر بمانید"</string>
@@ -1006,14 +1006,14 @@
     <string name="sms_short_code_confirm_never_allow" msgid="446992765774269673">"همیشه غیرمجاز"</string>
     <string name="sim_removed_title" msgid="6227712319223226185">"سیم کارت برداشته شد"</string>
     <string name="sim_removed_message" msgid="5450336489923274918">"تا زمانی که با یک سیم‌کارت معتبر دوباره راه‌اندازی نکنید شبکه تلفن همراه غیر قابل‌ دسترس خواهد بود."</string>
-    <string name="sim_done_button" msgid="827949989369963775">"انجام شد"</string>
+    <string name="sim_done_button" msgid="827949989369963775">"تمام"</string>
     <string name="sim_added_title" msgid="3719670512889674693">"سیم کارت اضافه شد"</string>
     <string name="sim_added_message" msgid="7797975656153714319">"برای دسترسی به شبکه تلفن همراه، دستگاهتان را مجدداً راه‌اندازی کنید."</string>
     <string name="sim_restart_button" msgid="4722407842815232347">"راه‌اندازی مجدد"</string>
     <string name="time_picker_dialog_title" msgid="8349362623068819295">"تنظیم زمان"</string>
     <string name="date_picker_dialog_title" msgid="5879450659453782278">"تاریخ تنظیم"</string>
     <string name="date_time_set" msgid="5777075614321087758">"تنظیم"</string>
-    <string name="date_time_done" msgid="2507683751759308828">"انجام شد"</string>
+    <string name="date_time_done" msgid="2507683751759308828">"تمام"</string>
     <string name="perms_new_perm_prefix" msgid="8257740710754301407"><font size="12" fgcolor="#ff33b5e5">"جدید: "</font></string>
     <string name="perms_description_app" msgid="5139836143293299417">"ارائه شده توسط <xliff:g id="APP_NAME">%1$s</xliff:g> ."</string>
     <string name="no_permissions" msgid="7283357728219338112">"مجوزی لازم نیست"</string>
@@ -1085,7 +1085,7 @@
     <string name="ime_action_search" msgid="658110271822807811">"جستجو"</string>
     <string name="ime_action_send" msgid="2316166556349314424">"ارسال"</string>
     <string name="ime_action_next" msgid="3138843904009813834">"بعدی"</string>
-    <string name="ime_action_done" msgid="8971516117910934605">"انجام شد"</string>
+    <string name="ime_action_done" msgid="8971516117910934605">"تمام"</string>
     <string name="ime_action_previous" msgid="1443550039250105948">"قبلی"</string>
     <string name="ime_action_default" msgid="2840921885558045721">"اجرا کردن"</string>
     <string name="dial_number_using" msgid="5789176425167573586">"شماره گیری \nبا استفاده از <xliff:g id="NUMBER">%s</xliff:g>"</string>
@@ -1131,7 +1131,7 @@
       <item quantity="one"><xliff:g id="INDEX">%d</xliff:g> از <xliff:g id="TOTAL">%d</xliff:g></item>
       <item quantity="other"><xliff:g id="INDEX">%d</xliff:g> از <xliff:g id="TOTAL">%d</xliff:g></item>
     </plurals>
-    <string name="action_mode_done" msgid="7217581640461922289">"انجام شد"</string>
+    <string name="action_mode_done" msgid="7217581640461922289">"تمام"</string>
     <string name="progress_erasing" product="nosdcard" msgid="4521573321524340058">"‏در حال پاک کردن حافظهٔ USB..."</string>
     <string name="progress_erasing" product="default" msgid="6596988875507043042">"‏در حال پاک کردن کارت SD..."</string>
     <string name="share" msgid="1778686618230011964">"اشتراک‌گذاری"</string>
@@ -1173,7 +1173,7 @@
     <string name="keyboardview_keycode_alt" msgid="4856868820040051939">"Alt"</string>
     <string name="keyboardview_keycode_cancel" msgid="1203984017245783244">"لغو"</string>
     <string name="keyboardview_keycode_delete" msgid="3337914833206635744">"Delete"</string>
-    <string name="keyboardview_keycode_done" msgid="1992571118466679775">"انجام شد"</string>
+    <string name="keyboardview_keycode_done" msgid="1992571118466679775">"تمام"</string>
     <string name="keyboardview_keycode_mode_change" msgid="4547387741906537519">"تغییر حالت"</string>
     <string name="keyboardview_keycode_shift" msgid="2270748814315147690">"Shift"</string>
     <string name="keyboardview_keycode_enter" msgid="2985864015076059467">"Enter"</string>
@@ -1416,7 +1416,7 @@
     <string name="immersive_cling_title" msgid="8394201622932303336">"مشاهده در حالت تمام صفحه"</string>
     <string name="immersive_cling_description" msgid="3482371193207536040">"برای خروج، انگشتتان را از بالای صفحه به پایین بکشید."</string>
     <string name="immersive_cling_positive" msgid="5016839404568297683">"متوجه شدم"</string>
-    <string name="done_label" msgid="2093726099505892398">"انجام شد"</string>
+    <string name="done_label" msgid="2093726099505892398">"تمام"</string>
     <string name="hour_picker_description" msgid="6698199186859736512">"لغزنده دایره‌ای ساعت"</string>
     <string name="minute_picker_description" msgid="8606010966873791190">"لغزنده دایره‌ای دقیقه"</string>
     <string name="select_hours" msgid="6043079511766008245">"انتخاب ساعت"</string>

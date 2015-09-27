@@ -37,7 +37,7 @@
     <string name="permlab_accessCoarseLocationwear" msgid="5880746016230166090">"おおよその位置情報（ネットワーク基地局）へのアクセス"</string>
     <string name="permlab_sim_communicationwear" msgid="1899198085342781874">"SIMへのコマンド送信"</string>
     <string name="permlab_createNetworkSocketswear" msgid="6467042386273822913">"ネットワークへのフルアクセス"</string>
-    <string name="permlab_manageProfileAndDeviceOwnerswear" msgid="7313340516937821847">"プロフィールの所有者と端末の所有者の管理"</string>
+    <string name="permlab_manageProfileAndDeviceOwnerswear" msgid="7313340516937821847">"プロファイルの所有者と端末の所有者の管理"</string>
     <string name="permlab_changeWimaxStatewear" msgid="3828470843939853744">"WiMAX状態の変更"</string>
     <string name="permlab_handoverStatuswear" msgid="4835786819716499249">"Androidビーム転送のステータスの受信"</string>
     <string name="permlab_route_media_outputwear" msgid="8737024341474587192">"メディア出力のルーティング"</string>
