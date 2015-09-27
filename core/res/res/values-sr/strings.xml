@@ -230,21 +230,21 @@
     <string name="permgrouplab_contacts" msgid="3657758145679177612">"Контакти"</string>
     <string name="permgroupdesc_contacts" msgid="6951499528303668046">"приступи контактима"</string>
     <string name="permgrouplab_location" msgid="7275582855722310164">"Локација"</string>
-    <string name="permgroupdesc_location" msgid="1346617465127855033">"приступ локацији овог уређаја"</string>
+    <string name="permgroupdesc_location" msgid="1346617465127855033">"приступи локацији овог уређаја"</string>
     <string name="permgrouplab_calendar" msgid="5863508437783683902">"Календар"</string>
     <string name="permgroupdesc_calendar" msgid="3889615280211184106">"приступи календару"</string>
     <string name="permgrouplab_sms" msgid="228308803364967808">"SMS"</string>
     <string name="permgroupdesc_sms" msgid="4656988620100940350">"шаље и прегледа SMS поруке"</string>
     <string name="permgrouplab_storage" msgid="1971118770546336966">"Складиште"</string>
-    <string name="permgroupdesc_storage" msgid="637758554581589203">"приступи сликама, медијима и датотекама на уређају"</string>
+    <string name="permgroupdesc_storage" msgid="637758554581589203">"приступа сликама, медијима и датотекама на уређају"</string>
     <string name="permgrouplab_microphone" msgid="171539900250043464">"Микрофон"</string>
-    <string name="permgroupdesc_microphone" msgid="4988812113943554584">"снимање аудио снимака"</string>
+    <string name="permgroupdesc_microphone" msgid="4988812113943554584">"снима аудио снимке"</string>
     <string name="permgrouplab_camera" msgid="4820372495894586615">"Камера"</string>
-    <string name="permgroupdesc_camera" msgid="3250611594678347720">"снимање слика и видео снимака"</string>
+    <string name="permgroupdesc_camera" msgid="3250611594678347720">"снима слике и видео снимке"</string>
     <string name="permgrouplab_phone" msgid="5229115638567440675">"Телефон"</string>
-    <string name="permgroupdesc_phone" msgid="6234224354060641055">"упућивање телефонских позива и управљање њима"</string>
+    <string name="permgroupdesc_phone" msgid="6234224354060641055">"упућује телефонске позиве и управља њима"</string>
     <string name="permgrouplab_sensors" msgid="416037179223226722">"Сензори за тело"</string>
-    <string name="permgroupdesc_sensors" msgid="7147968539346634043">"приступ подацима сензора о виталним функцијама"</string>
+    <string name="permgroupdesc_sensors" msgid="7147968539346634043">"приступа подацима сензора о виталним функцијама"</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"Преузима садржај прозора"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"Проверава садржај прозора са којим остварујете интеракцију."</string>
     <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"Укључи Истраживања додиром"</string>
@@ -273,7 +273,7 @@
     <string name="permdesc_readCellBroadcasts" msgid="6361972776080458979">"Омогућава апликацији да чита поруке инфо сервиса које уређај прима. Упозорења инфо сервиса се на неким локацијама примају као упозорења на хитне случајеве. Злонамерне апликације могу да утичу на учинак или ометају функционисање уређаја када се прими порука инфо сервиса о хитном случају."</string>
     <string name="permlab_subscribedFeedsRead" msgid="4756609637053353318">"читање пријављених фидова"</string>
     <string name="permdesc_subscribedFeedsRead" msgid="5557058907906144505">"Дозвољава апликацији да преузима детаље о тренутно синхронизованим фидовима."</string>
-    <string name="permlab_sendSms" msgid="7544599214260982981">"шаљи и прегледај SMS поруке"</string>
+    <string name="permlab_sendSms" msgid="7544599214260982981">"шаље и прегледа SMS поруке"</string>
     <string name="permdesc_sendSms" msgid="7094729298204937667">"Дозвољава апликацији да шаље SMS поруке. Ово може да доведе до неочекиваних трошкова. Злонамерне апликације могу да шаљу поруке без ваше потврде, што може да изазове трошкове."</string>
     <string name="permlab_readSms" msgid="8745086572213270480">"читање текстуалних порука (SMS или MMS)"</string>
     <string name="permdesc_readSms" product="tablet" msgid="2467981548684735522">"Дозвољава апликацији да чита SMS поруке ускладиштене на таблету или SIM картици. Ово омогућава апликацији да чита све SMS поруке, без обзира на садржај или поверљивост."</string>

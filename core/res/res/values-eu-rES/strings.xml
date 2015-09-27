@@ -227,23 +227,23 @@
     <string name="user_owner_label" msgid="2804351898001038951">"Pertsonalak"</string>
     <string name="managed_profile_label" msgid="6260850669674791528">"Lana"</string>
     <string name="permgrouplab_contacts" msgid="3657758145679177612">"Kontaktuak"</string>
-    <string name="permgroupdesc_contacts" msgid="6951499528303668046">"Atzitu kontaktuak"</string>
+    <string name="permgroupdesc_contacts" msgid="6951499528303668046">"kontaktuak atzitzeko"</string>
     <string name="permgrouplab_location" msgid="7275582855722310164">"Kokapena"</string>
-    <string name="permgroupdesc_location" msgid="1346617465127855033">"Atzitu gailuaren kokapena"</string>
+    <string name="permgroupdesc_location" msgid="1346617465127855033">"gailuaren kokapena atzitzeko"</string>
     <string name="permgrouplab_calendar" msgid="5863508437783683902">"Egutegia"</string>
-    <string name="permgroupdesc_calendar" msgid="3889615280211184106">"Atzitu egutegia"</string>
+    <string name="permgroupdesc_calendar" msgid="3889615280211184106">"egutegia atzitzeko"</string>
     <string name="permgrouplab_sms" msgid="228308803364967808">"SMS mezuak"</string>
-    <string name="permgroupdesc_sms" msgid="4656988620100940350">"Bidali eta ikusi SMS mezuak"</string>
+    <string name="permgroupdesc_sms" msgid="4656988620100940350">"SMS mezuak bidaltzeko eta ikusteko"</string>
     <string name="permgrouplab_storage" msgid="1971118770546336966">"Memoria"</string>
-    <string name="permgroupdesc_storage" msgid="637758554581589203">"Atzitu gailuko argazkiak, multimedia-elementuak eta fitxategiak"</string>
+    <string name="permgroupdesc_storage" msgid="637758554581589203">"gailuko argazkiak, multimedia-elementuak eta fitxategiak atzitzeko"</string>
     <string name="permgrouplab_microphone" msgid="171539900250043464">"Mikrofonoa"</string>
-    <string name="permgroupdesc_microphone" msgid="4988812113943554584">"Grabatu audioa"</string>
+    <string name="permgroupdesc_microphone" msgid="4988812113943554584">"audioa grabatzeko"</string>
     <string name="permgrouplab_camera" msgid="4820372495894586615">"Kamera"</string>
-    <string name="permgroupdesc_camera" msgid="3250611594678347720">"Atera argazkiak eta grabatu bideoak"</string>
+    <string name="permgroupdesc_camera" msgid="3250611594678347720">"argazkiak ateratzeko eta bideoak grabatzeko"</string>
     <string name="permgrouplab_phone" msgid="5229115638567440675">"Telefonoa"</string>
-    <string name="permgroupdesc_phone" msgid="6234224354060641055">"Egin eta kudeatu telefono-deiak"</string>
+    <string name="permgroupdesc_phone" msgid="6234224354060641055">"telefono-deiak egiteko eta kudeatzeko"</string>
     <string name="permgrouplab_sensors" msgid="416037179223226722">"Gorputz-sentsoreak"</string>
-    <string name="permgroupdesc_sensors" msgid="7147968539346634043">"Atzitu bizi-konstanteei buruzko sentsore-datuak"</string>
+    <string name="permgroupdesc_sensors" msgid="7147968539346634043">"bizi-konstanteei buruzko sentsore-datuak atzitzeko"</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"Eskuratu leihoko edukia"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"Arakatu irekita daukazun leihoko edukia."</string>
     <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"Aktibatu ukipen bidez arakatzeko eginbidea"</string>
