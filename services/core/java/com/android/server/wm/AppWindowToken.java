@@ -74,10 +74,6 @@ class AppWindowToken extends WindowToken {
     // case do not clear allDrawn until the animation completes.
     boolean deferClearAllDrawn;
 
-    // Is this token going to be hidden in a little while?  If so, it
-    // won't be taken into account for setting the screen orientation.
-    boolean willBeHidden;
-
     // Is this window's surface needed?  This is almost like hidden, except
     // it will sometimes be true a little earlier: when the token has
     // been shown, but is still waiting for its app transition to execute
@@ -321,7 +317,6 @@ class AppWindowToken extends WindowToken {
                 pw.print(" requestedOrientation="); pw.println(requestedOrientation);
         pw.print(prefix); pw.print("hiddenRequested="); pw.print(hiddenRequested);
                 pw.print(" clientHidden="); pw.print(clientHidden);
-                pw.print(" willBeHidden="); pw.print(willBeHidden);
                 pw.print(" reportedDrawn="); pw.print(reportedDrawn);
                 pw.print(" reportedVisible="); pw.println(reportedVisible);
         if (paused) {

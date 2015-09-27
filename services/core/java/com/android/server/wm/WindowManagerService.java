@@ -3268,8 +3268,7 @@ public class WindowManagerService extends IWindowManager.Stub
 
                 // if we're about to tear down this window and not seek for
                 // the behind activity, don't use it for orientation
-                if (!findingBehind
-                        && (!atoken.hidden && atoken.hiddenRequested)) {
+                if (!findingBehind && !atoken.hidden && atoken.hiddenRequested) {
                     if (DEBUG_ORIENTATION) Slog.v(TAG, "Skipping " + atoken
                             + " -- going to hide");
                     continue;
@@ -3290,7 +3289,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 }
 
                 // We ignore any hidden applications on the top.
-                if (atoken.hiddenRequested || atoken.willBeHidden) {
+                if (atoken.hiddenRequested) {
                     if (DEBUG_ORIENTATION) Slog.v(TAG, "Skipping " + atoken
                             + " -- hidden on top");
                     continue;
@@ -3786,7 +3785,6 @@ public class WindowManagerService extends IWindowManager.Stub
             if (!ttoken.hidden) {
                 wtoken.hidden = false;
                 wtoken.hiddenRequested = false;
-                wtoken.willBeHidden = false;
             }
             if (wtoken.clientHidden != ttoken.clientHidden) {
                 wtoken.clientHidden = ttoken.clientHidden;
@@ -3842,25 +3840,6 @@ public class WindowManagerService extends IWindowManager.Stub
         }
     }
 
-    @Override
-    public void setAppWillBeHidden(IBinder token) {
-        if (!checkCallingPermission(android.Manifest.permission.MANAGE_APP_TOKENS,
-                "setAppWillBeHidden()")) {
-            throw new SecurityException("Requires MANAGE_APP_TOKENS permission");
-        }
-
-        AppWindowToken wtoken;
-
-        synchronized(mWindowMap) {
-            wtoken = findAppWindowToken(token);
-            if (wtoken == null) {
-                Slog.w(TAG, "Attempted to set will be hidden of non-existing app token: " + token);
-                return;
-            }
-            wtoken.willBeHidden = true;
-        }
-    }
-
     public void setAppFullscreen(IBinder token, boolean toOpaque) {
         synchronized (mWindowMap) {
             AppWindowToken atoken = findAppWindowToken(token);
@@ -3897,7 +3876,6 @@ public class WindowManagerService extends IWindowManager.Stub
             wtoken.sendAppVisibilityToClients();
         }
 
-        wtoken.willBeHidden = false;
         // Allow for state changes and animation to be applied if:
         // * token is transitioning visibility state
         // * or the token was marked as hidden and is exiting before we had a chance to play the

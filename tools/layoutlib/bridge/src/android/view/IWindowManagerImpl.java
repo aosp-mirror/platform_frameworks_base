@@ -338,11 +338,6 @@ public class IWindowManagerImpl implements IWindowManager {
     }
 
     @Override
-    public void setAppWillBeHidden(IBinder arg0) throws RemoteException {
-        // TODO Auto-generated method stub
-    }
-
-    @Override
     public void setEventDispatching(boolean arg0) throws RemoteException {
         // TODO Auto-generated method stub
     }

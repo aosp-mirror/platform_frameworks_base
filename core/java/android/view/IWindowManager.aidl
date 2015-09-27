@@ -144,7 +144,6 @@ interface IWindowManager
     void setAppStartingWindow(IBinder token, String pkg, int theme,
             in CompatibilityInfo compatInfo, CharSequence nonLocalizedLabel, int labelRes,
             int icon, int logo, int windowFlags, IBinder transferFrom, boolean createIfNeeded);
-    void setAppWillBeHidden(IBinder token);
     void setAppVisibility(IBinder token, boolean visible);
     void startAppFreezingScreen(IBinder token, int configChanges);
     void stopAppFreezingScreen(IBinder token, boolean force);
