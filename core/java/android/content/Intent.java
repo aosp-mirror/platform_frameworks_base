@@ -3033,6 +3033,39 @@ public class Intent implements Parcelable, Cloneable {
     public static final String EXTRA_PROCESS_TEXT_READONLY =
             "android.intent.extra.PROCESS_TEXT_READONLY";
 
+    /**
+     * Broadcast action: reports when a new thermal event has been reached. When the device
+     * is reaching its maximum temperatue, the thermal level reported
+     * {@hide}
+     */
+    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
+    public static final String ACTION_THERMAL_EVENT = "android.intent.action.THERMAL_EVENT";
+
+    /** {@hide} */
+    public static final String EXTRA_THERMAL_STATE = "android.intent.extra.THERMAL_STATE";
+
+    /**
+     * Thermal state when the device is normal. This state is sent in the
+     * {@link ACTION_THERMAL_EVENT} broadcast as {@link EXTRA_THERMAL_STATE}.
+     * {@hide}
+     */
+    public static final int EXTRA_THERMAL_STATE_NORMAL = 0;
+
+    /**
+     * Thermal state where the device is approaching its maximum threshold. This state is sent in
+     * the {@link ACTION_THERMAL_EVENT} broadcast as {@link EXTRA_THERMAL_STATE}.
+     * {@hide}
+     */
+    public static final int EXTRA_THERMAL_STATE_WARNING = 1;
+
+    /**
+     * Thermal state where the device has reached its maximum threshold. This state is sent in the
+     * {@link ACTION_THERMAL_EVENT} broadcast as {@link EXTRA_THERMAL_STATE}.
+     * {@hide}
+     */
+    public static final int EXTRA_THERMAL_STATE_EXCEEDED = 2;
+
+
     // ---------------------------------------------------------------------
     // ---------------------------------------------------------------------
     // Standard intent categories (see addCategory()).
