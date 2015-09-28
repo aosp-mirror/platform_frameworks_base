@@ -2,7 +2,7 @@ page.title=Optimizing for Doze and App Standby
 page.metaDescription=Test and optimize your app for the power-saving features in Android 6.0.
 page.tags="doze", "app standby", "marshmallow", "alarms"
 meta.tags="battery", "marshmallow", "alarms"
-page.image=/images/cards/doze_16-9_2x.png
+page.image=images/cards/card-doze_16-9_2x.png
 page.article=true
 parent.link=index.html
 

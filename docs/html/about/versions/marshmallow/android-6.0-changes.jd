@@ -1,5 +1,6 @@
 page.title=Android 6.0 Changes
 page.keywords=androidm,sdk,compatibility,marshmallow
+page.tags=androidm,marshmallow
 sdk.platform.apiLevel=23
 @jd:body
 

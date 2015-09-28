@@ -1669,7 +1669,7 @@ var RESOURCE_COLLECTIONS = {
       "training/permissions/requesting.html",
       "training/backup/autosyncapi.html",
       "training/app-links/index.html",
-      "training/monitoring-device-state/battery-optimization.html",
+      "training/monitoring-device-state/doze-standby.html",
       "about/versions/marshmallow/testing.html"
     ]
   },

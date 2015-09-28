@@ -1,6 +1,6 @@
 page.title=Android 6.0 APIs
 page.keywords=marshmallow,sdk,compatibility
-page.tags=androidm
+page.tags=androidm,marshmallow
 sdk.platform.apiLevel=23
 page.image=images/cards/card-api-overview_16-9_2x.png
 @jd:body
