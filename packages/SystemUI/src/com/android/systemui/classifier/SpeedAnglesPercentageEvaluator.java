@@ -16,19 +16,12 @@
 
 package com.android.systemui.classifier;
 
-/**
- * A classifier which looks at the ratio between the length of the stroke and its number of
- * points.
- */
-public class LengthCountEvaluator {
+public class SpeedAnglesPercentageEvaluator {
     public static float evaluate(float value) {
         float evaluation = 0.0f;
-        if (value < 0.09) evaluation++;
-        if (value < 0.05) evaluation++;
-        if (value < 0.02) evaluation++;
-        if (value > 0.6) evaluation++;
-        if (value > 0.9) evaluation++;
-        if (value > 1.2) evaluation++;
+        if (value < 1.00) evaluation++;
+        if (value < 0.95) evaluation++;
+        if (value < 0.90) evaluation++;
         return evaluation;
     }
 }

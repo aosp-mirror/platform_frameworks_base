@@ -69,13 +69,13 @@ public class HumanInteractionClassifier extends Classifier {
         mClassifierData = new ClassifierData(mDpi);
         mHistoryEvaluator = new HistoryEvaluator();
 
-        mStrokeClassifiers.add(new AnglesVarianceClassifier(mClassifierData));
+        mStrokeClassifiers.add(new AnglesClassifier(mClassifierData));
         mStrokeClassifiers.add(new SpeedClassifier(mClassifierData));
         mStrokeClassifiers.add(new DurationCountClassifier(mClassifierData));
         mStrokeClassifiers.add(new EndPointRatioClassifier(mClassifierData));
         mStrokeClassifiers.add(new EndPointLengthClassifier(mClassifierData));
         mStrokeClassifiers.add(new AccelerationClassifier(mClassifierData));
-        mStrokeClassifiers.add(new SpeedVarianceClassifier(mClassifierData));
+        mStrokeClassifiers.add(new SpeedAnglesClassifier(mClassifierData));
         mStrokeClassifiers.add(new LengthCountClassifier(mClassifierData));
 
         mGestureClassifiers.add(new PointerCountClassifier(mClassifierData));

@@ -17,8 +17,11 @@
 package com.android.systemui.classifier;
 
 /**
- * A classifier which looks at the ratio between the duration of the stroke and its number of
- * points.
+ * A classifier which looks at the ratio between the length of the stroke and its number of
+ * points. The number of points is subtracted by 2 because the UP event comes in with some delay
+ * and it should not influence the ratio and also strokes which are long and have a small number
+ * of points are punished more (these kind of strokes are usually bad ones and they tend to score
+ * well in other classifiers).
  */
 public class LengthCountClassifier extends StrokeClassifier {
     public LengthCountClassifier(ClassifierData classifierData) {
@@ -26,6 +29,7 @@ public class LengthCountClassifier extends StrokeClassifier {
 
     @Override
     public float getFalseTouchEvaluation(int type, Stroke stroke) {
-        return LengthCountEvaluator.evaluate(stroke.getTotalLength() / stroke.getCount());
+        return LengthCountEvaluator.evaluate(stroke.getTotalLength()
+                / Math.max(1.0f, stroke.getCount() - 2));
     }
 }
