@@ -71,7 +71,7 @@ public:
     GlopBuilder& setFillTextureLayer(Layer& layer, float alpha);
 
     GlopBuilder& setTransform(const Snapshot& snapshot, const int transformFlags) {
-        setTransform(snapshot.getOrthoMatrix(), *snapshot.transform, transformFlags);
+        setTransform(*snapshot.transform, transformFlags);
         return *this;
     }
 
@@ -102,8 +102,7 @@ private:
     void setFill(int color, float alphaScale,
             SkXfermode::Mode mode, Blend::ModeOrderSwap modeUsage,
             const SkShader* shader, const SkColorFilter* colorFilter);
-    void setTransform(const Matrix4& ortho, const Matrix4& canvas,
-            const int transformFlags);
+    void setTransform(const Matrix4& canvas, const int transformFlags);
 
     enum StageFlags {
         kInitialStage = 0,
