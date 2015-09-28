@@ -40,8 +40,8 @@ in Get Started with TV Apps for more information.</p>
 
 <p>The first row of the Android TV home screen displays cards for content recommended by applications.
 Your application provides these recommendations, as described in <a href="{@docRoot}training/tv/discovery/recommendations.html">
-</a>. For a visual overview of recommendations, see <a href="design/tv/index.html#recommendations">
-Design for Android TV</a>.</p>
+</a>. For a visual overview of recommendations, see
+<a href="{@docRoot}design/tv/index.html#recommendations">Designing for Android TV</a>.</p>
 
 <div class="cols">
   <div class="col-8 with-callouts">
