@@ -77,6 +77,7 @@ public class HumanInteractionClassifier extends Classifier {
         mStrokeClassifiers.add(new AccelerationClassifier(mClassifierData));
         mStrokeClassifiers.add(new SpeedAnglesClassifier(mClassifierData));
         mStrokeClassifiers.add(new LengthCountClassifier(mClassifierData));
+        mStrokeClassifiers.add(new DirectionClassifier(mClassifierData));
 
         mGestureClassifiers.add(new PointerCountClassifier(mClassifierData));
         mGestureClassifiers.add(new ProximityClassifier(mClassifierData));
