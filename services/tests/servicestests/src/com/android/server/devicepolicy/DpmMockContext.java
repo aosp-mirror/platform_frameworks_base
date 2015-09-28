@@ -219,6 +219,11 @@ public class DpmMockContext extends MockContext {
     }
 
     @Override
+    public String getSystemServiceName(Class<?> serviceClass) {
+        return realTestContext.getSystemServiceName(serviceClass);
+    }
+
+    @Override
     public PackageManager getPackageManager() {
         return packageManager;
     }

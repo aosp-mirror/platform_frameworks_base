@@ -101,7 +101,7 @@ class Owners {
 
     public Owners(Context context) {
         mContext = context;
-        mUserManager = UserManager.get(mContext);
+        mUserManager = context.getSystemService(UserManager.class);
     }
 
     /**
