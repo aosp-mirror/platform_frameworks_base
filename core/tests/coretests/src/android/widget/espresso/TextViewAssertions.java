@@ -47,7 +47,7 @@ public final class TextViewAssertions {
      * @param selection  The expected selection.
      */
     public static ViewAssertion hasSelection(String selection) {
-        return new TextSelectionAssertion(is(selection));
+        return hasSelection(is(selection));
     }
 
     /**
@@ -63,6 +63,53 @@ public final class TextViewAssertions {
      */
     public static ViewAssertion hasSelection(Matcher<String> selection) {
         return new TextSelectionAssertion(selection);
+    }
+
+    /**
+     * Returns a {@link ViewAssertion} that asserts that the text view insertion pointer is at
+     * a specified index.<br>
+     * <br>
+     * View constraints:
+     * <ul>
+     * <li>must be a text view displayed on screen
+     * <ul>
+     *
+     * @param index  The expected index.
+     */
+    public static ViewAssertion hasInsertionPointerAtIndex(int index) {
+        return hasInsertionPointerAtIndex(is(index));
+    }
+
+    /**
+     * Returns a {@link ViewAssertion} that asserts that the text view insertion pointer is at
+     * a specified index.<br>
+     * <br>
+     * View constraints:
+     * <ul>
+     * <li>must be a text view displayed on screen
+     * <ul>
+     *
+     * @param index  A matcher representing the expected index.
+     */
+    public static ViewAssertion hasInsertionPointerAtIndex(final Matcher<Integer> index) {
+        return new ViewAssertion() {
+            @Override
+            public void check(View view, NoMatchingViewException exception) {
+                if (view instanceof TextView) {
+                    TextView textView = (TextView) view;
+                    int selectionStart = textView.getSelectionStart();
+                    int selectionEnd = textView.getSelectionEnd();
+                    try {
+                        assertThat(selectionStart, index);
+                        assertThat(selectionEnd, index);
+                    } catch (IndexOutOfBoundsException e) {
+                        throw new AssertionFailedError(e.getMessage());
+                    }
+                } else {
+                    throw new AssertionFailedError("TextView not found");
+                }
+            }
+        };
     }
 
     /**

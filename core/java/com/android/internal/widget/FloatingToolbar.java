@@ -73,6 +73,8 @@ public final class FloatingToolbar {
     // This class is responsible for the public API of the floating toolbar.
     // It delegates rendering operations to the FloatingToolbarPopup.
 
+    public static final String FLOATING_TOOLBAR_TAG = "floating_toolbar";
+
     private static final MenuItem.OnMenuItemClickListener NO_OP_MENUITEM_CLICK_LISTENER =
             new MenuItem.OnMenuItemClickListener() {
                 @Override
@@ -1460,8 +1462,10 @@ public final class FloatingToolbar {
     }
 
     private static ViewGroup createContentContainer(Context context) {
-        return (ViewGroup) LayoutInflater.from(context)
+        ViewGroup contentContainer = (ViewGroup) LayoutInflater.from(context)
                 .inflate(R.layout.floating_popup_container, null);
+        contentContainer.setTag(FLOATING_TOOLBAR_TAG);
+        return contentContainer;
     }
 
     private static PopupWindow createPopupWindow(View content) {
