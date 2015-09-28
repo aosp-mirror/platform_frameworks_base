@@ -592,6 +592,23 @@ data-sortorder="-timestamp" data-cardsizes="6x3" data-maxresults="6">
   </td>
   </tr>
 
+  <tr id="PS-B1">
+  <td>
+    Battery
+  </td>
+  <td>
+    PS-B1
+  </td>
+  <td>
+    App supports power management features in Android 6.0+ (Doze and App Standby)
+    properly. In the case where core functionality is disrupted by power management,
+    only qualified apps may request an exemption.
+  </td>
+  <td>
+    <a href="#BA-1">BA-1</a>
+  </td>
+  </tr>
+
   <tr id="PS-M1">
   <td>
     Media
@@ -702,7 +719,7 @@ data-cardsizes="6x3" data-maxresults="6">
   </tr>
 
   <tr id="GP-P1">
-  <td rowspan="2">
+  <td rowspan="3">
     Policies
   </td>
   <td>
@@ -737,6 +754,25 @@ data-cardsizes="6x3" data-maxresults="6">
   </td>
   <td>
     <a href="#gp">GP-1</a>
+  </td>
+  </tr>
+
+  <tr id="GP-P2">
+  <td>
+    GP-P3
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+    App supports power management features in Android 6.0+ (Doze and App Standby)
+    properly. In the case where core functionality is disrupted by power management,
+    only qualified apps may request an exemption.
+    See <a
+    href="{@docRoot}training/monitoring-device-state/doze-standby.html#other_use_cases">Support
+    for other use cases</a> in Doze and App Standby.</p>
+    </p>
+  </td>
+  <td>
+    <a href="#gp">GP-4</a>
   </td>
   </tr>
 
@@ -1088,8 +1124,29 @@ data-cardsizes="6x3,6x3,6x3,6x3,6x3,6x3" data-maxresults="6">
   </td>
   </tr>
 
+  <tr id="BA-1">
+  <td>
+    Battery
+  </td>
+  <td>
+    BA-1
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+    Repeat <em>Core Suite</em> across Doze and App Standby cycles.
+    </p>
+
+    <p style="margin-bottom:.25em;">
+    Pay close attention to alarms, timers, notifications, syncs, and so on.
+    See <a
+    href="{@docRoot}training/monitoring-device-state/doze-standby.html#testing_doze_and_app_standby">Testing
+    with Doze and App Standby</a>.
+    </p>
+  </td>
+  </tr>
+
   <tr id="gp">
-  <td rowspan="3">
+  <td rowspan="4">
     Google Play
   </td>
   <td>
@@ -1120,6 +1177,17 @@ data-cardsizes="6x3,6x3,6x3,6x3,6x3,6x3" data-maxresults="6">
   <td>
     Review all graphical assets, media, text, code libraries, and other
     content packaged in the app or expansion file download.
+  </td>
+  </tr>
+
+  <tr id="GP-4">
+  <td>
+    GP-4
+  </td>
+  <td>
+  Review <a
+  href="{@docRoot}training/monitoring-device-state/doze-standby.html#other_use_cases">Support
+  for other use cases</a> in Doze and App Standby.
   </td>
   </tr>
 
