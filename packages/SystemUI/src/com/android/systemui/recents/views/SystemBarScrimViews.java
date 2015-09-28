@@ -17,13 +17,19 @@
 package com.android.systemui.recents.views;
 
 import android.app.Activity;
+import android.content.Context;
 import android.view.View;
+import android.view.animation.AnimationUtils;
+import android.view.animation.Interpolator;
 import com.android.systemui.R;
+import com.android.systemui.recents.RecentsActivity;
+import com.android.systemui.recents.RecentsActivityLaunchState;
 import com.android.systemui.recents.RecentsConfiguration;
 
 /** Manages the scrims for the various system bars. */
 public class SystemBarScrimViews {
 
+    Context mContext;
     RecentsConfiguration mConfig;
 
     View mStatusBarScrimView;
@@ -34,10 +40,22 @@ public class SystemBarScrimViews {
     boolean mHasStatusBarScrim;
     boolean mShouldAnimateNavBarScrim;
 
-    public SystemBarScrimViews(Activity activity, RecentsConfiguration config) {
-        mConfig = config;
+    int mNavBarScrimEnterDuration;
+
+    Interpolator mFastOutSlowInInterpolator;
+    Interpolator mQuintOutInterpolator;
+
+    public SystemBarScrimViews(Activity activity) {
+        mContext = activity;
+        mConfig = RecentsConfiguration.getInstance();
         mStatusBarScrimView = activity.findViewById(R.id.status_bar_scrim);
         mNavBarScrimView = activity.findViewById(R.id.nav_bar_scrim);
+        mNavBarScrimEnterDuration = activity.getResources().getInteger(
+                R.integer.recents_nav_bar_scrim_enter_duration);
+        mFastOutSlowInInterpolator = AnimationUtils.loadInterpolator(activity,
+                        com.android.internal.R.interpolator.fast_out_slow_in);
+        mQuintOutInterpolator = AnimationUtils.loadInterpolator(activity,
+                com.android.internal.R.interpolator.decelerate_quint);
     }
 
     /**
@@ -45,10 +63,11 @@ public class SystemBarScrimViews {
      * the first draw.
      */
     public void prepareEnterRecentsAnimation() {
-        mHasNavBarScrim = mConfig.hasNavBarScrim();
-        mShouldAnimateNavBarScrim = mConfig.shouldAnimateNavBarScrim();
-        mHasStatusBarScrim = mConfig.hasStatusBarScrim();
-        mShouldAnimateStatusBarScrim = mConfig.shouldAnimateStatusBarScrim();
+        RecentsActivityLaunchState launchState = mConfig.getLaunchState();
+        mHasNavBarScrim = launchState.hasNavBarScrim();
+        mShouldAnimateNavBarScrim = launchState.shouldAnimateNavBarScrim();
+        mHasStatusBarScrim = launchState.hasStatusBarScrim();
+        mShouldAnimateStatusBarScrim = launchState.shouldAnimateStatusBarScrim();
 
         mNavBarScrimView.setVisibility(mHasNavBarScrim && !mShouldAnimateNavBarScrim ?
                 View.VISIBLE : View.INVISIBLE);
@@ -60,15 +79,21 @@ public class SystemBarScrimViews {
      * Starts animating the scrim views when entering Recents.
      */
     public void startEnterRecentsAnimation() {
+        RecentsActivityLaunchState launchState = mConfig.getLaunchState();
+        int transitionEnterFromAppDelay = mContext.getResources().getInteger(
+                R.integer.recents_enter_from_app_transition_duration);
+        int transitionEnterFromHomeDelay = mContext.getResources().getInteger(
+                R.integer.recents_enter_from_home_transition_duration);
+
         if (mHasStatusBarScrim && mShouldAnimateStatusBarScrim) {
             mStatusBarScrimView.setTranslationY(-mStatusBarScrimView.getMeasuredHeight());
             mStatusBarScrimView.animate()
                     .translationY(0)
-                    .setStartDelay(mConfig.launchedFromHome ?
-                            mConfig.transitionEnterFromHomeDelay :
-                            mConfig.transitionEnterFromAppDelay)
-                    .setDuration(mConfig.navBarScrimEnterDuration)
-                    .setInterpolator(mConfig.quintOutInterpolator)
+                    .setStartDelay(launchState.launchedFromHome ?
+                            transitionEnterFromHomeDelay :
+                            transitionEnterFromAppDelay)
+                    .setDuration(mNavBarScrimEnterDuration)
+                    .setInterpolator(mQuintOutInterpolator)
                     .withStartAction(new Runnable() {
                         @Override
                         public void run() {
@@ -81,11 +106,11 @@ public class SystemBarScrimViews {
             mNavBarScrimView.setTranslationY(mNavBarScrimView.getMeasuredHeight());
             mNavBarScrimView.animate()
                     .translationY(0)
-                    .setStartDelay(mConfig.launchedFromHome ?
-                            mConfig.transitionEnterFromHomeDelay :
-                            mConfig.transitionEnterFromAppDelay)
-                    .setDuration(mConfig.navBarScrimEnterDuration)
-                    .setInterpolator(mConfig.quintOutInterpolator)
+                    .setStartDelay(launchState.launchedFromHome ?
+                            transitionEnterFromHomeDelay :
+                            transitionEnterFromAppDelay)
+                    .setDuration(mNavBarScrimEnterDuration)
+                    .setInterpolator(mQuintOutInterpolator)
                     .withStartAction(new Runnable() {
                         @Override
                         public void run() {
@@ -101,20 +126,22 @@ public class SystemBarScrimViews {
      * going home).
      */
     public void startExitRecentsAnimation() {
+        int taskViewExitToAppDuration = mContext.getResources().getInteger(
+                R.integer.recents_task_exit_to_app_duration);
         if (mHasStatusBarScrim && mShouldAnimateStatusBarScrim) {
             mStatusBarScrimView.animate()
                     .translationY(-mStatusBarScrimView.getMeasuredHeight())
                     .setStartDelay(0)
-                    .setDuration(mConfig.taskViewExitToAppDuration)
-                    .setInterpolator(mConfig.fastOutSlowInInterpolator)
+                    .setDuration(taskViewExitToAppDuration)
+                    .setInterpolator(mFastOutSlowInInterpolator)
                     .start();
         }
         if (mHasNavBarScrim && mShouldAnimateNavBarScrim) {
             mNavBarScrimView.animate()
                     .translationY(mNavBarScrimView.getMeasuredHeight())
                     .setStartDelay(0)
-                    .setDuration(mConfig.taskViewExitToAppDuration)
-                    .setInterpolator(mConfig.fastOutSlowInInterpolator)
+                    .setDuration(taskViewExitToAppDuration)
+                    .setInterpolator(mFastOutSlowInInterpolator)
                     .start();
         }
     }

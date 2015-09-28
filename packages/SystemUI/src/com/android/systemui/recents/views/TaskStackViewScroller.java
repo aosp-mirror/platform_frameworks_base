@@ -21,9 +21,11 @@ import android.animation.AnimatorListenerAdapter;
 import android.animation.ObjectAnimator;
 import android.animation.ValueAnimator;
 import android.content.Context;
+import android.view.animation.AnimationUtils;
+import android.view.animation.Interpolator;
 import android.widget.OverScroller;
-import com.android.systemui.recents.RecentsConfiguration;
 import com.android.systemui.recents.misc.Utilities;
+import com.android.systemui.R;
 
 /* The scrolling logic for a TaskStackView */
 public class TaskStackViewScroller {
@@ -31,7 +33,7 @@ public class TaskStackViewScroller {
         public void onScrollChanged(float p);
     }
 
-    RecentsConfiguration mConfig;
+    Context mContext;
     TaskStackViewLayoutAlgorithm mLayoutAlgorithm;
     TaskStackViewScrollerCallbacks mCb;
 
@@ -41,10 +43,14 @@ public class TaskStackViewScroller {
     ObjectAnimator mScrollAnimator;
     float mFinalAnimatedScroll;
 
-    public TaskStackViewScroller(Context context, RecentsConfiguration config, TaskStackViewLayoutAlgorithm layoutAlgorithm) {
-        mConfig = config;
+    Interpolator mLinearOutSlowInInterpolator;
+
+    public TaskStackViewScroller(Context context, TaskStackViewLayoutAlgorithm layoutAlgorithm) {
+        mContext = context;
         mScroller = new OverScroller(context);
         mLayoutAlgorithm = layoutAlgorithm;
+        mLinearOutSlowInInterpolator = AnimationUtils.loadInterpolator(context,
+                com.android.internal.R.interpolator.linear_out_slow_in);
         setStackScroll(getStackScroll());
     }
 
@@ -140,8 +146,9 @@ public class TaskStackViewScroller {
 
         mFinalAnimatedScroll = newScroll;
         mScrollAnimator = ObjectAnimator.ofFloat(this, "stackScroll", curScroll, newScroll);
-        mScrollAnimator.setDuration(mConfig.taskStackScrollDuration);
-        mScrollAnimator.setInterpolator(mConfig.linearOutSlowInInterpolator);
+        mScrollAnimator.setDuration(mContext.getResources().getInteger(
+                R.integer.recents_animate_task_stack_scroll_duration));
+        mScrollAnimator.setInterpolator(mLinearOutSlowInInterpolator);
         mScrollAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
             @Override
             public void onAnimationUpdate(ValueAnimator animation) {

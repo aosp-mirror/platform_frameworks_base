@@ -26,19 +26,21 @@ import android.content.Context;
 import android.content.res.ColorStateList;
 import android.graphics.Canvas;
 import android.graphics.Color;
-import android.graphics.drawable.ColorDrawable;
-import android.graphics.drawable.Drawable;
-import android.graphics.drawable.GradientDrawable;
-import android.graphics.drawable.RippleDrawable;
 import android.graphics.Outline;
 import android.graphics.Paint;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffColorFilter;
 import android.graphics.PorterDuffXfermode;
 import android.graphics.Rect;
+import android.graphics.drawable.ColorDrawable;
+import android.graphics.drawable.Drawable;
+import android.graphics.drawable.GradientDrawable;
+import android.graphics.drawable.RippleDrawable;
 import android.util.AttributeSet;
 import android.view.View;
 import android.view.ViewOutlineProvider;
+import android.view.animation.AnimationUtils;
+import android.view.animation.Interpolator;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -67,6 +69,8 @@ public class TaskViewHeader extends FrameLayout {
     boolean mCurrentPrimaryColorIsDark;
     int mCurrentPrimaryColor;
     int mBackgroundColor;
+    int mCornerRadius;
+    int mHighlightHeight;
     Drawable mLightDismissDrawable;
     Drawable mDarkDismissDrawable;
     RippleDrawable mBackground;
@@ -80,6 +84,9 @@ public class TaskViewHeader extends FrameLayout {
     // Header dim, which is only used when task view hardware layers are not used
     Paint mDimLayerPaint = new Paint();
     PorterDuffColorFilter mDimColorFilter = new PorterDuffColorFilter(0, PorterDuff.Mode.SRC_ATOP);
+
+    Interpolator mFastOutSlowInInterpolator;
+    Interpolator mFastOutLinearInInterpolator;
 
     boolean mLayersDisabled;
 
@@ -113,13 +120,21 @@ public class TaskViewHeader extends FrameLayout {
         mDarkDismissDrawable = context.getDrawable(R.drawable.recents_dismiss_dark);
         mDismissContentDescription =
                 context.getString(R.string.accessibility_recents_item_will_be_dismissed);
+        mCornerRadius = getResources().getDimensionPixelSize(
+                R.dimen.recents_task_view_rounded_corners_radius);
+        mHighlightHeight = getResources().getDimensionPixelSize(
+                R.dimen.recents_task_view_highlight);
+        mFastOutSlowInInterpolator = AnimationUtils.loadInterpolator(context,
+                com.android.internal.R.interpolator.fast_out_slow_in);
+        mFastOutLinearInInterpolator = AnimationUtils.loadInterpolator(context,
+                com.android.internal.R.interpolator.fast_out_linear_in);
 
         // Configure the highlight paint
         if (sHighlightPaint == null) {
             sHighlightPaint = new Paint();
             sHighlightPaint.setStyle(Paint.Style.STROKE);
-            sHighlightPaint.setStrokeWidth(mConfig.taskViewHighlightPx);
-            sHighlightPaint.setColor(mConfig.taskBarViewHighlightColor);
+            sHighlightPaint.setStrokeWidth(mHighlightHeight);
+            sHighlightPaint.setColor(context.getColor(R.color.recents_task_bar_highlight_color));
             sHighlightPaint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.ADD));
             sHighlightPaint.setAntiAlias(true);
         }
@@ -154,8 +169,8 @@ public class TaskViewHeader extends FrameLayout {
     @Override
     protected void onDraw(Canvas canvas) {
         // Draw the highlight at the top edge (but put the bottom edge just out of view)
-        float offset = (float) Math.ceil(mConfig.taskViewHighlightPx / 2f);
-        float radius = mConfig.taskViewRoundedCornerRadiusPx;
+        float offset = (float) Math.ceil(mHighlightHeight / 2f);
+        float radius = mCornerRadius;
         int count = canvas.save(Canvas.CLIP_SAVE_FLAG);
         canvas.clipRect(0, 0, getMeasuredWidth(), getMeasuredHeight());
         canvas.drawRoundRect(-offset, 0f, (float) getMeasuredWidth() + offset,
@@ -207,10 +222,15 @@ public class TaskViewHeader extends FrameLayout {
             mBackgroundColorDrawable.setColor(t.colorPrimary);
             mBackgroundColor = t.colorPrimary;
         }
+
+        int taskBarViewLightTextColor = getResources().getColor(
+                R.color.recents_task_bar_light_text_color);
+        int taskBarViewDarkTextColor = getResources().getColor(
+                R.color.recents_task_bar_dark_text_color);
         mCurrentPrimaryColor = t.colorPrimary;
         mCurrentPrimaryColorIsDark = t.useLightOnPrimaryColor;
         mActivityDescription.setTextColor(t.useLightOnPrimaryColor ?
-                mConfig.taskBarViewLightTextColor : mConfig.taskBarViewDarkTextColor);
+                taskBarViewLightTextColor : taskBarViewDarkTextColor);
         mDismissButton.setImageDrawable(t.useLightOnPrimaryColor ?
                 mLightDismissDrawable : mDarkDismissDrawable);
         mDismissButton.setContentDescription(String.format(mDismissContentDescription,
@@ -262,12 +282,14 @@ public class TaskViewHeader extends FrameLayout {
     /** Animates this task bar dismiss button when launching a task. */
     void startLaunchTaskDismissAnimation() {
         if (mDismissButton.getVisibility() == View.VISIBLE) {
+            int taskViewExitToAppDuration = mContext.getResources().getInteger(
+                    R.integer.recents_task_exit_to_app_duration);
             mDismissButton.animate().cancel();
             mDismissButton.animate()
                     .alpha(0f)
                     .setStartDelay(0)
-                    .setInterpolator(mConfig.fastOutSlowInInterpolator)
-                    .setDuration(mConfig.taskViewExitToAppDuration)
+                    .setInterpolator(mFastOutSlowInInterpolator)
+                    .setDuration(taskViewExitToAppDuration)
                     .start();
         }
     }
@@ -280,8 +302,9 @@ public class TaskViewHeader extends FrameLayout {
             mDismissButton.animate()
                     .alpha(1f)
                     .setStartDelay(0)
-                    .setInterpolator(mConfig.fastOutLinearInInterpolator)
-                    .setDuration(mConfig.taskViewEnterFromAppDuration)
+                    .setInterpolator(mFastOutLinearInInterpolator)
+                    .setDuration(getResources().getInteger(
+                            R.integer.recents_task_enter_from_app_duration))
                     .start();
         }
     }

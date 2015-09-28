@@ -23,7 +23,6 @@ import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
 import android.os.UserHandle;
 import android.util.Log;
-import android.util.SparseArray;
 import com.android.systemui.recents.RecentsConfiguration;
 import com.android.systemui.recents.misc.SystemServicesProxy;
 
@@ -76,7 +75,7 @@ public class RecentsTaskLoadPlan {
      * An optimization to preload the raw list of tasks.
      */
     public synchronized void preloadRawTasks(boolean isTopTaskHome) {
-        mRawTasks = mSystemServicesProxy.getRecentTasks(mConfig.maxNumTasksToLoad,
+        mRawTasks = mSystemServicesProxy.getRecentTasks(ActivityManager.getMaxRecentTasksStatic(),
                 UserHandle.CURRENT.getIdentifier(), isTopTaskHome);
         Collections.reverse(mRawTasks);
 
@@ -125,7 +124,7 @@ public class RecentsTaskLoadPlan {
                     activityLabel, mSystemServicesProxy, res);
             Drawable activityIcon = loader.getAndUpdateActivityIcon(taskKey, t.taskDescription,
                     mSystemServicesProxy, res, infoHandle, false);
-            int activityColor = loader.getActivityPrimaryColor(t.taskDescription, mConfig);
+            int activityColor = loader.getActivityPrimaryColor(t.taskDescription, res);
 
             // Update the activity info cache
             if (!hadCachedActivityInfo && infoHandle.info != null) {
@@ -153,7 +152,7 @@ public class RecentsTaskLoadPlan {
         // Initialize the stacks
         mStack = new TaskStack();
         mStack.setTasks(stackTasks);
-        mStack.createAffiliatedGroupings(mConfig);
+        mStack.createAffiliatedGroupings(mContext);
     }
 
     /**

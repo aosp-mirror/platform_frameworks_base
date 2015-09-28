@@ -32,9 +32,11 @@ import android.graphics.RectF;
 import android.graphics.Shader;
 import android.util.AttributeSet;
 import android.view.View;
-import com.android.systemui.recents.RecentsConfiguration;
+import android.view.animation.AnimationUtils;
+import android.view.animation.Interpolator;
 import com.android.systemui.recents.misc.Utilities;
 import com.android.systemui.recents.model.Task;
+import com.android.systemui.R;
 
 
 /**
@@ -43,9 +45,8 @@ import com.android.systemui.recents.model.Task;
  */
 public class TaskViewThumbnail extends View {
 
-    RecentsConfiguration mConfig;
-
     // Drawing
+    int mCornerRadius;
     float mDimAlpha;
     Matrix mScaleMatrix = new Matrix();
     Paint mDrawPaint = new Paint();
@@ -53,6 +54,8 @@ public class TaskViewThumbnail extends View {
     RectF mLayoutRect = new RectF();
     BitmapShader mBitmapShader;
     LightingColorFilter mLightingColorFilter = new LightingColorFilter(0xffffffff, 0);
+
+    Interpolator mFastOutSlowInInterpolator;
 
     // Thumbnail alpha
     float mThumbnailAlpha;
@@ -89,15 +92,18 @@ public class TaskViewThumbnail extends View {
 
     public TaskViewThumbnail(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
-        mConfig = RecentsConfiguration.getInstance();
         mDrawPaint.setColorFilter(mLightingColorFilter);
         mDrawPaint.setFilterBitmap(true);
         mDrawPaint.setAntiAlias(true);
+        mCornerRadius = getResources().getDimensionPixelSize(
+                R.dimen.recents_task_view_rounded_corners_radius);
+        mFastOutSlowInInterpolator = AnimationUtils.loadInterpolator(context,
+                com.android.internal.R.interpolator.fast_out_slow_in);
     }
 
     @Override
     protected void onFinishInflate() {
-        mThumbnailAlpha = mConfig.taskViewThumbnailAlpha;
+        mThumbnailAlpha = getResources().getFloat(R.dimen.recents_task_view_thumbnail_alpha);
         updateThumbnailPaintFilter();
     }
 
@@ -117,8 +123,8 @@ public class TaskViewThumbnail extends View {
         }
         // Draw the thumbnail with the rounded corners
         canvas.drawRoundRect(0, 0, getWidth(), getHeight(),
-                mConfig.taskViewRoundedCornerRadiusPx,
-                mConfig.taskViewRoundedCornerRadiusPx, mDrawPaint);
+                mCornerRadius,
+                mCornerRadius, mDrawPaint);
     }
 
     /** Sets the thumbnail to a given bitmap. */
@@ -215,8 +221,10 @@ public class TaskViewThumbnail extends View {
                 startFadeAnimation(1f, 0, 150, null);
             }
         } else {
-            if (Float.compare(getAlpha(), mConfig.taskViewThumbnailAlpha) != 0) {
-                startFadeAnimation(mConfig.taskViewThumbnailAlpha, 0, 150, null);
+            float taskViewThumbnailAlpha = getResources().getFloat(
+                    R.dimen.recents_task_view_thumbnail_alpha);
+            if (Float.compare(getAlpha(), taskViewThumbnailAlpha) != 0) {
+                startFadeAnimation(taskViewThumbnailAlpha, 0, 150, null);
             }
         }
     }
@@ -229,20 +237,26 @@ public class TaskViewThumbnail extends View {
         if (isTaskViewLaunchTargetTask) {
             mThumbnailAlpha = 1f;
         } else {
-            mThumbnailAlpha = mConfig.taskViewThumbnailAlpha;
+            mThumbnailAlpha = getResources().getFloat(
+                    R.dimen.recents_task_view_thumbnail_alpha);
         }
         updateThumbnailPaintFilter();
     }
 
     /** Animates this task thumbnail as it enters Recents. */
     void startEnterRecentsAnimation(int delay, Runnable postAnimRunnable) {
-        startFadeAnimation(mConfig.taskViewThumbnailAlpha, delay,
-                mConfig.taskViewEnterFromAppDuration, postAnimRunnable);
+        float taskViewThumbnailAlpha = getResources().getFloat(
+                R.dimen.recents_task_view_thumbnail_alpha);
+        startFadeAnimation(taskViewThumbnailAlpha, delay,
+                getResources().getInteger(R.integer.recents_task_enter_from_app_duration),
+                postAnimRunnable);
     }
 
     /** Animates this task thumbnail as it exits Recents. */
     void startLaunchTaskAnimation(Runnable postAnimRunnable) {
-        startFadeAnimation(1f, 0, mConfig.taskViewExitToAppDuration, postAnimRunnable);
+        int taskViewExitToAppDuration = mContext.getResources().getInteger(
+                R.integer.recents_task_exit_to_app_duration);
+        startFadeAnimation(1f, 0, taskViewExitToAppDuration, postAnimRunnable);
     }
 
     /** Starts a new thumbnail alpha animation. */
@@ -251,7 +265,7 @@ public class TaskViewThumbnail extends View {
         mThumbnailAlphaAnimator = ValueAnimator.ofFloat(mThumbnailAlpha, finalAlpha);
         mThumbnailAlphaAnimator.setStartDelay(delay);
         mThumbnailAlphaAnimator.setDuration(duration);
-        mThumbnailAlphaAnimator.setInterpolator(mConfig.fastOutSlowInInterpolator);
+        mThumbnailAlphaAnimator.setInterpolator(mFastOutSlowInInterpolator);
         mThumbnailAlphaAnimator.addUpdateListener(mThumbnailAlphaUpdateListener);
         if (postAnimRunnable != null) {
             mThumbnailAlphaAnimator.addListener(new AnimatorListenerAdapter() {

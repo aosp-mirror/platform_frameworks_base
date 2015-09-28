@@ -27,7 +27,6 @@ import android.graphics.drawable.Drawable;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.util.Log;
-
 import com.android.systemui.R;
 import com.android.systemui.recents.Constants;
 import com.android.systemui.recents.RecentsConfiguration;
@@ -248,7 +247,7 @@ class TaskResourceLoader implements Runnable {
 }
 
 /* Recents task loader
- * NOTE: We should not hold any references to a Context from a static instance */
+ * NOTE: We should not hold any references to non-application Context from a static instance */
 public class RecentsTaskLoader {
     private static final String TAG = "RecentsTaskLoader";
 
@@ -438,12 +437,11 @@ public class RecentsTaskLoader {
     }
 
     /** Returns the activity's primary color. */
-    public int getActivityPrimaryColor(ActivityManager.TaskDescription td,
-            RecentsConfiguration config) {
+    public int getActivityPrimaryColor(ActivityManager.TaskDescription td, Resources res) {
         if (td != null && td.getPrimaryColor() != 0) {
             return td.getPrimaryColor();
         }
-        return config.taskBarViewDefaultBackgroundColor;
+        return res.getColor(R.color.recents_task_bar_default_background_color);
     }
 
     /** Returns the size of the app icon cache. */

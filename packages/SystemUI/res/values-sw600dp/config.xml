@@ -32,9 +32,4 @@
 
     <!-- Set to true to enable the user switcher on the keyguard. -->
     <bool name="config_keyguardUserSwitcher">true</bool>
-
-    <!-- Transposes the search bar layout in landscape. -->
-    <bool name="recents_has_transposed_search_bar">true</bool>
-    <!-- Transposes the nav bar in landscape (only used for purposes of layout). -->
-    <bool name="recents_has_transposed_nav_bar">false</bool>
 </resources>

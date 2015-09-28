@@ -16,10 +16,6 @@
 */
 -->
 <resources>
-    <!-- Recent Applications parameters -->
-    <!-- The side padding for the task stack as a percentage of the width. -->
-    <item name="recents_stack_width_padding_percentage" format="float" type="dimen">0.25</item>
-
     <fraction name="keyguard_clock_y_fraction_max">37%</fraction>
     <fraction name="keyguard_clock_y_fraction_min">20%</fraction>
 

@@ -39,12 +39,6 @@
     <!-- On tablets this is just the close_handle_height -->
     <dimen name="peek_height">@dimen/close_handle_height</dimen>
 
-    <!-- The side padding for the task stack as a percentage of the width. -->
-    <item name="recents_stack_width_padding_percentage" format="float" type="dimen">0.075</item>
-
-    <!-- The height of the search bar space. -->
-    <dimen name="recents_search_bar_space_height">72dp</dimen>
-
     <!-- The fraction of the screen height where the clock on the Keyguard has its center. The
          max value is used when no notifications are displaying, and the min value is when the
          highest possible number of notifications are showing. -->

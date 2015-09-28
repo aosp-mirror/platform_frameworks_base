@@ -17,8 +17,8 @@
 package com.android.systemui.recents.views;
 
 import com.android.systemui.recents.Constants;
-import com.android.systemui.recents.RecentsConfiguration;
 import com.android.systemui.recents.model.Task;
+import com.android.systemui.R;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -27,13 +27,10 @@ import java.util.List;
 /* The layout logic for a TaskStackView */
 public class TaskStackViewFilterAlgorithm {
 
-    RecentsConfiguration mConfig;
     TaskStackView mStackView;
     ViewPool<TaskView, Task> mViewPool;
 
-    public TaskStackViewFilterAlgorithm(RecentsConfiguration config, TaskStackView stackView,
-                                        ViewPool<TaskView, Task> viewPool) {
-        mConfig = config;
+    public TaskStackViewFilterAlgorithm(TaskStackView stackView, ViewPool<TaskView, Task> viewPool) {
         mStackView = stackView;
         mViewPool = viewPool;
     }
@@ -126,7 +123,8 @@ public class TaskStackViewFilterAlgorithm {
                 }
             }
         }
-        return mConfig.filteringNewViewsAnimDuration;
+        return mStackView.getResources().getInteger(
+                R.integer.recents_filter_animate_new_views_duration);
     }
 
     /**
@@ -172,7 +170,8 @@ public class TaskStackViewFilterAlgorithm {
             childViewTransformsOut.put(tv, toTransform);
             offset++;
         }
-        return mConfig.filteringCurrentViewsAnimDuration;
+        return mStackView.getResources().getInteger(
+                R.integer.recents_filter_animate_current_views_duration);
     }
 
 }

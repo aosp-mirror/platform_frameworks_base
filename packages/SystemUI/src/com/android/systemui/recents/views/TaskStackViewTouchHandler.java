@@ -26,7 +26,7 @@ import android.view.ViewParent;
 import com.android.internal.logging.MetricsLogger;
 import com.android.systemui.recents.Constants;
 import com.android.systemui.recents.Recents;
-import com.android.systemui.recents.RecentsConfiguration;
+import com.android.systemui.R;
 
 import java.util.List;
 
@@ -34,7 +34,7 @@ import java.util.List;
 class TaskStackViewTouchHandler implements SwipeHelper.Callback {
     static int INACTIVE_POINTER_ID = -1;
 
-    RecentsConfiguration mConfig;
+    Context mContext;
     TaskStackView mSv;
     TaskStackViewScroller mScroller;
     VelocityTracker mVelocityTracker;
@@ -62,7 +62,8 @@ class TaskStackViewTouchHandler implements SwipeHelper.Callback {
     boolean mInterceptedBySwipeHelper;
 
     public TaskStackViewTouchHandler(Context context, TaskStackView sv,
-            RecentsConfiguration config, TaskStackViewScroller scroller) {
+            TaskStackViewScroller scroller) {
+        mContext = context;
         ViewConfiguration configuration = ViewConfiguration.get(context);
         mMinimumVelocity = configuration.getScaledMinimumFlingVelocity();
         mMaximumVelocity = configuration.getScaledMaximumFlingVelocity();
@@ -71,10 +72,9 @@ class TaskStackViewTouchHandler implements SwipeHelper.Callback {
         mWindowTouchSlop = configuration.getScaledWindowTouchSlop();
         mSv = sv;
         mScroller = scroller;
-        mConfig = config;
 
         float densityScale = context.getResources().getDisplayMetrics().density;
-        mSwipeHelper = new SwipeHelper(SwipeHelper.X, this, densityScale, mPagingTouchSlop);
+        mSwipeHelper = new SwipeHelper(context, SwipeHelper.X, this, densityScale, mPagingTouchSlop);
         mSwipeHelper.setMinAlpha(1f);
     }
 
@@ -268,7 +268,8 @@ class TaskStackViewTouchHandler implements SwipeHelper.Callback {
                     if (Float.compare(overScrollAmount, 0f) != 0) {
                         // Bound the overscroll to a fixed amount, and inversely scale the y-movement
                         // relative to how close we are to the max overscroll
-                        float maxOverScroll = mConfig.taskStackOverscrollPct;
+                        float maxOverScroll = mContext.getResources().getFloat(
+                                R.dimen.recents_stack_overscroll_percentage);
                         deltaP *= (1f - (Math.min(maxOverScroll, overScrollAmount)
                                 / maxOverScroll));
                     }

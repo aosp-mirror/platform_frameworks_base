@@ -22,13 +22,15 @@ import android.animation.ObjectAnimator;
 import android.animation.ValueAnimator;
 import android.animation.ValueAnimator.AnimatorUpdateListener;
 import android.annotation.TargetApi;
+import android.content.Context;
 import android.os.Build;
 import android.util.DisplayMetrics;
 import android.view.MotionEvent;
 import android.view.VelocityTracker;
 import android.view.View;
+import android.view.animation.AnimationUtils;
+import android.view.animation.Interpolator;
 import android.view.animation.LinearInterpolator;
-import com.android.systemui.recents.RecentsConfiguration;
 
 /**
  * This class facilitates swipe to dismiss. It defines an interface to be implemented by the
@@ -46,6 +48,7 @@ public class SwipeHelper {
     public static final int Y = 1;
 
     private static LinearInterpolator sLinearInterpolator = new LinearInterpolator();
+    private Interpolator mLinearOutSlowInInterpolator;
 
     private float SWIPE_ESCAPE_VELOCITY = 100f; // dp/sec
     private int DEFAULT_ESCAPE_ANIMATION_DURATION = 75; // ms
@@ -74,13 +77,15 @@ public class SwipeHelper {
     public boolean mAllowSwipeTowardsEnd = true;
     private boolean mRtl;
 
-    public SwipeHelper(int swipeDirection, Callback callback, float densityScale,
+    public SwipeHelper(Context context, int swipeDirection, Callback callback, float densityScale,
             float pagingTouchSlop) {
         mCallback = callback;
         mSwipeDirection = swipeDirection;
         mVelocityTracker = VelocityTracker.obtain();
         mDensityScale = densityScale;
         mPagingTouchSlop = pagingTouchSlop;
+        mLinearOutSlowInInterpolator = AnimationUtils.loadInterpolator(context,
+                com.android.internal.R.interpolator.linear_out_slow_in);
     }
 
     public void setDensityScale(float densityScale) {
@@ -265,7 +270,7 @@ public class SwipeHelper {
         ValueAnimator anim = createTranslationAnimation(view, 0);
         int duration = SNAP_ANIM_LEN;
         anim.setDuration(duration);
-        anim.setInterpolator(RecentsConfiguration.getInstance().linearOutSlowInInterpolator);
+        anim.setInterpolator(mLinearOutSlowInInterpolator);
         anim.addUpdateListener(new AnimatorUpdateListener() {
             @Override
             public void onAnimationUpdate(ValueAnimator animation) {

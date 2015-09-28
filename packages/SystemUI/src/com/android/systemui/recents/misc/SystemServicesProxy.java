@@ -32,7 +32,6 @@ import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.content.pm.IPackageManager;
 import android.content.pm.PackageManager;
-import android.content.pm.PackageParser;
 import android.content.pm.ResolveInfo;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
@@ -56,18 +55,18 @@ import android.os.UserHandle;
 import android.provider.Settings;
 import android.util.Log;
 import android.util.MutableBoolean;
+import android.util.MutableFloat;
+import android.util.MutableInt;
 import android.util.Pair;
-import android.util.SparseArray;
+import android.util.Size;
 import android.view.Display;
 import android.view.WindowManager;
 import android.view.accessibility.AccessibilityManager;
-
 import com.android.internal.app.AssistUtils;
 import com.android.systemui.Prefs;
 import com.android.systemui.R;
 import com.android.systemui.recents.Constants;
 import com.android.systemui.recents.Recents;
-import com.android.systemui.recents.RecentsConfiguration;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -662,6 +661,18 @@ public class SystemServicesProxy {
     }
 
     /**
+     * Returns the smallest width/height.
+     */
+    public int getDeviceSmallestWidth() {
+        if (mWm == null) return 0;
+
+        Point smallestSizeRange = new Point();
+        Point largestSizeRange = new Point();
+        mWm.getDefaultDisplay().getCurrentSizeRange(smallestSizeRange, largestSizeRange);
+        return smallestSizeRange.x;
+    }
+
+    /**
      * Returns the display rect.
      */
     public Rect getDisplayRect() {
@@ -675,7 +686,7 @@ public class SystemServicesProxy {
     }
 
     /**
-     * Returns the window rect.
+     * Returns the window rect for the RecentsActivity, based on the dimensions of the home stack.
      */
     public Rect getWindowRect() {
         Rect windowRect = new Rect();
