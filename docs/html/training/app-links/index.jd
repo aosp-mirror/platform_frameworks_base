@@ -557,7 +557,7 @@ Status: always : 200000002
         &lt;/intent-filter&gt;
       &lt;/activity&gt;
 
-  &lt;/application&gt;
+&lt;/application&gt;
 </pre>
 
 <p>

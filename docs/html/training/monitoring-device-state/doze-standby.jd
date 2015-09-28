@@ -20,7 +20,7 @@ next.link=battery-monitoring.html
         <li><a href="#restrictions">Doze Restrictions</a></li>
         <li><a href="#assessing_your_app">Assessing Your App</a></li>
         <li><a href="#using_gcm">Using GCM to Interact with Your App</a></li>
-        <li><a href="#support_for_other_use">Support for Other Use-Cases</a></li>
+        <li><a href="#support_for_other_use-cases">Support for Other Use-Cases</a></li>
       </ol>
       </li>
       <li><a href="#understand_app_standby">Understanding App Standby</a></li>

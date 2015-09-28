@@ -93,15 +93,15 @@ by changes in the platform.</p>
 <p>This release enhances Android’s intent system by providing more powerful app linking.
 This feature allows you to associate an app with a web domain you own. Based on this
 association, the platform can determine the default app to use to handle a particular
-web link and skip prompting users to select an app. To learn how to implement this feature, see the
-<a href="{@docRoot}training/app-links/app-linking.html">App Linking</a> training.
+web link and skip prompting users to select an app. To learn how to implement this feature, see
+<a href="{@docRoot}training/app-links/index.html">Handling App Links</a>.
 
 <h2 id="backup">Auto Backup for Apps</h2>
 <p>The system now performs automatic full data backup and restore for apps. Your app must target
   Android 6.0 (API level 23) to enable this behavior; you do not need to add any additional code.
   If users delete their Google accounts, their backup data is deleted as well. To learn how this
-  feature works and how to configure what to back up on the file system, see the
-  <a href="{@docRoot}training/backup/auto-backup.html">Auto Backup for Apps</a> training.</p>
+  feature works and how to configure what to back up on the file system, see
+  <a href="{@docRoot}training/backup/autosyncapi.html">Configuring Auto Backup for Apps</a>.</p>
 
 <h2 id="authentication">Authentication</h2>
 <p>This release offers new APIs to let you authenticate users by using their fingerprint scans on
@@ -118,9 +118,9 @@ method. Your app must be running on a compatible
 device with a fingerprint sensor. You must implement the user interface for the fingerprint
 authentication flow on your app, and use the standard Android fingerprint icon in your UI.
 The Android fingerprint icon ({@code c_fp_40px.png}) is included in the
-<a href="https://github.com/googlesamples/android-FingerprintDialog"
-class="external-link">sample app</a>. If you are developing multiple apps that use fingerprint
-authentication, note that each app must authenticate the user’s fingerprint independently.
+<a href="{@docRoot}samples/FingerprintDialog/index.html">Fingerprint Dialog sample</a>. If you are
+developing multiple apps that use fingerprint authentication, note that each app must authenticate
+the user’s fingerprint independently.
 </p>
 
 <p>To use this feature in your app, first add the
@@ -135,8 +135,8 @@ srcset="{@docRoot}images/android-6.0/fingerprint-screen.png 1x, {@docRoot}images
 style="float:right; margin:0 0 10px 20px" width="282" height="476" />
 
 <p>To see an app implementation of fingerprint authentication, refer to the
-<a href="https://github.com/googlesamples/android-FingerprintDialog" class="external-link">
-  Fingerprint Dialog sample</a>. For a demonstration of how you can use these authentication
+<a href="{@docRoot}samples/FingerprintDialog/index.html">Fingerprint Dialog sample</a>. For a
+demonstration of how you can use these authentication
   APIs in conjunction with other Android APIs, see the video
   <a class="video-shadowbox-button" href="https://www.youtube.com/watch?v=VOn7VrTRlA4">
   Fingerprint and Payment APIs</a>.</p>
@@ -177,7 +177,7 @@ method to re-authenticate the user within your app.
 </p>
 
 <p>To see an app implementation of this feature, refer to the
-<a href="https://github.com/googlesamples/android-ConfirmCredential" class="external-link">
+<a href="{@docRoot}samples/ConfirmCredential/index.html">
   Confirm Credential sample</a>.</p>
 
 <h2 id="direct-share">Direct Share</h2>
@@ -294,8 +294,8 @@ callback.
   drawable resource ID.</li>
   <li>New {@link android.app.NotificationManager#getActiveNotifications()} method that allows your
   apps to find out which of their notifications are currently alive. To see an app implementation
-  that uses this feature, see the <a href="https://github.com/googlesamples/android-ActiveNotifications"
-  class="external-link">Active Notifications sample</a>.</li>
+  that uses this feature, see the
+  <a href="{@docRoot}samples/ActiveNotifications/index.html">Active Notifications sample</a>.</li>
 </ul>
 
 <h2 id="bluetooth-stylus">Bluetooth Stylus Support</h2>

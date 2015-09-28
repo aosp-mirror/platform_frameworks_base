@@ -19,14 +19,14 @@ page.keywords=marshmallow,androidm,testing
 </p>
 
 <ul>
-  <li><a href="{@docRoot}training/permissions/index.html">Permissions</a>:
+  <li><a href="{@docRoot}training/permissions/best-practices.html#testing">Permissions</a>:
     Information on the behavior of runtime permissions, of runtime permissions, testing, and best
     practices.
   </li>
-  <li><a href="{@docRoot}training/monitoring-device-state/battery-monitoring.html">Doze and App Standby</a>:
+  <li><a href="{@docRoot}training/monitoring-device-state/doze-standby.html#testing_doze_and_app_standby">Doze and App Standby</a>:
     Information on the behavior of Doze and App Standby, testing, and best practices.
   </li>
-  <li><a href="{@docRoot}training/backup/auto-backup.html">Auto Backup and Device Identifiers</a>:
-    Information on the behavior of auto backup for apps, testing, and best practices.
+  <li><a href="{@docRoot}training/backup/autosyncapi.html#testing">Auto Backup for Apps and Device Identifiers</a>:
+    Information on the behavior of Auto Backup for Apps, testing, and best practices.
   </li>
 </ul>

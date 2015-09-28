@@ -6,10 +6,10 @@ startpage=true
 
 @jd:body
 
-<div id="tb-wrapper"> 
+<div id="tb-wrapper">
 <div id="tb">
 
-<h2>Dependencies and prerequisites</h2> 
+<h2>Dependencies and prerequisites</h2>
 <ul>
   <li>Experience with <a href="{@docRoot}guide/components/intents-filters.html">Intents and Intent Filters</a></li>
 </ul>
@@ -19,7 +19,7 @@ startpage=true
   <li><a href="{@docRoot}guide/components/services.html">Services</a>
 </ul>
 
-</div> 
+</div>
 </div>
 
 <p>For your app to be a good citizen, it should seek to limit its impact on the battery life of its
@@ -30,14 +30,14 @@ and behavior based on the state of the host device.</p>
 reducing the rate of such updates when the battery level is low, you can ensure that the impact of
 your app on battery life is minimized, without compromising the user experience.</p>
 
-<h2>Lessons</h2> 
- 
+<h2>Lessons</h2>
+
 <!-- Create a list of the lessons in this class along with a short description of each lesson.
 These should be short and to the point. It should be clear from reading the summary whether someone
-will want to jump to a lesson or not.--> 
- 
+will want to jump to a lesson or not.-->
+
 <dl>
-  <dt><b><a href="doze-standby.html">Optimiing for Doze and App Standby</a></b></dt>
+  <dt><b><a href="doze-standby.html">Optimizing for Doze and App Standby</a></b></dt>
   <dd>Learn how to test and optimize your app for the power-management features introduced in
   Android 6.0 Marshmallow.</dd>
 
@@ -53,7 +53,7 @@ behavior.</dd>
 
   <dt><b><a href="connectivity-monitoring.html">Determining and Monitoring the Connectivity
 Status</a></b></dt>
-  <dd>Without Internet connectivity you can't update your app from an online source. Learn how to  
+  <dd>Without Internet connectivity you can't update your app from an online source. Learn how to
 check the connectivity status to alter your background update rate. You'll also learn to check for
 Wi-Fi or mobile connectivity before beginning high-bandwidth operations.</dd>
 
@@ -62,4 +62,4 @@ Wi-Fi or mobile connectivity before beginning high-bandwidth operations.</dd>
 those that aren't necessary due to the current device state. Learn to improve
 efficiency by toggling and cascading state change receivers and delay actions until the device is in
 a specific state.</dd>
-</dl> 
+</dl>

@@ -16,7 +16,7 @@ page.keywords=marshmallow,androidm,samples
 
 <ul>
 <li id="ActiveNotification">
-<a href="href="{@docRoot}samples/ActiveNotifications/index.html">Active Notification</a>: This sample demonstrates how the
+<a href="{@docRoot}samples/ActiveNotifications/index.html">Active Notification</a>: This sample demonstrates how the
   <a href="{@docRoot}reference/android/app/NotificationManager.html"><code>NotificationManager</code></a>
   can tell you how many notifications your app is currently showing.
 </li>

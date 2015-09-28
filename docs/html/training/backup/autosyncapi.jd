@@ -266,7 +266,7 @@ the system's default implementation of
 
 <p>If you are creating a new app that targets Android 6.0, but you also want to enable cloud backup
 for devices running on Android 5.1 (API level 22) and lower, you must also
-<a href="{@docRoot}training/cloudsync/backupapi.html">implement the Backup API</a>.</p>
+<a href="{@docRoot}training/backup/backupapi.html">implement the Backup API</a>.</p>
 
 <h2 id="testing">Test Backup Configuration</h2>
 

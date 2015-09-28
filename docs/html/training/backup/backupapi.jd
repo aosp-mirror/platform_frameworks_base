@@ -94,23 +94,23 @@ implementation is perhaps 10 lines of code.</p>
 <p>Here's an example that backs up a high scores file.</p>
 
 <pre>
- import android.app.backup.BackupAgentHelper;
- import android.app.backup.FileBackupHelper;
+import android.app.backup.BackupAgentHelper;
+import android.app.backup.FileBackupHelper;
 
 
- public class TheBackupAgent extends BackupAgentHelper {
-    // The name of the SharedPreferences file
-    static final String HIGH_SCORES_FILENAME = "scores";
+public class TheBackupAgent extends BackupAgentHelper {
+  // The name of the SharedPreferences file
+  static final String HIGH_SCORES_FILENAME = "scores";
 
-    // A key to uniquely identify the set of backup data
-    static final String FILES_BACKUP_KEY = "myfiles";
+  // A key to uniquely identify the set of backup data
+  static final String FILES_BACKUP_KEY = "myfiles";
 
-    // Allocate a helper and add it to the backup agent
-    &#64;Override
-    void onCreate() {
-        FileBackupHelper helper = new FileBackupHelper(this, HIGH_SCORES_FILENAME);
-        addHelper(FILES_BACKUP_KEY, helper);
-    }
+  // Allocate a helper and add it to the backup agent
+  &#64;Override
+  void onCreate() {
+      FileBackupHelper helper = new FileBackupHelper(this, HIGH_SCORES_FILENAME);
+      addHelper(FILES_BACKUP_KEY, helper);
+  }
 }
 </pre>
 <p>For added flexibility, {@link android.app.backup.FileBackupHelper}'s
@@ -118,11 +118,11 @@ constructor can take a variable number of filenames.  You could just as easily
 have backed up both a high scores file and a game progress file just by adding
 an extra parameter, like this:</p>
 <pre>
-    &#64;Override
-    void onCreate() {
-        FileBackupHelper helper = new FileBackupHelper(this, HIGH_SCORES_FILENAME, PROGRESS_FILENAME);
-        addHelper(FILES_BACKUP_KEY, helper);
-    }
+&#64;Override
+  void onCreate() {
+      FileBackupHelper helper = new FileBackupHelper(this, HIGH_SCORES_FILENAME, PROGRESS_FILENAME);
+      addHelper(FILES_BACKUP_KEY, helper);
+  }
 </pre>
 <p>Backing up preferences is similarly easy.  Create a {@link
 android.app.backup.SharedPreferencesBackupHelper}  the same way you did a {@link
@@ -132,26 +132,26 @@ your application.  Here's an example of how your backup agent helper might look 
 high scores are implemented as preferences instead of a flat file:</p>
 
 <pre>
- import android.app.backup.BackupAgentHelper;
- import android.app.backup.SharedPreferencesBackupHelper;
+import android.app.backup.BackupAgentHelper;
+import android.app.backup.SharedPreferencesBackupHelper;
 
- public class TheBackupAgent extends BackupAgentHelper {
-     // The names of the SharedPreferences groups that the application maintains.  These
-     // are the same strings that are passed to getSharedPreferences(String, int).
-     static final String PREFS_DISPLAY = "displayprefs";
-     static final String PREFS_SCORES = "highscores";
+public class TheBackupAgent extends BackupAgentHelper {
+    // The names of the SharedPreferences groups that the application maintains.  These
+    // are the same strings that are passed to getSharedPreferences(String, int).
+    static final String PREFS_DISPLAY = "displayprefs";
+    static final String PREFS_SCORES = "highscores";
 
-     // An arbitrary string used within the BackupAgentHelper implementation to
-     // identify the SharedPreferencesBackupHelper's data.
-     static final String MY_PREFS_BACKUP_KEY = "myprefs";
+    // An arbitrary string used within the BackupAgentHelper implementation to
+    // identify the SharedPreferencesBackupHelper's data.
+    static final String MY_PREFS_BACKUP_KEY = "myprefs";
 
-     // Simply allocate a helper and install it
-     void onCreate() {
-         SharedPreferencesBackupHelper helper =
-                 new SharedPreferencesBackupHelper(this, PREFS_DISPLAY, PREFS_SCORES);
-         addHelper(MY_PREFS_BACKUP_KEY, helper);
-     }
- }
+    // Simply allocate a helper and install it
+    void onCreate() {
+       SharedPreferencesBackupHelper helper =
+                new SharedPreferencesBackupHelper(this, PREFS_DISPLAY, PREFS_SCORES);
+        addHelper(MY_PREFS_BACKUP_KEY, helper);
+    }
+}
 </pre>
 
 <p>You can add as many backup helper instances to your backup agent helper as you
@@ -168,13 +168,13 @@ android.app.backup.BackupManager}, and call it's {@link
 android.app.backup.BackupManager#dataChanged()} method.</p>
 
 <pre>
- import android.app.backup.BackupManager;
- ...
+import android.app.backup.BackupManager;
+...
 
- public void requestBackup() {
-   BackupManager bm = new BackupManager(this);
-   bm.dataChanged();
- }
+public void requestBackup() {
+  BackupManager bm = new BackupManager(this);
+  bm.dataChanged();
+}
 </pre>
 
 <p>This call notifies the backup manager that there is data ready to be backed

@@ -81,8 +81,7 @@ access and suspends syncs and jobs for the apps it deems idle.</li>
 </ul>
 
 <p>To learn more about these power-saving changes, see
-<a href="{@docRoot}training/monitoring-device-state/battery-monitoring.html">Monitoring the
-Battery Level and Charging State</a>.</p>
+<a href="{@docRoot}training/monitoring-device-state/doze-standby.html">Optimizing for Doze and App Standby</a>.</p>
 
 <h2 id="behavior-adoptable-storage">Adoptable Storage Devices</h2>
 <p>
