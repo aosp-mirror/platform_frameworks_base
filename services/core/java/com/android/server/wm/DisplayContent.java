@@ -247,7 +247,7 @@ class DisplayContent {
             for (int taskNdx = tasks.size() - 1; taskNdx >= 0; --taskNdx) {
                 final Task task = tasks.get(taskNdx);
                 task.getBounds(mTmpRect);
-                if (task.inFreeformWorkspace() && mTmpRect.contains(x, y)) {
+                if (mTmpRect.contains(x, y)) {
                     return task.mTaskId;
                 }
             }
