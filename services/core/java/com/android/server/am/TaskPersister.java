@@ -35,6 +35,7 @@ import android.util.SparseArray;
 import android.util.Xml;
 import android.os.Process;
 
+import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.FastXmlSerializer;
 import com.android.internal.util.XmlUtils;
 
@@ -330,7 +331,7 @@ public class TaskPersister {
         return null;
     }
 
-    ArrayList<TaskRecord> restoreTasksLocked() {
+    ArrayList<TaskRecord> restoreTasksLocked(final int [] validUserIds) {
         final ArrayList<TaskRecord> tasks = new ArrayList<TaskRecord>();
         ArraySet<Integer> recoveredTaskIds = new ArraySet<Integer>();
 
@@ -362,15 +363,18 @@ public class TaskPersister {
                             if (DEBUG) Slog.d(TAG, "restoreTasksLocked: restored task=" +
                                     task);
                             if (task != null) {
-                                task.isPersistable = true;
                                 // XXX Don't add to write queue... there is no reason to write
                                 // out the stuff we just read, if we don't write it we will
                                 // read the same thing again.
                                 //mWriteQueue.add(new TaskWriteQueueItem(task));
-                                tasks.add(task);
                                 final int taskId = task.taskId;
-                                recoveredTaskIds.add(taskId);
                                 mStackSupervisor.setNextTaskId(taskId);
+                                // Check if it's a valid user id. Don't add tasks for removed users.
+                                if (ArrayUtils.contains(validUserIds, task.userId)) {
+                                    task.isPersistable = true;
+                                    tasks.add(task);
+                                    recoveredTaskIds.add(taskId);
+                                }
                             } else {
                                 Slog.e(TAG, "Unable to restore taskFile=" + taskFile + ": " +
                                         fileToString(taskFile));
