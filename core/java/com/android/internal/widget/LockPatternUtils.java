@@ -1074,7 +1074,7 @@ public class LockPatternUtils {
         long deadline = getLong(LOCKOUT_ATTEMPT_DEADLINE, 0L, userId);
         final long timeoutMs = getLong(LOCKOUT_ATTEMPT_TIMEOUT_MS, 0L, userId);
         final long now = SystemClock.elapsedRealtime();
-        if (deadline < now) {
+        if (deadline < now && deadline != 0) {
             // timeout expired
             setLong(LOCKOUT_ATTEMPT_DEADLINE, 0, userId);
             setLong(LOCKOUT_ATTEMPT_TIMEOUT_MS, 0, userId);
