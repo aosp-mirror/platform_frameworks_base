@@ -82,8 +82,8 @@ public:
 class DeferredDisplayList {
     friend struct DeferStateStruct; // used to give access to allocator
 public:
-    DeferredDisplayList(const Rect& bounds, bool avoidOverdraw = true) :
-            mBounds(bounds), mAvoidOverdraw(avoidOverdraw) {
+    DeferredDisplayList(const Rect& bounds)
+            : mBounds(bounds) {
         clear();
     }
     ~DeferredDisplayList() { clear(); }
@@ -151,7 +151,6 @@ private:
 
     // layer space bounds of rendering
     Rect mBounds;
-    const bool mAvoidOverdraw;
 
     /**
      * At defer time, stores the *defer time* savecount of save/saveLayer ops that were deferred, so
