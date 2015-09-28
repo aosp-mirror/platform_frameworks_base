@@ -103,6 +103,8 @@ public class ResolverActivity extends Activity {
     private ResolverComparator mResolverComparator;
     private PickTargetOptionRequest mPickOptionRequest;
 
+    protected ResolverDrawerLayout mResolverDrawerLayout;
+
     private boolean mRegistered;
     private final PackageMonitor mPackageMonitor = new PackageMonitor() {
         @Override public void onSomePackagesChanged() {
@@ -253,6 +255,7 @@ public class ResolverActivity extends Activity {
             if (isVoiceInteraction()) {
                 rdl.setCollapsed(false);
             }
+            mResolverDrawerLayout = rdl;
         }
 
         if (title == null) {
@@ -1567,7 +1570,10 @@ public class ResolverActivity extends Activity {
 
         private void onBindView(View view, TargetInfo info) {
             final ViewHolder holder = (ViewHolder) view.getTag();
-            holder.text.setText(info.getDisplayLabel());
+            final CharSequence label = info.getDisplayLabel();
+            if (!TextUtils.equals(holder.text.getText(), label)) {
+                holder.text.setText(info.getDisplayLabel());
+            }
             if (showsExtendedInfo(info)) {
                 holder.text2.setVisibility(View.VISIBLE);
                 holder.text2.setText(info.getExtendedInfo());
