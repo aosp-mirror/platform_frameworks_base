@@ -3184,14 +3184,14 @@ public class AudioManager {
 
     /**
      * Used as a key for {@link #getProperty} to determine if the default microphone audio source
-     * supports near-ultrasound frequencies (range of 18 - 21 kHz).
+     * supports near-ultrasound frequencies (range of 18.5 kHz - 20 kHz).
      */
     public static final String PROPERTY_SUPPORT_MIC_NEAR_ULTRASOUND =
             "android.media.property.SUPPORT_MIC_NEAR_ULTRASOUND";
 
     /**
      * Used as a key for {@link #getProperty} to determine if the default speaker audio path
-     * supports near-ultrasound frequencies (range of 18 - 21 kHz).
+     * supports near-ultrasound frequencies (range of 18.5 kHz - 20 kHz).
      */
     public static final String PROPERTY_SUPPORT_SPEAKER_NEAR_ULTRASOUND =
             "android.media.property.SUPPORT_SPEAKER_NEAR_ULTRASOUND";
