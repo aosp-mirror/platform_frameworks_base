@@ -60,6 +60,74 @@ import java.util.Set;
  * Monitors on-link IP reachability and notifies callers whenever any on-link
  * addresses of interest appear to have become unresponsive.
  *
+ * This code does not concern itself with "why" a neighbour might have become
+ * unreachable. Instead, it primarily reacts to the kernel's notion of IP
+ * reachability for each of the neighbours we know to be critically important
+ * to normal network connectivity. As such, it is often "just the messenger":
+ * the neighbours about which it warns are already deemed by the kernel to have
+ * become unreachable.
+ *
+ *
+ * How it works:
+ *
+ *   1. The "on-link neighbours of interest" found in a given LinkProperties
+ *      instance are added to a "watch list" via #updateLinkProperties().
+ *      This usually means all default gateways and any on-link DNS servers.
+ *
+ *   2. We listen continuously for netlink neighbour messages (RTM_NEWNEIGH,
+ *      RTM_DELNEIGH), watching only for neighbours in the watch list.
+ *
+ *        - A neighbour going into NUD_REACHABLE, NUD_STALE, NUD_DELAY, and
+ *          even NUD_PROBE is perfectly normal; we merely record the new state.
+ *
+ *        - A neighbour's entry may be deleted (RTM_DELNEIGH), for example due
+ *          to garbage collection.  This is not necessarily of immediate
+ *          concern; we record the neighbour as moving to NUD_NONE.
+ *
+ *        - A neighbour transitioning to NUD_FAILED (for any reason) is
+ *          critically important and is handled as described below in #4.
+ *
+ *   3. All on-link neighbours in the watch list can be forcibly "probed" by
+ *      calling #probeAll(). This should be called whenever it is important to
+ *      verify that critical neighbours on the link are still reachable, e.g.
+ *      when roaming between BSSIDs.
+ *
+ *        - The kernel will send unicast ARP requests for IPv4 neighbours and
+ *          unicast NS packets for IPv6 neighbours.  The expected replies will
+ *          likely be unicast.
+ *
+ *        - The forced probing is done holding a wakelock. The kernel may,
+ *          however, initiate probing of a neighbor on its own, i.e. whenever
+ *          a neighbour has expired from NUD_DELAY.
+ *
+ *        - The kernel sends:
+ *
+ *              /proc/sys/net/ipv{4,6}/neigh/<ifname>/ucast_solicit
+ *
+ *          number of probes (usually 3) every:
+ *
+ *              /proc/sys/net/ipv{4,6}/neigh/<ifname>/retrans_time_ms
+ *
+ *          number of milliseconds (usually 1000ms). This normally results in
+ *          3 unicast packets, 1 per second.
+ *
+ *        - If no response is received to any of the probe packets, the kernel
+ *          marks the neighbour as being in state NUD_FAILED, and the listening
+ *          process in #2 will learn of it.
+ *
+ *   4. We call the supplied Callback#notifyLost() function if the loss of a
+ *      neighbour in NUD_FAILED would cause IPv4 or IPv6 configuration to
+ *      become incomplete (a loss of provisioning).
+ *
+ *        - For example, losing all our IPv4 on-link DNS servers (or losing
+ *          our only IPv6 default gateway) constitutes a loss of IPv4 (IPv6)
+ *          provisioning; Callback#notifyLost() would be called.
+ *
+ *        - Since it can be non-trivial to reacquire certain IP provisioning
+ *          state it may be best for the link to disconnect completely and
+ *          reconnect afresh.
+ *
+ *
  * @hide
  */
 public class IpReachabilityMonitor {
