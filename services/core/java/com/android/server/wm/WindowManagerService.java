@@ -2460,6 +2460,59 @@ public class WindowManagerService extends IWindowManager.Stub
         }
     }
 
+    private void repositionChildInner(Session session, IWindow client,
+            int x, int y, long deferTransactionUntilFrame, Rect outFrame) {
+        synchronized(mWindowMap) {
+            WindowState win = windowForClientLocked(session, client, false);
+            if (win == null) {
+                return;
+            }
+            if (win.mAttachedWindow == null) {
+                throw new IllegalArgumentException(
+                        "repositionChild called but window is not"
+                        + "attached to a parent win=" + win);
+            }
+
+            win.mFrame.left = x;
+            win.mFrame.top = y;
+
+            win.mWinAnimator.computeShownFrameLocked();
+
+            if (SHOW_TRANSACTIONS) {
+                Slog.i(TAG, ">>> OPEN TRANSACTION repositionChild");
+            }
+
+            SurfaceControl.openTransaction();
+
+            if (deferTransactionUntilFrame > 0) {
+                win.mWinAnimator.mSurfaceControl.deferTransactionUntil(
+                        win.mAttachedWindow.mWinAnimator.mSurfaceControl.getHandle(),
+                        deferTransactionUntilFrame);
+            }
+            win.mWinAnimator.setSurfaceBoundariesLocked(false);
+
+            SurfaceControl.closeTransaction();
+            if (SHOW_TRANSACTIONS) {
+                Slog.i(TAG, "<<< CLOSE TRANSACTION repositionChild");
+            }
+
+            outFrame = win.mCompatFrame;
+        }
+    }
+
+    public void repositionChild(Session session, IWindow client,
+            int x, int y, long deferTransactionUntilFrame, Rect outFrame) {
+        Trace.traceBegin(Trace.TRACE_TAG_WINDOW_MANAGER, "repositionChild");
+        long origId = Binder.clearCallingIdentity();
+      
+        try {
+            repositionChildInner(session, client, x, y, deferTransactionUntilFrame, outFrame);
+        } finally {
+            Binder.restoreCallingIdentity(origId);
+            Trace.traceEnd(Trace.TRACE_TAG_WINDOW_MANAGER);
+        }
+    }
+
     public int relayoutWindow(Session session, IWindow client, int seq,
             WindowManager.LayoutParams attrs, int requestedWidth,
             int requestedHeight, int viewVisibility, int flags,
