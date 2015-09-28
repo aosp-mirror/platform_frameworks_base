@@ -19645,6 +19645,7 @@ package android.mtp {
     method public boolean importFile(int, java.lang.String);
     method public boolean importFile(int, android.os.ParcelFileDescriptor);
     method public boolean open(android.hardware.usb.UsbDeviceConnection);
+    method public android.mtp.MtpEvent readEvent(android.os.CancellationSignal);
     method public boolean sendObject(int, int, android.os.ParcelFileDescriptor);
     method public android.mtp.MtpObjectInfo sendObjectInfo(android.mtp.MtpObjectInfo);
   }
@@ -19654,6 +19655,11 @@ package android.mtp {
     method public final java.lang.String getModel();
     method public final java.lang.String getSerialNumber();
     method public final java.lang.String getVersion();
+  }
+
+  public class MtpEvent {
+    ctor public MtpEvent();
+    method public int getEventCode();
   }
 
   public final class MtpObjectInfo {

@@ -14,13 +14,18 @@
  * limitations under the License.
  */
 
-package com.android.mtp;
+package android.mtp;
 
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
+/**
+ * This class encapsulates information about a MTP event.
+ */
+public class MtpEvent {
+    private int mEventCode;
 
-@Retention(RetentionPolicy.RUNTIME)
-@Target({ElementType.TYPE, ElementType.METHOD})
-@interface RealDeviceTest {}
+    /**
+     * Returns event code of MTP event.
+     *
+     * @return event code
+     */
+    public int getEventCode() { return mEventCode; }
+}

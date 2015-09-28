@@ -16,35 +16,101 @@
 
 package com.android.mtp;
 
+import android.app.PendingIntent;
+import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.hardware.usb.UsbDevice;
 import android.hardware.usb.UsbDeviceConnection;
 import android.hardware.usb.UsbManager;
+import android.os.CancellationSignal;
+import android.os.OperationCanceledException;
 import android.test.InstrumentationTestCase;
 
+import java.io.IOException;
 import java.util.HashMap;
+import java.util.concurrent.CountDownLatch;
 
+@RealDeviceTest
 public class MtpManagerTest extends InstrumentationTestCase {
-    @RealDeviceTest
-    public void testBasic() throws Exception {
-        final UsbDevice usbDevice = findDevice();
-        final MtpManager manager = new MtpManager(getContext());
-        manager.openDevice(usbDevice.getDeviceId());
-        waitForStorages(manager, usbDevice.getDeviceId());
-        manager.closeDevice(usbDevice.getDeviceId());
+    private static final String ACTION_USB_PERMISSION =
+            "com.android.mtp.USB_PERMISSION";
+    private static final int TIMEOUT_MS = 1000;
+    UsbManager mUsbManager;
+    MtpManager mManager;
+    UsbDevice mUsbDevice;
+    int mRequest;
+
+    @Override
+    public void setUp() throws Exception {
+        mUsbManager = getContext().getSystemService(UsbManager.class);
+        mUsbDevice = findDevice();
+        mManager = new MtpManager(getContext());
+        mManager.openDevice(mUsbDevice.getDeviceId());
+        waitForStorages(mManager, mUsbDevice.getDeviceId());
+    }
+
+    @Override
+    public void tearDown() throws IOException {
+        mManager.closeDevice(mUsbDevice.getDeviceId());
+    }
+
+    public void testCancelEvent() throws Exception {
+        final CancellationSignal signal = new CancellationSignal();
+        final Thread thread = new Thread() {
+            @Override
+            public void run() {
+                try {
+                    mManager.readEvent(mUsbDevice.getDeviceId(), signal);
+                } catch (OperationCanceledException | IOException e) {
+                    show(e.getMessage());
+                }
+            }
+        };
+        thread.start();
+        Thread.sleep(TIMEOUT_MS);
+        signal.cancel();
+        thread.join(TIMEOUT_MS);
+    }
+
+    private void requestPermission(UsbDevice device) throws InterruptedException {
+        if (mUsbManager.hasPermission(device)) {
+            return;
+        }
+        final CountDownLatch latch = new CountDownLatch(1);
+        final BroadcastReceiver receiver = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                latch.countDown();
+                getInstrumentation().getTargetContext().unregisterReceiver(this);
+            }
+        };
+        getInstrumentation().getTargetContext().registerReceiver(
+                receiver, new IntentFilter(ACTION_USB_PERMISSION));
+        mUsbManager.requestPermission(device, PendingIntent.getBroadcast(
+                getInstrumentation().getTargetContext(),
+                0 /* requstCode */,
+                new Intent(ACTION_USB_PERMISSION),
+                0 /* flags */));
+        latch.await();
+        assertTrue(mUsbManager.hasPermission(device));
     }
 
     private UsbDevice findDevice() throws InterruptedException {
-        final UsbManager usbManager = getContext().getSystemService(UsbManager.class);
         while (true) {
-            final HashMap<String,UsbDevice> devices = usbManager.getDeviceList();
+            final HashMap<String,UsbDevice> devices = mUsbManager.getDeviceList();
             if (devices.size() == 0) {
                 show("Wait for devices.");
                 Thread.sleep(1000);
                 continue;
             }
             final UsbDevice device = devices.values().iterator().next();
-            final UsbDeviceConnection connection = usbManager.openDevice(device);
+            requestPermission(device);
+            final UsbDeviceConnection connection = mUsbManager.openDevice(device);
+            if (connection == null) {
+                fail("Cannot open USB connection.");
+            }
             for (int i = 0; i < device.getInterfaceCount(); i++) {
                 // Since the test runs real environment, we need to call claim interface with
                 // force = true to rob interfaces from other applications.

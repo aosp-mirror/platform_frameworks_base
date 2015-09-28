@@ -22,11 +22,13 @@ import android.hardware.usb.UsbDeviceConnection;
 import android.hardware.usb.UsbManager;
 import android.mtp.MtpConstants;
 import android.mtp.MtpDevice;
+import android.mtp.MtpEvent;
 import android.mtp.MtpObjectInfo;
+import android.os.CancellationSignal;
 import android.os.ParcelFileDescriptor;
-import android.provider.DocumentsContract.Document;
-import android.provider.DocumentsContract;
 import android.util.SparseArray;
+
+import com.android.internal.annotations.VisibleForTesting;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -188,7 +190,13 @@ class MtpManager {
         }
     }
 
-    private MtpDevice getDevice(int deviceId) throws IOException {
+    @VisibleForTesting
+    MtpEvent readEvent(int deviceId, CancellationSignal signal) throws IOException {
+        final MtpDevice device = getDevice(deviceId);
+        return device.readEvent(signal);
+    }
+
+    private synchronized MtpDevice getDevice(int deviceId) throws IOException {
         final MtpDevice device = mDevices.get(deviceId);
         if (device == null) {
             throw new IOException("USB device " + deviceId + " is not opened.");

@@ -46,10 +46,14 @@ static jfieldID field_context;
 jclass clazz_deviceInfo;
 jclass clazz_storageInfo;
 jclass clazz_objectInfo;
+jclass clazz_event;
+jclass clazz_io_exception;
+jclass clazz_operation_canceled_exception;
 
 jmethodID constructor_deviceInfo;
 jmethodID constructor_storageInfo;
 jmethodID constructor_objectInfo;
+jmethodID constructor_event;
 
 // MtpDeviceInfo fields
 static jfieldID field_deviceInfo_manufacturer;
@@ -85,6 +89,9 @@ static jfieldID field_objectInfo_name;
 static jfieldID field_objectInfo_dateCreated;
 static jfieldID field_objectInfo_dateModified;
 static jfieldID field_objectInfo_keywords;
+
+// MtpEvent fields
+static jfieldID field_event_eventCode;
 
 MtpDevice* get_device_from_object(JNIEnv* env, jobject javaDevice)
 {
@@ -488,6 +495,42 @@ android_mtp_MtpDevice_send_object_info(JNIEnv *env, jobject thiz, jobject info)
     return result;
 }
 
+static jint android_mtp_MtpDevice_submit_event_request(JNIEnv *env, jobject thiz)
+{
+    MtpDevice* const device = get_device_from_object(env, thiz);
+    if (!device) {
+        env->ThrowNew(clazz_io_exception, "");
+        return -1;
+    }
+    return device->submitEventRequest();
+}
+
+static jobject android_mtp_MtpDevice_reap_event_request(JNIEnv *env, jobject thiz, jint seq)
+{
+    MtpDevice* const device = get_device_from_object(env, thiz);
+    if (!device) {
+        env->ThrowNew(clazz_io_exception, "");
+        return NULL;
+    }
+    const int eventCode = device->reapEventRequest(seq);
+    if (eventCode <= 0) {
+        env->ThrowNew(clazz_operation_canceled_exception, "");
+        return NULL;
+    }
+    jobject result = env->NewObject(clazz_event, constructor_event);
+    env->SetIntField(result, field_event_eventCode, eventCode);
+    return result;
+}
+
+static void android_mtp_MtpDevice_discard_event_request(JNIEnv *env, jobject thiz, jint seq)
+{
+    MtpDevice* const device = get_device_from_object(env, thiz);
+    if (!device) {
+        return;
+    }
+    device->discardEventRequest(seq);
+}
+
 // ----------------------------------------------------------------------------
 
 static const JNINativeMethod gMethods[] = {
@@ -513,7 +556,11 @@ static const JNINativeMethod gMethods[] = {
     {"native_import_file",      "(II)Z",(void *)android_mtp_MtpDevice_import_file_to_fd},
     {"native_send_object",      "(III)Z",(void *)android_mtp_MtpDevice_send_object},
     {"native_send_object_info", "(Landroid/mtp/MtpObjectInfo;)Landroid/mtp/MtpObjectInfo;",
-                                        (void *)android_mtp_MtpDevice_send_object_info}
+                                        (void *)android_mtp_MtpDevice_send_object_info},
+    {"native_submit_event_request",  "()I", (void *)android_mtp_MtpDevice_submit_event_request},
+    {"native_reap_event_request",   "(I)Landroid/mtp/MtpEvent;",
+                                            (void *)android_mtp_MtpDevice_reap_event_request},
+    {"native_discard_event_request", "(I)V", (void *)android_mtp_MtpDevice_discard_event_request},
 };
 
 int register_android_mtp_MtpDevice(JNIEnv *env)
@@ -703,6 +750,23 @@ int register_android_mtp_MtpDevice(JNIEnv *env)
     }
     clazz_objectInfo = (jclass)env->NewGlobalRef(clazz);
 
+    clazz = env->FindClass("android/mtp/MtpEvent");
+    if (clazz == NULL) {
+        ALOGE("Can't find android/mtp/MtpEvent");
+        return -1;
+    }
+    constructor_event = env->GetMethodID(clazz, "<init>", "()V");
+    if (constructor_event == NULL) {
+        ALOGE("Can't find android/mtp/MtpEvent constructor");
+        return -1;
+    }
+    field_event_eventCode = env->GetFieldID(clazz, "mEventCode", "I");
+    if (field_event_eventCode == NULL) {
+        ALOGE("Can't find MtpObjectInfo.mEventCode");
+        return -1;
+    }
+    clazz_event = (jclass)env->NewGlobalRef(clazz);
+
     clazz = env->FindClass("android/mtp/MtpDevice");
     if (clazz == NULL) {
         ALOGE("Can't find android/mtp/MtpDevice");
@@ -713,6 +777,18 @@ int register_android_mtp_MtpDevice(JNIEnv *env)
         ALOGE("Can't find MtpDevice.mNativeContext");
         return -1;
     }
+    clazz = env->FindClass("java/io/IOException");
+    if (clazz == NULL) {
+        ALOGE("Can't find java.io.IOException");
+        return -1;
+    }
+    clazz_io_exception = (jclass)env->NewGlobalRef(clazz);
+    clazz = env->FindClass("android/os/OperationCanceledException");
+    if (clazz == NULL) {
+        ALOGE("Can't find android.os.OperationCanceledException");
+        return -1;
+    }
+    clazz_operation_canceled_exception = (jclass)env->NewGlobalRef(clazz);
 
     return AndroidRuntime::registerNativeMethods(env,
                 "android/mtp/MtpDevice", gMethods, NELEM(gMethods));
