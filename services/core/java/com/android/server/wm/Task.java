@@ -17,9 +17,11 @@
 package com.android.server.wm;
 
 import static android.app.ActivityManager.DOCKED_STACK_ID;
+import static android.app.ActivityManager.RESIZE_MODE_SYSTEM_SCREEN_ROTATION;
 import static com.android.server.wm.WindowManagerService.TAG;
 import static com.android.server.wm.WindowManagerService.DEBUG_RESIZE;
 import static com.android.server.wm.WindowManagerService.DEBUG_STACK;
+import static com.android.server.wm.WindowManagerService.H.RESIZE_TASK;
 import static android.app.ActivityManager.FREEFORM_WORKSPACE_STACK_ID;
 
 import android.content.res.Configuration;
@@ -274,7 +276,13 @@ class Task implements DimLayer.DimLayerUser {
         // this happens, so update the task bounds so it stays in the same place.
         mTmpRect2.set(mBounds);
         displayContent.rotateBounds(mRotation, newRotation, mTmpRect2);
-        setBounds(mTmpRect2, mOverrideConfig);
+        if (setBounds(mTmpRect2, mOverrideConfig) != BOUNDS_CHANGE_NONE) {
+            // Post message to inform activity manager of the bounds change simulating
+            // a one-way call. We do this to prevent a deadlock between window manager
+            // lock and activity manager lock been held.
+            mService.mH.sendMessage(mService.mH.obtainMessage(
+                            RESIZE_TASK, mTaskId, RESIZE_MODE_SYSTEM_SCREEN_ROTATION, mBounds));
+        }
     }
 
     /** Updates the dim layer bounds, recreating it if needed. */

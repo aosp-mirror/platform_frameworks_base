@@ -7209,6 +7209,9 @@ public class WindowManagerService extends IWindowManager.Stub
 
         public static final int UPDATE_DOCKED_STACK_DIVIDER = 42;
 
+        public static final int RESIZE_STACK = 43;
+        public static final int RESIZE_TASK = 44;
+
         @Override
         public void handleMessage(Message msg) {
             if (DEBUG_WINDOW_TRACE) {
@@ -7752,6 +7755,22 @@ public class WindowManagerService extends IWindowManager.Stub
                     DisplayContent content = (DisplayContent) msg.obj;
                     synchronized (mWindowMap) {
                         content.mDividerControllerLocked.update();
+                    }
+                }
+                break;
+                case RESIZE_TASK: {
+                    try {
+                        mActivityManager.resizeTask(msg.arg1, (Rect) msg.obj, msg.arg2);
+                    } catch (RemoteException e) {
+                        // This will not happen since we are in the same process.
+                    }
+                }
+                break;
+                case RESIZE_STACK: {
+                    try {
+                        mActivityManager.resizeStack(msg.arg1, (Rect) msg.obj);
+                    } catch (RemoteException e) {
+                        // This will not happen since we are in the same process.
                     }
                 }
                 break;
@@ -10083,8 +10102,6 @@ public class WindowManagerService extends IWindowManager.Stub
         @Override
         public void saveLastInputMethodWindowForTransition() {
             synchronized (mWindowMap) {
-                // TODO(multidisplay): Pass in the displayID.
-                DisplayContent displayContent = getDefaultDisplayContentLocked();
                 if (mInputMethodWindow != null) {
                     mPolicy.setLastInputMethodWindowLw(mInputMethodWindow, mInputMethodTarget);
                 }

@@ -3110,8 +3110,9 @@ public final class ActivityStackSupervisor implements DisplayListener {
             ActivityRecord r = task.topRunningActivityLocked(null);
             if (r != null) {
                 final ActivityStack stack = task.stack;
-                final boolean resizedByUser = resizeMode == RESIZE_MODE_USER;
-                final boolean preserveWindow = resizedByUser && !changedStacks;
+                final boolean preserveWindow = !changedStacks &&
+                        (resizeMode == RESIZE_MODE_USER
+                        || resizeMode == RESIZE_MODE_SYSTEM_SCREEN_ROTATION);
                 kept = stack.ensureActivityConfigurationLocked(r, 0, preserveWindow);
                 // All other activities must be made visible with their correct configuration.
                 ensureActivitiesVisibleLocked(r, 0, !PRESERVE_WINDOWS);
@@ -4626,16 +4627,6 @@ public final class ActivityStackSupervisor implements DisplayListener {
             return mActivityDisplay != null;
         }
 
-        void getBounds(Point outBounds) {
-            synchronized (mService) {
-                    if (mActivityDisplay != null) {
-                    mActivityDisplay.getBounds(outBounds);
-                } else {
-                    outBounds.set(0, 0);
-                }
-            }
-        }
-
         // TODO: Make sure every change to ActivityRecord.visible results in a call to this.
         void setVisible(boolean visible) {
             if (mVisible != visible) {
@@ -4805,12 +4796,6 @@ public final class ActivityStackSupervisor implements DisplayListener {
             if (DEBUG_STACK) Slog.v(TAG_STACK, "detachActivitiesLocked: detaching " + stack
                     + " from displayId=" + mDisplayId);
             mStacks.remove(stack);
-        }
-
-        void getBounds(Point bounds) {
-            mDisplay.getDisplayInfo(mDisplayInfo);
-            bounds.x = mDisplayInfo.appWidth;
-            bounds.y = mDisplayInfo.appHeight;
         }
 
         void setVisibleBehindActivity(ActivityRecord r) {
