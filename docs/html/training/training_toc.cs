@@ -1851,6 +1851,9 @@ results."
             </a>
         </div>
         <ul>
+          <li><a href="<?cs var:toroot ?>training/monitoring-device-state/doze-standby.html"
+            >Optimizing for Doze and App Standby</a>
+          </li>
           <li><a href="<?cs var:toroot ?>training/monitoring-device-state/battery-monitoring.html"
             zh-cn-lang="监控电池电量和充电状态"
             ja-lang="電池残量と充電状態の監視"

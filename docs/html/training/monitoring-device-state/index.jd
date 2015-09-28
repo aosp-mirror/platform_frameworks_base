@@ -11,7 +11,6 @@ startpage=true
 
 <h2>Dependencies and prerequisites</h2> 
 <ul>
-  <li>Android 2.0 (API level 5) or higher</li>
   <li>Experience with <a href="{@docRoot}guide/components/intents-filters.html">Intents and Intent Filters</a></li>
 </ul>
 
@@ -24,7 +23,7 @@ startpage=true
 </div>
 
 <p>For your app to be a good citizen, it should seek to limit its impact on the battery life of its
-host device. After this class you will be able to build apps that monitor modify their functionality
+host device. After this class you will be able to build apps that modify their functionality
 and behavior based on the state of the host device.</p>
 
 <p>By taking steps such as disabling background service updates when you lose connectivity, or
@@ -38,6 +37,10 @@ These should be short and to the point. It should be clear from reading the summ
 will want to jump to a lesson or not.--> 
  
 <dl>
+  <dt><b><a href="doze-standby.html">Optimiing for Doze and App Standby</a></b></dt>
+  <dd>Learn how to test and optimize your app for the power-management features introduced in
+  Android 6.0 Marshmallow.</dd>
+
   <dt><b><a href="battery-monitoring.html">Monitoring the Battery Level and Charging State</a></b></dt>
   <dd>Learn how to alter your app's update rate by determining, and monitoring, the current battery
 level and changes in charging state.</dd>
