@@ -248,9 +248,8 @@ public class ZenModeHelper {
         }
         pw.printf("allow(calls=%s,callsFrom=%s,repeatCallers=%s,messages=%s,messagesFrom=%s,"
                 + "events=%s,reminders=%s)\n",
-                config.allowCalls, ZenModeConfig.sourceToString(config.allowCallsFrom),
-                config.allowRepeatCallers, config.allowMessages,
-                ZenModeConfig.sourceToString(config.allowMessagesFrom),
+                config.allowCalls, config.allowCallsFrom, config.allowRepeatCallers,
+                config.allowMessages, config.allowMessagesFrom,
                 config.allowEvents, config.allowReminders);
         pw.print(prefix); pw.print("  manualRule="); pw.println(config.manualRule);
         if (config.automaticRules.isEmpty()) return;

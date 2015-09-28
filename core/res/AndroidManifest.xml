@@ -2530,12 +2530,6 @@
         android:label="@string/permlab_access_notification_policy"
         android:protectionLevel="normal" />
 
-    <!-- Allows modification of do not disturb rules and policies. Only allowed for system
-        processes.
-        @hide -->
-    <permission android:name="android.permission.MANAGE_NOTIFICATIONS"
-                android:protectionLevel="signature" />
-
     <!-- Allows access to keyguard secure storage.  Only allowed for system processes.
         @hide -->
     <permission android:name="android.permission.ACCESS_KEYGUARD_SECURE_STORAGE"
