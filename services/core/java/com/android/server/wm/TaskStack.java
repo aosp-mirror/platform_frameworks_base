@@ -86,6 +86,7 @@ public class TaskStack implements DimLayer.DimLayerUser {
     static final int DOCKED_TOP = 2;
     static final int DOCKED_RIGHT = 3;
     static final int DOCKED_BOTTOM = 4;
+
     @IntDef({
             DOCKED_INVALID,
             DOCKED_LEFT,
@@ -353,7 +354,7 @@ public class TaskStack implements DimLayer.DimLayerUser {
             bounds = new Rect();
             displayContent.getLogicalDisplayRect(mTmpRect);
             getInitialDockedStackBounds(mTmpRect, bounds, mStackId,
-                    mDisplayContent.mDividerControllerLocked.getWidth() / 2);
+                    mDisplayContent.mDividerControllerLocked.getWidthAdjustment());
         }
 
         updateDisplayInfo(bounds);
@@ -564,5 +565,17 @@ public class TaskStack implements DimLayer.DimLayerUser {
         } else {
             return DOCKED_INVALID;
         }
+    }
+
+    boolean isVisibleLocked() {
+        for (int i = mTasks.size() - 1; i >= 0; i--) {
+            Task task = mTasks.get(i);
+            for (int j = task.mAppTokens.size() - 1; j >= 0; j--) {
+                if (!task.mAppTokens.get(j).hidden) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 }

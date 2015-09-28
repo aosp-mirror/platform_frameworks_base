@@ -567,10 +567,10 @@ class DisplayContent {
         return "Display " + mDisplayId + " info=" + mDisplayInfo + " stacks=" + mStacks;
     }
 
-    TaskStack getDockedStack() {
+    TaskStack getDockedStackLocked() {
         for (int i = mStacks.size() - 1; i >= 0; i--) {
             TaskStack stack = mStacks.get(i);
-            if (stack.mStackId == DOCKED_STACK_ID) {
+            if (stack.mStackId == DOCKED_STACK_ID && stack.isVisibleLocked()) {
                 return stack;
             }
         }
