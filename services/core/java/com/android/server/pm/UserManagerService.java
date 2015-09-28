@@ -16,6 +16,7 @@
 
 package com.android.server.pm;
 
+import android.accounts.Account;
 import android.annotation.NonNull;
 import android.app.Activity;
 import android.app.ActivityManager;
@@ -63,6 +64,7 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.app.IAppOpsService;
 import com.android.internal.util.FastXmlSerializer;
 import com.android.internal.util.XmlUtils;
+import com.android.server.accounts.AccountManagerService;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
@@ -1383,6 +1385,25 @@ public class UserManagerService extends IUserManager.Stub {
             Binder.restoreCallingIdentity(ident);
         }
         return userInfo;
+    }
+
+    /**
+     * @hide
+     */
+    public UserInfo createRestrictedProfile(String name, int parentUserId) {
+        checkManageUsersPermission("setupRestrictedProfile");
+        final UserInfo user = createProfileForUser(name, UserInfo.FLAG_RESTRICTED, parentUserId);
+        if (user == null) {
+            return null;
+        }
+        setUserRestriction(UserManager.DISALLOW_MODIFY_ACCOUNTS, true, user.id);
+        // Change the setting before applying the DISALLOW_SHARE_LOCATION restriction, otherwise
+        // the putIntForUser() will fail.
+        android.provider.Settings.Secure.putIntForUser(mContext.getContentResolver(),
+                android.provider.Settings.Secure.LOCATION_MODE,
+                android.provider.Settings.Secure.LOCATION_MODE_OFF, user.id);
+        setUserRestriction(UserManager.DISALLOW_SHARE_LOCATION, true, user.id);
+        return user;
     }
 
     /**

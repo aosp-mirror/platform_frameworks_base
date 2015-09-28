@@ -17,7 +17,6 @@
 package android.os;
 
 import android.annotation.SystemApi;
-import android.util.SparseArray;
 
 import java.io.PrintWriter;
 
@@ -83,8 +82,6 @@ public final class UserHandle implements Parcelable {
 
     final int mHandle;
 
-    private static final SparseArray<UserHandle> userHandles = new SparseArray<UserHandle>();
-
     /**
      * Checks to see if the user id is the same for the two uids, i.e., they belong to the same
      * user.
@@ -144,15 +141,8 @@ public final class UserHandle implements Parcelable {
     }
 
     /** @hide */
-    public static UserHandle getCallingUserHandle() {
-        int userId = getUserId(Binder.getCallingUid());
-        UserHandle userHandle = userHandles.get(userId);
-        // Intentionally not synchronized to save time
-        if (userHandle == null) {
-            userHandle = new UserHandle(userId);
-            userHandles.put(userId, userHandle);
-        }
-        return userHandle;
+    public static UserHandle of(int userId) {
+        return userId == USER_SYSTEM ? SYSTEM : new UserHandle(userId);
     }
 
     /**
