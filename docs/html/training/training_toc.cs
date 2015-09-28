@@ -281,31 +281,6 @@ include the action bar on devices running Android 2.1 or higher."
         </ul>
       </li>
 
-      <li class="nav-section">
-        <div class="nav-section-header">
-          <a href="<?cs var:toroot ?>training/permissions/index.html"
-             description=
-             "How to declare that your app needs access to features and
-             resources outside of its 'sandbox', and how to request those
-             privileges at runtime."
-            >Working with System Permissions</a>
-        </div>
-        <ul>
-          <li><a href="<?cs var:toroot ?>training/permissions/declaring.html">
-            Declaring Permissions
-          </a>
-          </li>
-          <li><a href="<?cs var:toroot ?>training/permissions/requesting.html">
-            Requesting Permissions at Run Time
-          </a>
-          </li>
-          <li><a href="<?cs var:toroot ?>training/permissions/best-practices.html">
-            Best Practices for Runtime Permissions
-          </a>
-          </li>
-        </ul>
-      </li>
-
     </ul>
   </li><!-- end getting started -->
     <li class="nav-section">
@@ -836,7 +811,7 @@ include the action bar on devices running Android 2.1 or higher."
     <div class="nav-section-header">
       <a href="<?cs var:toroot ?>training/building-userinfo.html">
       <span class="small">Building Apps with</span><br/>
-              Contacts &amp; Sign-In
+              User Info &amp; Sign-In
       </a>
     </div>
     <ul>
@@ -1336,6 +1311,8 @@ include the action bar on devices running Android 2.1 or higher."
               </li>
           </ul>
       </li>
+
+
       <li class="nav-section">
         <div class="nav-section-header">
             <a href="<?cs var:toroot ?>training/swipe/index.html"
@@ -1354,6 +1331,8 @@ include the action bar on devices running Android 2.1 or higher."
             </li>
         </ul>
       </li>
+
+
       <li class="nav-section">
         <div class="nav-section-header">
           <a href="<?cs var:toroot ?>training/search/index.html"
@@ -1392,17 +1371,26 @@ results."
           </a>
           </li>
           <li><a href="<?cs var:toroot ?>training/app-indexing/enabling-app-indexing.html">
-            Specifying  App Content for Indexing
+            Specifying App Content for Indexing
           </a>
           </li>
         </ul>
-      </li>
-    </ul>
   </li>
+
+
+
+       <li class="nav-section">
+        <div class="nav-section">
+          <a href="<?cs var:toroot ?>training/app-links/index.html"
+             description=
+             "How to enable the system to handle web requests by taking the user directly
+             to your app instead of your website."
+            >Handling App Links</a>
+        </div>
+      </li>
   <!-- End Interaction and Engagement -->
 
-
-
+</ul>
 
   <li class="nav-section">
     <div class="nav-section-header">
@@ -1412,6 +1400,7 @@ results."
       </a>
     </div>
     <ul>
+
 
       <li class="nav-section">
         <div class="nav-section-header">
@@ -1444,27 +1433,6 @@ results."
             ja-lang="順応性のある UI フローの実装"
             es-lang="Cómo implementar interfaces de usuario adaptables"
             >Implementing Adaptive UI Flows</a>
-          </li>
-        </ul>
-      </li>
-
-      <li class="nav-section">
-        <div class="nav-section-header">
-          <a href="<?cs var:toroot ?>training/appbar/index.html"
-             description=
-             "How to use the support library's toolbar widget to implement an
-             app bar that displays properly on a wide range of devices."
-            >Adding the App Bar</a>
-        </div>
-        <ul>
-          <li><a href="<?cs var:toroot ?>training/appbar/setting-up.html"
-            >Setting Up the App Bar</a>
-          </li>
-          <li><a href="<?cs var:toroot ?>training/appbar/actions.html"
-            >Adding and Handling Actions</a>
-          </li>
-          <li><a href="<?cs var:toroot ?>training/appbar/up-action.html"
-            >Adding an Up Action</a>
           </li>
         </ul>
       </li>
@@ -1851,9 +1819,6 @@ results."
             </a>
         </div>
         <ul>
-          <li><a href="<?cs var:toroot ?>training/monitoring-device-state/doze-standby.html"
-            >Optimizing for Doze and App Standby</a>
-          </li>
           <li><a href="<?cs var:toroot ?>training/monitoring-device-state/battery-monitoring.html"
             zh-cn-lang="监控电池电量和充电状态"
             ja-lang="電池残量と充電状態の監視"
@@ -2049,12 +2014,6 @@ results."
         </ul>
       </li>
     </ul>
-    <ul>
-      <li><a href="<?cs var:toroot ?>training/testing/performance.html"
-      description="How to automate UI performance testing.">
-            <span class="en">Testing Display Performance</span>
-            </a></li>
-    <ul>
   </li>
   <!-- End best Testing -->
 
