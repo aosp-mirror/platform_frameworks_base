@@ -50,7 +50,7 @@ page.metaDescription=Get to know the new developer features in Android 6.0 Marsh
 </div>
 </div>
 
-<p>Android 6.0 (<a href="{@docRoot}reference/android/os/Build.VERSION_CODES.html#MARSHMALLOW">MARSHMALLOW</a>)
+<p>Android 6.0 (<a href="{@docRoot}reference/android/os/Build.VERSION_CODES.html#M">M</a>)
 offers new features for users and app developers. This document provides an introduction to the
 most notable APIs.</p>
 
