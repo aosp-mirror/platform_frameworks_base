@@ -584,17 +584,10 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
             }
             postDrawHeaderThumbnailTransitionRunnable(stackView, tv, offsetX, offsetY, stackScroll,
                     animStartedListener);
-            if (mConfig.multiWindowEnabled) {
-                opts = ActivityOptions.makeCustomAnimation(sourceView.getContext(),
-                        R.anim.recents_from_unknown_enter,
-                        R.anim.recents_from_unknown_exit,
-                        sourceView.getHandler(), animStartedListener);
-            } else {
-                opts = ActivityOptions.makeThumbnailAspectScaleUpAnimation(sourceView,
-                        Bitmap.createBitmap(1, 1, Bitmap.Config.ALPHA_8).createAshmemBitmap(),
-                        offsetX, offsetY, transform.rect.width(), transform.rect.height(),
-                        sourceView.getHandler(), animStartedListener);
-            }
+            opts = ActivityOptions.makeThumbnailAspectScaleUpAnimation(sourceView,
+                    Bitmap.createBitmap(1, 1, Bitmap.Config.ALPHA_8).createAshmemBitmap(),
+                    offsetX, offsetY, transform.rect.width(), transform.rect.height(),
+                    sourceView.getHandler(), animStartedListener);
         } else {
             opts = ActivityOptions.makeBasic();
         }

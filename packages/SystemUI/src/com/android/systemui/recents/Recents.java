@@ -163,7 +163,6 @@ public class Recents extends SystemUI
     static RecentsTaskLoadPlan sInstanceLoadPlan;
     static Recents sInstance;
 
-    LayoutInflater mInflater;
     SystemServicesProxy mSystemServicesProxy;
     Handler mHandler;
     TaskStackListenerImpl mTaskStackListener;
@@ -175,12 +174,14 @@ public class Recents extends SystemUI
 
     // Task launching
     RecentsConfiguration mConfig;
+    Rect mSearchBarBounds = new Rect();
     Rect mTaskStackBounds = new Rect();
-    Rect mSystemInsets = new Rect();
+    Rect mLastTaskViewBounds = new Rect();
     TaskViewTransform mTmpTransform = new TaskViewTransform();
     int mStatusBarHeight;
     int mNavBarHeight;
     int mNavBarWidth;
+    int mTaskBarHeight;
 
     // Header (for transition)
     TaskViewHeader mHeaderBar;
@@ -228,11 +229,11 @@ public class Recents extends SystemUI
         if (sInstance == null) {
             sInstance = this;
         }
+        Resources res = mContext.getResources();
         RecentsTaskLoader.initialize(mContext);
-        mInflater = LayoutInflater.from(mContext);
+        LayoutInflater inflater = LayoutInflater.from(mContext);
         mSystemServicesProxy = new SystemServicesProxy(mContext);
         mHandler = new Handler();
-        mTaskStackBounds = new Rect();
         mAppWidgetHost = new RecentsAppWidgetHost(mContext, Constants.Values.App.AppWidgetHostId);
 
         // Register the task stack listener
@@ -240,7 +241,7 @@ public class Recents extends SystemUI
         mSystemServicesProxy.registerTaskStackListener(mTaskStackListener);
 
         // Only the owner has the callback to update the SysUI visibility flags, so all non-owner
-        // instances of AlternateRecentsComponent needs to notify the owner when the visibility
+        // instances of RecentsComponent needs to notify the owner when the visibility
         // changes.
         if (mSystemServicesProxy.isForegroundUserSystem()) {
             mProxyBroadcastReceiver = new RecentsOwnerEventProxyReceiver();
@@ -253,8 +254,16 @@ public class Recents extends SystemUI
 
         // Initialize some static datastructures
         TaskStackViewLayoutAlgorithm.initializeCurve();
-        // Load the header bar layout
-        reloadHeaderBarLayout();
+        // Initialize the static configuration resources
+        mConfig = RecentsConfiguration.initialize(mContext, mSystemServicesProxy);
+        mStatusBarHeight = res.getDimensionPixelSize(com.android.internal.R.dimen.status_bar_height);
+        mNavBarHeight = res.getDimensionPixelSize(com.android.internal.R.dimen.navigation_bar_height);
+        mNavBarWidth = res.getDimensionPixelSize(com.android.internal.R.dimen.navigation_bar_width);
+        mTaskBarHeight = res.getDimensionPixelSize(R.dimen.recents_task_bar_height);
+        mDummyStackView = new TaskStackView(mContext, new TaskStack());
+        mHeaderBar = (TaskViewHeader) inflater.inflate(R.layout.recents_task_view_header,
+                null, false);
+        reloadHeaderBarLayout(true /* tryAndBindSearchWidget */);
 
         // When we start, preload the data associated with the previous recent tasks.
         // We can use a new plan since the caches will be the same.
@@ -272,6 +281,7 @@ public class Recents extends SystemUI
     @Override
     public void onBootCompleted() {
         mBootCompleted = true;
+        reloadHeaderBarLayout(true /* tryAndBindSearchWidget */);
     }
 
     /** Shows the Recents. */
@@ -292,7 +302,7 @@ public class Recents extends SystemUI
         mTriggeredFromAltTab = triggeredFromAltTab;
 
         try {
-            startRecentsActivity();
+            showRecentsActivity();
         } catch (ActivityNotFoundException e) {
             Console.logRawError("Failed to launch RecentAppsIntent", e);
         }
@@ -487,55 +497,52 @@ public class Recents extends SystemUI
     void configurationChanged() {
         // Don't reuse task stack views if the configuration changes
         mCanReuseTaskStackViews = false;
-        // Reload the header bar layout
-        reloadHeaderBarLayout();
+        mConfig.updateOnConfigurationChange();
     }
 
-    /** Prepares the header bar layout. */
-    void reloadHeaderBarLayout() {
-        Resources res = mContext.getResources();
+    /**
+     * Prepares the header bar layout for the next transition, if the task view bounds has changed
+     * since the last call, it will attempt to re-measure and layout the header bar to the new size.
+     *
+     * @param tryAndBindSearchWidget if set, will attempt to fetch and bind the search widget if one
+     *                               is not already bound (can be expensive)
+     */
+    void reloadHeaderBarLayout(boolean tryAndBindSearchWidget) {
         Rect windowRect = mSystemServicesProxy.getWindowRect();
 
-        mStatusBarHeight = res.getDimensionPixelSize(com.android.internal.R.dimen.status_bar_height);
-        mNavBarHeight = res.getDimensionPixelSize(com.android.internal.R.dimen.navigation_bar_height);
-        mNavBarWidth = res.getDimensionPixelSize(com.android.internal.R.dimen.navigation_bar_width);
-        mConfig = RecentsConfiguration.initialize(mContext, mSystemServicesProxy);
+        // Update the configuration for the current state
         mConfig.update(mContext, mSystemServicesProxy, mSystemServicesProxy.getWindowRect());
-        mConfig.updateOnConfigurationChange();
-        Rect searchBarBounds = new Rect();
-        // Try and pre-emptively bind the search widget on startup to ensure that we
-        // have the right thumbnail bounds to animate to.
-        // Note: We have to reload the widget id before we get the task stack bounds below
-        if (mSystemServicesProxy.getOrBindSearchAppWidget(mContext, mAppWidgetHost) != null) {
-            mConfig.getSearchBarBounds(windowRect,
-                    mStatusBarHeight, searchBarBounds);
+
+        if (tryAndBindSearchWidget) {
+            // Try and pre-emptively bind the search widget on startup to ensure that we
+            // have the right thumbnail bounds to animate to.
+            // Note: We have to reload the widget id before we get the task stack bounds below
+            if (mSystemServicesProxy.getOrBindSearchAppWidget(mContext, mAppWidgetHost) != null) {
+                mConfig.getSearchBarBounds(windowRect,
+                        mStatusBarHeight, mSearchBarBounds);
+            }
         }
         mConfig.getAvailableTaskStackBounds(windowRect,
-                mStatusBarHeight, (mConfig.hasTransposedNavBar ? mNavBarWidth : 0), searchBarBounds,
-                mTaskStackBounds);
-        if (mConfig.hasTransposedNavBar) {
-            mSystemInsets.set(0, mStatusBarHeight, mNavBarWidth, 0);
-        } else {
-            mSystemInsets.set(0, mStatusBarHeight, 0, mNavBarHeight);
-        }
+                mStatusBarHeight, (mConfig.hasTransposedNavBar ? mNavBarWidth : 0),
+                mSearchBarBounds, mTaskStackBounds);
+        int systemBarBottomInset = mConfig.hasTransposedNavBar ? 0 : mNavBarHeight;
 
-        // Inflate the header bar layout so that we can rebind and draw it for the transition
-        TaskStack stack = new TaskStack();
-        mDummyStackView = new TaskStackView(mContext, stack);
+        // Rebind the header bar and draw it for the transition
         TaskStackViewLayoutAlgorithm algo = mDummyStackView.getStackAlgorithm();
         Rect taskStackBounds = new Rect(mTaskStackBounds);
-        taskStackBounds.bottom -= mSystemInsets.bottom;
+        taskStackBounds.bottom -= systemBarBottomInset;
         algo.computeRects(windowRect.width(), windowRect.height(), taskStackBounds);
-        Rect taskViewSize = algo.getUntransformedTaskViewSize();
-        int taskBarHeight = res.getDimensionPixelSize(R.dimen.recents_task_bar_height);
-        synchronized (mHeaderBarLock) {
-            mHeaderBar = (TaskViewHeader) mInflater.inflate(R.layout.recents_task_view_header, null,
-                    false);
-            mHeaderBar.measure(
-                    View.MeasureSpec.makeMeasureSpec(taskViewSize.width(), View.MeasureSpec.EXACTLY),
-                    View.MeasureSpec.makeMeasureSpec(taskBarHeight, View.MeasureSpec.EXACTLY));
-            // TODO: may not be needed
-            mHeaderBar.layout(0, 0, taskViewSize.width(), taskBarHeight);
+        Rect taskViewBounds = algo.getUntransformedTaskViewBounds();
+        if (!taskViewBounds.equals(mLastTaskViewBounds)) {
+            mLastTaskViewBounds.set(taskViewBounds);
+
+            int taskViewWidth = taskViewBounds.width();
+            synchronized (mHeaderBarLock) {
+                mHeaderBar.measure(
+                    View.MeasureSpec.makeMeasureSpec(taskViewWidth, View.MeasureSpec.EXACTLY),
+                    View.MeasureSpec.makeMeasureSpec(mTaskBarHeight, View.MeasureSpec.EXACTLY));
+                mHeaderBar.layout(0, 0, taskViewWidth, mTaskBarHeight);
+            }
         }
     }
 
@@ -560,17 +567,17 @@ public class Recents extends SystemUI
             return;
         } else {
             // Otherwise, start the recents activity
-            startRecentsActivity(topTask, isTopTaskHome.value);
+            showRecentsActivity(topTask, isTopTaskHome.value);
         }
     }
 
-    /** Starts the recents activity if it is not already running */
-    void startRecentsActivity() {
+    /** Shows the recents activity if it is not already running */
+    void showRecentsActivity() {
         // Check if the top task is in the home stack, and start the recents activity
         ActivityManager.RunningTaskInfo topTask = mSystemServicesProxy.getTopMostTask();
         MutableBoolean isTopTaskHome = new MutableBoolean(true);
         if (topTask == null || !mSystemServicesProxy.isRecentsTopMost(topTask, isTopTaskHome)) {
-            startRecentsActivity(topTask, isTopTaskHome.value);
+            showRecentsActivity(topTask, isTopTaskHome.value);
         }
     }
 
@@ -732,31 +739,16 @@ public class Recents extends SystemUI
         return mTmpTransform;
     }
 
-    /** Starts the recents activity */
-    void startRecentsActivity(ActivityManager.RunningTaskInfo topTask, boolean isTopTaskHome) {
+    /** Shows the recents activity */
+    void showRecentsActivity(ActivityManager.RunningTaskInfo topTask, boolean isTopTaskHome) {
         RecentsTaskLoader loader = RecentsTaskLoader.getInstance();
-        // Don't reinitialize the configuration completely here, since it has the wrong context,
-        // only update the parts that we can get from any context
-        RecentsConfiguration config = RecentsConfiguration.getInstance();
-        config.update(mContext, mSystemServicesProxy, mSystemServicesProxy.getWindowRect());
+
+        // Update the header bar if necessary
+        reloadHeaderBarLayout(false /* tryAndBindSearchWidget */);
 
         if (sInstanceLoadPlan == null) {
             // Create a new load plan if onPreloadRecents() was never triggered
             sInstanceLoadPlan = loader.createLoadPlan(mContext);
-        }
-
-        // Temporarily skip the transition (use a dummy fade) if multi stack is enabled.
-        // For multi-stack we need to figure out where each of the tasks are going.
-        if (mConfig.multiWindowEnabled) {
-            loader.preloadTasks(sInstanceLoadPlan, true);
-            TaskStack stack = sInstanceLoadPlan.getTaskStack();
-            mDummyStackView.updateMinMaxScrollForStack(stack, mTriggeredFromAltTab, true);
-            TaskStackViewLayoutAlgorithm.VisibilityReport stackVr =
-                    mDummyStackView.computeStackVisibilityReport();
-            ActivityOptions opts = getUnknownTransitionActivityOptions();
-            startAlternateRecentsActivity(topTask, opts, true /* fromHome */,
-                    false /* fromSearchHome */, false /* fromThumbnail */, stackVr);
-            return;
         }
 
         if (!sInstanceLoadPlan.hasTasks()) {
@@ -777,7 +769,7 @@ public class Recents extends SystemUI
             ActivityOptions opts = getThumbnailTransitionActivityOptions(topTask, stack,
                     mDummyStackView);
             if (opts != null) {
-                startAlternateRecentsActivity(topTask, opts, false /* fromHome */,
+                startRecentsActivity(topTask, opts, false /* fromHome */,
                         false /* fromSearchHome */, true /* fromThumbnail */, stackVr);
             } else {
                 // Fall through below to the non-thumbnail transition
@@ -797,12 +789,12 @@ public class Recents extends SystemUI
                 boolean fromSearchHome = (homeActivityPackage != null) &&
                         homeActivityPackage.equals(searchWidgetPackage);
                 ActivityOptions opts = getHomeTransitionActivityOptions(fromSearchHome);
-                startAlternateRecentsActivity(topTask, opts, true /* fromHome */, fromSearchHome,
+                startRecentsActivity(topTask, opts, true /* fromHome */, fromSearchHome,
                         false /* fromThumbnail */, stackVr);
             } else {
                 // Otherwise we do the normal fade from an unknown source
                 ActivityOptions opts = getUnknownTransitionActivityOptions();
-                startAlternateRecentsActivity(topTask, opts, true /* fromHome */,
+                startRecentsActivity(topTask, opts, true /* fromHome */,
                         false /* fromSearchHome */, false /* fromThumbnail */, stackVr);
             }
         }
@@ -810,9 +802,9 @@ public class Recents extends SystemUI
     }
 
     /** Starts the recents activity */
-    void startAlternateRecentsActivity(ActivityManager.RunningTaskInfo topTask,
-            ActivityOptions opts, boolean fromHome, boolean fromSearchHome, boolean fromThumbnail,
-            TaskStackViewLayoutAlgorithm.VisibilityReport vr) {
+    void startRecentsActivity(ActivityManager.RunningTaskInfo topTask,
+              ActivityOptions opts, boolean fromHome, boolean fromSearchHome, boolean fromThumbnail,
+              TaskStackViewLayoutAlgorithm.VisibilityReport vr) {
         // Update the configuration based on the launch options
         RecentsActivityLaunchState launchState = mConfig.getLaunchState();
         launchState.launchedFromHome = fromSearchHome || fromHome;
