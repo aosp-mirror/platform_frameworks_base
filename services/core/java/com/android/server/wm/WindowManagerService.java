@@ -4517,11 +4517,11 @@ public class WindowManagerService extends IWindowManager.Stub
                     for (int winNdx = windows.size() - 1; winNdx >= 0; --winNdx) {
                         windows.get(winNdx).reportResized();
                     }
-                    if (stack.isFullscreen()) {
+                    if (stack.getRawFullscreen()) {
                         return null;
                     }
                     Rect bounds = new Rect();
-                    stack.getBounds(bounds);
+                    stack.getRawBounds(bounds);
                     return bounds;
                 }
             }
@@ -4644,7 +4644,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 stack.getDisplayContent().layoutNeeded = true;
                 mWindowPlacerLocked.performSurfacePlacement();
             }
-            return stack.isFullscreen();
+            return stack.getRawFullscreen();
         }
     }
 

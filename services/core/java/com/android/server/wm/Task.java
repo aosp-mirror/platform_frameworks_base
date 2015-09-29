@@ -245,8 +245,32 @@ class Task implements DimLayer.DimLayerUser {
         return true;
     }
 
+    /** Return true if the current bound can get outputted to the rest of the system as-is. */
+    private boolean useCurrentBounds() {
+        final DisplayContent displayContent = mStack.getDisplayContent();
+        if (mFullscreen
+                || mStack.mStackId == FREEFORM_WORKSPACE_STACK_ID
+                || mStack.mStackId == DOCKED_STACK_ID
+                || displayContent == null
+                || displayContent.getDockedStackLocked() != null) {
+            return true;
+        }
+        return false;
+    }
+
+    /** Bounds of the task with other system factors taken into consideration. */
     void getBounds(Rect out) {
-        out.set(mBounds);
+        if (useCurrentBounds()) {
+            // No need to adjust the output bounds if fullscreen or the docked stack is visible
+            // since it is already what we want to represent to the rest of the system.
+            out.set(mBounds);
+            return;
+        }
+
+        // The bounds has been adjusted to accommodate for a docked stack, but the docked stack
+        // is not currently visible. Go ahead a represent it as fullscreen to the rest of the
+        // system.
+        mStack.getDisplayContent().getLogicalDisplayRect(out);
     }
 
     void setDragResizing(boolean dragResizing) {
@@ -433,10 +457,6 @@ class Task implements DimLayer.DimLayerUser {
         return mStack != null && mStack.mStackId == FREEFORM_WORKSPACE_STACK_ID;
     }
 
-    boolean inDockedWorkspace() {
-        return mStack != null && mStack.mStackId == DOCKED_STACK_ID;
-    }
-
     WindowState getTopAppMainWindow() {
         final int tokensCount = mAppTokens.size();
         return tokensCount > 0 ? mAppTokens.get(tokensCount - 1).findMainWindow() : null;
@@ -444,7 +464,13 @@ class Task implements DimLayer.DimLayerUser {
 
     @Override
     public boolean isFullscreen() {
-        return mFullscreen;
+        if (useCurrentBounds()) {
+            return mFullscreen;
+        }
+        // The bounds has been adjusted to accommodate for a docked stack, but the docked stack
+        // is not currently visible. Go ahead a represent it as fullscreen to the rest of the
+        // system.
+        return true;
     }
 
     @Override
