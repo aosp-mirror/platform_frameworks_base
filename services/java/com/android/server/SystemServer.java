@@ -130,6 +130,8 @@ public final class SystemServer {
             "com.android.server.midi.MidiService$Lifecycle";
     private static final String WIFI_SERVICE_CLASS =
             "com.android.server.wifi.WifiService";
+    private static final String WIFI_NAN_SERVICE_CLASS =
+            "com.android.server.wifi.nan.WifiNanService";
     private static final String WIFI_P2P_SERVICE_CLASS =
             "com.android.server.wifi.p2p.WifiP2pService";
     private static final String ETHERNET_SERVICE_CLASS =
@@ -727,6 +729,11 @@ public final class SystemServer {
                 }
                 Trace.traceEnd(Trace.TRACE_TAG_SYSTEM_SERVER);
 
+                if (context.getPackageManager().hasSystemFeature(PackageManager.FEATURE_WIFI_NAN)) {
+                    mSystemServiceManager.startService(WIFI_NAN_SERVICE_CLASS);
+                } else {
+                    Slog.i(TAG, "No Wi-Fi NAN Service (NAN support Not Present)");
+                }
                 mSystemServiceManager.startService(WIFI_P2P_SERVICE_CLASS);
                 mSystemServiceManager.startService(WIFI_SERVICE_CLASS);
                 mSystemServiceManager.startService(

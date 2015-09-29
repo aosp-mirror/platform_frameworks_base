@@ -410,6 +410,9 @@ LOCAL_SRC_FILES += \
 	telephony/java/com/android/internal/telephony/IWapPushManager.aidl \
 	wifi/java/android/net/wifi/IWifiManager.aidl \
 	wifi/java/android/net/wifi/passpoint/IWifiPasspointManager.aidl \
+	wifi/java/android/net/wifi/nan/IWifiNanEventListener.aidl \
+	wifi/java/android/net/wifi/nan/IWifiNanManager.aidl \
+	wifi/java/android/net/wifi/nan/IWifiNanSessionListener.aidl \
 	wifi/java/android/net/wifi/p2p/IWifiP2pManager.aidl \
 	wifi/java/android/net/wifi/IWifiScanner.aidl \
 	wifi/java/android/net/wifi/IRttManager.aidl \
@@ -476,6 +479,11 @@ aidl_files := \
 	frameworks/base/media/java/android/media/tv/TvTrackInfo.aidl \
 	frameworks/base/media/java/android/media/browse/MediaBrowser.aidl \
 	frameworks/base/wifi/java/android/net/wifi/ScanSettings.aidl \
+	frameworks/base/wifi/java/android/net/wifi/nan/ConfigRequest.aidl \
+	frameworks/base/wifi/java/android/net/wifi/nan/PublishData.aidl \
+	frameworks/base/wifi/java/android/net/wifi/nan/SubscribeData.aidl \
+	frameworks/base/wifi/java/android/net/wifi/nan/PublishSettings.aidl \
+	frameworks/base/wifi/java/android/net/wifi/nan/SubscribeSettings.aidl \
 	frameworks/base/wifi/java/android/net/wifi/p2p/WifiP2pInfo.aidl \
 	frameworks/base/wifi/java/android/net/wifi/p2p/WifiP2pDeviceList.aidl \
 	frameworks/base/wifi/java/android/net/wifi/p2p/WifiP2pConfig.aidl \
