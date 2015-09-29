@@ -24,7 +24,7 @@
     <string name="label_paper_size" msgid="908654383827777759">"Velikost papirja"</string>
     <string name="label_paper_size_summary" msgid="5668204981332138168">"Velikost papirja:"</string>
     <string name="label_color" msgid="1108690305218188969">"Barvno"</string>
-    <string name="label_duplex" msgid="1263181386446435253">"Obojestransko"</string>
+    <string name="label_duplex" msgid="5370037254347072243">"Dvostransko"</string>
     <string name="label_orientation" msgid="2853142581990496477">"Postavitev"</string>
     <string name="label_pages" msgid="7768589729282182230">"Strani"</string>
     <string name="template_all_pages" msgid="3322235982020148762">"Vse (<xliff:g id="PAGE_COUNT">%1$s</xliff:g>)"</string>
@@ -54,12 +54,10 @@
     <string name="print_add_printer" msgid="1088656468360653455">"Dodajanje tiskalnika"</string>
     <string name="print_select_printer" msgid="7388760939873368698">"Izbira tiskalnika"</string>
     <string name="print_forget_printer" msgid="5035287497291910766">"Odstranitev tiskalnika"</string>
-    <plurals name="print_search_result_count_utterance" formatted="false" msgid="6997663738361080868">
-      <item quantity="one"><xliff:g id="COUNT_1">%1$s</xliff:g> najden tiskalnik</item>
-      <item quantity="two"><xliff:g id="COUNT_1">%1$s</xliff:g> najdena tiskalnika</item>
-      <item quantity="few"><xliff:g id="COUNT_1">%1$s</xliff:g> najdeni tiskalniki</item>
-      <item quantity="other"><xliff:g id="COUNT_1">%1$s</xliff:g> najdenih tiskalnikov</item>
-    </plurals>
+  <plurals name="print_search_result_count_utterance">
+    <item quantity="one" msgid="4484953260685964252">"Najden <xliff:g id="COUNT">%1$s</xliff:g> tiskalnik"</item>
+    <item quantity="other" msgid="6533817036607128241">"Število najdenih tiskalnikov: <xliff:g id="COUNT">%1$s</xliff:g>"</item>
+  </plurals>
     <string name="choose_print_service" msgid="3740309762324459694">"Izberite tiskalno storitev"</string>
     <string name="print_searching_for_printers" msgid="6550424555079932867">"Iskanje tiskalnikov"</string>
     <string name="print_no_printers" msgid="4869403323900054866">"Tiskalnikov ni mogoče najti"</string>
@@ -67,12 +65,10 @@
     <string name="cancelling_notification_title_template" msgid="1821759594704703197">"Preklic: <xliff:g id="PRINT_JOB_NAME">%1$s</xliff:g>"</string>
     <string name="failed_notification_title_template" msgid="2256217208186530973">"Napaka tiskalnika: <xliff:g id="PRINT_JOB_NAME">%1$s</xliff:g>"</string>
     <string name="blocked_notification_title_template" msgid="1175435827331588646">"Tiskalnik je blokiral <xliff:g id="PRINT_JOB_NAME">%1$s</xliff:g>"</string>
-    <plurals name="composite_notification_title_template" formatted="false" msgid="6940956968211733780">
-      <item quantity="one"><xliff:g id="PRINT_JOB_NAME_1">%1$d</xliff:g> tiskalno opravilo</item>
-      <item quantity="two"><xliff:g id="PRINT_JOB_NAME_1">%1$d</xliff:g> tiskalni opravili</item>
-      <item quantity="few"><xliff:g id="PRINT_JOB_NAME_1">%1$d</xliff:g> tiskalna opravila</item>
-      <item quantity="other"><xliff:g id="PRINT_JOB_NAME_1">%1$d</xliff:g> tiskalnih opravil</item>
-    </plurals>
+  <plurals name="composite_notification_title_template">
+    <item quantity="one" msgid="5866624638054847057">"Tiskalno opravilo: <xliff:g id="PRINT_JOB_NAME">%1$d</xliff:g>"</item>
+    <item quantity="other" msgid="8746611264734222865">"Tiskalna opravila: <xliff:g id="PRINT_JOB_NAME">%1$d</xliff:g>"</item>
+  </plurals>
     <string name="cancel" msgid="4373674107267141885">"Prekliči"</string>
     <string name="restart" msgid="2472034227037808749">"Začni znova"</string>
     <string name="no_connection_to_printer" msgid="2159246915977282728">"Ni povezave s tiskalnikom"</string>

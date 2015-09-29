@@ -24,13 +24,13 @@
     <string name="label_paper_size" msgid="908654383827777759">"Paperaren tamaina"</string>
     <string name="label_paper_size_summary" msgid="5668204981332138168">"Paperaren tamaina:"</string>
     <string name="label_color" msgid="1108690305218188969">"Koloretan"</string>
-    <string name="label_duplex" msgid="1263181386446435253">"Bikoitza"</string>
+    <string name="label_duplex" msgid="5370037254347072243">"Bi aldekoa"</string>
     <string name="label_orientation" msgid="2853142581990496477">"Orientazioa"</string>
     <string name="label_pages" msgid="7768589729282182230">"Orriak"</string>
     <string name="template_all_pages" msgid="3322235982020148762">"<xliff:g id="PAGE_COUNT">%1$s</xliff:g> orriak"</string>
     <string name="template_page_range" msgid="428638530038286328">"<xliff:g id="PAGE_COUNT">%1$s</xliff:g> orriko tartea"</string>
     <string name="pages_range_example" msgid="8558694453556945172">"adib., 1-5, 8,11-13"</string>
-    <string name="print_preview" msgid="8010217796057763343">"Inprimatzearen aurrebista"</string>
+    <string name="print_preview" msgid="8010217796057763343">"Inprimatze-aurrebista"</string>
     <string name="install_for_print_preview" msgid="6366303997385509332">"Aurrebista ikusteko, instalatu PDF ikustailea"</string>
     <string name="printing_app_crashed" msgid="854477616686566398">"Inprimatzeko aplikazioak matxura izan du"</string>
     <string name="generating_print_job" msgid="3119608742651698916">"Inprimatze-lana sortzen"</string>
@@ -54,10 +54,10 @@
     <string name="print_add_printer" msgid="1088656468360653455">"Gehitu inprimagailua"</string>
     <string name="print_select_printer" msgid="7388760939873368698">"Hautatu inprimagailua"</string>
     <string name="print_forget_printer" msgid="5035287497291910766">"Ahaztu inprimagailua"</string>
-    <plurals name="print_search_result_count_utterance" formatted="false" msgid="6997663738361080868">
-      <item quantity="other"><xliff:g id="COUNT_1">%1$s</xliff:g> inprimagailu aurkitu dira</item>
-      <item quantity="one"><xliff:g id="COUNT_0">%1$s</xliff:g> inprimagailu aurkitu da</item>
-    </plurals>
+  <plurals name="print_search_result_count_utterance">
+    <item quantity="one" msgid="4484953260685964252">"<xliff:g id="COUNT">%1$s</xliff:g> inprimagailu aurkitu da"</item>
+    <item quantity="other" msgid="6533817036607128241">"<xliff:g id="COUNT">%1$s</xliff:g> inprimagailu aurkitu dira"</item>
+  </plurals>
     <string name="choose_print_service" msgid="3740309762324459694">"Aukeratu inprimatze-zerbitzua"</string>
     <string name="print_searching_for_printers" msgid="6550424555079932867">"Inprimagailuak bilatzen"</string>
     <string name="print_no_printers" msgid="4869403323900054866">"Ez da inprimagailurik aurkitu"</string>
@@ -65,10 +65,10 @@
     <string name="cancelling_notification_title_template" msgid="1821759594704703197">"<xliff:g id="PRINT_JOB_NAME">%1$s</xliff:g> bertan behera uzten"</string>
     <string name="failed_notification_title_template" msgid="2256217208186530973">"Errorea <xliff:g id="PRINT_JOB_NAME">%1$s</xliff:g> inprimatzean"</string>
     <string name="blocked_notification_title_template" msgid="1175435827331588646">"Inprimag. <xliff:g id="PRINT_JOB_NAME">%1$s</xliff:g> blokeatu du"</string>
-    <plurals name="composite_notification_title_template" formatted="false" msgid="6940956968211733780">
-      <item quantity="other"><xliff:g id="PRINT_JOB_NAME_1">%1$d</xliff:g> inprimatze-lanak</item>
-      <item quantity="one"><xliff:g id="PRINT_JOB_NAME_0">%1$d</xliff:g> inprimatze-lana</item>
-    </plurals>
+  <plurals name="composite_notification_title_template">
+    <item quantity="one" msgid="5866624638054847057">"<xliff:g id="PRINT_JOB_NAME">%1$d</xliff:g> inprimatze-lana"</item>
+    <item quantity="other" msgid="8746611264734222865">"<xliff:g id="PRINT_JOB_NAME">%1$d</xliff:g> inprimatze-lanak"</item>
+  </plurals>
     <string name="cancel" msgid="4373674107267141885">"Utzi"</string>
     <string name="restart" msgid="2472034227037808749">"Berrabiarazi"</string>
     <string name="no_connection_to_printer" msgid="2159246915977282728">"Inprimagailua ez dago konektatuta"</string>
