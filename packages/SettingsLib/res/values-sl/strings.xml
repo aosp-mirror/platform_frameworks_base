@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 
+/*
+**
+** Copyright 2015 The Android Open Source Project
+**
+** Licensed under the Apache License, Version 2.0 (the "License");
+** you may not use this file except in compliance with the License.
+** You may obtain a copy of the License at
+**
+**     http://www.apache.org/licenses/LICENSE-2.0
+**
+** Unless required by applicable law or agreed to in writing, software
+** distributed under the License is distributed on an "AS IS" BASIS,
+** WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+** See the License for the specific language governing permissions and
+** limitations under the License.
+*/
+ -->
+
+<resources xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <string name="wifi_fail_to_scan" msgid="1265540342578081461">"Ni mogoče iskati omrežij"</string>
+    <string name="wifi_security_none" msgid="7985461072596594400">"Brez"</string>
+    <string name="wifi_remembered" msgid="4955746899347821096">"Shranjeno"</string>
+    <string name="wifi_disabled_generic" msgid="4259794910584943386">"Onemogočeno"</string>
+    <string name="wifi_disabled_network_failure" msgid="2364951338436007124">"Konfiguracija IP-ja ni uspela"</string>
+    <string name="wifi_disabled_wifi_failure" msgid="3081668066612876581">"Povezava prek Wi-Fi-ja ni uspela"</string>
+    <string name="wifi_disabled_password_failure" msgid="8659805351763133575">"Težava s preverjanjem pristnosti"</string>
+    <string name="wifi_not_in_range" msgid="1136191511238508967">"Ni v obsegu"</string>
+    <string name="wifi_no_internet" msgid="9151470775868728896">"Ni zaznanega dostopa do interneta; samodejna vnovična vzpostavitev povezave se ne bo izvedla."</string>
+    <string name="saved_network" msgid="4352716707126620811">"Shranil(-a): <xliff:g id="NAME">%1$s</xliff:g>"</string>
+    <string name="connected_via_wfa" msgid="3805736726317410714">"Povezava vzpostavljena prek pomočnika za Wi-Fi"</string>
+    <string name="connected_via_passpoint" msgid="2826205693803088747">"Vzpostavljena povezava prek: %1$s"</string>
+    <string name="available_via_passpoint" msgid="1617440946846329613">"Na voljo prek: %1$s"</string>
+    <string name="wifi_connected_no_internet" msgid="3149853966840874992">"Vzpostavljena povezava, brez interneta"</string>
+    <string name="bluetooth_disconnected" msgid="6557104142667339895">"Prekinjena povezava"</string>
+    <string name="bluetooth_disconnecting" msgid="8913264760027764974">"Prekinjanje povezave ..."</string>
+    <string name="bluetooth_connecting" msgid="8555009514614320497">"Vzpostavljanje povezave ..."</string>
+    <string name="bluetooth_connected" msgid="6038755206916626419">"Povezava je vzpostavljena"</string>
+    <string name="bluetooth_pairing" msgid="1426882272690346242">"Seznanjanje ..."</string>
+    <string name="bluetooth_connected_no_headset" msgid="2866994875046035609">"Povezava vzpostavljena (brez telefona)"</string>
+    <string name="bluetooth_connected_no_a2dp" msgid="4576188601581440337">"Povezava vzpostavljena (brez predstavnosti)"</string>
+    <string name="bluetooth_connected_no_map" msgid="6504436917057479986">"Povezava vzp. (ni dostopa do sporočil)"</string>
+    <string name="bluetooth_connected_no_headset_no_a2dp" msgid="9195757766755553810">"Povezava vzpostavljena (brez telefona ali predstavnosti)"</string>
+    <string name="bluetooth_profile_a2dp" msgid="2031475486179830674">"Zvok predstavnosti"</string>
+    <string name="bluetooth_profile_headset" msgid="8658779596261212609">"Zvok telefona"</string>
+    <string name="bluetooth_profile_opp" msgid="9168139293654233697">"Prenos datoteke"</string>
+    <string name="bluetooth_profile_hid" msgid="3680729023366986480">"Vnosna naprava"</string>
+    <string name="bluetooth_profile_pan" msgid="3391606497945147673">"Internetni dostop"</string>
+    <string name="bluetooth_profile_pbap" msgid="5372051906968576809">"Dajanje stikov v skupno rabo"</string>
+    <string name="bluetooth_profile_pbap_summary" msgid="6605229608108852198">"Uporabi za dajanje stikov v skupno rabo"</string>
+    <string name="bluetooth_profile_pan_nap" msgid="8429049285027482959">"Skupna raba internetne povezave"</string>
+    <string name="bluetooth_profile_map" msgid="5465271250454324383">"Dostop do sporočil"</string>
+    <string name="bluetooth_profile_sap" msgid="5764222021851283125">"Dostop do kartice SIM"</string>
+    <string name="bluetooth_a2dp_profile_summary_connected" msgid="963376081347721598">"Povezan s profilom za predstavnostni zvok"</string>
+    <string name="bluetooth_headset_profile_summary_connected" msgid="7661070206715520671">"Povezava s profilom za zvok telefona vzpostavljena"</string>
+    <string name="bluetooth_opp_profile_summary_connected" msgid="2611913495968309066">"Povezava s strežnikom za prenos datotek je vzpostavljena"</string>
+    <string name="bluetooth_map_profile_summary_connected" msgid="8191407438851351713">"Povezava je vzpostavljena z zemljevidom"</string>
+    <string name="bluetooth_sap_profile_summary_connected" msgid="8561765057453083838">"Vzpostavljena povezava s profilom SAP"</string>
+    <string name="bluetooth_opp_profile_summary_not_connected" msgid="1267091356089086285">"Povezava s strežnikom za prenos datotek ni vzpostavljena"</string>
+    <string name="bluetooth_hid_profile_summary_connected" msgid="3381760054215168689">"Povezava z vnosno napravo je vzpostavljena"</string>
+    <string name="bluetooth_pan_user_profile_summary_connected" msgid="4602294638909590612">"Povezava z napravo za internetni dostop"</string>
+    <string name="bluetooth_pan_nap_profile_summary_connected" msgid="1561383706411975199">"Skupna raba lok. internetne povezave z napravo"</string>
+    <string name="bluetooth_pan_profile_summary_use_for" msgid="5664884523822068653">"Uporabi za dostop do interneta"</string>
+    <string name="bluetooth_map_profile_summary_use_for" msgid="5154200119919927434">"Uporabi za zemljevid"</string>
+    <string name="bluetooth_sap_profile_summary_use_for" msgid="7085362712786907993">"Uporablja se za dostop do kartice SIM"</string>
+    <string name="bluetooth_a2dp_profile_summary_use_for" msgid="4630849022250168427">"Uporabi za zvok predstavnosti"</string>
+    <string name="bluetooth_headset_profile_summary_use_for" msgid="8705753622443862627">"Uporabi za zvok telefona"</string>
+    <string name="bluetooth_opp_profile_summary_use_for" msgid="1255674547144769756">"Uporabi za prenos datotek"</string>
+    <string name="bluetooth_hid_profile_summary_use_for" msgid="232727040453645139">"Uporabi za vnos"</string>
+    <string name="bluetooth_pairing_accept" msgid="6163520056536604875">"Seznani"</string>
+    <string name="bluetooth_pairing_accept_all_caps" msgid="6061699265220789149">"SEZNANI"</string>
+    <string name="bluetooth_pairing_decline" msgid="4185420413578948140">"Prekliči"</string>
+    <string name="bluetooth_pairing_will_share_phonebook" msgid="4982239145676394429">"Seznanjanje pri vzpostavljeni povezavi omogoči dostop do vaših stikov in zgodovine klicev."</string>
+    <string name="bluetooth_pairing_error_message" msgid="3748157733635947087">"Ni bilo mogoče vzpostaviti povezave z napravo <xliff:g id="DEVICE_NAME">%1$s</xliff:g>."</string>
+    <string name="bluetooth_pairing_pin_error_message" msgid="8337234855188925274">"Zaradi nepravilne kode PIN ali gesla ni mogoče vzpostaviti povezave z napravo <xliff:g id="DEVICE_NAME">%1$s</xliff:g>."</string>
+    <string name="bluetooth_pairing_device_down_error_message" msgid="7870998403045801381">"Z napravo <xliff:g id="DEVICE_NAME">%1$s</xliff:g> ni mogoče vzpostaviti povezave."</string>
+    <string name="bluetooth_pairing_rejected_error_message" msgid="1648157108520832454">"Naprava <xliff:g id="DEVICE_NAME">%1$s</xliff:g> je zavrnila seznanitev."</string>
+    <string name="accessibility_wifi_off" msgid="1166761729660614716">"Wi-Fi je izklopljen."</string>
+    <string name="accessibility_no_wifi" msgid="8834610636137374508">"Povezava Wi-Fi je prekinjena."</string>
+    <string name="accessibility_wifi_one_bar" msgid="4869376278894301820">"Ena črtica signala Wi-Fi."</string>
+    <string name="accessibility_wifi_two_bars" msgid="3569851234710034416">"Dve črtici signala Wi-Fi."</string>
+    <string name="accessibility_wifi_three_bars" msgid="8134185644861380311">"Tri črtice signala Wi-Fi."</string>
+    <string name="accessibility_wifi_signal_full" msgid="7061045677694702">"Poln signal Wi-Fi."</string>
+</resources>

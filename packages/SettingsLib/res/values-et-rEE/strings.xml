@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 
+/*
+**
+** Copyright 2015 The Android Open Source Project
+**
+** Licensed under the Apache License, Version 2.0 (the "License");
+** you may not use this file except in compliance with the License.
+** You may obtain a copy of the License at
+**
+**     http://www.apache.org/licenses/LICENSE-2.0
+**
+** Unless required by applicable law or agreed to in writing, software
+** distributed under the License is distributed on an "AS IS" BASIS,
+** WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+** See the License for the specific language governing permissions and
+** limitations under the License.
+*/
+ -->
+
+<resources xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <string name="wifi_fail_to_scan" msgid="1265540342578081461">"Võrke ei saa kontrollida"</string>
+    <string name="wifi_security_none" msgid="7985461072596594400">"Puudub"</string>
+    <string name="wifi_remembered" msgid="4955746899347821096">"Salvestatud"</string>
+    <string name="wifi_disabled_generic" msgid="4259794910584943386">"Keelatud"</string>
+    <string name="wifi_disabled_network_failure" msgid="2364951338436007124">"IP seadistamise ebaõnnestumine"</string>
+    <string name="wifi_disabled_wifi_failure" msgid="3081668066612876581">"WiFi-ühenduse viga"</string>
+    <string name="wifi_disabled_password_failure" msgid="8659805351763133575">"Autentimise probleem"</string>
+    <string name="wifi_not_in_range" msgid="1136191511238508967">"Pole vahemikus"</string>
+    <string name="wifi_no_internet" msgid="9151470775868728896">"Interneti-ühendust ei tuvastatud, seadet ei ühendata automaatselt."</string>
+    <string name="saved_network" msgid="4352716707126620811">"Salvestas: <xliff:g id="NAME">%1$s</xliff:g>"</string>
+    <string name="connected_via_wfa" msgid="3805736726317410714">"Ühendatud WiFi-abi kaudu"</string>
+    <string name="connected_via_passpoint" msgid="2826205693803088747">"Ühendatud üksuse %1$s kaudu"</string>
+    <string name="available_via_passpoint" msgid="1617440946846329613">"Saadaval üksuse %1$s kaudu"</string>
+    <string name="wifi_connected_no_internet" msgid="3149853966840874992">"Ühendatud, Interneti-ühendus puudub"</string>
+    <string name="bluetooth_disconnected" msgid="6557104142667339895">"Ühendus katkestatud"</string>
+    <string name="bluetooth_disconnecting" msgid="8913264760027764974">"Ühenduse katkestamine ..."</string>
+    <string name="bluetooth_connecting" msgid="8555009514614320497">"Ühendamine ..."</string>
+    <string name="bluetooth_connected" msgid="6038755206916626419">"Ühendatud"</string>
+    <string name="bluetooth_pairing" msgid="1426882272690346242">"Sidumine ..."</string>
+    <string name="bluetooth_connected_no_headset" msgid="2866994875046035609">"Ühendatud (telefoni pole)"</string>
+    <string name="bluetooth_connected_no_a2dp" msgid="4576188601581440337">"Ühendatud (meediat pole)"</string>
+    <string name="bluetooth_connected_no_map" msgid="6504436917057479986">"Ühendatud (sõnumita juurdepääs)"</string>
+    <string name="bluetooth_connected_no_headset_no_a2dp" msgid="9195757766755553810">"Ühendatud (pole telefoni ega meediat)"</string>
+    <string name="bluetooth_profile_a2dp" msgid="2031475486179830674">"Meedia heli"</string>
+    <string name="bluetooth_profile_headset" msgid="8658779596261212609">"Telefoni heli"</string>
+    <string name="bluetooth_profile_opp" msgid="9168139293654233697">"Failiedastus"</string>
+    <string name="bluetooth_profile_hid" msgid="3680729023366986480">"Sisendseade"</string>
+    <string name="bluetooth_profile_pan" msgid="3391606497945147673">"Internetti juurdepääs"</string>
+    <string name="bluetooth_profile_pbap" msgid="5372051906968576809">"Kontakti jagamine"</string>
+    <string name="bluetooth_profile_pbap_summary" msgid="6605229608108852198">"Kasutamine kontaktide jagamiseks"</string>
+    <string name="bluetooth_profile_pan_nap" msgid="8429049285027482959">"Interneti-ühenduse jagamine"</string>
+    <string name="bluetooth_profile_map" msgid="5465271250454324383">"Juurdepääs sõnumile"</string>
+    <string name="bluetooth_profile_sap" msgid="5764222021851283125">"SIM-kaardi juurdepääs"</string>
+    <string name="bluetooth_a2dp_profile_summary_connected" msgid="963376081347721598">"Ühendatud meediumiheliga"</string>
+    <string name="bluetooth_headset_profile_summary_connected" msgid="7661070206715520671">"Ühendatud telefoniheliga"</string>
+    <string name="bluetooth_opp_profile_summary_connected" msgid="2611913495968309066">"Ühendatud failiedastuse serveriga"</string>
+    <string name="bluetooth_map_profile_summary_connected" msgid="8191407438851351713">"Ühendatud kaardiga"</string>
+    <string name="bluetooth_sap_profile_summary_connected" msgid="8561765057453083838">"Ühendatud SAP-iga"</string>
+    <string name="bluetooth_opp_profile_summary_not_connected" msgid="1267091356089086285">"Ei ole failiedastuse serveriga ühendatud"</string>
+    <string name="bluetooth_hid_profile_summary_connected" msgid="3381760054215168689">"Ühendatud sisendseade"</string>
+    <string name="bluetooth_pan_user_profile_summary_connected" msgid="4602294638909590612">"Ühendatud seadmega Internetti juurdepääsuks"</string>
+    <string name="bluetooth_pan_nap_profile_summary_connected" msgid="1561383706411975199">"Kohaliku Interneti-ühenduse jagamine seadmega"</string>
+    <string name="bluetooth_pan_profile_summary_use_for" msgid="5664884523822068653">"Interneti-juurdepääsuks kasutamine"</string>
+    <string name="bluetooth_map_profile_summary_use_for" msgid="5154200119919927434">"Kasuta kaardi jaoks"</string>
+    <string name="bluetooth_sap_profile_summary_use_for" msgid="7085362712786907993">"SIM-kaardi juurdepääsuks kasutamine"</string>
+    <string name="bluetooth_a2dp_profile_summary_use_for" msgid="4630849022250168427">"Kasuta meediumiheli jaoks"</string>
+    <string name="bluetooth_headset_profile_summary_use_for" msgid="8705753622443862627">"Kasuta telefoniheli jaoks"</string>
+    <string name="bluetooth_opp_profile_summary_use_for" msgid="1255674547144769756">"Kasutage failide edastamiseks"</string>
+    <string name="bluetooth_hid_profile_summary_use_for" msgid="232727040453645139">"Kasutage sisendi jaoks"</string>
+    <string name="bluetooth_pairing_accept" msgid="6163520056536604875">"Seo"</string>
+    <string name="bluetooth_pairing_accept_all_caps" msgid="6061699265220789149">"SEO"</string>
+    <string name="bluetooth_pairing_decline" msgid="4185420413578948140">"Tühista"</string>
+    <string name="bluetooth_pairing_will_share_phonebook" msgid="4982239145676394429">"Sidumine annab ühenduse ajal juurdepääsu kontaktidele ja kõneajaloole."</string>
+    <string name="bluetooth_pairing_error_message" msgid="3748157733635947087">"Ei saanud seadmega <xliff:g id="DEVICE_NAME">%1$s</xliff:g> siduda."</string>
+    <string name="bluetooth_pairing_pin_error_message" msgid="8337234855188925274">"Ei saanud seadmega <xliff:g id="DEVICE_NAME">%1$s</xliff:g> siduda vale PIN-koodi või parooli tõttu."</string>
+    <string name="bluetooth_pairing_device_down_error_message" msgid="7870998403045801381">"Seadmega <xliff:g id="DEVICE_NAME">%1$s</xliff:g> ei saa sidet luua."</string>
+    <string name="bluetooth_pairing_rejected_error_message" msgid="1648157108520832454">"<xliff:g id="DEVICE_NAME">%1$s</xliff:g> hülgas sidumise."</string>
+    <string name="accessibility_wifi_off" msgid="1166761729660614716">"WiFi on välja lülitatud."</string>
+    <string name="accessibility_no_wifi" msgid="8834610636137374508">"WiFi-ühendus on katkestatud."</string>
+    <string name="accessibility_wifi_one_bar" msgid="4869376278894301820">"WiFi: üks pulk."</string>
+    <string name="accessibility_wifi_two_bars" msgid="3569851234710034416">"WiFi: kaks pulka."</string>
+    <string name="accessibility_wifi_three_bars" msgid="8134185644861380311">"WiFi: kolm pulka."</string>
+    <string name="accessibility_wifi_signal_full" msgid="7061045677694702">"WiFi-signaal on tugev."</string>
+</resources>

@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 
+/*
+**
+** Copyright 2015 The Android Open Source Project
+**
+** Licensed under the Apache License, Version 2.0 (the "License");
+** you may not use this file except in compliance with the License.
+** You may obtain a copy of the License at
+**
+**     http://www.apache.org/licenses/LICENSE-2.0
+**
+** Unless required by applicable law or agreed to in writing, software
+** distributed under the License is distributed on an "AS IS" BASIS,
+** WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+** See the License for the specific language governing permissions and
+** limitations under the License.
+*/
+ -->
+
+<resources xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <string name="wifi_fail_to_scan" msgid="1265540342578081461">"Impossible de rechercher des réseaux."</string>
+    <string name="wifi_security_none" msgid="7985461072596594400">"Aucune"</string>
+    <string name="wifi_remembered" msgid="4955746899347821096">"Enregistré"</string>
+    <string name="wifi_disabled_generic" msgid="4259794910584943386">"Désactivé"</string>
+    <string name="wifi_disabled_network_failure" msgid="2364951338436007124">"Échec de configuration de l\'adresse IP"</string>
+    <string name="wifi_disabled_wifi_failure" msgid="3081668066612876581">"Échec de la connexion Wi-Fi"</string>
+    <string name="wifi_disabled_password_failure" msgid="8659805351763133575">"Problème d\'authentification."</string>
+    <string name="wifi_not_in_range" msgid="1136191511238508967">"Hors de portée"</string>
+    <string name="wifi_no_internet" msgid="9151470775868728896">"Aucun accès à Internet détecté, reconnexion automatique impossible"</string>
+    <string name="saved_network" msgid="4352716707126620811">"Enregistré par <xliff:g id="NAME">%1$s</xliff:g>"</string>
+    <string name="connected_via_wfa" msgid="3805736726317410714">"Connecté via l\'assistant Wi‑Fi"</string>
+    <string name="connected_via_passpoint" msgid="2826205693803088747">"Connecté via %1$s"</string>
+    <string name="available_via_passpoint" msgid="1617440946846329613">"Disponible via %1$s"</string>
+    <string name="wifi_connected_no_internet" msgid="3149853966840874992">"Connecté, aucun accès à Internet"</string>
+    <string name="bluetooth_disconnected" msgid="6557104142667339895">"Déconnecté"</string>
+    <string name="bluetooth_disconnecting" msgid="8913264760027764974">"Déconnexion…"</string>
+    <string name="bluetooth_connecting" msgid="8555009514614320497">"Connexion…"</string>
+    <string name="bluetooth_connected" msgid="6038755206916626419">"Connecté"</string>
+    <string name="bluetooth_pairing" msgid="1426882272690346242">"Association…"</string>
+    <string name="bluetooth_connected_no_headset" msgid="2866994875046035609">"Connecté (sans audio pour appels tél.)"</string>
+    <string name="bluetooth_connected_no_a2dp" msgid="4576188601581440337">"Connecté (sans audio contenu mutimédia)"</string>
+    <string name="bluetooth_connected_no_map" msgid="6504436917057479986">"Connecté (sans accès aux messages)"</string>
+    <string name="bluetooth_connected_no_headset_no_a2dp" msgid="9195757766755553810">"Connecté (sans audio tel./multimédia)"</string>
+    <string name="bluetooth_profile_a2dp" msgid="2031475486179830674">"Multimédia"</string>
+    <string name="bluetooth_profile_headset" msgid="8658779596261212609">"Appels et notifications"</string>
+    <string name="bluetooth_profile_opp" msgid="9168139293654233697">"Transfert de fichier"</string>
+    <string name="bluetooth_profile_hid" msgid="3680729023366986480">"Périphérique d\'entrée"</string>
+    <string name="bluetooth_profile_pan" msgid="3391606497945147673">"Accès Internet"</string>
+    <string name="bluetooth_profile_pbap" msgid="5372051906968576809">"Partage de contacts"</string>
+    <string name="bluetooth_profile_pbap_summary" msgid="6605229608108852198">"Utiliser pour le partage de contacts"</string>
+    <string name="bluetooth_profile_pan_nap" msgid="8429049285027482959">"Partage de connexion Internet"</string>
+    <string name="bluetooth_profile_map" msgid="5465271250454324383">"Accès aux messages"</string>
+    <string name="bluetooth_profile_sap" msgid="5764222021851283125">"Accès à la carte SIM"</string>
+    <string name="bluetooth_a2dp_profile_summary_connected" msgid="963376081347721598">"Connecté aux paramètres audio du média"</string>
+    <string name="bluetooth_headset_profile_summary_connected" msgid="7661070206715520671">"Connecté aux paramètres audio du téléphone"</string>
+    <string name="bluetooth_opp_profile_summary_connected" msgid="2611913495968309066">"Connexion au serveur de transfert de fichiers"</string>
+    <string name="bluetooth_map_profile_summary_connected" msgid="8191407438851351713">"Connecté à la carte"</string>
+    <string name="bluetooth_sap_profile_summary_connected" msgid="8561765057453083838">"Connecté au point d\'accès au service"</string>
+    <string name="bluetooth_opp_profile_summary_not_connected" msgid="1267091356089086285">"Connexion au serveur de transfert de fichiers non établie"</string>
+    <string name="bluetooth_hid_profile_summary_connected" msgid="3381760054215168689">"Connecté au périphérique d\'entrée"</string>
+    <string name="bluetooth_pan_user_profile_summary_connected" msgid="4602294638909590612">"Connecté à l\'appareil pour accès Internet"</string>
+    <string name="bluetooth_pan_nap_profile_summary_connected" msgid="1561383706411975199">"Connexion Internet locale partagée"</string>
+    <string name="bluetooth_pan_profile_summary_use_for" msgid="5664884523822068653">"Utiliser pour l\'accès à Internet"</string>
+    <string name="bluetooth_map_profile_summary_use_for" msgid="5154200119919927434">"Utiliser pour la carte"</string>
+    <string name="bluetooth_sap_profile_summary_use_for" msgid="7085362712786907993">"Utiliser pour l\'accès à la carte SIM"</string>
+    <string name="bluetooth_a2dp_profile_summary_use_for" msgid="4630849022250168427">"Utiliser pour les paramètres audio du média"</string>
+    <string name="bluetooth_headset_profile_summary_use_for" msgid="8705753622443862627">"Utiliser pour les paramètres audio du téléphone"</string>
+    <string name="bluetooth_opp_profile_summary_use_for" msgid="1255674547144769756">"Utiliser pour le transfert de fichiers"</string>
+    <string name="bluetooth_hid_profile_summary_use_for" msgid="232727040453645139">"Utiliser comme entrée"</string>
+    <string name="bluetooth_pairing_accept" msgid="6163520056536604875">"Associer"</string>
+    <string name="bluetooth_pairing_accept_all_caps" msgid="6061699265220789149">"ASSOCIER"</string>
+    <string name="bluetooth_pairing_decline" msgid="4185420413578948140">"Annuler"</string>
+    <string name="bluetooth_pairing_will_share_phonebook" msgid="4982239145676394429">"L\'association vous permet d\'accéder à vos contacts et à l\'historique des appels lorsque vous êtes connecté."</string>
+    <string name="bluetooth_pairing_error_message" msgid="3748157733635947087">"Impossible d\'associer à <xliff:g id="DEVICE_NAME">%1$s</xliff:g>."</string>
+    <string name="bluetooth_pairing_pin_error_message" msgid="8337234855188925274">"Impossible d\'établir l\'association avec <xliff:g id="DEVICE_NAME">%1$s</xliff:g> en raison d\'un code ou d\'une clé d\'accès incorrects."</string>
+    <string name="bluetooth_pairing_device_down_error_message" msgid="7870998403045801381">"Impossible d\'établir la communication avec <xliff:g id="DEVICE_NAME">%1$s</xliff:g>."</string>
+    <string name="bluetooth_pairing_rejected_error_message" msgid="1648157108520832454">"Association refusée par <xliff:g id="DEVICE_NAME">%1$s</xliff:g>"</string>
+    <string name="accessibility_wifi_off" msgid="1166761729660614716">"Wi-Fi désactivé"</string>
+    <string name="accessibility_no_wifi" msgid="8834610636137374508">"Wi-Fi déconnecté"</string>
+    <string name="accessibility_wifi_one_bar" msgid="4869376278894301820">"Signal Wi-Fi faible"</string>
+    <string name="accessibility_wifi_two_bars" msgid="3569851234710034416">"Signal Wi-Fi moyen"</string>
+    <string name="accessibility_wifi_three_bars" msgid="8134185644861380311">"Signal Wi-Fi bon"</string>
+    <string name="accessibility_wifi_signal_full" msgid="7061045677694702">"Signal Wi-Fi excellent"</string>
+</resources>

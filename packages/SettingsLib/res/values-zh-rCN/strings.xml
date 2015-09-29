@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 
+/*
+**
+** Copyright 2015 The Android Open Source Project
+**
+** Licensed under the Apache License, Version 2.0 (the "License");
+** you may not use this file except in compliance with the License.
+** You may obtain a copy of the License at
+**
+**     http://www.apache.org/licenses/LICENSE-2.0
+**
+** Unless required by applicable law or agreed to in writing, software
+** distributed under the License is distributed on an "AS IS" BASIS,
+** WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+** See the License for the specific language governing permissions and
+** limitations under the License.
+*/
+ -->
+
+<resources xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <string name="wifi_fail_to_scan" msgid="1265540342578081461">"无法扫描网络"</string>
+    <string name="wifi_security_none" msgid="7985461072596594400">"无"</string>
+    <string name="wifi_remembered" msgid="4955746899347821096">"已保存"</string>
+    <string name="wifi_disabled_generic" msgid="4259794910584943386">"已停用"</string>
+    <string name="wifi_disabled_network_failure" msgid="2364951338436007124">"IP 配置失败"</string>
+    <string name="wifi_disabled_wifi_failure" msgid="3081668066612876581">"WLAN 连接失败"</string>
+    <string name="wifi_disabled_password_failure" msgid="8659805351763133575">"身份验证出现问题"</string>
+    <string name="wifi_not_in_range" msgid="1136191511238508967">"不在范围内"</string>
+    <string name="wifi_no_internet" msgid="9151470775868728896">"未检测到任何互联网连接，因此不会自动重新连接。"</string>
+    <string name="saved_network" msgid="4352716707126620811">"已通过<xliff:g id="NAME">%1$s</xliff:g>保存"</string>
+    <string name="connected_via_wfa" msgid="3805736726317410714">"已连接（通过 WLAN 助手）"</string>
+    <string name="connected_via_passpoint" msgid="2826205693803088747">"已通过%1$s连接"</string>
+    <string name="available_via_passpoint" msgid="1617440946846329613">"可通过%1$s连接"</string>
+    <string name="wifi_connected_no_internet" msgid="3149853966840874992">"已连接，但无法访问互联网"</string>
+    <string name="bluetooth_disconnected" msgid="6557104142667339895">"已断开连接"</string>
+    <string name="bluetooth_disconnecting" msgid="8913264760027764974">"正在断开连接..."</string>
+    <string name="bluetooth_connecting" msgid="8555009514614320497">"正在连接..."</string>
+    <string name="bluetooth_connected" msgid="6038755206916626419">"已连接"</string>
+    <string name="bluetooth_pairing" msgid="1426882272690346242">"正在配对..."</string>
+    <string name="bluetooth_connected_no_headset" msgid="2866994875046035609">"已连接（无手机）"</string>
+    <string name="bluetooth_connected_no_a2dp" msgid="4576188601581440337">"已连接（无媒体）"</string>
+    <string name="bluetooth_connected_no_map" msgid="6504436917057479986">"已连接（无消息权限）"</string>
+    <string name="bluetooth_connected_no_headset_no_a2dp" msgid="9195757766755553810">"已连接（没有手机或媒体信号）"</string>
+    <string name="bluetooth_profile_a2dp" msgid="2031475486179830674">"媒体音频"</string>
+    <string name="bluetooth_profile_headset" msgid="8658779596261212609">"手机音频"</string>
+    <string name="bluetooth_profile_opp" msgid="9168139293654233697">"文件传输"</string>
+    <string name="bluetooth_profile_hid" msgid="3680729023366986480">"输入设备"</string>
+    <string name="bluetooth_profile_pan" msgid="3391606497945147673">"互联网连接"</string>
+    <string name="bluetooth_profile_pbap" msgid="5372051906968576809">"共享联系人"</string>
+    <string name="bluetooth_profile_pbap_summary" msgid="6605229608108852198">"用于共享联系人"</string>
+    <string name="bluetooth_profile_pan_nap" msgid="8429049285027482959">"共享互联网连接"</string>
+    <string name="bluetooth_profile_map" msgid="5465271250454324383">"消息权限"</string>
+    <string name="bluetooth_profile_sap" msgid="5764222021851283125">"SIM 卡存取权限"</string>
+    <string name="bluetooth_a2dp_profile_summary_connected" msgid="963376081347721598">"已连接到媒体音频"</string>
+    <string name="bluetooth_headset_profile_summary_connected" msgid="7661070206715520671">"已连接到手机音频"</string>
+    <string name="bluetooth_opp_profile_summary_connected" msgid="2611913495968309066">"已连接到文件传输服务器"</string>
+    <string name="bluetooth_map_profile_summary_connected" msgid="8191407438851351713">"已连接到地图"</string>
+    <string name="bluetooth_sap_profile_summary_connected" msgid="8561765057453083838">"已连接到 SAP"</string>
+    <string name="bluetooth_opp_profile_summary_not_connected" msgid="1267091356089086285">"未连接到文件传输服务器"</string>
+    <string name="bluetooth_hid_profile_summary_connected" msgid="3381760054215168689">"已连接到输入设备"</string>
+    <string name="bluetooth_pan_user_profile_summary_connected" msgid="4602294638909590612">"经由其他设备连接到互联网"</string>
+    <string name="bluetooth_pan_nap_profile_summary_connected" msgid="1561383706411975199">"与其他设备共享该设备的互联网连接"</string>
+    <string name="bluetooth_pan_profile_summary_use_for" msgid="5664884523822068653">"用于连接互联网"</string>
+    <string name="bluetooth_map_profile_summary_use_for" msgid="5154200119919927434">"用于地图"</string>
+    <string name="bluetooth_sap_profile_summary_use_for" msgid="7085362712786907993">"用于存取 SIM 卡"</string>
+    <string name="bluetooth_a2dp_profile_summary_use_for" msgid="4630849022250168427">"用于媒体音频"</string>
+    <string name="bluetooth_headset_profile_summary_use_for" msgid="8705753622443862627">"用于手机音频"</string>
+    <string name="bluetooth_opp_profile_summary_use_for" msgid="1255674547144769756">"用于文件传输"</string>
+    <string name="bluetooth_hid_profile_summary_use_for" msgid="232727040453645139">"用于输入"</string>
+    <string name="bluetooth_pairing_accept" msgid="6163520056536604875">"配对"</string>
+    <string name="bluetooth_pairing_accept_all_caps" msgid="6061699265220789149">"配对"</string>
+    <string name="bluetooth_pairing_decline" msgid="4185420413578948140">"取消"</string>
+    <string name="bluetooth_pairing_will_share_phonebook" msgid="4982239145676394429">"配对之后，所配对的设备将可以在建立连接后访问您的通讯录和通话记录。"</string>
+    <string name="bluetooth_pairing_error_message" msgid="3748157733635947087">"无法与“<xliff:g id="DEVICE_NAME">%1$s</xliff:g>”进行配对。"</string>
+    <string name="bluetooth_pairing_pin_error_message" msgid="8337234855188925274">"PIN码或配对密钥不正确，无法与<xliff:g id="DEVICE_NAME">%1$s</xliff:g>配对。"</string>
+    <string name="bluetooth_pairing_device_down_error_message" msgid="7870998403045801381">"无法与“<xliff:g id="DEVICE_NAME">%1$s</xliff:g>”进行通信。"</string>
+    <string name="bluetooth_pairing_rejected_error_message" msgid="1648157108520832454">"<xliff:g id="DEVICE_NAME">%1$s</xliff:g> 已拒绝配对。"</string>
+    <string name="accessibility_wifi_off" msgid="1166761729660614716">"WLAN 已关闭。"</string>
+    <string name="accessibility_no_wifi" msgid="8834610636137374508">"WLAN 连接已断开。"</string>
+    <string name="accessibility_wifi_one_bar" msgid="4869376278894301820">"WLAN 信号强度为一格。"</string>
+    <string name="accessibility_wifi_two_bars" msgid="3569851234710034416">"WLAN 信号强度为两格。"</string>
+    <string name="accessibility_wifi_three_bars" msgid="8134185644861380311">"WLAN 信号强度为三格。"</string>
+    <string name="accessibility_wifi_signal_full" msgid="7061045677694702">"WLAN 信号满格。"</string>
+</resources>

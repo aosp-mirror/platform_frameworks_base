@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 
+/*
+**
+** Copyright 2015 The Android Open Source Project
+**
+** Licensed under the Apache License, Version 2.0 (the "License");
+** you may not use this file except in compliance with the License.
+** You may obtain a copy of the License at
+**
+**     http://www.apache.org/licenses/LICENSE-2.0
+**
+** Unless required by applicable law or agreed to in writing, software
+** distributed under the License is distributed on an "AS IS" BASIS,
+** WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+** See the License for the specific language governing permissions and
+** limitations under the License.
+*/
+ -->
+
+<resources xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <string name="wifi_fail_to_scan" msgid="1265540342578081461">"Желілерді шолу мүмкін емес"</string>
+    <string name="wifi_security_none" msgid="7985461072596594400">"Ешқандай"</string>
+    <string name="wifi_remembered" msgid="4955746899347821096">"Сақталды"</string>
+    <string name="wifi_disabled_generic" msgid="4259794910584943386">"Өшірілген"</string>
+    <string name="wifi_disabled_network_failure" msgid="2364951338436007124">"IP конфигурациясының қатесі"</string>
+    <string name="wifi_disabled_wifi_failure" msgid="3081668066612876581">"Wi-Fi байланысының қатесі"</string>
+    <string name="wifi_disabled_password_failure" msgid="8659805351763133575">"Растау мәселесі"</string>
+    <string name="wifi_not_in_range" msgid="1136191511238508967">"Аумақта жоқ"</string>
+    <string name="wifi_no_internet" msgid="9151470775868728896">"Интернетке қатынас анықталмады, автоматты түрде қайта қосылу орындалмайды."</string>
+    <string name="saved_network" msgid="4352716707126620811">"<xliff:g id="NAME">%1$s</xliff:g> сақтаған"</string>
+    <string name="connected_via_wfa" msgid="3805736726317410714">"Wi‑Fi көмекшісі арқылы қосылу орындалды"</string>
+    <string name="connected_via_passpoint" msgid="2826205693803088747">"%1$s арқылы қосылған"</string>
+    <string name="available_via_passpoint" msgid="1617440946846329613">"%1$s арқылы қолжетімді"</string>
+    <string name="wifi_connected_no_internet" msgid="3149853966840874992">"Қосылған, интернет жоқ"</string>
+    <string name="bluetooth_disconnected" msgid="6557104142667339895">"Ажыратылған"</string>
+    <string name="bluetooth_disconnecting" msgid="8913264760027764974">"Ажыратылуда…"</string>
+    <string name="bluetooth_connecting" msgid="8555009514614320497">"Жалғауда..."</string>
+    <string name="bluetooth_connected" msgid="6038755206916626419">"Жалғанған"</string>
+    <string name="bluetooth_pairing" msgid="1426882272690346242">"Жұптауда..."</string>
+    <string name="bluetooth_connected_no_headset" msgid="2866994875046035609">"Жалғанған (телефон жоқ)"</string>
+    <string name="bluetooth_connected_no_a2dp" msgid="4576188601581440337">"Жалғанған (медиа жоқ)"</string>
+    <string name="bluetooth_connected_no_map" msgid="6504436917057479986">"Жалғанған (хабарлар қол жетімсіз)"</string>
+    <string name="bluetooth_connected_no_headset_no_a2dp" msgid="9195757766755553810">"Жалғанған (телефон және медиа жоқ)"</string>
+    <string name="bluetooth_profile_a2dp" msgid="2031475486179830674">"Meдиа аудиосы"</string>
+    <string name="bluetooth_profile_headset" msgid="8658779596261212609">"Телефон аудиосы"</string>
+    <string name="bluetooth_profile_opp" msgid="9168139293654233697">"Файл жіберу"</string>
+    <string name="bluetooth_profile_hid" msgid="3680729023366986480">"Кіріс құрылғысы"</string>
+    <string name="bluetooth_profile_pan" msgid="3391606497945147673">"Интернетке қосылу"</string>
+    <string name="bluetooth_profile_pbap" msgid="5372051906968576809">"Контактіні бөлісу"</string>
+    <string name="bluetooth_profile_pbap_summary" msgid="6605229608108852198">"Контактіні бөлісу үшін пайдалану"</string>
+    <string name="bluetooth_profile_pan_nap" msgid="8429049285027482959">"Интернет байланысын ортақ қолдану"</string>
+    <string name="bluetooth_profile_map" msgid="5465271250454324383">"Хабарға кіру"</string>
+    <string name="bluetooth_profile_sap" msgid="5764222021851283125">"SIM картасына кіру"</string>
+    <string name="bluetooth_a2dp_profile_summary_connected" msgid="963376081347721598">"Медиа аудиосына жалғанған"</string>
+    <string name="bluetooth_headset_profile_summary_connected" msgid="7661070206715520671">"Телефон аудиосына қосылған"</string>
+    <string name="bluetooth_opp_profile_summary_connected" msgid="2611913495968309066">"Файл жіберу серверіне жалғанған"</string>
+    <string name="bluetooth_map_profile_summary_connected" msgid="8191407438851351713">"Картаға жалғанған"</string>
+    <string name="bluetooth_sap_profile_summary_connected" msgid="8561765057453083838">"SAP жүйесіне қосылған"</string>
+    <string name="bluetooth_opp_profile_summary_not_connected" msgid="1267091356089086285">"Файл жіберу серверіне жалғанбаған"</string>
+    <string name="bluetooth_hid_profile_summary_connected" msgid="3381760054215168689">"Кіріс құрылғысына косылған"</string>
+    <string name="bluetooth_pan_user_profile_summary_connected" msgid="4602294638909590612">"Құрылғыға интернетке кіру үшін жалғанған"</string>
+    <string name="bluetooth_pan_nap_profile_summary_connected" msgid="1561383706411975199">"Жергілікті интернет байланысын құрылғымен ортақ пайдалану"</string>
+    <string name="bluetooth_pan_profile_summary_use_for" msgid="5664884523822068653">"Интернетке кіру үшін қолдану"</string>
+    <string name="bluetooth_map_profile_summary_use_for" msgid="5154200119919927434">"Карта үшін қолдану"</string>
+    <string name="bluetooth_sap_profile_summary_use_for" msgid="7085362712786907993">"SIM картасына кіру үшін пайдалану"</string>
+    <string name="bluetooth_a2dp_profile_summary_use_for" msgid="4630849022250168427">"Медиа аудиосы үшін қолдану"</string>
+    <string name="bluetooth_headset_profile_summary_use_for" msgid="8705753622443862627">"Телефон аудиосы үшін қолдану"</string>
+    <string name="bluetooth_opp_profile_summary_use_for" msgid="1255674547144769756">"Файлды жіберу үшін қолдану"</string>
+    <string name="bluetooth_hid_profile_summary_use_for" msgid="232727040453645139">"Кіріс үшін қолдану"</string>
+    <string name="bluetooth_pairing_accept" msgid="6163520056536604875">"Жұптау"</string>
+    <string name="bluetooth_pairing_accept_all_caps" msgid="6061699265220789149">"ЖҰПТАУ"</string>
+    <string name="bluetooth_pairing_decline" msgid="4185420413578948140">"Бас тарту"</string>
+    <string name="bluetooth_pairing_will_share_phonebook" msgid="4982239145676394429">"Жұптасқан кезде, контактілеріңіз бен қоңыраулар тарихын көру мүмкіндігі беріледі."</string>
+    <string name="bluetooth_pairing_error_message" msgid="3748157733635947087">"<xliff:g id="DEVICE_NAME">%1$s</xliff:g> жұпталу орындалмады."</string>
+    <string name="bluetooth_pairing_pin_error_message" msgid="8337234855188925274">"<xliff:g id="DEVICE_NAME">%1$s</xliff:g> құрылғысымен жұптала алмады, себебі PIN немесе кілтсөз дұрыс емес."</string>
+    <string name="bluetooth_pairing_device_down_error_message" msgid="7870998403045801381">"<xliff:g id="DEVICE_NAME">%1$s</xliff:g> құрылғысымен қатынаса алмайды"</string>
+    <string name="bluetooth_pairing_rejected_error_message" msgid="1648157108520832454">"<xliff:g id="DEVICE_NAME">%1$s</xliff:g> құрылғысы жұпталудан бас тартты."</string>
+    <string name="accessibility_wifi_off" msgid="1166761729660614716">"Wi-Fi өшірулі."</string>
+    <string name="accessibility_no_wifi" msgid="8834610636137374508">"Wi-Fi ажыратылған."</string>
+    <string name="accessibility_wifi_one_bar" msgid="4869376278894301820">"Wi-Fi сигналы — бір жолақ."</string>
+    <string name="accessibility_wifi_two_bars" msgid="3569851234710034416">"Wi-Fi сигналы — екі жолақ."</string>
+    <string name="accessibility_wifi_three_bars" msgid="8134185644861380311">"Wi-Fi сигналы — үш жолақ."</string>
+    <string name="accessibility_wifi_signal_full" msgid="7061045677694702">"Wi-Fi сигналы толық."</string>
+</resources>
