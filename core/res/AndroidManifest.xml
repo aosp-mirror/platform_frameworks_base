@@ -1654,7 +1654,7 @@
         android:protectionLevel="signature|privileged" />
 
     <!-- Allows applications to change network connectivity state.
-         <p>Protection level: normal
+         <p>Protection level: signature
     -->
     <permission android:name="android.permission.CHANGE_NETWORK_STATE"
         android:description="@string/permdesc_changeNetworkState"
