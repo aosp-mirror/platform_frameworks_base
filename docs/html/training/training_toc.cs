@@ -2045,6 +2045,12 @@ results."
         </ul>
       </li>
     </ul>
+    <ul>
+      <li><a href="<?cs var:toroot ?>training/testing/performance.html"
+      description="How to automate UI performance testing.">
+            <span class="en">Testing Display Performance</span>
+            </a></li>
+    <ul>
   </li>
   <!-- End best Testing -->
 
