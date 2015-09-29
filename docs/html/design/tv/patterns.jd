@@ -39,8 +39,9 @@ in Get Started with TV Apps for more information.</p>
 <h2 id="recommendation">Recommendations</h2>
 
 <p>The first row of the Android TV home screen displays cards for content recommended by applications.
-Your application provides these recommendations, as described in <a href="{@docRoot}training/tv/discovery/recommendations.html">
-</a>. For a visual overview of recommendations, see
+Your application provides these recommendations, as described in
+<a href="{@docRoot}training/tv/discovery/recommendations.html">Recommending TV Content</a>.
+For a visual overview of recommendations, see
 <a href="{@docRoot}design/tv/index.html#recommendations">Designing for Android TV</a>.</p>
 
 <div class="cols">
@@ -75,7 +76,7 @@ row and fills the Android TV home screen when the user selects the recommendatio
 should be different than the one provided for the large icon, and meet the following specifications:</p>
 
 <ul>
-  <li>Measure 2016 x 1134 pixels (1920 x 1080 plus 5% margin for for motion)</li>
+  <li>Measure 2016 x 1134 pixels (1920 x 1080 plus 5% margin for motion)</li>
   <li id="solid-background">Must not be transparent</li>
 </ul>
 
