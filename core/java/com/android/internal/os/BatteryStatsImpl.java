@@ -5704,6 +5704,8 @@ public final class BatteryStatsImpl extends BatteryStats {
                                 cpuSpeeds[speed] = new LongSamplingCounter(mOnBatteryTimeBase, in);
                             }
                         }
+                    } else {
+                        mCpuClusterSpeed[cluster] = null;
                     }
                 }
             } else {
@@ -9382,13 +9384,14 @@ public final class BatteryStatsImpl extends BatteryStats {
 
                 u.mCpuClusterSpeed = new LongSamplingCounter[numClusters][];
                 for (int cluster = 0; cluster < numClusters; cluster++) {
-                    int NSB = in.readInt();
-                    if (mPowerProfile != null &&
-                            mPowerProfile.getNumSpeedStepsInCpuCluster(cluster) != NSB) {
-                        throw new ParcelFormatException("File corrupt: too many speed bins " + NSB);
-                    }
-
                     if (in.readInt() != 0) {
+                        final int NSB = in.readInt();
+                        if (mPowerProfile != null &&
+                                mPowerProfile.getNumSpeedStepsInCpuCluster(cluster) != NSB) {
+                            throw new ParcelFormatException("File corrupt: too many speed bins " +
+                                    NSB);
+                        }
+
                         u.mCpuClusterSpeed[cluster] = new LongSamplingCounter[NSB];
                         for (int speed = 0; speed < NSB; speed++) {
                             if (in.readInt() != 0) {
@@ -9397,6 +9400,8 @@ public final class BatteryStatsImpl extends BatteryStats {
                                 u.mCpuClusterSpeed[cluster][speed].readSummaryFromParcelLocked(in);
                             }
                         }
+                    } else {
+                        u.mCpuClusterSpeed[cluster] = null;
                     }
                 }
             } else {
