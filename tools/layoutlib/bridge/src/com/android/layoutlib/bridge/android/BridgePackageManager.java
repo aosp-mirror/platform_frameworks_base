@@ -65,6 +65,12 @@ public class BridgePackageManager extends PackageManager {
     }
 
     @Override
+    public PackageInfo getPackageInfoAsUser(String packageName, int flags, int userId)
+            throws NameNotFoundException {
+        return null;
+    }
+
+    @Override
     public String[] currentToCanonicalPackageNames(String[] names) {
         return new String[0];
     }
@@ -499,6 +505,11 @@ public class BridgePackageManager extends PackageManager {
     }
 
     @Override
+    public void installPackageAsUser(Uri packageURI, PackageInstallObserver observer,int flags,
+            String installerPackageName, int userId) {
+    }
+
+    @Override
     public void installPackageWithVerification(Uri packageURI, PackageInstallObserver observer,
             int flags, String installerPackageName, Uri verificationURI,
             ManifestDigest manifestDigest, ContainerEncryptionParams encryptionParams) {
@@ -512,6 +523,12 @@ public class BridgePackageManager extends PackageManager {
 
     @Override
     public int installExistingPackage(String packageName) throws NameNotFoundException {
+        return 0;
+    }
+
+    @Override
+    public int installExistingPackageAsUser(String packageName, int userId)
+            throws NameNotFoundException {
         return 0;
     }
 
@@ -565,6 +582,11 @@ public class BridgePackageManager extends PackageManager {
 
     @Override
     public void deletePackage(String packageName, IPackageDeleteObserver observer, int flags) {
+    }
+
+    @Override
+    public void deletePackageAsUser(String packageName, IPackageDeleteObserver observer, int flags,
+            int userId) {
     }
 
     @Override

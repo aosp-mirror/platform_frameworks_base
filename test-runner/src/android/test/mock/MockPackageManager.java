@@ -63,8 +63,14 @@ import java.util.List;
 public class MockPackageManager extends PackageManager {
 
     @Override
-    public PackageInfo getPackageInfo(String packageName, int flags)
-    throws NameNotFoundException {
+    public PackageInfo getPackageInfo(String packageName, int flags) throws NameNotFoundException {
+        throw new UnsupportedOperationException();
+    }
+
+    /** @hide */
+    @Override
+    public PackageInfo getPackageInfoAsUser(String packageName, int flags, int userId)
+            throws NameNotFoundException {
         throw new UnsupportedOperationException();
     }
 
@@ -524,6 +530,14 @@ public class MockPackageManager extends PackageManager {
         throw new UnsupportedOperationException();
     }
 
+    /** @hide */
+    @Override
+    public void installPackageAsUser(Uri packageURI, PackageInstallObserver observer,
+            int flags, String installerPackageName, int userId) {
+        throw new UnsupportedOperationException();
+    }
+
+
     @Override
     public void setInstallerPackageName(String targetPackage,
             String installerPackageName) {
@@ -626,6 +640,15 @@ public class MockPackageManager extends PackageManager {
     @Override
     public void deletePackage(
             String packageName, IPackageDeleteObserver observer, int flags) {
+        throw new UnsupportedOperationException();
+    }
+
+    /**
+     * @hide - to match hiding in superclass
+     */
+    @Override
+    public void deletePackageAsUser(
+            String packageName, IPackageDeleteObserver observer, int flags, int userId) {
         throw new UnsupportedOperationException();
     }
 
@@ -792,7 +815,15 @@ public class MockPackageManager extends PackageManager {
      * @hide
      */
     @Override
-    public int installExistingPackage(String packageName)
+    public int installExistingPackage(String packageName) throws NameNotFoundException {
+        throw new UnsupportedOperationException();
+    }
+
+    /**
+     * @hide
+     */
+    @Override
+    public int installExistingPackageAsUser(String packageName, int userId)
             throws NameNotFoundException {
         throw new UnsupportedOperationException();
     }
