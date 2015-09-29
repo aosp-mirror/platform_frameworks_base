@@ -3,7 +3,8 @@ page.metaDescription=Test and optimize your app for the power-saving features in
 page.tags=doze, app standby, marshmallow, alarms
 meta.tags="battery", "marshmallow", "alarms"
 page.image=images/cards/card-doze_16-9_2x.png
-page.article=true
+
+
 parent.link=index.html
 
 trainingnavtop=true
@@ -204,22 +205,13 @@ Standby</a>
   you can set alarms that will fire even if the device is in Doze.
 </p>
 
-<p>The system places certain restrictions on alarm frequency:</p>
-
-<ul>
-  <li>The {@link
-  android.app.AlarmManager#setExactAndAllowWhileIdle(int, long,
-  android.app.PendingIntent) setExactAndAllowWhileIdle()} method can fire alarms no more than once
-  per 10 seconds per app while in Doze. When not in Doze mode, the system can fire alarms no more
-  than once per 5 seconds per app.
-  </li>
-
-  <li>The {@link
+<p class="note"><strong>Note:</strong> Neither
+{@link
   android.app.AlarmManager#setAndAllowWhileIdle(int, long,
-  android.app.PendingIntent) setAndAllowWhileIdle()} method can fire alarms no more than once per
-  15 minutes per app while in Doze.
-  </li>
-</ul>
+  android.app.PendingIntent) setAndAllowWhileIdle()} nor {@link
+  android.app.AlarmManager#setExactAndAllowWhileIdle(int, long,
+  android.app.PendingIntent) setExactAndAllowWhileIdle()} can fire alarms more than once per 15
+minutes per app.</p>
 
 <p>
   The Doze restriction on network access is also likely to affect your app,
@@ -466,14 +458,6 @@ $ adb shell am get-inactive &lt;packageName&gt;</pre>
     <td></td>
  </tr>
 
- <tr>
-    <td>Calendar or timer app</td>
-    <td>Needs to notify user</td>
-    <td></td>
-    <td style="color:red">Not acceptable</td>
-    <td>Use {@link android.app.AlarmManager} and {@link android.app.job.JobScheduler}
-    APIs to optmize notifications, sync, etc.</td>
- </tr>
 </table>
 
 
