@@ -708,7 +708,7 @@ include the action bar on devices running Android 2.1 or higher."
         </div>
         <ul>
           <li><a href="<?cs var:toroot ?>training/backup/autosyncapi.html">
-            Configuring Auto Backup for Apps
+            Configuring Auto Backup
           </a>
           </li>
           <li><a href="<?cs var:toroot ?>training/backup/backupapi.html">

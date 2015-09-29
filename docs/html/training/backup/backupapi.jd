@@ -30,14 +30,20 @@ next.link=gcm.html
 
 <p>When a user purchases a new device or resets their existing one, they might
 expect that when Google Play restores your app back to their device during the
-initial setup, the previous data associated with the app restores as well.  By
-default, that doesn't happen and all the user's accomplishments or settings in
-your app are lost.</p>
+initial setup, the previous data associated with the app restores as well. On versions of Android
+prior to 6.0 (API level 23), app data is not restored by default, and all the user's accomplishments
+or settings in your app are lost.</p>
 <p>For situations where the volume of data is relatively light (less than a
 megabyte), like the user's preferences, notes, game high scores or other
 stats, the Backup API provides a lightweight solution.  This lesson walks you
 through integrating the Backup API into your application, and restoring data to
-new devices using the Backup API.</p>
+new devices using the Backup API.
+
+<p class="note">
+<strong>Note:</strong> Devices running Android 6.0 and higher
+<a href="{@docRoot}training/backup/autosyncapi.html">automatically back up</a>
+nearly all data by default.
+</p>
 
 <h2 id="register">Register for the Android Backup Service</h2>
 <p>This lesson requires the use of the <a

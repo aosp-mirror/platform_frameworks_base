@@ -25,8 +25,9 @@ page.image=images/cards/card-auto-backup_2x.png
 </div>
 
 <p>
-  One of the ways in which Android 6.0 (API level 23) and higher helps ensure a good user experience
-  is by automatically backing up app data to the cloud. The system performs this automatic backup
+  Users frequently invest time and effort to configure apps just the way they like them. Switching
+  to a new device can cancel out all that careful configuration. Devices running Android 6.0 and
+  higher automatically back up app data to the cloud. The system performs this automatic backup
   for nearly all app data by default, and does so without your having to write any additional app
   code.
 </p>
