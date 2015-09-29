@@ -44,6 +44,7 @@
 #include "TypefaceImpl.h"
 
 #include <vector>
+#include <memory>
 
 // temporary for debugging
 #include <Caches.h>
@@ -569,137 +570,9 @@ public:
         return descent - ascent + leading;
     }
 
-    static jfloat measureText_CIII(JNIEnv* env, jobject jpaint, jcharArray text, jint index, jint count,
-            jint bidiFlags) {
-        NPE_CHECK_RETURN_ZERO(env, jpaint);
-        NPE_CHECK_RETURN_ZERO(env, text);
-
-        size_t textLength = env->GetArrayLength(text);
-        if ((index | count) < 0 || (size_t)(index + count) > textLength) {
-            doThrowAIOOBE(env);
-            return 0;
-        }
-        if (count == 0) {
-            return 0;
-        }
-
-        Paint* paint = getNativePaint(env, jpaint);
-        const jchar* textArray = env->GetCharArrayElements(text, NULL);
-        jfloat result = 0;
-
-        Layout layout;
-        TypefaceImpl* typeface = getNativeTypeface(env, jpaint);
-        MinikinUtils::doLayout(&layout, paint, bidiFlags, typeface, textArray + index, 0, count,
-                count);
-        result = layout.getAdvance();
-        env->ReleaseCharArrayElements(text, const_cast<jchar*>(textArray), JNI_ABORT);
-        return result;
-    }
-
-    static jfloat measureText_StringIII(JNIEnv* env, jobject jpaint, jstring text, jint start, jint end,
-            jint bidiFlags) {
-        NPE_CHECK_RETURN_ZERO(env, jpaint);
-        NPE_CHECK_RETURN_ZERO(env, text);
-
-        size_t textLength = env->GetStringLength(text);
-        int count = end - start;
-        if ((start | count) < 0 || (size_t)end > textLength) {
-            doThrowAIOOBE(env);
-            return 0;
-        }
-        if (count == 0) {
-            return 0;
-        }
-
-        const jchar* textArray = env->GetStringChars(text, NULL);
-        Paint* paint = getNativePaint(env, jpaint);
-        jfloat width = 0;
-
-        Layout layout;
-        TypefaceImpl* typeface = getNativeTypeface(env, jpaint);
-        // Only the substring is used for measurement, so no additional context is passed in. This
-        // behavior is consistent between char[] and String specializations.
-        MinikinUtils::doLayout(&layout, paint, bidiFlags, typeface, textArray + start, 0, count, count);
-        width = layout.getAdvance();
-
-        env->ReleaseStringChars(text, textArray);
-        return width;
-    }
-
-    static jfloat measureText_StringI(JNIEnv* env, jobject jpaint, jstring text, jint bidiFlags) {
-        NPE_CHECK_RETURN_ZERO(env, jpaint);
-        NPE_CHECK_RETURN_ZERO(env, text);
-
-        size_t textLength = env->GetStringLength(text);
-        if (textLength == 0) {
-            return 0;
-        }
-
-        const jchar* textArray = env->GetStringChars(text, NULL);
-        Paint* paint = getNativePaint(env, jpaint);
-        jfloat width = 0;
-
-        Layout layout;
-        TypefaceImpl* typeface = getNativeTypeface(env, jpaint);
-        MinikinUtils::doLayout(&layout, paint, bidiFlags, typeface, textArray, 0, textLength, textLength);
-        width = layout.getAdvance();
-
-        env->ReleaseStringChars(text, textArray);
-        return width;
-    }
-
-    static int dotextwidths(JNIEnv* env, Paint* paint, TypefaceImpl* typeface, const jchar text[], int count,
-            jfloatArray widths, jint bidiFlags) {
-        NPE_CHECK_RETURN_ZERO(env, paint);
-        NPE_CHECK_RETURN_ZERO(env, text);
-
-        if (count < 0 || !widths) {
-            doThrowAIOOBE(env);
-            return 0;
-        }
-        if (count == 0) {
-            return 0;
-        }
-        size_t widthsLength = env->GetArrayLength(widths);
-        if ((size_t)count > widthsLength) {
-            doThrowAIOOBE(env);
-            return 0;
-        }
-
-        AutoJavaFloatArray autoWidths(env, widths, count);
-        jfloat* widthsArray = autoWidths.ptr();
-
-        Layout layout;
-        MinikinUtils::doLayout(&layout, paint, bidiFlags, typeface, text, 0, count, count);
-        layout.getAdvances(widthsArray);
-
-        return count;
-    }
-
-    static jint getTextWidths___CIII_F(JNIEnv* env, jobject clazz, jlong paintHandle, jlong typefaceHandle, jcharArray text,
-            jint index, jint count, jint bidiFlags, jfloatArray widths) {
-        Paint* paint = reinterpret_cast<Paint*>(paintHandle);
-        TypefaceImpl* typeface = reinterpret_cast<TypefaceImpl*>(typefaceHandle);
-        const jchar* textArray = env->GetCharArrayElements(text, NULL);
-        count = dotextwidths(env, paint, typeface, textArray + index, count, widths, bidiFlags);
-        env->ReleaseCharArrayElements(text, const_cast<jchar*>(textArray),
-                                      JNI_ABORT);
-        return count;
-    }
-
-    static jint getTextWidths__StringIII_F(JNIEnv* env, jobject clazz, jlong paintHandle, jlong typefaceHandle, jstring text,
-            jint start, jint end, jint bidiFlags, jfloatArray widths) {
-        Paint* paint = reinterpret_cast<Paint*>(paintHandle);
-        TypefaceImpl* typeface = reinterpret_cast<TypefaceImpl*>(typefaceHandle);
-        const jchar* textArray = env->GetStringChars(text, NULL);
-        int count = dotextwidths(env, paint, typeface, textArray + start, end - start, widths, bidiFlags);
-        env->ReleaseStringChars(text, textArray);
-        return count;
-    }
-
-    static jfloat doTextRunAdvances(JNIEnv *env, Paint *paint, TypefaceImpl* typeface, const jchar *text,
-                                    jint start, jint count, jint contextCount, jboolean isRtl,
-                                    jfloatArray advances, jint advancesIndex) {
+    static jfloat doTextAdvances(JNIEnv *env, Paint *paint, TypefaceImpl* typeface,
+            const jchar *text, jint start, jint count, jint contextCount, jint bidiFlags,
+            jfloatArray advances, jint advancesIndex) {
         NPE_CHECK_RETURN_ZERO(env, paint);
         NPE_CHECK_RETURN_ZERO(env, text);
 
@@ -712,50 +585,45 @@ public:
         }
         if (advances) {
             size_t advancesLength = env->GetArrayLength(advances);
-            if ((size_t)count > advancesLength) {
+            if ((size_t)(count  + advancesIndex) > advancesLength) {
                 doThrowAIOOBE(env);
                 return 0;
             }
         }
-        jfloat* advancesArray = new jfloat[count];
-        jfloat totalAdvance = 0;
-
-        int bidiFlags = isRtl ? kBidi_Force_RTL : kBidi_Force_LTR;
 
         Layout layout;
-        MinikinUtils::doLayout(&layout, paint, bidiFlags, typeface, text, start, count, contextCount);
-        layout.getAdvances(advancesArray);
-        totalAdvance = layout.getAdvance();
-
+        MinikinUtils::doLayout(&layout, paint, bidiFlags, typeface, text, start, count,
+                contextCount);
         if (advances != NULL) {
-            env->SetFloatArrayRegion(advances, advancesIndex, count, advancesArray);
+            std::unique_ptr<jfloat> advancesArray(new jfloat[count]);
+            layout.getAdvances(advancesArray.get());
+            env->SetFloatArrayRegion(advances, advancesIndex, count, advancesArray.get());
         }
-        delete [] advancesArray;
-        return totalAdvance;
+        return layout.getAdvance();
     }
 
-    static jfloat getTextRunAdvances___CIIIIZ_FI(JNIEnv* env, jobject clazz, jlong paintHandle,
+    static jfloat getTextAdvances___CIIIII_FI(JNIEnv* env, jobject clazz, jlong paintHandle,
             jlong typefaceHandle,
             jcharArray text, jint index, jint count, jint contextIndex, jint contextCount,
-            jboolean isRtl, jfloatArray advances, jint advancesIndex) {
+            jint bidiFlags, jfloatArray advances, jint advancesIndex) {
         Paint* paint = reinterpret_cast<Paint*>(paintHandle);
         TypefaceImpl* typeface = reinterpret_cast<TypefaceImpl*>(typefaceHandle);
         jchar* textArray = env->GetCharArrayElements(text, NULL);
-        jfloat result = doTextRunAdvances(env, paint, typeface, textArray + contextIndex,
-                index - contextIndex, count, contextCount, isRtl, advances, advancesIndex);
+        jfloat result = doTextAdvances(env, paint, typeface, textArray + contextIndex,
+                index - contextIndex, count, contextCount, bidiFlags, advances, advancesIndex);
         env->ReleaseCharArrayElements(text, textArray, JNI_ABORT);
         return result;
     }
 
-    static jfloat getTextRunAdvances__StringIIIIZ_FI(JNIEnv* env, jobject clazz, jlong paintHandle,
+    static jfloat getTextAdvances__StringIIIII_FI(JNIEnv* env, jobject clazz, jlong paintHandle,
             jlong typefaceHandle,
-            jstring text, jint start, jint end, jint contextStart, jint contextEnd, jboolean isRtl,
+            jstring text, jint start, jint end, jint contextStart, jint contextEnd, jint bidiFlags,
             jfloatArray advances, jint advancesIndex) {
         Paint* paint = reinterpret_cast<Paint*>(paintHandle);
         TypefaceImpl* typeface = reinterpret_cast<TypefaceImpl*>(typefaceHandle);
         const jchar* textArray = env->GetStringChars(text, NULL);
-        jfloat result = doTextRunAdvances(env, paint, typeface, textArray + contextStart,
-                start - contextStart, end - start, contextEnd - contextStart, isRtl,
+        jfloat result = doTextAdvances(env, paint, typeface, textArray + contextStart,
+                start - contextStart, end - start, contextEnd - contextStart, bidiFlags,
                 advances, advancesIndex);
         env->ReleaseStringChars(text, textArray);
         return result;
@@ -1160,18 +1028,13 @@ static JNINativeMethod methods[] = {
             (void*)PaintGlue::getFontMetrics},
     {"getFontMetricsInt", "!(Landroid/graphics/Paint$FontMetricsInt;)I",
             (void*)PaintGlue::getFontMetricsInt},
-    {"native_measureText","([CIII)F", (void*) PaintGlue::measureText_CIII},
-    {"native_measureText","(Ljava/lang/String;I)F", (void*) PaintGlue::measureText_StringI},
-    {"native_measureText","(Ljava/lang/String;III)F", (void*) PaintGlue::measureText_StringIII},
+
     {"native_breakText","(JJ[CIIFI[F)I", (void*) PaintGlue::breakTextC},
     {"native_breakText","(JJLjava/lang/String;ZFI[F)I", (void*) PaintGlue::breakTextS},
-    {"native_getTextWidths","(JJ[CIII[F)I", (void*) PaintGlue::getTextWidths___CIII_F},
-    {"native_getTextWidths","(JJLjava/lang/String;III[F)I",
-            (void*) PaintGlue::getTextWidths__StringIII_F},
-    {"native_getTextRunAdvances","(JJ[CIIIIZ[FI)F",
-            (void*) PaintGlue::getTextRunAdvances___CIIIIZ_FI},
-    {"native_getTextRunAdvances","(JJLjava/lang/String;IIIIZ[FI)F",
-            (void*) PaintGlue::getTextRunAdvances__StringIIIIZ_FI},
+    {"native_getTextAdvances","(JJ[CIIIII[FI)F",
+            (void*) PaintGlue::getTextAdvances___CIIIII_FI},
+    {"native_getTextAdvances","(JJLjava/lang/String;IIIII[FI)F",
+            (void*) PaintGlue::getTextAdvances__StringIIIII_FI},
 
     {"native_getTextRunCursor", "(J[CIIIII)I", (void*) PaintGlue::getTextRunCursor___C},
     {"native_getTextRunCursor", "(JLjava/lang/String;IIIII)I",
