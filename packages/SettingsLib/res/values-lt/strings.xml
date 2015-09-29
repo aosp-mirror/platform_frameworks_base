@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 
+/*
+**
+** Copyright 2015 The Android Open Source Project
+**
+** Licensed under the Apache License, Version 2.0 (the "License");
+** you may not use this file except in compliance with the License.
+** You may obtain a copy of the License at
+**
+**     http://www.apache.org/licenses/LICENSE-2.0
+**
+** Unless required by applicable law or agreed to in writing, software
+** distributed under the License is distributed on an "AS IS" BASIS,
+** WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+** See the License for the specific language governing permissions and
+** limitations under the License.
+*/
+ -->
+
+<resources xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <string name="wifi_fail_to_scan" msgid="1265540342578081461">"Nepavyksta nuskaityti tinklų"</string>
+    <string name="wifi_security_none" msgid="7985461072596594400">"Nėra"</string>
+    <string name="wifi_remembered" msgid="4955746899347821096">"Išsaugotas"</string>
+    <string name="wifi_disabled_generic" msgid="4259794910584943386">"Neleidžiama"</string>
+    <string name="wifi_disabled_network_failure" msgid="2364951338436007124">"IP konfigūracijos triktis"</string>
+    <string name="wifi_disabled_wifi_failure" msgid="3081668066612876581">"„Wi-Fi“ ryšio triktis"</string>
+    <string name="wifi_disabled_password_failure" msgid="8659805351763133575">"Autentifikavimo problema"</string>
+    <string name="wifi_not_in_range" msgid="1136191511238508967">"Ne diapazone"</string>
+    <string name="wifi_no_internet" msgid="9151470775868728896">"Neaptikta jokia prieiga prie interneto, nebus automatiškai iš naujo prisijungta."</string>
+    <string name="saved_network" msgid="4352716707126620811">"Išsaugojo <xliff:g id="NAME">%1$s</xliff:g>"</string>
+    <string name="connected_via_wfa" msgid="3805736726317410714">"Prisijungta naudojant „Wi‑Fi“ pagelbiklį"</string>
+    <string name="connected_via_passpoint" msgid="2826205693803088747">"Prisijungta naudojant „%1$s“"</string>
+    <string name="available_via_passpoint" msgid="1617440946846329613">"Pasiekiama naudojant „%1$s“"</string>
+    <string name="wifi_connected_no_internet" msgid="3149853966840874992">"Prisijungta, nėra interneto"</string>
+    <string name="bluetooth_disconnected" msgid="6557104142667339895">"Atsijungęs (-usi)"</string>
+    <string name="bluetooth_disconnecting" msgid="8913264760027764974">"Atjungiama..."</string>
+    <string name="bluetooth_connecting" msgid="8555009514614320497">"Prisijungiama..."</string>
+    <string name="bluetooth_connected" msgid="6038755206916626419">"Prisijungta"</string>
+    <string name="bluetooth_pairing" msgid="1426882272690346242">"Susiejama..."</string>
+    <string name="bluetooth_connected_no_headset" msgid="2866994875046035609">"Prijungta (be telefono)"</string>
+    <string name="bluetooth_connected_no_a2dp" msgid="4576188601581440337">"Prijungta (be laikmenos)"</string>
+    <string name="bluetooth_connected_no_map" msgid="6504436917057479986">"Prisijungta (be prieigos prie pranešimų)"</string>
+    <string name="bluetooth_connected_no_headset_no_a2dp" msgid="9195757766755553810">"Prijungta (be telefono ar laikmenos)"</string>
+    <string name="bluetooth_profile_a2dp" msgid="2031475486179830674">"Laikmenos garsas"</string>
+    <string name="bluetooth_profile_headset" msgid="8658779596261212609">"Telefono garsas"</string>
+    <string name="bluetooth_profile_opp" msgid="9168139293654233697">"Failo perkėlimas"</string>
+    <string name="bluetooth_profile_hid" msgid="3680729023366986480">"Įvesties įrenginys"</string>
+    <string name="bluetooth_profile_pan" msgid="3391606497945147673">"Prieiga prie interneto"</string>
+    <string name="bluetooth_profile_pbap" msgid="5372051906968576809">"Kontaktų bendrinimas"</string>
+    <string name="bluetooth_profile_pbap_summary" msgid="6605229608108852198">"Naudoti kontaktams bendrinti"</string>
+    <string name="bluetooth_profile_pan_nap" msgid="8429049285027482959">"Interneto ryšio bendrinimas"</string>
+    <string name="bluetooth_profile_map" msgid="5465271250454324383">"Prieiga prie pranešimų"</string>
+    <string name="bluetooth_profile_sap" msgid="5764222021851283125">"SIM prieiga"</string>
+    <string name="bluetooth_a2dp_profile_summary_connected" msgid="963376081347721598">"Prijungta prie medijos garso įrašo"</string>
+    <string name="bluetooth_headset_profile_summary_connected" msgid="7661070206715520671">"Prijungta prie telefono garso"</string>
+    <string name="bluetooth_opp_profile_summary_connected" msgid="2611913495968309066">"Prijungta prie failų perkėlimo serverio"</string>
+    <string name="bluetooth_map_profile_summary_connected" msgid="8191407438851351713">"Prisijungta prie žemėlapio"</string>
+    <string name="bluetooth_sap_profile_summary_connected" msgid="8561765057453083838">"Prisijungta prie SAP"</string>
+    <string name="bluetooth_opp_profile_summary_not_connected" msgid="1267091356089086285">"Neprijungta prie failų perkėlimo serverio"</string>
+    <string name="bluetooth_hid_profile_summary_connected" msgid="3381760054215168689">"Prisijungta prie įvesties įrenginio."</string>
+    <string name="bluetooth_pan_user_profile_summary_connected" msgid="4602294638909590612">"Pr. prie įr., kad gaut. pr. prie int."</string>
+    <string name="bluetooth_pan_nap_profile_summary_connected" msgid="1561383706411975199">"Bendr. vt. int. ryš. su įr."</string>
+    <string name="bluetooth_pan_profile_summary_use_for" msgid="5664884523822068653">"Naudoti interneto prieigai"</string>
+    <string name="bluetooth_map_profile_summary_use_for" msgid="5154200119919927434">"Naudoti žemėlapyje"</string>
+    <string name="bluetooth_sap_profile_summary_use_for" msgid="7085362712786907993">"Naudoti SIM prieigai"</string>
+    <string name="bluetooth_a2dp_profile_summary_use_for" msgid="4630849022250168427">"Naudoti medijos garsui"</string>
+    <string name="bluetooth_headset_profile_summary_use_for" msgid="8705753622443862627">"Naudoti telefono garso įrašui"</string>
+    <string name="bluetooth_opp_profile_summary_use_for" msgid="1255674547144769756">"Naudoti failų perkėlimui"</string>
+    <string name="bluetooth_hid_profile_summary_use_for" msgid="232727040453645139">"Naudoti įvedant"</string>
+    <string name="bluetooth_pairing_accept" msgid="6163520056536604875">"Susieti"</string>
+    <string name="bluetooth_pairing_accept_all_caps" msgid="6061699265220789149">"SUSIETI"</string>
+    <string name="bluetooth_pairing_decline" msgid="4185420413578948140">"Atšaukti"</string>
+    <string name="bluetooth_pairing_will_share_phonebook" msgid="4982239145676394429">"Susiejus suteikiama prieiga prie kontaktų ir skambučių istorijos, esant prisijungus."</string>
+    <string name="bluetooth_pairing_error_message" msgid="3748157733635947087">"Nepavyko susieti su „<xliff:g id="DEVICE_NAME">%1$s</xliff:g>“."</string>
+    <string name="bluetooth_pairing_pin_error_message" msgid="8337234855188925274">"Nepavyko susieti su „<xliff:g id="DEVICE_NAME">%1$s</xliff:g>“ dėl netinkamo PIN kodo ar prieigos rakto."</string>
+    <string name="bluetooth_pairing_device_down_error_message" msgid="7870998403045801381">"Nepavyksta užmegzti ryšio su „<xliff:g id="DEVICE_NAME">%1$s</xliff:g>“."</string>
+    <string name="bluetooth_pairing_rejected_error_message" msgid="1648157108520832454">"Susiejimą atmetė <xliff:g id="DEVICE_NAME">%1$s</xliff:g>."</string>
+    <string name="accessibility_wifi_off" msgid="1166761729660614716">"„Wi-Fi“ išjungtas."</string>
+    <string name="accessibility_no_wifi" msgid="8834610636137374508">"„Wi-Fi“ atjungtas."</string>
+    <string name="accessibility_wifi_one_bar" msgid="4869376278894301820">"Viena „Wi-Fi“ signalo juosta."</string>
+    <string name="accessibility_wifi_two_bars" msgid="3569851234710034416">"Dvi „Wi-Fi“ signalo juostos."</string>
+    <string name="accessibility_wifi_three_bars" msgid="8134185644861380311">"Trys „Wi-Fi“ signalo juostos."</string>
+    <string name="accessibility_wifi_signal_full" msgid="7061045677694702">"Stiprus „Wi-Fi“ signalas."</string>
+</resources>

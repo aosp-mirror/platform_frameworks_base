@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 
+/*
+**
+** Copyright 2015 The Android Open Source Project
+**
+** Licensed under the Apache License, Version 2.0 (the "License");
+** you may not use this file except in compliance with the License.
+** You may obtain a copy of the License at
+**
+**     http://www.apache.org/licenses/LICENSE-2.0
+**
+** Unless required by applicable law or agreed to in writing, software
+** distributed under the License is distributed on an "AS IS" BASIS,
+** WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+** See the License for the specific language governing permissions and
+** limitations under the License.
+*/
+ -->
+
+<resources xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <string name="wifi_fail_to_scan" msgid="1265540342578081461">"ජාල සඳහා පරිලෝකනය කළ නොහැක"</string>
+    <string name="wifi_security_none" msgid="7985461072596594400">"කිසිවක් නැත"</string>
+    <string name="wifi_remembered" msgid="4955746899347821096">"සුරකින ලදි"</string>
+    <string name="wifi_disabled_generic" msgid="4259794910584943386">"අබලයි"</string>
+    <string name="wifi_disabled_network_failure" msgid="2364951338436007124">"IP වින්‍යාස කිරීම අසාර්ථකයි"</string>
+    <string name="wifi_disabled_wifi_failure" msgid="3081668066612876581">"WiFi සම්බන්ධතාව අසාර්ථකයි"</string>
+    <string name="wifi_disabled_password_failure" msgid="8659805351763133575">"සත්‍යාපනයේ ගැටලුවකි"</string>
+    <string name="wifi_not_in_range" msgid="1136191511238508967">"පරාසයේ නැත"</string>
+    <string name="wifi_no_internet" msgid="9151470775868728896">"අන්තර්ජාල ප්‍රවේශය අනාවරණය වුයේ නැත, ස්වයංක්‍රිය නැවත සම්බන්ධ වීම වූ නැත"</string>
+    <string name="saved_network" msgid="4352716707126620811">"<xliff:g id="NAME">%1$s</xliff:g> විසින් සුරකින ලදී"</string>
+    <string name="connected_via_wfa" msgid="3805736726317410714">"Wi‑Fi සහායක හරහා සම්බන්ධ කරන ලදි"</string>
+    <string name="connected_via_passpoint" msgid="2826205693803088747">"%1$s හරහා සම්බන්ධ විය"</string>
+    <string name="available_via_passpoint" msgid="1617440946846329613">"%1$s හරහා ලබා ගැනීමට හැකිය"</string>
+    <string name="wifi_connected_no_internet" msgid="3149853966840874992">"සම්බන්ධයි, අන්තර්ජාලය නැත"</string>
+    <string name="bluetooth_disconnected" msgid="6557104142667339895">"විසන්ධි වුණි"</string>
+    <string name="bluetooth_disconnecting" msgid="8913264760027764974">"විසන්ධි වෙමින්…"</string>
+    <string name="bluetooth_connecting" msgid="8555009514614320497">"සම්බන්ධ වෙමින්…"</string>
+    <string name="bluetooth_connected" msgid="6038755206916626419">"සම්බන්ධිතයි"</string>
+    <string name="bluetooth_pairing" msgid="1426882272690346242">"යුගල කරමින්…"</string>
+    <string name="bluetooth_connected_no_headset" msgid="2866994875046035609">"සම්බන්ධයි (දුරකථන නැත)"</string>
+    <string name="bluetooth_connected_no_a2dp" msgid="4576188601581440337">"සම්බන්ධිතයි (මාධ්‍යයක් නොමැත)"</string>
+    <string name="bluetooth_connected_no_map" msgid="6504436917057479986">"සම්බන්ධිතයි (පණිවිඩ ප්‍රවේශ නොමැත)"</string>
+    <string name="bluetooth_connected_no_headset_no_a2dp" msgid="9195757766755553810">"සම්බන්ධිතයි (දුරකතනයක් හෝ මාධ්‍යයක් නැත)"</string>
+    <string name="bluetooth_profile_a2dp" msgid="2031475486179830674">"මාධ්‍ය ශ්‍රව්‍ය"</string>
+    <string name="bluetooth_profile_headset" msgid="8658779596261212609">"දුරකථන ශ්‍රව්‍ය"</string>
+    <string name="bluetooth_profile_opp" msgid="9168139293654233697">"ගොනු හුවමාරුව"</string>
+    <string name="bluetooth_profile_hid" msgid="3680729023366986480">"ආදාන උපාංගය"</string>
+    <string name="bluetooth_profile_pan" msgid="3391606497945147673">"අන්තර්ජාල ප්‍රවේශය"</string>
+    <string name="bluetooth_profile_pbap" msgid="5372051906968576809">"සම්බන්ධතා බෙදාගැනීම"</string>
+    <string name="bluetooth_profile_pbap_summary" msgid="6605229608108852198">"සම්බන්ධතා බෙදාගැනීම සඳහා භාවිතා කිරීම"</string>
+    <string name="bluetooth_profile_pan_nap" msgid="8429049285027482959">"අන්තර්ජාල සම්බන්ධතා බෙදාගැනීම"</string>
+    <string name="bluetooth_profile_map" msgid="5465271250454324383">"පණිවිඩ ප්‍රවේශය"</string>
+    <string name="bluetooth_profile_sap" msgid="5764222021851283125">"SIM ප්‍රවේශය"</string>
+    <string name="bluetooth_a2dp_profile_summary_connected" msgid="963376081347721598">"මාධ්‍ය ශ්‍රව්‍යට සම්බන්ධ විය"</string>
+    <string name="bluetooth_headset_profile_summary_connected" msgid="7661070206715520671">"දුරකතනයේ ශ්‍රව්‍යට සම්බන්ධ විය"</string>
+    <string name="bluetooth_opp_profile_summary_connected" msgid="2611913495968309066">"ගොනු හුවමාරු සේවාදායකය සමග සම්බන්ධ විය"</string>
+    <string name="bluetooth_map_profile_summary_connected" msgid="8191407438851351713">"සිතියම වෙත සම්බන්ධිතයි"</string>
+    <string name="bluetooth_sap_profile_summary_connected" msgid="8561765057453083838">"SAP වෙත සම්බන්ධ විය"</string>
+    <string name="bluetooth_opp_profile_summary_not_connected" msgid="1267091356089086285">"ගොනු හුවමාරු සේවාදායකය වෙත සම්බන්ධ වී නොමැත"</string>
+    <string name="bluetooth_hid_profile_summary_connected" msgid="3381760054215168689">"ආදාන උපාංග වෙත සම්බන්ධිතයි"</string>
+    <string name="bluetooth_pan_user_profile_summary_connected" msgid="4602294638909590612">"අන්තර්ජාල ප්‍රවේශය සඳහා උපාංගය වෙත සම්බන්ධ වුණි"</string>
+    <string name="bluetooth_pan_nap_profile_summary_connected" msgid="1561383706411975199">"මෙම උපාංගය සමඟ පෙදෙසි අන්තර්ජාල සම්බන්ධතාවය බෙදාගනිමින්"</string>
+    <string name="bluetooth_pan_profile_summary_use_for" msgid="5664884523822068653">"අන්තර්ජාල ප්‍රවේශය සඳහා භාවිතා කරන්න"</string>
+    <string name="bluetooth_map_profile_summary_use_for" msgid="5154200119919927434">"සිතියම සඳහා භාවිතා කරන්න"</string>
+    <string name="bluetooth_sap_profile_summary_use_for" msgid="7085362712786907993">"SIM ප්‍රවේශය සඳහා භාවිත කරන්න"</string>
+    <string name="bluetooth_a2dp_profile_summary_use_for" msgid="4630849022250168427">"මාධ්‍ය ශ්‍රව්‍ය සඳහා භාවිතා කරන්න"</string>
+    <string name="bluetooth_headset_profile_summary_use_for" msgid="8705753622443862627">"දුරකථන ශ්‍රව්‍ය සඳහා භාවිතා කෙරේ"</string>
+    <string name="bluetooth_opp_profile_summary_use_for" msgid="1255674547144769756">"ගොනු හුවමාරුව සඳහා භාවිතා කරන්න"</string>
+    <string name="bluetooth_hid_profile_summary_use_for" msgid="232727040453645139">"ආදානය සඳහා භාවිතා කරන්න"</string>
+    <string name="bluetooth_pairing_accept" msgid="6163520056536604875">"යුගල කරන්න"</string>
+    <string name="bluetooth_pairing_accept_all_caps" msgid="6061699265220789149">"යුගල කරන්න"</string>
+    <string name="bluetooth_pairing_decline" msgid="4185420413578948140">"අවලංගු කරන්න"</string>
+    <string name="bluetooth_pairing_will_share_phonebook" msgid="4982239145676394429">"සමබන්ධ වන විට ඔබගේ සම්බන්ධතා සහ ඇමතුම් ඉතිහාසයට යුගළ කිරීමට ප්‍රවේශය දෙන්න."</string>
+    <string name="bluetooth_pairing_error_message" msgid="3748157733635947087">"<xliff:g id="DEVICE_NAME">%1$s</xliff:g> සමඟ යුගල කළ නොහැකි විය."</string>
+    <string name="bluetooth_pairing_pin_error_message" msgid="8337234855188925274">"වැරදි PIN එකක් හෝ පාස් යතුරක් නිසා <xliff:g id="DEVICE_NAME">%1$s</xliff:g> සමඟ යුගල කිරීමට නොහැකිය."</string>
+    <string name="bluetooth_pairing_device_down_error_message" msgid="7870998403045801381">"<xliff:g id="DEVICE_NAME">%1$s</xliff:g> සමඟ සන්නිවේදනය කළ නොහැක."</string>
+    <string name="bluetooth_pairing_rejected_error_message" msgid="1648157108520832454">"<xliff:g id="DEVICE_NAME">%1$s</xliff:g> විසින් යුගල කිරීම ප්‍රතික්ෂේප කරන ලදි."</string>
+    <string name="accessibility_wifi_off" msgid="1166761729660614716">"Wifi අක්‍රියයි."</string>
+    <string name="accessibility_no_wifi" msgid="8834610636137374508">"Wifi සම්බන්ධ කර නොමැත."</string>
+    <string name="accessibility_wifi_one_bar" msgid="4869376278894301820">"Wifi තීරු එකයි."</string>
+    <string name="accessibility_wifi_two_bars" msgid="3569851234710034416">"Wifi තීරු දෙකයි."</string>
+    <string name="accessibility_wifi_three_bars" msgid="8134185644861380311">"WiFi තීරු තුනයි."</string>
+    <string name="accessibility_wifi_signal_full" msgid="7061045677694702">"Wifi සංඥාව පිරී ඇත."</string>
+</resources>
