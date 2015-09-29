@@ -140,6 +140,7 @@ public class PackageInstallerService extends IPackageInstaller.Stub {
     private static final String ATTR_APP_ICON = "appIcon";
     private static final String ATTR_APP_LABEL = "appLabel";
     private static final String ATTR_ORIGINATING_URI = "originatingUri";
+    private static final String ATTR_ORIGINATING_UID = "originatingUid";
     private static final String ATTR_REFERRER_URI = "referrerUri";
     private static final String ATTR_ABI_OVERRIDE = "abiOverride";
     private static final String ATTR_VOLUME_UUID = "volumeUuid";
@@ -405,6 +406,8 @@ public class PackageInstallerService extends IPackageInstaller.Stub {
         params.appIcon = readBitmapAttribute(in, ATTR_APP_ICON);
         params.appLabel = readStringAttribute(in, ATTR_APP_LABEL);
         params.originatingUri = readUriAttribute(in, ATTR_ORIGINATING_URI);
+        params.originatingUid =
+                readIntAttribute(in, ATTR_ORIGINATING_UID, SessionParams.UID_UNKNOWN);
         params.referrerUri = readUriAttribute(in, ATTR_REFERRER_URI);
         params.abiOverride = readStringAttribute(in, ATTR_ABI_OVERRIDE);
         params.volumeUuid = readStringAttribute(in, ATTR_VOLUME_UUID);
@@ -477,6 +480,7 @@ public class PackageInstallerService extends IPackageInstaller.Stub {
         writeStringAttribute(out, ATTR_APP_PACKAGE_NAME, params.appPackageName);
         writeStringAttribute(out, ATTR_APP_LABEL, params.appLabel);
         writeUriAttribute(out, ATTR_ORIGINATING_URI, params.originatingUri);
+        writeIntAttribute(out, ATTR_ORIGINATING_UID, params.originatingUid);
         writeUriAttribute(out, ATTR_REFERRER_URI, params.referrerUri);
         writeStringAttribute(out, ATTR_ABI_OVERRIDE, params.abiOverride);
         writeStringAttribute(out, ATTR_VOLUME_UUID, params.volumeUuid);
