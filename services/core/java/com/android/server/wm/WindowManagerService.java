@@ -2175,10 +2175,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 // The exit animation is running... wait for it!
                 win.mExiting = true;
                 win.mRemoveOnExit = true;
-                final DisplayContent displayContent = win.getDisplayContent();
-                if (displayContent != null) {
-                    displayContent.layoutNeeded = true;
-                }
+                win.setDisplayLayoutNeeded();
                 final boolean focusChanged = updateFocusedWindowLocked(
                         UPDATE_FOCUS_WILL_PLACE_SURFACES, false /*updateInputWindows*/);
                 mWindowPlacerLocked.performSurfacePlacement();
@@ -2301,10 +2298,7 @@ public class WindowManagerService extends IWindowManager.Stub
             windows.remove(win);
             if (!mWindowPlacerLocked.isInLayout()) {
                 assignLayersLocked(windows);
-                final DisplayContent displayContent = win.getDisplayContent();
-                if (displayContent != null) {
-                    displayContent.layoutNeeded = true;
-                }
+                win.setDisplayLayoutNeeded();
                 if (performLayout) {
                     mWindowPlacerLocked.performSurfacePlacement();
                 }
@@ -2386,10 +2380,7 @@ public class WindowManagerService extends IWindowManager.Stub
                         w.mGivenVisibleInsets.scale(w.mGlobalScale);
                         w.mGivenTouchableRegion.scale(w.mGlobalScale);
                     }
-                    final DisplayContent displayContent = w.getDisplayContent();
-                    if (displayContent != null) {
-                        displayContent.layoutNeeded = true;
-                    }
+                    w.setDisplayLayoutNeeded();
                     mWindowPlacerLocked.performSurfacePlacement();
                 }
             }
@@ -2731,10 +2722,7 @@ public class WindowManagerService extends IWindowManager.Stub
                         WindowManagerPolicy.FINISH_LAYOUT_REDO_WALLPAPER;
             }
 
-            final DisplayContent displayContent = win.getDisplayContent();
-            if (displayContent != null) {
-                displayContent.layoutNeeded = true;
-            }
+            win.setDisplayLayoutNeeded();
             win.mGivenInsetsPending = (flags&WindowManagerGlobal.RELAYOUT_INSETS_PENDING) != 0;
             configChanged = updateOrientationFromAppTokensLocked(false);
             mWindowPlacerLocked.performSurfacePlacement();
@@ -2827,10 +2815,7 @@ public class WindowManagerService extends IWindowManager.Stub
                         getDefaultDisplayContentLocked().pendingLayoutChanges |=
                                 WindowManagerPolicy.FINISH_LAYOUT_REDO_WALLPAPER;
                     }
-                    final DisplayContent displayContent = win.getDisplayContent();
-                    if (displayContent != null) {
-                        displayContent.layoutNeeded = true;
-                    }
+                    win.setDisplayLayoutNeeded();
                     mWindowPlacerLocked.requestTraversal();
                 }
             }
@@ -3929,10 +3914,7 @@ public class WindowManagerService extends IWindowManager.Stub
                             }
                         }
                         changed = true;
-                        final DisplayContent displayContent = win.getDisplayContent();
-                        if (displayContent != null) {
-                            displayContent.layoutNeeded = true;
-                        }
+                        win.setDisplayLayoutNeeded();
                     }
                 } else if (win.isVisibleNow()) {
                     if (!runningAppAnimation) {
@@ -3946,10 +3928,7 @@ public class WindowManagerService extends IWindowManager.Stub
                         }
                     }
                     changed = true;
-                    final DisplayContent displayContent = win.getDisplayContent();
-                    if (displayContent != null) {
-                        displayContent.layoutNeeded = true;
-                    }
+                    win.setDisplayLayoutNeeded();
                 }
             }
 
@@ -4117,10 +4096,7 @@ public class WindowManagerService extends IWindowManager.Stub
                     }
                     w.mLastFreezeDuration = 0;
                     unfrozeWindows = true;
-                    final DisplayContent displayContent = w.getDisplayContent();
-                    if (displayContent != null) {
-                        displayContent.layoutNeeded = true;
-                    }
+                    w.setDisplayLayoutNeeded();
                 }
             }
             if (force || unfrozeWindows) {
