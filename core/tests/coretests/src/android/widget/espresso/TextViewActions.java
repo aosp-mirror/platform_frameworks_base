@@ -52,6 +52,36 @@ public final class TextViewActions {
     }
 
     /**
+     * Returns an action that double-clicks on text at an index on the TextView.<br>
+     * <br>
+     * View constraints:
+     * <ul>
+     * <li>must be a TextView displayed on screen
+     * <ul>
+     *
+     * @param index The index of the TextView's text to double-click on.
+     */
+    public static ViewAction doubleClickOnTextAtIndex(int index) {
+        return actionWithAssertions(
+                new GeneralClickAction(Tap.DOUBLE, new TextCoordinates(index), Press.FINGER));
+    }
+
+    /**
+     * Returns an action that long presses on text at an index on the TextView.<br>
+     * <br>
+     * View constraints:
+     * <ul>
+     * <li>must be a TextView displayed on screen
+     * <ul>
+     *
+     * @param index The index of the TextView's text to long press on.
+     */
+    public static ViewAction longPressOnTextAtIndex(int index) {
+        return actionWithAssertions(
+                new GeneralClickAction(Tap.LONG, new TextCoordinates(index), Press.FINGER));
+    }
+
+    /**
      * Returns an action that long presses then drags on text from startIndex to endIndex on the
      * TextView.<br>
      * <br>
