@@ -1405,8 +1405,12 @@ results."
         </ul>
   </li>
 
-
-
+      <li>
+        <a href="<?cs var:toroot ?>training/articles/assistant.html"
+           description=
+           "Support contextually relevant actions through the Assist API."
+          >Optimizing Content for the Assistant</a>
+      </li>
        <li class="nav-section">
         <div class="nav-section">
           <a href="<?cs var:toroot ?>training/app-links/index.html"
@@ -1847,7 +1851,7 @@ results."
             </a>
         </div>
         <ul>
-          <li><a href="<?cs var:toroot ?>training/monitoring-device-state/doze-standby.html"
+         <li><a href="<?cs var:toroot ?>training/monitoring-device-state/doze-standby.html"
             >Optimizing for Doze and App Standby</a>
           </li>
           <li><a href="<?cs var:toroot ?>training/monitoring-device-state/battery-monitoring.html"
