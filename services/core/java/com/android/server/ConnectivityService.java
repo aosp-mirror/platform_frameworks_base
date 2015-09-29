@@ -754,6 +754,8 @@ public class ConnectivityService extends IConnectivityManager.Stub
         IntentFilter intentFilter = new IntentFilter();
         intentFilter.addAction(Intent.ACTION_USER_STARTING);
         intentFilter.addAction(Intent.ACTION_USER_STOPPING);
+        intentFilter.addAction(Intent.ACTION_USER_ADDED);
+        intentFilter.addAction(Intent.ACTION_USER_REMOVED);
         mContext.registerReceiverAsUser(
                 mUserIntentReceiver, UserHandle.ALL, intentFilter, null, null);
 
@@ -3525,6 +3527,26 @@ public class ConnectivityService extends IConnectivityManager.Stub
         }
     }
 
+    private void onUserAdded(int userId) {
+        synchronized(mVpns) {
+            final int vpnsSize = mVpns.size();
+            for (int i = 0; i < vpnsSize; i++) {
+                Vpn vpn = mVpns.valueAt(i);
+                vpn.onUserAdded(userId);
+            }
+        }
+    }
+
+    private void onUserRemoved(int userId) {
+        synchronized(mVpns) {
+            final int vpnsSize = mVpns.size();
+            for (int i = 0; i < vpnsSize; i++) {
+                Vpn vpn = mVpns.valueAt(i);
+                vpn.onUserRemoved(userId);
+            }
+        }
+    }
+
     private BroadcastReceiver mUserIntentReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
@@ -3536,6 +3558,10 @@ public class ConnectivityService extends IConnectivityManager.Stub
                 onUserStart(userId);
             } else if (Intent.ACTION_USER_STOPPING.equals(action)) {
                 onUserStop(userId);
+            } else if (Intent.ACTION_USER_ADDED.equals(action)) {
+                onUserAdded(userId);
+            } else if (Intent.ACTION_USER_REMOVED.equals(action)) {
+                onUserRemoved(userId);
             }
         }
     };

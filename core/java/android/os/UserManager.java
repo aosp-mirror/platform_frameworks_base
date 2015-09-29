@@ -632,6 +632,19 @@ public class UserManager {
     }
 
     /**
+     * Checks if specified user can have restricted profile.
+     * @hide
+     */
+    public boolean canHaveRestrictedProfile(int userId) {
+        try {
+            return mService.canHaveRestrictedProfile(userId);
+        } catch (RemoteException re) {
+            Log.w(TAG, "Could not check if user can have restricted profile", re);
+            return false;
+        }
+    }
+
+    /**
      * Checks if the calling app is running as a guest user.
      * @return whether the caller is a guest user.
      * @hide

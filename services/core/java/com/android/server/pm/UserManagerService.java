@@ -131,7 +131,7 @@ public class UserManagerService extends IUserManager.Stub {
 
     private static final int MIN_USER_ID = 10;
 
-    private static final int USER_VERSION = 5;
+    private static final int USER_VERSION = 6;
 
     private static final long EPOCH_PLUS_30_YEARS = 30L * 365 * 24 * 60 * 60 * 1000L; // ms
 
@@ -406,6 +406,24 @@ public class UserManagerService extends IUserManager.Stub {
         synchronized (mPackagesLock) {
             return getUserInfoLocked(UserHandle.getCallingUserId()).isRestricted();
         }
+    }
+
+    @Override
+    public boolean canHaveRestrictedProfile(int userId) {
+        checkManageUsersPermission("canHaveRestrictedProfile");
+        synchronized (mPackagesLock) {
+            final UserInfo userInfo = getUserInfoLocked(userId);
+            if (userInfo == null || !userInfo.canHaveProfile()) {
+                return false;
+            }
+            if (!userInfo.isAdmin()) {
+                return false;
+            }
+        }
+        DevicePolicyManager dpm = (DevicePolicyManager) mContext.getSystemService(
+                Context.DEVICE_POLICY_SERVICE);
+        // restricted profile can be created if there is no DO set and the admin user has no PO
+        return dpm.getDeviceOwner() == null && dpm.getProfileOwnerAsUser(userId) == null;
     }
 
     /*
@@ -846,6 +864,20 @@ public class UserManagerService extends IUserManager.Stub {
         if (userVersion < 5) {
             initDefaultGuestRestrictions();
             userVersion = 5;
+        }
+
+        if (userVersion < 6) {
+            final boolean splitSystemUser = UserManager.isSplitSystemUser();
+            for (int i = 0; i < mUsers.size(); i++) {
+                UserInfo user = mUsers.valueAt(i);
+                // In non-split mode, only user 0 can have restricted profiles
+                if (!splitSystemUser && user.isRestricted()
+                        && (user.restrictedProfileParentId == UserInfo.NO_PROFILE_GROUP_ID)) {
+                    user.restrictedProfileParentId = UserHandle.USER_SYSTEM;
+                    scheduleWriteUserLocked(user);
+                }
+            }
+            userVersion = 6;
         }
 
         if (userVersion < USER_VERSION) {

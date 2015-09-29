@@ -49,6 +49,7 @@ interface IUserManager {
     UserInfo getUserInfo(int userHandle);
     long getUserCreationTime(int userHandle);
     boolean isRestricted();
+    boolean canHaveRestrictedProfile(int userId);
     int getUserSerialNumber(int userHandle);
     int getUserHandle(int userSerialNumber);
     Bundle getUserRestrictions(int userHandle);
