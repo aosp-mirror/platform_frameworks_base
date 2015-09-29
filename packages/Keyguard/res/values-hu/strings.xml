@@ -45,7 +45,6 @@
     <string name="keyguard_sim_puk_locked_message" msgid="3747232467471801633">"A SIM kártya le van zárva a PUK kóddal."</string>
     <string name="keyguard_sim_unlock_progress_dialog_message" msgid="7975221805033614426">"SIM kártya feloldása..."</string>
     <string name="keyguard_accessibility_pattern_unlock" msgid="1490840706075246612">"Feloldás mintával"</string>
-    <string name="keyguard_accessibility_face_unlock" msgid="4817282543351718535">"Arcalapú feloldás"</string>
     <string name="keyguard_accessibility_pin_unlock" msgid="2469687111784035046">"Feloldás PIN kóddal"</string>
     <string name="keyguard_accessibility_password_unlock" msgid="7675777623912155089">"Feloldás jelszóval"</string>
     <string name="keyguard_accessibility_pattern_area" msgid="7679891324509597904">"Mintaterület"</string>
@@ -77,7 +76,7 @@
     <string name="kg_invalid_confirm_pin_hint" product="default" msgid="7003469261464593516">"A PIN kódok nem egyeznek."</string>
     <string name="kg_login_too_many_attempts" msgid="6486842094005698475">"Túl sok mintarajzolási próbálkozás"</string>
     <string name="kg_too_many_failed_pin_attempts_dialog_message" msgid="8276745642049502550">"<xliff:g id="NUMBER_0">%d</xliff:g> alkalommal helytelenül adta meg PIN kódját. \n\nPróbálja újra <xliff:g id="NUMBER_1">%d</xliff:g> másodperc múlva."</string>
-    <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="7813713389422226531">"<xliff:g id="NUMBER_0">%d</xliff:g> alkalommal helytelenül adta meg a jelszót. \n\n Próbálja újra <xliff:g id="NUMBER_1">%d</xliff:g> másodperc múlva."</string>
+    <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="7813713389422226531">"<xliff:g id="NUMBER_0">%d</xliff:g> alkalommal helytelenül adta meg a jelszót. \n\nPróbálja újra <xliff:g id="NUMBER_1">%d</xliff:g> másodperc múlva."</string>
     <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="74089475965050805">"<xliff:g id="NUMBER_0">%d</xliff:g> alkalommal rosszul rajzolta le feloldási mintát. \n\nPróbálja újra <xliff:g id="NUMBER_1">%d</xliff:g> másodperc múlva."</string>
     <string name="kg_failed_attempts_almost_at_wipe" product="tablet" msgid="8774056606869646621">"<xliff:g id="NUMBER_0">%d</xliff:g> alkalommal próbálkozott sikertelenül a táblagép zárolásának feloldásával. <xliff:g id="NUMBER_1">%d</xliff:g> további sikertelen kísérlet után a rendszer visszaállítja a táblagépet a gyári állapotba; ekkor az összes adat törlődik róla."</string>
     <string name="kg_failed_attempts_almost_at_wipe" product="default" msgid="1843331751334128428">"<xliff:g id="NUMBER_0">%d</xliff:g> alkalommal próbálkozott sikertelenül a telefon zárolásának feloldásával. <xliff:g id="NUMBER_1">%d</xliff:g> további sikertelen kísérlet után a rendszer visszaállítja a telefont a gyári állapotba; ekkor az összes adat törlődik róla."</string>
@@ -94,20 +93,32 @@
     <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"<xliff:g id="NUMBER_0">%d</xliff:g> alkalommal helytelenül rajzolta le a feloldási mintát. További <xliff:g id="NUMBER_1">%d</xliff:g> sikertelen kísérlet után egy e-mail fiók használatával kell feloldania a táblagépét.\n\n Kérjük, próbálja újra <xliff:g id="NUMBER_2">%d</xliff:g> másodperc múlva."</string>
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"<xliff:g id="NUMBER_0">%d</xliff:g> alkalommal helytelenül rajzolta le a feloldási mintát. További <xliff:g id="NUMBER_1">%d</xliff:g> sikertelen kísérlet után egy e-mail fiók használatával kell feloldania a telefonját.\n\n Kérjük, próbálja újra <xliff:g id="NUMBER_2">%d</xliff:g> másodperc múlva."</string>
     <string name="kg_password_wrong_pin_code_pukked" msgid="30531039455764924">"Helytelen PIN kód a SIM kártyához; vegye fel a kapcsolatot szolgáltatójával az eszköz feloldásához."</string>
-    <plurals name="kg_password_wrong_pin_code" formatted="false" msgid="6721575017538162249">
-      <item quantity="other">A SIM kártya PIN kódja helytelen. <xliff:g id="NUMBER_1">%d</xliff:g> próbálkozás maradt.</item>
-      <item quantity="one">A SIM kártya PIN kódja helytelen. <xliff:g id="NUMBER_0">%d</xliff:g> próbálkozás maradt. Utána a szolgáltatótól kell feloldást kérnie.</item>
-    </plurals>
+  <plurals name="kg_password_wrong_pin_code">
+    <item quantity="one" msgid="8134313997799638254">"Helytelen PIN kód a SIM kártyához; még <xliff:g id="NUMBER">%d</xliff:g> próbálkozása van, mielőtt fel kellene vennie a kapcsolatot szolgáltatójával az eszköz feloldásához."</item>
+    <item quantity="other" msgid="2215723361575359486">"Helytelen PIN kód a SIM kártyához; még <xliff:g id="NUMBER">%d</xliff:g> próbálkozása van."</item>
+  </plurals>
     <string name="kg_password_wrong_puk_code_dead" msgid="7077536808291316208">"A SIM kártya használhatatlan. Vegye fel a kapcsolatot szolgáltatójával."</string>
-    <plurals name="kg_password_wrong_puk_code" formatted="false" msgid="7576227366999858780">
-      <item quantity="other">Helytelen PUK kód a SIM kártyához. Még <xliff:g id="NUMBER_1">%d</xliff:g> próbálkozása van, mielőtt a SIM kártya végleg használhatatlanná válik.</item>
-      <item quantity="one">Helytelen PUK kód a SIM kártyához. Még <xliff:g id="NUMBER_0">%d</xliff:g> próbálkozása van, mielőtt a SIM kártya végleg használhatatlanná válik.</item>
-    </plurals>
+  <plurals name="kg_password_wrong_puk_code">
+    <item quantity="one" msgid="3256893607561060649">"Helytelen PUK kód a SIM kártyához; még <xliff:g id="NUMBER">%d</xliff:g> próbálkozása van, mielőtt a SIM kártya végleg használhatatlan lesz."</item>
+    <item quantity="other" msgid="5477305226026342036">"Helytelen PUK kód a SIM kártyához; még <xliff:g id="NUMBER">%d</xliff:g> próbálkozása van, mielőtt a SIM kártya végleg használhatatlan lesz."</item>
+  </plurals>
     <string name="kg_password_pin_failed" msgid="6268288093558031564">"A SIM kártya PIN-művelete sikertelen!"</string>
     <string name="kg_password_puk_failed" msgid="2838824369502455984">"A SIM kártya PUK-művelete sikertelen!"</string>
     <string name="kg_pin_accepted" msgid="1448241673570020097">"Kód elfogadva."</string>
     <string name="keyguard_carrier_default" msgid="8700650403054042153">"Nincs szolgáltatás."</string>
     <string name="accessibility_ime_switch_button" msgid="5032926134740456424">"Beviteli mód váltása gomb."</string>
     <string name="airplane_mode" msgid="3122107900897202805">"Repülős üzemmód"</string>
+    <string name="kg_prompt_reason_restart_pattern" msgid="489430505491862444">"Ha újraindítja az eszközt, meg kell adnia a mintát."</string>
+    <string name="kg_prompt_reason_restart_pin" msgid="994878216570694974">"Ha újraindítja az eszközt, meg kell adnia a PIN kódot."</string>
+    <string name="kg_prompt_reason_restart_password" msgid="2375742919528461664">"Ha újraindítja az eszközt, meg kell adnia a jelszót."</string>
+    <string name="kg_prompt_reason_switch_profiles_pattern" msgid="3802056699323773969">"Ha vált a profilok között, meg kell adnia a mintát."</string>
+    <string name="kg_prompt_reason_switch_profiles_pin" msgid="8108020184731052246">"Ha vált a profilok között, meg kell adnia a PIN kódot."</string>
+    <string name="kg_prompt_reason_switch_profiles_password" msgid="6755997057852042672">"Ha vált a profilok között, meg kell adnia a jelszót."</string>
+    <!-- no translation found for kg_prompt_reason_time_pattern:one (5598462918459516566) -->
+    <!-- no translation found for kg_prompt_reason_time_pattern:other (224518697489572649) -->
+    <!-- no translation found for kg_prompt_reason_time_pin:one (3073579168584205350) -->
+    <!-- no translation found for kg_prompt_reason_time_pin:other (3282423442327824649) -->
+    <!-- no translation found for kg_prompt_reason_time_password:one (9062782924671938516) -->
+    <!-- no translation found for kg_prompt_reason_time_password:other (1839722302513719629) -->
     <string name="fingerprint_not_recognized" msgid="2690661881608146617">"Nem sikerült felismerni"</string>
 </resources>

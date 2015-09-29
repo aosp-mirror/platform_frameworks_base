@@ -45,7 +45,6 @@
     <string name="keyguard_sim_puk_locked_message" msgid="3747232467471801633">"SIM-kort er låst med PUK-koden."</string>
     <string name="keyguard_sim_unlock_progress_dialog_message" msgid="7975221805033614426">"SIM-kortet låses op…"</string>
     <string name="keyguard_accessibility_pattern_unlock" msgid="1490840706075246612">"Lås op med mønster."</string>
-    <string name="keyguard_accessibility_face_unlock" msgid="4817282543351718535">"Lås op med ansigt."</string>
     <string name="keyguard_accessibility_pin_unlock" msgid="2469687111784035046">"Lås op med pinkode."</string>
     <string name="keyguard_accessibility_password_unlock" msgid="7675777623912155089">"Lås op med adgangskode."</string>
     <string name="keyguard_accessibility_pattern_area" msgid="7679891324509597904">"Mønsterområde."</string>
@@ -94,20 +93,32 @@
     <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"Du har tegnet dit oplåsningsmønster forkert <xliff:g id="NUMBER_0">%d</xliff:g> gange. Efter <xliff:g id="NUMBER_1">%d</xliff:g> yderligere mislykkede forsøg vil du blive bedt om at låse din tablet op ved hjælp af en e-mailkonto\n\n Prøv igen om <xliff:g id="NUMBER_2">%d</xliff:g> sekunder."</string>
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"Du har tegnet dit oplåsningsmønster forkert <xliff:g id="NUMBER_0">%d</xliff:g> gange. Efter <xliff:g id="NUMBER_1">%d</xliff:g> yderligere mislykkede forsøg til vil du blive bedt om at låse din telefon op ved hjælp af en e-mailkonto.\n\n Prøv igen om <xliff:g id="NUMBER_2">%d</xliff:g> sekunder."</string>
     <string name="kg_password_wrong_pin_code_pukked" msgid="30531039455764924">"Forkert pinkode til SIM-kort. Du skal nu kontakte dit mobilselskab for at låse din enhed op."</string>
-    <plurals name="kg_password_wrong_pin_code" formatted="false" msgid="6721575017538162249">
-      <item quantity="one">Forkert pinkode til SIM-kort. Du har <xliff:g id="NUMBER_1">%d</xliff:g> forsøg tilbage.</item>
-      <item quantity="other">Forkert pinkode til SIM-kort. Du har <xliff:g id="NUMBER_1">%d</xliff:g> forsøg tilbage.</item>
-    </plurals>
+  <plurals name="kg_password_wrong_pin_code">
+    <item quantity="one" msgid="8134313997799638254">"Forkert pinkode til SIM-kort. Du har <xliff:g id="NUMBER">%d</xliff:g> forsøg tilbage, før du skal kontakte dit mobilselskab for at låse din enhed op."</item>
+    <item quantity="other" msgid="2215723361575359486">"Forkert pinkode til SIM-kort. Du har <xliff:g id="NUMBER">%d</xliff:g> forsøg tilbage."</item>
+  </plurals>
     <string name="kg_password_wrong_puk_code_dead" msgid="7077536808291316208">"SIM-kortet er ubrugeligt. Kontakt dit mobilselskab."</string>
-    <plurals name="kg_password_wrong_puk_code" formatted="false" msgid="7576227366999858780">
-      <item quantity="one">Forkert PUK-kode til SIM-kort. Du har <xliff:g id="NUMBER_1">%d</xliff:g> forsøg tilbage, før SIM-kortet bliver permanent ubrugeligt.</item>
-      <item quantity="other">Forkert PUK-kode til SIM-kort. Du har <xliff:g id="NUMBER_1">%d</xliff:g> forsøg tilbage, før SIM-kortet bliver permanent ubrugeligt.</item>
-    </plurals>
+  <plurals name="kg_password_wrong_puk_code">
+    <item quantity="one" msgid="3256893607561060649">"Forkert PUK-kode til SIM-kort. Du har <xliff:g id="NUMBER">%d</xliff:g> forsøg tilbage, før SIM-kortet bliver permanent ubrugeligt."</item>
+    <item quantity="other" msgid="5477305226026342036">"Forkert PUK-kode til SIM-kort. Du har <xliff:g id="NUMBER">%d</xliff:g> forsøg tilbage, før dit SIM-kort bliver permanent ubrugeligt."</item>
+  </plurals>
     <string name="kg_password_pin_failed" msgid="6268288093558031564">"Pinkoden til SIM-kortet blev afvist."</string>
     <string name="kg_password_puk_failed" msgid="2838824369502455984">"PUK-koden til SIM-kortet blev afvist."</string>
     <string name="kg_pin_accepted" msgid="1448241673570020097">"Koden blev accepteret."</string>
     <string name="keyguard_carrier_default" msgid="8700650403054042153">"Ingen dækning."</string>
     <string name="accessibility_ime_switch_button" msgid="5032926134740456424">"Skift indtastningsmetode-knappen."</string>
     <string name="airplane_mode" msgid="3122107900897202805">"Flytilstand"</string>
+    <string name="kg_prompt_reason_restart_pattern" msgid="489430505491862444">"Du skal indtaste et mønster, når du genstarter enheden."</string>
+    <string name="kg_prompt_reason_restart_pin" msgid="994878216570694974">"Du skal indtaste en pinkode, når du genstarter enheden."</string>
+    <string name="kg_prompt_reason_restart_password" msgid="2375742919528461664">"Du skal indtaste en adgangskode, når du genstarter enheden."</string>
+    <string name="kg_prompt_reason_switch_profiles_pattern" msgid="3802056699323773969">"Du skal indtaste et mønster, når du skifter profiler."</string>
+    <string name="kg_prompt_reason_switch_profiles_pin" msgid="8108020184731052246">"Du skal indtaste en pinkode, når du skifter profiler."</string>
+    <string name="kg_prompt_reason_switch_profiles_password" msgid="6755997057852042672">"Du skal indtaste en adgangskode, når du skifter profiler."</string>
+    <!-- no translation found for kg_prompt_reason_time_pattern:one (5598462918459516566) -->
+    <!-- no translation found for kg_prompt_reason_time_pattern:other (224518697489572649) -->
+    <!-- no translation found for kg_prompt_reason_time_pin:one (3073579168584205350) -->
+    <!-- no translation found for kg_prompt_reason_time_pin:other (3282423442327824649) -->
+    <!-- no translation found for kg_prompt_reason_time_password:one (9062782924671938516) -->
+    <!-- no translation found for kg_prompt_reason_time_password:other (1839722302513719629) -->
     <string name="fingerprint_not_recognized" msgid="2690661881608146617">"Kan ikke genkendes"</string>
 </resources>

@@ -45,7 +45,6 @@
     <string name="keyguard_sim_puk_locked_message" msgid="3747232467471801633">"SIM kartica zaključana je PUK-om."</string>
     <string name="keyguard_sim_unlock_progress_dialog_message" msgid="7975221805033614426">"Otključavanje SIM kartice…"</string>
     <string name="keyguard_accessibility_pattern_unlock" msgid="1490840706075246612">"Uzorak za otključavanje."</string>
-    <string name="keyguard_accessibility_face_unlock" msgid="4817282543351718535">"Otključavanje licem."</string>
     <string name="keyguard_accessibility_pin_unlock" msgid="2469687111784035046">"Otključavanje PIN-om."</string>
     <string name="keyguard_accessibility_password_unlock" msgid="7675777623912155089">"Otključavanje zaporkom."</string>
     <string name="keyguard_accessibility_pattern_area" msgid="7679891324509597904">"Područje uzorka."</string>
@@ -94,22 +93,32 @@
     <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"Netočno ste iscrtali obrazac za otključavanje <xliff:g id="NUMBER_0">%d</xliff:g> puta. Nakon još ovoliko neuspješnih pokušaja: <xliff:g id="NUMBER_1">%d</xliff:g> morat ćete otključati tabletno računalo pomoću računa e-pošte.\n\n Pokušajte ponovo za <xliff:g id="NUMBER_2">%d</xliff:g> s."</string>
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"Netočno ste iscrtali obrazac za otključavanje <xliff:g id="NUMBER_0">%d</xliff:g> puta. Nakon još ovoliko neuspješnih pokušaja: <xliff:g id="NUMBER_1">%d</xliff:g> morat ćete otključati telefon pomoću računa e-pošte.\n\n Pokušajte ponovo za <xliff:g id="NUMBER_2">%d</xliff:g> s."</string>
     <string name="kg_password_wrong_pin_code_pukked" msgid="30531039455764924">"Netočan PIN kôd SIM kartice; sada morate kontaktirati svog mobilnog operatera da bi otključao vaš uređaj."</string>
-    <plurals name="kg_password_wrong_pin_code" formatted="false" msgid="6721575017538162249">
-      <item quantity="one">Netočan PIN kôd SIM kartice; imate još <xliff:g id="NUMBER_1">%d</xliff:g> pokušaj.</item>
-      <item quantity="few">Netočan PIN kôd SIM kartice; imate još <xliff:g id="NUMBER_1">%d</xliff:g> pokušaja.</item>
-      <item quantity="other">Netočan PIN kôd SIM kartice; imate još <xliff:g id="NUMBER_1">%d</xliff:g> pokušaja.</item>
-    </plurals>
+  <plurals name="kg_password_wrong_pin_code">
+    <item quantity="one" msgid="8134313997799638254">"Netočan PIN kôd SIM kartice; imate još <xliff:g id="NUMBER">%d</xliff:g> pokušaj prije nego što budete morali kontaktirati svog mobilnog operatera da bi otključao vaš uređaj."</item>
+    <item quantity="other" msgid="2215723361575359486">"Netočan PIN kôd SIM kartice; imate još ovoliko preostalih pokušaja: <xliff:g id="NUMBER">%d</xliff:g>."</item>
+  </plurals>
     <string name="kg_password_wrong_puk_code_dead" msgid="7077536808291316208">"SIM kartica nije upotrebljiva. Kontaktirajte svog mobilnog operatera."</string>
-    <plurals name="kg_password_wrong_puk_code" formatted="false" msgid="7576227366999858780">
-      <item quantity="one">Netočan PUK kôd SIM kartice; imate još <xliff:g id="NUMBER_1">%d</xliff:g> pokušaj prije nego što SIM kartica postane trajno neupotrebljiva.</item>
-      <item quantity="few">Netočan PUK kôd SIM kartice; imate još <xliff:g id="NUMBER_1">%d</xliff:g> pokušaja prije nego što SIM kartica postane trajno neupotrebljiva.</item>
-      <item quantity="other">Netočan PUK kôd SIM kartice; imate još <xliff:g id="NUMBER_1">%d</xliff:g> pokušaja prije nego što SIM kartica postane trajno neupotrebljiva.</item>
-    </plurals>
+  <plurals name="kg_password_wrong_puk_code">
+    <item quantity="one" msgid="3256893607561060649">"Netočan PUK kôd SIM kartice; imate još <xliff:g id="NUMBER">%d</xliff:g> pokušaj prije nego što SIM kartica postane trajno neupotrebljiva."</item>
+    <item quantity="other" msgid="5477305226026342036">"Netočan PUK kôd SIM kartice; imate još nekoliko preostalih pokušaja (<xliff:g id="NUMBER">%d</xliff:g>) prije nego što SIM kartica postane trajno neupotrebljiva."</item>
+  </plurals>
     <string name="kg_password_pin_failed" msgid="6268288093558031564">"Operacija PIN-a SIM kartice nije uspjela!"</string>
     <string name="kg_password_puk_failed" msgid="2838824369502455984">"Operacija PUK-a SIM kartice nije uspjela!"</string>
     <string name="kg_pin_accepted" msgid="1448241673570020097">"Kôd je prihvaćen!"</string>
     <string name="keyguard_carrier_default" msgid="8700650403054042153">"Nema usluge."</string>
     <string name="accessibility_ime_switch_button" msgid="5032926134740456424">"Gumb za promjenu načina unosa."</string>
     <string name="airplane_mode" msgid="3122107900897202805">"Način rada u zrakoplovu"</string>
+    <string name="kg_prompt_reason_restart_pattern" msgid="489430505491862444">"Za ponovno pokretanje uređaja morate unijeti uzorak."</string>
+    <string name="kg_prompt_reason_restart_pin" msgid="994878216570694974">"Za ponovno pokretanje uređaja morate unijeti PIN."</string>
+    <string name="kg_prompt_reason_restart_password" msgid="2375742919528461664">"Za ponovno pokretanje uređaja morate unijeti zaporku."</string>
+    <string name="kg_prompt_reason_switch_profiles_pattern" msgid="3802056699323773969">"Za promjenu profila morate unijeti uzorak."</string>
+    <string name="kg_prompt_reason_switch_profiles_pin" msgid="8108020184731052246">"Za promjenu profila morate unijeti PIN."</string>
+    <string name="kg_prompt_reason_switch_profiles_password" msgid="6755997057852042672">"Za promjenu profila morate unijeti zaporku."</string>
+    <!-- no translation found for kg_prompt_reason_time_pattern:one (5598462918459516566) -->
+    <!-- no translation found for kg_prompt_reason_time_pattern:other (224518697489572649) -->
+    <!-- no translation found for kg_prompt_reason_time_pin:one (3073579168584205350) -->
+    <!-- no translation found for kg_prompt_reason_time_pin:other (3282423442327824649) -->
+    <!-- no translation found for kg_prompt_reason_time_password:one (9062782924671938516) -->
+    <!-- no translation found for kg_prompt_reason_time_password:other (1839722302513719629) -->
     <string name="fingerprint_not_recognized" msgid="2690661881608146617">"Nije prepoznat"</string>
 </resources>

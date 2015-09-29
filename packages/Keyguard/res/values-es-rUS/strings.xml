@@ -45,7 +45,6 @@
     <string name="keyguard_sim_puk_locked_message" msgid="3747232467471801633">"La tarjeta SIM está bloqueada por código PUK."</string>
     <string name="keyguard_sim_unlock_progress_dialog_message" msgid="7975221805033614426">"Desbloqueando tarjeta SIM…"</string>
     <string name="keyguard_accessibility_pattern_unlock" msgid="1490840706075246612">"Desbloqueo por patrón"</string>
-    <string name="keyguard_accessibility_face_unlock" msgid="4817282543351718535">"Desbloqueo facial"</string>
     <string name="keyguard_accessibility_pin_unlock" msgid="2469687111784035046">"Desbloqueo por PIN"</string>
     <string name="keyguard_accessibility_password_unlock" msgid="7675777623912155089">"Desbloqueo por contraseña"</string>
     <string name="keyguard_accessibility_pattern_area" msgid="7679891324509597904">"Área de patrón"</string>
@@ -94,20 +93,32 @@
     <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"Dibujaste incorrectamente tu patrón de desbloqueo <xliff:g id="NUMBER_0">%d</xliff:g> veces. Luego de <xliff:g id="NUMBER_1">%d</xliff:g> intentos incorrectos más, se te solicitará que desbloquees tu tablet mediante el uso de una cuenta de correo.\n\n Vuelve a intentarlo en <xliff:g id="NUMBER_2">%d</xliff:g> segundos."</string>
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"Dibujaste incorrectamente tu patrón de desbloqueo <xliff:g id="NUMBER_0">%d</xliff:g> veces. Luego de <xliff:g id="NUMBER_1">%d</xliff:g> intentos incorrectos más, se te solicitará que desbloquees tu dispositivo mediante el uso de una cuenta de correo.\n\n Vuelve a intentarlo en <xliff:g id="NUMBER_2">%d</xliff:g> segundos."</string>
     <string name="kg_password_wrong_pin_code_pukked" msgid="30531039455764924">"El código PIN de la tarjeta SIM es incorrecto. Debes comunicarte con el proveedor para desbloquear el dispositivo."</string>
-    <plurals name="kg_password_wrong_pin_code" formatted="false" msgid="6721575017538162249">
-      <item quantity="other">El código PIN de la tarjeta SIM es incorrecto. Tienes <xliff:g id="NUMBER_1">%d</xliff:g> intentos más.</item>
-      <item quantity="one">El código PIN de la tarjeta SIM es incorrecto. Tienes <xliff:g id="NUMBER_0">%d</xliff:g> intento más antes de que debas comunicarte con el proveedor para desbloquear el dispositivo.</item>
-    </plurals>
+  <plurals name="kg_password_wrong_pin_code">
+    <item quantity="one" msgid="8134313997799638254">"El código PIN de la tarjeta SIM es incorrecto. Te queda <xliff:g id="NUMBER">%d</xliff:g> intento antes de que debas comunicarte con el proveedor para desbloquear el dispositivo."</item>
+    <item quantity="other" msgid="2215723361575359486">"El código PIN de la tarjeta SIM es incorrecto. Te quedan <xliff:g id="NUMBER">%d</xliff:g> intentos."</item>
+  </plurals>
     <string name="kg_password_wrong_puk_code_dead" msgid="7077536808291316208">"La tarjeta SIM no se puede utilizar. Comunícate con el proveedor."</string>
-    <plurals name="kg_password_wrong_puk_code" formatted="false" msgid="7576227366999858780">
-      <item quantity="other">El código PUK de la tarjeta SIM es incorrecto. Tienes <xliff:g id="NUMBER_1">%d</xliff:g> intentos más antes de que la tarjeta SIM quede inutilizable de forma permanente.</item>
-      <item quantity="one">El código PUK de la tarjeta SIM es incorrecto. Tienes <xliff:g id="NUMBER_0">%d</xliff:g> intento más antes de que la tarjeta SIM quede inutilizable de forma permanente.</item>
-    </plurals>
+  <plurals name="kg_password_wrong_puk_code">
+    <item quantity="one" msgid="3256893607561060649">"El código PUK de la tarjeta SIM es incorrecto. Te queda <xliff:g id="NUMBER">%d</xliff:g> intento antes de que la tarjeta SIM quede inutilizable permanentemente."</item>
+    <item quantity="other" msgid="5477305226026342036">"El código PUK de la tarjeta SIM es incorrecto. Te quedan <xliff:g id="NUMBER">%d</xliff:g> intentos antes de que la tarjeta SIM quede inutilizable permanentemente."</item>
+  </plurals>
     <string name="kg_password_pin_failed" msgid="6268288093558031564">"Error al desbloquear la tarjeta SIM con el PIN"</string>
     <string name="kg_password_puk_failed" msgid="2838824369502455984">"Error al desbloquear la tarjeta SIM con el PUK"</string>
     <string name="kg_pin_accepted" msgid="1448241673570020097">"Código aceptado"</string>
     <string name="keyguard_carrier_default" msgid="8700650403054042153">"Sin servicio"</string>
     <string name="accessibility_ime_switch_button" msgid="5032926134740456424">"Botón Cambiar método de entrada"</string>
     <string name="airplane_mode" msgid="3122107900897202805">"Modo de avión"</string>
+    <string name="kg_prompt_reason_restart_pattern" msgid="489430505491862444">"Se solicita el patrón al reiniciar el dispositivo."</string>
+    <string name="kg_prompt_reason_restart_pin" msgid="994878216570694974">"Se solicita el PIN al reiniciar el dispositivo."</string>
+    <string name="kg_prompt_reason_restart_password" msgid="2375742919528461664">"Se solicita la contraseña al reiniciar el dispositivo."</string>
+    <string name="kg_prompt_reason_switch_profiles_pattern" msgid="3802056699323773969">"Se solicita el patrón al cambiar de perfil."</string>
+    <string name="kg_prompt_reason_switch_profiles_pin" msgid="8108020184731052246">"Se solicita el PIN al cambiar de perfil."</string>
+    <string name="kg_prompt_reason_switch_profiles_password" msgid="6755997057852042672">"Se solicita la contraseña al cambiar de perfil."</string>
+    <!-- no translation found for kg_prompt_reason_time_pattern:one (5598462918459516566) -->
+    <!-- no translation found for kg_prompt_reason_time_pattern:other (224518697489572649) -->
+    <!-- no translation found for kg_prompt_reason_time_pin:one (3073579168584205350) -->
+    <!-- no translation found for kg_prompt_reason_time_pin:other (3282423442327824649) -->
+    <!-- no translation found for kg_prompt_reason_time_password:one (9062782924671938516) -->
+    <!-- no translation found for kg_prompt_reason_time_password:other (1839722302513719629) -->
     <string name="fingerprint_not_recognized" msgid="2690661881608146617">"No reconocido"</string>
 </resources>
