@@ -23,12 +23,12 @@
     <string name="status_bar_clear_all_button" msgid="7774721344716731603">"Wissen"</string>
     <string name="status_bar_recent_remove_item_title" msgid="6026395868129852968">"Verwijderen uit lijst"</string>
     <string name="status_bar_recent_inspect_item_title" msgid="7793624864528818569">"App-info"</string>
-    <string name="status_bar_no_recent_apps" msgid="7374907845131203189">"Uw recente schermen worden hier weergegeven"</string>
+    <string name="status_bar_no_recent_apps" msgid="7374907845131203189">"Je recente schermen worden hier weergegeven"</string>
     <string name="status_bar_accessibility_dismiss_recents" msgid="4576076075226540105">"Recente apps negeren"</string>
-    <plurals name="status_bar_accessibility_recent_apps" formatted="false" msgid="9138535907802238759">
-      <item quantity="other">%d schermen in Overzicht</item>
-      <item quantity="one">1 scherm in Overzicht</item>
-    </plurals>
+  <plurals name="status_bar_accessibility_recent_apps">
+    <item quantity="one" msgid="3969335317929254918">"1 scherm in Overzicht"</item>
+    <item quantity="other" msgid="5523506463832158203">"%d schermen in Overzicht"</item>
+  </plurals>
     <string name="status_bar_no_notifications_title" msgid="4755261167193833213">"Geen meldingen"</string>
     <string name="status_bar_ongoing_events_title" msgid="1682504513316879202">"Actief"</string>
     <string name="status_bar_latest_events_title" msgid="6594767438577593172">"Meldingen"</string>
@@ -63,15 +63,17 @@
     <string name="usb_debugging_title" msgid="4513918393387141949">"USB-foutopsporing toestaan?"</string>
     <string name="usb_debugging_message" msgid="2220143855912376496">"De vingerafdruk voor de RSA-sleutel van de computer is:\n<xliff:g id="FINGERPRINT">%1$s</xliff:g>"</string>
     <string name="usb_debugging_always" msgid="303335496705863070">"Altijd toestaan vanaf deze computer"</string>
+    <string name="usb_debugging_secondary_user_title" msgid="6353808721761220421">"USB-foutopsporing niet toegestaan"</string>
+    <string name="usb_debugging_secondary_user_message" msgid="6011931347142270156">"De gebruiker die momenteel is ingelogd op dit apparaat, kan USB-foutopsporing niet inschakelen. Als u deze functie wilt gebruiken, schakelt u naar de primaire gebruiker \'<xliff:g id="NAME">%s</xliff:g>\'."</string>
     <string name="compat_mode_on" msgid="6623839244840638213">"Zoom om scherm te vullen"</string>
     <string name="compat_mode_off" msgid="4434467572461327898">"Rek uit v. schermvulling"</string>
     <string name="screenshot_saving_ticker" msgid="7403652894056693515">"Screenshot opslaan..."</string>
     <string name="screenshot_saving_title" msgid="8242282144535555697">"Screenshot opslaan..."</string>
     <string name="screenshot_saving_text" msgid="2419718443411738818">"Screenshot wordt opgeslagen."</string>
     <string name="screenshot_saved_title" msgid="6461865960961414961">"Screenshot gemaakt."</string>
-    <string name="screenshot_saved_text" msgid="1152839647677558815">"Raak aan om uw screenshot te bekijken."</string>
+    <string name="screenshot_saved_text" msgid="1152839647677558815">"Raak aan om je screenshot te bekijken."</string>
     <string name="screenshot_failed_title" msgid="705781116746922771">"Screenshot is niet gemaakt."</string>
-    <string name="screenshot_failed_text" msgid="1260203058661337274">"Kan geen screenshot maken wegens beperkte opslagruimte of omdat de app of uw organisatie dit niet toestaat."</string>
+    <string name="screenshot_failed_text" msgid="1260203058661337274">"Kan geen screenshot maken wegens beperkte opslagruimte of omdat de app of je organisatie dit niet toestaat."</string>
     <string name="usb_preference_title" msgid="6551050377388882787">"Opties voor USB-bestandsoverdracht"</string>
     <string name="use_mtp_button_title" msgid="4333504413563023626">"Koppelen als mediaspeler (MTP)"</string>
     <string name="use_ptp_button_title" msgid="7517127540301625751">"Koppelen als camera (PTP)"</string>
@@ -83,9 +85,13 @@
     <string name="accessibility_search_light" msgid="1103867596330271848">"Zoeken"</string>
     <string name="accessibility_camera_button" msgid="8064671582820358152">"Camera"</string>
     <string name="accessibility_phone_button" msgid="6738112589538563574">"Telefoon"</string>
+    <string name="accessibility_voice_assist_button" msgid="487611083884852965">"Spraakassistent"</string>
     <string name="accessibility_unlock_button" msgid="128158454631118828">"Ontgrendelen"</string>
+    <string name="accessibility_unlock_button_fingerprint" msgid="8214125623493923751">"Knop Ontgrendelen, wacht op vingerafdruk"</string>
+    <string name="accessibility_unlock_without_fingerprint" msgid="7541705575183694446">"Ontgrendelen zonder je vingerafdruk te gebruiken"</string>
     <string name="unlock_label" msgid="8779712358041029439">"ontgrendelen"</string>
     <string name="phone_label" msgid="2320074140205331708">"telefoon openen"</string>
+    <string name="voice_assist_label" msgid="3956854378310019854">"spraakassistent openen"</string>
     <string name="camera_label" msgid="7261107956054836961">"camera openen"</string>
     <string name="recents_caption_resize" msgid="3517056471774958200">"Nieuwe taakindeling selecteren"</string>
     <string name="cancel" msgid="6442560571259935130">"Annuleren"</string>
@@ -108,12 +114,6 @@
     <string name="accessibility_data_two_bars" msgid="6166018492360432091">"Gegevens: twee streepjes."</string>
     <string name="accessibility_data_three_bars" msgid="9167670452395038520">"Gegevens: drie streepjes."</string>
     <string name="accessibility_data_signal_full" msgid="2708384608124519369">"Gegevenssignaal is op volle sterkte."</string>
-    <string name="accessibility_wifi_off" msgid="3177380296697933627">"Wifi: uitgeschakeld."</string>
-    <string name="accessibility_no_wifi" msgid="1425476551827924474">"Wifi-verbinding verbroken."</string>
-    <string name="accessibility_wifi_one_bar" msgid="7735893178010724377">"Wifi: één streepje."</string>
-    <string name="accessibility_wifi_two_bars" msgid="4994274250497262434">"Wifi: twee streepjes."</string>
-    <string name="accessibility_wifi_three_bars" msgid="3495755044276588384">"Wifi: drie streepjes."</string>
-    <string name="accessibility_wifi_signal_full" msgid="6853561303586480376">"Wifi-signaal is op volledige sterkte."</string>
     <string name="accessibility_wifi_name" msgid="7202151365171148501">"Verbonden met <xliff:g id="WIFI">%s</xliff:g>."</string>
     <string name="accessibility_bluetooth_name" msgid="8441517146585531676">"Verbonden met <xliff:g id="BLUETOOTH">%s</xliff:g>."</string>
     <string name="accessibility_no_wimax" msgid="4329180129727630368">"Geen WiMAX."</string>
@@ -121,6 +121,8 @@
     <string name="accessibility_wimax_two_bars" msgid="9176236858336502288">"WiMAX: twee streepjes."</string>
     <string name="accessibility_wimax_three_bars" msgid="6116551636752103927">"WiMAX: drie streepjes."</string>
     <string name="accessibility_wimax_signal_full" msgid="2768089986795579558">"WiMAX-signaal  is op volle sterkte."</string>
+    <string name="accessibility_ethernet_disconnected" msgid="5896059303377589469">"Ethernet-verbinding verbroken."</string>
+    <string name="accessibility_ethernet_connected" msgid="2692130313069182636">"Ethernet verbonden."</string>
     <string name="accessibility_no_signal" msgid="7064645320782585167">"Geen signaal."</string>
     <string name="accessibility_not_connected" msgid="6395326276213402883">"Niet verbonden."</string>
     <string name="accessibility_zero_bars" msgid="3806060224467027887">"Geen streepjes."</string>
@@ -146,6 +148,7 @@
     <string name="accessibility_no_sim" msgid="8274017118472455155">"Geen simkaart."</string>
     <string name="accessibility_bluetooth_tether" msgid="4102784498140271969">"Bluetooth-tethering."</string>
     <string name="accessibility_airplane_mode" msgid="834748999790763092">"Vliegtuigmodus."</string>
+    <string name="accessibility_no_sims" msgid="3957997018324995781">"Geen simkaart."</string>
     <string name="accessibility_carrier_network_change_mode" msgid="4017301580441304305">"Netwerk van provider wordt gewijzigd."</string>
     <string name="accessibility_battery_level" msgid="7451474187113371965">"Accu: <xliff:g id="NUMBER">%d</xliff:g> procent."</string>
     <string name="accessibility_settings_button" msgid="799583911231893380">"Systeeminstellingen."</string>
@@ -162,13 +165,14 @@
     <string name="accessibility_recents_item_dismissed" msgid="6803574935084867070">"<xliff:g id="APP">%s</xliff:g> verwijderd."</string>
     <string name="accessibility_recents_all_items_dismissed" msgid="4464697366179168836">"Alle recente apps gesloten."</string>
     <string name="accessibility_recents_item_launched" msgid="7616039892382525203">"<xliff:g id="APP">%s</xliff:g> starten."</string>
+    <string name="accessibility_recents_task_header" msgid="1437183540924535457">"<xliff:g id="APP">%1$s</xliff:g> <xliff:g id="ACTIVITY_LABEL">%2$s</xliff:g>"</string>
     <string name="accessibility_notification_dismissed" msgid="854211387186306927">"Melding verwijderd."</string>
     <string name="accessibility_desc_notification_shade" msgid="4690274844447504208">"Meldingenpaneel."</string>
     <string name="accessibility_desc_quick_settings" msgid="6186378411582437046">"Snelle instellingen."</string>
     <string name="accessibility_desc_lock_screen" msgid="5625143713611759164">"Vergrendelingsscherm."</string>
     <string name="accessibility_desc_settings" msgid="3417884241751434521">"Instellingen"</string>
     <string name="accessibility_desc_recent_apps" msgid="4876900986661819788">"Overzicht."</string>
-    <string name="accessibility_desc_confirm" msgid="3446792278337969766">"Bevestigen"</string>
+    <string name="accessibility_desc_close" msgid="7479755364962766729">"Sluiten"</string>
     <string name="accessibility_quick_settings_user" msgid="1104846699869476855">"Gebruiker: <xliff:g id="USER">%s</xliff:g>."</string>
     <string name="accessibility_quick_settings_wifi" msgid="5518210213118181692">"<xliff:g id="SIGNAL">%1$s</xliff:g>."</string>
     <string name="accessibility_quick_settings_wifi_changed_off" msgid="8716484460897819400">"Wifi uitgeschakeld."</string>
@@ -180,7 +184,7 @@
     <string name="accessibility_quick_settings_airplane_changed_off" msgid="66846307818850664">"Vliegtuigmodus uitgeschakeld."</string>
     <string name="accessibility_quick_settings_airplane_changed_on" msgid="8983005603505087728">"Vliegtuigmodus ingeschakeld."</string>
     <string name="accessibility_quick_settings_dnd_priority_on" msgid="1448402297221249355">"Niet storen aan, alleen prioriteit."</string>
-    <string name="accessibility_quick_settings_dnd_none_on" msgid="5910777408232088752">"Niet storen aan, geen onderbrekingen."</string>
+    <string name="accessibility_quick_settings_dnd_none_on" msgid="6882582132662613537">"Niet storen aan, totale stilte."</string>
     <string name="accessibility_quick_settings_dnd_alarms_on" msgid="9152834845587554157">"Niet storen aan, alleen alarmen."</string>
     <string name="accessibility_quick_settings_dnd_off" msgid="2371832603753738581">"Niet storen uit."</string>
     <string name="accessibility_quick_settings_dnd_changed_off" msgid="898107593453022935">"Niet storen uitgeschakeld."</string>
@@ -213,7 +217,7 @@
     <string name="data_usage_disabled_dialog_4g_title" msgid="1601769736881078016">"4G-data zijn onderbroken"</string>
     <string name="data_usage_disabled_dialog_mobile_title" msgid="4651001290947318931">"Mobiele gegevens zijn onderbroken"</string>
     <string name="data_usage_disabled_dialog_title" msgid="3932437232199671967">"Gegevens zijn onderbroken"</string>
-    <string name="data_usage_disabled_dialog" msgid="8453242888903772524">"Omdat de ingestelde gegevenslimiet is bereikt, heeft het apparaat het gegevensverbruik onderbroken voor de rest van deze cyclus.\n\nAls u het gegevensverbruik hervat, kan uw provider kosten in rekening brengen."</string>
+    <string name="data_usage_disabled_dialog" msgid="8453242888903772524">"Omdat de ingestelde gegevenslimiet is bereikt, heeft het apparaat het gegevensverbruik onderbroken voor de rest van deze cyclus.\n\nAls u het gegevensverbruik hervat, kan je provider kosten in rekening brengen."</string>
     <string name="data_usage_disabled_dialog_enable" msgid="1412395410306390593">"Hervatten"</string>
     <string name="status_bar_settings_signal_meter_disconnected" msgid="1940231521274147771">"Geen internetverbinding"</string>
     <string name="status_bar_settings_signal_meter_wifi_nossid" msgid="6557486452774597820">"Verbonden via wifi"</string>
@@ -235,7 +239,7 @@
     <string name="quick_settings_dnd_label" msgid="8735855737575028208">"Niet storen"</string>
     <string name="quick_settings_dnd_priority_label" msgid="483232950670692036">"Alleen prioriteit"</string>
     <string name="quick_settings_dnd_alarms_label" msgid="2559229444312445858">"Alleen alarmen"</string>
-    <string name="quick_settings_dnd_none_label" msgid="7309935569360609114">"Geen onderbrekingen"</string>
+    <string name="quick_settings_dnd_none_label" msgid="5025477807123029478">"Totale stilte"</string>
     <string name="quick_settings_bluetooth_label" msgid="6304190285170721401">"Bluetooth"</string>
     <string name="quick_settings_bluetooth_multiple_devices_label" msgid="3912245565613684735">"Bluetooth (<xliff:g id="NUMBER">%d</xliff:g> apparaten)"</string>
     <string name="quick_settings_bluetooth_off_label" msgid="8159652146149219937">"Bluetooth uit"</string>
@@ -260,7 +264,7 @@
     <string name="quick_settings_wifi_not_connected" msgid="7171904845345573431">"Niet verbonden"</string>
     <string name="quick_settings_wifi_no_network" msgid="2221993077220856376">"Geen netwerk"</string>
     <string name="quick_settings_wifi_off_label" msgid="7558778100843885864">"Wifi uit"</string>
-    <string name="quick_settings_wifi_detail_empty_text" msgid="2831702993995222755">"Geen opgeslagen netwerken beschikbaar"</string>
+    <string name="quick_settings_wifi_detail_empty_text" msgid="269990350383909226">"Geen wifi-netwerken beschikbaar"</string>
     <string name="quick_settings_cast_title" msgid="7709016546426454729">"Casten"</string>
     <string name="quick_settings_casting" msgid="6601710681033353316">"Casten"</string>
     <string name="quick_settings_cast_device_default_name" msgid="5367253104742382945">"Naamloos apparaat"</string>
@@ -285,7 +289,7 @@
     <string name="quick_settings_cellular_detail_data_used" msgid="1476810587475761478">"<xliff:g id="DATA_USED">%s</xliff:g> gebruikt"</string>
     <string name="quick_settings_cellular_detail_data_limit" msgid="56011158504994128">"Limiet van <xliff:g id="DATA_LIMIT">%s</xliff:g>"</string>
     <string name="quick_settings_cellular_detail_data_warning" msgid="2440098045692399009">"Waarschuwing voor <xliff:g id="DATA_LIMIT">%s</xliff:g>"</string>
-    <string name="recents_empty_message" msgid="8682129509540827999">"Uw recente schermen worden hier weergegeven"</string>
+    <string name="recents_empty_message" msgid="8682129509540827999">"Je recente schermen worden hier weergegeven"</string>
     <string name="recents_app_info_button_label" msgid="2890317189376000030">"App-informatie"</string>
     <string name="recents_lock_to_app_button_label" msgid="6942899049072506044">"scherm vastzetten"</string>
     <string name="recents_search_bar_label" msgid="8074997400187836677">"zoeken"</string>
@@ -302,31 +306,28 @@
     <string name="description_target_search" msgid="3091587249776033139">"Zoeken"</string>
     <string name="description_direction_up" msgid="7169032478259485180">"Veeg omhoog voor <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>."</string>
     <string name="description_direction_left" msgid="7207478719805562165">"Veeg naar links voor <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>."</string>
-    <string name="zen_no_interruptions_with_warning" msgid="4396898053735625287">"Geen onderbrekingen. Zelfs geen alarm."</string>
-    <string name="zen_priority_introduction" msgid="7253045784560169993">"U wordt niet gestoord door geluiden en trillingen, behalve voor alarmen, herinneringen, afspraken en bellers die u specificeert."</string>
+    <string name="zen_priority_introduction" msgid="3070506961866919502">"U wordt niet gestoord door geluiden en trillingen, behalve voor alarmen, herinneringen, afspraken en bellers die u specificeert."</string>
     <string name="zen_priority_customize_button" msgid="7948043278226955063">"Aanpassen"</string>
-    <string name="zen_no_interruptions" msgid="7970973750143632592">"Geen onderbrekingen"</string>
-    <string name="zen_important_interruptions" msgid="3477041776609757628">"Alleen prioriteitsonderbrekingen"</string>
-    <string name="zen_alarms" msgid="5055668280767657759">"Alleen alarmen"</string>
-    <string name="zen_alarm_information_time" msgid="5235772206174372272">"Uw volgende alarm is om <xliff:g id="ALARM_TIME">%s</xliff:g>"</string>
-    <string name="zen_alarm_information_day_time" msgid="8422733576255047893">"Uw volgende alarm is <xliff:g id="ALARM_DAY_AND_TIME">%s</xliff:g>"</string>
-    <string name="zen_alarm_warning" msgid="6873910860111498041">"U hoort uw alarm niet om <xliff:g id="ALARM_TIME">%s</xliff:g>"</string>
+    <string name="zen_silence_introduction_voice" msgid="2284540992298200729">"Hiermee worden ALLE geluiden en trillingen geblokkeerd, waaronder die voor alarmen, muziek, video\'s en games. U kunt wel nog steeds bellen."</string>
+    <string name="zen_silence_introduction" msgid="3137882381093271568">"Hiermee worden ALLE geluiden en trillingen geblokkeerd, waaronder die voor alarmen, muziek, video\'s en games."</string>
     <string name="keyguard_more_overflow_text" msgid="9195222469041601365">"+<xliff:g id="NUMBER_OF_NOTIFICATIONS">%d</xliff:g>"</string>
     <string name="speed_bump_explanation" msgid="1288875699658819755">"Minder urgente meldingen onderaan"</string>
     <string name="notification_tap_again" msgid="8524949573675922138">"Raak opnieuw aan om te openen"</string>
     <string name="keyguard_unlock" msgid="8043466894212841998">"Veeg omhoog om te ontgrendelen"</string>
-    <string name="phone_hint" msgid="3101468054914424646">"Veeg naar rechts voor telefoon"</string>
-    <string name="camera_hint" msgid="5241441720959174226">"Veeg naar links voor camera"</string>
-    <string name="interruption_level_none" msgid="8284541443482072628">"Geen onderbrekingen"</string>
+    <string name="phone_hint" msgid="4872890986869209950">"Vegen voor telefoon"</string>
+    <string name="voice_hint" msgid="8939888732119726665">"Vegen vanaf pictogram voor spraakassistent"</string>
+    <string name="camera_hint" msgid="7939688436797157483">"Vegen voor camera"</string>
+    <string name="interruption_level_none_with_warning" msgid="5114872171614161084">"Totale stilte. Hiermee worden schermlezers ook op stil gezet."</string>
+    <string name="interruption_level_none" msgid="6000083681244492992">"Totale stilte"</string>
     <string name="interruption_level_priority" msgid="6426766465363855505">"Alleen prioriteit"</string>
     <string name="interruption_level_alarms" msgid="5226306993448328896">"Alleen alarmen"</string>
-    <string name="interruption_level_all" msgid="1330581184930945764">"Alle"</string>
-    <string name="interruption_level_none_twoline" msgid="3942121050170227056">"Geen\nonderbrekingen"</string>
+    <string name="interruption_level_none_twoline" msgid="3957581548190765889">"Totale\nstilte"</string>
     <string name="interruption_level_priority_twoline" msgid="1564715335217164124">"Alleen\nprioriteit"</string>
     <string name="interruption_level_alarms_twoline" msgid="3266909566410106146">"Alleen\nalarmen"</string>
     <string name="keyguard_indication_charging_time" msgid="1757251776872835768">"Opladen (vol over <xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g>)"</string>
     <string name="accessibility_multi_user_switch_switcher" msgid="7305948938141024937">"Gebruiker wijzigen"</string>
     <string name="accessibility_multi_user_switch_switcher_with_current" msgid="8434880595284601601">"Schakelen tussen gebruikers, huidige gebruiker <xliff:g id="CURRENT_USER_NAME">%s</xliff:g>"</string>
+    <string name="accessibility_multi_user_switch_inactive" msgid="1424081831468083402">"Huidige gebruiker <xliff:g id="CURRENT_USER_NAME">%s</xliff:g>"</string>
     <string name="accessibility_multi_user_switch_quick_contact" msgid="3020367729287990475">"Profiel weergeven"</string>
     <string name="user_add_user" msgid="5110251524486079492">"Gebruiker toevoegen"</string>
     <string name="user_new_user_name" msgid="426540612051178753">"Nieuwe gebruiker"</string>
@@ -337,11 +338,11 @@
     <string name="guest_exit_guest_dialog_message" msgid="4155503224769676625">"Alle apps en gegevens in deze sessie worden verwijderd."</string>
     <string name="guest_exit_guest_dialog_remove" msgid="7402231963862520531">"Verwijderen"</string>
     <string name="guest_wipe_session_title" msgid="6419439912885956132">"Welkom terug, gast!"</string>
-    <string name="guest_wipe_session_message" msgid="8476238178270112811">"Wilt u doorgaan met uw sessie?"</string>
+    <string name="guest_wipe_session_message" msgid="8476238178270112811">"Wilt u doorgaan met je sessie?"</string>
     <string name="guest_wipe_session_wipe" msgid="5065558566939858884">"Opnieuw starten"</string>
     <string name="guest_wipe_session_dontwipe" msgid="1401113462524894716">"Ja, doorgaan"</string>
     <string name="guest_notification_title" msgid="1585278533840603063">"Gastgebruiker"</string>
-    <string name="guest_notification_text" msgid="7513706222848825467">"Verwijder de gast om apps en gegevens te wissen"</string>
+    <string name="guest_notification_text" msgid="335747957734796689">"Verwijder gastgebruiker om apps en gegevens te verwijderen"</string>
     <string name="guest_notification_remove_action" msgid="8820670703892101990">"GAST VERWIJDEREN"</string>
     <string name="user_add_user_title" msgid="4553596395824132638">"Nieuwe gebruiker toevoegen?"</string>
     <string name="user_add_user_message_short" msgid="2161624834066214559">"Wanneer u een nieuwe gebruiker toevoegt, moet die persoon zijn eigen profiel instellen.\n\n1Elke gebruiker kan apps updaten voor alle andere gebruikers."</string>
@@ -349,7 +350,7 @@
     <string name="battery_saver_notification_text" msgid="820318788126672692">"Vermindert de prestaties en achtergrondgegevens"</string>
     <string name="battery_saver_notification_action_text" msgid="109158658238110382">"Accubesparing uitschakelen"</string>
     <string name="notification_hidden_text" msgid="1135169301897151909">"Inhoud verborgen"</string>
-    <string name="media_projection_dialog_text" msgid="3071431025448218928">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> gaat alles vastleggen dat wordt weergegeven op uw scherm."</string>
+    <string name="media_projection_dialog_text" msgid="3071431025448218928">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> gaat alles vastleggen dat wordt weergegeven op je scherm."</string>
     <string name="media_projection_remember_text" msgid="3103510882172746752">"Niet opnieuw weergeven"</string>
     <string name="clear_all_notifications_text" msgid="814192889771462828">"Alles wissen"</string>
     <string name="media_projection_action_text" msgid="8470872969457985954">"Nu starten"</string>
@@ -362,13 +363,16 @@
     <string name="monitoring_title" msgid="169206259253048106">"Netwerkcontrole"</string>
     <string name="disable_vpn" msgid="4435534311510272506">"VPN uitschakelen"</string>
     <string name="disconnect_vpn" msgid="1324915059568548655">"Verbinding met VPN verbreken"</string>
-    <string name="monitoring_description_device_owned" msgid="5780988291898461883">"Uw apparaat wordt beheerd door <xliff:g id="ORGANIZATION">%1$s</xliff:g>.\n\nUw beheerder kan instellingen, bedrijfstoegang, apps, gegevens voor uw apparaat en locatiegegevens voor uw apparaat controleren en beheren. Neem voor meer informatie contact op met uw beheerder."</string>
-    <string name="monitoring_description_profile_owned" msgid="8110044290898637925">"Uw werkprofiel wordt beheerd door <xliff:g id="ORGANIZATION">%1$s</xliff:g>.\n\nUw beheerder kan uw netwerkactiviteit controleren, inclusief e-mails, apps en veilige websites.\n\nNeem voor meer informatie contact op met uw beheerder."</string>
-    <string name="monitoring_description_device_and_profile_owned" msgid="1664428184778531249">"Uw apparaat wordt beheerd door:\n<xliff:g id="ORGANIZATION_0">%1$s</xliff:g>.\nUw werkprofiel wordt beheerd door:\n<xliff:g id="ORGANIZATION_1">%2$s</xliff:g>.\n\nUw beheerder kan uw apparaat en netwerkactiviteit controleren, inclusief e-mails, apps en veilige websites.\n\nNeem voor meer informatie contact op met uw beheerder."</string>
-    <string name="monitoring_description_vpn" msgid="912328761766161919">"U heeft een app toestemming gegeven een VPN-verbinding in te stellen.\n\nDeze app kan uw apparaat- en netwerkactiviteit bijhouden, waaronder e-mails, apps en beveiligde websites."</string>
-    <string name="monitoring_description_vpn_device_owned" msgid="3090670777499161246">"Uw apparaat wordt beheerd door <xliff:g id="ORGANIZATION">%1$s</xliff:g>.\n\nUw beheerder kan instellingen, bedrijfstoegang, apps, gegevens voor uw apparaat en locatiegegevens voor uw apparaat controleren en beheren.\n\nU bent verbonden met een VPN, die uw netwerkactiviteit kan controleren, waaronder e-mails, apps en websites.\n\nNeem voor meer informatie contact op met uw beheerder."</string>
-    <string name="monitoring_description_vpn_profile_owned" msgid="2224494839524715272">"Uw werkprofiel wordt beheerd door <xliff:g id="ORGANIZATION">%1$s</xliff:g>.\n\nUw beheerder kan uw netwerkactiviteit controleren, inclusief e-mails, apps en veilige websites.\n\nNeem voor meer informatie contact op met uw beheerder.\n\nDaarnaast bent u verbonden met een VPN, die uw netwerkactiviteit kan controleren."</string>
-    <string name="monitoring_description_vpn_device_and_profile_owned" msgid="2198546817407897093">"Uw apparaat wordt beheerd door <xliff:g id="ORGANIZATION_0">%1$s</xliff:g>.\nUw werkprofiel wordt beheerd door:\n<xliff:g id="ORGANIZATION_1">%2$s</xliff:g>.\n\nUw beheerder kan uw netwerkactiviteit controleren, inclusief e-mails, apps en veilige websites.\n\nNeem voor meer informatie contact op met uw beheerder.\n\nDaarnaast bent u verbonden met een VPN, die uw persoonlijke netwerkactiviteit kan controleren."</string>
+    <string name="monitoring_description_device_owned" msgid="5780988291898461883">"Je apparaat wordt beheerd door <xliff:g id="ORGANIZATION">%1$s</xliff:g>.\n\nJe beheerder kan instellingen, bedrijfstoegang, apps, gegevens voor je apparaat en locatiegegevens voor je apparaat controleren en beheren. Neem voor meer informatie contact op met je beheerder."</string>
+    <string name="monitoring_description_vpn" msgid="4445150119515393526">"Je hebt een app toestemming gegeven voor het instellen van een VPN-verbinding.\n\nMet deze app kan je apparaat- en netwerkactiviteit worden gecontroleerd, inclusief e-mails, apps en websites."</string>
+    <string name="monitoring_description_vpn_device_owned" msgid="3090670777499161246">"Je apparaat wordt beheerd door <xliff:g id="ORGANIZATION">%1$s</xliff:g>.\n\nJe beheerder kan instellingen, bedrijfstoegang, apps, gegevens voor je apparaat en locatiegegevens voor je apparaat controleren en beheren.\n\nU bent verbonden met een VPN, die je netwerkactiviteit kan controleren, waaronder e-mails, apps en websites.\n\nNeem voor meer informatie contact op met je beheerder."</string>
+    <string name="monitoring_description_vpn_profile_owned" msgid="2054949132145039290">"Je werkprofiel wordt beheerd door <xliff:g id="ORGANIZATION">%1$s</xliff:g>.\n\nJe beheerder kan je netwerkactiviteit controleren, inclusief e-mails, apps en websites.\n\nNeem contact op met je beheerder voor meer informatie.\n\nU bent ook verbonden met een VPN waarmee je netwerkactiviteit kan worden gecontroleerd."</string>
+    <string name="legacy_vpn_name" msgid="6604123105765737830">"VPN"</string>
+    <string name="monitoring_description_app" msgid="6259179342284742878">"U bent verbonden met <xliff:g id="APPLICATION">%1$s</xliff:g>, waarmee je netwerkactiviteit kan worden gecontroleerd, inclusief e-mails, apps en websites."</string>
+    <string name="monitoring_description_app_personal" msgid="484599052118316268">"U bent verbonden met <xliff:g id="APPLICATION">%1$s</xliff:g>, waarmee je persoonlijke netwerkactiviteit kan worden gecontroleerd, inclusief e-mails, apps en websites."</string>
+    <string name="monitoring_description_app_work" msgid="1754325860918060897">"Je werkprofiel wordt beheerd door <xliff:g id="ORGANIZATION">%1$s</xliff:g>. Deze is verbonden met <xliff:g id="APPLICATION">%2$s</xliff:g>, waarmee je werkgerelateerde netwerkactiviteit kan worden gecontroleerd, inclusief e-mails, apps en websites.\n\nNeem contact op met je beheerder voor meer informatie."</string>
+    <string name="monitoring_description_app_personal_work" msgid="4946600443852045903">"Je werkprofiel wordt beheerd door <xliff:g id="ORGANIZATION">%1$s</xliff:g>. Deze is verbonden met <xliff:g id="APPLICATION_WORK">%2$s</xliff:g>, waarmee je werkgerelateerde netwerkactiviteit kan worden gecontroleerd, inclusief e-mails, apps en websites.\n\nU bent ook verbonden met <xliff:g id="APPLICATION_PERSONAL">%3$s</xliff:g>, waarmee je persoonlijke netwerkactiviteit kan worden gecontroleerd."</string>
+    <string name="monitoring_description_vpn_app_device_owned" msgid="4970443827043261703">"Je apparaat wordt beheerd door <xliff:g id="ORGANIZATION">%1$s</xliff:g>.\n\nJe beheerder kan instellingen, zakelijke toegang, apps, gekoppelde apparaatgegevens en locatiegegevens voor je apparaat controleren en beheren.\n\nU bent verbonden met <xliff:g id="APPLICATION">%2$s</xliff:g> waarmee je netwerkactiviteit kan worden gecontroleerd, inclusief e-mails, apps en websites.\n\nNeem contact op met je beheerder voor meer informatie."</string>
     <string name="keyguard_indication_trust_disabled" msgid="7412534203633528135">"Het apparaat blijft vergrendeld totdat u het handmatig ontgrendelt"</string>
     <string name="hidden_notifications_title" msgid="7139628534207443290">"Sneller meldingen ontvangen"</string>
     <string name="hidden_notifications_text" msgid="2326409389088668981">"Weergeven voordat u ontgrendelt"</string>
@@ -377,6 +381,9 @@
     <string name="notification_expand_button_text" msgid="1037425494153780718">"Alles weergeven"</string>
     <string name="notification_collapse_button_text" msgid="6883253262134328057">"Alles verbergen"</string>
     <string name="zen_mode_and_condition" msgid="4462471036429759903">"<xliff:g id="ZEN_MODE">%1$s</xliff:g>. <xliff:g id="EXIT_CONDITION">%2$s</xliff:g>"</string>
+    <string name="volume_zen_end_now" msgid="3179845345429841822">"Nu uitschakelen"</string>
+    <string name="accessibility_volume_expand" msgid="5946812790999244205">"Uitvouwen"</string>
+    <string name="accessibility_volume_collapse" msgid="3609549593031810875">"Samenvouwen"</string>
     <string name="screen_pinning_title" msgid="3273740381976175811">"Scherm is vastgezet"</string>
     <string name="screen_pinning_description" msgid="1346522416878235405">"Het scherm blijft zichtbaar totdat u het u losmaakt. Houd \'Terug\' en \'Overzicht\' tegelijkertijd aangeraakt om het los te maken."</string>
     <string name="screen_pinning_description_accessible" msgid="8518446209564202557">"Het scherm blijft zichtbaar totdat u het u losmaakt. Houd \'Overzicht\' aangeraakt om het los te maken."</string>
@@ -390,5 +397,33 @@
     <string name="volumeui_prompt_deny" msgid="5720663643411696731">"Afwijzen"</string>
     <string name="volumeui_notification_title" msgid="4906770126345910955">"<xliff:g id="APP_NAME">%1$s</xliff:g> is het volumedialoogvenster"</string>
     <string name="volumeui_notification_text" msgid="1826889705095768656">"Tik hierop om het origineel te herstellen."</string>
-    <string name="managed_profile_foreground_toast" msgid="3199278359979281097">"U bevindt zich in het werkprofiel"</string>
+    <string name="managed_profile_foreground_toast" msgid="5421487114739245972">"U gebruikt je werkprofiel"</string>
+    <string name="system_ui_tuner" msgid="708224127392452018">"Systeem-UI-tuner"</string>
+    <string name="show_battery_percentage" msgid="5444136600512968798">"Percentage ingebouwde accu weergeven"</string>
+    <string name="show_battery_percentage_summary" msgid="3215025775576786037">"Accupercentage weergeven in het pictogram op de statusbalk wanneer er niet wordt opgeladen"</string>
+    <string name="quick_settings" msgid="10042998191725428">"Snelle instellingen"</string>
+    <string name="status_bar" msgid="4877645476959324760">"Statusbalk"</string>
+    <string name="demo_mode" msgid="2389163018533514619">"Demomodus"</string>
+    <string name="enable_demo_mode" msgid="4844205668718636518">"Demomodus inschakelen"</string>
+    <string name="show_demo_mode" msgid="2018336697782464029">"Demomodus weergeven"</string>
+    <string name="status_bar_ethernet" msgid="5044290963549500128">"Ethernet"</string>
+    <string name="status_bar_alarm" msgid="8536256753575881818">"Alarm"</string>
+    <string name="status_bar_work" msgid="6022553324802866373">"Werkprofiel"</string>
+    <string name="status_bar_airplane" msgid="7057575501472249002">"Vliegtuigmodus"</string>
+    <string name="add_tile" msgid="2995389510240786221">"Tegel toevoegen"</string>
+    <string name="broadcast_tile" msgid="3894036511763289383">"Tegel \'Uitzenden\'"</string>
+    <string name="zen_alarm_warning_indef" msgid="3482966345578319605">"U hoort je volgende alarm niet <xliff:g id="WHEN">%1$s</xliff:g> tenzij u dit voor die tijd uitschakelt"</string>
+    <string name="zen_alarm_warning" msgid="444533119582244293">"U hoort je volgende alarm niet <xliff:g id="WHEN">%1$s</xliff:g>"</string>
+    <string name="alarm_template" msgid="3980063409350522735">"om <xliff:g id="WHEN">%1$s</xliff:g>"</string>
+    <string name="alarm_template_far" msgid="4242179982586714810">"op <xliff:g id="WHEN">%1$s</xliff:g>"</string>
+    <string name="accessibility_quick_settings_detail" msgid="2579369091672902101">"Snelle instellingen, <xliff:g id="TITLE">%s</xliff:g>."</string>
+    <string name="accessibility_status_bar_hotspot" msgid="4099381329956402865">"Hotspot"</string>
+    <string name="accessibility_managed_profile" msgid="6613641363112584120">"Werkprofiel"</string>
+    <string name="tuner_warning_title" msgid="7094689930793031682">"Leuk voor sommige gebruikers, maar niet voor iedereen"</string>
+    <string name="tuner_warning" msgid="8730648121973575701">"Met Systeem-UI-tuner beschikt u over extra manieren om de Android-gebruikersinterface aan te passen. Deze experimentele functies kunnen veranderen, vastlopen of verdwijnen in toekomstige releases. Ga voorzichtig verder."</string>
+    <string name="tuner_persistent_warning" msgid="8597333795565621795">"Deze experimentele functies kunnen veranderen, vastlopen of verdwijnen in toekomstige releases. Ga voorzichtig verder."</string>
+    <string name="got_it" msgid="2239653834387972602">"OK"</string>
+    <string name="tuner_toast" msgid="603429811084428439">"Systeem-UI-tuner is toegevoegd aan Instellingen"</string>
+    <string name="remove_from_settings" msgid="8389591916603406378">"Verwijderen uit Instellingen"</string>
+    <string name="remove_from_settings_prompt" msgid="6069085993355887748">"Systeem-UI-tuner uit Instellingen verwijderen en het gebruik van alle functies daarvan stopzetten?"</string>
 </resources>
