@@ -7,19 +7,7 @@ page.landing.image=images/develop/connectivity.png
 
 <div class="landing-docs">
 
-  <div class="col-6">
-    <h3>Blog Articles</h3>
-
-    <a href="http://android-developers.blogspot.com/2011/09/androids-http-clients.html">
-      <h4>Android’s HTTP Clients</h4>
-      <p>Most network-connected Android apps will use HTTP to send and receive data. Android
-includes two HTTP clients: HttpURLConnection and Apache HTTP Client. Both support HTTPS, streaming
-uploads and downloads, configurable timeouts, IPv6 and connection pooling.</p>
-    </a>
-
-  </div>
-
-  <div class="col-6">
+  <div>
     <h3>Training</h3>
 
     <a href="http://developer.android.com/training/efficient-downloads/index.html">
@@ -37,7 +25,6 @@ minimize impact on battery life.</p>
       their data when recovering from a data loss (such as a factory reset) or installing your
       application on a new device.
       </p>
-
     </a>
 
   </div>

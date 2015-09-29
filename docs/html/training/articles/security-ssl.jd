@@ -376,9 +376,8 @@ support <a href="http://en.wikipedia.org/wiki/Server_Name_Indication">Server Nam
 hostname to the server so the proper certificate can be returned.</p>
 
 <p>Fortunately, {@link javax.net.ssl.HttpsURLConnection} supports
-SNI since Android 2.3. Unfortunately, Apache
-HTTP Client does not, which is one of the many reasons we discourage its use. One workaround
-if you need to support Android 2.2 (and older) or Apache HTTP Client is to set up an alternative
+SNI since Android 2.3. One workaround
+if you need to support Android 2.2 (and older) is to set up an alternative
 virtual host on a unique port so that it's unambiguous which server certificate to return.</p>
 
 <p>The more drastic alternative is to replace {@link javax.net.ssl.HostnameVerifier}
