@@ -26,7 +26,7 @@
     <string name="gigabyteShort" msgid="3259882455212193214">"ஜி.பை."</string>
     <string name="terabyteShort" msgid="231613018159186962">"டெ.பை."</string>
     <string name="petabyteShort" msgid="5637816680144990219">"பெ.பை."</string>
-    <string name="fileSizeSuffix" msgid="9164292791500531949">"<xliff:g id="NUMBER">%1$s</xliff:g><xliff:g id="UNIT">%2$s</xliff:g>"</string>
+    <string name="fileSizeSuffix" msgid="8897567456150907538">"<xliff:g id="NUMBER">%1$s</xliff:g> <xliff:g id="UNIT">%2$s</xliff:g>"</string>
     <string name="durationDays" msgid="6652371460511178259">"<xliff:g id="DAYS">%1$d</xliff:g> நாட்கள்"</string>
     <string name="durationDayHours" msgid="2713107458736744435">"<xliff:g id="DAYS">%1$d</xliff:g> நாள் <xliff:g id="HOURS">%2$d</xliff:g> ம.நே."</string>
     <string name="durationDayHour" msgid="7293789639090958917">"<xliff:g id="DAYS">%1$d</xliff:g> நாள் <xliff:g id="HOURS">%2$d</xliff:g> ம.நே."</string>
@@ -55,16 +55,16 @@
     <string name="mmiComplete" msgid="8232527495411698359">"MMI நிறைவடைந்தது."</string>
     <string name="badPin" msgid="9015277645546710014">"உள்ளிட்ட பழைய பின் தவறானது."</string>
     <string name="badPuk" msgid="5487257647081132201">"உள்ளிட்ட PUK2 தவறானது."</string>
-    <string name="mismatchPin" msgid="609379054496863419">"உள்ளிட்ட PINகள் பொருந்தவில்லை."</string>
+    <string name="mismatchPin" msgid="609379054496863419">"உள்ளிட்ட பின்கள் பொருந்தவில்லை."</string>
     <string name="invalidPin" msgid="3850018445187475377">"4 இலிருந்து 8 எண்கள் வரையுள்ள பின் ஐத் தட்டச்சு செய்யவும்."</string>
     <string name="invalidPuk" msgid="8761456210898036513">"8 அல்லது அதற்கு மேல் எண்கள் உள்ள PUK ஐத் தட்டச்சு செய்யவும்."</string>
     <string name="needPuk" msgid="919668385956251611">"உங்கள் சிம் கார்டு PUK பூட்டுதல் செய்யப்பட்டுள்ளது. அதைத் திறக்க PUK குறியீட்டைத் உள்ளிடவும்."</string>
     <string name="needPuk2" msgid="4526033371987193070">"சிம் கார்டைத் தடுப்பு நீக்க PUK2 ஐ உள்ளிடவும்."</string>
     <string name="enablePin" msgid="209412020907207950">"தோல்வி, சிம்/RUIM பூட்டை இயக்கவும்."</string>
-    <plurals name="pinpuk_attempts" formatted="false" msgid="1251012001539225582">
-      <item quantity="other">சிம் பூட்டப்படுவதற்கு முன், நீங்கள் <xliff:g id="NUMBER_1">%d</xliff:g> முறை முயற்சிக்கலாம்.</item>
-      <item quantity="one">சிம் பூட்டப்படுவதற்கு முன், நீங்கள் <xliff:g id="NUMBER_0">%d</xliff:g> முறை முயற்சிக்கலாம்.</item>
-    </plurals>
+  <plurals name="pinpuk_attempts">
+    <item quantity="one" msgid="6596245285809790142">"சிம் பூட்டப்படுவதற்கு முன், நீங்கள் <xliff:g id="NUMBER">%d</xliff:g> முறை முயற்சிக்கலாம்."</item>
+    <item quantity="other" msgid="7530597808358774740">"சிம் பூட்டப்படுவதற்கு முன், நீங்கள் <xliff:g id="NUMBER">%d</xliff:g> முறை முயற்சிக்கலாம்."</item>
+  </plurals>
     <string name="imei" msgid="2625429890869005782">"IMEI"</string>
     <string name="meid" msgid="4841221237681254195">"MEID"</string>
     <string name="ClipMmi" msgid="6952821216480289285">"உள்வரும் அழைப்பாளர் ஐடி"</string>
@@ -129,6 +129,7 @@
   <string-array name="wfcOperatorErrorNotificationMessages">
   </string-array>
     <string name="wfcSpnFormat" msgid="8211621332478306568">"%s"</string>
+    <string name="wfcDataSpnFormat" msgid="1118052028767666883">"%s"</string>
     <string name="wifi_calling_off_summary" msgid="8720659586041656098">"முடக்கப்பட்டுள்ளது"</string>
     <string name="wfc_mode_wifi_preferred_summary" msgid="1994113411286935263">"வைஃபைக்கு முன்னுரிமை"</string>
     <string name="wfc_mode_cellular_preferred_summary" msgid="5920549484600758786">"செல்லுலாருக்கு முன்னுரிமை"</string>
@@ -171,6 +172,7 @@
     <string name="work_profile_deleted" msgid="5005572078641980632">"பணி சுயவிவரம் நீக்கப்பட்டது"</string>
     <string name="work_profile_deleted_description" msgid="6305147513054341102">"நிர்வாகி பயன்பாடு இல்லாததனால், பணி சுயவிவரம் நீக்கப்பட்டது."</string>
     <string name="work_profile_deleted_details" msgid="226615743462361248">"பணி சுயவிவர நிர்வாகி பயன்பாடு இல்லை அல்லது சேதமடைந்துள்ளது. இதன் விளைவாக, உங்கள் பணி சுயவிவரமும், அதனுடன் தொடர்புடைய தரவும் நீக்கப்பட்டன. உதவிக்கு, உங்கள் நிர்வாகியைத் தொடர்புகொள்ளவும்."</string>
+    <string name="work_profile_deleted_description_dpm_wipe" msgid="6019770344820507579">"சாதனத்தில் இனி பணி சுயவிவரம் கிடைக்காது."</string>
     <string name="factory_reset_warning" msgid="5423253125642394387">"சாதனத் தரவு அழிக்கப்படும்"</string>
     <string name="factory_reset_message" msgid="4905025204141900666">"நிர்வாகி பயன்பாடு இல்லை அல்லது சேதமடைந்துள்ளது மற்றும் பயன்படுத்த முடியாது. இப்போது சாதனத் தரவு அழிக்கப்படும். உதவிக்கு, நிர்வாகியைத் தொடர்புகொள்ளவும்."</string>
     <string name="me" msgid="6545696007631404292">"நான்"</string>
@@ -185,6 +187,12 @@
     <string name="silent_mode_silent" msgid="319298163018473078">"ரிங்கர் முடக்கப்பட்டது"</string>
     <string name="silent_mode_vibrate" msgid="7072043388581551395">"ரிங்கர் அதிர்வு"</string>
     <string name="silent_mode_ring" msgid="8592241816194074353">"ரிங்கர் இயக்கப்பட்டது"</string>
+    <string name="reboot_to_update_title" msgid="6212636802536823850">"Android முறைமை புதுப்பிப்பு"</string>
+    <string name="reboot_to_update_prepare" msgid="6305853831955310890">"புதுப்பிப்பதற்குத் தயாராகிறது…"</string>
+    <string name="reboot_to_update_package" msgid="3871302324500927291">"புதுப்பிப்புத் தொகுப்பைச் செயலாக்குகிறது…"</string>
+    <string name="reboot_to_update_reboot" msgid="6428441000951565185">"மீண்டும் தொடங்குகிறது…"</string>
+    <string name="reboot_to_reset_title" msgid="4142355915340627490">"தரவின் ஆரம்பநிலை மீட்டமைப்பு"</string>
+    <string name="reboot_to_reset_message" msgid="2432077491101416345">"மீண்டும் தொடங்குகிறது…"</string>
     <string name="shutdown_progress" msgid="2281079257329981203">"முடங்குகிறது…"</string>
     <string name="shutdown_confirm" product="tablet" msgid="3385745179555731470">"உங்கள் டேப்லெட் முடக்கப்படும்."</string>
     <string name="shutdown_confirm" product="tv" msgid="476672373995075359">"டிவி நிறுத்தப்படும்."</string>
@@ -216,37 +224,33 @@
     <string name="status_bar_notification_info_overflow" msgid="5301981741705354993">"999+"</string>
     <string name="safeMode" msgid="2788228061547930246">"பாதுகாப்பு பயன்முறை"</string>
     <string name="android_system_label" msgid="6577375335728551336">"Android அமைப்பு"</string>
-    <string name="user_owner_label" msgid="6465364741001216388">"தனிப்பட்ட பயன்பாடுகள்"</string>
+    <string name="user_owner_label" msgid="2804351898001038951">"தனிப்பட்ட"</string>
     <string name="managed_profile_label" msgid="6260850669674791528">"பணியிடம்"</string>
     <string name="permgrouplab_contacts" msgid="3657758145679177612">"தொடர்புகள்"</string>
-    <string name="permgroupdesc_contacts" msgid="1437393511338346185">"தொடர்புகளை அணுகும், மாற்றும்"</string>
+    <string name="permgroupdesc_contacts" msgid="6951499528303668046">"தொடர்புகளை அணுகும்"</string>
     <string name="permgrouplab_location" msgid="7275582855722310164">"இருப்பிடம்"</string>
-    <string name="permgroupdesc_location" msgid="536889867433972794">"இருப்பிடத்தை அணுகும்"</string>
-    <string name="permgrouplab_socialInfo" msgid="5799096623412043791">"உங்கள் சமூகத் தகவல்"</string>
-    <string name="permgroupdesc_socialInfo" msgid="7129842457611643493">"உங்கள் தொடர்புகள் மற்றும் சமூக இணைப்புகள் குறித்த தகவலுக்கான நேரடி அணுகல்."</string>
+    <string name="permgroupdesc_location" msgid="1346617465127855033">"சாதனத்தின் இருப்பிடத்தை அணுகும்"</string>
     <string name="permgrouplab_calendar" msgid="5863508437783683902">"கேலெண்டர்"</string>
-    <string name="permgroupdesc_calendar" msgid="2116049656685591803">"கேலெண்டரை அணுகும், மாற்றும்"</string>
+    <string name="permgroupdesc_calendar" msgid="3889615280211184106">"கேலெண்டரை அணுகும்"</string>
     <string name="permgrouplab_sms" msgid="228308803364967808">"SMS"</string>
-    <string name="permgroupdesc_sms" msgid="3695085582674524761">"SMSஐ அணுகும், மாற்றும்"</string>
-    <string name="permgrouplab_dictionary" msgid="8114410334955871144">"பயனர் அகராதி"</string>
-    <string name="permgroupdesc_dictionary" msgid="7586787746354378335">"பயனர் அகராதியில் சொற்களைப் படிக்கும் அல்லது எழுதும்."</string>
-    <string name="permgrouplab_bookmarks" msgid="1949519673103968229">"புத்தகக்குறிகள் மற்றும் வரலாறு"</string>
-    <string name="permgroupdesc_bookmarks" msgid="4169771606257963028">"புத்தகக்குறிகள் மற்றும் உலாவியின் வரலாற்றுக்கான நேரடி அணுகல்."</string>
+    <string name="permgroupdesc_sms" msgid="4656988620100940350">"SMS செய்திகளை அனுப்பும் மற்றும் பார்க்கும்"</string>
+    <string name="permgrouplab_storage" msgid="1971118770546336966">"சேமிப்பிடம்"</string>
+    <string name="permgroupdesc_storage" msgid="637758554581589203">"உங்கள் சாதனத்தில் உள்ள படங்கள், மீடியா மற்றும் கோப்புகளை அணுகும்"</string>
     <string name="permgrouplab_microphone" msgid="171539900250043464">"மைக்ரோஃபோன்"</string>
-    <string name="permgroupdesc_microphone" msgid="1296196977187629181">"சாதனத்தின் மைக்ரோஃபோனை அணுகும்"</string>
+    <string name="permgroupdesc_microphone" msgid="4988812113943554584">"ஆடியோவைப் பதிவுசெய்யும்"</string>
     <string name="permgrouplab_camera" msgid="4820372495894586615">"கேமரா"</string>
-    <string name="permgroupdesc_camera" msgid="2429930670410559293">"சாதனத்தின் கேமராவைப் பயன்படுத்தும்"</string>
+    <string name="permgroupdesc_camera" msgid="3250611594678347720">"படங்களை எடுக்கும், வீடியோவைப் பதிவுசெய்யும்"</string>
     <string name="permgrouplab_phone" msgid="5229115638567440675">"ஃபோன்"</string>
-    <string name="permgroupdesc_phone" msgid="2016641188146068700">"சாதனத்தின் டெலிஃபோனியைப் பயன்படுத்தும்"</string>
-    <string name="permgrouplab_sensors" msgid="7416703484233940260">"உணர்விகள்"</string>
-    <string name="permgroupdesc_sensors" msgid="2987451839455524494">"உணர்விகளையும் அணியக்கூடிய சாதனங்களையும் அணுகும்"</string>
-    <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"சாளர உள்ளடக்கத்தைப் பெறவும்"</string>
-    <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"நீங்கள் ஊடாடிக்கொண்டிருக்கும் சாளரத்தின் உள்ளடக்கத்தைப் பார்க்கலாம்."</string>
-    <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"தொடுவதன் மூலம் அறிவதை இயக்கவும்"</string>
+    <string name="permgroupdesc_phone" msgid="6234224354060641055">"மொபைல் அழைப்புகளைச் செய்யும், பெறும்"</string>
+    <string name="permgrouplab_sensors" msgid="416037179223226722">"உடல் உணர்விகள்"</string>
+    <string name="permgroupdesc_sensors" msgid="7147968539346634043">"உங்கள் உடலியக்கக் குறிகள் பற்றிய உணர்வித் தரவை அணுகும்"</string>
+    <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"சாளர உள்ளடக்கத்தைப் பெறும்"</string>
+    <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"நீங்கள் பணியாற்றி கொண்டிருக்கும் சாளரத்தின் உள்ளடக்கத்தைப் பார்க்கலாம்."</string>
+    <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"தொடுவதன் மூலம் அறிவதை இயக்கும்"</string>
     <string name="capability_desc_canRequestTouchExploration" msgid="5800552516779249356">"தொட்ட உருப்படிகள் சத்தமாகப் பேசும் மற்றும் சைகைகளைப் பயன்படுத்தி திரையை ஆராயலாம்."</string>
-    <string name="capability_title_canRequestEnhancedWebAccessibility" msgid="1739881766522594073">"மேம்பட்ட இணைய அணுகல்தன்மையை இயக்கவும்"</string>
-    <string name="capability_desc_canRequestEnhancedWebAccessibility" msgid="7881063961507511765">"பயன்பாட்டு உள்ளடக்கத்தை மேலும் எளிதாக அணுகக்கூடியதாக்க ஸ்கிரிப்ட்கள் நிறுவப்பட்டிருக்கலாம்."</string>
-    <string name="capability_title_canRequestFilterKeyEvents" msgid="2103440391902412174">"நீங்கள் தட்டச்சு செய்யும் உரையைக் கவனிக்கவும்"</string>
+    <string name="capability_title_canRequestEnhancedWebAccessibility" msgid="1739881766522594073">"மேம்பட்ட இணைய அணுகல்தன்மையை இயக்கும்"</string>
+    <string name="capability_desc_canRequestEnhancedWebAccessibility" msgid="7881063961507511765">"பயன்பாட்டு உள்ளடக்கத்தை மேலும் எளிதாக அணுகக்கூடியதாக்க ஸ்கிரிப்ட்கள் நிறுவப்படலாம்."</string>
+    <string name="capability_title_canRequestFilterKeyEvents" msgid="2103440391902412174">"நீங்கள் தட்டச்சு செய்யும் உரையைக் கவனிக்கும்"</string>
     <string name="capability_desc_canRequestFilterKeyEvents" msgid="7463135292204152818">"கிரெடிட் கார்டு எண்கள் மற்றும் கடவுச்சொற்கள் போன்ற தனிப்பட்ட தகவலும் உள்ளடங்கும்."</string>
     <string name="permlab_statusBar" msgid="7417192629601890791">"நிலைப் பட்டியை முடக்குதல் அல்லது மாற்றுதல்"</string>
     <string name="permdesc_statusBar" msgid="8434669549504290975">"நிலைப் பட்டியை முடக்க அல்லது முறைமையில் ஐகான்களைச் சேர்க்க மற்றும் அகற்ற பயன்பாட்டை அனுமதிக்கிறது."</string>
@@ -264,7 +268,11 @@
     <string name="permdesc_receiveSms" msgid="6424387754228766939">"SMS செய்திகளைப் பெற, செயற்படுத்தப் பயன்பாட்டை அனுமதிக்கிறது. இதற்கு அர்த்தம் உங்கள் சாதனத்திற்கு அனுப்பப்படும் செய்திகளை உங்களுக்குக் காட்டாமல் கண்காணிப்பதற்கு அல்லது நீக்குவதற்குப் பயன்பாட்டால் முடியும் என்பதாகும்."</string>
     <string name="permlab_receiveMms" msgid="1821317344668257098">"உரைச் செய்திகளை (MMS) பெறுதல்"</string>
     <string name="permdesc_receiveMms" msgid="533019437263212260">"MMS செய்திகளைப் பெற, செயற்படுத்தப் பயன்பாட்டை அனுமதிக்கிறது. இதற்கு அர்த்தம் உங்கள் சாதனத்திற்கு அனுப்பப்படும் செய்திகளை உங்களுக்குக் காட்டாமல் கண்காணிக்கவோ, நீக்கவோ பயன்பாட்டால் முடியும் என்பதாகும்."</string>
-    <string name="permlab_sendSms" msgid="5600830612147671529">"SMS குறுந்தகவல்களை அனுப்புதல்"</string>
+    <string name="permlab_readCellBroadcasts" msgid="1598328843619646166">"செல் அலைபரப்புச் செய்திகளைப் படித்தல்"</string>
+    <string name="permdesc_readCellBroadcasts" msgid="6361972776080458979">"உங்கள் சாதனத்தில் பெறப்படும் செல் அலைபரப்புச் செய்திகளைப் படிப்பதற்குப் பயன்பாட்டை அனுமதிக்கிறது. அவசரநிலை சூழ்நிலைகளை உங்களுக்கு எச்சரிக்கைச் செய்வதற்கு சில இடங்களில் செல் அலைபரப்பு விழிப்பூட்டல்கள் வழங்கப்படும். அவசரநிலை மொபைல் அலைபரப்புப் பெறப்படும்போது உங்கள் சாதனத்தின் செயல்திறன் அல்லது செயல்பாட்டுடன் தீங்கிழைக்கும் பயன்பாடுகள் அதைத் தடுக்கலாம்."</string>
+    <string name="permlab_subscribedFeedsRead" msgid="4756609637053353318">"குழுசேர்ந்த ஊட்டங்களைப் படித்தல்"</string>
+    <string name="permdesc_subscribedFeedsRead" msgid="5557058907906144505">"தற்போது ஒத்திசைந்த ஊட்டங்களைப் பற்றிய விவரங்களைப் பெற பயன்பாட்டை அனுமதிக்கிறது."</string>
+    <string name="permlab_sendSms" msgid="7544599214260982981">"SMS செய்திகளை அனுப்புதல் மற்றும் பார்த்தல்"</string>
     <string name="permdesc_sendSms" msgid="7094729298204937667">"SMS செய்திகளை அனுப்ப பயன்பாட்டை அனுமதிக்கிறது. இதற்கு எதிர்பாராத கட்டணங்கள் விதிக்கப்படலாம். தீங்கு விளைவிக்கும் பயன்பாடுகள் உங்களின் உறுதிப்படுத்தல் எதுவுமின்றி செய்திகளை அனுப்பி உங்களுக்குக் கட்டணம் விதிக்கலாம்."</string>
     <string name="permlab_readSms" msgid="8745086572213270480">"உங்கள் உரைச் செய்திகளை (SMS அல்லது MMS) படித்தல்"</string>
     <string name="permdesc_readSms" product="tablet" msgid="2467981548684735522">"உங்கள் டேப்லெட் அல்லது சிம் கார்டில் சேமிக்கப்பட்ட SMS குறுஞ்செய்திகளைப் படிக்க பயன்பாட்டை அனுமதிக்கிறது. SMS குறுஞ்செய்திகளின் உள்ளடக்கம் அல்லது ரகசியத்தன்மை ஆகியவற்றைப் பொருட்படுத்தாமல் அச்செய்திகளைப் படிக்க பயன்பாட்டை இது அனுமதிக்கிறது."</string>
@@ -316,16 +324,8 @@
     <string name="permdesc_writeCallLog" product="tablet" msgid="6661806062274119245">"உள்வரும் மற்றும் வெளிச்செல்லும் அழைப்புகள் குறித்த தகவல் உள்பட உங்கள் டேப்லெட்டின் அழைப்புப் பதிவைத் திருத்துவதற்குப் பயன்பாட்டை அனுமதிக்கிறது. உங்கள் அழைப்பின் பதிவை அழிக்க அல்லது திருத்த தீங்கு விளைவிக்கும் பயன்பாடுகள் இதைப் பயன்படுத்தலாம்."</string>
     <string name="permdesc_writeCallLog" product="tv" msgid="4225034892248398019">"உள்வரும் மற்றும் வெளிச்செல்லும் அழைப்புகள் குறித்த தகவல் உள்ளிட்ட உங்கள் டிவியின் அழைப்பு பதிவைத் திருத்த, பயன்பாட்டை அனுமதிக்கிறது. உங்கள் அழைப்பு பதிவை அழிக்க அல்லது திருத்த தீங்கு விளைவிக்கும் பயன்பாடுகள் இதைப் பயன்படுத்தலாம்."</string>
     <string name="permdesc_writeCallLog" product="default" msgid="683941736352787842">"உள்வரும் மற்றும் வெளிச்செல்லும் அழைப்புகள் குறித்த தகவல் உள்பட உங்கள் மொபைல் அழைப்புப் பதிவைத் திருத்துவதற்குப் பயன்பாட்டை அனுமதிக்கிறது. உங்கள் அழைப்பின் பதிவை அழிக்க அல்லது திருத்த தீங்கு விளைவிக்கும் பயன்பாடுகள் இதைப் பயன்படுத்தலாம்."</string>
-    <string name="permlab_readProfile" msgid="4701889852612716678">"உங்கள் சொந்த தொடர்பு அட்டையைப் படித்தல்"</string>
-    <string name="permdesc_readProfile" product="default" msgid="5462475151849888848">"உங்கள் பெயர் மற்றும் தொடர்பு தகவல் போன்ற, உங்கள் சாதனத்தில் சேமிக்கப்பட்ட தனிப்பட்ட சுயவிவரத் தகலைப் படிக்கப் பயன்பாட்டை அனுமதிக்கிறது, இதற்கு அர்த்தம், பயன்பாடு உங்களைக் அடையாளங்காணலாம் மற்றும் உங்கள் சுயவிவரத் தகவலைப் பிறருக்கு அனுப்பலாம் என்பதாகும்."</string>
-    <string name="permlab_writeProfile" msgid="907793628777397643">"உங்கள் சொந்த தொடர்பு அட்டையை மாற்றுதல்"</string>
-    <string name="permdesc_writeProfile" product="default" msgid="5552084294598465899">"உங்கள் சாதனத்தில் சேமிக்கப்பட்ட உங்கள் பெயர் மற்றும் தொடர்பு தகவல் போன்ற தனிப்பட்ட சுயவிவரத் தகவலை மாற்ற அல்லது சேர்க்க பயன்பாட்டை அனுமதிக்கிறது. அதாவது பயன்பாடு உங்களை அடையாளப்படுத்தலாம், உங்கள் சுயவிவரத் தகவலை மற்றவர்களுக்கு அனுப்பலாம்."</string>
     <string name="permlab_bodySensors" msgid="4871091374767171066">"உடல் உணர்விகள் (இதயத்துடிப்பு கண்காணித்தல் போன்றவை)"</string>
     <string name="permdesc_bodySensors" product="default" msgid="4380015021754180431">"உங்கள் இதயத்துடிப்பு விகிதம் போன்ற உங்கள் உடல்நிலையைக் கண்காணிக்கும் உணர்விகளில் இருந்து தரவை அணுக பயன்பாடுகளை அனுமதிக்கும்."</string>
-    <string name="permlab_readSocialStream" product="default" msgid="1268920956152419170">"எனது சமூக ஸ்ட்ரீமைப் படித்தல்"</string>
-    <string name="permdesc_readSocialStream" product="default" msgid="4255706027172050872">"உங்களிடமிருந்தும், உங்கள் நண்பர்களிடமிருந்தும் வரும் சமூகப் புதுப்பிப்புகளை அணுகி ஒத்திசைக்கப் பயன்பாட்டை அனுமதிக்கிறது. தகவலைப் பகிரும்போது எச்சரிக்கையாக இருக்கவும் -- ரகசியத்தன்மையைப் பொருட்படுத்தாமல், சமூக நெட்வொர்க்குகளில் உங்களுக்கும், உங்கள் நண்பர்களுக்கிடையேயும் உள்ள தொடர்புகளைப் படிக்க பயன்பாட்டை அனுமதிக்கிறது. குறிப்பு: இந்த அனுமதி எல்லா சமூக நெட்வொர்க்குகளிலும் செயல்படுத்தப்படாமல் இருக்கலாம்."</string>
-    <string name="permlab_writeSocialStream" product="default" msgid="3504179222493235645">"உங்கள் சமூக ஸ்ட்ரீமில் எழுதுக"</string>
-    <string name="permdesc_writeSocialStream" product="default" msgid="3086557552204114849">"உங்கள் நண்பர்களிடமிருந்து வரும் சமூக அறிவிப்புகளைக் காண்பிக்க பயன்பாட்டை அனுமதிக்கிறது. தகவலைப் பகிர்வதில் கவனமாக இருங்கள் -- நண்பரிடமிருந்து வரும் செய்திகளை உருவாக்க பயன்பாட்டை அனுமதிக்கிறது. குறிப்பு: இந்த அனுமதி எல்லா சமூக நெட்வொர்க்குகளிலும் செயல்படுத்தப்படாமல் இருக்கலாம்."</string>
     <string name="permlab_readCalendar" msgid="5972727560257612398">"கேலெண்டர் நிகழ்வுகளையும், ரகசிய தகவலையும் படித்தல்"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="4216462049057658723">"நண்பர்கள் அல்லது சகப் பணியாளர்கள் ஆகியோரின் நிகழ்வுகளையும் சேர்த்து, உங்கள் டேப்லெட்டில் சேமிக்கப்பட்ட எல்லா கேலெண்டர் நிகழ்வுகளையும் படிக்க பயன்பாட்டை அனுமதிக்கிறது. உங்கள் கேலெண்டர் தரவின் ரகசியத்தன்மை அல்லது முக்கியத்துவத்தைப் பொருட்படுத்தாமல் அதனைப் பகிர அல்லது சேமிக்க பயன்பாட்டை இது அனுமதிக்கிறது."</string>
     <string name="permdesc_readCalendar" product="tv" msgid="3191352452242394196">"நண்பர்கள் அல்லது சகப் பணியாளர்களின் நிகழ்வுகள் உள்ளிட்ட உங்கள் டிவியில் சேமிக்கப்பட்ட எல்லா கேலெண்டர் நிகழ்வுகளையும் படிக்க, பயன்பாட்டை அனுமதிக்கிறது. தரவின் ரகசியத்தன்மை அல்லது அதன் முக்கியத்துவத்தைப் பொருட்படுத்தாமல், உங்கள் கேலெண்டர் தரவைப் பகிர அல்லது சேமிக்க, இது பயன்பாட்டை அனுமதிக்கலாம்."</string>
@@ -334,8 +334,6 @@
     <string name="permdesc_writeCalendar" product="tablet" msgid="6679035520113668528">"நண்பர்கள் அல்லது சகப் பணியாளர்கள் உள்பட உங்கள் டேப்லெட்டில் நீங்கள் திருத்தக்கூடிய நிகழ்வுகளைச் சேர்க்கவும், அகற்றவும், மேலும் மாற்றவும் பயன்பாட்டை அனுமதிக்கிறது. இது கேலெண்டர் உரிமையாளர்களிடமிருந்து வரும் செய்திகளை அனுப்பவும் அல்லது உரிமையாளரின் ஒப்புதல் இல்லாமல் நிகழ்வுகளைத் திருத்தவும் பயன்பாட்டை அனுமதிக்கலாம்."</string>
     <string name="permdesc_writeCalendar" product="tv" msgid="1273290605500902507">"நண்பர்கள் அல்லது சகப் பணியாளர்களின் நிகழ்வுகள் உள்ளிட்ட உங்கள் டிவியில் நீங்கள் மாற்றக்கூடிய நிகழ்வுகளைச் சேர்க்க, அகற்ற மற்றும் மாற்ற, பயன்பாட்டை அனுமதிக்கிறது. இது கேலெண்டர் உரிமையாளர்கள் அனுப்புவது போன்ற செய்திகளை அனுப்ப அல்லது உரிமையாளரின் அனுமதி இல்லாமல் நிகழ்வுகளை மாற்ற, அனுமதிக்கிறது."</string>
     <string name="permdesc_writeCalendar" product="default" msgid="2324469496327249376">"நண்பர்கள் அல்லது சகப் பணியாளர்கள் உள்பட உங்கள் மொபைலில் நீங்கள் திருத்தக்கூடிய நிகழ்வுகளைச் சேர்க்கவும், அகற்றவும், மேலும் மாற்றவும் பயன்பாட்டை அனுமதிக்கிறது. இது கேலெண்டர் உரிமையாளர்களிடமிருந்து வரும் செய்திகளை அனுப்பவும் அல்லது உரிமையாளரின் ஒப்புதல் இல்லாமல் நிகழ்வுகளைத் திருத்தவும் பயன்பாட்டை அனுமதிக்கலாம்."</string>
-    <string name="permlab_accessMockLocation" msgid="8688334974036823330">"சோதனைக்கான போலி இட மூலங்கள்"</string>
-    <string name="permdesc_accessMockLocation" msgid="5808711039482051824">"சோதனைக்காக போலி இருப்பிட மூலங்களை உருவாக்கவும் அல்லது புதிய இருப்பிட வழங்குநரை நிறுவவும். இது, இருப்பிடத்தை மற்றும்/அல்லது GPS அல்லது இருப்பிட வழங்குநர்கள் போன்ற பிற இருப்பிட மூலங்கள் மூலம் வழங்கப்பட்ட நிலையை மேலெழுதப் பயன்பாட்டை அனுமதிக்கிறது."</string>
     <string name="permlab_accessLocationExtraCommands" msgid="2836308076720553837">"கூடுதல் இட வழங்குநரின் கட்டளைகளின் அணுகல்"</string>
     <string name="permdesc_accessLocationExtraCommands" msgid="6078307221056649927">"கூடுதல் இட வழங்குநர் கட்டளைகளை அணுகப் பயன்பாட்டை அனுமதிக்கிறது. இது, GPS அல்லது பிற இருப்பிட மூலங்களின் செயல்பாட்டை இடைமறிக்க பயன்பாட்டை அனுமதிக்கலாம்."</string>
     <string name="permlab_accessFineLocation" msgid="1191898061965273372">"துல்லியமான இருப்பிடம் (GPS மற்றும் நெட்வொர்க் சார்ந்தது)"</string>
@@ -356,6 +354,8 @@
     <string name="permdesc_flashlight" msgid="6522284794568368310">"ஃப்ளாஷ் லைட்டைக் கட்டுப்படுத்த, பயன்பாட்டை அனுமதிக்கிறது."</string>
     <string name="permlab_callPhone" msgid="3925836347681847954">"தொலைபேசி எண்களை நேரடியாக அழைத்தல்"</string>
     <string name="permdesc_callPhone" msgid="3740797576113760827">"உங்கள் தலையீட்டின்றி மொபைல் எண்களை அழைக்கப் பயன்பாட்டை அனுமதிக்கிறது. இதன் விளைவாக எதிர்பாராத கட்டணங்களோ அழைப்புகளோ ஏற்படலாம். அவசரகால எண்களை அழைக்க இது பயன்பாட்டை அனுமதிக்காது என்பதை நினைவில்கொள்ளவும். தீங்கிழைக்கும் பயன்பாடுகள், உங்கள் உறுதிப்படுத்தல் இன்றி அழைப்புகளைச் செய்வதால் உங்களுக்குச் செலவு ஏற்படக்கூடும்."</string>
+    <string name="permlab_accessImsCallService" msgid="3574943847181793918">"IMS அழைப்புச் சேவையை அணுகுதல்"</string>
+    <string name="permdesc_accessImsCallService" msgid="8992884015198298775">"உங்கள் குறுக்கீடின்றி IMS சேவையைப் பயன்படுத்தி அழைப்பதற்கு, பயன்பாட்டை அனுமதிக்கும்."</string>
     <string name="permlab_readPhoneState" msgid="9178228524507610486">"மொபைல் நிலை மற்றும் அடையாளத்தைப் படித்தல்"</string>
     <string name="permdesc_readPhoneState" msgid="1639212771826125528">"சாதனத்தின் மொபைல் அம்சங்களை அணுகப் பயன்பாட்டை அனுமதிக்கிறது. மொபைல் மற்றும் சாதன ஐடிகள், அழைப்பு செயலில் உள்ளதா மற்றும் அழைப்பு மூலம் இணைக்கப்பட்ட தொலைக் கட்டுப்பாட்டு எண் ஆகியவற்றைத் தீர்மானிக்க இந்த அனுமதி பயன்பாட்டை அனுமதிக்கிறது."</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1531731435011495015">"டேப்லெட் உறக்க நிலைக்குச் செல்வதைத் தடுத்தல்"</string>
@@ -380,12 +380,6 @@
     <string name="permdesc_getAccounts" product="tablet" msgid="2741496534769660027">"டேப்லெட் மூலம் அறியப்பட்ட கணக்குகளின் பட்டியலைப் பெற பயன்பாட்டை அனுமதிக்கிறது. நீங்கள் நிறுவிய பயன்பாடுகள் மூலம் உருவாக்கப்பட்ட எல்லா கணக்குகளும் இதில் உள்ளடங்கலாம்."</string>
     <string name="permdesc_getAccounts" product="tv" msgid="4190633395633907543">"டிவி அறிந்த கணக்குகளின் பட்டியலைப் பெற, பயன்பாட்டை அனுமதிக்கிறது. இதில் நிறுவிய பயன்பாடுகளினால் உருவாக்கப்பட்ட எல்லா கணக்குகளும் அடங்கலாம்."</string>
     <string name="permdesc_getAccounts" product="default" msgid="3448316822451807382">"மொபைல் மூலம் அறியப்பட்ட கணக்குகளின் பட்டியலைப் பெற பயன்பாட்டை அனுமதிக்கிறது. நீங்கள் நிறுவிய பயன்பாடுகள் மூலம் உருவாக்கப்பட்ட எல்லா கணக்குகளும் இதில் உள்ளடங்கலாம்."</string>
-    <string name="permlab_authenticateAccounts" msgid="5265908481172736933">"கணக்குகளை உருவாக்கி கடவுச்சொற்களை அமைத்தல்"</string>
-    <string name="permdesc_authenticateAccounts" msgid="5472124296908977260">"கணக்குகளை உருவாக்குதல், கடவுச்சொற்களைப் பெறுதல் மற்றும் அமைத்தல் போன்றவை உள்பட கணக்குநிர்வாகியின் கணக்கு அங்கீகார திறன்களைப் பயன்படுத்த, பயன்பாட்டை அனுமதிக்கிறது."</string>
-    <string name="permlab_manageAccounts" msgid="4983126304757177305">"கணக்குகளைச் சேர்த்தல் அல்லது அகற்றுதல்"</string>
-    <string name="permdesc_manageAccounts" msgid="8698295625488292506">"கணக்குகளைச் சேர்ப்பது மற்றும் அகற்றுவது, மேலும் அவற்றின் கடவுச்சொல்லை நீக்குவது போன்ற செயல்பாடுகளைச் செயல்படுத்த, பயன்பாட்டை அனுமதிக்கிறது."</string>
-    <string name="permlab_useCredentials" msgid="235481396163877642">"சாதனத்தில் கணக்குகளைப் பயன்படுத்துதல்"</string>
-    <string name="permdesc_useCredentials" msgid="7984227147403346422">"அங்கீகரிப்பு டோக்கன்களைக் கோர பயன்பாட்டை அனுமதிக்கிறது."</string>
     <string name="permlab_accessNetworkState" msgid="4951027964348974773">"நெட்வொர்க் இணைப்புகளைக் காட்டு"</string>
     <string name="permdesc_accessNetworkState" msgid="8318964424675960975">"தற்போது இருக்கும் நெட்வொர்க்குகள் எவை மற்றும் இணைக்கப்பட்டுள்ளவை எவை போன்ற நெட்வொர்க் இணைப்புகள் குறித்த தகவலைப் பார்க்கப் பயன்பாட்டை அனுமதிக்கிறது."</string>
     <string name="permlab_createNetworkSockets" msgid="8018758136404323658">"முழுமையான நெட்வொர்க் அணுகல்"</string>
@@ -428,7 +422,7 @@
     <string name="fingerprint_acquired_insufficient" msgid="4596546021310923214">"கைரேகையைச் செயலாக்க முடியவில்லை. மீண்டும் முயலவும்."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="1087209702421076105">"கைரேகை உணர்வியில் தூசி உள்ளது. சுத்தம் செய்து, முயலவும்."</string>
     <string name="fingerprint_acquired_too_fast" msgid="6470642383109155969">"விரலை வேகமாக எடுத்துவிட்டீர்கள். மீண்டும் முயற்சிக்கவும்."</string>
-    <string name="fingerprint_acquired_too_slow" msgid="7381891107120721078">"விரலை மெதுவாக எடுத்துவிட்டீர்கள். மீண்டும் முயலவும்."</string>
+    <string name="fingerprint_acquired_too_slow" msgid="59250885689661653">"விரலை மிகவும் மெதுவாக நகர்த்திவிட்டீர்கள். மீண்டும் முயற்சிக்கவும்."</string>
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
     <string name="fingerprint_error_hw_not_available" msgid="7955921658939936596">"கைரேகை வன்பொருள் இல்லை."</string>
@@ -437,20 +431,16 @@
     <string name="fingerprint_error_canceled" msgid="4402024612660774395">"கைரேகை செயல்பாடு ரத்துசெய்யப்பட்டது."</string>
     <string name="fingerprint_error_lockout" msgid="5536934748136933450">"அதிகமான முயற்சிகள். பிறகு முயற்சிக்கவும்."</string>
     <string name="fingerprint_error_unable_to_process" msgid="6107816084103552441">"மீண்டும் முயற்சிக்கவும்."</string>
+    <string name="fingerprint_name_template" msgid="5870957565512716938">"கைரேகை <xliff:g id="FINGERID">%d</xliff:g>"</string>
   <string-array name="fingerprint_error_vendor">
   </string-array>
+    <string name="fingerprint_icon_content_description" msgid="2340202869968465936">"கைரேகை ஐகான்"</string>
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"ஒத்திசைவு அமைப்புகளைப் படித்தல்"</string>
     <string name="permdesc_readSyncSettings" msgid="2706745674569678644">"கணக்கிற்கான ஒத்திசைவு அமைப்புகளைப் படிக்க பயன்பாட்டை அனுமதிக்கிறது. எடுத்துக்காட்டாக, பீப்பிள் பயன்பாடு கணக்குடன் ஒத்திசைக்கப்பட்டுள்ளதா என்பதை இது தீர்மானிக்கலாம்."</string>
     <string name="permlab_writeSyncSettings" msgid="5408694875793945314">"ஒத்திசைவை இயக்குவதையும், முடக்குவதையும் மாற்றுதல்"</string>
     <string name="permdesc_writeSyncSettings" msgid="8956262591306369868">"கணக்கிற்கான ஒத்திசைவு அமைப்புகளைத் திருத்த பயன்பாட்டை அனுமதிக்கிறது. எடுத்துக்காட்டாக, பீப்பிள் பயன்பாட்டைக் கணக்குடன் ஒத்திசைவை இயக்குவதற்கு இது பயன்படுத்தப்படலாம்."</string>
     <string name="permlab_readSyncStats" msgid="7396577451360202448">"ஒத்திசைவு புள்ளிவிவரங்களைப் படித்தல்"</string>
     <string name="permdesc_readSyncStats" msgid="1510143761757606156">"நிகழ்வுகள் ஒத்திசைவின் வரலாறு மற்றும் ஒத்திசைக்கப்பட்ட தரவு எவ்வளவு ஆகியன உட்பட, கணக்கிற்கான ஒத்திசைவு புள்ளிவிவரங்களைப் படிக்க பயன்பாட்டை அனுமதிக்கிறது."</string>
-    <string name="permlab_subscribedFeedsWrite" msgid="9015246325408209296">"குழுசேர்ந்த ஊட்டங்களை எழுதுதல்"</string>
-    <string name="permdesc_subscribedFeedsWrite" msgid="6928930188826089413">"தற்போது ஒத்திசைந்த ஊட்டங்களைப் பற்றிய விவரங்களைப் பெற பயன்பாட்டை அனுமதிக்கிறது. தீங்கிழைக்கும் பயன்பாடுகள் உங்கள் ஒத்திசைவு ஊட்டங்களை மாற்றலாம்."</string>
-    <string name="permlab_readDictionary" msgid="4107101525746035718">"அகராதியில் நீங்கள் சேர்த்த சொற்களைப் படித்தல்"</string>
-    <string name="permdesc_readDictionary" msgid="659614600338904243">"பயனர் அகராதியில் பயனர் சேமித்திருக்கக்கூடிய எல்லா வார்த்தைகள், பெயர்கள் மற்றும் சொற்றொடர்களைப் படிக்க பயன்பாட்டை அனுமதிக்கிறது."</string>
-    <string name="permlab_writeDictionary" msgid="2183110402314441106">"பயனர் வரையறுத்த அகராதியில் வார்த்தைகளைச் சேர்த்தல்"</string>
-    <string name="permdesc_writeDictionary" msgid="8185385716255065291">"பயனர் அகராதியில் புதிய சொற்களை எழுத, பயன்பாட்டை அனுமதிக்கிறது."</string>
     <string name="permlab_sdcardRead" product="nosdcard" msgid="367275095159405468">"உங்கள் USB சேமிப்பிடத்தின் உள்ளடக்கங்களைப் படித்தல்"</string>
     <string name="permlab_sdcardRead" product="default" msgid="2188156462934977940">"உங்கள் SD கார்டின் உள்ளடக்கங்களைப் படித்தல்"</string>
     <string name="permdesc_sdcardRead" product="nosdcard" msgid="3446988712598386079">"உங்கள் USB சேமிப்பிடத்தின் உள்ளடக்கங்களைப் படிக்கப் பயன்பாட்டை அனுமதிக்கிறது."</string>
@@ -501,8 +491,10 @@
     <string name="permdesc_removeDrmCertificates" msgid="7272999075113400993">"DRM சான்றிதழ்களை அகற்ற, பயன்பாட்டை அனுமதிக்கிறது. சாதாரண பயன்பாடுகளுக்கு எப்போதுமே தேவைப்படாது."</string>
     <string name="permlab_bindCarrierMessagingService" msgid="1490229371796969158">"மொபைல் நிறுவனச் செய்தியிடல் சேவையுடன் இணைத்தல்"</string>
     <string name="permdesc_bindCarrierMessagingService" msgid="2762882888502113944">"மொபைல் நிறுவனச் செய்தியிடல் சேவையின் உயர்-நிலை இடைமுகத்துடன் ஹோல்டரை இணைக்க அனுமதிக்கும். இயல்பான பயன்பாடுகளுக்குத் தேவைப்படாது."</string>
-    <string name="permlab_bindCarrierConfigService" msgid="4110548389449423386">"நிறுவன உள்ளமைவு சேவையுடன் இணை"</string>
-    <string name="permdesc_bindCarrierConfigService" msgid="1096888107671817447">"நிறுவன உள்ளமைவு சேவையை இணைக்க, ஹோல்டரை அனுமதிக்கும். சாதாரணப் பயன்பாடுகளுக்கு எப்போதுமே தேவைப்படாது."</string>
+    <string name="permlab_bindCarrierServices" msgid="3233108656245526783">"மொபைல் நிறுவன சேவைகளுடன் இணைத்தல்"</string>
+    <string name="permdesc_bindCarrierServices" msgid="1391552602551084192">"மொபைல் நிறுவன சேவைகளுடன் இணைக்க, ஹோல்டரை அனுமதிக்கும். சாதாரணப் பயன்பாடுகளுக்கு எப்போதுமே தேவைப்படாது."</string>
+    <string name="permlab_access_notification_policy" msgid="4247510821662059671">"தொந்தரவு செய்ய வேண்டாம் அம்சத்தை அணுகுதல்"</string>
+    <string name="permdesc_access_notification_policy" msgid="3296832375218749580">"தொந்தரவு செய்ய வேண்டாம் உள்ளமைவைப் படிக்கவும் எழுதவும், பயன்பாட்டை அனுமதிக்கிறது."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"கடவுச்சொல் விதிகளை அமைக்கவும்"</string>
     <string name="policydesc_limitPassword" msgid="2502021457917874968">"திரைப் பூட்டின் கடவுச்சொற்கள் மற்றும் பின்களில் அனுமதிக்கப்படும் நீளத்தையும் எழுத்துக்குறிகளையும் கட்டுப்படுத்தும்."</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"திரைத் திறக்க முயற்சிகளைக் கண்காணித்தல்"</string>
@@ -532,8 +524,8 @@
     <string name="policydesc_encryptedStorage" msgid="2637732115325316992">"சேமித்தப் பயன்பாட்டுத் தரவை முறைமையாக்கப்பட வேண்டும் என்பதைக் கோரலாம்."</string>
     <string name="policylab_disableCamera" msgid="6395301023152297826">"கேமராக்களை முடக்கு"</string>
     <string name="policydesc_disableCamera" msgid="2306349042834754597">"எல்லா சாதன கேமராக்களைப் பயன்படுத்துவதையும் தடுக்கலாம்."</string>
-    <string name="policylab_disableKeyguardFeatures" msgid="3565888260412415862">"திரைப் பூட்டின் அம்சங்களை முடக்கு"</string>
-    <string name="policydesc_disableKeyguardFeatures" msgid="3980868516629887575">"திரைப் பூட்டின் சில அம்சங்களைப் பயன்படுத்துவதைத் தடுக்கும்."</string>
+    <string name="policylab_disableKeyguardFeatures" msgid="8552277871075367771">"திரைப் பூட்டின் சில அம்சங்களை முடக்குதல்"</string>
+    <string name="policydesc_disableKeyguardFeatures" msgid="2044755691354158439">"திரைப் பூட்டின் சில அம்சங்களைப் பயன்படுத்துவதைத் தடுக்கும்."</string>
   <string-array name="phoneTypes">
     <item msgid="8901098336658710359">"வீடு"</item>
     <item msgid="869923650527136615">"மொபைல்"</item>
@@ -635,14 +627,14 @@
     <string name="relationTypeDomesticPartner" msgid="6904807112121122133">"வாழ்வுத் துணை"</string>
     <string name="relationTypeFather" msgid="5228034687082050725">"தந்தை"</string>
     <string name="relationTypeFriend" msgid="7313106762483391262">"நண்பர்"</string>
-    <string name="relationTypeManager" msgid="6365677861610137895">"நிர்வாகி"</string>
+    <string name="relationTypeManager" msgid="6365677861610137895">"மேலாளர்"</string>
     <string name="relationTypeMother" msgid="4578571352962758304">"தாய்"</string>
     <string name="relationTypeParent" msgid="4755635567562925226">"பெற்றோர்"</string>
     <string name="relationTypePartner" msgid="7266490285120262781">"கூட்டாளர்"</string>
     <string name="relationTypeReferredBy" msgid="101573059844135524">"பரிந்துரைத்தவர்"</string>
     <string name="relationTypeRelative" msgid="1799819930085610271">"உறவினர்"</string>
     <string name="relationTypeSister" msgid="1735983554479076481">"சகோதரி"</string>
-    <string name="relationTypeSpouse" msgid="394136939428698117">"வாழ்க்கைத்துணை"</string>
+    <string name="relationTypeSpouse" msgid="394136939428698117">"துணைவர்"</string>
     <string name="sipAddressTypeCustom" msgid="2473580593111590945">"தனிப்பயன்"</string>
     <string name="sipAddressTypeHome" msgid="6093598181069359295">"வீடு"</string>
     <string name="sipAddressTypeWork" msgid="6920725730797099047">"அலுவலகம்"</string>
@@ -719,7 +711,9 @@
     <string name="lockscreen_access_pattern_start" msgid="3941045502933142847">"வடிவம் தொடங்கியது"</string>
     <string name="lockscreen_access_pattern_cleared" msgid="5583479721001639579">"வடிவம் அழிக்கப்பட்டது"</string>
     <string name="lockscreen_access_pattern_cell_added" msgid="6756031208359292487">"கலம் சேர்க்கப்பட்டது"</string>
+    <string name="lockscreen_access_pattern_cell_added_verbose" msgid="7264580781744026939">"கலம் <xliff:g id="CELL_INDEX">%1$s</xliff:g> சேர்க்கப்பட்டது"</string>
     <string name="lockscreen_access_pattern_detected" msgid="4988730895554057058">"வடிவம் நிறைவடைந்தது"</string>
+    <string name="lockscreen_access_pattern_area" msgid="400813207572953209">"வடிவப் பகுதி."</string>
     <string name="keyguard_accessibility_widget_changed" msgid="5678624624681400191">"%1$s. விட்ஜெட் %2$d / %3$d."</string>
     <string name="keyguard_accessibility_add_widget" msgid="8273277058724924654">"விட்ஜெட்டைச் சேர்க்கவும்."</string>
     <string name="keyguard_accessibility_widget_empty_slot" msgid="1281505703307930757">"காலியானது"</string>
@@ -815,10 +809,7 @@
     <string name="enable_explore_by_touch_warning_message" product="default" msgid="2708199672852373195">"தொடுவதன் மூலம் அறிக என்பதை இயக்க <xliff:g id="ACCESSIBILITY_SERVICE_NAME">%1$s</xliff:g> விரும்புகிறது. தொடுவதன் மூலம் அறிக என்பது இயக்கப்பட்டிருக்கும்போது, உங்கள் விரலுக்கு அடியில் இருப்பவையின் விளக்கங்களை நீங்கள் கேட்கவோ, பார்க்கவோ செய்யலாம் அல்லது மொபைலுடன் ஊடாட சைகைகளை மேற்கொள்ளலாம்."</string>
     <string name="oneMonthDurationPast" msgid="7396384508953779925">"1 மாதத்திற்கு முன்பு"</string>
     <string name="beforeOneMonthDurationPast" msgid="909134546836499826">"1 மாதத்திற்கு முன்பு"</string>
-    <plurals name="last_num_days" formatted="false" msgid="5104533550723932025">
-      <item quantity="other">கடந்த <xliff:g id="COUNT_1">%d</xliff:g> நாட்களில்</item>
-      <item quantity="one">கடந்த <xliff:g id="COUNT_0">%d</xliff:g> நாளில்</item>
-    </plurals>
+    <!-- no translation found for last_num_days:one (7555846096746489821) -->
     <string name="last_month" msgid="3959346739979055432">"சென்ற மாதம்"</string>
     <string name="older" msgid="5211975022815554840">"பழையது"</string>
     <string name="preposition_for_date" msgid="9093949757757445117">"<xliff:g id="DATE">%s</xliff:g> அன்று"</string>
@@ -836,18 +827,18 @@
     <string name="weeks" msgid="6509623834583944518">"வாரங்கள்"</string>
     <string name="year" msgid="4001118221013892076">"ஆண்டு"</string>
     <string name="years" msgid="6881577717993213522">"ஆண்டுகள்"</string>
-    <plurals name="duration_seconds" formatted="false" msgid="4527986939729687805">
-      <item quantity="other"><xliff:g id="COUNT">%d</xliff:g> வினாடிகள்</item>
-      <item quantity="one">1 வினாடி</item>
-    </plurals>
-    <plurals name="duration_minutes" formatted="false" msgid="643786953939956125">
-      <item quantity="other"><xliff:g id="COUNT">%d</xliff:g> நிமிடங்கள்</item>
-      <item quantity="one">1 நிமிடம்</item>
-    </plurals>
-    <plurals name="duration_hours" formatted="false" msgid="6826233369186668274">
-      <item quantity="other"><xliff:g id="COUNT">%d</xliff:g> மணிநேரம்</item>
-      <item quantity="one">1 மணிநேரம்</item>
-    </plurals>
+  <plurals name="duration_seconds">
+    <item quantity="one" msgid="6962015528372969481">"1 வினாடி"</item>
+    <item quantity="other" msgid="1886107766577166786">"<xliff:g id="COUNT">%d</xliff:g> வினாடிகள்"</item>
+  </plurals>
+  <plurals name="duration_minutes">
+    <item quantity="one" msgid="4915414002546085617">"1 நிமிடம்"</item>
+    <item quantity="other" msgid="3165187169224908775">"<xliff:g id="COUNT">%d</xliff:g> நிமிடங்கள்"</item>
+  </plurals>
+  <plurals name="duration_hours">
+    <item quantity="one" msgid="8917467491248809972">"1 மணிநேரம்"</item>
+    <item quantity="other" msgid="3863962854246773930">"<xliff:g id="COUNT">%d</xliff:g> மணிநேரம்"</item>
+  </plurals>
     <string name="VideoView_error_title" msgid="3534509135438353077">"வீடியோவில் சிக்கல்"</string>
     <string name="VideoView_error_text_invalid_progressive_playback" msgid="3186670335938670444">"சாதனத்தில் ஸ்ட்ரீம் செய்வதற்கு இது சரியான வீடியோ அல்ல."</string>
     <string name="VideoView_error_text_unknown" msgid="3450439155187810085">"இந்த வீடியோவை இயக்க முடியவில்லை."</string>
@@ -960,18 +951,20 @@
     <string name="ringtone_silent" msgid="7937634392408977062">"ஏதுமில்லை"</string>
     <string name="ringtone_picker_title" msgid="3515143939175119094">"ரிங்டோன்கள்"</string>
     <string name="ringtone_unknown" msgid="5477919988701784788">"அறியப்படாத ரிங்டோன்"</string>
-    <plurals name="wifi_available" formatted="false" msgid="7900333017752027322">
-      <item quantity="other">வைஃபை நெட்வொர்க்குகள் உள்ளன</item>
-      <item quantity="one">வைஃபை நெட்வொர்க் உள்ளது</item>
-    </plurals>
-    <plurals name="wifi_available_detailed" formatted="false" msgid="1140699367193975606">
-      <item quantity="other">பொது வைஃபை நெட்வொர்க்குகள் உள்ளன</item>
-      <item quantity="one">பொது வைஃபை நெட்வொர்க் உள்ளது</item>
-    </plurals>
+  <plurals name="wifi_available">
+    <item quantity="one" msgid="6654123987418168693">"வைஃபை நெட்வொர்க் உள்ளது"</item>
+    <item quantity="other" msgid="4192424489168397386">"வைஃபை நெட்வொர்க்குகள் உள்ளன"</item>
+  </plurals>
+  <plurals name="wifi_available_detailed">
+    <item quantity="one" msgid="1634101450343277345">"இருக்கும் வைஃபை நெட்வொர்க்கைத் திற"</item>
+    <item quantity="other" msgid="7915895323644292768">"இருக்கும் வைஃபை நெட்வொர்க்குகளைத் திற"</item>
+  </plurals>
     <string name="wifi_available_sign_in" msgid="9157196203958866662">"வைஃபை நெட்வொர்க்கில் உள்நுழையவும்"</string>
     <string name="network_available_sign_in" msgid="1848877297365446605">"நெட்வொர்க்கில் உள்நுழையவும்"</string>
     <!-- no translation found for network_available_sign_in_detailed (8000081941447976118) -->
     <skip />
+    <string name="wifi_no_internet" msgid="8451173622563841546">"வைஃபை இணைய அணுகல் கொண்டிருக்கவில்லை"</string>
+    <string name="wifi_no_internet_detailed" msgid="7593858887662270131">"விருப்பங்களுக்குத் தொடவும்"</string>
     <string name="wifi_watchdog_network_disabled" msgid="7904214231651546347">"வைஃபை உடன் இணைக்க முடியவில்லை"</string>
     <string name="wifi_watchdog_network_disabled_detailed" msgid="5548780776418332675">" இணைய இணைப்பு மோசமாக உள்ளது."</string>
     <string name="wifi_connect_alert_title" msgid="8455846016001810172">"இணைப்பை அனுமதிக்கவா?"</string>
@@ -1041,17 +1034,12 @@
     <string name="dlg_confirm_kill_storage_users_text" msgid="5100428757107469454">"நீங்கள் USB சேமிப்பிடத்தை இயக்கினால், நீங்கள் பயன்படுத்தும் சில பயன்பாடுகள் நின்றுவிடும், மேலும் நீங்கள் USB சேமிப்பிடத்தை முடக்கும்வரை அவை கிடைக்காமல் இருக்கலாம்."</string>
     <string name="dlg_error_title" msgid="7323658469626514207">"USB செயல்முறை தோல்வியடைந்தது"</string>
     <string name="dlg_ok" msgid="7376953167039865701">"சரி"</string>
-    <string name="usb_mtp_notification_title" msgid="3699913097391550394">"மீடியா சாதனமாக இணைக்கப்பட்டது"</string>
-    <string name="usb_ptp_notification_title" msgid="1960817192216064833">"கேமராவாக இணைக்கப்பட்டுள்ளது"</string>
-    <string name="usb_midi_notification_title" msgid="1399152904227676460">"MIDI சாதனமாக இணைக்கப்பட்டது"</string>
-    <string name="usb_cd_installer_notification_title" msgid="6774712827892090754">"நிறுவியாக இணைக்கப்பட்டது"</string>
+    <string name="usb_charging_notification_title" msgid="4004114449249406402">"USB, சார்ஜ் செய்வதற்கு மட்டும்"</string>
+    <string name="usb_mtp_notification_title" msgid="8396264943589760855">"USB, கோப்புப் பரிமாற்றத்துக்கு மட்டும்"</string>
+    <string name="usb_ptp_notification_title" msgid="1347328437083192112">"USB, படப் பரிமாற்றத்துக்கு மட்டும்"</string>
+    <string name="usb_midi_notification_title" msgid="4850904915889144654">"USB, MIDIக்கு மட்டும்"</string>
     <string name="usb_accessory_notification_title" msgid="7848236974087653666">"USB துணைக்கருவியுடன் இணைக்கப்பட்டுள்ளது"</string>
-    <string name="usb_notification_message" msgid="2290859399983720271">"மற்ற USB விருப்பங்களுக்குத் தொடவும்."</string>
-    <string name="extmedia_format_title" product="nosdcard" msgid="9020092196061007262">"USB சேமிப்பகத்தில் உள்ளவற்றை அழிக்கவா?"</string>
-    <string name="extmedia_format_title" product="default" msgid="3648415921526526069">"SD கார்டில் உள்ளவற்றை அழிக்கவா?"</string>
-    <string name="extmedia_format_message" product="nosdcard" msgid="3934016853425761078">"USB சேமிப்பகத்தில் சேமித்த எல்லா கோப்புகளும் அழிக்கப்படும். இந்தச் செயலைச் செயல்தவிர்க்க முடியாது."</string>
-    <string name="extmedia_format_message" product="default" msgid="14131895027543830">"கார்டில் உள்ள எல்லா தரவையும் இழப்பீர்கள்."</string>
-    <string name="extmedia_format_button_format" msgid="4131064560127478695">"வடிவமைப்பு"</string>
+    <string name="usb_notification_message" msgid="7347368030849048437">"கூடுதல் விருப்பங்களுக்காகத் தொடவும்."</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"USB பிழைதிருத்தம் இணைக்கப்பட்டது"</string>
     <string name="adb_active_notification_message" msgid="1016654627626476142">"USB பிழைத்திருத்தத்தை முடக்க, தொடவும்."</string>
     <string name="select_input_method" msgid="8547250819326693584">"விசைப்பலகையை மாற்று"</string>
@@ -1067,15 +1055,17 @@
     <string name="ext_media_checking_notification_message" msgid="4747432538578886744">"பிழைகள் உள்ளதா எனப் பார்க்கிறது"</string>
     <string name="ext_media_new_notification_message" msgid="7589986898808506239">"புதிய <xliff:g id="NAME">%s</xliff:g> கண்டறியப்பட்டது"</string>
     <string name="ext_media_ready_notification_message" msgid="4083398150380114462">"படங்களையும் மீடியாவையும் மாற்றலாம்"</string>
-    <string name="ext_media_unmountable_notification_title" msgid="4863279349863279603">"<xliff:g id="NAME">%s</xliff:g> சேதமடைந்துள்ளது"</string>
-    <string name="ext_media_unmountable_notification_message" msgid="7391672496565685690">"<xliff:g id="NAME">%s</xliff:g> சேதமடைந்துள்ளது. அதை மறுபடியும் மீட்டமைக்க முயற்சிக்கவும்"</string>
+    <string name="ext_media_unmountable_notification_title" msgid="8295123366236989588">"<xliff:g id="NAME">%s</xliff:g> சிதைந்துள்ளது"</string>
+    <string name="ext_media_unmountable_notification_message" msgid="1586311304430052169">"<xliff:g id="NAME">%s</xliff:g> சிதைந்துள்ளது. சரிசெய்ய, தொடவும்."</string>
+    <string name="ext_media_unsupported_notification_title" msgid="3797642322958803257">"ஆதரிக்கப்படாத <xliff:g id="NAME">%s</xliff:g>"</string>
+    <string name="ext_media_unsupported_notification_message" msgid="8789610369456474891">"சாதனம் <xliff:g id="NAME">%s</xliff:g>ஐ ஆதரிக்கவில்லை. ஆதரிக்கப்படும் வடிவமைப்பில் அமைக்க, தொடவும்."</string>
     <string name="ext_media_badremoval_notification_title" msgid="3206248947375505416">"<xliff:g id="NAME">%s</xliff:g> அகற்றப்பட்டது"</string>
     <string name="ext_media_badremoval_notification_message" msgid="380176703346946313">"தரவு இழப்பைத் தவிர்க்க, <xliff:g id="NAME">%s</xliff:g>ஐ அகற்றுவதற்கு முன் இணைப்பு நீக்கவும்"</string>
     <string name="ext_media_nomedia_notification_title" msgid="1704840188641749091">"<xliff:g id="NAME">%s</xliff:g> அகற்றப்பட்டது"</string>
     <string name="ext_media_nomedia_notification_message" msgid="6471542972147056586">"<xliff:g id="NAME">%s</xliff:g> அகற்றப்பட்டது. புதியதைச் செருகவும்"</string>
     <string name="ext_media_unmounting_notification_title" msgid="640674168454809372">"இன்னும் <xliff:g id="NAME">%s</xliff:g>ஐ வெளியேற்றுகிறது…"</string>
     <string name="ext_media_unmounting_notification_message" msgid="4182843895023357756">"அகற்ற வேண்டாம்"</string>
-    <string name="ext_media_init_action" msgid="8317198948634872507">"அமைவு"</string>
+    <string name="ext_media_init_action" msgid="7952885510091978278">"அமை"</string>
     <string name="ext_media_unmount_action" msgid="1121883233103278199">"வெளியேற்று"</string>
     <string name="ext_media_browse_action" msgid="8322172381028546087">"உலாவுக"</string>
     <string name="ext_media_missing_title" msgid="620980315821543904">"<xliff:g id="NAME">%s</xliff:g> இல்லை"</string>
@@ -1085,12 +1075,25 @@
     <string name="ext_media_move_success_title" msgid="8575300932957954671">"நகர்த்தப்பட்டது"</string>
     <string name="ext_media_move_success_message" msgid="4199002148206265426">"<xliff:g id="NAME">%s</xliff:g>க்குத் தரவு நகர்த்தப்பட்டது"</string>
     <string name="ext_media_move_failure_title" msgid="7613189040358789908">"தரவை நகர்த்த முடியவில்லை"</string>
-    <string name="ext_media_move_failure_message" msgid="1978096440816403360">"அசல் இடத்திலிருந்து தரவு நகர்த்தப்பட்டது"</string>
+    <string name="ext_media_move_failure_message" msgid="1978096440816403360">"அசல் இடத்திலிருந்து தரவு நகர்த்தப்படவில்லை"</string>
+    <string name="ext_media_status_removed" msgid="6576172423185918739">"அகற்றப்பட்டது"</string>
+    <string name="ext_media_status_unmounted" msgid="2551560878416417752">"வெளியேற்றப்பட்டது"</string>
+    <string name="ext_media_status_checking" msgid="6193921557423194949">"சரிபார்க்கிறது..."</string>
+    <string name="ext_media_status_mounted" msgid="7253821726503179202">"தயார்"</string>
+    <string name="ext_media_status_mounted_ro" msgid="8020978752406021015">"படிக்க மட்டும்"</string>
+    <string name="ext_media_status_bad_removal" msgid="8395398567890329422">"பாதுகாப்பற்ற முறையில் அகற்றப்பட்டது"</string>
+    <string name="ext_media_status_unmountable" msgid="805594039236667894">"சிதைந்துள்ளது"</string>
+    <string name="ext_media_status_unsupported" msgid="4691436711745681828">"ஆதரிக்கப்படவில்லை"</string>
+    <string name="ext_media_status_ejecting" msgid="5463887263101234174">"வெளியேற்றுகிறது…"</string>
+    <string name="ext_media_status_formatting" msgid="1085079556538644861">"மீட்டமைக்கிறது…"</string>
+    <string name="ext_media_status_missing" msgid="5638633895221670766">"செருகப்படவில்லை"</string>
     <string name="activity_list_empty" msgid="1675388330786841066">"பொருந்தும் செயல்பாடுகள் கண்டறியப்படவில்லை."</string>
     <string name="permlab_route_media_output" msgid="1642024455750414694">"மீடியா அவுட்புட்டை வழிசெலுத்துதல்"</string>
     <string name="permdesc_route_media_output" msgid="4932818749547244346">"மீடியாவைப் பிற வெளிப்புறச் சாதனங்களுக்கு வெளியீடாக வழிகாட்ட பயன்பாட்டை அனுமதிக்கிறது."</string>
     <string name="permlab_readInstallSessions" msgid="6165432407628065939">"நிறுவல் அமர்வுகளைப் படிக்கலாம்"</string>
     <string name="permdesc_readInstallSessions" msgid="2049771699626019849">"நிறுவல் அமர்வுகளைப் படிக்க, பயன்பாட்டை அனுமதிக்கிறது. இது செயல்படும் தொகுப்பு நிறுவல்களைப் பற்றிய விவரங்களைப் பார்க்க அனுமதிக்கிறது."</string>
+    <string name="permlab_requestInstallPackages" msgid="1772330282283082214">"தொகுப்புகளின் நிறுவலைக் கோருதல்"</string>
+    <string name="permdesc_requestInstallPackages" msgid="5740101072486783082">"தொகுப்புகளின் நிறுவலைக் கோர, பயன்பாட்டை அனுமதிக்கும்."</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="4070433208160063538">"அளவை மாற்றும் கட்டுப்பாடுகளுக்கு இருமுறை தொடவும்"</string>
     <string name="gadget_host_error_inflating" msgid="4882004314906466162">"விட்ஜெட்டைச் சேர்க்க முடியவில்லை."</string>
     <string name="ime_action_go" msgid="8320845651737369027">"செல்"</string>
@@ -1139,24 +1142,13 @@
     <string name="skip_button_label" msgid="1275362299471631819">"தவிர்"</string>
     <string name="no_matches" msgid="8129421908915840737">"பொருத்தம் ஏதுமில்லை"</string>
     <string name="find_on_page" msgid="1946799233822820384">"பக்கத்தில் கண்டறி"</string>
-    <plurals name="matches_found" formatted="false" msgid="1210884353962081884">
-      <item quantity="other"><xliff:g id="INDEX">%d</xliff:g> / <xliff:g id="TOTAL">%d</xliff:g></item>
-      <item quantity="one">1 பொருத்தம்</item>
-    </plurals>
+  <plurals name="matches_found">
+    <item quantity="one" msgid="8167147081136579439">"1 பொருத்தம்"</item>
+    <item quantity="other" msgid="4641872797067609177">"<xliff:g id="TOTAL">%d</xliff:g> இல் <xliff:g id="INDEX">%d</xliff:g>"</item>
+  </plurals>
     <string name="action_mode_done" msgid="7217581640461922289">"முடிந்தது"</string>
-    <string name="progress_unmounting" product="nosdcard" msgid="3923810448507612746">"USB சேமிப்பிடத்தை இணைப்பு நீக்குகிறது…"</string>
-    <string name="progress_unmounting" product="default" msgid="1327894998409537190">"SD கார்டை இணைப்பு நீக்குகிறது…"</string>
     <string name="progress_erasing" product="nosdcard" msgid="4521573321524340058">"USB சேமிப்பிடத்தை அழிக்கிறது…"</string>
     <string name="progress_erasing" product="default" msgid="6596988875507043042">"SD கார்டை அழிக்கிறது…"</string>
-    <string name="format_error" product="nosdcard" msgid="6299769563624776948">"USB சேமிப்பை அழிக்க முடியவில்லை."</string>
-    <string name="format_error" product="default" msgid="7315248696644510935">"SD கார்டை அழிக்க முடியவில்லை."</string>
-    <string name="media_bad_removal" msgid="7960864061016603281">"இணைப்பு நீக்கப்படுவதற்கு முன் SD கார்டு அகற்றப்பட்டது."</string>
-    <string name="media_checking" product="nosdcard" msgid="418188720009569693">"USB சேமிப்பிடம் தற்போது சரிபார்க்கப்படுகிறது"</string>
-    <string name="media_checking" product="default" msgid="7334762503904827481">"SD கார்டு தற்போது சரிபார்க்கப்படுகிறது."</string>
-    <string name="media_removed" msgid="7001526905057952097">"SD கார்டு அகற்றப்பட்டது."</string>
-    <string name="media_shared" product="nosdcard" msgid="5830814349250834225">"USB சேமிப்பிடம் தற்போது கணினி மூலம் பயன்படுத்தப்படுகிறது."</string>
-    <string name="media_shared" product="default" msgid="5706130568133540435">"SD கார்டு தற்போது கணினி மூலம் பயன்படுத்தப்படுகிறது."</string>
-    <string name="media_unknown_state" msgid="729192782197290385">"வெளிப்புற மீடியா அறியப்படாத நிலையில் உள்ளது."</string>
     <string name="share" msgid="1778686618230011964">"பகிர்"</string>
     <string name="find" msgid="4808270900322985960">"கண்டறி"</string>
     <string name="websearch" msgid="4337157977400211589">"இணையத் தேடல்"</string>
@@ -1242,7 +1234,7 @@
     <string name="issued_by" msgid="2647584988057481566">"வழங்கியது:"</string>
     <string name="validity_period" msgid="8818886137545983110">"செல்லுபடியாகும் காலம்:"</string>
     <string name="issued_on" msgid="5895017404361397232">"வழங்கிய நாள்:"</string>
-    <string name="expires_on" msgid="3676242949915959821">"இதில் காலாவதியாகிறது:"</string>
+    <string name="expires_on" msgid="3676242949915959821">"காலாவதியாவது:"</string>
     <string name="serial_number" msgid="758814067660862493">"வரிசை எண்:"</string>
     <string name="fingerprints" msgid="4516019619850763049">"கைரேகைகள்:"</string>
     <string name="sha256_fingerprint" msgid="4391271286477279263">"SHA-256 கைரேகை:"</string>
@@ -1429,12 +1421,12 @@
     <string name="restr_pin_enter_new_pin" msgid="5959606691619959184">"புதிய பின்"</string>
     <string name="restr_pin_confirm_pin" msgid="8501523829633146239">"புதிய பின்னை உறுதிப்படுத்தவும்"</string>
     <string name="restr_pin_create_pin" msgid="8017600000263450337">"வரம்புகளைத் திருத்துவதற்கு பின்னை உருவாக்கவும்"</string>
-    <string name="restr_pin_error_doesnt_match" msgid="2224214190906994548">"PINகள் பொருந்தவில்லை. மீண்டும் முயற்சிக்கவும்."</string>
+    <string name="restr_pin_error_doesnt_match" msgid="2224214190906994548">"பின்கள் பொருந்தவில்லை. மீண்டும் முயற்சிக்கவும்."</string>
     <string name="restr_pin_error_too_short" msgid="8173982756265777792">"பின் மிகவும் சிறியதாக உள்ளது. குறைந்தது 4 இலக்கங்கள் இருக்க வேண்டும்."</string>
-    <plurals name="restr_pin_countdown" formatted="false" msgid="9061246974881224688">
-      <item quantity="other"><xliff:g id="COUNT">%d</xliff:g> வினாடிகள் கழித்து முயற்சிக்கவும்</item>
-      <item quantity="one">1 வினாடி கழித்து முயற்சிக்கவும்</item>
-    </plurals>
+  <plurals name="restr_pin_countdown">
+    <item quantity="one" msgid="311050995198548675">"1 வினாடி கழித்து முயற்சிக்கவும்"</item>
+    <item quantity="other" msgid="4730868920742952817">"<xliff:g id="COUNT">%d</xliff:g> வினாடிகள் கழித்து முயற்சிக்கவும்"</item>
+  </plurals>
     <string name="restr_pin_try_later" msgid="973144472490532377">"மீண்டும் முயற்சிக்கவும்"</string>
     <string name="immersive_cling_title" msgid="8394201622932303336">"முழுத் திரையில் காட்டுகிறது"</string>
     <string name="immersive_cling_description" msgid="3482371193207536040">"வெளியேற, மேலிருந்து கீழே ஸ்வைப் செய்யவும்"</string>
@@ -1457,32 +1449,43 @@
     <string name="lock_to_app_unlock_pattern" msgid="4182192144797225137">"அகற்றும் முன் திறத்தல் வடிவத்தைக் கேள்"</string>
     <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"அகற்றும் முன் கடவுச்சொல்லைக் கேள்"</string>
     <string name="package_installed_device_owner" msgid="8420696545959087545">"நிர்வாகி நிறுவினார்"</string>
+    <string name="package_updated_device_owner" msgid="8856631322440187071">"உங்கள் நிர்வாகி புதுப்பித்துள்ளார்"</string>
     <string name="package_deleted_device_owner" msgid="7650577387493101353">"நிர்வாகி நீக்கிவிட்டார்"</string>
-    <string name="battery_saver_description" msgid="1960431123816253034">"பேட்டரி ஆயுளை மேம்படுத்த, பேட்டரி சேமிப்பான் உங்கள் சாதனத்தின் செயல்திறனைக் குறைத்து, அதிர்வு, இடச் சேவைகள் மற்றும் பெரும்பாலான பின்புலத் தரவு போன்றவற்றைக் கட்டுப்படுத்துகிறது. ஒத்திசைவைச் சார்ந்துள்ள மின்னஞ்சல், செய்தியிடல் மற்றும் பிற பயன்பாடுகளானது அவற்றைத் திறக்கும்வரையில் புதுப்பிக்கப்படாமல் போகக்கூடும்.\n\nஉங்கள் ஃபோன் சார்ஜ் செய்யப்படும்போது, பேட்டரி சேமிப்பான் தானாகவே முடங்கும்."</string>
-    <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="4367877408072000848">
-      <item quantity="other">%1$d நிமிடங்களுக்கு (<xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g> வரை)</item>
-      <item quantity="one">ஒரு நிமிடத்திற்கு (<xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g> வரை)</item>
-    </plurals>
-    <plurals name="zen_mode_duration_hours_summary" formatted="false" msgid="8152974162096743862">
-      <item quantity="other">%1$d மணிநேரத்திற்கு (<xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g> வரை)</item>
-      <item quantity="one">ஒரு மணிநேரத்திற்கு (<xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g> வரை)</item>
-    </plurals>
-    <plurals name="zen_mode_duration_minutes" formatted="false" msgid="5127407202506485571">
-      <item quantity="other">%d நிமிடங்களுக்கு</item>
-      <item quantity="one">ஒரு நிமிடத்திற்கு</item>
-    </plurals>
-    <plurals name="zen_mode_duration_hours" formatted="false" msgid="3938821308277433854">
-      <item quantity="other">%d மணிநேரத்திற்கு</item>
-      <item quantity="one">ஒரு மணிநேரத்திற்கு</item>
-    </plurals>
+    <string name="battery_saver_description" msgid="1960431123816253034">"பேட்டரி ஆயுளை மேம்படுத்த, பேட்டரி சேமிப்பான் உங்கள் சாதனத்தின் செயல்திறனைக் குறைத்து, அதிர்வு, இடச் சேவைகள் மற்றும் பெரும்பாலான பின்புலத் தரவு போன்றவற்றைக் கட்டுப்படுத்துகிறது. ஒத்திசைவைச் சார்ந்துள்ள மின்னஞ்சல், செய்தியிடல் மற்றும் பிற பயன்பாடுகள் திறக்கும்வரை, அவை புதுப்பிக்கப்படாமல் இருக்கலாம்.\n\nஉங்கள் ஃபோன் சார்ஜ் செய்யப்படும்போது, பேட்டரி சேமிப்பான் தானாகவே முடங்கும்."</string>
+  <plurals name="zen_mode_duration_minutes_summary">
+    <item quantity="one" msgid="3177683545388923234">"ஒரு நிமிடத்திற்கு (<xliff:g id="FORMATTEDTIME">%2$s</xliff:g> வரை)"</item>
+    <item quantity="other" msgid="2787867221129368935">"%1$d நிமிடங்களுக்கு (<xliff:g id="FORMATTEDTIME">%2$s</xliff:g> வரை)"</item>
+  </plurals>
+    <!-- no translation found for zen_mode_duration_minutes_summary_short:one (4097046271119330874) -->
+    <!-- no translation found for zen_mode_duration_minutes_summary_short:other (9128259640307810602) -->
+  <plurals name="zen_mode_duration_hours_summary">
+    <item quantity="one" msgid="597194865053253679">"ஒரு மணிநேரத்திற்கு (<xliff:g id="FORMATTEDTIME">%2$s</xliff:g> வரை)"</item>
+    <item quantity="other" msgid="2827214920627669898">"%1$d மணிநேரத்திற்கு (<xliff:g id="FORMATTEDTIME">%2$s</xliff:g> வரை)"</item>
+  </plurals>
+    <!-- no translation found for zen_mode_duration_hours_summary_short:one (342658185856495801) -->
+    <!-- no translation found for zen_mode_duration_hours_summary_short:other (6842148190293675591) -->
+  <plurals name="zen_mode_duration_minutes">
+    <item quantity="one" msgid="9040808414992812341">"ஒரு நிமிடம்"</item>
+    <item quantity="other" msgid="6924190729213550991">"%d நிமிடங்கள்"</item>
+  </plurals>
+    <!-- no translation found for zen_mode_duration_minutes_short:one (4125166172281866385) -->
+    <!-- no translation found for zen_mode_duration_minutes_short:other (5131202943429775644) -->
+  <plurals name="zen_mode_duration_hours">
+    <item quantity="one" msgid="3480040795582254384">"ஒரு மணி நேரம்"</item>
+    <item quantity="other" msgid="5408537517529822157">"%d மணிநேரம்"</item>
+  </plurals>
+    <!-- no translation found for zen_mode_duration_hours_short:one (6798191385685158694) -->
+    <!-- no translation found for zen_mode_duration_hours_short:other (8464879049844138499) -->
     <string name="zen_mode_until" msgid="7336308492289875088">"<xliff:g id="FORMATTEDTIME">%1$s</xliff:g> வரை"</string>
     <string name="zen_mode_forever" msgid="7420011936770086993">"இதை முடக்கும்வரை"</string>
+    <string name="zen_mode_forever_dnd" msgid="3792132696572189081">"தொந்தரவு செய்ய வேண்டாம் என்பதை முடக்கும் வரை"</string>
     <string name="zen_mode_rule_name_combination" msgid="191109939968076477">"<xliff:g id="FIRST">%1$s</xliff:g> / <xliff:g id="REST">%2$s</xliff:g>"</string>
     <string name="toolbar_collapse_description" msgid="2821479483960330739">"சுருக்கு"</string>
     <string name="zen_mode_feature_name" msgid="5254089399895895004">"தொந்தரவு செய்ய வேண்டாம்"</string>
     <string name="zen_mode_downtime_feature_name" msgid="2626974636779860146">"செயலற்ற நேரம்"</string>
-    <string name="zen_mode_default_weeknights_name" msgid="2069189413656431610">"வார நாட்களின் இரவுகள்"</string>
-    <string name="zen_mode_default_weekends_name" msgid="2377398437072017011">"வார இறுதி நாட்கள்"</string>
+    <string name="zen_mode_default_weeknights_name" msgid="3081318299464998143">"வார இரவு"</string>
+    <string name="zen_mode_default_weekends_name" msgid="2786495801019345244">"வார இறுதி"</string>
+    <string name="zen_mode_default_events_name" msgid="8158334939013085363">"நிகழ்வு"</string>
     <string name="muted_by" msgid="6147073845094180001">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g> ஒலியடக்கினார்"</string>
     <string name="system_error_wipe_data" msgid="6608165524785354962">"சாதனத்தில் அகச் சிக்கல் இருக்கிறது, அதனை ஆரம்பநிலைக்கு மீட்டமைக்கும் வரை நிலையற்று இயங்கலாம்."</string>
     <string name="system_error_manufacturer" msgid="8086872414744210668">"சாதனத்தில் அகச் சிக்கல் இருக்கிறது. விவரங்களுக்கு சாதன தயாரிப்பாளரைத் தொடர்புகொள்ளவும்."</string>
@@ -1492,9 +1495,12 @@
     <string name="stk_cc_ss_to_dial" msgid="2151304435775557162">"SS கோரிக்கையானது DIAL கோரிக்கைக்கு மாற்றப்பட்டது."</string>
     <string name="stk_cc_ss_to_ussd" msgid="3951862188105305589">"SS கோரிக்கையானது USSD கோரிக்கைக்கு மாற்றப்பட்டது."</string>
     <string name="stk_cc_ss_to_ss" msgid="5470768854991452695">"SS கோரிக்கையானது புதிய SS கோரிக்கைக்கு மாற்றப்பட்டது."</string>
+    <string name="notification_work_profile_content_description" msgid="4600554564103770764">"பணி சுயவிவரம்"</string>
     <string name="usb_midi_peripheral_name" msgid="7221113987741003817">"Android USB பெரிபெரல் போர்ட்"</string>
     <string name="usb_midi_peripheral_manufacturer_name" msgid="7176526170008970168">"Android"</string>
     <string name="usb_midi_peripheral_product_name" msgid="4971827859165280403">"USB பெரிபெரல் போர்ட்"</string>
     <string name="floating_toolbar_open_overflow_description" msgid="4797287862999444631">"கூடுதல் விருப்பங்கள்"</string>
     <string name="floating_toolbar_close_overflow_description" msgid="559796923090723804">"மேல்தோன்றலை மூடு"</string>
+    <!-- no translation found for selected_count:one (8857281055159991036) -->
+    <!-- no translation found for selected_count:other (2608606845335294849) -->
 </resources>
