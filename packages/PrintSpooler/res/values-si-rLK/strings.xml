@@ -24,7 +24,7 @@
     <string name="label_paper_size" msgid="908654383827777759">"කඩදාසියේ ප්‍රමාණය"</string>
     <string name="label_paper_size_summary" msgid="5668204981332138168">"කඩදාසියේ ප්‍රමාණය:"</string>
     <string name="label_color" msgid="1108690305218188969">"වර්ණය"</string>
-    <string name="label_duplex" msgid="1263181386446435253">"ඩුප්ලෙක්ස්"</string>
+    <string name="label_duplex" msgid="5370037254347072243">"පැති-දෙකක"</string>
     <string name="label_orientation" msgid="2853142581990496477">"දිශානතිය"</string>
     <string name="label_pages" msgid="7768589729282182230">"පිටු"</string>
     <string name="template_all_pages" msgid="3322235982020148762">"සියලුම <xliff:g id="PAGE_COUNT">%1$s</xliff:g>"</string>
@@ -54,10 +54,10 @@
     <string name="print_add_printer" msgid="1088656468360653455">"මුද්‍රණ යන්ත්‍ර එකතු කරන්න"</string>
     <string name="print_select_printer" msgid="7388760939873368698">"මුද්‍රකය තේරීම"</string>
     <string name="print_forget_printer" msgid="5035287497291910766">"මුද්‍රකය අමතක කිරීම"</string>
-    <plurals name="print_search_result_count_utterance" formatted="false" msgid="6997663738361080868">
-      <item quantity="one">මුද්‍රණ යන්ත්‍ර <xliff:g id="COUNT_1">%1$s</xliff:g> ක් සොයා ගන්නා ලදි</item>
-      <item quantity="other">මුද්‍රණ යන්ත්‍ර <xliff:g id="COUNT_1">%1$s</xliff:g> ක් සොයා ගන්නා ලදි</item>
-    </plurals>
+  <plurals name="print_search_result_count_utterance">
+    <item quantity="one" msgid="4484953260685964252">"මුද්‍රණ යන්ත්‍ර <xliff:g id="COUNT">%1$s</xliff:g> ක් සොයා ගැනිණි"</item>
+    <item quantity="other" msgid="6533817036607128241">"මුද්‍රණ යන්ත්‍ර <xliff:g id="COUNT">%1$s</xliff:g> ක් සොයා ගැනිණි"</item>
+  </plurals>
     <string name="choose_print_service" msgid="3740309762324459694">"මුද්‍රණ සේවාව තෝරන්න"</string>
     <string name="print_searching_for_printers" msgid="6550424555079932867">"මුද්‍රණ යන්ත්‍ර සොයමින්"</string>
     <string name="print_no_printers" msgid="4869403323900054866">"මුද්‍රණ යන්ත්‍ර සොයා නොගැනුණි"</string>
@@ -65,10 +65,10 @@
     <string name="cancelling_notification_title_template" msgid="1821759594704703197">"අවලංගු කෙරේ <xliff:g id="PRINT_JOB_NAME">%1$s</xliff:g>"</string>
     <string name="failed_notification_title_template" msgid="2256217208186530973">"මුද්‍රණ දෝෂය <xliff:g id="PRINT_JOB_NAME">%1$s</xliff:g>"</string>
     <string name="blocked_notification_title_template" msgid="1175435827331588646">"මුද්‍රණ යන්ත්‍රය <xliff:g id="PRINT_JOB_NAME">%1$s</xliff:g> අවුරා ඇති"</string>
-    <plurals name="composite_notification_title_template" formatted="false" msgid="6940956968211733780">
-      <item quantity="one">මුද්‍රණ කාර්ය <xliff:g id="PRINT_JOB_NAME_1">%1$d</xliff:g></item>
-      <item quantity="other">මුද්‍රණ කාර්ය <xliff:g id="PRINT_JOB_NAME_1">%1$d</xliff:g></item>
-    </plurals>
+  <plurals name="composite_notification_title_template">
+    <item quantity="one" msgid="5866624638054847057">"<xliff:g id="PRINT_JOB_NAME">%1$d</xliff:g> මුද්‍රණ කාර්යය"</item>
+    <item quantity="other" msgid="8746611264734222865">"<xliff:g id="PRINT_JOB_NAME">%1$d</xliff:g> මුද්‍රණ කාර්යයන්"</item>
+  </plurals>
     <string name="cancel" msgid="4373674107267141885">"අවලංගු කරන්න"</string>
     <string name="restart" msgid="2472034227037808749">"යළි අරඹන්න"</string>
     <string name="no_connection_to_printer" msgid="2159246915977282728">"මුද්‍රණ යන්ත්‍රය වෙත සම්බන්ධය නැත"</string>
