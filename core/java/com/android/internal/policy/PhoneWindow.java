@@ -337,6 +337,10 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
             mElevation = preservedWindow.getElevation();
             mLoadEleveation = false;
             mForceDecorInstall = true;
+            // If we're preserving window, carry over the app token from the preserved
+            // window, as we'll be skipping the addView in handleResumeActivity(), and
+            // the token will not be updated as for a new window.
+            getAttributes().token = preservedWindow.getAttributes().token;
         }
     }
 
