@@ -41,21 +41,25 @@ footer.hide=1
 </section>
 
 <div class="wrap dac-offset-parent">
-  <a class="dac-fab dac-scroll-button" data-scroll-button href="#latest">
+  <a class="dac-fab dac-scroll-button" data-scroll-button href="#resources">
     <i class="dac-sprite dac-arrow-down-gray"></i>
   </a>
 </div>
 
-<section class="dac-section dac-gray dac-small dac-invert" id="latest"><div class="wrap">
-  <h2 class="norule">Latest</h2>
+
+<section class="dac-section dac-gray" id="resources"><div class="wrap">
+  <h1 class="dac-section-title">Resources</h1>
+  <div class="dac-section-subtitle">
+    Essential information to help you get your apps ready for Android 6.0.
+  </div>
+
   <div class="resource-widget resource-flow-layout col-16"
-      data-query="type:blog+tag:marshmallow"
-      data-sortOrder="-timestamp"
-      data-cardSizes="6x6"
-      data-maxResults="12"
-      data-initial-results="3"></div>
-</div></section>
+       data-query="collection:marshmallow/landing/more"
+       data-cardSizes="6x6"
+       data-initial-results="3"></div>
+  </div>
 </section>
+
 
 <section class="dac-section" id="videos"><div class="wrap">
   <h1 class="dac-section-title">Videos</h1>
@@ -72,15 +76,14 @@ footer.hide=1
   </div>
 </section>
 
-<section class="dac-section dac-gray" id="resources"><div class="wrap">
-  <h1 class="dac-section-title">Resources</h1>
-  <div class="dac-section-subtitle">
-    Essential information to help you get your apps ready for Android 6.0.
-  </div>
 
+<section class="dac-section dac-gray dac-small dac-invert" id="latest"><div class="wrap">
+  <h2 class="norule">Latest</h2>
   <div class="resource-widget resource-flow-layout col-16"
-       data-query="collection:marshmallow/landing/more"
-       data-cardSizes="6x6"
-       data-initial-results="3"></div>
+      data-query="type:blog+tag:marshmallow"
+      data-sortOrder="-timestamp"
+      data-cardSizes="6x6"
+      data-maxResults="12"
+      data-initial-results="3">
   </div>
 </section>
