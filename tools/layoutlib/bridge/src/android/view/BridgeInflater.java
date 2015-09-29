@@ -206,7 +206,7 @@ public final class BridgeInflater extends LayoutInflater {
                 File f = new File(value.getValue());
                 if (f.isFile()) {
                     try {
-                        XmlPullParser parser = ParserFactory.create(f);
+                        XmlPullParser parser = ParserFactory.create(f, true);
 
                         BridgeXmlBlockParser bridgeParser = new BridgeXmlBlockParser(
                                 parser, bridgeContext, value.isFramework());
