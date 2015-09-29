@@ -8,6 +8,7 @@ parent.link=available-resources.html
     <h2>See also</h2>
     <ol>
       <li><a href="{@docRoot}guide/topics/graphics/2d-graphics.html">2D Graphics</a></li>
+      <li><a href="{@docRoot}tools/help/vector-asset-studio.html">Vector Asset Studio</a></li>
     </ol>
   </div>
 </div>
