@@ -5,4 +5,7 @@
     <string name="action_use_network" msgid="6076184727448466030">"استخدام هذه الشبكة كما هي"</string>
     <string name="action_do_not_use_network" msgid="4577366536956516683">"عدم استخدام هذه الشبكة"</string>
     <string name="action_bar_label" msgid="917235635415966620">"تسجيل الدخول إلى الشبكة"</string>
+    <string name="ssl_error_warning" msgid="6653188881418638872">"الشبكة التي تحاول الانضمام إليها بها مشكلات أمنية."</string>
+    <string name="ssl_error_example" msgid="647898534624078900">"على سبيل المثال، قد لا تنتمي صفحة تسجيل الدخول إلى المنظمة المعروضة."</string>
+    <string name="ssl_error_continue" msgid="6492718244923937110">"المتابعة على أي حال عبر المتصفح"</string>
 </resources>

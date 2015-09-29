@@ -5,4 +5,7 @@
     <string name="action_use_network" msgid="6076184727448466030">"Χρήση αυτού του δικτύου ως έχει"</string>
     <string name="action_do_not_use_network" msgid="4577366536956516683">"Να μη χρησιμοποιείται αυτό το δίκτυο"</string>
     <string name="action_bar_label" msgid="917235635415966620">"Σύνδεση στο δίκτυο"</string>
+    <string name="ssl_error_warning" msgid="6653188881418638872">"Παρουσιάζονται προβλήματα ασφάλειας στο δίκτυο στο οποίο προσπαθείτε να συνδεθείτε."</string>
+    <string name="ssl_error_example" msgid="647898534624078900">"Για παράδειγμα, η σελίδα σύνδεσης ενδέχεται να μην ανήκει στον οργανισμό που εμφανίζεται."</string>
+    <string name="ssl_error_continue" msgid="6492718244923937110">"Συνέχεια ούτως ή άλλως μέσω του προγράμματος περιήγησης"</string>
 </resources>
