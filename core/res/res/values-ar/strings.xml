@@ -26,7 +26,7 @@
     <string name="gigabyteShort" msgid="3259882455212193214">"غيغابايت"</string>
     <string name="terabyteShort" msgid="231613018159186962">"تيرابايت"</string>
     <string name="petabyteShort" msgid="5637816680144990219">"بيتابايت"</string>
-    <string name="fileSizeSuffix" msgid="9164292791500531949">"<xliff:g id="NUMBER">%1$s</xliff:g> <xliff:g id="UNIT">%2$s</xliff:g>"</string>
+    <string name="fileSizeSuffix" msgid="8897567456150907538">"<xliff:g id="NUMBER">%1$s</xliff:g> <xliff:g id="UNIT">%2$s</xliff:g>"</string>
     <string name="durationDays" msgid="6652371460511178259">"<xliff:g id="DAYS">%1$d</xliff:g> يوم"</string>
     <string name="durationDayHours" msgid="2713107458736744435">"<xliff:g id="DAYS">%1$d</xliff:g> يوم <xliff:g id="HOURS">%2$d</xliff:g> ساعة"</string>
     <string name="durationDayHour" msgid="7293789639090958917">"<xliff:g id="DAYS">%1$d</xliff:g> يوم <xliff:g id="HOURS">%2$d</xliff:g> ساعة"</string>
@@ -61,14 +61,10 @@
     <string name="needPuk" msgid="919668385956251611">"‏شريحة SIM مؤمّنة بكود PUK. اكتب كود PUK لإلغاء تأمينها."</string>
     <string name="needPuk2" msgid="4526033371987193070">"‏اكتب PUK2 لإلغاء تأمين شريحة SIM."</string>
     <string name="enablePin" msgid="209412020907207950">"‏محاولة غير ناجحة، مكّن قفل SIM/RUIM."</string>
-    <plurals name="pinpuk_attempts" formatted="false" msgid="1251012001539225582">
-      <item quantity="zero">‏لم يتبق لديك أية محاولات (<xliff:g id="NUMBER_1">%d</xliff:g>) يتم بعدها قفل شريحة SIM.</item>
-      <item quantity="two">‏يتبقى لديك محاولتان (<xliff:g id="NUMBER_1">%d</xliff:g>) يتم بعدهما قفل شريحة SIM.</item>
-      <item quantity="few">‏يتبقى لديك <xliff:g id="NUMBER_1">%d</xliff:g> محاولات يتم بعدها قفل شريحة SIM.</item>
-      <item quantity="many">‏يتبقى لديك <xliff:g id="NUMBER_1">%d</xliff:g> محاولة يتم بعدها قفل شريحة SIM.</item>
-      <item quantity="other">‏يتبقى لديك <xliff:g id="NUMBER_1">%d</xliff:g> من المحاولات يتم بعدها قفل شريحة SIM.</item>
-      <item quantity="one">‏يتبقى لديك محاولة واحدة (<xliff:g id="NUMBER_0">%d</xliff:g>) يتم بعدها قفل شريحة SIM.</item>
-    </plurals>
+  <plurals name="pinpuk_attempts">
+    <item quantity="one" msgid="6596245285809790142">"‏يتبقى لديك محاولة واحدة (<xliff:g id="NUMBER">%d</xliff:g>) يتم بعدها قفل شريحة SIM."</item>
+    <item quantity="other" msgid="7530597808358774740">"‏يتبقى لديك <xliff:g id="NUMBER">%d</xliff:g> من المحاولات يتم بعدها قفل شريحة SIM."</item>
+  </plurals>
     <string name="imei" msgid="2625429890869005782">"IMEI"</string>
     <string name="meid" msgid="4841221237681254195">"MEID"</string>
     <string name="ClipMmi" msgid="6952821216480289285">"معرف المتصل الوارد"</string>
@@ -133,6 +129,7 @@
   <string-array name="wfcOperatorErrorNotificationMessages">
   </string-array>
     <string name="wfcSpnFormat" msgid="8211621332478306568">"%s"</string>
+    <string name="wfcDataSpnFormat" msgid="1118052028767666883">"%s"</string>
     <string name="wifi_calling_off_summary" msgid="8720659586041656098">"إيقاف"</string>
     <string name="wfc_mode_wifi_preferred_summary" msgid="1994113411286935263">"‏شبكة Wi-Fi مُفضّلة"</string>
     <string name="wfc_mode_cellular_preferred_summary" msgid="5920549484600758786">"شبكة الجوّال مُفضّلة"</string>
@@ -175,6 +172,7 @@
     <string name="work_profile_deleted" msgid="5005572078641980632">"تم حذف الملف الشخصي للعمل."</string>
     <string name="work_profile_deleted_description" msgid="6305147513054341102">"تم حذف الملف الشخصي للعمل نتيجة فقد تطبيق المشرف."</string>
     <string name="work_profile_deleted_details" msgid="226615743462361248">"تطبيق المشرف للملف الشخصي للعمل مفقود أو تالف لذا تم حذف الملف والبيانات ذات الصلة. اتصل بالمشرف للحصول على المساعدة."</string>
+    <string name="work_profile_deleted_description_dpm_wipe" msgid="6019770344820507579">"لم يعد ملفك الشخصي للعمل متاحًا على هذا الجهاز."</string>
     <string name="factory_reset_warning" msgid="5423253125642394387">"سيتم محو بيانات جهازك."</string>
     <string name="factory_reset_message" msgid="4905025204141900666">"تطبيق المشرف فاقد لمكونات أو تالف ويتعذر استخدامه. سيتم محو بيانات جهازك الآن. اتصل بالمشرف للحصول على المساعدة."</string>
     <string name="me" msgid="6545696007631404292">"أنا"</string>
@@ -189,6 +187,12 @@
     <string name="silent_mode_silent" msgid="319298163018473078">"إيقاف الرنين"</string>
     <string name="silent_mode_vibrate" msgid="7072043388581551395">"اهتزاز الرنين"</string>
     <string name="silent_mode_ring" msgid="8592241816194074353">"تشغيل الرنين"</string>
+    <string name="reboot_to_update_title" msgid="6212636802536823850">"‏تحديث نظام Android"</string>
+    <string name="reboot_to_update_prepare" msgid="6305853831955310890">"جارٍ الإعداد للتحديث…"</string>
+    <string name="reboot_to_update_package" msgid="3871302324500927291">"جارٍ معالجة حزمة التحديث…"</string>
+    <string name="reboot_to_update_reboot" msgid="6428441000951565185">"جارٍ إعادة التشغيل…"</string>
+    <string name="reboot_to_reset_title" msgid="4142355915340627490">"إعادة الضبط بحسب بيانات المصنع"</string>
+    <string name="reboot_to_reset_message" msgid="2432077491101416345">"جارٍ إعادة التشغيل…"</string>
     <string name="shutdown_progress" msgid="2281079257329981203">"جارٍ إيقاف التشغيل..."</string>
     <string name="shutdown_confirm" product="tablet" msgid="3385745179555731470">"سيتم إيقاف تشغيل الجهاز اللوحي."</string>
     <string name="shutdown_confirm" product="tv" msgid="476672373995075359">"سيتم إيقاف التلفزيون."</string>
@@ -220,30 +224,26 @@
     <string name="status_bar_notification_info_overflow" msgid="5301981741705354993">"999+"</string>
     <string name="safeMode" msgid="2788228061547930246">"الوضع الآمن"</string>
     <string name="android_system_label" msgid="6577375335728551336">"‏نظام Android"</string>
-    <string name="user_owner_label" msgid="6465364741001216388">"التطبيقات الشخصية"</string>
+    <string name="user_owner_label" msgid="2804351898001038951">"شخصي"</string>
     <string name="managed_profile_label" msgid="6260850669674791528">"عمل"</string>
     <string name="permgrouplab_contacts" msgid="3657758145679177612">"جهات الاتصال"</string>
-    <string name="permgroupdesc_contacts" msgid="1437393511338346185">"الدخول إلى جهات الاتصال وتعديلها"</string>
+    <string name="permgroupdesc_contacts" msgid="6951499528303668046">"الوصول إلى جهات اتصالك"</string>
     <string name="permgrouplab_location" msgid="7275582855722310164">"الموقع"</string>
-    <string name="permgroupdesc_location" msgid="536889867433972794">"الدخول إلى موقعك"</string>
-    <string name="permgrouplab_socialInfo" msgid="5799096623412043791">"المعلومات الاجتماعية"</string>
-    <string name="permgroupdesc_socialInfo" msgid="7129842457611643493">"الدخول المباشر إلى معلومات عن جهات الاتصال والاتصالات الاجتماعية."</string>
+    <string name="permgroupdesc_location" msgid="1346617465127855033">"الوصول إلى موقع هذا الجهاز"</string>
     <string name="permgrouplab_calendar" msgid="5863508437783683902">"التقويم"</string>
-    <string name="permgroupdesc_calendar" msgid="2116049656685591803">"الدخول إلى التقويم وتعديله"</string>
+    <string name="permgroupdesc_calendar" msgid="3889615280211184106">"الوصول تقويمك"</string>
     <string name="permgrouplab_sms" msgid="228308803364967808">"SMS"</string>
-    <string name="permgroupdesc_sms" msgid="3695085582674524761">"‏الدخول إلى SMS وتعديلها"</string>
-    <string name="permgrouplab_dictionary" msgid="8114410334955871144">"قاموس المستخدم"</string>
-    <string name="permgroupdesc_dictionary" msgid="7586787746354378335">"قراءة الكلمات وكتابتها في قاموس المستخدم."</string>
-    <string name="permgrouplab_bookmarks" msgid="1949519673103968229">"الإشارات المرجعية والسجل"</string>
-    <string name="permgroupdesc_bookmarks" msgid="4169771606257963028">"الدخول المباشر إلى الإشارات المرجعية وسجل المتصفح."</string>
+    <string name="permgroupdesc_sms" msgid="4656988620100940350">"‏إرسال رسائل قصيرة SMS وعرضها"</string>
+    <string name="permgrouplab_storage" msgid="1971118770546336966">"التخزين"</string>
+    <string name="permgroupdesc_storage" msgid="637758554581589203">"الوصول إلى الصور والوسائط والملفات على جهازك"</string>
     <string name="permgrouplab_microphone" msgid="171539900250043464">"الميكروفون"</string>
-    <string name="permgroupdesc_microphone" msgid="1296196977187629181">"استخدام ميكروفون الجهاز"</string>
+    <string name="permgroupdesc_microphone" msgid="4988812113943554584">"تسجيل الصوت"</string>
     <string name="permgrouplab_camera" msgid="4820372495894586615">"الكاميرا"</string>
-    <string name="permgroupdesc_camera" msgid="2429930670410559293">"استخدام كاميرا الجهاز"</string>
+    <string name="permgroupdesc_camera" msgid="3250611594678347720">"التقاط صور وتسجيل فيديو"</string>
     <string name="permgrouplab_phone" msgid="5229115638567440675">"الهاتف"</string>
-    <string name="permgroupdesc_phone" msgid="2016641188146068700">"استخدام الاتصالات الهاتفية للجهاز"</string>
-    <string name="permgrouplab_sensors" msgid="7416703484233940260">"أجهزة الاستشعار"</string>
-    <string name="permgroupdesc_sensors" msgid="2987451839455524494">"الدخول إلى أجهزة الاستشعار والأجهزة القابلة للارتداء"</string>
+    <string name="permgroupdesc_phone" msgid="6234224354060641055">"إجراء مكالمات هاتفية وإدارتها"</string>
+    <string name="permgrouplab_sensors" msgid="416037179223226722">"أجهزة استشعار الجسم"</string>
+    <string name="permgroupdesc_sensors" msgid="7147968539346634043">"الوصول إلى بيانات المستشعر حول علاماتك الحيوية"</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"استرداد محتوى النافذة"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"فحص محتوى نافذة يتم التفاعل معها."</string>
     <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"تشغيل الاستكشاف باللمس"</string>
@@ -268,7 +268,11 @@
     <string name="permdesc_receiveSms" msgid="6424387754228766939">"‏للسماح للتطبيق بتلقي ومعالجة الرسائل القصيرة SMS. وهذا يعني أنه يمكن للتطبيق مراقبة الرسائل التي يتم إرسالها إلى جهازك أو حذفها بدون عرضها لك."</string>
     <string name="permlab_receiveMms" msgid="1821317344668257098">"تلقي رسائل نصية (رسائل وسائط متعددة)"</string>
     <string name="permdesc_receiveMms" msgid="533019437263212260">"للسماح للتطبيق بتلقي ومعالجة رسائل الوسائط المتعددة. وهذا يعني أنه يمكن للتطبيق مراقبة الرسائل التي يتم إرسالها لجهازك أو حذفها بدون عرضها لك."</string>
-    <string name="permlab_sendSms" msgid="5600830612147671529">"‏إرسال رسائل قصيرة SMS"</string>
+    <string name="permlab_readCellBroadcasts" msgid="1598328843619646166">"قراءة رسائل بث الخلية"</string>
+    <string name="permdesc_readCellBroadcasts" msgid="6361972776080458979">"السماح للتطبيق بقراءة رسائل بث الخلية التي يتلقاها هذا الجهاز. يتم تسليم اشعارات بث الخلية في بعض المواقع لتحذيرك من حالات طارئة. يمكن أن تتداخل التطبيقات الضارة مع أداء أو تشغيل الجهاز عندما يتم تلقي بث خلية طارئ."</string>
+    <string name="permlab_subscribedFeedsRead" msgid="4756609637053353318">"قراءة الخلاصات المشتركة"</string>
+    <string name="permdesc_subscribedFeedsRead" msgid="5557058907906144505">"للسماح للتطبيق بالحصول على تفاصيل حول الخلاصات المتزامنة في الوقت الحالي."</string>
+    <string name="permlab_sendSms" msgid="7544599214260982981">"‏إرسال رسائل قصيرة SMS وعرضها"</string>
     <string name="permdesc_sendSms" msgid="7094729298204937667">"‏للسماح للتطبيق بإرسال رسائل قصيرة SMS. وقد يؤدي هذا إلى تحمل رسوم غير متوقعة. وقد تكلفك التطبيقات الضارة أموالاً من خلال إرسال رسائل بدون موافقة منك."</string>
     <string name="permlab_readSms" msgid="8745086572213270480">"‏قراءة الرسائل النصية (الرسائل القصيرة SMS أو رسائل الوسائط المتعددة)"</string>
     <string name="permdesc_readSms" product="tablet" msgid="2467981548684735522">"‏للسماح للتطبيق بقراءة الرسائل القصيرة SMS المخزنة على الجهاز اللوحي أو على شريحة SIM. ويتيح هذا للتطبيق قراءة جميع الرسائل القصيرة SMS، بغض النظر عن المحتوى أو مدى السرية."</string>
@@ -320,16 +324,8 @@
     <string name="permdesc_writeCallLog" product="tablet" msgid="6661806062274119245">"للسماح للتطبيق بتعديل سجل مكالمات الجهاز اللوحي، بما في ذلك البيانات عن المكالمات الواردة والصادرة. وربما تستخدم التطبيقات الضارة هذا لمسح سجل المكالمات أو تعديله."</string>
     <string name="permdesc_writeCallLog" product="tv" msgid="4225034892248398019">"يتيح للتطبيق تعديل سجل مكالمات التلفزيون، بما في ذلك البيانات عن المكالمات الواردة والصادرة. وربما تستخدم التطبيقات الضارة هذا لمسح سجل المكالمات أو تعديله."</string>
     <string name="permdesc_writeCallLog" product="default" msgid="683941736352787842">"للسماح للتطبيق بتعديل سجل مكالمات الهاتف، بما في ذلك البيانات عن المكالمات الواردة والصادرة. وربما تستخدم التطبيقات الضارة هذا لمحو سجل المكالمات أو تعديله."</string>
-    <string name="permlab_readProfile" msgid="4701889852612716678">"قراءة بطاقة الاتصال الخاصة"</string>
-    <string name="permdesc_readProfile" product="default" msgid="5462475151849888848">"للسماح للتطبيق بقراءة المعلومات الشخصية في الملف الشخصي المخزنة على الجهاز، مثل اسمك ومعلومات جهات الاتصال. ويعني ذلك أنه يمكن للتطبيق التعرف عليك كما يمكنه إرسال معلومات ملفك الشخصي إلى الآخرين."</string>
-    <string name="permlab_writeProfile" msgid="907793628777397643">"تعديل بطاقة جهة الاتصال الخاصة"</string>
-    <string name="permdesc_writeProfile" product="default" msgid="5552084294598465899">"للسماح للتطبيق بتغيير المعلومات الشخصية في الملف الشخصي المخزنة على الجهاز أو الإضافة إليها، مثل اسمك ومعلومات جهات الاتصال. ويعني ذلك أنه يمكن للتطبيق التعرف عليك كما يمكنه إرسال معلومات ملفك الشخصي إلى الآخرين."</string>
     <string name="permlab_bodySensors" msgid="4871091374767171066">"أجهزة استشعار الجسم (مثل شاشات معدل ضربات القلب)"</string>
     <string name="permdesc_bodySensors" product="default" msgid="4380015021754180431">"للسماح للتطبيق بالدخول إلى البيانات من المستشعرات التي تراقب الحالة البدنية، مثل معدل نبضات القلب."</string>
-    <string name="permlab_readSocialStream" product="default" msgid="1268920956152419170">"قراءة المشاركات الاجتماعية"</string>
-    <string name="permdesc_readSocialStream" product="default" msgid="4255706027172050872">"للسماح للتطبيق بالدخول إلى التحديثات الاجتماعية منك ومن أصدقائك ومزامنتها. توخ الحذر عند مشاركة المعلومات، حيث يتيح هذا للتطبيق قراءة عمليات التواصل بينك وبين أصدقائك على الشبكات الاجتماعية، بغض النظر عن مدى السرية. ملاحظة: لا يجوز فرض هذا الإذن على جميع الشبكات الاجتماعية."</string>
-    <string name="permlab_writeSocialStream" product="default" msgid="3504179222493235645">"كتابة إلى المشاركات الاجتماعية"</string>
-    <string name="permdesc_writeSocialStream" product="default" msgid="3086557552204114849">"للسماح للتطبيق بعرض التحديثات الاجتماعية منك ومن أصدقائك. توخ الحذر عند مشاركة المعلومات، حيث يتيح هذا للتطبيق إنشاء رسائل يبدو أنها واردة من صديق. ملاحظة: لا يجوز فرض هذا الإذن على جميع الشبكات الاجتماعية."</string>
     <string name="permlab_readCalendar" msgid="5972727560257612398">"قراءة أحداث التقويم بالإضافة إلى المعلومات السرية"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="4216462049057658723">"للسماح للتطبيق بقراءة جميع أحداث التقويم المخزنة على الجهاز اللوحي، بما في ذلك أحداث التقويم التابعة للأصدقاء أو زملاء العمل. وقد يتيح هذا للتطبيق مشاركة بيانات التقويم أو حفظها، بغض النظر عن مدى سرية البيانات أو حساسيتها."</string>
     <string name="permdesc_readCalendar" product="tv" msgid="3191352452242394196">"يتيح للتطبيق قراءة جميع أحداث التقويم المخزنة على التلفزيون، بما في ذلك أحداث الأصدقاء أو زملاء العمل. وقد يتيح هذا للتطبيق مشاركة بيانات التقويم أو حفظها، بغض النظر عن مدى السرية أو الحساسية."</string>
@@ -338,8 +334,6 @@
     <string name="permdesc_writeCalendar" product="tablet" msgid="6679035520113668528">"للسماح للتطبيق بإضافة أو إزالة أو تغيير الأحداث التي يمكنك تعديلها على جهازك اللوحي، بما في ذلك أحداث الأصدقاء أو زملاء العمل. وقد يتيح هذا للتطبيق إرسال رسائل يبدو أنها واردة من أصحاب التقويم أو تعديل الأحداث بدون معرفة المالكين."</string>
     <string name="permdesc_writeCalendar" product="tv" msgid="1273290605500902507">"يتيح للتطبيق إضافة أحداث يمكنك تعديلها على التلفزيون كما يتيح إزالتها أو تغييرها، بما في ذلك أحداث الأصدقاء وزملاء العمل. وقد يتيح هذا للتطبيق إرسال رسائل تبدو أنها من أصحاب التقاويم أو تعديل الأحداث بدون علم أصحاب هذه التقاويم."</string>
     <string name="permdesc_writeCalendar" product="default" msgid="2324469496327249376">"للسماح للتطبيق بإضافة أو إزالة أو تغيير الأحداث التي يمكنك تعديلها على هاتفك، بما في ذلك أحداث الأصدقاء أو زملاء العمل. وقد يتيح هذا للتطبيق إرسال رسائل يبدو أنها واردة من أصحاب التقويم أو تعديل الأحداث بدون معرفة المالكين."</string>
-    <string name="permlab_accessMockLocation" msgid="8688334974036823330">"مصادر مواقع وهمية للاختبار"</string>
-    <string name="permdesc_accessMockLocation" msgid="5808711039482051824">"‏لإنشاء مصادر مواقع زائفة للاختبار أو تثبيت موفر مواقع جديد. يتيح هذا للتطبيق إلغاء الموقع و/أو الحالة التي تعرضها مصادر المواقع الأخرى مثل GPS أو موفري المواقع."</string>
     <string name="permlab_accessLocationExtraCommands" msgid="2836308076720553837">"الدخول إلى المزيد من أوامر موفر الموقع"</string>
     <string name="permdesc_accessLocationExtraCommands" msgid="6078307221056649927">"‏للسماح للتطبيق بالدخول إلى أوامر إضافية لموفر الموقع. قد يتيح هذا للتطبيق التداخل مع تشغيل تقنية نظام تحديد المواقع العالمي (GPS) أو مصادر الموقع الأخرى."</string>
     <string name="permlab_accessFineLocation" msgid="1191898061965273372">"الموقع الدقيق (مستند إلى نظام تحديد المواقع العالمي والشبكة)"</string>
@@ -360,6 +354,8 @@
     <string name="permdesc_flashlight" msgid="6522284794568368310">"للسماح للتطبيق بالتحكم في الضوء الوامض."</string>
     <string name="permlab_callPhone" msgid="3925836347681847954">"اتصال مباشر بأرقام الهواتف"</string>
     <string name="permdesc_callPhone" msgid="3740797576113760827">"للسماح للتطبيق بطلب أرقام هاتفية بدون تدخل منك. وقد يؤدي ذلك إلى تحمل رسوم غير متوقعة أو إجراء مكالمات غير متوقعة. ومن الجدير بالذكر أن ذلك لا يتيح للتطبيق الاتصال بأرقام الطوارئ. وقد تؤدي التطبيقات الضارة إلى تحملك تكاليف مالية من خلال إجراء مكالمات بدون موافقة منك."</string>
+    <string name="permlab_accessImsCallService" msgid="3574943847181793918">"الوصول إلى خدمة الاتصال عبر الرسائل الفورية"</string>
+    <string name="permdesc_accessImsCallService" msgid="8992884015198298775">"للسماح للتطبيق باستخدام خدمة الرسائل الفورية لإجراء المكالمات دون تدخل منك."</string>
     <string name="permlab_readPhoneState" msgid="9178228524507610486">"قراءة حالة الهاتف والهوية"</string>
     <string name="permdesc_readPhoneState" msgid="1639212771826125528">"للسماح للتطبيق بالدخول إلى ميزات الهاتف في الجهاز. ويتيح هذا الإذن للتطبيق تحديد رقم الهاتف ومعرّفات الجهاز، وما إذا كانت هناك مكالمة نشطة والرقم البعيد الذي تم الاتصال به في المكالمة."</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1531731435011495015">"منع الجهاز اللوحي من الدخول في وضع السكون"</string>
@@ -384,12 +380,6 @@
     <string name="permdesc_getAccounts" product="tablet" msgid="2741496534769660027">"للسماح للتطبيق بالحصول على قائمة بالحسابات التي يعرفها الجهاز اللوحي. وقد يتضمن ذلك أية حسابات تم إنشاؤها بواسطة التطبيقات التي ثبتها."</string>
     <string name="permdesc_getAccounts" product="tv" msgid="4190633395633907543">"يتيح للتطبيق الحصول على قائمة بالحسابات المعروفة في التلفزيون. وقد يتضمن هذا أية حسابات أنشأتها التطبيقات التي ثبتها."</string>
     <string name="permdesc_getAccounts" product="default" msgid="3448316822451807382">"للسماح للتطبيق بالحصول على قائمة بالحسابات التي يعرفها الهاتف. وقد يتضمن ذلك أية حسابات تم إنشاؤها بواسطة التطبيقات التي ثبتها."</string>
-    <string name="permlab_authenticateAccounts" msgid="5265908481172736933">"إنشاء حسابات وتعيين كلمات مرور"</string>
-    <string name="permdesc_authenticateAccounts" msgid="5472124296908977260">"‏للسماح للتطبيق باستخدام إمكانيات مصدِّق الحساب لـ AccountManager، بما في ذلك إنشاء حسابات والحصول على كلمات مرورها وتعينها."</string>
-    <string name="permlab_manageAccounts" msgid="4983126304757177305">"إضافة حسابات أو إزالتها"</string>
-    <string name="permdesc_manageAccounts" msgid="8698295625488292506">"للسماح للتطبيق بإجراء عمليات مثل إضافة حسابات وإزالتها وحذف كلمات مرورها."</string>
-    <string name="permlab_useCredentials" msgid="235481396163877642">"استخدام الحسابات على الجهاز"</string>
-    <string name="permdesc_useCredentials" msgid="7984227147403346422">"للسماح للتطبيق بطلب الرموز المميزة للمصادقة."</string>
     <string name="permlab_accessNetworkState" msgid="4951027964348974773">"عرض اتصالات الشبكة"</string>
     <string name="permdesc_accessNetworkState" msgid="8318964424675960975">"للسماح للتطبيق بعرض معلومات حول اتصالات الشبكة كعرض معلومات عن الشبكات المتوفرة والشبكات المتصلة."</string>
     <string name="permlab_createNetworkSockets" msgid="8018758136404323658">"إمكانية دخول كاملة إلى الشبكة"</string>
@@ -432,7 +422,7 @@
     <string name="fingerprint_acquired_insufficient" msgid="4596546021310923214">"تعذرت معالجة بصمة الإصبع. يُرجى إعادة المحاولة."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="1087209702421076105">"جهاز استشعار بصمات الأصابع متسخ، يرجى تنظيفه وإعادة المحاولة."</string>
     <string name="fingerprint_acquired_too_fast" msgid="6470642383109155969">"تحرك الإصبع بسرعة كبيرة جدًا؛ الرجاء إعادة المحاولة."</string>
-    <string name="fingerprint_acquired_too_slow" msgid="7381891107120721078">"تحرك الإصبع ببطء شديد جدًا؛ يرجى إعادة المحاولة."</string>
+    <string name="fingerprint_acquired_too_slow" msgid="59250885689661653">"تم تحريك الإصبع ببطء شديد. الرجاء إعادة المحاولة."</string>
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
     <string name="fingerprint_error_hw_not_available" msgid="7955921658939936596">"جهاز بصمة الإصبع غير متاح."</string>
@@ -441,20 +431,16 @@
     <string name="fingerprint_error_canceled" msgid="4402024612660774395">"تم إلغاء تشغيل بصمة الإصبع."</string>
     <string name="fingerprint_error_lockout" msgid="5536934748136933450">"تم إجراء عدد كبير من المحاولات. أعد المحاولة لاحقًا."</string>
     <string name="fingerprint_error_unable_to_process" msgid="6107816084103552441">"أعد المحاولة."</string>
+    <string name="fingerprint_name_template" msgid="5870957565512716938">"الإصبع <xliff:g id="FINGERID">%d</xliff:g>"</string>
   <string-array name="fingerprint_error_vendor">
   </string-array>
+    <string name="fingerprint_icon_content_description" msgid="2340202869968465936">"رمز بصمة الإصبع"</string>
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"قراءة إعدادات المزامنة"</string>
     <string name="permdesc_readSyncSettings" msgid="2706745674569678644">"للسماح للتطبيق بقراءة الإعدادات المتزامنة لحساب ما. على سبيل المثال، يمكن أن يؤدي هذا إلى تحديد ما إذا تمت مزامنة تطبيق \"الأشخاص\" مع حساب ما."</string>
     <string name="permlab_writeSyncSettings" msgid="5408694875793945314">"التبديل بين تشغيل المزامنة وإيقافها"</string>
     <string name="permdesc_writeSyncSettings" msgid="8956262591306369868">"للسماح للتطبيق بتعديل إعدادات المزامنة لحساب ما. على سبيل المثال، يمكن استخدام ذلك لتمكين مزامنة تطبيق \"الأشخاص\" مع حساب ما."</string>
     <string name="permlab_readSyncStats" msgid="7396577451360202448">"قراءة إحصاءات المزامنة"</string>
     <string name="permdesc_readSyncStats" msgid="1510143761757606156">"للسماح للتطبيق بقراءة إحصائيات المزامنة لحساب ما، بما في ذلك سجل الأحداث المتزامنة ومقدار البيانات التي تمت مزامنتها."</string>
-    <string name="permlab_subscribedFeedsWrite" msgid="9015246325408209296">"كتابة الخلاصات المشتركة"</string>
-    <string name="permdesc_subscribedFeedsWrite" msgid="6928930188826089413">"للسماح للتطبيق بتعديل خلاصاتك المتزامنة في الوقت الحالي. قد تغيّر التطبيقات الضارة خلاصاتك المتزامنة."</string>
-    <string name="permlab_readDictionary" msgid="4107101525746035718">"قراءة المصطلحات التي أضفتها إلى القاموس"</string>
-    <string name="permdesc_readDictionary" msgid="659614600338904243">"للسماح للتطبيق بقراءة جميع الكلمات والأسماء والعبارات التي ربما يكون المستخدم قد خزنها في قاموس المستخدم."</string>
-    <string name="permlab_writeDictionary" msgid="2183110402314441106">"إضافة كلمات إلى القاموس المعرّف بواسطة المستخدم"</string>
-    <string name="permdesc_writeDictionary" msgid="8185385716255065291">"للسماح للتطبيق بكتابة كلمات جديدة في قاموس المستخدم."</string>
     <string name="permlab_sdcardRead" product="nosdcard" msgid="367275095159405468">"‏قراءة محتويات وحدة تخزين USB"</string>
     <string name="permlab_sdcardRead" product="default" msgid="2188156462934977940">"‏قراءة محتويات بطاقة SD"</string>
     <string name="permdesc_sdcardRead" product="nosdcard" msgid="3446988712598386079">"‏للسماح للتطبيق بقراءة محتويات وحدة تخزين USB."</string>
@@ -505,8 +491,10 @@
     <string name="permdesc_removeDrmCertificates" msgid="7272999075113400993">"‏للسماح لأحد التطبيقات بإزالة شهادات DRM. لن تكون هناك حاجة إليه مطلقًا مع التطبيقات العادية."</string>
     <string name="permlab_bindCarrierMessagingService" msgid="1490229371796969158">"الالتزام بخدمة المراسلة التابعة لمشغل شبكة الجوّال"</string>
     <string name="permdesc_bindCarrierMessagingService" msgid="2762882888502113944">"يسمح لحامله بالالتزام بواجهة المستوى العالي لخدمة المراسلة التابعة لمشغل شبكة الجوَّال. ومن المفترض عدم الحاجة إليه مع التطبيقات العادية."</string>
-    <string name="permlab_bindCarrierConfigService" msgid="4110548389449423386">"الربط بخدمة تهيئة أحد مشغِّلي شبكة الجوّال"</string>
-    <string name="permdesc_bindCarrierConfigService" msgid="1096888107671817447">"للسماح لحامل البطاقة بالربط مع خدمة تهيئة لدى أحد مشغِّلي شبكة الجوّال. ولن تحتاج إليه أبدًا مع التطبيقات العادية."</string>
+    <string name="permlab_bindCarrierServices" msgid="3233108656245526783">"الالتزام بخدمات مشغل شبكة الجوال"</string>
+    <string name="permdesc_bindCarrierServices" msgid="1391552602551084192">"للسماح للمالك بالالتزام بخدمات مشغل شبكة الجوال. لن تكون هناك حاجة إليه مطلقًا مع التطبيقات العادية."</string>
+    <string name="permlab_access_notification_policy" msgid="4247510821662059671">"الوصول إلى إعداد \"الرجاء عدم الإزعاج\""</string>
+    <string name="permdesc_access_notification_policy" msgid="3296832375218749580">"للسماح للتطبيق بقراءة تهيئة \"الرجاء عدم الإزعاج\" وكتابتها."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"تعيين قواعد كلمة المرور"</string>
     <string name="policydesc_limitPassword" msgid="2502021457917874968">"للتحكم في الطول والأحرف المسموح بها في كلمات المرور وأرقام التعريف الشخصي في قفل الشاشة."</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"مراقبة محاولات إلغاء قفل الشاشة"</string>
@@ -536,15 +524,15 @@
     <string name="policydesc_encryptedStorage" msgid="2637732115325316992">"يمكنك طلب تشفير بيانات التطبيق المخزنة."</string>
     <string name="policylab_disableCamera" msgid="6395301023152297826">"تعطيل الكاميرات"</string>
     <string name="policydesc_disableCamera" msgid="2306349042834754597">"يمكنك منح استخدام جميع كاميرات الجهاز."</string>
-    <string name="policylab_disableKeyguardFeatures" msgid="3565888260412415862">"تعطيل ميزات قفل الشاشة"</string>
-    <string name="policydesc_disableKeyguardFeatures" msgid="3980868516629887575">"لمنع استخدام بعض ميزات قفل الشاشة."</string>
+    <string name="policylab_disableKeyguardFeatures" msgid="8552277871075367771">"تعطيل بعض ميزات قفل الشاشة"</string>
+    <string name="policydesc_disableKeyguardFeatures" msgid="2044755691354158439">"منع استخدام بعض ميزات قفل الشاشة."</string>
   <string-array name="phoneTypes">
     <item msgid="8901098336658710359">"المنزل"</item>
     <item msgid="869923650527136615">"الجوال"</item>
     <item msgid="7897544654242874543">"عمل"</item>
     <item msgid="1103601433382158155">"فاكس العمل"</item>
     <item msgid="1735177144948329370">"فاكس المنزل"</item>
-    <item msgid="603878674477207394">"جهاز النداء"</item>
+    <item msgid="603878674477207394">"جهاز نداء"</item>
     <item msgid="1650824275177931637">"آخر"</item>
     <item msgid="9192514806975898961">"مخصص"</item>
   </string-array>
@@ -587,7 +575,7 @@
     <string name="phoneTypeWork" msgid="8863939667059911633">"عمل"</string>
     <string name="phoneTypeFaxWork" msgid="3517792160008890912">"فاكس العمل"</string>
     <string name="phoneTypeFaxHome" msgid="2067265972322971467">"فاكس المنزل"</string>
-    <string name="phoneTypePager" msgid="7582359955394921732">"جهاز النداء"</string>
+    <string name="phoneTypePager" msgid="7582359955394921732">"جهاز نداء"</string>
     <string name="phoneTypeOther" msgid="1544425847868765990">"آخر"</string>
     <string name="phoneTypeCallback" msgid="2712175203065678206">"هاتف معاودة الاتصال"</string>
     <string name="phoneTypeCar" msgid="8738360689616716982">"هاتف سيارة"</string>
@@ -723,7 +711,9 @@
     <string name="lockscreen_access_pattern_start" msgid="3941045502933142847">"بدأ النمط"</string>
     <string name="lockscreen_access_pattern_cleared" msgid="5583479721001639579">"تم محو النمط"</string>
     <string name="lockscreen_access_pattern_cell_added" msgid="6756031208359292487">"تمت إضافة الخلية"</string>
+    <string name="lockscreen_access_pattern_cell_added_verbose" msgid="7264580781744026939">"تمت إضافة الخلية <xliff:g id="CELL_INDEX">%1$s</xliff:g>"</string>
     <string name="lockscreen_access_pattern_detected" msgid="4988730895554057058">"اكتمل النمط"</string>
+    <string name="lockscreen_access_pattern_area" msgid="400813207572953209">"منطقة النقش."</string>
     <string name="keyguard_accessibility_widget_changed" msgid="5678624624681400191">"‏%1$s. الأداة %2$d من %3$d."</string>
     <string name="keyguard_accessibility_add_widget" msgid="8273277058724924654">"إضافة أداة."</string>
     <string name="keyguard_accessibility_widget_empty_slot" msgid="1281505703307930757">"فارغة"</string>
@@ -819,14 +809,7 @@
     <string name="enable_explore_by_touch_warning_message" product="default" msgid="2708199672852373195">"‏يريد <xliff:g id="ACCESSIBILITY_SERVICE_NAME">%1$s</xliff:g> تمكين ميزة Explore by Touch. عند تشغيل ميزة Explore by Touch، سيكون بإمكانك سماع أو مشاهدة أوصاف لما تحت إصبعك أو إجراء إيماءات للتفاعل مع الهاتف."</string>
     <string name="oneMonthDurationPast" msgid="7396384508953779925">"قبل شهر واحد"</string>
     <string name="beforeOneMonthDurationPast" msgid="909134546836499826">"قبل شهر واحد"</string>
-    <plurals name="last_num_days" formatted="false" msgid="5104533550723932025">
-      <item quantity="zero">آخر <xliff:g id="COUNT_1">%d</xliff:g> من الأيام</item>
-      <item quantity="two">آخر يومين (<xliff:g id="COUNT_1">%d</xliff:g>)</item>
-      <item quantity="few">آخر <xliff:g id="COUNT_1">%d</xliff:g> أيام</item>
-      <item quantity="many">آخر <xliff:g id="COUNT_1">%d</xliff:g> يومًا</item>
-      <item quantity="other">آخر <xliff:g id="COUNT_1">%d</xliff:g> من الأيام</item>
-      <item quantity="one">آخر <xliff:g id="COUNT_0">%d</xliff:g> يوم</item>
-    </plurals>
+    <!-- no translation found for last_num_days:one (7555846096746489821) -->
     <string name="last_month" msgid="3959346739979055432">"الشهر الماضي"</string>
     <string name="older" msgid="5211975022815554840">"أقدم"</string>
     <string name="preposition_for_date" msgid="9093949757757445117">"في <xliff:g id="DATE">%s</xliff:g>"</string>
@@ -844,30 +827,18 @@
     <string name="weeks" msgid="6509623834583944518">"أسابيع"</string>
     <string name="year" msgid="4001118221013892076">"سنة"</string>
     <string name="years" msgid="6881577717993213522">"أعوام"</string>
-    <plurals name="duration_seconds" formatted="false" msgid="4527986939729687805">
-      <item quantity="zero">أقل من ثانية (<xliff:g id="COUNT">%d</xliff:g>)</item>
-      <item quantity="two">ثانيتان (<xliff:g id="COUNT">%d</xliff:g>)</item>
-      <item quantity="few"><xliff:g id="COUNT">%d</xliff:g> ثوانٍ</item>
-      <item quantity="many"><xliff:g id="COUNT">%d</xliff:g> ثانية</item>
-      <item quantity="other"><xliff:g id="COUNT">%d</xliff:g> من الثواني</item>
-      <item quantity="one">ثانية واحدة</item>
-    </plurals>
-    <plurals name="duration_minutes" formatted="false" msgid="643786953939956125">
-      <item quantity="zero">أقل من دقيقة (<xliff:g id="COUNT">%d</xliff:g>)</item>
-      <item quantity="two">دقيقتان (<xliff:g id="COUNT">%d</xliff:g>)</item>
-      <item quantity="few"><xliff:g id="COUNT">%d</xliff:g> دقائق</item>
-      <item quantity="many"><xliff:g id="COUNT">%d</xliff:g> دقيقة</item>
-      <item quantity="other"><xliff:g id="COUNT">%d</xliff:g> من الدقائق</item>
-      <item quantity="one">دقيقة واحدة</item>
-    </plurals>
-    <plurals name="duration_hours" formatted="false" msgid="6826233369186668274">
-      <item quantity="zero">أقل من ساعة (<xliff:g id="COUNT">%d</xliff:g>)</item>
-      <item quantity="two">ساعتان (<xliff:g id="COUNT">%d</xliff:g>)</item>
-      <item quantity="few"><xliff:g id="COUNT">%d</xliff:g> ساعات</item>
-      <item quantity="many"><xliff:g id="COUNT">%d</xliff:g> ساعة</item>
-      <item quantity="other"><xliff:g id="COUNT">%d</xliff:g> من الساعات</item>
-      <item quantity="one">ساعة واحدة</item>
-    </plurals>
+  <plurals name="duration_seconds">
+    <item quantity="one" msgid="6962015528372969481">"ثانية واحدة"</item>
+    <item quantity="other" msgid="1886107766577166786">"<xliff:g id="COUNT">%d</xliff:g> من الثواني"</item>
+  </plurals>
+  <plurals name="duration_minutes">
+    <item quantity="one" msgid="4915414002546085617">"دقيقة واحدة"</item>
+    <item quantity="other" msgid="3165187169224908775">"<xliff:g id="COUNT">%d</xliff:g> من الدقائق"</item>
+  </plurals>
+  <plurals name="duration_hours">
+    <item quantity="one" msgid="8917467491248809972">"ساعة واحدة"</item>
+    <item quantity="other" msgid="3863962854246773930">"<xliff:g id="COUNT">%d</xliff:g> من الساعات"</item>
+  </plurals>
     <string name="VideoView_error_title" msgid="3534509135438353077">"مشكلة في الفيديو"</string>
     <string name="VideoView_error_text_invalid_progressive_playback" msgid="3186670335938670444">"عذرًا، هذا الفيديو غير صالح للبث على هذا الجهاز."</string>
     <string name="VideoView_error_text_unknown" msgid="3450439155187810085">"لا يمكنك تشغيل هذا الفيديو."</string>
@@ -980,26 +951,20 @@
     <string name="ringtone_silent" msgid="7937634392408977062">"لا شيء"</string>
     <string name="ringtone_picker_title" msgid="3515143939175119094">"نغمات الرنين"</string>
     <string name="ringtone_unknown" msgid="5477919988701784788">"نغمة رنين غير معروفة"</string>
-    <plurals name="wifi_available" formatted="false" msgid="7900333017752027322">
-      <item quantity="zero">‏لا تتوفر أية شبكات Wi-Fi</item>
-      <item quantity="two">‏تتوفر شبكتا Wi-Fi</item>
-      <item quantity="few">‏تتوفر شبكات Wi-Fi</item>
-      <item quantity="many">‏تتوفر شبكات Wi-Fi</item>
-      <item quantity="other">‏تتوفر شبكات Wi-Fi</item>
-      <item quantity="one">‏تتوفر شبكة Wi-Fi واحدة</item>
-    </plurals>
-    <plurals name="wifi_available_detailed" formatted="false" msgid="1140699367193975606">
-      <item quantity="zero">‏لا تتوفر أية شبكات Wi-Fi مفتوحة</item>
-      <item quantity="two">‏تتوفر شبكتا Wi-Fi مفتوحتان</item>
-      <item quantity="few">‏تتوفر شبكات Wi-Fi مفتوحة</item>
-      <item quantity="many">‏تتوفر شبكات Wi-Fi مفتوحة</item>
-      <item quantity="other">‏تتوفر شبكات Wi-Fi مفتوحة</item>
-      <item quantity="one">‏تتوفر شبكة Wi-Fi واحدة مفتوحة</item>
-    </plurals>
+  <plurals name="wifi_available">
+    <item quantity="one" msgid="6654123987418168693">"‏شبكة Wi-Fi متاحة"</item>
+    <item quantity="other" msgid="4192424489168397386">"‏شبكات Wi-Fi متاحة"</item>
+  </plurals>
+  <plurals name="wifi_available_detailed">
+    <item quantity="one" msgid="1634101450343277345">"‏هناك شبكة Wi-Fi مفتوحة متاحة"</item>
+    <item quantity="other" msgid="7915895323644292768">"‏هناك شبكات Wi-Fi مفتوحة متاحة"</item>
+  </plurals>
     <string name="wifi_available_sign_in" msgid="9157196203958866662">"‏تسجيل الدخول إلى شبكة Wi-Fi"</string>
     <string name="network_available_sign_in" msgid="1848877297365446605">"تسجيل الدخول إلى الشبكة"</string>
     <!-- no translation found for network_available_sign_in_detailed (8000081941447976118) -->
     <skip />
+    <string name="wifi_no_internet" msgid="8451173622563841546">"‏شبكة Wi-Fi غير متصلة بالإنترنت"</string>
+    <string name="wifi_no_internet_detailed" msgid="7593858887662270131">"المس لعرض الخيارات"</string>
     <string name="wifi_watchdog_network_disabled" msgid="7904214231651546347">"‏تعذر الاتصال بـ Wi-Fi"</string>
     <string name="wifi_watchdog_network_disabled_detailed" msgid="5548780776418332675">" لديها اتصال إنترنت رديء."</string>
     <string name="wifi_connect_alert_title" msgid="8455846016001810172">"هل تريد السماح بالاتصال؟"</string>
@@ -1069,17 +1034,12 @@
     <string name="dlg_confirm_kill_storage_users_text" msgid="5100428757107469454">"‏إذا تم تشغيل وحدة تخزين USB، فستتوقف بعض التطبيقات التي تستخدمها وربما تصبح غير متاحة إلى أن يتم إيقاف وحدة تخزين USB."</string>
     <string name="dlg_error_title" msgid="7323658469626514207">"‏لم تتم عملية USB بنجاح"</string>
     <string name="dlg_ok" msgid="7376953167039865701">"موافق"</string>
-    <string name="usb_mtp_notification_title" msgid="3699913097391550394">"التوصيل كجهاز وسائط"</string>
-    <string name="usb_ptp_notification_title" msgid="1960817192216064833">"التوصيل ككاميرا"</string>
-    <string name="usb_midi_notification_title" msgid="1399152904227676460">"‏تم التوصيل كجهاز MIDI"</string>
-    <string name="usb_cd_installer_notification_title" msgid="6774712827892090754">"التوصيل كأداة تثبيت"</string>
+    <string name="usb_charging_notification_title" msgid="4004114449249406402">"‏USB للشحن"</string>
+    <string name="usb_mtp_notification_title" msgid="8396264943589760855">"‏USB لنقل الملفات"</string>
+    <string name="usb_ptp_notification_title" msgid="1347328437083192112">"‏USB لنقل الصور"</string>
+    <string name="usb_midi_notification_title" msgid="4850904915889144654">"‏USB لـ MIDI"</string>
     <string name="usb_accessory_notification_title" msgid="7848236974087653666">"‏الاتصال بجهاز USB ملحق"</string>
-    <string name="usb_notification_message" msgid="2290859399983720271">"‏المس للاطلاع على خيارات USB الأخرى."</string>
-    <string name="extmedia_format_title" product="nosdcard" msgid="9020092196061007262">"‏تهيئة وحدة تخزين USB؟"</string>
-    <string name="extmedia_format_title" product="default" msgid="3648415921526526069">"‏هل تريد تنسيق بطاقة SD؟"</string>
-    <string name="extmedia_format_message" product="nosdcard" msgid="3934016853425761078">"‏سيتم مسح جميع الملفات المخزنة على وحدة تخزين USB. لا يمكن عكس هذا الإجراء!"</string>
-    <string name="extmedia_format_message" product="default" msgid="14131895027543830">"ستفقد جميع البيانات على بطاقتك."</string>
-    <string name="extmedia_format_button_format" msgid="4131064560127478695">"تنسيق"</string>
+    <string name="usb_notification_message" msgid="7347368030849048437">"المس للحصول على مزيد من الخيارات."</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"‏تم توصيل تصحيح أخطاء USB"</string>
     <string name="adb_active_notification_message" msgid="1016654627626476142">"‏المس لتعطيل تصحيح أخطاء USB."</string>
     <string name="select_input_method" msgid="8547250819326693584">"تغيير لوحة المفاتيح"</string>
@@ -1095,15 +1055,17 @@
     <string name="ext_media_checking_notification_message" msgid="4747432538578886744">"جارٍ التحقق من الأخطاء"</string>
     <string name="ext_media_new_notification_message" msgid="7589986898808506239">"تم اكتشاف <xliff:g id="NAME">%s</xliff:g> جديدة"</string>
     <string name="ext_media_ready_notification_message" msgid="4083398150380114462">"لنقل الصور والوسائط"</string>
-    <string name="ext_media_unmountable_notification_title" msgid="4863279349863279603">"<xliff:g id="NAME">%s</xliff:g> تالفة"</string>
-    <string name="ext_media_unmountable_notification_message" msgid="7391672496565685690">"إن <xliff:g id="NAME">%s</xliff:g> تالفة؛ حاول"</string>
+    <string name="ext_media_unmountable_notification_title" msgid="8295123366236989588">"أصاب <xliff:g id="NAME">%s</xliff:g> التلف"</string>
+    <string name="ext_media_unmountable_notification_message" msgid="1586311304430052169">"<xliff:g id="NAME">%s</xliff:g> تالف. المس لإصلاحه."</string>
+    <string name="ext_media_unsupported_notification_title" msgid="3797642322958803257">"<xliff:g id="NAME">%s</xliff:g> غير متوافق"</string>
+    <string name="ext_media_unsupported_notification_message" msgid="8789610369456474891">"هذا الجهاز غير متوافق مع <xliff:g id="NAME">%s</xliff:g> هذه. المس للإعداد بتنسيق متوافق."</string>
     <string name="ext_media_badremoval_notification_title" msgid="3206248947375505416">"تمت إزالة <xliff:g id="NAME">%s</xliff:g> بشكل غير متوقع"</string>
     <string name="ext_media_badremoval_notification_message" msgid="380176703346946313">"إلغاء تحميل <xliff:g id="NAME">%s</xliff:g> قبل الإزالة لتجنب فقد البيانات"</string>
     <string name="ext_media_nomedia_notification_title" msgid="1704840188641749091">"تمت إزالة <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="ext_media_nomedia_notification_message" msgid="6471542972147056586">"تمت إزالة <xliff:g id="NAME">%s</xliff:g>؛ أدخل واحدة جديدة"</string>
     <string name="ext_media_unmounting_notification_title" msgid="640674168454809372">"لا يزال إخراج <xliff:g id="NAME">%s</xliff:g> جاريًا…"</string>
     <string name="ext_media_unmounting_notification_message" msgid="4182843895023357756">"لا تزِلها"</string>
-    <string name="ext_media_init_action" msgid="8317198948634872507">"الإعداد"</string>
+    <string name="ext_media_init_action" msgid="7952885510091978278">"إعداد"</string>
     <string name="ext_media_unmount_action" msgid="1121883233103278199">"إلغاء"</string>
     <string name="ext_media_browse_action" msgid="8322172381028546087">"استكشاف"</string>
     <string name="ext_media_missing_title" msgid="620980315821543904">"<xliff:g id="NAME">%s</xliff:g> مفقود"</string>
@@ -1114,11 +1076,24 @@
     <string name="ext_media_move_success_message" msgid="4199002148206265426">"تم نقل البيانات إلى <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="ext_media_move_failure_title" msgid="7613189040358789908">"تعذر نقل البيانات"</string>
     <string name="ext_media_move_failure_message" msgid="1978096440816403360">"تم ترك البيانات في الموقع الأصلي"</string>
+    <string name="ext_media_status_removed" msgid="6576172423185918739">"تم الإخراج"</string>
+    <string name="ext_media_status_unmounted" msgid="2551560878416417752">"تم إنهاء التحميل"</string>
+    <string name="ext_media_status_checking" msgid="6193921557423194949">"جارٍ التحقق…"</string>
+    <string name="ext_media_status_mounted" msgid="7253821726503179202">"جاهز"</string>
+    <string name="ext_media_status_mounted_ro" msgid="8020978752406021015">"للقراءة فقط"</string>
+    <string name="ext_media_status_bad_removal" msgid="8395398567890329422">"تم الإخراج بشكل غير آمن"</string>
+    <string name="ext_media_status_unmountable" msgid="805594039236667894">"تالف"</string>
+    <string name="ext_media_status_unsupported" msgid="4691436711745681828">"غير متوافق"</string>
+    <string name="ext_media_status_ejecting" msgid="5463887263101234174">"جارٍ إنهاء التحميل…"</string>
+    <string name="ext_media_status_formatting" msgid="1085079556538644861">"جارٍ التهيئة…"</string>
+    <string name="ext_media_status_missing" msgid="5638633895221670766">"لم يتم الإدخال"</string>
     <string name="activity_list_empty" msgid="1675388330786841066">"لم يتم العثور على أي أنشطة متطابقة."</string>
     <string name="permlab_route_media_output" msgid="1642024455750414694">"توجيه إخراج الوسائط"</string>
     <string name="permdesc_route_media_output" msgid="4932818749547244346">"للسماح للتطبيق بتوجيه إخراج الوسائط إلى أجهزة خارجية أخرى."</string>
     <string name="permlab_readInstallSessions" msgid="6165432407628065939">"قراءة جلسات التثبيت"</string>
     <string name="permdesc_readInstallSessions" msgid="2049771699626019849">"للسماح لأحد التطبيقات بقراءة جلسات التثبيت. ويسمح لك هذا بالاطلاع على تفاصيل بشأن عمليات تثبيت الحزم النشطة."</string>
+    <string name="permlab_requestInstallPackages" msgid="1772330282283082214">"طلب تثبيت الحزم"</string>
+    <string name="permdesc_requestInstallPackages" msgid="5740101072486783082">"للسماح لتطبيق ما بطلب تثبيت الحزم."</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="4070433208160063538">"المس مرتين للتحكم في التكبير/التصغير"</string>
     <string name="gadget_host_error_inflating" msgid="4882004314906466162">"تعذرت إضافة أداة."</string>
     <string name="ime_action_go" msgid="8320845651737369027">"تنفيذ"</string>
@@ -1167,28 +1142,13 @@
     <string name="skip_button_label" msgid="1275362299471631819">"تخطٍ"</string>
     <string name="no_matches" msgid="8129421908915840737">"ليس هناك أية مطابقات"</string>
     <string name="find_on_page" msgid="1946799233822820384">"بحث في الصفحة"</string>
-    <plurals name="matches_found" formatted="false" msgid="1210884353962081884">
-      <item quantity="zero"><xliff:g id="INDEX">%d</xliff:g> من <xliff:g id="TOTAL">%d</xliff:g></item>
-      <item quantity="two"><xliff:g id="INDEX">%d</xliff:g> من <xliff:g id="TOTAL">%d</xliff:g></item>
-      <item quantity="few"><xliff:g id="INDEX">%d</xliff:g> من <xliff:g id="TOTAL">%d</xliff:g></item>
-      <item quantity="many"><xliff:g id="INDEX">%d</xliff:g> من <xliff:g id="TOTAL">%d</xliff:g></item>
-      <item quantity="other"><xliff:g id="INDEX">%d</xliff:g> من <xliff:g id="TOTAL">%d</xliff:g></item>
-      <item quantity="one">مباراة واحدة</item>
-    </plurals>
+  <plurals name="matches_found">
+    <item quantity="one" msgid="8167147081136579439">"مطابقة واحدة"</item>
+    <item quantity="other" msgid="4641872797067609177">"<xliff:g id="INDEX">%d</xliff:g> من <xliff:g id="TOTAL">%d</xliff:g>"</item>
+  </plurals>
     <string name="action_mode_done" msgid="7217581640461922289">"تم"</string>
-    <string name="progress_unmounting" product="nosdcard" msgid="3923810448507612746">"‏جارٍ إلغاء تحميل وحدة تخزين USB..."</string>
-    <string name="progress_unmounting" product="default" msgid="1327894998409537190">"‏جارٍ إلغاء تحميل بطاقة SD..."</string>
     <string name="progress_erasing" product="nosdcard" msgid="4521573321524340058">"‏جارٍ محو وحدة تخزين USB..."</string>
     <string name="progress_erasing" product="default" msgid="6596988875507043042">"‏جارٍ محو بطاقة SD..."</string>
-    <string name="format_error" product="nosdcard" msgid="6299769563624776948">"‏تعذر مسح وحدة تخزين USB."</string>
-    <string name="format_error" product="default" msgid="7315248696644510935">"‏تعذر مسح بطاقة SD."</string>
-    <string name="media_bad_removal" msgid="7960864061016603281">"‏تمت إزالة بطاقة SD قبل أن يتم إلغاء تركيبها."</string>
-    <string name="media_checking" product="nosdcard" msgid="418188720009569693">"‏يتم حاليًا التحقق من وحدة تخزين USB."</string>
-    <string name="media_checking" product="default" msgid="7334762503904827481">"‏يتم الآن التحقق من بطاقة SD."</string>
-    <string name="media_removed" msgid="7001526905057952097">"‏تمت إزالة بطاقة SD."</string>
-    <string name="media_shared" product="nosdcard" msgid="5830814349250834225">"‏وحدة تخزين USB قيد الاستخدام بواسطة كمبيوتر حاليًا."</string>
-    <string name="media_shared" product="default" msgid="5706130568133540435">"‏بطاقة SD قيد الاستخدام حاليًا بواسطة كمبيوتر."</string>
-    <string name="media_unknown_state" msgid="729192782197290385">"وسائط خارجية في حالة غير معروفة."</string>
     <string name="share" msgid="1778686618230011964">"مشاركة"</string>
     <string name="find" msgid="4808270900322985960">"بحث"</string>
     <string name="websearch" msgid="4337157977400211589">"بحث الويب"</string>
@@ -1463,14 +1423,10 @@
     <string name="restr_pin_create_pin" msgid="8017600000263450337">"إنشاء رقم تعريف شخصي لتعديل القيود"</string>
     <string name="restr_pin_error_doesnt_match" msgid="2224214190906994548">"أرقام التعريف الشخصية لا تتطابق، أعد المحاولة."</string>
     <string name="restr_pin_error_too_short" msgid="8173982756265777792">"‏رمز PIN أقصر مما يلزم، يجب ألا يقل عن 4 أرقام. "</string>
-    <plurals name="restr_pin_countdown" formatted="false" msgid="9061246974881224688">
-      <item quantity="zero">حاول مرة أخرى خلال أقل من ثانية <xliff:g id="COUNT">%d</xliff:g></item>
-      <item quantity="two">حاول مرة أخرى خلال ثانيتين (<xliff:g id="COUNT">%d</xliff:g>)</item>
-      <item quantity="few">حاول مرة أخرى خلال <xliff:g id="COUNT">%d</xliff:g> ثوانٍ</item>
-      <item quantity="many">حاول مرة أخرى خلال <xliff:g id="COUNT">%d</xliff:g> ثانية</item>
-      <item quantity="other">حاول مرة أخرى خلال <xliff:g id="COUNT">%d</xliff:g> من الثواني</item>
-      <item quantity="one">حاول مرة أخرى خلال ثانية واحدة</item>
-    </plurals>
+  <plurals name="restr_pin_countdown">
+    <item quantity="one" msgid="311050995198548675">"أعد المحاولة خلال ثانية واحدة."</item>
+    <item quantity="other" msgid="4730868920742952817">"أعد المحاولة خلال <xliff:g id="COUNT">%d</xliff:g> ثانية"</item>
+  </plurals>
     <string name="restr_pin_try_later" msgid="973144472490532377">"أعد المحاولة لاحقًا"</string>
     <string name="immersive_cling_title" msgid="8394201622932303336">"جارٍ العرض بملء الشاشة"</string>
     <string name="immersive_cling_description" msgid="3482371193207536040">"للخروج، مرر بسرعة من أعلى إلى أسفل."</string>
@@ -1493,48 +1449,43 @@
     <string name="lock_to_app_unlock_pattern" msgid="4182192144797225137">"المطالبة بنقش إلغاء القفل قبل إزالة التثبيت"</string>
     <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"المطالبة بكلمة المرور قبل إزالة التثبيت"</string>
     <string name="package_installed_device_owner" msgid="8420696545959087545">"تم تثبيت الحزمة عن طريق المشرف"</string>
+    <string name="package_updated_device_owner" msgid="8856631322440187071">"تم التحديث بواسطة المشرف"</string>
     <string name="package_deleted_device_owner" msgid="7650577387493101353">"تم حذف الحزمة عن طريق المشرف"</string>
     <string name="battery_saver_description" msgid="1960431123816253034">"للمساعدة في تحسين عمر البطارية، يساعد موفر البطارية في تقليل أداء الجهاز ويفرض قيدًا على الاهتزاز وخدمات الموقع ومعظم بيانات الخلفية. قد لا يتم تحديث البريد الإلكتروني والمراسلة والتطبيقات الأخرى التي تعتمد على المزامنة ما لم تفتحها.\n\nيتم إيقاف موفر البطارية تلقائيًا أثناء شحن الجهاز."</string>
-    <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="4367877408072000848">
-      <item quantity="zero">‏لمدة أقل من دقيقة (%1$d) (حتى <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
-      <item quantity="two">‏لمدة دقيقتين (%1$d) (حتى <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
-      <item quantity="few">‏لمدة %1$d دقائق (حتى <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
-      <item quantity="many">‏لمدة %1$d دقيقة (حتى <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
-      <item quantity="other">‏لمدة %1$d من الدقائق (حتى <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
-      <item quantity="one">لمدة دقيقة واحدة (حتى <xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g>)</item>
-    </plurals>
-    <plurals name="zen_mode_duration_hours_summary" formatted="false" msgid="8152974162096743862">
-      <item quantity="zero">‏لمدة أقل من ساعة (%1$d) (حتى <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
-      <item quantity="two">‏لمدة ساعتين (%1$d) (حتى <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
-      <item quantity="few">‏لمدة %1$d ساعات (حتى <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
-      <item quantity="many">‏لمدة %1$d ساعة (حتى <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
-      <item quantity="other">‏لمدة %1$d من الساعات (حتى <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
-      <item quantity="one">لمدة ساعة واحدة (حتى <xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g>)</item>
-    </plurals>
-    <plurals name="zen_mode_duration_minutes" formatted="false" msgid="5127407202506485571">
-      <item quantity="zero">‏لمدة أقل من دقيقة (%d)</item>
-      <item quantity="two">‏لمدة دقيقتين (%d)</item>
-      <item quantity="few">‏لمدة %d دقائق</item>
-      <item quantity="many">‏لمدة %d دقيقة</item>
-      <item quantity="other">‏لمدة %d من الدقائق</item>
-      <item quantity="one">لمدة دقيقة واحدة</item>
-    </plurals>
-    <plurals name="zen_mode_duration_hours" formatted="false" msgid="3938821308277433854">
-      <item quantity="zero">‏لمدة أقل من ساعة (%d)</item>
-      <item quantity="two">‏لمدة ساعتين (%d)</item>
-      <item quantity="few">‏لمدة %d ساعات</item>
-      <item quantity="many">‏لمدة %d ساعة</item>
-      <item quantity="other">‏لمدة %d من الساعات</item>
-      <item quantity="one">لمدة ساعة واحدة</item>
-    </plurals>
+  <plurals name="zen_mode_duration_minutes_summary">
+    <item quantity="one" msgid="3177683545388923234">"لمدة دقيقة واحدة (حتى <xliff:g id="FORMATTEDTIME">%2$s</xliff:g>)"</item>
+    <item quantity="other" msgid="2787867221129368935">"‏لمدة %1$d من الدقائق (حتى <xliff:g id="FORMATTEDTIME">%2$s</xliff:g>)"</item>
+  </plurals>
+    <!-- no translation found for zen_mode_duration_minutes_summary_short:one (4097046271119330874) -->
+    <!-- no translation found for zen_mode_duration_minutes_summary_short:other (9128259640307810602) -->
+  <plurals name="zen_mode_duration_hours_summary">
+    <item quantity="one" msgid="597194865053253679">"لمدة ساعة واحدة (حتى <xliff:g id="FORMATTEDTIME">%2$s</xliff:g>)"</item>
+    <item quantity="other" msgid="2827214920627669898">"‏لمدة %1$d من الساعات (حتى <xliff:g id="FORMATTEDTIME">%2$s</xliff:g>)"</item>
+  </plurals>
+    <!-- no translation found for zen_mode_duration_hours_summary_short:one (342658185856495801) -->
+    <!-- no translation found for zen_mode_duration_hours_summary_short:other (6842148190293675591) -->
+  <plurals name="zen_mode_duration_minutes">
+    <item quantity="one" msgid="9040808414992812341">"لمدة دقيقة واحدة"</item>
+    <item quantity="other" msgid="6924190729213550991">"‏لمدة %d من الدقائق"</item>
+  </plurals>
+    <!-- no translation found for zen_mode_duration_minutes_short:one (4125166172281866385) -->
+    <!-- no translation found for zen_mode_duration_minutes_short:other (5131202943429775644) -->
+  <plurals name="zen_mode_duration_hours">
+    <item quantity="one" msgid="3480040795582254384">"لمدة ساعة واحدة"</item>
+    <item quantity="other" msgid="5408537517529822157">"‏لمدة %d من الساعات"</item>
+  </plurals>
+    <!-- no translation found for zen_mode_duration_hours_short:one (6798191385685158694) -->
+    <!-- no translation found for zen_mode_duration_hours_short:other (8464879049844138499) -->
     <string name="zen_mode_until" msgid="7336308492289875088">"حتى <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
     <string name="zen_mode_forever" msgid="7420011936770086993">"لحين تعطيل هذا الإعداد"</string>
+    <string name="zen_mode_forever_dnd" msgid="3792132696572189081">"حتى يتم تعطيل \"الرجاء عدم الإزعاج\""</string>
     <string name="zen_mode_rule_name_combination" msgid="191109939968076477">"<xliff:g id="FIRST">%1$s</xliff:g> / <xliff:g id="REST">%2$s</xliff:g>"</string>
     <string name="toolbar_collapse_description" msgid="2821479483960330739">"تصغير"</string>
     <string name="zen_mode_feature_name" msgid="5254089399895895004">"الرجاء عدم الإزعاج"</string>
     <string name="zen_mode_downtime_feature_name" msgid="2626974636779860146">"التعطل"</string>
-    <string name="zen_mode_default_weeknights_name" msgid="2069189413656431610">"ليالي الأسبوع"</string>
-    <string name="zen_mode_default_weekends_name" msgid="2377398437072017011">"نهايات الأسبوع"</string>
+    <string name="zen_mode_default_weeknights_name" msgid="3081318299464998143">"ليلة يوم من أيام الأسبوع"</string>
+    <string name="zen_mode_default_weekends_name" msgid="2786495801019345244">"نهاية الأسبوع"</string>
+    <string name="zen_mode_default_events_name" msgid="8158334939013085363">"حدث"</string>
     <string name="muted_by" msgid="6147073845094180001">"تم كتم الصوت بواسطة <xliff:g id="THIRD_PARTY">%1$s</xliff:g>"</string>
     <string name="system_error_wipe_data" msgid="6608165524785354962">"حدثت مشكلة داخلية في جهازك، وقد لا يستقر وضعه حتى إجراء إعادة الضبط بحسب بيانات المصنع."</string>
     <string name="system_error_manufacturer" msgid="8086872414744210668">"حدثت مشكلة داخلية في جهازك. يمكنك الاتصال بالمصنِّع للحصول على تفاصيل."</string>
@@ -1544,9 +1495,12 @@
     <string name="stk_cc_ss_to_dial" msgid="2151304435775557162">"‏يتم تعديل الطلب SS لطلب الاتصال."</string>
     <string name="stk_cc_ss_to_ussd" msgid="3951862188105305589">"‏يتم تعديل طلب SS إلى طلب USSD."</string>
     <string name="stk_cc_ss_to_ss" msgid="5470768854991452695">"‏يتم تعديل طلب SS إلى طلب SS الجديد."</string>
+    <string name="notification_work_profile_content_description" msgid="4600554564103770764">"الملف الشخصي للعمل"</string>
     <string name="usb_midi_peripheral_name" msgid="7221113987741003817">"‏منفذ الأجهزة الطرفية المزودة بكابل USB ونظام التشغيل Android"</string>
     <string name="usb_midi_peripheral_manufacturer_name" msgid="7176526170008970168">"Android"</string>
     <string name="usb_midi_peripheral_product_name" msgid="4971827859165280403">"‏منفذ الأجهزة الطرفية المزودة بكابل USB"</string>
     <string name="floating_toolbar_open_overflow_description" msgid="4797287862999444631">"خيارات أخرى"</string>
     <string name="floating_toolbar_close_overflow_description" msgid="559796923090723804">"إغلاق التجاوز"</string>
+    <!-- no translation found for selected_count:one (8857281055159991036) -->
+    <!-- no translation found for selected_count:other (2608606845335294849) -->
 </resources>

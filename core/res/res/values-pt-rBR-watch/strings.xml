@@ -1,11 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- 
-/*
+/* //device/apps/common/assets/res/any/strings.xml
+**
 ** Copyright 2015, The Android Open Source Project
 **
 ** Licensed under the Apache License, Version 2.0 (the "License");
 ** you may not use this file except in compliance with the License.
-** You my obtain a copy of the License at
+** You may obtain a copy of the License at
 **
 **     http://www.apache.org/licenses/LICENSE-2.0
 **
@@ -17,16 +18,7 @@
 */
  -->
 
-<!--  These resources are around just to allow their values to be customized
-     for different hardware and product builds.  -->
-
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-  <string-array name="wfcOperatorErrorAlertMessages">
-    <item msgid="7239039348648848288">"Als je wilt bellen en berichten wilt verzenden via wifi, moet je eerst je provider vragen deze service in te stellen. Schakel bellen via wifi vervolgens opnieuw in via \'Instellingen\'."</item>
-  </string-array>
-  <string-array name="wfcOperatorErrorNotificationMessages">
-    <item msgid="483847327467331298">"Registreren bij je provider"</item>
-  </string-array>
-    <string name="wfcSpnFormat" msgid="4982938551498609442">"Bellen via wifi van %s"</string>
+    <string name="android_upgrading_apk" msgid="1090732262010398759">"App <xliff:g id="NUMBER_0">%1$d</xliff:g> de <xliff:g id="NUMBER_1">%2$d</xliff:g>."</string>
 </resources>
