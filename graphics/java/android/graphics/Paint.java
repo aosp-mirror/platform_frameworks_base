@@ -1526,17 +1526,17 @@ public class Paint {
             return 0f;
         }
         if (!mHasCompatScaling) {
-            return (float) Math.ceil(native_measureText(text, index, count, mBidiFlags));
+            return (float) Math.ceil(native_getTextAdvances(mNativePaint, mNativeTypeface, text,
+                    index, count, index, count, mBidiFlags, null, 0));
         }
 
         final float oldSize = getTextSize();
-        setTextSize(oldSize*mCompatScaling);
-        float w = native_measureText(text, index, count, mBidiFlags);
+        setTextSize(oldSize * mCompatScaling);
+        float w = native_getTextAdvances(mNativePaint, mNativeTypeface, text, index, count, index,
+                count, mBidiFlags, null, 0);
         setTextSize(oldSize);
         return (float) Math.ceil(w*mInvCompatScaling);
     }
-
-    private native float native_measureText(char[] text, int index, int count, int bidiFlags);
 
     /**
      * Return the width of the text.
@@ -1558,17 +1558,16 @@ public class Paint {
             return 0f;
         }
         if (!mHasCompatScaling) {
-            return (float) Math.ceil(native_measureText(text, start, end, mBidiFlags));
+            return (float) Math.ceil(native_getTextAdvances(mNativePaint, mNativeTypeface, text,
+                    start, end, start, end, mBidiFlags, null, 0));
         }
-
         final float oldSize = getTextSize();
-        setTextSize(oldSize*mCompatScaling);
-        float w = native_measureText(text, start, end, mBidiFlags);
+        setTextSize(oldSize * mCompatScaling);
+        float w = native_getTextAdvances(mNativePaint, mNativeTypeface, text, start, end, start,
+                end, mBidiFlags, null, 0);
         setTextSize(oldSize);
-        return (float) Math.ceil(w*mInvCompatScaling);
+        return (float) Math.ceil(w * mInvCompatScaling);
     }
-
-    private native float native_measureText(String text, int start, int end, int bidiFlags);
 
     /**
      * Return the width of the text.
@@ -1580,22 +1579,8 @@ public class Paint {
         if (text == null) {
             throw new IllegalArgumentException("text cannot be null");
         }
-
-        if (text.length() == 0) {
-            return 0f;
-        }
-
-        if (!mHasCompatScaling) {
-            return (float) Math.ceil(native_measureText(text, mBidiFlags));
-        }
-        final float oldSize = getTextSize();
-        setTextSize(oldSize*mCompatScaling);
-        float w = native_measureText(text, mBidiFlags);
-        setTextSize(oldSize);
-        return (float) Math.ceil(w*mInvCompatScaling);
+        return measureText(text, 0, text.length());
     }
-
-    private native float native_measureText(String text, int bidiFlags);
 
     /**
      * Return the width of the text.
@@ -1795,17 +1780,20 @@ public class Paint {
             return 0;
         }
         if (!mHasCompatScaling) {
-            return native_getTextWidths(mNativePaint, mNativeTypeface, text, index, count, mBidiFlags, widths);
+            native_getTextAdvances(mNativePaint, mNativeTypeface, text, index, count, index, count,
+                    mBidiFlags, widths, 0);
+            return count;
         }
 
         final float oldSize = getTextSize();
-        setTextSize(oldSize*mCompatScaling);
-        int res = native_getTextWidths(mNativePaint, mNativeTypeface, text, index, count, mBidiFlags, widths);
+        setTextSize(oldSize * mCompatScaling);
+        native_getTextAdvances(mNativePaint, mNativeTypeface, text, index, count, index, count,
+                mBidiFlags, widths, 0);
         setTextSize(oldSize);
-        for (int i=0; i<res; i++) {
+        for (int i = 0; i < count; i++) {
             widths[i] *= mInvCompatScaling;
         }
-        return res;
+        return count;
     }
 
     /**
@@ -1860,7 +1848,7 @@ public class Paint {
      * @param end    The end of the text slice to measure
      * @param widths array to receive the advance widths of the characters.
      *               Must be at least a large as the text.
-     * @return       the number of unichars in the specified text.
+     * @return       the number of code units in the specified text.
      */
     public int getTextWidths(String text, int start, int end, float[] widths) {
         if (text == null) {
@@ -1877,17 +1865,20 @@ public class Paint {
             return 0;
         }
         if (!mHasCompatScaling) {
-            return native_getTextWidths(mNativePaint, mNativeTypeface, text, start, end, mBidiFlags, widths);
+            native_getTextAdvances(mNativePaint, mNativeTypeface, text, start, end, start, end,
+                    mBidiFlags, widths, 0);
+            return end - start;
         }
 
         final float oldSize = getTextSize();
-        setTextSize(oldSize*mCompatScaling);
-        int res = native_getTextWidths(mNativePaint, mNativeTypeface, text, start, end, mBidiFlags, widths);
+        setTextSize(oldSize * mCompatScaling);
+        native_getTextAdvances(mNativePaint, mNativeTypeface, text, start, end, start, end,
+                mBidiFlags, widths, 0);
         setTextSize(oldSize);
-        for (int i=0; i<res; i++) {
+        for (int i = 0; i < end - start; i++) {
             widths[i] *= mInvCompatScaling;
         }
-        return res;
+        return end - start;
     }
 
     /**
@@ -1896,7 +1887,7 @@ public class Paint {
      * @param text   The text to measure
      * @param widths array to receive the advance widths of the characters.
      *               Must be at least a large as the text.
-     * @return       the number of unichars in the specified text.
+     * @return       the number of code units in the specified text.
      */
     public int getTextWidths(String text, float[] widths) {
         return getTextWidths(text, 0, text.length(), widths);
@@ -1929,14 +1920,16 @@ public class Paint {
             return 0f;
         }
         if (!mHasCompatScaling) {
-            return native_getTextRunAdvances(mNativePaint, mNativeTypeface, chars, index, count,
-                    contextIndex, contextCount, isRtl, advances, advancesIndex);
+            return native_getTextAdvances(mNativePaint, mNativeTypeface, chars, index, count,
+                    contextIndex, contextCount, isRtl ? BIDI_FORCE_RTL : BIDI_FORCE_LTR, advances,
+                    advancesIndex);
         }
 
         final float oldSize = getTextSize();
         setTextSize(oldSize * mCompatScaling);
-        float res = native_getTextRunAdvances(mNativePaint, mNativeTypeface, chars, index, count,
-                contextIndex, contextCount, isRtl, advances, advancesIndex);
+        float res = native_getTextAdvances(mNativePaint, mNativeTypeface, chars, index, count,
+                contextIndex, contextCount, isRtl ? BIDI_FORCE_RTL : BIDI_FORCE_LTR, advances,
+                advancesIndex);
         setTextSize(oldSize);
 
         if (advances != null) {
@@ -2039,7 +2032,6 @@ public class Paint {
      */
     public float getTextRunAdvances(String text, int start, int end, int contextStart,
             int contextEnd, boolean isRtl, float[] advances, int advancesIndex) {
-
         if (text == null) {
             throw new IllegalArgumentException("text cannot be null");
         }
@@ -2056,14 +2048,16 @@ public class Paint {
         }
 
         if (!mHasCompatScaling) {
-            return native_getTextRunAdvances(mNativePaint, mNativeTypeface, text, start, end,
-                    contextStart, contextEnd, isRtl, advances, advancesIndex);
+            return native_getTextAdvances(mNativePaint, mNativeTypeface, text, start, end,
+                    contextStart, contextEnd, isRtl ? BIDI_FORCE_RTL : BIDI_FORCE_LTR, advances,
+                    advancesIndex);
         }
 
         final float oldSize = getTextSize();
         setTextSize(oldSize * mCompatScaling);
-        float totalAdvance = native_getTextRunAdvances(mNativePaint, mNativeTypeface, text, start, end,
-                contextStart, contextEnd, isRtl, advances, advancesIndex);
+        float totalAdvance = native_getTextAdvances(mNativePaint, mNativeTypeface, text, start,
+                end, contextStart, contextEnd, isRtl ? BIDI_FORCE_RTL : BIDI_FORCE_LTR, advances,
+                advancesIndex);
         setTextSize(oldSize);
 
         if (advances != null) {
@@ -2511,21 +2505,16 @@ public class Paint {
     private static native void native_setTextLocale(long native_object,
                                                     String locale);
 
-    private static native int native_getTextWidths(long native_object, long native_typeface,
-                            char[] text, int index, int count, int bidiFlags, float[] widths);
-    private static native int native_getTextWidths(long native_object, long native_typeface,
-                            String text, int start, int end, int bidiFlags, float[] widths);
-
     private static native int native_getTextGlyphs(long native_object,
             String text, int start, int end, int contextStart, int contextEnd,
             int flags, char[] glyphs);
 
-    private static native float native_getTextRunAdvances(long native_object, long native_typeface,
+    private static native float native_getTextAdvances(long native_object, long native_typeface,
             char[] text, int index, int count, int contextIndex, int contextCount,
-            boolean isRtl, float[] advances, int advancesIndex);
-    private static native float native_getTextRunAdvances(long native_object, long native_typeface,
+            int bidiFlags, float[] advances, int advancesIndex);
+    private static native float native_getTextAdvances(long native_object, long native_typeface,
             String text, int start, int end, int contextStart, int contextEnd,
-            boolean isRtl, float[] advances, int advancesIndex);
+            int bidiFlags, float[] advances, int advancesIndex);
 
     private native int native_getTextRunCursor(long native_object, char[] text,
             int contextStart, int contextLength, int dir, int offset, int cursorOpt);
