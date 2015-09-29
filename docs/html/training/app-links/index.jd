@@ -33,7 +33,7 @@ page.tags=androidm,marshmallow
   Automatic handling of links requires the cooperation of app developers and website owners.
   A developer must configure their app to declare associations with one or more websites, and to
   request that the system verify those associations. A website owner must, in turn, provide
-  that verification by publishing a <a href="developers.google.com/digital-asset-links/"><i>Digital
+  that verification by publishing a <a href="http://developers.google.com/digital-asset-links/"><i>Digital
   Asset Links</i></a> file. The general steps for creating verified app links are as follows:
 </p>
 
