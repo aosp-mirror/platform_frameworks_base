@@ -5,4 +5,7 @@
     <string name="action_use_network" msgid="6076184727448466030">"Tumia mtandao huu jinsi ulivyo"</string>
     <string name="action_do_not_use_network" msgid="4577366536956516683">"Usitumie mtandao huu"</string>
     <string name="action_bar_label" msgid="917235635415966620">"Ingia katika mtandao"</string>
+    <string name="ssl_error_warning" msgid="6653188881418638872">"Mtandao unaojaribu kujiunga nao una matatizo ya usalama."</string>
+    <string name="ssl_error_example" msgid="647898534624078900">"Kwa mfano, ukurasa wa kuingia katika akaunti unaweza usiwe unamilikiwa na shirika lililoonyeshwa."</string>
+    <string name="ssl_error_continue" msgid="6492718244923937110">"Endelea hata hivyo kupitia kivinjari"</string>
 </resources>

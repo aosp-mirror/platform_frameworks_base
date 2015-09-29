@@ -5,4 +5,7 @@
     <string name="action_use_network" msgid="6076184727448466030">"Použít tuto síť tak, jak je"</string>
     <string name="action_do_not_use_network" msgid="4577366536956516683">"Tuto síť nepoužívat"</string>
     <string name="action_bar_label" msgid="917235635415966620">"Přihlásit se k síti"</string>
+    <string name="ssl_error_warning" msgid="6653188881418638872">"Síť, ke které se pokoušíte připojit, má bezpečnostní problémy."</string>
+    <string name="ssl_error_example" msgid="647898534624078900">"Například přihlašovací stránka nemusí patřit do zobrazované organizace."</string>
+    <string name="ssl_error_continue" msgid="6492718244923937110">"Přesto pokračovat prostřednictvím prohlížeče"</string>
 </resources>

@@ -5,4 +5,7 @@
     <string name="action_use_network" msgid="6076184727448466030">"Gebruik hierdie netwerk nes dit is"</string>
     <string name="action_do_not_use_network" msgid="4577366536956516683">"Moenie hierdie netwerk gebruik nie"</string>
     <string name="action_bar_label" msgid="917235635415966620">"Meld by netwerk aan"</string>
+    <string name="ssl_error_warning" msgid="6653188881418638872">"Die netwerk waarby jy probeer aansluit, het sekuriteitkwessies."</string>
+    <string name="ssl_error_example" msgid="647898534624078900">"Byvoorbeeld, die aanmeldbladsy behoort dalk nie aan die organisasie wat gewys word nie."</string>
+    <string name="ssl_error_continue" msgid="6492718244923937110">"Gaan in elk geval deur blaaier voort"</string>
 </resources>
