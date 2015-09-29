@@ -39,7 +39,7 @@ import com.android.systemui.R;
 import com.android.systemui.qs.QSPanel;
 import com.android.systemui.tuner.TunerService.Tunable;
 
-import static com.android.systemui.BatteryMeterView.SHOW_PERCENT_SETTING;
+import static com.android.systemui.BatteryMeterDrawable.SHOW_PERCENT_SETTING;
 
 public class TunerFragment extends PreferenceFragment {
 

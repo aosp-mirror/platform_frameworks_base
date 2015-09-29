@@ -44,7 +44,8 @@ public class CustomQSTileHost extends QSTileHost {
                 host.getRotationLockController(), host.getNetworkController(),
                 host.getZenModeController(), host.getHotspotController(), host.getCastController(),
                 host.getFlashlightController(), host.getUserSwitcherController(),
-                host.getKeyguardMonitor(), new BlankSecurityController());
+                host.getUserInfoController(), host.getKeyguardMonitor(),
+                new BlankSecurityController(), host.getBatteryController());
     }
 
     @Override

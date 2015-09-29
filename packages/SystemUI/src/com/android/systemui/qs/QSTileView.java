@@ -267,7 +267,7 @@ public class QSTileView extends ViewGroup {
         final int w = MeasureSpec.getSize(widthMeasureSpec);
         final int h = MeasureSpec.getSize(heightMeasureSpec);
         final int iconSpec = exactly(mIconSizePx);
-        mIcon.measure(MeasureSpec.makeMeasureSpec(w, MeasureSpec.AT_MOST), iconSpec);
+        mIcon.measure(MeasureSpec.makeMeasureSpec(w, MeasureSpec.EXACTLY), iconSpec);
         switch (mType) {
             case QS_TYPE_QUICK:
                 mCircle.measure(

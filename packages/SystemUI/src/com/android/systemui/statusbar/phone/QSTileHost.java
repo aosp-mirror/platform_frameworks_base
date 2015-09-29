@@ -26,34 +26,8 @@ import android.util.Log;
 
 import com.android.systemui.R;
 import com.android.systemui.qs.QSTile;
-import com.android.systemui.qs.tiles.AirplaneModeTile;
-import com.android.systemui.qs.tiles.BluetoothTile;
-import com.android.systemui.qs.tiles.CastTile;
-import com.android.systemui.qs.tiles.CellularTile;
-import com.android.systemui.qs.tiles.ColorInversionTile;
-import com.android.systemui.qs.tiles.DndTile;
-import com.android.systemui.qs.tiles.FlashlightTile;
-import com.android.systemui.qs.tiles.HotspotTile;
-import com.android.systemui.qs.tiles.IntentTile;
-import com.android.systemui.qs.tiles.LocationTile;
-import com.android.systemui.qs.tiles.QAirplaneTile;
-import com.android.systemui.qs.tiles.QBluetoothTile;
-import com.android.systemui.qs.tiles.QFlashlightTile;
-import com.android.systemui.qs.tiles.QRotationLockTile;
-import com.android.systemui.qs.tiles.QWifiTile;
-import com.android.systemui.qs.tiles.RotationLockTile;
-import com.android.systemui.qs.tiles.WifiTile;
-import com.android.systemui.statusbar.policy.BluetoothController;
-import com.android.systemui.statusbar.policy.CastController;
-import com.android.systemui.statusbar.policy.FlashlightController;
-import com.android.systemui.statusbar.policy.HotspotController;
-import com.android.systemui.statusbar.policy.KeyguardMonitor;
-import com.android.systemui.statusbar.policy.LocationController;
-import com.android.systemui.statusbar.policy.NetworkController;
-import com.android.systemui.statusbar.policy.RotationLockController;
-import com.android.systemui.statusbar.policy.SecurityController;
-import com.android.systemui.statusbar.policy.UserSwitcherController;
-import com.android.systemui.statusbar.policy.ZenModeController;
+import com.android.systemui.qs.tiles.*;
+import com.android.systemui.statusbar.policy.*;
 import com.android.systemui.tuner.TunerService;
 import com.android.systemui.tuner.TunerService.Tunable;
 
@@ -85,8 +59,10 @@ public class QSTileHost implements QSTile.Host, Tunable {
     private final Looper mLooper;
     private final FlashlightController mFlashlight;
     private final UserSwitcherController mUserSwitcherController;
+    private final UserInfoController mUserInfoController;
     private final KeyguardMonitor mKeyguard;
     private final SecurityController mSecurity;
+    private final BatteryController mBattery;
 
     private Callback mCallback;
 
@@ -95,8 +71,8 @@ public class QSTileHost implements QSTile.Host, Tunable {
             RotationLockController rotation, NetworkController network,
             ZenModeController zen, HotspotController hotspot,
             CastController cast, FlashlightController flashlight,
-            UserSwitcherController userSwitcher, KeyguardMonitor keyguard,
-            SecurityController security) {
+            UserSwitcherController userSwitcher, UserInfoController userInfo, KeyguardMonitor keyguard,
+            SecurityController security, BatteryController battery) {
         mContext = context;
         mStatusBar = statusBar;
         mBluetooth = bluetooth;
@@ -108,8 +84,10 @@ public class QSTileHost implements QSTile.Host, Tunable {
         mCast = cast;
         mFlashlight = flashlight;
         mUserSwitcherController = userSwitcher;
+        mUserInfoController = userInfo;
         mKeyguard = keyguard;
         mSecurity = security;
+        mBattery = battery;
 
         final HandlerThread ht = new HandlerThread(QSTileHost.class.getSimpleName(),
                 Process.THREAD_PRIORITY_BACKGROUND);
@@ -203,8 +181,19 @@ public class QSTileHost implements QSTile.Host, Tunable {
         return mKeyguard;
     }
 
+    @Override
     public UserSwitcherController getUserSwitcherController() {
         return mUserSwitcherController;
+    }
+
+    @Override
+    public UserInfoController getUserInfoController() {
+        return mUserInfoController;
+    }
+
+    @Override
+    public BatteryController getBatteryController() {
+        return mBattery;
     }
 
     public SecurityController getSecurityController() {
@@ -259,6 +248,8 @@ public class QSTileHost implements QSTile.Host, Tunable {
         else if (tileSpec.equals("location")) return new LocationTile(this);
         else if (tileSpec.equals("cast")) return new CastTile(this);
         else if (tileSpec.equals("hotspot")) return new HotspotTile(this);
+        else if (tileSpec.equals("user")) return new UserTile(this);
+        else if (tileSpec.equals("battery")) return new BatteryTile(this);
         // Detail only versions of wifi and bluetooth.
         else if (tileSpec.equals("dwifi")) return new WifiTile(this, true);
         else if (tileSpec.equals("dbt")) return new BluetoothTile(this, true);
@@ -268,6 +259,7 @@ public class QSTileHost implements QSTile.Host, Tunable {
         else if (tileSpec.equals("qairplane")) return new QAirplaneTile(this);
         else if (tileSpec.equals("qrotation")) return new QRotationLockTile(this);
         else if (tileSpec.equals("qflashlight")) return new QFlashlightTile(this);
+        else if (tileSpec.equals("qlock")) return new QLockTile(this);
         // Intent tiles.
         else if (tileSpec.startsWith(IntentTile.PREFIX)) return IntentTile.create(this,tileSpec);
         else throw new IllegalArgumentException("Bad tile spec: " + tileSpec);

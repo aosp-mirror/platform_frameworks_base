@@ -206,8 +206,8 @@ public class QsTuner extends Fragment implements Callback {
     private static class CustomHost extends QSTileHost {
 
         public CustomHost(Context context) {
-            super(context, null, null, null, null, null, null, null, null, null,
-                    null, null, new BlankSecurityController());
+            super(context, null, null, null, null, null, null, null, null, null, null,
+                    null, null, new BlankSecurityController(), null);
         }
 
         @Override

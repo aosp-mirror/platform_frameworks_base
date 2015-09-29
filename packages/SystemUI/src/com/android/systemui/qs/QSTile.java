@@ -30,16 +30,7 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.android.systemui.qs.QSTile.State;
-import com.android.systemui.statusbar.policy.BluetoothController;
-import com.android.systemui.statusbar.policy.CastController;
-import com.android.systemui.statusbar.policy.FlashlightController;
-import com.android.systemui.statusbar.policy.HotspotController;
-import com.android.systemui.statusbar.policy.KeyguardMonitor;
-import com.android.systemui.statusbar.policy.Listenable;
-import com.android.systemui.statusbar.policy.LocationController;
-import com.android.systemui.statusbar.policy.NetworkController;
-import com.android.systemui.statusbar.policy.RotationLockController;
-import com.android.systemui.statusbar.policy.ZenModeController;
+import com.android.systemui.statusbar.policy.*;
 
 import java.util.Collection;
 import java.util.Objects;
@@ -349,6 +340,9 @@ public abstract class QSTile<TState extends State> implements Listenable {
         CastController getCastController();
         FlashlightController getFlashlightController();
         KeyguardMonitor getKeyguardMonitor();
+        UserSwitcherController getUserSwitcherController();
+        UserInfoController getUserInfoController();
+        BatteryController getBatteryController();
 
         public interface Callback {
             void onTilesChanged();
