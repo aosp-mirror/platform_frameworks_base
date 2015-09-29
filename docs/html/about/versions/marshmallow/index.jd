@@ -1,6 +1,6 @@
-page.title=Android 6.0
-page.tags="marshmallow",
-meta.tags=marshamallow,M,androidm
+page.title=Android 6.0 Marshmallow
+page.tags="marshmallow"
+meta.tags="marshamallow","android60"
 fullpage=true
 section.landing=true
 header.hide=1
@@ -16,15 +16,15 @@ footer.hide=1
              {@docRoot}images/home/devices-hero_620px_2x.png 2x">
       </div>
       <div class="col-7of16 col-pull-9of16">
-        <h1 class="dac-hero-title">Android 6.0</h1>
+        <h1 class="dac-hero-title">Android 6.0 Marshmallow</h1>
         <p class="dac-hero-description">
-          <strong>The official Android 6.0 SDK is now available!</strong>
+          <strong>Get your apps ready for Android 6.0 Marshmallow!</strong>
           Explore what's new &mdash; <strong>runtime permissions</strong>,
           <strong>Doze</strong> and <strong>App Standby</strong> power-saving features, new
           <strong>assist technology</strong>, and more.
         </p>
 
-        <a class="dac-hero-cta" href="{@docRoot}about/versions/marshmallow/android-6.0.html">
+        <a class="dac-hero-cta" href="{@docRoot}about/versions/marshmallow/android-6.0-changes.html">
           <span class="dac-sprite dac-auto-chevron"></span>
           Get started
         </a><br>
@@ -46,6 +46,29 @@ footer.hide=1
   </a>
 </div>
 
+<section class="dac-section dac-gray dac-small dac-invert" id="latest"><div class="wrap">
+  <h2 class="norule">Latest</h2>
+  <div class="resource-widget resource-flow-layout col-16"
+      data-query="type:blog+tag:marshmallow"
+      data-sortOrder="-timestamp"
+      data-cardSizes="6x6"
+      data-maxResults="12"
+      data-initial-results="3">
+  </div>
+</section>
+
+<section class="dac-section" id="videos"><div class="wrap">
+  <h1 class="dac-section-title">Videos</h1>
+  <div class="dac-section-subtitle">
+    New Android capabilities and the right way to use them in your apps.
+  </div>
+
+  <div class="resource-widget resource-flow-layout col-16"
+       data-query="collection:marshmallow/landing/videos"
+       data-cardSizes="6x6"
+       data-initial-results="6"></div>
+  </div>
+</section>
 
 <section class="dac-section dac-gray" id="resources"><div class="wrap">
   <h1 class="dac-section-title">Resources</h1>
@@ -56,34 +79,6 @@ footer.hide=1
   <div class="resource-widget resource-flow-layout col-16"
        data-query="collection:marshmallow/landing/more"
        data-cardSizes="6x6"
-       data-initial-results="3"></div>
-  </div>
-</section>
-
-
-<section class="dac-section" id="videos"><div class="wrap">
-  <h1 class="dac-section-title">Videos</h1>
-  <div class="dac-section-subtitle">
-    Watch these videos to understand and use the features provided in Android
-    Marshmallow.
-  </div>
-
-  <div class="resource-widget resource-flow-layout col-16"
-       data-query="collection:marshmallow/landing/videos"
-       data-sortOrder="-timestamp"
-       data-cardSizes="6x6"
-       data-initial-results="3"></div>
-  </div>
-</section>
-
-
-<section class="dac-section dac-gray dac-small dac-invert" id="latest"><div class="wrap">
-  <h2 class="norule">Latest</h2>
-  <div class="resource-widget resource-flow-layout col-16"
-      data-query="type:blog+tag:marshmallow"
-      data-sortOrder="-timestamp"
-      data-cardSizes="6x6"
-      data-maxResults="12"
-      data-initial-results="3">
+       data-initial-results="6"></div>
   </div>
 </section>

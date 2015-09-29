@@ -161,34 +161,27 @@ This is the Android SDK Preview License Agreement (the “License Agreement”).
 
   <div id="landing">
 
-<div id="qv-wrapper">
-  <div id="qv">
-    <h2>In this document</h2>
-      <ol>
-        <li><a href="#images">Hardware System Images</a></li>
-      </ol>
-  </div>
-</div>
-
 
 <p>
-  The Android M Preview SDK includes development tools, Android system images, and library files to
-  help you test your app and the new APIs coming in the next release of the platform. This document
-  describes how to get the downloadable components of the preview for testing your app.
+  The Android M Developer Preview 3 system images below are available to you for a limited
+  time for final testing. Once the Android 6.0 release is final (early October),
+  the Preview downloads will no longer be available. Instead, 
+  you'll be able to download the official Android 6.0 images from the
+  <a href="https://developers.google.com/android/nexus/images?hl=en">Nexus
+  Factory Images</a> page. 
 </p>
+
+<p class="note"><strong>Note:</strong> If you previously flashed a device to
+  an Android M Developer Preview image, that device will not automatically
+  get the update to the final Android 6.0 build by OTA. To get the final Android 6.0
+  build, you must download it from the
+  <a href="https://developers.google.com/android/nexus/images?hl=en">Nexus
+  Factory Images</a> page when available and then flash it
+  manually to your device.</p>
 
 <h2 id="images">Hardware System Images</h2>
 
-<p>
-  These system images allow you to install a preview version of the platform on a physical device for
-  testing. By configuring a device with one of these images, you can install and test your app to
-  see how it performs on the next version of the platform. The process of installing a system image
-  on a device <em>removes all data from the device</em>, so you should backup your data before
-  installing a system image.
-</p>
-
-<p class="warning">
-  <b>Warning:</b> The following Android system images are previews and are subject to change. Your
+<p>The following Android system images are previews and are subject to change. Your
   use of these system images is governed by the Android SDK Preview License Agreement. The Android
   preview system images are not stable releases, and may contain errors and defects that can result
   in damage to your computer systems, devices, and data. The preview Android system images are not

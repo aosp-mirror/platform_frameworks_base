@@ -1643,23 +1643,27 @@ var RESOURCE_COLLECTIONS = {
   "marshmallow/landing/resources": {
     "title": "",
     "resources": [
+       "about/versions/marshmallow/android-6.0-changes.html",    
        "about/versions/marshmallow/android-6.0.html",
-       "about/versions/marshmallow/download.html",
        "about/versions/marshmallow/samples.html"
     ]
   },
   "marshmallow/landing/videos": {
     "title": "",
     "resources": [
-       "https://www.youtube.com/watch?v=yYU4DHLwoRk",
-       "https://www.youtube.com/watch?v=ndBdf1_oOGA",
-       "https://www.youtube.com/watch?v=C8lUdPVSzDk",
-       "https://www.youtube.com/watch?v=VOn7VrTRlA4",
-       "https://www.youtube.com/watch?v=HXacyy0HSW0",
+       "https://youtu.be/U9tw5ypqEN0",
+       "https://youtu.be/N72ksDKrX6c",
+       "https://youtu.be/iZqDdvhTZj0",
        "https://www.youtube.com/watch?v=vcSj8ln-BlE",
+       "https://youtu.be/LQoohRwojmw",
+       "https://www.youtube.com/watch?v=VOn7VrTRlA4",
+       "https://youtu.be/5sCQjeGoE7M",
+       "https://www.youtube.com/watch?v=C8lUdPVSzDk",
+       "https://www.youtube.com/watch?v=HXacyy0HSW0",
        "https://www.youtube.com/watch?v=OW1A4XFRuyc",
+       "https://www.youtube.com/watch?v=j3QC6hcpy90",
        "https://www.youtube.com/watch?v=f17qe9vZ8RM",
-       "https://www.youtube.com/watch?v=j3QC6hcpy90"
+       "https://www.youtube.com/watch?v=ndBdf1_oOGA"
     ]
   },
   "marshmallow/landing/more": {
@@ -1668,9 +1672,10 @@ var RESOURCE_COLLECTIONS = {
       "about/versions/marshmallow/android-6.0-changes.html",
       "training/permissions/requesting.html",
       "training/backup/autosyncapi.html",
-      "training/app-links/index.html",
       "training/monitoring-device-state/doze-standby.html",
-      "about/versions/marshmallow/testing.html"
+      "training/app-links/index.html",
+      "training/articles/assistant.html",
+      "training/testing/performance.html"
     ]
   },
 }

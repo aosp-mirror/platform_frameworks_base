@@ -8,7 +8,6 @@
         Android 6.0 APIs</a></li>
         <li><a href="<?cs var:toroot ?>about/versions/marshmallow/android-6.0-changes.html">
         Android 6.0 Changes</a></li>
-        <li><a href="<?cs var:toroot ?>about/versions/marshmallow/testing.html">Testing</a></li>
         <li><a href="<?cs var:toroot ?>about/versions/marshmallow/samples.html">Samples</a></li>
         <li><a href="<?cs var:toroot ?>about/versions/marshmallow/download.html">Downloads</a></li>
   </li>

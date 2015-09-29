@@ -3,6 +3,7 @@ page.keywords=marshmallow,sdk,compatibility
 page.tags=androidm,marshmallow
 sdk.platform.apiLevel=23
 page.image=images/cards/card-api-overview_16-9_2x.png
+page.metaDescription=Get to know the new developer features in Android 6.0 Marshmallow.
 @jd:body
 
 
@@ -15,17 +16,15 @@ page.image=images/cards/card-api-overview_16-9_2x.png
         <span class="less" style="display:none">show less</span></a></h2>
 
 <ol id="toc44" class="hide-nested">
+
+  <li><a href="#fingerprint-authentication">Fingerprint Authentication</a></li>
+  <li><a href="#confirm-credential">Confirm Credential</a></li>
   <li><a href="#app-linking">App Linking</a></li>
   <li><a href="#backup">Auto Backup for Apps</a></li>
-  <li><a href="#authentication">Authentication</a>
-    <ol>
-      <li><a href="#fingerprint-authentication">Fingerprint Authentication</a></li>
-      <li><a href="#confirm-credential">Confirm Credential</a></li>
-    </ol>
-  </li>
   <li><a href="#direct-share">Direct Share</a></li>
   <li><a href="#voice-interactions">Voice Interactions</a></li>
   <li><a href="#assist">Assist API</a></li>
+  <li><a href="#adoptable-storage">Adoptable Storage</a></li>
   <li><a href="#notifications">Notifications</a></li>
   <li><a href="#bluetooth-stylus">Bluetooth Stylus Support</a></li>
   <li><a href="#ble-scanning">Improved Bluetooth Low Energy Scanning</a></li>
@@ -82,34 +81,12 @@ Different Platform Versions</a>.</p>
 <p>For more information about how API levels work, read <a
 href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#ApiLevels">What is API
 Level?</a></p>
-<h3>Important behavior changes</h3>
 
-<p>If you have previously published an app for Android, be aware that your app might be affected
-by changes in the platform.</p>
+<h2 id="fingerprint-authentication">Fingerprint Authentication</h2>
 
-<p>Please see <a href="android-6.0-changes.html">Android 6.0 Changes</a> for complete information.</p>
-
-<h2 id="app-linking">App Linking</h2>
-<p>This release enhances Android’s intent system by providing more powerful app linking.
-This feature allows you to associate an app with a web domain you own. Based on this
-association, the platform can determine the default app to use to handle a particular
-web link and skip prompting users to select an app. To learn how to implement this feature, see
-<a href="{@docRoot}training/app-links/index.html">Handling App Links</a>.
-
-<h2 id="backup">Auto Backup for Apps</h2>
-<p>The system now performs automatic full data backup and restore for apps. Your app must target
-  Android 6.0 (API level 23) to enable this behavior; you do not need to add any additional code.
-  If users delete their Google accounts, their backup data is deleted as well. To learn how this
-  feature works and how to configure what to back up on the file system, see
-  <a href="{@docRoot}training/backup/autosyncapi.html">Configuring Auto Backup for Apps</a>.</p>
-
-<h2 id="authentication">Authentication</h2>
 <p>This release offers new APIs to let you authenticate users by using their fingerprint scans on
-supported devices, and check how recently the user was last authenticated using a device unlocking
-mechanism (such as a lockscreen password). Use these APIs in conjunction with
+supported devices, Use these APIs in conjunction with
 the <a href="{@docRoot}training/articles/keystore.html">Android Keystore system</a>.</p>
-
-<h3 id="fingerprint-authentication">Fingerprint Authentication</h3>
 
 <p>To authenticate users via fingerprint scan, get an instance of the new
 {@link android.hardware.fingerprint.FingerprintManager} class and call the
@@ -158,7 +135,7 @@ adb -e emu finger touch &lt;finger_id&gt;
 </li>
 </ol>
 
-<h3 id="confirm-credential">Confirm Credential</h3>
+<h2 id="confirm-credential">Confirm Credential</h2>
 <p>Your app can authenticate users based on how recently they last unlocked their device. This
 feature frees users from having to remember additional app-specific passwords, and avoids the need
 for you to implement your own authentication user interface. Your app should use this feature in
@@ -179,6 +156,20 @@ method to re-authenticate the user within your app.
 <p>To see an app implementation of this feature, refer to the
 <a href="{@docRoot}samples/ConfirmCredential/index.html">
   Confirm Credential sample</a>.</p>
+
+<h2 id="app-linking">App Linking</h2>
+<p>This release enhances Android’s intent system by providing more powerful app linking.
+This feature allows you to associate an app with a web domain you own. Based on this
+association, the platform can determine the default app to use to handle a particular
+web link and skip prompting users to select an app. To learn how to implement this feature, see
+<a href="{@docRoot}training/app-links/index.html">Handling App Links</a>.
+
+<h2 id="backup">Auto Backup for Apps</h2>
+<p>The system now performs automatic full data backup and restore for apps. Your app must target
+  Android 6.0 (API level 23) to enable this behavior; you do not need to add any additional code.
+  If users delete their Google accounts, their backup data is deleted as well. To learn how this
+  feature works and how to configure what to back up on the file system, see
+  <a href="{@docRoot}training/backup/autosyncapi.html">Configuring Auto Backup for Apps</a>.</p>
 
 <h2 id="direct-share">Direct Share</h2>
 
@@ -274,6 +265,53 @@ callback and, optionally, the new
 {@link android.app.Activity#onProvideAssistContent(android.app.assist.AssistContent) onProvideAssistContent()}
 callback.
 </ol>
+
+<h2 id="adoptable-storage">Adoptable Storage Devices</h2>
+<p>
+With this release, users can <em>adopt</em> external storage devices such as SD cards. Adopting an
+external storage device encrypts and formats the device to behave like internal storage. This
+feature allows users to move both apps and private data of those apps between storage devices. When
+moving apps, the system respects the
+<a href="{@docRoot}guide/topics/manifest/manifest-element.html#install">{@code android:installLocation}</a>
+preference in the manifest.</p>
+
+<p>If your app accesses the following APIs or fields, be aware that the file paths they return
+will dynamically change when the app is moved between internal and external storage devices.
+When building file paths, it is strongly recommended that you always call these APIs dynamically.
+Don’t use hardcoded file paths or persist fully-qualified file paths that were built previously.</p>
+
+<ul>
+<li>{@link android.content.Context} methods:
+    <ul>
+        <li>{@link android.content.Context#getFilesDir() getFilesDir()}</li>
+        <li>{@link android.content.Context#getCacheDir() getCacheDir()}</li>
+        <li>{@link android.content.Context#getCodeCacheDir() getCodeCacheDir()}</li>
+        <li>{@link android.content.Context#getDatabasePath(java.lang.String) getDatabasePath()}</li>
+        <li>{@link android.content.Context#getDir(java.lang.String,int) getDir()}</li>
+        <li>{@link android.content.Context#getNoBackupFilesDir() getNoBackupFilesDir()}</li>
+        <li>{@link android.content.Context#getFileStreamPath(java.lang.String) getFileStreamPath()}</li>
+        <li>{@link android.content.Context#getPackageCodePath() getPackageCodePath()}</li>
+        <li>{@link android.content.Context#getPackageResourcePath() getPackageResourcePath()}</li>
+    </ul>
+</li>
+<li>{@link android.content.pm.ApplicationInfo} fields:
+    <ul>
+        <li>{@link android.content.pm.ApplicationInfo#dataDir dataDir}</li>
+        <li>{@link android.content.pm.ApplicationInfo#sourceDir sourceDir}</li>
+        <li>{@link android.content.pm.ApplicationInfo#nativeLibraryDir nativeLibraryDir}</li>
+        <li>{@link android.content.pm.ApplicationInfo#publicSourceDir publicSourceDir}</li>
+        <li>{@link android.content.pm.ApplicationInfo#splitSourceDirs splitSourceDirs}</li>
+        <li>{@link android.content.pm.ApplicationInfo#splitPublicSourceDirs splitPublicSourceDirs}</li>
+    </ul>
+</li>
+</ul>
+
+<p>To debug this feature, you can enable adoption of a USB drive that is
+connected to an Android device through a USB On-The-Go (OTG) cable, by running this command:</p>
+
+<pre class="no-prettyprint">
+$ adb shell sm set-force-adoptable true
+</pre>
 
 <h2 id="notifications">Notifications</h2>
 <p>This release adds the following API changes for notifications:</p>

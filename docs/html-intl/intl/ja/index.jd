@@ -7,33 +7,29 @@ page.customHeadTag=<meta name="google-site-verification" content="sa-bIAI6GKvct3
 
 <!-- <div class="dac-hero-carousel" data-carousel-query="collection:index/carousel">
 </div> -->
-<section class="dac-hero-carousel">
-
-<!-- <article class="dac-expand dac-hero dac-invert active" style="background-color: rgb(38, 50, 56);"> -->
-<article class="dac-expand dac-hero dac-invert active" style="background-color: #455A64;">
-<a href="/preview/index.html">
-  <div class="wrap" style="max-width:1100px;">
+<article class="dac-expand dac-hero dac-invert dac-darken mprev active" style="background-color: #75d1ff;">
+<a href="about/versions/marshmallow/index.html">
+  <div class="wrap" style="max-width:1100px;margin-top:0">
     <div class="cols dac-hero-content">
-      <div class="col-10of16 col-push-6of16 dac-hero-figure">
-        <img class="dac-hero-image" src="{@docRoot}images/home/devices-hero_620px_2x.png"
-             srcset="{@docRoot}images/home/devices-hero_620px.png 1x,
-             {@docRoot}images/home/devices-hero_620px_2x.png 2x">
+      <div class="col-8of16 col-push-6of16 dac-hero-figure mprev">
       </div>
-      <div class="col-6of16 col-pull-10of16">
+      <div class="col-8of16 col-pull-7of16">
         <div class="dac-hero-tag"></div>
 
-        <h1 class="dac-hero-title">Android M Developer Preview</h1>
-        <p class="dac-hero-description">次期バージョンの Android に向けて準備しましょう。
-        Nexus 5、6、9、Nexus Player でアプリをテストします。 </p>
+        <h1 class="dac-hero-title" style="white-space:nowrap;">Android 6.0 Marshmallow</h1>
+        </div>
+        <div class="col-6of16 col-push-1of16">
+        <p class="dac-hero-description" style="color:white"><strong>The
+        official Android 6.0 SDK is now available!</strong>
+        Explore&nbsp;what's&nbsp;new &mdash; runtime permissions,
+        Doze and App Standby power-saving features, new
+        assist technology, and more.</p>
 
-        <a class="dac-hero-cta" href="{@docRoot}preview/index.html">
+        <a class="dac-hero-cta" href="{@docRoot}about/versions/marshmallow/index.html">
           <span class="dac-sprite dac-auto-chevron"></span>
-          スタートガイド
+          Learn more
         </a><br>
-        <a class="dac-hero-cta" href="{@docRoot}preview/support.html">
-          <span class="dac-sprite dac-auto-chevron"></span>
-          Developer Preview 2</a>
-
+      </div>
       </div>
     </div>
   </div>

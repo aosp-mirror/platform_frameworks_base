@@ -3146,7 +3146,78 @@ DISTRIBUTE_RESOURCES = DISTRIBUTE_RESOURCES.concat([
     "lang":"en",
     "type":"Video"
   },
-
+  {
+    "title":"Introduction to Doze",
+    "titleFriendly":"",
+    "summary":"An overview of Doze and how to make sure that your app behaves as expected both in and out of Doze mode. ",
+    "url":"https://youtu.be/N72ksDKrX6c",
+    "group":"",
+    "keywords": ["Marshmallow"],
+    "tags": [],
+    "image":"http://i1.ytimg.com/vi/N72ksDKrX6c/maxresdefault.jpg",
+    "lang":"en",
+    "type":"Video"
+  },
+  {
+    "title":"The Nexus 5X, Nexus 6P and Android Marshmallow",
+    "titleFriendly":"",
+    "summary":"The new Nexus 5X and Nexus 6P along with some of the most significant developer features in the latest Android release,.",
+    "url":"https://youtu.be/U9tw5ypqEN0",
+    "group":"",
+    "keywords": ["Marshmallow"],
+    "tags": [],
+    "image":"http://i1.ytimg.com/vi/U9tw5ypqEN0/maxresdefault.jpg",
+    "lang":"en",
+    "type":"Video"
+  },
+  {
+    "title":"Asking For Permission Fine",
+    "titleFriendly":"",
+    "summary":"Picking the right way and time to ask for a permission is critical to it being granted. ",
+    "url":"https://youtu.be/iZqDdvhTZj0",
+    "group":"",
+    "keywords": ["Marshmallow"],
+    "tags": [],
+    "image":"http://i1.ytimg.com/vi/iZqDdvhTZj0/maxresdefault.jpg",
+    "lang":"en",
+    "type":"Video"
+  },
+  {
+    "title":"Data Binding Library",
+    "titleFriendly":"",
+    "summary":"Data Binding Library is a way to write declarative layouts and minimize the glue code necessary to bind your application logic and layouts. ",
+    "url":"https://youtu.be/5sCQjeGoE7M",
+    "group":"",
+    "keywords": ["Marshmallow"],
+    "tags": [],
+    "image":"http://i1.ytimg.com/vi/5sCQjeGoE7M/maxresdefault.jpg",
+    "lang":"en",
+    "type":"Video"
+  },
+  {
+    "title":"App Links",
+    "titleFriendly":"",
+    "summary":"App Links is a new feature of Android Marshmallow that brings a faster way of opening website links for domains that you own.",
+    "url":"https://youtu.be/LQoohRwojmw",
+    "group":"",
+    "keywords": ["Marshmallow"],
+    "tags": [],
+    "image":"http://i1.ytimg.com/vi/LQoohRwojmw/maxresdefault.jpg",
+    "lang":"en",
+    "type":"Video"
+  },
+  {
+    "title":"Android M Permissions",
+    "titleFriendly":"",
+    "summary":"An introduction to Android M runtime permissions in Android M from Google I/O 2015. ",
+    "url":"https://www.youtube.com/watch?v=f17qe9vZ8RM",
+    "group":"",
+    "keywords": ["Marshmallow"],
+    "tags": [],
+    "image":"http://i1.ytimg.com/vi/f17qe9vZ8RM/maxresdefault.jpg",
+    "lang":"en",
+    "type":"Video"
+  },
   {
     "lang": "ja",
     "title": "Gaming Everywhere",

@@ -23,8 +23,10 @@ page.customHeadTag=<meta name="google-site-verification" content="sa-bIAI6GKvct3
         </div>
         <div class="col-6of16 col-push-1of16">
         <p class="dac-hero-description" style="color:white"><strong>The
-        official Android 6.0 SDK is now available!</strong> Update to
-        Android Marshmallow to get the latest features</p>
+        official Android 6.0 SDK is now available!</strong>
+        Explore&nbsp;what's&nbsp;new &mdash; runtime permissions,
+        Doze and App Standby power-saving features, new
+        assist technology, and more.</p>
 
         <a class="dac-hero-cta" href="{@docRoot}about/versions/marshmallow/index.html">
           <span class="dac-sprite dac-auto-chevron"></span>

@@ -1,7 +1,8 @@
 page.title=Android 6.0 Changes
-page.keywords=androidm,sdk,compatibility,marshmallow
-page.tags=androidm,marshmallow
+page.keywords=marshmallow,android60,sdk,compatibility
+meta.tags=marshmallow,api23,android60,androidm
 sdk.platform.apiLevel=23
+page.image=images/cards/samples-new_2x.png
 @jd:body
 
 <div id="qv-wrapper">
@@ -11,17 +12,17 @@ sdk.platform.apiLevel=23
 
 <ol id="toc44" class="hide-nested">
     <li><a href="#behavior-runtime-permissions">Runtime Permissions</a></li>
-    <li><a href="#behavior-power">Power-Saving Optimizations</a></li>
-    <li><a href="#behavior-adoptable-storage">Adoptable Storage Devices</a></li>
+    <li><a href="#behavior-power">Doze and App Standby</a></li>
     <li><a href="#behavior-apache-http-client">Apache HTTP Client Removal</a></li>
-    <li><a href="#behavior-audiomanager-Changes">AudioManager Changes</a></li>
+    <li><a href="#behavior-apache-http-client">BoringSSL</a></li>
+    <li><a href="#behavior-hardware-id">Access to Hardware Identifiers</a></li>
     <li><a href="#behavior-notifications">Notifications</a></li>
+    <li><a href="#behavior-audiomanager-Changes">AudioManager Changes</a></li>
     <li><a href="#behavior-test-selection">Text Selection</a></li>
     <li><a href="#behavior-keystore">Android Keystore Changes</a></li>
     <li><a href="#behavior-network">Wi-Fi and Networking Changes</a></li>
     <li><a href="#behavior-camera">Camera Service Changes</a></li>
     <li><a href="#behavior-runtime">Runtime</a></li>
-    <li><a href="#behavior-hardware-id">Access to Hardware Identifier</a></li>
     <li><a href="#behavior-apk-validation">APK Validation</a></li>
     <li><a href="#behavior-usb">USB Connection</a></li>
     <li><a href="#behavior-afw">Android for Work Changes</a></li>
@@ -67,8 +68,9 @@ the new permissions model.</p>
 Permissions</a> training page. For tips on how to assess the impact on your app,
 see the <a href="{@docRoot}about/versions/marshmallow/testing.html">Testing Guide</a></p>
 
-<h2 id="behavior-power">Power-Saving Optimizations</h2>
-<p>This release introduces new power-saving optimizations for idle devices and apps.</p>
+<h2 id="behavior-power">Doze and App Standby</h2>
+<p>This release introduces new power-saving optimizations for idle devices and apps. These
+features affect all apps so make sure to test your apps in these new modes.</p>
 <ul>
 <li><strong>Doze</strong>: If a user unplugs a device and leaves it stationary, with its screen off,
 for a period of time, the device goes into <em>Doze</em> mode, where it attempts to keep the system
@@ -83,55 +85,9 @@ access and suspends syncs and jobs for the apps it deems idle.</li>
 <p>To learn more about these power-saving changes, see
 <a href="{@docRoot}training/monitoring-device-state/doze-standby.html">Optimizing for Doze and App Standby</a>.</p>
 
-<h2 id="behavior-adoptable-storage">Adoptable Storage Devices</h2>
-<p>
-With this release, users can <em>adopt</em> external storage devices such as SD cards. Adopting an
-external storage device encrypts and formats the device to behave like internal storage. This
-feature allows users to move both apps and private data of those apps between storage devices. When
-moving apps, the system respects the
-<a href="{@docRoot}guide/topics/manifest/manifest-element.html#install">{@code android:installLocation}</a>
-preference in the manifest.</p>
-
-<p>If your app accesses the following APIs or fields, be aware that the file paths they return
-will dynamically change when the app is moved between internal and external storage devices.
-When building file paths, it is strongly recommended that you always call these APIs dynamically.
-Don’t use hardcoded file paths or persist fully-qualified file paths that were built previously.</p>
-
-<ul>
-<li>{@link android.content.Context} methods:
-    <ul>
-        <li>{@link android.content.Context#getFilesDir() getFilesDir()}</li>
-        <li>{@link android.content.Context#getCacheDir() getCacheDir()}</li>
-        <li>{@link android.content.Context#getCodeCacheDir() getCodeCacheDir()}</li>
-        <li>{@link android.content.Context#getDatabasePath(java.lang.String) getDatabasePath()}</li>
-        <li>{@link android.content.Context#getDir(java.lang.String,int) getDir()}</li>
-        <li>{@link android.content.Context#getNoBackupFilesDir() getNoBackupFilesDir()}</li>
-        <li>{@link android.content.Context#getFileStreamPath(java.lang.String) getFileStreamPath()}</li>
-        <li>{@link android.content.Context#getPackageCodePath() getPackageCodePath()}</li>
-        <li>{@link android.content.Context#getPackageResourcePath() getPackageResourcePath()}</li>
-    </ul>
-</li>
-<li>{@link android.content.pm.ApplicationInfo} fields:
-    <ul>
-        <li>{@link android.content.pm.ApplicationInfo#dataDir dataDir}</li>
-        <li>{@link android.content.pm.ApplicationInfo#sourceDir sourceDir}</li>
-        <li>{@link android.content.pm.ApplicationInfo#nativeLibraryDir nativeLibraryDir}</li>
-        <li>{@link android.content.pm.ApplicationInfo#publicSourceDir publicSourceDir}</li>
-        <li>{@link android.content.pm.ApplicationInfo#splitSourceDirs splitSourceDirs}</li>
-        <li>{@link android.content.pm.ApplicationInfo#splitPublicSourceDirs splitPublicSourceDirs}</li>
-    </ul>
-</li>
-</ul>
-
-<p>To debug this feature, you can enable adoption of a USB drive that is
-connected to an Android device through a USB On-The-Go (OTG) cable, by running this command:</p>
-
-<pre class="no-prettyprint">
-$ adb shell sm set-force-adoptable true
-</pre>
-
 <h2 id="behavior-apache-http-client">Apache HTTP Client Removal</h2>
-<p>This release removes support for the Apache HTTP client. If your app is using this client and
+
+<p>Android 6.0 release removes support for the Apache HTTP client. If your app is using this client and
 targets Android 2.3 (API level 9) or higher, use the {@link java.net.HttpURLConnection} class
 instead. This API is more efficient because it reduces network use through transparent compression
 and response caching, and minimizes power consumption. To continue using the Apache HTTP APIs, you
@@ -142,6 +98,9 @@ android {
     useLibrary 'org.apache.http.legacy'
 }
 </pre>
+
+<h2 id="boringSSL">BoringSSL </h2>
+
 <p>Android is moving away from OpenSSL to the
 <a href="https://boringssl.googlesource.com/boringssl/" class="external-link">BoringSSL</a>
 library. If you’re using the Android NDK in your app, don't link against cryptographic libraries
@@ -150,6 +109,44 @@ libraries are not public APIs, and may change or break without notice across rel
 In addition, you may expose yourself to security vulnerabilities. Instead, modify your
 native code to call the Java cryptography APIs via JNI or to statically link against a
 cryptography library of your choice.</p>
+
+<h2 id="behavior-hardware-id">Access to Hardware Identifier</h2>
+<p>To provide users with greater data protection, starting in this release, Android
+removes programmatic access to the device’s local hardware identifier for
+apps using the Wi-Fi and Bluetooth APIs. The
+{@link android.net.wifi.WifiInfo#getMacAddress() WifiInfo.getMacAddress()} and the
+{@link android.bluetooth.BluetoothAdapter#getAddress() BluetoothAdapter.getAddress()} methods
+now return a constant value of {@code 02:00:00:00:00:00}.</p>
+
+<p>To access the hardware identifiers of nearby external devices via Bluetooth and Wi-Fi scans,
+your app must now have the following permissions:</p>
+<ul>
+<li>{@link android.net.wifi.WifiManager#getScanResults() WifiManager.getScanResults()}:
+Your app must have {@link android.Manifest.permission#ACCESS_FINE_LOCATION} or
+{@link android.Manifest.permission#ACCESS_COARSE_LOCATION} permission.</li>
+<li>{@link android.bluetooth.BluetoothDevice#ACTION_FOUND BluetoothDevice.ACTION_FOUND}:
+Your app must have {@link android.Manifest.permission#ACCESS_COARSE_LOCATION} permission.</li>
+<li>{@link android.bluetooth.le.BluetoothLeScanner#startScan(android.bluetooth.le.ScanCallback)
+BluetoothLeScanner.startScan()}: Your app must have
+{@link android.Manifest.permission#ACCESS_FINE_LOCATION} or
+{@link android.Manifest.permission#ACCESS_COARSE_LOCATION} permission.</li>
+</ul>
+
+<p class="note"><strong>Note</strong>: When a device running Android 6.0 (API level 23) initiates a
+background Wi-Fi or Bluetooth scan, the operation is visible to external devices as
+originating from a randomized MAC address.</p>
+
+<h2 id="behavior-notifications">Notifications</h2>
+<p>
+This release removes the {@code Notification.setLatestEventInfo()} method. Use the
+{@link android.app.Notification.Builder} class instead to construct notifications. To update a
+notification repeatedly, reuse the {@link android.app.Notification.Builder} instance. Call the
+{@link android.app.Notification.Builder#build()} method to get
+updated {@link android.app.Notification} instances.
+</p>
+<p>The {@code adb shell dumpsys notification} command no longer prints out your notification text.
+Use the {@code adb shell dumpsys notification --noredact} command instead to print out the text
+in a notification object.</p>
 
 <h2 id="behavior-audiomanager-Changes">AudioManager Changes</h2>
 <p>Setting the volume directly or muting specific streams via the {@link android.media.AudioManager}
@@ -163,17 +160,6 @@ adjustStreamVolume()} method and pass in the direction value
 {@link android.media.AudioManager#ADJUST_MUTE} or
 {@link android.media.AudioManager#ADJUST_UNMUTE}.</p>
 
-<h2 id="behavior-notifications">Notifications</h2>
-<p>
-This release removes the {@code Notification.setLatestEventInfo()} method. Use the
-{@link android.app.Notification.Builder} class instead to construct notifications. To update a
-notification repeatedly, reuse the {@link android.app.Notification.Builder} instance. Call the
-{@link android.app.Notification.Builder#build()} method to get
-updated {@link android.app.Notification} instances.
-</p>
-<p>The {@code adb shell dumpsys notification} command no longer prints out your notification text.
-Use the {@code adb shell dumpsys notification --noredact} command instead to print out the text
-in a notification object.</p>
 
 <h2 id="behavior-test-selection">Text Selection</h2>
 
@@ -318,32 +304,6 @@ or higher. To help you detect if a library failed to load, your app should log t
 {@code dlopen(3)} failure, and include the problem description text that the {@code dlerror(3)}
 call returns. To learn more about handling text relocations, see this
 <a href="https://wiki.gentoo.org/wiki/Hardened/Textrels_Guide" class="external-link">guide</a>.</p>
-
-<h2 id="behavior-hardware-id">Access to Hardware Identifier</h2>
-<p>To provide users with greater data protection, starting in this release, Android
-removes programmatic access to the device’s local hardware identifier for
-apps using the Wi-Fi and Bluetooth APIs. The
-{@link android.net.wifi.WifiInfo#getMacAddress() WifiInfo.getMacAddress()} and the
-{@link android.bluetooth.BluetoothAdapter#getAddress() BluetoothAdapter.getAddress()} methods
-now return a constant value of {@code 02:00:00:00:00:00}.</p>
-
-<p>To access the hardware identifiers of nearby external devices via Bluetooth and Wi-Fi scans,
-your app must now have the following permissions:</p>
-<ul>
-<li>{@link android.net.wifi.WifiManager#getScanResults() WifiManager.getScanResults()}:
-Your app must have {@link android.Manifest.permission#ACCESS_FINE_LOCATION} or
-{@link android.Manifest.permission#ACCESS_COARSE_LOCATION} permission.</li>
-<li>{@link android.bluetooth.BluetoothDevice#ACTION_FOUND BluetoothDevice.ACTION_FOUND}:
-Your app must have {@link android.Manifest.permission#ACCESS_COARSE_LOCATION} permission.</li>
-<li>{@link android.bluetooth.le.BluetoothLeScanner#startScan(android.bluetooth.le.ScanCallback)
-BluetoothLeScanner.startScan()}: Your app must have
-{@link android.Manifest.permission#ACCESS_FINE_LOCATION} or
-{@link android.Manifest.permission#ACCESS_COARSE_LOCATION} permission.</li>
-</ul>
-
-<p class="note"><strong>Note</strong>: When a device running Android 6.0 (API level 23) initiates a
-background Wi-Fi or Bluetooth scan, the operation is visible to external devices as
-originating from a randomized MAC address.</p>
 
 <h2 id="behavior-apk-validation">APK Validation</h2>
 <p>The platform now performs stricter validation of APKs. An APK is considered corrupt if a file is

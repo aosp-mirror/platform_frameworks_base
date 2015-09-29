@@ -1,7 +1,7 @@
 page.title=Requesting Permissions at Run Time
 page.tags="runtime permissions",androidm,marshmallow
-helpoutsWidget=true
-
+page.image=images/permissions_check.png
+page.metaDescription=Learn about runtime permissions and how they make it easier for users to install and upgrade your apps. 
 @jd:body
 
 <div id="tb-wrapper">
