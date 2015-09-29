@@ -22,5 +22,5 @@
     <string name="bugreport_finished_text" product="default" msgid="3559904746859400732">"Hlásenie o chybách môžete zdielať klepnutím"</string>
     <string name="bugreport_confirm" msgid="5130698467795669780">"Správy o chybách obsahujú údaje z rôznych súborov denníkov systému vrátane osobných a súkromných informácií. Zdieľajte ich iba s dôveryhodnými aplikáciami a ľuďmi."</string>
     <string name="bugreport_confirm_repeat" msgid="4926842460688645058">"Zobraziť túto správu nabudúce"</string>
-    <string name="bugreport_storage_title" msgid="5332488144740527109">"Hlásenia o chybe"</string>
+    <string name="bugreport_storage_title" msgid="5332488144740527109">"Hlásenia chýb"</string>
 </resources>
