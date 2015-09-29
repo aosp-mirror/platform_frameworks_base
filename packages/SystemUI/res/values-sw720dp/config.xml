@@ -25,10 +25,5 @@
     <!-- The maximum count of notifications on Keyguard. The rest will be collapsed in an overflow
          card. -->
     <integer name="keyguard_max_notification_count">5</integer>
-
-    <!-- Transposes the search bar layout in landscape. -->
-    <bool name="recents_has_transposed_search_bar">false</bool>
-    <!-- Transposes the nav bar in landscape (only used for purposes of layout). -->
-    <bool name="recents_has_transposed_nav_bar">false</bool>
 </resources>
 

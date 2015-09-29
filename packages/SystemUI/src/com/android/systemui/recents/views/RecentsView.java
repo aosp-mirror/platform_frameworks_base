@@ -38,8 +38,9 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.WindowInsets;
 import android.view.WindowManagerGlobal;
+import android.view.animation.AnimationUtils;
+import android.view.animation.Interpolator;
 import android.widget.FrameLayout;
-
 import com.android.internal.logging.MetricsLogger;
 import com.android.systemui.R;
 import com.android.systemui.recents.Constants;
@@ -83,6 +84,9 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
     TaskStackView mTaskStackView;
     RecentsAppWidgetHostView mSearchBar;
     RecentsViewCallbacks mCb;
+    Interpolator mFastOutSlowInInterpolator;
+
+    Rect mSystemInsets = new Rect();
 
     public RecentsView(Context context) {
         super(context);
@@ -100,6 +104,8 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
         super(context, attrs, defStyleAttr, defStyleRes);
         mConfig = RecentsConfiguration.getInstance();
         mInflater = LayoutInflater.from(context);
+        mFastOutSlowInInterpolator = AnimationUtils.loadInterpolator(context,
+                com.android.internal.R.interpolator.fast_out_slow_in);
     }
 
     /** Sets the callbacks */
@@ -109,7 +115,7 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
 
     /** Set/get the bsp root node */
     public void setTaskStack(TaskStack stack) {
-        if (mConfig.launchedReuseTaskStackViews) {
+        if (mConfig.getLaunchState().launchedReuseTaskStackViews) {
             if (mTaskStackView != null) {
                 // If onRecentsHidden is not triggered, we need to the stack view again here
                 mTaskStackView.reset();
@@ -278,7 +284,7 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
         // Get the search bar bounds and measure the search bar layout
         Rect searchBarSpaceBounds = new Rect();
         if (mSearchBar != null) {
-            mConfig.getSearchBarBounds(new Rect(0, 0, width, height), mConfig.systemInsets.top,
+            mConfig.getSearchBarBounds(new Rect(0, 0, width, height), mSystemInsets.top,
                     searchBarSpaceBounds);
             mSearchBar.measure(
                     MeasureSpec.makeMeasureSpec(searchBarSpaceBounds.width(), MeasureSpec.EXACTLY),
@@ -286,8 +292,8 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
         }
 
         Rect taskStackBounds = new Rect();
-        mConfig.getAvailableTaskStackBounds(new Rect(0, 0, width, height), mConfig.systemInsets.top,
-                mConfig.systemInsets.right, searchBarSpaceBounds, taskStackBounds);
+        mConfig.getAvailableTaskStackBounds(new Rect(0, 0, width, height), mSystemInsets.top,
+                mSystemInsets.right, searchBarSpaceBounds, taskStackBounds);
         if (mTaskStackView != null && mTaskStackView.getVisibility() != GONE) {
             mTaskStackView.setTaskStackBounds(taskStackBounds);
             mTaskStackView.measure(widthMeasureSpec, heightMeasureSpec);
@@ -306,7 +312,7 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
         Rect searchBarSpaceBounds = new Rect();
         if (mSearchBar != null) {
             mConfig.getSearchBarBounds(measuredRect,
-                    mConfig.systemInsets.top, searchBarSpaceBounds);
+                    mSystemInsets.top, searchBarSpaceBounds);
             mSearchBar.layout(searchBarSpaceBounds.left, searchBarSpaceBounds.top,
                     searchBarSpaceBounds.right, searchBarSpaceBounds.bottom);
         }
@@ -318,8 +324,7 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
 
     @Override
     public WindowInsets onApplyWindowInsets(WindowInsets insets) {
-        // Update the configuration with the latest system insets and trigger a relayout
-        mConfig.updateSystemInsets(insets.getSystemWindowInsets());
+        mSystemInsets.set(insets.getSystemWindowInsets());
         requestLayout();
         return insets.consumeSystemWindowInsets();
     }
@@ -548,7 +553,7 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
             // outside the display rect (to ensure we don't animate from too far away)
             sourceView = stackView;
             offsetX = transform.rect.left;
-            offsetY = mConfig.displayRect.height();
+            offsetY = getMeasuredHeight();
         } else {
             sourceView = tv.mThumbnailView;
         }
@@ -700,11 +705,13 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
     public void onTaskStackFilterTriggered() {
         // Hide the search bar
         if (mSearchBar != null) {
+            int filterDuration = getResources().getInteger(
+                    R.integer.recents_filter_animate_current_views_duration);
             mSearchBar.animate()
                     .alpha(0f)
                     .setStartDelay(0)
-                    .setInterpolator(mConfig.fastOutSlowInInterpolator)
-                    .setDuration(mConfig.filteringCurrentViewsAnimDuration)
+                    .setInterpolator(mFastOutSlowInInterpolator)
+                    .setDuration(filterDuration)
                     .withLayer()
                     .start();
         }
@@ -714,11 +721,13 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
     public void onTaskStackUnfilterTriggered() {
         // Show the search bar
         if (mSearchBar != null) {
+            int filterDuration = getResources().getInteger(
+                    R.integer.recents_filter_animate_new_views_duration);
             mSearchBar.animate()
                     .alpha(1f)
                     .setStartDelay(0)
-                    .setInterpolator(mConfig.fastOutSlowInInterpolator)
-                    .setDuration(mConfig.filteringNewViewsAnimDuration)
+                    .setInterpolator(mFastOutSlowInInterpolator)
+                    .setDuration(filterDuration)
                     .withLayer()
                     .start();
         }

@@ -89,7 +89,8 @@ class FakeShadowDrawable extends Drawable {
         mCornerShadowPaint = new Paint(Paint.ANTI_ALIAS_FLAG | Paint.DITHER_FLAG);
         mCornerShadowPaint.setStyle(Paint.Style.FILL);
         mCornerShadowPaint.setDither(true);
-        mCornerRadius = config.taskViewRoundedCornerRadiusPx;
+        mCornerRadius = resources.getDimensionPixelSize(
+                R.dimen.recents_task_view_rounded_corners_radius);
         mCardBounds = new RectF();
         mEdgeShadowPaint = new Paint(mCornerShadowPaint);
     }

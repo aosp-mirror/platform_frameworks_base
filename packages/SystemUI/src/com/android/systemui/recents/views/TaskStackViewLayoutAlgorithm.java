@@ -16,11 +16,13 @@
 
 package com.android.systemui.recents.views;
 
+import android.content.Context;
 import android.graphics.Rect;
 import com.android.systemui.recents.Constants;
 import com.android.systemui.recents.RecentsConfiguration;
 import com.android.systemui.recents.misc.Utilities;
 import com.android.systemui.recents.model.Task;
+import com.android.systemui.R;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -48,6 +50,7 @@ public class TaskStackViewLayoutAlgorithm {
         }
     }
 
+    Context mContext;
     RecentsConfiguration mConfig;
 
     // The various rects that define the stack view
@@ -71,7 +74,8 @@ public class TaskStackViewLayoutAlgorithm {
     static float[] xp;
     static float[] px;
 
-    public TaskStackViewLayoutAlgorithm(RecentsConfiguration config) {
+    public TaskStackViewLayoutAlgorithm(Context context, RecentsConfiguration config) {
+        mContext = context;
         mConfig = config;
 
         // Precompute the path
@@ -87,7 +91,8 @@ public class TaskStackViewLayoutAlgorithm {
         mStackVisibleRect.bottom = mViewRect.bottom;
 
         int widthPadding = (int) (mConfig.taskStackWidthPaddingPct * mStackRect.width());
-        int heightPadding = mConfig.taskStackTopPaddingPx;
+        int heightPadding = mContext.getResources().getDimensionPixelSize(
+                R.dimen.recents_stack_top_padding);
         mStackRect.inset(widthPadding, heightPadding);
 
         // Compute the task rect
@@ -98,7 +103,8 @@ public class TaskStackViewLayoutAlgorithm {
 
         // Update the affiliation offsets
         float visibleTaskPct = 0.5f;
-        mWithinAffiliationOffset = mConfig.taskBarHeight;
+        mWithinAffiliationOffset = mContext.getResources().getDimensionPixelSize(
+                R.dimen.recents_task_bar_height);
         mBetweenAffiliationOffset = (int) (visibleTaskPct * mTaskRect.height());
     }
 
@@ -134,8 +140,10 @@ public class TaskStackViewLayoutAlgorithm {
                         mStackRect.bottom));
         float pDismissAllButtonOffset = 0f;
         if (Constants.DebugFlags.App.EnableDismissAll) {
+            int dismissAllButtonHeight = mContext.getResources().getDimensionPixelSize(
+                    R.dimen.recents_dismiss_all_button_size);
             pDismissAllButtonOffset = pAtBottomOfStackRect -
-                screenYToCurveProgress(mStackVisibleRect.bottom - mConfig.dismissAllButtonSizePx);
+                screenYToCurveProgress(mStackVisibleRect.bottom - dismissAllButtonHeight);
         }
 
         // Update the task offsets
@@ -177,6 +185,8 @@ public class TaskStackViewLayoutAlgorithm {
 
         // Walk backwards in the task stack and count the number of tasks and visible thumbnails
         int taskHeight = mTaskRect.height();
+        int taskBarHeight = mContext.getResources().getDimensionPixelSize(
+                R.dimen.recents_task_bar_height);
         int numVisibleTasks = 1;
         int numVisibleThumbnails = 1;
         float progress = mTaskProgressMap.get(tasks.get(tasks.size() - 1).key) - mInitialScrollP;
@@ -192,7 +202,7 @@ public class TaskStackViewLayoutAlgorithm {
                 float scaleAtP = curveProgressToScale(progress);
                 int scaleYOffsetAtP = (int) (((1f - scaleAtP) * taskHeight) / 2);
                 int screenY = curveProgressToScreenY(progress) + scaleYOffsetAtP;
-                boolean hasVisibleThumbnail = (prevScreenY - screenY) > mConfig.taskBarHeight;
+                boolean hasVisibleThumbnail = (prevScreenY - screenY) > taskBarHeight;
                 if (hasVisibleThumbnail) {
                     numVisibleThumbnails++;
                     numVisibleTasks++;
@@ -251,8 +261,8 @@ public class TaskStackViewLayoutAlgorithm {
         }
         float scale = curveProgressToScale(pBounded);
         int scaleYOffset = (int) (((1f - scale) * mTaskRect.height()) / 2);
-        int minZ = mConfig.taskViewTranslationZMinPx;
-        int maxZ = mConfig.taskViewTranslationZMaxPx;
+        int minZ = mContext.getResources().getDimensionPixelSize(R.dimen.recents_task_view_z_min);
+        int maxZ = mContext.getResources().getDimensionPixelSize(R.dimen.recents_task_view_z_max);
         transformOut.scale = scale;
         transformOut.translationY = curveProgressToScreenY(pBounded) - mStackVisibleRect.top -
                 scaleYOffset;

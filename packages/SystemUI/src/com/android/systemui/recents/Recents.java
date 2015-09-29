@@ -38,7 +38,6 @@ import android.util.MutableBoolean;
 import android.view.Display;
 import android.view.LayoutInflater;
 import android.view.View;
-
 import com.android.internal.logging.MetricsLogger;
 import com.android.systemui.Prefs;
 import com.android.systemui.R;
@@ -500,9 +499,8 @@ public class Recents extends SystemUI
         mStatusBarHeight = res.getDimensionPixelSize(com.android.internal.R.dimen.status_bar_height);
         mNavBarHeight = res.getDimensionPixelSize(com.android.internal.R.dimen.navigation_bar_height);
         mNavBarWidth = res.getDimensionPixelSize(com.android.internal.R.dimen.navigation_bar_width);
-        // TODO: We can't rely on this anymore since the activity context will yield different
-        //      resources while multiwindow is enabled
-        mConfig = RecentsConfiguration.reinitialize(mContext, mSystemServicesProxy);
+        mConfig = RecentsConfiguration.initialize(mContext, mSystemServicesProxy);
+        mConfig.update(mContext, mSystemServicesProxy, mSystemServicesProxy.getWindowRect());
         mConfig.updateOnConfigurationChange();
         Rect searchBarBounds = new Rect();
         // Try and pre-emptively bind the search widget on startup to ensure that we
@@ -515,7 +513,7 @@ public class Recents extends SystemUI
         mConfig.getAvailableTaskStackBounds(windowRect,
                 mStatusBarHeight, (mConfig.hasTransposedNavBar ? mNavBarWidth : 0), searchBarBounds,
                 mTaskStackBounds);
-        if (mConfig.isLandscape && mConfig.hasTransposedNavBar) {
+        if (mConfig.hasTransposedNavBar) {
             mSystemInsets.set(0, mStatusBarHeight, mNavBarWidth, 0);
         } else {
             mSystemInsets.set(0, mStatusBarHeight, 0, mNavBarHeight);
@@ -740,7 +738,7 @@ public class Recents extends SystemUI
         // Don't reinitialize the configuration completely here, since it has the wrong context,
         // only update the parts that we can get from any context
         RecentsConfiguration config = RecentsConfiguration.getInstance();
-        config.reinitializeWithApplicationContext(mContext, mSystemServicesProxy);
+        config.update(mContext, mSystemServicesProxy, mSystemServicesProxy.getWindowRect());
 
         if (sInstanceLoadPlan == null) {
             // Create a new load plan if onPreloadRecents() was never triggered
@@ -816,15 +814,16 @@ public class Recents extends SystemUI
             ActivityOptions opts, boolean fromHome, boolean fromSearchHome, boolean fromThumbnail,
             TaskStackViewLayoutAlgorithm.VisibilityReport vr) {
         // Update the configuration based on the launch options
-        mConfig.launchedFromHome = fromSearchHome || fromHome;
-        mConfig.launchedFromSearchHome = fromSearchHome;
-        mConfig.launchedFromAppWithThumbnail = fromThumbnail;
-        mConfig.launchedToTaskId = (topTask != null) ? topTask.id : -1;
-        mConfig.launchedWithAltTab = mTriggeredFromAltTab;
-        mConfig.launchedReuseTaskStackViews = mCanReuseTaskStackViews;
-        mConfig.launchedNumVisibleTasks = vr.numVisibleTasks;
-        mConfig.launchedNumVisibleThumbnails = vr.numVisibleThumbnails;
-        mConfig.launchedHasConfigurationChanged = false;
+        RecentsActivityLaunchState launchState = mConfig.getLaunchState();
+        launchState.launchedFromHome = fromSearchHome || fromHome;
+        launchState.launchedFromSearchHome = fromSearchHome;
+        launchState.launchedFromAppWithThumbnail = fromThumbnail;
+        launchState.launchedToTaskId = (topTask != null) ? topTask.id : -1;
+        launchState.launchedWithAltTab = mTriggeredFromAltTab;
+        launchState.launchedReuseTaskStackViews = mCanReuseTaskStackViews;
+        launchState.launchedNumVisibleTasks = vr.numVisibleTasks;
+        launchState.launchedNumVisibleThumbnails = vr.numVisibleThumbnails;
+        launchState.launchedHasConfigurationChanged = false;
 
         Intent intent = new Intent(sToggleRecentsAction);
         intent.setClassName(sRecentsPackage, sRecentsActivity);

@@ -29,10 +29,10 @@ import android.view.View;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityNodeInfo;
 import android.widget.FrameLayout;
-
 import com.android.internal.logging.MetricsLogger;
 import com.android.systemui.R;
 import com.android.systemui.recents.Constants;
+import com.android.systemui.recents.RecentsActivityLaunchState;
 import com.android.systemui.recents.RecentsConfiguration;
 import com.android.systemui.recents.misc.DozeTrigger;
 import com.android.systemui.recents.misc.SystemServicesProxy;
@@ -117,14 +117,17 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
         // Set the stack first
         setStack(stack);
         mConfig = RecentsConfiguration.getInstance();
-        mViewPool = new ViewPool<TaskView, Task>(context, this);
+        mViewPool = new ViewPool<>(context, this);
         mInflater = LayoutInflater.from(context);
-        mLayoutAlgorithm = new TaskStackViewLayoutAlgorithm(mConfig);
-        mFilterAlgorithm = new TaskStackViewFilterAlgorithm(mConfig, this, mViewPool);
-        mStackScroller = new TaskStackViewScroller(context, mConfig, mLayoutAlgorithm);
+        mLayoutAlgorithm = new TaskStackViewLayoutAlgorithm(context, mConfig);
+        mFilterAlgorithm = new TaskStackViewFilterAlgorithm(this, mViewPool);
+        mStackScroller = new TaskStackViewScroller(context, mLayoutAlgorithm);
         mStackScroller.setCallbacks(this);
-        mTouchHandler = new TaskStackViewTouchHandler(context, this, mConfig, mStackScroller);
-        mUIDozeTrigger = new DozeTrigger(mConfig.taskBarDismissDozeDelaySeconds, new Runnable() {
+        mTouchHandler = new TaskStackViewTouchHandler(context, this, mStackScroller);
+
+        int taskBarDismissDozeDelaySeconds = getResources().getInteger(
+                R.integer.recents_task_bar_dismiss_delay_seconds);
+        mUIDozeTrigger = new DozeTrigger(taskBarDismissDozeDelaySeconds, new Runnable() {
             @Override
             public void run() {
                 // Show the task bar dismiss buttons
@@ -731,8 +734,9 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
         int height = MeasureSpec.getSize(heightMeasureSpec);
 
         // Compute our stack/task rects
-        computeRects(width, height, mTaskStackBounds, mConfig.launchedWithAltTab,
-                mConfig.launchedFromHome);
+        RecentsActivityLaunchState launchState = mConfig.getLaunchState();
+        computeRects(width, height, mTaskStackBounds, launchState.launchedWithAltTab,
+                launchState.launchedFromHome);
 
         // If this is the first layout, then scroll to the front of the stack and synchronize the
         // stack views immediately to load all the views
@@ -764,9 +768,11 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
         // Measure the dismiss button
         if (mDismissAllButton != null) {
             int taskRectWidth = mLayoutAlgorithm.mTaskRect.width();
+            int dismissAllButtonHeight = getResources().getDimensionPixelSize(
+                    R.dimen.recents_dismiss_all_button_size);
             mDismissAllButton.measure(
                     MeasureSpec.makeMeasureSpec(taskRectWidth, MeasureSpec.EXACTLY),
-                    MeasureSpec.makeMeasureSpec(mConfig.dismissAllButtonSizePx, MeasureSpec.EXACTLY));
+                    MeasureSpec.makeMeasureSpec(dismissAllButtonHeight, MeasureSpec.EXACTLY));
         }
 
         setMeasuredDimension(width, height);
@@ -847,13 +853,14 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
 
         // When Alt-Tabbing, focus the previous task (but leave the animation until we finish the
         // enter animation).
-        if (mConfig.launchedWithAltTab) {
-            if (mConfig.launchedFromAppWithThumbnail) {
+        RecentsActivityLaunchState launchState = mConfig.getLaunchState();
+        if (launchState.launchedWithAltTab) {
+            if (launchState.launchedFromAppWithThumbnail) {
                 focusTask(Math.max(0, mStack.getTaskCount() - 2), false,
-                        mConfig.launchedHasConfigurationChanged);
+                        launchState.launchedHasConfigurationChanged);
             } else {
                 focusTask(Math.max(0, mStack.getTaskCount() - 1), false,
-                        mConfig.launchedHasConfigurationChanged);
+                        launchState.launchedHasConfigurationChanged);
             }
         }
 
@@ -924,7 +931,9 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
 
                     // Start the focus animation when alt-tabbing
                     ArrayList<Task> tasks = mStack.getTasks();
-                    if (mConfig.launchedWithAltTab && !mConfig.launchedHasConfigurationChanged &&
+                    RecentsActivityLaunchState launchState = mConfig.getLaunchState();
+                    if (launchState.launchedWithAltTab &&
+                            !launchState.launchedHasConfigurationChanged &&
                             0 <= mFocusedTaskIndex && mFocusedTaskIndex < tasks.size()) {
                         TaskView tv = getChildViewForTask(tasks.get(mFocusedTaskIndex));
                         if (tv != null) {
@@ -1115,7 +1124,8 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
         }
 
         // Update the min/max scroll and animate other task views into their new positions
-        updateMinMaxScroll(true, mConfig.launchedWithAltTab, mConfig.launchedFromHome);
+        RecentsActivityLaunchState launchState = mConfig.getLaunchState();
+        updateMinMaxScroll(true, launchState.launchedWithAltTab, launchState.launchedFromHome);
 
         // Offset the stack by as much as the anchor task would otherwise move back
         if (pullStackForward) {
@@ -1133,7 +1143,8 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
             TaskView frontTv = getChildViewForTask(newFrontMostTask);
             if (frontTv != null) {
                 frontTv.onTaskBound(newFrontMostTask);
-                frontTv.fadeInActionButton(0, mConfig.taskViewEnterFromAppDuration);
+                frontTv.fadeInActionButton(0, getResources().getInteger(
+                        R.integer.recents_task_enter_from_app_duration));
             }
         }
 
@@ -1384,7 +1395,8 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
                 if (nextTv != null) {
                     // Focus the next task, and only animate the visible state if we are launched
                     // from Alt-Tab
-                    nextTv.setFocusedTask(mConfig.launchedWithAltTab);
+                    RecentsActivityLaunchState launchState = mConfig.getLaunchState();
+                    nextTv.setFocusedTask(launchState.launchedWithAltTab);
                 }
             }
         }

@@ -19,9 +19,6 @@
     <!-- thickness (width) of the navigation bar on phones that require it -->
     <dimen name="navigation_bar_size">@*android:dimen/navigation_bar_width</dimen>
 
-    <!-- The side padding for the task stack as a percentage of the width. -->
-    <item name="recents_stack_width_padding_percentage" format="float" type="dimen">0.26</item>
-
     <!-- Standard notification width + gravity -->
     <dimen name="notification_panel_width">@dimen/standard_notification_panel_width</dimen>
     <integer name="notification_panel_layout_gravity">@integer/standard_notification_panel_layout_gravity</integer>

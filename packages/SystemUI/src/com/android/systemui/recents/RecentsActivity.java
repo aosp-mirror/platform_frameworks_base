@@ -25,17 +25,13 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.res.Configuration;
 import android.os.Bundle;
 import android.os.SystemClock;
 import android.os.UserHandle;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.ViewStub;
-import android.widget.Toast;
-
 import com.android.internal.logging.MetricsLogger;
-import com.android.systemui.Prefs;
 import com.android.systemui.R;
 import com.android.systemui.recents.misc.Console;
 import com.android.systemui.recents.misc.ReferenceCountedTrigger;
@@ -182,18 +178,19 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
         }
 
         // Start loading tasks according to the load plan
+        RecentsActivityLaunchState launchState = mConfig.getLaunchState();
         if (!plan.hasTasks()) {
-            loader.preloadTasks(plan, mConfig.launchedFromHome);
+            loader.preloadTasks(plan, launchState.launchedFromHome);
         }
         RecentsTaskLoadPlan.Options loadOpts = new RecentsTaskLoadPlan.Options();
-        loadOpts.runningTaskId = mConfig.launchedToTaskId;
-        loadOpts.numVisibleTasks = mConfig.launchedNumVisibleTasks;
-        loadOpts.numVisibleTaskThumbnails = mConfig.launchedNumVisibleThumbnails;
+        loadOpts.runningTaskId = launchState.launchedToTaskId;
+        loadOpts.numVisibleTasks = launchState.launchedNumVisibleTasks;
+        loadOpts.numVisibleTaskThumbnails = launchState.launchedNumVisibleThumbnails;
         loader.loadTasks(this, plan, loadOpts);
 
         TaskStack stack = plan.getTaskStack();
-        mConfig.launchedWithNoRecentTasks = !plan.hasTasks();
-        if (!mConfig.launchedWithNoRecentTasks) {
+        launchState.launchedWithNoRecentTasks = !plan.hasTasks();
+        if (!launchState.launchedWithNoRecentTasks) {
             mRecentsView.setTaskStack(stack);
         }
 
@@ -204,19 +201,19 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
                 Intent.FLAG_ACTIVITY_RESET_TASK_IF_NEEDED);
         mFinishLaunchHomeRunnable = new FinishRecentsRunnable(homeIntent,
             ActivityOptions.makeCustomAnimation(this,
-                mConfig.launchedFromSearchHome ? R.anim.recents_to_search_launcher_enter :
+                    launchState.launchedFromSearchHome ? R.anim.recents_to_search_launcher_enter :
                         R.anim.recents_to_launcher_enter,
-                    mConfig.launchedFromSearchHome ? R.anim.recents_to_search_launcher_exit :
+                    launchState.launchedFromSearchHome ? R.anim.recents_to_search_launcher_exit :
                         R.anim.recents_to_launcher_exit));
 
         // Mark the task that is the launch target
         int launchTaskIndexInStack = 0;
-        if (mConfig.launchedToTaskId != -1) {
+        if (launchState.launchedToTaskId != -1) {
             ArrayList<Task> tasks = stack.getTasks();
             int taskCount = tasks.size();
             for (int j = 0; j < taskCount; j++) {
                 Task t = tasks.get(j);
-                if (t.key.id == mConfig.launchedToTaskId) {
+                if (t.key.id == launchState.launchedToTaskId) {
                     t.isLaunchTarget = true;
                     launchTaskIndexInStack = tasks.size() - j - 1;
                     break;
@@ -225,7 +222,7 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
         }
 
         // Update the top level view's visibilities
-        if (mConfig.launchedWithNoRecentTasks) {
+        if (launchState.launchedWithNoRecentTasks) {
             if (mEmptyView == null) {
                 mEmptyView = mEmptyViewStub.inflate();
             }
@@ -246,13 +243,13 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
         mScrimViews.prepareEnterRecentsAnimation();
 
         // Keep track of whether we launched from the nav bar button or via alt-tab
-        if (mConfig.launchedWithAltTab) {
+        if (launchState.launchedWithAltTab) {
             MetricsLogger.count(this, "overview_trigger_alttab", 1);
         } else {
             MetricsLogger.count(this, "overview_trigger_nav_btn", 1);
         }
         // Keep track of whether we launched from an app or from home
-        if (mConfig.launchedFromAppWithThumbnail) {
+        if (launchState.launchedFromAppWithThumbnail) {
             MetricsLogger.count(this, "overview_source_app", 1);
             // If from an app, track the stack index of the app in the stack (for affiliated tasks)
             MetricsLogger.histogram(this, "overview_source_app_index", launchTaskIndexInStack);
@@ -266,6 +263,7 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
 
     /** Dismisses recents if we are already visible and the intent is to toggle the recents view */
     boolean dismissRecentsToFocusedTaskOrHome(boolean checkFilteredStackState) {
+        RecentsActivityLaunchState launchState = mConfig.getLaunchState();
         SystemServicesProxy ssp = RecentsTaskLoader.getInstance().getSystemServicesProxy();
         if (ssp.isRecentsTopMost(ssp.getTopMostTask(), null)) {
             // If we currently have filtered stacks, then unfilter those first
@@ -274,7 +272,7 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
             // If we have a focused Task, launch that Task now
             if (mRecentsView.launchFocusedTask()) return true;
             // If we launched from Home, then return to Home
-            if (mConfig.launchedFromHome) {
+            if (launchState.launchedFromHome) {
                 dismissRecentsToHomeRaw(true);
                 return true;
             }
@@ -324,7 +322,8 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
         // initialized
         RecentsTaskLoader.initialize(this);
         SystemServicesProxy ssp = RecentsTaskLoader.getInstance().getSystemServicesProxy();
-        mConfig = RecentsConfiguration.reinitialize(this, ssp);
+        mConfig = RecentsConfiguration.initialize(this, ssp);
+        mConfig.update(this, ssp, ssp.getWindowRect());
 
         // Initialize the widget host (the host id is static and does not change)
         mAppWidgetHost = new RecentsAppWidgetHost(this, Constants.Values.App.AppWidgetHostId);
@@ -337,7 +336,7 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
                 View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN |
                 View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION);
         mEmptyViewStub = (ViewStub) findViewById(R.id.empty_view_stub);
-        mScrimViews = new SystemBarScrimViews(this, mConfig);
+        mScrimViews = new SystemBarScrimViews(this);
 
         // Bind the search app widget when we first start up
         mSearchWidgetInfo = ssp.getOrBindSearchAppWidget(this, mAppWidgetHost);
@@ -358,6 +357,7 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
     @Override
     protected void onStart() {
         super.onStart();
+        RecentsActivityLaunchState launchState = mConfig.getLaunchState();
         MetricsLogger.visible(this, MetricsLogger.OVERVIEW_ACTIVITY);
         RecentsTaskLoader loader = RecentsTaskLoader.getInstance();
         SystemServicesProxy ssp = loader.getSystemServicesProxy();
@@ -379,12 +379,13 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
         // If this is a new instance from a configuration change, then we have to manually trigger
         // the enter animation state, or if recents was relaunched by AM, without going through
         // the normal mechanisms
-        boolean wasLaunchedByAm = !mConfig.launchedFromHome && !mConfig.launchedFromAppWithThumbnail;
-        if (mConfig.launchedHasConfigurationChanged || wasLaunchedByAm) {
+        boolean wasLaunchedByAm = !launchState.launchedFromHome &&
+                !launchState.launchedFromAppWithThumbnail;
+        if (launchState.launchedHasConfigurationChanged || wasLaunchedByAm) {
             onEnterAnimationTriggered();
         }
 
-        if (!mConfig.launchedHasConfigurationChanged) {
+        if (!launchState.launchedHasConfigurationChanged) {
             mRecentsView.disableLayersForOneFrame();
         }
     }
@@ -402,6 +403,7 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
     protected void onStop() {
         super.onStop();
         MetricsLogger.hidden(this, MetricsLogger.OVERVIEW_ACTIVITY);
+        RecentsActivityLaunchState launchState = mConfig.getLaunchState();
         RecentsTaskLoader loader = RecentsTaskLoader.getInstance();
         SystemServicesProxy ssp = loader.getSystemServicesProxy();
         Recents.notifyVisibilityChanged(this, ssp, false);
@@ -418,12 +420,12 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
         // Workaround for b/22542869, if the RecentsActivity is started again, but without going
         // through SystemUI, we need to reset the config launch flags to ensure that we do not
         // wait on the system to send a signal that was never queued.
-        mConfig.launchedFromHome = false;
-        mConfig.launchedFromSearchHome = false;
-        mConfig.launchedFromAppWithThumbnail = false;
-        mConfig.launchedToTaskId = -1;
-        mConfig.launchedWithAltTab = false;
-        mConfig.launchedHasConfigurationChanged = false;
+        launchState.launchedFromHome = false;
+        launchState.launchedFromSearchHome = false;
+        launchState.launchedFromAppWithThumbnail = false;
+        launchState.launchedToTaskId = -1;
+        launchState.launchedWithAltTab = false;
+        launchState.launchedHasConfigurationChanged = false;
     }
 
     @Override
@@ -475,8 +477,9 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
     public boolean onKeyDown(int keyCode, KeyEvent event) {
         switch (keyCode) {
             case KeyEvent.KEYCODE_TAB: {
+                int altTabKeyDelay = getResources().getInteger(R.integer.recents_alt_tab_key_delay);
                 boolean hasRepKeyTimeElapsed = (SystemClock.elapsedRealtime() -
-                        mLastTabKeyEventTime) > mConfig.altTabKeyDelay;
+                        mLastTabKeyEventTime) > altTabKeyDelay;
                 if (event.getRepeatCount() <= 0 || hasRepKeyTimeElapsed) {
                     // Focus the next task in the stack
                     final boolean backward = event.isShiftPressed();
@@ -514,9 +517,6 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
 
     @Override
     public void onBackPressed() {
-        // Test mode where back does not do anything
-        if (mConfig.debugModeEnabled) return;
-
         // Dismiss Recents to the focused Task or Home
         dismissRecentsToFocusedTaskOrHome(true);
     }

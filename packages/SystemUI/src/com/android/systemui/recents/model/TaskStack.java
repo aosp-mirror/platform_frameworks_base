@@ -16,11 +16,12 @@
 
 package com.android.systemui.recents.model;
 
+import android.content.Context;
 import android.graphics.Color;
 import com.android.systemui.recents.Constants;
-import com.android.systemui.recents.RecentsConfiguration;
 import com.android.systemui.recents.misc.NamedCounter;
 import com.android.systemui.recents.misc.Utilities;
+import com.android.systemui.R;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -367,7 +368,7 @@ public class TaskStack {
     /**
      * Temporary: This method will simulate affiliation groups by
      */
-    public void createAffiliatedGroupings(RecentsConfiguration config) {
+    public void createAffiliatedGroupings(Context context) {
         if (Constants.DebugFlags.App.EnableSimulatedTaskGroups) {
             HashMap<Task.TaskKey, Task> taskMap = new HashMap<Task.TaskKey, Task>();
             // Sort all tasks by increasing firstActiveTime of the task
@@ -452,7 +453,8 @@ public class TaskStack {
                 tasksMap.put(t.key, t);
             }
             // Update the task colors for each of the groups
-            float minAlpha = config.taskBarViewAffiliationColorMinAlpha;
+            float minAlpha = context.getResources().getFloat(
+                    R.dimen.recents_task_affiliation_color_min_alpha_percentage);
             int taskGroupCount = mGroups.size();
             for (int i = 0; i < taskGroupCount; i++) {
                 TaskGrouping group = mGroups.get(i);
