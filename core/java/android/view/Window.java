@@ -2016,4 +2016,8 @@ public abstract class Window {
     public boolean hasNonClientDecorView() {
         return false;
     }
+
+    /** @hide */
+    public void setTheme(int resId) {
+    }
 }

@@ -3742,6 +3742,12 @@ public class Activity extends ContextThemeWrapper
     }
 
     @Override
+    public void setTheme(int resid) {
+        super.setTheme(resid);
+        mWindow.setTheme(resid);
+    }
+
+    @Override
     protected void onApplyThemeResource(Resources.Theme theme, @StyleRes int resid,
             boolean first) {
         if (mParent == null) {
