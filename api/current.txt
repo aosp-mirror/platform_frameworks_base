@@ -40917,6 +40917,7 @@ package android.widget {
     method public int getInputMethodMode();
     method public int getMaxAvailableHeight(android.view.View);
     method public int getMaxAvailableHeight(android.view.View, int);
+    method public int getMaxAvailableHeight(android.view.View, int, boolean);
     method public boolean getOverlapAnchor();
     method public int getSoftInputMode();
     method public int getWidth();

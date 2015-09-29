@@ -18,6 +18,7 @@ package android.widget;
 
 import com.android.internal.R;
 
+import android.annotation.NonNull;
 import android.content.Context;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
@@ -1504,7 +1505,7 @@ public class PopupWindow {
      * @return The maximum available height for the popup to be completely
      *         shown.
      */
-    public int getMaxAvailableHeight(View anchor) {
+    public int getMaxAvailableHeight(@NonNull View anchor) {
         return getMaxAvailableHeight(anchor, 0);
     }
 
@@ -1519,7 +1520,7 @@ public class PopupWindow {
      * @return The maximum available height for the popup to be completely
      *         shown.
      */
-    public int getMaxAvailableHeight(View anchor, int yOffset) {
+    public int getMaxAvailableHeight(@NonNull View anchor, int yOffset) {
         return getMaxAvailableHeight(anchor, yOffset, false);
     }
 
@@ -1537,20 +1538,21 @@ public class PopupWindow {
      *        bottom decorations
      * @return The maximum available height for the popup to be completely
      *         shown.
-     *
-     * @hide Pending API council approval.
      */
-    public int getMaxAvailableHeight(View anchor, int yOffset, boolean ignoreBottomDecorations) {
+    public int getMaxAvailableHeight(
+            @NonNull View anchor, int yOffset, boolean ignoreBottomDecorations) {
         final Rect displayFrame = new Rect();
         anchor.getWindowVisibleDisplayFrame(displayFrame);
 
         final int[] anchorPos = mDrawingLocation;
         anchor.getLocationOnScreen(anchorPos);
 
-        int bottomEdge = displayFrame.bottom;
+        final int bottomEdge;
         if (ignoreBottomDecorations) {
-            Resources res = anchor.getContext().getResources();
+            final Resources res = anchor.getContext().getResources();
             bottomEdge = res.getDisplayMetrics().heightPixels;
+        } else {
+            bottomEdge = displayFrame.bottom;
         }
 
         final int distanceToBottom;
