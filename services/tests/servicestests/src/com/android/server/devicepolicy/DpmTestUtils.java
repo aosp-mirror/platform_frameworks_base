@@ -17,6 +17,8 @@
 package com.android.server.devicepolicy;
 
 import android.os.FileUtils;
+import android.os.Parcel;
+import android.os.Parcelable;
 import android.util.Log;
 import android.util.Printer;
 
@@ -39,6 +41,15 @@ public class DpmTestUtils {
 
     public static int getListSizeAllowingNull(List<?> list) {
         return list == null ? 0 : list.size();
+    }
+
+    public static <T extends Parcelable> T cloneParcelable(T source) {
+        Parcel p = Parcel.obtain();
+        p.writeParcelable(source, 0);
+        p.setDataPosition(0);
+        final T clone = p.readParcelable(DpmTestUtils.class.getClassLoader());
+        p.recycle();
+        return clone;
     }
 
     public static Printer LOG_PRINTER = new Printer() {

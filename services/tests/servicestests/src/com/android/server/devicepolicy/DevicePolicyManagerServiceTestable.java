@@ -50,11 +50,11 @@ public class DevicePolicyManagerServiceTestable extends DevicePolicyManagerServi
         private final File mDeviceOwnerFile;
         private final File mProfileOwnerBase;
 
-        public OwnersTestable(Context context, File dataDir) {
+        public OwnersTestable(DpmMockContext context) {
             super(context);
-            mLegacyFile = new File(dataDir, LEGACY_FILE);
-            mDeviceOwnerFile = new File(dataDir, DEVICE_OWNER_FILE);
-            mProfileOwnerBase = new File(dataDir, PROFILE_OWNER_FILE_BASE);
+            mLegacyFile = new File(context.dataDir, LEGACY_FILE);
+            mDeviceOwnerFile = new File(context.dataDir, DEVICE_OWNER_FILE);
+            mProfileOwnerBase = new File(context.dataDir, PROFILE_OWNER_FILE_BASE);
         }
 
         @Override
@@ -90,27 +90,15 @@ public class DevicePolicyManagerServiceTestable extends DevicePolicyManagerServi
 
         public final File dataDir;
 
-        public final File systemUserDataDir;
-        public final File secondUserDataDir;
-
         private MockInjector(DpmMockContext context, File dataDir) {
             super(context);
             this.context = context;
             this.dataDir = dataDir;
-
-            systemUserDataDir = new File(dataDir, "user0");
-            DpmTestUtils.clearDir(dataDir);
-
-            secondUserDataDir = new File(dataDir, "user" + DpmMockContext.CALLER_USER_HANDLE);
-            DpmTestUtils.clearDir(secondUserDataDir);
-
-            when(context.environment.getUserSystemDirectory(
-                    eq(DpmMockContext.CALLER_USER_HANDLE))).thenReturn(secondUserDataDir);
         }
 
         @Override
         Owners newOwners() {
-            return new OwnersTestable(context, dataDir);
+            return new OwnersTestable(context);
         }
 
         @Override
@@ -165,7 +153,7 @@ public class DevicePolicyManagerServiceTestable extends DevicePolicyManagerServi
 
         @Override
         String getDevicePolicyFilePathForSystemUser() {
-            return systemUserDataDir.getAbsolutePath();
+            return context.systemUserDataDir.getAbsolutePath();
         }
 
         @Override

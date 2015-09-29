@@ -69,22 +69,12 @@ public class OwnersTest extends DpmTestBase {
         }
     }
 
-    private void addUsersToUserManager(int... userIds) {
-        final ArrayList<UserInfo> userInfos = new ArrayList<>();
-        for (int userId : userIds) {
-            final UserInfo ui = new UserInfo();
-            ui.id = userId;
-            userInfos.add(ui);
-        }
-        when(getContext().userManager.getUsers()).thenReturn(userInfos);
-    }
-
     public void testUpgrade01() throws Exception {
-        addUsersToUserManager(10, 11, 20, 21);
+        getContext().addUsers(10, 11, 20, 21);
 
         // First, migrate.
         {
-            final OwnersTestable owners = new OwnersTestable(getContext(), dataDir);
+            final OwnersTestable owners = new OwnersTestable(getContext());
 
             createLegacyFile(owners.getLegacyConfigFileWithTestOverride(),
                     readAsset("OwnersTest/test01/input.xml"));
@@ -111,7 +101,7 @@ public class OwnersTest extends DpmTestBase {
 
         // Then re-read and check.
         {
-            final OwnersTestable owners = new OwnersTestable(getContext(), dataDir);
+            final OwnersTestable owners = new OwnersTestable(getContext());
             owners.load();
 
             assertFalse(owners.hasDeviceOwner());
@@ -123,11 +113,11 @@ public class OwnersTest extends DpmTestBase {
     }
 
     public void testUpgrade02() throws Exception {
-        addUsersToUserManager(10, 11, 20, 21);
+        getContext().addUsers(10, 11, 20, 21);
 
         // First, migrate.
         {
-            final OwnersTestable owners = new OwnersTestable(getContext(), dataDir);
+            final OwnersTestable owners = new OwnersTestable(getContext());
 
             createLegacyFile(owners.getLegacyConfigFileWithTestOverride(),
                     readAsset("OwnersTest/test02/input.xml"));
@@ -156,7 +146,7 @@ public class OwnersTest extends DpmTestBase {
 
         // Then re-read and check.
         {
-            final OwnersTestable owners = new OwnersTestable(getContext(), dataDir);
+            final OwnersTestable owners = new OwnersTestable(getContext());
             owners.load();
 
             assertTrue(owners.hasDeviceOwner());
@@ -171,11 +161,11 @@ public class OwnersTest extends DpmTestBase {
     }
 
     public void testUpgrade03() throws Exception {
-        addUsersToUserManager(10, 11, 20, 21);
+        getContext().addUsers(10, 11, 20, 21);
 
         // First, migrate.
         {
-            final OwnersTestable owners = new OwnersTestable(getContext(), dataDir);
+            final OwnersTestable owners = new OwnersTestable(getContext());
 
             createLegacyFile(owners.getLegacyConfigFileWithTestOverride(),
                     readAsset("OwnersTest/test03/input.xml"));
@@ -212,7 +202,7 @@ public class OwnersTest extends DpmTestBase {
 
         // Then re-read and check.
         {
-            final OwnersTestable owners = new OwnersTestable(getContext(), dataDir);
+            final OwnersTestable owners = new OwnersTestable(getContext());
             owners.load();
 
             assertFalse(owners.hasDeviceOwner());
@@ -235,11 +225,11 @@ public class OwnersTest extends DpmTestBase {
     }
 
     public void testUpgrade04() throws Exception {
-        addUsersToUserManager(10, 11, 20, 21);
+        getContext().addUsers(10, 11, 20, 21);
 
         // First, migrate.
         {
-            final OwnersTestable owners = new OwnersTestable(getContext(), dataDir);
+            final OwnersTestable owners = new OwnersTestable(getContext());
 
             createLegacyFile(owners.getLegacyConfigFileWithTestOverride(),
                     readAsset("OwnersTest/test04/input.xml"));
@@ -281,7 +271,7 @@ public class OwnersTest extends DpmTestBase {
 
         // Then re-read and check.
         {
-            final OwnersTestable owners = new OwnersTestable(getContext(), dataDir);
+            final OwnersTestable owners = new OwnersTestable(getContext());
             owners.load();
 
             assertTrue(owners.hasDeviceOwner());
@@ -309,11 +299,11 @@ public class OwnersTest extends DpmTestBase {
     }
 
     public void testUpgrade05() throws Exception {
-        addUsersToUserManager(10, 11, 20, 21);
+        getContext().addUsers(10, 11, 20, 21);
 
         // First, migrate.
         {
-            final OwnersTestable owners = new OwnersTestable(getContext(), dataDir);
+            final OwnersTestable owners = new OwnersTestable(getContext());
 
             createLegacyFile(owners.getLegacyConfigFileWithTestOverride(),
                     readAsset("OwnersTest/test05/input.xml"));
@@ -341,7 +331,7 @@ public class OwnersTest extends DpmTestBase {
 
         // Then re-read and check.
         {
-            final OwnersTestable owners = new OwnersTestable(getContext(), dataDir);
+            final OwnersTestable owners = new OwnersTestable(getContext());
             owners.load();
 
             assertFalse(owners.hasDeviceOwner());
@@ -356,11 +346,11 @@ public class OwnersTest extends DpmTestBase {
     }
 
     public void testUpgrade06() throws Exception {
-        addUsersToUserManager(10, 11, 20, 21);
+        getContext().addUsers(10, 11, 20, 21);
 
         // First, migrate.
         {
-            final OwnersTestable owners = new OwnersTestable(getContext(), dataDir);
+            final OwnersTestable owners = new OwnersTestable(getContext());
 
             createLegacyFile(owners.getLegacyConfigFileWithTestOverride(),
                     readAsset("OwnersTest/test06/input.xml"));
@@ -387,7 +377,7 @@ public class OwnersTest extends DpmTestBase {
 
         // Then re-read and check.
         {
-            final OwnersTestable owners = new OwnersTestable(getContext(), dataDir);
+            final OwnersTestable owners = new OwnersTestable(getContext());
             owners.load();
 
             assertFalse(owners.hasDeviceOwner());
@@ -401,9 +391,9 @@ public class OwnersTest extends DpmTestBase {
     }
 
     public void testRemoveExistingFiles() throws Exception {
-        addUsersToUserManager(10, 11, 20, 21);
+        getContext().addUsers(10, 11, 20, 21);
 
-        final OwnersTestable owners = new OwnersTestable(getContext(), dataDir);
+        final OwnersTestable owners = new OwnersTestable(getContext());
 
         // First, migrate to create new-style config files.
         createLegacyFile(owners.getLegacyConfigFileWithTestOverride(),

@@ -16,6 +16,7 @@
 package com.android.server.devicepolicy;
 
 import android.app.admin.DevicePolicyManager;
+import android.os.UserHandle;
 
 /**
  * Overrides {@link #DevicePolicyManager} for dependency injection.
@@ -31,6 +32,6 @@ public class DevicePolicyManagerTestable extends DevicePolicyManager {
 
     @Override
     public int myUserId() {
-        return DpmMockContext.CALLER_USER_HANDLE;
+        return UserHandle.getUserId(dpms.context.binder.callingUid);
     }
 }

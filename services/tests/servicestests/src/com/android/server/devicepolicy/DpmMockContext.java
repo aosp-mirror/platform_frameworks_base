@@ -27,6 +27,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.IPackageManager;
 import android.content.pm.PackageManager;
+import android.content.pm.UserInfo;
 import android.media.IAudioService;
 import android.os.Bundle;
 import android.os.Handler;
@@ -43,8 +44,10 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
+import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.when;
 
 /**
  * Context used throughout DPMS tests.
@@ -58,12 +61,12 @@ public class DpmMockContext extends MockContext {
     /**
      * UID corresponding to {@link #CALLER_USER_HANDLE}.
      */
-    public static final int CALLER_UID = UserHandle.PER_USER_RANGE * CALLER_USER_HANDLE + 123;
+    public static final int CALLER_UID = UserHandle.getUid(CALLER_USER_HANDLE, 20123);
 
     /**
      * UID used when a caller is on the system user.
      */
-    public static final int CALLER_SYSTEM_USER_UID = 123;
+    public static final int CALLER_SYSTEM_USER_UID = 20321;
 
     /**
      * PID of the caller.
@@ -164,6 +167,9 @@ public class DpmMockContext extends MockContext {
      */
     public final Context spiedContext;
 
+    public final File dataDir;
+    public final File systemUserDataDir;
+
     public final MockBinder binder;
     public final EnvironmentForMock environment;
     public final SystemPropertiesForMock systemProperties;
@@ -184,8 +190,14 @@ public class DpmMockContext extends MockContext {
 
     public final List<String> callerPermissions = new ArrayList<>();
 
-    public DpmMockContext(Context context) {
+    private final ArrayList<UserInfo> mUserInfos = new ArrayList<>();
+
+    public DpmMockContext(Context context, File dataDir) {
         realTestContext = context;
+
+        this.dataDir = dataDir;
+        DpmTestUtils.clearDir(dataDir);
+
         binder = new MockBinder();
         environment = mock(EnvironmentForMock.class);
         systemProperties= mock(SystemPropertiesForMock.class);
@@ -205,6 +217,39 @@ public class DpmMockContext extends MockContext {
         packageManager = spy(context.getPackageManager());
 
         spiedContext = mock(Context.class);
+
+        // Add the system user
+        systemUserDataDir = addUser(UserHandle.USER_SYSTEM, UserInfo.FLAG_PRIMARY);
+
+        // System user is always running.
+        when(userManager.isUserRunning(MockUtils.checkUserHandle(UserHandle.USER_SYSTEM)))
+                .thenReturn(true);
+    }
+
+    public File addUser(int userId, int flags) {
+
+        // Set up (default) UserInfo for CALLER_USER_HANDLE.
+        final UserInfo uh = new UserInfo(userId, "user" + userId, flags);
+        when(userManager.getUserInfo(eq(userId))).thenReturn(uh);
+
+        mUserInfos.add(uh);
+        when(userManager.getUsers()).thenReturn(mUserInfos);
+
+        // Create a data directory.
+        final File dir = new File(dataDir, "user" + userId);
+        DpmTestUtils.clearDir(dir);
+
+        when(environment.getUserSystemDirectory(eq(userId))).thenReturn(dir);
+        return dir;
+    }
+
+    /**
+     * Add multiple users at once.  They'll all have flag 0.
+     */
+    public void addUsers(int... userIds) {
+        for (int userId : userIds) {
+            addUser(userId, 0);
+        }
     }
 
     @Override
