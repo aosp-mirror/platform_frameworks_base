@@ -45,7 +45,6 @@
     <string name="keyguard_sim_puk_locked_message" msgid="3747232467471801633">"ဆင်းမ်ကဒ် ရဲ့ ပင်နံပါတ် ပြန်ဖွင့်သည့် ကုဒ် သော့ကျနေပါသည်"</string>
     <string name="keyguard_sim_unlock_progress_dialog_message" msgid="7975221805033614426">"ဆင်းမ်ကဒ် ကို သော့ဖွင့်နေပါသည်"</string>
     <string name="keyguard_accessibility_pattern_unlock" msgid="1490840706075246612">"ပုံစံဖြင့် သော့ဖွင့်ခြင်း"</string>
-    <string name="keyguard_accessibility_face_unlock" msgid="4817282543351718535">"မျက်နှာမှတ် သော့ဖွင့်ခြင်း"</string>
     <string name="keyguard_accessibility_pin_unlock" msgid="2469687111784035046">"ပင်နံပါတ်ဖြင့် သော့ဖွင့်ခြင်း"</string>
     <string name="keyguard_accessibility_password_unlock" msgid="7675777623912155089">"စကားဝှက်ဖြင့် သော့ဖွင့်ခြင်း"</string>
     <string name="keyguard_accessibility_pattern_area" msgid="7679891324509597904">"ပုံစံနေရာ"</string>
@@ -94,20 +93,32 @@
     <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"သင် ပုံဖော်၍သော့ဖွင့်ခြင်းကို  <xliff:g id="NUMBER_0">%d</xliff:g> အကြိမ် မှန်ကန်စွာ မပြုလုပ်နိုင်ပါ။  နောက်ထပ် <xliff:g id="NUMBER_1">%d</xliff:g> အကြိမ် မမှန်ကန်ပါက သင့်တက်ဘလက်အား အီးမေးလ်အသုံးပြု၍ သော့ဖွင့်ရန် တောင်းဆိုပါလိမ့်မည်။ \n\n <xliff:g id="NUMBER_2">%d</xliff:g> စက္ကန့်အကြာတွင် ပြန်လည် ကြိုးစားပါ"</string>
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"သင် ပုံဖော်၍သော့ဖွင့်ခြင်းကို <xliff:g id="NUMBER_0">%d</xliff:g> အကြိမ် မှန်ကန်စွာ မပြုလုပ်နိုင်ပါ။ နောက်ထပ် <xliff:g id="NUMBER_1">%d</xliff:g> အကြိမ် မမှန်ကန်ပါက သင့်ဖုန်းအား အီးမေးလ်အသုံးပြု၍ သော့ဖွင့်ရန် တောင်းဆိုပါလိမ့်မည်။ \n\n <xliff:g id="NUMBER_2">%d</xliff:g> စက္ကန့်အကြာတွင် ပြန်လည် ကြိုးစားပါ"</string>
     <string name="kg_password_wrong_pin_code_pukked" msgid="30531039455764924">"ဆင်းကဒ် လျှို့ဝှက် အမှတ် မှားယွင်းပါသည်, ဖုန်းလိုင်းဌာနကို ဆက်သွယ်ရမည် ဖြစ်ပါတယ်"</string>
-    <plurals name="kg_password_wrong_pin_code" formatted="false" msgid="6721575017538162249">
-      <item quantity="other">ဆင်းမ်ကဒ်၏ ပင်နံပါတ် မှားနေပါသည်၊ သင့်တွင်<xliff:g id="NUMBER_1">%d</xliff:g> ခါ ကြိုးစားခွင့် ကျန်ပါသေးသည်။</item>
-      <item quantity="one">ဆင်းမ်ကဒ်၏ ပင်နံပါတ် မှားနေပါသည်၊ သင့်ကိရိယာကို ဖွင့်ရန်  မိုဘိုင်းဖုန်းဆက်သွယ်ရေးဝန်ဆောင်မှုဌာနသို့ မဆက်သွယ်မီ သင့်တွင် <xliff:g id="NUMBER_0">%d</xliff:g> ခါ ကြိုးစားခွင့် ကျန်ပါသေးသည်။</item>
-    </plurals>
+  <plurals name="kg_password_wrong_pin_code">
+    <item quantity="one" msgid="8134313997799638254">"ဆင်းမ်ကဒ်၏ လျှို့ဝှက်နံပါတ် မှားနေပါသည်၊ သင်၏ စက်ပစ္စည်းကို သော့ဖွင့်ရန်  ဖုန်းလိုင်းဌာနသို့ မဆက်သွယ်မီ သင့်တွင် <xliff:g id="NUMBER">%d</xliff:g> ခါ ကြိုးစားခွင့် ကျန်ပါသေးသည်။"</item>
+    <item quantity="other" msgid="2215723361575359486">"ဆင်းမ်ကဒ်၏ လျှို့ဝှက်နံပါတ် မှားနေပါသည်၊ သင့်တွင် <xliff:g id="NUMBER">%d</xliff:g> ခါ ကြိုးစားခွင့် ကျန်ပါသေးသည်။"</item>
+  </plurals>
     <string name="kg_password_wrong_puk_code_dead" msgid="7077536808291316208">"ဆင်းမ်ကဒ်သုံးလို့မရတော့ပါ. ဖုန်းလိုင်းဌာနကို ဆက်သွယ်ပါ"</string>
-    <plurals name="kg_password_wrong_puk_code" formatted="false" msgid="7576227366999858780">
-      <item quantity="other">ဆင်းမ်ကဒ်၏ ပင်နံပါတ်ပြန်ဖွင့်သည့် ကုဒ် (PUK) မမှန်ပါ၊ ဆင်းမ်ကဒ်သည် ဆက်လက်အသုံးမပြုနိုင်အောင် မဖြစ်လာခင် သင့်တွင် <xliff:g id="NUMBER_1">%d</xliff:g>ခါ ကြိုးစားခွင့်များကျန်ပါသေးသည်။</item>
-      <item quantity="one">ဆင်းမ်ကဒ်၏ ပင်နံပါတ်ပြန်ဖွင့်သည့် ကုဒ် (PUK) မမှန်ပါ၊ ဆင်းမ်ကဒ်သည် ဆက်လက်အသုံးမပြုနိုင်အောင် မဖြစ်လာခင် သင့်တွင် <xliff:g id="NUMBER_0">%d</xliff:g> ခါ ကြိုးစားခွင့်ကျန်ပါသေးသည်။</item>
-    </plurals>
+  <plurals name="kg_password_wrong_puk_code">
+    <item quantity="one" msgid="3256893607561060649">"ဆင်းမ်ကဒ်၏ ပင်နံပါတ်ပြန်ဖွင့်သည့်ကုဒ်နံပါတ် မှားနေပါသည်။ နောက်ထပ် <xliff:g id="NUMBER">%d</xliff:g> ခါ ကြိုးစား၍ မအောင်မြင်ံပါက ဆင်းမ်ကဒ် ဆက်မသုံးနိုင်အောင် ပျက်စီးသွားမည် ဖြစ်ပါသည်"</item>
+    <item quantity="other" msgid="5477305226026342036">"ဆင်းမ်ကဒ်၏ ပင်နံပါတ်ပြန်ဖွင့်သည့် ကုဒ်နံပါတ် မှားနေပါသည်။ နောက်ထပ် <xliff:g id="NUMBER">%d</xliff:g> ခါ ကြိုးစား၍ မအောင်မြင်ံပါက ဆင်းမ်ကဒ် ဆက်မသုံးနိုင်အောင် ပျက်စီးသွားမည် ဖြစ်ပါသည်"</item>
+  </plurals>
     <string name="kg_password_pin_failed" msgid="6268288093558031564">"ဆင်းမ်ကဒ် ပင် လုပ်ဆောင်မှု မအောင်မြင်ပါ"</string>
     <string name="kg_password_puk_failed" msgid="2838824369502455984">"ပင်နံပါတ် ပြန်ဖွင့်သည့် ကုဒ် လုပ်ဆောင်မှု မအောင်မြင်ပါ"</string>
     <string name="kg_pin_accepted" msgid="1448241673570020097">"ကုဒ်နံပါတ်ကို လက်ခံလိုက်ပါသည်"</string>
     <string name="keyguard_carrier_default" msgid="8700650403054042153">"ဆားဗစ် မရှိပါ"</string>
     <string name="accessibility_ime_switch_button" msgid="5032926134740456424">"ထည့်သွင်းခြင်းခလုတ်အား ပြောင်းခြင်း"</string>
     <string name="airplane_mode" msgid="3122107900897202805">"လေယာဉ်ပေါ်သုံးစနစ်"</string>
+    <string name="kg_prompt_reason_restart_pattern" msgid="489430505491862444">"သင့် စက်ကိရိယာအား ပြန်စဖွင့်လျှင် ပုံစံ လို၏။"</string>
+    <string name="kg_prompt_reason_restart_pin" msgid="994878216570694974">"သင့် စက်ကိရိယာအား ပြန်စဖွင့်လျှင် PIN လို၏။"</string>
+    <string name="kg_prompt_reason_restart_password" msgid="2375742919528461664">"သင့် စက်ကိရိယာအား ပြန်စဖွင့်လျှင် စကားဝှက် လို၏။"</string>
+    <string name="kg_prompt_reason_switch_profiles_pattern" msgid="3802056699323773969">"ပရိုဖိုင်းများ သင်ပြောင်းလျှင် ပုံစံ လို၏။"</string>
+    <string name="kg_prompt_reason_switch_profiles_pin" msgid="8108020184731052246">"ပရိုဖိုင်းများ သင်ပြောင်းလျှင် PIN လို၏။"</string>
+    <string name="kg_prompt_reason_switch_profiles_password" msgid="6755997057852042672">"ပရိုဖိုင်းများ သင်ပြောင်းလျှင် စကားဝှက် လို၏။"</string>
+    <!-- no translation found for kg_prompt_reason_time_pattern:one (5598462918459516566) -->
+    <!-- no translation found for kg_prompt_reason_time_pattern:other (224518697489572649) -->
+    <!-- no translation found for kg_prompt_reason_time_pin:one (3073579168584205350) -->
+    <!-- no translation found for kg_prompt_reason_time_pin:other (3282423442327824649) -->
+    <!-- no translation found for kg_prompt_reason_time_password:one (9062782924671938516) -->
+    <!-- no translation found for kg_prompt_reason_time_password:other (1839722302513719629) -->
     <string name="fingerprint_not_recognized" msgid="2690661881608146617">"အသိအမှတ်မပြုပါ"</string>
 </resources>

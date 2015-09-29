@@ -29,7 +29,7 @@
     <string name="keyguard_password_enter_password_code" msgid="1054721668279049780">"Introduce la contraseña para desbloquear."</string>
     <string name="keyguard_password_enter_pin_password_code" msgid="6391755146112503443">"Introduce el código PIN para desbloquear."</string>
     <string name="keyguard_password_wrong_pin_code" msgid="2422225591006134936">"Código PIN incorrecto"</string>
-    <string name="keyguard_charged" msgid="3272223906073492454">"Cargada"</string>
+    <string name="keyguard_charged" msgid="3272223906073492454">"Cargado"</string>
     <string name="keyguard_plugged_in" msgid="9087497435553252863">"Cargando"</string>
     <string name="keyguard_low_battery" msgid="8143808018719173859">"Conecta el cargador."</string>
     <string name="keyguard_instructions_when_pattern_disabled" msgid="1332288268600329841">"Ve al menú para desbloquear la pantalla."</string>
@@ -45,7 +45,6 @@
     <string name="keyguard_sim_puk_locked_message" msgid="3747232467471801633">"La tarjeta SIM está bloqueada con el código PUK."</string>
     <string name="keyguard_sim_unlock_progress_dialog_message" msgid="7975221805033614426">"Desbloqueando tarjeta SIM…"</string>
     <string name="keyguard_accessibility_pattern_unlock" msgid="1490840706075246612">"Desbloqueo por patrón"</string>
-    <string name="keyguard_accessibility_face_unlock" msgid="4817282543351718535">"Desbloqueo facial"</string>
     <string name="keyguard_accessibility_pin_unlock" msgid="2469687111784035046">"Desbloqueo por PIN"</string>
     <string name="keyguard_accessibility_password_unlock" msgid="7675777623912155089">"Desbloqueo por contraseña"</string>
     <string name="keyguard_accessibility_pattern_area" msgid="7679891324509597904">"Área de patrón"</string>
@@ -94,20 +93,32 @@
     <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"Has fallado <xliff:g id="NUMBER_0">%d</xliff:g> veces al dibujar el patrón de desbloqueo. Si fallas otras <xliff:g id="NUMBER_1">%d</xliff:g> veces, deberás usar una cuenta de correo electrónico para desbloquear el tablet.\n\n Inténtalo de nuevo en <xliff:g id="NUMBER_2">%d</xliff:g> segundos."</string>
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"Has fallado <xliff:g id="NUMBER_0">%d</xliff:g> veces al dibujar el patrón de desbloqueo. Si fallas otras <xliff:g id="NUMBER_1">%d</xliff:g> veces, deberás usar una cuenta de correo electrónico para desbloquear el teléfono.\n\n Inténtalo de nuevo en <xliff:g id="NUMBER_2">%d</xliff:g> segundos."</string>
     <string name="kg_password_wrong_pin_code_pukked" msgid="30531039455764924">"Código PIN de la tarjeta SIM incorrecto. Debes ponerte en contacto con tu operador para desbloquear el dispositivo."</string>
-    <plurals name="kg_password_wrong_pin_code" formatted="false" msgid="6721575017538162249">
-      <item quantity="other">Código PIN de la tarjeta SIM incorrecto. Te quedan <xliff:g id="NUMBER_1">%d</xliff:g> intentos.</item>
-      <item quantity="one">Código PIN de la tarjeta SIM incorrecto. Te queda <xliff:g id="NUMBER_0">%d</xliff:g> intento para tener que ponerte en contacto con tu operador para desbloquear el dispositivo.</item>
-    </plurals>
+  <plurals name="kg_password_wrong_pin_code">
+    <item quantity="one" msgid="8134313997799638254">"Código PIN de la tarjeta SIM incorrecto. Queda <xliff:g id="NUMBER">%d</xliff:g> intento para tener que ponerte en contacto con tu operador para desbloquear el dispositivo."</item>
+    <item quantity="other" msgid="2215723361575359486">"Código PIN de la tarjeta SIM incorrecto. Quedan <xliff:g id="NUMBER">%d</xliff:g> intentos."</item>
+  </plurals>
     <string name="kg_password_wrong_puk_code_dead" msgid="7077536808291316208">"La tarjeta SIM no se puede utilizar. Ponte en contacto con tu operador."</string>
-    <plurals name="kg_password_wrong_puk_code" formatted="false" msgid="7576227366999858780">
-      <item quantity="other">Código PUK de la tarjeta SIM incorrecto. Te quedan <xliff:g id="NUMBER_1">%d</xliff:g> intentos para que la tarjeta SIM no se pueda utilizar de forma permanente.</item>
-      <item quantity="one">Código PUK de la tarjeta SIM incorrecto. Te queda <xliff:g id="NUMBER_0">%d</xliff:g> intento para que la tarjeta SIM no se pueda utilizar de forma permanente.</item>
-    </plurals>
+  <plurals name="kg_password_wrong_puk_code">
+    <item quantity="one" msgid="3256893607561060649">"Código PUK de la tarjeta SIM incorrecto. Te queda <xliff:g id="NUMBER">%d</xliff:g> intento para que la tarjeta SIM no se pueda utilizar de forma permanente."</item>
+    <item quantity="other" msgid="5477305226026342036">"Código PUK de la tarjeta SIM incorrecto. Quedan <xliff:g id="NUMBER">%d</xliff:g> intentos para que la tarjeta SIM no se pueda utilizar de forma permanente."</item>
+  </plurals>
     <string name="kg_password_pin_failed" msgid="6268288093558031564">"Error al intentar desbloquear la tarjeta SIM con el código PIN"</string>
     <string name="kg_password_puk_failed" msgid="2838824369502455984">"Error al intentar desbloquear la tarjeta SIM con el código PUK"</string>
     <string name="kg_pin_accepted" msgid="1448241673570020097">"Código aceptado"</string>
     <string name="keyguard_carrier_default" msgid="8700650403054042153">"Sin servicio"</string>
     <string name="accessibility_ime_switch_button" msgid="5032926134740456424">"Botón Cambiar método de entrada"</string>
     <string name="airplane_mode" msgid="3122107900897202805">"Modo avión"</string>
+    <string name="kg_prompt_reason_restart_pattern" msgid="489430505491862444">"Se debe introducir el patrón cuando se reinicia el dispositivo."</string>
+    <string name="kg_prompt_reason_restart_pin" msgid="994878216570694974">"Se debe introducir el PIN cuando se reinicia el dispositivo."</string>
+    <string name="kg_prompt_reason_restart_password" msgid="2375742919528461664">"Se debe introducir la contraseña cuando se reinicia el dispositivo."</string>
+    <string name="kg_prompt_reason_switch_profiles_pattern" msgid="3802056699323773969">"Se debe introducir el patrón cuando se cambia de perfil."</string>
+    <string name="kg_prompt_reason_switch_profiles_pin" msgid="8108020184731052246">"Se debe introducir el PIN cuando se cambia de perfil."</string>
+    <string name="kg_prompt_reason_switch_profiles_password" msgid="6755997057852042672">"Se debe introducir la contraseña cuando se cambia de perfil."</string>
+    <!-- no translation found for kg_prompt_reason_time_pattern:one (5598462918459516566) -->
+    <!-- no translation found for kg_prompt_reason_time_pattern:other (224518697489572649) -->
+    <!-- no translation found for kg_prompt_reason_time_pin:one (3073579168584205350) -->
+    <!-- no translation found for kg_prompt_reason_time_pin:other (3282423442327824649) -->
+    <!-- no translation found for kg_prompt_reason_time_password:one (9062782924671938516) -->
+    <!-- no translation found for kg_prompt_reason_time_password:other (1839722302513719629) -->
     <string name="fingerprint_not_recognized" msgid="2690661881608146617">"No reconocido"</string>
 </resources>

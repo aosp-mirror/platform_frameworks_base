@@ -45,7 +45,6 @@
     <string name="keyguard_sim_puk_locked_message" msgid="3747232467471801633">"Для разблокировки SIM-карты требуется PUK-код."</string>
     <string name="keyguard_sim_unlock_progress_dialog_message" msgid="7975221805033614426">"Разблокировка SIM-карты…"</string>
     <string name="keyguard_accessibility_pattern_unlock" msgid="1490840706075246612">"Графический ключ"</string>
-    <string name="keyguard_accessibility_face_unlock" msgid="4817282543351718535">"Фейсконтроль"</string>
     <string name="keyguard_accessibility_pin_unlock" msgid="2469687111784035046">"PIN-код"</string>
     <string name="keyguard_accessibility_password_unlock" msgid="7675777623912155089">"Пароль"</string>
     <string name="keyguard_accessibility_pattern_area" msgid="7679891324509597904">"Область ввода графического ключа"</string>
@@ -94,24 +93,32 @@
     <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"Вы <xliff:g id="NUMBER_0">%d</xliff:g> раз неверно указали графический ключ. После <xliff:g id="NUMBER_1">%d</xliff:g> неверных попыток для разблокировки планшетного ПК потребуется войти в аккаунт Google.\n\nПовтор через <xliff:g id="NUMBER_2">%d</xliff:g> сек."</string>
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"Вы <xliff:g id="NUMBER_0">%d</xliff:g> раз неверно указали графический ключ. После <xliff:g id="NUMBER_1">%d</xliff:g> неверных попыток для разблокировки телефона потребуется войти в аккаунт Google.\n\nПовтор через <xliff:g id="NUMBER_2">%d</xliff:g> сек."</string>
     <string name="kg_password_wrong_pin_code_pukked" msgid="30531039455764924">"Неверный PIN-код. Обратитесь к оператору связи, чтобы разблокировать SIM-карту."</string>
-    <plurals name="kg_password_wrong_pin_code" formatted="false" msgid="6721575017538162249">
-      <item quantity="one">Неверный PIN-код. Осталась <xliff:g id="NUMBER_1">%d</xliff:g> попытка. После этого SIM-карта будет заблокирована и вам придется обратиться к оператору связи.</item>
-      <item quantity="few">Неверный PIN-код. Осталось <xliff:g id="NUMBER_1">%d</xliff:g> попытки. После этого SIM-карта будет заблокирована и вам придется обратиться к оператору связи.</item>
-      <item quantity="many">Неверный PIN-код. Осталось <xliff:g id="NUMBER_1">%d</xliff:g> попыток. После этого SIM-карта будет заблокирована и вам придется обратиться к оператору связи.</item>
-      <item quantity="other">Неверный PIN-код. Осталось <xliff:g id="NUMBER_1">%d</xliff:g> попыток. После этого SIM-карта будет заблокирована и вам придется обратиться к оператору связи.</item>
-    </plurals>
+  <plurals name="kg_password_wrong_pin_code">
+    <item quantity="one" msgid="8134313997799638254">"Неверный PIN-код. Осталось попыток: <xliff:g id="NUMBER">%d</xliff:g>. После этого SIM-карта будет заблокирована и вам придется обратиться к оператору связи."</item>
+    <item quantity="other" msgid="2215723361575359486">"Неверный PIN-код. Осталось попыток: <xliff:g id="NUMBER">%d</xliff:g>."</item>
+  </plurals>
     <string name="kg_password_wrong_puk_code_dead" msgid="7077536808291316208">"SIM-карта заблокирована навсегда. Обратитесь к оператору связи."</string>
-    <plurals name="kg_password_wrong_puk_code" formatted="false" msgid="7576227366999858780">
-      <item quantity="one">Неверный PUK-код. Осталась <xliff:g id="NUMBER_1">%d</xliff:g> попытка. После этого SIM-карта будет заблокирована навсегда.</item>
-      <item quantity="few">Неверный PUK-код. Осталось <xliff:g id="NUMBER_1">%d</xliff:g> попытки. После этого SIM-карта будет заблокирована навсегда.</item>
-      <item quantity="many">Неверный PUK-код. Осталось <xliff:g id="NUMBER_1">%d</xliff:g> попыток. После этого SIM-карта будет заблокирована навсегда.</item>
-      <item quantity="other">Неверный PUK-код. Осталось <xliff:g id="NUMBER_1">%d</xliff:g> попыток. После этого SIM-карта будет заблокирована навсегда.</item>
-    </plurals>
+  <plurals name="kg_password_wrong_puk_code">
+    <item quantity="one" msgid="3256893607561060649">"Неверный PUK-код. Осталось попыток: <xliff:g id="NUMBER">%d</xliff:g>. После этого SIM-карта будет заблокирована навсегда."</item>
+    <item quantity="other" msgid="5477305226026342036">"Неверный PUK-код. Осталось попыток: <xliff:g id="NUMBER">%d</xliff:g>. После этого SIM-карта будет заблокирована навсегда."</item>
+  </plurals>
     <string name="kg_password_pin_failed" msgid="6268288093558031564">"Не удалось разблокировать SIM-карту"</string>
     <string name="kg_password_puk_failed" msgid="2838824369502455984">"Не удалось разблокировать SIM-карту"</string>
     <string name="kg_pin_accepted" msgid="1448241673570020097">"Код принят"</string>
     <string name="keyguard_carrier_default" msgid="8700650403054042153">"Нет сигнала."</string>
     <string name="accessibility_ime_switch_button" msgid="5032926134740456424">"Кнопка переключения способа ввода."</string>
     <string name="airplane_mode" msgid="3122107900897202805">"Режим полета"</string>
+    <string name="kg_prompt_reason_restart_pattern" msgid="489430505491862444">"После перезапуска устройства нужно ввести графический ключ."</string>
+    <string name="kg_prompt_reason_restart_pin" msgid="994878216570694974">"После перезапуска устройства нужно ввести PIN-код."</string>
+    <string name="kg_prompt_reason_restart_password" msgid="2375742919528461664">"После перезапуска устройства нужно ввести пароль."</string>
+    <string name="kg_prompt_reason_switch_profiles_pattern" msgid="3802056699323773969">"После смены аккаунта нужно ввести графический ключ."</string>
+    <string name="kg_prompt_reason_switch_profiles_pin" msgid="8108020184731052246">"После смены аккаунта нужно ввести PIN-код."</string>
+    <string name="kg_prompt_reason_switch_profiles_password" msgid="6755997057852042672">"После смены аккаунта нужно ввести пароль."</string>
+    <!-- no translation found for kg_prompt_reason_time_pattern:one (5598462918459516566) -->
+    <!-- no translation found for kg_prompt_reason_time_pattern:other (224518697489572649) -->
+    <!-- no translation found for kg_prompt_reason_time_pin:one (3073579168584205350) -->
+    <!-- no translation found for kg_prompt_reason_time_pin:other (3282423442327824649) -->
+    <!-- no translation found for kg_prompt_reason_time_password:one (9062782924671938516) -->
+    <!-- no translation found for kg_prompt_reason_time_password:other (1839722302513719629) -->
     <string name="fingerprint_not_recognized" msgid="2690661881608146617">"Не распознано"</string>
 </resources>

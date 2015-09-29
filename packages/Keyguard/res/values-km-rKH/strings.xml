@@ -45,7 +45,6 @@
     <string name="keyguard_sim_puk_locked_message" msgid="3747232467471801633">"ស៊ីម​កាត​ជាប់​កូដ​​ PUK ។"</string>
     <string name="keyguard_sim_unlock_progress_dialog_message" msgid="7975221805033614426">"កំពុង​ដោះ​សោ​ស៊ីម​កាត..."</string>
     <string name="keyguard_accessibility_pattern_unlock" msgid="1490840706075246612">"លំនាំ​ដោះ​សោ​។"</string>
-    <string name="keyguard_accessibility_face_unlock" msgid="4817282543351718535">"ដោះ​សោ​តាម​​ទម្រង់​មុខ។"</string>
     <string name="keyguard_accessibility_pin_unlock" msgid="2469687111784035046">"កូដ PIN ដោះ​សោ។"</string>
     <string name="keyguard_accessibility_password_unlock" msgid="7675777623912155089">"ពាក្យ​សម្ងាត់​ដោះ​សោ​។"</string>
     <string name="keyguard_accessibility_pattern_area" msgid="7679891324509597904">"ផ្ទៃ​លំនាំ។"</string>
@@ -94,20 +93,32 @@
     <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"អ្នក​បាន​គូរ​លំនាំ​ដោះ​សោ​មិន​ត្រឹមត្រូវ <xliff:g id="NUMBER_0">%d</xliff:g> ដង។ បន្ទាប់​ពី​ការ​ព្យាយាម <xliff:g id="NUMBER_1">%d</xliff:g> ដង​មិន​ជោគជ័យ អ្នក​នឹង​ត្រូវ​បាន​ស្នើ​ឲ្យ​ដោះ​សោ​កុំព្យូទ័រ​បន្ទះ​របស់​អ្នក ដោយ​ប្រើ​គណនី​អ៊ីមែល។\n\n ព្យាយាម​ម្ដង​ទៀត​ក្នុង​រយៈ​ពេល <xliff:g id="NUMBER_2">%d</xliff:g> វិនាទី។"</string>
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"អ្នក​បាន​គូរ​លំនាំ​ដោះ​​សោ​របស់​អ្នក​មិន​ត្រឹមត្រូវ​ចំនួន <xliff:g id="NUMBER_0">%d</xliff:g> ដង។ បន្ទាប់​ពី​ការ​ព្យាយាម​មិន​ជោគជ័យ​​ច្រើនជាង <xliff:g id="NUMBER_1">%d</xliff:g> ដង អ្នក​នឹង​ត្រូវ​បាន​​ស្នើ​ឲ្យ​ដោះ​សោ​ទូរស័ព្ទ​របស់​អ្នក​ដោយ​ប្រើ​គណនី​អ៊ីមែល។\n\n ព្យាយាម​ម្ដង​ទៀត​ក្នុង​រយៈ​ពេល <xliff:g id="NUMBER_2">%d</xliff:g> វិនាទី។"</string>
     <string name="kg_password_wrong_pin_code_pukked" msgid="30531039455764924">"លេខ​កូដ PIN ស៊ីម​មិន​ត្រឹមត្រូវ អ្នក​ត្រូវ​ទាក់ទង​ក្រុមហ៊ុន​បញ្ជូន​របស់​អ្នក​ឥឡូវ​នេះ ដើម្បី​ដោះ​សោ​ឧបករណ៍​របស់​អ្នក។"</string>
-    <plurals name="kg_password_wrong_pin_code" formatted="false" msgid="6721575017538162249">
-      <item quantity="other">លេខកូដសម្ងាត់ស៊ីមមិនត្រឹមត្រូវ អ្នកនៅសល់ការព្យាយាម <xliff:g id="NUMBER_1">%d</xliff:g> ដងទៀត</item>
-      <item quantity="one">លេខកូដសម្ងាត់ស៊ីមមិនត្រឹមត្រូវ អ្នកនៅសល់ការព្យាយាម <xliff:g id="NUMBER_0">%d</xliff:g> ដងទៀត មុនពេលពេលដែលអ្នកត្រូវទាក់ទងទៅអ្នកផ្តល់សេវាកម្មរបស់អ្នកដើម្បីដោះសោឧបករណ៍របស់អ្នក។</item>
-    </plurals>
+  <plurals name="kg_password_wrong_pin_code">
+    <item quantity="one" msgid="8134313997799638254">"លេខ​កូដ PIN ស៊ីម​មិន​​ត្រឹមត្រូវ​, អ្នក​មាន <xliff:g id="NUMBER">%d</xliff:g> ការ​ព្យាយាម​ដែល​នៅសល់​មុន​ពេល​អ្នក​ត្រូវ​​ទាក់ទង​ក្រុម​ហ៊ុន​​​បញ្ជូន​របស់​អ្នក​​ ដើម្បី​​​ដោះ​សោ​ឧបករណ៍​របស់​អ្នក​។"</item>
+    <item quantity="other" msgid="2215723361575359486">"លេខ​កូដ​ PIN ស៊ីម​មិន​ត្រឹមត្រូវ​, អ្នក​មាន <xliff:g id="NUMBER">%d</xliff:g> ការ​ព្យាយាម​ដែល​នៅ​​សល់​។"</item>
+  </plurals>
     <string name="kg_password_wrong_puk_code_dead" msgid="7077536808291316208">"ស៊ីម​មិន​អាច​ប្រើ​បាន។ ទាក់ទង​ក្រុមហ៊ុន​បញ្ជូន​របស់​អ្នក។"</string>
-    <plurals name="kg_password_wrong_puk_code" formatted="false" msgid="7576227366999858780">
-      <item quantity="other">លេខកូដ PUK ស៊ីមមិនត្រឹមត្រូវ អ្នកនៅសល់ការព្យាយាម <xliff:g id="NUMBER_1">%d</xliff:g> ដងទៀត មុនពេលស៊ីមរបស់អ្នកមិនអាចប្រើបានជាអចិន្ត្រៃយ៍។</item>
-      <item quantity="one">លេខកូដ PUK ស៊ីមមិនត្រឹមត្រូវ អ្នកនៅសល់ការព្យាយាម <xliff:g id="NUMBER_0">%d</xliff:g> ដងទៀត មុនពេលស៊ីមរបស់អ្នកមិនអាចប្រើបានជាអចិន្ត្រៃយ៍។</item>
-    </plurals>
+  <plurals name="kg_password_wrong_puk_code">
+    <item quantity="one" msgid="3256893607561060649">"លេខ​កូដ PUK ស៊ីម​មិន​ត្រឹមត្រូវ, អ្នក​មាន <xliff:g id="NUMBER">%d</xliff:g> ការ​ព្យាយាម​ដែល​នៅ​សល់ មុន​ពេល​ស៊ីម​​ក្លាយ​ជា​មិន​អាច​ប្រើ​បាន​ជា​អចិន្ត្រៃយ៍​។"</item>
+    <item quantity="other" msgid="5477305226026342036">"លេខ​កូដ PUK ស៊ីម​មិន​ត្រឹមត្រូវ, អ្នក​មាន <xliff:g id="NUMBER">%d</xliff:g> ការ​ព្យាយាម​ដែល​នៅ​សល់ មុន​ពេល​ស៊ីម​​ក្លាយ​ជា​មិន​អាច​ប្រើ​បាន​ជា​អចិន្ត្រៃយ៍​។"</item>
+  </plurals>
     <string name="kg_password_pin_failed" msgid="6268288093558031564">"បាន​បរាជ័យ​ក្នុង​ការ​ប្រតិបត្តិ​លេខ​កូដ PIN ស៊ីម!"</string>
     <string name="kg_password_puk_failed" msgid="2838824369502455984">"បាន​បរាជ័យ​ក្នុង​ការ​ប្រតិបត្តិ​​លេខ​កូដ PUK ស៊ីម!"</string>
     <string name="kg_pin_accepted" msgid="1448241673570020097">"បាន​ទទួល​យក​លេខ​កូដ​!"</string>
     <string name="keyguard_carrier_default" msgid="8700650403054042153">"គ្មាន​សេវា​"</string>
     <string name="accessibility_ime_switch_button" msgid="5032926134740456424">"ប្ដូរ​ប៊ូតុង​វិធីសាស្ត្រ​បញ្ចូល។"</string>
     <string name="airplane_mode" msgid="3122107900897202805">"របៀបក្នុងយន្តហោះ"</string>
+    <string name="kg_prompt_reason_restart_pattern" msgid="489430505491862444">"តម្រូវឲ្យមានលំនាំនៅពេលដែលអ្នកចាប់ផ្តើមឧបករណ៍ឡើងវិញ។"</string>
+    <string name="kg_prompt_reason_restart_pin" msgid="994878216570694974">"តម្រូវឲ្យមានកូដ PIN នៅពេលដែលអ្នកចាប់ផ្តើមឧបករណ៍ឡើងវិញ។"</string>
+    <string name="kg_prompt_reason_restart_password" msgid="2375742919528461664">"តម្រូវឲ្យមានពាក្យសម្ងាត់នៅពេលដែលអ្នកចាប់ផ្តើមឧបករណ៍ឡើងវិញ។"</string>
+    <string name="kg_prompt_reason_switch_profiles_pattern" msgid="3802056699323773969">"តម្រូវឲ្យមានលំនាំនៅពេលដែលអ្នកប្តូរប្រវត្តិរូបរបស់អ្នក។"</string>
+    <string name="kg_prompt_reason_switch_profiles_pin" msgid="8108020184731052246">"តម្រូវឲ្យមានកូដ PIN នៅពេលដែលអ្នកប្តូរប្រវត្តិរូបរបស់អ្នក។"</string>
+    <string name="kg_prompt_reason_switch_profiles_password" msgid="6755997057852042672">"តម្រូវឲ្យមានពាក្យសម្ងាត់នៅពេលដែលអ្នកប្តូរប្រវត្តិរូបរបស់អ្នក។"</string>
+    <!-- no translation found for kg_prompt_reason_time_pattern:one (5598462918459516566) -->
+    <!-- no translation found for kg_prompt_reason_time_pattern:other (224518697489572649) -->
+    <!-- no translation found for kg_prompt_reason_time_pin:one (3073579168584205350) -->
+    <!-- no translation found for kg_prompt_reason_time_pin:other (3282423442327824649) -->
+    <!-- no translation found for kg_prompt_reason_time_password:one (9062782924671938516) -->
+    <!-- no translation found for kg_prompt_reason_time_password:other (1839722302513719629) -->
     <string name="fingerprint_not_recognized" msgid="2690661881608146617">"មិនអាចសម្គាល់បានទេ"</string>
 </resources>

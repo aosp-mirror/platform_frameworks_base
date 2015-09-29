@@ -45,7 +45,6 @@
     <string name="keyguard_sim_puk_locked_message" msgid="3747232467471801633">"SIM कार्ड PUK-लक छ।"</string>
     <string name="keyguard_sim_unlock_progress_dialog_message" msgid="7975221805033614426">"SIM कार्ड अनलक हुँदै…"</string>
     <string name="keyguard_accessibility_pattern_unlock" msgid="1490840706075246612">"ढाँचा अनलक।"</string>
-    <string name="keyguard_accessibility_face_unlock" msgid="4817282543351718535">"फेस अनलक"</string>
     <string name="keyguard_accessibility_pin_unlock" msgid="2469687111784035046">"Pin अनलक"</string>
     <string name="keyguard_accessibility_password_unlock" msgid="7675777623912155089">"पासवर्ड अनलक।"</string>
     <string name="keyguard_accessibility_pattern_area" msgid="7679891324509597904">"ढाँचा क्षेत्र।"</string>
@@ -94,20 +93,32 @@
     <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"तपाईंले गलत तरिकाले आफ्नो अनलक ढाँचा <xliff:g id="NUMBER_0">%d</xliff:g> पटक कोर्नुभयो। <xliff:g id="NUMBER_1">%d</xliff:g> विफल प्रयत्नहरू पछि, तपाईंलाई आफ्नो ट्याब्लेट इमेल खाता प्रयोग गरेर अनलक गर्न सोधिने छ।\n\n फेरि प्रयास गर्नुहोस् <xliff:g id="NUMBER_2">%d</xliff:g> सेकेन्डहरूमा।"</string>
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"तपाईँले आफ्नो अनलक ढाँचा गलत रूपमा <xliff:g id="NUMBER_0">%d</xliff:g> पटक तान्नु भएको छ। <xliff:g id="NUMBER_1">%d</xliff:g> धेरै असफल प्रयासहरूपछि, तपाईँलाई एउटा इमेल खाताको प्रयोग गरेर तपाईँको फोन अनलक गर्न सोधिने छ।\n\n फेरि <xliff:g id="NUMBER_2">%d</xliff:g> सेकेन्डमा प्रयास गर्नुहोस्।"</string>
     <string name="kg_password_wrong_pin_code_pukked" msgid="30531039455764924">"SIM PIN कोड गलत छ। अब तपाईंले अाफ्नो उपकरण खोल्नलाई तपाईंको वाहकसँग सम्पर्क गर्नै पर्दर।"</string>
-    <plurals name="kg_password_wrong_pin_code" formatted="false" msgid="6721575017538162249">
-      <item quantity="other"> गलत SIM PIN कोड, तपाईं सँग <xliff:g id="NUMBER_1">%d</xliff:g> पटक प्रयास बाँकी छ।</item>
-      <item quantity="one">SIM PIN कोड गलत छ, तपाईंले अाफ्नो यन्त्र खोल्नलाई तपाईंको वाहकसँग सम्पर्क गर्नै पर्न अघि तपाईंसँग <xliff:g id="NUMBER_0">%d</xliff:g> पटक प्रयास बाँकी छ।</item>
-    </plurals>
+  <plurals name="kg_password_wrong_pin_code">
+    <item quantity="one" msgid="8134313997799638254">"SIM PIN कोड गलत छ, तपाईंले अाफ्नो उपकरण खोल्नलाई तपाईंको वाहकसँग सम्पर्क गर्नै पर्दछ यस अघि तपाईंसँग <xliff:g id="NUMBER">%d</xliff:g> बाँकी प्रयास छ।"</item>
+    <item quantity="other" msgid="2215723361575359486">"SIM PIN कोड गलत छ, तपाईंसँग <xliff:g id="NUMBER">%d</xliff:g> बाँकी प्रयासहरू छन्।"</item>
+  </plurals>
     <string name="kg_password_wrong_puk_code_dead" msgid="7077536808291316208">"SIM प्रयोग बिहिन छ। तपाईंको वाहकलाई सम्पर्क गर्नुहोस्।"</string>
-    <plurals name="kg_password_wrong_puk_code" formatted="false" msgid="7576227366999858780">
-      <item quantity="other">SIM PUK कोड गलत छ, तपाईंसँग SIM स्थायी रूपमा काम नलाग्ने हुनु अघि <xliff:g id="NUMBER_1">%d</xliff:g> पटक प्रयास बाँकी छ।</item>
-      <item quantity="one">SIM PUK कोड गलत छ, तपाईंसँग SIM स्थायी रूपमा काम नलाग्ने हुनु अघि <xliff:g id="NUMBER_0">%d</xliff:g> पटक प्रयास बाँकी छ।</item>
-    </plurals>
+  <plurals name="kg_password_wrong_puk_code">
+    <item quantity="one" msgid="3256893607561060649">"SIM PUK कोड गलत छ, तपाईंसँग SIM स्थायी रूपमा काम नलाग्ने हुनु अघि <xliff:g id="NUMBER">%d</xliff:g> बाँकी प्रयास छ।"</item>
+    <item quantity="other" msgid="5477305226026342036">"SIM PUK कोड गलत छ, तपाईंसँग SIM स्थायी रूपमा काम नलाग्ने हुनु अघि <xliff:g id="NUMBER">%d</xliff:g> बाँकी प्रयासहरू छन्।"</item>
+  </plurals>
     <string name="kg_password_pin_failed" msgid="6268288093558031564">"SIM PIN राख्‍ने कार्य बिफल भयो!"</string>
     <string name="kg_password_puk_failed" msgid="2838824369502455984">"SIM PUK राख्‍ने कार्य बिफल भयो!"</string>
     <string name="kg_pin_accepted" msgid="1448241673570020097">"कोड स्वीकृत!"</string>
     <string name="keyguard_carrier_default" msgid="8700650403054042153">"कुनै सेवा छैन।"</string>
     <string name="accessibility_ime_switch_button" msgid="5032926134740456424">"इनपुट विधि बटन स्विच गर्नुहोस्।"</string>
     <string name="airplane_mode" msgid="3122107900897202805">"हवाइजहाज मोड"</string>
+    <string name="kg_prompt_reason_restart_pattern" msgid="489430505491862444">"यन्त्र पुन:सुरू गर्न तपाईँलाई ढाँचा चाहिन्छ।"</string>
+    <string name="kg_prompt_reason_restart_pin" msgid="994878216570694974">"यन्त्र पुन:सुरू गर्न तपाईँलाई PIN चाहिन्छ।"</string>
+    <string name="kg_prompt_reason_restart_password" msgid="2375742919528461664">"यन्त्र पुन:सुरू गर्न तपाईँलाई पासवर्ड चाहिन्छ।"</string>
+    <string name="kg_prompt_reason_switch_profiles_pattern" msgid="3802056699323773969">"प्रोफाइल फेर्न तपाईँलाई ढाँचा चाहिन्छ।"</string>
+    <string name="kg_prompt_reason_switch_profiles_pin" msgid="8108020184731052246">"प्रोफाइल फेर्न तपाईँलाई PIN चाहिन्छ।"</string>
+    <string name="kg_prompt_reason_switch_profiles_password" msgid="6755997057852042672">"प्रोफाइल फेर्न तपाईँलाई पासवर्ड चाहिन्छ।"</string>
+    <!-- no translation found for kg_prompt_reason_time_pattern:one (5598462918459516566) -->
+    <!-- no translation found for kg_prompt_reason_time_pattern:other (224518697489572649) -->
+    <!-- no translation found for kg_prompt_reason_time_pin:one (3073579168584205350) -->
+    <!-- no translation found for kg_prompt_reason_time_pin:other (3282423442327824649) -->
+    <!-- no translation found for kg_prompt_reason_time_password:one (9062782924671938516) -->
+    <!-- no translation found for kg_prompt_reason_time_password:other (1839722302513719629) -->
     <string name="fingerprint_not_recognized" msgid="2690661881608146617">"चिनिएको छैन"</string>
 </resources>

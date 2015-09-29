@@ -45,7 +45,6 @@
     <string name="keyguard_sim_puk_locked_message" msgid="3747232467471801633">"SIM-kaart is PUK-geslote."</string>
     <string name="keyguard_sim_unlock_progress_dialog_message" msgid="7975221805033614426">"Ontsluit tans SIM-kaart…"</string>
     <string name="keyguard_accessibility_pattern_unlock" msgid="1490840706075246612">"Patroon ontsluit."</string>
-    <string name="keyguard_accessibility_face_unlock" msgid="4817282543351718535">"Gesigslot."</string>
     <string name="keyguard_accessibility_pin_unlock" msgid="2469687111784035046">"PIN ontsluit."</string>
     <string name="keyguard_accessibility_password_unlock" msgid="7675777623912155089">"Wagwoord ontsluit."</string>
     <string name="keyguard_accessibility_pattern_area" msgid="7679891324509597904">"Patroonarea."</string>
@@ -94,20 +93,32 @@
     <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"Jy het jou ontsluitpatroon <xliff:g id="NUMBER_0">%d</xliff:g> keer verkeerdelik geteken. Na nog <xliff:g id="NUMBER_1">%d</xliff:g> onsuksesvolle pogings, sal jy gevra word om jou tablet te ontsluit deur middel van \'n e-posrekening.\n\n Probeer weer oor <xliff:g id="NUMBER_2">%d</xliff:g> sekondes."</string>
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"Jy het jou ontsluitpatroon <xliff:g id="NUMBER_0">%d</xliff:g> keer verkeerdelik geteken. Na nog <xliff:g id="NUMBER_1">%d</xliff:g> onsuksesvolle pogings, sal jy gevra word om jou foon te ontsluit deur middel van \'n e-posrekening.\n\n Probeer weer oor <xliff:g id="NUMBER_2">%d</xliff:g> sekondes."</string>
     <string name="kg_password_wrong_pin_code_pukked" msgid="30531039455764924">"Verkeerde SIM PIN-kode, jy sal nou jou diensverskaffer moet kontak om jou toestel te ontsluit."</string>
-    <plurals name="kg_password_wrong_pin_code" formatted="false" msgid="6721575017538162249">
-      <item quantity="other">Verkeerde SIM-PIN-kode. Jy het <xliff:g id="NUMBER_1">%d</xliff:g> pogings oor.</item>
-      <item quantity="one">Verkeerde SIM-PIN-kode. Jy het <xliff:g id="NUMBER_0">%d</xliff:g> poging oor voordat jy jou diensverskaffer moet kontak om jou toestel te ontsluit.</item>
-    </plurals>
+  <plurals name="kg_password_wrong_pin_code">
+    <item quantity="one" msgid="8134313997799638254">"Verkeerde SIM PIN-kode, jy het <xliff:g id="NUMBER">%d</xliff:g> oorblywende poging voordat jy jou diensverskaffer sal moet kontak om jou toestel te ontsluit."</item>
+    <item quantity="other" msgid="2215723361575359486">"Verkeerde SIM PIN-kode, jy het <xliff:g id="NUMBER">%d</xliff:g> oorblywende pogings."</item>
+  </plurals>
     <string name="kg_password_wrong_puk_code_dead" msgid="7077536808291316208">"SIM is onbruikbaar. Kontak jou diensverskaffer."</string>
-    <plurals name="kg_password_wrong_puk_code" formatted="false" msgid="7576227366999858780">
-      <item quantity="other">Verkeerde SIM-PUK-kode. Jy het <xliff:g id="NUMBER_1">%d</xliff:g> pogings oor voordat SIM permanent onbruikbaar word.</item>
-      <item quantity="one">Verkeerde SIM-PUK-kode. Jy het <xliff:g id="NUMBER_0">%d</xliff:g> poging oor voordat SIM permanent onbruikbaar word.</item>
-    </plurals>
+  <plurals name="kg_password_wrong_puk_code">
+    <item quantity="one" msgid="3256893607561060649">"Verkeerde SIM PUK-kode, jy het <xliff:g id="NUMBER">%d</xliff:g> oorblywende poging voordat SIM permanent onbruikbaar word."</item>
+    <item quantity="other" msgid="5477305226026342036">"Verkeerde SIM PUK-kode, jy het <xliff:g id="NUMBER">%d</xliff:g> oorblywende pogings voordat SIM permanent onbruikbaar word."</item>
+  </plurals>
     <string name="kg_password_pin_failed" msgid="6268288093558031564">"SIM PIN-bewerking het misluk!"</string>
     <string name="kg_password_puk_failed" msgid="2838824369502455984">"SIM PUK-bewerking het misluk!"</string>
     <string name="kg_pin_accepted" msgid="1448241673570020097">"Kode is aanvaar!"</string>
     <string name="keyguard_carrier_default" msgid="8700650403054042153">"Geen diens nie."</string>
     <string name="accessibility_ime_switch_button" msgid="5032926134740456424">"Knoppie vir wissel van invoermetode."</string>
     <string name="airplane_mode" msgid="3122107900897202805">"Vliegtuigmodus"</string>
+    <string name="kg_prompt_reason_restart_pattern" msgid="489430505491862444">"Patroon word vereis wanneer jy die toestel herbegin."</string>
+    <string name="kg_prompt_reason_restart_pin" msgid="994878216570694974">"PIN word vereis wanneer jy die toestel herbegin."</string>
+    <string name="kg_prompt_reason_restart_password" msgid="2375742919528461664">"Wagwoord word vereis wanneer jy die toestel herbegin."</string>
+    <string name="kg_prompt_reason_switch_profiles_pattern" msgid="3802056699323773969">"Patroon word vereis wanneer jy profiele wissel."</string>
+    <string name="kg_prompt_reason_switch_profiles_pin" msgid="8108020184731052246">"PIN word vereis wanneer jy profiele wissel."</string>
+    <string name="kg_prompt_reason_switch_profiles_password" msgid="6755997057852042672">"Wagwoord word vereis wanneer jy profiele wissel."</string>
+    <!-- no translation found for kg_prompt_reason_time_pattern:one (5598462918459516566) -->
+    <!-- no translation found for kg_prompt_reason_time_pattern:other (224518697489572649) -->
+    <!-- no translation found for kg_prompt_reason_time_pin:one (3073579168584205350) -->
+    <!-- no translation found for kg_prompt_reason_time_pin:other (3282423442327824649) -->
+    <!-- no translation found for kg_prompt_reason_time_password:one (9062782924671938516) -->
+    <!-- no translation found for kg_prompt_reason_time_password:other (1839722302513719629) -->
     <string name="fingerprint_not_recognized" msgid="2690661881608146617">"Nie herken nie"</string>
 </resources>

@@ -45,7 +45,6 @@
     <string name="keyguard_sim_puk_locked_message" msgid="3747232467471801633">"SIM karta je zablokována pomocí kódu PUK."</string>
     <string name="keyguard_sim_unlock_progress_dialog_message" msgid="7975221805033614426">"Odblokování SIM karty…"</string>
     <string name="keyguard_accessibility_pattern_unlock" msgid="1490840706075246612">"Odemknutí gestem."</string>
-    <string name="keyguard_accessibility_face_unlock" msgid="4817282543351718535">"Odemknutí obličejem."</string>
     <string name="keyguard_accessibility_pin_unlock" msgid="2469687111784035046">"Odemknutí kódem PIN."</string>
     <string name="keyguard_accessibility_password_unlock" msgid="7675777623912155089">"Odemknutí heslem."</string>
     <string name="keyguard_accessibility_pattern_area" msgid="7679891324509597904">"Oblast pro zadání bezpečnostního gesta."</string>
@@ -94,24 +93,32 @@
     <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"Již <xliff:g id="NUMBER_0">%d</xliff:g>krát jste nesprávně nakreslili své heslo odemknutí. Po <xliff:g id="NUMBER_1">%d</xliff:g>dalších neúspěšných pokusech budete požádáni o odemčení tabletu pomocí e-mailového účtu.\n\n Zkuste to znovu za <xliff:g id="NUMBER_2">%d</xliff:g> s."</string>
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"Již <xliff:g id="NUMBER_0">%d</xliff:g>krát jste nesprávně nakreslili své heslo odemknutí. Po <xliff:g id="NUMBER_1">%d</xliff:g> dalších neúspěšných pokusech budete požádáni o odemčení telefonu pomocí e-mailového účtu.\n\n Zkuste to znovu za <xliff:g id="NUMBER_2">%d</xliff:g> s."</string>
     <string name="kg_password_wrong_pin_code_pukked" msgid="30531039455764924">"Zadali jste nesprávný kód PIN SIM karty. Nyní musíte za účelem odemknutí zařízení kontaktovat svého operátora."</string>
-    <plurals name="kg_password_wrong_pin_code" formatted="false" msgid="6721575017538162249">
-      <item quantity="few">Zadali jste nesprávný kód PIN SIM karty. Máte ještě <xliff:g id="NUMBER_1">%d</xliff:g> pokusy.</item>
-      <item quantity="many">Zadali jste nesprávný kód PIN SIM karty. Máte ještě <xliff:g id="NUMBER_1">%d</xliff:g> pokusu.</item>
-      <item quantity="other">Zadali jste nesprávný kód PIN SIM karty. Máte ještě <xliff:g id="NUMBER_1">%d</xliff:g> pokusů.</item>
-      <item quantity="one">Zadali jste nesprávný PIN SIM karty. Zbývá <xliff:g id="NUMBER_0">%d</xliff:g> pokus, poté bude muset zařízení odemknout operátor.</item>
-    </plurals>
+  <plurals name="kg_password_wrong_pin_code">
+    <item quantity="one" msgid="8134313997799638254">"Zadali jste nesprávný kód PIN SIM karty. Máte ještě <xliff:g id="NUMBER">%d</xliff:g> pokus, poté budete muset o odemknutí zařízení požádat svého operátora."</item>
+    <item quantity="other" msgid="2215723361575359486">"Zadali jste nesprávný kód PIN SIM karty. Počet zbývajících pokusů: <xliff:g id="NUMBER">%d</xliff:g>."</item>
+  </plurals>
     <string name="kg_password_wrong_puk_code_dead" msgid="7077536808291316208">"SIM kartu nelze použít. Kontaktujte operátora."</string>
-    <plurals name="kg_password_wrong_puk_code" formatted="false" msgid="7576227366999858780">
-      <item quantity="few">Nesprávný kód PUK SIM karty. Máte ještě <xliff:g id="NUMBER_1">%d</xliff:g> pokusy, poté bude SIM karta natrvalo zablokována.</item>
-      <item quantity="many">Nesprávný kód PUK SIM karty. Máte ještě <xliff:g id="NUMBER_1">%d</xliff:g> pokusu, poté bude SIM karta natrvalo zablokována.</item>
-      <item quantity="other">Nesprávný kód PUK SIM karty. Máte ještě <xliff:g id="NUMBER_1">%d</xliff:g> pokusů, poté bude SIM karta natrvalo zablokována.</item>
-      <item quantity="one">Nesprávný kód PUK SIM karty. Máte ještě <xliff:g id="NUMBER_0">%d</xliff:g> pokus, poté bude SIM karta natrvalo zablokována.</item>
-    </plurals>
+  <plurals name="kg_password_wrong_puk_code">
+    <item quantity="one" msgid="3256893607561060649">"Nesprávný kód PUK SIM karty. Máte ještě <xliff:g id="NUMBER">%d</xliff:g> pokus, poté bude SIM karta natrvalo zablokována."</item>
+    <item quantity="other" msgid="5477305226026342036">"Zadali jste nesprávný kód PUK SIM karty. Počet zbývajících pokusů, po kterých bude SIM karta natrvalo zablokována: <xliff:g id="NUMBER">%d</xliff:g>."</item>
+  </plurals>
     <string name="kg_password_pin_failed" msgid="6268288093558031564">"Operace pomocí kódu PIN SIM karty se nezdařila!"</string>
     <string name="kg_password_puk_failed" msgid="2838824369502455984">"Operace pomocí kódu PUK SIM karty se nezdařila!"</string>
     <string name="kg_pin_accepted" msgid="1448241673570020097">"Kód byl přijat."</string>
     <string name="keyguard_carrier_default" msgid="8700650403054042153">"Žádný signál."</string>
     <string name="accessibility_ime_switch_button" msgid="5032926134740456424">"Tlačítko přepnutí metody zadávání"</string>
     <string name="airplane_mode" msgid="3122107900897202805">"Režim Letadlo"</string>
+    <string name="kg_prompt_reason_restart_pattern" msgid="489430505491862444">"Po restartu zařízení je vyžadováno gesto."</string>
+    <string name="kg_prompt_reason_restart_pin" msgid="994878216570694974">"Po restartu zařízení je vyžadován PIN."</string>
+    <string name="kg_prompt_reason_restart_password" msgid="2375742919528461664">"Po restartu zařízení je vyžadováno heslo."</string>
+    <string name="kg_prompt_reason_switch_profiles_pattern" msgid="3802056699323773969">"Po přepnutí profilů je vyžadováno gesto."</string>
+    <string name="kg_prompt_reason_switch_profiles_pin" msgid="8108020184731052246">"Po přepnutí profilů je vyžadován PIN."</string>
+    <string name="kg_prompt_reason_switch_profiles_password" msgid="6755997057852042672">"Po přepnutí profilů je vyžadováno heslo."</string>
+    <!-- no translation found for kg_prompt_reason_time_pattern:one (5598462918459516566) -->
+    <!-- no translation found for kg_prompt_reason_time_pattern:other (224518697489572649) -->
+    <!-- no translation found for kg_prompt_reason_time_pin:one (3073579168584205350) -->
+    <!-- no translation found for kg_prompt_reason_time_pin:other (3282423442327824649) -->
+    <!-- no translation found for kg_prompt_reason_time_password:one (9062782924671938516) -->
+    <!-- no translation found for kg_prompt_reason_time_password:other (1839722302513719629) -->
     <string name="fingerprint_not_recognized" msgid="2690661881608146617">"Nerozpoznáno"</string>
 </resources>
