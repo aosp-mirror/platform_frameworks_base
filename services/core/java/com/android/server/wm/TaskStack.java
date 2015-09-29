@@ -18,6 +18,7 @@ package com.android.server.wm;
 
 import static android.app.ActivityManager.*;
 import static com.android.server.wm.WindowManagerService.DEBUG_TASK_MOVEMENT;
+import static com.android.server.wm.WindowManagerService.H.RESIZE_STACK;
 import static com.android.server.wm.WindowManagerService.TAG;
 
 import android.annotation.IntDef;
@@ -187,6 +188,9 @@ public class TaskStack implements DimLayer.DimLayerUser {
 
     void updateDisplayInfo(Rect bounds) {
         if (mDisplayContent != null) {
+            for (int taskNdx = mTasks.size() - 1; taskNdx >= 0; --taskNdx) {
+                mTasks.get(taskNdx).updateDisplayInfo(mDisplayContent);
+            }
             if (bounds != null) {
                 setBounds(bounds);
             } else if (mFullscreen) {
@@ -195,10 +199,13 @@ public class TaskStack implements DimLayer.DimLayerUser {
                 TmpRect2.set(mBounds);
                 mDisplayContent.rotateBounds(
                         mRotation, mDisplayContent.getDisplayInfo().rotation, TmpRect2);
-                setBounds(TmpRect2);
-            }
-            for (int taskNdx = mTasks.size() - 1; taskNdx >= 0; --taskNdx) {
-                mTasks.get(taskNdx).updateDisplayInfo(mDisplayContent);
+                if (setBounds(TmpRect2)) {
+                    // Post message to inform activity manager of the bounds change simulating
+                    // a one-way call. We do this to prevent a deadlock between window manager
+                    // lock and activity manager lock been held.
+                    mService.mH.sendMessage(
+                            mService.mH.obtainMessage(RESIZE_STACK, mStackId, -1, mBounds));
+                }
             }
         }
     }
