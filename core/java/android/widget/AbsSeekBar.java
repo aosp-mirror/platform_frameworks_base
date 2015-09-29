@@ -706,9 +706,12 @@ public abstract class AbsSeekBar extends ProgressBar {
             int increment = mKeyProgressIncrement;
             switch (keyCode) {
                 case KeyEvent.KEYCODE_DPAD_LEFT:
+                case KeyEvent.KEYCODE_MINUS:
                     increment = -increment;
                     // fallthrough
                 case KeyEvent.KEYCODE_DPAD_RIGHT:
+                case KeyEvent.KEYCODE_PLUS:
+                case KeyEvent.KEYCODE_EQUALS:
                     increment = isLayoutRtl() ? -increment : increment;
 
                     if (setProgressInternal(getProgress() + increment, true, true)) {
