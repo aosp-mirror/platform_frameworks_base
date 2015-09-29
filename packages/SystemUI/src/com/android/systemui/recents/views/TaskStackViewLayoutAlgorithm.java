@@ -275,11 +275,9 @@ public class TaskStackViewLayoutAlgorithm {
         return transformOut;
     }
 
-    /** Returns the untransformed task view size. */
-    public Rect getUntransformedTaskViewSize() {
-        Rect tvSize = new Rect(mTaskRect);
-        tvSize.offsetTo(0, 0);
-        return tvSize;
+    /** Returns the untransformed task view bounds. */
+    public Rect getUntransformedTaskViewBounds() {
+        return new Rect(mTaskRect);
     }
 
     /** Returns the scroll to such task top = 1f; */
