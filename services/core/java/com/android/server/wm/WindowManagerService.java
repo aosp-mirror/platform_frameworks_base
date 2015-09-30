@@ -222,6 +222,7 @@ public class WindowManagerService extends IWindowManager.Stub
     static final boolean HIDE_STACK_CRAWLS = true;
     static final int LAYOUT_REPEAT_THRESHOLD = 4;
 
+
     static final boolean PROFILE_ORIENTATION = false;
     static final boolean localLOGV = DEBUG;
 
@@ -4399,7 +4400,6 @@ public class WindowManagerService extends IWindowManager.Stub
         mInputMonitor.setUpdateInputWindowsNeededLw();
         mWindowPlacerLocked.performSurfacePlacement();
         mInputMonitor.updateInputWindowsLw(false /*force*/);
-
         //dump();
     }
 
@@ -4484,10 +4484,6 @@ public class WindowManagerService extends IWindowManager.Stub
                     }
                     stack.attachDisplayContent(displayContent);
                     displayContent.attachStack(stack, onTop);
-                    if (stack.mStackId == DOCKED_STACK_ID) {
-                        mH.obtainMessage(H.UPDATE_DOCKED_STACK_DIVIDER,
-                                displayContent).sendToTarget();
-                    }
                     moveStackWindowsLocked(displayContent);
                     final WindowList windows = displayContent.getWindowList();
                     for (int winNdx = windows.size() - 1; winNdx >= 0; --winNdx) {
@@ -4510,11 +4506,6 @@ public class WindowManagerService extends IWindowManager.Stub
     void detachStackLocked(DisplayContent displayContent, TaskStack stack) {
         displayContent.detachStack(stack);
         stack.detachDisplay();
-        // We can't directly remove the divider, because only the WM thread can do these operations
-        // and we can be on AM thread.
-        if (stack.mStackId == DOCKED_STACK_ID) {
-            mH.obtainMessage(H.UPDATE_DOCKED_STACK_DIVIDER, displayContent).sendToTarget();
-        }
     }
 
     public void detachStack(int stackId) {
@@ -8346,6 +8337,13 @@ public class WindowManagerService extends IWindowManager.Stub
             } else if (wtoken != null) {
                 winAnimator.mAnimLayer =
                         w.mLayer + wtoken.mAppAnimator.animLayerAdjustment;
+                if (wtoken.mReplacingWindow && wtoken.mAnimateReplacingWindow) {
+                    // We know that we will be animating a relaunching window in the near future,
+                    // which will receive a z-order increase. We want the replaced window to
+                    // immediately receive the same treatment, e.g. to be above the dock divider.
+                    w.mLayer += TYPE_LAYER_OFFSET;
+                    winAnimator.mAnimLayer += TYPE_LAYER_OFFSET;
+                }
             } else {
                 winAnimator.mAnimLayer = w.mLayer;
             }

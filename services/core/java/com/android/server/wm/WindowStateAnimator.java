@@ -1405,7 +1405,11 @@ class WindowStateAnimator {
 
     private void adjustCropToStackBounds(WindowState w, Rect clipRect) {
         final AppWindowToken appToken = w.mAppToken;
-        if (appToken != null && appToken.mCropWindowsToStack) {
+        // We don't apply the the stack bounds to the window that is being replaced, because it was
+        // living in a different stack. If we suddenly crop it to the new stack bounds, it might
+        // get cut off. We don't want it to happen, so we let it ignore the stack bounds until it
+        // gets removed. The window that will replace it will abide them.
+        if (appToken != null && appToken.mCropWindowsToStack && !appToken.mReplacingWindow) {
             TaskStack stack = w.getTask().mStack;
             stack.getBounds(mTmpStackBounds);
             final int surfaceX = (int) mSurfaceX;
