@@ -19,10 +19,10 @@ package com.android.systemui.classifier;
 public class SpeedVarianceEvaluator {
     public static float evaluate(float value) {
         float evaluation = 0.0f;
-        if (value > 0.06) evaluation += 1.0;
-        if (value > 0.15) evaluation += 1.0;
-        if (value > 0.3) evaluation += 1.0;
-        if (value > 0.6) evaluation += 1.0;
+        if (value > 0.06) evaluation++;
+        if (value > 0.15) evaluation++;
+        if (value > 0.3) evaluation++;
+        if (value > 0.6) evaluation++;
         return evaluation;
     }
 }

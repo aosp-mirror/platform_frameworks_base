@@ -19,8 +19,10 @@ package com.android.systemui.classifier;
 public class SpeedRatioEvaluator {
     public static float evaluate(float value) {
         float evaluation = 0.0f;
-        if (value > 9.0) ++evaluation;
-        if (value > 18.0) ++evaluation;
+        if (value <= 1.0) evaluation++;
+        if (value <= 0.5) evaluation++;
+        if (value > 9.0) evaluation++;
+        if (value > 18.0) evaluation++;
         return evaluation;
     }
 }
