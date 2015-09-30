@@ -7689,14 +7689,6 @@ public final class Settings {
         public static final String DEVICE_NAME = "device_name";
 
         /**
-         * Whether it should be possible to create a guest user on the device.
-         * <p>
-         * Type: int (0 for disabled, 1 for enabled)
-         * @hide
-         */
-        public static final String GUEST_USER_ENABLED = "guest_user_enabled";
-
-        /**
          * Whether the NetworkScoringService has been first initialized.
          * <p>
          * Type: int (0 for false, 1 for true)

@@ -882,7 +882,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         mKeyguardBottomArea.setAccessibilityController(mAccessibilityController);
         mNextAlarmController = new NextAlarmController(mContext);
         mKeyguardMonitor = new KeyguardMonitor(mContext);
-        if (UserSwitcherController.isUserSwitcherAvailable(UserManager.get(mContext))) {
+        if (UserManager.get(mContext).isUserSwitcherEnabled()) {
             mUserSwitcherController = new UserSwitcherController(mContext, mKeyguardMonitor,
                     mHandler);
             if (mUserSwitcherController.useFullscreenUserSwitcher()) {

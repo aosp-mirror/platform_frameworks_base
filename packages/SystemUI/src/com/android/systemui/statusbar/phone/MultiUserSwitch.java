@@ -81,7 +81,7 @@ public class MultiUserSwitch extends FrameLayout implements View.OnClickListener
     }
 
     private void registerListener() {
-        if (UserSwitcherController.isUserSwitcherAvailable(mUserManager) && mUserListener == null) {
+        if (mUserManager.isUserSwitcherEnabled() && mUserListener == null) {
 
             final UserSwitcherController controller = mUserSwitcherController;
             if (controller != null) {
@@ -103,7 +103,7 @@ public class MultiUserSwitch extends FrameLayout implements View.OnClickListener
 
     @Override
     public void onClick(View v) {
-        if (UserSwitcherController.isUserSwitcherAvailable(mUserManager)) {
+        if (mUserManager.isUserSwitcherEnabled()) {
             if (mKeyguardMode) {
                 if (mKeyguardUserSwitcher != null) {
                     mKeyguardUserSwitcher.show(true /* animate */);
@@ -135,14 +135,14 @@ public class MultiUserSwitch extends FrameLayout implements View.OnClickListener
 
     private void refreshContentDescription() {
         String currentUser = null;
-        if (UserSwitcherController.isUserSwitcherAvailable(mUserManager)
+        if (mUserManager.isUserSwitcherEnabled()
                 && mUserSwitcherController != null) {
             currentUser = mUserSwitcherController.getCurrentUserName(mContext);
         }
 
         String text = null;
         if (isClickable()) {
-            if (UserSwitcherController.isUserSwitcherAvailable(mUserManager)) {
+            if (mUserManager.isUserSwitcherEnabled()) {
                 if (TextUtils.isEmpty(currentUser)) {
                     text = mContext.getString(R.string.accessibility_multi_user_switch_switcher);
                 } else {
