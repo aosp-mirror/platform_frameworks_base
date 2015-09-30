@@ -165,7 +165,6 @@ class SRTTrack extends WebVttTrack {
             return;
         }
 
-        final int _ = 0;
         for (Cue cue : activeCues) {
             TextTrackCue ttc = (TextTrackCue) cue;
 
@@ -184,7 +183,8 @@ class SRTTrack extends WebVttTrack {
             parcel.writeInt(buf.length);
             parcel.writeByteArray(buf);
 
-            Message msg = mEventHandler.obtainMessage(MEDIA_TIMED_TEXT, _, _, parcel);
+            Message msg = mEventHandler.obtainMessage(MEDIA_TIMED_TEXT, 0 /* arg1 */, 0 /* arg2 */,
+                    parcel);
             mEventHandler.sendMessage(msg);
         }
         activeCues.clear();
