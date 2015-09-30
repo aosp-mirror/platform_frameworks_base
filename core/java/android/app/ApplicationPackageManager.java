@@ -1344,7 +1344,7 @@ public class ApplicationPackageManager extends PackageManager {
         final VerificationParams verificationParams = new VerificationParams(null, null,
                 null, VerificationParams.NO_UID, null);
         installCommon(packageURI, new LegacyPackageInstallObserver(observer), flags,
-                installerPackageName, verificationParams, null, UserHandle.myUserId());
+                installerPackageName, verificationParams, null, mContext.getUserId());
     }
 
     @Override
@@ -1354,7 +1354,7 @@ public class ApplicationPackageManager extends PackageManager {
         final VerificationParams verificationParams = new VerificationParams(verificationURI, null,
                 null, VerificationParams.NO_UID, manifestDigest);
         installCommon(packageURI, new LegacyPackageInstallObserver(observer), flags,
-                installerPackageName, verificationParams, encryptionParams, UserHandle.myUserId());
+                installerPackageName, verificationParams, encryptionParams, mContext.getUserId());
     }
 
     @Override
@@ -1362,14 +1362,14 @@ public class ApplicationPackageManager extends PackageManager {
             IPackageInstallObserver observer, int flags, String installerPackageName,
             VerificationParams verificationParams, ContainerEncryptionParams encryptionParams) {
         installCommon(packageURI, new LegacyPackageInstallObserver(observer), flags,
-                installerPackageName, verificationParams, encryptionParams, UserHandle.myUserId());
+                installerPackageName, verificationParams, encryptionParams, mContext.getUserId());
     }
 
     @Override
     public void installPackage(Uri packageURI, PackageInstallObserver observer,
             int flags, String installerPackageName) {
         installPackageAsUser(packageURI, observer, flags, installerPackageName,
-                UserHandle.myUserId());
+                mContext.getUserId());
     }
 
     @Override
@@ -1389,7 +1389,7 @@ public class ApplicationPackageManager extends PackageManager {
         final VerificationParams verificationParams = new VerificationParams(verificationURI, null,
                 null, VerificationParams.NO_UID, manifestDigest);
         installCommon(packageURI, observer, flags, installerPackageName, verificationParams,
-                encryptionParams, UserHandle.myUserId());
+                encryptionParams, mContext.getUserId());
     }
 
     @Override
@@ -1397,7 +1397,7 @@ public class ApplicationPackageManager extends PackageManager {
             PackageInstallObserver observer, int flags, String installerPackageName,
             VerificationParams verificationParams, ContainerEncryptionParams encryptionParams) {
         installCommon(packageURI, observer, flags, installerPackageName, verificationParams,
-                encryptionParams, UserHandle.myUserId());
+                encryptionParams, mContext.getUserId());
     }
 
     private void installCommon(Uri packageURI,
@@ -1421,7 +1421,7 @@ public class ApplicationPackageManager extends PackageManager {
 
     @Override
     public int installExistingPackage(String packageName) throws NameNotFoundException {
-        return installExistingPackageAsUser(packageName, UserHandle.myUserId());
+        return installExistingPackageAsUser(packageName, mContext.getUserId());
     }
 
     @Override
@@ -1726,7 +1726,7 @@ public class ApplicationPackageManager extends PackageManager {
 
     @Override
     public void deletePackage(String packageName, IPackageDeleteObserver observer, int flags) {
-        deletePackageAsUser(packageName, observer, flags, UserHandle.myUserId());
+        deletePackageAsUser(packageName, observer, flags, mContext.getUserId());
     }
 
     @Override
@@ -1838,7 +1838,7 @@ public class ApplicationPackageManager extends PackageManager {
     public void replacePreferredActivity(IntentFilter filter,
                                          int match, ComponentName[] set, ComponentName activity) {
         try {
-            mPM.replacePreferredActivity(filter, match, set, activity, UserHandle.myUserId());
+            mPM.replacePreferredActivity(filter, match, set, activity, mContext.getUserId());
         } catch (RemoteException e) {
             // Should never happen!
         }
@@ -2169,7 +2169,7 @@ public class ApplicationPackageManager extends PackageManager {
     }
 
     private UserInfo getUserIfProfile(int userHandle) {
-        List<UserInfo> userProfiles = getUserManager().getProfiles(UserHandle.myUserId());
+        List<UserInfo> userProfiles = getUserManager().getProfiles(mContext.getUserId());
         for (UserInfo user : userProfiles) {
             if (user.id == userHandle) {
                 return user;
