@@ -302,10 +302,9 @@ case ACTIVITY_EDIT:
     href="{@docRoot}guide/topics/ui/declaring-layout.html">XML Layouts</a> is an essential part of
 creating
     a good looking Android application.</p>
-    <p>Take a look at the
-    <a href="{@docRoot}resources/tutorials/views/index.html">Hello Views</a>
-    for some example layouts and how to use them. The ApiDemos sample project is also a
-    great resource from which to learn how to create different layouts.</p>
+    <p>The <a href="https://github.com/android/platform_development/tree/master/samples/ApiDemos"
+    class="external-link">ApiDemos sample project</a> is a good resource for
+    learning how to create different layouts.</p>
   </div>
   </div>
 
