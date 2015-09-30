@@ -3023,7 +3023,6 @@ public class WindowManagerService extends IWindowManager.Stub
 
         final long origId = Binder.clearCallingIdentity();
         synchronized(mWindowMap) {
-            DisplayContent displayContent = null;
             WindowToken wtoken = mTokenMap.remove(token);
             if (wtoken != null) {
                 boolean delayed = false;
@@ -3033,7 +3032,6 @@ public class WindowManagerService extends IWindowManager.Stub
 
                     for (int i=0; i<N; i++) {
                         WindowState win = wtoken.windows.get(i);
-                        displayContent = win.getDisplayContent();
 
                         if (win.mWinAnimator.isAnimating()) {
                             delayed = true;
@@ -3048,9 +3046,7 @@ public class WindowManagerService extends IWindowManager.Stub
                                         WindowManagerPolicy.TRANSIT_EXIT);
                             }
                             changed = true;
-                            if (displayContent != null) {
-                                displayContent.layoutNeeded = true;
-                            }
+                            win.setDisplayLayoutNeeded();
                         }
                     }
 
