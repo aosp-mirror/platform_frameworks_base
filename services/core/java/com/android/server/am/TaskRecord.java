@@ -1193,7 +1193,7 @@ final class TaskRecord {
             mOverrideConfig = Configuration.EMPTY;
         } else {
             mBounds = new Rect(bounds);
-            if (stack.mStackId != DOCKED_STACK_ID) {
+            if (stack == null || stack.mStackId != DOCKED_STACK_ID) {
                 mLastNonFullscreenBounds = mBounds;
             }
 
