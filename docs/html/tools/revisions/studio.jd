@@ -43,6 +43,33 @@ Android Studio, as denoted by revision number. </p>
 <div class="toggle-content opened">
   <p><a href="#" onclick="return toggleContent(this)">
     <img src="{@docRoot}assets/images/triangle-opened.png" class="toggle-content-img"
+      alt=""/>Android Studio v1.4.0</a> <em>(September 2015)</em>
+  </p>
+  <div class="toggle-content-toggleme">
+    <p>Fixes and enhancements:</p>
+  <ul>
+    <li>Added the Vector Asset Studio tool for importing vector graphics, such as material icons
+      and SVG files. To use this tool, in the Android view of the Project window, right-click the
+      <strong>res</strong> folder and select <strong>New</strong> &gt; <strong>Vector Asset</strong>.
+    </li>
+    <li>Added new Android Monitor functions, GPU and Network. To use these monitors, click
+      <strong>Android Monitor</strong> at the bottom of the main window. The Android Device Monitor
+      can't be running at the same time as Android Monitor.
+    </li>
+    <li>Added an early preview of the new Theme Editor. To use this feature, select
+      <strong>Tools</strong> &gt; <strong>Android</strong> &gt; <strong>Theme Editor</strong>.
+    </li>
+    <li>Updated the Android templates for the Design Support Library. Templates now include support
+      for the Material Design specification, as well as the <code>appcompat</code> Support Library
+      for backwards compatibility.
+    </li>
+  </ul>
+  </div>
+</div>
+
+<div class="toggle-content closed">
+  <p><a href="#" onclick="return toggleContent(this)">
+    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img"
       alt=""/>Android Studio v1.3.2</a> <em>(August 2015)</em>
   </p>
   <div class="toggle-content-toggleme">
