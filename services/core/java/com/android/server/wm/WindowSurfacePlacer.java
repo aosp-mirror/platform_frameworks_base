@@ -967,6 +967,7 @@ class WindowSurfacePlacer {
         }
 
         mService.mPolicy.finishLayoutLw();
+        mService.mH.obtainMessage(UPDATE_DOCKED_STACK_DIVIDER, displayContent).sendToTarget();
     }
 
     /**

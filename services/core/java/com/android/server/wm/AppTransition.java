@@ -1032,6 +1032,7 @@ public class AppTransition implements Dump {
                 0, top - containingFrame.top, 0);
         set.addAnimation(translate);
         set.setDuration(DEFAULT_APP_TRANSITION_DURATION);
+        set.setZAdjustment(Animation.ZORDER_TOP);
         return set;
     }
 
