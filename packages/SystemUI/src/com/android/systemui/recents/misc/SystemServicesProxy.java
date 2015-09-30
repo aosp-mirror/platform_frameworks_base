@@ -697,14 +697,6 @@ public class SystemServicesProxy {
             ActivityManager.StackInfo stackInfo = mIam.getStackInfo(ActivityManager.HOME_STACK_ID);
             if (stackInfo != null) {
                 windowRect.set(stackInfo.bounds);
-                // Temporary workaround, if we query this too early, occasionally, the home stack
-                // bounds are offset incorrectly
-                if (windowRect.left < 0) {
-                    windowRect.offset(-windowRect.left, 0);
-                }
-                if (windowRect.top < 0) {
-                    windowRect.offset(0, -windowRect.top);
-                }
             }
         } catch (RemoteException e) {
             e.printStackTrace();
