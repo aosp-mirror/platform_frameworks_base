@@ -167,14 +167,9 @@ automated recurring billing at your choice of intervals:</p>
   <li>Monthly &mdash; Google Play bills the customer’s Google payments account at
   the time of purchase and monthly subsequent to the purchase date (exact billing
   intervals can vary slightly over time).</li>
-  <li>3 Months &mdash; Google Play bills the customer’s Google payments account at
-  the time of purchase and every three months after that (exact billing
-  intervals can vary slightly over time).</li>
-  <li>6 Months &mdash; Google Play bills the customer’s Google payments account at
-  the time of purchase and every six months after that (exact billing
-  intervals can vary slightly over time).</li>
   <li>Annually &mdash; Google Play bills the customer's Google payments account at
   the time of purchase and again on the same date in subsequent years.</li>
+
   <li>Seasonal &mdash; Google Play bills the customer's Google payments account at
   the beginning of each "season" (you specify the season beginning and end
   dates). This
