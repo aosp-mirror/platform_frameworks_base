@@ -119,17 +119,13 @@ apps using the Wi-Fi and Bluetooth APIs. The
 now return a constant value of {@code 02:00:00:00:00:00}.</p>
 
 <p>To access the hardware identifiers of nearby external devices via Bluetooth and Wi-Fi scans,
-your app must now have the following permissions:</p>
+your app must now have the {@link android.Manifest.permission#ACCESS_FINE_LOCATION} or
+{@link android.Manifest.permission#ACCESS_COARSE_LOCATION} permissions:</p>
 <ul>
-<li>{@link android.net.wifi.WifiManager#getScanResults() WifiManager.getScanResults()}:
-Your app must have {@link android.Manifest.permission#ACCESS_FINE_LOCATION} or
-{@link android.Manifest.permission#ACCESS_COARSE_LOCATION} permission.</li>
-<li>{@link android.bluetooth.BluetoothDevice#ACTION_FOUND BluetoothDevice.ACTION_FOUND}:
-Your app must have {@link android.Manifest.permission#ACCESS_COARSE_LOCATION} permission.</li>
+<li>{@link android.net.wifi.WifiManager#getScanResults() WifiManager.getScanResults()}</li>
+<li>{@link android.bluetooth.BluetoothDevice#ACTION_FOUND BluetoothDevice.ACTION_FOUND}</li>
 <li>{@link android.bluetooth.le.BluetoothLeScanner#startScan(android.bluetooth.le.ScanCallback)
-BluetoothLeScanner.startScan()}: Your app must have
-{@link android.Manifest.permission#ACCESS_FINE_LOCATION} or
-{@link android.Manifest.permission#ACCESS_COARSE_LOCATION} permission.</li>
+BluetoothLeScanner.startScan()}</li>
 </ul>
 
 <p class="note"><strong>Note</strong>: When a device running Android 6.0 (API level 23) initiates a
