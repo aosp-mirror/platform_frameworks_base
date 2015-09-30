@@ -57,7 +57,8 @@ import com.android.internal.policy.PhoneWindow;
  * </ul>
  * This will be mitigated once b/22527834 will be addressed.
  */
-public class NonClientDecorView extends LinearLayout implements View.OnClickListener {
+public class NonClientDecorView extends LinearLayout
+        implements View.OnClickListener, View.OnTouchListener {
     private final static String TAG = "NonClientDecorView";
     // The height of a window which has focus in DIP.
     private final int DECOR_SHADOW_FOCUSED_HEIGHT_IN_DIP = 20;
@@ -112,7 +113,7 @@ public class NonClientDecorView extends LinearLayout implements View.OnClickList
     }
 
     @Override
-    public boolean onTouchEvent(MotionEvent e) {
+    public boolean onTouch(View v, MotionEvent e) {
         // Note: There are no mixed events. When a new device gets used (e.g. 1. Mouse, 2. touch)
         // the old input device events get cancelled first. So no need to remember the kind of
         // input device we are listening to.
@@ -224,6 +225,7 @@ public class NonClientDecorView extends LinearLayout implements View.OnClickList
         boolean invisible = isFillingScreen() || !mShowDecor;
         View caption = getChildAt(0);
         caption.setVisibility(invisible ? GONE : VISIBLE);
+        caption.setOnTouchListener(this);
         mVisible = !invisible;
     }
 
