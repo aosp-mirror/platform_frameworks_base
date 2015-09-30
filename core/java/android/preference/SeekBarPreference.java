@@ -96,18 +96,15 @@ public class SeekBarPreference extends Preference
 
     @Override
     public boolean onKey(View v, int keyCode, KeyEvent event) {
-        if (event.getAction() != KeyEvent.ACTION_UP) {
-            if (keyCode == KeyEvent.KEYCODE_PLUS
-                    || keyCode == KeyEvent.KEYCODE_EQUALS) {
-                setProgress(getProgress() + 1);
-                return true;
-            }
-            if (keyCode == KeyEvent.KEYCODE_MINUS) {
-                setProgress(getProgress() - 1);
-                return true;
-            }
+        if (event.getAction() != KeyEvent.ACTION_DOWN) {
+            return false;
         }
-        return false;
+
+        SeekBar seekBar = (SeekBar) v.findViewById(com.android.internal.R.id.seekbar);
+        if (seekBar == null) {
+            return false;
+        }
+        return seekBar.onKeyDown(keyCode, event);
     }
 
     public void setMax(int max) {
