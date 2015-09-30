@@ -63,10 +63,10 @@ method. To request a permission, call the new
 method. Even if your app is not targeting Android 6.0 (API level 23), you should test your app under
 the new permissions model.</p>
 
-<p>For details on supporting the new permissions model in your app, see the
+<p>For details on supporting the new permissions model in your app, see
 <a href="{@docRoot}training/permissions/index.html">
-Permissions</a> training page. For tips on how to assess the impact on your app,
-see the <a href="{@docRoot}about/versions/marshmallow/testing.html">Testing Guide</a></p>
+Working with System Permissionss</a>. For tips on how to assess the impact on your app,
+see <a href="{@docRoot}training/permissions/best-practices.html#testing">Permissions Best Practices</a>.</p>
 
 <h2 id="behavior-power">Doze and App Standby</h2>
 <p>This release introduces new power-saving optimizations for idle devices and apps. These
