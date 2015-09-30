@@ -126,6 +126,7 @@ class DisplayContent {
         display.getMetrics(mDisplayMetrics);
         isDefaultDisplay = mDisplayId == Display.DEFAULT_DISPLAY;
         mService = service;
+        initializeDisplayBaseInfo();
         mDividerControllerLocked = new DockedStackDividerController(service.mContext, this);
     }
 
@@ -189,6 +190,21 @@ class DisplayContent {
         mDisplay.getMetrics(mDisplayMetrics);
         for (int i = mStacks.size() - 1; i >= 0; --i) {
             mStacks.get(i).updateDisplayInfo(null);
+        }
+    }
+
+    void initializeDisplayBaseInfo() {
+        synchronized(mDisplaySizeLock) {
+            // Bootstrap the default logical display from the display manager.
+            final DisplayInfo newDisplayInfo =
+                    mService.mDisplayManagerInternal.getDisplayInfo(mDisplayId);
+            if (newDisplayInfo != null) {
+                mDisplayInfo.copyFrom(newDisplayInfo);
+            }
+            mBaseDisplayWidth = mInitialDisplayWidth = mDisplayInfo.logicalWidth;
+            mBaseDisplayHeight = mInitialDisplayHeight = mDisplayInfo.logicalHeight;
+            mBaseDisplayDensity = mInitialDisplayDensity = mDisplayInfo.logicalDensityDpi;
+            mBaseDisplayRect.set(0, 0, mBaseDisplayWidth, mBaseDisplayHeight);
         }
     }
 
