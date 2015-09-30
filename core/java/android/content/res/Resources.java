@@ -16,24 +16,14 @@
 
 package android.content.res;
 
-import android.annotation.AttrRes;
-import android.annotation.ColorInt;
-import android.annotation.StyleRes;
-import android.annotation.StyleableRes;
-import android.graphics.drawable.DrawableInflater;
-import android.icu.text.PluralRules;
-import com.android.internal.util.GrowingArrayUtils;
-import com.android.internal.util.XmlUtils;
-
-import org.xmlpull.v1.XmlPullParser;
-import org.xmlpull.v1.XmlPullParserException;
-
 import android.animation.Animator;
 import android.animation.StateListAnimator;
 import android.annotation.AnimRes;
 import android.annotation.AnyRes;
 import android.annotation.ArrayRes;
+import android.annotation.AttrRes;
 import android.annotation.BoolRes;
+import android.annotation.ColorInt;
 import android.annotation.ColorRes;
 import android.annotation.DimenRes;
 import android.annotation.DrawableRes;
@@ -45,18 +35,23 @@ import android.annotation.Nullable;
 import android.annotation.PluralsRes;
 import android.annotation.RawRes;
 import android.annotation.StringRes;
+import android.annotation.StyleRes;
+import android.annotation.StyleableRes;
 import android.annotation.XmlRes;
 import android.content.pm.ActivityInfo;
 import android.graphics.Movie;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.Drawable.ConstantState;
+import android.graphics.drawable.DrawableInflater;
+import android.icu.text.PluralRules;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Trace;
 import android.util.ArrayMap;
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
+import android.util.LocaleList;
 import android.util.Log;
 import android.util.LongSparseArray;
 import android.util.Pools.SynchronizedPool;
@@ -64,6 +59,12 @@ import android.util.Slog;
 import android.util.TypedValue;
 import android.view.ViewDebug;
 import android.view.ViewHierarchyEncoder;
+
+import com.android.internal.util.GrowingArrayUtils;
+import com.android.internal.util.XmlUtils;
+
+import org.xmlpull.v1.XmlPullParser;
+import org.xmlpull.v1.XmlPullParserException;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -372,7 +373,7 @@ public class Resources {
     private PluralRules getPluralRule() {
         synchronized (sSync) {
             if (mPluralRule == null) {
-                mPluralRule = PluralRules.forLocale(mConfiguration.locale);
+                mPluralRule = PluralRules.forLocale(mConfiguration.getLocales().getPrimary());
             }
             return mPluralRule;
         }
@@ -435,7 +436,7 @@ public class Resources {
     @NonNull
     public String getString(@StringRes int id, Object... formatArgs) throws NotFoundException {
         final String raw = getString(id);
-        return String.format(mConfiguration.locale, raw, formatArgs);
+        return String.format(mConfiguration.getLocales().getPrimary(), raw, formatArgs);
     }
 
     /**
@@ -466,7 +467,7 @@ public class Resources {
     public String getQuantityString(@PluralsRes int id, int quantity, Object... formatArgs)
             throws NotFoundException {
         String raw = getQuantityText(id, quantity).toString();
-        return String.format(mConfiguration.locale, raw, formatArgs);
+        return String.format(mConfiguration.getLocales().getPrimary(), raw, formatArgs);
     }
 
     /**
@@ -1971,20 +1972,16 @@ public class Resources {
             mCompatibilityInfo.applyToDisplayMetrics(mMetrics);
 
             final int configChanges = calcConfigChanges(config);
-            if (mConfiguration.locale == null) {
-                mConfiguration.locale = Locale.getDefault();
-                mConfiguration.setLayoutDirection(mConfiguration.locale);
+            LocaleList locales = mConfiguration.getLocales();
+            if (locales.isEmpty()) {
+                locales = LocaleList.getDefault();
+                mConfiguration.setLocales(locales);
             }
             if (mConfiguration.densityDpi != Configuration.DENSITY_DPI_UNDEFINED) {
                 mMetrics.densityDpi = mConfiguration.densityDpi;
                 mMetrics.density = mConfiguration.densityDpi * DisplayMetrics.DENSITY_DEFAULT_SCALE;
             }
             mMetrics.scaledDensity = mMetrics.density * mConfiguration.fontScale;
-
-            String locale = null;
-            if (mConfiguration.locale != null) {
-                locale = adjustLanguageTag(mConfiguration.locale.toLanguageTag());
-            }
 
             final int width, height;
             if (mMetrics.widthPixels >= mMetrics.heightPixels) {
@@ -2005,8 +2002,10 @@ public class Resources {
                 keyboardHidden = mConfiguration.keyboardHidden;
             }
 
+            // TODO: Pass the whole locale list to setConfiguration()
             mAssets.setConfiguration(mConfiguration.mcc, mConfiguration.mnc,
-                    locale, mConfiguration.orientation,
+                    adjustLanguageTag(locales.getPrimary().toLanguageTag()),
+                    mConfiguration.orientation,
                     mConfiguration.touchscreen,
                     mConfiguration.densityDpi, mConfiguration.keyboard,
                     keyboardHidden, mConfiguration.navigation, width, height,
@@ -2030,7 +2029,7 @@ public class Resources {
         }
         synchronized (sSync) {
             if (mPluralRule != null) {
-                mPluralRule = PluralRules.forLocale(config.locale);
+                mPluralRule = PluralRules.forLocale(config.getLocales().getPrimary());
             }
         }
     }
@@ -2049,9 +2048,8 @@ public class Resources {
 
             mCompatibilityInfo.applyToConfiguration(density, mTmpConfig);
 
-            if (mTmpConfig.locale == null) {
-                mTmpConfig.locale = Locale.getDefault();
-                mTmpConfig.setLayoutDirection(mTmpConfig.locale);
+            if (mTmpConfig.getLocales().isEmpty()) {
+                mTmpConfig.setLocales(LocaleList.getDefault());
             }
             configChanges = mConfiguration.updateFrom(mTmpConfig);
             configChanges = ActivityInfo.activityInfoConfigToNative(configChanges);
