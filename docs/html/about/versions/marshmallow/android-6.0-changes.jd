@@ -18,7 +18,8 @@ page.image=images/cards/samples-new_2x.png
     <li><a href="#behavior-hardware-id">Access to Hardware Identifiers</a></li>
     <li><a href="#behavior-notifications">Notifications</a></li>
     <li><a href="#behavior-audiomanager-Changes">AudioManager Changes</a></li>
-    <li><a href="#behavior-test-selection">Text Selection</a></li>
+    <li><a href="#behavior-text-selection">Text Selection</a></li>
+    <li><a href="#behavior-bookmark-browser">Browser Bookmark Changes</a></li>
     <li><a href="#behavior-keystore">Android Keystore Changes</a></li>
     <li><a href="#behavior-network">Wi-Fi and Networking Changes</a></li>
     <li><a href="#behavior-camera">Camera Service Changes</a></li>
@@ -157,7 +158,7 @@ adjustStreamVolume()} method and pass in the direction value
 {@link android.media.AudioManager#ADJUST_UNMUTE}.</p>
 
 
-<h2 id="behavior-test-selection">Text Selection</h2>
+<h2 id="behavior-text-selection">Text Selection</h2>
 
 <img src="{@docRoot}images/android-6.0/text-selection.gif"
 style="float:right; margin:0 0 20px 30px" width="360" height="640" />
@@ -201,6 +202,14 @@ the framework. In devices running Android 6.0 (API level 23), that allows the fr
 {@link android.support.v7.app.ActionBar} or floating toolbar modes, while on devices running
 Android 5.1 (API level 22) or lower, only the {@link android.support.v7.app.ActionBar} modes are
 supported.</p>
+
+<h2 id="behavior-bookmark-browser">Browser Bookmark Changes</h2>
+<p>This release removes support for global bookmarks. The
+{@code android.provider.Browser.getAllBookmarks()} and {@code android.provider.Browser.saveBookmark()}
+methods are now removed. Likewise, the {@code READ_HISTORY_BOOKMARKS} and {@code WRITE_HISTORY_BOOKMARKS}
+permissions are removed. If your app targets Android 6.0 (API level 23) or higher, don't access
+bookmarks from the global provider or use the bookmark permissions. Instead, your app should store
+bookmarks data internally.</p>
 
 <h2 id="behavior-keystore">Android Keystore Changes</h2>
 <p>With this release, the
