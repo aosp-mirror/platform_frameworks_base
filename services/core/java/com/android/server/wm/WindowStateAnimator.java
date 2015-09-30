@@ -1823,10 +1823,15 @@ class WindowStateAnimator {
                     c.mAttachedHidden = false;
                     if (c.mWinAnimator.mSurfaceControl != null) {
                         c.mWinAnimator.performShowLocked();
-                        // It hadn't been shown, which means layout not performed on it, so now we
-                        // want to make sure to do a layout.  If called from within the transaction
-                        // loop, this will cause it to restart with a new layout.
-                        c.setDisplayLayoutNeeded();
+                        // It hadn't been shown, which means layout not
+                        // performed on it, so now we want to make sure to
+                        // do a layout.  If called from within the transaction
+                        // loop, this will cause it to restart with a new
+                        // layout.
+                        final DisplayContent displayContent = c.getDisplayContent();
+                        if (displayContent != null) {
+                            displayContent.layoutNeeded = true;
+                        }
                     }
                 }
             }
