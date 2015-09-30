@@ -401,7 +401,7 @@ public final class BridgeResources extends Resources {
                     if (xml.isFile()) {
                         // we need to create a pull parser around the layout XML file, and then
                         // give that to our XmlBlockParser
-                        parser = ParserFactory.create(xml);
+                        parser = ParserFactory.create(xml, true);
                     }
                 }
 
