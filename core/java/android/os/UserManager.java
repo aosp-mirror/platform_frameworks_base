@@ -20,6 +20,7 @@ import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.app.ActivityManager;
 import android.app.ActivityManagerNative;
+import android.app.admin.DevicePolicyManager;
 import android.content.Context;
 import android.content.pm.UserInfo;
 import android.content.res.Resources;
@@ -1337,12 +1338,15 @@ public class UserManager {
     }
 
     /**
-     * Returns true if the user switcher should be shown, this will be if there
-     * are multiple users that aren't managed profiles.
+     * Returns true if the user switcher should be shown, this will be if device supports multi-user
+     * and there are at least 2 users available that are not managed profiles.
      * @hide
      * @return true if user switcher should be shown.
      */
     public boolean isUserSwitcherEnabled() {
+        if (!supportsMultipleUsers()) {
+            return false;
+        }
         List<UserInfo> users = getUsers(true);
         if (users == null) {
            return false;
@@ -1353,8 +1357,8 @@ public class UserManager {
                 ++switchableUserCount;
             }
         }
-        final boolean guestEnabled = Settings.Global.getInt(mContext.getContentResolver(),
-                Settings.Global.GUEST_USER_ENABLED, 0) == 1;
+        final boolean guestEnabled = !mContext.getSystemService(DevicePolicyManager.class)
+                .getGuestUserDisabled(null);
         return switchableUserCount > 1 || guestEnabled;
     }
 
