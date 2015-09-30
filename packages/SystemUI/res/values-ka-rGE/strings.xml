@@ -325,6 +325,8 @@
     <string name="interruption_level_priority_twoline" msgid="1564715335217164124">"მხოლოდ\nპრიორიტეტულები"</string>
     <string name="interruption_level_alarms_twoline" msgid="3266909566410106146">"მხოლოდ\nგაფრთხილებები"</string>
     <string name="keyguard_indication_charging_time" msgid="1757251776872835768">"(<xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g>-ის შეცვლა დასრულებამდე)"</string>
+    <string name="keyguard_indication_charging_time_fast" msgid="9018981952053914986">"იტენება სწრაფად (<xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g> სრულ დატენვამდე)"</string>
+    <string name="keyguard_indication_charging_time_slowly" msgid="955252797961724952">"იტენება ნელა (<xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g> სრულ დატენვამდე)"</string>
     <string name="accessibility_multi_user_switch_switcher" msgid="7305948938141024937">"მომხმარებლის გადართვა"</string>
     <string name="accessibility_multi_user_switch_switcher_with_current" msgid="8434880595284601601">"მომხმარებლის გდართვა. ამჟამინდელი მომხმარებელი <xliff:g id="CURRENT_USER_NAME">%s</xliff:g>"</string>
     <string name="accessibility_multi_user_switch_inactive" msgid="1424081831468083402">"ამჟამინდელი მომხმარებელი <xliff:g id="CURRENT_USER_NAME">%s</xliff:g>"</string>

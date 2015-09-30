@@ -325,6 +325,8 @@
     <string name="interruption_level_priority_twoline" msgid="1564715335217164124">"ਕੇਵਲ\nਤਰਜੀਹੀ"</string>
     <string name="interruption_level_alarms_twoline" msgid="3266909566410106146">"ਕੇਵਲ\nਅਲਾਰਮ"</string>
     <string name="keyguard_indication_charging_time" msgid="1757251776872835768">"ਚਾਰਜਿੰਗ (<xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g> ਪੂਰਾ ਹੋਣ ਤੱਕ)"</string>
+    <string name="keyguard_indication_charging_time_fast" msgid="9018981952053914986">"ਤੇਜ਼ੀ ਨਾਲ ਚਾਰਜ ਹੋ ਰਹੀ ਹੈ (<xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g> ਪੂਰੀ ਹੋਣ ਤੱਕ)"</string>
+    <string name="keyguard_indication_charging_time_slowly" msgid="955252797961724952">"ਹੌਲੀ-ਹੌਲੀ ਚਾਰਜ ਹੋ ਰਹੀ ਹੈ (<xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g> ਪੂਰੀ ਹੋਣ ਤੱਕ)"</string>
     <string name="accessibility_multi_user_switch_switcher" msgid="7305948938141024937">"ਉਪਭੋਗਤਾ ਸਵਿਚ ਕਰੋ"</string>
     <string name="accessibility_multi_user_switch_switcher_with_current" msgid="8434880595284601601">"ਉਪਭੋਗਤਾ, ਵਰਤਮਾਨ ਉਪਭੋਗਤਾ ਸਵਿਚ ਕਰੋ<xliff:g id="CURRENT_USER_NAME">%s</xliff:g>"</string>
     <string name="accessibility_multi_user_switch_inactive" msgid="1424081831468083402">"ਮੌਜੂਦਾ ਉਪਭੋਗਤਾ <xliff:g id="CURRENT_USER_NAME">%s</xliff:g>"</string>
