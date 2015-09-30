@@ -820,9 +820,9 @@ public class DirectoryFragment extends Fragment {
                                     mModel.undoDeletion();
                                 } else {
                                     mModel.finalizeDeletion(
-                                            new Runnable() {
+                                            new Model.DeletionListener() {
                                                 @Override
-                                                public void run() {
+                                                public void onError() {
                                                     Shared.makeSnackbar(
                                                             activity,
                                                             R.string.toast_failed_delete,
@@ -1865,9 +1865,9 @@ public class DirectoryFragment extends Fragment {
          * @param view The view which will be used to interact with the user (e.g. surfacing
          * snackbars) for errors, info, etc.
          */
-        void finalizeDeletion(Runnable errorCallback) {
+        void finalizeDeletion(DeletionListener listener) {
             final ContentResolver resolver = mContext.getContentResolver();
-            DeleteFilesTask task = new DeleteFilesTask(resolver, errorCallback);
+            DeleteFilesTask task = new DeleteFilesTask(resolver, listener);
             task.execute();
         }
 
@@ -1877,16 +1877,16 @@ public class DirectoryFragment extends Fragment {
          */
         private class DeleteFilesTask extends AsyncTask<Void, Void, List<DocumentInfo>> {
             private ContentResolver mResolver;
-            private Runnable mErrorCallback;
+            private DeletionListener mListener;
 
             /**
              * @param resolver A ContentResolver for performing the actual file deletions.
              * @param errorCallback A Runnable that is executed in the event that one or more errors
              *     occured while copying files.  Execution will occur on the UI thread.
              */
-            public DeleteFilesTask(ContentResolver resolver, Runnable errorCallback) {
+            public DeleteFilesTask(ContentResolver resolver, DeletionListener listener) {
                 mResolver = resolver;
-                mErrorCallback = errorCallback;
+                mListener = listener;
             }
 
             @Override
@@ -1920,13 +1920,27 @@ public class DirectoryFragment extends Fragment {
 
                 if (hadTrouble) {
                     // TODO show which files failed? b/23720103
-                    mErrorCallback.run();
+                    mListener.onError();
                     if (DEBUG) Log.d(TAG, "Deletion task completed.  Some deletions failed.");
                 } else {
                     if (DEBUG) Log.d(TAG, "Deletion task completed successfully.");
                 }
                 mMarkedForDeletion.clear();
+
+                mListener.onCompletion();
             }
+        }
+
+        static class DeletionListener {
+            /**
+             * Called when deletion has completed (regardless of whether an error occurred).
+             */
+            void onCompletion() {}
+
+            /**
+             * Called at the end of a deletion operation that produced one or more errors.
+             */
+            void onError() {}
         }
 
         void addUpdateListener(UpdateListener listener) {

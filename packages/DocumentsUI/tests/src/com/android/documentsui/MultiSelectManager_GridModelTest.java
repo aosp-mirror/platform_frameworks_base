@@ -22,14 +22,12 @@ import static org.junit.Assert.assertTrue;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.support.v7.widget.RecyclerView.OnScrollListener;
+import android.test.AndroidTestCase;
 import android.util.SparseBooleanArray;
 
 import com.android.documentsui.MultiSelectManager.GridModel;
 
-import org.junit.After;
-import org.junit.Test;
-
-public class MultiSelectManager_GridModelTest {
+public class MultiSelectManager_GridModelTest extends AndroidTestCase {
 
     private static final int VIEW_PADDING_PX = 5;
     private static final int CHILD_VIEW_EDGE_PX = 100;
@@ -53,14 +51,13 @@ public class MultiSelectManager_GridModelTest {
                 });
     }
 
-    @After
+    @Override
     public void tearDown() {
         model = null;
         helper = null;
         lastSelection = null;
     }
 
-    @Test
     public void testSelectionLeftOfItems() {
         setUp(20, 5);
         model.startSelection(new Point(0, 10));
@@ -69,7 +66,6 @@ public class MultiSelectManager_GridModelTest {
         assertEquals(GridModel.NOT_SET, model.getPositionNearestOrigin());
     }
 
-    @Test
     public void testSelectionRightOfItems() {
         setUp(20, 4);
         model.startSelection(new Point(viewWidth - 1, 10));
@@ -78,7 +74,6 @@ public class MultiSelectManager_GridModelTest {
         assertEquals(GridModel.NOT_SET, model.getPositionNearestOrigin());
     }
 
-    @Test
     public void testSelectionAboveItems() {
         setUp(20, 4);
         model.startSelection(new Point(10, 0));
@@ -87,7 +82,6 @@ public class MultiSelectManager_GridModelTest {
         assertEquals(GridModel.NOT_SET, model.getPositionNearestOrigin());
     }
 
-    @Test
     public void testSelectionBelowItems() {
         setUp(5, 4);
         model.startSelection(new Point(10, VIEWPORT_HEIGHT - 1));
@@ -96,7 +90,6 @@ public class MultiSelectManager_GridModelTest {
         assertEquals(GridModel.NOT_SET, model.getPositionNearestOrigin());
     }
 
-    @Test
     public void testVerticalSelectionBetweenItems() {
         setUp(20, 4);
         model.startSelection(new Point(106, 0));
@@ -105,7 +98,6 @@ public class MultiSelectManager_GridModelTest {
         assertEquals(GridModel.NOT_SET, model.getPositionNearestOrigin());
     }
 
-    @Test
     public void testHorizontalSelectionBetweenItems() {
         setUp(20, 4);
         model.startSelection(new Point(0, 105));
@@ -114,7 +106,6 @@ public class MultiSelectManager_GridModelTest {
         assertEquals(GridModel.NOT_SET, model.getPositionNearestOrigin());
     }
 
-    @Test
     public void testGrowingAndShrinkingSelection() {
         setUp(20, 4);
         model.startSelection(new Point(0, 0));
@@ -145,7 +136,6 @@ public class MultiSelectManager_GridModelTest {
         assertEquals(GridModel.NOT_SET, model.getPositionNearestOrigin());
     }
 
-    @Test
     public void testSelectionMovingAroundOrigin() {
         setUp(16, 4);
         model.startSelection(new Point(210, 210));
@@ -160,7 +150,6 @@ public class MultiSelectManager_GridModelTest {
         assertEquals(10, model.getPositionNearestOrigin());
     }
 
-    @Test
     public void testScrollingBandSelect() {
         setUp(40, 4);
         model.startSelection(new Point(0, 0));
