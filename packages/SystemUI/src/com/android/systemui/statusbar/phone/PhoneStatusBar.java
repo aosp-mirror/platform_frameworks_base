@@ -904,8 +904,8 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
                     mBluetoothController, mLocationController, mRotationLockController,
                     mNetworkController, mZenModeController, mHotspotController,
                     mCastController, mFlashlightController,
-                    mUserSwitcherController, mKeyguardMonitor,
-                    mSecurityController);
+                    mUserSwitcherController, mUserInfoController, mKeyguardMonitor,
+                    mSecurityController, mBatteryController);
             mQSPanel.setHost(qsh);
             mQSPanel.setTiles(qsh.getTiles());
             mBrightnessMirrorController = new BrightnessMirrorController(mStatusBarWindow);
@@ -2999,6 +2999,10 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
     @Override
     protected void dismissKeyguardThenExecute(OnDismissAction action, boolean afterKeyguardGone) {
         dismissKeyguardThenExecute(action, null /* cancelRunnable */, afterKeyguardGone);
+    }
+
+    public void dismissKeyguard() {
+        mStatusBarKeyguardViewManager.dismiss();
     }
 
     private void dismissKeyguardThenExecute(OnDismissAction action, Runnable cancelAction,

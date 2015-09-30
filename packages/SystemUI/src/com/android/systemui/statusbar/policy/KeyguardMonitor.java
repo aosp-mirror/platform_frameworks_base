@@ -18,7 +18,8 @@ package com.android.systemui.statusbar.policy;
 
 import android.app.ActivityManager;
 import android.content.Context;
-
+import android.os.RemoteException;
+import android.view.WindowManagerGlobal;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.keyguard.KeyguardUpdateMonitorCallback;
 import com.android.systemui.settings.CurrentUserTracker;
@@ -81,6 +82,20 @@ public final class KeyguardMonitor extends KeyguardUpdateMonitorCallback {
 
     public boolean canSkipBouncer() {
         return mCanSkipBouncer;
+    }
+
+    public void unlock() {
+        try {
+            WindowManagerGlobal.getWindowManagerService().dismissKeyguard();
+        } catch (RemoteException e) {
+        }
+    }
+
+    public void lock() {
+        try {
+            WindowManagerGlobal.getWindowManagerService().lockNow(null /* options */);
+        } catch (RemoteException e) {
+        }
     }
 
     public void notifyKeyguardState(boolean showing, boolean secure) {

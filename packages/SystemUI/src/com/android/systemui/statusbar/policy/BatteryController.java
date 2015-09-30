@@ -21,6 +21,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.BatteryManager;
+import android.os.Handler;
 import android.os.PowerManager;
 import android.util.Log;
 
@@ -30,24 +31,31 @@ import java.util.ArrayList;
 
 public class BatteryController extends BroadcastReceiver {
     private static final String TAG = "BatteryController";
+
+    public static final String ACTION_LEVEL_TEST = "com.android.systemui.BATTERY_LEVEL_TEST";
+
     private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
 
     private final ArrayList<BatteryStateChangeCallback> mChangeCallbacks = new ArrayList<>();
     private final PowerManager mPowerManager;
+    private final Handler mHandler;
 
     private int mLevel;
     private boolean mPluggedIn;
     private boolean mCharging;
     private boolean mCharged;
     private boolean mPowerSave;
+    private boolean mTestmode = false;
 
     public BatteryController(Context context) {
+        mHandler = new Handler();
         mPowerManager = (PowerManager) context.getSystemService(Context.POWER_SERVICE);
 
         IntentFilter filter = new IntentFilter();
         filter.addAction(Intent.ACTION_BATTERY_CHANGED);
         filter.addAction(PowerManager.ACTION_POWER_SAVE_MODE_CHANGED);
         filter.addAction(PowerManager.ACTION_POWER_SAVE_MODE_CHANGING);
+        filter.addAction(ACTION_LEVEL_TEST);
         context.registerReceiver(this, filter);
 
         updatePowerSave();
@@ -71,9 +79,10 @@ public class BatteryController extends BroadcastReceiver {
         mChangeCallbacks.remove(cb);
     }
 
-    public void onReceive(Context context, Intent intent) {
+    public void onReceive(final Context context, Intent intent) {
         final String action = intent.getAction();
         if (action.equals(Intent.ACTION_BATTERY_CHANGED)) {
+            if (mTestmode && !intent.getBooleanExtra("testmode", false)) return;
             mLevel = (int)(100f
                     * intent.getIntExtra(BatteryManager.EXTRA_LEVEL, 0)
                     / intent.getIntExtra(BatteryManager.EXTRA_SCALE, 100));
@@ -89,6 +98,38 @@ public class BatteryController extends BroadcastReceiver {
             updatePowerSave();
         } else if (action.equals(PowerManager.ACTION_POWER_SAVE_MODE_CHANGING)) {
             setPowerSave(intent.getBooleanExtra(PowerManager.EXTRA_POWER_SAVE_MODE, false));
+        } else if (action.equals(ACTION_LEVEL_TEST)) {
+            mTestmode = true;
+            mHandler.post(new Runnable() {
+                int curLevel = 0;
+                int incr = 1;
+                int saveLevel = mLevel;
+                boolean savePlugged = mPluggedIn;
+                Intent dummy = new Intent(Intent.ACTION_BATTERY_CHANGED);
+                @Override
+                public void run() {
+                    if (curLevel < 0) {
+                        mTestmode = false;
+                        dummy.putExtra("level", saveLevel);
+                        dummy.putExtra("plugged", savePlugged);
+                        dummy.putExtra("testmode", false);
+                    } else {
+                        dummy.putExtra("level", curLevel);
+                        dummy.putExtra("plugged", incr > 0 ? BatteryManager.BATTERY_PLUGGED_AC
+                                : 0);
+                        dummy.putExtra("testmode", true);
+                    }
+                    context.sendBroadcast(dummy);
+
+                    if (!mTestmode) return;
+
+                    curLevel += incr;
+                    if (curLevel == 100) {
+                        incr *= -1;
+                    }
+                    mHandler.postDelayed(this, 200);
+                }
+            });
         }
     }
 

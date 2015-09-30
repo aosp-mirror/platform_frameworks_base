@@ -71,6 +71,11 @@ public final class UserInfoController {
 
     public void addListener(OnUserInfoChangedListener callback) {
         mCallbacks.add(callback);
+        callback.onUserInfoChanged(mUserName, mUserDrawable);
+    }
+
+    public void remListener(OnUserInfoChangedListener callback) {
+        mCallbacks.remove(callback);
     }
 
     private final BroadcastReceiver mReceiver = new BroadcastReceiver() {

@@ -46,6 +46,9 @@ public class MetricsLogger implements MetricsConstants {
     public static final int ACTION_FINGERPRINT_RENAME = 254;
     public static final int ACTION_DOUBLE_TAP_POWER_CAMERA_GESTURE = 255;
     public static final int ACTION_WIGGLE_CAMERA_GESTURE = 256;
+    public static final int QS_LOCK_TILE = 257;
+    public static final int QS_USER_TILE = 258;
+    public static final int QS_BATTERY_TILE = 259;
 
     public static void visible(Context context, int category) throws IllegalArgumentException {
         if (Build.IS_DEBUGGABLE && category == VIEW_UNKNOWN) {
