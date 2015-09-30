@@ -666,7 +666,7 @@ public abstract class AbsSeekBar extends ProgressBar {
         progress += scale * max;
 
         setHotspot(x, (int) event.getY());
-        setProgress((int) progress, true);
+        setProgressInternal((int) progress, true, false);
     }
 
     /**
