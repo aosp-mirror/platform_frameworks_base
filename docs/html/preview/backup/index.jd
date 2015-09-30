@@ -108,9 +108,9 @@ page.image=images/cards/card-auto-backup_2x.png
         package="com.my.appexample"&gt;
     &lt;uses-sdk android:minSdkVersion="MNC"/&gt;
     &lt;uses-sdk android:targetSdkVersion="MNC"/&gt;
-    &lt;app ...
+    &lt;application ...
 <strong>        android:fullBackupContent="&#64;xml/mybackupscheme"&gt;</strong>
-    &lt;/app&gt;
+    &lt;/application&gt;
     ...
 &lt;/manifest&gt;
 </pre>
@@ -226,9 +226,9 @@ page.image=images/cards/card-auto-backup_2x.png
         package="com.my.appexample"&gt;
     &lt;uses-sdk android:minSdkVersion="MNC"/&gt;
     &lt;uses-sdk android:targetSdkVersion="MNC"/&gt;
-    &lt;app ...
+    &lt;application ...
 <strong>        android:allowBackup="false"&gt;</strong>
-    &lt;/app&gt;
+    &lt;/application&gt;
     ...
 &lt;/manifest&gt;
 </pre>
