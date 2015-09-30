@@ -130,6 +130,9 @@ public final class DocumentsContract {
      */
     private static final int THUMBNAIL_BUFFER_SIZE = (int) (128 * KB_IN_BYTES);
 
+    /** {@hide} */
+    public static final String PACKAGE_DOCUMENTS_UI = "com.android.documentsui";
+
     /**
      * Constants related to a document, including {@link Cursor} column names
      * and flags.

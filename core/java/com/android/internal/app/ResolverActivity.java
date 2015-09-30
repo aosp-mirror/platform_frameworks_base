@@ -796,7 +796,7 @@ public class ResolverActivity extends Activity {
         return false;
     }
 
-    boolean shouldAutoLaunchSingleChoice() {
+    boolean shouldAutoLaunchSingleChoice(TargetInfo target) {
         return true;
     }
 
@@ -837,18 +837,21 @@ public class ResolverActivity extends Activity {
         mAlwaysUseOption = alwaysUseOption;
 
         int count = mAdapter.getUnfilteredCount();
-        if ((!shouldAutoLaunchSingleChoice() && count > 0)
-                || count > 1
-                || (count == 1 && mAdapter.getOtherProfile() != null)) {
+        if (count == 1 && mAdapter.getOtherProfile() == null) {
+            // Only one target, so we're a candidate to auto-launch!
+            final TargetInfo target = mAdapter.targetInfoForPosition(0, false);
+            if (shouldAutoLaunchSingleChoice(target)) {
+                safelyStartActivity(target);
+                mPackageMonitor.unregister();
+                mRegistered = false;
+                finish();
+                return true;
+            }
+        }
+        if (count > 0) {
             setContentView(layoutId);
             mAdapterView = (AbsListView) findViewById(R.id.resolver_list);
             onPrepareAdapterView(mAdapterView, mAdapter, alwaysUseOption);
-        } else if (count == 1) {
-            safelyStartActivity(mAdapter.targetInfoForPosition(0, false));
-            mPackageMonitor.unregister();
-            mRegistered = false;
-            finish();
-            return true;
         } else {
             setContentView(R.layout.resolver_list);
 
