@@ -30,6 +30,7 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.design.widget.Snackbar;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.Menu;
@@ -37,7 +38,6 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.BaseAdapter;
 import android.widget.Spinner;
-import android.widget.Toast;
 import android.widget.Toolbar;
 
 import com.android.documentsui.RecentsProvider.ResumeColumns;
@@ -305,7 +305,7 @@ public class FilesActivity extends BaseActivity {
         try {
             startActivity(intent);
         } catch (ActivityNotFoundException ex2) {
-            Toast.makeText(this, R.string.toast_no_application, Toast.LENGTH_SHORT).show();
+            Shared.makeSnackbar(this, R.string.toast_no_application, Snackbar.LENGTH_SHORT).show();
         }
     }
 

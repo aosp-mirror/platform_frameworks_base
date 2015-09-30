@@ -91,7 +91,6 @@ import android.view.ViewGroup;
 import android.view.ViewParent;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.android.documentsui.BaseActivity.DocumentContext;
 import com.android.documentsui.MultiSelectManager.Selection;
@@ -805,8 +804,8 @@ public class DirectoryFragment extends Fragment {
 
         mModel.markForDeletion(selected);
 
-        Activity activity = getActivity();
-        Snackbar.make(this.getView(), message, Snackbar.LENGTH_LONG)
+        final Activity activity = getActivity();
+        Shared.makeSnackbar(activity, message, Snackbar.LENGTH_LONG)
                 .setAction(
                         R.string.undo,
                         new android.view.View.OnClickListener() {
@@ -824,8 +823,8 @@ public class DirectoryFragment extends Fragment {
                                             new Runnable() {
                                                 @Override
                                                 public void run() {
-                                                    Snackbar.make(
-                                                            DirectoryFragment.this.getView(),
+                                                    Shared.makeSnackbar(
+                                                            activity,
                                                             R.string.toast_failed_delete,
                                                             Snackbar.LENGTH_LONG)
                                                             .show();
@@ -1245,9 +1244,11 @@ public class DirectoryFragment extends Fragment {
 
     private void copyDocuments(final List<DocumentInfo> docs, final DocumentInfo destination) {
         if (!canCopy(docs, destination)) {
-            Toast.makeText(
+            Shared.makeSnackbar(
                     getActivity(),
-                    R.string.clipboard_files_cannot_paste, Toast.LENGTH_SHORT).show();
+                    R.string.clipboard_files_cannot_paste,
+                    Snackbar.LENGTH_SHORT)
+                    .show();
             return;
         }
 
@@ -1297,10 +1298,10 @@ public class DirectoryFragment extends Fragment {
             void onDocumentsReady(List<DocumentInfo> docs) {
                 mClipper.clipDocuments(docs);
                 Activity activity = getActivity();
-                Toast.makeText(activity,
+                Shared.makeSnackbar(activity,
                         activity.getResources().getQuantityString(
                                 R.plurals.clipboard_files_clipped, docs.size(), docs.size()),
-                                Toast.LENGTH_SHORT).show();
+                                Snackbar.LENGTH_SHORT).show();
             }
         }.execute(items);
     }
