@@ -18,16 +18,16 @@ package com.android.documentsui;
 
 import static org.junit.Assert.*;
 
+import android.test.AndroidTestCase;
+
 import com.android.documentsui.MultiSelectManager.Selection;
 
-import org.junit.Before;
-import org.junit.Test;
 
-public class MultiSelectManager_SelectionTest {
+public class MultiSelectManager_SelectionTest extends AndroidTestCase{
 
     private Selection selection;
 
-    @Before
+    @Override
     public void setUp() throws Exception {
         selection = new Selection();
         selection.add(3);
@@ -35,8 +35,7 @@ public class MultiSelectManager_SelectionTest {
         selection.add(9);
     }
 
-    @Test
-    public void add() {
+    public void testAdd() {
         // We added in setUp.
         assertEquals(3, selection.size());
         assertContains(3);
@@ -44,29 +43,25 @@ public class MultiSelectManager_SelectionTest {
         assertContains(9);
     }
 
-    @Test
-    public void remove() {
+    public void testRemove() {
         selection.remove(3);
         selection.remove(5);
         assertEquals(1, selection.size());
         assertContains(9);
     }
 
-    @Test
-    public void clear() {
+    public void testClear() {
         selection.clear();
         assertEquals(0, selection.size());
     }
 
-    @Test
-    public void isEmpty() {
+    public void testIsEmpty() {
         assertTrue(new Selection().isEmpty());
         selection.clear();
         assertTrue(selection.isEmpty());
     }
 
-    @Test
-    public void sizeAndGet() {
+    public void testSizeAndGet() {
         Selection other = new Selection();
         for (int i = 0; i < selection.size(); i++) {
             other.add(selection.get(i));
@@ -74,13 +69,11 @@ public class MultiSelectManager_SelectionTest {
         assertEquals(selection.size(), other.size());
     }
 
-    @Test
-    public void equalsSelf() {
+    public void testEqualsSelf() {
         assertEquals(selection, selection);
     }
 
-    @Test
-    public void equalsOther() {
+    public void testEqualsOther() {
         Selection other = new Selection();
         other.add(3);
         other.add(5);
@@ -89,23 +82,20 @@ public class MultiSelectManager_SelectionTest {
         assertEquals(selection.hashCode(), other.hashCode());
     }
 
-    @Test
-    public void equalsCopy() {
+    public void testEqualsCopy() {
         Selection other = new Selection();
         other.copyFrom(selection);
         assertEquals(selection, other);
         assertEquals(selection.hashCode(), other.hashCode());
     }
 
-    @Test
-    public void notEquals() {
+    public void testNotEquals() {
         Selection other = new Selection();
         other.add(789);
         assertFalse(selection.equals(other));
     }
 
-    @Test
-    public void expandBefore() {
+    public void testExpandBefore() {
         selection.expand(2, 10);
         assertEquals(3, selection.size());
         assertContains(13);
@@ -113,8 +103,7 @@ public class MultiSelectManager_SelectionTest {
         assertContains(19);
     }
 
-    @Test
-    public void expandAfter() {
+    public void testExpandAfter() {
         selection.expand(10, 10);
         assertEquals(3, selection.size());
         assertContains(3);
@@ -122,8 +111,7 @@ public class MultiSelectManager_SelectionTest {
         assertContains(9);
     }
 
-    @Test
-    public void expandSplit() {
+    public void testExpandSplit() {
         selection.expand(5, 10);
         assertEquals(3, selection.size());
         assertContains(3);
@@ -131,8 +119,7 @@ public class MultiSelectManager_SelectionTest {
         assertContains(19);
     }
 
-    @Test
-    public void expandEncompased() {
+    public void testExpandEncompased() {
         selection.expand(2, 10);
         assertEquals(3, selection.size());
         assertContains(13);
@@ -140,8 +127,7 @@ public class MultiSelectManager_SelectionTest {
         assertContains(19);
     }
 
-    @Test
-    public void collapseBefore() {
+    public void testCollapseBefore() {
         selection.collapse(0, 2);
         assertEquals(3, selection.size());
         assertContains(1);
@@ -149,8 +135,7 @@ public class MultiSelectManager_SelectionTest {
         assertContains(7);
     }
 
-    @Test
-    public void collapseAfter() {
+    public void testCollapseAfter() {
         selection.collapse(10, 10);
         assertEquals(3, selection.size());
         assertContains(3);
@@ -158,8 +143,7 @@ public class MultiSelectManager_SelectionTest {
         assertContains(9);
     }
 
-    @Test
-    public void collapseAcross() {
+    public void testCollapseAcross() {
         selection.collapse(0, 10);
         assertEquals(0, selection.size());
     }
