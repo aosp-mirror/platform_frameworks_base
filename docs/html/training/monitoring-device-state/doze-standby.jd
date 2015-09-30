@@ -217,7 +217,7 @@ minutes per app.</p>
   The Doze restriction on network access is also likely to affect your app,
   especially if the app relies on real-time messages such as tickles or
   notifications. If your app requires a persistent connection to the network to
-  receive messages, you should use <a href="#using_gcm">Google Cloud Messaging(GCM)</a>
+  receive messages, you should use <a href="#using_gcm">Google Cloud Messaging (GCM)</a>
   if possible.
 </p>
 
@@ -283,7 +283,7 @@ minutes per app.</p>
 
 <p>
   High-priority GCM messages do not otherwise affect Doze mode, and they don’t
-  affect the state of any other app, This means that your app can use them to communicate
+  affect the state of any other app. This means that your app can use them to communicate
   efficiently while minimizing battery impacts across the system and device.
 </p>
 
@@ -377,13 +377,18 @@ matches the <a href="#whitelisting-cases">acceptable use cases</a> for whitelist
   <li>Run your app and leave it active.
   </li>
 
-  <li>Force the system to cycle through Doze modes by running the following
-  commands:
+  <li>Shut off the device screen. (The app remains active.)
   </li>
 
-  <pre class="no-pretty-print">$ adb shell dumpsys battery unplug
-$ adb shell dumpsys deviceidle step
-$ adb shell dumpsys deviceidle -h</pre>
+  <li>Force the system to cycle through Doze modes by running the following
+  commands:
+
+  <pre class="no-pretty-print">
+$ adb shell dumpsys battery unplug
+$ adb shell dumpsys deviceidle step</pre>
+
+  <p>You may need to run the second command more than once. Repeat it until
+  the device state changes to idle.</p>
   </li>
 
   <li> Observe the behavior of your app after you reactivate the device. Make
