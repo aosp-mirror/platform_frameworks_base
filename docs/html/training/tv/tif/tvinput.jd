@@ -157,10 +157,10 @@ for more information about working with {@link android.view.Surface} to render v
 <p>The {@link android.media.tv.TvInputService.Session} handles the
 {@link android.media.tv.TvInputService.Session#onTune(android.net.Uri) onTune()}
 event when the user selects a channel, and notifies the system TV app for changes in the content and
-content meta data. These <code>notify()</code>code> methods are described in
+content meta data. These <code>notify()</code> methods are described in
 <a href="{@docRoot}training/tv/tif/ui.html#control">
-Control Content</a> and <a href="training/tv/tif/ui.html#track">Handle Track Selection</a> further
-in this training.</p>
+Control Content</a> and <a href="{@docRoot}training/tv/tif/ui.html#track">Handle Track Selection</a>
+further in this training.</p>
 
 <h2 id="setup">Define Setup and Settings Activities</h2>
 
