@@ -21,11 +21,13 @@ import static android.media.AudioAttributes.USAGE_NOTIFICATION;
 import static android.media.AudioAttributes.USAGE_NOTIFICATION_RINGTONE;
 
 import android.app.AppOpsManager;
+import android.app.AutomaticZenRule;
 import android.app.NotificationManager;
 import android.app.NotificationManager.Policy;
 import android.content.ComponentName;
 import android.content.ContentResolver;
 import android.content.Context;
+import android.content.pm.PackageManager;
 import android.content.res.Resources;
 import android.content.res.XmlResourceParser;
 import android.database.ContentObserver;
@@ -34,6 +36,7 @@ import android.media.AudioManagerInternal;
 import android.media.AudioSystem;
 import android.media.VolumePolicy;
 import android.net.Uri;
+import android.os.Binder;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -62,6 +65,7 @@ import org.xmlpull.v1.XmlSerializer;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 
 /**
@@ -196,6 +200,121 @@ public class ZenModeHelper {
         return mZenMode;
     }
 
+    public List<AutomaticZenRule> getAutomaticZenRules() {
+        List<AutomaticZenRule> rules = new ArrayList<>();
+        if (mConfig == null) return rules;
+        for(ZenRule rule : mConfig.automaticRules.values()) {
+            if (canManageAutomaticZenRule(rule)) {
+                rules.add(createAutomaticZenRule(rule));
+            }
+        }
+        return rules;
+    }
+
+    public AutomaticZenRule getAutomaticZenRule(String name) {
+        if (mConfig == null) return null;
+        for(ZenRule rule : mConfig.automaticRules.values()) {
+            if (canManageAutomaticZenRule(rule) && rule.name.equals(name)) {
+                return createAutomaticZenRule(rule);
+            }
+        }
+        return null;
+    }
+
+    public boolean addOrUpdateAutomaticZenRule(AutomaticZenRule automaticZenRule, String reason) {
+        if (mConfig == null) return false;
+        if (DEBUG) {
+            Log.d(TAG, "addOrUpdateAutomaticZenRule zenRule=" + automaticZenRule
+                    + " reason=" + reason);
+        }
+        final ZenModeConfig newConfig = mConfig.copy();
+        String ruleId = findMatchingRuleId(newConfig, automaticZenRule.getName());
+        ZenModeConfig.ZenRule rule = new ZenModeConfig.ZenRule();
+        if (ruleId == null) {
+            ruleId = newConfig.newRuleId();
+            rule.name = automaticZenRule.getName();
+            rule.component = automaticZenRule.getOwner();
+        } else {
+            rule = newConfig.automaticRules.get(ruleId);
+            if (!canManageAutomaticZenRule(rule)) {
+                throw new SecurityException(
+                        "Cannot update rules not owned by your condition provider");
+            }
+        }
+        if (rule.enabled != automaticZenRule.isEnabled()) {
+            rule.snoozing = false;
+        }
+        rule.condition = null;
+        rule.conditionId = automaticZenRule.getConditionId();
+        rule.enabled = automaticZenRule.isEnabled();
+        rule.zenMode = NotificationManager.zenModeFromInterruptionFilter(
+                automaticZenRule.getInterruptionFilter(), Global.ZEN_MODE_OFF);
+        newConfig.automaticRules.put(ruleId, rule);
+        return setConfig(newConfig, reason, true);
+    }
+
+    public boolean renameAutomaticZenRule(String oldName, String newName, String reason) {
+        if (mConfig == null) return false;
+        if (DEBUG) {
+            Log.d(TAG, "renameAutomaticZenRule oldName=" + oldName + "  newName=" + newName
+                    + " reason=" + reason);
+        }
+        final ZenModeConfig newConfig = mConfig.copy();
+        String ruleId = findMatchingRuleId(newConfig, oldName);
+        if (ruleId == null) {
+            return false;
+        } else {
+            ZenRule rule = newConfig.automaticRules.get(ruleId);
+            if (!canManageAutomaticZenRule(rule)) {
+                throw new SecurityException(
+                        "Cannot update rules not owned by your condition provider");
+            }
+            rule.name = newName;
+            return setConfig(newConfig, reason, true);
+        }
+    }
+
+    public boolean removeAutomaticZenRule(String name, String reason) {
+        if (mConfig == null) return false;
+        final ZenModeConfig newConfig = mConfig.copy();
+        String ruleId = findMatchingRuleId(newConfig, name);
+        if (ruleId != null) {
+            ZenRule rule = newConfig.automaticRules.get(ruleId);
+            if (canManageAutomaticZenRule(rule)) {
+                newConfig.automaticRules.remove(ruleId);
+                if (DEBUG) Log.d(TAG, "removeZenRule zenRule=" + name + " reason=" + reason);
+            } else {
+                throw new SecurityException(
+                        "Cannot delete rules not owned by your condition provider");
+            }
+        }
+        return setConfig(newConfig, reason, true);
+    }
+
+    public boolean canManageAutomaticZenRule(ZenRule rule) {
+        if (mContext.checkCallingPermission(android.Manifest.permission.MANAGE_NOTIFICATIONS)
+                == PackageManager.PERMISSION_GRANTED) {
+            return true;
+        } else {
+            String[] packages = mContext.getPackageManager().getPackagesForUid(
+                    Binder.getCallingUid());
+            if (packages != null) {
+                final int packageCount = packages.length;
+                for (int i = 0; i < packageCount; i++) {
+                    if (packages[i].equals(rule.component.getPackageName())) {
+                        return true;
+                    }
+                }
+            }
+            return false;
+        }
+    }
+
+    private AutomaticZenRule createAutomaticZenRule(ZenRule rule) {
+        return new AutomaticZenRule(rule.name, rule.component, rule.conditionId,
+                NotificationManager.zenModeToInterruptionFilter(rule.zenMode), rule.enabled);
+    }
+
     public void setManualZenMode(int zenMode, Uri conditionId, String reason) {
         setManualZenMode(zenMode, conditionId, reason, true /*setRingerMode*/);
     }
@@ -223,6 +342,15 @@ public class ZenModeHelper {
             newConfig.manualRule = newRule;
         }
         setConfig(newConfig, reason, setRingerMode);
+    }
+
+    private String findMatchingRuleId(ZenModeConfig config, String ruleName) {
+        for (String ruleId : config.automaticRules.keySet()) {
+            if (config.automaticRules.get(ruleId).name.equals(ruleName)) {
+                return ruleId;
+            }
+        }
+        return null;
     }
 
     public void dump(PrintWriter pw, String prefix) {
@@ -272,7 +400,7 @@ public class ZenModeHelper {
                 }
                 config.manualRule = null;  // don't restore the manual rule
                 if (config.automaticRules != null) {
-                    for (ZenModeConfig.ZenRule automaticRule : config.automaticRules.values()) {
+                    for (ZenRule automaticRule : config.automaticRules.values()) {
                         // don't restore transient state from restored automatic rules
                         automaticRule.snoozing = false;
                         automaticRule.condition = null;
@@ -319,36 +447,41 @@ public class ZenModeHelper {
     }
 
     private boolean setConfig(ZenModeConfig config, String reason, boolean setRingerMode) {
-        if (config == null || !config.isValid()) {
-            Log.w(TAG, "Invalid config in setConfig; " + config);
-            return false;
-        }
-        if (config.user != mUser) {
-            // simply store away for background users
+        final long identity = Binder.clearCallingIdentity();
+        try {
+            if (config == null || !config.isValid()) {
+                Log.w(TAG, "Invalid config in setConfig; " + config);
+                return false;
+            }
+            if (config.user != mUser) {
+                // simply store away for background users
+                mConfigs.put(config.user, config);
+                if (DEBUG) Log.d(TAG, "setConfig: store config for user " + config.user);
+                return true;
+            }
+            mConditions.evaluateConfig(config, false /*processSubscriptions*/);  // may modify config
             mConfigs.put(config.user, config);
-            if (DEBUG) Log.d(TAG, "setConfig: store config for user " + config.user);
+            if (DEBUG) Log.d(TAG, "setConfig reason=" + reason, new Throwable());
+            ZenLog.traceConfig(reason, mConfig, config);
+            final boolean policyChanged = !Objects.equals(getNotificationPolicy(mConfig),
+                    getNotificationPolicy(config));
+            mConfig = config;
+            if (config.equals(mConfig)) {
+                dispatchOnConfigChanged();
+            }
+            if (policyChanged){
+                dispatchOnPolicyChanged();
+            }
+            final String val = Integer.toString(mConfig.hashCode());
+            Global.putString(mContext.getContentResolver(), Global.ZEN_MODE_CONFIG_ETAG, val);
+            if (!evaluateZenMode(reason, setRingerMode)) {
+                applyRestrictions();  // evaluateZenMode will also apply restrictions if changed
+            }
+            mConditions.evaluateConfig(config, true /*processSubscriptions*/);
             return true;
+        } finally {
+            Binder.restoreCallingIdentity(identity);
         }
-        mConditions.evaluateConfig(config, false /*processSubscriptions*/);  // may modify config
-        mConfigs.put(config.user, config);
-        if (DEBUG) Log.d(TAG, "setConfig reason=" + reason, new Throwable());
-        ZenLog.traceConfig(reason, mConfig, config);
-        final boolean policyChanged = !Objects.equals(getNotificationPolicy(mConfig),
-                getNotificationPolicy(config));
-        mConfig = config;
-        if (config.equals(mConfig)) {
-            dispatchOnConfigChanged();
-        }
-        if (policyChanged){
-            dispatchOnPolicyChanged();
-        }
-        final String val = Integer.toString(mConfig.hashCode());
-        Global.putString(mContext.getContentResolver(), Global.ZEN_MODE_CONFIG_ETAG, val);
-        if (!evaluateZenMode(reason, setRingerMode)) {
-            applyRestrictions();  // evaluateZenMode will also apply restrictions if changed
-        }
-        mConditions.evaluateConfig(config, true /*processSubscriptions*/);
-        return true;
     }
 
     private int getZenModeSetting() {
@@ -506,6 +639,7 @@ public class ZenModeHelper {
                 .getString(R.string.zen_mode_default_weeknights_name);
         rule1.conditionId = ZenModeConfig.toScheduleConditionId(weeknights);
         rule1.zenMode = Global.ZEN_MODE_ALARMS;
+        rule1.component = ScheduleConditionProvider.COMPONENT;
         config.automaticRules.put(config.newRuleId(), rule1);
 
         final ScheduleInfo weekends = new ScheduleInfo();
@@ -519,6 +653,7 @@ public class ZenModeHelper {
                 .getString(R.string.zen_mode_default_weekends_name);
         rule2.conditionId = ZenModeConfig.toScheduleConditionId(weekends);
         rule2.zenMode = Global.ZEN_MODE_ALARMS;
+        rule2.component = ScheduleConditionProvider.COMPONENT;
         config.automaticRules.put(config.newRuleId(), rule2);
     }
 
@@ -533,6 +668,7 @@ public class ZenModeHelper {
         rule.name = mContext.getResources().getString(R.string.zen_mode_default_events_name);
         rule.conditionId = ZenModeConfig.toEventConditionId(events);
         rule.zenMode = Global.ZEN_MODE_ALARMS;
+        rule.component = EventConditionProvider.COMPONENT;
         config.automaticRules.put(config.newRuleId(), rule);
     }
 
@@ -573,6 +709,7 @@ public class ZenModeHelper {
                 rule.conditionId = ZenModeConfig.toScheduleConditionId(schedule);
                 rule.zenMode = v1.sleepNone ? Global.ZEN_MODE_NO_INTERRUPTIONS
                         : Global.ZEN_MODE_IMPORTANT_INTERRUPTIONS;
+                rule.component = ScheduleConditionProvider.COMPONENT;
                 rt.automaticRules.put(rt.newRuleId(), rule);
             } else {
                 Log.i(TAG, "No existing V1 downtime found, generating default schedules");

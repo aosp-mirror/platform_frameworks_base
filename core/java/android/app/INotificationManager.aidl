@@ -30,6 +30,7 @@ import android.service.notification.IConditionListener;
 import android.service.notification.IConditionProvider;
 import android.service.notification.INotificationListener;
 import android.service.notification.StatusBarNotification;
+import android.app.AutomaticZenRule;
 import android.service.notification.ZenModeConfig;
 
 /** {@hide} */
@@ -92,6 +93,11 @@ interface INotificationManager
     String[] getPackagesRequestingNotificationPolicyAccess();
     boolean isNotificationPolicyAccessGrantedForPackage(String pkg);
     void setNotificationPolicyAccessGranted(String pkg, boolean granted);
+    AutomaticZenRule getAutomaticZenRule(String name);
+    List<AutomaticZenRule> getAutomaticZenRules();
+    boolean addOrUpdateAutomaticZenRule(in AutomaticZenRule automaticZenRule);
+    boolean renameAutomaticZenRule(String oldName, String newName);
+    boolean removeAutomaticZenRule(String name);
 
     byte[] getBackupPayload(int user);
     void applyRestore(in byte[] payload, int user);
