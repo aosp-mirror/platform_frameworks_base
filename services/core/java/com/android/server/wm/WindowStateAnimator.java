@@ -16,6 +16,7 @@
 
 package com.android.server.wm;
 
+import static android.view.WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_STARTING;
 import static com.android.server.wm.WindowManagerService.DEBUG_ANIM;
 import static com.android.server.wm.WindowManagerService.DEBUG_LAYERS;
@@ -868,14 +869,18 @@ class WindowStateAnimator {
                 mSurfaceW = width;
                 mSurfaceH = height;
 
-                final boolean isHwAccelerated = (attrs.flags &
-                        WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED) != 0;
+                final boolean isHwAccelerated = (attrs.flags & FLAG_HARDWARE_ACCELERATED) != 0;
                 final int format = isHwAccelerated ? PixelFormat.TRANSLUCENT : attrs.format;
                 if (!PixelFormat.formatHasAlpha(attrs.format)
+                        // Don't make surface with surfaceInsets opaque as they display a
+                        // translucent shadow.
                         && attrs.surfaceInsets.left == 0
                         && attrs.surfaceInsets.top == 0
                         && attrs.surfaceInsets.right == 0
-                        && attrs.surfaceInsets.bottom  == 0) {
+                        && attrs.surfaceInsets.bottom == 0
+                        // Don't make surface opaque when resizing to reduce the amount of
+                        // artifacts shown in areas the app isn't drawing content to.
+                        && !w.isDragResizing()) {
                     flags |= SurfaceControl.OPAQUE;
                 }
 
@@ -1713,8 +1718,7 @@ class WindowStateAnimator {
             return false;
         }
         final LayoutParams attrs = mWin.getAttrs();
-        final boolean isHwAccelerated = (attrs.flags &
-                WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED) != 0;
+        final boolean isHwAccelerated = (attrs.flags & FLAG_HARDWARE_ACCELERATED) != 0;
         final int format = isHwAccelerated ? PixelFormat.TRANSLUCENT : attrs.format;
         if (format == mSurfaceFormat) {
             setOpaqueLocked(!PixelFormat.formatHasAlpha(attrs.format));
