@@ -23,8 +23,11 @@ import android.os.WorkSource;
 
 interface IPowerManager
 {
-    // WARNING: The first five methods must remain the first five methods because their
-    // transaction numbers must not change unless IPowerManager.cpp is also updated.
+    // WARNING: When methods are inserted or deleted, the transaction IDs in
+    // frameworks/native/include/powermanager/IPowerManager.h must be updated to match the order in this file.
+    //
+    // When a method's argument list is changed, BnPowerManager's corresponding serialization code (if any) in
+    // frameworks/native/services/powermanager/IPowerManager.cpp must be updated.
     void acquireWakeLock(IBinder lock, int flags, String tag, String packageName, in WorkSource ws,
             String historyTag);
     void acquireWakeLockWithUid(IBinder lock, int flags, String tag, String packageName,
