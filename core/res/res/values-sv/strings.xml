@@ -1235,7 +1235,7 @@
     <string name="activity_resolver_use_once" msgid="2404644797149173758">"Bara en gång"</string>
     <string name="activity_resolver_work_profiles_support" msgid="185598180676883455">"%1$s har inte stöd för arbetsprofil"</string>
     <string name="default_audio_route_name" product="tablet" msgid="4617053898167127471">"Surfplatta"</string>
-    <string name="default_audio_route_name" product="tv" msgid="9158088547603019321">"Tv"</string>
+    <string name="default_audio_route_name" product="tv" msgid="9158088547603019321">"TV"</string>
     <string name="default_audio_route_name" product="default" msgid="4239291273420140123">"Mobil"</string>
     <string name="default_audio_route_name_headphones" msgid="8119971843803439110">"Hörlurar"</string>
     <string name="default_audio_route_name_dock_speakers" msgid="6240602982276591864">"Dockningsstationens högtalare"</string>
