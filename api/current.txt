@@ -4021,6 +4021,8 @@ package android.app {
     ctor public AutomaticZenRule(android.os.Parcel);
     method public int describeContents();
     method public android.net.Uri getConditionId();
+    method public long getCreationTime();
+    method public java.lang.String getId();
     method public int getInterruptionFilter();
     method public java.lang.String getName();
     method public android.content.ComponentName getOwner();

@@ -33,6 +33,8 @@ public class AutomaticZenRule implements Parcelable {
     private int interruptionFilter;
     private Uri conditionId;
     private ComponentName owner;
+    private String id;
+    private long creationTime;
 
     /**
      * Creates an automatic zen rule.
@@ -55,6 +57,17 @@ public class AutomaticZenRule implements Parcelable {
         this.enabled = enabled;
     }
 
+    /**
+     * @SystemApi
+     * @hide
+     */
+    public AutomaticZenRule(String name, ComponentName owner, Uri conditionId,
+            int interruptionFilter, boolean enabled, String id, long creationTime) {
+        this(name, owner, conditionId, interruptionFilter, enabled);
+        this.id = id;
+        this.creationTime = creationTime;
+    }
+
     public AutomaticZenRule(Parcel source) {
         enabled = source.readInt() == 1;
         if (source.readInt() == 1) {
@@ -63,6 +76,10 @@ public class AutomaticZenRule implements Parcelable {
         interruptionFilter = source.readInt();
         conditionId = source.readParcelable(null);
         owner = source.readParcelable(null);
+        if (source.readInt() == 1) {
+            id = source.readString();
+        }
+        creationTime = source.readLong();
     }
 
     /**
@@ -98,6 +115,20 @@ public class AutomaticZenRule implements Parcelable {
      */
     public boolean isEnabled() {
         return enabled;
+    }
+
+    /**
+     * Returns the wall time in milliseconds when this rule was created, if known.
+     */
+    public long getCreationTime() {
+      return creationTime;
+    }
+
+    /**
+     * Returns the unique identifier for this rule.
+     */
+    public String getId() {
+      return id;
     }
 
     /**
@@ -146,6 +177,13 @@ public class AutomaticZenRule implements Parcelable {
         dest.writeInt(interruptionFilter);
         dest.writeParcelable(conditionId, 0);
         dest.writeParcelable(owner, 0);
+        if (id != null) {
+            dest.writeInt(1);
+            dest.writeString(id);
+        } else {
+            dest.writeInt(0);
+        }
+        dest.writeLong(creationTime);
     }
 
     @Override
@@ -156,6 +194,8 @@ public class AutomaticZenRule implements Parcelable {
                 .append(",interruptionFilter=").append(interruptionFilter)
                 .append(",conditionId=").append(conditionId)
                 .append(",owner=").append(owner)
+                .append(",id=").append(id)
+                .append(",creationTime=").append(creationTime)
                 .append(']').toString();
     }
 
@@ -168,12 +208,14 @@ public class AutomaticZenRule implements Parcelable {
                 && Objects.equals(other.name, name)
                 && other.interruptionFilter == interruptionFilter
                 && Objects.equals(other.conditionId, conditionId)
-                && Objects.equals(other.owner, owner);
+                && Objects.equals(other.owner, owner)
+                && Objects.equals(other.id, id)
+                && other.creationTime == creationTime;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(enabled, name, interruptionFilter, conditionId, owner);
+        return Objects.hash(enabled, name, interruptionFilter, conditionId, owner, id, creationTime);
     }
 
     public static final Parcelable.Creator<AutomaticZenRule> CREATOR

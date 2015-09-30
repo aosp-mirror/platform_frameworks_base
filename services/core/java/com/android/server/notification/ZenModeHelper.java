@@ -232,6 +232,8 @@ public class ZenModeHelper {
         ZenModeConfig.ZenRule rule = new ZenModeConfig.ZenRule();
         if (ruleId == null) {
             ruleId = newConfig.newRuleId();
+            rule.id = ruleId;
+            rule.creationTime = System.currentTimeMillis();
             rule.name = automaticZenRule.getName();
             rule.component = automaticZenRule.getOwner();
         } else {
@@ -312,7 +314,8 @@ public class ZenModeHelper {
 
     private AutomaticZenRule createAutomaticZenRule(ZenRule rule) {
         return new AutomaticZenRule(rule.name, rule.component, rule.conditionId,
-                NotificationManager.zenModeToInterruptionFilter(rule.zenMode), rule.enabled);
+                NotificationManager.zenModeToInterruptionFilter(rule.zenMode), rule.enabled,
+                rule.id, rule.creationTime);
     }
 
     public void setManualZenMode(int zenMode, Uri conditionId, String reason) {
@@ -640,7 +643,9 @@ public class ZenModeHelper {
         rule1.conditionId = ZenModeConfig.toScheduleConditionId(weeknights);
         rule1.zenMode = Global.ZEN_MODE_ALARMS;
         rule1.component = ScheduleConditionProvider.COMPONENT;
-        config.automaticRules.put(config.newRuleId(), rule1);
+        rule1.id = config.newRuleId();
+        rule1.creationTime = System.currentTimeMillis();
+        config.automaticRules.put(rule1.id, rule1);
 
         final ScheduleInfo weekends = new ScheduleInfo();
         weekends.days = ZenModeConfig.WEEKEND_DAYS;
@@ -654,7 +659,9 @@ public class ZenModeHelper {
         rule2.conditionId = ZenModeConfig.toScheduleConditionId(weekends);
         rule2.zenMode = Global.ZEN_MODE_ALARMS;
         rule2.component = ScheduleConditionProvider.COMPONENT;
-        config.automaticRules.put(config.newRuleId(), rule2);
+        rule2.id = config.newRuleId();
+        rule2.creationTime = System.currentTimeMillis();
+        config.automaticRules.put(rule2.id, rule2);
     }
 
     private void appendDefaultEventRules(ZenModeConfig config) {
@@ -669,7 +676,9 @@ public class ZenModeHelper {
         rule.conditionId = ZenModeConfig.toEventConditionId(events);
         rule.zenMode = Global.ZEN_MODE_ALARMS;
         rule.component = EventConditionProvider.COMPONENT;
-        config.automaticRules.put(config.newRuleId(), rule);
+        rule.id = config.newRuleId();
+        rule.creationTime = System.currentTimeMillis();
+        config.automaticRules.put(rule.id, rule);
     }
 
     private static int zenSeverity(int zen) {
