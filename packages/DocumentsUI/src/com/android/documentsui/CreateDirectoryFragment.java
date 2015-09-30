@@ -32,6 +32,7 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.provider.DocumentsContract;
 import android.provider.DocumentsContract.Document;
+import android.support.design.widget.Snackbar;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
@@ -39,7 +40,6 @@ import android.view.View;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.TextView.OnEditorActionListener;
-import android.widget.Toast;
 
 import com.android.documentsui.model.DocumentInfo;
 
@@ -147,7 +147,7 @@ public class CreateDirectoryFragment extends DialogFragment {
                 // Navigate into newly created child
                 mActivity.onDirectoryCreated(result);
             } else {
-                Toast.makeText(mActivity, R.string.create_error, Toast.LENGTH_SHORT).show();
+                Shared.makeSnackbar(mActivity, R.string.create_error, Snackbar.LENGTH_SHORT).show();
             }
 
             mActivity.setPending(false);

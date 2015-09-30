@@ -20,6 +20,7 @@ import static com.android.documentsui.Shared.DEBUG;
 import static com.android.documentsui.model.DocumentInfo.getCursorLong;
 import static com.android.documentsui.model.DocumentInfo.getCursorString;
 
+import android.app.Activity;
 import android.app.IntentService;
 import android.app.Notification;
 import android.app.NotificationManager;
@@ -37,6 +38,7 @@ import android.os.RemoteException;
 import android.os.SystemClock;
 import android.provider.DocumentsContract;
 import android.provider.DocumentsContract.Document;
+import android.support.design.widget.Snackbar;
 import android.text.format.DateUtils;
 import android.util.Log;
 import android.widget.Toast;
@@ -107,10 +109,10 @@ public class CopyService extends IntentService {
      * @param srcDocs A list of src files to copy.
      * @param dstStack The copy destination stack.
      */
-    public static void start(Context context, List<DocumentInfo> srcDocs, DocumentStack dstStack,
+    public static void start(Activity activity, List<DocumentInfo> srcDocs, DocumentStack dstStack,
             int mode) {
-        final Resources res = context.getResources();
-        final Intent copyIntent = new Intent(context, CopyService.class);
+        final Resources res = activity.getResources();
+        final Intent copyIntent = new Intent(activity, CopyService.class);
         copyIntent.putParcelableArrayListExtra(
                 EXTRA_SRC_LIST, new ArrayList<DocumentInfo>(srcDocs));
         copyIntent.putExtra(EXTRA_STACK, (Parcelable) dstStack);
@@ -118,10 +120,10 @@ public class CopyService extends IntentService {
 
         int toastMessage = (mode == TRANSFER_MODE_COPY) ? R.plurals.copy_begin
                 : R.plurals.move_begin;
-        Toast.makeText(context,
+        Shared.makeSnackbar(activity,
                 res.getQuantityString(toastMessage, srcDocs.size(), srcDocs.size()),
-                Toast.LENGTH_SHORT).show();
-        context.startService(copyIntent);
+                Snackbar.LENGTH_SHORT).show();
+        activity.startService(copyIntent);
     }
 
     @Override

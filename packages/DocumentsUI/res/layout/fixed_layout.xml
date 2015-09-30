@@ -14,49 +14,59 @@
      limitations under the License.
 -->
 
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<!-- CoordinatorLayout is necessary for various components (e.g. Snackbars, and
+     floating action buttons) to operate correctly. -->
+<android.support.design.widget.CoordinatorLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical">
+    android:id="@+id/coordinator_layout">
 
-    <com.android.documentsui.DocumentsToolBar
-        android:id="@+id/toolbar"
+    <LinearLayout 
         android:layout_width="match_parent"
-        android:layout_height="?android:attr/actionBarSize"
-        android:background="?android:attr/colorPrimary"
-        android:elevation="8dp"
-        android:theme="?actionBarTheme"
-        android:popupTheme="?actionBarPopupTheme">
+        android:layout_height="match_parent"
+        android:orientation="vertical">
 
-        <Spinner
-            android:id="@+id/stack"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="4dp"
-            android:overlapAnchor="true" />
-
-    </com.android.documentsui.DocumentsToolBar>
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1"
-        android:orientation="horizontal"
-        android:baselineAligned="false"
-        android:divider="?android:attr/dividerVertical"
-        android:showDividers="middle">
-
-        <FrameLayout
-            android:id="@+id/container_roots"
-            android:layout_width="256dp"
-            android:layout_height="match_parent" />
-
-        <include layout="@layout/directory_cluster"
-            android:layout_width="0dp"
-            android:layout_weight="1"
+        <com.android.documentsui.DocumentsToolBar
+            android:id="@+id/toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="?android:attr/actionBarSize"
+            android:background="?android:attr/colorPrimary"
             android:elevation="8dp"
-            android:background="@color/material_grey_50" />
+            android:theme="?actionBarTheme"
+            android:popupTheme="?actionBarPopupTheme">
+
+            <Spinner
+                android:id="@+id/stack"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="4dp"
+                android:overlapAnchor="true" />
+
+        </com.android.documentsui.DocumentsToolBar>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:orientation="horizontal"
+            android:baselineAligned="false"
+            android:divider="?android:attr/dividerVertical"
+            android:showDividers="middle">
+
+            <FrameLayout
+                android:id="@+id/container_roots"
+                android:layout_width="256dp"
+                android:layout_height="match_parent" />
+
+            <include layout="@layout/directory_cluster"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:elevation="8dp"
+                android:background="@color/material_grey_50" />
+
+        </LinearLayout>
 
     </LinearLayout>
 
-</LinearLayout>
+</android.support.design.widget.CoordinatorLayout>

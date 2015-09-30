@@ -41,6 +41,7 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Parcelable;
 import android.provider.DocumentsContract;
+import android.support.design.widget.Snackbar;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -48,7 +49,6 @@ import android.view.View;
 import android.view.WindowManager;
 import android.widget.BaseAdapter;
 import android.widget.Spinner;
-import android.widget.Toast;
 import android.widget.Toolbar;
 
 import com.android.documentsui.RecentsProvider.RecentColumns;
@@ -611,8 +611,8 @@ public class DocumentsActivity extends BaseActivity {
             if (result != null) {
                 onTaskFinished(result);
             } else {
-                Toast.makeText(DocumentsActivity.this, R.string.save_error, Toast.LENGTH_SHORT)
-                        .show();
+                Shared.makeSnackbar(
+                    DocumentsActivity.this, R.string.save_error, Snackbar.LENGTH_SHORT).show();
             }
 
             setPending(false);
