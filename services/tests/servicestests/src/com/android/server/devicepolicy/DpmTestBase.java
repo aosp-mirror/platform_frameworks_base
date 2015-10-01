@@ -34,10 +34,9 @@ public abstract class DpmTestBase extends AndroidTestCase {
         super.setUp();
 
         mRealTestContext = super.getContext();
-        mMockContext = new DpmMockContext(super.getContext());
 
-        dataDir = new File(mRealTestContext.getCacheDir(), "test-data");
-        DpmTestUtils.clearDir(dataDir);
+        mMockContext = new DpmMockContext(
+                mRealTestContext, new File(mRealTestContext.getCacheDir(), "test-data"));
     }
 
     @Override
