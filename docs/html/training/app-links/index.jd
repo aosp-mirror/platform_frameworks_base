@@ -159,7 +159,7 @@ page.tags=androidm,marshmallow
 
     &lt;intent-filter <strong>android:autoVerify="true"</strong>&gt;
         &lt;action android:name="android.intent.action.VIEW" /&gt;
-        &lt;category android:name="android.intent.category.DEFAULT"gt;
+        &lt;category android:name="android.intent.category.DEFAULT" /&gt;
         &lt;category android:name="android.intent.category.BROWSABLE" /&gt;
         &lt;data android:scheme="http" android:host="www.android.com" /&gt;
         &lt;data android:scheme="https" android:host="www.android.com" /&gt;
