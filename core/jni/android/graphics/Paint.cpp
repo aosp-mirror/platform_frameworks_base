@@ -66,10 +66,6 @@ static JMetricsID gFontMetrics_fieldID;
 static jclass   gFontMetricsInt_class;
 static JMetricsID gFontMetricsInt_fieldID;
 
-static jclass   gPaint_class;
-static jfieldID gPaint_nativeInstanceID;
-static jfieldID gPaint_nativeTypefaceID;
-
 static void defaultSettingsForAndroid(Paint* paint) {
     // GlyphID encoding is required because we are using Harfbuzz shaping
     paint->setTextEncoding(Paint::kGlyphID_TextEncoding);
@@ -82,37 +78,17 @@ struct LocaleCacheEntry {
 
 static thread_local LocaleCacheEntry sSingleEntryLocaleCache;
 
-class PaintGlue {
-public:
+namespace PaintGlue {
     enum MoveOpt {
         AFTER, AT_OR_AFTER, BEFORE, AT_OR_BEFORE, AT
     };
-
-    static Paint* getNativePaint(JNIEnv* env, jobject paint) {
-        SkASSERT(env);
-        SkASSERT(paint);
-        SkASSERT(env->IsInstanceOf(paint, gPaint_class));
-        jlong paintHandle = env->GetLongField(paint, gPaint_nativeInstanceID);
-        android::Paint* p = reinterpret_cast<android::Paint*>(paintHandle);
-        SkASSERT(p);
-        return p;
-    }
-
-    static TypefaceImpl* getNativeTypeface(JNIEnv* env, jobject paint) {
-        SkASSERT(env);
-        SkASSERT(paint);
-        SkASSERT(env->IsInstanceOf(paint, gPaint_class));
-        jlong typefaceHandle = env->GetLongField(paint, gPaint_nativeTypefaceID);
-        android::TypefaceImpl* p = reinterpret_cast<android::TypefaceImpl*>(typefaceHandle);
-        return p;
-    }
 
     static void finalizer(JNIEnv* env, jobject clazz, jlong objHandle) {
         Paint* obj = reinterpret_cast<Paint*>(objHandle);
         delete obj;
     }
 
-    static jlong init(JNIEnv* env, jobject clazz) {
+    static jlong init(JNIEnv* env, jobject) {
         static_assert(1 <<  0 == SkPaint::kAntiAlias_Flag,          "paint_flags_mismatch");
         static_assert(1 <<  2 == SkPaint::kDither_Flag,             "paint_flags_mismatch");
         static_assert(1 <<  3 == SkPaint::kUnderlineText_Flag,      "paint_flags_mismatch");
@@ -149,9 +125,8 @@ public:
     // Equivalent to the Java Paint's FILTER_BITMAP_FLAG.
     static const uint32_t sFilterBitmapFlag = 0x02;
 
-    static jint getFlags(JNIEnv* env, jobject paint) {
-        NPE_CHECK_RETURN_ZERO(env, paint);
-        Paint* nativePaint = getNativePaint(env, paint);
+    static jint getFlags(JNIEnv* env, jobject, jlong paintHandle) {
+        Paint* nativePaint = reinterpret_cast<Paint*>(paintHandle);
         uint32_t result = nativePaint->getFlags();
         result &= ~sFilterBitmapFlag; // Filtering no longer stored in this bit. Mask away.
         if (nativePaint->getFilterQuality() != kNone_SkFilterQuality) {
@@ -160,9 +135,8 @@ public:
         return static_cast<jint>(result);
     }
 
-    static void setFlags(JNIEnv* env, jobject paint, jint flags) {
-        NPE_CHECK_RETURN_VOID(env, paint);
-        Paint* nativePaint = getNativePaint(env, paint);
+    static void setFlags(JNIEnv* env, jobject, jlong paintHandle, jint flags) {
+        Paint* nativePaint = reinterpret_cast<Paint*>(paintHandle);
         // Instead of modifying 0x02, change the filter level.
         nativePaint->setFilterQuality(flags & sFilterBitmapFlag
                 ? kLow_SkFilterQuality
@@ -175,57 +149,47 @@ public:
         nativePaint->setFlags(flags);
     }
 
-    static jint getHinting(JNIEnv* env, jobject paint) {
-        NPE_CHECK_RETURN_ZERO(env, paint);
-        return getNativePaint(env, paint)->getHinting()
+    static jint getHinting(JNIEnv* env, jobject, jlong paintHandle) {
+        return reinterpret_cast<Paint*>(paintHandle)->getHinting()
                 == Paint::kNo_Hinting ? 0 : 1;
     }
 
-    static void setHinting(JNIEnv* env, jobject paint, jint mode) {
-        NPE_CHECK_RETURN_VOID(env, paint);
-        getNativePaint(env, paint)->setHinting(
+    static void setHinting(JNIEnv* env, jobject, jlong paintHandle, jint mode) {
+        reinterpret_cast<Paint*>(paintHandle)->setHinting(
                 mode == 0 ? Paint::kNo_Hinting : Paint::kNormal_Hinting);
     }
 
-    static void setAntiAlias(JNIEnv* env, jobject paint, jboolean aa) {
-        NPE_CHECK_RETURN_VOID(env, paint);
-        getNativePaint(env, paint)->setAntiAlias(aa);
+    static void setAntiAlias(JNIEnv* env, jobject, jlong paintHandle, jboolean aa) {
+        reinterpret_cast<Paint*>(paintHandle)->setAntiAlias(aa);
     }
 
-    static void setLinearText(JNIEnv* env, jobject paint, jboolean linearText) {
-        NPE_CHECK_RETURN_VOID(env, paint);
-        getNativePaint(env, paint)->setLinearText(linearText);
+    static void setLinearText(JNIEnv* env, jobject, jlong paintHandle, jboolean linearText) {
+        reinterpret_cast<Paint*>(paintHandle)->setLinearText(linearText);
     }
 
-    static void setSubpixelText(JNIEnv* env, jobject paint, jboolean subpixelText) {
-        NPE_CHECK_RETURN_VOID(env, paint);
-        getNativePaint(env, paint)->setSubpixelText(subpixelText);
+    static void setSubpixelText(JNIEnv* env, jobject, jlong paintHandle, jboolean subpixelText) {
+        reinterpret_cast<Paint*>(paintHandle)->setSubpixelText(subpixelText);
     }
 
-    static void setUnderlineText(JNIEnv* env, jobject paint, jboolean underlineText) {
-        NPE_CHECK_RETURN_VOID(env, paint);
-        getNativePaint(env, paint)->setUnderlineText(underlineText);
+    static void setUnderlineText(JNIEnv* env, jobject, jlong paintHandle, jboolean underlineText) {
+        reinterpret_cast<Paint*>(paintHandle)->setUnderlineText(underlineText);
     }
 
-    static void setStrikeThruText(JNIEnv* env, jobject paint, jboolean strikeThruText) {
-        NPE_CHECK_RETURN_VOID(env, paint);
-        getNativePaint(env, paint)->setStrikeThruText(strikeThruText);
+    static void setStrikeThruText(JNIEnv* env, jobject, jlong paintHandle, jboolean strikeThruText) {
+        reinterpret_cast<Paint*>(paintHandle)->setStrikeThruText(strikeThruText);
     }
 
-    static void setFakeBoldText(JNIEnv* env, jobject paint, jboolean fakeBoldText) {
-        NPE_CHECK_RETURN_VOID(env, paint);
-        getNativePaint(env, paint)->setFakeBoldText(fakeBoldText);
+    static void setFakeBoldText(JNIEnv* env, jobject, jlong paintHandle, jboolean fakeBoldText) {
+        reinterpret_cast<Paint*>(paintHandle)->setFakeBoldText(fakeBoldText);
     }
 
-    static void setFilterBitmap(JNIEnv* env, jobject paint, jboolean filterBitmap) {
-        NPE_CHECK_RETURN_VOID(env, paint);
-        getNativePaint(env, paint)->setFilterQuality(
+    static void setFilterBitmap(JNIEnv* env, jobject, jlong paintHandle, jboolean filterBitmap) {
+        reinterpret_cast<Paint*>(paintHandle)->setFilterQuality(
                 filterBitmap ? kLow_SkFilterQuality : kNone_SkFilterQuality);
     }
 
-    static void setDither(JNIEnv* env, jobject paint, jboolean dither) {
-        NPE_CHECK_RETURN_VOID(env, paint);
-        getNativePaint(env, paint)->setDither(dither);
+    static void setDither(JNIEnv* env, jobject, jlong paintHandle, jboolean dither) {
+        reinterpret_cast<Paint*>(paintHandle)->setDither(dither);
     }
 
     static jint getStyle(JNIEnv* env, jobject clazz,jlong objHandle) {
@@ -239,48 +203,40 @@ public:
         obj->setStyle(style);
     }
 
-    static jint getColor(JNIEnv* env, jobject paint) {
-        NPE_CHECK_RETURN_ZERO(env, paint);
+    static jint getColor(JNIEnv* env, jobject, jlong paintHandle) {
         int color;
-        color = getNativePaint(env, paint)->getColor();
+        color = reinterpret_cast<Paint*>(paintHandle)->getColor();
         return static_cast<jint>(color);
     }
 
-    static jint getAlpha(JNIEnv* env, jobject paint) {
-        NPE_CHECK_RETURN_ZERO(env, paint);
+    static jint getAlpha(JNIEnv* env, jobject, jlong paintHandle) {
         int alpha;
-        alpha = getNativePaint(env, paint)->getAlpha();
+        alpha = reinterpret_cast<Paint*>(paintHandle)->getAlpha();
         return static_cast<jint>(alpha);
     }
 
-    static void setColor(JNIEnv* env, jobject paint, jint color) {
-        NPE_CHECK_RETURN_VOID(env, paint);
-        getNativePaint(env, paint)->setColor(color);
+    static void setColor(JNIEnv* env, jobject, jlong paintHandle, jint color) {
+        reinterpret_cast<Paint*>(paintHandle)->setColor(color);
     }
 
-    static void setAlpha(JNIEnv* env, jobject paint, jint a) {
-        NPE_CHECK_RETURN_VOID(env, paint);
-        getNativePaint(env, paint)->setAlpha(a);
+    static void setAlpha(JNIEnv* env, jobject, jlong paintHandle, jint a) {
+        reinterpret_cast<Paint*>(paintHandle)->setAlpha(a);
     }
 
-    static jfloat getStrokeWidth(JNIEnv* env, jobject paint) {
-        NPE_CHECK_RETURN_ZERO(env, paint);
-        return SkScalarToFloat(getNativePaint(env, paint)->getStrokeWidth());
+    static jfloat getStrokeWidth(JNIEnv* env, jobject, jlong paintHandle) {
+        return SkScalarToFloat(reinterpret_cast<Paint*>(paintHandle)->getStrokeWidth());
     }
 
-    static void setStrokeWidth(JNIEnv* env, jobject paint, jfloat width) {
-        NPE_CHECK_RETURN_VOID(env, paint);
-        getNativePaint(env, paint)->setStrokeWidth(width);
+    static void setStrokeWidth(JNIEnv* env, jobject, jlong paintHandle, jfloat width) {
+        reinterpret_cast<Paint*>(paintHandle)->setStrokeWidth(width);
     }
 
-    static jfloat getStrokeMiter(JNIEnv* env, jobject paint) {
-        NPE_CHECK_RETURN_ZERO(env, paint);
-        return SkScalarToFloat(getNativePaint(env, paint)->getStrokeMiter());
+    static jfloat getStrokeMiter(JNIEnv* env, jobject, jlong paintHandle) {
+        return SkScalarToFloat(reinterpret_cast<Paint*>(paintHandle)->getStrokeMiter());
     }
 
-    static void setStrokeMiter(JNIEnv* env, jobject paint, jfloat miter) {
-        NPE_CHECK_RETURN_VOID(env, paint);
-        getNativePaint(env, paint)->setStrokeMiter(miter);
+    static void setStrokeMiter(JNIEnv* env, jobject, jlong paintHandle, jfloat miter) {
+        reinterpret_cast<Paint*>(paintHandle)->setStrokeMiter(miter);
     }
 
     static jint getStrokeCap(JNIEnv* env, jobject clazz, jlong objHandle) {
@@ -417,46 +373,38 @@ public:
         obj->setTextLocale(sSingleEntryLocaleCache.languageTag);
     }
 
-    static jboolean isElegantTextHeight(JNIEnv* env, jobject paint) {
-        NPE_CHECK_RETURN_ZERO(env, paint);
-        Paint* obj = getNativePaint(env, paint);
+    static jboolean isElegantTextHeight(JNIEnv* env, jobject, jlong paintHandle) {
+        Paint* obj = reinterpret_cast<Paint*>(paintHandle);
         return obj->getFontVariant() == VARIANT_ELEGANT;
     }
 
-    static void setElegantTextHeight(JNIEnv* env, jobject paint, jboolean aa) {
-        NPE_CHECK_RETURN_VOID(env, paint);
-        Paint* obj = getNativePaint(env, paint);
+    static void setElegantTextHeight(JNIEnv* env, jobject, jlong paintHandle, jboolean aa) {
+        Paint* obj = reinterpret_cast<Paint*>(paintHandle);
         obj->setFontVariant(aa ? VARIANT_ELEGANT : VARIANT_DEFAULT);
     }
 
-    static jfloat getTextSize(JNIEnv* env, jobject paint) {
-        NPE_CHECK_RETURN_ZERO(env, paint);
-        return SkScalarToFloat(getNativePaint(env, paint)->getTextSize());
+    static jfloat getTextSize(JNIEnv* env, jobject, jlong paintHandle) {
+        return SkScalarToFloat(reinterpret_cast<Paint*>(paintHandle)->getTextSize());
     }
 
-    static void setTextSize(JNIEnv* env, jobject paint, jfloat textSize) {
-        NPE_CHECK_RETURN_VOID(env, paint);
-        getNativePaint(env, paint)->setTextSize(textSize);
+    static void setTextSize(JNIEnv* env, jobject, jlong paintHandle, jfloat textSize) {
+        reinterpret_cast<Paint*>(paintHandle)->setTextSize(textSize);
     }
 
-    static jfloat getTextScaleX(JNIEnv* env, jobject paint) {
-        NPE_CHECK_RETURN_ZERO(env, paint);
-        return SkScalarToFloat(getNativePaint(env, paint)->getTextScaleX());
+    static jfloat getTextScaleX(JNIEnv* env, jobject, jlong paintHandle) {
+        return SkScalarToFloat(reinterpret_cast<Paint*>(paintHandle)->getTextScaleX());
     }
 
-    static void setTextScaleX(JNIEnv* env, jobject paint, jfloat scaleX) {
-        NPE_CHECK_RETURN_VOID(env, paint);
-        getNativePaint(env, paint)->setTextScaleX(scaleX);
+    static void setTextScaleX(JNIEnv* env, jobject, jlong paintHandle, jfloat scaleX) {
+        reinterpret_cast<Paint*>(paintHandle)->setTextScaleX(scaleX);
     }
 
-    static jfloat getTextSkewX(JNIEnv* env, jobject paint) {
-        NPE_CHECK_RETURN_ZERO(env, paint);
-        return SkScalarToFloat(getNativePaint(env, paint)->getTextSkewX());
+    static jfloat getTextSkewX(JNIEnv* env, jobject, jlong paintHandle) {
+        return SkScalarToFloat(reinterpret_cast<Paint*>(paintHandle)->getTextSkewX());
     }
 
-    static void setTextSkewX(JNIEnv* env, jobject paint, jfloat skewX) {
-        NPE_CHECK_RETURN_VOID(env, paint);
-        getNativePaint(env, paint)->setTextSkewX(skewX);
+    static void setTextSkewX(JNIEnv* env, jobject, jlong paintHandle, jfloat skewX) {
+        reinterpret_cast<Paint*>(paintHandle)->setTextSkewX(skewX);
     }
 
     static jfloat getLetterSpacing(JNIEnv* env, jobject clazz, jlong paintHandle) {
@@ -489,14 +437,15 @@ public:
         paint->setHyphenEdit((uint32_t)hyphen);
     }
 
-    static SkScalar getMetricsInternal(JNIEnv* env, jobject jpaint, Paint::FontMetrics *metrics) {
+    static SkScalar getMetricsInternal(jlong paintHandle, jlong typefaceHandle,
+            Paint::FontMetrics *metrics) {
         const int kElegantTop = 2500;
         const int kElegantBottom = -1000;
         const int kElegantAscent = 1900;
         const int kElegantDescent = -500;
         const int kElegantLeading = 0;
-        Paint* paint = getNativePaint(env, jpaint);
-        TypefaceImpl* typeface = getNativeTypeface(env, jpaint);
+        Paint* paint = reinterpret_cast<Paint*>(paintHandle);
+        TypefaceImpl* typeface = reinterpret_cast<TypefaceImpl*>(typefaceHandle);
         typeface = TypefaceImpl_resolveDefault(typeface);
         FakedFont baseFont = typeface->fFontCollection->baseFontFaked(typeface->fStyle);
         float saveSkewX = paint->getTextSkewX();
@@ -520,24 +469,22 @@ public:
         return spacing;
     }
 
-    static jfloat ascent(JNIEnv* env, jobject paint) {
-        NPE_CHECK_RETURN_ZERO(env, paint);
+    static jfloat ascent(JNIEnv* env, jobject, jlong paintHandle, jlong typefaceHandle) {
         Paint::FontMetrics metrics;
-        getMetricsInternal(env, paint, &metrics);
+        getMetricsInternal(paintHandle, typefaceHandle, &metrics);
         return SkScalarToFloat(metrics.fAscent);
     }
 
-    static jfloat descent(JNIEnv* env, jobject paint) {
-        NPE_CHECK_RETURN_ZERO(env, paint);
+    static jfloat descent(JNIEnv* env, jobject, jlong paintHandle, jlong typefaceHandle) {
         Paint::FontMetrics metrics;
-        getMetricsInternal(env, paint, &metrics);
+        getMetricsInternal(paintHandle, typefaceHandle, &metrics);
         return SkScalarToFloat(metrics.fDescent);
     }
 
-    static jfloat getFontMetrics(JNIEnv* env, jobject paint, jobject metricsObj) {
-        NPE_CHECK_RETURN_ZERO(env, paint);
+    static jfloat getFontMetrics(JNIEnv* env, jobject, jlong paintHandle,
+            jlong typefaceHandle, jobject metricsObj) {
         Paint::FontMetrics metrics;
-        SkScalar spacing = getMetricsInternal(env, paint, &metrics);
+        SkScalar spacing = getMetricsInternal(paintHandle, typefaceHandle, &metrics);
 
         if (metricsObj) {
             SkASSERT(env->IsInstanceOf(metricsObj, gFontMetrics_class));
@@ -550,11 +497,11 @@ public:
         return SkScalarToFloat(spacing);
     }
 
-    static jint getFontMetricsInt(JNIEnv* env, jobject paint, jobject metricsObj) {
-        NPE_CHECK_RETURN_ZERO(env, paint);
+    static jint getFontMetricsInt(JNIEnv* env, jobject, jlong paintHandle,
+            jlong typefaceHandle, jobject metricsObj) {
         Paint::FontMetrics metrics;
 
-        getMetricsInternal(env, paint, &metrics);
+        getMetricsInternal(paintHandle, typefaceHandle, &metrics);
         int ascent = SkScalarRoundToInt(metrics.fAscent);
         int descent = SkScalarRoundToInt(metrics.fDescent);
         int leading = SkScalarRoundToInt(metrics.fLeading);
@@ -573,7 +520,6 @@ public:
     static jfloat doTextAdvances(JNIEnv *env, Paint *paint, TypefaceImpl* typeface,
             const jchar *text, jint start, jint count, jint contextCount, jint bidiFlags,
             jfloatArray advances, jint advancesIndex) {
-        NPE_CHECK_RETURN_ZERO(env, paint);
         NPE_CHECK_RETURN_ZERO(env, text);
 
         if ((start | count | contextCount | advancesIndex) < 0 || contextCount < count) {
@@ -841,7 +787,7 @@ public:
 
     static void getStringBounds(JNIEnv* env, jobject, jlong paintHandle, jlong typefaceHandle,
                                 jstring text, jint start, jint end, jint bidiFlags, jobject bounds) {
-        const Paint* paint = reinterpret_cast<Paint*>(paintHandle);;
+        const Paint* paint = reinterpret_cast<Paint*>(paintHandle);
         TypefaceImpl* typeface = reinterpret_cast<TypefaceImpl*>(typefaceHandle);
         const jchar* textArray = env->GetStringChars(text, NULL);
         doTextBounds(env, textArray + start, end - start, bounds, *paint, typeface, bidiFlags);
@@ -961,97 +907,97 @@ public:
         return result;
     }
 
-};
+}; // namespace PaintGlue
 
 static const JNINativeMethod methods[] = {
-    {"finalizer", "(J)V", (void*) PaintGlue::finalizer},
-    {"native_init","()J", (void*) PaintGlue::init},
-    {"native_initWithPaint","(J)J", (void*) PaintGlue::initWithPaint},
+    {"nFinalizer", "(J)V", (void*) PaintGlue::finalizer},
+    {"nInit","()J", (void*) PaintGlue::init},
+    {"nInitWithPaint","(J)J", (void*) PaintGlue::initWithPaint},
 
-    {"native_reset","!(J)V", (void*) PaintGlue::reset},
-    {"native_set","!(JJ)V", (void*) PaintGlue::assign},
-    {"getFlags","!()I", (void*) PaintGlue::getFlags},
-    {"setFlags","!(I)V", (void*) PaintGlue::setFlags},
-    {"getHinting","!()I", (void*) PaintGlue::getHinting},
-    {"setHinting","!(I)V", (void*) PaintGlue::setHinting},
-    {"setAntiAlias","!(Z)V", (void*) PaintGlue::setAntiAlias},
-    {"setSubpixelText","!(Z)V", (void*) PaintGlue::setSubpixelText},
-    {"setLinearText","!(Z)V", (void*) PaintGlue::setLinearText},
-    {"setUnderlineText","!(Z)V", (void*) PaintGlue::setUnderlineText},
-    {"setStrikeThruText","!(Z)V", (void*) PaintGlue::setStrikeThruText},
-    {"setFakeBoldText","!(Z)V", (void*) PaintGlue::setFakeBoldText},
-    {"setFilterBitmap","!(Z)V", (void*) PaintGlue::setFilterBitmap},
-    {"setDither","!(Z)V", (void*) PaintGlue::setDither},
-    {"native_getStyle","!(J)I", (void*) PaintGlue::getStyle},
-    {"native_setStyle","!(JI)V", (void*) PaintGlue::setStyle},
-    {"getColor","!()I", (void*) PaintGlue::getColor},
-    {"setColor","!(I)V", (void*) PaintGlue::setColor},
-    {"getAlpha","!()I", (void*) PaintGlue::getAlpha},
-    {"setAlpha","!(I)V", (void*) PaintGlue::setAlpha},
-    {"getStrokeWidth","!()F", (void*) PaintGlue::getStrokeWidth},
-    {"setStrokeWidth","!(F)V", (void*) PaintGlue::setStrokeWidth},
-    {"getStrokeMiter","!()F", (void*) PaintGlue::getStrokeMiter},
-    {"setStrokeMiter","!(F)V", (void*) PaintGlue::setStrokeMiter},
-    {"native_getStrokeCap","!(J)I", (void*) PaintGlue::getStrokeCap},
-    {"native_setStrokeCap","!(JI)V", (void*) PaintGlue::setStrokeCap},
-    {"native_getStrokeJoin","!(J)I", (void*) PaintGlue::getStrokeJoin},
-    {"native_setStrokeJoin","!(JI)V", (void*) PaintGlue::setStrokeJoin},
-    {"native_getFillPath","!(JJJ)Z", (void*) PaintGlue::getFillPath},
-    {"native_setShader","!(JJ)J", (void*) PaintGlue::setShader},
-    {"native_setColorFilter","!(JJ)J", (void*) PaintGlue::setColorFilter},
-    {"native_setXfermode","!(JJ)J", (void*) PaintGlue::setXfermode},
-    {"native_setPathEffect","!(JJ)J", (void*) PaintGlue::setPathEffect},
-    {"native_setMaskFilter","!(JJ)J", (void*) PaintGlue::setMaskFilter},
-    {"native_setTypeface","!(JJ)J", (void*) PaintGlue::setTypeface},
-    {"native_setRasterizer","!(JJ)J", (void*) PaintGlue::setRasterizer},
-    {"native_getTextAlign","!(J)I", (void*) PaintGlue::getTextAlign},
-    {"native_setTextAlign","!(JI)V", (void*) PaintGlue::setTextAlign},
-    {"native_setTextLocale","!(JLjava/lang/String;)V", (void*) PaintGlue::setTextLocale},
-    {"isElegantTextHeight","!()Z", (void*) PaintGlue::isElegantTextHeight},
-    {"setElegantTextHeight","!(Z)V", (void*) PaintGlue::setElegantTextHeight},
-    {"getTextSize","!()F", (void*) PaintGlue::getTextSize},
-    {"setTextSize","!(F)V", (void*) PaintGlue::setTextSize},
-    {"getTextScaleX","!()F", (void*) PaintGlue::getTextScaleX},
-    {"setTextScaleX","!(F)V", (void*) PaintGlue::setTextScaleX},
-    {"getTextSkewX","!()F", (void*) PaintGlue::getTextSkewX},
-    {"setTextSkewX","!(F)V", (void*) PaintGlue::setTextSkewX},
-    {"native_getLetterSpacing","!(J)F", (void*) PaintGlue::getLetterSpacing},
-    {"native_setLetterSpacing","!(JF)V", (void*) PaintGlue::setLetterSpacing},
-    {"native_setFontFeatureSettings","(JLjava/lang/String;)V",
+    {"nReset","!(J)V", (void*) PaintGlue::reset},
+    {"nSet","!(JJ)V", (void*) PaintGlue::assign},
+    {"nGetFlags","!(J)I", (void*) PaintGlue::getFlags},
+    {"nSetFlags","!(JI)V", (void*) PaintGlue::setFlags},
+    {"nGetHinting","!(J)I", (void*) PaintGlue::getHinting},
+    {"nSetHinting","!(JI)V", (void*) PaintGlue::setHinting},
+    {"nSetAntiAlias","!(JZ)V", (void*) PaintGlue::setAntiAlias},
+    {"nSetSubpixelText","!(JZ)V", (void*) PaintGlue::setSubpixelText},
+    {"nSetLinearText","!(JZ)V", (void*) PaintGlue::setLinearText},
+    {"nSetUnderlineText","!(JZ)V", (void*) PaintGlue::setUnderlineText},
+    {"nSetStrikeThruText","!(JZ)V", (void*) PaintGlue::setStrikeThruText},
+    {"nSetFakeBoldText","!(JZ)V", (void*) PaintGlue::setFakeBoldText},
+    {"nSetFilterBitmap","!(JZ)V", (void*) PaintGlue::setFilterBitmap},
+    {"nSetDither","!(JZ)V", (void*) PaintGlue::setDither},
+    {"nGetStyle","!(J)I", (void*) PaintGlue::getStyle},
+    {"nSetStyle","!(JI)V", (void*) PaintGlue::setStyle},
+    {"nGetColor","!(J)I", (void*) PaintGlue::getColor},
+    {"nSetColor","!(JI)V", (void*) PaintGlue::setColor},
+    {"nGetAlpha","!(J)I", (void*) PaintGlue::getAlpha},
+    {"nSetAlpha","!(JI)V", (void*) PaintGlue::setAlpha},
+    {"nGetStrokeWidth","!(J)F", (void*) PaintGlue::getStrokeWidth},
+    {"nSetStrokeWidth","!(JF)V", (void*) PaintGlue::setStrokeWidth},
+    {"nGetStrokeMiter","!(J)F", (void*) PaintGlue::getStrokeMiter},
+    {"nSetStrokeMiter","!(JF)V", (void*) PaintGlue::setStrokeMiter},
+    {"nGetStrokeCap","!(J)I", (void*) PaintGlue::getStrokeCap},
+    {"nSetStrokeCap","!(JI)V", (void*) PaintGlue::setStrokeCap},
+    {"nGetStrokeJoin","!(J)I", (void*) PaintGlue::getStrokeJoin},
+    {"nSetStrokeJoin","!(JI)V", (void*) PaintGlue::setStrokeJoin},
+    {"nGetFillPath","!(JJJ)Z", (void*) PaintGlue::getFillPath},
+    {"nSetShader","!(JJ)J", (void*) PaintGlue::setShader},
+    {"nSetColorFilter","!(JJ)J", (void*) PaintGlue::setColorFilter},
+    {"nSetXfermode","!(JJ)J", (void*) PaintGlue::setXfermode},
+    {"nSetPathEffect","!(JJ)J", (void*) PaintGlue::setPathEffect},
+    {"nSetMaskFilter","!(JJ)J", (void*) PaintGlue::setMaskFilter},
+    {"nSetTypeface","!(JJ)J", (void*) PaintGlue::setTypeface},
+    {"nSetRasterizer","!(JJ)J", (void*) PaintGlue::setRasterizer},
+    {"nGetTextAlign","!(J)I", (void*) PaintGlue::getTextAlign},
+    {"nSetTextAlign","!(JI)V", (void*) PaintGlue::setTextAlign},
+    {"nSetTextLocale","!(JLjava/lang/String;)V", (void*) PaintGlue::setTextLocale},
+    {"nIsElegantTextHeight","!(J)Z", (void*) PaintGlue::isElegantTextHeight},
+    {"nSetElegantTextHeight","!(JZ)V", (void*) PaintGlue::setElegantTextHeight},
+    {"nGetTextSize","!(J)F", (void*) PaintGlue::getTextSize},
+    {"nSetTextSize","!(JF)V", (void*) PaintGlue::setTextSize},
+    {"nGetTextScaleX","!(J)F", (void*) PaintGlue::getTextScaleX},
+    {"nSetTextScaleX","!(JF)V", (void*) PaintGlue::setTextScaleX},
+    {"nGetTextSkewX","!(J)F", (void*) PaintGlue::getTextSkewX},
+    {"nSetTextSkewX","!(JF)V", (void*) PaintGlue::setTextSkewX},
+    {"nGetLetterSpacing","!(J)F", (void*) PaintGlue::getLetterSpacing},
+    {"nSetLetterSpacing","!(JF)V", (void*) PaintGlue::setLetterSpacing},
+    {"nSetFontFeatureSettings","(JLjava/lang/String;)V",
             (void*) PaintGlue::setFontFeatureSettings},
-    {"native_getHyphenEdit", "!(J)I", (void*) PaintGlue::getHyphenEdit},
-    {"native_setHyphenEdit", "!(JI)V", (void*) PaintGlue::setHyphenEdit},
-    {"ascent","!()F", (void*) PaintGlue::ascent},
-    {"descent","!()F", (void*) PaintGlue::descent},
+    {"nGetHyphenEdit", "!(J)I", (void*) PaintGlue::getHyphenEdit},
+    {"nSetHyphenEdit", "!(JI)V", (void*) PaintGlue::setHyphenEdit},
+    {"nAscent","!(JJ)F", (void*) PaintGlue::ascent},
+    {"nDescent","!(JJ)F", (void*) PaintGlue::descent},
 
-    {"getFontMetrics", "!(Landroid/graphics/Paint$FontMetrics;)F",
+    {"nGetFontMetrics", "!(JJLandroid/graphics/Paint$FontMetrics;)F",
             (void*)PaintGlue::getFontMetrics},
-    {"getFontMetricsInt", "!(Landroid/graphics/Paint$FontMetricsInt;)I",
+    {"nGetFontMetricsInt", "!(JJLandroid/graphics/Paint$FontMetricsInt;)I",
             (void*)PaintGlue::getFontMetricsInt},
 
-    {"native_breakText","(JJ[CIIFI[F)I", (void*) PaintGlue::breakTextC},
-    {"native_breakText","(JJLjava/lang/String;ZFI[F)I", (void*) PaintGlue::breakTextS},
-    {"native_getTextAdvances","(JJ[CIIIII[FI)F",
+    {"nBreakText","(JJ[CIIFI[F)I", (void*) PaintGlue::breakTextC},
+    {"nBreakText","(JJLjava/lang/String;ZFI[F)I", (void*) PaintGlue::breakTextS},
+    {"nGetTextAdvances","(JJ[CIIIII[FI)F",
             (void*) PaintGlue::getTextAdvances___CIIIII_FI},
-    {"native_getTextAdvances","(JJLjava/lang/String;IIIII[FI)F",
+    {"nGetTextAdvances","(JJLjava/lang/String;IIIII[FI)F",
             (void*) PaintGlue::getTextAdvances__StringIIIII_FI},
 
-    {"native_getTextRunCursor", "(J[CIIIII)I", (void*) PaintGlue::getTextRunCursor___C},
-    {"native_getTextRunCursor", "(JLjava/lang/String;IIIII)I",
+    {"nGetTextRunCursor", "(J[CIIIII)I", (void*) PaintGlue::getTextRunCursor___C},
+    {"nGetTextRunCursor", "(JLjava/lang/String;IIIII)I",
             (void*) PaintGlue::getTextRunCursor__String},
-    {"native_getTextPath", "(JJI[CIIFFJ)V", (void*) PaintGlue::getTextPath___C},
-    {"native_getTextPath", "(JJILjava/lang/String;IIFFJ)V", (void*) PaintGlue::getTextPath__String},
-    {"nativeGetStringBounds", "(JJLjava/lang/String;IIILandroid/graphics/Rect;)V",
+    {"nGetTextPath", "(JJI[CIIFFJ)V", (void*) PaintGlue::getTextPath___C},
+    {"nGetTextPath", "(JJILjava/lang/String;IIFFJ)V", (void*) PaintGlue::getTextPath__String},
+    {"nGetStringBounds", "(JJLjava/lang/String;IIILandroid/graphics/Rect;)V",
             (void*) PaintGlue::getStringBounds },
-    {"nativeGetCharArrayBounds", "(JJ[CIIILandroid/graphics/Rect;)V",
+    {"nGetCharArrayBounds", "(JJ[CIIILandroid/graphics/Rect;)V",
             (void*) PaintGlue::getCharArrayBounds },
-    {"native_hasGlyph", "(JJILjava/lang/String;)Z", (void*) PaintGlue::hasGlyph },
-    {"native_getRunAdvance", "(JJ[CIIIIZI)F", (void*) PaintGlue::getRunAdvance___CIIIIZI_F},
-    {"native_getOffsetForAdvance", "(JJ[CIIIIZF)I",
+    {"nHasGlyph", "(JJILjava/lang/String;)Z", (void*) PaintGlue::hasGlyph },
+    {"nGetRunAdvance", "(JJ[CIIIIZI)F", (void*) PaintGlue::getRunAdvance___CIIIIZI_F},
+    {"nGetOffsetForAdvance", "(JJ[CIIIIZF)I",
             (void*) PaintGlue::getOffsetForAdvance___CIIIIZF_I},
 
-    {"native_setShadowLayer", "!(JFFFI)V", (void*)PaintGlue::setShadowLayer},
-    {"native_hasShadowLayer", "!(J)Z", (void*)PaintGlue::hasShadowLayer}
+    {"nSetShadowLayer", "!(JFFFI)V", (void*)PaintGlue::setShadowLayer},
+    {"nHasShadowLayer", "!(J)Z", (void*)PaintGlue::hasShadowLayer}
 };
 
 int register_android_graphics_Paint(JNIEnv* env) {
@@ -1072,10 +1018,6 @@ int register_android_graphics_Paint(JNIEnv* env) {
     gFontMetricsInt_fieldID.descent = GetFieldIDOrDie(env, gFontMetricsInt_class, "descent", "I");
     gFontMetricsInt_fieldID.bottom = GetFieldIDOrDie(env, gFontMetricsInt_class, "bottom", "I");
     gFontMetricsInt_fieldID.leading = GetFieldIDOrDie(env, gFontMetricsInt_class, "leading", "I");
-
-    gPaint_class = MakeGlobalRefOrDie(env, FindClassOrDie(env, "android/graphics/Paint"));
-    gPaint_nativeInstanceID = GetFieldIDOrDie(env, gPaint_class, "mNativePaint", "J");
-    gPaint_nativeTypefaceID = GetFieldIDOrDie(env, gPaint_class, "mNativeTypeface", "J");
 
     return RegisterMethodsOrDie(env, "android/graphics/Paint", methods, NELEM(methods));
 }
