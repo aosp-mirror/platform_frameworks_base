@@ -9686,7 +9686,8 @@ public class PackageManagerService extends IPackageManager.Stub {
             IPackageInstallObserver2 observer, PackageInstaller.SessionParams sessionParams,
             String installerPackageName, int installerUid, UserHandle user) {
         final VerificationParams verifParams = new VerificationParams(
-                null, sessionParams.originatingUri, sessionParams.referrerUri, installerUid, null);
+                null, sessionParams.originatingUri, sessionParams.referrerUri,
+                sessionParams.originatingUid, null);
         verifParams.setInstallerUid(installerUid);
 
         final OriginInfo origin;

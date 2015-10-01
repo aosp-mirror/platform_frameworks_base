@@ -422,6 +422,15 @@ public abstract class PackageManager {
     public static final int INSTALL_FORCE_VOLUME_UUID = 0x00000200;
 
     /**
+     * Flag parameter for {@link #installPackage} to indicate that we always want to force
+     * the prompt for permission approval. This overrides any special behaviour for internal
+     * components.
+     *
+     * @hide
+     */
+    public static final int INSTALL_FORCE_PERMISSION_PROMPT = 0x00000400;
+
+    /**
      * Flag parameter for
      * {@link #setComponentEnabledSetting(android.content.ComponentName, int, int)} to indicate
      * that you don't want to kill the app containing the component.  Be careful when you set this
