@@ -116,21 +116,22 @@ public abstract class ActivityManagerNative extends Binder implements IActivityM
     static public void noteWakeupAlarm(PendingIntent ps, int sourceUid, String sourcePkg,
             String tag) {
         try {
-            getDefault().noteWakeupAlarm(ps.getTarget(), sourceUid, sourcePkg, tag);
+            getDefault().noteWakeupAlarm((ps != null) ? ps.getTarget() : null,
+                    sourceUid, sourcePkg, tag);
         } catch (RemoteException ex) {
         }
     }
 
     static public void noteAlarmStart(PendingIntent ps, int sourceUid, String tag) {
         try {
-            getDefault().noteAlarmStart(ps.getTarget(), sourceUid, tag);
+            getDefault().noteAlarmStart((ps != null) ? ps.getTarget() : null, sourceUid, tag);
         } catch (RemoteException ex) {
         }
     }
 
     static public void noteAlarmFinish(PendingIntent ps, int sourceUid, String tag) {
         try {
-            getDefault().noteAlarmFinish(ps.getTarget(), sourceUid, tag);
+            getDefault().noteAlarmFinish((ps != null) ? ps.getTarget() : null, sourceUid, tag);
         } catch (RemoteException ex) {
         }
     }

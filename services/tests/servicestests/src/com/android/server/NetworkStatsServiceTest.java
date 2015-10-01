@@ -876,11 +876,12 @@ public class NetworkStatsServiceTest extends AndroidTestCase {
     }
 
     private void expectSystemReady() throws Exception {
-        mAlarmManager.remove(isA(PendingIntent.class));
+        mAlarmManager.remove(isA(PendingIntent.class), null);
         expectLastCall().anyTimes();
 
-        mAlarmManager.set(eq(AlarmManager.ELAPSED_REALTIME), anyLong(), anyLong(), anyLong(),
-                anyInt(), isA(PendingIntent.class), isA(WorkSource.class),
+        mAlarmManager.set(getContext().getPackageName(),
+                eq(AlarmManager.ELAPSED_REALTIME), anyLong(), anyLong(), anyLong(),
+                anyInt(), isA(PendingIntent.class), null, null, isA(WorkSource.class),
                 isA(AlarmManager.AlarmClockInfo.class));
         expectLastCall().atLeastOnce();
 

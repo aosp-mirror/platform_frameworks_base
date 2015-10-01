@@ -21,15 +21,21 @@ import android.annotation.SystemApi;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Build;
+import android.os.Handler;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.RemoteException;
+import android.os.SystemClock;
 import android.os.UserHandle;
 import android.os.WorkSource;
 import android.text.TextUtils;
+import android.util.Log;
+
 import libcore.util.ZoneInfoDB;
 
 import java.io.IOException;
+import java.lang.ref.WeakReference;
+import java.util.WeakHashMap;
 
 /**
  * This class provides access to the system alarm services.  These allow you
@@ -72,6 +78,8 @@ import java.io.IOException;
  * Context.getSystemService(Context.ALARM_SERVICE)}.
  */
 public class AlarmManager {
+    private static final String TAG = "AlarmManager";
+
     /**
      * Alarm time in {@link System#currentTimeMillis System.currentTimeMillis()}
      * (wall clock time in UTC), which will wake up the device when
@@ -160,9 +168,89 @@ public class AlarmManager {
     public static final int FLAG_IDLE_UNTIL = 1<<4;
 
     private final IAlarmManager mService;
+    private final String mPackageName;
     private final boolean mAlwaysExact;
     private final int mTargetSdkVersion;
+    private final Handler mMainThreadHandler;
 
+    /**
+     * Direct-notification alarms: the requester must be running continuously from the
+     * time the alarm is set to the time it is delivered, or delivery will fail.  Only
+     * one-shot alarms can be set using this mechanism, not repeating alarms.
+     */
+    public interface OnAlarmListener {
+        /**
+         * Callback method that is invoked by the system when the alarm time is reached.
+         */
+        public void onAlarm();
+    }
+
+    final class ListenerWrapper extends IAlarmListener.Stub implements Runnable {
+        final OnAlarmListener mListener;
+        Handler mHandler;
+        IAlarmCompleteListener mCompletion;
+
+        public ListenerWrapper(OnAlarmListener listener) {
+            mListener = listener;
+        }
+
+        public void setHandler(Handler h) {
+           mHandler = h;
+        }
+
+        public void cancel() {
+            try {
+                mService.remove(null, this);
+            } catch (RemoteException ex) {
+            }
+
+            synchronized (AlarmManager.class) {
+                if (sWrappers != null) {
+                    sWrappers.remove(mListener);
+                }
+            }
+        }
+
+        @Override
+        public void doAlarm(IAlarmCompleteListener alarmManager) {
+            mCompletion = alarmManager;
+            mHandler.post(this);
+        }
+
+        @Override
+        public void run() {
+            // Remove this listener from the wrapper cache first; the server side
+            // already considers it gone
+            synchronized (AlarmManager.class) {
+                if (sWrappers != null) {
+                    sWrappers.remove(mListener);
+                }
+            }
+
+            // Now deliver it to the app
+            try {
+                mListener.onAlarm();
+            } finally {
+                // No catch -- make sure to report completion to the system process,
+                // but continue to allow the exception to crash the app.
+
+                try {
+                    mCompletion.alarmComplete(this);
+                } catch (Exception e) {
+                    Log.e(TAG, "Unable to report completion to Alarm Manager!", e);
+                }
+            }
+        }
+    }
+
+    // Tracking of the OnAlarmListener -> wrapper mapping, for cancel() support.
+    // Access is synchronized on the AlarmManager class object.
+    //
+    // These are weak references so that we don't leak listener references if, for
+    // example, the pending-alarm messages are posted to a HandlerThread that is
+    // disposed of prior to alarm delivery.  The underlying messages will be GC'd
+    // but this static reference would still persist, orphaned, never deallocated.
+    private static WeakHashMap<OnAlarmListener, WeakReference<ListenerWrapper>> sWrappers;
 
     /**
      * package private on purpose
@@ -170,8 +258,10 @@ public class AlarmManager {
     AlarmManager(IAlarmManager service, Context ctx) {
         mService = service;
 
+        mPackageName = ctx.getPackageName();
         mTargetSdkVersion = ctx.getApplicationInfo().targetSdkVersion;
         mAlwaysExact = (mTargetSdkVersion < Build.VERSION_CODES.KITKAT);
+        mMainThreadHandler = new Handler(ctx.getMainLooper());
     }
 
     private long legacyExactLength() {
@@ -249,7 +339,37 @@ public class AlarmManager {
      * @see #RTC_WAKEUP
      */
     public void set(int type, long triggerAtMillis, PendingIntent operation) {
-        setImpl(type, triggerAtMillis, legacyExactLength(), 0, 0, operation, null, null);
+        setImpl(type, triggerAtMillis, legacyExactLength(), 0, 0, operation, null, null,
+                null, null, null);
+    }
+
+    /**
+     * Direct callback version of {@link #set(int, long, PendingIntent)}.  Rather than
+     * supplying a PendingIntent to be sent when the alarm time is reached, this variant
+     * supplies an {@link OnAlarmListener} instance that will be invoked at that time.
+     * <p>
+     * The OnAlarmListener's {@link OnAlarmListener#onAlarm() onAlarm()} method will be
+     * invoked via the specified target Handler, or on the application's main looper
+     * if {@code null} is passed as the {@code targetHandler} parameter.
+     *
+     * @param type One of {@link #ELAPSED_REALTIME}, {@link #ELAPSED_REALTIME_WAKEUP},
+     *         {@link #RTC}, or {@link #RTC_WAKEUP}.
+     * @param triggerAtMillis time in milliseconds that the alarm should go
+     *         off, using the appropriate clock (depending on the alarm type).
+     * @param tag string describing the alarm, used for logging and battery-use
+     *         attribution
+     * @param listener {@link OnAlarmListener} instance whose
+     *         {@link OnAlarmListener#onAlarm() onAlarm()} method will be
+     *         called when the alarm time is reached.  A given OnAlarmListener instance can
+     *         only be the target of a single pending alarm, just as a given PendingIntent
+     *         can only be used with one alarm at a time.
+     * @param targetHandler {@link Handler} on which to execute the listener's onAlarm()
+     *         callback, or {@code null} to run that callback on the main looper.
+     */
+    public void set(int type, long triggerAtMillis, String tag, OnAlarmListener listener,
+            Handler targetHandler) {
+        setImpl(type, triggerAtMillis, legacyExactLength(), 0, 0, null, listener, tag,
+                targetHandler, null, null);
     }
 
     /**
@@ -310,8 +430,8 @@ public class AlarmManager {
      */
     public void setRepeating(int type, long triggerAtMillis,
             long intervalMillis, PendingIntent operation) {
-        setImpl(type, triggerAtMillis, legacyExactLength(), intervalMillis, 0, operation, null,
-                null);
+        setImpl(type, triggerAtMillis, legacyExactLength(), intervalMillis, 0, operation,
+                null, null, null, null, null);
     }
 
     /**
@@ -361,7 +481,23 @@ public class AlarmManager {
      */
     public void setWindow(int type, long windowStartMillis, long windowLengthMillis,
             PendingIntent operation) {
-        setImpl(type, windowStartMillis, windowLengthMillis, 0, 0, operation, null, null);
+        setImpl(type, windowStartMillis, windowLengthMillis, 0, 0, operation,
+                null, null, null, null, null);
+    }
+
+    /**
+     * Direct callback version of {@link #setWindow(int, long, long, PendingIntent)}.  Rather
+     * than supplying a PendingIntent to be sent when the alarm time is reached, this variant
+     * supplies an {@link OnAlarmListener} instance that will be invoked at that time.
+     * <p>
+     * The OnAlarmListener {@link OnAlarmListener#onAlarm() onAlarm()} method will be
+     * invoked via the specified target Handler, or on the application's main looper
+     * if {@code null} is passed as the {@code targetHandler} parameter.
+     */
+    public void setWindow(int type, long windowStartMillis, long windowLengthMillis,
+            String tag, OnAlarmListener listener, Handler targetHandler) {
+        setImpl(type, windowStartMillis, windowLengthMillis, 0, 0, null, listener, tag,
+                targetHandler, null, null);
     }
 
     /**
@@ -399,7 +535,23 @@ public class AlarmManager {
      * @see #RTC_WAKEUP
      */
     public void setExact(int type, long triggerAtMillis, PendingIntent operation) {
-        setImpl(type, triggerAtMillis, WINDOW_EXACT, 0, 0, operation, null, null);
+        setImpl(type, triggerAtMillis, WINDOW_EXACT, 0, 0, operation, null, null, null,
+                null, null);
+    }
+
+    /**
+     * Direct callback version of {@link #setExact(int, long, PendingIntent)}.  Rather
+     * than supplying a PendingIntent to be sent when the alarm time is reached, this variant
+     * supplies an {@link OnAlarmListener} instance that will be invoked at that time.
+     * <p>
+     * The OnAlarmListener's {@link OnAlarmListener#onAlarm() onAlarm()} method will be
+     * invoked via the specified target Handler, or on the application's main looper
+     * if {@code null} is passed as the {@code targetHandler} parameter.
+     */
+    public void setExact(int type, long triggerAtMillis, String tag, OnAlarmListener listener,
+            Handler targetHandler) {
+        setImpl(type, triggerAtMillis, WINDOW_EXACT, 0, 0, null, listener, tag,
+                targetHandler, null, null);
     }
 
     /**
@@ -408,7 +560,8 @@ public class AlarmManager {
      * @hide
      */
     public void setIdleUntil(int type, long triggerAtMillis, PendingIntent operation) {
-        setImpl(type, triggerAtMillis, WINDOW_EXACT, 0, FLAG_IDLE_UNTIL, operation, null, null);
+        setImpl(type, triggerAtMillis, WINDOW_EXACT, 0, FLAG_IDLE_UNTIL, operation,
+                null, null, null, null, null);
     }
 
     /**
@@ -436,19 +589,38 @@ public class AlarmManager {
      * @see android.content.Intent#filterEquals
      */
     public void setAlarmClock(AlarmClockInfo info, PendingIntent operation) {
-        setImpl(RTC_WAKEUP, info.getTriggerTime(), WINDOW_EXACT, 0, 0, operation, null, info);
+        setImpl(RTC_WAKEUP, info.getTriggerTime(), WINDOW_EXACT, 0, 0, operation,
+                null, null, null, null, info);
     }
 
     /** @hide */
     @SystemApi
     public void set(int type, long triggerAtMillis, long windowMillis, long intervalMillis,
             PendingIntent operation, WorkSource workSource) {
-        setImpl(type, triggerAtMillis, windowMillis, intervalMillis, 0, operation, workSource,
-                null);
+        setImpl(type, triggerAtMillis, windowMillis, intervalMillis, 0, operation, null, null,
+                null, workSource, null);
+    }
+
+    /**
+     * Direct callback version of {@link #set(int, long, long, long, PendingIntent, WorkSource)}.
+     * Note that repeating alarms must use the PendingIntent variant, not an OnAlarmListener.
+     * <p>
+     * The OnAlarmListener's {@link OnAlarmListener#onAlarm() onAlarm()} method will be
+     * invoked via the specified target Handler, or on the application's main looper
+     * if {@code null} is passed as the {@code targetHandler} parameter.
+     *
+     * @hide
+     */
+    //@SystemApi
+    public void set(int type, long triggerAtMillis, long windowMillis, long intervalMillis,
+            OnAlarmListener listener, Handler targetHandler, WorkSource workSource) {
+        setImpl(type, triggerAtMillis, windowMillis, intervalMillis, 0, null, listener, null,
+                targetHandler, workSource, null);
     }
 
     private void setImpl(int type, long triggerAtMillis, long windowMillis, long intervalMillis,
-            int flags, PendingIntent operation, WorkSource workSource, AlarmClockInfo alarmClock) {
+            int flags, PendingIntent operation, final OnAlarmListener listener, String listenerTag,
+            Handler targetHandler, WorkSource workSource, AlarmClockInfo alarmClock) {
         if (triggerAtMillis < 0) {
             /* NOTYET
             if (mAlwaysExact) {
@@ -460,9 +632,30 @@ public class AlarmManager {
             triggerAtMillis = 0;
         }
 
+        ListenerWrapper recipientWrapper = null;
+        if (listener != null) {
+            synchronized (AlarmManager.class) {
+                if (sWrappers == null) {
+                    sWrappers = new WeakHashMap<OnAlarmListener, WeakReference<ListenerWrapper>>();
+                }
+
+                WeakReference<ListenerWrapper> wrapperRef = sWrappers.get(listener);
+                // no existing wrapper *or* we've lost our weak ref to it => build a new one
+                if (wrapperRef == null ||
+                        (recipientWrapper = wrapperRef.get()) == null) {
+                    recipientWrapper = new ListenerWrapper(listener);
+                    wrapperRef = new WeakReference<ListenerWrapper>(recipientWrapper);
+                    sWrappers.put(listener, wrapperRef);
+                }
+            }
+
+            final Handler handler = (targetHandler != null) ? targetHandler : mMainThreadHandler;
+            recipientWrapper.setHandler(handler);
+        }
+
         try {
-            mService.set(type, triggerAtMillis, windowMillis, intervalMillis, flags, operation,
-                    workSource, alarmClock);
+            mService.set(mPackageName, type, triggerAtMillis, windowMillis, intervalMillis, flags,
+                    operation, recipientWrapper, listenerTag, workSource, alarmClock);
         } catch (RemoteException ex) {
         }
     }
@@ -562,7 +755,8 @@ public class AlarmManager {
      */
     public void setInexactRepeating(int type, long triggerAtMillis,
             long intervalMillis, PendingIntent operation) {
-        setImpl(type, triggerAtMillis, WINDOW_HEURISTIC, intervalMillis, 0, operation, null, null);
+        setImpl(type, triggerAtMillis, WINDOW_HEURISTIC, intervalMillis, 0, operation, null,
+                null, null, null, null);
     }
 
     /**
@@ -611,8 +805,8 @@ public class AlarmManager {
      * @see #RTC_WAKEUP
      */
     public void setAndAllowWhileIdle(int type, long triggerAtMillis, PendingIntent operation) {
-        setImpl(type, triggerAtMillis, WINDOW_HEURISTIC, 0, FLAG_ALLOW_WHILE_IDLE, operation,
-                null, null);
+        setImpl(type, triggerAtMillis, WINDOW_HEURISTIC, 0, FLAG_ALLOW_WHILE_IDLE,
+                operation, null, null, null, null, null);
     }
 
     /**
@@ -666,7 +860,7 @@ public class AlarmManager {
      */
     public void setExactAndAllowWhileIdle(int type, long triggerAtMillis, PendingIntent operation) {
         setImpl(type, triggerAtMillis, WINDOW_EXACT, 0, FLAG_ALLOW_WHILE_IDLE, operation,
-                null, null);
+                null, null, null, null, null);
     }
 
     /**
@@ -680,10 +874,41 @@ public class AlarmManager {
      * @see #set
      */
     public void cancel(PendingIntent operation) {
+        if (operation == null) {
+            throw new NullPointerException("operation");
+        }
+
         try {
-            mService.remove(operation);
+            mService.remove(operation, null);
         } catch (RemoteException ex) {
         }
+    }
+
+    /**
+     * Remove any alarm scheduled to be delivered to the given {@link OnAlarmListener}.
+     *
+     * @param listener OnAlarmListener instance that is the target of a currently-set alarm.
+     */
+    public void cancel(OnAlarmListener listener) {
+        if (listener == null) {
+            throw new NullPointerException("listener");
+        }
+
+        ListenerWrapper wrapper = null;
+        synchronized (AlarmManager.class) {
+            final WeakReference<ListenerWrapper> wrapperRef;
+            wrapperRef = sWrappers.get(listener);
+            if (wrapperRef != null) {
+                wrapper = wrapperRef.get();
+            }
+        }
+
+        if (wrapper == null) {
+            Log.w(TAG, "Unrecognized alarm listener " + listener);
+            return;
+        }
+
+        wrapper.cancel();
     }
 
     /**

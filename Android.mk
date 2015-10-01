@@ -68,6 +68,8 @@ LOCAL_SRC_FILES += \
 	core/java/android/app/IActivityContainerCallback.aidl \
 	core/java/android/app/IActivityController.aidl \
 	core/java/android/app/IActivityPendingResult.aidl \
+	core/java/android/app/IAlarmCompleteListener.aidl \
+	core/java/android/app/IAlarmListener.aidl \
 	core/java/android/app/IAlarmManager.aidl \
 	core/java/android/app/IAppTask.aidl \
 	core/java/android/app/ITaskStackListener.aidl \

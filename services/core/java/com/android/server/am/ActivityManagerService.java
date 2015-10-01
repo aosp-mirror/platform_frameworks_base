@@ -11193,7 +11193,7 @@ public final class ActivityManagerService extends ActivityManagerNative
     }
 
     public void noteWakeupAlarm(IIntentSender sender, int sourceUid, String sourcePkg, String tag) {
-        if (!(sender instanceof PendingIntentRecord)) {
+        if (sender != null && !(sender instanceof PendingIntentRecord)) {
             return;
         }
         final PendingIntentRecord rec = (PendingIntentRecord)sender;
@@ -11202,7 +11202,12 @@ public final class ActivityManagerService extends ActivityManagerNative
             if (mBatteryStatsService.isOnBattery()) {
                 mBatteryStatsService.enforceCallingPermission();
                 int MY_UID = Binder.getCallingUid();
-                int uid = rec.uid == MY_UID ? Process.SYSTEM_UID : rec.uid;
+                final int uid;
+                if (sender == null) {
+                    uid = sourceUid;
+                } else {
+                    uid = rec.uid == MY_UID ? Process.SYSTEM_UID : rec.uid;
+                }
                 BatteryStatsImpl.Uid.Pkg pkg =
                     stats.getPackageStatsLocked(sourceUid >= 0 ? sourceUid : uid,
                             sourcePkg != null ? sourcePkg : rec.key.packageName);
@@ -11212,7 +11217,7 @@ public final class ActivityManagerService extends ActivityManagerNative
     }
 
     public void noteAlarmStart(IIntentSender sender, int sourceUid, String tag) {
-        if (!(sender instanceof PendingIntentRecord)) {
+        if (sender != null && !(sender instanceof PendingIntentRecord)) {
             return;
         }
         final PendingIntentRecord rec = (PendingIntentRecord)sender;
@@ -11220,13 +11225,18 @@ public final class ActivityManagerService extends ActivityManagerNative
         synchronized (stats) {
             mBatteryStatsService.enforceCallingPermission();
             int MY_UID = Binder.getCallingUid();
-            int uid = rec.uid == MY_UID ? Process.SYSTEM_UID : rec.uid;
+            final int uid;
+            if (sender == null) {
+                uid = sourceUid;
+            } else {
+                uid = rec.uid == MY_UID ? Process.SYSTEM_UID : rec.uid;
+            }
             mBatteryStatsService.noteAlarmStart(tag, sourceUid >= 0 ? sourceUid : uid);
         }
     }
 
     public void noteAlarmFinish(IIntentSender sender, int sourceUid, String tag) {
-        if (!(sender instanceof PendingIntentRecord)) {
+        if (sender != null && !(sender instanceof PendingIntentRecord)) {
             return;
         }
         final PendingIntentRecord rec = (PendingIntentRecord)sender;
@@ -11234,7 +11244,12 @@ public final class ActivityManagerService extends ActivityManagerNative
         synchronized (stats) {
             mBatteryStatsService.enforceCallingPermission();
             int MY_UID = Binder.getCallingUid();
-            int uid = rec.uid == MY_UID ? Process.SYSTEM_UID : rec.uid;
+            final int uid;
+            if (sender == null) {
+                uid = sourceUid;
+            } else {
+                uid = rec.uid == MY_UID ? Process.SYSTEM_UID : rec.uid;
+            }
             mBatteryStatsService.noteAlarmFinish(tag, sourceUid >= 0 ? sourceUid : uid);
         }
     }

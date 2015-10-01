@@ -3723,17 +3723,21 @@ package android.app {
 
   public class AlarmManager {
     method public void cancel(android.app.PendingIntent);
+    method public void cancel(android.app.AlarmManager.OnAlarmListener);
     method public android.app.AlarmManager.AlarmClockInfo getNextAlarmClock();
     method public void set(int, long, android.app.PendingIntent);
+    method public void set(int, long, java.lang.String, android.app.AlarmManager.OnAlarmListener, android.os.Handler);
     method public void setAlarmClock(android.app.AlarmManager.AlarmClockInfo, android.app.PendingIntent);
     method public void setAndAllowWhileIdle(int, long, android.app.PendingIntent);
     method public void setExact(int, long, android.app.PendingIntent);
+    method public void setExact(int, long, java.lang.String, android.app.AlarmManager.OnAlarmListener, android.os.Handler);
     method public void setExactAndAllowWhileIdle(int, long, android.app.PendingIntent);
     method public void setInexactRepeating(int, long, long, android.app.PendingIntent);
     method public void setRepeating(int, long, long, android.app.PendingIntent);
     method public void setTime(long);
     method public void setTimeZone(java.lang.String);
     method public void setWindow(int, long, long, android.app.PendingIntent);
+    method public void setWindow(int, long, long, java.lang.String, android.app.AlarmManager.OnAlarmListener, android.os.Handler);
     field public static final java.lang.String ACTION_NEXT_ALARM_CLOCK_CHANGED = "android.app.action.NEXT_ALARM_CLOCK_CHANGED";
     field public static final int ELAPSED_REALTIME = 3; // 0x3
     field public static final int ELAPSED_REALTIME_WAKEUP = 2; // 0x2
@@ -3753,6 +3757,10 @@ package android.app {
     method public long getTriggerTime();
     method public void writeToParcel(android.os.Parcel, int);
     field public static final android.os.Parcelable.Creator<android.app.AlarmManager.AlarmClockInfo> CREATOR;
+  }
+
+  public static abstract interface AlarmManager.OnAlarmListener {
+    method public abstract void onAlarm();
   }
 
   public class AlertDialog extends android.app.Dialog implements android.content.DialogInterface {
