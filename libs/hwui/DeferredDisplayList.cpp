@@ -536,7 +536,11 @@ void DeferredDisplayList::addDrawOp(OpenGLRenderer& renderer, DrawOp* op) {
 
         if (deferInfo.mergeable) {
             // Try to merge with any existing batch with same mergeId.
-            if (mMergingBatches[deferInfo.batchId].get(deferInfo.mergeId, targetBatch)) {
+            std::unordered_map<mergeid_t, DrawBatch*>& mergingBatch
+                    = mMergingBatches[deferInfo.batchId];
+            auto getResult = mergingBatch.find(deferInfo.mergeId);
+            if (getResult != mergingBatch.end()) {
+                targetBatch = getResult->second;
                 if (!((MergingDrawBatch*) targetBatch)->canMergeWith(op, state)) {
                     targetBatch = nullptr;
                 }
@@ -580,7 +584,8 @@ void DeferredDisplayList::addDrawOp(OpenGLRenderer& renderer, DrawOp* op) {
         if (deferInfo.mergeable) {
             targetBatch = new MergingDrawBatch(deferInfo,
                     renderer.getViewportWidth(), renderer.getViewportHeight());
-            mMergingBatches[deferInfo.batchId].put(deferInfo.mergeId, targetBatch);
+            mMergingBatches[deferInfo.batchId].insert(
+                    std::make_pair(deferInfo.mergeId, targetBatch));
         } else {
             targetBatch = new DrawBatch(deferInfo);
             mBatchLookup[deferInfo.batchId] = targetBatch;
