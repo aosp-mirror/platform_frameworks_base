@@ -29,6 +29,7 @@ import static android.view.WindowManager.LayoutParams.TYPE_INPUT_METHOD;
 import static android.view.WindowManager.LayoutParams.TYPE_INPUT_METHOD_DIALOG;
 import static android.view.WindowManager.LayoutParams.TYPE_WALLPAPER;
 import static com.android.server.wm.WindowManagerService.DEBUG_CONFIGURATION;
+import static com.android.server.wm.WindowManagerService.DEBUG_DIM_LAYER;
 import static com.android.server.wm.WindowManagerService.DEBUG_LAYOUT;
 import static com.android.server.wm.WindowManagerService.DEBUG_ORIENTATION;
 import static com.android.server.wm.WindowManagerService.DEBUG_POWER;
@@ -698,10 +699,10 @@ final class WindowState implements WindowManagerPolicy.WindowState {
             final int height = Math.min(mFrame.height(), mContentFrame.height());
             final int width = Math.min(mContentFrame.width(), mFrame.width());
             final DisplayMetrics displayMetrics = getDisplayContent().getDisplayMetrics();
-            final int minVisibleHeight =
-                    mService.dipToPixel(MINIMUM_VISIBLE_HEIGHT_IN_DP, displayMetrics);
-            final int minVisibleWidth =
-                    mService.dipToPixel(MINIMUM_VISIBLE_WIDTH_IN_DP, displayMetrics);
+            final int minVisibleHeight = WindowManagerService.dipToPixel(
+                    MINIMUM_VISIBLE_HEIGHT_IN_DP, displayMetrics);
+            final int minVisibleWidth = WindowManagerService.dipToPixel(
+                    MINIMUM_VISIBLE_WIDTH_IN_DP, displayMetrics);
             final int top = Math.max(mContentFrame.top,
                     Math.min(mFrame.top, mContentFrame.bottom - minVisibleHeight));
             final int left = Math.max(mContentFrame.left + minVisibleWidth - width,
@@ -889,7 +890,7 @@ final class WindowState implements WindowManagerPolicy.WindowState {
 
     @Override
     public boolean isVoiceInteraction() {
-        return mAppToken != null ? mAppToken.voiceInteraction : false;
+        return mAppToken != null && mAppToken.voiceInteraction;
     }
 
     boolean setInsetsChanged() {
@@ -934,7 +935,10 @@ final class WindowState implements WindowManagerPolicy.WindowState {
                 return task.mStack;
             }
         }
-        return null;
+        // Some system windows (e.g. "Power off" dialog) don't have a task, but we would still
+        // associate them with some stack to enable dimming.
+        return mAttrs.type >= WindowManager.LayoutParams.FIRST_SYSTEM_WINDOW
+                && mDisplayContent != null ? mDisplayContent.getHomeStack() : null;
     }
 
     /**
@@ -970,7 +974,8 @@ final class WindowState implements WindowManagerPolicy.WindowState {
         }
         if (forTouch && inFreeformWorkspace()) {
             final DisplayMetrics displayMetrics = getDisplayContent().getDisplayMetrics();
-            final int delta = mService.dipToPixel(RESIZE_HANDLE_WIDTH_IN_DP, displayMetrics);
+            final int delta = WindowManagerService.dipToPixel(
+                    RESIZE_HANDLE_WIDTH_IN_DP, displayMetrics);
             bounds.inset(-delta, -delta);
         }
     }
@@ -1031,8 +1036,7 @@ final class WindowState implements WindowManagerPolicy.WindowState {
             return false;
         }
         final AppWindowToken atoken = mAppToken;
-        final boolean animating = atoken != null
-                ? (atoken.mAppAnimator.animation != null) : false;
+        final boolean animating = atoken != null && atoken.mAppAnimator.animation != null;
         return mHasSurface && !mDestroying && !mExiting
                 && (atoken == null ? mPolicyVisibility : !atoken.hiddenRequested)
                 && ((!mAttachedHidden && mViewVisibility == View.VISIBLE
@@ -1114,8 +1118,7 @@ final class WindowState implements WindowManagerPolicy.WindowState {
      * of a transition that has not yet been started.
      */
     boolean isReadyForDisplay() {
-        if (mRootToken.waitingToShow &&
-                mService.mAppTransition.isTransitionSet()) {
+        if (mRootToken.waitingToShow && mService.mAppTransition.isTransitionSet()) {
             return false;
         }
         return mHasSurface && mPolicyVisibility && !mDestroying
@@ -1295,17 +1298,18 @@ final class WindowState implements WindowManagerPolicy.WindowState {
     }
 
     void handleFlagDimBehind() {
-        if ((mAttrs.flags & FLAG_DIM_BEHIND) != 0 && isDisplayedLw() && !mExiting) {
-            final Task task = getTask();
-            if (task == null) {
-                return;
-            }
-            task.setContinueDimming();
-            if (!task.isDimming(mWinAnimator)) {
-                if (WindowManagerService.localLOGV) Slog.v(TAG, "Win " + this + " start dimming.");
-                task.startDimmingIfNeeded(mWinAnimator);
-            }
+        if ((mAttrs.flags & FLAG_DIM_BEHIND) != 0 && mDisplayContent != null && !mExiting
+                && isDisplayedLw()) {
+            mDisplayContent.mDimBehindController.applyDimBehind(getDimLayerUser(), mWinAnimator);
         }
+    }
+
+    DimLayer.DimLayerUser getDimLayerUser() {
+        Task task = getTask();
+        if (task != null) {
+            return task;
+        }
+        return getStack();
     }
 
     void maybeRemoveReplacedWindow() {
@@ -1512,11 +1516,9 @@ final class WindowState implements WindowManagerPolicy.WindowState {
 
     @Override
     public boolean isDimming() {
-        Task task = getTask();
-        if (task == null) {
-            return false;
-        }
-        return task.isDimming(mWinAnimator);
+        final DimLayer.DimLayerUser dimLayerUser = getDimLayerUser();
+        return dimLayerUser != null && mDisplayContent != null &&
+                mDisplayContent.mDimBehindController.isDimming(dimLayerUser, mWinAnimator);
     }
 
     public void setShowToOwnerOnlyLocked(boolean showToOwnerOnly) {

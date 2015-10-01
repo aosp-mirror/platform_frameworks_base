@@ -115,6 +115,8 @@ class DisplayContent {
 
     final DockedStackDividerController mDividerControllerLocked;
 
+    final DimBehindController mDimBehindController;
+
     /**
      * @param display May not be null.
      * @param service You know.
@@ -128,6 +130,7 @@ class DisplayContent {
         mService = service;
         initializeDisplayBaseInfo();
         mDividerControllerLocked = new DockedStackDividerController(service.mContext, this);
+        mDimBehindController = new DimBehindController(this);
     }
 
     int getDisplayId() {
@@ -246,6 +249,7 @@ class DisplayContent {
     }
 
     void detachStack(TaskStack stack) {
+        mDimBehindController.removeDimLayerUser(stack);
         mStacks.remove(stack);
     }
 
@@ -382,54 +386,23 @@ class DisplayContent {
     }
 
     boolean animateDimLayers() {
-        boolean result = false;
-        for (int stackNdx = mStacks.size() - 1; stackNdx >= 0; --stackNdx) {
-            final ArrayList<Task> tasks = mStacks.get(stackNdx).getTasks();
-            for (int taskNdx = tasks.size() - 1; taskNdx >= 0; --taskNdx) {
-                final Task task = tasks.get(taskNdx);
-                result |= task.animateDimLayers();
-                if (task.isFullscreen()) {
-                    // No point in continuing as this task covers the entire screen.
-                    // Also, fullscreen tasks all share the same dim layer, so we don't want
-                    // processing of fullscreen task below this one affecting the dim layer state.
-                    return result;
-                }
-            }
-        }
-        return result;
+        return mDimBehindController.animateDimLayers();
     }
 
     void resetDimming() {
-        for (int stackNdx = mStacks.size() - 1; stackNdx >= 0; --stackNdx) {
-            final ArrayList<Task> tasks = mStacks.get(stackNdx).getTasks();
-            for (int taskNdx = tasks.size() - 1; taskNdx >= 0; --taskNdx) {
-                tasks.get(taskNdx).clearContinueDimming();
-            }
-        }
+        mDimBehindController.resetDimming();
     }
 
     boolean isDimming() {
-        for (int stackNdx = mStacks.size() - 1; stackNdx >= 0; --stackNdx) {
-            final ArrayList<Task> tasks = mStacks.get(stackNdx).getTasks();
-            for (int taskNdx = tasks.size() - 1; taskNdx >= 0; --taskNdx) {
-                if (tasks.get(taskNdx).isDimming()) {
-                    return true;
-                }
-            }
-        }
-        return false;
+        return mDimBehindController.isDimming();
     }
 
     void stopDimmingIfNeeded() {
-        for (int stackNdx = mStacks.size() - 1; stackNdx >= 0; --stackNdx) {
-            final ArrayList<Task> tasks = mStacks.get(stackNdx).getTasks();
-            for (int taskNdx = tasks.size() - 1; taskNdx >= 0; --taskNdx) {
-                tasks.get(taskNdx).stopDimmingIfNeeded();
-            }
-        }
+        mDimBehindController.stopDimmingIfNeeded();
     }
 
     void close() {
+        mDimBehindController.close();
         for (int stackNdx = mStacks.size() - 1; stackNdx >= 0; --stackNdx) {
             mStacks.get(stackNdx).close();
         }
@@ -576,6 +549,7 @@ class DisplayContent {
             }
         }
         pw.println();
+        mDimBehindController.dump(prefix + "  ", pw);
     }
 
     @Override

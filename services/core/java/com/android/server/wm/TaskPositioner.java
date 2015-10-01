@@ -468,6 +468,16 @@ class TaskPositioner implements DimLayer.DimLayerUser {
         return mTask.mStack.getDisplayInfo();
     }
 
+    @Override
+    public void getBounds(Rect out) {
+        // This dim layer user doesn't need this.
+    }
+
+    @Override
+    public String toShortString() {
+        return TAG;
+    }
+
     private int getDragLayerLocked() {
         return mService.mPolicy.windowTypeToLayerLw(WindowManager.LayoutParams.TYPE_DRAG)
                 * WindowManagerService.TYPE_LAYER_MULTIPLIER

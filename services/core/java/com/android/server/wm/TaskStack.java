@@ -175,6 +175,10 @@ public class TaskStack implements DimLayer.DimLayerUser {
             return false;
         }
 
+        if (mDisplayContent != null) {
+            mDisplayContent.mDimBehindController.updateDimLayer(this);
+        }
+
         mAnimationBackgroundSurface.setBounds(bounds);
         mBounds.set(bounds);
         mRotation = rotation;
@@ -201,7 +205,8 @@ public class TaskStack implements DimLayer.DimLayerUser {
     }
 
     /** Bounds of the stack with other system factors taken into consideration. */
-    void getBounds(Rect out) {
+    @Override
+    public void getBounds(Rect out) {
         if (useCurrentBounds()) {
             // No need to adjust the output bounds if fullscreen or the docked stack is visible
             // since it is already what we want to represent to the rest of the system.
@@ -550,9 +555,6 @@ public class TaskStack implements DimLayer.DimLayerUser {
             mAnimationBackgroundSurface.destroySurface();
             mAnimationBackgroundSurface = null;
         }
-        for (int taskNdx = mTasks.size() - 1; taskNdx >= 0; --taskNdx) {
-            mTasks.get(taskNdx).close();
-        }
         mDisplayContent = null;
     }
 
@@ -607,6 +609,11 @@ public class TaskStack implements DimLayer.DimLayerUser {
     @Override
     public String toString() {
         return "{stackId=" + mStackId + " tasks=" + mTasks + "}";
+    }
+
+    @Override
+    public String toShortString() {
+        return "Stack=" + mStackId;
     }
 
     /**

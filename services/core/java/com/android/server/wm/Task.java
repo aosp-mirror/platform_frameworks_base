@@ -29,7 +29,6 @@ import android.graphics.Rect;
 import android.util.EventLog;
 import android.util.Slog;
 import android.util.SparseArray;
-import android.util.TypedValue;
 import android.view.DisplayInfo;
 import android.view.Surface;
 
@@ -39,10 +38,6 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 
 class Task implements DimLayer.DimLayerUser {
-    /** Amount of time in milliseconds to animate the dim surface from one value to another,
-     * when no window animation is driving it. */
-    private static final int DEFAULT_DIM_DURATION = 200;
-
     // Return value from {@link setBounds} indicating no change was made to the Task bounds.
     static final int BOUNDS_CHANGE_NONE = 0;
     // Return value from {@link setBounds} indicating the position of the Task bounds changed.
@@ -77,17 +72,6 @@ class Task implements DimLayer.DimLayerUser {
 
     // Whether the task is currently being drag-resized
     private boolean mDragResizing;
-
-    // The particular window with FLAG_DIM_BEHIND set. If null, hide mDimLayer.
-    WindowStateAnimator mDimWinAnimator;
-    // Used to support {@link android.view.WindowManager.LayoutParams#FLAG_DIM_BEHIND}
-    private DimLayer mDimLayer;
-    // Set to false at the start of performLayoutAndPlaceSurfaces. If it is still false by the end
-    // then stop any dimming.
-    private boolean mContinueDimming;
-    // Shared dim layer for fullscreen tasks. {@link #mDimLayer} will point to this instead
-    // of creating a new object per fullscreen task on a display.
-    private static final SparseArray<DimLayer> sSharedFullscreenDimLayers = new SparseArray<>();
 
     Task(int taskId, TaskStack stack, int userId, WindowManagerService service, Rect bounds,
             Configuration config) {
@@ -128,6 +112,10 @@ class Task implements DimLayer.DimLayerUser {
         if (DEBUG_STACK) Slog.i(TAG, "removeTask: removing taskId=" + mTaskId);
         EventLog.writeEvent(EventLogTags.WM_TASK_REMOVED, mTaskId, "removeTask");
         mDeferRemoval = false;
+        DisplayContent content = getDisplayContent();
+        if (content != null) {
+            content.mDimBehindController.removeDimLayerUser(this);
+        }
         mStack.removeTask(this);
         mService.mTaskIdToTask.delete(mTaskId);
     }
@@ -228,7 +216,9 @@ class Task implements DimLayer.DimLayerUser {
 
         mBounds.set(bounds);
         mRotation = rotation;
-        updateDimLayer();
+        if (displayContent != null) {
+            displayContent.mDimBehindController.updateDimLayer(this);
+        }
         mOverrideConfig = mFullscreen ? Configuration.EMPTY : config;
         return boundsChange;
     }
@@ -261,7 +251,8 @@ class Task implements DimLayer.DimLayerUser {
     }
 
     /** Bounds of the task with other system factors taken into consideration. */
-    void getBounds(Rect out) {
+    @Override
+    public void getBounds(Rect out) {
         if (useCurrentBounds()) {
             // No need to adjust the output bounds if fullscreen or the docked stack is visible
             // since it is already what we want to represent to the rest of the system.
@@ -306,139 +297,6 @@ class Task implements DimLayer.DimLayerUser {
             // lock and activity manager lock been held.
             mService.mH.sendMessage(mService.mH.obtainMessage(
                             RESIZE_TASK, mTaskId, RESIZE_MODE_SYSTEM_SCREEN_ROTATION, mBounds));
-        }
-    }
-
-    /** Updates the dim layer bounds, recreating it if needed. */
-    private void updateDimLayer() {
-        DimLayer newDimLayer;
-        final boolean previousFullscreen =
-                mDimLayer != null && sSharedFullscreenDimLayers.indexOfValue(mDimLayer) > -1;
-        final int displayId = mStack.getDisplayContent().getDisplayId();
-        if (mFullscreen) {
-            if (previousFullscreen) {
-                // Nothing to do here...
-                return;
-            }
-            // Use shared fullscreen dim layer
-            newDimLayer = sSharedFullscreenDimLayers.get(displayId);
-            if (newDimLayer == null) {
-                if (mDimLayer != null) {
-                    // Re-purpose the previous dim layer.
-                    newDimLayer = mDimLayer;
-                } else {
-                    // Create new full screen dim layer.
-                    newDimLayer = new DimLayer(mService, this, displayId);
-                }
-                newDimLayer.setBounds(mBounds);
-                sSharedFullscreenDimLayers.put(displayId, newDimLayer);
-            } else if (mDimLayer != null) {
-                mDimLayer.destroySurface();
-            }
-        } else {
-            newDimLayer = (mDimLayer == null || previousFullscreen)
-                    ? new DimLayer(mService, this, displayId) : mDimLayer;
-            newDimLayer.setBounds(mBounds);
-        }
-        mDimLayer = newDimLayer;
-    }
-
-    boolean animateDimLayers() {
-        final int dimLayer;
-        final float dimAmount;
-        if (mDimWinAnimator == null) {
-            dimLayer = mDimLayer.getLayer();
-            dimAmount = 0;
-        } else {
-            dimLayer = mDimWinAnimator.mAnimLayer - WindowManagerService.LAYER_OFFSET_DIM;
-            dimAmount = mDimWinAnimator.mWin.mAttrs.dimAmount;
-        }
-        final float targetAlpha = mDimLayer.getTargetAlpha();
-        if (targetAlpha != dimAmount) {
-            if (mDimWinAnimator == null) {
-                mDimLayer.hide(DEFAULT_DIM_DURATION);
-            } else {
-                long duration = (mDimWinAnimator.mAnimating && mDimWinAnimator.mAnimation != null)
-                        ? mDimWinAnimator.mAnimation.computeDurationHint()
-                        : DEFAULT_DIM_DURATION;
-                if (targetAlpha > dimAmount) {
-                    duration = getDimBehindFadeDuration(duration);
-                }
-                mDimLayer.show(dimLayer, dimAmount, duration);
-            }
-        } else if (mDimLayer.getLayer() != dimLayer) {
-            mDimLayer.setLayer(dimLayer);
-        }
-        if (mDimLayer.isAnimating()) {
-            if (!mService.okToDisplay()) {
-                // Jump to the end of the animation.
-                mDimLayer.show();
-            } else {
-                return mDimLayer.stepAnimation();
-            }
-        }
-        return false;
-    }
-
-    private long getDimBehindFadeDuration(long duration) {
-        TypedValue tv = new TypedValue();
-        mService.mContext.getResources().getValue(
-                com.android.internal.R.fraction.config_dimBehindFadeDuration, tv, true);
-        if (tv.type == TypedValue.TYPE_FRACTION) {
-            duration = (long)tv.getFraction(duration, duration);
-        } else if (tv.type >= TypedValue.TYPE_FIRST_INT && tv.type <= TypedValue.TYPE_LAST_INT) {
-            duration = tv.data;
-        }
-        return duration;
-    }
-
-    void clearContinueDimming() {
-        mContinueDimming = false;
-    }
-
-    void setContinueDimming() {
-        mContinueDimming = true;
-    }
-
-    boolean getContinueDimming() {
-        return mContinueDimming;
-    }
-
-    boolean isDimming() {
-        return mDimLayer.isDimming();
-    }
-
-    boolean isDimming(WindowStateAnimator winAnimator) {
-        return mDimWinAnimator == winAnimator && isDimming();
-    }
-
-    void startDimmingIfNeeded(WindowStateAnimator newWinAnimator) {
-        // Only set dim params on the highest dimmed layer.
-        // Don't turn on for an unshown surface, or for any layer but the highest dimmed layer.
-        if (newWinAnimator.mSurfaceShown && (mDimWinAnimator == null
-                || !mDimWinAnimator.mSurfaceShown
-                || mDimWinAnimator.mAnimLayer < newWinAnimator.mAnimLayer)) {
-            mDimWinAnimator = newWinAnimator;
-            if (mDimWinAnimator.mWin.mAppToken == null
-                    && !mFullscreen && mStack.getDisplayContent() != null) {
-                // Dim should cover the entire screen for system windows.
-                mStack.getDisplayContent().getLogicalDisplayRect(mTmpRect);
-                mDimLayer.setBounds(mTmpRect);
-            }
-        }
-    }
-
-    void stopDimmingIfNeeded() {
-        if (!mContinueDimming && isDimming()) {
-            mDimWinAnimator = null;
-            mDimLayer.setBounds(mBounds);
-        }
-    }
-
-    void close() {
-        if (mDimLayer != null) {
-            mDimLayer.destroySurface();
-            mDimLayer = null;
         }
     }
 
@@ -491,16 +349,14 @@ class Task implements DimLayer.DimLayerUser {
         return "{taskId=" + mTaskId + " appTokens=" + mAppTokens + " mdr=" + mDeferRemoval + "}";
     }
 
+    @Override
+    public String toShortString() {
+        return "Task=" + mTaskId;
+    }
+
     public void printTo(String prefix, PrintWriter pw) {
         pw.print(prefix); pw.print("taskId="); pw.print(mTaskId);
                 pw.print(prefix); pw.print("appTokens="); pw.print(mAppTokens);
                 pw.print(prefix); pw.print("mdr="); pw.println(mDeferRemoval);
-        if (mDimLayer.isDimming()) {
-            pw.print(prefix); pw.println("mDimLayer:");
-            mDimLayer.printTo(prefix + " ", pw);
-            pw.print(prefix); pw.print("mDimWinAnimator="); pw.println(mDimWinAnimator);
-        } else {
-            pw.println();
-        }
     }
 }

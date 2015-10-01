@@ -216,6 +216,7 @@ public class WindowManagerService extends IWindowManager.Stub
     static final boolean DEBUG_STACK = false;
     static final boolean DEBUG_DISPLAY = false;
     static final boolean DEBUG_POWER = false;
+    static final boolean DEBUG_DIM_LAYER = false;
     static final boolean SHOW_SURFACE_ALLOC = false;
     static final boolean SHOW_TRANSACTIONS = false;
     static final boolean SHOW_LIGHT_TRANSACTIONS = false || SHOW_TRANSACTIONS;
@@ -8356,8 +8357,10 @@ public class WindowManagerService extends IWindowManager.Stub
                 layerChanged = true;
                 anyLayerChanged = true;
             }
-            final Task task = w.getTask();
-            if (layerChanged && task != null && task.isDimming(winAnimator)) {
+            final DimLayer.DimLayerUser dimLayerUser = w.getDimLayerUser();
+            final DisplayContent displayContent = w.getDisplayContent();
+            if (layerChanged && dimLayerUser != null && displayContent != null &&
+                    displayContent.mDimBehindController.isDimming(dimLayerUser, winAnimator)) {
                 // Force an animation pass just to update the mDimLayer layer.
                 scheduleAnimationLocked();
             }
