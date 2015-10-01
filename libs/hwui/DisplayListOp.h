@@ -172,10 +172,6 @@ public:
     void setQuickRejected(bool quickRejected) { mQuickRejected = quickRejected; }
     bool getQuickRejected() { return mQuickRejected; }
 
-    inline int getPaintAlpha() const {
-        return OpenGLRenderer::getAlphaDirect(mPaint);
-    }
-
     virtual bool hasTextShadow() const {
         return false;
     }
@@ -213,7 +209,7 @@ protected:
 
         if (state.mAlpha != 1.0f) return false;
 
-        SkXfermode::Mode mode = OpenGLRenderer::getXfermodeDirect(mPaint);
+        SkXfermode::Mode mode = PaintUtils::getXfermodeDirect(mPaint);
         return (mode == SkXfermode::kSrcOver_Mode ||
                 mode == SkXfermode::kSrc_Mode);
 
@@ -249,8 +245,8 @@ public:
 
     virtual bool getLocalBounds(Rect& localBounds) override {
         localBounds.set(mLocalBounds);
-        OpenGLRenderer::TextShadow textShadow;
-        if (OpenGLRenderer::getTextShadow(mPaint, &textShadow)) {
+        PaintUtils::TextShadow textShadow;
+        if (PaintUtils::getTextShadow(mPaint, &textShadow)) {
             Rect shadow(mLocalBounds);
             shadow.translate(textShadow.dx, textShadow.dx);
             shadow.outset(textShadow.radius);
@@ -372,8 +368,8 @@ public:
 
 private:
     bool isSaveLayerAlpha() const {
-        SkXfermode::Mode mode = OpenGLRenderer::getXfermodeDirect(mPaint);
-        int alpha = OpenGLRenderer::getAlphaDirect(mPaint);
+        SkXfermode::Mode mode = PaintUtils::getXfermodeDirect(mPaint);
+        int alpha = PaintUtils::getAlphaDirect(mPaint);
         return alpha < 255 && mode == SkXfermode::kSrcOver_Mode;
     }
 
@@ -691,7 +687,7 @@ public:
         // TODO: support clipped bitmaps by handling them in SET_TEXTURE
         deferInfo.mergeable = state.mMatrix.isSimple() && state.mMatrix.positiveScale() &&
                 !state.mClipSideFlags &&
-                OpenGLRenderer::getXfermodeDirect(mPaint) == SkXfermode::kSrcOver_Mode &&
+                PaintUtils::getXfermodeDirect(mPaint) == SkXfermode::kSrcOver_Mode &&
                 (mBitmap->colorType() != kAlpha_8_SkColorType);
     }
 
@@ -895,7 +891,7 @@ public:
         deferInfo.batchId = DeferredDisplayList::kOpBatch_Patch;
         deferInfo.mergeId = getAtlasEntry(renderer) ? (mergeid_t) mEntry->getMergeId() : (mergeid_t) mBitmap;
         deferInfo.mergeable = state.mMatrix.isPureTranslate() &&
-                OpenGLRenderer::getXfermodeDirect(mPaint) == SkXfermode::kSrcOver_Mode;
+                PaintUtils::getXfermodeDirect(mPaint) == SkXfermode::kSrcOver_Mode;
         deferInfo.opaqueOverBounds = isOpaqueOverBounds(state) && mBitmap->isOpaque();
     }
 
@@ -1241,7 +1237,7 @@ public:
     }
 
     virtual bool hasTextShadow() const override {
-        return OpenGLRenderer::hasTextShadow(mPaint);
+        return PaintUtils::hasTextShadow(mPaint);
     }
 
     virtual void onDefer(OpenGLRenderer& renderer, DeferInfo& deferInfo,
@@ -1330,7 +1326,7 @@ public:
 
         deferInfo.mergeable = state.mMatrix.isPureTranslate()
                 && !hasDecorations
-                && OpenGLRenderer::getXfermodeDirect(mPaint) == SkXfermode::kSrcOver_Mode;
+                && PaintUtils::getXfermodeDirect(mPaint) == SkXfermode::kSrcOver_Mode;
     }
 
     virtual void applyDraw(OpenGLRenderer& renderer, Rect& dirty) override {

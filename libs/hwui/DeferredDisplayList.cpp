@@ -218,7 +218,10 @@ public:
         // if paints are equal, then modifiers + paint attribs don't need to be compared
         if (op->mPaint == mOps[0].op->mPaint) return true;
 
-        if (op->getPaintAlpha() != mOps[0].op->getPaintAlpha()) return false;
+        if (PaintUtils::getAlphaDirect(op->mPaint)
+                != PaintUtils::getAlphaDirect(mOps[0].op->mPaint)) {
+            return false;
+        }
 
         if (op->mPaint && mOps[0].op->mPaint &&
             op->mPaint->getColorFilter() != mOps[0].op->mPaint->getColorFilter()) {
