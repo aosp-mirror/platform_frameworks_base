@@ -2056,7 +2056,7 @@ public class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
     /**
      * <p>Whether video stabilization is
      * active.</p>
-     * <p>Video stabilization automatically translates and scales images from
+     * <p>Video stabilization automatically warps images from
      * the camera in order to stabilize motion between consecutive frames.</p>
      * <p>If enabled, video stabilization can modify the
      * {@link CaptureRequest#SCALER_CROP_REGION android.scaler.cropRegion} to keep the video stream stabilized.</p>
@@ -2066,6 +2066,15 @@ public class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
      * the video stabilization modes in the first several capture results may
      * still be "OFF", and it will become "ON" when the initialization is
      * done.</p>
+     * <p>In addition, not all recording sizes or frame rates may be supported for
+     * stabilization by a device that reports stabilization support. It is guaranteed
+     * that an output targeting a MediaRecorder or MediaCodec will be stabilized if
+     * the recording resolution is less than or equal to 1920 x 1080 (width less than
+     * or equal to 1920, height less than or equal to 1080), and the recording
+     * frame rate is less than or equal to 30fps.  At other sizes, the CaptureResult
+     * {@link CaptureRequest#CONTROL_VIDEO_STABILIZATION_MODE android.control.videoStabilizationMode} field will return
+     * OFF if the recording output is not stabilized, or if there are no output
+     * Surface types that can be stabilized.</p>
      * <p>If a camera device supports both this mode and OIS
      * ({@link CaptureRequest#LENS_OPTICAL_STABILIZATION_MODE android.lens.opticalStabilizationMode}), turning both modes on may
      * produce undesirable interaction, so it is recommended not to enable
@@ -2077,6 +2086,7 @@ public class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
      * </ul></p>
      * <p>This key is available on all devices.</p>
      *
+     * @see CaptureRequest#CONTROL_VIDEO_STABILIZATION_MODE
      * @see CaptureRequest#LENS_OPTICAL_STABILIZATION_MODE
      * @see CaptureRequest#SCALER_CROP_REGION
      * @see #CONTROL_VIDEO_STABILIZATION_MODE_OFF
