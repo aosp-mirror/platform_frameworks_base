@@ -18,11 +18,11 @@ package com.android.systemui.recents.views;
 
 import android.content.Context;
 import android.graphics.Rect;
+import com.android.systemui.R;
 import com.android.systemui.recents.Constants;
 import com.android.systemui.recents.RecentsConfiguration;
 import com.android.systemui.recents.misc.Utilities;
 import com.android.systemui.recents.model.Task;
-import com.android.systemui.R;
 
 import java.util.ArrayList;
 import java.util.HashMap;

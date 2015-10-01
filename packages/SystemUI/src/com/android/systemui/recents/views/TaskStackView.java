@@ -29,14 +29,14 @@ import android.view.View;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityNodeInfo;
 import android.widget.FrameLayout;
-import com.android.internal.logging.MetricsLogger;
 import com.android.systemui.R;
 import com.android.systemui.recents.Constants;
-import com.android.systemui.recents.RecentsActivityLaunchState;
 import com.android.systemui.recents.RecentsActivity;
+import com.android.systemui.recents.RecentsActivityLaunchState;
 import com.android.systemui.recents.RecentsConfiguration;
 import com.android.systemui.recents.events.EventBus;
 import com.android.systemui.recents.events.activity.PackagesChangedEvent;
+import com.android.systemui.recents.events.ui.DismissTaskEvent;
 import com.android.systemui.recents.misc.DozeTrigger;
 import com.android.systemui.recents.misc.SystemServicesProxy;
 import com.android.systemui.recents.misc.Utilities;
@@ -62,13 +62,9 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
     interface TaskStackViewCallbacks {
         public void onTaskViewClicked(TaskStackView stackView, TaskView tv, TaskStack stack, Task t,
                                       boolean lockToTask, boolean boundsValid, Rect bounds);
-        public void onTaskViewAppInfoClicked(Task t);
-        public void onTaskViewDismissed(Task t);
         public void onAllTaskViewsDismissed(ArrayList<Task> removedTasks);
         public void onTaskStackFilterTriggered();
         public void onTaskStackUnfilterTriggered();
-
-        public void onTaskResize(Task t);
     }
     RecentsConfiguration mConfig;
 
@@ -1175,11 +1171,6 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
             // Fade the dismiss button back in
             showDismissAllButton();
         }
-
-        // Notify the callback that we've removed the task and it can clean up after it. Note, we
-        // do this after onAllTaskViewsDismissed() is called, to allow the home activity to be
-        // started before the call to remove the task.
-        mCb.onTaskViewDismissed(removedTask);
     }
 
     @Override
@@ -1357,60 +1348,12 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
     /**** TaskViewCallbacks Implementation ****/
 
     @Override
-    public void onTaskViewAppIconClicked(TaskView tv) {
-        if (Constants.DebugFlags.App.EnableTaskFiltering) {
-            if (mStack.hasFilteredTasks()) {
-                mStack.unfilterTasks();
-            } else {
-                mStack.filterTasks(tv.getTask());
-            }
-        }
-    }
-
-    @Override
-    public void onTaskViewAppInfoClicked(TaskView tv) {
-        if (mCb != null) {
-            mCb.onTaskViewAppInfoClicked(tv.getTask());
-
-            // Keep track of app-info invocations
-            MetricsLogger.count(getContext(), "overview_app_info", 1);
-        }
-    }
-
-    @Override
     public void onTaskViewClicked(TaskView tv, Task task, boolean lockToTask) {
         // Cancel any doze triggers
         mUIDozeTrigger.stopDozing();
 
         if (mCb != null) {
             mCb.onTaskViewClicked(this, tv, mStack, task, lockToTask, false, null);
-        }
-    }
-
-    @Override
-    public void onTaskViewDismissed(TaskView tv) {
-        Task task = tv.getTask();
-        int taskIndex = mStack.indexOfTask(task);
-        boolean taskWasFocused = tv.isFocusedTask();
-        // Announce for accessibility
-        tv.announceForAccessibility(getContext().getString(R.string.accessibility_recents_item_dismissed,
-                tv.getTask().activityLabel));
-        // Remove the task from the view
-        mStack.removeTask(task);
-        // If the dismissed task was focused, then we should focus the new task in the same index
-        if (taskWasFocused) {
-            ArrayList<Task> tasks = mStack.getTasks();
-            int nextTaskIndex = Math.min(tasks.size() - 1, taskIndex - 1);
-            if (nextTaskIndex >= 0) {
-                Task nextTask = tasks.get(nextTaskIndex);
-                TaskView nextTv = getChildViewForTask(nextTask);
-                if (nextTv != null) {
-                    // Focus the next task, and only animate the visible state if we are launched
-                    // from Alt-Tab
-                    RecentsActivityLaunchState launchState = mConfig.getLaunchState();
-                    nextTv.setFocusedTask(launchState.launchedWithAltTab);
-                }
-            }
         }
     }
 
@@ -1425,13 +1368,6 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
     public void onTaskViewFocusChanged(TaskView tv, boolean focused) {
         if (focused) {
             mFocusedTaskIndex = mStack.indexOfTask(tv.getTask());
-        }
-    }
-
-    @Override
-    public void onTaskResize(TaskView tv) {
-        if (mCb != null) {
-            mCb.onTaskResize(tv.getTask());
         }
     }
 
@@ -1468,6 +1404,35 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
                 } else {
                     // Otherwise, remove the task from the stack immediately
                     mStack.removeTask(t);
+                }
+            }
+        }
+    }
+
+    public final void onBusEvent(DismissTaskEvent event) {
+        TaskView tv = event.taskView;
+        Task task = tv.getTask();
+        int taskIndex = mStack.indexOfTask(task);
+        boolean taskWasFocused = tv.isFocusedTask();
+
+        // Announce for accessibility
+        tv.announceForAccessibility(getContext().getString(R.string.accessibility_recents_item_dismissed,
+                tv.getTask().activityLabel));
+
+        // Remove the task from the view
+        mStack.removeTask(task);
+        // If the dismissed task was focused, then we should focus the new task in the same index
+        if (taskWasFocused) {
+            ArrayList<Task> tasks = mStack.getTasks();
+            int nextTaskIndex = Math.min(tasks.size() - 1, taskIndex - 1);
+            if (nextTaskIndex >= 0) {
+                Task nextTask = tasks.get(nextTaskIndex);
+                TaskView nextTv = getChildViewForTask(nextTask);
+                if (nextTv != null) {
+                    // Focus the next task, and only animate the visible state if we are launched
+                    // from Alt-Tab
+                    RecentsActivityLaunchState launchState = mConfig.getLaunchState();
+                    nextTv.setFocusedTask(launchState.launchedWithAltTab);
                 }
             }
         }

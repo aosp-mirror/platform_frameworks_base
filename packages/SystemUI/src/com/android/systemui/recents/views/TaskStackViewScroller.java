@@ -24,8 +24,8 @@ import android.content.Context;
 import android.view.animation.AnimationUtils;
 import android.view.animation.Interpolator;
 import android.widget.OverScroller;
-import com.android.systemui.recents.misc.Utilities;
 import com.android.systemui.R;
+import com.android.systemui.recents.misc.Utilities;
 
 /* The scrolling logic for a TaskStackView */
 public class TaskStackViewScroller {

@@ -635,7 +635,7 @@ public class EventBus extends BroadcastReceiver {
 
         // Find all the valid event bus handler methods of the subscriber
         MutableBoolean isInterprocessEvent = new MutableBoolean(false);
-        Method[] methods = subscriberType.getMethods();
+        Method[] methods = subscriberType.getDeclaredMethods();
         for (Method m : methods) {
             Class<?>[] parameterTypes = m.getParameterTypes();
             isInterprocessEvent.value = false;
