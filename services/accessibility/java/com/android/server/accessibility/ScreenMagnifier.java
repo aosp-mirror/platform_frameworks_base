@@ -137,6 +137,8 @@ public final class ScreenMagnifier implements WindowManagerInternal.Magnificatio
 
     private final AccessibilityManagerService mAms;
 
+    private final int mUserId;
+
     private final int mTapTimeSlop = ViewConfiguration.getJumpTapTimeout();
     private final int mMultiTapTimeSlop;
     private final int mTapDistanceSlop;
@@ -188,8 +190,10 @@ public final class ScreenMagnifier implements WindowManagerInternal.Magnificatio
         }
     };
 
-    public ScreenMagnifier(Context context, int displayId, AccessibilityManagerService service) {
+    public ScreenMagnifier(Context context, int userId, int displayId,
+            AccessibilityManagerService service) {
         mContext = context;
+        mUserId = userId;
         mWindowManager = LocalServices.getService(WindowManagerInternal.class);
         mAms = service;
 
@@ -882,17 +886,17 @@ public final class ScreenMagnifier implements WindowManagerInternal.Magnificatio
         new AsyncTask<Void, Void, Void>() {
             @Override
             protected Void doInBackground(Void... params) {
-                Settings.Secure.putFloat(mContext.getContentResolver(),
-                        Settings.Secure.ACCESSIBILITY_DISPLAY_MAGNIFICATION_SCALE, scale);
+                Settings.Secure.putFloatForUser(mContext.getContentResolver(),
+                        Settings.Secure.ACCESSIBILITY_DISPLAY_MAGNIFICATION_SCALE, scale, mUserId);
                 return null;
             }
         }.execute();
     }
 
     private float getPersistedScale() {
-        return Settings.Secure.getFloat(mContext.getContentResolver(),
+        return Settings.Secure.getFloatForUser(mContext.getContentResolver(),
                 Settings.Secure.ACCESSIBILITY_DISPLAY_MAGNIFICATION_SCALE,
-                DEFAULT_MAGNIFICATION_SCALE);
+                DEFAULT_MAGNIFICATION_SCALE, mUserId);
     }
 
     private static boolean isScreenMagnificationAutoUpdateEnabled(Context context) {
