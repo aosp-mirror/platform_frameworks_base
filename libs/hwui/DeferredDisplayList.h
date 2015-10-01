@@ -17,10 +17,11 @@
 #ifndef ANDROID_HWUI_DEFERRED_DISPLAY_LIST_H
 #define ANDROID_HWUI_DEFERRED_DISPLAY_LIST_H
 
+#include <unordered_map>
+
 #include <utils/Errors.h>
 #include <utils/LinearAllocator.h>
 #include <utils/Vector.h>
-#include <utils/TinyHashMap.h>
 
 #include "Matrix.h"
 #include "OpenGLRenderer.h"
@@ -176,7 +177,7 @@ private:
      * MergingDrawBatch of that id. These ids are unique per draw type and guaranteed to not
      * collide, which avoids the need to resolve mergeid collisions.
      */
-    TinyHashMap<mergeid_t, DrawBatch*> mMergingBatches[kOpBatch_Count];
+    std::unordered_map<mergeid_t, DrawBatch*> mMergingBatches[kOpBatch_Count];
 
     LinearAllocator mAllocator;
 };
