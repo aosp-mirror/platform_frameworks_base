@@ -59,8 +59,7 @@ import java.util.List;
  * This view is the the top level layout that contains TaskStacks (which are laid out according
  * to their SpaceNode bounds.
  */
-public class RecentsView extends FrameLayout implements TaskStackView.TaskStackViewCallbacks,
-        RecentsPackageMonitor.PackageCallbacks {
+public class RecentsView extends FrameLayout implements TaskStackView.TaskStackViewCallbacks {
 
     private static final String TAG = "RecentsView";
 
@@ -730,16 +729,6 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
     public void onTaskResize(Task t) {
         if (mCb != null) {
             mCb.onTaskResize(t);
-        }
-    }
-
-    /**** RecentsPackageMonitor.PackageCallbacks Implementation ****/
-
-    @Override
-    public void onPackagesChanged(RecentsPackageMonitor monitor, String packageName, int userId) {
-        // Propagate this event down to each task stack view
-        if (mTaskStackView != null) {
-            mTaskStackView.onPackagesChanged(monitor, packageName, userId);
         }
     }
 }

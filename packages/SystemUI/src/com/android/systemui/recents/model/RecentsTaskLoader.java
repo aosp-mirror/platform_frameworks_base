@@ -262,8 +262,6 @@ public class RecentsTaskLoader {
     TaskResourceLoadQueue mLoadQueue;
     TaskResourceLoader mLoader;
 
-    RecentsPackageMonitor mPackageMonitor;
-
     int mMaxThumbnailCacheSize;
     int mMaxIconCacheSize;
     int mNumVisibleTasksLoaded;
@@ -293,7 +291,6 @@ public class RecentsTaskLoader {
 
         // Initialize the proxy, cache and loaders
         mSystemServicesProxy = new SystemServicesProxy(context);
-        mPackageMonitor = new RecentsPackageMonitor();
         mLoadQueue = new TaskResourceLoadQueue();
         mApplicationIconCache = new DrawableLruCache(iconCacheSize);
         mThumbnailCache = new BitmapLruCache(thumbnailCacheSize);
@@ -517,17 +514,6 @@ public class RecentsTaskLoader {
     void stopLoader() {
         mLoader.stop();
         mLoadQueue.clearTasks();
-    }
-
-    /** Registers any broadcast receivers. */
-    public void registerReceivers(Context context, RecentsPackageMonitor.PackageCallbacks cb) {
-        // Register the broadcast receiver to handle messages related to packages being added/removed
-        mPackageMonitor.register(context, cb);
-    }
-
-    /** Unregisters any broadcast receivers. */
-    public void unregisterReceivers() {
-        mPackageMonitor.unregister();
     }
 
     /**

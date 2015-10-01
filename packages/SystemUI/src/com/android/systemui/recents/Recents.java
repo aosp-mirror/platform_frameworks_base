@@ -74,6 +74,8 @@ import java.util.ArrayList;
 public class Recents extends SystemUI
         implements ActivityOptions.OnAnimationStartedListener, RecentsComponent {
 
+    public final static int EVENT_BUS_PRIORITY = 1;
+
     final public static String EXTRA_TRIGGERED_FROM_ALT_TAB = "triggeredFromAltTab";
     final public static String EXTRA_TRIGGERED_FROM_HOME_KEY = "triggeredFromHomeKey";
     final public static String EXTRA_RECENTS_VISIBILITY = "recentsVisibility";

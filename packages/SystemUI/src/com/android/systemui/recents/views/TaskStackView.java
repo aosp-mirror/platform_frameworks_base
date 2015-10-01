@@ -33,11 +33,13 @@ import com.android.internal.logging.MetricsLogger;
 import com.android.systemui.R;
 import com.android.systemui.recents.Constants;
 import com.android.systemui.recents.RecentsActivityLaunchState;
+import com.android.systemui.recents.RecentsActivity;
 import com.android.systemui.recents.RecentsConfiguration;
+import com.android.systemui.recents.events.EventBus;
+import com.android.systemui.recents.events.activity.PackagesChangedEvent;
 import com.android.systemui.recents.misc.DozeTrigger;
 import com.android.systemui.recents.misc.SystemServicesProxy;
 import com.android.systemui.recents.misc.Utilities;
-import com.android.systemui.recents.model.RecentsPackageMonitor;
 import com.android.systemui.recents.model.RecentsTaskLoader;
 import com.android.systemui.recents.model.Task;
 import com.android.systemui.recents.model.TaskStack;
@@ -54,7 +56,7 @@ import java.util.List;
 /* The visual representation of a task stack view */
 public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCallbacks,
         TaskView.TaskViewCallbacks, TaskStackViewScroller.TaskStackViewScrollerCallbacks,
-        ViewPool.ViewPoolConsumer<TaskView, Task>, RecentsPackageMonitor.PackageCallbacks {
+        ViewPool.ViewPoolConsumer<TaskView, Task> {
 
     /** The TaskView callbacks */
     interface TaskStackViewCallbacks {
@@ -77,7 +79,7 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
     TaskStackViewTouchHandler mTouchHandler;
     TaskStackViewCallbacks mCb;
     ViewPool<TaskView, Task> mViewPool;
-    ArrayList<TaskViewTransform> mCurrentTaskTransforms = new ArrayList<TaskViewTransform>();
+    ArrayList<TaskViewTransform> mCurrentTaskTransforms = new ArrayList<>();
     DozeTrigger mUIDozeTrigger;
     DismissView mDismissAllButton;
     boolean mDismissAllButtonAnimating;
@@ -97,9 +99,9 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
     Matrix mTmpMatrix = new Matrix();
     Rect mTmpRect = new Rect();
     TaskViewTransform mTmpTransform = new TaskViewTransform();
-    HashMap<Task, TaskView> mTmpTaskViewMap = new HashMap<Task, TaskView>();
-    ArrayList<TaskView> mTaskViews = new ArrayList<TaskView>();
-    List<TaskView> mImmutableTaskViews = new ArrayList<TaskView>();
+    HashMap<Task, TaskView> mTmpTaskViewMap = new HashMap<>();
+    ArrayList<TaskView> mTaskViews = new ArrayList<>();
+    List<TaskView> mImmutableTaskViews = new ArrayList<>();
     LayoutInflater mInflater;
     boolean mLayersDisabled;
 
@@ -145,6 +147,18 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
     /** Sets the callbacks */
     void setCallbacks(TaskStackViewCallbacks cb) {
         mCb = cb;
+    }
+
+    @Override
+    protected void onAttachedToWindow() {
+        EventBus.getDefault().register(this, RecentsActivity.EVENT_BUS_PRIORITY + 1);
+        super.onAttachedToWindow();
+    }
+
+    @Override
+    protected void onDetachedFromWindow() {
+        super.onDetachedFromWindow();
+        EventBus.getDefault().unregister(this);
     }
 
     /** Sets the task stack */
@@ -1430,13 +1444,12 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
         postInvalidateOnAnimation();
     }
 
-    /**** RecentsPackageMonitor.PackageCallbacks Implementation ****/
+    /**** EventBus Events ****/
 
-    @Override
-    public void onPackagesChanged(RecentsPackageMonitor monitor, String packageName, int userId) {
+    public final void onBusEvent(PackagesChangedEvent event) {
         // Compute which components need to be removed
-        HashSet<ComponentName> removedComponents = monitor.computeComponentsRemoved(
-                mStack.getTaskKeys(), packageName, userId);
+        HashSet<ComponentName> removedComponents = event.monitor.computeComponentsRemoved(
+                mStack.getTaskKeys(), event.packageName, event.userId);
 
         // For other tasks, just remove them directly if they no longer exist
         ArrayList<Task> tasks = mStack.getTasks();
