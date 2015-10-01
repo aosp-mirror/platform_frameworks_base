@@ -272,25 +272,6 @@ public class WindowAnimator {
                 winAnimator.mWasAnimating = nowAnimating;
                 mAnimating |= nowAnimating;
 
-                boolean appWindowAnimating = winAnimator.mAppAnimator != null
-                        && winAnimator.mAppAnimator.animating;
-                boolean wasAppWindowAnimating = winAnimator.mAppAnimator != null
-                        && winAnimator.mAppAnimator.wasAnimating;
-                boolean anyAnimating = appWindowAnimating || nowAnimating;
-                boolean anyWasAnimating = wasAppWindowAnimating || wasAnimating;
-
-                try {
-                    if (anyAnimating && !anyWasAnimating) {
-                        win.mClient.onAnimationStarted(winAnimator.mAnimatingMove ? -1
-                                : winAnimator.mKeyguardGoingAwayAnimation ? 1
-                                : 0);
-                    } else if (!anyAnimating && anyWasAnimating) {
-                        win.mClient.onAnimationStopped();
-                    }
-                } catch (RemoteException e) {
-                    Slog.w(TAG, "Failed to dispatch window animation state change.", e);
-                }
-
                 if (WindowManagerService.DEBUG_WALLPAPER) {
                     Slog.v(TAG, win + ": wasAnimating=" + wasAnimating +
                             ", nowAnimating=" + nowAnimating);
