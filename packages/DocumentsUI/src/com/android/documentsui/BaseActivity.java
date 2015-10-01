@@ -20,6 +20,7 @@ import static com.android.documentsui.DirectoryFragment.ANIM_DOWN;
 import static com.android.documentsui.DirectoryFragment.ANIM_NONE;
 import static com.android.documentsui.DirectoryFragment.ANIM_SIDE;
 import static com.android.documentsui.DirectoryFragment.ANIM_UP;
+import static com.android.documentsui.Shared.DEBUG;
 import static com.android.internal.util.Preconditions.checkArgument;
 
 import android.app.Activity;
@@ -150,12 +151,10 @@ abstract class BaseActivity extends Activity {
         fileSize.setTitle(LocalPreferences.getDisplayFileSize(this)
                 ? R.string.menu_file_size_hide : R.string.menu_file_size_show);
 
-        State state = getDisplayState();
-
-        sortSize.setVisible(state.showSize); // Only sort by size when visible
-        fileSize.setVisible(!state.showSize);
-        grid.setVisible(state.derivedMode != State.MODE_GRID);
-        list.setVisible(state.derivedMode != State.MODE_LIST);
+        sortSize.setVisible(mState.showSize); // Only sort by size when visible
+        fileSize.setVisible(!mState.showSize);
+        grid.setVisible(mState.derivedMode != State.MODE_GRID);
+        list.setVisible(mState.derivedMode != State.MODE_LIST);
         advanced.setVisible(!mState.showAdvanced);
         settings.setVisible((root.flags & Root.FLAG_HAS_SETTINGS) != 0);
 
@@ -185,12 +184,10 @@ abstract class BaseActivity extends Activity {
     void onStackRestored(boolean restored, boolean external) {}
 
     void onRootPicked(RootInfo root) {
-        State state = getDisplayState();
-
         // Clear entire backstack and start in new root
-        state.stack.root = root;
-        state.stack.clear();
-        state.stackTouched = true;
+        mState.stack.root = root;
+        mState.stack.clear();
+        mState.stackTouched = true;
 
         mSearchManager.update(root);
 
@@ -289,8 +286,8 @@ abstract class BaseActivity extends Activity {
     }
 
     void openDirectory(DocumentInfo doc) {
-        getDisplayState().stack.push(doc);
-        getDisplayState().stackTouched = true;
+        mState.stack.push(doc);
+        mState.stackTouched = true;
         onCurrentDirectoryChanged(ANIM_DOWN);
     }
 
@@ -367,16 +364,15 @@ abstract class BaseActivity extends Activity {
     }
 
     void setDisplayAdvancedDevices(boolean display) {
-        State state = getDisplayState();
         LocalPreferences.setDisplayAdvancedDevices(this, display);
-        state.showAdvanced = state.forceAdvanced | display;
+        mState.showAdvanced = mState.forceAdvanced | display;
         RootsFragment.get(getFragmentManager()).onDisplayStateChanged();
         invalidateOptionsMenu();
     }
 
     void setDisplayFileSize(boolean display) {
         LocalPreferences.setDisplayFileSize(this, display);
-        getDisplayState().showSize = display;
+        mState.showSize = display;
         DirectoryFragment.get(getFragmentManager()).onDisplayStateChanged();
         invalidateOptionsMenu();
     }
@@ -389,7 +385,7 @@ abstract class BaseActivity extends Activity {
      * Set state sort order based on explicit user action.
      */
     void setUserSortOrder(int sortOrder) {
-        getDisplayState().userSortOrder = sortOrder;
+        mState.userSortOrder = sortOrder;
         DirectoryFragment.get(getFragmentManager()).onUserSortOrderChanged();
     }
 
@@ -397,7 +393,7 @@ abstract class BaseActivity extends Activity {
      * Set state mode based on explicit user action.
      */
     void setUserMode(int mode) {
-        getDisplayState().userMode = mode;
+        mState.userMode = mode;
         DirectoryFragment.get(getFragmentManager()).onUserModeChanged();
     }
 
@@ -411,7 +407,7 @@ abstract class BaseActivity extends Activity {
     @Override
     protected void onSaveInstanceState(Bundle state) {
         super.onSaveInstanceState(state);
-        state.putParcelable(EXTRA_STATE, getDisplayState());
+        state.putParcelable(EXTRA_STATE, mState);
     }
 
     @Override
@@ -420,16 +416,15 @@ abstract class BaseActivity extends Activity {
     }
 
     RootInfo getCurrentRoot() {
-        State state = getDisplayState();
-        if (state.stack.root != null) {
-            return state.stack.root;
+        if (mState.stack.root != null) {
+            return mState.stack.root;
         } else {
             return mRoots.getRecentsRoot();
         }
     }
 
     public DocumentInfo getCurrentDirectory() {
-        return getDisplayState().stack.peek();
+        return mState.stack.peek();
     }
 
     public Executor getExecutorForCurrentDirectory() {
@@ -470,9 +465,8 @@ abstract class BaseActivity extends Activity {
             // Update the restored stack to ensure we have freshest data
             stack.updateDocuments(getContentResolver());
 
-            State state = getDisplayState();
-            state.stack = stack;
-            state.stackTouched = true;
+            mState.stack = stack;
+            mState.stackTouched = true;
             onCurrentDirectoryChanged(ANIM_SIDE);
 
         } catch (FileNotFoundException e) {
@@ -502,9 +496,8 @@ abstract class BaseActivity extends Activity {
         @Override
         protected void onPostExecute(DocumentInfo result) {
             if (result != null) {
-                State state = getDisplayState();
-                state.stack.push(result);
-                state.stackTouched = true;
+                mState.stack.push(result);
+                mState.stackTouched = true;
                 onCurrentDirectoryChanged(ANIM_SIDE);
             }
         }
@@ -516,7 +509,9 @@ abstract class BaseActivity extends Activity {
 
         @Override
         protected Void doInBackground(Void... params) {
-            State state = getDisplayState();
+            if (DEBUG && !mState.stack.isEmpty()) {
+                Log.w(mTag, "Overwriting existing stack.");
+            }
             RootsCache roots = DocumentsApplication.getRootsCache(BaseActivity.this);
 
             // Restore last stack for calling package
@@ -528,7 +523,7 @@ abstract class BaseActivity extends Activity {
                     mExternal = cursor.getInt(cursor.getColumnIndex(ResumeColumns.EXTERNAL)) != 0;
                     final byte[] rawStack = cursor.getBlob(
                             cursor.getColumnIndex(ResumeColumns.STACK));
-                    DurableUtils.readFromArray(rawStack, state.stack);
+                    DurableUtils.readFromArray(rawStack, mState.stack);
                     mRestoredStack = true;
                 }
             } catch (IOException e) {
@@ -539,13 +534,13 @@ abstract class BaseActivity extends Activity {
 
             if (mRestoredStack) {
                 // Update the restored stack to ensure we have freshest data
-                final Collection<RootInfo> matchingRoots = roots.getMatchingRootsBlocking(state);
+                final Collection<RootInfo> matchingRoots = roots.getMatchingRootsBlocking(mState);
                 try {
-                    state.stack.updateRoot(matchingRoots);
-                    state.stack.updateDocuments(getContentResolver());
+                    mState.stack.updateRoot(matchingRoots);
+                    mState.stack.updateDocuments(getContentResolver());
                 } catch (FileNotFoundException e) {
                     Log.w(mTag, "Failed to restore stack: " + e);
-                    state.stack.reset();
+                    mState.stack.reset();
                     mRestoredStack = false;
                 }
             }
@@ -556,7 +551,7 @@ abstract class BaseActivity extends Activity {
         @Override
         protected void onPostExecute(Void result) {
             if (isDestroyed()) return;
-            getDisplayState().restored = true;
+            mState.restored = true;
             onCurrentDirectoryChanged(ANIM_NONE);
             onStackRestored(mRestoredStack, mExternal);
         }
@@ -600,10 +595,9 @@ abstract class BaseActivity extends Activity {
                 return;
             }
 
-            State state = getDisplayState();
-            while (state.stack.size() > position + 1) {
-                state.stackTouched = true;
-                state.stack.pop();
+            while (mState.stack.size() > position + 1) {
+                mState.stackTouched = true;
+                mState.stack.pop();
             }
             onCurrentDirectoryChanged(ANIM_UP);
         }
@@ -620,13 +614,12 @@ abstract class BaseActivity extends Activity {
     final class StackAdapter extends BaseAdapter {
         @Override
         public int getCount() {
-            return getDisplayState().stack.size();
+            return mState.stack.size();
         }
 
         @Override
         public DocumentInfo getItem(int position) {
-            State state = getDisplayState();
-            return state.stack.get(state.stack.size() - position - 1);
+            return mState.stack.get(mState.stack.size() - position - 1);
         }
 
         @Override
@@ -714,13 +707,12 @@ abstract class BaseActivity extends Activity {
                 return;
             }
 
-            State state = getDisplayState();
-            if (state.currentSearch != null) {
+            if (mState.currentSearch != null) {
                 mMenu.expandActionView();
 
                 mView.setIconified(false);
                 mView.clearFocus();
-                mView.setQuery(state.currentSearch, false);
+                mView.setQuery(mState.currentSearch, false);
             } else {
                 mView.clearFocus();
                 if (!mView.isIconified()) {
@@ -746,7 +738,7 @@ abstract class BaseActivity extends Activity {
 
             mMenu.setVisible(visible);
             if (!visible) {
-                getDisplayState().currentSearch = null;
+                mState.currentSearch = null;
             }
         }
 
@@ -764,7 +756,7 @@ abstract class BaseActivity extends Activity {
         }
 
         boolean isSearching() {
-            return getDisplayState().currentSearch != null;
+            return mState.currentSearch != null;
         }
 
         boolean isExpanded() {
@@ -779,7 +771,7 @@ abstract class BaseActivity extends Activity {
                 return false;
             }
 
-            getDisplayState().currentSearch = null;
+            mState.currentSearch = null;
             onCurrentDirectoryChanged(ANIM_NONE);
             return false;
         }
@@ -798,7 +790,7 @@ abstract class BaseActivity extends Activity {
                 mIgnoreNextCollapse = false;
                 return true;
             }
-            getDisplayState().currentSearch = null;
+            mState.currentSearch = null;
             onCurrentDirectoryChanged(ANIM_NONE);
             return true;
         }
@@ -806,7 +798,7 @@ abstract class BaseActivity extends Activity {
         @Override
         public boolean onQueryTextSubmit(String query) {
             mSearchExpanded = true;
-            getDisplayState().currentSearch = query;
+            mState.currentSearch = query;
             mView.clearFocus();
             onCurrentDirectoryChanged(ANIM_NONE);
             return true;

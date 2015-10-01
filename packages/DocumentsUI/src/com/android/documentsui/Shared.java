@@ -23,12 +23,11 @@ import android.content.Context;
 import android.support.design.widget.Snackbar;
 import android.view.View;
 
-/**
- * @hide
- */
+/** @hide */
 public final class Shared {
     public static final boolean DEBUG = true;
     public static final String TAG = "Documents";
+    public static final String EXTRA_STACK = "com.android.documentsui.STACK";
 
     /**
      * Generates a formatted quantity string.

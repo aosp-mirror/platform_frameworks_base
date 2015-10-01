@@ -66,7 +66,7 @@ public class FailureDialogFragment extends DialogFragment
         if (whichButton == DialogInterface.BUTTON_POSITIVE) {
             CopyService.start(getActivity(), mFailedSrcList,
                     (DocumentStack) getActivity().getIntent().getParcelableExtra(
-                            CopyService.EXTRA_STACK),
+                            Shared.EXTRA_STACK),
                             mTransferMode);
         }
     }

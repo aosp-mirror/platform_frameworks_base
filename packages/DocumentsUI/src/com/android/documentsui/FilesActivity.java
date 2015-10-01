@@ -30,6 +30,8 @@ import android.content.ContentValues;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Parcelable;
+import android.provider.DocumentsContract;
 import android.support.annotation.Nullable;
 import android.support.design.widget.Snackbar;
 import android.util.Log;
@@ -85,32 +87,49 @@ public class FilesActivity extends BaseActivity {
         mDrawer = DrawerController.create(this);
 
         RootsFragment.show(getFragmentManager(), null);
-        if (!mState.restored) {
-            Intent intent = getIntent();
-            Uri rootUri = intent.getData();
 
-            // If we've got a specific root to display, restore that root using a dedicated
-            // authority. That way a misbehaving provider won't result in an ANR.
-            if (rootUri != null && !LauncherActivity.isLaunchUri(rootUri)) {
-                new RestoreRootTask(rootUri).executeOnExecutor(
-                        ProviderExecutor.forAuthority(rootUri.getAuthority()));
+        if (mState.restored) {
+            onCurrentDirectoryChanged(ANIM_NONE);
+        } else {
+            Intent intent = getIntent();
+            Uri uri = intent.getData();
+
+            // If a non-empty stack is present in our state it was read (presumably)
+            // from EXTRA_STACK intent extra. In this case, we'll skip other means of
+            // loading or restoring the stack.
+            if (!mState.stack.isEmpty()) {
+                // When restoring from a stack, if a URI is present, it should only ever
+                // be a launch URI. Launch URIs support sensible activity management, but
+                // don't specify an real content target.
+                if (uri != null) {
+                    checkState(LauncherActivity.isLaunchUri(uri));
+                }
+                onCurrentDirectoryChanged(ANIM_NONE);
+            } else if (DocumentsContract.isRootUri(this, uri)) {
+                // If we've got a specific root to display, restore that root using a dedicated
+                // authority. That way a misbehaving provider won't result in an ANR.
+                new RestoreRootTask(uri).executeOnExecutor(
+                        ProviderExecutor.forAuthority(uri.getAuthority()));
             } else {
+                // Finally, we try to restore a stack from recents.
                 new RestoreStackTask().execute();
             }
 
+            // TODO: Ensure we're handling CopyService errors correctly across all activities.
             // Show a failure dialog if there was a failed operation.
-            final DocumentStack dstStack = intent.getParcelableExtra(CopyService.EXTRA_STACK);
             final int failure = intent.getIntExtra(CopyService.EXTRA_FAILURE, 0);
             final int transferMode = intent.getIntExtra(CopyService.EXTRA_TRANSFER_MODE,
                     CopyService.TRANSFER_MODE_NONE);
             if (failure != 0) {
                 final ArrayList<DocumentInfo> failedSrcList =
                         intent.getParcelableArrayListExtra(CopyService.EXTRA_SRC_LIST);
-                FailureDialogFragment.show(getFragmentManager(), failure, failedSrcList, dstStack,
+                FailureDialogFragment.show(
+                        getFragmentManager(),
+                        failure,
+                        failedSrcList,
+                        mState.stack,
                         transferMode);
             }
-        } else {
-            onCurrentDirectoryChanged(ANIM_NONE);
         }
     }
 
@@ -126,7 +145,7 @@ public class FilesActivity extends BaseActivity {
         // Options specific to the DocumentsActivity.
         checkArgument(!intent.hasExtra(Intent.EXTRA_LOCAL_ONLY));
 
-        final DocumentStack stack = intent.getParcelableExtra(CopyService.EXTRA_STACK);
+        final DocumentStack stack = intent.getParcelableExtra(Shared.EXTRA_STACK);
         if (stack != null) {
             state.stack = stack;
         }
@@ -240,7 +259,7 @@ public class FilesActivity extends BaseActivity {
                 showCreateDirectoryDialog();
                 return true;
             case R.id.menu_new_window:
-                startActivity(LauncherActivity.createLaunchIntent(this));
+                createNewWindow();
                 return true;
             case R.id.menu_paste_from_clipboard:
                 DirectoryFragment dir = DirectoryFragment.get(getFragmentManager());
@@ -250,6 +269,12 @@ public class FilesActivity extends BaseActivity {
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    private void createNewWindow() {
+        Intent intent = LauncherActivity.createLaunchIntent(this);
+        intent.putExtra(Shared.EXTRA_STACK, (Parcelable) mState.stack);
+        startActivity(intent);
     }
 
     @Override
