@@ -423,7 +423,7 @@ public class IpReachabilityMonitor {
                 try {
                     byteBuffer = recvKernelReply();
                 } catch (ErrnoException e) {
-                    Log.w(TAG, "ErrnoException: ", e);
+                    if (stillRunning()) { Log.w(TAG, "ErrnoException: ", e); }
                     break;
                 }
                 final long whenMs = SystemClock.elapsedRealtime();
