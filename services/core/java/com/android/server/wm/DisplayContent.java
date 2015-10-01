@@ -584,12 +584,7 @@ class DisplayContent {
     }
 
     TaskStack getDockedStackLocked() {
-        for (int i = mStacks.size() - 1; i >= 0; i--) {
-            TaskStack stack = mStacks.get(i);
-            if (stack.mStackId == DOCKED_STACK_ID && stack.isVisibleLocked()) {
-                return stack;
-            }
-        }
-        return null;
+        final TaskStack stack = mService.mStackIdToStack.get(DOCKED_STACK_ID);
+        return (stack != null && stack.isVisibleLocked()) ? stack : null;
     }
 }
