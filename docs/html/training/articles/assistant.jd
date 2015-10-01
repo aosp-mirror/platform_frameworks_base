@@ -210,7 +210,7 @@ public void onProvideAssistContent(AssistContent <strong>assistContent</strong>)
   android.app.Activity#onProvideAssistContent(android.app.assist.AssistContent)}
   callbacks are implemented, the system will still proceed and pass the
   information collected automatically to the assistant unless the current
-  window is flagged as <a href="#handling_of_sensitive_information">secure</a>.
+  window is flagged as <a href="#excluding_views">secure</a>.
   As shown in Figure 3, the system uses the default implementations of {@link
   android.view.View#onProvideStructure(android.view.ViewStructure)} and {@link
   android.view.View#onProvideVirtualStructure(android.view.ViewStructure)} to
@@ -234,7 +234,7 @@ public void onProvideAssistContent(AssistContent <strong>assistContent</strong>)
   Accessible”</a>.
 </p>
 
-<h4 id="handling_of_sensitive_information">Handling of Sensitive Information</h4>
+<h4 id="excluding_views">Excluding views from the assitant</h4>
 
 <p>
   An activity can exclude the current view from the assistant. This is accomplished
@@ -266,7 +266,7 @@ public void onProvideAssistContent(AssistContent <strong>assistContent</strong>)
   current activity. The assistant can be summoned by the user at any time.
   Therefore, apps should not create permanent {@link
   android.Manifest.permission#SYSTEM_ALERT_WINDOW system alert}
-  windows interfering with the overlay window s shown in Figure 4.
+  windows interfering with the overlay window shown in Figure 4.
 </p>
 
 <div style="">
