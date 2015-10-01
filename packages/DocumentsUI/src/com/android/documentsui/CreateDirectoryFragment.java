@@ -147,7 +147,7 @@ public class CreateDirectoryFragment extends DialogFragment {
                 // Navigate into newly created child
                 mActivity.onDirectoryCreated(result);
             } else {
-                Shared.makeSnackbar(mActivity, R.string.create_error, Snackbar.LENGTH_SHORT).show();
+                Snackbars.makeSnackbar(mActivity, R.string.create_error, Snackbar.LENGTH_SHORT).show();
             }
 
             mActivity.setPending(false);

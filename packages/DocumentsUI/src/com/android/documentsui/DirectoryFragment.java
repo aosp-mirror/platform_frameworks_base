@@ -44,7 +44,6 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.content.Loader;
-import android.content.res.Resources;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
@@ -54,7 +53,6 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.CancellationSignal;
-import android.os.Handler;
 import android.os.Looper;
 import android.os.OperationCanceledException;
 import android.os.Parcelable;
@@ -133,8 +131,6 @@ public class DirectoryFragment extends Fragment {
 
     private Model mModel;
     private Model.UpdateListener mModelUpdateListener = new ModelUpdateListener();
-
-    private final Handler mHandler = new Handler(Looper.getMainLooper());
 
     private View mEmptyView;
     private RecyclerView mRecView;
@@ -217,8 +213,6 @@ public class DirectoryFragment extends Fragment {
     @Override
     public View onCreateView(
             LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        final Context context = inflater.getContext();
-        final Resources res = context.getResources();
         final View view = inflater.inflate(R.layout.fragment_directory, container, false);
 
         mMessageBar = MessageBar.create(getChildFragmentManager());
@@ -678,6 +672,7 @@ public class DirectoryFragment extends Fragment {
             checkNotNull(mMenu);
             // Delegate update logic to our owning action, since specialized logic is desired.
             mFragmentTuner.updateActionMenu(mMenu, mType, mNoDeleteCount == 0);
+            Menus.disableHiddenItems(mMenu);
         }
 
         @Override
@@ -799,13 +794,12 @@ public class DirectoryFragment extends Fragment {
 
     private void deleteDocuments(final Selection selected) {
         Context context = getActivity();
-        ContentResolver resolver = context.getContentResolver();
         String message = Shared.getQuantityString(context, R.plurals.deleting, selected.size());
 
         mModel.markForDeletion(selected);
 
         final Activity activity = getActivity();
-        Shared.makeSnackbar(activity, message, Snackbar.LENGTH_LONG)
+        Snackbars.makeSnackbar(activity, message, Snackbar.LENGTH_LONG)
                 .setAction(
                         R.string.undo,
                         new android.view.View.OnClickListener() {
@@ -823,7 +817,7 @@ public class DirectoryFragment extends Fragment {
                                             new Model.DeletionListener() {
                                                 @Override
                                                 public void onError() {
-                                                    Shared.makeSnackbar(
+                                                    Snackbars.makeSnackbar(
                                                             activity,
                                                             R.string.toast_failed_delete,
                                                             Snackbar.LENGTH_LONG)
@@ -1244,7 +1238,7 @@ public class DirectoryFragment extends Fragment {
 
     private void copyDocuments(final List<DocumentInfo> docs, final DocumentInfo destination) {
         if (!canCopy(docs, destination)) {
-            Shared.makeSnackbar(
+            Snackbars.makeSnackbar(
                     getActivity(),
                     R.string.clipboard_files_cannot_paste,
                     Snackbar.LENGTH_SHORT)
@@ -1298,7 +1292,7 @@ public class DirectoryFragment extends Fragment {
             void onDocumentsReady(List<DocumentInfo> docs) {
                 mClipper.clipDocuments(docs);
                 Activity activity = getActivity();
-                Shared.makeSnackbar(activity,
+                Snackbars.makeSnackbar(activity,
                         activity.getResources().getQuantityString(
                                 R.plurals.clipboard_files_clipped, docs.size(), docs.size()),
                                 Snackbar.LENGTH_SHORT).show();
@@ -1608,23 +1602,25 @@ public class DirectoryFragment extends Fragment {
 
         @Override
         public void updateActionMenu(Menu menu, int dirType, boolean canDelete) {
+            boolean copyEnabled = mManaging && dirType != TYPE_RECENT_OPEN;
+            // TODO: The selection needs to be deletable.
+            boolean moveEnabled =
+                    SystemProperties.getBoolean("debug.documentsui.enable_move", false);
+            menu.findItem(R.id.menu_copy_to_clipboard).setEnabled(copyEnabled);
 
             final MenuItem open = menu.findItem(R.id.menu_open);
             final MenuItem share = menu.findItem(R.id.menu_share);
             final MenuItem delete = menu.findItem(R.id.menu_delete);
             final MenuItem copyTo = menu.findItem(R.id.menu_copy_to);
             final MenuItem moveTo = menu.findItem(R.id.menu_move_to);
-            final MenuItem copyToClipboard = menu.findItem(R.id.menu_copy_to_clipboard);
 
             open.setVisible(!mManaging);
             share.setVisible(mManaging);
             delete.setVisible(mManaging && canDelete);
-            // Disable copying from the Recents view.
-            copyTo.setVisible(mManaging && dirType != TYPE_RECENT_OPEN);
-            moveTo.setVisible(SystemProperties.getBoolean("debug.documentsui.enable_move", false));
-
-            // Only shown in files mode.
-            copyToClipboard.setVisible(false);
+            copyTo.setVisible(copyEnabled);
+            copyTo.setEnabled(copyEnabled);
+            moveTo.setVisible(moveEnabled);
+            moveTo.setEnabled(moveEnabled);
         }
 
         @Override
@@ -1638,13 +1634,14 @@ public class DirectoryFragment extends Fragment {
         @Override
         public void updateActionMenu(Menu menu, int dirType, boolean canDelete) {
 
+            menu.findItem(R.id.menu_copy_to_clipboard).setEnabled(dirType != TYPE_RECENT_OPEN);
+
             menu.findItem(R.id.menu_share).setVisible(true);
             menu.findItem(R.id.menu_delete).setVisible(canDelete);
-            menu.findItem(R.id.menu_copy_to_clipboard).setVisible(true);
 
             menu.findItem(R.id.menu_open).setVisible(false);
-            menu.findItem(R.id.menu_copy_to).setVisible(false);
-            menu.findItem(R.id.menu_move_to).setVisible(false);
+            menu.findItem(R.id.menu_copy_to).setVisible(true);
+            menu.findItem(R.id.menu_move_to).setVisible(true);
         }
 
         @Override

@@ -140,6 +140,7 @@ public class ManageRootActivity extends BaseActivity {
     @Override
     public boolean onPrepareOptionsMenu(Menu menu) {
         super.onPrepareOptionsMenu(menu);
+        Menus.disableHiddenItems(menu);
         return true;
     }
 
@@ -184,7 +185,7 @@ public class ManageRootActivity extends BaseActivity {
                 try {
                     startActivity(view);
                 } catch (ActivityNotFoundException ex2) {
-                    Shared.makeSnackbar(this, R.string.toast_no_application, Snackbar.LENGTH_SHORT)
+                    Snackbars.makeSnackbar(this, R.string.toast_no_application, Snackbar.LENGTH_SHORT)
                             .show();
                 }
             }

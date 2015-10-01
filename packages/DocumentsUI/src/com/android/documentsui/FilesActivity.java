@@ -225,30 +225,23 @@ public class FilesActivity extends BaseActivity {
 
     @Override
     public boolean onPrepareOptionsMenu(Menu menu) {
-        boolean shown = super.onPrepareOptionsMenu(menu);
-
-        menu.findItem(R.id.menu_file_size).setVisible(true);
-        menu.findItem(R.id.menu_advanced).setVisible(true);
+        super.onPrepareOptionsMenu(menu);
 
         final MenuItem createDir = menu.findItem(R.id.menu_create_dir);
         final MenuItem newWindow = menu.findItem(R.id.menu_new_window);
         final MenuItem pasteFromCb = menu.findItem(R.id.menu_paste_from_clipboard);
 
-        boolean canCreateDir = canCreateDirectory();
-
         createDir.setShowAsAction(MenuItem.SHOW_AS_ACTION_NEVER);
-        createDir.setVisible(canCreateDir);
-        createDir.setEnabled(canCreateDir);
+        createDir.setVisible(true);
+        createDir.setEnabled(canCreateDirectory());
+
+        pasteFromCb.setEnabled(mClipper.hasItemsToPaste());
 
         newWindow.setShowAsAction(MenuItem.SHOW_AS_ACTION_NEVER);
         newWindow.setVisible(mProductivityDevice);
-        newWindow.setEnabled(mProductivityDevice);
 
-        pasteFromCb.setShowAsAction(MenuItem.SHOW_AS_ACTION_NEVER);
-        pasteFromCb.setVisible(true);
-        pasteFromCb.setEnabled(mClipper.hasItemsToPaste());
-
-        return shown;
+        Menus.disableHiddenItems(menu, pasteFromCb);
+        return true;
     }
 
     @Override
@@ -347,7 +340,7 @@ public class FilesActivity extends BaseActivity {
         try {
             startActivity(intent);
         } catch (ActivityNotFoundException ex2) {
-            Shared.makeSnackbar(this, R.string.toast_no_application, Snackbar.LENGTH_SHORT).show();
+            Snackbars.makeSnackbar(this, R.string.toast_no_application, Snackbar.LENGTH_SHORT).show();
         }
     }
 

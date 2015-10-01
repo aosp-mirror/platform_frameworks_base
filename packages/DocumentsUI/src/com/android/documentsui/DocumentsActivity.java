@@ -89,8 +89,6 @@ public class DocumentsActivity extends BaseActivity {
             setTheme(R.style.DocumentsNonDialogTheme);
         }
 
-        final Context context = this;
-
         if (mShowAsDialog) {
             mDrawer = DrawerController.createDummy();
 
@@ -314,41 +312,35 @@ public class DocumentsActivity extends BaseActivity {
     public boolean onPrepareOptionsMenu(Menu menu) {
         super.onPrepareOptionsMenu(menu);
 
-        final RootInfo root = getCurrentRoot();
         final DocumentInfo cwd = getCurrentDirectory();
 
         final MenuItem createDir = menu.findItem(R.id.menu_create_dir);
         final MenuItem grid = menu.findItem(R.id.menu_grid);
         final MenuItem list = menu.findItem(R.id.menu_list);
-        final MenuItem advanced = menu.findItem(R.id.menu_advanced);
         final MenuItem fileSize = menu.findItem(R.id.menu_file_size);
         final MenuItem settings = menu.findItem(R.id.menu_settings);
 
-        boolean fileSizeVisible = mState.showSize && !mState.forceSize;
-        if (mState.action == ACTION_CREATE
+        boolean recents = cwd == null;
+        boolean picking = mState.action == ACTION_CREATE
                 || mState.action == ACTION_OPEN_TREE
-                || mState.action == ACTION_OPEN_COPY_DESTINATION) {
-            createDir.setVisible(cwd != null && cwd.isCreateSupported());
-            mSearchManager.showMenu(false);
+                || mState.action == ACTION_OPEN_COPY_DESTINATION;
 
-            // No display options in recent directories
-            if (cwd == null) {
-                grid.setVisible(false);
-                list.setVisible(false);
-                fileSizeVisible = false;
-            }
+        createDir.setVisible(picking && !recents && cwd.isCreateSupported());
+        mSearchManager.showMenu(!picking);
 
-            if (mState.action == ACTION_CREATE) {
-                final FragmentManager fm = getFragmentManager();
-                SaveFragment.get(fm).setSaveEnabled(cwd != null && cwd.isCreateSupported());
-            }
-        } else {
-            createDir.setVisible(false);
+        // No display options in recent directories
+        grid.setVisible(!(picking && recents));
+        list.setVisible(!(picking && recents));
+
+        fileSize.setVisible(fileSize.isVisible() && !picking);
+        settings.setVisible(false);
+
+        if (mState.action == ACTION_CREATE) {
+            final FragmentManager fm = getFragmentManager();
+            SaveFragment.get(fm).setSaveEnabled(cwd != null && cwd.isCreateSupported());
         }
 
-        advanced.setVisible(!mState.forceAdvanced);
-        fileSize.setVisible(fileSizeVisible);
-        settings.setVisible(false);
+        Menus.disableHiddenItems(menu);
 
         return true;
     }
@@ -611,7 +603,7 @@ public class DocumentsActivity extends BaseActivity {
             if (result != null) {
                 onTaskFinished(result);
             } else {
-                Shared.makeSnackbar(
+                Snackbars.makeSnackbar(
                     DocumentsActivity.this, R.string.save_error, Snackbar.LENGTH_SHORT).show();
             }
 

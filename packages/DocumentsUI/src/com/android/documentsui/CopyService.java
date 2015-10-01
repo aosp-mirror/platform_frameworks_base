@@ -119,7 +119,7 @@ public class CopyService extends IntentService {
 
         int toastMessage = (mode == TRANSFER_MODE_COPY) ? R.plurals.copy_begin
                 : R.plurals.move_begin;
-        Shared.makeSnackbar(activity,
+        Snackbars.makeSnackbar(activity,
                 res.getQuantityString(toastMessage, srcDocs.size(), srcDocs.size()),
                 Snackbar.LENGTH_SHORT).show();
         activity.startService(copyIntent);

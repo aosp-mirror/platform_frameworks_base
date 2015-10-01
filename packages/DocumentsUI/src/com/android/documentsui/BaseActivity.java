@@ -128,10 +128,10 @@ abstract class BaseActivity extends Activity {
 
     @Override
     public boolean onPrepareOptionsMenu(Menu menu) {
-        boolean shown = super.onPrepareOptionsMenu(menu);
+        super.onPrepareOptionsMenu(menu);
 
         final RootInfo root = getCurrentRoot();
-        final DocumentInfo cwd = getCurrentDirectory();
+        final boolean inRecents = getCurrentDirectory() == null;
 
         final MenuItem sort = menu.findItem(R.id.menu_sort);
         final MenuItem sortSize = menu.findItem(R.id.menu_sort_size);
@@ -141,24 +141,28 @@ abstract class BaseActivity extends Activity {
         final MenuItem fileSize = menu.findItem(R.id.menu_file_size);
         final MenuItem settings = menu.findItem(R.id.menu_settings);
 
-        mSearchManager.update(root);
+        // I'm thinkin' this isn't necesary here. If it is...'cuz of a bug....
+        // then uncomment the linke and let's get a proper bug reference here.
+        // mSearchManager.update(root);
 
         // Search uses backend ranking; no sorting
-        sort.setVisible(cwd != null && !mSearchManager.isSearching());
+        sort.setVisible(!inRecents && !mSearchManager.isSearching());
+
+        // grid/list is effectively a toggle.
+        grid.setVisible(mState.derivedMode != State.MODE_GRID);
+        list.setVisible(mState.derivedMode != State.MODE_LIST);
+
+        sortSize.setVisible(mState.showSize); // Only sort by size when visible
+        fileSize.setVisible(!mState.forceSize);
+        advanced.setVisible(!mState.forceAdvanced);
+        settings.setVisible((root.flags & Root.FLAG_HAS_SETTINGS) != 0);
 
         advanced.setTitle(LocalPreferences.getDisplayAdvancedDevices(this)
                 ? R.string.menu_advanced_hide : R.string.menu_advanced_show);
         fileSize.setTitle(LocalPreferences.getDisplayFileSize(this)
                 ? R.string.menu_file_size_hide : R.string.menu_file_size_show);
 
-        sortSize.setVisible(mState.showSize); // Only sort by size when visible
-        fileSize.setVisible(!mState.showSize);
-        grid.setVisible(mState.derivedMode != State.MODE_GRID);
-        list.setVisible(mState.derivedMode != State.MODE_LIST);
-        advanced.setVisible(!mState.showAdvanced);
-        settings.setVisible((root.flags & Root.FLAG_HAS_SETTINGS) != 0);
-
-        return shown;
+        return true;
     }
 
     State buildDefaultState() {
@@ -277,6 +281,7 @@ abstract class BaseActivity extends Activity {
         return cwd != null
                 && cwd.isCreateSupported()
                 && !mSearchManager.isSearching()
+                && !root.isRecents()
                 && !root.isDownloads();
     }
 
