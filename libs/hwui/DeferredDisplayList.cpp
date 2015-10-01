@@ -44,6 +44,12 @@ namespace uirenderer {
 #define DEBUG_COLOR_MERGEDBATCH      0x5f7f7fff
 #define DEBUG_COLOR_MERGEDBATCH_SOLO 0x5f7fff7f
 
+static bool avoidOverdraw() {
+    // Don't avoid overdraw when visualizing it, since that makes it harder to
+    // debug where it's coming from, and when the problem occurs.
+    return !Properties::debugOverdraw;
+};
+
 /////////////////////////////////////////////////////////////////////////////////
 // Operation Batches
 /////////////////////////////////////////////////////////////////////////////////
@@ -495,7 +501,7 @@ void DeferredDisplayList::addDrawOp(OpenGLRenderer& renderer, DrawOp* op) {
             && mSaveStack.empty()
             && !state->mRoundRectClipState;
 
-    if (CC_LIKELY(mAvoidOverdraw) && mBatches.size() &&
+    if (CC_LIKELY(avoidOverdraw()) && mBatches.size() &&
             state->mClipSideFlags != kClipSide_ConservativeFull &&
             deferInfo.opaqueOverBounds && state->mBounds.contains(mBounds)) {
         // avoid overdraw by resetting drawing state + discarding drawing ops
@@ -647,7 +653,7 @@ void DeferredDisplayList::flush(OpenGLRenderer& renderer, Rect& dirty) {
     // save and restore so that reordering doesn't affect final state
     renderer.save(SkCanvas::kMatrix_SaveFlag | SkCanvas::kClip_SaveFlag);
 
-    if (CC_LIKELY(mAvoidOverdraw)) {
+    if (CC_LIKELY(avoidOverdraw())) {
         for (unsigned int i = 1; i < mBatches.size(); i++) {
             if (mBatches[i] && mBatches[i]->coversBounds(mBounds)) {
                 discardDrawingBatches(i - 1);

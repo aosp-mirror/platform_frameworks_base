@@ -1431,10 +1431,7 @@ void OpenGLRenderer::drawRenderNode(RenderNode* renderNode, Rect& dirty, int32_t
             return;
         }
 
-        // Don't avoid overdraw when visualizing, since that makes it harder to
-        // debug where it's coming from, and when the problem occurs.
-        bool avoidOverdraw = !Properties::debugOverdraw;
-        DeferredDisplayList deferredList(mState.currentClipRect(), avoidOverdraw);
+        DeferredDisplayList deferredList(mState.currentClipRect());
         DeferStateStruct deferStruct(deferredList, *this, replayFlags);
         renderNode->defer(deferStruct, 0);
 
