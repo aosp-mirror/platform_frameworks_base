@@ -158,6 +158,33 @@ public class DpmMockContext extends MockContext {
         }
     }
 
+    public static class SettingsForMock {
+        int settingsSecureGetIntForUser(String name, int def, int userHandle) {
+            return 0;
+        }
+
+        void settingsSecurePutIntForUser(String name, int value, int userHandle) {
+        }
+
+        void settingsSecurePutStringForUser(String name, String value, int userHandle) {
+        }
+
+        void settingsGlobalPutStringForUser(String name, String value, int userHandle) {
+        }
+
+        void settingsSecurePutInt(String name, int value) {
+        }
+
+        void settingsGlobalPutInt(String name, int value) {
+        }
+
+        void settingsSecurePutString(String name, String value) {
+        }
+
+        void settingsGlobalPutString(String name, String value) {
+        }
+    }
+
     public final Context realTestContext;
 
     /**
@@ -184,6 +211,7 @@ public class DpmMockContext extends MockContext {
     public final IBackupManager ibackupManager;
     public final IAudioService iaudioService;
     public final LockPatternUtils lockPatternUtils;
+    public final SettingsForMock settings;
 
     /** Note this is a partial mock, not a real mock. */
     public final PackageManager packageManager;
@@ -212,6 +240,7 @@ public class DpmMockContext extends MockContext {
         ibackupManager = mock(IBackupManager.class);
         iaudioService = mock(IAudioService.class);
         lockPatternUtils = mock(LockPatternUtils.class);
+        settings = mock(SettingsForMock.class);
 
         // Package manager is huge, so we use a partial mock instead.
         packageManager = spy(context.getPackageManager());

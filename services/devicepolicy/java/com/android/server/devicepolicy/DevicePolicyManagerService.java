@@ -124,6 +124,7 @@ import com.android.internal.widget.LockPatternUtils;
 import com.android.server.LocalServices;
 import com.android.server.SystemService;
 import com.android.server.devicepolicy.DevicePolicyManagerService.ActiveAdmin.TrustAgentInfo;
+import com.android.server.pm.UserRestrictionsUtils;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
@@ -277,7 +278,8 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     final LocalService mLocalService;
 
     // Stores and loads state on device and profile owners.
-    private final Owners mOwners;
+    @VisibleForTesting
+    final Owners mOwners;
 
     private final Binder mToken = new Binder();
 
@@ -433,6 +435,8 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         private static final String TAG_PROVIDER = "provider";
         private static final String TAG_PACKAGE_LIST_ITEM  = "item";
 
+        private static final String TAG_USER_RESTRICTIONS = "user-restrictions";
+
         final DeviceAdminInfo info;
 
         int passwordQuality = DevicePolicyManager.PASSWORD_QUALITY_UNSPECIFIED;
@@ -511,6 +515,8 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         ArrayMap<String, TrustAgentInfo> trustAgentInfos = new ArrayMap<>();
 
         List<String> crossProfileWidgetProviders;
+
+        Bundle userRestrictions;
 
         ActiveAdmin(DeviceAdminInfo _info) {
             info = _info;
@@ -686,6 +692,10 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             writePackageListToXml(out, TAG_PERMITTED_ACCESSIBILITY_SERVICES,
                     permittedAccessiblityServices);
             writePackageListToXml(out, TAG_PERMITTED_IMES, permittedInputMethods);
+            if (hasUserRestrictions()) {
+                UserRestrictionsUtils.writeRestrictions(
+                        out, userRestrictions, TAG_USER_RESTRICTIONS);
+            }
         }
 
         void writePackageListToXml(XmlSerializer out, String outerTag,
@@ -795,6 +805,8 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                     permittedAccessiblityServices = readPackageList(parser, tag);
                 } else if (TAG_PERMITTED_IMES.equals(tag)) {
                     permittedInputMethods = readPackageList(parser, tag);
+                } else if (TAG_USER_RESTRICTIONS.equals(tag)) {
+                    UserRestrictionsUtils.readRestrictions(parser, ensureUserRestrictions());
                 } else {
                     Slog.w(LOG_TAG, "Unknown admin tag: " + tag);
                     XmlUtils.skipCurrentTag(parser);
@@ -915,6 +927,17 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             return result;
         }
 
+        boolean hasUserRestrictions() {
+            return userRestrictions != null && userRestrictions.size() > 0;
+        }
+
+        Bundle ensureUserRestrictions() {
+            if (userRestrictions == null) {
+                userRestrictions = new Bundle();
+            }
+            return userRestrictions;
+        }
+
         void dump(String prefix, PrintWriter pw) {
             pw.print(prefix); pw.print("uid="); pw.println(getUid());
             pw.print(prefix); pw.println("policies:");
@@ -984,6 +1007,8 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 pw.print(prefix); pw.print("permittedInputMethods=");
                         pw.println(permittedInputMethods.toString());
             }
+            pw.print(prefix); pw.println("userRestrictions:");
+            UserRestrictionsUtils.dumpRestrictions(pw, prefix + "  ", userRestrictions);
         }
     }
 
@@ -1116,6 +1141,10 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             return getCallingUid() == Process.myUid();
         }
 
+        final int userHandleGetCallingUserId() {
+            return UserHandle.getUserId(binderGetCallingUid());
+        }
+
         File environmentGetUserSystemDirectory(int userId) {
             return Environment.getUserSystemDirectory(userId);
         }
@@ -1150,6 +1179,42 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
 
         String getDevicePolicyFilePathForSystemUser() {
             return "/data/system/";
+        }
+
+        int settingsSecureGetIntForUser(String name, int def, int userHandle) {
+            return Settings.Secure.getIntForUser(mContext.getContentResolver(),
+                    name, def, userHandle);
+        }
+
+        void settingsSecurePutIntForUser(String name, int value, int userHandle) {
+            Settings.Secure.putIntForUser(mContext.getContentResolver(),
+                    name, value, userHandle);
+        }
+
+        void settingsSecurePutStringForUser(String name, String value, int userHandle) {
+            Settings.Secure.putStringForUser(mContext.getContentResolver(),
+                    name, value, userHandle);
+        }
+
+        void settingsGlobalPutStringForUser(String name, String value, int userHandle) {
+            Settings.Global.putStringForUser(mContext.getContentResolver(),
+                    name, value, userHandle);
+        }
+
+        void settingsSecurePutInt(String name, int value) {
+            Settings.Secure.putInt(mContext.getContentResolver(), name, value);
+        }
+
+        void settingsGlobalPutInt(String name, int value) {
+            Settings.Global.putInt(mContext.getContentResolver(), name, value);
+        }
+
+        void settingsSecurePutString(String name, String value) {
+            Settings.Secure.putString(mContext.getContentResolver(), name, value);
+        }
+
+        void settingsGlobalPutString(String name, String value) {
+            Settings.Global.putString(mContext.getContentResolver(), name, value);
         }
     }
 
@@ -3158,8 +3223,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             } else {
                 // Make sure KEEP_SCREEN_ON is disabled, since that
                 // would allow bypassing of the maximum time to lock.
-                Settings.Global.putInt(mContext.getContentResolver(),
-                        Settings.Global.STAY_ON_WHILE_PLUGGED_IN, 0);
+                mInjector.settingsGlobalPutInt(Settings.Global.STAY_ON_WHILE_PLUGGED_IN, 0);
             }
 
             policy.mLastMaximumTimeToLock = timeMs;
@@ -3378,7 +3442,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         // If there is a profile owner, redirect to that; otherwise query the device owner.
         ComponentName aliasChooser = getProfileOwner(caller.getIdentifier());
         if (aliasChooser == null && caller.isOwner()) {
-            ActiveAdmin deviceOwnerAdmin = getDeviceOwnerAdmin();
+            ActiveAdmin deviceOwnerAdmin = getDeviceOwnerAdminLocked();
             if (deviceOwnerAdmin != null) {
                 aliasChooser = deviceOwnerAdmin.info.getComponent();
             }
@@ -3838,16 +3902,15 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             } catch (NumberFormatException e) {}
         }
         exclusionList = exclusionList.trim();
-        ContentResolver res = mContext.getContentResolver();
 
         ProxyInfo proxyProperties = new ProxyInfo(data[0], proxyPort, exclusionList);
         if (!proxyProperties.isValid()) {
             Slog.e(LOG_TAG, "Invalid proxy properties, ignoring: " + proxyProperties.toString());
             return;
         }
-        Settings.Global.putString(res, Settings.Global.GLOBAL_HTTP_PROXY_HOST, data[0]);
-        Settings.Global.putInt(res, Settings.Global.GLOBAL_HTTP_PROXY_PORT, proxyPort);
-        Settings.Global.putString(res, Settings.Global.GLOBAL_HTTP_PROXY_EXCLUSION_LIST,
+        mInjector.settingsGlobalPutString(Settings.Global.GLOBAL_HTTP_PROXY_HOST, data[0]);
+        mInjector.settingsGlobalPutInt(Settings.Global.GLOBAL_HTTP_PROXY_PORT, proxyPort);
+        mInjector.settingsGlobalPutString(Settings.Global.GLOBAL_HTTP_PROXY_EXCLUSION_LIST,
                 exclusionList);
     }
 
@@ -4071,8 +4134,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         if (required) {
             long ident = mInjector.binderClearCallingIdentity();
             try {
-                Settings.Global.putInt(mContext.getContentResolver(),
-                        Settings.Global.AUTO_TIME, 1 /* AUTO_TIME on */);
+                mInjector.settingsGlobalPutInt(Settings.Global.AUTO_TIME, 1 /* AUTO_TIME on */);
             } finally {
                 mInjector.binderRestoreCallingIdentity(ident);
             }
@@ -4088,7 +4150,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             return false;
         }
         synchronized (this) {
-            ActiveAdmin deviceOwner = getDeviceOwnerAdmin();
+            ActiveAdmin deviceOwner = getDeviceOwnerAdminLocked();
             return (deviceOwner != null) ? deviceOwner.requireAutoTime : false;
         }
     }
@@ -4309,7 +4371,8 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     }
 
     // Returns the active device owner or null if there is no device owner.
-    private ActiveAdmin getDeviceOwnerAdmin() {
+    @VisibleForTesting
+    ActiveAdmin getDeviceOwnerAdminLocked() {
         String deviceOwnerPackageName = getDeviceOwner();
         if (deviceOwnerPackageName == null) {
             return null;
@@ -4502,7 +4565,8 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
 
     // Returns the active profile owner for this user or null if the current user has no
     // profile owner.
-    private ActiveAdmin getProfileOwnerAdmin(int userHandle) {
+    @VisibleForTesting
+    ActiveAdmin getProfileOwnerAdminLocked(int userHandle) {
         ComponentName profileOwner = mOwners.getProfileOwnerComponent(userHandle);
         if (profileOwner == null) {
             return null;
@@ -5374,7 +5438,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     @Override
     public void setUserRestriction(ComponentName who, String key, boolean enabled) {
         Preconditions.checkNotNull(who, "ComponentName is null");
-        final int userHandle = UserHandle.getCallingUserId();
+        final int userHandle = mInjector.userHandleGetCallingUserId();
         final UserHandle user = new UserHandle(userHandle);
         synchronized (this) {
             ActiveAdmin activeAdmin =
@@ -5399,37 +5463,40 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                         mInjector.getIAudioService()
                                 .setMasterMute(true, 0, mContext.getPackageName(), userHandle);
                     } else if (UserManager.DISALLOW_CONFIG_WIFI.equals(key)) {
-                        Settings.Secure.putIntForUser(mContext.getContentResolver(),
+                        mInjector.settingsSecurePutIntForUser(
                                 Settings.Secure.WIFI_NETWORKS_AVAILABLE_NOTIFICATION_ON, 0,
                                 userHandle);
                     } else if (UserManager.DISALLOW_SHARE_LOCATION.equals(key)) {
-                        Settings.Secure.putIntForUser(mContext.getContentResolver(),
+                        mInjector.settingsSecurePutIntForUser(
                                 Settings.Secure.LOCATION_MODE, Settings.Secure.LOCATION_MODE_OFF,
                                 userHandle);
-                        Settings.Secure.putStringForUser(mContext.getContentResolver(),
+                        mInjector.settingsSecurePutStringForUser(
                                 Settings.Secure.LOCATION_PROVIDERS_ALLOWED, "",
                                 userHandle);
                     } else if (UserManager.DISALLOW_DEBUGGING_FEATURES.equals(key)) {
                         // Only disable adb if changing for system user, since it is global
                         // TODO: should this be admin user?
                         if (userHandle == UserHandle.USER_SYSTEM) {
-                            Settings.Global.putStringForUser(mContext.getContentResolver(),
+                            mInjector.settingsGlobalPutStringForUser(
                                     Settings.Global.ADB_ENABLED, "0", userHandle);
                         }
                     } else if (UserManager.ENSURE_VERIFY_APPS.equals(key)) {
-                        Settings.Global.putStringForUser(mContext.getContentResolver(),
+                        mInjector.settingsGlobalPutStringForUser(
                                 Settings.Global.PACKAGE_VERIFIER_ENABLE, "1",
                                 userHandle);
-                        Settings.Global.putStringForUser(mContext.getContentResolver(),
+                        mInjector.settingsGlobalPutStringForUser(
                                 Settings.Global.PACKAGE_VERIFIER_INCLUDE_ADB, "1",
                                 userHandle);
                     } else if (UserManager.DISALLOW_INSTALL_UNKNOWN_SOURCES.equals(key)) {
-                        Settings.Secure.putIntForUser(mContext.getContentResolver(),
+                        mInjector.settingsSecurePutIntForUser(
                                 Settings.Secure.INSTALL_NON_MARKET_APPS, 0,
                                 userHandle);
                     }
                 }
                 mUserManager.setUserRestriction(key, enabled, user);
+                activeAdmin.ensureUserRestrictions().putBoolean(key, enabled);
+                saveSettingsLocked(userHandle);
+
                 if (enabled != alreadyRestricted) {
                     if (UserManager.DISALLOW_SHARE_LOCATION.equals(key)) {
                         // Send out notifications however as some clients may want to reread the
@@ -5730,7 +5797,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         // TODO: Should there be a check to make sure this relationship is within a profile group?
         //enforceSystemProcess("getCrossProfileCallerIdDisabled can only be called by system");
         synchronized (this) {
-            ActiveAdmin admin = getProfileOwnerAdmin(userId);
+            ActiveAdmin admin = getProfileOwnerAdminLocked(userId);
             return (admin != null) ? admin.disableCallerId : false;
         }
     }
@@ -5823,7 +5890,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         // within a profile group?
         // enforceSystemProcess("getCrossProfileCallerIdDisabled can only be called by system");
         synchronized (this) {
-            ActiveAdmin admin = getProfileOwnerAdmin(userId);
+            ActiveAdmin admin = getProfileOwnerAdminLocked(userId);
             return (admin != null) ? admin.disableBluetoothContactSharing : false;
         }
     }
@@ -5926,7 +5993,6 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
 
     @Override
     public void setGlobalSetting(ComponentName who, String setting, String value) {
-        final ContentResolver contentResolver = mContext.getContentResolver();
         Preconditions.checkNotNull(who, "ComponentName is null");
 
         synchronized (this) {
@@ -5954,7 +6020,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
 
             long id = mInjector.binderClearCallingIdentity();
             try {
-                Settings.Global.putString(contentResolver, setting, value);
+                mInjector.settingsGlobalPutString(setting, value);
             } finally {
                 mInjector.binderRestoreCallingIdentity(id);
             }
@@ -5983,7 +6049,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
 
             long id = mInjector.binderClearCallingIdentity();
             try {
-                Settings.Secure.putStringForUser(contentResolver, setting, value, callingUserId);
+                mInjector.settingsSecurePutStringForUser(setting, value, callingUserId);
             } finally {
                 mInjector.binderRestoreCallingIdentity(id);
             }
@@ -6106,11 +6172,10 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
      */
     void updateUserSetupComplete() {
         List<UserInfo> users = mUserManager.getUsers(true);
-        ContentResolver resolver = mContext.getContentResolver();
         final int N = users.size();
         for (int i = 0; i < N; i++) {
             int userHandle = users.get(i).id;
-            if (Settings.Secure.getIntForUser(resolver, Settings.Secure.USER_SETUP_COMPLETE, 0,
+            if (mInjector.settingsSecureGetIntForUser(Settings.Secure.USER_SETUP_COMPLETE, 0,
                     userHandle) != 0) {
                 DevicePolicyData policy = getUserData(userHandle);
                 if (!policy.mUserSetupComplete) {

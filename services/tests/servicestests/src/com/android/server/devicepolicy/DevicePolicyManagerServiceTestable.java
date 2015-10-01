@@ -225,5 +225,45 @@ public class DevicePolicyManagerServiceTestable extends DevicePolicyManagerServi
         boolean userManagerIsSplitSystemUser() {
             return context.userManagerForMock.isSplitSystemUser();
         }
+
+        @Override
+        int settingsSecureGetIntForUser(String name, int def, int userHandle) {
+            return context.settings.settingsSecureGetIntForUser(name, def, userHandle);
+        }
+
+        @Override
+        void settingsSecurePutIntForUser(String name, int value, int userHandle) {
+            context.settings.settingsSecurePutIntForUser(name, value, userHandle);
+        }
+
+        @Override
+        void settingsSecurePutStringForUser(String name, String value, int userHandle) {
+            context.settings.settingsSecurePutStringForUser(name, value, userHandle);
+        }
+
+        @Override
+        void settingsGlobalPutStringForUser(String name, String value, int userHandle) {
+            context.settings.settingsGlobalPutStringForUser(name, value, userHandle);
+        }
+
+        @Override
+        void settingsSecurePutInt(String name, int value) {
+            context.settings.settingsSecurePutInt(name, value);
+        }
+
+        @Override
+        void settingsGlobalPutInt(String name, int value) {
+            context.settings.settingsGlobalPutInt(name, value);
+        }
+
+        @Override
+        void settingsSecurePutString(String name, String value) {
+            context.settings.settingsSecurePutString(name, value);
+        }
+
+        @Override
+        void settingsGlobalPutString(String name, String value) {
+            context.settings.settingsGlobalPutString(name, value);
+        }
     }
 }
