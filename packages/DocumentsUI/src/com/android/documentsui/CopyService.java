@@ -32,6 +32,7 @@ import android.net.Uri;
 import android.os.CancellationSignal;
 import android.os.ParcelFileDescriptor;
 import android.os.Parcelable;
+import android.os.PowerManager;
 import android.os.RemoteException;
 import android.os.SystemClock;
 import android.provider.DocumentsContract;
@@ -64,6 +65,8 @@ public class CopyService extends IntentService {
 
     // TODO: Move it to a shared file when more operations are implemented.
     public static final int FAILURE_COPY = 1;
+
+    private PowerManager mPowerManager;
 
     private NotificationManager mNotificationManager;
     private Notification.Builder mProgressBuilder;
@@ -129,10 +132,14 @@ public class CopyService extends IntentService {
             return;
         }
 
+        final PowerManager.WakeLock wakeLock = mPowerManager
+                .newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, TAG);
         final ArrayList<DocumentInfo> srcs = intent.getParcelableArrayListExtra(EXTRA_SRC_LIST);
         final DocumentStack stack = intent.getParcelableExtra(EXTRA_STACK);
 
         try {
+            wakeLock.acquire();
+
             // Acquire content providers.
             mSrcClient = DocumentsApplication.acquireUnstableProviderOrThrow(getContentResolver(),
                     srcs.get(0).authority);
@@ -150,6 +157,8 @@ public class CopyService extends IntentService {
         } finally {
             ContentProviderClient.releaseQuietly(mSrcClient);
             ContentProviderClient.releaseQuietly(mDstClient);
+
+            wakeLock.release();
 
             // Dismiss the ongoing copy notification when the copy is done.
             mNotificationManager.cancel(mJobId, 0);
@@ -179,7 +188,8 @@ public class CopyService extends IntentService {
     @Override
     public void onCreate() {
         super.onCreate();
-        mNotificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+        mPowerManager = getSystemService(PowerManager.class);
+        mNotificationManager = getSystemService(NotificationManager.class);
     }
 
     /**
