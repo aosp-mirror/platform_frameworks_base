@@ -30,6 +30,7 @@ import android.util.Slog;
 import android.util.Xml;
 
 import com.android.internal.util.FastXmlSerializer;
+import com.android.internal.util.Preconditions;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
@@ -145,12 +146,16 @@ class Owners {
         return mDeviceOwner != null ? mDeviceOwner.name : null;
     }
 
-    void setDeviceOwner(String packageName, String ownerName, int userId) {
+    ComponentName getDeviceOwnerComponent() {
+        return mDeviceOwner != null ? mDeviceOwner.admin : null;
+    }
+
+    void setDeviceOwner(ComponentName admin, String ownerName, int userId) {
         if (userId < 0) {
             Slog.e(TAG, "Invalid user id for device owner user: " + userId);
             return;
         }
-        mDeviceOwner = new OwnerInfo(ownerName, packageName);
+        mDeviceOwner = new OwnerInfo(ownerName, admin);
         mDeviceOwnerUserId = userId;
     }
 
@@ -541,7 +546,7 @@ class Owners {
                 } else {
                     // This shouldn't happen but switch from package name -> component name
                     // might have written bad device owner files. b/17652534
-                    Slog.e(TAG, "Error parsing device-owner file. Bad component name " +
+                    Slog.e(TAG, "Error parsing owner file. Bad component name " +
                             componentName);
                 }
             }

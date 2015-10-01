@@ -44,6 +44,7 @@ public final class Dpm extends BaseCommand {
 
     private IDevicePolicyManager mDevicePolicyManager;
     private int mUserId = UserHandle.USER_SYSTEM;
+    private String mName = "";
     private ComponentName mComponent = null;
 
     @Override
@@ -52,8 +53,8 @@ public final class Dpm extends BaseCommand {
                 "usage: dpm [subcommand] [options]\n" +
                 "usage: dpm set-active-admin [ --user <USER_ID> ] <COMPONENT>\n" +
                 // STOPSHIP Finalize it
-                "usage: dpm set-device-owner [ --user <USER_ID> *EXPERIMENTAL* ] <COMPONENT>\n" +
-                "usage: dpm set-profile-owner [ --user <USER_ID> ] <COMPONENT>\n" +
+                "usage: dpm set-device-owner [ --user <USER_ID> *EXPERIMENTAL* ] [ --name <NAME> ] <COMPONENT>\n" +
+                "usage: dpm set-profile-owner [ --user <USER_ID> ] [ --name <NAME> ] <COMPONENT>\n" +
                 "\n" +
                 "dpm set-active-admin: Sets the given component as active admin" +
                 " for an existing user.\n" +
@@ -90,47 +91,51 @@ public final class Dpm extends BaseCommand {
         }
     }
 
-    private void parseArgs(boolean canHaveUser) {
-        String nextArg = nextArgRequired();
-        if (canHaveUser && "--user".equals(nextArg)) {
-            mUserId = parseInt(nextArgRequired());
-            nextArg = nextArgRequired();
+    private void parseArgs(boolean canHaveUser, boolean canHaveName) {
+        String opt;
+        while ((opt = nextOption()) != null) {
+            if (canHaveUser && "--user".equals(opt)) {
+                mUserId = parseInt(nextArgRequired());
+            } else if (canHaveName && "--name".equals(opt)) {
+                mName = nextArgRequired();
+            } else {
+                throw new IllegalArgumentException("Unknown option: " + opt);
+            }
         }
-        mComponent = parseComponentName(nextArg);
+        mComponent = parseComponentName(nextArgRequired());
     }
 
     private void runSetActiveAdmin() throws RemoteException {
-        parseArgs(true);
+        parseArgs(/*canHaveUser=*/ true, /*canHaveName=*/ false);
         mDevicePolicyManager.setActiveAdmin(mComponent, true /*refreshing*/, mUserId);
 
         System.out.println("Success: Active admin set to component " + mComponent.toShortString());
     }
 
     private void runSetDeviceOwner() throws RemoteException {
-        parseArgs(true);
+        parseArgs(/*canHaveUser=*/ true, /*canHaveName=*/ true);
         mDevicePolicyManager.setActiveAdmin(mComponent, true /*refreshing*/, mUserId);
 
-        String packageName = mComponent.getPackageName();
         try {
-            if (!mDevicePolicyManager.setDeviceOwner(packageName, null /*ownerName*/, mUserId)) {
+            if (!mDevicePolicyManager.setDeviceOwner(mComponent, mName, mUserId)) {
                 throw new RuntimeException(
-                        "Can't set package " + packageName + " as device owner.");
+                        "Can't set package " + mComponent + " as device owner.");
             }
         } catch (Exception e) {
             // Need to remove the admin that we just added.
             mDevicePolicyManager.removeActiveAdmin(mComponent, UserHandle.USER_SYSTEM);
             throw e;
         }
-        System.out.println("Success: Device owner set to package " + packageName);
+        System.out.println("Success: Device owner set to package " + mComponent);
         System.out.println("Active admin set to component " + mComponent.toShortString());
     }
 
     private void runSetProfileOwner() throws RemoteException {
-        parseArgs(true);
+        parseArgs(/*canHaveUser=*/ true, /*canHaveName=*/ true);
         mDevicePolicyManager.setActiveAdmin(mComponent, true /*refreshing*/, mUserId);
 
         try {
-            if (!mDevicePolicyManager.setProfileOwner(mComponent, "" /*ownerName*/, mUserId)) {
+            if (!mDevicePolicyManager.setProfileOwner(mComponent, mName, mUserId)) {
                 throw new RuntimeException("Can't set component " + mComponent.toShortString() +
                         " as profile owner for user " + mUserId);
             }

@@ -306,7 +306,8 @@ public class OwnersTest extends DpmTestBase {
             // The legacy file should be removed.
             assertFalse(owners.getLegacyConfigFileWithTestOverride().exists());
 
-            assertTrue(owners.getDeviceOwnerFileWithTestOverride().exists());
+            // Note device initializer is no longer supported.  No need to write the DO file.
+            assertFalse(owners.getDeviceOwnerFileWithTestOverride().exists());
 
             assertFalse(owners.getProfileOwnerFileWithTestOverride(10).exists());
             assertFalse(owners.getProfileOwnerFileWithTestOverride(11).exists());

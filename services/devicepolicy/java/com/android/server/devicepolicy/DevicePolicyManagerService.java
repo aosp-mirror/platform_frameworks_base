@@ -1326,8 +1326,57 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     void loadOwners() {
         synchronized (this) {
             mOwners.load();
+            findOwnerComponentIfNecessaryLocked();
+
+            // TODO PO may not have a class name either due to b/17652534.  Address that too.
+
             updateDeviceOwnerLocked();
         }
+    }
+
+    private void findOwnerComponentIfNecessaryLocked() {
+        if (!mOwners.hasDeviceOwner()) {
+            return;
+        }
+        final ComponentName doComponentName = mOwners.getDeviceOwnerComponent();
+
+        if (!TextUtils.isEmpty(doComponentName.getClassName())) {
+            return; // Already a full component name.
+        }
+
+        final ComponentName doComponent = findAdminComponentWithPackageLocked(
+                doComponentName.getPackageName(),
+                mOwners.getDeviceOwnerUserId());
+        if (doComponent == null) {
+            Slog.e(LOG_TAG, "Device-owner isn't registered as device-admin");
+        } else {
+            mOwners.setDeviceOwner(
+                    doComponent,
+                    mOwners.getDeviceOwnerName(),
+                    mOwners.getDeviceOwnerUserId());
+            mOwners.writeDeviceOwner();
+        }
+    }
+
+    private ComponentName findAdminComponentWithPackageLocked(String packageName, int userId) {
+        final DevicePolicyData policy = getUserData(userId);
+        final int n = policy.mAdminList.size();
+        ComponentName found = null;
+        int nFound = 0;
+        for (int i = 0; i < n; i++) {
+            final ActiveAdmin admin = policy.mAdminList.get(i);
+            if (packageName.equals(admin.info.getPackageName())) {
+                // Found!
+                if (nFound == 0) {
+                    found = admin.info.getComponent();
+                }
+                nFound++;
+            }
+        }
+        if (nFound > 0) {
+            Slog.w(LOG_TAG, "Multiple DA found; assume the first one is DO.");
+        }
+        return found;
     }
 
     /**
@@ -1440,9 +1489,10 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         return null;
     }
 
-    private boolean isActiveAdminWithPolicyForUserLocked(ActiveAdmin admin, int reqPolicy,
+    @VisibleForTesting
+    boolean isActiveAdminWithPolicyForUserLocked(ActiveAdmin admin, int reqPolicy,
             int userId) {
-        boolean ownsDevice = isDeviceOwner(admin.info.getPackageName());
+        boolean ownsDevice = isDeviceOwner(admin.info.getComponent());
         boolean ownsProfile = (getProfileOwner(userId) != null
                 && getProfileOwner(userId).getPackageName()
                     .equals(admin.info.getPackageName()));
@@ -1880,8 +1930,10 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     private void updateDeviceOwnerLocked() {
         long ident = mInjector.binderClearCallingIdentity();
         try {
-            mInjector.getIActivityManager()
-                    .updateDeviceOwner(getDeviceOwner());
+            if (getDeviceOwner() != null) {
+                mInjector.getIActivityManager()
+                        .updateDeviceOwner(getDeviceOwner().getPackageName());
+            }
         } catch (RemoteException e) {
             // Not gonna happen.
         } finally {
@@ -1945,7 +1997,8 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         }
     }
 
-    public void systemReady(int phase) {
+    @VisibleForTesting
+    void systemReady(int phase) {
         if (!mHasFeature) {
             return;
         }
@@ -2284,7 +2337,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             }
             if (admin.getUid() != mInjector.binderGetCallingUid()) {
                 // Active device owners must remain active admins.
-                if (isDeviceOwner(adminReceiver.getPackageName())) {
+                if (isDeviceOwner(adminReceiver)) {
                     return;
                 }
                 mContext.enforceCallingOrSelfPermission(
@@ -3544,7 +3597,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             try {
                 if ((flags & WIPE_RESET_PROTECTION_DATA) != 0) {
                     if (userHandle != UserHandle.USER_SYSTEM
-                            || !isDeviceOwner(admin.info.getPackageName())) {
+                            || !isDeviceOwner(admin.info.getComponent())) {
                         throw new SecurityException(
                                "Only device owner admins can set WIPE_RESET_PROTECTION_DATA");
                     }
@@ -4293,13 +4346,13 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     }
 
     @Override
-    public boolean setDeviceOwner(String packageName, String ownerName, int userId) {
+    public boolean setDeviceOwner(ComponentName admin, String ownerName, int userId) {
         if (!mHasFeature) {
             return false;
         }
-        if (packageName == null
-                || !isPackageInstalledForUser(packageName, userId)) {
-            throw new IllegalArgumentException("Invalid package name " + packageName
+        if (admin == null
+                || !isPackageInstalledForUser(admin.getPackageName(), userId)) {
+            throw new IllegalArgumentException("Invalid component " + admin
                     + " for device owner");
         }
         synchronized (this) {
@@ -4315,7 +4368,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 mInjector.binderRestoreCallingIdentity(ident);
             }
 
-            mOwners.setDeviceOwner(packageName, ownerName, userId);
+            mOwners.setDeviceOwner(admin, ownerName, userId);
             mOwners.writeDeviceOwner();
             updateDeviceOwnerLocked();
             Intent intent = new Intent(DevicePolicyManager.ACTION_DEVICE_OWNER_CHANGED);
@@ -4331,24 +4384,33 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         }
     }
 
+    public boolean isDeviceOwner(ComponentName who) {
+        if (!mHasFeature) {
+            return false;
+        }
+        synchronized (this) {
+            return mOwners.hasDeviceOwner() && mOwners.getDeviceOwnerComponent().equals(who);
+        }
+    }
+
     @Override
-    public boolean isDeviceOwner(String packageName) {
+    public boolean isDeviceOwnerPackage(String packageName) {
         if (!mHasFeature) {
             return false;
         }
         synchronized (this) {
             return mOwners.hasDeviceOwner()
-                    && mOwners.getDeviceOwnerPackageName().equals(packageName);
+                    && mOwners.getDeviceOwnerComponent().getPackageName().equals(packageName);
         }
     }
 
     @Override
-    public String getDeviceOwner() {
+    public ComponentName getDeviceOwner() {
         if (!mHasFeature) {
             return null;
         }
         synchronized (this) {
-            return mOwners.getDeviceOwnerPackageName();
+            return mOwners.getDeviceOwnerComponent();
         }
     }
 
@@ -4373,16 +4435,16 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     // Returns the active device owner or null if there is no device owner.
     @VisibleForTesting
     ActiveAdmin getDeviceOwnerAdminLocked() {
-        String deviceOwnerPackageName = getDeviceOwner();
-        if (deviceOwnerPackageName == null) {
+        ComponentName component = getDeviceOwner();
+        if (component == null) {
             return null;
         }
 
-        DevicePolicyData policy = getUserData(UserHandle.USER_SYSTEM);
+        DevicePolicyData policy = getUserData(mOwners.getDeviceOwnerUserId());
         final int n = policy.mAdminList.size();
         for (int i = 0; i < n; i++) {
             ActiveAdmin admin = policy.mAdminList.get(i);
-            if (deviceOwnerPackageName.equals(admin.info.getPackageName())) {
+            if (component.equals(admin.info.getComponent())) {
                 return admin;
             }
         }
@@ -4392,15 +4454,17 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     @Override
     public void clearDeviceOwner(String packageName) {
         Preconditions.checkNotNull(packageName, "packageName is null");
+        final int callingUid = mInjector.binderGetCallingUid();
         try {
             int uid = mContext.getPackageManager().getPackageUid(packageName, 0);
-            if (uid != mInjector.binderGetCallingUid()) {
+            if (uid != callingUid) {
                 throw new SecurityException("Invalid packageName");
             }
         } catch (NameNotFoundException e) {
             throw new SecurityException(e);
         }
-        if (!isDeviceOwner(packageName)) {
+        if (!mOwners.hasDeviceOwner() || !getDeviceOwner().getPackageName().equals(packageName)
+                || (mOwners.getDeviceOwnerUserId() != UserHandle.getUserId(callingUid))) {
             throw new SecurityException("clearDeviceOwner can only be called by the device owner");
         }
         synchronized (this) {
@@ -5443,7 +5507,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         synchronized (this) {
             ActiveAdmin activeAdmin =
                     getActiveAdminForCallerLocked(who, DeviceAdminInfo.USES_POLICY_PROFILE_OWNER);
-            boolean isDeviceOwner = isDeviceOwner(activeAdmin.info.getPackageName());
+            boolean isDeviceOwner = isDeviceOwner(who);
             if (!isDeviceOwner && userHandle != UserHandle.USER_SYSTEM
                     && DEVICE_OWNER_USER_RESTRICTIONS.contains(key)) {
                 throw new SecurityException("Profile owners cannot set user restriction " + key);
@@ -5976,7 +6040,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             Bundle adminExtras = new Bundle();
             adminExtras.putString(DeviceAdminReceiver.EXTRA_LOCK_TASK_PACKAGE, pkg);
             for (ActiveAdmin admin : policy.mAdminList) {
-                boolean ownsDevice = isDeviceOwner(admin.info.getPackageName());
+                boolean ownsDevice = isDeviceOwner(admin.info.getComponent());
                 boolean ownsProfile = (getProfileOwner(userHandle) != null
                         && getProfileOwner(userHandle).equals(admin.info.getPackageName()));
                 if (ownsDevice || ownsProfile) {
@@ -6034,10 +6098,9 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         final ContentResolver contentResolver = mContext.getContentResolver();
 
         synchronized (this) {
-            ActiveAdmin activeAdmin =
-                    getActiveAdminForCallerLocked(who, DeviceAdminInfo.USES_POLICY_PROFILE_OWNER);
+            getActiveAdminForCallerLocked(who, DeviceAdminInfo.USES_POLICY_PROFILE_OWNER);
 
-            if (isDeviceOwner(activeAdmin.info.getPackageName())) {
+            if (isDeviceOwner(who)) {
                 if (!SECURE_SETTINGS_DEVICEOWNER_WHITELIST.contains(setting)) {
                     throw new SecurityException(String.format(
                             "Permission denial: Device owners cannot update %1$s", setting));
@@ -6320,7 +6383,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     private boolean isCallerDeviceOwner(int callerUid) {
         String[] pkgs = mContext.getPackageManager().getPackagesForUid(callerUid);
         for (String pkg : pkgs) {
-            if (isDeviceOwner(pkg)) {
+            if (isDeviceOwnerPackage(pkg)) {
                 return true;
             }
         }
@@ -6342,7 +6405,8 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 updateReceivedTime);
 
         synchronized (this) {
-            String deviceOwnerPackage = getDeviceOwner();
+            final String deviceOwnerPackage = getDeviceOwner() == null ? null :
+                    getDeviceOwner().getPackageName();
             if (deviceOwnerPackage == null) {
                 return;
             }

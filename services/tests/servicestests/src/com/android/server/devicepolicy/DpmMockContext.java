@@ -22,6 +22,7 @@ import android.app.IActivityManager;
 import android.app.NotificationManager;
 import android.app.backup.IBackupManager;
 import android.content.BroadcastReceiver;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -35,6 +36,7 @@ import android.os.PowerManager.WakeLock;
 import android.os.PowerManagerInternal;
 import android.os.UserHandle;
 import android.os.UserManager;
+import android.test.mock.MockContentResolver;
 import android.test.mock.MockContext;
 import android.view.IWindowManager;
 
@@ -212,6 +214,7 @@ public class DpmMockContext extends MockContext {
     public final IAudioService iaudioService;
     public final LockPatternUtils lockPatternUtils;
     public final SettingsForMock settings;
+    public final MockContentResolver contentResolver;
 
     /** Note this is a partial mock, not a real mock. */
     public final PackageManager packageManager;
@@ -247,12 +250,13 @@ public class DpmMockContext extends MockContext {
 
         spiedContext = mock(Context.class);
 
+        contentResolver = new MockContentResolver();
+
         // Add the system user
         systemUserDataDir = addUser(UserHandle.USER_SYSTEM, UserInfo.FLAG_PRIMARY);
 
         // System user is always running.
-        when(userManager.isUserRunning(MockUtils.checkUserHandle(UserHandle.USER_SYSTEM)))
-                .thenReturn(true);
+        setUserRunning(UserHandle.USER_SYSTEM, true);
     }
 
     public File addUser(int userId, int flags) {
@@ -279,6 +283,11 @@ public class DpmMockContext extends MockContext {
         for (int userId : userIds) {
             addUser(userId, 0);
         }
+    }
+
+    public void setUserRunning(int userId, boolean isRunning) {
+        when(userManager.isUserRunning(MockUtils.checkUserHandle(userId)))
+                .thenReturn(isRunning);
     }
 
     @Override
@@ -472,5 +481,10 @@ public class DpmMockContext extends MockContext {
     @Override
     public void unregisterReceiver(BroadcastReceiver receiver) {
         spiedContext.unregisterReceiver(receiver);
+    }
+
+    @Override
+    public ContentResolver getContentResolver() {
+        return contentResolver;
     }
 }

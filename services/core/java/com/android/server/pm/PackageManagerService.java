@@ -12860,9 +12860,11 @@ public class PackageManagerService extends IPackageManager.Stub {
                 ServiceManager.getService(Context.DEVICE_POLICY_SERVICE));
         try {
             if (dpm != null) {
-                if (dpm.isDeviceOwner(packageName)) {
+                // Does the package contains the device owner?
+                if (dpm.isDeviceOwnerPackage(packageName)) {
                     return true;
                 }
+                // Does it contain a device admin for any user?
                 int[] users;
                 if (userId == UserHandle.USER_ALL) {
                     users = sUserManager.getUserIds();
