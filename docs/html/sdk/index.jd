@@ -5,28 +5,28 @@ page.image=images/cards/android-studio_2x.png
 header.hide=1
 page.metaDescription=Download the official Android IDE and developer tools to build apps for Android phones, tablets, wearables, TVs, and more.
 
-studio.version=1.3.2.0
+studio.version=1.4.0.10
 
-studio.linux_bundle_download=android-studio-ide-141.2178183-linux.zip
-studio.linux_bundle_bytes=352010593
-studio.linux_bundle_checksum=cf780413f8c8223eb348bd27c19a9c04b75eaeb2
+studio.linux_bundle_download=android-studio-ide-141.2288178-linux.zip
+studio.linux_bundle_bytes=380821638
+studio.linux_bundle_checksum=137e3734f2e8e285bd7c1d2fae2e8548d0f164bd
 
-studio.mac_bundle_download=android-studio-ide-141.2178183-mac.dmg
-studio.mac_bundle_bytes=368335367
-studio.mac_bundle_checksum=75b67eb15a34a152a40e7189484ab0ebc375b877
+studio.mac_bundle_download=android-studio-ide-141.2288178-mac.dmg
+studio.mac_bundle_bytes=364624965
+studio.mac_bundle_checksum=27068d59d5a78717d31bdedd054082b5c50d3897
 
-studio.win_bundle_download=android-studio-ide-141.2178183-windows.zip
-studio.win_bundle_bytes=344424713
-studio.win_bundle_checksum=3134f226b5f3c3f74d4fc2d9cff03a4458f01d69
+studio.win_bundle_download=android-studio-ide-141.2288178-windows.zip
+studio.win_bundle_bytes=373492997
+studio.win_bundle_checksum=c0851dc9a506ba9f4c1379a3e9b4019c08478220
 
 
-studio.win_bundle_exe_download=android-studio-bundle-141.2178183-windows.exe
-studio.win_bundle_exe_bytes=1136982712
-studio.win_bundle_exe_checksum=c7d39c529dd434489da9d086ff689d34dc791526
+studio.win_bundle_exe_download=android-studio-bundle-141.2288178-windows.exe
+studio.win_bundle_exe_bytes=1177811944
+studio.win_bundle_exe_checksum=a2f0141d35f8f0c24dad2ff390e7f6231c5f7625
 
-studio.win_notools_exe_download=android-studio-ide-141.2178183-windows.exe
-studio.win_notools_exe_bytes=321810248
-studio.win_notools_exe_checksum=b5d1aaa000729c03a3cf980add79d1b93121c56d
+studio.win_notools_exe_download=android-studio-ide-141.2288178-windows.exe
+studio.win_notools_exe_bytes=348295968
+studio.win_notools_exe_checksum=82d0d9c78ec23834956f941a07821be347fcb7bf
 
 
 
@@ -435,7 +435,7 @@ Studio</a>.</p>
 <h3>Windows</h3>
 
 <ul>
-<li>Microsoft&reg;  Windows&reg;  8/7/Vista/2003 (32 or 64-bit)</li>
+<li>Microsoft&reg;  Windows&reg;  8/7/Vista (32 or 64-bit)</li>
 <li>2 GB RAM minimum, 4 GB RAM recommended</li>
 <li>400 MB hard disk space</li>
 <li>At least 1 GB for Android SDK, emulator system images, and caches</li>
