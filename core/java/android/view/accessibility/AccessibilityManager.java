@@ -88,6 +88,9 @@ public final class AccessibilityManager {
     /** @hide */
     public static final int DALTONIZER_CORRECT_DEUTERANOMALY = 12;
 
+    /** @hide */
+    public static final int AUTOCLICK_DELAY_DEFAULT = 600;
+
     static final Object sInstanceSync = new Object();
 
     private static AccessibilityManager sInstance;
