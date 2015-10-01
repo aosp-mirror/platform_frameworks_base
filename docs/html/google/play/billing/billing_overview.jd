@@ -160,7 +160,7 @@ code in your application before you publish it. For more information, see
 and Design</a>.</p>
 
 <h2 id="migration">Migration Considerations</h2>
-<p>The In-app Billing Version 2 API is deprecated and will be discontinued in January 2015.
+<p>The In-app Billing Version 2 API was discontinued in January 2015.
 If you have an existing In-app Billing implementation that uses API Version 2 or
 earlier, you must migrate to <a href="{@docRoot}google/play/billing/api.html">In-app Billing Version
 3</a>.</p>
@@ -173,8 +173,7 @@ work with Version 3 as before.</li>
 treated as managed products if you make a purchase request for these items using
 the Version 3 API. You do not need to create a new product entry in Developer
 Console for these items, and you can use the same product IDs to purchase these
-items. They will still continue to be treated as unmanaged items if you make a
-purchase request for them using the Version 2 or earlier API.
+items.
 </ul>
 
 

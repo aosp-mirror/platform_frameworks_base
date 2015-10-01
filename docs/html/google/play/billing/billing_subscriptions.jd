@@ -199,15 +199,8 @@ which can then use it to validate or cancel the subscription remotely using the
 href="{@docRoot}google/play/developer-api.html">Google Play Developer API</a>.</p>
 
 <p>If a recurring payment fails (for example, because the customer’s credit
-card has become invalid), the subscription does not renew. How your app is
-notified depends on the In-app Billing API version that you are using:</p>
-<ul>
-<li>With In-app Billing Version 3, the failed or expired subscription is no longer
-returned when you call {@code getPurchases}.</li>
-<li>With In-app Billing Version 2, Google Play notifies your app at the end of
-the active cycle that the purchase state of the subscription is now "Expired".
-</li>
-</ul>
+card has become invalid), the subscription does not renew. The {@code
+getPurchases()} method does not return failed or expired subscriptions.</p>
 
 <p class="note"><strong>Recommendation</strong>: Include business logic in your
 app to notify your backend servers of subscription purchases, tokens, and any
