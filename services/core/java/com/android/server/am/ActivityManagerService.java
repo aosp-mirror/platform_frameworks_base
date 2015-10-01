@@ -11893,7 +11893,8 @@ public final class ActivityManagerService extends ActivityManagerNative
             updateCurrentProfileIdsLocked();
 
             mRecentTasks.clear();
-            mRecentTasks.addAll(mTaskPersister.restoreTasksLocked());
+            mRecentTasks.addAll(mTaskPersister.restoreTasksLocked(
+                    getUserManagerLocked().getUserIds()));
             mRecentTasks.cleanupLocked(UserHandle.USER_ALL);
             mTaskPersister.startPersisting();
 
@@ -20644,9 +20645,6 @@ public final class ActivityManagerService extends ActivityManagerNative
                 // Kill all the processes for the user.
                 forceStopUserLocked(userId, "finish user");
             }
-
-            // Explicitly remove the old information in mRecentTasks.
-            mRecentTasks.removeTasksForUserLocked(userId);
         }
 
         for (int i=0; i<callbacks.size(); i++) {
@@ -20663,6 +20661,10 @@ public final class ActivityManagerService extends ActivityManagerNative
                 mStackSupervisor.removeUserLocked(userId);
             }
         }
+    }
+
+    void onUserRemovedLocked(int userId) {
+        mRecentTasks.removeTasksForUserLocked(userId);
     }
 
     @Override
@@ -20947,6 +20949,13 @@ public final class ActivityManagerService extends ActivityManagerNative
             synchronized (ActivityManagerService.this) {
                 ActivityRecord homeActivity = mStackSupervisor.getHomeActivityForUser(userId);
                 return homeActivity == null ? null : homeActivity.realActivity;
+            }
+        }
+
+        @Override
+        public void onUserRemoved(int userId) {
+            synchronized (ActivityManagerService.this) {
+                ActivityManagerService.this.onUserRemovedLocked(userId);
             }
         }
     }

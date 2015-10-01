@@ -20,6 +20,7 @@ import android.accounts.Account;
 import android.annotation.NonNull;
 import android.app.Activity;
 import android.app.ActivityManager;
+import android.app.ActivityManagerInternal;
 import android.app.ActivityManagerNative;
 import android.app.IStopUserCallback;
 import android.app.admin.DevicePolicyManager;
@@ -64,7 +65,7 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.app.IAppOpsService;
 import com.android.internal.util.FastXmlSerializer;
 import com.android.internal.util.XmlUtils;
-import com.android.server.accounts.AccountManagerService;
+import com.android.server.LocalServices;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
@@ -242,13 +243,15 @@ public class UserManagerService extends IUserManager.Stub {
             synchronized (mPackagesLock) {
                 // Prune out any partially created/partially removed users.
                 ArrayList<UserInfo> partials = new ArrayList<UserInfo>();
-                for (int i = 0; i < mUsers.size(); i++) {
+                final int userSize = mUsers.size();
+                for (int i = 0; i < userSize; i++) {
                     UserInfo ui = mUsers.valueAt(i);
                     if ((ui.partial || ui.guestToRemove) && i != 0) {
                         partials.add(ui);
                     }
                 }
-                for (int i = 0; i < partials.size(); i++) {
+                final int partialsSize = partials.size();
+                for (int i = 0; i < partialsSize; i++) {
                     UserInfo ui = partials.get(i);
                     Slog.w(LOG_TAG, "Removing partially created user " + ui.id
                             + " (name=" + ui.name + ")");
@@ -272,7 +275,8 @@ public class UserManagerService extends IUserManager.Stub {
     public UserInfo getPrimaryUser() {
         checkManageUsersPermission("query users");
         synchronized (mPackagesLock) {
-            for (int i = 0; i < mUsers.size(); i++) {
+            final int userSize = mUsers.size();
+            for (int i = 0; i < userSize; i++) {
                 UserInfo ui = mUsers.valueAt(i);
                 if (ui.isPrimary()) {
                     return ui;
@@ -287,7 +291,8 @@ public class UserManagerService extends IUserManager.Stub {
         checkManageUsersPermission("query users");
         synchronized (mPackagesLock) {
             ArrayList<UserInfo> users = new ArrayList<UserInfo>(mUsers.size());
-            for (int i = 0; i < mUsers.size(); i++) {
+            final int userSize = mUsers.size();
+            for (int i = 0; i < userSize; i++) {
                 UserInfo ui = mUsers.valueAt(i);
                 if (ui.partial) {
                     continue;
@@ -323,7 +328,8 @@ public class UserManagerService extends IUserManager.Stub {
             // Probably a dying user
             return users;
         }
-        for (int i = 0; i < mUsers.size(); i++) {
+        final int userSize = mUsers.size();
+        for (int i = 0; i < userSize; i++) {
             UserInfo profile = mUsers.valueAt(i);
             if (!isProfileOf(user, profile)) {
                 continue;
@@ -1010,7 +1016,8 @@ public class UserManagerService extends IUserManager.Stub {
             serializer.startTag(null, TAG_GUEST_RESTRICTIONS);
             writeRestrictionsLocked(serializer, mGuestRestrictions);
             serializer.endTag(null, TAG_GUEST_RESTRICTIONS);
-            for (int i = 0; i < mUsers.size(); i++) {
+            final int userSize = mUsers.size();
+            for (int i = 0; i < userSize; i++) {
                 UserInfo user = mUsers.valueAt(i);
                 serializer.startTag(null, TAG_USER);
                 serializer.attribute(null, ATTR_ID, Integer.toString(user.id));
@@ -1587,6 +1594,9 @@ public class UserManagerService extends IUserManager.Stub {
                             }
                             new Thread() {
                                 public void run() {
+                                    // Clean up any ActivityManager state
+                                    LocalServices.getService(ActivityManagerInternal.class)
+                                            .onUserRemoved(userHandle);
                                     synchronized (mInstallLock) {
                                         synchronized (mPackagesLock) {
                                             removeUserStateLocked(userHandle);
@@ -1951,14 +1961,15 @@ public class UserManagerService extends IUserManager.Stub {
      */
     private void updateUserIdsLocked() {
         int num = 0;
-        for (int i = 0; i < mUsers.size(); i++) {
+        final int userSize = mUsers.size();
+        for (int i = 0; i < userSize; i++) {
             if (!mUsers.valueAt(i).partial) {
                 num++;
             }
         }
         final int[] newUsers = new int[num];
         int n = 0;
-        for (int i = 0; i < mUsers.size(); i++) {
+        for (int i = 0; i < userSize; i++) {
             if (!mUsers.valueAt(i).partial) {
                 newUsers[n++] = mUsers.keyAt(i);
             }

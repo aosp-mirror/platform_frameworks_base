@@ -55,4 +55,13 @@ public abstract class ActivityManagerInternal {
      * @param userId ID of the user or {@link android.os.UserHandle#USER_ALL}
      */
     public abstract ComponentName getHomeActivityForUser(int userId);
+
+    /**
+     * Called when a user has been deleted. This can happen during normal device usage
+     * or just at startup, when partially removed users are purged. Any state persisted by the
+     * ActivityManager should be purged now.
+     *
+     * @param userId The user being cleaned up.
+     */
+    public abstract void onUserRemoved(int userId);
 }
