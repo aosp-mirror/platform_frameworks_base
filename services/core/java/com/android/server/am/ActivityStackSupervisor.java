@@ -3058,7 +3058,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
         Trace.traceEnd(TRACE_TAG_ACTIVITY_MANAGER);
     }
 
-    void resizeTaskLocked(TaskRecord task, Rect bounds, int resizeMode) {
+    void resizeTaskLocked(TaskRecord task, Rect bounds, int resizeMode, boolean preserveWindow) {
         if (!task.mResizeable) {
             Slog.w(TAG, "resizeTask: task " + task + " not resizeable.");
             return;
@@ -3066,7 +3066,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
 
         // If this is a forced resize, let it go through even if the bounds is not changing,
         // as we might need a relayout due to surface size change (to/from fullscreen).
-        final boolean forced = (resizeMode == RESIZE_MODE_FORCED);
+        final boolean forced = (resizeMode & RESIZE_MODE_FORCED) != 0;
         if (task.mBounds != null && task.mBounds.equals(bounds) && !forced) {
             // Nothing to do here...
             return;
@@ -3084,22 +3084,11 @@ public final class ActivityStackSupervisor implements DisplayListener {
             return;
         }
 
-        Trace.traceBegin(TRACE_TAG_ACTIVITY_MANAGER, "am.resizeTask_" + task.taskId);
+        // Do not move the task to another stack here.
+        // This method assumes that the task is already placed in the right stack.
+        // we do not mess with that decision and we only do the resize!
 
-        // The stack of a task is determined by its size (fullscreen vs non-fullscreen).
-        // Place the task in the right stack if it isn't there already based on the requested
-        // bounds.
-        int stackId = task.stack.mStackId;
-        if (bounds == null && stackId != FULLSCREEN_WORKSPACE_STACK_ID) {
-            stackId = FULLSCREEN_WORKSPACE_STACK_ID;
-        } else if (bounds != null
-                && stackId != FREEFORM_WORKSPACE_STACK_ID && stackId != DOCKED_STACK_ID) {
-            stackId = FREEFORM_WORKSPACE_STACK_ID;
-        }
-        final boolean changedStacks = stackId != task.stack.mStackId;
-        if (changedStacks) {
-            moveTaskToStackUncheckedLocked(task, stackId, ON_TOP, !FORCE_FOCUS, "resizeTask");
-        }
+        Trace.traceBegin(TRACE_TAG_ACTIVITY_MANAGER, "am.resizeTask_" + task.taskId);
 
         final Configuration overrideConfig =  task.updateOverrideConfiguration(bounds);
         // This variable holds information whether the configuration didn't change in a signficant
@@ -3110,9 +3099,6 @@ public final class ActivityStackSupervisor implements DisplayListener {
             ActivityRecord r = task.topRunningActivityLocked(null);
             if (r != null) {
                 final ActivityStack stack = task.stack;
-                final boolean preserveWindow = !changedStacks &&
-                        (resizeMode == RESIZE_MODE_USER
-                        || resizeMode == RESIZE_MODE_SYSTEM_SCREEN_ROTATION);
                 kept = stack.ensureActivityConfigurationLocked(r, 0, preserveWindow);
                 // All other activities must be made visible with their correct configuration.
                 ensureActivitiesVisibleLocked(r, 0, !PRESERVE_WINDOWS);
@@ -3204,7 +3190,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
      * @param reason Reason the task is been moved.
      * @return The stack the task was moved to.
      */
-    private ActivityStack moveTaskToStackUncheckedLocked(
+    ActivityStack moveTaskToStackUncheckedLocked(
             TaskRecord task, int stackId, boolean toTop, boolean forceFocus, String reason) {
         final ActivityRecord r = task.getTopActivity();
         final boolean wasFocused = isFrontStack(task.stack) && (topRunningActivityLocked() == r);
@@ -3261,12 +3247,15 @@ public final class ActivityStackSupervisor implements DisplayListener {
 
         // Make sure the task has the appropriate bounds/size for the stack it is in.
         if (stackId == FULLSCREEN_WORKSPACE_STACK_ID && task.mBounds != null) {
-            resizeTaskLocked(task, stack.mBounds, RESIZE_MODE_SYSTEM);
+            resizeTaskLocked(task, stack.mBounds,
+                    RESIZE_MODE_SYSTEM, !PRESERVE_WINDOWS);
         } else if (stackId == FREEFORM_WORKSPACE_STACK_ID
                 && task.mBounds == null && task.mLastNonFullscreenBounds != null) {
-            resizeTaskLocked(task, task.mLastNonFullscreenBounds, RESIZE_MODE_SYSTEM);
+            resizeTaskLocked(task, task.mLastNonFullscreenBounds,
+                    RESIZE_MODE_SYSTEM, !PRESERVE_WINDOWS);
         } else if (stackId == DOCKED_STACK_ID) {
-            resizeTaskLocked(task, stack.mBounds, RESIZE_MODE_SYSTEM);
+            resizeTaskLocked(task, stack.mBounds,
+                    RESIZE_MODE_SYSTEM, !PRESERVE_WINDOWS);
         }
 
         // The task might have already been running and its visibility needs to be synchronized with

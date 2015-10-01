@@ -468,36 +468,51 @@ public class ActivityManager {
      */
     public static final int DOCKED_STACK_CREATE_MODE_BOTTOM_OR_RIGHT = 1;
 
-
     /**
      * Input parameter to {@link android.app.IActivityManager#resizeTask} which indicates
-     * that the resize is from the window manager (instead of the user).
+     * that the resize doesn't need to preserve the window, and can be skipped if bounds
+     * is unchanged. This mode is used by window manager in most cases.
      * @hide
      */
     public static final int RESIZE_MODE_SYSTEM = 0;
 
     /**
      * Input parameter to {@link android.app.IActivityManager#resizeTask} which indicates
-     * that the resize is from the window manager (instead of the user) due to a screen
-     * rotation change.
+     * that the resize should preserve the window if possible.
      * @hide
      */
-    public static final int RESIZE_MODE_SYSTEM_SCREEN_ROTATION = 1;
-
-    /**
-     * Input parameter to {@link android.app.IActivityManager#resizeTask} which indicates
-     * that the resize is initiated by the user (most likely via a drag action on the
-     * window's edge or corner).
-     * @hide
-     */
-    public static final int RESIZE_MODE_USER   = 2;
+    public static final int RESIZE_MODE_PRESERVE_WINDOW   = (0x1 << 0);
 
     /**
      * Input parameter to {@link android.app.IActivityManager#resizeTask} which indicates
      * that the resize should be performed even if the bounds appears unchanged.
      * @hide
      */
-    public static final int RESIZE_MODE_FORCED = 3;
+    public static final int RESIZE_MODE_FORCED = (0x1 << 1);
+
+    /**
+     * Input parameter to {@link android.app.IActivityManager#resizeTask} used by window
+     * manager during a screen rotation.
+     * @hide
+     */
+    public static final int RESIZE_MODE_SYSTEM_SCREEN_ROTATION = RESIZE_MODE_PRESERVE_WINDOW;
+
+    /**
+     * Input parameter to {@link android.app.IActivityManager#resizeTask} used when the
+     * resize is due to a drag action.
+     * @hide
+     */
+    public static final int RESIZE_MODE_USER = RESIZE_MODE_PRESERVE_WINDOW;
+
+    /**
+     * Input parameter to {@link android.app.IActivityManager#resizeTask} which indicates
+     * that the resize should preserve the window if possible, and should not be skipped
+     * even if the bounds is unchanged. Usually used to force a resizing when a drag action
+     * is ending.
+     * @hide
+     */
+    public static final int RESIZE_MODE_USER_FORCED =
+            RESIZE_MODE_PRESERVE_WINDOW | RESIZE_MODE_FORCED;
 
     /** @hide */
     public int getFrontActivityScreenCompatMode() {

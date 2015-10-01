@@ -20,8 +20,11 @@ import static android.Manifest.permission.INTERACT_ACROSS_USERS;
 import static android.Manifest.permission.INTERACT_ACROSS_USERS_FULL;
 import static android.Manifest.permission.START_TASKS_FROM_RECENTS;
 import static android.app.ActivityManager.DOCKED_STACK_ID;
+import static android.app.ActivityManager.FREEFORM_WORKSPACE_STACK_ID;
+import static android.app.ActivityManager.FULLSCREEN_WORKSPACE_STACK_ID;
 import static android.app.ActivityManager.HOME_STACK_ID;
 import static android.app.ActivityManager.INVALID_STACK_ID;
+import static android.app.ActivityManager.RESIZE_MODE_PRESERVE_WINDOW;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 import static com.android.internal.util.XmlUtils.readBooleanAttribute;
 import static com.android.internal.util.XmlUtils.readIntAttribute;
@@ -8685,7 +8688,32 @@ public final class ActivityManagerService extends ActivityManagerNative
                     Slog.w(TAG, "resizeTask: taskId=" + taskId + " not found");
                     return;
                 }
-                mStackSupervisor.resizeTaskLocked(task, bounds, resizeMode);
+                // Place the task in the right stack if it isn't there already based on
+                // the requested bounds.
+                // The stack transition logic is:
+                // - a null bounds on a freeform task moves that task to fullscreen
+                // - a non-null bounds on a non-freeform (fullscreen OR docked) task moves
+                //   that task to freeform
+                // - otherwise the task is not moved
+                // Note it's not allowed to resize a home stack task, or a docked task.
+                int stackId = task.stack.mStackId;
+                if (stackId == HOME_STACK_ID || stackId == DOCKED_STACK_ID) {
+                    throw new IllegalArgumentException("trying to resizeTask on a "
+                            + "home or docked task");
+                }
+                if (bounds == null && stackId == FREEFORM_WORKSPACE_STACK_ID) {
+                    stackId = FULLSCREEN_WORKSPACE_STACK_ID;
+                } else if (bounds != null && stackId != FREEFORM_WORKSPACE_STACK_ID ) {
+                    stackId = FREEFORM_WORKSPACE_STACK_ID;
+                }
+                boolean preserveWindow = (resizeMode & RESIZE_MODE_PRESERVE_WINDOW) != 0;
+                if (stackId != task.stack.mStackId) {
+                    mStackSupervisor.moveTaskToStackUncheckedLocked(
+                            task, stackId, ON_TOP, !FORCE_FOCUS, "resizeTask");
+                    preserveWindow = false;
+                }
+
+                mStackSupervisor.resizeTaskLocked(task, bounds, resizeMode, preserveWindow);
             }
         } finally {
             Binder.restoreCallingIdentity(ident);
