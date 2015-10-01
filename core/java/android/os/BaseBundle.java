@@ -19,6 +19,7 @@ package android.os;
 import android.annotation.Nullable;
 import android.util.ArrayMap;
 import android.util.Log;
+import android.util.MathUtils;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -1345,18 +1346,19 @@ public class BaseBundle {
      */
     void readFromParcelInner(Parcel parcel) {
         int length = parcel.readInt();
-        if (length < 0) {
-            throw new RuntimeException("Bad length in parcel: " + length);
-        }
         readFromParcelInner(parcel, length);
     }
 
     private void readFromParcelInner(Parcel parcel, int length) {
-        if (length == 0) {
+        if (length < 0) {
+            throw new RuntimeException("Bad length in parcel: " + length);
+
+        } else if (length == 0) {
             // Empty Bundle or end of data.
             mParcelledData = EMPTY_PARCEL;
             return;
         }
+
         int magic = parcel.readInt();
         if (magic != BUNDLE_MAGIC) {
             //noinspection ThrowableInstanceNeverThrown
@@ -1366,7 +1368,7 @@ public class BaseBundle {
 
         // Advance within this Parcel
         int offset = parcel.dataPosition();
-        parcel.setDataPosition(offset + length);
+        parcel.setDataPosition(MathUtils.addOrThrow(offset, length));
 
         Parcel p = Parcel.obtain();
         p.setDataPosition(0);

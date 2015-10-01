@@ -185,4 +185,24 @@ public final class MathUtils {
     public static void randomSeed(long seed) {
         sRandom.setSeed(seed);
     }
+
+    /**
+     * Returns the sum of the two parameters, or throws an exception if the resulting sum would
+     * cause an overflow or underflow.
+     * @throws IllegalArgumentException when overflow or underflow would occur.
+     */
+    public static int addOrThrow(int a, int b) throws IllegalArgumentException {
+        if (b == 0) {
+            return a;
+        }
+
+        if (b > 0 && a <= (Integer.MAX_VALUE - b)) {
+            return a + b;
+        }
+
+        if (b < 0 && a >= (Integer.MIN_VALUE - b)) {
+            return a + b;
+        }
+        throw new IllegalArgumentException("Addition overflow: " + a + " + " + b);
+    }
 }
