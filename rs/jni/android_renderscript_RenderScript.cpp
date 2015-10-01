@@ -611,7 +611,7 @@ nScriptIntrinsicBLAS_Double(JNIEnv *_env, jobject _this, jlong con, jlong id, ji
     in_allocs[2] = (RsAllocation)C;
 
     rsScriptForEachMulti((RsContext)con, (RsScript)id, 0,
-                         in_allocs, sizeof(in_allocs), nullptr,
+                         in_allocs, NELEM(in_allocs), nullptr,
                          &call, sizeof(call), nullptr, 0);
 }
 
@@ -646,7 +646,7 @@ nScriptIntrinsicBLAS_Complex(JNIEnv *_env, jobject _this, jlong con, jlong id, j
     in_allocs[2] = (RsAllocation)C;
 
     rsScriptForEachMulti((RsContext)con, (RsScript)id, 0,
-                         in_allocs, sizeof(in_allocs), nullptr,
+                         in_allocs, NELEM(in_allocs), nullptr,
                          &call, sizeof(call), nullptr, 0);
 }
 
@@ -681,7 +681,7 @@ nScriptIntrinsicBLAS_Z(JNIEnv *_env, jobject _this, jlong con, jlong id, jint fu
     in_allocs[2] = (RsAllocation)C;
 
     rsScriptForEachMulti((RsContext)con, (RsScript)id, 0,
-                         in_allocs, sizeof(in_allocs), nullptr,
+                         in_allocs, NELEM(in_allocs), nullptr,
                          &call, sizeof(call), nullptr, 0);
 }
 
@@ -707,7 +707,7 @@ nScriptIntrinsicBLAS_BNNM(JNIEnv *_env, jobject _this, jlong con, jlong id, jint
     in_allocs[2] = (RsAllocation)C;
 
     rsScriptForEachMulti((RsContext)con, (RsScript)id, 0,
-                         in_allocs, sizeof(in_allocs), nullptr,
+                         in_allocs, NELEM(in_allocs), nullptr,
                          &call, sizeof(call), nullptr, 0);
 }
 
