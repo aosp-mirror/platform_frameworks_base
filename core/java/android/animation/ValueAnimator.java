@@ -669,6 +669,10 @@ public class ValueAnimator extends Animator implements AnimationHandler.Animatio
      * The frame delay may be ignored when the animation system uses an external timing
      * source, such as the display refresh rate (vsync), to govern animations.
      *
+     * Note that this method should be called from the same thread that {@link #start()} is
+     * called in order to check the frame delay for that animation. A runtime exception will be
+     * thrown if the calling thread does not have a Looper.
+     *
      * @return the requested time between frames, in milliseconds
      */
     public static long getFrameDelay() {
@@ -684,6 +688,10 @@ public class ValueAnimator extends Animator implements AnimationHandler.Animatio
      *
      * The frame delay may be ignored when the animation system uses an external timing
      * source, such as the display refresh rate (vsync), to govern animations.
+     *
+     * Note that this method should be called from the same thread that {@link #start()} is
+     * called in order to have the new frame delay take effect on that animation. A runtime
+     * exception will be thrown if the calling thread does not have a Looper.
      *
      * @param frameDelay the requested time between frames, in milliseconds
      */
