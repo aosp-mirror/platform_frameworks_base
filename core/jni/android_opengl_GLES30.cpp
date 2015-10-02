@@ -501,8 +501,10 @@ android_glTexImage3D__IIIIIIIIILjava_nio_Buffer_2
     jint _remaining;
     GLvoid *pixels = (GLvoid *) 0;
 
-    pixels = (GLvoid *)getPointer(_env, pixels_buf, (jarray*)&_array, &_remaining, &_bufferOffset);
-    if (pixels == NULL) {
+    if (pixels_buf) {
+        pixels = (GLvoid *)getPointer(_env, pixels_buf, (jarray*)&_array, &_remaining, &_bufferOffset);
+    }
+    if (pixels_buf && pixels == NULL) {
         char * _pixelsBase = (char *)_env->GetPrimitiveArrayCritical(_array, (jboolean *) 0);
         pixels = (GLvoid *) (_pixelsBase + _bufferOffset);
     }
@@ -1910,22 +1912,18 @@ android_glGetTransformFeedbackVarying__III_3II_3II_3II_3BI
     jint _nameRemaining;
     char *name = (char *) 0;
 
-    if (!length_ref) {
-        _exception = 1;
-        _exceptionType = "java/lang/IllegalArgumentException";
-        _exceptionMessage = "length == null";
-        goto exit;
+    if (length_ref) {
+        if (lengthOffset < 0) {
+            _exception = 1;
+            _exceptionType = "java/lang/IllegalArgumentException";
+            _exceptionMessage = "lengthOffset < 0";
+            goto exit;
+        }
+        _lengthRemaining = _env->GetArrayLength(length_ref) - lengthOffset;
+        length_base = (GLsizei *)
+            _env->GetIntArrayElements(length_ref, (jboolean *)0);
+        length = length_base + lengthOffset;
     }
-    if (lengthOffset < 0) {
-        _exception = 1;
-        _exceptionType = "java/lang/IllegalArgumentException";
-        _exceptionMessage = "lengthOffset < 0";
-        goto exit;
-    }
-    _lengthRemaining = _env->GetArrayLength(length_ref) - lengthOffset;
-    length_base = (GLsizei *)
-        _env->GetIntArrayElements(length_ref, (jboolean *)0);
-    length = length_base + lengthOffset;
 
     if (!size_ref) {
         _exception = 1;
@@ -3591,22 +3589,18 @@ android_glGetActiveUniformBlockName_III_3II_3BI
     jint _nameRemaining;
     GLchar* _name = (GLchar*)0;
 
-    if (!length_ref) {
-        _exception = 1;
-        _exceptionType = "java/lang/IllegalArgumentException";
-        _exceptionMessage = "length == null";
-        goto exit;
+    if (length_ref) {
+        if (lengthOffset < 0) {
+            _exception = 1;
+            _exceptionType = "java/lang/IllegalArgumentException";
+            _exceptionMessage = "lengthOffset < 0";
+            goto exit;
+        }
+        _lengthRemaining = _env->GetArrayLength(length_ref) - lengthOffset;
+        _length_base = (GLsizei*)_env->GetIntArrayElements(
+                length_ref, (jboolean*)0);
+        _length = _length_base + lengthOffset;
     }
-    if (lengthOffset < 0) {
-        _exception = 1;
-        _exceptionType = "java/lang/IllegalArgumentException";
-        _exceptionMessage = "lengthOffset < 0";
-        goto exit;
-    }
-    _lengthRemaining = _env->GetArrayLength(length_ref) - lengthOffset;
-    _length_base = (GLsizei*)_env->GetIntArrayElements(
-            length_ref, (jboolean*)0);
-    _length = _length_base + lengthOffset;
 
     if (!name_ref) {
         _exception = 1;
@@ -3900,22 +3894,18 @@ android_glGetSynciv__JII_3II_3II
     jint _valuesRemaining;
     GLint *values = (GLint *) 0;
 
-    if (!length_ref) {
-        _exception = 1;
-        _exceptionType = "java/lang/IllegalArgumentException";
-        _exceptionMessage = "length == null";
-        goto exit;
+    if (length_ref) {
+        if (lengthOffset < 0) {
+            _exception = 1;
+            _exceptionType = "java/lang/IllegalArgumentException";
+            _exceptionMessage = "lengthOffset < 0";
+            goto exit;
+        }
+        _lengthRemaining = _env->GetArrayLength(length_ref) - lengthOffset;
+        length_base = (GLsizei *)
+            _env->GetIntArrayElements(length_ref, (jboolean *)0);
+        length = length_base + lengthOffset;
     }
-    if (lengthOffset < 0) {
-        _exception = 1;
-        _exceptionType = "java/lang/IllegalArgumentException";
-        _exceptionMessage = "lengthOffset < 0";
-        goto exit;
-    }
-    _lengthRemaining = _env->GetArrayLength(length_ref) - lengthOffset;
-    length_base = (GLsizei *)
-        _env->GetIntArrayElements(length_ref, (jboolean *)0);
-    length = length_base + lengthOffset;
 
     if (!values_ref) {
         _exception = 1;
@@ -3969,9 +3959,11 @@ android_glGetSynciv__JIILjava_nio_IntBuffer_2Ljava_nio_IntBuffer_2
     jint _valuesRemaining;
     GLint *values = (GLint *) 0;
 
-    length = (GLsizei *)getPointer(_env, length_buf, (jarray*)&_lengthArray, &_lengthRemaining, &_lengthBufferOffset);
+    if (length_buf) {
+        length = (GLsizei *)getPointer(_env, length_buf, (jarray*)&_lengthArray, &_lengthRemaining, &_lengthBufferOffset);
+    }
     values = (GLint *)getPointer(_env, values_buf, (jarray*)&_valuesArray, &_valuesRemaining, &_valuesBufferOffset);
-    if (length == NULL) {
+    if (length_buf && length == NULL) {
         char * _lengthBase = (char *)_env->GetIntArrayElements(_lengthArray, (jboolean *) 0);
         length = (GLsizei *) (_lengthBase + _lengthBufferOffset);
     }
@@ -4772,22 +4764,18 @@ android_glGetProgramBinary__II_3II_3IILjava_nio_Buffer_2
     jint _binaryRemaining;
     GLvoid *binary = (GLvoid *) 0;
 
-    if (!length_ref) {
-        _exception = 1;
-        _exceptionType = "java/lang/IllegalArgumentException";
-        _exceptionMessage = "length == null";
-        goto exit;
+    if (length_ref) {
+        if (lengthOffset < 0) {
+            _exception = 1;
+            _exceptionType = "java/lang/IllegalArgumentException";
+            _exceptionMessage = "lengthOffset < 0";
+            goto exit;
+        }
+        _lengthRemaining = _env->GetArrayLength(length_ref) - lengthOffset;
+        length_base = (GLsizei *)
+            _env->GetIntArrayElements(length_ref, (jboolean *)0);
+        length = length_base + lengthOffset;
     }
-    if (lengthOffset < 0) {
-        _exception = 1;
-        _exceptionType = "java/lang/IllegalArgumentException";
-        _exceptionMessage = "lengthOffset < 0";
-        goto exit;
-    }
-    _lengthRemaining = _env->GetArrayLength(length_ref) - lengthOffset;
-    length_base = (GLsizei *)
-        _env->GetIntArrayElements(length_ref, (jboolean *)0);
-    length = length_base + lengthOffset;
 
     if (!binaryFormat_ref) {
         _exception = 1;
@@ -4853,10 +4841,12 @@ android_glGetProgramBinary__IILjava_nio_IntBuffer_2Ljava_nio_IntBuffer_2Ljava_ni
     jint _binaryRemaining;
     GLvoid *binary = (GLvoid *) 0;
 
-    length = (GLsizei *)getPointer(_env, length_buf, (jarray*)&_lengthArray, &_lengthRemaining, &_lengthBufferOffset);
+    if (length_buf) {
+        length = (GLsizei *)getPointer(_env, length_buf, (jarray*)&_lengthArray, &_lengthRemaining, &_lengthBufferOffset);
+    }
     binaryFormat = (GLenum *)getPointer(_env, binaryFormat_buf, (jarray*)&_binaryFormatArray, &_binaryFormatRemaining, &_binaryFormatBufferOffset);
     binary = (GLvoid *)getPointer(_env, binary_buf, (jarray*)&_binaryArray, &_binaryRemaining, &_binaryBufferOffset);
-    if (length == NULL) {
+    if (length_buf && length == NULL) {
         char * _lengthBase = (char *)_env->GetIntArrayElements(_lengthArray, (jboolean *) 0);
         length = (GLsizei *) (_lengthBase + _lengthBufferOffset);
     }

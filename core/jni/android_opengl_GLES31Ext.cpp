@@ -646,13 +646,9 @@ android_glObjectLabelKHR__IIILjava_lang_String_2
     const char * _exceptionMessage = NULL;
     const char* _nativelabel = 0;
 
-    if (!label) {
-        _exception = 1;
-        _exceptionType = "java/lang/IllegalArgumentException";
-        _exceptionMessage = "label == null";
-        goto exit;
+    if (label) {
+        _nativelabel = _env->GetStringUTFChars(label, 0);
     }
-    _nativelabel = _env->GetStringUTFChars(label, 0);
 
     glObjectLabelKHR(
         (GLenum)identifier,
@@ -660,8 +656,6 @@ android_glObjectLabelKHR__IIILjava_lang_String_2
         (GLsizei)length,
         (GLchar *)_nativelabel
     );
-
-exit:
     if (_nativelabel) {
         _env->ReleaseStringUTFChars(label, _nativelabel);
     }
