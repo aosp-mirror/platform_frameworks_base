@@ -624,7 +624,7 @@ public final class Pm {
                 }
             }
 
-            String grp = nextOption();
+            String grp = nextArg();
             ArrayList<String> groupList = new ArrayList<String>();
             if (groups) {
                 List<PermissionGroupInfo> infos =
