@@ -2975,6 +2975,7 @@ package android.animation {
     method public android.animation.TimeInterpolator getInterpolator();
     method public java.util.ArrayList<android.animation.Animator.AnimatorListener> getListeners();
     method public abstract long getStartDelay();
+    method public long getTotalDuration();
     method public boolean isPaused();
     method public abstract boolean isRunning();
     method public boolean isStarted();
@@ -2990,6 +2991,7 @@ package android.animation {
     method public void setupEndValues();
     method public void setupStartValues();
     method public void start();
+    field public static final long DURATION_INFINITE = -1L; // 0xffffffffffffffffL
   }
 
   public static abstract interface Animator.AnimatorListener {

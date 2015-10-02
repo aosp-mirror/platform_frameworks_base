@@ -536,9 +536,6 @@ public class ValueAnimator extends Animator implements AnimationHandler.Animatio
         return mDuration;
     }
 
-    /**
-     * @hide
-     */
     @Override
     public long getTotalDuration() {
         if (mRepeatCount == INFINITE) {
