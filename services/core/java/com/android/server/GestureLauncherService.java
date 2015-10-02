@@ -55,7 +55,8 @@ public class GestureLauncherService extends SystemService {
      * Time in milliseconds in which the power button must be pressed twice so it will be considered
      * as a camera launch.
      */
-    private static final long CAMERA_POWER_DOUBLE_TAP_TIME_MS = 300;
+    private static final long CAMERA_POWER_DOUBLE_TAP_MAX_TIME_MS = 300;
+    private static final long CAMERA_POWER_DOUBLE_TAP_MIN_TIME_MS = 120;
 
     /** The listener that receives the gesture event. */
     private final GestureEventListener mGestureListener = new GestureEventListener();
@@ -256,14 +257,16 @@ public class GestureLauncherService extends SystemService {
         synchronized (this) {
             doubleTapInterval = event.getEventTime() - mLastPowerDown;
             if (mCameraDoubleTapPowerEnabled
-                    && doubleTapInterval < CAMERA_POWER_DOUBLE_TAP_TIME_MS) {
+                    && doubleTapInterval < CAMERA_POWER_DOUBLE_TAP_MAX_TIME_MS
+                    && doubleTapInterval > CAMERA_POWER_DOUBLE_TAP_MIN_TIME_MS) {
                 launched = true;
                 intercept = interactive;
             }
             mLastPowerDown = event.getEventTime();
         }
         if (launched) {
-            Slog.i(TAG, "Power button double tap gesture detected, launching camera.");
+            Slog.i(TAG, "Power button double tap gesture detected, launching camera. Interval="
+                    + doubleTapInterval + "ms");
             launched = handleCameraLaunchGesture(false /* useWakelock */,
                     StatusBarManager.CAMERA_LAUNCH_SOURCE_POWER_DOUBLE_TAP);
             if (launched) {
