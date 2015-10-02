@@ -200,8 +200,8 @@ class TimePickerClockDelegate extends TimePicker.AbstractTimePickerDelegate impl
 
         a.recycle();
 
-        mRadialTimePickerView = (RadialTimePickerView) mainView.findViewById(
-                R.id.radial_picker);
+        mRadialTimePickerView = (RadialTimePickerView) mainView.findViewById(R.id.radial_picker);
+        mRadialTimePickerView.applyAttributes(attrs, defStyleAttr, defStyleRes);
 
         setupListeners();
 
