@@ -135,10 +135,6 @@ struct Glop {
     } fill;
 
     struct Transform {
-        // Orthographic projection matrix for current FBO
-        // TODO: move out of Glop, since this is static per FBO
-        Matrix4 ortho;
-
         // modelView transform, accounting for delta between mesh transform and content of the mesh
         // often represents x/y offsets within command, or scaling for mesh unit size
         Matrix4 modelView;

@@ -208,7 +208,7 @@ void RenderState::postDecStrong(VirtualLightRefBase* object) {
 // Render
 ///////////////////////////////////////////////////////////////////////////////
 
-void RenderState::render(const Glop& glop) {
+void RenderState::render(const Glop& glop, const Matrix4& orthoMatrix) {
     const Glop::Mesh& mesh = glop.mesh;
     const Glop::Mesh::Vertices& vertices = mesh.vertices;
     const Glop::Mesh::Indices& indices = mesh.indices;
@@ -223,7 +223,7 @@ void RenderState::render(const Glop& glop) {
         fill.program->setColor(fill.color);
     }
 
-    fill.program->set(glop.transform.ortho,
+    fill.program->set(orthoMatrix,
             glop.transform.modelView,
             glop.transform.meshTransform(),
             glop.transform.transformFlags & TransformFlags::OffsetByFudgeFactor);

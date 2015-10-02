@@ -84,7 +84,7 @@ public:
     // more thinking...
     void postDecStrong(VirtualLightRefBase* object);
 
-    void render(const Glop& glop);
+    void render(const Glop& glop, const Matrix4& orthoMatrix);
 
     AssetAtlas& assetAtlas() { return mAssetAtlas; }
     Blend& blend() { return *mBlend; }

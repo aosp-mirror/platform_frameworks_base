@@ -461,11 +461,10 @@ GlopBuilder& GlopBuilder::setFillTextureLayer(Layer& layer, float alpha) {
 // Transform
 ////////////////////////////////////////////////////////////////////////////////
 
-void GlopBuilder::setTransform(const Matrix4& ortho, const Matrix4& canvas,
+void GlopBuilder::setTransform(const Matrix4& canvas,
         const int transformFlags) {
     TRIGGER_STAGE(kTransformStage);
 
-    mOutGlop->transform.ortho = ortho;
     mOutGlop->transform.canvas = canvas;
     mOutGlop->transform.transformFlags = transformFlags;
 }
