@@ -767,6 +767,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         private final Runnable mUpdateRotationRunnable = new Runnable() {
             @Override
             public void run() {
+                // send interaction hint to improve redraw performance
+                mPowerManagerInternal.powerHint(PowerManagerInternal.POWER_HINT_INTERACTION, 0);
                 updateRotation(false);
             }
         };
