@@ -146,13 +146,18 @@ class TaskPositioner implements DimLayer.DimLayerUser {
                         }
                         synchronized (mService.mWindowMap) {
                             mDragEnded = notifyMoveLocked(newX, newY);
+                            mTask.getBounds(mTmpRect);
                         }
-                        Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "wm.TaskPositioner.resizeTask");
-                        try {
-                            mService.mActivityManager.resizeTask(
-                                    mTask.mTaskId, mWindowDragBounds, RESIZE_MODE_USER);
-                        } catch(RemoteException e) {}
-                        Trace.traceEnd(Trace.TRACE_TAG_WINDOW_MANAGER);
+                        if (!mTmpRect.equals(mWindowDragBounds)) {
+                            Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER,
+                                    "wm.TaskPositioner.resizeTask");
+                            try {
+                                mService.mActivityManager.resizeTask(
+                                        mTask.mTaskId, mWindowDragBounds, RESIZE_MODE_USER);
+                            } catch (RemoteException e) {
+                            }
+                            Trace.traceEnd(Trace.TRACE_TAG_WINDOW_MANAGER);
+                        }
                     } break;
 
                     case MotionEvent.ACTION_UP: {
@@ -171,11 +176,12 @@ class TaskPositioner implements DimLayer.DimLayerUser {
                 }
 
                 if (mDragEnded) {
+                    final boolean wasResizing = mResizing;
                     synchronized (mService.mWindowMap) {
                         endDragLocked();
                     }
                     try {
-                        if (mResizing) {
+                        if (wasResizing) {
                             // We were using fullscreen surface during resizing. Request
                             // resizeTask() one last time to restore surface to window size.
                             mService.mActivityManager.resizeTask(

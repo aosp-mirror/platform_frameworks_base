@@ -3091,7 +3091,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
         Trace.traceBegin(TRACE_TAG_ACTIVITY_MANAGER, "am.resizeTask_" + task.taskId);
 
         final Configuration overrideConfig =  task.updateOverrideConfiguration(bounds);
-        // This variable holds information whether the configuration didn't change in a signficant
+        // This variable holds information whether the configuration didn't change in a significant
         // way and the activity was kept the way it was. If it's false, it means the activity had
         // to be relaunched due to configuration change.
         boolean kept = true;
