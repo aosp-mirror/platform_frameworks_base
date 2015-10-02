@@ -519,20 +519,24 @@ public class NonClientDecorView extends LinearLayout
             // inaccessible. For that case we remember the previous metrics to avoid flashes.
             View caption = getChildAt(0);
             View content = getChildAt(1);
-            if (content != null && caption != null) {
-                mLastContentWidth = content.getWidth();
-                mLastContentHeight = content.getHeight();
-                mLastCaptionHeight = caption.getHeight();
-
-                // Get the draw position within our surface.
+            if (caption != null && content != null) {
+                int captionHeight = caption.getHeight();
+                int contentWidth = content.getWidth();
+                int contentHeight = content.getHeight();
+                // Get the draw position within our surface (shadow offsets).
                 int[] surfaceOrigin = new int[2];
                 surfaceOrigin[0] = 0;
                 surfaceOrigin[1] = 0;
-
-                // Get the shadow offsets.
                 getLocationInSurface(surfaceOrigin);
-                mLastXOffset = surfaceOrigin[0];
-                mLastYOffset = surfaceOrigin[1];
+                // Only update if a layout has already be performed (which might not be after a
+                // relayout. Otherwise use the previous values for the content.
+                if (captionHeight != 0 && contentWidth != 0 && contentHeight != 0) {
+                    mLastCaptionHeight = captionHeight;
+                    mLastXOffset = surfaceOrigin[0];
+                    mLastYOffset = surfaceOrigin[1];
+                    mLastContentWidth = contentWidth;
+                    mLastContentHeight = contentHeight;
+                }
             }
 
             // Since the surface is spanning the entire screen, we have to add the start offset of
