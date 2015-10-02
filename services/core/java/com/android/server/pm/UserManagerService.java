@@ -130,6 +130,8 @@ public class UserManagerService extends IUserManager.Stub {
     private static final String XML_SUFFIX = ".xml";
 
     private static final int MIN_USER_ID = 10;
+    // We need to keep process uid within Integer.MAX_VALUE.
+    private static final int MAX_USER_ID = Integer.MAX_VALUE / UserHandle.PER_USER_RANGE;
 
     private static final int USER_VERSION = 6;
 
@@ -1994,14 +1996,14 @@ public class UserManagerService extends IUserManager.Stub {
     private int getNextAvailableIdLocked() {
         synchronized (mPackagesLock) {
             int i = MIN_USER_ID;
-            while (i < Integer.MAX_VALUE) {
+            while (i < MAX_USER_ID) {
                 if (mUsers.indexOfKey(i) < 0 && !mRemovingUserIds.get(i)) {
-                    break;
+                    return i;
                 }
                 i++;
             }
-            return i;
         }
+        throw new IllegalStateException("No user id available!");
     }
 
     private String packageToRestrictionsFileName(String packageName) {

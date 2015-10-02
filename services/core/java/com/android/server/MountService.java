@@ -29,6 +29,7 @@ import static org.xmlpull.v1.XmlPullParser.START_TAG;
 
 import android.Manifest;
 import android.annotation.Nullable;
+import android.app.ActivityManager;
 import android.app.ActivityManagerNative;
 import android.app.AppOpsManager;
 import android.app.IActivityManager;
@@ -90,7 +91,6 @@ import libcore.io.IoUtils;
 import libcore.util.EmptyArray;
 
 import com.android.internal.annotations.GuardedBy;
-import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.app.IMediaContainerService;
 import com.android.internal.os.SomeArgs;
 import com.android.internal.os.Zygote;
@@ -290,7 +290,7 @@ class MountService extends IMountService.Stub
     private ArrayMap<String, DiskInfo> mDisks = new ArrayMap<>();
     /** Map from volume ID to disk */
     @GuardedBy("mLock")
-    private ArrayMap<String, VolumeInfo> mVolumes = new ArrayMap<>();
+    private final ArrayMap<String, VolumeInfo> mVolumes = new ArrayMap<>();
 
     /** Map from UUID to record */
     @GuardedBy("mLock")
@@ -462,11 +462,7 @@ class MountService extends IMountService.Stub
         public ObbState(String rawPath, String canonicalPath, int callingUid,
                 IObbActionListener token, int nonce) {
             this.rawPath = rawPath;
-            this.canonicalPath = canonicalPath.toString();
-
-            final int userId = UserHandle.getUserId(callingUid);
-            this.ownerPath = buildObbPath(canonicalPath, userId, false);
-            this.voldPath = buildObbPath(canonicalPath, userId, true);
+            this.canonicalPath = canonicalPath;
 
             this.ownerGid = UserHandle.getSharedAppGid(callingUid);
             this.token = token;
@@ -475,8 +471,6 @@ class MountService extends IMountService.Stub
 
         final String rawPath;
         final String canonicalPath;
-        final String ownerPath;
-        final String voldPath;
 
         final int ownerGid;
 
@@ -509,8 +503,6 @@ class MountService extends IMountService.Stub
             StringBuilder sb = new StringBuilder("ObbState{");
             sb.append("rawPath=").append(rawPath);
             sb.append(",canonicalPath=").append(canonicalPath);
-            sb.append(",ownerPath=").append(ownerPath);
-            sb.append(",voldPath=").append(voldPath);
             sb.append(",ownerGid=").append(ownerGid);
             sb.append(",token=").append(token);
             sb.append(",binder=").append(getBinder());
@@ -569,6 +561,7 @@ class MountService extends IMountService.Stub
     private static final int H_VOLUME_MOUNT = 5;
     private static final int H_VOLUME_BROADCAST = 6;
     private static final int H_INTERNAL_BROADCAST = 7;
+    private static final int H_VOLUME_UNMOUNT = 8;
 
     class MountServiceHandler extends Handler {
         public MountServiceHandler(Looper looper) {
@@ -649,6 +642,11 @@ class MountService extends IMountService.Stub
                     }
                     break;
                 }
+                case H_VOLUME_UNMOUNT: {
+                    final VolumeInfo vol = (VolumeInfo) msg.obj;
+                    unmount(vol.getId());
+                    break;
+                }
                 case H_VOLUME_BROADCAST: {
                     final StorageVolume userVol = (StorageVolume) msg.obj;
                     final String envState = userVol.getState();
@@ -683,6 +681,7 @@ class MountService extends IMountService.Stub
         public void onReceive(Context context, Intent intent) {
             final String action = intent.getAction();
             final int userId = intent.getIntExtra(Intent.EXTRA_USER_HANDLE, -1);
+            Preconditions.checkArgument(userId >= 0);
 
             try {
                 if (Intent.ACTION_USER_ADDED.equals(action)) {
@@ -690,6 +689,16 @@ class MountService extends IMountService.Stub
                     final int userSerialNumber = um.getUserSerialNumber(userId);
                     mConnector.execute("volume", "user_added", userId, userSerialNumber);
                 } else if (Intent.ACTION_USER_REMOVED.equals(action)) {
+                    synchronized (mVolumes) {
+                        final int size = mVolumes.size();
+                        for (int i = 0; i < size; i++) {
+                            final VolumeInfo vol = mVolumes.valueAt(i);
+                            if (vol.mountUserId == userId) {
+                                vol.mountUserId = UserHandle.USER_NULL;
+                                mHandler.obtainMessage(H_VOLUME_UNMOUNT, vol).sendToTarget();
+                            }
+                        }
+                    }
                     mConnector.execute("volume", "user_removed", userId);
                 }
             } catch (NativeDaemonConnectorException e) {
@@ -757,17 +766,26 @@ class MountService extends IMountService.Stub
      * paths never changing, so we outright kill them to pick up new state.
      */
     @Deprecated
-    private void killMediaProvider() {
+    private void killMediaProvider(List<UserInfo> users) {
+        if (users == null) return;
+
         final long token = Binder.clearCallingIdentity();
         try {
-            final ProviderInfo provider = mPms.resolveContentProvider(MediaStore.AUTHORITY, 0,
-                    UserHandle.USER_OWNER);
-            if (provider != null) {
-                final IActivityManager am = ActivityManagerNative.getDefault();
-                try {
-                    am.killApplicationWithAppId(provider.applicationInfo.packageName,
-                            UserHandle.getAppId(provider.applicationInfo.uid), "vold reset");
-                } catch (RemoteException e) {
+            for (UserInfo user : users) {
+                // System user does not have media provider, so skip.
+                if (user.isSystemOnly()) continue;
+
+                final ProviderInfo provider =
+                        mPms.resolveContentProvider(MediaStore.AUTHORITY, 0, user.id);
+                if (provider != null) {
+                    final IActivityManager am = ActivityManagerNative.getDefault();
+                    try {
+                        am.killApplicationWithAppId(provider.applicationInfo.packageName,
+                                UserHandle.getAppId(provider.applicationInfo.uid), "vold reset");
+                        // We only need to run this once. It will kill all users' media processes.
+                        break;
+                    } catch (RemoteException e) {
+                    }
                 }
             }
         } finally {
@@ -788,7 +806,9 @@ class MountService extends IMountService.Stub
         Slog.d(TAG, "Thinking about reset, mSystemReady=" + mSystemReady
                 + ", mDaemonConnected=" + mDaemonConnected);
         if (mSystemReady && mDaemonConnected) {
-            killMediaProvider();
+            final UserManager um = UserManager.get(mContext);
+            final List<UserInfo> users = um.getUsers();
+            killMediaProvider(users);
 
             mDisks.clear();
             mVolumes.clear();
@@ -799,8 +819,6 @@ class MountService extends IMountService.Stub
                 mConnector.execute("volume", "reset");
 
                 // Tell vold about all existing and started users
-                final UserManager um = mContext.getSystemService(UserManager.class);
-                final List<UserInfo> users = um.getUsers();
                 for (UserInfo user : users) {
                     mConnector.execute("volume", "user_added", user.id, user.serialNumber);
                 }
@@ -1192,7 +1210,7 @@ class MountService extends IMountService.Stub
                 vol.mountFlags |= VolumeInfo.MOUNT_FLAG_VISIBLE;
             }
 
-            vol.mountUserId = UserHandle.USER_OWNER;
+            vol.mountUserId = ActivityManager.getCurrentUser();
             mHandler.obtainMessage(H_VOLUME_MOUNT, vol).sendToTarget();
 
         } else if (vol.type == VolumeInfo.TYPE_PRIVATE) {
@@ -2285,7 +2303,7 @@ class MountService extends IMountService.Stub
 
         final NativeDaemonEvent event;
         try {
-            event = mConnector.execute("obb", "path", state.voldPath);
+            event = mConnector.execute("obb", "path", state.canonicalPath);
             event.checkCode(VoldResponseCode.AsecPathResult);
             return event.getMessage();
         } catch (NativeDaemonConnectorException e) {
@@ -3038,14 +3056,14 @@ class MountService extends IMountService.Stub
         protected ObbInfo getObbInfo() throws IOException {
             ObbInfo obbInfo;
             try {
-                obbInfo = mContainerService.getObbInfo(mObbState.ownerPath);
+                obbInfo = mContainerService.getObbInfo(mObbState.canonicalPath);
             } catch (RemoteException e) {
                 Slog.d(TAG, "Couldn't call DefaultContainerService to fetch OBB info for "
-                        + mObbState.ownerPath);
+                        + mObbState.canonicalPath);
                 obbInfo = null;
             }
             if (obbInfo == null) {
-                throw new IOException("Couldn't read OBB file: " + mObbState.ownerPath);
+                throw new IOException("Couldn't read OBB file: " + mObbState.canonicalPath);
             }
             return obbInfo;
         }
@@ -3122,7 +3140,7 @@ class MountService extends IMountService.Stub
 
             int rc = StorageResultCode.OperationSucceeded;
             try {
-                mConnector.execute("obb", "mount", mObbState.voldPath, new SensitiveArg(hashedKey),
+                mConnector.execute("obb", "mount", mObbState.canonicalPath, new SensitiveArg(hashedKey),
                         mObbState.ownerGid);
             } catch (NativeDaemonConnectorException e) {
                 int code = e.getCode();
@@ -3133,7 +3151,7 @@ class MountService extends IMountService.Stub
 
             if (rc == StorageResultCode.OperationSucceeded) {
                 if (DEBUG_OBB)
-                    Slog.d(TAG, "Successfully mounted OBB " + mObbState.voldPath);
+                    Slog.d(TAG, "Successfully mounted OBB " + mObbState.canonicalPath);
 
                 synchronized (mObbMounts) {
                     addObbStateLocked(mObbState);
@@ -3194,7 +3212,7 @@ class MountService extends IMountService.Stub
 
             int rc = StorageResultCode.OperationSucceeded;
             try {
-                final Command cmd = new Command("obb", "unmount", mObbState.voldPath);
+                final Command cmd = new Command("obb", "unmount", mObbState.canonicalPath);
                 if (mForceUnmount) {
                     cmd.appendArg("force");
                 }
@@ -3238,49 +3256,6 @@ class MountService extends IMountService.Stub
             sb.append('}');
             return sb.toString();
         }
-    }
-
-    @VisibleForTesting
-    public static String buildObbPath(final String canonicalPath, int userId, boolean forVold) {
-        // TODO: allow caller to provide Environment for full testing
-        // TODO: extend to support OBB mounts on secondary external storage
-
-        // Only adjust paths when storage is emulated
-        if (!Environment.isExternalStorageEmulated()) {
-            return canonicalPath;
-        }
-
-        String path = canonicalPath.toString();
-
-        // First trim off any external storage prefix
-        final UserEnvironment userEnv = new UserEnvironment(userId);
-
-        // /storage/emulated/0
-        final String externalPath = userEnv.getExternalStorageDirectory().getAbsolutePath();
-        // /storage/emulated_legacy
-        final String legacyExternalPath = Environment.getLegacyExternalStorageDirectory()
-                .getAbsolutePath();
-
-        if (path.startsWith(externalPath)) {
-            path = path.substring(externalPath.length() + 1);
-        } else if (path.startsWith(legacyExternalPath)) {
-            path = path.substring(legacyExternalPath.length() + 1);
-        } else {
-            return canonicalPath;
-        }
-
-        // Handle special OBB paths on emulated storage
-        final String obbPath = "Android/obb";
-        if (path.startsWith(obbPath)) {
-            path = path.substring(obbPath.length() + 1);
-
-            final UserEnvironment ownerEnv = new UserEnvironment(UserHandle.USER_OWNER);
-            return new File(ownerEnv.buildExternalStorageAndroidObbDirs()[0], path)
-                    .getAbsolutePath();
-        }
-
-        // Handle normal external storage paths
-        return new File(userEnv.getExternalStorageDirectory(), path).getAbsolutePath();
     }
 
     private static class Callbacks extends Handler {
