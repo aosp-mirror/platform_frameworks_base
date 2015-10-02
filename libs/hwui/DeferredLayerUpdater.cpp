@@ -47,7 +47,8 @@ DeferredLayerUpdater::~DeferredLayerUpdater() {
 }
 
 void DeferredLayerUpdater::setPaint(const SkPaint* paint) {
-    OpenGLRenderer::getAlphaAndModeDirect(paint, &mAlpha, &mMode);
+    mAlpha = PaintUtils::getAlphaDirect(paint);
+    mMode = PaintUtils::getXfermodeDirect(paint);
     SkColorFilter* colorFilter = (paint) ? paint->getColorFilter() : nullptr;
     SkRefCnt_SafeAssign(mColorFilter, colorFilter);
 }

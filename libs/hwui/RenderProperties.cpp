@@ -52,11 +52,8 @@ bool LayerProperties::setColorFilter(SkColorFilter* filter) {
 
 bool LayerProperties::setFromPaint(const SkPaint* paint) {
     bool changed = false;
-    SkXfermode::Mode mode;
-    int alpha;
-    OpenGLRenderer::getAlphaAndModeDirect(paint, &alpha, &mode);
-    changed |= setAlpha(static_cast<uint8_t>(alpha));
-    changed |= setXferMode(mode);
+    changed |= setAlpha(static_cast<uint8_t>(PaintUtils::getAlphaDirect(paint)));
+    changed |= setXferMode(PaintUtils::getXfermodeDirect(paint));
     changed |= setColorFilter(paint ? paint->getColorFilter() : nullptr);
     return changed;
 }

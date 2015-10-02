@@ -16,12 +16,18 @@
 #ifndef PAINT_UTILS_H
 #define PAINT_UTILS_H
 
+#include <utils/Blur.h>
+
 #include <SkColorFilter.h>
 #include <SkXfermode.h>
 
 namespace android {
 namespace uirenderer {
 
+/**
+ * Utility methods for accessing data within SkPaint, and providing defaults
+ * with optional SkPaint pointers.
+ */
 class PaintUtils {
 public:
 
@@ -71,6 +77,39 @@ public:
             return false;
         }
         return (filter->getFlags() & SkColorFilter::kAlphaUnchanged_Flag) == 0;
+    }
+
+    struct TextShadow {
+        SkScalar radius;
+        float dx;
+        float dy;
+        SkColor color;
+    };
+
+    static inline bool getTextShadow(const SkPaint* paint, TextShadow* textShadow) {
+        SkDrawLooper::BlurShadowRec blur;
+        if (paint && paint->getLooper() && paint->getLooper()->asABlurShadow(&blur)) {
+            if (textShadow) {
+                textShadow->radius = Blur::convertSigmaToRadius(blur.fSigma);
+                textShadow->dx = blur.fOffset.fX;
+                textShadow->dy = blur.fOffset.fY;
+                textShadow->color = blur.fColor;
+            }
+            return true;
+        }
+        return false;
+    }
+
+    static inline bool hasTextShadow(const SkPaint* paint) {
+        return getTextShadow(paint, nullptr);
+    }
+
+    static inline SkXfermode::Mode getXfermodeDirect(const SkPaint* paint) {
+        return paint ? getXfermode(paint->getXfermode()) : SkXfermode::kSrcOver_Mode;
+    }
+
+    static inline int getAlphaDirect(const SkPaint* paint) {
+        return paint ? paint->getAlpha() : 255;
     }
 
 }; // class PaintUtils

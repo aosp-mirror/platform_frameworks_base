@@ -540,7 +540,7 @@ int OpenGLRenderer::saveLayerDeferred(float left, float top, float right, float 
         Rect bounds(left, top, right, bottom);
         Rect clip;
         calculateLayerBoundsAndClip(bounds, clip, true);
-        updateSnapshotIgnoreForLayer(bounds, clip, true, getAlphaDirect(paint));
+        updateSnapshotIgnoreForLayer(bounds, clip, true, PaintUtils::getAlphaDirect(paint));
 
         if (!mState.currentlyIgnored()) {
             writableSnapshot()->resetTransform(-bounds.left, -bounds.top, 0.0f);
@@ -615,7 +615,7 @@ bool OpenGLRenderer::createLayer(float left, float top, float right, float botto
     Rect clip;
     Rect bounds(left, top, right, bottom);
     calculateLayerBoundsAndClip(bounds, clip, fboLayer);
-    updateSnapshotIgnoreForLayer(bounds, clip, fboLayer, getAlphaDirect(paint));
+    updateSnapshotIgnoreForLayer(bounds, clip, fboLayer, PaintUtils::getAlphaDirect(paint));
 
     // Bail out if we won't draw in this snapshot
     if (mState.currentlyIgnored()) {
@@ -1955,8 +1955,8 @@ void OpenGLRenderer::drawTextShadow(const SkPaint* paint, const char* text,
         FontRenderer& fontRenderer, int alpha, float x, float y) {
     mCaches.textureState().activateTexture(0);
 
-    TextShadow textShadow;
-    if (!getTextShadow(paint, &textShadow)) {
+    PaintUtils::TextShadow textShadow;
+    if (!PaintUtils::getTextShadow(paint, &textShadow)) {
         LOG_ALWAYS_FATAL("failed to query shadow attributes");
     }
 
@@ -1984,8 +1984,10 @@ void OpenGLRenderer::drawTextShadow(const SkPaint* paint, const char* text,
     renderGlop(glop);
 }
 
+// TODO: remove this, once mState.currentlyIgnored captures snapshot alpha
 bool OpenGLRenderer::canSkipText(const SkPaint* paint) const {
-    float alpha = (hasTextShadow(paint) ? 1.0f : paint->getAlpha()) * currentSnapshot()->alpha;
+    float alpha = (PaintUtils::hasTextShadow(paint)
+            ? 1.0f : paint->getAlpha()) * currentSnapshot()->alpha;
     return MathUtils::isZero(alpha)
             && PaintUtils::getXfermode(paint->getXfermode()) == SkXfermode::kSrcOver_Mode;
 }
@@ -2014,11 +2016,10 @@ void OpenGLRenderer::drawPosText(const char* text, int bytesCount, int count,
     FontRenderer& fontRenderer = mCaches.fontRenderer.getFontRenderer();
     fontRenderer.setFont(paint, SkMatrix::I());
 
-    int alpha;
-    SkXfermode::Mode mode;
-    getAlphaAndMode(paint, &alpha, &mode);
+    int alpha = PaintUtils::getAlphaDirect(paint) * currentSnapshot()->alpha;
+    SkXfermode::Mode mode = PaintUtils::getXfermodeDirect(paint);
 
-    if (CC_UNLIKELY(hasTextShadow(paint))) {
+    if (CC_UNLIKELY(PaintUtils::hasTextShadow(paint))) {
         drawTextShadow(paint, text, bytesCount, count, positions, fontRenderer,
                 alpha, 0.0f, 0.0f);
     }
@@ -2159,13 +2160,12 @@ void OpenGLRenderer::drawText(const char* text, int bytesCount, int count, float
         y = floorf(y + transform.getTranslateY() + 0.5f);
     }
 
-    int alpha;
-    SkXfermode::Mode mode;
-    getAlphaAndMode(paint, &alpha, &mode);
+    int alpha = PaintUtils::getAlphaDirect(paint) * currentSnapshot()->alpha;
+    SkXfermode::Mode mode = PaintUtils::getXfermodeDirect(paint);
 
     FontRenderer& fontRenderer = mCaches.fontRenderer.getFontRenderer();
 
-    if (CC_UNLIKELY(hasTextShadow(paint))) {
+    if (CC_UNLIKELY(PaintUtils::hasTextShadow(paint))) {
         fontRenderer.setFont(paint, SkMatrix::I());
         drawTextShadow(paint, text, bytesCount, count, positions, fontRenderer,
                 alpha, oldX, oldY);
@@ -2235,9 +2235,8 @@ void OpenGLRenderer::drawTextOnPath(const char* text, int bytesCount, int count,
     fontRenderer.setFont(paint, SkMatrix::I());
     fontRenderer.setTextureFiltering(true);
 
-    int alpha;
-    SkXfermode::Mode mode;
-    getAlphaAndMode(paint, &alpha, &mode);
+    int alpha = PaintUtils::getAlphaDirect(paint) * currentSnapshot()->alpha;
+    SkXfermode::Mode mode = PaintUtils::getXfermodeDirect(paint);
     TextDrawFunctor functor(this, 0.0f, 0.0f, false, alpha, mode, paint);
 
     const Rect* clip = &writableSnapshot()->getLocalClip();
@@ -2525,12 +2524,6 @@ void OpenGLRenderer::drawColorRect(float left, float top, float right, float bot
             .setModelViewMapUnitToRect(Rect(left, top, right, bottom))
             .build();
     renderGlop(glop);
-}
-
-void OpenGLRenderer::getAlphaAndMode(const SkPaint* paint, int* alpha,
-        SkXfermode::Mode* mode) const {
-    getAlphaAndModeDirect(paint, alpha,  mode);
-    *alpha *= currentSnapshot()->alpha;
 }
 
 float OpenGLRenderer::getLayerAlpha(const Layer* layer) const {

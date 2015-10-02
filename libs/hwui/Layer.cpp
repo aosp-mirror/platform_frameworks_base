@@ -170,7 +170,8 @@ void Layer::updateDeferred(RenderNode* renderNode, int left, int top, int right,
 }
 
 void Layer::setPaint(const SkPaint* paint) {
-    OpenGLRenderer::getAlphaAndModeDirect(paint, &alpha, &mode);
+    alpha = PaintUtils::getAlphaDirect(paint);
+    mode = PaintUtils::getXfermodeDirect(paint);
     setColorFilter((paint) ? paint->getColorFilter() : nullptr);
 }
 
