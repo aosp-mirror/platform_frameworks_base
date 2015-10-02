@@ -252,8 +252,12 @@ $ ./desktop-head-unit</pre>
 
     <p>
       By default, the head unit server connects over port 5277. To override the host or port
-      (for example, to forward over SSH), use the <code>--adb</code> flag.
+      (for example, to forward over SSH), use the
+      <code>desktop-head-unit --adb &lt;[localhost:]port&gt;</code> flag, as in
+      the following example:
     </p>
+
+    <pre class="no-pretty-print">$ ./desktop-head-unit --adb 5999</pre>
 
   </li>
 </ol>
