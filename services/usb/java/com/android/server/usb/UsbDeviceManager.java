@@ -753,7 +753,7 @@ public class UsbDeviceManager {
                                         UsbManager.USB_FUNCTION_MTP)
                                 || UsbManager.containsFunction(mCurrentFunctions,
                                         UsbManager.USB_FUNCTION_PTP);
-                        if (active && mCurrentUser != UserHandle.USER_NULL) {
+                        if (mUsbDataUnlocked && active && mCurrentUser != UserHandle.USER_NULL) {
                             Slog.v(TAG, "Current user switched to " + mCurrentUser
                                     + "; resetting USB host stack for MTP or PTP");
                             setEnabledFunctions(mCurrentFunctions, true);
