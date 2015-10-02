@@ -65,8 +65,6 @@ Font::FontDescription::FontDescription(const SkPaint* paint, const SkMatrix& ras
 }
 
 Font::~Font() {
-    mState->removeFont(this);
-
     for (uint32_t i = 0; i < mCachedGlyphs.size(); i++) {
         delete mCachedGlyphs.valueAt(i);
     }
