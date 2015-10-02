@@ -2415,6 +2415,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      *                     1             PFLAG3_SCROLL_INDICATOR_START
      *                    1              PFLAG3_SCROLL_INDICATOR_END
      *                   1               PFLAG3_ASSIST_BLOCKED
+     *            1111111                PFLAG3_POINTER_ICON_MASK
      * |-------|-------|-------|-------|
      */
 
@@ -2609,6 +2610,36 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * into this view.<p>
      */
     static final int PFLAG3_ASSIST_BLOCKED = 0x4000;
+
+    /**
+     * The mask for use with private flags indicating bits used for pointer icon shapes.
+     */
+    static final int PFLAG3_POINTER_ICON_MASK = 0x7f8000;
+
+    /**
+     * Left-shift used for pointer icon shape values in private flags.
+     */
+    static final int PFLAG3_POINTER_ICON_LSHIFT = 15;
+
+    /**
+     * Value indicating {@link PointerIcon.STYLE_NOT_SPECIFIED}.
+     */
+    private static final int PFLAG3_POINTER_ICON_NOT_SPECIFIED = 0 << PFLAG3_POINTER_ICON_LSHIFT;
+
+    /**
+     * Value indicating {@link PointerIcon.STYLE_NULL}.
+     */
+    private static final int PFLAG3_POINTER_ICON_NULL = 1 << PFLAG3_POINTER_ICON_LSHIFT;
+
+    /**
+     * Value incicating {@link PointerIcon.STYLE_CUSTOM}.
+     */
+    private static final int PFLAG3_POINTER_ICON_CUSTOM = 2 << PFLAG3_POINTER_ICON_LSHIFT;
+
+    /**
+     * The base value for other pointer icon shapes.
+     */
+    private static final int PFLAG3_POINTER_ICON_VALUE_START = 3 << PFLAG3_POINTER_ICON_LSHIFT;
 
     /**
      * Always allow a user to over-scroll this view, provided it is a
@@ -20997,7 +21028,40 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
 
     /** @hide */
     public int getPointerShape(MotionEvent event, float x, float y) {
-        return PointerIcon.STYLE_NOT_SPECIFIED;
+        final int value = (mPrivateFlags3 & PFLAG3_POINTER_ICON_MASK);
+        switch (value) {
+            case PFLAG3_POINTER_ICON_NOT_SPECIFIED:
+                return PointerIcon.STYLE_NOT_SPECIFIED;
+            case PFLAG3_POINTER_ICON_NULL:
+                return PointerIcon.STYLE_NULL;
+            case PFLAG3_POINTER_ICON_CUSTOM:
+                return PointerIcon.STYLE_CUSTOM;
+            default:
+                return ((value - PFLAG3_POINTER_ICON_VALUE_START) >> PFLAG3_POINTER_ICON_LSHIFT)
+                        + PointerIcon.STYLE_ARROW;
+        }
+    }
+
+    /** @hide */
+    public void setPointerShape(int pointerShape) {
+        int newValue;
+        if (pointerShape == PointerIcon.STYLE_NOT_SPECIFIED) {
+            newValue = PFLAG3_POINTER_ICON_NOT_SPECIFIED;
+        } else if (pointerShape == PointerIcon.STYLE_NULL) {
+            newValue = PFLAG3_POINTER_ICON_NULL;
+        } else if (pointerShape == PointerIcon.STYLE_CUSTOM) {
+            newValue = PFLAG3_POINTER_ICON_CUSTOM;
+        } else if (pointerShape >= PointerIcon.STYLE_ARROW
+                && pointerShape <= PointerIcon.STYLE_GRABBING) {
+            newValue = ((pointerShape - PointerIcon.STYLE_ARROW) << PFLAG3_POINTER_ICON_LSHIFT)
+                    + PFLAG3_POINTER_ICON_VALUE_START;
+        } else {
+            Log.w(VIEW_LOG_TAG, "Invalid pointer shape " + pointerShape + " is specified.");
+            return;
+        }
+        if (newValue != (mPrivateFlags3 & PFLAG3_POINTER_ICON_MASK)) {
+            mPrivateFlags3 = (mPrivateFlags3 & ~PFLAG3_POINTER_ICON_MASK) | newValue;
+        }
     }
 
     //
