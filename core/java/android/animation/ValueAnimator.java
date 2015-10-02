@@ -932,6 +932,13 @@ public class ValueAnimator extends Animator implements AnimationHandler.Animatio
         updateScaledDuration(); // in case the scale factor has changed since creation time
         AnimationHandler animationHandler = AnimationHandler.getInstance();
         animationHandler.addAnimationFrameCallback(this, mStartDelay);
+
+        if (mStartDelay == 0) {
+            // If there's no start delay, init the animation and notify start listeners right away
+            // Otherwise, postpone this until the first frame after the start delay.
+            startAnimation();
+            setCurrentFraction(mSeekFraction == -1 ? 0 : mSeekFraction);
+        }
     }
 
     @Override
@@ -1075,6 +1082,7 @@ public class ValueAnimator extends Animator implements AnimationHandler.Animatio
         mStartListenersCalled = false;
         mPlayingBackwards = false;
         mReversing = false;
+        mLastFrameTime = 0;
         mCurrentIteration = 0;
         if (Trace.isTagEnabled(Trace.TRACE_TAG_VIEW)) {
             Trace.asyncTraceEnd(Trace.TRACE_TAG_VIEW, getNameForTrace(),
@@ -1184,12 +1192,13 @@ public class ValueAnimator extends Animator implements AnimationHandler.Animatio
      * @hide
      */
     public final void doAnimationFrame(long frameTime) {
-        mLastFrameTime = frameTime;
         AnimationHandler handler = AnimationHandler.getInstance();
-        if (!mRunning) {
+        if (mLastFrameTime == 0) {
             // First frame
             handler.addOneShotCommitCallback(this);
-            startAnimation();
+            if (mStartDelay > 0) {
+                startAnimation();
+            }
             if (mSeekFraction < 0) {
                 mStartTime = frameTime;
             } else {
@@ -1199,6 +1208,7 @@ public class ValueAnimator extends Animator implements AnimationHandler.Animatio
             }
             mStartTimeCommitted = false; // allow start time to be compensated for jank
         }
+        mLastFrameTime = frameTime;
         if (mPaused) {
             if (mPauseTime < 0) {
                 mPauseTime = frameTime;

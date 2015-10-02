@@ -603,7 +603,17 @@ public final class AnimatorSet extends Animator {
         createDependencyGraph();
 
         // Now that all dependencies are set up, start the animations that should be started.
-        start(mRootNode);
+        boolean setIsEmpty = false;
+        if (mStartDelay > 0) {
+            start(mRootNode);
+        } else if (mNodes.size() > 1) {
+            // No delay, but there are other animators in the set
+            onChildAnimatorEnded(mDelayAnim);
+        } else {
+            // Set is empty, no delay, no other animation. Skip to end in this case
+            setIsEmpty = true;
+        }
+
         if (mListeners != null) {
             ArrayList<AnimatorListener> tmpListeners =
                     (ArrayList<AnimatorListener>) mListeners.clone();
@@ -612,18 +622,9 @@ public final class AnimatorSet extends Animator {
                 tmpListeners.get(i).onAnimationStart(this);
             }
         }
-        if (mNodes.size() == 0 && mStartDelay == 0) {
-            // Handle unusual case where empty AnimatorSet is started - should send out
-            // end event immediately since the event will not be sent out at all otherwise
-            mStarted = false;
-            if (mListeners != null) {
-                ArrayList<AnimatorListener> tmpListeners =
-                        (ArrayList<AnimatorListener>) mListeners.clone();
-                int numListeners = tmpListeners.size();
-                for (int i = 0; i < numListeners; ++i) {
-                    tmpListeners.get(i).onAnimationEnd(this);
-                }
-            }
+        if (setIsEmpty) {
+            // In the case of empty AnimatorSet, we will trigger the onAnimationEnd() right away.
+            onChildAnimatorEnded(mDelayAnim);
         }
     }
 
@@ -751,44 +752,7 @@ public final class AnimatorSet extends Animator {
         public void onAnimationEnd(Animator animation) {
             animation.removeListener(this);
             mAnimatorSet.mPlayingSet.remove(animation);
-            Node animNode = mAnimatorSet.mNodeMap.get(animation);
-            animNode.mEnded = true;
-
-            if (!mAnimatorSet.mTerminated) {
-                List<Node> children = animNode.mChildNodes;
-                // Start children animations, if any.
-                int childrenSize = children == null ? 0 : children.size();
-                for (int i = 0; i < childrenSize; i++) {
-                    if (children.get(i).mLatestParent == animNode) {
-                        mAnimatorSet.start(children.get(i));
-                    }
-                }
-                // Listeners are already notified of the AnimatorSet ending in cancel() or
-                // end(); the logic below only kicks in when animations end normally
-                boolean allDone = true;
-                // Traverse the tree and find if there's any unfinished node
-                int size = mAnimatorSet.mNodes.size();
-                for (int i = 0; i < size; i++) {
-                    if (!mAnimatorSet.mNodes.get(i).mEnded) {
-                        allDone = false;
-                        break;
-                    }
-                }
-                if (allDone) {
-                    // If this was the last child animation to end, then notify listeners that this
-                    // AnimatorSet has ended
-                    if (mAnimatorSet.mListeners != null) {
-                        ArrayList<AnimatorListener> tmpListeners =
-                                (ArrayList<AnimatorListener>) mAnimatorSet.mListeners.clone();
-                        int numListeners = tmpListeners.size();
-                        for (int i = 0; i < numListeners; ++i) {
-                            tmpListeners.get(i).onAnimationEnd(mAnimatorSet);
-                        }
-                    }
-                    mAnimatorSet.mStarted = false;
-                    mAnimatorSet.mPaused = false;
-                }
-            }
+            mAnimatorSet.onChildAnimatorEnded(animation);
         }
 
         // Nothing to do
@@ -799,6 +763,47 @@ public final class AnimatorSet extends Animator {
         public void onAnimationStart(Animator animation) {
         }
 
+    }
+
+    private void onChildAnimatorEnded(Animator animation) {
+        Node animNode = mNodeMap.get(animation);
+        animNode.mEnded = true;
+
+        if (!mTerminated) {
+            List<Node> children = animNode.mChildNodes;
+            // Start children animations, if any.
+            int childrenSize = children == null ? 0 : children.size();
+            for (int i = 0; i < childrenSize; i++) {
+                if (children.get(i).mLatestParent == animNode) {
+                    start(children.get(i));
+                }
+            }
+            // Listeners are already notified of the AnimatorSet ending in cancel() or
+            // end(); the logic below only kicks in when animations end normally
+            boolean allDone = true;
+            // Traverse the tree and find if there's any unfinished node
+            int size = mNodes.size();
+            for (int i = 0; i < size; i++) {
+                if (!mNodes.get(i).mEnded) {
+                    allDone = false;
+                    break;
+                }
+            }
+            if (allDone) {
+                // If this was the last child animation to end, then notify listeners that this
+                // AnimatorSet has ended
+                if (mListeners != null) {
+                    ArrayList<AnimatorListener> tmpListeners =
+                            (ArrayList<AnimatorListener>) mListeners.clone();
+                    int numListeners = tmpListeners.size();
+                    for (int i = 0; i < numListeners; ++i) {
+                        tmpListeners.get(i).onAnimationEnd(this);
+                    }
+                }
+                mStarted = false;
+                mPaused = false;
+            }
+        }
     }
 
     /**
