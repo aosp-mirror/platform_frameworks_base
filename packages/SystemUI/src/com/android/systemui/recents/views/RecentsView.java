@@ -18,18 +18,13 @@ package com.android.systemui.recents.views;
 
 import android.app.ActivityManager;
 import android.app.ActivityOptions;
-import android.app.TaskStackBuilder;
 import android.content.Context;
-import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Rect;
-import android.net.Uri;
 import android.os.Bundle;
 import android.os.IRemoteCallback;
 import android.os.RemoteException;
-import android.os.UserHandle;
-import android.provider.Settings;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.util.SparseArray;
@@ -46,8 +41,9 @@ import com.android.systemui.R;
 import com.android.systemui.recents.Constants;
 import com.android.systemui.recents.RecentsAppWidgetHostView;
 import com.android.systemui.recents.RecentsConfiguration;
+import com.android.systemui.recents.events.EventBus;
+import com.android.systemui.recents.events.ui.DismissTaskEvent;
 import com.android.systemui.recents.misc.SystemServicesProxy;
-import com.android.systemui.recents.model.RecentsPackageMonitor;
 import com.android.systemui.recents.model.RecentsTaskLoader;
 import com.android.systemui.recents.model.Task;
 import com.android.systemui.recents.model.TaskStack;
@@ -72,7 +68,6 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
         public void onAllTaskViewsDismissed();
         public void onExitToHomeAnimationTriggered();
         public void onScreenPinningRequest();
-        public void onTaskResize(Task t);
         public void runAfterPause(Runnable r);
     }
 
@@ -610,7 +605,7 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
                     } else {
                         // Dismiss the task and return the user to home if we fail to
                         // launch the task
-                        onTaskViewDismissed(task);
+                        EventBus.getDefault().send(new DismissTaskEvent(task, tv));
                         if (mCb != null) {
                             mCb.onTaskLaunchFailed();
                         }
@@ -647,37 +642,15 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
     }
 
     @Override
-    public void onTaskViewAppInfoClicked(Task t) {
-        // Create a new task stack with the application info details activity
-        Intent baseIntent = t.key.baseIntent;
-        Intent intent = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS,
-                Uri.fromParts("package", baseIntent.getComponent().getPackageName(), null));
-        intent.setComponent(intent.resolveActivity(getContext().getPackageManager()));
-        TaskStackBuilder.create(getContext())
-                .addNextIntentWithParentStack(intent).startActivities(null,
-                new UserHandle(t.key.userId));
-    }
-
-    @Override
-    public void onTaskViewDismissed(Task t) {
-        // Remove any stored data from the loader.  We currently don't bother notifying the views
-        // that the data has been unloaded because at the point we call onTaskViewDismissed(), the views
-        // either don't need to be updated, or have already been removed.
-        RecentsTaskLoader loader = RecentsTaskLoader.getInstance();
-        loader.deleteTaskData(t, false);
-
-        // Remove the old task from activity manager
-        loader.getSystemServicesProxy().removeTask(t.key.id);
-    }
-
-    @Override
     public void onAllTaskViewsDismissed(ArrayList<Task> removedTasks) {
+        /* TODO: Not currently enabled
         if (removedTasks != null) {
             int taskCount = removedTasks.size();
             for (int i = 0; i < taskCount; i++) {
                 onTaskViewDismissed(removedTasks.get(i));
             }
         }
+        */
 
         mCb.onAllTaskViewsDismissed();
 
@@ -722,13 +695,6 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
                     .setDuration(filterDuration)
                     .withLayer()
                     .start();
-        }
-    }
-
-    @Override
-    public void onTaskResize(Task t) {
-        if (mCb != null) {
-            mCb.onTaskResize(t);
         }
     }
 }

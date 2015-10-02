@@ -30,34 +30,29 @@ import android.graphics.Rect;
 import android.util.AttributeSet;
 import android.view.View;
 import android.view.ViewOutlineProvider;
-import android.view.accessibility.AccessibilityManager;
 import android.view.animation.AccelerateInterpolator;
 import android.view.animation.AnimationUtils;
 import android.view.animation.Interpolator;
 import android.widget.FrameLayout;
-import com.android.internal.logging.MetricsLogger;
 import com.android.systemui.R;
 import com.android.systemui.recents.Constants;
 import com.android.systemui.recents.RecentsActivityLaunchState;
 import com.android.systemui.recents.RecentsConfiguration;
+import com.android.systemui.recents.events.EventBus;
+import com.android.systemui.recents.events.ui.DismissTaskEvent;
 import com.android.systemui.recents.misc.Utilities;
 import com.android.systemui.recents.model.Task;
 import com.android.systemui.statusbar.phone.PhoneStatusBar;
 
 /* A task view */
 public class TaskView extends FrameLayout implements Task.TaskCallbacks,
-        View.OnClickListener, View.OnLongClickListener {
+        View.OnClickListener {
 
     /** The TaskView callbacks */
     interface TaskViewCallbacks {
-        public void onTaskViewAppIconClicked(TaskView tv);
-        public void onTaskViewAppInfoClicked(TaskView tv);
         public void onTaskViewClicked(TaskView tv, Task task, boolean lockToTask);
-        public void onTaskViewDismissed(TaskView tv);
         public void onTaskViewClipStateChanged(TaskView tv);
         public void onTaskViewFocusChanged(TaskView tv, boolean focused);
-
-        public void onTaskResize(TaskView tv);
     }
 
     RecentsConfiguration mConfig;
@@ -535,9 +530,7 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks,
         startDeleteTaskAnimation(new Runnable() {
             @Override
             public void run() {
-                if (mCb != null) {
-                    mCb.onTaskViewDismissed(tv);
-                }
+                EventBus.getDefault().send(new DismissTaskEvent(mTask, tv));
             }
         }, 0);
     }
@@ -725,17 +718,7 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks,
             mThumbnailView.rebindToTask(mTask);
             mHeaderView.rebindToTask(mTask);
             // Rebind any listeners
-            AccessibilityManager am = (AccessibilityManager) getContext().
-                    getSystemService(Context.ACCESSIBILITY_SERVICE);
-            if (Constants.DebugFlags.App.EnableTaskFiltering || (am != null && am.isEnabled())) {
-                mHeaderView.mApplicationIcon.setOnClickListener(this);
-            }
-            mHeaderView.mDismissButton.setOnClickListener(this);
-            if (mConfig.multiWindowEnabled) {
-                mHeaderView.mMoveTaskButton.setOnClickListener(this);
-            }
             mActionButtonView.setOnClickListener(this);
-            mHeaderView.mApplicationIcon.setOnLongClickListener(this);
         }
         mTaskDataLoaded = true;
     }
@@ -748,13 +731,7 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks,
             mThumbnailView.unbindFromTask();
             mHeaderView.unbindFromTask();
             // Unbind any listeners
-            mHeaderView.mApplicationIcon.setOnClickListener(null);
-            mHeaderView.mDismissButton.setOnClickListener(null);
-            if (mConfig.multiWindowEnabled) {
-                mHeaderView.mMoveTaskButton.setOnClickListener(null);
-            }
             mActionButtonView.setOnClickListener(null);
-            mHeaderView.mApplicationIcon.setOnLongClickListener(null);
         }
         mTaskDataLoaded = false;
     }
@@ -768,60 +745,12 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks,
 
     @Override
      public void onClick(final View v) {
-        final TaskView tv = this;
-        final boolean delayViewClick = (v != this) && (v != mActionButtonView);
-        if (delayViewClick) {
-            // We purposely post the handler delayed to allow for the touch feedback to draw
-            postDelayed(new Runnable() {
-                @Override
-                public void run() {
-                    if (v == mHeaderView.mApplicationIcon) {
-                        if (Constants.DebugFlags.App.EnableTaskFiltering) {
-                            if (mCb != null) {
-                                mCb.onTaskViewAppIconClicked(tv);
-                            }
-                        } else {
-                            AccessibilityManager am = (AccessibilityManager) getContext().
-                                    getSystemService(Context.ACCESSIBILITY_SERVICE);
-                            if (am != null && am.isEnabled()) {
-                                if (mCb != null) {
-                                    mCb.onTaskViewAppInfoClicked(tv);
-                                }
-                            }
-                        }
-                    } else if (v == mHeaderView.mDismissButton) {
-                        dismissTask();
-                        // Keep track of deletions by the dismiss button
-                        MetricsLogger.histogram(getContext(), "overview_task_dismissed_source",
-                                Constants.Metrics.DismissSourceHeaderButton);
-                    } else if (v == mHeaderView.mMoveTaskButton) {
-                        if (mCb != null) {
-                            mCb.onTaskResize(tv);
-                        }
-                    }
-                }
-            }, 125);
-        } else {
-            if (v == mActionButtonView) {
-                // Reset the translation of the action button before we animate it out
-                mActionButtonView.setTranslationZ(0f);
-            }
-            if (mCb != null) {
-                mCb.onTaskViewClicked(tv, tv.getTask(), (v == mActionButtonView));
-            }
+        if (v == mActionButtonView) {
+            // Reset the translation of the action button before we animate it out
+            mActionButtonView.setTranslationZ(0f);
         }
-    }
-
-    /**** View.OnLongClickListener Implementation ****/
-
-    @Override
-    public boolean onLongClick(View v) {
-        if (v == mHeaderView.mApplicationIcon) {
-            if (mCb != null) {
-                mCb.onTaskViewAppInfoClicked(this);
-                return true;
-            }
+        if (mCb != null) {
+            mCb.onTaskViewClicked(this, mTask, (v == mActionButtonView));
         }
-        return false;
     }
 }

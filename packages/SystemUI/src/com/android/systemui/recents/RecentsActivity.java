@@ -19,15 +19,18 @@ package com.android.systemui.recents;
 import android.app.Activity;
 import android.app.ActivityOptions;
 import android.app.SearchManager;
+import android.app.TaskStackBuilder;
 import android.appwidget.AppWidgetManager;
 import android.appwidget.AppWidgetProviderInfo;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.SystemClock;
 import android.os.UserHandle;
+import android.provider.Settings;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.ViewStub;
@@ -35,6 +38,9 @@ import com.android.internal.logging.MetricsLogger;
 import com.android.systemui.R;
 import com.android.systemui.recents.events.EventBus;
 import com.android.systemui.recents.events.activity.AppWidgetProviderChangedEvent;
+import com.android.systemui.recents.events.ui.DismissTaskEvent;
+import com.android.systemui.recents.events.ui.ResizeTaskEvent;
+import com.android.systemui.recents.events.ui.ShowApplicationInfoEvent;
 import com.android.systemui.recents.misc.Console;
 import com.android.systemui.recents.misc.ReferenceCountedTrigger;
 import com.android.systemui.recents.misc.SystemServicesProxy;
@@ -536,11 +542,6 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
         return mResizeTaskDebugDialog;
     }
 
-    @Override
-    public void onTaskResize(Task t) {
-        getResizeTaskDebugDialog().showResizeTaskDialog(t, mRecentsView);
-    }
-
     /**** RecentsView.RecentsViewCallbacks Implementation ****/
 
     @Override
@@ -582,6 +583,33 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
 
     public final void onBusEvent(AppWidgetProviderChangedEvent event) {
         refreshSearchWidgetView();
+    }
+
+    public final void onBusEvent(ShowApplicationInfoEvent event) {
+        // Create a new task stack with the application info details activity
+        Intent baseIntent = event.task.key.baseIntent;
+        Intent intent = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS,
+                Uri.fromParts("package", baseIntent.getComponent().getPackageName(), null));
+        intent.setComponent(intent.resolveActivity(getPackageManager()));
+        TaskStackBuilder.create(this)
+                .addNextIntentWithParentStack(intent).startActivities(null,
+                new UserHandle(event.task.key.userId));
+
+        // Keep track of app-info invocations
+        MetricsLogger.count(this, "overview_app_info", 1);
+    }
+
+    public final void onBusEvent(DismissTaskEvent event) {
+        // Remove any stored data from the loader
+        RecentsTaskLoader loader = RecentsTaskLoader.getInstance();
+        loader.deleteTaskData(event.task, false);
+
+        // Remove the task from activity manager
+        loader.getSystemServicesProxy().removeTask(event.task.key.id);
+    }
+
+    public final void onBusEvent(ResizeTaskEvent event) {
+        getResizeTaskDebugDialog().showResizeTaskDialog(event.task, mRecentsView);
     }
 
     private void refreshSearchWidgetView() {

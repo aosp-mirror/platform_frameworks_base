@@ -39,14 +39,19 @@ import android.graphics.drawable.RippleDrawable;
 import android.util.AttributeSet;
 import android.view.View;
 import android.view.ViewOutlineProvider;
+import android.view.accessibility.AccessibilityManager;
 import android.view.animation.AnimationUtils;
 import android.view.animation.Interpolator;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.TextView;
+import com.android.internal.logging.MetricsLogger;
 import com.android.systemui.R;
 import com.android.systemui.recents.Constants;
 import com.android.systemui.recents.RecentsConfiguration;
+import com.android.systemui.recents.events.EventBus;
+import com.android.systemui.recents.events.ui.ResizeTaskEvent;
+import com.android.systemui.recents.events.ui.ShowApplicationInfoEvent;
 import com.android.systemui.recents.misc.SystemServicesProxy;
 import com.android.systemui.recents.misc.Utilities;
 import com.android.systemui.recents.model.RecentsTaskLoader;
@@ -54,10 +59,12 @@ import com.android.systemui.recents.model.Task;
 
 
 /* The task bar view */
-public class TaskViewHeader extends FrameLayout {
+public class TaskViewHeader extends FrameLayout
+        implements View.OnClickListener, View.OnLongClickListener {
 
     RecentsConfiguration mConfig;
     private SystemServicesProxy mSsp;
+    Task mTask;
 
     // Header views
     ImageView mMoveTaskButton;
@@ -144,15 +151,15 @@ public class TaskViewHeader extends FrameLayout {
     protected void onFinishInflate() {
         // Initialize the icon and description views
         mApplicationIcon = (ImageView) findViewById(R.id.application_icon);
+        mApplicationIcon.setOnLongClickListener(this);
         mActivityDescription = (TextView) findViewById(R.id.activity_description);
         mDismissButton = (ImageView) findViewById(R.id.dismiss_task);
+        mDismissButton.setOnClickListener(this);
         mMoveTaskButton = (ImageView) findViewById(R.id.move_task);
 
         // Hide the backgrounds if they are ripple drawables
-        if (!Constants.DebugFlags.App.EnableTaskFiltering) {
-            if (mApplicationIcon.getBackground() instanceof RippleDrawable) {
-                mApplicationIcon.setBackground(null);
-            }
+        if (mApplicationIcon.getBackground() instanceof RippleDrawable) {
+            mApplicationIcon.setBackground(null);
         }
 
         mBackgroundColorDrawable = (GradientDrawable) getContext().getDrawable(R.drawable
@@ -203,6 +210,8 @@ public class TaskViewHeader extends FrameLayout {
 
     /** Binds the bar view to the task */
     public void rebindToTask(Task t) {
+        mTask = t;
+
         // If an activity icon is defined, then we use that as the primary icon to show in the bar,
         // otherwise, we fall back to the application icon
         if (t.activityIcon != null) {
@@ -238,6 +247,25 @@ public class TaskViewHeader extends FrameLayout {
         mMoveTaskButton.setVisibility((mConfig.multiWindowEnabled) ? View.VISIBLE : View.INVISIBLE);
         if (mConfig.multiWindowEnabled) {
             updateResizeTaskBarIcon(t);
+            mMoveTaskButton.setOnClickListener(this);
+        }
+
+        // In accessibility, a single click on the focused app info button will show it
+        AccessibilityManager am = (AccessibilityManager) getContext().
+                getSystemService(Context.ACCESSIBILITY_SERVICE);
+        if (am != null && am.isEnabled()) {
+            mApplicationIcon.setOnClickListener(this);
+        }
+    }
+
+    /** Unbinds the bar view from the task */
+    void unbindFromTask() {
+        mTask = null;
+        mApplicationIcon.setImageDrawable(null);
+        mApplicationIcon.setOnClickListener(null);
+
+        if (mConfig.multiWindowEnabled) {
+            mMoveTaskButton.setOnClickListener(null);
         }
     }
 
@@ -272,11 +300,6 @@ public class TaskViewHeader extends FrameLayout {
             }
         }
         mMoveTaskButton.setImageResource(resId);
-    }
-
-    /** Unbinds the bar view from the task */
-    void unbindFromTask() {
-        mApplicationIcon.setImageDrawable(null);
     }
 
     /** Animates this task bar dismiss button when launching a task. */
@@ -440,5 +463,31 @@ public class TaskViewHeader extends FrameLayout {
                 setTranslationZ(0f);
             }
         }
+    }
+
+    @Override
+    public void onClick(View v) {
+        if (v == mApplicationIcon) {
+            // In accessibility, a single click on the focused app info button will show it
+            EventBus.getDefault().send(new ShowApplicationInfoEvent(mTask));
+        } else if (v == mDismissButton) {
+            TaskView tv = (TaskView) getParent().getParent();
+            tv.dismissTask();
+
+            // Keep track of deletions by the dismiss button
+            MetricsLogger.histogram(getContext(), "overview_task_dismissed_source",
+                    Constants.Metrics.DismissSourceHeaderButton);
+        } else if (v == mMoveTaskButton) {
+            EventBus.getDefault().send(new ResizeTaskEvent(mTask));
+        }
+    }
+
+    @Override
+    public boolean onLongClick(View v) {
+        if (v == mApplicationIcon) {
+            EventBus.getDefault().send(new ShowApplicationInfoEvent(mTask));
+            return true;
+        }
+        return false;
     }
 }

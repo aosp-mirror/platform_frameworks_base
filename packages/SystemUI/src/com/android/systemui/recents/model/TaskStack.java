@@ -18,10 +18,10 @@ package com.android.systemui.recents.model;
 
 import android.content.Context;
 import android.graphics.Color;
+import com.android.systemui.R;
 import com.android.systemui.recents.Constants;
 import com.android.systemui.recents.misc.NamedCounter;
 import com.android.systemui.recents.misc.Utilities;
-import com.android.systemui.R;
 
 import java.util.ArrayList;
 import java.util.Collections;
