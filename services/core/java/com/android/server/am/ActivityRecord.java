@@ -477,8 +477,8 @@ final class ActivityRecord {
         }
     }
 
-    boolean isNotResolverActivity() {
-        return !ResolverActivity.class.getName().equals(realActivity.getClassName());
+    boolean isResolverActivity() {
+        return ResolverActivity.class.getName().equals(realActivity.getClassName());
     }
 
     ActivityRecord(ActivityManagerService _service, ProcessRecord _caller,
@@ -605,7 +605,7 @@ final class ActivityRecord {
                     _intent.getData() == null &&
                     _intent.getType() == null &&
                     (intent.getFlags()&Intent.FLAG_ACTIVITY_NEW_TASK) != 0 &&
-                    isNotResolverActivity()) {
+                    !isResolverActivity()) {
                 // This sure looks like a home activity!
                 mActivityType = HOME_ACTIVITY_TYPE;
             } else if (realActivity.getClassName().contains(RECENTS_PACKAGE_NAME)) {
