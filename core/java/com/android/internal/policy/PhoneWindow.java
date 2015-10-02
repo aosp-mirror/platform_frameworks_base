@@ -2615,7 +2615,7 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
             if (action == MotionEvent.ACTION_DOWN) {
                 int y = (int)event.getY();
                 if (y >= (getHeight()-5) && !mWindow.hasChildren()) {
-                    Log.i(TAG, "Watchiing!");
+                    Log.i(TAG, "Watching!");
                     mWatchingForMenu = true;
                 }
                 return false;

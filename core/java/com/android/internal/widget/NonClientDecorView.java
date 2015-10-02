@@ -17,15 +17,23 @@
 package com.android.internal.widget;
 
 import android.content.Context;
+import android.graphics.Color;
 import android.graphics.Rect;
+import android.os.Looper;
 import android.os.RemoteException;
 import android.util.AttributeSet;
+import android.view.Choreographer;
+import android.view.DisplayListCanvas;
 import android.view.MotionEvent;
+import android.view.RenderNode;
+import android.view.ThreadedRenderer;
 import android.view.View;
+import android.view.ViewRootImpl;
 import android.widget.LinearLayout;
 import android.view.ViewGroup;
 import android.view.ViewOutlineProvider;
 import android.view.Window;
+import android.view.WindowCallbacks;
 import android.util.Log;
 import android.util.TypedValue;
 
@@ -58,7 +66,7 @@ import com.android.internal.policy.PhoneWindow;
  * This will be mitigated once b/22527834 will be addressed.
  */
 public class NonClientDecorView extends LinearLayout
-        implements View.OnClickListener, View.OnTouchListener {
+        implements View.OnClickListener, View.OnTouchListener, WindowCallbacks {
     private final static String TAG = "NonClientDecorView";
     // The height of a window which has focus in DIP.
     private final int DECOR_SHADOW_FOCUSED_HEIGHT_IN_DIP = 20;
@@ -67,6 +75,8 @@ public class NonClientDecorView extends LinearLayout
     private PhoneWindow mOwner = null;
     private boolean mWindowHasShadow = false;
     private boolean mShowDecor = false;
+    // True when this object is listening for window size changes.
+    private boolean mAttachedCallbacksToRootViewImpl = false;
 
     // True if the window is being dragged.
     private boolean mDragging = false;
@@ -84,6 +94,9 @@ public class NonClientDecorView extends LinearLayout
     // size calculation takes the shadow size into account. We set the elevation currently
     // to max until the first layout command has been executed.
     private boolean mAllowUpdateElevation = false;
+
+    // The resize frame renderer.
+    private ResizeFrameThread mFrameRendererThread = null;
 
     public NonClientDecorView(Context context) {
         super(context);
@@ -108,6 +121,18 @@ public class NonClientDecorView extends LinearLayout
         // By changing the outline provider to BOUNDS, the window can remove its
         // background without removing the shadow.
         mOwner.getDecorView().setOutlineProvider(ViewOutlineProvider.BOUNDS);
+
+        if (!mAttachedCallbacksToRootViewImpl) {
+            // If there is no window callback installed there was no window set before. Set it now.
+            // Note that our ViewRootImpl object will not change.
+            getViewRootImpl().addWindowCallbacks(this);
+            mAttachedCallbacksToRootViewImpl = true;
+        } else if (mFrameRendererThread != null) {
+            // We are resizing and this call happened due to a configuration change. Tell the
+            // renderer about it.
+            mFrameRendererThread.onConfigurationChange();
+        }
+
         findViewById(R.id.maximize_window).setOnClickListener(this);
         findViewById(R.id.close_window).setOnClickListener(this);
     }
@@ -251,7 +276,9 @@ public class NonClientDecorView extends LinearLayout
      **/
     private void updateElevation() {
         float elevation = 0;
-        if (mWindowHasShadow) {
+        // Do not use a shadow when we are in resizing mode (mRenderer not null) since the shadow
+        // is bound to the content size and not the target size.
+        if (mWindowHasShadow && mFrameRendererThread == null) {
             boolean fill = isFillingScreen();
             elevation = fill ? 0 :
                     (mWindowHasFocus ? DECOR_SHADOW_FOCUSED_HEIGHT_IN_DIP :
@@ -290,6 +317,272 @@ public class NonClientDecorView extends LinearLayout
                         android.app.ActivityManager.FULLSCREEN_WORKSPACE_STACK_ID);
             } catch (RemoteException ex) {
                 Log.e(TAG, "Cannot change task workspace.");
+            }
+        }
+    }
+
+    @Override
+    public void onWindowDragResizeStart(Rect initialBounds) {
+        if (mOwner.isDestroyed()) {
+            // If the owner's window is gone, we should not be able to come here anymore.
+            releaseResources();
+            return;
+        }
+        if (mFrameRendererThread != null) {
+            return;
+        }
+        final ThreadedRenderer renderer =
+                (ThreadedRenderer) mOwner.getDecorView().getHardwareRenderer();
+        if (renderer != null) {
+            mFrameRendererThread = new ResizeFrameThread(renderer, initialBounds);
+            // Get rid of the shadow while we are resizing. Shadow drawing takes considerable time.
+            // If we want to get the shadow shown while resizing, we would need to elevate a new
+            // element which owns the caption and has the elevation.
+            updateElevation();
+        }
+    }
+
+    @Override
+    public void onWindowDragResizeEnd() {
+        releaseThreadedRenderer();
+    }
+
+    @Override
+    public void onWindowSizeIsChanging(Rect newBounds) {
+        if (mFrameRendererThread != null) {
+            mFrameRendererThread.setTargetRect(newBounds);
+        }
+    }
+
+    /**
+     * Release the renderer thread which is usually done when the user stops resizing.
+     */
+    private void releaseThreadedRenderer() {
+        if (mFrameRendererThread != null) {
+            mFrameRendererThread.releaseRenderer();
+            mFrameRendererThread = null;
+            // Bring the shadow back.
+            updateElevation();
+        }
+    }
+
+    /**
+     * Called when the parent window is destroyed to release all resources. Note that this will also
+     * destroy the renderer thread.
+     */
+    private void releaseResources() {
+        releaseThreadedRenderer();
+        if (mAttachedCallbacksToRootViewImpl) {
+            ViewRootImpl.removeWindowCallbacks(this);
+            mAttachedCallbacksToRootViewImpl = false;
+        }
+    }
+
+    /**
+     * The thread which draws the chrome while we are resizing.
+     * It starts with the creation and it ends once someone calls destroy().
+     * Any size changes can be passed by a call to setTargetRect will passed to the thread and
+     * executed via the Choreographer.
+     */
+    private class ResizeFrameThread extends Thread implements Choreographer.FrameCallback {
+        // This is containing the last requested size by a resize command. Note that this size might
+        // or might not have been applied to the output already.
+        private final Rect mTargetRect = new Rect();
+
+        // The render nodes for the multi threaded renderer.
+        private ThreadedRenderer mRenderer;
+        private RenderNode mFrameNode;
+        private RenderNode mBackdropNode;
+
+        private final Rect mOldTargetRect = new Rect();
+        private final Rect mNewTargetRect = new Rect();
+        private Choreographer mChoreographer;
+
+        // Cached size values from the last render for the case that the view hierarchy is gone
+        // during a configuration change.
+        private int mLastContentWidth;
+        private int mLastContentHeight;
+        private int mLastCaptionHeight;
+        private int mLastXOffset;
+        private int mLastYOffset;
+
+        ResizeFrameThread(ThreadedRenderer renderer, Rect initialBounds) {
+            mRenderer = renderer;
+
+            // Create the render nodes for our frame and backdrop which can be resized independently
+            // from the content.
+            mFrameNode = RenderNode.create("FrameNode", null);
+            mBackdropNode = RenderNode.create("BackdropNode", null);
+
+            mRenderer.addRenderNode(mFrameNode, false);
+            mRenderer.addRenderNode(mBackdropNode, true);
+
+            // Set the initial bounds and draw once so that we do not get a broken frame.
+            mTargetRect.set(initialBounds);
+            changeWindowSize(initialBounds);
+
+            // Kick off our draw thread.
+            start();
+        }
+
+        /**
+         * Call this function asynchronously when the window size has been changed. The change will
+         * be picked up once per frame and the frame will be re-rendered accordingly.
+         * @param newTargetBounds The new target bounds.
+         */
+        public void setTargetRect(Rect newTargetBounds) {
+            synchronized (this) {
+                mTargetRect.set(newTargetBounds);
+                // Notify of a bounds change.
+                pingRenderLocked();
+            }
+        }
+
+        /**
+         * The window got replaced due to a configuration change.
+         */
+        public void onConfigurationChange() {
+            if (mRenderer != null) {
+                // Enforce a window redraw.
+                mOldTargetRect.set(0, 0, 0, 0);
+                pingRenderLocked();
+            }
+        }
+
+        /**
+         * All resources of the renderer will be released. This function can be called from the
+         * the UI thread as well as the renderer thread.
+         */
+        public void releaseRenderer() {
+            synchronized (this) {
+                if (mRenderer != null) {
+                    // Invalidate the current content bounds.
+                    mRenderer.setContentDrawBounds(0, 0, 0, 0);
+
+                    // Remove the render nodes again (see comment above - better to do that only once).
+                    mRenderer.removeRenderNode(mFrameNode);
+                    mRenderer.removeRenderNode(mBackdropNode);
+
+                    mRenderer = null;
+
+                    // Exit the renderer loop.
+                    pingRenderLocked();
+                }
+            }
+        }
+
+        @Override
+        public void run() {
+            try {
+                Looper.prepare();
+                mChoreographer = Choreographer.getInstance();
+                Looper.loop();
+            } finally {
+                releaseRenderer();
+            }
+            synchronized (this) {
+                // Make sure no more messages are being sent.
+                mChoreographer = null;
+            }
+        }
+
+        /**
+         * The implementation of the FrameCallback.
+         * @param frameTimeNanos The time in nanoseconds when the frame started being rendered,
+         * in the {@link System#nanoTime()} timebase.  Divide this value by {@code 1000000}
+         */
+        @Override
+        public void doFrame(long frameTimeNanos) {
+            if (mRenderer == null) {
+                // Tell the looper to stop. We are done.
+                Looper.myLooper().quit();
+                return;
+            }
+            // Prevent someone from changing this while we are copying.
+            synchronized (this) {
+                mNewTargetRect.set(mTargetRect);
+            }
+            if (!mNewTargetRect.equals(mOldTargetRect)) {
+                mOldTargetRect.set(mNewTargetRect);
+                changeWindowSize(mNewTargetRect);
+            }
+        }
+
+        /**
+         * Resizing the frame to fit the new window size.
+         * @param newBounds The window bounds which needs to be drawn.
+         */
+        private void changeWindowSize(Rect newBounds) {
+            long startTime = System.currentTimeMillis();
+
+            // While a configuration change is taking place the view hierarchy might become
+            // inaccessible. For that case we remember the previous metrics to avoid flashes.
+            View caption = getChildAt(0);
+            View content = getChildAt(1);
+            if (content != null && caption != null) {
+                mLastContentWidth = content.getWidth();
+                mLastContentHeight = content.getHeight();
+                mLastCaptionHeight = caption.getHeight();
+
+                // Get the draw position within our surface.
+                int[] surfaceOrigin = new int[2];
+                surfaceOrigin[0] = 0;
+                surfaceOrigin[1] = 0;
+
+                // Get the shadow offsets.
+                getLocationInSurface(surfaceOrigin);
+                mLastXOffset = surfaceOrigin[0];
+                mLastYOffset = surfaceOrigin[1];
+            }
+
+            // Since the surface is spanning the entire screen, we have to add the start offset of
+            // the bounds to get to the surface location.
+            final int left = mLastXOffset + newBounds.left;
+            final int top = mLastYOffset + newBounds.top;
+            final int width = newBounds.width();
+            final int height = newBounds.height();
+
+            // Produce the draw calls.
+            // TODO(skuhne): Create a separate caption view which draws this. If the shadow should
+            // be resized while the window resizes, this hierarchy needs to have the elevation.
+            // That said - it is probably no good idea to draw the shadow every time since it costs
+            // a considerable time which we should rather spend for resizing the content and it does
+            // barely show while the entire screen is moving.
+            mFrameNode.setLeftTopRightBottom(left, top, left + width, top + mLastCaptionHeight);
+            DisplayListCanvas canvas = mFrameNode.start(width, height);
+            canvas.drawColor(Color.BLACK);
+            mFrameNode.end(canvas);
+
+            mBackdropNode.setLeftTopRightBottom(left, top + mLastCaptionHeight, left + width,
+                    top + height);
+
+            // The backdrop: clear everything with the background. Clipping is done elsewhere.
+            canvas = mBackdropNode.start(width, height - mLastCaptionHeight);
+            // TODO(skuhne): mOwner.getDecorView().mBackgroundFallback.draw(..) - or similar.
+            // Note: This might not work (calculator for example uses a transparent background).
+            canvas.drawColor(0xff808080);
+            mBackdropNode.end(canvas);
+
+            // The current content buffer is drawn here.
+            mRenderer.setContentDrawBounds(
+                    mLastXOffset,
+                    mLastYOffset + mLastCaptionHeight,
+                    mLastXOffset + mLastContentWidth,
+                    mLastYOffset + mLastCaptionHeight + mLastContentHeight);
+
+            // We need to render both rendered nodes explicitly.
+            mRenderer.drawRenderNode(mFrameNode);
+            mRenderer.drawRenderNode(mBackdropNode);
+        }
+
+        /**
+         * Sends a message to the renderer to wake up and perform the next action which can be
+         * either the next rendering or the self destruction if mRenderer is null.
+         * Note: This call must be synchronized.
+         */
+        private void pingRenderLocked() {
+            if (mChoreographer != null) {
+                mChoreographer.postFrameCallback(this);
             }
         }
     }

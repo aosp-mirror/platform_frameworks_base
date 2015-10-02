@@ -126,8 +126,8 @@ public:
                 mRenderNodes.end());
     }
 
-    void setContentOverdrawProtectionBounds(int left, int top, int right, int bottom) {
-        mContentOverdrawProtectionBounds.set(left, top, right, bottom);
+    void setContentDrawBounds(int left, int top, int right, int bottom) {
+        mContentDrawBounds.set(left, top, right, bottom);
     }
 
 private:
@@ -167,7 +167,7 @@ private:
     std::set<RenderNode*> mPrefetechedLayers;
 
     // Stores the bounds of the main content.
-    Rect mContentOverdrawProtectionBounds;
+    Rect mContentDrawBounds;
 };
 
 } /* namespace renderthread */

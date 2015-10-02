@@ -62,7 +62,7 @@ CanvasContext::CanvasContext(RenderThread& thread, bool translucent,
         , mAnimationContext(contextFactory->createAnimationContext(mRenderThread.timeLord()))
         , mJankTracker(thread.timeLord().frameIntervalNanos())
         , mProfiler(mFrames)
-        , mContentOverdrawProtectionBounds(0, 0, 0, 0) {
+        , mContentDrawBounds(0, 0, 0, 0) {
     mRenderNodes.emplace_back(rootRenderNode);
     mRenderThread.renderState().registerCanvasContext(this);
     mProfiler.setDensity(mRenderThread.mainDisplayInfo().density);
@@ -309,7 +309,7 @@ void CanvasContext::draw() {
     Rect outBounds;
     // It there are multiple render nodes, they are as follows:
     // #0 - backdrop
-    // #1 - content (with - and clipped to - bounds mContentOverdrawProtectionBounds)
+    // #1 - content (positioned at (0,0) and clipped to - its bounds mContentDrawBounds)
     // #2 - frame
     // Usually the backdrop cannot be seen since it will be entirely covered by the content. While
     // resizing however it might become partially visible. The following render loop will crop the
@@ -317,66 +317,72 @@ void CanvasContext::draw() {
     // against the backdrop (since that indicates a shrinking of the window) and then the frame
     // around everything.
     // The bounds of the backdrop against which the content should be clipped.
-    Rect backdropBounds = mContentOverdrawProtectionBounds;
+    Rect backdropBounds = mContentDrawBounds;
+    // Usually the contents bounds should be mContentDrawBounds - however - we will
+    // move it towards the fixed edge to give it a more stable appearance (for the moment).
+    Rect contentBounds;
     // If there is no content bounds we ignore the layering as stated above and start with 2.
-    int layer = mContentOverdrawProtectionBounds.isEmpty() ? 2 : 0;
+    int layer = (mContentDrawBounds.isEmpty() || mRenderNodes.size() <= 2) ? 2 : 0;
     // Draw all render nodes. Note that
     for (const sp<RenderNode>& node : mRenderNodes) {
         if (layer == 0) { // Backdrop.
-            // Draw the backdrop clipped to the inverse content bounds.
+            // Draw the backdrop clipped to the inverse content bounds, but assume that the content
+            // was moved to the upper left corner.
             const RenderProperties& properties = node->properties();
             Rect targetBounds(properties.getLeft(), properties.getTop(),
                               properties.getRight(), properties.getBottom());
+            // Move the content bounds towards the fixed corner of the backdrop.
+            const int x = targetBounds.left;
+            const int y = targetBounds.top;
+            contentBounds.set(x, y, x + mContentDrawBounds.getWidth(),
+                                    y + mContentDrawBounds.getHeight());
             // Remember the intersection of the target bounds and the intersection bounds against
             // which we have to crop the content.
+            backdropBounds.set(x, y, x + backdropBounds.getWidth(), y + backdropBounds.getHeight());
             backdropBounds.intersect(targetBounds);
             // Check if we have to draw something on the left side ...
-            if (targetBounds.left < mContentOverdrawProtectionBounds.left) {
+            if (targetBounds.left < contentBounds.left) {
                 mCanvas->save(SkCanvas::kClip_SaveFlag);
                 if (mCanvas->clipRect(targetBounds.left, targetBounds.top,
-                                      mContentOverdrawProtectionBounds.left, targetBounds.bottom,
+                                      contentBounds.left, targetBounds.bottom,
                                       SkRegion::kIntersect_Op)) {
                     mCanvas->drawRenderNode(node.get(), outBounds);
                 }
                 // Reduce the target area by the area we have just painted.
-                targetBounds.left = std::min(mContentOverdrawProtectionBounds.left,
-                                             targetBounds.right);
+                targetBounds.left = std::min(contentBounds.left, targetBounds.right);
                 mCanvas->restore();
             }
             // ... or on the right side ...
-            if (targetBounds.right > mContentOverdrawProtectionBounds.right &&
+            if (targetBounds.right > contentBounds.right &&
                 !targetBounds.isEmpty()) {
                 mCanvas->save(SkCanvas::kClip_SaveFlag);
-                if (mCanvas->clipRect(mContentOverdrawProtectionBounds.right, targetBounds.top,
+                if (mCanvas->clipRect(contentBounds.right, targetBounds.top,
                                       targetBounds.right, targetBounds.bottom,
                                       SkRegion::kIntersect_Op)) {
                     mCanvas->drawRenderNode(node.get(), outBounds);
                 }
                 // Reduce the target area by the area we have just painted.
-                targetBounds.right = std::max(targetBounds.left,
-                                              mContentOverdrawProtectionBounds.right);
+                targetBounds.right = std::max(targetBounds.left, contentBounds.right);
                 mCanvas->restore();
             }
             // ... or at the top ...
-            if (targetBounds.top < mContentOverdrawProtectionBounds.top &&
+            if (targetBounds.top < contentBounds.top &&
                 !targetBounds.isEmpty()) {
                 mCanvas->save(SkCanvas::kClip_SaveFlag);
                 if (mCanvas->clipRect(targetBounds.left, targetBounds.top, targetBounds.right,
-                                      mContentOverdrawProtectionBounds.top,
+                                      contentBounds.top,
                                       SkRegion::kIntersect_Op)) {
                     mCanvas->drawRenderNode(node.get(), outBounds);
                 }
                 // Reduce the target area by the area we have just painted.
-                targetBounds.top = std::min(mContentOverdrawProtectionBounds.top,
-                                            targetBounds.bottom);
+                targetBounds.top = std::min(contentBounds.top, targetBounds.bottom);
                 mCanvas->restore();
             }
             // ... or at the bottom.
-            if (targetBounds.bottom > mContentOverdrawProtectionBounds.bottom &&
+            if (targetBounds.bottom > contentBounds.bottom &&
                 !targetBounds.isEmpty()) {
                 mCanvas->save(SkCanvas::kClip_SaveFlag);
-                if (mCanvas->clipRect(targetBounds.left,
-                                      mContentOverdrawProtectionBounds.bottom, targetBounds.right,
+                if (mCanvas->clipRect(targetBounds.left, contentBounds.bottom, targetBounds.right,
                                       targetBounds.bottom, SkRegion::kIntersect_Op)) {
                     mCanvas->drawRenderNode(node.get(), outBounds);
                 }
@@ -384,10 +390,17 @@ void CanvasContext::draw() {
             }
         } else if (layer == 1) { // Content
             // It gets cropped against the bounds of the backdrop to stay inside.
-            mCanvas->save(SkCanvas::kClip_SaveFlag);
-            if (mCanvas->clipRect(backdropBounds.left, backdropBounds.top,
-                                  backdropBounds.right, backdropBounds.bottom,
-                                  SkRegion::kIntersect_Op)) {
+            mCanvas->save(SkCanvas::kClip_SaveFlag | SkCanvas::kMatrix_SaveFlag);
+
+            // We shift and clip the content to match its final location in the window.
+            const float left = mContentDrawBounds.left;
+            const float top = mContentDrawBounds.top;
+            const float dx = backdropBounds.left - left;
+            const float dy = backdropBounds.top - top;
+            const float width = backdropBounds.getWidth();
+            const float height = backdropBounds.getHeight();
+            mCanvas->translate(dx, dy);
+            if (mCanvas->clipRect(left, top, left + width, top + height, SkRegion::kIntersect_Op)) {
                 mCanvas->drawRenderNode(node.get(), outBounds);
             }
             mCanvas->restore();

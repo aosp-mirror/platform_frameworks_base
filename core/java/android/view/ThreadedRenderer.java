@@ -349,7 +349,7 @@ public class ThreadedRenderer extends HardwareRenderer {
      * @param right The right side of the protected bounds.
      * @param bottom The bottom side of the protected bounds.
      */
-    public void setContentOverdrawProtectionBounds(int left, int top, int right, int bottom) {
+    public void setContentDrawBounds(int left, int top, int right, int bottom) {
         mStagedContentBounds.set(left, top, right, bottom);
     }
 
@@ -370,9 +370,9 @@ public class ThreadedRenderer extends HardwareRenderer {
         // renderer.
         if (!mCurrentContentBounds.equals(mStagedContentBounds)) {
             mCurrentContentBounds.set(mStagedContentBounds);
-            nSetContentOverdrawProtectionBounds(mNativeProxy, mCurrentContentBounds.left,
-                mCurrentContentBounds.top, mCurrentContentBounds.right,
-            mCurrentContentBounds.bottom);
+            nSetContentDrawBounds(mNativeProxy, mCurrentContentBounds.left,
+                    mCurrentContentBounds.top, mCurrentContentBounds.right,
+                    mCurrentContentBounds.bottom);
         }
 
         attachInfo.mIgnoreDirtyState = false;
@@ -600,6 +600,6 @@ public class ThreadedRenderer extends HardwareRenderer {
              boolean placeFront);
     private static native void nRemoveRenderNode(long nativeProxy, long rootRenderNode);
     private static native void nDrawRenderNode(long nativeProxy, long rootRenderNode);
-    private static native void nSetContentOverdrawProtectionBounds(long nativeProxy, int left,
+    private static native void nSetContentDrawBounds(long nativeProxy, int left,
              int top, int right, int bottom);
 }
