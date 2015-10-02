@@ -32,6 +32,7 @@ import android.view.MotionEvent;
 import android.view.MotionEvent.PointerCoords;
 import android.view.MotionEvent.PointerProperties;
 import android.view.accessibility.AccessibilityEvent;
+import android.view.accessibility.AccessibilityManager;
 
 /**
  * Implements "Automatically click on mouse stop" feature.
@@ -56,8 +57,6 @@ import android.view.accessibility.AccessibilityEvent;
  */
 public class AutoclickController implements EventStreamTransformation {
 
-    public static final int DEFAULT_CLICK_DELAY_MS = 600;
-
     private static final String LOG_TAG = AutoclickController.class.getSimpleName();
 
     private EventStreamTransformation mNext;
@@ -78,7 +77,8 @@ public class AutoclickController implements EventStreamTransformation {
         if (event.isFromSource(InputDevice.SOURCE_MOUSE)) {
             if (mClickScheduler == null) {
                 Handler handler = new Handler(mContext.getMainLooper());
-                mClickScheduler = new ClickScheduler(handler, DEFAULT_CLICK_DELAY_MS);
+                mClickScheduler =
+                        new ClickScheduler(handler, AccessibilityManager.AUTOCLICK_DELAY_DEFAULT);
                 mClickDelayObserver = new ClickDelayObserver(mUserId, handler);
                 mClickDelayObserver.start(mContext.getContentResolver(), mClickScheduler);
             }
@@ -230,7 +230,7 @@ public class AutoclickController implements EventStreamTransformation {
             if (mAutoclickDelaySettingUri.equals(uri)) {
                 int delay = Settings.Secure.getIntForUser(
                         mContentResolver, Settings.Secure.ACCESSIBILITY_AUTOCLICK_DELAY,
-                        DEFAULT_CLICK_DELAY_MS, mUserId);
+                        AccessibilityManager.AUTOCLICK_DELAY_DEFAULT, mUserId);
                 mClickScheduler.updateDelay(delay);
             }
         }
