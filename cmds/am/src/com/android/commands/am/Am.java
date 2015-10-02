@@ -44,6 +44,7 @@ import android.content.Intent;
 import android.content.pm.IPackageManager;
 import android.content.pm.ParceledListSlice;
 import android.content.pm.ResolveInfo;
+import android.content.pm.UserInfo;
 import android.content.res.Configuration;
 import android.graphics.Rect;
 import android.net.Uri;
@@ -63,6 +64,7 @@ import android.util.ArrayMap;
 import android.view.IWindowManager;
 
 import com.android.internal.os.BaseCommand;
+import com.android.internal.util.Preconditions;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -168,6 +170,7 @@ public class Am extends BaseCommand {
                 "       am get-inactive [--user <USER_ID>] <PACKAGE>\n" +
                 "       am send-trim-memory [--user <USER_ID>] <PROCESS>\n" +
                 "               [HIDDEN|RUNNING_MODERATE|BACKGROUND|RUNNING_LOW|MODERATE|RUNNING_CRITICAL|COMPLETE]\n" +
+                "       am get-current-user\n" +
                 "\n" +
                 "am start: start an Activity.  Options are:\n" +
                 "    -D: enable debugging\n" +
@@ -334,7 +337,9 @@ public class Am extends BaseCommand {
                 "\n" +
                 "am get-inactive: returns the inactive state of an app.\n" +
                 "\n" +
-                "am send-trim-memory: Send a memory trim event to a <PROCESS>.\n" +
+                "am send-trim-memory: send a memory trim event to a <PROCESS>.\n" +
+                "\n" +
+                "am get-current-user: returns id of the current foreground user.\n" +
                 "\n" +
                 "<INTENT> specifications include these flags and arguments:\n" +
                 "    [-a <ACTION>] [-d <DATA_URI>] [-t <MIME_TYPE>]\n" +
@@ -464,6 +469,8 @@ public class Am extends BaseCommand {
             runGetInactive();
         } else if (op.equals("send-trim-memory")) {
             runSendTrimMemory();
+        } else if (op.equals("get-current-user")) {
+            runGetCurrentUser();
         } else {
             showError("Error: unknown command '" + op + "'");
         }
@@ -2710,6 +2717,12 @@ public class Am extends BaseCommand {
             System.err.println("Error: Failure to set the level - probably Unknown Process: " +
                                proc);
         }
+    }
+
+    private void runGetCurrentUser() throws Exception {
+        UserInfo currentUser = Preconditions.checkNotNull(mAm.getCurrentUser(),
+                "Current user not set");
+        System.out.println(currentUser.id);
     }
 
     /**

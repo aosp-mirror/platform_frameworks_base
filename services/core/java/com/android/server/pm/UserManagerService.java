@@ -1520,6 +1520,11 @@ public class UserManagerService extends IUserManager.Stub {
         long ident = Binder.clearCallingIdentity();
         try {
             final UserInfo user;
+            int currentUser = ActivityManager.getCurrentUser();
+            if (currentUser == userHandle) {
+                Log.w(LOG_TAG, "Current user cannot be removed");
+                return false;
+            }
             synchronized (mPackagesLock) {
                 user = mUsers.get(userHandle);
                 if (userHandle == 0 || user == null || mRemovingUserIds.get(userHandle)) {
