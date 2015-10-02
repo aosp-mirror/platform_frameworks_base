@@ -1153,7 +1153,7 @@ final class ActivityStack {
         next.results = null;
         next.newIntents = null;
 
-        if (next.isHomeActivity() && next.isNotResolverActivity()) {
+        if (next.isHomeActivity()) {
             ProcessRecord app = next.task.mActivities.get(0).app;
             if (app != null && app != mService.mHomeProcess) {
                 mService.mHomeProcess = app;

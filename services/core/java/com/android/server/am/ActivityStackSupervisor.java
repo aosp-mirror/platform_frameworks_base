@@ -1262,7 +1262,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
                         r.userId, System.identityHashCode(r),
                         task.taskId, r.shortComponentName);
             }
-            if (r.isHomeActivity() && r.isNotResolverActivity()) {
+            if (r.isHomeActivity()) {
                 // Home process is the root process of the task.
                 mService.mHomeProcess = task.mActivities.get(0).app;
             }
@@ -2024,6 +2024,14 @@ public final class ActivityStackSupervisor implements DisplayListener {
             reuseTask = inTask;
         } else {
             inTask = null;
+            // Launch ResolverActivity in the source task, so that it stays in the task
+            // bounds when in freeform workspace.
+            // Also put noDisplay activities in the source task. These by itself can
+            // be placed in any task/stack, however it could launch other activities
+            // like ResolverActivity, and we want those to stay in the original task.
+            if (r.isResolverActivity() || r.noDisplay) {
+                addingToTask = true;
+            }
         }
 
         if (inTask == null) {
