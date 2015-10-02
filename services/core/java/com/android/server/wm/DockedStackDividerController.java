@@ -18,6 +18,8 @@ package com.android.server.wm;
 
 import static android.app.ActivityManager.DOCKED_STACK_ID;
 import static android.content.res.Configuration.ORIENTATION_LANDSCAPE;
+import static android.view.PointerIcon.STYLE_HORIZONTAL_DOUBLE_ARROW;
+import static android.view.PointerIcon.STYLE_VERTICAL_DOUBLE_ARROW;
 import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
 import static android.view.WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
 import static android.view.WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL;
@@ -87,6 +89,8 @@ public class DockedStackDividerController implements View.OnTouchListener, DimLa
         final boolean landscape = configuration.orientation == ORIENTATION_LANDSCAPE;
         final int width = landscape ? mDividerWidth : MATCH_PARENT;
         final int height = landscape ? MATCH_PARENT : mDividerWidth;
+        view.setPointerShape(
+                landscape ? STYLE_HORIZONTAL_DOUBLE_ARROW : STYLE_VERTICAL_DOUBLE_ARROW);
         WindowManager.LayoutParams params = new WindowManager.LayoutParams(
                 width, height, TYPE_DOCK_DIVIDER,
                 FLAG_TOUCHABLE_WHEN_WAKING | FLAG_NOT_FOCUSABLE | FLAG_NOT_TOUCH_MODAL
