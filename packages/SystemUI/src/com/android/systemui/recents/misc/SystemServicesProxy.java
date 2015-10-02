@@ -327,6 +327,21 @@ public class SystemServicesProxy {
         return mAm.isInHomeStack(taskId);
     }
 
+    /**
+     * @return whether there are any docked tasks.
+     */
+    public boolean hasDockedTask() {
+        if (mIam == null) return false;
+
+        ActivityManager.StackInfo stackInfo = null;
+        try {
+            stackInfo = mIam.getStackInfo(ActivityManager.DOCKED_STACK_ID);
+        } catch (RemoteException e) {
+            e.printStackTrace();
+        }
+        return stackInfo != null;
+    }
+
     /** Returns the top task thumbnail for the given task id */
     public Bitmap getTaskThumbnail(int taskId) {
         if (mAm == null) return null;

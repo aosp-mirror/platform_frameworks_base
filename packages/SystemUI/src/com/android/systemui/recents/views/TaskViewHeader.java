@@ -471,7 +471,7 @@ public class TaskViewHeader extends FrameLayout
             // In accessibility, a single click on the focused app info button will show it
             EventBus.getDefault().send(new ShowApplicationInfoEvent(mTask));
         } else if (v == mDismissButton) {
-            TaskView tv = (TaskView) getParent().getParent();
+            TaskView tv = Utilities.findParent(this, TaskView.class);
             tv.dismissTask();
 
             // Keep track of deletions by the dismiss button

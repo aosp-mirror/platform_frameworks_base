@@ -22,6 +22,7 @@ import android.graphics.Rect;
 import android.provider.Settings;
 import com.android.systemui.R;
 import com.android.systemui.recents.misc.SystemServicesProxy;
+import com.android.systemui.recents.model.RecentsTaskLoader;
 
 /**
  * Application resources that can be retrieved from the application context and are not specifically
@@ -70,6 +71,7 @@ public class RecentsConfiguration {
     public final int smallestWidth;
 
     /** Misc **/
+    public boolean hasDockedTasks;
     public boolean useHardwareLayers;
     public boolean fakeShadows;
     public int svelteLevel;
@@ -114,6 +116,7 @@ public class RecentsConfiguration {
         lockToAppEnabled = ssp.getSystemSetting(context,
                 Settings.System.LOCK_TO_APP_ENABLED) != 0;
         multiWindowEnabled = "true".equals(ssp.getSystemProperty("persist.sys.debug.multi_window"));
+        hasDockedTasks = ssp.hasDockedTask();
 
         // Recompute some values based on the given state, since we can not rely on the resource
         // system to get certain values.

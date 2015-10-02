@@ -22,6 +22,7 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Rect;
+import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.os.IRemoteCallback;
 import android.os.RemoteException;
@@ -30,19 +31,25 @@ import android.util.Log;
 import android.util.SparseArray;
 import android.view.AppTransitionAnimationSpec;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.WindowInsets;
 import android.view.WindowManagerGlobal;
+import android.view.animation.AccelerateInterpolator;
 import android.view.animation.AnimationUtils;
 import android.view.animation.Interpolator;
 import android.widget.FrameLayout;
 import com.android.internal.logging.MetricsLogger;
 import com.android.systemui.R;
 import com.android.systemui.recents.Constants;
+import com.android.systemui.recents.RecentsActivity;
 import com.android.systemui.recents.RecentsAppWidgetHostView;
 import com.android.systemui.recents.RecentsConfiguration;
 import com.android.systemui.recents.events.EventBus;
 import com.android.systemui.recents.events.ui.DismissTaskEvent;
+import com.android.systemui.recents.events.ui.dragndrop.DragDockStateChangedEvent;
+import com.android.systemui.recents.events.ui.dragndrop.DragEndEvent;
+import com.android.systemui.recents.events.ui.dragndrop.DragStartEvent;
 import com.android.systemui.recents.misc.SystemServicesProxy;
 import com.android.systemui.recents.model.RecentsTaskLoader;
 import com.android.systemui.recents.model.Task;
@@ -78,6 +85,11 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
     TaskStackView mTaskStackView;
     RecentsAppWidgetHostView mSearchBar;
     RecentsViewCallbacks mCb;
+
+    RecentsViewTouchHandler mTouchHandler;
+    DragView mDragView;
+    ColorDrawable mDockRegionOverlay;
+
     Interpolator mFastOutSlowInInterpolator;
 
     Rect mSystemInsets = new Rect();
@@ -96,10 +108,14 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
 
     public RecentsView(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
+        setWillNotDraw(false);
         mConfig = RecentsConfiguration.getInstance();
         mInflater = LayoutInflater.from(context);
         mFastOutSlowInInterpolator = AnimationUtils.loadInterpolator(context,
                 com.android.internal.R.interpolator.fast_out_slow_in);
+        mTouchHandler = new RecentsViewTouchHandler(this);
+        mDockRegionOverlay = new ColorDrawable(0x66000000);
+        mDockRegionOverlay.setAlpha(0);
     }
 
     /** Sets the callbacks */
@@ -200,6 +216,7 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
             ArrayList<Task> tasks = stack.getTasks();
 
             // Find the launch task in the stack
+            // TODO: replace this with an event from RecentsActivity
             if (!tasks.isEmpty()) {
                 int taskCount = tasks.size();
                 for (int j = 0; j < taskCount; j++) {
@@ -267,6 +284,20 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
         }
     }
 
+    @Override
+    protected void onAttachedToWindow() {
+        EventBus.getDefault().register(this, RecentsActivity.EVENT_BUS_PRIORITY + 1);
+        EventBus.getDefault().register(mTouchHandler, RecentsActivity.EVENT_BUS_PRIORITY + 1);
+        super.onAttachedToWindow();
+    }
+
+    @Override
+    protected void onDetachedFromWindow() {
+        super.onDetachedFromWindow();
+        EventBus.getDefault().unregister(this);
+        EventBus.getDefault().unregister(mTouchHandler);
+    }
+
     /**
      * This is called with the full size of the window since we are handling our own insets.
      */
@@ -293,6 +324,12 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
             mTaskStackView.measure(widthMeasureSpec, heightMeasureSpec);
         }
 
+        if (mDragView != null) {
+            mDragView.measure(
+                    MeasureSpec.makeMeasureSpec(width, MeasureSpec.AT_MOST),
+                    MeasureSpec.makeMeasureSpec(height, MeasureSpec.AT_MOST));
+        }
+
         setMeasuredDimension(width, height);
     }
 
@@ -314,6 +351,11 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
         if (mTaskStackView != null && mTaskStackView.getVisibility() != GONE) {
             mTaskStackView.layout(left, top, left + getMeasuredWidth(), top + getMeasuredHeight());
         }
+
+        if (mDragView != null) {
+            mDragView.layout(left, top, left + mDragView.getMeasuredWidth(),
+                    top + mDragView.getMeasuredHeight());
+        }
     }
 
     @Override
@@ -321,6 +363,24 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
         mSystemInsets.set(insets.getSystemWindowInsets());
         requestLayout();
         return insets.consumeSystemWindowInsets();
+    }
+
+    @Override
+    public boolean onInterceptTouchEvent(MotionEvent ev) {
+        return mTouchHandler.onInterceptTouchEvent(ev);
+    }
+
+    @Override
+    public boolean onTouchEvent(MotionEvent ev) {
+        return mTouchHandler.onTouchEvent(ev);
+    }
+
+    @Override
+    protected void dispatchDraw(Canvas canvas) {
+        super.dispatchDraw(canvas);
+        if (mDockRegionOverlay.getAlpha() > 0) {
+            mDockRegionOverlay.draw(canvas);
+        }
     }
 
     /** Notifies each task view of the user interaction. */
@@ -695,6 +755,66 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
                     .setDuration(filterDuration)
                     .withLayer()
                     .start();
+        }
+    }
+
+    /**** EventBus Events ****/
+
+    public final void onBusEvent(DragStartEvent event) {
+        // Add the drag view
+        mDragView = event.dragView;
+        addView(mDragView);
+    }
+
+    public final void onBusEvent(DragDockStateChangedEvent event) {
+        // Update the task stack positions, and then
+        if (event.dockState != null) {
+            // Draw an overlay on the bounds of the dock task
+            mDockRegionOverlay.setBounds(
+                    event.dockState.getDockedBounds(getMeasuredWidth(), getMeasuredHeight()));
+            mDockRegionOverlay.setAlpha(255);
+        } else {
+            mDockRegionOverlay.setAlpha(0);
+        }
+        invalidate();
+    }
+
+    public final void onBusEvent(final DragEndEvent event) {
+        event.postAnimationTrigger.increment();
+        event.postAnimationTrigger.addLastDecrementRunnable(new Runnable() {
+            @Override
+            public void run() {
+                // Remove the drag view
+                removeView(mDragView);
+                mDragView = null;
+                mDockRegionOverlay.setAlpha(0);
+                invalidate();
+
+                // Dock the new task if we are hovering over a valid dock state
+                if (event.dockState != null) {
+                    SystemServicesProxy ssp = RecentsTaskLoader.getInstance().getSystemServicesProxy();
+                    ssp.setTaskResizeable(event.task.key.id);
+                    ssp.dockTask(event.task.key.id, event.dockState.createMode);
+                    launchTask(event.task, null);
+                }
+            }
+        });
+        if (event.dockState == null) {
+            // Animate the alpha back to what it was before
+            Rect taskBounds = mTaskStackView.getStackAlgorithm().getUntransformedTaskViewBounds();
+            int left = taskBounds.left + (int) ((1f - event.taskView.getScaleX()) * taskBounds.width()) / 2;
+            int top = taskBounds.top + (int) ((1f - event.taskView.getScaleY()) * taskBounds.height()) / 2;
+            event.dragView.animate()
+                    .alpha(1f)
+                    .translationX(left + event.taskView.getTranslationX())
+                    .translationY(top + event.taskView.getTranslationY())
+                    .setDuration(175)
+                    .setInterpolator(new AccelerateInterpolator(1.5f))
+                    .withEndAction(event.postAnimationTrigger.decrementAsRunnable())
+                    .withLayer()
+                    .start();
+        } else {
+            event.postAnimationTrigger.decrement();
         }
     }
 }
