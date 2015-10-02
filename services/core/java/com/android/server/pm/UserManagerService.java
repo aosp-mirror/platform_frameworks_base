@@ -846,7 +846,7 @@ public class UserManagerService extends IUserManager.Stub {
         int userVersion = mUserVersion;
         if (userVersion < 1) {
             // Assign a proper name for the owner, if not initialized correctly before
-            UserInfo user = mUsers.get(UserHandle.USER_OWNER);
+            UserInfo user = mUsers.get(UserHandle.USER_SYSTEM);
             if ("Primary".equals(user.name)) {
                 user.name = mContext.getResources().getString(com.android.internal.R.string.owner_name);
                 scheduleWriteUserLocked(user);
@@ -856,7 +856,7 @@ public class UserManagerService extends IUserManager.Stub {
 
         if (userVersion < 2) {
             // Owner should be marked as initialized
-            UserInfo user = mUsers.get(UserHandle.USER_OWNER);
+            UserInfo user = mUsers.get(UserHandle.USER_SYSTEM);
             if ((user.flags & UserInfo.FLAG_INITIALIZED) == 0) {
                 user.flags |= UserInfo.FLAG_INITIALIZED;
                 scheduleWriteUserLocked(user);
