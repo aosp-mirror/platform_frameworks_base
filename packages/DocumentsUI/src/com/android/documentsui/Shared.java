@@ -16,12 +16,7 @@
 
 package com.android.documentsui;
 
-import static com.android.internal.util.Preconditions.checkNotNull;
-
-import android.app.Activity;
 import android.content.Context;
-import android.support.design.widget.Snackbar;
-import android.view.View;
 
 /** @hide */
 public final class Shared {
@@ -34,15 +29,5 @@ public final class Shared {
      */
     public static final String getQuantityString(Context context, int resourceId, int quantity) {
         return context.getResources().getQuantityString(resourceId, quantity, quantity);
-    }
-
-    public static final Snackbar makeSnackbar(Activity activity, int messageId, int duration) {
-        return makeSnackbar(activity, activity.getResources().getText(messageId), duration);
-    }
-
-    public static final Snackbar makeSnackbar(Activity activity, CharSequence message, int duration)
-    {
-        final View view = checkNotNull(activity.findViewById(R.id.coordinator_layout));
-        return Snackbar.make(view, message, duration);
     }
 }

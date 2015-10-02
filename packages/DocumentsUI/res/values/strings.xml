@@ -27,7 +27,7 @@
     <string name="title_save">Save to</string>
 
     <!-- Menu item that creates a new directory/folder at the current location [CHAR LIMIT=24] -->
-    <string name="menu_create_dir">Create folder</string>
+    <string name="menu_create_dir">New folder</string>
     <!-- Menu item that switches view to show documents as a large-format grid of thumbnails [CHAR LIMIT=24] -->
     <string name="menu_grid">Grid view</string>
     <!-- Menu item that switches view to show documents as a list [CHAR LIMIT=24] -->

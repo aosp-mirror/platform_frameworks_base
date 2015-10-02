@@ -15,5 +15,5 @@
 -->
 
 <resources>
-    <bool name="productivity_device">false</bool>
+    <bool name="productivity_device">true</bool>
 </resources>
