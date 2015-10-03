@@ -1,48 +1,51 @@
 page.title=Android Studio 및 SDK 도구 다운로드
 page.tags=sdk, android studio
-page.template=sdk
+page.template=sdkl10n
 header.hide=1
 page.metaDescription=Android 휴대폰, 태블릿, 웨어러블, TV 등을 위한 앱을 구축하는 데 사용할 수 있는 공식 Android IDE 및 개발자 도구를 다운로드하세요.
 
-studio.version=1.1.0
+studio.version=1.4.0.10
 
-studio.linux_bundle_download=android-studio-ide-135.1740770-linux.zip
-studio.linux_bundle_bytes=259336386
-studio.linux_bundle_checksum=e8d166559c50a484f83ebfec6731cc0e3f259208
+studio.linux_bundle_download=android-studio-ide-141.2288178-linux.zip
+studio.linux_bundle_bytes=380821638
+studio.linux_bundle_checksum=137e3734f2e8e285bd7c1d2fae2e8548d0f164bd
 
-studio.mac_bundle_download=android-studio-ide-135.1740770-mac.dmg
-studio.mac_bundle_bytes=261303345
-studio.mac_bundle_checksum=f9745d0fec1eefd498f6160a2d6a1b5247d4cda3
+studio.mac_bundle_download=android-studio-ide-141.2288178-mac.dmg
+studio.mac_bundle_bytes=364624965
+studio.mac_bundle_checksum=27068d59d5a78717d31bdedd054082b5c50d3897
 
-studio.win_bundle_exe_download=android-studio-bundle-135.1740770-windows.exe
-studio.win_bundle_exe_bytes=856233768
-studio.win_bundle_exe_checksum=7484b9989d2914e1de30995fbaa97a271a514b3f
-
-studio.win_notools_exe_download=android-studio-ide-135.1740770-windows.exe
-studio.win_notools_exe_bytes=242135128
-studio.win_notools_exe_checksum=5ea77661cd2300cea09e8e34f4a2219a0813911f
-
-studio.win_bundle_download=android-studio-ide-135.1740770-windows.zip
-studio.win_bundle_bytes=261667054
-studio.win_bundle_checksum=e903f17cc6a57c7e3d460c4555386e3e65c6b4eb
+studio.win_bundle_download=android-studio-ide-141.2288178-windows.zip
+studio.win_bundle_bytes=373492997
+studio.win_bundle_checksum=c0851dc9a506ba9f4c1379a3e9b4019c08478220
 
 
+studio.win_bundle_exe_download=android-studio-bundle-141.2288178-windows.exe
+studio.win_bundle_exe_bytes=1177811944
+studio.win_bundle_exe_checksum=a2f0141d35f8f0c24dad2ff390e7f6231c5f7625
 
-sdk.linux_download=android-sdk_r24.1.2-linux.tgz
-sdk.linux_bytes=168121693
-sdk.linux_checksum=68980e4a26cca0182abb1032abffbb72a1240c51
+studio.win_notools_exe_download=android-studio-ide-141.2288178-windows.exe
+studio.win_notools_exe_bytes=348295968
+studio.win_notools_exe_checksum=82d0d9c78ec23834956f941a07821be347fcb7bf
 
-sdk.mac_download=android-sdk_r24.1.2-macosx.zip
-sdk.mac_bytes=89151287
-sdk.mac_checksum=00e43ff1557e8cba7da53e4f64f3a34498048256
 
-sdk.win_download=android-sdk_r24.1.2-windows.zip
-sdk.win_bytes=159778618
-sdk.win_checksum=704f6c874373b98e061fe2e7eb34f9fcb907a341
 
-sdk.win_installer=installer_r24.1.2-windows.exe
-sdk.win_installer_bytes=111364285
-sdk.win_installer_checksum=e0ec864efa0e7449db2d7ed069c03b1f4d36f0cd
+
+sdk.linux_download=android-sdk_r24.3.4-linux.tgz
+sdk.linux_bytes=309138331
+sdk.linux_checksum=fb293d7bca42e05580be56b1adc22055d46603dd
+
+sdk.mac_download=android-sdk_r24.3.4-macosx.zip
+sdk.mac_bytes=98340900
+sdk.mac_checksum=128f10fba668ea490cc94a08e505a48a608879b9
+
+sdk.win_download=android-sdk_r24.3.4-windows.zip
+sdk.win_bytes=187496897
+sdk.win_checksum=4a8718fb4a2bf2128d34b92f23ddd79fc65839e7
+
+
+sdk.win_installer=installer_r24.3.4-windows.exe
+sdk.win_installer_bytes=139477985
+sdk.win_installer_checksum=094dd45f98a31f839feae898b48f23704f2878dd
 
 
 
@@ -111,7 +114,7 @@ sdk.win_installer_checksum=e0ec864efa0e7449db2d7ed069c03b1f4d36f0cd
 
 <h1 id="tos-header" style="margin-top:0">다운로드</h1>
 
-<p class="sdk-terms-intro">Android Studio 또는 독립 실행형 SDK 도구를 설치하려면, 
+<p class="sdk-terms-intro">Android Studio 또는 독립 실행형 SDK 도구를 설치하려면,
 먼저 다음 사용 약관에 동의해야 합니다.</p>
 
 <div class="sdk-terms" onfocus="this.blur()">
@@ -127,7 +130,7 @@ sdk.win_installer_checksum=e0ec864efa0e7449db2d7ed069c03b1f4d36f0cd
 
 
 <h3>2. 본 라이선스 계약 수락</h3>
-2.1 SDK를 사용하려면, 먼저 본 라이선스 계약에 동의해야 합니다. 이 라이선스 계약에 동의하지 않고 SDK를 사용해서는 안 됩니다. 
+2.1 SDK를 사용하려면, 먼저 본 라이선스 계약에 동의해야 합니다. 이 라이선스 계약에 동의하지 않고 SDK를 사용해서는 안 됩니다.
 
 2.2 수락을 클릭하면 본 라이선스 계약 조건에 동의하게 됩니다.
 
@@ -173,7 +176,7 @@ sdk.win_installer_checksum=e0ec864efa0e7449db2d7ed069c03b1f4d36f0cd
 
 
 <h3>6. 개인정보 보호정책 및 정보</h3>
-6.1 SDK를 지속적으로 혁신하고 개선하기 위해, Google은 고유 식별자, 관련 IP 주소, 소프트웨어 버전 번호, SDK에서 사용 중인 도구 및/또는 서비스와 도구의 사용법에 대한 정보를 포함하되 이에 국한되지 않고 소프트웨어에서 특정 사용량 통계 정보를 수집할 수 있습니다. 그러한 정보를 수집하기 전에 SDK는 계약자에게 이를 통지하고 동의를 구할 것입니다. 계약자가 동의하지 않을 경우 정보를 수집하지 않습니다. 
+6.1 SDK를 지속적으로 혁신하고 개선하기 위해, Google은 고유 식별자, 관련 IP 주소, 소프트웨어 버전 번호, SDK에서 사용 중인 도구 및/또는 서비스와 도구의 사용법에 대한 정보를 포함하되 이에 국한되지 않고 소프트웨어에서 특정 사용량 통계 정보를 수집할 수 있습니다. 그러한 정보를 수집하기 전에 SDK는 계약자에게 이를 통지하고 동의를 구할 것입니다. 계약자가 동의하지 않을 경우 정보를 수집하지 않습니다.
 
 6.2 수집된 데이터는 모두 취합된 형태로 SDK 개선을 위해 검토되며, Google의 개인정보 보호정책에 따라 유지 관리됩니다.
 
@@ -187,7 +190,7 @@ sdk.win_installer_checksum=e0ec864efa0e7449db2d7ed069c03b1f4d36f0cd
 
 
 <h3>8. Android API 사용</h3>
-8.1 Google Data API 
+8.1 Google Data API
 
 8.1.1 Google에서 데이터를 검색하기 위해 API를 사용하는 경우, 그러한 데이터가 Google 또는 데이터를 제공하는 당사자(또는 당사자를 대신하는 기타 개인 또는 기업)가 소유한 지적 재산권에 의해 보호될 수 있음을 인정합니다. 그러한 API를 사용하는 경우, 추가적인 서비스 약관의 적용을 받을 수 있습니다. 관련 서비스 약관에 허용되지 않은 한, 그러한 데이터(전부 또는 일부)를 변경, 임대, 리스, 대여, 판매, 배포하거나 이를 기반으로 파생물을 생성해서는 안 됩니다.
 
@@ -200,9 +203,9 @@ sdk.win_installer_checksum=e0ec864efa0e7449db2d7ed069c03b1f4d36f0cd
 9.2 본 라이선스 계약을 해지하고자 하는 경우, SDK 및 모든 관련 개발자 자격 증명의 사용을 중지함으로써 해지할 수 있습니다.
 
 9.3 Google은 아래의 경우 언제든지 계약자와 체결한 본 라이선스 계약을 해지할 수 있습니다.
-(A) 계약자가 본 라이선스 계약의 조항을 위반한 경우, 또는 
-(B) Google이 법 준수를 위해 해지하여야 하는 경우, 또는 
-(C) Google과 함께 SDK의 특정 부분(예: API)을 제공해 온 파트너와의 관계가 종료되거나, 계약자에 대한 SDK의 특정 일부 서비스 제공을 중단한 경우, 또는 
+(A) 계약자가 본 라이선스 계약의 조항을 위반한 경우, 또는
+(B) Google이 법 준수를 위해 해지하여야 하는 경우, 또는
+(C) Google과 함께 SDK의 특정 부분(예: API)을 제공해 온 파트너와의 관계가 종료되거나, 계약자에 대한 SDK의 특정 일부 서비스 제공을 중단한 경우, 또는
 (D) 계약자가 거주 중이거나 서비스를 사용 중인 국가에 있는 사용자에게 SDK 또는 SDK의 특정 부분의 제공을 중단하기로 결정한 경우, 또는 계약자에게 Google이 제공하는 SDK 또는 SDK의 특정 서비스가 Google의 재량에 따라 더 이상 상업성이 없다고 판단된 경우.
 
 9.4 본 라이선스 계약이 종료되면, 계약자와 Google이 향유하고 있거나, 예속되어 왔거나(또는 본 라이선스 계약이 효력을 가지는 동안 누적되거나) 또는 영구히 계속된다고 명시된 모든 법적 권리, 의무 및 책임은 본 계약 종료에 의해 영향을 받지 않으며, 제 14.7조의 조항이 그러한 권리, 의무 및 책임에 영구히 계속 적용됩니다.
@@ -253,7 +256,7 @@ sdk.win_installer_checksum=e0ec864efa0e7449db2d7ed069c03b1f4d36f0cd
 
 <div id="next-steps" style="display:none;position:absolute;width:inherit">
   <p>이제 금방 Android용 앱 구축을 시작할 수 있게 됩니다!</p>
-  <p>곧 
+  <p>곧
 <a id="next-link" href="{@docRoot}sdk/installing/index.html">Android SDK 설치하기</a> 페이지로 이동됩니다.</p>
 
 </div><!-- end next-steps -->
@@ -280,7 +283,7 @@ sdk.win_installer_checksum=e0ec864efa0e7449db2d7ed069c03b1f4d36f0cd
 
 <div class="col-13">&nbsp;</div><!-- provides top margin for content -->
 
-<img src="{@docRoot}images/tools/studio-hero.png" srcset="{@docRoot}images/tools/studio-hero_2x.png 2x, {@docRoot}images/tools/studio-hero.png 1x" width="760" height="400" alt="" style="margin-bottom:80px" />
+<img src="{@docRoot}images/tools/studio-hero.png" srcset="{@docRoot}images/tools/studio-hero_2x.png 2x, {@docRoot}images/tools/studio-hero.png 1x" width="760" height="400"/>
 
 <div style="color: #fff; width:226px; height:0; overflow:visible; position:absolute; top:40px; left:25px">
 
@@ -292,38 +295,38 @@ width: 400px;text-align: center;">공식 Android IDE</p>
 <ul style="font-size:12px">
 <li>Android Studio IDE</li>
 <li>Android SDK Tools</li>
-<li>Android 5.0(Lollipop) 플랫폼</li>
-<li>Google API를 사용하는 Android 5.0 에뮬레이터 시스템 이미지</li>
+<li>Android 6.0(Marshmallow) 플랫폼</li>
+<li>Google API를 사용하는 Android 6.0 에뮬레이터 시스템 이미지</li>
 </ul>
 
 
-<a class="online landing-button green download-bundle-button" style="margin-top:30px;" href="#Other">Android Studio 다운로드</a>
+<a class="online landing-button green download-bundle-button" style="margin-top:30px;" href="#Other">Download</a>
 
 <!-- this appears when viewing the offline docs -->
 <p class="offline">
 Android Studio 또는 독립 실행형 SDK 도구를 얻으려면 <a href="http://developer.android.com/sdk/index.html">developer.android.com/sdk/</a> 페이지를 방문하십시오.
 </p>
+</div>
 
-<ul style="margin-top:50px;color:#444">
+<ul>
   <li><a href="#Requirements">시스템 요건</a></li>
   <li><a href="#Other">기타 다운로드 옵션</a></li>
   <li><a href="{@docRoot}sdk/installing/migrate.html">Android Studio로 마이그레이션</a></li>
   <li><a href="https://docs.google.com/a/google.com/forms/d/1mjsyfzv3HAnDY-_Kfj-3QJKdpuksyMFs9e73CRwmT6Q/viewform" target="_blank">설문조사 참여</a></li>
 </ul>
 
-</div>
 
 
 
 
 <h2 class="feature norule" >지능형 코드 편집기</h2>
 
-<div class="col-9" style="margin:0 20px 0 0">
+<div class="col-9">
   <img src="{@docRoot}images/tools/studio-hero-code.png" srcset="{@docRoot}images/tools/studio-hero-code_2x.png 2x, {@docRoot}images/tools/studio-hero-code.png 1x" width="520" />
 </div><!-- end col-9 (left column) -->
 
 <div class="col-4 feature-blurb">
-  <p>Android Studio의 핵심에는 고급 코드 작성, 리팩터링, 코드 분석이 가능한 지능형 
+  <p>Android Studio의 핵심에는 고급 코드 작성, 리팩터링, 코드 분석이 가능한 지능형
 코드 편집기가 있습니다.</p>
   <p>이 강력한 코드 편집기를 사용하면 여러분이 더욱 생산적인 Android 앱 개발자가 되는 데 도움이 됩니다.</p>
 </div>
@@ -334,14 +337,14 @@ Android Studio 또는 독립 실행형 SDK 도구를 얻으려면 <a href="http:
 
 <h2 class="feature norule">코드 템플릿 및 GitHub 통합</h2>
 
-<div class="col-9" style="margin:0 20px 0 0">
+<div class="col-9">
   <img src="{@docRoot}images/tools/studio-hero-import.png" srcset="{@docRoot}images/tools/studio-hero-import_2x.png 2x, {@docRoot}images/tools/studio-hero-import.png 1x" width="520" />
 </div><!-- end col-9 (left column) -->
 
 <div class="col-4 feature-blurb">
   <p>새 프로젝트 마법사를 통해 새로운 프로젝트를 더욱 쉽게 시작할 수 있습니다.</p>
 
-  <p>탐색 드로어 및 보기 호출기와 같은 패턴에 대한 템플릿 코드를 사용해 프로젝트를 시작하고, 
+  <p>탐색 드로어 및 보기 호출기와 같은 패턴에 대한 템플릿 코드를 사용해 프로젝트를 시작하고,
 GitHub에서 Google 코드 샘플을 가져올 수도 있습니다.</p>
 </div>
 
@@ -350,14 +353,14 @@ GitHub에서 Google 코드 샘플을 가져올 수도 있습니다.</p>
 
 <h2 class="feature norule">다중 화면 앱 개발</h2>
 
-<div class="col-9" style="margin:0 20px 0 0">
+<div class="col-9">
   <img src="{@docRoot}images/tools/studio-hero-screens.png" srcset="{@docRoot}images/tools/studio-hero-screens_2x.png 2x, {@docRoot}images/tools/studio-hero-screens.png 1x" width="520" />
 </div><!-- end col-9 (left column) -->
 
 <div class="col-4 feature-blurb">
-  <p>Android 휴대폰, 태블릿, Android Wear, Android TV, 
+  <p>Android 휴대폰, 태블릿, Android Wear, Android TV,
 Android Auto 그리고 Google Glass용 앱을 구축할 수 있습니다.</p>
-  <p>Android Studio의 새로운 Android 프로젝트 보기 및 모듈 지원 기능을 통해 
+  <p>Android Studio의 새로운 Android 프로젝트 보기 및 모듈 지원 기능을 통해
 앱 프로젝트 및 리소스 관리를 더욱 쉽게 수행할 수 있습니다.
 </div>
 
@@ -366,13 +369,13 @@ Android Auto 그리고 Google Glass용 앱을 구축할 수 있습니다.</p>
 
 <h2 class="feature norule">모든 모양 및 크기를 지원하는 가상 기기</h2>
 
-<div class="col-9" style="margin:0 20px 0 0">
+<div class="col-9">
   <img src="{@docRoot}images/tools/studio-hero-avds.png" srcset="{@docRoot}images/tools/studio-hero-avds_2x.png 2x, {@docRoot}images/tools/studio-hero-avds.png 1x" width="520" />
 </div><!-- end col-9 (left column) -->
 
 <div class="col-4 feature-blurb">
   <p>Android Studio는 최적화된 에뮬레이터 이미지로 사전 구성된 형태로 제공됩니다.</p>
-  <p>업데이트되고 간소화된 Virtual Device Manager는 일반 Android 기기에 대해 
+  <p>업데이트되고 간소화된 Virtual Device Manager는 일반 Android 기기에 대해
 사전 정의된 기기 프로필을 제공합니다.</p>
 </div>
 
@@ -382,7 +385,7 @@ Android Auto 그리고 Google Glass용 앱을 구축할 수 있습니다.</p>
 <h2 class="feature norule">
 Gradle을 통해 진화된 Android 빌드</h2>
 
-<div class="col-9" style="margin:0 20px 0 0">
+<div class="col-9">
   <img src="{@docRoot}images/tools/studio-hero-gradle.png" srcset="{@docRoot}images/tools/studio-hero-gradle_2x.png 2x, {@docRoot}images/tools/studio-hero-gradle.png 1x" width="520" />
 </div><!-- end col-9 (left column) -->
 
@@ -398,7 +401,7 @@ Gradle을 통해 진화된 Android 빌드</h2>
 <h2 class="feature norule">Android Studio에 대한 추가 정보</h2>
 <div style="background:#424242;padding:30px; color:#fff;margin:0 0 15px;">
 
-<a class="online landing-button green download-bundle-button" style="margin:0 0 40px 60px;float:right" href="">Android Studio 다운로드</a>
+<a class="online landing-button green download-bundle-button" style="margin:0 0 40px 60px;float:right" href="">Download</a>
 
   <ul>
   <li>JetBrains에서 제공하는 인기 있는 Java IDE인 IntelliJ IDEA Community Edition 기반</li>
@@ -408,20 +411,20 @@ Gradle을 통해 진화된 Android 빌드</h2>
   <li>테마 편집을 지원하는 고급 레이아웃 편집기</li>
   <li>성능, 유용성, 버전 호환성 및 기타 문제를 파악하는 Lint 도구</li>
   <li>ProGuard 및 앱 서명 기능</li>
-  <li>Google Cloud Messaging 및 App Engine의 통합을 용이하게 하는 Google Cloud Platform에 대한 
+  <li>Google Cloud Messaging 및 App Engine의 통합을 용이하게 하는 Google Cloud Platform에 대한
 기본 지원 기능</li>
   </ul>
 
 <p style="margin:0">
-Android Studio에서 사용할 수 있는 기능에 대한 자세한 내용은 
+Android Studio에서 사용할 수 있는 기능에 대한 자세한 내용은
 <a href="{@docRoot}tools/studio/index.html">Android Studio 개요</a> 가이드를 참조하세요.</p>
 </div>
 
 
-<p>ADT와 함께 Eclipse를 사용하고 있었다면 현재 Android의 공식 IDE는 
-Android Studio이므로, 모든 최신 IDE 업데이트를 받을 수 있도록 Android Studio로 
-마이그레이션해야 합니다. 프로젝트 이동에 대한 도움말은 
-<a href="{@docRoot}sdk/installing/migrate.html">Migrating to Android 
+<p>ADT와 함께 Eclipse를 사용하고 있었다면 현재 Android의 공식 IDE는
+Android Studio이므로, 모든 최신 IDE 업데이트를 받을 수 있도록 Android Studio로
+마이그레이션해야 합니다. 프로젝트 이동에 대한 도움말은
+<a href="{@docRoot}sdk/installing/migrate.html">Migrating to Android
 Studio</a>를 참조하세요.</p>
 
 
@@ -441,7 +444,7 @@ Studio</a>를 참조하세요.</p>
 <li>Android SDK, 에뮬레이터 시스템 이미지 및 캐시용 최소 1GB</li>
 <li>1280 x 800 이상의 화면 해상도</li>
 <li>JDK(Java Development Kit) 7 </li>
-<li>가속 에뮬레이터를 위한 선택 사항: Intel® VT-x, Intel® EM64T(Intel® 64) 및 XD(Execute Disable) Bit 
+<li>가속 에뮬레이터를 위한 선택 사항: Intel® VT-x, Intel® EM64T(Intel® 64) 및 XD(Execute Disable) Bit
 기능 지원 Intel® 프로세서</li>
 </ul>
 
@@ -456,11 +459,11 @@ Studio</a>를 참조하세요.</p>
 <li>1280 x 800 이상의 화면 해상도</li>
 <li>JRE(Java Runtime Environment) 6</li>
 <li>JDK(Java Development Kit) 7</li>
-<li>가속 에뮬레이터를 위한 선택 사항: Intel® VT-x, Intel® EM64T(Intel® 64) 및 XD(Execute Disable) Bit 
+<li>가속 에뮬레이터를 위한 선택 사항: Intel® VT-x, Intel® EM64T(Intel® 64) 및 XD(Execute Disable) Bit
 기능 지원 Intel® 프로세서</li>
 </ul>
 
-<p>Mac OS에서는 최적화된 글꼴 렌더링을 위해 JRE(Java Runtime Environment) 6에서 Android Studio를 
+<p>Mac OS에서는 최적화된 글꼴 렌더링을 위해 JRE(Java Runtime Environment) 6에서 Android Studio를
 실행하십시오. 그런 다음, JDK(Java Development Kit) 6 또는 JDK 7을 사용하여 프로젝트를 구성할 수 있습니다.</p>
 
 
@@ -476,7 +479,7 @@ Studio</a>를 참조하세요.</p>
 <li>1280 x 800 이상의 화면 해상도</li>
 <li>Oracle&reg; JDK(Java Development Kit) 7 </li>
 </ul>
-<p>Ubuntu&reg; 14.04, Precise Pangolin(32비트 애플리케이션 실행 가능 64비트 버전)에서 
+<p>Ubuntu&reg; 14.04, Precise Pangolin(32비트 애플리케이션 실행 가능 64비트 버전)에서
 테스트됨</p>
 
 

@@ -1,48 +1,51 @@
 page.title=下载 Android Studio 和 SDK 工具
 page.tags=sdk, android studio
-page.template=sdk
+page.template=sdkl10n
 header.hide=1
 page.metaDescription=下载官方 Android IDE 和开发者工具，构建适用于 Android 手机、平板电脑、可穿戴设备、电视等设备的应用。
 
-studio.version=1.1.0
+studio.version=1.4.0.10
 
-studio.linux_bundle_download=android-studio-ide-135.1740770-linux.zip
-studio.linux_bundle_bytes=259336386
-studio.linux_bundle_checksum=e8d166559c50a484f83ebfec6731cc0e3f259208
+studio.linux_bundle_download=android-studio-ide-141.2288178-linux.zip
+studio.linux_bundle_bytes=380821638
+studio.linux_bundle_checksum=137e3734f2e8e285bd7c1d2fae2e8548d0f164bd
 
-studio.mac_bundle_download=android-studio-ide-135.1740770-mac.dmg
-studio.mac_bundle_bytes=261303345
-studio.mac_bundle_checksum=f9745d0fec1eefd498f6160a2d6a1b5247d4cda3
+studio.mac_bundle_download=android-studio-ide-141.2288178-mac.dmg
+studio.mac_bundle_bytes=364624965
+studio.mac_bundle_checksum=27068d59d5a78717d31bdedd054082b5c50d3897
 
-studio.win_bundle_exe_download=android-studio-bundle-135.1740770-windows.exe
-studio.win_bundle_exe_bytes=856233768
-studio.win_bundle_exe_checksum=7484b9989d2914e1de30995fbaa97a271a514b3f
-
-studio.win_notools_exe_download=android-studio-ide-135.1740770-windows.exe
-studio.win_notools_exe_bytes=242135128
-studio.win_notools_exe_checksum=5ea77661cd2300cea09e8e34f4a2219a0813911f
-
-studio.win_bundle_download=android-studio-ide-135.1740770-windows.zip
-studio.win_bundle_bytes=261667054
-studio.win_bundle_checksum=e903f17cc6a57c7e3d460c4555386e3e65c6b4eb
+studio.win_bundle_download=android-studio-ide-141.2288178-windows.zip
+studio.win_bundle_bytes=373492997
+studio.win_bundle_checksum=c0851dc9a506ba9f4c1379a3e9b4019c08478220
 
 
+studio.win_bundle_exe_download=android-studio-bundle-141.2288178-windows.exe
+studio.win_bundle_exe_bytes=1177811944
+studio.win_bundle_exe_checksum=a2f0141d35f8f0c24dad2ff390e7f6231c5f7625
 
-sdk.linux_download=android-sdk_r24.1.2-linux.tgz
-sdk.linux_bytes=168121693
-sdk.linux_checksum=68980e4a26cca0182abb1032abffbb72a1240c51
+studio.win_notools_exe_download=android-studio-ide-141.2288178-windows.exe
+studio.win_notools_exe_bytes=348295968
+studio.win_notools_exe_checksum=82d0d9c78ec23834956f941a07821be347fcb7bf
 
-sdk.mac_download=android-sdk_r24.1.2-macosx.zip
-sdk.mac_bytes=89151287
-sdk.mac_checksum=00e43ff1557e8cba7da53e4f64f3a34498048256
 
-sdk.win_download=android-sdk_r24.1.2-windows.zip
-sdk.win_bytes=159778618
-sdk.win_checksum=704f6c874373b98e061fe2e7eb34f9fcb907a341
 
-sdk.win_installer=installer_r24.1.2-windows.exe
-sdk.win_installer_bytes=111364285
-sdk.win_installer_checksum=e0ec864efa0e7449db2d7ed069c03b1f4d36f0cd
+
+sdk.linux_download=android-sdk_r24.3.4-linux.tgz
+sdk.linux_bytes=309138331
+sdk.linux_checksum=fb293d7bca42e05580be56b1adc22055d46603dd
+
+sdk.mac_download=android-sdk_r24.3.4-macosx.zip
+sdk.mac_bytes=98340900
+sdk.mac_checksum=128f10fba668ea490cc94a08e505a48a608879b9
+
+sdk.win_download=android-sdk_r24.3.4-windows.zip
+sdk.win_bytes=187496897
+sdk.win_checksum=4a8718fb4a2bf2128d34b92f23ddd79fc65839e7
+
+
+sdk.win_installer=installer_r24.3.4-windows.exe
+sdk.win_installer_bytes=139477985
+sdk.win_installer_checksum=094dd45f98a31f839feae898b48f23704f2878dd
 
 
 
@@ -280,7 +283,7 @@ sdk.win_installer_checksum=e0ec864efa0e7449db2d7ed069c03b1f4d36f0cd
 
 <div class="col-13">&nbsp;</div><!-- provides top margin for content -->
 
-<img src="{@docRoot}images/tools/studio-hero.png" srcset="{@docRoot}images/tools/studio-hero_2x.png 2x, {@docRoot}images/tools/studio-hero.png 1x" width="760" height="400" alt="" style="margin-bottom:80px" />
+<img src="{@docRoot}images/tools/studio-hero.png" srcset="{@docRoot}images/tools/studio-hero_2x.png 2x, {@docRoot}images/tools/studio-hero.png 1x" width="760" height="400"/>
 
 <div style="color: #fff; width:226px; height:0; overflow:visible; position:absolute; top:40px; left:25px">
 
@@ -292,33 +295,32 @@ width: 400px;text-align: center;">官方 Android IDE</p>
 <ul style="font-size:12px">
 <li>Android Studio IDE</li>
 <li>Android SDK 工具</li>
-<li>Android 5.0 (Lollipop) 平台</li>
-<li>Android 5.0 模拟器系统映像（附带 Google API）</li>
+<li>Android 6.0 (Marshmallow) 平台</li>
+<li>Android 6.0 模拟器系统映像（附带 Google API）</li>
 </ul>
 
 
-<a class="online landing-button green download-bundle-button" style="margin-top:30px;" href="#Other">下载 Android Studio</a>
+<a class="online landing-button green download-bundle-button" style="margin-top:30px;" href="#Other">Download</a>
 
 <!-- this appears when viewing the offline docs -->
 <p class="offline">
 如需获得 Android Studio 或独立 SDK 工具，请访问 <a href="http://developer.android.com/sdk/index.html">developer.android.com/sdk/</a>
 </p>
+</div>
 
-<ul style="margin-top:50px;color:#444">
+<ul>
   <li><a href="#Requirements">系统要求</a></li>
   <li><a href="#Other">其他下载选项</a></li>
   <li><a href="{@docRoot}sdk/installing/migrate.html">迁移至 Android Studio</a></li>
   <li><a href="https://docs.google.com/a/google.com/forms/d/1mjsyfzv3HAnDY-_Kfj-3QJKdpuksyMFs9e73CRwmT6Q/viewform" target="_blank">参加调查</a></li>
 </ul>
 
-</div>
-
 
 
 
 <h2 class="feature norule" >智能代码编辑器</h2>
 
-<div class="col-9" style="margin:0 20px 0 0">
+<div class="col-9">
   <img src="{@docRoot}images/tools/studio-hero-code.png" srcset="{@docRoot}images/tools/studio-hero-code_2x.png 2x, {@docRoot}images/tools/studio-hero-code.png 1x" width="520" />
 </div><!-- end col-9 (left column) -->
 
@@ -334,7 +336,7 @@ width: 400px;text-align: center;">官方 Android IDE</p>
 
 <h2 class="feature norule">代码模板和 GitHub 集成</h2>
 
-<div class="col-9" style="margin:0 20px 0 0">
+<div class="col-9">
   <img src="{@docRoot}images/tools/studio-hero-import.png" srcset="{@docRoot}images/tools/studio-hero-import_2x.png 2x, {@docRoot}images/tools/studio-hero-import.png 1x" width="520" />
 </div><!-- end col-9 (left column) -->
 
@@ -350,7 +352,7 @@ width: 400px;text-align: center;">官方 Android IDE</p>
 
 <h2 class="feature norule">多屏幕应用开发</h2>
 
-<div class="col-9" style="margin:0 20px 0 0">
+<div class="col-9">
   <img src="{@docRoot}images/tools/studio-hero-screens.png" srcset="{@docRoot}images/tools/studio-hero-screens_2x.png 2x, {@docRoot}images/tools/studio-hero-screens.png 1x" width="520" />
 </div><!-- end col-9 (left column) -->
 
@@ -366,7 +368,7 @@ width: 400px;text-align: center;">官方 Android IDE</p>
 
 <h2 class="feature norule">用于模拟所有形状和尺寸的虚拟设备</h2>
 
-<div class="col-9" style="margin:0 20px 0 0">
+<div class="col-9">
   <img src="{@docRoot}images/tools/studio-hero-avds.png" srcset="{@docRoot}images/tools/studio-hero-avds_2x.png 2x, {@docRoot}images/tools/studio-hero-avds.png 1x" width="520" />
 </div><!-- end col-9 (left column) -->
 
@@ -382,7 +384,7 @@ width: 400px;text-align: center;">官方 Android IDE</p>
 <h2 class="feature norule">
 Android 版本借助 Gradle 演进</h2>
 
-<div class="col-9" style="margin:0 20px 0 0">
+<div class="col-9">
   <img src="{@docRoot}images/tools/studio-hero-gradle.png" srcset="{@docRoot}images/tools/studio-hero-gradle_2x.png 2x, {@docRoot}images/tools/studio-hero-gradle.png 1x" width="520" />
 </div><!-- end col-9 (left column) -->
 
@@ -398,7 +400,7 @@ Android 版本借助 Gradle 演进</h2>
 <h2 class="feature norule">有关 Android Studio 的详细信息</h2>
 <div style="background:#424242;padding:30px; color:#fff;margin:0 0 15px;">
 
-<a class="online landing-button green download-bundle-button" style="margin:0 0 40px 60px;float:right" href="">下载 Android Studio</a>
+<a class="online landing-button green download-bundle-button" style="margin:0 0 40px 60px;float:right" href="">Download</a>
 
   <ul>
   <li>这款由 JetBrains 推出并广受欢迎的 Java IDE 以 IntelliJ IDEA Community Edition 为基础构建</li>
