@@ -1,0 +1,108 @@
+page.title=コンテンツ プロバイダ
+@jd:body
+<div id="qv-wrapper">
+<div id="qv">
+
+
+<!-- In this document -->
+<h2>トピック</h2>
+<ol>
+    <li>
+        <a href="{@docRoot}guide/topics/providers/content-provider-basics.html">        コンテンツ プロバイダの基本</a>
+
+    </li>
+    <li>
+        <a href="{@docRoot}guide/topics/providers/content-provider-creating.html">        コンテンツ プロバイダの作成</a>
+
+    </li>
+    <li>
+        <a href="{@docRoot}guide/topics/providers/calendar-provider.html">カレンダー プロバイダ</a>
+    </li>
+    <li>
+        <a href="{@docRoot}guide/topics/providers/contacts-provider.html">連絡先プロバイダ</a>
+    </li>
+</ol>
+
+    <!-- Related Samples -->
+<h2>関連サンプル</h2>
+    <ol>
+        <li>
+            <a href="{@docRoot}resources/samples/ContactManager/index.html">        Contact Manager</a> アプリケーション
+
+        </li>
+        <li>
+        <a href="{@docRoot}resources/samples/ApiDemos/src/com/example/android/apis/view/List2.html">
+        "Cursor (People)"
+        </a>
+        </li>
+        <li>
+        <a href="{@docRoot}resources/samples/ApiDemos/src/com/example/android/apis/view/List7.html">
+        "Cursor (Phones)"</a>
+        </li>
+        <li>
+            <a href="{@docRoot}resources/samples/SampleSyncAdapter/index.html">        サンプル同期アダプタ</a>
+
+        </li>
+    </ol>
+</div>
+</div>
+<p>
+    コンテンツ プロバイダは、一連の構造化されたデータへのアクセスを管理します。データをカプセル化し、データ セキュリティの定義のためのメカニズムを提供します。
+コンテンツ プロバイダは、1 つのプロセス内のデータを別のプロセスで実行されているコードにつなげるための標準的なインターフェースです。
+
+</p>
+<p>
+    コンテンツ プロバイダのデータにアクセスする場合は、アプリケーションの {@link android.content.Context} の {@link android.content.ContentResolver} オブジェクトを使用し、クライアントとしてプロバイダとやり取りします。
+
+
+    {@link android.content.ContentResolver} オブジェクトは、{@link android.content.ContentProvider} を実装するクラスのインスタンスである、プロバイダ オブジェクトとやり取りします。
+プロバイダ オブジェクトはクライアントからのデータ要求を受け取り、要求されたアクションを実行し、結果を返します。
+
+
+</p>
+<p>
+    データを他のアプリケーションと共有しない場合は、独自のプロバイダを開発する必要はありません。
+ただし、独自のアプリケーションでカスタムの検索候補を提供する場合は、独自のプロバイダが必要になります。
+また、自分のアプリケーションから別のアプリケーションに複雑なデータやファイルをコピーして貼り付ける場合も、独自のプロバイダが必要になります。
+
+</p>
+<p>
+    Android 自身には、オーディオ、ビデオ、画像、個人的な連絡先情報などのデータを管理するコンテンツ プロバイダが用意されています。
+一部のプロバイダについては、<code><a href="{@docRoot}reference/android/provider/package-summary.html">android.provider</a>
+    </code> パッケージのリファレンスに一覧が記載されています。
+
+いくつかの制限もありますが、これらのプロバイダにはすべての Android アプリケーションからアクセスできます。
+
+</p><p>
+    コンテンツ プロバイダの詳細は、次のトピックをご覧ください。
+</p>
+<dl>
+    <dt>
+        <strong><a href="{@docRoot}guide/topics/providers/content-provider-basics.html">        コンテンツ プロバイダの基本</a></strong>
+
+    </dt>
+    <dd>
+        データが表形式にまとめられている場合の、コンテンツ プロバイダでのデータへのアクセス方法。
+    </dd>
+    <dt>
+        <strong><a href="{@docRoot}guide/topics/providers/content-provider-creating.html">         コンテンツ プロバイダの作成</a></strong>
+
+    </dt>
+    <dd>
+        独自のコンテンツ プロバイダの作成方法。
+    </dd>
+    <dt>
+        <strong><a href="{@docRoot}guide/topics/providers/calendar-provider.html">        カレンダー プロバイダ</a></strong>
+
+    </dt>
+    <dd>
+        Android プラットフォームの一部であるカレンダー プロバイダへのアクセス方法。
+    </dd>
+    <dt>
+        <strong><a href="{@docRoot}guide/topics/providers/contacts-provider.html">        連絡先プロバイダ</a></strong>
+
+    </dt>
+    <dd>
+        Android プラットフォームの一部である連絡先プロバイダへのアクセス方法。
+    </dd>
+</dl>

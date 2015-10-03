@@ -1,0 +1,108 @@
+page.title=內容供應程式
+@jd:body
+<div id="qv-wrapper">
+<div id="qv">
+
+
+<!-- In this document -->
+<h2>本文主題</h2>
+<ol>
+    <li>
+        <a href="{@docRoot}guide/topics/providers/content-provider-basics.html">        內容供應程式基本概念</a>
+
+    </li>
+    <li>
+        <a href="{@docRoot}guide/topics/providers/content-provider-creating.html">        建立內容供應程式</a>
+
+    </li>
+    <li>
+        <a href="{@docRoot}guide/topics/providers/calendar-provider.html">日曆供應程式</a>
+    </li>
+    <li>
+        <a href="{@docRoot}guide/topics/providers/contacts-provider.html">聯絡人供應程式</a>
+    </li>
+</ol>
+
+    <!-- Related Samples -->
+<h2>相關範例</h2>
+    <ol>
+        <li>
+            <a href="{@docRoot}resources/samples/ContactManager/index.html">            聯絡人管理員</a>應用程式
+
+        </li>
+        <li>
+        <a href="{@docRoot}resources/samples/ApiDemos/src/com/example/android/apis/view/List2.html">        「游標 (使用者)」        </a>
+
+
+        </li>
+        <li>
+        <a href="{@docRoot}resources/samples/ApiDemos/src/com/example/android/apis/view/List7.html">        「游標 (電話)」</a>
+
+        </li>
+        <li>
+            <a href="{@docRoot}resources/samples/SampleSyncAdapter/index.html">            範例同步配接器</a>
+
+        </li>
+    </ol>
+</div>
+</div>
+<p>
+    內容供應程式可管理一組結構化資料的存取權、壓縮資料以及提供用於定義資料安全性的機制。
+內容供應程式是一種標準介面，可將某個處理程序中的資料與另一個處理程序中執行的程式碼建立連結。
+
+</p>
+<p>
+    如果想透過內容供應程式存取資料，請使用您應用程式的 {@link android.content.Context} 中的{@link android.content.ContentResolver} 物件，以用戶端的身分與供應程式通訊。
+
+
+    {@link android.content.ContentResolver} 物件會與供應程式物件 (實作 {@link android.content.ContentProvider} 的類別執行個體) 通訊。
+而供應程式物件則會接收用戶端發出的資料要求、執行要求的動作，以及傳回最終結果。
+
+
+</p>
+<p>
+    如果您打算與其他應用程式分享您的資料，您不必自行開發供應程式。
+不過，您必須為自己的應用程式準備專屬供應程式，以提供自訂搜尋建議。
+此外，如果您想從自己的應用程式複製複雜的資料或檔案並貼到其他應用程式，也需要準備專屬的供應程式。
+
+</p>
+<p>
+    Android 隨附內容供應程式，可用於管理音訊、影片、圖片、個人聯絡資訊等資料。
+如果想查看 Android 隨附的部分內容供應程式，請參閱 <code><a href="{@docRoot}reference/android/provider/package-summary.html">android.provider</a>
+    </code> 套件的參考文件。
+
+這些供應程式可透過任何 Android 應用程式存取，只不過使用上有些許限制。
+
+</p><p>
+    如果想進一步瞭解內容供應程式，請參閱下列主題：
+</p>
+<dl>
+    <dt>
+        <strong><a href="{@docRoot}guide/topics/providers/content-provider-basics.html">
+        內容供應程式基本概念</a></strong>
+    </dt>
+    <dd>
+        如何在資料已整理成表格的情況下，透過內容供應程式存取資料。
+    </dd>
+    <dt>
+        <strong><a href="{@docRoot}guide/topics/providers/content-provider-creating.html">
+        建立內容供應程式</a></strong>
+    </dt>
+    <dd>
+        如何自行建立內容供應程式。
+    </dd>
+    <dt>
+        <strong><a href="{@docRoot}guide/topics/providers/calendar-provider.html">
+        日曆供應程式</a></strong>
+    </dt>
+    <dd>
+        如何存取屬於 Android 平台一部分的日曆供應程式。
+    </dd>
+    <dt>
+        <strong><a href="{@docRoot}guide/topics/providers/contacts-provider.html">
+        聯絡人供應程式</a></strong>
+    </dt>
+    <dd>
+        如何存取屬於 Android 平台一部分的聯絡人供應程式。
+    </dd>
+</dl>

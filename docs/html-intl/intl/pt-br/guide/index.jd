@@ -1,0 +1,74 @@
+page.title=Introdução ao Android
+
+@jd:body
+
+
+<div class="sidebox" style="width:220px"><!-- width to match col-4 below -->
+<p>Para saber como os aplicativos funcionam, comece com
+<a href="{@docRoot}guide/components/fundamentals.html">Fundamentos do aplicativo</a>.</p>
+<p>Para começar a programar imediatamente, leia <a href="{@docRoot}training/basics/firstapp/index.html">Criação do primeiro aplicativo</a>.</p>
+</div>
+
+<p>O Android fornece uma estrutura de aplicativo rica que permite criar aplicativos e jogos inovadores
+para dispositivos móveis em um ambiente de linguagem Java. Os documentos listados na navegação
+à esquerda fornecem detalhes da criação de aplicativos usando as várias APIs do Android.</p>
+
+<p>Se você é novo no desenvolvimento para Android, é importante que entenda
+os seguintes conceitos fundamentais sobre a estrutura de aplicativos do Android:</p>
+
+
+<div class="landing-banner">
+
+<div class="col-6">
+
+<h4>Aplicativos oferecem vários pontos de entrada</h4>
+
+<p>Aplicativos para Android são criados como uma combinação de componentes distintos que podem ser invocados
+individualmente. Por exemplo, uma <em>atividade</em> individual fornece uma única
+tela para a interface de usuário e um <em>serviço</em> realiza trabalho
+em segundo plano de forma independente.</p>
+
+<p>De um componente, é possível executar outro componente usando uma <em>intenção</em>. É possível até mesmo
+iniciar um componente em um aplicativo diferente, como uma atividade em um aplicativo de mapas para mostrar um endereço. Esse modelo 
+fornece vários pontos de entrada para um único aplicativo e permite que qualquer aplicativo se comporte como o "padrão" de um usuário
+para uma ação que outros aplicativos podem invocar.</p>
+
+
+<p><b>Saiba mais:</b></p>
+<ul class="nolist">
+<li><a href="{@docRoot}guide/components/fundamentals.html">Fundamentos de aplicativos</a>
+<li><a href="{@docRoot}guide/components/intents-filters.html">Intenções e filtros de intenções</a>
+<li><a href="{@docRoot}guide/components/activities.html">Atividades</a>
+</ul>
+
+</div>
+
+
+<div class="col-6">
+
+<h4>Os aplicativos se adaptam a diferentes dispositivos</h4>
+
+<p>O Android fornece uma estrutura de aplicativo adaptativa que permite fornecer recursos exclusivos para
+diferentes configurações de dispositivos. Por exemplo, é possível criar diferentes arquivos XML
+de layout para diversos tamanhos de tela e o sistema
+determina qual layout deverá aplicar com base no tamanho da tela do dispositivo atual.</p>
+
+<p>Você pode consultar a disponibilidade dos recursos do dispositivo em tempo de execução se qualquer recurso do 
+aplicativo exigir hardware específico, como uma câmera. Se necessário, também é possível declarar recursos que o aplicativo exige,
+para que mercados como a Google Play Store não permitam a instalação em dispositivos que não sejam compatíveis
+com aquele recurso.</p>
+
+
+<p><b>Saiba mais:</b></p>
+<ul class="nolist">
+<li><a href="{@docRoot}guide/practices/compatibility.html">Compatibilidade do dispositivo</a>
+<li><a href="{@docRoot}guide/topics/resources/overview.html">Visão geral dos recursos</a>
+<li><a href="{@docRoot}guide/topics/ui/overview.html">Visão geral da interface do usuário</a>
+</ul>
+
+</div>
+
+</div><!-- end landing-banner -->
+
+
+

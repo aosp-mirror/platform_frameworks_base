@@ -1,0 +1,1202 @@
+page.title=설정
+page.tags=preference,preferenceactivity,preferencefragment
+
+@jd:body
+
+
+<div id="qv-wrapper">
+<div id="qv">
+
+<h2>이 문서의 내용</h2>
+<ol>
+  <li><a href="#Overview">개요</a>
+    <ol>
+      <li><a href="#SettingTypes">기본 설정</a></li>
+    </ol>
+  </li>
+  <li><a href="#DefiningPrefs">XML로 기본 설정 정의하기</a>
+    <ol>
+      <li><a href="#Groups">설정 그룹 만들기</a></li>
+      <li><a href="#Intents">인텐트 사용하기</a></li>
+    </ol>
+  </li>
+  <li><a href="#Activity">기본 설정 액티비티 만들기</a></li>
+  <li><a href="#Fragment">기본 설정 프래그먼트 사용하기</a></li>
+  <li><a href="#Defaults">설정 기본 값</a></li>
+  <li><a href="#PreferenceHeaders">기본 설정 헤더 사용하기</a>
+    <ol>
+      <li><a href="#CreateHeaders">헤더 파일 만들기</a></li>
+      <li><a href="#DisplayHeaders">헤더 표시하기</a></li>
+      <li><a href="#BackCompatHeaders">기본 설정 헤더로 이전 버전 지원하기</a></li>
+    </ol>
+  </li>
+  <li><a href="#ReadingPrefs">기본 설정 읽기</a>
+    <ol>
+      <li><a href="#Listening">기본 설정 변경 수신 대기</a></li>
+    </ol>
+  </li>
+  <li><a href="#NetworkUsage">네트워크 사용량 관리하기</a></li>
+  <li><a href="#Custom">사용자 지정 기본 설정 구축하기</a>
+    <ol>
+      <li><a href="#CustomSelected">사용자 인터페이스 지정하기</a></li>
+      <li><a href="#CustomSave">설정의 값 저장하기</a></li>
+      <li><a href="#CustomInitialize">현재 값 초기화하기</a></li>
+      <li><a href="#CustomDefault">기본 값 제공하기</a></li>
+      <li><a href="#CustomSaveState">기본 설정의 상태 저장 및 복원하기</a></li>
+    </ol>
+  </li>
+</ol>
+
+<h2>Key 클래스</h2>
+<ol>
+  <li>{@link android.preference.Preference}</li>
+  <li>{@link android.preference.PreferenceActivity}</li>
+  <li>{@link android.preference.PreferenceFragment}</li>
+</ol>
+
+
+<h2>참고 항목</h2>
+<ol>
+  <li><a href="{@docRoot}design/patterns/settings.html">설정 디자인 가이드</a></li>
+</ol>
+</div>
+</div>
+
+
+
+
+<p>애플리케이션에는 종종 설정이 포함되어 있어 사용자가 앱 기능과 행동을 수정할 수 있게 해줍니다. 예를 들어 
+몇몇 앱은 사용자에게 알림을 활성화할지 여부를 지정하거나 애플리케이션이 
+클라우드와 데이터를 동기화할 빈도를 지정할 수 있게 해줍니다.</p>
+
+<p>자신의 앱에 설정을 제공하고자 하는 경우, Android의 
+{@link android.preference.Preference} API를 사용하여 다른 Android 앱(시스템 설정 포함)의 사용자 환경과 
+일관성을 유지하는 인터페이스를 구축할 수 있게 해야 합니다. 이 문서에서는 
+{@link android.preference.Preference} API를 사용하여 앱 설정을 구축하는 방법을 설명합니다.</p>
+
+<div class="note design">
+<p><strong>설정 디자인</strong></p>
+  <p>설정을 디자인하는 방법에 관련된 정보는 <a href="{@docRoot}design/patterns/settings.html">설정</a> 디자인 가이드를 읽어보십시오.</p>
+</div>
+
+
+<img src="{@docRoot}images/ui/settings/settings.png" alt="" width="435" />
+<p class="img-caption"><strong>그림 1.</strong> Android 메시지 앱의 설정에서 가져온 
+스크린샷입니다. {@link android.preference.Preference}가 정의한 항목을 선택하면 
+인터페이스가 열려 설정을 변경할 수 있게 됩니다.</p>
+
+
+
+
+<h2 id="Overview">개요</h2>
+
+<p>사용자 인터페이스를 구축할 때에는 {@link android.view.View} 객체를 사용하지만, 설정은 그 대신 
+{@link android.preference.Preference} 클래스의 다양한 하위 클래스를 사용하여 구축합니다. 
+이와 같은 하위 클래스는 XML 파일에서 선언합니다.</p>
+
+<p>{@link android.preference.Preference} 객체는 하나의 설정을 이루는 기본 
+단위입니다. 각각의 {@link android.preference.Preference}는 목록의 항목으로 
+나타나며 사용자가 설정을 수정하기에 적절한 UI를 제공합니다. 예를 들어 {@link
+android.preference.CheckBoxPreference}는 확인란을 표시하는 목록 항목을 만들고, {@link
+android.preference.ListPreference}는 선택 목록이 있는 대화를 여는 항목을 만듭니다.</p>
+
+<p>각각의 {@link android.preference.Preference}를 추가할 때마다 상응하는 키-값 쌍이 있어 
+시스템이 이를 사용하여 해당 설정을 앱의 설정에 대한 기본 {@link android.content.SharedPreferences}
+파일에 저장합니다. 사용자가 설정을 변경하면 시스템이 
+{@link android.content.SharedPreferences} 파일에 있는 상응하는 값을 개발자 대신 업데이트합니다. 개발자가 직접 
+연관된 {@link android.content.SharedPreferences} 파일과 상호 작용을 해야 하는 경우는 
+사용자의 설정을 기반으로 앱의 동작을 결정하기 위해 값을 읽어야 할 때뿐입니다.</p>
+
+<p>각 설정에 대하여 {@link android.content.SharedPreferences}에 저장된 값은 다음과 같은 
+데이터 유형 중 한 가지를 취할 수 있습니다.</p>
+
+<ul>
+  <li>Boolean</li>
+  <li>Float</li>
+  <li>Int</li>
+  <li>Long</li>
+  <li>String</li>
+  <li>String {@link java.util.Set}</li>
+</ul>
+
+<p>앱의 설정 UI는 
+{@link android.view.View} 객체 대신 
+{@link android.preference.Preference} 객체를 사용하여 구축되기 때문에, 목록 설정을 표시하려면 특수 {@link android.app.Activity} 또는 
+{@link android.app.Fragment} 하위 클래스를 사용해야 합니다.</p>
+
+<ul>
+  <li>앱이 Android 3.0 이전 버전(API 레벨 10 이하)을 지원하는 경우, 액티비티를 구축할 때 
+{@link android.preference.PreferenceActivity} 클래스의 확장으로 구축해야 합니다.</li>
+  <li>Android 3.0 이후의 경우에는 대신 기존의 {@link android.app.Activity}를 
+사용해야 합니다. 이것은 앱 설정을 표시하는 {@link android.preference.PreferenceFragment}를 호스팅합니다. 
+하지만, 여러 개의 설정 그룹이 있는 경우 {@link android.preference.PreferenceActivity}를 사용하여 
+대형 화면에 맞는 창 두 개짜리 레이아웃을 만들 수도 있습니다.</li>
+</ul>
+
+<p>{@link android.preference.PreferenceActivity}와 {@link
+android.preference.PreferenceFragment}의 인스턴스를 설정하는 방법은 <a href="#Activity">기본 설정 액티비티 만들기</a>와 <a href="#Fragment">기본 설정 
+프래그먼트 사용하기</a>에 관련된 섹션에서 논합니다.</p>
+
+
+<h3 id="SettingTypes">기본 설정</h3>
+
+<p>앱에 대한 설정은 모두 {@link
+android.preference.Preference} 클래스의 특정 하위 클래스로 표현됩니다. 각 하위 클래스에 핵심 속성이 한 세트씩 포함되어 있어 
+설정의 제목과 기본 값 등과 같은 것을 지정할 수 있게 해줍니다. 각 하위 클래스는 또한 자신만의 
+특수 속성과 사용자 인터페이스도 제공합니다. 예를 들어, 그림 1에서는 메시지 앱의 설정에서 
+가져온 스크린샷을 나타낸 것입니다. 설정 화면에 있는 각 목록 항목은 각기 서로 다른 {@link
+android.preference.Preference} 객체로 지원됩니다.</p>
+
+<p>가장 보편적인 기본 설정을 몇 가지만 소개하면 다음과 같습니다.</p>
+
+<dl>
+  <dt>{@link android.preference.CheckBoxPreference}</dt>
+  <dd>활성화되었거나 비활성화된 설정에 대한 확인란이 있는 항목을 표시합니다. 저장된 값은 
+부울입니다(확인란이 선택된 경우 <code>true</code>).</dd>
+
+  <dt>{@link android.preference.ListPreference}</dt>
+  <dd>무선 버튼 목록이 있는 대화를 엽니다. 저장된 값은 
+지원되는 값 유형(위에 목록으로 나열) 중 어느 것이라도 될 수 있습니다.</dd>
+
+  <dt>{@link android.preference.EditTextPreference}</dt>
+  <dd>{@link android.widget.EditText} 위젯이 있는 대화를 엽니다. 저장된 값은 {@link
+java.lang.String}입니다.</dd>
+</dl>
+
+<p>다른 모든 하위 클래스와 이에 상응하는 속성의 목록을 보려면 {@link android.preference.Preference}
+ 클래스를 참조하십시오.</p>
+
+<p>물론 기본 제공 클래스만으로는 필요한 것을 모두 충족할 수 없고 앱에 무언가 좀 더 특수한 것이 
+필요할 수도 있습니다. 예를 들어 플랫폼은 현재 숫자나 날짜를 선택할 수 있는 {@link
+android.preference.Preference} 클래스를 제공하지 않습니다. 따라서 개발자 나름대로 
+{@link android.preference.Preference} 하위 클래스를 정의해야 할 수도 있습니다. 이 작업을 수행하는 데 유용한 내용인 <a href="#Custom">사용자 지정 기본 설정 구축하기</a>에 관한 섹션을 참조하십시오.</p>
+
+
+
+<h2 id="DefiningPrefs">XML로 기본 설정 정의하기</h2>
+
+<p>새로운 {@link android.preference.Preference} 객체를 런타임에 인스턴트화하는 것도 가능하지만, 
+설정 목록을 정의할 때에는 {@link android.preference.Preference}
+객체의 계층과 함께 XML을 사용해야 합니다. 설정 컬렉션을 정의하는 데 XM 파일을 사용하는 것이 선호되는 이유는 이 파일이 
+읽기 쉬운 구조를 제공하여 업데이트가 단순하기 때문입니다. 또한, 앱의 설정은 보통 
+미리 정의되어 있습니다. 다만 개발자도 여전히 런타임에 설정 컬렉션을 수정할 수 있습니다.</p>
+
+<p>각 {@link android.preference.Preference} 하위 클래스는 클래스 이름에 일치하는 XML 요소로 
+선언하면 됩니다. 예를 들면 {@code &lt;CheckBoxPreference&gt;}가 이에 해당됩니다.</p>
+
+<p>이 XML 파일은 반드시 {@code res/xml/} 디렉터리에 저장해야 합니다. 파일의 이름은 무엇이든 원하는 대로 지정할 수 있지만, 
+일반적으로는 {@code preferences.xml}이라고 명명합니다. 파일은 하나만 필요한 것이 보통입니다. 
+왜냐하면 계층에 있는 분기(자신만의 설정 목록을 엶)는 
+{@link android.preference.PreferenceScreen}의 중첩된 인스턴스를 사용하여 선언되기 때문입니다.</p>
+
+<p class="note"><strong>참고:</strong> 설정에 다중 창 레이아웃을 만들고자 하는 경우, 
+각 프래그먼트에 대해 별도의 XML 파일이 필요합니다.</p>
+
+<p>XML 파일의 루트 노드는 반드시 {@link android.preference.PreferenceScreen
+&lt;PreferenceScreen&gt;} 요소여야 합니다. 바로 이 요소 내에 각 {@link
+android.preference.Preference}를 추가하는 것입니다. 
+{@link android.preference.PreferenceScreen &lt;PreferenceScreen&gt;} 요소 내에 추가하는 각 하위는 설정 목록에서 
+각기 항목 하나씩으로 나타납니다.</p>
+
+<p>예:</p>
+
+<pre>
+&lt;?xml version="1.0" encoding="utf-8"?>
+&lt;PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+    &lt;CheckBoxPreference
+        android:key="pref_sync"
+        android:title="@string/pref_sync"
+        android:summary="@string/pref_sync_summ"
+        android:defaultValue="true" />
+    &lt;ListPreference
+        android:dependency="pref_sync"
+        android:key="pref_syncConnectionType"
+        android:title="@string/pref_syncConnectionType"
+        android:dialogTitle="@string/pref_syncConnectionType"
+        android:entries="@array/pref_syncConnectionTypes_entries"
+        android:entryValues="@array/pref_syncConnectionTypes_values"
+        android:defaultValue="@string/pref_syncConnectionTypes_default" />
+&lt;/PreferenceScreen>
+</pre>
+
+<p>이 예시에서는 {@link android.preference.CheckBoxPreference}와 {@link
+android.preference.ListPreference}가 하나씩 있습니다. 두 항목 모두 다음과 같은 세 가지 속성을 포함하고 있습니다.</p>
+
+<dl>
+  <dt>{@code android:key}</dt>
+  <dd>이 속성은 데이터 값을 유지하는 기본 설정에 필수입니다. 이것은 고유키(문자)를 
+나타내며, 시스템이 이것을 사용하여 이 설정의 값을 {@link
+android.content.SharedPreferences}에 저장합니다. 
+  <p>이 속성이 <em>필요하지 않은</em> 인스턴스는 기본 설정이 
+{@link android.preference.PreferenceCategory} 또는 {@link android.preference.PreferenceScreen}인 경우, 또는 
+기본 설정이 {@link android.content.Intent}를 호출할 것을 나타내거나(<a href="#Intents">{@code &lt;intent&gt;}</a> 요소로) {@link android.app.Fragment}를 표시하도록 지정하는 경우(<a href="{@docRoot}reference/android/preference/Preference.html#attr_android:fragment">{@code
+android:fragment}</a> 속성으로)뿐입니다.</p>
+  </dd>
+  <dt>{@code android:title}</dt>
+  <dd>이것은 설정에 대하여 사용자가 볼 수 있는 이름을 제공합니다.</dd>
+  <dt>{@code android:defaultValue}</dt>
+  <dd>이것은 시스템이 {@link
+android.content.SharedPreferences} 파일에 설정해야 하는 초기 값을 나타냅니다. 모든 설정에 기본 값을 제공해야 
+합니다.</dd>
+</dl>
+
+<p>다른 모든 지원되는 속성에 대해서는 {@link
+android.preference.Preference}(및 각각의 하위 클래스) 관련 문서를 참조하십시오.</p>
+
+
+<div class="figure" style="width:300px">
+  <img src="{@docRoot}images/ui/settings/settings-titles.png" alt="" />
+  <p class="img-caption"><strong>그림 2.</strong> 제목이 있는 설정
+카테고리입니다. <br/><b>1.</b> 카테고리는 {@link
+android.preference.PreferenceCategory &lt;PreferenceCategory&gt;} 요소가 지정합니다. <br/><b>2.</b> 제목은 
+{@code android:title} 속성으로 지정합니다.</p>
+</div>
+
+
+<p>설정 목록이 약 10개 항목을 초과하면 제목을 추가하여 
+설정 그룹을 정의하거나, 해당 그룹을 별도의 
+화면에 표시하는 것이 좋을 수도 있습니다. 이러한 옵션은 다음 섹션에 설명되어 있습니다.</p>
+
+
+<h3 id="Groups">설정 그룹 만들기</h3>
+
+<p>10개 이상의 설정 목록을 제시하는 경우, 사용자가 
+이들을 둘러보고 이해하며 처리하는 데 어려움을 겪을 수 있습니다. 이 문제를 해결하려면 
+설정의 일부 또는 모두를 그룹으로 나누어 사실상 하나의 긴 목록을 여러 개의 더 짧은 목록으로 
+바꿔주면 됩니다. 관련된 설정 그룹 하나를 나타낼 때에는 다음과 같은 두 가지 방식 중 하나를 택하면 됩니다.</p>
+
+<ul>
+  <li><a href="#Titles">제목 사용하기</a></li>
+  <li><a href="#Subscreens">보조 화면 사용하기</a></li>
+</ul>
+
+<p>이와 같은 그룹화 기법 중 하나 또는 둘 모두를 사용하여 앱의 설정을 조직화할 수 있습니다. 어느 것을 
+사용할지, 설정을 어떻게 나눌지 결정할 때에는 Android 
+디자인의 <a href="{@docRoot}design/patterns/settings.html">설정</a> 가이드에 있는 지침을 따라야 합니다.</p>
+
+
+<h4 id="Titles">제목 사용하기</h4>
+
+<p>여러 개의 설정 그룹 사이에 구분선과 제목을 제공하고자 하는 경우(그림 2에 표시된 것과 같이), 
+각 {@link android.preference.Preference} 객체 그룹을 {@link
+android.preference.PreferenceCategory} 내부에 배치합니다.</p>
+
+<p>예:</p>
+
+<pre>
+&lt;PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+    &lt;PreferenceCategory 
+        android:title="&#64;string/pref_sms_storage_title"
+        android:key="pref_key_storage_settings">
+        &lt;CheckBoxPreference
+            android:key="pref_key_auto_delete"
+            android:summary="&#64;string/pref_summary_auto_delete"
+            android:title="&#64;string/pref_title_auto_delete"
+            android:defaultValue="false"... />
+        &lt;Preference 
+            android:key="pref_key_sms_delete_limit"
+            android:dependency="pref_key_auto_delete"
+            android:summary="&#64;string/pref_summary_delete_limit"
+            android:title="&#64;string/pref_title_sms_delete"... />
+        &lt;Preference 
+            android:key="pref_key_mms_delete_limit"
+            android:dependency="pref_key_auto_delete"
+            android:summary="&#64;string/pref_summary_delete_limit"
+            android:title="&#64;string/pref_title_mms_delete" ... />
+    &lt;/PreferenceCategory>
+    ...
+&lt;/PreferenceScreen>
+</pre>
+
+
+<h4 id="Subscreens">보조 화면 사용하기</h4>
+
+<p>설정 그룹 여러 개를 보조 화면에 배치하고자 하는 경우(그림 3에 표시된 것과 같이), 해당 
+{@link android.preference.Preference} 객체 그룹을 {@link
+android.preference.PreferenceScreen} 안에 배치합니다.</p>
+
+<img src="{@docRoot}images/ui/settings/settings-subscreen.png" alt="" />
+<p class="img-caption"><strong>그림 3.</strong> 설정 보조 화면입니다. {@code
+&lt;PreferenceScreen&gt;} 요소가 
+항목을 만들며, 이 항목이 선택되면 별도의 목록이 열려 중첩된 설정을 표시합니다.</p>
+
+<p>예:</p>
+
+<pre>
+&lt;PreferenceScreen  xmlns:android="http://schemas.android.com/apk/res/android">
+    &lt;!-- opens a subscreen of settings -->
+    &lt;PreferenceScreen
+        android:key="button_voicemail_category_key"
+        android:title="&#64;string/voicemail"
+        android:persistent="false">
+        &lt;ListPreference
+            android:key="button_voicemail_provider_key"
+            android:title="&#64;string/voicemail_provider" ... />
+        &lt;!-- opens another nested subscreen -->
+        &lt;PreferenceScreen
+            android:key="button_voicemail_setting_key"
+            android:title="&#64;string/voicemail_settings"
+            android:persistent="false">
+            ...
+        &lt;/PreferenceScreen>
+        &lt;RingtonePreference
+            android:key="button_voicemail_ringtone_key"
+            android:title="&#64;string/voicemail_ringtone_title"
+            android:ringtoneType="notification" ... />
+        ...
+    &lt;/PreferenceScreen>
+    ...
+&lt;/PreferenceScreen>
+</pre>
+
+
+<h3 id="Intents">인텐트 사용하기</h3>
+
+<p>어떤 경우에는 기본 설정 항목을 사용하여 설정 화면 대신 여러 가지 액티비티를 
+열고자 할 수도 있습니다. 예를 들어 웹 브라우저를 열어 웹 페이지를 보는 것이 이에 해당됩니다. 사용자가 기본 설정 항목을 선택할 때 {@link
+android.content.Intent}를 호출하도록 하려면, {@code &lt;intent&gt;}
+요소를 상응하는 {@code &lt;Preference&gt;} 요소의 하위로 추가하면 됩니다.</p>
+
+<p>예를 들어 다음은 기본 설정 항목을 사용하여 웹 페이지를 열도록 하는 방법입니다.</p>
+
+<pre>
+&lt;Preference android:title="@string/prefs_web_page" >
+    &lt;intent android:action="android.intent.action.VIEW"
+            android:data="http://www.example.com" />
+&lt;/Preference>
+</pre>
+
+<p>다음 속성을 사용하여 명시적 인텐트와 암시적 인텐트 두 가지를 모두 만들 수 있습니다.</p>
+
+<dl>
+  <dt>{@code android:action}</dt>
+    <dd>할당할 작업이며, {@link android.content.Intent#setAction setAction()}
+메서드를 따릅니다.</dd>
+  <dt>{@code android:data}</dt>
+    <dd>할당할 데이터이며, {@link android.content.Intent#setData setData()} 메서드를 따릅니다.</dd>
+  <dt>{@code android:mimeType}</dt>
+    <dd>할당할 MIME 유형이며, {@link android.content.Intent#setType setType()}
+메서드를 따릅니다.</dd>
+  <dt>{@code android:targetClass}</dt>
+    <dd>구성 요소 이름의 클래스 부분이며, {@link android.content.Intent#setComponent
+setComponent()} 메서드를 따릅니다.</dd>
+  <dt>{@code android:targetPackage}</dt>
+    <dd>구성 요소 이름의 패키지 부분이며, {@link
+android.content.Intent#setComponent setComponent()} 메서드를 따릅니다.</dd>
+</dl>
+
+
+
+<h2 id="Activity">기본 설정 액티비티 만들기</h2>
+
+<p>설정을 액티비티에서 표시하려면 {@link
+android.preference.PreferenceActivity} 클래스를 확장하면 됩니다. 이것은 일반적인 {@link
+android.app.Activity} 클래스 확장의 일종입니다. 이는 {@link
+android.preference.Preference} 객체의 계층에 기반한 설정 목록을 표시합니다. {@link android.preference.PreferenceActivity}는 
+사용자가 변경 작업을 하면 각 {@link
+android.preference.Preference}와 연관된 설정을 유지합니다.</p>
+
+<p class="note"><strong>참고:</strong> Android 3.0 이상에 맞춰 애플리케이션을 개발하는 경우, 
+대신 {@link android.preference.PreferenceFragment}를 사용해야 합니다. 다음 섹션의 
+<a href="#Fragment">기본 설정 프래그먼트 사용하기</a> 관련 내용을 참조하십시오.</p>
+
+<p>여기서 기억해야 할 가장 중요한 점은 {@link
+android.preference.PreferenceActivity#onCreate onCreate()} 콜백 중에 보기 레이아웃을 로딩해서는 안 된다는 것입니다. 그 대신 {@link
+android.preference.PreferenceActivity#addPreferencesFromResource addPreferencesFromResource()}를 호출하여 
+XML 파일에서 선언한 기본 설정을 액티비티에 추가합니다. 예를 들어 다음은 기능적인 
+{@link android.preference.PreferenceActivity}에 필요한 가장 최소한의 코드를 나타낸 것입니다.</p>
+
+<pre>
+public class SettingsActivity extends PreferenceActivity {
+    &#64;Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        addPreferencesFromResource(R.xml.preferences);
+    }
+}
+</pre>
+
+<p>사실 이 코드만으로 몇몇 앱에는 충분합니다. 사용자가 기본 설정을 수정하자마자 
+시스템이 해당 변경을 기본 {@link android.content.SharedPreferences} 파일에 저장하여, 
+사용자의 설정을 확인해야 할 때 다른 애플리케이션 구성 요소가 이를 읽을 수 있도록 하기 때문입니다. 하지만 
+대다수의 앱은 기본 설정에 일어나는 변경을 수신 대기하기 위해 약간의 코드가 더 필요합니다.
+{@link android.content.SharedPreferences} 파일에 일어나는 변경을 수신 대기하는 데 관한 
+자세한 정보는 <a href="#ReadingPrefs">기본 설정 읽기</a>에 관한 섹션을 참조하십시오.</p>
+
+
+
+
+<h2 id="Fragment">기본 설정 프래그먼트 사용하기</h2>
+
+<p>Android 3.0(API 레벨 11) 이상에 맞춰 개발하는 경우, {@link
+android.preference.PreferenceFragment}를 사용하여 {@link android.preference.Preference}
+객체 목록을 표시해야 합니다. {@link android.preference.PreferenceFragment}는 모든 액티비티에 추가할 수 있습니다. 즉, 
+{@link android.preference.PreferenceActivity}를 사용하지 않아도 됩니다.</p>
+
+<p><a href="{@docRoot}guide/components/fragments.html">프래그먼트</a>는 액티비티만 
+사용하는 것에 비해 애플리케이션에 보다 유연한 아키텍처를 제공하며, 이는 구축하는 
+액티비티의 종류와 무관하게 적용됩니다. 따라서 설정 표시를 제어하는 데에는 {@link
+android.preference.PreferenceFragment}를 {@link
+android.preference.PreferenceActivity} 대신 사용하는 방안을 권장합니다(가능한 경우).</p>
+
+<p>{@link android.preference.PreferenceFragment} 구현은 매우 간단합니다.
+{@link android.preference.PreferenceFragment#onCreate onCreate()} 메서드를 정의하여 기본 설정 파일을 
+{@link android.preference.PreferenceFragment#addPreferencesFromResource
+addPreferencesFromResource()}로 로딩하도록 하기만 하면 됩니다. 예:</p>
+
+<pre>
+public static class SettingsFragment extends PreferenceFragment {
+    &#64;Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+
+        // Load the preferences from an XML resource
+        addPreferencesFromResource(R.xml.preferences);
+    }
+    ...
+}
+</pre>
+
+<p>그런 다음 이 프래그먼트를 {@link android.app.Activity}에 추가하기만 하면 되고, 이는 다른 모든 
+{@link android.app.Fragment}에서와 마찬가지입니다. 예:</p>
+
+<pre>
+public class SettingsActivity extends Activity {
+    &#64;Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+
+        // Display the fragment as the main content.
+        getFragmentManager().beginTransaction()
+                .replace(android.R.id.content, new SettingsFragment())
+                .commit();
+    }
+}
+</pre>
+
+<p class="note"><strong>참고:</strong> {@link android.preference.PreferenceFragment}에는 자신만의 
+{@link android.content.Context} 객체가 없습니다. {@link android.content.Context}
+객체가 필요한 경우, {@link android.app.Fragment#getActivity()}를 호출하면 됩니다. 하지만, 
+{@link android.app.Fragment#getActivity()}를 호출하는 것은 프래그먼트가 액티비티에 첨부되어 있는 경우만으로 국한시켜야 한다는 점을 유의하십시오. 프래그먼트가 
+아직 첨부되지 않았거나 수명 주기가 끝날 무렵 분리된 경우, {@link
+android.app.Fragment#getActivity()}가 null을 반환합니다.</p>
+
+
+<h2 id="Defaults">설정 기본 값</h2>
+
+<p>여러분이 만드는 기본 설정은 애플리케이션에 중요한 동작을 정의하는 경우가 많을 것입니다. 따라서 
+연관된 {@link android.content.SharedPreferences} 파일을 
+각 {@link android.preference.Preference}에 대한 기본 값으로 초기화하여 사용자가 애플리케이션을 처음 열 때 
+적용하는 것이 중요합니다.</p>
+
+<p>가장 먼저 해야 할 일은 XML 파일 내의 각 {@link
+android.preference.Preference}
+객체에 대해 기본 값을 지정하는 것입니다. 이때 {@code android:defaultValue} 속성을 사용합니다. 이 값은 상응하는 
+{@link android.preference.Preference} 객체에 대해 적절한 어느 데이터 유형이라도 될 수 있습니다. 예:
+</p>
+
+<pre>
+&lt;!-- default value is a boolean -->
+&lt;CheckBoxPreference
+    android:defaultValue="true"
+    ... />
+
+&lt;!-- default value is a string -->
+&lt;ListPreference
+    android:defaultValue="@string/pref_syncConnectionTypes_default"
+    ... />
+</pre>
+
+<p>그런 다음, 애플리케이션의 기본 액티비티에 있는 {@link android.app.Activity#onCreate onCreate()} 
+메서드로부터&mdash;또한 사용자가 애플리케이션에 처음으로 들어올 통로가 될 수 있는 
+다른 모든 액티비티도 포함&mdash;{@link android.preference.PreferenceManager#setDefaultValues
+setDefaultValues()}를 호출합니다.</p>
+
+<pre>
+PreferenceManager.setDefaultValues(this, R.xml.advanced_preferences, false);
+</pre>
+
+<p>이것을 {@link android.app.Activity#onCreate onCreate()} 중에 호출하면 
+애플리케이션이 기본 설정으로 적절히 초기화되도록 보장할 수 있습니다. 이것은 애플리케이션이 
+몇 가지 동작을 결정하기 위해 읽어야 할 수도 있습니다(예를 들어 셀룰러 네트워크에서 데이터를 
+다운로드할지 여부 등).</p>
+
+<p>이 메서드는 다음과 같은 세 개의 인수를 취합니다.</p>
+<ul>
+  <li>애플리케이션 {@link android.content.Context}.</li>
+  <li>기본 값을 설정하고자 하는 기본 설정 XML 파일에 대한 리소스 ID입니다.</li>
+  <li>기본 값을 한 번 이상 설정해야 하는지 여부를 나타내는 부울 값입니다.
+<p><code>false</code>인 경우, 시스템은 이 메서드가 전에 한 번도 호출된 적이 없을 경우에만 
+기본 값을 설정합니다(아니면 기본 값을 공유한 기본 설정 파일에 있는 {@link android.preference.PreferenceManager#KEY_HAS_SET_DEFAULT_VALUES}
+가 안전합니다).</p></li>
+</ul>
+
+<p>세 번째 인수를 <code>false</code>로 설정해 두는 한 이 메서드를 액티비티가 시작될 때마다 
+안전하게 호출할 수 있으며, 그렇게 해도 사용자의 저장된 기본 설정을 기본값으로 초기화하여 
+재정의하지 않습니다. 하지만 이를 <code>true</code>로 설정하면, 이전의 모든 값을 
+기본 값으로 재정의하게 됩니다.</p>
+
+
+
+<h2 id="PreferenceHeaders">기본 설정 헤더 사용하기</h2>
+
+<p>드문 경우지만 설정을 디자인할 때 첫 화면에는 
+<a href="#Subscreens">보조 화면</a> 목록만 표시하도록 하고자 할 수도 있습니다(예: 시스템 설정 앱, 
+그림 4와 5 참조). 그러한 디자인을 Android 3.0 이상을 대상으로 개발하는 경우, Android 3.0에 있는 
+새로운 "헤더" 기능을 사용해야 합니다. 이것이 중첩된 
+{@link android.preference.PreferenceScreen} 요소를 사용하여 보조 화면을 구축하는 방안을 대신합니다.</p>
+
+<p>헤더를 사용하여 설정을 구축하려면 다음과 같이 해야 합니다.</p>
+<ol>
+  <li>각 설정 그룹을 별개의 {@link
+android.preference.PreferenceFragment} 인스턴스로 구분합니다. 다시 말해, 설정 그룹마다 별도의 XML 파일이 하나씩 있어야 한다는 
+뜻입니다.</li>
+  <li>각 설정 그룹을 목록으로 나열하는 XML 헤더 파일을 생성하고 어느 프래그먼트에 
+상응하는 설정 목록이 들어있는지 선언합니다.</li>
+  <li>{@link android.preference.PreferenceActivity} 클래스를 확장하여 설정을 호스팅하도록 합니다.</li>
+  <li>{@link
+android.preference.PreferenceActivity#onBuildHeaders onBuildHeaders()} 콜백을 구현하여 헤더 파일을 
+나타냅니다.</li>
+</ol>
+
+<p>이 디자인을 사용하는 데 있어 커다란 이점은 {@link android.preference.PreferenceActivity}가 
+(앱이) 대형 화면에서 실행될 때 그림 4에서 나타낸 것과 같이 창 두 개짜리 레이아웃을 자동으로 표시한다는 것입니다.</p>
+
+<p>애플리케이션이 Android 3.0 이전 버전을 지원한다 하더라도 애플리케이션이 
+{@link android.preference.PreferenceFragment}를 사용하여 
+신형 기기에서 창 두 개짜리 표시를 지원하도록 하면서도 구형 기기에서는 일반적인 다중 화면 계층을 
+여전히 지원하도록 할 수도 있습니다(<a href="#BackCompatHeaders">기본 설정 헤더로 
+이전 버전 지원하기</a>를 참조하십시오).</p>
+
+<img src="{@docRoot}images/ui/settings/settings-headers-tablet.png" alt="" />
+<p class="img-caption"><strong>그림 4.</strong> 헤더가 있는 창 두 개짜리 레이아웃입니다. <br/><b>1.</b> 헤더는 
+XML 헤더 파일로 정의됩니다. <br/><b>2.</b> 각 설정 그룹은 
+{@link android.preference.PreferenceFragment}가 정의하며, 이는 헤더 파일에 있는 {@code &lt;header&gt;} 요소가 
+지정합니다.</p>
+
+<img src="{@docRoot}images/ui/settings/settings-headers-handset.png" alt="" />
+<p class="img-caption"><strong>그림 5.</strong> 설정 헤더가 있는 핸드셋 기기입니다. 항목을 선택하면 
+연관된 {@link android.preference.PreferenceFragment}가 헤더를 
+대체합니다.</p>
+
+
+<h3 id="CreateHeaders" style="clear:left">헤더 파일 만들기</h3>
+
+<p>헤더 목록에 있는 각 설정 그룹은 루트 {@code &lt;preference-headers&gt;} 
+요소 안에 있는 {@code &lt;header&gt;} 요소 하나로 나타냅니다. 예:</p>
+
+<pre>
+&lt;?xml version="1.0" encoding="utf-8"?>
+&lt;preference-headers xmlns:android="http://schemas.android.com/apk/res/android">
+    &lt;header 
+        android:fragment="com.example.prefs.SettingsActivity$SettingsFragmentOne"
+        android:title="@string/prefs_category_one"
+        android:summary="@string/prefs_summ_category_one" />
+    &lt;header 
+        android:fragment="com.example.prefs.SettingsActivity$SettingsFragmentTwo"
+        android:title="@string/prefs_category_two"
+        android:summary="@string/prefs_summ_category_two" >
+        &lt;!-- key/value pairs can be included as arguments for the fragment. -->
+        &lt;extra android:name="someKey" android:value="someHeaderValue" />
+    &lt;/header>
+&lt;/preference-headers>
+</pre>
+
+<p>각 헤더는 {@code android:fragment} 속성으로 {@link
+android.preference.PreferenceFragment} 예를 선언하며 이는 사용자가 헤더를 선택하면 열려야 합니다.</p>
+
+<p>{@code &lt;extras&gt;} 요소를 사용하면 키-값 쌍을 {@link
+android.os.Bundle} 내의 프래그먼트에 전달할 수 있게 해줍니다. 이 프래그먼트가 인수를 검색하려면 {@link
+android.app.Fragment#getArguments()}를 호출하면 됩니다. 인수를 프래그먼트에 전달하는 데에는 여러 가지 이유가 있을 수 있지만, 
+한 가지 중요한 이유를 예로 들면 각 그룹에 대해 {@link
+android.preference.PreferenceFragment}의 같은 하위 클래스를 재사용하고, 이 인수를 사용하여 해당 프래그먼트가 로딩해야 하는 
+기본 설정 XML 파일이 무엇인지 나타낼 수 있다는 점입니다.</p>
+
+<p>예를 들어 다음은 여러 가지 설정 그룹에 재사용할 수 있는 프래그먼트입니다. 이것은 
+각 헤더가 {@code "settings"} 키로 {@code &lt;extra&gt;} 인수를 정의하는 경우를 나타낸 것입니다.</p>
+
+<pre>
+public static class SettingsFragment extends PreferenceFragment {
+    &#64;Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+
+        String settings = getArguments().getString("settings");
+        if ("notifications".equals(settings)) {
+            addPreferencesFromResource(R.xml.settings_wifi);
+        } else if ("sync".equals(settings)) {
+            addPreferencesFromResource(R.xml.settings_sync);
+        }
+    }
+}
+</pre>
+
+
+
+<h3 id="DisplayHeaders">헤더 표시하기</h3>
+
+<p>기본 설정 헤더를 표시하려면 {@link
+android.preference.PreferenceActivity#onBuildHeaders onBuildHeaders()} 콜백 메서드를 구현하고 
+{@link android.preference.PreferenceActivity#loadHeadersFromResource
+loadHeadersFromResource()}를 호출해야 합니다. 예:</p>
+
+<pre>
+public class SettingsActivity extends PreferenceActivity {
+    &#64;Override
+    public void onBuildHeaders(List&lt;Header> target) {
+        loadHeadersFromResource(R.xml.preference_headers, target);
+    }
+}
+</pre>
+
+<p>사용자가 헤더 목록에서 항목을 하나 선택하면 시스템이 연관된 {@link
+android.preference.PreferenceFragment}를 엽니다.</p>
+
+<p class="note"><strong>참고:</strong> 기본 설정 헤더를 사용하는 경우, {@link
+android.preference.PreferenceActivity}의 하위 클래스가 {@link
+android.preference.PreferenceActivity#onCreate onCreate()} 메서드를 구현하지 않아도 됩니다. 액티비티에 대한 필수 작업은 
+헤더를 로딩하는 것뿐이기 때문입니다.</p>
+
+
+<h3 id="BackCompatHeaders">기본 설정 헤더로 이전 버전 지원하기</h3>
+
+<p>애플리케이션이 Android 3.0 이전 버전을 지원하는 경우에도 여전히 헤더를 사용하여 
+Android 3.0 이상에서 창 두 개짜리 레이아웃을 제공하도록 할 수 있습니다. 개발자가 해야 할 일은 추가로 기본 설정 XML 파일을 
+생성하는 것뿐입니다. 이 파일은 마치 헤더 항목처럼 동작하는 기본적인 {@link android.preference.Preference
+&lt;Preference&gt;} 요소를 사용합니다(이것을 이전 Android 버전이 사용하도록 
+할 예정).</p>
+
+<p>하지만 새로운 {@link android.preference.PreferenceScreen}을 여는 대신 각 {@link
+android.preference.Preference &lt;Preference&gt;} 요소가 {@link android.content.Intent}를 하나씩 
+{@link android.preference.PreferenceActivity}에 전송합니다. 이것이 로딩할 XML 파일이 무엇인지를 
+나타냅니다.</p>
+
+<p>예를 들어 다음은 Android 3.0 이상에서 사용되는 기본 설정 헤더에 대한 
+XML 파일입니다({@code res/xml/preference_headers.xml}).</p> 
+
+<pre>
+&lt;preference-headers xmlns:android="http://schemas.android.com/apk/res/android">
+    &lt;header 
+        android:fragment="com.example.prefs.SettingsFragmentOne"
+        android:title="@string/prefs_category_one"
+        android:summary="@string/prefs_summ_category_one" />
+    &lt;header 
+        android:fragment="com.example.prefs.SettingsFragmentTwo"
+        android:title="@string/prefs_category_two"
+        android:summary="@string/prefs_summ_category_two" />
+&lt;/preference-headers>
+</pre>
+
+<p>그리고 다음은, Android 3.0 이전 버전에 같은 헤더를 제공하는 기본 설정 
+파일입니다({@code res/xml/preference_headers_legacy.xml}).</p>
+
+<pre>
+&lt;PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+    &lt;Preference 
+        android:title="@string/prefs_category_one"
+        android:summary="@string/prefs_summ_category_one"  >
+        &lt;intent 
+            android:targetPackage="com.example.prefs"
+            android:targetClass="com.example.prefs.SettingsActivity"
+            android:action="com.example.prefs.PREFS_ONE" />
+    &lt;/Preference>
+    &lt;Preference 
+        android:title="@string/prefs_category_two"
+        android:summary="@string/prefs_summ_category_two" >
+        &lt;intent 
+            android:targetPackage="com.example.prefs"
+            android:targetClass="com.example.prefs.SettingsActivity"
+            android:action="com.example.prefs.PREFS_TWO" />
+    &lt;/Preference>
+&lt;/PreferenceScreen>
+</pre>
+
+<p>{@code &lt;preference-headers&gt;}에 대한 지원이 Android 3.0에서 추가되었기 때문에 시스템이 
+{@link android.preference.PreferenceActivity#onBuildHeaders onBuildHeaders()}를 {@link
+android.preference.PreferenceActivity}에서 호출하는 것은 Android 3.0 이상에서 실행될 때뿐입니다. "레거시" 헤더 파일을 
+로딩하려면({@code preference_headers_legacy.xml}) 반드시 Android 
+버전을 확인해야 하며, 해당 버전이 Android 3.0 이전인 경우({@link
+android.os.Build.VERSION_CODES#HONEYCOMB}), {@link
+android.preference.PreferenceActivity#addPreferencesFromResource addPreferencesFromResource()}를 호출하여 
+레거시 헤더 파일을 로딩해야 합니다. 예:</p>
+
+<pre>
+&#64;Override
+public void onCreate(Bundle savedInstanceState) {
+    super.onCreate(savedInstanceState);
+    ...
+
+    if (Build.VERSION.SDK_INT &lt; Build.VERSION_CODES.HONEYCOMB) {
+        // Load the legacy preferences headers
+        addPreferencesFromResource(R.xml.preference_headers_legacy);
+    }
+}
+
+// Called only on Honeycomb and later
+&#64;Override
+public void onBuildHeaders(List&lt;Header> target) {
+   loadHeadersFromResource(R.xml.preference_headers, target);
+}
+</pre>
+
+<p>이제 남은 할 일이라고는 {@link android.content.Intent}를 처리하는 것뿐입니다. 이것은 
+액티비티로 전달되어 어느 기본 설정 파일을 로딩해야 하는지 식별하는 데 쓰입니다. 그럼 이제 인텐트의 작업을 검색하여 기본 설정 XML의 
+{@code &lt;intent&gt;} 태그에서 사용한 알려진 작업 문자열에 비교해보겠습니다.</p>
+
+<pre>
+final static String ACTION_PREFS_ONE = "com.example.prefs.PREFS_ONE";
+...
+
+&#64;Override
+public void onCreate(Bundle savedInstanceState) {
+    super.onCreate(savedInstanceState);
+
+    String action = getIntent().getAction();
+    if (action != null &amp;&amp; action.equals(ACTION_PREFS_ONE)) {
+        addPreferencesFromResource(R.xml.preferences);
+    }
+    ...
+
+    else if (Build.VERSION.SDK_INT &lt; Build.VERSION_CODES.HONEYCOMB) {
+        // Load the legacy preferences headers
+        addPreferencesFromResource(R.xml.preference_headers_legacy);
+    }
+}
+</pre>
+
+<p>{@link
+android.preference.PreferenceActivity#addPreferencesFromResource addPreferencesFromResource()}를 연이어 호출하면 
+모든 기본 설정을 하나의 목록에 쌓게 된다는 점을 유의하십시오. 따라서 이것은 'Else-if' 문이 있는 조건을 변경하여 딱 한 번만 
+호출하도록 주의해야 합니다.</p>
+
+
+
+
+
+<h2 id="ReadingPrefs">기본 설정 읽기</h2>
+
+<p>기본적으로 앱의 기본 설정은 모두 
+애플리케이션 내의 어디서든 정적 메서드 {@link
+android.preference.PreferenceManager#getDefaultSharedPreferences
+PreferenceManager.getDefaultSharedPreferences()}를 호출하면 액세스할 수 있는 파일에 저장됩니다. 이것은 {@link
+android.content.SharedPreferences} 객체를 반환하며, 여기에 {@link
+android.preference.PreferenceActivity}에서 사용한 {@link android.preference.Preference} 객체와 
+연관된 모든 키-값 쌍이 들어있습니다.</p>
+
+<p>예를 들어 다음은 기본 설정 값 중 하나를 애플리케이션 내의 다른 모든 액티비티에서 읽는 방법을 
+나타낸 것입니다.</p>
+
+<pre>
+SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
+String syncConnPref = sharedPref.getString(SettingsActivity.KEY_PREF_SYNC_CONN, "");
+</pre>
+
+
+
+<h3 id="Listening">기본 설정 변경 수신 대기</h3>
+
+<p>사용자가 기본 설정 중 하나를 변경하자마자 이에 대해 알림을 받는 것이 좋은 데에는 몇 가지 
+이유가 있습니다. 기본 설정 중 어느 하나에라도 변경이 발생했을 때 콜백을 받으려면, 
+{@link android.content.SharedPreferences.OnSharedPreferenceChangeListener
+SharedPreference.OnSharedPreferenceChangeListener} 인터페이스를 구현하고 
+{@link android.content.SharedPreferences} 객체에 대한 수신기를 등록합니다. 이때 {@link
+android.content.SharedPreferences#registerOnSharedPreferenceChangeListener
+registerOnSharedPreferenceChangeListener()}를 호출하면 됩니다.</p>
+
+<p>이 인터페이스에는 콜백 메서드가 {@link
+android.content.SharedPreferences.OnSharedPreferenceChangeListener#onSharedPreferenceChanged
+onSharedPreferenceChanged()} 하나뿐이며, 인터페이스를 액티비티의 일부분으로 구현하는 것이 
+가장 쉬운 방법일 공산이 큽니다. 예:</p>
+
+<pre>
+public class SettingsActivity extends PreferenceActivity
+                              implements OnSharedPreferenceChangeListener {
+    public static final String KEY_PREF_SYNC_CONN = "pref_syncConnectionType";
+    ...
+
+    public void onSharedPreferenceChanged(SharedPreferences sharedPreferences,
+        String key) {
+        if (key.equals(KEY_PREF_SYNC_CONN)) {
+            Preference connectionPref = findPreference(key);
+            // Set summary to be the user-description for the selected value
+            connectionPref.setSummary(sharedPreferences.getString(key, ""));
+        }
+    }
+}
+</pre>
+
+<p>이 예시에서 메서드는 변경된 설정이 알려진 기본 설정 키에 대한 것인지 여부를 확인합니다. 이것은 
+{@link android.preference.PreferenceActivity#findPreference findPreference()}를 호출하여 
+변경된 {@link android.preference.Preference} 객체를 가져오는데, 이렇게 해야 항목의 요약을 수정하여 
+사용자의 선택에 대한 설명이 되도록 할 수 있습니다. 다시 말해, 설정이 {@link
+android.preference.ListPreference} 또는 다른 다중 선택 설정인 경우, 설정이 변경되어 현재 상태를 표시하도록 하면 {@link
+android.preference.Preference#setSummary setSummary()}를 호출해야 한다는 뜻입니다(예를 들어 
+그림 5에 표시된 절전 모드 설정과 같음).</p>
+
+<p class="note"><strong>참고:</strong> Android 디자인 문서의 <a href="{@docRoot}design/patterns/settings.html">설정</a> 관련 내용에서 설명한 바와 같이, 사용자가 기본 설정을 변경할 때마다 
+{@link android.preference.ListPreference}의 요약을 업데이트하는 것을 권장합니다. 이렇게 하여 현재 설정을 
+나타내는 것입니다.</p>
+
+<p>액티비티에서 적절한 수명 주기 관리를 수행하려면 
+{@link android.content.SharedPreferences.OnSharedPreferenceChangeListener}를 등록하고 등록 해제하는 작업은 각각 {@link
+android.app.Activity#onResume} 및 {@link android.app.Activity#onPause} 콜백 중에 수행하는 것을 권장합니다.</p>
+
+<pre>
+&#64;Override
+protected void onResume() {
+    super.onResume();
+    getPreferenceScreen().getSharedPreferences()
+            .registerOnSharedPreferenceChangeListener(this);
+}
+
+&#64;Override
+protected void onPause() {
+    super.onPause();
+    getPreferenceScreen().getSharedPreferences()
+            .unregisterOnSharedPreferenceChangeListener(this);
+}
+</pre>
+
+<p class="caution"><strong>주의:</strong> {@link
+android.content.SharedPreferences#registerOnSharedPreferenceChangeListener
+registerOnSharedPreferenceChangeListener()}를 호출하면 
+현재의 경우, 기본 설정 관리자가 수신기에 대한 강력한 참조를 저장하지 않습니다. 반드시 수신기에 대한 강력한 
+참조를 저장해야 합니다. 그렇지 않으면 가비지 수집의 대상이 될 가능성이 높습니다. 권장 사항으로는 
+수신기를 객체의 인스턴스 데이터 안에 보관하는 것을 추천합니다. 이 객체는 
+수신기를 필요로 하는 기간만큼 오래 존재할 것이 확실해야 합니다.</p>
+
+<p>예를 들어 다음 코드에서 발신자는 수신기에 대한 참조를 
+보관하지 않습니다. 그 결과 해당 수신기가 가비지 수집의 대상이 되며 
+향후 언젠가 알 수 없는 시점에 고장을 일으키게 될 것입니다.</p>
+
+<pre>
+prefs.registerOnSharedPreferenceChangeListener(
+  // Bad! The listener is subject to garbage collection!
+  new SharedPreferences.OnSharedPreferenceChangeListener() {
+  public void onSharedPreferenceChanged(SharedPreferences prefs, String key) {
+    // listener implementation
+  }
+});
+</pre>
+
+<p>대신, 수신기에 대한 참조를 수신기가 필요한 기간만큼 오래 존재할 것이 확실한 객체의 
+인스턴스 데이터 필드에 저장하십시오.</p>
+
+<pre>
+SharedPreferences.OnSharedPreferenceChangeListener listener =
+    new SharedPreferences.OnSharedPreferenceChangeListener() {
+  public void onSharedPreferenceChanged(SharedPreferences prefs, String key) {
+    // listener implementation
+  }
+};
+prefs.registerOnSharedPreferenceChangeListener(listener);
+</pre>
+
+<h2 id="NetworkUsage">네트워크 사용량 관리하기</h2>
+
+
+<p>Android 4.0부터 시스템의 설정 애플리케이션을 사용하면 사용자가 
+애플리케이션이 전경과 배경에 있는 동안 각각 얼마나 많은 네트워크 데이터를 사용하는지 알아볼 수 있게 되었습니다. 그런 다음 
+사용자는 각각의 앱에 대해 배경 데이터 사용을 비활성화할 수 있습니다. 사용자가 여러분의 앱이 배경에서 
+데이터에 액세스하는 기능을 비활성화하는 사태를 피하려면 데이터 연결을 효율적으로 사용하고 
+사용자가 애플리케이션 설정을 통하여 앱의 데이터 사용량을 미세 조정할 수 있도록 허용해야 합니다.<p>
+
+<p>예를 들어 사용자에게 앱의 데이터 동기화 빈도를 제어하도록 허용할 수 있습니다. 앱이 Wi-Fi에 있을 때에만 
+업로드/다운로드를 수행하도록 할지 여부, 앱이 로밍 중에 데이터를 사용하도록 할지 여부 등을 이렇게 조절합니다. 사용자가 
+이러한 제어 기능을 사용할 수 있게 되면 시스템 설정에서 설정한 한도에 가까워지고 
+있을 때 앱의 데이터 액세스를 비활성화할 가능성이 낮아집니다. 그 대신 앱이 사용하는 데이터 양을 
+정밀하게 제어할 수 있기 때문입니다.</p>
+
+<p>일단 필요한 기본 설정을 {@link android.preference.PreferenceActivity}에 
+추가하여 앱의 데이터 습관을 제어하도록 했으면, 다음으로 매니페스트 파일에 있는 {@link
+android.content.Intent#ACTION_MANAGE_NETWORK_USAGE}에 대한 인텐트 필터를 추가해야 합니다. 예:</p>
+
+<pre>
+&lt;activity android:name="SettingsActivity" ... >
+    &lt;intent-filter>
+       &lt;action android:name="android.intent.action.MANAGE_NETWORK_USAGE" />
+       &lt;category android:name="android.intent.category.DEFAULT" />
+    &lt;/intent-filter>
+&lt;/activity>
+</pre>
+
+<p>이 인텐트 필터는 이것이 애플리케이션의 데이터 사용량을 제어하는 액티비티라는 
+사실을 시스템에 나타내는 역할을 합니다. 따라서, 사용자가 시스템의 설정 앱에서 여러분의 앱이 
+얼마나 많은 데이터를 사용하는지 알아볼 때면 <em>애플리케이션 설정 보기</em> 버튼을 사용할 수 있어 
+{@link android.preference.PreferenceActivity}를 시작하게 됩니다. 그러면 사용자는 
+앱이 사용할 데이터 양을 미세하게 조정할 수 있습니다.</p>
+
+
+
+
+
+
+
+<h2 id="Custom">사용자 지정 기본 설정 구축하기</h2>
+
+<p>Android 프레임워크에는 다양한 {@link android.preference.Preference} 하위 클래스가 포함되어 있어 
+여러 가지 설정 유형에 맞게 UI를 구축할 수 있습니다. 
+하지만, 기본 제공 솔루션이 없는 설정이 필요하게 되는 경우도 있습니다. 예를 들어 숫자 선택기 또는 
+날짜 선택기 등이 이에 해당됩니다. 그러한 경우에는 사용자 지정 기본 설정을 만들어야 합니다. 이때 
+{@link android.preference.Preference} 클래스 또는 다른 하위 클래스 중 하나를 확장하는 방법을 씁니다.</p>
+
+<p>{@link android.preference.Preference} 클래스를 확장하는 경우, 다음과 같이 
+몇 가지 중요한 해야 할 일이 있습니다.</p>
+
+<ul>
+  <li>사용자가 설정을 선택하면 나타나는 사용자 인터페이스를 지정합니다.</li>
+  <li>필요에 따라 설정의 값을 저장합니다.</li>
+  <li>{@link android.preference.Preference}가 보이게 되면 
+이를 현재(또는 기본) 값으로 초기화합니다.</li>
+  <li>시스템이 요청하는 경우 기본 값을 제공합니다.</li>
+  <li>{@link android.preference.Preference}가 나름의 UI(예: 대화)를 제공하는 경우, 상태를 
+저장하고 복원하여 수명 주기 변경을 처리할 수 있도록 합니다(예: 사용자가 화면을 돌리는 경우).</li>
+</ul>
+
+<p>다음 섹션에서는 이와 같은 각각의 작업을 수행하는 방법을 설명합니다.</p>
+
+
+
+<h3 id="CustomSelected">사용자 인터페이스 지정하기</h3>
+
+  <p>{@link android.preference.Preference} 클래스를 직접 확장하는 경우, 
+{@link android.preference.Preference#onClick()}을 구현하여 사용자가 
+항목을 선택할 때 일어날 동작을 정의해야 합니다. 그러나, 대부분의 사용자 지정 설정은 {@link android.preference.DialogPreference}를 확장하여 
+대화를 표시하도록 합니다. 이렇게 하면 절차가 단순해집니다. {@link
+android.preference.DialogPreference}를 확장하는 경우에는 클래스 생성자 중에 반드시 {@link
+android.preference.DialogPreference#setDialogLayoutResource setDialogLayoutResourcs()}를 호출하여 
+대화에 대한 레이아웃을 지정해야 합니다.</p>
+
+  <p>예를 들어 다음은 레이아웃을 선언하는 사용자 지정 {@link
+android.preference.DialogPreference}와 기본 
+긍정적 및 부정적 대화 버튼에 대한 텍스트를 지정하는 생성자입니다.</p>
+
+<pre>
+public class NumberPickerPreference extends DialogPreference {
+    public NumberPickerPreference(Context context, AttributeSet attrs) {
+        super(context, attrs);
+        
+        setDialogLayoutResource(R.layout.numberpicker_dialog);
+        setPositiveButtonText(android.R.string.ok);
+        setNegativeButtonText(android.R.string.cancel);
+        
+        setDialogIcon(null);
+    }
+    ...
+}
+</pre>
+
+
+
+<h3 id="CustomSave">설정의 값 저장하기</h3>
+
+<p>설정에 대한 값은 언제든 저장할 수 있습니다. {@link
+android.preference.Preference} 클래스의 {@code persist*()} 메서드 중 하나를 호출하기만 하면 됩니다. 예를 들어 설정의 값이 정수인 경우 {@link
+android.preference.Preference#persistInt persistInt()}를, 부울을 저장하려면 
+{@link android.preference.Preference#persistBoolean persistBoolean()}을 호출하십시오.</p>
+
+<p class="note"><strong>참고:</strong> 각각의 {@link android.preference.Preference}는 데이터 유형 하나씩만 
+저장할 수 있으므로, 사용자 지정 
+{@link android.preference.Preference}에서 사용한 데이터 유형에 적절한 {@code persist*()} 메서드를 사용해야 합니다.</p>
+
+<p>설정을 유지하기로 선택하는 시점은 확장하는 지점이 {@link
+android.preference.Preference} 클래스인지에 좌우될 수 있습니다. {@link
+android.preference.DialogPreference}를 확장하면 값을 유지하는 것은 대화가 긍정적인 결과로 인해 
+닫히는 경우만으로 국한해야 합니다(사용자가 "확인(OK)" 버튼을 선택하는 경우).</p>
+
+<p>{@link android.preference.DialogPreference}가 닫히면 시스템이 {@link
+android.preference.DialogPreference#onDialogClosed onDialogClosed()} 메서드를 호출합니다. 이 메서드에는 
+부울 인수가 포함되어 있어 사용자의 결과가 "긍정적"인지 아닌지를 나타냅니다. 이 값이 
+<code>true</code>인 경우, 사용자가 긍정적 버튼을 선택한 것이고 새 값을 저장해야 합니다. 예:
+</p>
+
+<pre>
+&#64;Override
+protected void onDialogClosed(boolean positiveResult) {
+    // When the user selects "OK", persist the new value
+    if (positiveResult) {
+        persistInt(mNewValue);
+    }
+}
+</pre>
+
+<p>이 예시에서 <code>mNewValue</code>는 설정의 현재 값을 보유한 클래스 
+구성원입니다. {@link android.preference.Preference#persistInt persistInt()}를 호출하면 
+{@link android.content.SharedPreferences} 파일에 대한 값을 저장합니다(이 
+{@link android.preference.Preference}에 대하여 XML 파일에 지정된 키를 자동으로 사용합니다).</p>
+
+
+<h3 id="CustomInitialize">현재 값 초기화하기</h3>
+
+<p>시스템이 {@link android.preference.Preference}를 화면에 추가하는 경우, 이는 
+{@link android.preference.Preference#onSetInitialValue onSetInitialValue()}를 호출하여 
+설정에 유지된 값이 있는지 없는지를 알립니다. 유지된 값이 없는 경우, 이 호출은 기본 값을 
+제공합니다.</p>
+
+<p>{@link android.preference.Preference#onSetInitialValue onSetInitialValue()} 메서드는 
+부울 값 <code>restorePersistedValue</code>를 전달하여 해당 설정에 대해 이미 어떤 값이 유지되었는지 
+아닌지를 나타냅니다. 만일 이것이 <code>true</code>라면, 유지된 값을 검색하되 
+{@link
+android.preference.Preference} 클래스의 {@code getPersisted*()} 메서드 중 하나를 호출하는 방법을 써야 합니다. 예를 들어 정수 값이라면 {@link
+android.preference.Preference#getPersistedInt getPersistedInt()}를 사용합니다. 보통은 
+유지된 값을 검색하여, UI에 이전에 저장된 값을 반영하여 이를 적절하게 업데이트할 수 
+있도록 하는 것이 좋습니다.</p>
+
+<p><code>restorePersistedValue</code>가 <code>false</code>인 경우, 
+두 번째 인수로 전달된 기본 값을 사용해야 합니다.</p>
+
+<pre>
+&#64;Override
+protected void onSetInitialValue(boolean restorePersistedValue, Object defaultValue) {
+    if (restorePersistedValue) {
+        // Restore existing state
+        mCurrentValue = this.getPersistedInt(DEFAULT_VALUE);
+    } else {
+        // Set default state from the XML attribute
+        mCurrentValue = (Integer) defaultValue;
+        persistInt(mCurrentValue);
+    }
+}
+</pre>
+
+<p>각 {@code getPersisted*()} 메서드는 기본 값을 나타내는 인수를 취하여 
+사실은 유지된 값이 전혀 없거나 키 자체가 존재하지 않는 경우 사용하도록 합니다. 위의 
+예시에서는 혹시 {@link
+android.preference.Preference#getPersistedInt getPersistedInt()}가 유지된 값을 반환할 수 없는 경우에 사용하도록 기본 값을 나타내는 데 로컬 상수를 사용하였습니다.</p>
+
+<p class="caution"><strong>주의:</strong> {@code getPersisted*()} 메서드에서는 
+<code>defaultValue</code>를 기본 값으로 사용하면 <strong>안 됩니다</strong>. 이것의 값은 
+<code>restorePersistedValue</code>가 <code>true</code>이면 항상 null이기 때문입니다.</p>
+
+
+<h3 id="CustomDefault">기본 값 제공하기</h3>
+
+<p>{@link android.preference.Preference} 클래스의 인스턴스가 기본 값을 나타내는 경우
+({@code android:defaultValue} 속성으로), 시스템은 
+값을 검색하기 위해 객체를 인스턴트화할 때 {@link android.preference.Preference#onGetDefaultValue
+onGetDefaultValue()}를 호출합니다. 이 메서드를 구현해야 
+시스템이 {@link
+android.content.SharedPreferences}에 있는 기본 값을 저장할 수 있습니다. 예:</p>
+
+<pre>
+&#64;Override
+protected Object onGetDefaultValue(TypedArray a, int index) {
+    return a.getInteger(index, DEFAULT_VALUE);
+}
+</pre>
+
+<p>이 메서드 인수가 여러분에게 필요한 모든 것을 제공합니다. 즉 속성 배열과 
+{@code android:defaultValue}의 위치로, 이는 반드시 검색해야 합니다. 이 메서드를 
+반드시 구현하여 속성에서 기본 값을 추출해야만 하는 이유는 값이 정의되지 않은 경우, 속성에 대한 
+로컬 기본 값을 꼭 지정해야 하기 때문입니다.</p>
+
+
+
+<h3 id="CustomSaveState">기본 설정의 상태 저장 및 복원하기</h3>
+
+<p>레이아웃에서의 {@link android.view.View}와 마찬가지로 {@link android.preference.Preference}
+하위 클래스가 액티비티 또는 프래그먼트가 재시작했을 때 
+그 상태를 저장하고 복원하는 역할을 맡습니다(예를 들어 사용자가 화면을 돌리는 경우 등). 
+{@link android.preference.Preference} 클래스의 상태를 적절하게 저장하고 복원하려면, 
+수명 주기 콜백 메서드 {@link android.preference.Preference#onSaveInstanceState
+onSaveInstanceState()} 및 {@link
+android.preference.Preference#onRestoreInstanceState onRestoreInstanceState()}를 구현해야 합니다.</p>
+
+<p>{@link android.preference.Preference}의 상태를 정의하는 것은 
+{@link android.os.Parcelable} 인터페이스를 구현하는 객체입니다. Android 프레임워크는 
+그러한 객체를 제공하여 상태 객체를 정의하는 데 일종의 시작 지점으로 사용하도록 하고 있습니다. 즉 {@link
+android.preference.Preference.BaseSavedState} 클래스가 이에 해당됩니다.</p>
+
+<p>{@link android.preference.Preference} 클래스가 자신의 상태를 저장하는 방법을 정의하려면 
+{@link android.preference.Preference.BaseSavedState} 클래스를 확장해야 합니다. 아주 약간의 메서드를 재정의하고 
+{@link android.preference.Preference.BaseSavedState#CREATOR}
+객체를 정의해야 합니다.</p>
+
+<p>대부분의 앱에서는 다음과 같은 구현을 복사한 다음, 
+{@code value}를 처리하는 줄만 변경하면 됩니다. 이는 {@link android.preference.Preference} 하위 클래스가 정수보다는 데이터 
+유형을 저장하는 경우 해당됩니다.</p>
+
+<pre>
+private static class SavedState extends BaseSavedState {
+    // Member that holds the setting's value
+    // Change this data type to match the type saved by your Preference
+    int value;
+
+    public SavedState(Parcelable superState) {
+        super(superState);
+    }
+
+    public SavedState(Parcel source) {
+        super(source);
+        // Get the current preference's value
+        value = source.readInt();  // Change this to read the appropriate data type
+    }
+
+    &#64;Override
+    public void writeToParcel(Parcel dest, int flags) {
+        super.writeToParcel(dest, flags);
+        // Write the preference's value
+        dest.writeInt(value);  // Change this to write the appropriate data type
+    }
+
+    // Standard creator object using an instance of this class
+    public static final Parcelable.Creator&lt;SavedState> CREATOR =
+            new Parcelable.Creator&lt;SavedState>() {
+
+        public SavedState createFromParcel(Parcel in) {
+            return new SavedState(in);
+        }
+
+        public SavedState[] newArray(int size) {
+            return new SavedState[size];
+        }
+    };
+}
+</pre>
+
+<p>위의 {@link android.preference.Preference.BaseSavedState} 구현을 앱에 
+추가하고 나면(주로 {@link android.preference.Preference} 하위 클래스의 하위 클래스로), 이제 
+{@link android.preference.Preference#onSaveInstanceState
+onSaveInstanceState()} 및 {@link
+android.preference.Preference#onRestoreInstanceState onRestoreInstanceState()} 메서드를 구현해야 합니다. 이것은 
+{@link android.preference.Preference} 하위 클래스를 위한 것입니다.</p>
+
+<p>예:</p>
+
+<pre>
+&#64;Override
+protected Parcelable onSaveInstanceState() {
+    final Parcelable superState = super.onSaveInstanceState();
+    // Check whether this Preference is persistent (continually saved)
+    if (isPersistent()) {
+        // No need to save instance state since it's persistent,
+        // use superclass state
+        return superState;
+    }
+
+    // Create instance of custom BaseSavedState
+    final SavedState myState = new SavedState(superState);
+    // Set the state's value with the class member that holds current
+    // setting value
+    myState.value = mNewValue;
+    return myState;
+}
+
+&#64;Override
+protected void onRestoreInstanceState(Parcelable state) {
+    // Check whether we saved the state in onSaveInstanceState
+    if (state == null || !state.getClass().equals(SavedState.class)) {
+        // Didn't save the state, so call superclass
+        super.onRestoreInstanceState(state);
+        return;
+    }
+
+    // Cast state to custom BaseSavedState and pass to superclass
+    SavedState myState = (SavedState) state;
+    super.onRestoreInstanceState(myState.getSuperState());
+    
+    // Set this Preference's widget to reflect the restored state
+    mNumberPicker.setValue(myState.value);
+}
+</pre>
+

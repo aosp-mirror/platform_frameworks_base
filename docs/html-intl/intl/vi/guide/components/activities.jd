@@ -1,0 +1,756 @@
+page.title=Các hoạt động
+page.tags=hoạt động,ý định
+@jd:body
+
+<div id="qv-wrapper">
+<div id="qv">
+<h2>Trong tài liệu này</h2>
+<ol>
+  <li><a href="#Creating">Tạo một Hoạt động</a>
+    <ol>
+      <li><a href="#UI">Triển khai một giao diện người dùng</a></li>
+      <li><a href="#Declaring">Khai báo hoạt động trong bản kê khai</a></li>
+    </ol>
+  </li>
+  <li><a href="#StartingAnActivity">Bắt đầu một Hoạt động</a>
+    <ol>
+      <li><a href="#StartingAnActivityForResult">Bắt đầu một hoạt động cho một kết quả</a></li>
+    </ol>
+  </li>
+  <li><a href="#ShuttingDown">Tắt một Hoạt động</a></li>
+  <li><a href="#Lifecycle">Quản lý Vòng đời của Hoạt động</a>
+    <ol>
+      <li><a href="#ImplementingLifecycleCallbacks">Triển khai gọi lại vòng đời</a></li>
+      <li><a href="#SavingActivityState">Lưu trạng thái của hoạt động</a></li>
+      <li><a href="#ConfigurationChanges">Xử lý thay đổi về cấu hình</a></li>
+      <li><a href="#CoordinatingActivities">Điều phối hoạt động</a></li>
+    </ol>
+  </li>
+</ol>
+
+<h2>Lớp khóa</h2>
+<ol>
+  <li>{@link android.app.Activity}</li>
+</ol>
+
+<h2>Xem thêm</h2>
+<ol>
+  <li><a href="{@docRoot}guide/components/tasks-and-back-stack.html">Tác vụ và Ngăn
+Xếp</a></li>
+</ol>
+
+</div>
+</div>
+
+
+
+<p>{@link android.app.Activity} là một thành phần ứng dụng cung cấp một màn hình mà với nó
+người dùng có thể tương tác để thực hiện một điều gì đó, chẳng hạn như quay số điện thoại, chụp ảnh, gửi e-mail hoặc
+xem bản đồ. Mỗi hoạt động được cho trong một cửa sổ là nơi để vẽ giao diện người dùng của nó. Cửa sổ này
+thường lấp đầy màn hình, nhưng có thể nhỏ hơn màn hình và nổi bên trên các cửa sổ
+khác.</p>
+
+<p> Ứng dụng thường bao gồm nhiều hoạt động được liên kết lỏng lẻo
+với nhau. Thường thì một hoạt động trong một ứng dụng sẽ được quy định là hoạt động "chính", nó được
+trình bày trước người dùng khi khởi chạy ứng dụng lần đầu. Sau đó, mỗi
+hoạt động có thể bắt đầu một hoạt động khác để thực hiện các hành động khác nhau. Mỗi khi một hoạt động
+mới bắt đầu, hoạt động trước đó sẽ bị dừng lại, nhưng hệ thống vẫn giữ nguyên hoạt động
+trong một ngăn xếp ("back stack"). Khi một hoạt động mới bắt đầu, nó được đẩy lên ngăn xếp và
+chiếm lấy tiêu điểm của người dùng. Ngăn xếp sẽ tuân theo cơ chế xếp chồng cơ bản "vào cuối, ra đầu",
+vì thế, khi người dùng kết thúc hoạt động hiện tại và nhấn nút <em>Quay lại</em>, nó 
+sẽ được đẩy ra khỏi ngăn xếp (và bị hủy) và hoạt động trước đó sẽ tiếp tục. (Ngăn xếp được
+đề cập kỹ hơn trong tài liệu <a href="{@docRoot}guide/components/tasks-and-back-stack.html">Tác vụ
+và Ngăn Xếp</a>.)</p>
+
+<p>Khi một hoạt động bị dừng vì một hoạt động mới bắt đầu, nó được thông báo về sự thay đổi trạng thái này
+qua các phương pháp gọi lại vòng đời của hoạt động.
+Có một vài phương pháp gọi lại vòng đời mà một hoạt động có thể nhận, do một thay đổi về
+trạng thái của nó&mdash;dù hệ thống đang tạo, dừng hay tiếp tục nó, hay hủy nó&mdash;và
+mỗi lần gọi lại cho bạn cơ hội thực hiện công việc cụ thể
+phù hợp với sự thay đổi trạng thái đó. Ví dụ, khi bị dừng, hoạt động của bạn sẽ giải phóng mọi
+đối tượng lớn, chẳng hạn như các kết nối mạng hoặc cơ sở dữ liệu. Khi hoạt động tiếp tục, bạn có thể
+thu lại những tài nguyên cần thiết và tiếp tục những hành động bị gián đoạn. Những chuyển tiếp trạng thái này
+đều là một phần của vòng đời hoạt động.</p>
+
+<p>Phần còn lại của tài liệu này bàn đến những nội dung cơ bản về cách xây dựng và sử dụng một hoạt động,
+bao gồm một nội dung đề cập đầy đủ về cách vận hành của vòng đời hoạt động, để bạn có thể quản lý tốt
+sự chuyển tiếp giữa các trạng thái hoạt động khác nhau.</p>
+
+
+
+<h2 id="Creating">Tạo một Hoạt động</h2>
+
+<p>Để tạo một hoạt động, bạn phải tạo một lớp con của {@link android.app.Activity} (hoặc
+một lớp con hiện tại của nó). Trong lớp con của mình, bạn cần triển khai các phương pháp gọi lại mà hệ thống
+gọi khi hoạt động chuyển tiếp giữa các trạng thái khác nhau trong vòng đời, chẳng hạn như khi
+hoạt động đang được tạo, dừng, tiếp tục, hoặc hủy. Hai phương pháp gọi lại quan trọng nhất
+là:</p>
+
+<dl>
+  <dt>{@link android.app.Activity#onCreate onCreate()}</dt>
+  <dd>Bạn phải triển khai phương pháp này. Hệ thống gọi phương pháp này khi tạo hoạt động
+của bạn. Trong quá trình thực hiện của mình, bạn nên khởi chạy những thành phần thiết yếu cho hoạt động
+của mình.
+    Quan trọng nhất, đây là lúc bạn phải gọi {@link android.app.Activity#setContentView
+    setContentView()} để định nghĩa bố trí cho giao diện người dùng của hoạt động.</dd>
+  <dt>{@link android.app.Activity#onPause onPause()}</dt>
+  <dd>Hệ thống gọi phương pháp này là dấu hiệu đầu tiên về việc người dùng đang rời khỏi hoạt động
+của bạn (mặc dù không phải lúc nào cũng có nghĩa rằng hoạt động đang bị hủy). Trường hợp này thường là khi bạn
+định thực hiện bất kỳ thay đổi nào vẫn cần có hiệu lực ngoài phiên của người dùng hiện thời (vì
+người dùng có thể không quay lại).</dd>
+</dl>
+
+<p>Có một vài phương pháp gọi lại vòng đời khác mà bạn nên sử dụng để đem đến
+một trải nghiệm người dùng mượt mà giữa các hoạt động và xử lý những gián đoạn bất ngờ khiến hoạt động của bạn
+bị dừng và thậm chí bị hủy. Tất cả phương pháp gọi lại vòng đời được bàn sau trong phần
+nói về <a href="#Lifecycle">Quản lý Vòng đời của Hoạt động</a>.</p>
+
+
+
+<h3 id="UI">Triển khai một giao diện người dùng</h3>
+
+<p> Giao diện người dùng cho một hoạt động sẽ được cung cấp theo phân cấp dạng xem&mdash;đối tượng được suy ra
+từ lớp {@link android.view.View}.  Mỗi chế độ xem kiểm soát một không gian chữ nhật riêng
+trong cửa sổ của hoạt động và có thể phản hồi trước tương tác của người dùng. Ví dụ, chế độ xem có thể là
+một nút khởi xướng một hành động khi người dùng chạm vào nó.</p>
+
+<p>Android cung cấp nhiều chế độ xem sẵn có mà bạn có thể sử dụng để thiết kế và tổ chức cho bố trí
+của mình. "Widget" là những chế độ xem cung cấp những phần tử trực quan (và tương tác) cho màn hình, chẳng hạn như
+nút, trường văn bản, hộp kiểm, hay chỉ là một hình ảnh. "Bố trí" là những chế độ xem được suy ra từ {@link
+android.view.ViewGroup} cung cấp một mô hình bố trí duy nhất cho các chế độ xem con của nó, chẳng hạn như bố trí
+tuyến tính, bố trí lưới, hoặc bố trí tương đối. Bạn cũng có thể chia thành lớp con {@link android.view.View} và các lớp
+{@link android.view.ViewGroup} (hoặc các lớp con hiện tại) để tạo widget và
+bố trí của chính mình và áp dụng chúng vào bố trí hoạt động của bạn.</p>
+
+<p>Cách phổ biến nhất để định nghĩa một bố trí bằng cách sử dụng các chế độ xem là dùng một tệp bố trí XML được lưu trong tài nguyên ứng dụng
+của bạn. Bằng cách này, bạn có thể duy trì thiết kế giao diện người dùng của mình độc lập với
+mã nguồn định nghĩa hành vi của hoạt động. Bạn có thể đặt bố trí làm UI cho hoạt động
+của mình bằng {@link android.app.Activity#setContentView(int) setContentView()}, chuyển
+ID tài nguyên cho bố trí. Tuy nhiên, bạn cũng có thể tạo {@link android.view.View} mới trong mã hoạt động
+của mình và xây dựng một cấp bậc chế độ xem bằng cách chèn các {@link
+android.view.View} mới vào một {@link android.view.ViewGroup}, sau đó sử dụng bố trí đó bằng cách chuyển root
+{@link android.view.ViewGroup} sang {@link android.app.Activity#setContentView(View)
+setContentView()}.</p>
+
+<p>Để biết thông tin về việc tạo một giao diện người dùng, hãy xem tài liệu <a href="{@docRoot}guide/topics/ui/index.html">Giao diện Người dùng</a>.</p>
+
+
+
+<h3 id="Declaring">Khai báo hoạt động trong bản kê khai</h3>
+
+<p>Bạn phải khai báo hoạt động của mình trong tệp bản kê khai để hoạt động
+có thể truy cập được vào hệ thống. Để khai báo hoạt động của mình, hãy mở tệp bản kê khai của bạn và thêm một phần tử  <a href="{@docRoot}guide/topics/manifest/activity-element.html">{@code &lt;activity&gt;}</a> 
+làm con của phần tử <a href="{@docRoot}guide/topics/manifest/application-element.html">{@code &lt;application&gt;}</a>
+. Ví dụ:</p>
+
+<pre>
+&lt;manifest ... &gt;
+  &lt;application ... &gt;
+      &lt;activity android:name=".ExampleActivity" /&gt;
+      ...
+  &lt;/application ... &gt;
+  ...
+&lt;/manifest &gt;
+</pre>
+
+<p>Có vài thuộc tính khác mà bạn có thể nêu trong phần tử này, để định nghĩa các thuộc tính
+như nhãn cho hoạt động, biểu tượng cho hoạt động, hoặc chủ đề mô tả kiểu UI của
+hoạt động. Thuộc tính <a href="{@docRoot}guide/topics/manifest/activity-element.html#nm">{@code android:name}</a>
+là thuộc tính bắt buộc duy nhất&mdash;nó quy định tên lớp của hoạt động. Một khi
+bạn phát hành ứng dụng của mình, bạn không nên thay đổi tên này, vì nếu bạn làm vậy, bạn có thể làm hỏng
+một số tính năng, chẳng hạn như các lối tắt của ứng dụng (hãy đọc bài đăng trên blog, <a href="http://android-developers.blogspot.com/2011/06/things-that-cannot-change.html">Những Điều
+Không Thay Đổi Được</a>).</p>
+
+<p>Xem tài liệu tham khảo phần tử <a href="{@docRoot}guide/topics/manifest/activity-element.html">{@code &lt;activity&gt;}</a> 
+để biết thêm thông tin về việc khai báo hoạt động của bạn trong bản kê khai.</p>
+
+
+<h4>Sử dụng các bộ lọc ý định</h4>
+
+<p>Một phần tử <a href="{@docRoot}guide/topics/manifest/activity-element.html">{@code
+&lt;activity&gt;}</a> cũng có thể quy định các bộ lọc ý định khác nhau&mdash;bằng cách sử dụng phần tử <a href="{@docRoot}guide/topics/manifest/intent-filter-element.html">{@code
+&lt;intent-filter&gt;}</a> &mdash;để khai báo cách thức mà các thành phần khác của ứng dụng có thể
+kích hoạt nó.</p>
+
+<p>Khi bạn tạo một ứng dụng mới bằng cách sử dụng các công cụ SDK của Android, hoạt động chương trình nhỏ
+được tạo cho bạn sẽ tự động bao gồm một bộ lọc ý định khai báo hoạt động
+phản hồi lại hành động "chính" và nên được đặt trong thể loại "trình khởi chạy". Bộ lọc ý định
+trông như thế này:</p>
+
+<pre>
+&lt;activity android:name=".ExampleActivity" android:icon="@drawable/app_icon"&gt;
+    &lt;intent-filter&gt;
+        &lt;action android:name="android.intent.action.MAIN" /&gt;
+        &lt;category android:name="android.intent.category.LAUNCHER" /&gt;
+    &lt;/intent-filter&gt;
+&lt;/activity&gt;
+</pre>
+
+<p>Phần tử <a href="{@docRoot}guide/topics/manifest/action-element.html">{@code
+&lt;action&gt;}</a> quy định rằng đây là điểm mục nhập "chính" đối với ứng dụng. Phần tử <a href="{@docRoot}guide/topics/manifest/category-element.html">{@code
+&lt;category&gt;}</a> quy định rằng hoạt động này nên được liệt kê trong trình khởi chạy ứng dụng của hệ thống
+(để cho phép người dùng khởi chạy hoạt động này).</p>
+
+<p>Nếu bạn có ý định cho ứng dụng của mình được độc lập và không cho phép các ứng dụng khác
+kích hoạt các hoạt động của nó, vậy bạn không cần bất kỳ bộ lọc ý định nào khác. Chỉ một hoạt động nên có
+hành động "chính" và thể loại "trình khởi chạy" như trong ví dụ trước. Những hoạt động mà
+bạn không muốn cung cấp sẵn cho các ứng dụng khác không nên có bộ lọc ý định và bạn có thể
+tự mình bắt đầu chúng bằng cách sử dụng các ý định rõ ràng (như được đề cập trong phần sau).</p>
+
+<p>Tuy nhiên, nếu bạn muốn hoạt động của mình phản hồi lại những ý định ngầm mà được chuyển giao từ
+các ứng dụng khác (và chính bạn), thì bạn phải định nghĩa các bộ lọc ý định bổ sung cho hoạt động
+của mình. Với mỗi loại ý định mà bạn muốn phản hồi, bạn phải nêu một <a href="{@docRoot}guide/topics/manifest/intent-filter-element.html">{@code
+&lt;intent-filter&gt;}</a> bao gồm một phần tử 
+<a href="{@docRoot}guide/topics/manifest/action-element.html">{@code
+&lt;action&gt;}</a> và, không bắt buộc, một phần tử <a href="{@docRoot}guide/topics/manifest/category-element.html">{@code
+&lt;category&gt;}</a> và/hoặc một phần tử <a href="{@docRoot}guide/topics/manifest/data-element.html">{@code
+&lt;data&gt;}</a>. Những phần tử này quy định loại ý định mà hoạt động của bạn có thể
+phản hồi.</p>
+
+<p>Để biết thêm thông tin về cách thức các hoạt động của bạn có thể phản hồi lại ý định, hãy xem tài liệu <a href="{@docRoot}guide/components/intents-filters.html">Ý định và Bộ lọc Ý định</a>
+.</p>
+
+
+
+<h2 id="StartingAnActivity">Bắt đầu một Hoạt động</h2>
+
+<p>Bạn có thể bắt đầu một hoạt động khác bằng cách gọi {@link android.app.Activity#startActivity
+  startActivity()}, chuyển cho nó một {@link android.content.Intent} mà mô tả hoạt động bạn
+muốn bắt đầu. Ý định này sẽ quy định hoặc hoạt động chính xác mà bạn muốn bắt đầu hoặc mô tả
+ loại hành động mà bạn muốn thực hiện (và hệ thống lựa chọn hoạt động phù hợp cho bạn,
+thậm chí
+có thể từ một ứng dụng khác). Một ý định cũng có thể mang theo lượng nhỏ dữ liệu sẽ được
+ sử dụng bởi hoạt động được bắt đầu.</p>
+
+<p>Khi đang làm việc trong ứng dụng của chính mình, bạn thường sẽ cần khởi chạy một hoạt động đã biết.
+ Bạn có thể làm vậy bằng cách tạo một ý định trong đó quy định rõ hoạt động bạn muốn bắt đầu,
+sử dụng tên lớp đó. Ví dụ, sau đây là cách một hoạt động bắt đầu một hoạt động khác có tên {@code
+SignInActivity}:</p>
+
+<pre>
+Intent intent = new Intent(this, SignInActivity.class);
+startActivity(intent);
+</pre>
+
+<p>Tuy nhiên, ứng dụng của bạn cũng có thể muốn thực hiện một số hành động, chẳng hạn như gửi một e-mail, tin nhắn
+ văn bản, hoặc cập nhật trạng thái, bằng cách sử dụng dữ liệu từ hoạt động của bạn. Trong trường hợp này, ứng dụng của bạn có thể
+ không có các hoạt động của chính nó để thực hiện những hành động đó, vì vậy, thay vào đó, bạn có thể tận dụng những hoạt động
+ được cung cấp bởi các ứng dụng khác trên thiết bị mà có thể thực hiện hành động cho bạn. Đây là lúc
+ý định thực sự có giá trị&mdash;bạn có thể tạo một ý định mô tả một hành động bạn muốn
+thực hiện và hệ thống
+ sẽ khởi chạy hoạt động phù hợp đó từ một ứng dụng khác. Nếu có
+ nhiều hoạt động mà có thể xử lý ý định, vậy người dùng có thể chọn hoạt động nào sẽ sử dụng. Ví
+ dụ, nếu bạn muốn cho phép người dùng gửi e-mail, bạn có thể tạo
+ ý định sau:</p>
+
+<pre>
+Intent intent = new Intent(Intent.ACTION_SEND);
+intent.putExtra(Intent.EXTRA_EMAIL, recipientArray);
+startActivity(intent);
+</pre>
+
+<p>{@link android.content.Intent#EXTRA_EMAIL} phụ được thêm vào ý định là một mảng xâu của
+ các địa chỉ e-mail mà e-mail sẽ được gửi tới. Khi một ứng dụng e-mail phản hồi
+ ý định này, nó đọc mảng xâu được cung cấp trong phần phụ và đặt nó vào trường "đến" của mẫu soạn thảo
+ e-mail. Trong trường hợp này, hoạt động của ứng dụng e-mail bắt đầu và khi người dùng
+ làm xong, hoạt động của bạn sẽ tiếp tục.</p>
+
+
+
+
+<h3 id="StartingAnActivityForResult">Bắt đầu một hoạt động cho một kết quả</h3>
+
+<p>Đôi khi bạn có thể muốn nhận được một kết quả từ hoạt động mà bạn bắt đầu. Trong trường hợp đó,
+hãy bắt đầu hoạt động bằng cách gọi {@link android.app.Activity#startActivityForResult
+  startActivityForResult()} (thay vì {@link android.app.Activity#startActivity
+  startActivity()}). Rồi để nhận được kết quả từ hoạt động
+sau đó, hãy triển khai phương pháp gọi lại {@link android.app.Activity#onActivityResult onActivityResult()}
+. Khi hoạt động sau đó diễn ra xong, nó trả về một kết quả trong một {@link
+android.content.Intent} cho phương pháp {@link android.app.Activity#onActivityResult onActivityResult()}
+của bạn.</p>
+
+<p>Ví dụ, bạn có thể muốn người dùng chọn một trong các liên lạc của họ, vì vậy hoạt động của bạn có thể
+làm gì đó với thông tin trong liên lạc đó. Đây là cách bạn có thể tạo một ý định như vậy và
+xử lý kết quả:</p>
+
+<pre>
+private void pickContact() {
+    // Create an intent to "pick" a contact, as defined by the content provider URI
+    Intent intent = new Intent(Intent.ACTION_PICK, Contacts.CONTENT_URI);
+    startActivityForResult(intent, PICK_CONTACT_REQUEST);
+}
+
+&#64;Override
+protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+    // If the request went well (OK) and the request was PICK_CONTACT_REQUEST
+    if (resultCode == Activity.RESULT_OK &amp;&amp; requestCode == PICK_CONTACT_REQUEST) {
+        // Perform a query to the contact's content provider for the contact's name
+        Cursor cursor = getContentResolver().query(data.getData(),
+        new String[] {Contacts.DISPLAY_NAME}, null, null, null);
+        if (cursor.moveToFirst()) { // True if the cursor is not empty
+            int columnIndex = cursor.getColumnIndex(Contacts.DISPLAY_NAME);
+            String name = cursor.getString(columnIndex);
+            // Do something with the selected contact's name...
+        }
+    }
+}
+</pre>
+
+<p>Ví dụ này thể hiện lô-gic cơ bản mà bạn sẽ sử dụng trong phương pháp {@link
+android.app.Activity#onActivityResult onActivityResult()} của mình để xử lý một
+kết quả hoạt động. Điều kiện đầu tiên kiểm tra xem yêu cầu có thành công không&mdash;nếu có thì
+{@code resultCode} sẽ là {@link android.app.Activity#RESULT_OK}&mdash;và liệu yêu cầu
+mà kiểm tra này đang phản hồi có được biết hay không&mdash;trong trường hợp này, {@code requestCode} phù hợp với
+tham số thứ hai được gửi bằng {@link android.app.Activity#startActivityForResult
+startActivityForResult()}. Từ đó, mã xử lý kết quả hoạt động bằng cách truy vấn
+dữ liệu được trả về trong {@link android.content.Intent} (tham số {@code data}).</p>
+
+<p>Điều xảy ra đó là, {@link
+android.content.ContentResolver} sẽ thực hiện một truy vấn đối với nhà cung cấp nội dung, truy vấn này trả về một
+{@link android.database.Cursor} cho phép đọc dữ liệu được truy vấn. Để biết thêm thông tin, hãy xem tài liệu
+<a href="{@docRoot}guide/topics/providers/content-providers.html">Trình cung cấp Nội dung</a>.</p>
+
+<p>Để biết thêm thông tin về việc sử dụng ý định, hãy xem tài liệu <a href="{@docRoot}guide/components/intents-filters.html">Ý định và Bộ lọc
+Ý định</a>.</p>
+
+
+<h2 id="ShuttingDown">Tắt một Hoạt động</h2>
+
+<p>Bạn có thể tắt một hoạt động bằng cách gọi phương pháp {@link android.app.Activity#finish
+finish()} của nó. Bạn cũng có thể tắt một hoạt động riêng mà trước đó bạn đã bắt đầu bằng cách gọi
+{@link android.app.Activity#finishActivity finishActivity()}.</p>
+
+<p class="note"><strong>Lưu ý:</strong> Trong hầu hết trường hợp, bạn không nên kết thúc một hoạt động một cách rõ ràng
+bằng cách sử dụng những phương pháp này. Như đề cập trong phần sau về vòng đời của hoạt động, hệ thống
+Android quản lý tuổi thọ của một hoạt động cho bạn, vì vậy bạn không cần kết thúc các hoạt động
+của chính mình. Việc gọi những phương pháp này có thể ảnh hưởng tiêu cực tới trải nghiệm người dùng
+kỳ vọng và chỉ nên được sử dụng khi bạn tuyệt đối không muốn người dùng quay lại thực thể này của 
+hoạt động.</p>
+
+
+<h2 id="Lifecycle">Quản lý Vòng đời của Hoạt động</h2>
+
+<p>Việc quản lý vòng đời các hoạt động của bạn bằng cách triển khai các phương pháp gọi lại
+rất quan trọng đối với việc xây dựng một ứng dụng mạnh
+và linh hoạt. Vòng đời của một hoạt động trực tiếp bị ảnh hưởng bởi sự liên kết giữa nó với
+các hoạt động khác, tác vụ của nó và ngăn xếp (back stack).</p>
+
+<p>Về cơ bản, một hoạt động có thể tồn tại ở ba trạng thái:</p>
+
+<dl>
+  <dt><i>Tiếp tục</i></dt>
+    <dd>Hoạt động ở tiền cảnh của màn hình và có tiêu điểm của người dùng. (Trạng thái này
+đôi khi cũng được gọi là "đang chạy".)</dd>
+
+  <dt><i>Tạm dừng</i></dt>
+    <dd>Một hoạt động khác ở tiền cảnh và có tiêu điểm, nhưng hoạt động này vẫn hiển thị. Cụ thể,
+một hoạt động khác hiển thị ở trên hoạt động này và hoạt động đó trong suốt một phần hoặc không
+che toàn bộ màn hình. Trạng thái tạm dừng hoàn toàn đang hoạt động (đối tượng {@link android.app.Activity}
+được giữ lại trong bộ nhớ, nó duy trì tất cả thông tin về trạng thái và thành viên, và vẫn gắn với
+trình quản lý cửa sổ), nhưng có thể bị hệ thống tắt bỏ trong trường hợp bộ nhớ cực kỳ thấp.</dd>
+
+  <dt><i>Dừng</i></dt>
+    <dd>Hoạt động bị che khuất hoàn toàn bởi một hoạt động khác (hoạt động hiện đang 
+“dưới nền"). Hoạt động dừng cũng vẫn đang hoạt động ({@link android.app.Activity}
+đối tượng được giữ lại trong bộ nhớ, nó duy trì tất cả thông tin về trạng thái và thành viên, nhưng <em>không</em>
+gắn với trình quản lý cửa sổ). Tuy nhiên, hoạt động không còn hiển thị với người dùng nữa và hệ thống
+có thể tắt bỏ hoạt động này khi cần bộ nhớ ở nơi khác.</dd>
+</dl>
+
+<p>Nếu một hoạt động bị tạm dừng hoặc dừng, hệ thống có thể bỏ nó khỏi bộ nhớ hoặc bằng cách yêu cầu nó
+kết thúc (gọi phương pháp {@link android.app.Activity#finish finish()} của nó), hoặc đơn giản là tắt bỏ tiến trình
+của hoạt động.  Khi hoạt động được mở lại (sau khi bị kết thúc hoặc tắt bỏ), nó phải được tạo
+lại hoàn toàn.</p>
+
+
+
+<h3 id="ImplementingLifecycleCallbacks">Triển khai gọi lại vòng đời</h3>
+
+<p>Khi một hoạt động chuyển tiếp vào ra các trạng thái khác nhau nêu trên, nó được thông báo
+thông qua các phương pháp gọi lại. Tất cả phương pháp gọi lại đều là những móc (hook) mà bạn
+có thể khống chế để làm công việc phù hợp khi trạng thái hoạt động của bạn thay đổi. Hoạt động khung sau
+bao gồm từng phương pháp trong các phương pháp vòng đời cơ bản:</p>
+
+
+<pre>
+public class ExampleActivity extends Activity {
+    &#64;Override
+    public void {@link android.app.Activity#onCreate onCreate}(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        // The activity is being created.
+    }
+    &#64;Override
+    protected void {@link android.app.Activity#onStart onStart()} {
+        super.onStart();
+        // The activity is about to become visible.
+    }
+    &#64;Override
+    protected void {@link android.app.Activity#onResume onResume()} {
+        super.onResume();
+        // The activity has become visible (it is now "resumed").
+    }
+    &#64;Override
+    protected void {@link android.app.Activity#onPause onPause()} {
+        super.onPause();
+        // Another activity is taking focus (this activity is about to be "paused").
+    }
+    &#64;Override
+    protected void {@link android.app.Activity#onStop onStop()} {
+        super.onStop();
+        // The activity is no longer visible (it is now "stopped")
+    }
+    &#64;Override
+    protected void {@link android.app.Activity#onDestroy onDestroy()} {
+        super.onDestroy();
+        // The activity is about to be destroyed.
+    }
+}
+</pre>
+
+<p class="note"><strong>Lưu ý:</strong> Việc bạn triển khai những phương pháp vòng đời này phải luôn
+gọi triển khai siêu lớp trước khi làm bất kỳ công việc nào, như minh họa trong các ví dụ bên trên.</p>
+
+<p>Cùng nhau, những phương pháp này định nghĩa toàn bộ vòng đời của một hoạt động. Bằng việc triển khai những phương pháp
+này, bạn có thể theo dõi ba vòng lặp lồng nhau trong vòng đời của hoạt động: </p>
+
+<ul>
+<li><b>Toàn bộ vòng đời</b> của một hoạt động sẽ xảy ra từ thời điểm lệnh gọi đến {@link
+android.app.Activity#onCreate onCreate()} cho tới thời điểm lệnh gọi đến {@link
+android.app.Activity#onDestroy}. Hoạt động của bạn nên thực hiện thiết lập
+trạng thái "chung" (chẳng hạn như định nghĩa bố trí) trong {@link android.app.Activity#onCreate onCreate()}, và
+giải phóng tất cả tài nguyên còn lại trong {@link android.app.Activity#onDestroy}. Ví dụ, nếu hoạt động của bạn
+có một luồng đang chạy ngầm để tải xuống dữ liệu từ mạng, nó có thể tạo
+luồng đó trong {@link android.app.Activity#onCreate onCreate()} rồi dừng luồng trong {@link
+android.app.Activity#onDestroy}.</li>
+
+<li><p><b>Vòng đời hiển thị</b> của một hoạt động xảy ra từ thời điểm lệnh gọi đến {@link
+android.app.Activity#onStart onStart()} cho tới lệnh gọi đến {@link
+android.app.Activity#onStop onStop()}. Trong thời gian này, người dùng có thể thấy hoạt động
+trên màn hình và tương tác với nó. Ví dụ, {@link android.app.Activity#onStop onStop()} được gọi
+khi một hoạt động mới bắt đầu và không còn hiển thị nữa. Giữa hai phương pháp này, bạn có thể
+duy trì các tài nguyên cần để cho người dùng thấy hoạt động. Ví dụ, bạn có thể đăng ký một
+{@link android.content.BroadcastReceiver} trong {@link
+android.app.Activity#onStart onStart()} để theo dõi các thay đổi tác động tới UI của mình, và bỏ đăng ký
+nó trong {@link android.app.Activity#onStop onStop()} khi người dùng không còn thấy thứ bạn đang
+hiển thị nữa. Hệ thống có thể gọi {@link android.app.Activity#onStart onStart()} và {@link
+android.app.Activity#onStop onStop()} nhiều lần trong suốt vòng đời của hoạt động, khi đó
+hoạt động luân chuyển giữa trạng thái hiển thị và ẩn với người dùng.</p></li>
+
+<li><p><b>Vòng đời ở tiền cảnh</b> của một hoạt động xảy ra từ thời điểm lệnh gọi đến {@link
+android.app.Activity#onResume onResume()} cho tới thời điểm lệnh gọi đến {@link android.app.Activity#onPause
+onPause()}. Trong thời gian này, hoạt động sẽ ở phía trước tất cả hoạt động khác trên màn hình và có
+tiêu điểm đầu vào của người dùng.  Hoạt động có thể thường xuyên chuyển tiếp vào và ra tiền cảnh&mdash;ví
+dụ, {@link android.app.Activity#onPause onPause()} được gọi khi thiết bị vào trạng thái ngủ hoặc
+khi một hộp thoại xuất hiện. Vì trạng thái này có thể chuyển tiếp thường xuyên, mã trong hai phương pháp này nên
+tương đối nhẹ để tránh chuyển tiếp chậm khiến người dùng phải đợi.</p></li>
+</ul>
+
+<p>Hình 1 minh họa những vòng lặp này và các đường dẫn mà một hoạt động có thể diễn ra giữa các trạng thái.
+Hình chữ nhật đại diện cho các phương pháp gọi lại bạn có thể triển khai để thực hiện thao tác khi
+hoạt động chuyển tiếp giữa những trạng thái này. <p>
+
+<img src="{@docRoot}images/activity_lifecycle.png" alt="" />
+<p class="img-caption"><strong>Hình 1.</strong> Vòng đời của hoạt động.</p>
+
+<p>Những phương pháp gọi lại vòng đời này cũng được liệt kê trong bảng 1, trong đó mô tả từng phương pháp
+gọi lại một cách chi tiết hơn và xác định từng phương pháp
+trong vòng đời tổng thể của hoạt động, bao gồm việc hệ thống có thể tắt bỏ hoạt động hay không sau khi
+phương pháp gọi lại hoàn tất.</p>
+
+<p class="table-caption"><strong>Bảng 1.</strong> Tóm tắt các phương pháp gọi lại
+trong vòng đời của hoạt động.</p>
+
+<table border="2" width="85%" frame="hsides" rules="rows">
+<colgroup align="left" span="3"></colgroup>
+<colgroup align="left"></colgroup>
+<colgroup align="center"></colgroup>
+<colgroup align="center"></colgroup>
+
+<thead>
+<tr><th colspan="3">Phương pháp</th> <th>Mô tả</th> <th>Có thể tắt bỏ sau?</th> <th>Tiếp theo</th></tr>
+</thead>
+
+<tbody>
+<tr>
+  <td colspan="3" align="left"><code>{@link android.app.Activity#onCreate onCreate()}</code></td>
+  <td>Được gọi khi hoạt động mới được tạo.
+      Đây là lúc bạn nên thực hiện tất cả thiết lập cố định thông thường của mình &mdash;
+      tạo chế độ xem, kết ghép dữ liệu với danh sách, v.v.  Phương pháp này được chuyển cho
+      một đối tượng Gói chứa trạng thái trước đây của hoạt động, nếu trạng thái
+      đó được thu lại (xem phần <a href="#actstate">Lưu Trạng thái Hoạt động</a>,
+      ở đoạn sau).
+      <p>Luôn được theo sau bởi {@code onStart()}.</p></td>
+  <td align="center">Không</td>
+      <td align="center">{@code onStart()}</td>
+</tr>
+
+<tr>
+   <td rowspan="5" style="border-left: none; border-right: none;">&nbsp;&nbsp;&nbsp;&nbsp;</td>
+   <td colspan="2" align="left"><code>{@link android.app.Activity#onRestart
+onRestart()}</code></td>
+   <td>Được gọi sau khi hoạt động đã được dừng, ngay trước khi hoạt động được
+       bắt đầu lại.
+       <p>Luôn được theo sau bởi {@code onStart()}</p></td>
+   <td align="center">Không</td>
+   <td align="center">{@code onStart()}</td>
+</tr>
+
+<tr>
+   <td colspan="2" align="left"><code>{@link android.app.Activity#onStart onStart()}</code></td>
+   <td>Được gọi ngay trước khi hoạt động hiển thị trước người dùng.
+       <p>Được theo sau bởi {@code onResume()} nếu hoạt động vào
+       tiền cảnh, hoặc {@code onStop()} nếu hoạt động bị ẩn.</p></td>
+    <td align="center">Không</td>
+    <td align="center">{@code onResume()} <br/>hoặc<br/> {@code onStop()}</td>
+</tr>
+
+<tr>
+   <td rowspan="2" style="border-left: none;">&nbsp;&nbsp;&nbsp;&nbsp;</td>
+   <td align="left"><code>{@link android.app.Activity#onResume onResume()}</code></td>
+   <td>Được gọi ngay trước khi hoạt động bắt đầu
+       tương tác với người dùng.  Tại điểm này, hoạt động nằm ở
+       trên cùng của chồng hoạt động, trong đó mục nhập của người dùng sẽ đến hoạt động này.
+       <p>Luôn được theo sau bởi {@code onPause()}.</p></td>
+   <td align="center">Không</td>
+   <td align="center">{@code onPause()}</td>
+</tr>
+
+<tr>
+   <td align="left"><code>{@link android.app.Activity#onPause onPause()}</code></td>
+   <td>Được gọi khi hệ thống sắp bắt đầu tiếp tục một hoạt động
+       khác.  Phương pháp này thường được sử dụng để thực hiện các thay đổi chưa lưu cho
+       dữ liệu liên tục, dừng các hoạt ảnh và những việc khác mà có thể tiêu tốn công suất
+       CPU, v.v.  Nó sẽ thực hiện rất nhanh, vì
+       hoạt động tiếp theo sẽ không được tiếp tục tới khi nó trở lại.
+       <p>Được theo sau hoặc bởi {@code onResume()} nếu hoạt động
+       trở lại phía trước, hoặc bởi {@code onStop()} nếu nó
+       không hiển thị với người dùng.</td>
+   <td align="center"><strong style="color:#800000">Có</strong></td>
+   <td align="center">{@code onResume()} <br/>hoặc<br/> {@code onStop()}</td>
+</tr>
+
+<tr>
+   <td colspan="2" align="left"><code>{@link android.app.Activity#onStop onStop()}</code></td>
+   <td>Được gọi khi hoạt động không còn hiển thị với người dùng.  Điều này
+       có thể xảy ra vì nó đang bị hủy, hoặc vì một hoạt động khác
+       (đang tồn tại hoặc mới) đã được tiếp tục và đang che khuất nó.
+       <p>Được theo sau hoặc bởi {@code onRestart()} nếu
+       hoạt động đang quay lại để tương tác với người dùng, hoặc bởi
+       {@code onDestroy()} nếu hoạt động này sẽ đi mất.</p></td>
+   <td align="center"><strong style="color:#800000">Có</strong></td>
+   <td align="center">{@code onRestart()} <br/>hoặc<br/> {@code onDestroy()}</td>
+</tr>
+
+<tr>
+   <td colspan="3" align="left"><code>{@link android.app.Activity#onDestroy
+onDestroy()}</code></td>
+   <td>Được gọi trước khi hoạt động bị hủy.  Đây là lần gọi cuối cùng
+       mà hoạt động sẽ nhận được.  Nên gọi nó hoặc vì
+       hoạt động đang kết thúc (ai đó đã gọi <code>{@link android.app.Activity#finish
+       finish()}</code> trên nó), hoặc vì hệ thống đang tạm thời hủy thực thể này của
+       hoạt động để tiết kiệm bộ nhớ trống.  Bạn có thể phân biệt
+       những những kịch bản này bằng phương pháp <code>{@link
+       android.app.Activity#isFinishing isFinishing()}</code>.</td>
+   <td align="center"><strong style="color:#800000">Có</strong></td>
+   <td align="center"><em>không có gì</em></td>
+</tr>
+</tbody>
+</table>
+
+<p>Cột ghi "Có thể tắt bỏ sau?" cho biết liệu hệ thống có thể
+tắt bỏ tiến trình đang lưu trữ hoạt động vào bất cứ lúc nào <em>sau khi phương pháp trả về</em>, mà không
+thực hiện một dòng mã khác của hoạt động hay không.  Ba phương pháp được ghi là "có": ({@link
+android.app.Activity#onPause
+onPause()}, {@link android.app.Activity#onStop onStop()}, và {@link android.app.Activity#onDestroy
+onDestroy()}). Vì {@link android.app.Activity#onPause onPause()} là phương pháp đầu tiên
+trong ba phương pháp, sau khi hoạt động được tạo, {@link android.app.Activity#onPause onPause()} là
+phương pháp cuối cùng được bảo đảm sẽ được gọi trước khi tiến trình <em>có thể</em> bị tắt bỏ&mdash;nếu
+hệ thống phải khôi phục bộ nhớ trong một tình huống khẩn cấp, khi đó {@link
+android.app.Activity#onStop onStop()} và {@link android.app.Activity#onDestroy onDestroy()} có thể
+không được gọi. Vì thế, bạn nên sử dụng {@link android.app.Activity#onPause onPause()} để ghi
+dữ liệu cố định quan trọng (chẳng hạn như những chỉnh sửa của người dùng) vào thiết bị lưu trữ. Tuy nhiên, bạn nên chọn lọc
+thông tin nào phải được giữ lại trong {@link android.app.Activity#onPause onPause()}, vì bất kỳ
+thủ tục chặn nào trong phương pháp này cũng chặn chuyển tiếp sang hoạt động kế tiếp và làm chậm trải nghiệm
+của người dùng.</p>
+
+<p> Những phương pháp được ghi "Không" trong cột <b>Có thể tắt bỏ</b> sẽ bảo vệ tiến trình đang lưu trữ
+hoạt động khỏi bị tắt bỏ từ thời điểm chúng được gọi.  Vì thế, một hoạt động có thể tắt bỏ được
+từ thời điểm {@link android.app.Activity#onPause onPause()} trở về tới thời điểm
+{@link android.app.Activity#onResume onResume()} sẽ được gọi. Nó sẽ không thể lại tắt bỏ được tới khi
+{@link android.app.Activity#onPause onPause()} lại được gọi và trả về. </p>
+
+<p class="note"><strong>Lưu ý:</strong> Một hoạt động mà không thể "tắt bỏ được" về mặt kỹ thuật bởi
+định nghĩa này trong bảng 1 vẫn có thể bị hệ thống tắt bỏ&mdash;nhưng điều đó chỉ xảy ra trong
+những hoàn cảnh cực đoan khi không còn giải pháp nào khác. Thời điểm một hoạt động có thể bị tắt bỏ được
+đề cập kỹ hơn trong tài liệu <a href="{@docRoot}guide/components/processes-and-threads.html">Tiến trình và
+Luồng</a>.</p>
+
+
+<h3 id="SavingActivityState">Lưu trạng thái của hoạt động</h3>
+
+<p>Phần giới thiệu về <a href="#Lifecycle">Quản lý Vòng đời của Hoạt động</a> có đề cập sơ qua
+rằng
+khi một hoạt động bị tạm dừng hoặc dừng, trạng thái của hoạt động đó sẽ được giữ lại. Điều này đúng vì
+đối tượng {@link android.app.Activity} vẫn được giữ trong bộ nhớ khi nó bị tạm dừng hoặc
+dừng&mdash;tất cả thông tin về các thành viên và trạng thái hiện tại của nó vẫn hoạt động. Vì thế, bất kỳ thay đổi nào
+mà người dùng đã thực hiện trong hoạt động đều được giữ lại sao cho khi hoạt động trở về
+tiền cảnh (khi nó "tiếp tục"), thì những thay đổi này vẫn còn đó.</p>
+
+<p>Tuy nhiên, khi hệ thống hủy một hoạt động để khôi phục bộ nhớ, đối tượng {@link
+android.app.Activity} bị hủy, vì vậy hệ thống không thể đơn thuần tiếp tục hoạt động với trạng thái
+không bị ảnh hưởng. Thay vào đó, hệ thống phải tạo lại đối tượng {@link android.app.Activity} nếu người dùng
+điều hướng trở lại nó. Tuy vậy, người dùng không biết
+rằng hệ thống đã hủy hoạt động và tạo lại nó và, vì thế, có thể
+cho rằng hoạt động sẽ vẫn nguyên như cũ. Trong tình huống này, bạn có thể đảm bảo rằng
+thông tin quan trọng về trạng thái của hoạt động được giữ nguyên bằng cách triển khai một phương pháp gọi lại
+bổ sung cho phép bạn lưu thông tin về trạng thái của hoạt động của mình: {@link
+android.app.Activity#onSaveInstanceState onSaveInstanceState()}.</p>
+
+<p>Hệ thống gọi {@link android.app.Activity#onSaveInstanceState onSaveInstanceState()}
+trước khi khiến hoạt động dễ bị hủy. Hệ thống chuyển cho phương pháp này
+một {@link android.os.Bundle} trong đó bạn có thể lưu 
+thông tin trạng thái về hoạt động như cặp tên giá trị, bằng cách sử dụng các phương pháp như {@link
+android.os.Bundle#putString putString()} và {@link
+android.os.Bundle#putInt putInt()}. Sau đó, nếu hệ thống tắt bỏ tiến trình ứng dụng của bạn
+và người dùng điều hướng trở lại hoạt động của bạn, hệ thống sẽ tạo lại hoạt động đó và
+chuyển {@link android.os.Bundle} cho cả {@link android.app.Activity#onCreate onCreate()} và {@link
+android.app.Activity#onRestoreInstanceState onRestoreInstanceState()}. Sử dụng một trong
+hai phương pháp này, bạn có thể trích xuất trạng thái đã lưu của mình từ {@link android.os.Bundle} và khôi phục
+trạng thái của hoạt động. Nếu không có thông tin trạng thái để khôi phục, khi đó {@link
+android.os.Bundle} được chuyển cho bạn sẽ rỗng (là trường hợp khi hoạt động được tạo
+lần đầu).</p>
+
+<img src="{@docRoot}images/fundamentals/restore_instance.png" alt="" />
+<p class="img-caption"><strong>Hình 2.</strong> Hai cách mà theo đó một hoạt động trở về tiêu điểm
+của người dùng với trạng thái không thay đổi: hoặc hoạt động bị hủy, rồi tạo lại và hoạt động phải khôi phục
+trạng thái đã lưu trước đó, hoặc hoạt động bị dừng, rồi tiếp tục và trạng thái của hoạt động
+giữ nguyên không đổi.</p>
+
+<p class="note"><strong>Lưu ý:</strong> Không có gì bảo đảm rằng {@link
+android.app.Activity#onSaveInstanceState onSaveInstanceState()} sẽ được gọi trước khi hoạt động
+của bạn bị hủy, vì có những trường hợp mà sẽ không cần lưu trạng thái
+(chẳng hạn như khi người dùng rời bỏ hoạt động của bạn bằng cách sử dụng nút <em>Quay lại</em>, vì người dùng
+rõ ràng
+đang đóng hoạt động). Nếu hệ thống gọi {@link android.app.Activity#onSaveInstanceState
+onSaveInstanceState()}, nó làm vậy trước {@link
+android.app.Activity#onStop onStop()} và có thể trước cả {@link android.app.Activity#onPause
+onPause()}.</p>
+
+<p>Tuy nhiên, ngay cả khi bạn không làm gì và không triển khai {@link
+android.app.Activity#onSaveInstanceState onSaveInstanceState()}, một phần trạng thái của hoạt động được khôi phục
+bởi việc lớp {@link android.app.Activity} triển khai mặc định {@link
+android.app.Activity#onSaveInstanceState onSaveInstanceState()}. Cụ thể, triển khai
+mặc định sẽ gọi phương pháp {@link
+android.view.View#onSaveInstanceState onSaveInstanceState()} tương ứng cho mọi {@link
+android.view.View} trong bố trí, nó cho phép mỗi chế độ xem cung cấp thông tin về chính nó
+mà sẽ được lưu. Gần như mọi widget trong khuôn khổ Android đều triển khai phương pháp này nếu
+phù hợp, sao cho mọi thay đổi hiển thị đối với UI đều tự động được lưu và khôi phục khi hoạt động
+của bạn được tạo lại. Ví dụ, widget {@link android.widget.EditText} lưu mọi văn bản
+do người dùng điền vào và widget {@link android.widget.CheckBox} lưu sẽ thông tin cho dù đã được kiểm tra
+hay chưa. Việc duy nhất bạn cần làm đó là cung cấp một ID duy nhất (với thuộc tính <a href="{@docRoot}guide/topics/resources/layout-resource.html#idvalue">{@code android:id}</a>
+) cho mỗi widget bạn muốn lưu trạng thái của nó. Nếu một widget không có ID thì hệ thống
+không thể lưu trạng thái của nó.</p>
+
+<div class="sidebox-wrapper">
+<div class="sidebox">
+<p>Bạn cũng có thể rõ ràng dừng một chế độ xem trong bố trí của mình khỏi việc lưu trạng thái của nó bằng cách đặt thuộc tính
+{@link android.R.attr#saveEnabled android:saveEnabled} thành {@code "false"} hoặc bằng cách gọi
+phương pháp {@link android.view.View#setSaveEnabled setSaveEnabled()}. Thường thì bạn không nên
+vô hiệu hóa điều này, nhưng có thể làm nếu bạn muốn khôi phục trạng thái của UI hoạt động khác đi.</p>
+</div>
+</div>
+
+<p>Mặc dù việc triển khai mặc định {@link
+android.app.Activity#onSaveInstanceState onSaveInstanceState()} lưu thông tin hữu ích về
+UI hoạt động của bạn, bạn có thể vẫn cần khống chế nó để lưu thêm thông tin.
+Ví dụ, bạn có thể cần lưu các giá trị thành viên đã thay đổi trong vòng đời của hoạt động (mà
+có thể tương quan với các giá trị được khôi phục trong UI, nhưng các thành viên nắm giữ giá trị UI đó không được
+khôi phục theo mặc định).</p>
+
+<p>Vì việc triển khai mặc định {@link
+android.app.Activity#onSaveInstanceState onSaveInstanceState()} giúp lưu trạng thái của UI, nếu
+bạn khống chế phương pháp để lưu thêm thông tin trạng thái, bạn nên luôn luôn gọi
+triển khai siêu lớp của {@link android.app.Activity#onSaveInstanceState onSaveInstanceState()}
+trước khi thực hiện bất kỳ công việc nào. Tương tự, bạn cũng nên gọi triển khai siêu lớp {@link
+android.app.Activity#onRestoreInstanceState onRestoreInstanceState()} nếu bạn khống chế nó, để
+triển khai mặc định có thể khôi phục các trạng thái xem.</p>
+
+<p class="note"><strong>Lưu ý:</strong> Vì {@link android.app.Activity#onSaveInstanceState
+onSaveInstanceState()} không đảm bảo
+sẽ được gọi, bạn chỉ nên sử dụng nó để ghi trạng thái giao thời của hoạt động (trạng thái của
+UI)&mdash;bạn không nên sử dụng nó để lưu giữ dữ liệu liên tục.  Thay vào đó, bạn nên sử dụng  {@link
+android.app.Activity#onPause onPause()} để lưu giữ dữ liệu liên tục (chẳng hạn như dữ liệu mà nên được lưu
+vào một cơ sở dữ liệu) khi người dùng rời bỏ hoạt động.</p>
+
+<p>Một cách hay để kiểm tra khả năng khôi phục trạng thái của ứng dụng của bạn đó là chỉ cần xoay
+thiết bị sao cho hướng màn hình thay đổi. Khi hướng màn hình thay đổi, hệ thống
+hủy và tạo lại hoạt động để áp dụng các tài nguyên thay thế mà có thể có sẵn
+cho cấu hình màn hình mới. Chỉ với lý do này mà một điều rất quan trọng đó là hoạt động của bạn
+hoàn toàn khôi phục trạng thái của mình khi nó được tạo lại, vì người dùng thường xoay màn hình trong khi
+sử dụng ứng dụng.</p>
+
+
+<h3 id="ConfigurationChanges">Xử lý thay đổi về cấu hình</h3>
+
+<p>Một số cấu hình thiết bị có thể thay đổi trong thời gian chạy (chẳng hạn như hướng màn hình, sự sẵn có
+của bàn phím, và ngôn ngữ). Khi sự thay đổi đó diễn ra, Android tạo lại hoạt động đang chạy
+(hệ thống gọi {@link android.app.Activity#onDestroy}, rồi ngay lập tức gọi {@link
+android.app.Activity#onCreate onCreate()}). Hành vi này
+được thiết kế để giúp ứng dụng của bạn điều chỉnh theo những cấu hình mới bằng cách tự động tải lại ứng dụng
+của bạn bằng các tài nguyên thay thế mà bạn đã cung cấp (chẳng hạn như bố trí khác cho
+các hướng và kích cỡ màn hình khác).</p>
+
+<p>Nếu bạn thiết kế hoạt động của mình một cách phù hợp để xử lý khởi động lại do thay đổi hướng màn hình và
+khôi phục trạng thái hoạt động như nêu trên, ứng dụng của bạn sẽ linh hoạt hơn trước
+những sự kiện bất ngờ khác trong vòng đời của hoạt động.</p>
+
+<p>Cách tốt nhất để xử lý khởi động lại đó là
+ lưu và khôi phục trạng thái hoạt động của bạn bằng cách sử dụng {@link
+  android.app.Activity#onSaveInstanceState onSaveInstanceState()} và {@link
+android.app.Activity#onRestoreInstanceState onRestoreInstanceState()} (hoặc {@link
+android.app.Activity#onCreate onCreate()}), như đã đề cập trong phần trước.</p>
+
+<p>Để biết thêm thông tin về những thay đổi cấu hình xảy ra tại thời điểm chạy và cách bạn có thể xử lý
+chúng, hãy đọc hướng dẫn <a href="{@docRoot}guide/topics/resources/runtime-changes.html">Xử lý
+Thay đổi trong Thời gian chạy</a>.</p>
+
+
+
+<h3 id="CoordinatingActivities">Điều phối hoạt động</h3>
+
+ <p>Khi một hoạt động bắt đầu một hoạt động khác, cả hai đều trải qua những chuyển tiếp vòng đời. Hoạt động thứ nhất
+tạm dừng và dừng (tuy nhiên, nó sẽ không dừng nếu vẫn hiển thị được dưới nền), trong khi hoạt động kia
+được tạo. Trong trường hợp những hoạt động này chia sẻ dữ liệu được lưu vào đĩa hoặc nơi khác, điều quan trọng là
+phải hiểu rằng hoạt động thứ nhất không bị dừng hoàn toàn trước khi hoạt động thứ hai được tạo.
+Thay vào đó, tiến trình bắt đầu hoạt động thứ hai chồng lấp với tiến trình dừng hoạt động
+thứ nhất.</p>
+
+<p>Thứ tự gọi lại vòng đời được định nghĩa rõ, cụ thể là khi hai hoạt động trong cùng tiến trình
+và hoạt động này bắt đầu hoạt động kia. Sau đây là thứ tự thao tác diễn ra khi Hoạt động
+A bắt đầu Hoạt động B: </p>
+
+<ol>
+<li>Phương pháp {@link android.app.Activity#onPause onPause()} của Hoạt động A thực thi.</li>
+
+<li>{@link android.app.Activity#onCreate onCreate()} của Hoạt động B, {@link
+android.app.Activity#onStart onStart()}, và các phương pháp {@link android.app.Activity#onResume onResume()}
+thực thi theo trình tự. (Hoạt động B lúc này có tiêu điểm của người dùng.)</li>
+
+<li>Sau đó, nếu Hoạt động A không còn hiển thị trên màn hình, phương pháp {@link
+android.app.Activity#onStop onStop()} của nó sẽ thực thi.</li>
+</ol>
+
+ <p>Trình tự gọi lại vòng đời có thể dự đoán này cho phép bạn quản lý chuyển tiếp
+thông tin từ hoạt động này sang hoạt động khác. Ví dụ, nếu bạn phải ghi vào một cơ sở dữ liệu khi
+hoạt động thứ nhất dừng sao cho hoạt động theo sau có thể đọc nó, khi đó bạn nên ghi vào
+cơ sở dữ liệu trong khi {@link android.app.Activity#onPause onPause()} thay vì trong khi {@link
+android.app.Activity#onStop onStop()}.</p>
+
+<!--
+<h2>Beginner's Path</h2>
+
+<p>For more information about how Android maintains a history of activities and
+enables user multitasking, continue with the <b><a
+href="{@docRoot}guide/components/tasks-and-back-stack.html">Tasks and Back
+Stack</a></b> document.</p>
+-->

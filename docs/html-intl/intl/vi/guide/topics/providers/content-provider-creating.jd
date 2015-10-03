@@ -1,0 +1,1214 @@
+page.title=Tạo một Trình cung cấp Nội dung
+@jd:body
+<div id="qv-wrapper">
+<div id="qv">
+
+
+<h2>Trong tài liệu này</h2>
+<ol>
+    <li>
+        <a href="#DataStorage">Thiết kế Kho lưu trữ Dữ liệu</a>
+    </li>
+    <li>
+        <a href="#ContentURI">Thiết kế URI Nội dung</a>
+    </li>
+    <li>
+        <a href="#ContentProvider">Triển khai Lớp Trình cung cấp Nội dung</a>
+        <ol>
+            <li>
+                <a href="#RequiredAccess">Phương pháp được Yêu cầu</a>
+            </li>
+            <li>
+                <a href="#Query">Triển khai phương pháp query()</a>
+            </li>
+            <li>
+                <a href="#Insert">Triển khai phương pháp insert()</a>
+            </li>
+            <li>
+                <a href="#Delete">Triển khai phương pháp delete()</a>
+            </li>
+            <li>
+                <a href="#Update">Triển khai phương pháp update()</a>
+            </li>
+            <li>
+                <a href="#OnCreate">Triển khai phương pháp onCreate()</a>
+            </li>
+        </ol>
+    </li>
+    <li>
+        <a href="#MIMETypes">Triển khai Kiểu MIME của Trình cung cấp Nội dung</a>
+        <ol>
+            <li>
+                <a href="#TableMIMETypes">Kiểu MIME cho bảng</a>
+            </li>
+            <li>
+                <a href="#FileMIMETypes">Kiểu MIME cho tệp</a>
+            </li>
+        </ol>
+    </li>
+    <li>
+        <a href="#ContractClass">Triển khai một Lớp Hợp đồng</a>
+    </li>
+    <li>
+        <a href="#Permissions">Triển khai Quyền của Trình cung cấp Nội dung</a>
+    </li>
+    <li>
+        <a href="#ProviderElement">Phần tử &lt;provider&gt;</a>
+    </li>
+    <li>
+        <a href="#Intents">Ý định và Truy cập Dữ liệu</a>
+    </li>
+</ol>
+<h2>Lớp khóa</h2>
+    <ol>
+        <li>
+            {@link android.content.ContentProvider}
+        </li>
+        <li>
+            {@link android.database.Cursor}
+        </li>
+        <li>
+            {@link android.net.Uri}
+        </li>
+    </ol>
+<h2>Các Mẫu Liên quan</h2>
+    <ol>
+        <li>
+            <a href="{@docRoot}resources/samples/NotePad/index.html">
+                Ứng dụng mẫu Note Pad
+            </a>
+        </li>
+    </ol>
+<h2>Xem thêm</h2>
+    <ol>
+        <li>
+            <a href="{@docRoot}guide/topics/providers/content-provider-basics.html">
+            Nội dung Cơ bản về Trình cung cấp Nội dung</a>
+        </li>
+        <li>
+            <a href="{@docRoot}guide/topics/providers/calendar-provider.html">
+            Trình cung cấp Lịch</a>
+        </li>
+    </ol>
+</div>
+</div>
+
+
+<p>
+    Trình cung cấp nội dung quản lý truy cập vào một kho dữ liệu tập trung. Bạn triển khai một
+    trình cung cấp thành một hoặc nhiều lớp trong một ứng dụng Android, bên cạnh các phần tử trong
+    tệp bản kê khai. Một trong các lớp của bạn triển khai một lớp con
+    {@link android.content.ContentProvider}, đây là giao diện giữa trình cung cấp của bạn và
+    các ứng dụng khác. Mặc dù mục đích của các trình cung cấp nội dung khác là cung cấp dữ liệu có sẵn cho các
+    ứng dụng khác, dĩ nhiên bạn có thể ra lệnh cho các hoạt động trong ứng dụng của mình
+    truy vấn và sửa đổi dữ liệu được quản lý bởi trình cung cấp của bạn.
+</p>
+<p>
+    Phần còn lại của chủ đề này là một danh sách cơ bản về các bước để xây dựng một trình cung cấp nội dung và một danh sách
+    các API để sử dụng.
+</p>
+
+
+<!-- Before You Start Building -->
+<h2 id="BeforeYouStart">Trước khi Bạn Bắt đầu Xây dựng</h2>
+<p>
+    Trước khi bạn bắt đầu xây dựng một trình cung cấp, hãy làm việc sau:
+</p>
+<ol>
+    <li>
+        <strong>Quyết định xem bạn có cần một trình cung cấp nội dung không</strong>. Bạn cần xây dựng một trình cung cấp
+        nội dung nếu muốn cung cấp một hoặc nhiều tính năng sau đây:
+        <ul>
+            <li>Bạn muốn cung cấp dữ liệu hoặc tệp phức tạp cho các ứng dụng khác.</li>
+            <li>Bạn muốn cho phép người dùng sao chép dữ liệu phức tạp từ ứng dụng của bạn vào các ứng dụng khác.</li>
+            <li>Bạn muốn cung cấp các gợi ý tìm kiếm tùy chỉnh bằng cách sử dụng khuôn khổ tìm kiếm.</li>
+        </ul>
+    <p>
+        Bạn <em>không</em> cần trình cung cấp phải sử dụng một cơ sở dữ liệu SQLite nếu việc sử dụng hoàn toàn
+        diễn ra trong ứng dụng của bạn.
+    </p>
+    </li>
+    <li>
+        Nếu bạn chưa làm như vậy, hãy đọc chủ đề
+        <a href="{@docRoot}guide/topics/providers/content-provider-basics.html">
+        Nội dung Cơ bản về Trình cung cấp Nội dung</a> để tìm hiểu thêm về trình cung cấp.
+    </li>
+</ol>
+<p>
+    Tiếp theo, hãy làm theo những bước sau để xây dựng trình cung cấp của bạn:
+</p>
+<ol>
+    <li>
+        Thiết kế kho lưu trữ thô cho dữ liệu của bạn. Một trình cung cấp nội dung sẽ cung cấp dữ liệu theo hai cách:
+        <dl>
+            <dt>
+                Dữ liệu tệp
+            </dt>
+            <dd>
+                Dữ liệu mà thường đến các tệp chẳng hạn như
+                ảnh, âm thanh, hoặc video. Lưu trữ các tệp ở không gian
+                riêng tư trong ứng dụng của bạn. Để hồi đáp lại một yêu cầu tệp từ một ứng dụng khác, trình cung cấp
+                của bạn có thể cung cấp một núm điều tác cho tệp.
+            </dd>
+            <dt>
+                Dữ liệu "cấu trúc"
+            </dt>
+            <dd>
+                Dữ liệu mà thường đến một cơ sở dữ liệu, mảng, hoặc cấu trúc tương tự.
+                Lưu trữ dữ liệu dưới dạng tương thích với các bảng hàng cột. Hàng
+                biểu diễn một đối tượng, chẳng hạn như một người hoặc khoản mục trong kiểm kê. Cột biểu diễn
+                một số dữ liệu cho đối tượng, chẳng hạn như tên của một người hoặc giá của một khoản mục. Một cách thường dùng để
+                lưu trữ loại dữ liệu này đó là trong cơ sở dữ liệu SQLite, nhưng bạn có thể sử dụng bất kỳ loại
+                kho lưu trữ lâu dài nào. Để tìm hiểu thêm về các loại kho lưu trữ có sẵn trong
+                hệ thống Android, hãy xem phần <a href="#DataStorage">
+                Thiết kế Kho lưu trữ Dữ liệu</a>.
+            </dd>
+        </dl>
+    </li>
+    <li>
+        Định nghĩa một triển khai cụ thể của lớp {@link android.content.ContentProvider} và
+        các phương pháp được yêu cầu của nó. Lớp này là giao diện giữa dữ liệu của bạn và phần còn lại của
+        hệ thống Android. Để biết thêm thông tin về lớp này, hãy xem phần
+        <a href="#ContentProvider">Triển khai Lớp ContentProvider</a>.
+    </li>
+    <li>
+        Định nghĩa xâu thẩm quyền của trình cung cấp, URI nội dung của nó, và các tên cột. Nếu bạn muốn
+        ứng dụng của trình cung cấp xử lý các ý định, hãy định nghĩa các hành động ý định, dữ liệu phụ thêm,
+        và cờ. Đồng thời, hãy định nghĩa các quyền mà bạn sẽ yêu cầu cho những ứng dụng muốn
+        truy cập dữ liệu của bạn. Bạn nên cân nhắc định nghĩa tất cả những giá trị này là hằng số trong một
+        lớp riêng; sau đó, bạn có thể cho hiện lớp này ra với các nhà phát triển khác. Để biết thêm
+        thông tin về URI nội dung, hãy xem
+        phần <a href="#ContentURI">Thiết kế URI Nội dung</a>.
+        Để biết thêm thông tin về ý định, hãy xem
+        phần <a href="#Intents">Ý định và Truy cập Dữ liệu</a>.
+    </li>
+    <li>
+        Thêm các nội dung tùy chọn khác, chẳng hạn như dữ liệu mẫu hoặc triển
+        khai {@link android.content.AbstractThreadedSyncAdapter} mà có thể đồng bộ hoá dữ liệu giữa
+        trình cung cấp và dữ liệu nền đám mây.
+    </li>
+</ol>
+
+
+<!-- Designing Data Storage -->
+<h2 id="DataStorage">Thiết kế Kho lưu trữ Dữ liệu</h2>
+<p>
+    Trình cung cấp nội dung là giao diện đối với dữ liệu được lưu theo một định dạng cấu trúc. Trước khi tạo
+    giao diện, bạn phải quyết định cách lưu trữ dữ liệu. Bạn có thể lưu trữ dữ liệu theo bất kỳ dạng nào
+    mà bạn muốn rồi thiết kế giao diện để đọc và ghi dữ liệu nếu cần thiết.
+</p>
+<p>
+    Có một số công nghệ lưu trữ dữ liệu có sẵn trong Android:
+</p>
+<ul>
+    <li>
+        Hệ thống Android bao gồm một API cơ sở dữ liệu SQLite mà các trình cung cấp của chính Androi sử dụng
+        để lưu trữ dữ liệu theo định hướng bảng. Lớp
+        {@link android.database.sqlite.SQLiteOpenHelper} giúp bạn tạo cơ sở dữ liệu, và lớp
+        {@link android.database.sqlite.SQLiteDatabase} là lớp cơ bản để đánh giá
+        các cơ sở dữ liệu.
+        <p>
+            Nhớ rằng bạn không phải sử dụng một cơ sở dữ liệu để triển khai kho lưu giữ của mình. Bề ngoài, một trình cung cấp
+            có dạng như là một tập hợp bảng, tương tự như một cơ sở dữ liệu quan hệ, nhưng đây
+            không phải là một yêu cầu đối với việc triển khai nội bộ của trình cung cấp.
+        </p>
+    </li>
+    <li>
+        Để lưu trữ dữ liệu tệp, Android có nhiều API định hướng tệp khác nhau.
+        Để tìm hiểu thêm về lưu trữ tệp, hãy đọc chủ đề
+        <a href="{@docRoot}guide/topics/data/data-storage.html">Kho lưu trữ Dữ liệu</a>. Nếu bạn
+        đang thiết kế một trình cung cấp dữ liệu liên quan tới phương tiện chẳng hạn như nhạc hay video, bạn có thể
+        có một trình cung cấp cho phép kết hợp dữ liệu bảng và các tệp.
+    </li>
+    <li>
+        Để làm việc với dữ liệu trên nền mạng, hãy sử dụng các lớp trong {@link java.net} và 
+        {@link android.net}. Bạn cũng có thể đồng bộ hoá dữ liệu trên nền mạng với một kho lưu trữ dữ liệu cục bộ
+        chẳng hạn như một cơ sở dữ liệu, rồi cung cấp dữ liệu dưới dạng bảng hoặc tệp.
+        Ứng dụng mẫu <a href="{@docRoot}resources/samples/SampleSyncAdapter/index.html">
+        Trình điều hợp Đồng bộ Mẫu</a> minh họa loại đồng bộ hoá này.
+    </li>
+</ul>
+<h3 id="DataDesign">
+    Những nội dung cần xem xét khi thiết kế dữ liệu
+</h3>
+<p>
+    Sau đây là một số mẹo để thiết kế cấu trúc dữ liệu cho trình cung cấp của bạn:
+</p>
+<ul>
+    <li>
+        Dữ liệu bảng nên luôn có một cột "khóa chính" mà trình cung cấp duy trì
+        như một giá trị số duy nhất cho mỗi hàng. Bạn có thể sử dụng giá trị này để liên kết hàng với các hàng
+        có liên quan trong các bảng khác (sử dụng nó làm "khóa ngoại"). Mặc dù bạn có thể sử dụng bất kỳ tên gọi nào
+       cho cột này, sử dụng {@link android.provider.BaseColumns#_ID BaseColumns._ID} là lựa chọn tốt nhất
+        vì việc liên kết các kết quả của một truy vấn trình cung cấp với
+        {@link android.widget.ListView} đòi hỏi một trong các cột được truy xuất phải có tên
+        <code>_ID</code>.
+    </li>
+    <li>
+        Nếu bạn muốn cung cấp các hình ảnh bitmap hoặc nội dung dữ liệu định hướng tệp rất lớn khác, hãy lưu trữ
+        dữ liệu vào một tệp rồi cung cấp nó gián tiếp thay vì lưu trữ nó trực tiếp trong một
+        bảng. Nếu làm vậy, bạn cần báo cho người dùng trình cung cấp của bạn rằng họ cần sử dụng một phương pháp tệp
+        {@link android.content.ContentResolver} để truy cập dữ liệu.
+    </li>
+    <li>
+        Sử dụng kiểu dữ liệu Binary Large OBject (BLOB) để lưu trữ dữ liệu có kích cỡ khác nhau hoặc có một
+        cấu trúc thay đổi. Ví dụ, bạn có thể sử dụng cột BLOB để lưu trữ một
+        <a href="http://code.google.com/p/protobuf">bộ đệm giao thức</a> hay
+        <a href="http://www.json.org">cấu trúc JSON</a>.
+        <p>
+            Bạn cũng có thể sử dụng một BLOB để triển khai một bảng <em>độc lập với sơ đồ</em>. Trong
+            kiểu bảng này, bạn định nghĩa một cột khóa chính, một cột kiểu MIME, và một hoặc
+            nhiều cột chung là BLOB. Ý nghĩa của dữ liệu trong cột BLOB được thể hiện
+            bởi giá trị trong cột kiểu MIME. Điều này cho phép bạn lưu trữ các kiểu hàng khác nhau trong
+            cùng bảng. Bảng "dữ liệu"
+            {@link android.provider.ContactsContract.Data} của Trình cung cấp Danh bạ là một ví dụ về bảng
+            độc lập với sơ đồ.
+        </p>
+    </li>
+</ul>
+<!-- Designing Content URIs -->
+<h2 id="ContentURI">Thiết kế URI Nội dung</h2>
+<p>
+    <strong>URI nội dung</strong> là một URI xác định dữ liệu trong một trình cung cấp. URI nội dung bao gồm
+    tên mang tính biểu tượng của toàn bộ trình cung cấp (<strong>quyền</strong> của nó) và một
+    tên trỏ đến một bảng hoặc tệp (<strong>đường dẫn</strong>). Phần id tùy chọn chỉ đến một
+    hàng riêng lẻ trong một bảng. Mọi phương thức truy cập dữ liệu
+    {@link android.content.ContentProvider} đều có một URI nội dung là một tham đối; điều này cho phép bạn
+    xác định bảng, hàng, hoặc tệp để truy cập.
+</p>
+<p>
+    Nội dung cơ bản của URI nội dung được mô tả trong chủ đề
+    <a href="{@docRoot}guide/topics/providers/content-provider-basics.html">
+    Nội dung Cơ bản về Trình cung cấp Nội dung</a>.
+</p>
+<h3>Thiết kế một thẩm quyền</h3>
+<p>
+    Một trình cung cấp thường có một thẩm quyền duy nhất, đóng vai trò là tên nội bộ Android của nó. Để
+    tránh xung đột với các trình cung cấp khác, bạn nên sử dụng quyền sở hữu miền Internet (đảo ngược)
+    làm cơ sở cho thẩm quyền của trình cung cấp của mình. Vì đề xuất này cũng đúng đối với tên gói
+    Android, bạn có thể định nghĩa thẩm quyền trình cung cấp của mình là phần mở rộng của tên
+    gói chứa trình cung cấp. Ví dụ, nếu tên gói Android là
+    <code>com.example.&lt;appname&gt;</code>, bạn nên cấp cho trình cung cấp của mình
+    thẩm quyền <code>com.example.&lt;appname&gt;.provider</code>.
+</p>
+<h3>Thiết kế một cấu trúc đường dẫn</h3>
+<p>
+    Nhà phát triển thường tạo URI nội dung từ thẩm quyền bằng cách nối các đường dẫn trỏ đến
+    các bảng riêng lẻ. Ví dụ, nếu bạn có hai bảng <em>table1</em> và
+    <em>table2</em>, bạn kết hợp thẩm quyền từ ví dụ trước để tạo ra
+    các URI nội dung
+    <code>com.example.&lt;appname&gt;.provider/table1</code> và
+    <code>com.example.&lt;appname&gt;.provider/table2</code>. Các đường dẫn
+    không bị giới hạn ở một phân đoạn duy nhất, và không cần phải có một bảng cho từng cấp của đường dẫn.
+</p>
+<h3>Xử lý ID URI nội dung</h3>
+<p>
+    Theo quy ước, các trình cung cấp cho phép truy cập một hàng đơn trong một bảng bằng cách chấp nhận một URI nội dung
+    có một giá trị ID cho hàng đó ở cuối URI. Cũng theo quy ước, các trình cung cấp sẽ so khớp
+    giá trị ID với cột <code>_ID</code> của bảng, và thực hiện truy cập yêu cầu đối với
+    hàng trùng khớp.
+</p>
+<p>
+    Quy ước này tạo điều kiện cho một kiểu mẫu thiết kế chung cho các ứng dụng truy cập một trình cung cấp. Ứng dụng
+    tiến hành truy vấn đối với trình cung cấp và hiển thị kết quả {@link android.database.Cursor}
+    trong một {@link android.widget.ListView} bằng cách sử dụng {@link android.widget.CursorAdapter}.
+    Định nghĩa {@link android.widget.CursorAdapter} yêu cầu một trong các cột trong
+    {@link android.database.Cursor} phải là <code>_ID</code>
+</p>
+<p>
+    Sau đó, người dùng chọn một trong các hàng được hiển thị từ UI để xem hoặc sửa đổi
+    dữ liệu. Ứng dụng sẽ nhận được hàng tương ứng từ {@link android.database.Cursor} làm nền cho
+    {@link android.widget.ListView}, nhận giá trị <code>_ID</code> cho hàng này, nối nó với
+    URI nội dung, và gửi yêu cầu truy cập tới trình cung cấp. Sau đó, trình cung cấp có thể thực hiện
+    truy vấn hoặc sửa đổi đối với chính xác hàng mà người dùng đã chọn.
+</p>
+<h3>Kiểu mẫu URI nội dung</h3>
+<p>
+    Để giúp bạn chọn hành động nào sẽ thực hiện cho URI nội dung đến, API của trình cung cấp sẽ bao gồm
+    lớp thuận tiện {@link android.content.UriMatcher}, nó ánh xạ "kiểu mẫu" URI nội dung với
+    các giá trị số nguyên. Bạn có thể sử dụng các giá trị số nguyên trong một câu lệnh <code>switch</code> mà chọn
+    hành động mong muốn cho URI nội dung hoặc URI mà khớp với một kiểu mẫu cụ thể.
+</p>
+<p>
+    Kiểu mẫu URI nội dung sẽ so khớp các URI nội dung bằng cách sử dụng ký tự đại diện:
+</p>
+    <ul>
+        <li>
+            <strong><code>*</code>:</strong> Khớp một xâu ký tự hợp lệ bất kỳ với chiều dài bất kỳ.
+        </li>
+        <li>
+            <strong><code>#</code>:</strong> Khớp một xâu ký tự số có chiều dài bất kỳ.
+        </li>
+    </ul>
+<p>
+    Lấy một ví dụ về thiết kế và tạo mã xử lý URI nội dung, hãy xét một trình cung cấp có
+    thẩm quyền <code>com.example.app.provider</code> mà nhận ra các URI nội dung
+    trỏ đến các bảng sau:
+</p>
+<ul>
+    <li>
+        <code>content://com.example.app.provider/table1</code>: Một bảng gọi là <code>table1</code>.
+    </li>
+    <li>
+        <code>content://com.example.app.provider/table2/dataset1</code>: Một bảng gọi là
+        <code>dataset1</code>.
+    </li>
+    <li>
+        <code>content://com.example.app.provider/table2/dataset2</code>: Một bảng gọi là
+        <code>dataset2</code>.
+    </li>
+    <li>
+        <code>content://com.example.app.provider/table3</code>: Một bảng gọi là <code>table3</code>.
+    </li>
+</ul>
+<p>
+    Trình cung cấp cũng nhận ra những URI nội dung này nếu chúng có một ID hàng được nối kèm, như
+    ví dụ <code>content://com.example.app.provider/table3/1</code> đối với hàng được nhận biết bởi
+    <code>1</code> trong <code>table3</code>.
+</p>
+<p>
+    Sẽ có thể có các kiểu mẫu URI nội dung sau:
+</p>
+<dl>
+    <dt>
+        <code>content://com.example.app.provider/*</code>
+    </dt>
+    <dd>
+        Khớp với bất kỳ URI nội dung nào trong trình cung cấp.
+    </dd>
+    <dt>
+        <code>content://com.example.app.provider/table2/*</code>:
+    </dt>
+    <dd>
+        Khớp với một URI nội dung cho các bảng <code>dataset1</code>
+        và <code>dataset2</code>, nhưng không khớp với URI nội dung cho <code>table1</code> hoặc 
+        <code>table3</code>.
+    </dd>
+    <dt>
+        <code>content://com.example.app.provider/table3/#</code>: Khớp với một URI nội dung
+        cho các hàng đơn trong <code>table3</code>, chẳng hạn như
+        <code>content://com.example.app.provider/table3/6</code> đối với hàng được xác định bởi
+        <code>6</code>.
+    </dt>
+</dl>
+<p>
+    Đoạn mã HTML sau cho biết cách hoạt động của các phương pháp trong {@link android.content.UriMatcher}.
+    Đoạn mã này xử lý các URI cho toàn bộ một bảng khác với URI cho một
+    hàng đơn, bằng cách sử dụng mẫu hình URI nội dung
+    <code>content://&lt;authority&gt;/&lt;path&gt;</code> cho các bảng, và
+    <code>content://&lt;authority&gt;/&lt;path&gt;/&lt;id&gt;</code> cho các hàng đơn.
+</p>
+<p>
+    Phương pháp {@link android.content.UriMatcher#addURI(String, String, int) addURI()} ánh xạ một
+    thẩm quyền và đường dẫn tới một giá trị số nguyên. Phương pháp {@link android.content.UriMatcher#match(Uri)
+    match()} trả về giá trị số nguyên cho một URI. Câu lệnh <code>switch</code> sẽ chọn
+    giữa truy vấn toàn bộ bảng và truy vấn cho một bản ghi đơn:
+</p>
+<pre class="prettyprint">
+public class ExampleProvider extends ContentProvider {
+...
+    // Creates a UriMatcher object.
+    private static final UriMatcher sUriMatcher;
+...
+    /*
+     * The calls to addURI() go here, for all of the content URI patterns that the provider
+     * should recognize. For this snippet, only the calls for table 3 are shown.
+     */
+...
+    /*
+     * Sets the integer value for multiple rows in table 3 to 1. Notice that no wildcard is used
+     * in the path
+     */
+    sUriMatcher.addURI("com.example.app.provider", "table3", 1);
+
+    /*
+     * Sets the code for a single row to 2. In this case, the "#" wildcard is
+     * used. "content://com.example.app.provider/table3/3" matches, but
+     * "content://com.example.app.provider/table3 doesn't.
+     */
+    sUriMatcher.addURI("com.example.app.provider", "table3/#", 2);
+...
+    // Implements ContentProvider.query()
+    public Cursor query(
+        Uri uri,
+        String[] projection,
+        String selection,
+        String[] selectionArgs,
+        String sortOrder) {
+...
+        /*
+         * Choose the table to query and a sort order based on the code returned for the incoming
+         * URI. Here, too, only the statements for table 3 are shown.
+         */
+        switch (sUriMatcher.match(uri)) {
+
+
+            // If the incoming URI was for all of table3
+            case 1:
+
+                if (TextUtils.isEmpty(sortOrder)) sortOrder = "_ID ASC";
+                break;
+
+            // If the incoming URI was for a single row
+            case 2:
+
+                /*
+                 * Because this URI was for a single row, the _ID value part is
+                 * present. Get the last path segment from the URI; this is the _ID value.
+                 * Then, append the value to the WHERE clause for the query
+                 */
+                selection = selection + "_ID = " uri.getLastPathSegment();
+                break;
+
+            default:
+            ...
+                // If the URI is not recognized, you should do some error handling here.
+        }
+        // call the code to actually do the query
+    }
+</pre>
+<p>
+    Một lớp khác, {@link android.content.ContentUris}, sẽ cung cấp các phương pháp thuận tiện để làm việc
+    với phần <code>id</code> của URI nội dung. Các lớp {@link android.net.Uri} và
+    {@link android.net.Uri.Builder} bao gồm các phương pháp thuận tiện cho việc phân tích các đối tượng
+    {@link android.net.Uri} hiện có và xây dựng các đối tượng mới.
+</p>
+
+<!-- Implementing the ContentProvider class -->
+<h2 id="ContentProvider">Triển khai Lớp Trình cung cấp Nội dung</h2>
+<p>
+    Thực thể  {@link android.content.ContentProvider} quản lý truy cập vào
+    một tập dữ liệu cấu trúc bằng cách xử lý yêu cầu từ các ứng dụng khác. Tất cả các dạng
+    truy cập cuối cùng đều gọi {@link android.content.ContentResolver}, sau đó nó gọi ra một phương pháp
+    cụ thể của {@link android.content.ContentProvider} để lấy quyền truy cập.
+</p>
+<h3 id="RequiredAccess">Phương pháp được yêu cầu</h3>
+<p>
+    Lớp tóm tắt {@link android.content.ContentProvider} sẽ định nghĩa sáu phương pháp tóm tắt
+    mà bạn phải triển khai như một phần lớp con cụ thể của mình. Tất cả những phương pháp này ngoại trừ
+    {@link android.content.ContentProvider#onCreate() onCreate()} đều được gọi ra bởi một ứng dụng máy khách
+    đang cố truy cập trình cung cấp nội dung của bạn:
+</p>
+<dl>
+    <dt>
+        {@link android.content.ContentProvider#query(Uri, String[], String, String[], String)
+        query()}
+    </dt>
+    <dd>
+        Truy xuất dữ liệu từ trình cung cấp của bạn. Sử dụng các tham đối để chọn bảng để
+        truy vấn, các hàng và cột để trả về, và thứ tự sắp xếp của kết quả.
+        Trả về dữ liệu như một đối tượng {@link android.database.Cursor}.
+    </dd>
+    <dt>
+        {@link android.content.ContentProvider#insert(Uri, ContentValues) insert()}
+    </dt>
+    <dd>
+        Chèn một hàng mới vào trình cung cấp của bạn. Sử dụng các tham đối để lựa chọn
+        bảng đích và nhận các giá trị cột để sử dụng. Trả về một URI nội dung cho
+        hàng mới chèn.
+    </dd>
+    <dt>
+        {@link android.content.ContentProvider#update(Uri, ContentValues, String, String[])
+        update()}
+    </dt>
+    <dd>
+        Cập nhật các hàng hiện tại trong trình cung cấp của bạn. Sử dụng các tham đối để lựa chọn bảng và hàng
+        để cập nhật và nhận các giá trị cột được cập nhật. Trả về số hàng được cập nhật.
+    </dd>
+    <dt>
+        {@link android.content.ContentProvider#delete(Uri, String, String[]) delete()}
+    </dt>
+    <dd>
+        Xóa hàng khỏi trình cung cấp của bạn. Sử dụng các tham đối để lựa chọn bảng và các hàng
+        cần xóa. Trả về số hàng được xóa.
+    </dd>
+    <dt>
+        {@link android.content.ContentProvider#getType(Uri) getType()}
+    </dt>
+    <dd>
+        Trả về kiểu MIME tương ứng với một URI nội dung. Phương pháp này được mô tả chi tiết hơn
+        trong phần <a href="#MIMETypes">Triển khai Kiểu MIME của Trình cung cấp Nội dung</a>.
+    </dd>
+    <dt>
+        {@link android.content.ContentProvider#onCreate() onCreate()}
+    </dt>
+    <dd>
+        Khởi tạo trình cung cấp của bạn. Hệ thống Android sẽ gọi ra phương pháp này ngay lập tức sau khi nó
+        tạo trình cung cấp của bạn. Để ý rằng trình cung cấp của bạn không được tạo cho đến khi đối tượng
+        {@link android.content.ContentResolver} cố truy cập nó.
+    </dd>
+</dl>
+<p>
+    Để ý rằng những phương pháp này có cùng chữ ký như các phương pháp
+    {@link android.content.ContentResolver} được đặt tên như nhau.
+</p>
+<p>
+    Việc bạn triển khai những phương pháp này nên xét tới các nội dung sau:
+</p>
+<ul>
+    <li>
+        Tất cả phương pháp này ngoại trừ {@link android.content.ContentProvider#onCreate() onCreate()}
+        đều có thể được gọi đồng thời bằng nhiều luồng, vì thế chúng phải an toàn đối với luồng. Để tìm hiểu
+        thêm về nhiều luồng, hãy xem chủ đề
+        <a href="{@docRoot}guide/components/processes-and-threads.html">
+        Tiến trình và Luồng</a>.
+    </li>
+    <li>
+        Tránh thực hiện những thao tác dài trong {@link android.content.ContentProvider#onCreate()
+        onCreate()}. Hoãn các tác vụ khởi tạo tới khi chúng thực sự cần thiết.
+        Phần <a href="#OnCreate">Triển khai phương pháp onCreate()</a>
+        sẽ bàn kỹ hơn về vấn đề này.
+    </li>
+    <li>
+        Mặc dù bạn phải triển khai những phương pháp này, mã của bạn không nhất thiết phải làm gì ngoại trừ việc
+        trả về kiểu dữ liệu kỳ vọng. Ví dụ, bạn có thể muốn ngăn những ứng dụng khác
+        chèn dữ liệu vào một số bảng. Để làm điều này, bạn có thể bỏ qua lệnh gọi tới
+        {@link android.content.ContentProvider#insert(Uri, ContentValues) insert()} và trả về
+        0.
+    </li>
+</ul>
+<h3 id="Query">Triển khai phương pháp query()</h3>
+<p>
+    Phương pháp
+    {@link android.content.ContentProvider#query(Uri, String[], String, String[], String)
+    ContentProvider.query()} phải trả về một đối tượng {@link android.database.Cursor}, nếu không nó sẽ thất bại
+, đưa ra một lỗi {@link java.lang.Exception}. Nếu bạn đang sử dụng một cơ sở dữ liệu SQLite làm kho lưu trữ dữ liệu của mình
+, bạn có thể chỉ cần trả về {@link android.database.Cursor} được trả về bởi một trong các phương pháp
+    <code>query()</code> của lớp {@link android.database.sqlite.SQLiteDatabase}.
+    Nếu truy vấn không khớp với bất kỳ hàng nào, bạn nên trả về một thực thể  {@link android.database.Cursor}
+    có phương pháp {@link android.database.Cursor#getCount()} trả về 0.
+    Bạn chỉ nên trả về <code>null</code> nếu đã xảy ra một lỗi nội bộ trong tiến trình truy vấn.
+</p>
+<p>
+    Nếu bạn không đang sử dụng một cơ sở dữ liệu SQLite làm kho lưu trữ dữ liệu của mình, hãy sử dụng một trong các lớp con cụ thể
+    của {@link android.database.Cursor}. Ví dụ, lớp {@link android.database.MatrixCursor} sẽ triển khai
+    một con chạy trong đó mỗi hàng là một mảng của {@link java.lang.Object}. Với lớp này,
+    hãy sử dụng {@link android.database.MatrixCursor#addRow(Object[]) addRow()} để thêm một hàng mới.
+</p>
+<p>
+    Nhớ rằng hệ thống Android phải có thể giao tiếp với {@link java.lang.Exception}
+    qua các ranh giới tiến trình. Android có thể làm vậy cho những trường hợp ngoại lệ sau, điều này có thể hữu ích
+    trong xử lý lỗi truy vấn:
+</p>
+<ul>
+    <li>
+        {@link java.lang.IllegalArgumentException} (Bạn có thể chọn đưa ra lỗi này nếu trình cung cấp của bạn
+        nhận một URI nội dung không hợp lệ)
+    </li>
+    <li>
+        {@link java.lang.NullPointerException}
+    </li>
+</ul>
+<h3 id="Insert">Triển khai phương pháp insert()</h3>
+<p>
+    Phương pháp {@link android.content.ContentProvider#insert(Uri, ContentValues) insert()} sẽ thêm một
+    hàng mới vào bảng phù hợp bằng cách sử dụng các giá trị trong tham đối {@link android.content.ContentValues}
+. Nếu tên cột không nằm trong tham đối {@link android.content.ContentValues}, bạn có thể
+    muốn cung cấp một giá trị mặc định cho nó hoặc trong mã trình cung cấp của bạn hoặc trong sơ đồ
+    cơ sở dữ liệu của bạn.
+</p>
+<p>
+    Phương pháp này sẽ trả về URI nội dung cho hàng mới. Để xây dựng điều này, hãy nối
+    giá trị <code>_ID</code> của hàng mới (hay khóa chính khác) với URI nội dung của bảng bằng cách sử dụng
+    {@link android.content.ContentUris#withAppendedId(Uri, long) withAppendedId()}.
+</p>
+<h3 id="Delete">Triển khai phương pháp delete()</h3>
+<p>
+    Phương pháp {@link android.content.ContentProvider#delete(Uri, String, String[]) delete()} 
+    không cần phải xóa hàng thực chất khỏi kho lưu trữ dữ liệu của bạn. Nếu bạn đang sử dụng một trình điều hợp đồng bộ
+    với trình cung cấp của mình, bạn nên cân nhắc đánh dấu một hàng đã xóa
+    bằng cờ "xóa" thay vì gỡ bỏ hàng một cách hoàn toàn. Trình điều hợp đồng bộ có thể
+    kiểm tra các hàng đã xóa và gỡ bỏ chúng khỏi máy chủ trước khi xóa chúng khỏi trình cung cấp.
+</p>
+<h3 id="Update">Triển khai phương pháp update()</h3>
+<p>
+    Phương pháp {@link android.content.ContentProvider#update(Uri, ContentValues, String, String[])
+    update()} lấy cùng tham đối {@link android.content.ContentValues} được sử dụng bởi
+    {@link android.content.ContentProvider#insert(Uri, ContentValues) insert()}, và
+    cùng tham đối <code>selection</code> và <code>selectionArgs</code> được sử dụng bởi
+    {@link android.content.ContentProvider#delete(Uri, String, String[]) delete()} và 
+    {@link android.content.ContentProvider#query(Uri, String[], String, String[], String)
+    ContentProvider.query()}. Điều này có thể cho phép bạn sử dụng lại mã giữa những phương pháp này.
+</p>
+<h3 id="OnCreate">Triển khai phương pháp onCreate()</h3>
+<p>
+    Hệ thống Android sẽ gọi {@link android.content.ContentProvider#onCreate()
+    onCreate()} khi nó khởi động trình cung cấp. Bạn chỉ nên thực hiện các tác vụ khởi tạo chạy nhanh
+    trong phương pháp này, và hoãn việc tạo cơ sở dữ liệu và nạp dữ liệu tới khi trình cung cấp thực sự
+    nhận được yêu cầu cho dữ liệu. Nếu bạn thực hiện các tác vụ dài trong
+    {@link android.content.ContentProvider#onCreate() onCreate()}, bạn sẽ làm chậm lại
+    quá trình khởi động của trình cung cấp. Đến lượt mình, điều này sẽ làm chậm hồi đáp từ trình cung cấp đối với các
+    ứng dụng khác.
+</p>
+<p>
+    Ví dụ, nếu bạn đang sử dụng một cơ sở dữ liệu SQLite, bạn có thể tạo
+    một đối tượng {@link android.database.sqlite.SQLiteOpenHelper} mới trong
+    {@link android.content.ContentProvider#onCreate() ContentProvider.onCreate()},
+    rồi tạo các bảng SQL lần đầu tiên khi bạn mở cơ sở dữ liệu. Để tạo điều kiện cho điều này,
+    lần đầu tiên bạn gọi {@link android.database.sqlite.SQLiteOpenHelper#getWritableDatabase
+    getWritableDatabase()}, nó sẽ tự động gọi ra phương pháp
+    {@link android.database.sqlite.SQLiteOpenHelper#onCreate(SQLiteDatabase)
+    SQLiteOpenHelper.onCreate()}.
+</p>
+<p>
+    Hai đoạn mã HTML sau minh họa tương tác giữa
+    {@link android.content.ContentProvider#onCreate() ContentProvider.onCreate()} và
+    {@link android.database.sqlite.SQLiteOpenHelper#onCreate(SQLiteDatabase)
+    SQLiteOpenHelper.onCreate()}. Đoạn mã HTML đầu tiên là triển khai
+    {@link android.content.ContentProvider#onCreate() ContentProvider.onCreate()}:
+</p>
+<pre class="prettyprint">
+public class ExampleProvider extends ContentProvider
+
+    /*
+     * Defines a handle to the database helper object. The MainDatabaseHelper class is defined
+     * in a following snippet.
+     */
+    private MainDatabaseHelper mOpenHelper;
+
+    // Defines the database name
+    private static final String DBNAME = "mydb";
+
+    // Holds the database object
+    private SQLiteDatabase db;
+
+    public boolean onCreate() {
+
+        /*
+         * Creates a new helper object. This method always returns quickly.
+         * Notice that the database itself isn't created or opened
+         * until SQLiteOpenHelper.getWritableDatabase is called
+         */
+        mOpenHelper = new MainDatabaseHelper(
+            getContext(),        // the application context
+            DBNAME,              // the name of the database)
+            null,                // uses the default SQLite cursor
+            1                    // the version number
+        );
+
+        return true;
+    }
+
+    ...
+
+    // Implements the provider's insert method
+    public Cursor insert(Uri uri, ContentValues values) {
+        // Insert code here to determine which table to open, handle error-checking, and so forth
+
+        ...
+
+        /*
+         * Gets a writeable database. This will trigger its creation if it doesn't already exist.
+         *
+         */
+        db = mOpenHelper.getWritableDatabase();
+    }
+}
+</pre>
+<p>
+    Đoạn mã HTML tiếp theo là triển khai
+    {@link android.database.sqlite.SQLiteOpenHelper#onCreate(SQLiteDatabase)
+    SQLiteOpenHelper.onCreate()}, bao gồm một lớp trình trợ giúp:
+</p>
+<pre class="prettyprint">
+...
+// A string that defines the SQL statement for creating a table
+private static final String SQL_CREATE_MAIN = "CREATE TABLE " +
+    "main " +                       // Table's name
+    "(" +                           // The columns in the table
+    " _ID INTEGER PRIMARY KEY, " +
+    " WORD TEXT"
+    " FREQUENCY INTEGER " +
+    " LOCALE TEXT )";
+...
+/**
+ * Helper class that actually creates and manages the provider's underlying data repository.
+ */
+protected static final class MainDatabaseHelper extends SQLiteOpenHelper {
+
+    /*
+     * Instantiates an open helper for the provider's SQLite data repository
+     * Do not do database creation and upgrade here.
+     */
+    MainDatabaseHelper(Context context) {
+        super(context, DBNAME, null, 1);
+    }
+
+    /*
+     * Creates the data repository. This is called when the provider attempts to open the
+     * repository and SQLite reports that it doesn't exist.
+     */
+    public void onCreate(SQLiteDatabase db) {
+
+        // Creates the main table
+        db.execSQL(SQL_CREATE_MAIN);
+    }
+}
+</pre>
+
+
+<!-- Implementing ContentProvider MIME Types -->
+<h2 id="MIMETypes">Triển khai Kiểu MIME của Trình cung cấp Nội dung</h2>
+<p>
+    Lớp {@link android.content.ContentProvider} có hai phương pháp để trả về các kiểu MIME:
+</p>
+<dl>
+    <dt>
+        {@link android.content.ContentProvider#getType(Uri) getType()}
+    </dt>
+    <dd>
+        Một trong các phương pháp được yêu cầu mà bạn phải triển khai cho bất kỳ trình cung cấp nào.
+    </dd>
+    <dt>
+        {@link android.content.ContentProvider#getStreamTypes(Uri, String) getStreamTypes()}
+    </dt>
+    <dd>
+        Một phương pháp mà bạn được dự tính sẽ triển khai nếu trình cung cấp của bạn cung cấp tệp.
+    </dd>
+</dl>
+<h3 id="TableMIMETypes">Kiểu MIME cho bảng</h3>
+<p>
+    Phương pháp {@link android.content.ContentProvider#getType(Uri) getType()} trả về một
+    {@link java.lang.String} theo định dạng MIME mà mô tả kiểu dữ liệu được trả về bởi tham đối
+    URI nội dung. Tham đối {@link android.net.Uri} có thể là một mẫu hình thay vì một URI cụ thể;
+    trong trường hợp này, bạn nên trả về kiểu dữ liệu được liên kết với các URI nội dung mà khớp với
+    mẫu hình đó.
+</p>
+<p>
+    Đối với các kiểu dữ liệu phổ biến như văn bản, HTML, hay JPEG,
+    {@link android.content.ContentProvider#getType(Uri) getType()} sẽ trả về
+    kiểu MIME tiêu chuẩn cho dữ liệu đó. Một danh sách đầy đủ về những kiểu tiêu chuẩn này có sẵn trên trang web
+    <a href="http://www.iana.org/assignments/media-types/index.htm">IANA MIME Media Types</a>
+.
+</p>
+<p>
+    Đối với các URI nội dung mà trỏ tới một hàng hoặc các hàng của bảng dữ liệu,
+    {@link android.content.ContentProvider#getType(Uri) getType()} sẽ trả về
+    một kiểu MIME theo định dạng MIME riêng cho nhà cung cấp của Android:
+</p>
+<ul>
+    <li>
+        Bộ phận kiểu: <code>vnd</code>
+    </li>
+    <li>
+        Bộ phận kiểu con:
+        <ul>
+            <li>
+    Nếu mẫu hình URI áp dụng cho một hàng đơn: <code>android.cursor.<strong>item</strong>/</code>
+            </li>
+            <li>
+    Nếu mẫu hình URI áp dụng cho nhiều hơn một hàng: <code>android.cursor.<strong>dir</strong>/</code>
+            </li>
+        </ul>
+    </li>
+    <li>
+        Bộ phận riêng theo trình cung cấp: <code>vnd.&lt;name&gt;</code>.<code>&lt;type&gt;</code>
+        <p>
+            Bạn cung cấp <code>&lt;name&gt;</code> và <code>&lt;type&gt;</code>.
+            Giá trị <code>&lt;name&gt;</code> nên là giá trị duy nhất toàn cục,
+            và giá trị <code>&lt;type&gt;</code> nên là giá trị duy nhất đối với mẫu hình
+            URI tương ứng. Một lựa chọn hay cho <code>&lt;name&gt;</code> đó là tên công ty của bạn hoặc
+            một thành phần nào đó trong tên gói Android cho ứng dụng của bạn. Một lựa chọn hay cho
+            <code>&lt;type&gt;</code> đó là một xâu xác định bảng được liên kết với
+            URI.
+        </p>
+
+    </li>
+</ul>
+<p>
+    Ví dụ, nếu thẩm quyền của một trình cung cấp là
+    <code>com.example.app.provider</code>, và nó làm hiện ra một bảng có tên
+    <code>table1</code> thì kiểu MIME cho nhiều hàng trong <code>table1</code> là:
+</p>
+<pre>
+vnd.android.cursor.<strong>dir</strong>/vnd.com.example.provider.table1
+</pre>
+<p>
+    Đối với một hàng đơn của <code>table1</code>, kiểu MIME là:
+</p>
+<pre>
+vnd.android.cursor.<strong>item</strong>/vnd.com.example.provider.table1
+</pre>
+<h3 id="FileMIMETypes">Kiểu MIME cho tệp</h3>
+<p>
+    Nếu trình cung cấp của bạn cung cấp tệp, hãy triển khai
+    {@link android.content.ContentProvider#getStreamTypes(Uri, String) getStreamTypes()}.
+    Phương pháp này sẽ trả về một mảng {@link java.lang.String} của kiểu MIME đối với các tệp mà trình cung cấp của bạn
+    có thể trả về cho một URI nội dung cho trước. Bạn nên lọc các kiểu MIME mà mình cung cấp bằng tham đối bộ lọc
+    kiểu MIME, sao cho bạn chỉ trả về những kiểu MIME mà máy khách muốn xử lý.
+</p>
+<p>
+    Ví dụ, xét một trình cung cấp hình ảnh dưới dạng tệp có định dạng <code>.jpg</code>,
+    <code>.png</code> và <code>.gif</code>.
+    Nếu một ứng dụng gọi {@link android.content.ContentResolver#getStreamTypes(Uri, String)
+    ContentResolver.getStreamTypes()} bằng xâu bộ lọc <code>image/*</code> (
+    mà là một "hình ảnh"),
+    khi đó phương pháp {@link android.content.ContentProvider#getStreamTypes(Uri, String)
+    ContentProvider.getStreamTypes()} sẽ trả về mảng:
+</p>
+<pre>
+{ &quot;image/jpeg&quot;, &quot;image/png&quot;, &quot;image/gif&quot;}
+</pre>
+<p>
+    Nếu ứng dụng chỉ quan tâm đến các tệp <code>.jpg</code>, vậy nó có thể gọi
+    {@link android.content.ContentResolver#getStreamTypes(Uri, String)
+    ContentResolver.getStreamTypes()} bằng xâu bộ lọc <code>*\/jpeg</code>, và
+    {@link android.content.ContentProvider#getStreamTypes(Uri, String)
+    ContentProvider.getStreamTypes()} sẽ trả về:
+<pre>
+{&quot;image/jpeg&quot;}
+</pre>
+<p>
+    Nếu trình cung cấp của bạn không cung cấp bất kỳ kiểu MIME nào được yêu cầu trong xâu bộ lọc,
+    {@link android.content.ContentProvider#getStreamTypes(Uri, String) getStreamTypes()}
+    sẽ trả về <code>null</code>.
+</p>
+
+
+<!--  Implementing a Contract Class -->
+<h2 id="ContractClass">Triển khai một Lớp Hợp đồng</h2>
+<p>
+    Lớp hợp đồng là một lớp <code>public final</code> chứa các định nghĩa hằng số cho
+    URI, tên cột, kiểu MIME, và siêu dữ liệu khác liên quan tới trình cung cấp. Lớp này
+    sẽ thiết lập một hợp đồng giữa trình cung cấp và các ứng dụng khác bằng cách đảm bảo rằng trình cung cấp
+    có thể được truy cập đúng ngay cả khi có thay đổi về giá trị thực sự của URI, tên cột,
+    v.v.
+</p>
+<p>
+    Lớp hợp đồng cũng giúp các nhà phát triển vì chúng thường có tên dễ nhớ cho các hằng số của mình,
+    vì vậy các nhà phát triển ít có khả năng sử dụng các giá trị không đúng cho tên cột hay URI hơn. Do đó là một
+    lớp, nó có thể chứa tài liệu Javadoc. Các môi trường phát triển tích hợp như
+    Eclipse có thể tự động điền các tên hằng số từ lớp hợp đồng và hiển thị Javadoc cho các
+    hằng số đó.
+</p>
+<p>
+    Các nhà phát triển không thể truy cập tệp lớp của lớp hợp đồng từ ứng dụng của mình, nhưng họ có thể
+    lặng lẽ biên dịch nó vào ứng dụng của họ từ một tệp <code>.jar</code> mà bạn cung cấp.
+</p>
+<p>
+    Lớp {@link android.provider.ContactsContract} và các lớp lồng nhau của nó là các ví dụ về
+    lớp hợp đồng.
+</p>
+<h2 id="Permissions">Triển khai Quyền của Trình cung cấp Nội dung</h2>
+<p>
+    Quyền và truy cập đối với tất cả khía cạnh trong hệ thống Android được mô tả chi tiết trong
+    chủ đề <a href="{@docRoot}guide/topics/security/security.html">Bảo mật và Quyền</a>.
+    Chủ đề <a href="{@docRoot}guide/topics/data/data-storage.html">Kho lưu trữ Dữ liệu</a> cũng
+    mô tả bảo mật và các quyền có hiệu lực cho nhiều loại kho lưu trữ khác nhau.
+    Nói tóm lại, các điểm quan trọng là:
+</p>
+<ul>
+    <li>
+        Theo mặc định, các tệp dữ liệu được lưu trữ trên bộ nhớ trong của thiết bị là dữ liệu riêng tư
+        đối với ứng dụng và trình cung cấp của bạn.
+    </li>
+    <li>
+        Các cơ sở dữ liệu {@link android.database.sqlite.SQLiteDatabase} mà bạn tạo là dữ liệu riêng tư
+        đối với ứng dụng và trình cung cấp của bạn.
+    </li>
+    <li>
+        Theo mặc định, các tệp dữ liệu mà bạn lưu vào bộ nhớ ngoài là dữ liệu <em>công khai</em> và
+        <em>đọc được công khai</em>. Bạn không thể sử dụng một trình cung cấp nội dung để hạn chế truy cập vào các tệp trong
+        bộ nhớ ngoài vì các ứng dụng khác có thể sử dụng lệnh gọi API khác để đọc và ghi chúng.
+    </li>
+    <li>
+        Các lệnh gọi phương pháp để mở hoặc tạo tệp hoặc cơ sở dữ liệu SQLite trên bộ nhớ trong
+        của thiết bị của bạn có thể cấp quyền truy cập đọc và ghi cho tất cả ứng dụng khác. Nếu bạn
+        sử dụng một tệp hoặc cơ sở dữ liệu nội bộ làm kho lưu giữ của trình cung cấp của mình, và bạn cấp quyền truy cập
+        "đọc được công khai" hoặc "ghi được công khai", quyền mà bạn đặt cho trình cung cấp của mình trong
+        bản kê khai của nó sẽ không bảo vệ dữ liệu của bạn. Quyền truy cập mặc định cho các tệp và cơ sở dữ liệu trong
+        bộ nhớ trong là "riêng tư", và đối với kho lưu giữ của trình cung cấp của mình, bạn không nên thay đổi điều này.
+    </li>
+</ul>
+<p>
+    Nếu bạn muốn sử dụng các quyền của trình cung cấp nội dung để kiểm soát truy cập vào dữ liệu của mình, khi đó bạn nên
+    lưu trữ dữ liệu của mình trong các tệp nội bộ, cơ sở dữ liệu SQLite, hoặc "đám mây" (ví dụ,
+    trên một máy chủ từ xa), và bạn nên giữ các tệp và cơ sở dữ liệu riêng tư cho ứng dụng của mình.
+</p>
+<h3>Triển khai quyền</h3>
+<p>
+    Tất cả ứng dụng đều có thể đọc từ hoặc ghi vào trình cung cấp của bạn, ngay cả khi dữ liệu liên quan
+    là dữ liệu riêng tư, vì theo mặc định, trình cung cấp của bạn không được đặt quyền. Để thay đổi điều này,
+    hãy đặt quyền cho trình cung cấp của bạn trong tệp bản kê khai của bạn bằng cách sử dụng các thuộc tính hoặc phần tử
+    con của phần tử <code><a href="{@docRoot}guide/topics/manifest/provider-element.html">
+    &lt;provider&gt;</a></code>. Bạn có thể đặt quyền áp dụng cho toàn bộ trình cung cấp,
+    hoặc cho một số bảng, hoặc thậm chí cho một số bản ghi, hoặc cả ba.
+</p>
+<p>
+    Bạn định nghĩa các quyền cho trình cung cấp của bạn bằng một hoặc nhiều phần tử
+    <code><a href="{@docRoot}guide/topics/manifest/permission-element.html">
+    &lt;permission&gt;</a></code> trong tệp bản kê khai của bạn. Để
+    quyền là duy nhất cho trình cung cấp của bạn, hãy sử dụng phạm vi kiểu Java cho thuộc tính
+    <code><a href="{@docRoot}guide/topics/manifest/permission-element.html#nm">
+    android:name</a></code>. Ví dụ, đặt tên quyền đọc
+    <code>com.example.app.provider.permission.READ_PROVIDER</code>.
+
+</p>
+<p>
+    Danh sách sau liệt kê phạm vi các quyền của trình cung cấp, bắt đầu với các quyền
+    áp dụng cho toàn bộ trình cung cấp rồi mới đến các quyền chi tiết hơn.
+    Các quyền chi tiết hơn được ưu tiên so với các quyền có phạm vi rộng hơn:
+</p>
+<dl>
+    <dt>
+        Quyền đọc-ghi đơn lẻ ở cấp trình cung cấp
+    </dt>
+    <dd>
+        Một quyền kiểm soát cả quyền truy cập đọc và ghi cho toàn bộ trình cung cấp, được quy định
+        bằng thuộc tính <code><a href="{@docRoot}guide/topics/manifest/provider-element.html#prmsn">
+        android:permission</a></code> của phần tử
+        <code><a href="{@docRoot}guide/topics/manifest/provider-element.html">
+        &lt;provider&gt;</a></code>.
+    </dd>
+    <dt>
+        Quyền đọc ghi tách riêng ở cấp độ trình cung cấp
+    </dt>
+    <dd>
+        Một quyền đọc và một quyền ghi cho toàn bộ trình cung cấp. Bạn chỉ định chúng
+        bằng các thuộc tính <code><a href="{@docRoot}guide/topics/manifest/provider-element.html#rprmsn">
+        android:readPermission</a></code> và
+        <code><a href="{@docRoot}guide/topics/manifest/provider-element.html#wprmsn">
+        android:writePermission</a></code> của phần tử
+        <code><a href="{@docRoot}guide/topics/manifest/provider-element.html">
+        &lt;provider&gt;</a></code>. Chúng được ưu tiên so với quyền được yêu cầu bởi
+        <code><a href="{@docRoot}guide/topics/manifest/provider-element.html#prmsn">
+        android:permission</a></code>.
+    </dd>
+    <dt>
+        Quyền ở cấp đường dẫn
+    </dt>
+    <dd>
+        Quyền đọc, ghi, hoặc đọc/ghi cho một URI nội dung trong trình cung cấp của bạn. Bạn chỉ định
+        từng URI mà bạn muốn kiểm soát bằng một phần tử con
+        <code><a href="{@docRoot}guide/topics/manifest/path-permission-element.html">
+        &lt;path-permission&gt;</a></code> của phần tử
+        <code><a href="{@docRoot}guide/topics/manifest/provider-element.html">
+        &lt;provider&gt;</a></code>. Với mỗi một URI nội dung mà bạn chỉ định, bạn có thể chỉ định một
+        quyền đọc/ghi, quyền đọc, hoặc quyền ghi, hoặc cả ba. Quyền đọc và
+        quyền ghi được ưu tiên so với quyền đọc/ghi. Đồng thời, quyền ở cấp độ đường dẫn
+        sẽ được ưu tiên so với quyền ở cấp độ trình cung cấp.
+    </dd>
+    <dt>
+        Quyền tạm thời
+    </dt>
+    <dd>
+        Là cấp độ quyền cho phép truy cập tạm thời vào một ứng dụng, ngay cả khi ứng dụng
+        không có các quyền thường được yêu cầu. Tính năng truy cập
+        tạm thời làm giảm số quyền mà một ứng dụng phải yêu cầu trong
+        bản kê khai của mình. Khi bạn dùng đến các quyền tạm thời, những ứng dụng duy nhất mà cần
+        quyền "lâu dài" cho trình cung cấp của bạn là những ứng dụng liên tục truy cập tất cả
+        dữ liệu của bạn.
+        <p>
+            Xét các quyền bạn cần để triển khai một trình cung cấp và ứng dụng e-mail khi bạn
+            muốn cho phép một ứng dụng trình xem ảnh bên ngoài hiển thị các tài liệu đính kèm dạng ảnh từ trình cung cấp
+            của bạn. Để cấp cho trình xem ảnh quyền truy cập cần thiết mà không cần yêu cầu quyền,
+            hãy thiết lập các quyền tạm thời cho URI nội dung đối với ảnh. Thiết kế ứng dụng e-mail của bạn sao cho
+            khi người dùng muốn hiển thị một ảnh, ứng dụng sẽ gửi một ý định chứa URI nội dung
+            của ảnh và cờ cho phép tới trình xem ảnh. Trình xem ảnh khi đó có thể
+            truy vấn trình cung cấp e-mail của bạn để truy xuất ảnh, ngay cả khi trình xem không
+            có quyền đọc bình thường cho trình cung cấp của bạn.
+        </p>
+        <p>
+            Để sử dụng các quyền tạm thời, hoặc đặt thuộc tính
+            <code><a href="{@docRoot}guide/topics/manifest/provider-element.html#gprmsn">
+            android:grantUriPermissions</a></code> của phần tử
+            <code><a href="{@docRoot}guide/topics/manifest/provider-element.html">
+            &lt;provider&gt;</a></code> hoặc thêm một hoặc nhiều phần tử con
+            <code><a href="{@docRoot}guide/topics/manifest/grant-uri-permission-element.html">
+            &lt;grant-uri-permission&gt;</a></code> vào phần tử
+            <code><a href="{@docRoot}guide/topics/manifest/provider-element.html">
+            &lt;provider&gt;</a></code> của bạn. Nếu bạn sử dụng các quyền tạm thời, bạn phải gọi
+            {@link android.content.Context#revokeUriPermission(Uri, int)
+            Context.revokeUriPermission()} bất cứ khi nào bạn gỡ bỏ hỗ trợ cho một URI nội dung khỏi
+            trình cung cấp của mình, và URI nội dung đó sẽ được liên kết với một quyền tạm thời.
+        </p>
+        <p>
+            Giá trị của thuộc tính sẽ xác định trình cung cấp của bạn được cho phép truy cập bao nhiêu.
+            Nếu thuộc tính được đặt thành <code>true</code>, khi đó hệ thống sẽ cấp quyền tạm thời
+            cho toàn bộ trình cung cấp của bạn, khống chế mọi quyền khác mà được yêu cầu bởi
+            quyền ở cấp độ trình cung cấp hoặc cấp độ đường dẫn của bạn.
+        </p>
+        <p>
+            Nếu cờ này được đặt thành <code>false</code>, khi đó bạn phải thêm các phần tử con
+            <code><a href="{@docRoot}guide/topics/manifest/grant-uri-permission-element.html">
+            &lt;grant-uri-permission&gt;</a></code> vào phần tử
+            <code><a href="{@docRoot}guide/topics/manifest/provider-element.html">
+            &lt;provider&gt;</a></code> của mình. Mỗi phần tử con lại quy định URI nội dung hoặc
+            các URI mà truy cập tạm thời được cấp cho.
+        </p>
+        <p>
+            Để ủy quyền truy cập tạm thời cho một ứng dụng, ý định phải chứa
+            cờ {@link android.content.Intent#FLAG_GRANT_READ_URI_PERMISSION} hoặc cờ
+            {@link android.content.Intent#FLAG_GRANT_WRITE_URI_PERMISSION}, hoặc cả hai. Những quyền
+            này được đặt bằng phương pháp {@link android.content.Intent#setFlags(int) setFlags()}.
+        </p>
+        <p>
+            Nếu thuộc tính <code><a href="{@docRoot}guide/topics/manifest/provider-element.html#gprmsn">
+            android:grantUriPermissions</a></code> không có mặt, giả sử rằng nó là
+            <code>false</code>.
+        </p>
+    </dd>
+</dl>
+
+
+
+<!-- The Provider Element -->
+<h2 id="ProviderElement">Phần tử &lt;provider&gt;</h2>
+<p>
+    Như các thành phần {@link android.app.Activity} và {@link android.app.Service},
+    một lớp con của {@link android.content.ContentProvider}
+    phải được định nghĩa trong tệp bản kê khai cho ứng dụng của nó bằng cách sử dụng phần tử
+    <code><a href="{@docRoot}guide/topics/manifest/provider-element.html">
+    &lt;provider&gt;</a></code>. Hệ thống Android nhận thông tin sau từ
+    phần tử:
+<dl>
+    <dt>
+        Thẩm quyền
+        (<a href="{@docRoot}guide/topics/manifest/provider-element.html#auth">{@code
+        android:authorities}</a>)
+    </dt>
+    <dd>
+        Các tên biểu tượng nhận biết toàn bộ trình cung cấp trong hệ thống. Thuộc tính
+        này được mô tả chi tiết hơn trong phần
+        <a href="#ContentURI">Thiết kế URI Nội dung</a>.
+    </dd>
+    <dt>
+        Tên lớp của trình cung cấp
+        (<code>
+<a href="{@docRoot}guide/topics/manifest/provider-element.html#nm">android:name</a>
+        </code>)
+    </dt>
+    <dd>
+        Lớp triển khai {@link android.content.ContentProvider}. Lớp này
+        được mô tả chi tiết hơn trong phần
+        <a href="#ContentProvider">Triển khai Lớp Trình cung cấp Nội dung</a>.
+    </dd>
+    <dt>
+        Quyền
+    </dt>
+    <dd>
+        Những thuộc tính quy định quyền mà các ứng dụng khác phải có để truy cập
+        dữ liệu của trình cung cấp:
+        <ul>
+            <li>
+                <code><a href="{@docRoot}guide/topics/manifest/provider-element.html#gprmsn">
+                android:grantUriPermssions</a></code>: Cờ quyền tạm thời.
+            </li>
+            <li>
+                <code><a href="{@docRoot}guide/topics/manifest/provider-element.html#prmsn">
+                android:permission</a></code>: Quyền đọc/ghi đơn lẻ đối với toàn bộ trình cung cấp.
+            </li>
+            <li>
+                <code><a href="{@docRoot}guide/topics/manifest/provider-element.html#rprmsn">
+                android:readPermission</a></code>: Quyền đọc đối với toàn bộ trình cung cấp.
+            </li>
+            <li>
+                <code><a href="{@docRoot}guide/topics/manifest/provider-element.html#wprmsn">
+                android:writePermission</a></code>: Quyền ghi đối với toàn bộ trình cung cấp.
+            </li>
+        </ul>
+        <p>
+            Các quyền và thuộc tính tương ứng của chúng được mô tả chi tiết hơn trong
+            phần
+            <a href="#Permissions">Triển khai Quyền của Trình cung cấp Nội dung</a>.
+        </p>
+    </dd>
+    <dt>
+        Thuộc tính khởi động và kiểm soát
+    </dt>
+    <dd>
+        Những thuộc tính này xác định cách và thời điểm hệ thống Android khởi động trình cung cấp, các
+        đặc tính tiến trình của trình cung cấp, và các thiết đặt về thời gian chạy:
+        <ul>
+            <li>
+                <code><a href="{@docRoot}guide/topics/manifest/provider-element.html#enabled">
+                android:enabled</a></code>: Cờ cho phép hệ thống khởi động trình cung cấp.
+            </li>
+              <li>
+                <code><a href="{@docRoot}guide/topics/manifest/provider-element.html#exported">
+                android:exported</a></code>: Cờ cho phép các ứng dụng sử dụng trình cung cấp này.
+            </li>
+            <li>
+                <code><a href="{@docRoot}guide/topics/manifest/provider-element.html#init">
+                android:initOrder</a></code>: Thứ tự mà trình cung cấp nên được khởi động,
+                so với các trình cung cấp khác trong cùng tiến trình.
+            </li>
+            <li>
+                <code><a href="{@docRoot}guide/topics/manifest/provider-element.html#multi">
+                android:multiProcess</a></code>: Cờ cho phép hệ thống khởi động trình cung cấp
+                trong cùng tiến trình như máy khách gọi.
+            </li>
+            <li>
+                <code><a href="{@docRoot}guide/topics/manifest/provider-element.html#proc">
+                android:process</a></code>: Tên của tiến trình mà trình cung cấp
+                nên chạy trong đó.
+            </li>
+            <li>
+                <code><a href="{@docRoot}guide/topics/manifest/provider-element.html#sync">
+                android:syncable</a></code>: Cờ cho biết rằng dữ liệu của trình cung cấp sẽ được
+                đồng bộ với dữ liệu trên một máy chủ.
+            </li>
+        </ul>
+        <p>
+            Các thuộc tính được lập tài liệu theo dõi đầy đủ trong chủ đề hướng dẫn nhà phát triển đối với phần tử
+            <code><a href="{@docRoot}guide/topics/manifest/provider-element.html">
+            &lt;provider&gt;</a></code>
+.
+        </p>
+    </dd>
+    <dt>
+        Các thuộc tính thông tin
+    </dt>
+    <dd>
+        Một biểu tượng tùy chọn và nhãn cho trình cung cấp:
+        <ul>
+            <li>
+                <code><a href="{@docRoot}guide/topics/manifest/provider-element.html#icon">
+                android:icon</a></code>: Một tài nguyên có thể vẽ chứa một biểu tượng cho trình cung cấp.
+                Biểu tượng xuất hiện bên cạnh nhãn của trình cung cấp trong danh sách ứng dụng trong
+                <em>Settings</em> &gt; <em>Apps</em> &gt; <em>All</em>.
+            </li>
+            <li>
+                <code><a href="{@docRoot}guide/topics/manifest/provider-element.html#label">
+                android:label</a></code>: Một nhãn thông tin mô tả trình cung cấp hoặc dữ liệu
+                của nó, hoặc cả hai. Nhãn xuất hiện trong danh sách ứng dụng trong
+                <em>Settings</em> &gt; <em>Apps</em> &gt; <em>All</em>.
+            </li>
+        </ul>
+        <p>
+            Các thuộc tính được lập tài liệu theo dõi đầy đủ trong chủ đề hướng dẫn nhà phát triển đối với phần tử
+            <code><a href="{@docRoot}guide/topics/manifest/provider-element.html">
+            &lt;provider&gt;</a></code>.
+        </p>
+    </dd>
+</dl>
+
+<!-- Intent Access -->
+<h2 id="Intents">Ý định và Truy cập Dữ liệu</h2>
+<p>
+    Các ứng dụng có thể gián tiếp truy cập một trình cung cấp nội dung bằng một {@link android.content.Intent}.
+    Ứng dụng không gọi bất kỳ phương pháp nào của {@link android.content.ContentResolver} hoặc
+    {@link android.content.ContentProvider}. Thay vào đó, nó sẽ gửi một ý định để bắt đầu một hoạt động,
+    đây thường là một bộ phận trong ứng dụng của chính trình cung cấp. Hoạt động đích phụ trách
+    truy xuất và hiển thị dữ liệu trong UI của nó. Tùy vào hành động trong ý định, hoạt động
+    đích cũng có thể nhắc người dùng thực hiện sửa đổi dữ liệu của trình cung cấp.
+    Một ý định cũng có thể chứa dữ liệu "phụ thêm" mà hoạt động đích hiển thị
+    trong UI; khi đó người dùng có tùy chọn thay đổi dữ liệu này trước khi sử dụng nó để sửa đổi
+    dữ liệu trong trình cung cấp.
+</p>
+<p>
+
+</p>
+<p>
+    Bạn có thể muốn sử dụng truy cập ý định để giúp đảm bảo toàn vẹn dữ liệu. Trình cung cấp của bạn có thể phụ thuộc vào
+    việc chèn, cập nhật và xóa dữ liệu theo lô-gic nghiệp vụ được quy định chặt chẽ. Trong
+    trường hợp như vậy, việc cho phép các ứng dụng khác trực tiếp sửa đổi dữ liệu của bạn có thể dẫn đến dữ liệu
+    không hợp lệ. Nếu bạn muốn các nhà phát triển sử dụng truy cập ý định, hãy đảm bảo lập tài liệu theo dõi nó thật kỹ.
+    Giải thích với họ tại sao truy cập ý định sử dụng UI ứng dụng của chính bạn lại tốt hơn là cố gắng sửa đổi
+    dữ liệu bằng mã của họ.
+</p>
+<p>
+    Việc xử lý một ý định đến nhằm sửa đổi dữ liệu của trình cung cấp của bạn không khác với
+    việc xử lý các ý định khác. Bạn có thể tìm hiểu về việc sử dụng ý định bằng cách đọc chủ đề
+    <a href="{@docRoot}guide/components/intents-filters.html">Ý định và Bộ lọc Ý định</a>.
+</p>

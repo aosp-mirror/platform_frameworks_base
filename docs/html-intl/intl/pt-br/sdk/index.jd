@@ -1,0 +1,487 @@
+page.title=Como baixar o Android Studio e o SDK Tools
+page.tags=sdk, android studio
+page.template=sdk
+header.hide=1
+page.metaDescription=Baixar o Android IDE e ferramentas do desenvolvedor para compilar aplicativos para celulares, tablets, dispositivos de uso junto ao corpo, TVs e muito mais do Android.
+
+studio.version=1.1.0
+
+studio.linux_bundle_download=android-studio-ide-135.1740770-linux.zip
+studio.linux_bundle_bytes=259336386
+studio.linux_bundle_checksum=e8d166559c50a484f83ebfec6731cc0e3f259208
+
+studio.mac_bundle_download=android-studio-ide-135.1740770-mac.dmg
+studio.mac_bundle_bytes=261303345
+studio.mac_bundle_checksum=f9745d0fec1eefd498f6160a2d6a1b5247d4cda3
+
+studio.win_bundle_exe_download=android-studio-bundle-135.1740770-windows.exe
+studio.win_bundle_exe_bytes=856233768
+studio.win_bundle_exe_checksum=7484b9989d2914e1de30995fbaa97a271a514b3f
+
+studio.win_notools_exe_download=android-studio-ide-135.1740770-windows.exe
+studio.win_notools_exe_bytes=242135128
+studio.win_notools_exe_checksum=5ea77661cd2300cea09e8e34f4a2219a0813911f
+
+studio.win_bundle_download=android-studio-ide-135.1740770-windows.zip
+studio.win_bundle_bytes=261667054
+studio.win_bundle_checksum=e903f17cc6a57c7e3d460c4555386e3e65c6b4eb
+
+
+
+sdk.linux_download=android-sdk_r24.1.2-linux.tgz
+sdk.linux_bytes=168121693
+sdk.linux_checksum=68980e4a26cca0182abb1032abffbb72a1240c51
+
+sdk.mac_download=android-sdk_r24.1.2-macosx.zip
+sdk.mac_bytes=89151287
+sdk.mac_checksum=00e43ff1557e8cba7da53e4f64f3a34498048256
+
+sdk.win_download=android-sdk_r24.1.2-windows.zip
+sdk.win_bytes=159778618
+sdk.win_checksum=704f6c874373b98e061fe2e7eb34f9fcb907a341
+
+sdk.win_installer=installer_r24.1.2-windows.exe
+sdk.win_installer_bytes=111364285
+sdk.win_installer_checksum=e0ec864efa0e7449db2d7ed069c03b1f4d36f0cd
+
+
+
+
+
+
+@jd:body
+
+<style type="text/css">
+  .offline {display:none;}
+  a.download-bundle-button {display:block;}
+  h2.feature {
+    padding-top:30px;
+    margin-top:0;
+    clear:both;
+  }
+  .feature-blurb {
+  margin:0px; font-size:16px; font-weight:300;
+  padding:40px 0 0 0;
+  }
+
+  .landing-button.green {
+    font-size:16px;
+    background-color:#90c653;
+    padding:8px 10px 10px;
+    margin:0;
+    width:206px;
+    text-align:center;
+  }
+
+  .landing-button.green:hover {
+    background-color:#85b84f;
+  }
+
+  .landing-button .small {
+    font-size: 12px;
+    font-weight: normal;
+    line-height: 12px;
+    display: block;
+  }
+
+  h1.studio-logo {
+    width:226px;
+    height:78px;
+    display:block;
+    padding:0;
+    white-space: nowrap;
+    text-indent: -10000px;
+    font-size:0px;
+    background: url(../images/tools/studio-logo.png);
+    background-image: -webkit-image-set(url(../images/tools/studio-logo.png) 1x, url(../images/tools/studio-logo_2x.png) 2x);
+    background-size: 226px 78px;
+  }
+
+</style>
+
+
+
+
+
+<div style="position:relative;">
+
+
+<div class="wrap" id="tos" style="display:none;width:inherit;height:650px">
+<div class="col-13" style="margin:0;">&nbsp;</div><!-- provides top margin for content -->
+
+<h1 id="tos-header" style="margin-top:0">Baixar</h1>
+
+<p class="sdk-terms-intro">Antes de instalar o Android Studio ou a versão independente das ferramentas SDK,
+você deve concordar com os termos e condições a seguir:</p>
+
+<div class="sdk-terms" onfocus="this.blur()">
+<h2 class="norule">Termos e condições</h2>
+Esse é o Contrato de licença do conjunto de desenvolvimento de software do Android
+
+<h3>1. Introdução</h3>
+1.1 O conjunto de desenvolvimento de software do Android (o qual este Contrato de licença chama de "SDK", incluindo especificamente os arquivos de sistema do Android, APIs integradas e adicionais das APIs da Google) é licenciado por meio da concordância com os termos deste contrato. Este Contrato de licença forma um vínculo contratual legal entre o contratante e a Google em relação ao uso do SDK.
+
+1.2 "Android" refere-se à pilha de software do Android para dispositivos, conforme disponibilizado no Projeto de código aberto do Android, localizado no URL a seguir: http://source.android.com/, atualizado periodicamente.
+
+1.3 "Google" refere-se à Google Inc, uma corporação de Delaware, com sede em 1600 Amphitheatre Parkway, Mountain View, CA 94043, Estados Unidos.
+
+
+<h3>2. Aceitação deste Contrato de licença</h3>
+2.1 A fim de usar o SDK, é necessário concordar com este Contrato de licença. O uso do SDK é proibido àqueles que não concordam com este Contrato de licença.
+
+2.2 Ao clicar em aceitar, você concorda com os termos do Contrato de licença
+
+2.3 É proibido o uso do SDK e a aceitação deste contrato pelo indivíduo que tenha impedimento legal sobre o recebimento do SDK sob as leis dos Estados Unidos ou de outros países, incluindo o país de residência ou no qual usa o SDK.
+
+2.4 Ao concordar com o vínculo com este contrato em nome do empregador ou de outra entidade, você declara e garante que tem total autoridade legal para tanto. Se você não tem a autoridade necessária, não deve concordar com este contrato nem usar o SDK em nome do empregador ou de outra entidade.
+
+
+<h3>3. Licença SDK da Google</h3>
+3.1 Sujeita aos termos do Contrato de licença, a Google confere uma licença limitada, mundial, livre de taxas, intransmissível e não exclusiva para o uso apenas do SDK para fins de desenvolvimento de aplicativos executados na plataforma do Android.
+
+3.2 Você concorda que a Google ou terceiros detêm todos os direitos legais, títulos e interesses relativos ao SDK, incluindo quaisquer direitos de propriedade intelectual que subsistam no SDK. "Direitos de propriedade intelectual" referem-se a todo e qualquer direito sob as leis de patentes, de direitos autorais, de segredo comercial, de marca registrada e todos os outros direitos de propriedade. A Google preserva todos os direitos não conferidos expressamente a você.
+
+3.3 O uso do SDK não é autorizado para qualquer finalidade não expressamente permitida por este Contrato de licença.  Salvo na extensão exigida por licenças aplicáveis de terceiros, é proibido: (a) copiar (exceto para fins de cópia de segurança), modificar, adaptar, redistribuir, descompilar, fazer engenharia reversa, desmontar ou criar trabalhos derivados do SDK ou qualquer parte dele; ou (b) carregar qualquer parte do SDK em um aparelho celular ou outro dispositivo de hardware, exceto em computador pessoal, combinar qualquer parte do SDK com outros softwares ou distribuir qualquer software ou dispositivo que contenha uma parte do SDK.
+
+3.4 Você concorda que não tomará quaisquer medidas que possam causar ou resultar em fragmentação do Android, incluindo, sem limitar-se, a distribuição e a participação na criação ou na promoção, sob quaisquer formas, de um conjunto de desenvolvimento de software derivado do SDK.
+
+3.5 O uso, a reprodução e a distribuição de componentes do SDK licenciado sob licença de software de código aberto são regidos exclusivamente pelos termos daquela licença de software de código aberto, e não por este Contrato de licença.
+
+3.6 Você concorda que a forma e a natureza do SDK que a Google fornece podem mudar sem aviso prévio e que as versões futuras do SDK podem ser incompatíveis com aplicativos desenvolvidos em versões anteriores do SDK. Você concorda que a Google pode cessar (permanente ou temporariamente) o fornecimento do SDK (ou quaisquer recursos dentro dele) a você ou a usuários em geral sob critério exclusivo da Google, sem aviso prévio.
+
+3.7 Nada neste Contrato de licença confere o direito de uso de quaisquer nomes comerciais, marcas comerciais, marcas de serviço, logomarcas, nomes de domínios e outros recursos de marcas especiais da Google.
+
+3.8 Você concorda que não removerá, ocultará nem alterará quaisquer observações de direitos de propriedade (incluindo observações de direitos autorais e de marcas registradas) que possam estar afixadas ou contidas no SDK.
+
+
+<h3>4. O uso do SDK</h3>
+4.1 A Google compreende que não detém direito, título nem interesse no usuário (ou em seus licenciadores), sob o presente Contrato de licença, no que tange ao desenvolvimento de aplicativos de software através do uso do SDK, incluindo quaisquer direitos de propriedade intelectual que subsistam nos referidos aplicativos.
+
+4.2 Você concorda em usar o SDK e desenvolver aplicativos somente para as finalidades permitidas por (a) este Contrato de licença e (b) quaisquer leis, normas, diretrizes geralmente aceitas ou orientações aplicáveis nas jurisdições relevantes (incluindo quaisquer leis acerca da exportação e da importação de dados ou softwares nos Estados Unidos ou em outros países relevantes).
+
+4.3 Você concorda que, se usar o SDK para o desenvolvimento de aplicativos para usuários públicos em geral, deverá proteger a privacidade e os direitos legais destes usuários. Se nomes de usuário, senhas ou outras informações de acesso ou informações pessoais forem fornecidos ao aplicativo, deve-se informá-los de que tais dados estarão disponíveis para o aplicativo, além de fornecer observações de privacidade e proteção legalmente adequadas a esses usuários. Se o aplicativo armazenar informações pessoais ou confidenciais fornecidas pelos usuários, deve fazê-lo com segurança. Se o usuário fornecer ao seu aplicativo informações da conta do Google, o aplicativo poderá usar essas informações exclusivamente para acessar a conta da Google do usuário quando houver autorização para fazê-lo e para os fins limitados pela autorização.
+
+4.4 Você concorda que não se envolverá em qualquer atividade com o SDK, incluindo o desenvolvimento e a distribuição de um aplicativo que interfira, perturbe, danifique ou acesse, de modo não autorizado, servidores, redes ou outras propriedades de serviço de qualquer terceiro, incluindo, sem limitar-se, a Google ou qualquer operadora de comunicações móveis.
+
+4.5 Você concorda que é exclusivamente responsável por (e que a Google não tem qualquer responsabilidade com você ou terceiro) quaisquer dados, conteúdo ou recursos que criar, transmitir ou exibir por meio do Android e/ou de aplicativos do Android e pelas consequências que suas ações (incluindo perda ou dano que a Google possa sofrer) podem gerar.
+
+4.6 Você concorda que é exclusivamente responsável por (e que a Google não tem qualquer responsabilidade com você ou terceiro) qualquer violação das obrigações exigidas neste Contrato de licença, qualquer contrato ou termos de serviço aplicáveis a terceiros, qualquer lei ou norma aplicável e pelas consequências (incluindo a perda ou dano que a Google ou qualquer terceiro possa sofrer) de quaisquer violações.
+
+
+<h3>5. Suas credenciais de desenvolvedor</h3>
+5.1 Você é responsável pela manutenção da confidencialidade de quaisquer credenciais de desenvolvedor que possam ser emitidas pela Google ou escolhidas por você e será o único responsável por todos os aplicativos que forem desenvolvidos sob suas credenciais de desenvolvedor.
+
+
+<h3>6. Privacidade e informações</h3>
+6.1 A fim de inovar e aprimorar continuamente o SDK, a Google pode coletar certas estatísticas de uso do software, incluindo, sem limitar-se, um identificador exclusivo, endereço IP associado, número de versão do software e informações sobre quais ferramentas e/ou serviços no SDK estão sendo usados e como estão sendo usados. Antes de coletar quaisquer dessas informações, o SDK o notificará e buscará seu consentimento. Se você recusar, as informações não serão coletadas.
+
+6.2 Os dados coletados são examinados coletivamente para aprimorar o SDK e são mantidos em conformidade com a Política de privacidade da Google.
+
+
+<h3>7. Aplicativos de terceiros</h3>
+7.1 Ao usar o SDK para executar aplicativos desenvolvidos por terceiros ou que acessam dados, conteúdo ou recursos fornecidos por terceiros, você concorda que a Google não é responsável por tais aplicativos, dados, conteúdo ou recursos. Você compreende que quaisquer dados, conteúdo ou recursos passíveis de aceitação por meio de tais aplicativos de terceiros imputam responsabilidade exclusiva ao indivíduo que os originou. A Google não é responsável por qualquer perda ou dano que possa ocorrer como resultado do uso ou acesso de quaisquer aplicativos, dados, conteúdo ou recursos de terceiros.
+
+7.2 Você deve estar ciente de que os dados, conteúdo e recursos apresentados a você por aplicativos de terceiros podem ser protegidos pelos direitos de propriedade intelectual de posse dos fornecedores (ou de outras pessoas ou empresas em seus nomes). Não é permitido modificar, alugar, arrendar, emprestar, vender, distribuir nem criar trabalhos derivados com base nestes dados, conteúdo ou recursos (na totalidade ou em parte), salvo se houver permissão explícita especificada pelos respectivos detentores de direitos.
+
+7.3 Você reconhece que o uso de tais aplicativos, dados, conteúdo ou recursos de terceiros pode estar sujeito a termos adicionais entre você e o terceiro em questão. Nesse caso, esse Contrato de licença não afeta sua relação legal com esses terceiros.
+
+
+<h3>8. O uso das APIs do Android</h3>
+8.1 APIs de dados da Google
+
+8.1.1 Ao usar qualquer API para recuperar dados da Google, você reconhece que eles podem ser protegidos por direitos de propriedade intelectual de posse da Google ou dos terceiros que fornecem os dados (ou de pessoas ou empresas em nomes deles). O uso de tal API pode estar sujeito a termos de serviço adicionais. Não é permitido modificar, alugar, arrendar, emprestar, vender, distribuir nem criar trabalhos derivados baseados nesses dados (na totalidade ou em parte), salvo se permitido pelos termos de serviço pertinentes.
+
+8.1.2 Se você usar qualquer API para recuperar dados de um usuário a partir da Google, reconhece e concorda que deve recuperar dados somente com consentimento explícito do usuário e somente quando, e para os fins limitados aos quais, o usuário conceder permissão para fazê-lo.
+
+
+<h3>9. Rescisão do Contrato de licença</h3>
+9.1 Esse Contrato de licença continuará aplicável até ser rescindido por você ou pela Google, conforme definido abaixo.
+
+9.2 Se você deseja rescindir o Contrato de licença, poderá fazê-lo cessando o uso do SDK e de quaisquer credenciais de desenvolvedor pertinentes.
+
+9.3 9.3 A Google pode, a qualquer tempo, rescindir o contrato se:
+(A) houver violação de qualquer cláusula do contrato;
+(B) a Google for obrigada a fazê-lo perante a lei;
+(C) o parceiro com quem a Google ofereceu determinadas partes do SDK (tais como APIs) a você encerrar a relação com a Google ou cessar a oferta das referidas partes do SDK a você;
+(D) a Google decidir não fornecer o SDK ou determinadas partes dele a usuários no país em que você reside ou no qual você usa o serviço, ou se o fornecimento do SDK ou de determinados serviços dele a partir da Google para você, a critério exclusivo da Google, não for mais comercialmente viável.
+
+9.4 Ao encerramento deste contrato, todos os direitos, obrigações e responsabilidades legais dos quais você e a Google se beneficiaram, sujeitaram-se (ou que se acumularam no período em que este contrato esteve em vigor) ou os que vigoram expressamente por tempo indeterminado, não serão afetados por esta cessação e as cláusulas do parágrafo 14.7 devem continuar aplicáveis a tais direitos, obrigações e responsabilidades por tempo indeterminado.
+
+
+<h3>10. EXCLUSÃO DE GARANTIAS</h3>
+10.1 VOCÊ COMPREENDE E CONCORDA EXPRESSAMENTE QUE O RISCO DO USO DO SDK É EXCLUSIVAMENTE SEU E QUE O SDK É FORNECIDO NA FORMA EM QUE SE ENCONTRA E COMO DISPONIBILIZADO, SEM GARANTIA DE QUALQUER TIPO DA GOOGLE.
+
+10.2 O USO DO SDK E DE QUALQUER MATERIAL BAIXADO OU OBTIDO DE OUTRO MODO PELO USO DO SDK ESTÁ A SEU CRITÉRIO E RISCO E VOCÊ É O ÚNICO RESPONSÁVEL POR QUALQUER DANO AO SEU SISTEMA OPERACIONAL OU OUTRO DISPOSITIVO OU PELA PERDA DE DADOS QUE RESULTEM DE TAL USO.
+
+10.3 A GOOGLE EXCLUI EXPRESSAMENTE TODAS AS GARANTIAS E CONDIÇOES DE QUALQUER TIPO, EXPRESSAS OU IMPLÍCITAS, INCLUINDO, SEM LIMITAR-SE, GARANTIAS E CONDIÇÕES DE COMERCIALIZAÇÃO IMPLÍCITAS, ADEQUAÇÃO A UMA FINALIDADE PARTICULAR E A NÃO VIOLAÇÃO.
+
+
+<h3>11. LIMITAÇÃO DE RESPONSABILIDADE</h3>
+11.1 VOCÊ COMPREENDE E CONCORDA EXPRESSAMENTE QUE A GOOGLE, SUAS SUBSIDIÁRIAS, AFILIADAS E SEUS LICENCIADORES NÃO SERÃO RESPONSABILIZADOS POR VOCÊ SOB QUALQUER TEORIA DE RESPONSABILIDADE POR QUAISQUER DANOS, SEJAM ELES DIRETOS, INDIRETOS, INCIDENTAIS, ESPECIAIS, CONSEQUENCIAIS OU DE EXEMPLO QUE POSSAM INCORRER, INCLUINDO QUALQUER PERDA DE DADOS, INDEPENDENTE DE AVISO À GOOGLE OU A SEUS REPRESENTANTES OU DA NECESSIDADE DE AVISO SOBRE A POSSIBILIDADE DA INCORRÊNCIA DE TAIS PERDAS.
+
+
+<h3>12. Indenização</h3>
+12.1 Ao limite máximo permitido por lei, você concorda em defender, indenizar e isentar a Google, suas afiliadas e respectivos conselheiros, diretores, empregados e agentes com relação a todas e quaisquer reivindicações, ações, processos ou procedimentos, bem como todas e quaisquer perdas, responsabilidades, danos, custos e despesas (incluindo honorários advocatícios) decorrentes ou provenientes de: (a) seu uso do SDK, (b) qualquer aplicativo desenvolvido no SDK que infrinja qualquer direito autoral, de marca comercial, de segredo comercial, de imagem comercial, de patente ou outros direitos de propriedade intelectual de qualquer pessoa, difame qualquer pessoa ou viole seus direitos de publicidade ou privacidade e (c) qualquer não cumprimento deste Contrato de licença.
+
+
+<h3>13. Mudanças no Contrato de licença</h3>
+13.1 A Google pode realizar mudanças no Contrato de licença à medida que distribui novas versões do SDK. Quando essas mudanças forem realizadas, a Google fará uma nova versão do Contrato de licença disponível no site em que o SDK estiver disponível.
+
+
+<h3>14. Termos legais gerais</h3>
+14.1 Esse Contrato de licença constitui um contrato totalmente legal entre você e a Google e rege o uso do SDK (excluindo quaisquer serviços que a Google possa fornecer a você sob um contrato escrito em separado), e substitui inteiramente quaisquer contratos anteriores entre você e a Google em relação ao SDK.
+
+14.2 Você concorda que, se a Google não exercer nem impetrar qualquer direito ou recurso legal que esteja contido neste Contrato de licença (ou que a Google detenha direitos nos termos de qualquer lei aplicável), não se considerará esse fato como uma renúncia formal aos direitos da Google e esses direitos ou recursos continuarão disponíveis à Google.
+
+14.3 Se qualquer tribunal de justiça que tiver a competência para decidir sobre esse tema determinar que qualquer cláusula deste Contrato de licença é inválida, tal cláusula será removida do contrato sem afetar as cláusulas restantes ou sua vigência. As cláusulas restantes deste Contrato de licença continuarão válidas e obrigatórias.
+
+14.4 Você reconhece e concorda que cada membro do grupo de empresas das quais a Google é a empresa controladora deve ser beneficiário terceiro deste Contrato de licença e que essas outras empresas terão o poder de aplicar diretamente, e apoiar-se em, qualquer cláusula desse Contrato de licença que confira um direito (ou direitos em favor) deles. Mais do que isso, nenhuma outra pessoa nem empresa deve ser beneficiário terceiro deste Contrato de licença.
+
+14.5 RESTRIÇÕES DE EXPORTAÇÃO. O SDK ESTÁ SUJEITO ÀS LEIS E NORMAS DE EXPORTAÇÃO DOS ESTADOS UNIDOS. VOCÊ DEVE CUMPRIR TODAS AS LEIS E NORMAS DOMÉSTICAS E INTERNACIONAIS QUE SE APLICAREM AO SDK. ESSAS LEIS INCLUEM RESTRIÇÕES SOBRE DESTINOS, USUÁRIOS FINAIS E USO FINAL.
+
+14.6 Os direitos conferidos neste Contrato de licença não podem ser atribuídos nem transferidos por você nem pela Google sem aprovação prévia por escrito do terceiro envolvido. Não é permitido à Google nem a você a delegação das próprias responsabilidades ou obrigações nos termos deste Contrato de licença sem aprovação prévia por escrito do terceiro envolvido.
+
+14.7 Este Contrato de licença e sua relação com a Google nos termos deste contrato serão regidos pelas leis do estado da Califórnia sem considerar conflitos de disposições legais. Você e a Google concordam em submeter-se à competência exclusiva dos tribunais localizados na comarca de Santa Clara, Califórnia, para dirimir quaisquer questões legais decorrentes deste Contrato de licença. Não obstante a isso, você concorda que a Google continua habilitada a impetrar medidas cautelares (ou mecanismo legal urgente equivalente) em qualquer jurisdição.
+
+
+<em>13 de novembro de 2012</em>
+</div>
+
+
+
+
+
+<div id="next-steps" style="display:none;position:absolute;width:inherit">
+  <p>Você está a alguns passos de programar aplicativos para Android!</p>
+  <p>Em alguns instantes você será redirecionado para
+<a id="next-link" href="{@docRoot}sdk/installing/index.html">Instalação do Android SDK</a>.</p>
+
+</div><!-- end next-steps -->
+
+
+
+<div id="sdk-terms-form">
+<p>
+<input id="agree" type="checkbox" name="agree" value="1" onclick="onAgreeChecked()" />
+<label id="agreeLabel" for="agree">Li e concordo com todos os termos e condições expressos acima</label>
+</p>
+<p><a href="" class="button disabled" id="downloadForRealz" onclick="return onDownloadForRealz(this);"></a></p>
+</div>
+
+
+</div><!-- end TOS -->
+
+
+
+
+
+
+<div id="landing">
+
+<div class="col-13">&nbsp;</div><!-- provides top margin for content -->
+
+<img src="{@docRoot}images/tools/studio-hero.png" srcset="{@docRoot}images/tools/studio-hero_2x.png 2x, {@docRoot}images/tools/studio-hero.png 1x" width="760" height="400" alt="" style="margin-bottom:80px" />
+
+<div style="color: #fff; width:226px; height:0; overflow:visible; position:absolute; top:40px; left:25px">
+
+<h1 class="studio-logo" style="margin:0 0 35px !important">Android Studio</h1>
+
+<p style="font-size: 16px; color:#bbb; position: absolute;left: 297px; top: 5px; display: block;
+width: 400px;text-align: center;">O ambiente de desenvolvimento integrado (IDE) oficial do Android</p>
+
+<ul style="font-size:12px">
+<li>IDE do Android Studio</li>
+<li>Ferramentas do Android SDK</li>
+<li>Plataforma do Android 5.0 (Lollipop)</li>
+<li>Imagem do sistema do emulador do Android 5.0 com APIs da Google</li>
+</ul>
+
+
+<a class="online landing-button green download-bundle-button" style="margin-top:30px;" href="#Other">Baixar o Android Studio</a>
+
+<!-- this appears when viewing the offline docs -->
+<p class="offline">
+Para obter o Android Studio ou a versão independente das ferramentas SDK, acesse <a href="http://developer.android.com/sdk/index.html">developer.android.com/sdk/</a>
+</p>
+
+<ul style="margin-top:50px;color:#444">
+  <li><a href="#Requirements">Requisitos do sistema</a></li>
+  <li> <a href="#Other">Outras opções de download</a></li>
+  <li><a href="{@docRoot}sdk/installing/migrate.html">Migração para o Android Studio</a></li>
+  <li><a href="https://docs.google.com/a/google.com/forms/d/1mjsyfzv3HAnDY-_Kfj-3QJKdpuksyMFs9e73CRwmT6Q/viewform" target="_blank">Realização de uma pesquisa</a></li>
+</ul>
+
+</div>
+
+
+
+
+<h2 class="feature norule" >Editor de código inteligente</h2>
+
+<div class="col-9" style="margin:0 20px 0 0">
+  <img src="{@docRoot}images/tools/studio-hero-code.png" srcset="{@docRoot}images/tools/studio-hero-code_2x.png 2x, {@docRoot}images/tools/studio-hero-code.png 1x" width="520" />
+</div><!-- end col-9 (left column) -->
+
+<div class="col-4 feature-blurb">
+  <p>No núcleo do Android Studio, há um editor de código inteligente capaz de realizar,
+refatorar e analisar códigos avançados.</p>
+  <p>O poderoso editor de código auxilia na maior produtividade do desenvolvedor de aplicativos Android.</p>
+</div>
+
+
+
+
+
+<h2 class="feature norule">Modelos de códigos e integração GitHub</h2>
+
+<div class="col-9" style="margin:0 20px 0 0">
+  <img src="{@docRoot}images/tools/studio-hero-import.png" srcset="{@docRoot}images/tools/studio-hero-import_2x.png 2x, {@docRoot}images/tools/studio-hero-import.png 1x" width="520" />
+</div><!-- end col-9 (left column) -->
+
+<div class="col-4 feature-blurb">
+  <p>Os novos assistentes de projeto facilitam iniciar um projeto como nunca antes.</p>
+
+  <p>Inicie projetos usando códigos de modelo para padrões como menus de navegação e ViewPagers,
+e até importe exemplos de código da Google a partir do GitHub.</p>
+</div>
+
+
+
+
+<h2 class="feature norule">Desenvolvimento de aplicativos multitelas</h2>
+
+<div class="col-9" style="margin:0 20px 0 0">
+  <img src="{@docRoot}images/tools/studio-hero-screens.png" srcset="{@docRoot}images/tools/studio-hero-screens_2x.png 2x, {@docRoot}images/tools/studio-hero-screens.png 1x" width="520" />
+</div><!-- end col-9 (left column) -->
+
+<div class="col-4 feature-blurb">
+  <p>Programe aplicativos para celulares Android, tablets, Android Wear,
+Android TV, Android Auto e Google Glass.</p>
+  <p>Com a nova visualização de projeto Android e a compatibilidade com módulos no Android Studio,
+é mais fácil gerenciar projetos e recursos de aplicativos.
+</div>
+
+
+
+
+<h2 class="feature norule">Dispositivos virtuais para todas as formas e tamanhos</h2>
+
+<div class="col-9" style="margin:0 20px 0 0">
+  <img src="{@docRoot}images/tools/studio-hero-avds.png" srcset="{@docRoot}images/tools/studio-hero-avds_2x.png 2x, {@docRoot}images/tools/studio-hero-avds.png 1x" width="520" />
+</div><!-- end col-9 (left column) -->
+
+<div class="col-4 feature-blurb">
+  <p>O Android Studio já é pré-configurado com uma imagem do emulador otimizada.</p>
+  <p>O Gerenciador de dispositivos virtual atualizado e simplificado fornece
+perfis de dispositivos pré-definidos para dispositivos Android comuns.</p>
+</div>
+
+
+
+
+<h2 class="feature norule">
+As versões do Android evoluíram com o Gradle</h2>
+
+<div class="col-9" style="margin:0 20px 0 0">
+  <img src="{@docRoot}images/tools/studio-hero-gradle.png" srcset="{@docRoot}images/tools/studio-hero-gradle_2x.png 2x, {@docRoot}images/tools/studio-hero-gradle.png 1x" width="520" />
+</div><!-- end col-9 (left column) -->
+
+<div class="col-4 feature-blurb">
+  <p>Crie diversos APKs para seu aplicativo Android com diferentes recursos usando o mesmo projeto.</p>
+  <p>Gerencie dependências de aplicativo com o Maven.</p>
+  <p>Crie APKs com o Android Studio ou com a linha de comando.</p>
+</div>
+
+
+
+
+<h2 class="feature norule">Saiba mais sobre o Android Studio</h2>
+<div style="background:#424242;padding:30px; color:#fff;margin:0 0 15px;">
+
+<a class="online landing-button green download-bundle-button" style="margin:0 0 40px 60px;float:right" href="">Baixe o Android Studio</a>
+
+  <ul>
+  <li>Programado no IntelliJ IDEA Edição de Comunidade, o popular IDE da Java da JetBrains.</li>
+  <li>Sistema flexível de programação baseado em Gradle.</li>
+  <li>Crie variantes e várias gerações de APK.</li>
+  <li>Compatibilidade com modelos do Google Services ampliada e com diversos tipos de dispositivos.</li>
+  <li>Editor de layout completo compatível com edição de tema.</li>
+  <li>Ferramentas de identificação de construção suspeita para identificar problemas de desempenho, usabilidade, compatibilidade de versão e outros problemas.</li>
+  <li>ProGuard e recursos de assinatura de aplicativo.</li>
+  <li>Compatibilidade embutida na Google Cloud Platform, facilitando a integração com o Google Cloud
+Messasing e com o App Engine.</li>
+  </ul>
+
+<p style="margin:0">
+Para obter mais detalhes sobre recursos disponíveis no Android Studio,
+leia o guia <a href="{@docRoot}tools/studio/index.html">Conceitos básicos do Android Studio</a>.</p>
+</div>
+
+
+<p>Se você usou o Eclipse com ADT, esteja ciente de que o Android Studio é agora o IDE oficial
+para Android, portanto, é preciso migrar para o Android Studio para receber todas
+as últimas atualizações do IDE. Para obter ajuda para mover projetos,
+consulte <a href="{@docRoot}sdk/installing/migrate.html">Como migrar para o Android
+Studio</a>.</p>
+
+
+
+
+
+
+
+<h2 id="Requirements">Requisitos do sistema</h2>
+
+<h3>Windows</h3>
+
+<ul>
+<li>Microsoft&reg; Windows&reg; 8/7/Vista/2003 (32 ou 64 bits)</li>
+<li>Mínimo de 2 GB de RAM, 4 GB de RAM recomendado</li>
+<li>Espaço de 400 MB no disco rígido</li>
+<li>Pelo menos 1 GB para o Android SDK, imagens do sistema de emulador e caches</li>
+<li>Resolução de tela de 1.280 x 800 no mínimo</li>
+<li>Kit de desenvolvimento Java (JDK) 7 </li>
+<li>Opcional para emulador acelerado: Processador Intel® compatível com Intel® VT-x, Intel® EM64T
+(Intel® 64) e Desativador de bit executável (XD)</li>
+</ul>
+
+
+<h3>Mac OS X</h3>
+
+<ul>
+<li>Mac&reg; OS X&reg; 10.8.5 ou posterior, até o 10.9 (Mavericks)</li>
+<li>Mínimo de 2 GB de RAM, 4 GB de RAM recomendado</li>
+<li>Espaço de 400 MB no disco rígido</li>
+<li>Pelo menos 1 GB para o Android SDK, imagens do sistema de emulador e caches</li>
+<li>Resolução de tela de 1.280 x 800 no mínimo</li>
+<li>Ambiente de tempo de execução Java (JRE) 6</li>
+<li>Kit de desenvolvimento Java (JDK) 7</li>
+<li>Opcional para emulador acelerado: Processador Intel® compatível com Intel® VT-x, Intel® EM64T
+(Intel® 64) e Desativador de bit executável (XD)</li>
+</ul>
+
+<p>No Mac OS, execute o Android Studio com o Ambiente de tempo de execução Java (JRE) 6 para otimizar
+a renderização de fontes. Você pode, então, configurar o projeto para usar o Kit de desenvolvimento Java (JDK) 6 ou o JDK 7.</p>
+
+
+
+<h3>Linux</h3>
+
+<ul>
+<li>Área de trabalho GNOME ou KDE</li>
+<li>Biblioteca GNU C (glibc) 2.15 ou posterior</li>
+<li>Mínimo de 2 GB de RAM, 4 GB de RAM recomendado</li>
+<li>Espaço de 400 MB no disco rígido</li>
+<li>Pelo menos 1 GB para o Android SDK, imagens do sistema de emulador e caches</li>
+<li>Resolução de tela de 1.280 x 800 no mínimo</li>
+<li>Kit de desenvolvimento Oracle&reg; Java (JDK) 7 </li>
+</ul>
+<p>Testado no Trusty Tahr do Ubuntu&reg; 14.04 (distribuição de 64 bits capaz de executar
+aplicativos de 32 bits).</p>
+
+
+
+
+<h2 id="Other" style="clear:left">Outras opções de download</h2>
+
+<!-- alternative SDK options follows -->

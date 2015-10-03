@@ -1,0 +1,578 @@
+page.title=Tác vụ và Ngăn xếp
+parent.title=Hoạt động
+parent.link=activities.html
+@jd:body
+
+<div id="qv-wrapper">
+<div id="qv">
+
+<h2>Trong tài liệu này</h2>
+<ol>
+<li><a href="#ActivityState">Lưu Trạng thái của Hoạt động</a></li></li>
+<li><a href="#ManagingTasks">Quản lý Tác vụ</a>
+  <ol>
+    <li><a href="#TaskLaunchModes">Định nghĩa các chế độ khởi chạy</a></li>
+    <li><a href="#Affinities">Xử lý quan hệ</a></li>
+    <li><a href="#Clearing">Xóa ngăn xếp</a></li>
+    <li><a href="#Starting">Bắt đầu một tác vụ</a></li>
+  </ol>
+</li>
+</ol>
+
+<h2>Bài viết</h2>
+<ol>
+  <li><a href="http://android-developers.blogspot.com/2010/04/multitasking-android-way.html">
+  Đa nhiệm theo cách của Android</a></li>
+</ol>
+
+<h2>Xem thêm</h2>
+<ol>
+  <li><a href="{@docRoot}design/patterns/navigation.html">Thiết kế Android:
+Điều hướng</a></li>
+  <li><a href="{@docRoot}guide/topics/manifest/activity-element.html">Phần tử bản kê khai {@code &lt;activity&gt;}
+</a></li>
+  <li><a href="{@docRoot}guide/components/recents.html">Màn hình Tổng quan</a></li>
+</ol>
+</div>
+</div>
+
+
+<p>Một ứng dụng thường chứa nhiều <a href="{@docRoot}guide/components/activities.html">hoạt động</a>. Mỗi hoạt động
+nên được thiết kế xung quanh một kiểu hành động cụ thể mà người dùng có thể thực hiện và bắt đầu các hoạt động
+khác. Ví dụ, một ứng dụng e-mail có thể có một hoạt động để hiển thị một danh sách các thư mới.
+Khi người dùng chọn một thư, một hoạt động mới sẽ mở ra để xem thư đó.</p>
+
+<p>Hoạt động thậm chí có thể bắt đầu các hoạt động tồn tại trong các ứng dụng khác trên thiết bị. Ví
+dụ, nếu ứng dụng của bạn muốn gửi một thư e-mail, bạn có thể định nghĩa một ý định để thực hiện một hành động
+"gửi" và bao gồm một số dữ liệu, chẳng hạn như địa chỉ e-mail và nội dung. Một hoạt động từ một ứng dụng
+khác tự khai báo là có khả năng xử lý kiểu ý định này sẽ mở ra. Trong trường hợp này,
+ý định sẽ gửi một e-mail, sao cho hoạt động "soạn" của một ứng dụng e-mail sẽ bắt đầu (nếu nhiều hoạt động
+hỗ trợ cùng ý định, khi đó hệ thống cho phép người dùng chọn hoạt động sẽ sử dụng). Khi e-mail được
+gửi, hoạt động của bạn tiếp tục và dường như hoạt động e-mail là một phần ứng dụng của bạn. Mặc dù
+các hoạt động có thể đến từ những ứng dụng khác nhau, Android duy trì trải nghiệm người dùng
+mượt mà này bằng cách giữ cả hai hoạt động trong cùng <em>tác vụ</em>.</p>
+
+<p>Tác vụ là một tập hợp gồm nhiều hoạt động mà người dùng tương tác với
+khi thực hiện một công việc nhất định. Các hoạt động được sắp xếp trong một chồng (<em>ngăn xếp</em>), theo
+thứ tự mở mỗi hoạt động.</p>
+
+<!-- SAVE FOR WHEN THE FRAGMENT DOC IS ADDED
+<div class="sidebox-wrapper">
+<div class="sidebox">
+<h3>Adding fragments to a task's back stack</h3>
+
+<p>Your activity can also include {@link android.app.Fragment}s to the back stack. For example,
+suppose you have a two-pane layout using fragments, one of which is a list view (fragment A) and the
+other being a layout to display an item from the list (fragment B). When the user selects an item
+from the list, fragment B is replaced by a new fragment (fragment C). In this case, it might be
+desireable for the user to navigate back to reveal fragment B, using the <em>Back</em> button.</p>
+<p>In order to add fragment B to the back stack so that this is possible, you must call {@link
+android.app.FragmentTransaction#addToBackStack addToBackStack()} before you {@link
+android.app.FragmentTransaction#commit()} the transaction that replaces fragment B with fragment
+C.</p>
+<p>For more information about using fragments and adding them to the back stack, see the {@link
+android.app.Fragment} class documentation.</p>
+
+</div>
+</div>
+-->
+
+<p>Màn hình Trang chủ của thiết bị là nơi bắt đầu đối với hầu hết tác vụ. Khi người dùng chạm vào một biểu tượng trong trình khởi chạy
+ứng dụng
+ (hoặc lối tắt trên màn hình Trang chủ), tác vụ của ứng dụng đó sẽ tiến ra tiền cảnh. Nếu không
+có tác vụ nào cho ứng dụng (ứng dụng chưa được sử dụng gần đây), khi đó một tác vụ mới
+sẽ được tạo và hoạt động "chính" cho ứng dụng đó sẽ mở ra thành hoạt động gốc trong chồng.</p>
+
+<p>Khi hoạt động hiện tại bắt đầu một hoạt động khác, hoạt động mới sẽ bị đẩy lên trên cùng của chồng và
+có tiêu điểm. Hoạt động trước vẫn nằm trong chồng, nhưng bị dừng lại. Khi một hoạt động
+dừng, hệ thống giữ lại trạng thái hiện tại của giao diện người dùng của hoạt động đó. Khi người dùng nhấn nút
+<em>Quay lại</em>
+, hoạt động hiện tại được bật khỏi trên cùng của chồng (hoạt động bị hủy) và
+hoạt động trước tiếp tục (trạng thái trước đó của UI của nó được khôi phục). Các hoạt động trong chồng
+không bao giờ được sắp xếp lại, mà chỉ bị đẩy và bật khỏi chồng&mdash;bị đẩy lên trên chồng khi được bắt đầu bởi
+hoạt động hiện tại và bị bật khỏi chồng khi người dùng rời nó bằng cách sử dụng nút <em>Quay lại</em>. Như vậy,
+ngăn xếp
+vận hành như một cấu trúc đối tượng "vào cuối, ra đầu". Hình 1 minh họa
+hành vi này cùng một dòng thời gian thể hiện tiến độ giữa các hoạt động dọc theo ngăn xếp
+hiện tại ở từng thời điểm.</p>
+
+<img src="{@docRoot}images/fundamentals/diagram_backstack.png" alt="" />
+<p class="img-caption"><strong>Hình 1.</strong> Biểu diễn cách mỗi hoạt động mới trong một
+tác vụ thêm một mục vào ngăn xếp. Khi người dùng nhấn nút <em>Quay lại</em>, hoạt động
+hiện tại
+bị hủy và hoạt động trước đó tiếp tục.</p>
+
+
+<p>Nếu người dùng tiếp tục nhấn <em>Quay lại</em>, khi đó mỗi hoạt động trong chồng bị bật khỏi để
+hiện ra
+hoạt động trước, tới khi người dùng quay lại màn hình Trang chủ (hoặc trở về hoạt động đang chạy khi
+tác vụ bắt đầu). Khi tất cả hoạt động bị loại bỏ khỏi chồng, tác vụ sẽ không còn tồn tại.</p>
+
+<div class="figure" style="width:287px">
+<img src="{@docRoot}images/fundamentals/diagram_multitasking.png" alt="" /> <p
+class="img-caption"><strong>Hình 2.</strong> Hai tác vụ: Tác vụ B nhận tương tác người dùng
+trong tiền cảnh, trong khi Tác vụ A nằm dưới nền, chờ được tiếp tục.</p>
+</div>
+<div class="figure" style="width:215px">
+  <img src="{@docRoot}images/fundamentals/diagram_multiple_instances.png" alt="" /> <p
+class="img-caption"><strong>Hình 3.</strong> Một hoạt động đơn lẻ được khởi tạo nhiều lần.</p>
+</div>
+
+<p>Tác vụ là một đơn vị dính kết, có thể di chuyển tới "nền" khi người dùng bắt đầu một tác vụ mới hoặc đi đến
+màn hình Trang chủ, thông qua nút <em>Home</em>. Khi ở trong nền, tất cả hoạt động trong
+tác vụ bị
+dừng, nhưng ngăn xếp cho tác vụ vẫn không bị ảnh hưởng&mdash;tác vụ chỉ đơn thuần mất tiêu điểm trong khi
+một tác vụ khác thay thế, như minh họa trong hình 2. Khi đó, một tác vụ có thể quay lại "tiền cảnh" để người dùng
+có thể chọn ở nơi họ đã rời đi. Ví dụ, giả sử rằng tác vụ hiện tại (Tác vụ A) có ba
+hoạt động trong chồng của mình&mdash;hai trong số đó nằm dưới hoạt động hiện tại. Người dùng nhấn nút <em>Trang chủ</em>
+, sau đó
+bắt đầu một ứng dụng mới từ trình khởi chạy ứng dụng. Khi màn hình Trang chủ xuất hiện, Tác vụ A đi vào
+nền. Khi ứng dụng mới bắt đầu, hệ thống sẽ bắt đầu một tác vụ cho ứng dụng đó
+(Tác vụ B) bằng chồng các hoạt động của chính mình. Sau khi tương tác với
+ứng dụng đó, người dùng quay lại Trang chủ lần nữa và chọn ứng dụng
+đã bắt đầu Tác vụ A lúc đầu. Lúc này, Tác vụ A đi đến
+tiền cảnh&mdash;cả ba hoạt động trong chồng của nó đều giữ nguyên và hoạt động trên cùng
+của chồng được tiếp tục. Tại
+điểm này, người dùng cũng có thể chuyển trở lại Tác vụ B bằng cách đến Trang chủ và chọn biểu tượng ứng dụng
+đã bắt đầu tác vụ đó (hoặc bằng cách chọn tác vụ của ứng dụng từ
+<a href="{@docRoot}guide/components/recents.html">màn hình tổng quan</a>).
+Đây là một ví dụ về đa nhiệm trên Android.</p>
+
+<p class="note"><strong>Lưu ý:</strong> Nhiều tác vụ có thể được lưu giữ cùng lúc trong nền.
+Tuy nhiên, nếu người dùng đang chạy nhiều tác vụ nền tại cùng thời điểm, hệ thống có thể bắt đầu
+hủy các hoạt động nền để khôi phục bộ nhớ, khiến trạng thái của hoạt động bị mất.
+Xem phần sau đây về <a href="#ActivityState">Trạng thái của hoạt động</a>.</p>
+
+<p>Vì các hoạt động trong ngăn xếp không bao giờ được sắp xếp lại, nếu ứng dụng của bạn cho phép
+người dùng bắt đầu một hoạt động cụ thể từ nhiều hơn một hoạt động, một thực thể mới của
+hoạt động đó sẽ được tạo và đẩy lên chồng (thay vì mang bất kỳ thực thể nào trước đó của
+hoạt động lên trên cùng). Như vậy, một hoạt động trong ứng dụng của bạn có thể được tạo phiên bản nhiều
+lần (thậm chí từ các tác vụ khác nhau), như minh họa trong hình 3. Như vậy, nếu người dùng điều hướng ngược lại
+bằng cách sử dụng nút <em>Quay lại</em>, mỗi thực thể của hoạt động được hiển thị theo thứ tự được
+mở (mỗi hoạt động
+có trạng thái UI của chính chúng). Tuy nhiên, bạn có thể sửa đổi hành vi này nếu không muốn một hoạt động được
+khởi tạo nhiều hơn một lần. Cách làm như vậy được bàn trong phần sau về <a href="#ManagingTasks">Quản lý Tác vụ</a>.</p>
+
+
+<p>Để tóm tắt hành vi mặc định đối với các hoạt động và tác vụ:</p>
+
+<ul>
+  <li>Khi Hoạt động A bắt đầu Hoạt động B, Hoạt động A bị dừng, nhưng hệ thống giữ lại trạng thái của nó
+(chẳng hạn như vị trí cuộn và văn bản được nhập vào các mẫu).
+Nếu người dùng nhấn nút <em>Quay lại</em> khi đang trong Hoạt động B, Hoạt động A sẽ tiếp tục với trạng thái
+được khôi phục.</li>
+  <li>Khi người dùng rời khỏi một tác vụ bằng cách nhấn nút <em>Trang chủ</em>, hoạt động hiện tại bị
+dừng và
+tác vụ của nó sẽ đưa xuống dưới nền. Hệ thống sẽ giữ lại trạng thái của mọi hoạt động trong tác vụ. Nếu
+sau đó người dùng tiếp tục tác vụ bằng cách chọn biểu tượng trình khởi chạy đã bắt đầu tác vụ, tác vụ sẽ vào
+tiền cảnh và tiếp tục hoạt động ở trên cùng của chồng.</li>
+  <li>Nếu người dùng nhấn nút <em>Quay lại</em>, hoạt động hiện tại bị bật khỏi chồng
+và
+bị hủy. Hoạt động trước đó ở trong chồng sẽ được tiếp tục. Khi một hoạt động bị hủy, hệ thống
+<em>không</em> giữ lại trạng thái của hoạt động đó.</li>
+  <li>Hoạt động có thể được khởi tạo nhiều lần, thậm chí từ các tác vụ khác.</li>
+</ul>
+
+
+<div class="note design">
+<p><strong>Thiết kế Điều hướng</strong></p>
+  <p>Để biết thêm về cách điều hướng ứng dụng hoạt động trên Android, hãy đọc hướng dẫn <a href="{@docRoot}design/patterns/navigation.html">Điều hướng</a> của Thiết kế Android.</p>
+</div>
+
+
+<h2 id="ActivityState">Lưu Trạng thái của Hoạt động</h2>
+
+<p>Như được đề cập ở trên, hành vi mặc định của hệ thống giữ nguyên trạng thái của một hoạt động khi nó bị
+dừng. Bằng cách này, khi người dùng điều hướng trở lại một hoạt động trước đó, giao diện người dùng của nó sẽ xuất hiện
+ như lúc bị rời đi. Tuy nhiên, bạn có thể&mdash;và <strong>nên</strong>&mdash;chủ động giữ lại
+trạng thái của các hoạt động của mình bằng cách sử dụng các phương pháp gọi lại, trong trường hợp hoạt động bị hủy và phải
+được tạo lại.</p>
+
+<p>Khi hệ thống dừng một trong các hoạt động của bạn (chẳng hạn như khi một hoạt động mới bắt đầu hoặc tác vụ
+di chuyển về nền), hệ thống có thể hoàn toàn hủy hoạt động đó nếu nó cần khôi phục
+bộ nhớ hệ thống. Khi điều này xảy ra, thông tin về trạng thái của hoạt động sẽ bị mất. Nếu điều này xảy ra, 
+hệ thống vẫn
+biết rằng hoạt động có một vị trí trong ngăn xếp, nhưng khi hoạt động được đưa tới vị trí trên cùng
+của chồng, hệ thống phải tạo lại nó (thay vì tiếp tục). Để tránh
+làm mất công việc của người dùng, bạn nên chủ động giữ lại nó bằng cách triển khai phương pháp gọi lại
+{@link android.app.Activity#onSaveInstanceState onSaveInstanceState()} trong
+hoạt động của mình.</p>
+
+<p>Để biết thêm thông tin về cách lưu trạng thái hoạt động của mình, hãy xem tài liệu <a href="{@docRoot}guide/components/activities.html#SavingActivityState">Hoạt động</a>
+.</p>
+
+
+
+<h2 id="ManagingTasks">Quản lý Tác vụ</h2>
+
+<p>Cách Android quản lý tác vụ và ngăn xếp, như được mô tả bên trên&mdash;bằng cách đặt tất cả
+hoạt động được bắt đầu nối tiếp nhau vào cùng tác vụ và trong một chồng "vào cuối, ra đầu"&mdash;rất
+hiệu quả đối với hầu hết ứng dụng và bạn không phải lo lắng về cách thức các hoạt động của mình được liên kết với
+các tác vụ hay cách chúng tồn tại trong ngăn xếp. Tuy nhiên, bạn có thể quyết định rằng mình muốn gián đoạn
+hành vi thông thường. Có thể bạn muốn một hoạt động trong ứng dụng của mình bắt đầu một tác vụ mới khi nó được
+bắt đầu (thay vì được đặt trong tác vụ hiện tại); hoặc, khi bạn bắt đầu một hoạt động, bạn muốn
+mang lên trước một thực thể hiện tại của nó (thay vì tạo một
+thực thể mới trên cùng của ngăn xếp); hoặc, bạn muốn ngăn xếp của mình được xóa sạch tất cả các
+hoạt động, ngoại trừ hoạt động gốc khi người dùng rời khỏi tác vụ.</p>
+
+<p>Bạn có thể làm những điều này và nhiều điều khác với các thuộc tính trong phần tử bản kê khai
+<a href="{@docRoot}guide/topics/manifest/activity-element.html">{@code &lt;activity&gt;}</a>
+và cờ trong ý định mà bạn chuyển cho
+{@link android.app.Activity#startActivity startActivity()}.</p>
+
+<p>Về mặt này, các thuộc tính <a href="{@docRoot}guide/topics/manifest/activity-element.html">
+{@code &lt;activity&gt;}</a> chính mà bạn có thể sử dụng là:</p>
+
+<ul class="nolist">
+  <li><a href="{@docRoot}guide/topics/manifest/activity-element.html#aff">
+  {@code taskAffinity}</a></li>
+  <li><a href="{@docRoot}guide/topics/manifest/activity-element.html#lmode">
+  {@code launchMode}</a></li>
+  <li><a href="{@docRoot}guide/topics/manifest/activity-element.html#reparent">
+  {@code allowTaskReparenting}</a></li>
+  <li><a href="{@docRoot}guide/topics/manifest/activity-element.html#clear">
+  {@code clearTaskOnLaunch}</a></li>
+  <li><a href="{@docRoot}guide/topics/manifest/activity-element.html#always">
+  {@code alwaysRetainTaskState}</a></li>
+  <li><a href="{@docRoot}guide/topics/manifest/activity-element.html#finish">
+  {@code finishOnTaskLaunch}</a></li>
+</ul>
+
+<p>Và các cờ ý định chính mà bạn có thể sử dụng là:</p>
+
+<ul class="nolist">
+  <li>{@link android.content.Intent#FLAG_ACTIVITY_NEW_TASK}</li>
+  <li>{@link android.content.Intent#FLAG_ACTIVITY_CLEAR_TOP}</li>
+  <li>{@link android.content.Intent#FLAG_ACTIVITY_SINGLE_TOP}</li>
+</ul>
+
+<p>Trong những phần sau, bạn sẽ thấy cách bạn có thể sử dụng những thuộc tính của bản kê khai
+và cờ ý định này để định nghĩa cách các hoạt động được liên kết với tác vụ và hành vi của chúng như thế nào trong ngăn xếp.</p>
+
+<p>Bên cạnh đó, có phần bàn riêng về việc cân nhắc cách các tác vụ và hoạt động có thể
+được biểu diễn và quản lý trong màn hình tổng quan. Xem phần <a href="{@docRoot}guide/components/recents.html">Màn hình Tổng quan</a>
+để biết thêm thông tin. Thông thường, bạn nên cho phép hệ thống định nghĩa tác vụ và các hoạt động
+của bạn được biểu diễn như thế nào trong màn hình tổng quan, và bạn không cần sửa đổi hành vi này.</p>
+
+<p class="caution"><strong>Chú ý:</strong> Hầu hết các ứng dụng không nên gián đoạn hành vi
+mặc định cho các hoạt động và tác vụ. Nếu bạn xác định rằng hoạt động của bạn cần phải sửa đổi
+hành vi mặc định, hãy thận trọng và đảm bảo kiểm tra khả năng sử dụng được của hoạt động đó trong khi
+khởi chạy và khi điều hướng trở lại nó từ các hoạt động và tác vụ khác bằng nút <em>Quay lại</em>.
+Đảm bảo kiểm tra hành vi điều hướng mà có thể xung đột với hành vi được kỳ vọng của người dùng.</p>
+
+
+<h3 id="TaskLaunchModes">Định nghĩa các chế độ khởi chạy</h3>
+
+<p>Các chế độ khởi chạy cho phép bạn định nghĩa một thực thể mới của một hoạt động được liên kết với tác vụ hiện tại
+như thế nào. Bạn có thể định nghĩa các chế độ khởi chạy khác nhau theo hai cách:</p>
+<ul class="nolist">
+  <li><a href="#ManifestForTasks">Sử dụng tệp bản kê khai</a>
+    <p>Khi bạn khai báo một hoạt động trong tệp bản kê khai của mình, bạn có thể quy định hoạt động
+sẽ liên kết với các tác vụ như thế nào khi nó bắt đầu.</li>
+  <li><a href="#IntentFlagsForTasks">Sử dụng cờ Ý định</a>
+    <p>Khi bạn gọi {@link android.app.Activity#startActivity startActivity()},
+bạn có thể thêm một cờ vào {@link android.content.Intent} mà khai báo cách (hoặc
+liệu có hay không) hoạt động mới sẽ liên kết với tác vụ hiện tại.</p></li>
+</ul>
+
+<p>Như vậy, nếu Hoạt động A bắt đầu Hoạt động B, Hoạt động B có thể định nghĩa trong bản kê khai của mình cách nó
+sẽ liên kết với tác vụ hiện tại (nếu có) và Hoạt động A cũng có thể yêu cầu cách mà Hoạt động
+B sẽ liên kết với tác vụ hiện tại. Nếu cả hai hoạt động đều định nghĩa cách Hoạt động B
+nên liên kết với một tác vụ thì yêu cầu của Hoạt động A (như định nghĩa trong ý định) được ưu tiên
+so với yêu cầu của Hoạt động B (như được định nghĩa trong bản kê khai của nó).</p>
+
+<p class="note"><strong>Lưu ý:</strong> Một số chế độ khởi chạy sẵn có cho tệp bản kê khai
+không sẵn có dưới dạng cờ cho một ý định và, tương tự, một số chế độ khởi chạy sẵn có dưới dạng cờ
+cho một ý định không thể được định nghĩa trong bản kê khai.</p>
+
+
+<h4 id="ManifestForTasks">Sử dụng tệp bản kê khai</h4>
+
+<p>Khi khai báo một hoạt động trong tệp bản kê khai của bạn, bạn có thể quy định cách mà hoạt động
+sẽ liên kết với một tác vụ bằng cách sử dụng thuộc tính của phần tử <a href="{@docRoot}guide/topics/manifest/activity-element.html">{@code &lt;activity&gt;}</a>
+, <a href="{@docRoot}guide/topics/manifest/activity-element.html#lmode">{@code
+launchMode}</a>.</p>
+
+<p>Thuộc tính <a href="{@docRoot}guide/topics/manifest/activity-element.html#lmode">{@code
+launchMode}</a> quy định một chỉ lệnh về cách hoạt động sẽ được khởi chạy vào một
+tác vụ. Có bốn chế độ khởi chạy khác nhau mà bạn có thể gán cho thuộc tính
+<code><a href="{@docRoot}guide/topics/manifest/activity-element.html#lmode">launchMode</a></code>
+:</p>
+
+<dl>
+<dt>{@code "standard"} (chế độ mặc định)</dt>
+  <dd>Mặc định. Hệ thống tạo một thực thể mới của hoạt động trong tác vụ là nơi
+mà nó được bắt đầu và định tuyến ý định tới đó. Hoạt động có thể được khởi tạo nhiều lần,
+mỗi thực thể có thể thuộc về các tác vụ khác nhau, và một tác vụ có thể có nhiều thực thể.</dd>
+<dt>{@code "singleTop"}</dt>
+  <dd>Nếu một thực thể của hoạt động đã tồn tại ở trên cùng của tác vụ hiện tại, hệ thống
+sẽ định tuyến ý định tới thực thể đó thông qua một lệnh gọi tới phương pháp {@link
+android.app.Activity#onNewIntent onNewIntent()} của nó, thay vì tạo một thực thể mới của
+hoạt động. Hoạt động có thể được tạo phiên bản nhiều lần, mỗi thực thể có thể
+thuộc về các tác vụ khác nhau, và một tác vụ có thể có nhiều thực thể (nhưng chỉ nếu
+hoạt động nằm trên cùng của ngăn xếp <em>không</em> phải là một thực thể của hoạt động hiện có).
+  <p>Ví dụ, giả sử ngăn xếp của một tác vụ bao gồm hoạt động gốc A với các hoạt động B, C,
+và D ở trên cùng (chồng là A-B-C-D; D ở trên cùng). Một ý định đến cho loại hoạt động D.
+Nếu D có chế độ khởi chạy {@code "standard"} mặc định, một thực thể mới của lớp sẽ được khởi chạy và
+chồng trở thành A-B-C-D-D. Tuy nhiên, nếu chế độ khởi chạy của D là {@code "singleTop"}, thực thể hiện tại 
+của D sẽ nhận ý định thông qua {@link
+android.app.Activity#onNewIntent onNewIntent()}, bởi nó nằm ở vị trí trên cùng của chồng&mdash;chồng
+vẫn là A-B-C-D. Tuy nhiên, nếu một ý định đến cho hoạt động loại B, khi đó một thực thể
+mới của B sẽ được thêm vào chồng ngay cả khi chế độ khởi chạy của nó là {@code "singleTop"}.</p>
+  <p class="note"><strong>Lưu ý:</strong> Khi một thực thể mới của hoạt động được tạo,
+người dùng có thể nhấn nút <em>Quay lại</em> để quay về hoạt động trước đó. Nhưng khi một thực thể
+hiện tại của
+hoạt động xử lý một ý định mới, người dùng không thể nhấn nút <em>Quay lại</em> để quay về trạng thái
+của
+hoạt động trước khi ý định mới đến trong {@link android.app.Activity#onNewIntent
+onNewIntent()}.</p>
+</dd>
+
+<dt>{@code "singleTask"}</dt>
+  <dd>Hệ thống sẽ tạo ra một tác vụ mới và khởi tạo hoạt động ở gốc của tác vụ mới.
+Tuy nhiên, nếu một thực thể của hoạt động đã tồn tại trong một tác vụ riêng, hệ thống sẽ định tuyến
+ý định tới thực thể hiện tại thông qua một lệnh gọi tới phương pháp {@link
+android.app.Activity#onNewIntent onNewIntent()} của nó thay vì tạo một thực thể mới. Chỉ
+một thực thể của hoạt động có thể tồn tại ở một thời điểm.
+  <p class="note"><strong>Lưu ý:</strong> Mặc dù hoạt động bắt đầu một tác vụ mới, nút
+<em>Quay lại</em> sẽ vẫn đưa người dùng quay về hoạt động trước đó.</p></dd>
+<dt>{@code "singleInstance"}.</dt>
+  <dd>Giống như {@code "singleTask"}, trừ khi hệ thống không khởi chạy bất kỳ hoạt động nào khác vào
+tác vụ đang nắm giữ thực thể. Hoạt động luôn là thành viên đơn lẻ và duy nhất của tác vụ;
+bất kỳ hoạt động nào được bắt đầu bởi hoạt động này sẽ mở ra trong một tác vụ riêng.</dd>
+</dl>
+
+
+<p>Lấy một ví dụ khác, ứng dụng Trình duyệt của Android khai báo rằng hoạt động trình duyệt web sẽ
+luôn mở tác vụ của chính mình&mdash;bằng cách quy định chế độ khởi chạy {@code singleTask} trong phần tử <a href="{@docRoot}guide/topics/manifest/activity-element.html">{@code &lt;activity&gt;}</a>.
+Điều này có nghĩa rằng nếu ứng dụng của bạn phát hành một
+ý định để mở Trình duyệt Android, hoạt động của nó <em>không</em> được đặt trong cùng
+tác vụ như ứng dụng của bạn. Thay vào đó, hoặc là một tác vụ mới bắt đầu cho Trình duyệt hoặc, nếu Trình duyệt
+đã có một tác vụ đang chạy trong nền thì tác vụ đó sẽ được đưa lên trước để xử lý
+ý định mới.</p>
+
+<p>Không phụ thuộc vào việc một hoạt động bắt đầu trong một tác vụ mới hay trong cùng tác vụ mà hoạt động
+đã bắt đầu, nút <em>Quay lại</em> sẽ luôn đưa người dùng về hoạt động trước đó. Tuy nhiên, nếu bạn
+bắt đầu một hoạt động mà quy định chế độ khởi chạy {@code singleTask}, khi đó nếu một thực thể của
+hoạt động đó tồn tại trong một tác vụ nền, toàn bộ tác vụ đó sẽ được đưa ra tiền cảnh. Tại thời điểm này
+, lúc này ngăn xếp bao gồm tất cả hoạt động từ tác vụ được mang ra, ở vị trí trên cùng của
+chồng. Hình 4 minh họa loại kịch bản này.</p>
+
+<img src="{@docRoot}images/fundamentals/diagram_backstack_singletask_multiactivity.png" alt="" />
+<p class="img-caption"><strong>Hình 4.</strong> Biểu diễn cách thức một hoạt động với
+chế độ khởi chạy "singleTask" được thêm vào ngăn xếp. Nếu hoạt động đã là một phần của một
+tác vụ nền với ngăn xếp của chính nó, khi đó toàn bộ ngăn xếp cũng tiến
+về phía trước, ở trên cùng tác vụ hiện tại.</p>
+
+<p>Để biết thêm thông tin về việc sử dụng các chế độ khởi chạy trong tệp bản kê khai, hãy xem tài liệu phần tử
+<code><a href="{@docRoot}guide/topics/manifest/activity-element.html">&lt;activity&gt;</a></code>
+, trong đó có trình bày thêm về thuộc tính {@code launchMode} và các giá trị
+được chấp nhận.</p>
+
+<p class="note"><strong>Lưu ý:</strong> Hành vi mà bạn quy định cho hoạt động của mình bằng thuộc tính <a href="{@docRoot}guide/topics/manifest/activity-element.html#lmode">{@code launchMode}</a> có thể
+bị khống chế bởi cờ có ý định bắt đầu hoạt động của bạn, như được trình bày trong
+phần tiếp theo.</p>
+
+
+
+<h4 id="#IntentFlagsForTasks">Sử dụng cờ Ý định</h4>
+
+<p>Khi bắt đầu một hoạt động, bạn có thể sửa đổi liên kết mặc định giữa một hoạt động với tác vụ của nó
+bằng cách thêm cờ vào trong ý định mà bạn chuyển tới {@link
+android.app.Activity#startActivity startActivity()}. Những cờ mà bạn có thể sử dụng để sửa đổi
+hành vi mặc định là:</p>
+
+<p>
+  <dt>{@link android.content.Intent#FLAG_ACTIVITY_NEW_TASK}</dt>
+    <dd>Bắt đầu một hoạt động trong một tác vụ mới. Nếu đã có một tác vụ đang chạy cho hoạt động mà bạn đang
+bắt đầu, tác vụ đó sẽ được đưa ra tiền cảnh với trạng thái cuối cùng được khôi phục và hoạt động
+nhận ý định mới trong {@link android.app.Activity#onNewIntent onNewIntent()}.
+    <p>Điều này sẽ tạo ra cùng hành vi như giá trị {@code "singleTask"} <a href="{@docRoot}guide/topics/manifest/activity-element.html#lmode">{@code launchMode}</a>,
+đã được trình bày ở phần trước.</p></dd>
+  <dt>{@link android.content.Intent#FLAG_ACTIVITY_SINGLE_TOP}</dt>
+    <dd>Nếu hoạt động đang được bắt đầu là hoạt động hiện tại (ở trên cùng của ngăn xếp), khi đó
+thực thể hiện có sẽ nhận một lệnh gọi đến {@link android.app.Activity#onNewIntent onNewIntent()},
+thay vì tạo một thực thể của hoạt động mới.
+    <p>Điều này sẽ tạo ra cùng hành vi như giá trị {@code "singleTop"} <a href="{@docRoot}guide/topics/manifest/activity-element.html#lmode">{@code launchMode}</a>,
+đã được trình bày ở phần trước.</p></dd>
+  <dt>{@link android.content.Intent#FLAG_ACTIVITY_CLEAR_TOP}</dt>
+    <dd>Nếu hoạt động đang được bắt đầu đang chạy trong tác vụ hiện tại, khi đó
+thay vì khởi chạy một thực thể mới của hoạt động đó, tất cả các hoạt động khác bên trên nó đều
+bị hủy và ý định này được chuyển tới thực thể được tiếp tục của hoạt động (lúc này đang ở trên cùng),
+thông qua {@link android.app.Activity#onNewIntent onNewIntent()}).
+    <p>Không có giá trị cho thuộc tính <a href="{@docRoot}guide/topics/manifest/activity-element.html#lmode">{@code launchMode}</a>
+mà sinh ra hành vi này.</p>
+    <p>{@code FLAG_ACTIVITY_CLEAR_TOP} được sử dụng thường xuyên nhất cùng với
+    {@code FLAG_ACTIVITY_NEW_TASK}.
+Khi được sử dụng cùng nhau, những cờ này là một cách để định vị hoạt động hiện tại
+trong một tác vụ khác và đặt nó vào vị trí nơi nó có thể hồi đáp ý định. </p>
+    <p class="note"><strong>Lưu ý:</strong> Nếu chế độ khởi chạy của hoạt động được chỉ định là
+    {@code "standard"},
+nó cũng bị loại bỏ khỏi chồng và một thực thể mới sẽ được khởi chạy thay chỗ nó để xử lý
+ý định đến.  Đó là bởi một thực thể mới luôn được tạo cho ý định mới khi chế độ khởi chạy
+là {@code "standard"}. </p>
+</dd>
+</dl>
+
+
+
+
+
+<h3 id="Affinities">Xử lý quan hệ</h3>
+
+<p><em>Quan hệ</em> sẽ cho biết một hoạt động ưu tiên thuộc về tác vụ nào hơn. Theo mặc định, tất cả
+các hoạt động từ cùng ứng dụng có quan hệ với nhau. Vì thế, theo mặc định, tất cả
+hoạt động trong cùng ứng dụng ưu tiên ở trong cùng tác vụ hơn. Tuy nhiên, bạn có thể sửa đổi
+quan hệ mặc định cho một hoạt động. Các hoạt động được định nghĩa trong
+các ứng dụng khác nhau có thể chia sẻ một quan hệ, hoặc các hoạt động được định nghĩa trong cùng ứng dụng có thể
+được gán các quan hệ tác vụ khác nhau.</p>
+
+<p>Bạn có thể sửa đổi quan hệ cho bất kỳ hoạt động đã cho nào bằng thuộc tính <a href="{@docRoot}guide/topics/manifest/activity-element.html#aff">{@code taskAffinity}</a> của
+phần tử <a href="{@docRoot}guide/topics/manifest/activity-element.html">{@code &lt;activity&gt;}</a>
+.</p>
+
+<p>Thuộc tính <a href="{@docRoot}guide/topics/manifest/activity-element.html#aff">{@code taskAffinity}</a>
+lấy một giá trị xâu, đó phải là giá trị duy nhất từ tên gói mặc định
+được khai báo trong phần tử <a href="{@docRoot}guide/topics/manifest/manifest-element.html">
+{@code &lt;manifest&gt;}
+</a>, do hệ thống sử dụng tên đó để nhận biết quan hệ
+tác vụ mặc định cho ứng dụng.</p>
+
+<p>Vấn đề quan hệ được xét trong hai trường hợp:</p>
+<ul>
+  <li>Khi ý định khởi chạy hoạt động chứa cờ
+  {@link android.content.Intent#FLAG_ACTIVITY_NEW_TASK}
+.
+
+<p>Theo mặc định, một hoạt động mới được khởi chạy vào tác vụ của hoạt động
+đã gọi {@link android.app.Activity#startActivity startActivity()}. Nó được đẩy lên cùng
+ngăn xếp như trình gọi.  Tuy nhiên, nếu ý định được chuyển tới
+{@link android.app.Activity#startActivity startActivity()}
+chứa cờ {@link android.content.Intent#FLAG_ACTIVITY_NEW_TASK}
+, hệ thống sẽ tìm một tác vụ khác để chứa hoạt động mới. Thường thì đó là một tác vụ mới.
+Tuy nhiên, không nhất thiết phải như vậy.  Nếu đã có một tác vụ hiện tại với cùng quan hệ như
+hoạt động mới, hoạt động sẽ được khởi chạy vào tác vụ đó.  Nếu không, nó sẽ bắt đầu một tác vụ mới.</p>
+
+<p>Nếu cờ này khiến một hoạt động bắt đầu một tác vụ mới và người dùng nhấn nút <em>Home</em>
+để rời
+nó thì phải có một cách nào đó để người dùng điều hướng quay lại tác vụ. Một số đối tượng (chẳng hạn như
+trình quản lý thông báo) luôn bắt đầu các hoạt động trong một tác vụ bên ngoài, không bao giờ bắt đầu trong chính tác vụ của mình, vì thế
+chúng luôn đặt {@code FLAG_ACTIVITY_NEW_TASK} vào ý định mà chúng chuyển tới
+{@link android.app.Activity#startActivity startActivity()}.
+Nếu bạn có một hoạt động có thể được gọi ra bởi
+một đối tượng bên ngoài mà có thể sử dụng cờ này, hãy lưu ý là người dùng có một cách độc lập để quay lại
+tác vụ đã được bắt đầu, chẳng hạn như bằng một biểu tượng trình khởi chạy (hoạt động gốc của tác vụ
+có một bộ lọc ý định {@link android.content.Intent#CATEGORY_LAUNCHER}; xem phần <a href="#Starting">Bắt đầu một tác vụ</a> ở bên dưới).</p>
+</li>
+
+  <li>Khi một hoạt động có thuộc tính <a href="{@docRoot}guide/topics/manifest/activity-element.html#reparent">
+{@code allowTaskReparenting}</a> của nó được đặt thành {@code "true"}.
+  <p>Trong trường hợp này, hoạt động có thể di chuyển từ tác vụ mà nó bắt đầu tới tác vụ mà nó có quan hệ
+ khi tác vụ đó đi ra tiền cảnh.</p>
+  <p>Ví dụ, giả sử rằng một hoạt động với chức năng báo cáo tình hình thời tiết ở các thành phố được chọn
+được định nghĩa là một phần trong một ứng dụng du lịch.  Nó có cùng quan hệ như các hoạt động khác trong cùng
+ứng dụng (quan hệ ứng dụng mặc định) và nó cho phép tạo lại tập mẹ với thuộc tính này.
+Khi một trong các hoạt động của bạn bắt đầu hoạt động trình báo cáo thời tiết, ban đầu nó thuộc về cùng
+tác vụ như hoạt động của bạn. Tuy nhiên, khi tác vụ của ứng dụng du lịch đi ra tiền cảnh, hoạt động
+của trình báo cáo thời tiết được gán lại cho tác vụ đó và được hiển thị bên trong nó.</p>
+</li>
+</ul>
+
+<p class="note"><strong>Mẹo:</strong> Nếu một tệp {@code .apk} chứa nhiều hơn một "ứng dụng"
+từ quan điểm của người dùng, bạn có thể muốn sử dụng thuộc tính <a href="{@docRoot}guide/topics/manifest/activity-element.html#aff">{@code taskAffinity}</a>
+để gán các quan hệ khác nhau cho hoạt động được liên kết với từng "ứng dụng".</p>
+
+
+
+<h3 id="Clearing">Xóa ngăn xếp</h3>
+
+<p>Nếu người dùng rời một tác vụ trong khoảng thời gian dài, hệ thống sẽ xóa tác vụ của tất cả hoạt động ngoại trừ
+hoạt động gốc.  Khi người dùng quay trở lại tác vụ, chỉ hoạt động gốc được khôi phục.
+Hệ thống sẽ hoạt động theo cách này, vì, sau một khoảng thời gian dài, người dùng có thể đã từ bỏ
+việc mà họ đang làm trước đó và quay lại tác vụ để bắt đầu một việc mới. </p>
+
+<p>Có một số thuộc tính hoạt động mà bạn có thể sử dụng để sửa đổi hành vi này: </p>
+
+<dl>
+<dt><code><a
+href="{@docRoot}guide/topics/manifest/activity-element.html#always">alwaysRetainTaskState</a></code>
+</dt>
+<dd>Nếu thuộc tính này được đặt thành {@code "true"} trong hoạt động gốc của một tác vụ,
+hành vi mặc định được mô tả sẽ không xảy ra.
+Tác vụ giữ lại tất cả hoạt động trong chồng của mình kể cả sau một khoảng thời gian dài.</dd>
+
+<dt><code><a
+href="{@docRoot}guide/topics/manifest/activity-element.html#clear">clearTaskOnLaunch</a></code></dt>
+<dd>Nếu thuộc tính này được đặt thành {@code "true"} trong hoạt động gốc của một tác vụ,
+chồng sẽ bị xóa tới hoạt động gốc bất cứ khi nào người dùng rời khỏi tác vụ
+và quay lại.  Nói cách khác, nó ngược với
+<a href="{@docRoot}guide/topics/manifest/activity-element.html#always">
+{@code alwaysRetainTaskState}</a>. Người dùng luôn quay lại tác vụ ở
+trạng thái ban đầu của nó, ngay cả sau khi rời khỏi tác vụ trong chỉ một lúc.</dd>
+
+<dt><code><a
+href="{@docRoot}guide/topics/manifest/activity-element.html#finish">finishOnTaskLaunch</a></code>
+</dt>
+<dd>Thuộc tính này giống như <a href="{@docRoot}guide/topics/manifest/activity-element.html#clear">{@code clearTaskOnLaunch}</a>,
+nhưng nó hoạt động trên một tác vụ
+đơn lẻ chứ không phải một tác vụ toàn bộ.  Nó cũng có thể khiến bất kỳ hoạt động nào
+thoát mất, bao gồm cả hoạt động gốc.  Khi nó được đặt thành {@code "true"}, hoạt động
+vẫn là một bộ phận của tác vụ chỉ cho phiên làm việc hiện tại.  Nếu người dùng rời đi
+rồi quay lại tác vụ, nó không còn xuất hiện nữa.</dd>
+</dl>
+
+
+
+
+<h3 id="Starting">Bắt đầu một tác vụ</h3>
+
+<p>Bạn có thể thiết lập một hoạt động làm điểm bắt đầu cho một tác vụ bằng cách đưa cho nó một bộ lọc ý định với
+{@code "android.intent.action.MAIN"} là hành động được quy định và
+{@code "android.intent.category.LAUNCHER"}
+là thể loại được quy định. Ví dụ:</p>
+
+<pre>
+&lt;activity ... &gt;
+    &lt;intent-filter ... &gt;
+        &lt;action android:name="android.intent.action.MAIN" /&gt;
+        &lt;category android:name="android.intent.category.LAUNCHER" /&gt;
+    &lt;/intent-filter&gt;
+    ...
+&lt;/activity&gt;
+</pre>
+
+<p>Một bộ lọc ý định loại này khiến một biểu tượng và nhãn cho
+hoạt động được hiển thị trong trình khởi chạy ứng dụng, cho phép người dùng khởi chạy hoạt động và
+quay lại tác vụ mà nó tạo ra vào bất cứ lúc nào sau khi nó được khởi chạy.
+</p>
+
+<p>Khả năng thứ hai này là quan trọng: Người dùng chắc chắn có thể rời một tác vụ rồi quay lại
+sau bằng cách sử dụng trình khởi chạy hoạt động này. Vì lý do này, hai <a href="#LaunchModes">chế độ
+khởi chạy</a> mà đánh dấu các hoạt động là luôn khởi tạo một tác vụ, {@code "singleTask"} và
+{@code "singleInstance"}, sẽ chỉ được sử dụng khi hoạt động có một
+{@link android.content.Intent#ACTION_MAIN}
+và một bộ lọc {@link android.content.Intent#CATEGORY_LAUNCHER}. Ví dụ, hãy tưởng tượng chuyện gì
+sẽ xảy ra nếu thiếu bộ lọc: Một ý định khởi chạy một hoạt động {@code "singleTask"}, khởi đầu một
+tác vụ mới và người dùng dành một khoảng thời gian làm việc trong tác vụ đó. Khi đó, người dùng nhấn nút <em>Home</em>
+. Lúc này, tác vụ được gửi tới nền và không hiển thị. Bây giờ, người dùng không có cách nào để quay lại
+tác vụ bởi nó không được biểu diễn trong trình khởi chạy ứng dụng.</p>
+
+<p>Đối với những trường hợp mà bạn không muốn người dùng có thể quay lại một hoạt động, hãy đặt giá trị của phần tử 
+<code><a href="{@docRoot}guide/topics/manifest/activity-element.html">&lt;activity&gt;</a></code>
+, 
+<a href="{@docRoot}guide/topics/manifest/activity-element.html#finish">{@code finishOnTaskLaunch}</a>
+thành {@code "true"} (xem <a href="#Clearing">Xóa chồng</a>).</p>
+
+<p>Bạn có thể tham khảo thêm thông tin về cách các tác vụ và hoạt động được trình bày và quản lý trong
+màn hình tổng quan sẵn có tại phần <a href="{@docRoot}guide/components/recents.html">
+Màn hình Tổng quan</a>.</p>
+
+<!--
+<h2>Beginner's Path</h2>
+
+<p>For more information about how to use intents to
+activate other application components and publish the intents to which your components
+respond, continue with the <b><a
+href="{@docRoot}guide/components/intents-filters.html">Intents and Intent
+Filters</a></b> document.</p>
+-->

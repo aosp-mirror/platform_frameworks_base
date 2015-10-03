@@ -1,0 +1,57 @@
+page.title=應用程式元件
+page.landing=true
+page.landing.intro=Android 的應用程式架構可讓您使用一系列可重複使用的元件，建立內容豐富的新穎應用程式。本節說明如何建置元件來定義應用程式的設計模組，以及如何使用意圖連結這些元件。
+page.metaDescription=Android 的應用程式架構可讓您使用一系列可重複使用的元件，建立內容豐富的新穎應用程式。本節說明如何建置元件來定義應用程式的設計模組，以及如何使用意圖連結這些元件。
+page.landing.image=images/develop/app_components.png
+page.image=images/develop/app_components.png
+
+@jd:body
+
+<div class="landing-docs">
+
+  <div class="col-6">
+    <h3>部落格文章</h3>
+    
+    <a href="http://android-developers.blogspot.com/2012/05/using-dialogfragments.html">
+      <h4>使用 DialogFragments</h4>
+      <p>本文示範如何搭配 v4 支援程式庫 (可針對 Honeycomb 以下版本裝置提供向下相容性支援) 使用 DialogFragments 來顯示簡易的編輯對話方塊，以及透過介面將結果回傳給呼叫「Activity」。</p>
+    </a>
+
+    <a href="http://android-developers.blogspot.com/2011/03/fragments-for-all.html">
+      <h4>適用於各種裝置的片段</h4>
+      <p>我們於今日推出的靜態程式庫可列出相同的 Fragments API (以及新的 LoaderManager 和些許其他類別)，讓與 Android 1.6 以下版本相容的應用程式能夠使用片段來建立相容於平板電腦的使用者介面。 </p>
+    </a>
+    
+    <a href="http://android-developers.blogspot.com/2010/07/multithreading-for-performance.html">
+      <h4>運用多個執行緒來提升效能</h4>
+      <p>建立回應式應用程式的建議做法是，最小化您的主要 UI 執行緒所執行的工作數。
+方法是讓應用程式透過其他執行緒處理任何所需執行時間偏長的工作。
+</p>
+    </a>
+  </div>
+
+  <div class="col-6">
+    <h3>培訓</h3>
+    
+    <a href="http://developer.android.com/training/basics/activity-lifecycle/index.html">
+      <h4>管理 Activity 生命週期</h4>
+      <p>本課程說明每個「Activity」執行個體都會接收的生命週期重要回呼方法，並且說明如何使用這些方法，讓 Activity 的運作能符合使用者的預期，以及讓 Activity 在不需要系統資源時不耗用這類資源。
+
+</p>
+    </a>
+
+    <a href="http://developer.android.com/training/basics/fragments/index.html">
+      <h4>使用片段建置動態 UI</h4>
+      <p>本課程示範如何使用片段來設計動態使用者體驗，以及如何針對各種螢幕大小的裝置最佳化您的應用程式使用者體驗，同時讓應用程式繼續支援搭載 Android 1.6 等舊版作業系統的裝置。
+
+</p>
+    </a>
+
+    <a href="http://developer.android.com/training/sharing/index.html">
+      <h4>分享內容</h4>
+      <p>本課程說明幾個使用 Intent API 和 Action Provider 物件在不同應用程式間傳送及接收內容的常見方法。
+</p>
+    </a>
+  </div>
+
+</div>

@@ -1,0 +1,487 @@
+page.title=Android Studio と SDK Tools のダウンロード
+page.tags=sdk, android studio 
+page.template=sdk 
+header.hide=1 
+page.metaDescription=公式 Android IDE とデベロッパー ツールをダウンロードして、Android 版のモバイル端末、タブレット、ウェアラブル端末、TV などの端末向けのアプリをビルドする。
+
+studio.version=1.1.0
+
+studio.linux_bundle_download=android-studio-ide-135.1740770-linux.zip
+studio.linux_bundle_bytes=259336386
+studio.linux_bundle_checksum=e8d166559c50a484f83ebfec6731cc0e3f259208
+
+studio.mac_bundle_download=android-studio-ide-135.1740770-mac.dmg
+studio.mac_bundle_bytes=261303345
+studio.mac_bundle_checksum=f9745d0fec1eefd498f6160a2d6a1b5247d4cda3
+
+studio.win_bundle_exe_download=android-studio-bundle-135.1740770-windows.exe
+studio.win_bundle_exe_bytes=856233768
+studio.win_bundle_exe_checksum=7484b9989d2914e1de30995fbaa97a271a514b3f
+
+studio.win_notools_exe_download=android-studio-ide-135.1740770-windows.exe
+studio.win_notools_exe_bytes=242135128
+studio.win_notools_exe_checksum=5ea77661cd2300cea09e8e34f4a2219a0813911f
+
+studio.win_bundle_download=android-studio-ide-135.1740770-windows.zip
+studio.win_bundle_bytes=261667054
+studio.win_bundle_checksum=e903f17cc6a57c7e3d460c4555386e3e65c6b4eb
+
+
+
+sdk.linux_download=android-sdk_r24.1.2-linux.tgz
+sdk.linux_bytes=168121693
+sdk.linux_checksum=68980e4a26cca0182abb1032abffbb72a1240c51
+
+sdk.mac_download=android-sdk_r24.1.2-macosx.zip
+sdk.mac_bytes=89151287
+sdk.mac_checksum=00e43ff1557e8cba7da53e4f64f3a34498048256
+
+sdk.win_download=android-sdk_r24.1.2-windows.zip
+sdk.win_bytes=159778618
+sdk.win_checksum=704f6c874373b98e061fe2e7eb34f9fcb907a341
+
+sdk.win_installer=installer_r24.1.2-windows.exe
+sdk.win_installer_bytes=111364285
+sdk.win_installer_checksum=e0ec864efa0e7449db2d7ed069c03b1f4d36f0cd
+
+
+
+
+
+
+@jd:body
+
+<style type="text/css">
+  .offline {display:none;}
+  a.download-bundle-button {display:block;}
+  h2.feature {
+    padding-top:30px;
+    margin-top:0;
+    clear:both;
+  }
+  .feature-blurb {
+  margin:0px; font-size:16px; font-weight:300;
+  padding:40px 0 0 0;
+  }
+
+  .landing-button.green {
+    font-size:16px;
+    background-color:#90c653;
+    padding:8px 10px 10px;
+    margin:0;
+    width:206px;
+    text-align:center;
+  }
+
+  .landing-button.green:hover {
+    background-color:#85b84f;
+  }
+
+  .landing-button .small {
+    font-size: 12px;
+    font-weight: normal;
+    line-height: 12px;
+    display: block;
+  }
+
+  h1.studio-logo {
+    width:226px;
+    height:78px;
+    display:block;
+    padding:0;
+    white-space: nowrap;
+    text-indent: -10000px;
+    font-size:0px;
+    background: url(../images/tools/studio-logo.png);
+    background-image: -webkit-image-set(url(../images/tools/studio-logo.png) 1x, url(../images/tools/studio-logo_2x.png) 2x);
+    background-size: 226px 78px;
+  }
+
+</style>
+
+
+
+
+
+<div style="position:relative;">
+
+
+<div class="wrap" id="tos" style="display:none;width:inherit;height:650px">
+<div class="col-13" style="margin:0;">&nbsp;</div><!-- provides top margin for content -->
+
+<h1 id="tos-header" style="margin-top:0">ダウンロード</h1>
+
+<p class="sdk-terms-intro">Android Studio またはスタンドアロンの SDK Tools をインストールする前に、次の利用規約に同意する必要があります。
+</p>
+
+<div class="sdk-terms" onfocus="this.blur()">
+<h2 class="norule">利用規約</h2>
+以下は、Android Software Development Kit の使用許諾契約です。
+
+<h3>1.はじめに</h3>
+1.1 Android Software Development Kit（以下、本契約で「SDK」という。具体的には Android システム ファイル、パッケージ型 API、Google API アドオンを含む）は、本契約の規定に従ってライセンス許可されます。本契約では、デベロッパーの SDK の使用に関して、デベロッパーと Google の間で法的拘束力のある契約を結びます。
+
+1.2 「Android」とは、Android オープン ソース プロジェクト（http://source.android.com/ にて随時更新）にて利用可能な、端末向けの Android ソフトウェア スタックを意味します。
+
+1.3 「Google」とは、1600 Amphitheatre Parkway, Mountain View, CA 94043, United States に主たる事業所を有するデラウェア州法人である Google Inc. を意味します。
+
+
+<h3>2.本契約への同意</h3>
+2.1 SDK を使用するには、まず本契約に同意する必要があります。本契約に同意しない場合、SDK は使用できません。
+
+2.2 [同意する] をクリックすると、本契約に同意したことになります。
+
+2.3 米国またはその他の国（デベロッパーが居住している国またはデベロッパーが SDK を使用する国を含む）の法律により SDK の使用を禁止されている人である場合、SDK を使用することも、使用許諾契約に同意することもできません。
+
+2.4 雇用主またはその他の事業体を代表または代理して本契約に拘束されることに同意しようとする担当者は、当該雇用主またはその他の事業体を本契約に法的に拘束する完全な法的権限を有していることを表明および保証するものします。担当者が必要な権限を有していない場合は、担当者の雇用主またはその他の事業体を代表または代理して、本契約に同意することも、SDK を使用することもできません。
+
+
+<h3>3.Google からの SDK ライセンス</h3>
+3.1 本契約の規定に従い、Google は Android プラットフォーム上で実行するアプリケーションの開発に SDK を使用するための、限定的で、世界規模の、ロイヤリティ フリーな、譲渡不可で非排他的なライセンスを付与するものとします。
+
+3.2 SDK に関するすべての法的権利、所有権、利益（SDK に含まれる知的財産権を含む）は Google またはサードパーティが所有するものとします。「知的財産権」とは、特許法、著作権法、営業秘密法、商標法、不当競争防止法に基づいて発生するすべての権利、およびその他のすべての所有権を意味します。デベロッパーに明示的に付与されていない権利は、すべて Google が所有します。
+
+3.3 本契約で明示的に許可されている目的以外においては、SDK を使用することはできません。当該のサードパーティのライセンスで必要とされる場合を除き、デベロッパーは、（a）SDK または SDK の一部をコピー（バックアップ目的を除く）、修正、改造、再配布、逆コンパイル、リバース エンジニアリング、逆アセンブルまたは派生物の作成、または（b）モバイル ハンドセットまたは個人用 PC 以外のハードウェア端末への SDK の読み込み、SDK と他のソフトウェアとの結合、または SDK の一部を組み込んだソフトウェアや端末の配布はできません。
+
+3.4 デベロッパーは、Android の断片化につながるような行為をしないことに同意します。これには、SDK から派生したソフトウェア開発キットの配布、作成への参加、宣伝を含みます（ただし必ずしもこれらには限定されません）。
+
+3.5 オープン ソース ソフトウェア ライセンス下でライセンス付与された SDK のコンポーネントの使用、複製、配布は、本契約ではなく、そのオープン ソース ソフトウェアのライセンスに準拠するものとします。
+
+3.6 デベロッパーは、Google が提供する SDK の形式および性質は事前の通知なしに変更される場合があり、今後リリースされる SDK のバージョンでは、以前のバージョンの SDK で開発されたアプリケーションとの互換性がない可能性があることに同意します。デベロッパーは、Google が事前の通知なく、Google の単独の裁量でデベロッパーまたはユーザーへの SDK（または SDK 内の一部の機能）の提供を（恒久的または一時的に）停止する場合があることに同意します。
+
+3.7 本契約のいかなる部分も、Google のいかなる商標名、商標、サービスマーク、ロゴ、ドメイン名、またはその他のブランド識別表示を使用する権利もデベロッパーに付与するものではありません。
+
+3.8 デベロッパーは、SDK に添付または収録されているすべての知的財産権に関する通知（著作権および商標の通知を含む）の削除、隠ぺい、改ざんを行わないことに同意します。
+
+
+<h3>4.デベロッパーによる SDK の使用</h3>
+4.1 Google は、本契約に基づき SDK を使用してデベロッパーが開発したソフトウェア アプリケーションに関して、デベロッパー（またはデベロッパーのライセンサー）からいかなる権利、所有権、または利益（当該アプリケーションに含まれる知的財産権を含む）も取得するものではないことに同意します。
+
+4.2 デベロッパーは、SDK を（a）本契約、および（b）該当する司法管轄区における適用される法律、規則、または一般に認められた慣行またはガイドライン（米国またはその他の該当国におけるデータまたはソフトウェアの輸出入に関する法律を含む）で認められている目的にのみ使用することに同意します。
+
+4.3 SDK を使用して一般ユーザー向けにアプリケーションを開発する場合、デベロッパーはユーザーのプライバシーおよび法的権利を保護することに同意します。ユーザーからデベロッパーにユーザー名、パスワード、またはその他のログイン情報または個人情報が提供される場合、デベロッパーは、情報がデベロッパーのアプリケーションに提供されることをユーザーに認識させ、当該ユーザーについてプライバシーに関する法的に十分な通知および保護を行わなければなりません。デベロッパーのアプリケーションに個人情報または秘密情報が保存される場合、この保存は保護された方法で行われなければなりません。ユーザーからデベロッパーのアプリケーションに Google アカウントの情報が提供された場合、デベロッパーのアプリケーションでは、ユーザーが許可したタイミングで、かつユーザーが許可した限定された目的にのみ、当該情報を使用してユーザーの Google アカウントにアクセスすることが認められるものとします。
+
+4.4 デベロッパーは、SDK に関して、第三者（Google、およびあらゆる携帯電話会社を含むが、これらに限定されない）のサーバー、ネットワーク、またはその他の財産またはサービスへの妨害、中断、損害、または許可されていない態様でのアクセスとなる行為（そのような行為に該当する対象製品の開発または販売 / 配布を含む）に関与しないことに同意します。
+
+4.5 デベロッパーは、デベロッパーが Android および Android のアプリケーションを介して作成、送信、表示するデータ、コンテンツ、リソース、および自身の行為の結果（Google に発生する可能性のあるあらゆる損失および損害を含む）について、自身が単独で責任を負うこと（および Google がこれについてデベロッパーまたはいかなる第三者に対しても一切責任を負わないこと）に同意します。
+
+4.6 デベロッパーは、本契約、適用される第三者の契約もしくは利用規約、または適用される法律もしくは規則に基づく自身の義務に違反したこと、および当該違反の結果（Google または第三者に発生したあらゆる損失および損害を含む）について、自身が単独で責任を負うこと（および Google がこれについてデベロッパーまたはいかなる第三者に対しても一切責任を負わないこと）に同意します。
+
+
+<h3>5.デベロッパーの資格情報</h3>
+5.1 デベロッパーは、Google が発行した、またはデベロッパー自身で選択した、自身のデベロッパー用資格情報の秘密を保持する責任を負うこと、および自身のデベロッパー用資格情報のもとで開発されたすべてのアプリケーションについて単独で責任を負うことに同意します。
+
+
+<h3>6.プライバシーおよび情報</h3>
+6.1 Google は、SDK の継続的な技術革新と改良のために、ソフトウェアから特定の使用状況統計情報（一意識別子、関連する IP アドレス、ソフトウェアのバージョン番号、SDK のどのツール/サービスがどのように使用されているかに関する情報を含むが、これらに限定されない）を収集することができます。この情報が収集される前に、SDK に通知が表示され、デベロッパーの同意が求められます。デベロッパーが同意しない場合は、情報は収集されません。
+
+6.2 収集されるデータは、SDK の改良のために集約された形で精査され、Google のプライバシー ポリシーに従って管理されます。
+
+
+<h3>7.第三者のアプリケーション</h3>
+7.1 デベロッパーが、SDK を使用して第三者が開発したアプリケーションを実行する、あるいは第三者から提供されたデータ、コンテンツ、リソースにアクセスする場合、デベロッパーは、Google がそれらのアプリケーション、データ、コンテンツ、リソースについて責任を負わないことに同意します。デベロッパーは、そのような第三者のアプリケーションを介してアクセスするすべてのデータ、コンテンツ、リソースについては、それらを生成した者が単独で責任を負うものであり、Google はそれらの第三者のアプリケーション、データ、コンテンツ、またはリソースの使用もしくはアクセスによって生じたあらゆる損失および損害について一切責任を負わないことを理解します。
+
+7.2 デベロッパーは、そのような第三者のアプリケーションを介して表示されるデータ、コンテンツ、リソースは、提供者（あるいは代理の第三者または事業体）が所有する知的財産権で保護されている場合があることを認識するものとします。デベロッパーは、当該所有者からの明確な許可がない限り、それらのデータ、コンテンツ、リソース（全体または一部）の変更、貸与、賃貸、担保、配布または派生物の作成を行うことはできません。
+
+7.3 デベロッパーは、そのような第三者のアプリケーション、データ、コンテンツまたはリソースの使用が、デベロッパーと当該第三者間の別の規約に従うものであることを認識するものとします。その場合、デベロッパーとそれらの第三者との間の法的関係において本契約が与える影響はありません。
+
+
+<h3>8.Android API の使用</h3>
+8.1 Google Data API
+
+API を使用して Google からデータを取得する場合、デベロッパーは、そのデータは、Google またはデータを提供する事業体（あるいは代理の第三者または事業体）が所有する知的財産権で保護されている場合があることを認識するものとします。そのような API の使用は追加の利用規約に従うものとします。デベロッパーは、当該の利用規約による許可がない限り、そのデータ（全体または一部）の変更、貸与、賃貸、担保、配布または派生物の作成を行うことはできません。
+
+8.1.2 デベロッパーは、API を使用して Google からユーザーのデータを取得する場合、ユーザーが明示的に同意した場合のみ、およびユーザーが許可したタイミングとその目的にのみ、データを取得できることを理解し、同意します。
+
+
+<h3>9.本契約の終了</h3>
+9.1 本契約は、下記の規定に従ってデベロッパーまたは Google のいずれかによって解約されるまで、継続して適用されるものとします。
+
+9.2 デベロッパーが本契約の解約を希望する場合、デベロッパーは SDK の使用と該当するデベロッパー用資格情報の使用を停止しなければなりません。
+
+9.3 Google は、以下のいずれかに該当する場合、いつでもデベロッパーとの本契約を解約することができます。
+（A）デベロッパーが本契約の規定のいずれかに違反した場合。あるいは、
+（B）法律により Google が本契約を解約することが求められた場合。あるいは、
+（C）Google と共にユーザーに SDK または SDK の特定の部分を提供していた提携先が Google との関係を終了させた場合、もしくは、ユーザーに対する SDK または SDK の特定部分の提供を中止した場合。あるいは、
+（D）Google が自己の裁量で、デベロッパーが居住する国またはデベロッパーがサービスを使用する国のユーザーへの SDK または SDK の特定部分の提供を終了すると決定した場合、あるいは Google によるデベロッパーへの SDK または特定の SDK サービスの提供が商業的に可能でないと判断した場合。
+
+9.4 本規約が終了した場合、ユーザーおよび Google が享受し、適用を受けた（もしくは本規約が有効であった間に時間と共に発生した）または無期限に継続すると明示されたすべての法的権利、義務および債務は、上記中止により影響を受けないものとし、かつ第 14.7 項の規定は、引き続き上記権利、義務および債務に無期限に適用されるものとします。
+
+
+<h3>10.保証に関する免責事項</h3>
+10.1 デベロッパーは、デベロッパーによる SDK の使用はデベロッパー自身の責任において行うものであること、および SDK は「現状有姿」かつ「提供可能な限りにおいて」、いかなる種類の保証もなく提供されるものであることを明示的に理解し、これに同意します。
+
+10.2 デベロッパーによる SDK および SDK の使用を通じてダウンロードまたはその他の方法で取得されたマテリアルの使用は、デベロッパー自身の裁量および責任において行うものであり、当該使用の結果として生じるデベロッパーのコンピュータ システムもしくはその他の端末への損害またはデータの喪失についての責任はデベロッパーが単独で負います。
+
+10.3 Google はまた、商品性、特定目的への適合性、および権利侵害がないことの黙示的な保証および条件を含む（ただしこれらに限定されない）、明示的か黙示的かを問わずあらゆる種類のすべての保証および条件を明示的に否定します。
+
+
+<h3>11.責任の制限</h3>
+11.1 デベロッパーは、Google、その子会社および関連会社、ならびにそのライセンサーが、デベロッパーに発生した直接損害、間接損害、偶発的損害、特別損害、結果的損害、または懲罰的損害（データの喪失を含む）について、Google またはその代表者が当該損失が発生する可能性について告知されていたかどうか、または知っていたはずであるかどうかにかかわらず、いかなる責任法理のもとでもデベロッパーに対して責任を負わないことを明示的に理解し、これに同意します。
+
+
+<h3>12.補償</h3>
+12.1 法律で認められる最大限の範囲内において、デベロッパーは、（a）デベロッパーが SDK を使用したこと、および（b）デベロッパーが開発したアプリケーションが他者の著作権、商標権、営業秘密、トレードドレス、特許権、もしくはその他の知的財産権を侵害していること、または他者の名誉を毀損している、もしくは他者のパブリシティ権もしくはプライバシー権を侵害していること、および（c）デベロッパーが本契約に違反したことから発生したあらゆる申し立て、普通法上の訴訟、衡平法上の訴訟、または法的手続き、ならびにあらゆる損失、責任、損害、費用、および経費（合理的な弁護士報酬を含む）について、Google、その関連会社、ならびに当該各社の取締役、役員、従業員、代理人、および認定携帯通信会社を防御し、補償し、免責することに同意します。
+
+
+<h3>13.契約の変更</h3>
+13.1 Google は、SDK の新しいバージョンを配布することにより、いつでも本契約を変更することができます。変更が生じた場合、Google は、SDK の提供ウェブサイト上に使用許諾契約の改訂版を公開します。
+
+
+<h3>14.法的一般条項</h3>
+14.1 本契約は、デベロッパーと Google の間の法的な合意のすべてを表し、デベロッパーによる SDK の使用（別の契約下で Google が提供するサービスを除く）に適用され、SDK に関するデベロッパーと Google の間のあらゆる事前の合意に完全に取って代わるものです。
+
+14.2 デベロッパーは、Google が本契約に定める（または適用される法律のもとで Google が享受できる）法的な権利または救済措置を行使または執行しなかった場合でも、Google の権利が正式に放棄されたとはみなされないこと、および Google が以後も引き続き当該権利および救済措置を行使または執行できることに同意します。
+
+14.3 本件について判断を下す管轄権を有する司法裁判所によって、本契約のいずれかの条項が無効と判断された場合、当該条項は、本契約の残りの部分に影響を与えることなく本契約から削除されるものとします。本契約の残りの条項は、以後も引き続き有効かつ執行可能であるものとします。
+
+14.4 デベロッパーは、Google が親会社となっている各グループ企業が、本契約の第三受益者となること、および当該企業が、当該企業に利益（または受益権）を付与する本契約の条項を直接執行する、また当該条項に依拠する権利を有することを了承し、これに同意します。上記以外のいかなる人または法人も、本契約の第三受益者とはならないものとします。
+
+14.5 輸出規制。SDK は、米国輸出管理法令の対象です。デベロッパーは、SDK に適用されるすべての国内および国際の輸出管理法令に従わなければなりません。これらの法律には、仕向け地、ユーザー、および最終用途に関する制限が含まれます。
+
+14.6 デベロッパーも Google も、他方当事者から事前に書面で承認を得ずに、本契約において許諾される権利を譲渡または移転することはできません。デベロッパーも Google も、他方当事者から事前に書面で承認を得ずに、本契約に基づく自身の責任または義務を他者に委任してはなりません。
+
+14.7 本契約あるいは本契約に基づくデベロッパーと Google の関係から発生または関連するすべての申し立ては、米国カリフォルニア州の抵触法を除いて、カリフォルニア州法に準拠するものとします。デベロッパーおよび Google は、本契約あるいは本契約に基づくデベロッパーと Google の関係から発生または関連する法的事項の解決について、米国カリフォルニア州サンタクララ郡に所在の連邦裁判所または州立裁判所が専属管轄権を有することに合意します。上記にかかわらず、デベロッパーは、Google が任意の司法管轄区において差し止め命令による救済（または同等の緊急法的救済）を求める申し立てを行うことが認められることに同意します。
+
+
+<em>2012 年 11 月 13 日</em>
+</div>
+
+
+
+
+
+<div id="next-steps" style="display:none;position:absolute;width:inherit">
+  <p>数ステップで、Android 向けアプリのビルドを開始できます。</p>
+  <p>まもなく、<a id="next-link" href="{@docRoot}sdk/installing/index.html">Installing the Android SDK</a>へリダイレクトします。
+</p>
+
+</div><!-- end next-steps -->
+
+
+
+<div id="sdk-terms-form">
+<p>
+<input id="agree" type="checkbox" name="agree" value="1" onclick="onAgreeChecked()" />
+<label id="agreeLabel" for="agree">上記の利用規約を読み、同意します。</label>
+</p>
+<p><a href="" class="button disabled" id="downloadForRealz" onclick="return onDownloadForRealz(this);"></a></p>
+</div>
+
+
+</div><!-- end TOS -->
+
+
+
+
+
+
+<div id="landing">
+
+<div class="col-13">&nbsp;</div><!-- provides top margin for content -->
+
+<img src="{@docRoot}images/tools/studio-hero.png" srcset="{@docRoot}images/tools/studio-hero_2x.png 2x, {@docRoot}images/tools/studio-hero.png 1x" width="760" height="400" alt="" style="margin-bottom:80px" />
+
+<div style="color: #fff; width:226px; height:0; overflow:visible; position:absolute; top:40px; left:25px">
+
+<h1 class="studio-logo" style="margin:0 0 35px !important">Android Studio</h1>
+
+<p style="font-size: 16px; color:#bbb; position: absolute;left: 297px; top: 5px; display: block;
+width: 400px;text-align: center;">公式 Android IDE</p>
+
+<ul style="font-size:12px">
+<li>Android Studio IDE</li>
+<li>Android SDK Tools</li>
+<li>Android 5.0（Lollipop）プラットフォーム</li>
+<li>Google API を使用した Android 5.0 エミュレータのシステム イメージ</li>
+</ul>
+
+
+<a class="online landing-button green download-bundle-button" style="margin-top:30px;" href="#Other">Android Studio をダウンロード</a>
+
+<!-- this appears when viewing the offline docs -->
+<p class="offline">
+Android Studio または スタンドアロンの SDK Tools を入手するには、<a href="http://developer.android.com/sdk/index.html">developer.android.com/sdk/</a> へアクセスしてください。
+</p>
+
+<ul style="margin-top:50px;color:#444">
+  <li><a href="#Requirements">システム要件</a></li>
+  <li><a href="#Other">他のダウンロード オプション</a></li>
+  <li><a href="{@docRoot}sdk/installing/migrate.html">Android Studio への移行</a></li>
+  <li><a href="https://docs.google.com/a/google.com/forms/d/1mjsyfzv3HAnDY-_Kfj-3QJKdpuksyMFs9e73CRwmT6Q/viewform" target="_blank">アンケートに回答する</a></li>
+</ul>
+
+</div>
+
+
+
+
+<h2 class="feature norule" >インテリジェント コード エディタ</h2>
+
+<div class="col-9" style="margin:0 20px 0 0">
+  <img src="{@docRoot}images/tools/studio-hero-code.png" srcset="{@docRoot}images/tools/studio-hero-code_2x.png 2x, {@docRoot}images/tools/studio-hero-code.png 1x" width="520" />
+</div><!-- end col-9 (left column) -->
+
+<div class="col-4 feature-blurb">
+  <p>Android Studio の中核であるインテリジェント コード エディタは、高度なコード補完機能、リファクタリング機能、解析機能を備えています。
+</p>
+  <p>このパワフルなコード エディタは、Android アプリ デベロッパーの生産性を高めます。</p>
+</div>
+
+
+
+
+
+<h2 class="feature norule">コード テンプレートと GitHub との統合</h2>
+
+<div class="col-9" style="margin:0 20px 0 0">
+  <img src="{@docRoot}images/tools/studio-hero-import.png" srcset="{@docRoot}images/tools/studio-hero-import_2x.png 2x, {@docRoot}images/tools/studio-hero-import.png 1x" width="520" />
+</div><!-- end col-9 (left column) -->
+
+<div class="col-4 feature-blurb">
+  <p>新しいプロジェクト ウィザードでは、これまで以上に簡単に新規プロジェクトを開始できます。</p>
+
+  <p>ナビゲーション ドロワーやビュー ページャーなどのパターンにテンプレート コードを使用してプロジェクトを開始できます。加えて GitHub から Google のコード サンプルをインポートできます。
+</p>
+</div>
+
+
+
+
+<h2 class="feature norule">マルチスクリーン アプリの開発</h2>
+
+<div class="col-9" style="margin:0 20px 0 0">
+  <img src="{@docRoot}images/tools/studio-hero-screens.png" srcset="{@docRoot}images/tools/studio-hero-screens_2x.png 2x, {@docRoot}images/tools/studio-hero-screens.png 1x" width="520" />
+</div><!-- end col-9 (left column) -->
+
+<div class="col-4 feature-blurb">
+  <p>Android 携帯電話、タブレット、Android Wear、Android TV、Android Auto、Google Glass 向けのアプリをビルドできます。
+</p>
+  <p>Android Studio の新しい Android プロジェクト ビューとモジュールのサポートによって、アプリのプロジェクト管理やリソース管理がさらに簡単になります。
+
+</div>
+
+
+
+
+<h2 class="feature norule">あらゆる形状の端末をサポートする仮想デバイス</h2>
+
+<div class="col-9" style="margin:0 20px 0 0">
+  <img src="{@docRoot}images/tools/studio-hero-avds.png" srcset="{@docRoot}images/tools/studio-hero-avds_2x.png 2x, {@docRoot}images/tools/studio-hero-avds.png 1x" width="520" />
+</div><!-- end col-9 (left column) -->
+
+<div class="col-4 feature-blurb">
+  <p>Android Studio には最適化されたエミュレータ イメージが事前構成されています。</p>
+  <p>アップデートされ合理化された仮想デバイス マネージャーには、一般的な Android 端末向けにあらかじめ定義されたプロファイルが用意されています。
+</p>
+</div>
+
+
+
+
+<h2 class="feature norule">
+Gradle で進化する Android のビルド</h2>
+
+<div class="col-9" style="margin:0 20px 0 0">
+  <img src="{@docRoot}images/tools/studio-hero-gradle.png" srcset="{@docRoot}images/tools/studio-hero-gradle_2x.png 2x, {@docRoot}images/tools/studio-hero-gradle.png 1x" width="520" />
+</div><!-- end col-9 (left column) -->
+
+<div class="col-4 feature-blurb">
+  <p>1 つのプロジェクトで、Android アプリのための、異なる機能を持つ複数の APK を作成できます。</p>
+  <p>Maven を使用してアプリの依存関係を管理します。</p>
+  <p>APK は Android Studio でもコマンドラインでもビルドできます。</p>
+</div>
+
+
+
+
+<h2 class="feature norule">Android Studio のその他の特徴</h2>
+<div style="background:#424242;padding:30px; color:#fff;margin:0 0 15px;">
+
+<a class="online landing-button green download-bundle-button" style="margin:0 0 40px 60px;float:right" href="">Android Studio をダウンロード</a>
+
+  <ul>
+  <li>人気の高い JetBrains の Java IDE である IntelliJ IDEA Community Edition が基盤</li>
+  <li>Gradle ベースの柔軟なビルドシステム</li>
+  <li>ビルド バリアントと複数の APK 生成機能</li>
+  <li>Google サービスやさまざまな端末向けのテンプレート サポートの拡充</li>
+  <li>テーマの編集が可能なレイアウト エディタ</li>
+  <li>パフォーマンス、ユーザビリティ、バージョン互換性、その他の問題を検出する Lint ツール</li>
+  <li>ProGuard とアプリの署名機能</li>
+  <li>Google Cloud Messaging や App Engine との統合をサポートする Google Cloud プラットフォームの組み込みサポート
+</li>
+  </ul>
+
+<p style="margin:0">
+Android Studio の機能の詳細については、「<a href="{@docRoot}tools/studio/index.html">Android Studio の基礎</a>」をご覧ください。
+</p>
+</div>
+
+
+<p>Eclipse で ADT を使用している場合、Android Studio が Android の公式 IDE になったため、Android Studio に移行して IDE の最新アップデートを入手する必要があります。
+
+プロジェクトの移行については、「<a href="{@docRoot}sdk/installing/migrate.html">Migrating to Android Studio</a>」をご覧ください。
+
+</p>
+
+
+
+
+
+
+
+<h2 id="Requirements">システム要件</h2>
+
+<h3>Windows の場合</h3>
+
+<ul>
+<li>Microsoft&reg; Windows&reg; 8/7/Vista/2003（32-bit 版または 64-bit 版）</li>
+<li>2 GB 以上のシステム メモリ（RAM）、4 GB 以上を推奨</li>
+<li>400 MB の空き容量のあるハードディスク</li>
+<li>Android SDK、エミュレータのシステム イメージ、キャッシュ用には少なくとも 1 GB 以上</li>
+<li>1280 x 800 以上の画面解像度</li>
+<li>Java Development Kit (JDK) 7 </li>
+<li>エミュレータ アクセラレータ向け（任意）: Intel® VT-x、Intel® EM64T（Intel® 64）、Execute Disable（XD）ビット機能対応の Intel® プロセッサ
+</li>
+</ul>
+
+
+<h3>Mac OS X の場合</h3>
+
+<ul>
+<li>Mac &reg;OS X&reg; 10.8.5 以降、10.9（Mavericks）まで</li>
+<li>2 GB 以上のシステム メモリ（RAM）、4 GB 以上を推奨</li>
+<li>400 MB の空き容量のあるハードディスク</li>
+<li>Android SDK、エミュレータのシステム イメージ、キャッシュ用には少なくとも 1 GB 以上</li>
+<li>1280 x 800 以上の画面解像度</li>
+<li>Java Runtime Environment (JRE) 6</li>
+<li>Java Development Kit (JDK) 7</li>
+<li>エミュレータ アクセラレータ向け（任意）: Intel® VT-x、Intel® EM64T（Intel® 64）、Execute Disable（XD）ビット機能対応の Intel® プロセッサ
+</li>
+</ul>
+
+<p>Mac OSで最適化されたフォントのレンダリングを使用するには、Android Studio を Java Runtime Environment (JRE) 6 と共に実行する必要があります。
+その後、Java Development Kit（JDK）6 または JDK 7 を使用するようプロジェクトを構成できます。</p>
+
+
+
+<h3>Linux の場合</h3>
+
+<ul>
+<li>GNOME または KDE デスクトップ</li>
+<li>GNU C Library (glibc) 2.15 以降</li>
+<li>2 GB 以上のシステム メモリ（RAM）、4 GB 以上を推奨</li>
+<li>400 MB の空き容量のあるハードディスク</li>
+<li>Android SDK、エミュレータのシステム イメージ、キャッシュ用には少なくとも 1 GB 以上</li>
+<li>1280 x 800 以上の画面解像度</li>
+<li>Oracle&reg; Java Development Kit (JDK) 7 </li>
+</ul>
+<p>Ubuntu&reg; 14.04、Trusty Tahr（32-bit 版アプリケーションを実行可能な 64-bit 版）でテスト済み。
+</p>
+
+
+
+
+<h2 id="Other" style="clear:left">他のダウンロード オプション</h2>
+
+<!-- alternative SDK options follows -->

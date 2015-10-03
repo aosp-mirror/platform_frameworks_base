@@ -1,0 +1,812 @@
+page.title=片段
+parent.title=Activity
+parent.link=activities.html
+@jd:body
+
+<div id="qv-wrapper">
+<div id="qv">
+  <h2>本文内容</h2>
+  <ol>
+    <li><a href="#Design">设计原理</a></li>
+    <li><a href="#Creating">创建片段
+      <ol>
+        <li><a href="#UI">添加用户界面</a></li>
+        <li><a href="#Adding">向 Activity 添加片段</a></li>
+      </ol>
+    </li>
+    <li><a href="#Managing">管理片段</a></li>
+    <li><a href="#Transactions">执行片段事务</a></li>
+    <li><a href="#CommunicatingWithActivity">与 Activity 通信</a>
+      <ol>
+        <li><a href="#EventCallbacks">创建对 Activity 的事件回调</a></li>
+        <li><a href="#ActionBar">向操作栏添加项目</a></li>
+      </ol>
+    </li>
+    <li><a href="#Lifecycle">处理片段生命周期</a>
+      <ol>
+        <li><a href="#CoordinatingWithActivity">与 Activity 生命周期协调一致</a></li>
+      </ol>
+    </li>
+    <li><a href="#Example">示例</a></li>
+  </ol>
+
+  <h2>关键类</h2>
+  <ol>
+    <li>{@link android.app.Fragment}</li>
+    <li>{@link android.app.FragmentManager}</li>
+    <li>{@link android.app.FragmentTransaction}</li>
+  </ol>
+  
+  <h2>另请参阅</h2>
+  <ol>
+    <li><a href="{@docRoot}training/basics/fragments/index.html">利用片段构建动态 UI</a></li>
+    <li><a href="{@docRoot}guide/practices/tablets-and-handsets.html">支持平板电脑和手机</a>
+</li>
+  </ol>
+</div>
+</div>
+
+<p>{@link android.app.Fragment} 表示
+{@link android.app.Activity} 中的行为或用户界面部分。您可以将多个片段组合在一个 Activity 中来构建多窗格
+UI，以及在多个 Activity 中重复使用某个片段。您可以将片段视为 Activity 的模块化组成部分，它具有自己的生命周期，能接收自己的输入事件，并且您可以在 Activity 运行时添加或删除片段（有点像您可以在不同 Activity 中重复使用的“子 Activity”）。
+
+
+</p>
+
+<p>片段必须始终嵌入在 Activity 中，其生命周期直接受宿主 Activity 生命周期的影响。
+例如，当 Activity 暂停时，其中的所有片段也会暂停；当 Activity 被销毁时，所有片段也会被销毁。
+不过，当 Activity 正在运行（处于<em>已恢复</em><a href="{@docRoot}guide/components/activities.html#Lifecycle">生命周期状态</a>）时，您可以独立操纵每个片段，如添加或移除它们。
+
+当您执行此类片段事务时，您也可以将其添加到由 Activity 管理的返回栈&mdash;Activity 中的每个返回栈条目都是一条已发生片段事务的记录。
+
+
+返回栈让用户可以通过按“返回”<em></em>按钮撤消片段事务（后退）。
+</p>
+
+<p>当您将片段作为 Activity 布局的一部分添加时，它存在于 Activity 视图层次结构的某个 {@link
+android.view.ViewGroup}
+内部，并且片段会定义其自己的视图布局。您可以通过在 Activity 的布局文件中声明片段，将其作为
+{@code &lt;fragment&gt;}
+元素插入您的 Activity 布局中，或者通过将其添加到某个现有
+{@link android.view.ViewGroup}，利用应用代码进行插入。不过，片段并非必须成为 Activity 布局的一部分；您还可以将没有自己
+UI
+的片段用作 Activity 的不可见工作线程。</p>
+
+<p>本文描述如何在开发您的应用时使用片段，包括将片段添加到 Activity 返回栈时如何保持其状态、如何与 Activity 及 Activity 中的其他片段共享事件、如何为 Activity 的操作栏发挥作用等等。
+
+
+</p>
+
+
+<h2 id="Design">设计原理</h2>
+
+<p>Android 在 Android 3.0（API 11 级）中引入了片段，主要是为了给大屏幕（如平板电脑）上更加动态和灵活的 UI
+设计提供支持。由于平板电脑的屏幕比手机屏幕大得多，因此可用于组合和交换
+UI
+组件的空间更大。利用片段实现此类设计时，您无需管理对视图层次结构的复杂更改。
+通过将 Activity 布局分成片段，您可以在运行时修改 Activity 的外观，并在由 Activity 管理的返回栈中保留这些更改。
+
+</p>
+
+<p>例如，新闻应用可以使用一个片段在左侧显示文章列表，使用另一个片段在右侧显示文章&mdash;两个片段并排显示在一个 Activity 中，每个片段都具有自己的一套生命周期回调方法，并各自处理自己的用户输入事件。
+
+
+因此，用户不需要使用一个 Activity 来选择文章，然后使用另一个 Activity 来阅读文章，而是可以在同一个 Activity 内选择文章并进行阅读，如图
+1
+中的平板电脑布局所示。</p>
+
+<p>您应该将每个片段都设计为可重复使用的模块化 Activity 组件。也就是说，由于每个片段都会通过各自的生命周期回调来定义其自己的布局和行为，您可以将一个片段加入多个 Activity，因此，您应该采用可复用式设计，避免直接从某个片段直接操纵另一个片段。
+
+
+这特别重要，因为模块化片段让您可以通过更改片段的组合方式来适应不同的屏幕尺寸。
+在设计可同时支持平板电脑和手机的应用时，您可以在不同的布局配置中重复使用您的片段，以根据可用的屏幕空间优化用户体验。
+
+例如，在手机上，如果不能在同一 Activity 内储存多个片段，可能必须利用单独片段来实现单窗格
+UI。
+</p>
+
+<img src="{@docRoot}images/fundamentals/fragments.png" alt="" />
+<p class="img-caption"><strong>图 1. </strong>有关由片段定义的两个
+UI
+模块如何适应不同设计的示例：通过组合成一个 Activity 来适应平板电脑设计，通过单独片段来适应手机设计。</p>
+
+<p>例如&mdash;仍然以新闻应用为例&mdash;在平板电脑尺寸的设备上运行时，该应用可以在<em>Activity
+A</em> 中嵌入两个片段。不过，在手机尺寸的屏幕上，没有足以储存两个片段的空间，因此<em>Activity
+A</em>
+只包括用于显示文章列表的片段，当用户选择文章时，它会启动<em>Activity
+B</em>，其中包括用于阅读文章的第二个片段。因此，应用可通过重复使用不同组合的片段来同时支持平板电脑和手机，如图
+1
+所示。</p>
+
+<p>如需了解有关通过利用不同片段组合来适应不同屏幕配置这种方法设计应用的详细信息，请参阅<a href="{@docRoot}guide/practices/tablets-and-handsets.html">支持平板电脑和手机</a>指南。
+</p>
+
+
+
+<h2 id="Creating">创建片段</h2>
+
+<div class="figure" style="width:327px">
+<img src="{@docRoot}images/fragment_lifecycle.png" alt="" />
+<p class="img-caption"><strong>图 2. </strong>片段的生命周期（其 Activity 运行时）。
+</p>
+</div>
+
+<p>要想创建片段，您必须创建 {@link android.app.Fragment}
+的子类（或已有其子类）。{@link android.app.Fragment} 类的代码与
+{@link android.app.Activity} 非常相似。它包含与 Activity 类似的回调方法，如
+{@link android.app.Fragment#onCreate onCreate()}、{@link android.app.Fragment#onStart onStart()}、{@link android.app.Fragment#onPause onPause()}
+和 {@link android.app.Fragment#onStop onStop()}。实际上，如果您要将现有
+Android
+应用转换为使用片段，可能只需将代码从 Activity 的回调方法移入片段相应的回调方法中。
+</p>
+
+<p>通常，您至少应实现以下生命周期方法：</p>
+
+<dl>
+  <dt>{@link android.app.Fragment#onCreate onCreate()}</dt>
+  <dd>系统会在创建片段时调用此方法。您应该在实现内初始化您想在片段暂停或停止后恢复时保留的必需片段组件。
+
+</dd>
+  <dt>{@link android.app.Fragment#onCreateView onCreateView()}</dt>
+  <dd>系统会在片段首次绘制其用户界面时调用此方法。
+要想为您的片段绘制
+UI，您从此方法中返回的 {@link android.view.View} 必须是片段布局的根视图。如果片段未提供
+UI，您可以返回 null。</dd>
+  <dt>{@link android.app.Activity#onPause onPause()}</dt>
+  <dd>系统将此方法作为用户离开片段的第一个信号（但并不总是意味着此片段会被销毁）进行调用。
+您通常应该在此方法内确认在当前用户会话结束后仍然有效的任何更改（因为用户可能不会返回）。
+
+</dd>
+</dl>
+
+<p>大多数应用都应该至少为每个片段实现这三个方法，但您还应该使用几种其他回调方法来处理片段生命周期的各个阶段。
+
+<a href="#Lifecycle">处理片段生命周期</a>部分对所有生命周期回调方法做了更详尽的阐述。
+</p>
+
+
+<p>您可能还想扩展几个子类，而不是 {@link
+android.app.Fragment} 基类：</p>
+
+<dl>
+  <dt>{@link android.app.DialogFragment}</dt>
+  <dd>显示浮动对话框。使用此类创建对话框可有效地替代使用
+{@link android.app.Activity}
+类中的对话框帮助程序方法，因为您可以将片段对话框纳入由 Activity 管理的片段返回栈，从而使用户能够返回清除的片段。
+</dd>
+
+  <dt>{@link android.app.ListFragment}</dt>
+  <dd>显示由适配器（如 {@link
+android.widget.SimpleCursorAdapter}）管理的一系列项目，类似于 {@link android.app.ListActivity}。它提供了几种管理列表视图的方法，如用于处理点击事件的
+{@link
+android.app.ListFragment#onListItemClick(ListView,View,int,long) onListItemClick()}
+回调。</dd>
+
+  <dt>{@link android.preference.PreferenceFragment}</dt>
+  <dd>以列表形式显示 {@link android.preference.Preference} 对象的层次结构，类似于
+{@link android.preference.PreferenceActivity}。这在为您的应用创建“设置” Activity 时很有用处。
+</dd>
+</dl>
+
+
+<h3 id="UI">添加用户界面</h3>
+
+<p>片段通常用作 Activity 用户界面的一部分，将其自己的布局融入 Activity。
+</p>
+
+<p>要想为片段提供布局，您必须实现 {@link
+android.app.Fragment#onCreateView onCreateView()} 回调方法，Android
+系统会在片段需要绘制其布局时调用该方法。您对此方法的实现返回的
+{@link android.view.View} 必须是片段布局的根视图。</p>
+
+<p class="note"><strong>注：</strong>如果您的片段是 {@link
+android.app.ListFragment} 的子类，则默认实现会从
+{@link android.app.Fragment#onCreateView onCreateView()} 返回一个 {@link android.widget.ListView}，因此您无需实现它。</p>
+
+<p>要想从 {@link
+android.app.Fragment#onCreateView onCreateView()} 返回布局，您可以通过 XML 中定义的<a href="{@docRoot}guide/topics/resources/layout-resource.html">布局资源</a>来扩展布局。为帮助您执行此操作，{@link android.app.Fragment#onCreateView onCreateView()}
+提供了一个
+{@link android.view.LayoutInflater} 对象。</p>
+
+<p>例如，以下这个 {@link android.app.Fragment} 子类从 {@code example_fragment.xml}
+文件加载布局：</p>
+
+<pre>
+public static class ExampleFragment extends Fragment {
+    &#64;Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+                             Bundle savedInstanceState) {
+        // Inflate the layout for this fragment
+        return inflater.inflate(R.layout.example_fragment, container, false);
+    }
+}
+</pre>
+
+<div class="sidebox-wrapper">
+<div class="sidebox">
+  <h3>创建布局</h3>
+  <p>在上例中，{@code R.layout.example_fragment} 是对应用资源中保存的名为
+{@code example_fragment.xml} 的布局资源的引用。如需了解有关如何在
+XML
+中创建布局的信息，请参阅<a href="{@docRoot}guide/topics/ui/index.html">用户界面</a>文档。</p>
+</div>
+</div>
+
+<p>传递至 {@link android.app.Fragment#onCreateView
+onCreateView()} 的 {@code container}
+参数是您的片段布局将插入到的父
+{@link android.view.ViewGroup}（来自 Activity 的布局）。{@code savedInstanceState}
+参数是在恢复片段时，提供上一片段实例相关数据的
+{@link android.os.Bundle}（<a href="#Lifecycle">处理片段生命周期</a>部分对恢复状态做了详细阐述）。
+</p>
+
+<p>{@link android.view.LayoutInflater#inflate(int,ViewGroup,boolean) inflate()}
+方法带有三个参数：</p>
+<ul>
+  <li>您想要扩展的布局的资源 ID；</li>
+  <li>将作为扩展布局父项的 {@link android.view.ViewGroup}。传递 {@code
+container}
+对系统向扩展布局的根视图（由其所属的父视图指定）应用布局参数具有重要意义；</li>
+  <li>指示是否应该在扩展期间将扩展布局附加至 {@link
+android.view.ViewGroup}（第二个参数）的布尔值。（在本例中，其值为
+false，因为系统已经将扩展布局插入 {@code
+container}&mdash;传递 true 值会在最终布局中创建一个多余的视图组。）</li>
+</ul>
+
+<p>现在，您已经了解了如何创建提供布局的片段。接下来，您需要将该片段添加到您的 Activity 中。
+</p>
+
+
+
+<h3 id="Adding">向 Activity 添加片段</h3>
+
+<p>通常，片段向宿主 Activity 贡献一部分
+UI，作为 Activity 总体视图层次结构的一部分嵌入到 Activity 中。可以通过两种方式向 Activity 布局添加片段：
+</p>
+
+<ul>
+  <li><b>在 Activity 的布局文件内声明片段</b>
+<p>在本例中，您可以将片段当作视图来为其指定布局属性。
+例如，以下是一个具有两个片段的 Activity 的布局文件：
+</p>
+<pre>
+&lt;?xml version="1.0" encoding="utf-8"?&gt;
+&lt;LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="horizontal"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"&gt;
+    &lt;fragment android:name="com.example.news.ArticleListFragment"
+            android:id="@+id/list"
+            android:layout_weight="1"
+            android:layout_width="0dp"
+            android:layout_height="match_parent" /&gt;
+    &lt;fragment android:name="com.example.news.ArticleReaderFragment"
+            android:id="@+id/viewer"
+            android:layout_weight="2"
+            android:layout_width="0dp"
+            android:layout_height="match_parent" /&gt;
+&lt;/LinearLayout&gt;
+</pre>
+  <p>{@code &lt;fragment&gt;} 中的 {@code android:name} 属性指定要在布局中实例化的 {@link
+android.app.Fragment} 类。</p>
+
+<p>当系统创建此 Activity 布局时，会实例化在布局中指定的每个片段，并为每个片段调用
+{@link android.app.Fragment#onCreateView onCreateView()}
+方法，以检索每个片段的布局。系统会直接插入片段返回的 {@link android.view.View} 来替代
+{@code &lt;fragment&gt;} 元素。</p>
+
+<div class="note">
+  <p><strong>注：</strong>每个片段都需要一个唯一的标识符，重启 Activity 时，系统可以使用该标识符来恢复片段（您也可以使用该标识符来捕获片段以执行某些事务，如将其删除）。
+
+可以通过三种方式为片段提供
+ID：</p>
+  <ul>
+    <li>为 {@code android:id} 属性提供唯一 ID</li>
+    <li>为 {@code android:tag} 属性提供唯一字符串</li>
+    <li>如果您未给以上两个属性提供值，系统会使用容器视图的 ID
+</li>
+  </ul>
+</div>
+  </li>
+
+  <li><b>或者通过编程方式将片段添加到某个现有 {@link android.view.ViewGroup}</b>
+<p>您可以在 Activity 运行期间随时将片段添加到 Activity 布局中。您只需指定要将片段放入哪个
+{@link
+android.view.ViewGroup}。</p>
+  <p>要想在您的 Activity 中执行片段事务（如添加、删除或替换片段），您必须使用
+{@link android.app.FragmentTransaction} 中的 API。您可以像下面这样从
+{@link android.app.Activity} 获取一个 {@link android.app.FragmentTransaction} 实例：</p>
+
+<pre>
+FragmentManager fragmentManager = {@link android.app.Activity#getFragmentManager()}
+FragmentTransaction fragmentTransaction = fragmentManager.{@link android.app.FragmentManager#beginTransaction()};
+</pre>
+
+<p>然后，您可以使用 {@link
+android.app.FragmentTransaction#add(int,Fragment) add()}
+方法添加一个片段，指定要添加的片段以及将其插入哪个视图。例如：</p>
+
+<pre>
+ExampleFragment fragment = new ExampleFragment();
+fragmentTransaction.add(R.id.fragment_container, fragment);
+fragmentTransaction.commit();
+</pre>
+
+  <p>传递到 {@link android.app.FragmentTransaction#add(int,Fragment) add()}
+的第一个参数是 {@link android.view.ViewGroup}，即应该放置片段的位置，由资源
+ID 指定，第二个参数是要添加的片段。</p>
+  <p>一旦您通过
+{@link android.app.FragmentTransaction} 做出了更改，就必须调用
+{@link android.app.FragmentTransaction#commit} 以使更改生效。</p>
+  </li>
+</ul>
+
+
+<h4 id="AddingWithoutUI">添加没有 UI 的片段</h4>
+
+<p>上例展示了如何向您的 Activity 添加片段以提供
+UI。不过，您还可以使用片段为 Activity 提供后台行为，而不显示额外
+UI。</p>
+
+<p>要想添加没有 UI 的片段，请使用 {@link
+android.app.FragmentTransaction#add(Fragment,String)} 从 Activity 添加片段（为片段提供一个唯一的字符串“标记”，而不是视图
+ID）。这会添加片段，但由于它并不与 Activity 布局中的视图关联，因此不会收到对
+{@link
+android.app.Fragment#onCreateView onCreateView()} 的调用。因此，您不需要实现该方法。</p>
+
+<p>并非只能为非 UI 片段提供字符串标记&mdash;您也可以为具有 UI
+的片段提供字符串标记&mdash;但如果片段没有
+UI，则字符串标记将是标识它的唯一方式。如果您想稍后从 Activity 中获取片段，则需要使用
+{@link android.app.FragmentManager#findFragmentByTag
+findFragmentByTag()}。</p>
+
+<p>如需查看将没有 UI 的片段用作后台工作线程的示例 Activity，请参阅 {@code
+FragmentRetainInstance.java} 示例，该示例包括在 SDK 示例（通过
+Android SDK 管理器提供）中，以 
+<code>&lt;sdk_root&gt;/APIDemos/app/src/main/java/com/example/android/apis/app/FragmentRetainInstance.java</code> 形式位于您的系统中。</p>
+
+
+
+<h2 id="Managing">管理片段</h2>
+
+<p>要想管理您的 Activity 中的片段，您需要使用 {@link android.app.FragmentManager}。要想获取它，请从您的 Activity 调用
+{@link android.app.Activity#getFragmentManager()}。</p>
+
+<p>您可以使用 {@link android.app.FragmentManager} 执行的操作包括：</p>
+
+<ul>
+  <li>通过 {@link
+android.app.FragmentManager#findFragmentById findFragmentById()}（对于在 Activity 布局中提供 UI
+的片段）或 {@link android.app.FragmentManager#findFragmentByTag
+findFragmentByTag()}（对于提供或不提供 UI 的片段）获取 Activity 中存在的片段</li> 
+  <li>通过 {@link
+android.app.FragmentManager#popBackStack()}（模拟用户发出的 <em>Back</em> 命令）将片段从返回栈中弹出</li>
+  <li>通过 {@link
+android.app.FragmentManager#addOnBackStackChangedListener addOnBackStackChangedListener()} 注册一个侦听返回栈变化的侦听器</li>
+</ul>
+
+<p>如需了解有关这些方法以及其他方法的详细信息，请参阅 {@link
+android.app.FragmentManager} 类文档。</p>
+
+<p>如上文所示，您也可以使用 {@link android.app.FragmentManager}
+打开一个
+{@link android.app.FragmentTransaction}，通过它来执行某些事务，如添加和删除片段。</p>
+
+
+<h2 id="Transactions">执行片段事务</h2>
+
+<p>在 Activity 中使用片段的一大优点是，可以根据用户行为通过它们执行添加、删除、替换以及其他操作。
+您提交给 Activity 的每组更改都称为事务，您可以使用
+{@link
+android.app.FragmentTransaction} 中的 API 来执行一项事务。您也可以将每个事务保存到由 Activity 管理的返回栈内，从而让用户能够回退片段更改（类似于回退 Activity）。
+
+</p>
+
+<p>您可以像下面这样从 {@link
+android.app.FragmentManager} 获取一个 {@link android.app.FragmentTransaction} 实例：</p>
+
+<pre>
+FragmentManager fragmentManager = {@link android.app.Activity#getFragmentManager()};
+FragmentTransaction fragmentTransaction = fragmentManager.{@link android.app.FragmentManager#beginTransaction()};
+</pre>
+
+<p>每个事务都是您想要同时执行的一组更改。您可以使用
+{@link
+android.app.FragmentTransaction#add add()}、{@link android.app.FragmentTransaction#remove remove()} 和 {@link android.app.FragmentTransaction#replace replace()}
+等方法为给定事务设置您想要执行的所有更改。然后，要想将事务应用到 Activity，您必须调用
+{@link android.app.FragmentTransaction#commit()}。</p>
+</dl>
+
+<p>不过，在您调用 {@link
+android.app.FragmentTransaction#commit()} 之前，您可能想调用 {@link
+android.app.FragmentTransaction#addToBackStack addToBackStack()}，以将事务添加到片段事务返回栈。
+该返回栈由 Activity 管理，允许用户通过按“返回”
+<em></em> 按钮返回上一片段状态。</p>
+
+<p>例如，以下示例说明了如何将一个片段替换成另一个片段，以及如何在返回栈中保留先前状态：
+</p>
+
+<pre>
+// Create new fragment and transaction
+Fragment newFragment = new ExampleFragment();
+FragmentTransaction transaction = getFragmentManager().beginTransaction();
+
+// Replace whatever is in the fragment_container view with this fragment,
+// and add the transaction to the back stack
+transaction.replace(R.id.fragment_container, newFragment);
+transaction.addToBackStack(null);
+
+// Commit the transaction
+transaction.commit();
+</pre>
+
+<p>在上例中，{@code newFragment}
+会替换目前在 {@code R.id.fragment_container} ID 所标识的布局容器中的任何片段（如有）。通过调用 {@link
+android.app.FragmentTransaction#addToBackStack addToBackStack()}
+可将替换事务保存到返回栈，以便用户能够通过按“返回”
+<em></em>按钮撤消事务并回退到上一片段。</p>
+
+<p>如果您向事务添加了多个更改（如又一个 {@link
+android.app.FragmentTransaction#add add()} 或 {@link android.app.FragmentTransaction#remove
+remove()}），并且调用了 {@link
+android.app.FragmentTransaction#addToBackStack addToBackStack()}，则在调用
+{@link android.app.FragmentTransaction#commit commit()} 前应用的所有更改都将作为单一事务添加到返回栈，并且“返回”
+<em></em>按钮会将它们一并撤消。</p>
+
+<p>向 {@link android.app.FragmentTransaction}
+添加更改的顺序无关紧要，不过：</p>
+<ul>
+  <li>您必须最后调用 {@link android.app.FragmentTransaction#commit()}</li>
+  <li>如果您要向同一容器添加多个片段，则您添加片段的顺序将决定它们在视图层次结构中的出现顺序
+</li>
+</ul>
+
+<p>如果您没有在执行删除片段的事务时调用 {@link android.app.FragmentTransaction#addToBackStack(String)
+addToBackStack()}，则事务提交时该片段会被销毁，用户将无法回退到该片段。
+不过，如果您在删除片段时调用了
+{@link android.app.FragmentTransaction#addToBackStack(String) addToBackStack()}，则系统会<em>停止</em>该片段，并在用户回退时将其恢复。
+
+</p>
+
+<p class="note"><strong>提示</strong>：对于每个片段事务，您都可以通过在提交前调用
+{@link android.app.FragmentTransaction#setTransition setTransition()}
+来应用过渡动画。</p>
+
+<p>调用 {@link android.app.FragmentTransaction#commit()}
+不会立即执行事务，而是在 Activity 的 UI
+线程（“主”线程）可以执行该操作时再安排其在线程上运行。不过，如有必要，您也可以从 UI 线程调用 {@link
+android.app.FragmentManager#executePendingTransactions()} 以立即执行
+{@link android.app.FragmentTransaction#commit()} 提交的事务。通常不必这样做，除非其他线程中的作业依赖该事务。
+</p>
+
+<p class="caution"><strong>注意：</strong>您只能在 Activity<a href="{@docRoot}guide/components/activities.html#SavingActivityState">保存其状态</a>（用户离开 Activity）之前使用 {@link
+android.app.FragmentTransaction#commit commit()}
+提交事务。如果您试图在该时间点后提交，则会引发异常。
+这是因为如需恢复 Activity，则提交后的状态可能会丢失。
+对于丢失提交无关紧要的情况，请使用 {@link
+android.app.FragmentTransaction#commitAllowingStateLoss()}。</p>
+
+
+
+
+<h2 id="CommunicatingWithActivity">与 Activity 通信</h2>
+
+<p>尽管 {@link android.app.Fragment} 是作为独立于
+{@link android.app.Activity}
+的对象实现，并且可在多个 Activity 内使用，但片段的给定实例会直接绑定到包含它的 Activity。</p>
+
+<p>具体地说，片段可以通过 {@link
+android.app.Fragment#getActivity()}
+访问 {@link android.app.Activity} 实例，并轻松地执行在 Activity 布局中查找视图等任务。</p>
+
+<pre>
+View listView = {@link android.app.Fragment#getActivity()}.{@link android.app.Activity#findViewById findViewById}(R.id.list);
+</pre>
+
+<p>同样地，您的 Activity 也可以使用
+{@link
+android.app.FragmentManager#findFragmentById findFragmentById()} 或 {@link
+android.app.FragmentManager#findFragmentByTag findFragmentByTag()}，通过从 {@link android.app.FragmentManager} 获取对 {@link android.app.Fragment} 的引用来调用片段中的方法。例如：</p>
+
+<pre>
+ExampleFragment fragment = (ExampleFragment) getFragmentManager().findFragmentById(R.id.example_fragment);
+</pre>
+
+
+<h3 id="EventCallbacks">创建对 Activity 的事件回调</h3>
+
+<p>在某些情况下，您可能需要通过片段与 Activity 共享事件。执行此操作的一个好方法是，在片段内定义一个回调接口，并要求宿主 Activity 实现它。
+
+当 Activity 通过该接口收到回调时，可以根据需要与布局中的其他片段共享这些信息。
+</p>
+
+<p>例如，如果一个新闻应用的 Activity 有两个片段 &mdash;一个用于显示文章列表（片段 A），另一个用于显示文章（片段 B）&mdash;，那么片段 A必须在列表项被选定后告知 Activity，以便它告知片段 B 显示该文章。
+
+在本例中，{@code OnArticleSelectedListener}
+接口在片段 A 内声明：</p>
+
+<pre>
+public static class FragmentA extends ListFragment {
+    ...
+    // Container Activity must implement this interface
+    public interface OnArticleSelectedListener {
+        public void onArticleSelected(Uri articleUri);
+    }
+    ...
+}
+</pre>
+
+<p>然后，该片段的宿主 Activity 会实现
+{@code OnArticleSelectedListener}
+接口并替代 {@code onArticleSelected()}，将来自片段 A
+的事件通知片段 B。为确保宿主 Activity 实现此界面，片段 A 的 {@link
+android.app.Fragment#onAttach onAttach()}
+回调方法（系统在向 Activity 添加片段时调用的方法）会通过转换传递到
+{@link android.app.Fragment#onAttach
+onAttach()} 中的 {@link android.app.Activity} 来实例化 {@code OnArticleSelectedListener} 的实例：</p>
+
+<pre>
+public static class FragmentA extends ListFragment {
+    OnArticleSelectedListener mListener;
+    ...
+    &#64;Override
+    public void onAttach(Activity activity) {
+        super.onAttach(activity);
+        try {
+            mListener = (OnArticleSelectedListener) activity;
+        } catch (ClassCastException e) {
+            throw new ClassCastException(activity.toString() + " must implement OnArticleSelectedListener");
+        }
+    }
+    ...
+}
+</pre>
+
+<p>如果 Activity 未实现界面，则片段会引发
+{@link java.lang.ClassCastException}。实现时，{@code mListener}
+成员会保留对 Activity 的 {@code OnArticleSelectedListener} 实现的引用，以便片段 A 可以通过调用
+{@code OnArticleSelectedListener}
+界面定义的方法与 Activity 共享事件。例如，如果片段 A 是
+{@link android.app.ListFragment}
+的一个扩展，则用户每次点击列表项时，系统都会调用片段中的 {@link android.app.ListFragment#onListItemClick
+onListItemClick()}，然后该方法会调用 {@code onArticleSelected()}
+以与 Activity 共享事件：</p>
+
+<pre>
+public static class FragmentA extends ListFragment {
+    OnArticleSelectedListener mListener;
+    ...
+    &#64;Override
+    public void onListItemClick(ListView l, View v, int position, long id) {
+        // Append the clicked item's row ID with the content provider Uri
+        Uri noteUri = ContentUris.{@link android.content.ContentUris#withAppendedId withAppendedId}(ArticleColumns.CONTENT_URI, id);
+        // Send the event and Uri to the host activity
+        mListener.onArticleSelected(noteUri);
+    }
+    ...
+}
+</pre>
+
+<p>传递到 {@link
+android.app.ListFragment#onListItemClick onListItemClick()} 的 {@code id} 参数是被点击项的行
+ID，即 Activity（或其他片段）用来从应用的 {@link
+android.content.ContentProvider} 获取文章的 ID。</p>
+
+<p><!--To see a complete implementation of this kind of callback interface, see the <a
+href="{@docRoot}resources/samples/NotePad/index.html">NotePad sample</a>. --><a href="{@docRoot}guide/topics/providers/content-providers.html">内容提供程序</a>文档中提供了有关内容提供程序用法的更多详情。
+</p>
+
+
+
+<h3 id="ActionBar">向操作栏添加项目</h3>
+
+<p>您的片段可以通过实现
+{@link android.app.Fragment#onCreateOptionsMenu(Menu,MenuInflater) onCreateOptionsMenu()} 向 Activity 的<a href="{@docRoot}guide/topics/ui/menus.html#options-menu">选项菜单</a>（并因此向<a href="{@docRoot}guide/topics/ui/actionbar.html">操作栏</a>）贡献菜单项。不过，为了使此方法能够收到调用，您必须在
+{@link
+android.app.Fragment#onCreate(Bundle) onCreate()} 期间调用 {@link
+android.app.Fragment#setHasOptionsMenu(boolean) setHasOptionsMenu()}，以指示片段想要向选项菜单添加菜单项（否则，片段将不会收到对
+{@link android.app.Fragment#onCreateOptionsMenu onCreateOptionsMenu()}
+的调用）。</p>
+
+<p>您之后从片段添加到选项菜单的任何菜单项都将追加到现有菜单项之后。
+选定菜单项时，片段还会收到对 {@link
+android.app.Fragment#onOptionsItemSelected(MenuItem) onOptionsItemSelected()}
+的回调。</p>
+
+<p>您还可以通过调用 {@link
+android.app.Fragment#registerForContextMenu(View) registerForContextMenu()}，在片段布局中注册一个视图来提供上下文菜单。用户打开上下文菜单时，片段会收到对
+{@link
+android.app.Fragment#onCreateContextMenu(ContextMenu,View,ContextMenu.ContextMenuInfo)
+onCreateContextMenu()} 的调用。当用户选择某个菜单项时，片段会收到对 {@link
+android.app.Fragment#onContextItemSelected(MenuItem) onContextItemSelected()} 的调用。</p>
+
+<p class="note"><strong>注：</strong>尽管您的片段会收到与其添加的每个菜单项对应的菜单项选定回调，但当用户选择菜单项时，Activity 会首先收到相应的回调。
+
+如果 Activity 对菜单项选定回调的实现不会处理选定的菜单项，则系统会将事件传递到片段的回调。
+这适用于选项菜单和上下文菜单。
+</p>
+
+<p>如需了解有关菜单的详细信息，请参阅<a href="{@docRoot}guide/topics/ui/menus.html">菜单</a>和<a href="{@docRoot}guide/topics/ui/actionbar.html">操作栏</a>开发者指南。</p>
+
+
+
+
+<h2 id="Lifecycle">处理片段生命周期</h2>
+
+<div class="figure" style="width:350px">
+<img src="{@docRoot}images/activity_fragment_lifecycle.png" alt="" />
+<p class="img-caption"><strong>图 3. </strong>Activity 生命周期对片段生命周期的影响。
+</p>
+</div>
+
+<p>管理片段生命周期与管理 Activity 生命周期很相似。和 Activity 一样，片段也以三种状态存在：
+</p>
+
+<dl>
+  <dt><i>恢复</i></dt>
+    <dd>片段在运行中的 Activity 中可见。</dd>
+
+  <dt><i>暂停</i></dt>
+    <dd>另一个 Activity 位于前台并具有焦点，但此片段所在的 Activity 仍然可见（前台 Activity 部分透明，或未覆盖整个屏幕）。
+
+</dd>
+
+  <dt><i>停止</i></dt>
+    <dd>片段不可见。宿主 Activity 已停止，或片段已从 Activity 中删除，但已添加到返回栈。
+停止片段仍然处于活动状态（系统会保留所有状态和成员信息）。
+不过，它对用户不再可见，如果 Activity 被终止，它也会被终止。
+</dd>
+</dl>
+
+<p>同样与 Activity 一样，假使 Activity 的进程被终止，而您需要在重建 Activity 时恢复片段状态，您也可以使用 {@link
+android.os.Bundle}
+保留片段的状态。您可以在片段的 {@link
+android.app.Fragment#onSaveInstanceState onSaveInstanceState()} 回调期间保存状态，并可在
+{@link android.app.Fragment#onCreate onCreate()}、{@link
+android.app.Fragment#onCreateView onCreateView()} 或 {@link
+android.app.Fragment#onActivityCreated onActivityCreated()} 期间恢复状态。如需了解有关保存状态的详细信息，请参阅<a href="{@docRoot}guide/components/activities.html#SavingActivityState">Activity</a>文档。
+
+</p>
+
+<p>Activity 生命周期与片段生命周期之间的最显著差异在于它们在其各自返回栈中的存储方式。
+默认情况下，Activity 停止时会被放入由系统管理的 Activity 返回栈（以便用户通过“返回”
+<em></em>
+按钮回退到Activity，<a href="{@docRoot}guide/components/tasks-and-back-stack.html">任务和返回栈</a>对此做了阐述）。不过，仅当您在删除片段的事务执行期间通过调用
+{@link
+android.app.FragmentTransaction#addToBackStack(String) addToBackStack()}
+显式请求保存实例时，系统才会将片段放入由宿主 Activity 管理的返回栈。
+</p>
+
+<p>在其他方面，管理片段生命周期与管理 Activity 生命周期非常相似。
+因此，<a href="{@docRoot}guide/components/activities.html#Lifecycle">管理 Activity 生命周期</a>的做法同样适用于片段。
+但您还需要了解 Activity 的生命周期对片段生命周期的影响。
+</p>
+
+<p class="caution"><strong>注意：</strong>如需 {@link android.app.Fragment}
+内的某个 {@link android.content.Context}
+对象，可以调用 {@link android.app.Fragment#getActivity()}。但要注意，请仅在片段附加到 Activity 时调用
+{@link android.app.Fragment#getActivity()}。如果片段尚未附加，或在其生命周期结束期间分离，则
+{@link android.app.Fragment#getActivity()} 将返回 null。</p>
+
+
+<h3 id="CoordinatingWithActivity">与 Activity 生命周期协调一致</h3>
+
+<p>片段所在的 Activity 的生命周期会影响片段的生命周期，其表现为，Activity 的每次生命周期回调都会引发每个片段的类似回调。
+
+例如，当 Activity 收到 {@link android.app.Activity#onPause} 时，Activity 中的每个片段也会收到
+{@link android.app.Fragment#onPause}。</p>
+
+<p>不过，片段还有几个额外的生命周期回调，用于处理与 Activity 的唯一交互，以执行构建和销毁片段 UI 等操作。这些额外的回调方法是：
+
+</p>
+
+<dl>
+  <dt>{@link android.app.Fragment#onAttach onAttach()}</dt>
+    <dd>在片段已与 Activity 关联时调用（{@link
+android.app.Activity} 传递到此方法内）。</dd>
+  <dt>{@link android.app.Fragment#onCreateView onCreateView()}</dt>
+    <dd>调用它可创建与片段关联的视图层次结构。</dd>
+  <dt>{@link android.app.Fragment#onActivityCreated onActivityCreated()}</dt>
+    <dd>在 Activity 的 {@link android.app.Activity#onCreate
+onCreate()} 方法已返回时调用。</dd>
+  <dt>{@link android.app.Fragment#onDestroyView onDestroyView()}</dt>
+    <dd>在删除与片段关联的视图层次结构时调用。</dd>
+  <dt>{@link android.app.Fragment#onDetach onDetach()}</dt>
+    <dd>在取消片段与 Activity 的关联时调用。</dd>
+</dl>
+
+<p>图 3
+图示说明了受其宿主 Activity 影响的片段生命周期流。在该图中，您可以看到 Activity 的每个连续状态如何决定片段可以收到的回调方法。
+例如，当 Activity 收到其 {@link
+android.app.Activity#onCreate onCreate()} 回调时，Activity 中的片段只会收到
+{@link android.app.Fragment#onActivityCreated onActivityCreated()} 回调。</p>
+
+<p>一旦 Activity 达到恢复状态，您就可以意向 Activity 添加片段和删除其中的片段。
+因此，只有当 Activity 处于恢复状态时，片段的生命周期才能独立变化。
+</p>
+
+<p>不过，当 Activity 离开恢复状态时，片段会在 Activity 的推动下再次经历其生命周期。
+</p>
+
+
+
+
+<h2 id="Example">示例</h2>
+
+<p>为了将本文阐述的所有内容融会贯通，以下提供了一个示例，其中的 Activity 使用两个片段来创建一个双窗格布局。
+下面的 Activity 包括两个片段：一个用于显示莎士比亚戏剧标题列表，另一个用于从列表中选定戏剧时显示其摘要。
+
+此外，它还展示了如何根据屏幕配置提供不同的片段配置。
+</p>
+
+<p class="note"><strong>注：</strong><a href="{@docRoot}resources/samples/ApiDemos/src/com/example/android/apis/app/FragmentLayout.html">{@code
+FragmentLayout.java}</a>
+中提供了此 Activity 的完整源代码。</p>
+
+<p>主 Activity 会在 {@link
+android.app.Activity#onCreate onCreate()} 期间以常规方式应用布局：</p>
+
+{@sample development/samples/ApiDemos/src/com/example/android/apis/app/FragmentLayout.java main}
+
+<p>应用的布局为 {@code fragment_layout.xml}：</p>
+
+{@sample development/samples/ApiDemos/res/layout-land/fragment_layout.xml layout}
+
+<p>通过使用此布局，系统可在 Activity 加载布局时立即实例化
+{@code TitlesFragment}（列出戏剧标题），而
+{@link android.widget.FrameLayout}（用于显示戏剧摘要的片段所在位置）则会占用屏幕右侧的空间，但最初处于空白状态。
+正如您将在下文所见的那样，用户从列表中选择某个项目后，系统才会将片段放入
+{@link android.widget.FrameLayout}。</p>
+
+<p>不过，并非所有屏幕配置都具有足够的宽度，可以并排显示戏剧列表和摘要。
+因此，以上布局仅用于横向屏幕配置（布局保存在
+{@code res/layout-land/fragment_layout.xml}）。</p>
+
+<p>因此，当屏幕纵向显示时，系统会应用以下布局（保存在
+{@code res/layout/fragment_layout.xml}）：</p>
+
+{@sample development/samples/ApiDemos/res/layout/fragment_layout.xml layout}
+
+<p>此布局仅包括 {@code TitlesFragment}。这意味着，当设备纵向显示时，只有戏剧标题列表可见。
+因此，当用户在此配置中点击某个列表项时，应用会启动一个新 Activity 来显示摘要，而不是加载另一个片段。
+
+</p>
+
+<p>接下来，您可以看到如何在片段类中实现此目的。第一个片段是 {@code
+TitlesFragment}，它显示莎士比亚戏剧标题列表。该片段扩展了 {@link
+android.app.ListFragment}，并依靠它来处理大多数列表视图工作。</p>
+
+<p>当您检查此代码时，请注意，用户点击列表项时可能会出现两种行为：系统可能会创建并显示一个新片段，从而在同一活动中显示详细信息（将片段添加到
+{@link
+android.widget.FrameLayout}），也可能会启动一个新活动（在该活动中可显示片段），具体取决于这两个布局中哪一个处于活动状态。
+</p>
+
+{@sample development/samples/ApiDemos/src/com/example/android/apis/app/FragmentLayout.java titles}
+
+<p>第二个片段 {@code DetailsFragment} 显示从
+{@code TitlesFragment} 的列表中选择的项目的戏剧摘要：</p>
+ 
+{@sample development/samples/ApiDemos/src/com/example/android/apis/app/FragmentLayout.java details}
+
+<p>从 {@code TitlesFragment} 类中重新调用，如果用户点击某个列表项，且当前布局“根本不”<em></em>包括 {@code R.id.details}
+视图（即
+{@code DetailsFragment} 所属视图），则应用会启动 {@code DetailsActivity}
+Activity 以显示该项目的内容。</p>
+
+<p>以下是 {@code DetailsActivity}，它简单地嵌入了
+{@code DetailsFragment}，以在屏幕为纵向时显示所选的戏剧摘要：</p>
+
+{@sample development/samples/ApiDemos/src/com/example/android/apis/app/FragmentLayout.java
+details_activity}
+ 
+<p>请注意，如果配置为横向，则此 Activity 会自行完成，以便主 Activity 可以接管并沿 {@code TitlesFragment}
+显示
+{@code DetailsFragment}。如果用户在纵向显示时启动
+{@code DetailsActivity}，但随后旋转为横向（这会重启当前 Activity），就可能出现这种情况。</p>
+
+
+<p>如需查看使用片段的更多示例（以及本示例的完整源文件），请参阅
+<a href="{@docRoot}resources/samples/ApiDemos/src/com/example/android/apis/app/index.html#Fragment">
+ApiDemos</a>（可从<a href="{@docRoot}resources/samples/get.html">示例 SDK 组件</a>下载）中提供的 API Demos 示例应用。</p>
+
+

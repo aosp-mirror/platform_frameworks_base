@@ -1,0 +1,658 @@
+page.title=Dịch vụ Gắn kết
+parent.title=Dịch vụ
+parent.link=services.html
+@jd:body
+
+
+<div id="qv-wrapper">
+<ol id="qv">
+<h2>Trong tài liệu này</h2>
+<ol>
+  <li><a href="#Basics">Nội dung Cơ bản</a></li>
+  <li><a href="#Creating">Tạo một Dịch vụ Gắn kết</a>
+    <ol>
+      <li><a href="#Binder">Mở rộng lớp Trình gắn kết</a></li>
+      <li><a href="#Messenger">Sử dụng một Hàm nhắn tin</a></li>
+    </ol>
+  </li>
+  <li><a href="#Binding">Gắn kết với một Dịch vụ</a></li>
+  <li><a href="#Lifecycle">Quản lý Vòng đời của một Dịch vụ Gắn kết</a></li>
+</ol>
+
+<h2>Lớp khóa</h2>
+<ol>
+  <li>{@link android.app.Service}</li>
+  <li>{@link android.content.ServiceConnection}</li>
+  <li>{@link android.os.IBinder}</li>
+</ol>
+
+<h2>Mẫu</h2>
+<ol>
+  <li><a href="{@docRoot}resources/samples/ApiDemos/src/com/example/android/apis/app/RemoteService.html">{@code
+      RemoteService}</a></li>
+  <li><a href="{@docRoot}resources/samples/ApiDemos/src/com/example/android/apis/app/LocalService.html">{@code
+      LocalService}</a></li>
+</ol>
+
+<h2>Xem thêm</h2>
+<ol>
+  <li><a href="{@docRoot}guide/components/services.html">Dịch vụ</a></li>
+</ol>
+</div>
+
+
+<p>Dịch vụ gắn kết là máy chủ trong một giao diện máy khách-máy chủ. Dịch vụ gắn kết cho phép các thành phần
+(chẳng hạn như các hoạt động) gắn kết với dịch vụ, gửi yêu cầu, nhận phản hồi, và thậm chí thực hiện
+truyền thông liên tiến trình (IPC). Dịch vụ gắn kết thường chỉ hoạt động khi nó phục vụ một thành phần
+ứng dụng khác và không chạy ngầm mãi liên tục.</p>
+
+<p>Tài liệu này cho bạn biết cách tạo một dịch vụ gắn kết, bao gồm cách gắn kết
+với dịch vụ từ các thành phần ứng dụng khác. Tuy nhiên, bạn cũng nên tham khảo tài liệu <a href="{@docRoot}guide/components/services.html">Dịch vụ</a> để biết thêm thông tin
+về các dịch vụ nói chung, chẳng hạn như cách gửi thông báo từ một dịch vụ, đặt
+dịch vụ để chạy trong tiền cảnh, và nhiều nội dung khác.</p>
+
+
+<h2 id="Basics">Nội dung Cơ bản</h2>
+
+<p>Dịch vụ gắn kết là một sự triển khai lớp {@link android.app.Service} cho phép
+các ứng dụng khác gắn kết và tương tác với nó. Để thực hiện gắn kết cho một
+dịch vụ, bạn phải triển khai phương pháp gọi lại {@link android.app.Service#onBind onBind()}. Phương pháp này
+trả về một đối tượng {@link android.os.IBinder} định nghĩa giao diện lập trình mà
+các máy khách có thể sử dụng để tương tác với dịch vụ.</p>
+
+<div class="sidebox-wrapper">
+<div class="sidebox">
+  <h3>Gắn kết với một Dịch vụ được Bắt đầu</h3>
+
+<p>Như đã đề cập trong tài liệu <a href="{@docRoot}guide/components/services.html">Dịch vụ</a>
+, bạn có thể tạo một dịch vụ được bắt đầu và gắn kết. Cụ thể, dịch vụ có thể được
+bắt đầu bằng cách gọi {@link android.content.Context#startService startService()}, nó cho phép dịch vụ
+chạy mãi, và cũng cho phép một máy khách gắn kết với dịch vụ bằng cách gọi {@link
+android.content.Context#bindService bindService()}.
+  <p>Nếu bạn có cho phép dịch vụ của mình được bắt đầu và gắn kết, thì khi dịch vụ đã được
+bắt đầu, hệ thống sẽ <em>không</em> hủy dịch vụ đó khi tất cả máy khách bỏ gắn kết. Thay vào đó, bạn phải
+dừng dịch vụ một cách rõ ràng bằng cách gọi {@link android.app.Service#stopSelf stopSelf()} hoặc {@link
+android.content.Context#stopService stopService()}.</p>
+
+<p>Mặc dù bạn nên thường xuyên triển khai hoặc {@link android.app.Service#onBind onBind()}
+<em>hoặc</em> {@link android.app.Service#onStartCommand onStartCommand()}, đôi khi cần phải
+triển khai cả hai. Ví dụ, một trình chơi nhạc có thể cho rằng nên cho phép dịch vụ của nó chạy
+mãi và cũng thực hiện gắn kết. Bằng cách này, một hoạt động có thể bắt đầu dịch vụ để chơi vài
+bản nhạc và nhạc tiếp tục chơi ngay cả khi người dùng rời khỏi ứng dụng. Lúc đó, khi người dùng
+trở lại ứng dụng, hoạt động có thể gắn kết với dịch vụ để giành lại quyền kiểm soát phát lại.</p>
+
+<p>Đảm bảo đọc phần về <a href="#Lifecycle">Quản lý Vòng đời của một Dịch vụ
+Gắn kết</a> để biết thêm thông tin về vòng đời của dịch vụ khi thêm gắn kết vào một
+dịch vụ được bắt đầu.</p>
+</div>
+</div>
+
+<p>Một máy khách có thể gắn kết với dịch vụ bằng cách gọi {@link android.content.Context#bindService
+bindService()}. Khi làm vậy, nó phải cung cấp việc triển khai {@link
+android.content.ServiceConnection}, có chức năng theo dõi kết nối với dịch vụ. Phương pháp {@link
+android.content.Context#bindService bindService()} trả về ngay lập tức mà không có giá trị, nhưng
+khi hệ thống Android tạo kết nối giữa
+máy khách và dịch vụ, nó gọi {@link
+android.content.ServiceConnection#onServiceConnected onServiceConnected()} trên {@link
+android.content.ServiceConnection}, để giao {@link android.os.IBinder} mà
+máy khách có thể sử dụng để giao tiếp với dịch vụ.</p>
+
+<p>Nhiều máy khách có thể kết nối với dịch vụ đồng thời. Tuy nhiên, hệ thống sẽ gọi phương pháp
+{@link android.app.Service#onBind onBind()} của dịch vụ của bạn để truy xuất {@link android.os.IBinder} chỉ
+khi máy khách đầu tiên gắn kết. Sau đó, hệ thống sẽ giao cùng một {@link android.os.IBinder} đó cho bất kỳ
+máy khách bổ sung nào có gắn kết mà không gọi lại {@link android.app.Service#onBind onBind()}.</p>
+
+<p>Khi máy khách cuối cùng bỏ gắn kết với dịch vụ, hệ thống sẽ hủy dịch vụ (trừ khi dịch vụ
+cũng được bắt đầu bởi {@link android.content.Context#startService startService()}).</p>
+
+<p>Khi bạn triển khai dịch vụ gắn kết của mình, phần quan trọng nhất là định nghĩa giao diện
+mà phương pháp gọi lại {@link android.app.Service#onBind onBind()} của bạn sẽ trả về. Có một vài
+cách khác nhau mà bạn có thể định nghĩa giao diện {@link android.os.IBinder} của dịch vụ của mình và phần
+sau đây sẽ bàn về từng kỹ thuật.</p>
+
+
+
+<h2 id="Creating">Tạo một Dịch vụ Gắn kết</h2>
+
+<p>Khi tạo một dịch vụ thực hiện gắn kết, bạn phải nêu một {@link android.os.IBinder}
+cung cấp giao diện lập trình mà các máy khách có thể sử dụng để tương tác với dịch vụ. Có
+ba cách bạn có thể định nghĩa giao diện:</p>
+
+<dl>
+  <dt><a href="#Binder">Mở rộng lớp Trình gắn kết</a></dt>
+  <dd>Nếu dịch vụ của bạn chỉ riêng cho ứng dụng của chính bạn và chạy trong cùng tiến trình như máy khách
+(điều này thường hay gặp), bạn nên tạo giao diện của mình bằng cách mở rộng lớp {@link android.os.Binder}
+và trả về một thực thể của nó từ
+{@link android.app.Service#onBind onBind()}. Máy khách nhận được {@link android.os.Binder} và
+có thể sử dụng nó để trực tiếp truy cập các phương pháp công khai có sẵn trong triển khai {@link android.os.Binder}
+hoặc thậm chí trong {@link android.app.Service}.
+  <p>Nên áp dụng kỹ thuật này khi dịch vụ của bạn chỉ là một trình thực hiện chạy ngầm cho ứng dụng
+của chính bạn. Lý do duy nhất bạn không nên tạo giao diện của mình bằng cách này đó là
+dịch vụ của bạn được sử dụng bởi các ứng dụng khác hoặc giữa những tiến trình khác nhau.</dd>
+
+  <dt><a href="#Messenger">Sử dụng một Hàm nhắn tin</a></dt>
+  <dd>Nếu bạn cần giao diện của mình thực hiện các tiến trình khác nhau, bạn có thể tạo
+một giao diện cho dịch vụ bằng {@link android.os.Messenger}. Bằng cách này, dịch vụ
+định nghĩa một {@link android.os.Handler} phản hồi các loại đối tượng {@link
+android.os.Message} khác nhau. {@link android.os.Handler}
+này là cơ sở cho một {@link android.os.Messenger} mà sau đó có thể chia sẻ một {@link android.os.IBinder}
+với máy khách, cho phép máy khách gửi lệnh tới dịch vụ bằng cách sử dụng các đối tượng {@link
+android.os.Message}. Ngoài ra, máy khách có thể định nghĩa {@link android.os.Messenger} của
+chính nó để dịch vụ có thể gửi lại thông báo.
+  <p>Đây là cách đơn giản nhất để thực hiện truyền thông liên tiến trình (IPC), vì {@link
+android.os.Messenger} xếp hàng tất cả yêu cầu thành một luồng duy nhất sao cho bạn không phải thiết kế
+dịch vụ của mình an toàn với luồng.</p>
+  </dd>
+
+  <dt>Sử dụng AIDL</dt>
+  <dd>AIDL (Ngôn ngữ Định nghĩa Giao diện Android) thực hiện tất cả công việc để phân tách đối tượng thành
+các phần tử mà hệ điều hành có thể hiểu được và ghép nối chúng qua các tiến trình để thực hiện
+IPC. Bằng cách sử dụng {@link android.os.Messenger}, kỹ thuật trước đó thực tế được dựa trên AIDL như là
+cấu trúc cơ bản của nó. Như đã đề cập bên trên, {@link android.os.Messenger} tạo một hàng chờ
+gồm tất cả yêu cầu của máy khách trong một luồng duy nhất, vì thế dịch vụ nhận được từng yêu cầu một. Tuy nhiên, nếu
+bạn muốn dịch vụ xử lý nhiều yêu cầu đồng thời, bạn có thể sử dụng AIDL
+trực tiếp. Trong trường hợp này, dịch vụ của bạn phải có khả năng tạo đa luồng và được xây dựng an toàn với luồng.
+  <p>Để sử dụng AIDL trực tiếp, bạn phải
+tạo một tệp {@code .aidl} định nghĩa giao diện lập trình. Các công cụ SDK Android sử dụng tệp
+này để khởi tạo một lớp tóm tắt (abstract class) nhằm triển khai giao diện và xử lý IPC, mà sau đó
+bạn có thể mở rộng trong dịch vụ của mình.</p>
+  </dd>
+</dl>
+
+  <p class="note"><strong>Lưu ý:</strong> Hầu hết ứng dụng <strong>không nên</strong> sử dụng AIDL để
+tạo một dịch vụ gắn kết, vì nó có thể yêu cầu khả năng tạo đa luồng và
+có thể dẫn đến việc triển khai phức tạp hơn. Như vậy, AIDL không phù hợp với hầu hết ứng dụng
+và tài liệu này không bàn về cách sử dụng nó cho dịch vụ của bạn. Nếu bạn chắc chắn rằng mình cần
+sử dụng AIDL trực tiếp, hãy xem tài liệu <a href="{@docRoot}guide/components/aidl.html">AIDL</a>
+.</p>
+
+
+
+
+<h3 id="Binder">Mở rộng lớp Trình gắn kết</h3>
+
+<p>Nếu dịch vụ của bạn chỉ được sử dụng bởi ứng dụng cục bộ và không cần làm việc qua nhiều tiến trình,
+khi đó bạn có thể triển khai lớp {@link android.os.Binder} của chính mình để cung cấp quyền truy cập
+trực tiếp cho máy khách của bạn để truy nhập các phương pháp công khai trong dịch vụ.</p>
+
+<p class="note"><strong>Lưu ý:</strong> Cách này chỉ có tác dụng nếu máy khách và dịch vụ nằm trong cùng
+ứng dụng và tiến trình, là trường hợp phổ biến nhất. Ví dụ, cách này sẽ hoạt động tốt đối với một ứng dụng
+nhạc cần gắn kết một hoạt động với dịch vụ của chính nó đang phát nhạc
+chạy ngầm.</p>
+
+<p>Sau đây là cách thiết lập:</p>
+<ol>
+  <li>Trong dịch vụ của bạn, hãy tạo một thực thể {@link android.os.Binder} mà hoặc:
+    <ul>
+      <li>chứa các phương pháp công khai mà máy khách có thể gọi</li>
+      <li>trả về thực thể {@link android.app.Service} hiện tại, trong đó có các phương pháp công khai mà
+máy khách có thể gọi</li>
+      <li>hoặc, trả về một thực thể của một lớp khác được lưu trữ bởi dịch vụ bằng các phương pháp công khai mà
+máy khách có thể gọi</li>
+    </ul>
+  <li>Trả về thực thể {@link android.os.Binder} này từ phương pháp gọi lại {@link
+android.app.Service#onBind onBind()}.</li>
+  <li>Trong máy khách, nhận {@link android.os.Binder} từ phương pháp gọi lại {@link
+android.content.ServiceConnection#onServiceConnected onServiceConnected()} và
+thực hiện gọi tới dịch vụ gắn kết bằng cách sử dụng các phương pháp đã nêu.</li>
+</ol>
+
+<p class="note"><strong>Lưu ý:</strong> Lý do dịch vụ và máy khách phải ở trong cùng
+ứng dụng đó là máy khách có thể đổi kiểu đối tượng được trả về và gọi các API của nó một cách phù hợp. Dịch vụ
+và máy khách cũng phải ở trong cùng tiến trình, vì kỹ thuật này không thực hiện bất kỳ thao tác
+ghép nối qua các tiến trình nào.</p>
+
+<p>Ví dụ, sau đây là một dịch vụ cung cấp cho máy khách quyền truy cập các phương pháp trong dịch vụ thông qua
+việc triển khai {@link android.os.Binder}:</p>
+
+<pre>
+public class LocalService extends Service {
+    // Binder given to clients
+    private final IBinder mBinder = new LocalBinder();
+    // Random number generator
+    private final Random mGenerator = new Random();
+
+    /**
+     * Class used for the client Binder.  Because we know this service always
+     * runs in the same process as its clients, we don't need to deal with IPC.
+     */
+    public class LocalBinder extends Binder {
+        LocalService getService() {
+            // Return this instance of LocalService so clients can call public methods
+            return LocalService.this;
+        }
+    }
+
+    &#64;Override
+    public IBinder onBind(Intent intent) {
+        return mBinder;
+    }
+
+    /** method for clients */
+    public int getRandomNumber() {
+      return mGenerator.nextInt(100);
+    }
+}
+</pre>
+
+<p>{@code LocalBinder} cung cấp phương pháp {@code getService()} cho máy khách để truy xuất
+thực thể hiện tại của {@code LocalService}. Điều này cho phép máy khách gọi các phương pháp công khai trong
+dịch vụ. Ví dụ, máy khách có thể gọi {@code getRandomNumber()} từ dịch vụ.</p>
+
+<p>Sau đây là một hoạt động gắn kết với {@code LocalService} và sẽ gọi {@code getRandomNumber()}
+khi nhấp vào nút:</p>
+
+<pre>
+public class BindingActivity extends Activity {
+    LocalService mService;
+    boolean mBound = false;
+
+    &#64;Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.main);
+    }
+
+    &#64;Override
+    protected void onStart() {
+        super.onStart();
+        // Bind to LocalService
+        Intent intent = new Intent(this, LocalService.class);
+        bindService(intent, mConnection, Context.BIND_AUTO_CREATE);
+    }
+
+    &#64;Override
+    protected void onStop() {
+        super.onStop();
+        // Unbind from the service
+        if (mBound) {
+            unbindService(mConnection);
+            mBound = false;
+        }
+    }
+
+    /** Called when a button is clicked (the button in the layout file attaches to
+      * this method with the android:onClick attribute) */
+    public void onButtonClick(View v) {
+        if (mBound) {
+            // Call a method from the LocalService.
+            // However, if this call were something that might hang, then this request should
+            // occur in a separate thread to avoid slowing down the activity performance.
+            int num = mService.getRandomNumber();
+            Toast.makeText(this, "number: " + num, Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    /** Defines callbacks for service binding, passed to bindService() */
+    private ServiceConnection mConnection = new ServiceConnection() {
+
+        &#64;Override
+        public void onServiceConnected(ComponentName className,
+                IBinder service) {
+            // We've bound to LocalService, cast the IBinder and get LocalService instance
+            LocalBinder binder = (LocalBinder) service;
+            mService = binder.getService();
+            mBound = true;
+        }
+
+        &#64;Override
+        public void onServiceDisconnected(ComponentName arg0) {
+            mBound = false;
+        }
+    };
+}
+</pre>
+
+<p>Mẫu trên cho thấy cách mà máy khách gắn kết với dịch vụ bằng cách sử dụng triển khai
+{@link android.content.ServiceConnection} và gọi lại {@link
+android.content.ServiceConnection#onServiceConnected onServiceConnected()}. Phần tiếp theo
+cung cấp thêm thông tin về tiến trình gắn kết này với dịch vụ.</p>
+
+<p class="note"><strong>Lưu ý:</strong> Ví dụ trên không công khai bỏ gắn kết khỏi dịch vụ,
+nhưng tất cả máy khách cần bỏ gắn kết tại một thời điểm phù hợp (chẳng hạn như khi hoạt động tạm dừng).</p>
+
+<p>Để biết thêm mã ví dụ, hãy xem lớp <a href="{@docRoot}resources/samples/ApiDemos/src/com/example/android/apis/app/LocalService.html">{@code
+LocalService.java}</a> và lớp <a href="{@docRoot}resources/samples/ApiDemos/src/com/example/android/apis/app/LocalServiceActivities.html">{@code
+LocalServiceActivities.java}</a> trong <a href="{@docRoot}resources/samples/ApiDemos/index.html">ApiDemos</a>.</p>
+
+
+
+
+
+<h3 id="Messenger">Sử dụng một Hàm nhắn tin</h3>
+
+<div class="sidebox-wrapper">
+<div class="sidebox">
+  <h4>So sánh với AIDL</h4>
+  <p>Khi bạn cần thực hiện IPC, việc sử dụng một {@link android.os.Messenger} cho giao diện của bạn
+sẽ đơn giản hơn so với việc triển khai nó bằng AIDL, vì {@link android.os.Messenger} xếp hàng
+tất cả lệnh gọi đối với dịch vụ, trong khi đó, giao diện AIDL thuần túy sẽ gửi các yêu cầu đồng thời tới
+dịch vụ, sau đó dịch vụ phải xử lý tạo đa luồng.</p>
+  <p>Đối với hầu hết ứng dụng, dịch vụ không cần thực hiện tạo đa luồng, vì vậy sử dụng một {@link
+android.os.Messenger} sẽ cho phép dịch vụ xử lý từng lệnh gọi tại một thời điểm. Nếu quan trọng là
+dịch vụ của bạn phải được tạo đa luồng, khi đó bạn nên sử dụng <a href="{@docRoot}guide/components/aidl.html">AIDL</a> để định nghĩa giao diện của mình.</p>
+</div>
+</div>
+
+<p>Nếu bạn cần dịch vụ của mình giao tiếp với các tiến trình từ xa, khi đó bạn có thể sử dụng một
+{@link android.os.Messenger} để cung cấp giao diện cho dịch vụ của mình. Kỹ thuật này cho phép
+bạn thực hiện truyền thông liên tiến trình (IPC) mà không cần sử dụng AIDL.</p>
+
+<p>Sau đây là tóm tắt cách sử dụng {@link android.os.Messenger}:</p>
+
+<ul>
+  <li>Dịch vụ triển khai {@link android.os.Handler} để nhận lệnh gọi lại cho mỗi
+lệnh gọi từ một máy khách.</li>
+  <li>{@link android.os.Handler} được sử dụng để tạo một đối tượng {@link android.os.Messenger}
+(là một tham chiếu tới {@link android.os.Handler}).</li>
+  <li>{@link android.os.Messenger} tạo một {@link android.os.IBinder} mà dịch vụ
+trả về máy khách từ {@link android.app.Service#onBind onBind()}.</li>
+  <li>Máy khách sử dụng {@link android.os.IBinder} để khởi tạo {@link android.os.Messenger}
+(tham chiếu tới {@link android.os.Handler} của dịch vụ), mà máy khách sử dụng để gửi các đối tượng
+{@link android.os.Message} tới dịch vụ.</li>
+  <li>Dịch vụ nhận được từng {@link android.os.Message} trong {@link
+android.os.Handler} của mình&mdash;cụ thể là theo phương pháp {@link android.os.Handler#handleMessage
+handleMessage()}.</li>
+</ul>
+
+
+<p>Theo cách này, không có "phương pháp" nào để máy khách gọi đối với dịch vụ. Thay vào đó, máy khách
+gửi “thông báo” (đối tượng {@link android.os.Message}) mà dịch vụ nhận được trong 
+{@link android.os.Handler} của mình.</p>
+
+<p>Sau đây là một dịch vụ ví dụ đơn giản sử dụng một giao diện {@link android.os.Messenger}:</p>
+
+<pre>
+public class MessengerService extends Service {
+    /** Command to the service to display a message */
+    static final int MSG_SAY_HELLO = 1;
+
+    /**
+     * Handler of incoming messages from clients.
+     */
+    class IncomingHandler extends Handler {
+        &#64;Override
+        public void handleMessage(Message msg) {
+            switch (msg.what) {
+                case MSG_SAY_HELLO:
+                    Toast.makeText(getApplicationContext(), "hello!", Toast.LENGTH_SHORT).show();
+                    break;
+                default:
+                    super.handleMessage(msg);
+            }
+        }
+    }
+
+    /**
+     * Target we publish for clients to send messages to IncomingHandler.
+     */
+    final Messenger mMessenger = new Messenger(new IncomingHandler());
+
+    /**
+     * When binding to the service, we return an interface to our messenger
+     * for sending messages to the service.
+     */
+    &#64;Override
+    public IBinder onBind(Intent intent) {
+        Toast.makeText(getApplicationContext(), "binding", Toast.LENGTH_SHORT).show();
+        return mMessenger.getBinder();
+    }
+}
+</pre>
+
+<p>Để ý rằng phương pháp {@link android.os.Handler#handleMessage handleMessage()} trong
+{@link android.os.Handler} là nơi dịch vụ nhận được {@link android.os.Message}
+đến và quyết định việc cần làm dựa trên thành viên {@link android.os.Message#what}.</p>
+
+<p>Tất cả việc mà một máy khách cần làm đó là tạo một {@link android.os.Messenger} dựa trên {@link
+android.os.IBinder} được dịch vụ trả về và gửi một thông báo bằng cách sử dụng {@link
+android.os.Messenger#send send()}. Ví dụ, sau đây là một hoạt động đơn giản gắn kết với dịch vụ
+và gửi tin nhắn {@code MSG_SAY_HELLO} cho dịch vụ:</p>
+
+<pre>
+public class ActivityMessenger extends Activity {
+    /** Messenger for communicating with the service. */
+    Messenger mService = null;
+
+    /** Flag indicating whether we have called bind on the service. */
+    boolean mBound;
+
+    /**
+     * Class for interacting with the main interface of the service.
+     */
+    private ServiceConnection mConnection = new ServiceConnection() {
+        public void onServiceConnected(ComponentName className, IBinder service) {
+            // This is called when the connection with the service has been
+            // established, giving us the object we can use to
+            // interact with the service.  We are communicating with the
+            // service using a Messenger, so here we get a client-side
+            // representation of that from the raw IBinder object.
+            mService = new Messenger(service);
+            mBound = true;
+        }
+
+        public void onServiceDisconnected(ComponentName className) {
+            // This is called when the connection with the service has been
+            // unexpectedly disconnected -- that is, its process crashed.
+            mService = null;
+            mBound = false;
+        }
+    };
+
+    public void sayHello(View v) {
+        if (!mBound) return;
+        // Create and send a message to the service, using a supported 'what' value
+        Message msg = Message.obtain(null, MessengerService.MSG_SAY_HELLO, 0, 0);
+        try {
+            mService.send(msg);
+        } catch (RemoteException e) {
+            e.printStackTrace();
+        }
+    }
+
+    &#64;Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.main);
+    }
+
+    &#64;Override
+    protected void onStart() {
+        super.onStart();
+        // Bind to the service
+        bindService(new Intent(this, MessengerService.class), mConnection,
+            Context.BIND_AUTO_CREATE);
+    }
+
+    &#64;Override
+    protected void onStop() {
+        super.onStop();
+        // Unbind from the service
+        if (mBound) {
+            unbindService(mConnection);
+            mBound = false;
+        }
+    }
+}
+</pre>
+
+<p>Để ý rằng ví dụ này không cho biết cách mà dịch vụ có thể phản hồi máy khách. Nếu bạn muốn dịch vụ
+phản hồi, khi đó bạn cũng cần tạo một {@link android.os.Messenger} trong máy khách. Sau đó
+khi máy khách nhận được lệnh gọi lại {@link android.content.ServiceConnection#onServiceConnected
+onServiceConnected()}, nó sẽ gửi một {@link android.os.Message} tới dịch vụ, trong đó bao gồm
+{@link android.os.Messenger} của máy khách trong tham số {@link android.os.Message#replyTo}
+của phương pháp {@link android.os.Messenger#send send()}.</p>
+
+<p>Bạn có thể xem một ví dụ về cách cung cấp tính năng nhắn tin hai chiều trong <a href="{@docRoot}resources/samples/ApiDemos/src/com/example/android/apis/app/MessengerService.html">{@code
+MessengerService.java}</a> (dịch vụ) và các mẫu <a href="{@docRoot}resources/samples/ApiDemos/src/com/example/android/apis/app/MessengerServiceActivities.html">{@code
+MessengerServiceActivities.java}</a> (máy khách).</p>
+
+
+
+
+
+<h2 id="Binding">Gắn kết với một Dịch vụ</h2>
+
+<p>Các thành phần ứng dụng (máy khách) có thể gắn kết với một dịch vụ bằng cách gọi
+{@link android.content.Context#bindService bindService()}. Hệ thống Android
+khi đó sẽ gọi phương pháp {@link android.app.Service#onBind
+onBind()} của dịch vụ, nó trả về một {@link android.os.IBinder} để tương tác với dịch vụ.</p>
+
+<p>Việc gắn kết diễn ra không đồng bộ. {@link android.content.Context#bindService
+bindService()} trả về ngay lập tức và <em>không</em> trả {@link android.os.IBinder} về
+máy khách. Để nhận một {@link android.os.IBinder}, máy khách phải tạo một thực thể của {@link
+android.content.ServiceConnection} và chuyển nó cho {@link android.content.Context#bindService
+bindService()}. {@link android.content.ServiceConnection} bao gồm một phương pháp gọi lại mà hệ thống
+gọi để gửi {@link android.os.IBinder}.</p>
+
+<p class="note"><strong>Lưu ý:</strong> Chỉ các hoạt động, dịch vụ, và trình cung cấp nội dung mới có thể gắn kết
+với một dịch vụ&mdash;bạn <strong>không thể</strong> gắn kết với một dịch vụ từ một hàm nhận quảng bá (broadcast receiver).</p>
+
+<p>Vì vậy, để gắn kết với một dịch vụ từ máy khách của mình, bạn phải: </p>
+<ol>
+  <li>Triển khai {@link android.content.ServiceConnection}.
+    <p>Việc triển khai của bạn phải khống chế hai phương pháp gọi lại:</p>
+    <dl>
+      <dt>{@link android.content.ServiceConnection#onServiceConnected onServiceConnected()}</dt>
+        <dd>Hệ thống gọi phương pháp này để gửi {@link android.os.IBinder} được trả về bởi
+phương pháp {@link android.app.Service#onBind onBind()} của dịch vụ.</dd>
+      <dt>{@link android.content.ServiceConnection#onServiceDisconnected
+onServiceDisconnected()}</dt>
+        <dd>Hệ thống Android gọi phương pháp này khi kết nối với dịch vụ bị mất
+đột ngột, chẳng hạn như khi dịch vụ bị lỗi hoặc bị tắt bỏ. Phương pháp này <em>không</em> được gọi khi
+máy khách bỏ gắn kết.</dd>
+    </dl>
+  </li>
+  <li>Gọi {@link
+android.content.Context#bindService bindService()}, chuyển việc triển khai {@link
+android.content.ServiceConnection}. </li>
+  <li>Khi hệ thống gọi phương pháp gọi lại {@link android.content.ServiceConnection#onServiceConnected
+onServiceConnected()} của bạn, bạn có thể bắt đầu thực hiện các lệnh gọi tới dịch vụ bằng các phương pháp
+được định nghĩa bởi giao diện.</li>
+  <li>Để ngắt kết nối khỏi dịch vụ, hãy gọi {@link
+android.content.Context#unbindService unbindService()}.
+    <p>Khi máy khách của bạn bị hủy, nó sẽ bỏ gắn kết khỏi dịch vụ, nhưng bạn nên luôn bỏ gắn kết
+khi bạn đã tương tác xong với dịch vụ hoặc khi hoạt động của bạn tạm dừng sao cho dịch vụ có thể
+tắt khi không dùng đến. (Thời điểm phù hợp để gắn kết và bỏ gắn kết được đề cập
+kỹ hơn ở bên dưới.)</p>
+  </li>
+</ol>
+
+<p>Ví dụ, đoạn mã HTML sau sẽ kết nối máy khách với dịch vụ được tạo bên trên bằng cách
+<a href="#Binder">mở rộng lớp Trình gắn kết</a>, vì vậy tất cả những việc mà nó phải làm là đổi kiểu 
+{@link android.os.IBinder} được trả về thành lớp {@code LocalService} và yêu cầu thực thể {@code
+LocalService}:</p>
+
+<pre>
+LocalService mService;
+private ServiceConnection mConnection = new ServiceConnection() {
+    // Called when the connection with the service is established
+    public void onServiceConnected(ComponentName className, IBinder service) {
+        // Because we have bound to an explicit
+        // service that is running in our own process, we can
+        // cast its IBinder to a concrete class and directly access it.
+        LocalBinder binder = (LocalBinder) service;
+        mService = binder.getService();
+        mBound = true;
+    }
+
+    // Called when the connection with the service disconnects unexpectedly
+    public void onServiceDisconnected(ComponentName className) {
+        Log.e(TAG, "onServiceDisconnected");
+        mBound = false;
+    }
+};
+</pre>
+
+<p>Với {@link android.content.ServiceConnection} này, máy khách có thể gắn kết với một dịch vụ bằng cách chuyển
+nó cho {@link android.content.Context#bindService bindService()}. Ví dụ:</p>
+
+<pre>
+Intent intent = new Intent(this, LocalService.class);
+bindService(intent, mConnection, Context.BIND_AUTO_CREATE);
+</pre>
+
+<ul>
+  <li>Tham số đầu tiên của {@link android.content.Context#bindService bindService()} là một
+{@link android.content.Intent} trong đó nêu rõ tên của các dịch vụ sẽ gắn kết (mặc dù ý định
+có thể ngầm hiểu).</li>
+<li>Tham số thứ hai là đối tượng {@link android.content.ServiceConnection}.</li>
+<li>Tham số thứ ba là một cờ cho biết các tùy chọn cho gắn kết. Nên luôn luôn là {@link
+android.content.Context#BIND_AUTO_CREATE} để tạo dịch vụ nếu nó chưa hoạt động.
+Các giá trị có thể khác là {@link android.content.Context#BIND_DEBUG_UNBIND}
+và {@link android.content.Context#BIND_NOT_FOREGROUND}, hoặc {@code 0} trong trường hợp không có.</li>
+</ul>
+
+
+<h3>Lưu ý bổ sung</h3>
+
+<p>Sau đây là một số lưu ý quan trọng về việc gắn kết với một dịch vụ:</p>
+<ul>
+  <li>Bạn nên luôn bẫy các lỗi ngoại lệ {@link android.os.DeadObjectException} phát sinh khi
+kết nối bị đứt. Đây là lỗi ngoại lệ duy nhất phát sinh bởi các phương pháp từ xa.</li>
+  <li>Các đối tượng được xem là tham chiếu khắp các tiến trình. </li>
+  <li>Bạn nên luôn ghép đôi gắn kết và bỏ gắn kết trong khi
+khớp những khoảnh khắc kết nối và đứt kết nối trong vòng đời của máy khách. Ví dụ:
+    <ul>
+      <li>Nếu bạn chỉ cần tương tác với dịch vụ trong khi hoạt động của bạn hiển thị, bạn
+nên gắn kết trong khi {@link android.app.Activity#onStart onStart()} và bỏ gắn kết trong khi {@link
+android.app.Activity#onStop onStop()}.</li>
+      <li>Nếu bạn muốn hoạt động của mình nhận được phản hồi ngay cả trong khi bị dừng khi đang
+dưới nền, khi đó bạn có thể gắn kết trong khi {@link android.app.Activity#onCreate onCreate()} và bỏ gắn kết
+trong khi {@link android.app.Activity#onDestroy onDestroy()}. Chú ý rằng điều này hàm ý rằng hoạt động
+của bạn cần sử dụng dịch vụ trong toàn bộ thời gian khi nó đang chạy (ngay cả khi chạy ngầm), do đó nếu
+dịch vụ ở trong một tiến trình khác thì bạn hãy tăng trọng số của tiến trình và khả năng hệ thống
+tắt bỏ tiến trình đó sẽ cao hơn.</li>
+    </ul>
+    <p class="note"><strong>Lưu ý:</strong> Thông thường bạn <strong>không</strong> nên gắn kết và bỏ gắn kết
+trong khi {@link android.app.Activity#onResume onResume()} và {@link
+android.app.Activity#onPause onPause()} cho hoạt động của mình, vì những lệnh gọi lại này diễn ra tại mọi thời điểm chuyển tiếp vòng đời
+và bạn nên duy trì xử lý tại những thời điểm chuyển tiếp này ở mức tối thiểu. Đồng thời, nếu
+nhiều hoạt động trong ứng dụng của bạn gắn kết với cùng dịch vụ và có sự chuyển tiếp giữa
+hai trong số những hoạt động đó, dịch vụ có thể bị hủy và tạo lại khi hoạt động hiện tại bỏ gắn kết
+(trong khi tạm dừng) trước khi hoạt động tiếp theo gắn kết (trong khi tiếp tục). (Sự chuyển tiếp hoạt động này đối với cách mà các hoạt động
+phối hợp vòng đời của chúng được mô tả trong tài liệu <a href="{@docRoot}guide/components/activities.html#CoordinatingActivities">Hoạt động</a>
+.)</p>
+</ul>
+
+<p>Để biết thêm mã ví dụ, thể hiện cách gắn kết với một dịch vụ, hãy xem lớp <a href="{@docRoot}resources/samples/ApiDemos/src/com/example/android/apis/app/RemoteService.html">{@code
+RemoteService.java}</a> trong <a href="{@docRoot}resources/samples/ApiDemos/index.html">ApiDemos</a>.</p>
+
+
+
+
+
+<h2 id="Lifecycle">Quản lý Vòng đời của một Dịch vụ Gắn kết</h2>
+
+<p>Khi một dịch vụ bị bỏ gắn kết khỏi tất cả máy khách, hệ thống Android sẽ hủy nó (trừ khi nó cũng
+được bắt đầu bằng {@link android.app.Service#onStartCommand onStartCommand()}). Như vậy, bạn không phải
+ quản lý vòng đời dịch vụ của mình nếu nó thuần túy là một
+dịch vụ gắn kết&mdash;hệ thống Android sẽ quản lý nó cho bạn dựa trên việc nó có gắn kết với bất kỳ máy khách nào không.</p>
+
+<p>Tuy nhiên, nếu bạn chọn triển khai phương pháp gọi lại {@link android.app.Service#onStartCommand
+onStartCommand()}, vậy thì bạn phải dừng dịch vụ một cách tường minh, vì dịch vụ
+lúc này đang được coi là <em>được bắt đầu</em>. Trong trường hợp này, dịch vụ sẽ chạy cho tới khi dịch vụ
+tự dừng bằng {@link android.app.Service#stopSelf()} hoặc một thành phần khác sẽ gọi {@link
+android.content.Context#stopService stopService()}, bất kể nó có gắn kết với bất kỳ máy khách
+nào không.</p>
+
+<p>Ngoài ra, nếu dịch vụ của bạn được bắt đầu và chấp nhận gắn kết, lúc đó khi hệ thống gọi
+phương pháp {@link android.app.Service#onUnbind onUnbind()} của bạn, bạn có thể tùy chọn trả về
+{@code true} nếu bạn muốn nhận một lệnh gọi tới {@link android.app.Service#onRebind
+onRebind()} vào lần tới khi một máy khách gắn kết với dịch vụ (thay vì nhận một lệnh gọi tới {@link
+android.app.Service#onBind onBind()}). {@link android.app.Service#onRebind
+onRebind()} sẽ trả về rỗng, nhưng máy khách vẫn nhận được {@link android.os.IBinder} trong gọi lại
+{@link android.content.ServiceConnection#onServiceConnected onServiceConnected()} của mình.
+Hình 1 bên dưới minh họa lô-gic cho loại vòng đời này.</p>
+
+
+<img src="{@docRoot}images/fundamentals/service_binding_tree_lifecycle.png" alt="" />
+<p class="img-caption"><strong>Hình 1.</strong> Vòng đời của một dịch vụ được bắt đầu
+và cũng cho phép gắn kết.</p>
+
+
+<p>Để biết thêm thông tin về vòng đời của một dịch vụ được bắt đầu, hãy xem tài liệu <a href="{@docRoot}guide/components/services.html#Lifecycle">Dịch vụ</a>.</p>
+
+
+
+

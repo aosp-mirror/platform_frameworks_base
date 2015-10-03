@@ -1,0 +1,812 @@
+page.title=Phân đoạn
+parent.title=Hoạt động
+parent.link=activities.html
+@jd:body
+
+<div id="qv-wrapper">
+<div id="qv">
+  <h2>Trong tài liệu này</h2>
+  <ol>
+    <li><a href="#Design">Triết lý Thiết kế</a></li>
+    <li><a href="#Creating">Tạo một Phân đoạn</a>
+      <ol>
+        <li><a href="#UI">Thêm một giao diện người dùng</a></li>
+        <li><a href="#Adding">Thêm một phân đoạn vào một hoạt động</a></li>
+      </ol>
+    </li>
+    <li><a href="#Managing">Quản lý Phân đoạn</a></li>
+    <li><a href="#Transactions">Thực hiện Giao tác Phân đoạn</a></li>
+    <li><a href="#CommunicatingWithActivity">Giao tiếp với Hoạt động</a>
+      <ol>
+        <li><a href="#EventCallbacks">Tạo gọi lại sự kiện cho hoạt động</a></li>
+        <li><a href="#ActionBar">Thêm mục vào Thanh Hành động</a></li>
+      </ol>
+    </li>
+    <li><a href="#Lifecycle">Xử lý Vòng đời của Phân đoạn</a>
+      <ol>
+        <li><a href="#CoordinatingWithActivity">Phối hợp với vòng đời của hoạt động</a></li>
+      </ol>
+    </li>
+    <li><a href="#Example">Ví dụ</a></li>
+  </ol>
+
+  <h2>Lớp khóa</h2>
+  <ol>
+    <li>{@link android.app.Fragment}</li>
+    <li>{@link android.app.FragmentManager}</li>
+    <li>{@link android.app.FragmentTransaction}</li>
+  </ol>
+  
+  <h2>Xem thêm</h2>
+  <ol>
+    <li><a href="{@docRoot}training/basics/fragments/index.html">Xây dựng một UI Động bằng các Phân đoạn</a></li>
+    <li><a href="{@docRoot}guide/practices/tablets-and-handsets.html">Hỗ trợ Máy tính bảng
+và Thiết bị cầm tay</a></li>
+  </ol>
+</div>
+</div>
+
+<p>{@link android.app.Fragment} biểu diễn một hành vi hay một phần giao diện người dùng trong một
+{@link android.app.Activity}. Bạn có thể kết hợp nhiều phân đoạn trong một hoạt động duy nhất để xây dựng một
+UI nhiều bảng và sử dụng lại phân đoạn trong nhiều hoạt động. Bạn có thể coi phân đoạn như là một
+phần mô-đun của một hoạt động, có vòng đời của chính nó, nhận các sự kiện đầu vào của chính nó, và
+bạn có thể thêm hoặc gỡ bỏ trong khi hoạt động đang chạy (kiểu như một "hoạt động con" mà
+bạn có thể sử dụng lại trong các hoạt động khác nhau).</p>
+
+<p>Phân đoạn phải luôn được nhúng trong một hoạt động và vòng đời của phân đoạn bị ảnh hưởng trực tiếp bởi
+vòng đời của hoạt động chủ. Ví dụ, khi hoạt động bị tạm dừng, tất cả
+phân đoạn trong nó cũng vậy, và khi hoạt động bị hủy, tất cả phân đoạn cũng vậy. Tuy nhiên, trong khi một
+hoạt động đang chạy (nó ở trong trạng thái vòng đời <em>được tiếp tục</em><a href="{@docRoot}guide/components/activities.html#Lifecycle"></a>), bạn có thể
+thao tác từng phân đoạn độc lập, chẳng hạn như thêm hay xóa chúng. Khi bạn thực hiện một
+giao tác phân đoạn, bạn cũng có thể thêm nó vào một ngăn xếp được quản lý bởi
+hoạt động đó&mdash;từng mục nhập vào ngăn xếp trong hoạt động là một bản ghi giao tác phân đoạn
+đã xảy ra. Ngăn xếp cho phép người dùng đảo ngược một giao tác phân đoạn (điều hướng ngược lại),
+bằng cách nhấn nút <em>Quay lại</em>.</p>
+
+<p>Khi bạn thêm một phân đoạn như một phần trong bố trí hoạt động của mình, nó sẽ ở trong một {@link
+android.view.ViewGroup} bên trong phân cấp dạng xem của hoạt động đó và phân đoạn này sẽ định nghĩa bố trí
+dạng xem của chính nó.
+Bạn có thể chèn một phân đoạn vào bố trí hoạt động của mình bằng cách khai báo phân đoạn trong tệp
+bố trí của hoạt động, dưới dạng một phần tử {@code &lt;fragment&gt;}, hoặc từ mã ứng dụng của bạn bằng cách thêm nó vào một
+{@link android.view.ViewGroup} hiện hữu. Tuy nhiên, không bắt buộc phải có một phân đoạn là một bộ phận của bố trí hoạt động
+; bạn cũng có thể sử dụng một phân đoạn mà không cần UI của chính nó như một trình thực hiện vô hình cho hoạt động
+.</p>
+
+<p>Tài liệu này mô tả cách xây dựng ứng dụng của bạn để sử dụng phân đoạn, bao gồm
+cách các phân đoạn có thể duy trì trạng thái của chúng khi được thêm vào ngăn xếp của hoạt động, chia sẻ
+các sự kiện với hoạt động và các phân đoạn khác trong hoạt động, đóng góp vào thanh hành động của hoạt động
+và nhiều thông tin khác.</p>
+
+
+<h2 id="Design">Triết lý Thiết kế</h2>
+
+<p>Android giới thiệu phân đoạn trong phiên bản Android 3.0 (API mức 11), chủ yếu nhằm hỗ trợ
+các thiết kế UI động và linh hoạt hơn trên màn hình lớn, chẳng hạn như máy tính bảng. Vì
+màn hình của máy tính bảng lớn hơn nhiều màn hình của thiết bị cầm tay, có nhiều khoảng trống hơn để kết hợp và
+trao đổi các thành phần UI. Phân đoạn cho phép những thiết kế như vậy mà không cần bạn phải quản lý những thay đổi
+phức tạp về phân cấp dạng xem. Bằng cách chia bố trí của một hoạt động thành các phân đoạn, bạn có thể
+sửa đổi diện mạo của hoạt động vào thời gian chạy và giữ những thay đổi đó trong một ngăn xếp
+được quản lý bởi hoạt động.</p>
+
+<p>Ví dụ, một ứng dụng tin tức có thể sử dụng một phân đoạn để hiển thị một danh sách bài viết ở
+bên trái và một phân đoạn khác để hiển thị một bài viết ở bên phải&mdash;cả hai phân đoạn đều xuất hiện trong một
+hoạt động, bên cạnh nhau, và từng phân đoạn có tập phương pháp gọi lại vòng đời riêng và xử lý
+các sự kiện nhập liệu người dùng riêng của mình. Vì thế, thay vì sử dụng một hoạt động để chọn một bài viết và một
+hoạt động khác để đọc bài viết, người dùng có thể chọn một bài viết và đọc nó trong cùng
+hoạt động, như được minh họa trong bố trí máy tính bảng trong hình 1.</p>
+
+<p>Bạn nên thiết kế từng phân đoạn như một thành phần hoạt động dạng mô-đun và có thể sử dụng lại. Đó là bởi
+mỗi phân đoạn sẽ định nghĩa bố trí và hành vi của chính nó với các phương pháp gọi lại vòng đời của chính nó, bạn có thể
+bao gồm một phân đoạn trong nhiều hoạt động, vì thế bạn nên thiết kế để tái sử dụng và tránh trực tiếp
+thao tác một phân đoạn từ một phân đoạn khác. Điều này đặc biệt quan trọng vì một phân đoạn
+mô-đun cho phép bạn thay đổi kết hợp phân đoạn của mình cho các kích cỡ màn hình khác nhau. Khi thiết kế
+ứng dụng của bạn để hỗ trợ cả máy tính bảng và thiết bị cầm tay, bạn có thể sử dụng lại phân đoạn của mình trong các cấu hình
+bố trí khác nhau nhằm tối ưu hóa trải nghiệm người dùng dựa trên không gian màn hình có sẵn. Ví
+dụ, trên một thiết bị cầm tay, có thể cần phải tách riêng các phân đoạn để cung cấp một UI đơn bảng khi mà
+không thể làm vừa khít nhiều hơn một phân đoạn trong cùng hoạt động.</p>
+
+<img src="{@docRoot}images/fundamentals/fragments.png" alt="" />
+<p class="img-caption"><strong>Hình 1.</strong> Ví dụ về cách hai mô-đun UI được định nghĩa
+bởi các phân đoạn có thể được kết hợp thành một hoạt động đối với thiết kế máy tính bảng, nhưng được tách riêng đối với
+thiết kế thiết bị cầm tay.</p>
+
+<p>Ví dụ&mdash;để tiếp tục với ví dụ về ứng dụng tin tức&mdash;ứng dụng có thể nhúng
+hai phân đoạn trong <em>Hoạt động A</em>, khi đang chạy trên một thiết bị có kích cỡ máy tính bảng. Tuy nhiên, trên một
+màn hình kích cỡ thiết bị cầm tay, không có đủ khoảng trống cho cả hai phân đoạn, vì thế <em>Hoạt động A</em> chỉ
+bao gồm phân đoạn cho danh sách bài viết, và khi người dùng chọn một bài viết, nó sẽ khởi động
+<em>Hoạt động B</em>, hoạt động này chứa phân đoạn thứ hai là đọc bài viết. Vì thế, ứng dụng
+hỗ trợ cả máy tính bảng và thiết bị cầm tay bằng cách sử dụng lại các phân đoạn theo các cách kết hợp khác nhau như được minh họa trong
+hình 1.</p>
+
+<p>Để biết thêm thông tin về việc thiết kế ứng dụng của bạn bằng các cách kết hợp phân đoạn khác nhau cho
+cấu hình màn hình khác nhau, hãy xem hướng dẫn <a href="{@docRoot}guide/practices/tablets-and-handsets.html">Hỗ trợ Máy tính bảng và Thiết bị cầm tay</a>.</p>
+
+
+
+<h2 id="Creating">Tạo một Phân đoạn</h2>
+
+<div class="figure" style="width:327px">
+<img src="{@docRoot}images/fragment_lifecycle.png" alt="" />
+<p class="img-caption"><strong>Hình 2.</strong> Vòng đời của một phân đoạn (trong khi hoạt động
+của nó đang chạy).</p>
+</div>
+
+<p>Để tạo một phân đoạn, bạn phải tạo một lớp con của {@link android.app.Fragment} (hoặc
+một lớp con hiện tại của nó). Lớp {@link android.app.Fragment} có mã trông rất giống
+một {@link android.app.Activity}. Nó chứa các phương pháp gọi lại tương tự như hoạt động, chẳng
+hạn như {@link android.app.Fragment#onCreate onCreate()}, {@link android.app.Fragment#onStart onStart()},
+{@link android.app.Fragment#onPause onPause()}, và {@link android.app.Fragment#onStop onStop()}. Trên
+thực tế, nếu bạn đang chuyển đổi một ứng dụng Android hiện tại để sử dụng các phân đoạn, bạn có thể chỉ cần di chuyển
+mã khỏi các phương pháp gọi lại của hoạt động của bạn vào các phương pháp gọi lại tương ứng của phân đoạn
+của bạn.</p>
+
+<p>Thường thì ít nhất bạn nên triển khai các phương pháp vòng đời sau:</p>
+
+<dl>
+  <dt>{@link android.app.Fragment#onCreate onCreate()}</dt>
+  <dd>Hệ thống sẽ gọi phương pháp này khi tạo phân đoạn. Trong triển khai của mình, bạn nên
+khởi tạo các thành phần thiết yếu của phân đoạn mà bạn muốn giữ lại khi phân đoạn
+bị tạm dừng hoặc dừng hẳn, sau đó tiếp tục.</dd>
+  <dt>{@link android.app.Fragment#onCreateView onCreateView()}</dt>
+  <dd>Hệ thống sẽ gọi phương pháp này khi đến lúc phân đoạn vẽ giao diện người dùng của nó 
+lần đầu tiên. Để vẽ một UI cho phân đoạn của mình, bạn phải trả về một {@link android.view.View} từ phương pháp
+này, đây là gốc của bố trí phân đoạn của bạn. Bạn có thể trả về giá trị rỗng nếu phân đoạn không
+cung cấp UI.</dd>
+  <dt>{@link android.app.Activity#onPause onPause()}</dt>
+  <dd>Hệ thống gọi phương pháp này là dấu hiệu đầu tiên về việc người dùng đang rời khỏi
+phân đoạn (mặc dù không phải lúc nào cũng có nghĩa rằng phân đoạn đang bị hủy). Trường hợp này thường là khi bạn
+định thực hiện bất kỳ thay đổi nào vẫn cần có hiệu lực ngoài phiên của người dùng hiện thời (vì
+người dùng có thể không quay lại).</dd>
+</dl>
+
+<p>Phần lớn ứng dụng nên triển khai ít nhất ba phương pháp sau đối với mọi phân đoạn, nhưng có một vài
+phương pháp gọi lại khác mà bạn cũng nên sử dụng để xử lý các giai đoạn khác nhau trong
+vòng đời của phân đoạn. Tất cả phương pháp gọi lại vòng đời được đề cập chi tiết hơn trong phần
+về <a href="#Lifecycle">Xử lý Vòng đời của Phân đoạn</a>.</p>
+
+
+<p>Cũng có một vài lớp con mà bạn có thể muốn mở rộng thay vì lớp cơ bản {@link
+android.app.Fragment}:</p>
+
+<dl>
+  <dt>{@link android.app.DialogFragment}</dt>
+  <dd>Hiển thị một hộp thoại trôi nổi. Sử dụng lớp này để tạo một hộp thoại là một phương án hay cho việc sử dụng các phương pháp trình trợ giúp
+hộp thoại trong lớp {@link android.app.Activity}, vì bạn có thể
+kết hợp một hộp thoại phân đoạn vào ngăn xếp của các phân đoạn được quản lý bởi hoạt động,
+cho phép người dùng trả về một phân đoạn bị bỏ.</dd>
+
+  <dt>{@link android.app.ListFragment}</dt>
+  <dd>Hiển thị một danh sách các mục được quản lý bởi một trình điều hợp (chẳng hạn như một {@link
+android.widget.SimpleCursorAdapter}), tương tự như {@link android.app.ListActivity}. Nó cung cấp
+một vài phương pháp để quản lý một dạng xem danh sách, chẳng hạn như phương pháp gọi lại {@link
+android.app.ListFragment#onListItemClick(ListView,View,int,long) onListItemClick()} để
+xử lý các sự kiện nhấp.</dd>
+
+  <dt>{@link android.preference.PreferenceFragment}</dt>
+  <dd>Hiển thị một phân cấp các đối tượng {@link android.preference.Preference} dưới dạng một danh sách, tương tự như
+{@link android.preference.PreferenceActivity}. Điều này hữu ích khi tạo một hoạt động "thiết đặt"
+cho ứng dụng của bạn.</dd>
+</dl>
+
+
+<h3 id="UI">Thêm một giao diện người dùng</h3>
+
+<p>Phân đoạn thường được sử dụng như một phần giao diện người dùng của hoạt động và đóng góp bố trí của
+chính nó cho hoạt động.</p>
+
+<p>Để cung cấp một bố trí cho một phân đoạn, bạn phải triển khai phương pháp gọi lại {@link
+android.app.Fragment#onCreateView onCreateView()}, phương pháp này được hệ thống Android gọi
+khi đến lúc phân đoạn vẽ bố trí của nó. Việc bạn triển khai phương pháp này phải trả về một
+{@link android.view.View} là phần gốc cho bố trí phân đoạn của bạn.</p>
+
+<p class="note"><strong>Lưu ý:</strong> Nếu phân đoạn của bạn là một lớp con của {@link
+android.app.ListFragment}, triển khai mặc định sẽ trả về một {@link android.widget.ListView} từ
+{@link android.app.Fragment#onCreateView onCreateView()}, vì thế bạn không cần triển khai nó.</p>
+
+<p>Để trả về một bố trí từ {@link
+android.app.Fragment#onCreateView onCreateView()}, bạn có thể bung nó từ một <a href="{@docRoot}guide/topics/resources/layout-resource.html">tài nguyên bố trí</a> được định nghĩa trong XML. Để
+giúp bạn làm vậy, {@link android.app.Fragment#onCreateView onCreateView()} cung cấp một đối tượng
+{@link android.view.LayoutInflater}.</p>
+
+<p>Ví dụ, sau đây là một lớp con của {@link android.app.Fragment} với chức năng nạp một bố trí từ tệp
+{@code example_fragment.xml}:</p>
+
+<pre>
+public static class ExampleFragment extends Fragment {
+    &#64;Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+                             Bundle savedInstanceState) {
+        // Inflate the layout for this fragment
+        return inflater.inflate(R.layout.example_fragment, container, false);
+    }
+}
+</pre>
+
+<div class="sidebox-wrapper">
+<div class="sidebox">
+  <h3>Tạo một bố trí</h3>
+  <p>Trong ví dụ trên, {@code R.layout.example_fragment} là một tham chiếu tới tài nguyên bố trí
+có tên {@code example_fragment.xml} được lưu trong tài nguyên ứng dụng. Để biết thông tin về cách
+tạo một bố trí trong XML, hãy xem tài liệu <a href="{@docRoot}guide/topics/ui/index.html">Giao diện Người dùng</a>
+.</p>
+</div>
+</div>
+
+<p>Tham số {@code container} được chuyển tới {@link android.app.Fragment#onCreateView
+onCreateView()} là {@link android.view.ViewGroup} mẹ (tức bố trí của hoạt động), trong đó
+bố trí phân đoạn của bạn
+sẽ được chèn vào. Tham số {@code savedInstanceState} là một {@link android.os.Bundle} có chức năng
+cung cấp dữ liệu về thực thể trước đó của phân đoạn, nếu phân đoạn đang được tiếp tục
+(việc khôi phục trạng thái được bàn kỹ hơn trong phần về <a href="#Lifecycle">Xử lý
+Vòng đời của Phân đoạn</a>).</p>
+
+<p>Phương pháp {@link android.view.LayoutInflater#inflate(int,ViewGroup,boolean) inflate()} có
+ba tham đối:</p>
+<ul>
+  <li>ID tài nguyên của bố trí mà bạn muốn bung.</li>
+  <li>{@link android.view.ViewGroup} là mẹ của bố trí được bung. Việc chuyển {@code
+container} có vai trò quan trọng để hệ thống áp dụng các tham số bố trí cho dạng xem gốc của bố trí
+được bung, được quy định bởi dạng xem mẹ là nơi mà nó diễn ra trong đó.</li>
+  <li>Một boolean cho biết bố trí được bung có nên được gắn với {@link
+android.view.ViewGroup} (tham số thứ hai) trong khi bung hay không. (Trong trường hợp này, điều này là
+sai vì hệ thống đã đang chèn bố trí được bung vào {@code
+container}&mdash;việc chuyển đúng sẽ tạo ra một nhóm dạng xem thừa trong bố trí cuối cùng.)</li>
+</ul>
+
+<p>Giờ bạn đã thấy cách tạo một phân đoạn nhằm cung cấp một bố trí. Tiếp theo, bạn cần thêm
+phân đoạn vào hoạt động của mình.</p>
+
+
+
+<h3 id="Adding">Thêm một phân đoạn vào một hoạt động</h3>
+
+<p>Thường thì một phân đoạn đóng góp một phần UI vào hoạt động chủ, nó được nhúng như một phần
+trong phân cấp dạng xem tổng thể của hoạt động. Có hai cách mà bạn có thể thêm một phân đoạn vào bố trí
+của hoạt động:</p>
+
+<ul>
+  <li><b>Khai báo phân đoạn bên trong tệp bố trí của hoạt động.</b>
+<p>Trong trường hợp này, bạn có thể
+chỉ định các tính chất bố trí cho phân đoạn như thể nó là một dạng xem. Ví dụ, sau đây là tệp bố trí
+cho một hoạt động có hai phân đoạn:</p>
+<pre>
+&lt;?xml version="1.0" encoding="utf-8"?&gt;
+&lt;LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="horizontal"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"&gt;
+    &lt;fragment android:name="com.example.news.ArticleListFragment"
+            android:id="@+id/list"
+            android:layout_weight="1"
+            android:layout_width="0dp"
+            android:layout_height="match_parent" /&gt;
+    &lt;fragment android:name="com.example.news.ArticleReaderFragment"
+            android:id="@+id/viewer"
+            android:layout_weight="2"
+            android:layout_width="0dp"
+            android:layout_height="match_parent" /&gt;
+&lt;/LinearLayout&gt;
+</pre>
+  <p>Thuộc tính {@code android:name} trong {@code &lt;fragment&gt;} sẽ chỉ định lớp {@link
+android.app.Fragment} để khởi tạo trong bố trí.</p>
+
+<p>Khi hệ thống tạo bố trí hoạt động này, nó sẽ khởi tạo từng phân đoạn được chỉ định trong bố trí
+và gọi ra phương pháp {@link android.app.Fragment#onCreateView onCreateView()} cho từng phân đoạn,
+để truy xuất bố trí của từng phân đoạn. Hệ thống sẽ chèn {@link android.view.View} được trả về bởi phân đoạn
+trực tiếp thế chỗ phần tử {@code &lt;fragment&gt;}.</p>
+
+<div class="note">
+  <p><strong>Lưu ý:</strong> Mỗi phân đoạn yêu cầu một mã định danh duy nhất
+mà hệ thống có thể sử dụng để khôi phục phân đoạn nếu hoạt động bị khởi động lại (và bạn có thể sử dụng để
+nắm bắt phân đoạn sẽ thực hiện giao tác, chẳng hạn như gỡ bỏ nó). Có ba cách để cung cấp ID cho một
+phân đoạn:</p>
+  <ul>
+    <li>Cung cấp thuộc tính {@code android:id} với một ID duy nhất.</li>
+    <li>Cung cấp thuộc tính {@code android:tag} với một xâu duy nhất.</li>
+    <li>Nếu bạn không cung cấp được thuộc tính nào, hệ thống sẽ sử dụng ID của dạng xem 
+của bộ chứa.</li>
+  </ul>
+</div>
+  </li>
+
+  <li><b>Hoặc, bằng cách lập trình, thêm phân đoạn vào một {@link android.view.ViewGroup} hiện hữu.</b>
+<p>Vào bất cứ lúc nào trong khi hoạt động của bạn đang chạy, bạn có thể thêm phân đoạn vào bố trí hoạt động của mình. Bạn
+chỉ cần chỉ định một {@link
+android.view.ViewGroup} là nơi mà bạn sẽ đặt phân đoạn vào.</p>
+  <p>Để thực hiện giao tác phân đoạn trong hoạt động của mình (chẳng hạn như thêm, gỡ bỏ, hay thay thế một
+phân đoạn), bạn phải sử dụng các API từ {@link android.app.FragmentTransaction}. Bạn có thể nhận một thực thể
+của {@link android.app.FragmentTransaction} từ {@link android.app.Activity} của mình như sau:</p>
+
+<pre>
+FragmentManager fragmentManager = {@link android.app.Activity#getFragmentManager()}
+FragmentTransaction fragmentTransaction = fragmentManager.{@link android.app.FragmentManager#beginTransaction()};
+</pre>
+
+<p>Sau đó, bạn có thể thêm một phân đoạn bằng cách sử dụng phương pháp {@link
+android.app.FragmentTransaction#add(int,Fragment) add()}, chỉ định phân đoạn sẽ thêm và
+dạng xem mà bạn sẽ chèn nó vào. Ví dụ:</p>
+
+<pre>
+ExampleFragment fragment = new ExampleFragment();
+fragmentTransaction.add(R.id.fragment_container, fragment);
+fragmentTransaction.commit();
+</pre>
+
+  <p>Tham đối đầu tiên được chuyển cho {@link android.app.FragmentTransaction#add(int,Fragment) add()}
+là {@link android.view.ViewGroup}, là nơi mà phân đoạn sẽ được đặt vào, được chỉ định bởi
+ID tài nguyên, và tham đối thứ hai là phân đoạn cần thêm.</p>
+  <p>Sau khi bạn đã thực hiện các thay đổi của mình bằng
+{@link android.app.FragmentTransaction}, bạn phải
+gọi {@link android.app.FragmentTransaction#commit} để các thay đổi có hiệu lực.</p>
+  </li>
+</ul>
+
+
+<h4 id="AddingWithoutUI">Thêm một phân đoạn không có UI</h4>
+
+<p>Các ví dụ nêu trên cho biết cách thêm một phân đoạn vào hoạt động của bạn để cung cấp một UI. Tuy nhiên,
+bạn cũng có thể sử dụng một phân đoạn để cung cấp một hành vi chạy ngầm cho hoạt động mà không cần đưa
+UI bổ sung.</p>
+
+<p>Để thêm một phân đoạn không có UI, hãy thêm phân đoạn từ hoạt động đang bằng cách sử dụng {@link
+android.app.FragmentTransaction#add(Fragment,String)} (cung cấp một "tag" xâu duy nhất cho phân đoạn
+, thay vì một ID dạng xem). Làm vậy sẽ thêm phân đoạn, nhưng vì không liên kết với một dạng xem
+trong bố trí hoạt động, nó sẽ không nhận được lệnh gọi tới {@link
+android.app.Fragment#onCreateView onCreateView()}. Vì thế, bạn không cần triển khai phương pháp đó.</p>
+
+<p>Việc cung cấp tag xâu cho phân đoạn không chỉ áp dụng cho các phân đoạn không có UI&mdash;bạn cũng có thể
+cung cấp tag xâu cho phân đoạn có UI&mdash;nhưng nếu phân đoạn không có
+UI, khi đó, tag xâu là cách duy nhất để nhận biết nó. Nếu sau này bạn muốn nhận phân đoạn từ
+hoạt động, bạn cần sử dụng {@link android.app.FragmentManager#findFragmentByTag
+findFragmentByTag()}.</p>
+
+<p>Để biết ví dụ về hoạt động sử dụng phân đoạn như một trình thực hiện nền, không có UI, hãy xem mẫu {@code
+FragmentRetainInstance.java}, mẫu này có trong các mẫu SDK (có sẵn thông qua
+Trình quản lý SDK Android) và nằm trên hệ thống của bạn như là 
+<code>&lt;sdk_root&gt;/APIDemos/app/src/main/java/com/example/android/apis/app/FragmentRetainInstance.java</code>.</p>
+
+
+
+<h2 id="Managing">Quản lý Phân đoạn</h2>
+
+<p>Để quản lý các phân đoạn trong hoạt động của mình, bạn cần sử dụng {@link android.app.FragmentManager}. Để
+có nó, hãy gọi {@link android.app.Activity#getFragmentManager()} từ hoạt động của bạn.</p>
+
+<p>Một số việc bạn có thể làm với {@link android.app.FragmentManager} bao gồm:</p>
+
+<ul>
+  <li>Nhận các phân đoạn tồn tại trong hoạt động, bằng {@link
+android.app.FragmentManager#findFragmentById findFragmentById()} (đối với các phân đoạn cung cấp UI trong
+bố trí hoạt động) hoặc {@link android.app.FragmentManager#findFragmentByTag
+findFragmentByTag()} (đối với các phân đoạn có hoặc không cung cấp UI).</li> 
+  <li>Lấy phân đoạn ra khỏi ngăn xếp, bằng {@link
+android.app.FragmentManager#popBackStack()} (mô phỏng một câu lệnh <em>Quay lại</em> của người dùng).</li>
+  <li>Đăng ký một đối tượng theo dõi cho những thay đổi đối với ngăn xếp, bằng {@link
+android.app.FragmentManager#addOnBackStackChangedListener addOnBackStackChangedListener()}.</li>
+</ul>
+
+<p>Để biết thêm thông tin về những phương pháp này và phương pháp khác, hãy tham khảo tài liệu lớp {@link
+android.app.FragmentManager}.</p>
+
+<p>Như minh họa trong phần trước, bạn cũng có thể sử dụng {@link android.app.FragmentManager}
+để mở một {@link android.app.FragmentTransaction}, nó cho phép bạn thực hiện các giao tác, ví dụ như
+thêm hoặc gỡ bỏ phân đoạn.</p>
+
+
+<h2 id="Transactions">Thực hiện Giao tác Phân đoạn</h2>
+
+<p>Một tính năng tuyệt vời khi sử dụng phân đoạn trong hoạt động của bạn đó là khả năng thêm, gỡ bỏ, thay thế,
+và thực hiện các hành động khác với chúng, để hồi đáp lại tương tác của người dùng. Mỗi tập hợp thay đổi mà bạn
+thực thi cho hoạt động được gọi là một giao tác và bạn có thể thực hiện một giao tác bằng cách sử dụng các API trong {@link
+android.app.FragmentTransaction}. Bạn cũng có thể lưu từng giao tác vào một ngăn xếp được quản lý bởi
+hoạt động, cho phép người dùng điều hướng ngược lại thông qua những thay đổi phân đoạn (tương tự như điều hướng
+ngược lại thông qua hoạt động).</p>
+
+<p>Bạn có thể thu được một thực thể của {@link android.app.FragmentTransaction} từ {@link
+android.app.FragmentManager} như sau:</p>
+
+<pre>
+FragmentManager fragmentManager = {@link android.app.Activity#getFragmentManager()};
+FragmentTransaction fragmentTransaction = fragmentManager.{@link android.app.FragmentManager#beginTransaction()};
+</pre>
+
+<p>Mỗi giao tác là một tập hợp những thay đổi mà bạn muốn thực hiện tại cùng thời điểm. Bạn có thể thiết lập
+tất cả thay đổi mà mình muốn thực hiện đối với một giao tác cho trước bằng cách sử dụng các phương pháp như {@link
+android.app.FragmentTransaction#add add()}, {@link android.app.FragmentTransaction#remove remove()},
+và {@link android.app.FragmentTransaction#replace replace()}. Sau đó, để áp dụng giao tác
+cho hoạt động, bạn phải gọi {@link android.app.FragmentTransaction#commit()}.</p>
+</dl>
+
+<p>Trước khi bạn gọi {@link
+android.app.FragmentTransaction#commit()}, tuy nhiên, bạn có thể muốn gọi {@link
+android.app.FragmentTransaction#addToBackStack addToBackStack()}, để thêm giao tác
+vào một ngăn xếp của các giao tác phân đoạn. Ngăn xếp này được quản lý bởi hoạt động và cho phép
+người dùng trở về trạng thái phân đoạn trước đó, bằng cách nhấp nút <em>Quay lại</em>.</p>
+
+<p>Ví dụ, sau đây là cách bạn có thể thay thế phân đoạn này bằng phân đoạn khác, và giữ nguyên
+trạng thái trước đó của ngăn xếp:</p>
+
+<pre>
+// Create new fragment and transaction
+Fragment newFragment = new ExampleFragment();
+FragmentTransaction transaction = getFragmentManager().beginTransaction();
+
+// Replace whatever is in the fragment_container view with this fragment,
+// and add the transaction to the back stack
+transaction.replace(R.id.fragment_container, newFragment);
+transaction.addToBackStack(null);
+
+// Commit the transaction
+transaction.commit();
+</pre>
+
+<p>Trong ví dụ này, {@code newFragment} thay thế mọi phân đoạn (nếu có) hiện đang ở trong
+bộ chứa bố trí được nhận biết bởi ID {@code R.id.fragment_container}. Bằng cách gọi {@link
+android.app.FragmentTransaction#addToBackStack addToBackStack()}, giao tác thay thế
+được lưu vào ngăn xếp, vì thế người dùng có thể đảo ngược giao tác và mang
+giao tác trước đó trở lại bằng cách nhấn nút <em>Quay lại</em>.</p>
+
+<p>Nếu bạn thêm nhiều thay đổi vào giao tác (chẳng hạn như một {@link
+android.app.FragmentTransaction#add add()} khác hoặc {@link android.app.FragmentTransaction#remove
+remove()}) và gọi {@link
+android.app.FragmentTransaction#addToBackStack addToBackStack()}, khi đó, tất cả thay đổi được áp dụng
+trước khi bạn gọi {@link android.app.FragmentTransaction#commit commit()} đều được thêm vào
+ngăn xếp như một giao tác riêng lẻ và nút <em>Quay lại</em> sẽ đảo ngược tất cả cùng nhau.</p>
+
+<p>Thứ tự mà bạn thêm thay đổi vào một {@link android.app.FragmentTransaction} không quan trọng,
+ngoại trừ:</p>
+<ul>
+  <li>Bạn phải gọi {@link android.app.FragmentTransaction#commit()} cuối cùng</li>
+  <li>Nếu bạn thêm nhiều phân đoạn vào cùng bộ chứa, khi đó thứ tự mà
+bạn thêm chúng sẽ xác định thứ tự chúng xuất hiện trong phân cấp dạng xem</li>
+</ul>
+
+<p>Nếu bạn không gọi {@link android.app.FragmentTransaction#addToBackStack(String)
+addToBackStack()} khi thực hiện một giao tác để xóa một phân đoạn, khi đó, phân đoạn đó sẽ bị
+hủy khi giao tác được thực hiện và người dùng không thể điều hướng trở lại nó. Trong khi đó, nếu bạn
+gọi {@link android.app.FragmentTransaction#addToBackStack(String) addToBackStack()} khi
+gỡ bỏ một phân đoạn, khi đó phân đoạn bị <em>dừng</em> và sẽ được khôi phục nếu người dùng điều hướng
+trở lại.</p>
+
+<p class="note"><strong>Mẹo:</strong> Với mỗi giao tác phân đoạn, bạn có thể áp dụng một hoạt ảnh
+chuyển tiếp bằng cách gọi {@link android.app.FragmentTransaction#setTransition setTransition()} trước khi
+thực thi.</p>
+
+<p>Việc gọi {@link android.app.FragmentTransaction#commit()} không thực hiện giao tác
+ngay lập tức. Thay vào đó, nó lập lịch biểu để chạy trên luồng UI của hoạt động (luồng "chính") ngay khi
+luồng có thể làm vậy. Tuy nhiên, nếu cần, bạn có thể gọi {@link
+android.app.FragmentManager#executePendingTransactions()} từ luồng UI của mình để ngay lập tức thực hiện
+các giao tác được gửi bởi {@link android.app.FragmentTransaction#commit()}. Làm vậy
+thường không cần thiết trừ khi giao tác đó là phụ thuộc cho các tác vụ ở những luồng khác.</p>
+
+<p class="caution"><strong>Chú ý:</strong> Bạn có thể thực thi một giao tác bằng cách sử dụng {@link
+android.app.FragmentTransaction#commit commit()} chỉ trước khi hoạt động <a href="{@docRoot}guide/components/activities.html#SavingActivityState">lưu
+trạng thái</a> của nó (khi người dùng rời khỏi hoạt động). Nếu bạn định thực thi sau thời điểm đó sẽ phát sinh một lỗi
+ngoại lệ. Nguyên nhân là vì trạng thái sau khi thực thi có thể bị mất nếu hoạt động
+cần được khôi phục. Đối với những trường hợp mà bạn có thể mất thực thi, hãy sử dụng {@link
+android.app.FragmentTransaction#commitAllowingStateLoss()}.</p>
+
+
+
+
+<h2 id="CommunicatingWithActivity">Giao tiếp với Hoạt động</h2>
+
+<p>Mặc dù {@link android.app.Fragment} được triển khai như một đối tượng độc lập với
+{@link android.app.Activity} và có thể được sử dụng bên trong nhiều hoạt động, một thực thể đã cho của
+phân đoạn sẽ được gắn kết trực tiếp với hoạt động chứa nó.</p>
+
+<p>Cụ thể, phân đoạn có thể truy cập thực thể {@link android.app.Activity} bằng {@link
+android.app.Fragment#getActivity()} và dễ dàng thực hiện các tác vụ như tìm một dạng xem trong bố trí
+hoạt động:</p>
+
+<pre>
+View listView = {@link android.app.Fragment#getActivity()}.{@link android.app.Activity#findViewById findViewById}(R.id.list);
+</pre>
+
+<p>Tương tự, hoạt động của bạn có thể gọi ra các phương pháp trong phân đoạn bằng cách thu được một tham chiếu tới
+{@link android.app.Fragment} từ {@link android.app.FragmentManager}, bằng cách sử dụng {@link
+android.app.FragmentManager#findFragmentById findFragmentById()} hoặc {@link
+android.app.FragmentManager#findFragmentByTag findFragmentByTag()}. Ví dụ:</p>
+
+<pre>
+ExampleFragment fragment = (ExampleFragment) getFragmentManager().findFragmentById(R.id.example_fragment);
+</pre>
+
+
+<h3 id="EventCallbacks">Tạo gọi lại sự kiện cho hoạt động</h3>
+
+<p>Trong một số trường hợp, bạn có thể cần một phân đoạn để chia sẻ sự kiện với hoạt động. Một cách hay để làm điều này
+đó là định nghĩa một giao diện gọi lại bên trong phân đoạn và yêu cầu hoạt động chủ triển khai
+nó. Khi hoạt động nhận được một lệnh gọi lại thông qua giao diện, nó có thể chia sẻ thông tin với
+các phân đoạn khác trong bố trí nếu cần.</p>
+
+<p>Ví dụ, nếu một ứng dụng tin tức có hai phân đoạn trong một hoạt động&mdash;một để hiển thị danh sách
+bài viết (phân đoạn A) và một để hiển thị một bài viết (phân đoạn B)&mdash;khi đó, phân đoạn A phải thông báo với
+hoạt động khi nào thì một mục danh sách được chọn để nó có thể yêu cầu phân đoạn B hiển thị bài viết đó. Trong
+trường hợp này, giao diện {@code OnArticleSelectedListener} sẽ được khai báo bên trong phân đoạn A:</p>
+
+<pre>
+public static class FragmentA extends ListFragment {
+    ...
+    // Container Activity must implement this interface
+    public interface OnArticleSelectedListener {
+        public void onArticleSelected(Uri articleUri);
+    }
+    ...
+}
+</pre>
+
+<p>Khi đó, hoạt động lưu trữ phân đoạn sẽ triển khai giao diện {@code OnArticleSelectedListener}
+và
+khống chế {@code onArticleSelected()} để thông báo với phân đoạn B về sự kiện từ phân đoạn A. Để đảm bảo
+rằng hoạt động chủ triển khai giao diện này, phương pháp gọi lại {@link
+android.app.Fragment#onAttach onAttach()} của phân đoạn A (mà hệ thống gọi khi thêm
+phân đoạn vào hoạt động) sẽ khởi tạo một thực thể của {@code OnArticleSelectedListener} bằng cách
+đổi kiểu {@link android.app.Activity} mà được chuyển vào {@link android.app.Fragment#onAttach
+onAttach()}:</p>
+
+<pre>
+public static class FragmentA extends ListFragment {
+    OnArticleSelectedListener mListener;
+    ...
+    &#64;Override
+    public void onAttach(Activity activity) {
+        super.onAttach(activity);
+        try {
+            mListener = (OnArticleSelectedListener) activity;
+        } catch (ClassCastException e) {
+            throw new ClassCastException(activity.toString() + " must implement OnArticleSelectedListener");
+        }
+    }
+    ...
+}
+</pre>
+
+<p>Nếu hoạt động chưa triển khai giao diện, khi đó phân đoạn sẽ đưa ra lỗi 
+{@link java.lang.ClassCastException}.
+Nếu thành công, thành viên {@code mListener} giữ một tham chiếu tới triển khai 
+{@code OnArticleSelectedListener}của hoạt động, sao cho phân đoạn A có thể chia sẻ sự kiện với hoạt động bằng cách gọi các phương pháp
+được định nghĩa bởi giao diện {@code OnArticleSelectedListener}. Ví dụ, nếu phân đoạn A là một
+phần mở rộng của {@link android.app.ListFragment}, mỗi lần
+người dùng nhấp vào một mục danh sách, hệ thống sẽ gọi ra {@link android.app.ListFragment#onListItemClick
+onListItemClick()} trong phân đoạn, và nó lại gọi {@code onArticleSelected()} để chia sẻ
+sự kiện với hoạt động:</p>
+
+<pre>
+public static class FragmentA extends ListFragment {
+    OnArticleSelectedListener mListener;
+    ...
+    &#64;Override
+    public void onListItemClick(ListView l, View v, int position, long id) {
+        // Append the clicked item's row ID with the content provider Uri
+        Uri noteUri = ContentUris.{@link android.content.ContentUris#withAppendedId withAppendedId}(ArticleColumns.CONTENT_URI, id);
+        // Send the event and Uri to the host activity
+        mListener.onArticleSelected(noteUri);
+    }
+    ...
+}
+</pre>
+
+<p>Tham số {@code id} được chuyển vào {@link
+android.app.ListFragment#onListItemClick onListItemClick()} là ID hàng của mục được nhấp,
+nó được sử dụng bởi hoạt động (hoặc phân đoạn kia) để tải bài viết từ {@link
+android.content.ContentProvider} của ứng dụng.</p>
+
+<p><!--To see a complete implementation of this kind of callback interface, see the <a
+href="{@docRoot}resources/samples/NotePad/index.html">NotePad sample</a>. -->Bạn có thể xem thêm thông tin về
+cách sử dụng một trình cung cấp nội dung trong tài liệu <a href="{@docRoot}guide/topics/providers/content-providers.html">Trình cung cấp Nội dung</a>.</p>
+
+
+
+<h3 id="ActionBar">Thêm mục vào Thanh Hành động</h3>
+
+<p>Phân đoạn của bạn có thể đóng góp các mục menu vào <a href="{@docRoot}guide/topics/ui/menus.html#options-menu">Menu Tùy chọn</a> của hoạt động (và tiếp đó là cả <a href="{@docRoot}guide/topics/ui/actionbar.html">Thanh Hành động</a>) bằng cách triển khai
+{@link android.app.Fragment#onCreateOptionsMenu(Menu,MenuInflater) onCreateOptionsMenu()}. Tuy nhiên, để
+phương pháp này nhận lệnh gọi, bạn phải gọi {@link
+android.app.Fragment#setHasOptionsMenu(boolean) setHasOptionsMenu()} trong khi {@link
+android.app.Fragment#onCreate(Bundle) onCreate()}, để cho biết rằng phân đoạn
+sẽ muốn thêm mục vào Menu Tùy chọn (nếu không, phân đoạn sẽ không nhận được lệnh gọi tới
+{@link android.app.Fragment#onCreateOptionsMenu onCreateOptionsMenu()}).</p>
+
+<p>Bất kỳ mục nào mà bạn thêm vào Menu Tùy chọn sau đó từ phân đoạn đều được nối với các mục menu
+hiện tại. Phân đoạn cũng nhận các lệnh gọi lại tới {@link
+android.app.Fragment#onOptionsItemSelected(MenuItem) onOptionsItemSelected()} khi một mục menu
+được chọn.</p>
+
+<p>Bạn cũng có thể đăng ký một dạng xem trong bố trí phân đoạn của mình để cung cấp một menu ngữ cảnh bằng cách gọi {@link
+android.app.Fragment#registerForContextMenu(View) registerForContextMenu()}. Khi người dùng mở
+menu ngữ cảnh, phân đoạn nhận một lệnh gọi tới {@link
+android.app.Fragment#onCreateContextMenu(ContextMenu,View,ContextMenu.ContextMenuInfo)
+onCreateContextMenu()}. Khi người dùng chọn một mục, phân đoạn nhận được một lệnh gọi tới {@link
+android.app.Fragment#onContextItemSelected(MenuItem) onContextItemSelected()}.</p>
+
+<p class="note"><strong>Lưu ý:</strong> Mặc dù phân đoạn của bạn nhận được một lệnh gọi khi chọn mục
+đối với từng mục menu mà nó thêm, trước tiên hoạt động sẽ nhận phương pháp gọi lại tương ứng khi người dùng
+chọn một mục menu. Nếu việc triển khai gọi lại khi chọn mục của hoạt động không
+xử lý mục được chọn, khi đó sự kiện được chuyển sang phương pháp gọi lại của phân đoạn. Điều này đúng đối với
+Menu Tùy chọn và các menu ngữ cảnh.</p>
+
+<p>Để biết thêm thông tin về các menu, xem các hướng dẫn cho nhà phát triển <a href="{@docRoot}guide/topics/ui/menus.html">Menu</a> và <a href="{@docRoot}guide/topics/ui/actionbar.html">Thanh Hành động</a>.</p>
+
+
+
+
+<h2 id="Lifecycle">Xử lý Vòng đời của Phân đoạn</h2>
+
+<div class="figure" style="width:350px">
+<img src="{@docRoot}images/activity_fragment_lifecycle.png" alt="" />
+<p class="img-caption"><strong>Hình 3.</strong> Ảnh hưởng của vòng đời hoạt động tới vòng đời
+của phân đoạn.</p>
+</div>
+
+<p>Việc quản lý vòng đời của một phân đoạn rất giống với quản lý vòng đời của một hoạt động. Giống như
+hoạt động, phân đoạn có thể tồn tại ở ba trạng thái:</p>
+
+<dl>
+  <dt><i>Tiếp tục</i></dt>
+    <dd>Phân đoạn hiển thị trong hoạt động đang chạy.</dd>
+
+  <dt><i>Tạm dừng</i></dt>
+    <dd>Một hoạt động khác ở trong tiền cảnh và có tiêu điểm, nhưng hoạt động mà phân đoạn
+này nằm trong vẫn hiển thị (hoạt động tiền cảnh mờ một phần hoặc không
+che phủ toàn bộ màn hình).</dd>
+
+  <dt><i>Dừng</i></dt>
+    <dd>Phân đoạn không hiển thị. Hoặc là hoạt động chủ đã bị dừng hoặc
+phân đoạn đã được gỡ bỏ khỏi hoạt động, nhưng được thêm vào ngăn xếp. Phân đoạn dừng
+vẫn còn hoạt động (tất cả thông tin về trạng thái và thành viên đều được hệ thống giữ lại). Tuy nhiên, nó không còn
+hiển thị với người dùng nữa và sẽ bị tắt bỏ nếu hoạt động bị tắt bỏ.</dd>
+</dl>
+
+<p>Cũng như một hoạt động, bạn có thể giữ lại trạng thái của một phân đoạn bằng cách sử dụng {@link
+android.os.Bundle}, trong trường hợp tiến trình của hoạt động bị tắt bỏ và bạn cần khôi phục
+trạng thái của phân đoạn khi hoạt động được tạo lại. Bạn có thể lưu trạng thái trong phương pháp gọi lại {@link
+android.app.Fragment#onSaveInstanceState onSaveInstanceState()} của phân đoạn và khôi phục nó trong
+hoặc {@link android.app.Fragment#onCreate onCreate()}, {@link
+android.app.Fragment#onCreateView onCreateView()}, hoặc {@link
+android.app.Fragment#onActivityCreated onActivityCreated()}. Để biết thêm thông tin về việc lưu
+trạng thái, xem tài liệu <a href="{@docRoot}guide/components/activities.html#SavingActivityState">Hoạt động</a>
+.</p>
+
+<p>Sự khác nhau quan trọng nhất trong vòng đời giữa một hoạt động và một phân đoạn đó là cách chúng
+được lưu trữ trong ngăn xếp tương ứng. Hoạt động được đặt vào một ngăn xếp gồm nhiều hoạt động
+, được quản lý bởi hệ thống theo mặc định khi bị dừng (sao cho người dùng có thể điều hướng lại
+nó bằng nút <em>Quay lại</em> như được đề cập trong <a href="{@docRoot}guide/components/tasks-and-back-stack.html">Tác vụ và Ngăn xếp</a>).
+Tuy nhiên, phân đoạn chỉ được đặt vào một ngăn xếp do hoạt động chủ quản lý khi bạn
+yêu cầu rõ ràng rằng trường hợp đó phải được lưu bằng cách gọi {@link
+android.app.FragmentTransaction#addToBackStack(String) addToBackStack()} trong một giao tác
+gỡ bỏ phân đoạn.</p>
+
+<p>Nếu không thì việc quản lý vòng đời của phân đoạn rất giống với việc quản lý vòng đời
+của hoạt động. Vì thế, những nội dung áp dụng cho <a href="{@docRoot}guide/components/activities.html#Lifecycle">quản lý vòng đời của
+hoạt động</a> cũng áp dụng cho phân đoạn. Tuy nhiên, việc mà bạn cũng cần phải hiểu đó là cách
+vòng đời của hoạt động ảnh hưởng tới vòng đời của phân đoạn.</p>
+
+<p class="caution"><strong>Chú ý:</strong> Nếu bạn cần một đối tượng {@link android.content.Context} trong
+{@link android.app.Fragment}của mình, bạn có thể gọi {@link android.app.Fragment#getActivity()}.
+Tuy nhiên, nhớ chỉ được gọi {@link android.app.Fragment#getActivity()} khi phân đoạn được gắn với
+một hoạt động. Khi phân đoạn chưa được gắn, hoặc bị gỡ trong khi kết thúc
+vòng đời của nó, {@link android.app.Fragment#getActivity()} sẽ trả về rỗng.</p>
+
+
+<h3 id="CoordinatingWithActivity">Phối hợp với vòng đời của hoạt động</h3>
+
+<p>Vòng đời của hoạt động mà phân đoạn có ở trong đó sẽ trực tiếp ảnh hưởng tới vòng đời của phân đoạn
+, sao cho mỗi lệnh gọi lại vòng đời cho hoạt động đó sẽ dẫn tới một lệnh gọi lại tương tự cho từng
+phân đoạn. Ví dụ, khi hoạt động nhận được {@link android.app.Activity#onPause}, mỗi
+phân đoạn trong hoạt động sẽ nhận được {@link android.app.Fragment#onPause}.</p>
+
+<p>Tuy nhiên, các phân đoạn có thêm một vài lệnh gọi lại vòng đời nhằm xử lý tương tác duy nhất với
+hoạt động để thực hiện các hành động như xây dựng và hủy UI của phân đoạn. Những phương pháp gọi lại
+bổ sung này là:</p>
+
+<dl>
+  <dt>{@link android.app.Fragment#onAttach onAttach()}</dt>
+    <dd>Được gọi khi phân đoạn đã được liên kết với hoạt động {@link
+android.app.Activity} được chuyển ở đây).</dd>
+  <dt>{@link android.app.Fragment#onCreateView onCreateView()}</dt>
+    <dd>Được gọi khi tạo phân cấp dạng xem được liên kết với phân đoạn.</dd>
+  <dt>{@link android.app.Fragment#onActivityCreated onActivityCreated()}</dt>
+    <dd>Được gọi khi phương pháp {@link android.app.Activity#onCreate
+onCreate()} của hoạt động đã trả về.</dd>
+  <dt>{@link android.app.Fragment#onDestroyView onDestroyView()}</dt>
+    <dd>Được gọi khi phân cấp dạng xem được liên kết với phân đoạn đang được gỡ bỏ.</dd>
+  <dt>{@link android.app.Fragment#onDetach onDetach()}</dt>
+    <dd>Được gọi khi phân đoạn đang được bỏ liên kết khỏi hoạt động.</dd>
+</dl>
+
+<p>Tiến trình vòng đời của một phân đoạn, do bị ảnh hưởng bởi hoạt động chủ của nó, được minh họa
+bởi hình 3. Trong hình này, bạn có thể thấy cách thức mỗi trạng thái nối tiếp nhau của hoạt động sẽ xác định
+các phương pháp gọi lại nào mà một phân đoạn có thể nhận được. Ví dụ, khi hoạt động đã nhận được lệnh gọi lại {@link
+android.app.Activity#onCreate onCreate()} của nó, phân đoạn trong hoạt động sẽ nhận được không quá
+lệnh gọi lại {@link android.app.Fragment#onActivityCreated onActivityCreated()}.</p>
+
+<p>Sau khi hoạt động đạt trạng thái tiếp tục, bạn có thể tự do thêm và gỡ bỏ phân đoạn vào
+hoạt động. Vì thế, chỉ trong khi hoạt động ở trạng thái tiếp tục thì vòng đời của một phân đoạn
+mới có thể thay đổi độc lập.</p>
+
+<p>Tuy nhiên, khi hoạt động rời khỏi trạng thái tiếp tục, phân đoạn lại bị hoạt động đẩy qua vòng đời
+của mình.</p>
+
+
+
+
+<h2 id="Example">Ví dụ</h2>
+
+<p>Để kết hợp mọi nội dung được đề cập trong tài liệu này, sau đây là một ví dụ về hoạt động
+sử dụng hai phân đoạn để tạo một bố trí hai bảng. Hoạt động bên dưới bao gồm một phân đoạn để
+hiển thị danh sách các vở kịch của Shakespeare và một phân đoạn khác để hiển thị tóm tắt về vở kịch khi được chọn
+từ danh sách. Nó cũng minh họa cách cung cấp các cấu hình phân đoạn khác nhau,
+dựa trên cấu hình màn hình.</p>
+
+<p class="note"><strong>Lưu ý:</strong> Mã nguồn hoàn chỉnh cho hoạt động này có sẵn trong
+<a href="{@docRoot}resources/samples/ApiDemos/src/com/example/android/apis/app/FragmentLayout.html">{@code
+FragmentLayout.java}</a>.</p>
+
+<p>Hoạt động chính áp dụng một bố trí theo cách thông thường, trong {@link
+android.app.Activity#onCreate onCreate()}:</p>
+
+{@sample development/samples/ApiDemos/src/com/example/android/apis/app/FragmentLayout.java main}
+
+<p>Bố trí được áp dụng là {@code fragment_layout.xml}:</p>
+
+{@sample development/samples/ApiDemos/res/layout-land/fragment_layout.xml layout}
+
+<p>Khi sử dụng bố trí này, hệ thống sẽ khởi tạo {@code TitlesFragment} (liệt kê tên
+các vở kịch) ngay khi hoạt động nạp bố trí, trong khi {@link android.widget.FrameLayout}
+(nơi sẽ xuất hiện phân đoạn hiển thị tóm tắt về vở kịch) chiếm khoảng trống phía bên phải của
+màn hình, nhưng ban đầu vẫn trống. Như bạn sẽ thấy bên dưới, mãi tới khi người dùng chọn một mục
+từ danh sách thì một phân đoạn mới được đặt vào {@link android.widget.FrameLayout}.</p>
+
+<p>Tuy nhiên, không phải tất cả cấu hình màn hình đều đủ rộng để hiển thị cả danh sách
+các vở kịch và tóm tắt bên cạnh nhau. Vì thế, bố trí trên chỉ được sử dụng cho cấu hình
+màn hình khổ ngang bằng cách lưu nó dưới dạng {@code res/layout-land/fragment_layout.xml}.</p>
+
+<p>Vì thế, khi màn hình hướng đứng, hệ thống sẽ áp dụng bố trí sau, nó
+được lưu tại {@code res/layout/fragment_layout.xml}:</p>
+
+{@sample development/samples/ApiDemos/res/layout/fragment_layout.xml layout}
+
+<p>Bố trí này chỉ bao gồm {@code TitlesFragment}. Điều này có nghĩa là, khi thiết bị ở
+hướng đứng, chỉ danh sách tên vở kịch được hiển thị. Vì thế, khi người dùng nhấp vào một
+mục danh sách trong cấu hình này, ứng dụng sẽ bắt đầu một hoạt động mới để hiển thị tóm tắt,
+thay vì tải một phân đoạn thứ hai.</p>
+
+<p>Tiếp theo, bạn có thể thấy cách hoàn thành điều này trong các lớp phân đoạn. Đầu tiên là {@code
+TitlesFragment}, hiển thị danh sách tên các vở kịch của Shakespeare. Phân đoạn này sẽ mở rộng {@link
+android.app.ListFragment} và dựa vào nó để xử lý hầu hết công việc về dạng xem danh sách.</p>
+
+<p>Khi bạn kiểm tra đoạn mã này, hãy để ý rằng có hai hành vi có thể khi người dùng nhấp vào một
+mục danh sách: phụ thuộc vào bố trí nào trong hai bố trí đang hiện hoạt, nó có thể hoặc tạo và hiển thị một phân đoạn
+mới để hiển thị chi tiết trong cùng hoạt động (thêm phân đoạn vào {@link
+android.widget.FrameLayout}), hoặc bắt đầu một hoạt động mới (tại đó phân đoạn có thể được hiển thị).</p>
+
+{@sample development/samples/ApiDemos/src/com/example/android/apis/app/FragmentLayout.java titles}
+
+<p>Phân đoạn thứ hai, {@code DetailsFragment} sẽ hiển thị tóm tắt vở kịch cho mục được chọn từ
+danh sách trong {@code TitlesFragment}:</p>
+ 
+{@sample development/samples/ApiDemos/src/com/example/android/apis/app/FragmentLayout.java details}
+
+<p>Nhớ lại ở lớp {@code TitlesFragment} rằng, nếu người dùng nhấp vào một mục danh sách và bố trí
+hiện tại <em>không</em> có dạng xem {@code R.id.details} (là nơi mà
+{@code DetailsFragment} thuộc về), khi đó, ứng dụng sẽ bắt đầu hoạt động {@code DetailsActivity}
+để hiển thị nội dung của mục đó.</p>
+
+<p>Sau đây là {@code DetailsActivity}, nó chỉ đơn thuần nhúng {@code DetailsFragment} để hiển thị
+tóm tắt vở kịch được chọn khi màn hình ở hướng đứng:</p>
+
+{@sample development/samples/ApiDemos/src/com/example/android/apis/app/FragmentLayout.java
+details_activity}
+ 
+<p>Lưu ý rằng hoạt động này tự kết thúc nếu cấu hình là khổ ngang, sao cho hoạt động
+chính có thể chiếm lấy và hiển thị {@code DetailsFragment} bên cạnh {@code TitlesFragment}.
+Điều này có thể xảy ra nếu người dùng bắt đầu {@code DetailsActivity} ở dạng hướng đứng, nhưng
+sau đó xoay thành khổ ngang (làm vậy sẽ bắt đầu lại hoạt động hiện tại).</p>
+
+
+<p>Để biết thêm mẫu sử dụng phân đoạn (và toàn bộ tệp nguồn cho ví dụ này),
+hãy xem ứng dụng mẫu API Demos có sẵn trong <a href="{@docRoot}resources/samples/ApiDemos/src/com/example/android/apis/app/index.html#Fragment">
+ApiDemos</a> (có thể tải xuống từ <a href="{@docRoot}resources/samples/get.html">Thành phần SDK Mẫu</a>).</p>
+
+

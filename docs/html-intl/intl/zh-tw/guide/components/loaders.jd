@@ -1,0 +1,494 @@
+page.title=載入器
+parent.title=Activity
+parent.link=activities.html
+@jd:body
+<div id="qv-wrapper">
+<div id="qv">
+    <h2>本文件內容</h2>
+    <ol>
+    <li><a href="#summary">載入器 API 摘要</a></li>
+    <li><a href="#app">在應用程式中使用載入器</a>
+      <ol>
+        <li><a href="#requirements"></a></li>
+        <li><a href="#starting">啟動載入器</a></li>
+        <li><a href="#restarting">重新啟動載入器</a></li>
+        <li><a href="#callback">使用 LoaderManager 回呼</a></li>
+      </ol>
+    </li>
+    <li><a href="#example">範例說明</a>
+       <ol>
+         <li><a href="#more_examples">其他範例</a></li>
+        </ol>
+    </li>
+  </ol>
+    
+  <h2>重要類別</h2>
+    <ol>
+      <li>{@link android.app.LoaderManager}</li>
+      <li>{@link android.content.Loader}</li>
+
+    </ol>   
+    
+    <h2>相關範例</h2>
+   <ol>
+     <li> <a href="{@docRoot}resources/samples/ApiDemos/src/com/example/android/apis/app/LoaderCursor.html">LoaderCursor
+</a></li>
+     <li> <a href="{@docRoot}resources/samples/ApiDemos/src/com/example/android/apis/app/LoaderThrottle.html">LoaderThrottle
+</a></li>
+   </ol>
+  </div>
+</div>
+
+<p>在 Android 3.0 導入的載入器可輕鬆在 Activity 或片段中，以非同步方式載入資料。
+載入器的特性如下：</p>
+  <ul>
+    <li>適用於所有 {@link android.app.Activity} 和 {@link
+android.app.Fragment} 。</li>
+    <li>提供以非同步方式載入資料。</li>
+    <li>監視其資料來源，並在內容變更時傳送新的結果。
+</li>
+    <li>可在設定變更後重新建立時，自動重新連接到上次載入器的游標，
+因此不需要重新查詢資料。
+</li>
+  </ul>
+ 
+<h2 id="summary">載入器 API 摘要</h2>
+
+<p>有多個類別和介面可能與在應用程式中使用載入器有關。
+請參閱下表的摘要說明：</p>
+
+<table>
+  <tr>
+    <th>類別/介面</th>
+    <th>說明</th>
+  </tr>
+  <tr>
+    <td>{@link android.app.LoaderManager}</td>
+    <td>與 {@link android.app.Activity} 或
+{@link android.app.Fragment} 相關聯的抽象類別，可用於管理一或多個 {@link
+android.content.Loader} 執行個體。這可以協助應用程式管理所需執行時間較長的操作與 {@link android.app.Activity} 或 {@link android.app.Fragment} 生命週期搭配使用，這最常與
+{@link android.content.CursorLoader} 搭配使用，不過應用程式能夠撰寫自己的載入器來載入其他類型的資料。
+
+
+
+    <br />
+    <br />
+    每個 Activity 或片段只能有一個 {@link android.app.LoaderManager}，但 {@link android.app.LoaderManager} 可以有多個載入器。
+</td>
+  </tr>
+  <tr>
+    <td>{@link android.app.LoaderManager.LoaderCallbacks}</td>
+    <td>可供用戶端與 {@link
+android.app.LoaderManager} 互動的回呼介面。例如，您使用 {@link
+android.app.LoaderManager.LoaderCallbacks#onCreateLoader onCreateLoader()}
+回呼方法來建立新的載入器。</td>
+  </tr>
+  <tr>
+    <td>{@link android.content.Loader}</td>
+    <td>以非同步方式載入資料的抽象類別。這是載入器的基本類別。
+您通常會使用 {@link
+android.content.CursorLoader}，但您也可以實作自己的子類別。載入器處於使用中時，應會監視其資料來源，並在內容有變更時傳送新的結果。
+
+ </td>
+  </tr>
+  <tr>
+    <td>{@link android.content.AsyncTaskLoader}</td>
+    <td>提供 {@link android.os.AsyncTask} 以執行工作的抽象載入器。</td>
+  </tr>
+  <tr>
+    <td>{@link android.content.CursorLoader}</td>
+    <td>查詢
+{@link android.content.ContentResolver} 並傳回 {@link
+android.database.Cursor} 的 {@link android.content.AsyncTaskLoader} 子類別。此類別會以標準方式實作 {@link
+android.content.Loader} 通訊協定，用來查詢建置於 {@link android.content.AsyncTaskLoader} 的游標，以便在背景執行緒中執行游標查詢，藉此避免封鎖應用程式的 UI。
+
+
+以非同步方式從 {@link
+android.content.ContentProvider} 載入資料，而不是透過片段或 Activity 的 API 來管理查詢，最好的方法就是使用此載入器。
+</td>
+  </tr>
+</table>
+
+<p>上表中的類別和介面就是您將用來在應用程式中實作載入器的基本元件。
+上述元件不需要在您建立載入器時全部使用，但您必須一律參照到 {@link
+android.app.LoaderManager}，才能初始化載入器並實作
+{@link android.content.Loader} 類別，例如 {@link
+android.content.CursorLoader}。
+以下各節說明如何在應用程式中使用這些類別和介面。
+</p>
+
+<h2 id ="app">在應用程式中使用載入器</h2>
+<p>本節說明如何在 Android 應用程式中使用載入器。使用載入器的應用程式通常包括下列物件：
+</p>
+<ul>
+  <li>{@link android.app.Activity} 或 {@link android.app.Fragment}。</li>
+  <li>{@link android.app.LoaderManager} 的執行個體。</li>
+  <li>可載入 {@link
+android.content.ContentProvider} 所備份資料的 {@link android.content.CursorLoader}。或者，您可以實作自己的
+{@link android.content.Loader} 子類別或 {@link android.content.AsyncTaskLoader}，從其他來源載入資料。
+</li>
+  <li>{@link android.app.LoaderManager.LoaderCallbacks} 的實作。
+您可以在這裡建立新的載入器和管理對現有載入器的參照。
+</li> 
+<li>顯示載入器資料的一種方式，例如 {@link
+android.widget.SimpleCursorAdapter}。</li>
+  <li>使用 {@link android.content.CursorLoader} 時的資料來源，例如 {@link android.content.ContentProvider}。
+</li>
+</ul>
+<h3 id="starting">啟動載入器</h3>
+
+<p>{@link android.app.LoaderManager} 可在 {@link android.app.Activity} 或 {@link android.app.Fragment} 內管理一或多個 {@link
+android.content.Loader} 執行個體。
+每個 Activity 或片段只能有一個 {@link
+android.app.LoaderManager}。</p> 
+
+<p>您通常會在 Activity 的 {@link
+android.app.Activity#onCreate onCreate()} 方法內或在片段的 {@link android.app.Fragment#onActivityCreated onActivityCreated()} 方法內，初始化 {@link android.content.Loader}，
+
+如下所示：
+</p>
+
+<pre>// Prepare the loader.  Either re-connect with an existing one,
+// or start a new one.
+getLoaderManager().initLoader(0, null, this);</pre>
+
+<p>{@link android.app.LoaderManager#initLoader initLoader()} 方法採用下列參數：
+</p>
+<ul>
+  <li>可識別載入器的不重複 ID。在本範例中，此 ID 為 0。</li>
+<li>可在建構時提供給載入器的選用引數 (在本範例中為<code>null</code>)。
+</li> 
+
+<li>{@link android.app.LoaderManager.LoaderCallbacks} 實作，
+{@link android.app.LoaderManager} 會呼叫此實作來回報載入器事件。在本範例中，本機類別會實作 {@link
+android.app.LoaderManager.LoaderCallbacks} 執行個體，以將參照傳送給它自己 ({@code this})。
+
+</li> 
+</ul>
+<p>{@link android.app.LoaderManager#initLoader initLoader()} 呼叫可確保載入器已初始化且處於有效狀態。
+可能會有兩種結果：</p>
+<ul>
+  <li>如果 ID 所指定的載入器已經存在，就會重複使用上次建立的載入器。
+</li>
+  <li>如果 ID 所指定的載入器「不存在」<em></em>，
+{@link android.app.LoaderManager#initLoader initLoader()} 會觸發
+{@link android.app.LoaderManager.LoaderCallbacks} 方法 {@link android.app.LoaderManager.LoaderCallbacks#onCreateLoader onCreateLoader()}。
+您可以在這裡實作程式碼以具現化及傳回新的載入器。
+如需詳細資訊，請參閱 <a href="#onCreateLoader">onCreateLoader</a>。</li>
+</ul>
+<p>在任一情況下，指定的 {@link android.app.LoaderManager.LoaderCallbacks}實作會與載入器建立關聯且會在載入器狀態變更時呼叫。
+
+如果進行此呼叫時，呼叫器處於已啟動狀態，而要求的載入器已經存在並產生自己的資料，那麼系統會立即呼叫 {@link
+android.app.LoaderManager.LoaderCallbacks#onLoadFinished onLoadFinished()} (在 {@link android.app.LoaderManager#initLoader initLoader()} 期間)，請務必做好發生這種情況的準備。
+
+
+
+如要進一步瞭解此回呼，請參閱 <a href="#onLoadFinished">onLoadFinished
+</a>。</p>
+
+<p>請注意，{@link android.app.LoaderManager#initLoader initLoader()}方法會傳回建立的 {@link android.content.Loader}，但您不需要擷取它的參照。
+
+{@link android.app.LoaderManager} 會自動管理載入器的生命週期。
+{@link android.app.LoaderManager} 會在必要時啟動及停止載入，並維護載入器的狀態與其相關內容。
+
+顧名思義，您鮮少會直接與載入器互動 (但如需使用載入器方法微調載入器行為的範例，請參閱 <a href="{@docRoot}resources/samples/ApiDemos/src/com/example/android/apis/app/LoaderThrottle.html"> LoaderThrottle</a> 範例)。
+
+當發生特定事件時，您最常會使用 {@link
+android.app.LoaderManager.LoaderCallbacks} 方法來介入載入程序。
+
+如要進一步瞭解此主題，請參閱<a href="#callback">使用 LoaderManager 回呼</a>。</p>
+
+<h3 id="restarting">重新啟動載入器</h3>
+
+<p>當您使用 {@link android.app.LoaderManager#initLoader initLoader()} (如上所示)，它會使用已指定 ID 的現有載入器 (如果有的話)。
+
+如果沒有，就會自行建立載入器。不過，有時候您會想捨棄舊資料並從頭開始。
+</p>
+
+<p>如要捨棄舊資料，請使用 {@link
+android.app.LoaderManager#restartLoader restartLoader()}。例如，當使用者的查詢改變時，實作 {@link android.widget.SearchView.OnQueryTextListener} 會重新啟動載入器。
+
+您必須重新啟動載入器，才能使用修訂後的搜尋篩選器執行新的查詢：
+</p>
+
+<pre>
+public boolean onQueryTextChanged(String newText) {
+    // Called when the action bar search text has changed.  Update
+    // the search filter, and restart the loader to do a new query
+    // with this filter.
+    mCurFilter = !TextUtils.isEmpty(newText) ? newText : null;
+    getLoaderManager().restartLoader(0, null, this);
+    return true;
+}</pre>
+
+<h3 id="callback">使用 LoaderManager 回呼</h3>
+
+<p>{@link android.app.LoaderManager.LoaderCallbacks} 是回呼介面，可讓用戶端與 {@link android.app.LoaderManager} 互動。
+ </p>
+<p>載入器 (特別是 {@link android.content.CursorLoader}) 在停止之後，應該會保留它們的資料。
+這可讓應用程式保留其在 Activity 或片段的 {@link android.app.Activity#onStop
+onStop()} 與 {@link android.app.Activity#onStart onStart()} 方法間的資料，好讓使用者回到應用程式時，不必枯等資料重新載入。
+
+
+您可以使用 {@link android.app.LoaderManager.LoaderCallbacks} 方法，藉以得知何時該建立新的載入器，以及指示應用程式何時該停止使用載入器的資料。
+
+</p>
+
+<p>{@link android.app.LoaderManager.LoaderCallbacks} 包含以下方法：
+</p>
+<ul>
+  <li>{@link android.app.LoaderManager.LoaderCallbacks#onCreateLoader onCreateLoader()} — 具現化及傳回指定 ID 的新 {@link android.content.Loader}。
+
+</li></ul>
+<ul>
+  <li> {@link android.app.LoaderManager.LoaderCallbacks#onLoadFinished onLoadFinished()} — 當先前建立的載入器已完成其載入工作時呼叫。
+
+</li></ul>
+<ul>
+  <li>{@link android.app.LoaderManager.LoaderCallbacks#onLoaderReset onLoaderReset()} — 正要重設先前建立的載入器時呼叫，使其資料無法使用。
+
+
+</li>
+</ul>
+<p>以上方法在下列幾節有更詳細的說明。</p>
+
+<h4 id ="onCreateLoader">onCreateLoader</h4>
+
+<p>當您嘗試存取載入器 (例如，透過 {@link
+android.app.LoaderManager#initLoader initLoader()}) 時，系統會檢查根據 ID 指定的載入器是否已存在。
+如果不存在，就會觸發 {@link
+android.app.LoaderManager.LoaderCallbacks} 方法 {@link
+android.app.LoaderManager.LoaderCallbacks#onCreateLoader onCreateLoader()}。您可以在這裡建立新的載入器。
+這通常會是 {@link
+android.content.CursorLoader}，但您也可以實作自己的 {@link
+android.content.Loader} 子類別。 </p>
+
+<p>在此範例中，{@link
+android.app.LoaderManager.LoaderCallbacks#onCreateLoader onCreateLoader()} 回呼方法會建立 {@link android.content.CursorLoader}。
+您必須使用其建構函式方法來建置
+{@link android.content.CursorLoader}，其需要一組完整的資訊才能對 {@link
+android.content.ContentProvider} 執行查詢。
+具體來說，建構函式方法需要以下項目：</p>
+<ul>
+  <li>uri<em></em> - 要擷取內容的 URI。 </li>
+  <li>projection<em></em> - 要傳回的欄清單。傳送
+<code>null</code> 將會傳回無效的所有欄。 </li>
+  <li>selection<em></em> - 篩選器會採用 SQL WHERE 子句的格式 (WHERE 本身除外) 宣告要傳回的列。
+傳送
+<code>null</code> 將會傳回指定 URI 的所有列。 </li>
+  <li>selectionArgs<em></em> - 您可能會在選取項目中包含 ?s，而其會由來自 selectionArgs<em></em> 的值按照其出現在選取項目中的順序所取代。
+
+值將會繫結為字串。 </li>
+  <li>sortOrder<em></em> - 如何採用 SQL ORDER BY 子句的格式 (ORDER BY 本身除外) 來排列各列的順序。
+傳遞 <code>null</code> 將會使用預設的排序順序，其可能是無排序順序。
+</li>
+</ul>
+<p>例如：</p>
+<pre>
+ // If non-null, this is the current filter the user has provided.
+String mCurFilter;
+...
+public Loader&lt;Cursor&gt; onCreateLoader(int id, Bundle args) {
+    // This is called when a new Loader needs to be created.  This
+    // sample only has one Loader, so we don't care about the ID.
+    // First, pick the base URI to use depending on whether we are
+    // currently filtering.
+    Uri baseUri;
+    if (mCurFilter != null) {
+        baseUri = Uri.withAppendedPath(Contacts.CONTENT_FILTER_URI,
+                  Uri.encode(mCurFilter));
+    } else {
+        baseUri = Contacts.CONTENT_URI;
+    }
+
+    // Now create and return a CursorLoader that will take care of
+    // creating a Cursor for the data being displayed.
+    String select = &quot;((&quot; + Contacts.DISPLAY_NAME + &quot; NOTNULL) AND (&quot;
+            + Contacts.HAS_PHONE_NUMBER + &quot;=1) AND (&quot;
+            + Contacts.DISPLAY_NAME + &quot; != '' ))&quot;;
+    return new CursorLoader(getActivity(), baseUri,
+            CONTACTS_SUMMARY_PROJECTION, select, null,
+            Contacts.DISPLAY_NAME + &quot; COLLATE LOCALIZED ASC&quot;);
+}</pre>
+<h4 id="onLoadFinished">onLoadFinished</h4>
+
+<p>這個方法是在先前建立的載入器已完成其載入工作時呼叫。
+此方法一律是在提供給此載入器的最後資料發佈之前呼叫。
+此時，您應要移除所有使用的舊資料 (由於資料即將發佈)，但不應自行發佈，因為載入器擁有該資料且將會負責處理。
+
+</p>
+
+
+<p>一旦應用程式不再使用資料時，載入器就會立即發佈資料。
+例如，如果資料是來自 {@link
+android.content.CursorLoader} 的游標，您不應該自行對它呼叫 {@link
+android.database.Cursor#close close()}。如果正要將該游標放入
+{@link android.widget.CursorAdapter}，您應該使用 {@link
+android.widget.SimpleCursorAdapter#swapCursor swapCursor()} 方法，如此才不會關閉舊的
+{@link android.database.Cursor}。例如：</p>
+
+<pre>
+// This is the Adapter being used to display the list's data.<br
+/>SimpleCursorAdapter mAdapter;
+...
+
+public void onLoadFinished(Loader&lt;Cursor&gt; loader, Cursor data) {
+    // Swap the new cursor in.  (The framework will take care of closing the
+    // old cursor once we return.)
+    mAdapter.swapCursor(data);
+}</pre>
+
+<h4 id="onLoaderReset">onLoaderReset</h4>
+
+<p>這個方法是在正要重設先前建立的載入器時呼叫，以便使其資料無法使用。
+此回呼方法可讓您知道即將要發佈資料，而能先行將其參照移除。
+  </p>
+<p>此實作會以 <code>null</code> 的值呼叫 
+{@link android.widget.SimpleCursorAdapter#swapCursor swapCursor()}：
+</p>
+
+<pre>
+// This is the Adapter being used to display the list's data.
+SimpleCursorAdapter mAdapter;
+...
+
+public void onLoaderReset(Loader&lt;Cursor&gt; loader) {
+    // This is called when the last Cursor provided to onLoadFinished()
+    // above is about to be closed.  We need to make sure we are no
+    // longer using it.
+    mAdapter.swapCursor(null);
+}</pre>
+
+
+<h2 id="example">範例說明</h2>
+
+<p>例如，以下是 {@link
+android.app.Fragment} 的完整實作，
+其顯示的 {@link android.widget.ListView} 包含聯絡人內容供應程式的查詢結果。它使用 {@link
+android.content.CursorLoader} 管理對供應程式的查詢。</p>
+ 
+<p>如本範例所示，針對要存取使用者聯絡人的應用程式，它的宣示說明必須包含 {@link android.Manifest.permission#READ_CONTACTS READ_CONTACTS} 權限。
+
+</p>
+
+<pre>
+public static class CursorLoaderListFragment extends ListFragment
+        implements OnQueryTextListener, LoaderManager.LoaderCallbacks&lt;Cursor&gt; {
+
+    // This is the Adapter being used to display the list's data.
+    SimpleCursorAdapter mAdapter;
+
+    // If non-null, this is the current filter the user has provided.
+    String mCurFilter;
+
+    @Override public void onActivityCreated(Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
+
+        // Give some text to display if there is no data.  In a real
+        // application this would come from a resource.
+        setEmptyText(&quot;No phone numbers&quot;);
+
+        // We have a menu item to show in action bar.
+        setHasOptionsMenu(true);
+
+        // Create an empty adapter we will use to display the loaded data.
+        mAdapter = new SimpleCursorAdapter(getActivity(),
+                android.R.layout.simple_list_item_2, null,
+                new String[] { Contacts.DISPLAY_NAME, Contacts.CONTACT_STATUS },
+                new int[] { android.R.id.text1, android.R.id.text2 }, 0);
+        setListAdapter(mAdapter);
+
+        // Prepare the loader.  Either re-connect with an existing one,
+        // or start a new one.
+        getLoaderManager().initLoader(0, null, this);
+    }
+
+    @Override public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        // Place an action bar item for searching.
+        MenuItem item = menu.add(&quot;Search&quot;);
+        item.setIcon(android.R.drawable.ic_menu_search);
+        item.setShowAsAction(MenuItem.SHOW_AS_ACTION_IF_ROOM);
+        SearchView sv = new SearchView(getActivity());
+        sv.setOnQueryTextListener(this);
+        item.setActionView(sv);
+    }
+
+    public boolean onQueryTextChange(String newText) {
+        // Called when the action bar search text has changed.  Update
+        // the search filter, and restart the loader to do a new query
+        // with this filter.
+        mCurFilter = !TextUtils.isEmpty(newText) ? newText : null;
+        getLoaderManager().restartLoader(0, null, this);
+        return true;
+    }
+
+    @Override public boolean onQueryTextSubmit(String query) {
+        // Don't care about this.
+        return true;
+    }
+
+    @Override public void onListItemClick(ListView l, View v, int position, long id) {
+        // Insert desired behavior here.
+        Log.i(&quot;FragmentComplexList&quot;, &quot;Item clicked: &quot; + id);
+    }
+
+    // These are the Contacts rows that we will retrieve.
+    static final String[] CONTACTS_SUMMARY_PROJECTION = new String[] {
+        Contacts._ID,
+        Contacts.DISPLAY_NAME,
+        Contacts.CONTACT_STATUS,
+        Contacts.CONTACT_PRESENCE,
+        Contacts.PHOTO_ID,
+        Contacts.LOOKUP_KEY,
+    };
+    public Loader&lt;Cursor&gt; onCreateLoader(int id, Bundle args) {
+        // This is called when a new Loader needs to be created.  This
+        // sample only has one Loader, so we don't care about the ID.
+        // First, pick the base URI to use depending on whether we are
+        // currently filtering.
+        Uri baseUri;
+        if (mCurFilter != null) {
+            baseUri = Uri.withAppendedPath(Contacts.CONTENT_FILTER_URI,
+                    Uri.encode(mCurFilter));
+        } else {
+            baseUri = Contacts.CONTENT_URI;
+        }
+
+        // Now create and return a CursorLoader that will take care of
+        // creating a Cursor for the data being displayed.
+        String select = &quot;((&quot; + Contacts.DISPLAY_NAME + &quot; NOTNULL) AND (&quot;
+                + Contacts.HAS_PHONE_NUMBER + &quot;=1) AND (&quot;
+                + Contacts.DISPLAY_NAME + &quot; != '' ))&quot;;
+        return new CursorLoader(getActivity(), baseUri,
+                CONTACTS_SUMMARY_PROJECTION, select, null,
+                Contacts.DISPLAY_NAME + &quot; COLLATE LOCALIZED ASC&quot;);
+    }
+
+    public void onLoadFinished(Loader&lt;Cursor&gt; loader, Cursor data) {
+        // Swap the new cursor in.  (The framework will take care of closing the
+        // old cursor once we return.)
+        mAdapter.swapCursor(data);
+    }
+
+    public void onLoaderReset(Loader&lt;Cursor&gt; loader) {
+        // This is called when the last Cursor provided to onLoadFinished()
+        // above is about to be closed.  We need to make sure we are no
+        // longer using it.
+        mAdapter.swapCursor(null);
+    }
+}</pre>
+<h3 id="more_examples">其他範例</h3>
+
+<p><strong>ApiDemos</strong> 中有數個不同的範例，示範如何使用載入器：
+</p>
+<ul>
+  <li><a href="{@docRoot}resources/samples/ApiDemos/src/com/example/android/apis/app/LoaderCursor.html">LoaderCursor</a> - 上述程式碼片段的完整版本在此。
+
+</li>
+  <li><a href="{@docRoot}resources/samples/ApiDemos/src/com/example/android/apis/app/LoaderThrottle.html"> LoaderThrottle</a> - 以範例說明如何使用節流功能在其資料變更時降低內容供應程式執行的查詢數目。
+</li>
+</ul>
+
+<p>如要進一步瞭解如何下載及安裝 SDK 範例，請參閱<a href="http://developer.android.com/resources/samples/get.html">取得範例</a>。
+ </p>
+

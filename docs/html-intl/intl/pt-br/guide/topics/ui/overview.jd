@@ -1,0 +1,71 @@
+page.title=Visão geral da IU
+@jd:body
+
+
+<p>Todos os elementos da interface do usuário em um aplicativo para Android são criados usando objetos {@link android.view.View} e
+{@link android.view.ViewGroup}. Uma {@link android.view.View} é um objeto que desenha
+algo na tela com o qual o usuário pode interagir. Um {@link android.view.ViewGroup} é um 
+objeto que contém outros objetos {@link android.view.View} (e {@link android.view.ViewGroup}) para
+definir o layout da interface.</p>
+
+<p>O Android fornece uma coleção de subclasses {@link android.view.View} e {@link
+android.view.ViewGroup} que oferecem controles de entrada comuns (como botões e campos de 
+texto) e vários modelos de layout (como um layout linear ou relativo).</p>
+
+
+<h2 id="Layout">Layout da interface do usuário</h2>
+
+<p>A interface do usuário de cada componente do aplicativo é definida usando uma hierarquia de objetos {@link
+android.view.View} e {@link android.view.ViewGroup}, como mostra a figura 1. Cada grupo de vistas
+é um recipiente invisível que organiza vistas de nível inferior, enquanto que as vistas de nível inferior podem ser
+controles de entrada ou outros widgets
+que desenham alguma parte da IU. Essa árvore hierárquica pode ser simples ou complexa, conforme necessário
+(mas a simplicidade é melhor para desempenho).</p>
+
+<img src="{@docRoot}images/viewgroup.png" alt="" />
+<p class="img-caption"><strong>Figura 1.</strong> Ilustração de uma hierarquia de vistas, que define o layout
+de uma IU.</p>
+
+<p>Para declarar o layout, é possível instanciar objetos {@link android.view.View} no código e começar a
+criar uma árvore. Mas a forma mais fácil e efetiva de definir o layout é com um arquivo XML.
+O XML oferece uma estrutura legível por humanos para o layout, similar a HTML.</p>
+
+<p>O nome de um elemento XML para uma vista é respectivo à classe do Android que ele representa. Portanto, um elemento 
+<code>&lt;TextView&gt;</code> cria um widget {@link android.widget.TextView} na IU
+e um elemento <code>&lt;LinearLayout&gt;</code> cria um grupo de vistas de {@link android.widget.LinearLayout}
+. </p>
+
+<p>Por exemplo, um layout vertical simples com uma vista de texto e um botão se parece com:</p>
+<pre>
+&lt;?xml version="1.0" encoding="utf-8"?>
+&lt;LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:layout_width="fill_parent" 
+              android:layout_height="fill_parent"
+              android:orientation="vertical" >
+    &lt;TextView android:id="@+id/text"
+              android:layout_width="wrap_content"
+              android:layout_height="wrap_content"
+              android:text="I am a TextView" />
+    &lt;Button android:id="@+id/button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="I am a Button" />
+&lt;/LinearLayout>
+</pre>
+
+<p>Ao carregar um recurso de layout no aplicativo, o Android inicializa cada nó do layout em um
+objeto em tempo de execução que pode ser usado para definir comportamentos adicionais, consultar o estado do objeto ou modificar o
+layout.</p>
+
+<p>Para obter um guia completo para criar um layout de IU, consulte <a href="declaring-layout.html">Layouts
+XML</a>.
+
+  
+<h2 id="UIComponents">Componentes da interface do usuário</h2>
+
+<p>Você não precisa criar toda a IU usando objetos {@link android.view.View} e {@link
+android.view.ViewGroup}. O Android fornece vários componentes de aplicativo que oferecem
+um layout de IU padrão para os quais basta definir o conteúdo. Esses componentes de IU
+têm um conjunto único de APIs que são descritas nos respectivos documentos, como <a href="{@docRoot}guide/topics/ui/actionbar.html">Barra de ação</a>, <a href="{@docRoot}guide/topics/ui/dialogs.html">Caixas de diálogo</a> e <a href="{@docRoot}guide/topics/ui/notifiers/notifications.html">Notificações de status</a>.</p>
+
+

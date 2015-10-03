@@ -1,0 +1,1196 @@
+page.title=內容供應程式基本概念
+@jd:body
+<div id="qv-wrapper">
+<div id="qv">
+<!-- In this document -->
+<h2>本文件內容</h2>
+<ol>
+    <li>
+        <a href="#Basics">總覽</a>
+        <ol>
+            <li>
+                <a href="#ClientProvider">存取供應程式</a>
+            </li>
+            <li>
+                <a href="#ContentURIs">內容 URI</a>
+            </li>
+        </ol>
+    </li>
+    <li>
+        <a href="#SimpleQuery">從供應程式擷取資料</a>
+        <ol>
+            <li>
+                <a href="#RequestPermissions">要求讀取權限</a>
+            </li>
+            <li>
+                <a href="#Query">建構查詢</a>
+            </li>
+            <li>
+                <a href="#DisplayResults">顯示查詢結果</a>
+            </li>
+            <li>
+                <a href="#GettingResults">從查詢結果取得資料</a>
+            </li>
+        </ol>
+    </li>
+    <li>
+        <a href="#Permissions">內容供應程式權限</a>
+    </li>
+    <li>
+        <a href="#Modifications">插入、更新及刪除資料</a>
+        <ol>
+            <li>
+                <a href="#Inserting">插入資料</a>
+            </li>
+            <li>
+                <a href="#Updating">更新資料</a>
+            </li>
+            <li>
+                <a href="#Deleting">刪除資料</a>
+            </li>
+        </ol>
+    </li>
+    <li>
+        <a href="#DataTypes">供應程式資料類型</a>
+    </li>
+    <li>
+        <a href="#AltForms">供應程式存取權的替代形式</a>
+        <ol>
+            <li>
+                <a href="#Batch">批次存取</a>
+            </li>
+            <li>
+                <a href="#Intents">透過意圖存取資料</a>
+            </li>
+        </ol>
+    </li>
+    <li>
+        <a href="#ContractClasses">合約類別</a>
+    </li>
+    <li>
+        <a href="#MIMETypeReference">MIME 類型參考資料</a>
+    </li>
+</ol>
+
+    <!-- Key Classes -->
+<h2>重要類別</h2>
+    <ol>
+        <li>
+            {@link android.content.ContentProvider}
+        </li>
+        <li>
+            {@link android.content.ContentResolver}
+        </li>
+        <li>
+            {@link android.database.Cursor}
+        </li>
+        <li>
+            {@link android.net.Uri}
+        </li>
+    </ol>
+
+    <!-- Related Samples -->
+<h2>相關範例</h2>
+    <ol>
+        <li>
+        <a href="{@docRoot}resources/samples/ApiDemos/src/com/example/android/apis/view/List2.html">
+        游標 (使用者)</a>
+        </li>
+        <li>
+        <a href="{@docRoot}resources/samples/ApiDemos/src/com/example/android/apis/view/List7.html">
+        游標 (電話)</a>
+        </li>
+    </ol>
+
+    <!-- See also -->
+<h2>另請參閱</h2>
+    <ol>
+        <li>
+            <a href="{@docRoot}guide/topics/providers/content-provider-creating.html">
+            建立內容供應程式</a>
+        </li>
+        <li>
+            <a href="{@docRoot}guide/topics/providers/calendar-provider.html">
+            日曆供應程式</a>
+        </li>
+    </ol>
+</div>
+</div>
+
+    <!-- Intro paragraphs -->
+<p>
+    內容供應程式可管理中央資料存放庫的存取權。供應程式是 Android 應用程式的一部分，通常可提供本身的 UI 方便使用者處理資料。
+
+不過，內容供應程式主要是供其他應用程式使用 (透過供應程式用戶端物件進行存取)。
+供應程式與供應程式用戶端可提供一致的標準介面，除了可用於存取資料，還能用來處理程序間通訊以及保護資料存取的安全。
+
+
+</p>
+<p>
+    本主題涵蓋以下基本概念：
+</p>
+    <ul>
+        <li>內容供應程式的運作方式。</li>
+        <li>可用於從內容供應程式擷取資料的 API。</li>
+        <li>可用於插入、更新或刪除內容供應程式資料的 API。</li>
+        <li>有助於使用供應程式的其他 API 功能。</li>
+    </ul>
+
+    <!-- Basics -->
+<h2 id="Basics">總覽</h2>
+<p>
+    內容供應程式會向外部應用程式以一或多份表格顯示資料，這些表格的樣式類似於關聯式資料庫中的表格。
+每個資料列代表供應程式所收集部分資料類型的單一執行個體，而列中的每個資料欄則代表針對該執行個體收集的個別資料。
+
+
+</p>
+<p>
+    例如，Android 平台內建的其中一個供應程式是使用者字典，其中儲存使用者想保留的非標準字詞的拼寫方式。
+表 1 說明此供應程式表格顯示這種資料的方式：
+
+</p>
+<p class="table-caption">
+    <strong>表 1：</strong>使用者字典表格範例。
+</p>
+<table id="table1" style="width: 50%;">
+    <tr>
+        <th style="width:20%" align="center" scope="col">字詞</th>
+        <th style="width:20%" align="center" scope="col">應用程式 ID</th>
+        <th style="width:20%" align="center" scope="col">頻率</th>
+        <th style="width:20%" align="center" scope="col">地區</th>
+        <th style="width:20%" align="center" scope="col">_ID</th>
+    </tr>
+    <tr>
+        <td align="center" scope="row">mapreduce</td>
+        <td align="center">user1</td>
+        <td align="center">100</td>
+        <td align="center">en_US</td>
+        <td align="center">1</td>
+    </tr>
+    <tr>
+        <td align="center" scope="row">precompiler</td>
+        <td align="center">user14</td>
+        <td align="center">200</td>
+        <td align="center">fr_FR</td>
+        <td align="center">2</td>
+    </tr>
+    <tr>
+        <td align="center" scope="row">applet</td>
+        <td align="center">user2</td>
+        <td align="center">225</td>
+        <td align="center">fr_CA</td>
+        <td align="center">3</td>
+    </tr>
+    <tr>
+        <td align="center" scope="row">const</td>
+        <td align="center">user1</td>
+        <td align="center">255</td>
+        <td align="center">pt_BR</td>
+        <td align="center">4</td>
+    </tr>
+    <tr>
+        <td align="center" scope="row">int</td>
+        <td align="center">user5</td>
+        <td align="center">100</td>
+        <td align="center">en_UK</td>
+        <td align="center">5</td>
+    </tr>
+</table>
+<p>
+    在表 1 中，每個資料列代表標準字典未收錄的某個字詞執行個體。
+每個資料欄則代表該字詞的部分資料，例如初次出現該字詞的地區。
+欄標題為儲存在供應程式中的欄名稱。
+如果想得知某一列的地區，請查看相對應的 <code>locale</code> 欄。以這個供應程式為例，<code>_ID</code> 欄的用途與供應程式自動維護的「主索引鍵」欄相同。
+
+
+</p>
+<p class="note">
+    <strong>注意：</strong>供應程式不需具備主索引鍵，也不必採用 <code>_ID</code> 做為主索引鍵欄的名稱 (如果有此欄的話)。
+不過，如果您想將供應程式的資料繫結至 {@link android.widget.ListView}，就必須將其中一個資料欄命名為 <code>_ID</code>。
+
+如要進一步瞭解這項規定，請參閱<a href="#DisplayResults">顯示查詢結果</a>。
+
+</p>
+<h3 id="ClientProvider">存取供應程式</h3>
+<p>
+    應用程式會透過 {@link android.content.ContentResolver} 用戶端物件存取內容供應程式的資料。
+此物件內含的方法可呼叫供應程式物件 ({@link android.content.ContentProvider} 子類別的其中一項執行個體) 中的同名方法。
+
+
+{@link android.content.ContentResolver} 方法可提供永久儲存空間的「CRUD」(建立、擷取、更新、刪除) 基本功能。
+
+</p>
+<p>
+    用戶端應用程式處理程序中的 {@link android.content.ContentResolver} 物件以及擁有供應程式的應用程式中的 {@link android.content.ContentProvider} 物件，會自動處理程序間通訊。
+{@link android.content.ContentProvider} 還可當作其資料存放庫與外部資料表格之間的抽象層。
+
+
+
+</p>
+<p class="note">
+    <strong>注意：</strong>如要存取供應程式，您的應用程式通常必須透過本身的宣示說明檔案要求特定權限。
+如需詳細資料，請參閱<a href="#Permissions">內容供應程式權限</a>。
+
+</p>
+<p>
+    例如，如要從使用者字典供應程式取得一份列出字詞及其地區的清單，請呼叫 {@link android.content.ContentResolver#query ContentResolver.query()}。
+
+    {@link android.content.ContentResolver#query query()} 方法會呼叫使用者字典供應程式所定義的
+{@link android.content.ContentProvider#query ContentProvider.query()} 方法。
+以下是 
+{@link android.content.ContentResolver#query ContentResolver.query()} 呼叫的程式碼：
+<p>
+<pre>
+// Queries the user dictionary and returns results
+mCursor = getContentResolver().query(
+    UserDictionary.Words.CONTENT_URI,   // The content URI of the words table
+    mProjection,                        // The columns to return for each row
+    mSelectionClause                    // Selection criteria
+    mSelectionArgs,                     // Selection criteria
+    mSortOrder);                        // The sort order for the returned rows
+</pre>
+<p>
+    表 2 列出 
+{@link android.content.ContentResolver#query
+query(Uri,projection,selection,selectionArgs,sortOrder)} 的引數及相對應的 SQL SELECT 陳述式：
+</p>
+<p class="table-caption">
+    <strong>表 2：</strong>Query() 與 SQL 查詢的對照表。
+</p>
+<table id="table2" style="width: 75%;">
+    <tr>
+        <th style="width:25%" align="center" scope="col">query() 引數</th>
+        <th style="width:25%" align="center" scope="col">SELECT 關鍵字/參數</th>
+        <th style="width:50%" align="center" scope="col">備註</th>
+    </tr>
+    <tr>
+        <td align="center"><code>Uri</code></td>
+        <td align="center"><code>FROM <em>table_name</em></code></td>
+        <td><code>Uri</code> 會對應至供應程式中名為的「table_name」<em></em>表格。</td>
+    </tr>
+    <tr>
+        <td align="center"><code>projection</code></td>
+        <td align="center"><code><em>col,col,col,...</em></code></td>
+        <td>
+            <code>projection</code> 代表需針對每個擷取的資料列
+納入的一系列資料欄。
+        </td>
+    </tr>
+    <tr>
+        <td align="center"><code>selection</code></td>
+        <td align="center"><code>WHERE <em>col</em> = <em>value</em></code></td>
+        <td><code>selection</code> 會指定資料列選取條件。</td>
+    </tr>
+    <tr>
+        <td align="center"><code>selectionArgs</code></td>
+        <td align="center">
+            (沒有任何相對應的關鍵字/參數。選取引數會取代選取子句中的 
+<code>?</code> 預留位置。)
+        </td>
+    </tr>
+    <tr>
+        <td align="center"><code>sortOrder</code></td>
+        <td align="center"><code>ORDER BY <em>col,col,...</em></code></td>
+        <td>
+            <code>sortOrder</code> 會指定資料列在傳回的 {@link android.database.Cursor} 中的顯示順序。
+
+        </td>
+    </tr>
+</table>
+<h3 id="ContentURIs">內容 URI</h3>
+<p>
+    <strong>內容 URI</strong> 是指用於識別供應程式資料的 URI，內容 URI 包括整個供應程式的符號名稱 (亦即供應程式的<strong>授權</strong>)，以及指向表格的名稱 (亦即<strong>路徑</strong>)。
+
+當您呼叫用戶端方法來存取供應程式中的表格時，該表格的內容 URI 即為其中一個引數。
+
+
+</p>
+<p>
+    在上方程式碼中，
+{@link android.provider.UserDictionary.Words#CONTENT_URI} 常數包含使用者字典表格「字詞」的內容 URI。
+{@link android.content.ContentResolver} 物件會剖析該 URI 的授權，然後比較授權和已知供應程式的系統表格，藉此「解析」供應程式。
+
+接著 {@link android.content.ContentResolver} 可以查詢引數分派給正確的供應程式。
+
+
+</p>
+<p>
+    {@link android.content.ContentProvider} 會使用內容 URI 的路徑部分選擇要存取的表格。
+供應程式通常包含用於公開每個表格的「路徑」<strong></strong>。
+</p>
+<p>
+    以上方程式碼為例，「字詞」的完整 URI 會如下所示：
+</p>
+<pre>
+content://user_dictionary/words
+</pre>
+<p>
+    其中的 <code>user_dictionary</code> 字串代表供應程式的授權，而 <code>words</code> 字串則是表格的路徑。
+字串 <code>content://</code> (<strong>配置</strong>) 一律會顯示，而起會將此項目識別為內容 URI。
+
+
+</p>
+<p>
+    許多供應程式都可讓您存取表格中的單一資料列，方法是在 URI 後方附加 ID 值。例如，如要從使用者字典擷取 <code>_ID</code> 為 <code>4</code> 的資料列，請使用以下內容 URI：
+
+
+</p>
+<pre>
+Uri singleUri = ContentUris.withAppendedId(UserDictionary.Words.CONTENT_URI,4);
+</pre>
+<p>
+    在更新或刪除您擷取的一組資料列時，通常需要使用 ID 值。
+
+</p>
+<p class="note">
+    <strong>注意：</strong>{@link android.net.Uri} 和 {@link android.net.Uri.Builder} 類別包含可用於從字串建構格式正確之 URI 物件的簡便方法。
+而 {@link android.content.ContentUris} 則包含可用於將 ID 值附加至 URI 的簡便方法。上方程式碼片段是使用 {@link android.content.ContentUris#withAppendedId
+withAppendedId()} 將 ID 附加至 UserDictionary 內容 URI。
+
+
+</p>
+
+
+    <!-- Retrieving Data from the Provider -->
+<h2 id="SimpleQuery">從供應程式擷取資料</h2>
+<p>
+    本節以使用者字典供應程式為例，說明如何從供應程式擷取資料。
+
+</p>
+<p class="note">
+    為了避免造成混淆，本節中的程式碼片段是透過「UI 執行緒」呼叫 {@link android.content.ContentResolver#query ContentResolver.query()}。
+不過在實際程式碼中，您需要透過個別執行緒以非同步方式進行查詢。
+您可以使用 {@link android.content.CursorLoader} 類別 (詳情請參閱<a href="{@docRoot}guide/components/loaders.html">載入器</a>指南) 來完成這項作業。
+
+
+此外，本節中的程式碼都只是程式碼片段，無法呈現完整的應用程式。
+
+</p>
+<p>
+    如要從供應程式擷取資料，請按照下列基本步驟操作：
+</p>
+<ol>
+   <li>
+        要求供應程式的讀取權限。
+   </li>
+   <li>
+        定義可將查詢傳送至供應程式的程式碼。
+   </li>
+</ol>
+<h3 id="RequestPermissions">要求讀取權限</h3>
+<p>
+    您的應用程式需取得供應程式的「讀取權限」，才能從供應程式擷取資料。
+您無法在執行階段要求此權限；您必須使用 <code><a href="{@docRoot}guide/topics/manifest/uses-permission-element.html">&lt;uses-permission&gt;</a></code> 元素和供應程式所定義的確切權限名稱，在宣示說明中指明您需要此權限。
+
+
+
+在宣示說明中指定此元素後，即可為您的應用程式「要求」這項權限。
+當使用者安裝您應用程式時，他們會間接核准此要求。
+
+</p>
+<p>
+    如要找出所使用供應程式的確切讀取權限名稱，以及該供應程式使用的其他存取權限名稱，請查閱供應程式的說明文件。
+
+
+</p>
+<p>
+    如要進一步瞭解用於存取供應程式的權限角色，請參閱<a href="#Permissions">內容供應程式權限</a>。
+
+</p>
+<p>
+    使用者字典供應程式會在本身的宣示說明檔案中定義 <code>android.permission.READ_USER_DICTIONARY</code> 權限，因此想讀取該供應程式的應用程式都必須要求此權限。
+
+
+</p>
+<!-- Constructing the query -->
+<h3 id="Query">建構查詢</h3>
+<p>
+    從供應程式擷取資料的下一個步驟是建構查詢。本節中的第一個程式碼片段可定義數個用於存取使用者字典供應程式的變數：
+
+</p>
+<pre class="prettyprint">
+
+// A "projection" defines the columns that will be returned for each row
+String[] mProjection =
+{
+    UserDictionary.Words._ID,    // Contract class constant for the _ID column name
+    UserDictionary.Words.WORD,   // Contract class constant for the word column name
+    UserDictionary.Words.LOCALE  // Contract class constant for the locale column name
+};
+
+// Defines a string to contain the selection clause
+String mSelectionClause = null;
+
+// Initializes an array to contain selection arguments
+String[] mSelectionArgs = {""};
+
+</pre>
+<p>
+    下一個程式碼片段以使用者字典供應程式為例，示範 {@link android.content.ContentResolver#query ContentResolver.query()} 的使用方式。
+
+供應程式用戶端查詢類似於 SQL 查詢，包含一組要傳回的資料欄、一組選取條件以及一個排序順序。
+
+</p>
+<p>
+    查詢需傳回的一組資料欄稱為「投影」<strong></strong>(即 <code>mProjection</code> 變數)。
+
+</p>
+<p>
+    指定要擷取的資料列的運算式會分為選取子句和選取引數。
+選取子句包含邏輯運算式和布林運算式、欄名稱和值 (即 <code>mSelectionClause</code> 變數)。
+如果您指定可替換的參數 <code>?</code>，而不是某個值，則查詢方法會從選取引數陣列 (即 <code>mSelectionArgs</code> 變數) 擷取相關值。
+
+
+</p>
+<p>
+    在下方程式碼片段中，如果使用者未輸入任何字詞，選取子句會設定為 <code>null</code>，此時查詢會傳回供應程式中的所有字詞。
+如果使用者輸入了某個字詞，則選取子句會設定為 <code>UserDictionary.Words.WORD + " = ?"</code>，而選取引數陣列的第一個元素會設為使用者所輸入的字詞。
+
+
+</p>
+<pre class="prettyprint">
+/*
+ * This defines a one-element String array to contain the selection argument.
+ */
+String[] mSelectionArgs = {""};
+
+// Gets a word from the UI
+mSearchString = mSearchWord.getText().toString();
+
+// Remember to insert code here to check for invalid or malicious input.
+
+// If the word is the empty string, gets everything
+if (TextUtils.isEmpty(mSearchString)) {
+    // Setting the selection clause to null will return all words
+    mSelectionClause = null;
+    mSelectionArgs[0] = "";
+
+} else {
+    // Constructs a selection clause that matches the word that the user entered.
+    mSelectionClause = UserDictionary.Words.WORD + " = ?";
+
+    // Moves the user's input string to the selection arguments.
+    mSelectionArgs[0] = mSearchString;
+
+}
+
+// Does a query against the table and returns a Cursor object
+mCursor = getContentResolver().query(
+    UserDictionary.Words.CONTENT_URI,  // The content URI of the words table
+    mProjection,                       // The columns to return for each row
+    mSelectionClause                   // Either null, or the word the user entered
+    mSelectionArgs,                    // Either empty, or the string the user entered
+    mSortOrder);                       // The sort order for the returned rows
+
+// Some providers return null if an error occurs, others throw an exception
+if (null == mCursor) {
+    /*
+     * Insert code here to handle the error. Be sure not to use the cursor! You may want to
+     * call android.util.Log.e() to log this error.
+     *
+     */
+// If the Cursor is empty, the provider found no matches
+} else if (mCursor.getCount() &lt; 1) {
+
+    /*
+     * Insert code here to notify the user that the search was unsuccessful. This isn't necessarily
+     * an error. You may want to offer the user the option to insert a new row, or re-type the
+     * search term.
+     */
+
+} else {
+    // Insert code here to do something with the results
+
+}
+</pre>
+<p>
+    這個查詢類似下方的 SQL 陳述式：
+</p>
+<pre>
+SELECT _ID, word, locale FROM words WHERE word = &lt;userinput&gt; ORDER BY word ASC;
+</pre>
+<p>
+    這個 SQL 陳述式會使用實際的欄名稱，而不是合約類別常數。
+</p>
+<h4 id="Injection">防範惡意輸入</h4>
+<p>
+    如果內容供應程式所管理的資料是儲存在 SQL 資料庫中，在原始 SQL 陳述式中納入不受信任的外部資料可能會導致 SQL 遭植入惡意程式碼。
+
+</p>
+<p>
+    以下提供選取子句範例：
+</p>
+<pre>
+// Constructs a selection clause by concatenating the user's input to the column name
+String mSelectionClause =  "var = " + mUserInput;
+</pre>
+<p>
+    使用這個選取子句可讓使用者能夠將惡意 SQL 串連至您的 SQL 陳述式。
+    例如，使用者可針對 <code>mUserInput</code> 輸入「nothing; DROP TABLE *;」，以產生 <code>var = nothing; DROP TABLE *;</code> 選取子句。
+由於系統會將選取子句視為 SQL 陳述式，因此這種選取子句可能會導致供應程式清除底層 SQLite 資料庫中的所有表格 (除非您設定供應程式捕捉 <a href="http://en.wikipedia.org/wiki/SQL_injection">SQL 植入</a>嘗試)。
+
+
+
+</p>
+<p>
+    為了避免發生這個問題，請使用包含 <code>?</code> 可替換參數和一系列選取引數的選取子句。
+當您執行此動作時，使用者輸入會直接繫結到查詢，而不是被解譯為 SQL 陳述式的一部分。
+
+    這樣一來，系統就不會將選取子句視為 SQL，進而防止使用者輸入植入惡意 SQL。您也可以使用以下選取子句，而不是透過串連方式納入使用者輸入：
+
+</p>
+<pre>
+// Constructs a selection clause with a replaceable parameter
+String mSelectionClause =  "var = ?";
+</pre>
+<p>
+    設定如下所示的一系列選取引數：
+</p>
+<pre>
+// Defines an array to contain the selection arguments
+String[] selectionArgs = {""};
+</pre>
+<p>
+    如下所示在選取引數中加入一個值：
+</p>
+<pre>
+// Sets the selection argument to the user's input
+selectionArgs[0] = mUserInput;
+</pre>
+<p>
+    建議您使用包含 <code>?</code> 可替換參數和一系列選取引數的選取子句，即使供應程式並非以 SQL 資料庫為基礎亦然。
+
+
+</p>
+<!-- Displaying the results -->
+<h3 id="DisplayResults">顯示查詢結果</h3>
+<p>
+    {@link android.content.ContentResolver#query ContentResolver.query()} 用戶端方法一律會針對符合查詢選取條件的資料列，傳回內含查詢的投影所指定資料欄的 {@link android.database.Cursor}。
+
+{@link android.database.Cursor} 物件會針對本身包含的資料列和資料欄提供隨機讀取存取權。
+
+您可以使用 {@link android.database.Cursor} 方法逐一查看結果中的資料列、決定每個資料欄的資料類型、匯出資料欄的資料，以及檢查結果的其他屬性。
+
+實作某些 {@link android.database.Cursor} 方法可在供應程式的資料變更時自動更新相關物件，或在 {@link android.database.Cursor} 變更時觸發觀察器物件中的方法，或是同時進行以上兩者。
+
+
+</p>
+<p class="note">
+    <strong>注意：</strong>供應程式可能會根據建立查詢物件的屬性限制資料欄的存取權。
+例如，內容供應程式會限制同步配接器存取部分資料欄，避免將這些資料欄傳回 Activity 或服務。
+
+</p>
+<p>
+    如果沒有任何資料欄符合選取條件，則供應程式會傳回 {@link android.database.Cursor#getCount Cursor.getCount()} 為 0 的 
+{@link android.database.Cursor} 物件 (即沒有任何內容的游標)。
+
+</p>
+<p>
+    如果發生內部錯誤，查詢結果將取決於供應程式的決定。供應程式可能會選擇傳回 <code>null</code>，或是擲回 {@link java.lang.Exception}。
+
+</p>
+<p>
+    由於 {@link android.database.Cursor} 是一份資料欄「清單」，因此要顯示 {@link android.database.Cursor} 的內容，最佳做法是透過 {@link android.widget.SimpleCursorAdapter} 將其連結至 {@link android.widget.ListView}。
+
+
+</p>
+<p>
+    以下程式碼片段是上一個程式碼片段的延伸。它會建立內含查詢所擷取 {@link android.database.Cursor} 的 
+{@link android.widget.SimpleCursorAdapter} 物件，並將該物件設定為 {@link android.widget.ListView} 的配接器：
+
+
+</p>
+<pre class="prettyprint">
+// Defines a list of columns to retrieve from the Cursor and load into an output row
+String[] mWordListColumns =
+{
+    UserDictionary.Words.WORD,   // Contract class constant containing the word column name
+    UserDictionary.Words.LOCALE  // Contract class constant containing the locale column name
+};
+
+// Defines a list of View IDs that will receive the Cursor columns for each row
+int[] mWordListItems = { R.id.dictWord, R.id.locale};
+
+// Creates a new SimpleCursorAdapter
+mCursorAdapter = new SimpleCursorAdapter(
+    getApplicationContext(),               // The application's Context object
+    R.layout.wordlistrow,                  // A layout in XML for one row in the ListView
+    mCursor,                               // The result from the query
+    mWordListColumns,                      // A string array of column names in the cursor
+    mWordListItems,                        // An integer array of view IDs in the row layout
+    0);                                    // Flags (usually none are needed)
+
+// Sets the adapter for the ListView
+mWordList.setAdapter(mCursorAdapter);
+</pre>
+<p class="note">
+    <strong>注意：</strong>如要返回內含 {@link android.database.Cursor} 的{@link android.widget.ListView}，您必須為游標加入名為 <code>_ID</code> 的資料欄。
+
+    因為這樣，上述查詢會擷取「字詞」表格的 <code>_ID</code> 欄，即使 {@link android.widget.ListView} 未顯示該資料欄亦然。
+
+    這項限制也是為何大多數供應程式會針對本身的所有表格設定 <code>_ID</code> 欄的原因。
+
+</p>
+
+        <!-- Getting data from query results -->
+<h3 id="GettingResults">從查詢結果取得資料</h3>
+<p>
+    除了單純顯示查詢結果以外，您還可以將它們用於其他工作。例如，您可以從使用者字典擷取拼字，然後在其他供應程式中查閱這些拼字。
+
+如要這麼做，請逐一查看 {@link android.database.Cursor} 中的資料列：
+</p>
+<pre class="prettyprint">
+
+// Determine the column index of the column named "word"
+int index = mCursor.getColumnIndex(UserDictionary.Words.WORD);
+
+/*
+ * Only executes if the cursor is valid. The User Dictionary Provider returns null if
+ * an internal error occurs. Other providers may throw an Exception instead of returning null.
+ */
+
+if (mCursor != null) {
+    /*
+     * Moves to the next row in the cursor. Before the first movement in the cursor, the
+     * "row pointer" is -1, and if you try to retrieve data at that position you will get an
+     * exception.
+     */
+    while (mCursor.moveToNext()) {
+
+        // Gets the value from the column.
+        newWord = mCursor.getString(index);
+
+        // Insert code here to process the retrieved word.
+
+        ...
+
+        // end of while loop
+    }
+} else {
+
+    // Insert code here to report an error if the cursor is null or the provider threw an exception.
+}
+</pre>
+<p>
+    {@link android.database.Cursor} 實作方法包含數個用於從物件擷取不同資料類型的「get」方法。
+例如，上方程式碼片段使用了 {@link android.database.Cursor#getString getString()}。
+此外，這種實作方法還包括 
+{@link android.database.Cursor#getType getType()} 方法，可傳回指定資料欄資料類型的值。
+
+</p>
+
+
+    <!-- Requesting permissions -->
+<h2 id="Permissions">內容供應程式權限</h2>
+<p>
+    供應程式的應用程式可指定其他應用程式在存取供應程式的資料時所需的權限。
+這些權限可確保使用者瞭解應用程式嘗試存取的資料為何。
+根據供應程式需求，其他應用程式必須取得相關必要權限才能存取供應程式。
+使用者可在安裝應用程式時得知這些必要的權限。
+
+</p>
+<p>
+    如果供應程式的應用程式未指定任何權限，則其他應用程式就無法存取供應程式的資料。
+不過，供應程式的應用程式元件一律會具備完整的讀取及寫入存取權，無論供應程式指定的權限為何。
+
+</p>
+<p>
+    如上所述，使用者字典供應程式要求其他應用程式需取得 <code>android.permission.READ_USER_DICTIONARY</code> 權限，才能擷取其中的資料。
+
+    而該供應程式還個別針對插入、更新或刪除資料用途，指定了不同的 <code>android.permission.WRITE_USER_DICTIONARY</code> 權限。
+
+</p>
+<p>
+    如要取得存取供應程式時所需的權限，應用程式可利用 <code><a href="{@docRoot}guide/topics/manifest/uses-permission-element.html">&lt;uses-permission&gt;</a></code> 元素在本身的宣示說明檔案中要求相關權限。
+
+當 Android 套件管理員安裝應用程式時，使用者必須授予該應用程式要求的所有權限。
+使用者授予所有權限後，套件管理員才能繼續進行安裝作業；如果使用者不授予權限，則套件管理員就會取消安裝。
+
+
+</p>
+<p>
+    以下的 
+<code><a href="{@docRoot}guide/topics/manifest/uses-permission-element.html">&lt;uses-permission&gt;</a></code>
+ 元素會要求使用者字典供應程式的讀取存取權：
+</p>
+<pre>
+    &lt;uses-permission android:name="android.permission.READ_USER_DICTIONARY"&gt;
+</pre>
+<p>
+    如要進一步瞭解權限對供應程式存取的影響，請參閱<a href="{@docRoot}guide/topics/security/security.html">安全性和權限</a>指南。
+
+</p>
+
+
+<!-- Inserting, Updating, and Deleting Data -->
+<h2 id="Modifications">插入、更新及刪除資料</h2>
+<p>
+    透過從供應程式擷取資料的相同方式，您也可以利用供應程式用戶端與供應程式的 {@link android.content.ContentProvider} 之間的互動來修改資料。
+
+    如要這麼做，請呼叫其中引數已傳送到相對應 {@link android.content.ContentProvider} 方法的 {@link android.content.ContentResolver} 方法。
+供應程式和供應程式用戶端會自動處理安全性和處理程序間通訊。
+
+</p>
+<h3 id="Inserting">插入資料</h3>
+<p>
+    如要在供應程式中插入資料，請呼叫 
+{@link android.content.ContentResolver#insert ContentResolver.insert()} 方法。
+這個方法會在供應程式中插入新的資料列，並傳回該列的內容 URI。
+    以下程式碼片段示範如何在使用者字典供應程式中插入新的字詞：
+</p>
+<pre class="prettyprint">
+// Defines a new Uri object that receives the result of the insertion
+Uri mNewUri;
+
+...
+
+// Defines an object to contain the new values to insert
+ContentValues mNewValues = new ContentValues();
+
+/*
+ * Sets the values of each column and inserts the word. The arguments to the "put"
+ * method are "column name" and "value"
+ */
+mNewValues.put(UserDictionary.Words.APP_ID, "example.user");
+mNewValues.put(UserDictionary.Words.LOCALE, "en_US");
+mNewValues.put(UserDictionary.Words.WORD, "insert");
+mNewValues.put(UserDictionary.Words.FREQUENCY, "100");
+
+mNewUri = getContentResolver().insert(
+    UserDictionary.Word.CONTENT_URI,   // the user dictionary content URI
+    mNewValues                          // the values to insert
+);
+</pre>
+<p>
+    新資料列的資料會傳入單一 {@link android.content.ContentValues} 物件，該物件的格式與單列游標類似。
+您不必為這個物件中的資料欄指定相同的資料類型，而且如果您不想指定任何值，可以將資料欄設定為 <code>null</code> 以使用 {@link android.content.ContentValues#putNull ContentValues.putNull()}。
+
+
+</p>
+<p>
+    該程式碼片段並不會新增 <code>_ID</code> 欄，這是因為系統自動會維護該欄。
+供應程式會將不重複值 <code>_ID</code> 指派給新增的所有資料列。
+供應程式通常會採用該值做為表格的主索引鍵。
+</p>
+<p>
+    <code>newUri</code> 以下方格式傳回的內容 URI 可用於識別新增的資料列：
+
+</p>
+<pre>
+content://user_dictionary/words/&lt;id_value&gt;
+</pre>
+<p>
+    <code>&lt;id_value&gt;</code> 是 ID 為 <code>_ID</code> 的資料列內容。
+    大多數供應程式可自動偵測這種格式的內容 URI，並據以針對指定的資料列執行特定作業。
+
+</p>
+<p>
+    如要從傳回的 {@link android.net.Uri} 取得 <code>_ID</code> 的值，請呼叫 
+{@link android.content.ContentUris#parseId ContentUris.parseId()}。
+</p>
+<h3 id="Updating">更新資料</h3>
+<p>
+    如要更新資料列，請使用內含經過更新的值 (與您在插入資料時所使用的值相同) 以及選取條件 (與您在建立查詢時所使用的選取條件相同) 的 {@link android.content.ContentValues} 物件。
+
+    您所使用的用戶端方法為 
+{@link android.content.ContentResolver#update ContentResolver.update()}。您只需針對要更新的資料欄，將相關值加到 {@link android.content.ContentValues} 物件即可。
+如果您想清除資料欄的內容，請將值設定為 <code>null</code>。
+
+</p>
+<p>
+    以下程式碼片段會針對地區代碼含有「en」字詞的所有資料列，將其地區代碼變更為 <code>null</code>。
+系統會傳回已更新的資料列數量：
+</p>
+<pre>
+// Defines an object to contain the updated values
+ContentValues mUpdateValues = new ContentValues();
+
+// Defines selection criteria for the rows you want to update
+String mSelectionClause = UserDictionary.Words.LOCALE +  "LIKE ?";
+String[] mSelectionArgs = {"en_%"};
+
+// Defines a variable to contain the number of updated rows
+int mRowsUpdated = 0;
+
+...
+
+/*
+ * Sets the updated value and updates the selected words.
+ */
+mUpdateValues.putNull(UserDictionary.Words.LOCALE);
+
+mRowsUpdated = getContentResolver().update(
+    UserDictionary.Words.CONTENT_URI,   // the user dictionary content URI
+    mUpdateValues                       // the columns to update
+    mSelectionClause                    // the column to select on
+    mSelectionArgs                      // the value to compare to
+);
+</pre>
+<p>
+    建議您在呼叫 {@link android.content.ContentResolver#update ContentResolver.update()} 時對使用者輸入進行檢測。
+如需詳細資訊，請參閱<a href="#Injection">防範惡意輸入</a>。
+
+</p>
+<h3 id="Deleting">刪除資料</h3>
+<p>
+    刪除資料列的方法與擷取資料列資料類似：您必須為想刪除的資料列指定選取條件，用戶端方法最後會傳回已刪除的資料列數量。
+
+    以下程式碼片段可刪除應用程式 ID 為「user」的資料列。此外，這個方法還會傳回已刪除的資料列數量。
+
+</p>
+<pre>
+
+// Defines selection criteria for the rows you want to delete
+String mSelectionClause = UserDictionary.Words.APP_ID + " LIKE ?";
+String[] mSelectionArgs = {"user"};
+
+// Defines a variable to contain the number of rows deleted
+int mRowsDeleted = 0;
+
+...
+
+// Deletes the words that match the selection criteria
+mRowsDeleted = getContentResolver().delete(
+    UserDictionary.Words.CONTENT_URI,   // the user dictionary content URI
+    mSelectionClause                    // the column to select on
+    mSelectionArgs                      // the value to compare to
+);
+</pre>
+<p>
+    建議您在呼叫 {@link android.content.ContentResolver#delete ContentResolver.delete()}　時對使用者輸入進行檢測。
+如需詳細資訊，請參閱<a href="#Injection">防範惡意輸入</a>。
+
+</p>
+<!-- Provider Data Types -->
+<h2 id="DataTypes">供應程式資料類型</h2>
+<p>
+    內容供應程式可提供多種資料類型。使用者字典供應程式只能提供文字，但供應程式還可提供下列格式：
+
+</p>
+    <ul>
+        <li>
+            整數
+        </li>
+        <li>
+            長整數 (long)
+        </li>
+        <li>
+            浮點數
+        </li>
+        <li>
+            長浮點數 (double)
+        </li>
+    </ul>
+<p>
+    供應程式慣用的其他資料類型為二進位大型物件 (BLOB)，這種資料會實作成 64 KB 位元組陣列。
+如果想瞭解可用的資料類型，請查閱 {@link android.database.Cursor} 類別的「get」方法。
+
+</p>
+<p>
+    供應程式的說明文件通常會列出其中每個資料欄的資料類型。
+    使用者字典供應程式的資料類型列在其合約類別 {@link android.provider.UserDictionary.Words} 的參考文件 (如需合約類別的相關資訊，請參閱<a href="#ContractClasses">合約類別</a>一節) 中。
+
+
+    您也可以呼叫 {@link android.database.Cursor#getType
+Cursor.getType()} 來確認可用的資料類型。
+</p>
+<p>
+    此外，供應程式也會保留任何所定義內容 URI 的 MIME 資料類型資訊。您可以利用 MIME 類型資訊確認您的應用程式是否可處理供應程式所提供的資料，或是根據 MIME 類型選擇處理方式類型。
+
+當您使用內含複雜的資料結構或檔案的供應程式時，通常需要使用 MIME 類型。
+
+例如，聯絡人供應程式中的 {@link android.provider.ContactsContract.Data} 表格會使用 MIME 類型為每個資料列中儲存的聯絡人資料加上標籤。
+
+如要取得與內容 URI 相對應的 MIME 類型，請呼叫 
+{@link android.content.ContentResolver#getType ContentResolver.getType()}。
+</p>
+<p>
+    如要瞭解標準與自訂 MIME 類型的語法，請參閱 <a href="#MIMETypeReference">MIME 類型參考資料</a>。
+
+</p>
+
+
+<!-- Alternative Forms of Provider Access -->
+<h2 id="AltForms">供應程式存取權的替代形式</h2>
+<p>
+    開發應用程式時會使用到 3 種供應程式存取權的替代形式：
+</p>
+<ul>
+    <li>
+        <a href="#Batch">批次存取</a>：您可以使用 {@link android.content.ContentProviderOperation} 類別中的方法建立批次存取權呼叫，然後利用 {@link android.content.ContentResolver#applyBatch ContentResolver.applyBatch()} 套用這些呼叫。
+
+
+    </li>
+    <li>
+        非同步查詢：建議您在個別執行緒中進行查詢。您可以使用 {@link android.content.CursorLoader} 類別來完成這項作業。
+如需相關示範說明，請參閱<a href="{@docRoot}guide/components/loaders.html">載入器</a>指南中的範例。
+
+
+    </li>
+    <li>
+        <a href="#Intents">透過意圖存取資料</a>：您無法直接將意圖傳送到供應程式，但可以將意圖傳送到供應程式的應用程式；供應程式的應用程式通常是修改供應程式資料的最佳環境。
+
+
+    </li>
+</ul>
+<p>
+    如需透過意圖進行批次存取和修改作業的相關資訊，請參閱下文。
+</p>
+<h3 id="Batch">批次存取</h3>
+<p>
+    您可利用供應程式的批次存取功能插入大量資料列、透過相同方法呼叫在多個表格中插入資料列，或是透過單次交易 (微型作業) 在處理程序之間執行一組作業。
+
+
+</p>
+<p>
+    如要以「批次模式」存取供應程式，請建立一系列 {@link android.content.ContentProviderOperation} 物件，然後使用 {@link android.content.ContentResolver#applyBatch ContentResolver.applyBatch()} 將這些物件分派給內容供應程式。
+
+
+請將內容供應程式的「授權」<em></em>(而不是特定內容 URI) 傳入這個方法。這樣可讓陣列中的所有 {@link android.content.ContentProviderOperation} 物件能夠在不同表格中運作。
+
+
+如果您呼叫 {@link android.content.ContentResolver#applyBatch
+ContentResolver.applyBatch()}，則系統會傳回一系列結果。
+</p>
+<p>
+    {@link android.provider.ContactsContract.RawContacts} 合約類別的說明包含可展示批次插入作業的程式碼片段。
+<a href="{@docRoot}resources/samples/ContactManager/index.html">聯絡人管理員</a>範例應用程式的 <code>ContactAdder.java</code> 來源檔案包含批次存取範例供您參考。
+
+
+
+</p>
+<div class="sidebox-wrapper">
+<div class="sidebox">
+<h2>使用協助程式顯示資料</h2>
+<p>
+    如果您的應用程式「沒有」<em></em>存取權限，而您仍想使用意圖在其他應用程式中顯示資料。
+例如，日曆應用程式接受用於顯示特定日期或活動的 {@link android.content.Intent#ACTION_VIEW} 意圖。
+
+    這樣可讓您顯示日曆資訊，而不必自行建立使用者介面。如要進一步瞭解此功能，請參閱<a href="{@docRoot}guide/topics/providers/calendar-provider.html">日曆供應程式</a>指南。
+
+
+</p>
+<p>
+    您傳送意圖的目標應用程式未必要與供應程式建立關聯。
+例如，您可以從聯絡人供應程式擷取聯絡人資料，然後將內含聯絡人圖片內容 URI 的 {@link android.content.Intent#ACTION_VIEW} 意圖傳送到圖片檢視器。
+
+
+</p>
+</div>
+</div>
+<h3 id="Intents">透過意圖存取資料</h3>
+<p>
+    意圖可提供內容供應程式的間接存取權。即使您的應用程式沒有存取權限，您仍可透過以下方式允許使用者存取供應程式的資料：從具備權限的應用程式取回結果意圖，或是啟用具備權限的應用程式並允許使用者存取該應用程式。
+
+
+
+</p>
+<h4>透過臨時權限取得存取權</h4>
+<p>
+    即使沒有適當的存取權限，您仍可存取內容供應程式的資料，方法是傳送意圖到沒有權限的應用程式，然後接收內含「URI」權限的結果意圖。
+
+
+    URI 權限是特定內容 URI 專用的權限；在接收權限的 Activity 結束之前，這類權限會維持有效狀態。
+具備永久權限的應用程式可授予臨時權限，只要在結果意圖中設定旗標即可：
+
+</p>
+<ul>
+    <li>
+        <strong>讀取權限：</strong>
+        {@link android.content.Intent#FLAG_GRANT_READ_URI_PERMISSION}
+    </li>
+    <li>
+        <strong>寫入權限：</strong>
+        {@link android.content.Intent#FLAG_GRANT_WRITE_URI_PERMISSION}
+    </li>
+</ul>
+<p class="note">
+    <strong>注意：</strong>這些旗標並不會將讀取或寫入存取權授予系統在內容 URI 中提供授權的供應程式。存取權僅供 URI 使用。
+
+</p>
+<p>
+    供應程式會使用 
+<code><a href="{@docRoot}guide/topics/manifest/provider-element.html">&lt;provider&gt;</a></code>
+ 元素的 
+<code><a href="{@docRoot}guide/topics/manifest/provider-element.html#gprmsn">android:grantUriPermission</a></code>
+ 屬性以及 
+<code><a href="{@docRoot}guide/topics/manifest/provider-element.html">&lt;provider&gt;</a></code>
+ 元素的 
+<code><a href="{@docRoot}guide/topics/manifest/grant-uri-permission-element.html">&lt;grant-uri-permission&gt;</a></code>
+ 子元素在本身的宣示說明中為內容 URI 定義 URI 權限。如要進一步瞭解 URI 權限的運作機制，請參閱<a href="{@docRoot}guide/topics/security/security.html">安全性和權限</a>指南的「URI 權限」。
+
+
+</p>
+<p>
+    例如，即使您沒有 {@link android.Manifest.permission#READ_CONTACTS} 權限，您仍可透過聯絡人供應程式擷取聯絡人資料。
+您可能會想透過可用來在聯絡人的生日當天傳送電子賀卡給對方的應用程式進行這項動作。
+您偏好讓使用者控管要讓您的應用程式使用的聯絡人資料，而不是要求 {@link android.Manifest.permission#READ_CONTACTS} 授權您存取使用者的所有聯絡人以及個人資訊。
+
+
+為了達到這個目的，您進行了下列程序：
+</p>
+<ol>
+    <li>
+        您的應用程式使用 {@link android.app.Activity#startActivityForResult
+startActivityForResult()} 方法，傳送了內含 
+{@link android.content.Intent#ACTION_PICK} 動作的意圖以及「聯絡人」MIME 類型 
+{@link android.provider.ContactsContract.RawContacts#CONTENT_ITEM_TYPE}。
+
+    </li>
+    <li>
+        由於該意圖符合聯絡人應用程式的「選取」Activity 的意圖篩選器，因此該 Activity 會在移動到前景。
+
+    </li>
+    <li>
+        在選取 Activity 中，使用者選取了要更新的聯絡人。
+一旦使用者進行這項動作，選取 Activity 便會呼叫 
+{@link android.app.Activity#setResult setResult(resultcode, intent)} 來設定要傳回您應用程式的意圖。
+該意圖包含使用者所選聯絡人的內容 URI，以及「額外」的旗標 
+{@link android.content.Intent#FLAG_GRANT_READ_URI_PERMISSION}。
+這些旗標可將 URI 權限授予您的應用程式，以便其讀取內容 URI 指向的聯絡人資料。選取 Activity 隨後會呼叫 {@link android.app.Activity#finish()} 來傳回您應用程式的控制權。
+
+
+
+    </li>
+    <li>
+        您的 Activity 返回前景，而系統呼叫您 Activity 的 
+{@link android.app.Activity#onActivityResult onActivityResult()} 方法。
+這個方法可接收聯絡人應用程式中的選取 Activity 所建立的結果意圖。
+
+    </li>
+    <li>
+        即使您未在宣示說明中要求供應程式的永久讀取權限，只要利用結果意圖的內容 URI 即可從聯絡人供應程式讀取聯絡人資料。
+
+您之後可以取得聯絡人的出生日期資訊或聯絡人的電子郵件地址，以便傳送電子賀卡給對方。
+
+    </li>
+</ol>
+<h4>使用其他應用程式</h4>
+<p>
+    允許使用者修改您無法存取的資料的簡單方式，是啟用具備相關權限的應用程式，並且讓使用者透過該應用程式進行修改作業。
+
+</p>
+<p>
+    例如，日曆應用程式接受可讓您啟用應用程式插入 UI 的 
+{@link android.content.Intent#ACTION_INSERT} 意圖。您可以在該意圖中傳入「額外」的資料，供應用程式用於預先填入使用者介面。由於週期性活動的語法較為複雜，因此建議您利用 {@link android.content.Intent#ACTION_INSERT} 啟用日曆應用程式，然後讓使用者透過該應用程式將活動插入日曆供應程式。
+
+
+
+
+</p>
+<!-- Contract Classes -->
+<h2 id="ContractClasses">合約類別</h2>
+<p>
+    合約類別可定義協助應用程式使用內容 URI、欄名稱、意圖動作，以及內容供應程式的其他功能的常數。
+合約類別並不會自動納入供應程式；供應程式的開發人員必須自行定義合約類別，然後將其提供給其他開發人員。
+
+Android 平台內建的大多數供應程式都可在 {@link android.provider} 套件中取得對應的合約類別。
+
+</p>
+<p>
+    例如，使用者字典供應程式有一個內含內容 URI 和欄名稱常數的 {@link android.provider.UserDictionary} 合約類別。
+「字詞」表格的內容 URI 是在 
+{@link android.provider.UserDictionary.Words#CONTENT_URI UserDictionary.Words.CONTENT_URI} 常數中定義。
+
+    此外，{@link android.provider.UserDictionary.Words} 類別也包含欄名稱常數，可用於本指南中的程式碼片段範例。
+例如，您可以將查詢投影定義成如下所示：
+
+</p>
+<pre>
+String[] mProjection =
+{
+    UserDictionary.Words._ID,
+    UserDictionary.Words.WORD,
+    UserDictionary.Words.LOCALE
+};
+</pre>
+<p>
+    聯絡人供應程式的另一個合約類別為 {@link android.provider.ContactsContract}。
+    此類別的參考文件附有程式碼片段範例。其中一個 
+{@link android.provider.ContactsContract.Intents.Insert} 子類別為內含意圖常數和意圖資料的合約類別。
+
+</p>
+
+
+<!-- MIME Type Reference -->
+<h2 id="MIMETypeReference">MIME 類型參考資料</h2>
+<p>
+    內容供應程式可傳回標準 MIME 媒體類型或自訂媒體類型字串，或是以上兩者。
+</p>
+<p>
+    以下是 MIME 類型的格式
+</p>
+<pre>
+<em>type</em>/<em>subtype</em>
+</pre>
+<p>
+    例如，常見的 MIME 類型 <code>text/html</code> 包含 <code>text</code> 類型以及 <code>html</code> 子類型。
+如果供應程式傳回這種 URI 類型，代表採用該 URI 的查詢會傳回內含 HTML 標記的文字。
+
+</p>
+<p>
+    自訂 MIME 類型字串 (亦稱為「廠商專用」MIME 類型) 包含較為複雜的類型<em></em>和子類型<em></em>值。
+針對多個資料欄，類型值<em></em>一律會如下所示
+</p>
+<pre>
+vnd.android.cursor.<strong>dir</strong>
+</pre>
+<p>
+    或者，針對單一資料欄，類型值一律會如下所示
+</p>
+<pre>
+vnd.android.cursor.<strong>item</strong>
+</pre>
+<p>
+    。
+</p>
+<p>
+    子類型<em></em>為供應程式專用。Android 內建的供應程式通常包含簡易的子類型。
+例如，當聯絡人應用程式建立電話號碼資料列時，會為該列設定下列 MIME 類型：
+
+</p>
+<pre>
+vnd.android.cursor.item/phone_v2
+</pre>
+<p>
+    請注意，子類型值為 <code>phone_v2</code>。
+</p>
+<p>
+    其他的供應程式開發人員可能會根據供應程式的授權和表格名稱，自行建立專屬的子類型模式。
+例如，考慮一個包含火車時刻表的供應程式。
+    供應程式的授權為 <code>com.example.trains</code> 且包括 Line1、Line2 和 Line3 表格。
+根據 Line1 表格的內容 URI
+</p>
+<p>
+<pre>
+content://com.example.trains/Line1
+</pre>
+<p>
+    供應程式會傳回 MIME 類型
+</p>
+<pre>
+vnd.android.cursor.<strong>dir</strong>/vnd.example.line1
+</pre>
+<p>
+     根據 Line1 表格的內容 URI
+</p>
+<pre>
+content://com.example.trains/Line2/5
+</pre>
+<p>
+    供應程式會傳回 MIME 類型
+</p>
+<pre>
+vnd.android.cursor.<strong>item</strong>/vnd.example.line2
+</pre>
+<p>
+    大多數內容供應程式會針對其使用的 MIME 類型定義合約類別常數。例如，聯絡人供應程式的合約類別 {@link android.provider.ContactsContract.RawContacts} 會為某個 MIME 類型的原始聯絡人列定義 {@link android.provider.ContactsContract.RawContacts#CONTENT_ITEM_TYPE} 常數。
+
+
+
+
+</p>
+<p>
+    如要進一步瞭解個別資料列的內容 URI，請參閱<a href="#ContentURIs">內容 URI</a>。
+
+</p>

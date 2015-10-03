@@ -1,0 +1,1196 @@
+page.title=コンテンツ プロバイダの基本
+@jd:body
+<div id="qv-wrapper">
+<div id="qv">
+<!-- In this document -->
+<h2>本書の内容</h2>
+<ol>
+    <li>
+        <a href="#Basics">概要</a>
+        <ol>
+            <li>
+                <a href="#ClientProvider">プロバイダにアクセスする</a>
+            </li>
+            <li>
+                <a href="#ContentURIs">コンテンツ URI</a>
+            </li>
+        </ol>
+    </li>
+    <li>
+        <a href="#SimpleQuery">プロバイダからデータを取得する</a>
+        <ol>
+            <li>
+                <a href="#RequestPermissions">読み取りアクセス パーミッションを要求する</a>
+            </li>
+            <li>
+                <a href="#Query">クエリを作成する</a>
+            </li>
+            <li>
+                <a href="#DisplayResults">クエリ結果を表示する</a>
+            </li>
+            <li>
+                <a href="#GettingResults">クエリ結果を取得する</a>
+            </li>
+        </ol>
+    </li>
+    <li>
+        <a href="#Permissions">コンテンツ プロバイダ パーミッション</a>
+    </li>
+    <li>
+        <a href="#Modifications">データを挿入、更新、削除する</a>
+        <ol>
+            <li>
+                <a href="#Inserting">データを挿入する</a>
+            </li>
+            <li>
+                <a href="#Updating">データを更新する</a>
+            </li>
+            <li>
+                <a href="#Deleting">データを削除する</a>
+            </li>
+        </ol>
+    </li>
+    <li>
+        <a href="#DataTypes">プロバイダ データタイプ</a>
+    </li>
+    <li>
+        <a href="#AltForms">プロバイダ アクセスの別の形式</a>
+        <ol>
+            <li>
+                <a href="#Batch">バッチアクセス</a>
+            </li>
+            <li>
+                <a href="#Intents">インテント経由のデータアクセス</a>
+            </li>
+        </ol>
+    </li>
+    <li>
+        <a href="#ContractClasses">コントラクト クラス</a>
+    </li>
+    <li>
+        <a href="#MIMETypeReference">MIME タイプ リファレンス</a>
+    </li>
+</ol>
+
+    <!-- Key Classes -->
+<h2>キークラス</h2>
+    <ol>
+        <li>
+            {@link android.content.ContentProvider}
+        </li>
+        <li>
+            {@link android.content.ContentResolver}
+        </li>
+        <li>
+            {@link android.database.Cursor}
+        </li>
+        <li>
+            {@link android.net.Uri}
+        </li>
+    </ol>
+
+    <!-- Related Samples -->
+<h2>関連サンプル</h2>
+    <ol>
+        <li>
+        <a href="{@docRoot}resources/samples/ApiDemos/src/com/example/android/apis/view/List2.html">
+        Cursor (People)</a>
+        </li>
+        <li>
+        <a href="{@docRoot}resources/samples/ApiDemos/src/com/example/android/apis/view/List7.html">
+        Cursor (Phones)</a>
+        </li>
+    </ol>
+
+    <!-- See also -->
+<h2>関連ドキュメント</h2>
+    <ol>
+        <li>
+            <a href="{@docRoot}guide/topics/providers/content-provider-creating.html">
+            コンテンツ プロバイダの作成</a>
+        </li>
+        <li>
+            <a href="{@docRoot}guide/topics/providers/calendar-provider.html">
+            カレンダー プロバイダ</a>
+        </li>
+    </ol>
+</div>
+</div>
+
+    <!-- Intro paragraphs -->
+<p>
+    コンテンツ プロバイダは、データの中央リポジトリへのアクセスを管理します。プロバイダは Android アプリケーションの一部であり、通常、データを処理するための独自の UI を備えています。
+
+ただし、コンテンツ プロバイダは主に他のアプリケーションでの使用を意図したものです。アプリケーションはプロバイダ クライアント オブジェクトを使用してプロバイダにアクセスします。
+さらに、プロバイダとプロバイダ クライアントにはデータを扱うための一貫性のある標準のインターフェースが備わっており、プロセス間の通信や安全なデータ アクセスを処理します。
+
+
+</p>
+<p>
+    このトピックでは、次の項目に関する基本的な内容を説明します。
+</p>
+    <ul>
+        <li>コンテンツ プロバイダの仕組み。</li>
+        <li>コンテンツ プロバイダからのデータの取得に使用する API。</li>
+        <li>コンテンツ プロバイダへのデータの挿入、データの更新や削除に使用する API。</li>
+        <li>プロバイダでの作業に役立つその他の API 機能。</li>
+    </ul>
+
+    <!-- Basics -->
+<h2 id="Basics">概要</h2>
+<p>
+    外部アプリケーションでは、コンテンツ プロバイダのデータは、リレーショナル データベースで使用する表と同様に、1 つ以上の表として表示されます。
+行はプロバイダが収集するデータの何らかのタイプのインスタンスを表しており、行内のそれぞれの列はインスタンスに対して収集した個々のデータを表しています。
+
+
+</p>
+<p>
+    たとえば、Android プラットフォームに組み込まれているプロバイダの 1 つに単語リストがありますが、ここにはユーザーが保存しておく標準以外の単語のスペリングが格納されます
+表 1 は、このプロバイダの表にデータがどのように格納されているのかを表しています。
+
+</p>
+<p class="table-caption">
+    <strong>表 1:</strong> サンプルの単語リスト表。
+</p>
+<table id="table1" style="width: 50%;">
+    <tr>
+        <th style="width:20%" align="center" scope="col">word</th>
+        <th style="width:20%" align="center" scope="col">app id</th>
+        <th style="width:20%" align="center" scope="col">frequency</th>
+        <th style="width:20%" align="center" scope="col">locale</th>
+        <th style="width:20%" align="center" scope="col">_ID</th>
+    </tr>
+    <tr>
+        <td align="center" scope="row">mapreduce</td>
+        <td align="center">user1</td>
+        <td align="center">100</td>
+        <td align="center">en_US</td>
+        <td align="center">1</td>
+    </tr>
+    <tr>
+        <td align="center" scope="row">precompiler</td>
+        <td align="center">user14</td>
+        <td align="center">200</td>
+        <td align="center">fr_FR</td>
+        <td align="center">2</td>
+    </tr>
+    <tr>
+        <td align="center" scope="row">applet</td>
+        <td align="center">user2</td>
+        <td align="center">225</td>
+        <td align="center">fr_CA</td>
+        <td align="center">3</td>
+    </tr>
+    <tr>
+        <td align="center" scope="row">const</td>
+        <td align="center">user1</td>
+        <td align="center">255</td>
+        <td align="center">pt_BR</td>
+        <td align="center">4</td>
+    </tr>
+    <tr>
+        <td align="center" scope="row">int</td>
+        <td align="center">user5</td>
+        <td align="center">100</td>
+        <td align="center">en_UK</td>
+        <td align="center">5</td>
+    </tr>
+</table>
+<p>
+    表 1 の各行は、標準の辞書には含まれていない単語のインスタンスを表しています。
+各列は、該当する単語のデータの一部（その単語が最初に見つかったロケールなど）を表しています。
+列の見出しは、プロバイダに格納される列の名前です。
+行のロケールを調べるには、<code>locale</code> 列を参照します。このプロバイダの場合、<code>_ID</code> 列が「プライマリキー」の列の役割を果たし、プロバイダはこの列を自動的に保持します。
+
+
+</p>
+<p class="note">
+    <strong>注:</strong> プロバイダはプライマリキーを持つ必要がなく、プライマリキーがある場合は <code>_ID</code> をプライマリキーの列名として使用する必要はありません。
+ただし、プロバイダのデータを {@link android.widget.ListView} にバインドする場合は、いずれかの列の名前を <code>_ID</code> とする必要があります。
+
+この要件についての詳細は、<a href="#DisplayResults">クエリ結果を表示する</a>セクションをご覧ください。
+
+</p>
+<h3 id="ClientProvider">プロバイダにアクセスする</h3>
+<p>
+    アプリケーションは、{@link android.content.ContentResolver} クライアント オブジェクトを使用して、コンテンツ プロバイダのデータにアクセスします。
+このオブジェクトには、プロバイダ オブジェクトの同名のメソッドを呼び出すメソッドが備わっています。これは、{@link android.content.ContentProvider} の具体的なサブクラスのインスタンスのいずれかになります。
+
+{@link android.content.ContentResolver} メソッドには、永続ストレージの基本的な「CRUD」（作成、取得、更新、削除）機能が備わっています。
+
+
+</p>
+<p>
+    クライアント アプリケーションのプロセスにおける {@link android.content.ContentResolver} オブジェクトと、プロバイダを所有するアプリケーションの {@link android.content.ContentProvider} オブジェクトが、プロセス間の通信を自動的に処理します。さらに、{@link android.content.ContentProvider} は、データのリポジトリと、外部に表形式で表示されるデータの間の抽象化レイヤーとして機能します。
+
+
+
+
+</p>
+<p class="note">
+    <strong>注:</strong> 通常、アプリケーションがプロバイダにアクセスする場合、そのマニフェスト ファイルで特定のパーミッションを要求する必要があります。
+詳細は、<a href="#Permissions">コンテンツ プロバイダ パーミッション</a>セクションをご覧ください。
+
+</p>
+<p>
+    たとえば、単語リスト プロバイダから単語とそのロケールの一覧を取得するには、{@link android.content.ContentResolver#query ContentResolver.query()} を呼び出します。
+
+    {@link android.content.ContentResolver#query query()} メソッドによって、単語リスト プロバイダが定義する{@link android.content.ContentProvider#query ContentProvider.query()} メソッドが呼び出されます。
+
+コードの次の行は、{@link android.content.ContentResolver#query ContentResolver.query()} 呼び出しを表しています。
+
+<p>
+<pre>
+// Queries the user dictionary and returns results
+mCursor = getContentResolver().query(
+    UserDictionary.Words.CONTENT_URI,   // The content URI of the words table
+    mProjection,                        // The columns to return for each row
+    mSelectionClause                    // Selection criteria
+    mSelectionArgs,                     // Selection criteria
+    mSortOrder);                        // The sort order for the returned rows
+</pre>
+<p>
+    表 2 は、query(Uri,projection,selection,selectionArgs,sortOrder)} の引数が SQL SELECT 文にどのように一致しているかを示しています。
+
+
+</p>
+<p class="table-caption">
+    <strong>表 2:</strong> SQL クエリと比較した Query()。
+</p>
+<table id="table2" style="width: 75%;">
+    <tr>
+        <th style="width:25%" align="center" scope="col">query() 引数</th>
+        <th style="width:25%" align="center" scope="col">SELECT キーワード / パラメータ</th>
+        <th style="width:50%" align="center" scope="col">注</th>
+    </tr>
+    <tr>
+        <td align="center"><code>Uri</code></td>
+        <td align="center"><code>FROM <em>table_name</em></code></td>
+        <td><code>Uri</code> は、<em>table_name</em> という名前のプロバイダの表にマッピングされます。</td>
+    </tr>
+    <tr>
+        <td align="center"><code>projection</code></td>
+        <td align="center"><code><em>col,col,col,...</em></code></td>
+        <td>
+            <code>projection</code> は、取得するそれぞれの行に含まれる列の配列です。
+
+        </td>
+    </tr>
+    <tr>
+        <td align="center"><code>selection</code></td>
+        <td align="center"><code>WHERE <em>col</em> = <em>value</em></code></td>
+        <td><code>selection</code> は、行を選択する際の基準を指定します。</td>
+    </tr>
+    <tr>
+        <td align="center"><code>selectionArgs</code></td>
+        <td align="center">
+            （正確に一致するものはありません。選択句では、<code>?</code> プレースホルダーが選択引数に置き換わります）
+
+        </td>
+    </tr>
+    <tr>
+        <td align="center"><code>sortOrder</code></td>
+        <td align="center"><code>ORDER BY <em>col,col,...</em></code></td>
+        <td>
+            <code>sortOrder</code> は、返される {@link android.database.Cursor} 内で行が表示される順番を指定します。
+
+        </td>
+    </tr>
+</table>
+<h3 id="ContentURIs">コンテンツ URI</h3>
+<p>
+    <strong>コンテンツ URI</strong> は、プロバイダのデータを特定する URI です。コンテンツ URI には、プロバイダ全体の識別名（<strong>認証局</strong>）と表をポイントする名前（<strong>パス</strong>）が含まれます。
+
+プロバイダの表にアクセスするためのクライアント メソッドを呼び出す場合、その引数の 1 つがコンテンツ URI になります。
+
+
+</p>
+<p>
+    コードの前半の行では、定数 {@link android.provider.UserDictionary.Words#CONTENT_URI} に、単語リストの「words」表のコンテンツ URI が入ります。
+
+{@link android.content.ContentResolver} オブジェクトは URI の認証局をパースし、認証局を既知のプロバイダのシステム表と比較して、プロバイダを「解決」します。
+
+その後、{@link android.content.ContentResolver} は、クエリ引数を正しいプロバイダに送信できます。
+
+
+</p>
+<p>
+    {@link android.content.ContentProvider} は、アクセスする表を選択するのに、コンテンツ URI のパス部分を使用します。
+通常、プロバイダは公開する各表の<strong>パス</strong>を持ちます。
+</p>
+<p>
+    コードの前半の行では、「words」表の完全な URI は次のようになります。
+</p>
+<pre>
+content://user_dictionary/words
+</pre>
+<p>
+    ここで、<code>user_dictionary</code> 文字列はプロバイダの認証局になり、<code>words</code> 文字列は表のパスになります。
+文字列 <code>content://</code>（<strong>スキーム</strong>）は常に存在し、これがコンテンツ URI であることを示します。
+
+
+</p>
+<p>
+    多くのプログラムでは、URI の末尾に ID 値を付加することで、表内の 1 つの行にアクセスできます。たとえば、<code>_ID</code> が <code>4</code> の行を単語リストから取得するには、次のコンテンツ URI を使用します。
+
+
+</p>
+<pre>
+Uri singleUri = ContentUris.withAppendedId(UserDictionary.Words.CONTENT_URI,4);
+</pre>
+<p>
+    通常は、一連の行を取得してからいずれかの行を更新、削除するような場合に ID 値を使用します。
+
+</p>
+<p class="note">
+    <strong>注:</strong> {@link android.net.Uri} クラスと {@link android.net.Uri.Builder} クラスには、正しい形式の URI オブジェクトを文字列から作成するための、便利なメソッドが用意されています。
+{@link android.content.ContentUris} には、URI に ID 値を付加するための便利なメソッドが用意されています。前述のスニペットは {@link android.content.ContentUris#withAppendedId
+    withAppendedId()} を使用して、UserDictionary コンテンツ URI に ID を付加しています。
+
+
+</p>
+
+
+    <!-- Retrieving Data from the Provider -->
+<h2 id="SimpleQuery">プロバイダからデータを取得する</h2>
+<p>
+    このセクションでは、単語リスト プロバイダの例を使い、プロバイダからデータを取得する方法を説明します。
+
+</p>
+<p class="note">
+    わかりやすくするために、このセクションのコード スニペットは「UI スレッド」の {@link android.content.ContentResolver#query ContentResolver.query()} を呼び出しています。
+ただし、実際のコードでは、個別のスレッドで非同期にクエリを実行する必要があります。
+この操作は、{@link android.content.CursorLoader} クラスを使用して行うこともできます。このクラスについての詳細は、「<a href="{@docRoot}guide/components/loaders.html">ローダ</a>」に関するガイドをご覧ください。
+
+
+さらに、コードの行はスニペットのみであり、完全なアプリケーションにはなっていません。
+
+</p>
+<p>
+    プロバイダからデータを取得するには、次の基本的な手順に従います。
+</p>
+<ol>
+   <li>
+        プロバイダの読み取りアクセスを要求します。
+   </li>
+   <li>
+        プロバイダにクエリを送信するコードを定義します。
+   </li>
+</ol>
+<h3 id="RequestPermissions">読み取りアクセス パーミッションを要求する</h3>
+<p>
+    プロバイダからデータを取得するには、アプリケーションからプロバイダの読み取りアクセスを要求します。
+実行時にはこのパーミッションを要求できません。その代わりに、<code><a href="{@docRoot}guide/topics/manifest/uses-permission-element.html">&lt;uses-permission&gt;</a></code> 要素とプロバイダで定義した正確なパーミッション名を使用して、このパーミッションを必要としていることをマニフェストで指定する必要があります。
+
+
+
+この要素をマニフェストで指定すると、実際に、このパーミッションをアプリケーションに「要求」することになります。
+ユーザーがアプリケーションをインストールすると、この要求が暗黙的に付与されることになります。
+
+</p>
+<p>
+    使用する読み取りアクセス パーミッションの正確な名前と、プロバイダが使用するその他のアクセス パーミッションの名前については、プロバイダのドキュメントをご覧ください。
+
+
+</p>
+<p>
+    プロバイダにアクセスする際のパーミッションのロールの詳細は、<a href="#Permissions">コンテンツ プロバイダ パーミッション</a>セクションをご覧ください。
+
+</p>
+<p>
+    単語リスト プロバイダはパーミッション <code>android.permission.READ_USER_DICTIONARY</code> をマニフェスト ファイルで定義するため、プロバイダからの読み取りを行うアプリケーションはこのパーミッションを要求する必要があります。
+
+
+</p>
+<!-- Constructing the query -->
+<h3 id="Query">クエリを作成する</h3>
+<p>
+    プロバイダからのデータの取得の次の手順では、クエリを作成します。最初のスニペットで、単語リスト プロバイダにアクセスするための変数をいくつか定義します。
+
+</p>
+<pre class="prettyprint">
+
+// A "projection" defines the columns that will be returned for each row
+String[] mProjection =
+{
+    UserDictionary.Words._ID,    // Contract class constant for the _ID column name
+    UserDictionary.Words.WORD,   // Contract class constant for the word column name
+    UserDictionary.Words.LOCALE  // Contract class constant for the locale column name
+};
+
+// Defines a string to contain the selection clause
+String mSelectionClause = null;
+
+// Initializes an array to contain selection arguments
+String[] mSelectionArgs = {""};
+
+</pre>
+<p>
+    次のスニペットでは、単語リスト プロバイダの例を使って、{@link android.content.ContentResolver#query ContentResolver.query()} を使用する方法を示しています。
+
+プロバイダ クライアント クエリは SQL クエリに似たものであり、戻り値となる一連の列、一連の選択基準、並べ替えの順番を含みます。
+
+</p>
+<p>
+    クエリの戻り値となる一連の列は、<strong>投影</strong>（変数 <code>mProjection</code>）と呼ばれます。
+
+</p>
+<p>
+    取得する行を指定する式は、選択句と選択引数に分割されます。
+選択句は論理式やブール式、列名、値（変数 <code>mSelectionClause</code>）の組み合わせになります。
+値の代わりに置き換え可能パラメータ <code>?</code> を指定すると、クエリ メソッドによって、選択引数の配列（変数 <code>mSelectionArgs</code>）から値が取得されます。
+
+
+</p>
+<p>
+    次のスニペットでは、ユーザーが単語を入力しない場合、選択句が <code>null</code> に設定され、クエリによってプロバイダのすべての単語が返されます。
+ユーザーが単語を入力すると、選択句が <code>UserDictionary.Words.WORD + " = ?"</code> に設定され、選択引数の配列の最初の要素が、ユーザーが入力した単語に設定されます。
+
+
+</p>
+<pre class="prettyprint">
+/*
+ * This defines a one-element String array to contain the selection argument.
+ */
+String[] mSelectionArgs = {""};
+
+// Gets a word from the UI
+mSearchString = mSearchWord.getText().toString();
+
+// Remember to insert code here to check for invalid or malicious input.
+
+// If the word is the empty string, gets everything
+if (TextUtils.isEmpty(mSearchString)) {
+    // Setting the selection clause to null will return all words
+    mSelectionClause = null;
+    mSelectionArgs[0] = "";
+
+} else {
+    // Constructs a selection clause that matches the word that the user entered.
+    mSelectionClause = UserDictionary.Words.WORD + " = ?";
+
+    // Moves the user's input string to the selection arguments.
+    mSelectionArgs[0] = mSearchString;
+
+}
+
+// Does a query against the table and returns a Cursor object
+mCursor = getContentResolver().query(
+    UserDictionary.Words.CONTENT_URI,  // The content URI of the words table
+    mProjection,                       // The columns to return for each row
+    mSelectionClause                   // Either null, or the word the user entered
+    mSelectionArgs,                    // Either empty, or the string the user entered
+    mSortOrder);                       // The sort order for the returned rows
+
+// Some providers return null if an error occurs, others throw an exception
+if (null == mCursor) {
+    /*
+     * Insert code here to handle the error. Be sure not to use the cursor! You may want to
+     * call android.util.Log.e() to log this error.
+     *
+     */
+// If the Cursor is empty, the provider found no matches
+} else if (mCursor.getCount() &lt; 1) {
+
+    /*
+     * Insert code here to notify the user that the search was unsuccessful. This isn't necessarily
+     * an error. You may want to offer the user the option to insert a new row, or re-type the
+     * search term.
+     */
+
+} else {
+    // Insert code here to do something with the results
+
+}
+</pre>
+<p>
+    このクエリは、 SQL 文に似ています。
+</p>
+<pre>
+SELECT _ID, word, locale FROM words WHERE word = &lt;userinput&gt; ORDER BY word ASC;
+</pre>
+<p>
+    この SQL 文では、コントラクト クラスの定数ではなく、実際の列の名前が使用されます。
+</p>
+<h4 id="Injection">悪意のある入力から保護する</h4>
+<p>
+    コンテンツ プロバイダが管理するデータが SQL データベース内にある場合、外部の信頼されていないデータを未処理の SQL 文に含めると SQL インジェクションが発生することがあります。
+
+</p>
+<p>
+    次のような選択句を考えてみます。
+</p>
+<pre>
+// Constructs a selection clause by concatenating the user's input to the column name
+String mSelectionClause =  "var = " + mUserInput;
+</pre>
+<p>
+    このようにすれば、ユーザーが悪意のある SQL を SQL 文に連結できるようになります。
+    たとえば、ユーザーが <code>mUserInput</code> に「nothing; DROP TABLE *;」と入力すると、選択句は <code>var = nothing; DROP TABLE *;</code> となります。
+選択句は SQL 文として処理されるため、この場合、基本的な SQLite データベースのすべての表が消去されることがあります（プロバイダに <a href="http://en.wikipedia.org/wiki/SQL_injection">SQL インジェクション</a>の試みの検出が設定されていない場合）。
+
+
+
+</p>
+<p>
+    この問題を回避するには、<code>?</code> を置き換え可能パラメータとして使う選択句と、選択引数の個別の配列を使用します。
+そうすることで、ユーザー入力は、SQL 文の一部として解釈されずに、クエリに直接バインドされます。
+
+    SQL として扱われないため、ユーザー入力によって悪意のある SQL が挿入されることはありません。ユーザー入力を含める際に連結を使用しないで、次の選択句を使用します。
+
+</p>
+<pre>
+// Constructs a selection clause with a replaceable parameter
+String mSelectionClause =  "var = ?";
+</pre>
+<p>
+    選択引数の配列を次のように設定します。
+</p>
+<pre>
+// Defines an array to contain the selection arguments
+String[] selectionArgs = {""};
+</pre>
+<p>
+    選択引数の配列に次のように値を格納します。
+</p>
+<pre>
+// Sets the selection argument to the user's input
+selectionArgs[0] = mUserInput;
+</pre>
+<p>
+    プロバイダが SQL データベースに基づいたものではない場合でも、選択内容を指定する場合は、<code>?</code> を置き換え可能パラメータとして使う選択句と、選択引数の配列を使用することをお勧めします。
+
+
+</p>
+<!-- Displaying the results -->
+<h3 id="DisplayResults">クエリ結果を表示する</h3>
+<p>
+    {@link android.content.ContentResolver#query ContentResolver.query()} クライアント メソッドは、常に {@link android.database.Cursor} を返します。これには、クエリの選択基準に一致する、行へのクエリの投影によって指定される列が含まれます。
+
+{@link android.database.Cursor} オブジェクトは、含まれる行と列へのランダム読み取りアクセスを提供します。
+
+{@link android.database.Cursor} メソッドを使用すると、結果の行の繰り返し、各列のデータタイプの識別、列からのデータの取得、結果のその他のプロパティの確認といった操作が可能となります。
+
+一部の {@link android.database.Cursor} を実装すると、プロバイダのデータが変更された場合にオブジェクトが自動的に送信されたり、{@link android.database.Cursor} が変更された場合にオブザーバ オブジェクトのメソッドがトリガーされたり、その両方が実行されたりします。
+
+
+</p>
+<p class="note">
+    <strong>注:</strong> クエリを作成するオブジェクトの特性に基づいて、プロバイダによって列へのアクセスが制限されることがあります。
+たとえば、連絡先プロバイダにより同期アダプタは一部の列へのアクセスが制限されるため、その場合はアクティビティやサービスを返しません。
+
+</p>
+<p>
+    選択基準に一致する行がない場合は、{@link android.database.Cursor#getCount Cursor.getCount()} が 0（空のカーソル）の {@link android.database.Cursor} オブジェクトを返します。
+
+
+</p>
+<p>
+    内部エラーが発生した場合、クエリの結果はプロバイダによって異なります。<code>null</code> が返されることもあれば、{@link java.lang.Exception} がスローされることもあります。
+
+</p>
+<p>
+    {@link android.database.Cursor} は行の「一覧」であることから、{@link android.database.Cursor} のコンテンツを表示する場合は、{@link android.widget.SimpleCursorAdapter} 経由で {@link android.widget.ListView} にリンクすることをお勧めします。
+
+
+</p>
+<p>
+    次のスニペットは前のスニペットのコードの続きです。クエリによって取得する {@link android.database.Cursor} を含む {@link android.widget.SimpleCursorAdapter} オブジェクトを作成し、このオブジェクトを {@link android.widget.ListView} のアダプタに設定します。
+
+
+
+</p>
+<pre class="prettyprint">
+// Defines a list of columns to retrieve from the Cursor and load into an output row
+String[] mWordListColumns =
+{
+    UserDictionary.Words.WORD,   // Contract class constant containing the word column name
+    UserDictionary.Words.LOCALE  // Contract class constant containing the locale column name
+};
+
+// Defines a list of View IDs that will receive the Cursor columns for each row
+int[] mWordListItems = { R.id.dictWord, R.id.locale};
+
+// Creates a new SimpleCursorAdapter
+mCursorAdapter = new SimpleCursorAdapter(
+    getApplicationContext(),               // The application's Context object
+    R.layout.wordlistrow,                  // A layout in XML for one row in the ListView
+    mCursor,                               // The result from the query
+    mWordListColumns,                      // A string array of column names in the cursor
+    mWordListItems,                        // An integer array of view IDs in the row layout
+    0);                                    // Flags (usually none are needed)
+
+// Sets the adapter for the ListView
+mWordList.setAdapter(mCursorAdapter);
+</pre>
+<p class="note">
+    <strong>注:</strong> {@link android.database.Cursor} によって {@link android.widget.ListView} を戻すには、カーソルに <code>_ID</code> という名前の列を含める必要があります。
+
+    そのため、{@link android.widget.ListView} には表示されまませんが、前述のクエリは「words」表に <code>_ID</code> 列を取得します。
+
+    また、このような制限があることから、大部分のプロバイダがそれぞれの表に <code>_ID</code> 列を持ちます。
+
+</p>
+
+        <!-- Getting data from query results -->
+<h3 id="GettingResults">クエリ結果を取得する</h3>
+<p>
+    クエリ結果を単に表示するだけでなく、他のタスクに使用することもできます。たとえば、単語リストからスペリングを取得して、それを他のプロバイダで検索するといった操作も可能です。
+
+そのためには、次のように {@link android.database.Cursor} の行に操作を繰り返します。
+</p>
+<pre class="prettyprint">
+
+// Determine the column index of the column named "word"
+int index = mCursor.getColumnIndex(UserDictionary.Words.WORD);
+
+/*
+ * Only executes if the cursor is valid. The User Dictionary Provider returns null if
+ * an internal error occurs. Other providers may throw an Exception instead of returning null.
+ */
+
+if (mCursor != null) {
+    /*
+     * Moves to the next row in the cursor. Before the first movement in the cursor, the
+     * "row pointer" is -1, and if you try to retrieve data at that position you will get an
+     * exception.
+     */
+    while (mCursor.moveToNext()) {
+
+        // Gets the value from the column.
+        newWord = mCursor.getString(index);
+
+        // Insert code here to process the retrieved word.
+
+        ...
+
+        // end of while loop
+    }
+} else {
+
+    // Insert code here to report an error if the cursor is null or the provider threw an exception.
+}
+</pre>
+<p>
+    {@link android.database.Cursor} の実装には「取得」メソッドがいくつか備わっており、オブジェクトからさまざまなタイプのデータを取得できます。
+たとえば、前述のスニペットは {@link android.database.Cursor#getString getString()} を使用しています。
+さらに、列のデータタイプを示す値を返す {@link android.database.Cursor#getType getType()} メソッドも使用しています。
+
+
+</p>
+
+
+    <!-- Requesting permissions -->
+<h2 id="Permissions">コンテンツ プロバイダ パーミッション</h2>
+<p>
+    プロバイダのアプリケーションでは、他のアプリケーションがプロバイダのデータにアクセスするのに必要なパーミッションを指定できます。
+これらのパーミッションを設定しておけば、ユーザーはアプリケーションがアクセスしようとしているデータの種類を把握できます。
+他のアプリケーションは、プロバイダの要件に基づき、そのプロバイダにアクセスするのに必要なパーミッションを要求します。
+エンドユーザーがアプリケーションをインストールする際には、要求されたパーミッションを確認できます。
+
+</p>
+<p>
+    プロバイダのアプリケーションでパーミッションを指定していない場合は、他のアプリケーションはプロバイダのデータにアクセスできません。
+ただし、指定したパーミッションに関係なく、プロバイダのアプリケーションのコンポーネントには完全な読み取り権限と書き込み権限を常に付与する必要があります。
+
+</p>
+<p>
+    前述のとおり、単語リスト プロバイダには、データを取得するための <code>android.permission.READ_USER_DICTIONARY</code> パーミッションが必要です。
+
+    プロバイダには、データの挿入、更新、削除に対してそれぞれ個別の <code>android.permission.WRITE_USER_DICTIONARY</code> パーミッションがあります。
+
+</p>
+<p>
+    プロバイダにアクセスするのに必要なパーミッションを取得するには、アプリケーションのマニフェスト ファイルの <code><a href="{@docRoot}guide/topics/manifest/uses-permission-element.html">&lt;uses-permission&gt;</a></code> 要素を使用してパーミッションを要求する必要があります。
+
+Android Package Manager でアプリケーションをインストールする場合は、ユーザーがアプリケーションが要求するすべてのパーミッションを承認する必要があります。
+ユーザーがすべてのパーミッションを承認すると、Package Manager がインストールを続行します。ユーザーが承認しない場合は、Package Manager がインストールを中止します。
+
+
+</p>
+<p>
+    次の <code><a href="{@docRoot}guide/topics/manifest/uses-permission-element.html">&lt;uses-permission&gt;</a></code> 要素は、単語リスト プロバイダへの読み取りアクセスを要求します。
+
+
+</p>
+<pre>
+    &lt;uses-permission android:name="android.permission.READ_USER_DICTIONARY"&gt;
+</pre>
+<p>
+    プロバイダ アクセスへのパーミッションの影響については、<a href="{@docRoot}guide/topics/security/security.html">セキュリティとパーミッション</a>に関するガイドをご覧ください。
+
+</p>
+
+
+<!-- Inserting, Updating, and Deleting Data -->
+<h2 id="Modifications">データを挿入、更新、削除する</h2>
+<p>
+    データを収集するには、プロバイダからデータを取得するのと同様に、プロバイダ クライアントとプロバイダの {@link android.content.ContentProvider} 間で操作を行います。
+
+    対応する {@link android.content.ContentProvider} のメソッドに渡した引数を使用して、{@link android.content.ContentResolver} のメソッドを呼び出します。
+プロバイダとプロバイダ クライアントが、セキュリティとプロセス間の通信を自動的に処理します。
+
+</p>
+<h3 id="Inserting">データを挿入する</h3>
+<p>
+    プロバイダにデータを挿入するには、{@link android.content.ContentResolver#insert ContentResolver.insert()} メソッドを呼び出します。
+
+このメソッドはプロバイダに新しい行を挿入し、その行のコンテンツ URI を返します。
+    このスニペットは、単語リスト プロバイダに新しい単語を挿入する方法を示しています。
+</p>
+<pre class="prettyprint">
+// Defines a new Uri object that receives the result of the insertion
+Uri mNewUri;
+
+...
+
+// Defines an object to contain the new values to insert
+ContentValues mNewValues = new ContentValues();
+
+/*
+ * Sets the values of each column and inserts the word. The arguments to the "put"
+ * method are "column name" and "value"
+ */
+mNewValues.put(UserDictionary.Words.APP_ID, "example.user");
+mNewValues.put(UserDictionary.Words.LOCALE, "en_US");
+mNewValues.put(UserDictionary.Words.WORD, "insert");
+mNewValues.put(UserDictionary.Words.FREQUENCY, "100");
+
+mNewUri = getContentResolver().insert(
+    UserDictionary.Word.CONTENT_URI,   // the user dictionary content URI
+    mNewValues                          // the values to insert
+);
+</pre>
+<p>
+    新しい行のデータは 1 つの {@link android.content.ContentValues} オブジェクトに入ります。これは 1 行カーソルの形式に似ています。
+このオブジェクト内の列は同じデータタイプを持つ必要はなく、値をまったく指定しない場合は、{@link android.content.ContentValues#putNull ContentValues.putNull()} を使用して列を <code>null</code> に設定できます。
+
+
+</p>
+<p>
+    この列は自動的に保持されるため、スニペットは <code>_ID</code> 列を追加しません。
+プロバイダは、追加するそれぞれの行に、<code>_ID</code> の一意の値を割り当てます。
+通常、プロバイダはこの値を表のプライマリキーとして使用します。
+</p>
+<p>
+    <code>newUri</code> で返されるコンテンツ URI は、新たに追加された行を特定するものであり、次の形式となります。
+
+</p>
+<pre>
+content://user_dictionary/words/&lt;id_value&gt;
+</pre>
+<p>
+    <code>&lt;id_value&gt;</code> は、新しい行の <code>_ID</code> のコンテンツです。
+    ほとんどのプロバイダではコンテンツ URI のこの形式を自動的に検出し、特定の行で要求された操作を実行します。
+
+</p>
+<p>
+    返された {@link android.net.Uri} から <code>_ID</code> の値を取得するには、{@link android.content.ContentUris#parseId ContentUris.parseId()} を呼び出します。
+
+</p>
+<h3 id="Updating">データを更新する</h3>
+<p>
+    行を更新するには、挿入操作と同じように、値を更新した {@link android.content.ContentValues} オブジェクトと、クエリ操作のときと同じように選択基準を使用します。
+
+    使用するクライアント メソッドは {@link android.content.ContentResolver#update ContentResolver.update()} です。
+更新する列の {@link android.content.ContentValues} オブジェクトに値を追加する操作のみが必要になります。
+列のコンテンツを消去する場合は、値を <code>null</code> に設定します。
+
+</p>
+<p>
+    次のスニペットは、ロケール言語が「en」となっているすべての行のロケールを <code>null</code> に変更します。
+戻り値は、更新された行の数となります。
+</p>
+<pre>
+// Defines an object to contain the updated values
+ContentValues mUpdateValues = new ContentValues();
+
+// Defines selection criteria for the rows you want to update
+String mSelectionClause = UserDictionary.Words.LOCALE +  "LIKE ?";
+String[] mSelectionArgs = {"en_%"};
+
+// Defines a variable to contain the number of updated rows
+int mRowsUpdated = 0;
+
+...
+
+/*
+ * Sets the updated value and updates the selected words.
+ */
+mUpdateValues.putNull(UserDictionary.Words.LOCALE);
+
+mRowsUpdated = getContentResolver().update(
+    UserDictionary.Words.CONTENT_URI,   // the user dictionary content URI
+    mUpdateValues                       // the columns to update
+    mSelectionClause                    // the column to select on
+    mSelectionArgs                      // the value to compare to
+);
+</pre>
+<p>
+    また、{@link android.content.ContentResolver#update ContentResolver.update()} を呼び出すときには、ユーザー入力をサニタイズする必要があります。
+詳細は、<a href="#Injection">悪意のある入力から保護する</a>セクションをご覧ください。
+
+</p>
+<h3 id="Deleting">データを削除する</h3>
+<p>
+    行の削除は行データの取得と似た操作になります。削除する行の選択基準を指定することで、クライアント メソッドが削除した行の数を返します。
+
+    次のスニペットは appid が「user」となっている行を削除します。メソッドによって削除された行の数が返されます。
+
+</p>
+<pre>
+
+// Defines selection criteria for the rows you want to delete
+String mSelectionClause = UserDictionary.Words.APP_ID + " LIKE ?";
+String[] mSelectionArgs = {"user"};
+
+// Defines a variable to contain the number of rows deleted
+int mRowsDeleted = 0;
+
+...
+
+// Deletes the words that match the selection criteria
+mRowsDeleted = getContentResolver().delete(
+    UserDictionary.Words.CONTENT_URI,   // the user dictionary content URI
+    mSelectionClause                    // the column to select on
+    mSelectionArgs                      // the value to compare to
+);
+</pre>
+<p>
+    また、{@link android.content.ContentResolver#delete ContentResolver.delete()} を呼び出すときには、ユーザー入力をサニタイズする必要があります。
+詳細は、<a href="#Injection">悪意のある入力から保護する</a>セクションをご覧ください。
+
+</p>
+<!-- Provider Data Types -->
+<h2 id="DataTypes">プロバイダ データタイプ</h2>
+<p>
+    コンテンツ プロバイダではさまざまなデータタイプを利用できます。単語リスト プロバイダで提供できるのはテキストのみですが、次のような形式を提供できます。
+
+</p>
+    <ul>
+        <li>
+            整数
+        </li>
+        <li>
+            long 整数（long）
+        </li>
+        <li>
+            浮動小数点
+        </li>
+        <li>
+            long 浮動小数点（double）
+        </li>
+    </ul>
+<p>
+    それ以外にも、プロバイダでは 64KB バイト配列として実装されるバイナリ ラージ オブジェクト（BLOB）もよく使用されます。
+利用可能なデータタイプについては、{@link android.database.Cursor} クラスの「get」メソッドをご覧ください。
+
+</p>
+<p>
+    プロバイダの各列のデータタイプは、通常、そのドキュメントに一覧が記載されています。
+    単語リスト プロバイダのデータタイプは、コントラクト クラス {@link android.provider.UserDictionary.Words} のリファレンスに一覧が記載されています（コントラクト クラスの詳細は、<a href="#ContractClasses">コントラクト クラス</a>セクションをご覧ください）。
+
+
+    さらに、{@link android.database.Cursor#getType
+    Cursor.getType()} を呼び出すことで、データタイプを判断することもできます。
+</p>
+<p>
+    プロバイダは、プロバイダによって定義される各コンテンツ URI の MIME データタイプも保持します。MIME タイプ情報を使用すると、プロバイダが提供するデータをアプリケーションが処理できるかを判断したり、MIME タイプに基づいて処理のタイプを選択したりできます。
+
+通常は、複雑なデータ構造やファイルを持つプロバイダで作業をする際に MIME タイプが必要になります。
+
+たとえば、連絡先プロバイダの {@link android.provider.ContactsContract.Data} 表は MIME タイプを使用して、それぞれの行に格納される連絡先データのタイプをラベル付けします。
+
+コンテンツ URI に対応する MIME タイプを取得するには、{@link android.content.ContentResolver#getType ContentResolver.getType()} を呼び出します。
+
+</p>
+<p>
+    「<a href="#MIMETypeReference">MIME タイプ リファレンス</a>」セクションでは、標準とカスタムの両方の MIME タイプについて説明しています。
+
+</p>
+
+
+<!-- Alternative Forms of Provider Access -->
+<h2 id="AltForms">プロバイダ アクセスの別の形式</h2>
+<p>
+    アプリケーションの開発では、次に示すプロバイダ アクセスの別の 3 つの形式が重要になります。
+</p>
+<ul>
+    <li>
+        <a href="#Batch">バッチアクセス</a>: {@link android.content.ContentProviderOperation} クラスのメソッドを使用したアクセス呼び出しのバッチを作成し、{@link android.content.ContentResolver#applyBatch ContentResolver.applyBatch()} に適用できます。
+
+
+    </li>
+    <li>
+        非同期クエリ: クエリは個別のスレッドで実行する必要があります。この操作は、{@link android.content.CursorLoader} オブジェクトを使用して行うこともできます。
+「<a href="{@docRoot}guide/components/loaders.html">ローダ</a>」のガイドには、この操作の例が記載されています。
+
+
+    </li>
+    <li>
+        <a href="#Intents">インテント経由のデータアクセス</a>: インテントをプロバイダに直接送信できませんが、プロバイダのアプリケーションにはインテントを送信できます。通常、プロバイダのデータの修正に最適な機能を備えたアプリケーションになります。
+
+
+    </li>
+</ul>
+<p>
+    バッチアクセスとインテント経由の修正については、次のセクションで説明しています。
+</p>
+<h3 id="Batch">バッチアクセス</h3>
+<p>
+    多数の行を挿入する場合や、同じメソッド呼び出しで複数の表に行を挿入する場合は、プロバイダへのバッチアクセスを使用すると便利です。また、一般的には、境界をまたいでプロセス全体にトランザクションとして一連の操作を実行する場合にもバッチアクセスが便利です。
+
+
+</p>
+<p>
+    「バッチモード」でプロバイダにアクセスするには、{@link android.content.ContentProviderOperation} オブジェクトの配列を作成してから、{@link android.content.ContentResolver#applyBatch ContentResolver.applyBatch()} を使用してそれらのオブジェクトをコンテンツ プロバイダに送信します。
+
+
+このメソッドには、特定のコンテンツ URI ではなく、コンテンツ プロバイダの<em>認証局</em>を渡します。そうすることで、配列内のそれぞれの {@link android.content.ContentProviderOperation} オブジェクトを別々の表に対して機能するようになります。
+
+
+{@link android.content.ContentResolver#applyBatch
+    ContentResolver.applyBatch()} への呼び出しでは、結果の配列が返されます。
+</p>
+<p>
+    {@link android.provider.ContactsContract.RawContacts} コントラクト クラスの説明には、バッチ挿入を示したコード スニペットが記載されています。
+<a href="{@docRoot}resources/samples/ContactManager/index.html">Contact Manager</a> のサンプル アプリケーションでは、<code>ContactAdder.java</code> ソースファイルでのバッチアクセスの例が紹介されています。
+
+
+
+</p>
+<div class="sidebox-wrapper">
+<div class="sidebox">
+<h2>ヘルパーアプリでデータを表示する</h2>
+<p>
+    アプリケーションにアクセス パーミッションが<em>付与されている</em>場合でも、インテントを使用して別のアプリケーションにデータを表示できます。
+たとえば、カレンダー アプリケーションは {@link android.content.Intent#ACTION_VIEW} インテントにアクセスしますが、このインテントは特定の日付やイベントを表示するものです。
+
+    これにより、独自の UI を作成しなくても、カレンダー情報を表示できます。この機能の詳細は、「<a href="{@docRoot}guide/topics/providers/calendar-provider.html">カレンダー プロバイダ</a>」のガイドをご覧ください。
+
+
+</p>
+<p>
+    インテントの送信先アプリケーションは、必ずしもプロバイダに関連付けられたアプリケーションである必要はありません。
+たとえば、連絡先プロバイダから連絡先を取得してから、連絡先の画像のコンテンツ URI を含む {@link android.content.Intent#ACTION_VIEW} インテントを画像ビューワに送信するといった操作が可能です。
+
+
+</p>
+</div>
+</div>
+<h3 id="Intents">インテント経由のデータアクセス</h3>
+<p>
+    インテントを使用すれば、コンテンツ プロバイダに間接的にアクセスできます。アプリケーションにアクセス パーミッションがない場合でも、パーミッションを持つアプリケーションから結果のインテントを取得したり、パーミッションを持つアプリケーションをアクティベートしてそのアプリケーションをユーザーに使用させたりすることで、ユーザーがプロバイダのデータにアクセスできるようになります。
+
+
+
+</p>
+<h4>一時的なパーミッションによりアクセスを取得する</h4>
+<p>
+    適切なアクセス パーミッションがない場合でも、パーミッションを持つアプリケーションにインテントを送信し、「URI」パーミッションを含む結果のインテントを受け取ることで、コンテンツ プロバイダのデータにアクセスできます。
+
+
+    これらのパーミッションは特定のコンテンツ URI のパーミッションであり、パーミッションを受け取ったアクティビティが終了するまで効力を持ちます。
+永続的なパーミッションを持つアプリケーションは、次のように結果のインテントにフラグを設定し、一時的なパーミッションを付与します。
+
+</p>
+<ul>
+    <li>
+        <strong>読み取りパーミッション:</strong> {@link android.content.Intent#FLAG_GRANT_READ_URI_PERMISSION}
+
+    </li>
+    <li>
+        <strong>書き込みパーミッション:</strong> {@link android.content.Intent#FLAG_GRANT_WRITE_URI_PERMISSION}
+
+    </li>
+</ul>
+<p class="note">
+    <strong>注:</strong> これらのフラグは、認証局がコンテンツ URI に含まれるプロバイダへの全般的な読み取りと書き込みアクセスを付与するものではありません。アクセスは URI 自身に限定されます。
+
+</p>
+<p>
+    プロバイダは、<code><a href="{@docRoot}guide/topics/manifest/provider-element.html">&lt;provider&gt;</a></code> 要素の <code><a href="{@docRoot}guide/topics/manifest/provider-element.html#gprmsn">android:grantUriPermission</a></code> 属性や、<code><a href="{@docRoot}guide/topics/manifest/provider-element.html">&lt;provider&gt;</a></code> 要素の <code><a href="{@docRoot}guide/topics/manifest/grant-uri-permission-element.html">&lt;grant-uri-permission&gt;</a></code> 子要素を使用して、コンテンツ URI の URI パーミッションを自身のマニフェストで定義します。
+
+
+
+
+
+
+
+URI パーミッションのメカニズムについての詳細は、URI パーミッション セクションの<a href="{@docRoot}guide/topics/security/security.html">セキュリティとパーミッション</a>に関するガイドをご覧ください。
+
+
+</p>
+<p>
+    たとえば、{@link android.Manifest.permission#READ_CONTACTS} パーミッションを持たない場合でも、連絡先プロバイダの連絡先のデータを取得できます。
+連絡先の誕生日にグリーティング カードをオンラインで送信するアプリケーションなどにこのメカニズムを利用できます。
+ユーザーのすべての連絡先やそのすべての情報へのアクセス件を付与する {@link android.Manifest.permission#READ_CONTACTS} を要求する代わりに、アプリケーションで使用する連絡先をユーザーが制御できるように設定することもできます。
+
+
+そのためには、次の手順を使用します。
+</p>
+<ol>
+    <li>
+        アプリケーションが、メソッド {@link android.app.Activity#startActivityForResult
+        startActivityForResult()} を使用して、アクション {@link android.content.Intent#ACTION_PICK} と「連絡先」MIME タイプ {@link android.provider.ContactsContract.RawContacts#CONTENT_ITEM_TYPE} を含むインテントを送信します。
+
+
+
+    </li>
+    <li>
+        このインテントは連絡帳アプリの「selection」アクティビティのインテント フィルタに一致するため、アクティビティがフォアグラウンドに移動します。
+
+    </li>
+    <li>
+        selection アクティビティでは、更新する連絡先をユーザーが選択します。
+この操作が行われると、selection が {@link android.app.Activity#setResult setResult(resultcode, intent)} を呼び出し、アプリケーションに戻すインテントを設定します。
+
+インテントには、ユーザーが選択した連絡先のコンテンツ URI と、「エクストラ」フラグ {@link android.content.Intent#FLAG_GRANT_READ_URI_PERMISSION} が含まれます。
+
+これらのフラグがあることで、コンテンツ URI がポイントする連絡先のデータを読み取るための URI パーミッションがアプリに付与されます。その後、selection アクティビティによって、アプリケーションに制御を返すための {@link android.app.Activity#finish()} が呼び出されます。
+
+
+
+    </li>
+    <li>
+        アクティビティがフォアグラウンドに戻り、システムがアクティビティの {@link android.app.Activity#onActivityResult onActivityResult()} メソッドを呼び出します。
+
+このメソッドは、連絡帳アプリの selection アクティビティによって作成された結果のインテントを受け取ります。
+
+    </li>
+    <li>
+        結果のインテントのコンテンツ URI を使用すれば、マニフェストで永続的なアクセス パーミッションをプロバイダに要求していなくても、連絡先プロバイダから連絡先のデータを読み取ることができます。
+
+その後、連絡先の誕生日情報やメールアドレスを取得し、グリーティング カードをオンラインで送信できます。
+
+    </li>
+</ol>
+<h4>別のアプリケーションを使用する</h4>
+<p>
+    パーミッションを持つアプリケーションをアクティベートし、そのアプリケーションをユーザーが使用すれば、アクセス パーミッションを持たないデータをユーザーが修正できるようになります。
+
+</p>
+<p>
+    たとえば、アプリケーションの挿入 UI をアクティベートできる {@link android.content.Intent#ACTION_INSERT} インテントをカレンダー アプリケーションが受け入れるとします。このインテントに「エクストラ」データを渡すことで、アプリケーションがそのデータを使用して、事前に入力された UI を作成します。繰り返し発生するイベントは複雑な構文を持つため、カレンダー プロバイダにイベントを挿入する場合は、{@link android.content.Intent#ACTION_INSERT} でカレンダー アプリをアクティベートしてから、ユーザーにイベントを挿入してもらうことをお勧めします。
+
+
+
+
+
+</p>
+<!-- Contract Classes -->
+<h2 id="ContractClasses">コントラクト クラス</h2>
+<p>
+    コントラクト クラスは、アプリケーションがコンテンツ URI、列名、インテント アクション、コンテンツのその他の機能で作業する際に役立つ定数を定義します。
+プロバイダでコントラクト クラスが自動的に含まれることはありません。プロバイダのデベロッパーはコントラクト クラスを定義して、その他のデベロッパーが使用できるようにする必要があります。
+
+Android プラットフォームに含まれる多くのプロバイダは、パッケージ {@link android.provider} 内に対応するコントラクト クラスを持ちます。
+
+</p>
+<p>
+    たとえば、単語リスト プロバイダは、コンテンツ URI と列名の定数を含む、コントラクト クラス {@link android.provider.UserDictionary} を持つとします。
+「words」表のコンテンツ URI は、定数 {@link android.provider.UserDictionary.Words#CONTENT_URI UserDictionary.Words.CONTENT_URI} で定義されます。
+
+
+    さらに、{@link android.provider.UserDictionary.Words} クラスは、このガイドのサンプルのスニペットで使用される、列名の定数を持ちます。
+たとえば、クエリの投影は次のように定義できます。
+
+</p>
+<pre>
+String[] mProjection =
+{
+    UserDictionary.Words._ID,
+    UserDictionary.Words.WORD,
+    UserDictionary.Words.LOCALE
+};
+</pre>
+<p>
+    もう一方のコントラクト クラスは、連絡先プロバイダのクラス {@link android.provider.ContactsContract} です。
+    このクラスのリファレンスには、サンプルのコード スニペットが記載されています。サブクラスの 1 つである {@link android.provider.ContactsContract.Intents.Insert} は、インテントとインテント データの定数を含むコントラクト クラスです。
+
+
+</p>
+
+
+<!-- MIME Type Reference -->
+<h2 id="MIMETypeReference">MIME タイプ リファレンス</h2>
+<p>
+    コンテンツ プロバイダは、標準の MIME メディア タイプかカスタムの MIME タイプ文字列、またはその両方を返すことができます。
+</p>
+<p>
+    MIME タイプは次の形式となります
+</p>
+<pre>
+<em>type</em>/<em>subtype</em>
+</pre>
+<p>
+    たとえば、よく利用される MIME タイプ <code>text/html</code> は、<code>text</code> タイプと <code>html</code> サブタイプを持ちます。
+プロバイダから URI に対してこのタイプが返される場合、その URI を使用するクエリは HTML タグを含むテキストを返すことになります。
+
+</p>
+<p>
+    「ベンダー固有の」MIME タイプとも呼ばれるカスタムの MIME タイプ文字列には、より複雑な <em>type</em> と <em>subtype</em> の値が含まれます。
+複数行の場合、<em>type</em> 値は常に
+</p>
+<pre>
+vnd.android.cursor.<strong>dir</strong>
+</pre>
+<p>
+    となり、1 つの行の場合は
+</p>
+<pre>
+vnd.android.cursor.<strong>item</strong>
+</pre>
+<p>
+    となります。
+</p>
+<p>
+    <em>subtype</em> はプロバイダ固有の値になります。通常、Android 組み込みプロバイダは単純な subtype を使用します。
+たとえば、連絡先アプリケーションが電話番号の行を作成すると、行には次のように MIME タイプが設定されます。
+
+</p>
+<pre>
+vnd.android.cursor.item/phone_v2
+</pre>
+<p>
+    subtype の値は単純に <code>phone_v2</code> となっていることがわかります。
+</p>
+<p>
+    他のプロバイダ デベロッパーは、プロバイダの認証局と表明に基づいて独自のパターンの subtype を作成できます。
+たとえば、列車の時刻表を含むプロバイダについて考えてみます。
+    プロバイダの認証局は <code>com.example.trains</code> であり、表 Line1、Line2、Line3 を持ちます。
+表 Line1 のコンテンツ URI
+</p>
+<p>
+<pre>
+content://com.example.trains/Line1
+</pre>
+<p>
+    に対しては、プロバイダは次の MIME タイプを返します
+</p>
+<pre>
+vnd.android.cursor.<strong>dir</strong>/vnd.example.line1
+</pre>
+<p>
+     表 Line2 の行 5 のコンテンツ URI
+</p>
+<pre>
+content://com.example.trains/Line2/5
+</pre>
+<p>
+    に対しては、プロバイダは次の MIME タイプを返します
+</p>
+<pre>
+vnd.android.cursor.<strong>item</strong>/vnd.example.line2
+</pre>
+<p>
+    ほとんどのコンテンツ プロバイダが、使用する MIME タイプに対してコントラクト クラス定数を定義します。たとえば、連絡先プロバイダのコントラクト クラス {@link android.provider.ContactsContract.RawContacts} は、1 つの未加工連絡先行の MIME タイプに、定数 {@link android.provider.ContactsContract.RawContacts#CONTENT_ITEM_TYPE} を定義します。
+
+
+
+
+</p>
+<p>
+    1 つの行のコンテンツ URI については、<a href="#ContentURIs">コンテンツ URI</a> セクションをご覧ください。
+
+</p>

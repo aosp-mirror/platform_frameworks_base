@@ -1,0 +1,812 @@
+page.title=フラグメント
+parent.title=アクティビティ
+parent.link=activities.html
+@jd:body
+
+<div id="qv-wrapper">
+<div id="qv">
+  <h2>本書の内容</h2>
+  <ol>
+    <li><a href="#Design">デザインの指針</a></li>
+    <li><a href="#Creating">フラグメントを作成する</a>
+      <ol>
+        <li><a href="#UI">ユーザー インターフェースを追加する</a></li>
+        <li><a href="#Adding">フラグメントをアクティビティに追加する</a></li>
+      </ol>
+    </li>
+    <li><a href="#Managing">フラグメントを管理する</a></li>
+    <li><a href="#Transactions">フラグメントのトランザクションを実行する</a></li>
+    <li><a href="#CommunicatingWithActivity">アクティビティと通信する</a>
+      <ol>
+        <li><a href="#EventCallbacks">アクティビティへのイベント コールバックを作成する</a></li>
+        <li><a href="#ActionBar">アクションバーにアイテムを追加する</a></li>
+      </ol>
+    </li>
+    <li><a href="#Lifecycle">フラグメントのライフサイクルを処理する</a>
+      <ol>
+        <li><a href="#CoordinatingWithActivity">アクティビティのライフサイクルと連携する</a></li>
+      </ol>
+    </li>
+    <li><a href="#Example">例</a></li>
+  </ol>
+
+  <h2>キークラス</h2>
+  <ol>
+    <li>{@link android.app.Fragment}</li>
+    <li>{@link android.app.FragmentManager}</li>
+    <li>{@link android.app.FragmentTransaction}</li>
+  </ol>
+  
+  <h2>関連ドキュメント</h2>
+  <ol>
+    <li><a href="{@docRoot}training/basics/fragments/index.html">Building a Dynamic UI with Fragments</a></li>
+    <li><a href="{@docRoot}guide/practices/tablets-and-handsets.html">Supporting Tablets
+and Handsets</a></li>
+  </ol>
+</div>
+</div>
+
+<p>{@link android.app.Fragment} は、{@link android.app.Activity} でのユーザー インターフェースの挙動や部位を表すものです。
+1 つのアクティビティに複数のフラグメントを組み合わせてマルチペインの UI をビルドしたり、複数のアクティビティでフラグメントを再利用したりできます。
+フラグメントとは、アクティビティのモジュール型セクションのようなもので、独自のライフサイクルを持ち、独自の入力イベントを受信します。フラグメントはアクティビティの実行中に追加したり削除したりできます（別のアクティビティで再利用できる「サブ アクティビティ」のようなものです）。
+
+
+</p>
+
+<p>フラグメントは常にアクティビティに埋め込まれている必要があり、フラグメントのライフサイクルはホストのアクティビティのライフサイクルの影響を直接受けます。
+たとえば、アクティビティが一時停止しているとき、その中のすべてのフラグメントも一時停止し、アクティビティが破棄されると、すべてのフラグメントも破棄されます。
+ただし、アクティビティの実行中（<a href="{@docRoot}guide/components/activities.html#Lifecycle">ライフサイクル</a>で<em>再開</em>された状態）は、追加や削除といった操作は各フラグメントだけで行うことができます。
+
+このようなフラグメントのトランザクションを実行するとき、アクティビティで管理されているバックスタックにそれを追加することもできます。アクティビティの各バックスタック エントリは、発生したフラグメントのトランザクションの記録になります。
+
+&mdash;
+バックスタックでは、[<em>戻る</em>] ボタンを押すとフラグメントのトランザクションを戻す（前に戻る）ことができます。
+</p>
+
+<p>アクティビティのレイアウトの一部としてフラグメントを追加すると、フラグメントはアクティビティのビュー階層の {@link
+android.view.ViewGroup} に置かれ、フラグメントが自身のビュー レイアウトを定義します。フラグメントをアクティビティのレイアウトに挿入するには、アクティビティのレイアウト ファイルでフラグメントを {@code &lt;fragment&gt;} として定義するか、アプリケーション コードで既存の {@link android.view.ViewGroup} に追加します。
+
+
+
+ただし、フラグメントは必ずしもアクティビティの一部になる必要はなく、アクティビティの目に見えないワーカーとして、フラグメント独自の UI なしで使用することもできます。
+
+</p>
+
+<p>このドキュメントでは、アクティビティのバックスタックに追加した時のフラグメントの状態を維持する方法、アクティビティ内でアクティビティと他のフラグメントとイベントを共有する方法、アクティビティのアクションバーへの影響など、フラグメントを使用してアプリケーションをビルドする方法について説明します。
+
+
+</p>
+
+
+<h2 id="Design">デザインの指針</h2>
+
+<p>Android では、タブレットなどの大画面でのよりダイナミックで柔軟な UI デザインに対応するため、Android 3.0（API レベル 11）でフラグメントが採用されました。
+タブレットの画面はハンドセットよりもかなり大きいため、UI コンポーネントを組み合わせたり入れ替えたりできる領域が広くなります。
+
+フラグメントでは、ビュー階層に複雑な変更を加えることなく、そのようなデザインを実現できます。
+アクティビティのレイアウトをフラグメントに分割することで、アクティビティの外観を実行時に変更でき、それらの変更をアクティビティが管理するバックスタックに保持できます。
+
+</p>
+
+<p>たとえば新しいアプリケーションでは、1 つのフラグメントを使って左側に記事の一覧を表示したり、別のフラグメントを使って右側に記事の内容を表示したりできます。両方のフラグメントが 1 つのアクティビティに横並びに表示され、それぞれのフラグメントには自身のライフサイクル メソッドがあり、それぞれのユーザー入力イベントを処理します。
+&mdash;
+
+つまり、1 つのアクティビティで記事を選択して、別のアクティビティで記事を閲覧するのではなく、図 1 のタブレットのレイアウトのように 1 つのアクティビティ内で記事を選択して閲覧できるようになります。
+
+</p>
+
+<p>各フラグメントはモジュール型の、再利用可能なアクティビティ コンポーネントとしてデザインする必要があります。各フラグメントは独自のライフサイクル コールバックを使用して自身のレイアウトと挙動とを定義するため、1 つのフラグメントを複数のアクティビティに含めることができます。このことから、再利用可能なデザインを用いることに加えて、1 つのフラグメントを他のフラグメントから直接操作しないようにする必要があります。
+
+
+これは、モジュール型のフラグメントでは画面のサイズごとにフラグメントの組み合わせを変更できる点からも、特に重要です。
+タブレットとハンドセットの両方に対応したアプリケーションをデザインする場合、異なるレイアウト構成でフラグメントを再利用することで、利用可能な画面の領域に応じて最適な使い心地を実現できます。
+
+たとえばハンドセットの場合、同一のアクティビティ内に 2 つ以上のフラグメントが収まりきらないときは、フラグメントを分割してシングルペインの UI を提示する必要があることもあります。
+
+</p>
+
+<img src="{@docRoot}images/fundamentals/fragments.png" alt="" />
+<p class="img-caption"><strong>図 1.</strong> 1 つのアクティビティ内で、フラグメントで定義された 2 つの UI モジュールを組み合わせたタブレット用デザインと、それぞれを分けたハンドセット用デザインの例。
+
+</p>
+
+<p>引き続きニュース アプリケーションの例を使うと、アプリケーションがタブレット サイズの端末で実行中は、 2 つのフラグメントを<em>アクティビティ A</em> に埋め込むことができます。&mdash;&mdash;
+しかし、ハンドセット サイズの画面では両方のフラグメントを表示する領域が足りないため、<em>アクティビティ A</em> には記事の一覧のフラグメントだけが含まれます。記事を選択すると、記事を閲覧するための 2 つ目のフラグメントが含まれる<em>アクティビティ B</em> が開始されます。
+
+
+そのため、図 1 のようにアプリケーションはフラグメントを異なる組み合わせで再利用することで、タブレットとハンドセットの両方に対応できるようになります。
+
+</p>
+
+<p>異なる画面構成ごとに異なるフラグメントの組み合わせを用いたアプリケーションのデザインの詳細については、「<a href="{@docRoot}guide/practices/tablets-and-handsets.html">Supporting Tablets and Handsets</a>」のガイドをご覧ください。
+</p>
+
+
+
+<h2 id="Creating">フラグメントを作成する</h2>
+
+<div class="figure" style="width:327px">
+<img src="{@docRoot}images/fragment_lifecycle.png" alt="" />
+<p class="img-caption"><strong>図 2.</strong> フラグメントのライフサイクル（アクティビティの実行中）
+</p>
+</div>
+
+<p>フラグメントを作成するには、{@link android.app.Fragment} のサブクラス（またはその既存のサブクラス）を作成する必要があります。
+{@link android.app.Fragment} クラスには、{@link android.app.Activity} に非常に似ているコードがあります。
+これには、{@link android.app.Fragment#onCreate onCreate()}、{@link android.app.Fragment#onStart onStart()}、{@link android.app.Fragment#onPause onPause()}、{@link android.app.Fragment#onStop onStop()} のようなアクティビティと同様のコールバック メソッドが含まれています。
+
+実際に、既存の Android アプリケーションを変換してフラグメントを使用するには、アクティビティのコールバック メソッドから、フラグメントの各コールバック メソッドにコードを移動させるだけで。
+
+
+</p>
+
+<p>通常は、少なくとも次のライフサイクル メソッドを実装する必要があります。</p>
+
+<dl>
+  <dt>{@link android.app.Fragment#onCreate onCreate()}</dt>
+  <dd>フラグメントの作成時にシステムが呼び出します。実装内で、フラグメントが一時停止、停止、再開されたときに保持するフラグメントの必須コンポーネントを初期化する必要があります。
+
+</dd>
+  <dt>{@link android.app.Fragment#onCreateView onCreateView()}</dt>
+  <dd>フラグメントが初めてユーザー インターフェースを描画するタイミングでシステムがこれを呼び出します。
+フラグメントの UI を描画するには、このメソッドからフラグメントのレイアウトのルートとなっている {@link android.view.View} を返す必要があります。
+フラグメントが UI を提示しない場合は、null を返すことができます。
+</dd>
+  <dt>{@link android.app.Activity#onPause onPause()}</dt>
+  <dd>ユーザーがフラグメントから離れたことを初めて示すときに、このメソッドを呼び出します（フラグメントが破棄されていない場合も含む）。
+通常はここで、現在のユーザー セッション後も維持する必要のある変更点を保存しておきます（ユーザーが戻ってこない可能性があるため）。
+
+</dd>
+</dl>
+
+<p>ほとんどのアプリケーションでは、各フラグメントで少なくともこれら 3 つのメソッドを実装する必要がありますが、フラグメントのライフサイクルのさまざまなステージを処理する際に使用する他のコールバック メソッドもいくつかあります。
+
+すべてのライフサイクル コールバック メソッドについては、<a href="#Lifecycle">フラグメントのライフサイクルの処理</a>のセクションで説明します。
+</p>
+
+
+<p>基本の {@link
+android.app.Fragment} クラスの代わりに拡張できるサブクラスもいくつかあります。</p>
+
+<dl>
+  <dt>{@link android.app.DialogFragment}</dt>
+  <dd>フローティング ダイアログを表示します。{@link android.app.Activity} のダイアログ ヘルパー メソッド代わりにこのクラスを使用してダイアログを作成すると、アクティビティで管理されるフラグメントのバックスタックにフラグメント ダイアログを組み込むことができるため、ユーザーは終了したフラグメントに戻ることが可能になります。
+
+
+</dd>
+
+  <dt>{@link android.app.ListFragment}</dt>
+  <dd>{@link android.app.ListActivity} と同様に、アダプタで管理されるアイテムのリストを表示します（{@link
+android.widget.SimpleCursorAdapter} など）。クリック イベントを処理するための {@link
+android.app.ListFragment#onListItemClick(ListView,View,int,long) onListItemClick()} コールバックなど、リスト ビューを管理するメソッドがいくつか提供されます。
+
+</dd>
+
+  <dt>{@link android.preference.PreferenceFragment}</dt>
+  <dd>{@link android.preference.PreferenceActivity} と同様に、{@link android.preference.Preference} オブジェクトの階層をリストとして表示します。
+アプリケーションの「設定」アクティビティの作成時に便利です。
+</dd>
+</dl>
+
+
+<h3 id="UI">ユーザー インターフェースを追加する</h3>
+
+<p>通常、フラグメントはアクティビティのユーザー インターフェースの一部であり、独自のレイアウトをアクティビティに提示します。
+</p>
+
+<p>フラグメントのレイアウトを提供するには、{@link
+android.app.Fragment#onCreateView onCreateView()} コールバック メソッドを実装する必要があります。これは、フラグメントがレイアウトを描画するタイミングで Android システムが呼び出します。
+このメソッドの実装では、フラグメントのレイアウトのルートである {@link android.view.View} を返す必要があります。
+</p>
+
+<p class="note"><strong>注:</strong> フラグメントは {@link
+android.app.ListFragment} のサブクラスの場合、デフォルトの実装で {@link android.widget.ListView} が{@link android.app.Fragment#onCreateView onCreateView()} から返されるため、これを実装する必要はありません。
+</p>
+
+<p>{@link
+android.app.Fragment#onCreateView onCreateView()} からレイアウトを返すには、XML で定義した<a href="{@docRoot}guide/topics/resources/layout-resource.html">レイアウト リソース</a>からインフレートできます。これを行うため、{@link android.app.Fragment#onCreateView onCreateView()} から {@link android.view.LayoutInflater} オブジェクトが提供されます。
+
+</p>
+
+<p>たとえば、次の例では {@link android.app.Fragment} のサブクラスが {@code example_fragment.xml} ファイルからレイアウトをロードします。
+</p>
+
+<pre>
+public static class ExampleFragment extends Fragment {
+    &#64;Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+                             Bundle savedInstanceState) {
+        // Inflate the layout for this fragment
+        return inflater.inflate(R.layout.example_fragment, container, false);
+    }
+}
+</pre>
+
+<div class="sidebox-wrapper">
+<div class="sidebox">
+  <h3>レイアウトを作成する</h3>
+  <p>上の例では、{@code R.layout.example_fragment} はアプリケーション リソースに保存されている {@code example_fragment.xml} という名前のレイアウト リソースへの参照です。
+XML でレイアウトを作成する方法の詳細いついては、「<a href="{@docRoot}guide/topics/ui/index.html">ユーザー インターフェース</a>」のドキュメントをご覧ください。
+
+</p>
+</div>
+</div>
+
+<p>{@link android.app.Fragment#onCreateView
+onCreateView()} に渡される {@code container} パラメータは、フラグメントのレイアウトが挿入される {@link android.view.ViewGroup} の親になります（アクティビティのレイアウトから）。
+
+{@code savedInstanceState} パラメータは、フラグメントが再開された場合にフラグメントの前のインスタンスに関する情報を提供する {@link android.os.Bundle} です（状態の復元の詳細については、<a href="#Lifecycle">フラグメントのライフサイクルの処理</a>で説明します）。
+
+
+</p>
+
+<p>{@link android.view.LayoutInflater#inflate(int,ViewGroup,boolean) inflate()} メソッドは、次の 3 つの引数を受け取ります。
+</p>
+<ul>
+  <li>拡張するレイアウトのリソース ID。</li>
+  <li>インフレートされたレイアウトの親となる {@link android.view.ViewGroup}。システムがインフレートされたレイアウトのルートビュー（親ビューが指定）にレイアウト パラメータ適用するには、{@code
+container} を渡すことが重要です。
+</li>
+  <li>インフレート中に、インフレートされたレイアウトを {@link
+android.view.ViewGroup}（2 つ目のパラメータ）にアタッチすべきかどうかを示すブール値（この場合、システムが既にインフレートされたレイアウトを {@code
+container} に挿入しているため、false になります。true を渡すと、最終レイアウトに余分なビューグループが作成されます。
+&mdash;</li>
+</ul>
+
+<p>ここまで、レイアウトを提供するフラグメントの作成方法について説明しました。次は、フラグメントをアクティビティに追加する必要があります。
+</p>
+
+
+
+<h3 id="Adding">フラグメントをアクティビティに追加する</h3>
+
+<p>通常、フラグメントはホスト アクティビティに UI の一部を提供し、アクティビティの全体的なビュー階層の一部として埋め込まれます。
+アクティビティのレイアウトにフラグメントを追加する方法は 2 つあります。
+</p>
+
+<ul>
+  <li><b>アクティビティのレイアウト ファイル内でフラグメントを宣言する</b>
+<p>この場合、フラグメントがビューであるかのようにレイアウト プロパティを指定できます。
+以下は、2 つのフラグメントを持つアクティビティのレイアウト ファイルです。
+</p>
+<pre>
+&lt;?xml version="1.0" encoding="utf-8"?&gt;
+&lt;LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="horizontal"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"&gt;
+    &lt;fragment android:name="com.example.news.ArticleListFragment"
+            android:id="@+id/list"
+            android:layout_weight="1"
+            android:layout_width="0dp"
+            android:layout_height="match_parent" /&gt;
+    &lt;fragment android:name="com.example.news.ArticleReaderFragment"
+            android:id="@+id/viewer"
+            android:layout_weight="2"
+            android:layout_width="0dp"
+            android:layout_height="match_parent" /&gt;
+&lt;/LinearLayout&gt;
+</pre>
+  <p>{@code &lt;fragment&gt;} の {@code android:name} 属性は、{@link
+android.app.Fragment} クラスを指定してレイアウトにインスタンスを作成します。</p>
+
+<p>システムがこのアクティビティ レイアウトを作成するとき、レイアウトで指定された各フラグメントのインスタンスを作成し、それぞれの {@link android.app.Fragment#onCreateView onCreateView()} メソッドを呼び出して、各フラグメントのレイアウトを取得します。
+
+システムがフラグメントから返された{@link android.view.View} を {@code &lt;fragment&gt;} 要素の代わりに挿入します。
+</p>
+
+<div class="note">
+  <p><strong>注:</strong> 各フラグメントには、アクティビティの再開時にフラグメントを復元するためにシステムが使用できる（そしてフラグメントをキャプチャして削除などのトランザクションを実行する際に使用できる）一意の識別子が必要です
+
+フラグメントの ID を提供するには、次の 3 つの方法があります。
+</p>
+  <ul>
+    <li>{@code android:id} 属性に一意の ID を提供する。</li>
+    <li>{@code android:tag} 属性に一意の文字列を提供する。</li>
+    <li>上記のいずれも提供しない場合、システムはコンテナビューの ID を使用します。
+</li>
+  </ul>
+</div>
+  </li>
+
+  <li><b>または、既存の {@link android.view.ViewGroup} にプログラムを使用してフラグメントを追加します</b>。
+<p>アクティビティの実行中は、いつでもフラグメントをアクティビティ レイアウトに追加できます。必要なのは、フラグメントを配置する場所に {@link
+android.view.ViewGroup} を指定するだけです。
+</p>
+  <p>アクティビティ内にフラグメントのトランザクション（フラグメントの追加、削除、置換など）を作るには、{@link android.app.FragmentTransaction} からの API を使用する必要があります。
+{@link android.app.FragmentTransaction} のインスタンスは、{@link android.app.Activity} から次のようにして取得できます。
+</p>
+
+<pre>
+FragmentManager fragmentManager = {@link android.app.Activity#getFragmentManager()}
+FragmentTransaction fragmentTransaction = fragmentManager.{@link android.app.FragmentManager#beginTransaction()};
+</pre>
+
+<p>次に、{@link
+android.app.FragmentTransaction#add(int,Fragment) add()} メソッドを使用して、追加するフラグメントと挿入するビューを指定してフラグメントを追加できます。
+次に例を示します。</p>
+
+<pre>
+ExampleFragment fragment = new ExampleFragment();
+fragmentTransaction.add(R.id.fragment_container, fragment);
+fragmentTransaction.commit();
+</pre>
+
+  <p>{@link android.app.FragmentTransaction#add(int,Fragment) add()} に渡される最初の引数はフラグメントを配置する {@link android.view.ViewGroup} でリソース ID で指定されており、2 つ目のパラメータは追加するフラグメントです。 
+
+</p>
+  <p>{@link android.app.FragmentTransaction} で変更を加えたら、{@link android.app.FragmentTransaction#commit} を呼び出して変更を適用する必要があります。
+
+</p>
+  </li>
+</ul>
+
+
+<h4 id="AddingWithoutUI">UI のないフラグメントを追加する</h4>
+
+<p>上の例では、UI を提供するためにフラグメントをアクティビティに追加する方法を紹介しましたが、UI を提示せずにアクティビティのバックグラウンド動作を提供するためにフラグメントを使うこともできます。
+
+</p>
+
+<p>UI のないフラグメントを追加するには、{@link
+android.app.FragmentTransaction#add(Fragment,String)} を使用してアクティビティからフラグメントを追加します（ビュー ID ではなくフラグメントの一意の文字列である「タグ」を提供します）。
+これでフラグメントが追加されますが、アクティビティ レイアウトのビューには関連付けられていないため、{@link
+android.app.Fragment#onCreateView onCreateView()} への呼び出しは受け取りません。
+そのため、このメソッドを実装する必要はありません。</p>
+
+<p>フラグメントに文字列のタグを提供するのは UI のないフラグメントの場合だけではありません。UI のあるフラグメントにも文字列のタグを提供することはできますが、UI のないフラグメントにとっては、文字列のタグがフラグメントを識別する唯一の手段になります。&mdash;
+&mdash;
+後でアクティビティからフラグメントを取得する場合は、 {@link android.app.FragmentManager#findFragmentByTag
+findFragmentByTag()} を使用する必要があります。
+</p>
+
+<p>たとえば、フラグメントを UI を持たないバックグラウンド ワーカーとして使用するアクティビティの場合は、SDK サンプルに含まれている（Android SDK マネージャーで利用可能）{@code
+FragmentRetainInstance.java} のサンプルでシステムに <code>&lt;sdk_root&gt;/APIDemos/app/src/main/java/com/example/android/apis/app/FragmentRetainInstance.java</code> として置かれているものをご覧ください。
+
+</p>
+
+
+
+<h2 id="Managing">フラグメントを管理する</h2>
+
+<p>アクティビティのフラグメントを管理するには、{@link android.app.FragmentManager} を使用する必要があります。フラグメントを取得するには、アクティビティから {@link android.app.Activity#getFragmentManager()} を呼び出します。
+</p>
+
+<p>{@link android.app.FragmentManager} では、次の操作が可能です。</p>
+
+<ul>
+  <li>{@link
+android.app.FragmentManager#findFragmentById findFragmentById()}（アクティビティ レイアウトで UI を提供するフラグメントの場合）や {@link android.app.FragmentManager#findFragmentByTag
+findFragmentByTag()}（UI を提供しないフラグメントの場合）を使用して、アクティビティにあるフラグメントを取得する。
+</li> 
+  <li>{@link
+android.app.FragmentManager#popBackStack()} を使用してフラグメントをバックスタックから取り出す（ユーザーによる [<em>戻る</em>] コマンドをシミュレートする）。</li>
+  <li>{@link
+android.app.FragmentManager#addOnBackStackChangedListener addOnBackStackChangedListener()} を使用して、バックスタックの変更に対するリスナを登録する。</li>
+</ul>
+
+<p>これらのメソッドや他のメソッドの詳細については、{@link
+android.app.FragmentManager} クラスのドキュメントをご覧ください。</p>
+
+<p>前のセクションで説明したように、{@link android.app.FragmentManager} を使用して {@link android.app.FragmentTransaction} を開くことで、フラグメントの追加や削除といったトランザクションを実行することもできます。
+
+</p>
+
+
+<h2 id="Transactions">フラグメントのトランザクションを実行する</h2>
+
+<p>アクティビティでのフラグメントの使用における優れた機能として、フラグメントを追加、削除、置換したり、ユーザー操作への応答にフラグメントを使用して他のアクションを実行したりできる点が挙げられます。
+アクティビティに加える変更はそれぞれ 1 つのトランザクションとして、{@link
+android.app.FragmentTransaction} の API を使用して実行できます。
+各トランザクションはアクティビティが管理するバックスタックに保存でき、ユーザーはフラグメントの変更を元に戻すことができます（アクティビティ間で元に戻す動作と似ています）。
+
+</p>
+
+<p>{@link android.app.FragmentTransaction} のインスタンスは、次のように {@link
+android.app.FragmentManager} から作成できます。</p>
+
+<pre>
+FragmentManager fragmentManager = {@link android.app.Activity#getFragmentManager()};
+FragmentTransaction fragmentTransaction = fragmentManager.{@link android.app.FragmentManager#beginTransaction()};
+</pre>
+
+<p>各トランザクションは、同時に実行する一連の変更点です。{@link
+android.app.FragmentTransaction#add add()}、{@link android.app.FragmentTransaction#remove remove()}、{@link android.app.FragmentTransaction#replace replace()} などのメソッドを使って、トランザクションで実行するすべての変更点をセットアップできます。
+
+次に、トランザクションをアクティビティに適用するには、{@link android.app.FragmentTransaction#commit()} を呼び出す必要があります。
+</p>
+</dl>
+
+<p>ただし、{@link
+android.app.FragmentTransaction#commit()} を呼び出す前に、{@link
+android.app.FragmentTransaction#addToBackStack addToBackStack()} を呼び出して、フラグメントのトランザクションのバックスタックにトランザクションを追加することもできます。
+このバックスタックはアクティビティによって管理され、ユーザーが [<em>戻る</em>] ボタンを押して前のフラグメントの状態に戻れるようにします。
+</p>
+
+<p>例として、フラグメントを別のフラグメントに置き換えて、バックスタックで前の状態を保持する方法を次に示します。
+</p>
+
+<pre>
+// Create new fragment and transaction
+Fragment newFragment = new ExampleFragment();
+FragmentTransaction transaction = getFragmentManager().beginTransaction();
+
+// Replace whatever is in the fragment_container view with this fragment,
+// and add the transaction to the back stack
+transaction.replace(R.id.fragment_container, newFragment);
+transaction.addToBackStack(null);
+
+// Commit the transaction
+transaction.commit();
+</pre>
+
+<p>この例では、{@code R.id.fragment_container} ID で識別されるレイアウト コンテナに現在あるフラグメント（存在する場合）を {@code newFragment} が置き換えます。{@link
+android.app.FragmentTransaction#addToBackStack addToBackStack()} を呼び出すと、置き換えのトランザクションがバックスタックに保存されるため、ユーザーはトランザクションを元に戻して、[<em>戻る</em>] ボタンを押すことで前のフラグメントに戻れるようになります。
+
+
+</p>
+
+<p>トランザクションに複数の変更を加えて（{@link
+android.app.FragmentTransaction#add add()} や {@link android.app.FragmentTransaction#remove
+remove()} など）、{@link
+android.app.FragmentTransaction#addToBackStack addToBackStack()} を呼び出した場合、{@link android.app.FragmentTransaction#commit commit()} を呼び出す前に適用されたすべての変更点が 1 つのトランザクションとしてバックスタックに追加され、[<em>戻る</em>] ボタンを押すとすべてが同時に元に戻るようになります。
+
+</p>
+
+<p>次の場合を除き、{@link android.app.FragmentTransaction} に加える変更の順序は影響しません。
+</p>
+<ul>
+  <li>{@link android.app.FragmentTransaction#commit()} は最後に呼び出す必要があります。</li>
+  <li>複数のフラグメントを同じコンテナに追加する場合、追加する順序がビュー階層に表示される順序になります。
+</li>
+</ul>
+
+<p>フラグメントを削除するトランザクションの実行時に {@link android.app.FragmentTransaction#addToBackStack(String)
+addToBackStack()} を呼び出さない場合、トランザクションの実行時にそのフラグメントは破棄され、ユーザーは操作を元に戻すことができなくなります。
+一方で、フラグメントの削除時に {@link android.app.FragmentTransaction#addToBackStack(String) addToBackStack()} を呼び出した場合、フラグメントは<em>停止</em>状態になり、ユーザーが元に戻した時に再開します。
+
+
+</p>
+
+<p class="note"><strong>ヒント:</strong> それぞれのフラグメントのトランザクションでは、コミットする前に {@link android.app.FragmentTransaction#setTransition setTransition()} と呼ばれる遷移のアニメーションを適用できます。
+
+</p>
+
+<p>{@link android.app.FragmentTransaction#commit()} を呼び出してもトランザクションはすぐには実行されません。
+具体的には、アクティビティの UI スレッド（「メイン」スレッド）で実行可能になったときにすぐに実行されるようスケジュールされます。
+ただし、必要であれば UI スレッドから {@link
+android.app.FragmentManager#executePendingTransactions()} を呼び出して、{@link android.app.FragmentTransaction#commit()} から送信されたトランザクションをすぐに実行することもできます。
+通常、トランザクションが他のスレッドのジョブに依存していない限り、この操作は必要ありません。
+</p>
+
+<p class="caution"><strong>警告:</strong> {@link
+android.app.FragmentTransaction#commit commit()} を使用したトランザクションをコミットできるのは、アクティビティが<a href="{@docRoot}guide/components/activities.html#SavingActivityState">状態を保存</a>する前（ユーザーがアクティビティを離れるとき）にのみに限定されます。
+それ以降にコミットしようとすると、例外がスローされます。
+これは、アクティビティの復元が必要な場合に、コミット後のステータスが失われてしまう可能性があるためです。
+コミットが失われてもよい場合は、{@link
+android.app.FragmentTransaction#commitAllowingStateLoss()} を使用します。</p>
+
+
+
+
+<h2 id="CommunicatingWithActivity">アクティビティと通信する</h2>
+
+<p>{@link android.app.Fragment} が {@link android.app.Activity} から独立したフラグメントとして実行されていて、複数のアクティビティ内で使用可能であっても、フラグメントの特定のインスタンスは、それが含まれるアクティビティに直接結び付いています。
+
+</p>
+
+<p>具体的には、フラグメントは {@link
+android.app.Fragment#getActivity()} を使用して {@link android.app.Activity} インスタンスにアクセスでき、アクティビティのレイアウトでビューを見つけるなどのタスクを簡単に実行できます。
+</p>
+
+<pre>
+View listView = {@link android.app.Fragment#getActivity()}.{@link android.app.Activity#findViewById findViewById}(R.id.list);
+</pre>
+
+<p>同様に、アクティビティが {@link
+android.app.FragmentManager#findFragmentById findFragmentById()} や {@link
+android.app.FragmentManager#findFragmentByTag findFragmentByTag()} を使って {@link android.app.FragmentManager} から {@link android.app.Fragment} への参照を取得することで、フラグメント内のメソッドを呼び出すこともできます。
+次に例を示します。</p>
+
+<pre>
+ExampleFragment fragment = (ExampleFragment) getFragmentManager().findFragmentById(R.id.example_fragment);
+</pre>
+
+
+<h3 id="EventCallbacks">アクティビティへのイベント コールバックを作成する</h3>
+
+<p>アクティビティとイベントを共有するフラグメントが必要になる場面もあります。これを実現するには、フラグメント内でコールバック インターフェースを定義して、ホスト アクティビティがそれを実装するよう要求します。
+
+アクティビティがインターフェースを介してコールバックを受け取ると、必要に応じてレイアウト内の他のフラグメントと情報を共有します。
+</p>
+
+<p>たとえば、新しいアプリケーションでアクティビティ内に、記事のリストを表示するフラグメント（フラグメント A）と、記事を表示するフラグメント（フラグメント B）の 2 つのフラグメントがある場合、リストのアイテムが選択されたときに、フラグメント B に記事を表示するよう伝えるため、フラグメント A から選択されたことをアクティビティに伝える必要があります。&mdash;
+&mdash;
+ここでは、{@code OnArticleSelectedListener} インターフェースがフラグメント A で宣言されています。
+</p>
+
+<pre>
+public static class FragmentA extends ListFragment {
+    ...
+    // Container Activity must implement this interface
+    public interface OnArticleSelectedListener {
+        public void onArticleSelected(Uri articleUri);
+    }
+    ...
+}
+</pre>
+
+<p>次に、フラグメントのホストであるアクティビティが {@code OnArticleSelectedListener} インターフェースを実装して {@code onArticleSelected()} をオーバーライドし、フラグメント B にフラグメント A からのイベントを通知します。ホスト アクティビティがこのインターフェースを確実に実装するようにするため、フラグメント A の {@link
+android.app.Fragment#onAttach onAttach()} コールバック メソッド（フラグメントをアクティビティに追加するときにシステムが呼び出すメソッド）が、{@link android.app.Fragment#onAttach
+onAttach()} に渡される {@link android.app.Activity} をキャストして {@code OnArticleSelectedListener} のインスタンスを登録します。
+
+
+
+
+</p>
+
+<pre>
+public static class FragmentA extends ListFragment {
+    OnArticleSelectedListener mListener;
+    ...
+    &#64;Override
+    public void onAttach(Activity activity) {
+        super.onAttach(activity);
+        try {
+            mListener = (OnArticleSelectedListener) activity;
+        } catch (ClassCastException e) {
+            throw new ClassCastException(activity.toString() + " must implement OnArticleSelectedListener");
+        }
+    }
+    ...
+}
+</pre>
+
+<p>アクティビティがインターフェースを実装していない場合は、フラグメントは {@link java.lang.ClassCastException} をスローします。成功すると、{@code mListener} メンバーがアクティビティの {@code OnArticleSelectedListener} の実装への参照を保持でき、フラグメント A が {@code OnArticleSelectedListener} インターフェースで定義されたコールバック メソッドを呼び出すことでアクティビティとイベントを共有できるようになります。
+
+
+
+たとえば、フラグメント A は {@link android.app.ListFragment} の拡張で、ユーザーがリストアイテムをクリックするたびに、システムがフラグメントの {@link android.app.ListFragment#onListItemClick
+onListItemClick()} を呼び出し、それが{@code onArticleSelected()} を呼び出してアクティビティとイベントを共有します。
+
+
+</p>
+
+<pre>
+public static class FragmentA extends ListFragment {
+    OnArticleSelectedListener mListener;
+    ...
+    &#64;Override
+    public void onListItemClick(ListView l, View v, int position, long id) {
+        // Append the clicked item's row ID with the content provider Uri
+        Uri noteUri = ContentUris.{@link android.content.ContentUris#withAppendedId withAppendedId}(ArticleColumns.CONTENT_URI, id);
+        // Send the event and Uri to the host activity
+        mListener.onArticleSelected(noteUri);
+    }
+    ...
+}
+</pre>
+
+<p>{@link
+android.app.ListFragment#onListItemClick onListItemClick()} に渡される {@code id} パラメータはクリックされたアイテムの行 ID で、アクティビティ（または他のフラグメント）がアプリケーションの {@link
+android.content.ContentProvider} から記事を取得する際に使用します。
+</p>
+
+<p><!--To see a complete implementation of this kind of callback interface, see the <a
+href="{@docRoot}resources/samples/NotePad/index.html">NotePad sample</a>. -->コンテンツ プロバイダの使用に関する詳細については、「<a href="{@docRoot}guide/topics/providers/content-providers.html">コンテンツ プロバイダ</a>」のドキュメントをご覧ください。
+</p>
+
+
+
+<h3 id="ActionBar">アクションバーにアイテムを追加する</h3>
+
+<p>フラグメントは、{@link android.app.Fragment#onCreateOptionsMenu(Menu,MenuInflater) onCreateOptionsMenu()} を実装することでアクティビティの<a href="{@docRoot}guide/topics/ui/menus.html#options-menu">オプション メニュー</a>（とその<a href="{@docRoot}guide/topics/ui/actionbar.html">アクション バー</a>）にメニュー アイテムを提供することができます。
+ただし、このメソッドが呼び出しを受け取るには、{@link
+android.app.Fragment#onCreate(Bundle) onCreate()} の間に {@link
+android.app.Fragment#setHasOptionsMenu(boolean) setHasOptionsMenu()} を呼び出して、フラグメントがオプション メニューにアイテムを追加することを示す必要があります（これを行わない場合、フラグメントは {@link android.app.Fragment#onCreateOptionsMenu onCreateOptionsMenu()} への呼び出しを受け取りません）。
+
+
+</p>
+
+<p>フラグメントから追加するアイテムはすべて、既存のメニュー アイテムに追加されます。
+また、メニュー アイテムが選択されたとき、フラグメントは {@link
+android.app.Fragment#onOptionsItemSelected(MenuItem) onOptionsItemSelected()} へのコールバックも受け取ります。
+</p>
+
+<p>また、{@link
+android.app.Fragment#registerForContextMenu(View) registerForContextMenu()} を呼び出して、フラグメントのレイアウトにビューを登録してコンテキスト メニューを提供することもできます。ユーザーがコンテキスト メニューを開くと、フラグメントは {@link
+android.app.Fragment#onCreateContextMenu(ContextMenu,View,ContextMenu.ContextMenuInfo)
+onCreateContextMenu()} への呼び出しを受け取ります。
+ユーザーがアイテムを選択すると、フラグメントは {@link
+android.app.Fragment#onContextItemSelected(MenuItem) onContextItemSelected()} への呼び出しを受け取ります。</p>
+
+<p class="note"><strong>注:</strong> 追加するメニュー アイテムごとにフラグメントは on-item-selected コールバックを受け取りますが、ユーザーがメニュー アイテムを選択したときに最初にそれぞれのコールバックを受け取るのはアクティビティになります。
+
+アクティビティの on-item-selected コールバックの実装で、選択されたアイテムが処理されなかった場合、イベントはフラグメントのコールバックに渡されます。
+この挙動は、オプション メニューとコンテキスト メニューの両方に適用されます。
+</p>
+
+<p>メニューの詳細については、デベロッパー ガイドの「<a href="{@docRoot}guide/topics/ui/menus.html">メニュー</a>」と「<a href="{@docRoot}guide/topics/ui/actionbar.html">アクションバー</a>」をご覧ください。</p>
+
+
+
+
+<h2 id="Lifecycle">フラグメントのライフサイクルを処理する</h2>
+
+<div class="figure" style="width:350px">
+<img src="{@docRoot}images/activity_fragment_lifecycle.png" alt="" />
+<p class="img-caption"><strong>図 3.</strong> フラグメントのライフサイクルに対するアクティビティのライフサイクルの影響。
+</p>
+</div>
+
+<p>フラグメントのライフサイクルの管理は、アクティビティのライフサイクルの管理によく似ています。アクティビティと同様に、フラグメントには次の 3 つの状態があります。
+</p>
+
+<dl>
+  <dt><i>再開状態</i></dt>
+    <dd>フラグメントが実行中のアクティビティで表示されている。</dd>
+
+  <dt><i>一時停止状態</i></dt>
+    <dd>他のアクティビティがフォアグラウンドにあり、フォーカスがあるが、このアクティビティも表示されている（フォアグラウンドにある別のアクティビティは半透明になっているか、全画面をカバーしていない）。
+
+</dd>
+
+  <dt><i>停止状態</i></dt>
+    <dd>フラグメントは表示されていない。ホスト アクティビティが停止状態か、フラグメントがアクティビティから削除されたが、バックスタックに追加されている。
+停止状態のフラグメントはまだ存続しています（すべての状態とメンバー情報がシステムで保持されています）。
+ただし、アクティビティが破棄されるとユーザーには表示されなくなり、フラグメントも破棄されます。
+</dd>
+</dl>
+
+<p>さらに、アクティビティと同様に、アクティビティのプロセスが破棄されて、アクティビティが再作成されたときにフラグメントの状態を復元する必要がある場合は、 {@link
+android.os.Bundle} を使用してフラグメントの状態を保持できます。
+フラグメントの {@link
+android.app.Fragment#onSaveInstanceState onSaveInstanceState()} コールバックの間に状態を保存して、{@link android.app.Fragment#onCreate onCreate()}、{@link
+android.app.Fragment#onCreateView onCreateView()}、{@link
+android.app.Fragment#onActivityCreated onActivityCreated()} の間にそれを復元できます。
+状態の保存の詳細については、「<a href="{@docRoot}guide/components/activities.html#SavingActivityState">Activities</a>」のドキュメントをご覧ください。
+
+</p>
+
+<p>アクティビティとフラグメントのライフサイクルの最も重要な違いは、バックスタックでのそれぞれの保存方法です。
+アクティビティは、デフォルトで停止状態の時にシステムが管理するアクティビティのバックスタックに置かれますが（<a href="{@docRoot}guide/components/tasks-and-back-stack.html">タスクとバックスタック</a> で説明したようにユーザーが [<em>戻る</em>] ボタンで前に戻ることができるように）、フラグメントの場合は、フラグメントを削除するトランザクションの間に {@link
+android.app.FragmentTransaction#addToBackStack(String) addToBackStack()} を呼び出してインスタンスを保存するよう明示的に要求した場合のみ、ホスト アクティビティが管理するバックスタックに置かれます。
+
+
+
+
+</p>
+
+<p>これ以外については、フラグメントのライフサイクルの管理は、アクティビティのライフサイクルの管理とほとんど同じです。
+そのため、<a href="{@docRoot}guide/components/activities.html#Lifecycle">アクティビティのライフサイクルの管理</a>におけるベスト プラクティスがフラグメントにも適用されます。
+もう 1 つ理解しておくべき事項は、アクティビティの寿命がどのようにフラグメントの寿命に影響を与えるかという点です。
+</p>
+
+<p class="caution"><strong>警告:</strong> {@link android.app.Fragment} 内に {@link android.content.Context} オブジェクトが必要な場合は、{@link android.app.Fragment#getActivity()} を呼び出すことができます。ただし、{@link android.app.Fragment#getActivity()} はフラグメントがアクティビティにアタッチされている場合にのみ呼び出すようにしてください。
+
+
+フラグメントがまだアタッチされていない場合や、ライフサイクルの終了時にデタッチされた場合は、{@link android.app.Fragment#getActivity()} は null を返します。
+</p>
+
+
+<h3 id="CoordinatingWithActivity">アクティビティのライフサイクルと連携する</h3>
+
+<p>フラグメントが含まれるアクティビティのライフサイクルは、フラグメントのライフサイクルに直接影響し、アクティビティに対する各ライフサイクル コールバックは、各フラグメントに対して同様のコールバックをもたらします。
+
+たとえば、アクティビティが {@link android.app.Activity#onPause} を受け取ると、アクティビティ内の各フラグメントが {@link android.app.Fragment#onPause} を受け取ります。
+</p>
+
+<p>ただし、フラグメントにはフラグメントの UI をビルドしたり破棄したりするアクションを実行する際のアクティビティとの独自のやり取りを処理する追加のライフサイクル コールバックがいくつかあります。これらの追加のコールバック メソッドは次のとおりです。
+
+</p>
+
+<dl>
+  <dt>{@link android.app.Fragment#onAttach onAttach()}</dt>
+    <dd>フラグメントがアクティビティと関連付けられたときに呼び出されます（ここで {@link
+android.app.Activity} が渡されます）。</dd>
+  <dt>{@link android.app.Fragment#onCreateView onCreateView()}</dt>
+    <dd>フラグメントに関連付けられたビュー階層を作成する際に呼び出されます。</dd>
+  <dt>{@link android.app.Fragment#onActivityCreated onActivityCreated()}</dt>
+    <dd>アクティビティの {@link android.app.Activity#onCreate
+onCreate()} メソッドが戻ったときに呼び出されます。</dd>
+  <dt>{@link android.app.Fragment#onDestroyView onDestroyView()}</dt>
+    <dd>フラグメントに関連付けられたビュー階層が削除されたときに呼び出されます。</dd>
+  <dt>{@link android.app.Fragment#onDetach onDetach()}</dt>
+    <dd>フラグメントとアクティビティとの関連付けが解除されたときに呼び出されます。</dd>
+</dl>
+
+<p>図 3 は、ホスト アクティビティの影響を受けたフラグメントのライフサイクルのフローを表しています。
+この図から、アクティビティの一連の状態によって、フラグメントが受け取るコールバック メソッドがどのように決められているかがわかります。
+たとえば、アクティビティが {@link
+android.app.Activity#onCreate onCreate()} コールバックを受け取ると、アクティビティ内のフラグメントは {@link android.app.Fragment#onActivityCreated onActivityCreated()} コールバックまでを受け取ります。
+</p>
+
+<p>アクティビティが再開状態になると、アクティビティでのフラグメントの追加や削除を自由に行えます。
+つまり、アクティビティが再開された状態が、フラグメントのライフサイクルを独立して変更できる唯一の期間になります。
+</p>
+
+<p>ただし、アクティビティが再開状態でなくなると、フラグメントはアクティビティによって再度ライフサイクル間を通過することになります。
+</p>
+
+
+
+
+<h2 id="Example">例</h2>
+
+<p>このドキュメントで解説した内容をすべて網羅するため、2 つのフラグメントを使用して 2 つのペインのレイアウトを作成するアクティビティの例を紹介します。
+次のアクティビティには、シェイクスピア劇のタイトル リストを表示するフラグメントと、リストから劇が選択されたときに劇のあらすじを表示するフラグメントがあります。
+
+また、ここでは画面構成によって異なるフラグメント構成を提供する方法も示しています。
+</p>
+
+<p class="note"><strong>注:</strong> このアクティビティのすべてのソース コードは、<a href="{@docRoot}resources/samples/ApiDemos/src/com/example/android/apis/app/FragmentLayout.html">{@code
+FragmentLayout.java}</a> で入手できます。
+</p>
+
+<p>メイン アクティビティでは、通常の方法で {@link
+android.app.Activity#onCreate onCreate()} の間にレイアウトを適用します。</p>
+
+{@sample development/samples/ApiDemos/src/com/example/android/apis/app/FragmentLayout.java main}
+
+<p>適用されるレイアウトは {@code fragment_layout.xml} です。</p>
+
+{@sample development/samples/ApiDemos/res/layout-land/fragment_layout.xml layout}
+
+<p>このレイアウトを使って、アクティビティがレイアウトをロードするとすぐにシステムが {@code TitlesFragment}（これが劇のタイトルをリストします）のインスタンスを作成します。このとき、{@link android.widget.FrameLayout} （劇のあらすじを表示するフラグメントの目的地）が画面右側を使用し、残りは空白の状態です。
+
+
+ご覧のように、フラグメントが {@link android.widget.FrameLayout} に置かれるのはユーザーがアイテムを選択してからになります。
+</p>
+
+<p>ただし、画面構成によっては、劇の一覧とあらすじを横並びに表示するほどの幅がない場合もあります。
+そのため、上記のレイアウトは横方向の画面構成の場合のみ使用され、{@code res/layout-land/fragment_layout.xml} に保存されます。
+</p>
+
+<p>画面が縦方向の場合、システムは次のレイアウトを適用して {@code res/layout/fragment_layout.xml} に保存します。
+</p>
+
+{@sample development/samples/ApiDemos/res/layout/fragment_layout.xml layout}
+
+<p>このレイアウトには、{@code TitlesFragment} のみが含まれます。つまり、端末が縦方向の場合、劇のタイトルのみが表示されます。
+そのため、この構成時にユーザーがリストのアイテムをクリックしたとき、アプリケーションは 2 つ目のフラグメントをロードする代わりに新しいアクティビティを開始してあらすじを表示します。
+
+</p>
+
+<p>次に、フラグメントのクラスでこれをどう実現するのかを見ていきます。まず、{@code
+TitlesFragment} はシェイクスピア劇のタイトル リストを表示します。このフラグメントは {@link
+android.app.ListFragment} を拡張し、リスト ビューの動作の処理のほとんどを委ねます。</p>
+
+<p>このコードをよく見ると、ユーザーがリストのアイテムをクリックしたときの挙動が 2 つ考えられます。2 つのレイアウトのどちらがアクティブになっているかによって、新しいフラグメントを作成して表示することで同じアクティビティで詳細を表示するか（{@link
+android.widget.FrameLayout} にフラグメントを追加する）、新しいアクティビティを（フラグメントを表示できる場所に）開始するかのいずれかになります。
+
+</p>
+
+{@sample development/samples/ApiDemos/src/com/example/android/apis/app/FragmentLayout.java titles}
+
+<p>2 つ目のフラグメントである {@code DetailsFragment} は、{@code TitlesFragment} のリストで選択された劇のあらすじを表示します。
+</p>
+ 
+{@sample development/samples/ApiDemos/src/com/example/android/apis/app/FragmentLayout.java details}
+
+<p>{@code TitlesFragment} クラスで説明したように、ユーザーがリストアイテムをクリックしたときに、現在のレイアウトに{@code R.id.details} ビュー（{@code DetailsFragment} が属する場所）が<em>含まれていない</em>場合、アプリケーションは {@code DetailsActivity} のアクティビティを開始してアイテムのコンテンツを表示します。
+
+
+</p>
+
+<p>次の {@code DetailsActivity} では、画面が縦方向のときに単純に {@code DetailsFragment} を埋め込んで選択された劇のあらすじを表示します。
+</p>
+
+{@sample development/samples/ApiDemos/src/com/example/android/apis/app/FragmentLayout.java
+details_activity}
+ 
+<p>構成が横方向の場合はアクティビティは自ら終了するため、メイン アクティビティが引き継いで {@code DetailsFragment} を {@code TitlesFragment} の横に表示できます。これは、ユーザーが縦方向のときに {@code DetailsActivity} を開始し、その後横方向に回転した（ここで現在のアクティビティが再開される）ときに起こることがあります。
+
+
+</p>
+
+
+<p>フラグメントを使用したその他のサンプルとこの例の完全なソース ファイルについては、<a href="{@docRoot}resources/samples/ApiDemos/src/com/example/android/apis/app/index.html#Fragment">ApiDemos</a>（<a href="{@docRoot}resources/samples/get.html">SDK コンポーネントのサンプル</a>から入手可能）にある API デモサンプルをご覧ください。
+
+</p>
+
+

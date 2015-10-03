@@ -1,0 +1,492 @@
+page.title=レイアウト
+page.tags=view,viewgroup
+@jd:body
+
+<div id="qv-wrapper">
+<div id="qv">
+  <h2>本書の内容</h2>
+<ol>
+  <li><a href="#write">XML の記述</a></li>
+  <li><a href="#load">XML リソースの読み込み</a></li>
+  <li><a href="#attributes">属性</a>
+    <ol>
+      <li><a href="#id">ID</a></li>
+      <li><a href="#layout-params">レイアウト パラメータ</a></li>
+    </ol>
+  </li>
+  <li><a href="#Position">レイアウトの位置</a></li>
+  <li><a href="#SizePaddingMargins">サイズ、パディング、マージン</a></li>
+  <li><a href="#CommonLayouts">共通レイアウト</a></li>
+  <li><a href="#AdapterViews">アダプタを使ったレイアウトをビルドする</a>
+    <ol>
+      <li><a href="#FillingTheLayout">データを使ったアダプタビューを書き込む</a></li>
+      <li><a href="#HandlingUserSelections">クリック イベントを処理する</a></li>
+    </ol>
+  </li>
+</ol>
+
+  <h2>キークラス</h2>
+  <ol>
+    <li>{@link android.view.View}</li>
+    <li>{@link android.view.ViewGroup}</li>
+    <li>{@link android.view.ViewGroup.LayoutParams}</li>
+  </ol>
+
+  <h2>関連ドキュメント</h2>
+  <ol>
+    <li><a href="{@docRoot}training/basics/firstapp/building-ui.html">簡単なユーザー インターフェースをビルドする</a>
+</li> </div>
+</div>
+
+<p>レイアウトでは、<a href="{@docRoot}guide/components/activities.html">アクティビティ</a>や<a href="{@docRoot}guide/topics/appwidgets/index.html">アプリ ウィジェット</a>の UI のような、ユーザー インターフェースの視覚的構造が定義されます。次の 2 つの方法でレイアウトを宣言できます。
+</p>
+<ul>
+<li><strong>XML で UI 要素を宣言する</strong>。Android では、ウィジェットやレイアウトなどの View クラスとサブクラスに対応する単純な XML ボキャブラリが提供されます。
+</li>
+<li><strong>実行時にレイアウト要素のインスタンスを作成する</strong>。アプリケーションで View と ViewGroup オブジェクトを作成できます。また、プログラムを使ってプロパティを操作することもできます。
+ </li>
+</ul>
+
+<p>Android フレームワークでは、アプリケーション UI の宣言と管理に、これらのいずれかのメソッドまたは両方のメソッドを柔軟に使うことができます。たとえば、レイアウトに表示されるスクリーン要素やそのプロパティを含む、アプリケーションのデフォルト レイアウトを XML で宣言できます。スクリーン オブジェクトの状態を変更するコードをアプリケーション内で追加できます（実行時の XML での宣言を含む）。 </p>
+
+<div class="sidebox-wrapper">
+<div class="sidebox">
+  <ul>
+  <li><a href="{@docRoot}tools/sdk/eclipse-adt.html">ADT Plugin for Eclipse</a> では、XML ファイルを開いて [<strong>レイアウト</strong>] タブを選択すると、XML のレイアウト プレビューが提供されます。
+
+</li>
+  <li>レイアウトのデバッグに、<a href="{@docRoot}tools/debugging/debugging-ui.html#hierarchyViewer">Hierarchy Viewer</a> ツールを使うこともできます。このツールでは、レイアウト プロパティ値の表示、パディングやマージンのインジケーターを使ったワイヤーフレームの描画、エミュレータや端末でデバッグする間のレンダリングされた全画面表示が提供されます。
+
+
+
+</li>
+  <li><a href="{@docRoot}tools/debugging/debugging-ui.html#layoutopt">layoutopt</a> ツールを使うと、効率性の低下やその他の問題について、レイアウトや階層を素早く解析できます。
+</li>
+</div>
+</div>
+
+<p>XML で UI を宣言する利点は、動作を制御するコードとアプリケーションの表示をうまく切り離すことができる点です。UI の記述は、アプリケーション コード外にあるため、ソースコードの変更や再コンパイルをすることなく、記述を修正したり改良したりできます。たとえば、異なる画面の向き、端末の画面サイズ、言語に対して XML レイアウトを作成できます。XML でレイアウトを宣言すると、UI の構造を簡単に視覚化できるため、問題のデバッグも簡単です。そのため、本書では XML でレイアウトを宣言する方法を中心に説明しています。実行時に View オブジェクトのインスタンスを作成することに関心がある場合は、{@link android.view.ViewGroup} と {@link android.view.View} クラス参照をご覧ください。
+
+</p>
+
+<p>通常、UI 要素を宣言する XML ボキャブラリは、クラスとメソッドの構造と命名に厳密に従っており、要素名はクラス名に、属性名はメソッドに対応しています。実際、ほとんどの場合、直接的に対応しているため、クラスメソッドに対応する XML 属性を推測したり、与えられた XML 要素に対応するクラスを推測したりできます。ただし、すべてのボキャブラリが同一とは限りません。場合によっては、命名が若干異なります。たとえば、EditText 要素には、<code>EditText.setText()</code> に対応する <code>text</code> 属性があります。
+
+ </p>
+
+<p class="note"><strong>ヒント:</strong> 異なるレイアウト タイプの詳細については、<a href="{@docRoot}guide/topics/ui/layout-objects.html">共通レイアウト オブジェクト</a>をご覧ください。
+また、<a href="{@docRoot}resources/tutorials/views/index.html">Hello Views</a> のチュートリアル ガイドには、さまざまなレイアウトのビルドに関するチュートリアルがあります。
+</p>
+
+<h2 id="write">XML の記述</h2>
+
+<p>Android の XML ボキャブラリを使って、HTML でウェブページを作成するのと同じ方法で（ネストした一連の要素を使って）、UI レイアウトとそれに含まれる画面要素を素早く設計できます。 </p>
+
+<p>各レイアウト ファイルには、必ず 1 つのルート要素が含まれていて、そのルート要素は View または ViewGroup オブジェクトでなくてはなりません。ルート要素を定義すれば、追加のレイアウト オブジェクトやウィジェットを子の要素として追加して、レイアウトを定義するビュー階層を少しずつビルドできます。{@link android.widget.TextView} と {@link android.widget.Button} を保持するために、縦方向の {@link android.widget.LinearLayout} を使用する XML レイアウトの例を次に示します。
+</p>
+<pre>
+&lt;?xml version="1.0" encoding="utf-8"?>
+&lt;LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:layout_width="match_parent"
+              android:layout_height="match_parent"
+              android:orientation="vertical" >
+    &lt;TextView android:id="@+id/text"
+              android:layout_width="wrap_content"
+              android:layout_height="wrap_content"
+              android:text="Hello, I am a TextView" />
+    &lt;Button android:id="@+id/button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Hello, I am a Button" />
+&lt;/LinearLayout>
+</pre>
+
+<p>XML でレイアウトを宣言した後、そのファイルを Android プロジェクトの <code>res/layout/</code> ディレクトリ内で <code>.xml</code> 拡張子を付けて保存して、正しくコンパイルされるようにします。
+ </p>
+
+<p>レイアウト XML ファイルの構文の詳細については、「<a href="{@docRoot}guide/topics/resources/layout-resource.html">Layout Resources</a>」のドキュメントをご覧ください。</p>
+
+<h2 id="load">XML リソースの読み込み</h2>
+
+<p>アプリケーションをコンパイルすると、各 XML レイアウト ファイルは {@link android.view.View} リソースにコンパイルされます。
+{@link android.app.Activity#onCreate(android.os.Bundle) Activity.onCreate()} コールバックの実装で、アプリケーション コードからレイアウト リソースを読み込んでください。これを行うには、<code>{@link android.app.Activity#setContentView(int) setContentView()}</code> を呼び出し、<code>R.layout.<em>layout_file_name</em></code> の形式でレイアウト リソースへの参照を渡します。たとえば、XML レイアウトが <code>main_layout.xml</code> として保存される場合、次のようにしてアクティビティに読み込みます。
+
+
+
+
+
+</p>
+<pre>
+public void onCreate(Bundle savedInstanceState) {
+    super.onCreate(savedInstanceState);
+    setContentView(R.layout.main_layout);
+}
+</pre>
+
+<p>アクティビティの <code>onCreate()</code> コールバック メソッドは、アクティビティが起動されるときに、Android フレームワークによって呼び出されます（ライフサイクルに関する説明については、「<a href="{@docRoot}guide/components/activities.html#Lifecycle">アクティビティ</a>」のドキュメントをご覧ください）。
+
+
+</p>
+
+
+<h2 id="attributes">属性</h2>
+
+<p>すべての View と ViewGroup オブジェクトでは、独自のさまざまな XML 属性がサポートされています。一部の属性は、View オブジェクト特有のものですが（たとえば TextView では <code>textSize</code> 属性がサポートされています）、これらの属性はこのクラスを拡張可能な View オブジェクトによっても継承されます。一部は、ルート View クラスから継承されるため、すべての View オブジェクトに共通します（<code>id</code> 属性のような）。
+
+
+
+その他の属性は「レイアウト パラメータ」として考慮され、オブジェクトの親である ViewGroup オブジェクトとして定義された、View オブジェクトの特定のレイアウト方向を記述する属性となります。
+
+</p>
+
+<h3 id="id">ID</h3>
+
+<p>ツリー内で View を一意に識別するために、すべての View オブジェクトには、それに関連付けられた整数の ID があることがあります。アプリケーションがコンパイルされると、この ID は整数として参照されますが、一般的にその ID は <code>id</code> 属性で文字列としてレイアウト XML ファイルに割り当てられます。これは、すべての View オブジェクトに共通の XML 属性で（{@link android.view.View} クラスで定義）、非常に頻繁に使用されます。XML タグ内の ID の構文を次に示します。
+
+
+
+
+</p>
+<pre>android:id="&#64;+id/my_button"</pre>
+
+<p>文字列の先頭にあるアットマーク（@）は、その XML パーサーが ID の残りの文字列をパースして展開し、それを ID リソースとして識別する必要があることを示します。
+プラス記号（+）は、それが新しいリソース名で、作成してリソースに追加する（<code>R.java</code> ファイル内で）必要があることを意味しています。
+Android フレームワークによって提供されるその他のさまざまな ID リソースがあります。
+Android リソース ID を参照するときは、プラス記号を使う必要はありませんが、次のように <code>android</code> パッケージ名前空間を追加する必要があります。
+</p>
+<pre>android:id="&#64;android:id/empty"</pre>
+<p><code>android</code> パッケージ名前空間付きの場合、ローカルのリソースクラスからではなく <code>android.R</code> リソースクラスから ID を参照するようになります。
+</p>
+
+<p>ビューを作成してアプリケーションからそれを参照するには、次のような共通のパターンがあります。</p>
+<ol>
+  <li>レイアウト ファイルでビューとウィジェットを定義して、一意の ID を割り当てる。
+<pre>
+&lt;Button android:id="&#64;+id/my_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="&#64;string/my_button_text"/>
+</pre>
+  </li>
+  <li>次に、View オブジェクトのインスタンスを作成し、それを次のようにレイアウトから取得する（通常は、<code>{@link android.app.Activity#onCreate(Bundle) onCreate()}</code> メソッド内で）。
+
+<pre>
+Button myButton = (Button) findViewById(R.id.my_button);
+</pre>
+  </li>
+</ol>
+<p>View オブジェクトの ID を定義することは、{@link android.widget.RelativeLayout} を作成するときに重要になります。相対レイアウトでは、兄弟ビューは一意の ID で参照される別の兄弟ビューに相対するレイアウトを定義できます。
+
+</p>
+<p>ツリー全体で ID が一意である必要はありませんが、探しているツリーの一部では、一意である必要があります。ほとんどの場合、それはツリー全体になりますが、可能な時に完全に一意になるようにすることが最善です。
+
+</p>
+
+
+<h3 id="layout-params">レイアウト パラメータ</h3>
+
+<p><code>layout_<em>something</em></code> という名前の XML レイアウト属性では、含まれている ViewGroup に適した View に対するレイアウト パラメータが定義されます。
+</p>
+
+<p>すべての ViewGroup クラスでは、{@link
+android.view.ViewGroup.LayoutParams} を拡張するネストされたクラスが実装されます。このサブクラスには、各子ビューのサイズと位置を ViewGroup に合うように定義するプロパティ タイプが含まれています。
+
+図 1 にあるように、親 ViewGroup によって、子 ViewGroup を含む、各子ビューのレイアウト パラメータが定義されます。
+</p>
+
+<img src="{@docRoot}images/layoutparams.png" alt="" />
+<p class="img-caption"><strong>図 1.</strong> 各ビューに関連付けられたレイアウトのパラメータを含むビュー階層の視覚化。
+</p>
+
+<p>すべての LayoutParams サブクラスには、設定値に独自の構文があります。
+それぞれの子の要素では、その親に適した LayoutParams が定義される必要がありますが、自分の子に対して異なる LayoutParams を定義することもできます。
+ </p>
+
+<p>すべての ViewGroup には、幅と高さ（<code>layout_width</code> と <code>layout_height</code>）が含まれていて、各ビューでそれが定義されている必要があります。
+多くの LayoutParams には、省略可能なマージンと境界線も含まれています。
+ <p>
+
+<p>必要になる頻度は少ない可能性はありますが、幅と高さを正確なサイズで指定することもできます。
+ほとんどの場合は、次の定数のいずれかを使って幅や高さを設定します。
+ </p>
+
+<ul>
+  <li><var>wrap_content</var> では、ビューがそのコンテンツに必要な寸法に合わせられます。
+</li>
+  <li><var>match_parent</var> （API レベル 8 以前は <var>fill_parent</var> ）では、ビューが親 ViewGroup で許容される最大サイズで表示されます。
+</li>
+</ul>
+
+<p>通常、ピクセルなどの絶対単位でレイアウトの幅と高さを指定することは推奨されません。
+
+密度非依存ピクセル単位（<var>dp</var>）、 <var>wrap_content</var>、
+<var>match_parent</var>などの相対測定を使う方が賢明です。そうすることで、さまざまな端末の画面サイズでアプリケーションが正しく表示されるようになります。使用可能な測定タイプは、「<a href="{@docRoot}guide/topics/resources/available-resources.html#dimension">使用可能なリソース</a>」のドキュメントで定義されています。
+
+
+
+</p>
+
+
+<h2 id="Position">レイアウトの位置</h2>
+   <p>
+   ビューの形状は、矩形です。ビューには、<em>左</em>と<em>上</em>の座標ペアで表される位置と、幅と高さで表される 2 次元があります。
+
+位置と寸法の単位はピクセルです。
+
+   </p>
+
+   <p>
+   {@link android.view.View#getLeft()} と {@link android.view.View#getTop()} メソッドを呼び出してビューの位置を取得できます。
+前者では、左またはビューを表す矩形の X 座標が返されます。
+後者では、上またはビューを表す矩形の Y 座標が返されます。
+これらのメソッドでは、両方とも親に相対するビューの位置が返されます。
+たとえば、<code>getLeft()</code> で 20 が返される場合、そのビューはその直属の親の左端から右に 20 ピクセルの位置にあることを意味します。
+
+
+   </p>
+
+   <p>
+   他にも、{@link android.view.View#getRight()} や {@link android.view.View#getBottom()} といった不要な計算を回避するさまざまな便利なメソッドが提供されています。
+
+   これらのメソッドでは、ビューを表す矩形の右端と下端の座標が返されます。
+たとえば、{@link android.view.View#getRight()} を呼び出すことは、<code>getLeft() + getWidth()</code> の計算と同様です。
+
+   </p>
+
+
+<h2 id="SizePaddingMargins">サイズ、パディング、マージン</h2>
+   <p>
+   ビューのサイズは、幅と高さで示します。実際に、ビューには幅と高さ 2 つの値がペアとして保持されています。
+
+   </p>
+
+   <p>
+   最初のペアは、<em>測定された幅</em>と<em>測定された高さ</em>と呼ばれます。
+これらの寸法で、その親内でのビューの大きさが定義されます。
+測定された寸法は、{@link android.view.View#getMeasuredWidth()} と {@link android.view.View#getMeasuredHeight()} を呼び出して取得できます。
+
+
+   </p>
+
+   <p>
+   2 番目のペアは、単に<em>幅</em>と<em>高さ</em>と呼ばれたり、<em>描画する幅</em>と<em>描画する高さ</em>と呼ばれたりします。
+これらの寸法は、描画時とレイアウト後に、画面上のビューの実サイズを定義するものです。
+
+これらの値は、測定された幅や高さと異なる値にすることもできますが、必須ではありません。
+幅と高さは、{@link android.view.View#getWidth()} と {@link android.view.View#getHeight()} を呼び出して取得できます。
+
+   </p>
+
+   <p>
+   その寸法を測るために、ビューではパディングも考慮されます。パディングは、ビューの上下左右に対し、ピクセルで記述されます。
+
+   パディングを使って、特定のピクセル値でビュー コンテンツのオフセットを指定できます。
+たとえば、左側のパディングが 2 の場合は、左端から 2 ピクセル右にビューのコンテンツが寄せられます。
+パディングは {@link android.view.View#setPadding(int, int, int, int)} メソッドを使って設定でき、{@link android.view.View#getPaddingLeft()}、{@link android.view.View#getPaddingTop()}、{@link android.view.View#getPaddingRight()}、{@link android.view.View#getPaddingBottom()} を呼び出してクエリできます。
+
+
+
+   </p>
+
+   <p>
+   ビューではパディングを定義できますが、マージンについてはサポートされていません。
+ただし、ViewGroup ではそのようなサポートが提供されています。詳細については、{@link android.view.ViewGroup} と {@link android.view.ViewGroup.MarginLayoutParams} をご覧ください。
+
+
+   </p>
+
+   <p>寸法の詳細については、<a href="{@docRoot}guide/topics/resources/more-resources.html#Dimension">寸法の値</a>をご覧ください。
+
+   </p>
+
+
+
+
+
+
+<style type="text/css">
+div.layout {
+  float:left;
+  width:200px;
+  margin:0 0 20px 20px;
+}
+div.layout.first {
+  margin-left:0;
+  clear:left;
+}
+</style>
+
+
+
+
+<h2 id="CommonLayouts">共通レイアウト</h2>
+
+<p>{@link android.view.ViewGroup} クラスの各サブクラスでは、ビュー内でネストするビューを表示する一意の方法が提供されます。
+Android プラットフォームにビルドされる共通のレイアウト タイプの一部を以下に示します。
+</p>
+
+<p class="note"><strong>注:</strong> 別のレイアウト内で 1 つ以上のレイアウトをネストして UI を設計できますが、レイアウトの階層はできる限り浅くしておくようにしてください。
+
+ネストが浅いレイアウトの場合、レイアウトの描画がより速くなります。深いビュー階層より、ワイドなビュー階層の方がより良いと言えます。
+</p>
+
+<!--
+<h2 id="framelayout">FrameLayout</h2>
+<p>{@link android.widget.FrameLayout FrameLayout} is the simplest type of layout
+object. It's basically a blank space on your screen that you can
+later fill with a single object &mdash; for example, a picture that you'll swap in and out.
+All child elements of the FrameLayout are pinned to the top left corner of the screen; you cannot
+specify a different location for a child view. Subsequent child views will simply be drawn over
+previous ones,
+partially or totally obscuring them (unless the newer object is transparent).
+</p>
+-->
+
+
+<div class="layout first">
+  <h4><a href="layout/linear.html">線形レイアウト</a></h4>
+  <a href="layout/linear.html"><img src="{@docRoot}images/ui/linearlayout-small.png" alt="" /></a>
+  <p>子を横方向または縦方向の 1 行にまとめるレイアウト。ウィンドウの長さが画面の長さを超える場合は、スクロールバーが作成されます。
+</p>
+</div>
+
+<div class="layout">
+  <h4><a href="layout/relative.html">相対レイアウト</a></h4>
+  <a href="layout/relative.html"><img src="{@docRoot}images/ui/relativelayout-small.png" alt="" /></a>
+  <p>たとえば子 A を子 B の左になど、それぞれの子オブジェクトの位置を相対して指定したり、親の上に揃えてなど、親に相対して指定したりできます。
+</p>
+</div>
+
+<div class="layout">
+  <h4><a href="{@docRoot}guide/webapps/webview.html">ウェブビュー</a></h4>
+  <a href="{@docRoot}guide/webapps/webview.html"><img src="{@docRoot}images/ui/webview-small.png" alt="" /></a>
+  <p>ウェブページを表示します。</p>
+</div>
+
+
+
+
+<h2 id="AdapterViews" style="clear:left">アダプタを使ったレイアウトをビルドする</h2>
+
+<p>レイアウトのコンテンツが動的または事前設定されていないとき、{@link android.widget.AdapterView} のサブクラスのレイアウトを使って、実行時にビューでレイアウトを設定できます。
+{@link android.widget.AdapterView} クラスのサブクラスでは、{@link android.widget.Adapter} を使ってそのレイアウトにデータがバインドされます。
+
+{@link android.widget.Adapter} はデータソースと {@link android.widget.AdapterView} レイアウト間の仲介として動作します。{@link android.widget.Adapter} によって、配列やデータベース クエリのようなソースからデータが取得され、各エントリが {@link android.widget.AdapterView} レイアウトに追加できるビューに変換されます。
+
+
+</p>
+
+<p>アダプタでサポートされている共通レイアウトには次が含まれます。</p>
+
+<div class="layout first">
+  <h4><a href="layout/listview.html">リストビュー</a></h4>
+  <a href="layout/listview.html"><img src="{@docRoot}images/ui/listview-small.png" alt="" /></a>
+  <p>スクロール可能な 1 列のリストが表示されます。</p>
+</div>
+
+<div class="layout">
+  <h4><a href="layout/gridview.html">グリッドビュー</a></h4>
+  <a href="layout/gridview.html"><img src="{@docRoot}images/ui/gridview-small.png" alt="" /></a>
+  <p>スクロール可能な列と行のグリッドが表示されます。</p>
+</div>
+
+
+
+<h3 id="FillingTheLayout" style="clear:left">データを使ったアダプタビューを書き込む</h3>
+
+<p>{@link android.widget.AdapterView} インスタンスを {@link android.widget.Adapter} にバインドして、{@link android.widget.ListView} や {@link android.widget.GridView} などの {@link android.widget.AdapterView} を入力できます。外部ソースのデータが取得され、各データエントリを表す {@link
+android.view.View} が作成されます。
+
+</p>
+
+<p>Android ではさまざまな種類のデータの取得と {@link android.widget.AdapterView} のビューのビルドに役立つ {@link android.widget.Adapter} のサブクラスがいくつか提供されます。
+最も一般的なアダプタは次の 2 つです。
+</p>
+
+<dl>
+  <dt>{@link android.widget.ArrayAdapter}</dt>
+    <dd>データソースが配列の場合に、このアダプタを使います。デフォルトでは、{@link
+android.widget.ArrayAdapter} によって各アイテムで {@link
+java.lang.Object#toString()} が呼び出され、そのコンテンツが {@link
+android.widget.TextView} に配置されることで、各配列アイテムのビューが作成されます。
+      <p>たとえば、{@link
+android.widget.ListView} に表示する文字列の配列がある場合、コンストラクタを使って新しい {@link android.widget.ArrayAdapter} を初期化して、各文字列と文字列配列のレイアウトを指定します。
+</p>
+<pre>
+ArrayAdapter&lt;String> adapter = new ArrayAdapter&lt;String>(this,
+        android.R.layout.simple_list_item_1, myStringArray);
+</pre>
+<p>このコンストラクタの引数を次に示します。</p>
+<ul>
+  <li>アプリの {@link android.content.Context}</li>
+  <li>配列の各文字列に対して {@link android.widget.TextView} を含むレイアウト</li>
+  <li>文字列配列</li>
+</ul>
+<p>次に、{@link android.widget.ListView} で {@link android.widget.ListView#setAdapter setAdapter()} を呼び出します。
+</p>
+<pre>
+ListView listView = (ListView) findViewById(R.id.listview);
+listView.setAdapter(adapter);
+</pre>
+
+      <p>各アイテムの概観をカスタマイズするには、自分の配列内のオブジェクトに {@link
+java.lang.Object#toString()} メソッドをオーバーライドします。または、たとえば各配列アイテムに {@link android.widget.ImageView} が必要な場合など、{@link android.widget.TextView} 以外の各アイテムの表示を作成するには、{@link
+android.widget.ArrayAdapter} クラスを拡張し、{@link android.widget.ArrayAdapter#getView
+getView()} をオーバーライドして、各アイテムに必要なビュータイプが返されるようにします。
+
+</p>
+
+</dd>
+
+  <dt>{@link android.widget.SimpleCursorAdapter}</dt>
+    <dd>{@link android.database.Cursor} から取得されたデータの場合は、このアダプタを使います。{@link android.widget.SimpleCursorAdapter} を使う場合は、{@link android.database.Cursor} で各行に使うレイアウトを指定して、{@link android.database.Cursor} のどの列をレイアウトのビューに挿入するのかを指定してください。
+
+
+たとえば、人の名前と電話番号のリストを作成する場合は、それぞれの人の行と、その名前と番号の列を含む {@link
+android.database.Cursor} を返すクエリを実行します。
+
+次に、それぞれの結果に対して {@link
+android.database.Cursor} のどの列をレイアウトに含めるかを指定する文字列配列と、各列が配置されるべき対応するビューを指定する整数配列を作成します。
+</p>
+<pre>
+String[] fromColumns = {ContactsContract.Data.DISPLAY_NAME,
+                        ContactsContract.CommonDataKinds.Phone.NUMBER};
+int[] toViews = {R.id.display_name, R.id.phone_number};
+</pre>
+<p>{@link android.widget.SimpleCursorAdapter} のインスタンスを作成するとき、各結果に使うレイアウト、結果を含む {@link android.database.Cursor}、次の 2 つの配列を渡します。
+</p>
+<pre>
+SimpleCursorAdapter adapter = new SimpleCursorAdapter(this,
+        R.layout.person_name_and_number, cursor, fromColumns, toViews, 0);
+ListView listView = getListView();
+listView.setAdapter(adapter);
+</pre>
+<p>次に、{@link android.widget.SimpleCursorAdapter} によって、対応する {@code toViews} ビューに各 {@code
+fromColumns} アイテムを挿入して提供されたレイアウトを使って {@link android.database.Cursor} で各行のビューが作成されます。
+</p>.</dd>
+</dl>
+
+
+<p>アプリケーションのライフサイクル中に、アダプタによって読み取られる基礎となるデータを変更する場合は、{@link android.widget.ArrayAdapter#notifyDataSetChanged()} を呼び出してください。
+これによって、データが変更されたアタッチされたビューが通知され、それ自体を更新する必要があることが通知されます。
+</p>
+
+
+
+<h3 id="HandlingUserSelections">クリック イベントを処理する</h3>
+
+<p>{@link android.widget.AdapterView.OnItemClickListener} インターフェースを実装して {@link android.widget.AdapterView} の各アイテムでのクリック イベントに応答できます。
+次に例を示します。</p>
+
+<pre>
+// Create a message handling object as an anonymous class.
+private OnItemClickListener mMessageClickedHandler = new OnItemClickListener() {
+    public void onItemClick(AdapterView parent, View v, int position, long id) {
+        // Do something in response to the click
+    }
+};
+
+listView.setOnItemClickListener(mMessageClickedHandler);
+</pre>
+
+
+

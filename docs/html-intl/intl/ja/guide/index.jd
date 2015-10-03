@@ -1,0 +1,74 @@
+page.title=Android 入門
+
+@jd:body
+
+
+<div class="sidebox" style="width:220px"><!-- width to match col-4 below -->
+<p>アプリの動作方法について学ぶには、「<a href="{@docRoot}guide/components/fundamentals.html">App Fundamentals</a>」をご覧ください。
+</p>
+<p>今すぐコーディングを始める場合は、「<a href="{@docRoot}training/basics/firstapp/index.html">Building Your First App</a>」をご覧ください。</p>
+</div>
+
+<p>Android は、モバイル端末用の画期的なアプリやゲームを Java 言語環境でビルドできる、充実したアプリケーション フレームワークを提供します。
+左側のナビゲーションに表示されているドキュメントには、さまざまな Android API を使ってアプリをビルドする詳しい方法が記載されています。
+</p>
+
+<p>Android 開発の経験がない場合は、Android アプリのフレームワークについて次の基本的な概念を理解していることが重要になります。
+</p>
+
+
+<div class="landing-banner">
+
+<div class="col-6">
+
+<h4>アプリには複数のエントリ ポイントがある</h4>
+
+<p>Android のアプリは、個別に呼び出し可能な異なるコンポーネントを組み合わせてビルドされます。
+たとえば、1 つの<em>アクティビティ</em>が 1 つの画面でユーザー インターフェースを提供し、<em>サービス</em>がバックグラウンドで個別に処理を実行します。
+
+</p>
+
+<p><em>インテント</em>を使って、1 つのコンポーネントから別のコンポーネントを開始できます。地図アプリで住所を表示するアクティビティなどのように、別のアプリでコンポーネントを開始することもできます。
+このモデルでは、1 つのアプリに複数のエントリ ポイントを提供し、あらゆるアプリを他のアプリが呼び出すアクションの「デフォルト」として動作させることができます。
+
+</p>
+
+
+<p><b>詳細を見る</b></p>
+<ul class="nolist">
+<li><a href="{@docRoot}guide/components/fundamentals.html">App Fundamentals</a>
+<li><a href="{@docRoot}guide/components/intents-filters.html">インテントとインテント フィルタ</a>
+<li><a href="{@docRoot}guide/components/activities.html">Activities</a>
+</ul>
+
+</div>
+
+
+<div class="col-6">
+
+<h4>さまざまな端末に対応するアプリ</h4>
+
+<p>Android は、さまざまな端末の構成に独自のリソースを提供できる柔軟なアプリ フレームワークを提供します。
+たとえば、画面サイズごとに個別の XML レイアウト ファイルを作成し、システムが使用中の端末の画面サイズに基づいて適用するレイアウトを決定します。
+
+</p>
+
+<p>アプリの機能に特定のハードウェア（カメラなど）が必要な場合は、実行時に端末機能の使用可能状況をクエリできます。
+必要に応じて、アプリに必要な機能を宣言することもできます。これによって、Google Play ストアなどのアプリ マーケットでは、宣言した機能に対応していない端末へのインストールが許可されません。
+
+</p>
+
+
+<p><b>詳細を見る</b></p>
+<ul class="nolist">
+<li><a href="{@docRoot}guide/practices/compatibility.html">Device Compatibility</a>
+<li><a href="{@docRoot}guide/topics/resources/overview.html">リソースの概要</a>
+<li><a href="{@docRoot}guide/topics/ui/overview.html">ユーザー インターフェースの概要</a>
+</ul>
+
+</div>
+
+</div><!-- end landing-banner -->
+
+
+

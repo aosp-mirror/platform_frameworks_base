@@ -1,0 +1,90 @@
+page.title=入力コントロール
+parent.title=ユーザー インターフェース
+parent.link=index.html
+@jd:body
+
+<div class="figure" style="margin:0">
+  <img src="{@docRoot}images/ui/ui-controls.png" alt="" style="margin:0" />
+</div>
+
+<p>入力コントロールは、アプリのユーザー インターフェースのインタラクティブなコンポーネントです。Android では、ボタン、テキスト フィールド、シークバー、チェックボックス、ズームボタン、トグルボタンなど UI で使用できるさまざまなコントロールが提供されています。
+
+</p>
+
+<p>UI に入力コントロールを追加することは、<a href="{@docRoot}guide/topics/ui/declaring-layout.html">XML レイアウト</a>に XML 要素を追加するのと同じくらい簡単です。テキスト フィールドとボタンを含むレイアウトの例を次に示します。
+</p>
+
+<pre style="clear:right">
+&lt;?xml version="1.0" encoding="utf-8"?>
+&lt;LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:orientation="horizontal">
+    &lt;EditText android:id="@+id/edit_message"
+        android:layout_weight="1"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:hint="@string/edit_message" />
+    &lt;Button android:id="@+id/button_send"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/button_send"
+        android:onClick="sendMessage" />
+&lt;/LinearLayout>
+</pre>
+
+<p>各入力コントロールでは、特定の一連の入力イベントがサポートされているため、ユーザーがテキストを入力したり、ボタンをタップしたりするときなどに、イベントを処理できます。
+</p>
+
+
+<h2 id="CommonControls">コモン コントロール</h2>
+<p>アプリで使用できるコモン コントロールには、次のようなものがあります。それぞれの使い方の詳細については、各リンクをご覧ください。
+</p>
+
+<p class="note"><strong>注:</strong> Android では、ここにリストされている以外にもいくつかコントロールが提供されています。
+他のコントロールについては、{@link android.widget} パッケージをご確認ください。アプリで、特定の種類の入力コントロールを必要とする場合、独自の <a href="{@docRoot}guide/topics/ui/custom-components.html">カスタム コンポーネント</a> をビルドできます。
+</p>
+
+<table>
+    <tr>
+        <th scope="col">コントロール タイプ</th>
+        <th scope="col">説明</th>
+	<th scope="col">関連クラス</th>
+    </tr>
+    <tr>
+        <td><a href="controls/button.html">ボタン</a></td>
+        <td>ユーザーがアクションを実行するために、押したり、クリックしたりできるプッシュボタン。</td>
+	<td>{@link android.widget.Button Button} </td>
+    </tr>
+    <tr>
+        <td><a href="controls/text.html">テキスト フィールド</a></td>
+        <td>編集できるテキスト フィールド。<code>AutoCompleteTextView</code> ウィジェットを使って、オートコンプリート候補を表示するテキスト入力ウィジェットを作成できます。</td>
+	<td>{@link android.widget.EditText EditText}、{@link android.widget.AutoCompleteTextView}</td>
+    </tr>
+    <tr>
+        <td><a href="controls/checkbox.html">チェックボックス</a></td>
+        <td>ユーザーが切り替えることができる、オン、オフスイッチ。相互に排他的ではない選択可能なオプションのグループをユーザーに表示するときは、チェックボックスを使ってください。</td>
+	<td>{@link android.widget.CheckBox CheckBox} </td>
+    </tr>
+    <tr>
+        <td><a href="controls/radiobutton.html">ラジオボタン</a></td>
+        <td>グループで選択できるオプションは 1 つのみであることを除き、チェックボックスと同様です。</td>
+	<td>{@link android.widget.RadioGroup RadioGroup} 
+	<br>{@link android.widget.RadioButton RadioButton} </td>
+    </tr>
+    <tr>
+        <td><a href="controls/togglebutton.html" style="white-space:nowrap">トグルボタン</a></td>
+        <td>ライト インジケーター付きの、オン、オフボタン。</td>
+	<td>{@link android.widget.ToggleButton ToggleButton} </td>
+    </tr>
+    <tr>
+        <td><a href="controls/spinner.html">スピナー</a></td>
+        <td>ユーザーが一連の値から 1 つを選択できるドロップダウン リスト。</td>
+	<td>{@link android.widget.Spinner Spinner} </td>
+    </tr>
+    <tr>
+        <td><a href="controls/pickers.html">ピッカー</a></td>
+        <td>上下のボタンを使うか、スワイプして、1 つの値を選択するためのダイアログ。日付（月、日、年）の値を入力するには <code>DatePicker</code>code&gt; ウィジェットを使い、時刻（時間、分、午前または午後）の値を入力するには <code>TimePicker</code> ウィジェットを使います。これにより、ユーザーのロケールが自動的に書式設定されます。</td>
+	<td>{@link android.widget.DatePicker}、{@link android.widget.TimePicker}</td>
+    </tr>
+</table>

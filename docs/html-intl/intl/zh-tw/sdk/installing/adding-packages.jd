@@ -1,0 +1,227 @@
+page.title=新增 SDK 封裝
+
+page.tags=sdk manager
+helpoutsWidget=true
+
+@jd:body
+
+<style>
+ol.large {
+  margin-left:0;
+}
+ol.large > li {
+  list-style-position: inside;
+  list-style-type:none;
+  margin:30px 0 0 0;
+  padding:30px 20px;
+  background:#eee;
+}
+ol.large > li:nth-child(odd) {
+}
+ol.large > li:before {
+  display:inline;
+  left:-40px;
+  float:left;
+  width:20px;
+  font-size:20px;
+  line-height:20px;
+}
+ol.large > li > h2 {
+  font-size:20px;
+  line-height:20px;
+  padding:0 0 0 20px;
+  margin:0 0 20px 0;
+  display:inline-block;
+  font-weight:normal;
+}
+ol.large > li:nth-child(1):before {
+  content:"1. ";
+}
+ol.large > li:nth-child(2):before {
+  content:"2. ";
+}
+ol.large > li:nth-child(3):before {
+  content:"3. ";
+}
+ol.large > li:nth-child(4):before {
+  content:"4. ";
+}
+ol.large > li:nth-child(5):before {
+  content:"5. ";
+}
+ol.large > li:nth-child(6):before {
+  content:"6. ";
+}
+</style>
+
+
+<p>
+Android SDK 預設不會包括開發所需的所有內容。SDK 將工具、平台及其他元件劃分為不同的封裝。您可以使用
+ <a href="{@docRoot}tools/help/sdk-manager.html">Android SDK Manager</a> 視需要下載。因此，您要先將封裝加入 Android SDK 後，才可以開始進行。
+
+
+</p>
+
+<p>如要新增封裝，請透過下列其中一種方式啟動 Android SDK Manager：</p>
+<ul>
+  <li>在 Android Studio 中，按一下工具列的 [<strong>SDK Manager</strong>]
+<img src="{@docRoot}images/tools/sdk-manager-studio.png" style="vertical-align:bottom;margin:0;height:17px" />。</li>
+  <li>如果您不是使用 Android Studio：
+    <ul>
+      <li>Windows：按兩下位於 Android SDK 目錄之根目錄的 <code>SDK Manager.exe</code> 檔案。
+</li>
+      <li>Mac/Linux：開啟終端機並瀏覽到安裝 Android SDK 的 <code>tools/</code> 目錄，然後執行 <code>android sdk</code>。
+</li>
+    </ul>
+  </li>
+</ul>
+
+<p>第一次開啟 SDK Manager 時，預設會選取多個封裝。
+保留預設選取的封裝，但務必按照以下步驟確認您已經取得開發所需的所有內容：
+</p>
+
+
+<ol class="large">
+<li>
+  <h2 id="GetTools" class="norule">取得最新的 SDK 工具</h2>
+
+<img src="/images/sdk_manager_packages.png" alt="" width="350" style="float:right;margin-left:20px" />
+
+  <p>設定 Android SDK 時，您一定要下載最新的工具和平台：
+</p>
+  <ol>
+   <li>開啟 Tools 目錄並選取：
+     <ul>
+       <li><strong>Android SDK 工具</strong></li>
+       <li><strong>Android SDK 平台工具</strong></li>
+       <li><strong>Android SDK 建置工具</strong> (最新版本)</li>
+     </ul>
+   </li>
+   <li>開啟第一個 Android X.X 資料夾 (最新版本) 並選取：
+     <ul>
+      <li><strong>SDK 平台</strong></li>
+      <li>模擬器的系統映像，例如 <br>
+      <strong>ARM EABI v7a 系統映像</strong></li>
+     </ul>
+   </li>
+  </ol>
+</li>
+
+<li>
+  <h2 id="GetSupportLib" class="norule">取得額外 API 的支援程式庫</h2>
+
+  <div class="sidebox">
+    <p>以下各項需要支援程式庫：</p>
+    <ul>
+      <li><a href="{@docRoot}wear/index.html">Android Wear</a></li>
+      <li><a href="{@docRoot}tv/index.html">Android 電視</a></li>
+      <li><a href="{@docRoot}google/play-services/cast.html">Google Cast</a></li>
+    </ul>
+
+    <p>支援程式庫也提供常用的 API：</p>
+    <ul>
+      <li><a href="{@docRoot}reference/android/support/v4/widget/DrawerLayout.html">導覽匣</a>
+</li>
+      <li><a href="{@docRoot}reference/android/support/v4/view/ViewPager.html">滑動檢視</a></li>
+      <li><a href="{@docRoot}reference/android/support/v7/app/ActionBar.html">向下相容的動作列</a>
+</li>
+    </ul>
+  </div>
+
+  <p><a href="{@docRoot}tools/support-library/features.html">Android 支援程式庫</a>提供的 API 延伸集合，可以與大部分的 Android 版本相容。
+</p>
+
+  <p>開啟 <strong>Extras</strong> 目錄並選取：</p>
+     <ul>
+       <li><strong>Android 支援存放庫</strong></li>
+       <li><strong>Android 支援程式庫</strong></li>
+     </ul>
+
+  <p>&nbsp;</p>
+  <p>&nbsp;</p>
+
+</li>
+
+
+<li>
+  <h2 id="GetGoogle" class="norule">從 Google Play 服務取得更多 API</h2>
+
+  <div class="sidebox">
+
+    <p>Google Play 服務 API 為 Android 應用程式提供多種功能與服務，例如：
+</p>
+    <ul>
+      <li><a href="{@docRoot}google/play-services/plus.html">使用者驗證</a></li>
+      <li><a href="{@docRoot}google/play-services/maps.html">Google 地圖</a></li>
+      <li><a href="{@docRoot}google/play-services/cast.html">Google Cast</a></li>
+      <li><a href="{@docRoot}google/play-services/games.html">遊戲關卡和排行榜</a>
+</li>
+      <li><a href="{@docRoot}google/play-services/index.html">更多功能與服務</a></li>
+    </ul>
+  </div>
+
+  <p>如要使用 Google API 進行開發，您需要 Google Play 服務封裝：</p>
+  <p>開啟 <strong>Extras</strong> 目錄並選取：</p>
+     <ul>
+       <li><strong>Google 存放庫</strong></li>
+       <li><strong>Google Play 服務</strong></li>
+     </ul>
+
+  <p class="note"><strong>注意：</strong>並非所有 Android 裝置都提供 Google Play 服務，但內含 Google Play 市集的所有裝置都可以使用 Google Play 服務。
+如要在 Android 模擬器中使用這些 API，您必須從 SDK Manager 最新的 Android X.X 目錄中安裝 <strong>Google API</strong> 系統映像。
+
+</p>
+</li>
+
+
+<li>
+  <h2 id="Install" class="norule">安裝封裝</h2>
+  <p>您選好需要的所有封裝後，就可以繼續安裝：</p>
+  <ol>
+   <li>按一下 [<strong>安裝 X 封裝</strong>]。</li>
+   <li>在下一個視窗中，按兩下左側的每個封裝名稱，以接受每項的授權合約。
+</li>
+   <li>按一下 [<strong>安裝</strong>]。</li>
+  </ol>
+  <p>SDK Manager 視窗的下方會顯示下載進度。
+  <strong>請勿結束 SDK Manager</strong>，下載會因而取消。</p>
+</li>
+
+<li>
+  <h2 id="Build" class="norule">開始建置！</h2>
+
+<p>Android SDK 現在已內含上述封裝，您可以開始建置 Android 應用程式了。
+若有新的工具和其他 API，只要啟動 SDK Manager 即可將新的封裝下載到 SDK。
+</p>
+
+<p>以下是繼續進行的選項：</p>
+
+<div class="cols" style="padding:10px 0">
+<div class="col-4">
+<h3>開始使用</h3>
+<p>如果您是 Android 開發新手，可參考<strong><a href="{@docRoot}training/basics/firstapp/index.html">建置第一個應用程式</a></strong>指南瞭解 Android 應用程式的基本概念。
+</p>
+
+</div>
+<div class="col-4 box">
+<h3>建置穿戴式應用程式</h3>
+<p>如果您準備好開始建置 Android 穿戴式裝置的應用程式，請參閱<strong><a href="{@docRoot}wear/preview/start.html">建置 Android Wear 的應用程式</a></strong>指南。
+</p>
+
+</div>
+<div class="col-4 box">
+<h3>使用 Google API</h3>
+<p>如要開始使用 Google API (例如「地圖」或 Play Game 服務)，請參閱<strong><a href="{@docRoot}google/play-services/setup.html">設定 Google Play 服務</a></strong>指南。
+
+
+</p>
+
+</div>
+</div><!-- end cols -->
+
+
+</li>
+
+</ol>
+
+

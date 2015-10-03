@@ -1,0 +1,103 @@
+page.title=资源概览
+@jd:body
+
+<div id="qv-wrapper">
+<div id="qv">
+  <h2>主题</h2>
+  <ol>
+    <li><a href="providing-resources.html">提供资源</a></li>
+    <li><a href="accessing-resources.html">访问资源</a></li>
+    <li><a href="runtime-changes.html">处理运行时变更</a></li>
+    <li><a href="localization.html">本地化</a></li>
+  </ol>
+
+  <h2>参考文档</h2>
+  <ol>
+    <li><a href="available-resources.html">资源类型</a></li>
+  </ol>
+</div>
+</div>
+
+
+<p>您应该始终外部化资源，例如图像和应用代码中的字符串，这样有利于您单独维护这些资源。
+此外，通过外部化资源，您还可以提供支持特定设备配置（例如，不同的语言或屏幕尺寸）的备用资源，随着采用
+Android
+ 技术且配置各异的设备越来越多，这些资源的重要性也日益增加。
+为了提供与不同配置的兼容性，您必须使用各种按类型和配置对资源进行分组的子目录，对项目
+{@code res/}
+目录中的资源加以组织。
+</p>
+
+<div class="figure" style="width:429px">
+<img src="{@docRoot}images/resources/resource_devices_diagram1.png" height="167" alt="" />
+<p class="img-caption">
+<strong>图 1. </strong>两种不同的设备，均使用默认布局（应用不提供备用布局）。
+</p>
+</div>
+
+<div class="figure" style="width:429px">
+<img src="{@docRoot}images/resources/resource_devices_diagram2.png" height="167" alt="" />
+<p class="img-caption">
+<strong>图 2. </strong>两种不同的设备，分别使用针对不同屏幕尺寸提供的不同布局。
+</p>
+</div>
+
+<p>对于任意类型的资源，您均可以为应用指定默认资源和多个备用资源：
+<em></em><em></em></p>
+<ul>
+  <li>默认资源系指无论设备配置如何，或者在没有备用资源与当前配置相匹配时，均应使用的资源。
+
+</li>
+  <li>备用资源系指设计用于特定配置的资源。
+要指明某组资源适用于特定配置，请将相应的配置限定符追加到目录名称。
+</li>
+</ul>
+
+<p>例如，尽管默认 UI
+布局保存在
+{@code res/layout/} 目录中，但是您可以指定在屏幕处于横向时要使用的不同布局，方法是将其保存在 {@code res/layout-land/}
+目录中。Android
+可以通过将设备的当前配置与资源目录名称进行匹配，自动应用合适的资源。</p>
+
+<p>图 1
+说明了在没有备用资源可用时，系统如何为两种不同的设备应用相同布局。图 2
+显示的是同一应用针对大屏幕添加了备用布局资源。</p>
+
+<p>以下文档提供了有关如何组织应用资源、如何指定备用资源以及如何在应用中访问这些资源等的完整指南：
+</p>
+
+<dl>
+  <dt><strong><a href="providing-resources.html">提供资源</a></strong></dt>
+  <dd>您可在应用中提供何种资源、可将这些资源保存在何处以及如何为特定设备配置创建备用资源。
+</dd>
+  <dt><strong><a href="accessing-resources.html">访问资源</a></strong></dt>
+  <dd>如何通过从应用代码或其他
+XML 资源中引用来使用所提供的资源</dd>
+  <dt><strong><a href="runtime-changes.html">处理运行时变更</a></strong></dt>
+  <dd>如何管理在 Activity 运行时发生的配置变更。</dd>
+  <dt><strong><a href="localization.html">本地化</a></strong></dt>
+  <dd>从点到面地指导您使用备用资源本地化应用。尽管这只是备用资源的一种具体运用，但是这对于赢得更多用户非常重要。
+
+</dd>
+  <dt><strong><a href="available-resources.html">资源类型</a></strong></dt>
+  <dd>有关您可提供的各种资源类型的参考文档，其中描述了这些资源的
+XML 元素、属性和语法。例如，此参考文档向您展示了如何为应用菜单、可绘制对象、动画等创建资源。
+</dd>
+</dl>
+
+<!--
+<h2>Raw Assets</h2>
+
+<p>An alternative to saving files in {@code res/} is to save files in the {@code
+assets/} directory. This should only be necessary if you need direct access to original files and
+directories by name. Files saved in the {@code assets/} directory will not be given a resource
+ID, so you can't reference them through the {@code R} class or from XML resources. Instead, you can
+query data in the {@code assets/} directory like an ordinary file system, search through the
+directory and
+read raw data using {@link android.content.res.AssetManager}. For example, this can be more useful
+when dealing with textures for a game. However, if you only need to read raw data from a file
+(such as a video or audio file), then you should save files into the {@code res/raw/} directory and
+then read a stream of bytes using {@link android.content.res.Resources#openRawResource(int)}. This
+is uncommon, but if you need direct access to original files in {@code assets/}, refer to the {@link
+android.content.res.AssetManager} documentation.</p>
+-->

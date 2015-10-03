@@ -1,0 +1,1196 @@
+page.title=Nội dung Cơ bản về Trình cung cấp Nội dung
+@jd:body
+<div id="qv-wrapper">
+<div id="qv">
+<!-- In this document -->
+<h2>Trong tài liệu này</h2>
+<ol>
+    <li>
+        <a href="#Basics">Tổng quan</a>
+        <ol>
+            <li>
+                <a href="#ClientProvider">Truy cập một trình cung cấp</a>
+            </li>
+            <li>
+                <a href="#ContentURIs">URI Nội dung</a>
+            </li>
+        </ol>
+    </li>
+    <li>
+        <a href="#SimpleQuery">Truy xuất Dữ liệu từ Trình cung cấp</a>
+        <ol>
+            <li>
+                <a href="#RequestPermissions">Yêu cầu quyền truy cập đọc</a>
+            </li>
+            <li>
+                <a href="#Query">Xây dựng truy vấn</a>
+            </li>
+            <li>
+                <a href="#DisplayResults">Hiển thị các kết quả truy vấn</a>
+            </li>
+            <li>
+                <a href="#GettingResults">Lấy dữ liệu từ các kết quả truy vấn</a>
+            </li>
+        </ol>
+    </li>
+    <li>
+        <a href="#Permissions">Quyền của Trình cung cấp Nội dung</a>
+    </li>
+    <li>
+        <a href="#Modifications">Chèn, Cập nhật, và Xóa Dữ liệu</a>
+        <ol>
+            <li>
+                <a href="#Inserting">Chèn dữ liệu</a>
+            </li>
+            <li>
+                <a href="#Updating">Cập nhật dữ liệu</a>
+            </li>
+            <li>
+                <a href="#Deleting">Xóa dữ liệu</a>
+            </li>
+        </ol>
+    </li>
+    <li>
+        <a href="#DataTypes">Các Kiểu Dữ liệu của Trình cung cấp</a>
+    </li>
+    <li>
+        <a href="#AltForms">Các Hình thức Truy cập Trình cung cấp Thay thế</a>
+        <ol>
+            <li>
+                <a href="#Batch">Truy cập hàng loạt</a>
+            </li>
+            <li>
+                <a href="#Intents">Truy cập dữ liệu thông qua ý định</a>
+            </li>
+        </ol>
+    </li>
+    <li>
+        <a href="#ContractClasses">Các Lớp Hợp đồng</a>
+    </li>
+    <li>
+        <a href="#MIMETypeReference">Tham khảo Kiểu MIME</a>
+    </li>
+</ol>
+
+    <!-- Key Classes -->
+<h2>Lớp khóa</h2>
+    <ol>
+        <li>
+            {@link android.content.ContentProvider}
+        </li>
+        <li>
+            {@link android.content.ContentResolver}
+        </li>
+        <li>
+            {@link android.database.Cursor}
+        </li>
+        <li>
+            {@link android.net.Uri}
+        </li>
+    </ol>
+
+    <!-- Related Samples -->
+<h2>Các Mẫu Liên quan</h2>
+    <ol>
+        <li>
+        <a href="{@docRoot}resources/samples/ApiDemos/src/com/example/android/apis/view/List2.html">
+        Con chạy (Danh bạ)</a>
+        </li>
+        <li>
+        <a href="{@docRoot}resources/samples/ApiDemos/src/com/example/android/apis/view/List7.html">
+        Con chạy (Điện thoại)</a>
+        </li>
+    </ol>
+
+    <!-- See also -->
+<h2>Xem thêm</h2>
+    <ol>
+        <li>
+            <a href="{@docRoot}guide/topics/providers/content-provider-creating.html">
+            Tạo một Trình cung cấp Nội dung</a>
+        </li>
+        <li>
+            <a href="{@docRoot}guide/topics/providers/calendar-provider.html">
+            Trình cung cấp Lịch</a>
+        </li>
+    </ol>
+</div>
+</div>
+
+    <!-- Intro paragraphs -->
+<p>
+    Trình cung cấp nội dung quản lý truy cập vào một kho dữ liệu tập trung. Trình cung cấp
+    là bộ phận của một ứng dụng Android, nó thường cung cấp UI của chính mình để làm việc cùng
+    dữ liệu. Tuy nhiên, trình cung cấp nội dung được thiết kế chủ yếu cho các ứng dụng khác
+    sử dụng, giúp truy cập trình cung cấp bằng cách sử dụng một đối tượng máy khách cung cấp. Cùng nhau, trình cung cấp
+    và máy khách cung cấp sẽ mang đến một giao diện nhất quán, tiêu chuẩn cho dữ liệu, giao diện này
+    cũng đồng thời xử lý truyền thông liên tiến trình và bảo mật truy cập dữ liệu.
+</p>
+<p>
+    Chủ đề này đề cập đến những nội dung cơ bản sau đây:
+</p>
+    <ul>
+        <li>Cách trình cung cấp nội dung hoạt động.</li>
+        <li>API bạn sử dụng để truy xuất dữ liệu từ một trình cung cấp nội dung.</li>
+        <li>API bạn sử dụng để chèn, cập nhật, hoặc xóa dữ liệu trong một trình cung cấp nội dung.</li>
+        <li>Các tính năng API khác tạo điều kiện làm việc cùng các trình cung cấp.</li>
+    </ul>
+
+    <!-- Basics -->
+<h2 id="Basics">Tổng quan</h2>
+<p>
+    Trình cung cấp nội dung trình bày dữ liệu cho các ứng dụng bên ngoài dưới dạng một hoặc nhiều bảng tương tự
+    như các bảng được tìm thấy trong một cơ sở dữ liệu quan hệ. Mỗi hàng thể hiện một thực thể của một số kiểu dữ liệu
+    mà trình cung cấp thu thập, và mỗi cột trong hàng thể hiện một phần riêng biệt của dữ liệu được thu thập
+    đối với một thực thể.
+</p>
+<p>
+    Ví dụ, một trong các trình cung cấp tích hợp trong nền tảng Android đó là từ điển người dùng, nó
+    lưu giữ chính tả của những từ phi tiêu chuẩn mà người dùng muốn giữ lại. Bảng 1 minh họa
+    cách mà dữ liệu có thể được trình bày trong bảng của trình cung cấp này:
+</p>
+<p class="table-caption">
+    <strong>Bảng 1:</strong> Bảng từ điển người dùng mẫu.
+</p>
+<table id="table1" style="width: 50%;">
+    <tr>
+        <th style="width:20%" align="center" scope="col">từ</th>
+        <th style="width:20%" align="center" scope="col">id ứng dụng</th>
+        <th style="width:20%" align="center" scope="col">tần suất</th>
+        <th style="width:20%" align="center" scope="col">bản địa</th>
+        <th style="width:20%" align="center" scope="col">_ID</th>
+    </tr>
+    <tr>
+        <td align="center" scope="row">mapreduce</td>
+        <td align="center">user1</td>
+        <td align="center">100</td>
+        <td align="center">en_US</td>
+        <td align="center">1</td>
+    </tr>
+    <tr>
+        <td align="center" scope="row">precompiler</td>
+        <td align="center">user14</td>
+        <td align="center">200</td>
+        <td align="center">fr_FR</td>
+        <td align="center">2</td>
+    </tr>
+    <tr>
+        <td align="center" scope="row">applet</td>
+        <td align="center">user2</td>
+        <td align="center">225</td>
+        <td align="center">fr_CA</td>
+        <td align="center">3</td>
+    </tr>
+    <tr>
+        <td align="center" scope="row">const</td>
+        <td align="center">user1</td>
+        <td align="center">255</td>
+        <td align="center">pt_BR</td>
+        <td align="center">4</td>
+    </tr>
+    <tr>
+        <td align="center" scope="row">int</td>
+        <td align="center">user5</td>
+        <td align="center">100</td>
+        <td align="center">en_UK</td>
+        <td align="center">5</td>
+    </tr>
+</table>
+<p>
+    Trong bảng 1, mỗi hàng thể hiện một thực thể của một từ mà có thể không thấy có
+    trong từ điển chuẩn. Mỗi cột thể hiện một số dữ liệu cho từ đó, chẳng hạn như
+    từ bản địa được dùng lần đầu cho từ đó. Tiêu đề cột là các tên cột được lưu giữ trong
+    trình cung cấp. Để tham khảo tới bản địa của một hàng, bạn tham khảo tới cột <code>locale</code> của hàng đó. Đối với
+    trình cung cấp này, cột <code>_ID</code> đóng vai trò là cột "khóa chính" mà
+    trình cung cấp tự động duy trì.
+</p>
+<p class="note">
+    <strong>Lưu ý:</strong> Trình cung cấp không bắt buộc phải có một khóa chính, và không bắt buộc phải
+    sử dụng <code>_ID</code> làm tên cột của một khóa chính nếu có khóa. Tuy nhiên,
+    nếu bạn muốn gắn kết dữ liệu từ một trình cung cấp với một {@link android.widget.ListView}, một trong các
+    tên cột sẽ phải là <code>_ID</code>. Yêu cầu này được giải thích chi tiết hơn trong
+    phần <a href="#DisplayResults">Hiển thị các kết quả truy vấn</a>.
+</p>
+<h3 id="ClientProvider">Truy cập một trình cung cấp</h3>
+<p>
+    Một ứng dụng truy cập dữ liệu từ một trình cung cấp nội dung bằng
+    một đối tượng máy khách {@link android.content.ContentResolver}. Đối tượng này có các phương pháp để gọi
+    những phương pháp có tên giống nhau trong đối tượng trình cung cấp, một thực thể của một trong những lớp con
+    cụ thể của {@link android.content.ContentProvider}. Các phương pháp
+    {@link android.content.ContentResolver} cung cấp các chức năng
+    "CRUD" (tạo, truy xuất, cập nhật, và xóa) cơ bản của thiết bị lưu trữ liên tục.
+</p>
+<p>
+    Đối tượng {@link android.content.ContentResolver} trong tiến trình
+    của ứng dụng máy khách và đối tượng {@link android.content.ContentProvider} trong ứng dụng mà sở hữu
+    trình cung cấp sẽ tự động xử lý truyền thông liên tiến trình.
+    {@link android.content.ContentProvider} cũng đóng vai trò như một lớp rút gọn giữa kho dữ liệu
+    của nó và biểu diễn bên ngoài của dữ liệu dưới dạng bảng.
+</p>
+<p class="note">
+    <strong>Lưu ý:</strong> Để truy cập một trình cung cấp, ứng dụng của bạn thường phải yêu cầu các quyền
+    cụ thể trong tệp bản kê khai của mình. Điều này được mô tả chi tiết hơn trong phần
+    <a href="#Permissions">Quyền của Trình cung cấp Nội dung</a>
+</p>
+<p>
+    Ví dụ, để có một danh sách các từ và nội dung bản địa của chúng từ Trình cung cấp Từ điển Người dùng,
+    bạn hãy gọi {@link android.content.ContentResolver#query ContentResolver.query()}.
+    Phương pháp {@link android.content.ContentResolver#query query()} sẽ gọi phương pháp
+    {@link android.content.ContentProvider#query ContentProvider.query()} được định nghĩa bởi 
+    Trình cung cấp Từ điển Người dùng. Các dòng mã sau thể hiện một lệnh gọi
+    {@link android.content.ContentResolver#query ContentResolver.query()}:
+<p>
+<pre>
+// Queries the user dictionary and returns results
+mCursor = getContentResolver().query(
+    UserDictionary.Words.CONTENT_URI,   // The content URI of the words table
+    mProjection,                        // The columns to return for each row
+    mSelectionClause                    // Selection criteria
+    mSelectionArgs,                     // Selection criteria
+    mSortOrder);                        // The sort order for the returned rows
+</pre>
+<p>
+    Bảng 2 cho biết các tham đối tới
+    {@link android.content.ContentResolver#query 
+    query(Uri,projection,selection,selectionArgs,sortOrder)} khớp với một câu lệnh SQL SELECT như thế nào:
+</p>
+<p class="table-caption">
+    <strong>Bảng 2:</strong> Query() so với truy vấn SQL.
+</p>
+<table id="table2" style="width: 75%;">
+    <tr>
+        <th style="width:25%" align="center" scope="col">tham đối query()</th>
+        <th style="width:25%" align="center" scope="col">Từ khóa/tham số SELECT</th>
+        <th style="width:50%" align="center" scope="col">Lưu ý</th>
+    </tr>
+    <tr>
+        <td align="center"><code>Uri</code></td>
+        <td align="center"><code>FROM <em>table_name</em></code></td>
+        <td><code>Uri</code> ánh xạ tới bảng trong trình cung cấp có tên <em>table_name</em>.</td>
+    </tr>
+    <tr>
+        <td align="center"><code>projection</code></td>
+        <td align="center"><code><em>col,col,col,...</em></code></td>
+        <td>
+            <code>projection</code> là một mảng gồm các cột nên được đưa vào đối với mỗi hàng
+            được truy xuất.
+        </td>
+    </tr>
+    <tr>
+        <td align="center"><code>selection</code></td>
+        <td align="center"><code>WHERE <em>col</em> = <em>value</em></code></td>
+        <td><code>selection</code> quy định các tiêu chí để lựa chọn hàng.</td>
+    </tr>
+    <tr>
+        <td align="center"><code>selectionArgs</code></td>
+        <td align="center">
+            (Không có sự tương đương chính xác. Các tham đối lựa chọn sẽ thay thế các chỗ dành sẵn <code>?</code> trong
+            mệnh đề lựa chọn.)
+        </td>
+    </tr>
+    <tr>
+        <td align="center"><code>sortOrder</code></td>
+        <td align="center"><code>ORDER BY <em>col,col,...</em></code></td>
+        <td>
+            <code>sortOrder</code> quy định thứ tự các hàng xuất hiện trong 
+            {@link android.database.Cursor} được trả về.
+        </td>
+    </tr>
+</table>
+<h3 id="ContentURIs">URI Nội dung</h3>
+<p>
+    <strong>URI nội dung</strong> là một URI xác định dữ liệu trong một trình cung cấp. URI nội dung
+    bao gồm tên biểu tượng của toàn bộ trình cung cấp (<strong>quyền</strong> của nó) và một
+    tên trỏ đến một bảng (<strong>đường dẫn</strong>). Khi bạn gọi
+    một phương pháp máy khách để truy cập một bảng trong một trình cung cấp, URI nội dung cho bảng là một trong các
+    tham đối.
+</p>
+<p>
+    Trong các dòng mã trước, hằng số
+    {@link android.provider.UserDictionary.Words#CONTENT_URI} chứa URI nội dung của
+    bảng "từ" của từ điển người dùng. Đối tượng {@link android.content.ContentResolver}
+    sẽ phân tích quyền của URI, và sử dụng nó để "giải quyết" trình cung cấp bằng cách
+    so sánh quyền với một bảng hệ thống của các trình cung cấp đã biết. Khi đó,
+    {@link android.content.ContentResolver} có thể phân phối các tham đối truy vấn tới đúng
+    trình cung cấp.
+</p>
+<p>
+    {@link android.content.ContentProvider} sử dụng phần đường dẫn của URI nội dung nhằm chọn
+    bảng để truy cập. Trình cung cấp thường có một <strong>đường dẫn</strong> cho mỗi bảng mà nó hiện ra.
+</p>
+<p>
+    Trong các dòng mã trước, URI đầy đủ cho bảng "từ" là:
+</p>
+<pre>
+content://user_dictionary/words
+</pre>
+<p>
+    trong đó xâu <code>user_dictionary</code> là quyền của trình cung cấp, và
+xâu    <code>words</code> là đường dẫn của bảng. Xâu
+    <code>content://</code> (<strong>lược đồ</strong>) sẽ luôn có mặt,
+   và xác định đây là một URI nội dung.
+</p>
+<p>
+    Nhiều trình cung cấp cho phép bạn truy cập một hàng đơn lẻ trong một bảng bằng cách nối một giá trị ID
+    với đuôi của URI. Ví dụ, để truy xuất một hàng có <code>_ID</code> là
+    <code>4</code> từ một từ điển người dùng, bạn có thể sử dụng URI nội dung này:
+</p>
+<pre>
+Uri singleUri = ContentUris.withAppendedId(UserDictionary.Words.CONTENT_URI,4);
+</pre>
+<p>
+    Bạn thường sử dụng các giá trị id khi bạn đã truy xuất một tập hợp các hàng, sau đó muốn cập nhật hoặc xóa
+    một trong số chúng.
+</p>
+<p class="note">
+    <strong>Lưu ý:</strong> Các lớp {@link android.net.Uri} và {@link android.net.Uri.Builder}
+    chứa các phương pháp thuận tiện để xây dựng đối tượng URI định dạng tốt từ các xâu. 
+    {@link android.content.ContentUris} chứa các phương pháp thuận tiện để nối các giá trị id với
+    một URI. Đoạn mã HTML trước sử dụng {@link android.content.ContentUris#withAppendedId
+withAppendedId()} để nối một id với URI nội dung Từ điển Người dùng.
+</p>
+
+
+    <!-- Retrieving Data from the Provider -->
+<h2 id="SimpleQuery">Truy xuất Dữ liệu từ Trình cung cấp</h2>
+<p>
+    Phần này mô tả cách truy xuất dữ liệu từ một trình cung cấp bằng cách sử dụng Trình cung cấp Từ điển Người dùng
+    làm ví dụ.
+</p>
+<p class="note">
+    Để giải thích rõ, đoạn mã HTML trong phần này gọi
+    {@link android.content.ContentResolver#query ContentResolver.query()} trên "luồng UI"". Tuy nhiên, trong 
+    mã thực sự, bạn nên thực hiện các truy vấn không đồng bộ trên một luồng riêng. Một cách để làm 
+    điều này đó là sử dụng lớp {@link android.content.CursorLoader}, nó được mô tả chi tiết hơn
+    trong hướng dẫn <a href="{@docRoot}guide/components/loaders.html">
+    Trình tải</a>. Bênh cạnh đó, các dòng mã chỉ là đoạn mã HTML; chúng không thể hiện một ứng dụng
+    hoàn chỉnh.
+</p>
+<p>
+    Để truy xuất dữ liệu từ một trình cung cấp, hãy làm theo các bước cơ bản sau:
+</p>
+<ol>
+   <li>
+        Yêu cầu quyền truy cập đọc cho trình cung cấp.
+   </li>
+   <li>
+        Định nghĩa mã để gửi một truy vấn tới trình cung cấp.
+   </li>
+</ol>
+<h3 id="RequestPermissions">Yêu cầu quyền truy cập đọc</h3>
+<p>
+    Để truy xuất dữ liệu từ một trình cung cấp, ứng dụng của bạn cần "quyền truy cập đọc" cho
+    trình cung cấp. Bạn không thể yêu cầu quyền này trong thời gian chạy; thay vào đó, bạn phải chỉ định rằng
+    bạn cần quyền này trong bản kê khai của mình bằng cách sử dụng phần tử
+<code><a href="{@docRoot}guide/topics/manifest/uses-permission-element.html">&lt;uses-permission&gt;</a></code>
+    và tên quyền chính xác được định nghĩa bởi
+    trình cung cấp. Khi bạn chỉ định phần tử này trong bản kê khai của mình, bạn đang thực tế hóa "yêu cầu" quyền
+    này cho ứng dụng của mình. Khi người dùng cài đặt ứng dụng của bạn, họ ngầm hiểu cấp
+    yêu cầu này.
+</p>
+<p>
+    Để tìm tên chính xác của quyền truy cập đọc cho trình cung cấp bạn đang sử dụng, cũng như
+    tên cho các quyền truy cập khác được sử dụng bởi trình truy cập, hãy xem trong tài liệu
+    của trình cung cấp.
+</p>
+<p>
+    Vai trò của quyền trong việc truy cập các trình cung cấp được mô tả chi tiết hơn trong phần
+    <a href="#Permissions">Quyền của Trình cung cấp Nội dung</a>.
+</p>
+<p>
+    Trình cung cấp Từ điển Người dùng sẽ định nghĩa quyền
+    <code>android.permission.READ_USER_DICTIONARY</code> trong tệp bản kê khai của nó, vì vậy một
+    ứng dụng muốn đọc từ trình cung cấp sẽ phải yêu cầu quyền này.
+</p>
+<!-- Constructing the query -->
+<h3 id="Query">Xây dựng truy vấn</h3>
+<p>
+    Bước tiếp theo trong việc truy xuất dữ liệu từ một trình cung cấp đó là xây dựng một truy vấn. Đoạn mã HTML đầu tiên
+    này định nghĩa một số biến cho việc truy cập Trình cung cấp Từ điển Người dùng:
+</p>
+<pre class="prettyprint">
+
+// A "projection" defines the columns that will be returned for each row
+String[] mProjection =
+{
+    UserDictionary.Words._ID,    // Contract class constant for the _ID column name
+    UserDictionary.Words.WORD,   // Contract class constant for the word column name
+    UserDictionary.Words.LOCALE  // Contract class constant for the locale column name
+};
+
+// Defines a string to contain the selection clause
+String mSelectionClause = null;
+
+// Initializes an array to contain selection arguments
+String[] mSelectionArgs = {""};
+
+</pre>
+<p>
+    Đoạn mã HTML tiếp theo cho biết cách sử dụng
+    {@link android.content.ContentResolver#query ContentResolver.query()}, bằng cách sử dụng Trình cung cấp Từ điển
+    Người dùng như một ví dụ. Truy vấn máy khách trình cung cấp tương tự như một truy vấn SQL, và nó chứa một 
+    tập hợp các cột để trả về, một tập hợp các tiêu chí lựa chọn, và một thứ tự sắp xếp.
+</p>
+<p>
+    Tập hợp các cột mà truy vấn cần trả về được gọi là <strong>dự thảo</strong>
+    (biến <code>mProjection</code>).
+</p>
+<p>
+    Biểu thức để chỉ định các hàng cần truy xuất sẽ được chia thành một mệnh đề lựa chọn và
+    tham đối lựa chọn. Mệnh đề lựa chọn là sự kết hợp giữa các biểu thức lô-gic và biểu thức Boolean,
+    tên cột, và giá trị (biến <code>mSelectionClause</code>). Nếu bạn chỉ định 
+    tham số thay thế được <code>?</code> thay vì một giá trị, phương pháp truy vấn sẽ truy xuất giá trị 
+    từ mảng tham đối lựa chọn (biến <code>mSelectionArgs</code>).
+</p>
+<p>
+    Trong đoạn mã HTML tiếp theo, nếu người dùng không điền từ thì mệnh đề lựa chọn được đặt thành
+    <code>null</code>, và truy vấn trả về tất cả các từ trong trình cung cấp. Nếu người dùng nhập
+    một từ, mệnh đề lựa chọn được đặt thành <code>UserDictionary.Words.WORD + " = ?"</code> và
+    phần tử đầu tiên của mảng tham đối lựa chọn được đặt thành từ mà người dùng đã nhập.
+</p>
+<pre class="prettyprint">
+/*
+ * This defines a one-element String array to contain the selection argument.
+ */
+String[] mSelectionArgs = {""};
+
+// Gets a word from the UI
+mSearchString = mSearchWord.getText().toString();
+
+// Remember to insert code here to check for invalid or malicious input.
+
+// If the word is the empty string, gets everything
+if (TextUtils.isEmpty(mSearchString)) {
+    // Setting the selection clause to null will return all words
+    mSelectionClause = null;
+    mSelectionArgs[0] = "";
+
+} else {
+    // Constructs a selection clause that matches the word that the user entered.
+    mSelectionClause = UserDictionary.Words.WORD + " = ?";
+
+    // Moves the user's input string to the selection arguments.
+    mSelectionArgs[0] = mSearchString;
+
+}
+
+// Does a query against the table and returns a Cursor object
+mCursor = getContentResolver().query(
+    UserDictionary.Words.CONTENT_URI,  // The content URI of the words table
+    mProjection,                       // The columns to return for each row
+    mSelectionClause                   // Either null, or the word the user entered
+    mSelectionArgs,                    // Either empty, or the string the user entered
+    mSortOrder);                       // The sort order for the returned rows
+
+// Some providers return null if an error occurs, others throw an exception
+if (null == mCursor) {
+    /*
+     * Insert code here to handle the error. Be sure not to use the cursor! You may want to
+     * call android.util.Log.e() to log this error.
+     *
+     */
+// If the Cursor is empty, the provider found no matches
+} else if (mCursor.getCount() &lt; 1) {
+
+    /*
+     * Insert code here to notify the user that the search was unsuccessful. This isn't necessarily
+     * an error. You may want to offer the user the option to insert a new row, or re-type the
+     * search term.
+     */
+
+} else {
+    // Insert code here to do something with the results
+
+}
+</pre>
+<p>
+    Truy vấn này tương tự như câu lệnh SQL:
+</p>
+<pre>
+SELECT _ID, word, locale FROM words WHERE word = &lt;userinput&gt; ORDER BY word ASC;
+</pre>
+<p>
+    Trong câu lệnh SQL này, tên cột thực tế được sử dụng thay vì các hằng số lớp hợp đồng.
+</p>
+<h4 id="Injection">Bảo vệ trước mục nhập độc hại</h4>
+<p>
+    Nếu dữ liệu được quản lý bởi trình cung cấp nội dung nằm trong một cơ sở dữ liệu SQL, việc điền dữ liệu không được tin cậy từ bên ngoài
+    vào các câu lệnh SQL thô có thể dẫn đến tiêm lỗi SQL.
+</p>
+<p>
+    Hãy xét mệnh đề lựa chọn sau:
+</p>
+<pre>
+// Constructs a selection clause by concatenating the user's input to the column name
+String mSelectionClause =  "var = " + mUserInput;
+</pre>
+<p>
+    Nếu bạn làm vậy, bạn đang cho phép người dùng ghép nối SQL độc hại lên câu lệnh SQL của mình.
+    Ví dụ, người dùng có thể điền "nothing; DROP TABLE *;" cho <code>mUserInput</code>, làm vậy
+    sẽ dẫn đến mệnh đề lựa chọn <code>var = nothing; DROP TABLE *;</code>. Do
+    mệnh đề lựa chọn được coi như một câu lệnh SQL, điều này có thể khiến trình cung cấp xóa tất cả
+    bảng trong cơ sở dữ liệu SQLite cơ bản (trừ khi trình cung cấp được thiết lập để bắt những lần thử
+    <a href="http://en.wikipedia.org/wiki/SQL_injection">tiêm lỗi SQL</a>).
+</p>
+<p>
+    Để tránh vấn đề này, hãy sử dụng một mệnh đề lựa chọn mà sử dụng <code>?</code> làm tham số
+    thay thế được và một mảng các tham đối lựa chọn riêng. Khi bạn làm như vậy, mục nhập của người dùng
+    được gắn kết trực tiếp với truy vấn thay vì được giải nghĩa như một phần của câu lệnh SQL.
+    Vì nó không được coi như SQL, mục nhập của người dùng không thể tiêm lỗi SQL độc hại. Thay vì sử dụng
+    ghép nối để điền mục nhập của người dùng, hãy sử dụng mệnh đề lựa chọn này:
+</p>
+<pre>
+// Constructs a selection clause with a replaceable parameter
+String mSelectionClause =  "var = ?";
+</pre>
+<p>
+    Thiết lập mảng các tham đối lựa chọn như sau:
+</p>
+<pre>
+// Defines an array to contain the selection arguments
+String[] selectionArgs = {""};
+</pre>
+<p>
+    Đặt một giá trị trong mảng các tham đối lựa chọn như sau:
+</p>
+<pre>
+// Sets the selection argument to the user's input
+selectionArgs[0] = mUserInput;
+</pre>
+<p>
+    Mệnh đề lựa chọn mà sử dụng <code>?</code> như một tham số thay thế được và một mảng
+    các tham đối lựa chọn là cách được ưu tiên để chỉ định một lựa chọn, ngay cả khi trình cung cấp không
+    được dựa trên cơ sở dữ liệu SQL.
+</p>
+<!-- Displaying the results -->
+<h3 id="DisplayResults">Hiển thị các kết quả truy vấn</h3>
+<p>
+    Phương pháp máy khách {@link android.content.ContentResolver#query ContentResolver.query()} luôn trả về 
+    một {@link android.database.Cursor} chứa các cột được chỉ định bởi dự thảo của 
+    truy vấn cho các hàng khớp với các tiêu chí lựa chọn của truy vấn. Một đối tượng 
+    {@link android.database.Cursor} cung cấp truy cập đọc ngẫu nhiên vào các hàng và cột mà nó 
+    chứa. Bằng cách sử dụng phương pháp {@link android.database.Cursor}, bạn có thể lặp lại các hàng trong 
+    kết quả, xác định kiểu dữ liệu của từng cột, lấy dữ liệu ra khỏi cột, và kiểm tra các tính chất khác
+    của kết quả. Một số triển khai {@link android.database.Cursor} sẽ tự động 
+    cập nhật đối tượng khi dữ liệu của trình cung cấp thay đổi, hoặc kích khởi các phương pháp trong một đối tượng quan sát 
+    khi {@link android.database.Cursor} thay đổi, hoặc cả hai.
+</p>
+<p class="note">
+    <strong>Lưu ý:</strong> Một trình cung cấp có thể hạn chế truy cập vào các cột dựa trên tính chất của
+    đối tượng thực hiện truy vấn. Ví dụ, Trình cung cấp Danh bạ hạn chế truy cập đối với một số cột cho
+    các trình điều hợp đồng bộ, vì thế nó sẽ không trả chúng về một hoạt động hay dịch vụ.
+</p>
+<p>
+    Nếu không hàng nào khớp với các tiêu chí lựa chọn, trình cung cấp
+    sẽ trả về một đối tượng {@link android.database.Cursor} mà trong đó
+    {@link android.database.Cursor#getCount Cursor.getCount()} bằng 0 (con chạy trống).
+</p>
+<p>
+    Nếu xảy ra một lỗi nội bộ, các kết quả của truy vấn sẽ phụ thuộc vào trình cung cấp cụ thể. Nó có thể
+    chọn trả về <code>null</code>, hoặc nó có thể đưa ra một lỗi {@link java.lang.Exception}.
+</p>
+<p>
+    Do {@link android.database.Cursor} là một "danh sách" hàng, một cách hay để hiển thị
+    nội dung của một {@link android.database.Cursor} đó là liên kết nó với một {@link android.widget.ListView}
+    thông qua một {@link android.widget.SimpleCursorAdapter}.
+</p>
+<p>
+    Đoạn mã HTML sau tiếp tục từ đoạn mã HTML trước. Nó tạo một đối tượng
+    {@link android.widget.SimpleCursorAdapter} chứa {@link android.database.Cursor}
+    được truy xuất bởi truy vấn, và đặt đối tượng này thành trình điều hợp cho một
+    {@link android.widget.ListView}:
+</p>
+<pre class="prettyprint">
+// Defines a list of columns to retrieve from the Cursor and load into an output row
+String[] mWordListColumns =
+{
+    UserDictionary.Words.WORD,   // Contract class constant containing the word column name
+    UserDictionary.Words.LOCALE  // Contract class constant containing the locale column name
+};
+
+// Defines a list of View IDs that will receive the Cursor columns for each row
+int[] mWordListItems = { R.id.dictWord, R.id.locale};
+
+// Creates a new SimpleCursorAdapter
+mCursorAdapter = new SimpleCursorAdapter(
+    getApplicationContext(),               // The application's Context object
+    R.layout.wordlistrow,                  // A layout in XML for one row in the ListView
+    mCursor,                               // The result from the query
+    mWordListColumns,                      // A string array of column names in the cursor
+    mWordListItems,                        // An integer array of view IDs in the row layout
+    0);                                    // Flags (usually none are needed)
+
+// Sets the adapter for the ListView
+mWordList.setAdapter(mCursorAdapter);
+</pre>
+<p class="note">
+    <strong>Lưu ý:</strong> Để lùi {@link android.widget.ListView} bằng một
+    {@link android.database.Cursor}, con chạy phải chứa một cột có tên <code>_ID</code>.
+    Vì điều này, truy vấn được hiện lúc trước truy xuất cột <code>_ID</code> cho
+    bảng "từ" mặc dù {@link android.widget.ListView} không hiển thị nó.
+    Hạn chế này cũng giải thích lý do tại sao phần lớn trình cung cấp đều có một cột <code>_ID</code> cho mỗi
+    bảng của nó.
+</p>
+
+        <!-- Getting data from query results -->
+<h3 id="GettingResults">Lấy dữ liệu từ các kết quả truy vấn</h3>
+<p>
+    Thay vì chỉ hiển thị các kết quả truy vấn, bạn có thể sử dụng chúng cho các tác vụ khác. Ví
+    dụ, bạn có thể truy xuất chính tả từ một từ điển người dùng, rồi sau đó tìm kiếm từ đó trong
+    các trình cung cấp khác. Để làm điều này, bạn lặp lại các hàng trong {@link android.database.Cursor}:
+</p>
+<pre class="prettyprint">
+
+// Determine the column index of the column named "word"
+int index = mCursor.getColumnIndex(UserDictionary.Words.WORD);
+
+/*
+ * Only executes if the cursor is valid. The User Dictionary Provider returns null if
+ * an internal error occurs. Other providers may throw an Exception instead of returning null.
+ */
+
+if (mCursor != null) {
+    /*
+     * Moves to the next row in the cursor. Before the first movement in the cursor, the
+     * "row pointer" is -1, and if you try to retrieve data at that position you will get an
+     * exception.
+     */
+    while (mCursor.moveToNext()) {
+
+        // Gets the value from the column.
+        newWord = mCursor.getString(index);
+
+        // Insert code here to process the retrieved word.
+
+        ...
+
+        // end of while loop
+    }
+} else {
+
+    // Insert code here to report an error if the cursor is null or the provider threw an exception.
+}
+</pre>
+<p>
+    Triển khai {@link android.database.Cursor} sẽ chứa một vài phương pháp “get" để
+    truy xuất các kiểu dữ liệu khác nhau từ đối tượng. Ví dụ, đoạn mã HTML trước
+    sử dụng {@link android.database.Cursor#getString getString()}. Chúng cũng có một phương pháp
+    {@link android.database.Cursor#getType getType()} để trả về một giá trị cho biết
+    kiểu dữ liệu của cột.
+</p>
+
+
+    <!-- Requesting permissions -->
+<h2 id="Permissions">Quyền của Trình cung cấp Nội dung</h2>
+<p>
+    Ứng dụng của một trình cung cấp có thể chỉ định các quyền mà ứng dụng khác có thể có để
+    truy cập dữ liệu của trình cung cấp đó. Những quyền này đảm bảo rằng người dùng biết một ứng dụng
+    sẽ cố gắng truy cập dữ liệu nào. Dựa trên các yêu cầu của trình cung cấp, các ứng dụng khác
+    yêu cầu quyền mà chúng cần để truy cập trình dữ liệu. Người dùng cuối thấy các quyền
+    được yêu cầu khi họ cài đặt ứng dụng.
+</p>
+<p>
+    Nếu ứng dụng của một trình cung cấp không chỉ định bất kỳ quyền nào, khi đó các ứng dụng khác không có
+    quyền truy cập dữ liệu của trình cung cấp. Tuy nhiên, các thành phần trong ứng dụng của trình cung cấp luôn có
+    đầy đủ quyền truy nhập đọc và ghi, không phụ thuộc vào các quyền được chỉ định.
+</p>
+<p>
+    Như đã lưu ý, Trình cung cấp Từ điển Người dùng sẽ yêu cầu
+    quyền <code>android.permission.READ_USER_DICTIONARY</code> để truy xuất dữ liệu từ nó.
+    Trình cung cấp có quyền <code>android.permission.WRITE_USER_DICTIONARY</code>
+    riêng để chèn, cập nhật, hoặc xóa dữ liệu.
+</p>
+<p>
+    Để nhận các quyền cần để truy cập một trình cung cấp, ứng dụng yêu cầu chúng bằng một phần tử
+<code><a href="{@docRoot}guide/topics/manifest/uses-permission-element.html">&lt;uses-permission&gt;</a></code>
+    trong tệp bản kê khai của nó. Khi Trình quản lý Gói Android cài đặt các ứng dụng, người dùng 
+    phải phê chuẩn tất cả quyền mà ứng dụng yêu cầu. Nếu người dùng phê chuẩn tất cả quyền, khi đó
+    Trình quản lý Gói sẽ tiếp tục cài đặt; nếu người dùng không phê chuẩn chúng, Trình quản lý Gói sẽ
+    hủy bỏ việc cài đặt.
+</p>
+<p>
+    Phần tử
+<code><a href="{@docRoot}guide/topics/manifest/uses-permission-element.html">&lt;uses-permission&gt;</a></code> 
+    sau yêu cầu quyền truy cập đọc vào Trình cung cấp Từ điển Người dùng:
+</p>
+<pre>
+    &lt;uses-permission android:name="android.permission.READ_USER_DICTIONARY"&gt;
+</pre>
+<p>
+    Tác động của các quyền tới việc truy cập trình cung cấp được giải thích chi tiết hơn trong
+    hướng dẫn <a href="{@docRoot}guide/topics/security/security.html">Bảo mật và Quyền</a>.
+</p>
+
+
+<!-- Inserting, Updating, and Deleting Data -->
+<h2 id="Modifications">Chèn, Cập nhật, và Xóa Dữ liệu</h2>
+<p>
+    Giống như cách bạn truy xuất dữ liệu từ một trình cung cấp, bạn cũng có thể sử dụng tương tác giữa
+    một máy khách cung cấp và {@link android.content.ContentProvider} của trình cung cấp để sửa đổi dữ liệu.
+    Bạn gọi một phương pháp {@link android.content.ContentResolver} với các tham đối được chuyển sang
+    phương pháp {@link android.content.ContentProvider} tương ứng. Trình cung cấp và
+    máy khách cung cấp sẽ tự động xử lý bảo mật và truyền thông liên tiến trình.
+</p>
+<h3 id="Inserting">Chèn dữ liệu</h3>
+<p>
+    Để chèn dữ liệu vào một trình cung cấp, bạn gọi phương pháp
+    {@link android.content.ContentResolver#insert ContentResolver.insert()}
+. Phương pháp này chèn một hàng mới vào trình cung cấp và trả về một URI nội dung cho hàng đó.
+    Đoạn mã HTML này cho biết cách chèn một từ mới vào Trình cung cấp Từ điển Người dùng:
+</p>
+<pre class="prettyprint">
+// Defines a new Uri object that receives the result of the insertion
+Uri mNewUri;
+
+...
+
+// Defines an object to contain the new values to insert
+ContentValues mNewValues = new ContentValues();
+
+/*
+ * Sets the values of each column and inserts the word. The arguments to the "put"
+ * method are "column name" and "value"
+ */
+mNewValues.put(UserDictionary.Words.APP_ID, "example.user");
+mNewValues.put(UserDictionary.Words.LOCALE, "en_US");
+mNewValues.put(UserDictionary.Words.WORD, "insert");
+mNewValues.put(UserDictionary.Words.FREQUENCY, "100");
+
+mNewUri = getContentResolver().insert(
+    UserDictionary.Word.CONTENT_URI,   // the user dictionary content URI
+    mNewValues                          // the values to insert
+);
+</pre>
+<p>
+    Dữ liệu cho hàng mới đi vào trong một đối tượng {@link android.content.ContentValues} đơn lẻ, đối tượng này
+    có dạng tương tự như con chạy một hàng. Các cột trong đối tượng này không cần có
+    cùng kiểu dữ liệu, và nếu hoàn toàn không muốn chỉ định một giá trị, bạn có thể đặt một cột
+    thành <code>null</code> bằng cách sử dụng {@link android.content.ContentValues#putNull ContentValues.putNull()}.
+</p>
+<p>
+    Đoạn mã HTML không thêm cột <code>_ID</code> vì cột này được tự động
+    duy trì. Trình cung cấp sẽ gán một giá trị duy nhất <code>_ID</code> cho mỗi hàng được
+    thêm. Các trình cung cấp thường sử dụng giá trị này làm khóa chính của bảng.
+</p>
+<p>
+    URI nội dung được trả về trong <code>newUri</code> sẽ xác định hàng mới thêm, có
+    định dạng như sau:
+</p>
+<pre>
+content://user_dictionary/words/&lt;id_value&gt;
+</pre>
+<p>
+    <code>&lt;id_value&gt;</code> là nội dung của <code>_ID</code> cho hàng mới.
+    Hầu hết các trình cung cấp đều có thể tự động phát hiện dạng URI nội dung này rồi thực hiện thao tác được yêu cầu
+    trên hàng cụ thể đó.
+</p>
+<p>
+    Để nhận giá trị <code>_ID</code> từ {@link android.net.Uri} được trả về, hãy gọi
+    {@link android.content.ContentUris#parseId ContentUris.parseId()}.
+</p>
+<h3 id="Updating">Cập nhật dữ liệu</h3>
+<p>
+    Để cập nhật một hàng, bạn sử dụng một đối tượng {@link android.content.ContentValues} với các giá trị
+    được cập nhật giống như cách bạn làm với việc chèn, và các tiêu chí lựa chọn giống như cách bạn làm với truy vấn.
+    Phương pháp máy khách mà bạn sử dụng là
+    {@link android.content.ContentResolver#update ContentResolver.update()}. Bạn chỉ cần thêm 
+    các giá trị vào đối tượng {@link android.content.ContentValues} cho các cột mà bạn đang cập nhật. Nếu bạn 
+    muốn xóa các nội dung của một cột, hãy đặt giá trị thành <code>null</code>.
+</p>
+<p>
+    Đoạn mã HTML sau thay đổi tất cả hàng với cột bản địa có ngôn ngữ "en" thành cột
+    có bản địa là <code>null</code>. Giá trị trả về là số hàng đã được cập nhật:
+</p>
+<pre>
+// Defines an object to contain the updated values
+ContentValues mUpdateValues = new ContentValues();
+
+// Defines selection criteria for the rows you want to update
+String mSelectionClause = UserDictionary.Words.LOCALE +  "LIKE ?";
+String[] mSelectionArgs = {"en_%"};
+
+// Defines a variable to contain the number of updated rows
+int mRowsUpdated = 0;
+
+...
+
+/*
+ * Sets the updated value and updates the selected words.
+ */
+mUpdateValues.putNull(UserDictionary.Words.LOCALE);
+
+mRowsUpdated = getContentResolver().update(
+    UserDictionary.Words.CONTENT_URI,   // the user dictionary content URI
+    mUpdateValues                       // the columns to update
+    mSelectionClause                    // the column to select on
+    mSelectionArgs                      // the value to compare to
+);
+</pre>
+<p>
+    Bạn cũng nên thanh lọc thông tin đầu vào của người dùng khi gọi
+    {@link android.content.ContentResolver#update ContentResolver.update()}. Để tìm hiểu thêm về 
+    điều này, hãy đọc phần <a href="#Injection">Bảo vệ trước mục nhập độc hại</a>.
+</p>
+<h3 id="Deleting">Xóa dữ liệu</h3>
+<p>
+    Xóa hàng tương tự như truy xuất dữ liệu hàng: bạn chỉ định các tiêu chí lựa chọn cho hàng
+    mà bạn muốn xóa và phương pháp máy khách trả về số hàng được xóa.
+    Đoạn mã HTML sau xóa các hàng có appid khớp với "user". Phương pháp sẽ trả về
+    số hàng được xóa.
+</p>
+<pre>
+
+// Defines selection criteria for the rows you want to delete
+String mSelectionClause = UserDictionary.Words.APP_ID + " LIKE ?";
+String[] mSelectionArgs = {"user"};
+
+// Defines a variable to contain the number of rows deleted
+int mRowsDeleted = 0;
+
+...
+
+// Deletes the words that match the selection criteria
+mRowsDeleted = getContentResolver().delete(
+    UserDictionary.Words.CONTENT_URI,   // the user dictionary content URI
+    mSelectionClause                    // the column to select on
+    mSelectionArgs                      // the value to compare to
+);
+</pre>
+<p>
+    Bạn cũng nên thanh lọc thông tin đầu vào của người dùng khi gọi
+    {@link android.content.ContentResolver#delete ContentResolver.delete()}. Để tìm hiểu thêm về 
+    điều này, hãy đọc phần <a href="#Injection">Bảo vệ trước mục nhập độc hại</a>.
+</p>
+<!-- Provider Data Types -->
+<h2 id="DataTypes">Các Kiểu Dữ liệu của Trình cung cấp</h2>
+<p>
+    Trình cung cấp nội dung có thể cung cấp nhiều kiểu dữ liệu khác nhau. Trình cung cấp Từ điển Người dùng chỉ cung cấp
+    văn bản, nhưng trình cung cấp cũng có thể cung cấp các định dạng sau:
+</p>
+    <ul>
+        <li>
+            integer
+        </li>
+        <li>
+            long integer (long)
+        </li>
+        <li>
+            floating point
+        </li>
+        <li>
+            long floating point (double)
+        </li>
+    </ul>
+<p>
+    Một kiểu dữ liệu khác mà các trình cung cấp thường sử dụng đó là Binary Large OBject (BLOB) được triển khai như một
+    mảng 64KB byte. Bạn có thể xem các kiểu dữ liệu có sẵn bằng cách xem các phương pháp "get" lớp
+    {@link android.database.Cursor}.
+</p>
+<p>
+    Kiểu dữ liệu đối với mỗi cột trong một trình cung cấp thường được liệt kê trong tài liệu của trình cung cấp đó.
+    Các kiểu dữ liệu dành cho Trình cung cấp Từ điển Người dùng được liệt kê trong tài liệu tham khảo
+    cho lớp hợp đồng {@link android.provider.UserDictionary.Words} của nó (lớp hợp đồng được
+    mô tả trong phần <a href="#ContractClasses">Các Lớp Hợp đồng</a>).
+    Bạn cũng có thể xác định kiểu dữ liệu bằng cách gọi {@link android.database.Cursor#getType
+    Cursor.getType()}.
+</p>
+<p>
+    Trình cung cấp cũng duy trì thông tin về kiểu dữ liệu MIME cho mỗi URI nội dung mà chúng định nghĩa. Bạn có thể
+    sử dụng thông tin về kiểu MIME để tìm hiểu xem ứng dụng của mình có thể xử lý dữ liệu mà
+    trình cung cấp đưa ra hay không, hoặc để chọn một kiểu xử lý dựa trên kiểu MIME. Bạn thường cần kiểu
+    MIME khi đang làm việc với một trình cung cấp chứa các cấu trúc hoặc tệp
+    dữ liệu phức tạp. Ví dụ, bảng {@link android.provider.ContactsContract.Data}
+    trong Trình cung cấp Danh bạ sử dụng các kiểu MIME để dán nhãn kiểu dữ liệu liên lạc được lưu trữ trong từng
+    hàng. Để nhận được kiểu MIME tương ứng với một URI nội dung, hãy gọi
+    {@link android.content.ContentResolver#getType ContentResolver.getType()}.
+</p>
+<p>
+    Phần <a href="#MIMETypeReference">Tham khảo Kiểu MIME</a> mô tả
+    cú pháp của cả kiểu MIME tiêu chuẩn lẫn tùy chỉnh.
+</p>
+
+
+<!-- Alternative Forms of Provider Access -->
+<h2 id="AltForms">Các Hình thức Truy cập Trình cung cấp Thay thế</h2>
+<p>
+    Có ba hình thức truy cập trình cung cấp thay thế quan trọng trong phát triển ứng dụng:
+</p>
+<ul>
+    <li>
+        <a href="#Batch">Truy cập hàng loạt</a>: Bạn có thể tạo một loạt lệnh gọi truy cập bằng các phương pháp trong
+        lớp {@link android.content.ContentProviderOperation}, rồi sau đó áp dụng chúng với
+        {@link android.content.ContentResolver#applyBatch ContentResolver.applyBatch()}.
+    </li>
+    <li>
+        Truy vấn không đồng bộ: Bạn nên thực hiện các truy vấn trong một luồng riêng. Một cách để làm điều này đó là
+        sử dụng một đối tượng {@link android.content.CursorLoader}. Các ví dụ trong
+        hướng dẫn <a href="{@docRoot}guide/components/loaders.html">Trình tải</a> sẽ minh họa
+        cách làm điều này.
+    </li>
+    <li>
+        <a href="#Intents">Truy cập dữ liệu thông qua ý định</a>: Mặc dù không thể gửi một ý định
+        trực tiếp tới một trình cung cấp, bạn có thể gửi một ý định tới ứng dụng của trình cung cấp đó, 
+        đây thường là cách tốt nhất để sửa đổi dữ liệu của trình cung cấp.
+    </li>
+</ul>
+<p>
+    Truy cập hàng loạt và sửa đổi thông qua ý định được mô tả trong các phần sau.
+</p>
+<h3 id="Batch">Truy cập hàng loạt</h3>
+<p>
+    Truy cập hàng loạt vào một trình cung cấp là cách hữu ích để chèn nhiều hàng, hoặc để chèn
+    các hàng vào nhiều bảng trong cùng lệnh gọi phương pháp, hoặc nhìn chung để thực hiện một tập hợp
+    thao tác qua các ranh giới tiến trình như một giao tác (thao tác nguyên tử).
+</p>
+<p>
+    Để truy cập một trình cung cấp trong "chế độ hàng loạt",
+    bạn tạo một mảng đối tượng {@link android.content.ContentProviderOperation} rồi
+    phân phối chúng tới một trình cung cấp nội dung bằng
+    {@link android.content.ContentResolver#applyBatch ContentResolver.applyBatch()}. Bạn chuyển
+    <em>quyền</em> của trình cung cấp nội dung cho phương pháp này thay vì một URI nội dung cụ thể. 
+Điều này cho phép đối tượng {@link android.content.ContentProviderOperation} trong mảng có tác dụng
+    đối với một bảng khác. Một lệnh gọi tới {@link android.content.ContentResolver#applyBatch
+    ContentResolver.applyBatch()} trả về một mảng kết quả.
+</p>
+<p>
+    Mô tả lớp hợp đồng {@link android.provider.ContactsContract.RawContacts}
+    bao gồm một đoạn mã HTML thể hiện việc chèn hàng loạt. Ứng dụng mẫu 
+    <a href="{@docRoot}resources/samples/ContactManager/index.html">Trình quản lý Danh bạ</a>
+    có một ví dụ về truy cập hàng loạt trong tệp nguồn <code>ContactAdder.java</code>
+    của nó.
+</p>
+<div class="sidebox-wrapper">
+<div class="sidebox">
+<h2>Hiển thị dữ liệu bằng cách sử dụng một ứng dụng trình trợ giúp.</h2>
+<p>
+    Nếu ứng dụng của bạn <em>có</em> quyền truy cập, bạn vẫn có thể cần sử dụng một
+    ý định để hiển thị dữ liệu trong một ứng dụng khác. Ví dụ, ứng dụng Lịch chấp nhận một
+    ý định {@link android.content.Intent#ACTION_VIEW}, nhằm hiển thị một ngày hoặc sự kiện cụ thể.
+    Điều này cho phép bạn hiển thị thông tin lịch mà không phải tạo UI của chính mình.
+    Để tìm hiểu thêm về tính năng này, hãy xem
+    hướng dẫn <a href="{@docRoot}guide/topics/providers/calendar-provider.html">Trình cung cấp Lịch</a>.
+</p>
+<p>
+    Ứng dụng mà bạn gửi ý định đến không nhất thiết phải là ứng dụng
+    được liên kết với trình cung cấp. Ví dụ, bạn có thể truy xuất một liên lạc từ
+    Trình cung cấp Danh bạ, rồi gửi một ý định {@link android.content.Intent#ACTION_VIEW}
+    chứa URI nội dung cho hình ảnh liên lạc tới một trình xem ảnh.
+</p>
+</div>
+</div>
+<h3 id="Intents">Truy cập dữ liệu thông qua ý định</h3>
+<p>
+    Ý định có thể cho phép truy cập gián tiếp vào một trình cung cấp nội dung. Bạn cho phép người dùng truy cập
+    dữ liệu trong một trình cung cấp ngay cả khi ứng dụng của bạn không có quyền truy cập, hoặc bằng cách
+    nhận lại một ý định kết quả từ một ứng dụng có quyền, hoặc bằng cách kích hoạt một
+    ứng dụng có phép và cho phép người dùng được làm việc trong nó.
+</p>
+<h4>Được truy cập với các quyền tạm thời</h4>
+<p>
+    Bạn có thể truy cập dữ liệu trong một trình cung cấp nội dung, ngay cả khi bạn không có quyền
+    truy nhập phù hợp, bằng cách gửi một ý định tới một ứng dụng có quyền và
+    nhận lại một ý định kết quả chứa quyền "URI".
+    Đây là những quyền cho một URI nội dung cụ thể kéo dài tới khi hoạt động nhận chúng
+    được hoàn thành. Ứng dụng có quyền lâu dài sẽ cấp quyền tạm thời
+    bằng cách đặt một cờ trong ý định kết quả:
+</p>
+<ul>
+    <li>
+        <strong>Quyền đọc:</strong>
+        {@link android.content.Intent#FLAG_GRANT_READ_URI_PERMISSION}
+    </li>
+    <li>
+        <strong>Quyền ghi:</strong>
+        {@link android.content.Intent#FLAG_GRANT_WRITE_URI_PERMISSION}
+    </li>
+</ul>
+<p class="note">
+    <strong>Lưu ý:</strong> Những cờ này không cấp quyền truy cập đọc và ghi nói chung cho trình cung cấp
+    mà có quyền được chứa trong URI nội dung. Quyền truy cập này chỉ áp dụng cho chính URI đó.
+</p>
+<p>
+    Trình cung cấp sẽ định nghĩa quyền URI cho các URI nội dung trong bản kê khai của nó, bằng cách sử dụng thuộc tính
+<code><a href="{@docRoot}guide/topics/manifest/provider-element.html#gprmsn">android:grantUriPermission</a></code>
+    của phần tử
+<code><a href="{@docRoot}guide/topics/manifest/provider-element.html">&lt;provider&gt;</a></code>
+    cũng như phần tử con
+<code><a href="{@docRoot}guide/topics/manifest/grant-uri-permission-element.html">&lt;grant-uri-permission&gt;</a></code>
+    của phần tử
+<code><a href="{@docRoot}guide/topics/manifest/provider-element.html">&lt;provider&gt;</a></code>
+    . Cơ chế cấp quyền URI này được giải thích chi tiết hơn trong
+    hướng dẫn <a href="{@docRoot}guide/topics/security/security.html">Bảo mật và Quyền</a>,
+    trong phần "Quyền URI".
+</p>
+<p>
+    Ví dụ, bạn có thể truy xuất dữ liệu cho một liên lạc trong Trình cung cấp Danh bạ, ngay cả khi bạn không
+    có quyền {@link android.Manifest.permission#READ_CONTACTS}. Bạn có thể muốn thực hiện điều này
+    trong một ứng dụng gửi thiệp mừng điện tử tới một liên lạc vào ngày sinh nhật của người đó. Thay vì
+    yêu cầu {@link android.Manifest.permission#READ_CONTACTS}, là nơi cấp cho bạn quyền truy cập tất cả liên lạc
+    của người dùng và tất cả thông tin của họ, bạn nên cho phép người dùng kiểm soát những liên lạc
+    nào được sử dụng bởi ứng dụng của bạn. Để làm điều này, bạn sử dụng tiến trình sau:
+</p>
+<ol>
+    <li>
+        Ứng dụng của bạn gửi một ý định chứa hành động
+        {@link android.content.Intent#ACTION_PICK} và kiểu MIME "danh bạ"
+{@link android.provider.ContactsContract.RawContacts#CONTENT_ITEM_TYPE}, bằng cách sử dụng
+        phương pháp {@link android.app.Activity#startActivityForResult
+        startActivityForResult()}.
+    </li>
+    <li>
+        Vì ý định này khớp với bộ lọc ý định cho hoạt động
+        "lựa chọn" của ứng dụng Danh bạ, hoạt động sẽ đi đến tiền cảnh.
+    </li>
+    <li>
+        Trong hoạt động lựa chọn, người dùng chọn một
+        liên lạc để cập nhật. Khi điều này xảy ra, hoạt động lựa chọn sẽ gọi
+        {@link android.app.Activity#setResult setResult(resultcode, intent)}
+        để thiết lập một ý định nhằm gửi lại ứng dụng của bạn. Ý định chứa URI nội dung
+        của liên lạc mà người dùng đã chọn, và các cờ "phụ thêm"
+        {@link android.content.Intent#FLAG_GRANT_READ_URI_PERMISSION}. Những cờ này cấp quyền URI
+        cho ứng dụng của bạn để đọc dữ liệu cho liên lạc được trỏ đến bởi
+        URI nội dung. Sau đó, hoạt động lựa chọn gọi {@link android.app.Activity#finish()} để
+        trả kiểm soát về ứng dụng của bạn.
+    </li>
+    <li>
+        Hoạt động của bạn trả về tiền cảnh, và hệ thống sẽ gọi phương pháp 
+        {@link android.app.Activity#onActivityResult onActivityResult()}
+        của hoạt động của bạn. Phương pháp này nhận được ý định kết quả do hoạt động lựa chọn tạo trong
+        ứng dụng Danh bạ.
+    </li>
+    <li>
+        Với URI nội dung từ ý định kết quả, bạn có thể đọc dữ liệu của liên lạc
+        từ Trình cung cấp Danh bạ, ngay cả khi bạn không yêu cầu quyền truy cập đọc lâu dài
+        vào trình cung cấp trong bản kê khai của mình. Sau đó, bạn có thể nhận thông tin ngày sinh của liên lạc
+        hoặc địa chỉ e-mail của người đó rồi gửi thiệp mừng điện tử.
+    </li>
+</ol>
+<h4>Sử dụng một ứng dụng khác</h4>
+<p>
+    Một cách đơn giản để cho phép người dùng sửa đổi dữ liệu mà bạn không có quyền truy cập đó là
+    kích hoạt một ứng dụng có quyền và cho phép người dùng làm việc ở đó.
+</p>
+<p>
+    Ví dụ, ứng dụng Lịch chấp nhận một
+    ý định {@link android.content.Intent#ACTION_INSERT}, nó cho phép bạn kích hoạt UI chèn
+    của ứng dụng. Bạn có thể chuyển dữ liệu "phụ thêm" trong ý định này mà được ứng dụng sử dụng
+    để điền trước vào UI. Vì các sự kiện định kỳ có cú pháp phức tạp, cách
+    ưu tiên để chèn sự kiện vào Trình cung cấp Lịch đó là kích hoạt ứng dụng Lịch với một
+    {@link android.content.Intent#ACTION_INSERT} rồi để người dùng chèn sự kiện tại đó.
+</p>
+<!-- Contract Classes -->
+<h2 id="ContractClasses">Các Lớp Hợp đồng</h2>
+<p>
+    Lớp hợp đồng định nghĩa các hằng số sẽ giúp ứng dụng hoạt động với các URI nội dung, tên
+    cột, hành động ý định, và các tính năng khác của một trình cung cấp nội dung. Các lớp hợp đồng không
+    được tự động đưa vào cùng một trình cung cấp; nhà phát triển của trình cung cấp phải định nghĩa chúng rồi
+    cung cấp chúng cho các nhà phát triển khác. Nhiều trình cung cấp được bao gồm cùng với nền tảng
+    Android có các lớp hợp đồng tương ứng trong gói {@link android.provider}.
+</p>
+<p>
+    Ví dụ, Trình cung cấp Từ điển Người dùng có một lớp hợp đồng
+    {@link android.provider.UserDictionary} chứa các hằng số URI nội dung và tên cột. URI nội dung
+    đối với bảng "từ" được định nghĩa trong hằng số
+    {@link android.provider.UserDictionary.Words#CONTENT_URI UserDictionary.Words.CONTENT_URI}.
+    Lớp {@link android.provider.UserDictionary.Words} cũng chứa các hằng số tên cột,
+    chúng được sử dụng trong đoạn mã HTML mẫu trong hướng dẫn này. Ví dụ, một dự thảo truy vấn có thể được
+    định nghĩa là:
+</p>
+<pre>
+String[] mProjection =
+{
+    UserDictionary.Words._ID,
+    UserDictionary.Words.WORD,
+    UserDictionary.Words.LOCALE
+};
+</pre>
+<p>
+    Một lớp hợp đồng khác là {@link android.provider.ContactsContract} dành cho Trình cung cấp Danh bạ.
+    Tài liệu tham khảo cho lớp này bao gồm các đoạn mã HTML mẫu. Một trong số các
+    lớp con của nó, {@link android.provider.ContactsContract.Intents.Insert}, là một lớp hợp đồng
+    chứa các hằng số cho ý định và dữ liệu ý định.
+</p>
+
+
+<!-- MIME Type Reference -->
+<h2 id="MIMETypeReference">Tham khảo Kiểu MIME</h2>
+<p>
+    Trình cung cấp nội dung có thể trả về các kiểu phương tiện MIME tiêu chuẩn, hoặc xâu kiểu MIME tùy chỉnh, hoặc cả hai.
+</p>
+<p>
+    Các kiểu MIME có định dạng
+</p>
+<pre>
+<em>type</em>/<em>subtype</em>
+</pre>
+<p>
+    Ví dụ, kiểu MIME thông dụng <code>text/html</code> có kiểu <code>text</code> và
+    kiểu con <code>html</code>. Nếu trình cung cấp trả về loại này cho một URI, điều đó có nghĩa rằng một
+    truy vấn đang sử dụng URI đó sẽ trả về văn bản chứa thẻ HTML.
+</p>
+<p>
+    Các xâu kiểu MIME tùy chỉnh, còn gọi là kiểu MIME "theo nhà cung cấp", có các giá trị
+    <em>kiểu</em> và <em>kiểu con</em> phức tạp hơn. Giá trị <em>kiểu</em> luôn luôn
+</p>
+<pre>
+vnd.android.cursor.<strong>dir</strong>
+</pre>
+<p>
+    áp dụng cho nhiều hàng, hoặc
+</p>
+<pre>
+vnd.android.cursor.<strong>item</strong>
+</pre>
+<p>
+    áp dụng cho một hàng.
+</p>
+<p>
+    Giá trị <em>kiểu con</em> áp dụng theo trình cung cấp. Các trình cung cấp được tích hợp trong Android thường có một kiểu con
+    đơn giản. Ví dụ, khi ứng dụng Danh bạ tạo một hàng cho một số điện thoại,
+    nó đặt kiểu MIME sau trong hàng:
+</p>
+<pre>
+vnd.android.cursor.item/phone_v2
+</pre>
+<p>
+    Để ý rằng giá trị kiểu con đơn giản là <code>phone_v2</code>.
+</p>
+<p>
+    Các nhà phát triển trình cung cấp khác có thể tạo mẫu hình kiểu con của riêng mình dựa trên quyền
+    và tên bảng của trình cung cấp. Ví dụ, xét một trình cung cấp chứa các biểu thời gian lịch tàu.
+    Quyền của trình cung cấp là <code>com.example.trains</code>, và nó chứa các bảng
+    Line1, Line2, và Line3. Để phản hồi lại URI nội dung
+</p>
+<p>
+<pre>
+content://com.example.trains/Line1
+</pre>
+<p>
+    đối với bảng Line1, trình cung cấp trả về kiểu MIME
+</p>
+<pre>
+vnd.android.cursor.<strong>dir</strong>/vnd.example.line1
+</pre>
+<p>
+     Để phản hồi lại URI nội dung
+</p>
+<pre>
+content://com.example.trains/Line2/5
+</pre>
+<p>
+    đối với hàng 5 trong bảng Line2, trình cung cấp trả về kiểu MIME
+</p>
+<pre>
+vnd.android.cursor.<strong>item</strong>/vnd.example.line2
+</pre>
+<p>
+    Hầu hết các trình cung cấp nội dung đều định nghĩa hằng số lớp hợp đồng cho các kiểu MIME mà chúng sử dụng. Ví dụ như lớp hợp đồng
+    của Trình cung cấp Danh bạ {@link android.provider.ContactsContract.RawContacts},
+    sẽ định nghĩa hằng số
+    {@link android.provider.ContactsContract.RawContacts#CONTENT_ITEM_TYPE} cho kiểu MIME của
+    một hàng liên lạc thô duy nhất.
+</p>
+<p>
+    Các URI nội dung đối với hàng duy nhất được mô tả trong phần
+    <a href="#ContentURIs">URI nội dung</a>.
+</p>

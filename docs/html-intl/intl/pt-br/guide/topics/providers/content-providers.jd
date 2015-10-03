@@ -1,0 +1,108 @@
+page.title=Provedores de conteúdo
+@jd:body
+<div id="qv-wrapper">
+<div id="qv">
+
+
+<!-- In this document -->
+<h2>Tópicos</h2>
+<ol>
+    <li>
+        <a href="{@docRoot}guide/topics/providers/content-provider-basics.html">
+        Preceitos do provedor de conteúdo        </a>
+    </li>
+    <li>
+        <a href="{@docRoot}guide/topics/providers/content-provider-creating.html">
+            Criação de um Provedor de conteúdo</a>
+    </li>
+    <li>
+        <a href="{@docRoot}guide/topics/providers/calendar-provider.html">Provedor de agenda</a>
+    </li>
+    <li>
+        <a href="{@docRoot}guide/topics/providers/contacts-provider.html">Provedor de contatos</a>
+    </li>
+</ol>
+
+    <!-- Related Samples -->
+<h2>Exemplos relacionados</h2>
+    <ol>
+        <li>
+            <a href="{@docRoot}resources/samples/ContactManager/index.html">
+            Aplicativo Gerenciador de contatos</a>
+        </li>
+        <li>
+        <a href="{@docRoot}resources/samples/ApiDemos/src/com/example/android/apis/view/List2.html">
+        "Cursor (pessoas)"
+</a>
+        </li>
+        <li>
+        <a href="{@docRoot}resources/samples/ApiDemos/src/com/example/android/apis/view/List7.html">
+        "Cursor (telefones)"</a>
+        </li>
+        <li>
+            <a href="{@docRoot}resources/samples/SampleSyncAdapter/index.html">
+        Exemplo de adaptador de sincronização</a>
+        </li>
+    </ol>
+</div>
+</div>
+<p>
+    Provedores de conteúdo gerenciam o acesso a um conjunto estruturado de dados. Eles encapsulam os
+dados e fornecem mecanismos para definir a segurança dos dados. Provedores de conteúdo são a interface
+ padrão que conecta dados em um processo com código em execução em outro processo.
+</p>
+<p>
+    Quando desejar acessar dados em um provedor de conteúdo, você usa o 
+    objeto {@link android.content.ContentResolver} no 
+    {@link android.content.Context} do aplicativo para se comunicar com o provedor como cliente.
+    O objeto {@link android.content.ContentResolver} se comunica com o objeto provedor, uma
+    instância de uma classe que implementa {@link android.content.ContentProvider}. O objeto
+    provedor recebe solicitações de dados de clientes, realiza a ação solicitada e 
+    devolve os resultados.
+</p>
+<p>
+    Não é preciso desenvolver o próprio provedor se você não pretende compartilhar seus dados com
+    outros aplicativos. No entanto, precisará do próprio provedor para fornecer sugestões de pesquisa
+    personalizada em seu aplicativo. Também precisará do próprio provedor se quiser copiar e colar
+    dados complexos ou arquivos de seu aplicativo em outros aplicativos.
+</p>
+<p>
+    O Android propriamente dito inclui provedores de conteúdo que gerenciam dados como áudio, vídeo, imagens e
+    informações de contato pessoais. Alguns deles estão listados na documentação de 
+    referência do 
+    pacote <code><a href="{@docRoot}reference/android/provider/package-summary.html">android.provider</a>
+    </code>. Com algumas restrições, esses provedores podem ser acessados por qualquer aplicativo 
+    Android.
+</p><p>
+    Os tópicos a seguir descrevem provedores de conteúdo em mais detalhes:
+</p>
+<dl>
+    <dt>
+        <strong><a href="{@docRoot}guide/topics/providers/content-provider-basics.html">
+        Preceitos do provedor de conteúdo</a></strong>
+    </dt>
+    <dd>
+        Como acessar dados em um provedor de conteúdo quando os dados estão organizados em tabelas.
+    </dd>
+    <dt>
+        <strong><a href="{@docRoot}guide/topics/providers/content-provider-creating.html">
+Criação de um Provedor de conteúdo</a></strong>
+    </dt>
+    <dd>
+        Como criar o próprio provedor de conteúdo.
+    </dd>
+    <dt>
+        <strong><a href="{@docRoot}guide/topics/providers/calendar-provider.html">
+Provedor de agenda</a></strong>
+    </dt>
+    <dd>
+        Como acessar o Provedor de agenda que é parte da plataforma Android.
+    </dd>
+    <dt>
+        <strong><a href="{@docRoot}guide/topics/providers/contacts-provider.html">
+Provedor de contatos</a></strong>
+    </dt>
+    <dd>
+        Como acessar o Provedor de contatos que é parte da plataforma Android.
+    </dd>
+</dl>
