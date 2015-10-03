@@ -65,6 +65,9 @@ public class DimLayer {
         boolean isFullscreen();
         /** Returns the display info. of the dim layer user. */
         DisplayInfo getDisplayInfo();
+        /** Gets the bounds of the dim layer user. */
+        void getBounds(Rect outBounds);
+        String toShortString();
     }
     /** The user of this dim layer. */
     final DimLayerUser mUser;
@@ -239,8 +242,9 @@ public class DimLayer {
                 mDuration = duration;
             }
         }
-        if (DEBUG) Slog.v(TAG, "show: mStartAlpha=" + mStartAlpha + " mStartTime=" + mStartTime);
         mTargetAlpha = alpha;
+        if (DEBUG) Slog.v(TAG, "show: mStartAlpha=" + mStartAlpha + " mStartTime=" + mStartTime
+                + " mTargetAlpha=" + mTargetAlpha);
     }
 
     /** Immediate hide.

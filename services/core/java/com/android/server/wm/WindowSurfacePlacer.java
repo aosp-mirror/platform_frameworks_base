@@ -642,9 +642,7 @@ class WindowSurfacePlacer {
                     handleNotObscuredLocked(w, innerDw, innerDh);
                 }
 
-                if (task != null && !task.getContinueDimming()) {
-                    w.handleFlagDimBehind();
-                }
+                w.handleFlagDimBehind();
 
                 if (isDefaultDisplay && obscuredChanged
                         && mWallpaperControllerLocked.isWallpaperTarget(w) && w.isVisibleLw()) {
