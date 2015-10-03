@@ -1,0 +1,103 @@
+page.title=Tổng quan về Tài nguyên
+@jd:body
+
+<div id="qv-wrapper">
+<div id="qv">
+  <h2>Chủ đề</h2>
+  <ol>
+    <li><a href="providing-resources.html">Cung cấp Tài nguyên</a></li>
+    <li><a href="accessing-resources.html">Truy cập Tài nguyên</a></li>
+    <li><a href="runtime-changes.html">Xử lý Thay đổi Thời gian chạy</a></li>
+    <li><a href="localization.html">Bản địa hóa</a></li>
+  </ol>
+
+  <h2>Tham khảo</h2>
+  <ol>
+    <li><a href="available-resources.html">Loại Tài nguyên</a></li>
+  </ol>
+</div>
+</div>
+
+
+<p>Bạn nên luôn ngoại hiện hóa các tài nguyên chẳng hạn như hình ảnh và xâu từ mã
+ứng dụng của mình, sao cho bạn có thể duy trì chúng một cách độc lập. Việc ngoại hiện hóa
+tài nguyên cũng cho phép bạn cung cấp các tài nguyên thay thế hỗ trợ những cấu hình
+thiết bị cụ thể chẳng hạn như ngôn ngữ hoặc kích cỡ màn hình khác nhau, điều này đang ngày càng trở nên
+quan trọng bởi các thiết bị dựa trên nền tảng Android ngày càng sẵn có với các cấu hình khác nhau. Để
+đảm bảo tính tương thích với các cấu hình khác nhau, bạn phải tổ chức tài nguyên trong
+thư mục {@code res/} dự án của bạn bằng cách sử dụng các thư mục con khác nhau có chức năng nhóm tài nguyên lại theo loại và
+cấu hình.</p>
+
+<div class="figure" style="width:429px">
+<img src="{@docRoot}images/resources/resource_devices_diagram1.png" height="167" alt="" />
+<p class="img-caption">
+<strong>Hình 1.</strong> Hai thiết bị khác nhau, mỗi thiết bị sử dụng bố trí mặc định
+(ứng dụng không cung cấp bố trí thay thế).</p>
+</div>
+
+<div class="figure" style="width:429px">
+<img src="{@docRoot}images/resources/resource_devices_diagram2.png" height="167" alt="" />
+<p class="img-caption">
+<strong>Hình 2.</strong> Hai thiết bị khác nhau, mỗi thiết bị sử dụng một bố trí khác nhau được cung cấp
+cho các kích cỡ màn hình khác nhau.</p>
+</div>
+
+<p>Đối với mọi loại tài nguyên, bạn có thể quy định tài nguyên <em>mặc định</em> và nhiều tài nguyên
+<em>thay thế</em> cho ứng dụng của mình:</p>
+<ul>
+  <li>Tài nguyên mặc định là những tài nguyên nên được sử dụng không phụ thuộc vào
+cấu hình thiết bị hoặc khi không có tài nguyên thay thế khớp với cấu hình
+hiện tại.</li>
+  <li>Tài nguyên thay thế là những tài nguyên mà bạn đã thiết kế để sử dụng với một cấu hình
+cụ thể. Để quy định rằng một nhóm tài nguyên áp dụng cho một cấu hình cụ thể,
+hãy nối hình dạng cấu hình phù hợp với tên thư mục.</li>
+</ul>
+
+<p>Ví dụ, trong khi bố trí UI mặc định của bạn
+được lưu trong thư mục {@code res/layout/}, bạn có thể quy định một bố trí khác sẽ
+được sử dụng khi màn hình ở hướng khổ ngang, bằng cách lưu nó trong thư mục {@code res/layout-land/}
+. Android tự động áp dụng các tài nguyên phù hợp bằng cách khớp cấu hình hiện tại
+của thiết bị với tên thư mục tài nguyên của bạn.</p>
+
+<p>Hình 1 minh họa cách hệ thống áp dụng cùng bố trí cho
+hai thiết bị khác nhau khi không có sẵn tài nguyên thay thế. Hình 2 minh họa
+cùng ứng dụng khi nó thêm một tài nguyên bố trí thay thế cho các màn hình lớn hơn.</p>
+
+<p>Các tài liệu sau trình bày hướng dẫn hoàn chỉnh về cách bạn có thể tổ chức các tài nguyên ứng dụng của mình,
+quy định tài nguyên thay thế, truy cập chúng trong ứng dụng của bạn, và nhiều điều khác:</p>
+
+<dl>
+  <dt><strong><a href="providing-resources.html">Cung cấp Tài nguyên</a></strong></dt>
+  <dd>Những kiểu tài nguyên mà bạn có thể cung cấp trong ứng dụng của mình, nơi lưu chúng, và cách tạo
+tài nguyên thay thế cho những cấu hình thiết bị cụ thể.</dd>
+  <dt><strong><a href="accessing-resources.html">Truy cập Tài nguyên</a></strong></dt>
+  <dd>Cách sử dụng tài nguyên mà bạn đã cung cấp hoặc bằng cách tham chiếu chúng từ mã ứng dụng của mình
+hoặc từ các tài nguyên XML khác.</dd>
+  <dt><strong><a href="runtime-changes.html">Xử lý Thay đổi Thời gian chạy</a></strong></dt>
+  <dd>Cách quản lý những thay đổi cấu hình mà diễn ra trong khi Hoạt động của bạn đang chạy.</dd>
+  <dt><strong><a href="localization.html">Bản địa hóa</a></strong></dt>
+  <dd>Một hướng dẫn từ dưới lên về việc bản địa hóa ứng dụng của bạn bằng cách sử dụng các tài nguyên thay thế. Trong khi đây
+chỉ là một công dụng cụ thể của tài nguyên thay thế, nó rất quan trọng để tiếp cận với nhiều
+người dùng hơn.</dd>
+  <dt><strong><a href="available-resources.html">Loại Tài nguyên</a></strong></dt>
+  <dd>Một tham chiếu về các loại tài nguyên khác nhau mà bạn có thể cung cấp, mô tả các phần tử XML,
+thuộc tính và cú pháp của chúng. Ví dụ, tham chiếu này cho bạn thấy cách tạo một tài nguyên cho
+menu ứng dụng, đối tượng vẽ được, hoạt ảnh, và hơn thế nữa.</dd>
+</dl>
+
+<!--
+<h2>Raw Assets</h2>
+
+<p>An alternative to saving files in {@code res/} is to save files in the {@code
+assets/} directory. This should only be necessary if you need direct access to original files and
+directories by name. Files saved in the {@code assets/} directory will not be given a resource
+ID, so you can't reference them through the {@code R} class or from XML resources. Instead, you can
+query data in the {@code assets/} directory like an ordinary file system, search through the
+directory and
+read raw data using {@link android.content.res.AssetManager}. For example, this can be more useful
+when dealing with textures for a game. However, if you only need to read raw data from a file
+(such as a video or audio file), then you should save files into the {@code res/raw/} directory and
+then read a stream of bytes using {@link android.content.res.Resources#openRawResource(int)}. This
+is uncommon, but if you need direct access to original files in {@code assets/}, refer to the {@link
+android.content.res.AssetManager} documentation.</p>
+-->

@@ -1,0 +1,480 @@
+page.title=Đại cương về Ứng dụng
+@jd:body
+
+<div id="qv-wrapper">
+<div id="qv">
+
+<h2>Trong tài liệu này</h2>
+<ol>
+<li><a href="#Components">Thành phần của Ứng dụng</a>
+  <ol>
+    <li><a href="#ActivatingComponents">Kích hoạt các thành phần</a></li>
+  </ol>
+</li>
+<li><a href="#Manifest">Tệp Bản kê khai</a>
+  <ol>
+    <li><a href="#DeclaringComponents">Khai báo các thành phần</a></li>
+    <li><a href="#DeclaringRequirements">Khai báo các yêu cầu của ứng dụng</a></li>
+  </ol>
+</li>
+<li><a href="#Resources">Tài nguyên Ứng dụng</a></li>
+</ol>
+</div>
+</div>
+
+<p>Ứng dụng Android được viết bằng ngôn ngữ lập trình Java. Bộ công cụ SDK Android sẽ biên dịch
+mã của bạn&mdash;cùng với bất kỳ tệp dữ liệu và tài nguyên nào&mdash;vào một APK: một <i>gói Android</i>,
+đó là một tệp lưu trữ có hậu tố {@code .apk}. Một tệp APK chứa tất cả nội dung
+của một ứng dụng Android và là tệp mà các thiết bị dựa trên nền tảng Android sử dụng để cài đặt ứng dụng.</p>
+
+<p>Sau khi được cài đặt lên một thiết bị, từng ứng dụng Android sẽ ở bên trong hộp cát bảo mật của chính nó: </p>
+
+<ul>
+ <li>Hệ điều hành Android là một hệ thống Linux đa người dùng trong đó mỗi ứng dụng là một
+người dùng khác nhau.</li>
+
+<li>Theo mặc định, hệ thống gán cho từng ứng dụng một ID người dùng Linux duy nhất (ID chỉ được sử dụng bởi
+hệ thống và không xác định đối với ứng dụng). Hệ thống sẽ đặt quyền cho tất cả tệp trong một ứng dụng
+sao cho chỉ ID người dùng được gán cho ứng dụng đó mới có thể truy cập chúng. </li>
+
+<li>Mỗi tiến trình có máy ảo (VM) riêng của mình, vì thế mã của một ứng dụng sẽ chạy độc lập với
+các ứng dụng khác.</li>
+
+<li>Theo mặc định, mọi ứng dụng chạy trong tiến trình Linux của chính nó. Android khởi động tiến trình khi bất kỳ
+thành phần nào của ứng dụng cần được thực thi, sau đó tắt tiến trình khi không còn
+cần nữa hoặc khi hệ thống phải khôi phục bộ nhớ cho các ứng dụng khác.</li>
+</ul>
+
+<p>Bằng cách này, hệ thống Android triển khai <em>nguyên tắc đặc quyền ít nhất</em>. Cụ thể,
+theo mặc định, mỗi ứng dụng chỉ có thể truy cập vào các thành phần mà nó cần để thực hiện công việc của mình và
+không hơn. Điều này tạo ra một môi trường rất bảo mật mà trong đó một ứng dụng không thể truy cập các bộ phận của
+hệ thống mà nó không được cấp quyền.</p>
+
+<p>Tuy nhiên, có nhiều cách để một ứng dụng chia sẻ dữ liệu với các ứng dụng khác và để một
+ứng dụng truy cập vào các dịch vụ của hệ thống:</p>
+
+<ul>
+  <li>Có thể sắp xếp để hai ứng dụng chia sẻ cùng ID người dùng Linux, trong trường hợp đó
+chúng có thể truy cập các tệp của nhau.  Để tiết kiệm tài nguyên của hệ thống, các ứng dụng có
+cùng ID người dùng cũng có thể sắp xếp để chạy trong cùng tiến trình Linux và chia sẻ cùng VM (các
+ứng dụng cũng phải được ký bằng cùng chứng chỉ).</li>
+  <li>Một ứng dụng có thể yêu cầu quyền truy cập dữ liệu của thiết bị chẳng hạn như
+danh bạ của người dùng, tin nhắn SMS, thiết bị lưu trữ gắn được (thẻ SD), máy ảnh, Bluetooth và nhiều nữa. Tất cả
+quyền ứng dụng đều phải được cấp bởi người dùng tại thời điểm cài đặt.</li>
+</ul>
+
+<p>Đó là nội dung cơ bản về cách mà một ứng dụng Android tồn tại trong hệ thống. Phần còn lại của
+tài liệu này giới thiệu với bạn về:</p>
+<ul>
+  <li>Các thành phần khuôn khổ cốt lõi định nghĩa ứng dụng của bạn.</li>
+  <li>Tệp bản kê khai mà trong đó bạn khai báo các thành phần và tính năng yêu cầu của thiết bị cho ứng dụng
+của bạn.</li>
+  <li>Các tài nguyên tách riêng với mã ứng dụng và cho phép ứng dụng của bạn
+tối ưu hóa hành vi của nó cho nhiều loại cấu hình thiết bị đa dạng.</li>
+</ul>
+
+
+
+<h2 id="Components">Thành phần của Ứng dụng</h2>
+
+<p>Thành phần của ứng dụng là những khối dựng thiết yếu của một ứng dụng Android. Mỗi
+thành phần là một điểm khác nhau mà qua đó hệ thống có thể vào ứng dụng của bạn. Không phải tất cả
+thành phần đều là các điểm nhập thực tế cho người dùng và một số phụ thuộc vào nhau, nhưng mỗi thành phần tồn tại
+như một thực thể riêng và đóng một vai trò riêng&mdash;mỗi thành phần là một khối dựng duy nhất
+giúp định nghĩa hành vi chung của ứng dụng của bạn.</p>
+
+<p>Có bốn loại thành phần ứng dụng khác nhau. Mỗi loại có một mục đích riêng
+và có một vòng đời riêng, xác định cách thành phần được tạo lập và hủy.</p>
+
+<p>Sau đây là bốn loại thành phần ứng dụng:</p>
+
+<dl>
+
+<dt><b>Hoạt động</b></dt>
+
+<dd>Một <i>hoạt động</i> biểu diễn một màn hình đơn với một giao diện người dùng. Ví dụ,
+một ứng dụng e-mail có thể có một hoạt động với chức năng hiển thị một danh sách
+e-mail mới, một hoạt động khác để soạn e-mail, và một hoạt động khác để đọc e-mail. Mặc dù
+các hoạt động cùng nhau tạo thành một trải nghiệm người dùng gắn kết trong ứng dụng e-mail, mỗi hoạt động
+lại độc lập với nhau. Như vậy, một ứng dụng khác có thể khởi động bất kỳ hoạt động nào
+trong số này (nếu ứng dụng e-mail cho phép nó). Ví dụ, một ứng dụng máy ảnh có thể khởi động
+hoạt động trong ứng dụng e-mail có chức năng soạn thư mới, để người dùng chia sẻ một bức ảnh.
+
+<p>Hoạt động được triển khai như một lớp con của {@link android.app.Activity} và bạn có thể tìm hiểu thêm
+về nó trong hướng dẫn dành cho nhà phát triển <a href="{@docRoot}guide/components/activities.html">Hoạt động</a>
+.</p>
+</dd>
+
+
+<dt><b>Dịch vụ</b></dt>
+
+<dd>Một <i>dịch vụ</i> là một thành phần chạy ngầm để thực hiện các thao tác
+chạy lâu hoặc để thực hiện công việc cho các tiến trình từ xa. Dịch vụ
+không cung cấp giao diện người dùng. Ví dụ, một dịch vụ có thể phát nhạc dưới nền trong khi
+người dùng đang ở một ứng dụng khác, hoặc nó có thể tải dữ liệu qua mạng mà không
+chặn người dùng tương tác với hoạt động. Một thành phần khác, chẳng hạn như một hoạt động, có thể khởi động
+dịch vụ và để nó chạy hoặc gắn kết với nó để tương tác với nó.
+
+<p>Dịch vụ được triển khai như một lớp con của {@link android.app.Service} và bạn có thể tìm hiểu
+thêm về nó trong hướng dẫn cho nhà phát triển <a href="{@docRoot}guide/components/services.html">Dịch vụ</a>
+.</p>
+</dd>
+
+
+<dt><b>Trình cung cấp Nội dung</b></dt>
+
+<dd>Một <i>trình cung cấp nội dung</i> sẽ quản lý một tập dữ liệu ứng dụng được chia sẻ. Bạn có thể lưu trữ dữ liệu trong
+hệ thống tệp, một cơ sở dữ liệu SQLite, trên web, hay bất kỳ vị trí lưu trữ liên tục nào khác mà
+ứng dụng của bạn có thể truy cập. Thông qua trình cung cấp nội dung, các ứng dụng khác có thể truy vấn hay thậm chí sửa đổi
+dữ liệu (nếu trình cung cấp nội dung cho phép). Ví dụ, hệ thống Android cung cấp một trình cung cấp
+nội dung có chức năng quản lý thông tin danh bạ của người dùng. Như vậy, bất kỳ ứng dụng nào có các quyền
+phù hợp đều có thể truy vấn bất kỳ phần nào của trình cung cấp nội dung (chẳng hạn như {@link
+android.provider.ContactsContract.Data}) để đọc và ghi thông tin về một người cụ thể.
+
+<p>Trình cung cấp nội dung cũng hữu ích với việc đọc và ghi dữ liệu riêng tư đối với
+ứng dụng của bạn và không được chia sẻ. Ví dụ, ứng dụng mẫu <a href="{@docRoot}resources/samples/NotePad/index.html">Note Pad</a> sử dụng một
+trình cung cấp nội dung để lưu các ghi chú.</p>
+
+<p>Trình cung cấp nội dung được triển khai như một lớp con của {@link android.content.ContentProvider}
+và phải triển khai một tập các API tiêu chuẩn cho phép các ứng dụng khác thực hiện
+giao tác. Để biết thêm thông tin, xem hướng dẫn cho nhà phát triển <a href="{@docRoot}guide/topics/providers/content-providers.html">Trình cung cấp Nội dung</a>
+.</p>
+</dd>
+
+
+<dt><b>Hàm nhận quảng bá</b></dt>
+
+<dd>Một <i>hàm nhận quảng bá</i> (broadcast receiver) là một thành phần có chức năng hồi đáp lại các thông báo
+quảng bá trên toàn hệ thống.  Nhiều quảng bá khởi nguồn từ hệ thống&mdash;ví dụ, một quảng bá thông báo
+rằng màn hình đã tắt, pin yếu, hoặc một bức ảnh được chụp.
+Các ứng dụng cũng có thể khởi tạo quảng bá&mdash;ví dụ như để các ứng dụng khác biết rằng
+một phần dữ liệu đã được tải xuống thiết bị và có sẵn để họ sử dụng. Mặc dù các hàm nhận quảng bá
+không hiển thị giao diện người dùng, chúng có thể <a href="{@docRoot}guide/topics/ui/notifiers/notifications.html">tạo một thông báo thanh trạng thái</a>
+để cảnh báo người tiếp nhận khi xảy ra một sự kiện quảng bá. Tuy nhiên trường hợp phổ biến hơn đó là hàm nhận quảng bá chỉ
+là một "cổng kết nối" tới các thành phần khác và nhằm mục đích thực hiện lượng công việc rất ít. Ví
+dụ, nó có thể khởi tạo một dịch vụ để thực hiện một số công việc dựa trên sự kiện.
+
+<p>Hàm nhận quảng bá được triển khai như một lớp con của {@link android.content.BroadcastReceiver}
+và mỗi quảng bá được chuyển giao như một đối tượng {@link android.content.Intent}. Để biết thêm thông tin,
+hãy xem lớp {@link android.content.BroadcastReceiver}.</p>
+</dd>
+
+</dl>
+
+
+
+<p>Một khía cạnh độc đáo trong thiết kế hệ thống Android đó là bất kỳ ứng dụng nào cũng có thể khởi động một thành phần của
+ứng dụng khác. Ví dụ, nếu bạn muốn người dùng chụp
+ảnh bằng máy ảnh của thiết bị, có thể có một ứng dụng khác có chức năng đó và
+ứng dụng của bạn có thể sử dụng nó thay vì phát triển một hoạt động để tự chụp ảnh. Bạn không
+cần tích hợp hay thậm chí là liên kết với mã từ ứng dụng của máy ảnh.
+Thay vào đó, bạn đơn giản có thể khởi động hoạt động đó trong ứng dụng máy ảnh có chức năng
+chụp ảnh. Khi hoàn thành, ảnh thậm chí được trả về ứng dụng của bạn để bạn có thể sử dụng nó. Đối với người dùng,
+có vẻ như máy ảnh là một bộ phận thực sự trong ứng dụng của bạn.</p>
+
+<p>Khi hệ thống khởi động một thành phần, nó sẽ khởi động tiến trình cho ứng dụng đó (nếu tiến trình không
+đang chạy) và khởi tạo các lớp cần thiết cho thành phần. Ví dụ, nếu ứng dụng
+của bạn khởi động hoạt động trong ứng dụng máy ảnh có chức năng chụp ảnh, hoạt động đó
+sẽ chạy trong tiến trình thuộc về ứng dụng máy ảnh chứ không chạy trong tiến trình của ứng dụng của bạn.
+Vì thế, không như ứng dụng trên hầu hết các hệ thống khác, ứng dụng Android không có một điểm nhập
+duy nhất (ví dụ, không có chức năng {@code main()}).</p>
+
+<p>Vì hệ thống chạy từng ứng dụng trong một tiến trình riêng với các quyền của tệp mà
+hạn chế truy cập vào các ứng dụng khác, ứng dụng của bạn không thể trực tiếp kích hoạt một thành phần từ
+một ứng dụng khác. Tuy nhiên, hệ thống Android có thể. Vì thế, để kích hoạt một thành phần trong
+một ứng dụng khác, bạn phải chuyển giao một thông báo tới hệ thống trong đó nêu rõ <em>ý định</em> của bạn để
+khởi động một thành phần cụ thể. Sau đó, hệ thống sẽ kích hoạt thành phần cho bạn.</p>
+
+
+<h3 id="ActivatingComponents">Kích hoạt Thành phần</h3>
+
+<p>Ba trong bốn loại thành phần&mdash;hoạt động, dịch vụ và
+hàm nhận quảng bá&mdash;sẽ được kích hoạt bằng một thông báo không đồng bộ gọi là <em>ý định</em>.
+Ý định sẽ gắn kết từng thành phần với nhau vào thời gian chạy (bạn có thể nghĩ chúng như là
+các hàm nhắn tin có chức năng yêu cầu một hành động từ các thành phần khác), dù thành phần đó thuộc
+về ứng dụng của bạn hay ứng dụng khác.</p>
+
+<p>Một ý định được tạo thành bằng một đối tượng {@link android.content.Intent}, nó định nghĩa một thông báo để
+kích hoạt một thành phần cụ thể hoặc một <em>loại</em> thành phần cụ thể&mdash;tương ứng, một ý định
+có thể biểu thị hoặc không biểu thị.</p>
+
+<p>Đối với các hoạt động và dịch vụ, ý định có chức năng định nghĩa một hành động sẽ thực hiện (ví dụ, "xem" hoặc
+"gửi" gì đó) và có thể chỉ định URI của dữ liệu để hành động dựa trên đó (ngoài những điều khác mà
+thành phần được khởi động có thể cần biết). Ví dụ, một ý định có thể truyền tải một yêu cầu
+để một hoạt động hiển thị một hình ảnh hay mở một trang web. Trong một số trường hợp, bạn có thể khởi động một
+hoạt động để nhận kết quả, trong trường hợp đó, hoạt động cũng trả về
+kết quả trong một {@link android.content.Intent} (ví dụ, bạn có thể phát hành một ý định để cho phép
+người dùng chọn một liên lạc cá nhân và yêu cầu trả nó về cho bạn&mdash;ý định trả về bao gồm một
+URI chỉ đến liên lạc được chọn).</p>
+
+<p>Đối với hàm nhận quảng bá, ý định chỉ định nghĩa
+thông báo đang được quảng bá (ví dụ, một quảng bá để báo rằng pin của thiết bị yếu
+sẽ chỉ bao gồm một xâu hành động chỉ báo rằng "pin yếu").</p>
+
+<p>Loại thành phần còn lại, trình cung cấp nội dung, không được kích hoạt bởi ý định. Thay vào đó, nó được
+kích hoạt khi được nhằm tới bởi một yêu cầu từ một {@link android.content.ContentResolver}. Bộ giải quyết
+nội dung xử lý tất cả giao tác trực tiếp với trình cung cấp nội dung sao cho thành phần mà
+đang thực hiện giao tác với trình cung cấp sẽ không cần mà thay vào đó gọi các phương pháp trên đối tượng {@link
+android.content.ContentResolver}. Điều này để lại một lớp tóm tắt giữa trình cung cấp
+nội dung và thành phần yêu cầu thông tin (để bảo mật).</p>
+
+<p>Có các phương pháp riêng để kích hoạt từng loại thành phần:</p>
+<ul>
+  <li>Bạn có thể khởi động một hoạt động (hoặc giao cho nó việc gì mới để làm) bằng cách
+chuyển một {@link android.content.Intent} đến {@link android.content.Context#startActivity
+startActivity()} hoặc {@link android.app.Activity#startActivityForResult startActivityForResult()}
+(khi bạn muốn hoạt động trả về một kết quả).</li>
+  <li>Bạn có thể khởi động một dịch vụ (hoặc gửi chỉ dẫn mới tới một dịch vụ đang diễn ra) bằng cách
+chuyển một {@link android.content.Intent} đến {@link android.content.Context#startService
+startService()}. Hoặc bạn có thể gắn kết với dịch vụ bằng cách chuyển một {@link android.content.Intent} đến
+{@link android.content.Context#bindService bindService()}.</li>
+  <li>Bạn có thể khởi tạo một quảng bá bằng cách chuyển {@link android.content.Intent} tới các phương pháp như
+{@link android.content.Context#sendBroadcast(Intent) sendBroadcast()}, {@link
+android.content.Context#sendOrderedBroadcast(Intent, String) sendOrderedBroadcast()}, hoặc {@link
+android.content.Context#sendStickyBroadcast sendStickyBroadcast()}.</li>
+  <li>Bạn có thể thực hiện một truy vấn tới một trình cung cấp nội dung bằng cách gọi {@link
+android.content.ContentProvider#query query()} trên một {@link android.content.ContentResolver}.</li>
+</ul>
+
+<p>Để biết thêm thông tin về việc sử dụng ý định, hãy xem tài liệu <a href="{@docRoot}guide/components/intents-filters.html">Ý định và Bộ lọc
+Ý định</a>. Bạn cũng có thể xem thêm thông tin về việc kích hoạt các thành phần cụ thể
+trong những tài liệu sau: <a href="{@docRoot}guide/components/activities.html">Hoạt động</a>, <a href="{@docRoot}guide/components/services.html">Dịch vụ</a>, {@link
+android.content.BroadcastReceiver} và <a href="{@docRoot}guide/topics/providers/content-providers.html">Trình cung cấp Nội dung</a>.</p>
+
+
+<h2 id="Manifest">Tệp Bản kê khai</h2>
+
+<p>Trước khi hệ thống Android có thể khởi động một thành phần ứng dụng, hệ thống phải biết rằng
+thành phần đó tồn tại bằng cách đọc tệp {@code AndroidManifest.xml} của ứng dụng (tệp
+"bản kê khai"). Ứng dụng của bạn phải khai báo tất cả thành phần của nó trong tệp này, nó phải nằm ở gốc của
+thư mục dự án của ứng dụng.</p>
+
+<p>Bản kê khai làm nhiều việc bên cạnh việc khai báo các thành phần của ứng dụng,
+chẳng hạn như:</p>
+<ul>
+  <li>Xác định bất kỳ quyền của người dùng nào mà ứng dụng yêu cầu, chẳng hạn như truy cập Internet hay
+truy cập đọc vào danh bạ của người dùng.</li>
+  <li>Khai báo <a href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#ApiLevels">Mức API</a>
+tối thiểu mà ứng dụng yêu cầu dựa trên những API mà ứng dụng sử dụng.</li>
+  <li>Khai báo các tính năng phần cứng và phần mềm được sử dụng hoặc yêu cầu bởi ứng dụng, chẳng hạn như máy ảnh,
+dịch vụ Bluetooth, hoặc màn hình cảm ứng đa điểm.</li>
+  <li>Các thư viện API mà ứng dụng cần được liên kết với (ngoài các API khuôn khổ
+Android), chẳng hạn như <a href="http://code.google.com/android/add-ons/google-apis/maps-overview.html">thư viện Google Maps
+</a>.</li>
+  <li>Và hơn thế nữa</li>
+</ul>
+
+
+<h3 id="DeclaringComponents">Khai báo các thành phần</h3>
+
+<p>Nhiệm vụ chính của bản kê khai là thông báo cho hệ thống về các thành phần của ứng dụng. Ví
+dụ, một tệp bản kê khai có thể khai báo một hoạt động như sau: </p>
+
+<pre>
+&lt;?xml version="1.0" encoding="utf-8"?&gt;
+&lt;manifest ... &gt;
+    &lt;application android:icon="@drawable/app_icon.png" ... &gt;
+        &lt;activity android:name="com.example.project.ExampleActivity"
+                  android:label="@string/example_label" ... &gt;
+        &lt;/activity&gt;
+        ...
+    &lt;/application&gt;
+&lt;/manifest&gt;</pre>
+
+<p>Trong phần tử <code><a
+href="{@docRoot}guide/topics/manifest/application-element.html">&lt;application&gt;</a></code>
+, thuộc tính {@code android:icon} sẽ trỏ đến các tài nguyên cho một biểu tượng có chức năng nhận biết
+ứng dụng.</p>
+
+<p>Trong phần tử <code><a
+href="{@docRoot}guide/topics/manifest/activity-element.html">&lt;activity&gt;</a></code>,
+thuộc tính {@code android:name} quy định tên lớp hoàn toàn đủ tiêu chuẩn của lớp con {@link
+android.app.Activity} và các thuộc tính {@code android:label} quy định một xâu
+để sử dụng làm nhãn hiển thị với người dùng đối với hoạt động.</p>
+
+<p>Bạn phải khai báo tất cả thành phần của ứng dụng như sau:</p>
+<ul>
+  <li>Các phần tử <code><a
+href="{@docRoot}guide/topics/manifest/activity-element.html">&lt;activity&gt;</a></code> 
+cho hoạt động</li>
+  <li>Các phần tử <code><a
+href="{@docRoot}guide/topics/manifest/service-element.html">&lt;service&gt;</a></code> cho
+dịch vụ</li>
+  <li>Các phần tử <code><a
+href="{@docRoot}guide/topics/manifest/receiver-element.html">&lt;receiver&gt;</a></code> 
+cho hàm nhận quảng bá</li>
+  <li>Các phần tử <code><a
+href="{@docRoot}guide/topics/manifest/provider-element.html">&lt;provider&gt;</a></code> 
+cho trình cung cấp nội dung</li>
+</ul>
+
+<p>Các hoạt động, dịch vụ và trình cung cấp nội dung mà bạn bao gồm trong nguồn của mình nhưng không khai báo
+trong bản kê khai sẽ không hiển thị với hệ thống và hệ quả là không bao giờ chạy được.  Tuy nhiên,
+hàm nhận
+quảng bá có thể hoặc được khai báo trong bản kê khai hoặc được tạo linh hoạt trong mã (dạng đối tượng
+{@link android.content.BroadcastReceiver}) và được đăng ký với hệ thống bằng cách gọi
+{@link android.content.Context#registerReceiver registerReceiver()}.</p>
+
+<p>Để tìm hiểu thêm về cách cấu trúc tệp bản kê khai cho ứng dụng của mình, hãy xem tài liệu <a href="{@docRoot}guide/topics/manifest/manifest-intro.html">Tệp AndroidManifest.xml</a>
+. </p>
+
+
+
+<h3 id="DeclaringComponentCapabilities">Khai báo các khả năng của thành phần</h3>
+
+<p>Như đã nêu bên trên trong phần <a href="#ActivatingComponents">Kích hoạt các Thành phần</a>, bạn có thể sử dụng một
+{@link android.content.Intent} để khởi động các hoạt động, dịch vụ và hàm nhận quảng bá. Bạn có thể làm vậy bằng cách
+công khai chỉ định thành phần đích (sử dụng tên lớp thành phần) trong ý định. Tuy nhiên,
+sức mạnh thực sự của ý định nằm trong khái niệm <em>ý định không biểu thị</em>. Ý định không biểu thị
+đơn thuần mô tả kiểu hành động cần thực hiện (và có thể có cả dữ liệu mà bạn muốn
+thực hiện hành động) và cho phép hệ thống tìm một thành phần trên thiết bị có khả năng thực hiện
+hành động và khởi động nó. Nếu có nhiều thành phần có thể thực hiện hành động được mô tả bởi
+ý định, khi đó người dùng chọn ý định sẽ sử dụng.</p>
+
+<p>Cách hệ thống nhận biết các thành phần có khả năng hồi đáp lại một ý định là bằng cách so sánh
+ý định nhận được với <i>các bộ lọc ý định</i> được cung cấp trong tệp bản kê khai của các ứng dụng khác trên
+thiết bị.</p>
+
+<p>Khi bạn khai báo một hoạt động trong bản kê khai ứng dụng của mình, bạn có thể tùy chọn bao gồm
+các bộ lọc ý định có chức năng khai báo các khả năng của hoạt động sao cho nó có thể hồi đáp lại ý định
+từ các ứng dụng khác. Bạn có thể khai báo một bộ lọc ý định cho thành phần của mình bằng cách
+thêm một phần tử <a href="{@docRoot}guide/topics/manifest/intent-filter-element.html">{@code
+&lt;intent-filter&gt;}</a> làm con của phần tử công khai của thành phần đó.</p>
+
+<p>Ví dụ, nếu bạn đã xây dựng một ứng dụng e-mail có một hoạt động soạn e-mail mới, bạn có thể
+khai báo bộ lọc ý định đó để trả lời các ý định "gửi" (để gửi một e-mail mới) như sau:</p>
+<pre>
+&lt;manifest ... >
+    ...
+    &lt;application ... &gt;
+        &lt;activity android:name="com.example.project.ComposeEmailActivity">
+            &lt;intent-filter>
+                &lt;action android:name="android.intent.action.SEND" />
+                &lt;data android:type="*/*" />
+                &lt;category android:name="android.intent.category.DEFAULT" />
+            &lt;/intent-filter>
+        &lt;/activity>
+    &lt;/application&gt;
+&lt;/manifest>
+</pre>
+
+<p>Sau đó, nếu một ứng dụng khác tạo một ý định với hành động {@link
+android.content.Intent#ACTION_SEND} và chuyển nó cho {@link android.app.Activity#startActivity
+startActivity()}, hệ thống có thể khởi động hoạt động của bạn để người dùng có thể soạn thảo và gửi một
+e-mail.</p>
+
+<p>Để tìm hiểu thêm về việc tạo các bộ lọc ý định, hãy xem tài liệu <a href="{@docRoot}guide/components/intents-filters.html">Ý định và Bộ lọc Ý định</a>.
+</p>
+
+
+
+<h3 id="DeclaringRequirements">Khai báo các yêu cầu của ứng dụng</h3>
+
+<p>Có nhiều loại thiết bị dựa trên nền tảng Android và không phải tất cả chúng đều cung cấp
+các tính năng và khả năng như nhau. Để tránh việc ứng dụng của bạn bị cài đặt trên các thiết bị
+thiếu những tính năng mà ứng dụng của bạn cần, điều quan trọng là bạn phải định nghĩa rõ ràng một hồ sơ cho
+các kiểu thiết bị mà ứng dụng của bạn hỗ trợ bằng cách khai báo các yêu cầu về thiết bị và phần mềm trong tệp
+bản kê khai của mình. Hầu hết những khai báo này đều chỉ mang tính chất thông báo và hệ thống không đọc
+chúng, nhưng các dịch vụ bên ngoài như Google Play thì có đọc để cung cấp tính năng lọc
+cho người dùng khi họ tìm kiếm ứng dụng từ thiết bị của mình.</p>
+
+<p>Ví dụ, nếu ứng dụng của bạn yêu cầu máy ảnh và sử dụng các API được giới thiệu trong Android 2.1 (<a href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#ApiLevels">API Mức</a> 7),
+bạn cần khai báo những điều này như yêu cầu trong tệp bản kê khai của mình như sau:</p> 
+
+<pre>
+&lt;manifest ... >
+    &lt;uses-feature android:name="android.hardware.camera.any"
+                  android:required="true" />
+    &lt;uses-sdk android:minSdkVersion="7" android:targetSdkVersion="19" />
+    ...
+&lt;/manifest>
+</pre>
+
+<p>Lúc này, những thiết bị mà <em>không</em> có máy ảnh và có một phiên bản
+Android <em>thấp</em> hơn 2.1 sẽ không thể cài đặt ứng dụng của bạn từ Google Play.</p>
+
+<p>Tuy nhiên, bạn cũng có thể khai báo rằng ứng dụng của bạn sử dụng máy ảnh, nhưng không
+<em>yêu cầu</em> nó. Trong trường hợp đó, ứng dụng của bạn phải đặt thuộc tính <a href="{@docRoot}guide/topics/manifest/uses-feature-element.html#required">{@code required}</a>
+thành {@code "false"} và kiểm tra tại thời gian chạy xem
+thiết bị có máy ảnh không và vô hiệu hóa bất kỳ tính năng máy ảnh nào cho phù hợp.</p>
+
+<p>Bạn có thể tìm hiểu thêm thông tin về cách bạn có thể quản lý tính tương thích của ứng dụng của bạn với các thiết bị khác nhau
+trong tài liệu <a href="{@docRoot}guide/practices/compatibility.html">Tính tương thích với Thiết bị</a>
+.</p>
+
+
+
+<h2 id="Resources">Tài nguyên Ứng dụng</h2>
+
+<p>Một ứng dụng Android được soạn không chỉ có mã&mdash;nó còn yêu cầu các tài nguyên
+tách riêng với mã nguồn, chẳng hạn như hình ảnh, tệp âm thanh và bất kỳ thứ gì liên quan tới trình chiếu
+trực quan của ứng dụng. Ví dụ, bạn nên định nghĩa các hoạt cảnh, menu, kiểu, màu sắc,
+và bố trí của giao diện người dùng của hoạt động bằng các tệp XML. Việc sử dụng các tài nguyên ứng dụng giúp dễ dàng
+cập nhật các đặc điểm khác nhau trong ứng dụng của bạn mà không sửa đổi mã và&mdash;bằng cách cung cấp
+các tập hợp tài nguyên thay thế&mdash;cho phép bạn tối ưu hóa ứng dụng của mình cho nhiều loại
+cấu hình thiết bị (chẳng hạn như ngôn ngữ và kích cỡ màn hình khác nhau).</p>
+
+<p>Đối với mọi tài nguyên mà bạn bao gồm trong dự án Android của mình, bộ công cụ xây dựng SDK định nghĩa một ID số nguyên
+duy nhất mà bạn có thể sử dụng để tham chiếu tài nguyên từ mã ứng dụng của mình hoặc từ
+các tài nguyên khác được định nghĩa trong XML. Ví dụ, nếu ứng dụng của bạn chứa một tệp hình ảnh có tên {@code
+logo.png} (được lưu trong thư mục {@code res/drawable/}), bộ công cụ SDK sẽ khởi tạo một ID tài nguyên
+đặt tên là {@code R.drawable.logo} mà bạn có thể sử dụng để tham chiếu hình ảnh và chèn nó vào trong giao diện người dùng
+của mình.</p>
+
+<p>Một trong những khía cạnh quan trọng nhất của việc cung cấp tài nguyên tách riêng với mã nguồn của bạn
+là khả năng cho phép bạn cung cấp các tài nguyên thay thế cho các
+cấu hình thiết bị khác nhau. Ví dụ, bằng cách định nghĩa các xâu UI trong XML, bạn có thể biên dịch xâu sang
+các ngôn ngữ khác và lưu các xâu đó vào tệp riêng. Sau đó, dựa vào một <em>hạn định</em> ngôn ngữ
+mà bạn nối với tên của thư mục tài nguyên (chẳng hạn như {@code res/values-fr/} đối với các giá trị xâu
+tiếng Pháp) và thiết đặt ngôn ngữ của người dùng, hệ thống Android sẽ áp dụng các xâu ngôn ngữ phù hợp
+cho UI của bạn.</p>
+
+<p>Android hỗ trợ nhiều <em>hạn định</em> khác nhau cho các tài nguyên thay thế của bạn. Hạn định
+là một xâu ngắn mà bạn bao gồm trong tên của các thư mục tài nguyên của mình nhằm
+định nghĩa cấu hình thiết bị cho những tài nguyên đó nên được sử dụng. Lấy một
+ví dụ khác, bạn nên thường xuyên tạo các bố trí khác nhau cho hoạt động của mình, tùy vào hướng và kích cỡ
+màn hình của thiết bị. Ví dụ, khi màn hình thiết bị ở hướng
+đứng (cao), bạn có thể muốn một bố trí có các nút thẳng đứng, nhưng khi màn hình ở hướng
+khổ ngang (rộng), các nút nên được căn ngang. Để thay đổi bố trí
+tùy vào hướng, bạn có thể định nghĩa hai bố trí khác nhau và áp dụng hạn định
+phù hợp cho tên thư mục của từng bố trí. Sau đó, hệ thống sẽ tự động áp dụng bố trí
+phù hợp tùy thuộc vào hướng hiện tại của thiết bị.</p>
+
+<p>Để biết thêm thông tin về các loại tài nguyên khác nhau mà bạn có thể bao gồm trong ứng dụng của mình và cách
+tạo các tài nguyên thay thế cho những cấu hình thiết bị khác nhau, hãy đọc <a href="{@docRoot}guide/topics/resources/providing-resources.html">Cung cấp Tài nguyên</a>.</p>
+
+
+
+<div class="next-docs">
+<div class="col-6">
+  <h2 class="norule">Tiếp tục đọc về:</h2>
+  <dl>
+    <dt><a href="{@docRoot}guide/components/intents-filters.html">Ý định và Bộ lọc Ý định</a>
+    </dt>
+    <dd>Thông tin về cách sử dụng các API {@link android.content.Intent} để
+    kích hoạt các thành phần của ứng dụng, chẳng hạn như hoạt động và dịch vụ, và cách tạo các thành phần cho ứng dụng của bạn
+    có sẵn để cho các ứng dụng khác sử dụng.</dd>
+    <dt><a href="{@docRoot}guide/components/activities.html">Hoạt động</a></dt>
+    <dd>Thông tin về cách tạo một thực thể của lớp {@link android.app.Activity},
+    có chức năng cung cấp một màn hình riêng trong ứng dụng của bạn với một giao diện người dùng.</dd>
+    <dt><a href="{@docRoot}guide/topics/resources/providing-resources.html">Cung cấp Tài nguyên</a></dt>
+    <dd>Thông tin về cách các ứng dụng Android được cấu trúc để tách riêng các tài nguyên ứng dụng khỏi
+   mã ứng dụng, bao gồm cách bạn có thể cung cấp các tài nguyên thay thế cho những
+   cấu hình thiết bị cụ thể.
+    </dd>
+  </dl>
+</div>
+<div class="col-6">
+  <h2 class="norule">Bạn cũng có thể quan tâm tới:</h2>
+  <dl>
+    <dt><a href="{@docRoot}guide/practices/compatibility.html">Tính tương thích của Thiết bị</a></dt>
+    <dd>Thông tin về Android hoạt động trên các loại thiết bị khác nhau và giới thiệu
+    về cách bạn có thể tối ưu hóa ứng dụng của mình cho từng thiết bị hoặc hạn chế tính sẵn có của ứng dụng của bạn
+    đối với các thiết bị khác nhau.</dd>
+    <dt><a href="{@docRoot}guide/topics/security/permissions.html">Quyền của Hệ thống</a></dt>
+    <dd>Thông tin về cách Android hạn chế truy cập của ứng dụng vào một số API nhất định bằng một hệ thống
+    quyền cần có sự đồng ý của người dùng cho phép ứng dụng của bạn có thể sử dụng các API đó.</dd>
+  </dl>
+</div>
+</div>
+

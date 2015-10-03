@@ -1,0 +1,899 @@
+page.title=Объекты Intent и фильтры объектов Intent
+page.tags="IntentFilter"
+@jd:body
+
+<div id="qv-wrapper">
+<div id="qv">
+
+<h2>Содержание документа</h2>
+<ol>
+  <li><a href="#Types">Типы объектов Intent</a></li>
+  <li><a href="#Building">Создание объекта Intent</a>
+    <ol>
+      <li><a href="#ExampleExplicit">Пример явного объекта Intent</a></li>
+      <li><a href="#ExampleSend">Пример неявного объекта Intent</a></li>
+      <li><a href="#ForceChooser">Принудительное использование блока выбора приложения</a></li>
+    </ol>
+  </li>
+  <li><a href="#Receiving">Получение неявного объекта Intent</a>
+    <ol>
+      <li><a href="#ExampleFilters">Примеры фильтров</a></li>
+    </ol>
+  </li>
+  <li><a href="#PendingIntent">Использование ожидающего объекта Intent</a></li>
+  <li><a href="#Resolution">Разрешение объектов Intent</a>
+    <ol>
+      <li><a href="#ActionTest">Тестирование действия</a></li>
+      <li><a href="#CategoryTest">Тестирование категории</a></li>
+      <li><a href="#DataTest">Тестирование данных</a></li>
+      <li><a href="#imatch">Сопоставление объектов Intent</a></li>
+    </ol>
+  </li>
+</ol>
+
+<h2>См. также</h2>
+<ol>
+<li><a href="{@docRoot}training/basics/intents/index.html">Взаимодействие с другими приложениями</a></li>
+<li><a href="{@docRoot}training/sharing/index.html">Общий доступ к контенту</a></li>
+</ol>
+
+</div>
+</div>
+
+
+
+
+<p>{@link android.content.Intent} представляет собой объект обмена сообщениями, с помощью которого можно запросить выполнение действия
+у <a href="{@docRoot}guide/components/fundamentals.html#Components">компонента другого приложения</a>.
+Несмотря на то, что объекты Intent упрощают обмен данными между компонентами по нескольким аспектам, в основном они используются
+в трех ситуациях:</p>
+
+<ul>
+<li><b>Для запуска операции:</b>
+<p>Компонент {@link android.app.Activity} представляет собой один экран в приложении. Для запуска нового
+экземпляра компонента {@link android.app.Activity} необходимо передать объект {@link android.content.Intent}
+методу{@link android.content.Context#startActivity startActivity()}. Объект {@link android.content.Intent}
+описывает операцию, которую требуется запустить, а также содержит все остальные необходимые данные.</p>
+
+<p>Если после завершения операции от нее требуется получить результат,
+вызовите метод {@link android.app.Activity#startActivityForResult
+startActivityForResult()}. Ваша операция получит результат
+в виде отдельного объекта {@link android.content.Intent} в обратном вызове метода {@link
+android.app.Activity#onActivityResult onActivityResult()} операции.
+Подробные сведения см. в руководстве <a href="{@docRoot}guide/components/activities.html">Операции</a>.</p></li>
+
+<li><b>Для запуска службы:</b>
+<p>{@link android.app.Service} является компонентом, который выполняет действия в фоновом режиме
+без пользовательского интерфейса. Службу можно запустить для выполнения однократного действия
+(например, чтобы загрузить файл), передав объект{@link android.content.Intent}
+методу {@link android.content.Context#startService startService()}. Объект {@link android.content.Intent}
+описывает службу, которую требуется запустить, а также содержит все остальные необходимые данные.</p>
+
+<p>Если служба сконструирована с интерфейсом клиент-сервер, к ней
+можно установить привязку из другого компонента, передав объект{@link android.content.Intent} методу {@link
+android.content.Context#bindService bindService()}</code>. Подробные сведения см. в руководстве <a href="{@docRoot}guide/components/services.html">Службы</a>.</p></li>
+
+<li><b>Для рассылки широковещательных сообщений:</b>
+<p>Широковещательное сообщение ― это сообщение, которое может принять любое приложение. Система выдает различные
+широковещательные сообщения о системных событиях, например, когда система загружается или устройство начинает заряжаться.
+Для выдачи широковещательных сообщений другим приложениям необходимо передать объект {@link android.content.Intent}
+методу {@link android.content.Context#sendBroadcast(Intent) sendBroadcast()},
+{@link android.content.Context#sendOrderedBroadcast(Intent, String)
+sendOrderedBroadcast()} или {@link
+android.content.Context#sendStickyBroadcast sendStickyBroadcast()}.</p>
+</li>
+</ul>
+
+
+
+
+<h2 id="Types">Типы объектов Intent</h2>
+
+<p>Есть два типа объектов Intent:</p>
+
+<ul>
+<li><b>Явные объекты Intent</b> указывают компонент, который требуется запустить, по имени (
+полное имя класса). Явные объекты Intent обычно используются для запуска компонента из
+вашего собственного приложения, поскольку вам известно имя класса операции или службы, которую необходимо запустить. Например
+, можно запустить новую операцию в ответ на действие пользователя или запустить службу, чтобы загрузить
+файл в фоновом режиме.</li>
+
+<li><b>Неявные объекты Intent</b> не содержат имени конкретного компонента. Вместо этого они в целом объявляют действие,
+которое требуется выполнить, что дает возможность компоненту из другого приложения обработать этот запрос. Например, если требуется
+показать пользователю место на карте, то с помощью неявного объекта Intent можно запросить, чтобы это сделало другое приложение, в котором
+такая возможность предусмотрена.</li>
+</ul>
+
+<p>Когда создан явный объект Intent для запуска операции или службы, система немедленно
+запускает компонент приложения, указанный в объекте {@link android.content.Intent}.</p>
+
+<div class="figure" style="width:446px">
+<img src="{@docRoot}images/components/intent-filters@2x.png" width="446" alt="" />
+<p class="img-caption"><strong>Рисунок 1.</strong> Схематическое изображение процесса передачи неявного объекта Intent
+по системе для запуска другой операции: <b>[1]</b> <em>Операция А</em> создает объект
+{@link android.content.Intent} с описанием действия и передает его методу {@link
+android.content.Context#startActivity startActivity()}. <b>[2]</b> Система Android ищет во всех
+приложениях фильтры Intent, которые соответствуют данному объекту Intent. Когда приложение с подходящим фильтром найдено, <b>[3]</b> система
+запускает соответствующую операцию (<em>Операция B</em>), вызвав ее метод {@link
+android.app.Activity#onCreate onCreate()} и передав ему объект {@link android.content.Intent}.
+</p>
+</div>
+
+<p>Когда создан неявный объект Intent, система Android находит подходящий компонент путем
+сравнения содержимого объекта Intent с <em>фильтрами Intent</em>, объявленными в <a href="{@docRoot}guide/topics/manifest/manifest-intro.html">файлах манифеста</a> других приложений, имеющихся на
+устройстве. Если объект Intent совпадает с фильтром Intent, система запускает этот компонент и передает ему
+объект {@link android.content.Intent}. Если подходящими оказываются несколько фильтров Intent, система
+выводит диалоговое окно, где пользователь может выбрать приложение для выполнения данного действия.</p>
+
+<p>Фильтр Intent представляет собой выражение в файле манифеста приложения,
+указывающее типы объектов Intent, которые мог бы
+принимать компонент. Например, объявив фильтр Intent для операции,
+вы даете другим приложениям возможность напрямую запускать вашу операцию с помощью некоторого объекта Intent.
+Точно так же, если вы <em>не</em> объявите какие-либо фильтры Intent для операции, то ее можно будет запустить
+только с помощью явного объекта Intent.</p>
+
+<p class="caution"><strong>Внимание!</strong> В целях обеспечения безопасности приложения всегда используйте явный объект
+Intent при запуске {@link android.app.Service} и не
+объявляйте фильтры Intent для своих служб. Запуск служб с помощью неявных объектов Intent является
+рискованным с точки зрения безопасности, поскольку нельзя быть на абсолютно уверенным, какая служба отреагирует на такой объект Intent,
+а пользователь не может видеть, какая служба запускается. Начиная с Android 5.0 (уровень API 21) система
+вызывает исключение при вызове метода {@link android.content.Context#bindService bindService()}
+с помощью неявного объекта Intent.</p>
+
+
+
+
+
+<h2 id="Building">Создание объекта Intent</h2>
+
+<p>Объект {@link android.content.Intent} содержит информацию, на основании которой система Android
+определяет, какой компонент требуется запустить (например, точное имя компонента или категорию
+компонентов, которые должны получить этот объект Intent), а также сведения, которые необходимы компоненту-получателю,
+чтобы надлежащим образом выполнить действие (а именно — выполняемое действие и данные, с которыми его требуется выполнить).</p>
+
+
+<p>Основные сведения, содержащиеся в объекте {@link android.content.Intent}:</p>
+
+<dl>
+
+<dt><b>Имя компонента</b></dt>
+<dd>Имя компонента, который требуется запустить.
+
+<p>Эта информация является необязательной, но именно она и делает объект Intent
+<b>явным</b>. Ее наличие означает, что объект Intent следует доставить только компоненту приложения,
+определенному по имени. При отсутствии имени компонента объект Intent является <b>неявным</b>, а
+система определяет, какой компонент получит этот объект Intent по другим сведениям, которые в нем содержатся
+(например, по действию, данным и категории &mdash; см. описание далее). Поэтому, если вам требуется запустить определенный
+компонент из своего приложения, следует указать его имя.</p>
+
+<p class="note"><strong>Примечание.</strong> При запуске {@link android.app.Service} следует
+<strong>всегда указывать имя компонента</strong>. В противном случае вы не сможете быть на абсолютно уверенным в том, какая служба
+отреагирует на объект Intent, а пользователь не может видеть, какая служба запускается.</p>
+
+<p>Это поле объекта {@link android.content.Intent} представляет собой объект
+{@link android.content.ComponentName}, который можно указать с помощью полного
+имени класса целевого компонента, включая имя пакета приложения. Например,
+{@code com.example.ExampleActivity}. Задать имя компонента можно с помощью метода {@link
+android.content.Intent#setComponent setComponent()}, {@link android.content.Intent#setClass
+setClass()}, {@link android.content.Intent#setClassName(String, String) setClassName()} или конструктора
+{@link android.content.Intent}.</p>
+
+</dd>
+
+<p><dt><b>Действие</b></dt>
+<dd>Строка, определяющая стандартное действие, которое требуется выполнить (например, <em>view</em> (просмотр) или <em>pick</em> (выбор)).
+
+<p>При выдаче объектов Intent с широковещательными сообщениями это действие, которое произошло и о котором сообщается.
+Действие в значительной степени определяет, каким образом структурирована остальная часть объекта Intent,&mdash;в частности,
+что именно содержится в разделе данных и дополнительных данных.
+
+<p>Для использования объектами Intent в пределах своего приложения (либо для использования другими
+приложениями, чтобы вызывать компоненты из вашего приложения) можно указать собственные действия. Обычно же следует использовать константы действий,
+определенные классом {@link android.content.Intent} или другими классами платформы. Вот несколько
+стандартных действий для запуска операции:</p>
+
+<dl>
+<dt>{@link android.content.Intent#ACTION_VIEW}</dt>
+   <dd>Используйте это действие в объекте Intent с методом {@link
+   android.content.Context#startActivity startActivity()}, когда имеется определенная информация, которую
+   операция может показать пользователю, например, фотография в приложении галереи или адрес для
+   просмотра в картографическом приложении.</dd>
+
+<dt>{@link android.content.Intent#ACTION_SEND}</dt>
+   <dd>Его еще называют объектом Intent "share" (намерение предоставить общий доступ). Это действие следует использовать в объекте Intent с методом {@link
+   android.content.Context#startActivity startActivity()}, при наличии определенных данных, доступ к которым пользователь может
+   предоставить через другое приложение, например приложение для работы с электронной почтой или социальными сетями.</dd>
+</dl>
+
+<p>Другие константы, определяющие стандартные действия, см. в справочнике по классу {@link android.content.Intent}
+.  Другие действия определяются
+в других частях платформы Android. Например, в {@link android.provider.Settings} определяются действия,
+открывающие ряд экранов приложения настройки системы.</p>
+
+<p>Действие можно указать для объекта Intent с методом {@link android.content.Intent#setAction
+setAction()} или конструктором {@link android.content.Intent}.</p>
+
+<p>Если вы определяете собственные действия, обязательно используйте в качестве их префикса имя пакета
+вашего приложения. Например:</p>
+<pre>static final String ACTION_TIMETRAVEL = "com.example.action.TIMETRAVEL";</pre>
+</dd>
+
+<dt><b>Данные</b></dt>
+<dd>URI (объект {@link android.net.Uri}), ссылающийся на данные, с которыми будет выполняться действие и/или
+тип MIME этих данных. Тип передаваемых данных обычно определяется действием объекта Intent. Например,
+если действием является {@link android.content.Intent#ACTION_EDIT}, в данных должен содержаться
+URI документа, который требуется отредактировать.
+
+<p>При создании объекта Intent,
+помимо URI, зачастую бывает важно указать тип данных (их тип MIME).
+Например, операция, которая может выводить на экран изображения, скорее всего, не сможет
+воспроизвести аудиофайл, даже если и у тех, и у других данных будут одинаковые форматы URI.
+Поэтому указание типа MIME данных помогает системе Android
+найти наиболее подходящий компонент для получения вашего объекта Intent.
+Однако тип MIME иногда можно унаследовать от URI &mdash; в частности, когда данные представляют собой
+{@code content:} URI, который указывает, что данные находятся на устройстве и ими управляет
+{@link android.content.ContentProvider}, а это дает возможность системе видеть тип MIME данных.</p>
+
+<p>Чтобы задать только URI данных, вызовите {@link android.content.Intent#setData setData()}.
+Чтобы задать только тип MIME, вызовите {@link android.content.Intent#setType setType()}. При необходимости
+оба этих параметра можно в явном виде задать с помощью {@link
+android.content.Intent#setDataAndType setDataAndType()}.</p>
+
+<p class="caution"><strong>Внимание!</strong> Если требуется задать и URI, и тип MIME,
+<strong>не</strong> вызывайте {@link android.content.Intent#setData setData()} и
+{@link android.content.Intent#setType setType()}, поскольку каждый из этих методов аннулирует результат выполнения другого.
+Чтобы задать URI и тип MIME всегда используйте
+ метод {@link android.content.Intent#setDataAndType setDataAndType()}.</p>
+</dd>
+
+<p><dt><b>Категория</b></dt>
+<dd>Строка, содержащая прочие сведения о том, каким компонентом
+должна выполняться обработка этого объекта Intent.  В объект Intent можно поместить любое количество
+описаний категорий, однако большинству объектов Intent категория не требуется.
+Вот некоторые стандартные категории:
+
+<dl>
+<dt>{@link android.content.Intent#CATEGORY_BROWSABLE}</dt>
+  <dd>Целевая операция позволяет запускать себя веб-браузером для отображения данных,
+       указанных по ссылке &mdash; например, изображения или сообщения электронной почты.
+  </dd>
+<dt>{@link android.content.Intent#CATEGORY_LAUNCHER}</dt>
+  <dd>Эта операция является начальной операцией задачи, она указана в
+       средстве запуска приложений системы.
+  </dd>
+</dl>
+
+<p>Полный список категорий см. в описании класса {@link android.content.Intent}
+.</p>
+
+<p>Указать категорию можно с помощью{@link android.content.Intent#addCategory addCategory()}.</p>
+</dd>
+</dl>
+
+
+<p>Приведенные выше свойства (имя компонента, действие, данные и категория) представляют собой
+характеристики, определяющие объект Intent. На основании этих свойств система Android
+может решить, какой компонент следует запустить.</p>
+
+<p>Однако в объекте Intent может быть приведена и другая информация, которая не влияет на то,
+каким образом определяется требуемый компонент приложения. Объект Intent также может содержать:</p>
+
+<dl>
+<dt><b>Дополнительные данные</b></dt>
+<dd>Пары "ключ-значение", содержащие прочую информацию, которая необходима для выполнения запрошенного действия.
+Точно так же, как некоторые действия используют определенные виды URI данных, некоторые действия используют определенные дополнительные данные.
+
+<p>Добавлять дополнительные данные можно с помощью различных методов {@link android.content.Intent#putExtra putExtra()},
+каждый из которых принимает два параметра: имя и значение ключа.
+Также можно создать объект {@link android.os.Bundle} со всеми дополнительными данными, затем вставить
+объект {@link android.os.Bundle} в объект {@link android.content.Intent} с помощью метода {@link
+android.content.Intent#putExtras putExtras()}.</p>
+
+<p>Например, при создании объекта Intent для отправки сообщения электронной почты с методом
+{@link android.content.Intent#ACTION_SEND} можно указать получателя с помощью ключа
+{@link android.content.Intent#EXTRA_EMAIL}, а тему сообщения ― с помощью ключа
+{@link android.content.Intent#EXTRA_SUBJECT}.</p>
+
+<p>Класс {@link android.content.Intent} указывает много констант {@code EXTRA_*}
+для стандартных типов данных. Если вам требуется объявить собственные дополнительные ключи (для объектов Intent, которые
+принимает ваше приложение), обязательно указывайте в качестве префикса
+имя пакета своего приложения. Например:</p>
+<pre>static final String EXTRA_GIGAWATTS = "com.example.EXTRA_GIGAWATTS";</pre>
+</dd>
+
+<dt><b>Флаги</b></dt>
+<dd>Флаги, определенные в классе {@link android.content.Intent}, которые действуют как метаданные для объекта
+Intent. Флаги должны указывать системе Android, каким образом следует запускать операцию (например, к какой
+<a href="{@docRoot}guide/components/tasks-and-back-stack.html">задаче</a> должна принадлежать операция
+) и как с ней обращаться после запуска (например, будет ли она указана в списке последних
+операций).
+
+<p>Подробные сведения см. в документе, посвященном методу {@link android.content.Intent#setFlags setFlags()}.</p>
+</dd>
+
+</dl>
+
+
+
+
+<h3 id="ExampleExplicit">Пример явного объекта Intent</h3>
+
+<p>Явные объекты Intent используются для запуска конкретных компонентов приложения, например
+определенной операции или службы. Чтобы создать явный объект Intent, задайте
+имя компонента для объекта {@link android.content.Intent} &mdash; все
+остальные свойства объекта Intent можно не задавать.</p>
+
+<p>Например, если в своем приложении вы создали службу с именем {@code DownloadService},
+предназначенную для загрузки файлов из Интернета, то для ее запуска можно использовать следующий код:</p>
+
+<pre>
+// Executed in an Activity, so 'this' is the {@link android.content.Context}
+// The fileUrl is a string URL, such as "http://www.example.com/image.png"
+Intent downloadIntent = new Intent(this, DownloadService.class);
+downloadIntent.setData({@link android.net.Uri#parse Uri.parse}(fileUrl));
+startService(downloadIntent);
+</pre>
+
+<p>Конструктор {@link android.content.Intent#Intent(Context,Class)}
+предоставляет {@link android.content.Context} приложению, а
+компоненту ― объект {@link java.lang.Class}. Фактически
+этот объект Intent явно запускает класс{@code DownloadService} в приложении.</p>
+
+<p>Подробные сведения о создании и запуске службы см. в  руководстве
+<a href="{@docRoot}guide/components/services.html">Службы</a>.</p>
+
+
+
+
+<h3 id="ExampleSend">Пример неявного объекта Intent</h3>
+
+<p>Неявный объект Intent указывает действие, которым может быть вызвано любое имеющееся на устройстве приложение, способное
+выполнить это действие. Неявные объекты Intent используются, когда ваше приложение не может выполнить
+то или иное действие, а другие приложения, скорее всего, могут и вы хотите, чтобы пользователь имел возможность выбрать, какое приложение для этого использовать.</p>
+
+<p>Например, если у вас есть контент и вы хотите, чтобы пользователь поделился им с другими людьми, создайте объект Intent
+с действием {@link android.content.Intent#ACTION_SEND}
+и добавьте дополнительные данные, указывающие на контент, общий доступ к которому следует предоставить. Когда с помощью этого объекта Intent вы вызываете
+{@link android.content.Context#startActivity startActivity()}, пользователь сможет
+выбрать приложение, посредством которого к контенту будет предоставлен общий доступ.</p>
+
+<p class="caution"><strong>Внимание!</strong> Возможна ситуация, когда на устройстве пользователя не будет<em>никакого</em>
+приложения, которое может откликнуться на неявный объект Intent, отправленный вами методу {@link android.content.Context#startActivity
+startActivity()}. В этом случае вызов закончится неудачей, а работа приложения аварийно завершится. Чтобы проверить,
+будет получен ли операцией объект Intent, вызовите метод {@link android.content.Intent#resolveActivity
+resolveActivity()} для своего объекта {@link android.content.Intent}. Если результатом будет значение, отличное от null,
+значит, имеется хотя бы одно приложение, которое способно откликнуться на объект Intent и можно вызывать
+{@link android.content.Context#startActivity startActivity()}. Если же результатом будет значение null,
+объект Intent не следует использовать и по возможности следует отключить функцию, которая выдает
+этот объект Intent.</p>
+
+
+<pre>
+// Create the text message with a string
+Intent sendIntent = new Intent();
+sendIntent.setAction(Intent.ACTION_SEND);
+sendIntent.putExtra(Intent.EXTRA_TEXT, textMessage);
+sendIntent.setType("text/plain");
+
+// Verify that the intent will resolve to an activity
+if (sendIntent.resolveActivity(getPackageManager()) != null) {
+    startActivity(sendIntent);
+}
+</pre>
+
+<p class="note"><strong>Примечание.</strong> В этом случае URI не используется, а вместо этого следует объявить
+тип данных объекта Intent, чтобы указать контент, содержащийся в дополнительных данных.</p>
+
+
+<p>При вызове метода {@link android.content.Context#startActivity startActivity()} система
+анализирует все установленные приложения, чтобы определить, какие из них могут откликнуться на объект Intent этого вида (объект
+Intent с действием {@link android.content.Intent#ACTION_SEND} и данными "text/plain"
+). Если имеется только одно подходящее приложение, оно будет сразу же открыто и получит данный объект
+Intent. Если объект Intent принимают несколько операций, система
+отображает диалоговое окно, в котором пользователь может выбрать приложение для выполнения данного действия.</p>
+
+
+<div class="figure" style="width:200px">
+  <img src="{@docRoot}images/training/basics/intent-chooser.png" alt="">
+  <p class="img-caption"><strong>Рисунок 2.</strong> Диалоговое окно выбора.</p>
+</div>
+
+<h3 id="ForceChooser">Принудительное использование блока выбора приложения</h3>
+
+<p>При наличии нескольких приложений, откликающихся на ваш неявный объект Intent,
+пользователь может выбрать требуемое приложение и указать, что оно будет по умолчанию выполнять это
+действие. Это удобно в случае действия, для выполнения которого
+пользователь обычно хочет всегда использовать одно и то же приложение, например, при открытии веб-страницы (пользователи
+обычно используют один и тот же браузер).</p>
+
+<p>Однако если на объект Intent могут откликнуться несколько приложений, возможно, пользователь предпочтет каждый раз использовать другое
+приложение, поэтому следует явно выводить диалоговое окно выбора. В диалоговом окне
+выбора приложения пользователю предлагается при каждом запуске выбирать, какое приложение использовать для действия (пользователь не может выбрать приложение,
+используемое по умолчанию). Например, когда ваше приложение выполняет операцию "share" (поделиться) с помощью действия {@link
+android.content.Intent#ACTION_SEND}, пользователи могут, в зависимости от ситуации, предпочесть каждый раз делать это с помощью разных приложений
+, поэтому следует всегда использовать диалоговое окно выбора, как показано на рисунке 2.</p>
+
+
+
+
+<p>Чтобы вывести на экран блок выбора приложения, создайте {@link android.content.Intent} с помощью {@link
+android.content.Intent#createChooser createChooser()} и передайте его {@link
+android.app.Activity#startActivity startActivity()}. Например:</p>
+
+<pre>
+Intent sendIntent = new Intent(Intent.ACTION_SEND);
+...
+
+// Always use string resources for UI text.
+// This says something like "Share this photo with"
+String title = getResources().getString(R.string.chooser_title);
+// Create intent to show the chooser dialog
+Intent chooser = Intent.createChooser(sendIntent, title);
+
+// Verify the original intent will resolve to at least one activity
+if (sendIntent.resolveActivity(getPackageManager()) != null) {
+    startActivity(chooser);
+}
+</pre>
+
+<p>В результате на экран будет выведено диалоговое окно со списком приложений, которые могут отреагировать на объект Intent, переданный методу {@link
+android.content.Intent#createChooser createChooser()} и используют указанный текст в качестве
+заголовка диалога.</p>
+
+
+
+
+
+
+
+
+
+<h2 id="Receiving">Получение неявного объекта Intent</h2>
+
+<p>Чтобы указать, какие неявные объекты Intent может принимать ваше приложение, объявите один или несколько фильтров Intent для
+каждого компонента приложения с помощью элемента <a href="{@docRoot}guide/topics/manifest/intent-filter-element.html">{@code &lt;intent-filter&gt;}</a>
+в <a href="{@docRoot}guide/topics/manifest/manifest-intro.html">файле манифеста</a>.
+Каждый фильтр Intent указывает тип объектов Intent, которые принимает компонент на основании действия,
+данных и категории, заданных в объекте Intent. Система передаст неявный объект Intent вашему приложению, только если
+он может пройти через один из ваших фильтров Intent.</p>
+
+<p class="note"><strong>Примечание.</strong> Явный объект Intent всегда доставляется его целевому компоненту,
+без учета любых фильтров Intent, объявленных компонентом.</p>
+
+<p>Компонент приложения должен объявлять отдельные фильтры для каждой уникальной работы, которую он может выполнить.
+Например, у операции из приложения для работы с галереей изображений может быть два фильтра: один фильтр
+для просмотра изображения, и второй для его редактирования. Когда операция запускается,
+она анализирует объект {@link android.content.Intent} и выбирает режим своей работы на основании информации,
+приведенной в {@link android.content.Intent} (например, показывать элементы управления редактора или нет).</p>
+
+<p>Каждый фильтр Intent определяется элементом <a href="{@docRoot}guide/topics/manifest/intent-filter-element.html">{@code &lt;intent-filter&gt;}</a>
+в файле манифеста приложения, указанном в объявлении соответствующего компонента приложения (например,
+в элементе <a href="{@docRoot}guide/topics/manifest/activity-element.html">{@code &lt;activity&gt;}</a>).
+ Внутри элемента <a href="{@docRoot}guide/topics/manifest/intent-filter-element.html">{@code &lt;intent-filter&gt;}</a>,
+можно указать тип объектов Intent, которые будут приниматься, с помощью одного или нескольких
+из следующих трех элементов:</p>
+
+<dl>
+<dt><a href="{@docRoot}guide/topics/manifest/action-element.html">{@code &lt;action&gt;}</a></dt>
+  <dd>Объявляет принимаемое действие, заданное в объекте Intent, в атрибуте {@code name}. Значение
+  должно быть текстовой строкой действия, а не константой класса.</dd>
+<dt><a href="{@docRoot}guide/topics/manifest/data-element.html">{@code &lt;data&gt;}</a></dt>
+  <dd>Объявляет тип принимаемых данных, для чего используется один или несколько атрибутов, указывающих различные
+  составные части URI данных (<code>scheme</code>, <code>host</code>, <code>port</code>,
+  <code>path</code> и т. д.) и тип MIME.</dd>
+<dt><a href="{@docRoot}guide/topics/manifest/category-element.html">{@code &lt;category&gt;}</a></dt>
+  <dd>Объявляет принимаемую категорию, заданную в объекте Intent, в атрибуте {@code name}. Значение
+  должно быть текстовой строкой действия, а не константой класса.
+
+  <p class="note"><strong>Примечание.</strong> Для получения неявных объектов Intent
+ <strong>необходимо включить</strong> категорию
+{@link android.content.Intent#CATEGORY_DEFAULT} в фильтр Intent. Методы
+  {@link android.app.Activity#startActivity startActivity()} и
+  {@link android.app.Activity#startActivityForResult startActivityForResult()} обрабатывают все объекты Intent, как если бы они объявляли
+ категорию{@link android.content.Intent#CATEGORY_DEFAULT}.
+  Если вы не объявляете эту категорию в своем фильтре Intent, никакие неявные объекты Intent не будут переданы в
+вашу операцию.</p>
+  </dd>
+</dl>
+
+<p>В следующем примере объявлена операция с фильтром Intent, определяющим получение объекта Intent
+{@link android.content.Intent#ACTION_SEND}, когда данные относятся к типу text:</p>
+
+<pre>
+&lt;activity android:name="ShareActivity">
+    &lt;intent-filter>
+        &lt;action android:name="android.intent.action.SEND"/>
+        &lt;category android:name="android.intent.category.DEFAULT"/>
+        &lt;data android:mimeType="text/plain"/>
+    &lt;/intent-filter>
+&lt;/activity>
+</pre>
+
+<p>Можно создавать фильтры, в которых будет несколько экземпляров
+<a href="{@docRoot}guide/topics/manifest/action-element.html">{@code &lt;action&gt;}</a>,
+<a href="{@docRoot}guide/topics/manifest/data-element.html">{@code &lt;data&gt;}</a> или
+<a href="{@docRoot}guide/topics/manifest/category-element.html">{@code &lt;category&gt;}</a>.
+В этом случае просто нужно убедиться в том, что компонент может справиться с любыми сочетаниями
+этих элементов фильтра.</p>
+
+<p>Когда требуется обрабатывать объекты Intent нескольких видов, но только в определенных сочетаниях
+действия, типа данных и категории, необходимо создать несколько фильтров Intent.</p>
+
+
+<div class="sidebox-wrapper">
+<div class="sidebox">
+<h2>Ограничение доступа к компонентам</h2>
+<p>Использование фильтра Intent не является безопасным способом предотвращения запуска ваших компонентов
+другими приложениями. Несмотря на то, что после применения фильтров Intent компонент будет реагировать только
+на неявные объекты Intent определенного вида, другое приложение теоретически может запустить компонент вашего приложения
+с помощью явного объекта Intent, если разработчик определит имена ваших компонентов.
+Если важно, чтобы <em>только ваше собственное приложение</em> могло запускать один из ваших компонентов,
+задайте для атрибута <a href="{@docRoot}guide/topics/manifest/activity-element.html#exported">{@code
+exported}</a> этого компонента значение {@code "false"}.
+</p>
+</div>
+</div>
+
+<p>Неявный объект Intent проверяется фильтром путем сравнения объекта Intent с каждым из
+этих трех элементов. Чтобы объект Intent был доставлен компоненту, он должен пройти все три теста.
+Если он не будет соответствовать хотя бы одному из них, система Android не доставит этот объект Intent
+компоненту.  Однако, поскольку у компонента может быть несколько фильтров Intent, объект Intent, который
+не проходит через один из фильтров компонента, может пройти через другой фильтр.
+Подробные сведения о том, каким образом система принимает решения по поводу объектов Intent, см. в приведенном далее разделе
+ <a href="#Resolution">Разрешение объектов Intent</a>.</p>
+
+<p class="caution"><strong>Внимание!</strong> Чтобы случайно не запустить
+{@link android.app.Service} другого приложения, всегда используйте явные объекты Intent для запуска собственных служб и не
+объявляйте для них фильтры Intent.</p>
+
+<p class="note"><strong>Примечание.</strong>
+Фильтры Intent необходимо объявлять в файле манифеста для всех операций.
+Фильтры для приемников широковещательных сообщений можно регистрировать динамически путем вызова
+{@link android.content.Context#registerReceiver(BroadcastReceiver, IntentFilter, String,
+Handler) registerReceiver()}. После этого регистрацию приемника широковещательных сообщений можно отменить с помощью {@link
+android.content.Context#unregisterReceiver unregisterReceiver()}. В результате ваше приложение
+сможет воспринимать определенные объявления только в течение указанного периода времени в процессе работы
+приложения.</p>
+
+
+
+
+
+
+
+<h3 id="ExampleFilters">Примеры фильтров</h3>
+
+<p>Чтобы лучше понять различные режимы работы фильтров Intent, рассмотрите следующий фрагмент
+из файла манифеста приложения для работы с социальными сетями.</p>
+
+<pre>
+&lt;activity android:name="MainActivity">
+    &lt;!-- This activity is the main entry, should appear in app launcher -->
+    &lt;intent-filter>
+        &lt;action android:name="android.intent.action.MAIN" />
+        &lt;category android:name="android.intent.category.LAUNCHER" />
+    &lt;/intent-filter>
+&lt;/activity>
+
+&lt;activity android:name="ShareActivity">
+    &lt;!-- This activity handles "SEND" actions with text data -->
+    &lt;intent-filter&gt;
+        &lt;action android:name="android.intent.action.SEND"/>
+        &lt;category android:name="android.intent.category.DEFAULT"/>
+        &lt;data android:mimeType="text/plain"/>
+    &lt;/intent-filter&gt;
+    &lt;!-- This activity also handles "SEND" and "SEND_MULTIPLE" with media data -->
+    &lt;intent-filter&gt;
+        &lt;action android:name="android.intent.action.SEND"/>
+        &lt;action android:name="android.intent.action.SEND_MULTIPLE"/>
+        &lt;category android:name="android.intent.category.DEFAULT"/>
+        &lt;data android:mimeType="application/vnd.google.panorama360+jpg"/>
+        &lt;data android:mimeType="image/*"/>
+        &lt;data android:mimeType="video/*"/>
+    &lt;/intent-filter&gt;
+&lt;/activity&gt;
+</pre>
+
+<p>Первая операция ({@code MainActivity}) является основной точкой входа приложения &mdash; это операция, которая
+открывается, когда пользователь запускает приложение нажатием на его значок:</p>
+<ul>
+  <li>Действие {@link android.content.Intent#ACTION_MAIN}
+ указывает на то, что это основная точка входа, и не ожидает никаких данных объекта Intent.</li>
+  <li>Категория {@link android.content.Intent#CATEGORY_LAUNCHER} указывает, что значок этой операции
+ следует поместить в средство запуска приложений системы. Если элемент <a href="{@docRoot}guide/topics/manifest/activity-element.html">{@code &lt;activity&gt;}</a>
+ не содержит указаний на конкретный значок с помощью {@code icon}, то система воспользуется значком из элемента <a href="{@docRoot}guide/topics/manifest/application-element.html">{@code &lt;application&gt;}</a>
+.</li>
+</ul>
+<p>Чтобы операция отображалась в средстве запуска приложений системы, два этих элемента необходимо связать вместе.</p>
+
+<p>Вторая операция ({@code ShareActivity}) предназначена для упрощения обмена текстовым и мультимедийным
+контентом. Несмотря на то, что пользователи могут входить в эту операцию, выбрав ее из {@code MainActivity},
+они также могут входить в {@code ShareActivity} напрямую из другого приложения, которое выдает неявный объект
+Intent, соответствующий одному из двух фильтров Intent.</p>
+
+<p class="note"><strong>Примечание.</strong> Тип MIME
+(<a href="https://developers.google.com/panorama/android/">{@code
+application/vnd.google.panorama360+jpg}</a>) является особым типом данных, указывающим на
+панорамные фотографии, с которыми можно работать с помощью API-интерфейсов <a href="{@docRoot}reference/com/google/android/gms/panorama/package-summary.html">Google
+panorama</a>.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h2 id="PendingIntent">Использование ожидающего объекта Intent</h2>
+
+<p>Объект {@link android.app.PendingIntent} является оболочкой, в которую заключается объект {@link
+android.content.Intent}. Объект {@link android.app.PendingIntent}
+в основном предназначен для того, чтобы предоставлять разрешение внешним приложениям
+на использование содержащегося в нем объекта {@link android.content.Intent}, как если бы он исполнялся из
+процесса вашего собственного приложения.</p>
+
+<p>Основные варианты использования ожидающего объекта Intent:</p>
+<ul>
+  <li>Объявление объекта Intent, который должен будет исполняться, когда пользователь выполняет действие с вашим <a href="{@docRoot}guide/topics/ui/notifiers/notifications.html">уведомлением</a>
+  ({@link android.app.NotificationManager} системы Android
+ исполняет {@link android.content.Intent}).
+  <li>Объявление объекта Intent, который должен будет исполняться, когда пользователь выполняет действие с вашим
+<a href="{@docRoot}guide/topics/appwidgets/index.html">виджетом приложения</a>
+  (приложение главного экрана исполняет {@link android.content.Intent}).
+  <li>Объявление объекта Intent, который должен будет исполняться в указанное время в будущем ({@link android.app.AlarmManager} системы
+Android исполняет {@link android.content.Intent}).
+</ul>
+
+<p>Поскольку каждый объект {@link android.content.Intent} предназначен для обработки компонентом приложения,
+который относится к определенному типу ({@link android.app.Activity}, {@link android.app.Service} или
+ {@link android.content.BroadcastReceiver}), объект {@link android.app.PendingIntent} также следует создавать
+с учетом этого обстоятельства. При использовании ожидающего объекта Intent ваше приложение не будет
+исполнять объект Intent вызовом, например, {@link android.content.Context#startActivity
+startActivity()}. Вместо этого вам необходимо будет объявить требуемый тип компонента при создании
+{@link android.app.PendingIntent} путем вызова соответствующего метода-создателя:</p>
+
+<ul>
+  <li>Метод {@link android.app.PendingIntent#getActivity PendingIntent.getActivity()} для
+  {@link android.content.Intent}, который запускает {@link android.app.Activity}.</li>
+  <li>Метод {@link android.app.PendingIntent#getService PendingIntent.getService()} для
+  {@link android.content.Intent}, который запускает {@link android.app.Service}.</li>
+  <li>Метод {@link android.app.PendingIntent#getBroadcast PendingIntent.getBroadcast()} для
+  {@link android.content.Intent}, который запускает {@link android.content.BroadcastReceiver}.</li>
+</ul>
+
+<p>Если только ваше приложение не <em>принимает</em> ожидающие объекты Intent от других приложений,
+указанные выше методы создания {@link android.app.PendingIntent} являются единственными методами
+{@link android.app.PendingIntent}, которые вам когда-либо понадобятся.</p>
+
+<p>Каждый метод принимает текущий {@link android.content.Context} приложения, объект
+{@link android.content.Intent}, который требуется поместить в оболочку, и один или несколько флагов, указывающих,
+каким образом следует использовать объект Intent (например, можно ли использовать объект Intent неоднократно).</p>
+
+<p>Подробные сведения об использовании ожидающих объектов Intent приведены в документации по каждому
+из соответствующих вариантов использования, например, в руководствах, посвященным API-интерфейсам: <a href="{@docRoot}guide/topics/ui/notifiers/notifications.html">Уведомления</a>
+и <a href="{@docRoot}guide/topics/appwidgets/index.html">Виджеты приложений</a>.</p>
+
+
+
+
+
+
+
+<h2 id="Resolution">Разрешение объектов Intent</h2>
+
+
+<p>Когда система получает неявный объект Intent для запуска операции, она выполняет поиск
+наиболее подходящей операции путем сравнения объекта Intent с фильтрами Intent по трем критериям:</p>
+
+<ul>
+  <li>действие объекта Intent;
+  <li>данные объекта Intent (тип URI и данных);
+  <li>категория объекта Intent.
+</ul>
+
+<p>В следующих разделах описывается, каким образом объекты Intent сопоставляются с соответствующими компонентами,
+а именно, как должен быть фильтр Intent объявлен в файле манифеста приложения.</p>
+
+
+<h3 id="ActionTest">Тестирование действия</h3>
+
+<p>Для указания принимаемых действий объекта Intent фильтр Intent может объявлять любое (в том числе нулевое) число элементов
+<a href="{@docRoot}guide/topics/manifest/action-element.html">{@code
+action&gt;}</a>.  Например:</p>
+
+<pre>
+&lt;intent-filter&gt;
+    &lt;action android:name="android.intent.action.EDIT" /&gt;
+    &lt;action android:name="android.intent.action.VIEW" /&gt;
+    ...
+&lt;/intent-filter&gt;
+</pre>
+
+<p>Чтобы пройти через этот фильтр, действие, указанное в объекте {@link android.content.Intent},
+ должно соответствовать одному или нескольким действиям, перечисленным в фильтре.</p>
+
+<p>Если в фильтре не перечислены какие-либо действия, объекту
+Intent будет нечему соответствовать, поэтому все объекты Intent не пройдут этот тест. Однако, если в объекте {@link android.content.Intent}
+не указано действие, он пройдет тест (если в фильтре
+содержится хотя бы одно действие).</p>
+
+
+
+<h3 id="CategoryTest">Тестирование категории</h3>
+
+<p>Для указания принимаемых категорий объекта Intent фильтр Intent может объявлять любое (в том числе нулевое) число элементов
+<a href="{@docRoot}guide/topics/manifest/category-element.html">{@code
+&lt;category&gt;}</a>.  Например:</p>
+
+<pre>
+&lt;intent-filter&gt;
+    &lt;category android:name="android.intent.category.DEFAULT" /&gt;
+    &lt;category android:name="android.intent.category.BROWSABLE" /&gt;
+    ...
+&lt;/intent-filter&gt;
+</pre>
+
+<p>Чтобы объект Intent прошел тестирование категории, все категории, приведенные в объекте {@link android.content.Intent},
+должны соответствовать категории из фильтра. Обратное не требуется &mdash; фильтр Intent может
+объявлять и другие категории, которых нет в объекте {@link android.content.Intent}, объект
+{@link android.content.Intent} при этом все равно пройдет тест. Поэтому объект Intent без категорий
+всегда пройдет этот тест, независимо от того, какие категории объявлены в фильтре.</p>
+
+<p class="note"><strong>Примечание.</strong>
+Система Android автоматически применяет категорию {@link android.content.Intent#CATEGORY_DEFAULT}
+ко всем неявным объектам Intent, которые передаются в {@link
+android.content.Context#startActivity startActivity()} и {@link
+android.app.Activity#startActivityForResult startActivityForResult()}.
+Поэтому, если вы хотите, чтобы ваша операция принимала неявные объекты Intent, в ее фильтрах Intent
+должна быть указана категория для {@code "android.intent.category.DEFAULT"} (как
+показано в предыдущем примере {@code &lt;intent-filter&gt;}).</p>
+
+
+
+<h3 id="DataTest">Тестирование данных</h3>
+
+<p>Для указания принимаемых данных объекта Intent фильтр Intent может объявлять любое (в том числе нулевое) число элементов
+<a href="{@docRoot}guide/topics/manifest/data-element.html">{@code
+&lt;data&gt;}</a>.  Например:</p>
+
+<pre>
+&lt;intent-filter&gt;
+    &lt;data android:mimeType="video/mpeg" android:scheme="http" ... /&gt;
+    &lt;data android:mimeType="audio/mpeg" android:scheme="http" ... /&gt;
+    ...
+&lt;/intent-filter&gt;
+</pre>
+
+<p>Каждый элемент <code><a href="{@docRoot}guide/topics/manifest/data-element.html">&lt;data&gt;</a></code>
+может конкретизировать структуру URI и тип данных (тип мультимедиа MIME).  Имеются отдельные
+атрибуты &mdash; {@code scheme}, {@code host}, {@code port}
+и {@code path} &mdash; для каждой составной части URI:
+</p>
+
+<p style="margin-left: 2em">{@code &lt;scheme&gt;://&lt;host&gt;:&lt;port&gt;/&lt;path&gt;}</p>
+
+<p>
+Например:
+</p>
+
+<p style="margin-left: 2em">{@code content://com.example.project:200/folder/subfolder/etc}</p>
+
+<p>В этом URI схема имеет вид {@code content}, узел ―  {@code com.example.project},
+порт ― {@code 200}, а путь ― {@code folder/subfolder/etc}.
+</p>
+
+<p>Каждый из этих атрибутов является необязательным в элементе <a href="{@docRoot}guide/topics/manifest/data-element.html">{@code &lt;data&gt;}</a>,
+однако имеются линейные зависимости:</p>
+<ul>
+  <li>Если схема не указана, узел игнорируется.</li>
+  <li>Если узел не указан, порт игнорируется.</li>
+  <li>Если не указана ни схема, ни узел, путь игнорируется.</li>
+</ul>
+
+<p>Когда URI, указанный в объекте Intent, сравнивается с URI из фильтра,
+сравнение выполняется только с теми составными частями URI, которые приведены в фильтре. Например:</p>
+<ul>
+  <li>Если в фильтре указана только схема, то все URI с этой схемой будет соответствовать
+фильтру.</li>
+  <li>Если в фильтре указаны схема и полномочия, но отсутствует путь, все URI
+с такими же схемой и полномочиями пройдут фильтр, а их пути учитываться не будут.</li>
+  <li>Если в фильтре указаны схема, полномочия и путь, то только URI с такими же схемой,
+полномочиями и путем пройдут фильтр.</li>
+</ul>
+
+<p class="note"><strong>Примечание.</strong> Путь может быть
+указан с подстановочным символом (*), чтобы потребовалось только частичное соответствие имени пути.</p>
+
+<p>При выполнении тестирования данных сравнивается и URI, и тип MIME, указанные в объекте Intent, с URI
+и типом MIME из фильтра.  Действуют следующие правила:
+</p>
+
+<ol type="a">
+<li>Объект Intent, который не содержит ни URI, ни тип MIME, пройдет этот
+тест, только если в фильтре не указано никаких URI или типов MIME.</li>
+
+<li>Объект Intent, в котором имеется URI, но отсутствует тип MIME (ни явный, ни тот, который можно вывести из
+URI), пройдет этот тест, только если URI соответствует формату URI из фильтра
+, а в фильтре также не указан тип MIME.</li>
+
+<li>Объект Intent, в котором имеется тип MIME, но отсутствует URI, пройдет этот тест,
+только если в фильтре указан тот же тип MIME и не указан формат URI.</li>
+
+<li>Объект Intent, в котором имеется и URI, и тип MIME (явный или тот, который можно вывести из
+URI), пройдет только часть этого теста, проверяющую тип MIME,
+в том случае, если этот тип совпадает с типом, приведенным в фильтре.  Он пройдет часть этого теста, которая проверяет URI,
+либо если его URI совпадает с URI из фильтра, либо если этот объект содержит URI {@code content:}
+или {@code file:}, а в фильтре URI не указан. Другими словами,
+предполагается, что компонент поддерживает данные {@code content:} и {@code file:}, если в его
+фильтре указан <em>только</em> тип MIME.</p></li>
+</ol>
+
+<p>
+Это последнее правило (правило (d)) отражает ожидание того,
+что компоненты будут в состоянии получать локальные данные из файла или от поставщика контента.
+Поэтому их фильтры могут содержать только тип данных, а явно
+указывать схемы {@code content:} и {@code file:} не требуется.
+Это типичный случай.  Например, такой элемент <a href="{@docRoot}guide/topics/manifest/data-element.html">{@code &lt;data&gt;}</a>, как
+приведенный далее, сообщает системе Android, что компонент может получать данные изображений от поставщика
+контента и выводить их на экран:
+</p>
+
+<pre>
+&lt;intent-filter&gt;
+    &lt;data android:mimeType="image/*" /&gt;
+    ...
+&lt;/intent-filter&gt;</pre>
+
+<p>
+Поскольку имеющиеся данные преимущественно распространяются поставщиками контента, фильтры, в которых
+указан тип данных и нет URI, вероятно, являются самыми распространенными.
+</p>
+
+<p>
+Другой стандартной конфигурацией являются фильтры со схемой и типом данных.  Например,
+такой элемент <a href="{@docRoot}guide/topics/manifest/data-element.html">{@code &lt;data&gt;}</a>,
+как приведенный далее, сообщает системе Android, что
+компонент может получать видеоданные из сети для выполнения действия:
+</p>
+
+<pre>
+&lt;intent-filter&gt;
+    &lt;data android:scheme="http" android:type="video/*" /&gt;
+    ...
+&lt;/intent-filter&gt;</pre>
+
+
+
+<h3 id="imatch">Сопоставление объектов Intent</h3>
+
+<p>Объекты Intent сопоставляются с фильтрами Intent не только для определения целевого
+компонента, который требуется активировать, но также для выявления определенных сведений о наборе
+компонентов, имеющихся на устройстве.  Например, приложение главного экрана заполняет средство запуска приложений
+путем поиска всех операций с фильтрами Intent, в которых указано действие
+{@link android.content.Intent#ACTION_MAIN} и категория
+{@link android.content.Intent#CATEGORY_LAUNCHER}.</p>
+
+<p>Ваше приложение может использовать сопоставление объектов Intent таким же образом.
+В {@link android.content.pm.PackageManager} имеется набор методов {@code query...()},
+которые возвращают все компоненты, способные принять определенный объект, а также
+схожий набор методов {@code resolve...()}, которые определяют наиболее подходящий
+компонент, способный реагировать на объект Intent.  Например, метод
+{@link android.content.pm.PackageManager#queryIntentActivities
+queryIntentActivities()} возвращает передаваемый как аргумент список всех операций, которые могут выполнить
+объект Intent, а метод {@link
+android.content.pm.PackageManager#queryIntentServices
+queryIntentServices()} возвращает такой же список служб.
+Ни тот, ни другой метод не активирует компоненты; они просто перечисляют те из них, которые
+могут откликнуться.  Имеется схожий метод для приемников широковещательных сообщений (
+{@link android.content.pm.PackageManager#queryBroadcastReceivers
+).
+</p>
+
+
+
+

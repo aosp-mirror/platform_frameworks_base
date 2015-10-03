@@ -1,0 +1,813 @@
+page.title=Serviços
+@jd:body
+
+<div id="qv-wrapper">
+<ol id="qv">
+<h2>Neste documento</h2>
+<ol>
+<li><a href="#Basics">Conceitos básicos</a></li>
+<ol>
+  <li><a href="#Declaring">Declaração de serviço no manifesto</a></li>
+</ol>
+<li><a href="#CreatingAService">Criação de serviço iniciado</a>
+  <ol>
+    <li><a href="#ExtendingIntentService">Extensão da classe IntentService</a></li>
+    <li><a href="#ExtendingService">Extensão da classe Service</a></li>
+    <li><a href="#StartingAService">Início de serviço</a></li>
+    <li><a href="#Stopping">Interrupção de serviço</a></li>
+  </ol>
+</li>
+<li><a href="#CreatingBoundService">Criação de serviço vinculado</a></li>
+<li><a href="#Notifications">Envio de notificações ao usuário</a></li>
+<li><a href="#Foreground">Execução de serviço em primeiro plano</a></li>
+<li><a href="#Lifecycle">Gerenciamento do ciclo de vida de um serviço</a>
+<ol>
+  <li><a href="#LifecycleCallbacks">Implementação dos retornos de chamada do ciclo de vida</a></li>
+</ol>
+</li>
+</ol>
+
+<h2>Classes principais</h2>
+<ol>
+  <li>{@link android.app.Service}</li>
+  <li>{@link android.app.IntentService}</li>
+</ol>
+
+<h2>Exemplos</h2>
+<ol>
+  <li><a href="{@docRoot}resources/samples/ApiDemos/src/com/example/android/apis/app/ServiceStartArguments.html">{@code
+      ServiceStartArguments}</a></li>
+  <li><a href="{@docRoot}resources/samples/ApiDemos/src/com/example/android/apis/app/LocalService.html">{@code
+      LocalService}</a></li>
+</ol>
+
+<h2>Veja também</h2>
+<ol>
+<li><a href="{@docRoot}guide/components/bound-services.html">Serviços vinculados</a></li>
+</ol>
+
+</div>
+
+
+<p>Um {@link android.app.Service} é um componente do aplicativo que pode realizar
+operações longas e não fornece uma interface do usuário. Outro componente do aplicativo
+pode iniciar um serviço e ele continuará em execução em segundo plano mesmo que o usuário
+alterne para outro aplicativo. Além disso, um componente poderá vincular-se a um serviço
+para interagir com ele e até estabelecer comunicação entre processos (IPC). Por exemplo, um serviço pode lidar
+com operações de rede, reproduzir música, executar E/S de arquivos, ou interagir com um provedor de conteúdo,
+tudo a partir do segundo plano.</p>
+
+<p>Um serviço pode essencialmente ter duas formas:</p>
+
+<dl>
+  <dt>Iniciado</dt>
+  <dd>Um serviço é "iniciado" quando um componente do aplicativo (como um atividade)
+inicia-o chamando {@link android.content.Context#startService startService()}. Quando iniciado, um serviço
+pode ficar em execução em segundo plano indefinidamente, mesmo que o componente que o iniciou seja destruído. Geralmente,
+um serviço iniciado realiza uma única operação e não retorna um resultado para o autor da chamada.
+Por exemplo, ele pode fazer download ou upload de um arquivo pela rede. Quando a operação for concluída,
+o serviço deverá ser interrompido.</dd>
+  <dt>Vinculado</dt>
+  <dd>Um serviço é "vinculado" quando um componente do aplicativo o vincula chamando {@link
+android.content.Context#bindService bindService()}. Um serviço vinculado oferece uma interface
+servidor-cliente que permite que os componentes interajam com a interface, enviem solicitações, obtenham resultados,
+mesmo em processos com comunicação interprocessual (IPC). Um serviço vinculado permanece em execução somente enquanto
+outro componente do aplicativo estiver vinculado a ele. Vários componentes podem ser vinculados ao serviço de uma só vez,
+mas quando todos desfizerem o vínculo, o serviço será destruído.</dd>
+</dl>
+
+<p>Apesar de esta documentação discutir os dois tipos de serviços separadamente,
+um serviço pode funcionar das duas maneiras &mdash; ele pode ser iniciado (para permanecer em execução indefinidamente) e também permitir a vinculação.
+Basta você implementar alguns métodos de retorno de chamada: {@link
+android.app.Service#onStartCommand onStartCommand()} para permitir que os componentes iniciem o serviço e {@link
+android.app.Service#onBind onBind()} para permitir a vinculação.</p>
+
+<p>Se o aplicativo for iniciado, vinculado ou ambos, qualquer componente do aplicativo
+poderá usar o serviço (mesmo a partir de um aplicativo separado), da mesma forma que qualquer componente poderá usar
+uma atividade &mdash; iniciando com uma {@link android.content.Intent}. No entanto, é possível declarar
+o serviço como privado, no arquivo do manifesto, e bloquear o acesso de outros aplicativos. Isto é discutido com mais detalhes
+na seção <a href="#Declaring">Declaração do serviço
+no manifesto</a>.</p>
+
+<p class="caution"><strong>Atenção:</strong> um serviço é executado
+no encadeamento principal em seu processo de hospedagem &mdash; o serviço <strong>não</strong> cria seu próprio encadeamento
+e <strong>não</strong> é executado em um processo separado (salvo se especificado). Isso significa que,
+ se o serviço for realizar qualquer trabalho intensivo de CPU ou operações de bloqueio (como reprodução
+de MP3 ou rede), você deve criar um novo encadeamento dentro do serviço. Usando um encadeamento separado,
+você reduzirá o risco da ocorrência de erros de Aplicativo não respondendo (ANR)
+e o encadeamento principal do aplicativo poderá permanecer dedicado à interação do usuário com as atividades.</p>
+
+
+<h2 id="Basics">Conceitos básicos</h2>
+
+<div class="sidebox-wrapper">
+<div class="sidebox">
+  <h3>Você deve usar um serviço ou um encadeamento?</h3>
+  <p>Um serviço é simplesmente um componente que pode ser executado em segundo plano mesmo quando o usuário
+não está interagindo com o aplicativo. Portanto, um serviço deve ser criado somente
+se for realmente necessário.</p>
+  <p>Caso precise realizar trabalhos fora do encadeamento principal, mas somente enquanto o usuário estiver interagindo
+com o aplicativo, então você deve criar um novo encadeamento e não um serviço. Por exemplo,
+se quiser reproduzir músicas, mas somente enquanto a atividade estiver em execução, você pode criar um encadeamento
+em {@link android.app.Activity#onCreate onCreate()}, iniciando a execução em {@link
+android.app.Activity#onStart onStart()}, e interrompendo em {@link android.app.Activity#onStop
+onStop()}. Considere também usar {@link android.os.AsyncTask} ou {@link android.os.HandlerThread},
+em vez de a classe tradicional {@link java.lang.Thread}. Consulte o documento <a href="{@docRoot}guide/components/processes-and-threads.html#Threads">Processos e
+encadeamentos</a> para obter mais informações sobre encadeamentos.</p>
+  <p>Lembre-se de que, se usar um serviço, ele ainda será executado no encadeamento principal do aplicativo por padrão,
+portanto deve-se criar um novo encadeamento dentro do serviço se ele realizar operações
+intensivas ou de bloqueio.</p>
+</div>
+</div>
+
+<p>Para criar um serviço, você deve criar uma subclasse de {@link android.app.Service}
+(ou uma das subclasses existentes). Na implementação, será necessário substituir alguns métodos de retorno de chamada
+que lidem com aspectos essenciais do ciclo de vida do serviço e forneçam um mecanismo para vincular
+componentes ao serviço, se apropriado. Os dois métodos mais importantes de retorno de chamada que você deve substituir são:</p>
+
+<dl>
+  <dt>{@link android.app.Service#onStartCommand onStartCommand()}</dt>
+    <dd>O sistema chama este método quando outro componente, como uma atividade,
+solicita que o serviço seja iniciado, chamando {@link android.content.Context#startService
+startService()}. Quando este método é executado, o serviço é iniciado e pode ser executado
+em segundo plano indefinidamente. Se implementar isto, é de sua responsabilidade interromper o serviço
+quando o trabalho for concluído, chamando {@link android.app.Service#stopSelf stopSelf()} ou {@link
+android.content.Context#stopService stopService()} (caso queira somente fornecer a vinculação,
+não é necessário implementar este método).</dd>
+  <dt>{@link android.app.Service#onBind onBind()}</dt>
+    <dd>O sistema chama este método quando outro componente quer vincular-se
+ao serviço (como para realizações de RPC) chamando {@link android.content.Context#bindService
+bindService()}. Na implementação deste método, você deve fornecer uma interface que os clientes
+usem para comunicar-se com o serviço, retornando um {@link android.os.IBinder}. Você sempre deve implementar este método,
+mas, se não quiser permitir a vinculação, retorne nulo.</dd>
+  <dt>{@link android.app.Service#onCreate()}</dt>
+    <dd>O sistema chama este método quando o serviço é criado pela primeira vez para realizar procedimentos únicos
+de configuração (antes de chamar {@link android.app.Service#onStartCommand onStartCommand()} ou
+{@link android.app.Service#onBind onBind()}). Se o serviço já estiver em execução, este método
+não é chamado.</dd>
+  <dt>{@link android.app.Service#onDestroy()}</dt>
+    <dd>O sistema chama este método quando o serviço não é mais usado e está sendo destruído.
+O serviço deve implementar isto para limpar quaisquer recursos, como encadeamentos, escutas
+registradas, receptores etc. Esta é a última chamada que o serviço recebe.</dd>
+</dl>
+
+<p>Se um componente iniciar o serviço chamando {@link
+android.content.Context#startService startService()} (o que resulta em uma chamada para {@link
+android.app.Service#onStartCommand onStartCommand()}),
+o serviço permanecerá em execução até ser interrompido por conta própria com {@link android.app.Service#stopSelf()} ou por outro componente
+chamando {@link android.content.Context#stopService stopService()}.</p>
+
+<p>Se um componente
+chamar {@link android.content.Context#bindService bindService()} para criar o serviço (e {@link
+android.app.Service#onStartCommand onStartCommand()} <em>não</em> for chamado), o serviço será executado
+somente enquanto o componente estiver vinculado a ele. Quando o serviço for desvinculado de todos os clientes,
+o sistema o destruirá.</p>
+
+<p>O sistema Android forçará a interrupção de um serviço somente quando a memória estiver baixa e precisar
+recuperar os recursos do sistema para a atividade com que o usuário estiver interagindo. Se o serviço estiver vinculado a uma atividade que o usuário
+tenha atribuído foco, é menos provável que ele seja eliminado. E, se o serviço for declarado para <a href="#Foreground">ser executado em primeiro plano</a> (discutido posteriormente), então ele quase nunca será eliminado.
+Caso contrário, se o serviço for iniciado e estiver em uma longa execução, o sistema reduzirá sua posição
+na lista de tarefas de segundo plano no decorrer do tempo e o serviço se tornará altamente suscetível
+à eliminação &mdash; se o serviço for iniciado, então você deve programá-lo para lidar
+com reinicializações pelo sistema. Se o sistema eliminar o seu serviço, ele reiniciará assim que os recursos
+estiverem disponíveis novamente (apesar de isto também depender do valor que você retornar de {@link
+android.app.Service#onStartCommand onStartCommand()}, como discutido a seguir). Para obter mais informações sobre
+quando o sistema deve destruir um serviço, consulte o documento <a href="{@docRoot}guide/components/processes-and-threads.html">Processos e encadeamentos</a>
+.</p>
+
+<p>Nas seguintes seções, você verá como é possível criar cada tipo de serviço e como
+usá-los a partir de outros componentes do aplicativo.</p>
+
+
+
+<h3 id="Declaring">Declaração de serviço no manifesto</h3>
+
+<p>Como atividades (e outros componentes), você deve declarar todos os serviços no arquivo de manifesto
+do aplicativo.</p>
+
+<p>Para declarar o serviço, adicione um elemento <a href="{@docRoot}guide/topics/manifest/service-element.html">{@code &lt;service&gt;}</a> 
+como filho do elemento <a href="{@docRoot}guide/topics/manifest/application-element.html">{@code &lt;application&gt;}</a>
+. Por exemplo:</p>
+
+<pre>
+&lt;manifest ... &gt;
+  ...
+  &lt;application ... &gt;
+      &lt;service android:name=".ExampleService" /&gt;
+      ...
+  &lt;/application&gt;
+&lt;/manifest&gt;
+</pre>
+
+<p>Consulte a referência de elemento <a href="{@docRoot}guide/topics/manifest/service-element.html">{@code &lt;service&gt;}</a>
+para obter mais informações sobre como declarar o serviço no manifesto.</p>
+
+<p>É possível incluir outros atributos no elemento <a href="{@docRoot}guide/topics/manifest/service-element.html">{@code &lt;service&gt;}</a>
+para definir propriedades como permissões necessárias para iniciar o serviço e o processo
+em que o serviço deve ser executado. O atributo <a href="{@docRoot}guide/topics/manifest/service-element.html#nm">{@code android:name}</a>
+é o único necessário &mdash; ele especifica o nome da classe do serviço. Ao publicar o aplicativo,
+ não deve-se alterar-lhe o nome porque, se isso acontecer, há riscos de ocorrência de erros
+de código devido à dependência de intenções explícitas para iniciar ou vincular o serviço (leia a publicação do blogue, <a href="http://android-developers.blogspot.com/2011/06/things-that-cannot-change.html">Coisas
+que não podem mudar</a>).
+
+<p>Para garantir a segurança do aplicativo, <strong>sempre use uma intenção explícita ao iniciar ou vincular
+{@link android.app.Service}</strong> e não declare filtros de intenção para o serviço. Caso seja essencial permitir alguma ambiguidade, como qual serviço deve ser usado para iniciar,
+é possível fornecer filtros de intenções
+para os serviços e excluir o nome do componente de {@link
+android.content.Intent}, mas é preciso definir o pacote para a intenção com {@link
+android.content.Intent#setPackage setPackage()}, que fornece desambiguidade suficiente para
+o serviço alvo.</p>
+
+<p>Além disso, é possível garantir que o serviço esteja disponível somente para o aplicativo
+incluindo o atributo <a href="{@docRoot}guide/topics/manifest/service-element.html#exported">{@code android:exported}</a>
+e definindo-o como {@code "false"}. Isto impede efetivamente que outros aplicativos iniciem o serviço,
+ mesmo usando uma intenção explícita.</p>
+
+
+
+
+<h2 id="CreatingStartedService">Criação de um serviço iniciado</h2>
+
+<p>Um serviço iniciado é o que outro componente inicia chamando {@link
+android.content.Context#startService startService()}, resultando em uma chamada para o método
+{@link android.app.Service#onStartCommand onStartCommand()} do serviço.</p>
+
+<p>Quando um serviço é iniciado, ele tem um ciclo de vida que não depende do componente
+que o iniciou. Além disso, o serviço pode ser executado em segundo plano indefinidamente,
+mesmo se o componente que o iniciou for eliminado. Além disso, o serviço deve ser interrompido quando o seu trabalho
+for realizado, chamando {@link android.app.Service#stopSelf stopSelf()}. Outros componentes podem interrompê-lo
+chamando {@link android.content.Context#stopService stopService()}.</p>
+
+<p>Um componente do aplicativo, como uma atividade, pode iniciar o serviço chamando {@link
+android.content.Context#startService startService()} e passando {@link android.content.Intent},
+que especifica o serviço e inclui os dados para o serviço usar. O serviço
+recebe esta {@link android.content.Intent} no método {@link android.app.Service#onStartCommand
+onStartCommand()}.</p>
+
+<p>Por exemplo, presuma que uma atividade precise salvar alguns dados em um banco de dados on-line. A atividade pode iniciar
+um serviço de acompanhamento e entregar a ele os dados a salvar passando uma intenção para {@link
+android.content.Context#startService startService()}. O serviço recebe a intenção em {@link
+android.app.Service#onStartCommand onStartCommand()}, conecta-se à Internet e realiza
+a transação no banco de dados. Quando a operação é concluída, o serviço é interrompido
+e destruído.</p>
+
+<p class="caution"><strong>Atenção:</strong> um serviço é executado no mesmo processo que o aplicativo
+em que ele é declarado e no encadeamento principal do aplicativo, por padrão. Portanto, se o serviço
+realizar operações intensivas ou de bloqueio quando o usuário interagir com uma atividade do mesmo aplicativo,
+diminuirá o desempenho da atividade. Para evitar impacto no desempenho do aplicativo,
+deve-se iniciar um novo encadeamento dentro do serviço.</p>
+
+<p>Geralmente, há duas classes que podem ser estendidas para criar um serviço iniciado:</p>
+<dl>
+  <dt>{@link android.app.Service}</dt>
+  <dd>Esta é a classe de base para todos os serviços. Ao estender esta classe, é importante
+criar um novo encadeamento para fazer todo o trabalho do serviço, pois o serviço usa
+o encadeamento principal do aplicativo, por padrão, o que deve diminuir o desempenho de qualquer atividade
+que o aplicativo estiver executando.</dd>
+  <dt>{@link android.app.IntentService}</dt>
+  <dd>Esta é uma subclasse de {@link android.app.Service} que usa um encadeamento de trabalho para lidar
+com todas as solicitações de inicialização, uma por vez. Esta é a melhor opção se não quiser que o serviço
+lide com várias solicitações simultaneamente. Tudo que precisa fazer é implementar {@link
+android.app.IntentService#onHandleIntent onHandleIntent()}, que recebe a intenção para cada solicitação
+de início para que você possa realizar o trabalho de segundo plano.</dd>
+</dl>
+
+<p>As seguintes seções descrevem como é possível implementar o serviço usando
+uma dessas classes.</p>
+
+
+<h3 id="ExtendingIntentService">Extensão da classe IntentService</h3>
+
+<p>Como a maioria dos serviços não precisam lidar com várias solicitações simultaneamente
+(o que pode ser perigoso para situações de vários encadeamentos), é melhor
+se o serviço for implementado usando a classe {@link android.app.IntentService}.</p>
+
+<p>O {@link android.app.IntentService} faz o seguinte:</p>
+
+<ul>
+  <li>Cria um encadeamento de trabalho padrão que executa todas as intenções entregues a {@link
+android.app.Service#onStartCommand onStartCommand()} separado do encadeamento principal
+do aplicativo.</li>
+  <li>Cria uma fila de trabalho que passa uma intenção por vez à implementação {@link
+android.app.IntentService#onHandleIntent onHandleIntent()}, para que nunca seja necessário
+preocupar-se com vários encadeamentos.</li>
+  <li>Interrompe o serviço depois que todas as solicitações forem resolvidas para que não seja necessário chamar
+{@link android.app.Service#stopSelf}.</li>
+  <li>Fornece implementações padrão de {@link android.app.IntentService#onBind onBind()}
+que retornam como nulo.</li>
+  <li>Fornece uma implementação padrão de {@link android.app.IntentService#onStartCommand
+onStartCommand()} que envia a intenção para a fila de trabalho e, em seguida, para a implementação de {@link
+android.app.IntentService#onHandleIntent onHandleIntent()}.</li>
+</ul>
+
+<p>Tudo isso adiciona-se ao fato de que basta implementar {@link
+android.app.IntentService#onHandleIntent onHandleIntent()} para fazer o trabalho fornecido
+pelo cliente (embora também seja necessário fornecer um pequeno construtor para o serviço).</p>
+
+<p>A seguir há um exemplo de implementação de {@link android.app.IntentService}:</p>
+
+<pre>
+public class HelloIntentService extends IntentService {
+
+  /**
+   * A constructor is required, and must call the super {@link android.app.IntentService#IntentService}
+   * constructor with a name for the worker thread.
+   */
+  public HelloIntentService() {
+      super("HelloIntentService");
+  }
+
+  /**
+   * The IntentService calls this method from the default worker thread with
+   * the intent that started the service. When this method returns, IntentService
+   * stops the service, as appropriate.
+   */
+  &#64;Override
+  protected void onHandleIntent(Intent intent) {
+      // Normally we would do some work here, like download a file.
+      // For our sample, we just sleep for 5 seconds.
+      long endTime = System.currentTimeMillis() + 5*1000;
+      while (System.currentTimeMillis() &lt; endTime) {
+          synchronized (this) {
+              try {
+                  wait(endTime - System.currentTimeMillis());
+              } catch (Exception e) {
+              }
+          }
+      }
+  }
+}
+</pre>
+
+<p>É tudo que você precisa: um construtor e uma implementação de {@link
+android.app.IntentService#onHandleIntent onHandleIntent()}.</p>
+
+<p>Caso decida substituir outros métodos de retorno de chamada, como {@link
+android.app.IntentService#onCreate onCreate()}, {@link
+android.app.IntentService#onStartCommand onStartCommand()} ou {@link
+android.app.IntentService#onDestroy onDestroy()}, certifique-se de chamar a super-implementação
+para que o {@link android.app.IntentService} possa lidar adequadamente com a vida do encadeamento de trabalho.</p>
+
+<p>Por exemplo, {@link android.app.IntentService#onStartCommand onStartCommand()} deve retornar
+a implementação padrão (que é como a intenção é entregue para {@link
+android.app.IntentService#onHandleIntent onHandleIntent()}):</p>
+
+<pre>
+&#64;Override
+public int onStartCommand(Intent intent, int flags, int startId) {
+    Toast.makeText(this, "service starting", Toast.LENGTH_SHORT).show();
+    return super.onStartCommand(intent,flags,startId);
+}
+</pre>
+
+<p>Além de {@link android.app.IntentService#onHandleIntent onHandleIntent()}, o único método
+que não precisa ser usado para chamar a superclasse é {@link android.app.IntentService#onBind
+onBind()} (mas é necessário implementá-lo se o serviço permitir vinculações).</p>
+
+<p>Na próxima seção, você verá como o mesmo tipo de serviço é implementado ao estender
+a classe de base {@link android.app.Service}, que possui muito mais códigos, mas que pode
+ser apropriada para lidar com solicitações de inicialização simultâneas.</p>
+
+
+<h3 id="ExtendingService">Extensão da classe Service</h3>
+
+<p>Como você viu na seção anterior, o uso de {@link android.app.IntentService}
+torna a implementação de um serviço iniciado muito simples. Se, no entanto, você precisa do serviço
+para realizar vários encadeamentos (em vez de processar as solicitações de inicialização por meio de uma fila de trabalho),
+é possível estender a classe {@link android.app.Service} para lidar com cada intenção.</p>
+
+<p>Para efeito de comparação, o seguinte exemplo de código é uma implementação da classe {@link
+android.app.Service} que realiza exatamente o mesmo trabalho que o exemplo acima usando {@link
+android.app.IntentService}. Ou seja, para cada solicitação de inicialização, ela usa um encadeamento
+de trabalho para realizar o trabalho e processa apenas uma solicitação por vez.</p>
+
+<pre>
+public class HelloService extends Service {
+  private Looper mServiceLooper;
+  private ServiceHandler mServiceHandler;
+
+  // Handler that receives messages from the thread
+  private final class ServiceHandler extends Handler {
+      public ServiceHandler(Looper looper) {
+          super(looper);
+      }
+      &#64;Override
+      public void handleMessage(Message msg) {
+          // Normally we would do some work here, like download a file.
+          // For our sample, we just sleep for 5 seconds.
+          long endTime = System.currentTimeMillis() + 5*1000;
+          while (System.currentTimeMillis() &lt; endTime) {
+              synchronized (this) {
+                  try {
+                      wait(endTime - System.currentTimeMillis());
+                  } catch (Exception e) {
+                  }
+              }
+          }
+          // Stop the service using the startId, so that we don't stop
+          // the service in the middle of handling another job
+          stopSelf(msg.arg1);
+      }
+  }
+
+  &#64;Override
+  public void onCreate() {
+    // Start up the thread running the service.  Note that we create a
+    // separate thread because the service normally runs in the process's
+    // main thread, which we don't want to block.  We also make it
+    // background priority so CPU-intensive work will not disrupt our UI.
+    HandlerThread thread = new HandlerThread("ServiceStartArguments",
+            Process.THREAD_PRIORITY_BACKGROUND);
+    thread.start();
+
+    // Get the HandlerThread's Looper and use it for our Handler
+    mServiceLooper = thread.getLooper();
+    mServiceHandler = new ServiceHandler(mServiceLooper);
+  }
+
+  &#64;Override
+  public int onStartCommand(Intent intent, int flags, int startId) {
+      Toast.makeText(this, "service starting", Toast.LENGTH_SHORT).show();
+
+      // For each start request, send a message to start a job and deliver the
+      // start ID so we know which request we're stopping when we finish the job
+      Message msg = mServiceHandler.obtainMessage();
+      msg.arg1 = startId;
+      mServiceHandler.sendMessage(msg);
+
+      // If we get killed, after returning from here, restart
+      return START_STICKY;
+  }
+
+  &#64;Override
+  public IBinder onBind(Intent intent) {
+      // We don't provide binding, so return null
+      return null;
+  }
+
+  &#64;Override
+  public void onDestroy() {
+    Toast.makeText(this, "service done", Toast.LENGTH_SHORT).show();
+  }
+}
+</pre>
+
+<p>Como pode ver, é muito mais trabalhoso do que usar {@link android.app.IntentService}.</p>
+
+<p>No entanto, como você lida com cada chamada de {@link android.app.Service#onStartCommand
+onStartCommand()}, é possível realizar várias solicitações simultaneamente. Isso não é o que este exemplo faz,
+mas, se for o que quer, é possível criar um novo encadeamento
+para cada solicitação e executá-las na hora (em vez de esperar que a solicitação anterior seja concluída).</p>
+
+<p>Observe que o método {@link android.app.Service#onStartCommand onStartCommand()} deve retornar
+um número inteiro. O número inteiro é um valor que descreve como o sistema deve continuar o serviço
+no evento em que o sistema o eliminar (como discutido acima, a implementação padrão de {@link
+android.app.IntentService} lida com isto, apesar de ser possível modificá-lo). O valor de retorno
+de {@link android.app.Service#onStartCommand onStartCommand()} deve ser uma das seguintes
+constantes:</p>
+
+<dl>
+  <dt>{@link android.app.Service#START_NOT_STICKY}</dt>
+    <dd>Se o sistema eliminar o serviço após o retorno de {@link android.app.Service#onStartCommand
+onStartCommand()}, <em>não</em> recrie o serviço, a não ser que tenha
+intenções pendentes para entregar. Esta é a opção mais segura para evitar executar o serviço quando desnecessário
+e quando o aplicativo puder simplesmente reiniciar qualquer trabalho incompleto.</dd>
+  <dt>{@link android.app.Service#START_STICKY}</dt>
+    <dd>Se o sistema eliminar o serviço após o retorno de {@link android.app.Service#onStartCommand
+onStartCommand()}, recrie o serviço e chame {@link
+android.app.Service#onStartCommand onStartCommand()}, mas <em>não</em> entregue novamente a última intenção.
+Em vez disso, o sistema chama {@link android.app.Service#onStartCommand onStartCommand()} com intenção nula,
+a não ser que tenha intenções pendentes para iniciar o serviço e,
+nesse caso, essas intenções são entregues. Isto é adequado para reprodutores de mídia (ou serviços semelhantes)
+que não estejam executando comandos, mas estejam em execução indefinidamente e aguardando um trabalho.</dd>
+  <dt>{@link android.app.Service#START_REDELIVER_INTENT}</dt>
+    <dd>Se o sistema eliminar o serviço após o retorno de {@link android.app.Service#onStartCommand
+onStartCommand()}, recrie o serviço e chame {@link
+android.app.Service#onStartCommand onStartCommand()} com a última intenção que foi entregue
+ao serviço. Quaisquer intenções pendentes são entregues, por sua vez. Isto é adequado para serviços que estejam realizando
+um trabalho ativamente que deva ser retomado imediatamente, como o download de um arquivo.</dd>
+</dl>
+<p>Para obter mais informações sobre esses valores de retorno, veja a documentação de referência vinculada
+a cada constante.</p>
+
+
+
+<h3 id="StartingAService">Início de um serviço</h3>
+
+<p>É possível iniciar um dispositivo de uma atividade ou outro componente do aplicativo passando uma 
+{@link android.content.Intent} a {@link
+android.content.Context#startService startService()}. O sistema Android chama o método {@link
+android.app.Service#onStartCommand onStartCommand()} do serviço e passa a ele a {@link
+android.content.Intent} (nunca deve-se chamar {@link android.app.Service#onStartCommand
+onStartCommand()} diretamente).</p>
+
+<p>Por exemplo, uma atividade pode iniciar o serviço de exemplo na seção anterior ({@code
+HelloSevice}) usando uma intenção explícita com {@link android.content.Context#startService
+startService()}:</p>
+
+<pre>
+Intent intent = new Intent(this, HelloService.class);
+startService(intent);
+</pre>
+
+<p>O método {@link android.content.Context#startService startService()} retorna imediatamente
+e o sistema Android chama o método {@link android.app.Service#onStartCommand
+onStartCommand()} do serviço. Se o serviço não estiver em execução, o sistemo primeiro chama {@link
+android.app.Service#onCreate onCreate()} e, em seguida, chama {@link android.app.Service#onStartCommand
+onStartCommand()}.</p>
+
+<p>Se o serviço não fornecer vinculação, a intenção entregue com {@link
+android.content.Context#startService startService()} é o único modo de comunicação entre
+o componente do aplicativo e o serviço. No entanto, se quiser que o serviço envie um resultado de volta,
+o cliente que iniciar o serviço poderá criar um {@link android.app.PendingIntent} para uma transmissão
+(com {@link android.app.PendingIntent#getBroadcast getBroadcast()}) e entregá-la ao serviço
+na {@link android.content.Intent} que iniciar o serviço. O serviço pode então
+usar a transmissão para entregar um resultado.</p>
+
+<p>Várias solicitações para iniciar o serviço resultam em diversas chamadas correspondentes
+ao {@link android.app.Service#onStartCommand onStartCommand()} do serviço. No entanto, somente uma solicitação para interromper
+o serviço (com {@link android.app.Service#stopSelf stopSelf()} ou {@link
+android.content.Context#stopService stopService()}) é necessária para interrompê-lo.</p>
+
+
+<h3 id="Stopping">Interrupção de um serviço</h3>
+
+<p>Um serviço iniciado deve gerenciar seu próprio ciclo de vida. Ou seja, o sistema não interrompe
+ou elimina o serviço, a não ser que tenha que recuperar a memória do sistema e o serviço
+continuar em execução depois que {@link android.app.Service#onStartCommand onStartCommand()} retornar. Portanto,
+o serviço deve ser interrompido chamando {@link android.app.Service#stopSelf stopSelf()} ou outro
+componente pode interrompê-lo chamando {@link android.content.Context#stopService stopService()}.</p>
+
+<p>Ao solicitar o interrompimento com {@link android.app.Service#stopSelf stopSelf()} ou {@link
+android.content.Context#stopService stopService()}, o sistema elimina o serviço
+assim que possível.</p>
+
+<p>No entanto, se o serviço lida com várias solicitações para {@link
+android.app.Service#onStartCommand onStartCommand()} ao mesmo tempo, não se deve interromper
+o serviço ao terminar o processamento de uma solicitação de inicialização, pois é possível
+que uma nova solicitação de inicialização tenha ocorrido (interromper no final da primeira solicitação eliminaria a segunda). Para evitar este problema,
+é possível usar {@link android.app.Service#stopSelf(int)} para garantir que a solicitação
+que interrompe o serviço sempre se baseie na solicitação de inicialização mais recente. Ou seja, ao chamar {@link
+android.app.Service#stopSelf(int)}, você passa o ID da solicitação de inicialização (o <code>startId</code>
+entregue a {@link android.app.Service#onStartCommand onStartCommand()}) para aquele que solicitação de interrompimento
+corresponde. Em seguida, se o serviço receber uma nova solicitação de inicialização antes de ser possível chamar {@link
+android.app.Service#stopSelf(int)}, o ID não corresponderá e o serviço não será interrompido.</p>
+
+<p class="caution"><strong>Atenção:</strong> é importante que um aplicativo interrompa seus serviços
+quando terminar os trabalhos para evitar o desperdício dos recursos do sistema e consumo da bateria. Se necessário,
+outros componentes podem interromper o serviço chamando {@link
+android.content.Context#stopService stopService()}. Mesmo se for possível vincular-se ao serviço,
+deve-se sempre interrompê-lo por conta própria se ele tiver recebido uma chamada de {@link
+android.app.Service#onStartCommand onStartCommand()}.</p>
+
+<p>Para obter mais informações sobre o ciclo de vida de um serviço, consulte a seção <a href="#Lifecycle">Gerenciamento do ciclo de vida de um serviço</a> abaixo.</p>
+
+
+
+<h2 id="CreatingBoundService">Criação de um serviço vinculado</h2>
+
+<p>Um serviço vinculado permite que componentes de aplicativo sejam vinculados chamando {@link
+android.content.Context#bindService bindService()} para criar uma conexão de longo prazo
+(e, geralmente, não permite que os componentes o <em>iniciem</em> chamando {@link
+android.content.Context#startService startService()}).</p>
+
+<p>Deve-se criar um serviço vinculado quando se deseja interagir com o serviço a partir de atividades
+e outros componentes no aplicativo ou para expor algumas das funcionalidades do aplicativo
+para outros aplicativos, por meio de comunicação entre processos (IPC).</p>
+
+<p>Para criar um serviço vinculado, você deve implementar o método de retorno de chamada {@link
+android.app.Service#onBind onBind()} para retornar um {@link android.os.IBinder}
+que define a interface para a comunicação com o serviço. Outros componentes de aplicativo podem chamar
+{@link android.content.Context#bindService bindService()} para recuperar a interface
+e começar a chamar métodos no serviço. O serviço vive somente para servir o componente do aplicativo
+ao qual ele está vinculado. Portanto, quando não houver componentes vinculados ao serviço, o sistema o eliminará
+(<em>não</em> é necessário interromper um serviço vinculado da mesma maneira que quando o serviço é iniciado
+por meio de {@link android.app.Service#onStartCommand onStartCommand()}).</p>
+
+<p>Para criar um serviço vinculado, a primeira coisa a se fazer é definir a interface que especifica
+como um cliente pode comunicar-se com o servidor. Esta interface entre o serviço
+e um cliente deve ser uma implementação de {@link android.os.IBinder} e é o que o serviço deve retornar
+a partir do método de retorno de chamada {@link android.app.Service#onBind
+onBind()}. Quando o cliente receber {@link android.os.IBinder}, ele poderá começar
+a interagir com o serviço por meio da interface.</p>
+
+<p>Vários clientes podem vincular-se ao serviço por vez. Quando um cliente terminar de interagir com o serviço,
+ ele chamará {@link android.content.Context#unbindService unbindService()} para desvincular-se. Quando não houver
+clientes vinculados ao serviço, o sistema o eliminará.</p>
+
+<p>Há várias maneiras de implementar um serviço vinculado e a implementação é mais complicada
+que um serviço iniciado. Logo, a discussão sobre serviços vinculados aparece em um documento separado
+sobre <a href="{@docRoot}guide/components/bound-services.html">Serviços vinculados</a>.</p>
+
+
+
+<h2 id="Notifications">Enviar notificações ao usuário</h2>
+
+<p>Quando em execução, um serviço pode notificar o usuário sobre eventos usando <a href="{@docRoot}guide/topics/ui/notifiers/toasts.html">Notificações de aviso</a> ou <a href="{@docRoot}guide/topics/ui/notifiers/notifications.html">Notificações da barra de status</a>.</p>
+
+<p>Uma notificação de aviso é uma mensagem que aparece na superfície da janela atual
+por um breve momento antes de desaparecer, enquanto que uma notificação da barra de status fornece um ícone na barra de status
+com uma mensagem que o usuário pode selecionar para realizar uma ação (como iniciar uma atividade).</p>
+
+<p>Geralmente, uma notificação da barra de status é a melhor técnica quando um trabalho de segundo plano é concluído
+(como download
+de arquivo completo) e o usuário pode agir a partir dele. Quando o usuário seleciona a notificação a partir
+da vista expandida, ela pode iniciar uma atividade (como a vista do arquivo baixado).</p>
+
+<p>Consulte os guias de desenvolvedor <a href="{@docRoot}guide/topics/ui/notifiers/toasts.html">Notificações de aviso</a> ou <a href="{@docRoot}guide/topics/ui/notifiers/notifications.html">Notificações da barra de status</a>
+para obter mais informações.</p>
+
+
+
+<h2 id="Foreground">Execução de serviço em primeiro plano</h2>
+
+<p>Um serviço de primeiro plano é aquele
+com que o usuário está ativamente interagindo e não é uma opção para o sistema eliminá-lo quando a memória estiver baixa. Um serviço de primeiro plano
+deve fornecer uma notificação para a barra de status, que é colocada sob
+"o cabeçalho "Em andamento", o que significa que a notificação não pode ser dispensada a não ser que o serviço
+seja interrompido ou removido do primeiro plano.</p>
+
+<p>Por exemplo, um reprodutor de música que reproduz a partir de um serviço deve ser configurado
+para permanecer em execução em primeiro plano, pois o usuário está
+prestando atenção em sua operação explicitamente. A notificação na barra de status pode indicar a música atual
+e permitir que o usuário inicie uma atividade para interagir com o reprodutor de música.</p>
+
+<p>Para solicitar que o serviço seja executado em primeiro plano, chame {@link
+android.app.Service#startForeground startForeground()}. Este método usa dois parâmetros: um número inteiro
+que identifica unicamente a notificação e {@link
+android.app.Notification} para a barra de status. Por exemplo:</p>
+
+<pre>
+Notification notification = new Notification(R.drawable.icon, getText(R.string.ticker_text),
+        System.currentTimeMillis());
+Intent notificationIntent = new Intent(this, ExampleActivity.class);
+PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, notificationIntent, 0);
+notification.setLatestEventInfo(this, getText(R.string.notification_title),
+        getText(R.string.notification_message), pendingIntent);
+startForeground(ONGOING_NOTIFICATION_ID, notification);
+</pre>
+
+<p class="caution"><strong>Atenção:</strong> O ID do número inteiro fornecido para {@link
+android.app.Service#startForeground startForeground()} não deve ser zero.</p>
+
+
+<p>Para remover o serviço do primeiro plano, chame {@link
+android.app.Service#stopForeground stopForeground()}. Este método usa um booleano,
+indicando se deve remover também a notificação da barra de status. Este método <em>não</em> interrompe
+o serviço. No entanto, se você interromper o serviço enquanto estiver em execução em primeiro plano,
+a notificação também será removida.</p>
+
+<p>Para obter mais informações sobre notificações, consulte <a href="{@docRoot}guide/topics/ui/notifiers/notifications.html">Criação de notificações
+da barra de status</a>.</p>
+
+
+
+<h2 id="Lifecycle">Gerenciamento do ciclo de vida de um serviço</h2>
+
+<p>O ciclo de vida de um serviço é muito mais simples do que o de uma atividade. No entanto, é ainda mais importante
+que você preste muita atenção em como o serviço é criado e eliminado, pois ele
+pode ser executado em primeiro plano sem que o usuário esteja ciente.</p>
+
+<p>O ciclo de vida do serviço &mdash; desde quando é criado até ser eliminado &mdash; pode seguir
+dois caminhos:</p>
+
+<ul>
+<li>Um serviço iniciado
+  <p>O serviço é criado quando outro componente chama {@link
+android.content.Context#startService startService()}. Depois, o serviço permanece em execução indefinidamente e deve
+interromper-se chamando {@link
+android.app.Service#stopSelf() stopSelf()}. Outro componente também pode interromper
+o serviço chamando {@link
+android.content.Context#stopService stopService()}. Quando o serviço é interrompido, o sistema o elimina.</p></li>
+
+<li>Um serviço vinculado
+  <p>O serviço é criado quando outro componente (um cliente) chama {@link
+android.content.Context#bindService bindService()}. O cliente comunica-se com o serviço
+pela interface {@link android.os.IBinder}. O cliente pode escolher encerrar a conexão chamando
+{@link android.content.Context#unbindService unbindService()}. Vários clientes podem ser vinculados
+ao mesmo serviço e, quando todos os vínculos terminam, o sistema destrói o serviço (o serviço
+<em>não</em> precisa ser interrompido).</p></li>
+</ul>
+
+<p>Esses dois caminhos não são inteiramente separados. Ou seja, é possível vincular um serviço
+que já foi iniciado com {@link android.content.Context#startService startService()}. Por exemplo, um serviço de música
+de segundo plano pode ser iniciado chamando {@link android.content.Context#startService
+startService()} com uma {@link android.content.Intent} que identifica a música reproduzida. Depois,
+possivelmente quando o usuário quiser exercer mais controle sobre o reprodutor ou obter informações
+sobre a música em reprodução, uma atividade pode ser vinculada ao serviço chamando {@link
+android.content.Context#bindService bindService()}. Em casos como esse, {@link
+android.content.Context#stopService stopService()} ou {@link android.app.Service#stopSelf
+stopSelf()} não interrompe o serviço até que todos os clientes sejam desvinculados. </p>
+
+
+<h3 id="LifecycleCallbacks">Implementação de retornos de chamada do ciclo de vida</h3>
+
+<p>Como uma atividade, um serviço tem um método de ciclo de vida que é possível implementar
+para monitorar as alterações no estado do serviço e realizar trabalhos em momentos adequados. O seguinte serviço de esqueleto
+demonstra cada um dos métodos de ciclo de vida:</p>
+
+<pre>
+public class ExampleService extends Service {
+    int mStartMode;       // indicates how to behave if the service is killed
+    IBinder mBinder;      // interface for clients that bind
+    boolean mAllowRebind; // indicates whether onRebind should be used
+
+    &#64;Override
+    public void {@link android.app.Service#onCreate onCreate}() {
+        // The service is being created
+    }
+    &#64;Override
+    public int {@link android.app.Service#onStartCommand onStartCommand}(Intent intent, int flags, int startId) {
+        // The service is starting, due to a call to {@link android.content.Context#startService startService()}
+        return <em>mStartMode</em>;
+    }
+    &#64;Override
+    public IBinder {@link android.app.Service#onBind onBind}(Intent intent) {
+        // A client is binding to the service with {@link android.content.Context#bindService bindService()}
+        return <em>mBinder</em>;
+    }
+    &#64;Override
+    public boolean {@link android.app.Service#onUnbind onUnbind}(Intent intent) {
+        // All clients have unbound with {@link android.content.Context#unbindService unbindService()}
+        return <em>mAllowRebind</em>;
+    }
+    &#64;Override
+    public void {@link android.app.Service#onRebind onRebind}(Intent intent) {
+        // A client is binding to the service with {@link android.content.Context#bindService bindService()},
+        // after onUnbind() has already been called
+    }
+    &#64;Override
+    public void {@link android.app.Service#onDestroy onDestroy}() {
+        // The service is no longer used and is being destroyed
+    }
+}
+</pre>
+
+<p class="note"><strong>Observação:</strong> diferentemente dos métodos de retorno de chamada do ciclo de vida da atividade,
+você <em>não</em> precisa chamar a implementação da superclasse.</p>
+
+<img src="{@docRoot}images/service_lifecycle.png" alt="" />
+<p class="img-caption"><strong>Figura 2.</strong> Ciclo de vida do serviço. O diagrama à esquerda
+mostra o ciclo de vida quando o serviço é criado com {@link android.content.Context#startService
+startService()} e o diagrama à direita mostra o ciclo de vida quando o serviço
+é criado com {@link android.content.Context#bindService bindService()}.</p>
+
+<p>Ao implementar esses métodos, é possível monitorar dois retornos (loops) aninhados no ciclo de vida do serviço: </p>
+
+<ul>
+<li><strong>Todo o ciclo de vida</strong> de um serviço acontece entre o momento em que {@link
+android.app.Service#onCreate onCreate()} é chamado e em que {@link
+android.app.Service#onDestroy} retorna. Como uma atividade, um serviço faz a sua configuração inicial
+em {@link android.app.Service#onCreate onCreate()} e libera todos os recursos restantes em {@link
+android.app.Service#onDestroy onDestroy()}.  Por exemplo,
+um serviço de reprodução de música pode criar um encadeamento onde a música será reproduzida em {@link
+android.app.Service#onCreate onCreate()}, e interromperá o encadeamento em {@link
+android.app.Service#onDestroy onDestroy()}.
+
+<p>Os métodos {@link android.app.Service#onCreate onCreate()} e {@link android.app.Service#onDestroy
+onDestroy()} são chamados para todos os serviços,
+se tiverem sido criados por {@link android.content.Context#startService startService()} ou {@link
+android.content.Context#bindService bindService()}.</p></li>
+
+<li>O <strong>ciclo de vida ativo</strong> de um serviço começa com uma chamada de {@link
+android.app.Service#onStartCommand onStartCommand()} ou {@link android.app.Service#onBind onBind()}.
+Cada método entrega a {@link
+android.content.Intent} que foi passada para {@link android.content.Context#startService
+startService()} ou {@link android.content.Context#bindService bindService()}, respectivamente.
+<p>Se o serviço for iniciado, o ciclo de vida ativo terminará no mesmo momento
+em que o ciclo de vida inteiro terminar (o serviço permanece ativo mesmo após o retorno de {@link android.app.Service#onStartCommand
+onStartCommand()}). Se o serviço estiver vinculado, o ciclo de ida ativo acabará quando {@link
+android.app.Service#onUnbind onUnbind()} retornar.</p>
+</li>
+</ul>
+
+<p class="note"><strong>Observação:</strong> apesar de um serviço iniciado ser interrompido com uma chamada
+de {@link android.app.Service#stopSelf stopSelf()} ou {@link
+android.content.Context#stopService stopService()}, não há um retorno de chamada respectivo
+para o serviço (não há retorno de chamada de {@code onStop()}). Portanto, a não ser que o serviço esteja vinculado a um cliente,
+o sistema o eliminará quando for interrompido &mdash; {@link
+android.app.Service#onDestroy onDestroy()} será o único retorno de chamada recebido.</p>
+
+<p>A figura 2 ilustra os métodos de retorno de chamada tradicionais para um serviço. Apesar de a figura separar
+os serviços que são criados por {@link android.content.Context#startService startService()}
+daqueles que são criados por {@link android.content.Context#bindService bindService()},
+observe que qualquer serviço, não importa como foi iniciado, pode permitir a vinculação de clientes.
+Portanto, um serviço que já foi iniciado com {@link android.app.Service#onStartCommand
+onStartCommand()} (por um cliente chamando  {@link android.content.Context#startService startService()})
+ainda pode receber uma chamada de {@link android.app.Service#onBind onBind()} (quando um cliente chama
+{@link android.content.Context#bindService bindService()}).</p>
+
+<p>Para obter mais informações sobre como criar um serviço que forneça vinculação, consulte o documento <a href="{@docRoot}guide/components/bound-services.html">Serviços vinculados</a>,
+que aborda mais profundamente o método de retorno de chamada {@link android.app.Service#onRebind onRebind()}
+na seção sobre <a href="{@docRoot}guide/components/bound-services.html#Lifecycle">Gerenciamento do ciclo de vida
+de um serviço vinculado</a>.</p>
+
+
+<!--
+<h2>Beginner's Path</h2>
+
+<p>To learn how to query data from the system or other applications (such as contacts or media
+stored on the device), continue with the <b><a
+href="{@docRoot}guide/topics/providers/content-providers.html">Content Providers</a></b>
+document.</p>
+-->

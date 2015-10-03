@@ -1,0 +1,71 @@
+page.title=Обзор пользовательского интерфейса
+@jd:body
+
+
+<p>Все элементы интерфейса пользователя в приложении Android создаются с помощью объектов {@link android.view.View} и
+{@link android.view.ViewGroup}. Объект {@link android.view.View} формирует
+на экране элемент, с которым пользователь может взаимодействовать. Объект {@link android.view.ViewGroup} содержит
+другие объекты {@link android.view.View} (и {@link android.view.ViewGroup}) для
+определения макета интерфейса.</p>
+
+<p>Android предоставляет коллекцию подклассов {@link android.view.View} и {@link
+android.view.ViewGroup}, которая включает в себя обычные элементы ввода (такие как кнопки и текстовые
+поля) и различные модели макет (такие как линейный или относительный макет).</p>
+
+
+<h2 id="Layout">Макеты пользовательского интерфейса</h2>
+
+<p>Пользовательский интерфейс для каждого компонента вашего приложения определяется с помощью иерархии объектов {@link
+android.view.View} и {@link android.view.ViewGroup}, как показано на рисунке 1. Каждая группа просмотра
+представляет собой невидимый контейнер, в котором объединены дочерние виды, причем дочерние виды могут представлять собой элементы
+ввода или другие виджеты, которые
+составляют часть пользовательского интерфейса. Эта древовидная иерархия может быть настолько простой или сложной, насколько
+требуется (чем проще, тем лучше для производительности).</p>
+
+<img src="{@docRoot}images/viewgroup.png" alt="" />
+<p class="img-caption"><strong>Рисунок 1</strong>. Иллюстрация иерархии, которая определяет
+макет интерфейса.</p>
+
+<p>Чтобы объявить свой макет, можно создать экземпляры объектов {@link android.view.View} в коде и запустить построение
+дерева, но самый простой и наиболее эффективный способ — определение макета с помощью файла XML.
+XML позволяет создавать удобочитаемую структуру макета, подобно HTML.</p>
+
+<p>Имя элемента XML для вида соответствует классу Android, к которому от относится. Так, элемент
+<code>&lt;TextView&gt;</code> создает виджет {@link android.widget.TextView} в пользовательском интерфейсе,
+а элемент <code>&lt;LinearLayout&gt;</code> создает группу просмотра {@link android.widget.LinearLayout}
+. </p>
+
+<p>Например, простой вертикальный макет с текстом и кнопкой выглядит следующим образом:</p>
+<pre>
+&lt;?xml version="1.0" encoding="utf-8"?>
+&lt;LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:layout_width="fill_parent" 
+              android:layout_height="fill_parent"
+              android:orientation="vertical" >
+    &lt;TextView android:id="@+id/text"
+              android:layout_width="wrap_content"
+              android:layout_height="wrap_content"
+              android:text="I am a TextView" />
+    &lt;Button android:id="@+id/button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="I am a Button" />
+&lt;/LinearLayout>
+</pre>
+
+<p>При загрузке ресурсов макетов в приложение Android инициализирует каждый узел макета в
+объект режима выполнения, который можно использовать для определения дополнительного поведения, запроса состояния объекта или изменения
+макета.</p>
+
+<p>Полное руководство по созданию макета пользовательского интерфейса см. в документе <a href="declaring-layout.html">Макеты
+XML</a>.
+
+  
+<h2 id="UIComponents">Компоненты пользовательского интерфейса</h2>
+
+<p>Не обязательно создавать все элементы пользовательского интерфейса с помощью объектов {@link android.view.View} и {@link
+android.view.ViewGroup}. Android предоставляет несколько компонентов приложений, которые содержат
+стандартный макет пользовательского интерфейса, где остается лишь определить содержимое. Каждый из этих компонентов пользовательского интерфейса
+содержит уникальный набор API, который описан в соответствующих документах, таких как <a href="{@docRoot}guide/topics/ui/actionbar.html">Строка действий</a>, <a href="{@docRoot}guide/topics/ui/dialogs.html">Диалоги</a> и <a href="{@docRoot}guide/topics/ui/notifiers/notifications.html">Уведомления о состоянии</a>.</p>
+
+

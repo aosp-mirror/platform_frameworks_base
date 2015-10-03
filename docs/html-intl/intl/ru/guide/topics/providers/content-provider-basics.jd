@@ -1,0 +1,1196 @@
+page.title=Основные сведения о поставщике контента
+@jd:body
+<div id="qv-wrapper">
+<div id="qv">
+<!-- In this document -->
+<h2>Содержание документа</h2>
+<ol>
+    <li>
+        <a href="#Basics">Обзор</a>
+        <ol>
+            <li>
+                <a href="#ClientProvider">Доступ к поставщику</a>
+            </li>
+            <li>
+                <a href="#ContentURIs">URI контента</a>
+            </li>
+        </ol>
+    </li>
+    <li>
+        <a href="#SimpleQuery">Получение данных от поставщика</a>
+        <ol>
+            <li>
+                <a href="#RequestPermissions">Запрос разрешения на чтение</a>
+            </li>
+            <li>
+                <a href="#Query">Создание запроса</a>
+            </li>
+            <li>
+                <a href="#DisplayResults">Отображение результатов запроса</a>
+            </li>
+            <li>
+                <a href="#GettingResults">Получение данных из результатов запроса</a>
+            </li>
+        </ol>
+    </li>
+    <li>
+        <a href="#Permissions">Разрешения поставщика контента</a>
+    </li>
+    <li>
+        <a href="#Modifications">Вставка, обновление и удаление данных</a>
+        <ol>
+            <li>
+                <a href="#Inserting">Вставка данных</a>
+            </li>
+            <li>
+                <a href="#Updating">Обновление данных</a>
+            </li>
+            <li>
+                <a href="#Deleting">Удаление данных</a>
+            </li>
+        </ol>
+    </li>
+    <li>
+        <a href="#DataTypes">Типы поставщиков данных</a>
+    </li>
+    <li>
+        <a href="#AltForms">Альтернативные формы доступа к поставщику</a>
+        <ol>
+            <li>
+                <a href="#Batch">Пакетный доступ</a>
+            </li>
+            <li>
+                <a href="#Intents">Доступ к данным с помощью намерений</a>
+            </li>
+        </ol>
+    </li>
+    <li>
+        <a href="#ContractClasses">Классы-контракты</a>
+    </li>
+    <li>
+        <a href="#MIMETypeReference">Справка по типам MIME</a>
+    </li>
+</ol>
+
+    <!-- Key Classes -->
+<h2>Ключевые классы</h2>
+    <ol>
+        <li>
+            {@link android.content.ContentProvider}
+        </li>
+        <li>
+            {@link android.content.ContentResolver}
+        </li>
+        <li>
+            {@link android.database.Cursor}
+        </li>
+        <li>
+            {@link android.net.Uri}
+        </li>
+    </ol>
+
+    <!-- Related Samples -->
+<h2>Связанные примеры</h2>
+    <ol>
+        <li>
+        <a href="{@docRoot}resources/samples/ApiDemos/src/com/example/android/apis/view/List2.html">
+        Cursor (People)</a>
+        </li>
+        <li>
+        <a href="{@docRoot}resources/samples/ApiDemos/src/com/example/android/apis/view/List7.html">
+        Cursor (Phones)</a>
+        </li>
+    </ol>
+
+    <!-- See also -->
+<h2>См. также</h2>
+    <ol>
+        <li>
+            <a href="{@docRoot}guide/topics/providers/content-provider-creating.html">
+Создание поставщика контента</a>
+        </li>
+        <li>
+            <a href="{@docRoot}guide/topics/providers/calendar-provider.html">
+Поставщик календаря</a>
+        </li>
+    </ol>
+</div>
+</div>
+
+    <!-- Intro paragraphs -->
+<p>
+    Поставщик контента управляет доступом к центральному репозиторию данных. Поставщик
+является компонентом приложения Android, который зачастую имеет собственный пользовательский интерфейс для
+работы с данными. Однако поставщики контента предназначены в первую очередь для использования другими приложениями,
+которые получают доступ к поставщику посредством клиентского объекта поставщика. Вместе поставщики
+и клиенты поставщиков обеспечивают согласованный, стандартный интерфейс к данным, который также обрабатывает
+взаимодействие между процессами и обеспечивает защищенный доступ к данным.
+</p>
+<p>
+    В этой статье рассматриваются основные сведения, касающиеся следующих тем:
+</p>
+    <ul>
+        <li>принцип работы поставщика контента;</li>
+        <li>API, используемый для получения данных от поставщика контента;</li>
+        <li>API, используемый для вставки данных в поставщик контента и их обновления или удаления в нем;</li>
+        <li>другие функции API, которые упрощают работу с поставщиками.</li>
+    </ul>
+
+    <!-- Basics -->
+<h2 id="Basics">Обзор</h2>
+<p>
+    Поставщик контента предоставляет данные внешним приложениям в виде одной или нескольких таблиц,
+аналогичных таблицам в реляционной базе данных. Строка представляет собой экземпляр некоторого типа
+собираемых поставщиком данных, а каждый столбец в этой строке — это отдельный элемент данных,
+собранных для экземпляра.
+</p>
+<p>
+    Примером встроенного поставщика в платформе Android может служить пользовательский словарь,
+в котором хранятся данные о написании нестандартных слов, добавленных пользователем. В таблице 1 показано,
+как данные могут выглядеть в этой таблице поставщика.
+</p>
+<p class="table-caption">
+    <strong>Таблица 1.</strong> Пример таблицы пользовательского словаря.
+</p>
+<table id="table1" style="width: 50%;">
+    <tr>
+        <th style="width:20%" align="center" scope="col">word</th>
+        <th style="width:20%" align="center" scope="col">app id</th>
+        <th style="width:20%" align="center" scope="col">frequency</th>
+        <th style="width:20%" align="center" scope="col">locale</th>
+        <th style="width:20%" align="center" scope="col">_ID</th>
+    </tr>
+    <tr>
+        <td align="center" scope="row">mapreduce</td>
+        <td align="center">user1</td>
+        <td align="center">100</td>
+        <td align="center">en_US</td>
+        <td align="center">1</td>
+    </tr>
+    <tr>
+        <td align="center" scope="row">precompiler</td>
+        <td align="center">user14</td>
+        <td align="center">200</td>
+        <td align="center">fr_FR</td>
+        <td align="center">2</td>
+    </tr>
+    <tr>
+        <td align="center" scope="row">applet</td>
+        <td align="center">user2</td>
+        <td align="center">225</td>
+        <td align="center">fr_CA</td>
+        <td align="center">3</td>
+    </tr>
+    <tr>
+        <td align="center" scope="row">const</td>
+        <td align="center">user1</td>
+        <td align="center">255</td>
+        <td align="center">pt_BR</td>
+        <td align="center">4</td>
+    </tr>
+    <tr>
+        <td align="center" scope="row">int</td>
+        <td align="center">user5</td>
+        <td align="center">100</td>
+        <td align="center">en_UK</td>
+        <td align="center">5</td>
+    </tr>
+</table>
+<p>
+    В каждой строке таблицы 1 представлен экземпляр слова, которое отсутствует
+в стандартном словаре. В каждом ее столбце содержатся некоторые данные для слова,
+например, данные о языке, на котором это слово было впервые использовано. Заголовки столбцов представляют собой имена столбцов, которые хранятся
+в поставщике. Чтобы узнать язык строки, необходимо обратиться к столбцу <code>locale</code>. В этом
+поставщике столбец <code>_ID</code> выступает в роли «основного ключа»,
+который поставщик автоматически сохраняет.
+</p>
+<p class="note">
+    <strong>Примечание.</strong> В поставщике необязательно должен быть основной ключ, а также ему необязательно
+использовать<code>_ID</code> в качестве имени столбца основного ключа, если таковой имеется. Однако, если
+необходимо привязать данные из поставщика к классу {@link android.widget.ListView},
+один из столбцов должен именоваться <code>_ID</code>. Дополнительные сведения об этом требовании представлены в разделе
+<a href="#DisplayResults">Отображение результатов запроса</a>.
+</p>
+<h3 id="ClientProvider">Доступ к поставщику</h3>
+<p>
+    Для доступа приложения к данным из поставщика контента
+используется клиентский объект {@link android.content.ContentResolver}. В этом объекте имеются методы, которые вызывают
+идентичные методы в объекте поставщика, который представляет собой экземпляр одного из конкретных
+подклассов класса {@link android.content.ContentProvider}. В этих методах
+{@link android.content.ContentResolver} представлены основные функции
+ CRUD (аббревиатура create, retrieve, update, delete [создание, получение, обновление и удаление]) постоянного хранилища.
+</p>
+<p>
+    Объект {@link android.content.ContentResolver} в процессе клиентского приложения
+и объект {@link android.content.ContentProvider} в приложении,
+которое владеет поставщиком, автоматически обрабатывают взаимодействие между процессами.
+Объект {@link android.content.ContentProvider} также выступает в роли уровня абстракции между
+репозиторием данных и внешним представлением данных в виде таблиц.
+</p>
+<p class="note">
+    <strong>Примечание.</strong> Для доступа к поставщику ваше приложение обычно должно запросить определенные разрешения
+в своем файле манифеста. Дополнительные сведения об этом представлены в разделе
+<a href="#Permissions">Разрешения поставщика контента</a>.
+</p>
+<p>
+    Например, чтобы получить из поставщика пользовательского словаря список слов и языков, на которых они представлены,
+вызовите метод {@link android.content.ContentResolver#query ContentResolver.query()}.
+    В свою очередь, метод {@link android.content.ContentResolver#query query()} вызывает метод
+{@link android.content.ContentProvider#query ContentProvider.query()}, определенный поставщиком
+пользовательского словаря. В примере кода ниже показан вызов метода
+{@link android.content.ContentResolver#query ContentResolver.query()}.
+<p>
+<pre>
+// Queries the user dictionary and returns results
+mCursor = getContentResolver().query(
+    UserDictionary.Words.CONTENT_URI,   // The content URI of the words table
+    mProjection,                        // The columns to return for each row
+    mSelectionClause                    // Selection criteria
+    mSelectionArgs,                     // Selection criteria
+    mSortOrder);                        // The sort order for the returned rows
+</pre>
+<p>
+    В таблице 2 указано соответствие аргументов для метода
+{@link android.content.ContentResolver#query 
+query(Uri,projection,selection,selectionArgs,sortOrder)} SQL-инструкции SELECT.
+</p>
+<p class="table-caption">
+    <strong>Таблица 2.</strong> Сравнение метода query() и SQL-запроса.
+</p>
+<table id="table2" style="width: 75%;">
+    <tr>
+        <th style="width:25%" align="center" scope="col">Аргумент метода query()</th>
+        <th style="width:25%" align="center" scope="col">Параметр/ключевое слово SELECT</th>
+        <th style="width:50%" align="center" scope="col">Примечания</th>
+    </tr>
+    <tr>
+        <td align="center"><code>Uri</code></td>
+        <td align="center"><code>FROM <em>table_name</em></code></td>
+        <td><code>Uri</code> соответствует таблице <em>table_name</em> в поставщике.</td>
+    </tr>
+    <tr>
+        <td align="center"><code>projection</code></td>
+        <td align="center"><code><em>col,col,col,...</em></code></td>
+        <td>
+            <code>projection</code> представляет собой массив столбцов, которые следует включить
+в каждую полученную строку.
+        </td>
+    </tr>
+    <tr>
+        <td align="center"><code>selection</code></td>
+        <td align="center"><code>WHERE <em>col</em> = <em>value</em></code></td>
+        <td><code>selection</code> задает критерии для выбора строк.</td>
+    </tr>
+    <tr>
+        <td align="center"><code>selectionArgs</code></td>
+        <td align="center">
+            (Точный эквивалент отсутствует. В предложении выбора заполнители <code>?</code>
+заменяются аргументами выбора).
+        </td>
+    </tr>
+    <tr>
+        <td align="center"><code>sortOrder</code></td>
+        <td align="center"><code>ORDER BY <em>col,col,...</em></code></td>
+        <td>
+            <code>sortOrder</code> задает порядок отображения строк в возвращаемом объекте
+{@link android.database.Cursor}.
+        </td>
+    </tr>
+</table>
+<h3 id="ContentURIs">URI контента</h3>
+<p>
+    <strong>URI контента</strong> представляет собой URI, который определяет данные в поставщике. URI контента
+могут включать символическое имя всего поставщика (его <strong>центр</strong>) и
+имя, которое указывает на таблицу (<strong>путь</strong>). При вызове
+клиентского метода для доступа к таблице в поставщике URI контента этой таблицы выступает в роли одного
+из аргументов этого метода.
+</p>
+<p>
+    Константа
+{@link android.provider.UserDictionary.Words#CONTENT_URI} в предыдущих строках кода содержит URI контента
+таблицы words в пользовательском словаре. Объект{@link android.content.ContentResolver}
+анализирует центр URI и использует его для «разрешения» поставщика
+путем сравнения центра с системной таблицей известных поставщиков. {@link android.content.ContentResolver}
+может отправить аргументы запроса в соответствующий
+поставщик.
+</p>
+<p>
+    {@link android.content.ContentProvider} использует часть URI контента, в которой указан путь, для выбора таблицы
+для доступа. В поставщике обычно имеется <strong>путь</strong> для каждой предоставляемой им таблицы.
+</p>
+<p>
+    В предыдущих строках кода полный URI для таблицы words выглядит следующим образом:
+</p>
+<pre>
+content://user_dictionary/words
+</pre>
+<p>
+    Строка <code>user_dictionary</code> ֪– это центр поставщика, а строка
+<code>words</code> — это путь к таблице. Строка
+<code>content://</code> (<strong>схема</strong>) присутствует всегда;
+она определяет, что это URI контента.
+</p>
+<p>
+    Многие поставщики предоставляют доступ к одной строке в таблице путем добавления идентификатора
+в конец URI. Например, чтобы извлечь из пользовательского словаря строку, в столбце <code>_ID</code> которой
+указано <code>4</code>, можно воспользоваться следующим URI контента:
+</p>
+<pre>
+Uri singleUri = ContentUris.withAppendedId(UserDictionary.Words.CONTENT_URI,4);
+</pre>
+<p>
+    Идентификаторы часто используются в случае, когда вы извлекли набор строк и хотите обновить или удалить
+одну из них.
+</p>
+<p class="note">
+    <strong>Примечание.</strong> В классах {@link android.net.Uri} и {@link android.net.Uri.Builder}
+имеются методы для удобного создания правильно оформленных объектов URI из строк. {@link android.content.ContentUris}
+содержит методы для удобного добавления идентификаторов
+к URI. В примере кода выше для добавления идентификатора к URI контента UserDictionary используется метод {@link android.content.ContentUris#withAppendedId
+withAppendedId()}.
+</p>
+
+
+    <!-- Retrieving Data from the Provider -->
+<h2 id="SimpleQuery">Получение данных от поставщика</h2>
+<p>
+    В это разделе рассматривается порядок получения данных от поставщика на примере
+поставщика пользовательского словаря.
+</p>
+<p class="note">
+    Для полной ясности в примерах кода, приведенных в этом разделе, методы
+{@link android.content.ContentResolver#query ContentResolver.query()} вызываются в потоке пользовательского интерфейса. В реальном
+коде запросы следует выполнять асинхронно в отдельном потоке. Одним из способов реализовать
+это является использование класса {@link android.content.CursorLoader}, который более подробно описан в
+статье
+<a href="{@docRoot}guide/components/loaders.html">Загрузчики</a>. Кроме того, в этой статье представлены лишь фрагменты кода; они не представляют собой готовое
+приложение.
+</p>
+<p>
+    Чтобы получить данные из поставщика, выполните указанные ниже основные действия.
+</p>
+<ol>
+   <li>
+        Запросите у поставщика разрешение на чтение.
+   </li>
+   <li>
+        Определите код, который отвечает за отправку запроса поставщику.
+   </li>
+</ol>
+<h3 id="RequestPermissions">Запрос разрешения на чтение</h3>
+<p>
+    Чтобы ваше приложение могло получать данные от поставщика, приложению требуется получить от поставщика разрешение
+на чтение. Это разрешение невозможно получить во время выполнения; вместо этого вам необходимо указать, что вам требуется
+такое разрешение, в манифесте приложения. Для этого воспользуйтесь элементом
+<code><a href="{@docRoot}guide/topics/manifest/uses-permission-element.html">&lt;uses-permission&gt;</a></code>
+и укажите точное название разрешения,
+определенное поставщиком. Указав этот элемент в манифесте, вы тем самым запрашиваете
+необходимое разрешение для вашего приложения. Когда пользователи устанавливают ваше приложение, они косвенно
+получают разрешение по этому запросу.
+</p>
+<p>
+    Чтобы узнать точное название разрешения на чтение в используемом поставщике,
+а также названия других используемых в нем разрешений на чтение, обратитесь
+к документации поставщика.
+</p>
+<p>
+    Дополнительные сведения о роли разрешений в получении доступа к поставщику представлены в разделе
+<a href="#Permissions">Разрешения поставщика контента</a>.
+</p>
+<p>
+    Поставщик пользовательского словаря задает разрешение
+<code>android.permission.READ_USER_DICTIONARY</code> в своем файле манифеста,
+поэтому приложению, которому требуется выполнить чтение данных из поставщика, необходимо запросить именно это разрешение.
+</p>
+<!-- Constructing the query -->
+<h3 id="Query">Создание запроса</h3>
+<p>
+    Следующим этапом получения данных от поставщика является создание запроса. В следующем фрагменте кода
+задаются некоторые переменные для доступа к поставщику пользовательского словаря:
+</p>
+<pre class="prettyprint">
+
+// A "projection" defines the columns that will be returned for each row
+String[] mProjection =
+{
+    UserDictionary.Words._ID,    // Contract class constant for the _ID column name
+    UserDictionary.Words.WORD,   // Contract class constant for the word column name
+    UserDictionary.Words.LOCALE  // Contract class constant for the locale column name
+};
+
+// Defines a string to contain the selection clause
+String mSelectionClause = null;
+
+// Initializes an array to contain selection arguments
+String[] mSelectionArgs = {""};
+
+</pre>
+<p>
+    В следующем фрагменте кода демонстрируется порядок использования метода
+{@link android.content.ContentResolver#query ContentResolver.query()} (в качестве примера выступает
+поставщик пользовательского словаря): Клиентский запрос поставщика аналогичен SQL-запросу. В нем содержится
+набор столбцов, которые возвращаются, набор критериев выборки и порядок сортировки.
+</p>
+<p>
+    Набор столбцов, которые должен возвратить запрос, называется <strong>проекцией</strong>
+(переменная <code>mProjection</code>).
+</p>
+<p>
+    Выражение, которое задает строки для получения, состоит из предложения выбора
+и аргументов выбора. Предложение выбора представляет собой сочетание логических выражений,
+имен столбцов и значений (переменная <code>mSelectionClause</code>). Если вместо значения указать подставляемый параметр
+<code>?</code>, метод запроса извлекает значение из массива аргументов выбора (переменная
+<code>mSelectionArgs</code>).
+</p>
+<p>
+    В следующем фрагменте кода, если пользователь не указал слово, то для предложения выбора задается значение
+<code>null</code>, а запрос возвращает все слова, имеющиеся в поставщике. Если пользователь указал слово, то для предложения выбора задается значение
+<code>UserDictionary.Words.WORD + " = ?"</code>,
+а для первого элемента в массиве аргументов выбора задается введенное пользователем слово.
+</p>
+<pre class="prettyprint">
+/*
+ * This defines a one-element String array to contain the selection argument.
+ */
+String[] mSelectionArgs = {""};
+
+// Gets a word from the UI
+mSearchString = mSearchWord.getText().toString();
+
+// Remember to insert code here to check for invalid or malicious input.
+
+// If the word is the empty string, gets everything
+if (TextUtils.isEmpty(mSearchString)) {
+    // Setting the selection clause to null will return all words
+    mSelectionClause = null;
+    mSelectionArgs[0] = "";
+
+} else {
+    // Constructs a selection clause that matches the word that the user entered.
+    mSelectionClause = UserDictionary.Words.WORD + " = ?";
+
+    // Moves the user's input string to the selection arguments.
+    mSelectionArgs[0] = mSearchString;
+
+}
+
+// Does a query against the table and returns a Cursor object
+mCursor = getContentResolver().query(
+    UserDictionary.Words.CONTENT_URI,  // The content URI of the words table
+    mProjection,                       // The columns to return for each row
+    mSelectionClause                   // Either null, or the word the user entered
+    mSelectionArgs,                    // Either empty, or the string the user entered
+    mSortOrder);                       // The sort order for the returned rows
+
+// Some providers return null if an error occurs, others throw an exception
+if (null == mCursor) {
+    /*
+     * Insert code here to handle the error. Be sure not to use the cursor! You may want to
+     * call android.util.Log.e() to log this error.
+     *
+     */
+// If the Cursor is empty, the provider found no matches
+} else if (mCursor.getCount() &lt; 1) {
+
+    /*
+     * Insert code here to notify the user that the search was unsuccessful. This isn't necessarily
+     * an error. You may want to offer the user the option to insert a new row, or re-type the
+     * search term.
+     */
+
+} else {
+    // Insert code here to do something with the results
+
+}
+</pre>
+<p>
+    Этот запрос аналогичен следующей инструкции SQL:
+</p>
+<pre>
+SELECT _ID, word, locale FROM words WHERE word = &lt;userinput&gt; ORDER BY word ASC;
+</pre>
+<p>
+    В этой инструкции SQL вместо констант класса-контракта используются фактические имена столбцов.
+</p>
+<h4 id="Injection">Защита от ввода вредоносного кода</h4>
+<p>
+    Если данные, которыми управляет поставщик контента, находятся в базе данных SQL, то включение в необработанные инструкции
+SQL внешних ненадежных данных может привести к атаке путем внедрения кода SQL.
+</p>
+<p>
+    Рассмотрим следующее предложение выбора:
+</p>
+<pre>
+// Constructs a selection clause by concatenating the user's input to the column name
+String mSelectionClause =  "var = " + mUserInput;
+</pre>
+<p>
+    Если вы используете это предложение, вы разрешаете пользователю связать вашу инструкцию SQL с вредоносным кодом SQL.
+    Например, пользователь может ввести nothing; DROP TABLE *; для <code>mUserInput</code>, что
+приведет к созданию следующего предложения выбора: <code>var = nothing; DROP TABLE *;</code>. Поскольку
+предложение выбора выполняется в потоке как инструкция SQL, это может привести к тому, что поставщик удалит все
+таблицы в соответствующей базе данных SQLite (если только в поставщик не настроен на отслеживание попыток
+<a href="http://en.wikipedia.org/wiki/SQL_injection">внедрить вредоносный код SQL</a>).
+</p>
+<p>
+    Чтобы избежать этого, воспользуйтесь предложением выбора, в котором <code>?</code> выступает в качестве подставляемого
+параметра, а также отдельным массивом аргументов выбора. После этого ввод пользователя
+будет связан напрямую с запросом и не будет интерпретироваться как часть инструкции SQL.
+    Поскольку в этом случае введенный пользователем запрос не рассматривается как код SQL, то в него не удастся внедрить вредоносный код SQL. Вместо
+объединения, которое следует включить в пользовательский ввод, используйте следующее предложение выбора:
+</p>
+<pre>
+// Constructs a selection clause with a replaceable parameter
+String mSelectionClause =  "var = ?";
+</pre>
+<p>
+    Настройте массив аргументов выбора следующим образом:
+</p>
+<pre>
+// Defines an array to contain the selection arguments
+String[] selectionArgs = {""};
+</pre>
+<p>
+    Укажите значение для массива аргументов выбора:
+</p>
+<pre>
+// Sets the selection argument to the user's input
+selectionArgs[0] = mUserInput;
+</pre>
+<p>
+    Предложение выбора, в котором <code>?</code> используется в качестве подстановочного параметра, и массив
+аргументов выбора представляют собой предпочтительный способ указания выбора, даже если поставщик
+не использует базу данных SQL.
+</p>
+<!-- Displaying the results -->
+<h3 id="DisplayResults">Отображение результатов запроса</h3>
+<p>
+    Клиентский метод {@link android.content.ContentResolver#query ContentResolver.query()} всегда возвращает объект
+{@link android.database.Cursor}, содержащий столбцы, указанные в проекции
+запроса для строк, которые соответствуют критериям выборки в запросе. Объект
+{@link android.database.Cursor} предоставляет прямой доступ на чтение содержащихся в нем строк и
+столбцов. С помощью методов {@link android.database.Cursor} можно выполнить итерацию по строкам
+в результатах, определить тип данных для каждого столбца, получить данные из столбца, а также проверить другие свойства
+результатов. Некоторые реализации объекта {@link android.database.Cursor} автоматически обновляют
+объект при изменении данных в поставщике или запускают выполнение методов в объекте-наблюдателе
+при изменении объекта{@link android.database.Cursor}, либо выполняют и то, и другое.
+</p>
+<p class="note">
+    <strong>Примечание.</strong> Поставщик может ограничить доступ к столбцам на основе характера
+объекта, выполняющего запрос. Например, поставщик контактов ограничивает доступ адаптеров синхронизации к некоторым столбцам,
+поэтому он не возвращает их в операцию или службу.
+</p>
+<p>
+    Если строки, соответствующие критериям выборки, отсутствуют, поставщик
+возвращает объект{@link android.database.Cursor}, в котором для метода
+{@link android.database.Cursor#getCount Cursor.getCount()} указано значение «0» (пустой объект cursor).
+</p>
+<p>
+    При возникновении внутренней ошибки результаты запроса зависят от определенного поставщика. Поставщик может
+возвратить<code>null</code> или выдать {@link java.lang.Exception}.
+</p>
+<p>
+    Поскольку {@link android.database.Cursor} представляет собой «список» строк, то наилучшим способом отобразить содержимое объекта
+{@link android.database.Cursor} будет связать его с {@link android.widget.ListView}
+посредством {@link android.widget.SimpleCursorAdapter}.
+</p>
+<p>
+    Следующий фрагмент кода является продолжением предыдущего фрагмента. Он создает объект
+{@link android.widget.SimpleCursorAdapter}, содержащий объект{@link android.database.Cursor},
+который был получен в запросе, а затем определяет этот объект в качестве адаптера для
+{@link android.widget.ListView}:
+</p>
+<pre class="prettyprint">
+// Defines a list of columns to retrieve from the Cursor and load into an output row
+String[] mWordListColumns =
+{
+    UserDictionary.Words.WORD,   // Contract class constant containing the word column name
+    UserDictionary.Words.LOCALE  // Contract class constant containing the locale column name
+};
+
+// Defines a list of View IDs that will receive the Cursor columns for each row
+int[] mWordListItems = { R.id.dictWord, R.id.locale};
+
+// Creates a new SimpleCursorAdapter
+mCursorAdapter = new SimpleCursorAdapter(
+    getApplicationContext(),               // The application's Context object
+    R.layout.wordlistrow,                  // A layout in XML for one row in the ListView
+    mCursor,                               // The result from the query
+    mWordListColumns,                      // A string array of column names in the cursor
+    mWordListItems,                        // An integer array of view IDs in the row layout
+    0);                                    // Flags (usually none are needed)
+
+// Sets the adapter for the ListView
+mWordList.setAdapter(mCursorAdapter);
+</pre>
+<p class="note">
+    <strong>Примечание.</strong> Чтобы вернуть {@link android.widget.ListView} с объектом
+{@link android.database.Cursor}, объект cursor должен содержать столбец с именем <code>_ID</code>.
+    Поэтому показанный ранее запрос извлекает столбец<code>_ID</code> для таблицы
+words, даже если {@link android.widget.ListView} не отображает ее.
+    Данное ограничение также объясняет, почему в каждой таблице поставщика имеется столбец
+<code>_ID</code>.
+</p>
+
+        <!-- Getting data from query results -->
+<h3 id="GettingResults">Получение данных из результатов запроса</h3>
+<p>
+    Вместо того, чтобы просто отобразить результаты запроса, вы можете использовать их для выполнения других задач. Например,
+можно получить написание слов из пользовательского словаря, а затем выполнить их поиск в
+других поставщиках. Для этого выполните итерацию по строкам в объекте {@link android.database.Cursor}:
+</p>
+<pre class="prettyprint">
+
+// Determine the column index of the column named "word"
+int index = mCursor.getColumnIndex(UserDictionary.Words.WORD);
+
+/*
+ * Only executes if the cursor is valid. The User Dictionary Provider returns null if
+ * an internal error occurs. Other providers may throw an Exception instead of returning null.
+ */
+
+if (mCursor != null) {
+    /*
+     * Moves to the next row in the cursor. Before the first movement in the cursor, the
+     * "row pointer" is -1, and if you try to retrieve data at that position you will get an
+     * exception.
+     */
+    while (mCursor.moveToNext()) {
+
+        // Gets the value from the column.
+        newWord = mCursor.getString(index);
+
+        // Insert code here to process the retrieved word.
+
+        ...
+
+        // end of while loop
+    }
+} else {
+
+    // Insert code here to report an error if the cursor is null or the provider threw an exception.
+}
+</pre>
+<p>
+    Реализации объекта {@link android.database.Cursor} содержат несколько методов get для
+получения из объекта различных типов данных. Например, в следующем фрагменте кода используется метод
+{@link android.database.Cursor#getString getString()}. В них также имеется метод
+{@link android.database.Cursor#getType getType()}, который возвращает значение, указывающее на тип
+данных в столбце.
+</p>
+
+
+    <!-- Requesting permissions -->
+<h2 id="Permissions">Разрешения поставщика контента</h2>
+<p>
+    Приложение поставщика может задавать разрешения, которые требуются другим приложениям для доступа к
+данным в поставщике. Такие разрешения гарантируют, что пользователь знает, к каким
+данным приложение будет пытаться получить доступ. На основе требований поставщика другие
+приложения запрашивают разрешения, которые требуются им для доступа к поставщику. Конечные пользователи видят
+запрошенные разрешения при установке приложения.
+</p>
+<p>
+    Если приложение поставщика не задает никаких разрешений, другие приложения не получают доступ к
+данным поставщика. Однако компонентам приложения поставщика
+всегда предоставлен полный доступ на чтение и запись, независимо от заданных разрешений.
+</p>
+<p>
+    Как уже было отмечено ранее, для получения данных из поставщика пользовательского словаря требуется разрешение
+<code>android.permission.READ_USER_DICTIONARY</code>.
+    В поставщике предусмотрено отдельное разрешение<code>android.permission.WRITE_USER_DICTIONARY</code>
+для вставки, обновления или удаления данных.
+</p>
+<p>
+    Чтобы получить разрешения, необходимые для доступа к поставщику, приложение запрашивает их с помощью элемента 
+<code><a href="{@docRoot}guide/topics/manifest/uses-permission-element.html">&lt;uses-permission&gt;</a></code>
+в файле манифеста. При установке менеджером пакетов Android приложения пользователю необходимо
+утвердить все разрешения, запрашиваемые приложением. В случае утверждения всех разрешений
+менеджер пакетов продолжает установку; если же пользователь отклоняет их, менеджер
+пакетов отменяет установку.
+</p>
+<p>
+    Для запроса доступа на чтение данных в поставщике пользовательского словаря используется
+следующий элемент
+<code><a href="{@docRoot}guide/topics/manifest/uses-permission-element.html">&lt;uses-permission&gt;</a></code>:
+</p>
+<pre>
+    &lt;uses-permission android:name="android.permission.READ_USER_DICTIONARY"&gt;
+</pre>
+<p>
+    Дополнительные сведения о влиянии разрешений на доступ к поставщику представлены в статье
+<a href="{@docRoot}guide/topics/security/security.html">Безопасность и разрешения</a>.
+</p>
+
+
+<!-- Inserting, Updating, and Deleting Data -->
+<h2 id="Modifications">Вставка, обновление и удаление данных</h2>
+<p>
+    Подобно тому, как вы получаете данные от поставщика, вы также можете можете использовать возможности взаимодействия между клиентом поставщика и объектом
+{@link android.content.ContentProvider} поставщика для изменения данных.
+    Можно вызвать метод объекта {@link android.content.ContentResolver}, указав аргументы,
+которые были переданы в соответствующий метод объекта {@link android.content.ContentProvider}. Поставщик и клиент поставщика
+автоматически обрабатывают взаимодействие между процессами и обеспечивают безопасность.
+</p>
+<h3 id="Inserting">Вставка данных</h3>
+<p>
+    Для вставки данных в поставщик вызовите
+метод
+{@link android.content.ContentResolver#insert ContentResolver.insert()}. Этот метод вставляет новую строку в поставщик и возвращает URI контента для этой строки.
+    В следующем фрагменте кода демонстрируется порядок вставки нового слова в поставщик пользовательского словаря:
+</p>
+<pre class="prettyprint">
+// Defines a new Uri object that receives the result of the insertion
+Uri mNewUri;
+
+...
+
+// Defines an object to contain the new values to insert
+ContentValues mNewValues = new ContentValues();
+
+/*
+ * Sets the values of each column and inserts the word. The arguments to the "put"
+ * method are "column name" and "value"
+ */
+mNewValues.put(UserDictionary.Words.APP_ID, "example.user");
+mNewValues.put(UserDictionary.Words.LOCALE, "en_US");
+mNewValues.put(UserDictionary.Words.WORD, "insert");
+mNewValues.put(UserDictionary.Words.FREQUENCY, "100");
+
+mNewUri = getContentResolver().insert(
+    UserDictionary.Word.CONTENT_URI,   // the user dictionary content URI
+    mNewValues                          // the values to insert
+);
+</pre>
+<p>
+    Данные для новой строки поступают в один объект {@link android.content.ContentValues},
+который аналогичен объекту cursor с одной строкой. Столбцы в этом объекте необязательно
+должны содержать данные такого же типа, и если вы вообще не собираетесь указывать значение, вы можете задать для столбца значение
+<code>null</code> с помощью метода {@link android.content.ContentValues#putNull ContentValues.putNull()}.
+</p>
+<p>
+    Код в представленном фрагменте не добавляет столбец <code>_ID</code>, поскольку этот столбец сохраняется
+автоматически. Поставщик присваивает уникальное значение <code>_ID</code> каждой
+добавляемой строке. Обычно поставщики используют это значение в качестве основного ключа таблицы.
+</p>
+<p>
+    URI контента, возвращенный в элементе <code>newUri</code>, служит для идентификации новой добавленной строки
+в следующем формате:
+</p>
+<pre>
+content://user_dictionary/words/&lt;id_value&gt;
+</pre>
+<p>
+    <code>&lt;id_value&gt;</code> — это содержимое столбца <code>_ID</code> для новой строки.
+    Большинство поставщиков автоматически определяют эту форму URI контента, а затем
+выполняют запрошенную операцию с требуемой строкой.
+</p>
+<p>
+    Чтобы получить значение <code>_ID</code> из возвращенного объекта {@link android.net.Uri}, вызовите метод
+{@link android.content.ContentUris#parseId ContentUris.parseId()}.
+</p>
+<h3 id="Updating">Обновление данных</h3>
+<p>
+    Чтобы обновить строку, используйте объект {@link android.content.ContentValues} с обновленными
+значениями (точно так же, как вы это делаете при вставке) и критериями выборки (так же, как и с запросом).
+    Используемый вами клиентский метод называется
+{@link android.content.ContentResolver#update ContentResolver.update()}. Вам не нужно добавлять значения в объект
+{@link android.content.ContentValues} для обновляемых столбцов. Чтобы очистить содержимое столбца, задайте значение
+<code>null</code>.
+</p>
+<p>
+    Следующий фрагмент кода служит для изменения языка во всех строках, где в качестве языка указано en, на
+<code>null</code>. Возвращаемое значение представляет собой количество строк, которые были обновлены:
+</p>
+<pre>
+// Defines an object to contain the updated values
+ContentValues mUpdateValues = new ContentValues();
+
+// Defines selection criteria for the rows you want to update
+String mSelectionClause = UserDictionary.Words.LOCALE +  "LIKE ?";
+String[] mSelectionArgs = {"en_%"};
+
+// Defines a variable to contain the number of updated rows
+int mRowsUpdated = 0;
+
+...
+
+/*
+ * Sets the updated value and updates the selected words.
+ */
+mUpdateValues.putNull(UserDictionary.Words.LOCALE);
+
+mRowsUpdated = getContentResolver().update(
+    UserDictionary.Words.CONTENT_URI,   // the user dictionary content URI
+    mUpdateValues                       // the columns to update
+    mSelectionClause                    // the column to select on
+    mSelectionArgs                      // the value to compare to
+);
+</pre>
+<p>
+    Также следует проверить пользовательский ввод при вызове метода
+{@link android.content.ContentResolver#update ContentResolver.update()}. Дополнительные сведения об этом
+представлены в разделе <a href="#Injection">Защита от ввода вредоносного кода</a>.
+</p>
+<h3 id="Deleting">Удаление данных</h3>
+<p>
+    Удаление данных аналогично получению данных строки: необходимо указать критерии выборки для строк,
+которые требуется удалить, после чего клиентский метод возвратит количество удаленных строк.
+    Ниже представлен фрагмент кода для удаления строк с идентификатором appid user. Метод возвращает
+количество удаленных строк.
+</p>
+<pre>
+
+// Defines selection criteria for the rows you want to delete
+String mSelectionClause = UserDictionary.Words.APP_ID + " LIKE ?";
+String[] mSelectionArgs = {"user"};
+
+// Defines a variable to contain the number of rows deleted
+int mRowsDeleted = 0;
+
+...
+
+// Deletes the words that match the selection criteria
+mRowsDeleted = getContentResolver().delete(
+    UserDictionary.Words.CONTENT_URI,   // the user dictionary content URI
+    mSelectionClause                    // the column to select on
+    mSelectionArgs                      // the value to compare to
+);
+</pre>
+<p>
+    Также следует проверить пользовательский ввод при вызове метода
+{@link android.content.ContentResolver#delete ContentResolver.delete()}. Дополнительные сведения об этом
+представлены в разделе <a href="#Injection">Защита от ввода вредоносного кода</a>.
+</p>
+<!-- Provider Data Types -->
+<h2 id="DataTypes">Типы поставщиков данных</h2>
+<p>
+    Поставщики контента могут предоставлять различные тип данных. Поставщик пользовательского словаря предоставляет только
+текст, но также может предоставлять следующие форматы:
+</p>
+    <ul>
+        <li>
+            целое число;
+        </li>
+        <li>
+            длинное целое число (long);
+        </li>
+        <li>
+            число с плавающей запятой;
+        </li>
+        <li>
+            длинное число с плавающей запятой (double).
+        </li>
+    </ul>
+<p>
+    Другим типом данных, предлагаемых поставщиком, является большой двоичный объект (BLOB), реализованный как
+64-разрядный массив. Чтобы просмотреть доступные типы данных, обратитесь к методам get класса
+{@link android.database.Cursor}.
+</p>
+<p>
+    Тип данных для каждого столбца в поставщике обычно указывается в документации к поставщику.
+    Типы данных для поставщика пользовательского словаря указаны в справочной документации
+для класса-контракта {@link android.provider.UserDictionary.Words} (дополнительные сведения о классах-контрактах представлены в разделе
+<a href="#ContractClasses">Классы-контракты</a>).
+    Также определить тип данных можно путем вызова метода {@link android.database.Cursor#getType
+Cursor.getType()}.
+</p>
+<p>
+    Поставщики также хранят информацию о типе данных MIME для каждого определяемого ими URI контента. Эту информацию
+можно использовать для определения того, может ли ваше приложение обрабатывать предлагаемые
+поставщиком данные, а также для выбора типа обработки на основе типа MIME. Информация о типе
+MIME обычно требуется при работе с поставщиком, который содержит
+сложные структуры данных или файлы. Например, в таблице{@link android.provider.ContactsContract.Data}
+в поставщике контактов используются типы MIME для отметки типа данных контакта, которые хранятся в каждой
+строке. Чтобы получить тип MIME, соответствующий URI контента, вызовите метод
+{@link android.content.ContentResolver#getType ContentResolver.getType()}.
+</p>
+<p>
+    Синтаксис стандартных и настраиваемых типов MIME описан в
+<a href="#MIMETypeReference">справке по типам MIME</a>.
+</p>
+
+
+<!-- Alternative Forms of Provider Access -->
+<h2 id="AltForms">Альтернативные формы доступа к поставщику</h2>
+<p>
+    При разработке приложения следует учитывать три альтернативных формы доступа к поставщику:
+</p>
+<ul>
+    <li>
+        <a href="#Batch">Пакетный доступ:</a> можно создать пакет вызовов доступа с использованием методов в классе
+{@link android.content.ContentProviderOperation}, а затем применить их с помощью метода
+{@link android.content.ContentResolver#applyBatch ContentResolver.applyBatch()}.
+    </li>
+    <li>
+        Асинхронные запросы: Запросы следует выполнять в отдельном потоке. Одним из способов реализовать это является использование объекта
+{@link android.content.CursorLoader}. Примеры этого представлены в
+статье
+<a href="{@docRoot}guide/components/loaders.html">Загрузчики</a>.
+    </li>
+    <li>
+        <a href="#Intents">Доступ к данным с помощью намерений:</a> Несмотря на то, что намерение
+невозможно отправить напрямую в поставщик, вы можете отправить запрос в приложение поставщика, в котором обычно
+имеется больше возможностей для изменения данных поставщика.
+    </li>
+</ul>
+<p>
+    Пакетный доступ и изменение с помощью намерений описаны в следующих разделах.
+</p>
+<h3 id="Batch">Пакетный доступ</h3>
+<p>
+    Пакетный доступ к поставщику полезно использовать в случаях, когда необходимо вставить большое количество строк, или для вставки
+строк в несколько таблиц в рамках одного вызова метода, а также в общих случаях для выполнения ряда
+операций на границах процессов в виде транзакции (атомарной операции).
+</p>
+<p>
+    Для доступа к поставщику в «пакетном режиме» необходимо создать массив объектов
+{@link android.content.ContentProviderOperation}, а затем
+отправить их в поставщик контента с помощью метода
+{@link android.content.ContentResolver#applyBatch ContentResolver.applyBatch()}. В этот метод необходимо передать
+<em>центр</em> поставщика контента, а не определенный URI контента.
+Это позволит каждому объекту {@link android.content.ContentProviderOperation} в массиве взаимодействовать
+с разными таблицами. Метод {@link android.content.ContentResolver#applyBatch
+ContentResolver.applyBatch()} возвращает массив результатов.
+</p>
+<p>
+    В описании класса-контракта {@link android.provider.ContactsContract.RawContacts}
+также представлен фрагмент кода, в котором демонстрируется вставка в пакетном режиме. В исходном файле <code>ContactAdder.java</code> примера приложения
+<a href="{@docRoot}resources/samples/ContactManager/index.html">Диспетчер контактов</a>
+имеется пример пакетного
+доступа.
+</p>
+<div class="sidebox-wrapper">
+<div class="sidebox">
+<h2>Отображение данных с помощью вспомогательного приложения</h2>
+<p>
+    Если вашему приложению <em>не предоставлены</em> разрешения, вы по-прежнему можете воспользоваться
+намерением для отображения данных в другом приложении. Например, приложение «Календарь» принимает намерение
+{@link android.content.Intent#ACTION_VIEW}, которое позволяет отобразить определенную дату или событие.
+    Благодаря этому информацию календаря можно отображать без необходимости создавать собственный пользовательский интерфейс.
+Дополнительные сведения об этой функции представлены в статье
+<a href="{@docRoot}guide/topics/providers/calendar-provider.html">Поставщик календаря</a>.
+</p>
+<p>
+    Приложение, в которое вы отправляете намерение, не обязательно
+должно быть связано с поставщиком. Например,
+в поставщике контактов можно создать форму контакта, а затем отправить намерение {@link android.content.Intent#ACTION_VIEW},
+содержащее URI контента для изображения контакта, в средство просмотра изображений.
+</p>
+</div>
+</div>
+<h3 id="Intents">Доступ к данным с помощью намерений</h3>
+<p>
+    Намерения позволяют в обход получать доступ к поставщику контента. Вы можете разрешить пользователям доступ к
+данным в поставщике даже в том случае, если у приложения отсутствуют разрешения на доступ, либо путем
+получения результирующего намерения от приложения, у которого имеются необходимые разрешения, либо путем активации
+приложения, у которого имеются разрешения и которое разрешает пользователю работать с ним.
+</p>
+<h4>Получение доступа с временными разрешениями</h4>
+<p>
+    Вы можете получить доступ к данным в поставщике контента даже тогда, когда у вас нет необходимых разрешений на доступ
+, путем отправки намерения в приложение, у которого есть такие разрешения, и получения
+результирующего намерения, которое содержит разрешения URI.
+    Эти разрешения для определенного URI контента действуют до тех пор, пока не будет завершена операция, получившая
+их. Приложение, у которой имеются бессрочные разрешения, предоставляет временные
+разрешения путем задания соответствующего флага в результирующем намерении:
+</p>
+<ul>
+    <li>
+        <strong>Разрешение на чтение:</strong>
+{@link android.content.Intent#FLAG_GRANT_READ_URI_PERMISSION}
+    </li>
+    <li>
+        <strong>Разрешение на запись:</strong>
+{@link android.content.Intent#FLAG_GRANT_WRITE_URI_PERMISSION}
+    </li>
+</ul>
+<p class="note">
+    <strong>Примечание.</strong> Эти флаги не предоставляют общий доступ на чтение или запись поставщику,
+центр которого указан в URI контента. Доступ предоставляется только самому URI.
+</p>
+<p>
+    Поставщик определяет разрешения URI для URI контента в своем манифесте с помощью атрибута
+<code><a href="{@docRoot}guide/topics/manifest/provider-element.html#gprmsn">android:grantUriPermission</a></code>
+элемента
+<code><a href="{@docRoot}guide/topics/manifest/provider-element.html">&lt;provider&gt;</a></code>,
+а также
+с помощью дочернего элемента
+<code><a href="{@docRoot}guide/topics/manifest/grant-uri-permission-element.html">&lt;grant-uri-permission&gt;</a></code>
+элемента
+<code><a href="{@docRoot}guide/topics/manifest/provider-element.html">&lt;provider&gt;</a></code>. Дополнительные сведения о механизме разрешений URI представлены в статье
+<a href="{@docRoot}guide/topics/security/security.html">Безопасность и разрешения</a> в разделе
+Разрешения URI.
+</p>
+<p>
+    Например, можно получить данные о контакте из поставщика контактов, даже если у вас нет разрешения
+{@link android.Manifest.permission#READ_CONTACTS}. Возможно, это потребуется реализовать
+в приложении, которое отправляет электронные поздравления контакту в день его рождения. Вместо запроса
+{@link android.Manifest.permission#READ_CONTACTS}, когда вы получаете доступ ко всем контактам пользователя
+и всей информации о них, можно предоставить пользователю возможность указать,
+какие контакты используются вашим приложением. Для этого воспользуйтесь указанным ниже процессом.
+</p>
+<ol>
+    <li>
+        Ваше приложение отправляет намерение, содержащее действие
+{@link android.content.Intent#ACTION_PICK} и тип MIME
+{@link android.provider.ContactsContract.RawContacts#CONTENT_ITEM_TYPE} контактов, используя для этого метод
+{@link android.app.Activity#startActivityForResult
+startActivityForResult()}.
+    </li>
+    <li>
+        Поскольку это намерение соответствует условиям отбора намерений для операции выбора
+приложения «Контакты», эта операция переходит на передний план.
+    </li>
+    <li>
+        В операции выбора пользователь выбирает
+контакт для обновления. Когда это происходит, операция выбора вызывает метод
+{@link android.app.Activity#setResult setResult(resultcode, intent)}
+для создания намерения, которое будет передано обратно в ваше приложение. Намерение содержит URI контента
+выбранного пользователем контакта, а также флаги
+{@link android.content.Intent#FLAG_GRANT_READ_URI_PERMISSION} дополнительных данных. Эти флаги предоставляют вашему приложению разрешение URI
+на чтение данных контакта, на который указывает
+URI контента. Затем операция выбора вызывает метод{@link android.app.Activity#finish()},
+чтобы вернуть управление вашему приложению.
+    </li>
+    <li>
+        Ваша операция возвращается на передний план, а система вызывает метод
+{@link android.app.Activity#onActivityResult onActivityResult()}
+вашей операции. Этот метод получает результирующее намерение, созданное операцией выбора в
+приложении «Контакты».
+    </li>
+    <li>
+        С помощью URI контента из результирующего намерения можно выполнить чтение данных контакта
+из поставщика контактов, даже если вы не запрашивали у поставщика постоянный доступ на чтение
+в своем манифесте. Можно получить информацию о дне рождения контакта
+или сведения о его адресе эл. почты, а затем отправить контакту электронное поздравление.
+    </li>
+</ol>
+<h4>Использование другого приложения</h4>
+<p>
+    Простой способ разрешить пользователю изменять данные, на доступ к которым у вас нет доступа
+— это активировать приложение, у которого есть такие разрешения, а затем предоставить пользователю возможность выполнять необходимые действия в этом приложении.
+</p>
+<p>
+    Например, приложение «Календарь» принимает намерения
+{@link android.content.Intent#ACTION_INSERT}, с помощью которого можно активировать
+пользовательский интерфейс приложения для вставки. Вы можете передать в это намерение дополнительные данные, которые приложение
+использует для заполнения полей в пользовательском интерфейсе. Поскольку синтаксис повторяющихся событий довольно сложный, то события предпочтительно
+вставлять в поставщик календаря путем активации приложения «Календарь» с помощью действия
+{@link android.content.Intent#ACTION_INSERT} и последующего предоставления пользователю возможности самому вставить событие в этом приложении.
+</p>
+<!-- Contract Classes -->
+<h2 id="ContractClasses">Классы-контракты</h2>
+<p>
+    Класс-контракт определяет константы, которые обеспечивают для приложений возможность работать с URI контента, именами
+столбцов, операциями намерения и другими функциями поставщика контента. Классы-контракты не
+включены в поставщик; разработчику поставщика следует определить их и сделать
+их доступными для других разработчиков. Многие из поставщиков, включенные в платформу Android,
+содержат соответствующие классы-контракты в пакете {@link android.provider}.
+</p>
+<p>
+    Например, в поставщике пользовательского календаря имеется класс-контракт
+{@link android.provider.UserDictionary}, содержащий константы URI контента и имен столбцов. URI
+контента для таблицы words определен в константе
+{@link android.provider.UserDictionary.Words#CONTENT_URI UserDictionary.Words.CONTENT_URI}.
+    В классе {@link android.provider.UserDictionary.Words} также имеются константы имен столбцов,
+которые используются в фрагментах кода примера приложения, представленных в этой статье. Например, проекцию запроса
+можно определить следующим образом:
+</p>
+<pre>
+String[] mProjection =
+{
+    UserDictionary.Words._ID,
+    UserDictionary.Words.WORD,
+    UserDictionary.Words.LOCALE
+};
+</pre>
+<p>
+    Другим классом-контрактом является класс {@link android.provider.ContactsContract} для поставщика контактов.
+    В справочной документации к этому классу представлены фрагменты кода примера приложения. Один из его подклассов,
+{@link android.provider.ContactsContract.Intents.Insert}, представляет собой класс-контракт,
+который содержит константы для намерений и их данных.
+</p>
+
+
+<!-- MIME Type Reference -->
+<h2 id="MIMETypeReference">Справка по типам MIME</h2>
+<p>
+    Поставщики контента могут возвращать как стандартные типы мультимедиа MIME, так и строки с настраиваемым типом MIME, либо оба этих типа.
+</p>
+<p>
+    Типы MIME имеют следующий формат:
+</p>
+<pre>
+<em>type</em>/<em>subtype</em>
+</pre>
+<p>
+    Например, хорошо известный тип MIME <code>text/html</code> имеет тип <code>text</code> и подтип
+<code>html</code>. Если поставщик возвращает этот тип URI, это означает, что
+строка запроса, в которой используется этот URI, возвратит текста с тегами HTML.
+</p>
+<p>
+    Строки с настраиваемым типом MIME, которые также называются типами MIME поставщика, имеют более сложные значения
+<em>типов</em> и <em>подтипов</em>. Значение <em>типа</em> всегда следующее:
+</p>
+<pre>
+vnd.android.cursor.<strong>dir</strong>
+</pre>
+<p>
+    для нескольких строк, или
+</p>
+<pre>
+vnd.android.cursor.<strong>item</strong>
+</pre>
+<p>
+    для одной строки.
+</p>
+<p>
+    <em>Подтип</em> зависит от поставщика. Встроенные поставщики Android обычно содержат простой
+подтип. Например, когда приложение «Контакты» создает строку для номера телефона,
+оно задает следующий тип MIME в этой строке:
+</p>
+<pre>
+vnd.android.cursor.item/phone_v2
+</pre>
+<p>
+    Обратите внимание, что значение подтипа просто <code>phone_v2</code>.
+</p>
+<p>
+    Разработчики поставщиков могут создавать свои собственные шаблоны подтипов на основе
+центра и названий таблиц поставщика. Например, рассмотрим поставщик, который содержит расписание движения поездов.
+    Центром поставщика является <code>com.example.trains</code>, в котором содержатся таблицы
+Line1, Line2 и Line3. В ответ на следующий URI контента
+</p>
+<p>
+<pre>
+content://com.example.trains/Line1
+</pre>
+<p>
+    для таблицы Line1 поставщик возвращает следующий тип MIME
+</p>
+<pre>
+vnd.android.cursor.<strong>dir</strong>/vnd.example.line1
+</pre>
+<p>
+     В ответ на следующий URI контента
+</p>
+<pre>
+content://com.example.trains/Line2/5
+</pre>
+<p>
+    для строки 5 в таблице Line2 поставщик возвращает следующий тип MIME
+</p>
+<pre>
+vnd.android.cursor.<strong>item</strong>/vnd.example.line2
+</pre>
+<p>
+    В большинстве поставщиков контента определены константы класса-контракта для используемых в них типов MIME. Например, класс-контракт
+{@link android.provider.ContactsContract.RawContacts}
+поставщика контактов определяет константу
+{@link android.provider.ContactsContract.RawContacts#CONTENT_ITEM_TYPE} для типа MIME одной
+строки необработанного контакта.
+</p>
+<p>
+    URI контента для единичных строк описываются в разделе
+<a href="#ContentURIs">URI контента</a>.
+</p>

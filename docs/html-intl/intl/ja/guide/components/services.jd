@@ -1,0 +1,813 @@
+page.title=サービス
+@jd:body
+
+<div id="qv-wrapper">
+<ol id="qv">
+<h2>本書の内容</h2>
+<ol>
+<li><a href="#Basics">基本</a></li>
+<ol>
+  <li><a href="#Declaring">マニフェストでサービスを宣言する</a></li>
+</ol>
+<li><a href="#CreatingAService">開始されたサービスを作成する</a>
+  <ol>
+    <li><a href="#ExtendingIntentService">IntentService クラスを拡張する</a></li>
+    <li><a href="#ExtendingService">Service クラスを拡張する</a></li>
+    <li><a href="#StartingAService">サービスを開始する</a></li>
+    <li><a href="#Stopping">サービスを停止する</a></li>
+  </ol>
+</li>
+<li><a href="#CreatingBoundService">バインドされたサービスを作成する</a></li>
+<li><a href="#Notifications">ユーザーに通知を送信する</a></li>
+<li><a href="#Foreground">サービスをフォアグラウンドで実行する</a></li>
+<li><a href="#Lifecycle">サービスのライフサイクルを管理する</a>
+<ol>
+  <li><a href="#LifecycleCallbacks">ライフサイクル コールバックを実装する</a></li>
+</ol>
+</li>
+</ol>
+
+<h2>キークラス</h2>
+<ol>
+  <li>{@link android.app.Service}</li>
+  <li>{@link android.app.IntentService}</li>
+</ol>
+
+<h2>サンプル</h2>
+<ol>
+  <li><a href="{@docRoot}resources/samples/ApiDemos/src/com/example/android/apis/app/ServiceStartArguments.html">{@code
+      ServiceStartArguments}</a></li>
+  <li><a href="{@docRoot}resources/samples/ApiDemos/src/com/example/android/apis/app/LocalService.html">{@code
+      LocalService}</a></li>
+</ol>
+
+<h2>関連ドキュメント</h2>
+<ol>
+<li><a href="{@docRoot}guide/components/bound-services.html">バインドされたサービス</a></li>
+</ol>
+
+</div>
+
+
+<p>{@link android.app.Service} は、バックグラウンドで長時間動作して作業を行い、ユーザー インターフェースを表示しないアプリケーション コンポーネントです。
+別のアプリケーション コンポーネントがサービスを開始し、ユーザーが他のアプリケーションに切り替えた場合でも、サービスはバックグラウンドで実行し続けることができます。
+
+さらに、コンポーネントをサービスにバインドして操作したり、プロセス間通信（IPC）を実行したりすることも可能です。
+たとえば、サービスはネットワーク トランザクションの処理、音楽の再生、ファイルの I/O の実行、コンテンツ プロバイダとのやり取りなどのすべてをバックグラウンドで行うことができます。
+
+</p>
+
+<p>サービスには、基本的に次の 2 つの形式があります。</p>
+
+<dl>
+  <dt>開始されたサービス</dt>
+  <dd>アプリケーション コンポーネント（アクティビティなど）が {@link android.content.Context#startService startService()} を呼び出して開始したときに、サービスが「開始された」状態になります。
+一旦開始されると、たとえ開始したコンポーネントが破棄されても、サービスは無期限に実行できます。
+通常、開始されたサービスは 1 つの操作を実行するだけで、呼び出し元に結果を返すことはありません。たとえば、サービスはネットワーク上でファイルのダウンロードやアップロードを行います。
+
+操作が完了すると、サービスは自身で停止する必要があります。
+</dd>
+  <dt>バインドされたサービス</dt>
+  <dd>アプリケーション コンポーネントが {@link
+android.content.Context#bindService bindService()} を呼び出してサービスにバインドすると、サービスは「バインドされた」状態になります。バインドされたサービスは、コンポーネントがサービスを操作したり、要求を送信したり、結果を取得したり、さらにはプロセス間通信（IPC）でもそれを行えるクライアントサーバー型インターフェースを提供します。
+
+バインドされたサービスは、他のアプリケーション コンポーネントがそれにバインドしている限り実行し続けます。
+サービスには同時に複数のコンポーネントがバインドできますが、すべてがアンバインドされると、サービスは破棄されます。
+</dd>
+</dl>
+
+<p>このドキュメントではこの 2 種類のサービスそれぞれの概要について説明しますが、サービスは開始された状態（無期限に実行）、バインドされた状態のどちらの方法でも動作できます。これは、2 つのコールバック メソッドを実装するかどうかの問題で、{@link
+android.app.Service#onStartCommand onStartCommand()} ではコンポーネントにサービスの開始を許可し、{@link
+android.app.Service#onBind onBind()} ではバインドを許可することになります。
+
+</p>
+
+<p>アプリケーションが開始された、バインドされた、またはその両方かであるかどうかにかかわらず、どんなコンポーネントでもアクティビティを使用できるのと同じように、{@link android.content.Intent} を使って開始することで、どんなアプリケーション コンポーネントでもサービスを使用できます。
+
+&mdash;ただし、マニフェスト ファイルでサービスを非公開として宣言して、他のアプリケーションからのアクセスをブロックすることもできます。
+詳細については、<a href="#Declaring">マニフェストでサービスを宣言する</a>で説明します。
+
+</p>
+
+<p class="caution"><strong>警告:</strong> サービスは、そのホスト プロセスのメインスレッドで実行します。サービスが自身のスレッドを作成することは<strong>なく</strong>、別のプロセスで実行されることも<strong>ありません</strong>（別の方法を指定しない限り）。
+&mdash;
+つまり、サービスが CPU を集中的に使ったり、ブロック操作を行ったりするような場合（MP3 の再生やネットワーク作業）は、サービス内に新しいスレッドを作成してその作業を行う必要があります。
+
+別のスレッドを使うことで、「アプリケーションが応答していません (ANR)」のエラーが発生するリスクを軽減でき、アプリケーションのメインスレッドをアクティビティのユーザー操作専用にすることができます。
+
+</p>
+
+
+<h2 id="Basics">基本</h2>
+
+<div class="sidebox-wrapper">
+<div class="sidebox">
+  <h3>サービスとスレッド、どちらを使用すべきか。</h3>
+  <p>サービスは、ユーザーがアプリケーションを操作していない間もバックグラウンドで実行できるコンポーネントにすぎません。
+そのような必要性がある場合に限り、サービスを作成します。
+</p>
+  <p>ユーザーがアプリケーションを操作している間だけ、メインスレッド外で作業を行う必要がある場合は、サービスではなくスレッドを作成することをお勧めします。
+たとえば、アクティビティを実行している間だけ音楽を再生する場合は、{@link android.app.Activity#onCreate onCreate()} にスレッドを作成し、{@link
+android.app.Activity#onStart onStart()} で実行を開始して、{@link android.app.Activity#onStop
+onStop()} で停止します。
+
+また、従来の {@link java.lang.Thread} クラスの代わりに {@link android.os.AsyncTask} や {@link android.os.HandlerThread} を使用する方法もあります。
+スレッドの詳細については、「<a href="{@docRoot}guide/components/processes-and-threads.html#Threads">プロセスとスレッド</a>」のドキュメントをご覧ください。
+</p>
+  <p>サービスを使用する際は、デフォルトではアプリケーションのメインスレッドで実行されるため、集中的な作業やブロック操作を行う場合はサービス内に新しいスレッドを作成する必要があることに注意してください。
+
+</p>
+</div>
+</div>
+
+<p>サービスを作成するには、{@link android.app.Service} のサブクラス（またはその既存のサブクラス）を作成する必要があります。
+実装時には、サービスのライフサイクルの重要側面を扱うコールバック メソッドをオーバーライドして、必要に応じてサービスにバインドするためのメカニズムをコンポーネントに提供する必要があります。
+
+オーバーライドする必要のある、最も重要なコールバック メソッドは次の 2 つです。</p>
+
+<dl>
+  <dt>{@link android.app.Service#onStartCommand onStartCommand()}</dt>
+    <dd>アクティビティなどの他のコンポーネントが、{@link android.content.Context#startService
+startService()} を呼び出してサービスの開始を要求したときに、システムがこのメソッドを呼び出します。
+このメソッドが実行されるとサービスは開始され、バックグラウンドで無期限に実行します。
+これを実装すると、作業完了時に {@link android.app.Service#stopSelf stopSelf()} か {@link
+android.content.Context#stopService stopService()} を呼び出して自身でサービスを停止する必要があります
+（バインドのみを提供する場合は、このメソッドを実装する必要はありません）。
+</dd>
+  <dt>{@link android.app.Service#onBind onBind()}</dt>
+    <dd>{@link android.content.Context#bindService
+bindService()} を呼び出して他のコンポーネントをサービスにバインドさせるとき（RPC 実行時など）に、システムがこのメソッドを呼び出します。
+このメソッドの実装時には、{@link android.os.IBinder} を返してクライアントがサービスとの通信に使うインターフェースを提供する必要があります。
+このメソッドの実装は常に必要ですが、バインドを許可しない場合は、null を返す必要があります。
+</dd>
+  <dt>{@link android.app.Service#onCreate()}</dt>
+    <dd>サービスが始めて作成されたときに、1 回限りのセットアップ処理を実行するためにシステムがこのメソッドを呼び出します（{@link android.app.Service#onStartCommand onStartCommand()} か {@link android.app.Service#onBind onBind()} のいずれかを呼び出す前）。
+
+サービスが既に実行中の場合、このメソッドは呼び出されません。
+</dd>
+  <dt>{@link android.app.Service#onDestroy()}</dt>
+    <dd>サービスがもう使用されておらず破棄されたときに、システムがこのメソッドを呼び出します。これは、スレッドや登録されたリスナ、レシーバーなどをクリーンアップするためにサービスに実装する必要があります。
+
+これが、サービスが受け取る最後の呼び出しになります。</dd>
+</dl>
+
+<p>コンポーネントが {@link
+android.content.Context#startService startService()} を呼び出してサービスを開始すると（結果的に {@link
+android.app.Service#onStartCommand onStartCommand()} が呼び出される）、{@link android.app.Service#stopSelf()} を使ってサービス自身が停止するか、他のコンポーネントが {@link android.content.Context#stopService stopService()} を呼び出して停止するまで、サービスは実行し続けます。
+
+</p>
+
+<p>コンポーネントが {@link android.content.Context#bindService bindService()} を呼び出してサービスを作成した（そして {@link
+android.app.Service#onStartCommand onStartCommand()} が呼び出されて<em>いない</em>）場合、サービスはコンポーネントにバインドされている間のみ実行します。
+
+すべてのクライアントからアンバインドされると、サービスはシステムによって破棄されます。
+</p>
+
+<p>Android システムは メモリが少なくなって、ユーザーが使用しているアクティビティ用のシステムリソースを回復させる必要が生じた場合のみ、サービスを強制的に停止させます。
+サービスがユーザーが使用しているアクティビティにバインドされている場合は、それが強制終了される可能性は低く、<a href="#Foreground">フォアグラウンドで実行</a>（後で説明）するように宣言されている場合は、強制終了されることはほとんどありません。一方で、サービスが開始されてから長時間実行している場合は、システムはバックグラウンド タスクのリストにおけるその位置付けを徐々に低くし、そのサービスが強制終了される確率が高くなります。開始されたサービスを作成する際は、システムによる再起動を円滑に処理するようデザインする必要があります。
+
+
+
+&mdash;
+システムがサービスを強制終了すると、リソースが回復次第そのサービスが再起動します（後述の {@link
+android.app.Service#onStartCommand onStartCommand()} から返される値にもよります）。
+システムがサービスを破棄するタイミングについては、「<a href="{@docRoot}guide/components/processes-and-threads.html">Processes and Threading</a>」のドキュメントをご覧ください。
+
+</p>
+
+<p>次のセクションでは、それぞれのタイプのサービスの作成方法と、他のアプリケーション コンポーネントからの使用方法について説明します。
+</p>
+
+
+
+<h3 id="Declaring">マニフェストでサービスを宣言する</h3>
+
+<p>アクティビティ（や他のコンポーネント）と同様に、すべてのサービスをアプリケーションのマニフェスト ファイルで宣言する必要があります。
+</p>
+
+<p>サービスを宣言するには、<a href="{@docRoot}guide/topics/manifest/service-element.html">{@code &lt;service&gt;}</a> 要素を <a href="{@docRoot}guide/topics/manifest/application-element.html">{@code &lt;application&gt;}</a> の子要素として追加します。
+
+次に例を示します。</p>
+
+<pre>
+&lt;manifest ... &gt;
+  ...
+  &lt;application ... &gt;
+      &lt;service android:name=".ExampleService" /&gt;
+      ...
+  &lt;/application&gt;
+&lt;/manifest&gt;
+</pre>
+
+<p>マニフェストでのサービスの宣言に関する詳細については、<a href="{@docRoot}guide/topics/manifest/service-element.html">{@code &lt;service&gt;}</a> 要素のリファレンスをご覧ください。
+</p>
+
+<p><a href="{@docRoot}guide/topics/manifest/service-element.html">{@code &lt;service&gt;}</a> に含めることで、サービスやサービスを実行するプロセスの開始に必要なパーミッションなどのプロパティを定義できる他の属性がいくつかあります。
+
+<a href="{@docRoot}guide/topics/manifest/service-element.html#nm">{@code android:name}</a> 属性は唯一の必須属性で、サービスのクラス名を指定します。
+&mdash;アプリケーションを発行したら、この名前は変更できません。変更すると、サービスを開始したりバインドしたりする明示的インテントの依存関係によってコードを破損する可能性があります（ブログの投稿「<a href="http://android-developers.blogspot.com/2011/06/things-that-cannot-change.html">Things That Cannot Change</a>」をご覧ください）。
+
+
+
+
+<p>アプリの安全性を保つため、<strong>{@link android.app.Service}を開始したりバインドしたりするときは、常に明示的インテントを使用</strong>し、サービスでインテント フィルタを宣言しないようにしてください。
+どのサービスを開始するかについて、ある程度のあいまい静を残しておく必要がある場合は、サービスにインテント フィルタを定義でき、{@link
+android.content.Intent} からコンポーネント名を除外して、その後ターゲットのサービスのあいまい性を十分に解消する {@link
+android.content.Intent#setPackage setPackage()} でインテントのパッケージを設定する必要があります。
+
+
+</p>
+
+<p>さらに、<a href="{@docRoot}guide/topics/manifest/service-element.html#exported">{@code android:exported}</a> 属性を含めて {@code "false"} に設定すると、サービスを自身のアプリでしか利用できないようにできます。
+
+これにより、他のアプリによるサービスの開始を効果的に回避でき、たとえ明示的インテントを使用したとしても開始できなくなります。
+</p>
+
+
+
+
+<h2 id="CreatingStartedService">開始されたサービスを作成する</h2>
+
+<p>開始されたサービスは、他のコンポーネントが {@link
+android.content.Context#startService startService()} を呼び出すことで結果的にサービスの {@link android.app.Service#onStartCommand onStartCommand()} メソッドを呼び出して開始されたサービスです。
+</p>
+
+<p>サービスが開始されると、サービスはそれを開始したコンポーネントから独立したライフサイクルを持ち、たとえ開始したコンポーネントが破棄されても、サービスは無期限に実行できます。
+
+そのため、サービスはジョブが完了したら {@link android.app.Service#stopSelf stopSelf()} を呼び出して自身で停止する必要があり、他のコンポーネントが {@link android.content.Context#stopService stopService()} を呼び出して停止することもできます。
+
+</p>
+
+<p>アクティビティなどのアプリケーション コンポーネントは、{@link
+android.content.Context#startService startService()} を呼び出して、サービスを指定し、サービスが使用するデータを含めた {@link android.content.Intent} を渡してサービスを開始できます。
+サービスはこの {@link android.content.Intent} を、{@link android.app.Service#onStartCommand
+onStartCommand()} メソッドで受け取ります。
+</p>
+
+<p>たとえば、オンライン データベースにデータを保存する必要のあるアクティビティがあるとします。アクティビティでサービスを開始し、{@link
+android.content.Context#startService startService()} にインテントを渡して、保存するデータをサービスに配信します。
+サービスはインテントを {@link
+android.app.Service#onStartCommand onStartCommand()} で受け取り、インターネットに接続してデータベースのトランザクションを実行します。
+トランザクションが完了したら、サービスは自身で停止し、破棄されます。
+</p>
+
+<p class="caution"><strong>警告:</strong> デフォルトでは、アプリケーションで宣言されたサービスは、アプリケーションと同じプロセスで、そのアプリケーションのメインスレッドで実行します。
+そのため、ユーザーが同じアプリケーションのアクティビティを操作している間に、サービスが集中的な処理やブロック操作を実行すると、アクティビティのパフォーマンスが低下します。
+
+アプリケーションのパフォーマンスへの影響を回避するには、サービス内で新しいスレッドを開始する必要があります。
+</p>
+
+<p>従来どおり、開始されたサービスを作成するために拡張できるクラスが 2 つあります。</p>
+<dl>
+  <dt>{@link android.app.Service}</dt>
+  <dd>これは、すべてのサービスの基本クラスです。サービスはデフォルトでアプリケーションのメインスレッドを使用し、アプリケーションが実行しているアクティビティのパフォーマンスを低下させることがあるため、このクラスを拡張するときは、サービスのすべての作業を行うための新しいスレッドを作成することが重要です。
+
+
+</dd>
+  <dt>{@link android.app.IntentService}</dt>
+  <dd>すべての開始要求を一件ずつ処理するワーカー スレッドを使用した {@link android.app.Service} のサブクラスです。
+サービスで同時に複数の要求を処理する必要がない場合は、これが最適です。
+{@link
+android.app.IntentService#onHandleIntent onHandleIntent()} を実装するだけで、それぞれの開始要求のインテントを受け取り、バックグラウンドでの処理が可能になります。
+</dd>
+</dl>
+
+<p>次のセクションでは、これらいずれかのクラスを使用してサービスを実装する方法について説明します。
+</p>
+
+
+<h3 id="ExtendingIntentService">IntentService クラスを拡張する</h3>
+
+<p>開始されたサービスで同時に複数の要求を処理する必要があることはほとんどないため（実際には危険なマルチスレッド シナリオになります）、{@link android.app.IntentService} クラスを使用してサービスを実装するのが最適だと考えられます。
+
+</p>
+
+<p>{@link android.app.IntentService} は、次の操作を行います。</p>
+
+<ul>
+  <li>アプリケーションのメインスレッドとは別の {@link
+android.app.Service#onStartCommand onStartCommand()} に配信されるすべてのインテントを実行する、デフォルトのワーカー スレッドを作成します。
+</li>
+  <li>マルチスレッドの懸念を排除するため、一度に 1 つのインテントを {@link
+android.app.IntentService#onHandleIntent onHandleIntent()} の実装に渡すワークキューを作成します。
+</li>
+  <li>{@link android.app.Service#stopSelf} を呼び出す必要がないよう、すべての開始要求の処理後にサービスを停止します。
+</li>
+  <li>Null を返す {@link android.app.IntentService#onBind onBind()} のデフォルト実装を提供します。
+</li>
+  <li>インテントをワークキュー、{@link
+android.app.IntentService#onHandleIntent onHandleIntent()} の実装の順に送信する {@link android.app.IntentService#onStartCommand
+onStartCommand()} のデフォルト実装を提供します。</li>
+</ul>
+
+<p>上記すべての操作が行われることで、開発者が行う必要があるのは、クライアントから指示された内容を処理する {@link
+android.app.IntentService#onHandleIntent onHandleIntent()} を実装するだけになります
+（ただし、サービスの小さいコンストラクタを提供する必要はあります）。</p>
+
+<p>{@link android.app.IntentService} の実装例を次に示します。</p>
+
+<pre>
+public class HelloIntentService extends IntentService {
+
+  /**
+   * A constructor is required, and must call the super {@link android.app.IntentService#IntentService}
+   * constructor with a name for the worker thread.
+   */
+  public HelloIntentService() {
+      super("HelloIntentService");
+  }
+
+  /**
+   * The IntentService calls this method from the default worker thread with
+   * the intent that started the service. When this method returns, IntentService
+   * stops the service, as appropriate.
+   */
+  &#64;Override
+  protected void onHandleIntent(Intent intent) {
+      // Normally we would do some work here, like download a file.
+      // For our sample, we just sleep for 5 seconds.
+      long endTime = System.currentTimeMillis() + 5*1000;
+      while (System.currentTimeMillis() &lt; endTime) {
+          synchronized (this) {
+              try {
+                  wait(endTime - System.currentTimeMillis());
+              } catch (Exception e) {
+              }
+          }
+      }
+  }
+}
+</pre>
+
+<p>コンストラクタと {@link
+android.app.IntentService#onHandleIntent onHandleIntent()} の実装、必要なのはこれだけです。</p>
+
+<p>{@link
+android.app.IntentService#onCreate onCreate()}、{@link
+android.app.IntentService#onStartCommand onStartCommand()}、{@link
+android.app.IntentService#onDestroy onDestroy()} などの他のコールバック メソッドもオーバーライドする場合は、{@link android.app.IntentService} がワーカー スレッドの生存状態を正しく処理できるよう、必ず super を実装するようにします。
+</p>
+
+<p>たとえば、{@link android.app.IntentService#onStartCommand onStartCommand()} はデフォルト実装を返す必要があります（これによりインテントが {@link
+android.app.IntentService#onHandleIntent onHandleIntent()} に配信されます）。
+</p>
+
+<pre>
+&#64;Override
+public int onStartCommand(Intent intent, int flags, int startId) {
+    Toast.makeText(this, "service starting", Toast.LENGTH_SHORT).show();
+    return super.onStartCommand(intent,flags,startId);
+}
+</pre>
+
+<p>{@link android.app.IntentService#onHandleIntent onHandleIntent()} 以外で、super クラスを呼び出す必要のないメソッドは、{@link android.app.IntentService#onBind
+onBind()} です（ただし、サービスでバインドを許可している場合のみ実装が必要です）。
+</p>
+
+<p>次のセクションでは、この種のサービスが、基本の {@link android.app.Service} クラスを拡張したときにどのように実装されるかを説明します。
+これにはさらに多くのコードがありますが、開始要求の同時処理が必要な場合には適しています。
+</p>
+
+
+<h3 id="ExtendingService">Service クラスを拡張する</h3>
+
+<p>前のセクションで説明したように、{@link android.app.IntentService} を使用すると開始されたサービスの実装が非常に簡単になります。
+ただし、サービスでマルチスレッドを実行する必要がある場合（開始要求をワークキュー経由で処理するのではなく）、{@link android.app.Service} クラスを拡張して、それぞれのインテントを処理できます。
+
+</p>
+
+<p>比較のために、{@link
+android.app.IntentService} を使用した上記の例とまったく同じ処理を実行する {@link
+android.app.Service} クラスの実装の例が次のコードです。つまり、それぞれの開始要求に対し、ワーカー スレッドを使用してジョブとプロセスを実行し、一度に 1 つの要求のみを処理します。
+</p>
+
+<pre>
+public class HelloService extends Service {
+  private Looper mServiceLooper;
+  private ServiceHandler mServiceHandler;
+
+  // Handler that receives messages from the thread
+  private final class ServiceHandler extends Handler {
+      public ServiceHandler(Looper looper) {
+          super(looper);
+      }
+      &#64;Override
+      public void handleMessage(Message msg) {
+          // Normally we would do some work here, like download a file.
+          // For our sample, we just sleep for 5 seconds.
+          long endTime = System.currentTimeMillis() + 5*1000;
+          while (System.currentTimeMillis() &lt; endTime) {
+              synchronized (this) {
+                  try {
+                      wait(endTime - System.currentTimeMillis());
+                  } catch (Exception e) {
+                  }
+              }
+          }
+          // Stop the service using the startId, so that we don't stop
+          // the service in the middle of handling another job
+          stopSelf(msg.arg1);
+      }
+  }
+
+  &#64;Override
+  public void onCreate() {
+    // Start up the thread running the service.  Note that we create a
+    // separate thread because the service normally runs in the process's
+    // main thread, which we don't want to block.  We also make it
+    // background priority so CPU-intensive work will not disrupt our UI.
+    HandlerThread thread = new HandlerThread("ServiceStartArguments",
+            Process.THREAD_PRIORITY_BACKGROUND);
+    thread.start();
+
+    // Get the HandlerThread's Looper and use it for our Handler
+    mServiceLooper = thread.getLooper();
+    mServiceHandler = new ServiceHandler(mServiceLooper);
+  }
+
+  &#64;Override
+  public int onStartCommand(Intent intent, int flags, int startId) {
+      Toast.makeText(this, "service starting", Toast.LENGTH_SHORT).show();
+
+      // For each start request, send a message to start a job and deliver the
+      // start ID so we know which request we're stopping when we finish the job
+      Message msg = mServiceHandler.obtainMessage();
+      msg.arg1 = startId;
+      mServiceHandler.sendMessage(msg);
+
+      // If we get killed, after returning from here, restart
+      return START_STICKY;
+  }
+
+  &#64;Override
+  public IBinder onBind(Intent intent) {
+      // We don't provide binding, so return null
+      return null;
+  }
+
+  &#64;Override
+  public void onDestroy() {
+    Toast.makeText(this, "service done", Toast.LENGTH_SHORT).show();
+  }
+}
+</pre>
+
+<p>このように、{@link android.app.IntentService} を使う場合よりもかなり面倒です。</p>
+
+<p>ただし、{@link android.app.Service#onStartCommand
+onStartCommand()} への各呼び出しを自身で処理するため、同時に複数の要求を実行することも可能です。この例にはあてはまりませんが、自身の状況に合う場合は、要求ごとに新しいスレッドを作成し、すぐに実行することもできます（前の要求が完了するのを待つ必要がありません）。
+
+</p>
+
+<p>{@link android.app.Service#onStartCommand onStartCommand()} メソッドは整数を返す必要があることに注意してください。
+整数は、システムがサービスを強制終了した場合に、サービスをどのように続行させるかを記述する値です（前述したように、{@link
+android.app.IntentService} のデフォルト実装が代わりにこれを処理しますが、自身で修正することもできます）。
+{@link android.app.Service#onStartCommand onStartCommand()} から返される値は、次のいずれかの定数である必要があります。
+
+</p>
+
+<dl>
+  <dt>{@link android.app.Service#START_NOT_STICKY}</dt>
+    <dd>{@link android.app.Service#onStartCommand
+onStartCommand()} から戻った後でシステムがサービスを強制終了した場合は、配信が保留中のインテントがない限りシステムはサービスを再作成<em>しません</em>。
+これは、サービスが不必要で、アプリケーションが未完了のジョブを再開できる場合にサービスを実行してしまうのを回避できる最も安全な選択肢です。
+</dd>
+  <dt>{@link android.app.Service#START_STICKY}</dt>
+    <dd>{@link android.app.Service#onStartCommand
+onStartCommand()} から戻った後でシステムがサービスを強制終了した場合は、サービスを再作成し、{@link
+android.app.Service#onStartCommand onStartCommand()} を呼び出しますが、最後のインテントは再配信<em>しません</em>。代わりに、サービスを開始するインテントが保留になっている場合を除いて、システムは {@link android.app.Service#onStartCommand onStartCommand()} を null インテントを使って呼び出します。保留中のインテントがある場合、そのインテントは配信されます。
+
+
+これは、コマンドは実行しないが、無期限に実行し、ジョブを待機するメディア プレーヤー（や同様のサービス）に適しています。
+</dd>
+  <dt>{@link android.app.Service#START_REDELIVER_INTENT}</dt>
+    <dd>{@link android.app.Service#onStartCommand
+onStartCommand()} から戻った後でシステムがサービスを強制終了した場合は、サービスを再作成し、サービスに最後に配信されたインテントで {@link
+android.app.Service#onStartCommand onStartCommand()} を呼び出します。
+すべてのペンディング インテントが順に配信されます。これは、ファイルのダウンロードのような、活発にジョブを実行し、ただちに再開する必要のあるサービスに適しています。
+</dd>
+</dl>
+<p>これらの戻り値の詳細については、リンクされた各定数のリファレンス ドキュメントをご覧ください。
+</p>
+
+
+
+<h3 id="StartingAService">サービスを開始する</h3>
+
+<p>アクティビティや他のアプリケーション コンポーネントから {@link android.content.Intent}（開始するサービスを指定する）を {@link android.content.Context#startService startService()} に渡すことで、サービスを開始できます。
+
+Android システムが、サービスの {@link
+android.app.Service#onStartCommand onStartCommand()} メソッドを呼び出して、{@link
+android.content.Intent} を渡します（絶対に、{@link android.app.Service#onStartCommand
+onStartCommand()} を直接呼び出さないでください）。</p>
+
+<p>アクティビティが前のセクションで例に挙げたサービス（{@code
+HelloSevice}）を、{@link android.content.Context#startService
+startService()} で明示的インテントを使って開始する例を次に示します。</p>
+
+<pre>
+Intent intent = new Intent(this, HelloService.class);
+startService(intent);
+</pre>
+
+<p>{@link android.content.Context#startService startService()} メソッドがすぐに戻り、Android システムがサービスの {@link android.app.Service#onStartCommand
+onStartCommand()} メソッドを呼び出します。
+サービスがまだ実行されていない場合、システムはまず {@link
+android.app.Service#onCreate onCreate()} を呼び出してから、{@link android.app.Service#onStartCommand
+onStartCommand()} を呼び出します。</p>
+
+<p>サービスでバインドが提供されない場合は、{@link
+android.content.Context#startService startService()} で配信されたインテントが、アプリケーション コンポーネントとサービス間の唯一の通信モードになります。
+ただし、サービスから結果を送り返す場合は、サービスを開始するクライアントがブロードキャスト用に {@link android.app.PendingIntent} を作成でき（{@link android.app.PendingIntent#getBroadcast getBroadcast()} で）、それをサービスを開始する {@link android.content.Intent} のサービスに配信できます。
+
+
+その後、サービスはブロードキャストを使って結果を配信できます。
+</p>
+
+<p>サービスを開始する要求が複数ある場合は、それに対応する複数の呼び出しがサービスの {@link android.app.Service#onStartCommand onStartCommand()} に対して発生することになります。
+ただし、サービスを停止するために必要な要求（{@link android.app.Service#stopSelf stopSelf()} や {@link
+android.content.Context#stopService stopService()} を使用）は、1 つのみです。
+</p>
+
+
+<h3 id="Stopping">サービスを停止する</h3>
+
+<p>開始されたサービスは、自身でライフサイクルを管理する必要があります。つまり、システムメモリを復元する必要がある場合を除き、システムがサービスを停止したり破棄したりすることはなく、サービスは {@link android.app.Service#onStartCommand onStartCommand()} から戻った後も実行し続けます。
+
+そのため、サービスは {@link android.app.Service#stopSelf stopSelf()} を呼び出して自身で停止する必要があり、他のコンポーネントが {@link android.content.Context#stopService stopService()} を呼び出して停止することもできます。
+
+</p>
+
+<p>{@link android.app.Service#stopSelf stopSelf()} や {@link
+android.content.Context#stopService stopService()} で停止が要求されたら、システムは可能な限りすぐにサービスを破棄します。
+</p>
+
+<p>ただし、サービスが {@link
+android.app.Service#onStartCommand onStartCommand()} への複数の要求を同時に処理している場合は、その後に新しい開始要求を受け取る可能性があることから、開始要求の処理後もサービスを停止しないでください（1 つ目の要求の最後に停止すると、2 つ目が停止されてしまいます）。
+
+この問題を回避するには、{@link android.app.Service#stopSelf(int)} を使って、常に最新の開始要求に基づいてサービスの停止要求を行うようにできます。
+
+具体的には、{@link
+android.app.Service#stopSelf(int)} を呼び出すとき、停止要求に対応する開始要求の ID（{@link android.app.Service#onStartCommand onStartCommand()} に配信された <code>startId</code>）を渡します。
+
+その後、{@link
+android.app.Service#stopSelf(int)} を呼び出す前にサービスが新しい開始要求を受け取ったとしても、結果的に ID が一致せずサービスが停止されなくなります。</p>
+
+<p class="caution"><strong>警告:</strong> アプリケーションはサービスの処理が完了したら、システムリソースやバッテリ電力の節約のため、サービスを停止することが重要です。
+必要であれば、他のコンポーネントから {@link
+android.content.Context#stopService stopService()} を呼び出してサービスを停止することもできます。
+サービスのバインドを有効にしている場合でも、{@link
+android.app.Service#onStartCommand onStartCommand()} を受け取ったときには常に自身でサービスを停止する必要があります。
+</p>
+
+<p>サービスのライフサイクルの詳細については、後半のセクションの<a href="#Lifecycle">サービスのライフサイクルを管理する</a>をご覧ください。</p>
+
+
+
+<h2 id="CreatingBoundService">バインドされたサービスを作成する</h2>
+
+<p>バインドされたサービスとは、アプリケーション コンポーネントが長時間の接続を作成するために {@link
+android.content.Context#bindService bindService()} を呼び出してサービスにバインドできるようにするサービスです（通常はコンポーネントが {@link
+android.content.Context#startService startService()} を呼び出すことではサービスは<em>開始</em>できません）。
+</p>
+
+<p>バインドされたサービスは、アプリケーションのアクティビティや他のコンポーネントからのサービスとやり取りしたり、アプリケーションの一部の機能をプロセス間通信（IPC）を用いて他のアプリケーションが利用できるようにしたりする場合に作成します。
+
+</p>
+
+<p>バインドされたサービスを作成するには、{@link
+android.app.Service#onBind onBind()} コールバック メソッドを実装して、サービスとの通信用のインターフェースを定義する {@link android.os.IBinder} を返す必要があります。
+その後、他のアプリケーション コンポーネントが {@link android.content.Context#bindService bindService()} を呼び出してインターフェースを取得し、サービスのメソッドの呼び出しを開始できます。
+
+サービスは、バインドされているアプリケーション コンポーネントのためだけに存在するため、バインドされているコンポーネントがなくなると、サービスにシステムによって破棄されます（バインドされたサービスは、{@link android.app.Service#onStartCommand onStartCommand()} でサービスが開始されたときと同じ方法で停止する必要は<em>ありません</em>）。
+
+
+</p>
+
+<p>バインドされたサービスを作成するには、まずクライアントからサービスへの通信方法を指定するインターフェースを定義します。
+サービスとクライアント間のこのインターフェースは {@link android.os.IBinder} の実装である必要があり、サービスはこれを {@link android.app.Service#onBind
+onBind()} コールバック メソッドから返す必要があります。
+
+クライアントが {@link android.os.IBinder} を受け取ると、そのインターフェースを介してサービスとのやり取りを開始できます。
+</p>
+
+<p>複数のクライアントが同時にサービスにバインドできます。クライアントとサービスのやり取りが終わったら、{@link android.content.Context#unbindService unbindService()} を呼び出してアンバインドします。
+サービスにバインドされているクライアントがなくなったら、システムがサービスを破棄します。
+</p>
+
+<p>バインドされたサービスの実装方法はいくつかあり、その実装は開始されたサービスよりも複雑であるため、バインドされたサービスの詳細については、<a href="{@docRoot}guide/components/bound-services.html">バインドされたサービス</a> のドキュメントで別途説明しています。
+
+</p>
+
+
+
+<h2 id="Notifications">ユーザーに通知を送信する</h2>
+
+<p>一旦サービスが実行されると、<a href="{@docRoot}guide/topics/ui/notifiers/toasts.html">トースト通知</a>や<a href="{@docRoot}guide/topics/ui/notifiers/notifications.html">ステータスバー通知</a>を使ってユーザーにイベントを通知できます。</p>
+
+<p>トースト通知は、現在のウィンドウに表示されるメッセージで、少しの間表示され、すぐに消えます。一方、ステータスバー通知では、ステータスバーにメッセージの付いたアイコンが表示され、ユーザーはそれを選択して何らかの操作（アクティビティの開始など）を行うことができます。
+
+</p>
+
+<p>通常は、バックグラウンド ワークが完了して、ユーザーが実行できる操作がある場合（ファイルのダウンロードが完了した場合など）は、ステータスバーの通知が最適なテクニックです。
+
+展開したビューでユーザーが通知を選択すると、通知がアクティビティ（ダウンロードしたファイルを表示するなど）を開始できるようになります。
+</p>
+
+<p>詳細については、デベロッパー ガイドの「<a href="{@docRoot}guide/topics/ui/notifiers/toasts.html">トースト通知</a>」や「<a href="{@docRoot}guide/topics/ui/notifiers/notifications.html">ステータスバーの通知</a>」をご覧ください。
+</p>
+
+
+
+<h2 id="Foreground">サービスをフォアグラウンドで実行する</h2>
+
+<p>フォアグラウンド サービスは、ユーザーがその存在を認識しているものであるとみなされるため、メモリ残量が少なくなった場合でも、システムによる強制終了の現候補にはなりません。
+フォアグラウンド サービスではステータスバーに通知を表示する必要があり、通知は「継続中」という見出しの下に表示されるため、サービスが停止するか、フォアグラウンドから除去しない限り通知を消すことはできないということになります。
+
+
+</p>
+
+<p>たとえば、サービスから音楽を再生する音楽プレーヤーは、ユーザーがその操作を認識しているのは明らかであるため、フォアグラウンドで実行する必要があります。
+
+ステータスバーの通知には現在再生中の曲名を表示でき、ユーザーが音楽プレーヤーを操作するためのアクティビティを起動できるようにできます。
+</p>
+
+<p>サービスをフォアグラウンドで実行するよう要求するには、{@link
+android.app.Service#startForeground startForeground()} を呼び出します。このメソッドは、通知を一意に識別する整数と、ステータスバーの {@link
+android.app.Notification} の 2 つのパラメータを受け付けます。
+次に例を示します。</p>
+
+<pre>
+Notification notification = new Notification(R.drawable.icon, getText(R.string.ticker_text),
+        System.currentTimeMillis());
+Intent notificationIntent = new Intent(this, ExampleActivity.class);
+PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, notificationIntent, 0);
+notification.setLatestEventInfo(this, getText(R.string.notification_title),
+        getText(R.string.notification_message), pendingIntent);
+startForeground(ONGOING_NOTIFICATION_ID, notification);
+</pre>
+
+<p class="caution"><strong>警告:</strong> {@link
+android.app.Service#startForeground startForeground()} に渡す整数 ID には、0 は使用できません。</p>
+
+
+<p>サービスをフォアグラウンドから除去するには、{@link
+android.app.Service#stopForeground stopForeground()} を呼び出します。このメソッドでは、同時にステータスバーの通知も除去するかどうかを示すブール値を受け付けます。
+このメソッドでは、サービスは停止<em>されません</em>。
+ただし、サービスがまだフォアグラウンドで実行中に停止した場合は、通知も除去されます。
+</p>
+
+<p>通知の詳細については、「<a href="{@docRoot}guide/topics/ui/notifiers/notifications.html">Creating Status Bar Notifications</a>」をご覧ください。
+</p>
+
+
+
+<h2 id="Lifecycle">サービスのライフサイクルを管理する</h2>
+
+<p>サービスのライフサイクルは、アクティビティのライフサイクルよりもはるかにシンプルです。ただし、サービスはバックグラウンドでサイレントに実行されるため、サービスがどのように作成され、破棄されるかについては、より一層の注意を払っておく必要があります。
+
+</p>
+
+<p>作成されてから破棄されるまでのサービスのライフサイクルには、2 つの経路があります。&mdash;&mdash;
+</p>
+
+<ul>
+<li>開始されたサービスの場合
+  <p>他のコンポーネントが {@link
+android.content.Context#startService startService()} を呼び出したときにサービスが作成されます。その後サービスは無期限に実行し、{@link
+android.app.Service#stopSelf() stopSelf()} を呼び出して自身で停止する必要があります。
+また、他のコンポーネントから {@link android.content.Context#stopService stopService()} を呼び出してサービスを停止することもできます。
+
+サービスが停止すると、システムがそれを破棄します。</p></li>
+
+<li>バインドされたサービス
+  <p>他のコンポーネント（クライアント）が {@link
+android.content.Context#bindService bindService()} を呼び出したときにサービスが作成されます。その後、クライアントが {@link android.os.IBinder} インターフェースを介してサービスとやり取りします。
+クライアントは、{@link android.content.Context#unbindService unbindService()} を呼び出して接続を終了できます。
+サービスには同時に複数のクライアントがバインドでき、すべてがアンバインドされると、サービスはシステムによって破棄されます
+（サービスを自身で停止する必要は<em>ありません</em>）。
+</p></li>
+</ul>
+
+<p>この 2 つの経路は、完全に分離しているわけではありません。つまり、{@link android.content.Context#startService startService()} で既に開始されたサービスにバインドすることも可能です。
+たとえば、{@link android.content.Context#startService
+startService()} を呼び出してバックグラウンドの音楽サービスを開始し、{@link android.content.Intent} を使って再生する音楽を指定できます。
+その後、ユーザーがプレーヤーを操作したり、現在の曲に関する情報を入手したりする場合は、{@link
+android.content.Context#bindService bindService()} を呼び出すことでアクティビティをサービスにバインドできます。
+
+このような場合は、すべてのクライアントがアンバインドされるまで、{@link
+android.content.Context#stopService stopService()} や {@link android.app.Service#stopSelf
+stopSelf()} ではサービスは停止されません。 </p>
+
+
+<h3 id="LifecycleCallbacks">ライフサイクル コールバックを実装する</h3>
+
+<p>アクティビティと同様に、サービスにもコールバック メソッドがあり、それを実装することでサービスの状態の変化を監視したり、適切なタイミングで処理を実行したりできます。
+次のスケルトン サービスは、それぞれのライフサイクル メソッドを表しています。
+</p>
+
+<pre>
+public class ExampleService extends Service {
+    int mStartMode;       // indicates how to behave if the service is killed
+    IBinder mBinder;      // interface for clients that bind
+    boolean mAllowRebind; // indicates whether onRebind should be used
+
+    &#64;Override
+    public void {@link android.app.Service#onCreate onCreate}() {
+        // The service is being created
+    }
+    &#64;Override
+    public int {@link android.app.Service#onStartCommand onStartCommand}(Intent intent, int flags, int startId) {
+        // The service is starting, due to a call to {@link android.content.Context#startService startService()}
+        return <em>mStartMode</em>;
+    }
+    &#64;Override
+    public IBinder {@link android.app.Service#onBind onBind}(Intent intent) {
+        // A client is binding to the service with {@link android.content.Context#bindService bindService()}
+        return <em>mBinder</em>;
+    }
+    &#64;Override
+    public boolean {@link android.app.Service#onUnbind onUnbind}(Intent intent) {
+        // All clients have unbound with {@link android.content.Context#unbindService unbindService()}
+        return <em>mAllowRebind</em>;
+    }
+    &#64;Override
+    public void {@link android.app.Service#onRebind onRebind}(Intent intent) {
+        // A client is binding to the service with {@link android.content.Context#bindService bindService()},
+        // after onUnbind() has already been called
+    }
+    &#64;Override
+    public void {@link android.app.Service#onDestroy onDestroy}() {
+        // The service is no longer used and is being destroyed
+    }
+}
+</pre>
+
+<p class="note"><strong>注:</strong> アクティビティのライフサイクル コールバック メソッドの場合とは異なり、これらのコールバック メソッドのスーパークラスの実装を呼び出す必要は<em>ありません</em>。
+</p>
+
+<img alt="" src="images/hero/how-to-enter1.jpg" />
+<p class="img-caption"><strong>図 2.</strong> サービスのライフサイクル。左側の図は、{@link android.content.Context#startService
+startService()} でサービスが作成されたときのライフサイクルを示し、右側の図は、{@link android.content.Context#bindService bindService()} でサービスが作成されたときのライフサイクルを示しています。
+
+</p>
+
+<p>これらのメソッドを実装すると、サービスのライフサイクル内の次の 2 つのネストされたループを監視できます。 </p>
+
+<ul>
+<li>サービスの<strong>全体の生存期間</strong>は、{@link
+android.app.Service#onCreate onCreate()} が呼び出されてから、{@link
+android.app.Service#onDestroy} から戻るまでの間です。アクティビティと同様に、サービスが {@link android.app.Service#onCreate onCreate()} で初期設定を行い、{@link
+android.app.Service#onDestroy onDestroy()} で残りのすべてのリソースを解放します。
+たとえば、音楽再生サービスでは、音楽を再生するスレッドを {@link
+android.app.Service#onCreate onCreate()} に作成して、停止するスレッドを {@link
+android.app.Service#onDestroy onDestroy()} に作成します。
+
+
+<p>{@link android.app.Service#onCreate onCreate()} メソッドと {@link android.app.Service#onDestroy
+onDestroy()} メソッドは、それが{@link android.content.Context#startService startService()} か {@link
+android.content.Context#bindService bindService()} のどちらで作成された場合でも、すべてのサービスに対して呼び出されます。
+</p></li>
+
+<li>サービスの<strong>アクティブな生存期間</strong> {@link
+android.app.Service#onStartCommand onStartCommand()} か {@link android.app.Service#onBind onBind()} のいずれかへの呼び出しから開始します。各メソッドには、{@link android.content.Context#startService
+startService()} か {@link android.content.Context#bindService bindService()} のいずれかに渡された {@link
+android.content.Intent} が渡されます。
+
+<p>サービスが開始された場合、アクティブな生存期間の完了は、全体の生存期間の完了と同じタイミングとなります（{@link android.app.Service#onStartCommand
+onStartCommand()} から戻った後もサービスはまだアクティブです）。
+サービスがバインドされた場合、アクティブな生存期間は {@link
+android.app.Service#onUnbind onUnbind()} から戻った時点で完了します。</p>
+</li>
+</ul>
+
+<p class="note"><strong>注:</strong> 開始されたサービスは、{@link android.app.Service#stopSelf stopSelf()} か {@link
+android.content.Context#stopService stopService()} への呼び出しで停止されますが、サービスには同様のコールバックはありません（{@code onStop()} コールバックがありません）。
+
+そのため、サービスがクライアントにバインドされていない限り、サービスが停止するとシステムがそれを破棄します。受け取るコールバックは {@link
+android.app.Service#onDestroy onDestroy()} のみです。
+&mdash;</p>
+
+<p>図 2 は、サービスの典型的なコールバック メソッドを表しています。この図では、{@link android.content.Context#startService startService()} で作成されたサービスと {@link android.content.Context#bindService bindService()} で作成されたサービスを分けていますが、開始方法にかかわらず、すべてのサービスがクライアントからバインドされる可能性があることに注意してください。つまり、当初は {@link android.app.Service#onStartCommand
+onStartCommand()} で（クライアントが {@link android.content.Context#startService startService()} を呼び出した際）開始されたサービスも、{@link android.app.Service#onBind onBind()} への呼び出し（クライアントが {@link android.content.Context#bindService bindService()} を呼び出した際）を受け取ることができます。
+
+
+
+
+
+</p>
+
+<p>バインドを提供するサービスの作成に関する詳細は、「<a href="{@docRoot}guide/components/bound-services.html">バインドされたサービス</a>」のドキュメントをご覧ください。このドキュメントの<a href="{@docRoot}guide/components/bound-services.html#Lifecycle">バインドされたサービスのライフサイクルを管理する</a>では、{@link android.app.Service#onRebind onRebind()} コールバックの詳細についても説明しています。
+
+
+</p>
+
+
+<!--
+<h2>Beginner's Path</h2>
+
+<p>To learn how to query data from the system or other applications (such as contacts or media
+stored on the device), continue with the <b><a
+href="{@docRoot}guide/topics/providers/content-providers.html">Content Providers</a></b>
+document.</p>
+-->

@@ -1,0 +1,74 @@
+page.title=Android 소개
+
+@jd:body
+
+
+<div class="sidebox" style="width:220px"><!-- width to match col-4 below -->
+<p>앱의 작동 원리를 배워보고자 한다면, 우선 
+<a href="{@docRoot}guide/components/fundamentals.html">앱 기본 항목</a>부터 시작하십시오.</p>
+<p>바로 코딩을 시작하려면, <a href="{@docRoot}training/basics/firstapp/index.html">첫 앱 구축하기</a>를 읽어보십시오.</p>
+</div>
+
+<p>Android는 풍성한 애플리케이션 프레임워크를 제공하여 Java 언어 환경에서 실행되는 
+모바일 기기에서 사용할 혁신적인 앱과 게임을 구축할 수 있습니다. 왼쪽 탐색 영역에 목록으로 나열된 
+여러 문서에서 Android의 다양한 API를 사용하여 앱을 구축하는 방법에 대한 상세한 정보를 제공합니다.</p>
+
+<p>Android 개발을 처음 시도하신다면, 다음과 같은 
+Android 앱 프레임워크 기본 개념을 숙지하는 것이 중요합니다.</p>
+
+
+<div class="landing-banner">
+
+<div class="col-6">
+
+<h4>앱은 여러 개의 진입 지점을 제공합니다.</h4>
+
+<p>Android 앱은 여러 가지 고유한 구성 요소들의 조합으로 구축되며, 이러한 구성 요소는 개별적으로 
+호출할 수도 있습니다. 예를 들어 어떤 하나의 <em>액티비티</em>가 사용자 인터페이스를 위한 
+화면을 하나 제공하고, <em>서비스</em>가 배경에서 독립적으로 작업을 수행할 
+수 있습니다.</p>
+
+<p>한 구성 요소에서 또 다른 구성 요소를 시작하려면 <em>인텐트</em>를 사용하면 됩니다. 심지어 다른 앱에서도 
+구성 요소를 시작할 수 있습니다. 지도 앱에서 주소를 표시하는 액티비티를 시작하는 것이 좋은 예입니다. 이 모델은 
+하나의 앱에 대한 여러 개의 진입 지점을 제공하여 어느 앱이라도 다른 여러 앱이 호출할 수 있는 작업에 대해 
+사용자의 "기본" 앱 역할을 합니다.</p>
+
+
+<p><b>자세히 알아보기:</b></p>
+<ul class="nolist">
+<li><a href="{@docRoot}guide/components/fundamentals.html">앱 기본 항목</a>
+<li><a href="{@docRoot}guide/components/intents-filters.html">인텐트 및 인텐트 필터</a>
+<li><a href="{@docRoot}guide/components/activities.html">액티비티</a>
+</ul>
+
+</div>
+
+
+<div class="col-6">
+
+<h4>앱은 여러 가지 기기에 맞게 변경됩니다.</h4>
+
+<p>Android는 적응형 앱 프레임워크를 제공하여 여러 가지 기기 구성에 맞게 
+고유한 리소스를 제공할 수 있습니다. 예를 들어, 여러 가지 화면 크기에 맞춰 각기 다른 XML 
+레이아웃 파일을 생성하면 시스템이 현재 기기의 화면 크기를 근거로 
+어느 레이아웃을 적용할지 결정합니다.</p>
+
+<p>앱 기능이 특정한 하드웨어(예: 카메라)를 필요로 하는 경우 런타임에 
+기기 특징의 기능을 쿼리할 수 있습니다. 필요하다면 앱이 필요로 하는 기능을 선언할 수도 있습니다. 
+그러면 Google Play Store와 같은 앱 마켓에서 해당 기능을 지원하지 않는 기기에서 
+설치를 허용하지 않습니다.</p>
+
+
+<p><b>자세히 알아보기:</b></p>
+<ul class="nolist">
+<li><a href="{@docRoot}guide/practices/compatibility.html">기기 호환성</a>
+<li><a href="{@docRoot}guide/topics/resources/overview.html">리소스 개요</a>
+<li><a href="{@docRoot}guide/topics/ui/overview.html">사용자 인터페이스 개요</a>
+</ul>
+
+</div>
+
+</div><!-- end landing-banner -->
+
+
+

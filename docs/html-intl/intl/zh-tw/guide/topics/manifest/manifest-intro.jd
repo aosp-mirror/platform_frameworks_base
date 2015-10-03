@@ -1,0 +1,517 @@
+page.title=應用程式宣示說明
+@jd:body
+
+<div id="qv-wrapper">
+<div id="qv">
+
+<h2>本文件內容</h2>
+<ol>
+<li><a href="#filestruct">宣示說明檔案結構</a></li>
+<li><a href="#filec">檔案轉換</a>
+<li><a href="#filef">檔案功能</a>
+	<ol>
+	<li><a href="#ifs">意圖篩選器</a></li>
+	<li><a href="#iconlabel">圖示和標籤</a></li>
+	<li><a href="#perms">權限</a></li>
+	<li><a href="#libs">程式庫</a></li>
+	</ol></li>
+</ol>
+</div>
+</div>
+
+<p>
+  每個應用程式的根目錄都必須包含 AndroidManifest.xml 檔案 (名稱要一字不差)。
+ <span itemprop="description">宣示說明檔案可向 Android 系統顯示應用程式的基本資訊，也就是系統在執行該應用程式的任何程式碼之前必須具備的資訊。
+
+
+</span> 宣示說明可執行下列動作：
+</p>
+
+<ul>
+<li>為應用程式的 Java 封裝命名。
+封裝名稱可當成應用程式的唯一識別碼使用。</li>
+
+<li>描述應用程式的元件 &mdash; 組成應用程式的 Activity、服務、廣播接收器和內容供應程式。
+
+為實作每個元件的類別命名以及發佈類別的功能 (例如，類別可處理的 {@link android.content.Intent 
+Intent} 訊息)。
+這些宣告可讓 Android 系統瞭解元件為何以及可在哪些情況下啟動。
+</li>
+
+<li>決定代管應用程式元件的程序。</li>  
+
+<li>宣告應用程式必須擁有哪些權限，才能存取 API 受保護的部分以及與其他應用程式互動。
+</li>  
+
+<li>宣示說明亦可宣告其他項目必須擁有哪些權限，才能與應用程式的元件互動。
+</li>
+
+<li>列出可在應用程式執行時提供分析和其他資訊的 {@link android.app.Instrumentation} 類別。
+只有在應用程式開發及測試完成的情況下，宣示說明中才會顯示這些宣告；這些宣告會在應用程式發佈之前移除。
+
+</li>
+
+<li>宣告應用程式要求的最低 Android API 級別。
+</li>
+
+<li>列出應用程式必須連結的程式庫。</li>
+</ul>
+
+
+<h2 id="filestruct">宣示說明檔案結構</h2>
+
+<p>
+下圖顯示宣示說明檔案的一般結構和可納入其中的元素。
+每個元素和其所有屬性都會完全記錄在個別檔案中。
+如要查看任一元素的詳細資訊，只要按一下圖表中的元素名稱、圖表後方按字母順序列出的元素清單，或在他處提及的任何元素名稱。
+
+
+ 
+</p>
+
+<pre>
+&lt;?xml version="1.0" encoding="utf-8"?&gt;
+
+<a href="{@docRoot}guide/topics/manifest/manifest-element.html">&lt;manifest&gt;</a>
+
+    <a href="{@docRoot}guide/topics/manifest/uses-permission-element.html">&lt;uses-permission /&gt;</a>
+    <a href="{@docRoot}guide/topics/manifest/permission-element.html">&lt;permission /&gt;</a>
+    <a href="{@docRoot}guide/topics/manifest/permission-tree-element.html">&lt;permission-tree /&gt;</a>
+    <a href="{@docRoot}guide/topics/manifest/permission-group-element.html">&lt;permission-group /&gt;</a>
+    <a href="{@docRoot}guide/topics/manifest/instrumentation-element.html">&lt;instrumentation /&gt;</a>
+    <a href="{@docRoot}guide/topics/manifest/uses-sdk-element.html">&lt;uses-sdk /&gt;</a>
+    <a href="{@docRoot}guide/topics/manifest/uses-configuration-element.html">&lt;uses-configuration /&gt;</a>  <!-- ##api level 3## -->
+    <a href="{@docRoot}guide/topics/manifest/uses-feature-element.html">&lt;uses-feature /&gt;</a>  <!-- ##api level 4## -->
+    <a href="{@docRoot}guide/topics/manifest/supports-screens-element.html">&lt;supports-screens /&gt;</a>  <!-- ##api level 4## -->
+    <a href="{@docRoot}guide/topics/manifest/compatible-screens-element.html">&lt;compatible-screens /&gt;</a>  <!-- ##api level 9## -->
+    <a href="{@docRoot}guide/topics/manifest/supports-gl-texture-element.html">&lt;supports-gl-texture /&gt;</a>  <!-- ##api level 11## -->
+
+    <a href="{@docRoot}guide/topics/manifest/application-element.html">&lt;application&gt;</a>
+
+        <a href="{@docRoot}guide/topics/manifest/activity-element.html">&lt;activity&gt;</a>
+            <a href="{@docRoot}guide/topics/manifest/intent-filter-element.html">&lt;intent-filter&gt;</a>
+                <a href="{@docRoot}guide/topics/manifest/action-element.html">&lt;action /&gt;</a>
+                <a href="{@docRoot}guide/topics/manifest/category-element.html">&lt;category /&gt;</a>
+                <a href="{@docRoot}guide/topics/manifest/data-element.html">&lt;data /&gt;</a>
+            <a href="{@docRoot}guide/topics/manifest/intent-filter-element.html">&lt;/intent-filter&gt;</a>
+            <a href="{@docRoot}guide/topics/manifest/meta-data-element.html">&lt;meta-data /&gt;</a>
+        <a href="{@docRoot}guide/topics/manifest/activity-element.html">&lt;/activity&gt;</a>
+
+        <a href="{@docRoot}guide/topics/manifest/activity-alias-element.html">&lt;activity-alias&gt;</a>
+            <a href="{@docRoot}guide/topics/manifest/intent-filter-element.html">&lt;intent-filter&gt;</a> . . . <a href="{@docRoot}guide/topics/manifest/intent-filter-element.html">&lt;/intent-filter&gt;</a>
+            <a href="{@docRoot}guide/topics/manifest/meta-data-element.html">&lt;meta-data /&gt;</a>
+        <a href="{@docRoot}guide/topics/manifest/activity-alias-element.html">&lt;/activity-alias&gt;</a>
+
+        <a href="{@docRoot}guide/topics/manifest/service-element.html">&lt;service&gt;</a>
+            <a href="{@docRoot}guide/topics/manifest/intent-filter-element.html">&lt;intent-filter&gt;</a> . . . <a href="{@docRoot}guide/topics/manifest/intent-filter-element.html">&lt;/intent-filter&gt;</a>
+            <a href="{@docRoot}guide/topics/manifest/meta-data-element.html">&lt;meta-data/&gt;</a>
+        <a href="{@docRoot}guide/topics/manifest/service-element.html">&lt;/service&gt;</a>
+
+        <a href="{@docRoot}guide/topics/manifest/receiver-element.html">&lt;receiver&gt;</a>
+            <a href="{@docRoot}guide/topics/manifest/intent-filter-element.html">&lt;intent-filter&gt;</a> . . . <a href="{@docRoot}guide/topics/manifest/intent-filter-element.html">&lt;/intent-filter&gt;</a>
+            <a href="{@docRoot}guide/topics/manifest/meta-data-element.html">&lt;meta-data /&gt;</a>
+        <a href="{@docRoot}guide/topics/manifest/receiver-element.html">&lt;/receiver&gt;</a>
+
+        <a href="{@docRoot}guide/topics/manifest/provider-element.html">&lt;provider&gt;</a>
+            <a href="{@docRoot}guide/topics/manifest/grant-uri-permission-element.html">&lt;grant-uri-permission /&gt;</a>
+            <a href="{@docRoot}guide/topics/manifest/meta-data-element.html">&lt;meta-data /&gt;</a>
+            <a href="{@docRoot}guide/topics/manifest/path-permission-element.html">&lt;path-permission /&gt;</a>
+        <a href="{@docRoot}guide/topics/manifest/provider-element.html">&lt;/provider&gt;</a>
+
+        <a href="{@docRoot}guide/topics/manifest/uses-library-element.html">&lt;uses-library /&gt;</a>
+
+    <a href="{@docRoot}guide/topics/manifest/application-element.html">&lt;/application&gt;</a>
+
+<a href="{@docRoot}guide/topics/manifest/manifest-element.html">&lt;/manifest&gt;</a>
+</pre>
+
+<p>
+下方按字母順序列出可出現在宣示說明檔案中的所有元素。
+只有這些才是符合資格的元素，您無法新增自己的元素或屬性。
+  
+</p>
+
+<p style="margin-left: 2em">
+<code><a href="{@docRoot}guide/topics/manifest/action-element.html">&lt;action&gt;</a></code>
+<br/><code><a href="{@docRoot}guide/topics/manifest/activity-element.html">&lt;activity&gt;</a></code>
+<br/><code><a href="{@docRoot}guide/topics/manifest/activity-alias-element.html">&lt;activity-alias&gt;</a></code>
+<br/><code><a href="{@docRoot}guide/topics/manifest/application-element.html">&lt;application&gt;</a></code>
+<br/><code><a href="{@docRoot}guide/topics/manifest/category-element.html">&lt;category&gt;</a></code>
+<br/><code><a href="{@docRoot}guide/topics/manifest/data-element.html">&lt;data&gt;</a></code>
+<br/><code><a href="{@docRoot}guide/topics/manifest/grant-uri-permission-element.html">&lt;grant-uri-permission&gt;</a></code>
+<br/><code><a href="{@docRoot}guide/topics/manifest/instrumentation-element.html">&lt;instrumentation&gt;</a></code>
+<br/><code><a href="{@docRoot}guide/topics/manifest/intent-filter-element.html">&lt;intent-filter&gt;</a></code>
+<br/><code><a href="{@docRoot}guide/topics/manifest/manifest-element.html">&lt;manifest&gt;</a></code>
+<br/><code><a href="{@docRoot}guide/topics/manifest/meta-data-element.html">&lt;meta-data&gt;</a></code>
+<br/><code><a href="{@docRoot}guide/topics/manifest/permission-element.html">&lt;permission&gt;</a></code>
+<br/><code><a href="{@docRoot}guide/topics/manifest/permission-group-element.html">&lt;permission-group&gt;</a></code>
+<br/><code><a href="{@docRoot}guide/topics/manifest/permission-tree-element.html">&lt;permission-tree&gt;</a></code>
+<br/><code><a href="{@docRoot}guide/topics/manifest/provider-element.html">&lt;provider&gt;</a></code>
+<br/><code><a href="{@docRoot}guide/topics/manifest/receiver-element.html">&lt;receiver&gt;</a></code>
+<br/><code><a href="{@docRoot}guide/topics/manifest/service-element.html">&lt;service&gt;</a></code>
+<br/><code><a href="{@docRoot}guide/topics/manifest/supports-screens-element.html">&lt;supports-screens&gt;</a></code>  <!-- ##api level 4## -->
+<br/><code><a href="{@docRoot}guide/topics/manifest/uses-configuration-element.html">&lt;uses-configuration&gt;</a></code>  <!-- ##api level 3## -->
+<br/><code><a href="{@docRoot}guide/topics/manifest/uses-feature-element.html">&lt;uses-feature&gt;</a></code>  <!-- ##api level 4## -->
+<br/><code><a href="{@docRoot}guide/topics/manifest/uses-library-element.html">&lt;uses-library&gt;</a></code>
+<br/><code><a href="{@docRoot}guide/topics/manifest/uses-permission-element.html">&lt;uses-permission&gt;</a></code>
+<br/><code><a href="{@docRoot}guide/topics/manifest/uses-sdk-element.html">&lt;uses-sdk&gt;</a></code>
+</p>
+
+
+    
+
+<h2 id="filec">檔案轉換</h2>
+
+<p>
+某些轉換和規則通常適用於宣示說明中的所有元素與屬性：
+
+</p>
+
+<dl>
+<dt><b>元素</b></dt>
+<dd>只有
+<code><a href="{@docRoot}guide/topics/manifest/manifest-element.html">&lt;manifest&gt;</a></code> 與
+<code><a href="{@docRoot}guide/topics/manifest/application-element.html">&lt;application&gt;</a></code> 是必要元素，務必顯示兩者且這些元素只能出現一次。
+雖然您至少必須顯示當中的一些元素，才能完成有意義的作業，但大部分其他元素可以出現數次或完全不出現。
+
+
+
+
+<p>
+如果可以的話，元素還可以包含其他元素。所有值並非當成元素內的字元資料使用，而是透過屬性設定。
+
+</p>
+
+<p>
+系統通常不會將位於相同層級的元素排序。例如，
+<code><a href="{@docRoot}guide/topics/manifest/activity-element.html">&lt;activity&gt;</a></code>、
+<code><a href="{@docRoot}guide/topics/manifest/provider-element.html">&lt;provider&gt;</a></code> 和 
+<code><a href="{@docRoot}guide/topics/manifest/service-element.html">&lt;service&gt;</a></code> 元素能以任何順序排列組合。
+(
+<code><a href="{@docRoot}guide/topics/manifest/activity-alias-element.html">&lt;activity-alias&gt;</a></code> 元素是這項規則的例外狀況：
+由於它是
+<code><a href="{@docRoot}guide/topics/manifest/activity-element.html">&lt;activity&gt;</a></code> 的別名，因此必須跟在該元素的後面)。
+
+</p></dd>
+
+<dt><b>屬性</b></dt>
+<dd>形式上而言，所有屬性均為選用性質。不過，您必須為元素指定某些屬性，才能達到其目的。
+請使用本文件當成參考指南。
+真正的選用屬性會提及在缺少規格時要使用的預設值或狀態。
+
+
+<p>除了
+<code><a href="{@docRoot}guide/topics/manifest/manifest-element.html">&lt;manifest&gt;</a></code> 根元素的某些屬性以外，所有屬性名稱都是以前置詞 {@code android:}為開頭，例如 {@code android:alwaysRetainTaskState}。
+
+由於前置詞是通用的，因此按名稱參照屬性時，文件通常會加以省略。
+
+</p></dd>
+
+<dt><b>宣告類別名稱</b></dt>
+<dd>許多元素都會對應到 Java 物件，包括應用程式本身的元素 (
+<code><a href="{@docRoot}guide/topics/manifest/application-element.html">&lt;application&gt;</a></code> 元素) 與其主要元件：Activity (<code><a href="{@docRoot}guide/topics/manifest/activity-element.html">&lt;activity&gt;</a></code>)、服務 (<code><a href="{@docRoot}guide/topics/manifest/service-element.html">&lt;service&gt;</a></code>)、廣播接收器 (<code><a href="{@docRoot}guide/topics/manifest/receiver-element.html">&lt;receiver&gt;</a></code>) 以及內容供應程式 (<code><a href="{@docRoot}guide/topics/manifest/provider-element.html">&lt;provider&gt;</a></code>)。
+
+
+
+
+
+
+
+
+  
+
+<p>
+如果您一如往常定義元件類別 ({@link android.app.Activity}、{@link android.app.Service}、
+{@link android.content.BroadcastReceiver} 及 {@link android.content.ContentProvider}) 般定義子類別，就會透過 {@code name} 屬性宣告子類別。
+
+該名稱必須包含完整的封裝指定名稱。
+例如，{@link android.app.Service} 子類別可能會以下列格式宣告：
+
+</p>
+
+<pre>&lt;manifest . . . &gt;
+    &lt;application . . . &gt;
+        &lt;service android:name="com.example.project.SecretService" . . . &gt;
+            . . .
+        &lt;/service&gt;
+        . . .
+    &lt;/application&gt;
+&lt;/manifest&gt;</pre>
+
+<p>
+不過，採用速記法時，如果字串的第一個字元是句點，就會將字串附加到應用程式的封裝名稱 (如同由
+<code><a href="{@docRoot}guide/topics/manifest/manifest-element.html">&lt;manifest&gt;</a></code> 元素的
+<code><a href="{@docRoot}guide/topics/manifest/manifest-element.html#package">package</a></code> 屬性指定)。
+
+
+下列的指派結果會和上述相同： 
+</p>
+
+<pre>&lt;manifest package="com.example.project" . . . &gt;
+    &lt;application . . . &gt;
+        &lt;service android:name=".SecretService" . . . &gt;
+            . . .
+        &lt;/service&gt;
+        . . .
+    &lt;/application&gt;
+&lt;/manifest&gt;</pre>
+
+<p>
+啟動元件時，Android 會建立具名子類別的執行個體。如果未指定子類別，就會建立基本類別的執行個體。
+
+</p></dd>
+
+<dt><b>多個值</b></dt>
+<dd>如果可以指定多個值，該元素幾乎會一直重複，而不是在單一元素內列出多個值。
+例如，意圖篩選器能列出數種動作：
+
+
+<pre>&lt;intent-filter . . . &gt;
+    &lt;action android:name="android.intent.action.EDIT" /&gt;
+    &lt;action android:name="android.intent.action.INSERT" /&gt;
+    &lt;action android:name="android.intent.action.DELETE" /&gt;
+    . . .
+&lt;/intent-filter&gt;</pre></dd>
+
+<dt><b>資源值</b></dt>
+<dd>有些屬性的值可以供使用者查看 &mdash; 例如 Activity 的標籤和圖示。
+您必須將這些屬性的值本地化，以便從資源或主題設定這些值。
+資源值是採用下列格式表示：
+</p>
+
+<p style="margin-left: 2em">{@code @[<i>package</i>:]<i>type</i>:<i>name</i>}</p>
+
+<p>
+其中的<i>package</i> 名稱可以省略 (如果資源所在的封裝和應用程式相同的話)，
+ <i>type</i> 是指資源類型 &mdash; 例如「字串」或「可繪項目」 &mdash; 而
+ <i>name</i> 則是可識別特定資源的名稱。範例：
+
+</p>
+
+<pre>&lt;activity android:icon="@drawable/smallPic" . . . &gt</pre>
+
+<p>
+主題中的值會以類似的方式表示，但字首會是 '{@code ?}'，而不是 '{@code @}'：
+
+</p>
+
+<p style="margin-left: 2em">{@code ?[<i>package</i>:]<i>type</i>:<i>name</i>}
+</p></dd>
+
+<dt><b>字串值</b></dt>
+<dd>如果屬性值為字串，必須使用雙反斜線 ('{@code \\}')來溢出字元，例如 '{@code \\n}'表示換行字元，或 '{@code \\uxxxx}' 表示 Unicode 字元。
+
+</dd>
+</dl>
+
+
+<h2 id="filef">檔案功能</h2>
+
+<p>
+下列各節說明如何在宣示說明檔案中反映部分 Android 功能。
+
+</p>
+
+
+<h3 id="ifs">意圖篩選器</h3>
+
+<p>
+應用程式的核心元件 (即應用程式的 Activity、服務和廣播接收器) 是由
+ <i>意圖</i>啟動。意圖是一組資訊組合 ({@link android.content.Intent} 物件)，用於說明要採取的動作 &mdash; 包括執行依據的資料、應執行動作的元件類別，以及其他相關的指示。
+
+
+Android 會找出適當的元件來回應意圖、視需要啟動元件的新執行個體，以及將意圖物件傳送給它。
+
+
+
+</p>
+
+<p>
+元件會通知其功能 (元件可回應的意圖類型)，而通知途徑是
+ <i>意圖篩選器</i>。由於 Android 系統必須先瞭解元件能夠處理哪些意圖，才能啟動該元件，因此意圖篩選器在宣示說明中會指定為
+<code><a href="{@docRoot}guide/topics/manifest/intent-filter-element.html">&lt;intent-filter&gt;</a></code> 元素。
+
+
+元件可包含的篩選器數目不拘，每個篩選器描述的功能各不相同。
+
+</p>
+
+<p>
+明確命名目標元件的意圖會啟動該元件，而不必使用篩選器。
+但未指定目標名稱的意圖，只有在其通過其中一個元件的篩選器後，才能啟動元件。
+
+
+</p>
+
+<p>
+如要瞭解意圖物件測試意圖篩選器的方式，請參閱<a href="{@docRoot}guide/components/intents-filters.html">意圖和意圖篩選器</a>。
+
+
+
+</p>
+
+
+<h3 id="iconlabel">圖示和標籤</h3>
+
+<p>
+許多元素都有可供小型圖示與文字標籤使用的 {@code icon} 和 {@code label} 屬性，而使用者可看到這些圖示和標籤。
+有些元素還包含可供較長說明文字使用的
+{@code description} 屬性，這個說明文字亦可顯示在螢幕上。
+例如，假設
+<code><a href="{@docRoot}guide/topics/manifest/permission-element.html">&lt;permission&gt;</a></code> 元素含有上述三種屬性，當系統詢問使用者是否將權限授予發出要求的應用程式時，可以將代表權限的圖示、該權限的名稱以及所需的描述全都向使用者顯示。
+
+
+
+
+</p>
+
+<p>
+在各種情況下，元件中設定的圖示和標籤會成為所有容器下層元素的預設
+{@code icon} 與 {@code label} 設定因此，
+<code><a href="{@docRoot}guide/topics/manifest/application-element.html">&lt;application&gt;</a></code> 元素中設定的圖示和標籤會是應用程式各元件的預設圖示和標籤。
+
+同樣地，為元件 (例如
+<code><a href="{@docRoot}guide/topics/manifest/activity-element.html">&lt;activity&gt;</a></code> 元素) 設定的圖示和標籤會是元件的
+<code><a href="{@docRoot}guide/topics/manifest/intent-filter-element.html">&lt;intent-filter&gt;</a></code> 元素預設值。
+
+
+如果 
+<code><a href="{@docRoot}guide/topics/manifest/application-element.html">&lt;application&gt;</a></code> 元素設有一個標籤，但 Activity 與其意圖篩選器並未設定該標籤，系統會將應用程式標籤視為 Activity 和意圖篩選器的標籤。
+
+
+
+</p>
+
+<p>
+每當執行篩選器通告的功能，要向使用者顯示元件時，就會將為意圖篩選器設定的圖示和標籤用來代表元件。
+
+例如，包含
+"{@code android.intent.action.MAIN}" 與
+"{@code android.intent.category.LAUNCHER}" 設定的篩選器會將某 Activity 宣告為啟動應用程式的 Activity，也就是應顯示在應用程式啟動器中的 Activity。
+
+因此，顯示在啟動器中的會是篩選器中設定的圖示和標籤。
+
+</p>
+
+
+<h3 id="perms">權限</h3>
+
+<p>
+單一 <i>權限</i> 是指一項限制，可限制某部分程式碼或裝置上資料的存取權。
+   系統會強制實施這項限制，以保護會遭到誤用而扭曲或損害使用者體驗的重要資料與程式碼。
+  
+</p>
+
+<p>
+各項權限都是用不重複的標籤加以辨識。該標籤通常會指出受到限制的動作。
+例如，以下是 Android 定義的一些權限：
+
+</p>
+
+<p style="margin-left: 2em">{@code android.permission.CALL_EMERGENCY_NUMBERS}
+<br/>{@code android.permission.READ_OWNER_DATA}
+<br/>{@code android.permission.SET_WALLPAPER}
+<br/>{@code android.permission.DEVICE_POWER}</p>
+
+<p>
+單一功能最多只能利用一項權限來加以保護。
+</p>
+
+<p>
+如果應用程式需要存取受權限保護的功能，它必須在宣示說明中利用
+<code><a href="{@docRoot}guide/topics/manifest/uses-permission-element.html">&lt;uses-permission&gt;</a></code> 元素來宣告其需要該項權限。
+
+接著，要在裝置上安裝該應用程式時，安裝程式會檢查簽署該應用程式憑證的授權單位 (在某些情況下還會詢問使用者)，然後決定是否授予要求的權限。
+
+
+如果授予權限，該應用程式就能夠使用受保護的功能。
+
+如果不授予權限，存取相關功能的嘗試就會失敗，但使用者不會收到任何通知。
+ 
+</p>
+
+<p>
+應用程式也能利用權限來保護自己的元件 (Activity、服務、廣播接收器和內容供應程式)。
+它能使用 Android 定義的任何權限 (列於 
+{@link android.Manifest.permission android.Manifest.permission}) 或其他應用程式宣告的任何權限。
+
+此外，應用程式也能自行定義權限。新的權限是以
+<code><a href="{@docRoot}guide/topics/manifest/permission-element.html">&lt;permission&gt;</a></code> 元素宣告。
+
+例如，您可以利用下列權限保護 Activity：
+</p>
+
+<pre>
+&lt;manifest . . . &gt;
+    &lt;permission android:name="com.example.project.DEBIT_ACCT" . . . /&gt;
+    &lt;uses-permission android:name="com.example.project.DEBIT_ACCT" /&gt;
+    . . .
+    &lt;application . . .&gt;
+        &lt;activity android:name="com.example.project.FreneticActivity"
+                  android:permission="com.example.project.DEBIT_ACCT"
+                  . . . &gt;
+            . . .
+        &lt;/activity&gt;
+    &lt;/application&gt;
+&lt;/manifest&gt;
+</pre>
+
+<p>
+請注意，在本範例中，不只以
+<code><a href="{@docRoot}guide/topics/manifest/permission-element.html">&lt;permission&gt;</a></code> 元素宣告 {@code DEBIT_ACCT} 權限，還使用 
+<code><a href="{@docRoot}guide/topics/manifest/uses-permission-element.html">&lt;uses-permission&gt;</a></code> 元素來要求使用此權限。
+
+
+即使保護是由應用程式本身強制施行，還是必須要求使用該權限，應用程式的其他元件才能啟動受保護的 Activity。
+
+  
+</p>
+
+<p>
+在相同的範例中，如果 {@code permission} 屬性設定為在別處宣告的權限 (例如 {@code android.permission.CALL_EMERGENCY_NUMBERS})，就不必再次使用
+<code><a href="{@docRoot}guide/topics/manifest/permission-element.html">&lt;permission&gt;</a></code> 元素來宣告。
+
+
+
+不過，還是必須利用
+<code><a href="{@docRoot}guide/topics/manifest/uses-permission-element.html">&lt;uses-permission&gt;</a></code> 來要求使用。 
+</p>
+
+<p>
+
+<code><a href="{@docRoot}guide/topics/manifest/permission-tree-element.html">&lt;permission-tree&gt;</a></code> 元素可為程式碼將定義的一組權限宣告命名空間。
+
+此外，
+<code><a href="{@docRoot}guide/topics/manifest/permission-group-element.html">&lt;permission-group&gt;</a></code> 可為一組權限定義標籤 (以
+<code><a href="{@docRoot}guide/topics/manifest/permission-element.html">&lt;permission&gt;</a></code> 元素在宣示說明中宣告的權限或在別處宣告的權限)。
+
+它只會影響在向使用者呈現權限時的分組方式。
+
+<code><a href="{@docRoot}guide/topics/manifest/permission-group-element.html">&lt;permission-group&gt;</a></code> 元素不會指定各權限所屬的群組，只會指定群組的名稱。
+
+只要將群組名稱指派給
+<code><a href="{@docRoot}guide/topics/manifest/permission-element.html">&lt;permission&gt;</a></code> 元素
+<code><a href="{@docRoot}guide/topics/manifest/permission-element.html#pgroup">permissionGroup</a></code> 的屬性，就能將權限放入群組中。
+
+
+
+</p>
+
+
+<h3 id="libs">程式庫</h3>
+
+<p>
+每款應用程式都會與預設的 Android 程式庫連結，該程式庫中包含的基本封裝可用於建置應用程式 (使用 Activity、Service、Intent、View、Button、Application、ContentProvider 等一般類別)。
+
+
+
+</p>
+
+<p>
+不過，有些封裝是存放在其專屬的程式庫中。如果您的應用程式使用來自這類封裝的程式碼，您必須明確要求與其建立連結。
+
+宣示說明必須包含個別的
+<code><a href="{@docRoot}guide/topics/manifest/uses-library-element.html">&lt;uses-library&gt;</a></code> 元素，才能命名各個程式庫。
+(您可以在封裝的說明文件中找到程式庫名稱)。
+
+</p>

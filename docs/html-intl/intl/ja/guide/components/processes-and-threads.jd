@@ -1,0 +1,411 @@
+page.title=プロセスとスレッド
+page.tags=lifecycle,background
+
+@jd:body
+
+<div id="qv-wrapper">
+<div id="qv">
+
+<h2>本書の内容</h2>
+<ol>
+<li><a href="#Processes">プロセス</a>
+  <ol>
+    <li><a href="#Lifecycle">プロセスのライフサイクル</a></li>
+  </ol>
+</li>
+<li><a href="#Threads">スレッド</a>
+  <ol>
+    <li><a href="#WorkerThreads">ワーカー スレッド</a></li>
+    <li><a href="#ThreadSafe">スレッド セーフのメソッド</a></li>
+  </ol>
+</li>
+<li><a href="#IPC">プロセス間通信（IPC）</a></li>
+</ol>
+
+</div>
+</div>
+
+<p>アプリケーション コンポーネントが開始し、アプリケーションに他に実行中のコンポーネントがない場合、Android システムは実行用のシングル スレッドを持つアプリケーション用の新しい Linux プロセスを開始します。
+
+デフォルトでは、同じアプリケーションのすべてのコンポーネントは同じプロセスとスレッド（「メイン」 スレッドと呼ばれます）で実行します。
+アプリケーション コンポーネントが開始したときに、既にそのアプリケーションのプロセスが存在する場合（アプリケーションからの他のコンポーネントが存在するため）、コンポーネントはそのプロセス内で開始し、同じ実行用のスレッドを使用します。
+
+ただし、アプリケーション内の別のコンポーネントを別のプロセスで実行するよう調整でき、あらゆるプロセスに対して追加のスレッドを作成できます。
+
+</p>
+
+<p>このドキュメントでは、Android アプリケーションでプロセスとスレッドがどのように動作するかについて説明します。</p>
+
+
+<h2 id="Processes">プロセス</h2>
+
+<p>デフォルトでは、同じアプリケーションのすべてのコンポーネントは同じプロセスで実行し、ほとんどのアプリケーションでこの動作を変更する必要はありません。
+ただし、特定のコンポーネントが属するプロセスを管理する必要がある場合は、マニフェスト ファイルでそれを行うことができます。
+</p>
+
+<p>コンポーネント要素の各タイプのマニフェスト エントリ（<a href="{@docRoot}guide/topics/manifest/activity-element.html">{@code
+&lt;activity&gt;}</a>、<a href="{@docRoot}guide/topics/manifest/service-element.html">{@code
+&lt;service&gt;}</a>、<a href="{@docRoot}guide/topics/manifest/receiver-element.html">{@code
+&lt;receiver&gt;}</a>、<a href="{@docRoot}guide/topics/manifest/provider-element.html">{@code
+&lt;provider&gt;}</a>）は、コンポーネントを実行するプロセスを指定できる {@code android:process} 属性をサポートしています。&mdash;
+&mdash;この属性を設定して、各コンポーネントが独自のプロセスで実行するようにしたり、一部のコンポーネントで同じプロセスを共有し、残りのコンポーネントでは別のプロセスを使用するようにしたりできます。
+また、{@code android:process} を設定すると、異なるアプリケーションのコンポーネントを同じプロセスで実行させることもできます。この場合、アプリケーションが同じ Linux ユーザー ID を共有していて、同じ証明書で署名されている必要があります。
+&mdash;
+
+</p>
+
+<p><a href="{@docRoot}guide/topics/manifest/application-element.html">{@code
+&lt;application&gt;}</a> 要素も {@code android:process} 属性をサポートしており、すべてのコンポーネントに適用されるデフォルトの値を設定します。
+</p>
+
+<p>メモリの空きが少なくなり、早急にユーザーに提供する必要のあるプロセスが必要とする場合は、Android がプロセスをどこかの時点でシャットダウンするよう決定する場合があります。
+破棄されたプロセスで実行しているアプリケーション コンポーネントは、結果的に破棄されます。
+プロセスは、それらのコンポーネントの処理が再度発生したときに再開されます。
+</p>
+
+<p>破棄するプロセスを決定する際、Android システムはユーザーへの相対的な重要度を測ります。
+たとえば、画面に見えているアクティビティをホストするプロセスよりも、もう画面に見えていないアクティビティをホストするプロセスの方が先にシャットダウンされることになります。
+そのため、プロセスを停止するかどうかは、そのプロセスで実行しているコンポーネントの状態によって決まります。
+ここから、停止するプロセスを決定する規則について詳しく説明していきます。
+ </p>
+
+
+<h3 id="Lifecycle">プロセスのライフサイクル</h3>
+
+<p>Android システムは、可能な限り長期間アプリケーション プロセスを維持しようとしますが、新たに重要なプロセスが発生した際には、メモリを回収するために古いプロセスをいずれは削除する必要が生じます。
+どのプロセスを維持して、どのプロセスを強制終了するかを決定するため、システムはプロセスで実行しているコンポーネントとコンポーネントの状態に基づいて、各プロセスを「重要度の階層」に位置付けします。
+
+
+まず、重要度の最も低いプロセスが除去され、その後システム リソースを回復できるまで重要度の低い順に除去していきます。
+
+</p>
+
+<p>重要度の階層には 5 つのレベルがあります。次の一覧では、さまざまなプロセスのタイプを重要度の高い順に表しています（1 つ目のプロセスが<em>最も重要度が高く</em>、<em>最後に強制終了</em>されます）。
+
+</p>
+
+<ol>
+  <li><b>フォアグラウンド プロセス</b>
+    <p>ユーザーが現在行っている操作に必要なプロセスです。次の条件のいずれかにあてはまる場合、そのプロセスはフォアグラウンドにあるとみなされます。
+</p>
+
+      <ul>
+        <li>ユーザーが操作している {@link android.app.Activity} のホストになっている（{@link
+android.app.Activity} の{@link android.app.Activity#onResume onResume()} メソッドが呼び出された）。
+</li>
+
+        <li>ユーザーが操作しているアクティビティにバインドされている {@link android.app.Service} のホストになっている。
+</li>
+
+        <li>「フォアグラウンド」 で実行中の {@link android.app.Service} のホストになっている（サービスが {@link android.app.Service#startForeground startForeground()} を呼び出した）。&mdash;
+
+
+        <li>{@link android.app.Service#onCreate onCreate()}、{@link android.app.Service#onStart
+onStart()}、{@link android.app.Service#onDestroy onDestroy()} のいずれかのライフサイクル コールバックを実行している {@link android.app.Service} のホストになっている。
+</li>
+
+        <li>{@link
+        android.content.BroadcastReceiver#onReceive onReceive()} メソッドを実行している {@link android.content.BroadcastReceiver} のホストになっている。</li>
+    </ul>
+
+    <p>通常は、2~3 個のフォアグラウンド プロセスが存在します。フォアグラウンド プロセスは、それらすべてを実行できなくなるほどメモリが少なくなると、最終手段として強制終了されます。
+&mdash;通常はその時点で、端末がメモリのページング状態に達しているため、ユーザー インターフェースのレスポンシブを維持するには一部のフォアグラウンド プロセスを強制終了する必要があります。
+
+</p></li>
+
+  <li><b>可視プロセス</b>
+    <p>フォアグラウンド コンポーネントはないものの、ユーザーに対して画面上に表示される内容に影響を与える可能性のあるプロセスです。
+次の条件のいずれかにあてはまる場合、そのプロセスは可視プロセスであるとみなされます。
+</p>
+
+      <ul>
+        <li>フォアグラウンドにないが、ユーザーに表示されている {@link android.app.Activity} のホストになっている（{@link android.app.Activity#onPause onPause()} メソッドが呼び出された）。
+たとえば、フォアグラウンドのアクティビティがダイアログを開始したときに、前のアクティビティがその背後に見えている場合などがあります。
+
+</li>
+
+        <li>可視（またはフォアグラウンドの）アクティビティにバインドされている {@link android.app.Service} のホストになっている。
+</li>
+      </ul>
+
+      <p>可視プロセスは非常に重要度が高いため、フォアグラウンド プロセスの実行を維持するのに必要な場合のみ、強制終了されます。
+ </p>
+    </li>
+
+  <li><b>サービス プロセス</b>
+    <p>{@link
+android.content.Context#startService startService()} メソッドで開始されたサービスを実行するプロセスで、上の 2 つのカテゴリに分類されないものです。
+サービス プロセスは、ユーザーに表示される内容には直接関係ありませんが、ユーザーにとって必要な操作を実行している場合が多いため（バックグラウンドで音楽を再生したり、ネットワーク経由でデータをダウンロードしたりなど）、フォアグラウンド プロセスと可視プロセスのすべてと合わせて、それらを継続するのにメモリが不足した場合のみ強制終了されます。
+
+
+ </p>
+  </li>
+
+  <li><b>バックグラウンド プロセス</b>
+    <p>現在ユーザーに表示されていないアクティビティを有するプロセスです（アクティビティの {@link android.app.Activity#onStop onStop()} メソッドが呼び出された）。
+ユーザーの操作性に直接影響を与えるものではなく、フォアグラウンド プロセス、可視プロセス、サービス プロセス用にメモリを回収する必要があればいつでも強制終了されます。
+
+
+通常はバックグラウンドで実行するプロセスは多数あるため、最近ユーザーに表示されたアクティビティのあるプロセスを最後に強制終了するよう、LRU（最小使用頻度）リストに入れられます。
+
+アクティビティがライフサイクル メソッドを正確に実装し、現在の状態を保存する場合は、そのプロセスを強制終了しても、ユーザーがそのアクティビティに戻ったときに、アクティビティがすべての視覚的状態を復元するため、ユーザーの操作性に視覚的な影響はありません
+
+
+。状態の保存と復元の詳細については、「<a href="{@docRoot}guide/components/activities.html#SavingActivityState">Activities</a>」のドキュメントをご覧ください。
+</p>
+  </li>
+
+  <li><b>空のプロセス</b>
+    <p>アクティブなアプリケーション コンポーネントが 1 つも含まれていないプロセスです。このようなプロセスは、プロセスをキャッシュしておくことのみを目的として保持され、次回コンポーネントを実行する際の起動時間を向上させることができます。
+
+システムは、プロセスのキャッシュと下層のカーネル キャッシュとの間の全体的なシステム リソースのバランスを整える目的でこれらのシステムを頻繁に強制終了します。
+</p>
+  </li>
+</ol>
+
+
+  <p>Android では、プロセスで現在アクティブなコンポーネントの重要度に基づいて、あてはまるランクのなかで最も高いランクにプロセスを位置付けます。
+たとえば、サービス アクティビティと可視アクティビティの両方のホストとなっているプロセスは、サービス プロセスではなく、可視プロセスとして位置付けられます。
+</p>
+
+  <p>さらに、他のプロセスから依存されているプロセスの位置付けが上がる場合があります。他のプロセスのために動作しているプロセスは、その対象プロセスよりも下に位置付けられることはありません。
+&mdash;
+たとえば、プロセス A のコンテンツ プロバイダが、プロセス B のクライアントのために動作している場合や、プロセス A のサービスがプロセス B のコンポーネントにバインドされている場合、プロセス A の重要度は常にプロセス B 以上であるとみなされます。
+
+</p>
+
+  <p>サービスを実行するプロセスは、バックグラウンドのアクティビティを持つプロセスよりも上に位置付けされるため、長時間の操作を開始するアクティビティでは、特に、操作がアクティビティよりも長く続く場合、ワーカー スレッドを作成するよりもその操作の<a href="{@docRoot}guide/components/services.html">サービス</a>を開始する方がよいと考えられます。たとえば、ウェブサイトに写真をアップロードするアクティビティでは、ユーザーがアクティビティから離れた後もアップロードをバックグラウンドで続行できるよう、アップロードを実行するサービスを開始することをお勧めします。サービスを使用することで、アクティビティの状況に変わらず、その操作に「サービス プロセス」以上の優先度が保証されることになります。
+
+
+
+
+
+同じ理由から、ブロードキャスト レシーバーでもスレッドに長時間の処理を置くのではなく、サービスを採用するようお勧めします。
+</p>
+
+
+
+
+<h2 id="Threads">スレッド</h2>
+
+<p>アプリケーション起動の際、システムは アプリケーション実行用のスレッドを作成します。これは、「メイン スレッド」と呼ばれます。
+このスレッドは、イベント（描画イベントを含む）を適切なユーザー インターフェース ウィジェットに送信する役割を担うため非常に重要です。
+また、これはアプリケーションが Android UI ツールキット（{@link
+android.widget} と {@link android.view} パッケージからのコンポーネント）からのコンポーネントとやり取りをするスレッドでもあります。
+そのため、メイン スレッドは UI スレッドと呼ばれることもあります。
+</p>
+
+<p>コンポーネントのインスタンスごとに別のスレッドが作成されることは<em>ありません</em>。同じプロセスで実行するすべてのコンポーネントは UI スレッドでインスタンス化され、スレッドから送られた各コンポーネントをシステムが呼び出します。
+
+結果的に、システムのコールバック（ユーザー操作を報告する {@link android.view.View#onKeyDown onKeyDown()} やライフサイクル コールバック メソッドなど）に応答するメソッドは常にプロセスの UI スレッドで実行することになります。
+
+</p>
+
+<p>たとえば、ユーザーが画面上のボタンをタッチすると、アプリの UI スレッドがタッチ イベントをウィジェットに送信し、ウィジェットがそのタッチされた状態を設定してイベント キューに無効化の要求を投稿します。
+
+UI スレッドが要求をキューから取り出し、ウィジェットに自身を描画するよう通知します。
+</p>
+
+<p>アプリがユーザー操作に応答して集中的な動作を実行する場合、アプリケーションを正しく実装していない限りこのシングル スレッド モデルではパフォーマンスの低下につながる可能性があります。
+具体的には、すべてが UI スレッドで行われている場合、長ネットワークへのアクセスやデータベースへの問い合わせといった時間のかかる操作を実行すると UI 全体をブロックしてしまいます。スレッドがブロックされると、描画イベントを含むすべてのイベントを送信できなくなります。
+
+
+ユーザー側には、アプリケーションがハングしたように見えます。
+さらには、UI スレッドが数秒以上（現時点では 5 秒以上）ブロックされると、ユーザーに<a href="http://developer.android.com/guide/practices/responsiveness.html">「アプリケーションが応答していません」</a>のダイアログが表示されます。
+
+ユーザーはアプリケーションを停止するか、不快な場合はアンインストールしてしまう可能性があります。
+</p>
+
+<p>また、Android UI ツールキットはスレッド セーフ<em>ではありません</em>。そのため、ワーカー スレッドから UI を操作できません。すべての操作は、UI スレッドから行う必要があります。
+&mdash;
+そのため、Android のシングル スレッド モデルには 2 つの明快なルールがあります。</p>
+
+<ol>
+<li>UI スレッドをブロックしない
+<li>UI スレッド以外から Android UI ツールキットにアクセスしない
+</ol>
+
+<h3 id="WorkerThreads">ワーカー スレッド</h3>
+
+<p>上記で説明したシングル スレッド モデルにより、アプリケーションの UI の応答性のためにも UI スレッドをブロックしないことが不可欠です。
+即座に実行する必要のない操作の場合は、別のスレッド（「バックグラウンド」スレッドや「ワーカー」スレッド）で実行するようにする必要があります。
+
+</p>
+
+<p>例として、別のスレッドから画像をダウンロードして {@link android.widget.ImageView} に表示するクリック リスナのコードの一部を次に示します。
+</p>
+
+<pre>
+public void onClick(View v) {
+    new Thread(new Runnable() {
+        public void run() {
+            Bitmap b = loadImageFromNetwork("http://example.com/image.png");
+            mImageView.setImageBitmap(b);
+        }
+    }).start();
+}
+</pre>
+
+<p>ここでは、ネットワークの操作を処理する新しいスレッドを作成しているため、一見問題ないように見えます。
+ただし、これは<em>UI スレッド以外から Android UI ツールキットにアクセスしない</em>というシングルスレッド モデルの 2 つ目のルールに違反しています。このサンプルは、UI スレッドではなくワーカー スレッドから {@link
+android.widget.ImageView} を変更しています。&mdash;
+結果として、未定義かつ予想外の動作を引き起こし、追跡が難しく時間のかかる作業になってしまいます。
+</p>
+
+<p>この問題を修正するため、Android には UI スレッド以外からのアクセス方法がいくつか用意されています。
+使用できるメソッドは次のとおりです。</p>
+
+<ul>
+<li>{@link android.app.Activity#runOnUiThread(java.lang.Runnable)
+Activity.runOnUiThread(Runnable)}</li>
+<li>{@link android.view.View#post(java.lang.Runnable) View.post(Runnable)}</li>
+<li>{@link android.view.View#postDelayed(java.lang.Runnable, long) View.postDelayed(Runnable,
+long)}</li>
+</ul>
+
+<p>たとえば、上記のコードは {@link
+android.view.View#post(java.lang.Runnable) View.post(Runnable)} メソッドを使用して修正できます。</p>
+
+<pre>
+public void onClick(View v) {
+    new Thread(new Runnable() {
+        public void run() {
+            final Bitmap bitmap = loadImageFromNetwork("http://example.com/image.png");
+            mImageView.post(new Runnable() {
+                public void run() {
+                    mImageView.setImageBitmap(bitmap);
+                }
+            });
+        }
+    }).start();
+}
+</pre>
+
+<p>これで、この実装がスレッドセーフになりました。ネットワーク操作は別のスレッドから実行され、{@link android.widget.ImageView} は UI スレッドから操作されます。
+</p>
+
+<p>ただし、操作が複雑になるにつれて、この種のコードも複雑化してメンテナンスも難しくなります。
+ワーカー スレッドとのより複雑なやり取りを処理するため、ワーカー スレッドで {@link android.os.Handler} を使うと、UI スレッドから配信されたメッセージを処理できます。
+
+ただし、最善なのは{@link android.os.AsyncTask} クラスを拡張することであり、これにより UI を操作する必要のあるワーカー スレッドのタスクの実行を簡素化できます。
+</p>
+
+
+<h4 id="AsyncTask">AsyncTask を使用する</h4>
+
+<p>{@link android.os.AsyncTask} では、ユーザー インターフェースに非同期の処理を実行できます。
+スレッドやハンドラを自身で処理する必要なく、ワーカー スレッドの操作をブロックし、結果を UI スレッドに発行します。
+</p>
+
+<p>これを使用するには、{@link android.os.AsyncTask} をサブクラス化し、バックグラウンド スレッドのプール内で実行する {@link
+android.os.AsyncTask#doInBackground doInBackground()} コールバック メソッドを実装する必要があります。
+UI を更新するには、{@link
+android.os.AsyncTask#onPostExecute onPostExecute()} を実装します。これは {@link
+android.os.AsyncTask#doInBackground doInBackground()} からの結果を配信し、UI スレッド内で実行されるため、UI を安全に更新できます。その後、UI スレッドから {@link android.os.AsyncTask#execute execute()} を呼び出してタスクを実行できます。
+
+</p>
+
+<p>たとえば、次のように {@link android.os.AsyncTask} を使って前出の例を実装できます。
+</p>
+
+<pre>
+public void onClick(View v) {
+    new DownloadImageTask().execute("http://example.com/image.png");
+}
+
+private class DownloadImageTask extends AsyncTask&lt;String, Void, Bitmap&gt; {
+    /** The system calls this to perform work in a worker thread and
+      * delivers it the parameters given to AsyncTask.execute() */
+    protected Bitmap doInBackground(String... urls) {
+        return loadImageFromNetwork(urls[0]);
+    }
+    
+    /** The system calls this to perform work in the UI thread and delivers
+      * the result from doInBackground() */
+    protected void onPostExecute(Bitmap result) {
+        mImageView.setImageBitmap(result);
+    }
+}
+</pre>
+
+<p>ワーカー スレッドで処理される作業と、UI スレッドで処理される作業が分けられたため、UI は安全に、コードはシンプルになりました。
+</p>
+
+<p>このクラスの使用方法をより深く理解するには {@link android.os.AsyncTask} に目を通す必要がありますが、ここに、その仕組みについて簡単に挙げておきます。
+</p>
+
+<ul>
+<li>ジェネリックを使ってパラメータのタイプ、進捗の値、タスクの最終値を指定できます
+</li>
+<li>{@link android.os.AsyncTask#doInBackground doInBackground()} メソッドがワーカー スレッド上で自動的に実行されます
+</li>
+<li>{@link android.os.AsyncTask#onPreExecute onPreExecute()}、{@link
+android.os.AsyncTask#onPostExecute onPostExecute()}、{@link
+android.os.AsyncTask#onProgressUpdate onProgressUpdate()}はすべて UI スレッドで呼び出されます</li>
+<li>{@link android.os.AsyncTask#doInBackground doInBackground()} から返される値は、{@link android.os.AsyncTask#onPostExecute onPostExecute()} に送られます
+</li>
+<li>{@link android.os.AsyncTask#publishProgress publishProgress()} は、{@link
+android.os.AsyncTask#doInBackground doInBackground()} でいつでも呼び出すことができます。UI スレッドで {@link
+android.os.AsyncTask#onProgressUpdate onProgressUpdate()} を実行できます</li>
+<li>いつでも、どのスレッドからでもタスクをキャンセルできます</li>
+</ul>
+
+<p class="caution"><strong>警告:</strong> ワーカー スレッドの使用時に発生する可能性のあるもう 1 つの問題として、<a href="{@docRoot}guide/topics/resources/runtime-changes.html">実行時の設定が変更</a>された（ユーザーが画面の向きを変えた場合など）ことによってアクティビティが予期せず再起動され、ワーカー スレッドが破棄されてしまうことがあります。
+
+このような再起動の間タスクを維持する方法、アクティビティが破棄されたときの正しいタスクのキャンセル方法については、<a href="http://code.google.com/p/shelves/">Shelves</a> のサンプル アプリケーションのソース コードをご覧ください。
+
+</p>
+
+
+<h3 id="ThreadSafe">スレッド セーフのメソッド</h3>
+
+<p> 状況によっては、実装したメソッドが複数のスレッドから呼び出されることがあり、その場合はメソッドがスレッドセーフになるよう作成する必要があります。
+ </p>
+
+<p>主に、<a href="{@docRoot}guide/components/bound-services.html">バインドされたサービス</a>のメソッドなど、リモートで呼び出されるメソッドなどがこれに該当します。&mdash;{@link android.os.IBinder} に実装されたメソッドへの呼び出しが、{@link android.os.IBinder IBinder} を実行しているプロセスと同じプロセスで発生した場合、メソッドは呼び出し側のスレッドで実行されます。ただし、呼び出しが別のプロセスで起こった場合は、メソッドはシステムが {@link android.os.IBinder
+IBinder} と同じプロセスに保持するスレッドのプールから選ばれたスレッドで実行されます（プロセスの UI スレッドでは実行されません）。
+
+
+
+たとえば、サービスの {@link android.app.Service#onBind onBind()} メソッドがサービスのプロセスの UI スレッドから呼び出されるのに対して、{@link android.app.Service#onBind
+onBind()} が返すオブジェクトで実装されたメソッド（RPC メソッドを実装するサブクラスなど）は、プール内のスレッドから呼び出されます。
+
+
+サービスは複数のクライアントを持てるため、複数のプール スレッドが同じ {@link android.os.IBinder IBinder} メソッドを同時に動かすことができます。このため、{@link android.os.IBinder
+IBinder} メソッドはスレッドセーフになるよう実装する必要があります。
+</p>
+
+<p> 同様に、コンテンツ プロバイダは他のプロセスから送られたデータ要求を受け取ることができます。{@link android.content.ContentResolver} クラスと {@link android.content.ContentProvider} クラスによってプロセス間通信がどのように管理されているかが見えなくなりますが、それらの要求に応答する {@link
+android.content.ContentProvider} メソッド（{@link
+android.content.ContentProvider#query query()}、 {@link android.content.ContentProvider#insert
+insert()}、{@link android.content.ContentProvider#delete delete()}、{@link
+android.content.ContentProvider#update update()}、{@link android.content.ContentProvider#getType
+getType()}）は、プロセスの UI スレッドではなく、コンテンツ プロバイダのプロセスにあるスレッドのプールから呼び出されます。
+
+
+&mdash;&mdash;これらのメソッドは同時に複数のスレッドから呼び出される可能性があるため、先ほどと同様にスレッドセーフになるよう実装する必要があります。
+ </p>
+
+
+<h2 id="IPC">プロセス間通信（IPC）</h2>
+
+<p>Android では、リモート プロシージャ コール（RPC）を使ったプロセス間通信のメカニズムを備えており、メソッドはアクティビティや他のアプリケーション コンポーネントから呼び出された後に、リモート（別のプロセス）で実行され、結果を呼び出し側に返します。
+
+
+これにより、メソッドの呼び出しとそのデータをオペレーティング システムが理解できるレベルまで分解し、ローカル プロセスとアドレス空間からリモート プロセスとアドレス空間にそれを送信して、そこで呼び出しが再度組み立てて、再現します。
+
+その後、戻り値が逆方向に伝達されます。
+Android ではこれらの IPC トランザクションを実行するためのすべてのコードが用意されているため、開発者は RPC のプログラミング インターフェースの定義と実装に集中できます。
+ </p>
+
+<p>IPC を実行するには、アプリケーションが {@link
+android.content.Context#bindService bindService()} を使ってサービスにバインドされている必要があります。詳細については、デベロッパー ガイドの「<a href="{@docRoot}guide/components/services.html">サービス</a>」をご覧ください。</p>
+
+
+<!--
+<h2>Beginner's Path</h2>
+
+<p>For information about how to perform work in the background for an indefinite period of time
+(without a user interface), continue with the <b><a
+href="{@docRoot}guide/components/services.html">Services</a></b> document.</p>
+-->

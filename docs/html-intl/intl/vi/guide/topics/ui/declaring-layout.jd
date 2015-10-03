@@ -1,0 +1,492 @@
+page.title=Bố trí
+page.tags=dạng xem, nhóm dạng xem
+@jd:body
+
+<div id="qv-wrapper">
+<div id="qv">
+  <h2>Trong tài liệu này</h2>
+<ol>
+  <li><a href="#write">Ghi XML</a></li>
+  <li><a href="#load">Nạp Tài nguyên XML</a></li>
+  <li><a href="#attributes">Thuộc tính</a>
+    <ol>
+      <li><a href="#id">ID</a></li>
+      <li><a href="#layout-params">Tham số Bố trí</a></li>
+    </ol>
+  </li>
+  <li><a href="#Position">Vị trí Bố trí</a></li>
+  <li><a href="#SizePaddingMargins">Kích cỡ, Phần đệm và Lề</a></li>
+  <li><a href="#CommonLayouts">Các Bố trí Thường gặp</a></li>
+  <li><a href="#AdapterViews">Xây dựng Bố trí bằng một Trình điều hợp</a>
+    <ol>
+      <li><a href="#FillingTheLayout">Điền dữ liệu vào một dạng xem trình điều hợp</a></li>
+      <li><a href="#HandlingUserSelections">Xử lý sự kiện nhấp</a></li>
+    </ol>
+  </li>
+</ol>
+
+  <h2>Lớp khóa</h2>
+  <ol>
+    <li>{@link android.view.View}</li>
+    <li>{@link android.view.ViewGroup}</li>
+    <li>{@link android.view.ViewGroup.LayoutParams}</li>
+  </ol>
+
+  <h2>Xem thêm</h2>
+  <ol>
+    <li><a href="{@docRoot}training/basics/firstapp/building-ui.html">Xây dựng một Giao diện Người dùng
+Đơn giản</a></li> </div>
+</div>
+
+<p>Bố trí định nghĩa cấu trúc hiển thị cho một giao diện người dùng, chẳng hạn như UI cho một <a href="{@docRoot}guide/components/activities.html">hoạt động</a> hoặc <a href="{@docRoot}guide/topics/appwidgets/index.html">widget ứng dụng</a>.
+Bạn có thể khai báo một bố trí bằng hai cách:</p>
+<ul>
+<li><strong>Khai báo phần tử UI trong XML</strong>. Android cung cấp một kho từ vựng XML
+đơn giản, tương ứng với các lớp và lớp con Dạng xem, chẳng hạn như dành cho các widget và bố trí.</li>
+<li><strong>Khởi tạo các phần tử bố trí vào thời gian chạy</strong>. Ứng dụng
+của bạn có thể tạo các đối tượng Dạng xem và Nhóm Dạng xem (và thao tác trên các tính chất của nó) theo lập trình. </li>
+</ul>
+
+<p>Khuôn khổ Android cho bạn sự linh hoạt trong khi sử dụng một hoặc cả hai phương pháp này để khai báo và quản lý UI ứng dụng của mình. Ví dụ, bạn có thể khai báo các bố trí mặc định cho ứng dụng của mình trong XML, bao gồm các phần tử màn hình mà sẽ xuất hiện trong chúng hoặc tính chất của chúng. Sau đó, bạn có thể thêm mã trong ứng dụng của mình để sửa đổi trạng thái của các đối tượng trên màn hình, bao gồm những đối tượng được khai báo trong XML, vào thời gian chạy. </p>
+
+<div class="sidebox-wrapper">
+<div class="sidebox">
+  <ul>
+  <li>Phần bổ trợ <a href="{@docRoot}tools/sdk/eclipse-adt.html">ADT
+ cho Eclipse</a> sẽ đưa ra một bản xem trước bố trí XML của bạn &mdash;
+  có tệp XML được mở, hãy chọn tab <strong>Bố trí</strong>.</li>
+  <li>Bạn cũng nên thử công cụ
+  <a href="{@docRoot}tools/debugging/debugging-ui.html#hierarchyViewer">Trình xem Phân cấp</a>,
+  để gỡ rối các bố trí &mdash; nó hé lộ các giá trị tính chất của bố trí,
+  vẽ đường viền bằng các chỉ báo phần đệm/lề, và các dạng xem được dựng đầy đủ trong khi
+  bạn gỡ rối trên trình mô phỏng hoặc thiết bị.</li>
+  <li>Công cụ <a href="{@docRoot}tools/debugging/debugging-ui.html#layoutopt">layoutopt</a> cho phép
+  bạn nhanh chóng phân tích các bố trí và phân cấp của mình xem có không hiệu quả hoặc có các vấn đề khác không.</li>
+</div>
+</div>
+
+<p>Ưu điểm của việc khai báo UI của bạn trong XML là cho phép bạn tách việc trình bày ứng dụng của mình với mã điều khiển hành vi của nó hiệu quả hơn. Mô tả UI của bạn nằm ngoài mã ứng dụng của bạn, điều này có nghĩa rằng bạn có thể sửa đổi hoặc điều hợp nó mà không phải sửa đổi mã nguồn của bạn và biên dịch lại. Ví dụ, bạn có thể tạo bố trí XML cho các hướng màn hình khác nhau, kích cỡ màn hình khác nhau, và ngôn ngữ khác nhau. Ngoài ra, việc khai báo bố trí trong XML giúp dễ dàng hơn trong việc hiển thị cấu trúc UI của bạn, vì vậy sẽ dễ gỡ lỗi sự cố hơn. Như vậy, tài liệu này tập trung vào việc hướng dẫn bạn cách khai báo bố trí của mình trong XML. Nếu bạn
+quan tâm tới việc khởi tạo các đối tượng Dạng xem vào thời gian chạy, hãy tham khảo {@link android.view.ViewGroup} và
+tài liệu tham khảo lớp {@link android.view.View}.</p>
+
+<p>Nhìn chung, kho từ vựng của XML đối với việc khai báo các phần tử UI tuân thủ chặt chẽ cấu trúc và cách đặt tên các lớp và phương pháp, trong đó các tên phần tử tương ứng với tên lớp và tên thuộc tính tương ứng với phương pháp. Trên thực tế, sự tương ứng thường trực tiếp đến mức bạn có thể đoán thuộc tính XML nào tương ứng với một phương pháp lớp, hoặc đoán xem lớp nào tương ứng với một phần tử XML cho trước. Tuy nhiên, lưu ý rằng không phải tất cả từ vựng đều giống nhau. Trong một số trường hợp, có sự khác biệt nhỏ trong việc đặt tên. Ví
+dụ, phần tử EditText có thuộc tính <code>text</code> tương ứng với
+<code>EditText.setText()</code>. </p>
+
+<p class="note"><strong>Mẹo:</strong> Tìm hiểu thêm về các kiểu bố trí trong <a href="{@docRoot}guide/topics/ui/layout-objects.html">Đối tượng Bố trí
+Thường gặp</a>. Có một tuyển tập các bài hướng dẫn về việc xây dựng các bố trí khác nhau trong hướng dẫn bài học
+<a href="{@docRoot}resources/tutorials/views/index.html">Dạng xem Hello</a>.</p>
+
+<h2 id="write">Ghi XML</h2>
+
+<p>Khi sử dụng từ vựng XML của Android, bạn có thể nhanh chóng thiết kế các bố trí UI và phần tử màn hình mà chúng chứa, giống như cách bạn tạo trang web trong HTML &mdash; bằng một loạt các phần tử lồng nhau. </p>
+
+<p>Mỗi tệp bố trí phải chứa chính xác một phần tử gốc, đó phải là một đối tượng Dạng xem hoặc Nhóm Dạng xem. Sau khi đã định nghĩa phần tử gốc, bạn có thể thêm các đối tượng hoặc widget bố trí bổ sung làm phần tử con để dần dần xây dựng một phân cấp Dạng xem định nghĩa bố trí của bạn. Ví dụ, sau đây là một bố trí XML sử dụng một {@link android.widget.LinearLayout}
+thẳng đứng để giữ một {@link android.widget.TextView} và một {@link android.widget.Button}:</p>
+<pre>
+&lt;?xml version="1.0" encoding="utf-8"?>
+&lt;LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:layout_width="match_parent"
+              android:layout_height="match_parent"
+              android:orientation="vertical" >
+    &lt;TextView android:id="@+id/text"
+              android:layout_width="wrap_content"
+              android:layout_height="wrap_content"
+              android:text="Hello, I am a TextView" />
+    &lt;Button android:id="@+id/button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Hello, I am a Button" />
+&lt;/LinearLayout>
+</pre>
+
+<p>Sau khi bạn đã khai báo bố trí của mình trong XML, hãy lưu tệp với phần mở rộng <code>.xml</code>,
+trong thư mục dự án <code>res/layout/</code> Android của bạn để biên dịch cho phù hợp. </p>
+
+<p>Thông tin về cú pháp đối với tệp XML bố trí có sẵn trong tài liệu <a href="{@docRoot}guide/topics/resources/layout-resource.html">Tài nguyên Bố trí</a>.</p>
+
+<h2 id="load">Nạp Tài nguyên XML</h2>
+
+<p>Khi bạn biên dịch ứng dụng của mình, từng tệp bố trí XML được biên dịch thành một tài nguyên 
+{@link android.view.View}. Bạn nên nạp tài nguyên bố trí từ mã ứng dụng của mình, trong triển khai gọi lại
+{@link android.app.Activity#onCreate(android.os.Bundle) Activity.onCreate()} của bạn.
+Làm vậy bằng cách gọi <code>{@link android.app.Activity#setContentView(int) setContentView()}</code>,
+chuyển cho nó tham chiếu tới tài nguyên bố trí của bạn dưới hình thức:
+<code>R.layout.<em>layout_file_name</em></code>.
+Ví dụ, nếu bố trí XML của bạn được lưu thành <code>main_layout.xml</code>, bạn sẽ nạp nó
+cho Hoạt động của mình như sau:</p>
+<pre>
+public void onCreate(Bundle savedInstanceState) {
+    super.onCreate(savedInstanceState);
+    setContentView(R.layout.main_layout);
+}
+</pre>
+
+<p>Phương pháp gọi lại <code>onCreate()</code> trong Hoạt động của bạn được gọi bởi khuôn khổ Android khi
+Hoạt động của bạn được khởi chạy (xem phần thảo luận về vòng đời, trong tài liệu
+<a href="{@docRoot}guide/components/activities.html#Lifecycle">Hoạt động</a>
+).</p>
+
+
+<h2 id="attributes">Thuộc tính</h2>
+
+<p>Mọi đối tượng Dạng xem và Nhóm Dạng xem đều hỗ trợ các phiên bản thuộc tính XML của chính mình.
+Một số thuộc tính áp dụng riêng cho đối tượng Dạng xem (ví dụ, TextView hỗ trợ thuộc tính <code>textSize</code>
+), nhưng những thuộc tính này cũng được kế thừa bởi bất kỳ đối tượng Dạng xem nào mà có thể mở rộng lớp này.
+Một số được áp dụng chung cho tất cả đối tượng Dạng xem vì chúng được kế thừa từ lớp Dạng xem gốc (như
+thuộc tính <code>id</code>). Và những thuộc tính còn lại được coi là "tham số bố trí," đó là những thuộc tính
+mô tả một số hướng bố trí nhất định của đối tượng Dạng xem, như được định nghĩa bởi đối tượng Nhóm Dạng xem
+mẹ của đối tượng đó.</p>
+
+<h3 id="id">ID</h3>
+
+<p>Bất kỳ đối tượng Dạng xem nào cũng có một ID số nguyên được liên kết với nó để nhận biết duy nhất Dạng xem trong cây.
+Khi ứng dụng được biên dịch, ID này được tham chiếu như một số nguyên, nhưng ID thường
+được gán trong tệp XML bố trí như một xâu, trong thuộc tính <code>id</code>.
+Đây là thuộc tính XML chung cho tất cả đối tượng Dạng xem
+(được định nghĩa theo lớp {@link android.view.View}) và bạn sẽ rất hay sử dụng nó.
+Cú pháp đối với một ID bên trong một tag XML là:</p>
+<pre>android:id="&#64;+id/my_button"</pre>
+
+<p>Biểu tượng "a móc" (@) ở đầu xâu thể hiện rằng trình phân tích XML nên phân tích và mở rộng phần còn lại
+của xâu ID và nhận biết nó như một tài nguyên ID. Biểu tượng dấu cộng (+) có nghĩa rằng đây là một tên tài nguyên mới mà phải
+được tạo và thêm vào tài nguyên của chúng ta (trong tệp <code>R.java</code>). Có nhiều tài nguyên ID khác
+được cung cấp bởi khuôn khổ Android. Khi tham chiếu một ID tài nguyên Android, bạn không cần biểu tượng dấu cộng,
+nhưng phải thêm vùng tên gói <code>android</code>, như sau:</p>
+<pre>android:id="&#64;android:id/empty"</pre>
+<p>Khi đã có vùng tên gói <code>android</code>, giờ chúng ta đang tham chiếu một ID từ lớp tài nguyên <code>android.R</code>
+, thay vì lớp tài nguyên cục bộ.</p>
+
+<p>Để tạo các dạng xem và tham chiếu chúng từ ứng dụng, một mô thức thường thấy đó là:</p>
+<ol>
+  <li>Định nghĩa một dạng xem/widget trong tệp bố trí và gán cho nó một ID duy nhất:
+<pre>
+&lt;Button android:id="&#64;+id/my_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="&#64;string/my_button_text"/>
+</pre>
+  </li>
+  <li>Sau đó, tạo một thực thể của đối tượng dạng xem và chụp nó từ bố trí
+(thường trong phương pháp <code>{@link android.app.Activity#onCreate(Bundle) onCreate()}</code>):
+<pre>
+Button myButton = (Button) findViewById(R.id.my_button);
+</pre>
+  </li>
+</ol>
+<p>Định nghĩa các ID cho đối tượng dạng xem là việc quan trọng khi tạo một {@link android.widget.RelativeLayout}.
+Trong một bố trí tương đối, các dạng xem đồng hạng có thể định nghĩa bố trí của nó so với dạng xem đồng hạng kia,
+dạng xem mà được tham chiếu bởi ID duy nhất.</p>
+<p>Một ID không cần phải là duy nhất trong toàn bộ cây, nhưng nên là
+duy nhất trong bộ phận của cây mà bạn đang tìm kiếm (thường là toàn bộ cây, vì thế tốt nhất là
+ID nên hoàn toàn duy nhất khi có thể).</p>
+
+
+<h3 id="layout-params">Tham số Bố trí</h3>
+
+<p>Các thuộc tính bố trí XML <code>layout_<em>something</em></code> sẽ định nghĩa
+các tham số bố trí cho Dạng xem phù hợp với Nhóm Dạng xem mà nó nằm trong đó.</p>
+
+<p>Mọi lớp Nhóm Dạng xem đều triển khai một lớp lồng nhau có chức năng mở rộng {@link
+android.view.ViewGroup.LayoutParams}. Lớp con này
+chứa các kiểu tính chất mà định nghĩa kích cỡ và vị trí của từng dạng xem con cho
+phù hợp với nhóm dạng xem. Như bạn có thể thấy trong hình 1, nhóm dạng xem
+mẹ sẽ định nghĩa các tham số bố trí cho từng dạng xem con (bao gồm nhóm dạng xem con).</p>
+
+<img src="{@docRoot}images/layoutparams.png" alt="" />
+<p class="img-caption"><strong>Hình 1.</strong> Trực quan hóa một phân cấp dạng xem với các tham số
+bố trí được liên kết với từng dạng xem.</p>
+
+<p>Để ý rằng mọi lớp con LayoutParams đều có cú pháp riêng của mình cho các giá trị
+thiết đặt. Mỗi phần tử con phải định nghĩa LayoutParams cho phù hợp với phần tử mẹ của nó,
+mặc dù cũng có thể định nghĩa LayoutParams khác cho phần tử con của chính nó. </p>
+
+<p>Tất cả nhóm dạng xem đều có chiều rộng và chiều cao (<code>layout_width</code> và
+<code>layout_height</code>), và mỗi dạng xem đều phải định nghĩa chúng. Nhiều
+LayoutParams cũng có lề và viền tùy chọn. <p>
+
+<p>Bạn có thể chỉ định chiều rộng và chiều cao bằng các số đo chính xác, mặc dù có thể
+bạn sẽ không muốn làm điều này thường xuyên. Bạn sẽ thường sử dụng một trong những hằng số này để
+đặt chiều rộng hoặc chiều cao: </p>
+
+<ul>
+  <li><var>wrap_content</var> cho biết dạng xem của bạn tự định cỡ theo kích thước
+mà nội dung của nó yêu cầu.</li>
+  <li><var>match_parent</var> (được đặt tên <var>fill_parent</var> trước API Mức 8)
+cho biết dạng xem của bạn có thể phóng lớn khi nhóm dạng xem mẹ của nó cho phép.</li>
+</ul>
+
+<p>Nhìn chung, việc chỉ định một chiều rộng và chiều cao bố trí bằng cách sử dụng các đơn vị tuyệt đối như
+điểm ảnh là điều không được khuyến cáo. Thay vào đó, sử dụng các số đo tương đối như
+số đơn vị điểm ảnh độc lập với mật độ (<var>dp</var>), <var>wrap_content</var>, hoặc
+<var>match_parent</var>, là một phương pháp tốt hơn, vì nó giúp đảm bảo rằng
+ứng dụng của bạn sẽ hiển thị phù hợp giữa nhiều loại kích cỡ màn hình thiết bị khác nhau.
+Các kiểu số đo được chấp nhận được định nghĩa trong tài liệu
+<a href="{@docRoot}guide/topics/resources/available-resources.html#dimension">
+Tài nguyên Có sẵn</a>.</p>
+
+
+<h2 id="Position">Vị trí Bố trí</h2>
+   <p>
+   Hình học của một dạng xem là hình chữ nhật. Dạng xem có một vị trí,
+   được biểu diễn thành một cặp tọa độ <em>trái</em> và <em>trên</em> và
+   hai kích thước, được biểu diễn thành chiều rộng và chiều cao. Đơn vị của vị trí
+   và kích thước là điểm ảnh.
+   </p>
+
+   <p>
+   Có thể truy xuất vị trí của một dạng xem bằng cách gọi ra các phương pháp
+   {@link android.view.View#getLeft()} và {@link android.view.View#getTop()}. Phương pháp đầu trả về tọa độ trái, hay X,
+   của hình chữ nhật biểu diễn dạng xem. Phương pháp sau trả về tọa độ trên, hay Y,
+   của hình chữ nhật biểu diễn dạng xem. Những phương pháp này
+   đều trả về vị trí của dạng xem so với dạng xem mẹ của nó. Ví dụ,
+   khi <code>getLeft()</code> trả về 20, điều đó có nghĩa là dạng xem nằm ở 20 điểm ảnh về
+   bên phải của cạnh trái của dạng xem mẹ trực tiếp của nó.
+   </p>
+
+   <p>
+   Ngoài ra, một vài phương pháp thuận tiện được đưa ra để tránh những tính toán
+   không cần thiết, cụ thể là {@link android.view.View#getRight()} và {@link android.view.View#getBottom()}.
+   Những phương pháp này trả về tọa độ của cạnh phải và cạnh đáy của hình chữ nhật
+   biểu diễn dạng xem. Ví dụ, việc gọi {@link android.view.View#getRight()}
+   tương tự như tính toán sau: <code>getLeft() + getWidth()</code>.
+   </p>
+
+
+<h2 id="SizePaddingMargins">Kích cỡ, Phần đệm và Lề</h2>
+   <p>
+   Kích cỡ của một dạng xem được biểu diễn bằng chiều rộng và chiều cao. Thực ra một dạng xem
+   sẽ có hai cặp giá trị chiều rộng và chiều cao.
+   </p>
+
+   <p>
+   Cặp thứ nhất được gọi là <em>chiều rộng đo được</em> và 
+   <em>chiều cao đo được</em>. Những kích thước này xác định một dạng xem muốn phóng lớn bao nhiêu
+   trong dạng xem mẹ của nó. Các
+   kích thước đo được có thể thu được bằng cách gọi {@link android.view.View#getMeasuredWidth()}
+   và {@link android.view.View#getMeasuredHeight()}.
+   </p>
+
+   <p>
+   Cặp thứ hai đơn thuần là <em>chiều rộng</em> và <em>chiều cao</em>, hoặc
+   đôi khi gọi là <em>chiều rộng vẽ</em> và <em>chiều cao vẽ</em>. Những
+   kích thước này xác định kích cỡ thực sự của dạng xem trên màn hình, tại thời điểm vẽ và
+   sau khi bố trí. Những giá trị này có thể nhưng không nhất thiết phải khác với
+   chiều rộng và chiều cao đo được. Chiều rộng và chiều cao này có thể lấy được bằng cách gọi
+   {@link android.view.View#getWidth()} và {@link android.view.View#getHeight()}.
+   </p>
+
+   <p>
+   Để đo các kích thước của nó, dạng xem cần xét tới phần đệm của nó. Phần đệm
+   được biểu diễn bằng số điểm ảnh của phần bên trái, bên trên, bên phải và bên dưới của dạng xem.
+   Phần đệm có thể được sử dụng để bù trừ nội dung của dạng xem bằng một số điểm ảnh
+   cụ thể. Ví dụ, phần đệm bên trái bằng 2 sẽ đẩy nội dung của dạng xem đi
+   2 điểm ảnh về bên phải của cạnh bên trái. Phần đệm có thể được đặt bằng cách sử dụng phương pháp
+   {@link android.view.View#setPadding(int, int, int, int)} và được truy vấn bằng cách gọi
+   {@link android.view.View#getPaddingLeft()}, {@link android.view.View#getPaddingTop()},
+   {@link android.view.View#getPaddingRight()} và {@link android.view.View#getPaddingBottom()}.
+   </p>
+
+   <p>
+   Mặc dù dạng xem có thể xác định phần đệm, nó không có bất kỳ sự hỗ trợ nào cho
+   lề. Tuy nhiên, các nhóm dạng xem lại cung cấp sự hỗ trợ như vậy. Tham khảo
+   {@link android.view.ViewGroup} và
+   {@link android.view.ViewGroup.MarginLayoutParams} để biết thêm thông tin.
+   </p>
+
+   <p>Để biết thêm thông tin về kích thước, xem
+   <a href="{@docRoot}guide/topics/resources/more-resources.html#Dimension">Giá trị Kích thước</a>.
+   </p>
+
+
+
+
+
+
+<style type="text/css">
+div.layout {
+  float:left;
+  width:200px;
+  margin:0 0 20px 20px;
+}
+div.layout.first {
+  margin-left:0;
+  clear:left;
+}
+</style>
+
+
+
+
+<h2 id="CommonLayouts">Các Bố trí Thường gặp</h2>
+
+<p>Mỗi lớp con của lớp {@link android.view.ViewGroup} cung cấp một cách duy nhất để hiển thị
+các dạng xem mà bạn lồng trong nó. Dưới đây là một số kiểu bố trí phổ biến hơn mà được tích hợp
+trong nền tảng Android.</p>
+
+<p class="note"><strong>Lưu ý:</strong> Mặc dù bạn có thể lồng một hoặc nhiều bố trí với một
+bố trí khác để đạt được thiết kế UI của mình, bạn nên cố gắng duy trì phân cấp bố trí của mình ở mức nông nhất
+có thể. Bố trí của bạn sẽ vẽ nhanh hơn nếu nó có ít bố trí lồng nhau hơn (phân cấp dạng xem rộng
+sẽ tốt hơn phân cấp dạng xem sâu).</p>
+
+<!--
+<h2 id="framelayout">FrameLayout</h2>
+<p>{@link android.widget.FrameLayout FrameLayout} is the simplest type of layout
+object. It's basically a blank space on your screen that you can
+later fill with a single object &mdash; for example, a picture that you'll swap in and out.
+All child elements of the FrameLayout are pinned to the top left corner of the screen; you cannot
+specify a different location for a child view. Subsequent child views will simply be drawn over
+previous ones,
+partially or totally obscuring them (unless the newer object is transparent).
+</p>
+-->
+
+
+<div class="layout first">
+  <h4><a href="layout/linear.html">Bố trí Tuyến tính</a></h4>
+  <a href="layout/linear.html"><img src="{@docRoot}images/ui/linearlayout-small.png" alt="" /></a>
+  <p>Một bố trí có chức năng sắp xếp tổ chức các bố trí con của nó thành một hàng ngang hoặc thẳng đứng. Nó
+  sẽ tạo một thanh cuộn nếu chiều dài của cửa sổ vượt quá chiều dài của màn hình.</p>
+</div>
+
+<div class="layout">
+  <h4><a href="layout/relative.html">Bố trí Tương đối</a></h4>
+  <a href="layout/relative.html"><img src="{@docRoot}images/ui/relativelayout-small.png" alt="" /></a>
+  <p>Cho phép bạn chỉ định vị trí của các đối tượng con so với nhau (đối tượng con A về phía
+bên trái của đối tượng con B) hoặc so với đối tượng mẹ (được căn theo bên trên đối tượng mẹ).</p>
+</div>
+
+<div class="layout">
+  <h4><a href="{@docRoot}guide/webapps/webview.html">Dạng xem Web</a></h4>
+  <a href="{@docRoot}guide/webapps/webview.html"><img src="{@docRoot}images/ui/webview-small.png" alt="" /></a>
+  <p>Hiển thị trang web.</p>
+</div>
+
+
+
+
+<h2 id="AdapterViews" style="clear:left">Xây dựng Bố trí bằng một Trình điều hợp</h2>
+
+<p>Khi nội dung cho bố trí của bạn động hoặc chưa được xác định trước, bạn có thể sử dụng một bố trí có chức năng
+tạo lớp con {@link android.widget.AdapterView} để đưa vào bố trí có dạng xem vào thời gian chạy. Một
+lớp con của lớp {@link android.widget.AdapterView} sẽ sử dụng một {@link android.widget.Adapter} để
+gắn kết dữ liệu với bố trí của nó. {@link android.widget.Adapter} đóng vai trò trung gian giữa nguồn
+dữ liệu và bố trí {@link android.widget.AdapterView} &mdash;{@link android.widget.Adapter}
+sẽ truy xuất dữ liệu (từ một nguồn chẳng hạn như một mảng hoặc truy vấn cơ sở dữ liệu) và chuyển từng mục nhập
+thành một dạng xem có thể thêm vào bố trí {@link android.widget.AdapterView}.</p>
+
+<p>Các bố trí phổ biến được hỗ trợ bởi trình điều hợp bao gồm:</p>
+
+<div class="layout first">
+  <h4><a href="layout/listview.html">Dạng xem Danh sách</a></h4>
+  <a href="layout/listview.html"><img src="{@docRoot}images/ui/listview-small.png" alt="" /></a>
+  <p>Hiển thị một danh sách cột cuộn đơn.</p>
+</div>
+
+<div class="layout">
+  <h4><a href="layout/gridview.html">Dạng xem Lưới</a></h4>
+  <a href="layout/gridview.html"><img src="{@docRoot}images/ui/gridview-small.png" alt="" /></a>
+  <p>Hiển thị một lưới cuộn gồm nhiều hàng và cột.</p>
+</div>
+
+
+
+<h3 id="FillingTheLayout" style="clear:left">Điền dữ liệu vào một dạng xem trình điều hợp</h3>
+
+<p>Bạn có thể đưa vào một {@link android.widget.AdapterView} chẳng hạn như {@link android.widget.ListView} hoặc
+{@link android.widget.GridView} bằng cách gắn kết thực thể {@link android.widget.AdapterView} với một
+{@link android.widget.Adapter}, nó truy xuất dữ liệu từ một nguồn bên ngoài và tạo một {@link
+android.view.View} để biểu diễn từng mục nhập dữ liệu.</p>
+
+<p>Android cung cấp một vài lớp con của {@link android.widget.Adapter} rất hữu ích cho việc
+truy xuất các kiểu dữ liệu khác nhau và xây dựng dạng xem cho một {@link android.widget.AdapterView}. Hai
+trình điều hợp phổ biến nhất là:</p>
+
+<dl>
+  <dt>{@link android.widget.ArrayAdapter}</dt>
+    <dd>Sử dụng trình điều hợp này khi nguồn dữ liệu của bạn là một mảng. Theo mặc định, {@link
+android.widget.ArrayAdapter} tạo một dạng xem cho mỗi mục mảng bằng cách gọi {@link
+java.lang.Object#toString()} trên từng mục và đặt nội dung trong một {@link
+android.widget.TextView}.
+      <p>Ví dụ, nếu bạn có một mảng xâu mà bạn muốn hiển thị trong một {@link
+android.widget.ListView}, hãy khởi tạo một {@link android.widget.ArrayAdapter} mới bằng cách sử dụng
+hàm dựng để chỉ định bố trí cho từng xâu và mảng xâu:</p>
+<pre>
+ArrayAdapter&lt;String> adapter = new ArrayAdapter&lt;String>(this,
+        android.R.layout.simple_list_item_1, myStringArray);
+</pre>
+<p>Các tham đối cho hàm dựng này là:</p>
+<ul>
+  <li>Ứng dụng của bạn {@link android.content.Context}</li>
+  <li>Bố trí chứa một {@link android.widget.TextView} cho mỗi xâu trong mảng</li>
+  <li>Mảng xâu</li>
+</ul>
+<p>Sau đó chỉ cần gọi
+{@link android.widget.ListView#setAdapter setAdapter()} trên {@link android.widget.ListView} của bạn:</p>
+<pre>
+ListView listView = (ListView) findViewById(R.id.listview);
+listView.setAdapter(adapter);
+</pre>
+
+      <p>Để tùy chỉnh diện mạo của từng mục, bạn có thể khống chế phương pháp {@link
+java.lang.Object#toString()} cho các đối tượng trong mảng của mình. Hoặc, để tạo một dạng xem cho từng
+mục không phải là một {@link android.widget.TextView} (ví dụ, nếu bạn muốn một
+{@link android.widget.ImageView} cho từng mục mảng), hãy mở rộng lớp {@link
+android.widget.ArrayAdapter} và khống chế {@link android.widget.ArrayAdapter#getView
+getView()} để trả về kiểu dạng xem mà bạn muốn cho từng mục.</p>
+
+</dd>
+
+  <dt>{@link android.widget.SimpleCursorAdapter}</dt>
+    <dd>Sử dụng trình điều hợp này khi dữ liệu của bạn đến từ một {@link android.database.Cursor}. Khi
+sử dụng {@link android.widget.SimpleCursorAdapter}, bạn phải chỉ định một bố trí để sử dụng cho từng
+hàng trong {@link android.database.Cursor} và những cột nào trong {@link android.database.Cursor}
+nên được chèn vào dạng xem nào của bố trí. Ví dụ, nếu bạn muốn tạo một danh sách
+tên người và số điện thoại, bạn có thể thực hiện một truy vấn mà trả về một {@link
+android.database.Cursor} chứa một hàng cho từng người và nhiều cột cho các tên và
+số điện thoại. Sau đó, bạn tạo một mảng xâu chỉ định những cột nào từ {@link
+android.database.Cursor} mà bạn muốn trong bố trí cho từng kết quả và một mảng số nguyên chỉ định các
+dạng xem tương ứng mà từng cột sẽ được đặt vào:</p>
+<pre>
+String[] fromColumns = {ContactsContract.Data.DISPLAY_NAME,
+                        ContactsContract.CommonDataKinds.Phone.NUMBER};
+int[] toViews = {R.id.display_name, R.id.phone_number};
+</pre>
+<p>Khi bạn khởi tạo {@link android.widget.SimpleCursorAdapter}, hãy chuyển bố trí cần sử dụng cho
+từng kết quả, {@link android.database.Cursor} chứa các kết quả, và hai mảng sau:</p>
+<pre>
+SimpleCursorAdapter adapter = new SimpleCursorAdapter(this,
+        R.layout.person_name_and_number, cursor, fromColumns, toViews, 0);
+ListView listView = getListView();
+listView.setAdapter(adapter);
+</pre>
+<p>Sau đó, {@link android.widget.SimpleCursorAdapter} tạo một dạng xem cho từng hàng trong
+{@link android.database.Cursor} sử dụng bố trí được cung cấp bằng cách chèn từng mục {@code
+fromColumns} vào dạng xem {@code toViews} tương ứng.</p>.</dd>
+</dl>
+
+
+<p>Trong vòng đời ứng dụng của bạn, nếu bạn thay đổi dữ liệu liên quan được đọc bởi
+trình điều hợp của mình, bạn nên gọi {@link android.widget.ArrayAdapter#notifyDataSetChanged()}. Nó sẽ
+thông báo với dạng xem đính kèm rằng dữ liệu đã được thay đổi và dạng xem nên tự làm mới.</p>
+
+
+
+<h3 id="HandlingUserSelections">Xử lý sự kiện nhấp</h3>
+
+<p>Bạn có thể phản hồi các sự kiện nhấp trên từng mục trong một {@link android.widget.AdapterView} bằng cách
+triển khai giao diện {@link android.widget.AdapterView.OnItemClickListener}. Ví dụ:</p>
+
+<pre>
+// Create a message handling object as an anonymous class.
+private OnItemClickListener mMessageClickedHandler = new OnItemClickListener() {
+    public void onItemClick(AdapterView parent, View v, int position, long id) {
+        // Do something in response to the click
+    }
+};
+
+listView.setOnItemClickListener(mMessageClickedHandler);
+</pre>
+
+
+

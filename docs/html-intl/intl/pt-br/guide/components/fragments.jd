@@ -1,0 +1,812 @@
+page.title=Fragmentos
+parent.title=Atividades
+parent.link=activities.html
+@jd:body
+
+<div id="qv-wrapper">
+<div id="qv">
+  <h2>Neste documento</h2>
+  <ol>
+    <li><a href="#Design">Filosofia do projeto</a></li>
+    <li><a href="#Creating">Criação de um fragmento</a>
+      <ol>
+        <li><a href="#UI">Adição de uma interface do usuário</a></li>
+        <li><a href="#Adding">Adição de um fragmento a uma atividade</a></li>
+      </ol>
+    </li>
+    <li><a href="#Managing">Gerenciamento de fragmentos</a></li>
+    <li><a href="#Transactions">Realização de operações com fragmentos</a></li>
+    <li><a href="#CommunicatingWithActivity">Comunicação com a atividade</a>
+      <ol>
+        <li><a href="#EventCallbacks">Criação de eventos de retornos de chamada para a atividade</a></li>
+        <li><a href="#ActionBar">Adição de itens à barra de ação</a></li>
+      </ol>
+    </li>
+    <li><a href="#Lifecycle">Tratamento do ciclo de vida dos fragmentos</a>
+      <ol>
+        <li><a href="#CoordinatingWithActivity">Coordenação com o ciclo de vida da atividade</a></li>
+      </ol>
+    </li>
+    <li><a href="#Example">Exemplo</a></li>
+  </ol>
+
+  <h2>Classes principais</h2>
+  <ol>
+    <li>{@link android.app.Fragment}</li>
+    <li>{@link android.app.FragmentManager}</li>
+    <li>{@link android.app.FragmentTransaction}</li>
+  </ol>
+  
+  <h2>Veja também</h2>
+  <ol>
+    <li><a href="{@docRoot}training/basics/fragments/index.html">Construção de uma IU dinâmica com Fragmentos</a></li>
+    <li><a href="{@docRoot}guide/practices/tablets-and-handsets.html">Compatibilidade com
+tablets e celulares</a></li>
+  </ol>
+</div>
+</div>
+
+<p>Um {@link android.app.Fragment} representa o comportamento ou uma parte da interface do usuário em um
+{@link android.app.Activity}. É possível combinar vários fragmentos em uma única atividade para compilar
+uma IU de painéis múltiplos e reutilizar um fragmento em diversas atividades. Um fragmento
+é como uma seção modular de uma atividade, que tem o próprio ciclo de vida, recebe os próprios eventos de entrada
+e que pode ser adicionado ou removido com a atividade em execução (uma espécie de "sub-atividade"
+que pode ser reutilizada em diferentes atividades).</p>
+
+<p>Um fragmento deve sempre ser embutido em uma atividade e o ciclo de vida dele
+é diretamente impactado pelo ciclo de vida da atividade do host. Por exemplo, quando a atividade é pausada, todos os fragmentos
+também são e, quando a atividade é destruída, todos os fragmentos também são. No entanto, enquanto
+uma atividade estiver em execução (estiver no <em>estado do ciclo de vida</em> <a href="{@docRoot}guide/components/activities.html#Lifecycle">retomado</a>), é possível
+manipular cada fragmento independentemente, como adicionar ou removê-los. Ao realizar tal operação com fragmentos,
+também é possível adicioná-los a uma pilha de retorno que é gerenciada pela
+atividade &mdash; cada entrada da pilha de retorno na atividade é um registro da operação de fragmento
+que ocorreu. A pilha de retorno permite que o usuário inverta uma operação de fragmento (navegue ao contrário),
+pressionando o botão <em>Voltar</em>.</p>
+
+<p>Ao adicionar um fragmento como parte do layout da atividade, ele viverá em um {@link
+android.view.ViewGroup} dentro da hierarquia de vistas e o fragmento definirá o próprio
+layout da vista.
+É possível inserir um fragmento no layout, declarando-o no arquivo de layout
+da atividade, como um elemento {@code &lt;fragment&gt;} ou a partir do código do aplicativo adicionando-o
+a um {@link android.view.ViewGroup} existente. No entanto, não é necessário que um fragmento faça parte
+do layout da atividade; também é possível usar um fragmento sem a IU como um trabalhador invisível
+da atividade.</p>
+
+<p>Este documento descreve como compilar o aplicativo para usar fragmentos,
+incluindo como os fragmentos podem manter seu estado ao serem adicionados à pilha de retorno da atividade,
+como compartilhar eventos com a atividade e com outros fragmentos da atividade, como contribuir para a barra de ação
+da atividade e muito mais.</p>
+
+
+<h2 id="Design">Filosofia do projeto</h2>
+
+<p>O Android introduziu os fragmentos no Android 3.0 (API de nível 11), principalmente para suportar
+mais projetos de IU flexíveis e dinâmicos em telas grandes, como em tablets. Como a tela de um tablet
+é muito maior que a de um celular, há mais espaço para combinar
+e alternar componentes da IU. Os fragmentos permitem tais projetos sem haver a necessidade de gerenciar
+alterações complexas na hierarquia de vistas. Ao dividir o layout de uma atividade em fragmentos, é possível
+modificar a aparência da atividade em tempo de execução e preservar essas alterações na pilha de retorno,
+que é gerenciada por esta atividade.</p>
+
+<p>Por exemplo, um aplicativo de notícias pode usar um fragmento para exibir uma lista de artigos
+na esquerda e outro fragmento para exibir um artigo na direita &mdash; ambos os fragmentos aparecem
+em uma atividade, lado a lado, e cada fragmento possui o próprio conjunto de métodos de retorno de chamada do ciclo de vida e lidam
+com os próprios eventos de entrada do usuário. Portanto, em vez de usar uma atividade para selecionar um artigo
+e outra atividade para lê-lo, o usuário pode selecionar um artigo e lê-lo por completo dentro
+da mesma atividade, como ilustrado no layout do tablet na figura 1.</p>
+
+<p>Você deve projetar cada fragmento como um componente modular e reutilizável da atividade. Ou seja, como cada fragmento
+define seu próprio layout e comportamento com os próprios retornos de chamada do ciclo de vida, é possível
+incluir um fragmento em várias atividades para poder projetá-lo para reutilização e evitar
+a manipulação direta de um fragmento a partir de outro fragmento. Isto é especialmente importante porque
+um fragmento modular permite alterar as combinações de fragmentos para tamanhos de tela diferentes. Ao projetar o aplicativo
+para ser compatível com tablets e celulares, você poderá reutilizar os fragmentos em diferentes configurações
+de layout para otimizar a experiência do usuário com base no espaço de tela disponível. Por exemplo,
+em um celular, talvez seja necessário separar os fragmentos para fornecer uma IU de painel único
+quando mais de um não se encaixar dentro da mesma atividade.</p>
+
+<img src="{@docRoot}images/fundamentals/fragments.png" alt="" />
+<p class="img-caption"><strong>Figura 1.</strong> Um exemplo de como dois módulos de IU definidos
+pelos fragmentos podem ser combinados em uma atividade de um projeto para tablet mas separados
+em um projeto para celular.</p>
+
+<p>Por exemplo, &mdash; continuando com o exemplo do aplicativo de notícias &mdash; o aplicativo pode embutir
+dois fragmentos na <em>atividade A</em>, quando executado em um dispositivo do tamanho de um tablet. No entanto,
+em uma tela de tamanho de celular, não há espaço suficiente para ambos os fragmentos, então a <em>atividade A</em> inclui
+somente o fragmento da lista de artigos e, quando o usuário seleciona um artigo, ele inicia
+a <em>atividade B</em>, que inclui o segundo fragmento para ler o artigo. Portanto, o aplicativo
+é compatível com tablets e celulares através da reutilização dos fragmentos em combinações diferentes, como ilustrado
+na figura 1.</p>
+
+<p>Para obter mais informações sobre o projeto de aplicativos com diferentes combinações de fragmentos
+para configurações de tela diferentes, consulte o guia <a href="{@docRoot}guide/practices/tablets-and-handsets.html">Compatibilidade com tablets e celulares</a>.</p>
+
+
+
+<h2 id="Creating">Criação de um fragmento</h2>
+
+<div class="figure" style="width:327px">
+<img src="{@docRoot}images/fragment_lifecycle.png" alt="" />
+<p class="img-caption"><strong>Figura 2.</strong> O ciclo de vida de um fragmento
+(enquanto sua atividade está em execução).</p>
+</div>
+
+<p>Para criar um fragmento, é preciso criar uma subclasse de {@link android.app.Fragment} (ou uma respectiva
+subclasse existente). A classe {@link android.app.Fragment} tem um código que é muito parecido
+com o de uma {@link android.app.Activity}. Ele contém métodos de retorno de chamada semelhantes aos de uma atividade,
+como {@link android.app.Fragment#onCreate onCreate()}, {@link android.app.Fragment#onStart onStart()},
+{@link android.app.Fragment#onPause onPause()} e {@link android.app.Fragment#onStop onStop()}. Na verdade,
+caso esteja convertendo um aplicativo do Android existente para usar os fragmentos, basta mover
+o código dos métodos de retorno de chamada da atividade para os respectivos métodos de retorno de chamada
+do fragmento.</p>
+
+<p>Geralmente, deve-se implementar pelo menos os seguintes métodos de ciclo de vida:</p>
+
+<dl>
+  <dt>{@link android.app.Fragment#onCreate onCreate()}</dt>
+  <dd>O sistema o chama ao criar o fragmento. Dentro da implementação,
+deve-se inicializar os componentes essenciais do fragmento que deseja-se reter quando o fragmento
+for pausado ou interrompido e, em seguida, retomado.</dd>
+  <dt>{@link android.app.Fragment#onCreateView onCreateView()}</dt>
+  <dd>O sistema chama isto quando é o momento de o fragmento desenhar a interface do usuário
+pela primeira vez. Para desenhar uma IU para o fragmento, você deve retornar uma {@link android.view.View}
+deste método, que é a raiz do layout do fragmento. É possível retornar como nulo se o fragmento
+não fornecer uma IU.</dd>
+  <dt>{@link android.app.Activity#onPause onPause()}</dt>
+  <dd>O sistema chama esse método como o primeiro indício de que o usuário está saindo
+do fragmento (embora não seja sempre uma indicação de que o fragmento está sendo destruído). É quando geralmente
+deve-se confirmar qualquer alteração que deva se manter além da sessão atual do usuário (porque
+o usuário pode não retornar).</dd>
+</dl>
+
+<p>A maioria dos aplicativos deve implementar pelo menos três destes métodos para cada fragmento,
+mas há vários outros métodos de retorno de chamada que você deve usar para lidar com diversos estágios
+do ciclo de vida do fragmento. Todos os métodos de retorno de chamada do ciclo de vida são abordados com mais detalhes na seção
+<a href="#Lifecycle">Tratamento do ciclo de vida dos fragmentos</a>.</p>
+
+
+<p>Há também algumas subclasses que você pode querer estender, em vez de a classe {@link
+android.app.Fragment} de base:</p>
+
+<dl>
+  <dt>{@link android.app.DialogFragment}</dt>
+  <dd>Exibe uma caixa de diálogo flutuante. Usar esta classe para criar uma caixa de diálogo é uma boa alternativa
+para usar métodos auxiliares das caixas de diálogo na classe {@link android.app.Activity},
+pois é possível incorporar uma caixa de diálogo de fragmento na pilha de retorno dos fragmentos gerenciados pela atividade,
+permitindo que o usuário retorne a um fragmento dispensado.</dd>
+
+  <dt>{@link android.app.ListFragment}</dt>
+  <dd>Exibe uma lista de itens que são gerenciados por um adaptador (como um {@link
+android.widget.SimpleCursorAdapter}), semelhante à {@link android.app.ListActivity}. Ele fornece vários métodos
+para gerenciar uma vista de lista, como o retorno de chamada {@link
+android.app.ListFragment#onListItemClick(ListView,View,int,long) onListItemClick()}
+para lidar com eventos de clique.</dd>
+
+  <dt>{@link android.preference.PreferenceFragment}</dt>
+  <dd>Exibe uma hierarquia de objetos {@link android.preference.Preference} como uma lista,
+parecido com {@link android.preference.PreferenceActivity}. Isto é útil ao criar uma atividade
+de "configurações" para o aplicativo.</dd>
+</dl>
+
+
+<h3 id="UI">Adição de uma interface do usuário</h3>
+
+<p>Um fragmento é geralmente usado como parte de uma interface do usuário da atividade e contribui
+para a atividade com seu próprio layout.</p>
+
+<p>Para fornecer um layout para um fragmento, você deve implementar o método de retorno de chamada {@link
+android.app.Fragment#onCreateView onCreateView()}, que o sistema Android chama
+no momento em que o fragmento deve desenhar o layout. A implementação deste método deve retornar
+uma {@link android.view.View}, que é a raiz do layout do fragmento.</p>
+
+<p class="note"><strong>Observação:</strong> se o fragmento for uma subclasse de {@link
+android.app.ListFragment}, a implementação padrão retornará uma {@link android.widget.ListView}
+de {@link android.app.Fragment#onCreateView onCreateView()}, então não será necessário implementá-lo.</p>
+
+<p>Para retornar um layout de {@link
+android.app.Fragment#onCreateView onCreateView()}, é possível inflá-lo a partir de um <a href="{@docRoot}guide/topics/resources/layout-resource.html">recurso de layout</a> definido no XML. Para ajudar
+a fazer isto, o {@link android.app.Fragment#onCreateView onCreateView()} fornece
+um objeto {@link android.view.LayoutInflater}.</p>
+
+<p>Por exemplo, a seguir há uma subclasse de {@link android.app.Fragment} que carrega um layout
+do arquivo {@code example_fragment.xml}:</p>
+
+<pre>
+public static class ExampleFragment extends Fragment {
+    &#64;Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+                             Bundle savedInstanceState) {
+        // Inflate the layout for this fragment
+        return inflater.inflate(R.layout.example_fragment, container, false);
+    }
+}
+</pre>
+
+<div class="sidebox-wrapper">
+<div class="sidebox">
+  <h3>Criação de um layout</h3>
+  <p>No exemplo acima, {@code R.layout.example_fragment} é uma referência para um recurso de layout
+chamado {@code example_fragment.xml}, salvo nos recursos do aplicativo. Para obter informações sobre
+como criar um layout no XML, consulte a documentação <a href="{@docRoot}guide/topics/ui/index.html">Interface do usuário</a>
+.</p>
+</div>
+</div>
+
+<p>O parâmetro {@code container} passado para {@link android.app.Fragment#onCreateView
+onCreateView()} é o pai de {@link android.view.ViewGroup} (do layout da atividade)
+em que o layout do fragmento
+será inserido. O parâmetro {@code savedInstanceState} é um {@link android.os.Bundle}
+que fornece dados sobre a instância anterior do fragmento, se o fragmento estiver sendo retomado
+(a restauração de estado é abordada mais detalhadamente na seção <a href="#Lifecycle">Tratamento do ciclo
+de vida dos fragmentos</a>).</p>
+
+<p>O método {@link android.view.LayoutInflater#inflate(int,ViewGroup,boolean) inflate()}
+usa três argumentos:</p>
+<ul>
+  <li>O ID de recurso do layout que você quer inflar.</li>
+  <li>O {@link android.view.ViewGroup} que será pai do layout inflado. Passar o {@code
+container} é importante para que o sistema aplique os parâmetros de layout à vista raiz
+do layout inflado, especificado pela vista pai em que está ocorrendo.</li>
+  <li>Um booleano que indica se o layout inflado deve ser anexado a {@link
+android.view.ViewGroup} (o segundo parâmetro) durante a inflação (neste caso,
+isto é falso, pois o sistema já está inserindo o layout inflado no {@code
+container} &mdash; retornar como verdadeiro criaria um grupo de vistas redundante no layout final).</li>
+</ul>
+
+<p>Este é o modo de criar um fragmento que fornece um layout. A seguir,
+é preciso adicionar o fragmento à atividade.</p>
+
+
+
+<h3 id="Adding">Adição de um fragmento a uma atividade</h3>
+
+<p>Geralmente, um fragmento contribui com a atividade do host com uma parte da IU, que é embutida como parte
+da hierarquia de vistas geral da atividade. Há duas formas de adicionar um fragmento ao layout
+da atividade:</p>
+
+<ul>
+  <li><b>Declarar o fragmento dentro do arquivo de layout da atividade.</b>
+<p>Neste caso,
+é possível especificar as propriedades do layout para o fragmento como se fosse uma vista. Por exemplo, a seguir há o arquivo de layout
+para uma atividade com dois fragmentos:</p>
+<pre>
+&lt;?xml version="1.0" encoding="utf-8"?&gt;
+&lt;LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="horizontal"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"&gt;
+    &lt;fragment android:name="com.example.news.ArticleListFragment"
+            android:id="@+id/list"
+            android:layout_weight="1"
+            android:layout_width="0dp"
+            android:layout_height="match_parent" /&gt;
+    &lt;fragment android:name="com.example.news.ArticleReaderFragment"
+            android:id="@+id/viewer"
+            android:layout_weight="2"
+            android:layout_width="0dp"
+            android:layout_height="match_parent" /&gt;
+&lt;/LinearLayout&gt;
+</pre>
+  <p>O atributo {@code android:name} em {@code &lt;fragment&gt;} especifica a classe {@link
+android.app.Fragment} a instanciar no layout.</p>
+
+<p>Quando o sistema cria este layout de atividade, ele instancia cada fragmento especificado
+no layout e chama o método {@link android.app.Fragment#onCreateView onCreateView()} para cada um
+para recuperar o layout de cada fragmento. O sistema insere a {@link android.view.View} retornada
+pelo fragmento diretamente no lugar do elemento {@code &lt;fragment&gt;}.</p>
+
+<div class="note">
+  <p><strong>Observação:</strong> cada fragmento requer um identificador único
+que o sistema possa usar para restaurá-lo se a atividade for reiniciada (e que possa ser usado
+para capturar o fragmento para realizar operações, como a remoção). Há três maneiras de fornecer
+um ID para um fragmento:</p>
+  <ul>
+    <li>Fornecer o atributo {@code android:id} com um ID único.</li>
+    <li>Fornecer o atributo {@code android:tag} com uma string única.</li>
+    <li>Caso não forneça nenhuma das alternativas anteriores, o sistema usará o ID da vista
+do recipiente.</li>
+  </ul>
+</div>
+  </li>
+
+  <li><b>Ou adicionar programaticamente o fragmento a um {@link android.view.ViewGroup} existente.</b>
+<p>A qualquer momento, enquanto a atividade está em execução, é possível adicionar fragmentos ao layout da atividade. Você precisa
+apenas especificar um {@link
+android.view.ViewGroup} para posicionar o fragmento.</p>
+  <p>Para realizar operações de fragmentos na atividade (como adicionar, remover ou substituir
+um fragmento), você deve usar APIs de {@link android.app.FragmentTransaction}. É possível adquirir
+uma instância de {@link android.app.FragmentTransaction} da {@link android.app.Activity} desta maneira:</p>
+
+<pre>
+FragmentManager fragmentManager = {@link android.app.Activity#getFragmentManager()}
+FragmentTransaction fragmentTransaction = fragmentManager.{@link android.app.FragmentManager#beginTransaction()};
+</pre>
+
+<p>É possível adicionar um fragmento usando o método {@link
+android.app.FragmentTransaction#add(int,Fragment) add()}, especificando o fragmento que será adicionado
+e a vista em que será inserido. Por exemplo:</p>
+
+<pre>
+ExampleFragment fragment = new ExampleFragment();
+fragmentTransaction.add(R.id.fragment_container, fragment);
+fragmentTransaction.commit();
+</pre>
+
+  <p>O primeiro argumento passado para {@link android.app.FragmentTransaction#add(int,Fragment) add()}
+é {@link android.view.ViewGroup}, onde o fragmento deve ser colocado, especificado
+pelo ID de recurso e o segundo parâmetro é o fragmento a ser adicionado.</p>
+  <p>Ao realizar as alterações
+com {@link android.app.FragmentTransaction},
+deve-se chamar{@link android.app.FragmentTransaction#commit} para que as alterações entrem em vigor.</p>
+  </li>
+</ul>
+
+
+<h4 id="AddingWithoutUI">Adição de um fragmento sem IU</h4>
+
+<p>O exemplo acima mostra como adicionar um fragmento à atividade para fornecer uma IU. No entanto,
+é possível também usar um fragmento para fornecer o comportamento de segundo plano para a atividade sem apresentar
+IU adicional.</p>
+
+<p>Para adicionar um fragmento sem uma IU, adicione o fragmento da atividade usando {@link
+android.app.FragmentTransaction#add(Fragment,String)} (fornecendo uma "tag" de string única
+para o fragmento, em vez de um ID de vista). Isto adiciona o fragmento, mas, como ele não está associado
+a uma vista no layout da atividade, não recebe uma chamada de {@link
+android.app.Fragment#onCreateView onCreateView()}. Portanto, não é necessário implementar este método.</p>
+
+<p>Fornecer uma tag de string para o fragmento não é algo estrito para fragmentos que não sejam de IU &mdash; é possível também
+fornecer tags de string para fragmentos que possuam uma IU &mdash; mas, se o fragmento não possuir uma IU,
+a tag de string é a única maneira de identificá-lo. Caso queira obter o fragmento da atividade posteriormente,
+você precisará usar {@link android.app.FragmentManager#findFragmentByTag
+findFragmentByTag()}.</p>
+
+<p>Para ver uma atividade de exemplo que usa um fragmento como um trabalhador de segundo plano, sem uma IU, consulte o exemplo de {@code
+FragmentRetainInstance.java}, incluso nos exemplos do SDK (disponibilizados pelo 
+Android SDK Manager) e localizado no sistema como 
+<code>&lt;sdk_root&gt;/APIDemos/app/src/main/java/com/example/android/apis/app/FragmentRetainInstance.java</code>.</p>
+
+
+
+<h2 id="Managing">Gerenciamento de fragmentos</h2>
+
+<p>Para gerenciar os fragmentos na atividade, você precisa usar {@link android.app.FragmentManager}. Para adquiri-lo,
+chame {@link android.app.Activity#getFragmentManager()} a partir da atividade.</p>
+
+<p>Algumas das coisas que você pode fazer com {@link android.app.FragmentManager} incluem:</p>
+
+<ul>
+  <li>Adquirir fragmentos existentes na atividade, com {@link
+android.app.FragmentManager#findFragmentById findFragmentById()} (para fragmentos que forneçam uma IU
+no layout da atividade) ou {@link android.app.FragmentManager#findFragmentByTag
+findFragmentByTag()} (para fragmentos que forneçam ou não uma IU).</li> 
+  <li>Retire os fragmentos da pilha de retorno com {@link
+android.app.FragmentManager#popBackStack()} (simulando um comando de <em>Voltar</em> do usuário).</li>
+  <li>Registre uma escuta para as alterações na pilha de retorno com {@link
+android.app.FragmentManager#addOnBackStackChangedListener addOnBackStackChangedListener()}.</li>
+</ul>
+
+<p>Para obter mais informações sobre esses e outros métodos, consulte a documentação da classe {@link
+android.app.FragmentManager}.</p>
+
+<p>Como demonstrado na seção anterior, é possível usar o {@link android.app.FragmentManager}
+para abrir uma {@link android.app.FragmentTransaction}, que permite realizar operações,
+como adicionar e remover fragmentos.</p>
+
+
+<h2 id="Transactions">Realização de operações com fragmentos</h2>
+
+<p>Um grande recurso fornecido por fragmentos em atividades é a possibilidade de adicionar, remover, substituir
+e realizar outras ações com eles em resposta à interação do usuário. Cada conjunto de alterações que forem realizadas
+na atividade é chamado de operação e podem ser feitas usando APIs em {@link
+android.app.FragmentTransaction}. Também é possível salvar cada operação em uma pilha de retorno gerenciada pela atividade,
+permitindo que o usuário navegue inversamente por meio de alterações de fragmento (semelhante à navegação
+inversa por meio de atividades).</p>
+
+<p>É possível adquirir uma instância de {@link android.app.FragmentTransaction} a partir do {@link
+android.app.FragmentManager} da seguinte forma:</p>
+
+<pre>
+FragmentManager fragmentManager = {@link android.app.Activity#getFragmentManager()};
+FragmentTransaction fragmentTransaction = fragmentManager.{@link android.app.FragmentManager#beginTransaction()};
+</pre>
+
+<p>Cada operação é um conjunto de alterações que você deseja realizar ao mesmo tempo. É possível definir
+todas as alterações desejadas para uma operação usando métodos como {@link
+android.app.FragmentTransaction#add add()}, {@link android.app.FragmentTransaction#remove remove()}
+e {@link android.app.FragmentTransaction#replace replace()}. Em seguida, para aplicar a operação
+à atividade, deve-se chamar {@link android.app.FragmentTransaction#commit()}.</p>
+</dl>
+
+<p>Antes de chamar {@link
+android.app.FragmentTransaction#commit()}, no entanto, você pode querer chamar {@link
+android.app.FragmentTransaction#addToBackStack addToBackStack()} para adicionar a operação
+a uma pilha de retorno de operações de fragmentos. A pilha de retorno é gerenciada pela atividade
+e permite que o usuário retorne ao estado anterior do fragmento, ao pressionar o botão <em>Voltar</em>.</p>
+
+<p>Por exemplo, a seguir é apresentado o modo de substituir um fragmento por outro e preservar
+o estado anterior da pilha de retorno:</p>
+
+<pre>
+// Create new fragment and transaction
+Fragment newFragment = new ExampleFragment();
+FragmentTransaction transaction = getFragmentManager().beginTransaction();
+
+// Replace whatever is in the fragment_container view with this fragment,
+// and add the transaction to the back stack
+transaction.replace(R.id.fragment_container, newFragment);
+transaction.addToBackStack(null);
+
+// Commit the transaction
+transaction.commit();
+</pre>
+
+<p>Neste exemplo, {@code newFragment} substitui qualquer fragmento (se houver) que estiver
+no recipiente do layout identificado pelo ID {@code R.id.fragment_container}. Ao chamar {@link
+android.app.FragmentTransaction#addToBackStack addToBackStack()}, a operação de substituição
+é salva na pilha de retorno para que o usuário possa reverter a operação
+e voltar ao fragmento anterior pressionando o botão <em>Voltar</em>.</p>
+
+<p>Se você adicionar várias alterações à operação (como outro {@link
+android.app.FragmentTransaction#add add()} ou {@link android.app.FragmentTransaction#remove
+remove()}) e chamar {@link
+android.app.FragmentTransaction#addToBackStack addToBackStack()}, todas as alterações aplicadas
+antes de chamar {@link android.app.FragmentTransaction#commit commit()} serão adicionadas
+à pilha de retorno como uma única operação e o botão <em>Voltar</em> reverterá todas elas juntas.</p>
+
+<p>A ordem em que você adicionar as alterações em {@link android.app.FragmentTransaction} não importa,
+exceto que:</p>
+<ul>
+  <li>Você deve chamar {@link android.app.FragmentTransaction#commit()} por último</li>
+  <li>Caso esteja adicionando vários fragmentos ao mesmo recipiente, a ordem em que
+adicioná-los determina a ordem em que eles aparecerão na hierarquia de vistas</li>
+</ul>
+
+<p>Caso você não chame {@link android.app.FragmentTransaction#addToBackStack(String)
+addToBackStack()} ao realizar uma operação que remove um fragmento, este fragmento
+será destruído quando a operação for realizada e o usuário não poderá navegar de volta a ele. Considerando que,
+se você não chamar {@link android.app.FragmentTransaction#addToBackStack(String) addToBackStack()}
+ao remover um fragmento, o fragmento será <em>interrompido</em> e será retomado se o usuário
+navegar de volta.</p>
+
+<p class="note"><strong>Dica:</strong> para cada operação de fragmento, é possível aplicar uma animação
+de transição, chamando {@link android.app.FragmentTransaction#setTransition setTransition()}
+antes da realização.</p>
+
+<p>Chamar {@link android.app.FragmentTransaction#commit()} não realiza a operação
+imediatamente. Em vez disso, o parâmetro agenda a execução no encadeamento da IU da atividade (o encadeamento “main”, ou principal)
+assim que possível. Se necessário, no entanto, é possível chamar {@link
+android.app.FragmentManager#executePendingTransactions()} a partir do encadeamento da IU para executar imediatamente
+as operações enviadas por {@link android.app.FragmentTransaction#commit()}. Tal medida, geralmente,
+não é necessária, a não ser que a operação represente uma dependência para trabalhos em outros encadeamentos.</p>
+
+<p class="caution"><strong>Atenção:</strong> É possível realizar uma operação usando {@link
+android.app.FragmentTransaction#commit commit()} somente antes da atividade <a href="{@docRoot}guide/components/activities.html#SavingActivityState">salvar
+seu estado</a> (quando o usuário deixa a atividade). Caso tente efetivas as alterações após este ponto,
+uma exceção será lançada. Isto acontece porque o estado após a efetivação pode ser perdido se a atividade
+precisar ser restaurada. Para situações em que não haja problema em perder a efetivação, use {@link
+android.app.FragmentTransaction#commitAllowingStateLoss()}.</p>
+
+
+
+
+<h2 id="CommunicatingWithActivity">Comunicação com a atividade</h2>
+
+<p>Apesar de {@link android.app.Fragment} ser implementado como um objeto independente
+de uma {@link android.app.Activity} e poder ser usado dentro de várias atividades, uma dada instância
+de um fragmento é diretamente vinculada à atividade que o contém.</p>
+
+<p>Especificamente, o fragmento pode acessar a instância {@link android.app.Activity} com {@link
+android.app.Fragment#getActivity()} e realizar facilmente tarefas como encontrar uma vista
+no layout da atividade:</p>
+
+<pre>
+View listView = {@link android.app.Fragment#getActivity()}.{@link android.app.Activity#findViewById findViewById}(R.id.list);
+</pre>
+
+<p>Do mesmo modo, a atividade pode chamar métodos no fragmento adquirindo uma referência
+para o {@link android.app.Fragment} a partir do {@link android.app.FragmentManager} usando {@link
+android.app.FragmentManager#findFragmentById findFragmentById()} ou {@link
+android.app.FragmentManager#findFragmentByTag findFragmentByTag()}. Por exemplo:</p>
+
+<pre>
+ExampleFragment fragment = (ExampleFragment) getFragmentManager().findFragmentById(R.id.example_fragment);
+</pre>
+
+
+<h3 id="EventCallbacks">Criação de retornos de chamada de evento para a atividade</h3>
+
+<p>Em alguns casos, um fragmento que compartilhe eventos com a atividade pode ser necessário. Uma boa maneira de fazer isto
+é definir uma interface de retorno de chamada dentro do fragmento e solicitar que a atividade do host
+implemente-a. Quando a atividade recebe um retorno de chamada por meio da interface, ela pode compartilhar as informações
+com outros fragmentos no layout conforme necessário.</p>
+
+<p>Por exemplo, se um aplicativo de notícias em uma atividade tiver dois fragmentos &mdash; um para exibir uma lista
+de artigos (fragmento A) e outro para exibir um artigo (fragmento B) &mdash; então o fragmento A
+deve informar à atividade quando um item de lista é selecionado para que ela possa instruir o fragmento B a exibir o artigo. Neste caso,
+ a interface {@code OnArticleSelectedListener} é declarada dentro do fragmento A:</p>
+
+<pre>
+public static class FragmentA extends ListFragment {
+    ...
+    // Container Activity must implement this interface
+    public interface OnArticleSelectedListener {
+        public void onArticleSelected(Uri articleUri);
+    }
+    ...
+}
+</pre>
+
+<p>Portanto, a atividade que hospeda o fragmento implementa a interface {@code OnArticleSelectedListener}
+e suspende
+{@code onArticleSelected()} para notificar o fragmento B do evento do fragmento A. Para garantir
+que a atividade do host implemente esta interface, o método de retorno de chamada de {@link
+android.app.Fragment#onAttach onAttach()} do fragmento A (que o sistema chama ao adicionar
+o fragmento à atividade) instanciará {@code OnArticleSelectedListener}
+lançando a {@link android.app.Activity}, que é passada para {@link android.app.Fragment#onAttach
+onAttach()}:</p>
+
+<pre>
+public static class FragmentA extends ListFragment {
+    OnArticleSelectedListener mListener;
+    ...
+    &#64;Override
+    public void onAttach(Activity activity) {
+        super.onAttach(activity);
+        try {
+            mListener = (OnArticleSelectedListener) activity;
+        } catch (ClassCastException e) {
+            throw new ClassCastException(activity.toString() + " must implement OnArticleSelectedListener");
+        }
+    }
+    ...
+}
+</pre>
+
+<p>Se a atividade não implementar a interface, o fragmento lançará
+{@link java.lang.ClassCastException}.
+Se for bem-sucedida, o membro {@code mListener} reterá uma referência da implementação da atividade
+de {@code OnArticleSelectedListener}, para que o fragmento A possa compartilhar os eventos com a atividade
+chamando métodos definidos pela interface {@code OnArticleSelectedListener}. Por exemplo, se o fragmento A
+for uma extensão de {@link android.app.ListFragment}, sempre
+que o usuário clicar em um item de lista, o sistema chamará {@link android.app.ListFragment#onListItemClick
+onListItemClick()} no fragmento que, em seguida, chamará {@code onArticleSelected()} para compartilhar
+o evento com a atividade:</p>
+
+<pre>
+public static class FragmentA extends ListFragment {
+    OnArticleSelectedListener mListener;
+    ...
+    &#64;Override
+    public void onListItemClick(ListView l, View v, int position, long id) {
+        // Append the clicked item's row ID with the content provider Uri
+        Uri noteUri = ContentUris.{@link android.content.ContentUris#withAppendedId withAppendedId}(ArticleColumns.CONTENT_URI, id);
+        // Send the event and Uri to the host activity
+        mListener.onArticleSelected(noteUri);
+    }
+    ...
+}
+</pre>
+
+<p>O parâmetro {@code id} passado para {@link
+android.app.ListFragment#onListItemClick onListItemClick()} é o ID da linha do item clicado
+que a atividade (ou outro fragmento) usa para resgatar o artigo do {@link
+android.content.ContentProvider} do aplicativo.</p>
+
+<p><!--To see a complete implementation of this kind of callback interface, see the <a
+href="{@docRoot}resources/samples/NotePad/index.html">NotePad sample</a>. -->Mais informações sobre
+como usar o provedor de conteúdo estão disponíveis na documentação <a href="{@docRoot}guide/topics/providers/content-providers.html">Provedores de conteúdo</a>.</p>
+
+
+
+<h3 id="ActionBar">Adição de itens à barra de ação</h3>
+
+<p>Os fragmentos podem contribuir com itens de menu para o <a href="{@docRoot}guide/topics/ui/menus.html#options-menu">menu de opções</a> da atividade (e, consequentemente, para a <a href="{@docRoot}guide/topics/ui/actionbar.html">barra de ação</a>) implementando 
+{@link android.app.Fragment#onCreateOptionsMenu(Menu,MenuInflater) onCreateOptionsMenu()}. Para que este método
+receba chamadas, no entanto, você deve chamar {@link
+android.app.Fragment#setHasOptionsMenu(boolean) setHasOptionsMenu()} durante {@link
+android.app.Fragment#onCreate(Bundle) onCreate()} para indicar que o fragmento
+gostaria de adicionar itens ao menu de opções (caso contrário, o fragmento não receberá uma chamada
+para {@link android.app.Fragment#onCreateOptionsMenu onCreateOptionsMenu()}).</p>
+
+<p>Quaisquer itens adicionados ao menu de opções do fragmento são anexados
+aos itens de menu existentes. O fragmento também recebe retornos de chamada para {@link
+android.app.Fragment#onOptionsItemSelected(MenuItem) onOptionsItemSelected()} quando um item de menu
+é selecionado.</p>
+
+<p>Também é possível registrar uma vista no layout do fragmento para fornecer um menu de contexto chamando {@link
+android.app.Fragment#registerForContextMenu(View) registerForContextMenu()}. Quando o usuário
+abre o menu de contexto, o fragmento recebe uma chamada de {@link
+android.app.Fragment#onCreateContextMenu(ContextMenu,View,ContextMenu.ContextMenuInfo)
+onCreateContextMenu()}. Quando o usuário seleciona um item, o fragmento recebe uma chamada de {@link
+android.app.Fragment#onContextItemSelected(MenuItem) onContextItemSelected()}.</p>
+
+<p class="note"><strong>Observação:</strong> apesar de o fragmento receber um retorno de chamada selecionado no item
+para cada item de menu que adiciona, a atividade é a primeira a receber o respectivo retorno de chamada quando o usuário
+seleciona um item de menu. Se a implementação da atividade do retorno de chamada selecionado no item não
+lida com o item selecionado, o evento é passado para o retorno de chamada do fragmento. Isto é verdadeiro
+para o menu de opções e os menus de contexto.</p>
+
+<p>Para obter mais informações sobre menus, consulte os guias do desenvolvedor <a href="{@docRoot}guide/topics/ui/menus.html">Menus</a> e <a href="{@docRoot}guide/topics/ui/actionbar.html">Barra de ação</a>.</p>
+
+
+
+
+<h2 id="Lifecycle">Tratamento do ciclo de vida dos fragmentos</h2>
+
+<div class="figure" style="width:350px">
+<img src="{@docRoot}images/activity_fragment_lifecycle.png" alt="" />
+<p class="img-caption"><strong>Figura 3.</strong> O efeito do ciclo de vida da atividade no ciclo de vida
+do fragmento.</p>
+</div>
+
+<p>Gerenciar o ciclo de vida de um fragmento é muito parecido com gerenciar o ciclo de vida de uma atividade. Como uma atividade,
+um fragmento pode existir em três estados:</p>
+
+<dl>
+  <dt><i>Retomado</i></dt>
+    <dd>O fragmento é visível na atividade em execução.</dd>
+
+  <dt><i>Pausado</i></dt>
+    <dd>Outra atividade está em primeiro plano, mas a atividade em que este fragmento
+vive ainda está visível (a atividade de primeiro plano é parcialmente transparente
+ou não cobre a tela inteira).</dd>
+
+  <dt><i>Interrompido</i></dt>
+    <dd>O fragmento não é visível. A atividade do host foi interrompida
+ou o fragmento foi removido da atividade mas adicionado à pilha de retorno. Um fragmento interrompido
+ainda está vivo (todas as informações do membro e de estado estão retidas no sistema). No entanto,
+não está mais visível e será eliminado se a atividade também for.</dd>
+</dl>
+
+<p>Além disso, como uma atividade, é possível reter o estado de um fragmento usando um {@link
+android.os.Bundle}, caso o processo da atividade seja eliminado e você precise restaurar
+o estado do fragmento quando a atividade for recriada. É possível salvar o estado durante o retorno de chamada {@link
+android.app.Fragment#onSaveInstanceState onSaveInstanceState()} do fragmento e restaurá-lo
+durante {@link android.app.Fragment#onCreate onCreate()}, {@link
+android.app.Fragment#onCreateView onCreateView()} ou {@link
+android.app.Fragment#onActivityCreated onActivityCreated()}. Para obter mais informações sobre
+como salvar o estado, consulte a documentação <a href="{@docRoot}guide/components/activities.html#SavingActivityState">Atividades</a>
+.</p>
+
+<p>A diferença mais significante entre o ciclo de vida de uma atividade e de um fragmento
+é o armazenamento em suas respectivas pilhas de retorno. Por padrão, uma atividade é colocada de volta na pilha de retorno de atividades,
+que é gerenciada pelo sistema, quando interrompida (para que o usuário possa navegar
+a ela com o botão <em>Voltar</em>, como discutido em <a href="{@docRoot}guide/components/tasks-and-back-stack.html">Tarefas e pilha de retorno</a>).
+No entanto, um fragmento é posicionado em uma pilha de retorno gerenciada pela atividade do host somente
+ao solicitar explicitamente que a instância seja salva chamando {@link
+android.app.FragmentTransaction#addToBackStack(String) addToBackStack()} durante uma operação
+que remove o fragmento.</p>
+
+<p>Caso contrário, gerenciar o ciclo de vida do fragmento é muito semelhante a gerenciar
+o ciclo de vida da atividade. Portanto, as mesmas práticas para <a href="{@docRoot}guide/components/activities.html#Lifecycle">gerenciar o ciclo de vida
+da atividade</a> aplicam-se aos fragmentos. O que você também precisa entender, no entanto, é como a vida
+da atividade afeta a vida do fragmento.</p>
+
+<p class="caution"><strong>Atenção:</strong> caso precise de um objeto {@link android.content.Context}
+dentro do {@link android.app.Fragment}, é possível chamar {@link android.app.Fragment#getActivity()}.
+No entanto, tome cuidado para chamar {@link android.app.Fragment#getActivity()} somente quando o fragmento
+estiver anexado a uma atividade. Quando o fragmento ainda não estiver anexado, ou tiver sido desvinculado durante o fim
+do seu ciclo de vida, {@link android.app.Fragment#getActivity()} retornará como nulo.</p>
+
+
+<h3 id="CoordinatingWithActivity">Coordenação do ciclo de vida da atividade</h3>
+
+<p>O ciclo de vida da atividade em que o fragmento vive afeta diretamente o ciclo de vida
+do fragmento, da mesma forma que um retorno de chamada de cada ciclo de vida da atividade resulta em um retorno de chamada semelhante
+de cada fragmento. Por exemplo, quando a atividade receber {@link android.app.Activity#onPause},
+cada fragmento na atividade receberá {@link android.app.Fragment#onPause}.</p>
+
+<p>Os fragmentos têm alguns retornos de chamada do ciclo de vida extras. No entanto, isto trata da interação única
+com a atividade para realizar ações como compilar e destruir a IU do fragmento. Esses
+métodos adicionais de retorno de chamada são:</p>
+
+<dl>
+  <dt>{@link android.app.Fragment#onAttach onAttach()}</dt>
+    <dd>Chamado quando o fragmento tiver sido associado à atividade ({@link
+android.app.Activity} é passado aqui).</dd>
+  <dt>{@link android.app.Fragment#onCreateView onCreateView()}</dt>
+    <dd>Chamado para criar a hierarquia de vistas associada ao fragmento.</dd>
+  <dt>{@link android.app.Fragment#onActivityCreated onActivityCreated()}</dt>
+    <dd>Chamado quando o método {@link android.app.Activity#onCreate
+onCreate()} da atividade tiver retornado.</dd>
+  <dt>{@link android.app.Fragment#onDestroyView onDestroyView()}</dt>
+    <dd>Chamado quando a hierarquia de vistas associada ao fragmento estiver sendo removida.</dd>
+  <dt>{@link android.app.Fragment#onDetach onDetach()}</dt>
+    <dd>Chamado quando o fragmento estiver sendo desassociado da atividade.</dd>
+</dl>
+
+<p>O fluxo do ciclo de vida do fragmento, afetado pela atividade do host, como ilustrado
+pela figura 3. Nesta figura, é possível ver como cada estado sucessivo da atividade determina
+qual método de retorno de chamada um fragmento pode receber. Por exemplo, quando a atividade recebe o retorno de chamada {@link
+android.app.Activity#onCreate onCreate()}, um fragmento na atividade recebe nada mais
+do que o retorno de chamada {@link android.app.Fragment#onActivityCreated onActivityCreated()}.</p>
+
+<p>Quando a atividade atinge o estado retomado, é possível adicionar e remover fragmentos
+dela livremente. Portanto, somente quando a atividade estiver no estado retomado, o ciclo de vida
+de um fragmento poderá alterar-se de forma independente.</p>
+
+<p>No entanto, quando a atividade deixa o estado retomado, o fragmento é novamente forçado
+a passar pelo ciclo de vida pela atividade.</p>
+
+
+
+
+<h2 id="Example">Exemplo</h2>
+
+<p>Para juntar tudo que foi discutido neste documento, abaixo há um exemplo de uma atividade
+que usa dois fragmentos para criar um layout de dois painéis. A atividade abaixo inclui um fragmento
+para exibir uma lista de títulos de peças de Shakespeare e outra para exibir um resumo da peça,
+quando selecionada na lista. Ela também determina como fornecer diferentes configurações de fragmentos,
+com base na configuração da tela.</p>
+
+<p class="note"><strong>Observação:</strong> O código fonte completo desta atividade está disponível em
+<a href="{@docRoot}resources/samples/ApiDemos/src/com/example/android/apis/app/FragmentLayout.html">{@code
+FragmentLayout.java}</a>.</p>
+
+<p>A atividade principal aplica-se de maneira comum, durante {@link
+android.app.Activity#onCreate onCreate()}:</p>
+
+{@sample development/samples/ApiDemos/src/com/example/android/apis/app/FragmentLayout.java main}
+
+<p>O layout aplicado é {@code fragment_layout.xml}:</p>
+
+{@sample development/samples/ApiDemos/res/layout-land/fragment_layout.xml layout}
+
+<p>Usando este layout, o sistema instancia {@code TitlesFragment} (que lista os títulos
+das peças) assim que a atividade carrega o layout, enquanto que {@link android.widget.FrameLayout}
+(onde o fragmento para exibir o resumo da peça aparecerá) consome o espaço do lado direito da tela,
+ mas primeiramente permanece vazio. Como verá abaixo, ele não estará visível até que o usuário selecione um item
+na lista em que um fragmento esteja posicionado no {@link android.widget.FrameLayout}.</p>
+
+<p>No entanto, nem todas as configurações de tela são grandes o suficiente para exibir a lista
+de peças e o resumo, lado a lado. Portanto, o layout acima é usado somente para configuração
+de tela de paisagem, salvando-o em {@code res/layout-land/fragment_layout.xml}.</p>
+
+<p>Por isso, quando a tela está na orientação de retrato, o sistema aplica o seguinte layout,
+que é salvo em {@code res/layout/fragment_layout.xml}:</p>
+
+{@sample development/samples/ApiDemos/res/layout/fragment_layout.xml layout}
+
+<p>Este layout inclui somente {@code TitlesFragment}. Isto significa que, quando o dispositivo
+está na orientação de retrato, somente a lista de título das peças está disponível. Portanto, quando o usuário clicar
+em um item da lista nesta configuração, o aplicativo iniciará uma nova atividade para exibir o resumo,
+em vez de carregar um segundo fragmento.</p>
+
+<p>A seguir, é possível ver como isto é realizado com classes de fragmento. Primeiro, {@code
+TitlesFragment}, que exibe a lista de peças de Shakespeare. Este fragmento estende {@link
+android.app.ListFragment} e confia nele para lidar com grande parte do trabalho da vista de lista.</p>
+
+<p>Enquanto inspeciona este código, observe que há dois possíveis comportamentos quando um usuário
+clica em um item de lista: dependendo de qual dos dois layouts está ativo, ele pode criar e exibir
+um novo fragmento para exibir os detalhes na mesma atividade (adicionando o fragmento {@link
+android.widget.FrameLayout}), ou iniciar uma nova atividade (onde o fragmento possa ser exibido).</p>
+
+{@sample development/samples/ApiDemos/src/com/example/android/apis/app/FragmentLayout.java titles}
+
+<p>O segundo fragmento, {@code DetailsFragment}, exibe o resumo da peça para o item selecionado
+na lista de {@code TitlesFragment}:</p>
+ 
+{@sample development/samples/ApiDemos/src/com/example/android/apis/app/FragmentLayout.java details}
+
+<p>Uma nova chamada da classe {@code TitlesFragment}, ou seja, se o usuário clicar em um item de lista
+e o layout original <em>não</em> incluir a vista {@code R.id.details} (a que
+{@code DetailsFragment} pertence), o aplicativo iniciará a atividade {@code DetailsActivity}
+para exibir o conteúdo do item.</p>
+
+<p>A seguir há {@code DetailsActivity}, que simplesmente embute {@code DetailsFragment} para exibir
+o resumo da peça selecionada quando a tela está na orientação de retrato:</p>
+
+{@sample development/samples/ApiDemos/src/com/example/android/apis/app/FragmentLayout.java
+details_activity}
+ 
+<p>Observe que esta atividade finaliza-se se a configuração for de paisagem,
+pois a atividade principal pode tomar o controle e exibir {@code DetailsFragment} juntamente com {@code TitlesFragment}.
+Isto pode acontecer se o usuário iniciar {@code DetailsActivity} enquanto estiver na orientação de retrato,
+mas alternar para orientação de paisagem (o que reinicia a atividade atual).</p>
+
+
+<p>Para obter mais exemplos do uso de fragmentos (e arquivos fonte completos deste exemplo),
+consulte o aplicativo de exemplo API Demos disponível em <a href="{@docRoot}resources/samples/ApiDemos/src/com/example/android/apis/app/index.html#Fragment">
+ApiDemos</a> (disponível para download em <a href="{@docRoot}resources/samples/get.html">Exemplos de componentes do SDK</a>).</p>
+
+

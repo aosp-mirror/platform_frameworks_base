@@ -1,0 +1,517 @@
+page.title=앱 매니페스트
+@jd:body
+
+<div id="qv-wrapper">
+<div id="qv">
+
+<h2>이 문서의 내용</h2>
+<ol>
+<li><a href="#filestruct">매니페스트 파일의 구조</a></li>
+<li><a href="#filec">파일 규칙</a>
+<li><a href="#filef">파일 기능</a>
+	<ol>
+	<li><a href="#ifs">인텐트 필터</a></li>
+	<li><a href="#iconlabel">아이콘 및 레이블</a></li>
+	<li><a href="#perms">권한</a></li>
+	<li><a href="#libs">라이브러리</a></li>
+	</ol></li>
+</ol>
+</div>
+</div>
+
+<p>
+  모든 애플리케이션에는 루트 라이브러리에 AndroidManifest.xml 파일(정확히 
+이 이름으로)이 있어야 합니다. <span itemprop="description">매니페스트 파일은 
+Android 시스템에 대한 여러분의 앱 관련 필수 정보를 나타냅니다. 
+즉 앱의 코드를 실행하기 전에 시스템이 반드시 필요로 하는 정보를 
+말합니다.</span> 매니페스트가 하는 일에는 여러 가지가 있지만, 그 중에서 몇 가지만 소개하면 다음과 같습니다.
+</p>
+
+<ul>
+<li>애플리케이션에 대한 Java 패키지의 이름을 나타냅니다. 
+패키지 이름이 애플리케이션에 대한 고유한 식별자 역할을 합니다.</li>
+
+<li>애플리케이션의 구성 요소를 설명합니다. 액티비티, 
+서비스, 브로드캐스트 수신기 및 콘텐츠 제공자 등 애플리케이션을 이루는 여러 항목을 
+말합니다.  이것은 각 구성 요소를 구현하는 클래스의 이름을 나타내고 
+각각의 기능을 게시합니다(예를 들어 처리할 수 있는 {@link android.content.Intent 
+Intent} 메시지 종류 등).  이러한 선언을 통해 Android 시스템이 여러 구성 요소가 
+각각 무엇인지 알게 되고, 어떤 조건에서 시작해야 하는지 알 수 있습니다.</li>
+
+<li>어느 프로세스가 애플리케이션 구성 요소를 호스팅할 것인지 결정합니다.</li>  
+
+<li>API의 보호된 부분에 액세스하여 다른 애플리케이션과 상호 작용하려면 
+애플리케이션에 어느 권한이 꼭 필요한지 선언합니다.</li>  
+
+<li>또한, 이 애플리케이션의 구성 요소와 상호 작용하려면 다른 애플리케이션이 
+반드시 가지고 있어야 하는 권한도 선언합니다.</li>
+
+<li>이는 애플리케이션이 실행 중일 때 프로파일링과 기타 정보를 제공하는 
+{@link android.app.Instrumentation} 클래스를 목록으로 표시합니다.  이러한 선언이 매니페스트에 나타나는 것은 
+애플리케이션이 개발 중이고 테스트되는 단계에만 국한됩니다. 
+이들은 애플리케이션이 게시되기 전에 제거됩니다.</li>
+
+<li>이는 애플리케이션이 필요로 하는 Android API의 최소 레벨을 
+선언합니다.</li>
+
+<li>애플리케이션이 연결되어야 하는 라이브러리를 목록으로 표시합니다.</li>
+</ul>
+
+
+<h2 id="filestruct">매니페스트 파일의 구조</h2>
+
+<p>
+아래의 다이어그램은 매니페스트 파일의 일반적인 구조와 매니페스트 파일에 
+들어있을 수 있는 모든 요소를 표시한 것입니다.  각 요소와 각각의 속성을 모두 문서화한 
+전문은 별도의 파일에서 확인하실 수 있습니다.  어떤 요소에 대해서든 
+상세한 정보를 보려면 다이어그램에서 해당 요소 이름을 클릭하십시오. 
+이름은 다이어그램 뒤에 나오는 요소 목록(알파벳 순) 또는 
+요소 이름이 언급되는 기타 영역 어디서든 클릭할 수 있습니다. 
+</p>
+
+<pre>
+&lt;?xml version="1.0" encoding="utf-8"?&gt;
+
+<a href="{@docRoot}guide/topics/manifest/manifest-element.html">&lt;manifest&gt;</a>
+
+    <a href="{@docRoot}guide/topics/manifest/uses-permission-element.html">&lt;uses-permission /&gt;</a>
+    <a href="{@docRoot}guide/topics/manifest/permission-element.html">&lt;permission /&gt;</a>
+    <a href="{@docRoot}guide/topics/manifest/permission-tree-element.html">&lt;permission-tree /&gt;</a>
+    <a href="{@docRoot}guide/topics/manifest/permission-group-element.html">&lt;permission-group /&gt;</a>
+    <a href="{@docRoot}guide/topics/manifest/instrumentation-element.html">&lt;instrumentation /&gt;</a>
+    <a href="{@docRoot}guide/topics/manifest/uses-sdk-element.html">&lt;uses-sdk /&gt;</a>
+    <a href="{@docRoot}guide/topics/manifest/uses-configuration-element.html">&lt;uses-configuration /&gt;</a>  <!-- ##api level 3## -->
+    <a href="{@docRoot}guide/topics/manifest/uses-feature-element.html">&lt;uses-feature /&gt;</a>  <!-- ##api level 4## -->
+    <a href="{@docRoot}guide/topics/manifest/supports-screens-element.html">&lt;supports-screens /&gt;</a>  <!-- ##api level 4## -->
+    <a href="{@docRoot}guide/topics/manifest/compatible-screens-element.html">&lt;compatible-screens /&gt;</a>  <!-- ##api level 9## -->
+    <a href="{@docRoot}guide/topics/manifest/supports-gl-texture-element.html">&lt;supports-gl-texture /&gt;</a>  <!-- ##api level 11## -->
+
+    <a href="{@docRoot}guide/topics/manifest/application-element.html">&lt;application&gt;</a>
+
+        <a href="{@docRoot}guide/topics/manifest/activity-element.html">&lt;activity&gt;</a>
+            <a href="{@docRoot}guide/topics/manifest/intent-filter-element.html">&lt;intent-filter&gt;</a>
+                <a href="{@docRoot}guide/topics/manifest/action-element.html">&lt;action /&gt;</a>
+                <a href="{@docRoot}guide/topics/manifest/category-element.html">&lt;category /&gt;</a>
+                <a href="{@docRoot}guide/topics/manifest/data-element.html">&lt;data /&gt;</a>
+            <a href="{@docRoot}guide/topics/manifest/intent-filter-element.html">&lt;/intent-filter&gt;</a>
+            <a href="{@docRoot}guide/topics/manifest/meta-data-element.html">&lt;meta-data /&gt;</a>
+        <a href="{@docRoot}guide/topics/manifest/activity-element.html">&lt;/activity&gt;</a>
+
+        <a href="{@docRoot}guide/topics/manifest/activity-alias-element.html">&lt;activity-alias&gt;</a>
+            <a href="{@docRoot}guide/topics/manifest/intent-filter-element.html">&lt;intent-filter&gt;</a> . . . <a href="{@docRoot}guide/topics/manifest/intent-filter-element.html">&lt;/intent-filter&gt;</a>
+            <a href="{@docRoot}guide/topics/manifest/meta-data-element.html">&lt;meta-data /&gt;</a>
+        <a href="{@docRoot}guide/topics/manifest/activity-alias-element.html">&lt;/activity-alias&gt;</a>
+
+        <a href="{@docRoot}guide/topics/manifest/service-element.html">&lt;service&gt;</a>
+            <a href="{@docRoot}guide/topics/manifest/intent-filter-element.html">&lt;intent-filter&gt;</a> . . . <a href="{@docRoot}guide/topics/manifest/intent-filter-element.html">&lt;/intent-filter&gt;</a>
+            <a href="{@docRoot}guide/topics/manifest/meta-data-element.html">&lt;meta-data/&gt;</a>
+        <a href="{@docRoot}guide/topics/manifest/service-element.html">&lt;/service&gt;</a>
+
+        <a href="{@docRoot}guide/topics/manifest/receiver-element.html">&lt;receiver&gt;</a>
+            <a href="{@docRoot}guide/topics/manifest/intent-filter-element.html">&lt;intent-filter&gt;</a> . . . <a href="{@docRoot}guide/topics/manifest/intent-filter-element.html">&lt;/intent-filter&gt;</a>
+            <a href="{@docRoot}guide/topics/manifest/meta-data-element.html">&lt;meta-data /&gt;</a>
+        <a href="{@docRoot}guide/topics/manifest/receiver-element.html">&lt;/receiver&gt;</a>
+
+        <a href="{@docRoot}guide/topics/manifest/provider-element.html">&lt;provider&gt;</a>
+            <a href="{@docRoot}guide/topics/manifest/grant-uri-permission-element.html">&lt;grant-uri-permission /&gt;</a>
+            <a href="{@docRoot}guide/topics/manifest/meta-data-element.html">&lt;meta-data /&gt;</a>
+            <a href="{@docRoot}guide/topics/manifest/path-permission-element.html">&lt;path-permission /&gt;</a>
+        <a href="{@docRoot}guide/topics/manifest/provider-element.html">&lt;/provider&gt;</a>
+
+        <a href="{@docRoot}guide/topics/manifest/uses-library-element.html">&lt;uses-library /&gt;</a>
+
+    <a href="{@docRoot}guide/topics/manifest/application-element.html">&lt;/application&gt;</a>
+
+<a href="{@docRoot}guide/topics/manifest/manifest-element.html">&lt;/manifest&gt;</a>
+</pre>
+
+<p>
+매니페스트 파일에 표시될 수 있는 모든 요소는 아래에 알파벳 순서로 
+목록으로 표시되어 있습니다.  합법적인 요소는 이들이 전부입니다. 개발자 나름대로 요소 또는 속성을 
+추가해서는 안 됩니다.  
+</p>
+
+<p style="margin-left: 2em">
+<code><a href="{@docRoot}guide/topics/manifest/action-element.html">&lt;action&gt;</a></code>
+<br/><code><a href="{@docRoot}guide/topics/manifest/activity-element.html">&lt;activity&gt;</a></code>
+<br/><code><a href="{@docRoot}guide/topics/manifest/activity-alias-element.html">&lt;activity-alias&gt;</a></code>
+<br/><code><a href="{@docRoot}guide/topics/manifest/application-element.html">&lt;application&gt;</a></code>
+<br/><code><a href="{@docRoot}guide/topics/manifest/category-element.html">&lt;category&gt;</a></code>
+<br/><code><a href="{@docRoot}guide/topics/manifest/data-element.html">&lt;data&gt;</a></code>
+<br/><code><a href="{@docRoot}guide/topics/manifest/grant-uri-permission-element.html">&lt;grant-uri-permission&gt;</a></code>
+<br/><code><a href="{@docRoot}guide/topics/manifest/instrumentation-element.html">&lt;instrumentation&gt;</a></code>
+<br/><code><a href="{@docRoot}guide/topics/manifest/intent-filter-element.html">&lt;intent-filter&gt;</a></code>
+<br/><code><a href="{@docRoot}guide/topics/manifest/manifest-element.html">&lt;manifest&gt;</a></code>
+<br/><code><a href="{@docRoot}guide/topics/manifest/meta-data-element.html">&lt;meta-data&gt;</a></code>
+<br/><code><a href="{@docRoot}guide/topics/manifest/permission-element.html">&lt;permission&gt;</a></code>
+<br/><code><a href="{@docRoot}guide/topics/manifest/permission-group-element.html">&lt;permission-group&gt;</a></code>
+<br/><code><a href="{@docRoot}guide/topics/manifest/permission-tree-element.html">&lt;permission-tree&gt;</a></code>
+<br/><code><a href="{@docRoot}guide/topics/manifest/provider-element.html">&lt;provider&gt;</a></code>
+<br/><code><a href="{@docRoot}guide/topics/manifest/receiver-element.html">&lt;receiver&gt;</a></code>
+<br/><code><a href="{@docRoot}guide/topics/manifest/service-element.html">&lt;service&gt;</a></code>
+<br/><code><a href="{@docRoot}guide/topics/manifest/supports-screens-element.html">&lt;supports-screens&gt;</a></code>  <!-- ##api level 4## -->
+<br/><code><a href="{@docRoot}guide/topics/manifest/uses-configuration-element.html">&lt;uses-configuration&gt;</a></code>  <!-- ##api level 3## -->
+<br/><code><a href="{@docRoot}guide/topics/manifest/uses-feature-element.html">&lt;uses-feature&gt;</a></code>  <!-- ##api level 4## -->
+<br/><code><a href="{@docRoot}guide/topics/manifest/uses-library-element.html">&lt;uses-library&gt;</a></code>
+<br/><code><a href="{@docRoot}guide/topics/manifest/uses-permission-element.html">&lt;uses-permission&gt;</a></code>
+<br/><code><a href="{@docRoot}guide/topics/manifest/uses-sdk-element.html">&lt;uses-sdk&gt;</a></code>
+</p>
+
+
+    
+
+<h2 id="filec">파일 규칙</h2>
+
+<p>
+몇몇 규칙과 규정은 매니페스트 내의 모든 요소와 속성에 전반적으로 
+적용됩니다.
+</p>
+
+<dl>
+<dt><b>요소</b></dt>
+<dd>필수 요소는 
+<code><a href="{@docRoot}guide/topics/manifest/manifest-element.html">&lt;manifest&gt;</a></code> 및 
+<code><a href="{@docRoot}guide/topics/manifest/application-element.html">&lt;application&gt;</a></code> 요소뿐으로, 
+이들은 각기 따로 표시되어야 하며 한 번씩만 발생할 수 있습니다.  
+나머지는 대부분 여러 번 발생할 수 있거나 전혀 발생하지 않기도 합니다. 다만, 
+그 중 최소한 몇몇은 있어야 매니페스트가 무엇이든 의미 있는 작업을 
+달성할 수 있습니다.
+
+<p>
+요소에 무엇이든 들어있기만 하면 다른 요소가 그 요소에 들어 있는 것입니다.  
+모든 값은 요소 내의 문자 데이터로서가 아니라 속성을 통해 설정됩니다.
+</p>
+
+<p>
+같은 레벨에 있는 여러 요소는 보통 순서가 지정되지 않습니다.  예를 들어 
+<code><a href="{@docRoot}guide/topics/manifest/activity-element.html">&lt;activity&gt;</a></code>, 
+<code><a href="{@docRoot}guide/topics/manifest/provider-element.html">&lt;provider&gt;</a></code> 및 
+<code><a href="{@docRoot}guide/topics/manifest/service-element.html">&lt;service&gt;</a></code> 
+요소는 어떤 순서로든 서로 섞여도 됩니다  (이 규칙에서 
+<code><a href="{@docRoot}guide/topics/manifest/activity-alias-element.html">&lt;activity-alias&gt;</a></code>
+요소는 예외입니다.  이것은 
+<code><a href="{@docRoot}guide/topics/manifest/activity-element.html">&lt;activity&gt;</a></code>의 별칭이므로 
+이를 반드시 따라야 합니다).
+</p></dd>
+
+<dt><b>속성</b></dt>
+<dd>공식적인 의미에서 모든 속성은 선택 항목입니다.  그러나, 요소가 목적을 달성하기 
+위해서 반드시 지정되어야 하는 것이 몇 가지 있습니다.  관련 문서를 
+지침으로 사용하십시오.  정말로 선택적인 속성의 경우, 기본 값을 언급하거나 
+사양이 없으면 어떤 일이 벌어지는지 진술합니다.
+
+<p>루트 
+<code><a href="{@docRoot}guide/topics/manifest/manifest-element.html">&lt;manifest&gt;</a></code> 
+요소의 몇 가지 속성을 제외하고 모든 속성 이름은 {@code android:alwaysRetainTaskState} 접두사로 시작합니다.
+예를 들어, {@code android:}와 같습니다.  이 접두사는 범용이기 때문에 
+속성을 이름으로 참조하는 경우 관련 문서가 이를 생략하는 경우가 
+일반적입니다.</p></dd>
+
+<dt><b>클래스 이름 선언</b></dt>
+<dd>대다수의 요소가 Java 객체에 상응합니다. 여기에는 
+애플리케이션 자체에 대한 요소가 포함되며(
+<code><a href="{@docRoot}guide/topics/manifest/application-element.html">&lt;application&gt;</a></code> 
+요소), 그것의 주 구성 요소도 포함됩니다. 즉, 액티비티 
+(<code><a href="{@docRoot}guide/topics/manifest/activity-element.html">&lt;activity&gt;</a></code>), 
+서비스
+(<code><a href="{@docRoot}guide/topics/manifest/service-element.html">&lt;service&gt;</a></code>), 
+브로드캐스트 수신기
+(<code><a href="{@docRoot}guide/topics/manifest/receiver-element.html">&lt;receiver&gt;</a></code>) 및 
+콘텐츠 제공자
+(<code><a href="{@docRoot}guide/topics/manifest/provider-element.html">&lt;provider&gt;</a></code>) 등이 이에 해당됩니다.  
+
+<p>
+하위 클래스를 정의하는 경우 구성 요소 클래스
+({@link android.app.Activity}, {@link android.app.Service}, 
+{@link android.content.BroadcastReceiver} 및 {@link android.content.ContentProvider})는 거의 항상 이렇게 하게 되는데, 
+이때 하위 클래스는 {@code name} 속성을 통해 선언됩니다.  이 이름에 반드시 
+완전한 패키지 지정이 포함되어 있어야 합니다.  
+예를 들어, {@link android.app.Service} 하위 클래스를 선언하려면 다음과 같이 할 수 있습니다.
+</p>
+
+<pre>&lt;manifest . . . &gt;
+    &lt;application . . . &gt;
+        &lt;service android:name="com.example.project.SecretService" . . . &gt;
+            . . .
+        &lt;/service&gt;
+        . . .
+    &lt;/application&gt;
+&lt;/manifest&gt;</pre>
+
+<p>
+그러나 일종의 줄임으로서 문자열의 첫 번째 글자가 마침표인 경우, 해당 
+문자열은 애플리케이션의 패키지 이름에 추가됩니다(
+<code><a href="{@docRoot}guide/topics/manifest/manifest-element.html">&lt;manifest&gt;</a></code> 
+요소의 
+<code><a href="{@docRoot}guide/topics/manifest/manifest-element.html#package">package</a></code> 
+속성에서 지정한 바와 같이).  다음 할당은 위의 것과 같습니다. 
+</p>
+
+<pre>&lt;manifest package="com.example.project" . . . &gt;
+    &lt;application . . . &gt;
+        &lt;service android:name=".SecretService" . . . &gt;
+            . . .
+        &lt;/service&gt;
+        . . .
+    &lt;/application&gt;
+&lt;/manifest&gt;</pre>
+
+<p>
+Android는 구성 요소를 시작할 때 이름이 명명된 하위 클래스의 인스턴스를 생성합니다.  
+하위 클래스가 지정되지 않은 경우, 기본 클래스의 인스턴스를 생성합니다.
+</p></dd>
+
+<dt><b>여러 개의 값</b></dt>
+<dd>하나 이상의 값을 지정할 수 있는 경우, 해당 요소는 
+한 요소 안에 여러 개의 값을 목록으로 표시하기보다 거의 항상 반복됩니다.  
+예를 들어 한 인텐트 필터가 여러 개의 작업을 목록으로 표시할 수 있습니다.
+
+<pre>&lt;intent-filter . . . &gt;
+    &lt;action android:name="android.intent.action.EDIT" /&gt;
+    &lt;action android:name="android.intent.action.INSERT" /&gt;
+    &lt;action android:name="android.intent.action.DELETE" /&gt;
+    . . .
+&lt;/intent-filter&gt;</pre></dd>
+
+<dt><b>리소스 값</b></dt>
+<dd>몇몇 속성에는 사용자에게 표시될 수 있는 값이 있습니다. 예를 들어 
+액티비티에 대한 레이블과 아이콘 등이 이에 해당됩니다.  이러한 속성의 값은 
+지역화해야 하며 따라서 리소스나 테마에서 설정됩니다.  리소스 
+값은 다음과 같은 형식으로 표현됩니다.</p>
+
+<p style="margin-left: 2em">{@code @[<i>패키지</i>:]<i>유형</i>:<i>이름</i>}</p>
+
+<p>
+여기에서 <i>패키지</i> 이름은 리소스가 애플리케이션과 같은 패키지에 있으면 생략할 수 있고,
+ <i>유형</i> 은 "문자열" 또는 "그릴 수 있음" 같은 리소스 유형입니다. 그리고
+ <i>이름</i> 은 특정 리소스를 식별하는 이름입니다.  
+예:
+</p>
+
+<pre>&lt;activity android:icon="@drawable/smallPic" . . . &gt</pre>
+
+<p>
+테마에서 가져온 값도 비슷한 방식으로 표현되지만, 처음 부분에 '{@code ?}'를 사용합니다
+('{@code @}' 대신).
+</p>
+
+<p style="margin-left: 2em">{@code ?[<i>패키지</i>:]<i>유형</i>:<i>이름</i>}
+</p></dd>
+
+<dt><b>문자열 값</b></dt>
+<dd>속성 값이 문자열인 경우, 이중 백슬래시('{@code \\}')를 사용하여 
+문자 이스케이프를 수행해야 합니다. 예를 들어 줄바꿈에는 {@code \\n}, 
+유니코드 문자에는 '{@code \\uxxxx}'를 쓰십시오.</dd>
+</dl>
+
+
+<h2 id="filef">파일 기능</h2>
+
+<p>
+다음 섹션에서는 Android 기능을 매니페스트 파일에 반영하는 
+몇 가지 방식을 설명합니다.
+</p>
+
+
+<h3 id="ifs">인텐트 필터</h3>
+
+<p>
+애플리케이션의 핵심 구성 요소(액티비티, 서비스 및 브로드캐스트 
+수신기)를 활성화하는 것은 <i>인텐트</i>입니다.  인텐트는 
+원하는 작업을 설명하는 정보 묶음입니다({@link android.content.Intent} 객체).
+여기에는 작업을 수행할 데이터, 작업을 수행할 구성 요소의 카테고리와 
+기타 관련 지침 등이 포함됩니다.  
+Android는 인텐트에 응답할 적절한 구성 요소를 찾아 필요한 경우 구성 요소의 
+새 인스턴스를 시작하고, 이것을 인텐트 객체에 
+전달합니다.
+</p>
+
+<p>
+구성 요소는 자신의 능력을 알립니다. 즉, 자신이 응답할 수 있는 
+인텐트 종류를 밝힙니다. 이때 사용하는 것이 <i>인텐트 필터</i>입니다.  Android 시스템은 
+구성 요소를 시작하기 전에 해당 구성 요소가 처리할 수 있는 인텐트에 대해 학습해야 하기 때문에, 
+인텐트 필터는 매니페스트 파일에 
+<code><a href="{@docRoot}guide/topics/manifest/intent-filter-element.html">&lt;intent-filter&gt;</a></code> 
+요소로 지정됩니다.  구성 요소 하나에 필터는 얼마든지 있을 수 있으며, 각각 서로 다른 기능을 
+설명하게 됩니다.
+</p>
+
+<p>
+대상 구성 요소를 명시적으로 지명하는 인텐트가 해당 구성 요소를 활성화합니다.
+필터는 아무런 역할을 하지 않습니다.  하지만 대상을 이름으로 지정하지 않는 인텐트의 경우에는 
+자신이 구성 요소의 필터 중 하나를 통과할 수 있을 때에만 해당 구성 요소를 활성화할 수 
+있습니다.
+</p>
+
+<p>
+인텐트 객체를 인텐트 필터에 대해 테스트하는 방법에 대한 자세한 방법은 
+별도의 문서인 
+<a href="{@docRoot}guide/components/intents-filters.html">인텐트 
+및 인텐트 필터</a>를 참조하십시오.
+</p>
+
+
+<h3 id="iconlabel">아이콘 및 레이블</h3>
+
+<p>
+대다수의 요소에 {@code icon}과 {@code label} 속성이 있으며 
+이것으로 사용자에게 표시될 수 있는 작은 아이콘과 텍스트 레이블을 나타냅니다.  몇몇 요소에는 
+{@code description} 속성도 있어 좀 더 긴 설명 텍스트를 나타낼 수 있고, 이것 또한 화면에 
+표시될 수 있습니다.  예를 들어 
+<code><a href="{@docRoot}guide/topics/manifest/permission-element.html">&lt;permission&gt;</a></code>
+요소는 이와 같은 속성을 셋 모두 가지고 있어 사용자가 이를 요청한 애플리케이션에 대한 
+권한을 허가할 것인지 여부를 물으면 해당 권한, 
+권한의 이름과 그에 수반되는 내용에 대한 설명을 
+사용자에게 표시할 수 있습니다.
+</p>
+
+<p>
+어떤 경우에든, 요소에서 설정된 아이콘과 레이블이 해당 컨테이너의 모든 하위 요소에 대한 기본 
+{@code icon}과 {@code label} 설정이 됩니다.  
+따라서 
+<code><a href="{@docRoot}guide/topics/manifest/application-element.html">&lt;application&gt;</a></code> 
+요소에서 설정된 아이콘과 레이블이 애플리케이션의 각 요소에 대한 기본 아이콘과 레이블입니다.  
+이와 유사하게, 구성 요소에 대해 설정된 아이콘과 레이블이 &mdash; 예를 들어 
+<code><a href="{@docRoot}guide/topics/manifest/activity-element.html">&lt;activity&gt;</a></code> 
+요소 &mdash; 각 구성 요소의 
+<code><a href="{@docRoot}guide/topics/manifest/intent-filter-element.html">&lt;intent-filter&gt;</a></code> 
+요소에 대한 기본 설정입니다.  
+<code><a href="{@docRoot}guide/topics/manifest/application-element.html">&lt;application&gt;</a></code> 
+요소가 레이블을 설정하지만 액티비티와 그 인텐트 필터는 이를 설정하지 않는 경우, 
+애플리케이션 레이블을 액티비티와 인텐트 필터 양쪽 모두의 레이블인 것으로 
+취급합니다.
+</p>
+
+<p>
+인텐트 필터에 대해 설정된 아이콘과 레이블은 구성 요소가 사용자에게 
+표시될 때마다 구성 요소를 나타내는 데 사용되며, 이는 필터가 알린 기능을 
+충족하는 것입니다.  예를 들어 
+"{@code android.intent.action.MAIN}" 및 
+"{@code android.intent.category.LAUNCHER}"가 설정된 필터는 
+액티비티를 애플리케이션을 초기화하는 주역으로 알립니다. 다시 말해, 
+애플리케이션 시작 관리자에 표시되어야 하는 것이 됩니다.  따라서 필터에서 설정된 아이콘과 레이블이 
+시작 관리자에 표시되는 아이콘과 레이블입니다.
+</p>
+
+
+<h3 id="perms">권한</h3>
+
+<p>
+통상 <i>권한</i> 이란 기기에서 코드의 일부분 또는 데이터에 대한 액세스를 한정하는 
+제한입니다.   이런 한계를 부과하는 것은 중요한 데이터와 코드를 보호하여 
+이들이 남용되어서 사용자 환경을 왜곡하거나 손상시키지 않도록 하기 위해서입니다.  
+</p>
+
+<p>
+각 권한은 고유한 레이블로 식별할 수 있습니다.  레이블을 보면 자신이 어떤 작업을 제한하는지 
+나타내는 경우가 잦습니다.  예를 들어 다음은 Android가 정의하는 몇 가지 권한을 나타낸 
+것입니다.
+</p>
+
+<p style="margin-left: 2em">{@code android.permission.CALL_EMERGENCY_NUMBERS}
+<br/>{@code android.permission.READ_OWNER_DATA}
+<br/>{@code android.permission.SET_WALLPAPER}
+<br/>{@code android.permission.DEVICE_POWER}</p>
+
+<p>
+하나의 기능을 보호하는 데에는 권한 하나면 충분합니다.
+</p>
+
+<p>
+애플리케이션에서 권한으로 보호하는 기능에 액세스해야 하는 경우, 
+해당 권한이 필요하다고 매니페스트의 
+<code><a href="{@docRoot}guide/topics/manifest/uses-permission-element.html">&lt;uses-permission&gt;</a></code> 
+요소로 선언해야 합니다.  그런 다음, 해당 애플리케이션이 기기에 설치되고 나면 
+설치 관리자가 요청한 권한을 허가할지 여부를 판별합니다. 
+이때 애플리케이션의 인증서를 서명한 권한을 확인하고 어떤 경우에는 사용자에게 
+묻기도 합니다.  
+권한이 허가되면 해당 애플리케이션은 보호된 기능을 사용할 수 
+있습니다.  허가되지 않으면, 그러한 기능에 액세스하려는 애플리케이션의 시도가 단순히 실패하고 사용자에게는 
+아무런 알림도 표시되지 않습니다. 
+</p>
+
+<p>
+애플리케이션은 권한을 사용하여 자신의 구성 요소를(액티비티, 서비스, 
+브로드캐스트 수신기 및 콘텐츠 제공자) 보호할 수도 있습니다.  Android가 정의한 
+권한이라면 어떤 것이든 사용할 수 있고(
+{@link android.Manifest.permission android.Manifest.permission}에 목록으로 나열), 
+아니면 다른 애플리케이션이 선언한 권한을 사용해도 됩니다.  아예 직접 자신만의 권한을 정의해도 됩니다.  새 권한을 선언할 때에는 
+
+<code><a href="{@docRoot}guide/topics/manifest/permission-element.html">&lt;permission&gt;</a></code> 
+요소를 사용합니다.  예를 들어 액티비티를 보호하려면 다음과 같이 하면 됩니다.
+</p>
+
+<pre>
+&lt;manifest . . . &gt;
+    &lt;permission android:name="com.example.project.DEBIT_ACCT" . . . /&gt;
+    &lt;uses-permission android:name="com.example.project.DEBIT_ACCT" /&gt;
+    . . .
+    &lt;application . . .&gt;
+        &lt;activity android:name="com.example.project.FreneticActivity"
+                  android:permission="com.example.project.DEBIT_ACCT"
+                  . . . &gt;
+            . . .
+        &lt;/activity&gt;
+    &lt;/application&gt;
+&lt;/manifest&gt;
+</pre>
+
+<p>
+이 예시에서는 {@code DEBIT_ACCT} 권한이 
+
+<code><a href="{@docRoot}guide/topics/manifest/permission-element.html">&lt;permission&gt;</a></code> 
+요소로 선언하였을 뿐만 아니라, 해당 권한의 사용 또한 
+<code><a href="{@docRoot}guide/topics/manifest/uses-permission-element.html">&lt;uses-permission&gt;</a></code> 
+요소로 요청되었다는 점을 눈여겨 보십시오.  이것의 사용을 요청해야 애플리케이션의 다른 구성 요소가 보호된 
+액티비티를 시작할 수 있습니다. 이는 해당 보호를 애플리케이션 자신이 부과한 것이더라도 
+관계 없이 적용됩니다.  
+</p>
+
+<p>
+같은 예시에서, {@code permission} 속성이 다른 곳에서 
+선언한 권한에 설정된 경우
+(예: {@code android.permission.CALL_EMERGENCY_NUMBERS}), 이것을 
+
+<code><a href="{@docRoot}guide/topics/manifest/permission-element.html">&lt;permission&gt;</a></code> 
+요소를 사용하여 다시 선언할 필요가 없습니다.  하지만 해당 권한의 사용은 여전히 
+<code><a href="{@docRoot}guide/topics/manifest/uses-permission-element.html">&lt;uses-permission&gt;</a></code>로 요청해야 합니다. 
+</p>
+
+<p>
+
+<code><a href="{@docRoot}guide/topics/manifest/permission-tree-element.html">&lt;permission-tree&gt;</a></code> 
+요소는 코드로 정의될 권한 그룹에 대한 네임스페이스를 
+선언합니다.  그리고 
+<code><a href="{@docRoot}guide/topics/manifest/permission-group-element.html">&lt;permission-group&gt;</a></code>
+가 권한 집합에 대한 레이블을 정의합니다(매니페스트에 
+<code><a href="{@docRoot}guide/topics/manifest/permission-element.html">&lt;permission&gt;</a></code> 
+요소로 선언한 것과 다른 곳에서 선언한 것 양쪽 모두).  이것은 권한이 사용자에게 표시될 때 
+그룹 지정될 방식에만 영향을 미칩니다.  
+<code><a href="{@docRoot}guide/topics/manifest/permission-group-element.html">&lt;permission-group&gt;</a></code>
+요소는 그룹에 어느 권한이 속해 있는지 지정하는 것이 아니라, 그저 
+그룹에 이름을 부여할 뿐입니다.  그룹에 권한을 배치하려면 그룹 이름을 
+
+<code><a href="{@docRoot}guide/topics/manifest/permission-element.html">&lt;permission&gt;</a></code> 
+요소의 
+<code><a href="{@docRoot}guide/topics/manifest/permission-element.html#pgroup">permissionGroup</a></code> 
+속성에 할당하면 됩니다.
+</p>
+
+
+<h3 id="libs">라이브러리</h3>
+
+<p>
+모든 애플리케이션은 기본 Android 라이브러리에 연결되어 있습니다. 여기에는 
+애플리케이션 구축을 위한 기본적인 패키지(액티비티, 서비스, 
+인텐트, 보기, 버튼, 애플리케이션, ContentProvider 등 보편적인 클래스 포함)가 포함되어 
+있습니다.
+</p>
+
+<p>
+그러나 패키지 가운데에는 자신만의 라이브러리에 속한 것도 있습니다.  애플리케이션이 
+사용하는 코드의 출처가 이러한 패키지 가운데 어느 한 가지에 해당되는 경우, 해당 패키지에 연결되도록 
+명시적으로 요청해야만 합니다.  매니페스트에는 별도의 
+<code><a href="{@docRoot}guide/topics/manifest/uses-library-element.html">&lt;uses-library&gt;</a></code> 
+요소가 들어 있어 각 라이브러리의 이름을 나타내야 합니다  (라이브러리 이름은 패키지에 대한 
+관련 문서에서 찾을 수 있습니다).
+</p>

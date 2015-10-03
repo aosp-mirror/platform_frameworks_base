@@ -1,0 +1,256 @@
+page.title=Экран обзора
+page.tags="recents","overview"
+
+@jd:body
+
+<div id="qv-wrapper">
+<div id="qv">
+
+  <h2>Содержание документа</h2>
+  <ol>
+    <li><a href="#adding">Добавление задач на экран обзора</a>
+      <ol>
+        <li><a href="#flag-new-doc">Использование флага Intent для добавления задачи</a></li>
+        <li><a href="#attr-doclaunch">Использование атрибута Операция для добавления задачи</a></li>
+      </ol>
+    </li>
+    <li><a href="#removing">Удаление задач</a>
+      <ol>
+        <li><a href="#apptask-remove">Использование класса AppTask для удаления задач</a></li>
+        <li><a href="#retain-finished">Сохранение завершенных задач</a></li>
+      </ol>
+    </li>
+  </ol>
+
+  <h2>Ключевые классы</h2>
+  <ol>
+    <li>{@link android.app.ActivityManager.AppTask}</li>
+    <li>{@link android.content.Intent}</li>
+  </ol>
+
+  <h2>Пример кода</h2>
+  <ol>
+    <li><a href="{@docRoot}samples/DocumentCentricApps/index.html">Приложения для работы с документами</a></li>
+  </ol>
+
+</div>
+</div>
+
+<p>Экран обзора (также используются названия: экран последних задач, список последних задач или последние приложения)
+является элементом пользовательского интерфейса системного уровня, в котором содержится список последних <a href="{@docRoot}guide/components/activities.html">
+операций</a> и <a href="{@docRoot}guide/components/tasks-and-back-stack.html">задач</a>. Пользователь
+может перемещаться по списку и выбирать задачи для возобновления, или жестом удалять задачи
+из списка. В версии Android 5.0 (уровень API 21) несколько экземпляров
+одной операции, содержащие различные документы, могут отображаться в виде задач на экране обзора. Например,
+Google Диск может иметь задачу для каждого из нескольких документов Google. На экране обзора каждый документ
+отображается в виде задачи.</p>
+
+<img src="{@docRoot}images/components/recents.png" alt="" width="284" />
+<p class="img-caption"><strong>Рисунок 1.</strong> Экран обзора, на котором показаны три документа Google Диск,
+ представленные в виде отдельных задач.</p>
+
+<p>Обычно следует разрешить системе определить способ представления ваших задач и
+операций на экране обзора. Вам не нужно менять это поведение.
+Однако приложение может определять способ и время появления операции на экране обзора. С помощью класса
+{@link android.app.ActivityManager.AppTask} можно управлять задачами, а с помощью флагов операции класса
+{@link android.content.Intent} указывается, когда операция добавляется на экран обзора
+или удаляется с него. Кроме того, атрибуты <code><a href="{@docRoot}guide/topics/manifest/activity-element.html">
+&lt;activity&gt;</a></code> позволяют устанавливать поведение в манифесте.</p>
+
+<h2 id="adding">Добавление задач на экран обзора</h2>
+
+<p>Использование флагов класса {@link android.content.Intent} для добавления задачи обеспечивает лучшее управление
+временем и способом открытия или повторного открытия документа на экране обзора. С помощью атрибутов
+<code><a href="{@docRoot}guide/topics/manifest/activity-element.html">&lt;activity&gt;</a></code>
+можно выбрать открытие документа в новой задаче или повторное использование
+существующей задачи для документа.</p>
+
+<h3 id="flag-new-doc">Использование флага Intent для добавления задачи</h3>
+
+<p>При создании нового документа для операции вы вызываете метод
+{@link android.app.ActivityManager.AppTask#startActivity(android.content.Context, android.content.Intent, android.os.Bundle) startActivity()}
+класса {@link android.app.ActivityManager.AppTask}, передавая ему intent,
+который запускает операцию. Для вставки логического разрыва, чтобы система обрабатывала вашу операцию как новую
+задачу на экране обзора, передайте флаг {@link android.content.Intent#FLAG_ACTIVITY_NEW_DOCUMENT}
+в метод {@link android.content.Intent#addFlags(int) addFlags()} {@link android.content.Intent},
+который запускает операцию.</p>
+
+<p class="note"><strong>Примечание.</strong> Флаг {@link android.content.Intent#FLAG_ACTIVITY_NEW_DOCUMENT}
+замещает флаг {@link android.content.Intent#FLAG_ACTIVITY_CLEAR_WHEN_TASK_RESET},
+который является устаревшим для систем Android 5.0 и выше (уровень API 21).</p>
+
+<p>Если вы установили флаг {@link android.content.Intent#FLAG_ACTIVITY_MULTIPLE_TASK} при создании
+нового документа, система всегда создает новую задачу с целевой операцией в качестве корня.
+Этот параметр позволяет открывать один документ в нескольких задачах. Следующий код показывает,
+как это делает основная операция:</p>
+
+<p class="code-caption"><a href="{@docRoot}samples/DocumentCentricApps/index.html">
+DocumentCentricActivity.java</a></p>
+<pre>
+public void createNewDocument(View view) {
+      final Intent newDocumentIntent = newDocumentIntent();
+      if (useMultipleTasks) {
+          newDocumentIntent.addFlags(Intent.FLAG_ACTIVITY_MULTIPLE_TASK);
+      }
+      startActivity(newDocumentIntent);
+  }
+
+  private Intent newDocumentIntent() {
+      boolean useMultipleTasks = mCheckbox.isChecked();
+      final Intent newDocumentIntent = new Intent(this, NewDocumentActivity.class);
+      newDocumentIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_DOCUMENT);
+      newDocumentIntent.putExtra(KEY_EXTRA_NEW_DOCUMENT_COUNTER, incrementAndGet());
+      return newDocumentIntent;
+  }
+
+  private static int incrementAndGet() {
+      Log.d(TAG, "incrementAndGet(): " + mDocumentCounter);
+      return mDocumentCounter++;
+  }
+}
+</pre>
+
+<p class="note"><strong>Примечание.</strong> Операции, запущенные с флагом {@code FLAG_ACTIVITY_NEW_DOCUMENT},
+должны иметь значение атрибута {@code android:launchMode="standard"} (по умолчанию), установленное
+в манифесте.</p>
+
+<p>Когда основная операция запускает новую операцию, система ищет в существующих задачах одну,
+значение intent которой соответствует имени компонента и данным Intent для операции. Если задача
+не найдена или intent содержит флаг {@link android.content.Intent#FLAG_ACTIVITY_MULTIPLE_TASK},
+создается новая задача с операцией в качестве корня. Если задача найдена, система выводит
+ эту задачу на передний план и передает новое значение intent в {@link android.app.Activity#onNewIntent onNewIntent()}.
+Новая операция получает intent и создает новый документ на экране обзора, как
+в следующем примере:</p>
+
+<p class="code-caption"><a href="{@docRoot}samples/DocumentCentricApps/index.html">
+NewDocumentActivity.java</a></p>
+<pre>
+&#64;Override
+protected void onCreate(Bundle savedInstanceState) {
+    super.onCreate(savedInstanceState);
+    setContentView(R.layout.activity_new_document);
+    mDocumentCount = getIntent()
+            .getIntExtra(DocumentCentricActivity.KEY_EXTRA_NEW_DOCUMENT_COUNTER, 0);
+    mDocumentCounterTextView = (TextView) findViewById(
+            R.id.hello_new_document_text_view);
+    setDocumentCounterText(R.string.hello_new_document_counter);
+}
+
+&#64;Override
+protected void onNewIntent(Intent intent) {
+    super.onNewIntent(intent);
+    /* If FLAG_ACTIVITY_MULTIPLE_TASK has not been used, this activity
+    is reused to create a new document.
+     */
+    setDocumentCounterText(R.string.reusing_document_counter);
+}
+</pre>
+
+
+<h3 id="#attr-doclaunch">Использование атрибута Операция для добавления задачи</h3>
+
+<p>В манифесте операции можно также указать, что операция всегда запускается в новой задаче. Для этого используется атрибут
+<code><a href="{@docRoot}guide/topics/manifest/activity-element.html">&lt;activity&gt;</a></code>
+, <a href="{@docRoot}guide/topics/manifest/activity-element.html#dlmode">
+{@code android:documentLaunchMode}</a>. Этот атрибут имеет четыре значения, которые работают следующим образом,
+когда пользователь открывает документ в приложении:</p>
+
+<dl>
+  <dt>"{@code intoExisting}"</dt>
+  <dd>Операция повторно использует существующую задачу для документа. Это равносильно установке
+флага {@link android.content.Intent#FLAG_ACTIVITY_NEW_DOCUMENT} <em>без</em> установки
+флага {@link android.content.Intent#FLAG_ACTIVITY_MULTIPLE_TASK}, как описано в разделе
+<a href="#flag-new-doc">Использование флага Intent для добавления задачи</a> выше.</dd>
+
+  <dt>"{@code always}"</dt>
+  <dd>Операция создает новую задачу для документа, даже если документ уже открыт. Использование
+этого значения равносильно установке обоих флагов {@link android.content.Intent#FLAG_ACTIVITY_NEW_DOCUMENT}
+и {@link android.content.Intent#FLAG_ACTIVITY_MULTIPLE_TASK}.</dd>
+
+  <dt>"{@code none”}"</dt>
+  <dd>Операция не создает новой задачи для документа. Экран обзора обрабатывает
+операцию как операцию по умолчанию: на экране обзора отображается одна задача для приложения, которая
+возобновляется с любой последней операции, вызванной пользователем.</dd>
+
+  <dt>"{@code never}"</dt>
+  <dd>Операция не создает новой задачи для документа. Установка этого значения
+переопределяет поведение флагов {@link android.content.Intent#FLAG_ACTIVITY_NEW_DOCUMENT}
+ и {@link android.content.Intent#FLAG_ACTIVITY_MULTIPLE_TASK}, если оба они установлены в
+intent, и на экране обзора отображается одна задача для приложения, которая
+возобновляется с любой последней операции, вызванной пользователем.</dd>
+</dl>
+
+<p class="note"><strong>Примечание.</strong> Для значений кроме {@code none} и {@code never}
+операция должна быть определена с атрибутом {@code launchMode="standard"}. Если этот атрибут не указан,
+используется {@code documentLaunchMode="none"}.</p>
+
+<h2 id="removing">Удаление задач</h2>
+
+<p>По умолчанию задача документа автоматически удаляется с экрана обзора после завершения
+соответствующей операции. Можно переопределить это поведение с помощью класса {@link android.app.ActivityManager.AppTask},
+с флагом {@link android.content.Intent} или атрибутом <code><a href="{@docRoot}guide/topics/manifest/activity-element.html">
+&lt;activity&gt;</a></code>.</p>
+
+<p>Можно в любой момент полностью убрать задачу с экрана обзора, установив для атрибута
+<code><a href="{@docRoot}guide/topics/manifest/activity-element.html">&lt;activity&gt;</a></code>
+ <a href="{@docRoot}guide/topics/manifest/activity-element.html#exclude">
+{@code android:excludeFromRecents}</a> значение {@code true}.</p>
+
+<p>Можно установить максимальное число задач, которое ваше приложение может включить в экран обзора, установив для атрибута
+<code><a href="{@docRoot}guide/topics/manifest/activity-element.html">&lt;activity&gt;</a></code>
+ <a href="{@docRoot}guide/topics/manifest/activity-element.html#maxrecents">{@code android:maxRecents}
+</a> целое значение. Значение по умолчанию: 16. При достижении максимального количества задач самая
+долго не используемая задача удаляется с экрана обзора. Максимальное значение {@code android:maxRecents} составляет
+50 (25 для устройств с малым объемом памяти); Значения менее 1 не допускаются.</p>
+
+<h3 id="#apptask-remove">Использование класса AppTask для удаления задач</h3>
+
+<p>В операции, которая создает новую задачу на экране обзора,
+можно указать время удаления задачи и завершения всех связанных с ней операций, вызвав
+метод {@link android.app.ActivityManager.AppTask#finishAndRemoveTask() finishAndRemoveTask()}.</p>
+
+<p class="code-caption"><a href="{@docRoot}samples/DocumentCentricApps/index.html">
+NewDocumentActivity.java</a></p>
+<pre>
+public void onRemoveFromRecents(View view) {
+    // The document is no longer needed; remove its task.
+    finishAndRemoveTask();
+}
+</pre>
+
+<p class="note"><strong>Примечание.</strong> Использование
+метода {@link android.app.ActivityManager.AppTask#finishAndRemoveTask() finishAndRemoveTask()},
+который переопределяет использование тега {@link android.content.Intent#FLAG_ACTIVITY_RETAIN_IN_RECENTS},
+рассмотрен ниже.</p>
+
+<h3 id="#retain-finished">Сохранение завершенных задач</h3>
+
+<p>Чтобы сохранить задачу на экране обзора, даже если ее операция завершена, передайте
+флаг {@link android.content.Intent#FLAG_ACTIVITY_RETAIN_IN_RECENTS} в метод
+{@link android.content.Intent#addFlags(int) addFlags()} объекта Intent, который запускает операцию.</p>
+
+<p class="code-caption"><a href="{@docRoot}samples/DocumentCentricApps/index.html">
+DocumentCentricActivity.java</a></p>
+<pre>
+private Intent newDocumentIntent() {
+    final Intent newDocumentIntent = new Intent(this, NewDocumentActivity.class);
+    newDocumentIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_DOCUMENT |
+      android.content.Intent.FLAG_ACTIVITY_RETAIN_IN_RECENTS);
+    newDocumentIntent.putExtra(KEY_EXTRA_NEW_DOCUMENT_COUNTER, incrementAndGet());
+    return newDocumentIntent;
+}
+</pre>
+
+<p>Для достижения того же результата установите для атрибута
+<code><a href="{@docRoot}guide/topics/manifest/activity-element.html">&lt;activity&gt;</a></code>
+ <a href="{@docRoot}guide/topics/manifest/activity-element.html#autoremrecents">
+{@code android:autoRemoveFromRecents}</a> значение {@code false}. Значение по умолчанию {@code true}
+для операций документа и {@code false} для обычных операций. Использование этого атрибута переопределяет
+флаг {@link android.content.Intent#FLAG_ACTIVITY_RETAIN_IN_RECENTS}, описанный выше.</p>
+
+
+
+
+
+
+

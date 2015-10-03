@@ -1,0 +1,1196 @@
+page.title=콘텐츠 제공자 기본 정보
+@jd:body
+<div id="qv-wrapper">
+<div id="qv">
+<!-- In this document -->
+<h2>이 문서의 내용</h2>
+<ol>
+    <li>
+        <a href="#Basics">개요</a>
+        <ol>
+            <li>
+                <a href="#ClientProvider">제공자 액세스</a>
+            </li>
+            <li>
+                <a href="#ContentURIs">콘텐츠 URI</a>
+            </li>
+        </ol>
+    </li>
+    <li>
+        <a href="#SimpleQuery">제공자에서 데이터 검색</a>
+        <ol>
+            <li>
+                <a href="#RequestPermissions">읽기 액세스 권한 요청</a>
+            </li>
+            <li>
+                <a href="#Query">쿼리 구성</a>
+            </li>
+            <li>
+                <a href="#DisplayResults">쿼리 결과 표시</a>
+            </li>
+            <li>
+                <a href="#GettingResults">쿼리 결과에서 데이터 가져오기</a>
+            </li>
+        </ol>
+    </li>
+    <li>
+        <a href="#Permissions">콘텐츠 제공자 권한</a>
+    </li>
+    <li>
+        <a href="#Modifications">데이터 삽입, 업데이트 및 삭제</a>
+        <ol>
+            <li>
+                <a href="#Inserting">데이터 삽입</a>
+            </li>
+            <li>
+                <a href="#Updating">데이터 업데이트</a>
+            </li>
+            <li>
+                <a href="#Deleting">데이터 삭제</a>
+            </li>
+        </ol>
+    </li>
+    <li>
+        <a href="#DataTypes">제공자 데이터 유형</a>
+    </li>
+    <li>
+        <a href="#AltForms">제공자 액세스의 대체 형식</a>
+        <ol>
+            <li>
+                <a href="#Batch">일괄 액세스</a>
+            </li>
+            <li>
+                <a href="#Intents">인텐트를 통한 데이터 액세스</a>
+            </li>
+        </ol>
+    </li>
+    <li>
+        <a href="#ContractClasses">계약 클래스</a>
+    </li>
+    <li>
+        <a href="#MIMETypeReference">MIME 유형 참조</a>
+    </li>
+</ol>
+
+    <!-- Key Classes -->
+<h2>Key 클래스</h2>
+    <ol>
+        <li>
+            {@link android.content.ContentProvider}
+        </li>
+        <li>
+            {@link android.content.ContentResolver}
+        </li>
+        <li>
+            {@link android.database.Cursor}
+        </li>
+        <li>
+            {@link android.net.Uri}
+        </li>
+    </ol>
+
+    <!-- Related Samples -->
+<h2>관련 샘플</h2>
+    <ol>
+        <li>
+        <a href="{@docRoot}resources/samples/ApiDemos/src/com/example/android/apis/view/List2.html">
+        커서(피플)</a>
+        </li>
+        <li>
+        <a href="{@docRoot}resources/samples/ApiDemos/src/com/example/android/apis/view/List7.html">
+        커서(전화)</a>
+        </li>
+    </ol>
+
+    <!-- See also -->
+<h2>참고 항목</h2>
+    <ol>
+        <li>
+            <a href="{@docRoot}guide/topics/providers/content-provider-creating.html">
+        콘텐츠 제공자 생성</a>
+        </li>
+        <li>
+            <a href="{@docRoot}guide/topics/providers/calendar-provider.html">
+        캘린더 제공자</a>
+        </li>
+    </ol>
+</div>
+</div>
+
+    <!-- Intro paragraphs -->
+<p>
+    콘텐츠 제공자는 데이터의 중앙 리포지토리로의 액세스를 관리합니다. 
+제공자는 Android 애플리케이션의 일부이며, 이는 종종 나름의 UI를 제공하여 데이터에 작용하도록 합니다.
+ 그러나 콘텐츠 제공자는 기본적으로 다른 애플리케이션이 사용하도록 만들어진 것입니다. 
+이들은 제공자 클라이언트 개체를 사용하여 제공자에 액세스합니다. 
+제공자와 제공자 클라이언트가 결합되면 데이터에 하나의 일관적인 표준 인터페이스를 제공하여 
+이것이 프로세스간 통신과 보안 데이터 액세스도 처리합니다.
+</p>
+<p>
+    이 주제에서는 다음의 기본 정보를 설명합니다.
+</p>
+    <ul>
+        <li>콘텐츠 제공자의 작동 원리</li>
+        <li>콘텐츠 제공자에서 데이터를 검색할 때 사용하는 API</li>
+        <li>콘텐츠 제공자 내의 데이터를 삽입, 업데이트 및 삭제하는 데 사용하는 API</li>
+        <li>제공자를 다루는 데 도움이 되는 기타 API 기능</li>
+    </ul>
+
+    <!-- Basics -->
+<h2 id="Basics">개요</h2>
+<p>
+    콘텐츠 제공자는 외부 애플리케이션에 데이터를 표시하며, 이때 데이터는 
+관계형 데이터베이스에서 찾을 수 있는 테이블과 유사한 하나 이상의 테이블로서 표시됩니다. 
+한 행은 제공자가 수집하는 어떤 유형의 데이터 인스턴스를 나타내며, 
+행 안의 각 열은 인스턴스에 대해 수집된 개별적인 데이터를 나타냅니다.
+</p>
+<p>
+    예를 들어 Android 플랫폼 안에 내장된 여러 제공자 중에 사용자 사전이라는 것이 있습니다. 
+이것은 사용자가 보관하고 싶어하는 비표준 단어의 철자를 저장합니다. 표 1은 이 제공자의 테이블에서 
+데이터가 어떤 형태를 띨 수 있는지를 나타낸 것입니다.
+</p>
+<p class="table-caption">
+    <strong>표 1:</strong> 샘플 사용자 사전 테이블입니다.
+</p>
+<table id="table1" style="width: 50%;">
+    <tr>
+        <th style="width:20%" align="center" scope="col">단어</th>
+        <th style="width:20%" align="center" scope="col">앱 ID</th>
+        <th style="width:20%" align="center" scope="col">빈도</th>
+        <th style="width:20%" align="center" scope="col">로케일</th>
+        <th style="width:20%" align="center" scope="col">_ID</th>
+    </tr>
+    <tr>
+        <td align="center" scope="row">mapreduce</td>
+        <td align="center">user1</td>
+        <td align="center">100</td>
+        <td align="center">en_US</td>
+        <td align="center">1</td>
+    </tr>
+    <tr>
+        <td align="center" scope="row">precompiler</td>
+        <td align="center">user14</td>
+        <td align="center">200</td>
+        <td align="center">fr_FR</td>
+        <td align="center">2</td>
+    </tr>
+    <tr>
+        <td align="center" scope="row">applet</td>
+        <td align="center">user2</td>
+        <td align="center">225</td>
+        <td align="center">fr_CA</td>
+        <td align="center">3</td>
+    </tr>
+    <tr>
+        <td align="center" scope="row">const</td>
+        <td align="center">user1</td>
+        <td align="center">255</td>
+        <td align="center">pt_BR</td>
+        <td align="center">4</td>
+    </tr>
+    <tr>
+        <td align="center" scope="row">int</td>
+        <td align="center">user5</td>
+        <td align="center">100</td>
+        <td align="center">en_UK</td>
+        <td align="center">5</td>
+    </tr>
+</table>
+<p>
+    표 1에서, 각 행은 일반적인 사전에 나오지 않는 단어의 인스턴스를 
+나타냅니다. 각 열은 해당 단어에 대한 일부 데이터를 나타냅니다. 예를 들어 
+단어가 처음 나온 로케일 등을 들 수 있습니다. 열 헤더는 제공자에 저장된
+열 이름입니다. 행의 로케일을 참조하려면 그 행의 <code>locale</code> 열을 참조합니다. 
+이 제공자의 경우, <code>_ID</code> 열은 제공자가 자동으로 유지하는 "기본 키" 열
+역할을 합니다.
+</p>
+<p class="note">
+    <strong>참고:</strong> 제공자에 기본 키가 꼭 있어야 하는 것은 아니고, 
+기본 키가 있는 경우 <code>_ID</code>를 열 이름으로 사용하지 않아도 됩니다. 그러나 제공자의 데이터를 
+{@link android.widget.ListView}에 바인딩하려면 
+열 이름 중 하나는<code>_ID</code>여야 합니다. 이 요구 사항은
+<a href="#DisplayResults">쿼리 결과 표시</a> 섹션에 자세히 설명되어 있습니다.
+</p>
+<h3 id="ClientProvider">제공자 액세스</h3>
+<p>
+    애플리케이션은 콘텐츠 제공자로부터의 데이터에 
+{@link android.content.ContentResolver} 클라이언트 개체로 액세스합니다. 
+이 개체에는 제공자 개체 내의 같은 이름을 가진 메서드를 호출하는 메서드가 있습니다. 
+이는 {@link android.content.ContentProvider}의 구체적인 하위 클래스 중 하나의 인스턴스입니다. 
+{@link android.content.ContentResolver} 메서드는 
+영구적 저장소의 기본적인 "CRUD"(생성, 검색, 업데이트 및 삭제) 기능을 제공합니다.
+</p>
+<p>
+    클라이언트 애플리케이션의 프로세스 내에 있는 {@link android.content.ContentResolver} 개체와
+ 제공자를 소유하는 애플리케이션 내의 {@link android.content.ContentProvider} 개체가 
+자동으로 프로세스간 통신을 처리합니다.
+{@link android.content.ContentProvider} 또한 
+콘텐츠 제공자의 데이터 리포지토리와 외부에 테이블로 표시되는 데이터 모습 사이에서 추상화 계층 역할을 합니다.
+</p>
+<p class="note">
+    <strong>참고:</strong> 제공자에 액세스하려면 보통은 애플리케이션이 
+제공자의 매니페스트 파일에 있는 특정 권한을 요청해야 합니다. 이것은 
+<a href="#Permissions">콘텐츠 제공자 권한</a> 섹션에 더 자세히 설명되어 있습니다.
+</p>
+<p>
+    예를 들어 사용자 사전 제공자로부터 단어와 그에 해당하는 로케일 목록을 가져오려면,
+{@link android.content.ContentResolver#query ContentResolver.query()}를 호출하면 됩니다.
+    {@link android.content.ContentResolver#query query()} 메서드는 사용자 사전 제공자가 정의한
+{@link android.content.ContentProvider#query ContentProvider.query()} 메서드를
+호출합니다. 다음 몇 줄의 코드는 
+{@link android.content.ContentResolver#query ContentResolver.query()} 호출을 나타낸 것입니다.
+<p>
+<pre>
+// Queries the user dictionary and returns results
+mCursor = getContentResolver().query(
+    UserDictionary.Words.CONTENT_URI,   // The content URI of the words table
+    mProjection,                        // The columns to return for each row
+    mSelectionClause                    // Selection criteria
+    mSelectionArgs,                     // Selection criteria
+    mSortOrder);                        // The sort order for the returned rows
+</pre>
+<p>
+    표 2는
+{@link android.content.ContentResolver#query
+query(Uri,projection,selection,selectionArgs,sortOrder)}에 대한 인수가 SQL SELECT 문과 일치하는 방식을 나타낸 것입니다.
+</p>
+<p class="table-caption">
+    <strong>표 2:</strong> Query()를 SQL 쿼리에 비교한 것입니다.
+</p>
+<table id="table2" style="width: 75%;">
+    <tr>
+        <th style="width:25%" align="center" scope="col">query() 인수</th>
+        <th style="width:25%" align="center" scope="col">SELECT 키워드/매개변수</th>
+        <th style="width:50%" align="center" scope="col">참고</th>
+    </tr>
+    <tr>
+        <td align="center"><code>Uri</code></td>
+        <td align="center"><code>FROM <em>table_name</em></code></td>
+        <td><code>Uri</code>가 <em>table_name</em>이라 불리는 제공자에 있는 테이블에 매핑됩니다.</td>
+    </tr>
+    <tr>
+        <td align="center"><code>projection</code></td>
+        <td align="center"><code><em>col,col,col,...</em></code></td>
+        <td>
+            <code>projection</code>은 검색된 각 행에 포함되어야 하는 일련의 열입니다.
+
+        </td>
+    </tr>
+    <tr>
+        <td align="center"><code>selection</code></td>
+        <td align="center"><code>WHERE <em>col</em> = <em>value</em></code></td>
+        <td><code>selection</code>은 행을 선택하는 기준을 나타냅니다.</td>
+    </tr>
+    <tr>
+        <td align="center"><code>selectionArgs</code></td>
+        <td align="center">
+            (정확한 등가는 없습니다. 선택 인수는 선택 절에 있는 <code>?</code>
+ 자리 표시자를 대체합니다.)
+        </td>
+    </tr>
+    <tr>
+        <td align="center"><code>sortOrder</code></td>
+        <td align="center"><code>ORDER BY <em>col,col,...</em></code></td>
+        <td>
+            <code>sortOrder</code>는 반환된 
+{@link android.database.Cursor} 내에 행이 나타나는 순서를 지정합니다.
+        </td>
+    </tr>
+</table>
+<h3 id="ContentURIs">콘텐츠 URI</h3>
+<p>
+    <strong>콘텐츠 URI</strong>는 제공자에서 데이터를 식별하는 URI입니다. 
+콘텐츠 URI에는 전체 제공자의 상징적인 이름(제공자의 <strong>권한</strong>)과
+테이블을 가리키는 이름(<strong>경로</strong>)이 포함됩니다. 
+제공자 내의 테이블에 액세스하기 위해 클라이언트 메서드를 호출하는 경우,
+그 테이블에 대한 콘텐츠 URI는 인수 중 하나입니다.
+</p>
+<p>
+    앞선 몇 줄의 코드에서 상수
+{@link android.provider.UserDictionary.Words#CONTENT_URI}에 
+사용자 사전의 "단어" 테이블의 콘텐츠 URI가 들어있습니다. {@link android.content.ContentResolver}
+ 개체가 이 URI의 권한을 구문 분석한 다음, 이를 이용해 제공자를 "확인"합니다. 즉 이 권한을 알려진 제공자로 이루어진 시스템 테이블과 비교하는 것입니다.
+ 
+그러면 {@link android.content.ContentResolver}가 쿼리 인수를 
+올바른 제공자에게 발송할 수 있습니다.
+</p>
+<p>
+    {@link android.content.ContentProvider}는 콘텐츠 URI의 경로 부분을 사용하여
+액세스할 테이블을 선택합니다. 제공자에는 보통 제공자가 노출하는 테이블마다 <strong>경로</strong>가 있습니다.
+</p>
+<p>
+    앞선 몇 줄의 코드에서 "단어" 테이블에 대한 전체 URI는 다음과 같습니다.
+</p>
+<pre>
+content://user_dictionary/words
+</pre>
+<p>
+    여기에서 <code>user_dictionary</code> 문자열은 제공자의 권한이고
+<code>words</code> 문자열은 테이블의 경로입니다. 문자열
+<code>content://</code>(<strong>구성표</strong>)는 언제나 표시되며,
+이것을 콘텐츠 URI로 식별합니다.
+</p>
+<p>
+    대다수의 제공자에서는 URI의 맨 끝에 ID 값을 추가하면 
+테이블 내 하나의 행에 액세스할 수 있게 해줍니다. 예를 들어 <code>_ID</code>가 
+사용자 사전의 <code>4</code>인 행을 검색하려면, 이 콘텐츠 URI를 사용하면 됩니다.
+</p>
+<pre>
+Uri singleUri = ContentUris.withAppendedId(UserDictionary.Words.CONTENT_URI,4);
+</pre>
+<p>
+    일련의 행을 검색한 다음 그 중 하나를 업데이트하거나 삭제하고자 하는 경우 종종 ID 값을 
+이용하곤 합니다.
+</p>
+<p class="note">
+    <strong>참고:</strong> {@link android.net.Uri}와 
+{@link android.net.Uri.Builder} 클래스에는 문자열에서 잘 구성된(Well-Formed) URI 개체를 구성하기 위한 편의 메서드가 들어 있습니다. 
+{@link android.content.ContentUris}에는 URI에 ID 값을 추가하기 위한 편의 메서드가 들어 있습니다.
+이전 조각은 {@link android.content.ContentUris#withAppendedId
+withAppendedId()}를 사용하여 UserDictionary 콘텐츠 URI에 ID를 추가합니다.
+</p>
+
+
+    <!-- Retrieving Data from the Provider -->
+<h2 id="SimpleQuery">제공자에서 데이터 검색</h2>
+<p>
+    이 섹션은 사용자 사전 제공자를 예시로 사용하여 제공자에서 데이터를 검색하는
+방법을 설명합니다.
+</p>
+<p class="note">
+    명확히 나타내기 위해 이 섹션의 코드 조각은 
+{@link android.content.ContentResolver#query ContentResolver.query()}를 "UI 스레드"에서 호출합니다. 
+그러나 실제 코드의 경우 쿼리는 별도의 스레드에서 비동기식으로 수행해야 합니다. 이를 위한 한 가지 방식으로
+{@link android.content.CursorLoader} 
+클래스를 쓰는 것을 들 수 있습니다. 이 내용은 <a href="{@docRoot}guide/components/loaders.html">
+로더</a> 가이드에 더 자세히 설명되어 있습니다. 또한, 이 코드 줄은 조각일 뿐이며 애플리케이션을 전체적으로 표시한 것이 아닙니다.
+
+</p>
+<p>
+    제공자에서 데이터를 검색하려면 다음과 같은 기본 단계를 따르십시오.
+</p>
+<ol>
+   <li>
+        제공자에 대한 읽기 액세스 권한을 요청합니다.
+   </li>
+   <li>
+        제공자에게 쿼리를 보내는 코드를 정의합니다.
+   </li>
+</ol>
+<h3 id="RequestPermissions">읽기 액세스 권한 요청</h3>
+<p>
+    제공자에서 데이터를 검색하려면 애플리케이션에 해당 제공자에 대한 "읽기 액세스 권한"이 필요합니다.
+ 런타임에는 이 권한을 요청할 수 없습니다. 대신 이 권한이 필요하다는 것을 매니페스트에 나타내야 합니다. 이때, 
+
+<code><a href="{@docRoot}guide/topics/manifest/uses-permission-element.html">&lt;uses-permission&gt;</a></code>
+ 요소와 제공자가 정의한 정확한 권한 이름을 사용하면 됩니다.
+ 매니페스트에서 이 요소를 지정하는 것은 사실상 애플리케이션을 위해 이 권한을 "요청"하는 것과 
+같습니다. 사용자가 애플리케이션을 설치할 때면, 이 요청을 암시적으로 허용하게 됩니다.
+
+</p>
+<p>
+    사용 중인 제공자에 대한 읽기 액세스 권한의 정확한 이름과 해당 제공자가 사용하는 
+다른 액세스 권한의 이름을 찾아보려면 제공자의 문서를 살펴보십시오.
+
+</p>
+<p>
+    제공자에 액세스하는 데 있어 권한이 어떤 역할을 하는지는 
+<a href="#Permissions">콘텐츠 제공자 권한</a> 섹션에 더 자세하게 설명되어 있습니다.
+</p>
+<p>
+    사용자 사전 제공자는 
+<code>android.permission.READ_USER_DICTIONARY</code> 권한을 자신의 매니페스트 파일에 정의합니다. 따라서 해당 제공자에서 
+읽기 작업을 하고자 하는 애플리케이션은 반드시 이 권한을 요청해야 합니다.
+</p>
+<!-- Constructing the query -->
+<h3 id="Query">쿼리 구성</h3>
+<p>
+    제공자에서 데이터를 검색할 때 다음 단계는 쿼리를 구성하는 것입니다. 다음의 첫 번째 조각은 
+사용자 사전 제공자에 액세스하는 데 필요한 몇 가지 변수를 정의한 것입니다.
+</p>
+<pre class="prettyprint">
+
+// A "projection" defines the columns that will be returned for each row
+String[] mProjection =
+{
+    UserDictionary.Words._ID,    // Contract class constant for the _ID column name
+    UserDictionary.Words.WORD,   // Contract class constant for the word column name
+    UserDictionary.Words.LOCALE  // Contract class constant for the locale column name
+};
+
+// Defines a string to contain the selection clause
+String mSelectionClause = null;
+
+// Initializes an array to contain selection arguments
+String[] mSelectionArgs = {""};
+
+</pre>
+<p>
+    다음 조각은 사용자 사전 제공자를 예시로 사용하여 
+{@link android.content.ContentResolver#query ContentResolver.query()}를
+ 사용하는 방법을 나타낸 것입니다. 제공자 클라이언트 쿼리는 SQL 쿼리와 비슷하며, 
+반환할 열 집합과 선택 기준 집합, 그리고 정렬 순서가 이 안에 들어 있습니다.
+</p>
+<p>
+    쿼리가 반환해야 할 열 집합을 <strong>프로젝션</strong>
+(변수<code>mProjection</code>)이라고 합니다.
+</p>
+<p>
+    검색할 행을 나타내는 식은 선택 절과 선택 인수로 분할되어 있습니다.
+ 선택 절은 논리와 부울 식, 열 이름과 값
+(변수 <code>mSelectionClause</code>)을 조합한 것입니다. 
+값 대신 대체 가능한 매개변수 <code>?</code>를 지정하면, 
+쿼리 메서드가 그 값을 선택 인수 배열에서 검색합니다(변수 <code>mSelectionArgs</code>).
+</p>
+<p>
+    다음 조각의 경우, 사용자가 단어를 입력하지 않으면 선택 절이 
+<code>null</code>로 설정되고, 쿼리는 제공자 안의 모든 단어를 반환합니다. 
+사용자가 단어를 입력하면 선택 절은 <code>UserDictionary.Words.WORD + " = ?"</code>로 설정되며
+선택 인수의 첫 번째 요소가 사용자가 입력한 단어로 설정됩니다.
+</p>
+<pre class="prettyprint">
+/*
+ * This defines a one-element String array to contain the selection argument.
+ */
+String[] mSelectionArgs = {""};
+
+// Gets a word from the UI
+mSearchString = mSearchWord.getText().toString();
+
+// Remember to insert code here to check for invalid or malicious input.
+
+// If the word is the empty string, gets everything
+if (TextUtils.isEmpty(mSearchString)) {
+    // Setting the selection clause to null will return all words
+    mSelectionClause = null;
+    mSelectionArgs[0] = "";
+
+} else {
+    // Constructs a selection clause that matches the word that the user entered.
+    mSelectionClause = UserDictionary.Words.WORD + " = ?";
+
+    // Moves the user's input string to the selection arguments.
+    mSelectionArgs[0] = mSearchString;
+
+}
+
+// Does a query against the table and returns a Cursor object
+mCursor = getContentResolver().query(
+    UserDictionary.Words.CONTENT_URI,  // The content URI of the words table
+    mProjection,                       // The columns to return for each row
+    mSelectionClause                   // Either null, or the word the user entered
+    mSelectionArgs,                    // Either empty, or the string the user entered
+    mSortOrder);                       // The sort order for the returned rows
+
+// Some providers return null if an error occurs, others throw an exception
+if (null == mCursor) {
+    /*
+     * Insert code here to handle the error. Be sure not to use the cursor! You may want to
+     * call android.util.Log.e() to log this error.
+     *
+     */
+// If the Cursor is empty, the provider found no matches
+} else if (mCursor.getCount() &lt; 1) {
+
+    /*
+     * Insert code here to notify the user that the search was unsuccessful. This isn't necessarily
+     * an error. You may want to offer the user the option to insert a new row, or re-type the
+     * search term.
+     */
+
+} else {
+    // Insert code here to do something with the results
+
+}
+</pre>
+<p>
+    이 쿼리는 SQL 문에 대한 아날로그입니다.
+</p>
+<pre>
+SELECT _ID, word, locale FROM words WHERE word = &lt;userinput&gt; ORDER BY word ASC;
+</pre>
+<p>
+    이 SQL 문에서는 계약 클래스 상수 대신 실제 열 이름을 사용하였습니다.
+</p>
+<h4 id="Injection">악의적인 입력에 대한 보호</h4>
+<p>
+    콘텐츠 제공자가 관리하는 데이터가 SQL 데이터베이스에 있는 경우, 
+원시 SQL 문에 외부의 신뢰할 수 없는 데이터를 포함시키면 SQL 삽입을 초래할 수 있습니다.
+</p>
+<p>
+    이 선택 절을 예로 들어 봅시다.
+</p>
+<pre>
+// Constructs a selection clause by concatenating the user's input to the column name
+String mSelectionClause =  "var = " + mUserInput;
+</pre>
+<p>
+    이렇게 하면 사용자로 하여금 여러분의 SQL 문에 악의적인 SQL을 연결할 수 있도록 허용합니다.
+    예를 들어 사용자가 <code>mUserInput</code>에 대해 "nothing; DROP TABLE *;"을 입력할 수 있습니다. 
+그러면 그 결과로 선택 절 <code>var = nothing; DROP TABLE *;</code>이 나옵니다. 
+선택 절이 일종의 SQL 문으로 취급되었기 때문에 제공자가 기본 SQLite 데이터베이스에서 테이블을 
+모두 삭제하는 결과를 낳을 수도 있습니다(제공자가 <a href="http://en.wikipedia.org/wiki/SQL_injection">SQL 삽입</a> 
+시도를 잡아내도록 설정된 경우는 예외입니다).
+</p>
+<p>
+    이 문제를 피하려면 <code>?</code>를 대체 가능한 매개변수로 사용하는 선택 절과, 
+별도의 선택 인수 배열을 사용하면 됩니다. 이렇게 하면, 사용자 입력이 SQL 문의 일부로 해석되기보다 쿼리에 직접 바인딩됩니다.
+
+    이것은 SQL로 취급되지 않기 때문에 사용자 입력이 악의적인 SQL을 삽입할 수 없습니다. 
+사용자 입력을 포함하는 데 연결을 사용하는 대신 다음 선택 절을 사용합니다.
+</p>
+<pre>
+// Constructs a selection clause with a replaceable parameter
+String mSelectionClause =  "var = ?";
+</pre>
+<p>
+    선택 인수 배열을 이렇게 설정합니다.
+</p>
+<pre>
+// Defines an array to contain the selection arguments
+String[] selectionArgs = {""};
+</pre>
+<p>
+    선택 인수 배열에 값을 입력할 때는 이렇게 합니다.
+</p>
+<pre>
+// Sets the selection argument to the user's input
+selectionArgs[0] = mUserInput;
+</pre>
+<p>
+    <code>?</code>를 대체 가능한 매개변수로 사용하는 선택 절과 
+선택 인수 배열을 사용하는 것이 선택을 지정하는 데 선호되는 방법입니다. 
+이는 제공자가 SQL 데이터베이스 기반이 아닐 때에도 마찬가지입니다.
+</p>
+<!-- Displaying the results -->
+<h3 id="DisplayResults">쿼리 결과 표시</h3>
+<p>
+    {@link android.content.ContentResolver#query ContentResolver.query()} 
+클라이언트 메서드는 언제나 쿼리 선택 기준과 일치하는 행에 대해 쿼리 프로젝션이 지정한 열을 포함하는
+{@link android.database.Cursor}를 반환합니다. 
+{@link android.database.Cursor} 개체가 자신이 포함한 행과 열에 무작위 읽기 액세스를 제공합니다.
+ {@link android.database.Cursor} 메서드를 사용하면 행을 결과에서 반복할 수 있고, 
+각 열의 데이터 유형을 결정하며 열에서 데이터를 꺼내거나 결과의 다른 속성을 검토할 수도 있습니다.
+ 일부 {@link android.database.Cursor} 구현은 제공자의 데이터가 변경될 경우,
+{@link android.database.Cursor}가 변경될 때 관찰자 개체 내의 메서드를 트리거하는 경우 
+또는 두 가지가 한 번에 발생할 경우 자동으로 개체를 업데이트합니다.
+</p>
+<p class="note">
+    <strong>참고:</strong> 제공자는 쿼리를 수행하는 개체의 성격을 근거로 
+열에 대한 액세스를 제한할 수 있습니다. 예를 들어 연락처 제공자는 동기화 어댑터로의 몇몇 열에 대한 액세스를 제한합니다. 
+이렇게 해야 액티비티 또는 서비스에 열을 반환하지 않기 때문입니다.
+</p>
+<p>
+    선택 기준에 일치하는 행이 없으면, 제공자는 
+{@link android.database.Cursor} 개체를 반환합니다. 이 개체의 
+{@link android.database.Cursor#getCount Cursor.getCount()}는 0(빈 커서)입니다.
+</p>
+<p>
+    내부 오류가 발생하는 경우, 쿼리 결과는 특정 제공자에 따라 달라집니다. 
+<code>null</code>을 반환하기로 선택할 수도 있고, {@link java.lang.Exception}을 발생시킬 수도 있습니다.
+</p>
+<p>
+    {@link android.database.Cursor}는 행의 "목록"이므로,
+{@link android.database.Cursor}의 콘텐츠를 표시하는 좋은 방법은 {@link android.widget.SimpleCursorAdapter}를 통해 {@link android.widget.ListView}에
+연결하는 것입니다.
+</p>
+<p>
+    다음 조각은 이전 조각으로부터 코드를 계속 이어가는 것입니다. 
+이는 해당 쿼리가 검색한 {@link android.database.Cursor}가 들어 있는
+{@link android.widget.SimpleCursorAdapter} 개체를 생성하며, 이 개체를 
+{@link android.widget.ListView}에 대한 어댑터로 설정합니다.
+</p>
+<pre class="prettyprint">
+// Defines a list of columns to retrieve from the Cursor and load into an output row
+String[] mWordListColumns =
+{
+    UserDictionary.Words.WORD,   // Contract class constant containing the word column name
+    UserDictionary.Words.LOCALE  // Contract class constant containing the locale column name
+};
+
+// Defines a list of View IDs that will receive the Cursor columns for each row
+int[] mWordListItems = { R.id.dictWord, R.id.locale};
+
+// Creates a new SimpleCursorAdapter
+mCursorAdapter = new SimpleCursorAdapter(
+    getApplicationContext(),               // The application's Context object
+    R.layout.wordlistrow,                  // A layout in XML for one row in the ListView
+    mCursor,                               // The result from the query
+    mWordListColumns,                      // A string array of column names in the cursor
+    mWordListItems,                        // An integer array of view IDs in the row layout
+    0);                                    // Flags (usually none are needed)
+
+// Sets the adapter for the ListView
+mWordList.setAdapter(mCursorAdapter);
+</pre>
+<p class="note">
+    <strong>참고:</strong> {@link android.database.Cursor}로 {@link android.widget.ListView}를 뒷받침하려면,
+커서에 <code>_ID</code>라는 열이 포함되어야 합니다.
+    이것 때문에 이전에 표시된 쿼리가 "단어" 테이블에 대하여 <code>_ID</code> 열을 
+검색하며, {@link android.widget.ListView}가 이를 표시하지 않더라도 무관합니다.
+    이 제한은 대부분의 제공자에 각 테이블에 대한 <code>_ID</code> 열이 있는 이유를 설명해주기도 합니다.
+
+</p>
+
+        <!-- Getting data from query results -->
+<h3 id="GettingResults">쿼리 결과에서 데이터 가져오기</h3>
+<p>
+    쿼리 결과를 단순히 표시만 하는 것보다 이를 다른 작업에 사용할 수 있습니다. 
+예를 들어, 사용자 사전에서 철자를 검색한 다음 이것을 다른 제공자 내에서 찾아볼 수 있습니다.
+ 이렇게 하려면, {@link android.database.Cursor}에서 행을 계속 반복하면 됩니다.
+</p>
+<pre class="prettyprint">
+
+// Determine the column index of the column named "word"
+int index = mCursor.getColumnIndex(UserDictionary.Words.WORD);
+
+/*
+ * Only executes if the cursor is valid. The User Dictionary Provider returns null if
+ * an internal error occurs. Other providers may throw an Exception instead of returning null.
+ */
+
+if (mCursor != null) {
+    /*
+     * Moves to the next row in the cursor. Before the first movement in the cursor, the
+     * "row pointer" is -1, and if you try to retrieve data at that position you will get an
+     * exception.
+     */
+    while (mCursor.moveToNext()) {
+
+        // Gets the value from the column.
+        newWord = mCursor.getString(index);
+
+        // Insert code here to process the retrieved word.
+
+        ...
+
+        // end of while loop
+    }
+} else {
+
+    // Insert code here to report an error if the cursor is null or the provider threw an exception.
+}
+</pre>
+<p>
+    {@link android.database.Cursor} 구현에는 
+여러 개의 "가져오기" 메서드가 들어 있어 개체로부터 여러 가지 유형의 데이터를 검색합니다. 예를 들어 이전 조각에서는 
+{@link android.database.Cursor#getString getString()}을 사용합니다. 
+여기에는 해당 열의 데이터 유형을 나타내는 값을 반환하는 
+{@link android.database.Cursor#getType getType()} 메서드도 있습니다.
+</p>
+
+
+    <!-- Requesting permissions -->
+<h2 id="Permissions">콘텐츠 제공자 권한</h2>
+<p>
+    제공자의 애플리케이션은 해당 제공자의 데이터에 액세스하려면 다른 애플리케이션이 반드시 가지고 있어야 하는 
+권한을 지정할 수 있습니다. 이와 같은 권한을 통해 사용자는 한 애플리케이션이 어느 데이터에 액세스하려 시도할지 
+알 수 있습니다. 다른 애플리케이션은 제공자의 요구 사항을 근거로 해당 제공자에 액세스하기 위해 필요한 
+권한을 요청합니다. 최종 사용자는 애플리케이션을 설치할 때 요청된 권한을 보게 됩니다.
+
+</p>
+<p>
+    제공자의 애플리케이션이 아무 권한도 지정하지 않은 경우, 다른 애플리케이션은 해당 제공자의 
+데이터에 액세스할 수 없습니다. 그러나 제공자의 애플리케이션 내에 있는 구성 요소는 
+지정된 권한과 무관하게 항상 읽기 및 쓰기 액세스 권한을 모두 가지고 있습니다.
+</p>
+<p>
+    이전에 언급한 것과 같이 사용자 사전 제공자에서 데이터를 검색하려면 
+<code>android.permission.READ_USER_DICTIONARY</code> 권한이 필요합니다.
+    이 제공자에게는 데이터 삽입, 업데이트 또는 삭제에 각각 별도의 <code>android.permission.WRITE_USER_DICTIONARY</code>
+권한이 있습니다.
+</p>
+<p>
+    제공자에 액세스하는 데 필요한 권한을 얻으려면 애플리케이션은 
+자신의 매니페스트 파일에 있는 <code><a href="{@docRoot}guide/topics/manifest/uses-permission-element.html">&lt;uses-permission&gt;</a></code>
+으로 그러한 권한을 요청합니다. Android 패키지 관리자가 애플리케이션을 설치하는 경우, 
+사용자는 애플리케이션이 요청하는 권한을 모두 승인해야 합니다. 사용자가 이를 모두 승인하면
+패키지 관리자가 설치를 계속하지만, 사용자가 이를 승인하지 않으면 패키지 관리자는 설치를 중단합니다.
+
+</p>
+<p>
+    
+다음 <code><a href="{@docRoot}guide/topics/manifest/uses-permission-element.html">&lt;uses-permission&gt;</a></code>
+ 요소는 사용자 사전 제공자에 읽기 액세스 권한을 요청하는 것입니다.
+</p>
+<pre>
+    &lt;uses-permission android:name="android.permission.READ_USER_DICTIONARY"&gt;
+</pre>
+<p>
+    제공자 액세스 권한이 미치는 영향은 
+<a href="{@docRoot}guide/topics/security/security.html">보안 및 권한</a> 가이드에 좀 더 자세히 설명되어 있습니다.
+</p>
+
+
+<!-- Inserting, Updating, and Deleting Data -->
+<h2 id="Modifications">데이터 삽입, 업데이트 및 삭제</h2>
+<p>
+    제공자로부터 데이터를 검색하는 것과 같은 방식으로, 데이터를 수정할 때에도 제공자 클라이언트와 제공자의 
+{@link android.content.ContentProvider} 사이의 상호작용을 사용합니다.
+    {@link android.content.ContentResolver}의 메서드를 호출하면서 
+{@link android.content.ContentProvider}의 상응하는 메서드로 전달된 인수를 사용합니다. 
+제공자와 제공자의 클라이언트가 보안과 프로세스간 통신을 자동으로 처리합니다.
+</p>
+<h3 id="Inserting">데이터 삽입</h3>
+<p>
+    데이터를 제공자 안으로 삽입하려면, 
+{@link android.content.ContentResolver#insert ContentResolver.insert()}
+ 메서드를 호출합니다. 이 메서드는 제공자에 새로운 행을 삽입하고 해당 열에 대한 콘텐츠 URI를 반환합니다.
+    이 조각은 사용자 사전 제공자에 새 단어를 삽입하는 방법을 나타낸 것입니다.
+</p>
+<pre class="prettyprint">
+// Defines a new Uri object that receives the result of the insertion
+Uri mNewUri;
+
+...
+
+// Defines an object to contain the new values to insert
+ContentValues mNewValues = new ContentValues();
+
+/*
+ * Sets the values of each column and inserts the word. The arguments to the "put"
+ * method are "column name" and "value"
+ */
+mNewValues.put(UserDictionary.Words.APP_ID, "example.user");
+mNewValues.put(UserDictionary.Words.LOCALE, "en_US");
+mNewValues.put(UserDictionary.Words.WORD, "insert");
+mNewValues.put(UserDictionary.Words.FREQUENCY, "100");
+
+mNewUri = getContentResolver().insert(
+    UserDictionary.Word.CONTENT_URI,   // the user dictionary content URI
+    mNewValues                          // the values to insert
+);
+</pre>
+<p>
+    새로운 행에 대한 데이터는 단일 행 커서와 형태가 유사한 단일 {@link android.content.ContentValues} 개체로
+이동합니다. 이 개체 내의 열은 모두 같은 데이터 유형을 가지지 않아도 됩니다. 
+또한 아예 값을 지정하고 싶지 않은 경우라면 열을 <code>null</code>로 설정할 수 있습니다. 
+이때 {@link android.content.ContentValues#putNull ContentValues.putNull()}을 사용하면 됩니다.
+</p>
+<p>
+    조각은 <code>_ID</code> 열을 추가하지 않습니다. 이 열은 자동으로 유지관리되기 때문입니다.
+ 제공자는 추가된 모든 열마다 고유한 <code>_ID</code> 값을 할당합니다.
+ 제공자는 보통 이 값을 테이블의 기본 키로 사용합니다.
+</p>
+<p>
+    <code>newUri</code>에 반환된 콘텐츠 URI는 다음과 같은 형식으로 새로 추가된 행을 식별합니다.
+
+</p>
+<pre>
+content://user_dictionary/words/&lt;id_value&gt;
+</pre>
+<p>
+    <code>&lt;id_value&gt;</code>는 새로운 행에 대한 <code>_ID</code>의 콘텐츠입니다.
+    대부분의 제공자는 이런 형태의 콘텐츠 URI를 자동으로 감지할 수 있으며, 그런 다음 해당 행에서 요청된 작업을 수행합니다.
+
+</p>
+<p>
+    반환된 {@link android.net.Uri}에서 <code>_ID</code> 값을 가져오려면
+{@link android.content.ContentUris#parseId ContentUris.parseId()}를 호출합니다.
+</p>
+<h3 id="Updating">데이터 업데이트</h3>
+<p>
+    행을 업데이트하려면 업데이트된 값과 함께 {@link android.content.ContentValues} 개체를 사용합니다. 
+이때 값은 삽입할 때와 똑같고, 선택 기준은 쿼리할 때와 같습니다.
+    사용하는 클라이언트 메서드는
+{@link android.content.ContentResolver#update ContentResolver.update()}입니다. 
+값을 추가하는 것은 업데이트 중인 열에 대한 {@link android.content.ContentValues} 개체에만 하면 됩니다. 
+열의 콘텐츠를 삭제하려면, 값을 <code>null</code>로 설정하십시오.
+</p>
+<p>
+    다음 조각에서는 로케일이 언어 "en"인 행 모두를 로케일 <code>null</code>을 가지도록 변경합니다.
+ 반환 값이 업데이트된 행 수입니다.
+</p>
+<pre>
+// Defines an object to contain the updated values
+ContentValues mUpdateValues = new ContentValues();
+
+// Defines selection criteria for the rows you want to update
+String mSelectionClause = UserDictionary.Words.LOCALE +  "LIKE ?";
+String[] mSelectionArgs = {"en_%"};
+
+// Defines a variable to contain the number of updated rows
+int mRowsUpdated = 0;
+
+...
+
+/*
+ * Sets the updated value and updates the selected words.
+ */
+mUpdateValues.putNull(UserDictionary.Words.LOCALE);
+
+mRowsUpdated = getContentResolver().update(
+    UserDictionary.Words.CONTENT_URI,   // the user dictionary content URI
+    mUpdateValues                       // the columns to update
+    mSelectionClause                    // the column to select on
+    mSelectionArgs                      // the value to compare to
+);
+</pre>
+<p>
+    
+{@link android.content.ContentResolver#update ContentResolver.update()}를 호출하는 경우에는 사용자 입력도 삭제해야 합니다. 이 내용에 관해 자세히 알아보려면
+<a href="#Injection">악의적인 입력에 대한 보호</a> 섹션을 읽어 보십시오.
+</p>
+<h3 id="Deleting">데이터 삭제</h3>
+<p>
+    행을 삭제하는 것은 행 데이터를 검색하는 것과 비슷합니다. 즉, 삭제하고자 하는 행에 대한 선택 기준을 지정하면 
+클라이언트 메서드가 삭제된 행 수를 반환하는 식입니다.
+    다음 조각은 앱 ID가 "user"와 일치하는 행을 삭제합니다. 메서드가 삭제된 행 수를 반환합니다.
+
+</p>
+<pre>
+
+// Defines selection criteria for the rows you want to delete
+String mSelectionClause = UserDictionary.Words.APP_ID + " LIKE ?";
+String[] mSelectionArgs = {"user"};
+
+// Defines a variable to contain the number of rows deleted
+int mRowsDeleted = 0;
+
+...
+
+// Deletes the words that match the selection criteria
+mRowsDeleted = getContentResolver().delete(
+    UserDictionary.Words.CONTENT_URI,   // the user dictionary content URI
+    mSelectionClause                    // the column to select on
+    mSelectionArgs                      // the value to compare to
+);
+</pre>
+<p>
+    {@link android.content.ContentResolver#delete ContentResolver.delete()}를 
+호출하는 경우에는 사용자 입력도 삭제해야 합니다. 이 내용에 관해 자세히 알아보려면
+<a href="#Injection">악의적인 입력에 대한 보호</a> 섹션을 읽어 보십시오.
+</p>
+<!-- Provider Data Types -->
+<h2 id="DataTypes">제공자 데이터 유형</h2>
+<p>
+    콘텐츠 제공자는 아주 다양한 데이터 유형을 제공할 수 있습니다. 
+사용자 사전 제공자는 텍스트만 제공하지만, 제공자는 다음과 같은 형식도 제공할 수 있습니다.
+</p>
+    <ul>
+        <li>
+            정수
+        </li>
+        <li>
+            긴 정수(Long)
+        </li>
+        <li>
+            부동 소수점 수
+        </li>
+        <li>
+            긴 부동 소수점 수(double)
+        </li>
+    </ul>
+<p>
+    제공자가 종종 사용하는 또 다른 데이터 유형은 64KB 바이트 배열로 구현되는 BLOB(Binary Large OBject)입니다.
+ 이용 가능한 데이터 유형을 확인하려면 
+{@link android.database.Cursor} 클래스 "가져오기" 메서드를 살펴보면 됩니다.
+</p>
+<p>
+    제공자 내의 각 열에 대한 데이터 유형은 보통 자신의 문서에 목록으로 나열되어 있습니다.
+    사용자 사전 제공자의 데이터 유형은 제공자의 계약 클래스 
+{@link android.provider.UserDictionary.Words}의 참조 문서에 나열되어 있습니다(계약 클래스는
+<a href="#ContractClasses">계약 클래스</a> 섹션에 설명되어 있습니다).
+    @link android.database.Cursor#getType
+    Cursor.getType()}을 호출해서도 데이터 유형을 결정할 수 있습니다.
+</p>
+<p>
+    제공자는 스스로 정의하는 각 콘텐츠 URI의 MIME 데이터 유형 정보도 유지관리합니다. 
+MIME 유형 정보를 사용하면 애플리케이션이 제공자가 제공하는 데이터를 처리할 수 있을지 알아낼 수도 있고, 
+MIME 유형을 근거로 처리 유형을 선택할 수도 있습니다. 
+MIME 유형이 필요한 시점은 주로 복잡한 데이터 구조 또는 파일이 들어 있는 제공자를 다룰 때입니다.
+ 예를 들어 연락처 제공자 내의 {@link android.provider.ContactsContract.Data}
+ 테이블은 MIME 유형을 사용하여 각 행에 저장된 연락처 데이터의 유형에 레이블을 붙입니다.
+ 콘텐츠 URI에 상응하는 MIME 유형을 가져오려면 
+{@link android.content.ContentResolver#getType ContentResolver.getType()}을 호출하십시오.
+</p>
+<p>
+    <a href="#MIMETypeReference">MIME 유형 참조</a> 섹션에서 표준 및 사용자 지정 MIME 유형의 
+두 가지를 모두 설명하고 있습니다.
+</p>
+
+
+<!-- Alternative Forms of Provider Access -->
+<h2 id="AltForms">제공자 액세스의 대체 형식</h2>
+<p>
+    애플리케이션 개발에 있어 중요한 제공자 액세스의 대체 형식에는 다음과 같은 세 가지가 있습니다.
+</p>
+<ul>
+    <li>
+        <a href="#Batch">일괄 액세스</a>: {@link android.content.ContentProviderOperation}
+ 클래스에 있는 메서드로 일괄 액세스 호출을 생성하고
+{@link android.content.ContentResolver#applyBatch ContentResolver.applyBatch()}로 이를 적용할 수 있습니다.
+    </li>
+    <li>
+        비동기식 쿼리: 쿼리는 별도의 스레드에서 수행해야 합니다. 이 작업을 수행하는 한 가지 방법으로 
+{@link android.content.CursorLoader} 개체를 사용하는 것이 있습니다. 이 사용 방법은 
+<a href="{@docRoot}guide/components/loaders.html">로더</a> 가이드에 있는 예시에서 설명합니다.
+
+    </li>
+    <li>
+        <a href="#Intents">인텐트를 통한 데이터 액세스</a>: 
+인텐트를 제공자에 직접 보낼 수는 없지만, 인텐트를 제공자의 애플리케이션에 보낼 수는 있습니다.
+보통은 이것이 제공자의 데이터를 수정하기에 가장 좋습니다.
+    </li>
+</ul>
+<p>
+    일괄 액세스와 인텐트를 통한 수정은 다음 섹션에서 설명되어 있습니다.
+</p>
+<h3 id="Batch">일괄 액세스</h3>
+<p>
+    제공자에 일괄 액세스를 하면 많은 수의 행을 삽입할 때, 같은 메서드 호출 내에서 여러 개의 테이블에 여러 행을 삽입할 때 
+또는 전반적으로, 프로세스 경계를 가로질러 일련의 작업을 수행하는 경우(원자성 작업) 유용합니다.
+
+</p>
+<p>
+    "일괄 모드"로 제공자에 액세스하려면
+{@link android.content.ContentProviderOperation} 개체의 배열을 생성한 다음 이를 콘텐츠 제공자에게 
+{@link android.content.ContentResolver#applyBatch ContentResolver.applyBatch()}로
+ 발송하면 됩니다. 
+이 메서드에는 특정한 콘텐츠 URI보다는 콘텐츠 제공자의 <em>권한</em>을 전달합니다.
+이렇게 하면 배열 내의 각 {@link android.content.ContentProviderOperation} 개체가 
+서로 다른 테이블에 대해 작용하도록 할 수 있습니다. {@link android.content.ContentResolver#applyBatch
+    ContentResolver.applyBatch()}를 호출하면 일련의 결과를 반환합니다.
+</p>
+<p>
+    {@link android.provider.ContactsContract.RawContacts} 계약 클래스의 설명에
+ 일괄 삽입을 설명하는 코드 조각이 포함되어 있습니다. 
+<a href="{@docRoot}resources/samples/ContactManager/index.html">연락처 관리자</a>
+샘플 애플리케이션에는 <code>ContactAdder.java</code>
+소스 파일의 일괄 액세스 예시가 포함되어 있습니다.
+</p>
+<div class="sidebox-wrapper">
+<div class="sidebox">
+<h2>도우미 앱을 사용한 데이터 표시</h2>
+<p>
+    애플리케이션에 액세스 권한이 <em>있더라도</em> 
+다른 애플리케이션에 데이터를 표시할 인텐트를 사용하고자 할 수 있습니다. 예를 들어 캘린더 애플리케이션은 
+특정 날짜나 이벤트를 표시하는 {@link android.content.Intent#ACTION_VIEW}를 허용합니다.
+    이 때문에 나름의 UI를 직접 생성하지 않고도 캘린더 정보를 표시할 수 있습니다.
+이 기능에 대한 자세한 정보는 
+<a href="{@docRoot}guide/topics/providers/calendar-provider.html">캘린더 제공자</a> 가이드를 참조하십시오.
+</p>
+<p>
+    인텐트를 보낼 목적지인 애플리케이션은 제공자와 연관된 애플리케이션이 아니어도 됩니다.
+ 예를 들어 연락처 제공자에서 연락처를 검색한 다음, 해당 연락처의 이미지에 대한 콘텐츠 URI가 들어 있는 
+{@link android.content.Intent#ACTION_VIEW} 인텐트를 
+이미지 뷰어로 보낼 수 있습니다.
+</p>
+</div>
+</div>
+<h3 id="Intents">인텐트를 통한 데이터 액세스</h3>
+<p>
+    인텐트는 콘텐츠 제공자에 간접 액세스를 제공할 수 있습니다. 애플리케이션에 액세스 권한이 없는데도 
+사용자에게 제공자 내의 데이터에 액세스 권한을 허가하려면, 권한을 가지고 있는 애플리케이션에서 결과 인텐트를 다시 가져오거나 
+권한이 있는 애플리케이션을 활성화한 다음 사용자에게 그 애플리케이션에서 작업하도록 하면 됩니다.
+
+</p>
+<h4>임시 권한으로 액세스 얻기</h4>
+<p>
+    적절한 액세스 권한이 없더라도 콘텐츠 제공자 내의 데이터에 액세스할 수는 있습니다. 
+권한을 가지고 있는 애플리케이션에 인텐트를 보내 "URI" 권한이 들어 있는 결과 인텐트를 돌려받으면 됩니다.
+
+    이들 권한은 특정 콘텐츠 URI에 대한 권한으로, 이를 수신하는 액티비티가 완료될 때까지 유지됩니다.
+ 영구 권한을 가지고 있는 애플리케이션은 결과 인텐트에 다음과 같이 플래그를 설정하여 임시 권한을 허가합니다.
+
+</p>
+<ul>
+    <li>
+        <strong>읽기 권한:</strong>
+{@link android.content.Intent#FLAG_GRANT_READ_URI_PERMISSION}
+    </li>
+    <li>
+        <strong>쓰기 권한:</strong>
+{@link android.content.Intent#FLAG_GRANT_WRITE_URI_PERMISSION}
+    </li>
+</ul>
+<p class="note">
+    <strong>참고:</strong> 이와 같은 플래그는 콘텐츠 URI에 권한이 들어 있는 제공자에 일반적인 읽기 또는 쓰기 액세스 
+권한을 부여하지는 않습니다. 이 액세스는 URI 자체에만 해당됩니다.
+</p>
+<p>
+    제공자는 자신의 매니페스트 내의 콘텐츠 URI에 대한 URI 권한을 정의합니다. 이때 
+<code><a href="{@docRoot}guide/topics/manifest/provider-element.html">&lt;provider&gt;</a></code>
+ 요소의 
+<code><a href="{@docRoot}guide/topics/manifest/provider-element.html#gprmsn">android:grantUriPermission</a></code>
+ 속성을 사용하며, 
+<code><a href="{@docRoot}guide/topics/manifest/provider-element.html">&lt;provider&gt;</a></code>
+ 요소의 
+<code><a href="{@docRoot}guide/topics/manifest/grant-uri-permission-element.html">&lt;grant-uri-permission&gt;</a></code>
+ 하위 요소도 사용합니다. 
+URI 권한 메커니즘은 "URI 권한" 섹션의 <a href="{@docRoot}guide/topics/security/security.html">보안 및 권한</a> 가이드에
+자세히 설명되어 있습니다.
+</p>
+<p>
+    예를 들어, {@link android.Manifest.permission#READ_CONTACTS} 권한이 없더라도
+연락처 제공자 내의 연락처에 대한 데이터를 검색할 수 있습니다. 
+이 작업을 하면 좋은 예로, 연락처에 기재된 사람의 생일에 전자 축하 카드를 보내주는 애플리케이션을 들 수 있습니다. 
+{@link android.Manifest.permission#READ_CONTACTS}를 요청하면 
+사용자의 연락처 전체와 해당 정보 일체에 대한 액세스를 부여하므로, 그 대신 애플리케이션에서 어느 연락처를 사용할지 사용자가 직접 제어하도록 해주는 편이 낫습니다.
+ 이렇게 하려면, 다음 절차를 사용합니다.
+</p>
+<ol>
+    <li>
+        애플리케이션이{@link android.app.Activity#startActivityForResult
+startActivityForResult()} 메서드를 사용해서
+{@link android.content.Intent#ACTION_PICK} 작업과 "contacts" MIME 유형
+{@link android.provider.ContactsContract.RawContacts#CONTENT_ITEM_TYPE}이 들어 있는 인텐트를 보냅니다.
+
+    </li>
+    <li>
+        이 인텐트는 피플 앱의 "선택" 액티비티에 대한 인텐트 필터와 일치하기 때문에, 이 액티비티가 전경으로 나옵니다.
+
+    </li>
+    <li>
+        선택 액티비티에서 사용자가 업데이트할 연락처를 선택합니다.
+ 이렇게 되면 선택 액티비티가 
+{@link android.app.Activity#setResult setResult(resultcode, intent)}
+를 호출하여 애플리케이션에 돌려줄 인텐트를 설정합니다. 
+이 인텐트에 사용자가 선택한 연락처의 콘텐츠 URI와 "추가" 플래그 
+{@link android.content.Intent#FLAG_GRANT_READ_URI_PERMISSION}이 들어 있습니다. 
+이러한 플래그가 URI에 앱으로의 권한을 허가하여 콘텐츠 URI가 가리킨 연락처에 대한 데이터를 읽을 수 있도록 합니다. 
+그런 다음 선택 액티비티는 {@link android.app.Activity#finish()}를 호출하여 
+애플리케이션에 제어를 반환합니다.
+    </li>
+    <li>
+        액티비티가 전경으로 돌아오고, 시스템은 액티비티의
+{@link android.app.Activity#onActivityResult onActivityResult()} 메서드를
+호출합니다. 이 메서드가 피플 앱의 선택 액티비티가 생성한 결과 인텐트를 수신합니다.
+
+    </li>
+    <li>
+        결과 인텐트로부터 받은 콘텐츠 URI를 사용하면 연락처 제공자에서 연락처의 데이터를 읽을 수 있습니다.
+이것은 매니페스트에서 제공자로의 영구 읽기 액세스 권한을 요청하지 않았어도 적용됩니다.
+ 그러면 연락처의 생일 정보나 당사자의 이메일 주소를 가져와 전자 축하 카드를 보낼 수 있게 됩니다.
+
+    </li>
+</ol>
+<h4>다른 애플리케이션 사용</h4>
+<p>
+    개발자에게 액세스 권한이 없는 데이터를 사용자가 수정할 수 있도록 허용하는 간단한 방법은 
+해당 권한을 가지고 있는 애플리케이션을 활성화한 다음 사용자에게 그곳에서 작업하도록 해주는 것입니다.
+</p>
+<p>
+    예를 들어, 캘린더 애플리케이션은
+애플리케이션의 삽입 UI를 활성화해주는 {@link android.content.Intent#ACTION_INSERT} 인텐트를 수락합니다. 애플리케이션이 UI를 미리 채우는 데 사용하는 이 인텐트의 "extras" 데이터를
+전달할 수 있게 됩니다. 반복적인 이벤트의 구문은 복잡하므로
+캘린더 제공자에 이벤트를 삽입하기 좋은 방법은
+{@link android.content.Intent#ACTION_INSERT}로 캘린더 앱을 활성화하고 사용자에게 그곳에서 이벤트를
+삽입하게 하는 것입니다.
+</p>
+<!-- Contract Classes -->
+<h2 id="ContractClasses">계약 클래스</h2>
+<p>
+    계약 클래스는 애플리케이션이 콘텐츠 URI, 열 이름, 인텐트 작업 및 콘텐츠 제공자의 다른 기능과
+작업할 수 있게 도와주는 상수를 정의합니다. 계약 클래스는 제공자와 함께 자동으로 포함되지 않습니다. 
+해당 제공자의 개발자가 이를 정의한 다음 다른 개발자가 사용할 수 있도록 해야 합니다.
+ Android 플랫폼 내에 포함된 제공자는 대부분 패키지 
+{@link android.provider} 안에 상응하는 계약 클래스를 가지고 있습니다.
+</p>
+<p>
+    예를 들어, 사용자 사전 제공자에는 콘텐츠 URI와 열 이름 상수가 들어 있는
+{@link android.provider.UserDictionary} 계약 클래스가 있습니다. 
+"단어" 테이블에 대한 콘텐츠 URI는 상수
+{@link android.provider.UserDictionary.Words#CONTENT_URI UserDictionary.Words.CONTENT_URI}에 정의됩니다.
+    {@link android.provider.UserDictionary.Words} 클래스에도 
+열 이름 상수가 들어 있으며, 이는 이 가이드의 예시 조각에서 사용됩니다. 
+예를 들어 쿼리 프로젝션은 다음과 같이 정의될 수 있습니다.
+</p>
+<pre>
+String[] mProjection =
+{
+    UserDictionary.Words._ID,
+    UserDictionary.Words.WORD,
+    UserDictionary.Words.LOCALE
+};
+</pre>
+<p>
+    또 다른 계약 클래스는 연락처 제공자의 {@link android.provider.ContactsContract}입니다.
+    이 클래스에 대한 참조 문서에는 예시 코드 조각이 포함되어 있습니다. 
+이것의 하위 클래스 중 하나인 {@link android.provider.ContactsContract.Intents.Insert}는
+ 인텐트와 인텐트 데이터의 상수가 들어 있는 계약 클래스입니다.
+</p>
+
+
+<!-- MIME Type Reference -->
+<h2 id="MIMETypeReference">MIME 유형 참조</h2>
+<p>
+    콘텐츠 제공자는 표준 MIME 미디어 유형이나 사용자 지정 MIME 유형 문자열, 또는 그 두 가지를 모두 반환할 수 있습니다.
+</p>
+<p>
+    MIME 유형의 형식은 다음과 같습니다.
+</p>
+<pre>
+<em>type</em>/<em>subtype</em>
+</pre>
+<p>
+    예를 들어, 잘 알려진 MIME 유형 <code>text/html</code>에는 <code>text</code> 유형과
+<code>html</code> 하위 유형이 있습니다. 제공자가 URI에 대해 이 유형을 반환하면,
+해당 URI를 사용하는 쿼리가 HTML 태그가 들어 있는 텍스트를 반환할 것이라는 뜻입니다.
+</p>
+<p>
+    사용자 지정 MIME 유형 문자열은 "공급업체별" MIME 유형이라고도 불리며 
+이쪽의 <em>유형</em>과 <em>하위 유형</em> 값이 더 복잡합니다. <em>유형</em> 값은 경우에 따라 항상 다음과 같습니다.
+</p>
+<pre>
+vnd.android.cursor.<strong>dir</strong>
+</pre>
+<p>
+    (여러 행의 경우)
+</p>
+<pre>
+vnd.android.cursor.<strong>item</strong>
+</pre>
+<p>
+    (하나의 행의 경우).
+</p>
+<p>
+    <em>하위 유형</em>은 제공자별로 다릅니다. Android 내장 제공자는 보통 단순한 하위 유형을 가지고 있습니다.
+ 예를 들어 연락처 애플리케이션이 전화 번호에 대한 행을 생성한다고 합니다. 이때 애플리케이션은 해당 행에 다음과 같은 MIME 유형을 설정하게 됩니다.
+
+</p>
+<pre>
+vnd.android.cursor.item/phone_v2
+</pre>
+<p>
+    하위 유형 값은 단순히 <code>phone_v2</code>인 것을 눈여겨 보십시오.
+</p>
+<p>
+    다른 제공자 개발자도 해당 제공자의 권한과 테이블 이름을 근거로 나름의 하위 유형 패턴을 만들 수 있습니다.
+ 예를 들어 기차 시간표가 들어 있는 제공자가 있다고 생각해 보겠습니다.
+    제공자의 권한은 <code>com.example.trains</code>이고 이 안에 테이블
+Line1, Line2, Line3이 들어 있습니다. 다음과 같은 콘텐츠 URI에 대응하는 방식을 살펴보십시오.
+</p>
+<p>
+<pre>
+content://com.example.trains/Line1
+</pre>
+<p>
+    테이블 Line1의 경우, 제공자는 다음과 같은 MIME 유형을 반환합니다.
+</p>
+<pre>
+vnd.android.cursor.<strong>dir</strong>/vnd.example.line1
+</pre>
+<p>
+     다음과 같은 콘텐츠 URI에 대응하는 방식을 살펴보십시오.
+</p>
+<pre>
+content://com.example.trains/Line2/5
+</pre>
+<p>
+    테이블 Line2의 행 5에 대해 제공자가 반환하는 MIME 유형은 다음과 같습니다.
+</p>
+<pre>
+vnd.android.cursor.<strong>item</strong>/vnd.example.line2
+</pre>
+<p>
+    대부분의 콘텐츠 제공자는 자신이 사용하는 MIME 유형에 대한 계약 클래스 상수를 정의합니다. 
+예를 들어, 연락처 제공자 계약 클래스 {@link android.provider.ContactsContract.RawContacts}는
+단일 연락처 행의 MIME 유행에 대한
+ 상수 {@link android.provider.ContactsContract.RawContacts#CONTENT_ITEM_TYPE}을
+정의합니다.
+</p>
+<p>
+    한 행에 대한 콘텐츠 URI는 
+<a href="#ContentURIs">콘텐츠 URI</a> 섹션에 설명되어 있습니다.
+</p>

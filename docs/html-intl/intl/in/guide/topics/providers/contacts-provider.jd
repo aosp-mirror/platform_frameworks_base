@@ -1,0 +1,2356 @@
+page.title=Penyedia Kontak
+@jd:body
+<div id="qv-wrapper">
+<div id="qv">
+<h2>Tampilan Cepat</h2>
+<ul>
+    <li>Repository informasi Android tentang orang.</li>
+    <li>
+        Sinkronisasi dengan web.
+    </li>
+    <li>
+        Mengintegrasikan data aliran sosial.
+    </li>
+</ul>
+<h2>Dalam dokumen ini</h2>
+<ol>
+    <li>
+        <a href="#InformationTypes">Organisasi Penyedia Kontak</a>
+    </li>
+    <li>
+        <a href="#RawContactBasics">Kontak mentah</a>
+    </li>
+    <li>
+        <a href="#DataBasics">Data</a>
+    </li>
+    <li>
+        <a href="#ContactBasics">Kontak</a>
+    </li>
+    <li>
+        <a href="#Sources">Data Dari Adaptor Sinkronisasi</a>
+    </li>
+    <li>
+        <a href="#Permissions">Izin yang Diperlukan</a>
+    </li>
+    <li>
+        <a href="#UserProfile">Profil Pengguna</a>
+    </li>
+    <li>
+        <a href="#ContactsProviderMetadata">Metadata Penyedia Kontak</a>
+    </li>
+    <li>
+        <a href="#Access">Akses Penyedia Kontak</a>
+    <li>
+    </li>
+    <li>
+        <a href="#SyncAdapters">Adaptor Sinkronisasi Penyedia Kontak</a>
+    </li>
+    <li>
+        <a href="#SocialStream">Data Aliran Sosial</a>
+    </li>
+    <li>
+        <a href="#AdditionalFeatures">Fitur Tambahan Penyedia Kontak</a>
+    </li>
+</ol>
+<h2>Kelas-kelas utama</h2>
+<ol>
+    <li>{@link android.provider.ContactsContract.Contacts}</li>
+    <li>{@link android.provider.ContactsContract.RawContacts}</li>
+    <li>{@link android.provider.ContactsContract.Data}</li>
+    <li>{@code android.provider.ContactsContract.StreamItems}</li>
+</ol>
+<h2>Contoh-Contoh Terkait</h2>
+<ol>
+    <li>
+        <a href="{@docRoot}resources/samples/ContactManager/index.html">
+        Contact Manager
+        </a>
+    </li>
+    <li>
+        <a href="{@docRoot}resources/samples/SampleSyncAdapter/index.html">
+        Contoh Adaptor Sinkronisasi</a>
+    </li>
+</ol>
+<h2>Lihat Juga</h2>
+<ol>
+    <li>
+        <a href="{@docRoot}guide/topics/providers/content-provider-basics.html">
+        Dasar-Dasar Penyedia Konten
+        </a>
+    </li>
+</ol>
+</div>
+</div>
+<p>
+    Penyedia Kontak adalah komponen Android yang tangguh dan fleksibel dalam mengelola
+ repository data pusat tentang orang di perangkat. Penyedia Kontak adalah sumber data
+ yang Anda lihat dalam aplikasi kontak perangkat, dan Anda juga bisa mengakses datanya dalam aplikasi
+    Anda sendiri serta mentransfer data antara perangkat dan layanan online. Penyedia mengakomodasi
+    berbagai sumber data dan mencoba mengelola data sebanyak mungkin untuk setiap orang, sehingga
+   organisasinya menjadi kompleks. Karena itu, API penyedia menyertakan
+    satu set kelas kontrak dan antarmuka ekstensif yang membantu pengambilan dan
+    modifikasi data.
+</p>
+<p>
+    Panduan ini menjelaskan hal-hal berikut:
+</p>
+    <ul>
+        <li>
+            Struktur penyedia dasar.
+        </li>
+        <li>
+            Cara mengambil data dari penyedia.
+        </li>
+        <li>
+            Cara memodifikasi data di penyedia.
+        </li>
+        <li>
+            Cara menulis adaptor sinkronisasi untuk menyinkronkan data dari server Anda ke
+            Penyedia Kontak.
+        </li>
+    </ul>
+<p>
+    Panduan ini beranggapan bahwa Anda mengetahui dasar-dasar penyedia konten Android. Untuk mengetahui selengkapnya
+    tentang penyedia konten Android, bacalah
+    panduan<a href="{@docRoot}guide/topics/providers/content-provider-basics.html">
+    Dasar-Dasar Penyedia Konten</a>. Contoh aplikasi
+    <a href="{@docRoot}resources/samples/SampleSyncAdapter/index.html">Sample Sync Adapter</a>
+    adalah contoh penggunaan adaptor sinkronisasi untuk mentransfer data antara Penyedia Kontak
+    dan contoh aplikasi yang memiliki host di Google Web Services.
+</p>
+<h2 id="InformationTypes">Organisasi Penyedia Kontak</h2>
+<p>
+    Penyedia Kontak adalah komponen penyedia konten Android. Komponen ini memelihara tiga tipe
+    data tentang seseorang, masing-masing disesuaikan dengan tabel yang ditawarkan oleh penyedia, seperti
+    yang terlihat dalam gambar 1:
+</p>
+<img src="{@docRoot}images/providers/contacts_structure.png" alt="" height="364" id="figure1" />
+<p class="img-caption">
+  <strong>Gambar 1.</strong> Struktur tabel Penyedia Kontak.
+</p>
+<p>
+    Ketiga tabel disebut secara umum menurut nama kelas kontrak. Kelas
+    mendefinisikan konstanta untuk URI konten, nama kolom, dan nilai kolom yang digunakan oleh tabel-tabel:
+</p>
+<dl>
+    <dt>
+        Tabel {@link android.provider.ContactsContract.Contacts}
+    </dt>
+    <dd>
+        Baris mewakili orang yang berbeda, berdasarkan agregrasi baris kontak mentah.
+    </dd>
+    <dt>
+        Tabel {@link android.provider.ContactsContract.RawContacts}
+    </dt>
+    <dd>
+        Baris berisi rangkuman data seseorang, untuk tipe dan akun pengguna tertentu.
+    </dd>
+    <dt>
+        Tabel {@link android.provider.ContactsContract.Data}
+    </dt>
+    <dd>
+        Baris berisi data untuk kontak mentah, seperti alamat email atau nomor telepon.
+    </dd>
+</dl>
+<p>
+    Tabel lain yang diwakili oleh kelas kontrak dalam {@link android.provider.ContactsContract}
+    adalah tabel tambahan yang digunakan Penyedia Kontak untuk mengelola operasinya atau mendukung
+    fungsi tertentu dalam kontak atau aplikasi telepon perangkat.
+</p>
+<h2 id="RawContactBasics">Kontak mentah</h2>
+<p>
+    Kontak mentah mewakili data seseorang yang berasal dari satu tipe akun dan nama
+  akun. Karena Penyedia Kontak memungkinkan lebih dari satu layanan online sebagai sumber
+    data untuk satu orang, Penyedia Kontak memungkinkan multikontak mentah untuk orang yang sama.
+    Multikontak mentah juga memungkinkan seorang pengguna mengombinasikan data seseorang dari lebih dari satu akun
+    bertipe akun yang sama.
+</p>
+<p>
+    Sebagian besar data untuk kontak mentah tidak disimpan dalam
+    tabel {@link android.provider.ContactsContract.RawContacts}. Sebagai gantinya, data tersebut disimpan dalam satu atau beberapa baris
+    dalam tabel {@link android.provider.ContactsContract.Data}. Setiap baris data memiliki kolom
+    {@link android.provider.ContactsContract.DataColumns#RAW_CONTACT_ID Data.RAW_CONTACT_ID} yang
+    berisi nilai {@code android.provider.BaseColumns#_ID RawContacts._ID} dari
+    baris {@link android.provider.ContactsContract.RawContacts} induknya.
+</p>
+<h3 id="RawContactsColumns">Kolom-kolom kontak mentah yang penting</h3>
+<p>
+    Kolom-kolom penting dalam tabel {@link android.provider.ContactsContract.RawContacts}
+    tercantum pada tabel 1. Bacalah catatan yang diberikan setelah tabel:
+</p>
+<p class="table-caption" id="table1">
+    <strong>Tabel 1.</strong> Kolom-kolom kontak mentah yang penting.
+</p>
+<table>
+    <tr>
+        <th scope="col">Nama kolom</th>
+        <th scope="col">Kegunaan</th>
+        <th scope="col">Catatan</th>
+    </tr>
+    <tr>
+        <td>
+            {@link android.provider.ContactsContract.SyncColumns#ACCOUNT_NAME}
+        </td>
+        <td>
+            Nama akun untuk tipe akun yang merupakan sumber kontak mentah ini.
+            Misalnya, nama akun dari akun Google adalah salah satu alamat Gmail
+   pemilik perangkat. Lihat entri berikutnya untuk
+            {@link android.provider.ContactsContract.SyncColumns#ACCOUNT_TYPE} untuk informasi
+            selengkapnya.
+        </td>
+        <td>
+            Format nama ini khusus untuk tipe akun ini. Format ini tidak
+            harus alamat email.
+        </td>
+    </tr>
+    <tr>
+        <td>
+            {@link android.provider.ContactsContract.SyncColumns#ACCOUNT_TYPE}
+        </td>
+        <td>
+            Tipe akun yang merupakan sumber kontak mentah ini. Misalnya, tipe
+           akun dari akun Google adalah <code>com.google</code>. Selalu batasi tipe akun Anda
+            dengan identifier domain untuk domain yang Anda miliki atau kontrol. Hal ini akan memastikan bahwa tipe
+            akun Anda bersifat unik.
+        </td>
+        <td>
+            Tipe akun yang menawarkan data kontak biasanya memiliki adaptor sinkronisasi terkait yang
+            menyinkronkan dengan Penyedia Kontak.
+    </tr>
+    <tr>
+        <td>
+            {@link android.provider.ContactsContract.RawContactsColumns#DELETED}
+        </td>
+        <td>
+            Flag "deleted" untuk kontak mentah.
+        </td>
+        <td>
+            Flag ini memungkinkan Penyedia Kontak memelihara baris secara internal hingga adaptor
+            sinkronisasi bisa menghapus baris dari server mereka dan akhirnya menghapus baris
+            dari repository.
+        </td>
+    </tr>
+</table>
+<h4>Catatan</h4>
+<p>
+    Berikut ini adalah catatan penting tentang
+    tabel {@link android.provider.ContactsContract.RawContacts}:
+</p>
+<ul>
+    <li>
+        Nama kontak mentah tidak disimpan di barisnya dalam
+        {@link android.provider.ContactsContract.RawContacts}. Sebagai gantinya, nama tersebut disimpan dalam
+         tabel {@link android.provider.ContactsContract.Data}, pada
+        baris {@link android.provider.ContactsContract.CommonDataKinds.StructuredName}. Kontak mentah
+        hanya memiliki satu baris dari tipe ini dalam tabel {@link android.provider.ContactsContract.Data}.
+    </li>
+    <li>
+        <strong>Perhatian:</strong> Untuk menggunakan data akun sendiri dalam baris kontak mentah, akun harus
+        didaftarkan lebih dahulu dengan {@link android.accounts.AccountManager}. Caranya, mintalah
+        pengguna untuk menambahkan tipe akun dan nama akun ke dalam daftar akun. Jika Anda tidak
+        melakukannya, Penyedia Kontak secara otomatis akan menghapus baris kontak mentah Anda.
+        <p>
+            Misalnya, Anda menginginkan aplikasi memelihara data kontak untuk layanan berbasis web
+            dengan domain {@code com.example.dataservice}, dan akun pengguna untuk layanan Anda
+            adalah {@code becky.sharp@dataservice.example.com}, pengguna harus menambahkan lebih dahulu "type"
+            akun ({@code com.example.dataservice}) dan "name" akun
+            ({@code becky.smart@dataservice.example.com}) sebelum aplikasi Anda bisa menambahkan baris kontak mentah.
+            Anda bisa menjelaskan ketentuan ini kepada pengguna dalam dokumentasi, atau meminta
+            pengguna untuk menambahkan tipe dan nama, atau keduanya. Tipe akun dan nama akun
+            dijelaskan lebih detail di bagian berikutnya.
+    </li>
+</ul>
+<h3 id="RawContactsExample">Sumber data kontak mentah</h3>
+<p>
+    Untuk memahami cara kerja kontak mentah, perhatikan pengguna "Emily Dickinson" yang mendefinisikan
+    tiga akun pengguna berikut pada perangkatnya:
+</p>
+<ul>
+    <li><code>emily.dickinson@gmail.com</code></li>
+    <li><code>emilyd@gmail.com</code></li>
+    <li>Akun Twitter "belle_of_amherst"</li>
+</ul>
+<p>
+    Pengguna ini telah mengaktifkan <em>Sync Contacts</em> untuk ketiga akun dalam pengaturan
+    <em>Accounts</em>.
+</p>
+<p>
+    Anggaplah Emily Dickinson membuka jendela browser, masuk ke Gmail sebagai
+    <code>emily.dickinson@gmail.com</code>, membuka
+    Contacts, dan menambahkan "Thomas Higginson". Kemudian, ia masuk ke Gmail sebagai
+    <code>emilyd@gmail.com</code> dan mengirimkan email kepada "Thomas Higginson", yang
+    menambahkan Thomas secara otomatis sebagai kontak. Ia juga mengikuti "colonel_tom" (ID Twitter Thomas Higginson) di
+    Twitter.
+</p>
+<p>
+    Penyedia Kontak membuat tiga kontak mentah akibat pekerjaan ini:
+</p>
+<ol>
+    <li>
+        Kontak mentah untuk "Thomas Higginson" yang dikaitkan dengan <code>emily.dickinson@gmail.com</code>.
+        Tipe akun penggunanya adalah Google.
+    </li>
+    <li>
+        Kontak mentah kedua untuk "Thomas Higginson" yang dikaitkan dengan <code>emilyd@gmail.com</code>.
+        Tipe akun pengguna juga Google. Ada kontak mentah kedua
+       meskipun nama tersebut identik dengan nama sebelumnya karena orang bersangkutan ditambahkan untuk
+        akun pengguna yang berbeda.
+    </li>
+    <li>
+        Kontak mentah ketiga untuk "Thomas Higginson" yang dikaitkan dengan "belle_of_amherst". Tipe
+        akun penggunanya adalah Twitter.
+    </li>
+</ol>
+<h2 id="DataBasics">Data</h2>
+<p>
+    Seperti yang telah disebutkan, data untuk kontak mentah disimpan dalam
+    baris {@link android.provider.ContactsContract.Data} yang ditautkan dengan nilai
+    <code>_ID</code> kontak mentah. Cara ini memungkinkan satu kontak mentah memiliki beberapa instance tipe data
+    yang sama dengan alamat email atau nomor telepon. Misalnya, jika
+    "Thomas Higginson" untuk {@code emilyd@gmail.com} (baris kontak mentah untuk Thomas Higginson
+   yang dikaitkan dengan akun Google <code>emilyd@gmail.com</code>) memiliki alamat email rumah
+    <code>thigg@gmail.com</code> dan alamat email kerja
+    <code>thomas.higginson@gmail.com</code>, Penyedia Kontak akan menyimpan dua baris alamat
+    email dan menautkan keduanya ke kontak mentah.
+</p>
+<p>
+    Perhatikan bahwa tipe data yang berbeda disimpan dalam satu tabel ini. Baris-baris nama tampilan,
+    nomor telepon, email, alamat surat, foto, dan data situs web semuanya bisa ditemukan dalam
+    tabel {@link android.provider.ContactsContract.Data}. Untuk membantu mengelola ini,
+    tabel {@link android.provider.ContactsContract.Data} memiliki beberapa kolom dengan nama deskriptif,
+    dalam kolom lain dengan nama generik. Konten kolom bernama deskriptif memiliki arti yang sama
+    terlepas dari tipe data dalam barisnya, sedangkan konten kolom bernama generik memiliki
+    arti yang berbeda-beda sesuai dengan tipe data.
+</p>
+<h3 id="DescriptiveColumns">Nama kolom deskriptif</h3>
+<p>
+    Beberapa contoh nama kolom deskriptif adalah:
+</p>
+<dl>
+    <dt>
+        {@link android.provider.ContactsContract.Data#RAW_CONTACT_ID}
+    </dt>
+    <dd>
+        Nilai kolom <code>_ID</code> kontak mentah untuk data ini.
+    </dd>
+    <dt>
+        {@link android.provider.ContactsContract.Data#MIMETYPE}
+    </dt>
+    <dd>
+        Tipe data yang disimpan dalam baris ini, dinyatakan berupa tipe MIME custom. Penyedia Kontak
+        menggunakan tipe MIME yang didefinisikan dalam subkelas
+        {@link android.provider.ContactsContract.CommonDataKinds}. Tipe MIME ini adalah sumber terbuka,
+        dan bisa digunakan oleh setiap aplikasi atau adaptor sinkronisasi yang bisa digunakan bersama Penyedia Kontak.
+    </dd>
+    <dt>
+        {@link android.provider.ContactsContract.DataColumns#IS_PRIMARY}
+    </dt>
+    <dd>
+        Jika tipe baris data ini bisa terjadi lebih dari satu kali untuk suatu kontak mentah,
+        kolom {@link android.provider.ContactsContract.DataColumns#IS_PRIMARY}
+        menandai baris data yang berisi data utama untuk tipe itu. Misalnya, jika
+        pengguna menekan lama sebuah nomor telepon untuk kontak dan memilih <strong>Set default</strong>,
+       maka baris {@link android.provider.ContactsContract.Data} yang berisi angka itu
+        mengatur kolom {@link android.provider.ContactsContract.DataColumns#IS_PRIMARY}-nya ke suatu
+        nilai bukan nol.
+    </dd>
+</dl>
+<h3 id="GenericColumns">Nama kolom generik</h3>
+<p>
+    Ada 15 kolom generik bernama <code>DATA1</code> hingga
+    <code>DATA15</code> yang tersedia secara umum dan empat kolom generik
+    tambahan <code>SYNC1</code> hingga <code>SYNC4</code> yang harus digunakan hanya oleh adaptor
+    sinkronisasi. Konstanta nama kolom generik selalu berfungsi, terlepas dari tipe
+    data dalam baris .
+</p>
+<p>
+    Kolom <code>DATA1</code> diindeks.  Penyedia Kontak selalu menggunakan kolom ini untuk
+    data yang diharapkan penyedia akan menjadi target yang paling sering dari suatu query. Misalnya,
+    dalam baris email, kolom ini berisi alamat email sebenarnya.
+</p>
+<p>
+    Sesuai konvensi, kolom <code>DATA15</code> dicadangkan untuk menyimpan data Binary Large Object
+    (BLOB) seperti thumbnail foto.
+</p>
+<h3 id="TypeSpecificNames">Nama kolom bertipe spesifik</h3>
+<p>
+    Guna memudahkan pekerjaan dengan kolom untuk tipe baris tertentu, Penyedia Kontak
+    juga menyediakan konstanta nama kolom bertipe spesifik, yang didefinisikan dalam subkelas
+    {@link android.provider.ContactsContract.CommonDataKinds}. Konstanta cuma memberikan nama
+    konstanta yang berbeda ke nama kolom yang sama, yang membantu Anda mengakses data dalam baris
+    bertipe spesifik.
+</p>
+<p>
+    Misalnya, kelas {@link android.provider.ContactsContract.CommonDataKinds.Email} mendefinisikan
+    konstanta nama kolom bertipe spesifik untuk baris {@link android.provider.ContactsContract.Data}
+    yang memiliki tipe MIME
+    {@link android.provider.ContactsContract.CommonDataKinds.Email#CONTENT_ITEM_TYPE
+    Email.CONTENT_ITEM_TYPE}. Kelas ini berisi konstanta
+    {@link android.provider.ContactsContract.CommonDataKinds.Email#ADDRESS} untuk kolom
+    alamat email. Nilai sesungguhnya dari
+    {@link android.provider.ContactsContract.CommonDataKinds.Email#ADDRESS} adalah "data1", yang
+    sama dengan nama generik kolom.
+</p>
+<p class="caution">
+    <strong>Perhatian:</strong> Jangan tambahkan data custom Anda sendiri ke
+    tabel {@link android.provider.ContactsContract.Data} dengan menggunakan baris yang memiliki salah satu
+    tipe MIME yang telah didefinisikan penyedia. Jika melakukannya, Anda bisa kehilangan data atau menyebabkan penyedia
+    gagal berfungsi. Misalnya, Anda seharusnya tidak menambahkan baris bertipe MIME
+    {@link android.provider.ContactsContract.CommonDataKinds.Email#CONTENT_ITEM_TYPE
+    Email.CONTENT_ITEM_TYPE} yang berisi nama pengguna sebagai ganti alamat email dalam
+    kolom <code>DATA1</code>. Jika Anda menggunakan tipe MIME custom sendiri untuk baris bersangkutan, maka Anda bebas
+    untuk mendefinisikan nama kolom bertipe spesifik dan menggunakan kolom sekehendak Anda.
+</p>
+<p>
+    Gambar 2 menampilkan cara kolom deskriptif dan kolom data muncul dalam
+    baris {@link android.provider.ContactsContract.Data}, dan cara nama kolom bertipe spesifik "melapisi"
+    nama kolom generik
+</p>
+<img src="{@docRoot}images/providers/data_columns.png" alt="How type-specific column names map to generic column names" height="311" id="figure2" />
+<p class="img-caption">
+  <strong>Gambar 2.</strong> Nama kolom bertipe spesifik dan nama kolom generik.
+</p>
+<h3 id="ColumnMaps">Kelas nama kolom bertipe spesifik</h3>
+<p>
+    Tabel 2 berisi daftar kelas nama kolom bertipe spesifik yang paling umum digunakan:
+</p>
+<p class="table-caption" id="table2">
+  <strong>Tabel 2.</strong> Kelas nama kolom bertipe spesifik</p>
+<table>
+  <tr>
+    <th scope="col">Kelas pemetaan</th>
+    <th scope="col">Tipe data</th>
+    <th scope="col">Catatan</th>
+  </tr>
+  <tr>
+    <td>{@link android.provider.ContactsContract.CommonDataKinds.StructuredName}</td>
+    <td>Data nama untuk kontak mentah yang dikaitkan dengan baris data ini.</td>
+    <td>Kontak mentah hanya memiliki salah satu baris ini.</td>
+  </tr>
+  <tr>
+    <td>{@link android.provider.ContactsContract.CommonDataKinds.Photo}</td>
+    <td>Foto utama untuk kontak mentah yang dikaitkan dengan baris data ini.</td>
+    <td>Kontak mentah hanya memiliki salah satu baris ini.</td>
+  </tr>
+  <tr>
+    <td>{@link android.provider.ContactsContract.CommonDataKinds.Email}</td>
+    <td>Alamat email untuk kontak mentah yang dikaitkan dengan baris data ini.</td>
+    <td>Kontak mentah bisa memiliki beberapa alamat email.</td>
+  </tr>
+  <tr>
+    <td>{@link android.provider.ContactsContract.CommonDataKinds.StructuredPostal}</td>
+    <td>Alamat pos untuk kontak mentah yang dikaitkan dengan baris data ini.</td>
+    <td>Kontak mentah bisa memiliki beberapa alamat email.</td>
+  </tr>
+  <tr>
+    <td>{@link android.provider.ContactsContract.CommonDataKinds.GroupMembership}</td>
+    <td>Identifier yang menautkan kontak mentah ke salah satu grup dalam Penyedia Kontak.</td>
+    <td>
+        Grup adalah fitur opsional pada tipe akun dan nama akun. Grup dijelaskan
+       lebih detail di bagian <a href="#Groups">Grup kontak</a>.
+    </td>
+  </tr>
+</table>
+<h3 id="ContactBasics">Kontak</h3>
+<p>
+    Penyedia Kontak mengombinasikan baris kontak mentah di semua tipe akun dan nama akun
+    untuk membentuk <strong>kontak</strong>. Hal ini memudahkan menampilkan dan memodifikasi semua data
+    yang telah dikumpulkan pengguna untuk seseorang. Penyedia Kontak mengelola pembuatan baris
+    kontak baru, dan agregasi kontak mentah dengan baris kontak yang ada. Baik aplikasi maupun adaptor sinkronisasi
+    tidak boleh menambahkan kontak dan sebagian kolom dalam baris kontak yang bersifat hanya baca.
+</p>
+<p class="note">
+    <strong>Catatan:</strong> Jika Anda mencoba menambahkan kontak ke Penyedia Kontak dengan
+    {@link android.content.ContentResolver#insert(Uri,ContentValues) insert()}, Anda akan mendapatkan
+    eksepsi {@link java.lang.UnsupportedOperationException}. Jika Anda mencoba memperbarui sebuah kolom
+   yang tercantum sebagai "hanya-baca", pembaruan akan diabaikan.
+</p>
+<p>
+    Penyedia Kontak membuat kontak baru untuk merespons penambahan kontak mentah baru
+    yang tidak cocok dengan kontak yang ada. Penyedia juga melakukan ini jika data
+    kontak mentah yang ada berubah sehingga tidak lagi cocok dengan kontak yang
+    sebelumnya dihubungkan. Jika aplikasi atau adaptor sinkronisasi membuat kontak mentah baru yang
+    <em>memang</em> cocok dengan kontak yang ada, kontak mentah baru akan diagregasikan ke kontak
+    yang ada.
+</p>
+<p>
+    Penyedia Kontak menautkan baris kontak ke baris kontak mentahnya dengan kolom
+    <code>_ID</code> dari baris kontak dalam tabel {@link android.provider.ContactsContract.Contacts Contacts}.
+ Kolom <code>CONTACT_ID</code> tabel kontak mentah
+    {@link android.provider.ContactsContract.RawContacts} berisi nilai <code>_ID</code> untuk
+    baris kontak yang dikaitkan dengan tiap baris kontak mentah.
+</p>
+<p>
+    Tabel {@link android.provider.ContactsContract.Contacts} juga memiliki kolom
+    {@code android.provider.ContactsContract.ContactsColumns#LOOKUP_KEY} yang merupakan
+    tautan "permanen" ke baris kontak. Karena memelihara kontak
+    secara otomatis, Penyedia Kontak bisa mengubah nilai {@code android.provider.BaseColumns#_ID} baris kontak
+    untuk merespons agregasi atau sinkronisasi. Sekalipun ini terjadi, URI konten
+    {@link android.provider.ContactsContract.Contacts#CONTENT_LOOKUP_URI} yang dikombinasikan dengan
+    {@code android.provider.ContactsContract.ContactsColumns#LOOKUP_KEY} kontak akan tetap
+    menunjuk ke baris kontak itu, sehingga Anda bisa menggunakan
+    {@code android.provider.ContactsContract.ContactsColumns#LOOKUP_KEY}
+   untuk memelihara tautan ke kontak "favorit", dan seterusnya. Kolom ini memiliki formatnya sendiri, yang
+    tidak terkait dengan format kolom {@code android.provider.BaseColumns#_ID}.
+</p>
+<p>
+    Gambar 3 menampilkan cara ketiga tabel utama terkait satu sama lain.
+</p>
+<img src="{@docRoot}images/providers/contacts_tables.png" alt="Contacts provider main tables" height="514" id="figure4" />
+<p class="img-caption">
+  <strong>Gambar 3.</strong> Hubungan tabel Contacts, Raw Contacts, dan Details.
+</p>
+<h2 id="Sources">Data Dari Adaptor Sinkronisasi</h2>
+<p>
+    Pengguna memasukkan data kontak secara langsung ke dalam perangkat, namun data juga mengalir masuk ke Penyedia Kontak
+    dari layanan web melalui <strong>adaptor sinkronisasi</strong>, yang mengotomatiskan
+    transfer data antara perangkat dan layanan. Adaptor sinkronisasi berjalan di latar belakang
+    di bawah kontrol sistem, dan memanggil metode {@link android.content.ContentResolver}
+   untuk mengelola data.
+</p>
+<p>
+    Di Android, layanan web yang digunakan adaptor sinkronisasi diidentifikasi melalui tipe akun.
+    Setiap adaptor sinkronisasi bekerja dengan satu tipe akun, tetapi bisa mendukung beberapa nama akun untuk
+    tipe itu. Tipe akun dan nama akun dijelaskan secara singkat di bagian
+    <a href="#RawContactsExample">Sumber data kontak mentah</a>. Definisi berikut menyediakan
+    detail selengkapnya, dan menjelaskan cara tipe dan nama akun berkaitan dengan adaptor sinkronisasi dan layanan.
+</p>
+<dl>
+    <dt>
+        Tipe akun
+    </dt>
+    <dd>
+        Mengidentifikasi layanan tempat pengguna menyimpan data. Sering kali, pengguna harus
+        mengautentikasi diri dengan layanan. Misalnya, Google Contacts adalah tipe akun, yang diidentifikasi
+        dengan kode <code>google.com</code>. Nilai ini sesuai dengan tipe akun yang digunakan oleh
+        {@link android.accounts.AccountManager}.
+    </dd>
+    <dt>
+        Nama akun
+    </dt>
+    <dd>
+        Mengidentifikasi akun atau login tertentu untuk suatu tipe akun. Akun Google Contacts
+        sama dengan akun Google, yang memiliki alamat email sebagai nama akun.
+        Layanan lain mungkin menggunakan nama pengguna satu-kata atau identitas berupa angka.
+    </dd>
+</dl>
+<p>
+    Tipe akun tidak harus unik. Pengguna boleh mengonfigurasi beberapa akun Google Contacts
+    dan mengunduh data ke Penyedia Kontak; ini mungkin terjadi jika pengguna memiliki satu set
+    kontak pribadi untuk satu nama akun pribadi, dan satu set lagi untuk pekerjaan. Nama akun
+    biasanya unik. Bersama-sama, keduanya mengidentifikasi aliran data tertentu antara Penyedia Kontak dan
+    layanan eksternal.
+</p>
+<p>
+    Jika Anda ingin mentransfer data layanan ke Penyedia Kontak, Anda perlu menulis
+    adaptor sinkronisasi sendiri. Hal ini dijelaskan lebih detail di bagian
+    <a href="#SyncAdapters">Adaptor Sinkronisasi Penyedia Kontak</a>.
+</p>
+<p>
+    Gambar 4 menampilkan cara Penyedia Kontak dimasukkan ke dalam aliran data
+    tentang orang. Dalam kotak bertanda "sync adapters", setiap adaptor diberi label menurut tipe akunnya.
+</p>
+<img src="{@docRoot}images/providers/ContactsDataFlow.png" alt="Flow of data about people" height="252" id="figure5" />
+<p class="img-caption">
+  <strong>Gambar 4.</strong> Aliran data Penyedia Kontak.
+</p>
+<h2 id="Permissions">Izin yang Diperlukan</h2>
+<p>
+    Aplikasi yang ingin mengakses Penyedia Kontak harus meminta izin
+   berikut:
+</p>
+<dl>
+    <dt>Akses baca ke satu atau beberapa tabel</dt>
+    <dd>
+        {@link android.Manifest.permission#READ_CONTACTS}, yang ditetapkan dalam
+        <code>AndroidManifest.xml</code> dengan elemen
+        <code><a href="{@docRoot}guide/topics/manifest/uses-permission-element.html">
+        &lt;uses-permission&gt;</a></code> sebagai
+        <code>&lt;uses-permission android:name="android.permission.READ_CONTACTS"&gt;</code>.
+    </dd>
+    <dt>Akses tulis ke satu atau beberapa tabel</dt>
+    <dd>
+        {@link android.Manifest.permission#WRITE_CONTACTS}, yang ditetapkan dalam
+        <code>AndroidManifest.xml</code> dengan elemen
+        <code><a href="{@docRoot}guide/topics/manifest/uses-permission-element.html">
+        &lt;uses-permission&gt;</a></code> sebagai
+        <code>&lt;uses-permission android:name="android.permission.WRITE_CONTACTS"&gt;</code>.
+    </dd>
+</dl>
+<p>
+    Izin ini tidak diperluas ke data profil pengguna. Profil pengguna dan izin
+   yang diperlukan dibahas di bagian berikut,
+    <a href="#UserProfile">Profil Pengguna</a>.
+</p>
+<p>
+    Ingatlah bahwa data kontak pengguna bersifat pribadi dan sensitif. Pengguna mempersoalkan
+    privasinya, sehingga tidak ingin aplikasi mengumpulkan data tentang diri atau kontak mereka.
+    Jika alasan Anda memerlukan izin untuk mengakses data kontak tidak jelas, pengguna mungkin memberi
+    aplikasi Anda peringkat rendah atau langsung menolak menginstalnya.
+</p>
+<h2 id="UserProfile">Profil Pengguna</h2>
+<p>
+    Tabel {@link android.provider.ContactsContract.Contacts} berisi satu baris yang berisi
+    data profil untuk pengguna perangkat. Data ini menjelaskan data perangkat  <code>user</code> bukannya
+    salah satu kontak pengguna. Baris kontak profil ditautkan ke baris
+     kontak mentah untuk setiap sistem yang menggunakan profil.
+    Setiap baris kontak mentah profil bisa memiliki beberapa baris data. Konstanta untuk mengakses profil
+    pengguna tersedia dalam kelas {@link android.provider.ContactsContract.Profile}.
+</p>
+<p>
+    Akses ke profil pengguna memerlukan izin khusus. Selain itu, izin
+    {@link android.Manifest.permission#READ_CONTACTS} dan
+    {@link android.Manifest.permission#WRITE_CONTACTS} diperlukan untuk membaca dan menulis, akses
+    ke profil pengguna memerlukan masing-masing izin {@code android.Manifest.permission#READ_PROFILE} dan
+    {@code android.Manifest.permission#WRITE_PROFILE} untuk akses baca dan tulis.
+
+</p>
+<p>
+    Ingatlah bahwa Anda harus mempertimbangkan profil pengguna bersifat sensitif. Izin
+    {@code android.Manifest.permission#READ_PROFILE} memungkinkan Anda mengakses data yang mengidentifikasi secara pribadi
+    pengguna perangkat. Pastikan memberi tahu pengguna alasan
+    Anda memerlukan izin akses profil pengguna dalam keterangan aplikasi Anda.
+</p>
+<p>
+    Untuk mengambil baris kontak berisi profil pengguna,
+    panggil {@link android.content.ContentResolver#query(Uri,String[], String, String[], String)
+    ContentResolver.query()}. Atur URI konten ke
+    {@link android.provider.ContactsContract.Profile#CONTENT_URI} dan jangan sediakan
+    kriteria pemilihan apa pun. Anda juga bisa menggunakan URI konten ini sebagai URI dasar untuk mengambil kontak
+    mentah atau data untuk profil. Misalnya, cuplikan kode ini mengambil data untuk profil:
+</p>
+<pre>
+// Sets the columns to retrieve for the user profile
+mProjection = new String[]
+    {
+        Profile._ID,
+        Profile.DISPLAY_NAME_PRIMARY,
+        Profile.LOOKUP_KEY,
+        Profile.PHOTO_THUMBNAIL_URI
+    };
+
+// Retrieves the profile from the Contacts Provider
+mProfileCursor =
+        getContentResolver().query(
+                Profile.CONTENT_URI,
+                mProjection ,
+                null,
+                null,
+                null);
+</pre>
+<p class="note">
+    <strong>Catatan:</strong> Jika Anda mengambil beberapa baris kontak, dan ingin menentukan apakah salah satu baris
+    adalah profil pengguna, uji
+    kolom {@link android.provider.ContactsContract.ContactsColumns#IS_USER_PROFILE} pada baris tersebut. Kolom ini
+    diatur ke "1" jika kontak adalah profil pengguna.
+</p>
+<h2 id="ContactsProviderMetadata">Metadata Penyedia Kontak</h2>
+<p>
+    Penyedia Kontak mengelola data yang mencatat status data kontak dalam
+    repository. Metadata repository ini disimpan di berbagai tempat, termasuk baris-baris tabel
+    Raw Contacts, Data, dan Contacts,
+    tabel {@link android.provider.ContactsContract.Settings}, dan
+    tabel {@link android.provider.ContactsContract.SyncState}. Tabel berikut menampilkan
+    efek setiap potongan metadata ini:
+</p>
+<p class="table-caption" id="table3">
+  <strong>Tabel 3.</strong> Metadata di Penyedia Kontak</p>
+<table>
+    <tr>
+        <th scope="col">Tabel</th>
+        <th scope="col">Kolom</th>
+        <th scope="col">Nilai</th>
+        <th scope="col">Arti</th>
+    </tr>
+    <tr>
+        <td rowspan="2">{@link android.provider.ContactsContract.RawContacts}</td>
+        <td rowspan="2">{@link android.provider.ContactsContract.SyncColumns#DIRTY}</td>
+        <td>"0" - tidak berubah sejak sinkronisasi terakhir.</td>
+        <td rowspan="2">
+            Menandai kontak mentah yang berubah pada perangkat dan telah disinkronkan kembali ke
+           server. Nilai diatur secara otomatis oleh Penyedia Kontak bila aplikasi
+            Android memperbarui baris.
+            <p>
+                Adaptor sinkronisasi yang memodifikasi kontak mentah atau tabel data harus selalu menambahkan
+                string {@link android.provider.ContactsContract#CALLER_IS_SYNCADAPTER} ke
+                URI konten yang digunakannya. Ini mencegah penyedia menandai baris sebagai kotor.
+                Sebaliknya, modifikasi oleh adaptor sinkronisasi tampak seperti modifikasi lokal dan
+                dikirim ke server, meskipun server adalah sumber modifikasi.
+            </p>
+        </td>
+    </tr>
+    <tr>
+            <td>"1" - berubah sejak sinkronisasi terakhir, harus disinkronkan kembali ke server.</td>
+    </tr>
+    <tr>
+        <td>{@link android.provider.ContactsContract.RawContacts}</td>
+        <td>{@link android.provider.ContactsContract.SyncColumns#VERSION}</td>
+        <td>Nomor versi baris ini.</td>
+        <td>
+            Penyedia Kontak menambahkan nilai ini secara otomatis bila baris atau
+            data terkaitnya berubah.
+        </td>
+    </tr>
+    <tr>
+        <td>{@link android.provider.ContactsContract.Data}</td>
+        <td>{@link android.provider.ContactsContract.DataColumns#DATA_VERSION}</td>
+        <td>Nomor versi baris ini.</td>
+        <td>
+            Penyedia Kontak menambahkan nilai ini secara otomatis bila baris data
+            berubah.
+        </td>
+    </tr>
+    <tr>
+        <td>{@link android.provider.ContactsContract.RawContacts}</td>
+        <td>{@link android.provider.ContactsContract.SyncColumns#SOURCE_ID}</td>
+        <td>
+            Nilai string yang mengidentifikasi secara unik kontak mentah ini ke akun tempat
+            kontak dibuat.
+        </td>
+        <td>
+            Bila adaptor sinkronisasi membuat kontak mentah baru, kolom ini harus diatur ke
+            ID unik server untuk kontak mentah itu. Bila aplikasi Android membuat kontak mentah
+            baru, aplikasi harus membiarkan kolom ini kosong. Ini mengisyaratkan pada adaptor
+            sinkronisasi bahwa adaptor harus membuat kontak mentah baru pada server, dan mendapatkan
+            nilai untuk {@link android.provider.ContactsContract.SyncColumns#SOURCE_ID}.
+            <p>
+                Khususnya, id sumber harus <strong>unik</strong> untuk setiap tipe
+                akun dan stabil di semua sinkronisasi:
+            </p>
+                <ul>
+                    <li>
+                        Unik: Setiap kontak mentah untuk satu akun harus memiliki id sumbernya sendiri. Jika Anda
+                        tidak memberlakukan aturan ini, masalah akan timbul dalam aplikasi kontak.
+                        Perhatikan bahwa dua kontak mentah untuk tipe akun yang <em>sama</em> boleh memiliki
+                       id sumber yang sama. Misalnya, kontak mentah "Thomas Higginson" untuk
+                        akun {@code emily.dickinson@gmail.com} boleh memiliki id sumber
+                        yang sama dengan kontak mentah "Thomas Higginson" untuk akun
+                        {@code emilyd@gmail.com}.
+                    </li>
+                    <li>
+                        Stabil: Id sumber adalah bagian tetap dari data layanan online untuk
+                        kontak mentah. Misalnya, jika pengguna membersihkan Contacts Storage dari
+                        pengaturan aplikasi dan menyinkronkan ulang, kontak mentah yang dipulihkan akan memiliki id sumber
+                        yang sama dengan sebelumnya. Jika Anda tidak memberlakukan hal ini, pintasan akan berhenti
+                        berfungsi.
+                    </li>
+                </ul>
+        </td>
+    </tr>
+    <tr>
+        <td rowspan="2">{@link android.provider.ContactsContract.Groups}</td>
+        <td rowspan="2">{@link android.provider.ContactsContract.GroupsColumns#GROUP_VISIBLE}</td>
+        <td>"0" - Kontak dalam grup ini tidak boleh terlihat dalam UI aplikasi Android.</td>
+        <td>
+            Kolom ini digunakan untuk kompatibilitas dengan server yang memungkinkan pengguna menyembunyikan kontak dalam
+            grup tertentu.
+        </td>
+    </tr>
+    <tr>
+        <td>"1" - Kontak dalam grup ini boleh terlihat dalam UI aplikasi.</td>
+    </tr>
+    <tr>
+        <td rowspan="2">{@link android.provider.ContactsContract.Settings}</td>
+        <td rowspan="2">
+            {@link android.provider.ContactsContract.SettingsColumns#UNGROUPED_VISIBLE}</td>
+        <td>
+            "0" - Untuk akun dan tipe akun ini, kontak yang bukan milik grup
+            tidak akan terlihat pada UI aplikasi Android.
+        </td>
+        <td rowspan="2">
+            Secara default, kontak tidak terlihat jika tidak satu pun kontak mentahnya milik grup
+            (Keanggotaan grup untuk kontak mentah ditandai oleh satu atau beberapa baris
+            {@link android.provider.ContactsContract.CommonDataKinds.GroupMembership}
+            dalam tabel {@link android.provider.ContactsContract.Data}).
+            Dengan mengatur flag ini dalam baris tabel {@link android.provider.ContactsContract.Settings}
+            untuk tipe akun dan akun, Anda bisa memaksakan kontak tanpa grup agar terlihat.
+            Satu kegunaan flag ini adalah menampilkan kontak dari server yang tidak menggunakan grup.
+        </td>
+    </tr>
+    <tr>
+        <td>
+            "1" - Untuk akun dan tipe akun ini, kontak yang bukan milik grup
+            akan terlihat pada UI aplikasi.
+        </td>
+
+    </tr>
+    <tr>
+        <td>{@link android.provider.ContactsContract.SyncState}</td>
+        <td>(semua)</td>
+        <td>
+            Gunakan tabel ini untuk menyimpan metadata bagi adaptor sinkronisasi Anda.
+        </td>
+        <td>
+            Dengan tabel ini, Anda bisa menyimpan status sinkronisasi dan data lain yang terkait dengan sinkronisasi secara persisten pada
+            perangkat.
+        </td>
+    </tr>
+</table>
+<h2 id="Access">Akses Penyedia Kontak</h2>
+<p>
+    Bagian ini menjelaskan panduan untuk mengakses data dari Penyedia Kontak, yang berfokus pada
+    hal-hal berikut:
+</p>
+<ul>
+    <li>
+        Query entitas.
+    </li>
+    <li>
+        Modifikasi batch.
+    </li>
+    <li>
+        Pengambilan dan modifikasi dengan intent.
+    </li>
+    <li>
+        Integritas data.
+    </li>
+</ul>
+<p>
+    Membuat modifikasi dari adaptor sinkronisasi juga secara lebih detail di bagian
+    <a href="#SyncAdapters">Adaptor Sinkronisasi Penyedia Kontak</a>.
+</p>
+<h3 id="Entities">Membuat query entitas</h3>
+<p>
+    Karena disusun secara hierarki, tabel-tabel Penyedia Kontak sering kali berguna untuk
+    mengambil baris dan semua baris "anak" yang ditautkan dengannya. Misalnya, untuk menampilkan
+    semua informasi untuk satu orang, Anda mungkin ingin mengambil semua
+    baris {@link android.provider.ContactsContract.RawContacts} untuk satu baris
+    {@link android.provider.ContactsContract.Contacts}, atau semua
+    baris {@link android.provider.ContactsContract.CommonDataKinds.Email} untuk satu baris
+    {@link android.provider.ContactsContract.RawContacts}. Untuk memudahkan hal ini, Penyedia Kontak
+    menawarkan konstruksi <strong>entitas</strong>, yang berfungsi seperti gabungan database di antara
+    tabel-tabel.
+</p>
+<p>
+    Entitas adalah seperti tabel yang terdiri atas kolom-kolom terpilih dari tabel induk dan tabel anaknya.
+    Bila membuat query sebuah entitas, Anda memberikan proyeksi dan kriteria pencarian berdasarkan kolom-kolom
+    yang tersedia dari entitas itu. Hasilnya adalah sebuah {@link android.database.Cursor} yang
+    berisi satu baris untuk setiap baris tabel anak yang diambil. Misalnya, jika Anda membuat query
+    {@link android.provider.ContactsContract.Contacts.Entity} untuk satu nama kontak
+    dan semua baris {@link android.provider.ContactsContract.CommonDataKinds.Email} untuk semua
+    kontak mentah bagi nama itu, Anda akan mendapatkan kembali {@link android.database.Cursor} berisi satu baris
+    untuk setiap baris {@link android.provider.ContactsContract.CommonDataKinds.Email}.
+</p>
+<p>
+    Entitas menyederhanakan query. Dengan entitas, Anda bisa mengambil semua data kontak untuk satu
+    kontak atau kontak mentah sekaligus, sebagai ganti harus membuat query tabel induk terlebih dahulu untuk mendapatkan
+    ID, lalu harus membuat query tabel anak dengan ID itu. Selain itu, Penyedia Kontak akan memproses
+    query terhadap entitas dalam satu transaksi, yang memastikan bahwa data yang diambil
+    konsisten secara internal.
+</p>
+<p class="note">
+    <strong>Catatan:</strong> Entitas biasanya tidak berisi semua kolom tabel induk dan
+    anak. Jika Anda mencoba menggunakan nama kolom yang tidak ada dalam daftar konstanta
+    nama kolom untuk entitas, Anda akan mendapatkan {@link java.lang.Exception}.
+</p>
+<p>
+    Cuplikan berikut menampilkan cara mengambil semua baris kontak mentah untuk sebuah kontak. Cuplikan ini
+    adalah bagian dari aplikasi lebih besar yang memiliki dua aktivitas, "main" dan "detail". Aktivitas utama
+    menampilkan daftar baris kontak; bila pengguna memilih satu baris, aktivitas akan mengirimkan ID-nya ke aktivitas
+    detail. Aktivitas detail menggunakan{@link android.provider.ContactsContract.Contacts.Entity}
+    untuk menampilkan semua baris data dari semua kontak mentah yang dikaitkan dengan kontak
+    terpilih.
+</p>
+<p>
+    Cuplikan ini diambil dari aktivitas "detail":
+</p>
+<pre>
+...
+    /*
+     * Appends the entity path to the URI. In the case of the Contacts Provider, the
+     * expected URI is content://com.google.contacts/#/entity (# is the ID value).
+     */
+    mContactUri = Uri.withAppendedPath(
+            mContactUri,
+            ContactsContract.Contacts.Entity.CONTENT_DIRECTORY);
+
+    // Initializes the loader identified by LOADER_ID.
+    getLoaderManager().initLoader(
+            LOADER_ID,  // The identifier of the loader to initialize
+            null,       // Arguments for the loader (in this case, none)
+            this);      // The context of the activity
+
+    // Creates a new cursor adapter to attach to the list view
+    mCursorAdapter = new SimpleCursorAdapter(
+            this,                        // the context of the activity
+            R.layout.detail_list_item,   // the view item containing the detail widgets
+            mCursor,                     // the backing cursor
+            mFromColumns,                // the columns in the cursor that provide the data
+            mToViews,                    // the views in the view item that display the data
+            0);                          // flags
+
+    // Sets the ListView's backing adapter.
+    mRawContactList.setAdapter(mCursorAdapter);
+...
+&#64;Override
+public Loader&lt;Cursor&gt; onCreateLoader(int id, Bundle args) {
+
+    /*
+     * Sets the columns to retrieve.
+     * RAW_CONTACT_ID is included to identify the raw contact associated with the data row.
+     * DATA1 contains the first column in the data row (usually the most important one).
+     * MIMETYPE indicates the type of data in the data row.
+     */
+    String[] projection =
+        {
+            ContactsContract.Contacts.Entity.RAW_CONTACT_ID,
+            ContactsContract.Contacts.Entity.DATA1,
+            ContactsContract.Contacts.Entity.MIMETYPE
+        };
+
+    /*
+     * Sorts the retrieved cursor by raw contact id, to keep all data rows for a single raw
+     * contact collated together.
+     */
+    String sortOrder =
+            ContactsContract.Contacts.Entity.RAW_CONTACT_ID +
+            " ASC";
+
+    /*
+     * Returns a new CursorLoader. The arguments are similar to
+     * ContentResolver.query(), except for the Context argument, which supplies the location of
+     * the ContentResolver to use.
+     */
+    return new CursorLoader(
+            getApplicationContext(),  // The activity's context
+            mContactUri,              // The entity content URI for a single contact
+            projection,               // The columns to retrieve
+            null,                     // Retrieve all the raw contacts and their data rows.
+            null,                     //
+            sortOrder);               // Sort by the raw contact ID.
+}
+</pre>
+<p>
+    Bila selesai dimuat, {@link android.app.LoaderManager} akan memicu callback ke
+    {@link android.app.LoaderManager.LoaderCallbacks#onLoadFinished(Loader, D)
+    onLoadFinished()}. Salah satu argumen masuk pada metode ini adalah
+    {@link android.database.Cursor} bersama hasil query. Dalam aplikasi Anda sendiri, Anda bisa memperoleh
+    data dari {@link android.database.Cursor} ini untuk menampilkannya atau menggunakannya lebih jauh.
+</p>
+<h3 id="Transactions">Modifikasi batch</h3>
+<p>
+    Bila memungkinkan, Anda harus menyisipkan, memperbarui, dan menghapus data dalam Penyedia Kontak dengan
+    "batch mode", dengan membuat {@link java.util.ArrayList} dari
+    objek-objek {@link android.content.ContentProviderOperation} dan memanggil
+    {@link android.content.ContentResolver#applyBatch(String, ArrayList) applyBatch()}. Karena
+    Penyedia Kontak menjalankan semua operasi dalam satu
+    {@link android.content.ContentResolver#applyBatch(String, ArrayList) applyBatch()} transaksi,
+    modifikasi Anda tidak akan pernah meninggalkan repository kontak dalam keadaan
+    tidak konsisten. Modifikasi batch juga memudahkan penyisipan kontak mentah dan data detailnya
+    sekaligus.
+</p>
+<p class="note">
+    <strong>Catatan:</strong> Untuk memodifikasi <em>satu</em> kontak mentah, pertimbangkan untuk mengirim intent ke
+    aplikasi kontak perangkat daripada menangani modifikasi dalam aplikasi Anda.
+    Cara ini dijelaskan lebih detail di bagian
+    <a href="#Intents">Pengambilan dan modifikasi dengan intent</a>.
+</p>
+<h4>Yield point</h4>
+<p>
+    Modifikasi batch yang berisi operasi dalam jumlah besar bisa memblokir proses lain,
+    yang mengakibatkan pengalaman pengguna yang buruk secara keseluruhan. Untuk menata semua modifikasi yang ingin Anda
+    jalankan dalam sesedikit mungkin daftar terpisah, sambil mencegah modifikasi dari
+    memblokir sistem, Anda harus menetapkan <strong>yield point</strong> untuk satu atau beberapa operasi.
+    Yield point (titik hasil) adalah objek {@link android.content.ContentProviderOperation} yang mengatur
+    nilai {@link android.content.ContentProviderOperation#isYieldAllowed()}-nya ke
+    <code>true</code>. Bila menemui yield point, Penyedia Kontak akan menghentikan pekerjaannya untuk
+    membiarkan proses lain berjalan dan menutup transaksi saat ini. Bila dimulai lagi, penyedia akan
+    melanjutkan dengan operasi berikutnya di {@link java.util.ArrayList} dan memulai transaksi
+    baru.
+</p>
+<p>
+    Yield point memang menyebabkan lebih dari satu transaksi per panggilan ke
+    {@link android.content.ContentResolver#applyBatch(String, ArrayList) applyBatch()}. Karena
+    itu, Anda harus menetapkan yield point pada operasi terakhir untuk satu set baris terkait.
+    Misalnya, Anda harus menetapkan yield point pada operasi terakhir di satu set yang menambahkan
+    baris kontak mentah dan baris data terkait, atau operasi terakhir untuk satu set baris yang terkait
+    dengan satu kontak.
+</p>
+<p>
+    Yield point juga merupakan unit operasi atomis. Semua akses antara dua yield point bisa
+    saja berhasil atau gagal sebagai satu unit. Jika Anda mengatur yield point, operasi
+    atomis terkecil adalah seluruh batch operasi. Jika menggunakan yield point, Anda akan mencegah
+    operasi menurunkan kinerja sistem, sekaligus memastikan subset
+    operasi bersifat atomis.
+</p>
+<h4>Acuan balik modifikasi</h4>
+<p>
+    Saat Anda menyisipkan baris kontak mentah baru dan baris data terkaitnya sebagai satu set
+    objek {@link android.content.ContentProviderOperation}, Anda harus menautkan baris data ke
+    baris kontak mentah dengan memasukkan nilai
+    {@code android.provider.BaseColumns#_ID} kontak mentah sebagai
+    nilai {@link android.provider.ContactsContract.DataColumns#RAW_CONTACT_ID}. Akan tetapi, nilai
+    ini tidak tersedia saat Anda membuat {@link android.content.ContentProviderOperation}
+    untuk baris data, karena Anda belum menerapkan
+    {@link android.content.ContentProviderOperation} untuk baris kontak mentah. Solusinya,
+     kelas {@link android.content.ContentProviderOperation.Builder} memiliki metode
+    {@link android.content.ContentProviderOperation.Builder#withValueBackReference(String, int) withValueBackReference()}.
+    Metode ini memungkinkan Anda menyisipkan atau mengubah kolom dengan
+    hasil dari operasi sebelumnya.
+</p>
+<p>
+    Metode {@link android.content.ContentProviderOperation.Builder#withValueBackReference(String, int) withValueBackReference()}
+    memiliki dua argumen:
+</p>
+    <dl>
+        <dt>
+            <code>key</code>
+        </dt>
+        <dd>
+            Kunci dari pasangan kunci-nilai. Nilai argumen ini harus berupa nama kolom
+            dalam tabel yang Anda modifikasi.
+        </dd>
+        <dt>
+            <code>previousResult</code>
+        </dt>
+        <dd>
+            Indeks berbasis 0 dari nilai pada larik
+            objek {@link android.content.ContentProviderResult} dari
+            {@link android.content.ContentResolver#applyBatch(String, ArrayList) applyBatch()}. Saat
+            operasi batch diterapkan, hasil tiap operasi akan disimpan dalam
+            larik hasil antara. Nilai <code>previousResult</code> adalah indeks
+            dari salah satu hasil ini, yang diambil dan disimpan bersama nilai <code>key</code>.
+ Cara ini memungkinkan Anda menyisipkan record kontak mentah baru dan mendapatkan kembali nilai
+            {@code android.provider.BaseColumns#_ID}-nya, lalu membuat "acuan balik" ke
+            nilai itu saat Anda menambahkan baris {@link android.provider.ContactsContract.Data}.
+            <p>
+                Seluruh larik hasil dibuat saat Anda memanggil
+                {@link android.content.ContentResolver#applyBatch(String, ArrayList) applyBatch()} untuk pertama kali,
+                dengan ukuran setara dengan ukuran {@link java.util.ArrayList} dari
+                objek {@link android.content.ContentProviderOperation} yang Anda sediakan. Akan tetapi, semua
+                elemen dalam larik hasil diatur ke <code>null</code>, dan jika Anda mencoba
+                melakukan acuan balik ke hasil untuk operasi yang belum diterapkan,
+{@link android.content.ContentProviderOperation.Builder#withValueBackReference(String, int) withValueBackReference()}
+                akan mengeluarkan {@link java.lang.Exception}.
+
+            </p>
+        </dd>
+    </dl>
+<p>
+    Cuplikan kode berikut menampilkan cara menyisipkan kontak mentah baru dan data secara batch. Cuplikan kode ini
+    menyertakan kode yang menetapkan yield point dan menggunakan acuan balik. Cuplikan kode ini adalah
+    versi perluasan dari metode<code>createContacEntry()</code>, yang merupakan bagian dari kelas
+    <code>ContactAdder</code> dalam
+    aplikasi contoh <code><a href="{@docRoot}resources/samples/ContactManager/index.html">
+    Contact Manager</a></code>.
+</p>
+<p>
+    Cuplikan pertama mengambil data kontak dari UI. Pada saat ini, pengguna sudah
+    memilih akun tempat kontak mentah baru harus ditambahkan.
+</p>
+<pre>
+// Creates a contact entry from the current UI values, using the currently-selected account.
+protected void createContactEntry() {
+    /*
+     * Gets values from the UI
+     */
+    String name = mContactNameEditText.getText().toString();
+    String phone = mContactPhoneEditText.getText().toString();
+    String email = mContactEmailEditText.getText().toString();
+
+    int phoneType = mContactPhoneTypes.get(
+            mContactPhoneTypeSpinner.getSelectedItemPosition());
+
+    int emailType = mContactEmailTypes.get(
+            mContactEmailTypeSpinner.getSelectedItemPosition());
+</pre>
+<p>
+    Cuplikan berikutnya membuat operasi untuk menyisipkan baris kontak mentah ke dalam
+    tabel {@link android.provider.ContactsContract.RawContacts}:
+</p>
+<pre>
+    /*
+     * Prepares the batch operation for inserting a new raw contact and its data. Even if
+     * the Contacts Provider does not have any data for this person, you can't add a Contact,
+     * only a raw contact. The Contacts Provider will then add a Contact automatically.
+     */
+
+     // Creates a new array of ContentProviderOperation objects.
+    ArrayList&lt;ContentProviderOperation&gt; ops =
+            new ArrayList&lt;ContentProviderOperation&gt;();
+
+    /*
+     * Creates a new raw contact with its account type (server type) and account name
+     * (user's account). Remember that the display name is not stored in this row, but in a
+     * StructuredName data row. No other data is required.
+     */
+    ContentProviderOperation.Builder op =
+            ContentProviderOperation.newInsert(ContactsContract.RawContacts.CONTENT_URI)
+            .withValue(ContactsContract.RawContacts.ACCOUNT_TYPE, mSelectedAccount.getType())
+            .withValue(ContactsContract.RawContacts.ACCOUNT_NAME, mSelectedAccount.getName());
+
+    // Builds the operation and adds it to the array of operations
+    ops.add(op.build());
+</pre>
+<p>
+    Berikutnya, kode akan membuat baris data untuk baris-baris nama tampilan, telepon, dan email.
+</p>
+<p>
+    Setiap objek pembangun operasi menggunakan
+    {@link android.content.ContentProviderOperation.Builder#withValueBackReference(String, int) withValueBackReference()}
+    untuk mendapatkan
+    {@link android.provider.ContactsContract.DataColumns#RAW_CONTACT_ID}. Acuan menunjuk
+    balik ke objek {@link android.content.ContentProviderResult} dari operasi pertama,
+    yang menambahkan baris kontak mentah dan mengembalikan nilai {@code android.provider.BaseColumns#_ID}
+    barunya. Hasilnya, setiap data ditautkan secara otomatis oleh
+    {@link android.provider.ContactsContract.DataColumns#RAW_CONTACT_ID}-nya
+    ke baris {@link android.provider.ContactsContract.RawContacts} baru yang memilikinya.
+</p>
+<p>
+    Objek {@link android.content.ContentProviderOperation.Builder} yang menambahkan baris email
+    diberi flag {@link android.content.ContentProviderOperation.Builder#withYieldAllowed(boolean)
+    withYieldAllowed()}, yang mengatur yield point:
+</p>
+<pre>
+    // Creates the display name for the new raw contact, as a StructuredName data row.
+    op =
+            ContentProviderOperation.newInsert(ContactsContract.Data.CONTENT_URI)
+            /*
+             * withValueBackReference sets the value of the first argument to the value of
+             * the ContentProviderResult indexed by the second argument. In this particular
+             * call, the raw contact ID column of the StructuredName data row is set to the
+             * value of the result returned by the first operation, which is the one that
+             * actually adds the raw contact row.
+             */
+            .withValueBackReference(ContactsContract.Data.RAW_CONTACT_ID, 0)
+
+            // Sets the data row's MIME type to StructuredName
+            .withValue(ContactsContract.Data.MIMETYPE,
+                    ContactsContract.CommonDataKinds.StructuredName.CONTENT_ITEM_TYPE)
+
+            // Sets the data row's display name to the name in the UI.
+            .withValue(ContactsContract.CommonDataKinds.StructuredName.DISPLAY_NAME, name);
+
+    // Builds the operation and adds it to the array of operations
+    ops.add(op.build());
+
+    // Inserts the specified phone number and type as a Phone data row
+    op =
+            ContentProviderOperation.newInsert(ContactsContract.Data.CONTENT_URI)
+            /*
+             * Sets the value of the raw contact id column to the new raw contact ID returned
+             * by the first operation in the batch.
+             */
+            .withValueBackReference(ContactsContract.Data.RAW_CONTACT_ID, 0)
+
+            // Sets the data row's MIME type to Phone
+            .withValue(ContactsContract.Data.MIMETYPE,
+                    ContactsContract.CommonDataKinds.Phone.CONTENT_ITEM_TYPE)
+
+            // Sets the phone number and type
+            .withValue(ContactsContract.CommonDataKinds.Phone.NUMBER, phone)
+            .withValue(ContactsContract.CommonDataKinds.Phone.TYPE, phoneType);
+
+    // Builds the operation and adds it to the array of operations
+    ops.add(op.build());
+
+    // Inserts the specified email and type as a Phone data row
+    op =
+            ContentProviderOperation.newInsert(ContactsContract.Data.CONTENT_URI)
+            /*
+             * Sets the value of the raw contact id column to the new raw contact ID returned
+             * by the first operation in the batch.
+             */
+            .withValueBackReference(ContactsContract.Data.RAW_CONTACT_ID, 0)
+
+            // Sets the data row's MIME type to Email
+            .withValue(ContactsContract.Data.MIMETYPE,
+                    ContactsContract.CommonDataKinds.Email.CONTENT_ITEM_TYPE)
+
+            // Sets the email address and type
+            .withValue(ContactsContract.CommonDataKinds.Email.ADDRESS, email)
+            .withValue(ContactsContract.CommonDataKinds.Email.TYPE, emailType);
+
+    /*
+     * Demonstrates a yield point. At the end of this insert, the batch operation's thread
+     * will yield priority to other threads. Use after every set of operations that affect a
+     * single contact, to avoid degrading performance.
+     */
+    op.withYieldAllowed(true);
+
+    // Builds the operation and adds it to the array of operations
+    ops.add(op.build());
+</pre>
+<p>
+    Cuplikan terakhir menampilkan panggilan ke
+    {@link android.content.ContentResolver#applyBatch(String, ArrayList) applyBatch()} yang
+    menyisipkan baris-baris kontak mentah dan data baru.
+</p>
+<pre>
+    // Ask the Contacts Provider to create a new contact
+    Log.d(TAG,"Selected account: " + mSelectedAccount.getName() + " (" +
+            mSelectedAccount.getType() + ")");
+    Log.d(TAG,"Creating contact: " + name);
+
+    /*
+     * Applies the array of ContentProviderOperation objects in batch. The results are
+     * discarded.
+     */
+    try {
+
+            getContentResolver().applyBatch(ContactsContract.AUTHORITY, ops);
+    } catch (Exception e) {
+
+            // Display a warning
+            Context ctx = getApplicationContext();
+
+            CharSequence txt = getString(R.string.contactCreationFailure);
+            int duration = Toast.LENGTH_SHORT;
+            Toast toast = Toast.makeText(ctx, txt, duration);
+            toast.show();
+
+            // Log exception
+            Log.e(TAG, "Exception encountered while inserting contact: " + e);
+    }
+}
+</pre>
+<p>
+    Operasi batch juga memungkinkan Anda menerapkan <strong>kontrol konkurensi optimistis</strong>,
+    sebuah metode yang menerapkan transaksi modifikasi tanpa harus mengunci repository yang mendasari.
+    Untuk menggunakan metode ini, terapkan transaksi dan periksa modifikasi lain yang
+    mungkin telah dibuat bersamaan. Jika ternyata modifikasi tidak konsisten, Anda
+    mengembalikan transaksi ke kondisi semula dan mencobanya kembali.
+</p>
+<p>
+    Kontrol konkurensi optimistis berguna untuk perangkat seluler, apabila hanya ada satu pengguna setiap
+   kalinya, dan akses simultan ke repository data jarang terjadi. Karena penguncian tidak digunakan,
+    tidak ada waktu yang terbuang untuk memasang kunci atau menunggu transaksi lain untuk melepas kunci.
+</p>
+<p>
+    Untuk menggunakan kontrol konkurensi optimistis saat memperbarui satu baris
+    {@link android.provider.ContactsContract.RawContacts}, ikuti langkah-langkah ini:
+</p>
+<ol>
+    <li>
+        Ambil kolom {@link android.provider.ContactsContract.SyncColumns#VERSION}
+        kontak mentah bersama data lain yang Anda ambil.
+    </li>
+    <li>
+        Buat sebuah objek {@link android.content.ContentProviderOperation.Builder} yang cocok untuk
+        memberlakukan batasan, dengan menggunakan metode
+        {@link android.content.ContentProviderOperation#newAssertQuery(Uri)}. Untuk URI konten,
+        gunakan {@link android.provider.ContactsContract.RawContacts#CONTENT_URI
+        RawContacts.CONTENT_URI}
+        dengan {@code android.provider.BaseColumns#_ID} kontak mentah yang ditambahkan padanya.
+    </li>
+    <li>
+        Untuk objek {@link android.content.ContentProviderOperation.Builder}, panggil
+        {@link android.content.ContentProviderOperation.Builder#withValue(String, Object)
+        withValue()} untuk membandingkan kolom {@link android.provider.ContactsContract.SyncColumns#VERSION}
+        dengan nomor versi yang baru saja Anda ambil.
+    </li>
+    <li>
+        Untuk {@link android.content.ContentProviderOperation.Builder} yang sama, panggil
+        {@link android.content.ContentProviderOperation.Builder#withExpectedCount(int)
+        withExpectedCount()} untuk memastikan bahwa hanya satu baris yang diuji oleh pernyataan ini.
+    </li>
+    <li>
+        Panggil {@link android.content.ContentProviderOperation.Builder#build()} untuk membuat
+        objek {@link android.content.ContentProviderOperation}, kemudian tambahkan objek ini sebagai
+        objek pertama di {@link java.util.ArrayList} yang Anda teruskan ke
+        {@link android.content.ContentResolver#applyBatch(String, ArrayList) applyBatch()}.
+    </li>
+    <li>
+        Terapkan transaksi batch.
+    </li>
+</ol>
+<p>
+    Jika baris kontak mentah diperbarui oleh operasi lain antara waktu Anda membaca baris dan
+    waktu Anda mencoba memodifikasinya, "asert" {@link android.content.ContentProviderOperation}
+    akan gagal, dan seluruh batch operasi akan dibatalkan. Anda nanti bisa memilih untuk mencoba ulang
+    batch atau melakukan tindakan lain.
+</p>
+<p>
+    Cuplikan berikut memperagakan cara membuat "asert"
+    {@link android.content.ContentProviderOperation} setelah membuat query satu kontak mentah yang menggunakan
+     {@link android.content.CursorLoader}:
+</p>
+<pre>
+/*
+ * The application uses CursorLoader to query the raw contacts table. The system calls this method
+ * when the load is finished.
+ */
+public void onLoadFinished(Loader&lt;Cursor&gt; loader, Cursor cursor) {
+
+    // Gets the raw contact's _ID and VERSION values
+    mRawContactID = cursor.getLong(cursor.getColumnIndex(BaseColumns._ID));
+    mVersion = cursor.getInt(cursor.getColumnIndex(SyncColumns.VERSION));
+}
+
+...
+
+// Sets up a Uri for the assert operation
+Uri rawContactUri = ContentUris.withAppendedId(RawContacts.CONTENT_URI, mRawContactID);
+
+// Creates a builder for the assert operation
+ContentProviderOperation.Builder assertOp = ContentProviderOperation.netAssertQuery(rawContactUri);
+
+// Adds the assertions to the assert operation: checks the version and count of rows tested
+assertOp.withValue(SyncColumns.VERSION, mVersion);
+assertOp.withExpectedCount(1);
+
+// Creates an ArrayList to hold the ContentProviderOperation objects
+ArrayList ops = new ArrayList&lt;ContentProviderOperationg&gt;;
+
+ops.add(assertOp.build());
+
+// You would add the rest of your batch operations to "ops" here
+
+...
+
+// Applies the batch. If the assert fails, an Exception is thrown
+try
+    {
+        ContentProviderResult[] results =
+                getContentResolver().applyBatch(AUTHORITY, ops);
+
+    } catch (OperationApplicationException e) {
+
+        // Actions you want to take if the assert operation fails go here
+    }
+</pre>
+<h3 id="Intents">Pengambilan dan modifikasi dengan intent</h3>
+<p>
+    Mengirimkan intent ke aplikasi kontak perangkat memungkinkan Anda mengakses Penyedia Kontak
+    secara tidak langsung. Intent akan memulai UI aplikasi kontak perangkat, tempat pengguna bisa
+    melakukan pekerjaan yang terkait dengan kontak. Dengan tipe akses ini, pengguna bisa:
+    <ul>
+        <li>Memilih kontak dari daftar dan meneruskannya ke aplikasi untuk pekerjaan lebih jauh.</li>
+        <li>Mengedit data kontak yang ada.</li>
+        <li>Memasukkan kontak mentah baru untuk akun mereka.</li>
+        <li>Menghapus kontak atau data kontak.</li>
+    </ul>
+<p>
+    Jika pengguna menyisipkan atau memperbarui data, Anda bisa mengumpulkan data lebih dahulu dan mengirimkannya sebagai
+    bagian dari intent.
+</p>
+<p>
+    Bila Anda menggunakan intent untuk mengakses Penyedia Kontak melalui aplikasi kontak perangkat, Anda
+    tidak perlu menulis UI atau kode sendiri untuk mengakses penyedia. Anda juga tidak harus
+   meminta izin untuk membaca dari atau menulis ke penyedia. Aplikasi kontak perangkat bisa
+    mendelegasikan izin membaca untuk kontak kepada Anda, dan karena Anda membuat modifikasi pada
+    penyedia melalui aplikasi lain, Anda tidak perlu memiliki izin menulis.
+</p>
+<p>
+    Proses umum pengiriman intent untuk mengakses penyedia dijelaskan secara detail dalam panduan
+    <a href="{@docRoot}guide/topics/providers/content-provider-basics.html">
+    Dasar-Dasar Penyedia Konten</a> di bagian "Akses data melalui intent". Tindakan,
+    tipe MIME, dan nilai data yang Anda gunakan untuk tugas yang tersedia dirangkum dalam Tabel 4, sedangkan
+    nilai ekstra yang bisa Anda gunakan bersama
+    {@link android.content.Intent#putExtra(String, String) putExtra()} tercantum dalam
+    dokumentasi acuan untuk {@link android.provider.ContactsContract.Intents.Insert}:
+</p>
+<p class="table-caption" id="table4">
+  <strong>Tabel 4.</strong> Intent Penyedia Kontak.
+</p>
+<table style="width:75%">
+    <tr>
+        <th scope="col" style="width:10%">Tugas</th>
+        <th scope="col" style="width:5%">Tindakan</th>
+        <th scope="col" style="width:10%">Data</th>
+        <th scope="col" style="width:10%">Tipe MIME</th>
+        <th scope="col" style="width:25%">Catatan</th>
+    </tr>
+    <tr>
+        <td><strong>Memilih kontak dari daftar</strong></td>
+        <td>{@link android.content.Intent#ACTION_PICK}</td>
+        <td>
+            Salah satu dari:
+            <ul>
+                <li>
+{@link android.provider.ContactsContract.Contacts#CONTENT_URI Contacts.CONTENT_URI},
+                    yang menampilkan daftar kontak.
+                </li>
+                <li>
+{@link android.provider.ContactsContract.CommonDataKinds.Phone#CONTENT_URI Phone.CONTENT_URI},
+                    yang menampilkan daftar nomor telepon untuk kontak mentah.
+                </li>
+                <li>
+{@link android.provider.ContactsContract.CommonDataKinds.StructuredPostal#CONTENT_URI
+StructuredPostal.CONTENT_URI},
+                    yang menampilkan daftar alamat pos untuk kontak mentah.
+                </li>
+                <li>
+{@link android.provider.ContactsContract.CommonDataKinds.Email#CONTENT_URI Email.CONTENT_URI},
+                    yang menampilkan daftar alamat email untuk kontak baru.
+                </li>
+            </ul>
+        </td>
+        <td>
+            Tidak digunakan
+        </td>
+        <td>
+            Menampilkan daftar kontak mentah atau daftar data dari kontak mentah, sesuai dengan tipe
+            URI konten yang Anda sediakan.
+            <p>
+                Panggil
+         {@link android.app.Activity#startActivityForResult(Intent, int) startActivityForResult()},
+                yang menghasilkan URI konten dari baris terpilih. Bentuk URI adalah
+                URI konten tabel dengan <code>LOOKUP_ID</code> baris yang ditambahkan padanya.
+                Aplikasi kontak perangkat mendelegasikan izin membaca dan menulis untuk URI konten ini
+                selama masa pakai aktivitas Anda. Lihat panduan
+                <a href="{@docRoot}guide/topics/providers/content-provider-basics.html">
+                Dasar-Dasar Penyedia Konten</a> untuk detail selengkapnya.
+            </p>
+        </td>
+    </tr>
+    <tr>
+        <td><strong>Menyisipkan kontak mentah baru</strong></td>
+        <td>{@link android.provider.ContactsContract.Intents.Insert#ACTION Insert.ACTION}</td>
+        <td>N/A</td>
+        <td>
+            {@link android.provider.ContactsContract.RawContacts#CONTENT_TYPE
+            RawContacts.CONTENT_TYPE}, tipe MIME untuk satu set kontak mentah.
+        </td>
+        <td>
+            Menampilkan layar <strong>Add Contact</strong> aplikasi kontak perangkat. Nilai
+            ekstra yang Anda tambahkan ke intent akan ditampilkan. Jika dikirimkan bersama
+        {@link android.app.Activity#startActivityForResult(Intent, int) startActivityForResult()},
+            URI konten dari kontak mentah yang baru saja ditambahkan akan dikembalikan ke
+            {@link android.app.Activity#onActivityResult(int, int, Intent) onActivityResult()}
+           metode callback aktivitas Anda pada argumen {@link android.content.Intent}, di
+            bidang "data". Untuk mendapatkan nilainya, panggil {@link android.content.Intent#getData()}.
+        </td>
+    </tr>
+    <tr>
+        <td><strong>Mengedit kontak</strong></td>
+        <td>{@link android.content.Intent#ACTION_EDIT}</td>
+        <td>
+            {@link android.provider.ContactsContract.Contacts#CONTENT_LOOKUP_URI} untuk
+            kontak. Aktivitas editor memungkinkan pengguna mengedit setiap data yang dikaitkan
+            dengan kontak ini.
+        </td>
+        <td>
+            {@link android.provider.ContactsContract.Contacts#CONTENT_ITEM_TYPE
+            Contacts.CONTENT_ITEM_TYPE}, kontak tunggal.</td>
+        <td>
+            Menampilkan layar Edit Contact dalam aplikasi kontak. Nilai ekstra yang Anda tambahkan
+            ke intent akan ditampilkan. Bila pengguna mengklik <strong>Done</strong> untuk menyimpan
+            hasil edit, aktivitas Anda kembali ke latar depan.
+        </td>
+    </tr>
+    <tr>
+        <td><strong>Menampilkan picker yang juga bisa menambahkan data.</strong></td>
+        <td>{@link android.content.Intent#ACTION_INSERT_OR_EDIT}</td>
+        <td>
+            N/A
+        </td>
+        <td>
+            {@link android.provider.ContactsContract.Contacts#CONTENT_ITEM_TYPE}
+        </td>
+         <td>
+            Intent ini selalu menampilkan layar picker aplikasi kontak. Pengguna bisa memilih
+            kontak untuk diedit, atau menambahkan kontak baru. Layar edit atau layar tambah
+            akan muncul, sesuai dengan pilihan pengguna, dan data ekstra yang Anda kirimkan dalam intent
+            akan ditampilkan. Jika aplikasi Anda menampilkan data kontak seperti email atau nomor telepon, gunakan
+            intent ini untuk memungkinkan pengguna menambahkan data ke kontak yang ada.
+
+            <p class="note">
+                <strong>Catatan:</strong> Tidak perlu mengirimkan nilai nama dalam ekstra intent ini,
+                karena pengguna selalu mengambil nama yang ada atau menambahkan nama baru. Lebih-lebih,
+                jika Anda mengirimkan nama, dan pengguna memilih untuk melakukan edit, aplikasi kontak akan
+                menampilkan nama yang Anda kirimkan, yang menimpa nilai sebelumnya. Jika pengguna tidak
+                menyadari hal ini dan menyimpan hasil edit, nilai lama akan hilang.
+            </p>
+         </td>
+    </tr>
+</table>
+<p>
+    Aplikasi kontak perangkat tidak memperbolehkan Anda menghapus kontak mentah atau datanya dengan
+    intent. Sebagai gantinya, untuk menghapus kontak mentah, gunakan
+    {@link android.content.ContentResolver#delete(Uri, String, String[]) ContentResolver.delete()}
+    atau {@link android.content.ContentProviderOperation#newDelete(Uri)
+    ContentProviderOperation.newDelete()}.
+</p>
+<p>
+    Cuplikan berikut menampilkan cara menyusun dan mengirimkan intent yang menyisipkan kontak dan data
+    mentah baru:
+</p>
+<pre>
+// Gets values from the UI
+String name = mContactNameEditText.getText().toString();
+String phone = mContactPhoneEditText.getText().toString();
+String email = mContactEmailEditText.getText().toString();
+
+String company = mCompanyName.getText().toString();
+String jobtitle = mJobTitle.getText().toString();
+
+// Creates a new intent for sending to the device's contacts application
+Intent insertIntent = new Intent(ContactsContract.Intents.Insert.ACTION);
+
+// Sets the MIME type to the one expected by the insertion activity
+insertIntent.setType(ContactsContract.RawContacts.CONTENT_TYPE);
+
+// Sets the new contact name
+insertIntent.putExtra(ContactsContract.Intents.Insert.NAME, name);
+
+// Sets the new company and job title
+insertIntent.putExtra(ContactsContract.Intents.Insert.COMPANY, company);
+insertIntent.putExtra(ContactsContract.Intents.Insert.JOB_TITLE, jobtitle);
+
+/*
+ * Demonstrates adding data rows as an array list associated with the DATA key
+ */
+
+// Defines an array list to contain the ContentValues objects for each row
+ArrayList&lt;ContentValues&gt; contactData = new ArrayList&lt;ContentValues&gt;();
+
+
+/*
+ * Defines the raw contact row
+ */
+
+// Sets up the row as a ContentValues object
+ContentValues rawContactRow = new ContentValues();
+
+// Adds the account type and name to the row
+rawContactRow.put(ContactsContract.RawContacts.ACCOUNT_TYPE, mSelectedAccount.getType());
+rawContactRow.put(ContactsContract.RawContacts.ACCOUNT_NAME, mSelectedAccount.getName());
+
+// Adds the row to the array
+contactData.add(rawContactRow);
+
+/*
+ * Sets up the phone number data row
+ */
+
+// Sets up the row as a ContentValues object
+ContentValues phoneRow = new ContentValues();
+
+// Specifies the MIME type for this data row (all data rows must be marked by their type)
+phoneRow.put(
+        ContactsContract.Data.MIMETYPE,
+        ContactsContract.CommonDataKinds.Phone.CONTENT_ITEM_TYPE
+);
+
+// Adds the phone number and its type to the row
+phoneRow.put(ContactsContract.CommonDataKinds.Phone.NUMBER, phone);
+
+// Adds the row to the array
+contactData.add(phoneRow);
+
+/*
+ * Sets up the email data row
+ */
+
+// Sets up the row as a ContentValues object
+ContentValues emailRow = new ContentValues();
+
+// Specifies the MIME type for this data row (all data rows must be marked by their type)
+emailRow.put(
+        ContactsContract.Data.MIMETYPE,
+        ContactsContract.CommonDataKinds.Email.CONTENT_ITEM_TYPE
+);
+
+// Adds the email address and its type to the row
+emailRow.put(ContactsContract.CommonDataKinds.Email.ADDRESS, email);
+
+// Adds the row to the array
+contactData.add(emailRow);
+
+/*
+ * Adds the array to the intent's extras. It must be a parcelable object in order to
+ * travel between processes. The device's contacts app expects its key to be
+ * Intents.Insert.DATA
+ */
+insertIntent.putParcelableArrayListExtra(ContactsContract.Intents.Insert.DATA, contactData);
+
+// Send out the intent to start the device's contacts app in its add contact activity.
+startActivity(insertIntent);
+</pre>
+<h3 id="DataIntegrity">Integritas data</h3>
+<p>
+    Karena repository kontak berisi data penting dan sensitif yang diharapkan pengguna agar
+    benar dan terbaru. Penyedia Kontak memiliki aturan yang didefinisikan dengan baik demi integritas data. Anda
+    bertanggung jawab untuk mematuhi aturan ini saat memodifikasi data kontak. Aturan-aturan penting itu
+    dicantumkan di sini:
+</p>
+<dl>
+    <dt>
+        Selalu tambahkan baris {@link android.provider.ContactsContract.CommonDataKinds.StructuredName}
+        untuk setiap baris {@link android.provider.ContactsContract.RawContacts} yang Anda tambahkan.
+    </dt>
+    <dd>
+        Baris {@link android.provider.ContactsContract.RawContacts} tanpa
+        baris {@link android.provider.ContactsContract.CommonDataKinds.StructuredName} dalam
+        tabel {@link android.provider.ContactsContract.Data} bisa menyebabkan masalah selama
+       agregasi.
+    </dd>
+    <dt>
+        Selalu tautkan baris {@link android.provider.ContactsContract.Data} baru ke baris
+        {@link android.provider.ContactsContract.RawContacts} induknya.
+    </dt>
+    <dd>
+        Baris {@link android.provider.ContactsContract.Data} yang tidak ditautkan ke
+        {@link android.provider.ContactsContract.RawContacts} tidak akan terlihat dalam aplikasi kontak
+        perangkat, dan itu bisa menimbulkan masalah dengan adaptor sinkronisasi.
+    </dd>
+    <dt>
+        Ubah data hanya untuk kontak mentah yang Anda miliki.
+    </dt>
+    <dd>
+        Ingatlah bahwa Penyedia Kontak biasanya mengelola data dari berbagai
+        tipe akun/layanan online. Anda harus memastikan bahwa aplikasi Anda hanya memodifikasi
+        atau menghapus data untuk baris milik Anda, dan bahwa aplikasi hanya menyisipkan data dengan
+        tipe akun dan nama yang Anda kontrol.
+    </dd>
+    <dt>
+        Selalu gunakan konstanta yang didefinisikan dalam {@link android.provider.ContactsContract} dan
+        subkelasnya untuk otoritas, URI konten, URI path, nama kolom, tipe MIME, dan
+        nilai {@link android.provider.ContactsContract.CommonDataKinds.CommonColumns#TYPE}.
+    </dt>
+    <dd>
+        Menggunakan konstanta ini membantu Anda menghindari kesalahan. Anda juga akan diberi tahu dengan peringatan
+        compiler jika salah satu konstanta sudah usang.
+    </dd>
+</dl>
+<h3 id="CustomData">Baris data custom</h3>
+<p>
+    Dengan membuat dan menggunakan tipe MIME custom sendiri, Anda bisa menyisipkan, mengedit, menghapus, dan mengambil
+    baris data sendiri dalam tabel {@link android.provider.ContactsContract.Data}. Baris Anda
+    dibatasi untuk menggunakan kolom yang didefinisikan dalam
+    {@link android.provider.ContactsContract.DataColumns}, meskipun Anda bisa memetakan nama kolom
+    bertipe spesifik sendiri ke nama kolom default. Dalam aplikasi kontak perangkat,
+    data untuk baris Anda ditampilkan, tetapi tidak bisa diedit atau dihapus, dan pengguna tidak bisa menambahkan
+    data lain. Untuk memudahkan pengguna mengubah baris data custom Anda, Anda harus menyediakan aktivitas
+    editor dalam aplikasi Anda sendiri.
+</p>
+<p>
+    Untuk menampilkan data custom, sediakan file <code>contacts.xml</code> berisi elemen
+    <code>&lt;ContactsAccountType&gt;</code> dan satu atau beberapa elemen anak
+    <code>&lt;ContactsDataKind&gt;</code>. Hal ini dijelaskan lebih detail di
+    bagian <a href="#SocialStreamDataKind"><code>&lt;ContactsDataKind&gt; element</code></a>.
+</p>
+<p>
+    Untuk mengetahui selengkapnya tentang tipe MIME custom, bacalah panduan
+    <a href="{@docRoot}guide/topics/providers/content-provider-creating.html">
+    Membuat Penyedia Konten</a>.
+</p>
+<h2 id="SyncAdapters">Adaptor Sinkronisasi Penyedia Kontak</h2>
+<p>
+    Penyedia Kontak didesain khusus untuk menangani <strong>sinkronisasi</strong>
+    data kontak antara perangkat dan layanan online. Hal ini memungkinkan pengguna mengunduh
+    data yang ada dari perangkat baru dan mengunggah data yang ada ke akun baru.
+    Sinkronisasi juga memastikan bahwa pengguna memiliki data terbaru, apa pun
+    sumber penambahan dan perubahan itu. Keuntungan lain dari sinkronisasi adalah membuat
+    data kontak tersedia sekalipun perangkat tidak terhubung ke jaringan.
+</p>
+<p>
+    Walaupun Anda bisa menerapkan sinkronisasi dengan berbagai cara, sistem Android menyediakan
+    kerangka kerja sinkronisasi plug-in yang mengotomatiskan tugas-tugas berikut:
+    <ul>
+
+    <li>
+        Memeriksa ketersediaan jaringan.
+    </li>
+    <li>
+        Menjadwalkan dan menjalankan sinkronisasi, berdasarkan preferensi pengguna.
+    </li>
+    <li>
+        Memulai kembali sinkronisasi yang telah berhenti.
+    </li>
+    </ul>
+<p>
+    Untuk menggunakan kerangka kerja ini, Anda harus menyediakan plug-in adaptor sinkronisasi. Setiap adaptor sinkronisasi bersifat unik bagi
+    layanan dan penyedia konten, tetapi mampu menangani beberapa nama akun untuk layanan yang sama. Kerangka
+    kerja ini juga memungkinkan beberapa adaptor sinkronisasi untuk layanan dan penyedia yang sama.
+</p>
+<h3 id="SyncClassesFiles">Kelas dan file adaptor sinkronisasi</h3>
+<p>
+    Anda mengimplementasikan adaptor sinkronisasi sebagai subkelas
+    {@link android.content.AbstractThreadedSyncAdapter} dan menginstalnya sebagai bagian dari aplikasi
+    Android. Sistem akan mempelajari adaptor sinkronisasi dari elemen-elemen di manifes
+     aplikasi Anda dan dari file XML khusus yang ditunjuk oleh manifes. File XML mendefinisikan
+    tipe akun untuk layanan online dan otoritas untuk penyedia konten, yang bersama-sama
+    mengidentifikasi adaptor secara unik. Adaptor sinkronisasi tidak menjadi aktif hingga pengguna menambahkan
+    akun untuk tipe akun adaptor sinkronisasi dan memungkinkan sinkronisasi untuk penyedia
+    konten yang disinkronkan dengan adaptor sinkronisasi.  Pada saat itu, sistem mulai mengelola adaptor,
+    memanggilnya seperlunya untuk menyinkronkan antara penyedia konten dan server.
+</p>
+<p class="note">
+    <strong>Catatan:</strong> Menggunakan tipe akun sebagai bagian dari identifikasi adaptor sinkronisasi memungkinkan
+    sistem mendeteksi dan menghimpun adaptor-adaptor sinkronisasi yang mengakses berbagai layanan dari
+    organisasi yang sama. Misalnya, adaptor sinkronisasi untuk semua layanan online Google semuanya memiliki tipe akun
+    yang sama <code>com.google</code>. Bila pengguna menambahkan akun Google ke perangkatnya, semua
+    adaptor sinkronisasi yang terinstal untuk layanan Google akan dicantumkan bersama; setiap adaptor sinkronisasi
+    yang tercantum akan menyinkronkan diri dengan berbagai penyedia konten pada perangkat.
+</p>
+<p>
+    Karena sebagian besar layanan mengharuskan pengguna untuk memeriksa identitas sebelum mengakses
+    data, sistem Android menawarkan kerangka kerja autentikasi yang serupa dengan, dan sering kali
+    digunakan bersama, kerangka kerja adaptor sinkronisasi. Kerangka kerja autentikasi menggunakan
+    autentikator plug-in yang merupakan subkelas
+    {@link android.accounts.AbstractAccountAuthenticator}. Autentikator memeriksa
+    identitas pengguna dalam langkah-langkah berikut:
+    <ol>
+        <li>
+            Mengumpulkan nama pengguna, kata sandi, atau informasi serupa (
+            <strong>kredensial</strong> pengguna).
+        </li>
+        <li>
+            Mengirimkan kredensial ke layanan
+        </li>
+        <li>
+            Memeriksa balasan layanan.
+        </li>
+    </ol>
+<p>
+    Jika layanan menerima kredensial, autentikator bisa
+    menyimpan kredensial itu untuk digunakan nanti. Karena kerangka kerja autentikator plug-in,
+    {@link android.accounts.AccountManager} bisa menyediakan akses ke setiap token autentikasi yang didukung suatu autentikator
+    dan dipilihnya untuk diekspos, seperti token autentikasi OAuth2.
+</p>
+<p>
+    Meskipun autentikasi tidak diharuskan, sebagian besar layanan kontak menggunakannya.
+    Akan tetapi, Anda tidak wajib menggunakan kerangka kerja autentikasi Android untuk melakukan autentikasi.
+</p>
+<h3 id="SyncAdapterImplementing">Implementasi adaptor sinkronisasi</h3>
+<p>
+    Untuk mengimplementasikan adaptor sinkronisasi bagi Penyedia Kontak, perlu Anda memulai dengan membuat
+    aplikasi Android yang berisi elemen-elemen berikut:
+</p>
+    <dl>
+        <dt>
+            Komponen {@link android.app.Service} yang merespons permintaan sistem untuk
+            mengikat ke adaptor sinkronisasi.
+        </dt>
+        <dd>
+            Bila sistem ingin menjalankan sinkronisasi, sistem akan memanggil metode
+            {@link android.app.Service#onBind(Intent) onBind()} layanan untuk mendapatkan
+            {@link android.os.IBinder} bagi adaptor sinkronisasi. Hal ini memungkinkan sistem melakukan
+            panggilan lintas proses ke metode adaptor.
+            <p>
+                Dalam contoh aplikasi <a href="{@docRoot}resources/samples/SampleSyncAdapter/index.html">
+               Sample Sync Adapter</a>, nama kelas layanan ini adalah
+                <code>com.example.android.samplesync.syncadapter.SyncService</code>.
+            </p>
+        </dd>
+        <dt>
+            Adaptor sinkronisasi yang sesungguhnya, diimplementasikan sebagai subkelas konkret dari
+            {@link android.content.AbstractThreadedSyncAdapter}.
+        </dt>
+        <dd>
+            Kelas ini melakukan pekerjaan mengunduh data dari server, mengunggah data ke
+            perangkat, dan menyelesaikan konflik. Pekerjaan utama adaptor
+            diselesaikan dengan metode {@link android.content.AbstractThreadedSyncAdapter#onPerformSync(
+            Account, Bundle, String, ContentProviderClient, SyncResult)
+            onPerformSync()}. Instance kelas ini harus dibuat sebagai singleton.
+            <p>
+                Dalam contoh aplikasi <a href="{@docRoot}resources/samples/SampleSyncAdapter/index.html">
+               Sample Sync Adapter</a>, adaptor sinkronisasi didefinisikan dalam kelas
+                <code>com.example.android.samplesync.syncadapter.SyncAdapter</code>.
+            </p>
+        </dd>
+        <dt>
+            Subkelas {@link android.app.Application}.
+        </dt>
+        <dd>
+            Kelas ini berfungsi sebagai pabrik untuk singleton adaptor sinkronisasi. Gunakan
+            metode {@link android.app.Application#onCreate()} untuk membuat instance adaptor sinkronisasi , dan
+            menyediakan metode "getter" statis untuk mengembalikan singleton ke
+            metode {@link android.app.Service#onBind(Intent) onBind()} dari layanan
+            adaptor sinkronisasi.
+        </dd>
+        <dt>
+            <strong>Opsional:</strong> Komponen {@link android.app.Service} yang merespons
+            permintaan dari sistem untuk autentikasi pengguna.
+        </dt>
+        <dd>
+            {@link android.accounts.AccountManager} memulai layanan ini untuk memulai proses
+            autentikasi. Metode {@link android.app.Service#onCreate()} layanan membuat instance
+            objek autentikator. Bila sistem ingin mengautentikasi akun pengguna untuk
+            adaptor sinkronisasi aplikasi, sistem akan memanggil metode
+{@link android.app.Service#onBind(Intent) onBind()}            layanan guna mendapatkan
+            {@link android.os.IBinder} bagi autentikator. Hal ini memungkinkan sistem melakukan
+            panggilan lintas proses ke metode autentikator.
+            <p>
+                Dalam contoh aplikasi <a href="{@docRoot}resources/samples/SampleSyncAdapter/index.html">
+               Sample Sync Adapter</a>, nama kelas layanan ini adalah
+                <code>com.example.android.samplesync.authenticator.AuthenticationService</code>.
+            </p>
+        </dd>
+        <dt>
+            <strong>Opsional:</strong> Subkelas konkret
+            {@link android.accounts.AbstractAccountAuthenticator} yang menangani permintaan
+            autentikasi.
+        </dt>
+        <dd>
+            Kelas ini menyediakan metode yang dipicu {@link android.accounts.AccountManager}
+            untuk mengautentikasi kredensial pengguna dengan layanan. Detail
+            proses autentikasi sangat bervariasi, berdasarkan teknologi server yang digunakan. Anda harus
+            mengacu ke dokumentasi bagi perangkat lunak server untuk mengetahui selengkapnya tentang autentikasi.
+            <p>
+                Dalam contoh aplikasi <a href="{@docRoot}resources/samples/SampleSyncAdapter/index.html">
+               Sample Sync Adapter</a>, autentikator didefinisikan dalam kelas
+                <code>com.example.android.samplesync.authenticator.Authenticator</code>.
+            </p>
+        </dd>
+        <dt>
+            File XML yang mendefinisikan adaptor sinkronisasi dan autentikator bagi sistem.
+        </dt>
+        <dd>
+            Komponen-komponen layanan adaptor sinkronisasi dan autentikator
+            didefinisikan dalam elemen-elemen
+<code>&lt;<a href="{@docRoot}guide/topics/manifest/service-element.html">service</a>&gt;</code>
+            di manifes aplikasi. Elemen-elemen ini
+            berisi
+<code>&lt;<a href="{@docRoot}guide/topics/manifest/meta-data-element.html">meta-data</a>&gt;</code>
+elemen anak yang menyediakan data tertentu ke
+            sistem:
+            <ul>
+                <li>
+                    Elemen
+<code>&lt;<a href="{@docRoot}guide/topics/manifest/meta-data-element.html">meta-data</a>&gt;</code>
+                    untuk layanan adaptor sinkronisasi menunjuk ke
+                    file XML <code>res/xml/syncadapter.xml</code>. Pada gilirannya, file ini mendefinisikan
+                    URI untuk layanan web yang akan disinkronkan dengan Penyedia Kontak,
+                    dan tipe akun untuk layanan web.
+                </li>
+                <li>
+                    <strong>Opsional:</strong> Elemen
+<code>&lt;<a href="{@docRoot}guide/topics/manifest/meta-data-element.html">meta-data</a>&gt;</code>
+                   untuk autentikator menunjuk ke file XML
+                    <code>res/xml/authenticator.xml</code>. Pada gilirannya, file ini menetapkan
+                    tipe akun yang didukung autentikator, serta sumber daya UI yang
+                    muncul selama proses autentikasi. Tipe akun yang ditetapkan dalam elemen ini
+                    harus sama dengan tipe akun yang ditetapkan untuk adaptor
+                    sinkronisasi.
+                </li>
+            </ul>
+        </dd>
+    </dl>
+<h2 id="SocialStream">Data Aliran Sosial</h2>
+<p>
+    Tabel-tabel {@code android.provider.ContactsContract.StreamItems} dan
+    {@code android.provider.ContactsContract.StreamItemPhotos}
+    mengelola data yang masuk dari jaringan sosial. Anda bisa menulis adaptor sinkronisasi yang menambahkan data aliran
+    dari jaringan Anda sendiri ke tabel-tabel ini, atau Anda bisa membaca data aliran dari tabel-tabel ini dan
+    menampilkannya dalam aplikasi sendiri, atau keduanya. Dengan fitur-fitur ini, layanan dan aplikasi
+    jaringan sosial Anda bisa diintegrasikan ke dalam pengalaman jaringan sosial Android.
+</p>
+<h3 id="StreamText">Teks aliran sosial</h3>
+<p>
+    Item aliran selalu dikaitkan dengan kontak mentah.
+    {@code android.provider.ContactsContract.StreamItemsColumns#RAW_CONTACT_ID} menautkan ke
+    nilai <code>_ID</code> untuk kontak mentah. Tipe akun dan nama akun kontak
+    mentah juga disimpan dalam baris item aliran.
+</p>
+<p>
+    Simpanlah data dari aliran Anda dalam kolom-kolom berikut:
+</p>
+<dl>
+    <dt>
+        {@code android.provider.ContactsContract.StreamItemsColumns#ACCOUNT_TYPE}
+    </dt>
+    <dd>
+        <strong>Diperlukan.</strong> Tipe akun pengguna untuk kontak mentah yang dikaitkan dengan
+        item aliran ini. Ingatlah untuk mengatur nilai ini saat Anda menyisipkan item aliran.
+    </dd>
+    <dt>
+        {@code android.provider.ContactsContract.StreamItemsColumns#ACCOUNT_NAME}
+    </dt>
+    <dd>
+        <strong>Diperlukan.</strong> Nama akun pengguna untuk kontak mentah yang dikaitkan dengan
+        item aliran ini. Ingatlah untuk mengatur nilai ini saat Anda menyisipkan item aliran.
+    </dd>
+    <dt>
+        Kolom identifier
+    </dt>
+    <dd>
+        <strong>Diperlukan.</strong> Anda harus memasukkan kolom identifier berikut saat
+        menyisipkan item aliran:
+        <ul>
+            <li>
+                {@code android.provider.ContactsContract.StreamItemsColumns#CONTACT_ID}:
+                Nilai {@code android.provider.BaseColumns#_ID} kontak yang dikaitkan dengan item aliran
+                ini.
+            </li>
+            <li>
+                {@code android.provider.ContactsContract.StreamItemsColumns#CONTACT_LOOKUP_KEY}:
+                Nilai {@code android.provider.ContactsContract.ContactsColumns#LOOKUP_KEY}
+                kontak yang dikaitkan dengan item aliran ini.
+            </li>
+            <li>
+                {@code android.provider.ContactsContract.StreamItemsColumns#RAW_CONTACT_ID}:
+                Nilai {@code android.provider.BaseColumns#_ID} kontak mentah yang dikaitkan dengan item aliran
+                ini.
+            </li>
+        </ul>
+    </dd>
+    <dt>
+        {@code android.provider.ContactsContract.StreamItemsColumns#COMMENTS}
+    </dt>
+    <dd>
+        Opsional. Menyimpan informasi rangkuman yang bisa Anda tampilkan di awal item aliran.
+    </dd>
+    <dt>
+        {@code android.provider.ContactsContract.StreamItemsColumns#TEXT}
+    </dt>
+    <dd>
+        Teks item aliran, baik konten yang diposting oleh sumber item,
+        maupun keterangan beberapa tindakan yang menghasilkan item aliran. Kolom ini bisa berisi
+        sembarang gambar sumber daya pemformatan dan tertanam yang bisa dirender oleh
+        {@link android.text.Html#fromHtml(String) fromHtml()}. Penyedia bisa memotong atau
+        menghapus konten yang panjang, tetapi penyedia akan mencoba menghindari memutus tag.
+    </dd>
+    <dt>
+        {@code android.provider.ContactsContract.StreamItemsColumns#TIMESTAMP}
+    </dt>
+    <dd>
+        String teks berisi waktu item aliran yang disisipkan atau diperbarui, berupa
+        <em>milidetik</em> sejak waktu patokan. Aplikasi yang menyisipkan atau memperbarui item aliran
+        bertanggung jawab memelihara kolom ini; aplikasi tidak dipelihara secara otomatis oleh
+        Penyedia Kontak.
+    </dd>
+</dl>
+<p>
+    Untuk menampilkan informasi pengidentifikasi item aliran Anda, gunakan
+    {@code android.provider.ContactsContract.StreamItemsColumns#RES_ICON},
+    {@code android.provider.ContactsContract.StreamItemsColumns#RES_LABEL}, dan
+    {@code android.provider.ContactsContract.StreamItemsColumns#RES_PACKAGE} untuk menautkan ke sumber daya
+    dalam aplikasi Anda.
+</p>
+<p>
+    Tabel {@code android.provider.ContactsContract.StreamItems} juga berisi kolom-kolom
+    {@code android.provider.ContactsContract.StreamItemsColumns#SYNC1} hingga
+    {@code android.provider.ContactsContract.StreamItemsColumns#SYNC4} untuk penggunaan eksklusif oleh
+    adaptor sinkronisasi.
+</p>
+<h3 id="StreamPhotos">Foto aliran sosial</h3>
+<p>
+   Tabel {@code android.provider.ContactsContract.StreamItemPhotos} menyimpan foto-foto yang dikaitkan
+   dengan item aliran. Kolom
+{@code android.provider.ContactsContract.StreamItemPhotosColumns#STREAM_ITEM_ID}   tabel ini
+   menautkan ke nilai dalam kolom {@code android.provider.BaseColumns#_ID}
+   tabel {@code android.provider.ContactsContract.StreamItems}. Acuan foto disimpan dalam
+   tabel pada kolom-kolom ini:
+</p>
+<dl>
+    <dt>
+        Kolom {@code android.provider.ContactsContract.StreamItemPhotos#PHOTO} (BLOB).
+    </dt>
+    <dd>
+        Representasi biner foto, yang diubah ukurannya oleh penyedia untuk penyimpanan dan tampilan.
+        Kolom ini tersedia untuk kompatibilitas ke belakang dengan versi Penyedia Kontak
+        sebelumnya yang menggunakannya untuk menyimpan foto. Akan tetapi, pada versi saat ini
+        Anda tidak boleh menggunakan kolom ini untuk menyimpan foto. Sebagai gantinya, gunakan
+         {@code android.provider.ContactsContract.StreamItemPhotosColumns#PHOTO_FILE_ID} atau
+        {@code android.provider.ContactsContract.StreamItemPhotosColumns#PHOTO_URI} (keduanya
+        dijelaskan dalam poin-poin berikut) untuk menyimpan foto di file. Kolom ini sekarang
+        berisi thumbnail foto, yang tersedia untuk dibaca.
+    </dd>
+    <dt>
+        {@code android.provider.ContactsContract.StreamItemPhotosColumns#PHOTO_FILE_ID}
+    </dt>
+    <dd>
+        Identifier numerik foto untuk kontak mentah. Tambahkan nilai ini ke konstanta
+        {@link android.provider.ContactsContract.DisplayPhoto#CONTENT_URI DisplayPhoto.CONTENT_URI}
+        untuk mendapatkan URI konten yang menunjuk ke satu file foto, kemudian panggil
+        {@link android.content.ContentResolver#openAssetFileDescriptor(Uri, String)
+        openAssetFileDescriptor()} untuk mendapatkan handle ke file foto.
+    </dd>
+    <dt>
+        {@code android.provider.ContactsContract.StreamItemPhotosColumns#PHOTO_URI}
+    </dt>
+    <dd>
+        URI konten menunjuk langsung ke file foto untuk foto yang diwakili oleh baris ini.
+        Panggillah {@link android.content.ContentResolver#openAssetFileDescriptor(Uri, String)
+        openAssetFileDescriptor()} dengan URI ini untuk mendapatkan handle ke file foto.
+    </dd>
+</dl>
+<h3 id="SocialStreamTables">Menggunakan tabel aliran sosial</h3>
+<p>
+    Tabel-tabel ini sama fungsinya dengan tabel-tabel utama lainnya dalam Penyedia Kontak, kecuali:
+</p>
+    <ul>
+        <li>
+            Tabel-tabel ini memerlukan izin akses tambahan. Untuk membaca dari tabel, aplikasi Anda
+            harus memiliki izin {@code android.Manifest.permission#READ_SOCIAL_STREAM}. Untuk memodifikasi
+            tabel, aplikasi Anda harus memiliki izin
+            {@code android.Manifest.permission#WRITE_SOCIAL_STREAM}.
+        </li>
+        <li>
+            Untuk tabel {@code android.provider.ContactsContract.StreamItems}, jumlah baris
+            yang disimpan bagi setiap kontak mentah adalah terbatas. Setelah batasnya tercapai,
+            Penyedia Kontak akan membuat ruang untuk baris item aliran baru dengan menghapus secara otomatis
+            baris yang memiliki
+            {@code android.provider.ContactsContract.StreamItemsColumns#TIMESTAMP} terlama. Untuk mendapatkan
+            batas, keluarkan query ke URI konten
+            {@code android.provider.ContactsContract.StreamItems#CONTENT_LIMIT_URI}. Anda bisa membiarkan
+            semua argumen selain URI konten diatur ke <code>null</code>. Query
+            menghasilkan sebuah Kursor yang berisi baris tunggal, dengan kolom tunggal
+            {@code android.provider.ContactsContract.StreamItems#MAX_ITEMS}.
+        </li>
+    </ul>
+
+<p>
+    Kelas {@code android.provider.ContactsContract.StreamItems.StreamItemPhotos} mendefinisikan
+    subtabel {@code android.provider.ContactsContract.StreamItemPhotos} yang berisi
+    baris foto untuk satu item aliran.
+</p>
+<h3 id="SocialStreamInteraction">Interaksi aliran sosial</h3>
+<p>
+    Data aliran sosial yang dikelola oleh Penyedia Kontak, bersama aplikasi kontak
+    perangkat, menawarkan cara andal untuk menghubungkan sistem jaringan sosial Anda
+    dengan kontak yang ada. Tersedia fitur-fitur berikut:
+</p>
+    <ul>
+        <li>
+            Dengan menyinkronkan layanan jaringan sosial ke Penyedia Kontak dengan adaptor
+            sinkronisasi, Anda bisa mengambil aktivitas terbaru untuk kontak pengguna dan menyimpannya dalam tabel-tabel
+             {@code android.provider.ContactsContract.StreamItems} dan
+            {@code android.provider.ContactsContract.StreamItemPhotos} untuk digunakan nanti.
+        </li>
+        <li>
+            Selain sinkronisasi rutin, Anda bisa memicu adaptor sinkronisasi agar mengambil
+            data tambahan bila pengguna memilih sebuah kontak untuk ditampilkan. Hal ini memungkinkan adaptor sinkronisasi Anda
+            mengambil foto resolusi tinggi dan item aliran terbaru untuk kontak.
+        </li>
+        <li>
+            Dengan mendaftarkan pemberitahuan pada aplikasi kontak perangkat dan Penyedia Kontak,
+            Anda bisa <em>menerima</em> intent saat kontak ditampilkan, dan pada saat itu
+            memperbarui status kontak dari layanan Anda. Pendekatan ini mungkin lebih cepat dan menggunakan
+            bandwidth lebih sedikit daripada melakukan sinkronisasi penuh dengan adaptor sinkronisasi.
+        </li>
+        <li>
+            Pengguna bisa menambahkan kontak ke layanan jaringan sosial Anda sambil melihat kontak
+            dalam aplikasi kontak perangkat. Anda mengaktifkannya dengan fitur "invite contact",
+            yang Anda aktifkan dengan kombinasi aktivitas yang menambahkan kontak yang ada ke jaringan
+           Anda, dan file XML yang menyediakan aplikasi kontak perangkat dan
+            Penyedia Kontak dengan detail aplikasi Anda.
+        </li>
+    </ul>
+<p>
+    Sinkronisasi rutin item aliran dengan Penyedia Kontak sama dengan
+    sinkronisasi lainnya. Untuk mengetahui selengkapnya tentang sinkronisasi, lihat bagian
+    <a href="#SyncAdapters">Adaptor Sinkronisasi Penyedia Kontak</a>. Mendaftarkan pemberitahuan dan
+    mengundang kontak dibahas dalam dua bagian berikutnya.
+</p>
+<h4>Pendaftaran untuk menangani tampilan jaringan sosial</h4>
+<p>
+    Untuk mendaftarkan adaptor sinkronisasi agar menerima pemberitahuan saat pengguna menampilkan kontak
+    yang dikelola oleh adaptor sinkronisasi Anda:
+</p>
+<ol>
+    <li>
+        Buat file yang bernama <code>contacts.xml</code> dalam direktori <code>res/xml/</code>
+        proyek Anda. Jika sudah memiliki file ini, langkah ini boleh dilewati.
+    </li>
+    <li>
+        Dalam file ini, tambahkan elemen
+<code>&lt;ContactsAccountType xmlns:android="http://schemas.android.com/apk/res/android"&gt;</code>.
+        Jika elemen ini sudah ada, langkah ini boleh dilewati.
+    </li>
+    <li>
+        Untuk mendaftarkan layanan yang diberitahukan saat pengguna membuka halaman detail kontak dalam
+        aplikasi kontak perangkat, tambahkan atribut
+        <code>viewContactNotifyService="<em>serviceclass</em>"</code> ke elemen, dengan
+        <code><em>serviceclass</em></code> sebagai nama kelas mutlak (fully qualified) dari layanan
+        yang seharusnya menerima intent dari aplikasi kontak perangkat. Untuk layanan
+        notifier, gunakan kelas yang memperluas {@link android.app.IntentService}, guna memudahkan layanan
+        untuk menerima intent. Data dalam intent yang masuk berisi URI konten dari kontak
+        mentah yang diklik pengguna. Untuk layanan notifier, Anda bisa mengikatnya ke kemudian memanggil
+        adaptor sinkronisasi Anda untuk memperbarui data bagi kontak mentah.
+    </li>
+</ol>
+<p>
+    Untuk mendaftarkan aktivitas agar dipanggil saat pengguna mengklik item aliran atau foto atau keduanya:
+</p>
+<ol>
+    <li>
+        Buat file yang bernama <code>contacts.xml</code> dalam direktori <code>res/xml/</code>
+        proyek Anda. Jika sudah memiliki file ini, langkah ini boleh dilewati.
+    </li>
+    <li>
+        Dalam file ini, tambahkan elemen
+<code>&lt;ContactsAccountType xmlns:android="http://schemas.android.com/apk/res/android"&gt;</code>.
+        Jika elemen ini sudah ada, langkah ini boleh dilewati.
+    </li>
+    <li>
+        Untuk mendaftarkan salah satu aktivitas Anda guna menangani klik oleh pengguna pada item aliran dalam
+        aplikasi kontak perangkat, tambahkan atribut
+        <code>viewStreamItemActivity="<em>activityclass</em>"</code> ke elemen, dengan
+        <code><em>activityclass</em></code> sebagai nama kelas mutlak (fully-qualified) dari aktivitas
+        yang harus menerima intent dari aplikasi kontak perangkat.
+    </li>
+    <li>
+        Untuk mendaftarkan salah satu aktivitas Anda guna menangani klik oleh pengguna pada foto aliran dalam
+        aplikasi kontak perangkat, tambahkan atribut
+        <code>viewStreamItemPhotoActivity="<em>activityclass</em>"</code> ke elemen, dengan
+        <code><em>activityclass</em></code> adalah kelas nama mutlak aktivitas
+        yang harus menerima intent dari aplikasi kontak perangkat.
+    </li>
+</ol>
+<p>
+    Elemen <code>&lt;ContactsAccountType&gt;</code> dijelaskan lebih detail di
+    bagian <a href="#SocialStreamAcctType">Elemen &lt;ContactsAccountType&gt;</a>.
+</p>
+<p>
+    Intent yang masuk berisi URI konten dari materi atau foto yang diklik pengguna.
+    Untuk mendapatkan aktivitas terpisah bagi item teks dan foto, gunakan kedua atribut dalam file yang sama.
+</p>
+<h4>Berinteraksi dengan layanan jaringan sosial Anda</h4>
+<p>
+    Pengguna tidak harus meninggalkan aplikasi perangkat kontak untuk mengundang kontak ke situs
+    jaringan sosial Anda. Sebagai gantinya, Anda bisa meminta aplikasi kontak perangkat mengirimkan intent untuk mengundang
+    kontak ke salah satu aktivitas Anda. Untuk mempersiapkannya:
+</p>
+<ol>
+    <li>
+        Buat file yang bernama <code>contacts.xml</code> dalam direktori <code>res/xml/</code>
+        proyek Anda. Jika sudah memiliki file ini, langkah ini boleh dilewati.
+    </li>
+    <li>
+        Dalam file ini, tambahkan elemen
+<code>&lt;ContactsAccountType xmlns:android="http://schemas.android.com/apk/res/android"&gt;</code>.
+        Jika elemen ini sudah ada, langkah ini boleh dilewati.
+    </li>
+    <li>
+        Tambahkan atribut-atribut berikut:
+        <ul>
+            <li><code>inviteContactActivity="<em>activityclass</em>"</code></li>
+            <li>
+                <code>inviteContactActionLabel="&#64;string/<em>invite_action_label</em>"</code>
+            </li>
+        </ul>
+        Nilai <code><em>activityclass</em></code> adalah nama kelas mutlak
+        aktivitas yang harus menerima intent ini. Nilai <code><em>invite_action_label</em></code>
+        adalah string teks yang ditampilkan dalam menu <strong>Add Connection</strong> dalam
+        aplikasi kontak perangkat.
+    </li>
+</ol>
+<p class="note">
+    <strong>Catatan:</strong> <code>ContactsSource</code> adalah nama tag yang sudah usang untuk
+    <code>ContactsAccountType</code>.
+</p>
+<h3 id="ContactsFile">Acuan contacts.xml</h3>
+<p>
+    File <code>contacts.xml</code> berisi elemen XML yang mengontrol interaksi adaptor sinkronisasi
+    Anda dan aplikasi dengan aplikasi kontak dan Penyedia Kontak. Elemen-elemen ini
+    dijelaskan di bagian-bagian selanjutnya.
+</p>
+<h4 id="SocialStreamAcctType">Elemen &lt;ContactsAccountType&gt;</h4>
+<p>
+    Elemen <code>&lt;ContactsAccountType&gt;</code> mengontrol interaksi aplikasi
+    Anda dengan aplikasi kontak. Sintaksnya adalah sebagai berikut:
+</p>
+<pre>
+&lt;ContactsAccountType
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        inviteContactActivity="<em>activity_name</em>"
+        inviteContactActionLabel="<em>invite_command_text</em>"
+        viewContactNotifyService="<em>view_notify_service</em>"
+        viewGroupActivity="<em>group_view_activity</em>"
+        viewGroupActionLabel="<em>group_action_text</em>"
+        viewStreamItemActivity="<em>viewstream_activity_name</em>"
+        viewStreamItemPhotoActivity="<em>viewphotostream_activity_name</em>"&gt;
+</pre>
+<p>
+    <strong>dimuat dalam:</strong>
+</p>
+<p>
+    <code>res/xml/contacts.xml</code>
+</p>
+<p>
+    <strong>bisa berisi:</strong>
+</p>
+<p>
+    <strong><code>&lt;ContactsDataKind&gt;</code></strong>
+</p>
+<p>
+    <strong>Keterangan:</strong>
+</p>
+<p>
+    Mendeklarasikan komponen Android dan label UI yang memungkinkan pengguna mengundang salah satu kontak ke
+    jaringan sosial, memberi tahu pengguna bila salah satu aliran jaringan sosial diperbarui, dan
+    seterusnya.
+</p>
+<p>
+    Perhatikan bahwa awalan atribut <code>android:</code> tidak perlu untuk atribut-atribut
+    <code>&lt;ContactsAccountType&gt;</code>.
+</p>
+<p>
+    <strong>Atribut:</strong>
+</p>
+<dl>
+    <dt>{@code inviteContactActivity}</dt>
+    <dd>
+        Nama kelas mutlak aktivitas dalam aplikasi yang Anda ingin
+        aktifkan bila pengguna memilih <strong>Add connection</strong> dari aplikasi kontak
+        perangkat.
+    </dd>
+    <dt>{@code inviteContactActionLabel}</dt>
+    <dd>
+        String teks yang ditampilkan untuk aktivitas yang ditetapkan dalam
+        {@code inviteContactActivity}, dalam menu <strong>Add connection</strong>.
+        Misalnya, Anda bisa menggunakan string "Ikuti di jaringan saya". Anda bisa menggunakan identifier sumber daya
+        string untuk tabel ini.
+    </dd>
+    <dt>{@code viewContactNotifyService}</dt>
+    <dd>
+        Nama kelas mutlak layanan dalam aplikasi Anda yang harus menerima
+        pemberitahuan saat pengguna menampilkan kontak. Pemberitahuan ini dikirimkan oleh aplikasi kontak
+        perangkat; hal ini memungkinkan aplikasi Anda menunda operasi yang banyak memproses data
+        hingga dibutuhkan. Misalnya, aplikasi Anda bisa merespons pemberitahuan ini
+        dengan membaca dalam dan menampilkan foto resolusi tinggi kontak dan item aliran sosial
+        terbaru. Fitur ini dijelaskan lebih detail di bagian
+        <a href="#SocialStreamInteraction">Interaksi aliran sosial</a>. Anda bisa melihat
+        contoh layanan pemberitahuan dalam file <code>NotifierService.java</code> dalam contoh aplikasi
+        <a href="{@docRoot}resources/samples/SampleSyncAdapter/index.html">Sample Sync Adapter</a>.
+
+    </dd>
+    <dt>{@code viewGroupActivity}</dt>
+    <dd>
+        Nama kelas mutlak aktivitas dalam aplikasi yang bisa menampilkan
+        informasi grup. Bila pengguna mengklik label grup dalam aplikasi
+        kontak perangkat, UI aktivitas ini akan ditampilkan.
+    </dd>
+    <dt>{@code viewGroupActionLabel}</dt>
+    <dd>
+        Label yang ditampilkan aplikasi kontak untuk kontrol UI yang memungkinkan
+        pengguna melihat grup dalam aplikasi Anda.
+        <p>
+            Misalnya, jika Anda menginstal aplikasi Google+ di perangkat dan menyinkronkan
+            Google+ dengan aplikasi kontak, Anda akan melihat lingkaran Google+ tercantum sebagai grup
+            dalam tab <strong>Groups</strong> aplikasi kontak Anda. Jika Anda mengklik
+            lingkaran Google+, Anda akan melihat orang-orang di lingkaran itu tercantum sebagai satu "grup". Di atas
+            tampilan, Anda akan melihat ikon Google+; jika mengklik ikon itu, kontrol akan beralih ke
+            aplikasi Google+. Aplikasi kontak melakukan ini dengan
+            {@code viewGroupActivity}, yang menggunakan ikon Google+ sebagai nilai
+            {@code viewGroupActionLabel}.
+        </p>
+        <p>
+            Identifier sumber daya string diperbolehkan untuk atribut ini.
+        </p>
+    </dd>
+    <dt>{@code viewStreamItemActivity}</dt>
+    <dd>
+        Nama kelas mutlak aktivitas dalam aplikasi Anda
+        yang diluncurkan aplikasi kontak perangkat bila pengguna mengklik item aliran untuk kontak mentah.
+    </dd>
+    <dt>{@code viewStreamItemPhotoActivity}</dt>
+    <dd>
+        Nama kelas mutlak aktivitas yang diluncurkan
+        aplikasi kontak perangkat bila pengguna mengklik foto dalam item aliran
+        untuk kontak mentah.
+    </dd>
+</dl>
+<h4 id="SocialStreamDataKind">Elemen &lt;ContactsDataKind&gt;</h4>
+<p>
+    Elemen <code>&lt;ContactsDataKind&gt;</code> mengontrol tampilan baris data custom
+    aplikasi Anda dalam UI aplikasi kontak. Sintaksnya adalah sebagai berikut:
+</p>
+<pre>
+&lt;ContactsDataKind
+        android:mimeType="<em>MIMEtype</em>"
+        android:icon="<em>icon_resources</em>"
+        android:summaryColumn="<em>column_name</em>"
+        android:detailColumn="<em>column_name</em>"&gt;
+</pre>
+<p>
+    <strong>dimuat dalam:</strong>
+</p>
+<code>&lt;ContactsAccountType&gt;</code>
+<p>
+    <strong>Keterangan:</strong>
+</p>
+<p>
+    Gunakan elemen ini untuk memerintahkan aplikasi kontak agar menampilkan konten baris data custom sebagai
+    bagian dari detail kontak mentah. Setiap elemen anak <code>&lt;ContactsDataKind&gt;</code>
+    <code>&lt;ContactsAccountType&gt;</code> mewakili tipe baris data custom yang
+    ditambahkan adaptor sinkronisasi Anda ke tabel {@link android.provider.ContactsContract.Data}. Tambahkan satu
+    elemen <code>&lt;ContactsDataKind&gt;</code> untuk setiap tipe MIME custom yang Anda gunakan. Anda tidak harus
+    menambahkan elemen jika Anda memiliki baris data custom yang datanya tidak ingin ditampilkan.
+</p>
+<p>
+    <strong>Atribut:</strong>
+</p>
+<dl>
+    <dt>{@code android:mimeType}</dt>
+    <dd>
+        Tipe MIME custom yang telah Anda definisikan untuk salah satu tipe baris data custom dalam
+        tabel {@link android.provider.ContactsContract.Data}. Misalnya, nilai
+        <code>vnd.android.cursor.item/vnd.example.locationstatus</code> bisa berupa tipe MIME
+       custom untuk baris data yang mencatat lokasi kontak yang terakhir diketahui.
+    </dd>
+    <dt>{@code android:icon}</dt>
+    <dd>
+
+        <a href="{@docRoot}guide/topics/resources/drawable-resource.html">Sumber daya drawable</a>
+        Android yang ditampilkan aplikasi kontak di samping data Anda. Gunakan ini untuk menunjukkan kepada
+        pengguna bahwa data berasal dari layanan Anda.
+    </dd>
+    <dt>{@code android:summaryColumn}</dt>
+    <dd>
+        Nama kolom untuk yang pertama dari dua nilai yang diambil dari baris data. Nilai
+        ditampilkan sebagai baris pertama entri untuk baris data ini. Baris pertama
+        dimaksudkan untuk digunakan sebagai rangkuman data, tetapi itu bersifat opsional. Lihat juga
+        <a href="#detailColumn">android:detailColumn</a>.
+    </dd>
+    <dt>{@code android:detailColumn}</dt>
+    <dd>
+        Nama kolom untuk yang kedua dari dua nilai yang diambil dari baris data. Nilai
+        ditampilkan sebagai baris kedua entri untuk baris data ini. Lihat juga
+        {@code android:summaryColumn}.
+    </dd>
+</dl>
+<h2 id="AdditionalFeatures">Fitur Tambahan Penyedia Kontak</h2>
+<p>
+    Di samping fitur-fitur utama yang dijelaskan di bagian sebelumnya, Penyedia Kontak menawarkan
+   fitur-fitur berguna ini untuk digunakan bersama data kontak:
+</p>
+    <ul>
+       <li>Grup kontak</li>
+       <li>Fitur foto</li>
+    </ul>
+<h3 id="Groups">Grup kontak</h3>
+<p>
+    Penyedia Kontak secara opsional bisa melabeli kumpulan kontak terkait dengan data
+    <strong>grup</strong>. Jika server yang dikaitkan dengan akun pengguna
+    ingin mempertahankan grup, adaptor sinkronisasi untuk tipe akun dari akun itu harus mentransfer
+    data grup antara Penyedia Kontak dan server. Bila pengguna menambahkan kontak baru ke
+    server, kemudian memasukkan kontak ini dalam grup baru, adaptor sinkronisasi harus menambahkan grup baru
+    ke tabel {@link android.provider.ContactsContract.Groups}. Grup atau grup-grup yang memiliki kontak
+    disimpan dalam tabel {@link android.provider.ContactsContract.Data}, dengan menggunakan
+    tipe MIME {@link android.provider.ContactsContract.CommonDataKinds.GroupMembership}.
+</p>
+<p>
+    Jika Anda mendesain adaptor sinkronisasi yang akan menambahkan data kontak mentah dari
+    server ke Penyedia Kontak, dan Anda tidak menggunakan grup, maka Anda harus memberi tahu
+    penyedia itu agar membuat data Anda terlihat. Dalam kode yang dijalankan bila pengguna menambahkan akun
+    ke perangkat, perbarui baris {@link android.provider.ContactsContract.Settings}
+    yang ditambahkan Penyedia Kontak untuk akunnya. Dalam baris ini, atur nilai kolom
+    {@link android.provider.ContactsContract.SettingsColumns#UNGROUPED_VISIBLE
+    Settings.UNGROUPED_VISIBLE} ke 1. Bila melakukannya, Penyedia Kontak akan selalu
+    membuat data kontak Anda terlihat, meskipun Anda tidak menggunakan grup.
+</p>
+<h3 id="Photos">Foto kontak</h3>
+<p>
+    Tabel {@link android.provider.ContactsContract.Data} menyimpan foto sebagai baris dengan tipe MIME
+    {@link android.provider.ContactsContract.CommonDataKinds.Photo#CONTENT_ITEM_TYPE
+    Photo.CONTENT_ITEM_TYPE}. Kolom
+    {@link android.provider.ContactsContract.RawContactsColumns#CONTACT_ID} baris yang ditautkan ke
+    kolom {@code android.provider.BaseColumns#_ID} kontak mentah yang memiliki kolom itu.
+    Kelas {@link android.provider.ContactsContract.Contacts.Photo} mendefinisikan subtabel
+    {@link android.provider.ContactsContract.Contacts} yang berisi informasi foto untuk foto
+    utama kontak, yang merupakan foto utama dari kontak mentah utama kontak itu. Demikian pula,
+    kelas {@link android.provider.ContactsContract.RawContacts.DisplayPhoto} mendefinisikan subtabel
+    {@link android.provider.ContactsContract.RawContacts} yang berisi informasi foto untuk
+    foto utama kontak mentah.
+</p>
+<p>
+    Dokumentasi acuan untuk {@link android.provider.ContactsContract.Contacts.Photo} dan
+    {@link android.provider.ContactsContract.RawContacts.DisplayPhoto} berisi contoh-contoh
+    pengambilan informasi foto. Tidak ada kelas praktis untuk mengambil
+    thumbnail utama kontak mentah, tetapi Anda bisa mengirim query ke
+    tabel {@link android.provider.ContactsContract.Data}, dengan memilih
+    {@code android.provider.BaseColumns#_ID} kontak mentah,
+    {@link android.provider.ContactsContract.CommonDataKinds.Photo#CONTENT_ITEM_TYPE
+    Photo.CONTENT_ITEM_TYPE}, dan kolom {@link android.provider.ContactsContract.Data#IS_PRIMARY}
+    untuk menemukan baris foto utama kontak mentah.
+</p>
+<p>
+    Data aliran sosial untuk seseorang bisa juga disertai foto. Data ini disimpan dalam
+    tabel {@code android.provider.ContactsContract.StreamItemPhotos}, yang dijelaskan lebih detail
+    di bagian <a href="#StreamPhotos">Foto aliran sosial</a>.
+</p>

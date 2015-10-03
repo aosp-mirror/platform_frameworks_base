@@ -1,0 +1,71 @@
+page.title=UI 개요
+@jd:body
+
+
+<p>Android 앱의 모든 사용자 인터페이스 요소는 {@link android.view.View}와
+{@link android.view.ViewGroup} 개체를 사용하여 구축합니다. {@link android.view.View}는 사용자가 상호 작용할 수 있는 무언가를 
+화면에 그리는 객체입니다. {@link android.view.ViewGroup}은 
+인터페이스 레이아웃을 정의하기 위해 다른 {@link android.view.View}(및{@link android.view.ViewGroup}) 객체를 
+보유하는 객체입니다.</p>
+
+<p>Android는 공통 입력 제어(버튼 및 텍스트 필드)와 다양한 레이아웃 모델(선형 또는 관계 레이아웃)을 제공하는 {@link android.view.View}와 {@link
+android.view.ViewGroup} 하위 클래스의
+컬렉션을 제공합니다.</p>
+
+
+<h2 id="Layout">사용자 인터페이스 레이아웃</h2>
+
+<p>앱의 각 구성 요소에 대한 사용자 인터페이스는 그림 1에서 나타난 바와 같이 {@link
+android.view.View}와 {@link android.view.ViewGroup} 객체의 계층으로 정의됩니다. 각 보기 그룹은 
+하위 보기를 체계화하는 투명한 컨테이너이고, 
+하위 보기는 UI의 일부분을 그리는 제어나 다른 위젯일 수 있습니다. 
+이 계층 트리는 개발자에게 필요한 만큼 단순하거나 복잡하게 
+만들 수 있습니다(다만 단순한 것이 성능에는 가장 좋습니다).</p>
+
+<img src="{@docRoot}images/viewgroup.png" alt="" />
+<p class="img-caption"><strong>그림 1.</strong> 보기 계층을 나타낸 것으로, 이것이 
+UI 레이아웃을 정의합니다.</p>
+
+<p>레이아웃을 선언하려면 코드의 {@link android.view.View} 객체를 인스턴트화하고 트리를 구축하기 시작하면 되지만, 
+레이아웃을 정의하는 가장 쉽고 효과적인 방법은 XML 파일을 사용하는 것입니다. 
+XML은 HTML과 유사한, 인간이 읽을 수 있는 레이아웃 구조를 제공합니다.</p>
+
+<p>보기의 XML 요소 이름은 해당 요소가 나타내는 각각의 Android 클래스를 따릅니다. 말하자면 
+<code>&lt;TextView&gt;</code> 요소가 UI에서 {@link android.widget.TextView} 위젯을 생성하고,
+<code>&lt;LinearLayout&gt;</code> 요소는 {@link android.widget.LinearLayout} 보기 
+그룹을 생성하는 것입니다. </p>
+
+<p>예를 들어, 텍스트 보기와 버튼 하나가 있는 단순한 수직 레이아웃은 이런 모습을 띱니다.</p>
+<pre>
+&lt;?xml version="1.0" encoding="utf-8"?>
+&lt;LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:layout_width="fill_parent" 
+              android:layout_height="fill_parent"
+              android:orientation="vertical" >
+    &lt;TextView android:id="@+id/text"
+              android:layout_width="wrap_content"
+              android:layout_height="wrap_content"
+              android:text="I am a TextView" />
+    &lt;Button android:id="@+id/button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="I am a Button" />
+&lt;/LinearLayout>
+</pre>
+
+<p>앱에 레이아웃 리소스를 로드하면 Android가 레이아웃의 각 노드를 초기화하여 
+추가 동작을 정의하거나, 객체 상태를 쿼리 또는 레이아웃을 수정하는 데 쓸 수 있는 런타임 객체로 
+초기화합니다.</p>
+
+<p>UI 레이아웃 생성에 대한 완전한 가이드는 <a href="declaring-layout.html">XML 
+레이아웃</a>을 참조하십시오.
+
+  
+<h2 id="UIComponents">사용자 인터페이스 구성 요소</h2>
+
+<p>UI를 구축할 때 모두 {@link android.view.View} 및 {@link
+android.view.ViewGroup} 객체를 사용해야 하는 것은 아닙니다. Android가 표준형 UI 레이아웃을 제공하는 앱 구성 요소를 여러 개 제공하고 있으니, 
+개발자 여러분은 이에 대한 콘텐츠만 정의하면 됩니다. 이와 같은 UI 구성 요소에는 각각 
+고유한 API 세트가 있습니다. 이들은 <a href="{@docRoot}guide/topics/ui/actionbar.html">작업 모음</a>, <a href="{@docRoot}guide/topics/ui/dialogs.html">대화</a> 및 <a href="{@docRoot}guide/topics/ui/notifiers/notifications.html">상태 알림</a> 등 각각 다른 문서에서 설명하였습니다.</p>
+
+

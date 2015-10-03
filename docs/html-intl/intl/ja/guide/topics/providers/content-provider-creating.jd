@@ -1,0 +1,1214 @@
+page.title=コンテンツ プロバイダの作成
+@jd:body
+<div id="qv-wrapper">
+<div id="qv">
+
+
+<h2>本書の内容</h2>
+<ol>
+    <li>
+        <a href="#DataStorage">データ ストレージを設計する</a>
+    </li>
+    <li>
+        <a href="#ContentURI">コンテンツ URI を設計する</a>
+    </li>
+    <li>
+        <a href="#ContentProvider">ContentProvider クラスを実装する</a>
+        <ol>
+            <li>
+                <a href="#RequiredAccess">必須メソッド</a>
+            </li>
+            <li>
+                <a href="#Query">query() メソッドを実装する</a>
+            </li>
+            <li>
+                <a href="#Insert">insert() メソッドを実装する</a>
+            </li>
+            <li>
+                <a href="#Delete">delete() メソッドを実装する</a>
+            </li>
+            <li>
+                <a href="#Update">update() メソッドを実装する</a>
+            </li>
+            <li>
+                <a href="#OnCreate">onCreate() メソッドを実装する</a>
+            </li>
+        </ol>
+    </li>
+    <li>
+        <a href="#MIMETypes">コンテンツ プロバイダ MIME を実装する</a>
+        <ol>
+            <li>
+                <a href="#TableMIMETypes">テーブルの MIME タイプ</a>
+            </li>
+            <li>
+                <a href="#FileMIMETypes">ファイルの MIME タイプ</a>
+            </li>
+        </ol>
+    </li>
+    <li>
+        <a href="#ContractClass">コントラクト クラスを実装する</a>
+    </li>
+    <li>
+        <a href="#Permissions">コンテンツ プロバイダ パーミッションを実装する</a>
+    </li>
+    <li>
+        <a href="#ProviderElement">&lt;provider&gt; 要素</a>
+    </li>
+    <li>
+        <a href="#Intents">インテントとデータアクセス</a>
+    </li>
+</ol>
+<h2>キークラス</h2>
+    <ol>
+        <li>
+            {@link android.content.ContentProvider}
+        </li>
+        <li>
+            {@link android.database.Cursor}
+        </li>
+        <li>
+            {@link android.net.Uri}
+        </li>
+    </ol>
+<h2>関連サンプル</h2>
+    <ol>
+        <li>
+            <a href="{@docRoot}resources/samples/NotePad/index.html">
+                Note Pad のサンプル アプリケーション            </a>
+
+        </li>
+    </ol>
+<h2>関連ドキュメント</h2>
+    <ol>
+        <li>
+            <a href="{@docRoot}guide/topics/providers/content-provider-basics.html">
+            コンテンツ プロバイダの基本</a>
+        </li>
+        <li>
+            <a href="{@docRoot}guide/topics/providers/calendar-provider.html">
+            カレンダー プロバイダ</a>
+        </li>
+    </ol>
+</div>
+</div>
+
+
+<p>
+    コンテンツ プロバイダは、データの中央リポジトリへのアクセスを管理します。Android アプリケーションでは 1 つ以上のクラスとしてプロバイダを実装し、要素をマニフェスト ファイルで実装します。
+
+いずれか 1 つのクラスがサブラス {@link android.content.ContentProvider} を実装します。これは、プロバイダと他のアプリケーションとの間のインターフェースになります。
+
+コンテンツ プロバイダは他のアプリケーションへのデータの提供を意図したものですが、ユーザーがプロバイダに管理されるデータを照会、修正するアクティビティをアプリケーション内に設定することもできます。
+
+
+</p>
+<p>
+    このトピックの残りの部分では、コンテンツ プロバイダと使用する API のリストをビルドするための基本的な手順を挙げていきます。
+
+</p>
+
+
+<!-- Before You Start Building -->
+<h2 id="BeforeYouStart">ビルドを開始する前に</h2>
+<p>
+    ビルドを開始する前に、次の操作を行います。
+</p>
+<ol>
+    <li>
+        <strong>コンテンツ プロバイダが必要かどうかを決定します</strong>。次のような機能を 1 つ以上提供する場合に、コンテンツ プロバイダをビルドする必要があります。
+
+        <ul>
+            <li>他のアプリケーションに複雑なデータやファイルを提供する。</li>
+            <li>アプリから他のアプリへの複雑なデータのコピーをユーザーに許可する。</li>
+            <li>検索フレームワークを使用してカスタムの検索候補を提供する。</li>
+        </ul>
+    <p>
+        完全に独自アプリケーション内だけで使用する場合は、SQLite データベースを使用するプロバイダは必要はありません。<em></em>
+
+    </p>
+    </li>
+    <li>
+        必要かどうかを決定していない場合は、プロバイダの詳細については「<a href="{@docRoot}guide/topics/providers/content-provider-basics.html">コンテンツ プロバイダの基本</a>」のトピックをご覧ください。
+
+
+    </li>
+</ol>
+<p>
+    次に、以下の手順に従ってプロバイダをビルドします。
+</p>
+<ol>
+    <li>
+        データの未処理のストレージを設計します。コンテンツ プロバイダは次の 2 つの方法でデータを提供します。
+        <dl>
+            <dt>
+                ファイルデータ
+            </dt>
+            <dd>
+                通常、写真、オーディオ、ビデオなどのファイルの形式となるデータです。
+ファイルはアプリケーションのプライベート スペースに格納します。
+ファイルに対する別のアプリケーションからの要求に応じて、プロバイダからファイルへのハンドルが提供されます。
+
+            </dd>
+            <dt>
+                「構造化」データ
+            </dt>
+            <dd>
+                通常、データベース、配列、類似の構造の形式となるデータです。
+                テーブルの行と列に互換性を持つ形式でデータが格納されます。行は、担当者や在庫にあるアイテムなどのエンティティを表します。
+列は、担当者の名前やアイテムの価格などの、エンティティの一部のデータを表します。
+一般的にこのタイプのデータは SQLite データベースに格納しますが、任意のタイプの永続ストレージを使用できます。
+
+Android システムで使用できるストレージ タイプの詳細は、<a href="#DataStorage">データ ストレージを設計する</a>をご覧ください。
+
+
+            </dd>
+        </dl>
+    </li>
+    <li>
+        {@link android.content.ContentProvider} クラスの具体的な実装とそれに必要なメソッドを定義します。
+このクラスは、データと Android システムのそれ以外の部分とのインターフェースとなります。
+このクラスの詳細は、<a href="#ContentProvider">ContentProvider クラスを実装する</a>セクションをご覧ください。
+
+    </li>
+    <li>
+        プロバイダの認証局の文字列、コンテンツ URI、列名を定義します。プロバイダのアプリケーションでインテントを処理する場合は、インテント アクション、エクストラ データ、フラグも定義します。
+
+さらに、データにアクセスするアプリケーションに必要なパーミッションも定義します。
+これらの値はすべて定数として個別のコントラクト クラスに定義するようにします。そうしておくと、後で他のデベロッパーに対してこのクラスを公開できます。
+コンテンツ URI の詳細は、<a href="#ContentURI">コンテンツ URI を設計する</a>セクションをご覧ください。
+
+
+        インテントの使用に関する詳細については、<a href="#Intents">インテントとデータアクセス</a>セクションをご覧ください。
+
+    </li>
+    <li>
+        サンプルデータや、プロバイダとクラウドベースのデータの間でデータを同期する {@link android.content.AbstractThreadedSyncAdapter} の実装などの、その他のオプション部分を追加します。
+
+
+    </li>
+</ol>
+
+
+<!-- Designing Data Storage -->
+<h2 id="DataStorage">データ ストレージを設計する</h2>
+<p>
+    コンテンツ プロバイダは、構造化された形式で保存されているデータへのインターフェースです。インターフェースを作成する前に、データの格納方法を決定しておく必要があります。
+データは任意の形式で保存でき、必要に応じてデータの読み取りと書き込みを行うためのインターフェースを設計できます。
+
+</p>
+<p>
+    Android には、次のように、いくつかのデータ格納テクノロジーがあります。
+</p>
+<ul>
+    <li>
+        Android システムには、Android の独自のプロバイダがテーブル指向のデータを格納するために使用する、SQLite データベース API があります。
+{@link android.database.sqlite.SQLiteOpenHelper} クラスを使用すると、データベースを作成できます。また、{@link android.database.sqlite.SQLiteDatabase} クラスは、データベースにアクセスするための基本クラスです。
+
+
+
+        <p>
+            リポジトリを実装するのに、データベースを使用する必要がありません。外部的には、プロバイダはリレーショナル データベースに似た一連のテーブルとして表示されますが、プロバイダの内部実装をそのような形式にする必要はありません。
+
+
+        </p>
+    </li>
+    <li>
+        ファイルデータを格納するために、Android にはファイル指向のさまざまな API があります。
+        ファイル ストレージの詳細は、「<a href="{@docRoot}guide/topics/data/data-storage.html">Data Storage</a>」トピックをご覧ください。
+音楽やビデオのようにメディア関連のデータを提供するプロバイダを設計する場合は、テーブルデータとファイルを組み合わせるプロバイダを作成できます。
+
+
+    </li>
+    <li>
+        ネットワーク ベースのデータで作業する場合は、{@link java.net} と {@link android.net} のクラスを使用します。
+また、ネットワーク ベースをデータベースなどのローカル データストアに同期させ、データをテーブルやファイルとして提供することもできます。
+
+        <a href="{@docRoot}resources/samples/SampleSyncAdapter/index.html">サンプル同期アダプタ</a>のサンプル アプリケーションでは、このタイプの同期のデモを紹介しています。
+
+    </li>
+</ul>
+<h3 id="DataDesign">
+    データ設計上の考慮事項
+</h3>
+<p>
+    次に、プロバイダのデータ構造を設計する際のヒントを示します。
+</p>
+<ul>
+    <li>
+        テーブルデータには、プロバイダが各行の一意の数値として保持する「プライマリキー」列が常に必要です。
+この値を使用すると、行を他のテーブルの関連する行にリンクできます（「外部キー」として使用）。
+この列には任意の名前を設定できますが、プロバイダ クエリの結果を {@link android.widget.ListView} にリンクさせるには、取得する列のいずれかの名前が <code>_ID</code> になっている必要があるため、{@link android.provider.BaseColumns#_ID BaseColumns._ID} を使用することをお勧めします。
+
+
+
+
+    </li>
+    <li>
+        ビットマップ画像やサイズが非常に大きなその他のファイル指向のデータを提供する場合は、テーブルにデータを直接格納するのではなく、データをファイルに格納し、データを間接的に提供します。
+
+その場合、データにアクセスするには、{@link android.content.ContentResolver} ファイル メソッドの使用が必要であることをプロバイダのユーザーに通知する必要があります。
+
+    </li>
+    <li>
+        サイズや構造が異なるデータを格納するには、バイナリ ラージ オブジェクト（BLOB）データタイプを使用します。
+たとえば、<a href="http://code.google.com/p/protobuf">Protocol Buffer</a> や <a href="http://www.json.org">JSON 構造</a>を格納するには、BLOB 列を使用します。
+
+
+        <p>
+            さらに、BLOB を使用してスキーマに依存しないテーブルを実装できます。<em></em>このタイプのテーブルでは、プライマリキー列、MIME タイプ列、1 つ以上の汎用列を BLOB として定義します。
+
+BLOB 列内のデータの内容は、MIME タイプ列の値によって示されます。
+これにより、同じテーブルにさまざまな行タイプを格納できます。
+連絡先プロバイダの「データ」テーブル {@link android.provider.ContactsContract.Data} は、スキーマに依存しないテーブルの例です。
+
+
+        </p>
+    </li>
+</ul>
+<!-- Designing Content URIs -->
+<h2 id="ContentURI">コンテンツ URI を設計する</h2>
+<p>
+    <strong>コンテンツ URI</strong> は、プロバイダのデータを特定する URI です。コンテンツ URI には、プロバイダ全体の識別名（<strong>認証局</strong>）とテーブルやファイルをポイントする名前（<strong>パス</strong>）が含まれます。
+
+オプションの ID 部分は、テーブル内の個々の行を指します。
+{@link android.content.ContentProvider} のそれぞれのデータアクセス メソッドは引数としてコンテンツ URI を使用します。これにより、アクセスするテーブル、行、ファイルを決定できます。
+
+
+</p>
+<p>
+    コンテンツ URI の基本については、「<a href="{@docRoot}guide/topics/providers/content-provider-basics.html">コンテンツ プロバイダの基本</a>」トピックをご覧ください。
+
+
+</p>
+<h3>認証局を設計する</h3>
+<p>
+    通常、プロバイダは、Android 内部の名前として使用される認証局を 1 つ持ちます。他のプロバイダとの競合を避けるためには、（逆に）プロバイダの認証局の基礎としてインターネット ドメインの所有権を使用する必要があります。
+
+この推奨事項は Android パッケージ名にもあてはまるため、プロバイダを含むパッケージの名前の拡張子として、プロバイダの認証局を定義できます。
+
+たとえば、Android パッケージ名が <code>com.example.&lt;appname&gt;</code> の場合、プロバイダに認証局 <code>com.example.&lt;appname&gt;.provider</code> を付与する必要があります。
+
+
+</p>
+<h3>パス構造を設計する</h3>
+<p>
+    デベロッパーは通常、個々のテーブルを指すパスを末尾に追加して認証局からコンテンツ URI を作成します。
+たとえば、<em>table1</em> と <em>table2</em> の 2 つのテーブルがある場合、前の例の認証局を組み合わせてコンテンツ URI <code>com.example.&lt;appname&gt;.provider/table1</code> と <code>com.example.&lt;appname&gt;.provider/table2</code> を作成します。
+
+
+
+パスは 1 つのセグメントに限定されず、パスの各レベルにテーブルを作成する必要はありません。
+
+</p>
+<h3>コンテンツ URI ID を処理する</h3>
+<p>
+    慣例として、URI の末尾にある行の ID 値を持つコンテンツ URI を受け取ることで、プロバイダはテーブル内の 1 つの行へのアクセスを提供します。さらに、慣例として、プロバイダは ID 値をテーブルの <code>_ID</code> 列とマッチングし、一致する行に対して要求されたアクセスを実行します。
+
+
+
+</p>
+<p>
+    この慣例により、プロバイダにアクセスするアプリの一般的なパターンを簡単に設計できます。アプリはプロバイダにクエリを実行し、{@link android.widget.CursorAdapter} を使用して、取得した {@link android.database.Cursor} を {@link android.widget.ListView} に表示します。
+
+
+    {@link android.widget.CursorAdapter} の定義には、{@link android.database.Cursor} のいずれかの列を <code>_ID</code> に設定する必要があります
+
+</p>
+<p>
+    その後、ユーザーはデータの確認や修正のために、表示された行のいずれかを UI から選択します。
+アプリは {@link android.widget.ListView} を返す {@link android.database.Cursor} から対応する行を取得し、この行の <code>_ID</code> 値を取得し、その値をコンテンツ URI の末尾に追加して、プロバイダにアクセス要求を送ります。
+
+その後、プロバイダは、ユーザーが選択した行にクエリや修正を実行します。
+
+</p>
+<h3>コンテンツ URI パターン</h3>
+<p>
+    受け取ったコンテンツ URI に対するアクションを簡単に選択できるように、プロバイダ API には {@link android.content.UriMatcher} という便利なクラスが用意されています。このクラスはコンテンツ URI 「パターン」を正数値にマッピングします。
+
+この正数値を <code>switch</code> 文で使用することで、特定のパターンに一致する 1 つ以上のコンテンツ URI に目的のアクションを選択できます。
+
+</p>
+<p>
+    コンテンツ URI パターンは、次のワイルドカード文字を使用するコンテンツ URI に一致します。
+</p>
+    <ul>
+        <li>
+            <strong><code>*</code>:</strong> 任意の長さの任意の有効な文字で構成される文字列に一致します。
+        </li>
+        <li>
+            <strong><code>#</code>:</strong> 任意の長さの任意の数字で構成される文字列に一致します。
+        </li>
+    </ul>
+<p>
+    コンテンツ URI 処理の設計とコーディングの例として、テーブルを指す次のコンテンツ URI を認識する認証局 <code>com.example.app.provider</code> を持つプロバイダを考えてみます。
+
+
+</p>
+<ul>
+    <li>
+        <code>content://com.example.app.provider/table1</code>: <code>table1</code> という名前のテーブル。
+    </li>
+    <li>
+        <code>content://com.example.app.provider/table2/dataset1</code>: <code>dataset1</code> という名前のテーブル。
+
+    </li>
+    <li>
+        <code>content://com.example.app.provider/table2/dataset2</code>: <code>dataset2</code> という名前のテーブル。
+
+    </li>
+    <li>
+        <code>content://com.example.app.provider/table3</code>: <code>table3</code> という名前のテーブル。
+    </li>
+</ul>
+<p>
+    さらに、行 ID が末尾に追加されていると、プロバイダではこれらのコンテンツ URI が認識されます。たとえば、<code>table3</code> の <code>1</code> で特定される行は <code>content://com.example.app.provider/table3/1</code> になります。
+
+
+</p>
+<p>
+    次のようなコンテンツ URI パターンを使用できます。
+</p>
+<dl>
+    <dt>
+        <code>content://com.example.app.provider/*</code>
+    </dt>
+    <dd>
+        プロバイダの任意のコンテンツ URI に一致します。
+    </dd>
+    <dt>
+        <code>content://com.example.app.provider/table2/*</code>: 
+    </dt>
+    <dd>
+        テーブル <code>dataset1</code> と <code>dataset2</code> のコンテンツ URI に一致しますが、<code>table1</code> や <code>table3</code> のコンテンツ URI には一致しません。
+
+
+    </dd>
+    <dt>
+        <code>content://com.example.app.provider/table3/#</code>: <code>table3</code> の 1 つの行のコンテンツ URI に一致します。<code>6</code> で特定される行は <code>content://com.example.app.provider/table3/6</code> になります。
+
+
+
+    </dt>
+</dl>
+<p>
+    次のコード スニペットでは、{@link android.content.UriMatcher} のメソッドが機能する仕組みを示します。
+    このコードでは、テーブルにコンテンツ URI パターン <code>content://&lt;authority&gt;/&lt;path&gt;</code> を使用し、1 つの行に <code>content://&lt;authority&gt;/&lt;path&gt;/&lt;id&gt;</code> を使用することで、表全体の URI と 1 つの行の URI を異なる方法で処理します。
+
+
+
+</p>
+<p>
+    メソッド {@link android.content.UriMatcher#addURI(String, String, int) addURI()} は認証局とパスを正数値にマッピングします。
+メソッド {@link android.content.UriMatcher#match(Uri)
+    match()} は URI に正数値を返します。次のように、<code>switch</code> 文によって、クエリをテーブル全体に実行するか、1 つのレコードに実行するかが決まります。
+
+</p>
+<pre class="prettyprint">
+public class ExampleProvider extends ContentProvider {
+...
+    // Creates a UriMatcher object.
+    private static final UriMatcher sUriMatcher;
+...
+    /*
+     * The calls to addURI() go here, for all of the content URI patterns that the provider
+     * should recognize. For this snippet, only the calls for table 3 are shown.
+     */
+...
+    /*
+     * Sets the integer value for multiple rows in table 3 to 1. Notice that no wildcard is used
+     * in the path
+     */
+    sUriMatcher.addURI("com.example.app.provider", "table3", 1);
+
+    /*
+     * Sets the code for a single row to 2. In this case, the "#" wildcard is
+     * used. "content://com.example.app.provider/table3/3" matches, but
+     * "content://com.example.app.provider/table3 doesn't.
+     */
+    sUriMatcher.addURI("com.example.app.provider", "table3/#", 2);
+...
+    // Implements ContentProvider.query()
+    public Cursor query(
+        Uri uri,
+        String[] projection,
+        String selection,
+        String[] selectionArgs,
+        String sortOrder) {
+...
+        /*
+         * Choose the table to query and a sort order based on the code returned for the incoming
+         * URI. Here, too, only the statements for table 3 are shown.
+         */
+        switch (sUriMatcher.match(uri)) {
+
+
+            // If the incoming URI was for all of table3
+            case 1:
+
+                if (TextUtils.isEmpty(sortOrder)) sortOrder = "_ID ASC";
+                break;
+
+            // If the incoming URI was for a single row
+            case 2:
+
+                /*
+                 * Because this URI was for a single row, the _ID value part is
+                 * present. Get the last path segment from the URI; this is the _ID value.
+                 * Then, append the value to the WHERE clause for the query
+                 */
+                selection = selection + "_ID = " uri.getLastPathSegment();
+                break;
+
+            default:
+            ...
+                // If the URI is not recognized, you should do some error handling here.
+        }
+        // call the code to actually do the query
+    }
+</pre>
+<p>
+    別の {@link android.content.ContentUris} には、コンテンツ URI の一部である <code>id</code> で作業するための便利なメソッドが備わっています。
+クラス {@link android.net.Uri} と {@link android.net.Uri.Builder} には、既存の {@link android.net.Uri} オブジェクトを解析して新しいオブジェクトをビルドするための便利なメソッドがあります。
+
+
+</p>
+
+<!-- Implementing the ContentProvider class -->
+<h2 id="ContentProvider">ContentProvider クラスを実装する</h2>
+<p>
+    {@link android.content.ContentProvider} インスタンスは、他のアプリケーションからの要求を処理することで、一連の構造化されたデータへのアクセスを管理します。
+どのような形式でアクセスする場合も、最終的には {@link android.content.ContentResolver} が呼び出されます。その後 {@link android.content.ContentProvider} の具象メソッドが呼び出され、アクセスを取得します。
+
+
+</p>
+<h3 id="RequiredAccess">必須メソッド</h3>
+<p>
+    抽象クラス {@link android.content.ContentProvider} は 6 つの抽象メソッドを定義しますが、これらのメソッドは独自の具象サブクラスの一部として実装する必要があります。
+次のように、{@link android.content.ContentProvider#onCreate() onCreate()} を除くこれらのメソッドは、コンテンツ プロバイダへのアクセスを試みるクライアント アプリケーションによって呼び出されます。
+
+
+</p>
+<dl>
+    <dt>
+        {@link android.content.ContentProvider#query(Uri, String[], String, String[], String)
+        query()}
+    </dt>
+    <dd>
+        プロバイダからデータを取得します。引数を使って、クエリを実行するテーブル、返す行と列、結果の並び順を選択します。
+
+        データは {@link android.database.Cursor} オブジェクトとして返されます。
+    </dd>
+    <dt>
+        {@link android.content.ContentProvider#insert(Uri, ContentValues) insert()}
+    </dt>
+    <dd>
+        プロバイダに新しい行を挿入します。引数を使って、挿入先のテーブルを選択し、使用する列の値を取得します。
+新たに挿入した行のコンテンツ URI が返されます。
+
+    </dd>
+    <dt>
+        {@link android.content.ContentProvider#update(Uri, ContentValues, String, String[])
+        update()}
+    </dt>
+    <dd>
+        プロバイダ内の既存の行を更新します。引数を使って、更新するテーブルと行を選び、更新された列の値を取得します。
+更新された行の数が返されます。
+    </dd>
+    <dt>
+        {@link android.content.ContentProvider#delete(Uri, String, String[]) delete()}
+    </dt>
+    <dd>
+        プロバイダから行を削除します。引数を使って、削除するテーブルと行を選びます。
+削除された行の数が返されます。
+    </dd>
+    <dt>
+        {@link android.content.ContentProvider#getType(Uri) getType()}
+    </dt>
+    <dd>
+        コンテンツ URI に対応する MIME  タイプを返します。このメソッドの詳細は、<a href="#MIMETypes">コンテンツ プロバイダ MIME を実装する</a>セクションをご覧ください。
+
+    </dd>
+    <dt>
+        {@link android.content.ContentProvider#onCreate() onCreate()}
+    </dt>
+    <dd>
+        プロバイダを初期化します。プロバイダが作成されると、Android システムがこのメソッドを即座に呼び出します。
+{@link android.content.ContentResolver} オブジェクトがアクセスを試みるまでは、プロバイダは作成されません。
+
+    </dd>
+</dl>
+<p>
+    これらのメソッドが持つ署名は、同じ名前の {@link android.content.ContentResolver} メソッドの署名と同じになります。
+
+</p>
+<p>
+    これらのメソッドを実装する場合は、次の点を考慮する必要があります。
+</p>
+<ul>
+    <li>
+        {@link android.content.ContentProvider#onCreate() onCreate()} を除くこれらのすべてのメソッドは、複数のスレッドを使用して同時に呼び出すことができるため、スレッドに対応した設定にする必要があります。
+複数のスレッドの詳細は、<a href="{@docRoot}guide/components/processes-and-threads.html">プロセスとスレッド</a>をご覧ください。
+
+
+
+    </li>
+    <li>
+        {@link android.content.ContentProvider#onCreate()
+        onCreate()} では冗長な操作は行わないようにします。本当に必要になるまでは、タスクの初期化は行わないようにします。
+        詳細は、<a href="#OnCreate">onCreate() メソッドを実装する</a>をご覧ください。
+
+    </li>
+    <li>
+        これのメソッドの実装は必須ですが、コードでは予測されたデータタイプを返す以外の操作は必要ありません。
+たとえば、他のアプリケーションが一部のテーブルにデータを挿入できないように設定するとします。
+その場合、{@link android.content.ContentProvider#insert(Uri, ContentValues) insert()} への呼び出しを無視して 0 を返します。
+
+
+    </li>
+</ul>
+<h3 id="Query">query() メソッドを実装する</h3>
+<p>
+    {@link android.content.ContentProvider#query(Uri, String[], String, String[], String)
+    ContentProvider.query()} メソッドは {@link android.database.Cursor} オブジェクトを返す必要があります。失敗した場合は、{@link java.lang.Exception} をスローします。
+
+SQLite データベースをデータストレージとして使用する場合は、{@link android.database.sqlite.SQLiteDatabase} クラスのいずれかの <code>query()</code> メソッドが返す {@link android.database.Cursor} を返します。
+
+
+    クエリがどの行にも一致しない場合は、{@link android.database.Cursor#getCount()} メソッドが 0 を返す {@link android.database.Cursor} インスタンスを返す必要があります。
+
+    クエリプロセス中にエラーが発生した場合にのみ <code>null</code> を返します。
+</p>
+<p>
+    SQLite データベースをデータストレージとして使用しない場合は、{@link android.database.Cursor} クラスのいずれかの具象サブクラスを使用します。
+たとえば、{@link android.database.MatrixCursor} クラスは、各行が {@link java.lang.Object} の配列となるカーソルを実装します。
+このクラスでは、{@link android.database.MatrixCursor#addRow(Object[]) addRow()} を使って新しい行を追加します。
+
+</p>
+<p>
+    Android システムは、プロセスの境界をまたいで {@link java.lang.Exception} を送信できるように設定する必要があることにご注意ください。
+Android では、クエリエラーを処理するのに便利な、次の例外を送信できます。
+
+</p>
+<ul>
+    <li>
+        {@link java.lang.IllegalArgumentException}（プロバイダが無効なコンテンツ URI を受け取った場合にこの例外をスローするように選択できます）
+
+    </li>
+    <li>
+        {@link java.lang.NullPointerException}
+    </li>
+</ul>
+<h3 id="Insert">insert() メソッドを実装する</h3>
+<p>
+    {@link android.content.ContentProvider#insert(Uri, ContentValues) insert()} メソッドは、{@link android.content.ContentValues} 引数の値を使用して、適切なテーブルに新しい行を追加します。
+
+列名が {@link android.content.ContentValues} 引数にない場合は、プロバイダ コードがデータベース スキーマのいずれかで、デフォルト値を設定できます。
+
+
+</p>
+<p>
+    このメソッドは新しい行のコンテンツ URI を返します。作成するには、{@link android.content.ContentUris#withAppendedId(Uri, long) withAppendedId()} を使用して、新しい行の <code>_ID</code>（または他のプライマリキー）の値をテーブルのコンテンツ URI の末尾に追加します。
+
+
+</p>
+<h3 id="Delete">delete() メソッドを実装する</h3>
+<p>
+    {@link android.content.ContentProvider#delete(Uri, String, String[]) delete()} メソッドでは、データストレージから行を物理的に削除する必要はありません。
+プロバイダで同期アダプタを使用する場合は、行全体を削除するのではなく、削除された行に「削除」フラグを付けるようにします。
+
+同期アダプタは削除された行を探して、プロバイダから削除される前に、サーバーから行を削除できます。
+
+</p>
+<h3 id="Update">update() メソッドを実装する</h3>
+<p>
+    {@link android.content.ContentProvider#update(Uri, ContentValues, String, String[])
+    update()} メソッドは {@link android.content.ContentProvider#insert(Uri, ContentValues) insert()} が使用するのと同じ {@link android.content.ContentValues} 引数、{@link android.content.ContentProvider#delete(Uri, String, String[]) delete()} と {@link android.content.ContentProvider#query(Uri, String[], String, String[], String)
+    ContentProvider.query()} が使用するのと同じ <code>selection</code> と <code>selectionArgs</code> 引数を使用します。
+
+
+
+これにより、これらのメソッド間でコードを再利用できます。
+</p>
+<h3 id="OnCreate">onCreate() メソッドを実装する</h3>
+<p>
+    Android システムはプロバイダを起動する際に {@link android.content.ContentProvider#onCreate()
+    onCreate()} を呼び出します。このメソッドでは迅速に実行できる初期化タスクのみを実行するようにし、プロバイダが実際にデータの要求を受け取るまでは、データベースの作成とデータロードを保留します。
+
+{@link android.content.ContentProvider#onCreate() onCreate()} で冗長なタスクを行う場合は、プロバイダの起動が遅くなります。
+
+同様に、プロバイダから他のアプリケーションへの応答も遅くなります。
+
+</p>
+<p>
+    たとえば、SQLite データベースを使用すると、{@link android.content.ContentProvider#onCreate() ContentProvider.onCreate()} に {@link android.database.sqlite.SQLiteOpenHelper} オブジェクトを作成し、データベースを初めて開くときに SQL テーブルを作成できます。
+
+
+この操作を簡単にするために、{@link android.database.sqlite.SQLiteOpenHelper#getWritableDatabase
+    getWritableDatabase()} を初めて呼び出すときには、{@link android.database.sqlite.SQLiteOpenHelper#onCreate(SQLiteDatabase)
+    SQLiteOpenHelper.onCreate()} メソッドが自動的に呼び出されます。
+
+
+</p>
+<p>
+    次の 2 つのスニペットは、{@link android.content.ContentProvider#onCreate() ContentProvider.onCreate()} と {@link android.database.sqlite.SQLiteOpenHelper#onCreate(SQLiteDatabase)
+    SQLiteOpenHelper.onCreate()} との間のやり取りを表しています。
+
+最初のスニペットは {@link android.content.ContentProvider#onCreate() ContentProvider.onCreate()} の実装です。
+
+</p>
+<pre class="prettyprint">
+public class ExampleProvider extends ContentProvider
+
+    /*
+     * Defines a handle to the database helper object. The MainDatabaseHelper class is defined
+     * in a following snippet.
+     */
+    private MainDatabaseHelper mOpenHelper;
+
+    // Defines the database name
+    private static final String DBNAME = "mydb";
+
+    // Holds the database object
+    private SQLiteDatabase db;
+
+    public boolean onCreate() {
+
+        /*
+         * Creates a new helper object. This method always returns quickly.
+         * Notice that the database itself isn't created or opened
+         * until SQLiteOpenHelper.getWritableDatabase is called
+         */
+        mOpenHelper = new MainDatabaseHelper(
+            getContext(),        // the application context
+            DBNAME,              // the name of the database)
+            null,                // uses the default SQLite cursor
+            1                    // the version number
+        );
+
+        return true;
+    }
+
+    ...
+
+    // Implements the provider's insert method
+    public Cursor insert(Uri uri, ContentValues values) {
+        // Insert code here to determine which table to open, handle error-checking, and so forth
+
+        ...
+
+        /*
+         * Gets a writeable database. This will trigger its creation if it doesn't already exist.
+         *
+         */
+        db = mOpenHelper.getWritableDatabase();
+    }
+}
+</pre>
+<p>
+    次のスニペットは {@link android.database.sqlite.SQLiteOpenHelper#onCreate(SQLiteDatabase)
+    SQLiteOpenHelper.onCreate()} の実装であり、ヘルパークラスを含みます。
+
+</p>
+<pre class="prettyprint">
+...
+// A string that defines the SQL statement for creating a table
+private static final String SQL_CREATE_MAIN = "CREATE TABLE " +
+    "main " +                       // Table's name
+    "(" +                           // The columns in the table
+    " _ID INTEGER PRIMARY KEY, " +
+    " WORD TEXT"
+    " FREQUENCY INTEGER " +
+    " LOCALE TEXT )";
+...
+/**
+ * Helper class that actually creates and manages the provider's underlying data repository.
+ */
+protected static final class MainDatabaseHelper extends SQLiteOpenHelper {
+
+    /*
+     * Instantiates an open helper for the provider's SQLite data repository
+     * Do not do database creation and upgrade here.
+     */
+    MainDatabaseHelper(Context context) {
+        super(context, DBNAME, null, 1);
+    }
+
+    /*
+     * Creates the data repository. This is called when the provider attempts to open the
+     * repository and SQLite reports that it doesn't exist.
+     */
+    public void onCreate(SQLiteDatabase db) {
+
+        // Creates the main table
+        db.execSQL(SQL_CREATE_MAIN);
+    }
+}
+</pre>
+
+
+<!-- Implementing ContentProvider MIME Types -->
+<h2 id="MIMETypes">ContentProvider MIME タイプを実装する</h2>
+<p>
+    {@link android.content.ContentProvider} クラスには、MIME タイプを返すための次の 2 つのクラスがあります。
+</p>
+<dl>
+    <dt>
+        {@link android.content.ContentProvider#getType(Uri) getType()}
+    </dt>
+    <dd>
+        任意のプロバイダに実装する必要がある必須メソッドの 1 つです。
+    </dd>
+    <dt>
+        {@link android.content.ContentProvider#getStreamTypes(Uri, String) getStreamTypes()}
+    </dt>
+    <dd>
+        ファイルを提供するプロバイダの場合に、実装が考えられるメソッドです。
+    </dd>
+</dl>
+<h3 id="TableMIMETypes">テーブルの MIME タイプ</h3>
+<p>
+    {@link android.content.ContentProvider#getType(Uri) getType()} メソッドは、MIME 形式で {@link java.lang.String} を返します。これは、コンテンツ URI 引数によって返されるデータのタイプを表します。
+
+{@link android.net.Uri} 引数には特定の URI ではなくパターンを指定することもできます。この場合、パターンに一致するコンテンツ URI に関連付けられているデータのタイプを返します。
+
+
+</p>
+<p>
+    テキスト、HTML、JPEG といった一般的なタイプのデータの場合、{@link android.content.ContentProvider#getType(Uri) getType()} では該当するデータの標準的な MIME タイプを返す必要があります。
+
+利用できるこれらの標準的なタイプの詳細なリストは、「<a href="http://www.iana.org/assignments/media-types/index.htm">IANA MIME Media Types</a>」のウェブサイトをご覧ください。
+
+
+</p>
+<p>
+    テーブル データの 1 つ以上の行を指すコンテンツ URI の場合、{@link android.content.ContentProvider#getType(Uri) getType()} は、Android のベンダー固有の MIME 形式で MIME タイプを返す必要があります。
+
+
+</p>
+<ul>
+    <li>
+        タイプ部分: <code>vnd</code>
+    </li>
+    <li>
+        サブタイプ部分: 
+        <ul>
+            <li>
+    URI パターンが 1 つの行の場合: <code>android.cursor.<strong>item</strong>/</code>
+            </li>
+            <li>
+    URI パターンが複数の行の場合: <code>android.cursor.<strong>dir</strong>/</code>
+            </li>
+        </ul>
+    </li>
+    <li>
+        プロバイダ固有の部分: <code>vnd.&lt;name&gt;</code>.<code>&lt;type&gt;</code>
+        <p>
+            <code>&lt;name&gt;</code> と <code>&lt;type&gt;</code> を指定します。
+            <code>&lt;name&gt;</code> の値はグローバルに一意の値とし、<code>&lt;type&gt;</code> の値は対応する URI パターンに一意のものとする必要があります。
+
+<code>&lt;name&gt;</code> には、企業名や、アプリケーションの Android パッケージ名の一部を使うことをお勧めします。
+<code>&lt;type&gt;</code> には、URI に関連付けられているテーブルを特定する文字列を使うことをお勧めします。
+
+
+        </p>
+
+    </li>
+</ul>
+<p>
+    たとえば、プロバイダの認証局が <code>com.example.app.provider</code> の場合、テーブル名は <code>table1</code> となり、<code>table1</code> の複数行の MIME タイプは次のようになります。
+
+
+</p>
+<pre>
+vnd.android.cursor.<strong>dir</strong>/vnd.com.example.provider.table1
+</pre>
+<p>
+    <code>table1</code> の 1 つの行の場合は、MIME タイプは次のようになります。
+</p>
+<pre>
+vnd.android.cursor.<strong>item</strong>/vnd.com.example.provider.table1
+</pre>
+<h3 id="FileMIMETypes">ファイルの MIME タイプ</h3>
+<p>
+    ファイルを提供するプロバイダの場合は、{@link android.content.ContentProvider#getStreamTypes(Uri, String) getStreamTypes()} を実装します。
+
+    このメソッドは、プロバイダが特定のコンテンツ URI に対して返すことができるファイルの MIME タイプの {@link java.lang.String} 配列を返します。クライアントで処理する MIME タイプのみを返すには、MIME タイプフィルタ引数によって、提供する MIME タイプをフィルタする必要があります。
+
+
+</p>
+<p>
+    たとえば、写真画像を <code>.jpg</code>、<code>.png</code>、<code>.gif</code> 形式で提供するプロバイダについて考えてみます。
+
+    アプリケーションが {@link android.content.ContentResolver#getStreamTypes(Uri, String)
+    ContentResolver.getStreamTypes()} をフィルタ文字列 <code>image/*</code>  （何らかの形式の「画像」）で呼び出す場合、{@link android.content.ContentProvider#getStreamTypes(Uri, String)
+    ContentProvider.getStreamTypes()} メソッドは次のような配列を返します。
+
+
+</p>
+<pre>
+{ &quot;image/jpeg&quot;, &quot;image/png&quot;, &quot;image/gif&quot;}
+</pre>
+<p>
+    アプリの対象が <code>.jpg</code> ファイルのみであり、アプリが {@link android.content.ContentResolver#getStreamTypes(Uri, String)
+    ContentResolver.getStreamTypes()} をフィルタ文字列 <code>*\/jpeg</code> で呼び出す場合、{@link android.content.ContentProvider#getStreamTypes(Uri, String)
+    ContentProvider.getStreamTypes()} は次の項目を返します。
+
+
+<pre>
+{&quot;image/jpeg&quot;}
+</pre>
+<p>
+    プロバイダが、フィルタ文字列で要求した MIME タイプを提供していない場合、{@link android.content.ContentProvider#getStreamTypes(Uri, String) getStreamTypes()} は <code>null</code> を返します。
+
+
+</p>
+
+
+<!--  Implementing a Contract Class -->
+<h2 id="ContractClass">コントラクト クラスを実装する</h2>
+<p>
+    コントラクト クラスは <code>public final</code> クラスであり、URI、列名、MIME タイプ、プロバイダに関連するその他のメタデータを含みます。
+このクラスは、URI や列名などの実際の値が変更された場合にも、プロバイダに正しくアクセスできることを保証することで、プロバイダとその他のアプリケーションとの間にコントラクトを構築します。
+
+
+
+</p>
+<p>
+    さらに、通常、コントラクト クラスではその定数にニーモニック名が設定されているため、デベロッパーが列名や URI に誤った値を使用しにくいようになっています。
+クラスであるため、Javadoc ドキュメントを含めることができます。
+Eclipse などの統合型開発環境では、コントラクト クラスから定数名が自動的に設定され、定数の Javadoc が表示されます。
+
+
+</p>
+<p>
+    デベロッパーはアプリケーションからコントラクト クラスのクラスファイルにアクセスできませんが、提供する <code>.jar</code> ファイルからクラスファイルをアプリケーションに静的にコンパイルできます。
+
+</p>
+<p>
+    {@link android.provider.ContactsContract} クラスとそのネストされたクラスは、コントラクト クラスの例です。
+
+</p>
+<h2 id="Permissions">コンテンツ プロバイダ パーミッションを実装する</h2>
+<p>
+    Android システムのあらゆる領域に対するパーミッションとクラスについては、「<a href="{@docRoot}guide/topics/security/security.html">セキュリティとパーミッション</a>」トピックをご覧ください。
+
+    また、トピック「<a href="{@docRoot}guide/topics/data/data-storage.html">Data Storage</a>」にも、ストレージのさまざまなタイプに有効なセキュリティとパーミッションについて記載されています。
+
+    重要な点をまとめると次のようになります。
+</p>
+<ul>
+    <li>
+        デフォルトでは、端末の内部ストレージに格納されるデータファイルは、アプリケーションとプロバイダでのみ使用できます。
+
+    </li>
+    <li>
+        作成する {@link android.database.sqlite.SQLiteDatabase} データベースは、自分のアプリケーションとプロバイダにのみ公開されます。
+
+    </li>
+    <li>
+        デフォルトでは、外部ストレージに保存するデータファイルはパブリックとなり、誰もが読み取ることができます。<em></em><em></em>
+他のアプリケーションは別の API 呼び出しを使用してファイルの読み取りと書き込みを実行できるため、コンテンツ プロバイダで外部ストレージにあるファイルへのアクセスは制限できません。
+
+    </li>
+    <li>
+        端末の内部ストレージにあるファイルや SQLite データベースを開いたり作成したりするメソッド呼び出しは、他のすべてのアプリケーションに読み取りと書き込みの両方のアクセスを付与してしまう可能性があります。
+内部ファイルやデータベースをプロバイダのリポジトリとして使用する場合に、「誰でも読み取り可能」や「誰でも書き込み可能」なアクセスを付与してしまうと、マニフェストで設定したプロバイダのパーミッションでデータを保護できなくなってしまいます。
+
+
+内部ストレージのファイルとデータベースへのデフォルトのアクセスは「プライベート」になっているため、プロバイダのリポジトリの場合はこの設定を変更しないでください。
+
+    </li>
+</ul>
+<p>
+    コンテンツ プロバイダ パーミッションを使用してデータへのアクセスを制御する場合は、内部ファイル、SQLite データベース、「クラウド」（リモート サーバーなど）にデータを格納し、ファイルやデータベースを自分のアプリケーションにのみ公開するように設定します。
+
+
+</p>
+<h3>パーミッションを実装する</h3>
+<p>
+    デフォルトではプロバイダにはパーミッションが設定されていないため、基礎となるデータがプライベートに設定されている場合でも、すべてのアプリケーションは自分のプロバイダからの読み取りとプロバイダへの書き込みを実行できます。
+これを変更するには、<code><a href="{@docRoot}guide/topics/manifest/provider-element.html">
+    &lt;provider&gt;</a></code> 要素の属性や子要素を使用して、マニフェスト ファイルでプロバイダのパーミッションを設定します。
+
+プロバイダ全体に適用するパーミッションを設定することもできますし、特定のテーブル、特定のレコード、これら 3 つすべてに適用するパーミッションを設定することもできます。
+
+</p>
+<p>
+    マニフェスト ファイルで 1 つ以上の <code><a href="{@docRoot}guide/topics/manifest/permission-element.html">
+    &lt;permission&gt;</a></code> 要素を使用して、プロバイダのパーミッションを定義します。
+自分のプロバイダに独自のパーミッションを作成するには、<code><a href="{@docRoot}guide/topics/manifest/permission-element.html#nm">
+    android:name</a></code> 属性に Java スタイルのスコーピングを使用します
+
+たとえば、読み取りパーミッションの名前を <code>com.example.app.provider.permission.READ_PROVIDER</code> とします。
+
+
+</p>
+<p>
+    次のリストは、プロバイダ パーミッションの範囲を示しています。プロバイダ全体に適用するパーミッションから始まり、より詳細な範囲のものになっています。
+
+    より広い範囲を持つパーミッションよりも、範囲が限定されるパーミッションの方が優先されます。
+</p>
+<dl>
+    <dt>
+        プロバイダ レベルで 1 つの読み取りと書き込みのパーミッション
+    </dt>
+    <dd>
+        1 つのパーミッションでプロバイダ全体の読み取りと書き込みのアクセスの両方を制御します。<code><a href="{@docRoot}guide/topics/manifest/provider-element.html">
+        &lt;provider&gt;</a></code> 要素の <code><a href="{@docRoot}guide/topics/manifest/provider-element.html#prmsn">
+        android:permission</a></code> 属性で指定します。
+
+
+    </dd>
+    <dt>
+        プロバイダ レベルで別々の読み取りと書き込みパーミッション
+    </dt>
+    <dd>
+        プロバイダ全体の読み取りパーミッションと書き込みパーミッションです。これらのパーミッションは <code><a href="{@docRoot}guide/topics/manifest/provider-element.html">
+        &lt;provider&gt;</a></code> 要素の <code><a href="{@docRoot}guide/topics/manifest/provider-element.html#rprmsn">
+        android:readPermission</a></code> 属性と <code><a href="{@docRoot}guide/topics/manifest/provider-element.html#wprmsn">
+        android:writePermission</a></code> 属性で指定します。
+
+
+これらは、<code><a href="{@docRoot}guide/topics/manifest/provider-element.html#prmsn">
+        android:permission</a></code> で要求するパーミッションよりも優先されます。
+
+    </dd>
+    <dt>
+        パスレベルのパーミッション
+    </dt>
+    <dd>
+        プロバイダのコンテンツ URI の読み取り、書き込み、読み取り / 書き込みパーミッションです。<code><a href="{@docRoot}guide/topics/manifest/provider-element.html">
+        &lt;provider&gt;</a></code> 要素の <code><a href="{@docRoot}guide/topics/manifest/path-permission-element.html">
+        &lt;path-permission&gt;</a></code> 子要素を使用して、制御対象の各 URI を指定します。
+
+
+指定する各コンテンツ URI に対して、読み取り / 書き込みパーミッション、読み取りパーミッション、書き込みパーミッション、3 つすべてを指定できます。
+読み取りパーミッションと書き込みパーミッションは、読み取り / 書き込みパーミッションに優先します。
+また、パスレベルのパーミッションはプロバイダ レベルのパーミッションに優先します。
+
+    </dd>
+    <dt>
+        一時的なパーミッション
+    </dt>
+    <dd>
+        アプリケーションへの一時的なアクセスを付与するパーミッション レベルです。アプリケーションに通常必要とするパーミッションが付与されていない場合でも付与できます。
+一時的なアクセス機能により、アプリケーションのマニフェストに必要なパーミッションの数を減らせます。
+
+一時的なパーミッションを有効にすると、プロバイダへの「永続的な」パーミッションを必要とするアプリケーションのみが、継続的にすべてのデータにアクセスできます。
+
+
+        <p>
+            プロバイダからの写真の添付ファイルを外部の画像ビューワ アプリケーションで表示する場合に、メール プロバイダとアプリに実装するパーミッションを考えてみます。
+
+パーミッションを要求しなくても、画像ビューワに必要なアクセスを付与するには、写真のコンテンツ URI に一時的なパーミッションを設定します。
+ユーザーが写真を表示しようとしたときに、アプリから写真のコンテンツ URI とパーミッション フラグを含むインテントを画像ビューワに送信するようにメール アプリを設計します。
+
+ビューワにプロバイダの通常の読み取りパーミッションが付与されていない場合でも、画像ビューワはメール プロバイダにクエリを実行して写真を取得します。
+
+
+        </p>
+        <p>
+            一時的なパーミッションを有効にするには、<code><a href="{@docRoot}guide/topics/manifest/provider-element.html">
+            &lt;provider&gt;</a></code> 要素の <code><a href="{@docRoot}guide/topics/manifest/provider-element.html#gprmsn">
+            android:grantUriPermissions</a></code> 属性を設定するか、1 つ以上の <code><a href="{@docRoot}guide/topics/manifest/grant-uri-permission-element.html">
+            &lt;grant-uri-permission&gt;</a></code> 子要素を <code><a href="{@docRoot}guide/topics/manifest/provider-element.html">
+            &lt;provider&gt;</a></code> 要素に追加します。
+
+
+
+一時的なパーミッションを使用する場合、プロバイダからのコンテンツ URI のサポートを削除したときは常に {@link android.content.Context#revokeUriPermission(Uri, int)
+            Context.revokeUriPermission()} を呼び出す必要があります。そうすると、コンテンツ URI が一時的なパーミッションに関連付けられます。
+
+
+        </p>
+        <p>
+            属性の値によって、プロバイダへのアクセスレベルが決まります。
+            属性を <code>true</code> に設定すると、システムによってプロバイダ全体への一時的なパーミッションが付与されます。このパーミッションは、プロバイダ レベルやパスレベルのパーミッションで必要になるその他のパーミッションよりも優先されます。
+
+
+        </p>
+        <p>
+            このフラグを <code>false</code> に設定する場合は、<code><a href="{@docRoot}guide/topics/manifest/grant-uri-permission-element.html">
+            &lt;grant-uri-permission&gt;</a></code> 子要素を <code><a href="{@docRoot}guide/topics/manifest/provider-element.html">
+            &lt;provider&gt;</a></code> 要素に追加する必要があります。
+
+それぞれの子要素は、一時的なアクセスが付与される 1 つ以上のコンテンツ URI を指定します。
+
+        </p>
+        <p>
+            一時的なアクセスをアプリケーションに委任するには、インテントに {@link android.content.Intent#FLAG_GRANT_READ_URI_PERMISSION} フラグか {@link android.content.Intent#FLAG_GRANT_WRITE_URI_PERMISSION} フラグ、またはその両方を含める必要があります。
+
+これらは、{@link android.content.Intent#setFlags(int) setFlags()} メソッドで設定します。
+
+        </p>
+        <p>
+            <code><a href="{@docRoot}guide/topics/manifest/provider-element.html#gprmsn">
+            android:grantUriPermissions</a></code> 属性がない場合は、<code>false</code> であると仮定されます。
+
+        </p>
+    </dd>
+</dl>
+
+
+
+<!-- The Provider Element -->
+<h2 id="ProviderElement">&lt;provider&gt; 要素</h2>
+<p>
+    {@link android.app.Activity} コンポーネントや {@link android.app.Service} コンポーネントと同様に、<code><a href="{@docRoot}guide/topics/manifest/provider-element.html">
+    &lt;provider&gt;</a></code> 要素を使用して {@link android.content.ContentProvider} のサブクラスをアプリケーションのマニフェスト ファイルに定義する必要があります。
+
+
+Android システムは要素から次の情報を取得します。
+
+<dl>
+    <dt>
+        認証局（<a href="{@docRoot}guide/topics/manifest/provider-element.html#auth">{@code
+        android:authorities}</a>）
+
+    </dt>
+    <dd>
+        システム内のプロバイダ全体を特定する識別名です。この属性の詳細は、<a href="#ContentURI">コンテンツ URI を設計する</a>セクションをご覧ください。
+
+
+    </dd>
+    <dt>
+        プロバイダ クラス名（<code>
+<a href="{@docRoot}guide/topics/manifest/provider-element.html#nm">android:name</a>
+        </code>）
+
+    </dt>
+    <dd>
+        {@link android.content.ContentProvider} を実装するクラスです。このクラスの詳細は、<a href="#ContentProvider">ContentProvider クラスを実装する</a>セクションをご覧ください。
+
+
+    </dd>
+    <dt>
+        パーミッション
+    </dt>
+    <dd>
+        他のアプリケーションがプロバイダのデータにアクセスするのに必要なパーミッションを指定する属性です。
+
+        <ul>
+            <li>
+                <code><a href="{@docRoot}guide/topics/manifest/provider-element.html#gprmsn">
+                android:grantUriPermssions</a></code>: 一時的なパーミッションのフラグです。
+            </li>
+            <li>
+                <code><a href="{@docRoot}guide/topics/manifest/provider-element.html#prmsn">
+                android:permission</a></code>: 1 つのプロバイダ全体の読み取り / 書き込みパーミッションです。
+            </li>
+            <li>
+                <code><a href="{@docRoot}guide/topics/manifest/provider-element.html#rprmsn">
+                android:readPermission</a></code>: プロバイダ全体の読み取りパーミッションです。
+            </li>
+            <li>
+                <code><a href="{@docRoot}guide/topics/manifest/provider-element.html#wprmsn">
+                android:writePermission</a></code>: プロバイダ全体の書き込みパーミッションです。
+            </li>
+        </ul>
+        <p>
+            パーミッションとそれに対応する属性の詳細は、<a href="#Permissions">コンテンツ プロバイダ パーミッションを実装する</a>セクションをご覧ください。
+
+
+        </p>
+    </dd>
+    <dt>
+        起動と制御の属性
+    </dt>
+    <dd>
+        これらの属性は、Android システムの起動方法とそのタイミング、プロバイダのプロセスの特性、その他の実行時の設定を決定します。
+
+        <ul>
+            <li>
+                <code><a href="{@docRoot}guide/topics/manifest/provider-element.html#enabled">
+                android:enabled</a></code>: システムにプロバイダの起動を許可するフラグです。
+            </li>
+              <li>
+                <code><a href="{@docRoot}guide/topics/manifest/provider-element.html#exported">
+                android:exported</a></code>: 他のアプリケーションにこのプロバイダの使用を許可するフラグです。
+            </li>
+            <li>
+                <code><a href="{@docRoot}guide/topics/manifest/provider-element.html#init">
+                android:initOrder</a></code>: 同じプロセス内の他のプロバイダに対して、このプロバイダを起動する順番です。
+
+            </li>
+            <li>
+                <code><a href="{@docRoot}guide/topics/manifest/provider-element.html#multi">
+                android:multiProcess</a></code>: システムに呼び出しクライアントと同じプロセスでのプロバイダの開始を許可するフラグです。
+
+            </li>
+            <li>
+                <code><a href="{@docRoot}guide/topics/manifest/provider-element.html#proc">
+                android:process</a></code>: プロバイダを実行するプロセスの名前です。
+
+            </li>
+            <li>
+                <code><a href="{@docRoot}guide/topics/manifest/provider-element.html#sync">
+                android:syncable</a></code>: プロバイダのデータをサーバー上のデータと同期することを示すフラグです。
+
+            </li>
+        </ul>
+        <p>
+            属性に関する詳細は、開発ガイドの <code><a href="{@docRoot}guide/topics/manifest/provider-element.html">
+            &lt;provider&gt;</a></code> 要素に関するトピックに記載されています。
+
+
+        </p>
+    </dd>
+    <dt>
+        情報に関する属性
+    </dt>
+    <dd>
+        プロバイダのオプションのアイコンとラベルです。
+        <ul>
+            <li>
+                <code><a href="{@docRoot}guide/topics/manifest/provider-element.html#icon">
+                android:icon</a></code>: プロバイダのアイコンを含むドローアブル リソースです。
+                [設定] &gt; [アプリ] &gt; [すべて] にあるアプリのリストのプロバイダラベルの横に表示されるアイコンです。<em></em><em></em><em></em>
+
+            </li>
+            <li>
+                <code><a href="{@docRoot}guide/topics/manifest/provider-element.html#label">
+                android:label</a></code>: プロバイダ、データ、その両方を説明する、情報ラベルです。
+[設定] &gt; [アプリ] &gt; [すべて] にあるアプリのリストのプロバイダラベルの横に表示されるアイコンです。<em></em><em></em><em></em>
+
+            </li>
+        </ul>
+        <p>
+            属性に関する詳細は、開発ガイドの <code><a href="{@docRoot}guide/topics/manifest/provider-element.html">
+            &lt;provider&gt;</a></code> 要素に関するトピックに記載されています。
+
+        </p>
+    </dd>
+</dl>
+
+<!-- Intent Access -->
+<h2 id="Intents">インテントとデータアクセス</h2>
+<p>
+    {@link android.content.Intent} を使用すると、アプリケーションはコンテンツ プロバイダに間接的にアクセスできます。
+    アプリケーションは、{@link android.content.ContentResolver} や {@link android.content.ContentProvider} のメソッドを呼び出しません。
+その代わりに、アクティビティを起動するインテントを送信します。これは通常、プロバイダ独自のアプリケーションの一部となっています。
+対象のアクティビティは UI のデータの取得と表示を担当します。インテントのアクションに応じて、対象のアクティビティにより、ユーザーにプロバイダのデータの修正を求めるメッセージが表示されることがあります。
+
+
+    さらに、インテントには、対象のアクティビティが UI に表示する「エクストラ」データが含まれることがあります。ユーザーは使用前に、このデータを変更してプロバイダのデータを修正することもできます。
+
+
+</p>
+<p>
+
+</p>
+<p>
+    インテント アクセスを使用して、データの整合性を保証できます。プロバイダのデータの挿入、更新、削除は、厳格に定義されたビジネス ロジックによって規定されることがあります。
+この場合、他のアプリケーションにデータを直接修正できるように許可すると、無効なデータが発生することがあります。
+
+デベロッパーがインテント アクセスを使用する場合は、すべての操作を完全に文書化します。
+    コードを使用してデータを修正するよりも、独自のアプリケーションの UI を使用したインテント アクセスの方が優れている理由を説明します。
+
+</p>
+<p>
+    プロバイダのデータを修正するための受信インテントの処理は、その他のインテントの処理と同じです。
+インテントの使用についての詳細は、「<a href="{@docRoot}guide/components/intents-filters.html">インテントとインテント フィルタ</a>」をご覧ください。
+
+</p>

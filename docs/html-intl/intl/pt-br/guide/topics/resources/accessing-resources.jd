@@ -1,0 +1,337 @@
+page.title=Acesso aos recursos
+parent.title=Recursos de aplicativos
+parent.link=index.html
+@jd:body
+
+<div id="qv-wrapper">
+<div id="qv">
+  <h2>Visualização rápida</h2>
+  <ul>
+    <li>Recursos podem ser referenciados a partir do código usando números inteiros de {@code R.java}, como
+{@code R.drawable.myimage}</li>
+    <li>Recursos podem ser referenciados de recursos usando uma sintaxe XML especial, como {@code
+&#64;drawable/myimage}</li>
+    <li>Também é possível acessar os recursos do aplicativo com métodos em 
+{@link android.content.res.Resources}</li>
+  </ul>
+
+  <h2>Classes principais</h2>
+  <ol>
+    <li>{@link android.content.res.Resources}</li>
+  </ol>
+
+  <h2>Neste documento</h2>
+  <ol>
+    <li><a href="#ResourcesFromCode">Acesso aos recursos do código</a></li>
+    <li><a href="#ResourcesFromXml">Acesso aos recursos do XML</a>
+      <ol>
+        <li><a href="#ReferencesToThemeAttributes">Referência a atributos de estilo</a></li>
+      </ol>
+    </li>
+    <li><a href="#PlatformResources">Acesso aos recursos da plataforma</a></li>
+  </ol>
+
+  <h2>Veja também</h2>
+  <ol>
+    <li><a href="providing-resources.html">Fornecimento de recursos</a></li>
+    <li><a href="available-resources.html">Tipos de recursos</a></li>
+  </ol>
+</div>
+</div>
+
+
+
+
+<p>Depois de fornecer um recurso no aplicativo (discutido em <a href="providing-resources.html">Fornecimento de recursos</a>), é possível aplicá-lo
+referenciando seu ID de recurso. Todos os IDs de recursos são definidos na classe {@code R} do projeto, que 
+a ferramenta {@code aapt} gera automaticamente.</p>
+
+<p>Quando o aplicativo é compilado, {@code aapt} gera a classe {@code R}, que contém 
+IDs de recursos para todos os recursos no diretório {@code
+res/}. Para cada tipo de recurso, há uma subclasse {@code R} (por exemplo,
+{@code R.drawable} para todos os recursos desenháveis) e, para cada recurso daquele tipo, há um número inteiro
+estático (por exemplo, {@code R.drawable.icon}). Esse número inteiro é o ID do recurso que pode ser usado para
+recuperá-lo.</p>
+
+<p>Apesar de a classe {@code R} ser o local onde os IDs de recursos são especificados, não deve nunca ser necessário
+verificá-la para descobrir um ID de recurso. Ele é sempre composto de:</p>
+<ul>
+  <li>O <em>tipo de recurso</em>: cada recurso é agrupado em um "tipo", como {@code
+string}, {@code drawable} e {@code layout}. Para saber mais sobre os diferentes tipos, consulte <a href="available-resources.html">Tipos de recursos</a>.
+  </li>
+  <li>O <em>nome do recurso</em>, que é: o nome do arquivo,
+excluindo a extensão; ou o valor no atributo {@code android:name} do XML, se o 
+recurso for um valor simples (como uma string).</li>
+</ul>
+
+<p>Há duas formas de acessar um recurso:</p>
+<ul>
+  <li><strong>No código:</strong> Usando um número inteiro estático de uma subclasse de sua classe {@code R},
+como:
+    <pre class="classic no-pretty-print">R.string.hello</pre>
+    <p>{@code string} é o tipo de recurso e {@code hello} é o nome do recurso. Há muitas
+APIs do Android que podem acessar os seus recursos quando você fornece um ID de recurso nesse formato. Consulte
+<a href="#ResourcesFromCode">Acesso aos recursos no código</a>.</p>
+  </li>
+  <li><strong>No XML:</strong> usando uma sintaxe XML especial que também corresponde ao
+ID de recurso definido em sua classe {@code R}, como:
+    <pre class="classic no-pretty-print">&#64;string/hello</pre>
+    <p>{@code string} é o tipo de recurso e {@code hello} é o nome do recurso. Você pode usar essa
+sintaxe em um recurso XML em qualquer lugar em que um valor é esperado e que seja fornecido em um recurso. Consulte <a href="#ResourcesFromXml">Acesso aos recursos do XML</a>.</p>
+  </li>
+</ul>
+
+
+
+<h2 id="ResourcesFromCode">Acesso aos recursos no código </h2>
+
+<p>Você pode usar um recurso no código passando o ID do recurso como um parâmetro do método. Por
+exemplo, é possível definir uma {@link android.widget.ImageView} para usar o recurso {@code res/drawable/myimage.png}
+usando {@link android.widget.ImageView#setImageResource(int) setImageResource()}:</p>
+<pre>
+ImageView imageView = (ImageView) findViewById(R.id.myimageview);
+imageView.setImageResource(<strong>R.drawable.myimage</strong>);
+</pre>
+
+<p>Também é possível recuperar recursos individuais usando métodos em {@link
+android.content.res.Resources}, dos quais é possível obter uma instância
+com {@link android.content.Context#getResources()}.</p>
+
+<div class="sidebox-wrapper">
+<div class="sidebox">
+<h2>Acesso aos arquivos originais</h2>
+
+<p>Apesar de ser incomum, pode ser necessário acessar os arquivos e os diretórios originais. Nesse caso, 
+salvar os arquivos em {@code res/} não funcionará, pois a única forma de ler um recurso de
+{@code res/} é com o ID do recurso. Em vez disso, é possível salvar os recursos no
+diretório {@code assets/}.</p>
+<p>Arquivos salvos no diretório {@code assets/} <em>não</em> recebem um ID de recurso,
+portanto, não é possível referenciá-los com a classe {@code R} nem de recursos XML. Em vez disso, é possível
+consultar arquivos no diretório {@code assets/} como um sistema de arquivos normal e ler dados brutos usando o
+{@link android.content.res.AssetManager}.</p>
+<p>No entanto, se você só precisa da capacidade de ler dados brutos (como um arquivo de vídeo ou áudio),
+salve o arquivo no diretório {@code res/raw/} e leia um fluxo de bytes usando {@link
+android.content.res.Resources#openRawResource(int) openRawResource()}.</p>
+
+</div>
+</div>
+
+
+<h3>Sintaxe</h3>
+
+<p>Esta é a sintaxe para referenciar um recurso no código:</p>
+
+<pre class="classic no-pretty-print">
+[<em>&lt;package_name&gt;</em>.]R.<em>&lt;resource_type&gt;</em>.<em>&lt;resource_name&gt;</em>
+</pre>
+
+<ul>
+  <li><em>{@code &lt;package_name&gt;}</em> é o nome do pacote no qual o recurso está localizado (não
+é obrigatório ao referenciar recursos de seu próprio pacote).</li>
+  <li><em>{@code &lt;resource_type&gt;}</em> é a subclasse {@code R} do tipo de recurso.</li>
+  <li><em>{@code &lt;resource_name&gt;}</em> é o nome do arquivo do recurso
+sem a extensão ou o valor do atributo {@code android:name} no elemento XML (para valores
+simples).</li>
+</ul>
+<p>Consulte <a href="available-resources.html">Tipos de recursos</a> para
+obter mais informações sobre cada tipo de recurso e como referenciá-los.</p>
+
+
+<h3>Casos de uso</h3>
+
+<p>Há muitos métodos que aceitam um parâmetro de ID de recurso e você pode recuperar recursos usando 
+métodos em {@link android.content.res.Resources}. É possível obter uma instância de {@link
+android.content.res.Resources} com {@link android.content.Context#getResources
+Context.getResources()}.</p>
+
+
+<p>Abaixo há alguns exemplos do acesso aos recursos no código:</p>
+
+<pre>
+// Load a background for the current screen from a drawable resource
+{@link android.app.Activity#getWindow()}.{@link
+android.view.Window#setBackgroundDrawableResource(int)
+setBackgroundDrawableResource}(<strong>R.drawable.my_background_image</strong>) ;
+
+// Set the Activity title by getting a string from the Resources object, because
+//  this method requires a CharSequence rather than a resource ID
+{@link android.app.Activity#getWindow()}.{@link android.view.Window#setTitle(CharSequence)
+setTitle}(getResources().{@link android.content.res.Resources#getText(int)
+getText}(<strong>R.string.main_title</strong>));
+
+// Load a custom layout for the current screen
+{@link android.app.Activity#setContentView(int)
+setContentView}(<strong>R.layout.main_screen</strong>);
+
+// Set a slide in animation by getting an Animation from the Resources object
+mFlipper.{@link android.widget.ViewAnimator#setInAnimation(Animation)
+setInAnimation}(AnimationUtils.loadAnimation(this,
+        <strong>R.anim.hyperspace_in</strong>));
+
+// Set the text on a TextView object using a resource ID
+TextView msgTextView = (TextView) findViewById(<strong>R.id.msg</strong>);
+msgTextView.{@link android.widget.TextView#setText(int)
+setText}(<strong>R.string.hello_message</strong>);
+</pre>
+
+
+<p class="caution"><strong>Atenção:</strong> nunca modifique o arquivo {@code
+R.java} manualmente &mdash; ele é gerado pela ferramenta {@code aapt} quando o projeto é 
+compilado. As alterações serão sobrepostas na próxima compilação.</p>
+
+
+
+<h2 id="ResourcesFromXml">Acesso aos recursos do XML</h2>
+
+<p>Você pode definir valores para alguns atributos e elementos XML usando uma
+referência a um recurso existente. Isso será feito com frequência ao criar arquivos de layout
+para fornecer strings e imagens para os widgets.</p>
+
+<p>Por enviar mensagem de texto, se você adicionar um {@link android.widget.Button} ao layout, deverá usar
+um <a href="string-resource.html">recurso de string</a> para o texto do botão:</p>
+
+<pre>
+&lt;Button
+    android:layout_width="fill_parent"
+    android:layout_height="wrap_content"
+    android:text="<strong>@string/submit</strong>" /&gt;
+</pre>
+
+
+<h3>Sintaxe</h3>
+
+<p>Esta é a sintaxe para referenciar um recurso em um recurso XML:</p>
+
+<pre class="classic no-pretty-print">
+&#64;[<em>&lt;package_name&gt;</em>:]<em>&lt;resource_type&gt;</em>/<em>&lt;resource_name&gt;</em>
+</pre>
+
+<ul>
+  <li>{@code &lt;package_name&gt;} é o nome do pacote no qual o recurso está localizado (não
+é obrigatório ao referenciar recursos do mesmo pacote).</li>
+  <li>{@code &lt;resource_type&gt;} é a subclasse 
+{@code R} do tipo de recurso.</li>
+  <li>{@code &lt;resource_name&gt;} é o nome do arquivo do recurso
+sem a extensão ou o valor do atributo {@code android:name} no elemento XML (para valores
+simples).</li>
+</ul>
+
+<p>Consulte <a href="available-resources.html">Tipos de recursos</a> para
+obter mais informações sobre cada tipo de recurso e como referenciá-los.</p>
+
+
+<h3>Casos de uso</h3>
+
+<p>Em alguns casos, é preciso usar um recurso para um valor em XML (por exemplo, para aplicar uma imagem desenhável
+a um widget), mas você também pode usar um recurso em XML em qualquer lugar que aceite um valor simples. Por
+exemplo, se você tiver o seguinte arquivo de recursos que inclui um <a href="more-resources.html#Color">recurso de cor</a> e um <a href="string-resource.html">recurso de string</a>:</p>
+
+<pre>
+&lt;?xml version="1.0" encoding="utf-8"?>
+&lt;resources>
+   &lt;color name="opaque_red">#f00&lt;/color>
+   &lt;string name="hello">Hello!&lt;/string>
+&lt;/resources>
+</pre>
+
+<p>É possível usar esses recursos no arquivo de layout a seguir para definir a cor to texto e a
+string do texto:</p>
+
+<pre>
+&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;
+&lt;EditText xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;
+    android:layout_width=&quot;fill_parent&quot;
+    android:layout_height=&quot;fill_parent&quot;
+    android:textColor=&quot;<strong>&#64;color/opaque_red</strong>&quot;
+    android:text=&quot;<strong>&#64;string/hello</strong>&quot; /&gt;
+</pre>
+
+<p>Nesse caso, não é preciso especificar o nome do pacote na referência do recurso porque os
+recursos são de seu próprio pacote. Para
+referenciar um recurso do sistema, é preciso incluir o nome do pacote. Por exemplo:</p>
+
+<pre>
+&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;
+&lt;EditText xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;
+    android:layout_width=&quot;fill_parent&quot;
+    android:layout_height=&quot;fill_parent&quot;
+    android:textColor=&quot;<strong>&#64;android:color/secondary_text_dark</strong>&quot;
+    android:text=&quot;&#64;string/hello&quot; /&gt;
+</pre>
+
+<p class="note"><strong>Observação:</strong> você deve usar recursos de string
+o tempo inteiro para que o seu aplicativo possa ser localizado para outros idiomas. 
+Para obter informações sobre a criação de recursos
+alternativos (como strings localizadas), consulte <a href="providing-resources.html#AlternativeResources">Fornecimento de recursos 
+alternativos</a>. Para obter um guia completo para localizar o aplicativo para outros idiomas, 
+consulte <a href="localization.html">Localização</a>.</p>
+
+<p>Você pode até mesmo usar recursos em XML para criar alias. Por exemplo, é possível criar um recurso
+desenhável que seja um alias para outro recurso desenhável:</p>
+
+<pre>
+&lt;?xml version="1.0" encoding="utf-8"?>
+&lt;bitmap xmlns:android="http://schemas.android.com/apk/res/android"
+    android:src="@drawable/other_drawable" />
+</pre>
+
+<p>Isso parece redundante, mas pode ser muito útil ao usar um recurso alternativo. Leia mais sobre
+<a href="providing-resources.html#AliasResources">Criação de recursos de alias</a>.</p>
+
+
+
+<h3 id="ReferencesToThemeAttributes">Referência a atributos de estilo</h3>
+
+<p>Um recurso de atributo de estilo permite referenciar o valor
+de um atributo no tema atualmente aplicado. Referenciar um atributo de estilo permite
+personalizar a aparência de elementos da IU deixando-os com estilo que corresponda a variações padrão fornecidas pelo
+tema atual, em vez de fornecer um valor codificado. Referenciar um atributo de estilo
+essencialmente significa "usar o estilo que é definido por esse atributo no tema atual".</p>
+
+<p>Para referenciar um atributo de estilo, a sintaxe do nome é quase idêntica ao formato normal de recurso,
+mas, em vez de o símbolo arroba ({@code @}), use um ponto de interrogação ({@code ?}). Além disso, 
+a parte do tipo de recurso é opcional. Por exemplo:</p>
+
+<pre class="classic">
+?[<em>&lt;package_name&gt;</em>:][<em>&lt;resource_type&gt;</em>/]<em>&lt;resource_name&gt;</em>
+</pre>
+
+<p>Por exemplo, abaixo apresenta-se como você pode referenciar um atributo para definir a cor do texto para que corresponda à 
+cor "principal" do texto do tema do sistema:</p>
+
+<pre>
+&lt;EditText id=&quot;text&quot;
+    android:layout_width=&quot;fill_parent&quot;
+    android:layout_height=&quot;wrap_content&quot;
+    android:textColor=&quot;<strong>?android:textColorSecondary</strong>&quot;
+    android:text=&quot;&#64;string/hello_world&quot; /&gt;
+</pre>
+
+<p>Aqui, o atributo {@code android:textColor} especifica o nome de um atributo de estilo
+no tema atual. O Android agora usa o valor aplicado ao atributo de estilo {@code android:textColorSecondary}
+como o valor para {@code android:textColor} nesse widget. Como a ferramenta de recursos
+do sistema sabe que um recurso de atributo é esperado nesse contexto,
+não é preciso declarar explicitamente o tipo (que seria
+<code>?android:attr/textColorSecondary</code>) &mdash; você pode excluir o tipo de {@code attr}.</p>
+
+
+
+
+<h2 id="PlatformResources">Acesso aos recursos da plataforma</h2>
+
+<p>O Android contém uma série de recursos padrão, como estilos, temas e layouts. Para
+acessá-los, qualifique a referência de recurso com o 
+nome do pacote <code>android</code>. Por exemplo, o Android fornece um recurso de layout que pode ser usado para
+listar itens em um {@link android.widget.ListAdapter}:</p>
+
+<pre>
+{@link android.app.ListActivity#setListAdapter(ListAdapter)
+setListAdapter}(new {@link
+android.widget.ArrayAdapter}&lt;String&gt;(this, <strong>android.R.layout.simple_list_item_1</strong>, myarray));
+</pre>
+
+<p>Nesse exemplo, {@link android.R.layout#simple_list_item_1} é um recurso de layout definido pela
+plataforma para itens em uma {@link android.widget.ListView}. Você pode usá-lo em vez de criar o
+próprio layout para itens de lista. Para obter mais informações, consulte o
+guia do desenvolvedor de <a href="{@docRoot}guide/topics/ui/layout/listview.html">Vista de lista</a>.</p>
+

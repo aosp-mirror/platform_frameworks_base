@@ -1,0 +1,487 @@
+page.title=下載 Android Studio 和 SDK 工具
+page.tags=sdk, android studio
+page.template=sdk
+header.hide=1
+page.metaDescription=下載官方 Android IDE 和開發人員工具以建置適用於 Android 手機、平板電腦、穿戴式裝置、電視等裝置的應用程式。
+
+studio.version=1.1.0
+
+studio.linux_bundle_download=android-studio-ide-135.1740770-linux.zip
+studio.linux_bundle_bytes=259336386
+studio.linux_bundle_checksum=e8d166559c50a484f83ebfec6731cc0e3f259208
+
+studio.mac_bundle_download=android-studio-ide-135.1740770-mac.dmg
+studio.mac_bundle_bytes=261303345
+studio.mac_bundle_checksum=f9745d0fec1eefd498f6160a2d6a1b5247d4cda3
+
+studio.win_bundle_exe_download=android-studio-bundle-135.1740770-windows.exe
+studio.win_bundle_exe_bytes=856233768
+studio.win_bundle_exe_checksum=7484b9989d2914e1de30995fbaa97a271a514b3f
+
+studio.win_notools_exe_download=android-studio-ide-135.1740770-windows.exe
+studio.win_notools_exe_bytes=242135128
+studio.win_notools_exe_checksum=5ea77661cd2300cea09e8e34f4a2219a0813911f
+
+studio.win_bundle_download=android-studio-ide-135.1740770-windows.zip
+studio.win_bundle_bytes=261667054
+studio.win_bundle_checksum=e903f17cc6a57c7e3d460c4555386e3e65c6b4eb
+
+
+
+sdk.linux_download=android-sdk_r24.1.2-linux.tgz
+sdk.linux_bytes=168121693
+sdk.linux_checksum=68980e4a26cca0182abb1032abffbb72a1240c51
+
+sdk.mac_download=android-sdk_r24.1.2-macosx.zip
+sdk.mac_bytes=89151287
+sdk.mac_checksum=00e43ff1557e8cba7da53e4f64f3a34498048256
+
+sdk.win_download=android-sdk_r24.1.2-windows.zip
+sdk.win_bytes=159778618
+sdk.win_checksum=704f6c874373b98e061fe2e7eb34f9fcb907a341
+
+sdk.win_installer=installer_r24.1.2-windows.exe
+sdk.win_installer_bytes=111364285
+sdk.win_installer_checksum=e0ec864efa0e7449db2d7ed069c03b1f4d36f0cd
+
+
+
+
+
+
+@jd:body
+
+<style type="text/css">
+  .offline {display:none;}
+  a.download-bundle-button {display:block;}
+  h2.feature {
+    padding-top:30px;
+    margin-top:0;
+    clear:both;
+  }
+  .feature-blurb {
+  margin:0px; font-size:16px; font-weight:300;
+  padding:40px 0 0 0;
+  }
+
+  .landing-button.green {
+    font-size:16px;
+    background-color:#90c653;
+    padding:8px 10px 10px;
+    margin:0;
+    width:206px;
+    text-align:center;
+  }
+
+  .landing-button.green:hover {
+    background-color:#85b84f;
+  }
+
+  .landing-button .small {
+    font-size: 12px;
+    font-weight: normal;
+    line-height: 12px;
+    display: block;
+  }
+
+  h1.studio-logo {
+    width:226px;
+    height:78px;
+    display:block;
+    padding:0;
+    white-space: nowrap;
+    text-indent: -10000px;
+    font-size:0px;
+    background: url(../images/tools/studio-logo.png);
+    background-image: -webkit-image-set(url(../images/tools/studio-logo.png) 1x, url(../images/tools/studio-logo_2x.png) 2x);
+    background-size: 226px 78px;
+  }
+
+</style>
+
+
+
+
+
+<div style="position:relative;">
+
+
+<div class="wrap" id="tos" style="display:none;width:inherit;height:650px">
+<div class="col-13" style="margin:0;">&nbsp;</div><!-- provides top margin for content -->
+
+<h1 id="tos-header" style="margin-top:0">下載</h1>
+
+<p class="sdk-terms-intro">在安裝 Android Studio 或單獨的 SDK 工具之前，您必須同意遵守下列條款及細則。
+</p>
+
+<div class="sdk-terms" onfocus="this.blur()">
+<h2 class="norule">條款及細則</h2>
+此為「Android 軟體開發套件授權協議」
+
+<h3>1.簡介</h3>
+1.1「Android 軟體開發套件」(在此「授權協議」中稱為「SDK」，包括 Android 系統檔案、經過封裝的 API 和 Google API 附加元件) 是在此「授權協議」之條款的約束下授權給您使用。此「授權協議」就您對 SDK 的使用，構成您與 Google 間具法律約束力之合約。
+
+1.2「Android」係指「Android 軟體開放原始碼專案」(http://source.android.com/) 所提供的 Android 裝置軟體堆疊 (不定期更新)。
+
+1.3「Google」係指 Google Inc.，是一家在美國德拉瓦州註冊的公司，地址為 1600 Amphitheatre Parkway, Mountain View, CA 94043, United States。
+
+
+<h3>2.接受此「授權協議」</h3>
+2.1 您必須先同意遵守此「授權協議」，才能使用此 SDK。如果不接受此「授權協議」，您就無法使用此 SDK。
+
+2.2 按一下 [接受]，即表示您同意此「授權協議」的條款。
+
+2.3 如果您是美國或其他國家/地區 (包括您所居住或使用此 SDK 的國家/地區) 的法律所禁止接收此 SDK 的人員，就不得使用此 SDK 及接受此「授權協議」。
+
+2.4 如果您是代表雇主或其他實體同意受此「授權協議」約束，您即代表並保證具備完整法定權限來約束您的員工或這類實體遵守此「授權協議」。如果您不具備必要的權限，就不得代表您的雇主或其他實體接受此「授權協議」或使用此 SDK。
+
+
+<h3>3.來自 Google 的 SDK 授權</h3>
+3.1 在此「授權協議」之條款的約束下，Google 授權您使用此 SDK，此授權為有限、全球通用、買斷式、不可轉讓且非獨占性。此 SDK 僅供您用於開發在 Android 平台上執行的應用程式。
+
+3.2 您同意 Google 或第三方對此 SDK 擁有一切法定權利及權益，包括存在於此 SDK 中的任何「智慧財產權」。「智慧財產權」係指專利法、著作權法、商業秘密法、商標法及任何和所有其他專利權下的任何及一切權利。Google 保留一切未明確授予您的權利。
+
+3.3 您不得將此 SDK 用於此「授權協議」未明文許可的任何用途。除非適用的第三方授權所需，否則您不得：(a) 對此 SDK 或其任何部分進行複製 (備份用途除外)、修改、改編、轉散佈、反向組譯、還原工程、解編或製作衍生成品；或是 (b) 將此 SDK 的任何部分載入至行動電話或個人電腦以外的任何其他硬體裝置、將此 SDK 的任何部分與其他軟體結合，或散佈包含此 SDK 之任一部分的任何軟體或裝置。
+
+3.4 您同意不會從事任何可能導致或造成 Android 分裂的活動，包括但不限於以任何形式散佈從此 SDK 衍生的軟體開發套件、參其製作或宣傳。
+
+3.5 對開放原始碼軟體授權下所授權之 SDK 的使用、複製及散佈，完全受該開放原始碼軟體授權的條款管制，而不受此「授權協議」管制。
+
+3.6 您同意 Google 可在不事先通知您的情況下變更其提供之 SDK 的形式和本質，且此 SDK 的未來版本可與使用此 SDK 的先前版本所開發的應用程式不相容。您同意 Google 通常可全權斟酌永久或暫時停止提供此 SDK (或此 SDK 的任何功能) 給您或使用者，毋須事先通知。
+
+3.7 此「授權協議」中的所有條款皆未授予您任何使用 Google 之商業名稱、商標、服務標章、標誌、網域名稱或其他明確品牌特徵的權利。
+
+3.8 您同意不會移除、遮蔽或更改可能附加至或內含在此 SDK 中的任何專利權通知 (包括著作權和商標通知)。
+
+
+<h3>4.您對此 SDK 的使用</h3>
+4.1 Google 同意不在此「授權協議」下，從您 (或您的授權人) 獲得對您使用此 SDK 開發之任何軟體應用程式的任何權利及權益，包括存在於這些應用程式中的任何智慧財產權。
+
+4.2 您同意只就 (a) 此「授權協議」和 (b) 相關管轄權中任何適用法律、規定或是普遍獲得接受之慣例或指導方針 (包括任何有關將資料或軟體輸出或輸入美國或其他相關國家/地區的法律) 所允許的用途使用此 SDK 及撰寫應用程式。
+
+4.3 您同意在使用此 SDK 為一般公共使用者開發應用程式時，您將保護這些使用者的隱私權和法定權利。如果使用者提供您使用者名稱、密碼或是其他登入資訊或個人資訊，您必須告知使用者這類資訊將提供給您的應用程式使用，並且必須為這些使用者提供法定充分的隱私權通知和保護。如果您的應用程式會儲存使用者所提供的個人或敏感資訊，它必須確保這些資訊安全無虞。如果使用者提供 Google 帳戶資訊給您的應用程式，則只有在使用者已授權您存取其 Google 帳戶並僅限用於使用者所授權之用途的情況下，您的應用程式才能使用該資訊來存取使用者的 Google 帳戶。
+
+4.4 您同意不會使用此 SDK 從事任何不當活動，例如開發或散佈會以未經授權的方式干擾、妨礙、損害或存取任何第三方 (包括但不限於 Google 或任何行動通訊業者) 之伺服器、網路或是其他財產或服務的應用程式。
+
+4.5 您同意對您透過 Android 裝置和 (或) Android 應用程式建立、傳輸或顯示的任何資料、內容或資源，以及上述行為造成的後果 (包括 Google 可能蒙受的任何損失或損害) 負起全責 (而 Google 對您或任何第三方就上述一切不需負任何責任)。
+
+4.6 您同意對違反在此「授權協議」、任何適用之第三方合約或《服務條款》或是任何適用之法律或規定下所必須遵守的義務，以及違反相關義務造成的後果 (包括 Google 或任何第三方可能蒙受的任何損失或損害) 負起全責 (而 Google 對您或任何第三方就上述一切不需負任何責任)。
+
+
+<h3>5.您的開發人員憑證</h3>
+5.1 您同意負責保密 Google 可能核發給您或您自己選擇的任何開發人員憑證，並且對在您開發人員憑證名義下開發的所有應用程式負起全責。
+
+
+<h3>6.隱私權和資訊</h3>
+6.1 為了持續更新及改進此 SDK，Google 可能會從軟體收集某些使用狀況統計數據，包括但不限於軟體的唯一識別碼、相關 IP 位址、版本號碼，以及有關使用此 SDK 中的哪些工具和 (或) 服務及其使用方式的相關資訊。在收集這類資訊之前，此 SDK 會先通知您並徵求您的同意。如果您不同意，Google 將不會收集這類資訊。
+
+6.2 Google 會彙總並檢查收集到的資料，據以改善此 SDK，並且會依據《Google 隱私權政策》加以妥善保存。
+
+
+<h3>s7.第三方應用程式</h3>
+7.1 如果您使用此 SDK 來執行第三方開發的應用程式，或是執行會存取第三方所提供之資料、內容或資源的應用程式，您同意 Google 不需對這類應用程式、資料、內容或資源負任何責任。您瞭解您透過第三方應用程式存取的所有資料、內容或資源是由其提供者負起全責，而 Google 對您因使用或存取任何這些第三方應用程式、資料、內容或資源所造成的損失或損害不需負任何責任。
+
+7.2 您瞭解第三方應用程式提供給您的資料、內容或資源可能受到提供者 (或代表他們的其他人員或公司) 所擁有的智慧財產權保護。您不得根據這類資料、內容或資源 (不論是整個或部分) 修改、出租、出借、販售、散佈或製作衍生成品，除非相關擁有者明確授權您從事上述活動。
+
+7.3 您瞭解使用第三方應用程式、資料、內容或資源可能受到您與相關第三方之間的個別條款約束。在這種情況下，此「授權協議」並不影響您與這些第三方之間的法律關係。
+
+
+<h3>8.使用 Android API</h3>
+8.1 Google Data API
+
+8.1.1 如果您使用任何 API 從 Google 擷取資料，您瞭解這些資料可能受到 Google 或資料提供者 (或代表他們的其他人員或公司) 所擁有的智慧財產權保護。您對任何這類 API 的使用可能受到其他《服務條款》約束。除非相關《服務條款》明文允許，否則您不得根據這類資料 (不論是整個或部分) 修改、出租、出借、販售、散佈或製作衍生成品。
+
+8.1.2 使用任何 API 從 Google 擷取使用者的資料時，您瞭解並同意只有在該使用者明確同意且授權您擷取其資料，而且僅限用於使用者所授權之用途的情況下，您才能擷取資料。
+
+
+<h3>9.終止此「授權協議」</h3>
+9.1 除非您或 Google 終止此「授權協議」(請見下方說明)，否則此「授權協議」將持續具有效力。
+
+9.2 如果想終止此「授權協議」，只要停止使用此 SDK 及任何相關的開發人員憑證即可。
+
+9.3 Google 可在下列情況下，隨時終止與您簽署的這項「授權協議」：
+(A) 您違反此「授權協議」的任何條款；或
+(B) Google 依法終止此「授權協議」；或
+(C) 與 Google 一起提供此 SDK 的特定部分 (例如 API) 給您的合作夥伴已終止與 Google 的關係，或是已停止提供此 SDK 的特定部分給您；或 
+(D) Google 決定不再提供此 SDK 或此 SDK 的特定部分給您所居住或使用此服務之國家/地區的使用者，或是 Google 自行判斷提供此 SDK 或特定 SDK 服務給您已不再具商業價值。
+
+9.4 當此「授權條款」終止時，您和 Google 已從中受益、受到約束 (或隨此「授權協議」的有效期間而累積) 或表示無限期持續的一切法定權利、義務及責任，將不受此終止措施影響，並且第 14.7 條的條款將無限期持續適用於這類權利、義務及責任。
+
+
+<h3>10.免責聲明</h3>
+10.1 您明確瞭解並同意完全自負使用此 SDK 的風險，並且此 SDK 是依「現況」和「可提供性」提供，Google 不負任何擔保責任。
+
+10.2 您對使用此 SDK 及透過此 SDK 以下載或其他方式取得的任何內容，需自行斟酌和自負風險，而且您對因這類使用而對您的電腦系統或其他裝置所造成的任何損害或資料遺失，需負起全責。
+
+10.3 Google 進一步明確聲明不提供任何形式的瑕疵擔保和條件 (不論明示或默示)，包括但不限於適售性、適合特定用途及未侵權的默示擔保和條件。
+
+
+<h3>11.責任限制</h3>
+11.1 您明確瞭解並同意在任何歸責理論下，就可能由您引起的任何直接、間接、附隨性、特殊性、衍生性或懲罰性損害賠償 (包括任何資料遺失)，不論 Google 或其代表是否已獲告知或應已瞭解發生任何這類損失的可能性，Google、其子公司和關係企業及其授權人不必對您負起任何責任。
+
+
+<h3>12.賠償</h3>
+12.1 在法律允許的最大範圍內，您同意為 Google、其子公司及其個別董監事、主管、員工和代理人，就任何和一切索賠、法律行動、訴訟或訴訟程序，以及因下列原因而引起的任何和一切損失、責任、損害賠償、費用及開支 (包括合理的律師費)，提供辯護、賠償損失並確保其免於承擔賠償責任：(a) 您使用此 SDK；(b) 您使用此 SDK 開發的應用程式侵害任何人的任何著作權、商標、商業機密、商業包裝、專利或其他智慧財產權，或是詆毀任何人或違反其公開權或隱私權；以及 (c) 您未遵守此「授權協議」。
+
+
+<h3>13.對此「授權協議」做出的變更</h3>
+13.1 Google 可在散佈此 SDK 的新版本時修改此「授權協議」。做出這類變更後，Google 會在提供此 SDK 的網站上提供此「授權協議」的新版本。
+
+
+<h3>14.一般法律條款</h3>
+14.1 此「授權協議」構成您與 Google 之間的法律協議，用於管制您對此 SDK (不包括 Google 依據個別書面協議提供給您的任何服務) 的使用，並完全取代先前您與 Google 之間就此 SDK 簽署的相關協議。
+
+14.2 您同意如果 Google 未行使或執行此「授權協議」所含的任何法律權利或救濟 (或在任何適用法律下對 Google 有利的權益)，並不代表 Google 正式放棄權利，Google 日後仍可行使這些權利或救濟。
+
+14.3 如果經任何法院 (就此事宜依管轄權決定) 裁決此「授權協議」中有任何條款無效，則該條款將自此「授權協議」中移除，此「授權協議」的其餘部分則不受影響。此「授權協議」的其餘條款將持續具有效力且可執行。
+
+14.4 您瞭解並同意 Google 旗下子公司體系的每位成員都是此「授權協議」的第三方受益人，而且這類其他公司有權直接執行和依據此「授權協議」中對其授予權益 (或對其有利之權利) 的任何條款。除此之外的任何其他人員或公司皆非此「授權協議」的第三方受益人。
+
+14.5 出口限制。此 SDK 受美國出口法規約束。您必須遵守適用於此 SDK 的所有國內和國際出口法規。這些法律包括對目的地、使用者及最終用途的限制。
+
+14.6 您或 Google 不得在未事先取得另一方書面核准的情況下，轉讓或轉移此「授權協議」所授予的權利。您和 Google 皆不得在未事先取得另一方書面核准的情況下，委派其此「授權協議」涵蓋的責任或義務。
+
+14.7 此「授權協議」以及您與 Google 就此「授權協議」構成的關係皆受加州法律管轄，毋須理會其法律牴觸條款。您和 Google 同意服從加州聖塔克拉拉 (Santa Clara, California) 郡內法院的專屬管轄權，以解決由此「授權協議」產生的任何法律事務。儘管如此，您同意 Google 仍可依據任何管轄權申請禁制令救濟 (或相同類型的緊急法定救濟)。
+
+
+2012 年 11 月 13 日<em></em>
+</div>
+
+
+
+
+
+<div id="next-steps" style="display:none;position:absolute;width:inherit">
+  <p>只要再進行幾個步驟，即可建置適用於 Android 的應用程式！</p>
+  <p>系統即將把您重新導向至 
+<a id="next-link" href="{@docRoot}sdk/installing/index.html">安裝 Android SDK</a> 網頁。</p>
+
+</div><!-- end next-steps -->
+
+
+
+<div id="sdk-terms-form">
+<p>
+<input id="agree" type="checkbox" name="agree" value="1" onclick="onAgreeChecked()" />
+<label id="agreeLabel" for="agree">我已閱讀並同意上述條款及細則</label>
+</p>
+<p><a href="" class="button disabled" id="downloadForRealz" onclick="return onDownloadForRealz(this);"></a></p>
+</div>
+
+
+</div><!-- end TOS -->
+
+
+
+
+
+
+<div id="landing">
+
+<div class="col-13">&nbsp;</div><!-- provides top margin for content -->
+
+<img src="{@docRoot}images/tools/studio-hero.png" srcset="{@docRoot}images/tools/studio-hero_2x.png 2x, {@docRoot}images/tools/studio-hero.png 1x" width="760" height="400" alt="" style="margin-bottom:80px" />
+
+<div style="color: #fff; width:226px; height:0; overflow:visible; position:absolute; top:40px; left:25px">
+
+<h1 class="studio-logo" style="margin:0 0 35px !important">Android Studio</h1>
+
+<p style="font-size: 16px; color:#bbb; position: absolute;left: 297px; top: 5px; display: block;
+width: 400px;text-align: center;">官方 Android IDE</p>
+
+<ul style="font-size:12px">
+<li>Android Studio IDE</li>
+<li>Android SDK 工具</li>
+<li>Android 5.0 (Lollipop) 平台</li>
+<li>含 Google API 的 Android 5.0 模擬器系統映像檔</li>
+</ul>
+
+
+<a class="online landing-button green download-bundle-button" style="margin-top:30px;" href="#Other">下載 Android Studio</a>
+
+<!-- this appears when viewing the offline docs -->
+<p class="offline">
+想要取得 Android Studio 或獨立 SDK 工具，請造訪 <a href="http://developer.android.com/sdk/index.html">developer.android.com/sdk/</a>
+</p>
+
+<ul style="margin-top:50px;color:#444">
+  <li><a href="#Requirements">系統需求</a></li>
+  <li><a href="#Other">其他下載選項</a></li>
+  <li><a href="{@docRoot}sdk/installing/migrate.html">遷移至 Android Studio</a></li>
+  <li><a href="https://docs.google.com/a/google.com/forms/d/1mjsyfzv3HAnDY-_Kfj-3QJKdpuksyMFs9e73CRwmT6Q/viewform" target="_blank">參與問卷調查</a></li>
+</ul>
+
+</div>
+
+
+
+
+<h2 class="feature norule" >智慧型程式碼編輯器</h2>
+
+<div class="col-9" style="margin:0 20px 0 0">
+  <img src="{@docRoot}images/tools/studio-hero-code.png" srcset="{@docRoot}images/tools/studio-hero-code_2x.png 2x, {@docRoot}images/tools/studio-hero-code.png 1x" width="520" />
+</div><!-- end col-9 (left column) -->
+
+<div class="col-4 feature-blurb">
+  <p>Android Studio 的核心是一個智慧型程式碼編輯器，能夠進行進階的程式碼自動完成、重構及程式碼分析作業。
+</p>
+  <p>這項功能強大的程式碼編輯器可協助您成為更具生產力的 Android 應用程式開發人員。</p>
+</div>
+
+
+
+
+
+<h2 class="feature norule">程式碼範本與 GitHub 整合</h2>
+
+<div class="col-9" style="margin:0 20px 0 0">
+  <img src="{@docRoot}images/tools/studio-hero-import.png" srcset="{@docRoot}images/tools/studio-hero-import_2x.png 2x, {@docRoot}images/tools/studio-hero-import.png 1x" width="520" />
+</div><!-- end col-9 (left column) -->
+
+<div class="col-4 feature-blurb">
+  <p>全新的專案精靈可協助您及早發起新專案。</p>
+
+  <p>您可以使用模式 (例如導覽匣和資料檢視巡覽區) 範本程式碼，甚至是從 GitHub 匯入 Google 程式碼來發起專案。
+</p>
+</div>
+
+
+
+
+<h2 class="feature norule">多螢幕應用程式開發</h2>
+
+<div class="col-9" style="margin:0 20px 0 0">
+  <img src="{@docRoot}images/tools/studio-hero-screens.png" srcset="{@docRoot}images/tools/studio-hero-screens_2x.png 2x, {@docRoot}images/tools/studio-hero-screens.png 1x" width="520" />
+</div><!-- end col-9 (left column) -->
+
+<div class="col-4 feature-blurb">
+  <p>建置適用於 Android 手機、平板電腦、Android Wear、Android TV、Android Auto 和 Google Glass 的應用程式。
+</p>
+  <p>透過 Android Studio 中新的「Android 專案檢視」和模組支援功能，管理應用程式專案和相關資源變得更加容易。
+
+</div>
+
+
+
+
+<h2 class="feature norule">適用於所有形狀和大小的虛擬裝置</h2>
+
+<div class="col-9" style="margin:0 20px 0 0">
+  <img src="{@docRoot}images/tools/studio-hero-avds.png" srcset="{@docRoot}images/tools/studio-hero-avds_2x.png 2x, {@docRoot}images/tools/studio-hero-avds.png 1x" width="520" />
+</div><!-- end col-9 (left column) -->
+
+<div class="col-4 feature-blurb">
+  <p>Android Studio 隨附預先設定、經過最佳化的模擬器映像檔。</p>
+  <p>經過更新及簡化的 Virtual Device Manager (虛擬裝置管理員) 可為常見的 Android 裝置提供預先定義的裝置設定檔。
+</p>
+</div>
+
+
+
+
+<h2 class="feature norule">
+Android 版本已隨 Gradle 更新</h2>
+
+<div class="col-9" style="margin:0 20px 0 0">
+  <img src="{@docRoot}images/tools/studio-hero-gradle.png" srcset="{@docRoot}images/tools/studio-hero-gradle_2x.png 2x, {@docRoot}images/tools/studio-hero-gradle.png 1x" width="520" />
+</div><!-- end col-9 (left column) -->
+
+<div class="col-4 feature-blurb">
+  <p>可使用同一項專案為您的 Android 應用程式建立多個具有不同功能的 APK。</p>
+  <p>可使用 Maven 管理應用程式依附功能。</p>
+  <p>可使用 Android Studio 或命令列建置 APK。</p>
+</div>
+
+
+
+
+<h2 class="feature norule">瞭解 Android Studio</h2>
+<div style="background:#424242;padding:30px; color:#fff;margin:0 0 15px;">
+
+<a class="online landing-button green download-bundle-button" style="margin:0 0 40px 60px;float:right" href="">下載 Android Studio</a>
+
+  <ul>
+  <li>以 IntelliJ IDEA Community Edition (JetBrains 所推出的常用 Java IDE) 為基礎。</li>
+  <li>具有彈性的 Gradle 型建置系統。</li>
+  <li>可產生建置變體和多個 APK。</li>
+  <li>可為 Google 各項服務和各種裝置類型提供額外的範本支援。</li>
+  <li>具有支援主題編輯功能的版面配置編輯器。</li>
+  <li>具有可取得效能、可用性、版本相容性資料及偵測其他問題的 Lint 工具。</li>
+  <li>具有 ProGuard 和應用程式簽署功能。</li>
+  <li>內建 Google Cloud Platform 支援，可讓您輕鬆整合 Google Cloud Messaging 與 App Engine。
+</li>
+  </ul>
+
+<p style="margin:0">
+如要進一步瞭解 Android Studio 提供的功能，請參閱《<a href="{@docRoot}tools/studio/index.html">Android Studio 基本概念</a>》指南。
+</p>
+</div>
+
+
+<p>如果您搭配 ADT 使用 Eclipse，請注意，Android Studio 現已成為 Android 的官方 IDE，因此請遷移至 Android Studio 以接收 IDE 的所有更新資訊。
+
+如果想瞭解如何遷移專案，請參閱<a href="{@docRoot}sdk/installing/migrate.html">遷移至 Android Studio</a>。
+
+</p>
+
+
+
+
+
+
+
+<h2 id="Requirements">系統需求</h2>
+
+<h3>Windows</h3>
+
+<ul>
+<li>Microsoft&reg; Windows&reg; 8/7/Vista/2003 (32 或 64 位元)</li>
+<li>2 GB 以上的 RAM (建議準備 4 GB 的 RAM)</li>
+<li>400 MB 的硬碟空間</li>
+<li>至少 1 GB (供 Android SDK、模擬器系統映像檔及快取使用)</li>
+<li>1280 x 800 以上的螢幕解析度</li>
+<li>Java Development Kit (JDK) 7 </li>
+<li>提升模擬器效能的選用配件：支援 Intel® VT-x、Intel® EM64T (Intel® 64) 及 Execute Disable (XD) Bit 功能的 Intel® 處理器
+</li>
+</ul>
+
+
+<h3>Mac OS X</h3>
+
+<ul>
+<li>Mac&reg; OS X&reg; 10.8.5 以上版本；最高可支援 10.9 (Mavericks)</li>
+<li>2 GB 以上的 RAM (建議準備 4 GB 的 RAM)</li>
+<li>400 MB 的硬碟空間</li>
+<li>至少 1 GB (供 Android SDK、模擬器系統映像檔及快取使用)</li>
+<li>1280 x 800 以上的螢幕解析度</li>
+<li>Java Runtime Environment (JRE) 6</li>
+<li>Java Development Kit (JDK) 7</li>
+<li>提升模擬器效能的選用配件：支援 Intel® VT-x、Intel® EM64T (Intel® 64) 及 Execute Disable (XD) Bit 功能的 Intel® 處理器
+</li>
+</ul>
+
+<p>如果您使用 Mac OS，可搭配 Java Runtime Environment (JRE) 6 執行 Android Studio 以獲得最佳字型顯示效果。
+此外，您還可以設定專案使用 Java Development Kit (JDK) 6 或 JDK 7。</p>
+
+
+
+<h3>Linux</h3>
+
+<ul>
+<li>GNOME 或 KDE 桌面</li>
+<li>GNU C 程式庫 (glibc) 2.15 以上版本</li>
+<li>2 GB 以上的 RAM (建議準備 4 GB 的 RAM)</li>
+<li>400 MB 的硬碟空間</li>
+<li>至少 1 GB (供 Android SDK、模擬器系統映像檔及快取使用)</li>
+<li>1280 x 800 以上的螢幕解析度</li>
+<li>Oracle&reg; Java Development Kit (JDK) 7 </li>
+</ul>
+<p>已在 Ubuntu&reg; 14.04 Trusty Tahr (能夠執行 32 位元應用程式的 64 位元發行版本) 上經過測試。
+</p>
+
+
+
+
+<h2 id="Other" style="clear:left">其他下載選項</h2>
+
+<!-- alternative SDK options follows -->

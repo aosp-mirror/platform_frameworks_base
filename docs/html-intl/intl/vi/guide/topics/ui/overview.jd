@@ -1,0 +1,71 @@
+page.title=Tổng quan về UI
+@jd:body
+
+
+<p>Tất cả phần tử giao diện người dùng trong một ứng dụng Android đều được xây dựng bằng cách sử dụng các đối tượng {@link android.view.View} và
+{@link android.view.ViewGroup}. {@link android.view.View} là một đối tượng có chức năng vẽ
+thứ gì đó trên màn hình mà người dùng có thể tương tác với. {@link android.view.ViewGroup} là một đối tượng
+có chức năng giữ các đối tượng {@link android.view.View} (và {@link android.view.ViewGroup}) khác
+để định nghĩa bố trí của giao diện.</p>
+
+<p>Android cung cấp một bộ sưu tập cả lớp con {@link android.view.View} và {@link
+android.view.ViewGroup} cung cấp cho bạn các cách điều khiển nhập liệu thông dụng (chẳng hạn như nút và
+trường văn bản) và các mô hình bố trí khác nhau (chẳng hạn như bố trí tuyến tính hoặc tương đối).</p>
+
+
+<h2 id="Layout">Bố trí Giao diện Người dùng</h2>
+
+<p>Giao diện người dùng của từng thành phần trong ứng dụng của bạn được định nghĩa bằng cách sử dụng một phân cấp của các đối tượng {@link
+android.view.View} và {@link android.view.ViewGroup} như minh họa trong hình 1. Mỗi nhóm dạng xem
+là một bộ chứa vô hình có chức năng tổ chức các dạng xem con, trong khi dạng xem con có thể là
+điều khiển nhập liệu hoặc các widget khác để
+vẽ một phần nào đó của UI. Cây phân cấp này có thể đơn giản hoặc phức tạp như nhu cầu
+của bạn (nhưng đơn giản sẽ tốt cho hiệu năng).</p>
+
+<img src="{@docRoot}images/viewgroup.png" alt="" />
+<p class="img-caption"><strong>Hình 1.</strong> Minh họa một phân cấp dạng xem có chức năng định nghĩa một
+bố trí UI.</p>
+
+<p>Để khai báo bố trí của mình, bạn có thể khởi tạo các đối tượng {@link android.view.View} trong mã và bắt đầu
+xây dựng một cây, nhưng cách dễ nhất và hiệu quả nhất để định nghĩa bố trí của bạn đó là bằng một tệp XML.
+XML cung cấp một cấu trúc mà người dùng có thể đọc được cho bố trí, tương tự như HTML.</p>
+
+<p>Tên của phần tử XML đối với một dạng xem tương ứng với lớp Android mà nó biểu diễn. Vì thế một phần tử
+<code>&lt;TextView&gt;</code> tạo ra một widget {@link android.widget.TextView} trong UI của bạn,
+và một phần tử <code>&lt;LinearLayout&gt;</code> tạo ra một nhóm dạng xem {@link android.widget.LinearLayout}
+. </p>
+
+<p>Ví dụ, một bố trí thẳng đứng đơn giản với dạng xem văn bản và nút trông như sau:</p>
+<pre>
+&lt;?xml version="1.0" encoding="utf-8"?>
+&lt;LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:layout_width="fill_parent" 
+              android:layout_height="fill_parent"
+              android:orientation="vertical" >
+    &lt;TextView android:id="@+id/text"
+              android:layout_width="wrap_content"
+              android:layout_height="wrap_content"
+              android:text="I am a TextView" />
+    &lt;Button android:id="@+id/button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="I am a Button" />
+&lt;/LinearLayout>
+</pre>
+
+<p>Khi bạn tải một tài nguyên bố trí trong ứng dụng của mình, Android khởi tạo từng nút của bố trí vào một
+đối tượng thời gian chạy mà bạn có thể sử dụng để định nghĩa các hành vi bổ sung, truy vấn trạng thái của đối tượng hoặc sửa đổi
+bố trí.</p>
+
+<p>Để xem hướng dẫn đầy đủ về tạo bố trí UI, hãy xem phần <a href="declaring-layout.html">Bố trí
+XML</a>.
+
+  
+<h2 id="UIComponents">Thành phần Giao diện Người dùng</h2>
+
+<p>Bạn không phải xây dựng tất cả UI của mình bằng cách sử dụng các đối tượng {@link android.view.View} và {@link
+android.view.ViewGroup}. Android cung cấp một vài thành phần ứng dụng đưa ra một
+bố trí UI chuẩn mà bạn chỉ cần định nghĩa nội dung cho nó. Mỗi thành phần UI như vậy
+đều có một bộ API duy nhất được mô tả trong các tài liệu tương ứng, chẳng hạn như <a href="{@docRoot}guide/topics/ui/actionbar.html">Thanh Hành động</a>, <a href="{@docRoot}guide/topics/ui/dialogs.html">Hộp thoại</a> và <a href="{@docRoot}guide/topics/ui/notifiers/notifications.html">Thông báo Trạng thái</a>.</p>
+
+

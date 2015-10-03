@@ -1,0 +1,1094 @@
+page.title=提供資源
+parent.title=應用程式資源
+parent.link=index.html
+@jd:body
+
+<div id="qv-wrapper">
+<div id="qv">
+  <h2>快速檢視</h2>
+  <ul>
+    <li>不同類型的資源屬於 {@code res/} 中不同的子目錄</li>
+    <li>替代資源提供特定設定資源檔案</li>
+    <li>始終要包含預設資源，如此應用程式才不會依賴特定裝置設定
+</li>
+  </ul>
+  <h2>本文件內容</h2>
+  <ol>
+    <li><a href="#ResourceTypes">分組資源類型</a></li>
+    <li><a href="#AlternativeResources">提供替代資源</a>
+      <ol>
+        <li><a href="#QualifierRules">限定詞名稱規則</a></li>
+        <li><a href="#AliasResources">建立別名資源</a></li>
+      </ol>
+    </li>
+    <li><a href="#Compatibility">使用資源提供最佳的裝置相容性</a></li>
+    <li><a href="#BestMatch">Android 如何尋找最相符的資源</a></li>
+  </ol>
+
+  <h2>另請參閱</h2>
+  <ol>
+    <li><a href="accessing-resources.html">存取資源</a></li>
+    <li><a href="available-resources.html">資源類型</a></li>
+    <li><a href="{@docRoot}guide/practices/screens_support.html">支援多個螢幕</a>
+</li>
+  </ol>
+</div>
+</div>
+
+<p>您應該一律將應用程式資源具體化，例如影像和程式碼字串，以便單獨維護它們。
+同時，您還應該將替代資源分組到特殊命名的資源目錄中，為特定裝置設定提供替代資源。
+Android 會在執行階段根據目前的設定使用適當的資源。
+例如，您可能會想根據螢幕大小提供不同的 UI 版面配置，或者根據語言設定提供不同的字串。
+
+</p>
+
+<p>具體化您的應用程式資源後，可以使用在專案 {@code R} 類別中產生的資源 ID 來存取它們。
+在應用程式使用資源的方法在<a href="accessing-resources.html">存取資源</a>中有相關討論。
+
+本文件說明如何在 Android 專案分組您的資源，並為特定裝置設定提供替代資源。
+</p>
+
+
+<h2 id="ResourceTypes">分組資源類型</h2>
+
+<p>您應該將每個資源類型放在專案
+{@code res/} 目錄的特定子目錄中。例如，下列為簡單專案的檔案階層：</p>
+
+<pre class="classic no-pretty-print">
+MyProject/
+    src/  <span style="color:black">
+        MyActivity.java  </span>
+    res/
+        drawable/  <span style="color:black">
+            graphic.png  </span>
+        layout/  <span style="color:black">
+            main.xml
+            info.xml</span>
+        mipmap/  <span style="color:black">
+            icon.png </span>
+        values/  <span style="color:black">
+            strings.xml  </span>
+</pre>
+
+<p>如您在此範例所見，{@code res/} 目錄包含所有資源 (在子目錄中)：一個影像資源、兩個版面配置資源、啟動器圖示的 {@code mipmap/} 目錄，以及字串資源檔案。
+
+資源目錄名稱非常重要，在表 1 有相關說明。
+</p>
+
+<p class="note"><strong>注意：</strong>如需有關使用 mipmap 資料夾的詳細資訊，請參閱<a href="{@docRoot}tools/projects/index.html#mipmap">管理專案總覽</a>。
+</p>
+
+<p class="table-caption" id="table1"><strong>表 1.</strong>專案 {@code res/} 目錄內部支援資源目錄。
+</p>
+
+<table>
+  <tr>
+    <th scope="col">目錄</th>
+    <th scope="col">資源類型</th>
+  </tr>
+
+  <tr>
+    <td><code>animator/</code></td>
+    <td>定義<a href="{@docRoot}guide/topics/graphics/prop-animation.html">屬性動畫</a>的 XML 檔案。
+</td>
+  </tr>
+
+  <tr>
+    <td><code>anim/</code></td>
+    <td>定義 <a href="{@docRoot}guide/topics/graphics/view-animation.html#tween-animation">tween 動畫</a>的 XML 檔案。
+(屬性動畫也能儲存在這個目錄中，但建議將屬性動畫放在{@code animator/} 目錄中，以區分這兩個類型。)
+
+</td>
+  </tr>
+
+  <tr>
+    <td><code>color/</code></td>
+    <td>定義色彩狀態清單的 XML 檔案。請參閱<a href="color-list-resource.html">色彩狀態清單資源</a>
+</td>
+  </tr>
+
+  <tr>
+    <td><code>drawable/</code></td>
+
+    <td><p>編譯成下列可繪項目資源子類型的點陣圖檔案 ({@code .png}、{@code .9.png}、{@code .jpg}、{@code .gif}) 或 XML 檔案：
+</p>
+      <ul>
+        <li>點陣圖檔案</li>
+        <li>九宮格影像 (可重新調整大小的點陣圖)</li>
+        <li>狀態清單</li>
+        <li>形狀</li>
+        <li>動畫可繪項目</li>
+        <li>其他可繪項目</li>
+      </ul>
+      <p>請參閱<a href="drawable-resource.html">可繪項目資源</a>。</p>
+    </td>
+  </tr>
+
+  <tr>
+    <td><code>mipmap/</code></td>
+    <td>適用於不同啟動器圖示密度的可繪項目檔案。如需有關使用 {@code mipmap/} 資料夾管理啟動器圖示的詳細資訊，請參閱<a href="{@docRoot}tools/project/index.html#mipmap">管理專案總覽</a>。
+
+</td>
+  </tr>
+
+  <tr>
+    <td><code>layout/</code></td>
+    <td>定義使用者介面版面配置的 XML 檔案。
+        請參閱<a href="layout-resource.html">版面配置資源</a>。</td>
+  </tr>
+
+  <tr>
+    <td><code>menu/</code></td>
+    <td>定義應用程式選單 (例如，選項選單、操作選單或子選單) 的 XML 檔案。
+請參閱<a href="menu-resource.html">選單資源</a>。</td>
+  </tr>
+
+  <tr>
+    <td><code>raw/</code></td>
+    <td><p>以原始格式儲存的任意檔案。如要使用原始
+{@link java.io.InputStream} 開啟這些資源，使用資源 ID 呼叫 {@link android.content.res.Resources#openRawResource(int)
+Resources.openRawResource()}，資源 ID 為 {@code R.raw.<em>filename</em>}。</p>
+      <p>然而，如果您需要存取原始檔案名稱和檔案階層，可以考慮將一些資源儲存在 {@code
+assets/} 目錄中 (而不是 {@code res/raw/})。
+位於 {@code assets/} 的檔案不會有資源 ID，因此您只能使用 {@link android.content.res.AssetManager} 讀取它們。
+</p></td>
+  </tr>
+
+  <tr>
+    <td><code>values/</code></td>
+    <td><p>包含簡單值 (例如，字串、整數和色彩) 的 XML 檔案。</p>
+      <p>位於其他 {@code res/} 子目錄的 XML 資源檔案會根據 XML 檔案名稱定義單一資源，而位於 {@code values/} 目錄的檔案則會描述多個資源。
+針對這個目錄中的檔案，{@code &lt;resources&gt;} 元素的每個子項都會定義單一資源。
+
+例如，{@code &lt;string&gt;} 元素建立一個
+{@code R.string} 資源，{@code &lt;color&gt;} 元素建立一個 {@code R.color}資源。
+</p>
+      <p>由於每個資源都是以自己的 XML 元素定義，您可以依照自己的喜好命名檔案，並將不同的資源類型放在一個檔案中。
+然而，為了更加清楚，您可以將唯一資源類型放在不同的檔案中。
+例如，針對您可以在此目錄建立的資源，這裡提供一些檔案名稱慣例：
+</p>
+      <ul>
+        <li>arrays.xml 適用於資源陣列 (<a href="more-resources.html#TypedArray">具類型的陣列</a>)。</li>
+        <li>colors.xml 適用於<a href="more-resources.html#Color">色彩值</a></li>
+        <li>dimens.xml 適用於<a href="more-resources.html#Dimension">維度值</a>。</li>
+        <li>strings.xml 適用於<a href="string-resource.html">字串值</a>。
+</li>
+        <li>styles.xml 適用於<a href="style-resource.html">樣式</a>。</li>
+      </ul>
+      <p>請參閱<a href="string-resource.html">字串資源</a>、
+<a href="style-resource.html">樣式資源</a>和
+<a href="more-resources.html">更多資源類型</a>。</p>
+    </td>
+  </tr>
+
+  <tr>
+    <td><code>xml/</code></td>
+    <td>可以在執行階段讀取的任意 XML 檔案，方法是呼叫 {@link
+android.content.res.Resources#getXml(int) Resources.getXML()}。各種 XML 設定檔案都必須儲存在這裡，例如<a href="{@docRoot}guide/topics/search/searchable-config.html">可搜尋項目設定</a>。
+
+<!-- or preferences configuration. --></td>
+  </tr>
+</table>
+
+<p class="caution"><strong>注意：</strong>千萬不要將資源檔案直接儲存在
+{@code res/} 目錄內 &mdash; 會發生編譯錯誤。</p>
+
+<p>如需特定資源類型的詳細資訊，請參閱<a href="available-resources.html">資源類型</a>文件。</p>
+
+<p>您儲存在表 1 定義之子目錄的資源是您的「預設」資源。
+也就是說，這些資源會定義您應用程式的預設設計和內容。
+然而，不同類型的 Android 平台裝置可能需要不同類型的資源。
+例如，如果裝置的螢幕大於一般螢幕，則您需要提供不同的版面配置資源，以充分利用額外的螢幕空間。
+或者，如果裝置有不同的語言設定，則您需要提供不同的字串資源，以翻譯您使用者介面中的文字。
+
+如要為不同裝置設定提供這些不同的資源，除了預設資源之外，您還需要提供替代資源。
+
+</p>
+
+
+<h2 id="AlternativeResources">提供替代資源</h2>
+
+
+<div class="figure" style="width:429px">
+<img src="{@docRoot}images/resources/resource_devices_diagram2.png" height="167" alt="" />
+<p class="img-caption">
+<strong>圖 1.</strong>兩個不同的裝置，個別使用不同的版面配置資源。</p>
+</div>
+
+<p>幾乎每個應用程式都應提供替代資源以支援特定裝置設定。
+例如，您應該為不同的螢幕密度包含替代可繪項目資源，並為不同語言提供替代字串資源。
+Android 會在執行階段偵測目前的裝置設定，並為您的應用程式載入適當的資源。
+
+</p>
+
+<p>如要為一組資源指定特定設定的替代項目：</p>
+<ol>
+  <li>在 {@code res/} 建立一個新的目錄，命名的格式為 {@code
+<em>&lt;resources_name&gt;</em>-<em>&lt;config_qualifier&gt;</em>}。
+    <ul>
+      <li><em>{@code &lt;resources_name&gt;}</em> 是對應預設資源 (定義在表 1) 的目錄名稱。
+</li>
+      <li><em>{@code &lt;qualifier&gt;}</em> 是用來指定要使用這些資源之個別設定的名稱 (定義在表 2)。
+</li>
+    </ul>
+    <p>您可以附加一個以上的 <em>{@code &lt;qualifier&gt;}</em>。使用破折號分隔每個項目。
+</p>
+    <p class="caution"><strong>注意：</strong>附加多個限定詞時，您必須以表 2 列出的相同順序放置它們。
+如果限定詞的順序錯誤，將會忽略該資源。
+</p>
+  </li>
+  <li>將各個替代資源儲存在這個新的目錄。資源檔案的名稱必須和預設資源檔案的名稱完全相同。
+</li>
+</ol>
+
+<p>例如，這裡有些預設和替代資源：</p>
+
+<pre class="classic no-pretty-print">
+res/
+    drawable/   <span style="color:black">
+        icon.png
+        background.png    </span>
+    drawable-hdpi/  <span style="color:black">
+        icon.png
+        background.png  </span>
+</pre>
+
+<p>{@code hdpi} 限定詞代表該目錄的資源適用於高密度螢幕裝置。
+這些可繪項目目錄中的影像大小已調整為符合特定螢幕密度，但是檔案名稱完全相同。
+
+如此一來，您用來參照 {@code icon.png} 或 {@code
+background.png} 影像的資源 ID 一律都會相同，但 Android 會透過比對裝置設定資訊和資源目錄名稱中的限定詞，選擇最符合目前裝置的每個資源版本。
+
+</p>
+
+<p>Android 支援多種設定限定詞，而且您可以將多個限定詞加到一個目錄名稱，並用破折號分隔每個限定詞。
+表 2 依優先等級列出有效的設定限定詞 &mdash; 如果您針對一個資源目錄使用多個限定詞，您必須依表格中列出的順序將它們新增到目錄名稱。
+
+
+</p>
+
+
+<p class="table-caption" id="table2"><strong>表 2.</strong>設定限定詞名稱。
+</p>
+<table>
+    <tr>
+        <th>設定</th>
+        <th>限定詞值</th>
+        <th>描述</th>
+    </tr>
+    <tr id="MccQualifier">
+      <td>MCC 和 MNC</td>
+      <td>範例：<br/>
+        <code>mcc310</code><br/>
+        <code><nobr>mcc310-mnc004</nobr></code><br/>
+        <code>mcc208-mnc00</code><br/>
+        等等。
+      </td>
+      <td>
+        <p>行動裝置國家/地區代碼 (MCC) 後面會選擇性加上裝置 SIM 卡上的行動裝置網路代碼 (MNC)
+。例如，<code>mcc310</code> 代表美國地區的所有行動通訊業者、
+        <code>mcc310-mnc004</code> 代表美國地區的 Verizon，以及 <code>mcc208-mnc00</code> 代表法國地區的 Orange。
+</p>
+        <p>如果裝置使用無線電連線 (GSM 手機)，MCC 和 MNC 值都會來自SIM 卡。
+</p>
+        <p>您也可以單獨使用 MCC (例如，在應用程式包含國家特定法律資源)。
+如果您只需根據語言進行指定，則改為使用「語言和區域」<em></em>限定詞 (稍後將會討論)。
+如果您決定使用 MCC 和 MNC 限定詞，應謹慎使用，並測試是否可按預期運作。
+</p>
+        <p>另請查看設定欄位 {@link
+android.content.res.Configuration#mcc} 和 {@link
+android.content.res.Configuration#mnc}，分別提供目前的行動裝置國家代碼和行動裝置網路代碼。
+</p>
+      </td>
+    </tr>
+    <tr id="LocaleQualifier">
+      <td>語言和區域</td>
+      <td>範例：<br/>
+        <code>en</code><br/>
+        <code>fr</code><br/>
+        <code>en-rUS</code><br/>
+        <code>fr-rFR</code><br/>
+        <code>fr-rCA</code><br/>
+        等等。
+      </td>
+      <td><p>語言是以兩個字母的 <a href="http://www.loc.gov/standards/iso639-2/php/code_list.php">ISO 639-1</a> 語言代碼定義，後面可以視需要加上兩個字母的 <a href="http://www.iso.org/iso/en/prods-services/iso3166ma/02iso-3166-code-lists/list-en1.html">ISO 3166-1-alpha-2</a> 區域代碼 (前面加上小寫 "{@code r}")。
+
+
+
+        </p><p>
+        代碼「沒有」<em></em>大小寫之分；{@code r} 首碼是用來區分區域部分。
+
+        您不能只指定區域。</p>
+        <p>如果使用者在系統設定變更其語言，此設定就會在應用程式生命週期內發生變更。
+請參閱<a href="runtime-changes.html">處理執行階段變更</a>，以瞭解這會如何在執行階段期間影響您的應用程式。
+</p>
+        <p>請參閱<a href="localization.html">當地語系化</a>，以取得將您的應用程式當地語系化成其他語言的詳細指南。
+</p>
+        <p>另請查看 {@link android.content.res.Configuration#locale} 設定欄位，這會提供目前的地區設定。
+</p>
+      </td>
+    </tr>
+    <tr id="LayoutDirectionQualifier">
+      <td>版面配置方向</td>
+      <td><code>ldrtl</code><br/>
+        <code>ldltr</code><br/>
+      </td>
+      <td><p>應用程式的版面配置方向。{@code ldrtl} 代表「版面配置方向右至左」。
+      {@code ldltr} 代表「版面配置方向左至右」，而且是預設隱含值。
+      </p>
+      <p>這適用於任何資源，例如版面配置、可繪項目或值。
+      </p>
+      <p>例如，如果您想針對阿拉伯語言提供一些特定版面配置，以及為任何其他「右至左」語言 (像是波斯文或希伯來文) 提供幾個一般版面配置，則程式碼如下：
+
+      </p>
+<pre class="classic no-pretty-print">
+res/
+    layout/   <span style="color:black">
+        main.xml  </span>(Default layout)
+    layout-ar/  <span style="color:black">
+        main.xml  </span>(Specific layout for Arabic)
+    layout-ldrtl/  <span style="color:black">
+        main.xml  </span>(Any "right-to-left" language, except
+                  for Arabic, because the "ar" language qualifier
+                  has a higher precedence.)
+</pre>
+        <p class="note"><strong>注意：</strong>如要為您的應用程式啟用右至左版面配置功能，您必須將 <a href="{@docRoot}guide/topics/manifest/application-element.html#supportsrtl">{@code
+        supportsRtl}</a> 設成 {@code "true"}，以及將 <a href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#target">{@code targetSdkVersion}</a> 設成 17 或更高。
+</p>
+        <p>已新增至 API 級別 17。<em></em></p>
+      </td>
+    </tr>
+    <tr id="SmallestScreenWidthQualifier">
+      <td>smallestWidth</td>
+      <td><code>sw&lt;N&gt;dp</code><br/><br/>
+        範例：<br/>
+        <code>sw320dp</code><br/>
+        <code>sw600dp</code><br/>
+        <code>sw720dp</code><br/>
+        等等。
+      </td>
+      <td>
+        <p>螢幕的基本大小，也就是可用
+螢幕區域的最短維度。具體而言，裝置的 smallestWidth 是螢幕最短的可用高度和寬度 (您也可以把它當成螢幕的「最小寬度」)。
+您可以使用此限定詞確保無論螢幕目前的方向為何，您的應用程式至少有 {@code &lt;N&gt;} dps 的寬度可供 UI 使用。
+
+</p>
+        <p>例如，如果您的版面配置需要隨時保持至少 600 dp 的最小螢幕區域維度，則您可以使用此限定詞建立版面配置資源 {@code
+res/layout-sw600dp/}。
+系統只會在可用螢幕的最小維度至少是 600dp 時使用這些資源，無論 600dp 的長度對使用者而言是高度或寬度都一樣。
+
+smallestWidth 是螢幕的固定螢幕大小特性；<strong>裝置的 smallestWidth 不會隨著螢幕方向的改變而變更。</strong>
+</p>
+        <p>裝置的 smallestWidth 會將螢幕裝飾和系統 UI 列入計算。例如，如果裝置的螢幕上有一些永久的 UI 元素，且這些元素佔用了 smallestWidth 座標軸上的空間，系統會宣告 smallestWidth 小於實際螢幕大小，因為這些是 UI 無法使用的螢幕像素。
+
+
+因此，您使用的值應該是版面配置所需的實際最小維度<em></em> (這個值通常是您版面配置支援的「最小寬度」，無論螢幕目前的方向為何都一樣)。
+
+</p>
+        <p>您可以針對一般螢幕大小在這裡使用的一些值：</p>
+        <ul>
+          <li>320 適用於採用以下螢幕設定的裝置：
+            <ul>
+              <li>240x320 ldpi (QVGA 手機)</li>
+              <li>320x480 mdpi (手機)</li>
+              <li>480x800 hdpi (高密度手機)</li>
+            </ul>
+          </li>
+          <li>480 適用於 480x800 mdpi 這類螢幕 (平板電腦/手機)。</li>
+          <li>600 適用於 600x1024 mdpi 這類螢幕 (7" 平板電腦)。</li>
+          <li>720 適用於 720x1280 mdpi 這類螢幕 (10" 平板電腦)。</li>
+        </ul>
+        <p>當您的應用程式為 smallestWidth 限定詞提供多個值不相同的資源目錄時，系統會使用最接近 (不超過)裝置 smallestWidth 的值。
+
+ </p>
+        <p>已新增至 API 級別 13。<em></em></p>
+        <p>另請查看 <a href="{@docRoot}guide/topics/manifest/supports-screens-element.html#requiresSmallest">{@code
+android:requiresSmallestWidthDp}</a> 屬性，該屬性會宣告與您應用程式相容的最小 smallestWidth，以及 {@link
+android.content.res.Configuration#smallestScreenWidthDp} 設定欄位，此欄位保留裝置的 smallestWidth 值。
+
+</p>
+        <p>如需設計不同螢幕及使用此限定詞的詳細資訊，請參閱<a href="{@docRoot}guide/practices/screens_support.html">支援多個螢幕</a>開發人員指南。
+
+</p>
+      </td>
+    </tr>
+    <tr id="ScreenWidthQualifier">
+      <td>可用寬度</td>
+      <td><code>w&lt;N&gt;dp</code><br/><br/>
+        範例：<br/>
+        <code>w720dp</code><br/>
+        <code>w1024dp</code><br/>
+        等等。
+      </td>
+      <td>
+        <p>指定資源應使用的最小可用螢幕寬度，以 {@code dp} 單位計算 &mdash; 由 <code>&lt;N&gt;</code> 值定義。
+這個設定值會隨著螢幕方向變更為橫向或直向而改變，以符合目前實際的寬度。
+
+</p>
+        <p>當您的應用程式為這個設定提供多個值不相同的資源目錄時，系統會使用最接近 (不超過) 裝置目前螢幕寬度的值。
+
+這個值會將螢幕裝飾列入計算，因此如果裝置顯示的左邊緣或右邊緣有一些永久的 UI 元素，則會使用比實際螢幕大小更小的寬度值，將這些 UI 元素列入計算並減少應用程式的可用空間。
+
+
+
+</p>
+        <p>已新增至 API 級別 13。<em></em></p>
+        <p>另請查看 {@link android.content.res.Configuration#screenWidthDp} 設定欄位，該欄位保留目前的螢幕寬度。
+</p>
+        <p>如需設計不同螢幕及使用此限定詞的詳細資訊，請參閱<a href="{@docRoot}guide/practices/screens_support.html">支援多個螢幕</a>開發人員指南。
+
+</p>
+      </td>
+    </tr>
+    <tr id="ScreenHeightQualifier">
+      <td>可用高度</td>
+      <td><code>h&lt;N&gt;dp</code><br/><br/>
+        範例：<br/>
+        <code>h720dp</code><br/>
+        <code>h1024dp</code><br/>
+        等等。
+      </td>
+      <td>
+        <p>指定資源應使用的最小可用螢幕高度，以「dp」單位計算 &mdash; 由 <code>&lt;N&gt;</code> 值定義。
+這個設定值會隨著螢幕方向變更為橫向或直向而改變，以符合目前實際的高度。
+
+</p>
+        <p>當您的應用程式為這個設定提供多個值不相同的資源目錄時，系統會使用最接近 (不超過) 裝置目前螢幕高度的值。
+
+這個值會將螢幕裝飾列入計算，因此如果裝置顯示的上邊緣或下邊緣有一些永久的 UI 元素，則會使用比實際螢幕大小更小的高度值，將這些 UI 元素列入計算並減少應用程式的可用空間。
+
+
+
+不固定的螢幕裝飾 (例如，可在全螢幕時隱藏的手機狀態列) 在這裡不<em></em>列入計算，標題列或動作列這類視窗裝飾也不會列入計算，因此應用程式必須做好準備因應比其指定還小的空間。
+
+
+
+
+        <p>已新增至 API 級別 13。<em></em></p>
+        <p>另請查看 {@link android.content.res.Configuration#screenHeightDp} 設定欄位，該欄位保留目前的螢幕寬度。
+</p>
+        <p>如需設計不同螢幕及使用此限定詞的詳細資訊，請參閱<a href="{@docRoot}guide/practices/screens_support.html">支援多個螢幕</a>開發人員指南。
+
+</p>
+      </td>
+    </tr>
+    <tr id="ScreenSizeQualifier">
+      <td>螢幕大小</td>
+      <td>
+        <code>small</code><br/>
+        <code>normal</code><br/>
+        <code>large</code><br/>
+        <code>xlarge</code>
+      </td>
+      <td>
+        <ul class="nolist">
+        <li>{@code small}：與低密度 QVGA 螢幕大小相似的螢幕
+。小螢幕的最低版面配置大小約 320x426 dp 單位。
+範例包含 QVGA 低密度和 VGA 高密度。
+</li>
+        <li>{@code normal}：與中密度 HVGA 螢幕大小相似的螢幕。
+一般螢幕的最低版面配置大小約 320x470 dp 單位。
+這類螢幕的範例有 WQVGA 低密度、HVGA 中密度、WVGA高密度。
+
+</li>
+        <li>{@code large}：與中密度 VGA 螢幕大小相似的螢幕。
+
+        大螢幕的最低版面配置大小約 480x640 dp 單位。
+        範例包含 VGA 和 WVGA 中密度螢幕。</li>
+        <li>{@code xlarge}：比傳統中密度 HVGA 螢幕大很多的螢幕。
+超大螢幕的最低版面配置大小約 720x960 dp 單位。
+在大多數情況下，使用超大螢幕的裝置由於尺寸過大無法放入口袋，因此最有可能是平板電腦樣式的裝置。
+
+已新增至 API 級別 9。<em></em></li>
+        </ul>
+        <p class="note"><strong>注意：</strong>使用大小限定詞不代表資源僅適用於該大小的螢幕。<em></em>
+如果您提供的替代資源沒有更符合目前裝置設定的限定詞，系統將使用<a href="#BestMatch">最符合</a>的資源。
+
+</p>
+        <p class="caution"><strong>注意：</strong>如果所有資源都使用比目前螢幕更大<em></em>的大小限定詞，系統將不會<strong></strong>使用這些資源，您的應用程式將會在執行階段當機 (例如，如果所有版面配置資源都標記為 {@code
+xlarge} 限定詞，但裝置為一般大小螢幕)。
+
+</p>
+        <p>已新增至 API 級別 4。<em></em></p>
+        
+        <p>請參閱<a href="{@docRoot}guide/practices/screens_support.html">支援多個螢幕</a>以取得詳細資訊。
+</p>
+        <p>另請查看 {@link android.content.res.Configuration#screenLayout} 設定欄位，該欄位會指出螢幕為小螢幕、一般螢幕或大螢幕。
+
+</p>
+      </td>
+    </tr>
+    <tr id="ScreenAspectQualifier">
+      <td>螢幕外觀</td>
+      <td>
+        <code>long</code><br/>
+        <code>notlong</code>
+      </td>
+      <td>
+        <ul class="nolist">
+          <li>{@code long}：長螢幕，例如 WQVGA、WVGA、FWVGA</li>
+          <li>{@code notlong}：非長螢幕，例如 QVGA、HVGA、VGA</li>
+        </ul>
+        <p>已新增至 API 級別 4。<em></em></p>
+        <p>這純粹是依照螢幕的外觀比例來判定 (「長」螢幕是較寬的螢幕)。這與螢幕方向無關。
+</p>
+        <p>另請查看 {@link android.content.res.Configuration#screenLayout} 設定欄位，該欄位會指出螢幕是否為長螢幕。
+</p>
+      </td>
+    </tr>
+    <tr id="OrientationQualifier">
+      <td>螢幕方向</td>
+      <td>
+        <code>port</code><br/>
+        <code>land</code>  <!-- <br/>
+        <code>square</code>  -->
+      </td>
+      <td>
+        <ul class="nolist">
+          <li>{@code port}：裝置的方向為直向 (垂直)</li>
+          <li>{@code land}：裝置的方向為橫向 (水平)</li>
+          <!-- Square mode is currently not used. -->
+        </ul>
+        <p>如果使用者旋轉螢幕，此設定就會在應用程式生命週期內發生變更。
+請參閱<a href="runtime-changes.html">處理執行階段變更</a>，以瞭解這會如何在執行階段期間影響您的應用程式。
+</p>
+        <p>另請查看 {@link android.content.res.Configuration#orientation} 設定欄位，該欄位會指出目前的裝置方向。
+</p>
+      </td>
+    </tr>
+    <tr id="UiModeQualifier">
+      <td>UI 模式</td>
+      <td>
+        <code>car</code><br/>
+        <code>desk</code><br/>
+        <code>television</code><br/>
+        <code>appliance</code>
+        <code>watch</code>
+      </td>
+      <td>
+        <ul class="nolist">
+          <li>{@code car}：在車用座架顯示的裝置</li>
+          <li>{@code desk}：在桌面座架顯示的裝置</li>
+          <li>{@code television}：在電視上顯示的裝置，提供在離使用者很遠的大螢幕上顯示 UI 的「十英呎」體驗，主要透過 DPAD 或其他非指標互動指定方向。
+
+
+</li>
+          <li>{@code appliance}：做為設備使用的裝置，沒有顯示器
+</li>
+          <li>{@code watch}：裝置有佩戴在手腕上的顯示器</li>
+        </ul>
+        <p>已新增至 API 級別 8、電視已新增至 API 13、手錶已新增至 API 20。<em></em></p>
+        <p>如要瞭解從座架插入或移除裝置時，您的應用程式可以如何回應的相關資訊，請參閱<a href="{@docRoot}training/monitoring-device-state/docking-monitoring.html">判斷和監控座架狀態和類型</a>。
+
+</p>
+        <p>如果使用者將裝置放入座架，此設定就會在應用程式生命週期內發生變更。
+您可以使用 {@link
+android.app.UiModeManager} 啟用或停用這些模式。請參閱<a href="runtime-changes.html">處理執行階段變更</a>，以瞭解這會如何在執行階段期間影響您的應用程式。
+</p>
+      </td>
+    </tr>
+    <tr id="NightQualifier">
+      <td>夜間模式</td>
+      <td>
+        <code>night</code><br/>
+        <code>notnight</code>
+      </td>
+      <td>
+        <ul class="nolist">
+          <li>{@code night}：夜間時間</li>
+          <li>{@code notnight}：日間模式</li>
+        </ul>
+        <p>已新增至 API 級別 8。<em></em></p>
+        <p>如果從自動模式 (預設) 的夜間模式離開，在這種情況下模式會隨著日間時間變更，此設定就會在應用程式生命週期內發生變更。
+您可以使用 {@link android.app.UiModeManager} 啟用或停用這個模式。
+請參閱<a href="runtime-changes.html">處理執行階段變更</a>，以瞭解這會如何在執行階段期間影響您的應用程式。
+</p>
+      </td>
+    </tr>
+    <tr id="DensityQualifier">
+      <td>螢幕像素密度 (dpi)</td>
+      <td>
+        <code>ldpi</code><br/>
+        <code>mdpi</code><br/>
+        <code>hdpi</code><br/>
+        <code>xhdpi</code><br/>
+        <code>xxhdpi</code><br/>
+        <code>xxxhdpi</code><br/>
+        <code>nodpi</code><br/>
+        <code>tvdpi</code>
+      </td>
+      <td>
+        <ul class="nolist">
+          <li>{@code ldpi}：低密度螢幕；約 120dpi。</li>
+          <li>{@code mdpi}：中密度 (在傳統 HVGA) 螢幕；約 160dpi。
+</li>
+          <li>{@code hdpi}：高密度螢幕；約 240dpi。</li>
+          <li>{@code xhdpi}：特高密度螢幕；約 320dpi。已新增至 API 級別 8。
+<em></em></li>
+          <li>{@code xxhdpi}：特特高密度螢幕；約 480dpi。已新增至 API 級別 16。
+<em></em></li>
+          <li>{@code xxxhdpi}：特特特高密度使用 (僅限啟動器圖示，請參閱支援多個螢幕中的<a href="{@docRoot}guide/practices/screens_support.html#xxxhdpi-note">注意</a><em></em>)；約 640dpi。
+
+已新增至 API 級別 18。
+<em></em></li>
+          <li>{@code nodpi}：如果您不想縮放點陣圖資源以符合裝置密度，可使用此設定。
+</li>
+          <li>{@code tvdpi}：介於 mdpi 和 hdpi 的螢幕；約 213dpi。這不屬於「主要」密度群組。
+這大部分用於電視，大多數應用程式應該不需要用到 &mdash;mdpi 和 hdpi 資源對大多數應用程式已經足夠，系統將視需要縮放它們。
+
+這個限定詞由 API 級別 13 導入。</li>
+        </ul>
+        <p>六個主要密度之間有一個 3:4:6:8:12:16 縮放比例 (忽略tvdpi 密度)。
+因此，ldpi 的 9x9 點陣圖等同於 mdpi 的 12x12 點陣圖、hdpi 的 18x18 點陣圖、xhdpi 的 24x24 點陣圖，以此類推。
+</p>
+        <p>如果您覺得影像資源在電視或其他特定裝置上看起來不夠美觀，而想嘗試 tvdpi 資源，比例因數為 1.33*mdpi。
+例如，mdpi 螢幕上的 100px x 100px 影像在 tvdpi 螢幕應該是 133px x 133px。
+</p>
+        <p class="note"><strong>注意：</strong>使用密度限定詞不代表資源僅適用於該密度的螢幕。
+<em></em>如果您提供的替代資源沒有更符合目前裝置設定的限定詞，系統將使用<a href="#BestMatch">最符合</a>的資源。
+
+</p>
+        <p>請參閱<a href="{@docRoot}guide/practices/screens_support.html">支援多個螢幕</a>，深入瞭解如何處理不同的螢幕密度，以及 Android會如何縮放點陣圖以符合目前的密度。
+
+</p>
+       </td>
+    </tr>
+    <tr id="TouchscreenQualifier">
+      <td>觸控螢幕類型</td>
+      <td>
+        <code>notouch</code><br/>
+        <code>finger</code>
+      </td>
+      <td>
+        <ul class="nolist">
+          <li>{@code notouch}：沒有觸控螢幕的裝置。</li>
+          <li>{@code finger}：裝置含有觸控螢幕，其目的是透過使用者的手指進行方向互動。
+</li>
+        </ul>
+        <p>另請查看 {@link android.content.res.Configuration#touchscreen} 設定欄位，該欄位會指出裝置的觸控螢幕類型。
+</p>
+      </td>
+    </tr>
+    <tr id="KeyboardAvailQualifier">
+      <td>鍵盤可用性</td>
+      <td>
+        <code>keysexposed</code><br/>
+        <code>keyshidden</code><br/>
+        <code>keyssoft</code>
+      </td>
+      <td>
+        <ul class="nolist">
+          <li>{@code keysexposed}：裝置包含鍵盤。如果裝置啟用軟體鍵盤 (可能性很高)，即使沒有將硬體鍵盤展示給使用者或甚至裝置沒有硬體鍵盤時，都可使用此設定。
+
+<em></em>如果沒有提供或已停用軟體鍵盤，則只能在展示硬體鍵盤時使用此設定。
+
+</li>
+          <li>{@code keyshidden}：裝置有可用的硬體鍵盤但已隱藏起來，且裝置沒有啟用軟體鍵盤。
+<em></em><em></em></li>
+          <li>{@code keyssoft}：裝置已啟用軟體鍵盤，無論是可見或不可見。
+</li>
+        </ul>
+        <p>如果您提供 <code>keysexposed</code> 資源但沒有 <code>keyssoft</code>資源，只要系統已啟用軟體鍵盤，無論鍵盤是否可見，系統都會使用 <code>keysexposed</code> 資源。
+
+</p>
+        <p>如果使用者開啟硬體鍵盤，此設定就會在應用程式生命週期內發生變更。
+請參閱<a href="runtime-changes.html">處理執行階段變更</a>，以瞭解這會如何在執行階段期間影響您的應用程式。
+</p>
+        <p>另請查看設定欄位 {@link
+android.content.res.Configuration#hardKeyboardHidden} 和 {@link
+android.content.res.Configuration#keyboardHidden}，這兩個欄位會分別指出硬體鍵盤的可見度，以及任何其他類型鍵盤 (包含軟體) 的可見度。
+</p>
+      </td>
+    </tr>
+    <tr id="ImeQualifier">
+      <td>主要文字輸入方式</td>
+      <td>
+        <code>nokeys</code><br/>
+        <code>qwerty</code><br/>
+        <code>12key</code>
+      </td>
+      <td>
+        <ul class="nolist">
+          <li>{@code nokeys}：裝置沒有硬體按鍵可輸入文字。</li>
+          <li>{@code qwerty}：裝置有硬體 qwerty 軟體鍵盤，無論使用者是否可見。
+
+</li>
+          <li>{@code 12key}：裝置有硬體 12 鍵鍵盤，無論使用者是否可見。
+</li>
+        </ul>
+        <p>另請查看 {@link android.content.res.Configuration#keyboard} 設定欄位，該欄位會指出可用的主要文字輸入方式。
+</p>
+      </td>
+    </tr>
+    <tr id="NavAvailQualifier">
+      <td>導覽鍵可用性</td>
+      <td>
+        <code>navexposed</code><br/>
+        <code>navhidden</code>
+      </td>
+      <td>
+        <ul class="nolist">
+          <li>{@code navexposed}：使用者可使用導覽鍵。</li>
+          <li>{@code navhidden}：不提供導覽鍵 (例如，位於密合蓋子的後方)。
+</li>
+        </ul>
+        <p>如果使用者顯示導覽鍵，此設定就會在應用程式生命週期內發生變更。
+請參閱<a href="runtime-changes.html">處理執行階段變更</a>，以瞭解這會如何在執行階段期間影響您的應用程式。
+</p>
+        <p>另請查看 {@link android.content.res.Configuration#navigationHidden} 設定欄位，該欄位會指出導覽鍵是否隱藏起來。
+</p>
+      </td>
+    </tr>
+    <tr id="NavigationQualifier">
+      <td>主要的非觸控導覽方式</td>
+      <td>
+        <code>nonav</code><br/>
+        <code>dpad</code><br/>
+        <code>trackball</code><br/>
+        <code>wheel</code>
+      </td>
+      <td>
+        <ul class="nolist">
+          <li>{@code nonav}：裝置除了使用觸控螢幕之外沒有其他導覽設施。
+</li>
+          <li>{@code dpad}：裝置有導覽用的方向鍵 (d-pad)。</li>
+          <li>{@code trackball}：裝置有導覽用的軌跡球。</li>
+          <li>{@code wheel}：裝置有導覽用的方向輪 (不常見)。</li>
+        </ul>
+        <p>另請查看 {@link android.content.res.Configuration#navigation} 設定欄位，該欄位會指出可用的導覽方式類型。
+</p>
+      </td>
+    </tr>
+<!-- DEPRECATED
+    <tr>
+      <td>Screen dimensions</td>
+      <td>Examples:<br/>
+        <code>320x240</code><br/>
+        <code>640x480</code><br/>
+        etc.
+      </td>
+      <td>
+        <p>The larger dimension must be specified first. <strong>This configuration is deprecated
+and should not be used</strong>. Instead use "screen size," "wider/taller screens," and "screen
+orientation" described above.</p>
+      </td>
+    </tr>
+-->
+    <tr id="VersionQualifier">
+      <td>平台版本 (API 級別)</td>
+      <td>範例：<br/>
+        <code>v3</code><br/>
+        <code>v4</code><br/>
+        <code>v7</code><br/>
+        等等。</td>
+      <td>
+        <p>裝置支援的 API 級別。例如，<code>v1</code> 代表 API 級別1 (裝置安裝 Android 1.0 以上版本)，以及 <code>v4</code> 代表 API 級別 4 (裝置安裝 Android1.6 以上版本)。
+
+請參閱 <a href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#ApiLevels">Android API 級別</a>文件以取得有關這些值的詳細資訊。
+</p>
+      </td>
+    </tr>
+</table>
+
+
+<p class="note"><strong>注意：</strong>有些設定限定詞從 Android1.0 就已新增，因此並非所有 Android 版本都支援所有限定詞。
+使用新的限定詞會以隱含的方式新增平台版本的限定詞，因此較舊的裝置一定會忽略它。
+例如，使用
+ <code>w600dp</code> 限定詞最自動包含 <code>v13</code> 限定詞，因為可用寬度限定詞是 API 級別 13 的新項目。
+為了避免發生任何問題，永遠要包含一組預設資源 (一組沒有限定詞的資源<em></em>)。
+如需詳細資訊，請參閱<a href="#Compatibility">使用資源提供最佳的裝置相容性</a>一節。
+
+</p>
+
+
+
+<h3 id="QualifierRules">限定詞名稱規則</h3>
+
+<p>這裡有一些使用設定限定詞名稱的規則：</p>
+
+<ul>
+    <li>您可以為一組資源指定多個限定詞，以破折號分隔。例如，
+<code>drawable-en-rUS-land</code> 適用於橫向的美國英文裝置。
+</li>
+    <li>限定詞的順序必須與<a href="#table2">表 2</a> 所列的一樣。例如：
+
+      <ul>
+        <li>錯誤：<code>drawable-hdpi-port/</code></li>
+        <li>正確：<code>drawable-port-hdpi/</code></li>
+      </ul>
+    </li>
+    <li>替代資源目錄不可為巢狀。例如，您不能有
+<code>res/drawable/drawable-en/</code>。</li>
+    <li>值有大小寫之分。資源編譯器會將目錄名稱轉換為小寫再處理，以避免有大小寫之分的檔案系統發生問題。
+
+名稱中的任何大寫只是為了方便閱讀。</li>
+    <li>每個限定詞類型只支援一個值。例如，如果您想在西班牙文和法文使用相同的可繪項目檔案，則不能將目錄命名為 <em></em>
+<code>drawable-rES-rFR/</code>。
+您必須有兩個資源目錄，例如 
+<code>drawable-rES/</code> 和 <code>drawable-rFR/</code>，這兩個目錄要包含適當的檔案。
+但是，您不需要實際將相同的檔案複製到這兩位置。您可以為資源建立別名。
+請參閱下方的
+<a href="#AliasResources">建立別名資源</a>。</li>
+</ul>
+
+<p>當您將替代資源儲存到以這些限定詞命名的目錄後，Android 會根據目前的裝置設定自動將資源套用到您的應用程式。
+
+每次要求資源時，Android 會檢查包含要求之資源檔案的替代資源目錄，然後<a href="#BestMatch">尋找最符合的資源
+</a> (下方有相關討論)。
+如果沒有符合特定裝置設定的替代資源，則 Android 會使用對應的預設資源 (特定資源類型的資源組，不含設定限定詞)。
+
+
+</p>
+
+
+
+<h3 id="AliasResources">建立別名資源</h3>
+
+<p>如果您要將資源用於一個以上的裝置設定 (但不想以預設資源的形式提供)，您不需要將相同的資源放入一個以上的替代資源目錄。
+
+您可以 (在某些情況下) 建立一個替代資源，將它做為儲存在您預設資源目錄的資源別名。
+
+</p>
+
+<p class="note"><strong>注意：</strong>並非所有資源都提供為其他資源建立別名的機制。
+特別是動畫、選單、原始項目和其他在 {@code xml/} 目錄中未指定的資源都不提供這項功能。
+</p>
+
+<p>例如，想像您有一個應用程式圖示 {@code icon.png}，且必須為不同的地區設定提供唯一的版本。
+但是，加拿大英文和加拿大法文這兩個地區設定必須使用相同的版本。
+您可能會假設必須在加拿大英文和加拿大法文這兩個資源目錄中複製相同的影像，但並不需要這樣做。
+
+您可以將這兩個地區設定的影像儲存成 {@code icon_ca.png} ({@code icon.png} 以外的任何名稱)，然後將該影像放入預設的 {@code res/drawable/} 目錄。
+
+之後，在 {@code
+res/drawable-en-rCA/} 建立一個 {@code icon.xml} 檔案，以及建立 {@code res/drawable-fr-rCA/}，用於參照使用 {@code &lt;bitmap&gt;} 元素的 {@code icon_ca.png} 資源。
+這樣可以讓您只儲存一個版本的 PNG 檔案，以及指向該檔案的兩個小 XML 檔案。
+(範例 XML 檔案如下所示。)</p>
+
+
+<h4>可繪項目</h4>
+
+<p>如要為現有的可繪項目建立別名，請使用 {@code &lt;bitmap&gt;} 元素。
+例如：</p>
+
+<pre>
+&lt;?xml version="1.0" encoding="utf-8"?>
+&lt;bitmap xmlns:android="http://schemas.android.com/apk/res/android"
+    android:src="@drawable/icon_ca" />
+</pre>
+
+<p>如果您將此檔案儲存成 {@code icon.xml} (在替代資源目錄中，像是 
+{@code res/drawable-en-rCA/})，系統會將它編譯成可當作 {@code R.drawable.icon} 參照的資源，但它實際上是 {@code
+R.drawable.icon_ca} 資源 (儲存在 {@code res/drawable/}) 的別名。
+</p>
+
+
+<h4>版面配置</h4>
+
+<p>如要為現有的可繪項目建立別名，請使用以 {@code &lt;merge&gt;} 包裝的{@code &lt;include&gt;} 元素。
+例如：</p>
+
+<pre>
+&lt;?xml version="1.0" encoding="utf-8"?>
+&lt;merge>
+    &lt;include layout="@layout/main_ltr"/>
+&lt;/merge>
+</pre>
+
+<p>如果您將此檔案儲存成 {@code main.xml}，系統會將它編譯成可當作 {@code R.layout.main} 參照的資源，但它實際上是 {@code R.layout.main_ltr} 資源的別名。
+
+</p>
+
+
+<h4>字串和其他簡單值</h4>
+
+<p>如要為現有的字串建立別名，只要將所需字串的資源 ID 當作新字串的值即可。
+例如：</p>
+
+<pre>
+&lt;?xml version="1.0" encoding="utf-8"?>
+&lt;resources>
+    &lt;string name="hello">Hello&lt;/string>
+    &lt;string name="hi">@string/hello&lt;/string>
+&lt;/resources>
+</pre>
+
+<p>{@code R.string.hi} 資源現在是 {@code R.string.hello} 的別名。</p>
+
+<p> <a href="{@docRoot}guide/topics/resources/more-resources.html">其他簡易值</a>的運作方法也一樣。
+例如，一個顏色：</p>
+
+<pre>
+&lt;?xml version="1.0" encoding="utf-8"?>
+&lt;resources>
+    &lt;color name="yellow">#f00&lt;/color>
+    &lt;color name="highlight">@color/red&lt;/color>
+&lt;/resources>
+</pre>
+
+
+
+
+<h2 id="Compatibility">使用資源提供最佳的裝置相容性</h2>
+
+<p>如要讓您的應用程式支援多個裝置設定，務必要為您應用程式使用的每個資源類型提供預設資源。
+</p>
+
+<p>例如，如果您的應用程式支援多個語言，一律要包含一個 {@code
+values/} 目錄 (儲存字串的位置)，其中「不包含」<em></em><a href="#LocaleQualifier">語言和區域限定詞</a>。如果您將所有字串檔案放在含有語言和區域限定詞的目錄中，當執行應用程式的裝置，其語言設定不受字串支援時，應用程式就會當機。
+
+不過，只要您提供預設 {@code values/} 資源，
+應用程式就能正常運作 (即便使用者不懂該語言 &mdash; 仍然比當機好)。
+</p>
+
+<p>同樣地，如果您根據螢幕方向提供不同的版面配置資源，您應該選擇一個方向做為您的預設值。
+例如，不要在 {@code
+layout-land/} 提供橫向版面配置資源及在 {@code layout-port/} 提供直向版面配置資源，而是留下一個做為預設值，例如 {@code layout/} 做為橫向和 {@code layout-port/} 做為直向。
+</p>
+
+<p>提供預設資源很重要，這不只是因為您的應用程式可能執行您未預期到的設定，還因為新的 Android 版本有時候會新增舊版不支援的設定限定詞。
+
+如果您使用新的資源限定詞，但與舊版 Android 保持程式碼相容，則舊版 Android 執行您的應用程式時，如果您沒有提供預設資源，應用程式就會當機，這是因為它無法使用以新限定詞命名的資源。
+
+
+例如，如果您的 <a href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#min">{@code
+minSdkVersion}</a> 設為 4，而且您讓所有可繪項目資源具備使用<a href="#NightQualifier">夜間模式</a>的資格 (已新增到 API 級別 8 的 {@code night} 或 {@code notnight})，則 API 級別 4 裝置將無法存取您的可繪項目資源且會當機。
+在這種情況下，您可能會想要將 {@code notnight} 當作預設資源，因此您應該要排除該限定詞，讓您的可繪項目資源成為 {@code drawable/} 或 {@code drawable-night/}。
+
+</p>
+
+<p>因此，如要提供最佳的裝置相容性，請務必針對應用程式正常執行所需的資源提供預設資源。
+然後，使用設定限定詞為特定裝置設定建立替代資源。
+</p>
+
+<p>這個規則有一個例外狀況：如果您應用程式的 <a href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#min">{@code minSdkVersion}</a> 為 4 或高，當您提供含有<em></em><a href="#DensityQualifier">螢幕密度</a>限定詞的替代可繪項目資源時，則不需要預設可繪項目資源。
+
+即使沒有預設可繪項目資源，Android 仍然可從替代螢幕密度中找到最符合的項目，並視需要縮放點陣圖。
+
+不過，為了在所有裝置類型獲得最佳體驗，您應該為這三種密度類型提供替代可繪項目。
+</p>
+
+
+
+<h2 id="BestMatch">Android 如何尋找最相符的資源</h2>
+
+<p>當您要求已提供替代項目的資源時，Android 會根據目前的裝置設定，選擇執行階段要使用的替代資源。
+為了示範 Android 如何選取替代資源，假設下列可繪項目目錄分別包含相同影像的不同版本：
+
+</p>
+
+<pre class="classic no-pretty-print">
+drawable/
+drawable-en/
+drawable-fr-rCA/
+drawable-en-port/
+drawable-en-notouch-12key/
+drawable-port-ldpi/
+drawable-port-notouch-12key/
+</pre>
+
+<p>同時假設裝置設定如下：</p>
+
+<p style="margin-left:1em;">
+地區設定 = <code>en-GB</code> <br/>
+螢幕方向 = <code>port</code> <br/>
+螢幕像素密度 = <code>hdpi</code> <br/>
+觸控螢幕類型 = <code>notouch</code> <br/>
+主要文字輸入方式 = <code>12key</code>
+</p>
+
+<p>Android 透過比對裝置設定和可用的替代資源，從 {@code drawable-en-port} 選取可繪項目。
+</p>
+
+<p>系統使用下列邏輯決定要使用的資源：
+</p>
+
+
+<div class="figure" style="width:371px">
+<img src="{@docRoot}images/resources/res-selection-flowchart.png" alt="" height="471" />
+<p class="img-caption"><strong>圖 2.</strong>Android 如何尋找最相符資源的流程圖。
+</p>
+</div>
+
+
+<ol>
+  <li>排除與裝置設定衝突的資源檔案。
+    <p>已排除 <code>drawable-fr-rCA/</code> 目錄，因為它與 <code>en-GB</code> 地區設定衝突。
+</p>
+<pre class="classic no-pretty-print">
+drawable/
+drawable-en/
+<strike>drawable-fr-rCA/</strike>
+drawable-en-port/
+drawable-en-notouch-12key/
+drawable-port-ldpi/
+drawable-port-notouch-12key/
+</pre>
+<p class="note"><strong>例外狀況：</strong>螢幕像素密度是唯一沒有因為衝突而被排除的限定詞。
+即使裝置的螢幕密度是 hdpi 但仍然沒有排除 
+<code>drawable-port-ldpi/</code>，因為此刻每個螢幕密度都視為相符。
+如需詳細資訊，請參閱<a href="{@docRoot}guide/practices/screens_support.html">支援多個螢幕</a>文件。
+</p></li>
+
+  <li>在清單 (<a href="#table2">表 2</a>) 中選擇 (下一個) 最高優先等級的限定詞(從 MCC 往下移動)。
+ </li>
+  <li>有任何資源目錄包含此限定詞嗎？  </li>
+    <ul>
+      <li>如果沒有，回到步驟 2 查看下一個限定詞。(在此範例中，回答一直是「否」，直到語言限定詞為止。)
+</li>
+      <li>如果有，繼續到步驟 4。</li>
+    </ul>
+  </li>
+
+  <li>排除不包含此限定詞的來源目錄。在此範例中，系統排除所有不包含語言限定詞的目錄：
+</li>
+<pre class="classic no-pretty-print">
+<strike>drawable/</strike>
+drawable-en/
+drawable-en-port/
+drawable-en-notouch-12key/
+<strike>drawable-port-ldpi/</strike>
+<strike>drawable-port-notouch-12key/</strike>
+</pre>
+<p class="note"><strong>例外狀況：</strong>如果提到的限定詞是螢幕像素密度，Android 會選擇最符合裝置螢幕密度的選項。一般而言，Android 偏好縮小較大的原始影像以放大較小的原始影像。
+
+
+請參閱<a href="{@docRoot}guide/practices/screens_support.html">支援多個螢幕</a>。
+</p>
+  </li>
+
+  <li>重複步驟 2、3 和 4，直到剩下一個目錄為止。在此範例中，螢幕方向是下個有相符項目的限定詞。
+因此，將排除沒有指定螢幕方向的資源：
+
+<pre class="classic no-pretty-print">
+<strike>drawable-en/</strike>
+drawable-en-port/
+<strike>drawable-en-notouch-12key/</strike>
+</pre>
+<p>剩下的目錄是 {@code drawable-en-port}。</p>
+  </li>
+</ol>
+
+<p>雖然會針對每個要求的資源執行此程序，但系統還是會進一步最佳化某些方面。
+其中一個最佳化是一旦知道裝置設定，它將排除永遠無法符合的替代資源。
+例如，如果設定語言是英文 ("en")，則語言限定詞設定為不是英文的任何資源目錄永遠都不會包含在檢查的資源集區內 (但仍會包含<em>不含</em>語言限定詞的資源目錄)。
+
+
+</p>
+
+<p>根據螢幕大小限定詞選取資源時，如果沒有最符合的資源，系統會使用適用於比目前螢幕更小之螢幕設計的資源 (例如，如有需要，大型螢幕會使用一般大小螢幕資源)。
+
+然而，如果唯一可用的資源比目前螢幕<em>更大</em>，系統將<strong>不會</strong>使用這些資源，如果沒有其他資源符合裝置設定，則應用程式將會當機 (例如，如果所有版面配置資源都標記為 {@code xlarge} 限定詞，但裝置為一般大小螢幕)。
+
+
+
+</p>
+
+<p class="note"><strong>注意：</strong>限定詞的優先等級<em></em> (在<a href="#table2">表 2</a>) 比完全符合裝置的限定詞數量更重要。
+例如，在上述步驟 4，清單的最後一個選擇包含三個完全符合裝置的限定詞 (方向、觸控螢幕類型和輸入方法)，而 <code>drawable-en</code> 只有一個相符的參數(語言)。
+
+
+然而，語言的優先等級高於這些其他限定詞，因此將排除
+<code>drawable-port-notouch-12key</code>。</p>
+
+<p>如需深入瞭解在應用程式使用資源的方法，請繼續閱讀<a href="accessing-resources.html">存取資源</a>。</p>

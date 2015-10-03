@@ -1,0 +1,578 @@
+page.title=Tarefas e pilhas de retorno
+parent.title=Atividades
+parent.link=activities.html
+@jd:body
+
+<div id="qv-wrapper">
+<div id="qv">
+
+<h2>Neste documento</h2>
+<ol>
+<li><a href="#ActivityState">Gravação do estado da atividade</a></li></li>
+<li><a href="#ManagingTasks">Gerenciamento de tarefas</a>
+  <ol>
+    <li><a href="#TaskLaunchModes">Definição de modos de inicialização</a></li>
+    <li><a href="#Affinities">Tratamento de afinidades</a></li>
+    <li><a href="#Clearing">Apagar a pilha de retorno</a></li>
+    <li><a href="#Starting">Início de uma tarefa</a></li>
+  </ol>
+</li>
+</ol>
+
+<h2>Artigos</h2>
+<ol>
+  <li><a href="http://android-developers.blogspot.com/2010/04/multitasking-android-way.html">
+  Multitarefa do modo Android</a></li>
+</ol>
+
+<h2>Veja também</h2>
+<ol>
+  <li><a href="{@docRoot}design/patterns/navigation.html">Projeto para Android:
+Navegação</a></li>
+  <li><a href="{@docRoot}guide/topics/manifest/activity-element.html">Elemento de manifesto
+{@code &lt;activity&gt;}</a></li>
+  <li><a href="{@docRoot}guide/components/recents.html">Tela de visão geral</a></li>
+</ol>
+</div>
+</div>
+
+
+<p>Os aplicativos normalmente contêm diversas <a href="{@docRoot}guide/components/activities.html">atividades</a>. Cada atividade
+deve ser projetada com relação a tipos específicos de ações que o usuário pode realizar e que podem iniciar outras
+atividades. Por exemplo: um aplicativo de e-mail pode ter uma atividade para exibir uma lista de novas mensagens.
+Quando o usuário seleciona uma mensagem, uma nova atividade abre para exibir essa mensagem.</p>
+
+<p>As atividades podem também iniciar atividades existentes em outros aplicativos no dispositivo. Por
+exemplo: se o seu aplicativo deseja enviar um e-mail, é possível definir uma intenção para realizar
+uma ação de "enviar" e incluir alguns dados, como um endereço de e-mail e uma mensagem. Uma atividade de outro
+aplicativo que se declara para tratar deste tipo de intenções, então, abre-se. Nesse caso, a intenção
+destina-se ao envio de e-mails, portanto inicia-se uma atividade de “composição" do aplicativo de e-mail (se diversas atividades
+forem compatíveis com a mesma intenção, o sistema permitirá que o usuário selecione qual usar). Quando o e-mail é
+enviado, sua atividade reinicia, parecendo que a atividade de e-mail faz parte do seu aplicativo. Apesar
+de as atividades serem de aplicativos diferentes, o Android mantém essa experiência
+do usuário retilínea mantendo ambas as atividades na mesma <em>tarefa</em>.</p>
+
+<p>Tarefas são coleções de atividades com as quais os usuários interagem
+ao realizar determinado trabalho. As atividades são organizadas em uma pilha (a <em>pilha de retorno</em>)
+na ordem em que cada atividade é aberta.</p>
+
+<!-- SAVE FOR WHEN THE FRAGMENT DOC IS ADDED
+<div class="sidebox-wrapper">
+<div class="sidebox">
+<h3>Adding fragments to a task's back stack</h3>
+
+<p>Your activity can also include {@link android.app.Fragment}s to the back stack. For example,
+suppose you have a two-pane layout using fragments, one of which is a list view (fragment A) and the
+other being a layout to display an item from the list (fragment B). When the user selects an item
+from the list, fragment B is replaced by a new fragment (fragment C). In this case, it might be
+desireable for the user to navigate back to reveal fragment B, using the <em>Back</em> button.</p>
+<p>In order to add fragment B to the back stack so that this is possible, you must call {@link
+android.app.FragmentTransaction#addToBackStack addToBackStack()} before you {@link
+android.app.FragmentTransaction#commit()} the transaction that replaces fragment B with fragment
+C.</p>
+<p>For more information about using fragments and adding them to the back stack, see the {@link
+android.app.Fragment} class documentation.</p>
+
+</div>
+</div>
+-->
+
+<p>A tela inicial do dispositivo é o ponto de partida para a maioria das tarefas. Quando o usuário toca em um ícone no inicializador do 
+aplicativo
+ (ou em um atalho na tela inicial), essa tarefa do aplicativo acontece em primeiro plano. Se não
+existir nenhuma tarefa para o aplicativo (se o aplicativo não tiver sido usado recentemente), uma nova tarefa
+será criada e a atividade "principal" daquele aplicativo abrirá como a atividade raiz na pilha.</p>
+
+<p>Quando a atividade atual inicia outra, a nova atividade é colocada no topo da pilha
+e recebe foco. A atividade anterior permanece na pilha, mas é interrompida. Quando uma atividade
+para, o sistema retém o estado atual da interface do usuário. Quando o usuário pressiona o botão 
+<em>Voltar</em>
+, a atividade atual é retirada do topo da pilha (a atividade é destruída)
+e a atividade anterior reinicia (o estado anterior da IU é restaurado). Atividades na pilha nunca
+são reorganizadas, somente colocadas e retiradas da pilha &mdash; colocadas na pilha quando iniciadas
+pela atividade atual e retiradas quando o usuário se retira dela usando o botão <em>Voltar</em>. Desse modo, a pilha
+de retorno
+opera como uma estrutura de objeto UEPS (último que entra, primeiro que sai). A figura 1
+ilustra esse comportamento com uma linha cronológica exibindo o progresso entre atividades junto com a pilha de retorno
+atual em cada ponto no tempo.</p>
+
+<img src="{@docRoot}images/fundamentals/diagram_backstack.png" alt="" />
+<p class="img-caption"><strong>Figura 1.</strong> Representação de como cada nova atividade
+em uma tarefa adiciona um item à pilha de retorno. Quando o usuário pressiona o botão <em>Voltar</em>,
+a atividade atual é
+destruída e a atividade anterior reinicia.</p>
+
+
+<p>Se o usuário continua pressionando <em>Voltar</em>, cada atividade na pilha é retirada para 
+revelar
+a anterior até que o usuário retorne à tela inicial (ou a qualquer atividade que estivesse em execução
+no começo da tarefa). Quando todas as atividades forem removidas da pilha, a tarefa não existirá mais.</p>
+
+<div class="figure" style="width:287px">
+<img src="{@docRoot}images/fundamentals/diagram_multitasking.png" alt="" /> <p
+class="img-caption"><strong>Figura 2.</strong> Duas tarefas: a tarefa B recebe a interação do usuário
+em primeiro plano enquanto a tarefa A está em segundo plano aguardando para ser retomada.</p>
+</div>
+<div class="figure" style="width:215px">
+  <img src="{@docRoot}images/fundamentals/diagram_multiple_instances.png" alt="" /> <p
+class="img-caption"><strong>Figura 3.</strong> Uma única atividade é instanciada diversas vezes.</p>
+</div>
+
+<p>As tarefas são unidades coesas que podem mover-se para "segundo plano" quando usuário inicia uma nova tarefa
+ou ir para a tela inicial por meio do botão <em>Página inicial</em>. Quando em segundo plano, todas as atividades
+da tarefa são
+interrompidas, mas a pilha de retorno das tarefas continua intacta &mdash; a tarefa simplesmente perdeu o foco,
+que foi para outra tarefa, como ilustrado na figura 2. Uma tarefa pode, então, retornar ao "primeiro plano" para que os usuários
+continuem de onde pararam. Suponha, por exemplo, que a tarefa atual (tarefa A) tenha três
+atividades na sua pilha &mdash; duas sob a atividade atual. O usuário pressiona o botão <em>Página inicial</em> e,
+em seguida,
+inicia um novo aplicativo no inicializador do aplicativo. Quando a tela inicial aparece, a tarefa A
+vai para segundo plano. Quando o novo aplicativo inicia, o sistema inicia uma tarefa para este aplicativo
+(tarefa B) com sua própria pilha de atividades. Após interagir
+com este aplicativo, o usuário retorna à Página inicial novamente e seleciona o aplicativo que originalmente
+iniciou a tarefa A. Agora, a tarefa A fica
+em primeiro plano &mdash; todas as três atividades nas pilhas estão intactas e a atividade no topo
+da pilha reinicia. Nesse
+momento, o usuário pode alternar para a tarefa B acessando a Página inicial e selecionando o ícone do aplicativo
+que iniciou essa tarefa (ou selecionando a tarefa do aplicativo
+na <a href="{@docRoot}guide/components/recents.html">tela de visão geral</a>).
+Esse é um exemplo de multitarefas no Android.</p>
+
+<p class="note"><strong>Observação:</strong> várias tarefas podem ser mantidas em segundo plano simultaneamente.
+Contudo, se o usuário estiver executando diversas tarefas em segundo plano ao mesmo tempo, o sistema pode começar
+a destruir atividades de segundo plano para recuperar memória, fazendo com que o estado das atividades seja perdido.
+Consulte a seção a seguir sobre <a href="#ActivityState">Estado de atividades</a>.</p>
+
+<p>Como as atividades na pilha de retorno nunca são reorganizadas, se o seu aplicativo permitir que
+usuários iniciem uma determinada atividade a partir de mais de uma atividade, uma nova instância
+dela será criada e colocada na pilha (em vez de trazer qualquer instância anterior
+dela para o topo). Assim, uma atividade no aplicativo pode ser instanciada diversas
+vezes (mesmo a partir de diferentes tarefas), como ilustrado na figura 3. Assim, se o usuário navegar inversamente
+usando o botão <em>Voltar</em>, as instâncias da atividade serão revelada na ordem em que foram
+abertas (cada uma
+com o próprio estado da IU). No entanto, é possível modificar esse comportamento se você não deseja que uma atividade seja
+instanciada mais de uma vez. Esse assunto é abordado na próxima seção sobre <a href="#ManagingTasks">Gerenciamento de tarefas</a>.</p>
+
+
+<p>Para resumir o comportamento padrão de atividades e tarefas:</p>
+
+<ul>
+  <li>Quando a atividade A inicia a atividade B, a atividade A é interrompida, mas o sistema retém seu estado
+(como posição de rolagem e texto inserido em formulários).
+Se o usuário pressionar o botão <em>Voltar</em> na atividade B, a atividade A reiniciará com seu estado
+restaurado.</li>
+  <li>Quando o usuário se retira de uma tarefa pressionando o botão <em>Página inicial</em>, a atividade atual é
+interrompida
+e sua tarefa fica em segundo plano. O sistema retém o estado de cada atividade na tarefa. Se,
+mais tarde, o usuário reiniciar a tarefa selecionando o ícone de inicialização que a inicia, ela ficará
+em primeiro plano e reiniciará a atividade no topo da pilha.</li>
+  <li>Se o usuário pressionar o botão <em>Voltar</em>, a atividade atual será retirada da pilha
+e
+destruída. A atividade anterior na pilha é retomada. Quando uma atividade é destruída, o sistema
+<em>não</em> retém seu estado.</li>
+  <li>As atividades podem ser instanciadas diversas vezes mesmo a partir de outras tarefas.</li>
+</ul>
+
+
+<div class="note design">
+<p><strong>Projeto de navegação</strong></p>
+  <p>Para saber mais sobre o funcionamento da navegação de aplicativos no Android, leia o guia <a href="{@docRoot}design/patterns/navigation.html">Navegação</a> do Projeto do Android.</p>
+</div>
+
+
+<h2 id="ActivityState">Gravação do estado da atividade</h2>
+
+<p>Como discutido acima, o comportamento padrão do sistema preserva o estado de uma atividade quando ela é
+interrompida. Desse modo, quando usuários navegam inversamente a uma atividade anterior, a interface do usuário aparece
+na forma em que foi deixada. Entretanto, é possível &mdash; e <strong>recomendável</strong> &mdash; reter proativamente
+o estado das atividades usando métodos de retorno de chamada nos casos em que a atividade é destruída e deve
+ser recriada.</p>
+
+<p>Quando o sistema interrompe uma das atividades (como quando uma nova atividade inicia ou a tarefa
+se move para segundo plano), o sistema pode destruir esta atividade completamente se precisar recuperar
+a memória do sistema. Quando isso ocorre, as informações sobre o estado da atividade são perdidas. Se isso acontecer,
+o sistema ainda
+saberá que a atividade tem um lugar na pilha de retorno, mas quando a atividade for levada
+ao topo da pilha, o sistema precisará recriá-la (em vez de reiniciá-la). Para
+evitar perder o trabalho do usuário, deve-se retê-la proativamente implementando
+métodos de retorno de chamada {@link android.app.Activity#onSaveInstanceState onSaveInstanceState()}
+na atividade.</p>
+
+<p>Para obter mais informações sobre a gravação do estado da atividade, consulte o documento
+<a href="{@docRoot}guide/components/activities.html#SavingActivityState">Atividades</a>.</p>
+
+
+
+<h2 id="ManagingTasks">Gerenciamento de tarefas</h2>
+
+<p>O modo com que o Android gerencia tarefas e a pilha de retorno, como descrito abaixo &mdash; posicionando todas
+as atividades iniciadas em sucessão na mesma tarefa em uma pilha UEPS (último que entra, primeiro que sai) &mdash; funciona
+muito bem para a maioria dos aplicativo e não é preciso preocupar-se com a associação das atividades
+a tarefas ou como elas estão organizadas na pilha de retorno. No entanto, pode-se decidir interromper
+o comportamento normal. Talvez você deseje que uma atividade inicie uma nova tarefa no aplicativo ao ser
+iniciada (em vez de ser colocada dentro da tarefa atual); ou, quando você inicia uma atividade, deseja
+apresentar uma instância dela existente (em vez de criar uma nova
+instância no topo da pilha de retorno); ou talvez você deseje que a pilha apague
+todas as atividades, exceto a atividade raiz, quando o usuário sai da tarefa.</p>
+
+<p>É possível fazer tudo isso e muito mais com atributos
+no elemento <a href="{@docRoot}guide/topics/manifest/activity-element.html">{@code &lt;activity&gt;}</a> do manifesto
+ e com sinalizadores na intenção passada
+a {@link android.app.Activity#startActivity startActivity()}.</p>
+
+<p>Com relação a isso, os principais atributos <a href="{@docRoot}guide/topics/manifest/activity-element.html">
+{@code &lt;activity&gt;}</a> que podem ser usados são:</p>
+
+<ul class="nolist">
+  <li><a href="{@docRoot}guide/topics/manifest/activity-element.html#aff">
+  {@code taskAffinity}</a></li>
+  <li><a href="{@docRoot}guide/topics/manifest/activity-element.html#lmode">
+  {@code launchMode}</a></li>
+  <li><a href="{@docRoot}guide/topics/manifest/activity-element.html#reparent">
+  {@code allowTaskReparenting}</a></li>
+  <li><a href="{@docRoot}guide/topics/manifest/activity-element.html#clear">
+  {@code clearTaskOnLaunch}</a></li>
+  <li><a href="{@docRoot}guide/topics/manifest/activity-element.html#always">
+  {@code alwaysRetainTaskState}</a></li>
+  <li><a href="{@docRoot}guide/topics/manifest/activity-element.html#finish">
+  {@code finishOnTaskLaunch}</a></li>
+</ul>
+
+<p>E os principais sinalizadores de intenção que podem ser usados são:</p>
+
+<ul class="nolist">
+  <li>{@link android.content.Intent#FLAG_ACTIVITY_NEW_TASK}</li>
+  <li>{@link android.content.Intent#FLAG_ACTIVITY_CLEAR_TOP}</li>
+  <li>{@link android.content.Intent#FLAG_ACTIVITY_SINGLE_TOP}</li>
+</ul>
+
+<p>Nas seções a seguir, você verá como usar esses atributos de manifesto e sinalizadores
+de intenção para definir como as atividades são associadas a tarefas e como elas se comportam na pilha de retorno.</p>
+
+<p>Além disso, são discutidas separadamente as considerações sobre como tarefas e atividades podem ser representadas
+e gerenciadas na tela de visão geral. Consulte <a href="{@docRoot}guide/components/recents.html">Tela de visão geral</a>
+para obter mais informações. Normalmente, é preciso permitir que o sistema defina como as tarefas
+e as atividades são representadas na tela de visão geral e não é necessário modificar esse comportamento.</p>
+
+<p class="caution"><strong>Atenção:</strong> a maioria dos aplicativos não deve interromper o comportamento
+padrão de atividades e tarefas. Se você determinar que é necessário modificar os comportamentos padrão
+da atividade, seja prudente e certifique-se de testar a capacidade de uso da atividade durante
+a inicialização e ao navegar de volta para ela de outras atividades e tarefas com o botão <em>Voltar</em>.
+Certifique-se de testar os comportamentos de navegação que podem entrar em conflito com o comportamento esperado pelo usuário.</p>
+
+
+<h3 id="TaskLaunchModes">Definição de modos de inicialização</h3>
+
+<p>Os modos de inicialização permitem definir a forma com que uma nova instância de uma atividade é associada
+à tarefa atual. Pode-se definir diferentes modos de inicialização de duas maneiras:</p>
+<ul class="nolist">
+  <li><a href="#ManifestForTasks">Usando o arquivo de manifesto</a>
+    <p>Ao declarar uma atividade em um arquivo de manifesto, pode-se especificar como a atividade
+deve associar-se a tarefas quando ela inicia.</li>
+  <li><a href="#IntentFlagsForTasks">Usando sinalizadores de intenção</a>
+    <p>Ao chamar {@link android.app.Activity#startActivity startActivity()},
+é possível incluir um sinalizador na {@link android.content.Intent} que declara como
+(ou se) a nova atividade deve associar-se à tarefa atual.</p></li>
+</ul>
+
+<p>Assim, se a atividade A iniciar a atividade B, a atividade B poderá definir no manifesto como
+deve associar-se à tarefa atual (se ocorrer) e a atividade A poderá solicitar o modo pelo qual a atividade
+B deverá associar-se à tarefa atual. Se ambas as atividades definem como a atividade B
+deve associar-se a uma tarefa, a solicitação da atividade A (como definido na intenção) sobrepõe
+a solicitação da atividade B (como definido no seu manifesto).</p>
+
+<p class="note"><strong>Observação:</strong> Alguns modos de inicialização disponíveis para o arquivo de manifesto
+não estão disponíveis como sinalizadores para uma intenção e, do mesmo modo, alguns modos de inicialização disponíveis como sinalizadores
+de uma intenção não podem ser definidos no manifesto.</p>
+
+
+<h4 id="ManifestForTasks">Uso do arquivo de manifesto</h4>
+
+<p>Ao declarar uma atividade no arquivo de manifesto, pode-se especificar como a atividade
+deve associar-se a tarefas usando o atributo <a href="{@docRoot}guide/topics/manifest/activity-element.html#lmode">{@code
+launchMode}</a> do elemento
+<a href="{@docRoot}guide/topics/manifest/activity-element.html">{@code &lt;activity&gt;}</a>.</p>
+
+<p>O atributo <a href="{@docRoot}guide/topics/manifest/activity-element.html#lmode">{@code
+launchMode}</a> especifica uma instrução sobre como a atividade deve ser inicializada
+em uma tarefa. Há quatro modos diferentes de inicialização que podem ser designados ao atributo 
+<code><a href="{@docRoot}guide/topics/manifest/activity-element.html#lmode">launchMode</a></code>:
+</p>
+
+<dl>
+<dt>{@code "standard"} (o modo padrão)</dt>
+  <dd>Padrão. O sistema cria uma nova instância da atividade na tarefa
+pela qual foi iniciada e encaminha-lhe a intenção. A atividade pode ser instanciada diversas vezes;
+cada instância pode pertencer a diferentes tarefas e uma tarefa pode ter diversas instâncias.</dd>
+<dt>{@code "singleTop"}</dt>
+  <dd>Se uma instância da atividade já existir no topo da tarefa atual, o sistema
+encaminhará a intenção àquela instância por meio de uma chamada do método {@link
+android.app.Activity#onNewIntent onNewIntent()} em vez de criar uma nova instância
+da atividade. A atividade pode ser instanciada diversas vezes; cada instância pode
+pertencer a diferentes tarefas e uma tarefa pode ter diversas instâncias (mas somente se
+a atividade no topo da pilha de retorno <em>não</em> for uma instância existente da atividade).
+  <p>Por exemplo: suponhamos que uma pilha de retorno da tarefa consista na atividade raiz A com as atividades B, C e
+D no topo (a pilha é A-B-C-D, com D no topo). Uma intenção chega de uma atividade de tipo D.
+Se D for o modo de inicialização {@code "standard"} padrão, uma nova instância da classe será inicializada
+e a tarefa se tornará A-B-C-D-D. Entretanto, se o modo de inicialização de D for {@code "singleTop"}, a instância existente
+de D receberá a intenção por {@link
+android.app.Activity#onNewIntent onNewIntent()} porque ela está no topo da pilha &mdash;
+a pilha permanece A-B-C-D. Contudo, se uma intenção chegar de uma atividade de tipo B, uma nova
+instância de B será adicionada à pilha, mesmo que o modo de inicialização seja {@code "singleTop"}.</p>
+  <p class="note"><strong>Observação:</strong> quando uma nova instância de uma atividade é criada,
+o usuário pode pressionar o botão <em>Voltar</em> para retornar à atividade anterior. Porém, quando uma
+instância
+existente de uma atividade trata de uma nova intenção, o usuário não pode pressionar o botão <em>Voltar</em> para retornar
+ao estado
+da atividade antes que a nova intenção chegue em {@link android.app.Activity#onNewIntent
+onNewIntent()}.</p>
+</dd>
+
+<dt>{@code "singleTask"}</dt>
+  <dd>O sistema cria uma nova tarefa e instancia a atividade em sua raiz.
+Entretanto, se uma instância da atividade já existir em uma tarefa separada, o sistema encaminhará
+a intenção àquela instância por meio de uma chamada do método {@link
+android.app.Activity#onNewIntent onNewIntent()} em vez de criar uma nova instância. Somente
+uma instância da atividade pode existir por vez.
+  <p class="note"><strong>Observação:</strong> embora a atividade inicie em uma nova tarefa, o botão 
+<em>Voltar</em> ainda direciona o usuário à atividade anterior.</p></dd>
+<dt>{@code "singleInstance"}.</dt>
+  <dd>Igual à {@code "singleTask"}, exceto que o sistema não inicializa nenhuma outra atividade
+na tarefa que contém a instância. A atividade é sempre o único e exclusivo membro de sua tarefa;
+toda atividade iniciada por ela abre em uma tarefa separada.</dd>
+</dl>
+
+
+<p>Outro exemplo: o aplicativo Navegador do Android declara que a atividade do navegador da web deve
+sempre abrir na própria tarefa &mdash; especificando o modo de inicialização {@code singleTask} no elemento <a href="{@docRoot}guide/topics/manifest/activity-element.html">{@code &lt;activity&gt;}</a>.
+Isso significa que, se o aplicativo emite uma
+intenção para abrir o navegador do Android, sua atividade <em>não</em> é colocada na mesma
+tarefa do aplicativo. Em vez disso, uma nova tarefa inicia para o navegador ou, se o navegador
+já possui uma tarefa em execução em segundo plano, essa tarefa é colocada em primeiro plano para tratar a nova
+intenção.</p>
+
+<p>Se uma atividade inicia em uma nova tarefa ou na mesma tarefa que a atividade que
+a iniciou, o botão <em>Voltar</em> sempre direciona o usuário à atividade anterior. Porém, se você
+iniciar uma atividade que especifica o modo de inicialização {@code singleTask} e se uma instância
+dessa atividade existir em uma tarefa de segundo plano, toda a tarefa será colocada em primeiro plano. Nesse
+momento, a pilha de retorno conterá todas as atividades da tarefa colocada em primeiro plano
+no topo. A figura 4 ilustra essa situação.</p>
+
+<img src="{@docRoot}images/fundamentals/diagram_backstack_singletask_multiactivity.png" alt="" />
+<p class="img-caption"><strong>Figura 4.</strong> Representação de como uma atividade
+com modo de inicialização "singleTask" é adicionada à pilha de retorno. Se a atividade já for parte de uma tarefa
+de segundo plano com a própria pilha de retorno, toda a pilha também virá
+para primeiro plano, no topo da tarefa atual.</p>
+
+<p>Para obter mais informações sobre o uso de modos de inicialização no arquivo de manifesto, consulte a documentação do elemento
+<code><a href="{@docRoot}guide/topics/manifest/activity-element.html">&lt;activity&gt;</a></code>
+, onde o atributo {@code launchMode} e os valores aceitos
+são discutidos mais aprofundadamente.</p>
+
+<p class="note"><strong>Observação:</strong> os comportamentos a especificar para a atividade com o atributo <a href="{@docRoot}guide/topics/manifest/activity-element.html#lmode">{@code launchMode}</a>
+ podem ser neutralizados por sinalizadores incluídos na intenção que inicia a atividade, conforme abordado
+na próxima seção.</p>
+
+
+
+<h4 id="#IntentFlagsForTasks">Uso de sinalizadores de intenção</h4>
+
+<p>Ao iniciar uma atividade, é possível modificar a associação padrão de uma atividade à tarefa
+incluindo sinalizadores na intenção fornecida a {@link
+android.app.Activity#startActivity startActivity()}. Os sinalizadores que podem ser usados para modificar
+o comportamento padrão são:</p>
+
+<p>
+  <dt>{@link android.content.Intent#FLAG_ACTIVITY_NEW_TASK}</dt>
+    <dd>Inicia a atividade em uma nova tarefa. Se uma tarefa já estiver em execução para a atividade que você está
+iniciando agora, ela será colocada em primeiro plano com o último estado restaurado e a atividade
+receberá a nova intenção em {@link android.app.Activity#onNewIntent onNewIntent()}.
+    <p>Isso produz o mesmo comportamento que o valor {@code "singleTask"} do <a href="{@docRoot}guide/topics/manifest/activity-element.html#lmode">{@code launchMode}</a>,
+abordado na seção anterior.</p></dd>
+  <dt>{@link android.content.Intent#FLAG_ACTIVITY_SINGLE_TOP}</dt>
+    <dd>Se a atividade iniciada for a atual (no topo da pilha de retorno),
+a instância existente receberá uma chamada de {@link android.app.Activity#onNewIntent onNewIntent()}
+em vez de criar uma nova instância da atividade.
+    <p>Isso produz o mesmo comportamento que o valor {@code "singleTop"} do <a href="{@docRoot}guide/topics/manifest/activity-element.html#lmode">{@code launchMode}</a>
+abordado na seção anterior.</p></dd>
+  <dt>{@link android.content.Intent#FLAG_ACTIVITY_CLEAR_TOP}</dt>
+    <dd>Se a atividade iniciada já estiver em execução na tarefa atual, em vez
+de lançar uma nova instância daquela atividade, todas as outras atividades no topo dela serão
+destruídas e essa intenção será entregue à instância reiniciada da atividade (agora no topo)
+por {@link android.app.Activity#onNewIntent onNewIntent()}.
+    <p>Não há nenhum valor para o atributo <a href="{@docRoot}guide/topics/manifest/activity-element.html#lmode">{@code launchMode}</a>
+ que produza esse comportamento.</p>
+    <p>{@code FLAG_ACTIVITY_CLEAR_TOP} é mais usado em conjunto com
+    {@code FLAG_ACTIVITY_NEW_TASK}.
+Quando usados juntos, estes sinalizadores são o modo de localizar uma atividade existente
+em outra tarefa e colocá-la em uma posição em que possa responder à intenção. </p>
+    <p class="note"><strong>Observação:</strong> se o modo de inicialização da atividade designada for
+{@code "standard"},
+ela também será removida da pilha e uma nova instância será iniciada em seu lugar para tratar
+a intenção recebida.  Isso se deve ao fato de que uma nova instância é sempre criada para uma nova intenção quando o
+modo de inicialização é {@code "standard"}. </p>
+</dd>
+</dl>
+
+
+
+
+
+<h3 id="Affinities">Tratamento de afinidades</h3>
+
+<p>A <em>afinidade</em> indica a que tarefa uma atividade prefere pertencer. Por padrão, todas
+as atividades do mesmo aplicativo têm afinidade entre si. Assim, por padrão, todas
+as atividades no mesmo aplicativo preferem estar na mesma tarefa. Contudo, é possível modificar
+a afinidade padrão de uma atividade. Atividades definidas
+em aplicativos diferentes podem compartilhar uma afinidade, ou atividades definidas no mesmo aplicativo podem ter
+diferentes afinidades de tarefa atribuídas.</p>
+
+<p>É possível modificar a afinidade de qualquer atividade com o atributo <a href="{@docRoot}guide/topics/manifest/activity-element.html#aff">{@code taskAffinity}</a>
+ do elemento
+<a href="{@docRoot}guide/topics/manifest/activity-element.html">{@code &lt;activity&gt;}</a>.</p>
+
+<p>O atributo <a href="{@docRoot}guide/topics/manifest/activity-element.html#aff">{@code taskAffinity}</a>
+ recebe um valor de string que deve ser exclusivo do nome do pacote padrão
+declarado no elemento <a href="{@docRoot}guide/topics/manifest/manifest-element.html">
+{@code &lt;manifest&gt;}
+</a> porque o sistema usa esse nome para identificar a afinidade
+de tarefa padrão do aplicativo.</p>
+
+<p>A afinidade tem relevância em duas circunstâncias:</p>
+<ul>
+  <li>Quando a intenção que inicializa uma atividade contém
+  o sinalizador
+  {@link android.content.Intent#FLAG_ACTIVITY_NEW_TASK}.
+
+<p>Uma nova atividade é, por padrão, inicializada na tarefa da atividade
+que chamou {@link android.app.Activity#startActivity startActivity()}. Ela é colocada na mesma
+pilha de retorno do autor da chamada.  Contudo, se a intenção passada a
+{@link android.app.Activity#startActivity startActivity()}
+contiver o sinalizador {@link android.content.Intent#FLAG_ACTIVITY_NEW_TASK}
+, o sistema procurará uma tarefa diferente para comportar a nova atividade. Na maioria das vezes, é uma nova tarefa.
+Porém, isso não é obrigatório.  Se já houver uma tarefa com a mesma afinidade
+da nova atividade, ela será inicializada naquela tarefa.  Caso contrário, ela iniciará uma nova tarefa.</p>
+
+<p>Se esse sinalizador fizer com que uma atividade inicie uma nova tarefa e se o usuário pressionar o botão <em>Página inicial</em>
+para sair dela,
+ será necessário ter um modo de o usuário navegar de volta à tarefa. Algumas entidades (como
+o gerenciador de notificação) sempre iniciam atividades em tarefas externas, nunca como parte de si mesmas, por isso
+elas sempre colocam {@code FLAG_ACTIVITY_NEW_TASK} nas intenções que passam
+a {@link android.app.Activity#startActivity startActivity()}.
+Se você tiver uma atividade que possa ser chamada
+por uma entidade externa que possa usar este sinalizador, certifique-se de que o usuário tenha um modo independente
+de voltar à tarefa iniciada, como com um ícone de inicialização (a atividade raiz da tarefa
+tem um filtro de intenções {@link android.content.Intent#CATEGORY_LAUNCHER}; consulte a seção <a href="#Starting">Início de uma tarefa</a> abaixo).</p>
+</li>
+
+  <li>Quando uma atividade tem o atributo <a href="{@docRoot}guide/topics/manifest/activity-element.html#reparent">
+{@code allowTaskReparenting}</a> definido como {@code "true"}.
+  <p>Nesse caso, a atividade pode mover-se da tarefa que iniciou para a tarefa afim
+quando for colocada em primeiro plano.</p>
+  <p>Por exemplo: suponhamos que uma atividade que relate condições do clima em cidades selecionadas seja
+definida como parte de um aplicativo de viagens.  Ela tem a mesma afinidade que outras atividades no mesmo
+aplicativo (a afinidade padrão do aplicativo) e permite a redefinição da hierarquia com esse atributo.
+Quando uma das atividades inicia a atividade de notificação de clima, ela inicialmente pertence à mesma
+tarefa de sua atividade. Porém, quando a tarefa do aplicativo de viagens é colocada em primeiro plano,
+a atividade de notificação de clima é reatribuída a essa tarefa e exibida dentro dela.</p>
+</li>
+</ul>
+
+<p class="note"><strong>Dica:</strong> se um arquivo {@code .apk} contiver mais de um "aplicativo"
+do ponto de vista do usuário, você provavelmente desejará usar o atributo <a href="{@docRoot}guide/topics/manifest/activity-element.html#aff">{@code taskAffinity}</a>
+ para designar diferentes afinidades às atividades associadas a cada "aplicativo".</p>
+
+
+
+<h3 id="Clearing">Apagar a pilha de retorno</h3>
+
+<p>Se o usuário sair de uma tarefa por muito tempo, o sistema apagará a tarefa de todas as atividades exceto
+a da atividade raiz.  Quando o usuário retornar à tarefa, somente a atividade raiz será restaurada.
+O sistema comporta-se dessa maneira porque, após longo tempo de uso, os usuários provavelmente abandonaram
+o que estavam fazendo antes e são direcionados de volta à tarefa para começar algo novo. </p>
+
+<p>Há alguns atributos de atividade que podem ser usados para modificar esse comportamento: </p>
+
+<dl>
+<dt><code><a
+href="{@docRoot}guide/topics/manifest/activity-element.html#always">alwaysRetainTaskState</a></code>
+</dt>
+<dd>Se esse atributo for definido como {@code "true"} na atividade raiz de uma tarefa,
+o comportamento padrão descrito não acontecerá.
+A tarefa reterá todas as atividades em sua pilha mesmo após um longo período.</dd>
+
+<dt><code><a
+href="{@docRoot}guide/topics/manifest/activity-element.html#clear">clearTaskOnLaunch</a></code></dt>
+<dd>Se esse atributo for definido como {@code "true"} na atividade raiz de uma tarefa,
+a pilha será apagada da atividade raiz sempre que o usuário sair da tarefa
+e retornar a ela.  Em outras palavras, é o oposto de 
+<a href="{@docRoot}guide/topics/manifest/activity-element.html#always">
+{@code alwaysRetainTaskState}</a>. O usuário sempre retorna à tarefa
+no estado inicial, mesmo ao retirar-se da tarefa somente por um momento.</dd>
+
+<dt><code><a
+href="{@docRoot}guide/topics/manifest/activity-element.html#finish">finishOnTaskLaunch</a></code>
+</dt>
+<dd>Esse atributo é como <a href="{@docRoot}guide/topics/manifest/activity-element.html#clear">{@code clearTaskOnLaunch}</a>,
+mas opera
+em uma única atividade, e não em uma tarefa inteira.  Ele também apaga todas as atividades,
+inclusive a atividade raiz.  Quando definido como {@code "true"},
+a atividade permanece parte da tarefa somente para a sessão atual.  Se o usuário
+retirar-se e, em seguida, retornar à tarefa, ela não estará mais presente.</dd>
+</dl>
+
+
+
+
+<h3 id="Starting">Início de uma tarefa</h3>
+
+<p>É possível configurar uma atividade como ponto de entrada de uma tarefa fornecendo-lhe um filtro de intenções
+com {@code "android.intent.action.MAIN"} como a ação especificada
+e {@code "android.intent.category.LAUNCHER"}
+como a categoria especificada. Por exemplo:</p>
+
+<pre>
+&lt;activity ... &gt;
+    &lt;intent-filter ... &gt;
+        &lt;action android:name="android.intent.action.MAIN" /&gt;
+        &lt;category android:name="android.intent.category.LAUNCHER" /&gt;
+    &lt;/intent-filter&gt;
+    ...
+&lt;/activity&gt;
+</pre>
+
+<p>Um filtro de intenções desse tipo faz com que um ícone e o rótulo
+da atividade sejam exibidos no inicializador do aplicativo, fornecendo aos usuários um modo de inicializar a atividade
+e de retornar à tarefa criada a qualquer tempo após sua inicialização.
+</p>
+
+<p>Este segundo recurso é importante: é preciso que os usuários possam sair de uma tarefa e voltar a ela
+mais tarde usando esse inicializador de atividades. Por isso, os dois <a href="#LaunchModes">modos
+de inicialização</a> que marcam atividades como sempre iniciando uma tarefa ({@code "singleTask"} e
+{@code "singleInstance"}) devem ser usados somente quando a atividade tiver um filtro
+{@link android.content.Intent#ACTION_MAIN}
+e um {@link android.content.Intent#CATEGORY_LAUNCHER}. Imagine, por exemplo, o que
+aconteceria se o filtro não estivesse presente: uma intenção inicializaria uma atividade {@code "singleTask"}, iniciando uma
+nova tarefa, e o usuário perderia algum tempo trabalhando nessa tarefa. O usuário, então, pressiona o botão
+<em>Página inicial</em>. A tarefa é enviada para segundo plano e não fica mais visível. O usuário não tem como voltar
+à tarefa porque ela não é representada no inicializador do aplicativo.</p>
+
+<p>Para esses casos em que se deseja que o usuário não seja capaz de retornar a uma atividade, defina 
+<a href="{@docRoot}guide/topics/manifest/activity-element.html#finish">{@code finishOnTaskLaunch}</a>
+ do elemento 
+<code><a href="{@docRoot}guide/topics/manifest/activity-element.html">&lt;activity&gt;</a></code>
+como {@code "true"} (consulte <a href="#Clearing">Apagar a pilha</a>).</p>
+
+<p>Veja mais informações sobre a representação e o gerenciamento de atividades 
+na tela de visão geral em <a href="{@docRoot}guide/components/recents.html">
+Tela de visão geral</a>.</p>
+
+<!--
+<h2>Beginner's Path</h2>
+
+<p>For more information about how to use intents to
+activate other application components and publish the intents to which your components
+respond, continue with the <b><a
+href="{@docRoot}guide/components/intents-filters.html">Intents and Intent
+Filters</a></b> document.</p>
+-->

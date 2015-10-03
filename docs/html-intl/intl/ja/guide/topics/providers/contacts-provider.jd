@@ -1,0 +1,2356 @@
+page.title=連絡先プロバイダ
+@jd:body
+<div id="qv-wrapper">
+<div id="qv">
+<h2>クイックビュー</h2>
+<ul>
+    <li>人の情報に関する Android のリポジトリ。</li>
+    <li>
+        ウェブとの同期。
+    </li>
+    <li>
+        ソーシャル ストリーム データの統合。
+    </li>
+</ul>
+<h2>本書の内容</h2>
+<ol>
+    <li>
+        <a href="#InformationTypes">連絡先プロバイダの構成</a>
+    </li>
+    <li>
+        <a href="#RawContactBasics">未加工連絡先</a>
+    </li>
+    <li>
+        <a href="#DataBasics">データ</a>
+    </li>
+    <li>
+        <a href="#ContactBasics">連絡先</a>
+    </li>
+    <li>
+        <a href="#Sources">同期アダプタからのデータ</a>
+    </li>
+    <li>
+        <a href="#Permissions">必要なパーミッション</a>
+    </li>
+    <li>
+        <a href="#UserProfile">ユーザー プロファイル</a>
+    </li>
+    <li>
+        <a href="#ContactsProviderMetadata">連絡先プロバイダのメタデータ</a>
+    </li>
+    <li>
+        <a href="#Access">連絡先プロバイダへのアクセス</a>
+    <li>
+    </li>
+    <li>
+        <a href="#SyncAdapters">連絡先プロバイダの同期アダプタ</a>
+    </li>
+    <li>
+        <a href="#SocialStream">ソーシャル ストリーム データ</a>
+    </li>
+    <li>
+        <a href="#AdditionalFeatures">連絡先プロバイダの追加機能</a>
+    </li>
+</ol>
+<h2>キークラス</h2>
+<ol>
+    <li>{@link android.provider.ContactsContract.Contacts}</li>
+    <li>{@link android.provider.ContactsContract.RawContacts}</li>
+    <li>{@link android.provider.ContactsContract.Data}</li>
+    <li>{@code android.provider.ContactsContract.StreamItems}</li>
+</ol>
+<h2>関連サンプル</h2>
+<ol>
+    <li>
+        <a href="{@docRoot}resources/samples/ContactManager/index.html">        Contact Manager        </a>
+
+
+    </li>
+    <li>
+        <a href="{@docRoot}resources/samples/SampleSyncAdapter/index.html">        サンプル同期アダプタ</a>
+
+    </li>
+</ol>
+<h2>関連ドキュメント</h2>
+<ol>
+    <li>
+        <a href="{@docRoot}guide/topics/providers/content-provider-basics.html">        コンテンツ プロバイダの基本        </a>
+
+
+    </li>
+</ol>
+</div>
+</div>
+<p>
+    連絡先プロバイダは、人のデータに関する端末の中央リポジトリを管理する、柔軟で効果的な Android コンポーネントです。
+連絡先プロバイダは、端末の連絡先アプリケーションに表示されるデータのソースであり、さらに独自アプリケーションで連絡先プロバイダのデータにアクセスし、端末とオンライン サービスとの間でデータを転送することもできます。
+
+このプロバイダは幅広いデータソースに対応しており、各人に関してできるだけ多くのデータを管理しようとするため、複雑な構造をしています。
+
+そのため、連絡先プロバイダの API には、データの取得と変更をどちらもやりやすくするクラスやインターフェースが多数用意されています。
+
+
+</p>
+<p>
+    このガイドでは、以下について説明します。
+</p>
+    <ul>
+        <li>
+            プロバイダの基本構造。
+        </li>
+        <li>
+            プロバイダからのデータの取得方法。
+        </li>
+        <li>
+            プロバイダでのデータの変更方法。
+        </li>
+        <li>
+            サーバーから連絡先プロバイダとデータを同期する同期アダプタの作成方法。
+
+        </li>
+    </ul>
+<p>
+    このガイドは、Android のコンテンツ プロバイダの基礎知識がある読者を対象としています。Android のコンテンツ プロバイダについて詳しくは、「<a href="{@docRoot}guide/topics/providers/content-provider-basics.html">コンテンツ プロバイダの基本</a>」をご覧ください。
+
+
+<a href="{@docRoot}resources/samples/SampleSyncAdapter/index.html">サンプル同期アダプタ</a> サンプルアプリは、同期アダプタを使用して連絡先プロバイダと Google ウェブ サービスでホストされているサンプル アプリケーションとの間でデータを転送する例です。
+
+
+
+</p>
+<h2 id="InformationTypes">連絡先プロバイダの構成</h2>
+<p>
+    連絡先プロバイダは、Android のコンテンツ プロバイダ コンポーネントです。人に関する 3 種類のデータを保持しており、それぞれがコンテンツ プロバイダによって提供される 1 つのテーブルに対応しています。この構成を図 1 に示します。
+
+
+</p>
+<img src="{@docRoot}images/providers/contacts_structure.png" alt="" height="364" id="figure1" />
+<p class="img-caption">
+  <strong>図 1.</strong> 連絡先プロバイダのテーブル構造。
+</p>
+<p>
+    この 3 つのテーブルは、一般にそれぞれのコントラクト クラス名で呼ばれます。各クラスは、テーブルによって使用されるコンテンツ URI、列名、列の値のための定数を定義しています。
+
+</p>
+<dl>
+    <dt>
+        {@link android.provider.ContactsContract.Contacts} テーブル
+    </dt>
+    <dd>
+        各行は、未加工連絡先の行の集約に基づいて異なる人を表します。
+    </dd>
+    <dt>
+        {@link android.provider.ContactsContract.RawContacts} テーブル
+    </dt>
+    <dd>
+        各行には、ユーザーのアカウントとタイプに固有の、人に関するデータの概要が格納されています。
+    </dd>
+    <dt>
+        {@link android.provider.ContactsContract.Data} テーブル
+    </dt>
+    <dd>
+        各行には、メールアドレスや電話番号など、未加工連絡先の詳細情報が格納されています。
+    </dd>
+</dl>
+<p>
+    {@link android.provider.ContactsContract} に含まれるコントラクト クラスによって表現される他のテーブルは補助テーブルであり、連絡先プロバイダがその操作を管理したり、端末の連絡先アプリや電話アプリの特定機能をサポートしたりするために使用します。
+
+
+</p>
+<h2 id="RawContactBasics">未加工連絡先</h2>
+<p>
+    未加工連絡先は、アカウント タイプとアカウント名の 1 つのペアを使用して得られる人に関するデータです。
+連絡先プロバイダでは、1 人に関するデータのソースとして複数のオンライン サーバーを使用できるため、同じ個人に対して複数の未加工連絡先が許されます。
+
+    未加工連絡先が複数ある場合、ユーザーは同じアカウント タイプの複数のアカウントから取得したその人のデータを組み合わせることができます。
+
+</p>
+<p>
+    未加工連絡先データの大半は、{@link android.provider.ContactsContract.RawContacts} テーブルには格納されません。
+その代わり、{@link android.provider.ContactsContract.Data} テーブルの 1 つまたは複数の行に格納されています。
+各データ行には列 {@link android.provider.ContactsContract.DataColumns#RAW_CONTACT_ID Data.RAW_CONTACT_ID} があり、親 {@link android.provider.ContactsContract.RawContacts} 行の {@code android.provider.BaseColumns#_ID RawContacts._ID} 値が格納されています。
+
+
+
+</p>
+<h3 id="RawContactsColumns">重要な未加工連絡先列</h3>
+<p>
+    表 1 に、{@link android.provider.ContactsContract.RawContacts} の重要な列を示します。
+表の後の注もお読みください。
+</p>
+<p class="table-caption" id="table1">
+    <strong>表 1.</strong> 重要な未加工連絡先列。
+</p>
+<table>
+    <tr>
+        <th scope="col">列名</th>
+        <th scope="col">用途</th>
+        <th scope="col">注</th>
+    </tr>
+    <tr>
+        <td>
+            {@link android.provider.ContactsContract.SyncColumns#ACCOUNT_NAME}
+        </td>
+        <td>
+            この未加工連絡先のソースであるアカウント タイプにおけるアカウント名。
+            たとえば、Google アカウントのアカウント名は、デバイス オーナーの Gmail アドレスのどれかです。
+詳しくは、次の {@link android.provider.ContactsContract.SyncColumns#ACCOUNT_TYPE} の項目をご覧ください。
+
+
+        </td>
+        <td>
+            この名前の形式は、アカウント タイプによって異なります。必ずしもメールアドレスとは限りません。
+
+        </td>
+    </tr>
+    <tr>
+        <td>
+            {@link android.provider.ContactsContract.SyncColumns#ACCOUNT_TYPE}
+        </td>
+        <td>
+            この未加工連絡先のソースであるアカウント タイプ。たとえば、Google アカウントのアカウント タイプは <code>com.google</code> です。
+アカウント タイプは必ず、所有または管理しているドメインのドメイン ID で修飾してください。
+そうすることで、アカウント タイプが確実に一意になります。
+
+        </td>
+        <td>
+            連絡先データを提供するアカウント タイプには、通常、連絡先プロバイダと同期する関連同期アダプタが用意されています。
+
+    </tr>
+    <tr>
+        <td>
+            {@link android.provider.ContactsContract.RawContactsColumns#DELETED}
+        </td>
+        <td>
+            未加工連絡先の「削除済み」フラグ。
+        </td>
+        <td>
+            連絡先プロバイダは、同期アダプタが該当行をサーバーから削除し、最終的にリポジトリから削除するまで、このフラグを基に行を内部的に管理します。
+
+
+        </td>
+    </tr>
+</table>
+<h4>注</h4>
+<p>
+    次に、{@link android.provider.ContactsContract.RawContacts} テーブルに関する重要な注を示します。
+
+</p>
+<ul>
+    <li>
+        未加工連絡先の名前は、{@link android.provider.ContactsContract.RawContacts} の行には格納されません。
+その代わり、{@link android.provider.ContactsContract.Data} テーブルの {@link android.provider.ContactsContract.CommonDataKinds.StructuredName} 行に格納されます。
+
+未加工連絡先は、このタイプの行を {@link android.provider.ContactsContract.Data} テーブルに 1 行だけ持ちます。
+
+    </li>
+    <li>
+        <strong>警告:</strong> 未加工連絡先の行で独自のアカウント データを使用する場合は、まずそれを {@link android.accounts.AccountManager} に登録する必要があります。
+登録するには、ユーザーに対し、アカウントのリストにアカウント タイプとアカウント名を追加するよう求めます。
+そうしないと、連絡先プロバイダによって未加工連絡先の行が自動的に削除されてしまいます。
+
+        <p>
+            たとえば、ドメインが {@code com.example.dataservice} であるウェブベースのサービス用に連絡先データをアプリで管理する場合、そのサービス用のユーザー アカウントが {@code becky.sharp@dataservice.example.com} であれば、そのユーザーが先にそのアカウントの「タイプ」（{@code com.example.dataservice}）と「名前」（{@code becky.smart@dataservice.example.com}）を追加しておくことで、アプリが未加工連絡先の行を追加できるようになります。
+
+
+
+
+            この要件については、文書で説明するか、ユーザーにタイプと名前を追加するよう求めるか、あるいはその両方を実施してください。
+アカウントのタイプと名前については、次のセクションで詳しく説明します。
+
+    </li>
+</ul>
+<h3 id="RawContactsExample">未加工連絡先データのソース</h3>
+<p>
+    未加工連絡先の働きを理解するために、「Emily Dickinson」というユーザーについて考えてみましょう。彼女は自分の端末に次の 3 つのアカウントを定義しています。
+
+</p>
+<ul>
+    <li><code>emily.dickinson@gmail.com</code></li>
+    <li><code>emilyd@gmail.com</code></li>
+    <li>Twitter アカウント「belle_of_amherst」</li>
+</ul>
+<p>
+    このユーザーは、[<em>アカウント</em>] の設定でこの 3 つのアカウントすべてについて [<em>連絡先を同期</em>] を有効にしています。
+
+</p>
+<p>
+    Emily Dickinson がブラウザのウィンドウを開き、Gmail に <code>emily.dickinson@gmail.com</code> としてログインし、[連絡先] を開いて「Thomas Higginson」を追加したとしましょう。
+
+後日、彼女が Gmail に <code>emilyd@gmail.com</code> としてログインし、メールを「Thomas Higginson」宛てに送信すると、彼は自動的に連絡先として追加されます。
+
+彼女はまた、Twitter で「colonel_tom」（Thomas Higginson の Twitter ID）をフォローしています。
+
+</p>
+<p>
+    連絡先プロバイダは、この操作の結果として次の 3 行の未加工連絡先を作成します。
+</p>
+<ol>
+    <li>
+        「Thomas Higginson」の、<code>emily.dickinson@gmail.com</code> に関連付けられた未加工連絡先。
+        ユーザー アカウントのタイプは Google です。
+    </li>
+    <li>
+        「Thomas Higginson」の、<code>emilyd@gmail.com</code> に関連付けられた新たな未加工連絡先。
+        ユーザー アカウントのタイプはやはり Google です。名前が前の行とまったく同じなのに新たな未加工連絡先が作成されたのは、この個人が異なるユーザー アカウントに追加されたからです。
+
+
+    </li>
+    <li>
+        「Thomas Higginson」の、「belle_of_amherst」に関連付けられた未加工連絡先。ユーザー アカウントのタイプは Twitter です。
+
+    </li>
+</ol>
+<h2 id="DataBasics">データ</h2>
+<p>
+    前にも説明したように、未加工連絡先のデータは未加工連絡先の <code>_ID</code> 値にリンクされている {@link android.provider.ContactsContract.Data} 行に格納されます。
+
+これにより、1 つの未加工連絡先が同じタイプのデータ（メールアドレスや電話番号など）のインスタンスを複数持つことができます。
+たとえば、{@code emilyd@gmail.com} に対する「Thomas Higginson」（Google アカウント <code>emilyd@gmail.com</code> に関連付けられた、Thomas Higginson の未加工連絡先の行）には、<code>thigg@gmail.com</code> という個人用アドレスと <code>thomas.higginson@gmail.com</code> という仕事用アドレスがあり、連絡先プロバイダはこの 2 つのメールアドレスの行を格納し、両方とも同じ未加工連絡先にリンクします。
+
+
+
+
+
+</p>
+<p>
+    異なるタイプのデータが同じテーブルに格納されることに注目してください。表示名、電話番号、メール、住所、写真、ウェブサイトに関する詳細行はすべて、{@link android.provider.ContactsContract.Data} テーブルにあります。
+
+これを管理しやすくするため、{@link android.provider.ContactsContract.Data} テーブルの一部の行には説明的な名前が、それ以外には一般的な名前がそれぞれ付いています。
+
+説明的な名前が付いた列の内容は、行データのタイプによらず意味が同じなのに対し、一般的な名前が付いた列の内容は、データのタイプによって意味が異なります。
+
+
+</p>
+<h3 id="DescriptiveColumns">説明的な名前の列</h3>
+<p>
+    説明的な名前が付いた列の例をいくつか示します。
+</p>
+<dl>
+    <dt>
+        {@link android.provider.ContactsContract.Data#RAW_CONTACT_ID}
+    </dt>
+    <dd>
+        このデータの、未加工連絡先の <code>_ID</code> 列の値。
+    </dd>
+    <dt>
+        {@link android.provider.ContactsContract.Data#MIMETYPE}
+    </dt>
+    <dd>
+        カスタム MIME タイプで表現した、この行に格納されているデータのタイプ。連絡先プロバイダは、{@link android.provider.ContactsContract.CommonDataKinds} のサブクラスに定義されている MIME タイプを使用します。
+
+これらの MIME タイプはオープンソースで、連絡先プロバイダと連携する任意のアプリケーションまたは同期アダプタで使用できます。
+
+    </dd>
+    <dt>
+        {@link android.provider.ContactsContract.DataColumns#IS_PRIMARY}
+    </dt>
+    <dd>
+        このタイプのデータ行が 1 つの未加工連絡先に対して複数発生する場合、{@link android.provider.ContactsContract.DataColumns#IS_PRIMARY} 列はそのタイプに対するプライマリ データを含むデータ行を示します。
+
+たとえば、ユーザーがある連絡先の電話番号を長押しし、[<strong>デフォルトに設定</strong>] を選択すると、その番号を含む {@link android.provider.ContactsContract.Data} 行の {@link android.provider.ContactsContract.DataColumns#IS_PRIMARY} 列にゼロでない値が設定されます。
+
+
+
+
+    </dd>
+</dl>
+<h3 id="GenericColumns">汎用名の列</h3>
+<p>
+    自由に使用できる <code>DATA1</code> ～ <code>DATA15</code> という 15 個の汎用列の他に、同期アダプタしか使用してはいけない <code>SYNC1</code> ～ <code>SYNC4</code> という 4 個の列があります。
+
+
+汎用名列の定数は、行に指定されているデータのタイプによらず、常に機能します。
+
+</p>
+<p>
+    <code>DATA1</code> 列はインデックス付きです。連絡先プロバイダは常に、この列を、最も頻繁にクエリの対象となるとプロバイダが予想するデータ用の列として使用します。
+たとえば、メールの行では、この列には実際のメールアドレスが格納されます。
+
+</p>
+<p>
+    <code>DATA15</code> は慣例として、写真サムネイルのようなバイナリ ラージ オブジェクト（BLOB）データ用に予約されています。
+
+</p>
+<h3 id="TypeSpecificNames">タイプ固有の列名</h3>
+<p>
+    特定タイプの行に含まれる列に対する作業をやりやすくするため、連絡先プロバイダではタイプ固有の列名定数もあり、たとえば {@link android.provider.ContactsContract.CommonDataKinds} のサブクラスに定義されています。
+
+こうした定数は、同じ列名に異なる定数名を充てて、特定タイプの行に含まれるデータにアクセスしやすくしているだけのものです。
+
+
+</p>
+<p>
+    たとえば、{@link android.provider.ContactsContract.CommonDataKinds.Email} クラスには、MIME タイプが {@link android.provider.ContactsContract.CommonDataKinds.Email#CONTENT_ITEM_TYPE Email.CONTENT_ITEM_TYPE} である{@link android.provider.ContactsContract.Data} 行向けにタイプ固有の列名定数が定義されています。
+
+
+
+このクラスには、メールアドレス 列用に {@link android.provider.ContactsContract.CommonDataKinds.Email#ADDRESS} という定数が含まれています。
+
+{@link android.provider.ContactsContract.CommonDataKinds.Email#ADDRESS} の実際の値は「data1」で、これはこの列の汎用名と同じです。
+
+
+</p>
+<p class="caution">
+    <strong>警告:</strong> 連絡先プロバイダにあらかじめ定義されている MIME タイプのどれかである行を使用している {@link android.provider.ContactsContract.Data} テーブルには、独自のカスタムデータを追加しないでください。
+
+追加すると、データが失われたり、連絡先プロバイダが誤動作したりすることがあります。
+たとえば、メールアドレスではなくユーザー名が格納されている MIME タイプ {@link android.provider.ContactsContract.CommonDataKinds.Email#CONTENT_ITEM_TYPE Email.CONTENT_ITEM_TYPE} の行は、列 <code>DATA1</code> には追加しないでください。
+
+
+一方、行に独自のカスタム MIME タイプを使用している場合は、独自のタイプ固有名を定義して列を自由に使用してかまいません。
+
+</p>
+<p>
+    図 2 に、説明的な名前の列とデータ列で {@link android.provider.ContactsContract.Data} 行がどう見えるか、そしてタイプ固有の列名が汎用列名をどう「オーバーレイ」するかを示します。
+
+
+</p>
+<img src="{@docRoot}images/providers/data_columns.png" alt="How type-specific column names map to generic column names" height="311" id="figure2" />
+<p class="img-caption">
+  <strong>図 2.</strong> タイプ固有の列名と汎用列名
+</p>
+<h3 id="ColumnMaps">タイプ固有列名が使用されるクラス</h3>
+<p>
+    表 2 に、最もよく用いられるタイプ固有列名クラスを示します。
+</p>
+<p class="table-caption" id="table2">
+  <strong>表 2.</strong> タイプ固有列名が使用されるクラス</p>
+<table>
+  <tr>
+    <th scope="col">対応クラス</th>
+    <th scope="col">データのタイプ</th>
+    <th scope="col">注</th>
+  </tr>
+  <tr>
+    <td>{@link android.provider.ContactsContract.CommonDataKinds.StructuredName}</td>
+    <td>このデータ行に関連付けられている未加工連絡先の名前データ。</td>
+    <td>1 つの未加工連絡先は、この行を 1 行だけ持ちます。</td>
+  </tr>
+  <tr>
+    <td>{@link android.provider.ContactsContract.CommonDataKinds.Photo}</td>
+    <td>このデータ行に関連付けられている未加工連絡先のメインの写真。</td>
+    <td>1 つの未加工連絡先は、この行を 1 行だけ持ちます。</td>
+  </tr>
+  <tr>
+    <td>{@link android.provider.ContactsContract.CommonDataKinds.Email}</td>
+    <td>このデータ行に関連付けられている未加工連絡先のメールレアドレス。</td>
+    <td>1 つの未加工連絡先は複数のメールアドレスを持つことができます。</td>
+  </tr>
+  <tr>
+    <td>{@link android.provider.ContactsContract.CommonDataKinds.StructuredPostal}</td>
+    <td>このデータ行に関連付けられている未加工連絡先の住所。</td>
+    <td>1 つの未加工連絡先は複数の住所を持つことができます。</td>
+  </tr>
+  <tr>
+    <td>{@link android.provider.ContactsContract.CommonDataKinds.GroupMembership}</td>
+    <td>その未加工連絡先を連絡先プロバイダのグループのどれかにリンクする識別子。</td>
+    <td>
+        グループは、アカウント タイプとアカウント名のオプション機能です。詳しくは、<a href="#Groups">連絡先グループ</a>をご覧ください。
+
+    </td>
+  </tr>
+</table>
+<h3 id="ContactBasics">連絡先</h3>
+<p>
+    連絡先プロバイダは、すべてのアカウント タイプとアカウント名にわたって未加工連絡先の行を結び付けて 1 つの<strong>連絡先</strong>を形成します。
+これにより、1 人の人についてユーザーが集めた全データを表示したり変更したりしやすくなります。
+連絡先プロバイダは、新しい連絡先の行の作成と、既存の連絡先の行を使用した未加工連絡先の集約とを管理します。
+アプリケーションと同期アダプタは連絡先の追加はできず、連絡先の行の一部の列は読み取り専用です。
+
+</p>
+<p class="note">
+    <strong>注:</strong> 連絡先を連絡先プロバイダに {@link android.content.ContentResolver#insert(Uri,ContentValues) insert()} を使用して追加しようとすると、{@link java.lang.UnsupportedOperationException} 例外が発生します。
+
+「読み取り専用」になっている列をアップデートしようとしても、そのアップデートは無視されます。
+
+</p>
+<p>
+    連絡先プロバイダは、既存の連絡先と一致しない新しい未加工連絡先が追加されると、それに対して新しい連絡先を作成します。
+また、既存の未加工連絡先のデータが変更され、それまで関連付けられていた連絡先と一致しなくなった場合にも、同じ処理がなされます。
+
+アプリケーションまたは同期アダプタが、既存の連絡先と一致する新しい未加工連絡先を作成すると、その新しい未加工連絡先は既存の連絡先に集約されます。<em></em>
+
+
+</p>
+<p>
+    連絡先プロバイダは、連絡先の行を未加工連絡先とリンクするのに、{@link android.provider.ContactsContract.Contacts Contacts} テーブルの <code>_ID</code> 列を使用します。
+
+未加工連絡先テーブル {@link android.provider.ContactsContract.RawContacts} の <code>CONTACT_ID</code> 列には、未加工連絡先の各行に関連付けられている連絡先の行の <code>_ID</code> 値が格納されます。
+
+
+</p>
+<p>
+    {@link android.provider.ContactsContract.Contacts} テーブルには列 {@code android.provider.ContactsContract.ContactsColumns#LOOKUP_KEY} もあり、こちらは連絡先の行への「永久」リンクです。
+
+連絡先プロバイダは連絡先を自動的に管理するため、集約や同期が行われると、それに応じて連絡先の行の {@code android.provider.BaseColumns#_ID} 値が変更される場合があります。
+
+この処理が行われても、コンテンツ URI {@link android.provider.ContactsContract.Contacts#CONTENT_LOOKUP_URI} と連絡先の {@code android.provider.ContactsContract.ContactsColumns#LOOKUP_KEY} の組み合わせは、引き続きその連絡先の行を指すため、{@code android.provider.ContactsContract.ContactsColumns#LOOKUP_KEY} を使用して「お気に入り」の連絡先へのリンクを管理するなどができます。
+
+
+
+
+この列には、{@code android.provider.BaseColumns#_ID} 列の形式と関係のない独自の形式があります。
+
+</p>
+<p>
+    図 3 に、3 つのテーブルの相互関係を示します。
+</p>
+<img src="{@docRoot}images/providers/contacts_tables.png" alt="Contacts provider main tables" height="514" id="figure4" />
+<p class="img-caption">
+  <strong>図 3.</strong> Contacts、RawContacts、Data の各テーブル間の関係。
+</p>
+<h2 id="Sources">同期アダプタからのデータ</h2>
+<p>
+    ユーザーは端末に連絡先データを直接入力しますが、データはウェブサービスから<strong>同期アダプタ</strong>を経由して連絡先プロバイダにも流れます。同期アダプタは、端末とサービスの間のデータ転送を自動化します。
+
+同期アダフタはシステムの管理下でバックグラウンドで実行され、{@link android.content.ContentResolver} のメソッドを呼び出してデータを管理します。
+
+
+</p>
+<p>
+    Android では、同期アダプタと連携するウェブサービスをアカウント タイプで識別します。
+    各同期アダプタが扱うアカウント タイプは 1 つですが、そのタイプのアカウント名を複数サポートできます。
+アカウント名とアカウント タイプについては、<a href="#RawContactsExample">未加工連絡先データのソース</a>で簡単に説明しています。
+次に、アカウント タイプとアカウント名が同期アダプタやサービスとどのような関係にあるかを詳しく説明します。
+
+</p>
+<dl>
+    <dt>
+        アカウント タイプ
+    </dt>
+    <dd>
+        ユーザーがデータを格納しているサービスを示します。ほとんどの場合、ユーザーにはサービスに対する認証が求められます。
+たとえば、Google Contacts はアカウント タイプの 1 つで、コード <code>google.com</code> で識別されます。
+この値は、{@link android.accounts.AccountManager} によって使用されるアカウント タイプに対応します。
+
+    </dd>
+    <dt>
+        アカウント名
+    </dt>
+    <dd>
+        あるアカウント タイプで使用する特定のアカウントまたはログインを示します。Google Contacts アカウントは Google アカウントと同じで、アカウント名としてメールアドレスを使用します。
+
+        他のサービスでは、1 語のユーザー名や数字の ID が使われていることもあります。
+    </dd>
+</dl>
+<p>
+    アカウント タイプは、一意である必要はありません。1 人のユーザーが複数の Google Contacts アカウントを設定し、それぞれのデータを連絡先プロバイダにダウンロードする、ということが可能です。このような使い方は、そのユーザーが個人用のアカウント名で私用の連絡先を、仕事用のアカウント名で仕事用の連絡先を管理している場合にありえます。
+
+アカウント名は、普通は一意です。
+この 2 つを組み合わせて、連絡先プロバイダと外部サービスとの間のある決まったデータフローを識別します。
+
+</p>
+<p>
+    独自サービスのデータを連絡先プロバイダに転送する場合は、独自の同期アダプタを作成する必要があります。
+詳しくは、<a href="#SyncAdapters">連絡先プロバイダの同期アダプタ</a>をご覧ください。
+
+</p>
+<p>
+    図 4 に、人に関するデータの流れにおける連絡先プロバイダの位置付けを示します。
+右から 2 列目の各ボックス内のアダプタには、そのアダプタのアカウント タイプが示されています。
+</p>
+<img src="{@docRoot}images/providers/ContactsDataFlow.png" alt="Flow of data about people" height="252" id="figure5" />
+<p class="img-caption">
+  <strong>図 4.</strong> 連絡先プロバイダに絡んだデータフロー。
+</p>
+<h2 id="Permissions">必要なパーミッション</h2>
+<p>
+    連絡先プロバイダにアクセスするアプリケーションは、次のパーミッションを要求する必要があります。
+
+</p>
+<dl>
+    <dt>1 つ以上のテーブルに対する読み取りアクセス</dt>
+    <dd>
+        {@link android.Manifest.permission#READ_CONTACTS}。<code>AndroidManifest.xml</code> に <code><a href="{@docRoot}guide/topics/manifest/uses-permission-element.html">
+        &lt;uses-permission&gt;</a></code> 要素を使用して <code>&lt;uses-permission android:name="android.permission.READ_CONTACTS"&gt;</code> のように指定します。
+
+
+
+    </dd>
+    <dt>1 つ以上のテーブルに対する書き込みアクセス</dt>
+    <dd>
+        {@link android.Manifest.permission#WRITE_CONTACTS}。<code>AndroidManifest.xml</code> に <code><a href="{@docRoot}guide/topics/manifest/uses-permission-element.html">
+        &lt;uses-permission&gt;</a></code> 要素を使用して <code>&lt;uses-permission android:name="android.permission.WRITE_CONTACTS"&gt;</code> のように指定します。
+
+
+
+    </dd>
+</dl>
+<p>
+    これらのパーミッションは、ユーザー プロファイル データにまでは拡張されません。ユーザー プロファイルとそれに必要なパーミッションについては、次のセクションである<a href="#UserProfile">ユーザー プロファイル</a>で説明しています。
+
+
+</p>
+<p>
+    ユーザーの連絡先データは個人的で秘密性の高い情報であることを再度ご確認ください。ユーザーはプライバシーに敏感であり、アプリケーションが自分や自分の連絡先に関するデータを集めることを望みません。
+
+    連絡先データにアクセスするためのパーミッションが必要な理由が明らかでないと、ユーザーがアプリケーションを低く評価したりインストールを拒否したりすることがあります。
+
+</p>
+<h2 id="UserProfile">ユーザー プロファイル</h2>
+<p>
+    {@link android.provider.ContactsContract.Contacts} テーブルには、その端末のユーザーのプロファイル データを格納している行が 1 行あります。
+このデータが記述しているのは端末の <code>user</code> であって、そのユーザーの連絡先ではありません。
+プロファイルの連絡先の行は、プロファイルを使用する各システムの未加工連絡先の行にリンクされています。
+
+    プロファイルの未加工連絡先の各行は、複数のデータ行を持つことができます。ユーザー プロファイルにアクセスするための定数は、{@link android.provider.ContactsContract.Profile} クラスに用意されています。
+
+</p>
+<p>
+    ユーザー プロファイルにアクセスするには、特別なパーミッションが必要です。読み取りと書き込みに必要な {@link android.Manifest.permission#READ_CONTACTS} パーミッションと {@link android.Manifest.permission#WRITE_CONTACTS} パーミッションの他に、ユーザー プロファイルに対する読み取りと書き込みのために {@code android.Manifest.permission#READ_PROFILE} パーミッションと {@code android.Manifest.permission#WRITE_PROFILE} パーミッションがそれぞれ必要です。
+
+
+
+
+
+</p>
+<p>
+    ユーザーのプロファイルは秘密性の高い情報であることを再度ご確認ください。パーミッション {@code android.Manifest.permission#READ_PROFILE} を使用すると、端末ユーザーの個人識別データにアクセスできます。
+
+アプリケーションの説明には、ユーザー プロファイルへのアクセス パーミッションが必要な理由を必ず記載してください。
+
+</p>
+<p>
+    ユーザーのプロファイルが格納された連絡先の行を取得するには、{@link android.content.ContentResolver#query(Uri,String[], String, String[], String) ContentResolver.query()} を呼び出します。
+
+コンテンツ URI を {@link android.provider.ContactsContract.Profile#CONTENT_URI} に設定し、選択条件は何も指定しません。
+
+このコンテンツ URI は、そのプロファイルの未加工連絡先やデータを取得するためのベース URI としても使用できます。
+たとえば、次のスニペットは指定されたプロファイルのデータを取得します。
+</p>
+<pre>
+// Sets the columns to retrieve for the user profile
+mProjection = new String[]
+    {
+        Profile._ID,
+        Profile.DISPLAY_NAME_PRIMARY,
+        Profile.LOOKUP_KEY,
+        Profile.PHOTO_THUMBNAIL_URI
+    };
+
+// Retrieves the profile from the Contacts Provider
+mProfileCursor =
+        getContentResolver().query(
+                Profile.CONTENT_URI,
+                mProjection ,
+                null,
+                null,
+                null);
+</pre>
+<p class="note">
+    <strong>注:</strong> 連絡先の行を複数取得する場合、そのなかの 1 つがユーザー プロファイルかどうかを確認するには、行の {@link android.provider.ContactsContract.ContactsColumns#IS_USER_PROFILE} 列をテストします。
+
+その連絡先がユーザー プロファイルであれば、この列は「1」に設定されています。
+
+</p>
+<h2 id="ContactsProviderMetadata">連絡先プロバイダのメタデータ</h2>
+<p>
+    連絡先プロバイダは、連絡先データの状態を継続的に追跡するためのデータをリポジトリで管理します。
+リポジトリに関するこのメタデータは、RawContacts、Data、Contacts の各テーブルの行、{@link android.provider.ContactsContract.Settings} テーブル、{@link android.provider.ContactsContract.SyncState} テーブルなど、さまざまな場所に格納されています。
+
+
+次の表に、各メタデータの効果を示します。
+
+</p>
+<p class="table-caption" id="table3">
+  <strong>表 3.</strong> 連絡先プロバイダに用意されているメタデータ</p>
+<table>
+    <tr>
+        <th scope="col">テーブル</th>
+        <th scope="col">列</th>
+        <th scope="col">値</th>
+        <th scope="col">意味</th>
+    </tr>
+    <tr>
+        <td rowspan="2">{@link android.provider.ContactsContract.RawContacts}</td>
+        <td rowspan="2">{@link android.provider.ContactsContract.SyncColumns#DIRTY}</td>
+        <td>「0」 - 前回の同期以降、変更はありません。</td>
+        <td rowspan="2">
+            端末上で変更があり、サーバーと同期する必要がある未加工連絡先をマークします。
+Android アプリケーションが行をアップデートすると、連絡先プロバイダによって値が自動的に設定されます。
+
+            <p>
+                未加工連絡先やデータのテーブルを変更する同期アダプタは、使用するコンテンツ URI の末尾に文字列 {@link android.provider.ContactsContract#CALLER_IS_SYNCADAPTER} を必ず追加してください。
+
+これにより、プロバイダが行をダーティとマークするのを防ぐことができます。
+                こうしないと、同期アダプタによる変更がローカルな変更と認識され、変更のソースがサーバーであるにもかかわらず、その変更がサーバーに送信されます。
+
+            </p>
+        </td>
+    </tr>
+    <tr>
+            <td>「1」 - 前回の同期以降に変更があり、サーバーへの同期が必要です。</td>
+    </tr>
+    <tr>
+        <td>{@link android.provider.ContactsContract.RawContacts}</td>
+        <td>{@link android.provider.ContactsContract.SyncColumns#VERSION}</td>
+        <td>この行のバージョン番号。</td>
+        <td>
+            この行またはその関連データが変更されるたび、連絡先プロバイダがこの値を自動的にインクリメントします。
+
+        </td>
+    </tr>
+    <tr>
+        <td>{@link android.provider.ContactsContract.Data}</td>
+        <td>{@link android.provider.ContactsContract.DataColumns#DATA_VERSION}</td>
+        <td>この行のバージョン番号。</td>
+        <td>
+            このデータ行が変更されるたび、連絡先プロバイダがこの値を自動的にインクリメントします。
+
+        </td>
+    </tr>
+    <tr>
+        <td>{@link android.provider.ContactsContract.RawContacts}</td>
+        <td>{@link android.provider.ContactsContract.SyncColumns#SOURCE_ID}</td>
+        <td>
+            この未加工連絡先をそれが作成されたアカウントと一意に結び付ける文字列値。
+
+        </td>
+        <td>
+            同期アダプタが新しい未加工連絡先を作成するたび、この列はその未加工連絡先に対するサーバーの一意の ID に設定される必要があります。
+Android アプリケーションが新しい未加工連絡先を作成した場合、そのアプリケーションはこの列を空欄のままにする必要があります。
+同期アダプタはこれを確認して、サーバー上に新しい未加工連絡先を作成し、{@link android.provider.ContactsContract.SyncColumns#SOURCE_ID} の値を取得します。
+
+
+            <p>
+                特に、ソース ID はアカウント タイプごとに<strong>一意</strong>で、同期中に安定している必要があります。
+
+            </p>
+                <ul>
+                    <li>
+                        Unique: アカウントの各未加工連絡先には独自のソース ID が必要です。これを強制しないと、連絡先アプリケーションに問題を引き起こすことになります。
+
+                        同じアカウント <em>タイプ</em>に対する 2 つの未加工連絡先が、同じソース ID を持つことがありえます。
+たとえば、アカウント {@code emily.dickinson@gmail.com} の未加工連絡先「Thomas Higginson」は、アカウント {@code emilyd@gmail.com} の未加工連絡先「Thomas Higginson」と同じソース ID を持つことができます。
+
+
+
+                    </li>
+                    <li>
+                        Stable: ソース ID は、未加工連絡先のオンライン サービス データにおいて変わらない部分です。
+たとえば、ユーザーが [アプリ] 設定から [連絡先ストレージ] を消去し、再同期したとしても、復元された未加工連絡先のソース ID は以前と同じになります。
+
+これを強制しないと、ショートカットが機能しなくなります。
+
+                    </li>
+                </ul>
+        </td>
+    </tr>
+    <tr>
+        <td rowspan="2">{@link android.provider.ContactsContract.Groups}</td>
+        <td rowspan="2">{@link android.provider.ContactsContract.GroupsColumns#GROUP_VISIBLE}</td>
+        <td>「0」 - このグループに属する連絡先が Android アプリケーションの UI に表示されなくなります。</td>
+        <td>
+            この列は、ユーザーが特定のグループに属する連絡先を非表示にすることを許可するサーバーに対して互換性を確保するために用意されています。
+
+        </td>
+    </tr>
+    <tr>
+        <td>「1」 - このグループに属する連絡先を Android アプリケーションの UI に表示できます。</td>
+    </tr>
+    <tr>
+        <td rowspan="2">{@link android.provider.ContactsContract.Settings}</td>
+        <td rowspan="2">
+            {@link android.provider.ContactsContract.SettingsColumns#UNGROUPED_VISIBLE}</td>
+        <td>
+            「0」 - このアカウントとアカウント タイプについて、グループに属さない連絡先は Android アプリケーションの UI に表示されなくなります。
+
+        </td>
+        <td rowspan="2">
+            デフォルトでは、グループに属する未加工連絡先がないなら連絡先は表示されません（未加工連絡先のグループ メンバーシップは、{@link android.provider.ContactsContract.Data} テーブルの 1 つないし複数の {@link android.provider.ContactsContract.CommonDataKinds.GroupMembership} 行によって示されます）。
+
+
+
+            あるアカウントとアカウント タイプについて、{@link android.provider.ContactsContract.Settings} テーブルの行でこのフラグを設定すると、グループのない連絡先を強制的に表示できます。
+
+            このフラグの用途の 1 つとして、グループを使用しないサーバーから連絡先を取得して表示することが考えられます。
+        </td>
+    </tr>
+    <tr>
+        <td>
+            「0」 - このアカウントとアカウント タイプについて、グループに属さない連絡先が Android アプリケーションの UI に表示されます。
+
+        </td>
+
+    </tr>
+    <tr>
+        <td>{@link android.provider.ContactsContract.SyncState}</td>
+        <td>（すべて）</td>
+        <td>
+            このテーブルを使用して、同期アダプタのメタデータを格納します。
+        </td>
+        <td>
+            このテーブルを使用すると、同期状態などの同期関連データを永続的に端末上に格納できます。
+
+        </td>
+    </tr>
+</table>
+<h2 id="Access">連絡先プロバイダへのアクセス</h2>
+<p>
+    このセクションでは、連絡先プロバイダからのデータにアクセスするためのガイドラインについて、以下に注目して説明します。
+
+</p>
+<ul>
+    <li>
+        エンティティ クエリ。
+    </li>
+    <li>
+        バッチ変更。
+    </li>
+    <li>
+        インテントを使用した取得と変更。
+    </li>
+    <li>
+        データ整合性。
+    </li>
+</ul>
+<p>
+    同期アダプタからの変更については、<a href="#SyncAdapters">連絡先プロバイダの同期アダプタ</a>でも詳しく説明しています。
+
+</p>
+<h3 id="Entities">エンティティのクエリ</h3>
+<p>
+    連絡先プロバイダのテーブルは階層構造になっており、ある行とその「子」の行すべてを取得すると便利なことがよくあります。
+たとえば、ある人に関するすべての情報を表示するために、{@link android.provider.ContactsContract.Contacts} 行 1 行に対するすべての {@link android.provider.ContactsContract.RawContacts} 行や、{@link android.provider.ContactsContract.RawContacts} 行 1 行に対するすべての {@link android.provider.ContactsContract.CommonDataKinds.Email} 行を取得することが考えられます。
+
+
+
+
+こうした処理をやりやすくするため、連絡先プロバイダには<strong>エンティティ</strong>構造が用意されています。これは、テーブル間でのデータベースの和集合のように機能します。
+
+
+</p>
+<p>
+    1 つのエンティティは、ある親テーブルとその子テーブルから選ばれた列からなるテーブルのようなものです。
+    エンティティをクエリする場合は、そのエンティティで使用できる列に基づいてプロジェクションと検索の条件を指定します。
+その結果が {@link android.database.Cursor} で、取得された各子テーブル行につき 1 行を含みます。
+たとえば、ある連絡先名と、その名前のすべての未加工連絡先の {@link android.provider.ContactsContract.CommonDataKinds.Email} 行について、{@link android.provider.ContactsContract.Contacts.Entity} をクエリすると、各 {@link android.provider.ContactsContract.CommonDataKinds.Email} 行につき 1 行を含む {@link android.database.Cursor} が得られます。
+
+
+
+
+</p>
+<p>
+    エンティティにより、クエリが簡素化されます。エンティティを使用することで、ある連絡先または未加工連絡先の連絡先データをすべて取得できるため、まず親テーブルにクエリして ID を取得し、次にその ID 使用して子テーブルにクエリする必要がありません。また、連絡先プロバイダは、エンティティに対するクエリを 1 回のトランザクションで処理することから、取得されたデータの内部的な整合性が保証されます。
+
+
+
+
+</p>
+<p class="note">
+    <strong>注:</strong> エンティティには通常、親テーブルと子テーブルのすべての列が含まれるわけではありません。
+そのエンティティの列名定数のリストにない列名に対して作業しようとすると、{@link java.lang.Exception} が発生します。
+
+</p>
+<p>
+    次のスニペットは、ある連絡先のすべての未加工連絡先を取得する方法を示しています。このスニペットは、「メイン」と「詳細」という 2 つのアクティビティを持つ、もっと大きなアプリケーションの一部です。
+メイン アクティビティは、連絡先の行の一覧を示します。ユーザーが 1 つを選択すると、このアクティビティはその ID を詳細アクティビティに送ります。
+
+詳細アクティビティは {@link android.provider.ContactsContract.Contacts.Entity} を使用して、選択した連絡先と関連付けられているすべての未加工連絡先から取得したすべてのデータ行を示します。
+
+
+</p>
+<p>
+    このスニペットは「詳細」アクティビティからの抜粋です。
+</p>
+<pre>
+...
+    /*
+     * Appends the entity path to the URI. In the case of the Contacts Provider, the
+     * expected URI is content://com.google.contacts/#/entity (# is the ID value).
+     */
+    mContactUri = Uri.withAppendedPath(
+            mContactUri,
+            ContactsContract.Contacts.Entity.CONTENT_DIRECTORY);
+
+    // Initializes the loader identified by LOADER_ID.
+    getLoaderManager().initLoader(
+            LOADER_ID,  // The identifier of the loader to initialize
+            null,       // Arguments for the loader (in this case, none)
+            this);      // The context of the activity
+
+    // Creates a new cursor adapter to attach to the list view
+    mCursorAdapter = new SimpleCursorAdapter(
+            this,                        // the context of the activity
+            R.layout.detail_list_item,   // the view item containing the detail widgets
+            mCursor,                     // the backing cursor
+            mFromColumns,                // the columns in the cursor that provide the data
+            mToViews,                    // the views in the view item that display the data
+            0);                          // flags
+
+    // Sets the ListView's backing adapter.
+    mRawContactList.setAdapter(mCursorAdapter);
+...
+&#64;Override
+public Loader&lt;Cursor&gt; onCreateLoader(int id, Bundle args) {
+
+    /*
+     * Sets the columns to retrieve.
+     * RAW_CONTACT_ID is included to identify the raw contact associated with the data row.
+     * DATA1 contains the first column in the data row (usually the most important one).
+     * MIMETYPE indicates the type of data in the data row.
+     */
+    String[] projection =
+        {
+            ContactsContract.Contacts.Entity.RAW_CONTACT_ID,
+            ContactsContract.Contacts.Entity.DATA1,
+            ContactsContract.Contacts.Entity.MIMETYPE
+        };
+
+    /*
+     * Sorts the retrieved cursor by raw contact id, to keep all data rows for a single raw
+     * contact collated together.
+     */
+    String sortOrder =
+            ContactsContract.Contacts.Entity.RAW_CONTACT_ID +
+            " ASC";
+
+    /*
+     * Returns a new CursorLoader. The arguments are similar to
+     * ContentResolver.query(), except for the Context argument, which supplies the location of
+     * the ContentResolver to use.
+     */
+    return new CursorLoader(
+            getApplicationContext(),  // The activity's context
+            mContactUri,              // The entity content URI for a single contact
+            projection,               // The columns to retrieve
+            null,                     // Retrieve all the raw contacts and their data rows.
+            null,                     //
+            sortOrder);               // Sort by the raw contact ID.
+}
+</pre>
+<p>
+    読み込みが完了すると、{@link android.app.LoaderManager} は {@link android.app.LoaderManager.LoaderCallbacks#onLoadFinished(Loader, D) onLoadFinished()} に対するコールバックを起動します。
+
+このメソッドへの入力引数の 1 つは、クエリの結果を含む {@link android.database.Cursor} です。
+独自アプリでは、データをこの {@link android.database.Cursor} から取得して表示したりさらに処理したりできます。
+
+</p>
+<h3 id="Transactions">バッチ変更</h3>
+<p>
+    可能であれば必ず、連絡先プロバイダのデータを「バッチモード」で挿入、アップデート、削除してください。そのためには、{@link android.content.ContentProviderOperation} オブジェクトの {@link java.util.ArrayList} を作成し、{@link android.content.ContentResolver#applyBatch(String, ArrayList) applyBatch()} を呼び出します。
+
+
+連絡先プロバイダはすべての操作を 1 つのトランザクションの 1 つの {@link android.content.ContentResolver#applyBatch(String, ArrayList) applyBatch()} で行うため、変更内容が連絡先リポジトリで不整合のままになることは決してありません。
+
+
+
+また、バッチ変更では、未加工連絡先とその詳細データを同時に挿入しやすくなっています。
+
+</p>
+<p class="note">
+    <strong>注:</strong> <em>1 つ</em>の未加工連絡先を変更する場合は、変更を独自アプリ内で処理するのではなく、インテントを端末の連絡先アプリケーションに送信することを検討してください。この方法については、<a href="#Intents">インテントを使用した取得と変更</a>で詳しく説明しています。
+
+
+
+</p>
+<h4>明け渡し点</h4>
+<p>
+    多数の操作を伴うバッチ変更は、他のプロセスをブロックしてユーザーにとっての全体的な使用感を悪化させかねません。
+意図したすべての変更をできるだけ少ない個別リストに整理するとともに、それらがシステムをブロックしないようにするために、1 つまたは複数の操作に<strong>明け渡し点</strong>を設定してください。
+
+
+    明け渡し点の実体は、{@link android.content.ContentProviderOperation#isYieldAllowed()} の値が <code>true</code> に設定された {@link android.content.ContentProviderOperation} オブジェクトです。
+
+連絡先プロバイダが明け渡し点に遭遇すると、作業を一時中断して他のプロセスを実行させ、現在のトランザクションをクローズします。
+作業を再開した連絡先プロバイダは、{@link java.util.ArrayList} に含まれている次の操作を行い、新しいトランザクションを始めます。
+
+
+</p>
+<p>
+    明け渡し点により、{@link android.content.ContentResolver#applyBatch(String, ArrayList) applyBatch()} の呼び出し 1 回につき複数のトランザクションが発生します。
+そのため、明け渡し点は 1 組の関連する行への最後の操作に設定してください。
+
+    たとえば、未加工連絡先の行とその関連データ行を追加する一連の操作の最後に、あるいは 1 人の連絡先に関連する 1 組の行に対する最後の操作に、明け渡し点を設定します。
+
+
+</p>
+<p>
+    明け渡し点は、アトミック操作の単位でもあります。2 つの明け渡し点間のすべてのアクセスは、1 つのまとまりとして成功または失敗します。
+明け渡し点を設定しない場合、最小のアトミック操作は操作のバッチ全体になります。
+明け渡し点を使用すると、操作がシステムのパフォーマンスを低下させるのを防ぐと同時に、操作の一部分が確実にアトミックになります。
+
+
+</p>
+<h4>変更の後方参照</h4>
+<p>
+    新しい未加工連絡先の行とその関連データの行を 1 組の {@link android.content.ContentProviderOperation} オブジェクトとして挿入している場合は、データの行を未加工連絡先の行にリンクする必要があります。そのためには、未加工連絡先の {@code android.provider.BaseColumns#_ID} 値を {@link android.provider.ContactsContract.DataColumns#RAW_CONTACT_ID} 値として挿入します。
+
+
+
+ただし、この値は、データの行のために{@link android.content.ContentProviderOperation} を作成している間は使用できません。未加工連絡先に {@link android.content.ContentProviderOperation} 操作がまだ適用されていないからです。
+
+
+これを回避するため、{@link android.content.ContentProviderOperation.Builder} クラスにはメソッド {@link android.content.ContentProviderOperation.Builder#withValueBackReference(String, int) withValueBackReference()} が用意されています。
+
+
+    このメソッドを使用すると、前の操作の結果を使用して列を挿入または変更できます。
+
+</p>
+<p>
+    {@link android.content.ContentProviderOperation.Builder#withValueBackReference(String, int) withValueBackReference()} メソッドには引数が 2 つあります。
+
+</p>
+    <dl>
+        <dt>
+            <code>key</code>
+        </dt>
+        <dd>
+            キーと値のペアのキーです。この引数の値は、変更中のテーブルに含まれる列であることが必要です。
+
+        </dd>
+        <dt>
+            <code>previousResult</code>
+        </dt>
+        <dd>
+            {@link android.content.ContentResolver#applyBatch(String, ArrayList) applyBatch()} から取得した {@link android.content.ContentProviderResult} オブジェクトの配列に含まれる値の、0 ベースのインデックスです。
+
+バッチ操作が適用されると、各操作の結果は結果用の中間配列に格納されます。
+
+<code>previousResult</code> 値はそうした結果の 1 つのインデックスで、<code>key</code> 値を使用して取得され、格納されます。
+
+これにより、新しい未加工連絡先レコードを挿入してその {@code android.provider.BaseColumns#_ID} 値に戻り、次に {@link android.provider.ContactsContract.Data} 行を追加するときにその値を「後方参照」できます。
+
+
+            <p>
+                {@link android.content.ContentResolver#applyBatch(String, ArrayList) applyBatch()} を初めて呼び出すと、指定した {@link android.content.ContentProviderOperation} オブジェクトの {@link java.util.ArrayList} と同じサイズを使用して、結果配列全体が作成されます。
+
+
+ただし、結果配列に含まれるすべての要素は <code>null</code> に設定され、そのためまだ適用されていない操作から結果を後方参照しようとすると {@link android.content.ContentProviderOperation.Builder#withValueBackReference(String, int) withValueBackReference()} が {@link java.lang.Exception} をスローします。
+
+
+
+
+
+            </p>
+        </dd>
+    </dl>
+<p>
+    次のスニペットは、新しい未加工連絡先とデータをバッチで挿入する方法を示しています。その中には、明け渡し点を指定し、後方参照を使用するコードが含まれています。
+これらのスニペットは、<code><a href="{@docRoot}resources/samples/ContactManager/index.html">
+    Contact Manager</a></code> サンプル アプリケーションの <code>ContactAdder</code> クラスの一部である <code>createContacEntry()</code> メソッドの拡張版です。
+
+
+
+</p>
+<p>
+    最初のスニペットは、連絡先データを UI から取得します。この時点で、ユーザーは新しい未加工連絡先の追加先となるアカウントを既に選択してあります。
+
+</p>
+<pre>
+// Creates a contact entry from the current UI values, using the currently-selected account.
+protected void createContactEntry() {
+    /*
+     * Gets values from the UI
+     */
+    String name = mContactNameEditText.getText().toString();
+    String phone = mContactPhoneEditText.getText().toString();
+    String email = mContactEmailEditText.getText().toString();
+
+    int phoneType = mContactPhoneTypes.get(
+            mContactPhoneTypeSpinner.getSelectedItemPosition());
+
+    int emailType = mContactEmailTypes.get(
+            mContactEmailTypeSpinner.getSelectedItemPosition());
+</pre>
+<p>
+    次のスニペットは、未加工連絡先の行を {@link android.provider.ContactsContract.RawContacts} テーブルに挿入する操作を作成します。
+
+</p>
+<pre>
+    /*
+     * Prepares the batch operation for inserting a new raw contact and its data. Even if
+     * the Contacts Provider does not have any data for this person, you can't add a Contact,
+     * only a raw contact. The Contacts Provider will then add a Contact automatically.
+     */
+
+     // Creates a new array of ContentProviderOperation objects.
+    ArrayList&lt;ContentProviderOperation&gt; ops =
+            new ArrayList&lt;ContentProviderOperation&gt;();
+
+    /*
+     * Creates a new raw contact with its account type (server type) and account name
+     * (user's account). Remember that the display name is not stored in this row, but in a
+     * StructuredName data row. No other data is required.
+     */
+    ContentProviderOperation.Builder op =
+            ContentProviderOperation.newInsert(ContactsContract.RawContacts.CONTENT_URI)
+            .withValue(ContactsContract.RawContacts.ACCOUNT_TYPE, mSelectedAccount.getType())
+            .withValue(ContactsContract.RawContacts.ACCOUNT_NAME, mSelectedAccount.getName());
+
+    // Builds the operation and adds it to the array of operations
+    ops.add(op.build());
+</pre>
+<p>
+    次に、表示名、電話、メールのデータ行を作成します。
+</p>
+<p>
+    操作の各ビルダー オブジェクトは、{@link android.content.ContentProviderOperation.Builder#withValueBackReference(String, int) withValueBackReference()} を使用して {@link android.provider.ContactsContract.DataColumns#RAW_CONTACT_ID} を取得します。
+
+
+この参照が最初の操作からの {@link android.content.ContentProviderResult} オブジェクトを後方参照しており、それが未加工連絡先の行を追加し、新しい {@code android.provider.BaseColumns#_ID} 値を返します。
+
+
+その結果、各データ行はその {@link android.provider.ContactsContract.DataColumns#RAW_CONTACT_ID} によって、属する新しい {@link android.provider.ContactsContract.RawContacts} 行に自動的にリンクされます。
+
+
+</p>
+<p>
+    メール行を追加する {@link android.content.ContentProviderOperation.Builder} オブジェクトは、明け渡し点を設定する {@link android.content.ContentProviderOperation.Builder#withYieldAllowed(boolean) withYieldAllowed()} でフラグ付けされます。
+
+
+</p>
+<pre>
+    // Creates the display name for the new raw contact, as a StructuredName data row.
+    op =
+            ContentProviderOperation.newInsert(ContactsContract.Data.CONTENT_URI)
+            /*
+             * withValueBackReference sets the value of the first argument to the value of
+             * the ContentProviderResult indexed by the second argument. In this particular
+             * call, the raw contact ID column of the StructuredName data row is set to the
+             * value of the result returned by the first operation, which is the one that
+             * actually adds the raw contact row.
+             */
+            .withValueBackReference(ContactsContract.Data.RAW_CONTACT_ID, 0)
+
+            // Sets the data row's MIME type to StructuredName
+            .withValue(ContactsContract.Data.MIMETYPE,
+                    ContactsContract.CommonDataKinds.StructuredName.CONTENT_ITEM_TYPE)
+
+            // Sets the data row's display name to the name in the UI.
+            .withValue(ContactsContract.CommonDataKinds.StructuredName.DISPLAY_NAME, name);
+
+    // Builds the operation and adds it to the array of operations
+    ops.add(op.build());
+
+    // Inserts the specified phone number and type as a Phone data row
+    op =
+            ContentProviderOperation.newInsert(ContactsContract.Data.CONTENT_URI)
+            /*
+             * Sets the value of the raw contact id column to the new raw contact ID returned
+             * by the first operation in the batch.
+             */
+            .withValueBackReference(ContactsContract.Data.RAW_CONTACT_ID, 0)
+
+            // Sets the data row's MIME type to Phone
+            .withValue(ContactsContract.Data.MIMETYPE,
+                    ContactsContract.CommonDataKinds.Phone.CONTENT_ITEM_TYPE)
+
+            // Sets the phone number and type
+            .withValue(ContactsContract.CommonDataKinds.Phone.NUMBER, phone)
+            .withValue(ContactsContract.CommonDataKinds.Phone.TYPE, phoneType);
+
+    // Builds the operation and adds it to the array of operations
+    ops.add(op.build());
+
+    // Inserts the specified email and type as a Phone data row
+    op =
+            ContentProviderOperation.newInsert(ContactsContract.Data.CONTENT_URI)
+            /*
+             * Sets the value of the raw contact id column to the new raw contact ID returned
+             * by the first operation in the batch.
+             */
+            .withValueBackReference(ContactsContract.Data.RAW_CONTACT_ID, 0)
+
+            // Sets the data row's MIME type to Email
+            .withValue(ContactsContract.Data.MIMETYPE,
+                    ContactsContract.CommonDataKinds.Email.CONTENT_ITEM_TYPE)
+
+            // Sets the email address and type
+            .withValue(ContactsContract.CommonDataKinds.Email.ADDRESS, email)
+            .withValue(ContactsContract.CommonDataKinds.Email.TYPE, emailType);
+
+    /*
+     * Demonstrates a yield point. At the end of this insert, the batch operation's thread
+     * will yield priority to other threads. Use after every set of operations that affect a
+     * single contact, to avoid degrading performance.
+     */
+    op.withYieldAllowed(true);
+
+    // Builds the operation and adds it to the array of operations
+    ops.add(op.build());
+</pre>
+<p>
+    最後のスニペットは、新しい未加工連絡先とデータ行を挿入する {@link android.content.ContentResolver#applyBatch(String, ArrayList) applyBatch()} を呼び出しています。
+
+
+</p>
+<pre>
+    // Ask the Contacts Provider to create a new contact
+    Log.d(TAG,"Selected account: " + mSelectedAccount.getName() + " (" +
+            mSelectedAccount.getType() + ")");
+    Log.d(TAG,"Creating contact: " + name);
+
+    /*
+     * Applies the array of ContentProviderOperation objects in batch. The results are
+     * discarded.
+     */
+    try {
+
+            getContentResolver().applyBatch(ContactsContract.AUTHORITY, ops);
+    } catch (Exception e) {
+
+            // Display a warning
+            Context ctx = getApplicationContext();
+
+            CharSequence txt = getString(R.string.contactCreationFailure);
+            int duration = Toast.LENGTH_SHORT;
+            Toast toast = Toast.makeText(ctx, txt, duration);
+            toast.show();
+
+            // Log exception
+            Log.e(TAG, "Exception encountered while inserting contact: " + e);
+    }
+}
+</pre>
+<p>
+    バッチ処理を使用すると、<strong>楽観的並行性制御</strong>を実装できます。これは、背後のリポジトリをロックする必要なく変更トランザクションを適用する手法です。
+
+    この手法を使用するには、トランザクションを適用してから、同時に行うことのできる可能性のある他の変更をチェックします。
+一貫性のない変更が発生していることがわかった場合は、トランザクションをロールバックしてやり直します。
+
+</p>
+<p>
+    楽観的並行性制御は、一度に使用するユーザーが 1 人でデータリポジトリへの同時アクセスがまれなモバイル端末に便利です。
+ロックが使用されないため、ロックの設定や他のトランザクションによるロックの解放待ちで時間を無駄にしません。
+
+</p>
+<p>
+    {@link android.provider.ContactsContract.RawContacts} 行を 1 行更新している間に楽観的並行性制御を使用する方法は次のとおりです。
+
+</p>
+<ol>
+    <li>
+        取得する他のデータとともに、未加工連絡先の {@link android.provider.ContactsContract.SyncColumns#VERSION} 列を取得します。
+
+    </li>
+    <li>
+        制約を強制するのに適した {@link android.content.ContentProviderOperation.Builder} オブジェクトを、メソッド {@link android.content.ContentProviderOperation#newAssertQuery(Uri)} を使用して作成します。
+
+コンテンツ URI に、未加工連絡先の {@code android.provider.BaseColumns#_ID} が末尾に追加された {@link android.provider.ContactsContract.RawContacts#CONTENT_URI RawContacts.CONTENT_URI} を使用します。
+
+
+
+    </li>
+    <li>
+        {@link android.content.ContentProviderOperation.Builder} オブジェクトに対し、{@link android.content.ContentProviderOperation.Builder#withValue(String, Object) withValue()} を呼び出して、{@link android.provider.ContactsContract.SyncColumns#VERSION} 列と取得したばかりのバージョン番号を比較します。
+
+
+
+    </li>
+    <li>
+        同じ {@link android.content.ContentProviderOperation.Builder} に対し、{@link android.content.ContentProviderOperation.Builder#withExpectedCount(int) withExpectedCount()} を呼び出して、このアサーションで 1 行だけがテストされるようにします。
+
+
+    </li>
+    <li>
+        {@link android.content.ContentProviderOperation.Builder#build()} を呼び出して {@link android.content.ContentProviderOperation} オブジェクトを作成し、次のこのオブジェクトを {@link android.content.ContentResolver#applyBatch(String, ArrayList) applyBatch()} に渡す {@link java.util.ArrayList} に先頭オブジェクトとして追加します。
+
+
+
+    </li>
+    <li>
+        バッチトランザクションを適用します。
+    </li>
+</ol>
+<p>
+    目的の未加工連絡先の行が、行の読み込みからその変更の試行までの間に別の操作によってアップデートされた場合、{@link android.content.ContentProviderOperation} の「アサート」が失敗し、操作のバッチ全体がバックアウトされます。
+
+バックアウトが終わったら、バッチをやり直すこと、または他のアクションを行うことができます。
+
+</p>
+<p>
+    次のスニペットは、{@link android.content.CursorLoader} を使用して未加工連絡先を 1 つクエリした後に、{@link android.content.ContentProviderOperation} を「アサート」します。
+
+
+</p>
+<pre>
+/*
+ * The application uses CursorLoader to query the raw contacts table. The system calls this method
+ * when the load is finished.
+ */
+public void onLoadFinished(Loader&lt;Cursor&gt; loader, Cursor cursor) {
+
+    // Gets the raw contact's _ID and VERSION values
+    mRawContactID = cursor.getLong(cursor.getColumnIndex(BaseColumns._ID));
+    mVersion = cursor.getInt(cursor.getColumnIndex(SyncColumns.VERSION));
+}
+
+...
+
+// Sets up a Uri for the assert operation
+Uri rawContactUri = ContentUris.withAppendedId(RawContacts.CONTENT_URI, mRawContactID);
+
+// Creates a builder for the assert operation
+ContentProviderOperation.Builder assertOp = ContentProviderOperation.netAssertQuery(rawContactUri);
+
+// Adds the assertions to the assert operation: checks the version and count of rows tested
+assertOp.withValue(SyncColumns.VERSION, mVersion);
+assertOp.withExpectedCount(1);
+
+// Creates an ArrayList to hold the ContentProviderOperation objects
+ArrayList ops = new ArrayList&lt;ContentProviderOperationg&gt;;
+
+ops.add(assertOp.build());
+
+// You would add the rest of your batch operations to "ops" here
+
+...
+
+// Applies the batch. If the assert fails, an Exception is thrown
+try
+    {
+        ContentProviderResult[] results =
+                getContentResolver().applyBatch(AUTHORITY, ops);
+
+    } catch (OperationApplicationException e) {
+
+        // Actions you want to take if the assert operation fails go here
+    }
+</pre>
+<h3 id="Intents">インテントを使用した取得と変更</h3>
+<p>
+    インテントを端末の連絡先アプリケーションに送信すると、連絡先プロバイダに間接的にアクセスできます。
+インテントが端末の連絡先アプリケーション UI を起動し、ユーザーはそこで連絡先関連の作業を行えます。
+このタイプのアクセスで、ユーザーは次の作業ができます。
+    <ul>
+        <li>連絡先をリストから選び、アプリケーションに返してさらに作業する。</li>
+        <li>既存の連絡先データを編集する。</li>
+        <li>任意のアカウントに新しい未加工連絡先を挿入する。</li>
+        <li>連絡先または連絡先データを削除する。</li>
+    </ul>
+<p>
+    ユーザーがデータを挿入またはアップデートしている場合は、まずデータを収集し、次にそれをインテントの一部として送信できます。
+
+</p>
+<p>
+    インテントを使用して端末の連絡先アプリケーション経由で連絡先プロバイダにアクセスする場合、連絡先プロバイダにアクセスするための独自の UI やコードを作成する必要はありません。
+また、連絡先プロバイダに対する読み取りや書き込みのパーミッションを要求する必要もありません。
+端末の連絡先アプリケーションは、連絡先に対する読み取りパーミッションをデリゲートできます。また、連絡先プロバイダへの変更を他のアプリケーション経由で行っていることから、書き込みパーミッションは不要です。
+
+
+</p>
+<p>
+    プロバイダにアクセスするためのインテントを送信する汎用プロセスについては、<a href="{@docRoot}guide/topics/providers/content-provider-basics.html">コンテンツ プロバイダの基本</a>のセクション「インテント経由のデータアクセス」で詳しく説明しています。
+
+表 4 に、利用可能なタスクで使用できるアクション、MIME タイプ、データ値をまとめます。{@link android.content.Intent#putExtra(String, String) putExtra()} で使用できるエクストラ値については、{@link android.provider.ContactsContract.Intents.Insert} のリファレンス ドキュメントに一覧があります。
+
+
+
+
+</p>
+<p class="table-caption" id="table4">
+  <strong>表 4.</strong> 連絡先プロバイダのインテント
+</p>
+<table style="width:75%">
+    <tr>
+        <th scope="col" style="width:10%">タスク</th>
+        <th scope="col" style="width:5%">アクション</th>
+        <th scope="col" style="width:10%">データ</th>
+        <th scope="col" style="width:10%">MIME タイプ</th>
+        <th scope="col" style="width:25%">注</th>
+    </tr>
+    <tr>
+        <td><strong>連絡先をリストから選ぶ</strong></td>
+        <td>{@link android.content.Intent#ACTION_PICK}</td>
+        <td>
+            次のどれかです。
+            <ul>
+                <li>
+{@link android.provider.ContactsContract.Contacts#CONTENT_URI Contacts.CONTENT_URI}。連絡先のリストを表示します。
+
+                </li>
+                <li>
+{@link android.provider.ContactsContract.CommonDataKinds.Phone#CONTENT_URI Phone.CONTENT_URI}。未加工連絡先の電話番号のリストを表示します。
+
+                </li>
+                <li>
+{@link android.provider.ContactsContract.CommonDataKinds.StructuredPostal#CONTENT_URI StructuredPostal.CONTENT_URI}。未加工連絡先の住所のリストを表示します。
+
+
+                </li>
+                <li>
+{@link android.provider.ContactsContract.CommonDataKinds.Email#CONTENT_URI Email.CONTENT_URI}。未加工連絡先のメールアドレスのリストを表示します。
+
+                </li>
+            </ul>
+        </td>
+        <td>
+            使用せず
+        </td>
+        <td>
+            指定したコンテンツ URI のタイプに応じて、未加工連絡先のリストか、未加工連絡先から取得されたデータのリストを表示します。
+
+            <p>
+                {@link android.app.Activity#startActivityForResult(Intent, int) startActivityForResult()} を呼び出してください。それにより、選択した行のコンテンツ URI が返されます。
+
+URI の形式は、テーブルのコンテンツ URI の末尾にその行の <code>LOOKUP_ID</code> が追加されたものです。
+
+                端末の連絡先アプリは、このアクティビティの実行中を通して、読み取りと書き込みのパーミッションをこのコンテンツ URI にデリゲートします。
+詳しくは、「<a href="{@docRoot}guide/topics/providers/content-provider-basics.html">コンテンツ プロバイダの基本</a>」をご覧ください。
+
+
+            </p>
+        </td>
+    </tr>
+    <tr>
+        <td><strong>新しい未加工連絡先を挿入する</strong></td>
+        <td>{@link android.provider.ContactsContract.Intents.Insert#ACTION Insert.ACTION}</td>
+        <td>該当せず</td>
+        <td>
+            {@link android.provider.ContactsContract.RawContacts#CONTENT_TYPE RawContacts.CONTENT_TYPE}。未加工連絡先のセットに対する MIME タイプです。
+
+        </td>
+        <td>
+            端末の連絡先アプリケーションの [<strong>連絡先の追加</strong>] 画面を表示します。インテントに追加したエクストラ値が表示されます。
+{@link android.app.Activity#startActivityForResult(Intent, int) startActivityForResult()} を使用して送信すると、新たに追加された未加工連絡先の URI が、アクティビティの {@link android.app.Activity#onActivityResult(int, int, Intent) onActivityResult()} コールバック メソッドの {@link android.content.Intent} 引数の「data」フィールドに格納されて戻ってきます。
+
+
+
+
+この値を取得するには、{@link android.content.Intent#getData()} を呼び出します。
+        </td>
+    </tr>
+    <tr>
+        <td><strong>連絡先を編集する</strong></td>
+        <td>{@link android.content.Intent#ACTION_EDIT}</td>
+        <td>
+            連絡先の {@link android.provider.ContactsContract.Contacts#CONTENT_LOOKUP_URI}。
+エディタ アクティビティを使用すると、ユーザーがその連絡先に関連付けられている任意のデータを編集できます。
+
+        </td>
+        <td>
+            {@link android.provider.ContactsContract.Contacts#CONTENT_ITEM_TYPE Contacts.CONTENT_ITEM_TYPE}。1 つの連絡先です。
+</td>
+        <td>
+            連絡先アプリケーションに連絡先の編集画面を表示します。インテントに追加したエクストラ値が表示されます。
+ユーザーが [<strong>完了</strong>] をタップして編集内容を保存すると、アクティビティがフォアグラウンドに戻ります。
+
+        </td>
+    </tr>
+    <tr>
+        <td><strong>ピッカー（やはりデータを追加できる）を表示する。</strong></td>
+        <td>{@link android.content.Intent#ACTION_INSERT_OR_EDIT}</td>
+        <td>
+            該当せず
+        </td>
+        <td>
+            {@link android.provider.ContactsContract.Contacts#CONTENT_ITEM_TYPE}
+        </td>
+         <td>
+            このインテントは、連絡先アプリのピッカー画面を常に表示します。ユーザーは、編集する連絡先を選ぶか、新しい連絡先を追加できます。
+ユーザーの選択に応じて編集画面か追加画面が開き、インテントに含めて渡したエクストラ データが表示されます。
+
+メールアドレスや電話番号などの連絡先データを独自アプリに表示する場合は、このインテントを使用すると、ユーザーが既存の連絡先にデータを追加できます。
+
+
+            <p class="note">
+                <strong>注:</strong> このインテントのエクストラで名前の値を送信する必要はありません。ユーザーは必ず既存の名前を選ぶか新しい名前を追加するからです。
+そのうえ、アプリが名前を送信し、ユーザーが編集することを選んだ場合、連絡先アプリは送信した名前を表示し、以前の値を上書きします。
+
+ユーザーがこのことに気付かず、編集内容を保存すると、以前の値が失われます。
+
+            </p>
+         </td>
+    </tr>
+</table>
+<p>
+    端末の連絡先アプリは、インテントを使用して未加工連絡先や任意のデータを削除することを許可しません。
+そのため、未加工連絡先を削除するには {@link android.content.ContentResolver#delete(Uri, String, String[]) ContentResolver.delete()} または {@link android.content.ContentProviderOperation#newDelete(Uri) ContentProviderOperation.newDelete()} を使用してください。
+
+
+
+</p>
+<p>
+    次のスニペットは、新しい未加工連絡先とデータをバッチで挿入するインテントをコンストラクトして送信する方法を示しています。
+
+</p>
+<pre>
+// Gets values from the UI
+String name = mContactNameEditText.getText().toString();
+String phone = mContactPhoneEditText.getText().toString();
+String email = mContactEmailEditText.getText().toString();
+
+String company = mCompanyName.getText().toString();
+String jobtitle = mJobTitle.getText().toString();
+
+// Creates a new intent for sending to the device's contacts application
+Intent insertIntent = new Intent(ContactsContract.Intents.Insert.ACTION);
+
+// Sets the MIME type to the one expected by the insertion activity
+insertIntent.setType(ContactsContract.RawContacts.CONTENT_TYPE);
+
+// Sets the new contact name
+insertIntent.putExtra(ContactsContract.Intents.Insert.NAME, name);
+
+// Sets the new company and job title
+insertIntent.putExtra(ContactsContract.Intents.Insert.COMPANY, company);
+insertIntent.putExtra(ContactsContract.Intents.Insert.JOB_TITLE, jobtitle);
+
+/*
+ * Demonstrates adding data rows as an array list associated with the DATA key
+ */
+
+// Defines an array list to contain the ContentValues objects for each row
+ArrayList&lt;ContentValues&gt; contactData = new ArrayList&lt;ContentValues&gt;();
+
+
+/*
+ * Defines the raw contact row
+ */
+
+// Sets up the row as a ContentValues object
+ContentValues rawContactRow = new ContentValues();
+
+// Adds the account type and name to the row
+rawContactRow.put(ContactsContract.RawContacts.ACCOUNT_TYPE, mSelectedAccount.getType());
+rawContactRow.put(ContactsContract.RawContacts.ACCOUNT_NAME, mSelectedAccount.getName());
+
+// Adds the row to the array
+contactData.add(rawContactRow);
+
+/*
+ * Sets up the phone number data row
+ */
+
+// Sets up the row as a ContentValues object
+ContentValues phoneRow = new ContentValues();
+
+// Specifies the MIME type for this data row (all data rows must be marked by their type)
+phoneRow.put(
+        ContactsContract.Data.MIMETYPE,
+        ContactsContract.CommonDataKinds.Phone.CONTENT_ITEM_TYPE
+);
+
+// Adds the phone number and its type to the row
+phoneRow.put(ContactsContract.CommonDataKinds.Phone.NUMBER, phone);
+
+// Adds the row to the array
+contactData.add(phoneRow);
+
+/*
+ * Sets up the email data row
+ */
+
+// Sets up the row as a ContentValues object
+ContentValues emailRow = new ContentValues();
+
+// Specifies the MIME type for this data row (all data rows must be marked by their type)
+emailRow.put(
+        ContactsContract.Data.MIMETYPE,
+        ContactsContract.CommonDataKinds.Email.CONTENT_ITEM_TYPE
+);
+
+// Adds the email address and its type to the row
+emailRow.put(ContactsContract.CommonDataKinds.Email.ADDRESS, email);
+
+// Adds the row to the array
+contactData.add(emailRow);
+
+/*
+ * Adds the array to the intent's extras. It must be a parcelable object in order to
+ * travel between processes. The device's contacts app expects its key to be
+ * Intents.Insert.DATA
+ */
+insertIntent.putParcelableArrayListExtra(ContactsContract.Intents.Insert.DATA, contactData);
+
+// Send out the intent to start the device's contacts app in its add contact activity.
+startActivity(insertIntent);
+</pre>
+<h3 id="DataIntegrity">データの整合性</h3>
+<p>
+    連絡先リポジトリにはユーザーによる修正や更新が予想される重要で秘密性の高いデータが格納されるため、連絡先プロバイダにはデータの整合性に関して明確に定義されたルールがあります。
+連絡先データを変更する際にこれらのルールを守ることは、開発側の責任です。
+ここでは、重要なルールを示します。
+
+</p>
+<dl>
+    <dt>
+        {@link android.provider.ContactsContract.CommonDataKinds.StructuredName} 行を、追加する {@link android.provider.ContactsContract.RawContacts} 行ごとに必ず追加してください。
+
+    </dt>
+    <dd>
+        {@link android.provider.ContactsContract.Data} テーブルに {@link android.provider.ContactsContract.CommonDataKinds.StructuredName} 行のない {@link android.provider.ContactsContract.RawContacts} 行は、集約中に問題を引き起こすことがあります。
+
+
+
+    </dd>
+    <dt>
+        新しい {@link android.provider.ContactsContract.Data} 行を、その親 {@link android.provider.ContactsContract.RawContacts} 行に必ずリンクしてください。
+
+    </dt>
+    <dd>
+        {@link android.provider.ContactsContract.RawContacts} にリンクされていない {@link android.provider.ContactsContract.Data} 行は端末の連絡先アプリケーションで可視にならず、同期アダプタで問題になることがあります。
+
+
+    </dd>
+    <dt>
+        変更するのは、所有する未加工連絡先のデータに限ってください。
+    </dt>
+    <dd>
+        通常、連絡先プロバイダは複数の異なるアカウント タイプやオンライン サービスから取得したデータを管理しています。
+そのため、アプリケーションが所有しているデータのみ変更または削除されるようにし、アプリケーションが管理しているアカウント タイプとアカウント名のデータのみ挿入するようにすることが必要です。
+
+
+    </dd>
+    <dt>
+        権限、コンテンツ URI、URI パス、列名、MIME タイプ、{@link android.provider.ContactsContract.CommonDataKinds.CommonColumns#TYPE} 値については、{@link android.provider.ContactsContract} とそのサブクラスに定義されている定数を必ず使用してください。
+
+
+    </dt>
+    <dd>
+        そのような定数を使用することがエラーの予防に役立ちます。また、使われなくなった定数があれば、コンパイラーから警告として通知されます。
+
+    </dd>
+</dl>
+<h3 id="CustomData">カスタムデータ行</h3>
+<p>
+    独自のカスタム MIME タイプを作成して使用すると、{@link android.provider.ContactsContract.Data} テーブルで独自データ行を挿入、編集、削除、取得できます。
+独自行で使用できるのは {@link android.provider.ContactsContract.DataColumns} に定義された列だけですが、独自タイプに固有の列名をデフォルトの列名にマッピングできます。
+
+
+端末の連絡先アプリケーションで、独自行のデータは表示されますが、編集または削除はできず、ユーザーはデータの追加ができません。
+
+ユーザーがカスタムデータ行を変更できるようにするには、独自のアプリケーションでエディタ アクティビティを提供する必要があります。
+
+</p>
+<p>
+    カスタムデータを表示するには、1 つの <code>&lt;ContactsAccountType&gt;</code> 要素と 1 つまたは複数の <code>&lt;ContactsDataKind&gt;</code> 子要素を含む <code>contacts.xml</code> ファイルを提供します。
+
+詳しくは、<a href="#SocialStreamDataKind"><code>&lt;ContactsDataKind&gt; element</code></a>に関するセクションで説明しています。
+
+</p>
+<p>
+    カスタム MIME タイプについて詳しくは、「<a href="{@docRoot}guide/topics/providers/content-provider-creating.html">コンテンツ プロバイダの作成</a>」をご覧ください。
+
+
+</p>
+<h2 id="SyncAdapters">連絡先プロバイダの同期アダプタ</h2>
+<p>
+    連絡先プロバイダは、特に端末とオンライン サービスとの間における連絡先データの<strong>同期</strong>を処理するために設計されています。
+これを使用することで、ユーザーは既存のデータを新しい端末にダウンロードしたり、既存のデータを新しいアカウントにアップロードしたりできています。
+
+    また、同期によって、追加や変更のソースに関係なく、ユーザーは最新データを入手できます。
+同期の利点としては他にも、端末がネットワークに接続されていなくても連絡先データを使用できるようになることが挙げられます。
+
+</p>
+<p>
+    同期はさまざまな手法で実装できますが、Android システムでは次のタスクを自動化するプラグイン同期フレームワークを提供しています。
+
+    <ul>
+
+    <li>
+        ネットワークの可用性のチェック。
+    </li>
+    <li>
+        ユーザーのプリファレンスに基づく同期のスケジュールと実施。
+    </li>
+    <li>
+        停止された同期の再開。
+    </li>
+    </ul>
+<p>
+    このフレームワークを使用するには、同期アダプタ プラグインを提供する必要があります。各同期アダプタはサービスと連絡先プロバイダに対して一意ですが、同じサービスに対して複数のアカウント名を処理できます。
+また、このフレームワークでは同じサービスとプロバイダに対して複数の同期アダプタが可能です。
+
+</p>
+<h3 id="SyncClassesFiles">同期アダプタのクラスとファイル</h3>
+<p>
+    同期アダプタは、{@link android.content.AbstractThreadedSyncAdapter} のサブクラスとして実装し、Android アプリケーションの一部としてインストールします。
+
+システムは同期アダプタに関する知識を、アプリケーション マニフェストの要素からと、マニフェストが指す専用の XML ファイルから取得します。
+この XML ファイルは、オンライン サービスのアカウント タイプと連絡先プロバイダに絡む権限を定義しており、この組み合わせでアダプタを一意に識別します。
+
+同期アダプタは、ユーザーが同期アダプタのアカウント タイプに対してアカウントを追加し、同期アダプタの同期対象である連絡先プロバイダで同期を有効にすることで、アクティブになります。
+
+この時点で、システムはアダプタの管理を開始し、連絡先プロバイダとサーバーとの同期が必要になるとそれを呼び出します。
+
+</p>
+<p class="note">
+    <strong>注:</strong> アカウント タイプを同期アダプタの識別の一環として使用することにより、システムは同じ組織から異なるサービスにアクセスする同期アダプタを検出してグループ化できます。
+
+たとえば、Google オンライン サービス用の同期アダプタでは、すべて同じアカウント タイプ <code>com.google</code> です。
+ユーザーが Google アカウントを端末に追加すると、Google サービス用にインストールされているすべての同期アダプタがひとまとめにリストされ、リストされている各同期アダプタは端末上の異なる連絡先プロバイダと同期します。
+
+
+</p>
+<p>
+    データにアクセスするたび、ほとんどのサービスがユーザーに ID の確認を要求するため、Android システムでは、同期アダプタ フレームワークと類似した認証フレームワークを提供しており、往々にして同期アダプタ フレームワークと組み合わせて使用します。
+
+この認証フレームワークでは、{@link android.accounts.AbstractAccountAuthenticator} のサブクラスであるプラグイン認証システムを使用します。
+
+認証システムは、次の手順でユーザーの身元を検証します。
+
+    <ol>
+        <li>
+            ユーザー名とパスワードか、それに準ずる情報（ユーザーの<strong>資格情報</strong>）を収集します。
+
+        </li>
+        <li>
+            収集した資格情報をサービスに送信します。
+        </li>
+        <li>
+            サービスの返答を検証します。
+        </li>
+    </ol>
+<p>
+    サービスが資格情報を受け入れた場合、認証システムはその資格情報を後での使用のために格納します。
+{@link android.accounts.AccountManager} はプラグイン認証フレームワークのおかげで、OAuth2 認証トークンなど、認証システムがサポートして公開することを選択している任意の認証トークンへのアクセスを提供できます。
+
+
+</p>
+<p>
+    認証は必須ではありませんが、たいていの連絡先サービスが使用しています。
+    ただし、認証に Android 認証フレームワークを使用する必要はありません。
+</p>
+<h3 id="SyncAdapterImplementing">同期アダプタの実装</h3>
+<p>
+    連絡先プロバイダ用の同期アダプタを実装するには、まず以下を備えた Android アプリケーションを作成します。
+
+</p>
+    <dl>
+        <dt>
+            システムからの同期アダプタとのバインド要求に対処する {@link android.app.Service} コンポーネント。
+
+        </dt>
+        <dd>
+            システムは、同期しようとするとき、サービスの {@link android.app.Service#onBind(Intent) onBind()} メソッドを呼び出して、同期アダプタの {@link android.os.IBinder} を取得します。
+
+これにより、システムはアダプタのメソッドに対するプロセス間呼び出しを実行できます。
+
+            <p>
+                <a href="{@docRoot}resources/samples/SampleSyncAdapter/index.html">サンプル同期アダプタ</a>のサンプルアプリで、このサービスのクラス名は <code>com.example.android.samplesync.syncadapter.SyncService</code> です。
+
+
+            </p>
+        </dd>
+        <dt>
+            {@link android.content.AbstractThreadedSyncAdapter} の具象サブクラスとして実装された、実際の同期アダプタ。
+
+        </dt>
+        <dd>
+            このクラスが、サーバーからのデータのダウンロード、端末からのデータのアップロード、競合の解消といった作業を実施します。
+アダフタの主な作業は、メソッド {@link android.content.AbstractThreadedSyncAdapter#onPerformSync( Account, Bundle, String, ContentProviderClient, SyncResult) onPerformSync()} で実行されます。
+
+
+このクラスは、シングルトンとしてインスタンス化する必要があります。
+            <p>
+                <a href="{@docRoot}resources/samples/SampleSyncAdapter/index.html">サンプル同期アダプタ</a>のサンプルアプリで、同期アダプタはクラス <code>com.example.android.samplesync.syncadapter.SyncAdapter</code> に定義されています。
+
+
+            </p>
+        </dd>
+        <dt>
+            {@link android.app.Application} のサブクラス。
+        </dt>
+        <dd>
+            このクラスは同期アダプタ シングルトンのファクトリとして機能します。同期アダプタのインスタンス化には {@link android.app.Application#onCreate()} メソッドを使用し、同期アダプタ シングルトンを同期アダプタのサービスの {@link android.app.Service#onBind(Intent) onBind()} メソッドに返すための静的な「getter」メソッドを提供します。
+
+
+
+
+        </dd>
+        <dt>
+            <strong>省略可能:</strong> システムからのユーザー認証要求に対処する {@link android.app.Service} コンポーネント。
+
+        </dt>
+        <dd>
+            {@link android.accounts.AccountManager} は、このサービスを開始することによって認証プロセスを始めます。
+サービスの {@link android.app.Service#onCreate()} メソッドは、認証システム オブジェクトをインスタンス化します。
+システムは、アプリケーションの同期アダプタのためにユーザー アカウントを認証しようとするとき、サービスの {@link android.app.Service#onBind(Intent) onBind()} メソッドを呼び出して、認証システムの {@link android.os.IBinder} を取得します。
+
+
+これにより、システムは認証システムのメソッドに対するプロセス間呼び出しを実行できます。
+
+            <p>
+                <a href="{@docRoot}resources/samples/SampleSyncAdapter/index.html">サンプル同期アダプタ</a>のサンプルアプリで、このサービスのクラス名は <code>com.example.android.samplesync.authenticator.AuthenticationService</code> です。
+
+
+            </p>
+        </dd>
+        <dt>
+            <strong>省略可能:</strong> 認証の要求を処理する {@link android.accounts.AbstractAccountAuthenticator} の具象サブクラス。
+
+
+        </dt>
+        <dd>
+            このクラスは、ユーザーの資格情報をサーバーに対して認証するために {@link android.accounts.AccountManager} が呼び出すメソッドを提供します。認証プロセスの詳細は、使用されているサーバー技術に応じて多岐にわたります。
+
+認証について詳しくは、使用するサーバー ソフトウェアのドキュメントをご覧ください。
+
+            <p>
+                <a href="{@docRoot}resources/samples/SampleSyncAdapter/index.html">サンプル同期アダプタ</a>のサンプルアプリで、認証はクラス <code>com.example.android.samplesync.authenticator.Authenticator</code> に定義されています。
+
+
+            </p>
+        </dd>
+        <dt>
+            システムに対する同期アダプタと認証システムを定義する XML ファイル。
+        </dt>
+        <dd>
+            前述の同期アダプタと認証システム サービスのコンポーネントは、アプリケーション マニフェストの <code>&lt;<a href="{@docRoot}guide/topics/manifest/service-element.html">service</a>&gt;</code> 要素に定義されます。
+
+
+これらの要素には、特定のデータをシステムに提供する次のような <code>&lt;<a href="{@docRoot}guide/topics/manifest/meta-data-element.html">meta-data</a>&gt;</code> 子要素が含まれます。
+
+
+
+
+            <ul>
+                <li>
+                    同期アダプタ サービス用の <code>&lt;<a href="{@docRoot}guide/topics/manifest/meta-data-element.html">meta-data</a>&gt;</code> 要素は、XML ファイル <code>res/xml/syncadapter.xml</code> を指します。
+
+
+このファイルが、連絡先プロバイダと同期されるウェブサービスの URI と、そのウェブサービスで使用するアカウント タイプを指定します。
+
+
+                </li>
+                <li>
+                    <strong>省略可能:</strong> 認証システム用の <code>&lt;<a href="{@docRoot}guide/topics/manifest/meta-data-element.html">meta-data</a>&gt;</code> 要素は、XML ファイル <code>res/xml/authenticator.xml</code> を指します。
+
+
+このファイルが、この認証システムがサポートするアカウント タイプと、認証プロセスの最中に表示される UI リソースを指定します。
+
+この要素に指定されるアカウント タイプは、同期アダプタ用に指定されるアカウント タイプと同じであることが必要です。
+
+
+                </li>
+            </ul>
+        </dd>
+    </dl>
+<h2 id="SocialStream">ソーシャル ストリーム データ</h2>
+<p>
+    {@code android.provider.ContactsContract.StreamItems} テーブルと {@code android.provider.ContactsContract.StreamItemPhotos} テーブルは、ソーシャル ネットワークからの受信データを管理します。
+
+独自ネットワークからのストリーム データをこれらのテーブルに追加する同期アダプタを作成したり、ストリーム データをこれらのテーブルから読み込んで独自アプリケーションに表示したり、この両方を行ったりできます。
+
+このような機能があると、ソーシャル ネットワーキングのサービスやアプリケーションを Android のソーシャル ネットワーキング機能に統合できます。
+
+</p>
+<h3 id="StreamText">ソーシャル ストリーム テキスト</h3>
+<p>
+    ストリーム アイテムは、必ず未加工連絡先に関連付けられます。{@code android.provider.ContactsContract.StreamItemsColumns#RAW_CONTACT_ID} は、未加工連絡先の <code>_ID</code> 値にリンクされます。
+
+未加工連絡先のアカウント タイプとアカウント名は、ストリーム アイテム行にも格納されます。
+
+</p>
+<p>
+    ストリームからのデータを次の列に格納します。
+</p>
+<dl>
+    <dt>
+        {@code android.provider.ContactsContract.StreamItemsColumns#ACCOUNT_TYPE}
+    </dt>
+    <dd>
+        <strong>必須</strong>。このストリーム アイテムに関連付けられている未加工連絡先の、ユーザーのアカウント タイプ。
+ストリーム アイテムを挿入する際には、この値を忘れずに設定してください。
+    </dd>
+    <dt>
+        {@code android.provider.ContactsContract.StreamItemsColumns#ACCOUNT_NAME}
+    </dt>
+    <dd>
+        <strong>必須</strong>。このストリーム アイテムに関連付けられている未加工連絡先の、ユーザーのアカウント名。
+ストリーム アイテムを挿入する際には、この値を忘れずに設定してください。
+    </dd>
+    <dt>
+        識別用列
+    </dt>
+    <dd>
+        <strong>必須</strong>。ストリーム アイテムを挿入する際には、次の識別用列を挿入する必要があります。
+
+        <ul>
+            <li>
+                {@code android.provider.ContactsContract.StreamItemsColumns#CONTACT_ID}:このストリーム アイテムが関連付けられている連絡先の {@code android.provider.BaseColumns#_ID} 値。
+
+
+            </li>
+            <li>
+                {@code android.provider.ContactsContract.StreamItemsColumns#CONTACT_LOOKUP_KEY}: このストリーム アイテムが関連付けられている連絡先の {@code android.provider.ContactsContract.ContactsColumns#LOOKUP_KEY} 値。
+
+
+            </li>
+            <li>
+                {@code android.provider.ContactsContract.StreamItemsColumns#RAW_CONTACT_ID}:このストリーム アイテムが関連付けられている未加工連絡先の {@code android.provider.BaseColumns#_ID} 値。
+
+
+            </li>
+        </ul>
+    </dd>
+    <dt>
+        {@code android.provider.ContactsContract.StreamItemsColumns#COMMENTS}
+    </dt>
+    <dd>
+        省略可能。ストリーム アイテムの冒頭に表示できる概要情報を格納します。
+    </dd>
+    <dt>
+        {@code android.provider.ContactsContract.StreamItemsColumns#TEXT}
+    </dt>
+    <dd>
+        ストリーム アイテムのテキスト。アイテムのソースによって投稿されたコンテンツか、そのストリーム アイテムを生成した何らかのアクションに関する説明です。
+この列には、{@link android.text.Html#fromHtml(String) fromHtml()} でレンダリングできる任意の書式や埋め込みリソース画像を含めることができます。
+
+プロバイダは、長いコンテンツを切り捨てたり省いたりすることがありますが、タグは壊さないようにします。
+
+    </dd>
+    <dt>
+        {@code android.provider.ContactsContract.StreamItemsColumns#TIMESTAMP}
+    </dt>
+    <dd>
+        ストリーム アイテムが挿入またはアップデートされた時刻を含むテキスト。エポックからのミリ秒<em></em>の形式です。
+ストリーム アイテムを挿入またはアップデートするアプリケーションは、この列の管理を担当します。この列は、連絡先プロバイダによって自動的に管理されるわけではありません。
+
+
+    </dd>
+</dl>
+<p>
+    ストリーム アイテムの識別情報を表示するには、{@code android.provider.ContactsContract.StreamItemsColumns#RES_ICON}、{@code android.provider.ContactsContract.StreamItemsColumns#RES_LABEL}、{@code android.provider.ContactsContract.StreamItemsColumns#RES_PACKAGE} を使用してアプリケーション内のリソースにリンクします。
+
+
+
+
+</p>
+<p>
+    {@code android.provider.ContactsContract.StreamItems} テーブルには、同期アダプタ専用に列 {@code android.provider.ContactsContract.StreamItemsColumns#SYNC1} ～ {@code android.provider.ContactsContract.StreamItemsColumns#SYNC4} も格納されます。
+
+
+
+</p>
+<h3 id="StreamPhotos">ソーシャル ストリーム フォト</h3>
+<p>
+   {@code android.provider.ContactsContract.StreamItemPhotos} テーブルには、ストリーム アイテムに関連付けられた写真が格納されます。
+このテーブルの {@code android.provider.ContactsContract.StreamItemPhotosColumns#STREAM_ITEM_ID} 列は、{@code android.provider.ContactsContract.StreamItems} テーブルの {@code android.provider.BaseColumns#_ID} 列の値にリンクされます。
+
+
+写真の参照は、テーブルの次の列に格納されます。
+
+</p>
+<dl>
+    <dt>
+        {@code android.provider.ContactsContract.StreamItemPhotos#PHOTO} 列（BLOB）。
+    </dt>
+    <dd>
+        写真のバイナリ表現。格納や表示のためにプロバイダによってサイズが変更されます。
+        この列は、写真を格納するために使用されていた連絡先プロバイダの従来のバージョンとの下方互換性のために用意されています。
+ただし、現在のバージョンでは、写真の格納にこの列を使用しないでください。
+代わりに、{@code android.provider.ContactsContract.StreamItemPhotosColumns#PHOTO_FILE_ID} または {@code android.provider.ContactsContract.StreamItemPhotosColumns#PHOTO_URI}（どちらについても次の項目で説明します）を使用して、写真をファイルに保存します。
+
+
+現状では、この列には写真のサムネイルが格納されており、読み出し可能です。
+
+    </dd>
+    <dt>
+        {@code android.provider.ContactsContract.StreamItemPhotosColumns#PHOTO_FILE_ID}
+    </dt>
+    <dd>
+        未加工連絡先の写真の数値 ID。この値を定数 {@link android.provider.ContactsContract.DisplayPhoto#CONTENT_URI DisplayPhoto.CONTENT_URI} の末尾に追加して、1 つの写真ファイルを指すコンテンツ URI を取得し、{@link android.content.ContentResolver#openAssetFileDescriptor(Uri, String) openAssetFileDescriptor()} を呼び出して、その写真ファイルのハンドルを取得します。
+
+
+
+
+    </dd>
+    <dt>
+        {@code android.provider.ContactsContract.StreamItemPhotosColumns#PHOTO_URI}
+    </dt>
+    <dd>
+        この行によって表されている写真の写真ファイルを直接指すコンテンツ URI。
+        この URI を使用して {@link android.content.ContentResolver#openAssetFileDescriptor(Uri, String) openAssetFileDescriptor()} を呼び出して、写真ファイルのハンドルを取得します。
+
+    </dd>
+</dl>
+<h3 id="SocialStreamTables">ソーシャル ストリーム テーブルの使用</h3>
+<p>
+    これらのテーブルは、連絡先プロバイダの他の主なテーブルと同じように機能しますが、次のような例外があります。
+</p>
+    <ul>
+        <li>
+            これらのテーブルには、追加のアクセス パーミッションが必要です。これらからの読み出しには、アプリケーションにパーミッション {@code android.Manifest.permission#READ_SOCIAL_STREAM} が必要です。
+これらの変更には、アプリケーションにパーミッション {@code android.Manifest.permission#WRITE_SOCIAL_STREAM} が必要です。
+
+
+        </li>
+        <li>
+            {@code android.provider.ContactsContract.StreamItems} テーブルについては、各未加工連絡先に格納できる行数に上限があります。
+上限に達すると、連絡先プロバイダは最も古い {@code android.provider.ContactsContract.StreamItemsColumns#TIMESTAMP} を持つ行を自動的に削除して、新しいストリーム アイテムのための領域を作ります。
+
+
+この上限を取得するには、コンテンツ URI {@code android.provider.ContactsContract.StreamItems#CONTENT_LIMIT_URI} にクエリを発行します。
+
+コンテンツ URI を除くすべての引数は、<code>null</code> のままでかまいません。
+このクエリは、列 {@code android.provider.ContactsContract.StreamItems#MAX_ITEMS} だけの 1 行を含む Cursor を返します。
+
+
+        </li>
+    </ul>
+
+<p>
+    クラス {@code android.provider.ContactsContract.StreamItems.StreamItemPhotos} は、1 つのストリーム アイテムの写真行を含む {@code android.provider.ContactsContract.StreamItemPhotos} のサブテーブルを定義します。
+
+
+</p>
+<h3 id="SocialStreamInteraction">ソーシャル ストリーム操作</h3>
+<p>
+    連絡先プロバイダによって端末の連絡先アプリケーションと連携して管理されるソーシャル ストリーム データは、ソーシャル ネットワーキング システムと既存の連絡先を接続するためのとても便利な手段を用意しています。
+
+利用できる機能は次のとおりです。
+</p>
+    <ul>
+        <li>
+            ソーシャル ネットワーキング サービスを連絡先プロバイダに同期アダプタを使用して同期することで、ユーザーの連絡先による最近のアクティビティを取得し、それを {@code android.provider.ContactsContract.StreamItems} テーブルや {@code android.provider.ContactsContract.StreamItemPhotos} テーブルに格納して後で使えるようにできます。
+
+
+
+        </li>
+        <li>
+            ユーザーが連絡先を選択して表示したときには、定期的な同期とは別に同期アダプタを起動して追加データを取得できます。
+この機能により、同期アダプタは連絡先の高解像度の写真や直近のストリーム アイテムを取得できます。
+
+        </li>
+        <li>
+            端末の連絡先アプリケーションと連絡先プロバイダに関する通知を登録すると、連絡先が表示された場合にインテントを受信<em></em>し、その時点で連絡先のステータスをサービスからアップデートできます。
+
+このアプローチは、同期アダプタを使用してフル同期を実施するより、処理が速く、帯域幅が節約されます。
+
+        </li>
+        <li>
+            ユーザーが端末の連絡先アプリケーションで連絡先を見ている間に、その連絡先をソーシャル ネットワーキング サービスに追加できます。
+この機能は「連絡先の招待」機能を使用して実現できます。連絡先の招待は、既存の連絡先をネットワークに追加するアクティビティと、端末の連絡先アプリケーションと連絡先プロバイダにアプリケーションの詳細を提供する XML ファイルとを組み合わせて実現できます。
+
+
+
+        </li>
+    </ul>
+<p>
+    連絡先プロバイダを使用したストリーム アイテムの定期的な同期は、他の同期と同じです。
+同期について詳しくは、<a href="#SyncAdapters">連絡先プロバイダの同期アダプタ</a>をご覧ください。
+通知の登録と連絡先の招待については、次の 2 つのセクションで説明します。
+
+</p>
+<h4>ソーシャル ネットワーキング表示を処理するための登録</h4>
+<p>
+    同期アダプタを登録し、同期アダプタによって管理されている連絡先をユーザーが表示したときに通知されるようにする方法は、次のとおりです。
+
+</p>
+<ol>
+    <li>
+        <code>contacts.xml</code> という名前のファイルをプロジェクトの <code>res/xml/</code> ディレクトリに作成します。
+このファイルが既に存在する場合は、この手順を省略できます。
+    </li>
+    <li>
+        このファイルに要素 <code>&lt;ContactsAccountType xmlns:android="http://schemas.android.com/apk/res/android"&gt;</code> を追加します。
+
+        この要素が既に存在する場合は、この手順を省略できます。
+    </li>
+    <li>
+        ユーザーが端末の連絡先アプリケーションで連絡先の詳細ページを開いたときに通知されるサービスを登録するには、属性 <code>viewContactNotifyService="<em>serviceclass</em>"</code> を要素に追加します。<code><em>serviceclass</em></code> は、端末の連絡先アプリケーションからインテントを受け取ることになるサービスの完全修飾クラス名です。
+
+
+
+通知側サービスのために、{@link android.app.IntentService} を機能拡張したクラスを使用して、そのサービスがインテントを受け取れるようにします。
+
+受け取るインテントに含まれるデータには、ユーザーがクリックした未加工連絡先のコンテンツ URI が格納されます。
+通知側サービスから、同期アダプタをバインドして呼び出し、未加工連絡先のデータをアップデートできます。
+
+    </li>
+</ol>
+<p>
+    ユーザーがストリーム アイテムかストリーム フォトかその両方をクリックしたときに呼び出されるアクティビティを登録する方法は次のとおりです。
+</p>
+<ol>
+    <li>
+        <code>contacts.xml</code> という名前のファイルをプロジェクトの <code>res/xml/</code> ディレクトリに作成します。
+このファイルが既に存在する場合は、この手順を省略できます。
+    </li>
+    <li>
+        このファイルに要素 <code>&lt;ContactsAccountType xmlns:android="http://schemas.android.com/apk/res/android"&gt;</code> を追加します。
+
+        この要素が既に存在する場合は、この手順を省略できます。
+    </li>
+    <li>
+        アクティビティのどれかを登録して、ユーザーが端末の連絡先アプリケーションでストリーム アイテムをタップしたことに対処するには、属性 <code>viewStreamItemActivity="<em>activityclass</em>"</code> を要素に追加します。<code><em>activityclass</em></code> は、端末の連絡先アプリケーションからインテントを受け取ることになるアクティビティの完全修飾クラス名です。
+
+
+
+
+    </li>
+    <li>
+        アクティビティのどれかを登録して、ユーザーが端末の連絡先アプリケーションでストリーム フォトをタップしたことに対処するには、属性 <code>viewStreamItemPhotoActivity="<em>activityclass</em>"</code> を要素に追加します。<code><em>activityclass</em></code> は、端末の連絡先アプリケーションからインテントを受け取ることになるアクティビティの完全修飾クラス名です。
+
+
+
+
+    </li>
+</ol>
+<p>
+    <code>&lt;ContactsAccountType&gt;</code> 要素については、<a href="#SocialStreamAcctType">&lt;ContactsAccountType&gt; 要素</a>で詳しく説明しています。
+
+</p>
+<p>
+    受け取るインテントには、ユーザーがクリックしたアイテムまたは写真のコンテンツ URI が格納されます。
+    テキスト アイテムと写真とで異なるアクティビティを使用するには、同じファイルで両方の属性を使用します。
+</p>
+<h4>ソーシャル ネットワーキング サービスの操作</h4>
+<p>
+    ユーザーは、連絡先をソーシャル ネットワーキング サービスに招待するのに、端末の連絡先アプリケーションを離れる必要はありません。
+その代わりとして、連絡先をアクティビティのどれかに招待するインテントを端末の連絡先アプリケーションに送信させることができます。
+これをセットアップする方法は次のとおりです。
+</p>
+<ol>
+    <li>
+        <code>contacts.xml</code> という名前のファイルをプロジェクトの <code>res/xml/</code> ディレクトリに作成します。
+このファイルが既に存在する場合は、この手順を省略できます。
+    </li>
+    <li>
+        このファイルに要素 <code>&lt;ContactsAccountType xmlns:android="http://schemas.android.com/apk/res/android"&gt;</code> を追加します。
+
+        この要素が既に存在する場合は、この手順を省略できます。
+    </li>
+    <li>
+        次の属性を追加します。
+        <ul>
+            <li><code>inviteContactActivity="<em>activityclass</em>"</code></li>
+            <li>
+                <code>inviteContactActionLabel="&#64;string/<em>invite_action_label</em>"</code>
+            </li>
+        </ul>
+        <code><em>activityclass</em></code> 値は、インテントを受信するアクティビティの完全修飾クラス名です。
+<code><em>invite_action_label</em></code> 値は、端末の連絡先アプリケーションの [<strong>Add Connection</strong>] メニューに表示される文字列です。
+
+
+    </li>
+</ol>
+<p class="note">
+    <strong>注:</strong> <code>ContactsSource</code> は廃止されたタグ名で、<code>ContactsAccountType</code> に置き換わっています。
+
+</p>
+<h3 id="ContactsFile">contacts.xml リファレンス</h3>
+<p>
+    ファイル <code>contacts.xml</code> には、同期アダプタやアプリケーションと連絡先アプリケーションや連絡先プロバイダとのやり取りを管理する XML 要素が含まれています。
+これらの要素について、以降のセクションで説明します。
+
+</p>
+<h4 id="SocialStreamAcctType">&lt;ContactsAccountType&gt; 要素</h4>
+<p>
+    <code>&lt;ContactsAccountType&gt;</code> 要素は、アプリケーションと連絡先アプリケーションとのやり取りを管理します。
+構文は次のとおりです。
+</p>
+<pre>
+&lt;ContactsAccountType
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        inviteContactActivity="<em>activity_name</em>"
+        inviteContactActionLabel="<em>invite_command_text</em>"
+        viewContactNotifyService="<em>view_notify_service</em>"
+        viewGroupActivity="<em>group_view_activity</em>"
+        viewGroupActionLabel="<em>group_action_text</em>"
+        viewStreamItemActivity="<em>viewstream_activity_name</em>"
+        viewStreamItemPhotoActivity="<em>viewphotostream_activity_name</em>"&gt;
+</pre>
+<p>
+    <strong>含まれているファイル:</strong> 
+</p>
+<p>
+    <code>res/xml/contacts.xml</code>
+</p>
+<p>
+    <strong>含めることのできる要素:</strong> 
+</p>
+<p>
+    <strong><code>&lt;ContactsDataKind&gt;</code></strong>
+</p>
+<p>
+    <strong>説明:</strong> 
+</p>
+<p>
+    ユーザーが連絡先の 1 人をソーシャル ネットワーキングに招待できるようにしたり、ソーシャル ネットワーキング ストリームのどれかがアップデートされたらユーザーに通知したりするための、Android コンポーネントや UI ラベルを宣言します。
+
+
+</p>
+<p>
+    属性プレフィックス <code>android:</code> は、<code>&lt;ContactsAccountType&gt;</code> の属性に必須ではないことに注目してください。
+
+</p>
+<p>
+    <strong>属性:</strong> 
+</p>
+<dl>
+    <dt>{@code inviteContactActivity}</dt>
+    <dd>
+        ユーザーが端末の連絡先アプリケーションで [<strong>Add Connection</strong>] を選択したときに起動する、アプリケーション内のアクティビティの完全修飾クラス名。
+
+
+    </dd>
+    <dt>{@code inviteContactActionLabel}</dt>
+    <dd>
+        [<strong>Add Connection</strong>] メニューで、{@code inviteContactActivity} に指定されたアクティビティ用に表示されるテキスト。
+
+        たとえば、文字列「Follow in my network」を指定できます。このラベルには文字列リソース ID を使用できます。
+
+    </dd>
+    <dt>{@code viewContactNotifyService}</dt>
+    <dd>
+        ユーザーが連絡先を表示したときに通知を受け取ることになる、独自アプリケーション内のサービスの完全修飾クラス名。
+この通知は端末の連絡先アプリケーションによって送信されます。これを使用することで、アプリケーションはデータ処理の多い操作を必要になるまで延期できます。
+
+たとえば、アプリケーションはこの通知への対応として、連絡先の高解像度写真と直近のソーシャル ストリーム アイテムを読み込んで表示できます。
+
+この機能について詳しくは、<a href="#SocialStreamInteraction">ソーシャル ストリーム操作</a>で説明しています。
+<code>NotifierService.java</code> ファイルに指定された通知サービスの例は、<a href="{@docRoot}resources/samples/SampleSyncAdapter/index.html">SampleSyncAdapter</a> サンプル アプリケーションにあります。
+
+
+
+    </dd>
+    <dt>{@code viewGroupActivity}</dt>
+    <dd>
+        グループ情報を表示できる、独自アプリケーション内のアクティビティの完全修飾クラス名。
+ユーザーが端末の連絡先アプリケーションでグループラベルをタップすると、このアクティビティの UI が表示されます。
+
+    </dd>
+    <dt>{@code viewGroupActionLabel}</dt>
+    <dd>
+        ユーザーがアプリケーションでグループを表示できるようにする UI コントロールに対し、連絡先アプリケーションが表示するラベル。
+
+        <p>
+            たとえば、端末に Google+ アプリケーションをインストールし、Google+ を連絡先アプリケーションと同期すると、Google+ のサークルが連絡先アプリケーションの [<strong>グループ</strong>] タブにグループとして表示されます。
+
+Google+ サークルのどれかをクリックすると、そのサークルに所属する人が「グループ」として表示されます。
+表示の最上部に、Google+ アイコンが表示されます。それをクリックすると、制御が Google+ アプリに移ります。連絡先アプリケーションはこれを {@code viewGroupActivity} を使用して行い、Google+ アイコンを {@code viewGroupActionLabel} の値として使用します。
+
+
+
+
+        </p>
+        <p>
+            この属性には、文字列リソース ID を使用できます。
+        </p>
+    </dd>
+    <dt>{@code viewStreamItemActivity}</dt>
+    <dd>
+        ユーザーが未加工連絡先のストリーム アイテムをタップしたときに端末の連絡先アプリケーションが起動する、独自アプリケーション内のアクティビティの完全修飾クラス名。
+
+    </dd>
+    <dt>{@code viewStreamItemPhotoActivity}</dt>
+    <dd>
+        ユーザーが未加工連絡先のストリーム アイテムで写真をタップしたときに端末の連絡先アプリケーションが起動する、独自アプリケーション内のアクティビティの完全修飾クラス名。
+
+
+    </dd>
+</dl>
+<h4 id="SocialStreamDataKind">&lt;ContactsDataKind&gt; 要素</h4>
+<p>
+    <code>&lt;ContactsDataKind&gt;</code> 要素は、連絡先アプリケーションにおける独自アプリケーションのカスタムデータ行の表示を管理します。構文は次のとおりです。
+
+</p>
+<pre>
+&lt;ContactsDataKind
+        android:mimeType="<em>MIMEtype</em>"
+        android:icon="<em>icon_resources</em>"
+        android:summaryColumn="<em>column_name</em>"
+        android:detailColumn="<em>column_name</em>"&gt;
+</pre>
+<p>
+    <strong>含まれているファイル:</strong> 
+</p>
+<code>&lt;ContactsAccountType&gt;</code>
+<p>
+    <strong>説明:</strong> 
+</p>
+<p>
+    この要素は、カスタムデータ行のコンテンツを未加工連絡先の詳細の一部として連絡先アプリケーションに表示させるために使用します。
+<code>&lt;ContactsAccountType&gt;</code> の各 <code>&lt;ContactsDataKind&gt;</code> 子要素は、同期アダプタが {@link android.provider.ContactsContract.Data} テーブルに追加するカスタムデータ行のタイプを表します。
+
+使用するカスタム MIME タイプごとに <code>&lt;ContactsDataKind&gt;</code> 要素を 1 つ追加します。
+データを表示しないカスタムデータ行がある場合は、この要素を追加する必要はありません。
+
+</p>
+<p>
+    <strong>属性:</strong> 
+</p>
+<dl>
+    <dt>{@code android:mimeType}</dt>
+    <dd>
+        {@link android.provider.ContactsContract.Data} テーブルに含まれるカスタムデータ行のどれかに定義したカスタム MIME タイプ。
+たとえば、値 <code>vnd.android.cursor.item/vnd.example.locationstatus</code> は、連絡先の最新の場所情報を記録するデータ行のためのカスタム MIME タイプということが考えられます。
+
+
+    </dd>
+    <dt>{@code android:icon}</dt>
+    <dd>
+        連絡先アプリケーションがデータの隣に表示する Android <a href="{@docRoot}guide/topics/resources/drawable-resource.html">ドローアブル リソース</a>。
+
+そのデータが独自サービスからのものであることを示すのに使用します。
+
+    </dd>
+    <dt>{@code android:summaryColumn}</dt>
+    <dd>
+        データ行から取得された 2 つの値で最初の列名。この値は、このデータ行のエントリの先頭行として表示されます。
+この先頭行は、データの要約として使われることを狙ったものですが、省略可能です。
+<a href="#detailColumn">android:detailColumn</a> もご覧ください。
+
+    </dd>
+    <dt>{@code android:detailColumn}</dt>
+    <dd>
+        データ行から取得された 2 つの値で 2 番目の列名。この値は、このデータ行のエントリの 2 行目として表示されます。
+{@code android:summaryColumn} もご覧ください。
+
+    </dd>
+</dl>
+<h2 id="AdditionalFeatures">連絡先プロバイダの追加機能</h2>
+<p>
+    ここまでのセクションで説明した主な機能の他に、連絡先プロバイダには連絡先データの作業用として次のような便利な機能が用意されています。
+
+</p>
+    <ul>
+       <li>連絡先グループ</li>
+       <li>写真機能</li>
+    </ul>
+<h3 id="Groups">連絡先グループ</h3>
+<p>
+    連絡先プロバイダでは、オプションで、関連連絡先のコレクションを<strong>グループ</strong> データでラベル付けできます。
+あるユーザー アカウントに関連付けられているサーバーがグループを管理する場合、そのアカウントのアカウント タイプ用の同期アダプタが、連絡先プロバイダとサーバーとの間でグループデータを転送する必要があります。
+
+ユーザーが新しい連絡先をサーバーに追加し、その連絡先を新しいグループに入れた場合、同期アダプタはその新しいグループを {@link android.provider.ContactsContract.Groups} テーブルに追加する必要があります。
+
+ある未加工連絡先が属するグループ（複数の場合あり）は、{@link android.provider.ContactsContract.Data} テーブルに、{@link android.provider.ContactsContract.CommonDataKinds.GroupMembership} MIME タイプを使用して格納されます。
+
+
+</p>
+<p>
+    サーバーからの未加工連絡先データを連絡先プロバイダに追加する同期アダプタを設計している場合、グループを使用しないのであれば、連絡先プロバイダに対してデータが可視であることを通知する必要があります。
+
+ユーザーがアカウントを端末に追加したときに実行されるコード内で、連絡先プロバイダがそのアカウントに対して追加する {@link android.provider.ContactsContract.Settings} 行をアップデートします。
+
+この行で、{@link android.provider.ContactsContract.SettingsColumns#UNGROUPED_VISIBLE Settings.UNGROUPED_VISIBLE} 列の値を 1 に設定します。
+
+こうすると、連絡先プロバイダは、グループを使用していない場合でも、独自の連絡先データを可視にします。
+
+</p>
+<h3 id="Photos">連絡先の写真</h3>
+<p>
+    {@link android.provider.ContactsContract.Data} テーブルは、写真を MIME タイプ {@link android.provider.ContactsContract.CommonDataKinds.Photo#CONTENT_ITEM_TYPE Photo.CONTENT_ITEM_TYPE} の行として格納します。
+
+この行の {@link android.provider.ContactsContract.RawContactsColumns#CONTACT_ID} 列は、それが属する未加工連絡先の {@code android.provider.BaseColumns#_ID} 列にリンクされます。
+
+
+    クラス {@link android.provider.ContactsContract.Contacts.Photo} は、連絡先のプライマリ フォトの写真情報を格納する {@link android.provider.ContactsContract.Contacts} のサブテーブルを定義します。ここでプライマリ フォトとは、連絡先のプライマリ未加工連絡先のプライマリ フォトのことを示します。
+
+同様に、クラス {@link android.provider.ContactsContract.RawContacts.DisplayPhoto} は、未加工連絡先のプライマリ フォトに関する情報を含む {@link android.provider.ContactsContract.RawContacts} のサブテーブルを定義します。
+
+
+
+</p>
+<p>
+    {@link android.provider.ContactsContract.Contacts.Photo} と {@link android.provider.ContactsContract.RawContacts.DisplayPhoto} の参照ドキュメントには、写真情報の取得例が含まれています。
+
+未加工連絡先のプライマリ サムネイルを取得するための便利なクラスはありませんが、{@link android.provider.ContactsContract.Data} テーブルにクエリを送信して、未加工連絡先の {@code android.provider.BaseColumns#_ID}、{@link android.provider.ContactsContract.CommonDataKinds.Photo#CONTENT_ITEM_TYPE Photo.CONTENT_ITEM_TYPE}、{@link android.provider.ContactsContract.Data#IS_PRIMARY} 列を選んでその未加工連絡先のプライマリ フォト行を探すことができます。
+
+
+
+
+
+
+</p>
+<p>
+    人のソーシャル ストリーム データにも写真が含まれていることがあります。その場合は {@code android.provider.ContactsContract.StreamItemPhotos} テーブルに格納されています。このテーブルについては、<a href="#StreamPhotos">ソーシャル ストリーム フォト</a>で詳しく説明しています
+
+
+</p>

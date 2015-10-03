@@ -1,0 +1,517 @@
+page.title=Manifesto do aplicativo
+@jd:body
+
+<div id="qv-wrapper">
+<div id="qv">
+
+<h2>Neste documento</h2>
+<ol>
+<li><a href="#filestruct">Estrutura do arquivo de manifesto</a></li>
+<li><a href="#filec">Convenções de arquivos</a>
+<li><a href="#filef">Características do arquivo</a>
+	<ol>
+	<li><a href="#ifs">Filtros de intenções</a></li>
+	<li><a href="#iconlabel">Ícones e etiquetas</a></li>
+	<li><a href="#perms">Permissões</a></li>
+	<li><a href="#libs">Bibliotecas</a></li>
+	</ol></li>
+</ol>
+</div>
+</div>
+
+<p>
+  Todo aplicativo tem que ter um arquivo AndroidManifest.xml (precisamente
+com esse nome) no seu diretório raiz. <span itemprop="description">O arquivo de manifesto
+apresenta informações essenciais sobre o aplicativo ao sistema Android,
+necessárias para o sistema antes que ele possa executar o código
+do aplicativo.</span> Entre outras coisas, o manifesto serve para:
+</p>
+
+<ul>
+<li>Nomear o pacote Java para o aplicativo.
+O nome do pacote serve como identificador exclusivo para o aplicativo.</li>
+
+<li>Descrever os componentes do aplicativo &mdash; as atividades,
+os serviços, os receptores de transmissão e os provedores de conteúdo que compõem
+o aplicativo.  Nomear as classes que implementam os componentes
+e publicam seus recursos (por exemplo, que mensagens {@link android.content.Intent 
+Intent} eles podem tratar).  Essas declarações permitem ao sistema Android
+saber quais são os componentes e em que condições eles podem ser iniciados.</li>
+
+<li>Determinar que processos hospedarão componentes de aplicativo.</li>  
+
+<li>Declarar as permissões que o aplicativo deve ter para acessar
+partes protegidas da API e interagir com outros aplicativos.</li>  
+
+<li>Declarar também as permissões que outros devem ter
+para interagir com os componentes do aplicativo.</li>
+
+<li>Listar as classes {@link android.app.Instrumentation} que fornecem
+geração de perfil e outras informações durante a execução do aplicativo.  Essas declarações
+estão presentes no manifesto somente enquanto o aplicativo está em desenvolvimento
+e teste — elas são removidas antes da publicação do aplicativo.</li>
+
+<li>Declarar o nível mínimo da API do Android que o aplicativo
+exige.</li>
+
+<li>Listar as bibliotecas às quais o aplicativo deve se vincular.</li>
+</ul>
+
+
+<h2 id="filestruct">Estrutura do arquivo de manifesto</h2>
+
+<p>
+O diagrama ilustra a estrutura geral do arquivo de manifesto e cada
+elemento que ele pode conter.  Cada elemento e seus atributos
+são documentados na totalidade em um arquivo separado.  Para exibir informações detalhadas
+sobre cada elemento, clique no nome do elemento no diagrama,
+na lista de elementos em ordem alfabética que acompanha o diagrama
+ou em qualquer outra menção ao nome do elemento. 
+</p>
+
+<pre>
+&lt;?xml version="1.0" encoding="utf-8"?&gt;
+
+<a href="{@docRoot}guide/topics/manifest/manifest-element.html">&lt;manifest&gt;</a>
+
+    <a href="{@docRoot}guide/topics/manifest/uses-permission-element.html">&lt;uses-permission /&gt;</a>
+    <a href="{@docRoot}guide/topics/manifest/permission-element.html">&lt;permission /&gt;</a>
+    <a href="{@docRoot}guide/topics/manifest/permission-tree-element.html">&lt;permission-tree /&gt;</a>
+    <a href="{@docRoot}guide/topics/manifest/permission-group-element.html">&lt;permission-group /&gt;</a>
+    <a href="{@docRoot}guide/topics/manifest/instrumentation-element.html">&lt;instrumentation /&gt;</a>
+    <a href="{@docRoot}guide/topics/manifest/uses-sdk-element.html">&lt;uses-sdk /&gt;</a>
+    <a href="{@docRoot}guide/topics/manifest/uses-configuration-element.html">&lt;uses-configuration /&gt;</a>  <!-- ##api level 3## -->
+    <a href="{@docRoot}guide/topics/manifest/uses-feature-element.html">&lt;uses-feature /&gt;</a>  <!-- ##api level 4## -->
+    <a href="{@docRoot}guide/topics/manifest/supports-screens-element.html">&lt;supports-screens /&gt;</a>  <!-- ##api level 4## -->
+    <a href="{@docRoot}guide/topics/manifest/compatible-screens-element.html">&lt;compatible-screens /&gt;</a>  <!-- ##api level 9## -->
+    <a href="{@docRoot}guide/topics/manifest/supports-gl-texture-element.html">&lt;supports-gl-texture /&gt;</a>  <!-- ##api level 11## -->
+
+    <a href="{@docRoot}guide/topics/manifest/application-element.html">&lt;application&gt;</a>
+
+        <a href="{@docRoot}guide/topics/manifest/activity-element.html">&lt;activity&gt;</a>
+            <a href="{@docRoot}guide/topics/manifest/intent-filter-element.html">&lt;intent-filter&gt;</a>
+                <a href="{@docRoot}guide/topics/manifest/action-element.html">&lt;action /&gt;</a>
+                <a href="{@docRoot}guide/topics/manifest/category-element.html">&lt;category /&gt;</a>
+                <a href="{@docRoot}guide/topics/manifest/data-element.html">&lt;data /&gt;</a>
+            <a href="{@docRoot}guide/topics/manifest/intent-filter-element.html">&lt;/intent-filter&gt;</a>
+            <a href="{@docRoot}guide/topics/manifest/meta-data-element.html">&lt;meta-data /&gt;</a>
+        <a href="{@docRoot}guide/topics/manifest/activity-element.html">&lt;/activity&gt;</a>
+
+        <a href="{@docRoot}guide/topics/manifest/activity-alias-element.html">&lt;activity-alias&gt;</a>
+            <a href="{@docRoot}guide/topics/manifest/intent-filter-element.html">&lt;intent-filter&gt;</a> . . . <a href="{@docRoot}guide/topics/manifest/intent-filter-element.html">&lt;/intent-filter&gt;</a>
+            <a href="{@docRoot}guide/topics/manifest/meta-data-element.html">&lt;meta-data /&gt;</a>
+        <a href="{@docRoot}guide/topics/manifest/activity-alias-element.html">&lt;/activity-alias&gt;</a>
+
+        <a href="{@docRoot}guide/topics/manifest/service-element.html">&lt;service&gt;</a>
+            <a href="{@docRoot}guide/topics/manifest/intent-filter-element.html">&lt;intent-filter&gt;</a> . . . <a href="{@docRoot}guide/topics/manifest/intent-filter-element.html">&lt;/intent-filter&gt;</a>
+            <a href="{@docRoot}guide/topics/manifest/meta-data-element.html">&lt;meta-data/&gt;</a>
+        <a href="{@docRoot}guide/topics/manifest/service-element.html">&lt;/service&gt;</a>
+
+        <a href="{@docRoot}guide/topics/manifest/receiver-element.html">&lt;receiver&gt;</a>
+            <a href="{@docRoot}guide/topics/manifest/intent-filter-element.html">&lt;intent-filter&gt;</a> . . . <a href="{@docRoot}guide/topics/manifest/intent-filter-element.html">&lt;/intent-filter&gt;</a>
+            <a href="{@docRoot}guide/topics/manifest/meta-data-element.html">&lt;meta-data /&gt;</a>
+        <a href="{@docRoot}guide/topics/manifest/receiver-element.html">&lt;/receiver&gt;</a>
+
+        <a href="{@docRoot}guide/topics/manifest/provider-element.html">&lt;provider&gt;</a>
+            <a href="{@docRoot}guide/topics/manifest/grant-uri-permission-element.html">&lt;grant-uri-permission /&gt;</a>
+            <a href="{@docRoot}guide/topics/manifest/meta-data-element.html">&lt;meta-data /&gt;</a>
+            <a href="{@docRoot}guide/topics/manifest/path-permission-element.html">&lt;path-permission /&gt;</a>
+        <a href="{@docRoot}guide/topics/manifest/provider-element.html">&lt;/provider&gt;</a>
+
+        <a href="{@docRoot}guide/topics/manifest/uses-library-element.html">&lt;uses-library /&gt;</a>
+
+    <a href="{@docRoot}guide/topics/manifest/application-element.html">&lt;/application&gt;</a>
+
+<a href="{@docRoot}guide/topics/manifest/manifest-element.html">&lt;/manifest&gt;</a>
+</pre>
+
+<p>
+Todos os elementos que podem aparecer no arquivo de manifesto estão
+relacionados abaixo em ordem alfabética.  Estes são os únicos elementos legais. Não é possível
+adicionar elementos ou atributos próprios.  
+</p>
+
+<p style="margin-left: 2em">
+<code><a href="{@docRoot}guide/topics/manifest/action-element.html">&lt;action&gt;</a></code>
+<br/><code><a href="{@docRoot}guide/topics/manifest/activity-element.html">&lt;activity&gt;</a></code>
+<br/><code><a href="{@docRoot}guide/topics/manifest/activity-alias-element.html">&lt;activity-alias&gt;</a></code>
+<br/><code><a href="{@docRoot}guide/topics/manifest/application-element.html">&lt;application&gt;</a></code>
+<br/><code><a href="{@docRoot}guide/topics/manifest/category-element.html">&lt;category&gt;</a></code>
+<br/><code><a href="{@docRoot}guide/topics/manifest/data-element.html">&lt;data&gt;</a></code>
+<br/><code><a href="{@docRoot}guide/topics/manifest/grant-uri-permission-element.html">&lt;grant-uri-permission&gt;</a></code>
+<br/><code><a href="{@docRoot}guide/topics/manifest/instrumentation-element.html">&lt;instrumentation&gt;</a></code>
+<br/><code><a href="{@docRoot}guide/topics/manifest/intent-filter-element.html">&lt;intent-filter&gt;</a></code>
+<br/><code><a href="{@docRoot}guide/topics/manifest/manifest-element.html">&lt;manifest&gt;</a></code>
+<br/><code><a href="{@docRoot}guide/topics/manifest/meta-data-element.html">&lt;meta-data&gt;</a></code>
+<br/><code><a href="{@docRoot}guide/topics/manifest/permission-element.html">&lt;permission&gt;</a></code>
+<br/><code><a href="{@docRoot}guide/topics/manifest/permission-group-element.html">&lt;permission-group&gt;</a></code>
+<br/><code><a href="{@docRoot}guide/topics/manifest/permission-tree-element.html">&lt;permission-tree&gt;</a></code>
+<br/><code><a href="{@docRoot}guide/topics/manifest/provider-element.html">&lt;provider&gt;</a></code>
+<br/><code><a href="{@docRoot}guide/topics/manifest/receiver-element.html">&lt;receiver&gt;</a></code>
+<br/><code><a href="{@docRoot}guide/topics/manifest/service-element.html">&lt;service&gt;</a></code>
+<br/><code><a href="{@docRoot}guide/topics/manifest/supports-screens-element.html">&lt;supports-screens&gt;</a></code>  <!-- ##api level 4## -->
+<br/><code><a href="{@docRoot}guide/topics/manifest/uses-configuration-element.html">&lt;uses-configuration&gt;</a></code>  <!-- ##api level 3## -->
+<br/><code><a href="{@docRoot}guide/topics/manifest/uses-feature-element.html">&lt;uses-feature&gt;</a></code>  <!-- ##api level 4## -->
+<br/><code><a href="{@docRoot}guide/topics/manifest/uses-library-element.html">&lt;uses-library&gt;</a></code>
+<br/><code><a href="{@docRoot}guide/topics/manifest/uses-permission-element.html">&lt;uses-permission&gt;</a></code>
+<br/><code><a href="{@docRoot}guide/topics/manifest/uses-sdk-element.html">&lt;uses-sdk&gt;</a></code>
+</p>
+
+
+    
+
+<h2 id="filec">Convenções de arquivos</h2>
+
+<p>
+Algumas convenções e regras se aplicam geralmente a todos os elementos e atributos
+no manifesto:
+</p>
+
+<dl>
+<dt><b>Elementos</b></dt>
+<dd>Somente os elementos
+<code><a href="{@docRoot}guide/topics/manifest/manifest-element.html">&lt;manifest&gt;</a></code>
+e <code><a href="{@docRoot}guide/topics/manifest/application-element.html">&lt;application&gt;</a></code>
+são necessários — eles devem estar presentes e ocorrer somente uma vez.  
+A maioria dos outros pode ocorrer diversas vezes ou nunca &mdash; embora
+pelo menos alguns deles devam estar presentes para que o manifesto
+realize algo significativo.
+
+<p>
+Se um elemento contiver qualquer coisa, ele conterá outros elementos.  
+Todos os valores são definidos por meio de atributos, e não como dados de caracteres dentro de um elemento.
+</p>
+
+<p>
+Elementos de mesmo nível geralmente não são ordenados.  Por exemplo: os elementos
+<code><a href="{@docRoot}guide/topics/manifest/activity-element.html">&lt;activity&gt;</a></code>, 
+<code><a href="{@docRoot}guide/topics/manifest/provider-element.html">&lt;provider&gt;</a></code>
+e <code><a href="{@docRoot}guide/topics/manifest/service-element.html">&lt;service&gt;</a></code> 
+podem ser combinados entre si em qualquer sequência.  (O elemento 
+<code><a href="{@docRoot}guide/topics/manifest/activity-alias-element.html">&lt;activity-alias&gt;</a></code>
+é uma exceção a essa regra:  ele deve seguir o 
+<code><a href="{@docRoot}guide/topics/manifest/activity-element.html">&lt;activity&gt;</a></code> 
+para o qual é alias.)
+</p></dd>
+
+<dt><b>Atributos</b></dt>
+<dd>Formalmente, todos os atributos são opcionais.  No entanto, alguns deles
+devem ser especificados para um elemento para cumprir a sua finalidade.  Use
+a documentação como guia.  Para atributos verdadeiramente opcionais, ele menciona
+um valor padrão ou declara o que acontece na ausência de uma especificação.
+
+<p>Exceto por alguns atributos do elemento 
+<code><a href="{@docRoot}guide/topics/manifest/manifest-element.html">&lt;manifest&gt;</a></code>
+raiz, todos os nomes de atributo têm um prefixo {@code android:} &mdash; 
+por exemplo, {@code android:alwaysRetainTaskState}.  Como o prefixo é universal,
+a documentação geralmente o omite ao referir-se a atributos
+pelo nome.</p></dd>
+
+<dt><b>Declaração de nomes de classe</b></dt>
+<dd>Muitos elementos correspondem a objetos Java, inclusive elementos do próprio
+aplicativo (o elemento 
+<code><a href="{@docRoot}guide/topics/manifest/application-element.html">&lt;application&gt;</a></code> 
+) e seus componentes principais &mdash; atividades 
+(<code><a href="{@docRoot}guide/topics/manifest/activity-element.html">&lt;activity&gt;</a></code>), 
+serviços 
+(<code><a href="{@docRoot}guide/topics/manifest/service-element.html">&lt;service&gt;</a></code>), 
+receptores de transmissão 
+(<code><a href="{@docRoot}guide/topics/manifest/receiver-element.html">&lt;receiver&gt;</a></code>) 
+e provedores de conteúdo 
+(<code><a href="{@docRoot}guide/topics/manifest/provider-element.html">&lt;provider&gt;</a></code>).  
+
+<p>
+Se uma subclasse for definida, como quase sempre acontece para classes de componentes 
+({@link android.app.Activity}, {@link android.app.Service}, 
+{@link android.content.BroadcastReceiver} e {@link android.content.ContentProvider}), 
+a subclasse será declarada por meio de um atributo {@code name}.  O nome deve conter
+toda a designação do pacote.  
+Por exemplo: uma subclasse {@link android.app.Service} pode ser declarada assim:
+</p>
+
+<pre>&lt;manifest . . . &gt;
+    &lt;application . . . &gt;
+        &lt;service android:name="com.example.project.SecretService" . . . &gt;
+            . . .
+        &lt;/service&gt;
+        . . .
+    &lt;/application&gt;
+&lt;/manifest&gt;</pre>
+
+<p>
+No entanto, para encurtar, se o primeiro caractere da string for um ponto,
+a string será acrescentada ao nome do pacote do aplicativo (conforme especificado pelo atributo 
+<code><a href="{@docRoot}guide/topics/manifest/manifest-element.html#package">package</a></code> 
+ do elemento 
+<code><a href="{@docRoot}guide/topics/manifest/manifest-element.html">&lt;manifest&gt;</a></code> 
+).  A seguinte atribuição é igual à atribuição acima: 
+</p>
+
+<pre>&lt;manifest package="com.example.project" . . . &gt;
+    &lt;application . . . &gt;
+        &lt;service android:name=".SecretService" . . . &gt;
+            . . .
+        &lt;/service&gt;
+        . . .
+    &lt;/application&gt;
+&lt;/manifest&gt;</pre>
+
+<p>
+Ao iniciar um componente, o Android cria uma instância da subclasse nomeada.  
+Se nenhuma subclasse for especificada, ele criará uma instância da classe base.
+</p></dd>
+
+<dt><b>Vários valores</b></dt>
+<dd>Se for especificado mais de um valor, o elemento sempre será repetido
+em vez de listar os vários valores dentro de um único elemento.  
+Por exemplo, um filtro de intenção pode listar algumas ações:
+
+<pre>&lt;intent-filter . . . &gt;
+    &lt;action android:name="android.intent.action.EDIT" /&gt;
+    &lt;action android:name="android.intent.action.INSERT" /&gt;
+    &lt;action android:name="android.intent.action.DELETE" /&gt;
+    . . .
+&lt;/intent-filter&gt;</pre></dd>
+
+<dt><b>Valores de recurso</b></dt>
+<dd>Alguns atributos têm valores que podem ser exibidos aos usuários &mdash; por exemplo,
+uma etiqueta e um ícone de uma atividade.  Os valores desses atributos
+devem ser localizados e, por tanto, definidos a partir de um recurso ou tema.  Os valores 
+de recurso são expressos no formato a seguir:</p>
+
+<p style="margin-left: 2em">{@code @[<i>pacote</i>:]<i>tipo</i>:<i>nome</i>}</p>
+
+<p>
+em que o nome do <i>pacote</i> pode ser omitido se o recurso estiver no mesmo pacote
+que o aplicativo <i>tipo</i> é um tipo de recurso &mdash; como uma "string" ou 
+"drawable" (desenhável) &mdash; e <i>nome</i> é o nome que identifica o recurso específico.  
+Por exemplo:
+</p>
+
+<pre>&lt;activity android:icon="@drawable/smallPic" . . . &gt</pre>
+
+<p>
+Os valores de um tema são expressos de forma semelhante, mas, com um '{@code ?}' 
+em vez de '{@code @}':
+</p>
+
+<p style="margin-left: 2em">{@code ?[<i>pacote</i>:]<i>tipo</i>:<i>nome</i>}
+</p></dd>
+
+<dt><b>Valores de string</b></dt>
+<dd>Quando o valor de um atributo é uma string, devem-se usar duas barras invertidas ('{@code \\}') 
+para caracteres de escape &mdash; por exemplo, '{@code \\n}' para 
+uma nova linha ou '{@code \\uxxxx}' para um caractere Unicode.</dd>
+</dl>
+
+
+<h2 id="filef">Características do arquivo</h2>
+
+<p>
+As seções a seguir descrevem como alguns recursos do Android se refletem
+no arquivo de manifesto.
+</p>
+
+
+<h3 id="ifs">Filtros de intenções</h3>
+
+<p>
+Os componentes fundamentais de um aplicativo (suas atividades, serviços e receptores
+de transmissão) são ativados por <i>intenções</i>.  Intenções são
+pacotes de informações (objetos {@link android.content.Intent}) que descrevem
+uma ação desejada &mdash; inclusive os dados usados em ações, a categoria
+do componente que deve executar a ação e outras instruções pertinentes.  
+O Android localiza um componente adequado para responder à intenção, inicia
+uma nova instância do componente se necessário e passa-o
+ao objeto da intenção.
+</p>
+
+<p>
+Os componentes anunciam seus recursos &mdash; os tipos de intenção aos quais eles podem
+responder &mdash; por meio de <i>filtros de intenções</i>.  Como o sistema Android
+precisa saber que intenções um componente pode tratar antes de iniciá-lo, os filtros
+de intenções são especificados no manifesto como elementos 
+<code><a href="{@docRoot}guide/topics/manifest/intent-filter-element.html">&lt;intent-filter&gt;</a></code>
+.  Os componentes podem ter qualquer quantidade de filtros, em que cada um descreve
+um recurso diferente.
+</p>
+
+<p>
+A intenção que nomeia explicitamente um componente alvo ativará
+aquele componente — o filtro não desempenha nenhuma função.  Porém, uma intenção que não especifica nenhum alvo
+pelo nome pode ativar um componente somente se ele puder passar por um dos filtros
+do componente.
+</p>
+
+<p>
+Para ver como os objetos de intenção são testados em relação aos filtros de intenções,
+consulte o documento 
+<a href="{@docRoot}guide/components/intents-filters.html">Intenções 
+e filtros de intenções</a> em separado.
+</p>
+
+
+<h3 id="iconlabel">Ícones e etiquetas</h3>
+
+<p>
+Alguns elementos têm atributos {@code icon} e {@code label} de um pequeno ícone
+e uma etiqueta de texto que pode ficar visível para os usuários.  Alguns deles também têm um atributo 
+{@code description} para um texto explicativo mais longo que também pode ser 
+exibido na tela.  Por exemplo: o elemento 
+<code><a href="{@docRoot}guide/topics/manifest/permission-element.html">&lt;permission&gt;</a></code>
+tem todos os três atributos; assim, quando o usuário é consultado para dar 
+permissão a um aplicativo que a solicitou, serão apresentados ao usuário um ícone 
+que representa a permissão, o nome da permissão e uma descrição 
+de tudo o que está envolvido.
+</p>
+
+<p>
+Em todo caso, o ícone e a etiqueta definidos em um elemento recipiente se tornam as configurações 
+{@code icon} e {@code label} padrão de todos os subelementos do contêiner.  
+Assim, o ícone e a etiqueta definidos no elemento 
+<code><a href="{@docRoot}guide/topics/manifest/application-element.html">&lt;application&gt;</a></code> 
+são o ícone e a etiqueta padrão para cada um dos componentes do aplicativo.  
+Da mesma forma, o ícone e a etiqueta definidos para um componente &mdash; por exemplo, um elemento 
+<code><a href="{@docRoot}guide/topics/manifest/activity-element.html">&lt;activity&gt;</a></code> 
+ &mdash; são as configurações padrão para cada um dos elementos 
+<code><a href="{@docRoot}guide/topics/manifest/intent-filter-element.html">&lt;intent-filter&gt;</a></code> 
+do componente.  Se um elemento
+<code><a href="{@docRoot}guide/topics/manifest/application-element.html">&lt;application&gt;</a></code> 
+define uma etiqueta, mas uma atividade e seu filtro de intenção não definem, 
+a etiqueta do aplicativo é tratada como a etiqueta de atividade 
+e do filtro de intenção.
+</p>
+
+<p>
+O ícone e a etiqueta definidos para um filtro de intenção são usados para representar um componente 
+apresentado para o usuário para preencher a função
+anunciada pelo filtro.  Por exemplo: um filtro com as configurações 
+"{@code android.intent.action.MAIN}" e 
+"{@code android.intent.category.LAUNCHER}" anuncia uma atividade 
+como uma que inicia um aplicativo &mdash; ou seja,
+que deve ser exibida no inicializador do aplicativo.  O ícone e a etiqueta 
+definidos no filtro são, portanto, as exibidas no inicializador.
+</p>
+
+
+<h3 id="perms">Permissões</h3>
+
+<p>
+As <i>permissões</i> são restrições que limitam o acesso a parte do código 
+ou aos dados de um dispositivo.   A limitação é imposta para proteger dados 
+essenciais que podem sofrer mau uso e distorções ou prejudicar a experiência do usuário.  
+</p>
+
+<p>
+Cada permissão é identificada por uma etiqueta exclusiva.  Geralmente a etiqueta indica 
+a ação que foi restringida.  A seguir há alguns exemplos de permissões definidas 
+pelo Android:
+</p>
+
+<p style="margin-left: 2em">{@code android.permission.CALL_EMERGENCY_NUMBERS}
+<br/>{@code android.permission.READ_OWNER_DATA}
+<br/>{@code android.permission.SET_WALLPAPER}
+<br/>{@code android.permission.DEVICE_POWER}</p>
+
+<p>
+Um recurso pode ser protegido por, no máximo, uma permissão.
+</p>
+
+<p>
+Se um aplicativo precisar de acesso a um recurso protegido por uma permissão, 
+ele deve declarar que precisa da permissão com um elemento 
+<code><a href="{@docRoot}guide/topics/manifest/uses-permission-element.html">&lt;uses-permission&gt;</a></code> 
+no manifesto.  Assim, quando o aplicativo é instalado 
+no dispositivo, o instalador determina se concederá ou não a permissão 
+solicitada, marcando as autoridades que assinaram os certificados 
+do aplicativo e, em alguns casos, perguntando ao usuário.  
+Se a permissão for concedida, o aplicativo será capaz de usar os recursos 
+protegidos.  Caso contrário, sua tentativa de acessar esses recursos simplesmente falhará 
+sem nenhuma notificação ao usuário. 
+</p>
+
+<p>
+Um aplicativo também pode proteger seus componentes (atividades, serviços, 
+receptores de transmissão e provedores de conteúdo) com permissões.  Ele pode empregar 
+qualquer uma das permissões definidas pelo Android (listadas em 
+{@link android.Manifest.permission android.Manifest.permission}) ou declaradas 
+por outros aplicativos.  Ou então, ele pode definir as suas próprias.  As novas permissões são declaradas 
+com o elemento 
+<code><a href="{@docRoot}guide/topics/manifest/permission-element.html">&lt;permission&gt;</a></code>.
+  Por exemplo: uma atividade pode ser protegida da seguinte forma:
+</p>
+
+<pre>
+&lt;manifest . . . &gt;
+    &lt;permission android:name="com.example.project.DEBIT_ACCT" . . . /&gt;
+    &lt;uses-permission android:name="com.example.project.DEBIT_ACCT" /&gt;
+    . . .
+    &lt;application . . .&gt;
+        &lt;activity android:name="com.example.project.FreneticActivity"
+                  android:permission="com.example.project.DEBIT_ACCT"
+                  . . . &gt;
+            . . .
+        &lt;/activity&gt;
+    &lt;/application&gt;
+&lt;/manifest&gt;
+</pre>
+
+<p>
+Observe que, nesse exemplo, a permissão {@code DEBIT_ACCT}, além de declarada
+com o elemento 
+<code><a href="{@docRoot}guide/topics/manifest/permission-element.html">&lt;permission&gt;</a></code>
+, tem seu uso solicitado com o elemento 
+<code><a href="{@docRoot}guide/topics/manifest/uses-permission-element.html">&lt;uses-permission&gt;</a></code>.
+  Ela deve ser solicitada para que outros componentes do aplicativo
+iniciem a atividade protegida, mesmo que a proteção 
+seja imposta pelo próprio aplicativo.  
+</p>
+
+<p>
+Se, no mesmo exemplo, o atributo {@code permission} fosse definido
+como uma permissão declarada em outro lugar 
+(como {@code android.permission.CALL_EMERGENCY_NUMBERS}), não seria
+necessário declará-la novamente com um elemento 
+<code><a href="{@docRoot}guide/topics/manifest/permission-element.html">&lt;permission&gt;</a></code>.
+  No entanto, ainda seria necessário solicitar seu uso com 
+<code><a href="{@docRoot}guide/topics/manifest/uses-permission-element.html">&lt;uses-permission&gt;</a></code>. 
+</p>
+
+<p>
+O elemento 
+<code><a href="{@docRoot}guide/topics/manifest/permission-tree-element.html">&lt;permission-tree&gt;</a></code> 
+declara um espaço de nome de um grupo de permissões que será definido 
+no código.  E 
+<code><a href="{@docRoot}guide/topics/manifest/permission-group-element.html">&lt;permission-group&gt;</a></code>
+define um etiqueta de um conjunto de permissões (os dois declarados no manifesto com elementos 
+<code><a href="{@docRoot}guide/topics/manifest/permission-element.html">&lt;permission&gt;</a></code> 
+e as declaradas em outro lugar).  Ele afeta somente a forma com que as permissões estão 
+agrupadas quando apresentadas ao usuário.  O elemento 
+<code><a href="{@docRoot}guide/topics/manifest/permission-group-element.html">&lt;permission-group&gt;</a></code>
+não especifica que permissões pertencem ao grupo; 
+ele só dá um nome ao grupo.  Para incluir uma permissão no grupo,
+designa-se o nome do grupo ao atributo 
+<code><a href="{@docRoot}guide/topics/manifest/permission-element.html#pgroup">permissionGroup</a></code> 
+ do elemento 
+<code><a href="{@docRoot}guide/topics/manifest/permission-element.html">&lt;permission&gt;</a></code>.
+
+</p>
+
+
+<h3 id="libs">Bibliotecas</h3>
+
+<p>
+Todo aplicativo está vinculado à biblioteca Android padrão, que 
+contém os pacotes básicos para programar aplicativos (com classes comuns 
+tais como Activity, Service, Intent, View, Button, Application, ContentProvider
+etc.).
+</p>
+
+<p>
+No entanto, alguns pacotes residem em suas próprias bibliotecas.  Se o aplicativo 
+usar código de algum desses pacotes, ele deve receber solicitação explícita para ser 
+vinculado a eles.  O manifesto deve conter um elemento 
+<code><a href="{@docRoot}guide/topics/manifest/uses-library-element.html">&lt;uses-library&gt;</a></code>
+ separado para nomear cada uma das bibliotecas  (o nome da biblioteca se encontra 
+na documentação do pacote).
+</p>

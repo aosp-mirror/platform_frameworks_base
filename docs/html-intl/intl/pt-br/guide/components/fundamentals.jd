@@ -1,0 +1,480 @@
+page.title=Fundamentos de aplicativos
+@jd:body
+
+<div id="qv-wrapper">
+<div id="qv">
+
+<h2>Neste documento</h2>
+<ol>
+<li><a href="#Components">Componentes de aplicativo</a>
+  <ol>
+    <li><a href="#ActivatingComponents">Ativação de componentes</a></li>
+  </ol>
+</li>
+<li><a href="#Manifest">O arquivo de manifesto</a>
+  <ol>
+    <li><a href="#DeclaringComponents">Declaração de componentes</a></li>
+    <li><a href="#DeclaringRequirements">Declaração de requisitos do aplicativo</a></li>
+  </ol>
+</li>
+<li><a href="#Resources">Recursos do aplicativo</a></li>
+</ol>
+</div>
+</div>
+
+<p>Os aplicativos do Android são programados em linguagem de programação Java. As ferramentas Android SDK compilam
+o código &mdash; em conjunto com todos os arquivos de dados e recursos &mdash; em um APK, que é o <i>pacote do Android</i>,
+um arquivo de arquivamento com sufixo {@code .apk}. Os arquivos de APK contêm todo o conteúdo
+de um aplicativo do Android e são os arquivos que os dispositivos desenvolvidos para Android usam para instalar o aplicativo.</p>
+
+<p>Depois de instalado em um dispositivo, cada aplicativo do Android é ativado em sua própria área de segurança: </p>
+
+<ul>
+ <li>O sistema operacional Android é um sistema Linux multiusuário em que cada aplicativo
+é um usuário diferente.</li>
+
+<li>Por padrão, o sistema atribui a cada aplicativo um ID de usuário do Linux exclusivo (o ID é usado somente
+pelo sistema e é desconhecido para o aplicativo). O sistema define permissões para todos os arquivos
+em um aplicativo, de modo que somente o ID de usuário atribuído àquele aplicativo pode acessá-los. </li>
+
+<li>Cada processo tem sua própria máquina virtual (VM), portanto o código de um aplicativo é executado isoladamente
+de outros aplicativos.</li>
+
+<li>Por padrão, cada aplicativo é executado em seu próprio processo Linux. O Android inicia o processo quando é preciso
+executar algum componente do aplicativo; em seguida, encerra-o quando não mais é
+necessário ou quando o sistema precisa recuperar memória para outros aplicativos.</li>
+</ul>
+
+<p>Assim, o sistema Android implementa o <em>princípio do privilégio mínimo</em>. Ou seja,
+cada aplicativo, por padrão, tem acesso somente aos componentes necessários para a execução do seu trabalho
+e nada mais. Isso cria um ambiente muito seguro em que o aplicativo não pode acessar partes
+do sistema para o qual não tem permissão.</p>
+
+<p>No entanto, sempre existe uma maneira de um aplicativo compartilhar dados com outros aplicativos
+e acessar serviços do sistema:</p>
+
+<ul>
+  <li>É impossível fazer com que dois aplicativos compartilhem o mesmo ID de usuário do Linux, caso em que
+eles são capazes de acessar os arquivos um do outro.  Para preservar os recursos do sistema, os aplicativos com o mesmo
+ID de usuário também podem ser combinados para serem executados no mesmo processo Linux e compartilhar a mesma VM
+(também é preciso atribuir o mesmo certificado aos aplicativos).</li>
+  <li>Um aplicativo pode solicitar permissão para acessar dados de dispositivo como
+contatos do usuário, mensagens SMS, o sistema montável (cartão SD), câmera, Bluetooth etc. Todas
+as permissões de aplicativo devem ser concedidas pelo usuário no momento da instalação.</li>
+</ul>
+
+<p>Essas são as informações básicas de como um aplicativo do Android existe dentro do sistema. O restante
+deste documento apresenta o leitor a:</p>
+<ul>
+  <li>Componentes fundamentais de estrutura que definem o aplicativo.</li>
+  <li>O arquivo de manifesto em que os componentes são declarados e os recursos de dispositivo necessários
+ao aplicativo.</li>
+  <li>Recursos separados do código do aplicativo que permitem
+otimizar o comportamento de uma variedade de configurações de dispositivo.</li>
+</ul>
+
+
+
+<h2 id="Components">Componentes de aplicativo</h2>
+
+<p>Os componentes de aplicativo são os blocos de construção fundamentais de um aplicativo do Android.
+Cada componente é um ponto diferente pelo qual o sistema pode entrar no aplicativo. Nem todos
+os componentes são pontos de entrada reais para o usuário e alguns dependem uns dos outros, mas cada um existe
+como uma entidade independente e desempenha uma função específica &mdash; cada um é um bloco de construção exclusivo
+que ajuda a definir o comportamento geral do aplicativo.</p>
+
+<p>Há quatro tipos diferentes de componentes de aplicativo. Cada tipo tem uma finalidade distinta
+e tem um ciclo de vida específico que define a forma pela qual o componente é criado e destruído.</p>
+
+<p>A seguir apresentam-se os quatro tipos de componentes de aplicativos:</p>
+
+<dl>
+
+<dt><b>Atividades</b></dt>
+
+<dd>As <i>atividades</i> representam uma tela única com uma interface do usuário. Por exemplo:
+um aplicativo de e-mails pode ter uma atividade que mostra uma lista de novos
+e-mails, outra atividade que compõe um e-mail e outra ainda que lê e-mails. Embora
+essas atividades funcionem juntas para formar uma experiência de usuário coesa no aplicativo de e-mails,
+elas são independentes entre si. Portanto, um aplicativo diferente pode iniciar qualquer uma
+dessas atividades (se o aplicativo de e-mails permitir). Por exemplo: um aplicativo de câmera pode iniciar
+a atividade no aplicativo de e-mail que compõe o novo e-mail para que o usuário compartilhe uma foto.
+
+<p>Uma atividade é implementada como uma subclasse de {@link android.app.Activity} — saiba mais sobre isso
+no guia do desenvolvedor
+<a href="{@docRoot}guide/components/activities.html">Atividades</a>.</p>
+</dd>
+
+
+<dt><b>Serviços</b></dt>
+
+<dd>Os <i>serviços</i> são componentes executados em segundo plano para realizar operações
+de execução longa ou para realizar trabalho para processos remotos. Eles
+não apresentam uma interface do usuário. Por exemplo: um serviço pode tocar música em segundo plano
+enquanto o usuário está em um aplicativo diferente ou buscar dados na rede sem bloquear
+a interação do usuário com uma atividade. Outro componente, como uma atividade, pode iniciar
+o serviço e deixá-lo executar ou vincular-se a ele para interagir.
+
+<p>Um serviço é implementado como uma subclasse de {@link android.app.Service} — saiba mais sobre isso
+no guia do desenvolvedor
+<a href="{@docRoot}guide/components/services.html">Serviços</a>.</p>
+</dd>
+
+
+<dt><b>Provedores de conteúdo</b></dt>
+
+<dd>Os <i>provedores de conteúdo</i> gerenciam um conjunto compartilhado de dados do aplicativo. É possível armazenar os dados
+no sistema de arquivos, em um banco de dados SQLite ou em qualquer local de armazenamento persistente
+que o aplicativo possa acessar. Por meio do provedor de conteúdo, outros aplicativos podem consultar ou até modificar
+os dados (se o provedor de conteúdo permitir). Por exemplo: o sistema Android oferece um provedor
+de conteúdo que gerencia as informações de contato do usuário. Assim, qualquer aplicativo
+com as permissões adequadas pode consultar parte do provedor de conteúdo (como {@link
+android.provider.ContactsContract.Data}) para ler e gravar informações sobre uma pessoa específica.
+
+<p>Os provedores de conteúdo são úteis para ler e gravar dados privados
+no aplicativo e não compartilhados. Por exemplo: o exemplo de aplicativo <a href="{@docRoot}resources/samples/NotePad/index.html">Note Pad</a> usa
+um provedor de conteúdo para salvar notas.</p>
+
+<p>Um provedor de conteúdo é implementado como uma subclasse de {@link android.content.ContentProvider}
+e precisa implementar um conjunto padrão de APIs que permitem a outros aplicativos
+realizar transações. Para obter mais informações, consulte o guia de desenvolvedor
+<a href="{@docRoot}guide/topics/providers/content-providers.html">Provedores de conteúdo</a>.</p>
+</dd>
+
+
+<dt><b>Receptores de transmissão</b></dt>
+
+<dd>Os <i>receptores de transmissão</i> são componentes que respondem a anúncios de transmissão
+por todo o sistema.  Muitas transmissões se originam do sistema &mdash; por exemplo, uma transmissão que anuncia
+que uma tela foi desligada, a bateria está baixa ou uma tela foi capturada.
+Os aplicativos também podem iniciar transmissões &mdash; por exemplo, para comunicar a outros dispositivos
+que alguns dados foram baixados no dispositivo e estão disponíveis para uso. Embora os receptores
+de transmissão não exibam nenhuma interface do usuário, eles podem <a href="{@docRoot}guide/topics/ui/notifiers/notifications.html">criar uma notificação na barra de status</a>
+para alertar ao usuário quando ocorre uma transmissão. Mais comumente, no entanto, um receptor de transmissão
+é somente um "portal" para outros componentes e realiza uma quantidade mínima de trabalho. Por
+exemplo: ele pode iniciar um serviço para executar um trabalho baseado no evento.
+
+<p>Os receptores de transmissão são implementados como subclasses de {@link android.content.BroadcastReceiver}
+e cada transmissão é entregue como um objeto {@link android.content.Intent}. Para obter mais informações,
+consulte a classe {@link android.content.BroadcastReceiver}.</p>
+</dd>
+
+</dl>
+
+
+
+<p>Um aspecto exclusivo do projeto do sistema Android é que qualquer aplicativo pode iniciar
+um componente de outro aplicativo. Por exemplo: se você quiser que o usuário capture
+uma foto com a câmera do dispositivo, provavelmente haverá outro aplicativo que faz isso
+e o seu aplicativo poderá usá-lo, ou seja, não será necessário desenvolver uma atividade para capturar uma foto. Não é
+necessário incorporar nem mesmo vinculá-lo do aplicativo da câmera ao código.
+Em vez disso, basta iniciar a atividade no aplicativo da câmera que captura
+uma foto. Quando concluída, a foto até retorna ao aplicativo em questão para ser usada. Para o usuário,
+parece que a câmera é realmente parte do aplicativo.</p>
+
+<p>Quando o sistema inicia um componente, ele inicia o processo daquele aplicativo (se ele já
+não estiver em execução) e instancia as classes necessárias para o componente. Por exemplo: se o aplicativo
+iniciar a atividade no aplicativo da câmera que captura uma foto, aquele aplicativo
+é executado no processo que pertence ao aplicativo da câmera e não no processo do aplicativo.
+Portanto, ao contrário dos aplicativos na maioria dos outros sistemas, os aplicativos do Android não têm um ponto
+de entrada único (não há a função {@code main()}, por exemplo).</p>
+
+<p>Como o sistema executa cada aplicativo em um processo separado com permissões de arquivo
+que restringem o acesso a outros aplicativos, o aplicativo não pode ativar diretamente um componente
+a partir de outro aplicativo. No entanto, o sistema Android pode. Portanto, para ativar um componente
+em outro aplicativo, é preciso enviar uma mensagem ao sistema que especifique a <em>intenção</em>
+de iniciar um componente específico. Em seguida, o sistema ativa o componente.</p>
+
+
+<h3 id="ActivatingComponents">Ativação de componentes</h3>
+
+<p>Três dos quatro tipos de componente &mdash; atividades, serviços
+e receptores de transmissão &mdash; são ativados por uma mensagem assíncrona chamada <em>intenção</em>.
+As intenções vinculam componentes individuais entre si em tempo de execução (como
+mensageiros que solicitam uma ação de outros componentes), seja o componente pertencente
+ao aplicativo ou não.</p>
+
+<p>A intenção é criada com um objeto {@link android.content.Intent}, que define uma mensagem
+para ativar um componente específico ou um <em>tipo</em> específico de componente &mdash; as intenções
+podem ser explícitas ou implícitas, respectivamente.</p>
+
+<p>Para atividades e serviços, as intenções definem a ação a executar (por exemplo, "exibir" ou
+"enviar" algo) e podem especificar a URI dos dados usados na ação (entre outras coisas
+que o componente a iniciar precisa saber). Por exemplo: uma intenção pode transmitir uma solicitação
+de uma atividade para exibir uma imagem ou abrir uma página da web. Em alguns casos, é preciso iniciar
+uma atividade para receber um resultado; nesse caso, a atividade também retorna
+o resultado em um {@link android.content.Intent} (por exemplo, é possível emitir uma intenção para
+que o usuário selecione um contato pessoal e o retorne a você &mdash; a intenção de retorno contém
+uma URI que aponta para o contato selecionado).</p>
+
+<p>Para receptores de transmissão, a intenção simplesmente define
+o anúncio que está sendo transmitido (por exemplo, uma transmissão para indicar que a bateria do dispositivo está acabando
+contém uma string de ação conhecida que indica "nível baixo da bateria").</p>
+
+<p>O outro tipo de componente, o provedor de conteúdo, não é ativado por intenções. Em vez disso,
+ele é ativado por uma solicitação de um {@link android.content.ContentResolver}. O resolvedor
+de conteúdo manipula todas as transações diretas com o provedor de conteúdo para que o componente
+que executa as transações com o provedor não precise e, em vez disso, chama os métodos no objeto {@link
+android.content.ContentResolver}. Isso deixa uma camada de abstração entre o provedor
+de conteúdo e o componente que solicita informações (por segurança).</p>
+
+<p>Há dois métodos separados para ativar cada tipo de componente:</p>
+<ul>
+  <li>É possível iniciar uma atividade (ou dar-lhe algo novo para fazer)
+passando uma {@link android.content.Intent} a {@link android.content.Context#startActivity
+startActivity()} ou {@link android.app.Activity#startActivityForResult startActivityForResult()}
+(para que, quando desejado, a atividade retorne um resultado).</li>
+  <li>É possível iniciar um dispositivo (ou dar novas instruções a um serviço em andamento)
+passando uma {@link android.content.Intent} a {@link android.content.Context#startService
+startService()}. Ou então, é possível vincular ao serviço passando uma{@link android.content.Intent}
+a {@link android.content.Context#bindService bindService()}.</li>
+  <li>É possível iniciar uma transmissão passando uma{@link android.content.Intent} a métodos como
+{@link android.content.Context#sendBroadcast(Intent) sendBroadcast()}, {@link
+android.content.Context#sendOrderedBroadcast(Intent, String) sendOrderedBroadcast()} ou {@link
+android.content.Context#sendStickyBroadcast sendStickyBroadcast()}.</li>
+  <li>É possível iniciar uma consulta a um provedor de conteúdo chamando {@link
+android.content.ContentProvider#query query()} em um {@link android.content.ContentResolver}.</li>
+</ul>
+
+<p>Para obter mais informações sobre intenções, consulte o documento
+<a href="{@docRoot}guide/components/intents-filters.html">Intenções e filtros de intenções</a>. Veja mais informações sobre a ativação de componentes específicos
+nos seguintes documentos: <a href="{@docRoot}guide/components/activities.html">Atividades</a>, <a href="{@docRoot}guide/components/services.html">Serviços</a>, {@link
+android.content.BroadcastReceiver} e <a href="{@docRoot}guide/topics/providers/content-providers.html">Provedores de conteúdo</a>.</p>
+
+
+<h2 id="Manifest">O arquivo de manifesto</h2>
+
+<p>Antes de o sistema Android iniciar um componente de aplicativo, é preciso ler o arquivo {@code AndroidManifest.xml}
+(o arquivo de "manifesto")
+do aplicativo para que o sistema saiba se o componente existe. O aplicativo precisa declarar todos os seus componentes nesse arquivo, que deve estar na raiz
+do diretório do projeto do aplicativo.</p>
+
+<p>O manifesto faz outras coisas além de declarar os componentes do aplicativo,
+por exemplo:</p>
+<ul>
+  <li>Identifica todas as permissões do usuário de que o aplicativo precisa, como acesso à internet
+ou acesso de somente leitura aos contatos do usuário.</li>
+  <li>Declara o <a href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#ApiLevels">nível de API</a> mínimo
+exigido pelo aplicativo com base nas APIs que o aplicativo usa.</li>
+  <li>Declara os recursos de hardware e software usados ou exigidos pelo aplicativo, como câmera,
+serviços de bluetooth ou tela multitoque.</li>
+  <li>As bibliotecas de API às quais o aplicativo precisa vincular-se (outras além das APIs
+de estrutura do Android), como a <a href="http://code.google.com/android/add-ons/google-apis/maps-overview.html">biblioteca
+Google Maps</a>.</li>
+  <li>E outros.</li>
+</ul>
+
+
+<h3 id="DeclaringComponents">Declaração de componentes</h3>
+
+<p>A principal tarefa do manifesto é informar ao sistema os componentes do aplicativo. Por
+exemplo: um arquivo de manifesto pode declarar uma atividade da seguinte forma: </p>
+
+<pre>
+&lt;?xml version="1.0" encoding="utf-8"?&gt;
+&lt;manifest ... &gt;
+    &lt;application android:icon="@drawable/app_icon.png" ... &gt;
+        &lt;activity android:name="com.example.project.ExampleActivity"
+                  android:label="@string/example_label" ... &gt;
+        &lt;/activity&gt;
+        ...
+    &lt;/application&gt;
+&lt;/manifest&gt;</pre>
+
+<p>No elemento <code><a
+href="{@docRoot}guide/topics/manifest/application-element.html">&lt;application&gt;</a></code>
+, o atributo {@code android:icon} aponta para recursos de um ícone que identifica
+o aplicativo.</p>
+
+<p>No elemento <code><a
+href="{@docRoot}guide/topics/manifest/activity-element.html">&lt;activity&gt;</a></code>,
+o atributo {@code android:name} especifica o nome da classe totalmente qualificada da subclasse de {@link
+android.app.Activity} e o atributo {@code android:label} especifica uma string
+a usar como a etiqueta da atividade visível ao usuário.</p>
+
+<p>É preciso declarar todos os componentes desta forma:</p>
+<ul>
+  <li>Elementos <code><a
+href="{@docRoot}guide/topics/manifest/activity-element.html">&lt;activity&gt;</a></code>
+para atividades</li>
+  <li>Elementos <code><a
+href="{@docRoot}guide/topics/manifest/service-element.html">&lt;service&gt;</a></code>
+para serviços</li>
+  <li>Elementos <code><a
+href="{@docRoot}guide/topics/manifest/receiver-element.html">&lt;receiver&gt;</a></code>
+para receptores de transmissão</li>
+  <li>Elementos <code><a
+href="{@docRoot}guide/topics/manifest/provider-element.html">&lt;provider&gt;</a></code>
+para provedores de conteúdo</li>
+</ul>
+
+<p>Atividades, serviços e provedores de conteúdo incluídos na fonte, mas não declarados
+no manifesto, não ficam visíveis para o sistema e, consequentemente, podem não ser executados.  No entanto, receptores
+de transmissão
+podem ser declarados no manifesto dinamicamente no código (como objetos
+{@link android.content.BroadcastReceiver}) e registrados no sistema chamando-se
+{@link android.content.Context#registerReceiver registerReceiver()}.</p>
+
+<p>Para obter mais informações sobre a estrutura do arquivo de manifesto de aplicativos, consulte a documentação
+<a href="{@docRoot}guide/topics/manifest/manifest-intro.html">O arquivo AndroidManifest.xml</a>. </p>
+
+
+
+<h3 id="DeclaringComponentCapabilities">Declaração de recursos de componentes</h3>
+
+<p>Conforme abordado acima, em <a href="#ActivatingComponents">Ativação de componentes</a>, é possível usar
+uma {@link android.content.Intent} para iniciar atividades, serviços e receptores de transmissão. Isso pode ser feito
+nomeando-se explicitamente o componente-alvo (usando o nome da classe do componente) na intenção. No entanto,
+a verdadeira força das intenções reside no conceito de <em>intenções implícitas</em>. As intenções implícitas
+descrevem simplesmente o tipo de ação a executar (e, opcionalmente, os dados em que
+a ação deve ser executada) e permitem ao sistema encontrar e iniciar um componente no dispositivo que pode executar
+a ação. Se houver mais de um componente que possa executar a ação descrita
+pela intenção, o usuário selecionará qual deles usar.</p>
+
+<p>Para o sistema identificar os componentes que podem responder a uma intenção, compara-se
+a intenção recebida com os <i>filtros de intenções</i> fornecidos no arquivo de manifesto de outros aplicativos
+do dispositivo.</p>
+
+<p>Ao declarar uma atividade no manifesto do aplicativo, pode-se incluir
+filtros de intenções que declarem os recursos da atividade para que ela responda
+a intenções de outros aplicativos. Para declarar um filtro de intenções no componentes,
+adiciona-se um elemento <a href="{@docRoot}guide/topics/manifest/intent-filter-element.html">{@code
+&lt;intent-filter&gt;}</a> como filho do elemento de declaração do componente.</p>
+
+<p>Por exemplo: se você estiver programando um aplicativo de e-mail com uma atividade de compor um novo e-mail,
+é possível declarar um filtro de intenções para responder a intenções "enviar" (para enviar um novo e-mail), assim:</p>
+<pre>
+&lt;manifest ... >
+    ...
+    &lt;application ... &gt;
+        &lt;activity android:name="com.example.project.ComposeEmailActivity">
+            &lt;intent-filter>
+                &lt;action android:name="android.intent.action.SEND" />
+                &lt;data android:type="*/*" />
+                &lt;category android:name="android.intent.category.DEFAULT" />
+            &lt;/intent-filter>
+        &lt;/activity>
+    &lt;/application&gt;
+&lt;/manifest>
+</pre>
+
+<p>Em seguida, se outro aplicativo criar uma intenção com a ação {@link
+android.content.Intent#ACTION_SEND} e passá-la para {@link android.app.Activity#startActivity
+startActivity()}, o sistema poderá iniciar a atividade de forma que o usuário possa rascunhar e enviar
+um e-mail.</p>
+
+<p>Para obter mais informações sobre filtros de intenções, consulte o documento <a href="{@docRoot}guide/components/intents-filters.html">Intenções e filtros de intenções</a>.
+</p>
+
+
+
+<h3 id="DeclaringRequirements">Declaração de requisitos do aplicativo</h3>
+
+<p>Existem vários dispositivos desenvolvidos para Android e nem todos apresentam os mesmos
+recursos e características. Para evitar que o aplicativo seja instalado em dispositivos
+que não contenham os recursos que o aplicativo necessita, é importante definir um perfil
+para os tipos de dispositivo compatíveis com o aplicativo. É preciso declarar os requisitos de dispositivo e software
+no arquivo de manifesto. A maior parte dessas declarações é somente informativa e o sistema não as lê,
+mas serviços externos, como o Google Play, as leem para oferecer uma filtragem
+aos usuários quando buscam esses aplicativos para seu dispositivo.</p>
+
+<p>Por exemplo: se o aplicativo exige uma câmera e usa APIs introduzidas no Android 2.1 (<a href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#ApiLevels">API de nível</a> 7),
+deve-se declarar esses requisitos no arquivo de manifesto da seguinte forma:</p> 
+
+<pre>
+&lt;manifest ... >
+    &lt;uses-feature android:name="android.hardware.camera.any"
+                  android:required="true" />
+    &lt;uses-sdk android:minSdkVersion="7" android:targetSdkVersion="19" />
+    ...
+&lt;/manifest>
+</pre>
+
+<p>Assim, dispositivos que <em>não</em> tenham câmera e tenham
+versão Android <em>anterior</em> a 2.1 não poderão instalar o aplicativo a partir do Google Play.</p>
+
+<p>No entanto, também é possível declarar que o aplicativo usa a câmera como recurso 
+<em>não obrigatório</em>. Nesse caso, o aplicativo precisa definir o atributo <a href="{@docRoot}guide/topics/manifest/uses-feature-element.html#required">{@code required}</a>
+ como {@code "false"} e verificar em tempo de execução
+se o dispositivo tem câmera e desativar os recursos da câmera conforme o necessário.</p>
+
+<p>Veja mais informações sobre o gerenciamento da compatibilidade do aplicativo com diferentes dispositivos
+no documento <a href="{@docRoot}guide/practices/compatibility.html">Compatibilidade
+do dispositivo</a>.</p>
+
+
+
+<h2 id="Resources">Recursos do aplicativo</h2>
+
+<p>Os aplicativos Android são compostos por mais do que somente códigos &mdash; eles requerem recursos
+separados do código-fonte, como imagens, arquivos de áudio e tudo o que se relaciona
+com a apresentação visual do aplicativo. Por exemplo: deve-se definir animações, menus, estilos, cores
+e o layout das interfaces do usuário da atividade com arquivos XML. O uso de recursos de aplicativo facilita
+a atualização de diversas características do aplicativo sem a necessidade de modificar
+o código e &mdash; fornecendo conjuntos de recursos alternativos &mdash; permite otimizar o aplicativo
+para diversas configurações de dispositivo (como idiomas e tamanhos de tela diferentes).</p>
+
+<p>Para todo recurso incluído no projeto Android, as ferramentas de programação SDK definem
+um ID inteiro exclusivo que o programador pode usar para referenciar o recurso do código do aplicativo
+ou de outros recursos definidos no XML. Por exemplo: se o aplicativo contiver um arquivo de imagem de nome {@code
+logo.png} (salvo no diretório {@code res/drawable/}), as ferramentas de SDK gerarão um ID de recurso
+chamado {@code R.drawable.logo}, que pode ser usado para referenciar a imagem e inseri-la
+na interface do usuário.</p>
+
+<p>Um dos aspectos mais importantes de fornecer recursos separados do código-fonte
+é a capacidade de fornecer recursos alternativos para diferentes configurações
+de dispositivo. Por exemplo: ao definir strings de IU em XML, é possível converter as strings em outros
+idiomas e salvá-las em arquivos separados. Em seguida, com base em um <em>qualificador</em> de idioma
+acrescentado ao nome do diretório do recurso (como {@code res/values-fr/} para valores
+de string em francês) e a configuração de idioma do usuário, o sistema Android aplica as strings de idioma adequadas
+à IU.</p>
+
+<p>O Android aceita vários <em>qualificadores</em> para recursos alternativos. O qualificador
+é uma string curta incluída no nome dos diretórios de recurso para definir
+a configuração de dispositivo em que esses recursos serão usados. Outro exemplo:
+deve-se criar diferentes layouts para as atividades conforme a orientação
+e o tamanho da tela do dispositivo. Por exemplo: quando a tela do dispositivo está em orientação
+retrato (vertical), pode ser desejável um layout com botões na vertical, mas, quando a tela está em orientação
+paisagem (horizontal), os botões devem estar alinhados horizontalmente. Para alterar o layout
+conforme a orientação, pode-se definir dois layouts diferentes e aplicar o qualificador
+adequado ao nome do diretório de cada layout. Em seguida, o sistema aplica automaticamente o layout adequado
+conforme a orientação atual do dispositivo.</p>
+
+<p>Para obter mais informações sobre os diferentes tipos de recursos a incluir no aplicativo
+e como criar recursos alternativos para diferentes configurações de dispositivo, leia <a href="{@docRoot}guide/topics/resources/providing-resources.html">Como fornecer recursos</a>.</p>
+
+
+
+<div class="next-docs">
+<div class="col-6">
+  <h2 class="norule">Continue lendo sobre:</h2>
+  <dl>
+    <dt><a href="{@docRoot}guide/components/intents-filters.html">Intenções e filtros de intenções</a>
+    </dt>
+    <dd>Informações sobre o uso de APIs {@link android.content.Intent} para
+ativar componentes de aplicativos, como atividades e serviços, e como disponibilizar componentes
+de aplicativo para uso em outros aplicativos.</dd>
+    <dt><a href="{@docRoot}guide/components/activities.html">Atividades</a></dt>
+    <dd>Informações sobre a criação de uma instância da classe {@link android.app.Activity},
+que permite uma tela diferente no aplicativo com uma interface do usuário.</dd>
+    <dt><a href="{@docRoot}guide/topics/resources/providing-resources.html">Como fornecer recursos</a></dt>
+    <dd>Informações sobre a estrutura de aplicativos Android para recursos de aplicativo separados do código-fonte
+, inclusive como fornecer recursos alternativos para configurações
+de dispositivo específicas.
+    </dd>
+  </dl>
+</div>
+<div class="col-6">
+  <h2 class="norule">Você também pode se interessar por:</h2>
+  <dl>
+    <dt><a href="{@docRoot}guide/practices/compatibility.html">Compatibilidade do dispositivo</a></dt>
+    <dd>Informações sobre como o Android funciona em diferentes tipos de dispositivo e uma introdução
+a como otimizar o aplicativo para cada dispositivo ou restringir a disponibilidade
+a diferentes dispositivos.</dd>
+    <dt><a href="{@docRoot}guide/topics/security/permissions.html">Permissões do sistema</a></dt>
+    <dd>Informações sobre como o aplicativo restringe o acesso do Android a determinadas APIs sem um
+sistema de permissão que exija o consentimento do usuário para que o aplicativo use essas APIs.</dd>
+  </dl>
+</div>
+</div>
+

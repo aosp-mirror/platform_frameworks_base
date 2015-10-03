@@ -1,0 +1,2356 @@
+page.title=연락처 제공자
+@jd:body
+<div id="qv-wrapper">
+<div id="qv">
+<h2>간략히 보기</h2>
+<ul>
+    <li>사람들 관련 정보를 저장한 Android의 리포지토리입니다.</li>
+    <li>
+        웹과 동기화합니다.
+    </li>
+    <li>
+        소셜 스트림 데이터와 통합됩니다.
+    </li>
+</ul>
+<h2>이 문서의 내용</h2>
+<ol>
+    <li>
+        <a href="#InformationTypes">연락처 제공자 조직</a>
+    </li>
+    <li>
+        <a href="#RawContactBasics">원시 연락처</a>
+    </li>
+    <li>
+        <a href="#DataBasics">데이터</a>
+    </li>
+    <li>
+        <a href="#ContactBasics">연락처</a>
+    </li>
+    <li>
+        <a href="#Sources">동기화 어댑터의 데이터</a>
+    </li>
+    <li>
+        <a href="#Permissions">필수 권한</a>
+    </li>
+    <li>
+        <a href="#UserProfile">사용자 프로필</a>
+    </li>
+    <li>
+        <a href="#ContactsProviderMetadata">연락처 제공자 메타데이터</a>
+    </li>
+    <li>
+        <a href="#Access">연락처 제공자 액세스</a>
+    <li>
+    </li>
+    <li>
+        <a href="#SyncAdapters">연락처 제공자 동기화 어댑터</a>
+    </li>
+    <li>
+        <a href="#SocialStream">소셜 스트림 데이터</a>
+    </li>
+    <li>
+        <a href="#AdditionalFeatures">추가 연락처 제공자 기능</a>
+    </li>
+</ol>
+<h2>Key 클래스</h2>
+<ol>
+    <li>{@link android.provider.ContactsContract.Contacts}</li>
+    <li>{@link android.provider.ContactsContract.RawContacts}</li>
+    <li>{@link android.provider.ContactsContract.Data}</li>
+    <li>{@code android.provider.ContactsContract.StreamItems}</li>
+</ol>
+<h2>관련 샘플</h2>
+<ol>
+    <li>
+        <a href="{@docRoot}resources/samples/ContactManager/index.html">
+        연락처 관리자
+        </a>
+    </li>
+    <li>
+        <a href="{@docRoot}resources/samples/SampleSyncAdapter/index.html">
+            샘플 동기화 어댑터</a>
+    </li>
+</ol>
+<h2>참고 항목</h2>
+<ol>
+    <li>
+        <a href="{@docRoot}guide/topics/providers/content-provider-basics.html">
+        콘텐츠 제공자 기본 정보
+        </a>
+    </li>
+</ol>
+</div>
+</div>
+<p>
+    콘텐츠 제공자는 기기의 사람에 대한 중앙 데이터 리포지토리를 관리하는 강력하고 유연한
+Android 구성 요소입니다. 콘텐츠 제공자는 기기의 연락처 애플리케이션에서 개발자에게 표시되는 
+데이터의 출처입니다. 여기의 데이터에는 개발자 자신의 애플리케이션에서 
+액세스하여 기기와 온라인 서비스 사이에서 데이터를 전송할 수도 있습니다. 제공자는 
+광범위한 데이터 소스를 수용하며 각 인물에 대해 가능한 한 많은 데이터를 관리하여야 하므로, 그 결과 조직이 무척 
+복잡합니다. 이 때문에 이 제공자의 API에는 
+광범위한 계약 클래스와 인터페이스 세트가 포함되어 있어 데이터 검색과 수정을 모두 한층 
+용이하게 해줍니다.
+</p>
+<p>
+    이 가이드에서 설명하는 내용은 다음과 같습니다.
+</p>
+    <ul>
+        <li>
+            기본적인 제공자 구조.
+        </li>
+        <li>
+            제공자에서 데이터를 검색하는 방법.
+        </li>
+        <li>
+            제공자에서 데이터를 수정하는 방법.
+        </li>
+        <li>
+            동기화 어댑터를 작성하여 서버에서 가져온 데이터를 연락처 제공자와 
+동기화하는 방법.
+        </li>
+    </ul>
+<p>
+    이 가이드는 독자가 Android 콘텐츠 제공자의 기본 정보를 알고 있는 것으로 간주합니다. Android 콘텐츠 제공자에 
+관한 자세한 내용은 
+<a href="{@docRoot}guide/topics/providers/content-provider-basics.html">
+콘텐츠 제공자 기본 정보</a> 가이드를 읽어보십시오. 
+<a href="{@docRoot}resources/samples/SampleSyncAdapter/index.html">샘플 동기화 어댑터</a>
+샘플 앱은 동기화 어댑터를 사용하여 연락처 제공자와 Google Web Services가 호스팅하는 샘플 애플리케이션 사이에서
+데이터를 전송하는 동기화 어댑터의 사용 예시입니다.
+</p>
+<h2 id="InformationTypes">연락처 제공자 조직</h2>
+<p>
+    연락처 제공자는 Android 콘텐츠 제공자 구성 요소입니다. 이것은 한 사람에 대해 
+각기 세 가지 유형의 데이터를 관리합니다. 각 데이터는 그림 1에서 설명하는 바와 같이 제공자가 제공하는 
+각 테이블에 상응합니다.
+</p>
+<img src="{@docRoot}images/providers/contacts_structure.png" alt="" height="364" id="figure1" />
+<p class="img-caption">
+  <strong>그림 1.</strong> 연락처 제공자 테이블 구조입니다.
+</p>
+<p>
+    이 세 개의 테이블은 보통 자신의 계약 클래스의 이름으로 불립니다. 이들 클래스는 
+테이블에서 사용하는 콘텐츠 URI, 열 이름 및 열 값의 상수를 정의합니다.
+</p>
+<dl>
+    <dt>
+        {@link android.provider.ContactsContract.Contacts} 테이블
+    </dt>
+    <dd>
+        행은 원시 연락처 행의 집계에 기초하여 각기 다른 사람을 나타냅니다.
+    </dd>
+    <dt>
+        {@link android.provider.ContactsContract.RawContacts} 테이블
+    </dt>
+    <dd>
+        사용자 계정과 유형을 기준으로, 한 사람에 대한 데이터 요약이 들어있는 행입니다.
+    </dd>
+    <dt>
+        {@link android.provider.ContactsContract.Data} 테이블
+    </dt>
+    <dd>
+        이메일 주소나 전화 번호와 같은 원시 연락처의 세부 정보가 들어있는 행입니다.
+    </dd>
+</dl>
+<p>
+    {@link android.provider.ContactsContract}의 계약 클래스가 대표하는 다른 테이블은 
+보조 테이블로, 연락처 제공자는 이들을 사용하여 작업을 관리하거나 기기의 연락처에 있는 
+특정 기능 또는 전화 통신 애플리케이션 등을 지원합니다.
+</p>
+<h2 id="RawContactBasics">원시 연락처</h2>
+<p>
+    원시 연락처는 단일 계정 유형과 계정 이름에서 가져오는 
+한 사람의 데이터를 나타냅니다. 연락처 제공자는 한 사람에 대해 하나 이상의 온라인 서비스를 데이터의 출처로 허용하므로, 
+연락처 제공자에서는 같은 사람에 대해 여러 개의 원시 연락처를 허용합니다.
+    원시 연락처를 여러 개 사용하면 사용자가 같은 계정 유형의 하나 이상의 계정에서 가져온 
+한 사람의 여러 데이터를 조합할 수 있습니다.
+</p>
+<p>
+    원시 연락처의 데이터 대부분은 
+{@link android.provider.ContactsContract.RawContacts} 테이블에 저장되지 않습니다. 대신, 
+{@link android.provider.ContactsContract.Data} 테이블에서 하나 이상의 행에 저장됩니다. 각 데이터 행에는
+상위 {@link android.provider.ContactsContract.RawContacts} 행의 {@code android.provider.BaseColumns#_ID RawContacts._ID} 값을 포함하는 
+열 {@link android.provider.ContactsContract.DataColumns#RAW_CONTACT_ID Data.RAW_CONTACT_ID}가 
+있습니다.
+</p>
+<h3 id="RawContactsColumns">중요한 원시 연락처 열</h3>
+<p>
+    {@link android.provider.ContactsContract.RawContacts} 테이블의 중요한 열은 
+표 1에 나열되어 있습니다. 표 뒤에 이어지는 참고 사항을 꼭 읽어주십시오.
+</p>
+<p class="table-caption" id="table1">
+    <strong>표 1.</strong> 중요한 원시 연락처 열입니다.
+</p>
+<table>
+    <tr>
+        <th scope="col">열 이름</th>
+        <th scope="col">용도</th>
+        <th scope="col">참고</th>
+    </tr>
+    <tr>
+        <td>
+            {@link android.provider.ContactsContract.SyncColumns#ACCOUNT_NAME}
+        </td>
+        <td>
+            이 원시 연락처의 소스인 계정 유형에 대한 계정 이름입니다.
+            예를 들어, Google 계정의 계정 이름은 
+기기 소유자의 Gmail 주소 중 하나입니다. 자세한 정보는 
+{@link android.provider.ContactsContract.SyncColumns#ACCOUNT_TYPE}의 
+다음 항목을 참조하십시오.
+        </td>
+        <td>
+            이 이름의 형식은 각자의 계정 유형별로 다릅니다. 이것은 꼭 
+이메일 주소여야 하는 것은 아닙니다.
+        </td>
+    </tr>
+    <tr>
+        <td>
+            {@link android.provider.ContactsContract.SyncColumns#ACCOUNT_TYPE}
+        </td>
+        <td>
+            이 원시 연락처의 소스인 계정 유형입니다. 예를 들어, Google 계정의 
+계정 유형은 <code>com.google</code>입니다. 계정 유형을 정규화할 때에는 항상 
+본인이 소유하거나 제어하는 도메인의 도메인 식별자를 사용하십시오. 이렇게 하면 계정 유형이 고유한 것이도록 
+확실히 해둘 수 있습니다.
+        </td>
+        <td>
+            연락처 데이터를 제공하는 계정 유형은 대개 연락처 제공자와 동기화되는 동기화 어댑터와 
+연관되어 있습니다.
+    </tr>
+    <tr>
+        <td>
+            {@link android.provider.ContactsContract.RawContactsColumns#DELETED}
+        </td>
+        <td>
+            원시 연락처에 대한 "삭제됨" 플래그입니다.
+        </td>
+        <td>
+            이 플래그를 사용하면 연락처 제공자가 해당 행을 내부에 계속 유지할 수 있습니다. 
+이는 동기화 어댑터가 해당 행을 자신의 서버에서 삭제하고 마침내는 행을 리포지토리에서도 삭제할 수 있을 
+때까지만입니다.
+        </td>
+    </tr>
+</table>
+<h4>참고</h4>
+<p>
+    다음은 
+{@link android.provider.ContactsContract.RawContacts} 테이블에 관한 중요한 참고 사항입니다.
+</p>
+<ul>
+    <li>
+        원시 연락처의 이름은 
+{@link android.provider.ContactsContract.RawContacts}에 있는 자신의 행에 저장되지 않습니다. 대신, 
+{@link android.provider.ContactsContract.CommonDataKinds.StructuredName} 행에 있는 
+{@link android.provider.ContactsContract.Data} 테이블에 저장됩니다. 원시 연락처 하나에는 
+{@link android.provider.ContactsContract.Data} 테이블에서 이런 유형의 행이 하나씩만 있습니다.
+    </li>
+    <li>
+        <strong>주의:</strong> 원시 연락처에서 본인의 계정 데이터를 사용하려면 이를 우선 
+{@link android.accounts.AccountManager}로 등록해야 합니다. 이렇게 하려면, 
+사용자에게 계정 유형과 본인의 계정 이름을 계정 목록에 추가하라는 프롬프트를 표시하십시오. 이렇게 하지 않으면, 
+연락처 제공자가 원시 연락처 행을 자동으로 삭제합니다.
+        <p>
+            예를 들어, 앱에서 도메인 {@code com.example.dataservice}로 웹 베이스 서비스에 대한 연락처 데이터를 유지하고 
+서비스에 대한 사용자 계정이 
+{@code becky.sharp@dataservice.example.com}이라면, 사용자는 앱이 원시 연락처 행을 추가하기 전에 
+계정 "유형"({@code com.example.dataservice})과 계정 "이름"
+({@code becky.smart@dataservice.example.com})을 먼저 추가해야 합니다.
+            이 요구 사항을 사용자에게 설명하려면 관련 문서를 사용해도 되고, 아니면 사용자에게 
+유형과 이름을 추가하라는 프롬프트를 표시해도 되고 두 가지 방법을 다 써도 됩니다. 계정 유형과 계정 이름은 
+다음 섹션에서 더 자세히 설명되어 있습니다.
+    </li>
+</ul>
+<h3 id="RawContactsExample">원시 연락처 데이터 소스</h3>
+<p>
+    원시 연락처의 작동 원리를 이해하기 위해, 다음과 같이 기기에서 정의한 사용자 계정 세 가지를 보유한 사용자 "Emily Dickinson"이 있다고 
+가정해 봅시다.
+</p>
+<ul>
+    <li><code>emily.dickinson@gmail.com</code></li>
+    <li><code>emilyd@gmail.com</code></li>
+    <li>Twitter 계정 "belle_of_amherst"</li>
+</ul>
+<p>
+    이 사용자는 <em>계정</em> 설정에서 모든 세 가지 계정에 대해 <em>연락처 동기화</em>를
+활성화했습니다.
+</p>
+<p>
+    Emily Dickinson이 브라우저 창을 열고, 
+Gmail에 <code>emily.dickinson@gmail.com</code>으로 로그인하고,
+연락처를 열어서 "Thomas Higginson"을 추가한다고 가정하겠습니다. 이 사용자는 나중에 Gmail에 
+<code>emilyd@gmail.com</code>으로 로그인하고 "Thomas Higginson"에게 이메일을 전송합니다. 
+이렇게 하면 이 사람을 자동으로 연락처로 추가합니다. Emily는 Twitter에서 "colonel_tom"(Thomas Higginson의 Twitter ID)도 
+팔로우합니다.
+</p>
+<p>
+    연락처 제공자는 이 작업의 결과로 원시 연락처를 세 개 생성합니다.
+</p>
+<ol>
+    <li>
+        <code>emily.dickinson@gmail.com</code>과 연관된 "Thomas Higginson"의 원시 연락처입니다.
+        사용자 계정 유형은 Google입니다.
+    </li>
+    <li>
+        <code>emilyd@gmail.com</code>과 연관된 "Thomas Higginson"의 두 번째 원시 연락처입니다.
+        사용자 계정 유형은 마찬가지로 Google입니다. 이름이 이전 이름과 똑같더라도 두 번째 원시 연락처가 
+더해집니다. 왜냐하면 이 사람은 아까와 다른 
+사용자 계정에 추가되었기 때문입니다.
+    </li>
+    <li>
+        "belle_of_amherst"와 연관된 "Thomas Higginson"의 세 번째 원시 연락처입니다. 사용자 
+계정 유형은 Twitter입니다.
+    </li>
+</ol>
+<h2 id="DataBasics">데이터</h2>
+<p>
+    이전에 언급한 바와 같이, 원시 연락처의 데이터는
+원시 연락처의 <code>_ID</code> 값과 연결된{@link android.provider.ContactsContract.Data} 행에 
+저장됩니다. 이렇게 하면 하나의 원시 연락처에 같은 유형의 데이터의 인스턴스가 여러 개 있을 수 있게 됩니다. 
+예를 들어 이메일 주소 또는 전화 번호 등이 이에 해당됩니다. 예를 들어, 
+{@code emilyd@gmail.com}에 대한 "Thomas Higginson"(Google 계정 <code>emilyd@gmail.com</code>과 연관된 Thomas Higginson의
+원시 연락처)에는 
+<code>thigg@gmail.com</code>이라는 집 이메일 주소와
+<code>thomas.higginson@gmail.com</code>이라는 직장 이메일 주소가 있고, 연락처 제공자는 두 개의 이메일 주소 행을 저장하고
+원시 연락처에 두 가지를 연결합니다.
+</p>
+<p>
+    이 테이블 하나에 여러 가지 유형의 데이터가 저장된 점에 주의하십시오. 표시 이름, 
+전화 번호, 이메일, 우편 주소, 사진 및 웹사이트 세부 정보 행은 모두 
+{@link android.provider.ContactsContract.Data} 테이블에서 찾을 수 있습니다. 이런 데이터 관리를 돕기 위해 
+{@link android.provider.ContactsContract.Data} 테이블에는 설명이 포함된 이름이 있는 열이 몇 개 있고 
+일반적 이름이 포함된 열도 몇 개 있습니다. 설명이 포함된 이름 열의 콘텐츠는 행 안의 데이터 유형과 관계 없이 모두 의미가 같고, 
+일반적인 이름 열의 콘텐츠는 데이터 유형에 따라 
+서로 의미가 다릅니다.
+</p>
+<h3 id="DescriptiveColumns">설명이 포함된 열 이름</h3>
+<p>
+    다음은 설명이 포함된 열 이름의 몇 가지 예시입니다.
+</p>
+<dl>
+    <dt>
+        {@link android.provider.ContactsContract.Data#RAW_CONTACT_ID}
+    </dt>
+    <dd>
+        이 데이터에 대한 원시 연락처의 <code>_ID</code> 열 값입니다.
+    </dd>
+    <dt>
+        {@link android.provider.ContactsContract.Data#MIMETYPE}
+    </dt>
+    <dd>
+        이 행에 저장되는 데이터 유형으로, 사용자 지정 MIME 유형으로 표현됩니다. 연락처 제공자는 
+{@link android.provider.ContactsContract.CommonDataKinds}의 하위 클래스에서 정의된 
+MIME 유형을 사용합니다. 이러한 MIME 유형은 오픈 소스이고, 
+연락처 제공자와 함께 사용할 수 있는 모든 애플리케이션 또는 동기화 어댑터가 사용할 수 있습니다.
+    </dd>
+    <dt>
+        {@link android.provider.ContactsContract.DataColumns#IS_PRIMARY}
+    </dt>
+    <dd>
+        이 유형의 데이터 행이 원시 연락처에서 한 번 이상 발생하는 경우,
+{@link android.provider.ContactsContract.DataColumns#IS_PRIMARY} 열은 
+해당 유형의 기본 데이터가 들어있는 데이터 행을 플래그로 표시합니다. 예를 들어, 
+사용자가 연락처의 전화 번호를 길게 누르고 <strong>기본값으로 설정</strong>을 선택하면 
+그 번호가 들어있는 {@link android.provider.ContactsContract.Data} 행이
+{@link android.provider.ContactsContract.DataColumns#IS_PRIMARY} 열을 
+0이 아닌 값으로 설정합니다.
+    </dd>
+</dl>
+<h3 id="GenericColumns">일반 열 이름</h3>
+<p>
+    15개의 일반 열 중에서 <code>DATA1</code>부터 
+<code>DATA15</code>까지는 일반적으로 이용할 수 있고 이외에 추가로 마련된 네 개의 일반 
+열, 즉 <code>SYNC1</code>부터 <code>SYNC4</code>까지는 
+동기화 어댑터 전용입니다. 일반 열 이름 상수는 해당 행에 들어있는 데이터 유형과 관계 없이 
+언제나 통합니다.
+</p>
+<p>
+    <code>DATA1</code> 열은 색인됩니다.  연락처 제공자는 제공자가 가장 자주 쿼리의 대상이 될 것으로 예상하는 
+데이터에 대해 항상 이 열을 사용합니다. 예컨대 
+이메일 행의 경우, 이 열에 실제 이메일 주소가 들어있습니다.
+</p>
+<p>
+    규칙에 따라 열 <code>DATA15</code>는 사진 미리 보기와 같은 BLOB(Binary Large Object)
+데이터를 저장할 목적으로 예약되어 있습니다.
+</p>
+<h3 id="TypeSpecificNames">유형별 열 이름</h3>
+<p>
+    특정 유형의 행에 대한 열과의 작업을 돕기 위해, 연락처 제공자는 
+ 유형별 열 이름 상수도 제공합니다. 이는 
+{@link android.provider.ContactsContract.CommonDataKinds}의 하위 클래스에서 정의합니다. 이 상수는 그저 같은 열 이름에 
+서로 다른 상수 이름을 부여할 뿐이며, 이렇게 하면 개발자가 특정 유형의 행에 있는 데이터에 
+액세스하기 쉽습니다.
+</p>
+<p>
+    예를 들어, {@link android.provider.ContactsContract.CommonDataKinds.Email} 클래스는 
+MIME 유형{@link android.provider.ContactsContract.CommonDataKinds.Email#CONTENT_ITEM_TYPE
+Email.CONTENT_ITEM_TYPE}을 갖는
+{@link android.provider.ContactsContract.Data} 행에 
+대한 유형별 열 이름 상수를 정의합니다. 이 클래스에는 이메일 주소 열에 대한
+ 상수 {@link android.provider.ContactsContract.CommonDataKinds.Email#ADDRESS}가 
+들어있습니다. 
+{@link android.provider.ContactsContract.CommonDataKinds.Email#ADDRESS}의 실제 값은 
+"data1"이고, 이는 열의 일반 이름과 같습니다.
+</p>
+<p class="caution">
+    <strong>주의:</strong> 개발자 본인의 사용자 지정 데이터를 
+{@link android.provider.ContactsContract.Data} 테이블에 
+추가할 때 제공자의 미리 정의된 MIME 유형 중 하나가 있는 행을 사용하면 안 됩니다. 그렇게 하면 데이터가 손실되거나 제공자의 오작동을 
+유발할 수 있습니다. 예를 들어, MIME 유형 
+    {@link android.provider.ContactsContract.CommonDataKinds.Email#CONTENT_ITEM_TYPE
+    Email.CONTENT_ITEM_TYPE} 안에 
+<code>DATA1</code> 열에 있는 이메일 주소 대신 사용자 이름이 들어있는 행은 추가하면 안 됩니다. 해당 행에 개발자 나름의 사용자 지정 MIME 유형을 사용하는 경우 
+본인만의 유형별 열 이름을 자유자재로 정의하고 이러한 열을 마음대로 사용해도 됩니다.
+</p>
+<p>
+    그림 2는 
+{@link android.provider.ContactsContract.Data} 행에서 설명 열과 데이터 열이 나타나는 방식과 유형별 열 이름이 
+일반 열 이름에 "오버레이"되는 방식을 나타낸 것입니다.
+</p>
+<img src="{@docRoot}images/providers/data_columns.png" alt="How type-specific column names map to generic column names" height="311" id="figure2" />
+<p class="img-caption">
+  <strong>그림 2.</strong> 유형별 열 이름과 일반 열 이름입니다.
+</p>
+<h3 id="ColumnMaps">유형별 열 이름 클래스</h3>
+<p>
+    표 2는 가장 보편적으로 사용되는 유형별 열 이름 클래스를 목록으로 나열한 것입니다.
+</p>
+<p class="table-caption" id="table2">
+  <strong>표 2.</strong> 유형별 열 이름 클래스</p>
+<table>
+  <tr>
+    <th scope="col">매핑 클래스</th>
+    <th scope="col">데이터 유형</th>
+    <th scope="col">참고</th>
+  </tr>
+  <tr>
+    <td>{@link android.provider.ContactsContract.CommonDataKinds.StructuredName}</td>
+    <td>이 데이터 행과 연관된 원시 연락처의 이름 데이터입니다.</td>
+    <td>하나의 원시 연락처에는 이러한 행이 딱 하나만 있습니다.</td>
+  </tr>
+  <tr>
+    <td>{@link android.provider.ContactsContract.CommonDataKinds.Photo}</td>
+    <td>이 데이터 행과 연관된 원시 연락처의 기본 사진입니다.</td>
+    <td>하나의 원시 연락처에는 이러한 행이 딱 하나만 있습니다.</td>
+  </tr>
+  <tr>
+    <td>{@link android.provider.ContactsContract.CommonDataKinds.Email}</td>
+    <td>이 데이터 행과 연관된 원시 연락처의 이메일 주소입니다.</td>
+    <td>하나의 원시 연락처에는 여러 개의 이메일 주소가 있을 수 있습니다.</td>
+  </tr>
+  <tr>
+    <td>{@link android.provider.ContactsContract.CommonDataKinds.StructuredPostal}</td>
+    <td>이 데이터 행과 연관된 원시 연락처의 우편 주소입니다.</td>
+    <td>하나의 원시 연락처에는 여러 개의 우편 주소가 있을 수 있습니다.</td>
+  </tr>
+  <tr>
+    <td>{@link android.provider.ContactsContract.CommonDataKinds.GroupMembership}</td>
+    <td>원시 연락처를 연락처 제공자의 그룹 중 하나와 연결하는 식별자입니다.</td>
+    <td>
+        그룹은 계정 유형과 계정 이름의 선택적 기능입니다. 이러한 내용은 
+<a href="#Groups">연락처 그룹</a> 섹션에 자세히 설명되어 있습니다.
+    </td>
+  </tr>
+</table>
+<h3 id="ContactBasics">연락처</h3>
+<p>
+    연락처 제공자는 모든 계정 유형과 계정 이름을 통틀어 원시 연락처 행을 조합하여 
+하나의 <strong>연락처</strong>를 형성합니다. 이렇게 하면 사용자가 한 사람에 대해 수집한 
+모든 데이터를 표시하고 수정하기 쉽습니다. 연락처 제공자는 새 연락처 행의 생성을 관리하고 
+원시 연락처를 기존 연락처 행과 통합하기도 합니다. 애플리케이션과 
+동기화 어댑터는 모두 연락처를 추가할 수 없으며, 연락처 행에 있는 열 중 몇몇은 읽기 전용입니다.
+</p>
+<p class="note">
+    <strong>참고:</strong> 연락처 제공자에 연락처를 추가하려고 
+{@link android.content.ContentResolver#insert(Uri,ContentValues) insert()}를 사용하는 경우, 
+{@link java.lang.UnsupportedOperationException} 예외가 발생합니다. "읽기 전용"으로 표시된 열을 업데이트하려고 하면 
+그 업데이트는 무시됩니다.
+</p>
+<p>
+    연락처 제공자는 기존 연락처 어느 것과도 일치하지 않는 새로운 원시 연락처가 추가되면 
+새로운 연락처를 생성합니다. 제공자가 이 작업을 하는 또 다른 경우는 
+기존 원시 연락처의 데이터가 변경되어 이전에 첨부되어 있던 연락처에 더 이상 일치하지 않는 
+경우입니다. 애플리케이션이나 동기화 어댑터가 
+기존 연락처와 <em>일치하는</em> 새로운 원시 연락처를 생성하면, 새로운 원시 연락처는
+기존 연락처에 통합됩니다.
+</p>
+<p>
+    연락처 제공자는
+{@link android.provider.ContactsContract.Contacts Contacts} 테이블에 있는 연락처 행의 <code>_ID</code> 열로 
+연락처 행과 원시 연락처 행를 연결합니다. 원시 연락처 테이블 {@link android.provider.ContactsContract.RawContacts}의 <code>CONTACT_ID</code> 행에는 
+각 원시 연락처 행과 관련된 연락처 행에 대한 <code>_ID</code> 값이 
+들어있습니다.
+</p>
+<p>
+    {@link android.provider.ContactsContract.Contacts} 테이블에는 연락처 행에 대한 "영구" 링크인
+{@code android.provider.ContactsContract.ContactsColumns#LOOKUP_KEY} 열도
+있습니다. 연락처 제공자가 연락처를 자동으로 관리하므로, 
+통합이나 동기화에 응답하여 연락처 행의 {@code android.provider.BaseColumns#_ID} 값을 
+변경할 수도 있습니다. 이런 일이 발생한다 하더라도 콘텐츠 URI 
+{@link android.provider.ContactsContract.Contacts#CONTENT_LOOKUP_URI}와 
+연락처의 {@code android.provider.ContactsContract.ContactsColumns#LOOKUP_KEY}는 여전히 
+연락처 행을 가리키므로, 
+{@code android.provider.ContactsContract.ContactsColumns#LOOKUP_KEY}를 
+사용하여 "즐겨찾기" 연락처에 대한 연결 등을 그대로 유지할 수 있습니다. 이 열에는 
+{@code android.provider.BaseColumns#_ID} 열의 형식과 관련이 없는 나름의 형식이 있습니다.
+</p>
+<p>
+    그림 3은 세 가지 기본 테이블이 서로 관련되는 방식을 나타낸 것입니다.
+</p>
+<img src="{@docRoot}images/providers/contacts_tables.png" alt="Contacts provider main tables" height="514" id="figure4" />
+<p class="img-caption">
+  <strong>그림 3.</strong> 연락처, 원시 연락처 및 세부 사항 테이블의 관계입니다.
+</p>
+<h2 id="Sources">동기화 어댑터의 데이터</h2>
+<p>
+    사용자가 연락처 데이터를 기기에 직접 입력하기도 하지만, 데이터는 웹 서비스에서 
+<strong>동기화 어댑터</strong>를 통해 연락처 제공자로 흘러들어가기도 합니다. 이것이 기기와 
+서비스 사이에서 데이터의 전송을 자동화하는 것입니다. 동기화 어댑터는 시스템의 제어를 받으며 
+배경에서 실행되고, {@link android.content.ContentResolver} 메서드를 
+호출하여 데이터를 관리합니다.
+</p>
+<p>
+    Android에서 동기화 어댑터와 함께 작업하는 웹 서비스는 계정 유형으로 식별됩니다.
+    각 동기화 어댑터는 계정 유형 하나에 통하지만, 그 유형에 대한 여러 개의 계정이름을 
+지원할 수 있습니다. 계정 유형과 계정 이름은 
+<a href="#RawContactsExample">원시 연락처 데이터 소스</a> 섹션에 간단히 설명되어 있습니다. 다음 정의는 좀 더 자세한 내용을 제공하며, 
+계정 유형과 이름이 동기화 어댑터와 서비스에 관련되는 방식을 설명합니다.
+</p>
+<dl>
+    <dt>
+        계정 유형
+    </dt>
+    <dd>
+        사용자가 데이터를 저장해둔 서비스를 식별합니다. 대부분의 경우, 사용자가 
+서비스로 인증해야 합니다. 예를 들어, Google 주소록은 계정 유형이고, 이는 
+코드 <code>google.com</code>으로 식별됩니다. 이 값은 
+{@link android.accounts.AccountManager}가 사용하는 계정 유형에 상응합니다.
+    </dd>
+    <dt>
+        계정 이름
+    </dt>
+    <dd>
+        하나의 계정 유형에 대한 특정 계정 또는 로그인을 식별합니다. Google 주소록 계정은 
+Google 계정과 같고, 이는 계정 이름으로 이메일 주소를 사용합니다.
+        다른 서비스는 한 단어로 된 사용자 이름이나 숫자 ID를 사용할 수 있습니다.
+    </dd>
+</dl>
+<p>
+    계정 유형은 고유하지 않아도 됩니다. 한 사람의 사용자가 여러 개의 Google 주소록을 구성할 수 있고 
+그 데이터를 연락처 제공자에 다운로드할 수 있습니다. 이런 일은 사용자에게 
+개인용 계정 이름에 대한 개인용 연락처가 한 세트 있고, 업무용으로 또 한 세트가 있는 경우 일어납니다. 계정 이름은 보통 
+고유합니다. 이 둘은 함께 사용되어 연락처 제공자와 외부 서비스 사이의 특정 데이터 
+흐름을 식별합니다.
+</p>
+<p>
+    서비스의 데이터를 연락처 제공자에 전송하려면, 나름의 
+동기화 어댑터를 작성해야 합니다. 이 내용은 
+<a href="#SyncAdapters">연락처 제공자 동기화 어댑터</a> 섹션에 자세히 설명되어 있습니다.
+</p>
+<p>
+    그림 4는 연락처 제공자가 사람에 대한 데이터 흐름에 
+어떻게 들어맞는지 나타낸 것입니다. "동기화 어댑터"라고 표시된 상자에서, 각 어댑터에는 계정 유형에 따라 레이블이 붙어 있습니다.
+</p>
+<img src="{@docRoot}images/providers/ContactsDataFlow.png" alt="Flow of data about people" height="252" id="figure5" />
+<p class="img-caption">
+  <strong>그림 4.</strong> 연락처 제공자의 데이터 흐름입니다.
+</p>
+<h2 id="Permissions">필수 권한</h2>
+<p>
+    연락처 제공자에 액세스하고자 하는 애플리케이션은 다음 권한을 
+요청해야 합니다.
+</p>
+<dl>
+    <dt>하나 이상의 테이블에 대한 읽기 액세스</dt>
+    <dd>
+        {@link android.Manifest.permission#READ_CONTACTS}, 
+<code>AndroidManifest.xml</code>에서 
+<code><a href="{@docRoot}guide/topics/manifest/uses-permission-element.html">
+        &lt;uses-permission&gt;</a></code> 요소와 함께 
+<code>&lt;uses-permission android:name="android.permission.READ_CONTACTS"&gt;</code>로 지정된 것.
+    </dd>
+    <dt>하나 이상의 테이블에 대한 쓰기 액세스</dt>
+    <dd>
+        {@link android.Manifest.permission#WRITE_CONTACTS}, 
+<code>AndroidManifest.xml</code>에서 
+<code><a href="{@docRoot}guide/topics/manifest/uses-permission-element.html">
+        &lt;uses-permission&gt;</a></code> 요소와 함께 
+<code>&lt;uses-permission android:name="android.permission.WRITE_CONTACTS"&gt;</code>로 지정된 것.
+    </dd>
+</dl>
+<p>
+    이들 권한은 사용자 프로필 데이터로 확대되지 않습니다. 사용자 프로필과 
+필수 권한은 
+다음 섹션인 <a href="#UserProfile">사용자 프로필</a>에서 논의합니다.
+</p>
+<p>
+    사용자의 연락처 데이터는 중요한 개인 정보라는 사실을 명심하십시오. 사용자는 자신의 
+개인정보보호를 중요하게 생각하고 신경 쓰기 때문에 애플리케이션이 자신이나 자신의 연락처에 관한 정보를 수집하는 것을 바라지 않습니다.
+    사용자의 연락처 데이터에 액세스할 권한이 필요한 이유가 분명하지 않으면 여러분의 
+애플리케이션에 낮은 순위를 매기거나 설치를 거부할 수도 있습니다.
+</p>
+<h2 id="UserProfile">사용자 프로필</h2>
+<p>
+    {@link android.provider.ContactsContract.Contacts} 테이블에 있는 한 개의 행에는 기기의 사용자에 대한 프로필 
+데이터가 담겨 있습니다. 이 데이터는 사용자의 연락처 중 하나라기보다는 기기의 <code>user</code>를 
+설명하는 것입니다. 프로필 연락처 행은 
+프로필을 사용하는 각 시스템에 대한 원시 연락처 행에 연결되어 있습니다.
+    각 프로필 원시 연락처 행에는 여러 개의 데이터 행이 있을 수 있습니다. 사용자 프로필에 액세스하기 위한 상수는 
+{@link android.provider.ContactsContract.Profile} 클래스에서 이용할 수 있습니다.
+</p>
+<p>
+    사용자 프로필에 액세스하려면 특수 권한이 필요합니다. 읽기와 쓰기에 필요한 
+{@link android.Manifest.permission#READ_CONTACTS}와
+{@link android.Manifest.permission#WRITE_CONTACTS} 권한 외에도, 
+사용자 프로필에 액세스하려면 각각 읽기와 쓰기 액세스를 위한{@code android.Manifest.permission#READ_PROFILE}과 
+{@code android.Manifest.permission#WRITE_PROFILE} 권한이 
+필요합니다.
+</p>
+<p>
+    사용자의 프로필은 중요한 정보로 간주해야 한다는 점을 명심하십시오. 
+{@code android.Manifest.permission#READ_PROFILE}권한을 사용하면 개발자가 기기 사용자의 
+개인 식별 데이터에 액세스할 수 있게 해줍니다. 애플리케이션 설명에서 
+사용자에게 왜 여러분이 사용자 프로필 권한을 필요로 하는지 밝혀두어야 합니다.
+</p>
+<p>
+    사용자 프로필이 포함된 연락처 행을 검색하려면,
+{@link android.content.ContentResolver#query(Uri,String[], String, String[], String)
+ContentResolver.query()}를 호출합니다. 콘텐츠 URI 를
+{@link android.provider.ContactsContract.Profile#CONTENT_URI}로 설정하고 
+선택 기준은 아무것도 제공하지 마십시오. 이 콘텐츠 URI는 원시 연락처 또는 프로필에 대한 데이터를 검색하기 위한 
+기본 URI로도 쓸 수 있습니다. 예를 들어, 이 코드 조각은 프로필에 대한 데이터를 검색합니다.
+</p>
+<pre>
+// Sets the columns to retrieve for the user profile
+mProjection = new String[]
+    {
+        Profile._ID,
+        Profile.DISPLAY_NAME_PRIMARY,
+        Profile.LOOKUP_KEY,
+        Profile.PHOTO_THUMBNAIL_URI
+    };
+
+// Retrieves the profile from the Contacts Provider
+mProfileCursor =
+        getContentResolver().query(
+                Profile.CONTENT_URI,
+                mProjection ,
+                null,
+                null,
+                null);
+</pre>
+<p class="note">
+    <strong>참고:</strong> 여러 개의 연락처 행을 검색하고 그 중 하나가 
+사용자 프로필인지 판별하고자 하는 경우, 
+행의 {@link android.provider.ContactsContract.ContactsColumns#IS_USER_PROFILE} 열을 테스트합니다. 이 열은 
+해당 연락처가 사용자 프로필이면 "1"로 설정됩니다.
+</p>
+<h2 id="ContactsProviderMetadata">연락처 제공자 메타데이터</h2>
+<p>
+    연락처 제공자는 리포지토리에서 연락처 데이터 상태를 
+추적하는 데이터를 관리합니다. 이 리포지토리 관련 데이터는 
+원시 연락처, 데이터 및 연락처 테이블 행,
+{@link android.provider.ContactsContract.Settings} 테이블 및 
+{@link android.provider.ContactsContract.SyncState} 테이블 등의 여러 장소에 저장됩니다. 다음 표는 각 메타데이터 조각이 미치는 
+영향을 나타낸 것입니다.
+</p>
+<p class="table-caption" id="table3">
+  <strong>표 3.</strong> 연락처 제공자의 메타데이터</p>
+<table>
+    <tr>
+        <th scope="col">테이블</th>
+        <th scope="col">열</th>
+        <th scope="col">값</th>
+        <th scope="col">의미</th>
+    </tr>
+    <tr>
+        <td rowspan="2">{@link android.provider.ContactsContract.RawContacts}</td>
+        <td rowspan="2">{@link android.provider.ContactsContract.SyncColumns#DIRTY}</td>
+        <td>"0" - 마지막 동기화 이후로 변경되지 않았습니다.</td>
+        <td rowspan="2">
+            기기에서 변경되었고 서버로 다시 동기화되어야 하는 원시 데이터를 
+표시합니다. 이 값은 Android 애플리케이션이 행을 업데이트하면 연락처 제공자가 
+자동으로 설정합니다.
+            <p>
+                원시 연락처나 데이터 테이블을 수정하는 동기화 어댑터는 
+언제나 문자열 {@link android.provider.ContactsContract#CALLER_IS_SYNCADAPTER}를 
+자신이 사용하는 콘텐츠 URI에 추가해야 합니다. 이렇게 하면 제공자가 행을 변경(dirty)으로 표시하지 못하게 방지합니다.
+                그렇지 않으면, 동기화 어댑터 수정이 로컬 수정으로 나타나며 
+서버가 수정의 근원이었다 하더라도 이 내용이 다시 서버로 전송됩니다.
+            </p>
+        </td>
+    </tr>
+    <tr>
+            <td>"1" - 마지막 동기화 이후 변경되었고, 서버에 다시 동기화해야 합니다.</td>
+    </tr>
+    <tr>
+        <td>{@link android.provider.ContactsContract.RawContacts}</td>
+        <td>{@link android.provider.ContactsContract.SyncColumns#VERSION}</td>
+        <td>이 행의 버전 번호입니다.</td>
+        <td>
+            연락처 제공자는 행이나 관련 데이터가 변경될 때마다 이 값을 자동으로 
+증가시킵니다.
+        </td>
+    </tr>
+    <tr>
+        <td>{@link android.provider.ContactsContract.Data}</td>
+        <td>{@link android.provider.ContactsContract.DataColumns#DATA_VERSION}</td>
+        <td>이 행의 버전 번호입니다.</td>
+        <td>
+            연락처 제공자는 데이터 행이 변경될 때마다 이 값을 자동으로 
+증가시킵니다.
+        </td>
+    </tr>
+    <tr>
+        <td>{@link android.provider.ContactsContract.RawContacts}</td>
+        <td>{@link android.provider.ContactsContract.SyncColumns#SOURCE_ID}</td>
+        <td>
+            이 원시 연락처를 자신이 생성된 계정에 대해 고유하게 식별하는 
+문자열 값입니다.
+        </td>
+        <td>
+            동기화 어댑터가 새로운 원시 연락처를 생성하면, 이 열이 
+해당 원시 연락처에 대한 서버의 고유 ID로 설정되어야 합니다. Android 애플리케이션이 새로운 원시 연락처를 생성하면, 
+애플리케이션은 이 열을 빈 채로 두어야 합니다. 이것은 동기화 어댑터에 
+서버에 새 원시 데이터를 생성해야 한다고 신호하고, 
+{@link android.provider.ContactsContract.SyncColumns#SOURCE_ID}에 대한 값을 가져오라고 알립니다.
+            <p>
+                특히, 소스 ID는 각 계정 유형에 대해 <strong>고유</strong>해야 하고 
+동기화 전체에서 안정적이어야 합니다.
+            </p>
+                <ul>
+                    <li>
+                        고유: 하나의 계정에 대한 각 원시 연락처에는 나름의 소스 ID가 있어야 합니다. 개발자가 
+이것을 강제 적용하지 않으면 연락처 애플리케이션에 문제를 유발하게 됩니다.
+                        같은 계정 <em>유형</em>에 대한 두 개의 원시 연락처는 소스 ID가 
+같을 수 있다는 점을 유의하십시오. 예를 들어, 
+{@code emily.dickinson@gmail.com} 계정에 대한 원시 연락처 "Thomas Higginson"은 
+{@code emilyd@gmail.com} 계정에 대한 
+원시 연락처 "Thomas Higginson"과 소스 ID가 같을 수 있습니다.
+                    </li>
+                    <li>
+                        안정적: 소스 ID는 원시 연락처에 대한 온라인 서비스의 데이터 중 영구적인 
+부분입니다. 예를 들어, 사용자가 앱 설정에서 연락처 저장소를 삭제하고 다시 동기화하면 
+복원된 원시 연락처의 소스 ID는 전과 같아야 
+합니다. 개발자가 이것을 강제 적용하지 않으면 바로 가기가 더 이상
+ 작동하지 않습니다.
+                    </li>
+                </ul>
+        </td>
+    </tr>
+    <tr>
+        <td rowspan="2">{@link android.provider.ContactsContract.Groups}</td>
+        <td rowspan="2">{@link android.provider.ContactsContract.GroupsColumns#GROUP_VISIBLE}</td>
+        <td>"0" - 이 그룹의 연락처는 Android 애플리케이션 UI에 표시되지 않아야 합니다.</td>
+        <td>
+            이 열은 사용자가 특정 그룹에 연락처를 숨길 수 있게 해주는 서버와의 
+호환성을 위한 것입니다.
+        </td>
+    </tr>
+    <tr>
+        <td>"1" - 이 그룹의 연락처는 애플리케이션 UI에 표시되어도 됩니다.</td>
+    </tr>
+    <tr>
+        <td rowspan="2">{@link android.provider.ContactsContract.Settings}</td>
+        <td rowspan="2">
+            {@link android.provider.ContactsContract.SettingsColumns#UNGROUPED_VISIBLE}</td>
+        <td>
+            "0" - 이 계정과 계정 유형의 경우, 그룹에 속하지 않는 연락처는 Android 애플리케이션 UI에 
+표시되지 않습니다.
+        </td>
+        <td rowspan="2">
+            기본적으로, 연락처에 그룹에 속한 원시 데이터가 하나도 없는 경우 이는 표시되지 않습니다(원시 연락처의 그룹 구성원은 
+{@link android.provider.ContactsContract.Data} 테이블에서 
+하나 이상의 {@link android.provider.ContactsContract.CommonDataKinds.GroupMembership} 행으로 
+표시됩니다).
+            계정 유형과 계정에 대한 {@link android.provider.ContactsContract.Settings} 테이블 행에서 
+이 플래그를 설정하면 그룹이 없는 연락처가 표시되도록 강제할 수 있습니다.
+            이 플래그의 용도 중 하나는 그룹을 사용하지 않는 서버로부터 가져온 연락처를 표시하는 것입니다.
+        </td>
+    </tr>
+    <tr>
+        <td>
+            "1" - 이 계정과 계정 유형의 경우, 그룹에 속하지 않는 연락처가 애플리케이션 UI에 
+표시됩니다.
+        </td>
+
+    </tr>
+    <tr>
+        <td>{@link android.provider.ContactsContract.SyncState}</td>
+        <td>(모두)</td>
+        <td>
+            이 테이블을 사용하여 동기화 어댑터의 메타데이터를 저장합니다.
+        </td>
+        <td>
+            이 테이블을 사용하면 동기화 상태와 기타 동기화 관련 데이터를 기기에 영구적으로 
+저장할 수 있습니다.
+        </td>
+    </tr>
+</table>
+<h2 id="Access">연락처 제공자 액세스</h2>
+<p>
+    이 섹션은 연락처 제공자에서 가져온 데이터에 액세스하는 법에 대한 지침을 제공하며, 
+요점은 다음과 같습니다.
+</p>
+<ul>
+    <li>
+        엔티티 쿼리.
+    </li>
+    <li>
+        일괄 수정.
+    </li>
+    <li>
+        인텐트로 검색 및 수정.
+    </li>
+    <li>
+        데이터 무결성.
+    </li>
+</ul>
+<p>
+    동기화 어댑터에서 수정하는 방법은 
+<a href="#SyncAdapters">연락처 제공자 동기화 어댑터</a> 섹션에도 자세히 설명되어 있습니다.
+</p>
+<h3 id="Entities">엔티티 쿼리</h3>
+<p>
+    연락처 제공자 테이블은 계층을 사용하여 조직화되어 있으므로, 
+행과 그 행에 연결된 모든 "하위" 행을 검색하는 것이 유용할 때가 많습니다. 예를 들어, 
+어떤 개인의 모든 정보를 표시하려면 
+하나의 {@link android.provider.ContactsContract.Contacts} 행에 대한 모든 
+{@link android.provider.ContactsContract.RawContacts} 행을 검색하거나 하나의 
+{@link android.provider.ContactsContract.RawContacts} 행에 대한 모든 
+{@link android.provider.ContactsContract.CommonDataKinds.Email} 행을 검색하는 것이 좋습니다. 이를 용이하게 하기 위해, 
+연락처 제공자는 테이블 사이를 연결하는 데이터베이스 역할을 하는 <strong>엔티티</strong> 구조를 
+제공합니다.
+</p>
+<p>
+    하나의 엔티티는 마치 상위 테이블과 그 하위 테이블에서 가져온 선택된 몇 개의 열로 이루어진 테이블과 같습니다.
+    엔티티를 쿼리하는 경우, 해당 엔티티에서 사용할 수 있는 열을 기반으로 하여 예측과 검색 
+기준을 제공합니다. 그 결과도 도출되는 것이 {@link android.database.Cursor}이며, 
+여기에 검색된 각 하위 테이블에 대해 행이 하나씩 들어있습니다. 예를 들어 연락처 이름에 대해 
+{@link android.provider.ContactsContract.Contacts.Entity}를 쿼리하고 
+그 이름에 대한 모든 원시 연락처에 대한 모든 {@link android.provider.ContactsContract.CommonDataKinds.Email} 행을 쿼리하면 
+{@link android.database.Cursor}를 돌려받게 되며 이 안에 
+각 {@link android.provider.ContactsContract.CommonDataKinds.Email}행에 대한 행이 하나씩 들어있습니다.
+</p>
+<p>
+    엔티티는 쿼리를 단순화합니다. 엔티티를 사용하면 연락처나 원시 연락처에 대한 모든 연락처 데이터를 
+한꺼번에 검색할 수 있습니다. 즉 우선 상위 테이블을 검색하여 ID를 가져오고, 그런 다음 
+하위 테이블을 그 ID로 검색하지 않아도 된다는 뜻입니다. 또한, 연락처 제공자에는 엔티티에 대한 쿼리를 
+하나의 트랜잭션으로 처리하므로, 검색된 데이터가 내부적으로 일관성을 유지하도록 
+보장합니다.
+</p>
+<p class="note">
+    <strong>참고:</strong> 하나의 엔티티에 상위 및 하위 테이블의 모든 열이 들어있지는 않은 것이 
+보통입니다. 엔티티에 대한 열 이름 상수 목록에 없는 열 이름으로 작업하려 시도하면, 
+{@link java.lang.Exception}이 발생합니다.
+</p>
+<p>
+    다음 조각은 하나의 연락처에 대해 모든 원시 연락처 행을 검색하는 방법을 나타낸 것입니다. 이 조각은 
+두 개의 액티비티, 즉 "기본"과 "세부"를 가진 더 큰 애플리케이션의 일부입니다. 기본 액티비티는 
+연락처 행 목록을 보여줍니다. 사용자가 하나를 선택하면, 이 액티비티가 해당 목록의 ID를 
+세부 액티비티에 전송합니다. 세부 액티비티는 {@link android.provider.ContactsContract.Contacts.Entity}를 사용하여 
+선택된 연락처와 연관된 모든 원시 연락처에서 
+모든 데이터 행을 표시합니다.
+</p>
+<p>
+    이 조각은 "세부" 액티비티에서 가져온 것입니다.
+</p>
+<pre>
+...
+    /*
+     * Appends the entity path to the URI. In the case of the Contacts Provider, the
+     * expected URI is content://com.google.contacts/#/entity (# is the ID value).
+     */
+    mContactUri = Uri.withAppendedPath(
+            mContactUri,
+            ContactsContract.Contacts.Entity.CONTENT_DIRECTORY);
+
+    // Initializes the loader identified by LOADER_ID.
+    getLoaderManager().initLoader(
+            LOADER_ID,  // The identifier of the loader to initialize
+            null,       // Arguments for the loader (in this case, none)
+            this);      // The context of the activity
+
+    // Creates a new cursor adapter to attach to the list view
+    mCursorAdapter = new SimpleCursorAdapter(
+            this,                        // the context of the activity
+            R.layout.detail_list_item,   // the view item containing the detail widgets
+            mCursor,                     // the backing cursor
+            mFromColumns,                // the columns in the cursor that provide the data
+            mToViews,                    // the views in the view item that display the data
+            0);                          // flags
+
+    // Sets the ListView's backing adapter.
+    mRawContactList.setAdapter(mCursorAdapter);
+...
+&#64;Override
+public Loader&lt;Cursor&gt; onCreateLoader(int id, Bundle args) {
+
+    /*
+     * Sets the columns to retrieve.
+     * RAW_CONTACT_ID is included to identify the raw contact associated with the data row.
+     * DATA1 contains the first column in the data row (usually the most important one).
+     * MIMETYPE indicates the type of data in the data row.
+     */
+    String[] projection =
+        {
+            ContactsContract.Contacts.Entity.RAW_CONTACT_ID,
+            ContactsContract.Contacts.Entity.DATA1,
+            ContactsContract.Contacts.Entity.MIMETYPE
+        };
+
+    /*
+     * Sorts the retrieved cursor by raw contact id, to keep all data rows for a single raw
+     * contact collated together.
+     */
+    String sortOrder =
+            ContactsContract.Contacts.Entity.RAW_CONTACT_ID +
+            " ASC";
+
+    /*
+     * Returns a new CursorLoader. The arguments are similar to
+     * ContentResolver.query(), except for the Context argument, which supplies the location of
+     * the ContentResolver to use.
+     */
+    return new CursorLoader(
+            getApplicationContext(),  // The activity's context
+            mContactUri,              // The entity content URI for a single contact
+            projection,               // The columns to retrieve
+            null,                     // Retrieve all the raw contacts and their data rows.
+            null,                     //
+            sortOrder);               // Sort by the raw contact ID.
+}
+</pre>
+<p>
+    로딩이 완료되면, {@link android.app.LoaderManager}가 
+{@link android.app.LoaderManager.LoaderCallbacks#onLoadFinished(Loader, D)
+onLoadFinished()}에 대한 콜백을 호출합니다. 이 메서드로 수신되는 인수 중 하나가 
+{@link android.database.Cursor}로, 여기에 쿼리 결과도 함께 들어옵니다. 개발자 본인의 앱에서는, 이 
+{@link android.database.Cursor}에서 데이터를 가져와 이를 표시할 수도 있고 여기에 작업을 더할 수도 있습니다.
+</p>
+<h3 id="Transactions">일괄 수정</h3>
+<p>
+    연락처 제공자에서 데이터를 삽입, 업데이트 및 삭제하는 경우 가급적이면 
+"일괄 모드"를 쓰는 것이 좋습니다. 이때 
+{@link android.content.ContentProviderOperation} 객체의 {@link java.util.ArrayList}를 생성하고 
+{@link android.content.ContentResolver#applyBatch(String, ArrayList) applyBatch()}를 호출하면 됩니다. 연락처 제공자는 
+
+{@link android.content.ContentResolver#applyBatch(String, ArrayList) applyBatch()}에서의 모든 작업을 
+하나의 트랜잭션으로 수행하기 때문에, 수정한 내용이 일관되지 않은 상태로 연락처 리포지토리를 
+떠날 일이 결코 없습니다. 일괄 수정을 사용하면 원시 연락처와 그 세부 데이터를 동시에 삽입하는 것도 
+쉽습니다.
+</p>
+<p class="note">
+    <strong>참고:</strong> <em>하나의</em> 원시 연락처를 수정하려면 수정 작업을 앱에서 처리하는 것보다는 
+인텐트를 기기의 연락처 애플리케이션에 보내는 방안을 고려하십시오. 
+이렇게 하는 방법이 
+<a href="#Intents">인텐트로 검색 및 수정</a> 섹션에 자세히 설명되어 있습니다.
+</p>
+<h4>양보 지점</h4>
+<p>
+    대량의 작업이 들어있는 일괄 수정은 다른 프로세스를 차단하므로, 
+그 결과 전반적으로 불량한 사용자 환경을 유발할 수 있습니다. 수행하고자 하는 모든 수정 작업을 가능한 한 
+적은 수의 별도의 목록으로 정리하고 그와 동시에 이 작업이 시스템을 차단하지 못하도록 방지하려면 
+하나 이상의 작업에 <strong>양보 지점</strong>을 설정해야 합니다.
+    양보 지점은 {@link android.content.ContentProviderOperation#isYieldAllowed()} 값이 <code>true</code>로 설정된 {@link android.content.ContentProviderOperation} 객체입니다.
+
+ 연락처 제공자가 양보 지점을 만나면 
+다른 프로세스가 실행되도록 작업을 잠시 멈추고 현재 트랜잭션을 종료합니다. 제공자가 다시 시작되면, 이는 
+{@link java.util.ArrayList}에서 다음 작업을 계속 진행하고 
+새 트랜잭션을 시작합니다.
+</p>
+<p>
+    양보 지점을 사용하면 그 결과 
+{@link android.content.ContentResolver#applyBatch(String, ArrayList) applyBatch()}로의 호출 한 건당 하나 이상의 트랜잭션이 생기는 것은 사실입니다. 이 때문에, 
+ 양보 지점은 관련된 행 한 세트에서 마지막 작업에 설정해야 합니다.
+    예를 들어, 원시 연락처 행과 관련된 데이터 행을 추가하는 세트의 마지막 작업에 
+양보 지점을 설정하거나, 하나의 연락처와 관련된 행 한 세트의 
+마지막 작업에 양보 지점을 설정해야 합니다.
+</p>
+<p>
+    양보 지점은 원자성 작업의 단위이기도 합니다. 두 개의 양보 지점 사이를 향한 액세스는 모두 
+한 가지 단위로서 성공 또는 실패합니다. 양보 지점을 설정하지 않는 경우, 가장 작은 
+원자성 작업은 작업 전체가 됩니다. 양보 지점을 사용하면, 작업이 
+시스템 성능을 저하하지 않도록 방지하는 동시에 작업의 하위 세트가 원자성 작업이도록 
+보장할 수 있습니다.
+</p>
+<h4>수정 역참조</h4>
+<p>
+    새로운 원시 연락처 행과 관련 데이터 행을 
+일련의 {@link android.content.ContentProviderOperation} 개체로 삽입할 때는, 
+ 원시 연락처의 
+{@code android.provider.BaseColumns#_ID} 값을
+{@link android.provider.ContactsContract.DataColumns#RAW_CONTACT_ID} 값으로 삽입하여 데이터 행과 원시 연락처 행을 연결해야 합니다. 그러나, 이 값은 
+데이터 행에 대하여 {@link android.content.ContentProviderOperation}을 
+생성하는 경우에는 사용할 수 없습니다. 원시 연락처 행에 대해 {@link android.content.ContentProviderOperation}
+을 아직 적용하지 않았기 때문입니다. 이 문제를 해결하려면 
+{@link android.content.ContentProviderOperation.Builder} 클래스에
+{@link android.content.ContentProviderOperation.Builder#withValueBackReference(String, int) withValueBackReference()} 메서드가 있어야 합니다.
+    이 메서드를 사용하면 열을 이전 작업의 결과로 삽입 또는 수정할 수 
+있습니다.
+</p>
+<p>
+    {@link android.content.ContentProviderOperation.Builder#withValueBackReference(String, int) withValueBackReference()}
+메서드에는 인수가 두 가지 있습니다.
+</p>
+    <dl>
+        <dt>
+            <code>key</code>
+        </dt>
+        <dd>
+            키-값 쌍의 키입니다. 이 인수의 값은 수정하는 테이블의 
+열 이름이어야 합니다.
+        </dd>
+        <dt>
+            <code>previousResult</code>
+        </dt>
+        <dd>
+            
+{@link android.content.ContentResolver#applyBatch(String, ArrayList) applyBatch()}의 {@link android.content.ContentProviderResult} 객체 배열에 있는
+값의 0 기반 색인입니다. 
+일괄 작업이 적용되면 각 작업의 결과가 
+결과의 중간 배열에 저장됩니다. <code>previousResult</code> 값은 
+이러한 결과 중 하나의 색인이고, 이는 <code>key</code> 값으로 
+검색 및 저장됩니다. 이것을 사용하면 새 원시 연락처 레코드를 삽입하고
+{@code android.provider.BaseColumns#_ID} 값을 다시 가져온 뒤, 
+{@link android.provider.ContactsContract.Data} 행을 추가할 때 해당 값을 "역참조"할 수 있게 해줍니다.
+            <p>
+                
+{@link android.content.ContentResolver#applyBatch(String, ArrayList) applyBatch()}를 처음 호출할 때, 
+개발자가 제공하는 {@link android.content.ContentProviderOperation} 객체의 {@link java.util.ArrayList} 크기와 같은 크기로 
+전체 결과 배열이 생성됩니다. 그러나 
+결과 배열의 모든 요소는 <code>null</code>로 설정되고, 
+아직 적용되지 않은 작업 결과에 대한 역참조를 수행하려 시도하면 
+{@link android.content.ContentProviderOperation.Builder#withValueBackReference(String, int) withValueBackReference()}가
+{@link java.lang.Exception}을 발생시킵니다.
+
+            </p>
+        </dd>
+    </dl>
+<p>
+    다음 조각은 새로운 원시 연락처와 데이터를 일괄 삽입하는 방법을 나타낸 것입니다. 여기에는 
+양보 지점을 지정하고 역참조를 사용하는 코드가 포함되어 있습니다. 이 조각은 
+<code>createContacEntry()</code> 메서드의 확장 버전이며, 이는 
+<code><a href="{@docRoot}resources/samples/ContactManager/index.html">
+    Contact Manager</a></code> 샘플 애플리케이션에 있는 <code>ContactAdder</code> 클래스의 
+일부입니다.
+</p>
+<p>
+    첫 번째 조각은 UI에서 연락처 데이터를 검색합니다. 이 시점에서 사용자는 이미 
+새로운 원시 연락처를 추가할 계정을 선택하였습니다.
+</p>
+<pre>
+// Creates a contact entry from the current UI values, using the currently-selected account.
+protected void createContactEntry() {
+    /*
+     * Gets values from the UI
+     */
+    String name = mContactNameEditText.getText().toString();
+    String phone = mContactPhoneEditText.getText().toString();
+    String email = mContactEmailEditText.getText().toString();
+
+    int phoneType = mContactPhoneTypes.get(
+            mContactPhoneTypeSpinner.getSelectedItemPosition());
+
+    int emailType = mContactEmailTypes.get(
+            mContactEmailTypeSpinner.getSelectedItemPosition());
+</pre>
+<p>
+    다음 조각은 
+{@link android.provider.ContactsContract.RawContacts} 테이블에 원시 연락처 행을 삽입하는 작업을 생성합니다.
+</p>
+<pre>
+    /*
+     * Prepares the batch operation for inserting a new raw contact and its data. Even if
+     * the Contacts Provider does not have any data for this person, you can't add a Contact,
+     * only a raw contact. The Contacts Provider will then add a Contact automatically.
+     */
+
+     // Creates a new array of ContentProviderOperation objects.
+    ArrayList&lt;ContentProviderOperation&gt; ops =
+            new ArrayList&lt;ContentProviderOperation&gt;();
+
+    /*
+     * Creates a new raw contact with its account type (server type) and account name
+     * (user's account). Remember that the display name is not stored in this row, but in a
+     * StructuredName data row. No other data is required.
+     */
+    ContentProviderOperation.Builder op =
+            ContentProviderOperation.newInsert(ContactsContract.RawContacts.CONTENT_URI)
+            .withValue(ContactsContract.RawContacts.ACCOUNT_TYPE, mSelectedAccount.getType())
+            .withValue(ContactsContract.RawContacts.ACCOUNT_NAME, mSelectedAccount.getName());
+
+    // Builds the operation and adds it to the array of operations
+    ops.add(op.build());
+</pre>
+<p>
+    그런 다음, 코드가 표시 이름, 전화 및 이메일 행에 대한 데이터 행을 생성합니다.
+</p>
+<p>
+    각 작업 빌더 개체는 
+{@link android.content.ContentProviderOperation.Builder#withValueBackReference(String, int) withValueBackReference()}를 
+사용하여
+{@link android.provider.ContactsContract.DataColumns#RAW_CONTACT_ID}를 가져옵니다. 참조는 
+첫 번째 작업의 {@link android.content.ContentProviderResult} 객체를 다시 가리키고, 
+이것이 원시 연락처 행을 추가한 뒤 이의 새 {@code android.provider.BaseColumns#_ID}
+값을 반환합니다. 그 결과, 각 데이터 행은 자동으로 자신의 
+{@link android.provider.ContactsContract.DataColumns#RAW_CONTACT_ID}
+에 의해 자신이 속하는 새 {@link android.provider.ContactsContract.RawContacts} 행에 연결됩니다.
+</p>
+<p>
+    이메일 행을 추가하는 {@link android.content.ContentProviderOperation.Builder} 객체는 
+양보 지점을 설정하는 {@link android.content.ContentProviderOperation.Builder#withYieldAllowed(boolean)
+withYieldAllowed()}로 플래그 표시합니다.
+</p>
+<pre>
+    // Creates the display name for the new raw contact, as a StructuredName data row.
+    op =
+            ContentProviderOperation.newInsert(ContactsContract.Data.CONTENT_URI)
+            /*
+             * withValueBackReference sets the value of the first argument to the value of
+             * the ContentProviderResult indexed by the second argument. In this particular
+             * call, the raw contact ID column of the StructuredName data row is set to the
+             * value of the result returned by the first operation, which is the one that
+             * actually adds the raw contact row.
+             */
+            .withValueBackReference(ContactsContract.Data.RAW_CONTACT_ID, 0)
+
+            // Sets the data row's MIME type to StructuredName
+            .withValue(ContactsContract.Data.MIMETYPE,
+                    ContactsContract.CommonDataKinds.StructuredName.CONTENT_ITEM_TYPE)
+
+            // Sets the data row's display name to the name in the UI.
+            .withValue(ContactsContract.CommonDataKinds.StructuredName.DISPLAY_NAME, name);
+
+    // Builds the operation and adds it to the array of operations
+    ops.add(op.build());
+
+    // Inserts the specified phone number and type as a Phone data row
+    op =
+            ContentProviderOperation.newInsert(ContactsContract.Data.CONTENT_URI)
+            /*
+             * Sets the value of the raw contact id column to the new raw contact ID returned
+             * by the first operation in the batch.
+             */
+            .withValueBackReference(ContactsContract.Data.RAW_CONTACT_ID, 0)
+
+            // Sets the data row's MIME type to Phone
+            .withValue(ContactsContract.Data.MIMETYPE,
+                    ContactsContract.CommonDataKinds.Phone.CONTENT_ITEM_TYPE)
+
+            // Sets the phone number and type
+            .withValue(ContactsContract.CommonDataKinds.Phone.NUMBER, phone)
+            .withValue(ContactsContract.CommonDataKinds.Phone.TYPE, phoneType);
+
+    // Builds the operation and adds it to the array of operations
+    ops.add(op.build());
+
+    // Inserts the specified email and type as a Phone data row
+    op =
+            ContentProviderOperation.newInsert(ContactsContract.Data.CONTENT_URI)
+            /*
+             * Sets the value of the raw contact id column to the new raw contact ID returned
+             * by the first operation in the batch.
+             */
+            .withValueBackReference(ContactsContract.Data.RAW_CONTACT_ID, 0)
+
+            // Sets the data row's MIME type to Email
+            .withValue(ContactsContract.Data.MIMETYPE,
+                    ContactsContract.CommonDataKinds.Email.CONTENT_ITEM_TYPE)
+
+            // Sets the email address and type
+            .withValue(ContactsContract.CommonDataKinds.Email.ADDRESS, email)
+            .withValue(ContactsContract.CommonDataKinds.Email.TYPE, emailType);
+
+    /*
+     * Demonstrates a yield point. At the end of this insert, the batch operation's thread
+     * will yield priority to other threads. Use after every set of operations that affect a
+     * single contact, to avoid degrading performance.
+     */
+    op.withYieldAllowed(true);
+
+    // Builds the operation and adds it to the array of operations
+    ops.add(op.build());
+</pre>
+<p>
+    마지막 조각은 새로운 원시 연락처와 데이터 행을 삽입하는 
+{@link android.content.ContentResolver#applyBatch(String, ArrayList) applyBatch()}에 대한 호출을 
+나타낸 것입니다.
+</p>
+<pre>
+    // Ask the Contacts Provider to create a new contact
+    Log.d(TAG,"Selected account: " + mSelectedAccount.getName() + " (" +
+            mSelectedAccount.getType() + ")");
+    Log.d(TAG,"Creating contact: " + name);
+
+    /*
+     * Applies the array of ContentProviderOperation objects in batch. The results are
+     * discarded.
+     */
+    try {
+
+            getContentResolver().applyBatch(ContactsContract.AUTHORITY, ops);
+    } catch (Exception e) {
+
+            // Display a warning
+            Context ctx = getApplicationContext();
+
+            CharSequence txt = getString(R.string.contactCreationFailure);
+            int duration = Toast.LENGTH_SHORT;
+            Toast toast = Toast.makeText(ctx, txt, duration);
+            toast.show();
+
+            // Log exception
+            Log.e(TAG, "Exception encountered while inserting contact: " + e);
+    }
+}
+</pre>
+<p>
+    일괄 작업을 사용하면 <strong>낙관적 동시성 제어</strong>도 구현할 수 있습니다. 
+이것은 기본 리포지토리를 잠그지 않고도 수정 트랜잭션을 적용할 수 있는 메서드입니다.
+    이 메서드를 사용하려면 트랜잭션을 적용하고 동시에 발생한 
+다른 수정 사항이 있는지 확인합니다. 부합하지 않는 수정이 발생한 것을 발견하면 
+트랜잭션을 롤백하고 다시 시도합니다.
+</p>
+<p>
+    낙관적 동시성 제어는 한 번에 한 명의 사용자만 존재하고 데이터 리포지토리에 대한 동시 액세스가 드문 모바일 기기에 
+유용합니다. 잠금을 사용하지 않으므로 
+잠금을 설정하거나 다른 트랜잭션이 잠금을 해제하기를 기다리면서 시간을 낭비하지 않습니다.
+</p>
+<p>
+    하나의 
+{@link android.provider.ContactsContract.RawContacts} 행을 업데이트하면서 동시에 낙관적 동시성 제어를 사용하려면, 다음 단계를 따르십시오.
+</p>
+<ol>
+    <li>
+        검색하는 다른 데이터와 함께 행 연락처의 {@link android.provider.ContactsContract.SyncColumns#VERSION}을 
+검색합니다.
+    </li>
+    <li>
+        제약을 강제 적용하는 데 적합한 
+{@link android.content.ContentProviderOperation.Builder} 객체를 하나 생성하되 
+{@link android.content.ContentProviderOperation#newAssertQuery(Uri)} 메서드를 사용합니다. 콘텐츠 URI의 경우, 
+{@link android.provider.ContactsContract.RawContacts#CONTENT_URI
+        RawContacts.CONTENT_URI}를 사용하되 
+이에 추가된 원시 데이터의 {@code android.provider.BaseColumns#_ID}를 함께 씁니다.
+    </li>
+    <li>
+        {@link android.content.ContentProviderOperation.Builder} 개체의 경우,
+{@link android.content.ContentProviderOperation.Builder#withValue(String, Object)
+withValue()}를 호출하여 방금 검색한 버전 번호와 {@link android.provider.ContactsContract.SyncColumns#VERSION} 열을
+비교합니다.
+    </li>
+    <li>
+        같은 {@link android.content.ContentProviderOperation.Builder}의 경우,
+{@link android.content.ContentProviderOperation.Builder#withExpectedCount(int)
+withExpectedCount()}를 호출하여 이 어설션이 테스트하는 행이 하나뿐이도록 보장합니다.
+    </li>
+    <li>
+        {@link android.content.ContentProviderOperation.Builder#build()}를 호출하여
+{@link android.content.ContentProviderOperation} 객체를 생성하고, 이 객체를
+{@link android.content.ContentResolver#applyBatch(String, ArrayList) applyBatch()}에 전달하는 {@link java.util.ArrayList}의 첫 번째 객체로 추가합니다.
+
+    </li>
+    <li>
+        일괄 트랜잭션을 적용합니다.
+    </li>
+</ol>
+<p>
+    행을 읽고 수정하려고 시도하는 사이에 다른 작업이 원시 연락처 행을 업데이트하면,
+"어설션" {@link android.content.ContentProviderOperation}은 
+실패하고 전체 일괄 작업이 취소됩니다. 그러면 일괄 작업을 다시 시도하거나 
+다른 조치를 취하기로 선택할 수 있습니다.
+</p>
+<p>
+    다음 조각은 {@link android.content.CursorLoader}를 사용하여 단일 원시 연락처를 쿼리한 후 
+"어설션" {@link android.content.ContentProviderOperation}을 
+생성하는 방법을 나타낸 것입니다.
+</p>
+<pre>
+/*
+ * The application uses CursorLoader to query the raw contacts table. The system calls this method
+ * when the load is finished.
+ */
+public void onLoadFinished(Loader&lt;Cursor&gt; loader, Cursor cursor) {
+
+    // Gets the raw contact's _ID and VERSION values
+    mRawContactID = cursor.getLong(cursor.getColumnIndex(BaseColumns._ID));
+    mVersion = cursor.getInt(cursor.getColumnIndex(SyncColumns.VERSION));
+}
+
+...
+
+// Sets up a Uri for the assert operation
+Uri rawContactUri = ContentUris.withAppendedId(RawContacts.CONTENT_URI, mRawContactID);
+
+// Creates a builder for the assert operation
+ContentProviderOperation.Builder assertOp = ContentProviderOperation.netAssertQuery(rawContactUri);
+
+// Adds the assertions to the assert operation: checks the version and count of rows tested
+assertOp.withValue(SyncColumns.VERSION, mVersion);
+assertOp.withExpectedCount(1);
+
+// Creates an ArrayList to hold the ContentProviderOperation objects
+ArrayList ops = new ArrayList&lt;ContentProviderOperationg&gt;;
+
+ops.add(assertOp.build());
+
+// You would add the rest of your batch operations to "ops" here
+
+...
+
+// Applies the batch. If the assert fails, an Exception is thrown
+try
+    {
+        ContentProviderResult[] results =
+                getContentResolver().applyBatch(AUTHORITY, ops);
+
+    } catch (OperationApplicationException e) {
+
+        // Actions you want to take if the assert operation fails go here
+    }
+</pre>
+<h3 id="Intents">인텐트로 검색 및 수정</h3>
+<p>
+    기기 연락처 애플리케이션에 인텐트를 전송하면 연락처 제공자에 
+간접적으로 액세스할 수 있습니다. 인텐트는 기기의 연락처 애플리케이션 UI를 시작하고, 여기서 사용자는 
+연락처 관련 작업을 할 수 있습니다. 사용자가 이런 액세스 유형을 가지고 할 수 있는 일은 다음과 같습니다.
+    <ul>
+        <li>목록에서 연락처를 선택하고 추가 작업을 위해 앱에 반환시킵니다.</li>
+        <li>기존 연락처의 데이터를 편집합니다.</li>
+        <li>새 원시 데이터를 해당되는 계정 중 아무 곳에나 삽입합니다.</li>
+        <li>연락처 또는 연락처 데이터를 삭제합니다.</li>
+    </ul>
+<p>
+    사용자가 데이터를 삽입하거나 업데이트하고 있다면, 먼저 데이터를 수집하고 
+인텐트의 일부로 전송할 수 있습니다.
+</p>
+<p>
+    인텐트를 사용하여 기기의 연락처 애플리케이션을 통해 연락처 제공자에 액세스하는 경우 
+제공자에 액세스하기 위해 개발자 나름의 UI나 코드를 작성하지 않아도 됩니다. 제공자에 대한 읽기 또는 쓰기 권한도 요청하지 않아도 
+됩니다. 기기 연락처 애플리케이션은 
+연락처에 대한 읽기 권한을 위임할 수 있고, 다른 애플리케이션을 통해 수정하기 때문에 
+쓰기 권한도 필요 없습니다.
+</p>
+<p>
+    제공자에 액세스하기 위해 인텐트를 전송하는 일반적인 과정은 
+"인텐트를 통한 데이터 액세스" 섹션의 <a href="{@docRoot}guide/topics/providers/content-provider-basics.html">
+콘텐츠 제공자 기본 정보</a> 가이드에 상세히 설명되어 있습니다. 이용 가능한 작업에 대해 사용하는 동작, 
+MIME 유형 및 데이터 값은 표 4에 요약되어 있고,
+
+{@link android.content.Intent#putExtra(String, String) putExtra()}와 함께 사용할 수 있는 추가 값은
+{@link android.provider.ContactsContract.Intents.Insert}의 참조 문서에 나열되어 있습니다.
+</p>
+<p class="table-caption" id="table4">
+  <strong>표 4.</strong> 연락처 제공자 인텐트
+</p>
+<table style="width:75%">
+    <tr>
+        <th scope="col" style="width:10%">작업</th>
+        <th scope="col" style="width:5%">동작</th>
+        <th scope="col" style="width:10%">데이터</th>
+        <th scope="col" style="width:10%">MIME 유형</th>
+        <th scope="col" style="width:25%">참고</th>
+    </tr>
+    <tr>
+        <td><strong>목록에서 연락처 선택</strong></td>
+        <td>{@link android.content.Intent#ACTION_PICK}</td>
+        <td>
+            다음 중 하나로 정해집니다.
+            <ul>
+                <li>
+{@link android.provider.ContactsContract.Contacts#CONTENT_URI Contacts.CONTENT_URI}, 
+이는 연락처 목록을 표시합니다.
+                </li>
+                <li>
+{@link android.provider.ContactsContract.CommonDataKinds.Phone#CONTENT_URI Phone.CONTENT_URI}, 
+이는 원시 연락처에 대한 전화 번호 목록을 표시합니다.
+                </li>
+                <li>
+{@link android.provider.ContactsContract.CommonDataKinds.StructuredPostal#CONTENT_URI
+StructuredPostal.CONTENT_URI}, 
+이는 원시 연락처에 대한 우편 주소 목록을 표시합니다.
+                </li>
+                <li>
+{@link android.provider.ContactsContract.CommonDataKinds.Email#CONTENT_URI Email.CONTENT_URI}, 
+이는 원시 연락처에 대한 이메일 주소 목록을 표시합니다.
+                </li>
+            </ul>
+        </td>
+        <td>
+            사용하지 않음
+        </td>
+        <td>
+            개발자가 제공하는 콘텐츠 URI에 따라 원시 연락처 목록이나 원시 연락처에서 가져온 
+데이터 목록을 표시합니다.
+            <p>
+                
+{@link android.app.Activity#startActivityForResult(Intent, int) startActivityForResult()} 호출, 
+이는 선택한 행의 콘텐츠 URI를 반환합니다. URI의 형태는 
+테이블의 콘텐츠 URI에 행의 <code>LOOKUP_ID</code>를 추가한 것입니다.
+                기기의 연락처 앱은 액티비티 수명 동안 이 콘텐츠 URI에 
+읽기 및 쓰기 권한을 위임합니다. 자세한 내용은 
+<a href="{@docRoot}guide/topics/providers/content-provider-basics.html">
+콘텐츠 제공자 기본 정보</a> 가이드를 참조하십시오.
+            </p>
+        </td>
+    </tr>
+    <tr>
+        <td><strong>새 원시 연락처 삽입</strong></td>
+        <td>{@link android.provider.ContactsContract.Intents.Insert#ACTION Insert.ACTION}</td>
+        <td>N/A</td>
+        <td>
+            {@link android.provider.ContactsContract.RawContacts#CONTENT_TYPE
+RawContacts.CONTENT_TYPE}, 일련의 원시 연락처에 대한 MIME 유형입니다.
+        </td>
+        <td>
+            기기의 연락처 애플리케이션의 <strong>연락처 추가</strong> 화면을 표시합니다. 개발자가 
+인텐트에 추가하는 추가 사항 값이 표시됩니다. 
+{@link android.app.Activity#startActivityForResult(Intent, int) startActivityForResult()}와 함께 전송되는 경우,
+새로 추가된 원시 연락처의 콘텐츠 URI는 
+"데이터" 필드의 {@link android.content.Intent} 인수에 있는 액티비티의 {@link android.app.Activity#onActivityResult(int, int, Intent) onActivityResult()}
+콜백 메서드로 
+다시 전달됩니다. 값을 가져오려면, {@link android.content.Intent#getData()}를 호출합니다.
+        </td>
+    </tr>
+    <tr>
+        <td><strong>연락처 편집</strong></td>
+        <td>{@link android.content.Intent#ACTION_EDIT}</td>
+        <td>
+            연락처에 대한 
+{@link android.provider.ContactsContract.Contacts#CONTENT_LOOKUP_URI}입니다. 편집자 액티비티를 사용하면 사용자가 이 연락처와 관련된 데이터를 어느 것이든 
+편집할 수 있습니다.
+        </td>
+        <td>
+            {@link android.provider.ContactsContract.Contacts#CONTENT_ITEM_TYPE
+Contacts.CONTENT_ITEM_TYPE}, 하나의 연락처입니다.</td>
+        <td>
+            연락처 애플리케이션에 연락처 편집 화면을 표시합니다. 개발자가 
+인텐트에 추가하는 추가 사항 값이 표시됩니다. 사용자가 <strong>완료</strong>를 클릭하여 편집 내용을 저장하면, 
+액티비티가 전경으로 돌아옵니다.
+        </td>
+    </tr>
+    <tr>
+        <td><strong>데이터를 추가할 수 있는 선택기를 표시합니다.</strong></td>
+        <td>{@link android.content.Intent#ACTION_INSERT_OR_EDIT}</td>
+        <td>
+            N/A
+        </td>
+        <td>
+            {@link android.provider.ContactsContract.Contacts#CONTENT_ITEM_TYPE}
+        </td>
+         <td>
+            이 인텐트는 항상 연락처 앱의 선택기 화면을 표시합니다. 사용자는 
+편집할 연락처를 선택하거나 새 연락처를 추가할 수 있습니다. 사용자의 선택에 따라 
+편집 또는 추가 화면이 나타나고 개발자가 인텐트에 전달하는 추가 사항 데이터가 
+표시됩니다. 앱이 이메일이나 전화 번호 등의 연락처 데이터를 표시하는 경우, 
+이 인텐트를 사용하면 사용자가 기존 연락처에 데이터를 추가할 수 
+있습니다.
+            <p class="note">
+                <strong>참고:</strong> 이 인텐트의 추가 사항에서는 이름 값을 전송하지 않아도 됩니다. 
+사용자가 항상 기존의 이름을 선택하거나 새 이름을 추가하기 때문입니다. 게다가, 
+개발자가 이름을 전송하고 사용자가 편집을 선택하면 연락처 앱은 개발자가 전송한 이름을 표시하면서 
+이전 값을 재정의하게 됩니다. 사용자가 
+이를 눈치채지 못하고 편집 내용을 저장하면 이전 값은 손실됩니다.
+            </p>
+         </td>
+    </tr>
+</table>
+<p>
+    기기의 연락처 앱은 개발자가 인텐트로 원시 연락처 또는 그에 속한 모든 데이터를 삭제하도록 
+허용하지 않습니다. 대신, 원시 연락처를 삭제하려면 
+{@link android.content.ContentResolver#delete(Uri, String, String[]) ContentResolver.delete()} 
+또는 {@link android.content.ContentProviderOperation#newDelete(Uri)
+ContentProviderOperation.newDelete()}를 사용합니다.
+</p>
+<p>
+    다음 조각은 새로운 원시 연락처와 
+데이터를 삽입하는 인텐트를 구성, 전송하는 방법을 나타낸 것입니다.
+</p>
+<pre>
+// Gets values from the UI
+String name = mContactNameEditText.getText().toString();
+String phone = mContactPhoneEditText.getText().toString();
+String email = mContactEmailEditText.getText().toString();
+
+String company = mCompanyName.getText().toString();
+String jobtitle = mJobTitle.getText().toString();
+
+// Creates a new intent for sending to the device's contacts application
+Intent insertIntent = new Intent(ContactsContract.Intents.Insert.ACTION);
+
+// Sets the MIME type to the one expected by the insertion activity
+insertIntent.setType(ContactsContract.RawContacts.CONTENT_TYPE);
+
+// Sets the new contact name
+insertIntent.putExtra(ContactsContract.Intents.Insert.NAME, name);
+
+// Sets the new company and job title
+insertIntent.putExtra(ContactsContract.Intents.Insert.COMPANY, company);
+insertIntent.putExtra(ContactsContract.Intents.Insert.JOB_TITLE, jobtitle);
+
+/*
+ * Demonstrates adding data rows as an array list associated with the DATA key
+ */
+
+// Defines an array list to contain the ContentValues objects for each row
+ArrayList&lt;ContentValues&gt; contactData = new ArrayList&lt;ContentValues&gt;();
+
+
+/*
+ * Defines the raw contact row
+ */
+
+// Sets up the row as a ContentValues object
+ContentValues rawContactRow = new ContentValues();
+
+// Adds the account type and name to the row
+rawContactRow.put(ContactsContract.RawContacts.ACCOUNT_TYPE, mSelectedAccount.getType());
+rawContactRow.put(ContactsContract.RawContacts.ACCOUNT_NAME, mSelectedAccount.getName());
+
+// Adds the row to the array
+contactData.add(rawContactRow);
+
+/*
+ * Sets up the phone number data row
+ */
+
+// Sets up the row as a ContentValues object
+ContentValues phoneRow = new ContentValues();
+
+// Specifies the MIME type for this data row (all data rows must be marked by their type)
+phoneRow.put(
+        ContactsContract.Data.MIMETYPE,
+        ContactsContract.CommonDataKinds.Phone.CONTENT_ITEM_TYPE
+);
+
+// Adds the phone number and its type to the row
+phoneRow.put(ContactsContract.CommonDataKinds.Phone.NUMBER, phone);
+
+// Adds the row to the array
+contactData.add(phoneRow);
+
+/*
+ * Sets up the email data row
+ */
+
+// Sets up the row as a ContentValues object
+ContentValues emailRow = new ContentValues();
+
+// Specifies the MIME type for this data row (all data rows must be marked by their type)
+emailRow.put(
+        ContactsContract.Data.MIMETYPE,
+        ContactsContract.CommonDataKinds.Email.CONTENT_ITEM_TYPE
+);
+
+// Adds the email address and its type to the row
+emailRow.put(ContactsContract.CommonDataKinds.Email.ADDRESS, email);
+
+// Adds the row to the array
+contactData.add(emailRow);
+
+/*
+ * Adds the array to the intent's extras. It must be a parcelable object in order to
+ * travel between processes. The device's contacts app expects its key to be
+ * Intents.Insert.DATA
+ */
+insertIntent.putParcelableArrayListExtra(ContactsContract.Intents.Insert.DATA, contactData);
+
+// Send out the intent to start the device's contacts app in its add contact activity.
+startActivity(insertIntent);
+</pre>
+<h3 id="DataIntegrity">데이터 무결성</h3>
+<p>
+    연락처 리포지토리에는 사용자 측에서 올바르고 최신일 것으로 기대하는 중요하고 민감한 데이터가 들어있으므로 
+연락처 제공자는 데이터 무결성에 대한 잘 정의된 규칙이 있습니다. 개발자 
+여러분에게는 연락처 데이터를 수정할 때 이와 같은 규칙을 준수할 의무가 있습니다. 아래에는 중요한 규칙을 
+몇 가지 나열해 놓았습니다.
+</p>
+<dl>
+    <dt>
+        {@link android.provider.ContactsContract.RawContacts} 행을 추가할 때마다 언제나 
+{@link android.provider.ContactsContract.CommonDataKinds.StructuredName} 행을 추가합니다.
+    </dt>
+    <dd>
+        {@link android.provider.ContactsContract.Data} 테이블에 {@link android.provider.ContactsContract.CommonDataKinds.StructuredName} 행이 없는 {@link android.provider.ContactsContract.RawContacts} 행이 있으면 
+통합 과정에서
+문제가 발생할 수 있습니다.
+
+    </dd>
+    <dt>
+        언제나 새로운 {@link android.provider.ContactsContract.Data} 행을 
+해당 상위 {@link android.provider.ContactsContract.RawContacts} 행에 연결합니다.
+    </dt>
+    <dd>
+        {@link android.provider.ContactsContract.RawContacts}에 연결되지 않은 {@link android.provider.ContactsContract.Data} 행은 
+기기 연락처 애플리케이션에 표시되지 않고, 
+동기화 어댑터에서 문제를 발생시킬 수 있습니다.
+    </dd>
+    <dt>
+        개발자 본인의 소유인 원시 연락처에 대한 데이터만 변경하십시오.
+    </dt>
+    <dd>
+        연락처 제공자는 보통 여러 가지 서로 다른 계정 유형/온라인 서비스에서 가져온 
+데이터를 관리한다는 점을 명심하십시오. 개발자의 애플리케이션은 본인에게 
+속한 행에 대한 데이터만 수정 또는 삭제하도록 확실히 해두어야 하며, 데이터를 삽입할 때에도 개발자 본인이 
+제어하는 계정 유형과 이름만 사용해야 합니다.
+    </dd>
+    <dt>
+        권한, 콘텐츠 URI, URI 경로, 열 이름, MIME 유형 및 
+{@link android.provider.ContactsContract.CommonDataKinds.CommonColumns#TYPE} 값에 대해서는 항상 
+{@link android.provider.ContactsContract} 및 그 하위 클래스에서 정의한 상수를 사용합니다.
+    </dt>
+    <dd>
+        이런 상수를 사용하면 오류를 피하는 데 도움이 됩니다. 이런 상수 중 하나라도 사용하지 않게 되는 경우 컴파일러로부터 
+알림을 받기도 합니다.
+    </dd>
+</dl>
+<h3 id="CustomData">사용자 지정 데이터 행</h3>
+<p>
+    사용자 지정 MIME 유형을 생성하여 사용하면,
+{@link android.provider.ContactsContract.Data} 테이블에 있는 본인의 데이터 행을 삽입, 편집, 삭제 및 검색할 수 있습니다. 개발자의 행은 
+{@link android.provider.ContactsContract.DataColumns}에서 
+정의된 열만 사용하도록 제한되어 있습니다. 다만 나름의 유형별 열 이름을 
+기본 열 이름에 매핑할 수는 있습니다. 기기의 연락처 애플리케이션에서는 
+개발자의 행에 대한 데이터가 표시는 되지만 편집이나 삭제는 할 수 없고, 사용자가 추가 데이터를 
+추가할 수도 없습니다. 사용자가 개발자의 사용자 지정 데이터 행을 수정하도록 허용하려면, 본인의 애플리케이션에 
+편집기 액티비티를 제공해야 합니다.
+</p>
+<p>
+    개발자의 사용자 지정 데이터를 표시하려면, <code>&lt;ContactsAccountType&gt;</code> 요소와 하나 이상의 <code>&lt;ContactsDataKind&gt;</code> 하위 요소를 포함하는 <code>contacts.xml</code> 파일을 
+제공합니다.
+ 이 내용은 
+<a href="#SocialStreamDataKind"><code>&lt;ContactsDataKind&gt; element</code></a> 섹션에 자세히 설명되어 있습니다.
+</p>
+<p>
+    사용자 지정 MIME 유형에 대해 자세히 알아보려면,
+<a href="{@docRoot}guide/topics/providers/content-provider-creating.html">
+콘텐츠 제공자 생성</a> 가이드를 참조하십시오.
+</p>
+<h2 id="SyncAdapters">연락처 제공자 동기화 어댑터</h2>
+<p>
+    연락처 제공자는 기기와 온라인 서비스 사이에서 연락처 데이터의 <strong>동기화</strong>를 
+처리한다는 구체적인 목적을 두고 디자인된 것입니다. 이것을 사용하면 사용자가 기존의 
+데이터를 새 기기에 다운로드할 수도 있고, 기존의 데이터를 새 계정에 업로드할 수도 있습니다.
+    동기화를 사용하면 사용자가 추가나 변경의 출처와 관계 없이 최신 데이터를 
+편리하게 사용할 수 있게 보장하기도 합니다. 동기화의 또 다른 장점은 
+기기가 네트워크에 연결되어 있지 않더라도 연락처 데이터를 사용할 수 있다는 것입니다.
+</p>
+<p>
+    다양한 방식으로 동기화를 구현할 수 있지만, Android 시스템은 
+플러그인 동기화 프레임워크를 제공하여 다음과 같은 작업들을 자동화해줍니다.
+    <ul>
+
+    <li>
+        네트워크 가용성을 확인합니다.
+    </li>
+    <li>
+        사용자 기본 설정에 따라 동기화를 예약하고 실행합니다.
+    </li>
+    <li>
+        중단된 동기화를 다시 시작합니다.
+    </li>
+    </ul>
+<p>
+    이 프레임워크를 사용하려면 동기화 어댑터 플러그인은 개발자가 직접 제공해야 합니다. 동기화 어댑터는 
+서비스와 콘텐츠 제공자마다 각기 다르지만, 같은 서비스에 대해 여러 개의 계정 이름을 처리할 수 있습니다. 이 
+프레임워크 또한 같은 서비스와 제공자에 대해 여러 개의 동기화 어댑터를 허용합니다.
+</p>
+<h3 id="SyncClassesFiles">동기화 어댑터 클래스 및 파일</h3>
+<p>
+    동기화 어댑터를 
+{@link android.content.AbstractThreadedSyncAdapter}의 
+하위 클래스로 구현하고 이를Android 애플리케이션의 일부로 설치합니다. 시스템은 애플리케이션 매니페스트의 요소와 매니페스트가 가리키는 
+특수 XML 파일에서 동기화 어댑터에 관한 정보를 얻습니다. XML 파일은 
+온라인 서비스와 콘텐츠 제공자의 권한에 대한 계정 유형을 정의하고, 
+이들이 함께 어댑터를 고유하게 식별합니다. 동기화 어댑터가 활성화되려면 사용자가 
+동기화 어댑터의 계정 유형에 대해 계정을 추가하고 해당 동기화 어댑터와 동기화하는 콘텐츠 제공자의 동기화를 
+활성화해야 합니다.  이 시점에서, 시스템이 어댑터 관리를 시작하고, 
+콘텐츠 제공자와 서버 사이에서 동기화가 필요할 때 이를 호출합니다.
+</p>
+<p class="note">
+    <strong>참고:</strong> 계정 유형을 동기화 어댑터 식별의 일부로 사용하면 
+시스템이 동일한 같은 조직에서 여러 서비스에 액세스하는 동기화 어댑터를 
+감지하고 그룹화할 수 있습니다. 예를 들어, Google 온라인 서비스의 동기화 어댑터는 계정 유형이 모두 
+<code>com.google</code>로 같습니다. 사용자가 기기에 Google 계정을 추가하면, 
+Google 서비스에 설치된 모든 동기화 어댑터가 함께 목록으로 표시됩니다. 목록에 게재된 각 동기화는 
+기기에서 각기 다른 콘텐츠 제공자와 동기화합니다.
+</p>
+<p>
+    대부분의 서비스에서는 사용자가 데이터에 액세스하기 전에 
+ID를 확인해야 하기 때문에 Android에서는 동기화 어댑터 프레임워크와 비슷하면서 종종 이와 함께 쓰이기도 하는 
+인증 프레임워크를 제공합니다. 인증 프레임워크는 
+{@link android.accounts.AbstractAccountAuthenticator}의 하위 클래스인 
+플러그인 인증자를 사용합니다. 인증자는 다음 절차에 따라 
+사용자의 ID를 확인합니다.
+    <ol>
+        <li>
+            사용자 이름, 암호 또는 유사한 정보(사용자의 
+<strong>자격 증명</strong>)를 수집합니다.
+        </li>
+        <li>
+            자격 증명을 서비스로 전송합니다.
+        </li>
+        <li>
+            서비스의 회신을 검토합니다.
+        </li>
+    </ol>
+<p>
+    서비스가 자격 증명을 수락하면 
+인증자가 자격 증명을 저장하여 나중에 사용할 수 있습니다. 플러그인 인증자 프레임워크로 인해, 
+{@link android.accounts.AccountManager}는 Oauth2 authToken과 같이 인증자가 지원하고 노출하기로 선택하는 모든 authToken에 액세스를 
+제공합니다.
+</p>
+<p>
+    인증이 꼭 필요한 것은 아니지만, 대부분의 연락처 서비스는 이를 사용합니다.
+    다만, 인증을 수행하기 위해 꼭 Android 인증 프레임워크를 사용해야 하는 것은 아닙니다.
+</p>
+<h3 id="SyncAdapterImplementing">동기화 어댑터 구현</h3>
+<p>
+    연락처 제공자에 대한 동기화 어댑터를 구현하려면, 
+다음이 들어있는 Android 애플리케이션을 생성하는 것으로 시작합니다.
+</p>
+    <dl>
+        <dt>
+            시스템의 요청에 응답하여 동기화 어댑터에 바인딩하는 {@link android.app.Service} 
+구성 요소.
+        </dt>
+        <dd>
+            시스템이 동기화를 실행하고자 하는 경우, 이는 
+서비스의 {@link android.app.Service#onBind(Intent) onBind()} 메서드를 호출하여
+동기화 어댑터의 {@link android.os.IBinder}를 가져옵니다. 이렇게 하면 시스템이 어댑터의 
+메서드에 대해 프로세스간 호출을 수행할 수 있습니다.
+            <p>
+                <a href="{@docRoot}resources/samples/SampleSyncAdapter/index.html">
+샘플 동기화 어댑터</a> 샘플 앱에서 이 서비스의 클래스 이름은
+<code>com.example.android.samplesync.syncadapter.SyncService</code>입니다.
+            </p>
+        </dd>
+        <dt>
+            {@link android.content.AbstractThreadedSyncAdapter}의 
+하위 클래스로 구현된 실제 동기화 어댑터.
+        </dt>
+        <dd>
+            이 클래스는 서버에서 데이터를 다운로드하고, 기기에서 데이터를 업로드하고, 
+충돌을 해결하는 작업을 수행합니다. 어댑터의 주요 작업은 
+{@link android.content.AbstractThreadedSyncAdapter#onPerformSync(
+Account, Bundle, String, ContentProviderClient, SyncResult)
+onPerformSync()} 메서드에서 실행합니다. 이 클래스는 반드시 단일 항목으로 인스턴트화해야 합니다.
+            <p>
+                <a href="{@docRoot}resources/samples/SampleSyncAdapter/index.html">
+샘플 동기화 어댑터</a> 샘플 앱에서 동기화 어댑터는 
+<code>com.example.android.samplesync.syncadapter.SyncAdapter</code> 클래스에서 정의됩니다.
+            </p>
+        </dd>
+        <dt>
+            {@link android.app.Application}의 하위 클래스.
+        </dt>
+        <dd>
+            이 클래스는 동기화 어댑터 단일 항목의 팩터리 역할을 합니다. 
+{@link android.app.Application#onCreate()} 메서드는 
+동기화 어댑터를 인스턴트화하고, 단일 항목을 동기화 어댑터 서비스의 
+{@link android.app.Service#onBind(Intent) onBind()} 메서드에 반환할 정적 "getter" 메서드를 제공하는 데 
+사용하십시오.
+        </dd>
+        <dt>
+            <strong>선택 항목:</strong> 사용자 인증에 대한 시스템으로부터의 요청에 응답하는 {@link android.app.Service} 
+구성 요소.
+        </dt>
+        <dd>
+            {@link android.accounts.AccountManager}가 이 서비스를 시작하여 인증 
+절차를 시작합니다. 서비스의 {@link android.app.Service#onCreate()} 메서드가 
+인증자 객체를 인스턴트화합니다. 시스템이 애플리케이션 동기화 어댑터의 사용자 계정을 인증하고자 하는 경우, 
+시스템은 서비스의 
+{@link android.app.Service#onBind(Intent) onBind()} 메서드를 호출하여 
+인증자의 {@link android.os.IBinder}를 가져옵니다. 이렇게 하면 시스템이 인증자의 
+메서드에 대해 프로세스간 호출을 수행할 수 있습니다.
+            <p>
+                <a href="{@docRoot}resources/samples/SampleSyncAdapter/index.html">
+샘플 동기화 어댑터</a> 샘플 앱에서 이 서비스의 클래스 이름은
+<code>com.example.android.samplesync.authenticator.AuthenticationService</code>입니다.
+            </p>
+        </dd>
+        <dt>
+            <strong>선택 항목:</strong> 인증에 대한 요청을 처리하는 
+{@link android.accounts.AbstractAccountAuthenticator}의 구체적인 
+하위 클래스.
+        </dt>
+        <dd>
+            이 클래스는 {@link android.accounts.AccountManager}가 
+서버로 사용자 자격 증명 인증을 호출하는 메서드를 제공합니다. 인증 절차의 세부 사항은 
+사용하는 서버 기술에 따라 매우 차이가 있습니다. 인증에 대한 
+자세한 정보는 각자의 서버 소프트웨어에 해당되는 관련 문서를 참조하십시오.
+            <p>
+                <a href="{@docRoot}resources/samples/SampleSyncAdapter/index.html">
+샘플 동기화 어댑터</a> 샘플 앱에서 인증자는 
+<code>com.example.android.samplesync.authenticator.Authenticator</code> 클래스에서 정의됩니다.
+            </p>
+        </dd>
+        <dt>
+            동기화 어댑터와 서버의 인증자를 정의하는 XML 파일.
+        </dt>
+        <dd>
+            이전에 설명한 동기화 어댑터와 인증자 서비스 구성 요소는 
+애플리케이션 매니페스트의 
+<code>&lt;<a href="{@docRoot}guide/topics/manifest/service-element.html">service</a>&gt;</code> 요소에서 
+정의합니다. 이런 요소에는 
+시스템에 특정 데이터를 제공하는 
+<code>&lt;<a href="{@docRoot}guide/topics/manifest/meta-data-element.html">meta-data</a>&gt;</code>
+하위 요소가 
+들어있습니다.
+            <ul>
+                <li>
+                    동기화 어댑터 서비스에 대한 
+<code>&lt;<a href="{@docRoot}guide/topics/manifest/meta-data-element.html">meta-data</a>&gt;</code>
+요소는 
+XML 파일 <code>res/xml/syncadapter.xml</code>을 가리킵니다. 그런가 하면 
+이 파일은 연락처 제공자와 동기화될 웹 서비스에 대한 URI와 웹 서비스에 대한 계정 유형을 
+나타냅니다.
+                </li>
+                <li>
+                    <strong>선택 항목:</strong> 인증자의 
+<code>&lt;<a href="{@docRoot}guide/topics/manifest/meta-data-element.html">meta-data</a>&gt;</code>
+요소는 XML 파일 
+<code>res/xml/authenticator.xml</code>을 가리킵니다. 이 파일은 다시 
+이 인증이 지원하는 계정 유형과, 인증 과정 중에 표시되는 UI 리소스를 
+나타냅니다. 이 요소에서 지정한 계정 유형은 반드시 
+동기화 어댑터에 대해 지정된 계정 유형과 
+같아야 합니다.
+                </li>
+            </ul>
+        </dd>
+    </dl>
+<h2 id="SocialStream">소셜 스트림 데이터</h2>
+<p>
+    {@code android.provider.ContactsContract.StreamItems}와 
+{@code android.provider.ContactsContract.StreamItemPhotos} 테이블은 
+소셜 네트워크에서 수신하는 데이터를 관리합니다. 개발자는 본인의 네트워크의 스트림 데이터를 이 테이블에 추가하는 
+동기화 어댑터를 작성할 수도 있고, 이 테이블에서 스트림 데이터를 읽어서 
+본인의 애플리케이션에 표시할 수도 있으며 두 가지를 모두 해도 됩니다. 이 기능을 사용하면 소셜 네트워킹 
+서비스와 애플리케이션을 Android의 소셜 네트워킹 환경에 통합할 수 있습니다.
+</p>
+<h3 id="StreamText">소셜 스트림 텍스트</h3>
+<p>
+    스트림 항목은 항상 원시 연락처와 연관됩니다. 
+{@code android.provider.ContactsContract.StreamItemsColumns#RAW_CONTACT_ID}는 
+원시 연락처의 <code>_ID</code> 값과 연관됩니다. 원시 연락처의 계정 유형과 계정 이름도 
+스트림 항목 행에 저장됩니다.
+</p>
+<p>
+    스트림에서 가져온 데이터는 다음 열에 저장합니다.
+</p>
+<dl>
+    <dt>
+        {@code android.provider.ContactsContract.StreamItemsColumns#ACCOUNT_TYPE}
+    </dt>
+    <dd>
+        <strong>필수입니다.</strong> 이 스트림 항목과 연관된 원시 연락처에 대한 
+사용자 계정입니다. 스트림 항목을 삽입할 때 이 값을 설정하는 것을 잊지 마십시오.
+    </dd>
+    <dt>
+        {@code android.provider.ContactsContract.StreamItemsColumns#ACCOUNT_NAME}
+    </dt>
+    <dd>
+        <strong>필수입니다.</strong> 이 스트림 항목과 연관된 원시 연락처에 대한 
+사용자 계정 이름입니다. 스트림 항목을 삽입할 때 이 값을 설정하는 것을 잊지 마십시오.
+    </dd>
+    <dt>
+        식별자 열
+    </dt>
+    <dd>
+        <strong>필수입니다.</strong> 스트림 항목을 삽입할 때 
+다음 식별자 열을 삽입해야 합니다.
+        <ul>
+            <li>
+                {@code android.provider.ContactsContract.StreamItemsColumns#CONTACT_ID}: 이 
+스트림 항목과 연관된 연락처의 {@code android.provider.BaseColumns#_ID} 
+값입니다.
+            </li>
+            <li>
+                {@code android.provider.ContactsContract.StreamItemsColumns#CONTACT_LOOKUP_KEY}: 이 
+스트림 항목과 연관된 연락처의 {@code android.provider.ContactsContract.ContactsColumns#LOOKUP_KEY} 
+값입니다.
+            </li>
+            <li>
+                {@code android.provider.ContactsContract.StreamItemsColumns#RAW_CONTACT_ID}: 이 
+스트림 항목과 연관된 원시 연락처의 {@code android.provider.BaseColumns#_ID} 
+값입니다.
+            </li>
+        </ul>
+    </dd>
+    <dt>
+        {@code android.provider.ContactsContract.StreamItemsColumns#COMMENTS}
+    </dt>
+    <dd>
+        선택 사항입니다. 스트림 항목의 시작 부분에 표시할 수 있는 요약 정보를 저장합니다.
+    </dd>
+    <dt>
+        {@code android.provider.ContactsContract.StreamItemsColumns#TEXT}
+    </dt>
+    <dd>
+        스트림 항목의 텍스트로, 항목의 소스가 게시한 콘텐츠 또는 
+스트림 항목을 생성하는 작업의 설명 중 하나입니다. 이 열에는 
+{@link android.text.Html#fromHtml(String) fromHtml()}가 렌더링할 수 있는 모든 서식과 포함된 리소스 이미지가 
+들어있을 수 있습니다. 제공자는 긴 콘텐츠를 
+자르거나 생략할 수 있지만, 가능하면 태그를 손상시키는 것은 피하려 듭니다.
+    </dd>
+    <dt>
+        {@code android.provider.ContactsContract.StreamItemsColumns#TIMESTAMP}
+    </dt>
+    <dd>
+        스트림 항목이 삽입되거나 업데이트된 시간이 들어있는 텍스트 문자열로, 형식은 
+epoch 이후 <em>밀리초</em> 형태를 취합니다. 이 열을 관리할 책임은 
+스트림 항목을 삽입 또는 업데이트하는 애플리케이션에 있으며, 이것은 연락처 제공자가 자동으로 
+유지 관리하지 않습니다.
+    </dd>
+</dl>
+<p>
+    스트림 항목의 식별 정보를 표시하려면
+{@code android.provider.ContactsContract.StreamItemsColumns#RES_ICON},
+{@code android.provider.ContactsContract.StreamItemsColumns#RES_LABEL},
+{@code android.provider.ContactsContract.StreamItemsColumns#RES_PACKAGE}를 사용하여 애플리케이션에서
+리소스를 연결하십시오.
+</p>
+<p>
+    {@code android.provider.ContactsContract.StreamItems} 테이블에도 
+동기화 어댑터가 독점적으로 사용하는 {@code android.provider.ContactsContract.StreamItemsColumns#SYNC1}에서
+{@code android.provider.ContactsContract.StreamItemsColumns#SYNC4}까지의 열이 
+들어있습니다.
+</p>
+<h3 id="StreamPhotos">소셜 스트림 사진</h3>
+<p>
+   {@code android.provider.ContactsContract.StreamItemPhotos} 테이블은 스트림 항목과 연관된 
+사진을 저장합니다. 테이블의 
+{@code android.provider.ContactsContract.StreamItemPhotosColumns#STREAM_ITEM_ID} 열은
+{@code android.provider.ContactsContract.StreamItems} 테이블의 {@code android.provider.BaseColumns#_ID} 열에 있는 값과 
+연결됩니다. 사진 참조는 
+다음 열의 테이블에 저장됩니다.
+</p>
+<dl>
+    <dt>
+        {@code android.provider.ContactsContract.StreamItemPhotos#PHOTO} 열(BLOB).
+    </dt>
+    <dd>
+        사진의 바이너리 표현으로, 제공자가 저장하고 표시하기 위해 크기를 조정한 것입니다.
+        이 열은 사진을 저장하는 데 사용한 연락처 제공자의 이전 버전과 
+호환됩니다. 그러나 현재 버전에서는 
+이 열을 사진 저장에 사용하면 안 됩니다. 대신, 
+{@code android.provider.ContactsContract.StreamItemPhotosColumns#PHOTO_FILE_ID} 또는 
+{@code android.provider.ContactsContract.StreamItemPhotosColumns#PHOTO_URI}(
+다음 항목에서 두 가지 모두 설명)를 사용하여 사진을 파일로 저장합니다. 지금 이 열에는 
+사진의 미리 보기가 들어있어 읽기 작업에 사용할 수 있습니다.
+    </dd>
+    <dt>
+        {@code android.provider.ContactsContract.StreamItemPhotosColumns#PHOTO_FILE_ID}
+    </dt>
+    <dd>
+        원시 연락처에 대한 사진의 숫자 식별자입니다. 이 값을 
+상수 {@link android.provider.ContactsContract.DisplayPhoto#CONTENT_URI DisplayPhoto.CONTENT_URI}에 추가하여 
+하나의 사진 파일을 가리키는 콘텐츠 URI를 가져온 다음, 
+{@link android.content.ContentResolver#openAssetFileDescriptor(Uri, String)
+openAssetFileDescriptor()}를 호출하여 사진 파일에 대한 핸들을 가져옵니다.
+    </dd>
+    <dt>
+        {@code android.provider.ContactsContract.StreamItemPhotosColumns#PHOTO_URI}
+    </dt>
+    <dd>
+        이 행이 나타내는 사진에 대한 사진 파일을 직접 가리키는 콘텐츠 URI입니다.
+        이 URI로 {@link android.content.ContentResolver#openAssetFileDescriptor(Uri, String)
+openAssetFileDescriptor()}를 호출하면 사진 파일에 대한 핸들을 가져올 수 있습니다.
+    </dd>
+</dl>
+<h3 id="SocialStreamTables">소셜 스트림 테이블 사용</h3>
+<p>
+    이들 테이블은 연락처 제공자의 다른 주요 테이블과 똑같이 작동하지만, 다음 예외가 적용됩니다.
+</p>
+    <ul>
+        <li>
+            이 테이블에는 추가 액세스 권한이 필요합니다. 여기서 읽기 작업을 수행하려면 애플리케이션에
+{@code android.Manifest.permission#READ_SOCIAL_STREAM} 권한이 있어야 합니다. 여기서 수정 작업을 수행하려면 
+애플리케이션에
+{@code android.Manifest.permission#WRITE_SOCIAL_STREAM} 권한이 있어야 합니다.
+        </li>
+        <li>
+            {@code android.provider.ContactsContract.StreamItems} 테이블의 경우, 각 원시 연락처에 저장되는 
+행 개수가 제한되어 있습니다. 이 한계에 도달하면, 
+연락처 제공자가 새 스트림 항목 열에 필요한 공간을 만들어야 합니다.
+이때 가장 오래된 {@code android.provider.ContactsContract.StreamItemsColumns#TIMESTAMP}가 
+있는 행부터 자동으로 삭제하는 방법을 씁니다. 이 한계를 
+가져오려면, 콘텐츠 URI 
+{@code android.provider.ContactsContract.StreamItems#CONTENT_LIMIT_URI}에 쿼리를 발행합니다. 콘텐츠 
+URI를 뺀 나머지 모든 인수는 <code>null</code>로 설정한 채 두면 됩니다. 이 쿼리는 
+행이 하나 들어 있는 커서를 반환하며, 
+{@code android.provider.ContactsContract.StreamItems#MAX_ITEMS} 열 하나가 수반됩니다.
+        </li>
+    </ul>
+
+<p>
+    {@code android.provider.ContactsContract.StreamItems.StreamItemPhotos} 클래스는 
+스트림 항목 하나의 사진 행을 포함하는 {@code android.provider.ContactsContract.StreamItemPhotos}의 
+하위 테이블을 정의합니다.
+</p>
+<h3 id="SocialStreamInteraction">소셜 스트림 상호 작용</h3>
+<p>
+    연락처 제공자가 기기 연락처 애플리케이션과 함께 관리하는 소셜 스트림 데이터는 
+소셜 네트워킹 시스템과 
+기존 연락처를 연결하는 강력한 방법을 제공합니다. 사용할 수 있는 기능은 다음과 같습니다.
+</p>
+    <ul>
+        <li>
+            소셜 네트워킹 서비스를 동기화 어댑터로 연락처 제공자에 동기화함으로써, 
+사용자 연락처의 최근 활동을 검색하고 이를 
+{@code android.provider.ContactsContract.StreamItems} 및 
+{@code android.provider.ContactsContract.StreamItemPhotos} 테이블에 저장해 두어 나중에 사용할 수 있습니다.
+        </li>
+        <li>
+            정기 동기화 외에도 사용자가 볼 연락처를 선택하면 동기화 어댑터를 트리거하여 
+추가 데이터를 검색하게 할 수 있습니다. 이렇게 하면 동기화 어댑터가 
+해당 연락처의 고해상도 사진과 가장 최근 스트림 항목을 검색할 수 있습니다.
+        </li>
+        <li>
+            기기 연락처 애플리케이션과 연락처 제공자에 알림을 등록하면, 
+연락처가 열람될 때 인텐트를 <em>수신</em>하고, 
+그 시점에 개발자의 서비스로부터 연락처의 상태를 업데이트할 수 있습니다. 이 방법을 사용하면 동기화 어댑터로 
+완전 동기화를 수행하는 것보다 빠르고 대역폭도 적게 사용합니다.
+        </li>
+        <li>
+            사용자는 기기의 연락처 애플리케이션을 보면서 여러분의 소셜 네트워킹 서비스에 
+연락처를 추가할 수 있습니다. 이는 "연락처 초대" 기능으로 사용할 수 있습니다. 
+연락처 초대 기능은 기존 연락처를 네트워크에 추가하는 액티비티와 
+기기의 연락처 애플리케이션을 제공하는 XML 파일, 
+애플리케이션의 세부 정보가 포함된 연락처 제공자를 조합하여 활성화합니다.
+        </li>
+    </ul>
+<p>
+    연락처 제공자로 스트림 항목을 정기 동기화하는 방법은 
+다른 동기화와 같습니다. 동기화에 관한 자세한 내용은 
+<a href="#SyncAdapters">연락처 제공자 동기화 어댑터</a> 섹션을 참조하십시오. 알림을 등록하고 연락처를 초대하는 방법은 
+다음 두 섹션에서 다룰 것입니다.
+</p>
+<h4>소셜 네트워킹 보기를 처리하기 위한 등록</h4>
+<p>
+    동기화 어댑터를 등록하여 사용자가 동기화 어댑터에서 관리하는 연락처를 볼 때 알림을 
+수신하는 방법:
+</p>
+<ol>
+    <li>
+        프로젝트의 <code>res/xml/</code> 디렉터리에 <code>contacts.xml</code> 파일을 
+만듭니다. 이미 이 파일이 있다면 이 절차를 건너뛰어도 됩니다.
+    </li>
+    <li>
+        이 파일에서, 
+<code>&lt;ContactsAccountType xmlns:android="http://schemas.android.com/apk/res/android"&gt;</code> 요소를 추가합니다.
+        이 요소가 이미 존재한다면 이 절차를 건너뛰어도 됩니다.
+    </li>
+    <li>
+        사용자가 기기의 연락처 애플리케이션에서 
+연락처 세부 정보 페이지를 열면 알림을 보내는 서비스를 등록하려면,
+<code>viewContactNotifyService="<em>serviceclass</em>"</code> 속성을 요소에 추가합니다. 
+이 요소에서 <code><em>serviceclass</em></code>는 기기의 연락처 애플리케이션에서 인텐트를 수신하는 서비스의 
+완전히 정규화된 클래스 이름입니다. 알림 서비스의 경우, 
+{@link android.app.IntentService}를 확장하는 클래스를 사용하여 서비스가 인텐트를 수신하도록 
+허용합니다. 수신되는 인텐트의 데이터에는 
+사용자가 클릭한 원시 연락처의 콘텐츠 URI가 들어있습니다. 알림 서비스에서 동기화 어댑터에 바인딩한 다음 동기화 어댑터를 호출하여 
+원시 연락처의 데이터를 업데이트할 수 있습니다.
+    </li>
+</ol>
+<p>
+    사용자가 스트림 항목이나 사진, 또는 그 두 가지를 모두 클릭할 때 호출할 액티비티를 등록하는 방법:
+</p>
+<ol>
+    <li>
+        프로젝트의 <code>res/xml/</code> 디렉터리에 <code>contacts.xml</code> 파일을 
+만듭니다. 이미 이 파일이 있다면 이 절차를 건너뛰어도 됩니다.
+    </li>
+    <li>
+        이 파일에서, 
+<code>&lt;ContactsAccountType xmlns:android="http://schemas.android.com/apk/res/android"&gt;</code> 요소를 추가합니다.
+        이 요소가 이미 존재한다면 이 절차를 건너뛰어도 됩니다.
+    </li>
+    <li>
+        사용자가 기기의 연락처 애플리케이션에서 스트림 항목을 클릭했을 때 
+처리할 액티비티를 등록하려면, 
+<code>viewStreamItemActivity="<em>activityclass</em>"</code> 속성을 요소에 추가합니다. 
+이 요소에서 <code><em>activityclass</em></code>는 기기의 연락처 애플리케이션에서 인텐트를 수신하는 액티비티의 
+완전히 정규화된 클래스 이름입니다.
+    </li>
+    <li>
+        사용자가 기기의 연락처 애플리케이션에서 스트림 사진을 클릭했을 때 
+처리할 액티비티를 등록하려면,
+<code>viewStreamItemPhotoActivity="<em>activityclass</em>"</code> 속성을 요소에 추가합니다.
+이 요소에서 <code><em>activityclass</em></code>는 기기의 연락처 애플리케이션에서 인텐트를 수신하는 액티비티의 
+완전히 정규화된 클래스 이름입니다.
+    </li>
+</ol>
+<p>
+    <code>&lt;ContactsAccountType&gt;</code> 요소는 
+<a href="#SocialStreamAcctType">&lt;ContactsAccountType&gt; 요소</a> 섹션에 자세히 설명되어 있습니다.
+</p>
+<p>
+    수신되는 인텐트에 사용자가 클릭한 항목 또는 사진의 콘텐츠 URI가 들어있습니다.
+    텍스트 항목과 사진에 각기 별도의 액티비티를 적용하려면, 두 속성을 모두 같은 파일에서 사용하십시오.
+</p>
+<h4>소셜 네트워킹 서비스로 상호 작용</h4>
+<p>
+    사용자는 소셜 네트워킹 사이트에 연락처를 초대할 때 
+기기의 연락처 애플리케이션을 떠나지 않아도 됩니다. 대신, 개발자가 기기의 연락처 앱에 액티비티 중 하나로 연락처를 초대하는 인텐트를 
+보내게 할 수 있습니다. 이렇게 설정하는 방법은 다음과 같습니다.
+</p>
+<ol>
+    <li>
+        프로젝트의 <code>res/xml/</code> 디렉터리에 <code>contacts.xml</code> 파일을 
+만듭니다. 이미 이 파일이 있다면 이 절차를 건너뛰어도 됩니다.
+    </li>
+    <li>
+        이 파일에서, 
+<code>&lt;ContactsAccountType xmlns:android="http://schemas.android.com/apk/res/android"&gt;</code> 요소를 추가합니다.
+        이 요소가 이미 존재한다면 이 절차를 건너뛰어도 됩니다.
+    </li>
+    <li>
+        다음 속성을 추가합니다.
+        <ul>
+            <li><code>inviteContactActivity="<em>activityclass</em>"</code></li>
+            <li>
+                <code>inviteContactActionLabel="&#64;string/<em>invite_action_label</em>"</code>
+            </li>
+        </ul>
+        <code><em>activityclass</em></code> 값은 인텐트를 수신해야 하는 액티비티의 
+완전히 정규화된 클래스 이름입니다. <code><em>invite_action_label</em></code>
+값은 기기의 연락처 애플리케이션에 있는 <strong>연결 추가</strong> 메뉴에 
+표시되는 텍스트 문자열입니다.
+    </li>
+</ol>
+<p class="note">
+    <strong>참고:</strong> <code>ContactsSource</code>는 
+<code>ContactsAccountType</code>에 대하여 이제 사용하지 않는 태그 이름입니다.
+</p>
+<h3 id="ContactsFile">contacts.xml 참조</h3>
+<p>
+    <code>contacts.xml</code> 파일에는 XML 요소가 들어있어 개발자의 동기화 어댑터와 
+애플리케이션, 연락처 애플리케이션과 연락처 제공자 사이의 상호 작용을 제어합니다. 이런 
+요소는 다음 섹션에 설명되어 있습니다.
+</p>
+<h4 id="SocialStreamAcctType">&lt;ContactsAccountType&gt; 요소</h4>
+<p>
+    <code>&lt;ContactsAccountType&gt;</code>요 요소는 개발자의 애플리케이션과 
+연락처 애플리케이션 사이의 상호 작용을 제어합니다. 이 요소에는 다음 구문이 있습니다.
+</p>
+<pre>
+&lt;ContactsAccountType
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        inviteContactActivity="<em>activity_name</em>"
+        inviteContactActionLabel="<em>invite_command_text</em>"
+        viewContactNotifyService="<em>view_notify_service</em>"
+        viewGroupActivity="<em>group_view_activity</em>"
+        viewGroupActionLabel="<em>group_action_text</em>"
+        viewStreamItemActivity="<em>viewstream_activity_name</em>"
+        viewStreamItemPhotoActivity="<em>viewphotostream_activity_name</em>"&gt;
+</pre>
+<p>
+    <strong>포함 장소:</strong>
+</p>
+<p>
+    <code>res/xml/contacts.xml</code>
+</p>
+<p>
+    <strong>포함 가능 요소:</strong>
+</p>
+<p>
+    <strong><code>&lt;ContactsDataKind&gt;</code></strong>
+</p>
+<p>
+    <strong>설명:</strong>
+</p>
+<p>
+    사용자가 연락처 중 하나를 소셜 네트워크에 초대하고, 
+소셜 네트워킹 스트림이 업데이트되면 사용자에게 알리는 등의 작업을 허용하는 
+Android 구성 요소와 UI 레이블을 선언합니다.
+</p>
+<p>
+    속성 접두사 <code>android:</code>는 
+<code>&lt;ContactsAccountType&gt;</code>의 속성에는 필요하지 않다는 점을 눈여겨보십시오.
+</p>
+<p>
+    <strong>속성:</strong>
+</p>
+<dl>
+    <dt>{@code inviteContactActivity}</dt>
+    <dd>
+        사용자가 기기의 연락처 애플리케이션에서 
+<strong>연결 추가</strong>를 선택했을 때 활성화하고자 하는 
+애플리케이션 액티비티의 완전히 정규화된 클래스 이름입니다.
+    </dd>
+    <dt>{@code inviteContactActionLabel}</dt>
+    <dd>
+        <strong>연결 추가</strong> 메뉴의 
+{@code inviteContactActivity}에서 지정된 액티비티에 대해 표시되는 텍스트 문자열입니다.
+        예를 들어, 문자열 "제 네트워크를 팔로우하세요"를 사용할 수 있습니다. 이 레이블에 대한 문자열 리소스 
+식별자를 사용할 수 있습니다.
+    </dd>
+    <dt>{@code viewContactNotifyService}</dt>
+    <dd>
+        사용자가 연락처를 볼 때 알림을 수신해야 하는 
+애플리케이션 서비스의 완전히 정규화된 클래스 이름입니다. 이 알림은 
+기기의 연락처 애플리케이션이 전송합니다. 이것을 사용하면 개발자의 애플리케이션이 데이터 집약적인 작업을 필요할 때까지 
+연기할 수 있습니다. 예를 들어, 개발자의 애플리케이션은 
+연락처의 고해상도 사진과 가장 최근 소셜 스트림 항목을 읽어서 표시함으로써 
+이 알림에 응답할 수 있습니다. 이 기능은 
+<a href="#SocialStreamInteraction">소셜 스트림 상호 작용</a>에 상세히 설명되어 있습니다. 알림 서비스의 예시를 
+보려면 <a href="{@docRoot}resources/samples/SampleSyncAdapter/index.html">SampleSyncAdapter</a>
+ 샘플 앱에 있는 <code>NotifierService.java</code> 파일을 
+확인합니다.
+    </dd>
+    <dt>{@code viewGroupActivity}</dt>
+    <dd>
+        그룹 정보를 표시할 수 있는 애플리케이션 액티비티의 
+완전히 정규화된 클래스 이름입니다. 사용자가 기기의 연락처 애플리케이션에서 그룹 레이블을 클릭하면, 
+이 액티비티의 UI가 표시됩니다.
+    </dd>
+    <dt>{@code viewGroupActionLabel}</dt>
+    <dd>
+        사용자가 개발자의 애플리케이션에서 그룹을 살펴볼 수 있도록 해주는 UI 제어에 대해 
+연락처 애플리케이션이 표시하는 레이블입니다.
+        <p>
+            예를 들어, 기기에 Google+ 애플리케이션을 설치하고 
+Google+를 연락처 애플리케이션과 동기화하면, Google+ 서클이 
+연락처 애플리케이션의 <strong>그룹</strong> 탭에 표시되는 것을 볼 수 있습니다. Google+ 서클을 
+클릭하면 해당 서클에서 "그룹"으로 표시된 사람들을 볼 수 있습니다. 이 표시의 맨 위에 
+Google+ 아이콘이 표시되며, 이것을 클릭하면 제어가 
+Google+ 앱으로 전환됩니다. 연락처 애플리케이션은 이 작업을 
+{@code viewGroupActivity}로 수행하며, Google+ 아이콘을 
+{@code viewGroupActionLabel}의 값으로 사용합니다.
+        </p>
+        <p>
+            이 속성에서는 문자열 리소스 식별자가 허용됩니다.
+        </p>
+    </dd>
+    <dt>{@code viewStreamItemActivity}</dt>
+    <dd>
+        사용자가 원시 연락처의 스트림 항목을 클릭할 때 기기의 연락처 애플리케이션이 시작하는 
+애플리케이션 액티비티의 완전히 정규화된 클래스 이름입니다.
+    </dd>
+    <dt>{@code viewStreamItemPhotoActivity}</dt>
+    <dd>
+        사용자가 원시 연락처 스트림 항목의 사진을 클릭할 때 
+기기의 연락처 애플리케이션이 시작하는 애플리케이션 액티비티의 
+완전히 정규화된 클래스 이름입니다.
+    </dd>
+</dl>
+<h4 id="SocialStreamDataKind">&lt;ContactsDataKind&gt; 요소</h4>
+<p>
+    <code>&lt;ContactsDataKind&gt;</code> 요소는 연락처 애플리케이션 UI에서 애플리케이션의 사용자 지정 데이터 행 표시를 
+제어합니다. 이 요소에는 다음 구문이 있습니다.
+</p>
+<pre>
+&lt;ContactsDataKind
+        android:mimeType="<em>MIMEtype</em>"
+        android:icon="<em>icon_resources</em>"
+        android:summaryColumn="<em>column_name</em>"
+        android:detailColumn="<em>column_name</em>"&gt;
+</pre>
+<p>
+    <strong>포함 장소:</strong>
+</p>
+<code>&lt;ContactsAccountType&gt;</code>
+<p>
+    <strong>설명:</strong>
+</p>
+<p>
+    이 요소를 사용하여 연락처 애플리케이션이 사용자 지정 데이터 행의 콘텐츠를 
+원시 연락처 세부 정보의 일부로 표시하게 합니다. <code>&lt;ContactsAccountType&gt;</code>의 각 <code>&lt;ContactsDataKind&gt;</code> 하위 요소는 
+동기화 어댑터가 {@link android.provider.ContactsContract.Data}에 추가하는 
+사용자 지정 데이터 행의 유형을 나타냅니다. 개발자가 사용하는 사용자 지정 MIME 유형 하나마다 
+<code>&lt;ContactsDataKind&gt;</code> 요소를 하나씩 추가합니다. 데이터를 
+표시하는 것을 원치 않는 사용자 지정 데이터 행이 있으면, 이 요소를 추가하지 않아도 됩니다.
+</p>
+<p>
+    <strong>속성:</strong>
+</p>
+<dl>
+    <dt>{@code android:mimeType}</dt>
+    <dd>
+        {@link android.provider.ContactsContract.Data} 테이블에서 
+사용자 지정 데이터 행 유형 중 하나로 지정한 사용자 지정 MIME 유형입니다. 예를 들어, 
+<code>vnd.android.cursor.item/vnd.example.locationstatus</code> 값은 연락처의 마지막으로 알려진 위치를 기록하는 
+데이터 행에 대한 사용자 지정 MIME 유형이 될 수 있습니다.
+    </dd>
+    <dt>{@code android:icon}</dt>
+    <dd>
+        연락처 애플리케이션이 개발자의 데이터 옆에 표시하는 
+Android <a href="{@docRoot}guide/topics/resources/drawable-resource.html">드로어블 리소스</a>
+입니다. 이 리소스를 사용하여 사용자에게 
+데이터 출처가 개발자의 서비스임을 나타내는 것입니다.
+    </dd>
+    <dt>{@code android:summaryColumn}</dt>
+    <dd>
+        데이터 행에서 검색한 두 개 값 중에서 첫 번째 값에 대한 열 이름입니다. 이 값은 
+이 데이터 행에 대한 항목의 첫 번째 줄로 표시됩니다. 첫 번째 줄은 
+데이터 요약으로 사용되는 것이 본 목적이지만, 이것은 선택 사항입니다. 
+<a href="#detailColumn">android:detailColumn</a>도 참조하십시오.
+    </dd>
+    <dt>{@code android:detailColumn}</dt>
+    <dd>
+        데이터 행에서 검색한 두 개 값 중에서 두 번째 값에 대한 열 이름입니다. 이 값은
+이 데이터 행에 대한 항목의 두 번째 줄로 표시됩니다. 
+{@code android:summaryColumn}도 참조하십시오.
+    </dd>
+</dl>
+<h2 id="AdditionalFeatures">추가 연락처 제공자 기능</h2>
+<p>
+    이전 섹션에서 설명한 주요 기능 외에도 연락처 제공자는 연락처 데이터를 다루는 데 
+유용한 기능을 많이 제공합니다. 예를 들면 다음과 같습니다.
+</p>
+    <ul>
+       <li>연락처 그룹</li>
+       <li>사진 기능</li>
+    </ul>
+<h3 id="Groups">연락처 그룹</h3>
+<p>
+    연락처 제공자는 관련된 연락처 컬렉션에 
+<strong>그룹</strong> 데이터로 레이블을 붙이기로 선택할 수 있습니다. 사용자 계정과 연관된 서버에서 
+그룹을 관리하고자 하는 경우, 계정의 계정 유형에 대한 동기화 어댑터가 
+연락처 제공자와 서버 사이에서 그룹 데이터를 전송해야 합니다. 사용자가 해당 서버에 새 연락처를 추가하고 
+이 연락처를 새 그룹에 넣으면, 동기화 어댑터가 해당 새 그룹을
+{@link android.provider.ContactsContract.Groups} 테이블에 추가해야 합니다. 원시 연락처가 속한 그룹(또는 여러 그룹)은 
+{@link android.provider.ContactsContract.Data} 테이블에 저장되며, 이때 
+{@link android.provider.ContactsContract.CommonDataKinds.GroupMembership} MIME 유형을 사용합니다.
+</p>
+<p>
+    개발자가 서버에서 가져온 원시 연락처 데이터를 연락처 제공자에 추가할 
+동기화 어댑터를 디자인하는 중이고 그룹은 사용하지 않는다면, 
+제공자 쪽에 데이터를 표시하라고 지시해야 합니다. 사용자가 기기에 계정을 추가했을 때 실행되는 코드에서 
+연락처 제공자가 계정에 추가하는{@link android.provider.ContactsContract.Settings} 행을 
+업데이트하십시오. 이 행에서 
+{@link android.provider.ContactsContract.SettingsColumns#UNGROUPED_VISIBLE
+Settings.UNGROUPED_VISIBLE} 열의 값을 1로 설정합니다. 이렇게 하면 연락처 제공자가 
+개발자의 연락처 데이터를 항상 표시하게 되고, 이는 그룹을 사용하지 않더라도 관계 없습니다.
+</p>
+<h3 id="Photos">연락처 사진</h3>
+<p>
+    {@link android.provider.ContactsContract.Data} 테이블은
+{@link android.provider.ContactsContract.CommonDataKinds.Photo#CONTENT_ITEM_TYPE
+Photo.CONTENT_ITEM_TYPE} MIME 유형으로 사진을 행에 저장합니다. 이 행의 
+{@link android.provider.ContactsContract.RawContactsColumns#CONTACT_ID} 열은 
+행이 속한 원시 연락처의 {@code android.provider.BaseColumns#_ID} 열과 연결됩니다.
+    클래스 {@link android.provider.ContactsContract.Contacts.Photo}는 
+연락처 기본 사진의 사진 정보가 들어있는 {@link android.provider.ContactsContract.Contacts} 하위 테이블을 정의합니다. 
+연락처의 기본 사진은 연락처 기본 원시 연락처의 기본 사진입니다. 마찬가지로, 
+{@link android.provider.ContactsContract.RawContacts.DisplayPhoto} 클래스는
+원시 연락처의 기본 사진의 사진 정보가 들어있는 {@link android.provider.ContactsContract.RawContacts} 하위 테이블을
+정의합니다.
+</p>
+<p>
+    {@link android.provider.ContactsContract.Contacts.Photo} 및 
+{@link android.provider.ContactsContract.RawContacts.DisplayPhoto}에 대한 참조 문서에 
+사진 정보를 검색하는 예시가 들어있습니다. 원시 연락처에 대한 기본 미리 보기를 검색하는 데 쓰이는 
+편의 클래스는 없습니다. 하지만 
+{@link android.provider.ContactsContract.Data} 테이블에 쿼리를 보내 원시 연락처의 
+{@code android.provider.BaseColumns#_ID}, 
+    {@link android.provider.ContactsContract.CommonDataKinds.Photo#CONTENT_ITEM_TYPE
+    Photo.CONTENT_ITEM_TYPE}, 및 {@link android.provider.ContactsContract.Data#IS_PRIMARY}
+ 열을 선택하면 해당 원시 연락처의 기본 사진 행을 찾을 수 있습니다.
+</p>
+<p>
+    한 사람의 소셜 스트림 데이터에도 사진이 포함되어 있을 수 있습니다. 이런 사진은 
+{@code android.provider.ContactsContract.StreamItemPhotos} 테이블에 저장되며, 이 내용은 
+<a href="#StreamPhotos">소셜 스트림 사진</a>에 더 자세하게 설명되어 있습니다.
+</p>

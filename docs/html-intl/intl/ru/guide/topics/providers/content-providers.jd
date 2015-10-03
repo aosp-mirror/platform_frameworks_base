@@ -1,0 +1,108 @@
+page.title=Поставщики контента
+@jd:body
+<div id="qv-wrapper">
+<div id="qv">
+
+
+<!-- In this document -->
+<h2>Темы</h2>
+<ol>
+    <li>
+        <a href="{@docRoot}guide/topics/providers/content-provider-basics.html">
+Основные сведения о поставщике контента</a>
+    </li>
+    <li>
+        <a href="{@docRoot}guide/topics/providers/content-provider-creating.html">
+Создание поставщика контента</a>
+    </li>
+    <li>
+        <a href="{@docRoot}guide/topics/providers/calendar-provider.html">Поставщик календаря</a>
+    </li>
+    <li>
+        <a href="{@docRoot}guide/topics/providers/contacts-provider.html">Поставщик контактов</a>
+    </li>
+</ol>
+
+    <!-- Related Samples -->
+<h2>Образцы кода по теме</h2>
+    <ol>
+        <li>
+            Приложение
+<a href="{@docRoot}resources/samples/ContactManager/index.html">Диспетчер контактов</a>
+        </li>
+        <li>
+        <a href="{@docRoot}resources/samples/ApiDemos/src/com/example/android/apis/view/List2.html">
+Cursor (People)
+</a>
+        </li>
+        <li>
+        <a href="{@docRoot}resources/samples/ApiDemos/src/com/example/android/apis/view/List7.html">
+Cursor (Phones)</a>
+        </li>
+        <li>
+            <a href="{@docRoot}resources/samples/SampleSyncAdapter/index.html">
+Пример адаптера синхронизации</a>
+        </li>
+    </ol>
+</div>
+</div>
+<p>
+    Поставщики контента управляют доступом к структурированному набору данных. Они инкапсулируют данные
+и предоставляют механизмы обеспечения их безопасности. Поставщики контента представляют собой стандартный
+интерфейс для объединения данных в одном процессе с кодом, который выполняется в другом процессе.
+</p>
+<p>
+    Когда вам требуется доступ к данным в поставщике контента, используйте объект
+{@link android.content.ContentResolver} в интерфейсе
+{@link android.content.Context} вашего приложения, чтобы подключиться к поставщику как клиент.
+    Объект {@link android.content.ContentResolver} взаимодействует с объектом поставщика, который представляет собой экземпляр класса, реализующий объект
+{@link android.content.ContentProvider}. Объект
+поставщика получает от клиентов запросы данных, выполняет запрашиваемые действия и
+возвращает результаты.
+</p>
+<p>
+    Вам не нужно разрабатывать собственный поставщик, если вы не планируете предоставлять доступ к своим данным
+другим приложениям. Однако вам потребуется собственный поставщик для предоставления настраиваемых
+поисковых подсказок в вашем собственном приложении. Вам также потребуется собственный поставщик, если вы хотите копировать и вставлять сложные данные или файлы из своего приложения
+в другие приложения.
+</p>
+<p>
+    В состав системы Android входят поставщики контента, которые управляют такими данными, как аудио, видео, изображения и
+личная контактная информация. Некоторые из поставщиков указаны в справочной документации для
+пакета
+<code><a href="{@docRoot}reference/android/provider/package-summary.html">android.provider</a>
+    .</code> Работать с этими поставщиками может любое приложение Android
+(однако с некоторыми ограничениями).
+</p><p>
+    Ниже перечислены статьи, в которых представлено более подробное описание поставщиков контента.
+</p>
+<dl>
+    <dt>
+        <strong><a href="{@docRoot}guide/topics/providers/content-provider-basics.html">
+Основные сведения о поставщике контента</a></strong>
+    </dt>
+    <dd>
+        Сведения о доступе к данным в поставщике контента, которые представлены в таблицах.
+    </dd>
+    <dt>
+        <strong><a href="{@docRoot}guide/topics/providers/content-provider-creating.html">
+Создание поставщика контента</a></strong>
+    </dt>
+    <dd>
+        Сведения о создании своего собственного поставщика контента.
+    </dd>
+    <dt>
+        <strong><a href="{@docRoot}guide/topics/providers/calendar-provider.html">
+Поставщик календаря</a></strong>
+    </dt>
+    <dd>
+        Сведения о доступе к поставщику календаря, который входит в состав платформы Android.
+    </dd>
+    <dt>
+        <strong><a href="{@docRoot}guide/topics/providers/contacts-provider.html">
+Поставщик контактов</a></strong>
+    </dt>
+    <dd>
+        Сведения о доступе к поставщику контактов, который входит в состав платформы Android.
+    </dd>
+</dl>

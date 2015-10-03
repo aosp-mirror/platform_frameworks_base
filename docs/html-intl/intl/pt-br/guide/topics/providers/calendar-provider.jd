@@ -1,0 +1,1184 @@
+page.title=Provedor de agenda
+@jd:body
+
+<div id="qv-wrapper">
+<div id="qv">
+    <h2>Neste documento</h2>
+    <ol>
+  <li><a href="#overview">Conceitos básicos</a></li>
+  <li><a href="#manifest">Permissões do usuário</a></li>
+  <li><a href="#calendar">Tabela de agenda</a>
+<ol>
+      <li><a href="#query">Consulta em uma agenda</a></li>
+      <li><a href="#modify-calendar">Modificação de uma agenda</a></li>
+      <li><a href="#insert-calendar">Inserção de uma agenda</a></li>
+    </ol>
+  </li>
+  <li><a href="#events">Tabelas de eventos</a>
+<ol>
+      <li><a href="#add-event">Adição de eventos</a></li>
+      <li><a href="#update-event">Atualização de eventos</a></li>
+      <li><a href="#delete-event">Exclusão de eventos</a></li>
+    </ol>
+  </li>
+  <li><a href="#attendees">Tabela de participantes</a>
+<ol>
+      <li><a href="#add-attendees">Adição de participantes</a></li>
+    </ol>
+  </li>
+  <li><a href="#reminders">Tabela de lembretes</a>
+<ol>
+      <li><a href="#add-reminders">Adição de lembretes</a></li>
+    </ol>
+  </li>
+  <li><a href="#instances">Tabela de instâncias</a>
+  <ol>
+      <li><a href="#query-instances">Consulta na tabela de instâncias</a></li>
+  </ol></li>
+  <li><a href="#intents">Intenções do Agenda</a>
+  <ol>
+      <li><a href="#intent-insert">Uso de uma intenção para inserir um evento</a></li>
+      <li><a href="#intent-edit">Uso de uma intenção para editar um evento</a></li>
+      <li><a href="#intent-view">Uso de intenções para exibir dados de agenda</a></li>
+    </ol>
+  </li>
+  
+  <li><a href="#sync-adapter">Adaptadores de sincronização</a></li>
+</ol>
+
+    <h2>Classes principais</h2>
+    <ol>
+      <li>{@link android.provider.CalendarContract.Calendars}</li>
+      <li>{@link android.provider.CalendarContract.Events}</li>
+      <li>{@link android.provider.CalendarContract.Attendees}</li>
+      <li>{@link android.provider.CalendarContract.Reminders}</li>
+    </ol>
+</div>
+</div>
+
+<p>O Provedor de agenda é um repositório para eventos da agenda do usuário. A
+API do Provedor de Agenda permite consultar, inserir, atualizar e excluir
+operações em agendas, eventos, participantes, lembretes etc.</p>
+
+
+<p>A API do Provedor de Agenda pode ser usada por aplicativos e adaptadores de sincronização. As regras
+variam conforme o tipo de programa que realiza as chamadas. Este documento
+se concentra principalmente no uso da API do Provedor de Agenda como um aplicativo. Veja
+uma discussão sobre as diferenças entre adaptadores de sincronização em
+<a href="#sync-adapter">Adaptadores de sincronização</a>.</p>
+
+
+<p>Normalmente, para ler ou programar dados da agenda, o manifesto de um aplicativo deve
+conter as permissões adequadas descritas em <a href="#manifest">Permissões
+do usuário</a>. Para facilitar a realização de operações comuns, o Provedor
+de Agenda fornece um conjunto de intenções conforme descrito em <a href="#intents">Intenções
+do Agenda</a>. Essas intenções levam os usuários ao aplicativo Agenda para inserir, exibir
+e editar eventos. O usuário interage com o aplicativo Agenda e, em seguida,
+retorna ao aplicativo original. Assim, o aplicativo não precisa solicitar permissões
+nem fornecer uma interface gráfica para exibir ou criar eventos.</p>
+
+<h2 id="overview">Conceitos básicos</h2>
+
+<p>Os <a href="{@docRoot}guide/topics/providers/content-providers.html">provedores de conteúdo</a> armazenam dados e disponibilizam-nos
+para aplicativos. Os provedores de conteúdo oferecidos pela plataforma do Android (inclusive o Provedor de Agenda) normalmente expõem dados como um conjunto de tabelas baseadas em
+um modelo de banco de dados relacional, em que cada linha é um registro e cada coluna são dados
+de um tipo e significado específico. Por meio da API do Provedor de Agenda, aplicativos
+e adaptadores de sincronização podem obter acesso de leitura/gravação às tabelas do banco de dados que armazenam
+dados da agenda do usuário.</p>
+
+<p>Cada provedor de conteúdo expõe uma URI pública (agrupada como
+um objeto {@link android.net.Uri}
+) que identifica exclusivamente seu conjunto de dados.  Um provedor de conteúdo que controla
+diversos conjuntos de dados (diversas tabelas) expõe uma URI separada para cada um.  Todas as
+URIs de provedores começam com a string "content://".  Ela
+identifica os dados como controlados por um provedor de conteúdo. O Provedor
+de Agenda define constantes para as URIs de cada uma das classes (tabelas). Essas
+URIs têm o formato <code><em>&lt;class&gt;</em>.CONTENT_URI</code>. Por exemplo:
+ {@link android.provider.CalendarContract.Events#CONTENT_URI Events.CONTENT_URI}.</p>
+
+<p>A figura 1 exibe uma representação gráfica do modelo de dados do Provedor de Agenda. Ela ilustra
+as tabelas e os campos principais que as vinculam entre si.</p>
+
+<img src="{@docRoot}images/providers/datamodel.png" alt="Calendar Provider Data Model" />
+<p class="img-caption"><strong>Figura 1.</strong> Modelo de dados do Provedor de Agenda.</p>
+
+<p>Cada usuário pode ter diversas agendas e diferentes agendas podem ser associadas a diferentes tipos de conta (Google Agenda, Exchange etc.).</p>
+
+<p>O {@link android.provider.CalendarContract} define o modelo de dados de informações relacionadas a eventos e agendas. Esses dados são armazenados em diversas tabelas, que são listadas a seguir.</p>
+
+<table>
+  <tr>
+    <th>Tabela (classe)</th>
+    <th>Descrição</th>
+  </tr>
+  <tr>
+    <td><p>{@link android.provider.CalendarContract.Calendars}</p></td>
+    
+    <td>Essa tabela contém
+as informações específicas da agenda. Cada linha nessa tabela contém os detalhes
+de uma única agenda, como nome, cor, informações de sincronização etc.</td>
+  </tr>
+  <tr>
+    <td>{@link android.provider.CalendarContract.Events}</td>
+    
+    <td>Essa tabela contém
+as informações específicas do evento. Cada linha nessa tabela tem as informações de um único
+evento &mdash; por exemplo: título do evento, local, horário de início, horário
+de término etc. O evento pode ocorrer uma vez ou diversas vezes. Os participantes,
+lembretes e propriedades estendidas são armazenados em tabelas separadas. 
+Cada um deles tem um {@link android.provider.CalendarContract.AttendeesColumns#EVENT_ID}
+que referencia o {@link android.provider.BaseColumns#_ID} na tabela de eventos.</td>
+
+  </tr>
+  <tr>
+    <td>{@link android.provider.CalendarContract.Instances}</td>
+    
+    <td>Essa tabela contém os
+horários de início e término para cada ocorrência em um evento. Cada linha nessa tabela
+representa uma única ocorrência do evento. Para eventos de ocorrência única, há um mapeamento 1:1
+de instâncias para eventos. Para eventos recorrentes, diversas linhas correspondentes
+a diversas ocorrências daquele evento são geradas automaticamente.</td>
+  </tr>
+  <tr>
+    <td>{@link android.provider.CalendarContract.Attendees}</td>
+    
+    <td>Essa tabela contém
+as informações dos participantes (convidados) do evento. Cada linha representa um único convidado
+de um evento. Ela especifica o tipo de convidado e a resposta quanto à participação do convidado
+no evento.</td>
+  </tr>
+  <tr>
+    <td>{@link android.provider.CalendarContract.Reminders}</td>
+    
+    <td>Essa tabela contém os
+dados de alerta/notificação. Cada linha representa um único alerta de um evento. Um evento
+pode ter vários lembretes. O número máximo de lembretes por evento
+é especificado em
+{@link android.provider.CalendarContract.CalendarColumns#MAX_REMINDERS},
+que é definido pelo adaptador de sincronização
+que possui a agenda fornecida. Os lembretes são especificados em minutos antes do evento
+e têm um método que determina a forma de alertar o usuário.</td>
+  </tr>
+  
+</table>
+
+<p>A API do Provedor de Agenda é projetada para ser flexível e poderosa. Ao mesmo tempo,
+é importante fornecer uma boa experiência ao usuário final
+e proteger a integridade da agenda e de seus dados. Para isso, a seguir apresentam-se
+alguns pontos a considerar ao usar a API:</p>
+
+<ul>
+
+<li><strong>Inserção, atualização e exibição de eventos da agenda.</strong> Para inserir, modificar e ler eventos diretamente do provedor de agenda, é necessário ter as <a href="#manifest">permissões</a> apropriadas. Contudo, se o aplicativo em criação não for um aplicativo de agenda totalmente desenvolvido nem um adaptador de sincronização, não será necessário solicitar essas permissões. Em vez disso, podem-se usar intenções compatíveis com o aplicativo Agenda do Android para entregar operações de leitura e gravação a esse aplicativo. Ao usar as intenções, o aplicativo envia usuários ao aplicativo Agenda para realizar a operação desejada
+em um formulário pré-preenchido. Após finalizarem a operação, eles serão direcionados de volta ao aplicativo.
+Ao projetar seu aplicativo para realizar operações comuns através do Agenda,
+os usuários têm uma experiência em uma interface robusta e consistente. Essa é
+a abordagem recomendada. Para obter mais informações, consulte <a href="#intents">Intenções
+do Agenda</a>.</p>
+
+
+<li><strong>Adaptadores de sincronização.</strong> Os adaptadores de sincronização sincronizam os dados da agenda
+em um dispositivo do usuário com outro servidor ou fonte de dados. Nas tabelas
+{@link android.provider.CalendarContract.Calendars}
+e {@link android.provider.CalendarContract.Events},
+há colunas reservadas para o uso dos adaptadores de sincronização.
+O provedor e os aplicativos não devem modificá-las. De fato, elas não são
+visíveis a menos que sejam acessadas como um adaptador de sincronização. Para obter mais informações sobre
+adaptadores de sincronização, consulte <a href="#sync-adapter">Adaptadores de sincronização</a>.</li>
+
+</ul>
+
+
+<h2 id="manifest">Permissões do usuário</h2>
+
+<p>Para ler dados da agenda, o aplicativo deve conter a permissão {@link
+android.Manifest.permission#READ_CALENDAR} no arquivo de manifesto. Ele
+deve conter a permissão {@link android.Manifest.permission#WRITE_CALENDAR}
+para excluir, inserir ou atualizar dados da agenda:</p>
+
+<pre>
+&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;
+&lt;manifest xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;...&gt;
+    &lt;uses-sdk android:minSdkVersion=&quot;14&quot; /&gt;
+    &lt;uses-permission android:name=&quot;android.permission.READ_CALENDAR&quot; /&gt;
+    &lt;uses-permission android:name=&quot;android.permission.WRITE_CALENDAR&quot; /&gt;
+    ...
+&lt;/manifest&gt;
+</pre>
+
+
+<h2 id="calendar">Tabela de agendas</h2>
+
+<p>A tabela {@link android.provider.CalendarContract.Calendars} contém detalhes
+de agendas individuais. As colunas
+Agendas a seguir são graváveis tanto por aplicativos quanto por <a href="#sync-adapter">adaptadores de sincronização</a>. 
+Para obter uma lista completa de campos compatíveis, consulte
+a referência {@link android.provider.CalendarContract.Calendars}</p>
+<table>
+  <tr>
+    <th>Constante</th>
+    <th>Descrição</th>
+  </tr>
+  <tr>
+    <td>{@link android.provider.CalendarContract.Calendars#NAME}</td>
+    <td>O nome da agenda.</td>
+  </tr>
+  <tr>
+    <td>{@link android.provider.CalendarContract.Calendars#CALENDAR_DISPLAY_NAME}</td>
+    <td>O nome desta agenda que é exibido ao usuário.</td>
+  </tr>
+  <tr>
+    <td>{@link android.provider.CalendarContract.Calendars#VISIBLE}</td>
+    
+    <td>Um booleano indicando se a agenda foi selecionada para ser exibida. Um valor
+de 0 indica que eventos associados a essa agenda não devem ser
+exibidos.  Um valor de 1 indica que eventos associados a essa agenda devem
+ser exibidos. Esse valor afeta a geração de linhas na tabela {@link
+android.provider.CalendarContract.Instances}.</td>
+
+
+  </tr>
+  <tr>
+    <td>{@link android.provider.CalendarContract.CalendarColumns#SYNC_EVENTS}</td>
+    
+    <td>Um booleano que indica se a agenda deve ser sincronizada e ter
+os eventos armazenados no dispositivo. Um valor de 0 indica a não sincronização dessa agenda
+e o não armazenamento dos eventos no dispositivo.  Um valor de 1 indica a sincronização dos eventos dessa agenda
+e o armazenamento dos eventos no dispositivo.</td>
+  </tr>
+</table>
+
+<h3 id="query">Consulta em uma agenda</h3>
+
+<p>A seguir há um exemplo que mostra como obter as agendas de propriedade de determinado
+usuário. Para simplificar o exemplo, a operação de consulta é exibida no
+encadeamento da interface do usuário ("encadeamento principal"). Na prática, isso deve ser feito em um encadeamento
+assíncrono em vez de no encadeamento principal. Para ver mais discussões, consulte 
+<a href="{@docRoot}guide/components/loaders.html">Carregadores</a>. Se você não estiver somente
+lendo dados, mas modificando-os, consulte {@link android.content.AsyncQueryHandler}.
+</p>
+
+
+<pre>
+// Projection array. Creating indices for this array instead of doing
+// dynamic lookups improves performance.
+public static final String[] EVENT_PROJECTION = new String[] {
+    Calendars._ID,                           // 0
+    Calendars.ACCOUNT_NAME,                  // 1
+    Calendars.CALENDAR_DISPLAY_NAME,         // 2
+    Calendars.OWNER_ACCOUNT                  // 3
+};
+  
+// The indices for the projection array above.
+private static final int PROJECTION_ID_INDEX = 0;
+private static final int PROJECTION_ACCOUNT_NAME_INDEX = 1;
+private static final int PROJECTION_DISPLAY_NAME_INDEX = 2;
+private static final int PROJECTION_OWNER_ACCOUNT_INDEX = 3;</pre>
+  
+
+<div class="sidebox-wrapper"> <div class="sidebox"> <h3>Por que incluir
+ACCOUNT_TYPE?</h3> <p>Ao consultar um {@link
+android.provider.CalendarContract.Calendars#ACCOUNT_NAME
+Calendars.ACCOUNT_NAME}, é necessário incluir
+{@link android.provider.CalendarContract.Calendars#ACCOUNT_TYPE Calendars.ACCOUNT_TYPE}
+na seleção. Isso porque determinada conta
+só é considerada exclusiva devido a seus <code>ACCOUNT_NAME</code>
+e <code>ACCOUNT_TYPE</code>. <code>ACCOUNT_TYPE</code> é a string correspondente
+ao autenticador da conta que foi usado quando ela foi registrada com
+o {@link android.accounts.AccountManager}. Há também um tipo especial de conta chamado {@link
+android.provider.CalendarContract#ACCOUNT_TYPE_LOCAL} para agendas
+não associadas a nenhuma conta do dispositivo. Contas {@link
+android.provider.CalendarContract#ACCOUNT_TYPE_LOCAL} não são
+sincronizadas.</p> </div> </div> 
+
+
+<p> Na próxima parte do exemplo, você construirá a consulta. A seleção
+especifica os critérios da consulta. Neste exemplo, a consulta busca
+agendas que tenham o <code>ACCOUNT_NAME</code>
+"sampleuser@google.com", o <code>ACCOUNT_TYPE</code>
+"com.google" e o <code>OWNER_ACCOUNT</code>
+"sampleuser@google.com". Para ver todas as agendas que um usuário
+tenha exibido, não somente as que ele possui, omita o <code>OWNER_ACCOUNT</code>.
+A consulta retorna um objeto {@link android.database.Cursor}
+que pode ser usado para cruzar o conjunto de resultados retornado pela consulta
+do banco de dados. Para ver mais informações sobre o uso de consultas em provedores de conteúdo,
+consulte <a href="{@docRoot}guide/topics/providers/content-providers.html">Provedores de conteúdo</a>.</p>
+
+
+<pre>// Run query
+Cursor cur = null;
+ContentResolver cr = getContentResolver();
+Uri uri = Calendars.CONTENT_URI;   
+String selection = "((" + Calendars.ACCOUNT_NAME + " = ?) AND (" 
+                        + Calendars.ACCOUNT_TYPE + " = ?) AND ("
+                        + Calendars.OWNER_ACCOUNT + " = ?))";
+String[] selectionArgs = new String[] {"sampleuser@gmail.com", "com.google",
+        "sampleuser@gmail.com"}; 
+// Submit the query and get a Cursor object back. 
+cur = cr.query(uri, EVENT_PROJECTION, selection, selectionArgs, null);</pre>
+
+<p>Essa próxima seção usa o cursor para avançar pelo conjunto de resultados. Ele usa
+as constantes definidas no início do exemplo para retornar os valores
+de cada campo.</p>
+    
+<pre>// Use the cursor to step through the returned records
+while (cur.moveToNext()) {
+    long calID = 0;
+    String displayName = null;
+    String accountName = null;
+    String ownerName = null;
+      
+    // Get the field values
+    calID = cur.getLong(PROJECTION_ID_INDEX);
+    displayName = cur.getString(PROJECTION_DISPLAY_NAME_INDEX);
+    accountName = cur.getString(PROJECTION_ACCOUNT_NAME_INDEX);
+    ownerName = cur.getString(PROJECTION_OWNER_ACCOUNT_INDEX);
+              
+    // Do something with the values...
+
+   ...
+}
+</pre>
+  
+<h3 id="modify-calendar">Modificação de uma agenda</h3>
+
+<p>Para realizar uma atualização de uma agenda, é possível fornecer o {@link
+android.provider.BaseColumns#_ID} da agenda como um ID anexado à
+URI
+
+({@link android.content.ContentUris#withAppendedId(android.net.Uri,long) withAppendedId()})
+ou como o primeiro item de seleção. A seleção
+deve iniciar com <code>&quot;_id=?&quot;</code> e o primeiro
+<code>selectionArg</code> deve ser o {@link
+android.provider.BaseColumns#_ID} da agenda. 
+Também é possível realizar atualizações com codificações do ID na URI. Este exemplo altera
+o nome de exibição de uma agenda usando a
+abordagem
+({@link android.content.ContentUris#withAppendedId(android.net.Uri,long) withAppendedId()}):</p>
+
+<pre>private static final String DEBUG_TAG = "MyActivity";
+...
+long calID = 2;
+ContentValues values = new ContentValues();
+// The new display name for the calendar
+values.put(Calendars.CALENDAR_DISPLAY_NAME, &quot;Trevor's Calendar&quot;);
+Uri updateUri = ContentUris.withAppendedId(Calendars.CONTENT_URI, calID);
+int rows = getContentResolver().update(updateUri, values, null, null);
+Log.i(DEBUG_TAG, &quot;Rows updated: &quot; + rows);</pre>
+
+<h3 id="insert-calendar">Inserção de uma agenda</h2>
+
+<p>Agendas são projetadas para serem gerenciadas principalmente por um adaptador de sincronização, por isso
+deve-se inserir somente novas agendas como um adaptador de sincronização. Para a maior parte,
+aplicativos só podem efetuar mudanças superficiais em agendas, como mudar o nome de exibição. Se
+um aplicativo precisa criar uma agenda local, pode fazê-lo realizando
+a inserção da agenda como um adaptador de sincronização usando um {@link
+android.provider.CalendarContract.SyncColumns#ACCOUNT_TYPE} de {@link
+android.provider.CalendarContract#ACCOUNT_TYPE_LOCAL}.
+{@link android.provider.CalendarContract#ACCOUNT_TYPE_LOCAL}
+é um tipo de conta especial para agendas
+não associado a nenhuma conta do dispositivo. Agendas desse tipo não são sincronizadas com um servidor. Para 
+ver discussões sobre adaptadores de sincronização, consulte <a href="#sync-adapter">Adaptadores de sincronização</a>.</p>
+
+<h2 id="events">Tabela de eventos</h2>
+
+<p>A tabela {@link android.provider.CalendarContract.Events} contém detalhes
+de eventos individuais. Para adicionar, atualizar ou excluir eventos, um aplicativo deve
+conter a permissão {@link android.Manifest.permission#WRITE_CALENDAR} 
+no <a href="#manifest">arquivo de manifesto</a>.</p>
+
+<p>As colunas de Eventos a seguir são graváveis tanto por um aplicativo quanto por um adaptador
+de sincronização. Para obter uma lista completa de campos compatíveis, consulte a referência de {@link
+android.provider.CalendarContract.Events}.</p>
+
+<table>
+  <tr>
+    <th>Constante</th>
+    <th>Descrição</th>
+  </tr>
+  <tr>
+    <td>{@link android.provider.CalendarContract.EventsColumns#CALENDAR_ID}</td>
+    <td>O {@link android.provider.BaseColumns#_ID} da agenda à qual o evento pertence.</td>
+  </tr>
+  <tr>
+    <td>{@link android.provider.CalendarContract.EventsColumns#ORGANIZER}</td>
+    <td>E-mail do organizador (dono) do evento.</td>
+  </tr>
+  <tr>
+    <td>{@link android.provider.CalendarContract.EventsColumns#TITLE}</td>
+    <td>O título do evento.</td>
+  </tr>
+  <tr>
+    <td>{@link android.provider.CalendarContract.EventsColumns#EVENT_LOCATION}</td>
+    <td>Onde o evento acontece. </td>
+  </tr>
+  <tr>
+    <td>{@link android.provider.CalendarContract.EventsColumns#DESCRIPTION}</td>
+    <td>A descrição do evento.</td>
+  </tr>
+  <tr>
+    <td>{@link android.provider.CalendarContract.EventsColumns#DTSTART}</td>
+    <td>O horário de início do evento em milissegundos em UTC desde a época. </td>
+  </tr>
+  <tr>
+    <td>{@link android.provider.CalendarContract.EventsColumns#DTEND}</td>
+    <td>O horário de término do evento em milissegundos em UTC desde a época. </td>
+  </tr>
+  <tr>
+    <td>{@link android.provider.CalendarContract.EventsColumns#EVENT_TIMEZONE}</td>
+    <td>O fuso horário do evento.</td>
+  </tr>
+  <tr>
+    <td>{@link android.provider.CalendarContract.EventsColumns#EVENT_END_TIMEZONE}</td>
+    <td>O fuso horário do horário de término do evento.</td>
+  </tr>
+  <tr>
+    <td>{@link android.provider.CalendarContract.EventsColumns#DURATION}</td>
+    
+    <td>A duração do evento em formato <a href="http://tools.ietf.org/html/rfc5545#section-3.8.2.5">RCF5545</a>.
+Por exemplo, um valor de <code>&quot;PT1H&quot;</code> indica que o evento
+deve durar uma hora, e um valor de <code>&quot;P2W&quot;</code> indica
+uma duração de 2 semanas. </td>
+
+
+  </tr>
+  <tr>
+    <td>{@link android.provider.CalendarContract.EventsColumns#ALL_DAY}</td>
+    
+    <td>Um valor de 1 indica que esse evento ocupa o dia inteiro, como definido
+pelo fuso horário local. Um valor de 0 indica que é um evento comum que pode iniciar
+e terminar a qualquer momento durante um dia.</td>
+
+    
+  </tr>
+  
+  
+  <tr>
+    <td>{@link android.provider.CalendarContract.EventsColumns#RRULE}</td>
+    
+    <td>A regra de recorrência do formato do evento. Por
+exemplo, <code>&quot;FREQ=WEEKLY;COUNT=10;WKST=SU&quot;</code>. Veja
+mais exemplos <a href="http://tools.ietf.org/html/rfc5545#section-3.8.5.3">aqui</a>.</td>
+    
+  </tr>
+  
+  <tr>
+    <td>{@link android.provider.CalendarContract.EventsColumns#RDATE}</td>
+    <td>As datas de recorrência do evento. 
+    Normalmente, usa-se {@link android.provider.CalendarContract.EventsColumns#RDATE} 
+    em conjunto com {@link android.provider.CalendarContract.EventsColumns#RRULE} 
+    para definir um conjunto agregado
+de ocorrências repetidas. Para ver mais discussões, consulte <a href="http://tools.ietf.org/html/rfc5545#section-3.8.5.2">Especificação RFC5545</a>.</td>
+</tr>
+ 
+  <tr>
+    <td>{@link android.provider.CalendarContract.EventsColumns#AVAILABILITY}</td>
+    
+    <td>Se esse evento considera tempo ocupado ou se há tempo livre que pode ser
+reagendado. </td>
+    
+  </tr>
+  <tr>
+    <td>{@link android.provider.CalendarContract.EventsColumns#GUESTS_CAN_MODIFY}</td>
+    <td>Se convidados podem modificar o evento. </td>
+  </tr>
+  <tr>
+    <td>{@link android.provider.CalendarContract.EventsColumns#GUESTS_CAN_INVITE_OTHERS}</td>
+    <td>Se convidados podem convidar outros. </td>
+  </tr>
+  <tr>
+    <td>{@link android.provider.CalendarContract.EventsColumns#GUESTS_CAN_SEE_GUESTS}</td>
+    <td>Se convidados podem ver a lista de participantes.</td>
+  </tr>
+</table>
+
+<h3 id="add-event">Adição de eventos</h3>
+
+<p>Quando o aplicativo insere um novo evento, recomenda-se usar
+uma intenção {@link android.content.Intent#ACTION_INSERT INSERT}, como descrito em <a href="#intent-insert">Uso de uma intenção para inserir um evento</a>. Contudo, se for
+necessário, é possível inserir eventos diretamente. Esta seção descreve como
+fazê-lo.</p>
+
+
+<p>Abaixo apresentam-se as regras para inserção de um novo evento: </p>
+<ul>
+
+  <li>É necessário incluir {@link
+android.provider.CalendarContract.EventsColumns#CALENDAR_ID} e {@link
+android.provider.CalendarContract.EventsColumns#DTSTART}.</li>
+
+<li>É necessário incluir um {@link
+android.provider.CalendarContract.EventsColumns#EVENT_TIMEZONE}. Para obter uma lista
+dos IDs de fuso horário instalados do sistema, use {@link
+java.util.TimeZone#getAvailableIDs()}. Observe que essa regra não se aplica
+a inserções de evento pela intenção {@link
+android.content.Intent#ACTION_INSERT INSERT} descrita em <a href="#intent-insert">Uso de uma intenção para inserir um evento</a> &mdash; nesta
+situação, é fornecido um fuso horário padrão.</li>
+  
+  <li>Para eventos não recorrentes, é preciso incluir {@link
+android.provider.CalendarContract.EventsColumns#DTEND}. </li>
+  
+  
+  <li>Para eventos recorrentes, é necessário incluir uma {@link
+android.provider.CalendarContract.EventsColumns#DURATION} além de uma {@link
+android.provider.CalendarContract.EventsColumns#RRULE} ou {@link
+android.provider.CalendarContract.EventsColumns#RDATE}. Observe que essa regra não se aplica
+a inserções de evento pela intenção {@link
+android.content.Intent#ACTION_INSERT INSERT} descrita em <a href="#intent-insert">Uso de uma intenção para inserir um evento</a> &mdash; nessa situação,
+é possível usar uma {@link
+android.provider.CalendarContract.EventsColumns#RRULE} em conjunto com {@link android.provider.CalendarContract.EventsColumns#DTSTART} e {@link android.provider.CalendarContract.EventsColumns#DTEND}. Desta forma, o aplicativo Agenda
+a converte em uma duração automaticamente.</li>
+  
+</ul>
+
+<p>A seguir há um exemplo de inserção de um evento: para simplificar, isso está sendo realizado
+no encadeamento da IU. Na prática, inserções e atualizações devem ser feitas
+em um encadeamento assíncrono para mover a ação para um encadeamento de segundo plano. Para obter
+mais informações, consulte {@link android.content.AsyncQueryHandler}.</p>
+
+
+<pre>
+long calID = 3;
+long startMillis = 0; 
+long endMillis = 0;     
+Calendar beginTime = Calendar.getInstance();
+beginTime.set(2012, 9, 14, 7, 30);
+startMillis = beginTime.getTimeInMillis();
+Calendar endTime = Calendar.getInstance();
+endTime.set(2012, 9, 14, 8, 45);
+endMillis = endTime.getTimeInMillis();
+...
+
+ContentResolver cr = getContentResolver();
+ContentValues values = new ContentValues();
+values.put(Events.DTSTART, startMillis);
+values.put(Events.DTEND, endMillis);
+values.put(Events.TITLE, &quot;Jazzercise&quot;);
+values.put(Events.DESCRIPTION, &quot;Group workout&quot;);
+values.put(Events.CALENDAR_ID, calID);
+values.put(Events.EVENT_TIMEZONE, "America/Los_Angeles");
+Uri uri = cr.insert(Events.CONTENT_URI, values);
+
+// get the event ID that is the last element in the Uri
+long eventID = Long.parseLong(uri.getLastPathSegment());
+// 
+// ... do something with event ID
+//
+//</pre>
+
+<p class="note"><strong>Observação:</strong> veja como este exemplo captura o ID
+do evento depois que o evento é criado. Este é o modo mais fácil de obter um ID de evento. Muitas vezes o ID do evento
+é necessário para realizar outras operações de agenda &mdash; por exemplo, adicionar
+participantes ou lembretes a um evento.</p>
+
+
+<h3 id="update-event">Atualização de eventos</h3>
+
+<p>Quando o aplicativo deseja permitir que o usuário edite um evento, é recomendável
+usar uma intenção {@link android.content.Intent#ACTION_EDIT EDIT}, como
+descrito em <a href="#intent-edit">Uso de uma intenção para editar um evento</a>.
+Contudo, se for necessário, é possível editar eventos diretamente. Para realizar uma atualização
+de um evento, é possível fornecer o <code>_ID</code>
+do evento como um ID anexado à URI ({@link
+android.content.ContentUris#withAppendedId(android.net.Uri,long) withAppendedId()})
+ou como o primeiro item de seleção. 
+A seleção deve iniciar com <code>&quot;_id=?&quot;</code> e o primeiro
+<code>selectionArg</code> deve ser o <code>_ID</code> do evento. Você também
+pode realizar atualizações usando uma seleção sem ID. A seguir há um exemplo de como atualizar
+um evento. É possível mudar o título do evento usando
+a abordagem
+{@link android.content.ContentUris#withAppendedId(android.net.Uri,long) withAppendedId()}:</p>
+
+
+<pre>private static final String DEBUG_TAG = "MyActivity";
+...
+long eventID = 188;
+...
+ContentResolver cr = getContentResolver();
+ContentValues values = new ContentValues();
+Uri updateUri = null;
+// The new title for the event
+values.put(Events.TITLE, &quot;Kickboxing&quot;); 
+updateUri = ContentUris.withAppendedId(Events.CONTENT_URI, eventID);
+int rows = getContentResolver().update(updateUri, values, null, null);
+Log.i(DEBUG_TAG, &quot;Rows updated: &quot; + rows);  </pre>
+
+<h3 id="delete-event">Exclusão de eventos</h3>
+
+<p>Pode-se excluir um evento tanto pelo {@link
+android.provider.BaseColumns#_ID} como um ID anexado na URI quanto usando-se
+a seleção padrão. Ao usar um ID anexado, não é possível fazer seleções.
+Há duas versões de exclusão: como aplicativo e como adaptador de sincronização. 
+A exclusão por um aplicativo define as colunas <em>excluídas</em> como 1. Esse sinalizador é que diz
+ao adaptador de sincronização que a linha foi excluída e que essa exclusão deve ser
+propagada para o servidor. A exclusão por um adaptador de sincronização remove o evento
+do banco de dados junto com todos os dados associados. A seguir há um exemplo de um aplicativo
+excluindo um evento pelo seu {@link android.provider.BaseColumns#_ID}:</p>
+
+
+<pre>private static final String DEBUG_TAG = "MyActivity";
+...
+long eventID = 201;
+...
+ContentResolver cr = getContentResolver();
+ContentValues values = new ContentValues();
+Uri deleteUri = null;
+deleteUri = ContentUris.withAppendedId(Events.CONTENT_URI, eventID);
+int rows = getContentResolver().delete(deleteUri, null, null);
+Log.i(DEBUG_TAG, &quot;Rows deleted: &quot; + rows);  
+</pre>
+
+<h2 id="attendees">Tabela de participantes</h2>
+
+<p>Cada linha da tabela {@link android.provider.CalendarContract.Attendees}
+representa um único participante ou convidado de um evento. Chamar
+{@link android.provider.CalendarContract.Reminders#query(android.content.ContentResolver, long, java.lang.String[]) query()}
+retorna uma lista de participantes para
+o evento com o {@link android.provider.CalendarContract.AttendeesColumns#EVENT_ID} dado. 
+Esse {@link android.provider.CalendarContract.AttendeesColumns#EVENT_ID}
+deve corresponder ao {@link
+android.provider.BaseColumns#_ID} de determinado evento.</p> 
+
+<p>A tabela a seguir lista
+os campos graváveis. Ao inserir um novo participante, é necessário incluir todos eles
+exceto <code>ATTENDEE_NAME</code>.
+</p>
+
+
+<table>
+  <tr>
+    <th>Constante</th>
+    <th>Descrição</th>
+  </tr>
+  <tr>
+    <td>{@link android.provider.CalendarContract.AttendeesColumns#EVENT_ID}</td>
+    <td>O ID do evento.</td>
+  </tr>
+  <tr>
+    <td>{@link android.provider.CalendarContract.AttendeesColumns#ATTENDEE_NAME}</td>
+    <td>O nome do participante.</td>
+  </tr>
+  <tr>
+    <td>{@link android.provider.CalendarContract.AttendeesColumns#ATTENDEE_EMAIL}</td>
+    <td>O endereço de e-mail do participante.</td>
+  </tr>
+  <tr>
+    <td>{@link android.provider.CalendarContract.AttendeesColumns#ATTENDEE_RELATIONSHIP}</td>
+    <td><p>A relação do participante com o evento. Uma das seguintes:</p>
+      <ul>
+        <li>{@link android.provider.CalendarContract.AttendeesColumns#RELATIONSHIP_ATTENDEE}</li>
+        <li>{@link android.provider.CalendarContract.AttendeesColumns#RELATIONSHIP_NONE}</li>
+        <li>{@link android.provider.CalendarContract.AttendeesColumns#RELATIONSHIP_ORGANIZER}</li>
+        <li>{@link android.provider.CalendarContract.AttendeesColumns#RELATIONSHIP_PERFORMER}</li>
+        <li>{@link android.provider.CalendarContract.AttendeesColumns#RELATIONSHIP_SPEAKER}</li>
+    </ul>
+    </td>
+  </tr>
+  <tr>
+    <td>{@link android.provider.CalendarContract.AttendeesColumns#ATTENDEE_TYPE}</td>
+    <td><p>O tipo de participante. Uma das seguintes: </p>
+      <ul>
+        <li>{@link android.provider.CalendarContract.AttendeesColumns#TYPE_REQUIRED}</li>
+        <li>{@link android.provider.CalendarContract.AttendeesColumns#TYPE_OPTIONAL}</li>
+    </ul></td>
+  </tr>
+  <tr>
+    <td>{@link android.provider.CalendarContract.AttendeesColumns#ATTENDEE_STATUS}</td>
+    <td><p>O status de participação do participante. Uma das seguintes:</p>
+      <ul>
+        <li>{@link android.provider.CalendarContract.AttendeesColumns#ATTENDEE_STATUS_ACCEPTED}</li>
+        <li>{@link android.provider.CalendarContract.AttendeesColumns#ATTENDEE_STATUS_DECLINED}</li>
+        <li>{@link android.provider.CalendarContract.AttendeesColumns#ATTENDEE_STATUS_INVITED}</li>
+        <li>{@link android.provider.CalendarContract.AttendeesColumns#ATTENDEE_STATUS_NONE}</li>
+        <li>{@link android.provider.CalendarContract.AttendeesColumns#ATTENDEE_STATUS_TENTATIVE}</li>
+    </ul></td>
+  </tr>
+</table>
+
+<h3 id="add-attendees">Adição de participantes</h3>
+
+<p>A seguir há um exemplo que adiciona um único participante a um evento. Observe que
+o {@link android.provider.CalendarContract.AttendeesColumns#EVENT_ID}
+é obrigatório:</p>
+
+<pre>
+long eventID = 202;
+...
+ContentResolver cr = getContentResolver();
+ContentValues values = new ContentValues();
+values.put(Attendees.ATTENDEE_NAME, &quot;Trevor&quot;);
+values.put(Attendees.ATTENDEE_EMAIL, &quot;trevor@example.com&quot;);
+values.put(Attendees.ATTENDEE_RELATIONSHIP, Attendees.RELATIONSHIP_ATTENDEE);
+values.put(Attendees.ATTENDEE_TYPE, Attendees.TYPE_OPTIONAL);
+values.put(Attendees.ATTENDEE_STATUS, Attendees.ATTENDEE_STATUS_INVITED);
+values.put(Attendees.EVENT_ID, eventID);
+Uri uri = cr.insert(Attendees.CONTENT_URI, values);
+</pre>
+
+<h2 id="reminders">Tabela de lembretes</h2>
+
+<p>Cada linha da tabela {@link android.provider.CalendarContract.Reminders}
+representa um único lembrete de um evento. Chamar
+{@link android.provider.CalendarContract.Reminders#query(android.content.ContentResolver, long, java.lang.String[]) query()} retorna uma lista de lembretes para
+o evento com o dado
+{@link android.provider.CalendarContract.AttendeesColumns#EVENT_ID}.</p>
+
+
+<p>A tabela a seguir relaciona os campos graváveis de lembretes. Todos eles devem
+ser incluídos ao inserir um novo lembrete. Observe que adaptadores de sincronização especificam
+os tipos de lembretes compatíveis na tabela {@link
+android.provider.CalendarContract.Calendars}. Consulte
+{@link android.provider.CalendarContract.CalendarColumns#ALLOWED_REMINDERS}
+para obter detalhes.</p>
+
+
+<table>
+  <tr>
+    <th>Constante</th>
+    <th>Descrição</th>
+  </tr>
+  <tr>
+    <td>{@link android.provider.CalendarContract.RemindersColumns#EVENT_ID}</td>
+    <td>O ID do evento.</td>
+  </tr>
+  <tr>
+    <td>{@link android.provider.CalendarContract.RemindersColumns#MINUTES}</td>
+    <td>Os minutos antes do evento em que o lembrete deve disparar.</td>
+  </tr>
+  <tr>
+    <td>{@link android.provider.CalendarContract.RemindersColumns#METHOD}</td>
+    <td><p>O método de alarme, como definido no servidor. Uma das seguintes:</p>
+      <ul>
+        <li>{@link android.provider.CalendarContract.RemindersColumns#METHOD_ALERT}</li>
+        <li>{@link android.provider.CalendarContract.RemindersColumns#METHOD_DEFAULT}</li>
+        <li>{@link android.provider.CalendarContract.RemindersColumns#METHOD_EMAIL}</li>
+        <li>{@link android.provider.CalendarContract.RemindersColumns#METHOD_SMS}</li>
+    </ul></td>
+  </tr>
+</table>
+
+<h3 id="add-reminders">Adição de lembretes</h3>
+
+<p>Este exemplo adiciona um lembrete para um evento. O lembrete dispara
+15 minutos antes do evento.</p>
+<pre>
+long eventID = 221;
+...
+ContentResolver cr = getContentResolver();
+ContentValues values = new ContentValues();
+values.put(Reminders.MINUTES, 15);
+values.put(Reminders.EVENT_ID, eventID);
+values.put(Reminders.METHOD, Reminders.METHOD_ALERT);
+Uri uri = cr.insert(Reminders.CONTENT_URI, values);</pre>
+
+<h2 id="instances">Tabela de instâncias</h2>
+
+<p>A tabela 
+{@link android.provider.CalendarContract.Instances} contém
+os horários de início e término das ocorrência de um evento. Cada linha nessa tabela
+representa uma única ocorrência do evento. A tabela de instâncias não é gravável e fornece
+somente um modo de consultar ocorrências de eventos. </p>
+
+<p>A tabela a seguir relaciona alguns dos campos passíveis de consulta de uma instância. Observe
+que o fuso horário é definido por
+{@link android.provider.CalendarContract.CalendarCache#KEY_TIMEZONE_TYPE}
+e 
+{@link android.provider.CalendarContract.CalendarCache#KEY_TIMEZONE_INSTANCES}.</p>
+
+
+<table>
+  <tr>
+    <th>Constante</th>
+    <th>Descrição</th>
+  </tr>
+  <tr>
+    <td>{@link android.provider.CalendarContract.Instances#BEGIN}</td>
+    <td>O horário de início da instância, em milissegundos UTC.</td>
+  </tr>
+  <tr>
+    <td>{@link android.provider.CalendarContract.Instances#END}</td>
+    <td>O horário de término da instância, em milissegundos UTC.</td>
+  </tr>
+  <tr>
+    <td>{@link android.provider.CalendarContract.Instances#END_DAY}</td>
+    
+    <td>O dia final juliano da instância relativo ao fuso horário
+do Agenda. 
+    
+</td>
+  </tr>
+  <tr>
+    <td>{@link android.provider.CalendarContract.Instances#END_MINUTE}</td>
+    
+    <td>O minuto final da instância calculado a partir de meia-noite
+no fuso horário do Agenda.</td>
+    
+  </tr>
+  <tr>
+    <td>{@link android.provider.CalendarContract.Instances#EVENT_ID}</td>
+    <td>O <code>_ID</code> do evento para essa instância.</td>
+  </tr>
+    <tr>
+    <td>{@link android.provider.CalendarContract.Instances#START_DAY}</td>
+    <td>O dia inicial juliano da instância relativo ao fuso horário do Agenda. 
+ </td>
+  </tr>
+  <tr>
+    <td>{@link android.provider.CalendarContract.Instances#START_MINUTE}</td>
+    
+    <td>O minuto inicial da instância calculado a partir de meia-noite, relativo
+ao fuso horário do Agenda. 
+</td>
+    
+  </tr>
+
+</table>
+
+<h3 id="query-instances">Consulta na tabela de instâncias</h3>
+
+<p>Para consultar a Tabela de instâncias, é necessário especificar um intervalo de tempo para a consulta
+na URI. Neste exemplo, {@link android.provider.CalendarContract.Instances}
+obtém acesso ao campo {@link
+android.provider.CalendarContract.EventsColumns#TITLE} por meio
+da sua implementação da interface {@link android.provider.CalendarContract.EventsColumns}. 
+Em outras palavras, {@link
+android.provider.CalendarContract.EventsColumns#TITLE} é retornado por uma
+vista do banco de dados, não pela consulta da tabela {@link
+android.provider.CalendarContract.Instances} bruta.</p>
+
+<pre>
+private static final String DEBUG_TAG = "MyActivity";
+public static final String[] INSTANCE_PROJECTION = new String[] {
+    Instances.EVENT_ID,      // 0
+    Instances.BEGIN,         // 1
+    Instances.TITLE          // 2
+  };
+  
+// The indices for the projection array above.
+private static final int PROJECTION_ID_INDEX = 0;
+private static final int PROJECTION_BEGIN_INDEX = 1;
+private static final int PROJECTION_TITLE_INDEX = 2;
+...
+
+// Specify the date range you want to search for recurring
+// event instances
+Calendar beginTime = Calendar.getInstance();
+beginTime.set(2011, 9, 23, 8, 0);
+long startMillis = beginTime.getTimeInMillis();
+Calendar endTime = Calendar.getInstance();
+endTime.set(2011, 10, 24, 8, 0);
+long endMillis = endTime.getTimeInMillis();
+  
+Cursor cur = null;
+ContentResolver cr = getContentResolver();
+
+// The ID of the recurring event whose instances you are searching
+// for in the Instances table
+String selection = Instances.EVENT_ID + " = ?";
+String[] selectionArgs = new String[] {"207"};
+
+// Construct the query with the desired date range.
+Uri.Builder builder = Instances.CONTENT_URI.buildUpon();
+ContentUris.appendId(builder, startMillis);
+ContentUris.appendId(builder, endMillis);
+
+// Submit the query
+cur =  cr.query(builder.build(), 
+    INSTANCE_PROJECTION, 
+    selection, 
+    selectionArgs, 
+    null);
+   
+while (cur.moveToNext()) {
+    String title = null;
+    long eventID = 0;
+    long beginVal = 0;    
+    
+    // Get the field values
+    eventID = cur.getLong(PROJECTION_ID_INDEX);
+    beginVal = cur.getLong(PROJECTION_BEGIN_INDEX);
+    title = cur.getString(PROJECTION_TITLE_INDEX);
+              
+    // Do something with the values. 
+    Log.i(DEBUG_TAG, "Event:  " + title); 
+    Calendar calendar = Calendar.getInstance();
+    calendar.setTimeInMillis(beginVal);  
+    DateFormat formatter = new SimpleDateFormat("MM/dd/yyyy");
+    Log.i(DEBUG_TAG, "Date: " + formatter.format(calendar.getTime()));    
+    }
+ }</pre>
+
+<h2 id="intents">Intenções do Agenda</h2>
+<p>O aplicativo não precisa de <a href="#manifest">permissões</a> para ler e gravar dados de agenda. Em vez disso, ele pode usar intenções compatíveis com o aplicativo Agenda do Android para entregar operações de leitura e gravação. A tabela a seguir lista as intenções compatíveis com o Provedor de Agenda.</p>
+<table>
+  <tr>
+    <th>Ação</th>
+    <th>URI</th>
+
+    <th>Descrição</th>
+    <th>Extras</th>
+  </tr>
+  <tr>
+    <td><br>
+    {@link android.content.Intent#ACTION_VIEW VIEW} <br></td>
+    <td><p><code>content://com.android.calendar/time/&lt;ms_since_epoch&gt;</code></p>
+    Também pode-se consultar a URI com
+{@link android.provider.CalendarContract#CONTENT_URI CalendarContract.CONTENT_URI}. 
+Para ver um exemplo do uso dessa intenção, consulte <a href="{@docRoot}guide/topics/providers/calendar-provider.html#intent-view">Uso de intenções para exibir dados de calendários</a>. 
+
+    </td>
+    <td>Abre a agenda no horário especificado por <code>&lt;ms_since_epoch&gt;</code>.</td>
+    <td>Nenhum.</td>
+  </tr>
+  <tr>
+    <td><p>{@link android.content.Intent#ACTION_VIEW VIEW} </p>
+
+     </td>
+    <td><p><code>content://com.android.calendar/events/&lt;event_id&gt;</code></p>
+    
+    Também é possível consultar a URI com
+{@link android.provider.CalendarContract.Events#CONTENT_URI Events.CONTENT_URI}. 
+Para ver um exemplo do uso dessa intenção, consulte <a href="{@docRoot}guide/topics/providers/calendar-provider.html#intent-view">Uso de intenções para exibir dados de calendários</a>.
+    
+    </td>
+    <td>Exibe o evento especificado por <code>&lt;event_id&gt;</code>.</td>
+
+    <td>{@link android.provider.CalendarContract#EXTRA_EVENT_BEGIN_TIME CalendarContract.EXTRA_EVENT_BEGIN_TIME}<br>
+      <br>
+      <br>
+    {@link android.provider.CalendarContract#EXTRA_EVENT_END_TIME CalendarContract.EXTRA_EVENT_END_TIME}</td>
+  </tr>
+
+  <tr>
+    <td>{@link android.content.Intent#ACTION_EDIT EDIT} </td>
+    <td><p><code>content://com.android.calendar/events/&lt;event_id&gt;</code></p>
+    
+  Também é possível consultar a URI com
+{@link android.provider.CalendarContract.Events#CONTENT_URI Events.CONTENT_URI}. 
+Para ver um exemplo do uso dessa intenção, consulte <a href="{@docRoot}guide/topics/providers/calendar-provider.html#intent-edit">Uso de uma intenção para editar um evento</a>.
+    
+    
+    </td>
+    <td>Edita o evento especificado por <code>&lt;event_id&gt;</code>.</td>
+
+    <td>{@link android.provider.CalendarContract#EXTRA_EVENT_BEGIN_TIME CalendarContract.EXTRA_EVENT_BEGIN_TIME}<br>
+      <br>
+      <br>
+    {@link android.provider.CalendarContract#EXTRA_EVENT_END_TIME CalendarContract.EXTRA_EVENT_END_TIME}</td>
+  </tr>
+
+  <tr>
+    <td>{@link android.content.Intent#ACTION_EDIT EDIT} <br>
+    <br>
+    {@link android.content.Intent#ACTION_INSERT INSERT} </td>
+    <td><p><code>content://com.android.calendar/events</code></p>
+    
+   Também é possível consultar a URI com
+{@link android.provider.CalendarContract.Events#CONTENT_URI Events.CONTENT_URI}. 
+Para ver um exemplo do uso dessa intenção, consulte <a href="{@docRoot}guide/topics/providers/calendar-provider.html#intent-insert">Uso de uma intenção para inserir um evento</a>.
+    
+    </td>
+
+    <td>Cria um evento.</td>
+    <td>Qualquer um dos extras listados na tabela abaixo.</td>
+  </tr>
+</table>
+
+<p>A tabela a seguir lista os extras de intenção compatíveis com o Provedor de Agenda:
+</p>
+<table>
+  <tr>
+    <th>Extra de intenção</th>
+    <th>Descrição</th>
+  </tr>
+  <tr>
+    <td>{@link android.provider.CalendarContract.EventsColumns#TITLE Events.TITLE}</td>
+    <td>Nome do evento.</td>
+  </tr>
+  <tr>
+  
+    <td>{@link android.provider.CalendarContract#EXTRA_EVENT_BEGIN_TIME
+CalendarContract.EXTRA_EVENT_BEGIN_TIME}</td>
+    <td>Horário de início do evento em milissegundos a partir da época.</td>
+  </tr>
+  <tr>
+    <td>{@link android.provider.CalendarContract#EXTRA_EVENT_END_TIME
+CalendarContract.EXTRA_EVENT_END_TIME}</td>
+    
+    <td>Horário de término do evento em milissegundos a partir da época.</td>
+  </tr>
+  <tr>
+    <td>{@link android.provider.CalendarContract#EXTRA_EVENT_ALL_DAY
+CalendarContract.EXTRA_EVENT_ALL_DAY}</td>
+    
+    <td>Um booleano que indica que um evento acontece o dia inteiro. O valor pode ser
+<code>true</code> ou <code>false</code>.</td> </tr>
+  <tr>
+    <td>{@link android.provider.CalendarContract.EventsColumns#EVENT_LOCATION
+Events.EVENT_LOCATION}</td>
+    
+    <td>Local do evento.</td>
+  </tr>
+  <tr>
+    <td>{@link android.provider.CalendarContract.EventsColumns#DESCRIPTION
+Events.DESCRIPTION}</td>
+    
+    <td>Descrição do evento.</td>
+  </tr>
+  <tr>
+    <td>
+    {@link android.content.Intent#EXTRA_EMAIL Intent.EXTRA_EMAIL}</td>
+    <td>Endereços de e-mail daqueles a convidar em forma de lista com termos separados por vírgula.</td>
+  </tr>
+  <tr>
+    <td>
+    {@link android.provider.CalendarContract.EventsColumns#RRULE Events.RRULE}</td>
+    <td>A regra de recorrência do evento.</td>
+  </tr>
+  <tr>
+    <td>
+    {@link android.provider.CalendarContract.EventsColumns#ACCESS_LEVEL
+Events.ACCESS_LEVEL}</td>
+    
+    <td>Se o evento é privado ou público.</td>
+  </tr>
+  <tr>
+    <td>{@link android.provider.CalendarContract.EventsColumns#AVAILABILITY
+Events.AVAILABILITY}</td>
+    
+    <td>Se esse evento considera tempo ocupado na contagem ou se há tempo livre que pode ser reagendado.</td>
+    
+</table> 
+<p>As seções a seguir descrevem como usar estas intenções.</p>
+
+
+<h3 id="intent-insert">Uso de uma intenção para inserir um evento</h3>
+
+<p>A intenção {@link android.content.Intent#ACTION_INSERT INSERT}
+permite que o aplicativo entregue a tarefa de inserção de eventos ao próprio aplicativo Agenda.
+Com essa abordagem, o aplicativo não precisará ter a permissão {@link
+android.Manifest.permission#WRITE_CALENDAR} contida no <a href="#manifest">arquivo de manifesto</a>.</p>
+
+  
+<p>Quando usuários executam um aplicativo que usa essa abordagem, ele os direciona
+ao Agenda para finalizar a adição do evento. A intenção {@link
+android.content.Intent#ACTION_INSERT INSERT} usa campos extras para
+pré-preencher um formulário com os detalhes do evento na Agenda. Os usuários podem,
+então, cancelar o evento, editar o formulário conforme o necessário ou salvar o evento nas suas
+agendas.</p>
+  
+
+
+<p>A seguir há um fragmento de código que agenda um evento em 19 de janeiro de 2012, que acontece
+das 7h30 às 8h30. Observe o exposto a seguir sobre esse fragmento de código:</p>
+
+<ul>
+  <li>Ele especifica {@link android.provider.CalendarContract.Events#CONTENT_URI Events.CONTENT_URI}
+ como a URI.</li>
+  
+  <li>Ele usa os campos extras {@link
+android.provider.CalendarContract#EXTRA_EVENT_BEGIN_TIME
+CalendarContract.EXTRA_EVENT_BEGIN_TIME} e {@link
+android.provider.CalendarContract#EXTRA_EVENT_END_TIME
+CalendarContract.EXTRA_EVENT_END_TIME} para pré-preencher o formulário
+com o horário do evento. Os valores desses horários devem estar em milissegundos UTC
+da época.</li>
+  
+  <li>Ele usa o campo extra {@link android.content.Intent#EXTRA_EMAIL Intent.EXTRA_EMAIL}
+ para fornecer uma lista de termos separados por vírgula de convidados, especificados por endereço de e-mail.</li>
+  
+</ul>
+<pre>
+Calendar beginTime = Calendar.getInstance();
+beginTime.set(2012, 0, 19, 7, 30);
+Calendar endTime = Calendar.getInstance();
+endTime.set(2012, 0, 19, 8, 30);
+Intent intent = new Intent(Intent.ACTION_INSERT)
+        .setData(Events.CONTENT_URI)
+        .putExtra(CalendarContract.EXTRA_EVENT_BEGIN_TIME, beginTime.getTimeInMillis())
+        .putExtra(CalendarContract.EXTRA_EVENT_END_TIME, endTime.getTimeInMillis())
+        .putExtra(Events.TITLE, &quot;Yoga&quot;)
+        .putExtra(Events.DESCRIPTION, &quot;Group class&quot;)
+        .putExtra(Events.EVENT_LOCATION, &quot;The gym&quot;)
+        .putExtra(Events.AVAILABILITY, Events.AVAILABILITY_BUSY)
+        .putExtra(Intent.EXTRA_EMAIL, &quot;rowan@example.com,trevor@example.com&quot;);
+startActivity(intent);
+</pre>
+
+<h3 id="intent-edit">Uso de uma intenção para editar um evento</h3>
+
+<p>É possível atualizar um evento diretamente, como descrito em <a href="#update-event">Atualização de eventos</a>. Porém, o uso da intenção {@link
+android.content.Intent#ACTION_EDIT EDIT} permite que um aplicativo
+sem permissão forneça a edição de eventos ao aplicativo Agenda.
+Quando usuários finalizam a edição do evento no Agenda, retornam
+ao aplicativo original.</p> <p>A seguir há um exemplo de uma intenção que define um novo
+título para o evento especificado e permite aos usuários editar o evento no Agenda.</p>
+
+
+<pre>long eventID = 208;
+Uri uri = ContentUris.withAppendedId(Events.CONTENT_URI, eventID);
+Intent intent = new Intent(Intent.ACTION_EDIT)
+    .setData(uri)
+    .putExtra(Events.TITLE, &quot;My New Title&quot;);
+startActivity(intent);</pre>
+
+<h3 id="intent-view">Uso de intenções para exibir dados de agenda</h3>
+<p>O Provedor de Agenda oferece dois modos diferentes de usar a intenção {@link android.content.Intent#ACTION_VIEW VIEW}:</p>
+<ul>
+  <li>Para abrir o Agenda em uma data específica.</li>
+  <li>Para exibir um evento.</li>
+
+</ul>
+<p>A seguir há um exemplo que mostra como abrir o Agenda em uma data específica:</p>
+<pre>// A date-time specified in milliseconds since the epoch.
+long startMillis;
+...
+Uri.Builder builder = CalendarContract.CONTENT_URI.buildUpon();
+builder.appendPath(&quot;time&quot;);
+ContentUris.appendId(builder, startMillis);
+Intent intent = new Intent(Intent.ACTION_VIEW)
+    .setData(builder.build());
+startActivity(intent);</pre>
+
+<p>Abaixo há um exemplo que mostra como abrir um evento para exibição:</p>
+<pre>long eventID = 208;
+...
+Uri uri = ContentUris.withAppendedId(Events.CONTENT_URI, eventID);
+Intent intent = new Intent(Intent.ACTION_VIEW)
+   .setData(uri);
+startActivity(intent);
+</pre>
+
+
+<h2 id="sync-adapter">Adaptadores de sincronização</h2>
+
+
+<p>Há pequenas diferenças apenas nos modos de acesso ao Provedor de Agenda
+via aplicativo e via adaptador de sincronização:</p>
+
+<ul>
+  <li>Um adaptador de sincronização precisa especificar que é um adaptador de sincronização que define {@link android.provider.CalendarContract#CALLER_IS_SYNCADAPTER} como <code>true</code>.</li>
+  
+  
+  <li>Os adaptadores de sincronização precisam fornecer um {@link
+android.provider.CalendarContract.SyncColumns#ACCOUNT_NAME} e um {@link
+android.provider.CalendarContract.SyncColumns#ACCOUNT_TYPE} como parâmetros da consulta na URI. </li>
+  
+  <li>Os adaptadores de sincronização têm acesso de gravação a mais colunas do que um aplicativo ou widget.
+  Por exemplo: um aplicativo só pode modificar algumas características de uma agenda,
+como nome, nome de exibição, configurações de visibilidade e se a agenda está
+sincronizada. Por comparação, um adaptador de sincronização pode acessar não somente essas colunas, mas muitas outras,
+como cores da agenda, fuso horário, nível de acesso, local etc.
+No entanto, um adaptador de sincronização é restrito ao <code>ACCOUNT_NAME</code>
+e ao <code>ACCOUNT_TYPE</code> que especificou.</li> </ul>
+
+<p>A seguir há um método auxiliar que pode ser usado para retornar uma URI para uso com um adaptador de sincronização:</p>
+<pre> static Uri asSyncAdapter(Uri uri, String account, String accountType) {
+    return uri.buildUpon()
+        .appendQueryParameter(android.provider.CalendarContract.CALLER_IS_SYNCADAPTER,&quot;true&quot;)
+        .appendQueryParameter(Calendars.ACCOUNT_NAME, account)
+        .appendQueryParameter(Calendars.ACCOUNT_TYPE, accountType).build();
+ }
+</pre>
+<p>Para obter uma implementação de exemplo de um adaptador de sincronização (não especificamente relacionada ao Agenda), consulte 
+<a href="{@docRoot}resources/samples/SampleSyncAdapter/index.html">SampleSyncAdapter</a>.

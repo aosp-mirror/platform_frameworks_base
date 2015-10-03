@@ -1,0 +1,916 @@
+page.title=Платформа доступа к хранилищу (Storage Access Framework)
+@jd:body
+<div id="qv-wrapper">
+<div id="qv">
+
+<h2>Содержание документа
+<a href="#" onclick="hideNestedItems('#toc44',this);return false;" class="header-toggle">
+        <span class="more">больше информации</span>
+        <span class="less" style="display:none">меньше информации</span></a></h2>
+<ol id="toc44" class="hide-nested">
+    <li>
+        <a href="#overview">Обзор</a>
+    </li>
+    <li>
+        <a href="#flow">Поток управления</a>
+    </li>
+    <li>
+        <a href="#client">Создание клиентского приложения</a>
+        <ol>
+        <li><a href="#search">Поиск документов</a></li>
+        <li><a href="#process">Обработка результатов</a></li>
+        <li><a href="#metadata">Изучение метаданных документа</a></li>
+        <li><a href="#open">Открытие документа</a></li>
+        <li><a href="#create">Создание нового документа</a></li>
+        <li><a href="#delete">Удаление документа</a></li>
+        <li><a href="#edit">Редактирование документа</a></li>
+        <li><a href="#permissions">Удержание прав доступа</a></li>
+        </ol>
+    </li>
+    <li><a href="#custom">Создание собственного поставщика документов</a>
+        <ol>
+        <li><a href="#manifest">Манифест</a></li>
+        <li><a href="#contract">Контракты</a></li>
+        <li><a href="#subclass">Создание подкласса класса DocumentsProvider</a></li>
+        <li><a href="#security">Безопасность</a></li>
+        </ol>
+    </li>
+
+</ol>
+<h2>Ключевые классы</h2>
+<ol>
+    <li>{@link android.provider.DocumentsProvider}</li>
+    <li>{@link android.provider.DocumentsContract}</li>
+</ol>
+
+<h2>Видео</h2>
+
+<ol>
+    <li><a href="http://www.youtube.com/watch?v=zxHVeXbK1P4">
+DevBytes: Android 4.4 Storage Access Framework: Поставщик</a></li>
+     <li><a href="http://www.youtube.com/watch?v=UFj9AEz0DHQ">
+DevBytes: Android 4.4 Storage Access Framework: Клиент</a></li>
+</ol>
+
+
+<h2>Примеры кода</h2>
+
+<ol>
+    <li><a href="{@docRoot}samples/StorageProvider/index.html">
+Класс StorageProvider</a></li>
+     <li><a href="{@docRoot}samples/StorageClient/index.html">
+Класс StorageClient</a></li>
+</ol>
+
+<h2>См. также:</h2>
+<ol>
+    <li>
+        <a href="{@docRoot}guide/topics/providers/content-provider-basics.html">
+Основные сведения о поставщике контента
+</a>
+    </li>
+</ol>
+
+</div>
+</div>
+
+
+<p>Платформа доступа к хранилищу (Storage Access Framework, SAF) впервые появилась в Android версии 4.4 (API уровня 19). Платформа SAF
+ облегчает пользователям поиск и открытие документов, изображений и других файлов
+в хранилищах всех поставщиков, с которыми они работают. Стандартный удобный интерфейс
+позволяет пользователям применять единый для всех приложений и поставщиков способ поиска файлов и доступа к последним добавленным файлам.</p>
+
+<p>Облачные или локальные службы хранения могут присоединиться к этой экосистеме, реализовав
+класс {@link android.provider.DocumentsProvider}, инкапсулирующий их услуги. Клиентские
+приложения, которым требуется доступ к документам поставщика, могут интегрироваться с SAF с помощью всего нескольких
+строчек кода.</p>
+
+<p>Платформа SAF включает в себя следующие компоненты:</p>
+
+<ul>
+<li><strong>Поставщик документов</strong>&mdash;поставщик контента, позволяющий
+службе хранения (например, Диск Google) показывать файлы, которыми он управляет. Поставщик документов
+реализуется как подкласс класса{@link android.provider.DocumentsProvider}.
+Его схема основана на традиционной файловой иерархии,
+однако физический способ хранения данных в поставщике документов остается на усмотрении разработчика.
+ Платформа Android включает в себя несколько встроенных поставщиков документов, таких как
+Загрузки, Изображения и Видео.</li>
+
+<li><strong>Клиентское приложение</strong>&mdash;пользовательское приложение, вызывающее намерение
+{@link android.content.Intent#ACTION_OPEN_DOCUMENT} и/или
+{@link android.content.Intent#ACTION_CREATE_DOCUMENT} и принимающее
+файлы, возвращаемые поставщиками документов.</li>
+
+<li><strong>Элемент выбора</strong>&mdash;системный пользовательский интерфейс, обеспечивающий пользователям доступ к документам у всех
+поставщиков документов, которые удовлетворяют критериям поиска, заданным в клиентском приложении.</li>
+</ul>
+
+<p>Платформа SAF в числе прочих предоставляет следующие функции:</p>
+<ul>
+<li>позволяет пользователям искать контент у всех поставщиков документов, а не только у одного приложения;</li>
+<li>обеспечивает приложению возможность долговременного, постоянного доступа к
+ документам, принадлежащим поставщику документов. Благодаря такому доступу пользователи могут добавлять, редактировать,
+ сохранять и удалять файлы, хранящиеся у поставщика;</li>
+<li>поддерживает несколько учетных записей и временные корневые каталоги, например, поставщики
+на USB-накопителях, которые появляются, только когда накопитель вставлен в порт. </li>
+</ul>
+
+<h2 id ="overview">Обзор</h2>
+
+<p>В центре платформы SAF находится поставщик контента, являющийся
+подклассом класса {@link android.provider.DocumentsProvider}. Внутри <em>поставщика документов</em>данные имеют
+структуру традиционной файловой иерархии:</p>
+<p><img src="{@docRoot}images/providers/storage_datamodel.png" alt="data model" /></p>
+<p class="img-caption"><strong>Рисунок 1.</strong> Модель данных поставщика документов. На рисунке Root (Корневой каталог) указывает на один объект Document (Документ),
+который затем разветвляется в целое дерево.</p>
+
+<p>Обратите внимание на следующее.</p>
+<ul>
+
+<li>Каждый поставщик документов предоставляет один или несколько
+«корневых каталогов», являющихся отправными точками при обходе дерева документов.
+Каждый корневой каталог имеет уникальный идентификатор {@link android.provider.DocumentsContract.Root#COLUMN_ROOT_ID}
+и указывает на документ (каталог),
+представляющий содержимое на уровне ниже корневого.
+Корневые каталоги динамичны по своей конструкции, чтобы обеспечивать поддержку таким вариантам использования, как несколько учетных записей,
+временные хранилища на USB-нкопителях и возможность для пользователя войти в систему и выйти из нее.</li>
+
+<li>В каждом корневом каталоге находится один документ. Этот документ указывает на количество документов <em>N</em>
+каждый из которых, в свою очередь, может указывать на один или <em>N</em> документов. </li>
+
+<li>Каждый сервер хранилища показывает
+отдельные файлы и каталоги, ссылаясь на них с помощью уникального
+идентификатора {@link android.provider.DocumentsContract.Document#COLUMN_DOCUMENT_ID}.
+Идентификаторы документов должны быть уникальными и не меняться после присвоения, поскольку они используются для выдачи постоянных
+URI, не зависящих от перезагрузки устройства.</li>
+
+
+<li>Документ — это или открываемый файл (имеющий конкретный MIME-тип), или
+каталог, содержащий другие документы (с
+MIME-типом {@link android.provider.DocumentsContract.Document#MIME_TYPE_DIR}).</li>
+
+<li>Каждый документ может иметь различные свойства, описываемые флагами
+{@link android.provider.DocumentsContract.Document#COLUMN_FLAGS COLUMN_FLAGS},
+такими как{@link android.provider.DocumentsContract.Document#FLAG_SUPPORTS_WRITE},
+{@link android.provider.DocumentsContract.Document#FLAG_SUPPORTS_DELETE} и
+{@link android.provider.DocumentsContract.Document#FLAG_SUPPORTS_THUMBNAIL}.
+Документ с одним и тем же идентификатором {@link android.provider.DocumentsContract.Document#COLUMN_DOCUMENT_ID} может находиться
+в нескольких каталогах.</li>
+</ul>
+
+<h2 id="flow">Поток управления</h2>
+<p>Как было сказано выше, модель данных поставщика документов основана на традиционной
+файловой иерархии. Однако физический способ хранения данных остается на усмотрение разработчика, при
+условии, что к ним можно обращаться через API-интерфейс {@link android.provider.DocumentsProvider}. Например, можно
+использовать для данных облачное хранилище на основе тегов.</p>
+
+<p>На рисунке 2 показан пример того, как приложение для обработки фотографий может использовать SAF
+для доступа к сохраненным данным:</p>
+<p><img src="{@docRoot}images/providers/storage_dataflow.png" alt="app" /></p>
+
+<p class="img-caption"><strong>Рисунок 2.</strong> Поток управления Storage Access Framework</p>
+
+<p>Обратите внимание на следующее.</p>
+<ul>
+
+<li>На платформе SAF поставщики и клиенты не взаимодействуют
+напрямую. Клиент запрашивает разрешение на взаимодействие
+с файлами (то есть, на чтение, редактирование, создание или удаление файлов).</li>
+
+<li>Взаимодействие начинается, когда приложение (в нашем примере обрабатывающее фотографии) активизирует намерение
+{@link android.content.Intent#ACTION_OPEN_DOCUMENT} или {@link android.content.Intent#ACTION_CREATE_DOCUMENT}. Намерение может включать в себя фильтры
+для уточнения критериев, например, «предоставить открываемые файлы
+с MIME-типом image».</li>
+
+<li>Когда намерение срабатывает, системный элемент выбора переходит к каждому зарегистрированному поставщику
+и показывает пользователю корневые каталоги с контентом, соответствующим запросу.</li>
+
+<li>Элемент выбора предоставляет пользователю стандартный интерфейс, даже
+если поставщики документов значительно различаются. В качестве примера на рисунке 2
+изображены Диск Google, поставщик на USB-накопителе и облачный поставщик.</li>
+</ul>
+
+<p>На рисунке 3 показан элемент выбора, в котором пользователь для поиска изображений выбрал учетную запись
+Диск Google:</p>
+
+<p><img src="{@docRoot}images/providers/storage_picker.png" width="340" alt="picker" style="border:2px solid #ddd" /></p>
+
+<p class="img-caption"><strong>Рисунок 3.</strong> Элемент выбора</p>
+
+<p>Когда пользователь выбирает Диск Google, изображения отображаются, как показано на
+рисунке 4. С этого момента пользователь может взаимодействовать с ними любыми способами,
+ которые поддерживаются поставщиком и клиентским приложением.
+
+<p><img src="{@docRoot}images/providers/storage_photos.png" width="340" alt="picker" style="border:2px solid #ddd" /></p>
+
+<p class="img-caption"><strong>Рисунок 4.</strong> Изображения</p>
+
+<h2 id="client">Создание клиентского приложения</h2>
+
+<p>В Android версии 4.3 и ниже для того, чтобы приложение могло получать файл от другого
+приложения, оно должно активизировать намерение, например, {@link android.content.Intent#ACTION_PICK}
+или {@link android.content.Intent#ACTION_GET_CONTENT}. После этого пользователь должен выбрать
+какое-либо одно приложение, чтобы получить файл, а оно должно предоставить пользователю
+интерфейс, с помощью которого он сможет выбирать и получать файлы. </p>
+
+<p>Начиная с Android 4.4 и выше, у разработчика имеется дополнительная возможность — намерение
+{@link android.content.Intent#ACTION_OPEN_DOCUMENT},
+которое отображает пользовательский интерфейс элемента выбора, управляемого системой. Этот элемент предоставляет пользователю
+обзор всех файлов, доступных в других приложениях. Благодаря этому единому интерфейсу,
+пользователь может выбрать файл в любом из поддерживаемых приложений.</p>
+
+<p>Намерение {@link android.content.Intent#ACTION_OPEN_DOCUMENT} не
+является заменой для намерения {@link android.content.Intent#ACTION_GET_CONTENT}.
+ Разработчику следует использовать то, которое лучше соответствует потребностям приложения:</p>
+
+<ul>
+<li>используйте {@link android.content.Intent#ACTION_GET_CONTENT}, если приложению нужно просто
+прочитать или импортировать данные. При таком подходе приложение импортирует копию данных,
+ например, файл с изображением.</li>
+
+<li>используйте {@link android.content.Intent#ACTION_OPEN_DOCUMENT}, если
+приложению нужна возможность долговременного, постоянного доступа к документам, принадлежащим поставщику
+документов. В качестве примера можно назвать редактор фотографий, позволяющий пользователям обрабатывать
+изображения, хранящиеся в поставщике документов. </li>
+
+</ul>
+
+
+<p>В этом разделе показано, как написать клиентское приложение, использующее намерения
+{@link android.content.Intent#ACTION_OPEN_DOCUMENT} и
+{@link android.content.Intent#ACTION_CREATE_DOCUMENT}.</p>
+
+
+<h3 id="search">Поиск документов</h3>
+
+<p>
+В следующем фрагменте кода намерение {@link android.content.Intent#ACTION_OPEN_DOCUMENT}
+используется для поиска поставщиков документов,
+содержащих файлы изображений:</p>
+
+<pre>private static final int READ_REQUEST_CODE = 42;
+...
+/**
+ * Fires an intent to spin up the &quot;file chooser&quot; UI and select an image.
+ */
+public void performFileSearch() {
+
+    // ACTION_OPEN_DOCUMENT is the intent to choose a file via the system's file
+    // browser.
+    Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
+
+    // Filter to only show results that can be &quot;opened&quot;, such as a
+    // file (as opposed to a list of contacts or timezones)
+    intent.addCategory(Intent.CATEGORY_OPENABLE);
+
+    // Filter to show only images, using the image MIME data type.
+    // If one wanted to search for ogg vorbis files, the type would be &quot;audio/ogg&quot;.
+    // To search for all documents available via installed storage providers,
+    // it would be &quot;*/*&quot;.
+    intent.setType(&quot;image/*&quot;);
+
+    startActivityForResult(intent, READ_REQUEST_CODE);
+}</pre>
+
+<p>Обратите внимание на следующее.</p>
+<ul>
+<li>Когда приложение активизирует намерение {@link android.content.Intent#ACTION_OPEN_DOCUMENT}
+, оно запускает элемент выбора, отображающий всех поставщиков документов, соответствующих заданным критериям.</li>
+
+<li>Добавление категории {@link android.content.Intent#CATEGORY_OPENABLE} в
+фильтры намерения приводит к отображению только тех документов, которые можно открыть, например, файлов с изображениями.</li>
+
+<li>Оператор {@code intent.setType("image/*")} выполняет дальнейшую фильтрацию, чтобы
+отображались только документы с MIME-типом image.</li>
+</ul>
+
+<h3 id="results">Обработка результатов</h3>
+
+<p>Когда пользователь выбирает документ в элементе выбора,
+вызывается метод {@link android.app.Activity#onActivityResult onActivityResult()}.
+Идентификатор URI, указывающий на выбранный документ, содержится в параметре{@code resultData}.
+ Чтобы извлечь URI, следует вызвать {@link android.content.Intent#getData getData()}.
+Этот URI можно использовать для получения документа, нужного пользователю. Например:
+</p>
+
+<pre>&#64;Override
+public void onActivityResult(int requestCode, int resultCode,
+        Intent resultData) {
+
+    // The ACTION_OPEN_DOCUMENT intent was sent with the request code
+    // READ_REQUEST_CODE. If the request code seen here doesn't match, it's the
+    // response to some other intent, and the code below shouldn't run at all.
+
+    if (requestCode == READ_REQUEST_CODE && resultCode == Activity.RESULT_OK) {
+        // The document selected by the user won't be returned in the intent.
+        // Instead, a URI to that document will be contained in the return intent
+        // provided to this method as a parameter.
+        // Pull that URI using resultData.getData().
+        Uri uri = null;
+        if (resultData != null) {
+            uri = resultData.getData();
+            Log.i(TAG, "Uri: " + uri.toString());
+            showImage(uri);
+        }
+    }
+}
+</pre>
+
+<h3 id="metadata">Изучение метаданных документа</h3>
+
+<p>Имея в своем распоряжении URI документа, разработчик получает доступ к его метаданным. В следующем
+фрагменте кода метаданные документа, определяемого идентификатором URI, считываются и записываются в журнал:</p>
+
+<pre>public void dumpImageMetaData(Uri uri) {
+
+    // The query, since it only applies to a single document, will only return
+    // one row. There's no need to filter, sort, or select fields, since we want
+    // all fields for one document.
+    Cursor cursor = getActivity().getContentResolver()
+            .query(uri, null, null, null, null, null);
+
+    try {
+    // moveToFirst() returns false if the cursor has 0 rows.  Very handy for
+    // &quot;if there's anything to look at, look at it&quot; conditionals.
+        if (cursor != null &amp;&amp; cursor.moveToFirst()) {
+
+            // Note it's called &quot;Display Name&quot;.  This is
+            // provider-specific, and might not necessarily be the file name.
+            String displayName = cursor.getString(
+                    cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME));
+            Log.i(TAG, &quot;Display Name: &quot; + displayName);
+
+            int sizeIndex = cursor.getColumnIndex(OpenableColumns.SIZE);
+            // If the size is unknown, the value stored is null.  But since an
+            // int can't be null in Java, the behavior is implementation-specific,
+            // which is just a fancy term for &quot;unpredictable&quot;.  So as
+            // a rule, check if it's null before assigning to an int.  This will
+            // happen often:  The storage API allows for remote files, whose
+            // size might not be locally known.
+            String size = null;
+            if (!cursor.isNull(sizeIndex)) {
+                // Technically the column stores an int, but cursor.getString()
+                // will do the conversion automatically.
+                size = cursor.getString(sizeIndex);
+            } else {
+                size = &quot;Unknown&quot;;
+            }
+            Log.i(TAG, &quot;Size: &quot; + size);
+        }
+    } finally {
+        cursor.close();
+    }
+}
+</pre>
+
+<h3 id="open-client">Открытие документа</h3>
+
+<p>Получив URI документа, разработчик может открывать его и в целом
+делать с ним всё, что угодно.</p>
+
+<h4>Объект растровых изображений</h4>
+
+<p>Приведем пример кода для открытия объекта {@link android.graphics.Bitmap}:</p>
+
+<pre>private Bitmap getBitmapFromUri(Uri uri) throws IOException {
+    ParcelFileDescriptor parcelFileDescriptor =
+            getContentResolver().openFileDescriptor(uri, "r");
+    FileDescriptor fileDescriptor = parcelFileDescriptor.getFileDescriptor();
+    Bitmap image = BitmapFactory.decodeFileDescriptor(fileDescriptor);
+    parcelFileDescriptor.close();
+    return image;
+}
+</pre>
+
+<p>Обратите внимание, что не следует производить эту операцию в потоке пользовательского интерфейса. Ее нужно выполнять
+в фоне, с помощью {@link android.os.AsyncTask}. Когда файл с растровым изображением откроется, его
+можно отобразить в виджете {@link android.widget.ImageView}.
+</p>
+
+<h4>Получение объекта InputStream</h4>
+
+<p>Далее приведен пример того, как можно получить объект {@link java.io.InputStream} по идентификатору URI. В этом
+фрагменте кода строчки файла считываются в объект строкового типа:</p>
+
+<pre>private String readTextFromUri(Uri uri) throws IOException {
+    InputStream inputStream = getContentResolver().openInputStream(uri);
+    BufferedReader reader = new BufferedReader(new InputStreamReader(
+            inputStream));
+    StringBuilder stringBuilder = new StringBuilder();
+    String line;
+    while ((line = reader.readLine()) != null) {
+        stringBuilder.append(line);
+    }
+    fileInputStream.close();
+    parcelFileDescriptor.close();
+    return stringBuilder.toString();
+}
+</pre>
+
+<h3 id="create">Создание нового документа</h3>
+
+<p>Приложение может создать новый документ в поставщике документов, используя намерение
+{@link android.content.Intent#ACTION_CREATE_DOCUMENT}
+. Чтобы создать файл, нужно указать в намерении MIME-тип и имя файла, а затем
+запустить его с уникальным кодом запроса. Об остальном позаботится платформа:</p>
+
+
+<pre>
+// Here are some examples of how you might call this method.
+// The first parameter is the MIME type, and the second parameter is the name
+// of the file you are creating:
+//
+// createFile("text/plain", "foobar.txt");
+// createFile("image/png", "mypicture.png");
+
+// Unique request code.
+private static final int WRITE_REQUEST_CODE = 43;
+...
+private void createFile(String mimeType, String fileName) {
+    Intent intent = new Intent(Intent.ACTION_CREATE_DOCUMENT);
+
+    // Filter to only show results that can be &quot;opened&quot;, such as
+    // a file (as opposed to a list of contacts or timezones).
+    intent.addCategory(Intent.CATEGORY_OPENABLE);
+
+    // Create a file with the requested MIME type.
+    intent.setType(mimeType);
+    intent.putExtra(Intent.EXTRA_TITLE, fileName);
+    startActivityForResult(intent, WRITE_REQUEST_CODE);
+}
+</pre>
+
+<p>После создания нового документа можно получить его URI с помощью
+метода {@link android.app.Activity#onActivityResult onActivityResult()}, чтобы иметь возможность
+записывать в него данные.</p>
+
+<h3 id="delete">Удаление документа</h3>
+
+<p>Если у разработчика имеется URI документа, а объект
+{@link android.provider.DocumentsContract.Document#COLUMN_FLAGS Document.COLUMN_FLAGS}
+этого документа содержит флаг
+{@link android.provider.DocumentsContract.Document#FLAG_SUPPORTS_DELETE SUPPORTS_DELETE},
+то документ можно удалить. Например:</p>
+
+<pre>
+DocumentsContract.deleteDocument(getContentResolver(), uri);
+</pre>
+
+<h3 id="edit">Редактирование документа</h3>
+
+<p>Платформа SAF позволяет редактировать текстовые документы на месте.
+В следующем фрагменте кода активизируется
+намерение {@link android.content.Intent#ACTION_OPEN_DOCUMENT}, а
+категория {@link android.content.Intent#CATEGORY_OPENABLE} используется, чтобы отображались только
+документы, которые можно открыть. Затем производится дальнейшая фильтрация, чтобы отображались только текстовые файлы:</p>
+
+<pre>
+private static final int EDIT_REQUEST_CODE = 44;
+/**
+ * Open a file for writing and append some text to it.
+ */
+ private void editDocument() {
+    // ACTION_OPEN_DOCUMENT is the intent to choose a file via the system's
+    // file browser.
+    Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
+
+    // Filter to only show results that can be &quot;opened&quot;, such as a
+    // file (as opposed to a list of contacts or timezones).
+    intent.addCategory(Intent.CATEGORY_OPENABLE);
+
+    // Filter to show only text files.
+    intent.setType(&quot;text/plain&quot;);
+
+    startActivityForResult(intent, EDIT_REQUEST_CODE);
+}
+</pre>
+
+<p>Далее, из метода {@link android.app.Activity#onActivityResult onActivityResult()}
+(см. <a href="#results">Обработка результатов</a>) можно вызвать код для выполнения редактирования.
+В следующем фрагменте кода объект {@link java.io.FileOutputStream}
+получен с помощью объекта класса {@link android.content.ContentResolver}. По умолчанию используется режим записи.
+Рекомендуется запрашивать минимально необходимые права доступа, поэтому не следует запрашивать
+чтение/запись, если приложению требуется только записать файл:</p>
+
+<pre>private void alterDocument(Uri uri) {
+    try {
+        ParcelFileDescriptor pfd = getActivity().getContentResolver().
+                openFileDescriptor(uri, "w");
+        FileOutputStream fileOutputStream =
+                new FileOutputStream(pfd.getFileDescriptor());
+        fileOutputStream.write(("Overwritten by MyCloud at " +
+                System.currentTimeMillis() + "\n").getBytes());
+        // Let the document provider know you're done by closing the stream.
+        fileOutputStream.close();
+        pfd.close();
+    } catch (FileNotFoundException e) {
+        e.printStackTrace();
+    } catch (IOException e) {
+        e.printStackTrace();
+    }
+}</pre>
+
+<h3 id="permissions">Удержание прав доступа</h3>
+
+<p>Когда приложение открывает файл для чтения или записи, система предоставляет
+ему URI-разрешение на этот файл. Разрешение действует вплоть до перезагрузки устройства.
+Предположим, что в графическом редакторе требуется, чтобы у пользователя была возможность
+открыть непосредственно в этом приложении последние пять изображений, которые он редактировал. Если он
+перезапустил устройство, возникает необходимость снова отсылать его к системному элементу выбора для поиска
+файлов. Очевидно, это далеко не идеальный вариант.</p>
+
+<p>Чтобы избежать такой ситуации, разработчик может удержать права доступа, предоставленные системой
+его приложению. Приложение фактически принимает постоянное URI-разрешение,
+предлагаемое системой. В результате пользователь получает непрерывный доступ к файлам
+из приложения, независимо от перезагрузки устройства:</p>
+
+
+<pre>final int takeFlags = intent.getFlags()
+            &amp; (Intent.FLAG_GRANT_READ_URI_PERMISSION
+            | Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
+// Check for the freshest data.
+getContentResolver().takePersistableUriPermission(uri, takeFlags);</pre>
+
+<p>Остается один заключительный шаг. Можно сохранить последние
+URI-идентификаторы, с которыми работало приложение. Однако не исключено, что они потеряют актуальность, поскольку другое приложение
+может удалить или модифицировать документ. Поэтому следует всегда вызывать
+{@code getContentResolver().takePersistableUriPermission()}, чтобы получать
+актуальные данные.</p>
+
+<h2 id="custom">Создание собственного поставщика документов</h2>
+
+<p>
+При разработке приложения, оказывающего услуги по хранению файлов (например,
+службы хранения в облаке), можно предоставить доступ к файлам при помощи
+SAF, написав собственный поставщик документов.  В этом разделе показано,
+как это сделать.</p>
+
+
+<h3 id="manifest">Манифест</h3>
+
+<p>Чтобы реализовать собственный поставщик документов, необходимо добавить в манифест приложения
+следующую информацию:</p>
+<ul>
+
+<li>Целевой API-интерфейс уровня 19 или выше.</li>
+
+<li>Элемент <code>&lt;provider&gt;</code>, в котором объявляется нестандартный поставщик
+ хранилища. </li>
+
+<li>Имя поставщика, т. е., имя его класса с именем пакета.
+Например: <code>com.example.android.storageprovider.MyCloudProvider</code>.</li>
+
+<li>Имя центра поставщика, т. е. имя пакета (в этом примере —
+<code>com.example.android.storageprovider</code>) с типом поставщика контента
+(<code>documents</code>). Например,{@code com.example.android.storageprovider.documents}.</li>
+
+<li>Атрибут <code>android:exported</code>, установленный в значение <code>&quot;true&quot;</code>.
+ Необходимо экспортировать поставщик, чтобы он был виден другим приложениям.</li>
+
+<li>Атрибут <code>android:grantUriPermissions</code>, установленный в значение 
+<code>&quot;true&quot;</code>. Этот параметр позволяет системе предоставлять другим приложениям доступ
+к контенту поставщика. Обсуждение того, как следует удерживать права доступа
+к конкретному документу см. в разделе <a href="#permissions">Удержание прав доступа</a>.</li>
+
+<li>Разрешение {@code MANAGE_DOCUMENTS}. По умолчанию поставщик доступен
+всем. Добавление этого разрешения в манифест делает поставщик доступным только системе.
+Это важно для обеспечения безопасности.</li>
+
+<li>Атрибут {@code android:enabled}, имеющий логическое значение, определенное в файле
+ресурсов. Этот атрибут предназначен для отключения поставщика на устройствах под управлением Android версии 4.3 и ниже.
+ Например: {@code android:enabled="@bool/atLeastKitKat"}. Помимо
+включения этого атрибута в манифест, необходимо сделать следующее:
+<ul>
+<li>В файл ресурсов {@code bool.xml}, расположенный в каталоге {@code res/values/}, добавить
+строчку <pre>&lt;bool name=&quot;atLeastKitKat&quot;&gt;false&lt;/bool&gt;</pre></li>
+
+<li>В файл ресурсов {@code bool.xml}, расположенный в каталоге {@code res/values-v19/}, добавить
+строчку <pre>&lt;bool name=&quot;atLeastKitKat&quot;&gt;true&lt;/bool&gt;</pre></li>
+</ul></li>
+
+<li>Фильтр намерения с действием
+{@code android.content.action.DOCUMENTS_PROVIDER}, чтобы поставщик
+появлялся в элементе выбора, когда система будет искать поставщиков.</li>
+
+</ul>
+<p>Ниже приведены отрывки из образца манифеста, включающего в себя поставщик:</p>
+
+<pre>&lt;manifest... &gt;
+    ...
+    &lt;uses-sdk
+        android:minSdkVersion=&quot;19&quot;
+        android:targetSdkVersion=&quot;19&quot; /&gt;
+        ....
+        &lt;provider
+            android:name=&quot;com.example.android.storageprovider.MyCloudProvider&quot;
+            android:authorities=&quot;com.example.android.storageprovider.documents&quot;
+            android:grantUriPermissions=&quot;true&quot;
+            android:exported=&quot;true&quot;
+            android:permission=&quot;android.permission.MANAGE_DOCUMENTS&quot;
+            android:enabled=&quot;&#64;bool/atLeastKitKat&quot;&gt;
+            &lt;intent-filter&gt;
+                &lt;action android:name=&quot;android.content.action.DOCUMENTS_PROVIDER&quot; /&gt;
+            &lt;/intent-filter&gt;
+        &lt;/provider&gt;
+    &lt;/application&gt;
+
+&lt;/manifest&gt;</pre>
+
+<h4 id="43">Поддержка устройств под управлением Android версии 4.3 и ниже</h4>
+
+<p>Намерение
+{@link android.content.Intent#ACTION_OPEN_DOCUMENT} доступно только
+на устройствах с Android версии 4.4 и выше.
+Если приложение должно поддерживать {@link android.content.Intent#ACTION_GET_CONTENT},
+чтобы обслуживать устройства, работающие под управлением Android 4.3 и ниже, необходимо
+отключить фильтр намерения {@link android.content.Intent#ACTION_GET_CONTENT} в
+манифесте для устройств с Android версии 4.4 и выше. Поставщик
+документов и намерение {@link android.content.Intent#ACTION_GET_CONTENT} следует считать
+взаимоисключающими. Если приложение поддерживает их одновременно, оно
+будет появляться в пользовательском интерфейсе системного элемента выбора дважды, предлагая два различных способа доступа
+к сохраненным данным. Это запутает пользователей.</p>
+
+<p>Отключать фильтр намерения
+{@link android.content.Intent#ACTION_GET_CONTENT} на устройствах
+с Android версии 4.4 и выше рекомендуется следующим образом:</p>
+
+<ol>
+<li>В файл ресурсов {@code bool.xml}, расположенный в каталоге {@code res/values/}, добавить
+следующую строку: <pre>&lt;bool name=&quot;atMostJellyBeanMR2&quot;&gt;true&lt;/bool&gt;</pre></li>
+
+<li>В файл ресурсов {@code bool.xml}, расположенный в каталоге {@code res/values-v19/}, добавить
+следующую строку: <pre>&lt;bool name=&quot;atMostJellyBeanMR2&quot;&gt;false&lt;/bool&gt;</pre></li>
+
+<li>Добавить
+<a href="{@docRoot}guide/topics/manifest/activity-alias-element.html">псевдоним
+операции</a>, чтобы отключить фильтр намерения {@link android.content.Intent#ACTION_GET_CONTENT}
+для версий 4.4 (API уровня 19) и выше. Например:
+
+<pre>
+&lt;!-- This activity alias is added so that GET_CONTENT intent-filter
+     can be disabled for builds on API level 19 and higher. --&gt;
+&lt;activity-alias android:name=&quot;com.android.example.app.MyPicker&quot;
+        android:targetActivity=&quot;com.android.example.app.MyActivity&quot;
+        ...
+        android:enabled=&quot;@bool/atMostJellyBeanMR2&quot;&gt;
+    &lt;intent-filter&gt;
+        &lt;action android:name=&quot;android.intent.action.GET_CONTENT&quot; /&gt;
+        &lt;category android:name=&quot;android.intent.category.OPENABLE&quot; /&gt;
+        &lt;category android:name=&quot;android.intent.category.DEFAULT&quot; /&gt;
+        &lt;data android:mimeType=&quot;image/*&quot; /&gt;
+        &lt;data android:mimeType=&quot;video/*&quot; /&gt;
+    &lt;/intent-filter&gt;
+&lt;/activity-alias&gt;
+</pre>
+</li>
+</ol>
+<h3 id="contract">Контракты</h3>
+
+<p>Как правило, при создании нестандартного поставщика контента одной из задач
+является реализация классов-контрактов, описанная в руководстве для разработчиков
+<a href="{@docRoot}guide/topics/providers/content-provider-creating.html#ContractClass">
+Поставщики контента</a>. Класс-контракт представляет собой класс {@code public final},
+в котором содержатся определения констант для URI, имен столбцов, типов MIME и
+других метаданных поставщика. Платформа SAF
+предоставляет разработчику следующие классы-контракты, так что ему не нужно писать
+собственные:</p>
+
+<ul>
+   <li>{@link android.provider.DocumentsContract.Document}</li>
+   <li>{@link android.provider.DocumentsContract.Root}</li>
+</ul>
+
+<p>Например, когда
+к поставщику документов приходит запрос на документы или корневой каталог, можно возвращать в курсоре следующие столбцы:</p>
+
+<pre>private static final String[] DEFAULT_ROOT_PROJECTION =
+        new String[]{Root.COLUMN_ROOT_ID, Root.COLUMN_MIME_TYPES,
+        Root.COLUMN_FLAGS, Root.COLUMN_ICON, Root.COLUMN_TITLE,
+        Root.COLUMN_SUMMARY, Root.COLUMN_DOCUMENT_ID,
+        Root.COLUMN_AVAILABLE_BYTES,};
+private static final String[] DEFAULT_DOCUMENT_PROJECTION = new
+        String[]{Document.COLUMN_DOCUMENT_ID, Document.COLUMN_MIME_TYPE,
+        Document.COLUMN_DISPLAY_NAME, Document.COLUMN_LAST_MODIFIED,
+        Document.COLUMN_FLAGS, Document.COLUMN_SIZE,};
+</pre>
+
+<h3 id="subclass">Создание подкласса класса DocumentsProvider</h3>
+
+<p>Следующим шагом в разработке собственного поставщика документов является создание подкласса
+абстрактного класса {@link android.provider.DocumentsProvider}. Как минимум, необходимо
+реализовать следующие методы:</p>
+
+<ul>
+<li>{@link android.provider.DocumentsProvider#queryRoots queryRoots()}</li>
+
+<li>{@link android.provider.DocumentsProvider#queryChildDocuments queryChildDocuments()}</li>
+
+<li>{@link android.provider.DocumentsProvider#queryDocument queryDocument()}</li>
+
+<li>{@link android.provider.DocumentsProvider#openDocument openDocument()}</li>
+</ul>
+
+<p>Это единственные методы, реализация которых строго обязательна, однако существует
+намного больше методов, которые, возможно, тоже придется реализовать. Подробности приводятся в описании класса{@link android.provider.DocumentsProvider}
+.</p>
+
+<h4 id="queryRoots">Реализация метода queryRoots</h4>
+
+<p>Реализация метода {@link android.provider.DocumentsProvider#queryRoots
+queryRoots()} должна возвращать объект {@link android.database.Cursor}, указывающий на все
+корневые каталоги поставщиков документов, используя столбцы, определенные в
+{@link android.provider.DocumentsContract.Root}.</p>
+
+<p>В следующем фрагменте кода параметр {@code projection} представляет
+конкретные поля, нужные вызывающему объекту. В этом коде создается курсор,
+и к нему добавляется одна строка, соответствующая одному корневому каталогу (каталогу верхнего уровня), например,
+Загрузки или Изображения.  Большинство поставщиков имеет только один корневой каталог. Однако ничто не мешает иметь несколько корневых каталогов,
+например, при наличии нескольких учетных записей. В этом случае достаточно добавить в
+курсор еще одну строку.</p>
+
+<pre>
+&#64;Override
+public Cursor queryRoots(String[] projection) throws FileNotFoundException {
+
+    // Create a cursor with either the requested fields, or the default
+    // projection if "projection" is null.
+    final MatrixCursor result =
+            new MatrixCursor(resolveRootProjection(projection));
+
+    // If user is not logged in, return an empty root cursor.  This removes our
+    // provider from the list entirely.
+    if (!isUserLoggedIn()) {
+        return result;
+    }
+
+    // It's possible to have multiple roots (e.g. for multiple accounts in the
+    // same app) -- just add multiple cursor rows.
+    // Construct one row for a root called &quot;MyCloud&quot;.
+    final MatrixCursor.RowBuilder row = result.newRow();
+    row.add(Root.COLUMN_ROOT_ID, ROOT);
+    row.add(Root.COLUMN_SUMMARY, getContext().getString(R.string.root_summary));
+
+    // FLAG_SUPPORTS_CREATE means at least one directory under the root supports
+    // creating documents. FLAG_SUPPORTS_RECENTS means your application's most
+    // recently used documents will show up in the &quot;Recents&quot; category.
+    // FLAG_SUPPORTS_SEARCH allows users to search all documents the application
+    // shares.
+    row.add(Root.COLUMN_FLAGS, Root.FLAG_SUPPORTS_CREATE |
+            Root.FLAG_SUPPORTS_RECENTS |
+            Root.FLAG_SUPPORTS_SEARCH);
+
+    // COLUMN_TITLE is the root title (e.g. Gallery, Drive).
+    row.add(Root.COLUMN_TITLE, getContext().getString(R.string.title));
+
+    // This document id cannot change once it's shared.
+    row.add(Root.COLUMN_DOCUMENT_ID, getDocIdForFile(mBaseDir));
+
+    // The child MIME types are used to filter the roots and only present to the
+    //  user roots that contain the desired type somewhere in their file hierarchy.
+    row.add(Root.COLUMN_MIME_TYPES, getChildMimeTypes(mBaseDir));
+    row.add(Root.COLUMN_AVAILABLE_BYTES, mBaseDir.getFreeSpace());
+    row.add(Root.COLUMN_ICON, R.drawable.ic_launcher);
+
+    return result;
+}</pre>
+
+<h4 id="queryChildDocuments">Реализация метода queryChildDocuments</h4>
+
+<p>Реализация метода 
+{@link android.provider.DocumentsProvider#queryChildDocuments queryChildDocuments()}
+должна возвращать объект{@link android.database.Cursor}, указывающий на все файлы в
+заданном каталоге, используя столбцы, определенные в
+{@link android.provider.DocumentsContract.Document}.</p>
+
+<p>Этот метод вызывается, когда в интерфейсе элемента выбора пользователь выбирает корневой каталог приложения.
+Метод получает документы-потомки каталога на уровне ниже корневого.  Его можно вызывать на любом уровне
+файловой иерархии, а не только в корневом каталоге. В следующем фрагменте кода
+создается курсор с запрошенными столбцами. Затем в него заносится информация о
+каждом ближайшем потомке родительского каталога.
+Потомком может быть изображение, еще один каталог, в общем, любой файл:</p>
+
+<pre>&#64;Override
+public Cursor queryChildDocuments(String parentDocumentId, String[] projection,
+                              String sortOrder) throws FileNotFoundException {
+
+    final MatrixCursor result = new
+            MatrixCursor(resolveDocumentProjection(projection));
+    final File parent = getFileForDocId(parentDocumentId);
+    for (File file : parent.listFiles()) {
+        // Adds the file's display name, MIME type, size, and so on.
+        includeFile(result, null, file);
+    }
+    return result;
+}
+</pre>
+
+<h4 id="queryDocument">Реализация метода queryDocument</h4>
+
+<p>Реализация метода
+{@link android.provider.DocumentsProvider#queryDocument queryDocument()}
+должна возвращать объект{@link android.database.Cursor}, указывающий на заданный файл,
+используя столбцы, определенные в{@link android.provider.DocumentsContract.Document}.
+</p>
+
+<p>Метод {@link android.provider.DocumentsProvider#queryDocument queryDocument()}
+возвращает ту же информацию, которую возвращал
+{@link android.provider.DocumentsProvider#queryChildDocuments queryChildDocuments()},
+но для конкретного файла:</p>
+
+
+<pre>&#64;Override
+public Cursor queryDocument(String documentId, String[] projection) throws
+        FileNotFoundException {
+
+    // Create a cursor with the requested projection, or the default projection.
+    final MatrixCursor result = new
+            MatrixCursor(resolveDocumentProjection(projection));
+    includeFile(result, documentId, null);
+    return result;
+}
+</pre>
+
+<h4 id="openDocument">Реализация метода openDocument</h4>
+
+<p>Необходимо реализовать метод {@link android.provider.DocumentsProvider#openDocument
+openDocument()}, который возвращает объект {@link android.os.ParcelFileDescriptor}, представляющий
+указанный файл. Другие приложения смогут воспользоваться возращенным объектом {@link android.os.ParcelFileDescriptor}
+для организации потока данных. Система вызывает этот метод, когда пользователь выбирает файл,
+и клиентское приложение запрашивает доступ нему, вызывая
+метод {@link android.content.ContentResolver#openFileDescriptor openFileDescriptor()}.
+Например:</p>
+
+<pre>&#64;Override
+public ParcelFileDescriptor openDocument(final String documentId,
+                                         final String mode,
+                                         CancellationSignal signal) throws
+        FileNotFoundException {
+    Log.v(TAG, &quot;openDocument, mode: &quot; + mode);
+    // It's OK to do network operations in this method to download the document,
+    // as long as you periodically check the CancellationSignal. If you have an
+    // extremely large file to transfer from the network, a better solution may
+    // be pipes or sockets (see ParcelFileDescriptor for helper methods).
+
+    final File file = getFileForDocId(documentId);
+
+    final boolean isWrite = (mode.indexOf('w') != -1);
+    if(isWrite) {
+        // Attach a close listener if the document is opened in write mode.
+        try {
+            Handler handler = new Handler(getContext().getMainLooper());
+            return ParcelFileDescriptor.open(file, accessMode, handler,
+                        new ParcelFileDescriptor.OnCloseListener() {
+                &#64;Override
+                public void onClose(IOException e) {
+
+                    // Update the file with the cloud server. The client is done
+                    // writing.
+                    Log.i(TAG, &quot;A file with id &quot; +
+                    documentId + &quot; has been closed!
+                    Time to &quot; +
+                    &quot;update the server.&quot;);
+                }
+
+            });
+        } catch (IOException e) {
+            throw new FileNotFoundException(&quot;Failed to open document with id &quot;
+            + documentId + &quot; and mode &quot; + mode);
+        }
+    } else {
+        return ParcelFileDescriptor.open(file, accessMode);
+    }
+}
+</pre>
+
+<h3 id="security">Безопасность</h3>
+
+<p>Предположим, что поставщик документов представляет собой защищенную паролем службу хранения в облаке,
+а приложение должно убедиться, что пользователь вошел в систему, прежде чем оно предоставит ему доступ к файлам.
+Что должно предпринять приложение, если пользователь не выполнил вход?  Решение состоит в том, чтобы
+реализация метода {@link android.provider.DocumentsProvider#queryRoots
+queryRoots()} не возвращала корневых каталогов. Иными словами, это должен быть пустой корневой курсор:</p>
+
+<pre>
+public Cursor queryRoots(String[] projection) throws FileNotFoundException {
+...
+    // If user is not logged in, return an empty root cursor.  This removes our
+    // provider from the list entirely.
+    if (!isUserLoggedIn()) {
+        return result;
+}
+</pre>
+
+<p>Следующий шаг состоит в вызове метода {@code getContentResolver().notifyChange()}.
+Помните объект {@link android.provider.DocumentsContract}?  Воспользуемся им для создания
+соответствующего URI. В следующем фрагменте кода система извещается о необходимости опрашивать корневые каталоги
+поставщика документов, когда меняется статус входа пользователя в систему. Если пользователь не
+выполнил вход, метод {@link android.provider.DocumentsProvider#queryRoots queryRoots()} возвратит
+пустой курсор, как показано выше. Это гарантирует, что документы поставщика будут
+доступны только пользователям, вошедшим в поставщик.</p>
+
+<pre>private void onLoginButtonClick() {
+    loginOrLogout();
+    getContentResolver().notifyChange(DocumentsContract
+            .buildRootsUri(AUTHORITY), null);
+}
+</pre>

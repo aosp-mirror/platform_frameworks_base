@@ -1,0 +1,281 @@
+page.title=実行時の変更の処理
+page.tags=アクティビティ,ライフサイクル
+@jd:body
+
+<div id="qv-wrapper">
+<div id="qv">
+
+  <h2>本書の内容</h2>
+  <ol>
+    <li><a href="#RetainingAnObject">構成の変更中にオブジェクトを保持する</a></li>
+    <li><a href="#HandlingTheChange">構成の変更を自分で処理する</a>
+  </ol>
+
+  <h2>関連ドキュメント</h2>
+  <ol>
+    <li><a href="providing-resources.html">リソースの提供</a></li>
+    <li><a href="accessing-resources.html">リソースへのアクセス</a></li>
+    <li><a href="http://android-developers.blogspot.com/2009/02/faster-screen-orientation-change.html">Faster
+        Screen Orientation Change</a></li>
+  </ol>
+</div>
+</div>
+
+<p>端末の構成の中には、実行時に変化するものがあります（画面の向き、キーボードの可用性、言語など）。
+そのような変更が発生すると、Android は実行中の {@link android.app.Activity} を再起動します（{@link android.app.Activity#onDestroy()} が呼び出され、その後に{@link
+android.app.Activity#onCreate(Bundle) onCreate()} が呼び出されます）。
+
+再起動の動作は、新しい端末構成に一致する代替リソースを使用してアプリケーションを自動的にリロードすることで、アプリケーションを新しい構成に適応させることを目的としています。
+
+</p>
+
+<p>再起動を適切に処理するには、アクティビティが通常の<a href="{@docRoot}guide/components/activities.html#Lifecycle">アクティビティのライフサイクル</a>を通じて事前の状態を格納することが重要です。その場合、アプリケーションの状態に関するデータを保存できるように、Android はアクティビティを破棄する前に {@link android.app.Activity#onSaveInstanceState(Bundle) onSaveInstanceState()} を呼び出します。
+
+
+
+その後、{@link android.app.Activity#onCreate(Bundle) onCreate()} か {@link
+android.app.Activity#onRestoreInstanceState(Bundle) onRestoreInstanceState()} の際に状態を格納できます。
+</p>
+
+<p>アプリケーション自体がそのままの状態で再起動することをテストするには、アプリケーションでさまざまなタスクを実行中に、構成の変更（画面の向きの変更など）を呼び出す必要があります。
+
+構成の変更を処理したり、ユーザーが電話を着信し、アプリケーション プロセスが破棄されるほど時間が経過してからアプリケーションに戻ったりするような場合には、ユーザーデータや状態を失うことなくいつでもアプリケーションを再起動できるようにする必要があります。
+
+
+アクティビティの状態を格納する方法については、「<a href="{@docRoot}guide/components/activities.html#Lifecycle">アクティビティのライフサイクル</a>」をご覧ください。</p>
+
+<p>ただし、場合によっては、アプリケーションを再起動すると、大量のデータの復元にコストがかかり、操作性が悪くなることがあります。
+そのような場合、次の 2 つの方法で処理できます。
+</p>
+
+<ol type="a">
+  <li><a href="#RetainingAnObject">構成の変更中にオブジェクトを保持する</a>
+  <p>構成の変更時にアクティビティを再起動できますが、ステートフル オブジェクトがアクティビティの新しいインスタンスに移動します。
+</p>
+
+  </li>
+  <li><a href="#HandlingTheChange">構成の変更を自分で処理する</a>
+  <p>特定の構成変更の際に、システムがアクティビティを再起動しないようにしますが、必要に応じてアクティビティをアップデートできるように、構成が変更された場合には、コールバックを受け取ります。
+
+</p>
+  </li>
+</ol>
+
+
+<h2 id="RetainingAnObject">構成の変更中にオブジェクトを保持する</h2>
+
+<p>アクティビティの再起動で大量のデータの復元、ネットワーク接続の再構築、他の負荷のかかる操作の実行が必要になる場合、構成変更のために完全な再起動を実行すると、操作性が悪くなってしまうことがあります。
+
+さらに、システムの {@link
+android.app.Activity#onSaveInstanceState(Bundle) onSaveInstanceState()} コールバックによって保存される {@link android.os.Bundle} を使用して、アクティビティの状態を完全に復元できない場合もあります。&mdash;大きなオブジェクト（ビットマップなど）を扱うためのものではなく、内部のデータをシリアル化してから逆シリアル化を行うため、多くのメモリを消費することになり、構成の変更に時間がかかってしまいます。
+
+
+そのような場合、構成の変更によるアクティビティの再起動の際に、{@link
+android.app.Fragment} を保持することで、再初期化の負担を軽減できます。
+このフラグメントには、保持しておきたいステートフル オブジェクトへの参照を含めることができます。
+</p>
+
+<p>構成変更により Android システムがアクティビティをシャットダウンするとき、保持するためのマークを設定しておくと、アクティビティのフラグメントが破棄されません。
+ステートフル オブジェクトを保持するために、アクティビティにこのようなフラグメントを追加しておくことができます。
+</p>
+
+<p>実行時の構成変更の際に、フラグメントにステートフル オブジェクトを保持するには:</p>
+
+<ol>
+  <li>{@link android.app.Fragment} クラスを拡張し、ステートフル オブジェクトへの参照を宣言します。
+</li>
+  <li>フラグメントを作成するときに、{@link android.app.Fragment#setRetainInstance(boolean)} を呼び出します。
+      </li>
+  <li>フラグメントをアクティビティに追加します。</li>
+  <li>アクティビティの再起動時にフラグメントを取得するには、{@link android.app.FragmentManager} を使用します。
+</li>
+</ol>
+
+<p>次は、フラグメントの定義の例です。</p>
+
+<pre>
+public class RetainedFragment extends Fragment {
+
+    // data object we want to retain
+    private MyDataObject data;
+
+    // this method is only called once for this fragment
+    &#64;Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        // retain this fragment
+        setRetainInstance(true);
+    }
+
+    public void setData(MyDataObject data) {
+        this.data = data;
+    }
+
+    public MyDataObject getData() {
+        return data;
+    }
+}
+</pre>
+
+<p class="caution"><strong>警告:</strong> オブジェクトの格納が可能な間は、{@link
+android.graphics.drawable.Drawable}、{@link android.widget.Adapter}、{@link android.view.View}、さらには {@link android.content.Context} に関連付けられているその他のオブジェクトのように、{@link android.app.Activity} に結び付いたオブジェクトを渡さないようにしてください。
+
+オブジェクトを渡すと、元のアクティビティ インスタンスのビューやリソースがすべて漏えいしてしまいます
+（リソースが漏えいすると、アプリケーションはリソースを保持しているがガーベジコレクションを実行できず、大量のメモリが失われてしまうことがあります）。
+
+</p>
+
+<p>次に、{@link android.app.FragmentManager} を使用して、フラグメントをアクティビティに追加します。実行時に構成を変更する際にアクティビティを再び起動すると、フラグメントからデータ オブジェクトを取得できます。
+
+次は、アクティビティの定義の例です。</p>
+
+<pre>
+public class MyActivity extends Activity {
+
+    private RetainedFragment dataFragment;
+
+    &#64;Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.main);
+
+        // find the retained fragment on activity restarts
+        FragmentManager fm = getFragmentManager();
+        dataFragment = (DataFragment) fm.findFragmentByTag(“data”);
+
+        // create the fragment and data the first time
+        if (dataFragment == null) {
+            // add the fragment
+            dataFragment = new DataFragment();
+            fm.beginTransaction().add(dataFragment, “data”).commit();
+            // load the data from the web
+            dataFragment.setData(loadMyData());
+        }
+
+        // the data is available in dataFragment.getData()
+        ...
+    }
+
+    &#64;Override
+    public void onDestroy() {
+        super.onDestroy();
+        // store the data in the fragment
+        dataFragment.setData(collectMyLoadedData());
+    }
+}
+</pre>
+
+<p>この例では、{@link android.app.Activity#onCreate(Bundle) onCreate()} がフラグメントを追加するか、フラグメントへの参照を復元します。さらに、{@link android.app.Activity#onCreate(Bundle) onCreate()} がステートフル オブジェクトをフラグメント インスタンスの内部に格納し、{@link android.app.Activity#onDestroy() onDestroy()} が保持しているフラグメント インスタンス内部のステートフル オブジェクトを更新します。
+
+
+
+</p>
+
+
+
+
+
+<h2 id="HandlingTheChange">構成の変更を自分で処理する</h2>
+
+<p>アプリケーションに特定の構成の変更の際にリソースを更新する必要がなく、パフォーマンスの制限によりアクティビティの再起動を回避する必要がある場合は、構成の変更をアクティビティ自身が処理することを宣言します。そうすることで、システムによってアクティビティが再起動されなくなります。
+<em></em>
+
+</p>
+
+<p class="note"><strong>注:</strong> 構成の変更を自分で処理すると、変更がシステムによって自動的に適用されることがないため、代替リソースの使用が非常に難しくなります。
+
+この手法は、構成の変更による再起動を回避する際の最後の手段として検討する手法です。ほとんどの場合、アプリケーションでの使用は推奨されません。
+</p>
+
+<p>アクティビティで構成の変更を処理することを宣言するには、マニフェスト ファイルの該当する <a href="{@docRoot}guide/topics/manifest/activity-element.html">{@code &lt;activity&gt;}</a> 要素を編集し、処理する構成を表す値とともに <a href="{@docRoot}guide/topics/manifest/activity-element.html#config">{@code
+android:configChanges}</a> 属性を配置します。
+
+使用可能な値は、<a href="{@docRoot}guide/topics/manifest/activity-element.html#config">{@code
+android:configChanges}</a> 属性のドキュメントに一覧が記載されています（一般的には、画面の向きを変更した場合の再起動を回避するには {@code "orientation"} の値を、キーボードの可用性を変更した場合の再起動を回避するには {@code "keyboardHidden"} の値を使用します）。
+
+パイプ記号の {@code |} 文字を使用して区切ることで、属性内に複数の構成値を宣言できます。
+</p>
+
+<p>たとえば、次のマニフェスト コードでは、画面の向きとキーボードの可用性の変更の両方を処理するアクティビティを宣言しています。
+</p>
+
+<pre>
+&lt;activity android:name=".MyActivity"
+          android:configChanges="orientation|keyboardHidden"
+          android:label="@string/app_name">
+</pre>
+
+<p>これで、これらのいずれかの構成が変更された場合でも、{@code MyActivity} が再起動することはなくなりました。代わりに、{@code MyActivity} が {@link
+android.app.Activity#onConfigurationChanged(Configuration) onConfigurationChanged()} への呼び出しを取得します。
+このメソッドには、新しい端末構成を指定する {@link android.content.res.Configuration} オブジェクトが渡されます。
+
+{@link android.content.res.Configuration} のフィールドを読み込むことで新しい構成を判断し、インターフェースに使用するリソースを更新して適切に変更できます。
+
+このメソッドが呼び出されると、アクティビティの {@link android.content.res.Resources} オブジェクトが更新され、新しい構成に基づいたリソースを返します。それにより、システムがアクティビティを再起動しなくても、UI の要素を簡単にリセットできます。
+
+
+</p>
+
+<p class="caution"><strong>警告:</strong> Android 3.2（API レベル 13）以降では、端末の画面の向きを縦から横に切り替えると、<strong>「画面サイズ」も変更されます</strong>。
+
+そのため、API レベル 13 以降で開発を行う場合（<a href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#min">{@code minSdkVersion}</a> 属性と <a href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#target">{@code targetSdkVersion}</a> 属性により宣言）、画面の向きによる実行時の再起動を回避するには、{@code "screenSize"} 値と一緒に {@code
+"orientation"} 値を使用する必要があります。
+
+つまり、{@code
+android:configChanges="orientation|screenSize"} を宣言する必要があります。ただし、アプリケーションのターゲットが API レベル 12 以前の場合は、常にアクティビティ自身がこの構成の変更を処理します（Android 3.2 以降の端末で実行している場合でも、この構成の変更によりアクティビティが再起動されることはありません）。
+
+</p>
+
+<p>たとえば、次の {@link
+android.app.Activity#onConfigurationChanged(Configuration) onConfigurationChanged()} の実装により現在の端末の画面の向きがチェックされます。
+</p>
+
+<pre>
+&#64;Override
+public void onConfigurationChanged(Configuration newConfig) {
+    super.onConfigurationChanged(newConfig);
+
+    // Checks the orientation of the screen
+    if (newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE) {
+        Toast.makeText(this, "landscape", Toast.LENGTH_SHORT).show();
+    } else if (newConfig.orientation == Configuration.ORIENTATION_PORTRAIT){
+        Toast.makeText(this, "portrait", Toast.LENGTH_SHORT).show();
+    }
+}
+</pre>
+
+<p>{@link android.content.res.Configuration} オブジェクトは、変更された構成を除く、現在のすべての構成を表します。
+ほとんどの場合、構成の変更内容を正確に把握する必要はなく、代替の構成を提供するすべてのリソースを処理中の構成に割り当て直します。
+
+たとえば、現在は {@link
+android.content.res.Resources} オブジェクトが更新されたため、任意の {@link android.widget.ImageView} を {@link android.widget.ImageView#setImageResource(int)
+setImageResource()} でリセットでき、新しい構成には最適なリソースが使用されます（「<a href="providing-resources.html#AlternateResources">リソースの提供</a>」をご覧ください）。
+
+</p>
+
+<p>{@link
+android.content.res.Configuration} フィールドの値は、{@link android.content.res.Configuration} クラスの特定の定数に一致する整数であることにご注意ください。
+それぞれのフィールドで使用する定数に関するドキュメントについては、{@link
+android.content.res.Configuration} リファレンスの該当するフィールドをご覧ください。
+</p>
+
+<p class="note"><strong>メモ:</strong> 構成の変更をアクティビティで処理することを宣言すると、代替を提供するすべての要素をリセットする操作が必要になります。
+画面の向きの変更を処理するアクティビティを宣言しており、縦向きと横向きで切り替わる画像がある場合、{@link
+android.app.Activity#onConfigurationChanged(Configuration) onConfigurationChanged()} の際にそれぞれの要素に各リソースを割り当て直す必要があります。
+
+</p>
+
+<p>これらの構成の変更に基づいてアプリケーションを更新する必要がない場合は、代わりに <em></em>{@link
+android.app.Activity#onConfigurationChanged(Configuration) onConfigurationChanged()} を実装できません。
+このような場合、構成の変更前に使用していたすべてのリソースがそのまま使用され、アクティビティの再起動を回避した状態となります。
+
+ただし、アプリケーションはいつでもシャットダウンして以前のままの状態で再起動できる状態にしておく必要があるため、通常のアクティビティのライフサイクルでは、状態を保持しない手段としてこの手法を使用しないようにします。
+
+それは、アプリケーションの再起動を回避できない他の構成の変更があるだけでなく、ユーザーがアプリケーションを離れ、ユーザーがアプリケーションに戻る前に破棄されてしまうようなイベントを処理する必要があるためです。
+
+
+</p>
+
+<p>アクティビティで処理できる構成の変更についての詳細は、<a href="{@docRoot}guide/topics/manifest/activity-element.html#config">{@code
+android:configChanges}</a> のドキュメントと{@link android.content.res.Configuration} クラスをご覧ください。
+</p>

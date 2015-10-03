@@ -1,0 +1,1202 @@
+page.title=Thiết đặt
+page.tags=preference,preferenceactivity,preferencefragment
+
+@jd:body
+
+
+<div id="qv-wrapper">
+<div id="qv">
+
+<h2>Trong tài liệu này</h2>
+<ol>
+  <li><a href="#Overview">Tổng quan</a>
+    <ol>
+      <li><a href="#SettingTypes">Tùy chọn</a></li>
+    </ol>
+  </li>
+  <li><a href="#DefiningPrefs">Định nghĩa Tùy chọn trong XML</a>
+    <ol>
+      <li><a href="#Groups">Tạo nhóm thiết đặt</a></li>
+      <li><a href="#Intents">Sử dụng ý định</a></li>
+    </ol>
+  </li>
+  <li><a href="#Activity">Tạo một Hoạt động Tùy chọn</a></li>
+  <li><a href="#Fragment">Sử dụng Phân đoạn Tùy chọn</a></li>
+  <li><a href="#Defaults">Thiết đặt Giá trị Mặc định</a></li>
+  <li><a href="#PreferenceHeaders">Sử dụng Tiêu đề Tùy chọn</a>
+    <ol>
+      <li><a href="#CreateHeaders">Tạo tệp tiêu đề</a></li>
+      <li><a href="#DisplayHeaders">Hiển thị tiêu đề</a></li>
+      <li><a href="#BackCompatHeaders">Hỗ trợ các phiên bản cũ hơn với tiêu đề tùy chọn</a></li>
+    </ol>
+  </li>
+  <li><a href="#ReadingPrefs">Đọc Tùy chọn</a>
+    <ol>
+      <li><a href="#Listening">Theo dõi thay đổi tùy chọn</a></li>
+    </ol>
+  </li>
+  <li><a href="#NetworkUsage">Quản lý Sử dụng Mạng</a></li>
+  <li><a href="#Custom">Xây dựng một Thiết đặt Tùy chỉnh</a>
+    <ol>
+      <li><a href="#CustomSelected">Quy định một giao diện người dùng</a></li>
+      <li><a href="#CustomSave">Lưu giá trị của thiết đặt</a></li>
+      <li><a href="#CustomInitialize">Khởi tạo giá trị hiện tại</a></li>
+      <li><a href="#CustomDefault">Cung cấp một giá trị mặc định</a></li>
+      <li><a href="#CustomSaveState">Lưu và khôi phục trạng thái của Tùy chọn</a></li>
+    </ol>
+  </li>
+</ol>
+
+<h2>Lớp khóa</h2>
+<ol>
+  <li>{@link android.preference.Preference}</li>
+  <li>{@link android.preference.PreferenceActivity}</li>
+  <li>{@link android.preference.PreferenceFragment}</li>
+</ol>
+
+
+<h2>Xem thêm</h2>
+<ol>
+  <li><a href="{@docRoot}design/patterns/settings.html">Hướng dẫn thiết kế Thiết đặt</a></li>
+</ol>
+</div>
+</div>
+
+
+
+
+<p>Ứng dụng thường bao gồm những thiết đặt cho phép người dùng sửa đổi các tính năng và hành vi của ứng dụng. Ví
+dụ, một số ứng dụng cho phép người dùng quy định xem thông báo có được kích hoạt hay không hoặc quy định tần suất
+ứng dụng sẽ đồng bộ dữ liệu với đám mây.</p>
+
+<p>Nếu muốn cung cấp thiết đặt cho ứng dụng của mình, bạn nên sử dụng
+các API {@link android.preference.Preference} của Android để xây dựng một giao diện phù hợp với
+trải nghiệm người dùng trong các ứng dụng Android khác (bao gồm thiết đặt hệ thống). Tài liệu này mô tả
+cách xây dựng thiết đặt ứng dụng của bạn bằng cách sử dụng các API {@link android.preference.Preference}.</p>
+
+<div class="note design">
+<p><strong>Thiết kế Thiết đặt</strong></p>
+  <p>Để biết thông tin về cách thiết kế thiết đặt của bạn, hãy đọc hướng dẫn thiết kế <a href="{@docRoot}design/patterns/settings.html">Thiết đặt</a>.</p>
+</div>
+
+
+<img src="{@docRoot}images/ui/settings/settings.png" alt="" width="435" />
+<p class="img-caption"><strong>Hình 1.</strong> Ảnh chụp màn hình từ thiết đặt của ứng dụng
+Messaging trên Android. Chọn một mục được định nghĩa bởi một {@link android.preference.Preference} 
+sẽ mở ra một giao diện để thay đổi thiết đặt.</p>
+
+
+
+
+<h2 id="Overview">Tổng quan</h2>
+
+<p>Thay vì sử dụng các đối tượng {@link android.view.View} để xây dựng giao diện người dùng, thiết đặt được
+xây dựng bằng cách sử dụng các lớp con khác nhau của lớp {@link android.preference.Preference} mà bạn
+khai báo trong một tệp XML.</p>
+
+<p>Đối tượng {@link android.preference.Preference} là một khối dựng cho một thiết đặt
+đơn lẻ. Mỗi {@link android.preference.Preference} xuất hiện như một mục trong một danh sách và cung cấp
+UI phù hợp để người dùng sửa đổi thiết đặt. Ví dụ, một {@link
+android.preference.CheckBoxPreference} tạo một mục danh sách hiển thị một hộp kiểm, và một {@link
+android.preference.ListPreference} tạo một mục mở ra một hộp thoại với danh sách lựa chọn.</p>
+
+<p>Mỗi {@link android.preference.Preference} mà bạn thêm có một cặp khóa-giá trị tương ứng mà
+hệ thống sử dụng để lưu thiết đặt trong một tệp {@link android.content.SharedPreferences}
+mặc định cho thiết đặt của ứng dụng của bạn. Khi người dùng thay đổi một thiết đặt, hệ thống sẽ cập nhật giá trị
+tương ứng trong tệp {@link android.content.SharedPreferences} cho bạn. Lần duy nhất mà bạn nên
+trực tiếp tương tác với tệp {@link android.content.SharedPreferences} được liên kết đó là khi bạn
+cần đọc giá trị để xác định xem hành vi ứng dụng của mình có được dựa trên thiết đặt của người dùng không.</p>
+
+<p>Giá trị được lưu trong {@link android.content.SharedPreferences} cho từng thiết đặt có thể là một trong các kiểu dữ liệu
+sau:</p>
+
+<ul>
+  <li>Boolean</li>
+  <li>Float</li>
+  <li>Int</li>
+  <li>Long</li>
+  <li>String</li>
+  <li>String {@link java.util.Set}</li>
+</ul>
+
+<p>Vì thiết đặt của ứng dụng của bạn được xây dựng bằng cách sử dụng các đối tượng {@link android.preference.Preference}
+thay vì đối tượng
+{@link android.view.View}, bạn nên sử dụng một lớp con {@link android.app.Activity} hoặc 
+{@link android.app.Fragment} chuyên dụng để hiển thị thiết đặt danh sách:</p>
+
+<ul>
+  <li>Nếu ứng dụng của bạn hỗ trợ các phiên bản Android cũ hơn 3.0 (API mức 10 và thấp hơn), bạn phải
+xây dựng hoạt động như một phần mở rộng của lớp {@link android.preference.PreferenceActivity}.</li>
+  <li>Trên phiên bản Android 3.0 trở lên, thay vào đó, bạn nên sử dụng một {@link android.app.Activity}
+truyền thống nơi lưu giữ {@link android.preference.PreferenceFragment} để hiển thị thiết đặt ứng dụng của bạn.
+Tuy nhiên, bạn cũng có thể sử dụng {@link android.preference.PreferenceActivity} để tạo một bố trí hai bảng
+cho màn hình lớn khi bạn có nhiều nhóm thiết đặt.</li>
+</ul>
+
+<p>Cách thiết đặt {@link android.preference.PreferenceActivity} của bạn và các thực thể của {@link
+android.preference.PreferenceFragment} được trình bày trong các phần về <a href="#Activity">Tạo một Hoạt động Tùy chọn</a> và <a href="#Fragment">Sử dụng
+Phân đoạn Tùy chọn</a>.</p>
+
+
+<h3 id="SettingTypes">Tùy chọn</h3>
+
+<p>Mọi thiết đặt cho ứng dụng của bạn đều được biểu diễn bởi một lớp con cụ thể của lớp {@link
+android.preference.Preference}. Mỗi lớp con lại bao gồm một tập hợp các tính chất cốt lõi cho phép bạn
+quy định những thứ như tiêu đề cho thiết đặt và giá trị mặc định. Mỗi lớp con cũng cung cấp
+các tính chất và giao diện người dùng chuyên dụng của chính nó. Ví dụ, hình 1 mình họa một ảnh chụp màn hình từ thiết đặt của ứng dụng
+Messaging. Mỗi mục danh sách trong màn hình thiết đặt được hỗ trợ bởi một đối tượng {@link
+android.preference.Preference} khác nhau.</p>
+
+<p>Sau đây là một số tùy chọn phổ biến nhất:</p>
+
+<dl>
+  <dt>{@link android.preference.CheckBoxPreference}</dt>
+  <dd>Hiển thị một mục kèm một hộp kiểm cho thiết đặt hoặc được kích hoạt hoặc bị vô hiệu hóa. Giá trị
+được lưu là một boolean (<code>true</code> nếu nó được chọn).</dd>
+
+  <dt>{@link android.preference.ListPreference}</dt>
+  <dd>Mở một hộp thoại kèm danh sách nút chọn một. Giá trị được lưu
+có thể là bất kỳ loại giá trị được hỗ trợ nào (liệt kê bên trên).</dd>
+
+  <dt>{@link android.preference.EditTextPreference}</dt>
+  <dd>Mở một hộp thoại kèm một widget {@link android.widget.EditText}. Giá trị được lưu là một {@link
+java.lang.String}.</dd>
+</dl>
+
+<p>Xem lớp {@link android.preference.Preference} để biết danh sách tất cả các lớp con khác và tính chất
+tương ứng của chúng.</p>
+
+<p>Dĩ nhiên, các lớp tích hợp không đáp ứng mọi nhu cầu và ứng dụng của bạn có thể yêu cầu
+lớp con chuyên dụng hơn. Ví dụ, nền tảng này hiện chưa cung cấp một lớp {@link
+android.preference.Preference} cho việc chọn một số hay ngày. Vì thế, bạn có thể cần phải định nghĩa
+lớp con {@link android.preference.Preference} của chính mình. Để được trợ giúp khi làm vậy, hãy xem phần về <a href="#Custom">Xây dựng Thiết đặt Tùy chỉnh</a>.</p>
+
+
+
+<h2 id="DefiningPrefs">Định nghĩa Tùy chọn trong XML</h2>
+
+<p>Mặc dù bạn có thể khởi tạo các đối tượng {@link android.preference.Preference} mới vào thời gian chạy, bạn
+nên định nghĩa danh sách các thiết đặt của mình trong XML kèm một phân cấp của các đối tượng {@link android.preference.Preference}
+. Việc sử dụng một tệp XML để định nghĩa bộ sưu tập thiết đặt của bạn sẽ được ưu tiên vì tệp
+cung cấp một cấu trúc dễ đọc, cập nhật đơn giản. Bên cạnh đó, các thiết đặt ứng dụng của bạn thường được
+xác định trước, mặc dù bạn vẫn có thể sửa đổi bộ sưu tập vào thời gian chạy.</p>
+
+<p>Mỗi lớp con {@link android.preference.Preference} có thể được khai báo bằng một phần tử XML mà
+khớp với tên lớp đó, chẳng hạn như {@code &lt;CheckBoxPreference&gt;}.</p>
+
+<p>Bạn phải lưu tệp XML trong thư mục {@code res/xml/}. Mặc dù bạn có thể đặt tên tệp là
+bất cứ thứ gì mình muốn, nó thường được đặt tên là{@code preferences.xml}. Bạn thường chỉ cần một tệp,
+bởi các nhánh trong phân cấp (mà mở danh sách thiết đặt của riêng chúng) sẽ được khai báo bằng cách sử dụng các thực thể
+lồng nhau của {@link android.preference.PreferenceScreen}.</p>
+
+<p class="note"><strong>Lưu ý:</strong> Nếu bạn muốn tạo một bố trí đa bảng cho thiết đặt
+của mình, vậy bạn nên tách riêng các tệp XML cho từng phân đoạn.</p>
+
+<p>Node gốc cho tệp XML phải là một phần tử {@link android.preference.PreferenceScreen
+&lt;PreferenceScreen&gt;}. Trong phần tử này là nơi bạn thêm từng {@link
+android.preference.Preference}. Từng phần tử con mà bạn thêm vào trong phần tử
+{@link android.preference.PreferenceScreen &lt;PreferenceScreen&gt;} sẽ xuất hiện như một mục
+đơn lẻ trong danh sách thiết đặt.</p>
+
+<p>Ví dụ:</p>
+
+<pre>
+&lt;?xml version="1.0" encoding="utf-8"?>
+&lt;PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+    &lt;CheckBoxPreference
+        android:key="pref_sync"
+        android:title="@string/pref_sync"
+        android:summary="@string/pref_sync_summ"
+        android:defaultValue="true" />
+    &lt;ListPreference
+        android:dependency="pref_sync"
+        android:key="pref_syncConnectionType"
+        android:title="@string/pref_syncConnectionType"
+        android:dialogTitle="@string/pref_syncConnectionType"
+        android:entries="@array/pref_syncConnectionTypes_entries"
+        android:entryValues="@array/pref_syncConnectionTypes_values"
+        android:defaultValue="@string/pref_syncConnectionTypes_default" />
+&lt;/PreferenceScreen>
+</pre>
+
+<p>Trong ví dụ này, có một {@link android.preference.CheckBoxPreference} và một {@link
+android.preference.ListPreference}. Cả hai mục đều bao gồm ba thuộc tính sau:</p>
+
+<dl>
+  <dt>{@code android:key}</dt>
+  <dd>Thuộc tính này được yêu cầu cho các tùy chọn duy trì một giá trị dữ liệu. Nó quy định khóa
+(xâu) duy nhất mà hệ thống sử dụng khi lưu giá trị của thiết đặt này trong {@link
+android.content.SharedPreferences}. 
+  <p>Các thực thể duy nhất mà thuộc tính này không <em>được yêu cầu</em> là khi tùy chọn là một
+{@link android.preference.PreferenceCategory} hoặc {@link android.preference.PreferenceScreen}, hoặc
+tùy chọn quy định một {@link android.content.Intent} để gọi ra (bằng phần tử <a href="#Intents">{@code &lt;intent&gt;}</a>) hoặc {@link android.app.Fragment} để hiển thị (bằng thuộc tính <a href="{@docRoot}reference/android/preference/Preference.html#attr_android:fragment">{@code
+android:fragment}</a>).</p>
+  </dd>
+  <dt>{@code android:title}</dt>
+  <dd>Thuộc tính này cung cấp một tên hiển thị với người dùng cho thiết đặt.</dd>
+  <dt>{@code android:defaultValue}</dt>
+  <dd>Nó quy định giá trị ban đầu mà hệ thống nên đặt trong tệp {@link
+android.content.SharedPreferences}. Bạn nên cung cấp một giá trị mặc định cho tất cả
+thiết đặt.</dd>
+</dl>
+
+<p>Để biết thông tin về tất cả thuộc tính được hỗ trợ khác, hãy xem tài liệu {@link
+android.preference.Preference} (và lớp con tương ứng).</p>
+
+
+<div class="figure" style="width:300px">
+  <img src="{@docRoot}images/ui/settings/settings-titles.png" alt="" />
+  <p class="img-caption"><strong>Hình 2.</strong> Thiết đặt thể loại
+    có tiêu đề. <br/><b>1.</b> Thể loại được quy định bởi phần tử {@link
+android.preference.PreferenceCategory &lt;PreferenceCategory&gt;}. <br/><b>2.</b> Tiêu đề
+được quy định bằng thuộc tính {@code android:title}.</p>
+</div>
+
+
+<p>Khi danh sách thiết đặt của bạn vượt quá khoảng 10 mục, bạn có thể muốn thêm tiêu đề để
+định nghĩa các nhóm thiết đặt hoặc hiển thị các nhóm đó trong một
+màn hình riêng. Những tùy chọn này được mô tả trong các phần sau.</p>
+
+
+<h3 id="Groups">Tạo nhóm thiết đặt</h3>
+
+<p>Nếu bạn trình bày một danh sách từ 10 thiết đặt trở lên, người dùng
+có thể gặp khó khăn trong việc dò tìm, hiểu và xử lý chúng. Bạn có thể khắc phục điều này bằng cách
+chia một số hoặc tất cả thiết đặt thành các nhóm, qua đó biến một danh sách dài thành nhiều
+danh sách ngắn hơn. Một nhóm các thiết đặt có liên quan có thể được trình bày bằng một trong hai cách:</p>
+
+<ul>
+  <li><a href="#Titles">Sử dụng tiêu đề</a></li>
+  <li><a href="#Subscreens">Sử dụng màn hình con</a></li>
+</ul>
+
+<p>Bạn có thể sử dụng một hoặc cả hai kỹ thuật tạo nhóm này để sắp xếp các thiết đặt cho ứng dụng của mình. Khi
+quyết định sử dụng cái nào và làm thế nào để chia các thiết đặt của mình, bạn nên tuân theo các hướng dẫn trong tài liệu hướng dẫn
+<a href="{@docRoot}design/patterns/settings.html">Thiết đặt</a> của Thiết kế Android.</p>
+
+
+<h4 id="Titles">Sử dụng tiêu đề</h4>
+
+<p>Nếu bạn muốn cung cấp các thanh chia có tiêu đề giữa các nhóm thiết đặt (như minh họa trong hình 2),
+hãy đặt từng nhóm đối tượng {@link android.preference.Preference} vào bên trong một {@link
+android.preference.PreferenceCategory}.</p>
+
+<p>Ví dụ:</p>
+
+<pre>
+&lt;PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+    &lt;PreferenceCategory 
+        android:title="&#64;string/pref_sms_storage_title"
+        android:key="pref_key_storage_settings">
+        &lt;CheckBoxPreference
+            android:key="pref_key_auto_delete"
+            android:summary="&#64;string/pref_summary_auto_delete"
+            android:title="&#64;string/pref_title_auto_delete"
+            android:defaultValue="false"... />
+        &lt;Preference 
+            android:key="pref_key_sms_delete_limit"
+            android:dependency="pref_key_auto_delete"
+            android:summary="&#64;string/pref_summary_delete_limit"
+            android:title="&#64;string/pref_title_sms_delete"... />
+        &lt;Preference 
+            android:key="pref_key_mms_delete_limit"
+            android:dependency="pref_key_auto_delete"
+            android:summary="&#64;string/pref_summary_delete_limit"
+            android:title="&#64;string/pref_title_mms_delete" ... />
+    &lt;/PreferenceCategory>
+    ...
+&lt;/PreferenceScreen>
+</pre>
+
+
+<h4 id="Subscreens">Sử dụng màn hình con</h4>
+
+<p>Nếu bạn muốn đặt các nhóm thiết đặt vào một màn hình con (như minh họa trong hình 3), hãy đặt nhóm
+các đối tượng {@link android.preference.Preference} vào bên trong một {@link
+android.preference.PreferenceScreen}.</p>
+
+<img src="{@docRoot}images/ui/settings/settings-subscreen.png" alt="" />
+<p class="img-caption"><strong>Hình 3.</strong> Màn hình con thiết đặt. Phần tử {@code
+&lt;PreferenceScreen&gt;} sẽ tạo
+một mục mà, khi được chọn, nó sẽ mở ra một danh sách riêng để hiển thị các thiết đặt lồng nhau.</p>
+
+<p>Ví dụ:</p>
+
+<pre>
+&lt;PreferenceScreen  xmlns:android="http://schemas.android.com/apk/res/android">
+    &lt;!-- opens a subscreen of settings -->
+    &lt;PreferenceScreen
+        android:key="button_voicemail_category_key"
+        android:title="&#64;string/voicemail"
+        android:persistent="false">
+        &lt;ListPreference
+            android:key="button_voicemail_provider_key"
+            android:title="&#64;string/voicemail_provider" ... />
+        &lt;!-- opens another nested subscreen -->
+        &lt;PreferenceScreen
+            android:key="button_voicemail_setting_key"
+            android:title="&#64;string/voicemail_settings"
+            android:persistent="false">
+            ...
+        &lt;/PreferenceScreen>
+        &lt;RingtonePreference
+            android:key="button_voicemail_ringtone_key"
+            android:title="&#64;string/voicemail_ringtone_title"
+            android:ringtoneType="notification" ... />
+        ...
+    &lt;/PreferenceScreen>
+    ...
+&lt;/PreferenceScreen>
+</pre>
+
+
+<h3 id="Intents">Sử dụng ý định</h3>
+
+<p>Trong một số trường hợp, bạn có thể muốn một mục tùy chọn mở một hoạt động khác thay vì một
+màn hình thiết đặt, chẳng hạn như một trình duyệt web để xem một trang web. Để gọi ra một {@link
+android.content.Intent} khi người dùng chọn một mục tùy chọn, hãy thêm một phần tử {@code &lt;intent&gt;}
+làm con của phần tử {@code &lt;Preference&gt;} tương ứng.</p>
+
+<p>Ví dụ, sau đây là cách bạn có thể sử dụng một mục tùy chọn để mở một trang web:</p>
+
+<pre>
+&lt;Preference android:title="@string/prefs_web_page" >
+    &lt;intent android:action="android.intent.action.VIEW"
+            android:data="http://www.example.com" />
+&lt;/Preference>
+</pre>
+
+<p>Bạn có thể tạo cả ý định biểu thị và không biểu thị bằng cách sử dụng các thuộc tính sau:</p>
+
+<dl>
+  <dt>{@code android:action}</dt>
+    <dd>Hành động cần gán, theo mỗi phương pháp {@link android.content.Intent#setAction setAction()}
+.</dd>
+  <dt>{@code android:data}</dt>
+    <dd>Dữ liệu cần gán, theo mỗi phương pháp {@link android.content.Intent#setData setData()}.</dd>
+  <dt>{@code android:mimeType}</dt>
+    <dd>Kiểu MIME cần gán, theo mỗi phương pháp {@link android.content.Intent#setType setType()}
+.</dd>
+  <dt>{@code android:targetClass}</dt>
+    <dd>Phần lớp của tên thành phần, theo mỗi phương pháp {@link android.content.Intent#setComponent
+setComponent()}.</dd>
+  <dt>{@code android:targetPackage}</dt>
+    <dd>Phần gói của tên thành phần, theo mỗi phương pháp {@link
+android.content.Intent#setComponent setComponent()}.</dd>
+</dl>
+
+
+
+<h2 id="Activity">Tạo một Hoạt động Tùy chọn</h2>
+
+<p>Để hiển thị thiết đặt của bạn trong một hoạt động, hãy mở rộng lớp {@link
+android.preference.PreferenceActivity}. Đây là phần mở rộng của lớp {@link
+android.app.Activity} truyền thống mà hiển thị một danh sách các thiết đặt dựa trên một phân cấp của các đối tượng {@link
+android.preference.Preference}. {@link android.preference.PreferenceActivity}
+sẽ tự động duy trì các thiết đặt liên kết với từng {@link
+android.preference.Preference} khi người dùng thực hiện một thay đổi.</p>
+
+<p class="note"><strong>Lưu ý:</strong> Nếu bạn đang phát triển ứng dụng của mình cho phiên bản Android 3.0 và
+cao hơn, thay vào đó bạn nên sử dụng {@link android.preference.PreferenceFragment}. Đi đến phần
+tiếp theo về <a href="#Fragment">Sử dụng Phân đoạn Tùy chọn</a>.</p>
+
+<p>Điều quan trọng nhất cần nhớ đó là bạn không được tải một bố trí dạng xem trong khi gọi lại {@link
+android.preference.PreferenceActivity#onCreate onCreate()}. Thay vào đó, bạn hãy gọi {@link
+android.preference.PreferenceActivity#addPreferencesFromResource addPreferencesFromResource()} để
+thêm tùy chọn mà bạn đã khai báo trong một tệp XML vào hoạt động. Ví dụ, sau đây là đoạn mã tối thiểu
+cần thiết cho một {@link android.preference.PreferenceActivity} chức năng:</p>
+
+<pre>
+public class SettingsActivity extends PreferenceActivity {
+    &#64;Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        addPreferencesFromResource(R.xml.preferences);
+    }
+}
+</pre>
+
+<p>Đây là đoạn mã vừa đủ cho một số ứng dụng bởi ngay khi người dùng sửa đổi một tùy chọn,
+hệ thống sẽ lưu thay đổi đối với tệp {@link android.content.SharedPreferences} mặc định mà các
+thành phần ứng dụng khác của bạn có thể đọc khi bạn cần kiểm tra thiết đặt của người dùng. Tuy nhiên,
+nhiều ứng dụng lại yêu cầu thêm mã để theo dõi những thay đổi xảy ra với các tùy chọn đó.
+Để biết thông tin về việc theo dõi thay đổi trong tệp {@link android.content.SharedPreferences},
+hãy xem phần về <a href="#ReadingPrefs">Đọc Tùy chọn</a>.</p>
+
+
+
+
+<h2 id="Fragment">Sử dụng Phân đoạn Tùy chọn</h2>
+
+<p>Nếu bạn đang phát triển cho phiên bản Android 3.0 (API mức 11) trở lên, bạn nên sử dụng một {@link
+android.preference.PreferenceFragment} để hiển thị danh sách các đối tượng {@link android.preference.Preference}
+của bạn. Bạn có thể thêm một {@link android.preference.PreferenceFragment} vào bất kỳ hoạt động nào&mdash;bạn không cần
+sử dụng {@link android.preference.PreferenceActivity}.</p>
+
+<p><a href="{@docRoot}guide/components/fragments.html">Phân đoạn</a> cung cấp một kiến trúc
+linh hoạt hơn cho ứng dụng của bạn, so với việc sử dụng chỉ các hoạt động, dù loại hoạt động
+mà bạn đang xây dựng là gì. Như vậy, chúng tôi gợi ý bạn sử dụng {@link
+android.preference.PreferenceFragment} để kiểm soát hiển thị các thiết đặt của mình thay cho {@link
+android.preference.PreferenceActivity} khi có thể.</p>
+
+<p>Việc triển khai {@link android.preference.PreferenceFragment} có thể chỉ đơn giản như
+định nghĩa phương pháp {@link android.preference.PreferenceFragment#onCreate onCreate()} để tải một
+tệp tùy chọn bằng {@link android.preference.PreferenceFragment#addPreferencesFromResource
+addPreferencesFromResource()}. Ví dụ:</p>
+
+<pre>
+public static class SettingsFragment extends PreferenceFragment {
+    &#64;Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+
+        // Load the preferences from an XML resource
+        addPreferencesFromResource(R.xml.preferences);
+    }
+    ...
+}
+</pre>
+
+<p>Khi đó, bạn có thể thêm phân đoạn này vào một {@link android.app.Activity} giống như cách mà bạn sẽ làm với bất kỳ
+{@link android.app.Fragment} nào khác. Ví dụ:</p>
+
+<pre>
+public class SettingsActivity extends Activity {
+    &#64;Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+
+        // Display the fragment as the main content.
+        getFragmentManager().beginTransaction()
+                .replace(android.R.id.content, new SettingsFragment())
+                .commit();
+    }
+}
+</pre>
+
+<p class="note"><strong>Lưu ý:</strong> {@link android.preference.PreferenceFragment} không có một
+đối tượng {@link android.content.Context} của chính nó. Nếu bạn cần một đối tượng {@link android.content.Context}
+, bạn có thể gọi {@link android.app.Fragment#getActivity()}. Tuy nhiên, hãy chắc chắn là chỉ gọi
+{@link android.app.Fragment#getActivity()} khi phân đoạn đó được gắn kèm với một hoạt động. Khi
+phân đoạn chưa được gắn kèm, hoặc bị bỏ gắn kèm trong khi kết thúc vòng đời của nó, {@link
+android.app.Fragment#getActivity()} sẽ trả về rỗng.</p>
+
+
+<h2 id="Defaults">Thiết đặt Giá trị Mặc định</h2>
+
+<p>Tùy chọn mà bạn tạo có thể định nghĩa một số hành vi quan trọng cho ứng dụng của bạn, vì thế
+bạn cần phải khởi tạo tệp {@link android.content.SharedPreferences} kèm theo với các
+giá trị mặc định cho từng {@link android.preference.Preference} khi người dùng lần đầu mở
+ứng dụng của bạn.</p>
+
+<p>Điều đầu tiên bạn phải làm đó là quy định một giá trị mặc định cho từng đối tượng {@link
+android.preference.Preference}
+trong tệp XML của bạn bằng cách sử dụng thuộc tính {@code android:defaultValue}. Giá trị đó có thể là bất kỳ kiểu
+dữ liệu nào mà phù hợp với đối tượng {@link android.preference.Preference} tương ứng. Ví
+dụ:</p>
+
+<pre>
+&lt;!-- default value is a boolean -->
+&lt;CheckBoxPreference
+    android:defaultValue="true"
+    ... />
+
+&lt;!-- default value is a string -->
+&lt;ListPreference
+    android:defaultValue="@string/pref_syncConnectionTypes_default"
+    ... />
+</pre>
+
+<p>Khi đó, từ phương pháp {@link android.app.Activity#onCreate onCreate()} trong hoạt động chính
+&mdash;của ứng dụng của bạn và trong bất kỳ hoạt động nào khác mà thông qua đó người dùng có thể vào ứng dụng của bạn lần
+đầu tiên&mdash;hãy gọi {@link android.preference.PreferenceManager#setDefaultValues
+setDefaultValues()}:</p>
+
+<pre>
+PreferenceManager.setDefaultValues(this, R.xml.advanced_preferences, false);
+</pre>
+
+<p>Việc gọi này trong khi {@link android.app.Activity#onCreate onCreate()} sẽ đảm bảo rằng
+ứng dụng của bạn được khởi tạo phù hợp với các thiết đặt mặc định mà ứng dụng của bạn có thể cần
+đọc để xác định một số hành vi (chẳng hạn như có tải xuống dữ liệu trong khi đang trên
+mạng di động hay không).</p>
+
+<p>Phương pháp này dùng ba tham đối:</p>
+<ul>
+  <li>{@link android.content.Context} ứng dụng của bạn.</li>
+  <li>ID tài nguyên cho tệp XML tùy chọn mà bạn muốn đặt các giá trị mặc định cho.</li>
+  <li>Một boolean cho biết các giá trị mặc định có nên được đặt nhiều hơn một lần hay không.
+<p>Khi tham đối này là <code>false</code>, hệ thống sẽ đặt các giá trị mặc định chỉ khi phương pháp này chưa từng được
+gọi trước đây (hoặc {@link android.preference.PreferenceManager#KEY_HAS_SET_DEFAULT_VALUES}
+trong tệp tùy chọn được chia sẻ giá trị mặc định là sai).</p></li>
+</ul>
+
+<p>Miễn là bạn đặt tham đối thứ ba này thành <code>false</code>, bạn có thể gọi phương pháp này một cách an toàn
+mỗi khi hoạt động của bạn bắt đầu mà không khống chế các tùy chọn đã lưu của người dùng bằng cách đặt lại chúng thành
+mặc định. Tuy nhiên, nếu bạn đặt nó thành <code>true</code>, bạn sẽ khống chế mọi giá trị
+trước đó bằng các giá trị mặc định.</p>
+
+
+
+<h2 id="PreferenceHeaders">Sử dụng Tiêu đề Tùy chọn</h2>
+
+<p>Trong vài trường hợp hiếm gặp, bạn có thể muốn thiết kế các thiết đặt của mình sao cho màn hình thứ nhất
+chỉ hiển thị một danh sách <a href="#Subscreens">các màn hình con</a> (chẳng hạn như trong ứng dụng Thiết đặt của hệ thống,
+như minh họa trong các hình 4 và 5). Khi phát triển thiết kế như vậy cho phiên bản Android 3.0 trở lên, bạn
+nên sử dụng tính năng "tiêu đề" mới trong Android 3.0, thay vì xây dựng màn hình con với các phần tử
+{@link android.preference.PreferenceScreen} lồng nhau.</p>
+
+<p>Để xây dựng thiết đặt có tiêu đề của mình, bạn cần:</p>
+<ol>
+  <li>Tách riêng từng nhóm thiết đặt thành các thực thể riêng của {@link
+android.preference.PreferenceFragment}. Cụ thể, mỗi nhóm thiết đặt cần một tệp XML
+riêng.</li>
+  <li>Tạo một tệp tiêu đề XML liệt kê từng nhóm thiết đặt và khai báo phân đoạn nào
+chứa danh sách thiết đặt tương ứng.</li>
+  <li>Mở rộng lớp {@link android.preference.PreferenceActivity} để lưu trữ các thiết đặt của bạn.</li>
+  <li>Triển khai lệnh gọi lại {@link
+android.preference.PreferenceActivity#onBuildHeaders onBuildHeaders()} để quy định
+tệp tiêu đề.</li>
+</ol>
+
+<p>Một lợi ích tuyệt vời đối với việc sử dụng thiết kế này đó là {@link android.preference.PreferenceActivity}
+tự động trình bày bố trí hai bảng như minh họa trong hình 4 khi chạy trên màn hình lớn.</p>
+
+<p>Ngay cả khi ứng dụng của bạn hỗ trợ các phiên bản Android cũ hơn 3.0, bạn có thể xây dựng ứng dụng
+của mình để sử dụng {@link android.preference.PreferenceFragment} cho một trình chiếu hai bảng trên
+các thiết bị mới hơn, trong khi vẫn hỗ trợ phân cấp đa màn hình truyền thống trên các thiết bị
+cũ hơn (xem phần nói về <a href="#BackCompatHeaders">Hỗ trợ các phiên bản cũ hơn
+với tiêu đề tùy chọn</a>).</p>
+
+<img src="{@docRoot}images/ui/settings/settings-headers-tablet.png" alt="" />
+<p class="img-caption"><strong>Hình 4.</strong> Bố trí có hai bảng với tiêu đề. <br/><b>1.</b> 
+Tiêu đề được định nghĩa trong một tệp tiêu đề XML. <br/><b>2.</b> Mỗi nhóm thiết đặt được định nghĩa bởi một
+{@link android.preference.PreferenceFragment}, được quy định bởi một phần tử {@code &lt;header&gt;} trong tệp tiêu đề
+.</p>
+
+<img src="{@docRoot}images/ui/settings/settings-headers-handset.png" alt="" />
+<p class="img-caption"><strong>Hình 5.</strong> Thiết bị cầm tay với các tiêu đề thiết đặt. Khi một
+mục được chọn, {@link android.preference.PreferenceFragment} được liên kết sẽ thay thế
+tiêu đề.</p>
+
+
+<h3 id="CreateHeaders" style="clear:left">Tạo tệp tiêu đề</h3>
+
+<p>Mỗi nhóm thiết đặt trong danh sách tiêu đề của bạn được quy định bởi một phần tử {@code &lt;header&gt;}
+đơn lẻ bên trong một phần tử {@code &lt;preference-headers&gt;} gốc. Ví dụ:</p>
+
+<pre>
+&lt;?xml version="1.0" encoding="utf-8"?>
+&lt;preference-headers xmlns:android="http://schemas.android.com/apk/res/android">
+    &lt;header 
+        android:fragment="com.example.prefs.SettingsActivity$SettingsFragmentOne"
+        android:title="@string/prefs_category_one"
+        android:summary="@string/prefs_summ_category_one" />
+    &lt;header 
+        android:fragment="com.example.prefs.SettingsActivity$SettingsFragmentTwo"
+        android:title="@string/prefs_category_two"
+        android:summary="@string/prefs_summ_category_two" >
+        &lt;!-- key/value pairs can be included as arguments for the fragment. -->
+        &lt;extra android:name="someKey" android:value="someHeaderValue" />
+    &lt;/header>
+&lt;/preference-headers>
+</pre>
+
+<p>Với thuộc tính {@code android:fragment}, mỗi tiêu đề sẽ khai báo một thực thể của {@link
+android.preference.PreferenceFragment} mà sẽ mở khi người dùng chọn tiêu đề đó.</p>
+
+<p>Phần tử {@code &lt;extras&gt;} cho phép bạn chuyển các cặp khóa-giá trị sang phân đoạn trong một {@link
+android.os.Bundle}. Phân đoạn có thể truy xuất các tham đối bằng cách gọi {@link
+android.app.Fragment#getArguments()}. Bạn có thể chuyển các tham đối tới phân đoạn vì nhiều
+lý do khác nhau, nhưng một lý do chính đáng đó là để sử dụng lại cùng lớp con của {@link
+android.preference.PreferenceFragment} cho mỗi nhóm và sử dụng tham đối để quy định
+tệp XML tùy chọn nào mà phân đoạn cần tải.</p>
+
+<p>Ví dụ, sau đây là một phân đoạn mà có thể được tái sử dụng cho nhiều nhóm thiết đặt, khi từng
+tiêu đề định nghĩa một tham đối {@code &lt;extra&gt;} với khóa {@code "settings"}:</p>
+
+<pre>
+public static class SettingsFragment extends PreferenceFragment {
+    &#64;Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+
+        String settings = getArguments().getString("settings");
+        if ("notifications".equals(settings)) {
+            addPreferencesFromResource(R.xml.settings_wifi);
+        } else if ("sync".equals(settings)) {
+            addPreferencesFromResource(R.xml.settings_sync);
+        }
+    }
+}
+</pre>
+
+
+
+<h3 id="DisplayHeaders">Hiển thị tiêu đề</h3>
+
+<p>Để hiển thị tiêu đề tùy chọn, bạn phải triển khai phương pháp gọi lại {@link
+android.preference.PreferenceActivity#onBuildHeaders onBuildHeaders()} và gọi
+{@link android.preference.PreferenceActivity#loadHeadersFromResource
+loadHeadersFromResource()}. Ví dụ:</p>
+
+<pre>
+public class SettingsActivity extends PreferenceActivity {
+    &#64;Override
+    public void onBuildHeaders(List&lt;Header> target) {
+        loadHeadersFromResource(R.xml.preference_headers, target);
+    }
+}
+</pre>
+
+<p>Khi người dùng chọn một mục từ danh sách tiêu đề, hệ thống sẽ mở {@link
+android.preference.PreferenceFragment} kèm theo.</p>
+
+<p class="note"><strong>Lưu ý:</strong> Khi sử dụng tiêu đề tùy chọn, lớp con {@link
+android.preference.PreferenceActivity} của bạn không cần triển khai phương pháp {@link
+android.preference.PreferenceActivity#onCreate onCreate()}, vì tác vụ cần thiết duy nhất
+cho hoạt động đó là tải tiêu đề.</p>
+
+
+<h3 id="BackCompatHeaders">Hỗ trợ các phiên bản cũ hơn với tiêu đề tùy chọn</h3>
+
+<p>Nếu ứng dụng của bạn hỗ trợ các phiên bản Android cũ hơn 3.0, bạn vẫn có thể sử dụng tiêu đề để
+cung cấp một bố trí hai bảng khi chạy trên Android 3.0 trở lên. Tất cả những việc bạn cần làm đó là tạo một
+tệp XML tùy chọn bổ sung có sử dụng phần tử cơ bản {@link android.preference.Preference
+&lt;Preference&gt;} đóng vai trò như mục tiêu đề (để dùng cho các phiên bản Android
+cũ hơn).</p>
+
+<p>Tuy nhiên, thay vì mở một {@link android.preference.PreferenceScreen} mới, từng phần tử {@link
+android.preference.Preference &lt;Preference&gt;} sẽ gửi một {@link android.content.Intent} tới
+{@link android.preference.PreferenceActivity} mà quy định tệp XML tùy chọn cần
+tải.</p>
+
+<p>Ví dụ, sau đây là một tệp XML cho các tiêu đề tùy chọn được sử dụng trên Android 3.0
+trở lên ({@code res/xml/preference_headers.xml}):</p> 
+
+<pre>
+&lt;preference-headers xmlns:android="http://schemas.android.com/apk/res/android">
+    &lt;header 
+        android:fragment="com.example.prefs.SettingsFragmentOne"
+        android:title="@string/prefs_category_one"
+        android:summary="@string/prefs_summ_category_one" />
+    &lt;header 
+        android:fragment="com.example.prefs.SettingsFragmentTwo"
+        android:title="@string/prefs_category_two"
+        android:summary="@string/prefs_summ_category_two" />
+&lt;/preference-headers>
+</pre>
+
+<p>Và sau đây là một tệp tùy chọn cung cấp cùng các tiêu đề cho các phiên bản cũ hơn
+Android 3.0 ({@code res/xml/preference_headers_legacy.xml}):</p>
+
+<pre>
+&lt;PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+    &lt;Preference 
+        android:title="@string/prefs_category_one"
+        android:summary="@string/prefs_summ_category_one"  >
+        &lt;intent 
+            android:targetPackage="com.example.prefs"
+            android:targetClass="com.example.prefs.SettingsActivity"
+            android:action="com.example.prefs.PREFS_ONE" />
+    &lt;/Preference>
+    &lt;Preference 
+        android:title="@string/prefs_category_two"
+        android:summary="@string/prefs_summ_category_two" >
+        &lt;intent 
+            android:targetPackage="com.example.prefs"
+            android:targetClass="com.example.prefs.SettingsActivity"
+            android:action="com.example.prefs.PREFS_TWO" />
+    &lt;/Preference>
+&lt;/PreferenceScreen>
+</pre>
+
+<p>Vì hỗ trợ dành cho {@code &lt;preference-headers&gt;} đã được thêm trong Android 3.0, hệ thống sẽ gọi
+{@link android.preference.PreferenceActivity#onBuildHeaders onBuildHeaders()} trong {@link
+android.preference.PreferenceActivity} của bạn chỉ khi đang chạy trên phiên bản Androd 3.0 hoặc cao hơn. Để tải
+tệp tiêu đề "kế thừa" ({@code preference_headers_legacy.xml}), bạn phải kiểm tra phiên bản Android
+và, nếu phiên bản cũ hơn Android 3.0 ({@link
+android.os.Build.VERSION_CODES#HONEYCOMB}), hãy gọi {@link
+android.preference.PreferenceActivity#addPreferencesFromResource addPreferencesFromResource()} để
+tải tệp tiêu đề kế thừa. Ví dụ:</p>
+
+<pre>
+&#64;Override
+public void onCreate(Bundle savedInstanceState) {
+    super.onCreate(savedInstanceState);
+    ...
+
+    if (Build.VERSION.SDK_INT &lt; Build.VERSION_CODES.HONEYCOMB) {
+        // Load the legacy preferences headers
+        addPreferencesFromResource(R.xml.preference_headers_legacy);
+    }
+}
+
+// Called only on Honeycomb and later
+&#64;Override
+public void onBuildHeaders(List&lt;Header> target) {
+   loadHeadersFromResource(R.xml.preference_headers, target);
+}
+</pre>
+
+<p>Việc duy nhất còn lại cần làm đó là xử lý {@link android.content.Intent} mà được chuyển vào
+hoạt động để nhận biết tệp tùy chọn nào cần tải. Vì vậy, hãy truy xuất hành động của ý định và so sánh nó với
+các xâu hành động đã biết mà bạn đã sử dụng trong tag {@code &lt;intent&gt;} của XML tùy chọn:</p>
+
+<pre>
+final static String ACTION_PREFS_ONE = "com.example.prefs.PREFS_ONE";
+...
+
+&#64;Override
+public void onCreate(Bundle savedInstanceState) {
+    super.onCreate(savedInstanceState);
+
+    String action = getIntent().getAction();
+    if (action != null &amp;&amp; action.equals(ACTION_PREFS_ONE)) {
+        addPreferencesFromResource(R.xml.preferences);
+    }
+    ...
+
+    else if (Build.VERSION.SDK_INT &lt; Build.VERSION_CODES.HONEYCOMB) {
+        // Load the legacy preferences headers
+        addPreferencesFromResource(R.xml.preference_headers_legacy);
+    }
+}
+</pre>
+
+<p>Lưu ý rằng các lệnh gọi liên tiếp đến {@link
+android.preference.PreferenceActivity#addPreferencesFromResource addPreferencesFromResource()} sẽ
+xếp chồng tất cả tùy chọn trong một danh sách duy nhất, vì thế hãy chắc chắn rằng nó chỉ được gọi một lần bằng cách liên kết các
+điều kiện với mệnh đề else-if.</p>
+
+
+
+
+
+<h2 id="ReadingPrefs">Đọc Tùy chọn</h2>
+
+<p>Theo mặc định, tất cả tùy chọn của ứng dụng của bạn đều được lưu vào một tệp có thể truy cập từ bất kỳ nơi nào
+trong ứng dụng của bạn bằng cách gọi phương pháp tĩnh {@link
+android.preference.PreferenceManager#getDefaultSharedPreferences
+PreferenceManager.getDefaultSharedPreferences()}. Điều này sẽ trả về đối tượng {@link
+android.content.SharedPreferences} chứa tất cả cặp khóa-giá trị liên kết
+với các đối tượng {@link android.preference.Preference} được sử dụng trong {@link
+android.preference.PreferenceActivity}.</p>
+
+<p>Ví dụ, sau đây là cách bạn có thể đọc một trong các giá trị tùy chọn từ bất kỳ hoạt động nào khác trong ứng dụng
+của mình:</p>
+
+<pre>
+SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
+String syncConnPref = sharedPref.getString(SettingsActivity.KEY_PREF_SYNC_CONN, "");
+</pre>
+
+
+
+<h3 id="Listening">Theo dõi thay đổi tùy chọn</h3>
+
+<p>Có một vài lý do khiến bạn có thể muốn được thông báo càng sớm càng tốt nếu người dùng thay đổi một trong các
+tùy chọn. Để nhận một phương pháp gọi lại khi thay đổi xảy ra với bất kỳ tùy chọn nào,
+hãy triển khai giao diện {@link android.content.SharedPreferences.OnSharedPreferenceChangeListener
+SharedPreference.OnSharedPreferenceChangeListener} và đăng ký đối tượng theo dõi cho đối tượng
+{@link android.content.SharedPreferences} bằng cách gọi {@link
+android.content.SharedPreferences#registerOnSharedPreferenceChangeListener
+registerOnSharedPreferenceChangeListener()}.</p>
+
+<p>Giao diện này chỉ có một phương pháp gọi lại, {@link
+android.content.SharedPreferences.OnSharedPreferenceChangeListener#onSharedPreferenceChanged
+onSharedPreferenceChanged()}, và bạn có thể thấy đây là cách dễ nhất để triển khai giao diện như một phần
+hoạt động của mình. Ví dụ:</p>
+
+<pre>
+public class SettingsActivity extends PreferenceActivity
+                              implements OnSharedPreferenceChangeListener {
+    public static final String KEY_PREF_SYNC_CONN = "pref_syncConnectionType";
+    ...
+
+    public void onSharedPreferenceChanged(SharedPreferences sharedPreferences,
+        String key) {
+        if (key.equals(KEY_PREF_SYNC_CONN)) {
+            Preference connectionPref = findPreference(key);
+            // Set summary to be the user-description for the selected value
+            connectionPref.setSummary(sharedPreferences.getString(key, ""));
+        }
+    }
+}
+</pre>
+
+<p>Trong ví dụ này, phương pháp sẽ kiểm tra xem thiết đặt bị thay đổi có áp dụng cho một khóa tùy chọn đã biết không. Nó
+sẽ gọi {@link android.preference.PreferenceActivity#findPreference findPreference()} để nhận đối tượng
+{@link android.preference.Preference} đã bị thay đổi để nó có thể sửa đổi tóm tắt
+của mục đó thành mô tả lựa chọn của người dùng. Cụ thể, khi thiết đặt là một {@link
+android.preference.ListPreference} hoặc thiết đặt nhiều lựa chọn khác, bạn nên gọi {@link
+android.preference.Preference#setSummary setSummary()} khi thiết đặt thay đổi để hiển thị
+trạng thái hiện tại (chẳng hạn như thiết đặt Ngủ như minh họa trong hình 5).</p>
+
+<p class="note"><strong>Lưu ý:</strong> Như đã mô tả trong tài liệu Thiết kế Android về <a href="{@docRoot}design/patterns/settings.html">Thiết đặt</a>, chúng tôi khuyên bạn nên cập nhật
+tóm tắt cho {@link android.preference.ListPreference} mỗi khi người dùng thay đổi tùy chọn để 
+mô tả thiết đặt hiện tại.</p>
+
+<p>Để quản lý vòng đời trong hoạt động cho phù hợp, chúng tôi khuyên rằng bạn nên đăng ký và bỏ đăng ký
+{@link android.content.SharedPreferences.OnSharedPreferenceChangeListener} của mình tương ứng trong {@link
+android.app.Activity#onResume} và các lệnh gọi lại {@link android.app.Activity#onPause}:</p>
+
+<pre>
+&#64;Override
+protected void onResume() {
+    super.onResume();
+    getPreferenceScreen().getSharedPreferences()
+            .registerOnSharedPreferenceChangeListener(this);
+}
+
+&#64;Override
+protected void onPause() {
+    super.onPause();
+    getPreferenceScreen().getSharedPreferences()
+            .unregisterOnSharedPreferenceChangeListener(this);
+}
+</pre>
+
+<p class="caution"><strong>Chú ý:</strong> Khi bạn gọi {@link
+android.content.SharedPreferences#registerOnSharedPreferenceChangeListener
+registerOnSharedPreferenceChangeListener()}, trình quản lý tùy chọn hiện
+không lưu trữ một tham chiếu mạnh tới đối tượng theo dõi. Bạn phải lưu trữ một tham chiếu
+mạnh tới đối tượng theo dõi, nếu không nó sẽ dễ bị thu thập thông tin rác. Chúng tôi
+khuyên bạn nên giữ một tham chiếu tới đối tượng theo dõi trong dữ liệu thực thể của một đối tượng
+mà sẽ tồn tại miễn là bạn còn cần đối tượng theo dõi đó.</p>
+
+<p>Ví dụ, trong đoạn mã sau, hàm gọi không giữ tham chiếu tới
+đối tượng theo dõi. Kết quả là đối tượng theo dõi sẽ bị thu thập thông tin rác,
+và nó sẽ bị lỗi tại một thời điểm không xác định trong tương lai:</p>
+
+<pre>
+prefs.registerOnSharedPreferenceChangeListener(
+  // Bad! The listener is subject to garbage collection!
+  new SharedPreferences.OnSharedPreferenceChangeListener() {
+  public void onSharedPreferenceChanged(SharedPreferences prefs, String key) {
+    // listener implementation
+  }
+});
+</pre>
+
+<p>Thay vào đó, hãy lưu một tham chiếu tới đối tượng theo dõi trong một trường dữ liệu thực thể của một
+đối tượng mà sẽ tồn tại miễn là còn cần đối tượng theo dõi đó:</p>
+
+<pre>
+SharedPreferences.OnSharedPreferenceChangeListener listener =
+    new SharedPreferences.OnSharedPreferenceChangeListener() {
+  public void onSharedPreferenceChanged(SharedPreferences prefs, String key) {
+    // listener implementation
+  }
+};
+prefs.registerOnSharedPreferenceChangeListener(listener);
+</pre>
+
+<h2 id="NetworkUsage">Quản lý Sử dụng Mạng</h2>
+
+
+<p>Bắt đầu với Android 4.0, ứng dụng Thiết đặt của hệ thống sẽ cho phép người dùng xem
+ứng dụng của họ đang sử dụng bao nhiêu dữ liệu mạng khi đang ở tiền cảnh và dưới nền. Khi đó, người dùng có thể
+vô hiệu hóa việc sử dụng dữ liệu chạy ngầm cho từng ứng dụng. Để tránh việc người dùng vô hiệu hóa truy cập dữ liệu
+của ứng dụng của bạn từ dưới nền, bạn nên sử dụng kết nối dữ liệu một cách hiệu quả và cho phép
+người dùng tinh chỉnh mức sử dụng dữ liệu cho ứng dụng của bạn thông qua thiết đặt ứng dụng.<p>
+
+<p>Ví dụ, bạn có thể cho phép người dùng kiểm soát tần suất ứng dụng của bạn đồng bộ dữ liệu, ứng dụng của bạn
+chỉ được thực hiện tải lên/tải xuống khi trên Wi-Fi, ứng dụng của bạn sử dụng dữ liệu trong khi đang chuyển vùng dữ liệu, v.v... hay không. Với 
+những kiểm soát này, người dùng sẽ ít có khả năng vô hiệu hóa truy cập dữ liệu của ứng dụng của bạn
+hơn nhiều khi họ đạt gần mức giới hạn đặt ra trong Thiết đặt hệ thống, vì thay vào đó, họ có thể kiểm soát chính xác
+lượng dữ liệu mà ứng dụng của bạn sử dụng.</p>
+
+<p>Sau khi bạn đã thêm các tùy chọn cần thiết trong {@link android.preference.PreferenceActivity}
+của mình để kiểm soát các thói quen dữ liệu của ứng dụng của bạn, bạn nên thêm một bộ lọc ý định cho {@link
+android.content.Intent#ACTION_MANAGE_NETWORK_USAGE} trong tệp bản kê khai của mình. Ví dụ:</p>
+
+<pre>
+&lt;activity android:name="SettingsActivity" ... >
+    &lt;intent-filter>
+       &lt;action android:name="android.intent.action.MANAGE_NETWORK_USAGE" />
+       &lt;category android:name="android.intent.category.DEFAULT" />
+    &lt;/intent-filter>
+&lt;/activity>
+</pre>
+
+<p>Bộ lọc ý định này cho hệ thống biết rằng đây là hoạt động kiểm soát mức sử dụng dữ liệu
+của ứng dụng của bạn. Vì thế, khi người dùng kiểm tra lượng dữ liệu mà ứng dụng của bạn đang dùng từ ứng dụng
+Thiết đặt của hệ thống, sẽ có một nút <em>Xem thiết đặt ứng dụng</em> khởi chạy
+{@link android.preference.PreferenceActivity} của bạn, vì thế người dùng có thể tinh chỉnh lượng dữ liệu mà ứng dụng của bạn
+dùng.</p>
+
+
+
+
+
+
+
+<h2 id="Custom">Xây dựng một Thiết đặt Tùy chỉnh</h2>
+
+<p>Khuôn khổ Android bao gồm nhiều lớp con {@link android.preference.Preference} mà
+cho phép bạn xây dựng một UI cho một vài loại thiết đặt khác nhau.
+Tuy nhiên, bạn có thể khám phá thiết đặt mình cần mà chưa có giải pháp tích hợp sẵn, chẳng hạn như một
+bộ chọn số hay bộ chọn ngày. Trong trường hợp như vậy, bạn sẽ cần tạo một tùy chọn tùy chỉnh bằng cách mở rộng
+lớp {@link android.preference.Preference} hoặc một trong các lớp con khác.</p>
+
+<p>Khi bạn mở rộng lớp {@link android.preference.Preference}, có một vài điều quan trọng
+mà bạn cần làm:</p>
+
+<ul>
+  <li>Quy định giao diện người dùng sẽ xuất hiện khi người dùng chọn thiết đặt.</li>
+  <li>Lưu giá trị của thiết đặt khi phù hợp.</li>
+  <li>Khởi tạo {@link android.preference.Preference} bằng giá trị hiện tại (hoặc mặc định) 
+khi xét tới dạng xem.</li>
+  <li>Cung cấp giá trị mặc định khi hệ thống yêu cầu.</li>
+  <li>Nếu {@link android.preference.Preference} cung cấp UI của chính mình (chẳng hạn như một hộp thoại), hãy lưu
+và khôi phục trạng thái để xử lý các thay đổi trong vòng đời (chẳng hạn như khi người dùng xoay màn hình).</li>
+</ul>
+
+<p>Các phần sau mô tả cách hoàn thành từng tác vụ này.</p>
+
+
+
+<h3 id="CustomSelected">Quy định một giao diện người dùng</h3>
+
+  <p>Nếu bạn trực tiếp mở rộng lớp {@link android.preference.Preference}, bạn cần triển khai
+{@link android.preference.Preference#onClick()} để định nghĩa hành động xảy ra khi người dùng
+chọn mục. Tuy nhiên, hầu hết các thiết đặt tùy chỉnh sẽ mở rộng {@link android.preference.DialogPreference} để
+hiển thị một hộp thoại, điều này làm đơn giản hóa quy trình. Khi bạn mở rộng {@link
+android.preference.DialogPreference}, bạn phải gọi {@link
+android.preference.DialogPreference#setDialogLayoutResource setDialogLayoutResourcs()} trong khi đang ở trong
+hàm dựng lớp để quy định bố trí cho hộp thoại.</p>
+
+  <p>Ví dụ, sau đây là hàm dựng cho một {@link
+android.preference.DialogPreference} tùy chỉnh mà khai báo bố trí và quy định văn bản cho
+các nút hộp thoại tích cực và tiêu cực mặc định:</p>
+
+<pre>
+public class NumberPickerPreference extends DialogPreference {
+    public NumberPickerPreference(Context context, AttributeSet attrs) {
+        super(context, attrs);
+        
+        setDialogLayoutResource(R.layout.numberpicker_dialog);
+        setPositiveButtonText(android.R.string.ok);
+        setNegativeButtonText(android.R.string.cancel);
+        
+        setDialogIcon(null);
+    }
+    ...
+}
+</pre>
+
+
+
+<h3 id="CustomSave">Lưu giá trị của thiết đặt</h3>
+
+<p>Bạn có thể lưu một giá trị cho thiết đặt vào bất cứ lúc nào bằng cách gọi một trong các phương pháp của lớp {@link
+android.preference.Preference}, {@code persist*()}, chẳng hạn như {@link
+android.preference.Preference#persistInt persistInt()} nếu giá trị của thiết đặt là một số nguyên hoặc
+{@link android.preference.Preference#persistBoolean persistBoolean()} để lưu một boolean.</p>
+
+<p class="note"><strong>Lưu ý:</strong> Mỗi {@link android.preference.Preference} chỉ có thể lưu một
+kiểu dữ liệu, vì thế bạn phải sử dụng phương pháp {@code persist*()} phù hợp cho kiểu dữ liệu được sử dụng bởi
+{@link android.preference.Preference} tùy chỉnh của mình.</p>
+
+<p>Thời điểm bạn chọn duy trì thiết đặt có thể phụ thuộc vào lớp {@link
+android.preference.Preference} nào mà bạn mở rộng. Nếu mở rộng {@link
+android.preference.DialogPreference}, khi đó bạn nên duy trì giá trị đó chỉ khi hộp thoại
+đóng lại do kết quả tích cực (người dùng chọn nút "OK").</p>
+
+<p>Khi {@link android.preference.DialogPreference} đóng lại, hệ thống sẽ gọi phương pháp {@link
+android.preference.DialogPreference#onDialogClosed onDialogClosed()}. Phương pháp bao gồm một
+tham đối boolean quy định xem người dùng có trả về kết quả "tích cực" hay không&mdash;nếu kết quả là
+<code>true</code>, khi đó, người dùng đã chọn nút tích cực và bạn nên lưu giá trị mới này. Ví
+dụ:</p>
+
+<pre>
+&#64;Override
+protected void onDialogClosed(boolean positiveResult) {
+    // When the user selects "OK", persist the new value
+    if (positiveResult) {
+        persistInt(mNewValue);
+    }
+}
+</pre>
+
+<p>Trong ví dụ này, <code>mNewValue</code> là một thành viên lớp lưu giữ giá trị
+hiện tại của thiết đặt. Việc gọi {@link android.preference.Preference#persistInt persistInt()} sẽ lưu giá trị vào
+tệp {@link android.content.SharedPreferences} (tự động sử dụng khóa mà
+được quy định trong tệp XML cho {@link android.preference.Preference} này).</p>
+
+
+<h3 id="CustomInitialize">Khởi tạo giá trị hiện tại</h3>
+
+<p>Khi hệ thống thêm {@link android.preference.Preference} của bạn vào màn hình, nó
+gọi {@link android.preference.Preference#onSetInitialValue onSetInitialValue()} để thông báo
+với bạn xem thiết đặt có giá trị được duy trì hay không. Nếu không có giá trị được duy trì, lệnh gọi này sẽ cung cấp
+cho bạn giá trị mặc định.</p>
+
+<p>Phương pháp {@link android.preference.Preference#onSetInitialValue onSetInitialValue()} chuyển một
+boolean, <code>restorePersistedValue</code>, để cho biết liệu giá trị đã được duy trì 
+cho thiết đặt hay không. Nếu nó là <code>true</code>, khi đó bạn nên truy xuất giá trị được duy trì bằng cách gọi
+một trong các phương pháp của lớp {@link
+android.preference.Preference}, {@code getPersisted*()}, chẳng hạn như {@link
+android.preference.Preference#getPersistedInt getPersistedInt()} đối với một giá trị số nguyên. Bạn sẽ
+thường muốn truy xuất giá trị được duy trì sao cho bạn có thể cập nhật UI cho phù hợp để phản ánh
+giá trị đã lưu trước đó.</p>
+
+<p>Nếu <code>restorePersistedValue</code> là <code>false</code>, vậy bạn
+nên sử dụng giá trị mặc định được chuyển trong tham đối thứ hai.</p>
+
+<pre>
+&#64;Override
+protected void onSetInitialValue(boolean restorePersistedValue, Object defaultValue) {
+    if (restorePersistedValue) {
+        // Restore existing state
+        mCurrentValue = this.getPersistedInt(DEFAULT_VALUE);
+    } else {
+        // Set default state from the XML attribute
+        mCurrentValue = (Integer) defaultValue;
+        persistInt(mCurrentValue);
+    }
+}
+</pre>
+
+<p>Mỗi phương pháp {@code getPersisted*()} sẽ lấy một tham đối quy định
+giá trị mặc định sẽ sử dụng trong trường hợp thực sự không có giá trị được duy trì hoặc khóa không tồn tại. Trong 
+ví dụ trên, một hằng số cục bộ được sử dụng để quy định giá trị mặc định trong trường hợp {@link
+android.preference.Preference#getPersistedInt getPersistedInt()} không thể trả về một giá trị được duy trì.</p>
+
+<p class="caution"><strong>Chú ý:</strong> Bạn <strong>không thể</strong> sử dụng
+<code>defaultValue</code> làm giá trị mặc định trong phương pháp {@code getPersisted*()}, bởi
+giá trị của nó luôn rỗng khi <code>restorePersistedValue</code> là <code>true</code>.</p>
+
+
+<h3 id="CustomDefault">Cung cấp một giá trị mặc định</h3>
+
+<p>Nếu trường hợp lớp {@link android.preference.Preference} của bạn quy định một giá trị mặc định
+(với thuộc tính {@code android:defaultValue}), khi đó hệ thống
+sẽ gọi {@link android.preference.Preference#onGetDefaultValue
+onGetDefaultValue()} khi nó khởi tạo đối tượng để truy xuất giá trị. Bạn phải
+triển khai phương pháp này để hệ thống lưu giá trị mặc định trong {@link
+android.content.SharedPreferences}. Ví dụ:</p>
+
+<pre>
+&#64;Override
+protected Object onGetDefaultValue(TypedArray a, int index) {
+    return a.getInteger(index, DEFAULT_VALUE);
+}
+</pre>
+
+<p>Các tham đối của phương pháp cung cấp mọi thứ bạn cần: mảng thuộc tính và vị trí chỉ mục
+của {@code android:defaultValue} mà bạn phải truy xuất. Lý do bạn phải triển khai
+phương pháp này nhằm trích xuất giá trị mặc định từ thuộc tính đó là bởi bạn phải quy định
+một giá trị mặc định cục bộ cho thuộc tính trong trường hợp giá trị không được định nghĩa.</p>
+
+
+
+<h3 id="CustomSaveState">Lưu và khôi phục trạng thái của Tùy chọn</h3>
+
+<p>Giống như {@link android.view.View} trong một bố trí, lớp con {@link android.preference.Preference}
+của bạn chịu trách nhiệm lưu và khôi phục trạng thái của nó trong trường hợp hoạt động hoặc phân đoạn
+được khởi động lại (chẳng hạn như khi người dùng xoay màn hình). Để lưu và khôi phục
+trạng thái của lớp {@link android.preference.Preference} của bạn cho đúng, bạn phải triển khai các
+phương pháp gọi lại vòng đời {@link android.preference.Preference#onSaveInstanceState
+onSaveInstanceState()} và {@link
+android.preference.Preference#onRestoreInstanceState onRestoreInstanceState()}.</p>
+
+<p>Trạng thái của {@link android.preference.Preference} của bạn được định nghĩa bởi một đối tượng mà triển khai
+giao diện {@link android.os.Parcelable}. Khuôn khổ Android sẽ cung cấp một đối tượng như vậy cho bạn
+như một điểm bắt đầu để định nghĩa đối tượng trạng thái của bạn: lớp {@link
+android.preference.Preference.BaseSavedState}.</p>
+
+<p>Để định nghĩa cách thức lớp {@link android.preference.Preference} của bạn lưu trạng thái của nó
+hãy mở rộng lớp {@link android.preference.Preference.BaseSavedState}. Bạn cần khống chế chỉ
+ một vài phương pháp và định nghĩa đối tượng {@link android.preference.Preference.BaseSavedState#CREATOR}
+.</p>
+
+<p>Đối với hầu hết ứng dụng, bạn có thể sao chép triển khai sau và chỉ cần thay đổi các dòng
+xử lý {@code value} nếu lớp con {@link android.preference.Preference} của bạn lưu một kiểu
+dữ liệu khác số nguyên.</p>
+
+<pre>
+private static class SavedState extends BaseSavedState {
+    // Member that holds the setting's value
+    // Change this data type to match the type saved by your Preference
+    int value;
+
+    public SavedState(Parcelable superState) {
+        super(superState);
+    }
+
+    public SavedState(Parcel source) {
+        super(source);
+        // Get the current preference's value
+        value = source.readInt();  // Change this to read the appropriate data type
+    }
+
+    &#64;Override
+    public void writeToParcel(Parcel dest, int flags) {
+        super.writeToParcel(dest, flags);
+        // Write the preference's value
+        dest.writeInt(value);  // Change this to write the appropriate data type
+    }
+
+    // Standard creator object using an instance of this class
+    public static final Parcelable.Creator&lt;SavedState> CREATOR =
+            new Parcelable.Creator&lt;SavedState>() {
+
+        public SavedState createFromParcel(Parcel in) {
+            return new SavedState(in);
+        }
+
+        public SavedState[] newArray(int size) {
+            return new SavedState[size];
+        }
+    };
+}
+</pre>
+
+<p>Với triển khai {@link android.preference.Preference.BaseSavedState} bên trên được thêm
+vào ứng dụng của bạn (thường dưới dạng một lớp con của lớp con {@link android.preference.Preference} của bạn), khi đó
+bạn cần triển khai các phương pháp {@link android.preference.Preference#onSaveInstanceState
+onSaveInstanceState()} và {@link
+android.preference.Preference#onRestoreInstanceState onRestoreInstanceState()} cho lớp con
+{@link android.preference.Preference} của mình.</p>
+
+<p>Ví dụ:</p>
+
+<pre>
+&#64;Override
+protected Parcelable onSaveInstanceState() {
+    final Parcelable superState = super.onSaveInstanceState();
+    // Check whether this Preference is persistent (continually saved)
+    if (isPersistent()) {
+        // No need to save instance state since it's persistent,
+        // use superclass state
+        return superState;
+    }
+
+    // Create instance of custom BaseSavedState
+    final SavedState myState = new SavedState(superState);
+    // Set the state's value with the class member that holds current
+    // setting value
+    myState.value = mNewValue;
+    return myState;
+}
+
+&#64;Override
+protected void onRestoreInstanceState(Parcelable state) {
+    // Check whether we saved the state in onSaveInstanceState
+    if (state == null || !state.getClass().equals(SavedState.class)) {
+        // Didn't save the state, so call superclass
+        super.onRestoreInstanceState(state);
+        return;
+    }
+
+    // Cast state to custom BaseSavedState and pass to superclass
+    SavedState myState = (SavedState) state;
+    super.onRestoreInstanceState(myState.getSuperState());
+    
+    // Set this Preference's widget to reflect the restored state
+    mNumberPicker.setValue(myState.value);
+}
+</pre>
+

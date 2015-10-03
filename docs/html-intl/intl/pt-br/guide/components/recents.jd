@@ -1,0 +1,256 @@
+page.title=Tela de visão geral
+page.tags="recents","overview"
+
+@jd:body
+
+<div id="qv-wrapper">
+<div id="qv">
+
+  <h2>Neste documento</h2>
+  <ol>
+    <li><a href="#adding">Adição de tarefas à tela de visão geral</a>
+      <ol>
+        <li><a href="#flag-new-doc">Uso do sinalizador Intent para adicionar uma tarefa</a></li>
+        <li><a href="#attr-doclaunch">Uso do atributo Activity para adicionar uma tarefa</a></li>
+      </ol>
+    </li>
+    <li><a href="#removing">Remoção de tarefas</a>
+      <ol>
+        <li><a href="#apptask-remove">Uso da classe AppTask para remover tarefas</a></li>
+        <li><a href="#retain-finished">Retenção de tarefas terminadas</a></li>
+      </ol>
+    </li>
+  </ol>
+
+  <h2>Classes principais</h2>
+  <ol>
+    <li>{@link android.app.ActivityManager.AppTask}</li>
+    <li>{@link android.content.Intent}</li>
+  </ol>
+
+  <h2>Exemplo de código</h2>
+  <ol>
+    <li><a href="{@docRoot}samples/DocumentCentricApps/index.html">Aplicativos centralizados em documentos</a></li>
+  </ol>
+
+</div>
+</div>
+
+<p>A tela de visão geral (também chamada de tela de recentes, lista de tarefas recentes ou aplicativos recentes)
+é uma IU de nível de sistema que lista <a href="{@docRoot}guide/components/activities.html">
+atividades</a> e <a href="{@docRoot}guide/components/tasks-and-back-stack.html">tarefas</a> acessadas recentemente. O
+usuário pode navegar pela lista e selecionar uma tarefa a retomar ou remover uma tarefa da
+lista deslizando-a para fora. Com a versão 5.0 do Android (API de nível 21), várias instâncias da
+mesma atividade contendo diferentes documentos podem aparecer como tarefas na tela de visão geral. Por exemplo, o 
+Google Drive pode ter uma tarefa para cada um dos vários documentos do Google. Cada documento aparece como uma
+tarefa na tela de visão geral.</p>
+
+<img src="{@docRoot}images/components/recents.png" alt="" width="284" />
+<p class="img-caption"><strong>Figura 1.</strong> A tela de visão geral mostrando três documentos do Google Drive,
+cada um representado como uma tarefa separada.</p>
+
+<p>Normalmente, você deve permitir que o sistema defina como as tarefas e as
+atividades são representadas na tela de visão geral e não precisa modificar esse comportamento.
+No entanto, o seu aplicativo pode determinar como e quando as atividades aparecem na tela de visão geral. A
+classe {@link android.app.ActivityManager.AppTask} permite gerenciar tarefas e os sinalizadores de atividade da classe
+{@link android.content.Intent} permitem especificar quando uma atividade é adicionada ou removida da
+tela de visão geral. Além disso, os atributos <code><a href="{@docRoot}guide/topics/manifest/activity-element.html">
+&lt;activity&gt;</a></code> permitem definir o comportamento no manifesto.</p>
+
+<h2 id="adding">Adição de tarefas à tela de visão geral</h2>
+
+<p>Usar os sinalizadores da classe {@link android.content.Intent} para adicionar uma tarefa permite maior controle sobre
+quando e como um documento é aberto ou reaberto na tela de visão geral. Ao usar os atributos
+<code><a href="{@docRoot}guide/topics/manifest/activity-element.html">&lt;activity&gt;</a></code>,
+é possível escolher entre sempre abrir o documento em uma nova tarefa ou reutilizar uma
+tarefa existente para o documento.</p>
+
+<h3 id="flag-new-doc">Uso do sinalizador Intent para adicionar uma tarefa</h3>
+
+<p>Ao criar um novo documento para a atividade, você chama o método
+{@link android.app.ActivityManager.AppTask#startActivity(android.content.Context, android.content.Intent, android.os.Bundle) startActivity()}
+da classe {@link android.app.ActivityManager.AppTask}, passando a ele a intenção que
+inicia a atividade. Para inserir uma quebra lógica para que o sistema trate a atividade como uma nova
+tarefa na tela de visão geral, passe o sinalizador {@link android.content.Intent#FLAG_ACTIVITY_NEW_DOCUMENT}
+no método {@link android.content.Intent#addFlags(int) addFlags()} da {@link android.content.Intent}
+que inicia a atividade.</p>
+
+<p class="note"><strong>Observação:</strong> o sinalizador {@link android.content.Intent#FLAG_ACTIVITY_NEW_DOCUMENT}
+substitui o sinalizador {@link android.content.Intent#FLAG_ACTIVITY_CLEAR_WHEN_TASK_RESET},
+obsoleto a partir do Android 5.0 (API de nível 21).</p>
+
+<p>Se você usar o sinalizador {@link android.content.Intent#FLAG_ACTIVITY_MULTIPLE_TASK} ao criar
+o novo documento, o sistema sempre criará uma nova tarefa com a atividade-alvo como raiz.
+Essa configuração permite que o mesmo documento seja aberto em mais de uma tarefa. O código a seguir demonstra
+como a atividade principal faz isso:</p>
+
+<p class="code-caption"><a href="{@docRoot}samples/DocumentCentricApps/index.html">
+DocumentCentricActivity.java</a></p>
+<pre>
+public void createNewDocument(View view) {
+      final Intent newDocumentIntent = newDocumentIntent();
+      if (useMultipleTasks) {
+          newDocumentIntent.addFlags(Intent.FLAG_ACTIVITY_MULTIPLE_TASK);
+      }
+      startActivity(newDocumentIntent);
+  }
+
+  private Intent newDocumentIntent() {
+      boolean useMultipleTasks = mCheckbox.isChecked();
+      final Intent newDocumentIntent = new Intent(this, NewDocumentActivity.class);
+      newDocumentIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_DOCUMENT);
+      newDocumentIntent.putExtra(KEY_EXTRA_NEW_DOCUMENT_COUNTER, incrementAndGet());
+      return newDocumentIntent;
+  }
+
+  private static int incrementAndGet() {
+      Log.d(TAG, "incrementAndGet(): " + mDocumentCounter);
+      return mDocumentCounter++;
+  }
+}
+</pre>
+
+<p class="note"><strong>Observação:</strong> Atividades iniciadas com o sinalizador {@code FLAG_ACTIVITY_NEW_DOCUMENT}
+devem ter o valor do atributo {@code android:launchMode="standard"} (o padrão) definido no
+manifesto.</p>
+
+<p>Quando a atividade principal inicia uma nova atividade, o sistema procura nas tarefas existentes uma
+cuja intenção corresponda ao nome do componente da intenção e aos dados de Intent para a atividade. Se a tarefa
+não for encontrada ou se a intenção continha o sinalizador {@link android.content.Intent#FLAG_ACTIVITY_MULTIPLE_TASK},
+uma nova tarefa será criada com a atividade como raiz. Se o sistema encontrar uma tarefa, ele a trará
+para a frente e passará a nova intenção para {@link android.app.Activity#onNewIntent onNewIntent()}.
+A nova atividade receberá a intenção e criará um novo documento na tela de visão geral, como no
+exemplo a seguir:</p>
+
+<p class="code-caption"><a href="{@docRoot}samples/DocumentCentricApps/index.html">
+NewDocumentActivity.java</a></p>
+<pre>
+&#64;Override
+protected void onCreate(Bundle savedInstanceState) {
+    super.onCreate(savedInstanceState);
+    setContentView(R.layout.activity_new_document);
+    mDocumentCount = getIntent()
+            .getIntExtra(DocumentCentricActivity.KEY_EXTRA_NEW_DOCUMENT_COUNTER, 0);
+    mDocumentCounterTextView = (TextView) findViewById(
+            R.id.hello_new_document_text_view);
+    setDocumentCounterText(R.string.hello_new_document_counter);
+}
+
+&#64;Override
+protected void onNewIntent(Intent intent) {
+    super.onNewIntent(intent);
+    /* If FLAG_ACTIVITY_MULTIPLE_TASK has not been used, this activity
+    is reused to create a new document.
+     */
+    setDocumentCounterText(R.string.reusing_document_counter);
+}
+</pre>
+
+
+<h3 id="#attr-doclaunch">Uso do atributo Activity para adicionar uma tarefa</h3>
+
+<p>Uma atividade também pode especificar em seu manifesto que sempre iniciará uma nova tarefa usando
+o atributo <code><a href="{@docRoot}guide/topics/manifest/activity-element.html">&lt;activity&gt;</a></code>,
+ <a href="{@docRoot}guide/topics/manifest/activity-element.html#dlmode">
+{@code android:documentLaunchMode}</a>. Esse atributo tem quatro valores que produzem os seguintes
+efeitos quando o usuário abre um documento com o aplicativo:</p>
+
+<dl>
+  <dt>"{@code intoExisting}"</dt>
+  <dd>A atividade reutiliza uma tarefa existente para o documento. Isso é o mesmo que configurar o
+  sinalizador {@link android.content.Intent#FLAG_ACTIVITY_NEW_DOCUMENT} <em>sem</em> configurar 
+  o sinalizador {@link android.content.Intent#FLAG_ACTIVITY_MULTIPLE_TASK}, como descrito em 
+  <a href="#flag-new-doc">Uso do sinalizador Intent para adicionar uma tarefa</a> acima.</dd>
+
+  <dt>"{@code always}"</dt>
+  <dd>A atividade cria uma nova tarefa para o documento, mesmo se o mesmo já estiver aberto. Usar
+  esse valor é o mesmo que configurar os sinalizadores {@link android.content.Intent#FLAG_ACTIVITY_NEW_DOCUMENT}
+  e {@link android.content.Intent#FLAG_ACTIVITY_MULTIPLE_TASK}.</dd>
+
+  <dt>"{@code none”}"</dt>
+  <dd>A atividade não cria uma nova tarefa para o documento. A tela de visão geral trata a
+  atividade como aconteceria por padrão: ela exibe uma tarefa para o aplicativo, que 
+  retoma a atividade invocada por último pelo usuário.</dd>
+
+  <dt>"{@code never}"</dt>
+  <dd>A atividade não cria uma nova tarefa para o documento. Definir esse valor substitui o
+  comportamento dos sinalizadores {@link android.content.Intent#FLAG_ACTIVITY_NEW_DOCUMENT}
+  e {@link android.content.Intent#FLAG_ACTIVITY_MULTIPLE_TASK}, caso um deles esteja definido
+  na intenção, e a tela de visão geral exibe uma tarefa para o aplicativo, que retoma a
+  atividade invocada por último pelo usuário.</dd>
+</dl>
+
+<p class="note"><strong>Observação:</strong> para valores diferentes de {@code none} e {@code never}, a
+atividade deve ser definida com {@code launchMode="standard"}. Se esse atributo não for especificado,
+{@code documentLaunchMode="none"} será usado.</p>
+
+<h2 id="removing">Remoção de tarefas</h2>
+
+<p>Por padrão, uma tarefa de documento é automaticamente removida da tela de visão geral quando a atividade
+termina. Esse comportamento pode ser substituído com a classe {@link android.app.ActivityManager.AppTask},
+com um sinalizador {@link android.content.Intent} ou com um atributo <code><a href="{@docRoot}guide/topics/manifest/activity-element.html">
+&lt;activity&gt;</a></code>.</p>
+
+<p>É possível excluir inteiramente uma tarefa da tela de visão geral definindo o
+atributo <code><a href="{@docRoot}guide/topics/manifest/activity-element.html">&lt;activity&gt;</a></code>,
+ <a href="{@docRoot}guide/topics/manifest/activity-element.html#exclude">
+{@code android:excludeFromRecents}</a> como {@code true}.</p>
+
+<p>É possível definir o número máximo de tarefas que o aplicativo pode incluir na tela de visão geral definindo
+o atributo <code><a href="{@docRoot}guide/topics/manifest/activity-element.html">&lt;activity&gt;</a></code>
+<a href="{@docRoot}guide/topics/manifest/activity-element.html#maxrecents">{@code android:maxRecents}
+</a> como um valor inteiro. O padrão é 16. Quando o número máximo de tarefas é atingido, a tarefa usada menos
+recentemente é removida da tela de visão geral. O valor máximo de {@code android:maxRecents}
+é 50 (25 em dispositivos com pouca memória); valores menores que 1 não são válidos.</p>
+
+<h3 id="#apptask-remove">Uso da classe AppTask para remover tarefas</h3>
+
+<p>Na atividade que cria uma nova tarefa na tela de visão geral, é possível 
+especificar quando remover a tarefa e terminar todas as atividades associadas a ela chamando
+o método {@link android.app.ActivityManager.AppTask#finishAndRemoveTask() finishAndRemoveTask()}.</p>
+
+<p class="code-caption"><a href="{@docRoot}samples/DocumentCentricApps/index.html">
+NewDocumentActivity.java</a></p>
+<pre>
+public void onRemoveFromRecents(View view) {
+    // The document is no longer needed; remove its task.
+    finishAndRemoveTask();
+}
+</pre>
+
+<p class="note"><strong>Observação:</strong> o uso
+do método {@link android.app.ActivityManager.AppTask#finishAndRemoveTask() finishAndRemoveTask()}
+substitui o uso do sinalizador {@link android.content.Intent#FLAG_ACTIVITY_RETAIN_IN_RECENTS}
+discutido abaixo.</p>
+
+<h3 id="#retain-finished">Retenção de tarefas terminadas</h3>
+
+<p>Se você deseja reter uma tarefa na tela de visão geral, mesmo que a atividade tenha terminado, passe
+o sinalizador {@link android.content.Intent#FLAG_ACTIVITY_RETAIN_IN_RECENTS} no
+método {@link android.content.Intent#addFlags(int) addFlags()} da Intent que inicia a atividade.</p>
+
+<p class="code-caption"><a href="{@docRoot}samples/DocumentCentricApps/index.html">
+DocumentCentricActivity.java</a></p>
+<pre>
+private Intent newDocumentIntent() {
+    final Intent newDocumentIntent = new Intent(this, NewDocumentActivity.class);
+    newDocumentIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_DOCUMENT |
+      android.content.Intent.FLAG_ACTIVITY_RETAIN_IN_RECENTS);
+    newDocumentIntent.putExtra(KEY_EXTRA_NEW_DOCUMENT_COUNTER, incrementAndGet());
+    return newDocumentIntent;
+}
+</pre>
+
+<p>Para obter o mesmo efeito, defina o
+atributo <code><a href="{@docRoot}guide/topics/manifest/activity-element.html">&lt;activity&gt;</a></code>
+<a href="{@docRoot}guide/topics/manifest/activity-element.html#autoremrecents">
+{@code android:autoRemoveFromRecents}</a> como {@code false}. O valor padrão é {@code true}
+para atividades de documentos e {@code false} para atividades comuns. Usar esse atributo substitui
+o sinalizador {@link android.content.Intent#FLAG_ACTIVITY_RETAIN_IN_RECENTS} discutido anteriormente.</p>
+
+
+
+
+
+
+
