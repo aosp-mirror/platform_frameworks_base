@@ -3420,12 +3420,20 @@ public class WindowManagerService extends IWindowManager.Stub
         }
 
         synchronized(mWindowMap) {
+            final boolean orientationChanged = mCurConfiguration.orientation != config.orientation;
             mCurConfiguration = new Configuration(config);
             if (mWaitingForConfig) {
                 mWaitingForConfig = false;
                 mLastFinishedFreezeSource = "new-config";
             }
             mWindowPlacerLocked.performSurfacePlacement();
+            if (orientationChanged) {
+                for (int i = mDisplayContents.size() - 1; i >= 0; i--) {
+                    DisplayContent content = mDisplayContents.valueAt(i);
+                    Message.obtain(mH, H.UPDATE_DOCKED_STACK_DIVIDER, H.DOCK_DIVIDER_FORCE_UPDATE,
+                            H.UNUSED, content).sendToTarget();
+                }
+            }
         }
     }
 
@@ -7165,6 +7173,21 @@ public class WindowManagerService extends IWindowManager.Stub
         public static final int RESIZE_STACK = 43;
         public static final int RESIZE_TASK = 44;
 
+        /**
+         * Used to indicate in the message that the dock divider needs to be updated only if it's
+         * necessary.
+         */
+        static final int DOCK_DIVIDER_NO_FORCE_UPDATE = 0;
+        /**
+         * Used to indicate in the message that the dock divider should be force-removed before
+         * updating, so new configuration can be applied.
+         */
+        static final int DOCK_DIVIDER_FORCE_UPDATE = 1;
+        /**
+         * Used to denote that an integer field in a message will not be used.
+         */
+        public static final int UNUSED = 0;
+
         @Override
         public void handleMessage(Message msg) {
             if (DEBUG_WINDOW_TRACE) {
@@ -7706,8 +7729,9 @@ public class WindowManagerService extends IWindowManager.Stub
                 break;
                 case UPDATE_DOCKED_STACK_DIVIDER: {
                     DisplayContent content = (DisplayContent) msg.obj;
+                    final boolean forceUpdate = msg.arg1 == DOCK_DIVIDER_FORCE_UPDATE;
                     synchronized (mWindowMap) {
-                        content.mDividerControllerLocked.update();
+                        content.mDividerControllerLocked.update(mCurConfiguration, forceUpdate);
                     }
                 }
                 break;

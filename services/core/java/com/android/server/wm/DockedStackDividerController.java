@@ -17,6 +17,7 @@
 package com.android.server.wm;
 
 import static android.app.ActivityManager.DOCKED_STACK_ID;
+import static android.content.res.Configuration.ORIENTATION_LANDSCAPE;
 import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
 import static android.view.WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
 import static android.view.WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL;
@@ -25,16 +26,15 @@ import static android.view.WindowManager.LayoutParams.FLAG_TOUCHABLE_WHEN_WAKING
 import static android.view.WindowManager.LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH;
 import static android.view.WindowManager.LayoutParams.TYPE_DOCK_DIVIDER;
 import static com.android.server.wm.TaskStack.DOCKED_BOTTOM;
-import static com.android.server.wm.TaskStack.DOCKED_INVALID;
 import static com.android.server.wm.TaskStack.DOCKED_LEFT;
 import static com.android.server.wm.TaskStack.DOCKED_RIGHT;
 import static com.android.server.wm.TaskStack.DOCKED_TOP;
 
 import android.content.Context;
+import android.content.res.Configuration;
 import android.graphics.PixelFormat;
 import android.graphics.Rect;
 import android.os.RemoteException;
-import android.util.Slog;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
@@ -58,7 +58,6 @@ public class DockedStackDividerController implements View.OnTouchListener {
     private Rect mOriginalRect = new Rect();
     private int mDockSide;
 
-
     DockedStackDividerController(Context context, DisplayContent displayContent) {
         mContext = context;
         mDisplayContent = displayContent;
@@ -66,13 +65,16 @@ public class DockedStackDividerController implements View.OnTouchListener {
                 com.android.internal.R.dimen.docked_stack_divider_thickness);
     }
 
-    private void addDivider() {
+    private void addDivider(Configuration configuration) {
         View view = LayoutInflater.from(mContext).inflate(
                 com.android.internal.R.layout.docked_stack_divider, null);
         view.setOnTouchListener(this);
         WindowManagerGlobal manager = WindowManagerGlobal.getInstance();
+        final boolean landscape = configuration.orientation == ORIENTATION_LANDSCAPE;
+        final int width = landscape ? mDividerWidth : MATCH_PARENT;
+        final int height = landscape ? MATCH_PARENT : mDividerWidth;
         WindowManager.LayoutParams params = new WindowManager.LayoutParams(
-                mDividerWidth, MATCH_PARENT, TYPE_DOCK_DIVIDER,
+                width, height, TYPE_DOCK_DIVIDER,
                 FLAG_TOUCHABLE_WHEN_WAKING | FLAG_NOT_FOCUSABLE | FLAG_NOT_TOUCH_MODAL
                         | FLAG_WATCH_OUTSIDE_TOUCH | FLAG_SPLIT_TOUCH,
                 PixelFormat.OPAQUE);
@@ -92,10 +94,13 @@ public class DockedStackDividerController implements View.OnTouchListener {
         return mView != null;
     }
 
-    void update() {
+    void update(Configuration configuration, boolean forceUpdate) {
+        if (forceUpdate && mView != null) {
+            removeDivider();
+        }
         TaskStack stack = mDisplayContent.getDockedStackLocked();
         if (stack != null && mView == null) {
-            addDivider();
+            addDivider(configuration);
         } else if (stack == null && mView != null) {
             removeDivider();
         }
