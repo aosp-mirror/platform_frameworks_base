@@ -294,9 +294,12 @@ class Task implements DimLayer.DimLayerUser {
         if (setBounds(mTmpRect2, mOverrideConfig) != BOUNDS_CHANGE_NONE) {
             // Post message to inform activity manager of the bounds change simulating
             // a one-way call. We do this to prevent a deadlock between window manager
-            // lock and activity manager lock been held.
-            mService.mH.sendMessage(mService.mH.obtainMessage(
-                            RESIZE_TASK, mTaskId, RESIZE_MODE_SYSTEM_SCREEN_ROTATION, mBounds));
+            // lock and activity manager lock been held. Only tasks within the freeform stack
+            // are resizeable independently of their stack resizing.
+            if (mStack.mStackId == FREEFORM_WORKSPACE_STACK_ID) {
+                mService.mH.sendMessage(mService.mH.obtainMessage(
+                        RESIZE_TASK, mTaskId, RESIZE_MODE_SYSTEM_SCREEN_ROTATION, mBounds));
+            }
         }
     }
 
