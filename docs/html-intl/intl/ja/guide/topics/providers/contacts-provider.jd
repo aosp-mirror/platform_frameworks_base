@@ -57,7 +57,7 @@ page.title=連絡先プロバイダ
     <li>{@link android.provider.ContactsContract.Contacts}</li>
     <li>{@link android.provider.ContactsContract.RawContacts}</li>
     <li>{@link android.provider.ContactsContract.Data}</li>
-    <li>{@link android.provider.ContactsContract.StreamItems}</li>
+    <li>{@code android.provider.ContactsContract.StreamItems}</li>
 </ol>
 <h2>関連サンプル</h2>
 <ol>
@@ -168,7 +168,7 @@ page.title=連絡先プロバイダ
 <p>
     未加工連絡先データの大半は、{@link android.provider.ContactsContract.RawContacts} テーブルには格納されません。
 その代わり、{@link android.provider.ContactsContract.Data} テーブルの 1 つまたは複数の行に格納されています。
-各データ行には列 {@link android.provider.ContactsContract.DataColumns#RAW_CONTACT_ID Data.RAW_CONTACT_ID} があり、親 {@link android.provider.ContactsContract.RawContacts} 行の {@link android.provider.BaseColumns#_ID RawContacts._ID} 値が格納されています。
+各データ行には列 {@link android.provider.ContactsContract.DataColumns#RAW_CONTACT_ID Data.RAW_CONTACT_ID} があり、親 {@link android.provider.ContactsContract.RawContacts} 行の {@code android.provider.BaseColumns#_ID RawContacts._ID} 値が格納されています。
 
 
 
@@ -481,16 +481,16 @@ page.title=連絡先プロバイダ
 
 </p>
 <p>
-    {@link android.provider.ContactsContract.Contacts} テーブルには列 {@link android.provider.ContactsContract.ContactsColumns#LOOKUP_KEY} もあり、こちらは連絡先の行への「永久」リンクです。
+    {@link android.provider.ContactsContract.Contacts} テーブルには列 {@code android.provider.ContactsContract.ContactsColumns#LOOKUP_KEY} もあり、こちらは連絡先の行への「永久」リンクです。
 
-連絡先プロバイダは連絡先を自動的に管理するため、集約や同期が行われると、それに応じて連絡先の行の {@link android.provider.BaseColumns#_ID} 値が変更される場合があります。
+連絡先プロバイダは連絡先を自動的に管理するため、集約や同期が行われると、それに応じて連絡先の行の {@code android.provider.BaseColumns#_ID} 値が変更される場合があります。
 
-この処理が行われても、コンテンツ URI {@link android.provider.ContactsContract.Contacts#CONTENT_LOOKUP_URI} と連絡先の {@link android.provider.ContactsContract.ContactsColumns#LOOKUP_KEY} の組み合わせは、引き続きその連絡先の行を指すため、{@link android.provider.ContactsContract.ContactsColumns#LOOKUP_KEY} を使用して「お気に入り」の連絡先へのリンクを管理するなどができます。
-
-
+この処理が行われても、コンテンツ URI {@link android.provider.ContactsContract.Contacts#CONTENT_LOOKUP_URI} と連絡先の {@code android.provider.ContactsContract.ContactsColumns#LOOKUP_KEY} の組み合わせは、引き続きその連絡先の行を指すため、{@code android.provider.ContactsContract.ContactsColumns#LOOKUP_KEY} を使用して「お気に入り」の連絡先へのリンクを管理するなどができます。
 
 
-この列には、{@link android.provider.BaseColumns#_ID} 列の形式と関係のない独自の形式があります。
+
+
+この列には、{@code android.provider.BaseColumns#_ID} 列の形式と関係のない独自の形式があります。
 
 </p>
 <p>
@@ -598,7 +598,7 @@ page.title=連絡先プロバイダ
 
 </p>
 <p>
-    ユーザー プロファイルにアクセスするには、特別なパーミッションが必要です。読み取りと書き込みに必要な {@link android.Manifest.permission#READ_CONTACTS} パーミッションと {@link android.Manifest.permission#WRITE_CONTACTS} パーミッションの他に、ユーザー プロファイルに対する読み取りと書き込みのために {@link android.Manifest.permission#READ_PROFILE} パーミッションと {@link android.Manifest.permission#WRITE_PROFILE} パーミッションがそれぞれ必要です。
+    ユーザー プロファイルにアクセスするには、特別なパーミッションが必要です。読み取りと書き込みに必要な {@link android.Manifest.permission#READ_CONTACTS} パーミッションと {@link android.Manifest.permission#WRITE_CONTACTS} パーミッションの他に、ユーザー プロファイルに対する読み取りと書き込みのために {@code android.Manifest.permission#READ_PROFILE} パーミッションと {@code android.Manifest.permission#WRITE_PROFILE} パーミッションがそれぞれ必要です。
 
 
 
@@ -606,7 +606,7 @@ page.title=連絡先プロバイダ
 
 </p>
 <p>
-    ユーザーのプロファイルは秘密性の高い情報であることを再度ご確認ください。パーミッション {@link android.Manifest.permission#READ_PROFILE} を使用すると、端末ユーザーの個人識別データにアクセスできます。
+    ユーザーのプロファイルは秘密性の高い情報であることを再度ご確認ください。パーミッション {@code android.Manifest.permission#READ_PROFILE} を使用すると、端末ユーザーの個人識別データにアクセスできます。
 
 アプリケーションの説明には、ユーザー プロファイルへのアクセス パーミッションが必要な理由を必ず記載してください。
 
@@ -975,7 +975,7 @@ public Loader&lt;Cursor&gt; onCreateLoader(int id, Bundle args) {
 </p>
 <h4>変更の後方参照</h4>
 <p>
-    新しい未加工連絡先の行とその関連データの行を 1 組の {@link android.content.ContentProviderOperation} オブジェクトとして挿入している場合は、データの行を未加工連絡先の行にリンクする必要があります。そのためには、未加工連絡先の {@link android.provider.BaseColumns#_ID} 値を {@link android.provider.ContactsContract.DataColumns#RAW_CONTACT_ID} 値として挿入します。
+    新しい未加工連絡先の行とその関連データの行を 1 組の {@link android.content.ContentProviderOperation} オブジェクトとして挿入している場合は、データの行を未加工連絡先の行にリンクする必要があります。そのためには、未加工連絡先の {@code android.provider.BaseColumns#_ID} 値を {@link android.provider.ContactsContract.DataColumns#RAW_CONTACT_ID} 値として挿入します。
 
 
 
@@ -1010,7 +1010,7 @@ public Loader&lt;Cursor&gt; onCreateLoader(int id, Bundle args) {
 
 <code>previousResult</code> 値はそうした結果の 1 つのインデックスで、<code>key</code> 値を使用して取得され、格納されます。
 
-これにより、新しい未加工連絡先レコードを挿入してその {@link android.provider.BaseColumns#_ID} 値に戻り、次に {@link android.provider.ContactsContract.Data} 行を追加するときにその値を「後方参照」できます。
+これにより、新しい未加工連絡先レコードを挿入してその {@code android.provider.BaseColumns#_ID} 値に戻り、次に {@link android.provider.ContactsContract.Data} 行を追加するときにその値を「後方参照」できます。
 
 
             <p>
@@ -1089,7 +1089,7 @@ protected void createContactEntry() {
     操作の各ビルダー オブジェクトは、{@link android.content.ContentProviderOperation.Builder#withValueBackReference(String, int) withValueBackReference()} を使用して {@link android.provider.ContactsContract.DataColumns#RAW_CONTACT_ID} を取得します。
 
 
-この参照が最初の操作からの {@link android.content.ContentProviderResult} オブジェクトを後方参照しており、それが未加工連絡先の行を追加し、新しい {@link android.provider.BaseColumns#_ID} 値を返します。
+この参照が最初の操作からの {@link android.content.ContentProviderResult} オブジェクトを後方参照しており、それが未加工連絡先の行を追加し、新しい {@code android.provider.BaseColumns#_ID} 値を返します。
 
 
 その結果、各データ行はその {@link android.provider.ContactsContract.DataColumns#RAW_CONTACT_ID} によって、属する新しい {@link android.provider.ContactsContract.RawContacts} 行に自動的にリンクされます。
@@ -1228,7 +1228,7 @@ protected void createContactEntry() {
     <li>
         制約を強制するのに適した {@link android.content.ContentProviderOperation.Builder} オブジェクトを、メソッド {@link android.content.ContentProviderOperation#newAssertQuery(Uri)} を使用して作成します。
 
-コンテンツ URI に、未加工連絡先の {@link android.provider.BaseColumns#_ID} が末尾に追加された {@link android.provider.ContactsContract.RawContacts#CONTENT_URI RawContacts.CONTENT_URI} を使用します。
+コンテンツ URI に、未加工連絡先の {@code android.provider.BaseColumns#_ID} が末尾に追加された {@link android.provider.ContactsContract.RawContacts#CONTENT_URI RawContacts.CONTENT_URI} を使用します。
 
 
 
@@ -1821,7 +1821,7 @@ startActivity(insertIntent);
     </dl>
 <h2 id="SocialStream">ソーシャル ストリーム データ</h2>
 <p>
-    {@link android.provider.ContactsContract.StreamItems} テーブルと {@link android.provider.ContactsContract.StreamItemPhotos} テーブルは、ソーシャル ネットワークからの受信データを管理します。
+    {@code android.provider.ContactsContract.StreamItems} テーブルと {@code android.provider.ContactsContract.StreamItemPhotos} テーブルは、ソーシャル ネットワークからの受信データを管理します。
 
 独自ネットワークからのストリーム データをこれらのテーブルに追加する同期アダプタを作成したり、ストリーム データをこれらのテーブルから読み込んで独自アプリケーションに表示したり、この両方を行ったりできます。
 
@@ -1830,7 +1830,7 @@ startActivity(insertIntent);
 </p>
 <h3 id="StreamText">ソーシャル ストリーム テキスト</h3>
 <p>
-    ストリーム アイテムは、必ず未加工連絡先に関連付けられます。{@link android.provider.ContactsContract.StreamItemsColumns#RAW_CONTACT_ID} は、未加工連絡先の <code>_ID</code> 値にリンクされます。
+    ストリーム アイテムは、必ず未加工連絡先に関連付けられます。{@code android.provider.ContactsContract.StreamItemsColumns#RAW_CONTACT_ID} は、未加工連絡先の <code>_ID</code> 値にリンクされます。
 
 未加工連絡先のアカウント タイプとアカウント名は、ストリーム アイテム行にも格納されます。
 
@@ -1840,14 +1840,14 @@ startActivity(insertIntent);
 </p>
 <dl>
     <dt>
-        {@link android.provider.ContactsContract.StreamItemsColumns#ACCOUNT_TYPE}
+        {@code android.provider.ContactsContract.StreamItemsColumns#ACCOUNT_TYPE}
     </dt>
     <dd>
         <strong>必須</strong>。このストリーム アイテムに関連付けられている未加工連絡先の、ユーザーのアカウント タイプ。
 ストリーム アイテムを挿入する際には、この値を忘れずに設定してください。
     </dd>
     <dt>
-        {@link android.provider.ContactsContract.StreamItemsColumns#ACCOUNT_NAME}
+        {@code android.provider.ContactsContract.StreamItemsColumns#ACCOUNT_NAME}
     </dt>
     <dd>
         <strong>必須</strong>。このストリーム アイテムに関連付けられている未加工連絡先の、ユーザーのアカウント名。
@@ -1861,30 +1861,30 @@ startActivity(insertIntent);
 
         <ul>
             <li>
-                {@link android.provider.ContactsContract.StreamItemsColumns#CONTACT_ID}:このストリーム アイテムが関連付けられている連絡先の {@link android.provider.BaseColumns#_ID} 値。
+                {@code android.provider.ContactsContract.StreamItemsColumns#CONTACT_ID}:このストリーム アイテムが関連付けられている連絡先の {@code android.provider.BaseColumns#_ID} 値。
 
 
             </li>
             <li>
-                {@link android.provider.ContactsContract.StreamItemsColumns#CONTACT_LOOKUP_KEY}: このストリーム アイテムが関連付けられている連絡先の {@link android.provider.ContactsContract.ContactsColumns#LOOKUP_KEY} 値。
+                {@code android.provider.ContactsContract.StreamItemsColumns#CONTACT_LOOKUP_KEY}: このストリーム アイテムが関連付けられている連絡先の {@code android.provider.ContactsContract.ContactsColumns#LOOKUP_KEY} 値。
 
 
             </li>
             <li>
-                {@link android.provider.ContactsContract.StreamItemsColumns#RAW_CONTACT_ID}:このストリーム アイテムが関連付けられている未加工連絡先の {@link android.provider.BaseColumns#_ID} 値。
+                {@code android.provider.ContactsContract.StreamItemsColumns#RAW_CONTACT_ID}:このストリーム アイテムが関連付けられている未加工連絡先の {@code android.provider.BaseColumns#_ID} 値。
 
 
             </li>
         </ul>
     </dd>
     <dt>
-        {@link android.provider.ContactsContract.StreamItemsColumns#COMMENTS}
+        {@code android.provider.ContactsContract.StreamItemsColumns#COMMENTS}
     </dt>
     <dd>
         省略可能。ストリーム アイテムの冒頭に表示できる概要情報を格納します。
     </dd>
     <dt>
-        {@link android.provider.ContactsContract.StreamItemsColumns#TEXT}
+        {@code android.provider.ContactsContract.StreamItemsColumns#TEXT}
     </dt>
     <dd>
         ストリーム アイテムのテキスト。アイテムのソースによって投稿されたコンテンツか、そのストリーム アイテムを生成した何らかのアクションに関する説明です。
@@ -1894,7 +1894,7 @@ startActivity(insertIntent);
 
     </dd>
     <dt>
-        {@link android.provider.ContactsContract.StreamItemsColumns#TIMESTAMP}
+        {@code android.provider.ContactsContract.StreamItemsColumns#TIMESTAMP}
     </dt>
     <dd>
         ストリーム アイテムが挿入またはアップデートされた時刻を含むテキスト。エポックからのミリ秒<em></em>の形式です。
@@ -1904,22 +1904,22 @@ startActivity(insertIntent);
     </dd>
 </dl>
 <p>
-    ストリーム アイテムの識別情報を表示するには、{@link android.provider.ContactsContract.StreamItemsColumns#RES_ICON}、{@link android.provider.ContactsContract.StreamItemsColumns#RES_LABEL}、{@link android.provider.ContactsContract.StreamItemsColumns#RES_PACKAGE} を使用してアプリケーション内のリソースにリンクします。
+    ストリーム アイテムの識別情報を表示するには、{@code android.provider.ContactsContract.StreamItemsColumns#RES_ICON}、{@code android.provider.ContactsContract.StreamItemsColumns#RES_LABEL}、{@code android.provider.ContactsContract.StreamItemsColumns#RES_PACKAGE} を使用してアプリケーション内のリソースにリンクします。
 
 
 
 
 </p>
 <p>
-    {@link android.provider.ContactsContract.StreamItems} テーブルには、同期アダプタ専用に列 {@link android.provider.ContactsContract.StreamItemsColumns#SYNC1} ～ {@link android.provider.ContactsContract.StreamItemsColumns#SYNC4} も格納されます。
+    {@code android.provider.ContactsContract.StreamItems} テーブルには、同期アダプタ専用に列 {@code android.provider.ContactsContract.StreamItemsColumns#SYNC1} ～ {@code android.provider.ContactsContract.StreamItemsColumns#SYNC4} も格納されます。
 
 
 
 </p>
 <h3 id="StreamPhotos">ソーシャル ストリーム フォト</h3>
 <p>
-   {@link android.provider.ContactsContract.StreamItemPhotos} テーブルには、ストリーム アイテムに関連付けられた写真が格納されます。
-このテーブルの {@link android.provider.ContactsContract.StreamItemPhotosColumns#STREAM_ITEM_ID} 列は、{@link android.provider.ContactsContract.StreamItems} テーブルの {@link android.provider.BaseColumns#_ID} 列の値にリンクされます。
+   {@code android.provider.ContactsContract.StreamItemPhotos} テーブルには、ストリーム アイテムに関連付けられた写真が格納されます。
+このテーブルの {@code android.provider.ContactsContract.StreamItemPhotosColumns#STREAM_ITEM_ID} 列は、{@code android.provider.ContactsContract.StreamItems} テーブルの {@code android.provider.BaseColumns#_ID} 列の値にリンクされます。
 
 
 写真の参照は、テーブルの次の列に格納されます。
@@ -1927,20 +1927,20 @@ startActivity(insertIntent);
 </p>
 <dl>
     <dt>
-        {@link android.provider.ContactsContract.StreamItemPhotos#PHOTO} 列（BLOB）。
+        {@code android.provider.ContactsContract.StreamItemPhotos#PHOTO} 列（BLOB）。
     </dt>
     <dd>
         写真のバイナリ表現。格納や表示のためにプロバイダによってサイズが変更されます。
         この列は、写真を格納するために使用されていた連絡先プロバイダの従来のバージョンとの下方互換性のために用意されています。
 ただし、現在のバージョンでは、写真の格納にこの列を使用しないでください。
-代わりに、{@link android.provider.ContactsContract.StreamItemPhotosColumns#PHOTO_FILE_ID} または {@link android.provider.ContactsContract.StreamItemPhotosColumns#PHOTO_URI}（どちらについても次の項目で説明します）を使用して、写真をファイルに保存します。
+代わりに、{@code android.provider.ContactsContract.StreamItemPhotosColumns#PHOTO_FILE_ID} または {@code android.provider.ContactsContract.StreamItemPhotosColumns#PHOTO_URI}（どちらについても次の項目で説明します）を使用して、写真をファイルに保存します。
 
 
 現状では、この列には写真のサムネイルが格納されており、読み出し可能です。
 
     </dd>
     <dt>
-        {@link android.provider.ContactsContract.StreamItemPhotosColumns#PHOTO_FILE_ID}
+        {@code android.provider.ContactsContract.StreamItemPhotosColumns#PHOTO_FILE_ID}
     </dt>
     <dd>
         未加工連絡先の写真の数値 ID。この値を定数 {@link android.provider.ContactsContract.DisplayPhoto#CONTENT_URI DisplayPhoto.CONTENT_URI} の末尾に追加して、1 つの写真ファイルを指すコンテンツ URI を取得し、{@link android.content.ContentResolver#openAssetFileDescriptor(Uri, String) openAssetFileDescriptor()} を呼び出して、その写真ファイルのハンドルを取得します。
@@ -1950,7 +1950,7 @@ startActivity(insertIntent);
 
     </dd>
     <dt>
-        {@link android.provider.ContactsContract.StreamItemPhotosColumns#PHOTO_URI}
+        {@code android.provider.ContactsContract.StreamItemPhotosColumns#PHOTO_URI}
     </dt>
     <dd>
         この行によって表されている写真の写真ファイルを直接指すコンテンツ URI。
@@ -1964,27 +1964,27 @@ startActivity(insertIntent);
 </p>
     <ul>
         <li>
-            これらのテーブルには、追加のアクセス パーミッションが必要です。これらからの読み出しには、アプリケーションにパーミッション {@link android.Manifest.permission#READ_SOCIAL_STREAM} が必要です。
-これらの変更には、アプリケーションにパーミッション {@link android.Manifest.permission#WRITE_SOCIAL_STREAM} が必要です。
+            これらのテーブルには、追加のアクセス パーミッションが必要です。これらからの読み出しには、アプリケーションにパーミッション {@code android.Manifest.permission#READ_SOCIAL_STREAM} が必要です。
+これらの変更には、アプリケーションにパーミッション {@code android.Manifest.permission#WRITE_SOCIAL_STREAM} が必要です。
 
 
         </li>
         <li>
-            {@link android.provider.ContactsContract.StreamItems} テーブルについては、各未加工連絡先に格納できる行数に上限があります。
-上限に達すると、連絡先プロバイダは最も古い {@link android.provider.ContactsContract.StreamItemsColumns#TIMESTAMP} を持つ行を自動的に削除して、新しいストリーム アイテムのための領域を作ります。
+            {@code android.provider.ContactsContract.StreamItems} テーブルについては、各未加工連絡先に格納できる行数に上限があります。
+上限に達すると、連絡先プロバイダは最も古い {@code android.provider.ContactsContract.StreamItemsColumns#TIMESTAMP} を持つ行を自動的に削除して、新しいストリーム アイテムのための領域を作ります。
 
 
-この上限を取得するには、コンテンツ URI {@link android.provider.ContactsContract.StreamItems#CONTENT_LIMIT_URI} にクエリを発行します。
+この上限を取得するには、コンテンツ URI {@code android.provider.ContactsContract.StreamItems#CONTENT_LIMIT_URI} にクエリを発行します。
 
 コンテンツ URI を除くすべての引数は、<code>null</code> のままでかまいません。
-このクエリは、列 {@link android.provider.ContactsContract.StreamItems#MAX_ITEMS} だけの 1 行を含む Cursor を返します。
+このクエリは、列 {@code android.provider.ContactsContract.StreamItems#MAX_ITEMS} だけの 1 行を含む Cursor を返します。
 
 
         </li>
     </ul>
 
 <p>
-    クラス {@link android.provider.ContactsContract.StreamItems.StreamItemPhotos} は、1 つのストリーム アイテムの写真行を含む {@link android.provider.ContactsContract.StreamItemPhotos} のサブテーブルを定義します。
+    クラス {@code android.provider.ContactsContract.StreamItems.StreamItemPhotos} は、1 つのストリーム アイテムの写真行を含む {@code android.provider.ContactsContract.StreamItemPhotos} のサブテーブルを定義します。
 
 
 </p>
@@ -1996,7 +1996,7 @@ startActivity(insertIntent);
 </p>
     <ul>
         <li>
-            ソーシャル ネットワーキング サービスを連絡先プロバイダに同期アダプタを使用して同期することで、ユーザーの連絡先による最近のアクティビティを取得し、それを {@link android.provider.ContactsContract.StreamItems} テーブルや {@link android.provider.ContactsContract.StreamItemPhotos} テーブルに格納して後で使えるようにできます。
+            ソーシャル ネットワーキング サービスを連絡先プロバイダに同期アダプタを使用して同期することで、ユーザーの連絡先による最近のアクティビティを取得し、それを {@code android.provider.ContactsContract.StreamItems} テーブルや {@code android.provider.ContactsContract.StreamItemPhotos} テーブルに格納して後で使えるようにできます。
 
 
 
@@ -2328,7 +2328,7 @@ Google+ サークルのどれかをクリックすると、そのサークルに
 <p>
     {@link android.provider.ContactsContract.Data} テーブルは、写真を MIME タイプ {@link android.provider.ContactsContract.CommonDataKinds.Photo#CONTENT_ITEM_TYPE Photo.CONTENT_ITEM_TYPE} の行として格納します。
 
-この行の {@link android.provider.ContactsContract.RawContactsColumns#CONTACT_ID} 列は、それが属する未加工連絡先の {@link android.provider.BaseColumns#_ID} 列にリンクされます。
+この行の {@link android.provider.ContactsContract.RawContactsColumns#CONTACT_ID} 列は、それが属する未加工連絡先の {@code android.provider.BaseColumns#_ID} 列にリンクされます。
 
 
     クラス {@link android.provider.ContactsContract.Contacts.Photo} は、連絡先のプライマリ フォトの写真情報を格納する {@link android.provider.ContactsContract.Contacts} のサブテーブルを定義します。ここでプライマリ フォトとは、連絡先のプライマリ未加工連絡先のプライマリ フォトのことを示します。
@@ -2341,7 +2341,7 @@ Google+ サークルのどれかをクリックすると、そのサークルに
 <p>
     {@link android.provider.ContactsContract.Contacts.Photo} と {@link android.provider.ContactsContract.RawContacts.DisplayPhoto} の参照ドキュメントには、写真情報の取得例が含まれています。
 
-未加工連絡先のプライマリ サムネイルを取得するための便利なクラスはありませんが、{@link android.provider.ContactsContract.Data} テーブルにクエリを送信して、未加工連絡先の {@link android.provider.BaseColumns#_ID}、{@link android.provider.ContactsContract.CommonDataKinds.Photo#CONTENT_ITEM_TYPE Photo.CONTENT_ITEM_TYPE}、{@link android.provider.ContactsContract.Data#IS_PRIMARY} 列を選んでその未加工連絡先のプライマリ フォト行を探すことができます。
+未加工連絡先のプライマリ サムネイルを取得するための便利なクラスはありませんが、{@link android.provider.ContactsContract.Data} テーブルにクエリを送信して、未加工連絡先の {@code android.provider.BaseColumns#_ID}、{@link android.provider.ContactsContract.CommonDataKinds.Photo#CONTENT_ITEM_TYPE Photo.CONTENT_ITEM_TYPE}、{@link android.provider.ContactsContract.Data#IS_PRIMARY} 列を選んでその未加工連絡先のプライマリ フォト行を探すことができます。
 
 
 
@@ -2350,7 +2350,7 @@ Google+ サークルのどれかをクリックすると、そのサークルに
 
 </p>
 <p>
-    人のソーシャル ストリーム データにも写真が含まれていることがあります。その場合は {@link android.provider.ContactsContract.StreamItemPhotos} テーブルに格納されています。このテーブルについては、<a href="#StreamPhotos">ソーシャル ストリーム フォト</a>で詳しく説明しています
+    人のソーシャル ストリーム データにも写真が含まれていることがあります。その場合は {@code android.provider.ContactsContract.StreamItemPhotos} テーブルに格納されています。このテーブルについては、<a href="#StreamPhotos">ソーシャル ストリーム フォト</a>で詳しく説明しています
 
 
 </p>

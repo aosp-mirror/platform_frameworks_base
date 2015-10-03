@@ -230,12 +230,12 @@ setAction()} 或 {@link android.content.Intent} 建構函式來指定意圖的�
 例如，能夠顯示影像的 Activity 可能無法播放音訊檔案，即使有類似的 URI 格式。
 因此，指定資料的 MIME 格式可協助 Android 系統找出最適合接收意圖的元件。
 
-不過 &mdash; 尤其是當資料指出資料位在裝置何處且受 
-{@link android.content.ContentProvider} 控制讓系統看見資料 MIME 類型的 
+不過 &mdash; 尤其是當資料指出資料位在裝置何處且受
+{@link android.content.ContentProvider} 控制讓系統看見資料 MIME 類型的
 {@code content:} URI 時，有時能夠從 URI 推論出 MIME 類型。</p>
 
 <p>如果您只想設定資料 URI，請呼叫 {@link android.content.Intent#setData setData()}。
-如要設定 MIME 類型，請呼叫 {@link android.content.Intent#setType setType()}。您還可以視需要利用 
+如要設定 MIME 類型，請呼叫 {@link android.content.Intent#setType setType()}。您還可以視需要利用
 {@link
 android.content.Intent#setDataAndType setDataAndType()} 明確設定兩者。</p>
 
@@ -373,9 +373,7 @@ resolveActivity()}。如果結果不是 null，表示至少有一個應用程式
 Intent sendIntent = new Intent();
 sendIntent.setAction(Intent.ACTION_SEND);
 sendIntent.putExtra(Intent.EXTRA_TEXT, textMessage);
-sendIntent.setType({@link
-        org.apache.http.protocol.HTTP#PLAIN_TEXT_TYPE
-        HTTP.PLAIN_TEXT_TYPE}); // "text/plain" MIME type
+sendIntent.setType("text/plain");
 
 // Verify that the intent will resolve to an activity
 if (sendIntent.resolveActivity(getPackageManager()) != null) {
@@ -491,7 +489,7 @@ android.content.Intent#createChooser createChooser()} 方法)，並使用提供�
 
 
 {@link android.app.Activity#startActivity startActivity()} 與
-{@link android.app.Activity#startActivityForResult startActivityForResult()} 方法對所有意圖進行處理時，就像已宣告 
+{@link android.app.Activity#startActivityForResult startActivityForResult()} 方法對所有意圖進行處理時，就像已宣告
 {@link android.content.Intent#CATEGORY_DEFAULT} 類別一樣。
   如果您未在意圖篩選器中宣告此類別，任何隱含意圖都不會解析為 Activity。
 </p>
@@ -511,9 +509,9 @@ android.content.Intent#createChooser createChooser()} 方法)，並使用提供�
 &lt;/activity>
 </pre>
 
-<p>想要建立包含多個 
+<p>想要建立包含多個
 <a href="{@docRoot}guide/topics/manifest/action-element.html">{@code &lt;action&gt;}</a>、
-<a href="{@docRoot}guide/topics/manifest/data-element.html">{@code &lt;data&gt;}</a> 或 
+<a href="{@docRoot}guide/topics/manifest/data-element.html">{@code &lt;data&gt;}</a> 或
 <a href="{@docRoot}guide/topics/manifest/category-element.html">{@code &lt;category&gt;}</a> 執行個體的篩選器也沒關係。
 如果您這樣做，只需要確定該元件能處理這些篩選器元素的任何組合。
 </p>
@@ -529,7 +527,7 @@ android.content.Intent#createChooser createChooser()} 方法)，並使用提供�
 雖然意圖篩選器限制元件只能回應特定的隱含意圖，如果開發人員決定您的元件名稱，另一款應用程式還是有可能使用明確意圖來啟動您的應用程式元件。
 
 
-如果必須「限定只有您自己的應用程式」<em></em>才能啟動您的元件，請將該元件的 
+如果必須「限定只有您自己的應用程式」<em></em>才能啟動您的元件，請將該元件的
 <a href="{@docRoot}guide/topics/manifest/activity-element.html#exported">{@code
 exported}</a> 屬性設定為 {@code "false"}。
 </p>
@@ -550,7 +548,7 @@ exported}</a> 屬性設定為 {@code "false"}。
 
 <p class="note"><strong>注意：</strong>對於所有 Activity，您都必須在宣示說明檔案中宣告意圖篩選器。
 
-不過，廣播接收器的篩選器可以藉由呼叫 
+不過，廣播接收器的篩選器可以藉由呼叫
 {@link android.content.Context#registerReceiver(BroadcastReceiver, IntentFilter, String,
 Handler) registerReceiver()} 進行動態註冊。您之後可以利用 {@link
 android.content.Context#unregisterReceiver unregisterReceiver()} 來取消註冊接收器。這樣做可在您的應用程式執行時，讓應用程式只能在指定期間內接聽特定廣播。
@@ -615,7 +613,7 @@ android.content.Context#unregisterReceiver unregisterReceiver()} 來取消註冊
 
 <p class="note"><strong>注意：</strong>
 <a href="https://developers.google.com/panorama/android/">{@code
-application/vnd.google.panorama360+jpg}</a> MIME 類型是指定全景相片的特殊資料類型，您可以透過 
+application/vnd.google.panorama360+jpg}</a> MIME 類型是指定全景相片的特殊資料類型，您可以透過
 <a href="{@docRoot}reference/com/google/android/gms/panorama/package-summary.html">Google 全景</a> API 來處理。
 </p>
 
@@ -654,7 +652,7 @@ android.content.Intent} 物件的包裝函式。{@link android.app.PendingIntent
 <p>由於每個 {@link android.content.Intent} 物件都設計為要由特定的應用程式元件類型來處理 ({@link android.app.Activity}、{@link android.app.Service} 或 {@link android.content.BroadcastReceiver})，因此請務必以相同的考量建立 {@link android.app.PendingIntent}。
 
 
-使用待處理意圖時，您的應用程式將不會透過像是 
+使用待處理意圖時，您的應用程式將不會透過像是
 {@link android.content.Context#startActivity
 startActivity()} 的呼叫來執行意圖。當您藉由呼叫以下的個別建立者方法建立
 {@link android.app.PendingIntent} 時，您必須改為宣告意圖元件類型：</p>
@@ -704,7 +702,7 @@ startActivity()} 的呼叫來執行意圖。當您藉由呼叫以下的個別建
 
 <h3 id="ActionTest">動作測試</h3>
 
-<p>如要指定接受的意圖動作，意圖篩選器可以宣告零或多個 
+<p>如要指定接受的意圖動作，意圖篩選器可以宣告零或多個
 <a href="{@docRoot}guide/topics/manifest/action-element.html">{@code
 &lt;action&gt;}</a> 元素。例如：</p>
 
@@ -728,7 +726,7 @@ startActivity()} 的呼叫來執行意圖。當您藉由呼叫以下的個別建
 
 <h3 id="CategoryTest">類別測試</h3>
 
-<p>如要指定接受的意圖類別，意圖篩選器可以宣告零或多個 
+<p>如要指定接受的意圖類別，意圖篩選器可以宣告零或多個
 <a href="{@docRoot}guide/topics/manifest/category-element.html">{@code
 &lt;category&gt;}</a> 元素。例如：</p>
 
@@ -741,14 +739,14 @@ startActivity()} 的呼叫來執行意圖。當您藉由呼叫以下的個別建
 </pre>
 
 <p>{@link android.content.Intent} 中的每個類別都必須與篩選器中的類別相符，意圖才會通過類別測試。
-不需要反向進行 &mdash; 意圖篩選器宣告的類別可以比 
+不需要反向進行 &mdash; 意圖篩選器宣告的類別可以比
 {@link android.content.Intent} 中指定的類別多，而
 {@link android.content.Intent} 仍可通過測試。因此，不論篩選器中宣告的類別為何，未包含類別的意圖一律可通過此測試。
 </p>
 
 <p class="note"><strong>注意：</strong>Android 會將 {@link android.content.Intent#CATEGORY_DEFAULT} 類別自動套用到所有傳送至 {@link
 android.content.Context#startActivity startActivity()} 與 {@link
-android.app.Activity#startActivityForResult startActivityForResult()} 的隱含意圖。因此，如果您希望 Activity 收到隱含意圖，Activity 的意圖篩選器就必須包含 
+android.app.Activity#startActivityForResult startActivityForResult()} 的隱含意圖。因此，如果您希望 Activity 收到隱含意圖，Activity 的意圖篩選器就必須包含
 {@code "android.intent.category.DEFAULT"} 的類別 (如先前的 {@code &lt;intent-filter&gt;} 範例中所示)。
 
 
@@ -759,7 +757,7 @@ android.app.Activity#startActivityForResult startActivityForResult()} 的隱含�
 
 <h3 id="DataTest">資料測試</h3>
 
-<p>如要指定接受的意圖資料，意圖篩選器可以宣告零或多個 
+<p>如要指定接受的意圖資料，意圖篩選器可以宣告零或多個
 <a href="{@docRoot}guide/topics/manifest/data-element.html">{@code
 &lt;data&gt;}</a> 元素。例如：</p>
 
@@ -828,7 +826,7 @@ android.app.Activity#startActivityForResult startActivityForResult()} 的隱含�
 
 <li>只有在 MIME 類型與篩選器中列出的類型相符時，包含 URI 與 MIME 類型 (明確或可從 URI 推測得出) 的意圖才會通過 MIME 類型部分的測試。
 
-如果它的 URI 與篩選器中的 URI 相符，或如果它有 
+如果它的 URI 與篩選器中的 URI 相符，或如果它有
 {@code content:} 或 {@code file:} URI，而且篩選器未指定 URI 時，就會通過 URI 部分的測試。換句話說，如果它的篩選器「只」<em></em>列出 MIME 類型，就會假設元件支援 {@code content:} 與 {@code file:} 資料。
 
 
@@ -886,12 +884,12 @@ android.app.Activity#startActivityForResult startActivityForResult()} 的隱含�
 
 例如，
 {@link android.content.pm.PackageManager#queryIntentActivities
-queryIntentActivities()} 會傳回所有 Activity 清單，上述的 Activity 都可以執行當成引數傳送的意圖，以及 
+queryIntentActivities()} 會傳回所有 Activity 清單，上述的 Activity 都可以執行當成引數傳送的意圖，以及
 {@link
 android.content.pm.PackageManager#queryIntentServices
 queryIntentServices()} 可傳回類似的服務清單。
 
-這些方法不會啟動元件，只會列出可以回應的元件。類似的方法 
+這些方法不會啟動元件，只會列出可以回應的元件。類似的方法
 {@link android.content.pm.PackageManager#queryBroadcastReceivers
 queryBroadcastReceivers()} 可用於廣播接收器。
 </p>

@@ -57,7 +57,7 @@ page.title=Trình cung cấp Danh bạ
     <li>{@link android.provider.ContactsContract.Contacts}</li>
     <li>{@link android.provider.ContactsContract.RawContacts}</li>
     <li>{@link android.provider.ContactsContract.Data}</li>
-    <li>{@link android.provider.ContactsContract.StreamItems}</li>
+    <li>{@code android.provider.ContactsContract.StreamItems}</li>
 </ol>
 <h2>Các Mẫu Liên quan</h2>
 <ol>
@@ -170,7 +170,7 @@ page.title=Trình cung cấp Danh bạ
     {@link android.provider.ContactsContract.RawContacts}. Thay vào đó, nó được lưu giữ trong một hoặc nhiều
     hàng trong bảng {@link android.provider.ContactsContract.Data}. Mỗi hàng dữ liệu có một cột
     {@link android.provider.ContactsContract.DataColumns#RAW_CONTACT_ID Data.RAW_CONTACT_ID} chứa
-    giá trị {@link android.provider.BaseColumns#_ID RawContacts._ID} của
+    giá trị {@code android.provider.BaseColumns#_ID RawContacts._ID} của
     hàng {@link android.provider.ContactsContract.RawContacts} mẹ của nó.
 </p>
 <h3 id="RawContactsColumns">Các cột liên lạc thô quan trọng</h3>
@@ -482,16 +482,16 @@ page.title=Trình cung cấp Danh bạ
 </p>
 <p>
     Bảng {@link android.provider.ContactsContract.Contacts} cũng có cột
-    {@link android.provider.ContactsContract.ContactsColumns#LOOKUP_KEY} mà là một liên kết
+    {@code android.provider.ContactsContract.ContactsColumns#LOOKUP_KEY} mà là một liên kết
     "cố định" với hàng liên lạc đó. Vì Trình cung cấp Danh bạ tự động duy trì
-    các liên lạc, nó có thể thay đổi giá trị {@link android.provider.BaseColumns#_ID} của một hàng liên lạc
+    các liên lạc, nó có thể thay đổi giá trị {@code android.provider.BaseColumns#_ID} của một hàng liên lạc
     hồi đáp lại một sự tổng hợp hoặc đồng bộ. Ngay cả khi điều này xảy ra, URI nội dung
     {@link android.provider.ContactsContract.Contacts#CONTENT_LOOKUP_URI} kết hợp với
-    {@link android.provider.ContactsContract.ContactsColumns#LOOKUP_KEY} của liên lạc sẽ vẫn
+    {@code android.provider.ContactsContract.ContactsColumns#LOOKUP_KEY} của liên lạc sẽ vẫn
     chỉ về hàng liên lạc đó, vì thế bạn có thể sử dụng
-    {@link android.provider.ContactsContract.ContactsColumns#LOOKUP_KEY}
+    {@code android.provider.ContactsContract.ContactsColumns#LOOKUP_KEY}
     để duy trì các liên kết đến liên lạc "yêu thích", v.v. Cột này có định dạng riêng không
-    liên quan tới định dạng của cột {@link android.provider.BaseColumns#_ID}.
+    liên quan tới định dạng của cột {@code android.provider.BaseColumns#_ID}.
 </p>
 <p>
     Hình 3 minh họa mối liên quan giữa ba bảng chính này với nhau.
@@ -601,13 +601,13 @@ page.title=Trình cung cấp Danh bạ
     Truy cập hồ sơ người dùng đòi hỏi phải có các quyền đặc biệt. Ngoài các quyền
     {@link android.Manifest.permission#READ_CONTACTS} và
     {@link android.Manifest.permission#WRITE_CONTACTS} cần để đọc và ghi, truy cập
-    hồ sơ người dùng còn yêu cầu quyền {@link android.Manifest.permission#READ_PROFILE} và
-    {@link android.Manifest.permission#WRITE_PROFILE} tương ứng cho quyền truy cập đọc và
+    hồ sơ người dùng còn yêu cầu quyền {@code android.Manifest.permission#READ_PROFILE} và
+    {@code android.Manifest.permission#WRITE_PROFILE} tương ứng cho quyền truy cập đọc và
     ghi.
 </p>
 <p>
     Nhớ rằng bạn nên coi hồ sơ của một người dùng là nội dung nhạy cảm. Quyền
-    {@link android.Manifest.permission#READ_PROFILE} cho phép bạn truy cập dữ liệu xác định cá nhân
+    {@code android.Manifest.permission#READ_PROFILE} cho phép bạn truy cập dữ liệu xác định cá nhân
     của người dùng thiết bị. Chắc chắn phải nói cho người dùng biết lý do tại sao
     bạn cần các quyền truy cập hồ sơ người dùng trong phần mô tả ứng dụng của mình.
 </p>
@@ -978,7 +978,7 @@ public Loader&lt;Cursor&gt; onCreateLoader(int id, Bundle args) {
     Khi bạn đang chèn một hàng liên lạc thô mới và các hàng dữ liệu liên kết của nó như một tập hợp các đối tượng
     {@link android.content.ContentProviderOperation}, bạn phải liên kết các hàng dữ liệu với
     hàng liên lạc thô bằng cách chèn giá trị
-    {@link android.provider.BaseColumns#_ID} của liên lạc thô làm giá trị
+    {@code android.provider.BaseColumns#_ID} của liên lạc thô làm giá trị
     {@link android.provider.ContactsContract.DataColumns#RAW_CONTACT_ID}. Tuy nhiên, giá trị
     này không có sẵn khi bạn đang tạo {@link android.content.ContentProviderOperation}
     cho hàng dữ liệu, vì bạn chưa áp dụng
@@ -1011,7 +1011,7 @@ public Loader&lt;Cursor&gt; onCreateLoader(int id, Bundle args) {
             trung gian. Giá trị <code>previousResult</code> là chỉ mục
             của một trong những kết quả này, nó được truy xuất và lưu giữ với giá trị <code>key</code>
 . Điều này cho phép bạn chèn một bản ghi liên lạc thô mới và nhận lại giá trị
-            {@link android.provider.BaseColumns#_ID} của nó, rồi thực hiện một "tham chiếu ngược" về
+            {@code android.provider.BaseColumns#_ID} của nó, rồi thực hiện một "tham chiếu ngược" về
             giá trị đó khi bạn thêm một hàng {@link android.provider.ContactsContract.Data}.
             <p>
                 Toàn bộ mảng kết quả được tạo khi bạn lần đầu gọi
@@ -1091,7 +1091,7 @@ protected void createContactEntry() {
     để nhận
     {@link android.provider.ContactsContract.DataColumns#RAW_CONTACT_ID}. Tham chiếu đó sẽ trỏ
     ngược về đối tượng {@link android.content.ContentProviderResult} từ thao tác đầu tiên,
-    là thao tác thêm hàng liên lạc thô và trả về giá trị {@link android.provider.BaseColumns#_ID}
+    là thao tác thêm hàng liên lạc thô và trả về giá trị {@code android.provider.BaseColumns#_ID}
     mới của nó. Kết quả là, mỗi hàng dữ liệu được tự động liên kết bởi
     {@link android.provider.ContactsContract.DataColumns#RAW_CONTACT_ID}
     của nó với hàng {@link android.provider.ContactsContract.RawContacts} mới mà nó thuộc về.
@@ -1231,7 +1231,7 @@ protected void createContactEntry() {
         {@link android.content.ContentProviderOperation#newAssertQuery(Uri)}. Đối với URI nội dung,
         sử dụng {@link android.provider.ContactsContract.RawContacts#CONTENT_URI
         RawContacts.CONTENT_URI}
-        với {@link android.provider.BaseColumns#_ID} của liên lạc thô được nối với nó.
+        với {@code android.provider.BaseColumns#_ID} của liên lạc thô được nối với nó.
     </li>
     <li>
         Đối với đối tượng {@link android.content.ContentProviderOperation.Builder}, hãy gọi
@@ -1821,8 +1821,8 @@ mà cung cấp dữ liệu cụ thể cho
     </dl>
 <h2 id="SocialStream">Dữ liệu từ Luồng Xã hội</h2>
 <p>
-    Các bảng {@link android.provider.ContactsContract.StreamItems} và 
-    {@link android.provider.ContactsContract.StreamItemPhotos} quản lý
+    Các bảng {@code android.provider.ContactsContract.StreamItems} và 
+    {@code android.provider.ContactsContract.StreamItemPhotos} quản lý
     dữ liệu đến từ các mạng xã hội. Bạn có thể ghi một trình điều hợp đồng bộ mà thêm dữ liệu luồng từ
     mạng của chính mình vào những bảng này, hoặc bạn có thể đọc dữ liệu luồng từ những bảng này và
     hiển thị nó trong ứng dụng của chính mình, hoặc cả hai. Với những tính năng này, các dịch vụ và ứng dụng
@@ -1831,7 +1831,7 @@ mà cung cấp dữ liệu cụ thể cho
 <h3 id="StreamText">Văn bản từ luồng xã hội</h3>
 <p>
     Các mục dòng dữ liệu luôn được liên kết với một liên lạc thô. 
-    {@link android.provider.ContactsContract.StreamItemsColumns#RAW_CONTACT_ID} liên kết với giá trị
+    {@code android.provider.ContactsContract.StreamItemsColumns#RAW_CONTACT_ID} liên kết với giá trị
     <code>_ID</code> của liên lạc thô mới. Loại tài khoản và tên tài khoản của liên lạc thô
     cũng được lưu giữ trong hàng mục dòng.
 </p>
@@ -1840,14 +1840,14 @@ mà cung cấp dữ liệu cụ thể cho
 </p>
 <dl>
     <dt>
-        {@link android.provider.ContactsContract.StreamItemsColumns#ACCOUNT_TYPE}
+        {@code android.provider.ContactsContract.StreamItemsColumns#ACCOUNT_TYPE}
     </dt>
     <dd>
         <strong>Bắt buộc.</strong> Loại tài khoản của người dùng đối với liên lạc thô được liên kết với mục dòng
         này. Nhớ đặt giá trị này khi bạn chèn một mục dòng.
     </dd>
     <dt>
-        {@link android.provider.ContactsContract.StreamItemsColumns#ACCOUNT_NAME}
+        {@code android.provider.ContactsContract.StreamItemsColumns#ACCOUNT_NAME}
     </dt>
     <dd>
         <strong>Bắt buộc.</strong> Tên tài khoản của người dùng đối với liên lạc thô được liên kết với mục dòng
@@ -1861,30 +1861,30 @@ mà cung cấp dữ liệu cụ thể cho
         một mục dòng:
         <ul>
             <li>
-                {@link android.provider.ContactsContract.StreamItemsColumns#CONTACT_ID}: Giá trị
-                {@link android.provider.BaseColumns#_ID} của liên lạc mà mục dòng
+                {@code android.provider.ContactsContract.StreamItemsColumns#CONTACT_ID}: Giá trị
+                {@code android.provider.BaseColumns#_ID} của liên lạc mà mục dòng
                 này được liên kết với.
             </li>
             <li>
-                {@link android.provider.ContactsContract.StreamItemsColumns#CONTACT_LOOKUP_KEY}: Giá trị
-                {@link android.provider.ContactsContract.ContactsColumns#LOOKUP_KEY} của liên lạc
+                {@code android.provider.ContactsContract.StreamItemsColumns#CONTACT_LOOKUP_KEY}: Giá trị
+                {@code android.provider.ContactsContract.ContactsColumns#LOOKUP_KEY} của liên lạc
                 mà mục dòng này được liên kết với.
             </li>
             <li>
-                {@link android.provider.ContactsContract.StreamItemsColumns#RAW_CONTACT_ID}: Giá trị
-                {@link android.provider.BaseColumns#_ID} của liên lạc thô mà mục dòng này
+                {@code android.provider.ContactsContract.StreamItemsColumns#RAW_CONTACT_ID}: Giá trị
+                {@code android.provider.BaseColumns#_ID} của liên lạc thô mà mục dòng này
                 được liên kết với.
             </li>
         </ul>
     </dd>
     <dt>
-        {@link android.provider.ContactsContract.StreamItemsColumns#COMMENTS}
+        {@code android.provider.ContactsContract.StreamItemsColumns#COMMENTS}
     </dt>
     <dd>
         Tùy chọn. Lưu giữ thông tin tóm tắt mà bạn có thể hiển thị ở phần đầu của một mục dòng.
     </dd>
     <dt>
-        {@link android.provider.ContactsContract.StreamItemsColumns#TEXT}
+        {@code android.provider.ContactsContract.StreamItemsColumns#TEXT}
     </dt>
     <dd>
         Văn bản của mục dòng, hoặc là nội dung đã được đăng bởi nguồn của mục đó,
@@ -1894,7 +1894,7 @@ mà cung cấp dữ liệu cụ thể cho
         cắt ngắn bằng dấu ba chấm các nội dung dài, nhưng sẽ cố gắng tránh làm hỏng các tag.
     </dd>
     <dt>
-        {@link android.provider.ContactsContract.StreamItemsColumns#TIMESTAMP}
+        {@code android.provider.ContactsContract.StreamItemsColumns#TIMESTAMP}
     </dt>
     <dd>
         Xâu văn bản chứa thời gian mà mục dòng được chèn hoặc cập nhật, có
@@ -1905,42 +1905,42 @@ mà cung cấp dữ liệu cụ thể cho
 </dl>
 <p>
     Để hiển thị thông tin nhận dạng cho các mục dòng của bạn, hãy sử dụng
-    {@link android.provider.ContactsContract.StreamItemsColumns#RES_ICON},
-    {@link android.provider.ContactsContract.StreamItemsColumns#RES_LABEL}, và
-    {@link android.provider.ContactsContract.StreamItemsColumns#RES_PACKAGE} để liên kết với các tài nguyên
+    {@code android.provider.ContactsContract.StreamItemsColumns#RES_ICON},
+    {@code android.provider.ContactsContract.StreamItemsColumns#RES_LABEL}, và
+    {@code android.provider.ContactsContract.StreamItemsColumns#RES_PACKAGE} để liên kết với các tài nguyên
     trong ứng dụng của mình.
 </p>
 <p>
-    Bảng {@link android.provider.ContactsContract.StreamItems} chứa các cột
-    {@link android.provider.ContactsContract.StreamItemsColumns#SYNC1} thông qua
-    {@link android.provider.ContactsContract.StreamItemsColumns#SYNC4} dành riêng để sử dụng
+    Bảng {@code android.provider.ContactsContract.StreamItems} chứa các cột
+    {@code android.provider.ContactsContract.StreamItemsColumns#SYNC1} thông qua
+    {@code android.provider.ContactsContract.StreamItemsColumns#SYNC4} dành riêng để sử dụng
     trình điều hợp đồng bộ.
 </p>
 <h3 id="StreamPhotos">Ảnh từ luồng xã hội</h3>
 <p>
-   Bảng {@link android.provider.ContactsContract.StreamItemPhotos} lưu giữ ảnh được liên kết
+   Bảng {@code android.provider.ContactsContract.StreamItemPhotos} lưu giữ ảnh được liên kết
    với một mục dòng. Cột
-   {@link android.provider.ContactsContract.StreamItemPhotosColumns#STREAM_ITEM_ID} của bảng
-   liên kết với các giá trị trong {@link android.provider.BaseColumns#_ID} của bảng
-   {@link android.provider.ContactsContract.StreamItems}. Các tham chiếu ảnh được lưu giữ trong
+   {@code android.provider.ContactsContract.StreamItemPhotosColumns#STREAM_ITEM_ID} của bảng
+   liên kết với các giá trị trong {@code android.provider.BaseColumns#_ID} của bảng
+   {@code android.provider.ContactsContract.StreamItems}. Các tham chiếu ảnh được lưu giữ trong
    bảng ở những cột này:
 </p>
 <dl>
     <dt>
-        Cột {@link android.provider.ContactsContract.StreamItemPhotos#PHOTO} (một BLOB).
+        Cột {@code android.provider.ContactsContract.StreamItemPhotos#PHOTO} (một BLOB).
     </dt>
     <dd>
         Biểu diễn dạng nhị phân của ảnh, được trình cung cấp đổi kích cỡ để lưu giữ và hiển thị.
         Cột này có sẵn để tương thích ngược với các phiên bản trước của Trình cung cấp
         Danh bạ mà đã sử dụng nó để lưu giữ ảnh. Tuy nhiên, trong phiên bản hiện tại
         bạn không nên sử dụng cột này để lưu giữ ảnh. Thay vào đó, hãy sử dụng
-        hoặc {@link android.provider.ContactsContract.StreamItemPhotosColumns#PHOTO_FILE_ID} hoặc 
-        {@link android.provider.ContactsContract.StreamItemPhotosColumns#PHOTO_URI} (cả hai
+        hoặc {@code android.provider.ContactsContract.StreamItemPhotosColumns#PHOTO_FILE_ID} hoặc 
+        {@code android.provider.ContactsContract.StreamItemPhotosColumns#PHOTO_URI} (cả hai
         đều được mô tả trong các điểm sau) để lưu giữ ảnh trong một tệp. Lúc này, cột này
         chứa một hình thu nhỏ của ảnh sẵn sàng để đọc.
     </dd>
     <dt>
-        {@link android.provider.ContactsContract.StreamItemPhotosColumns#PHOTO_FILE_ID}
+        {@code android.provider.ContactsContract.StreamItemPhotosColumns#PHOTO_FILE_ID}
     </dt>
     <dd>
         Một mã định danh dạng số của ảnh cho một liên lạc thô. Nối giá trị này với hằng số
@@ -1950,7 +1950,7 @@ mà cung cấp dữ liệu cụ thể cho
         openAssetFileDescriptor()} để nhận một điều khiển (handle) cho tệp ảnh.
     </dd>
     <dt>
-        {@link android.provider.ContactsContract.StreamItemPhotosColumns#PHOTO_URI}
+        {@code android.provider.ContactsContract.StreamItemPhotosColumns#PHOTO_URI}
     </dt>
     <dd>
         Một URI nội dung trỏ trực tiếp tới tệp ảnh cho ảnh được đại diện bởi hàng này.
@@ -1965,27 +1965,27 @@ mà cung cấp dữ liệu cụ thể cho
     <ul>
         <li>
             Những bảng này yêu cầu quyền truy cập bổ sung. Để đọc từ chúng, ứng dụng của bạn
-            phải có quyền {@link android.Manifest.permission#READ_SOCIAL_STREAM}. Để
+            phải có quyền {@code android.Manifest.permission#READ_SOCIAL_STREAM}. Để
             sửa đổi chúng, ứng dụng của bạn phải có quyền
-            {@link android.Manifest.permission#WRITE_SOCIAL_STREAM}.
+            {@code android.Manifest.permission#WRITE_SOCIAL_STREAM}.
         </li>
         <li>
-            Đối với bảng {@link android.provider.ContactsContract.StreamItems}, số hàng
+            Đối với bảng {@code android.provider.ContactsContract.StreamItems}, số hàng
             được lưu giữ cho mỗi liên lạc thô sẽ bị giới hạn. Sau khi đạt đến giới hạn này,
             Trình cung cấp Danh bạ sẽ tạo khoảng trống cho các hàng mục dòng mới bằng cách tự động xóa
             những hàng có
-            {@link android.provider.ContactsContract.StreamItemsColumns#TIMESTAMP} lâu nhất. Để nhận
+            {@code android.provider.ContactsContract.StreamItemsColumns#TIMESTAMP} lâu nhất. Để nhận
             giới hạn, hãy phát hành một truy vấn tới URI nội dung
-            {@link android.provider.ContactsContract.StreamItems#CONTENT_LIMIT_URI}. Bạn có thể để
+            {@code android.provider.ContactsContract.StreamItems#CONTENT_LIMIT_URI}. Bạn có thể để
             tất cả các tham đối khác ngoài URI nội dung được đặt về <code>null</code>. Truy vấn
             trả về một Con chạy chứa một hàng đơn, với cột đơn
-            {@link android.provider.ContactsContract.StreamItems#MAX_ITEMS}.
+            {@code android.provider.ContactsContract.StreamItems#MAX_ITEMS}.
         </li>
     </ul>
 
 <p>
-    Lớp {@link android.provider.ContactsContract.StreamItems.StreamItemPhotos} định nghĩa một
-    bảng con {@link android.provider.ContactsContract.StreamItemPhotos} chứa các hàng ảnh
+    Lớp {@code android.provider.ContactsContract.StreamItems.StreamItemPhotos} định nghĩa một
+    bảng con {@code android.provider.ContactsContract.StreamItemPhotos} chứa các hàng ảnh
     cho một mục dòng đơn.
 </p>
 <h3 id="SocialStreamInteraction">Tương tác từ luồng xã hội</h3>
@@ -1998,8 +1998,8 @@ mà cung cấp dữ liệu cụ thể cho
         <li>
             Bằng cách đồng bộ dịch vụ mạng xã hội của bạn với Trình cung cấp Danh bạ bằng một trình điều hợp
             đồng bộ, bạn có thể truy xuất hoạt động gần đây đối với danh bạ của một người dùng và lưu giữ nó trong
-            các bảng {@link android.provider.ContactsContract.StreamItems} và
-            {@link android.provider.ContactsContract.StreamItemPhotos} để sử dụng sau.
+            các bảng {@code android.provider.ContactsContract.StreamItems} và
+            {@code android.provider.ContactsContract.StreamItemPhotos} để sử dụng sau.
         </li>
         <li>
             Bên cạnh việc đồng bộ hoá thường xuyên, bạn có thể kích khởi trình điều hợp đồng bộ của mình để truy xuất
@@ -2330,7 +2330,7 @@ mà cung cấp dữ liệu cụ thể cho
     {@link android.provider.ContactsContract.CommonDataKinds.Photo#CONTENT_ITEM_TYPE
     Photo.CONTENT_ITEM_TYPE}. Cột
     {@link android.provider.ContactsContract.RawContactsColumns#CONTACT_ID} của hàng được liên kết với cột
-    {@link android.provider.BaseColumns#_ID} của liên lạc thô mà nó thuộc về.
+    {@code android.provider.BaseColumns#_ID} của liên lạc thô mà nó thuộc về.
     Lớp {@link android.provider.ContactsContract.Contacts.Photo} định nghĩa một bảng con của
     {@link android.provider.ContactsContract.Contacts} chứa thông tin ảnh về ảnh chính
     của một liên lạc, đây là ảnh chính của liên lạc thô chính của liên lạc. Tương tự,
@@ -2344,13 +2344,13 @@ mà cung cấp dữ liệu cụ thể cho
     việc truy xuất thông tin ảnh. Không có lớp thuận tiện cho việc truy xuất hình thu nhỏ
     chính đối với một liên lạc thô, nhưng bạn có thể gửi một truy vấn tới bảng
     {@link android.provider.ContactsContract.Data}, chọn
-    {@link android.provider.BaseColumns#_ID} của liên lạc thô, 
+    {@code android.provider.BaseColumns#_ID} của liên lạc thô, 
     {@link android.provider.ContactsContract.CommonDataKinds.Photo#CONTENT_ITEM_TYPE
     Photo.CONTENT_ITEM_TYPE}, và cột {@link android.provider.ContactsContract.Data#IS_PRIMARY}
     để tìm hàng ảnh chính của liên lạc thô.
 </p>
 <p>
     Dữ liệu từ luồng xã hội đối với một người cũng có thể bao gồm ảnh. Những ảnh này được lưu giữ trong bảng
-    {@link android.provider.ContactsContract.StreamItemPhotos}, được mô tả chi tiết hơn
+    {@code android.provider.ContactsContract.StreamItemPhotos}, được mô tả chi tiết hơn
     trong phần <a href="#StreamPhotos">Ảnh từ luồng xã hội</a>.
 </p>

@@ -57,7 +57,7 @@ page.title=Поставщик контактов
     <li>{@link android.provider.ContactsContract.Contacts}</li>
     <li>{@link android.provider.ContactsContract.RawContacts}</li>
     <li>{@link android.provider.ContactsContract.Data}</li>
-    <li>{@link android.provider.ContactsContract.StreamItems}</li>
+    <li>{@code android.provider.ContactsContract.StreamItems}</li>
 </ol>
 <h2>Образцы кода по теме</h2>
 <ol>
@@ -170,7 +170,7 @@ page.title=Поставщик контактов
 {@link android.provider.ContactsContract.RawContacts}. Вместо этого они хранятся в одной или нескольких
 строках в таблице {@link android.provider.ContactsContract.Data}. В каждой строке данных имеется
 столбец {@link android.provider.ContactsContract.DataColumns#RAW_CONTACT_ID Data.RAW_CONTACT_ID},
-в котором содержится значение {@link android.provider.BaseColumns#_ID RawContacts._ID} его
+в котором содержится значение {@code android.provider.BaseColumns#_ID RawContacts._ID} его
 родительской строки{@link android.provider.ContactsContract.RawContacts}.
 </p>
 <h3 id="RawContactsColumns">Важные столбцы необработанных контактов</h3>
@@ -482,16 +482,16 @@ Email.CONTENT_ITEM_TYPE}, в которой в столбце
 </p>
 <p>
     В таблице {@link android.provider.ContactsContract.Contacts} также имеется столбец
-{@link android.provider.ContactsContract.ContactsColumns#LOOKUP_KEY}, который выступает в роли
+{@code android.provider.ContactsContract.ContactsColumns#LOOKUP_KEY}, который выступает в роли
 «постоянной ссылки» на строку контакта. Поскольку поставщик контактов автоматически сохраняет контакты,
-в ответ на агрегирование или синхронизацию он может изменить значение {@link android.provider.BaseColumns#_ID}
+в ответ на агрегирование или синхронизацию он может изменить значение {@code android.provider.BaseColumns#_ID}
 строки контакта. Даже если это произойдет, URI контента
 {@link android.provider.ContactsContract.Contacts#CONTENT_LOOKUP_URI}, объединенный с
-{@link android.provider.ContactsContract.ContactsColumns#LOOKUP_KEY} контакта, будет
+{@code android.provider.ContactsContract.ContactsColumns#LOOKUP_KEY} контакта, будет
 по-прежнему указывать на строку контакта, поэтому вы можете смело использовать
-{@link android.provider.ContactsContract.ContactsColumns#LOOKUP_KEY}
+{@code android.provider.ContactsContract.ContactsColumns#LOOKUP_KEY}
 для сохранения ссылок на «избранные» контакты и др. Столбец имеет собственный формат,
-который не связан с форматом столбца{@link android.provider.BaseColumns#_ID}.
+который не связан с форматом столбца{@code android.provider.BaseColumns#_ID}.
 </p>
 <p>
     На рисунке 3 показаны взаимосвязи этих трех основных таблиц друг с другом.
@@ -601,13 +601,13 @@ Email.CONTENT_ITEM_TYPE}, в которой в столбце
     Для доступа к профилю пользователя требуются особые разрешения. Кроме разрешений
 {@link android.Manifest.permission#READ_CONTACTS} и
 {@link android.Manifest.permission#WRITE_CONTACTS}, которые требуются для чтения и записи, для доступа к профилю пользователя необходимы разрешения
-{@link android.Manifest.permission#READ_PROFILE} и
-{@link android.Manifest.permission#WRITE_PROFILE}
+{@code android.Manifest.permission#READ_PROFILE} и
+{@code android.Manifest.permission#WRITE_PROFILE}
 на чтение и запись соответственно.
 </p>
 <p>
     Всегда следует помнить, что профиль пользователя представляет собой конфиденциальную информацию. Разрешение
-{@link android.Manifest.permission#READ_PROFILE} предоставляет вам доступ к личной информации на устройстве
+{@code android.Manifest.permission#READ_PROFILE} предоставляет вам доступ к личной информации на устройстве
 пользователя. В описании своего приложения обязательно укажите, для
 чего вам требуется доступ к профилю пользователя.
 </p>
@@ -978,7 +978,7 @@ onLoadFinished()}. Одним их входящих аргументов для 
     При вставке новой строки необработанного контакта и связанных с ним рядов данных в виде набора объектов
 {@link android.content.ContentProviderOperation} вам приходится связывать строки данных
 со строкой необработанного контакта путем вставки значения
-{@link android.provider.BaseColumns#_ID} необработанного контакта в виде значения
+{@code android.provider.BaseColumns#_ID} необработанного контакта в виде значения
 {@link android.provider.ContactsContract.DataColumns#RAW_CONTACT_ID}. Однако это значение
 недоступно, когда вы создаете{@link android.content.ContentProviderOperation}
 для строки данных, поскольку вы еще не применили
@@ -1011,7 +1011,7 @@ onLoadFinished()}. Одним их входящих аргументов для 
 промежуточном массиве результатов. Значением <code>previousResult</code> является индекс
 одного из этих результатов, который извлекается и хранится со значением
 <code>key</code>. Благодаря этому можно вставить новую запись необработанного контакта и получить обратно его значение
-{@link android.provider.BaseColumns#_ID}, а затем создать «обратную ссылку» на
+{@code android.provider.BaseColumns#_ID}, а затем создать «обратную ссылку» на
 значение при добавлении строки {@link android.provider.ContactsContract.Data}.
             <p>
                 Целиком весь результат создается при первом вызове метода
@@ -1092,7 +1092,7 @@ protected void createContactEntry() {
 {@link android.provider.ContactsContract.DataColumns#RAW_CONTACT_ID}. Ссылка возвращается
 обратно к объекту {@link android.content.ContentProviderResult} из первой операции,
 в результате чего добавляется строка необработанного контакта и возвращается его новое значение
-{@link android.provider.BaseColumns#_ID}. После этого каждая строка данных автоматически связывается по своему
+{@code android.provider.BaseColumns#_ID}. После этого каждая строка данных автоматически связывается по своему
 {@link android.provider.ContactsContract.DataColumns#RAW_CONTACT_ID}
 с новой строкой {@link android.provider.ContactsContract.RawContacts}, которой она принадлежит.
 </p>
@@ -1231,7 +1231,7 @@ withYieldAllowed()}, который задает предел:
 {@link android.content.ContentProviderOperation#newAssertQuery(Uri)}. Для URI контента
 используйте {@link android.provider.ContactsContract.RawContacts#CONTENT_URI
 RawContacts.CONTENT_URI},
-добавив к нему {@link android.provider.BaseColumns#_ID} необработанного контакта.
+добавив к нему {@code android.provider.BaseColumns#_ID} необработанного контакта.
     </li>
     <li>
         Для объекта {@link android.content.ContentProviderOperation.Builder} вызовите метод
@@ -1821,9 +1821,9 @@ URI веб-службы для синхронизации с поставщик�
     </dl>
 <h2 id="SocialStream">Потоки данных из социальных сетей</h2>
 <p>
-    Для управления входящими данными из социальных сетей используются таблицы {@link android.provider.ContactsContract.StreamItems}
+    Для управления входящими данными из социальных сетей используются таблицы {@code android.provider.ContactsContract.StreamItems}
 и
-{@link android.provider.ContactsContract.StreamItemPhotos}. Можно создать адаптер синхронизации, который добавляет поток данных
+{@code android.provider.ContactsContract.StreamItemPhotos}. Можно создать адаптер синхронизации, который добавляет поток данных
 из вашей собственной сети в эти таблицы, либо вы можете считывать поток данных из этих таблиц и отображать
 их в собственном приложении. Можно также реализовать оба этих способа. С помощью этих функций вы можете интегрировать службы социальных сетей
 в компоненты Android для работы с социальными сетями.
@@ -1831,7 +1831,7 @@ URI веб-службы для синхронизации с поставщик�
 <h3 id="StreamText">Текст из потока данных из социальных сетей</h3>
 <p>
     Элементы потока всегда ассоциируются с необработанным контактом. Идентификатор
-{@link android.provider.ContactsContract.StreamItemsColumns#RAW_CONTACT_ID} связывается со значением
+{@code android.provider.ContactsContract.StreamItemsColumns#RAW_CONTACT_ID} связывается со значением
 <code>_ID</code> необработанного контакта. Тип аккаунта и его имя для необработанного
 контакта также хранятся в строке элемента потока.
 </p>
@@ -1840,14 +1840,14 @@ URI веб-службы для синхронизации с поставщик�
 </p>
 <dl>
     <dt>
-        {@link android.provider.ContactsContract.StreamItemsColumns#ACCOUNT_TYPE}
+        {@code android.provider.ContactsContract.StreamItemsColumns#ACCOUNT_TYPE}
     </dt>
     <dd>
         <strong>Обязательный.</strong> Тип аккаунта пользователя для необработанного контакта, связанного с
 этим элементом потока. Не забудьте задать это значение при вставке элемента потока.
     </dd>
     <dt>
-        {@link android.provider.ContactsContract.StreamItemsColumns#ACCOUNT_NAME}
+        {@code android.provider.ContactsContract.StreamItemsColumns#ACCOUNT_NAME}
     </dt>
     <dd>
         <strong>Обязательный.</strong> Имя аккаунта пользователя для необработанного контакта, связанного с
@@ -1861,30 +1861,30 @@ URI веб-службы для синхронизации с поставщик�
 указанные ниже столбцы идентификатора.
         <ul>
             <li>
-                {@link android.provider.ContactsContract.StreamItemsColumns#CONTACT_ID}: значение
-{@link android.provider.BaseColumns#_ID} для контакта, с которым ассоциирован
+                {@code android.provider.ContactsContract.StreamItemsColumns#CONTACT_ID}: значение
+{@code android.provider.BaseColumns#_ID} для контакта, с которым ассоциирован
 этот элемент потока.
             </li>
             <li>
-                {@link android.provider.ContactsContract.StreamItemsColumns#CONTACT_LOOKUP_KEY}: значение
-{@link android.provider.ContactsContract.ContactsColumns#LOOKUP_KEY} для контакта, с которым ассоциирован
+                {@code android.provider.ContactsContract.StreamItemsColumns#CONTACT_LOOKUP_KEY}: значение
+{@code android.provider.ContactsContract.ContactsColumns#LOOKUP_KEY} для контакта, с которым ассоциирован
 этот элемент потока.
             </li>
             <li>
-                {@link android.provider.ContactsContract.StreamItemsColumns#RAW_CONTACT_ID}: значение
-{@link android.provider.BaseColumns#_ID} для необработанного контакта, с которым ассоциирован
+                {@code android.provider.ContactsContract.StreamItemsColumns#RAW_CONTACT_ID}: значение
+{@code android.provider.BaseColumns#_ID} для необработанного контакта, с которым ассоциирован
 этот элемент потока.
             </li>
         </ul>
     </dd>
     <dt>
-        {@link android.provider.ContactsContract.StreamItemsColumns#COMMENTS}
+        {@code android.provider.ContactsContract.StreamItemsColumns#COMMENTS}
     </dt>
     <dd>
         Необязательный. В нем хранится сводная информация, которую можно отобразить в начале элемента потока.
     </dd>
     <dt>
-        {@link android.provider.ContactsContract.StreamItemsColumns#TEXT}
+        {@code android.provider.ContactsContract.StreamItemsColumns#TEXT}
     </dt>
     <dd>
         Текст элемента потока: либо контент, опубликованный источником элемента,
@@ -1894,7 +1894,7 @@ URI веб-службы для синхронизации с поставщик�
 или заменить его часть многоточием, однако он попытается избежать нарушения тегов.
     </dd>
     <dt>
-        {@link android.provider.ContactsContract.StreamItemsColumns#TIMESTAMP}
+        {@code android.provider.ContactsContract.StreamItemsColumns#TIMESTAMP}
     </dt>
     <dd>
         Текстовая строка с информацией о времени вставки или обновления элемента в
@@ -1905,42 +1905,42 @@ URI веб-службы для синхронизации с поставщик�
 </dl>
 <p>
     Для отображения идентификационной информации для элементов потока воспользуйтесь
-{@link android.provider.ContactsContract.StreamItemsColumns#RES_ICON},
-{@link android.provider.ContactsContract.StreamItemsColumns#RES_LABEL} и
-{@link android.provider.ContactsContract.StreamItemsColumns#RES_PACKAGE} для связывания с ресурсами
+{@code android.provider.ContactsContract.StreamItemsColumns#RES_ICON},
+{@code android.provider.ContactsContract.StreamItemsColumns#RES_LABEL} и
+{@code android.provider.ContactsContract.StreamItemsColumns#RES_PACKAGE} для связывания с ресурсами
 в вашем приложении.
 </p>
 <p>
-    В таблице {@link android.provider.ContactsContract.StreamItems} также имеются столбцы
-{@link android.provider.ContactsContract.StreamItemsColumns#SYNC1}—{@link android.provider.ContactsContract.StreamItemsColumns#SYNC4},
+    В таблице {@code android.provider.ContactsContract.StreamItems} также имеются столбцы
+{@code android.provider.ContactsContract.StreamItemsColumns#SYNC1}—{@code android.provider.ContactsContract.StreamItemsColumns#SYNC4},
 которые предназначены исключительно для
 адаптеров синхронизации.
 </p>
 <h3 id="StreamPhotos">Фотографии из потока данных из социальных сетей</h3>
 <p>
    Фотографии, связанные с элементом потока, хранятся в таблице
-{@link android.provider.ContactsContract.StreamItemPhotos}. Столбец
-{@link android.provider.ContactsContract.StreamItemPhotosColumns#STREAM_ITEM_ID}
-в этой таблице связан со столбцом {@link android.provider.BaseColumns#_ID}
-в таблице {@link android.provider.ContactsContract.StreamItems}. Ссылки на фотографии хранятся в следующих столбцах
+{@code android.provider.ContactsContract.StreamItemPhotos}. Столбец
+{@code android.provider.ContactsContract.StreamItemPhotosColumns#STREAM_ITEM_ID}
+в этой таблице связан со столбцом {@code android.provider.BaseColumns#_ID}
+в таблице {@code android.provider.ContactsContract.StreamItems}. Ссылки на фотографии хранятся в следующих столбцах
 таблицы:
 </p>
 <dl>
     <dt>
-        Столбец {@link android.provider.ContactsContract.StreamItemPhotos#PHOTO} (объект BLOB).
+        Столбец {@code android.provider.ContactsContract.StreamItemPhotos#PHOTO} (объект BLOB).
     </dt>
     <dd>
         Представление фотографии в двоичном формате и с измененным поставщиком размером для ее хранения и отображения.
         Этот столбец доступен для обеспечения обратной совместимости с предыдущими версиями поставщика
 контактов, которые использовались для хранения фотографий. Однако в текущей версии
 поставщика мы не рекомендуем использовать этот столбец для хранения фотографий. Вместо этого воспользуйтесь столбцом
-{@link android.provider.ContactsContract.StreamItemPhotosColumns#PHOTO_FILE_ID} или
-{@link android.provider.ContactsContract.StreamItemPhotosColumns#PHOTO_URI} (или обоими
+{@code android.provider.ContactsContract.StreamItemPhotosColumns#PHOTO_FILE_ID} или
+{@code android.provider.ContactsContract.StreamItemPhotosColumns#PHOTO_URI} (или обоими
 столбцами, как описано далее) для хранения фотографий в файле. В этом
 столбце теперь хранятся миниатюры фотографий, доступных для чтения.
     </dd>
     <dt>
-        {@link android.provider.ContactsContract.StreamItemPhotosColumns#PHOTO_FILE_ID}
+        {@code android.provider.ContactsContract.StreamItemPhotosColumns#PHOTO_FILE_ID}
     </dt>
     <dd>
         Числовой идентификатор фотографии для необработанного контакта. Добавьте это значение к константе
@@ -1950,7 +1950,7 @@ URI веб-службы для синхронизации с поставщик�
 openAssetFileDescriptor()}, чтобы получить средство обработки файла фотографии.
     </dd>
     <dt>
-        {@link android.provider.ContactsContract.StreamItemPhotosColumns#PHOTO_URI}
+        {@code android.provider.ContactsContract.StreamItemPhotosColumns#PHOTO_URI}
     </dt>
     <dd>
         URI контента, указывающий на файл фотографии, для фотографии, которая представлена этой строкой.
@@ -1965,27 +1965,27 @@ openAssetFileDescriptor()}, передав в него этот URI, чтобы 
     <ul>
         <li>
             Для работы с этими таблицами требуются дополнительные разрешения на доступ. Для чтения данных из них вашему приложению
-должно быть предоставлено разрешение {@link android.Manifest.permission#READ_SOCIAL_STREAM}. Для
+должно быть предоставлено разрешение {@code android.Manifest.permission#READ_SOCIAL_STREAM}. Для
 изменения таблиц ваше приложение должно иметь разрешение
-{@link android.Manifest.permission#WRITE_SOCIAL_STREAM}.
+{@code android.Manifest.permission#WRITE_SOCIAL_STREAM}.
         </li>
         <li>
-            Для таблицы {@link android.provider.ContactsContract.StreamItems} существует ограничение на количество строк,
+            Для таблицы {@code android.provider.ContactsContract.StreamItems} существует ограничение на количество строк,
 которое можно хранить для каждого необработанного контакта. При достижении этого ограничения
 поставщик контактов освобождает место для новых строк элементов потока путем автоматического удаления
 строк со самой старой меткой
-{@link android.provider.ContactsContract.StreamItemsColumns#TIMESTAMP}. Чтобы получить это ограничение,
+{@code android.provider.ContactsContract.StreamItemsColumns#TIMESTAMP}. Чтобы получить это ограничение,
 запросите URI контента
-{@link android.provider.ContactsContract.StreamItems#CONTENT_LIMIT_URI}. Для всех аргументов,
+{@code android.provider.ContactsContract.StreamItems#CONTENT_LIMIT_URI}. Для всех аргументов,
 отличных от URI контента, можно оставить значение <code>null</code>. Запрос возвращает
 объект Cursor, в котором содержится одна строка с одним столбцом
-{@link android.provider.ContactsContract.StreamItems#MAX_ITEMS}.
+{@code android.provider.ContactsContract.StreamItems#MAX_ITEMS}.
         </li>
     </ul>
 
 <p>
-    Класс {@link android.provider.ContactsContract.StreamItems.StreamItemPhotos} определяет
-дочернюю таблицу объектов {@link android.provider.ContactsContract.StreamItemPhotos}, в которой содержатся
+    Класс {@code android.provider.ContactsContract.StreamItems.StreamItemPhotos} определяет
+дочернюю таблицу объектов {@code android.provider.ContactsContract.StreamItemPhotos}, в которой содержатся
 строки для одного элемента потока.
 </p>
 <h3 id="SocialStreamInteraction">Взаимодействие с потоками данных из социальных сетей</h3>
@@ -1998,8 +1998,8 @@ openAssetFileDescriptor()}, передав в него этот URI, чтобы 
         <li>
             Организовав синхронизацию данных из социальной службы с поставщиком контактов посредством
 адаптера синхронизации, вы можете получать данные о недавней активности контактов пользователя и хранить такие данные в таблицах
-,{@link android.provider.ContactsContract.StreamItems}
-и {@link android.provider.ContactsContract.StreamItemPhotos} для использования в дальнейшем.
+,{@code android.provider.ContactsContract.StreamItems}
+и {@code android.provider.ContactsContract.StreamItemPhotos} для использования в дальнейшем.
         </li>
         <li>
             Помимо регулярной синхронизации, адаптер синхронизации можно настроить на получение
@@ -2330,7 +2330,7 @@ Settings.UNGROUPED_VISIBLE} значение «1». После этого пос
 {@link android.provider.ContactsContract.CommonDataKinds.Photo#CONTENT_ITEM_TYPE
 Photo.CONTENT_ITEM_TYPE} типа MIME. Столбец
 {@link android.provider.ContactsContract.RawContactsColumns#CONTACT_ID} в строке связан со столбцом
-{@link android.provider.BaseColumns#_ID} необработанного контакта, которому он принадлежит.
+{@code android.provider.BaseColumns#_ID} необработанного контакта, которому он принадлежит.
     Класс {@link android.provider.ContactsContract.Contacts.Photo} определяет вложенную таблицу
 {@link android.provider.ContactsContract.Contacts}, в которой содержится информация об основной фотографии
 контакта (которая является основной фотографией основного необработанного контакта этого контакта). Аналогичным образом класс
@@ -2344,13 +2344,13 @@ Photo.CONTENT_ITEM_TYPE} типа MIME. Столбец
 получения информации о фотографии. К сожалению, отсутствует класс для удобного извлечения миниатюры
 основной фотографии необработанного контакта, однако вы можете отправить запрос в таблицу
 {@link android.provider.ContactsContract.Data}, выбрать
-{@link android.provider.BaseColumns#_ID} необработанного контакта,
+{@code android.provider.BaseColumns#_ID} необработанного контакта,
 {@link android.provider.ContactsContract.CommonDataKinds.Photo#CONTENT_ITEM_TYPE
 Photo.CONTENT_ITEM_TYPE} и столбец {@link android.provider.ContactsContract.Data#IS_PRIMARY},
 чтобы найти строку основной фотографии необработанного контакта.
 </p>
 <p>
     Потоки данных из социальных сетей также могут включать фотографии. Они находятся в таблице
-{@link android.provider.ContactsContract.StreamItemPhotos}, дополнительные сведения о которой представлены в разделе
+{@code android.provider.ContactsContract.StreamItemPhotos}, дополнительные сведения о которой представлены в разделе
 <a href="#StreamPhotos">Фотографии из потока данных из социальных сетей</a>.
 </p>

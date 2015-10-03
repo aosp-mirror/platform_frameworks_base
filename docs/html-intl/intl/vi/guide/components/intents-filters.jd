@@ -373,9 +373,7 @@ bạn không nên sử dụng ý định và, nếu có thể, bạn nên vô hi
 Intent sendIntent = new Intent();
 sendIntent.setAction(Intent.ACTION_SEND);
 sendIntent.putExtra(Intent.EXTRA_TEXT, textMessage);
-sendIntent.setType({@link
-        org.apache.http.protocol.HTTP#PLAIN_TEXT_TYPE
-        HTTP.PLAIN_TEXT_TYPE}); // "text/plain" MIME type
+sendIntent.setType("text/plain");
 
 // Verify that the intent will resolve to an activity
 if (sendIntent.resolveActivity(getPackageManager()) != null) {
@@ -550,7 +548,7 @@ khai báo các bộ lọc ý định cho dịch vụ của bạn.</p>
 
 <p class="note"><strong>Lưu ý:</strong>
 Đối với tất cả hoạt động, bạn phải khai báo các bộ lọc ý định của mình trong một tệp bản kê khai.
-Tuy nhiên, các bộ lọc cho hàm nhận quảng bá có thể được đăng ký linh hoạt bằng cách gọi 
+Tuy nhiên, các bộ lọc cho hàm nhận quảng bá có thể được đăng ký linh hoạt bằng cách gọi
 {@link android.content.Context#registerReceiver(BroadcastReceiver, IntentFilter, String,
 Handler) registerReceiver()}. Sau đó, bạn có thể bỏ đăng ký hàm nhận đó bằng {@link
 android.content.Context#unregisterReceiver unregisterReceiver()}. Làm vậy sẽ cho phép ứng dụng của bạn
@@ -672,7 +670,7 @@ startActivity()}. Thay vào đó, bạn phải khai báo loại thành phần th
 các phương pháp để tạo lập {@link android.app.PendingIntent} trên là những phương pháp
 {@link android.app.PendingIntent} duy nhất mà bạn sẽ cần.</p>
 
-<p>Mỗi phương pháp sẽ lấy ứng dụng {@link android.content.Context} hiện tại, 
+<p>Mỗi phương pháp sẽ lấy ứng dụng {@link android.content.Context} hiện tại,
 {@link android.content.Intent} mà bạn muốn bao bọc, và một hoặc nhiều cờ quy định
 cách thức sử dụng ý định (chẳng hạn như ý định có thể được sử dụng nhiều hơn một lần hay không).</p>
 
@@ -704,7 +702,7 @@ về phương diện bộ lọc ý định được khai báo như thế nào tr
 
 <h3 id="ActionTest">Kiểm tra hành động</h3>
 
-<p>Để quy định các hành động của ý định được chấp nhận, một bộ lọc ý định có thể khai báo 0 phần tử 
+<p>Để quy định các hành động của ý định được chấp nhận, một bộ lọc ý định có thể khai báo 0 phần tử
 <a href="{@docRoot}guide/topics/manifest/action-element.html">{@code
 &lt;action&gt;}</a> hoặc nhiều hơn.  Ví dụ:</p>
 
@@ -728,7 +726,7 @@ chứa ít nhất một hành động).</p>
 
 <h3 id="CategoryTest">Kiểm tra thể loại</h3>
 
-<p>Để quy định các thể loại của ý định được chấp nhận, một bộ lọc ý định có thể khai báo 0 phần tử 
+<p>Để quy định các thể loại của ý định được chấp nhận, một bộ lọc ý định có thể khai báo 0 phần tử
 <a href="{@docRoot}guide/topics/manifest/category-element.html">{@code
 &lt;category&gt;}</a> hoặc nhiều hơn.  Ví dụ:</p>
 
@@ -747,7 +745,7 @@ khai báo nhiều thể loại hơn được quy định trong {@link android.co
 luôn vượt qua kiểm tra này, không phụ thuộc vào những thể loại nào được khai báo trong bộ lọc.</p>
 
 <p class="note"><strong>Lưu ý:</strong>
-Android sẽ tự động áp dụng thể loại {@link android.content.Intent#CATEGORY_DEFAULT} 
+Android sẽ tự động áp dụng thể loại {@link android.content.Intent#CATEGORY_DEFAULT}
 cho tất cả ý định không biểu thị được chuyển tới {@link
 android.content.Context#startActivity startActivity()} và {@link
 android.app.Activity#startActivityForResult startActivityForResult()}.
@@ -759,7 +757,7 @@ nêu một thể loại cho {@code "android.intent.category.DEFAULT"} trong các
 
 <h3 id="DataTest">Kiểm tra dữ liệu</h3>
 
-<p>Để quy định dữ liệu của ý định được chấp nhận, một bộ lọc ý định có thể khai báo 0 phần tử 
+<p>Để quy định dữ liệu của ý định được chấp nhận, một bộ lọc ý định có thể khai báo 0 phần tử
 <a href="{@docRoot}guide/topics/manifest/data-element.html">{@code
 &lt;data&gt;}</a> hoặc nhiều hơn.  Ví dụ:</p>
 
@@ -875,7 +873,7 @@ thành phần có thể truy xuất dữ liệu video từ mạng để thực h
 
 <p>Các ý định được so khớp với các bộ lọc ý định không chỉ để khám phá một thành phần
 mục tiêu cần kích hoạt, mà còn để khám phá điều gì đó về tập hợp
-các thành phần trên thiết bị.  Ví dụ, ứng dụng Trang chủ đưa trình khởi chạy ứng dụng 
+các thành phần trên thiết bị.  Ví dụ, ứng dụng Trang chủ đưa trình khởi chạy ứng dụng
 vào bằng cách tìm tất cả hoạt động có bộ lọc ý định mà quy định hành động
 {@link android.content.Intent#ACTION_MAIN} và thể loại
 {@link android.content.Intent#CATEGORY_LAUNCHER}.</p>

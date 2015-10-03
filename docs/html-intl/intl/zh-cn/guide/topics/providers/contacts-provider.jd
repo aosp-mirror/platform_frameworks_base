@@ -57,7 +57,7 @@ page.title=联系人提供程序
     <li>{@link android.provider.ContactsContract.Contacts}</li>
     <li>{@link android.provider.ContactsContract.RawContacts}</li>
     <li>{@link android.provider.ContactsContract.Data}</li>
-    <li>{@link android.provider.ContactsContract.StreamItems}</li>
+    <li>{@code android.provider.ContactsContract.StreamItems}</li>
 </ol>
 <h2>相关示例</h2>
 <ol>
@@ -169,7 +169,7 @@ page.title=联系人提供程序
     原始联系人的大部分数据并不存储在
 {@link android.provider.ContactsContract.RawContacts} 表内，而是存储在
 {@link android.provider.ContactsContract.Data} 表中的一行或多行内。每个数据行都有一个
-{@link android.provider.ContactsContract.DataColumns#RAW_CONTACT_ID Data.RAW_CONTACT_ID} 列，其中包含其父级 {@link android.provider.ContactsContract.RawContacts} 行的 {@link android.provider.BaseColumns#_ID RawContacts._ID} 值。
+{@link android.provider.ContactsContract.DataColumns#RAW_CONTACT_ID Data.RAW_CONTACT_ID} 列，其中包含其父级 {@link android.provider.ContactsContract.RawContacts} 行的 {@code android.provider.BaseColumns#_ID RawContacts._ID} 值。
 
 
 </p>
@@ -482,15 +482,15 @@ page.title=联系人提供程序
 </p>
 <p>
     {@link android.provider.ContactsContract.Contacts} 表还有一个
-{@link android.provider.ContactsContract.ContactsColumns#LOOKUP_KEY} 列，它是一个指向联系人行的“永久性”链接。
-由于联系人提供程序会自动维护联系人，因此可能会在合并或同步时相应地更改联系人行的 {@link android.provider.BaseColumns#_ID} 值。
+{@code android.provider.ContactsContract.ContactsColumns#LOOKUP_KEY} 列，它是一个指向联系人行的“永久性”链接。
+由于联系人提供程序会自动维护联系人，因此可能会在合并或同步时相应地更改联系人行的 {@code android.provider.BaseColumns#_ID} 值。
 
 即使发生这种情况，合并了联系人
-{@link android.provider.ContactsContract.ContactsColumns#LOOKUP_KEY} 的内容 URI
+{@code android.provider.ContactsContract.ContactsColumns#LOOKUP_KEY} 的内容 URI
 {@link android.provider.ContactsContract.Contacts#CONTENT_LOOKUP_URI} 仍将指向联系人行，这样，您就能使用
-{@link android.provider.ContactsContract.ContactsColumns#LOOKUP_KEY}
+{@code android.provider.ContactsContract.ContactsColumns#LOOKUP_KEY}
 保持指向“最喜爱”联系人的链接，以及执行其他操作。
-该列具有其自己的格式，与 {@link android.provider.BaseColumns#_ID} 列的格式无关。
+该列具有其自己的格式，与 {@code android.provider.BaseColumns#_ID} 列的格式无关。
 
 </p>
 <p>
@@ -600,13 +600,13 @@ page.title=联系人提供程序
 <p>
     访问用户个人资料需要特殊权限。除了进行读取和写入所需的
 {@link android.Manifest.permission#READ_CONTACTS} 和
-{@link android.Manifest.permission#WRITE_CONTACTS} 权限外，如果想访问用户个人资料，还分别需要 {@link android.Manifest.permission#READ_PROFILE} 和
-{@link android.Manifest.permission#WRITE_PROFILE} 权限进行读取和写入访问。
+{@link android.Manifest.permission#WRITE_CONTACTS} 权限外，如果想访问用户个人资料，还分别需要 {@code android.Manifest.permission#READ_PROFILE} 和
+{@code android.Manifest.permission#WRITE_PROFILE} 权限进行读取和写入访问。
 
 
 </p>
 <p>
-    请切记，您应该将用户的个人资料视为敏感数据。{@link android.Manifest.permission#READ_PROFILE} 权限让您可以访问设备用户的个人身份识别数据。
+    请切记，您应该将用户的个人资料视为敏感数据。{@code android.Manifest.permission#READ_PROFILE} 权限让您可以访问设备用户的个人身份识别数据。
 
 请务必在您的应用的描述中告知用户您需要用户个人资料访问权限的原因。
 
@@ -977,7 +977,7 @@ onLoadFinished()} 回调。此方法的传入参数之一是一个
 <p>
     当您将一个新原始联系人行及其关联的数据行作为一组
 {@link android.content.ContentProviderOperation} 对象插入时，需要通过将原始联系人的
-{@link android.provider.BaseColumns#_ID} 值作为
+{@code android.provider.BaseColumns#_ID} 值作为
 {@link android.provider.ContactsContract.DataColumns#RAW_CONTACT_ID} 值插入，将数据行链接到原始联系人行。
 不过，当您为数据行创建
 {@link android.content.ContentProviderOperation} 时，该值不可用，因为您尚未对原始联系人行应用
@@ -1011,7 +1011,7 @@ onLoadFinished()} 回调。此方法的传入参数之一是一个
 <code>previousResult</code> 值是其中一个结果的索引，它通过 <code>key</code>
 值进行检索和存储。
 这样，您就可以插入一条新的原始联系人记录，并取回其
-{@link android.provider.BaseColumns#_ID} 值，然后在添加 {@link android.provider.ContactsContract.Data} 行时“向后引用”该值。
+{@code android.provider.BaseColumns#_ID} 值，然后在添加 {@link android.provider.ContactsContract.Data} 行时“向后引用”该值。
 
             <p>
                 系统会在您首次调用
@@ -1089,7 +1089,7 @@ protected void createContactEntry() {
     每个操作生成器对象都使用
 {@link android.content.ContentProviderOperation.Builder#withValueBackReference(String, int) withValueBackReference()}
 来获取
-{@link android.provider.ContactsContract.DataColumns#RAW_CONTACT_ID}。引用指回来自第一次操作的 {@link android.content.ContentProviderResult} 对象，第一次操作就是添加原始联系人行并返回其新 {@link android.provider.BaseColumns#_ID}
+{@link android.provider.ContactsContract.DataColumns#RAW_CONTACT_ID}。引用指回来自第一次操作的 {@link android.content.ContentProviderResult} 对象，第一次操作就是添加原始联系人行并返回其新 {@code android.provider.BaseColumns#_ID}
 值。
 
 结果是，每个数据行都通过其
@@ -1228,7 +1228,7 @@ withYieldAllowed()} 标志，用于设置屈服点：
     <li>
         创建一个适合使用
 {@link android.content.ContentProviderOperation#newAssertQuery(Uri)} 方法强制执行约束
-的 {@link android.content.ContentProviderOperation.Builder} 对象。对于内容 URI，请使用追加有原始联系人 {@link android.provider.BaseColumns#_ID} 的 {@link android.provider.ContactsContract.RawContacts#CONTENT_URI
+的 {@link android.content.ContentProviderOperation.Builder} 对象。对于内容 URI，请使用追加有原始联系人 {@code android.provider.BaseColumns#_ID} 的 {@link android.provider.ContactsContract.RawContacts#CONTENT_URI
 RawContacts.CONTENT_URI}
 。
 
@@ -1821,8 +1821,8 @@ XML 文件 <code>res/xml/syncadapter.xml</code>。而该文件则指定将与联
     </dl>
 <h2 id="SocialStream">社交流数据</h2>
 <p>
-    {@link android.provider.ContactsContract.StreamItems} 表和
-{@link android.provider.ContactsContract.StreamItemPhotos} 表管理来自社交网络的传入数据。
+    {@code android.provider.ContactsContract.StreamItems} 表和
+{@code android.provider.ContactsContract.StreamItemPhotos} 表管理来自社交网络的传入数据。
 您可以编写一个同步适配器，用其将您自己社交网络中的流数据添加到这些表中，也可以从这些表读取流数据并将其显示在您的自有应用中，或者同时采用这两种方法。
 
 利用这些功能，可以将您的社交网络服务和应用集成到 Android 的社交网络体验之中。
@@ -1831,7 +1831,7 @@ XML 文件 <code>res/xml/syncadapter.xml</code>。而该文件则指定将与联
 <h3 id="StreamText">社交流文本</h3>
 <p>
     流项目始终与原始联系人关联。
-{@link android.provider.ContactsContract.StreamItemsColumns#RAW_CONTACT_ID} 链接到原始联系人的 <code>_ID</code> 值。
+{@code android.provider.ContactsContract.StreamItemsColumns#RAW_CONTACT_ID} 链接到原始联系人的 <code>_ID</code> 值。
 原始联系人的帐户类型和帐户名称也存储在流项目行中。
 
 </p>
@@ -1840,14 +1840,14 @@ XML 文件 <code>res/xml/syncadapter.xml</code>。而该文件则指定将与联
 </p>
 <dl>
     <dt>
-        {@link android.provider.ContactsContract.StreamItemsColumns#ACCOUNT_TYPE}
+        {@code android.provider.ContactsContract.StreamItemsColumns#ACCOUNT_TYPE}
     </dt>
     <dd>
         <strong>必备。</strong>与该流项目关联的原始联系人对应的用户帐户类型。
 请记得在插入流项目时设置此值。
     </dd>
     <dt>
-        {@link android.provider.ContactsContract.StreamItemsColumns#ACCOUNT_NAME}
+        {@code android.provider.ContactsContract.StreamItemsColumns#ACCOUNT_NAME}
     </dt>
     <dd>
         <strong>必备。</strong>与该流项目关联的原始联系人对应的用户帐户名称。
@@ -1861,30 +1861,30 @@ XML 文件 <code>res/xml/syncadapter.xml</code>。而该文件则指定将与联
 
         <ul>
             <li>
-                {@link android.provider.ContactsContract.StreamItemsColumns#CONTACT_ID}：此流项目关联的联系人的
-{@link android.provider.BaseColumns#_ID} 值。
+                {@code android.provider.ContactsContract.StreamItemsColumns#CONTACT_ID}：此流项目关联的联系人的
+{@code android.provider.BaseColumns#_ID} 值。
 
             </li>
             <li>
-                {@link android.provider.ContactsContract.StreamItemsColumns#CONTACT_LOOKUP_KEY}：此流项目关联的联系人的
-{@link android.provider.ContactsContract.ContactsColumns#LOOKUP_KEY} 值。
+                {@code android.provider.ContactsContract.StreamItemsColumns#CONTACT_LOOKUP_KEY}：此流项目关联的联系人的
+{@code android.provider.ContactsContract.ContactsColumns#LOOKUP_KEY} 值。
 
             </li>
             <li>
-                {@link android.provider.ContactsContract.StreamItemsColumns#RAW_CONTACT_ID}：此流项目关联的原始联系人的
-{@link android.provider.BaseColumns#_ID} 值。
+                {@code android.provider.ContactsContract.StreamItemsColumns#RAW_CONTACT_ID}：此流项目关联的原始联系人的
+{@code android.provider.BaseColumns#_ID} 值。
 
             </li>
         </ul>
     </dd>
     <dt>
-        {@link android.provider.ContactsContract.StreamItemsColumns#COMMENTS}
+        {@code android.provider.ContactsContract.StreamItemsColumns#COMMENTS}
     </dt>
     <dd>
         可选。存储可在流项目开头显示的摘要信息。
     </dd>
     <dt>
-        {@link android.provider.ContactsContract.StreamItemsColumns#TEXT}
+        {@code android.provider.ContactsContract.StreamItemsColumns#TEXT}
     </dt>
     <dd>
         流项目的文本，或为项目来源发布的内容，或是对生成流项目的某项操作的描述。
@@ -1894,7 +1894,7 @@ XML 文件 <code>res/xml/syncadapter.xml</code>。而该文件则指定将与联
 
     </dd>
     <dt>
-        {@link android.provider.ContactsContract.StreamItemsColumns#TIMESTAMP}
+        {@code android.provider.ContactsContract.StreamItemsColumns#TIMESTAMP}
     </dt>
     <dd>
         一个包含流项目插入时间或更新时间的文本字符串，以从公元纪年开始计算的<em>毫秒数</em>形式表示。
@@ -1905,42 +1905,42 @@ XML 文件 <code>res/xml/syncadapter.xml</code>。而该文件则指定将与联
 </dl>
 <p>
     要显示您的流项目的标识信息，请使用
-{@link android.provider.ContactsContract.StreamItemsColumns#RES_ICON}、
-{@link android.provider.ContactsContract.StreamItemsColumns#RES_LABEL} 和
-{@link android.provider.ContactsContract.StreamItemsColumns#RES_PACKAGE} 链接到您的应用中的资源。
+{@code android.provider.ContactsContract.StreamItemsColumns#RES_ICON}、
+{@code android.provider.ContactsContract.StreamItemsColumns#RES_LABEL} 和
+{@code android.provider.ContactsContract.StreamItemsColumns#RES_PACKAGE} 链接到您的应用中的资源。
 
 </p>
 <p>
-    {@link android.provider.ContactsContract.StreamItems} 表还包含供同步适配器专用的列
-{@link android.provider.ContactsContract.StreamItemsColumns#SYNC1} 至
-{@link android.provider.ContactsContract.StreamItemsColumns#SYNC4}。
+    {@code android.provider.ContactsContract.StreamItems} 表还包含供同步适配器专用的列
+{@code android.provider.ContactsContract.StreamItemsColumns#SYNC1} 至
+{@code android.provider.ContactsContract.StreamItemsColumns#SYNC4}。
 
 </p>
 <h3 id="StreamPhotos">社交流照片</h3>
 <p>
-   {@link android.provider.ContactsContract.StreamItemPhotos} 表存储与流项目关联的照片。
+   {@code android.provider.ContactsContract.StreamItemPhotos} 表存储与流项目关联的照片。
 该表的
-{@link android.provider.ContactsContract.StreamItemPhotosColumns#STREAM_ITEM_ID}列链接到 {@link android.provider.ContactsContract.StreamItems} 表 {@link android.provider.BaseColumns#_ID} 列中的值。
+{@code android.provider.ContactsContract.StreamItemPhotosColumns#STREAM_ITEM_ID}列链接到 {@code android.provider.ContactsContract.StreamItems} 表 {@code android.provider.BaseColumns#_ID} 列中的值。
 
 照片引用存储在表中的以下列：
 
 </p>
 <dl>
     <dt>
-        {@link android.provider.ContactsContract.StreamItemPhotos#PHOTO} 列（一个二进制大型对象）。
+        {@code android.provider.ContactsContract.StreamItemPhotos#PHOTO} 列（一个二进制大型对象）。
     </dt>
     <dd>
         照片的二进制表示，为便于存储和显示，由提供程序调整了尺寸。
         此列可用于向后兼容使用它来存储照片的旧版本联系人提供程序。
 不过，在当前版本中，您不应使用此列来存储照片，
 而应使用
-{@link android.provider.ContactsContract.StreamItemPhotosColumns#PHOTO_FILE_ID} 或
-{@link android.provider.ContactsContract.StreamItemPhotosColumns#PHOTO_URI}（下文对两者都做了描述）将照片存储在一个文件内。
+{@code android.provider.ContactsContract.StreamItemPhotosColumns#PHOTO_FILE_ID} 或
+{@code android.provider.ContactsContract.StreamItemPhotosColumns#PHOTO_URI}（下文对两者都做了描述）将照片存储在一个文件内。
 此列现在包含可用于读取的照片缩略图。
 
     </dd>
     <dt>
-        {@link android.provider.ContactsContract.StreamItemPhotosColumns#PHOTO_FILE_ID}
+        {@code android.provider.ContactsContract.StreamItemPhotosColumns#PHOTO_FILE_ID}
     </dt>
     <dd>
         原始联系人照片的数字标识符。将此值追加到常量
@@ -1950,7 +1950,7 @@ openAssetFileDescriptor()} 来获取照片文件的句柄。
 
     </dd>
     <dt>
-        {@link android.provider.ContactsContract.StreamItemPhotosColumns#PHOTO_URI}
+        {@code android.provider.ContactsContract.StreamItemPhotosColumns#PHOTO_URI}
     </dt>
     <dd>
         一个内容 URI，直接指向此行所表示的照片的照片文件。
@@ -1964,28 +1964,28 @@ openAssetFileDescriptor()} 以获得照片文件的句柄。
 </p>
     <ul>
         <li>
-            这些表需要额外的访问权限。要读取它们的数据，您的应用必须具有 {@link android.Manifest.permission#READ_SOCIAL_STREAM} 权限。
+            这些表需要额外的访问权限。要读取它们的数据，您的应用必须具有 {@code android.Manifest.permission#READ_SOCIAL_STREAM} 权限。
 要修改它们，您的应用必须具有
-{@link android.Manifest.permission#WRITE_SOCIAL_STREAM} 权限。
+{@code android.Manifest.permission#WRITE_SOCIAL_STREAM} 权限。
 
         </li>
         <li>
-            对于 {@link android.provider.ContactsContract.StreamItems} 表，为每一位原始联系人存储的行数有限。
+            对于 {@code android.provider.ContactsContract.StreamItems} 表，为每一位原始联系人存储的行数有限。
 一旦达到该限制，联系人提供程序即会自动删除
-{@link android.provider.ContactsContract.StreamItemsColumns#TIMESTAMP} 最早的行，为新流项目行腾出空间。
+{@code android.provider.ContactsContract.StreamItemsColumns#TIMESTAMP} 最早的行，为新流项目行腾出空间。
 
 要获取该限制，请发出对内容 URI
-{@link android.provider.ContactsContract.StreamItems#CONTENT_LIMIT_URI} 的查询。
+{@code android.provider.ContactsContract.StreamItems#CONTENT_LIMIT_URI} 的查询。
 您可以将内容 URI 以外的所有其他参数保持设置为 <code>null</code>。
 查询会返回一个 Cursor，其中包含一行，并且只有
-{@link android.provider.ContactsContract.StreamItems#MAX_ITEMS} 一列。
+{@code android.provider.ContactsContract.StreamItems#MAX_ITEMS} 一列。
 
         </li>
     </ul>
 
 <p>
-    {@link android.provider.ContactsContract.StreamItems.StreamItemPhotos} 类定义了
- {@link android.provider.ContactsContract.StreamItemPhotos} 的一个子表，其中包含某个流项目的照片行。
+    {@code android.provider.ContactsContract.StreamItems.StreamItemPhotos} 类定义了
+ {@code android.provider.ContactsContract.StreamItemPhotos} 的一个子表，其中包含某个流项目的照片行。
 
 </p>
 <h3 id="SocialStreamInteraction">社交流交互</h3>
@@ -1997,8 +1997,8 @@ openAssetFileDescriptor()} 以获得照片文件的句柄。
     <ul>
         <li>
             您可以通过同步适配器让您的社交网络服务与联系人提供程序同步，检索用户联系人的近期 Activity，并将其存储在
- {@link android.provider.ContactsContract.StreamItems} 表和
-{@link android.provider.ContactsContract.StreamItemPhotos} 表中，以供日后使用。
+ {@code android.provider.ContactsContract.StreamItems} 表和
+{@code android.provider.ContactsContract.StreamItemPhotos} 表中，以供日后使用。
 
         </li>
         <li>
@@ -2330,7 +2330,7 @@ Settings.UNGROUPED_VISIBLE} 列的值设置为 1。执行此操作后，即使�
 {@link android.provider.ContactsContract.CommonDataKinds.Photo#CONTENT_ITEM_TYPE
 Photo.CONTENT_ITEM_TYPE} 以行的形式存储照片。该行的
 {@link android.provider.ContactsContract.RawContactsColumns#CONTACT_ID} 列链接到其所属原始联系人的
-{@link android.provider.BaseColumns#_ID} 列。
+{@code android.provider.BaseColumns#_ID} 列。
     {@link android.provider.ContactsContract.Contacts.Photo} 类定义了一个
 {@link android.provider.ContactsContract.Contacts} 子表，其中包含联系人主要照片（联系人的主要原始联系人的主要照片）的照片信息。
 同样，
@@ -2343,7 +2343,7 @@ Photo.CONTENT_ITEM_TYPE} 以行的形式存储照片。该行的
 {@link android.provider.ContactsContract.RawContacts.DisplayPhoto} 参考文档包含检索照片信息的示例。
 并没有可用来检索原始联系人主要缩略图的实用类，但您可以向
 {@link android.provider.ContactsContract.Data} 表发送查询，从而通过选定原始联系人的
-{@link android.provider.BaseColumns#_ID}、
+{@code android.provider.BaseColumns#_ID}、
 {@link android.provider.ContactsContract.CommonDataKinds.Photo#CONTENT_ITEM_TYPE
 Photo.CONTENT_ITEM_TYPE} 以及 {@link android.provider.ContactsContract.Data#IS_PRIMARY}
 列，找到原始联系人的主要照片行。
@@ -2351,6 +2351,6 @@ Photo.CONTENT_ITEM_TYPE} 以及 {@link android.provider.ContactsContract.Data#IS
 </p>
 <p>
     联系人的社交流数据也可能包含照片。这些照片存储在
-{@link android.provider.ContactsContract.StreamItemPhotos} 表中，<a href="#StreamPhotos">社交流照片</a>部分对该表做了更详尽的描述。
+{@code android.provider.ContactsContract.StreamItemPhotos} 表中，<a href="#StreamPhotos">社交流照片</a>部分对该表做了更详尽的描述。
 
 </p>

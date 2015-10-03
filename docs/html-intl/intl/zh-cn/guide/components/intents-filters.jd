@@ -45,7 +45,7 @@ page.tags="IntentFilter"
 
 <p>{@link android.content.Intent}
 是一个消息传递对象，您可以使用它从其他<a href="{@docRoot}guide/components/fundamentals.html#Components">应用组件</a>请求操作。尽管
- Intent 
+ Intent
 可以通过多种方式促进组件之间的通信，但其基本用例主要包括以下三个：</p>
 
 <ul>
@@ -93,7 +93,7 @@ android.content.Context#sendStickyBroadcast sendStickyBroadcast()}，您可以�
 
 <ul>
 <li><b>显式
- Intent </b>：按名称（完全限定类名）指定要启动的组件。通常，您会在自己的应用中使用显式 Intent 
+ Intent </b>：按名称（完全限定类名）指定要启动的组件。通常，您会在自己的应用中使用显式 Intent
 来启动组件，这是因为您知道要启动的 Activity 或服务的类名。例如，启动新 Activity 以响应用户操作，或者启动服务以在后台下载文件。
 
 </li>
@@ -113,20 +113,20 @@ android.content.Context#sendStickyBroadcast sendStickyBroadcast()}，您可以�
  Intent 如何通过系统传递以启动其他 Activity 的图解：<b>[1]</b> Activity A 创建包含操作描述的
 {@link android.content.Intent}，并将其传递给 {@link
 android.content.Context#startActivity startActivity()}。<b>[2]</b>
-Android 系统搜索所有应用中与 Intent 匹配的 Intent 过滤器。<em></em>找到匹配项之后，<b>[3]</b> 该系统通过调用匹配 Activity（Activity 
+Android 系统搜索所有应用中与 Intent 匹配的 Intent 过滤器。<em></em>找到匹配项之后，<b>[3]</b> 该系统通过调用匹配 Activity（Activity
 B）的 {@link
 android.app.Activity#onCreate onCreate()} 方法并将其传递给 {@link android.content.Intent}，以此启动匹配 Activity。<em></em>
 </p>
 </div>
 
-<p>创建隐式 Intent 
+<p>创建隐式 Intent
 时，Android 系统通过将 Intent 的内容与在设备上其他应用的<a href="{@docRoot}guide/topics/manifest/manifest-intro.html">清单文件</a>中声明的
- Intent 过滤器进行比较，从而找到要启动的相应组件。<em></em>{@link android.content.Intent}如果 Intent 与 Intent 
+ Intent 过滤器进行比较，从而找到要启动的相应组件。<em></em>{@link android.content.Intent}如果 Intent 与 Intent
 过滤器匹配，则系统将启动该组件，并将其传递给对象。如果多个
  Intent 过滤器兼容，则系统会显示一个对话框，支持用户选取要使用的应用。</p>
 
-<p>Intent 
-过滤器是应用清单文件中的一个表达式，它指定该组件要接收的 Intent 
+<p>Intent
+过滤器是应用清单文件中的一个表达式，它指定该组件要接收的 Intent
 类型。例如，通过为 Activity 声明 Intent 过滤器，您可以使其他应用能够直接使用某一特定类型的
  Intent 启动 Activity。同样，如果您没有为 Activity 声明任何
  Intent 过滤器，则 Activity 只能通过显式
@@ -137,7 +137,7 @@ android.app.Activity#onCreate onCreate()} 方法并将其传递给 {@link androi
  Intent，且不要为服务声明 Intent 过滤器。使用隐式
  Intent 启动服务存在安全隐患，因为您无法确定哪些服务将响应
  Intent，且用户无法看到哪些服务已启动。从 Android 5.0（API 级别 21）开始，如果使用隐式
- Intent 
+ Intent
 调用 {@link android.content.Context#bindService bindService()}，系统会抛出异常。</p>
 
 
@@ -195,7 +195,7 @@ extra 中包含的内容。
 <dl>
 <dt>{@link android.content.Intent#ACTION_VIEW}</dt>
    <dd>如果您拥有一些某项 Activity 可向用户显示的信息（例如，要使用图库应用查看的照片；或者要使用地图应用查找的地址），请使用
- Intent 
+ Intent
 将此操作与 {@link
 android.content.Context#startActivity startActivity()} 结合使用。</dd>
 
@@ -247,7 +247,7 @@ URI 和 MIME 类型。</p>
 </dd>
 
 <p><dt><b>类别</b></dt>
-<dd>一个包含应处理 Intent 
+<dd>一个包含应处理 Intent
 组件类型的附加信息的字符串。您可以将任意数量的类别描述放入一个
  Intent 中，但大多数
  Intent 均不需要类别。以下是一些常见类别：
@@ -275,7 +275,7 @@ URI 和 MIME 类型。</p>
  Intent 的既定特征。通过读取这些属性，Android
 系统能够解析应当启动哪个应用组件。</p>
 
-<p>但是，Intent 
+<p>但是，Intent
 也有可能会一些携带不影响其如何解析为应用组件的信息。Intent 还可以提供：</p>
 
 <dl>
@@ -320,7 +320,7 @@ android.content.Intent#putExtras putExtras()} 将
 
 <p>显式
  Intent 是指用于启动某个特定应用组件（例如，应用中的某个特定 Activity 或服务）的 Intent。要创建显式 Intent，请为
-{@link android.content.Intent} 对象定义组件名称。Intent 
+{@link android.content.Intent} 对象定义组件名称。Intent
 的所有其他属性均为可选属性。</p>
 
 <p>例如，如果在应用中构建了一个名为
@@ -373,9 +373,7 @@ resolveActivity()}。如果结果为非空，则至少有一个应用能够处�
 Intent sendIntent = new Intent();
 sendIntent.setAction(Intent.ACTION_SEND);
 sendIntent.putExtra(Intent.EXTRA_TEXT, textMessage);
-sendIntent.setType({@link
-        org.apache.http.protocol.HTTP#PLAIN_TEXT_TYPE
-        HTTP.PLAIN_TEXT_TYPE}); // "text/plain" MIME type
+sendIntent.setType("text/plain");
 
 // Verify that the intent will resolve to an activity
 if (sendIntent.resolveActivity(getPackageManager()) != null) {
@@ -527,7 +525,7 @@ URI（<code>scheme</code>、<code>host</code>、<code>port</code>、<code>path</
 <h2>限制对组件的访问</h2>
 <p>使用
  Intent 过滤器时，无法安全地防止其他应用启动组件。尽管
- Intent 
+ Intent
 过滤器将组件限制为仅响应特定类型的隐式
  Intent，但如果开发者确定您的组件名称，则其他应用有可能通过使用显式 Intent 启动您的应用组件。如果必须确保只有您自己的应用才能启动您的某一组件，请针对该组件将 <a href="{@docRoot}guide/topics/manifest/activity-element.html#exported">{@code
 exported}</a>
@@ -540,7 +538,7 @@ exported}</a>
  Intent 与所有这三个元素进行比较，根据过滤器测试隐式 Intent。隐式 Intent 若要传递给组件，必须通过所有这三项测试。如果
  Intent 甚至无法匹配其中任何一项测试，则 Android
 系统不会将其传递给组件。但是，由于一个组件可能有多个
- Intent 
+ Intent
 过滤器，因此未能通过某一组件过滤器的 Intent 可能会通过另一过滤器。如需了解有关系统如何解析 Intent 的详细信息，请参阅下文的
 <a href="#Resolution"> Intent 解析</a>部分。</p>
 
@@ -613,7 +611,7 @@ android.content.Context#unregisterReceiver unregisterReceiver()} 注销该接收
  Intent（与两个
  Intent 过滤器之一匹配）的另一应用中直接进入 {@code ShareActivity}。</p>
 
-<p class="note"><strong>注意：</strong>MIME 类型 
+<p class="note"><strong>注意：</strong>MIME 类型
 <a href="https://developers.google.com/panorama/android/">{@code
 application/vnd.google.panorama360+jpg}</a> 是一个指定全景照片的特殊
 数据类型，您可以使用 <a href="{@docRoot}reference/com/google/android/gms/panorama/package-summary.html">Google
@@ -741,7 +739,7 @@ startActivity()}）执行该 Intent。相反，通过调用相应的创建器方
 </pre>
 
 <p>若要 Intent 通过类别测试，则 {@link android.content.Intent}
-中的每个类别均必须与过滤器中的类别匹配。反之则未必然，Intent 
+中的每个类别均必须与过滤器中的类别匹配。反之则未必然，Intent
 过滤器声明的类别可以超出 {@link android.content.Intent}
 中指定的数量，且 {@link android.content.Intent} 仍会通过测试。因此，不含类别的
  Intent 应当始终会通过此测试，无论过滤器中声明何种类别均是如此。</p>
@@ -874,7 +872,7 @@ Android
 <h3 id="imatch"> Intent 匹配</h3>
 
 <p>通过
- Intent 
+ Intent
 过滤器匹配 Intent，这不仅有助于发现要激活的目标组件，还有助于发现设备上组件集的相关信息。例如，主页应用通过使用指定
 {@link android.content.Intent#ACTION_MAIN} 操作和
 {@link android.content.Intent#CATEGORY_LAUNCHER} 类别的
@@ -882,8 +880,8 @@ Android
 
 <p>您的应用可以采用类似的方式使用
  Intent 匹配。{@link android.content.pm.PackageManager} 提供了一整套 {@code query...()}
-方法来返回所有能够接受特定 Intent 
-的组件。此外，它还提供了一系列类似的 {@code resolve...()} 方法来确定响应 Intent 
+方法来返回所有能够接受特定 Intent
+的组件。此外，它还提供了一系列类似的 {@code resolve...()} 方法来确定响应 Intent
 的最佳组件。例如，{@link android.content.pm.PackageManager#queryIntentActivities
 queryIntentActivities()}
 将返回能够执行那些作为参数传递的

@@ -49,7 +49,7 @@ page.tags="IntentFilter"
 </p>
 
 <ul>
-<li><b>アクティビティを開始するには:</b> 
+<li><b>アクティビティを開始するには:</b>
 <p>{@link android.app.Activity} はアプリ内の 1 つの画面を表します。{@link android.app.Activity} の新しいインスタンスを開始するには、{@link android.content.Intent} を {@link android.content.Context#startActivity startActivity()} に渡します。
 
 {@link android.content.Intent} は、開始するアクティビティを記述し、必要なデータすべてを含んでいます。
@@ -62,7 +62,7 @@ android.app.Activity#onActivityResult onActivityResult()} コールバック内�
 
 </p></li>
 
-<li><b>サービスを開始するには:</b> 
+<li><b>サービスを開始するには:</b>
 <p>{@link android.app.Service} は、ユーザー インターフェースを持たず、バックグラウンドで操作を実行するコンポーネントです。
 サービスを開始して 1 回限りの操作を実行する（ファイルのダウンロードなど）には、{@link android.content.Intent} を {@link android.content.Context#startService startService()} に渡します。
 
@@ -73,7 +73,7 @@ android.app.Activity#onActivityResult onActivityResult()} コールバック内�
 android.content.Context#bindService bindService()}</code> に渡して、他のコンポーネントからのサービスにバインドできます。
 詳細については、「<a href="{@docRoot}guide/components/services.html">サービス</a>」のガイドをご覧ください。</p></li>
 
-<li><b>ブロードキャストを配信するには:</b> 
+<li><b>ブロードキャストを配信するには:</b>
 <p>ブロードキャストは、アプリが受け取ることのできるメッセージです。システムは、システムの起動や端末の充電開始など、さまざまなシステム イベントを配信します。他のアプリにブロードキャストを配信するには、{@link android.content.Intent} を {@link android.content.Context#sendBroadcast(Intent) sendBroadcast()}、{@link android.content.Context#sendOrderedBroadcast(Intent, String)
 sendOrderedBroadcast()}、{@link
 android.content.Context#sendStickyBroadcast sendStickyBroadcast()} のいずれかに渡します。
@@ -373,9 +373,7 @@ resolveActivity()} を呼び出します。
 Intent sendIntent = new Intent();
 sendIntent.setAction(Intent.ACTION_SEND);
 sendIntent.putExtra(Intent.EXTRA_TEXT, textMessage);
-sendIntent.setType({@link
-        org.apache.http.protocol.HTTP#PLAIN_TEXT_TYPE
-        HTTP.PLAIN_TEXT_TYPE}); // "text/plain" MIME type
+sendIntent.setType("text/plain");
 
 // Verify that the intent will resolve to an activity
 if (sendIntent.resolveActivity(getPackageManager()) != null) {
@@ -748,7 +746,7 @@ startActivity()} などの呼び出しを行いません。
 
 <p class="note"><strong>注:</strong> Androidは自動的に、{@link
 android.content.Context#startActivity startActivity()} と {@link
-android.app.Activity#startActivityForResult startActivityForResult()} に渡されるすべての暗黙的インテントに {@link android.content.Intent#CATEGORY_DEFAULT} カテゴリを自動的に適用します。そのため、アクティビティで暗黙的インテントを受け取りたい場合は、前出の {@code &lt;intent-filter&gt;} の例のように、アクティビティのインテント フィルタに {@code "android.intent.category.DEFAULT"} のカテゴリを含める必要があります。 
+android.app.Activity#startActivityForResult startActivityForResult()} に渡されるすべての暗黙的インテントに {@link android.content.Intent#CATEGORY_DEFAULT} カテゴリを自動的に適用します。そのため、アクティビティで暗黙的インテントを受け取りたい場合は、前出の {@code &lt;intent-filter&gt;} の例のように、アクティビティのインテント フィルタに {@code "android.intent.category.DEFAULT"} のカテゴリを含める必要があります。
 
 
 

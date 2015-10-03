@@ -57,7 +57,7 @@ page.title=Provedor de Contatos
     <li>{@link android.provider.ContactsContract.Contacts}</li>
     <li>{@link android.provider.ContactsContract.RawContacts}</li>
     <li>{@link android.provider.ContactsContract.Data}</li>
-    <li>{@link android.provider.ContactsContract.StreamItems}</li>
+    <li>{@code android.provider.ContactsContract.StreamItems}</li>
 </ol>
 <h2>Exemplos relacionados</h2>
 <ol>
@@ -170,7 +170,7 @@ de dados de uma pessoa, ele permite diversos contatos brutos para a mesma pessoa
     na tabela {@link android.provider.ContactsContract.RawContacts}. Em vez disso, é armazenada em uma ou mais
     linhas na tabela {@link android.provider.ContactsContract.Data}. Cada linha de dados tem uma coluna
     {@link android.provider.ContactsContract.DataColumns#RAW_CONTACT_ID Data.RAW_CONTACT_ID} que
-    contém o valor {@link android.provider.BaseColumns#_ID RawContacts._ID} de sua
+    contém o valor {@code android.provider.BaseColumns#_ID RawContacts._ID} de sua
     linha {@link android.provider.ContactsContract.RawContacts} pai.
 </p>
 <h3 id="RawContactsColumns">Colunas importantes de contatos brutos</h3>
@@ -482,16 +482,16 @@ de dados de uma pessoa, ele permite diversos contatos brutos para a mesma pessoa
 </p>
 <p>
     A tabela {@link android.provider.ContactsContract.Contacts} também tem a coluna
-    {@link android.provider.ContactsContract.ContactsColumns#LOOKUP_KEY}, que é
+    {@code android.provider.ContactsContract.ContactsColumns#LOOKUP_KEY}, que é
     um vínculo "permanente" com a linha do contato. Como o Provedor de Contatos mantém contatos
-    automaticamente, ele pode mudar o valor de {@link android.provider.BaseColumns#_ID} da linha do contato
+    automaticamente, ele pode mudar o valor de {@code android.provider.BaseColumns#_ID} da linha do contato
     em resposta a uma agregação ou sincronização. Mesmo que isso aconteça, a URI de conteúdo
     {@link android.provider.ContactsContract.Contacts#CONTENT_LOOKUP_URI} combinada com
-    {@link android.provider.ContactsContract.ContactsColumns#LOOKUP_KEY} do contato continuará
+    {@code android.provider.ContactsContract.ContactsColumns#LOOKUP_KEY} do contato continuará
     apontado para a linha do contato para permitir o uso de
-    {@link android.provider.ContactsContract.ContactsColumns#LOOKUP_KEY}
+    {@code android.provider.ContactsContract.ContactsColumns#LOOKUP_KEY}
     e manter ligações com contatos "favoritos" e assim por diante. Essa coluna tem o próprio formato, que 
-    não tem nenhuma relação com o formato da coluna {@link android.provider.BaseColumns#_ID}.
+    não tem nenhuma relação com o formato da coluna {@code android.provider.BaseColumns#_ID}.
 </p>
 <p>
     A figura 3 mostra como as três tabelas principais se relacionam entre si.
@@ -601,13 +601,13 @@ de dados de uma pessoa, ele permite diversos contatos brutos para a mesma pessoa
     O acesso ao perfil do usuário exige permissões especiais. Além das permissões
     {@link android.Manifest.permission#READ_CONTACTS} e
     {@link android.Manifest.permission#WRITE_CONTACTS} necessárias para ler e gravar, o acesso
-    ao perfil do usuário requer as permissões {@link android.Manifest.permission#READ_PROFILE} e
-    {@link android.Manifest.permission#WRITE_PROFILE}, respectivamente, para ler e
+    ao perfil do usuário requer as permissões {@code android.Manifest.permission#READ_PROFILE} e
+    {@code android.Manifest.permission#WRITE_PROFILE}, respectivamente, para ler e
     gravar.
 </p>
 <p>
     Lembre-se de que é preciso considerar a confidencialidade de um perfil do usuário. A permissão
-    {@link android.Manifest.permission#READ_PROFILE} permite o acesso aos dados de identificação
+    {@code android.Manifest.permission#READ_PROFILE} permite o acesso aos dados de identificação
     pessoal do usuário do dispositivo. Certifique-se de informar ao usuário o motivo
     da necessidade de permissões de acesso ao perfil do usuário na descrição do aplicativo.
 </p>
@@ -978,7 +978,7 @@ public Loader&lt;Cursor&gt; onCreateLoader(int id, Bundle args) {
     Ao inserir uma nova linha de contato bruto e as linhas de dados associados como um conjunto
     de objetos {@link android.content.ContentProviderOperation}, é preciso vincular as linhas de dados
     à linha de contato bruto pela inserção do valor
-    {@link android.provider.BaseColumns#_ID} do contato bruto como
+    {@code android.provider.BaseColumns#_ID} do contato bruto como
     o valor {@link android.provider.ContactsContract.DataColumns#RAW_CONTACT_ID}. Contudo, esse
     valor não está disponível ao criar a {@link android.content.ContentProviderOperation}
     para a linha de dados porque 
@@ -1011,7 +1011,7 @@ de             {@link android.content.ContentResolver#applyBatch(String, ArrayLi
             em uma matriz intermediária de resultados. O valor <code>previousResult</code> é o índice
             de um desses resultados, que é recuperado e armazenado com o valor
             <code>key</code>. Isso permite a inserção de um novo registro de contato bruto e a recuperação do seu
-            valor {@link android.provider.BaseColumns#_ID}, seguido de uma "referência de retorno" ao
+            valor {@code android.provider.BaseColumns#_ID}, seguido de uma "referência de retorno" ao
             valor ao adicionar uma linha {@link android.provider.ContactsContract.Data}.
             <p>
                 Toda a matriz de resultados é criada ao chamar
@@ -1092,7 +1092,7 @@ protected void createContactEntry() {
     o {@link android.provider.ContactsContract.DataColumns#RAW_CONTACT_ID}. Os pontos de referência
     voltam ao objeto {@link android.content.ContentProviderResult} a partir da primeira operação,
     que adiciona a linha de contato bruto e retorna seu novo valor
-    {@link android.provider.BaseColumns#_ID}. Como resultado, cada linha de dados é automaticamente vinculada por meio do
+    {@code android.provider.BaseColumns#_ID}. Como resultado, cada linha de dados é automaticamente vinculada por meio do
     {@link android.provider.ContactsContract.DataColumns#RAW_CONTACT_ID}
     à nova linha {@link android.provider.ContactsContract.RawContacts} à qual ela pertence.
 </p>
@@ -1231,7 +1231,7 @@ protected void createContactEntry() {
         {@link android.content.ContentProviderOperation#newAssertQuery(Uri)}. Para a URI de conteúdo,
         use {@link android.provider.ContactsContract.RawContacts#CONTENT_URI
         RawContacts.CONTENT_URI}
-        com o {@link android.provider.BaseColumns#_ID} do contato bruto anexado a ela.
+        com o {@code android.provider.BaseColumns#_ID} do contato bruto anexado a ela.
     </li>
     <li>
         Para o objeto {@link android.content.ContentProviderOperation.Builder}, chame
@@ -1821,8 +1821,8 @@ elemento <code>&lt;<a href="{@docRoot}guide/topics/manifest/meta-data-element.ht
     </dl>
 <h2 id="SocialStream">Dados de fluxos sociais</h2>
 <p>
-    As tabelas {@link android.provider.ContactsContract.StreamItems}
-    e {@link android.provider.ContactsContract.StreamItemPhotos}
+    As tabelas {@code android.provider.ContactsContract.StreamItems}
+    e {@code android.provider.ContactsContract.StreamItemPhotos}
     gerenciam dados advindos de redes sociais. É possível criar um adaptador de sincronização que adicione dados de fluxo
     da sua própria rede a essas tabelas ou ler dados de fluxo dessas tabelas
     e exibi-los no seu aplicativo, ou ambos. Com esses recursos, os serviços e aplicativos
@@ -1831,7 +1831,7 @@ elemento <code>&lt;<a href="{@docRoot}guide/topics/manifest/meta-data-element.ht
 <h3 id="StreamText">Textos de fluxos sociais</h3>
 <p>
     Itens de fluxo sempre são associados a um contato bruto. 
-    O {@link android.provider.ContactsContract.StreamItemsColumns#RAW_CONTACT_ID} conecta-se ao
+    O {@code android.provider.ContactsContract.StreamItemsColumns#RAW_CONTACT_ID} conecta-se ao
     valor <code>_ID</code> do contato bruto. O tipo e o nome da conta do contato
     bruto também são armazenados na linha do item de fluxo.
 </p>
@@ -1840,14 +1840,14 @@ elemento <code>&lt;<a href="{@docRoot}guide/topics/manifest/meta-data-element.ht
 </p>
 <dl>
     <dt>
-        {@link android.provider.ContactsContract.StreamItemsColumns#ACCOUNT_TYPE}
+        {@code android.provider.ContactsContract.StreamItemsColumns#ACCOUNT_TYPE}
     </dt>
     <dd>
         <strong>Obrigatório.</strong> O tipo de conta do usuário do contato bruto associado a esse
         item de fluxo. Lembre-se de definir esse valor ao inserir um item de fluxo.
     </dd>
     <dt>
-        {@link android.provider.ContactsContract.StreamItemsColumns#ACCOUNT_NAME}
+        {@code android.provider.ContactsContract.StreamItemsColumns#ACCOUNT_NAME}
     </dt>
     <dd>
         <strong>Obrigatório.</strong> O nome de conta do usuário do contato bruto associado
@@ -1861,30 +1861,30 @@ elemento <code>&lt;<a href="{@docRoot}guide/topics/manifest/meta-data-element.ht
         ao inserir um item de fluxo:
         <ul>
             <li>
-                {@link android.provider.ContactsContract.StreamItemsColumns#CONTACT_ID}: 
-                o valor {@link android.provider.BaseColumns#_ID} do contato ao qual esse item
+                {@code android.provider.ContactsContract.StreamItemsColumns#CONTACT_ID}: 
+                o valor {@code android.provider.BaseColumns#_ID} do contato ao qual esse item
                 de fluxo está associado.
             </li>
             <li>
-                {@link android.provider.ContactsContract.StreamItemsColumns#CONTACT_LOOKUP_KEY}: 
-                o valor{@link android.provider.ContactsContract.ContactsColumns#LOOKUP_KEY} do
+                {@code android.provider.ContactsContract.StreamItemsColumns#CONTACT_LOOKUP_KEY}: 
+                o valor{@code android.provider.ContactsContract.ContactsColumns#LOOKUP_KEY} do
                 contato ao qual esse item de fluxo está associado.
             </li>
             <li>
-                {@link android.provider.ContactsContract.StreamItemsColumns#RAW_CONTACT_ID}: 
-                o valor {@link android.provider.BaseColumns#_ID} do contato bruto ao qual esse item
+                {@code android.provider.ContactsContract.StreamItemsColumns#RAW_CONTACT_ID}: 
+                o valor {@code android.provider.BaseColumns#_ID} do contato bruto ao qual esse item
                 de fluxo está associado.
             </li>
         </ul>
     </dd>
     <dt>
-        {@link android.provider.ContactsContract.StreamItemsColumns#COMMENTS}
+        {@code android.provider.ContactsContract.StreamItemsColumns#COMMENTS}
     </dt>
     <dd>
         Opcional. Armazena informações resumidas que podem ser exibidas no início do item de fluxo.
     </dd>
     <dt>
-        {@link android.provider.ContactsContract.StreamItemsColumns#TEXT}
+        {@code android.provider.ContactsContract.StreamItemsColumns#TEXT}
     </dt>
     <dd>
         O texto do item de fluxo, o conteúdo que foi publicado pela fonte do item
@@ -1894,7 +1894,7 @@ elemento <code>&lt;<a href="{@docRoot}guide/topics/manifest/meta-data-element.ht
         ou abreviar conteúdos longos, mas ele tentará evitar quebrar as tags.
     </dd>
     <dt>
-        {@link android.provider.ContactsContract.StreamItemsColumns#TIMESTAMP}
+        {@code android.provider.ContactsContract.StreamItemsColumns#TIMESTAMP}
     </dt>
     <dd>
         Uma string de texto contendo o tempo em que o item de fluxo foi inserido ou atualizado, em forma
@@ -1905,42 +1905,42 @@ elemento <code>&lt;<a href="{@docRoot}guide/topics/manifest/meta-data-element.ht
 </dl>
 <p>
     Para exibir informações de identificação para os itens de fluxo, use
-    {@link android.provider.ContactsContract.StreamItemsColumns#RES_ICON},
-    {@link android.provider.ContactsContract.StreamItemsColumns#RES_LABEL} e
-    {@link android.provider.ContactsContract.StreamItemsColumns#RES_PACKAGE} para vincular a recursos
+    {@code android.provider.ContactsContract.StreamItemsColumns#RES_ICON},
+    {@code android.provider.ContactsContract.StreamItemsColumns#RES_LABEL} e
+    {@code android.provider.ContactsContract.StreamItemsColumns#RES_PACKAGE} para vincular a recursos
     no aplicativo.
 </p>
 <p>
-    A tabela {@link android.provider.ContactsContract.StreamItems} também contém as colunas
-    {@link android.provider.ContactsContract.StreamItemsColumns#SYNC1} por meio de
-    {@link android.provider.ContactsContract.StreamItemsColumns#SYNC4} para uso exclusivo
+    A tabela {@code android.provider.ContactsContract.StreamItems} também contém as colunas
+    {@code android.provider.ContactsContract.StreamItemsColumns#SYNC1} por meio de
+    {@code android.provider.ContactsContract.StreamItemsColumns#SYNC4} para uso exclusivo
     dos adaptadores de sincronização.
 </p>
 <h3 id="StreamPhotos">Fotos de fluxos sociais</h3>
 <p>
-   A tabela {@link android.provider.ContactsContract.StreamItemPhotos} armazena fotos associadas
+   A tabela {@code android.provider.ContactsContract.StreamItemPhotos} armazena fotos associadas
     a um item de fluxo. A coluna
-    {@link android.provider.ContactsContract.StreamItemPhotosColumns#STREAM_ITEM_ID} da tabela
-    vincula-se a valores na coluna {@link android.provider.BaseColumns#_ID}
-    da tabela {@link android.provider.ContactsContract.StreamItems}. Referências de fotografias são armazenadas
+    {@code android.provider.ContactsContract.StreamItemPhotosColumns#STREAM_ITEM_ID} da tabela
+    vincula-se a valores na coluna {@code android.provider.BaseColumns#_ID}
+    da tabela {@code android.provider.ContactsContract.StreamItems}. Referências de fotografias são armazenadas
     na tabela nessas colunas:
 </p>
 <dl>
     <dt>
-        Coluna {@link android.provider.ContactsContract.StreamItemPhotos#PHOTO} (um BLOB).
+        Coluna {@code android.provider.ContactsContract.StreamItemPhotos#PHOTO} (um BLOB).
     </dt>
     <dd>
         Representação binária da foto, redimensionada pelo provedor para armazenar e exibir.
         Essa coluna está disponível para compatibilidade retroativa com versões anteriores do Provedor
         de Contatos que a usavam para armazenar fotos. Contudo, na versão atual,
         não se deve usar essa coluna para armazenar fotos. Em vez disso, use
-        {@link android.provider.ContactsContract.StreamItemPhotosColumns#PHOTO_FILE_ID} ou
-        {@link android.provider.ContactsContract.StreamItemPhotosColumns#PHOTO_URI} (ambas são
+        {@code android.provider.ContactsContract.StreamItemPhotosColumns#PHOTO_FILE_ID} ou
+        {@code android.provider.ContactsContract.StreamItemPhotosColumns#PHOTO_URI} (ambas são
         descritas nos pontos a seguir) para armazenar fotos em um arquivo. Essa coluna
         passa a conter uma miniatura da foto, que estará disponível para leitura.
     </dd>
     <dt>
-        {@link android.provider.ContactsContract.StreamItemPhotosColumns#PHOTO_FILE_ID}
+        {@code android.provider.ContactsContract.StreamItemPhotosColumns#PHOTO_FILE_ID}
     </dt>
     <dd>
         Identificador numérico de uma foto de um contato bruto. Anexe esse valor à constante
@@ -1950,7 +1950,7 @@ elemento <code>&lt;<a href="{@docRoot}guide/topics/manifest/meta-data-element.ht
         openAssetFileDescriptor()} para obter um identificador para o arquivo de foto.
     </dd>
     <dt>
-        {@link android.provider.ContactsContract.StreamItemPhotosColumns#PHOTO_URI}
+        {@code android.provider.ContactsContract.StreamItemPhotosColumns#PHOTO_URI}
     </dt>
     <dd>
         URI de conteúdo direcionada diretamente para o arquivo de foto da foto representada por essa linha.
@@ -1965,27 +1965,27 @@ elemento <code>&lt;<a href="{@docRoot}guide/topics/manifest/meta-data-element.ht
     <ul>
         <li>
             Exigem permissões de acesso adicionais. Para ler o conteúdo delas, o aplicativo
-            deve ter a permissão {@link android.Manifest.permission#READ_SOCIAL_STREAM}. Para
+            deve ter a permissão {@code android.Manifest.permission#READ_SOCIAL_STREAM}. Para
             modificá-las, o aplicativo precisa ter a permissão
-            {@link android.Manifest.permission#WRITE_SOCIAL_STREAM}.
+            {@code android.Manifest.permission#WRITE_SOCIAL_STREAM}.
         </li>
         <li>
-            Para a tabela {@link android.provider.ContactsContract.StreamItems}, o número de linhas
+            Para a tabela {@code android.provider.ContactsContract.StreamItems}, o número de linhas
             armazenadas para cada contato bruto é limitado. Ao atingir o limite,
             o Provedor de Contatos abre espaço para novas linhas de itens de fluxo excluindo automaticamente
             as linhas que têm
-            o {@link android.provider.ContactsContract.StreamItemsColumns#TIMESTAMP} mais antigo. Para conhecer
+            o {@code android.provider.ContactsContract.StreamItemsColumns#TIMESTAMP} mais antigo. Para conhecer
             o limite, faça uma consulta à URI de conteúdo
-            {@link android.provider.ContactsContract.StreamItems#CONTENT_LIMIT_URI}. É possível deixar
+            {@code android.provider.ContactsContract.StreamItems#CONTENT_LIMIT_URI}. É possível deixar
             todos os argumentos, exceto a URI de conteúdo, definidos como <code>null</code>. A consulta
             retorna um Cursor contendo uma linha única com a coluna única
-            {@link android.provider.ContactsContract.StreamItems#MAX_ITEMS}.
+            {@code android.provider.ContactsContract.StreamItems#MAX_ITEMS}.
         </li>
     </ul>
 
 <p>
-    A classe {@link android.provider.ContactsContract.StreamItems.StreamItemPhotos} define
-    uma subtabela de {@link android.provider.ContactsContract.StreamItemPhotos} que contém as linhas
+    A classe {@code android.provider.ContactsContract.StreamItems.StreamItemPhotos} define
+    uma subtabela de {@code android.provider.ContactsContract.StreamItemPhotos} que contém as linhas
     de foto de um único item de fluxo.
 </p>
 <h3 id="SocialStreamInteraction">Interações de fluxos sociais</h3>
@@ -1998,8 +1998,8 @@ elemento <code>&lt;<a href="{@docRoot}guide/topics/manifest/meta-data-element.ht
         <li>
             Ao sincronizar seu serviço de rede social com o Provedor de Contatos com um adaptador
             de sincronização, é possível recuperar atividades recentes de contatos de um usuário e armazená-las
-            nas tabelas {@link android.provider.ContactsContract.StreamItems}
-            e {@link android.provider.ContactsContract.StreamItemPhotos} para uso posterior.
+            nas tabelas {@code android.provider.ContactsContract.StreamItems}
+            e {@code android.provider.ContactsContract.StreamItemPhotos} para uso posterior.
         </li>
         <li>
             Além da sincronização regular, é possível ativar o adaptador de sincronização para recuperar
@@ -2330,7 +2330,7 @@ elemento <code>&lt;<a href="{@docRoot}guide/topics/manifest/meta-data-element.ht
     {@link android.provider.ContactsContract.CommonDataKinds.Photo#CONTENT_ITEM_TYPE
     Photo.CONTENT_ITEM_TYPE}. A coluna
     {@link android.provider.ContactsContract.RawContactsColumns#CONTACT_ID} da linha é vinculada
-    à coluna {@link android.provider.BaseColumns#_ID} do contato bruto à qual pertence.
+    à coluna {@code android.provider.BaseColumns#_ID} do contato bruto à qual pertence.
     A classe {@link android.provider.ContactsContract.Contacts.Photo} define uma subtabela de
     {@link android.provider.ContactsContract.Contacts} contendo informações de foto
     de uma foto principal do contato, que é a foto principal do contato bruto principal do contato. Da mesma forma,
@@ -2343,7 +2343,7 @@ elemento <code>&lt;<a href="{@docRoot}guide/topics/manifest/meta-data-element.ht
     {@link android.provider.ContactsContract.RawContacts.DisplayPhoto} contém exemplos
     de recuperação de informações de foto. Não há classe conveniente para recuperar a miniatura
     principal de um contato bruto, mas é possível enviar uma consulta
-    à tabela {@link android.provider.ContactsContract.Data}, selecionando no {@link android.provider.BaseColumns#_ID}
+    à tabela {@link android.provider.ContactsContract.Data}, selecionando no {@code android.provider.BaseColumns#_ID}
     do contato bruto, o
     {@link android.provider.ContactsContract.CommonDataKinds.Photo#CONTENT_ITEM_TYPE
     Photo.CONTENT_ITEM_TYPE} e a coluna
@@ -2351,6 +2351,6 @@ elemento <code>&lt;<a href="{@docRoot}guide/topics/manifest/meta-data-element.ht
 </p>
 <p>
     Dados de fluxos sociais de uma pessoa também podem conter fotos. Elas são armazenadas
-    na tabela {@link android.provider.ContactsContract.StreamItemPhotos}, que é descrita com mais
+    na tabela {@code android.provider.ContactsContract.StreamItemPhotos}, que é descrita com mais
     detalhes na seção <a href="#StreamPhotos">Fotos de fluxos sociais</a>.
 </p>

@@ -94,7 +94,7 @@ android.content.Context#sendStickyBroadcast sendStickyBroadcast()}.</p>
 <ul>
 <li>As <b>intenções explícitas</b> especificam o componente a iniciar pelo nome
 (o nome de classe totalmente qualificado). Normalmente, usa-se uma intenção explícita para iniciar um componente
-no próprio aplicativo porque se sabe o nome de classe da atividade ou serviço que se deseja iniciar. 
+no próprio aplicativo porque se sabe o nome de classe da atividade ou serviço que se deseja iniciar.
 Por exemplo, iniciar uma nova atividade em resposta a uma ação do usuário ou iniciar um serviço para baixar
 um arquivo em segundo plano.</li>
 
@@ -220,7 +220,7 @@ como prefixo. Por exemplo:</p>
 
 <dt><b>Dados</b></dt>
 <dd>A URI (um objeto {@link android.net.Uri}) que referencia os dados a serem aproveitados e/ou o
-tipo MIME desses dados. O tipo dos dados fornecidos geralmente é determinado pela ação da intenção. 
+tipo MIME desses dados. O tipo dos dados fornecidos geralmente é determinado pela ação da intenção.
 Por exemplo: se a ação for {@link android.content.Intent#ACTION_EDIT}, os dados devem conter
 a URI do documento a editar.
 
@@ -373,9 +373,7 @@ a intenção.</p>
 Intent sendIntent = new Intent();
 sendIntent.setAction(Intent.ACTION_SEND);
 sendIntent.putExtra(Intent.EXTRA_TEXT, textMessage);
-sendIntent.setType({@link
-        org.apache.http.protocol.HTTP#PLAIN_TEXT_TYPE
-        HTTP.PLAIN_TEXT_TYPE}); // "text/plain" MIME type
+sendIntent.setType("text/plain");
 
 // Verify that the intent will resolve to an activity
 if (sendIntent.resolveActivity(getPackageManager()) != null) {
@@ -453,7 +451,7 @@ título da caixa de diálogo.</p>
 <h2 id="Receiving">Recepção de uma intenção implícita</h2>
 
 <p>Para anunciar quais intenções implícitas o aplicativo pode receber, declare um ou mais filtros de intenções
-para cada um dos componentes do aplicativo com um elemento 
+para cada um dos componentes do aplicativo com um elemento
 <a href="{@docRoot}guide/topics/manifest/intent-filter-element.html">{@code &lt;intent-filter&gt;}</a> no <a href="{@docRoot}guide/topics/manifest/manifest-intro.html">arquivo de manifesto</a>.
 Cada filtro de intenções especifica o tipo de intenções aceito com base na ação
 nos dados e na categoria da intenção. O sistema fornecerá uma intenção implícita ao componente do seu aplicativo somente se ela

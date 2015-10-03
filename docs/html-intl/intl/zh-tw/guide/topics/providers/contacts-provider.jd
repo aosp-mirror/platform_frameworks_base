@@ -57,7 +57,7 @@ page.title=聯絡人供應程式
     <li>{@link android.provider.ContactsContract.Contacts}</li>
     <li>{@link android.provider.ContactsContract.RawContacts}</li>
     <li>{@link android.provider.ContactsContract.Data}</li>
-    <li>{@link android.provider.ContactsContract.StreamItems}</li>
+    <li>{@code android.provider.ContactsContract.StreamItems}</li>
 </ol>
 <h2>相關範例</h2>
 <ol>
@@ -169,7 +169,7 @@ page.title=聯絡人供應程式
     原始聯絡人的大部分資料不是儲存在
 {@link android.provider.ContactsContract.RawContacts} 表格，而是儲存在 {@link android.provider.ContactsContract.Data} 表格中的一或多個列。
 每個資料列都有一欄
-{@link android.provider.ContactsContract.DataColumns#RAW_CONTACT_ID Data.RAW_CONTACT_ID}，當中包含其上層資料列 {@link android.provider.ContactsContract.RawContacts} 的 {@link android.provider.BaseColumns#_ID RawContacts._ID} 值。
+{@link android.provider.ContactsContract.DataColumns#RAW_CONTACT_ID Data.RAW_CONTACT_ID}，當中包含其上層資料列 {@link android.provider.ContactsContract.RawContacts} 的 {@code android.provider.BaseColumns#_ID RawContacts._ID} 值。
 
 
 </p>
@@ -482,15 +482,15 @@ Email.CONTENT_ITEM_TYPE} (內含使用者名稱，而不是電子郵件地址) �
 </p>
 <p>
     {@link android.provider.ContactsContract.Contacts} 表格也有
-{@link android.provider.ContactsContract.ContactsColumns#LOOKUP_KEY} 欄，此為聯絡人列的「永久」連結。
-因為聯絡人供應程式會自動維護聯絡人，它會變更聯絡人列的 {@link android.provider.BaseColumns#_ID} 值，以回應彙總或同步操作。
+{@code android.provider.ContactsContract.ContactsColumns#LOOKUP_KEY} 欄，此為聯絡人列的「永久」連結。
+因為聯絡人供應程式會自動維護聯絡人，它會變更聯絡人列的 {@code android.provider.BaseColumns#_ID} 值，以回應彙總或同步操作。
 
 即使發生這種情況，與聯絡人的
-{@link android.provider.ContactsContract.ContactsColumns#LOOKUP_KEY} 合併的內容 URI {@link android.provider.ContactsContract.Contacts#CONTENT_LOOKUP_URI} 仍會指向聯絡人列，因此，您可以使用
-{@link android.provider.ContactsContract.ContactsColumns#LOOKUP_KEY}
+{@code android.provider.ContactsContract.ContactsColumns#LOOKUP_KEY} 合併的內容 URI {@link android.provider.ContactsContract.Contacts#CONTENT_LOOKUP_URI} 仍會指向聯絡人列，因此，您可以使用
+{@code android.provider.ContactsContract.ContactsColumns#LOOKUP_KEY}
  來維護「常用聯絡人」等聯絡人的連結。
 
-此欄有自己的格式，與 {@link android.provider.BaseColumns#_ID} 欄的格式無關。
+此欄有自己的格式，與 {@code android.provider.BaseColumns#_ID} 欄的格式無關。
 
 </p>
 <p>
@@ -600,14 +600,14 @@ Email.CONTENT_ITEM_TYPE} (內含使用者名稱，而不是電子郵件地址) �
 <p>
     存取使用者設定檔需要特殊權限。除了
 {@link android.Manifest.permission#READ_CONTACTS} 和
-{@link android.Manifest.permission#WRITE_CONTACTS} 的讀取和寫入權限以外，存取使用者設定檔還分別需要 {@link android.Manifest.permission#READ_PROFILE} 讀取權限和
-{@link android.Manifest.permission#WRITE_PROFILE} 寫入權限。
+{@link android.Manifest.permission#WRITE_CONTACTS} 的讀取和寫入權限以外，存取使用者設定檔還分別需要 {@code android.Manifest.permission#READ_PROFILE} 讀取權限和
+{@code android.Manifest.permission#WRITE_PROFILE} 寫入權限。
 
 
 </p>
 <p>
     請務必將使用者的設定檔視為敏感資訊。
-{@link android.Manifest.permission#READ_PROFILE}權限可以讓您存取裝置上使用者的身分識別資料。
+{@code android.Manifest.permission#READ_PROFILE}權限可以讓您存取裝置上使用者的身分識別資料。
 請務必在應用程式的簡介中告訴使用者，為何需要使用者設定檔存取權限。
 
 </p>
@@ -977,7 +977,7 @@ public Loader&lt;Cursor&gt; onCreateLoader(int id, Bundle args) {
 <p>
     以一組
  {@link android.content.ContentProviderOperation} 物件插入新的原始聯絡人及其關聯的資料列時，您必須透過插入原始聯絡人的
- {@link android.provider.BaseColumns#_ID} 值做為
+ {@code android.provider.BaseColumns#_ID} 值做為
 {@link android.provider.ContactsContract.DataColumns#RAW_CONTACT_ID} 值，將資料列連結到原始聯絡人列。
 不過，此
 值在您為資料列建立 {@link android.content.ContentProviderOperation}
@@ -1011,7 +1011,7 @@ public Loader&lt;Cursor&gt; onCreateLoader(int id, Bundle args) {
 <code>previousResult</code> 值是這些結果的其中一個索引，這些結果是以 <code>key</code>值擷取並加以儲存。
 
 這樣可以讓您插入新的原始聯絡人記錄，並取得其
-{@link android.provider.BaseColumns#_ID} 值，然後在您新增 {@link android.provider.ContactsContract.Data} 列時，做為此值的「反向參考」。
+{@code android.provider.BaseColumns#_ID} 值，然後在您新增 {@link android.provider.ContactsContract.Data} 列時，做為此值的「反向參考」。
 
             <p>
                 您首次呼叫
@@ -1089,7 +1089,7 @@ protected void createContactEntry() {
     每項操作建立器物件會使用
 {@link android.content.ContentProviderOperation.Builder#withValueBackReference(String, int) withValueBackReference()}來取得
 {@link android.provider.ContactsContract.DataColumns#RAW_CONTACT_ID}。
-參照會指向第一項操作中的 {@link android.content.ContentProviderResult} 物件 (第一項操作會新增原始聯絡人列，並傳回其新的 {@link android.provider.BaseColumns#_ID} 值)。
+參照會指向第一項操作中的 {@link android.content.ContentProviderResult} 物件 (第一項操作會新增原始聯絡人列，並傳回其新的 {@code android.provider.BaseColumns#_ID} 值)。
 
 
 因此，每個資料列會透過其
@@ -1229,7 +1229,7 @@ protected void createContactEntry() {
         使用
  {@link android.content.ContentProviderOperation#newAssertQuery(Uri)} 方法建立適合用於強制執行限制的{@link android.content.ContentProviderOperation.Builder} 物件。
 如果是內容 URI，請使用 {@link android.provider.ContactsContract.RawContacts#CONTENT_URI
-RawContacts.CONTENT_URI} 並附加原始聯絡人的 {@link android.provider.BaseColumns#_ID}。
+RawContacts.CONTENT_URI} 並附加原始聯絡人的 {@code android.provider.BaseColumns#_ID}。
 
 
     </li>
@@ -1821,8 +1821,8 @@ onPerformSync()} 方法完成。
     </dl>
 <h2 id="SocialStream">社交串流資料</h2>
 <p>
-    {@link android.provider.ContactsContract.StreamItems} 和
-{@link android.provider.ContactsContract.StreamItemPhotos} 表格負責管理社交網路的傳入資料。
+    {@code android.provider.ContactsContract.StreamItems} 和
+{@code android.provider.ContactsContract.StreamItemPhotos} 表格負責管理社交網路的傳入資料。
 您可以編寫一個同步配接器，將來自您自己網路的串流資料
 新增至這些表格，或是可以從這些表格讀取串流資料，然後
 顯示於您自己的應用程式中，或同時具備這兩種功能。有了這些功能，您的社交網路服務和應用程式就可以整合到 Android 的社交網路體驗。
@@ -1831,7 +1831,7 @@ onPerformSync()} 方法完成。
 <h3 id="StreamText">社交串流文字</h3>
 <p>
     串流項目永遠會與原始聯絡人關聯。
-{@link android.provider.ContactsContract.StreamItemsColumns#RAW_CONTACT_ID} 會連結到原始聯絡人的
+{@code android.provider.ContactsContract.StreamItemsColumns#RAW_CONTACT_ID} 會連結到原始聯絡人的
  <code>_ID</code> 值。原始聯絡人的帳戶類型和帳戶名稱也會儲存在串流項目列。
 
 </p>
@@ -1840,14 +1840,14 @@ onPerformSync()} 方法完成。
 </p>
 <dl>
     <dt>
-        {@link android.provider.ContactsContract.StreamItemsColumns#ACCOUNT_TYPE}
+        {@code android.provider.ContactsContract.StreamItemsColumns#ACCOUNT_TYPE}
     </dt>
     <dd>
         <strong>必要。</strong>與此串流項目相關聯的原始聯絡人使用者帳戶類型。
 請記得在插入串流項目時設定此值。
     </dd>
     <dt>
-        {@link android.provider.ContactsContract.StreamItemsColumns#ACCOUNT_NAME}
+        {@code android.provider.ContactsContract.StreamItemsColumns#ACCOUNT_NAME}
     </dt>
     <dd>
         <strong>必要。</strong>與此串流項目相關聯的原始聯絡人使用者帳戶名稱。
@@ -1861,30 +1861,30 @@ onPerformSync()} 方法完成。
 
         <ul>
             <li>
-                {@link android.provider.ContactsContract.StreamItemsColumns#CONTACT_ID}：與此串流項目相關聯的聯絡人
-{@link android.provider.BaseColumns#_ID} 值。
+                {@code android.provider.ContactsContract.StreamItemsColumns#CONTACT_ID}：與此串流項目相關聯的聯絡人
+{@code android.provider.BaseColumns#_ID} 值。
 
             </li>
             <li>
-                {@link android.provider.ContactsContract.StreamItemsColumns#CONTACT_LOOKUP_KEY}：與此串流項目相關聯的聯絡人
-{@link android.provider.ContactsContract.ContactsColumns#LOOKUP_KEY} 值。
+                {@code android.provider.ContactsContract.StreamItemsColumns#CONTACT_LOOKUP_KEY}：與此串流項目相關聯的聯絡人
+{@code android.provider.ContactsContract.ContactsColumns#LOOKUP_KEY} 值。
 
             </li>
             <li>
-                {@link android.provider.ContactsContract.StreamItemsColumns#RAW_CONTACT_ID}：與此串流項目相關聯的原始聯絡人
-{@link android.provider.BaseColumns#_ID} 值。
+                {@code android.provider.ContactsContract.StreamItemsColumns#RAW_CONTACT_ID}：與此串流項目相關聯的原始聯絡人
+{@code android.provider.BaseColumns#_ID} 值。
 
             </li>
         </ul>
     </dd>
     <dt>
-        {@link android.provider.ContactsContract.StreamItemsColumns#COMMENTS}
+        {@code android.provider.ContactsContract.StreamItemsColumns#COMMENTS}
     </dt>
     <dd>
         選用。儲存您可以在串流項目開頭顯示的摘要資訊。
     </dd>
     <dt>
-        {@link android.provider.ContactsContract.StreamItemsColumns#TEXT}
+        {@code android.provider.ContactsContract.StreamItemsColumns#TEXT}
     </dt>
     <dd>
         串流項目的文字，可能是項目來源張貼的內容，或者會產生串流項目動作的描述。
@@ -1894,7 +1894,7 @@ onPerformSync()} 方法完成。
 
     </dd>
     <dt>
-        {@link android.provider.ContactsContract.StreamItemsColumns#TIMESTAMP}
+        {@code android.provider.ContactsContract.StreamItemsColumns#TIMESTAMP}
     </dt>
     <dd>
         內含插入或更新串流項目時間的文字字串，
@@ -1905,42 +1905,42 @@ onPerformSync()} 方法完成。
 </dl>
 <p>
     如要顯示串流項目的識別資訊，請使用
-{@link android.provider.ContactsContract.StreamItemsColumns#RES_ICON}、
-{@link android.provider.ContactsContract.StreamItemsColumns#RES_LABEL} 以及
-{@link android.provider.ContactsContract.StreamItemsColumns#RES_PACKAGE} 連結到應用程式中的資源。
+{@code android.provider.ContactsContract.StreamItemsColumns#RES_ICON}、
+{@code android.provider.ContactsContract.StreamItemsColumns#RES_LABEL} 以及
+{@code android.provider.ContactsContract.StreamItemsColumns#RES_PACKAGE} 連結到應用程式中的資源。
 
 </p>
 <p>
-    {@link android.provider.ContactsContract.StreamItems} 表格也包含
-{@link android.provider.ContactsContract.StreamItemsColumns#SYNC1} 到
-{@link android.provider.ContactsContract.StreamItemsColumns#SYNC4} 欄，專門供同步配接器使用。
+    {@code android.provider.ContactsContract.StreamItems} 表格也包含
+{@code android.provider.ContactsContract.StreamItemsColumns#SYNC1} 到
+{@code android.provider.ContactsContract.StreamItemsColumns#SYNC4} 欄，專門供同步配接器使用。
 
 </p>
 <h3 id="StreamPhotos">社交串流相片</h3>
 <p>
-   {@link android.provider.ContactsContract.StreamItemPhotos} 表格會儲存與串流項目相關聯的相片。
+   {@code android.provider.ContactsContract.StreamItemPhotos} 表格會儲存與串流項目相關聯的相片。
 表格的
-{@link android.provider.ContactsContract.StreamItemPhotosColumns#STREAM_ITEM_ID} 欄會連結到
- {@link android.provider.ContactsContract.StreamItems} 表格中 {@link android.provider.BaseColumns#_ID} 欄的值。
+{@code android.provider.ContactsContract.StreamItemPhotosColumns#STREAM_ITEM_ID} 欄會連結到
+ {@code android.provider.ContactsContract.StreamItems} 表格中 {@code android.provider.BaseColumns#_ID} 欄的值。
 相片參照會儲存在表格中的以下各欄：
 
 </p>
 <dl>
     <dt>
-        {@link android.provider.ContactsContract.StreamItemPhotos#PHOTO} 欄 (BLOB)。
+        {@code android.provider.ContactsContract.StreamItemPhotos#PHOTO} 欄 (BLOB)。
     </dt>
     <dd>
         相片的二進位檔，由供應程式調整大小以進行儲存和顯示。
         此欄是要提供與使用舊版聯絡人供應程式儲存相片的向下相容性。
 不過，在目前版本中，您不應使用此欄來儲存相片。
-請改用 {@link android.provider.ContactsContract.StreamItemPhotosColumns#PHOTO_FILE_ID} 或
-{@link android.provider.ContactsContract.StreamItemPhotosColumns#PHOTO_URI} (下文提供這兩者的相關說明) 在檔案中儲存相片。
+請改用 {@code android.provider.ContactsContract.StreamItemPhotosColumns#PHOTO_FILE_ID} 或
+{@code android.provider.ContactsContract.StreamItemPhotosColumns#PHOTO_URI} (下文提供這兩者的相關說明) 在檔案中儲存相片。
 
 此欄現在包含相片的縮圖可供讀取。
 
     </dd>
     <dt>
-        {@link android.provider.ContactsContract.StreamItemPhotosColumns#PHOTO_FILE_ID}
+        {@code android.provider.ContactsContract.StreamItemPhotosColumns#PHOTO_FILE_ID}
     </dt>
     <dd>
         原始聯絡人相片的數字識別碼。將此值附加到常數
@@ -1950,7 +1950,7 @@ openAssetFileDescriptor()} 可取得此相片檔案的控制代碼。
 
     </dd>
     <dt>
-        {@link android.provider.ContactsContract.StreamItemPhotosColumns#PHOTO_URI}
+        {@code android.provider.ContactsContract.StreamItemPhotosColumns#PHOTO_URI}
     </dt>
     <dd>
         直接指向此列所呈現相片的相片檔案內容 URI。
@@ -1964,27 +1964,27 @@ openAssetFileDescriptor()} 可取得相片檔案的控制代碼。
 </p>
     <ul>
         <li>
-            這些表格需要額外的存取權限。如要從中讀取，您的應用程式必須具備 {@link android.Manifest.permission#READ_SOCIAL_STREAM} 權限。
+            這些表格需要額外的存取權限。如要從中讀取，您的應用程式必須具備 {@code android.Manifest.permission#READ_SOCIAL_STREAM} 權限。
 如要加以修改，您的應用程式必須具備
-{@link android.Manifest.permission#WRITE_SOCIAL_STREAM} 權限。
+{@code android.Manifest.permission#WRITE_SOCIAL_STREAM} 權限。
 
         </li>
         <li>
-            針對 {@link android.provider.ContactsContract.StreamItems} 表格，每個原始聯絡人的儲存列數是有限制的。
+            針對 {@code android.provider.ContactsContract.StreamItems} 表格，每個原始聯絡人的儲存列數是有限制的。
 達到此限制後，聯絡人供應程式會自動刪除
-{@link android.provider.ContactsContract.StreamItemsColumns#TIMESTAMP} 最舊的列，為新的串流項目列騰出空間。
+{@code android.provider.ContactsContract.StreamItemsColumns#TIMESTAMP} 最舊的列，為新的串流項目列騰出空間。
 
 如要取得此限制，請發出查詢給內容 URI
-{@link android.provider.ContactsContract.StreamItems#CONTENT_LIMIT_URI}。
+{@code android.provider.ContactsContract.StreamItems#CONTENT_LIMIT_URI}。
 您只要將內容 URI 設為 <code>null</code> 即可，其餘引數不需要處理。
 此查詢會傳回內含單一列的 Cursor 與單一欄
-{@link android.provider.ContactsContract.StreamItems#MAX_ITEMS}。
+{@code android.provider.ContactsContract.StreamItems#MAX_ITEMS}。
 
         </li>
     </ul>
 
 <p>
-    類別 {@link android.provider.ContactsContract.StreamItems.StreamItemPhotos} 定義了單一串流項目，且內含相片列的 {@link android.provider.ContactsContract.StreamItemPhotos} 子表格。
+    類別 {@code android.provider.ContactsContract.StreamItems.StreamItemPhotos} 定義了單一串流項目，且內含相片列的 {@code android.provider.ContactsContract.StreamItemPhotos} 子表格。
 
 
 </p>
@@ -1996,8 +1996,8 @@ openAssetFileDescriptor()} 可取得相片檔案的控制代碼。
 </p>
     <ul>
         <li>
-            使用同步配接器將您的社交網路服務同步到聯絡人供應程式後，您可以擷取某位使用者的聯絡人最近 Activity，並將它儲存在 {@link android.provider.ContactsContract.StreamItems} 和
-{@link android.provider.ContactsContract.StreamItemPhotos} 表格中，供後續使用。
+            使用同步配接器將您的社交網路服務同步到聯絡人供應程式後，您可以擷取某位使用者的聯絡人最近 Activity，並將它儲存在 {@code android.provider.ContactsContract.StreamItems} 和
+{@code android.provider.ContactsContract.StreamItemPhotos} 表格中，供後續使用。
 
 
         </li>
@@ -2330,7 +2330,7 @@ Settings.UNGROUPED_VISIBLE} 欄的值設為 1。
 Photo.CONTENT_ITEM_TYPE} 在列中儲存相片。
 列的
 {@link android.provider.ContactsContract.RawContactsColumns#CONTACT_ID} 欄是連結到其所屬原始聯絡人的
- {@link android.provider.BaseColumns#_ID} 欄。
+ {@code android.provider.BaseColumns#_ID} 欄。
     類別 {@link android.provider.ContactsContract.Contacts.Photo} 定義了
  {@link android.provider.ContactsContract.Contacts} 的子表格，其中包含聯絡人主要相片的相片資訊，也就是聯絡人之主要原始聯絡人的主要相片。
 同樣地，
@@ -2343,7 +2343,7 @@ Photo.CONTENT_ITEM_TYPE} 在列中儲存相片。
 {@link android.provider.ContactsContract.RawContacts.DisplayPhoto} 的參考文件含有擷取相片資訊的範例。
 擷取原始聯絡人的主要縮圖沒有方便使用的類別，不過您可以傳送查詢到
 {@link android.provider.ContactsContract.Data} 表格，然後選取原始聯絡人的
-{@link android.provider.BaseColumns#_ID}、{@link android.provider.ContactsContract.CommonDataKinds.Photo#CONTENT_ITEM_TYPE
+{@code android.provider.BaseColumns#_ID}、{@link android.provider.ContactsContract.CommonDataKinds.Photo#CONTENT_ITEM_TYPE
 Photo.CONTENT_ITEM_TYPE} 以及 {@link android.provider.ContactsContract.Data#IS_PRIMARY} 欄，以尋找原始聯絡人的主要相片列。
 
 
@@ -2351,6 +2351,6 @@ Photo.CONTENT_ITEM_TYPE} 以及 {@link android.provider.ContactsContract.Data#IS
 </p>
 <p>
     人員的社交串流資料可能也包括相片。這些資訊都儲存在
-{@link android.provider.ContactsContract.StreamItemPhotos} 表格。<a href="#StreamPhotos">社交串流相片</a>中針對此表格會有更詳細的說明。
+{@code android.provider.ContactsContract.StreamItemPhotos} 表格。<a href="#StreamPhotos">社交串流相片</a>中針對此表格會有更詳細的說明。
 
 </p>

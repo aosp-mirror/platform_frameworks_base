@@ -94,7 +94,7 @@ android.content.Context#sendStickyBroadcast sendStickyBroadcast()}.</p>
 <ul>
 <li><b>Intent eksplisit</b> menetapkan komponen untuk memulai dengan nama (
 nama kelas yang sepenuhnya memenuhi syarat). Anda biasanya akan menggunakan intent eksplisit untuk memulai sebuah komponen
-dalam aplikasi sendiri, karena Anda mengetahui nama kelas dari aktivitas atau layanan yang ingin dimulai. 
+dalam aplikasi sendiri, karena Anda mengetahui nama kelas dari aktivitas atau layanan yang ingin dimulai.
 Misalnya, mulai aktivitas baru sebagai respons terhadap tindakan pengguna atau mulai layanan untuk mengunduh
 file di latar belakang.</li>
 
@@ -220,7 +220,7 @@ sebagai awalan. Misalnya:</p>
 
 <dt><b>Data</b></dt>
 <dd>URI (objek {@link android.net.Uri}) yang mengacu data untuk diolah dan/atau
-tipe MIME dari data tersebut. Tipe data yang disediakan umumnya didikte oleh tindakan intent. 
+tipe MIME dari data tersebut. Tipe data yang disediakan umumnya didikte oleh tindakan intent.
 Misalnya, jika tindakan merupakan {@link android.content.Intent#ACTION_EDIT}, data harus berisi
 URI dari dokumen untuk diedit.
 
@@ -230,7 +230,7 @@ Misalnya, aktivitas yang mampu menampilkan gambar mungkin tidak mampu
 memutar file audio, walaupun format URI mungkin serupa.
 Jadi menetapkan tipe MIME data Anda akan membantu sistem
 Android menemukan komponen terbaik untuk diterima intent.
-Akan tetapi, tipe MIME seringkali bisa diambil dari URI&mdash;terutama saat datanya merupakan URI 
+Akan tetapi, tipe MIME seringkali bisa diambil dari URI&mdash;terutama saat datanya merupakan URI
 {@code content:}, yang menunjukkan data tersebut berada di perangkat dan dikontrol oleh
 {@link android.content.ContentProvider}, yang membuat data tipe MIME terlihat di sistem.</p>
 
@@ -242,7 +242,7 @@ android.content.Intent#setDataAndType setDataAndType()}.</p>
 <p class="caution"><strong>Perhatian:</strong> Jika ingin mengatur tipe URI dan MIME,
 <strong>jangan</strong> panggil {@link android.content.Intent#setData setData()} dan
 {@link android.content.Intent#setType setType()} karena mereka saling menghapuskan nilai satu sama lain.
-Selalu gunakan {@link android.content.Intent#setDataAndType setDataAndType()} untuk mengatur 
+Selalu gunakan {@link android.content.Intent#setDataAndType setDataAndType()} untuk mengatur
 tipe URI maupun MIME.</p>
 </dd>
 
@@ -290,8 +290,8 @@ Anda juga bisa membuat objek {@link android.os.Bundle} dengan semua data ekstra,
 android.content.Intent#putExtras putExtras()}.</p>
 
 <p>Misalnya, saat membuat intent yang akan dikirimkan bersama email
-{@link android.content.Intent#ACTION_SEND}, Anda bisa menetapkan penerima "kepada" dengan kunci 
-{@link android.content.Intent#EXTRA_EMAIL}, dan menetapkan "subjek" dengan kunci 
+{@link android.content.Intent#ACTION_SEND}, Anda bisa menetapkan penerima "kepada" dengan kunci
+{@link android.content.Intent#EXTRA_EMAIL}, dan menetapkan "subjek" dengan kunci
 {@link android.content.Intent#EXTRA_SUBJECT}.</p>
 
 <p>Kelas {@link android.content.Intent} menetapkan beberapa konstanta {@code EXTRA_*}
@@ -339,7 +339,7 @@ startService(downloadIntent);
 objek {@link java.lang.Class} pada komponen. Dengan demikian,
 intent ini memulai secara eksplisit kelas {@code DownloadService} dalam aplikasi.</p>
 
-<p>Untuk informasi selengkapnya tentang membangun dan memulai layanan, lihat panduan 
+<p>Untuk informasi selengkapnya tentang membangun dan memulai layanan, lihat panduan
 <a href="{@docRoot}guide/components/services.html">Layanan</a>.</p>
 
 
@@ -373,9 +373,7 @@ intent tersebut.</p>
 Intent sendIntent = new Intent();
 sendIntent.setAction(Intent.ACTION_SEND);
 sendIntent.putExtra(Intent.EXTRA_TEXT, textMessage);
-sendIntent.setType({@link
-        org.apache.http.protocol.HTTP#PLAIN_TEXT_TYPE
-        HTTP.PLAIN_TEXT_TYPE}); // "text/plain" MIME type
+sendIntent.setType("text/plain");
 
 // Verify that the intent will resolve to an activity
 if (sendIntent.resolveActivity(getPackageManager()) != null) {
@@ -544,7 +542,7 @@ lolos melalui salah satu filter komponen mungkin akan lolos di filter lain.
 Informasi selengkapnya tentang cara sistem menetapkan intent disediakan dalam bagian di bawah ini
 tentang <a href="#Resolution">Resolusi Intent</a>.</p>
 
-<p class="caution"><strong>Perhatian:</strong> Untuk menghindari menjalankan 
+<p class="caution"><strong>Perhatian:</strong> Untuk menghindari menjalankan
 {@link android.app.Service} aplikasi yang berbeda secara tidak sengaja, selalu gunakan intent eksplisit untuk memulai layanan Anda sendiri dan jangan
 deklarasikan filter intent untuk layanan Anda.</p>
 
@@ -603,7 +601,7 @@ terbuka saat pengguna meluncurkan aplikasi dengan ikon launcher:</p>
   menunjukkan ini adalah titik masuk utama dan tidak mengharapkan data intent apa pun.</li>
   <li>Kategori {@link android.content.Intent#CATEGORY_LAUNCHER} menunjukjkan bahwa ikon
   aktivitas ini harus ditempatkan dalam launcher aplikasi sistem. Jika elemen <a href="{@docRoot}guide/topics/manifest/activity-element.html">{@code &lt;activity&gt;}</a>
-  tidak menetapkan ikon dengan{@code icon}, maka sistem akan menggunakan ikon dari elemen 
+  tidak menetapkan ikon dengan{@code icon}, maka sistem akan menggunakan ikon dari elemen
 <a href="{@docRoot}guide/topics/manifest/application-element.html">{@code &lt;application&gt;}</a>.</li>
 </ul>
 <p>Keduanya harus dipasangkan bersama agar aktivitas muncul dalam launcher aplikasi.</p>
@@ -644,10 +642,10 @@ proses aplikasi Anda sendiri.</p>
   <li>Mendeklarasikan intent untuk dieksekusi saat pengguna melakukan tindakan dengan <a href="{@docRoot}guide/topics/ui/notifiers/notifications.html">Pemberitahuan</a>
   ({@link android.app.NotificationManager}
   sistem Android akan mengeksekusi {@link android.content.Intent}) Anda.
-  <li>Mendeklarasikan intent untuk dieksekusi saat pengguna melakukan tindakan dengan 
+  <li>Mendeklarasikan intent untuk dieksekusi saat pengguna melakukan tindakan dengan
 <a href="{@docRoot}guide/topics/appwidgets/index.html">App Widget</a>
   (aplikasi layar Home mengeksekusi {@link android.content.Intent}).
-  <li>Mendeklarasikan intent untuk dieksekusi di waktu yang telah ditetapkan di masa mendatang 
+  <li>Mendeklarasikan intent untuk dieksekusi di waktu yang telah ditetapkan di masa mendatang
 ({@link android.app.AlarmManager}  sistem Android akan mengeksekusi {@link android.content.Intent}).
 </ul>
 
@@ -672,7 +670,7 @@ startActivity()}. Anda harus mendeklarasikan tipe komponen yang dimaksud saat me
 metode di atas untuk membuat {@link android.app.PendingIntent} menjadi satu-satunya metode
 {@link android.app.PendingIntent} yang mungkin Anda butuhkan.</p>
 
-<p>Tiap metode mengambil {@link android.content.Context} aplikasi saat itu, 
+<p>Tiap metode mengambil {@link android.content.Context} aplikasi saat itu,
 {@link android.content.Intent} yang ingin Anda bungkus, dan satu atau beberapa flag yang menetapkan
 cara penggunaan intent (misalnya apakah intent bisa digunakan lebih dari sekali).</p>
 
@@ -747,7 +745,7 @@ mendeklarasikan kategori lebih banyak daripada yang ditetapkan dalam {@link andr
 selalu lolos pengujian ini, kategori apa pun yang dideklarasikan dalam filter.</p>
 
 <p class="note"><strong>Catatan:</strong>
-Android secara otomatis menerapkan kategori {@link android.content.Intent#CATEGORY_DEFAULT} 
+Android secara otomatis menerapkan kategori {@link android.content.Intent#CATEGORY_DEFAULT}
 untuk semua intent implisit yang diteruskan ke {@link
 android.content.Context#startActivity startActivity()} dan {@link
 android.app.Activity#startActivityForResult startActivityForResult()}.
@@ -819,14 +817,14 @@ dan tipe MIME yang ditetapkan dalam filter.  Aturannya adalah sebagai berikut:
 <li>Intent yang tidak berisi URI maupun tipe MIME hanya akan lolos
 pengujian jika filter tersebut tidak menetapkan URI atau tipe MIME apa pun.</li>
 
-<li>Intent yang berisi URI namun tidak berisi tipe MIME (baik secara eksplisit maupun tidak langsung dari 
+<li>Intent yang berisi URI namun tidak berisi tipe MIME (baik secara eksplisit maupun tidak langsung dari
 URI) hanya akan lolos pengujian jika URI-nya cocok dengan format URI filter
 dan filternya juga tidak menetapkan tipe MIME.</li>
 
 <li>Intent yang berisi tipe MIME namun tidak berisi URI hanya akan lolos pengujian
 jika filter mencantumkan tipe MIME yang sama dan tidak menetapkan format URI.</li>
 
-<li>Intent yang berisi URI maupun tipe MIME (baik secara eksplisit maupun tidak langsung dari 
+<li>Intent yang berisi URI maupun tipe MIME (baik secara eksplisit maupun tidak langsung dari
 URI) hanya akan lolos pengujian bagian tipe MIME jika
 tipe tersebut cocok dengan tipe yang dicantumkan dalam filter.  Ini akan lolos pengujian bagian URI
 jika URI-nya cocok dengan URI dalam filter atau memiliki {@code content:}
@@ -840,7 +838,7 @@ Aturan terakhir ini, aturan (d), mencerminkan harapan
 bahwa komponen mampu mendapatkan data lokal dari file atau penyedia konten.
 Oleh karena itu, filter mereka mencatumkan tipe data saja dan tidak secara eksplisit
 harus menamai skema {@code content:} dan {@code file:}.
-Ini adalah kasus umum.  Elemen <a href="{@docRoot}guide/topics/manifest/data-element.html">{@code &lt;data&gt;}</a> 
+Ini adalah kasus umum.  Elemen <a href="{@docRoot}guide/topics/manifest/data-element.html">{@code &lt;data&gt;}</a>
 seperti berikut ini, misalnya, memberi tahu Android bahwa komponen bisa mengambil data gambar dari penyedia
 konten dan menampilkannya:
 </p>
@@ -876,7 +874,7 @@ komponen bisa mengambil data video dari jaringan untuk melakukan tindakan:
 <p>Intent dicocokkan dengan filter intent selain untuk menemukan komponen
 target yang akan diaktifkan, juga untuk menemukan sesuatu tentang rangkaian
 komponen pada perangkat.  Misalnya, aplikasi Home akan menempatkan launcher aplikasi
-dengan mencari semua aktivitas dengan filter intent yang menetapkan tindakan 
+dengan mencari semua aktivitas dengan filter intent yang menetapkan tindakan
 {@link android.content.Intent#ACTION_MAIN} dan
 kategori {@link android.content.Intent#CATEGORY_LAUNCHER}.</p>
 

@@ -57,7 +57,7 @@ page.title=연락처 제공자
     <li>{@link android.provider.ContactsContract.Contacts}</li>
     <li>{@link android.provider.ContactsContract.RawContacts}</li>
     <li>{@link android.provider.ContactsContract.Data}</li>
-    <li>{@link android.provider.ContactsContract.StreamItems}</li>
+    <li>{@code android.provider.ContactsContract.StreamItems}</li>
 </ol>
 <h2>관련 샘플</h2>
 <ol>
@@ -169,7 +169,7 @@ Android 구성 요소입니다. 콘텐츠 제공자는 기기의 연락처 애�
     원시 연락처의 데이터 대부분은 
 {@link android.provider.ContactsContract.RawContacts} 테이블에 저장되지 않습니다. 대신, 
 {@link android.provider.ContactsContract.Data} 테이블에서 하나 이상의 행에 저장됩니다. 각 데이터 행에는
-상위 {@link android.provider.ContactsContract.RawContacts} 행의 {@link android.provider.BaseColumns#_ID RawContacts._ID} 값을 포함하는 
+상위 {@link android.provider.ContactsContract.RawContacts} 행의 {@code android.provider.BaseColumns#_ID RawContacts._ID} 값을 포함하는 
 열 {@link android.provider.ContactsContract.DataColumns#RAW_CONTACT_ID Data.RAW_CONTACT_ID}가 
 있습니다.
 </p>
@@ -482,16 +482,16 @@ Email.CONTENT_ITEM_TYPE}을 갖는
 </p>
 <p>
     {@link android.provider.ContactsContract.Contacts} 테이블에는 연락처 행에 대한 "영구" 링크인
-{@link android.provider.ContactsContract.ContactsColumns#LOOKUP_KEY} 열도
+{@code android.provider.ContactsContract.ContactsColumns#LOOKUP_KEY} 열도
 있습니다. 연락처 제공자가 연락처를 자동으로 관리하므로, 
-통합이나 동기화에 응답하여 연락처 행의 {@link android.provider.BaseColumns#_ID} 값을 
+통합이나 동기화에 응답하여 연락처 행의 {@code android.provider.BaseColumns#_ID} 값을 
 변경할 수도 있습니다. 이런 일이 발생한다 하더라도 콘텐츠 URI 
 {@link android.provider.ContactsContract.Contacts#CONTENT_LOOKUP_URI}와 
-연락처의 {@link android.provider.ContactsContract.ContactsColumns#LOOKUP_KEY}는 여전히 
+연락처의 {@code android.provider.ContactsContract.ContactsColumns#LOOKUP_KEY}는 여전히 
 연락처 행을 가리키므로, 
-{@link android.provider.ContactsContract.ContactsColumns#LOOKUP_KEY}를 
+{@code android.provider.ContactsContract.ContactsColumns#LOOKUP_KEY}를 
 사용하여 "즐겨찾기" 연락처에 대한 연결 등을 그대로 유지할 수 있습니다. 이 열에는 
-{@link android.provider.BaseColumns#_ID} 열의 형식과 관련이 없는 나름의 형식이 있습니다.
+{@code android.provider.BaseColumns#_ID} 열의 형식과 관련이 없는 나름의 형식이 있습니다.
 </p>
 <p>
     그림 3은 세 가지 기본 테이블이 서로 관련되는 방식을 나타낸 것입니다.
@@ -601,13 +601,13 @@ Google 계정과 같고, 이는 계정 이름으로 이메일 주소를 사용�
     사용자 프로필에 액세스하려면 특수 권한이 필요합니다. 읽기와 쓰기에 필요한 
 {@link android.Manifest.permission#READ_CONTACTS}와
 {@link android.Manifest.permission#WRITE_CONTACTS} 권한 외에도, 
-사용자 프로필에 액세스하려면 각각 읽기와 쓰기 액세스를 위한{@link android.Manifest.permission#READ_PROFILE}과 
-{@link android.Manifest.permission#WRITE_PROFILE} 권한이 
+사용자 프로필에 액세스하려면 각각 읽기와 쓰기 액세스를 위한{@code android.Manifest.permission#READ_PROFILE}과 
+{@code android.Manifest.permission#WRITE_PROFILE} 권한이 
 필요합니다.
 </p>
 <p>
     사용자의 프로필은 중요한 정보로 간주해야 한다는 점을 명심하십시오. 
-{@link android.Manifest.permission#READ_PROFILE}권한을 사용하면 개발자가 기기 사용자의 
+{@code android.Manifest.permission#READ_PROFILE}권한을 사용하면 개발자가 기기 사용자의 
 개인 식별 데이터에 액세스할 수 있게 해줍니다. 애플리케이션 설명에서 
 사용자에게 왜 여러분이 사용자 프로필 권한을 필요로 하는지 밝혀두어야 합니다.
 </p>
@@ -978,7 +978,7 @@ onLoadFinished()}에 대한 콜백을 호출합니다. 이 메서드로 수신�
     새로운 원시 연락처 행과 관련 데이터 행을 
 일련의 {@link android.content.ContentProviderOperation} 개체로 삽입할 때는, 
  원시 연락처의 
-{@link android.provider.BaseColumns#_ID} 값을
+{@code android.provider.BaseColumns#_ID} 값을
 {@link android.provider.ContactsContract.DataColumns#RAW_CONTACT_ID} 값으로 삽입하여 데이터 행과 원시 연락처 행을 연결해야 합니다. 그러나, 이 값은 
 데이터 행에 대하여 {@link android.content.ContentProviderOperation}을 
 생성하는 경우에는 사용할 수 없습니다. 원시 연락처 행에 대해 {@link android.content.ContentProviderOperation}
@@ -1011,7 +1011,7 @@ onLoadFinished()}에 대한 콜백을 호출합니다. 이 메서드로 수신�
 결과의 중간 배열에 저장됩니다. <code>previousResult</code> 값은 
 이러한 결과 중 하나의 색인이고, 이는 <code>key</code> 값으로 
 검색 및 저장됩니다. 이것을 사용하면 새 원시 연락처 레코드를 삽입하고
-{@link android.provider.BaseColumns#_ID} 값을 다시 가져온 뒤, 
+{@code android.provider.BaseColumns#_ID} 값을 다시 가져온 뒤, 
 {@link android.provider.ContactsContract.Data} 행을 추가할 때 해당 값을 "역참조"할 수 있게 해줍니다.
             <p>
                 
@@ -1091,7 +1091,7 @@ protected void createContactEntry() {
 사용하여
 {@link android.provider.ContactsContract.DataColumns#RAW_CONTACT_ID}를 가져옵니다. 참조는 
 첫 번째 작업의 {@link android.content.ContentProviderResult} 객체를 다시 가리키고, 
-이것이 원시 연락처 행을 추가한 뒤 이의 새 {@link android.provider.BaseColumns#_ID}
+이것이 원시 연락처 행을 추가한 뒤 이의 새 {@code android.provider.BaseColumns#_ID}
 값을 반환합니다. 그 결과, 각 데이터 행은 자동으로 자신의 
 {@link android.provider.ContactsContract.DataColumns#RAW_CONTACT_ID}
 에 의해 자신이 속하는 새 {@link android.provider.ContactsContract.RawContacts} 행에 연결됩니다.
@@ -1231,7 +1231,7 @@ withYieldAllowed()}로 플래그 표시합니다.
 {@link android.content.ContentProviderOperation#newAssertQuery(Uri)} 메서드를 사용합니다. 콘텐츠 URI의 경우, 
 {@link android.provider.ContactsContract.RawContacts#CONTENT_URI
         RawContacts.CONTENT_URI}를 사용하되 
-이에 추가된 원시 데이터의 {@link android.provider.BaseColumns#_ID}를 함께 씁니다.
+이에 추가된 원시 데이터의 {@code android.provider.BaseColumns#_ID}를 함께 씁니다.
     </li>
     <li>
         {@link android.content.ContentProviderOperation.Builder} 개체의 경우,
@@ -1821,8 +1821,8 @@ XML 파일 <code>res/xml/syncadapter.xml</code>을 가리킵니다. 그런가 �
     </dl>
 <h2 id="SocialStream">소셜 스트림 데이터</h2>
 <p>
-    {@link android.provider.ContactsContract.StreamItems}와 
-{@link android.provider.ContactsContract.StreamItemPhotos} 테이블은 
+    {@code android.provider.ContactsContract.StreamItems}와 
+{@code android.provider.ContactsContract.StreamItemPhotos} 테이블은 
 소셜 네트워크에서 수신하는 데이터를 관리합니다. 개발자는 본인의 네트워크의 스트림 데이터를 이 테이블에 추가하는 
 동기화 어댑터를 작성할 수도 있고, 이 테이블에서 스트림 데이터를 읽어서 
 본인의 애플리케이션에 표시할 수도 있으며 두 가지를 모두 해도 됩니다. 이 기능을 사용하면 소셜 네트워킹 
@@ -1831,7 +1831,7 @@ XML 파일 <code>res/xml/syncadapter.xml</code>을 가리킵니다. 그런가 �
 <h3 id="StreamText">소셜 스트림 텍스트</h3>
 <p>
     스트림 항목은 항상 원시 연락처와 연관됩니다. 
-{@link android.provider.ContactsContract.StreamItemsColumns#RAW_CONTACT_ID}는 
+{@code android.provider.ContactsContract.StreamItemsColumns#RAW_CONTACT_ID}는 
 원시 연락처의 <code>_ID</code> 값과 연관됩니다. 원시 연락처의 계정 유형과 계정 이름도 
 스트림 항목 행에 저장됩니다.
 </p>
@@ -1840,14 +1840,14 @@ XML 파일 <code>res/xml/syncadapter.xml</code>을 가리킵니다. 그런가 �
 </p>
 <dl>
     <dt>
-        {@link android.provider.ContactsContract.StreamItemsColumns#ACCOUNT_TYPE}
+        {@code android.provider.ContactsContract.StreamItemsColumns#ACCOUNT_TYPE}
     </dt>
     <dd>
         <strong>필수입니다.</strong> 이 스트림 항목과 연관된 원시 연락처에 대한 
 사용자 계정입니다. 스트림 항목을 삽입할 때 이 값을 설정하는 것을 잊지 마십시오.
     </dd>
     <dt>
-        {@link android.provider.ContactsContract.StreamItemsColumns#ACCOUNT_NAME}
+        {@code android.provider.ContactsContract.StreamItemsColumns#ACCOUNT_NAME}
     </dt>
     <dd>
         <strong>필수입니다.</strong> 이 스트림 항목과 연관된 원시 연락처에 대한 
@@ -1861,30 +1861,30 @@ XML 파일 <code>res/xml/syncadapter.xml</code>을 가리킵니다. 그런가 �
 다음 식별자 열을 삽입해야 합니다.
         <ul>
             <li>
-                {@link android.provider.ContactsContract.StreamItemsColumns#CONTACT_ID}: 이 
-스트림 항목과 연관된 연락처의 {@link android.provider.BaseColumns#_ID} 
+                {@code android.provider.ContactsContract.StreamItemsColumns#CONTACT_ID}: 이 
+스트림 항목과 연관된 연락처의 {@code android.provider.BaseColumns#_ID} 
 값입니다.
             </li>
             <li>
-                {@link android.provider.ContactsContract.StreamItemsColumns#CONTACT_LOOKUP_KEY}: 이 
-스트림 항목과 연관된 연락처의 {@link android.provider.ContactsContract.ContactsColumns#LOOKUP_KEY} 
+                {@code android.provider.ContactsContract.StreamItemsColumns#CONTACT_LOOKUP_KEY}: 이 
+스트림 항목과 연관된 연락처의 {@code android.provider.ContactsContract.ContactsColumns#LOOKUP_KEY} 
 값입니다.
             </li>
             <li>
-                {@link android.provider.ContactsContract.StreamItemsColumns#RAW_CONTACT_ID}: 이 
-스트림 항목과 연관된 원시 연락처의 {@link android.provider.BaseColumns#_ID} 
+                {@code android.provider.ContactsContract.StreamItemsColumns#RAW_CONTACT_ID}: 이 
+스트림 항목과 연관된 원시 연락처의 {@code android.provider.BaseColumns#_ID} 
 값입니다.
             </li>
         </ul>
     </dd>
     <dt>
-        {@link android.provider.ContactsContract.StreamItemsColumns#COMMENTS}
+        {@code android.provider.ContactsContract.StreamItemsColumns#COMMENTS}
     </dt>
     <dd>
         선택 사항입니다. 스트림 항목의 시작 부분에 표시할 수 있는 요약 정보를 저장합니다.
     </dd>
     <dt>
-        {@link android.provider.ContactsContract.StreamItemsColumns#TEXT}
+        {@code android.provider.ContactsContract.StreamItemsColumns#TEXT}
     </dt>
     <dd>
         스트림 항목의 텍스트로, 항목의 소스가 게시한 콘텐츠 또는 
@@ -1894,7 +1894,7 @@ XML 파일 <code>res/xml/syncadapter.xml</code>을 가리킵니다. 그런가 �
 자르거나 생략할 수 있지만, 가능하면 태그를 손상시키는 것은 피하려 듭니다.
     </dd>
     <dt>
-        {@link android.provider.ContactsContract.StreamItemsColumns#TIMESTAMP}
+        {@code android.provider.ContactsContract.StreamItemsColumns#TIMESTAMP}
     </dt>
     <dd>
         스트림 항목이 삽입되거나 업데이트된 시간이 들어있는 텍스트 문자열로, 형식은 
@@ -1905,42 +1905,42 @@ epoch 이후 <em>밀리초</em> 형태를 취합니다. 이 열을 관리할 책
 </dl>
 <p>
     스트림 항목의 식별 정보를 표시하려면
-{@link android.provider.ContactsContract.StreamItemsColumns#RES_ICON},
-{@link android.provider.ContactsContract.StreamItemsColumns#RES_LABEL},
-{@link android.provider.ContactsContract.StreamItemsColumns#RES_PACKAGE}를 사용하여 애플리케이션에서
+{@code android.provider.ContactsContract.StreamItemsColumns#RES_ICON},
+{@code android.provider.ContactsContract.StreamItemsColumns#RES_LABEL},
+{@code android.provider.ContactsContract.StreamItemsColumns#RES_PACKAGE}를 사용하여 애플리케이션에서
 리소스를 연결하십시오.
 </p>
 <p>
-    {@link android.provider.ContactsContract.StreamItems} 테이블에도 
-동기화 어댑터가 독점적으로 사용하는 {@link android.provider.ContactsContract.StreamItemsColumns#SYNC1}에서
-{@link android.provider.ContactsContract.StreamItemsColumns#SYNC4}까지의 열이 
+    {@code android.provider.ContactsContract.StreamItems} 테이블에도 
+동기화 어댑터가 독점적으로 사용하는 {@code android.provider.ContactsContract.StreamItemsColumns#SYNC1}에서
+{@code android.provider.ContactsContract.StreamItemsColumns#SYNC4}까지의 열이 
 들어있습니다.
 </p>
 <h3 id="StreamPhotos">소셜 스트림 사진</h3>
 <p>
-   {@link android.provider.ContactsContract.StreamItemPhotos} 테이블은 스트림 항목과 연관된 
+   {@code android.provider.ContactsContract.StreamItemPhotos} 테이블은 스트림 항목과 연관된 
 사진을 저장합니다. 테이블의 
-{@link android.provider.ContactsContract.StreamItemPhotosColumns#STREAM_ITEM_ID} 열은
-{@link android.provider.ContactsContract.StreamItems} 테이블의 {@link android.provider.BaseColumns#_ID} 열에 있는 값과 
+{@code android.provider.ContactsContract.StreamItemPhotosColumns#STREAM_ITEM_ID} 열은
+{@code android.provider.ContactsContract.StreamItems} 테이블의 {@code android.provider.BaseColumns#_ID} 열에 있는 값과 
 연결됩니다. 사진 참조는 
 다음 열의 테이블에 저장됩니다.
 </p>
 <dl>
     <dt>
-        {@link android.provider.ContactsContract.StreamItemPhotos#PHOTO} 열(BLOB).
+        {@code android.provider.ContactsContract.StreamItemPhotos#PHOTO} 열(BLOB).
     </dt>
     <dd>
         사진의 바이너리 표현으로, 제공자가 저장하고 표시하기 위해 크기를 조정한 것입니다.
         이 열은 사진을 저장하는 데 사용한 연락처 제공자의 이전 버전과 
 호환됩니다. 그러나 현재 버전에서는 
 이 열을 사진 저장에 사용하면 안 됩니다. 대신, 
-{@link android.provider.ContactsContract.StreamItemPhotosColumns#PHOTO_FILE_ID} 또는 
-{@link android.provider.ContactsContract.StreamItemPhotosColumns#PHOTO_URI}(
+{@code android.provider.ContactsContract.StreamItemPhotosColumns#PHOTO_FILE_ID} 또는 
+{@code android.provider.ContactsContract.StreamItemPhotosColumns#PHOTO_URI}(
 다음 항목에서 두 가지 모두 설명)를 사용하여 사진을 파일로 저장합니다. 지금 이 열에는 
 사진의 미리 보기가 들어있어 읽기 작업에 사용할 수 있습니다.
     </dd>
     <dt>
-        {@link android.provider.ContactsContract.StreamItemPhotosColumns#PHOTO_FILE_ID}
+        {@code android.provider.ContactsContract.StreamItemPhotosColumns#PHOTO_FILE_ID}
     </dt>
     <dd>
         원시 연락처에 대한 사진의 숫자 식별자입니다. 이 값을 
@@ -1950,7 +1950,7 @@ epoch 이후 <em>밀리초</em> 형태를 취합니다. 이 열을 관리할 책
 openAssetFileDescriptor()}를 호출하여 사진 파일에 대한 핸들을 가져옵니다.
     </dd>
     <dt>
-        {@link android.provider.ContactsContract.StreamItemPhotosColumns#PHOTO_URI}
+        {@code android.provider.ContactsContract.StreamItemPhotosColumns#PHOTO_URI}
     </dt>
     <dd>
         이 행이 나타내는 사진에 대한 사진 파일을 직접 가리키는 콘텐츠 URI입니다.
@@ -1965,27 +1965,27 @@ openAssetFileDescriptor()}를 호출하면 사진 파일에 대한 핸들을 가
     <ul>
         <li>
             이 테이블에는 추가 액세스 권한이 필요합니다. 여기서 읽기 작업을 수행하려면 애플리케이션에
-{@link android.Manifest.permission#READ_SOCIAL_STREAM} 권한이 있어야 합니다. 여기서 수정 작업을 수행하려면 
+{@code android.Manifest.permission#READ_SOCIAL_STREAM} 권한이 있어야 합니다. 여기서 수정 작업을 수행하려면 
 애플리케이션에
-{@link android.Manifest.permission#WRITE_SOCIAL_STREAM} 권한이 있어야 합니다.
+{@code android.Manifest.permission#WRITE_SOCIAL_STREAM} 권한이 있어야 합니다.
         </li>
         <li>
-            {@link android.provider.ContactsContract.StreamItems} 테이블의 경우, 각 원시 연락처에 저장되는 
+            {@code android.provider.ContactsContract.StreamItems} 테이블의 경우, 각 원시 연락처에 저장되는 
 행 개수가 제한되어 있습니다. 이 한계에 도달하면, 
 연락처 제공자가 새 스트림 항목 열에 필요한 공간을 만들어야 합니다.
-이때 가장 오래된 {@link android.provider.ContactsContract.StreamItemsColumns#TIMESTAMP}가 
+이때 가장 오래된 {@code android.provider.ContactsContract.StreamItemsColumns#TIMESTAMP}가 
 있는 행부터 자동으로 삭제하는 방법을 씁니다. 이 한계를 
 가져오려면, 콘텐츠 URI 
-{@link android.provider.ContactsContract.StreamItems#CONTENT_LIMIT_URI}에 쿼리를 발행합니다. 콘텐츠 
+{@code android.provider.ContactsContract.StreamItems#CONTENT_LIMIT_URI}에 쿼리를 발행합니다. 콘텐츠 
 URI를 뺀 나머지 모든 인수는 <code>null</code>로 설정한 채 두면 됩니다. 이 쿼리는 
 행이 하나 들어 있는 커서를 반환하며, 
-{@link android.provider.ContactsContract.StreamItems#MAX_ITEMS} 열 하나가 수반됩니다.
+{@code android.provider.ContactsContract.StreamItems#MAX_ITEMS} 열 하나가 수반됩니다.
         </li>
     </ul>
 
 <p>
-    {@link android.provider.ContactsContract.StreamItems.StreamItemPhotos} 클래스는 
-스트림 항목 하나의 사진 행을 포함하는 {@link android.provider.ContactsContract.StreamItemPhotos}의 
+    {@code android.provider.ContactsContract.StreamItems.StreamItemPhotos} 클래스는 
+스트림 항목 하나의 사진 행을 포함하는 {@code android.provider.ContactsContract.StreamItemPhotos}의 
 하위 테이블을 정의합니다.
 </p>
 <h3 id="SocialStreamInteraction">소셜 스트림 상호 작용</h3>
@@ -1998,8 +1998,8 @@ URI를 뺀 나머지 모든 인수는 <code>null</code>로 설정한 채 두면 
         <li>
             소셜 네트워킹 서비스를 동기화 어댑터로 연락처 제공자에 동기화함으로써, 
 사용자 연락처의 최근 활동을 검색하고 이를 
-{@link android.provider.ContactsContract.StreamItems} 및 
-{@link android.provider.ContactsContract.StreamItemPhotos} 테이블에 저장해 두어 나중에 사용할 수 있습니다.
+{@code android.provider.ContactsContract.StreamItems} 및 
+{@code android.provider.ContactsContract.StreamItemPhotos} 테이블에 저장해 두어 나중에 사용할 수 있습니다.
         </li>
         <li>
             정기 동기화 외에도 사용자가 볼 연락처를 선택하면 동기화 어댑터를 트리거하여 
@@ -2330,7 +2330,7 @@ Settings.UNGROUPED_VISIBLE} 열의 값을 1로 설정합니다. 이렇게 하면
 {@link android.provider.ContactsContract.CommonDataKinds.Photo#CONTENT_ITEM_TYPE
 Photo.CONTENT_ITEM_TYPE} MIME 유형으로 사진을 행에 저장합니다. 이 행의 
 {@link android.provider.ContactsContract.RawContactsColumns#CONTACT_ID} 열은 
-행이 속한 원시 연락처의 {@link android.provider.BaseColumns#_ID} 열과 연결됩니다.
+행이 속한 원시 연락처의 {@code android.provider.BaseColumns#_ID} 열과 연결됩니다.
     클래스 {@link android.provider.ContactsContract.Contacts.Photo}는 
 연락처 기본 사진의 사진 정보가 들어있는 {@link android.provider.ContactsContract.Contacts} 하위 테이블을 정의합니다. 
 연락처의 기본 사진은 연락처 기본 원시 연락처의 기본 사진입니다. 마찬가지로, 
@@ -2344,13 +2344,13 @@ Photo.CONTENT_ITEM_TYPE} MIME 유형으로 사진을 행에 저장합니다. 이
 사진 정보를 검색하는 예시가 들어있습니다. 원시 연락처에 대한 기본 미리 보기를 검색하는 데 쓰이는 
 편의 클래스는 없습니다. 하지만 
 {@link android.provider.ContactsContract.Data} 테이블에 쿼리를 보내 원시 연락처의 
-{@link android.provider.BaseColumns#_ID}, 
+{@code android.provider.BaseColumns#_ID}, 
     {@link android.provider.ContactsContract.CommonDataKinds.Photo#CONTENT_ITEM_TYPE
     Photo.CONTENT_ITEM_TYPE}, 및 {@link android.provider.ContactsContract.Data#IS_PRIMARY}
  열을 선택하면 해당 원시 연락처의 기본 사진 행을 찾을 수 있습니다.
 </p>
 <p>
     한 사람의 소셜 스트림 데이터에도 사진이 포함되어 있을 수 있습니다. 이런 사진은 
-{@link android.provider.ContactsContract.StreamItemPhotos} 테이블에 저장되며, 이 내용은 
+{@code android.provider.ContactsContract.StreamItemPhotos} 테이블에 저장되며, 이 내용은 
 <a href="#StreamPhotos">소셜 스트림 사진</a>에 더 자세하게 설명되어 있습니다.
 </p>
