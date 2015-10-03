@@ -681,14 +681,6 @@ bool FontRenderer::renderTextOnPath(const SkPaint* paint, const Rect* clip, cons
     return mDrawn;
 }
 
-void FontRenderer::removeFont(const Font* font) {
-    mActiveFonts.remove(font->getDescription());
-
-    if (mCurrentFont == font) {
-        mCurrentFont = nullptr;
-    }
-}
-
 void FontRenderer::blurImage(uint8_t** image, int32_t width, int32_t height, float radius) {
     uint32_t intRadius = Blur::convertRadiusToInt(radius);
 #ifdef ANDROID_ENABLE_RENDERSCRIPT
