@@ -28,9 +28,8 @@ import android.content.Context;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
-import android.graphics.drawable.Drawable;
 import android.graphics.PixelFormat;
-import android.graphics.Rect;
+import android.graphics.drawable.Drawable;
 import android.media.session.MediaController;
 import android.net.Uri;
 import android.os.Bundle;
@@ -2006,16 +2005,6 @@ public abstract class Window {
      * </p>
      */
     public abstract void setNavigationBarColor(@ColorInt int color);
-
-    /**
-     * Get information whether the activity has non client decoration view. These views are used in
-     * the multi window environment, to provide dragging handle and maximize/close buttons.
-     *
-     * @hide
-     */
-    public boolean hasNonClientDecorView() {
-        return false;
-    }
 
     /** @hide */
     public void setTheme(int resId) {

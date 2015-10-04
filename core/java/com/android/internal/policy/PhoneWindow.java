@@ -488,7 +488,7 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
     }
 
     public void clearContentView() {
-        if (mNonClientDecorView.getChildCount() > 1) {
+        if (mNonClientDecorView != null && mNonClientDecorView.getChildCount() > 1) {
             mNonClientDecorView.removeViewAt(1);
         }
     }
@@ -5413,13 +5413,7 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
      * @Return Returns true if the window should show a shadow.
      **/
     private boolean nonClientDecorHasShadow(int workspaceId) {
-        // TODO(skuhne): Add side by side mode here to add a decor.
         return workspaceId == FREEFORM_WORKSPACE_STACK_ID;
-    }
-
-    @Override
-    public boolean hasNonClientDecorView() {
-        return mNonClientDecorView != null;
     }
 
     @Override
