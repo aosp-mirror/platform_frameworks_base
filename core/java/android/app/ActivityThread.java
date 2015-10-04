@@ -1368,7 +1368,6 @@ public final class ActivityThread {
                     Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
                 } break;
                 case RELAUNCH_ACTIVITY: {
-                    Log.d(TAG, "handleRelaunchActivity: " + msg.obj);
                     Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER, "activityRestart");
                     ActivityClientRecord r = (ActivityClientRecord)msg.obj;
                     handleRelaunchActivity(r);
@@ -3228,10 +3227,6 @@ public final class ActivityThread {
 
         if (r != null) {
             final Activity a = r.activity;
-            if (a.toString().contains("Recents")) {
-                Log.d(TAG, "handleResumeActivity ativity=" + a + ", windowAdded=" + a.mWindowAdded
-                        + " " + Log.getStackTraceString(new Throwable()));
-            }
 
             if (localLOGV) Slog.v(
                 TAG, "Resume " + r + " started activity: " +
@@ -3974,10 +3969,6 @@ public final class ActivityThread {
                             r.window.clearContentView();
                         }
                     } else {
-                        if (r.activity.toString().contains("Recents")) {
-                            Log.d(TAG, "removeViewImmediate activity=" + r.activity + " "
-                                    + Log.getStackTraceString(new Throwable()));
-                        }
                         wm.removeViewImmediate(v);
                     }
                 }
