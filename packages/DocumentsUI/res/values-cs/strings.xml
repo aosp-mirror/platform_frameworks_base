@@ -20,7 +20,8 @@
     <string name="files_label" msgid="6051402950202690279">"Soubory"</string>
     <string name="title_open" msgid="4353228937663917801">"Otevřít"</string>
     <string name="title_save" msgid="2433679664882857999">"Uložit do"</string>
-    <string name="menu_create_dir" msgid="5947289605844398389">"Vytvořit složku"</string>
+    <!-- no translation found for menu_create_dir (2547620241173881754) -->
+    <skip />
     <string name="menu_grid" msgid="6878021334497835259">"Mřížkové zobrazení"</string>
     <string name="menu_list" msgid="7279285939892417279">"Zobrazení seznamu"</string>
     <string name="menu_sort" msgid="7677740407158414452">"Řadit podle"</string>
@@ -33,6 +34,7 @@
     <string name="menu_select_all" msgid="8323579667348729928">"Vybrat vše"</string>
     <string name="menu_copy" msgid="3612326052677229148">"Kopírovat do…"</string>
     <string name="menu_move" msgid="1828090633118079817">"Přesunout do…"</string>
+    <string name="menu_new_window" msgid="1226032889278727538">"Nové okno"</string>
     <string name="menu_copy_to_clipboard" msgid="489311381979634291">"Kopírovat"</string>
     <string name="menu_paste_from_clipboard" msgid="2071583031180257091">"Vložit"</string>
     <string name="menu_advanced_show" product="nosdcard" msgid="4693652895715631401">"Zobrazit inter. úložiště"</string>

@@ -20,7 +20,8 @@
     <string name="files_label" msgid="6051402950202690279">"Fichiers"</string>
     <string name="title_open" msgid="4353228937663917801">"Ouvrir à partir de"</string>
     <string name="title_save" msgid="2433679664882857999">"Enregistrer sous"</string>
-    <string name="menu_create_dir" msgid="5947289605844398389">"Créer un dossier"</string>
+    <!-- no translation found for menu_create_dir (2547620241173881754) -->
+    <skip />
     <string name="menu_grid" msgid="6878021334497835259">"Grille"</string>
     <string name="menu_list" msgid="7279285939892417279">"Liste"</string>
     <string name="menu_sort" msgid="7677740407158414452">"Trier par"</string>
@@ -33,6 +34,7 @@
     <string name="menu_select_all" msgid="8323579667348729928">"Tout sélectionner"</string>
     <string name="menu_copy" msgid="3612326052677229148">"Copier vers…"</string>
     <string name="menu_move" msgid="1828090633118079817">"Placer dans…"</string>
+    <string name="menu_new_window" msgid="1226032889278727538">"Nouvelle fenêtre"</string>
     <string name="menu_copy_to_clipboard" msgid="489311381979634291">"Copier"</string>
     <string name="menu_paste_from_clipboard" msgid="2071583031180257091">"Coller"</string>
     <string name="menu_advanced_show" product="nosdcard" msgid="4693652895715631401">"Aff. mém. stock. interne"</string>

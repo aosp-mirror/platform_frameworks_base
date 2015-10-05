@@ -20,7 +20,8 @@
     <string name="files_label" msgid="6051402950202690279">"檔案"</string>
     <string name="title_open" msgid="4353228937663917801">"開啟檔案"</string>
     <string name="title_save" msgid="2433679664882857999">"儲存至"</string>
-    <string name="menu_create_dir" msgid="5947289605844398389">"建立資料夾"</string>
+    <!-- no translation found for menu_create_dir (2547620241173881754) -->
+    <skip />
     <string name="menu_grid" msgid="6878021334497835259">"格狀檢視"</string>
     <string name="menu_list" msgid="7279285939892417279">"清單檢視"</string>
     <string name="menu_sort" msgid="7677740407158414452">"排序方式"</string>
@@ -33,6 +34,7 @@
     <string name="menu_select_all" msgid="8323579667348729928">"全部選取"</string>
     <string name="menu_copy" msgid="3612326052677229148">"複製到…"</string>
     <string name="menu_move" msgid="1828090633118079817">"移至…"</string>
+    <string name="menu_new_window" msgid="1226032889278727538">"新視窗"</string>
     <string name="menu_copy_to_clipboard" msgid="489311381979634291">"複製"</string>
     <string name="menu_paste_from_clipboard" msgid="2071583031180257091">"貼上"</string>
     <string name="menu_advanced_show" product="nosdcard" msgid="4693652895715631401">"顯示內部儲存空間"</string>
@@ -45,8 +47,7 @@
     <string name="button_copy" msgid="8706475544635021302">"複製"</string>
     <string name="button_move" msgid="2202666023104202232">"移動"</string>
     <string name="button_dismiss" msgid="3714065566893946085">"關閉"</string>
-    <!-- no translation found for button_retry (4392027584153752797) -->
-    <skip />
+    <string name="button_retry" msgid="4392027584153752797">"再試一次"</string>
     <string name="sort_name" msgid="9183560467917256779">"按名稱"</string>
     <string name="sort_date" msgid="586080032956151448">"按修改日期"</string>
     <string name="sort_size" msgid="3350681319735474741">"按大小"</string>

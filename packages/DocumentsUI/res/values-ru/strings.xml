@@ -20,7 +20,8 @@
     <string name="files_label" msgid="6051402950202690279">"Файлы"</string>
     <string name="title_open" msgid="4353228937663917801">"Открыть"</string>
     <string name="title_save" msgid="2433679664882857999">"Сохранить"</string>
-    <string name="menu_create_dir" msgid="5947289605844398389">"Новая папка"</string>
+    <!-- no translation found for menu_create_dir (2547620241173881754) -->
+    <skip />
     <string name="menu_grid" msgid="6878021334497835259">"Сетка"</string>
     <string name="menu_list" msgid="7279285939892417279">"Список"</string>
     <string name="menu_sort" msgid="7677740407158414452">"Сортировать"</string>
@@ -33,6 +34,7 @@
     <string name="menu_select_all" msgid="8323579667348729928">"Выбрать все"</string>
     <string name="menu_copy" msgid="3612326052677229148">"Копировать в…"</string>
     <string name="menu_move" msgid="1828090633118079817">"Переместить"</string>
+    <string name="menu_new_window" msgid="1226032889278727538">"Новое окно"</string>
     <string name="menu_copy_to_clipboard" msgid="489311381979634291">"Копировать"</string>
     <string name="menu_paste_from_clipboard" msgid="2071583031180257091">"Вставить"</string>
     <string name="menu_advanced_show" product="nosdcard" msgid="4693652895715631401">"Внутренняя память"</string>
@@ -45,8 +47,7 @@
     <string name="button_copy" msgid="8706475544635021302">"Копировать"</string>
     <string name="button_move" msgid="2202666023104202232">"Переместить"</string>
     <string name="button_dismiss" msgid="3714065566893946085">"Скрыть"</string>
-    <!-- no translation found for button_retry (4392027584153752797) -->
-    <skip />
+    <string name="button_retry" msgid="4392027584153752797">"Повторить"</string>
     <string name="sort_name" msgid="9183560467917256779">"По названию"</string>
     <string name="sort_date" msgid="586080032956151448">"По дате изменения"</string>
     <string name="sort_size" msgid="3350681319735474741">"По размеру"</string>

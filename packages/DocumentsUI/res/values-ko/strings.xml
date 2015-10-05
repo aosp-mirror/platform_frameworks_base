@@ -20,7 +20,8 @@
     <string name="files_label" msgid="6051402950202690279">"파일"</string>
     <string name="title_open" msgid="4353228937663917801">"열기:"</string>
     <string name="title_save" msgid="2433679664882857999">"저장 위치:"</string>
-    <string name="menu_create_dir" msgid="5947289605844398389">"폴더 만들기"</string>
+    <!-- no translation found for menu_create_dir (2547620241173881754) -->
+    <skip />
     <string name="menu_grid" msgid="6878021334497835259">"바둑판식 보기"</string>
     <string name="menu_list" msgid="7279285939892417279">"목록 보기"</string>
     <string name="menu_sort" msgid="7677740407158414452">"정렬 기준"</string>
@@ -33,6 +34,7 @@
     <string name="menu_select_all" msgid="8323579667348729928">"모두 선택"</string>
     <string name="menu_copy" msgid="3612326052677229148">"복사…"</string>
     <string name="menu_move" msgid="1828090633118079817">"이동…"</string>
+    <string name="menu_new_window" msgid="1226032889278727538">"새 창"</string>
     <string name="menu_copy_to_clipboard" msgid="489311381979634291">"복사"</string>
     <string name="menu_paste_from_clipboard" msgid="2071583031180257091">"붙여넣기"</string>
     <string name="menu_advanced_show" product="nosdcard" msgid="4693652895715631401">"내부 저장소 표시"</string>
@@ -45,8 +47,7 @@
     <string name="button_copy" msgid="8706475544635021302">"복사"</string>
     <string name="button_move" msgid="2202666023104202232">"이동"</string>
     <string name="button_dismiss" msgid="3714065566893946085">"닫기"</string>
-    <!-- no translation found for button_retry (4392027584153752797) -->
-    <skip />
+    <string name="button_retry" msgid="4392027584153752797">"다시 시도"</string>
     <string name="sort_name" msgid="9183560467917256779">"이름순"</string>
     <string name="sort_date" msgid="586080032956151448">"수정된 날짜순"</string>
     <string name="sort_size" msgid="3350681319735474741">"크기순"</string>

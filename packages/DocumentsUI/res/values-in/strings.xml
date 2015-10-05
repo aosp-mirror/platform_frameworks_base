@@ -20,7 +20,8 @@
     <string name="files_label" msgid="6051402950202690279">"File"</string>
     <string name="title_open" msgid="4353228937663917801">"Buka dari"</string>
     <string name="title_save" msgid="2433679664882857999">"Simpan ke"</string>
-    <string name="menu_create_dir" msgid="5947289605844398389">"Buat folder"</string>
+    <!-- no translation found for menu_create_dir (2547620241173881754) -->
+    <skip />
     <string name="menu_grid" msgid="6878021334497835259">"Tampilan kisi"</string>
     <string name="menu_list" msgid="7279285939892417279">"Tampilan daftar"</string>
     <string name="menu_sort" msgid="7677740407158414452">"Urutkan menurut"</string>
@@ -33,6 +34,7 @@
     <string name="menu_select_all" msgid="8323579667348729928">"Pilih semua"</string>
     <string name="menu_copy" msgid="3612326052677229148">"Salin ke…"</string>
     <string name="menu_move" msgid="1828090633118079817">"Pindahkan ke..."</string>
+    <string name="menu_new_window" msgid="1226032889278727538">"Jendela baru"</string>
     <string name="menu_copy_to_clipboard" msgid="489311381979634291">"Salin"</string>
     <string name="menu_paste_from_clipboard" msgid="2071583031180257091">"Tempel"</string>
     <string name="menu_advanced_show" product="nosdcard" msgid="4693652895715631401">"Tampilkan simpanan internal"</string>

@@ -20,7 +20,8 @@
     <string name="files_label" msgid="6051402950202690279">"ಫೈಲ್‌ಗಳು"</string>
     <string name="title_open" msgid="4353228937663917801">"ಇದರ ಮೂಲಕ ತೆರೆಯಿರಿ"</string>
     <string name="title_save" msgid="2433679664882857999">"ಇವುಗಳಲ್ಲಿ ಉಳಿಸಿ"</string>
-    <string name="menu_create_dir" msgid="5947289605844398389">"ಫೋಲ್ಡರ್ ರಚಿಸು"</string>
+    <!-- no translation found for menu_create_dir (2547620241173881754) -->
+    <skip />
     <string name="menu_grid" msgid="6878021334497835259">"ಗ್ರಿಡ್ ವೀಕ್ಷಣೆ"</string>
     <string name="menu_list" msgid="7279285939892417279">"ಪಟ್ಟಿ ವೀಕ್ಷಣೆ"</string>
     <string name="menu_sort" msgid="7677740407158414452">"ಈ ಪ್ರಕಾರ ವಿಂಗಡಿಸು"</string>
@@ -33,6 +34,7 @@
     <string name="menu_select_all" msgid="8323579667348729928">"ಎಲ್ಲವನ್ನೂ ಆಯ್ಕೆಮಾಡಿ"</string>
     <string name="menu_copy" msgid="3612326052677229148">"ಇದಕ್ಕೆ ನಕಲಿಸಿ…"</string>
     <string name="menu_move" msgid="1828090633118079817">"ಇದಕ್ಕೆ ಸರಿಸು…"</string>
+    <string name="menu_new_window" msgid="1226032889278727538">"ಹೊಸ ವಿಂಡೋ"</string>
     <string name="menu_copy_to_clipboard" msgid="489311381979634291">"ನಕಲಿಸು"</string>
     <string name="menu_paste_from_clipboard" msgid="2071583031180257091">"ಅಂಟಿಸು"</string>
     <string name="menu_advanced_show" product="nosdcard" msgid="4693652895715631401">"ಆಂತರಿಕ ಸಂಗ್ರಹಣೆಯನ್ನು ತೋರಿಸು"</string>
