@@ -3956,13 +3956,12 @@ public final class ActivityThread {
                 }
                 IBinder wtoken = v.getWindowToken();
                 if (r.activity.mWindowAdded) {
-                    boolean reuseForResize = r.window.hasNonClientDecorView() && r.mPreserveWindow;
-                    if (r.onlyLocalRequest || reuseForResize) {
+                    if (r.onlyLocalRequest || r.mPreserveWindow) {
                         // Hold off on removing this until the new activity's
                         // window is being added.
                         r.mPendingRemoveWindow = r.window;
                         r.mPendingRemoveWindowManager = wm;
-                        if (reuseForResize) {
+                        if (r.mPreserveWindow) {
                             // We can only keep the part of the view hierarchy that we control,
                             // everything else must be removed, because it might not be able to
                             // behave properly when activity is relaunching.
