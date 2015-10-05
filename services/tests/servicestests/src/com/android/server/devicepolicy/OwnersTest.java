@@ -94,7 +94,6 @@ public class OwnersTest extends DpmTestBase {
 
             assertFalse(owners.hasDeviceOwner());
             assertEquals(UserHandle.USER_NULL, owners.getDeviceOwnerUserId());
-            assertFalse(owners.hasDeviceInitializer());
             assertNull(owners.getSystemUpdatePolicy());
             assertEquals(0, owners.getProfileOwnerKeys().size());
         }
@@ -106,7 +105,6 @@ public class OwnersTest extends DpmTestBase {
 
             assertFalse(owners.hasDeviceOwner());
             assertEquals(UserHandle.USER_NULL, owners.getDeviceOwnerUserId());
-            assertFalse(owners.hasDeviceInitializer());
             assertNull(owners.getSystemUpdatePolicy());
             assertEquals(0, owners.getProfileOwnerKeys().size());
         }
@@ -139,7 +137,6 @@ public class OwnersTest extends DpmTestBase {
             assertEquals("com.google.android.testdpc", owners.getDeviceOwnerPackageName());
             assertEquals(UserHandle.USER_SYSTEM, owners.getDeviceOwnerUserId());
 
-            assertFalse(owners.hasDeviceInitializer());
             assertNull(owners.getSystemUpdatePolicy());
             assertEquals(0, owners.getProfileOwnerKeys().size());
         }
@@ -154,7 +151,6 @@ public class OwnersTest extends DpmTestBase {
             assertEquals("com.google.android.testdpc", owners.getDeviceOwnerPackageName());
             assertEquals(UserHandle.USER_SYSTEM, owners.getDeviceOwnerUserId());
 
-            assertFalse(owners.hasDeviceInitializer());
             assertNull(owners.getSystemUpdatePolicy());
             assertEquals(0, owners.getProfileOwnerKeys().size());
         }
@@ -184,7 +180,6 @@ public class OwnersTest extends DpmTestBase {
 
             assertFalse(owners.hasDeviceOwner());
             assertEquals(UserHandle.USER_NULL, owners.getDeviceOwnerUserId());
-            assertFalse(owners.hasDeviceInitializer());
             assertNull(owners.getSystemUpdatePolicy());
 
             assertEquals(2, owners.getProfileOwnerKeys().size());
@@ -207,7 +202,6 @@ public class OwnersTest extends DpmTestBase {
 
             assertFalse(owners.hasDeviceOwner());
             assertEquals(UserHandle.USER_NULL, owners.getDeviceOwnerUserId());
-            assertFalse(owners.hasDeviceInitializer());
             assertNull(owners.getSystemUpdatePolicy());
 
             assertEquals(2, owners.getProfileOwnerKeys().size());
@@ -251,8 +245,6 @@ public class OwnersTest extends DpmTestBase {
             assertEquals("com.google.android.testdpc", owners.getDeviceOwnerPackageName());
             assertEquals(UserHandle.USER_SYSTEM, owners.getDeviceOwnerUserId());
 
-            assertTrue(owners.hasDeviceInitializer());
-            assertEquals("com.google.android.testdpcx", owners.getDeviceInitializerPackageName());
             assertNotNull(owners.getSystemUpdatePolicy());
             assertEquals(5, owners.getSystemUpdatePolicy().getPolicyType());
 
@@ -279,8 +271,6 @@ public class OwnersTest extends DpmTestBase {
             assertEquals("com.google.android.testdpc", owners.getDeviceOwnerPackageName());
             assertEquals(UserHandle.USER_SYSTEM, owners.getDeviceOwnerUserId());
 
-            assertTrue(owners.hasDeviceInitializer());
-            assertEquals("com.google.android.testdpcx", owners.getDeviceInitializerPackageName());
             assertNotNull(owners.getSystemUpdatePolicy());
             assertEquals(5, owners.getSystemUpdatePolicy().getPolicyType());
 
@@ -322,8 +312,6 @@ public class OwnersTest extends DpmTestBase {
             assertFalse(owners.hasDeviceOwner());
             assertEquals(UserHandle.USER_NULL, owners.getDeviceOwnerUserId());
 
-            assertTrue(owners.hasDeviceInitializer());
-            assertEquals("com.google.android.testdpcx", owners.getDeviceInitializerPackageName());
 
             assertNull(owners.getSystemUpdatePolicy());
             assertEquals(0, owners.getProfileOwnerKeys().size());
@@ -337,8 +325,6 @@ public class OwnersTest extends DpmTestBase {
             assertFalse(owners.hasDeviceOwner());
             assertEquals(UserHandle.USER_NULL, owners.getDeviceOwnerUserId());
 
-            assertTrue(owners.hasDeviceInitializer());
-            assertEquals("com.google.android.testdpcx", owners.getDeviceInitializerPackageName());
 
             assertNull(owners.getSystemUpdatePolicy());
             assertEquals(0, owners.getProfileOwnerKeys().size());
@@ -368,7 +354,6 @@ public class OwnersTest extends DpmTestBase {
 
             assertFalse(owners.hasDeviceOwner());
             assertEquals(UserHandle.USER_NULL, owners.getDeviceOwnerUserId());
-            assertFalse(owners.hasDeviceInitializer());
             assertEquals(0, owners.getProfileOwnerKeys().size());
 
             assertNotNull(owners.getSystemUpdatePolicy());
@@ -382,7 +367,6 @@ public class OwnersTest extends DpmTestBase {
 
             assertFalse(owners.hasDeviceOwner());
             assertEquals(UserHandle.USER_NULL, owners.getDeviceOwnerUserId());
-            assertFalse(owners.hasDeviceInitializer());
             assertEquals(0, owners.getProfileOwnerKeys().size());
 
             assertNotNull(owners.getSystemUpdatePolicy());
@@ -408,7 +392,6 @@ public class OwnersTest extends DpmTestBase {
         assertTrue(owners.getProfileOwnerFileWithTestOverride(11).exists());
 
         // Then clear all information and save.
-        owners.clearDeviceInitializer();
         owners.clearDeviceOwner();
         owners.clearSystemUpdatePolicy();
         owners.removeProfileOwner(10);

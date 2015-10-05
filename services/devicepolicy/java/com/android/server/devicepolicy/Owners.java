@@ -90,9 +90,6 @@ class Owners {
 
     private int mDeviceOwnerUserId = UserHandle.USER_NULL;
 
-    // Internal state for the device initializer package.
-    private OwnerInfo mDeviceInitializer;
-
     // Internal state for the profile owner packages.
     private final ArrayMap<Integer, OwnerInfo> mProfileOwners = new ArrayMap<>();
 
@@ -167,26 +164,6 @@ class Owners {
         mDeviceOwnerUserId = UserHandle.USER_NULL;
     }
 
-    ComponentName getDeviceInitializerComponent() {
-        return mDeviceInitializer.admin;
-    }
-
-    String getDeviceInitializerPackageName() {
-        return mDeviceInitializer != null ? mDeviceInitializer.packageName : null;
-    }
-
-    void setDeviceInitializer(ComponentName admin) {
-        mDeviceInitializer = new OwnerInfo(null, admin);
-    }
-
-    void clearDeviceInitializer() {
-        mDeviceInitializer = null;
-    }
-
-    boolean hasDeviceInitializer() {
-        return mDeviceInitializer != null;
-    }
-
     void setProfileOwner(ComponentName admin, String ownerName, int userId) {
         mProfileOwners.put(userId, new OwnerInfo(ownerName, admin));
     }
@@ -252,18 +229,7 @@ class Owners {
                     mDeviceOwner = new OwnerInfo(name, packageName);
                     mDeviceOwnerUserId = UserHandle.USER_SYSTEM;
                 } else if (tag.equals(TAG_DEVICE_INITIALIZER)) {
-                    String packageName = parser.getAttributeValue(null, ATTR_PACKAGE);
-                    String initializerComponentStr =
-                            parser.getAttributeValue(null, ATTR_COMPONENT_NAME);
-                    ComponentName admin =
-                            ComponentName.unflattenFromString(initializerComponentStr);
-                    if (admin != null) {
-                        mDeviceInitializer = new OwnerInfo(null, admin);
-                    } else {
-                        mDeviceInitializer = new OwnerInfo(null, packageName);
-                        Slog.e(TAG, "Error parsing device-owner file. Bad component name " +
-                                initializerComponentStr);
-                    }
+                    // Deprecated tag
                 } else if (tag.equals(TAG_PROFILE_OWNER)) {
                     String profileOwnerPackageName = parser.getAttributeValue(null, ATTR_PACKAGE);
                     String profileOwnerName = parser.getAttributeValue(null, ATTR_NAME);
@@ -444,8 +410,7 @@ class Owners {
 
         @Override
         boolean shouldWrite() {
-            return (mDeviceOwner != null) || (mDeviceInitializer != null)
-                    || (mSystemUpdatePolicy != null);
+            return (mDeviceOwner != null) || (mSystemUpdatePolicy != null);
         }
 
         @Override
@@ -457,9 +422,6 @@ class Owners {
                 out.endTag(null, TAG_DEVICE_OWNER_CONTEXT);
             }
 
-            if (mDeviceInitializer != null) {
-                mDeviceInitializer.writeToXml(out, TAG_DEVICE_INITIALIZER);
-            }
             if (mSystemUpdatePolicy != null) {
                 out.startTag(null, TAG_SYSTEM_UPDATE_POLICY);
                 mSystemUpdatePolicy.saveToXml(out);
@@ -488,7 +450,7 @@ class Owners {
                     break;
                 }
                 case TAG_DEVICE_INITIALIZER:
-                    mDeviceInitializer = OwnerInfo.readFromXml(parser);
+                    // Deprecated tag
                     break;
                 case TAG_SYSTEM_UPDATE_POLICY:
                     mSystemUpdatePolicy = SystemUpdatePolicy.restoreFromXml(parser);
@@ -605,11 +567,6 @@ class Owners {
             pw.println(prefix + "Device Owner: ");
             mDeviceOwner.dump(prefix + "  ", pw);
             pw.println(prefix + "  User ID: " + mDeviceOwnerUserId);
-            pw.println();
-        }
-        if (mDeviceInitializer != null) {
-            pw.println(prefix + "Device Initializer: ");
-            mDeviceInitializer.dump(prefix + "  ", pw);
             pw.println();
         }
         if (mSystemUpdatePolicy != null) {

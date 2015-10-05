@@ -5629,7 +5629,7 @@ package android.app.admin {
     method public void onPasswordFailed(android.content.Context, android.content.Intent);
     method public void onPasswordSucceeded(android.content.Context, android.content.Intent);
     method public void onProfileProvisioningComplete(android.content.Context, android.content.Intent);
-    method public void onReadyForUserInitialization(android.content.Context, android.content.Intent);
+    method public deprecated void onReadyForUserInitialization(android.content.Context, android.content.Intent);
     method public void onReceive(android.content.Context, android.content.Intent);
     method public void onSystemUpdatePending(android.content.Context, android.content.Intent, long);
     field public static final java.lang.String ACTION_DEVICE_ADMIN_DISABLED = "android.app.action.DEVICE_ADMIN_DISABLED";

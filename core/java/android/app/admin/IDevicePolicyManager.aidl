@@ -211,13 +211,6 @@ interface IDevicePolicyManager {
 
     boolean isRemovingAdmin(in ComponentName adminReceiver, int userHandle);
 
-    boolean setUserEnabled(in ComponentName who);
-    boolean isDeviceInitializer(String packageName);
-    void clearDeviceInitializer(in ComponentName who);
-    boolean setDeviceInitializer(in ComponentName who, in ComponentName initializer);
-    String getDeviceInitializer();
-    ComponentName getDeviceInitializerComponent();
-
     void setUserIcon(in ComponentName admin, in Bitmap icon);
 
     void setSystemUpdatePolicy(in ComponentName who, in SystemUpdatePolicy policy);

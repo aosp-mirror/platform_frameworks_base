@@ -497,96 +497,6 @@ public class DevicePolicyManager {
              "android.app.extra.PROVISIONING_SKIP_ENCRYPTION";
 
     /**
-     * @hide
-     * On devices managed by a device owner app, a {@link ComponentName} extra indicating the
-     * component of the application that is temporarily granted device owner privileges during
-     * device initialization and profile owner privileges during secondary user initialization.
-     *
-     * <p>
-     * It can also be used in an NFC record with {@link #MIME_TYPE_PROVISIONING_NFC_V2} that starts
-     * device owner provisioning via an NFC bump. For the NFC record, it should be flattened to a
-     * string first.
-     *
-     * @see ComponentName#flattenToShortString()
-     */
-    public static final String EXTRA_PROVISIONING_DEVICE_INITIALIZER_COMPONENT_NAME
-        = "android.app.extra.PROVISIONING_DEVICE_INITIALIZER_COMPONENT_NAME";
-
-    /**
-     * @hide
-     * A String extra holding an http url that specifies the download location of the device
-     * initializer package. When not provided it is assumed that the device initializer package is
-     * already installed.
-     *
-     * <p>Use in an NFC record with {@link #MIME_TYPE_PROVISIONING_NFC_V2} that starts device owner
-     * provisioning via an NFC bump.
-     */
-    public static final String EXTRA_PROVISIONING_DEVICE_INITIALIZER_PACKAGE_DOWNLOAD_LOCATION
-        = "android.app.extra.PROVISIONING_DEVICE_INITIALIZER_PACKAGE_DOWNLOAD_LOCATION";
-
-    /**
-     * @hide
-     * An int extra holding a minimum required version code for the device initializer package.
-     * If the initializer is already installed on the device, it will only be re-downloaded from
-     * {@link #EXTRA_PROVISIONING_DEVICE_INITIALIZER_PACKAGE_DOWNLOAD_LOCATION} if the version of
-     * the installed package is less than this version code.
-     *
-     * <p>Use in an NFC record with {@link #MIME_TYPE_PROVISIONING_NFC_V2} that starts device owner
-     * provisioning via an NFC bump.
-     */
-    public static final String EXTRA_PROVISIONING_DEVICE_INITIALIZER_MINIMUM_VERSION_CODE
-        = "android.app.extra.PROVISIONING_DEVICE_INITIALIZER_MINIMUM_VERSION_CODE";
-
-    /**
-     * @hide
-     * A String extra holding a http cookie header which should be used in the http request to the
-     * url specified in {@link #EXTRA_PROVISIONING_DEVICE_INITIALIZER_PACKAGE_DOWNLOAD_LOCATION}.
-     *
-     * <p>Use in an NFC record with {@link #MIME_TYPE_PROVISIONING_NFC_V2} that starts device owner
-     * provisioning via an NFC bump.
-     */
-    public static final String EXTRA_PROVISIONING_DEVICE_INITIALIZER_PACKAGE_DOWNLOAD_COOKIE_HEADER
-        = "android.app.extra.PROVISIONING_DEVICE_INITIALIZER_PACKAGE_DOWNLOAD_COOKIE_HEADER";
-
-    /**
-     * @hide
-     * A String extra holding the URL-safe base64 encoded SHA-256 checksum of the file at download
-     * location specified in
-     * {@link #EXTRA_PROVISIONING_DEVICE_INITIALIZER_PACKAGE_DOWNLOAD_LOCATION}.
-     *
-     * <p>Either this extra or {@link #EXTRA_PROVISIONING_DEVICE_INITIALIZER_SIGNATURE_CHECKSUM}
-     * should be present. The provided checksum should match the checksum of the file at the
-     * download location. If the checksum doesn't match an error will be shown to the user and the
-     * user will be asked to factory reset the device.
-     *
-     * <p>Use in an NFC record with {@link #MIME_TYPE_PROVISIONING_NFC_V2} that starts device owner
-     * provisioning via an NFC bump.
-     */
-    public static final String EXTRA_PROVISIONING_DEVICE_INITIALIZER_PACKAGE_CHECKSUM
-        = "android.app.extra.PROVISIONING_DEVICE_INITIALIZER_PACKAGE_CHECKSUM";
-
-    /**
-     * @hide
-     * A String extra holding the URL-safe base64 encoded SHA-256 checksum of any signature of the
-     * android package archive at the download location specified in {@link
-     * #EXTRA_PROVISIONING_DEVICE_INITIALIZER_PACKAGE_DOWNLOAD_LOCATION}.
-     *
-     * <p>The signatures of an android package archive can be obtained using
-     * {@link android.content.pm.PackageManager#getPackageArchiveInfo} with flag
-     * {@link android.content.pm.PackageManager#GET_SIGNATURES}.
-     *
-     * <p>Either this extra or {@link #EXTRA_PROVISIONING_DEVICE_INITIALIZER_PACKAGE_CHECKSUM}
-     * should be present. The provided checksum should match the checksum of any signature of the
-     * file at the download location. If the checksum doesn't match an error will be shown to the
-     * user and the user will be asked to factory reset the device.
-     *
-     * <p>Use in an NFC record with {@link #MIME_TYPE_PROVISIONING_NFC_V2} that starts device owner
-     * provisioning via an NFC bump.
-     */
-    public static final String EXTRA_PROVISIONING_DEVICE_INITIALIZER_SIGNATURE_CHECKSUM
-        = "android.app.extra.PROVISIONING_DEVICE_INITIALIZER_SIGNATURE_CHECKSUM";
-
-    /**
      * This MIME type is used for starting the Device Owner provisioning.
      *
      * <p>During device owner provisioning a device admin app is set as the owner of the device.
@@ -628,44 +538,6 @@ public class DevicePolicyManager {
      */
     public static final String MIME_TYPE_PROVISIONING_NFC
         = "application/com.android.managedprovisioning";
-
-
-    /**
-     * @hide
-     * This MIME type is used for starting the Device Owner provisioning that requires
-     * new provisioning features introduced in API version
-     * {@link android.os.Build.VERSION_CODES#M} in addition to those supported in earlier
-     * versions.
-     *
-     * <p>During device owner provisioning a device admin app is set as the owner of the device.
-     * A device owner has full control over the device. The device owner can not be modified by the
-     * user.
-     *
-     * <p> A typical use case would be a device that is owned by a company, but used by either an
-     * employee or client.
-     *
-     * <p> The NFC message should be sent to an unprovisioned device.
-     *
-     * <p>The NFC record must contain a serialized {@link java.util.Properties} object which
-     * contains the following properties in addition to properties listed at
-     * {@link #MIME_TYPE_PROVISIONING_NFC}:
-     * <ul>
-     * <li>{@link #EXTRA_PROVISIONING_SKIP_ENCRYPTION}, optional</li>
-     * <li>{@link #EXTRA_PROVISIONING_DEVICE_ADMIN_COMPONENT_NAME}.
-     * Replaces {@link #EXTRA_PROVISIONING_DEVICE_ADMIN_PACKAGE_NAME}. The value of the property
-     * should be converted to a String via
-     * {@link android.content.ComponentName#flattenToString()}</li>
-     * <li>{@link #EXTRA_PROVISIONING_DEVICE_ADMIN_MINIMUM_VERSION_CODE}, optional</li></ul>
-     *
-     * <p> When device owner provisioning has completed, an intent of the type
-     * {@link DeviceAdminReceiver#ACTION_PROFILE_PROVISIONING_COMPLETE} is broadcasted to the
-     * device owner.
-     *
-     * <p>
-     * If provisioning fails, the device is factory reset.
-     */
-    public static final String MIME_TYPE_PROVISIONING_NFC_V2
-            = "application/com.android.managedprovisioning.v2";
 
     /**
      * Activity action: ask the user to add a new device administrator to the system.
@@ -2830,132 +2702,24 @@ public class DevicePolicyManager {
 
     /**
      * @hide
-     * Sets the given component as the device initializer. The package must already be installed and
-     * set as an active device administrator, and there must not be an existing device initializer,
-     * for this call to succeed. This method can only be called by an app holding the
-     * MANAGE_DEVICE_ADMINS permission before the device is provisioned or by a device owner app. A
-     * device initializer app is granted device owner privileges during device initialization and
-     * profile owner privileges during secondary user initialization.
-     * @param admin Which {@link DeviceAdminReceiver} this request is associated with, or
-     *              {@code null} if not called by the device owner.
-     * @param initializer Which {@link DeviceAdminReceiver} to make device initializer.
-     * @return whether the component was successfully registered as the device initializer.
-     * @throws IllegalArgumentException if the componentname is null or invalid
-     * @throws IllegalStateException if the caller is not device owner or the device has
-     *         already been provisioned or a device initializer already exists.
+     * @deprecated Do not use
+     * @removed
      */
-    public boolean setDeviceInitializer(@Nullable ComponentName admin,
-            @NonNull ComponentName initializer)
-            throws IllegalArgumentException, IllegalStateException {
-        if (mService != null) {
-            try {
-                return mService.setDeviceInitializer(admin, initializer);
-            } catch (RemoteException re) {
-                Log.w(TAG, "Failed to set device initializer");
-            }
-        }
-        return false;
-    }
-
-    /**
-     * @hide
-     * Used to determine if a particular package has been registered as the device initializer.
-     *
-     * @param packageName the package name of the app, to compare with the registered device
-     *        initializer app, if any.
-     * @return whether or not the caller is registered as the device initializer app.
-     */
-    public boolean isDeviceInitializerApp(String packageName) {
-        if (mService != null) {
-            try {
-                return mService.isDeviceInitializer(packageName);
-            } catch (RemoteException re) {
-                Log.w(TAG, "Failed to check device initializer");
-            }
-        }
-        return false;
-    }
-
-    /**
-     * @hide
-     * Removes the device initializer, so that it will not be invoked on user initialization for any
-     * subsequently created users. This method can be called by either the device owner or device
-     * initializer itself. The caller must be an active administrator.
-     *
-     * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
-     */
-    public void clearDeviceInitializerApp(@NonNull ComponentName admin) {
-        if (mService != null) {
-            try {
-                mService.clearDeviceInitializer(admin);
-            } catch (RemoteException re) {
-                Log.w(TAG, "Failed to clear device initializer");
-            }
-        }
-    }
-
-    /**
-     * @hide
-     * Gets the device initializer of the system.
-     *
-     * @return the package name of the device initializer.
-     */
+    @Deprecated
     @SystemApi
     public String getDeviceInitializerApp() {
-        if (mService != null) {
-            try {
-                return mService.getDeviceInitializer();
-            } catch (RemoteException re) {
-                Log.w(TAG, "Failed to get device initializer");
-            }
-        }
         return null;
     }
 
     /**
      * @hide
-     * Gets the device initializer component of the system.
-     *
-     * @return the component name of the device initializer.
+     * @deprecated Do not use
+     * @removed
      */
+    @Deprecated
     @SystemApi
     public ComponentName getDeviceInitializerComponent() {
-        if (mService != null) {
-            try {
-                return mService.getDeviceInitializerComponent();
-            } catch (RemoteException re) {
-                Log.w(TAG, "Failed to get device initializer");
-            }
-        }
         return null;
-    }
-
-
-    /**
-     * @hide
-     * Sets the enabled state of the user. A user should be enabled only once it is ready to
-     * be used.
-     *
-     * <p>Device initializer must call this method to mark the user as functional.
-     * Only the device initializer agent can call this.
-     *
-     * <p>When the user is enabled, if the device initializer is not also the device owner, the
-     * device initializer will no longer have elevated permissions to call methods in this class.
-     * Additionally, it will be removed as an active administrator and its
-     * {@link DeviceAdminReceiver} will be disabled.
-     *
-     * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
-     * @return whether the user is now enabled.
-     */
-    public boolean setUserEnabled(@NonNull ComponentName admin) {
-        if (mService != null) {
-            try {
-                return mService.setUserEnabled(admin);
-            } catch (RemoteException e) {
-                Log.w(TAG, "Failed talking with device policy service", e);
-            }
-        }
-        return false;
     }
 
     /**
