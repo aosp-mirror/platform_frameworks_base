@@ -1,5 +1,5 @@
 page.title=APK Expansion Files
-page.metaDescription=If your app needs more than the 50MB APK max, use free APK expansion files from Google Play.
+page.metaDescription=If your app needs more than the 100MB APK max, use free APK expansion files from Google Play.
 page.tags="apk size, apk max, large assets"
 @jd:body
 
@@ -8,7 +8,7 @@ page.tags="apk size, apk max, large assets"
 <div id="qv">
 <h2>Quickview</h2>
 <ul>
-  <li>Recommended for most apps that exceed the 50MB APK limit</li>
+  <li>Recommended for most apps that exceed the 100MB APK limit</li>
   <li>You can provide up to 4GB of additional data for each APK</li>
   <li>Google Play hosts and serves the expansion files at no charge</li>
   <li>The files can be any file type you want and are saved to the device's shared storage</li>
@@ -63,10 +63,10 @@ APK Support</a></li>
 
 
 
-<p>Google Play currently requires that your APK file be no more than 50MB. For most
+<p>Google Play currently requires that your APK file be no more than 100MB. For most
 applications, this is plenty of space for all the application's code and assets.
 However, some apps need more space for high-fidelity graphics, media files, or other large assets.
-Previously, if your app exceeded 50MB, you had to host and download the additional resources
+Previously, if your app exceeded 100MB, you had to host and download the additional resources
 yourself when the user opens the app. Hosting and serving the extra files can be costly, and the
 user experience is often less than ideal. To make this process easier for you and more pleasant
 for users, Google Play allows you to attach two large expansion files that supplement your
@@ -241,9 +241,9 @@ code from you.</p>
 application:</p>
 
 <ol>
-  <li>First determine whether your application absolutely requires more than 50MB per installation.
+  <li>First determine whether your application absolutely requires more than 100MB per installation.
 Space is precious and you should keep your total application size as small as possible. If your app
-uses more than 50MB in order to provide multiple versions of your graphic assets for multiple screen
+uses more than 100MB in order to provide multiple versions of your graphic assets for multiple screen
 densities, consider instead publishing <a
 href="{@docRoot}google/play/publishing/multiple-apks.html">multiple APKs</a> in which each APK
 contains only the assets required for the screens that it targets.</li>

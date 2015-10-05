@@ -67,7 +67,7 @@ Android applications usually run on most compatible devices with a single APK, b
 alternative resources for different configurations (for example, different layouts for different
 screen sizes) and the Android system selects the appropriate resources for the device at runtime. In
 a few cases, however, a single APK is unable to support all device configurations, because
-alternative resources make the APK file too big (greater than 50MB) or other technical challenges
+alternative resources make the APK file too big (greater than 100MB) or other technical challenges
 prevent a single APK from working on all devices.</p>
 
 <p>Although <strong>we encourage you to develop and publish a single APK</strong> that supports as
@@ -93,7 +93,7 @@ multiple APKs as the same application.</p>
 
 <p class="note"><strong>Note:</strong> You should generally use multiple APKs to support
 different device configurations <strong>only when your APK is too large</strong> (greater than
-50MB) due to the alternative resources needed for different device configurations.
+100MB) due to the alternative resources needed for different device configurations.
 Using a single APK to support different configurations is always the best practice,
 because it makes the path for application updates simple and clear for users (and also makes
 your life simpler by avoiding development and publishing complexity). Read the section below about
@@ -626,7 +626,7 @@ public void onSurfaceChanged(GL10 gl, int w, int h) {
 
 <h3 id="ScreenOptions">Supporting multiple screens</h3>
 
-<p>Unless your APK file exceeds the Google Play size limit of 50MB, supporting multiple screens
+<p>Unless your APK file exceeds the Google Play size limit of 100MB, supporting multiple screens
 should always be done with a single APK. Since Android 1.6, the Android system manages most of the
 work required for your application to run successfully on a variety of screen sizes and
 densities.</p>
