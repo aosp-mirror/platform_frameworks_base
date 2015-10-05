@@ -1412,9 +1412,9 @@ var RESOURCE_COLLECTIONS = {
   "marshmallow/landing/resources": {
     "title": "",
     "resources": [
+      "about/versions/marshmallow/android-6.0-changes.html",
       "about/versions/marshmallow/android-6.0.html",
-      "about/versions/marshmallow/samples.html",
-      "about/versions/marshmallow/download.html"
+      "about/versions/marshmallow/samples.html"
     ]
   },
   "autolanding": {
@@ -1643,7 +1643,7 @@ var RESOURCE_COLLECTIONS = {
   "marshmallow/landing/resources": {
     "title": "",
     "resources": [
-       "about/versions/marshmallow/android-6.0-changes.html",    
+       "about/versions/marshmallow/android-6.0-changes.html",
        "about/versions/marshmallow/android-6.0.html",
        "about/versions/marshmallow/samples.html"
     ]

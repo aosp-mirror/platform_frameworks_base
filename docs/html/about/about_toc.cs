@@ -10,7 +10,6 @@
         Android 6.0 Changes</a></li>
         <li><a href="<?cs var:toroot ?>about/versions/marshmallow/samples.html">
         Android 6.0 Samples</a></li>
-        <li><a href="<?cs var:toroot ?>about/versions/marshmallow/download.html">Downloads</a></li>
   </li>
       </ul>
   </li>
