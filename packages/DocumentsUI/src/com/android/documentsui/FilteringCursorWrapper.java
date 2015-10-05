@@ -16,6 +16,7 @@
 
 package com.android.documentsui;
 
+import static com.android.documentsui.Shared.DEBUG;
 import static com.android.documentsui.Shared.TAG;
 import static com.android.documentsui.model.DocumentInfo.getCursorLong;
 import static com.android.documentsui.model.DocumentInfo.getCursorString;
@@ -65,7 +66,9 @@ public class FilteringCursorWrapper extends AbstractCursor {
             }
         }
 
-        Log.d(TAG, "Before filtering " + cursor.getCount() + ", after " + mCount);
+        if (DEBUG && mCount != cursor.getCount()) {
+            Log.d(TAG, "Before filtering " + cursor.getCount() + ", after " + mCount);
+        }
     }
 
     @Override

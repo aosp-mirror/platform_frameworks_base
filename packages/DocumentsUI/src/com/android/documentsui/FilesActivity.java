@@ -89,11 +89,13 @@ public class FilesActivity extends BaseActivity {
         RootsFragment.show(getFragmentManager(), null);
 
         if (mState.restored) {
+            if (DEBUG) Log.d(TAG, "Restored instance for uri: " + getIntent().getData());
             onCurrentDirectoryChanged(ANIM_NONE);
         } else {
             Intent intent = getIntent();
             Uri uri = intent.getData();
 
+            if (DEBUG) Log.d(TAG, "Creating new instance for uri: " + uri);
             // If a non-empty stack is present in our state it was read (presumably)
             // from EXTRA_STACK intent extra. In this case, we'll skip other means of
             // loading or restoring the stack.

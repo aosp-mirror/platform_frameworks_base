@@ -16,15 +16,17 @@
 
 package com.android.documentsui;
 
+import static com.android.documentsui.Shared.DEBUG;
+
 import android.app.Activity;
 import android.app.ActivityManager;
 import android.app.ActivityManager.AppTask;
-import android.app.ActivityManager.RecentTaskInfo;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.util.Log;
 
 import java.util.List;
 
@@ -39,39 +41,47 @@ import java.util.List;
  */
 public class LauncherActivity extends Activity {
 
-    public static final String LAUNCH_CONTROL_AUTHORITY = "com.android.documentsui.launchControl";
+    private static final String LAUNCH_CONTROL_AUTHORITY = "com.android.documentsui.launchControl";
+    private static final String TAG = "LauncherActivity";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
         ActivityManager activities = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
-        List<AppTask> tasks = activities.getAppTasks();
 
-        AppTask raiseTask = null;
-        for (AppTask task : tasks) {
-            Uri taskUri = task.getTaskInfo().baseIntent.getData();
-            if (taskUri != null && isLaunchUri(taskUri)) {
-                raiseTask = task;
-            }
-        }
-
-        if (raiseTask == null) {
-            launchFilesTask();
+        Intent intent = findTask(activities);
+        if (intent != null) {
+            restoreTask(intent);
         } else {
-            raiseFilesTask(activities, raiseTask.getTaskInfo());
+            startTask();
         }
 
         finish();
     }
 
-    private void launchFilesTask() {
+    private @Nullable Intent findTask(ActivityManager activities) {
+        List<AppTask> tasks = activities.getAppTasks();
+        for (AppTask task : tasks) {
+            Intent intent = task.getTaskInfo().baseIntent;
+            Uri uri = intent.getData();
+            if (isLaunchUri(uri)) {
+                return intent;
+            }
+        }
+        return null;
+    }
+
+    private void startTask() {
         Intent intent = createLaunchIntent(this);
+        if (DEBUG) Log.d(TAG, "Starting new task > " + intent.getData());
         startActivity(intent);
     }
 
-    private void raiseFilesTask(ActivityManager activities, RecentTaskInfo task) {
-        activities.moveTaskToFront(task.id, 0);
+    private void restoreTask(Intent intent) {
+        if (DEBUG) Log.d(TAG, "Restoring existing task > " + intent.getData());
+        // TODO: This doesn't appear to restore a task once it has stopped running.
+        startActivity(intent);
     }
 
     static Intent createLaunchIntent(Context context) {
@@ -88,6 +98,7 @@ public class LauncherActivity extends Activity {
     }
 
     static boolean isLaunchUri(@Nullable Uri uri) {
-        return uri != null && LAUNCH_CONTROL_AUTHORITY.equals(uri.getAuthority());
+        boolean result = uri != null && LAUNCH_CONTROL_AUTHORITY.equals(uri.getAuthority());
+        return result;
     }
 }
