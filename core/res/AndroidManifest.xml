@@ -1408,11 +1408,21 @@
     <!-- ================================== -->
     <eat-comment />
 
-    <!-- Allows an application to open windows using the type
+    <!-- Allows an app to create windows using the type
          {@link android.view.WindowManager.LayoutParams#TYPE_SYSTEM_ALERT},
-         shown on top of all other applications.  Very few applications
+         shown on top of all other apps.  Very few apps
          should use this permission; these windows are intended for
-         system-level interaction with the user. -->
+         system-level interaction with the user.
+
+         <p class="note"><strong>Note:</strong> If the app
+         targets API level 23 or higher, the app user must explicitly grant
+         this permission to the app through a permission management screen. The app requests
+         the user's approval by sending an intent with action
+         {@link android.provider.Settings#ACTION_MANAGE_OVERLAY_PERMISSION}.
+         The app can check whether it has this authorization by calling
+         {@link android.provider.Settings#canDrawOverlays
+         Settings.canDrawOverlays()}.
+         <p>Protection level: signature -->
     <permission android:name="android.permission.SYSTEM_ALERT_WINDOW"
         android:label="@string/permlab_systemAlertWindow"
         android:description="@string/permdesc_systemAlertWindow"
@@ -1535,7 +1545,16 @@
         android:protectionLevel="signature|privileged|development" />
 
     <!-- Allows an application to read or write the system settings.
-         <p>Protection level: signature
+
+        <p class="note"><strong>Note:</strong> If the app targets API level 23
+        or higher, the app user
+        must explicitly grant this permission to the app through a permission management screen.
+        The app requests the user's approval by sending an intent with action
+        {@link android.provider.Settings#ACTION_MANAGE_WRITE_SETTINGS}. The app
+        can check whether it has this authorization by calling {@link
+        android.provider.Settings.System#canWrite Settings.System.canWrite()}.
+
+        <p>Protection level: signature
     -->
     <permission android:name="android.permission.WRITE_SETTINGS"
         android:label="@string/permlab_writeSettings"
