@@ -192,16 +192,18 @@ class RotationHelper {
         }
 
         public void run() {
-            int newRotation;
             while (mWaitCounter < WAIT_TIMES_MS.length) {
-                updateOrientation();
                 int waitTimeMs;
                 synchronized(mCounterLock) {
-                    waitTimeMs = WAIT_TIMES_MS[mWaitCounter];
+                    waitTimeMs = mWaitCounter < WAIT_TIMES_MS.length ?
+                            WAIT_TIMES_MS[mWaitCounter] : 0;
                     mWaitCounter++;
                 }
                 try {
-                    sleep(waitTimeMs);
+                    if (waitTimeMs > 0) {
+                        sleep(waitTimeMs);
+                        updateOrientation();
+                    }
                 } catch (InterruptedException e) { }
             }
         }
