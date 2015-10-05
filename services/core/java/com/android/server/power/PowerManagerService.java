@@ -397,6 +397,10 @@ public final class PowerManagerService extends SystemService
     // Set this to false to disable.
     private boolean mUserInactiveOverrideFromWindowManager;
 
+    // The next possible user activity timeout after being explicitly told the user is inactive.
+    // Set to -1 when not told the user is inactive since the last period spent dozing or asleep.
+    private long mOverriddenTimeout = -1;
+
     // The user activity timeout override from the window manager
     // to allow the current foreground activity to override the user activity timeout.
     // Use -1 to disable.
@@ -1034,6 +1038,7 @@ public final class PowerManagerService extends SystemService
 
             if (mUserInactiveOverrideFromWindowManager) {
                 mUserInactiveOverrideFromWindowManager = false;
+                mOverriddenTimeout = -1;
             }
 
             if (mWakefulness == WAKEFULNESS_ASLEEP
@@ -1251,11 +1256,27 @@ public final class PowerManagerService extends SystemService
         }
     }
 
+    /**
+     * Logs the time the device would have spent awake before user activity timeout,
+     * had the system not been told the user was inactive.
+     */
+    private void logSleepTimeoutRecapturedLocked() {
+        final long now = SystemClock.uptimeMillis();
+        final long savedWakeTimeMs = mOverriddenTimeout - now;
+        if (savedWakeTimeMs >= 0) {
+            EventLog.writeEvent(EventLogTags.POWER_SOFT_SLEEP_REQUESTED, savedWakeTimeMs);
+            mOverriddenTimeout = -1;
+        }
+    }
+
     private void finishWakefulnessChangeIfNeededLocked() {
         if (mWakefulnessChanging && mDisplayReady) {
             if (mWakefulness == WAKEFULNESS_DOZING
                     && (mWakeLockSummary & WAKE_LOCK_DOZE) == 0) {
                 return; // wait until dream has enabled dozing
+            }
+            if (mWakefulness == WAKEFULNESS_DOZING || mWakefulness == WAKEFULNESS_ASLEEP) {
+                logSleepTimeoutRecapturedLocked();
             }
             mWakefulnessChanging = false;
             mNotifier.onWakefulnessChangeFinished();
@@ -1579,10 +1600,11 @@ public final class PowerManagerService extends SystemService
                 if (mUserActivitySummary != USER_ACTIVITY_SCREEN_DREAM && userInactiveOverride) {
                     if ((mUserActivitySummary &
                             (USER_ACTIVITY_SCREEN_BRIGHT | USER_ACTIVITY_SCREEN_DIM)) != 0) {
-                      // Device is being kept awake by recent user activity
-                      long savedWakeTimeMs = now - nextTimeout;
-                      EventLog.writeEvent(
-                              EventLogTags.POWER_SOFT_SLEEP_REQUESTED, savedWakeTimeMs);
+                        // Device is being kept awake by recent user activity
+                        if (nextTimeout >= now && mOverriddenTimeout == -1) {
+                            // Save when the next timeout would have occurred
+                            mOverriddenTimeout = nextTimeout;
+                        }
                     }
                     mUserActivitySummary = USER_ACTIVITY_SCREEN_DREAM;
                     nextTimeout = -1;
