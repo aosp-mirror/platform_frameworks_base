@@ -57,7 +57,7 @@ Platform Versions</a>.</p>
 </div>
 
 
-<p style="clear:both"><em>Data collected during a 7-day period ending on September 7, 2015.
+<p style="clear:both"><em>Data collected during a 7-day period ending on October 5, 2015.
 <br/>Any versions with less than 0.1% distribution are not shown.</em>
 </p>
 
@@ -88,7 +88,7 @@ Screens</a>.</p>
 </div>
 
 
-<p style="clear:both"><em>Data collected during a 7-day period ending on September 7, 2015.
+<p style="clear:both"><em>Data collected during a 7-day period ending on October 5, 2015.
 
 <br/>Any screen configurations with less than 0.1% distribution are not shown.</em></p>
 
@@ -108,7 +108,7 @@ support for any lower version (for example, support for version 2.0 also implies
 
 
 <img alt="" style="float:right"
-src="//chart.googleapis.com/chart?chl=GL%202.0%7CGL%203.0%7CGL%203.1&chf=bg%2Cs%2C00000000&chd=t%3A58.3%2C37.6%2C4.1&chco=c4df9b%2C6fad0c&cht=p&chs=400x250">
+src="//chart.googleapis.com/chart?chl=GL%202.0%7CGL%203.0%7CGL%203.1&chf=bg%2Cs%2C00000000&chd=t%3A57.2%2C38.1%2C4.7&chco=c4df9b%2C6fad0c&cht=p&chs=400x250">
 
 <p>To declare which version of OpenGL ES your application requires, you should use the {@code
 android:glEsVersion} attribute of the <a
@@ -126,21 +126,21 @@ uses.</p>
 </tr>
 <tr>
 <td>2.0</td>
-<td>58.3%</td>
+<td>57.2%</td>
 </tr>
 <tr>
 <td>3.0</td>
-<td>37.6%</td>
+<td>38.1%</td>
 </tr>
 <tr>
 <td>3.1</td>
-<td>4.1%</td>
+<td>4.7%</td>
 </tr>
 </table>
 
 
 
-<p style="clear:both"><em>Data collected during a 7-day period ending on September 7, 2015</em></p>
+<p style="clear:both"><em>Data collected during a 7-day period ending on October 5, 2015</em></p>
 
 
 
@@ -155,18 +155,18 @@ var SCREEN_DATA =
         "hdpi": "0.6",
         "ldpi": "0.3",
         "mdpi": "4.8",
-        "tvdpi": "2.3",
+        "tvdpi": "2.2",
         "xhdpi": "0.6"
       },
       "Normal": {
         "hdpi": "41.0",
-        "mdpi": "6.5",
-        "tvdpi": "0.1",
-        "xhdpi": "20.9",
+        "mdpi": "6.2",
+        "tvdpi": "0.2",
+        "xhdpi": "21.3",
         "xxhdpi": "15.6"
       },
       "Small": {
-        "ldpi": "3.3"
+        "ldpi": "3.2"
       },
       "Xlarge": {
         "hdpi": "0.3",
@@ -174,8 +174,8 @@ var SCREEN_DATA =
         "xhdpi": "0.7"
       }
     },
-    "densitychart": "//chart.googleapis.com/chart?chd=t%3A3.6%2C14.3%2C2.4%2C42.0%2C22.2%2C15.6&chf=bg%2Cs%2C00000000&chl=ldpi%7Cmdpi%7Ctvdpi%7Chdpi%7Cxhdpi%7Cxxhdpi&chco=c4df9b%2C6fad0c&cht=p&chs=400x250",
-    "layoutchart": "//chart.googleapis.com/chart?chd=t%3A4.0%2C8.6%2C84.2%2C3.3&chf=bg%2Cs%2C00000000&chl=Xlarge%7CLarge%7CNormal%7CSmall&chco=c4df9b%2C6fad0c&cht=p&chs=400x250"
+    "densitychart": "//chart.googleapis.com/chart?chd=t%3A3.5%2C14.0%2C2.4%2C42.0%2C22.6%2C15.6&chf=bg%2Cs%2C00000000&chl=ldpi%7Cmdpi%7Ctvdpi%7Chdpi%7Cxhdpi%7Cxxhdpi&chco=c4df9b%2C6fad0c&cht=p&chs=400x250",
+    "layoutchart": "//chart.googleapis.com/chart?chd=t%3A4.0%2C8.5%2C84.4%2C3.2&chf=bg%2Cs%2C00000000&chl=Xlarge%7CLarge%7CNormal%7CSmall&chco=c4df9b%2C6fad0c&cht=p&chs=400x250"
   }
 ];
 
@@ -183,7 +183,7 @@ var SCREEN_DATA =
 var VERSION_DATA =
 [
   {
-    "chart": "//chart.googleapis.com/chart?chd=t%3A0.2%2C4.1%2C3.7%2C31.8%2C39.2%2C21.0&chf=bg%2Cs%2C00000000&chl=Froyo%7CGingerbread%7CIce%20Cream%20Sandwich%7CJelly%20Bean%7CKitKat%7CLollipop&chco=c4df9b%2C6fad0c&cht=p&chs=500x250",
+    "chart": "//chart.googleapis.com/chart?chd=t%3A0.2%2C3.8%2C3.4%2C30.2%2C38.9%2C23.5&chf=bg%2Cs%2C00000000&chl=Froyo%7CGingerbread%7CIce%20Cream%20Sandwich%7CJelly%20Bean%7CKitKat%7CLollipop&chco=c4df9b%2C6fad0c&cht=p&chs=500x250",
     "data": [
       {
         "api": 8,
@@ -193,42 +193,42 @@ var VERSION_DATA =
       {
         "api": 10,
         "name": "Gingerbread",
-        "perc": "4.1"
+        "perc": "3.8"
       },
       {
         "api": 15,
         "name": "Ice Cream Sandwich",
-        "perc": "3.7"
+        "perc": "3.4"
       },
       {
         "api": 16,
         "name": "Jelly Bean",
-        "perc": "12.1"
+        "perc": "11.4"
       },
       {
         "api": 17,
         "name": "Jelly Bean",
-        "perc": "15.2"
+        "perc": "14.5"
       },
       {
         "api": 18,
         "name": "Jelly Bean",
-        "perc": "4.5"
+        "perc": "4.3"
       },
       {
         "api": 19,
         "name": "KitKat",
-        "perc": "39.2"
+        "perc": "38.9"
       },
       {
         "api": 21,
         "name": "Lollipop",
-        "perc": "15.9"
+        "perc": "15.6"
       },
       {
         "api": 22,
         "name": "Lollipop",
-        "perc": "5.1"
+        "perc": "7.9"
       }
     ]
   }
