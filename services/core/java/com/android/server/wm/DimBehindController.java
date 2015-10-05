@@ -159,24 +159,32 @@ class DimBehindController {
 
     boolean animateDimLayers() {
         int fullScreen = -1;
+        int fullScreenAndDimming = -1;
+        boolean result = false;
+
         for (int i = mState.size() - 1; i >= 0; i--) {
-            DimLayer.DimLayerUser dimLayerUser = mState.keyAt(i);
-            if (dimLayerUser.isFullscreen()) {
+            DimLayer.DimLayerUser user = mState.keyAt(i);
+            if (user.isFullscreen()) {
                 fullScreen = i;
                 if (mState.valueAt(i).continueDimming) {
-                    break;
+                    fullScreenAndDimming = i;
                 }
+            } else {
+                // We always want to animate the non fullscreen windows, they don't share their
+                // dim layers.
+                result |= animateDimLayers(user);
             }
         }
-        if (fullScreen != -1) {
-            return animateDimLayers(mState.keyAt(fullScreen));
-        } else {
-            boolean result = false;
-            for (int i = mState.size() - 1; i >= 0; i--) {
-                result |= animateDimLayers(mState.keyAt(i));
-            }
-            return result;
+        // For the shared, full screen dim layer, we prefer the animation that is causing it to
+        // appear.
+        if (fullScreenAndDimming != -1) {
+            result |= animateDimLayers(mState.keyAt(fullScreenAndDimming));
+        } else if (fullScreen != -1) {
+            // If there is no animation for the full screen dim layer to appear, we can use any of
+            // the animators that will cause it to disappear.
+            result |= animateDimLayers(mState.keyAt(fullScreen));
         }
+        return result;
     }
 
     private boolean animateDimLayers(DimLayer.DimLayerUser dimLayerUser) {
