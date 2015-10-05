@@ -17,6 +17,7 @@
 #define PAINT_UTILS_H
 
 #include <SkColorFilter.h>
+#include <SkDrawLooper.h>
 #include <SkXfermode.h>
 
 namespace android {
