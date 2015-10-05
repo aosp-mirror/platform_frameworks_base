@@ -58,7 +58,7 @@ void LayerRenderer::prepareDirty(int viewportWidth, int viewportHeight,
         mLayer->region.clear();
         dirty.set(0.0f, 0.0f, width, height);
     } else {
-        dirty.intersect(0.0f, 0.0f, width, height);
+        dirty.doIntersect(0.0f, 0.0f, width, height);
         android::Rect r(dirty.left, dirty.top, dirty.right, dirty.bottom);
         mLayer->region.subtractSelf(r);
     }

@@ -549,7 +549,7 @@ public:
         if (flags & CLIP_TO_BOUNDS) {
             outRect->set(0, 0, getWidth(), getHeight());
             if (flags & CLIP_TO_CLIP_BOUNDS) {
-                outRect->intersect(mPrimitiveFields.mClipBounds);
+                outRect->doIntersect(mPrimitiveFields.mClipBounds);
             }
         } else {
             outRect->set(mPrimitiveFields.mClipBounds);

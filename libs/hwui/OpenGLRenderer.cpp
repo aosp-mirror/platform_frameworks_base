@@ -488,7 +488,8 @@ void OpenGLRenderer::calculateLayerBoundsAndClip(Rect& bounds, Rect& clip, bool 
     currentTransform()->mapRect(bounds);
 
     // Layers only make sense if they are in the framebuffer's bounds
-    if (bounds.intersect(mState.currentClipRect())) {
+    bounds.doIntersect(mState.currentClipRect());
+    if (!bounds.isEmpty()) {
         // We cannot work with sub-pixels in this case
         bounds.snapToPixelBoundaries();
 
@@ -497,23 +498,20 @@ void OpenGLRenderer::calculateLayerBoundsAndClip(Rect& bounds, Rect& clip, bool 
         // of the framebuffer
         const Snapshot& previous = *(currentSnapshot()->previous);
         Rect previousViewport(0, 0, previous.getViewportWidth(), previous.getViewportHeight());
-        if (!bounds.intersect(previousViewport)) {
-            bounds.setEmpty();
-        } else if (fboLayer) {
+
+        bounds.doIntersect(previousViewport);
+        if (!bounds.isEmpty() && fboLayer) {
             clip.set(bounds);
             mat4 inverse;
             inverse.loadInverse(*currentTransform());
             inverse.mapRect(clip);
             clip.snapToPixelBoundaries();
-            if (clip.intersect(untransformedBounds)) {
+            clip.doIntersect(untransformedBounds);
+            if (!clip.isEmpty()) {
                 clip.translate(-untransformedBounds.left, -untransformedBounds.top);
                 bounds.set(untransformedBounds);
-            } else {
-                clip.setEmpty();
             }
         }
-    } else {
-        bounds.setEmpty();
     }
 }
 
@@ -1038,7 +1036,8 @@ void OpenGLRenderer::dirtyLayer(const float left, const float top,
 }
 
 void OpenGLRenderer::dirtyLayerUnchecked(Rect& bounds, Region* region) {
-    if (CC_LIKELY(!bounds.isEmpty() && bounds.intersect(mState.currentClipRect()))) {
+    bounds.doIntersect(mState.currentClipRect());
+    if (!bounds.isEmpty()) {
         bounds.snapToPixelBoundaries();
         android::Rect dirty(bounds.left, bounds.top, bounds.right, bounds.bottom);
         if (!dirty.isEmpty()) {
@@ -1112,7 +1111,8 @@ bool OpenGLRenderer::storeDisplayState(DeferredDisplayState& state, int stateDef
             // is used, it should more closely duplicate the quickReject logic (in how it uses
             // snapToPixelBoundaries)
 
-            if (!clippedBounds.intersect(currentClip)) {
+            clippedBounds.doIntersect(currentClip);
+            if (clippedBounds.isEmpty()) {
                 // quick rejected
                 return true;
             }
@@ -1242,9 +1242,8 @@ void OpenGLRenderer::drawRectangleList(const RectangleList& rectangleList) {
         Rect bounds = tr.getBounds();
         if (transform.rectToRect()) {
             transform.mapRect(bounds);
-            if (!bounds.intersect(scissorBox)) {
-                bounds.setEmpty();
-            } else {
+            bounds.doIntersect(scissorBox);
+            if (!bounds.isEmpty()) {
                 handlePointNoTransform(rectangleVertices, bounds.left, bounds.top);
                 handlePointNoTransform(rectangleVertices, bounds.right, bounds.top);
                 handlePointNoTransform(rectangleVertices, bounds.left, bounds.bottom);

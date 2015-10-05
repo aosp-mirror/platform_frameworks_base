@@ -33,7 +33,7 @@ public:
     TransformedRectangle(const Rect& bounds, const Matrix4& transform);
 
     bool canSimplyIntersectWith(const TransformedRectangle& other) const;
-    bool intersectWith(const TransformedRectangle& other);
+    void intersectWith(const TransformedRectangle& other);
 
     bool isEmpty() const;
 

@@ -23,14 +23,6 @@
 namespace android {
 namespace uirenderer {
 
-static bool intersect(Rect& r, const Rect& r2) {
-    bool hasIntersection = r.intersect(r2);
-    if (!hasIntersection) {
-        r.setEmpty();
-    }
-    return hasIntersection;
-}
-
 static void handlePoint(Rect& transformedBounds, const Matrix4& transform, float x, float y) {
     Vertex v = {x, y};
     transform.mapPoint(v.x, v.y);
@@ -67,9 +59,8 @@ bool TransformedRectangle::canSimplyIntersectWith(
     return mTransform == other.mTransform;
 }
 
-bool TransformedRectangle::intersectWith(const TransformedRectangle& other) {
-    Rect translatedBounds(other.mBounds);
-    return intersect(mBounds, translatedBounds);
+void TransformedRectangle::intersectWith(const TransformedRectangle& other) {
+    mBounds.doIntersect(other.mBounds);
 }
 
 bool TransformedRectangle::isEmpty() const {
@@ -146,7 +137,7 @@ Rect RectangleList::calculateBounds() const {
         if (index == 0) {
             bounds = tr.transformedBounds();
         } else {
-            bounds.intersect(tr.transformedBounds());
+            bounds.doIntersect(tr.transformedBounds());
         }
     }
     return bounds;
@@ -275,10 +266,7 @@ void ClipArea::rectangleModeClipRectWithTransform(const Rect& r,
     if (transform->rectToRect()) {
         Rect transformed(r);
         transform->mapRect(transformed);
-        bool hasIntersection = mClipRect.intersect(transformed);
-        if (!hasIntersection) {
-            mClipRect.setEmpty();
-        }
+        mClipRect.doIntersect(transformed);
         return;
     }
 
