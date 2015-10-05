@@ -19,6 +19,7 @@
 #include <utils/Blur.h>
 
 #include <SkColorFilter.h>
+#include <SkDrawLooper.h>
 #include <SkXfermode.h>
 
 namespace android {
