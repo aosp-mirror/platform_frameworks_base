@@ -634,6 +634,11 @@ public class Build {
          * M comes after L.
          */
         public static final int M = 23;
+
+        /**
+         * N is for ¯\_(ツ)_/¯.
+         */
+        public static final int N = CUR_DEVELOPMENT;
     }
 
     /** The type of build, like "user" or "eng". */
