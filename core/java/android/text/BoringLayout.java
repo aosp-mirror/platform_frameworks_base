@@ -364,6 +364,11 @@ public class BoringLayout extends Layout implements TextUtils.EllipsizeCallback 
     }
 
     @Override
+    public float getLineWidth(int line) {
+        return (line == 0 ? mMax : 0);
+    }
+
+    @Override
     public final Directions getLineDirections(int line) {
         return Layout.DIRS_ALL_LEFT_TO_RIGHT;
     }
