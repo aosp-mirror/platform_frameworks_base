@@ -1,6 +1,6 @@
 page.title=Android Studio と SDK Tools のダウンロード
 page.tags=sdk, android studio
-page.template=sdkl10n
+page.template=sdk
 header.hide=1
 page.metaDescription=公式 Android IDE とデベロッパー ツールをダウンロードして、Android 版のモバイル端末、タブレット、ウェアラブル端末、TV などの端末向けのアプリをビルドする。
 
