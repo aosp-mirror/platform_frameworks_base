@@ -1757,7 +1757,7 @@ public class DirectoryFragment extends Fragment {
                 }
             }
 
-            if (DEBUG) {
+            if (DEBUG && position != originalPos) {
                 Log.d(TAG, "Item position adjusted for deletion.  Original: " + originalPos
                         + "  Adjusted: " + position);
             }
