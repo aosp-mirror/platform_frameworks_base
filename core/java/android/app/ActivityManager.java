@@ -204,17 +204,10 @@ public class ActivityManager {
 
     /**
      * Flag for IActivityManaqer.startActivity: launch the app for
-     * OpenGL tracing.
-     * @hide
-     */
-    public static final int START_FLAG_OPENGL_TRACES = 1<<2;
-
-    /**
-     * Flag for IActivityManaqer.startActivity: launch the app for
      * allocation tracking.
      * @hide
      */
-    public static final int START_FLAG_TRACK_ALLOCATION = 1<<3;
+    public static final int START_FLAG_TRACK_ALLOCATION = 1<<2;
 
     /**
      * Result for IActivityManaqer.broadcastIntent: success!

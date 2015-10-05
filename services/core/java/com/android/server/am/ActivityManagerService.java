@@ -1225,7 +1225,6 @@ public final class ActivityManagerService extends ActivityManagerNative
     int mSamplingInterval = 0;
     boolean mAutoStopProfiler = false;
     int mProfileType = 0;
-    String mOpenGlTraceApp = null;
     final ProcessMap<Pair<Long, String>> mMemWatchProcesses = new ProcessMap<>();
     String mMemWatchDumpProcName;
     String mMemWatchDumpFile;
@@ -6141,11 +6140,6 @@ public final class ActivityManagerService extends ActivityManagerNative
                 samplingInterval = mSamplingInterval;
                 profileAutoStop = mAutoStopProfiler;
             }
-            boolean enableOpenGlTrace = false;
-            if (mOpenGlTraceApp != null && mOpenGlTraceApp.equals(processName)) {
-                enableOpenGlTrace = true;
-                mOpenGlTraceApp = null;
-            }
             boolean enableTrackAllocation = false;
             if (mTrackAllocationApp != null && mTrackAllocationApp.equals(processName)) {
                 enableTrackAllocation = true;
@@ -6179,9 +6173,9 @@ public final class ActivityManagerService extends ActivityManagerNative
             thread.bindApplication(processName, appInfo, providers, app.instrumentationClass,
                     profilerInfo, app.instrumentationArguments, app.instrumentationWatcher,
                     app.instrumentationUiAutomationConnection, testMode,
-                    mBinderTransactionTrackingEnabled, enableOpenGlTrace,
-                    enableTrackAllocation, isRestrictedBackupMode || !normalMode,
-                    app.persistent, new Configuration(mConfiguration), app.compat,
+                    mBinderTransactionTrackingEnabled, enableTrackAllocation,
+                    isRestrictedBackupMode || !normalMode, app.persistent,
+                    new Configuration(mConfiguration), app.compat,
                     getCommonServicesLocked(app.isolated),
                     mCoreSettingsObserver.getCoreSettingsLocked());
             updateLruProcessLocked(app, false, null);
@@ -10779,19 +10773,6 @@ public final class ActivityManagerService extends ActivityManagerNative
         }
     }
 
-    void setOpenGlTraceApp(ApplicationInfo app, String processName) {
-        synchronized (this) {
-            boolean isDebuggable = "1".equals(SystemProperties.get(SYSTEM_DEBUGGABLE, "0"));
-            if (!isDebuggable) {
-                if ((app.flags & ApplicationInfo.FLAG_DEBUGGABLE) == 0) {
-                    throw new SecurityException("Process not debuggable: " + app.packageName);
-                }
-            }
-
-            mOpenGlTraceApp = processName;
-        }
-    }
-
     void setTrackAllocationApp(ApplicationInfo app, String processName) {
         synchronized (this) {
             boolean isDebuggable = "1".equals(SystemProperties.get(SYSTEM_DEBUGGABLE, "0"));
@@ -13905,15 +13886,6 @@ public final class ActivityManagerService extends ActivityManagerNative
             pw.print("  mMemWatchDumpFile="); pw.println(mMemWatchDumpFile);
             pw.print("  mMemWatchDumpPid="); pw.print(mMemWatchDumpPid);
                     pw.print(" mMemWatchDumpUid="); pw.println(mMemWatchDumpUid);
-        }
-        if (mOpenGlTraceApp != null) {
-            if (dumpPackage == null || dumpPackage.equals(mOpenGlTraceApp)) {
-                if (needSep) {
-                    pw.println();
-                    needSep = false;
-                }
-                pw.println("  mOpenGlTraceApp=" + mOpenGlTraceApp);
-            }
         }
         if (mTrackAllocationApp != null) {
             if (dumpPackage == null || dumpPackage.equals(mTrackAllocationApp)) {

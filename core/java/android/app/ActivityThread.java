@@ -448,7 +448,6 @@ public final class ActivityThread {
         IUiAutomationConnection instrumentationUiAutomationConnection;
         int debugMode;
         boolean enableBinderTracking;
-        boolean enableOpenGlTrace;
         boolean trackAllocation;
         boolean restrictedBackupMode;
         boolean persistent;
@@ -774,10 +773,9 @@ public final class ActivityThread {
                 ProfilerInfo profilerInfo, Bundle instrumentationArgs,
                 IInstrumentationWatcher instrumentationWatcher,
                 IUiAutomationConnection instrumentationUiConnection, int debugMode,
-                boolean enableBinderTracking, boolean enableOpenGlTrace,
-                boolean trackAllocation, boolean isRestrictedBackupMode,
-                boolean persistent, Configuration config, CompatibilityInfo compatInfo,
-                Map<String, IBinder> services, Bundle coreSettings) {
+                boolean enableBinderTracking, boolean trackAllocation,
+                boolean isRestrictedBackupMode, boolean persistent, Configuration config,
+                CompatibilityInfo compatInfo, Map<String, IBinder> services, Bundle coreSettings) {
 
             if (services != null) {
                 // Setup the service cache in the ServiceManager
@@ -833,7 +831,6 @@ public final class ActivityThread {
             data.instrumentationUiAutomationConnection = instrumentationUiConnection;
             data.debugMode = debugMode;
             data.enableBinderTracking = enableBinderTracking;
-            data.enableOpenGlTrace = enableOpenGlTrace;
             data.trackAllocation = trackAllocation;
             data.restrictedBackupMode = isRestrictedBackupMode;
             data.persistent = persistent;
@@ -4675,11 +4672,6 @@ public final class ActivityThread {
                 Slog.w(TAG, "Application " + data.info.getPackageName()
                       + " can be debugged on port 8100...");
             }
-        }
-
-        // Enable OpenGL tracing if required
-        if (data.enableOpenGlTrace) {
-            GLUtils.setTracingLevel(1);
         }
 
         // Allow application-generated systrace messages if we're debuggable.
