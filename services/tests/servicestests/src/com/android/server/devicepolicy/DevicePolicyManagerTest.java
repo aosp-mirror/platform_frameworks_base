@@ -31,8 +31,8 @@ import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.os.Bundle;
 import android.content.pm.PackageInfo;
-import android.content.pm.UserInfo;
 import android.os.UserHandle;
+import android.os.UserManager;
 import android.util.Pair;
 
 import org.mockito.ArgumentCaptor;
@@ -65,8 +65,6 @@ import static org.mockito.Mockito.when;
  (mmma frameworks/base/services/tests/servicestests/ for non-ninja build)
  */
 public class DevicePolicyManagerTest extends DpmTestBase {
-
-
     private DpmMockContext mContext;
     public DevicePolicyManager dpm;
     public DevicePolicyManagerServiceTestable dpms;
@@ -207,9 +205,7 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         mContext.callerPermissions.add(permission.MANAGE_DEVICE_ADMINS);
         mContext.callerPermissions.add(permission.MANAGE_PROFILE_AND_DEVICE_OWNERS);
 
-        final UserInfo uh = new UserInfo(DpmMockContext.CALLER_USER_HANDLE, "user", 0);
-
-        // DO needs to be an DA.
+        // PO needs to be an DA.
         dpm.setActiveAdmin(admin, /* replace =*/ false);
 
         // Fire!
@@ -624,5 +620,98 @@ public class DevicePolicyManagerTest extends DpmTestBase {
 
         dpm.setApplicationRestrictions(admin1, "pkg2", new Bundle());
         assertEquals(0, dpm.getApplicationRestrictions(admin1, "pkg2").size());
+    }
+
+    public void testSetUserRestriction_asDo() throws Exception {
+        mContext.callerPermissions.add(permission.MANAGE_DEVICE_ADMINS);
+        mContext.callerPermissions.add(permission.MANAGE_PROFILE_AND_DEVICE_OWNERS);
+        mContext.callerPermissions.add(permission.INTERACT_ACROSS_USERS_FULL);
+
+        // First, set DO.
+
+        // Call from a process on the system user.
+        mContext.binder.callingUid = DpmMockContext.CALLER_SYSTEM_USER_UID;
+
+        // Make sure admin1 is installed on system user.
+        setUpPackageManagerForAdmin(admin1, DpmMockContext.CALLER_SYSTEM_USER_UID);
+        setUpApplicationInfo(PackageManager.COMPONENT_ENABLED_STATE_DISABLED_UNTIL_USED,
+                DpmMockContext.CALLER_SYSTEM_USER_UID);
+
+        // Call.
+        dpm.setActiveAdmin(admin1, /* replace =*/ false, UserHandle.USER_SYSTEM);
+        assertTrue(dpm.setDeviceOwner(admin1.getPackageName(), "owner-name",
+                UserHandle.USER_SYSTEM));
+
+        assertFalse(dpms.getDeviceOwnerAdminLocked().ensureUserRestrictions()
+                .getBoolean(UserManager.DISALLOW_SMS));
+        assertFalse(dpms.getDeviceOwnerAdminLocked().ensureUserRestrictions()
+                .getBoolean(UserManager.DISALLOW_OUTGOING_CALLS));
+
+        dpm.addUserRestriction(admin1, UserManager.DISALLOW_SMS);
+        dpm.addUserRestriction(admin1, UserManager.DISALLOW_OUTGOING_CALLS);
+
+        assertTrue(dpms.getDeviceOwnerAdminLocked().ensureUserRestrictions()
+                .getBoolean(UserManager.DISALLOW_SMS));
+        assertTrue(dpms.getDeviceOwnerAdminLocked().ensureUserRestrictions()
+                .getBoolean(UserManager.DISALLOW_OUTGOING_CALLS));
+
+        dpm.clearUserRestriction(admin1, UserManager.DISALLOW_SMS);
+
+        assertFalse(dpms.getDeviceOwnerAdminLocked().ensureUserRestrictions()
+                .getBoolean(UserManager.DISALLOW_SMS));
+        assertTrue(dpms.getDeviceOwnerAdminLocked().ensureUserRestrictions()
+                .getBoolean(UserManager.DISALLOW_OUTGOING_CALLS));
+
+        dpm.clearUserRestriction(admin1, UserManager.DISALLOW_OUTGOING_CALLS);
+
+        assertFalse(dpms.getDeviceOwnerAdminLocked().ensureUserRestrictions()
+                .getBoolean(UserManager.DISALLOW_SMS));
+        assertFalse(dpms.getDeviceOwnerAdminLocked().ensureUserRestrictions()
+                .getBoolean(UserManager.DISALLOW_OUTGOING_CALLS));
+
+        // TODO Check inner calls.
+        // TODO Make sure restrictions are written to the file.
+    }
+
+    public void testSetUserRestriction_asPo() {
+        setAsProfileOwner(admin1);
+
+        assertFalse(dpms.getProfileOwnerAdminLocked(DpmMockContext.CALLER_USER_HANDLE)
+                .ensureUserRestrictions()
+                .getBoolean(UserManager.DISALLOW_INSTALL_UNKNOWN_SOURCES));
+        assertFalse(dpms.getProfileOwnerAdminLocked(DpmMockContext.CALLER_USER_HANDLE)
+                .ensureUserRestrictions()
+                .getBoolean(UserManager.DISALLOW_OUTGOING_CALLS));
+
+        dpm.addUserRestriction(admin1, UserManager.DISALLOW_INSTALL_UNKNOWN_SOURCES);
+        dpm.addUserRestriction(admin1, UserManager.DISALLOW_OUTGOING_CALLS);
+
+        assertTrue(dpms.getProfileOwnerAdminLocked(DpmMockContext.CALLER_USER_HANDLE)
+                .ensureUserRestrictions()
+                .getBoolean(UserManager.DISALLOW_INSTALL_UNKNOWN_SOURCES));
+        assertTrue(dpms.getProfileOwnerAdminLocked(DpmMockContext.CALLER_USER_HANDLE)
+                .ensureUserRestrictions()
+                .getBoolean(UserManager.DISALLOW_OUTGOING_CALLS));
+
+        dpm.clearUserRestriction(admin1, UserManager.DISALLOW_INSTALL_UNKNOWN_SOURCES);
+
+        assertFalse(dpms.getProfileOwnerAdminLocked(DpmMockContext.CALLER_USER_HANDLE)
+                .ensureUserRestrictions()
+                .getBoolean(UserManager.DISALLOW_INSTALL_UNKNOWN_SOURCES));
+        assertTrue(dpms.getProfileOwnerAdminLocked(DpmMockContext.CALLER_USER_HANDLE)
+                .ensureUserRestrictions()
+                .getBoolean(UserManager.DISALLOW_OUTGOING_CALLS));
+
+        dpm.clearUserRestriction(admin1, UserManager.DISALLOW_OUTGOING_CALLS);
+
+        assertFalse(dpms.getProfileOwnerAdminLocked(DpmMockContext.CALLER_USER_HANDLE)
+                .ensureUserRestrictions()
+                .getBoolean(UserManager.DISALLOW_INSTALL_UNKNOWN_SOURCES));
+        assertFalse(dpms.getProfileOwnerAdminLocked(DpmMockContext.CALLER_USER_HANDLE)
+                .ensureUserRestrictions()
+                .getBoolean(UserManager.DISALLOW_OUTGOING_CALLS));
+
+        // TODO Check inner calls.
+        // TODO Make sure restrictions are written to the file.
     }
 }
