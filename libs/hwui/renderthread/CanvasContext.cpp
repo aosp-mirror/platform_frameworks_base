@@ -339,7 +339,7 @@ void CanvasContext::draw() {
             // Remember the intersection of the target bounds and the intersection bounds against
             // which we have to crop the content.
             backdropBounds.set(x, y, x + backdropBounds.getWidth(), y + backdropBounds.getHeight());
-            backdropBounds.intersect(targetBounds);
+            backdropBounds.doIntersect(targetBounds);
             // Check if we have to draw something on the left side ...
             if (targetBounds.left < contentBounds.left) {
                 mCanvas->save(SkCanvas::kClip_SaveFlag);
