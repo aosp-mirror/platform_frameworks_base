@@ -267,7 +267,7 @@ static const JNINativeMethod gMethods[] = {
     { "nativeDispose",
             "(J)V",
             (void*)nativeDispose },
-    { "nativeScheduleVsync", "(J)V",
+    { "nativeScheduleVsync", "!(J)V",
             (void*)nativeScheduleVsync }
 };
 
