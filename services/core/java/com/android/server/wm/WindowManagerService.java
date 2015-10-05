@@ -1191,7 +1191,9 @@ public class WindowManagerService extends IWindowManager.Stub
         int i;
         for (i = N - 1; i >= 0; --i) {
             WindowState w = windows.get(i);
-            if (w.mBaseLayer <= myLayer) {
+            // Dock divider shares the base layer with application windows, but we want to always
+            // keep it above the application windows.
+            if (w.mBaseLayer <= myLayer && w.mAttrs.type != TYPE_DOCK_DIVIDER) {
                 break;
             }
         }
