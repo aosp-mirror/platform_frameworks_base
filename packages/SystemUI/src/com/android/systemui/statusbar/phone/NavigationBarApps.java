@@ -16,6 +16,8 @@
 
 package com.android.systemui.statusbar.phone;
 
+import static android.app.ActivityManager.INVALID_STACK_ID;
+
 import android.animation.LayoutTransition;
 import android.annotation.Nullable;
 import android.app.ActivityManager;
@@ -742,9 +744,9 @@ class NavigationBarApps extends LinearLayout
 
     private void activateTask(int taskPersistentId) {
         // Launch or bring the activity to front.
-        IActivityManager manager = ActivityManagerNative.getDefault();
+        final IActivityManager iAm = ActivityManagerNative.getDefault();
         try {
-            manager.startActivityFromRecents(taskPersistentId, null /* options */);
+            iAm.startActivityFromRecents(taskPersistentId, INVALID_STACK_ID, null /* options */);
         } catch (RemoteException e) {
             Slog.e(TAG, "Exception when activating a recent task", e);
         } catch (IllegalArgumentException e) {
