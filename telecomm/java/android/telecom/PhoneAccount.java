@@ -28,6 +28,7 @@ import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.Icon;
 import android.net.Uri;
+import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.text.TextUtils;
@@ -160,6 +161,7 @@ public final class PhoneAccount implements Parcelable {
     private final CharSequence mShortDescription;
     private final List<String> mSupportedUriSchemes;
     private final Icon mIcon;
+    private final Bundle mExtras;
     private boolean mIsEnabled;
 
     /**
@@ -175,6 +177,7 @@ public final class PhoneAccount implements Parcelable {
         private CharSequence mShortDescription;
         private List<String> mSupportedUriSchemes = new ArrayList<String>();
         private Icon mIcon;
+        private Bundle mExtras;
         private boolean mIsEnabled = false;
 
         /**
@@ -300,6 +303,20 @@ public final class PhoneAccount implements Parcelable {
         }
 
         /**
+         * Specifies the extras associated with the {@link PhoneAccount}.
+         * <p>
+         * {@code PhoneAccount}s only support extra values of type: {@link String}, {@link Integer},
+         * and {@link Boolean}.  Extras which are not of these types are ignored.
+         *
+         * @param extras
+         * @return
+         */
+        public Builder setExtras(Bundle extras) {
+            mExtras = extras;
+            return this;
+        }
+
+        /**
          * Sets the enabled state of the phone account.
          *
          * @param isEnabled The enabled state.
@@ -332,6 +349,7 @@ public final class PhoneAccount implements Parcelable {
                     mLabel,
                     mShortDescription,
                     mSupportedUriSchemes,
+                    mExtras,
                     mIsEnabled);
         }
     }
@@ -346,6 +364,7 @@ public final class PhoneAccount implements Parcelable {
             CharSequence label,
             CharSequence shortDescription,
             List<String> supportedUriSchemes,
+            Bundle extras,
             boolean isEnabled) {
         mAccountHandle = account;
         mAddress = address;
@@ -356,6 +375,7 @@ public final class PhoneAccount implements Parcelable {
         mLabel = label;
         mShortDescription = shortDescription;
         mSupportedUriSchemes = Collections.unmodifiableList(supportedUriSchemes);
+        mExtras = extras;
         mIsEnabled = isEnabled;
     }
 
@@ -452,6 +472,18 @@ public final class PhoneAccount implements Parcelable {
      */
     public List<String> getSupportedUriSchemes() {
         return mSupportedUriSchemes;
+    }
+
+    /**
+     * The extras associated with this {@code PhoneAccount}.
+     * <p>
+     * A {@link ConnectionService} may provide implementation specific information about the
+     * {@link PhoneAccount} via the extras.
+     *
+     * @return The extras.
+     */
+    public Bundle getExtras() {
+        return mExtras;
     }
 
     /**
@@ -552,6 +584,8 @@ public final class PhoneAccount implements Parcelable {
             out.writeInt(1);
             mIcon.writeToParcel(out, flags);
         }
+
+        out.writeBundle(mExtras);
         out.writeByte((byte) (mIsEnabled ? 1 : 0));
     }
 
@@ -594,6 +628,7 @@ public final class PhoneAccount implements Parcelable {
         } else {
             mIcon = null;
         }
+        mExtras = in.readBundle();
         mIsEnabled = in.readByte() == 1;
     }
 
@@ -610,6 +645,8 @@ public final class PhoneAccount implements Parcelable {
             sb.append(scheme)
                     .append(" ");
         }
+        sb.append(" Extras : ");
+        sb.append(mExtras);
         sb.append("]");
         return sb.toString();
     }
