@@ -18,11 +18,21 @@
 #include <utils/Singleton.h>
 
 #include "DisplayList.h"
+#if HWUI_NEW_OPS
+#include "RecordingCanvas.h"
+#else
 #include "DisplayListCanvas.h"
+#endif
 #include "microbench/MicroBench.h"
 
 using namespace android;
 using namespace android::uirenderer;
+
+#if HWUI_NEW_OPS
+typedef RecordingCanvas TestCanvas;
+#else
+typedef DisplayListCanvas TestCanvas;
+#endif
 
 BENCHMARK_NO_ARG(BM_DisplayListData_alloc);
 void BM_DisplayListData_alloc::Run(int iters) {
@@ -48,7 +58,7 @@ void BM_DisplayListData_alloc_theoretical::Run(int iters) {
 
 BENCHMARK_NO_ARG(BM_DisplayListCanvas_record_empty);
 void BM_DisplayListCanvas_record_empty::Run(int iters) {
-    DisplayListCanvas canvas(100, 100);
+    TestCanvas canvas(100, 100);
     canvas.finishRecording();
 
     StartBenchmarkTiming();
@@ -62,7 +72,7 @@ void BM_DisplayListCanvas_record_empty::Run(int iters) {
 
 BENCHMARK_NO_ARG(BM_DisplayListCanvas_record_saverestore);
 void BM_DisplayListCanvas_record_saverestore::Run(int iters) {
-    DisplayListCanvas canvas(100, 100);
+    TestCanvas canvas(100, 100);
     canvas.finishRecording();
 
     StartBenchmarkTiming();
@@ -80,7 +90,7 @@ void BM_DisplayListCanvas_record_saverestore::Run(int iters) {
 
 BENCHMARK_NO_ARG(BM_DisplayListCanvas_record_translate);
 void BM_DisplayListCanvas_record_translate::Run(int iters) {
-    DisplayListCanvas canvas(100, 100);
+    TestCanvas canvas(100, 100);
     canvas.finishRecording();
 
     StartBenchmarkTiming();

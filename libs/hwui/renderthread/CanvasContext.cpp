@@ -28,6 +28,11 @@
 #include "renderstate/Stencil.h"
 #include "protos/hwui.pb.h"
 
+#if HWUI_NEW_OPS
+#include "BakedOpRenderer.h"
+#include "OpReorderer.h"
+#endif
+
 #include <cutils/properties.h>
 #include <google/protobuf/io/zero_copy_stream_impl.h>
 #include <private/hwui/DrawGlInfo.h>
@@ -121,9 +126,11 @@ void CanvasContext::setSwapBehavior(SwapBehavior swapBehavior) {
 
 bool CanvasContext::initialize(ANativeWindow* window) {
     setSurface(window);
+#if !HWUI_NEW_OPS
     if (mCanvas) return false;
     mCanvas = new OpenGLRenderer(mRenderThread.renderState());
     mCanvas->initProperties();
+#endif
     return true;
 }
 
@@ -162,11 +169,13 @@ void CanvasContext::makeCurrent() {
 }
 
 void CanvasContext::processLayerUpdate(DeferredLayerUpdater* layerUpdater) {
+#if !HWUI_NEW_OPS
     bool success = layerUpdater->apply();
     LOG_ALWAYS_FATAL_IF(!success, "Failed to update layer!");
     if (layerUpdater->backingLayer()->deferredUpdateScheduled) {
         mCanvas->pushLayerUpdate(layerUpdater->backingLayer());
     }
+#endif
 }
 
 static bool wasSkipped(FrameInfo* info) {
@@ -239,8 +248,10 @@ void CanvasContext::notifyFramePending() {
 }
 
 void CanvasContext::draw() {
+#if !HWUI_NEW_OPS
     LOG_ALWAYS_FATAL_IF(!mCanvas || mEglSurface == EGL_NO_SURFACE,
             "drawRenderNode called on a context with no canvas or surface!");
+#endif
 
     SkRect dirty;
     mDamageAccumulator.finish(&dirty);
@@ -254,6 +265,8 @@ void CanvasContext::draw() {
     mCurrentFrameInfo->markIssueDrawCommandsStart();
 
     Frame frame = mEglManager.beginFrame(mEglSurface);
+
+#if !HWUI_NEW_OPS
     if (frame.width() != mCanvas->getViewportWidth()
             || frame.height() != mCanvas->getViewportHeight()) {
         // can't rely on prior content of window if viewport size changes
@@ -417,6 +430,16 @@ void CanvasContext::draw() {
     // Even if we decided to cancel the frame, from the perspective of jank
     // metrics the frame was swapped at this point
     mCurrentFrameInfo->markSwapBuffers();
+#else
+    OpReorderer reorderer;
+    reorderer.defer(frame.width(), frame.height(), mRenderNodes);
+    BakedOpRenderer::Info info(Caches::getInstance(), mRenderThread.renderState(),
+            frame.width(), frame.height(), mOpaque);
+    reorderer.replayBakedOps<BakedOpRenderer>(&info);
+
+    bool drew = info.didDraw;
+    SkRect screenDirty = SkRect::MakeWH(frame.width(), frame.height());
+#endif
 
     if (drew) {
         if (CC_UNLIKELY(!mEglManager.swapBuffers(frame, screenDirty))) {

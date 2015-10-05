@@ -461,12 +461,12 @@ GlopBuilder& GlopBuilder::setFillTextureLayer(Layer& layer, float alpha) {
 // Transform
 ////////////////////////////////////////////////////////////////////////////////
 
-void GlopBuilder::setTransform(const Matrix4& canvas,
-        const int transformFlags) {
+GlopBuilder& GlopBuilder::setTransform(const Matrix4& canvas, const int transformFlags) {
     TRIGGER_STAGE(kTransformStage);
 
     mOutGlop->transform.canvas = canvas;
     mOutGlop->transform.transformFlags = transformFlags;
+    return *this;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -630,6 +630,43 @@ void GlopBuilder::build() {
     // Final step: populate program and map bounds into render target space
     mOutGlop->fill.program = mCaches.programCache.get(mDescription);
     mOutGlop->transform.meshTransform().mapRect(mOutGlop->bounds);
+}
+
+void GlopBuilder::dump(const Glop& glop) {
+    ALOGD("Glop Mesh");
+    const Glop::Mesh& mesh = glop.mesh;
+    ALOGD("    primitive mode: %d", mesh.primitiveMode);
+    ALOGD("    indices: buffer obj %x, indices %p", mesh.indices.bufferObject, mesh.indices.indices);
+
+    const Glop::Mesh::Vertices& vertices = glop.mesh.vertices;
+    ALOGD("    vertices: buffer obj %x, flags %x, pos %p, tex %p, clr %p, stride %d",
+            vertices.bufferObject, vertices.attribFlags,
+            vertices.position, vertices.texCoord, vertices.color, vertices.stride);
+    ALOGD("    element count: %d", mesh.elementCount);
+
+    ALOGD("Glop Fill");
+    const Glop::Fill& fill = glop.fill;
+    ALOGD("    program %p", fill.program);
+    if (fill.texture.texture) {
+        ALOGD("    texture %p, target %d, filter %d, clamp %d",
+                fill.texture.texture, fill.texture.target, fill.texture.filter, fill.texture.clamp);
+        if (fill.texture.textureTransform) {
+            fill.texture.textureTransform->dump("texture transform");
+        }
+    }
+    ALOGD_IF(fill.colorEnabled, "    color (argb) %.2f %.2f %.2f %.2f",
+            fill.color.a, fill.color.r, fill.color.g, fill.color.b);
+    ALOGD_IF(fill.filterMode != ProgramDescription::ColorFilterMode::None,
+            "    filterMode %d", (int)fill.filterMode);
+    ALOGD_IF(fill.skiaShaderData.skiaShaderType, "    shader type %d",
+            fill.skiaShaderData.skiaShaderType);
+
+    ALOGD("Glop transform");
+    glop.transform.modelView.dump("model view");
+    glop.transform.canvas.dump("canvas");
+
+    ALOGD("Glop blend %d %d", glop.blend.src, glop.blend.dst);
+    ALOGD("Glop bounds " RECT_STRING, RECT_ARGS(glop.bounds));
 }
 
 } /* namespace uirenderer */

@@ -29,8 +29,8 @@
 
 #include "AnimatorManager.h"
 #include "Debug.h"
-#include "Matrix.h"
 #include "DisplayList.h"
+#include "Matrix.h"
 #include "RenderProperties.h"
 
 #include <vector>
@@ -43,6 +43,7 @@ class SkRegion;
 namespace android {
 namespace uirenderer {
 
+class CanvasState;
 class DisplayListOp;
 class DisplayListCanvas;
 class OpenGLRenderer;
@@ -74,6 +75,7 @@ class RenderNode;
  * attached.
  */
 class RenderNode : public VirtualLightRefBase {
+friend class TestUtils; // allow TestUtils to access syncDisplayList / syncProperties
 public:
     enum DirtyPropertyMask {
         GENERIC         = 1 << 1,
@@ -176,7 +178,24 @@ public:
 
     AnimatorManager& animators() { return mAnimatorManager; }
 
+    // Returns false if the properties dictate the subtree contained in this RenderNode won't render
+    bool applyViewProperties(CanvasState& canvasState) const;
+
     void applyViewPropertyTransforms(mat4& matrix, bool true3dTransform = false) const;
+
+    bool nothingToDraw() const {
+        const Outline& outline = properties().getOutline();
+        return mDisplayListData == nullptr
+                || properties().getAlpha() <= 0
+                || (outline.getShouldClip() && outline.isEmpty())
+                || properties().getScaleX() == 0
+                || properties().getScaleY() == 0;
+    }
+
+    // Only call if RenderNode has DisplayListData...
+    const DisplayListData& getDisplayListData() const {
+        return *mDisplayListData;
+    }
 
 private:
     typedef key_value_pair_t<float, DrawRenderNodeOp*> ZDrawRenderNodeOpPair;
@@ -234,6 +253,10 @@ private:
         size_t mByteLength;
         const char* mText;
     };
+
+
+    void syncProperties();
+    void syncDisplayList();
 
     void prepareTreeImpl(TreeInfo& info, bool functorsNeedLayer);
     void pushStagingPropertiesChanges(TreeInfo& info);

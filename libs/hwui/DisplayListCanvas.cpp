@@ -558,16 +558,18 @@ size_t DisplayListCanvas::addDrawOp(DrawOp* op) {
 
 size_t DisplayListCanvas::addRenderNodeOp(DrawRenderNodeOp* op) {
     int opIndex = addDrawOp(op);
+#if !HWUI_NEW_OPS
     int childIndex = mDisplayListData->addChild(op);
 
     // update the chunk's child indices
     DisplayListData::Chunk& chunk = mDisplayListData->chunks.back();
     chunk.endChildIndex = childIndex + 1;
 
-    if (op->renderNode()->stagingProperties().isProjectionReceiver()) {
+    if (op->renderNode->stagingProperties().isProjectionReceiver()) {
         // use staging property, since recording on UI thread
         mDisplayListData->projectionReceiveIndex = opIndex;
     }
+#endif
     return opIndex;
 }
 

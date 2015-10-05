@@ -49,7 +49,7 @@ typedef const void* mergeid_t;
 
 class DeferredDisplayState {
 public:
-    /** static void* operator new(size_t size); PURPOSELY OMITTED **/
+    static void* operator new(size_t size) = delete;
     static void* operator new(size_t size, LinearAllocator& allocator) {
         return allocator.alloc(size);
     }
@@ -61,7 +61,6 @@ public:
     bool mClipValid;
     Rect mClip;
     int mClipSideFlags; // specifies which sides of the bounds are clipped, unclipped if cleared
-    bool mClipped;
     mat4 mMatrix;
     float mAlpha;
     const RoundRectClipState* mRoundRectClipState;
