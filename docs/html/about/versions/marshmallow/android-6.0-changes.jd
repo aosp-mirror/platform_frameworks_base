@@ -31,7 +31,7 @@ page.image=images/cards/samples-new_2x.png
 
 <h2>API Differences</h2>
 <ol>
-<li><a href="{@docRoot}about/versions/marshmallow/download.html">API level 22 to 23 &raquo;</a> </li>
+<li><a href="{@docRoot}sdk/api_diff/23/changes.html">API level 22 to 23 &raquo;</a> </li>
 </ol>
 
 
