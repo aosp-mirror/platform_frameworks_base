@@ -235,11 +235,9 @@ public class RecentsResizeTaskDialog extends DialogFragment {
 
         // In debug mode, we force all task to be resizeable regardless of the
         // current app configuration.
-        if (RecentsConfiguration.getInstance().multiWindowEnabled) {
-            for (int i = additionalTasks; i >= 0; --i) {
-                if (mTasks[i] != null) {
-                    mSsp.setTaskResizeable(mTasks[i].key.id);
-                }
+        for (int i = additionalTasks; i >= 0; --i) {
+            if (mTasks[i] != null) {
+                mSsp.setTaskResizeable(mTasks[i].key.id);
             }
         }
 

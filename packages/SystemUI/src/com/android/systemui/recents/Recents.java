@@ -116,9 +116,8 @@ public class Recents extends SystemUI
 
         /** Preloads the next task */
         public void run() {
-            // Temporarily skip this if multi stack is enabled
-            if (mConfig.multiWindowEnabled) return;
-
+            // TODO: Temporarily skip this if multi stack is enabled
+            /*
             RecentsConfiguration config = RecentsConfiguration.getInstance();
             if (config.svelteLevel == RecentsConfiguration.SVELTE_NONE) {
                 RecentsTaskLoader loader = RecentsTaskLoader.getInstance();
@@ -127,7 +126,7 @@ public class Recents extends SystemUI
 
                 // Load the next task only if we aren't svelte
                 RecentsTaskLoadPlan plan = loader.createLoadPlan(mContext);
-                loader.preloadTasks(plan, true /* isTopTaskHome */);
+                loader.preloadTasks(plan, true);
                 RecentsTaskLoadPlan.Options launchOpts = new RecentsTaskLoadPlan.Options();
                 // This callback is made when a new activity is launched and the old one is paused
                 // so ignore the current activity and try and preload the thumbnail for the
@@ -141,6 +140,7 @@ public class Recents extends SystemUI
                 launchOpts.onlyLoadPausedActivities = true;
                 loader.loadTasks(mContext, plan, launchOpts);
             }
+            */
         }
     }
 

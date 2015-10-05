@@ -78,7 +78,6 @@ public class RecentsConfiguration {
     public int searchBarSpaceHeightPx;
 
     /** Dev options and global settings */
-    public boolean multiWindowEnabled;
     public boolean lockToAppEnabled;
 
     /** Private constructor */
@@ -115,7 +114,6 @@ public class RecentsConfiguration {
         // settings or via multi window
         lockToAppEnabled = ssp.getSystemSetting(context,
                 Settings.System.LOCK_TO_APP_ENABLED) != 0;
-        multiWindowEnabled = "true".equals(ssp.getSystemProperty("persist.sys.debug.multi_window"));
         hasDockedTasks = ssp.hasDockedTask();
 
         // Recompute some values based on the given state, since we can not rely on the resource
