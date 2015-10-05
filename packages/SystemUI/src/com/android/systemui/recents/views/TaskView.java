@@ -21,13 +21,17 @@ import android.animation.ObjectAnimator;
 import android.animation.ValueAnimator;
 import android.content.Context;
 import android.content.res.Resources;
+import android.graphics.Bitmap;
+import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Outline;
 import android.graphics.Paint;
+import android.graphics.Point;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffColorFilter;
 import android.graphics.Rect;
 import android.util.AttributeSet;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewOutlineProvider;
 import android.view.animation.AccelerateInterpolator;
@@ -36,17 +40,22 @@ import android.view.animation.Interpolator;
 import android.widget.FrameLayout;
 import com.android.systemui.R;
 import com.android.systemui.recents.Constants;
+import com.android.systemui.recents.RecentsActivity;
 import com.android.systemui.recents.RecentsActivityLaunchState;
 import com.android.systemui.recents.RecentsConfiguration;
 import com.android.systemui.recents.events.EventBus;
 import com.android.systemui.recents.events.ui.DismissTaskEvent;
+import com.android.systemui.recents.events.ui.dragndrop.DragEndEvent;
+import com.android.systemui.recents.events.ui.dragndrop.DragStartEvent;
+import com.android.systemui.recents.misc.SystemServicesProxy;
 import com.android.systemui.recents.misc.Utilities;
+import com.android.systemui.recents.model.RecentsTaskLoader;
 import com.android.systemui.recents.model.Task;
 import com.android.systemui.statusbar.phone.PhoneStatusBar;
 
 /* A task view */
 public class TaskView extends FrameLayout implements Task.TaskCallbacks,
-        View.OnClickListener {
+        View.OnClickListener, View.OnLongClickListener {
 
     /** The TaskView callbacks */
     interface TaskViewCallbacks {
@@ -78,6 +87,8 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks,
     TaskViewHeader mHeaderView;
     View mActionButtonView;
     TaskViewCallbacks mCb;
+
+    Point mDownTouchPos = new Point();
 
     Interpolator mFastOutSlowInInterpolator;
     Interpolator mFastOutLinearInInterpolator;
@@ -166,6 +177,14 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks,
             }
         });
         mActionButtonTranslationZ = mActionButtonView.getTranslationZ();
+    }
+
+    @Override
+    public boolean onInterceptTouchEvent(MotionEvent ev) {
+        if (ev.getAction() == MotionEvent.ACTION_DOWN) {
+            mDownTouchPos.set((int) (ev.getX() * getScaleX()), (int) (ev.getY() * getScaleY()));
+        }
+        return super.onInterceptTouchEvent(ev);
     }
 
     @Override
@@ -719,6 +738,7 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks,
             mHeaderView.rebindToTask(mTask);
             // Rebind any listeners
             mActionButtonView.setOnClickListener(this);
+            setOnLongClickListener(mConfig.hasDockedTasks ? null : this);
         }
         mTaskDataLoaded = true;
     }
@@ -752,5 +772,70 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks,
         if (mCb != null) {
             mCb.onTaskViewClicked(this, mTask, (v == mActionButtonView));
         }
+    }
+
+    /**** View.OnLongClickListener Implementation ****/
+
+    @Override
+    public boolean onLongClick(View v) {
+        if (v == this) {
+            // Start listening for drag events
+            setClipViewInStack(false);
+
+            int width = (int) (getScaleX() * getWidth());
+            int height = (int) (getScaleY() * getHeight());
+            Bitmap dragBitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
+            Canvas c = new Canvas(dragBitmap);
+            c.scale(getScaleX(), getScaleY());
+            mThumbnailView.draw(c);
+            mHeaderView.draw(c);
+            c.setBitmap(null);
+
+            // Initiate the drag
+            final DragView dragView = new DragView(getContext(), dragBitmap, mDownTouchPos);
+            dragView.setOutlineProvider(mViewBounds);
+            dragView.addOnAttachStateChangeListener(new View.OnAttachStateChangeListener() {
+                @Override
+                public void onViewAttachedToWindow(View v) {
+                    // Hide this task view after the drag view is attached
+                    setVisibility(View.INVISIBLE);
+                    // Animate the alpha slightly to indicate dragging
+                    dragView.setElevation(getElevation());
+                    dragView.setTranslationZ(getTranslationZ());
+                    dragView.animate()
+                            .alpha(0.75f)
+                            .setDuration(175)
+                            .setInterpolator(new AccelerateInterpolator(1.5f))
+                            .withLayer()
+                            .start();
+                }
+
+                @Override
+                public void onViewDetachedFromWindow(View v) {
+                }
+            });
+            EventBus.getDefault().register(this, RecentsActivity.EVENT_BUS_PRIORITY + 1);
+            EventBus.getDefault().send(new DragStartEvent(mTask, this, dragView));
+            return true;
+        }
+        return false;
+    }
+
+    /**** Events ****/
+
+    public final void onBusEvent(DragEndEvent event) {
+        event.postAnimationTrigger.addLastDecrementRunnable(new Runnable() {
+            @Override
+            public void run() {
+                // If docked state == null:
+                // Animate the drag view back from where it is, to the view location, then after it returns,
+                // update the clip state
+                setClipViewInStack(true);
+
+                // Show this task view
+                setVisibility(View.VISIBLE);
+            }
+        });
+        EventBus.getDefault().unregister(this);
     }
 }

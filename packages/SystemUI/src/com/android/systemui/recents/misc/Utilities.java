@@ -21,11 +21,28 @@ import android.graphics.Color;
 import android.graphics.Matrix;
 import android.graphics.Rect;
 import android.view.View;
+import android.view.ViewParent;
 
 import java.util.ArrayList;
 
 /* Common code */
 public class Utilities {
+
+    /**
+     * @return the first parent walking up the view hierarchy that has the given class type.
+     *
+     * @param parentClass must be a class derived from {@link View}
+     */
+    public static <T extends View> T findParent(View v, Class<T> parentClass) {
+        ViewParent parent = v.getParent();
+        while (parent != null) {
+            if (parent.getClass().equals(parentClass)) {
+                return (T) parent;
+            }
+            parent = parent.getParent();
+        }
+        return null;
+    }
 
     /** Scales a rect about its centroid */
     public static void scaleRectAboutCenter(Rect r, float scale) {

@@ -26,6 +26,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.pm.ActivityInfo;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.SystemClock;
@@ -41,6 +42,8 @@ import com.android.systemui.recents.events.activity.AppWidgetProviderChangedEven
 import com.android.systemui.recents.events.ui.DismissTaskEvent;
 import com.android.systemui.recents.events.ui.ResizeTaskEvent;
 import com.android.systemui.recents.events.ui.ShowApplicationInfoEvent;
+import com.android.systemui.recents.events.ui.dragndrop.DragEndEvent;
+import com.android.systemui.recents.events.ui.dragndrop.DragStartEvent;
 import com.android.systemui.recents.misc.Console;
 import com.android.systemui.recents.misc.ReferenceCountedTrigger;
 import com.android.systemui.recents.misc.SystemServicesProxy;
@@ -610,6 +613,18 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
 
     public final void onBusEvent(ResizeTaskEvent event) {
         getResizeTaskDebugDialog().showResizeTaskDialog(event.task, mRecentsView);
+    }
+
+    public final void onBusEvent(DragStartEvent event) {
+        // Lock the orientation while dragging
+        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LOCKED);
+
+        // TODO: docking requires custom accessibility actions
+    }
+
+    public final void onBusEvent(DragEndEvent event) {
+        // Unlock the orientation when dragging completes
+        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_BEHIND);
     }
 
     private void refreshSearchWidgetView() {

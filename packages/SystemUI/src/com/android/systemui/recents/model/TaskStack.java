@@ -16,8 +16,11 @@
 
 package com.android.systemui.recents.model;
 
+import android.app.ActivityManager;
 import android.content.Context;
 import android.graphics.Color;
+import android.graphics.Rect;
+import android.graphics.RectF;
 import com.android.systemui.R;
 import com.android.systemui.recents.Constants;
 import com.android.systemui.recents.misc.NamedCounter;
@@ -29,6 +32,9 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Random;
+
+import static android.app.ActivityManager.DOCKED_STACK_CREATE_MODE_BOTTOM_OR_RIGHT;
+import static android.app.ActivityManager.DOCKED_STACK_CREATE_MODE_TOP_OR_LEFT;
 
 
 /**
@@ -172,6 +178,63 @@ public class TaskStack {
         public void onStackFiltered(TaskStack newStack, ArrayList<Task> curTasks, Task t);
         /** Notifies when the stack was un-filtered */
         public void onStackUnfiltered(TaskStack newStack, ArrayList<Task> curTasks);
+    }
+
+
+    public enum DockState {
+        LEFT(DOCKED_STACK_CREATE_MODE_TOP_OR_LEFT,
+                new RectF(0, 0, 0.25f, 1), new RectF(0, 0, 0.5f, 1), new RectF(0.5f, 0, 1, 1)),
+        TOP(DOCKED_STACK_CREATE_MODE_TOP_OR_LEFT,
+                new RectF(0, 0, 1, 0.25f), new RectF(0, 0, 1, 0.5f), new RectF(0, 0.5f, 1, 1)),
+        RIGHT(DOCKED_STACK_CREATE_MODE_BOTTOM_OR_RIGHT,
+                new RectF(0.75f, 0, 1, 1), new RectF(0.5f, 0, 1, 1), new RectF(0, 0, 0.5f, 1)),
+        BOTTOM(DOCKED_STACK_CREATE_MODE_BOTTOM_OR_RIGHT,
+                new RectF(0, 0.75f, 1, 1), new RectF(0, 0.5f, 1, 1), new RectF(0, 0, 1, 0.5f));
+
+        public final int createMode;
+        private final RectF touchArea;
+        private final RectF dockArea;
+        private final RectF stackArea;
+
+        /**
+         * @param createMode used to pass to ActivityManager to dock the task
+         * @param touchArea the area in which touch will initiate this dock state
+         * @param stackArea the area for the stack if a task is docked
+         */
+        DockState(int createMode, RectF touchArea, RectF dockArea, RectF stackArea) {
+            this.createMode = createMode;
+            this.touchArea = touchArea;
+            this.dockArea = dockArea;
+            this.stackArea = stackArea;
+        }
+
+        /**
+         * Returns whether {@param x} and {@param y} are contained in the touch area scaled to the
+         * given {@param width} and {@param height}.
+         */
+        public boolean touchAreaContainsPoint(int width, int height, float x, float y) {
+            int left = (int) (touchArea.left * width);
+            int top = (int) (touchArea.top * height);
+            int right = (int) (touchArea.right * width);
+            int bottom = (int) (touchArea.bottom * height);
+            return x >= left && y >= top && x <= right && y <= bottom;
+        }
+
+        /**
+         * Returns the docked task bounds with the given {@param width} and {@param height}.
+         */
+        public Rect getDockedBounds(int width, int height) {
+            return new Rect((int) (dockArea.left * width), (int) (dockArea.top * height),
+                    (int) (dockArea.right * width), (int) (dockArea.bottom * height));
+        }
+
+        /**
+         * Returns the stack bounds with the given {@param width} and {@param height}.
+         */
+        public Rect getStackBounds(int width, int height) {
+            return new Rect((int) (stackArea.left * width), (int) (stackArea.top * height),
+                    (int) (stackArea.right * width), (int) (stackArea.bottom * height));
+        }
     }
 
     // The task offset to apply to a task id as a group affiliation
