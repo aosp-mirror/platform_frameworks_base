@@ -18,6 +18,7 @@ package android.content.res;
 
 import com.android.SdkConstants;
 import com.android.ide.common.rendering.api.ArrayResourceValue;
+import com.android.ide.common.rendering.api.DensityBasedResourceValue;
 import com.android.ide.common.rendering.api.LayoutLog;
 import com.android.ide.common.rendering.api.LayoutlibCallback;
 import com.android.ide.common.rendering.api.ResourceValue;
@@ -661,12 +662,17 @@ public final class BridgeResources extends Resources {
         Pair<String, ResourceValue> value = getResourceValue(id, mPlatformResourceFlag);
 
         if (value != null) {
-            String v = value.getSecond().getValue();
+            ResourceValue resVal = value.getSecond();
+            String v = resVal.getValue();
 
             if (v != null) {
                 if (ResourceHelper.parseFloatAttribute(value.getFirst(), v, outValue,
                         false /*requireUnit*/)) {
                     return;
+                }
+                if (resVal instanceof DensityBasedResourceValue) {
+                    outValue.density =
+                      ((DensityBasedResourceValue) resVal).getResourceDensity().getDpiValue();
                 }
 
                 // else it's a string
