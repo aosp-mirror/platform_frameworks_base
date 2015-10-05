@@ -177,6 +177,8 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
         return mTvInputs.containsValue(deviceId);
     }
 
+    private SelectRequestBuffer mSelectRequestBuffer;
+
     HdmiCecLocalDeviceTv(HdmiControlService service) {
         super(service, HdmiDeviceInfo.DEVICE_TV);
         mPrevPortId = Constants.INVALID_PORT_ID;
@@ -205,6 +207,7 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
         launchRoutingControl(reason != HdmiControlService.INITIATED_BY_ENABLE_CEC &&
                 reason != HdmiControlService.INITIATED_BY_BOOT_UP);
         mLocalDeviceAddresses = initLocalDeviceAddresses();
+        resetSelectRequestBuffer();
         launchDeviceDiscovery();
     }
 
@@ -217,6 +220,19 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
             addresses.add(device.getDeviceInfo().getLogicalAddress());
         }
         return Collections.unmodifiableList(addresses);
+    }
+
+
+    @ServiceThreadOnly
+    public void setSelectRequestBuffer(SelectRequestBuffer requestBuffer) {
+        assertRunOnServiceThread();
+        mSelectRequestBuffer = requestBuffer;
+    }
+
+    @ServiceThreadOnly
+    private void resetSelectRequestBuffer() {
+        assertRunOnServiceThread();
+        setSelectRequestBuffer(SelectRequestBuffer.EMPTY_BUFFER);
     }
 
     @Override
@@ -776,6 +792,9 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
                         for (HdmiCecLocalDevice device : mService.getAllLocalDevices()) {
                             addCecDevice(device.getDeviceInfo());
                         }
+
+                        mSelectRequestBuffer.process();
+                        resetSelectRequestBuffer();
 
                         addAndStartAction(new HotplugDetectionAction(HdmiCecLocalDeviceTv.this));
                         addAndStartAction(new PowerStatusMonitorAction(HdmiCecLocalDeviceTv.this));
