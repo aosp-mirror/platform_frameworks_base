@@ -238,11 +238,7 @@ public final class ViewRootImpl implements ViewParent,
     boolean mNewSurfaceNeeded;
     boolean mHasHadWindowFocus;
     boolean mLastWasImTarget;
-    boolean mWindowsAnimating;
-    boolean mDrawDuringWindowsAnimating;
 
-    /** How many frames the app is still allowed to draw when a window animation is happening. */
-    private int mRemainingFrameCount;
     boolean mIsDrawing;
     int mLastSystemUiVisibility;
     int mClientWindowLayoutFlags;
@@ -1978,8 +1974,6 @@ public final class ViewRootImpl implements ViewParent,
             }
         }
 
-        boolean skipDraw = false;
-
         if (mFirst) {
             // handle first focus request
             if (DEBUG_INPUT_RESIZE) Log.v(TAG, "First: mView.hasFocus()="
@@ -1994,11 +1988,6 @@ public final class ViewRootImpl implements ViewParent,
                             + mView.findFocus());
                 }
             }
-        } else if (mWindowsAnimating) {
-            if (mRemainingFrameCount <= 0) {
-                skipDraw = true;
-            }
-            mRemainingFrameCount--;
         }
 
         final boolean changedVisibility = (viewVisibilityChanged || mFirst) && isViewVisible;
@@ -2043,16 +2032,14 @@ public final class ViewRootImpl implements ViewParent,
         boolean cancelDraw = mAttachInfo.mTreeObserver.dispatchOnPreDraw() || !isViewVisible;
 
         if (!cancelDraw && !newSurface) {
-            if (!skipDraw || mReportNextDraw) {
-                if (mPendingTransitions != null && mPendingTransitions.size() > 0) {
-                    for (int i = 0; i < mPendingTransitions.size(); ++i) {
-                        mPendingTransitions.get(i).startChangingAnimations();
-                    }
-                    mPendingTransitions.clear();
+            if (mPendingTransitions != null && mPendingTransitions.size() > 0) {
+                for (int i = 0; i < mPendingTransitions.size(); ++i) {
+                    mPendingTransitions.get(i).startChangingAnimations();
                 }
-
-                performDraw();
+                mPendingTransitions.clear();
             }
+
+            performDraw();
         } else {
             if (isViewVisible) {
                 // Try again
@@ -2787,16 +2774,6 @@ public final class ViewRootImpl implements ViewParent,
         return mAttachInfo.mAccessibilityFocusDrawable;
     }
 
-    /**
-     * @hide
-     */
-    public void setDrawDuringWindowsAnimating(boolean value) {
-        mDrawDuringWindowsAnimating = value;
-        if (value) {
-            handleDispatchWindowAnimationStopped();
-        }
-    }
-
     boolean scrollToRectOrFocus(Rect rectangle, boolean immediate) {
         final Rect ci = mAttachInfo.mContentInsets;
         final Rect vi = mAttachInfo.mVisibleInsets;
@@ -3160,8 +3137,6 @@ public final class ViewRootImpl implements ViewParent,
     private final static int MSG_WINDOW_MOVED = 23;
     private final static int MSG_SYNTHESIZE_INPUT_EVENT = 24;
     private final static int MSG_DISPATCH_WINDOW_SHOWN = 25;
-    private final static int MSG_DISPATCH_WINDOW_ANIMATION_STOPPED = 26;
-    private final static int MSG_DISPATCH_WINDOW_ANIMATION_STARTED = 27;
 
     final class ViewRootHandler extends Handler {
         @Override
@@ -3205,10 +3180,6 @@ public final class ViewRootImpl implements ViewParent,
                     return "MSG_PROCESS_INPUT_EVENTS";
                 case MSG_CLEAR_ACCESSIBILITY_FOCUS_HOST:
                     return "MSG_CLEAR_ACCESSIBILITY_FOCUS_HOST";
-                case MSG_DISPATCH_WINDOW_ANIMATION_STARTED:
-                    return "MSG_DISPATCH_WINDOW_ANIMATION_STARTED";
-                case MSG_DISPATCH_WINDOW_ANIMATION_STOPPED:
-                    return "MSG_DISPATCH_WINDOW_ANIMATION_STOPPED";
                 case MSG_WINDOW_MOVED:
                     return "MSG_WINDOW_MOVED";
                 case MSG_SYNTHESIZE_INPUT_EVENT:
@@ -3428,13 +3399,6 @@ public final class ViewRootImpl implements ViewParent,
             } break;
             case MSG_CLEAR_ACCESSIBILITY_FOCUS_HOST: {
                 setAccessibilityFocus(null, null);
-            } break;
-            case MSG_DISPATCH_WINDOW_ANIMATION_STARTED: {
-                int remainingFrameCount = msg.arg1;
-                handleDispatchWindowAnimationStarted(remainingFrameCount);
-            } break;
-            case MSG_DISPATCH_WINDOW_ANIMATION_STOPPED: {
-                handleDispatchWindowAnimationStopped();
             } break;
             case MSG_INVALIDATE_WORLD: {
                 if (mView != null) {
@@ -4048,9 +4012,6 @@ public final class ViewRootImpl implements ViewParent,
             if (q.mEvent instanceof KeyEvent) {
                 return processKeyEvent(q);
             } else {
-                // If delivering a new non-key event, make sure the window is
-                // now allowed to start updating.
-                handleDispatchWindowAnimationStopped();
                 final int source = q.mEvent.getSource();
                 if ((source & InputDevice.SOURCE_CLASS_POINTER) != 0) {
                     return processPointerEvent(q);
@@ -4076,12 +4037,6 @@ public final class ViewRootImpl implements ViewParent,
 
         private int processKeyEvent(QueuedInputEvent q) {
             final KeyEvent event = (KeyEvent)q.mEvent;
-
-            if (event.getAction() != KeyEvent.ACTION_UP) {
-                // If delivering a new key event, make sure the window is
-                // now allowed to start updating.
-                handleDispatchWindowAnimationStopped();
-            }
 
             // Deliver the key to the view hierarchy.
             if (mView.dispatchKeyEvent(event)) {
@@ -5297,22 +5252,6 @@ public final class ViewRootImpl implements ViewParent,
         }
     }
 
-    public void handleDispatchWindowAnimationStarted(int remainingFrameCount) {
-        if (!mDrawDuringWindowsAnimating && remainingFrameCount != -1) {
-            mRemainingFrameCount = remainingFrameCount;
-            mWindowsAnimating = true;
-        }
-    }
-
-    public void handleDispatchWindowAnimationStopped() {
-        if (mWindowsAnimating) {
-            mWindowsAnimating = false;
-            if (!mDirty.isEmpty() || mIsAnimating || mFullRedrawNeeded)  {
-                scheduleTraversals();
-            }
-        }
-    }
-
     public void handleDispatchWindowShown() {
         mAttachInfo.mTreeObserver.dispatchOnWindowShown();
     }
@@ -6224,15 +6163,6 @@ public final class ViewRootImpl implements ViewParent,
         mHandler.sendMessage(mHandler.obtainMessage(MSG_DISPATCH_SYSTEM_UI_VISIBILITY, args));
     }
 
-    public void dispatchWindowAnimationStarted(int remainingFrameCount) {
-        mHandler.obtainMessage(MSG_DISPATCH_WINDOW_ANIMATION_STARTED,
-                remainingFrameCount, 0 /* unused */).sendToTarget();
-    }
-
-    public void dispatchWindowAnimationStopped() {
-        mHandler.sendEmptyMessage(MSG_DISPATCH_WINDOW_ANIMATION_STOPPED);
-    }
-
     public void dispatchCheckFocus() {
         if (!mHandler.hasMessages(MSG_CHECK_FOCUS)) {
             // This will result in a call to checkFocus() below.
@@ -6798,22 +6728,6 @@ public final class ViewRootImpl implements ViewParent,
             if (viewAncestor != null) {
                 viewAncestor.dispatchSystemUiVisibilityChanged(seq, globalVisibility,
                         localValue, localChanges);
-            }
-        }
-
-        @Override
-        public void onAnimationStarted(int remainingFrameCount) {
-            final ViewRootImpl viewAncestor = mViewAncestor.get();
-            if (viewAncestor != null) {
-                viewAncestor.dispatchWindowAnimationStarted(remainingFrameCount);
-            }
-        }
-
-        @Override
-        public void onAnimationStopped() {
-            final ViewRootImpl viewAncestor = mViewAncestor.get();
-            if (viewAncestor != null) {
-                viewAncestor.dispatchWindowAnimationStopped();
             }
         }
 

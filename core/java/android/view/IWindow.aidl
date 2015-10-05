@@ -80,20 +80,6 @@ oneway interface IWindow {
             int localValue, int localChanges);
 
     /**
-     * The window is beginning to animate. The application should stop drawing frames until the
-     * window is not animating anymore, indicated by being called {@link #windowEndAnimating}.
-     *
-     * @param remainingFrameCount how many frames the app might still draw before stopping drawing;
-     *                            pass -1 to let it continue drawing
-     */
-    void onAnimationStarted(int remainingFrameCount);
-
-    /**
-     * The window has ended animating. See {@link #onAnimationStarted}.
-     */
-    void onAnimationStopped();
-
-    /**
      * Called for non-application windows when the enter animation has completed.
      */
     void dispatchWindowShown();
