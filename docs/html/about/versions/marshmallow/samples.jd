@@ -1,4 +1,4 @@
-page.title=Samples
+page.title=Android 6.0 Samples
 page.image=images/cards/card-build_16x9_2x.png
 page.tags=marshmallow, samples
 meta.tags=marshmallow,androidm,samples
@@ -9,7 +9,7 @@ page.metaDescription=Code to get your started with Android 6.0 APIs.
   Download or browse sample projects to get started with Android 6.0
   APIs (API level 23). You can download the samples
   directly from Android Studio &mdash; just select the <b>File > Import
-  Samples</b> menu option and pick the sample you want. 
+  Samples</b> menu option and pick the sample you want.
 </p>
 
 <p class="note">
