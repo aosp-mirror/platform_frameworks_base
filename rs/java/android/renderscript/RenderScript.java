@@ -1585,14 +1585,19 @@ public class RenderScript {
             mMessageThread.mRun = false;
 
             // Wait for mMessageThread to join.  Try in a loop, in case this thread gets interrupted
-            // during the wait.
-            boolean hasJoined = false;
+            // during the wait.  If interrupted, set the "interrupted" status of the current thread.
+            boolean hasJoined = false, interrupted = false;
             while (!hasJoined) {
                 try {
                     mMessageThread.join();
                     hasJoined = true;
-                } catch(InterruptedException e) {
+                } catch (InterruptedException e) {
+                    interrupted = true;
                 }
+            }
+            if (interrupted) {
+                Log.v(LOG_TAG, "Interrupted during wait for MessageThread to join");
+                Thread.currentThread().interrupt();
             }
 
             nContextDestroy();
