@@ -7,6 +7,9 @@ page.customHeadTag=<meta name="google-site-verification" content="sa-bIAI6GKvct3
 
 <!-- <div class="dac-hero-carousel" data-carousel-query="collection:index/carousel">
 </div> -->
+<section class="dac-hero-carousel">
+
+<!-- <article class="dac-expand dac-hero dac-invert active" style="background-color: rgb(38, 50, 56);"> -->
 <article class="dac-expand dac-hero dac-invert dac-darken mprev active" style="background-color: #75d1ff;">
 <a href="about/versions/marshmallow/index.html">
   <div class="wrap" style="max-width:1100px;margin-top:0">
