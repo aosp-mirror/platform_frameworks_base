@@ -111,22 +111,11 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
 
         @Override
         public void run() {
-            // Finish Recents
-            if (mLaunchIntent != null) {
-                try {
-                    if (mLaunchOpts != null) {
-                        startActivityAsUser(mLaunchIntent, mLaunchOpts.toBundle(), UserHandle.CURRENT);
-                    } else {
-                        startActivityAsUser(mLaunchIntent, UserHandle.CURRENT);
-                    }
-                } catch (Exception e) {
-                    Console.logError(RecentsActivity.this,
-                            getString(R.string.recents_launch_error_message, "Home"));
-                }
-            } else {
-                finish();
-                overridePendingTransition(R.anim.recents_to_launcher_enter,
-                        R.anim.recents_to_launcher_exit);
+            try {
+                startActivityAsUser(mLaunchIntent, mLaunchOpts.toBundle(), UserHandle.CURRENT);
+            } catch (Exception e) {
+                Console.logError(RecentsActivity.this,
+                        getString(R.string.recents_launch_error_message, "Home"));
             }
         }
     }
@@ -144,7 +133,7 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
                     dismissRecentsToFocusedTaskOrHome(false);
                 } else if (intent.getBooleanExtra(Recents.EXTRA_TRIGGERED_FROM_HOME_KEY, false)) {
                     // Otherwise, dismiss Recents to Home
-                    dismissRecentsToHomeRaw(true);
+                    dismissRecentsToHome(true);
                 } else {
                     // Do nothing
                 }
@@ -170,7 +159,7 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
             String action = intent.getAction();
             if (action.equals(Intent.ACTION_SCREEN_OFF)) {
                 // When the screen turns off, dismiss Recents to Home
-                dismissRecentsToHome(false);
+                dismissRecentsToHomeIfVisible(false);
             } else if (action.equals(SearchManager.INTENT_GLOBAL_SEARCH_ACTIVITY_CHANGED)) {
                 // When the search activity changes, update the search widget view
                 SystemServicesProxy ssp = RecentsTaskLoader.getInstance().getSystemServicesProxy();
@@ -286,25 +275,28 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
             if (mRecentsView.launchFocusedTask()) return true;
             // If we launched from Home, then return to Home
             if (launchState.launchedFromHome) {
-                dismissRecentsToHomeRaw(true);
+                dismissRecentsToHome(true);
                 return true;
             }
             // Otherwise, try and return to the Task that Recents was launched from
             if (mRecentsView.launchPreviousTask()) return true;
             // If none of the other cases apply, then just go Home
-            dismissRecentsToHomeRaw(true);
+            dismissRecentsToHome(true);
             return true;
         }
         return false;
     }
 
-    /** Dismisses Recents directly to Home. */
-    void dismissRecentsToHomeRaw(boolean animated) {
+    /**
+     * Dismisses Recents directly to Home without checking whether it is currently visible.
+     */
+    void dismissRecentsToHome(boolean animated) {
         if (animated) {
             ReferenceCountedTrigger exitTrigger = new ReferenceCountedTrigger(this,
                     null, mFinishLaunchHomeRunnable, null);
             mRecentsView.startExitToHomeAnimation(
                     new ViewAnimation.TaskViewExitContext(exitTrigger));
+            mScrimViews.startExitRecentsAnimation();
         } else {
             mFinishLaunchHomeRunnable.run();
         }
@@ -317,11 +309,11 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
     }
 
     /** Dismisses Recents directly to Home if we currently aren't transitioning. */
-    boolean dismissRecentsToHome(boolean animated) {
+    boolean dismissRecentsToHomeIfVisible(boolean animated) {
         SystemServicesProxy ssp = RecentsTaskLoader.getInstance().getSystemServicesProxy();
         if (ssp.isRecentsTopMost(ssp.getTopMostTask(), null)) {
             // Return to Home
-            dismissRecentsToHomeRaw(animated);
+            dismissRecentsToHome(animated);
             return true;
         }
         return false;
@@ -421,7 +413,6 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
     protected void onStop() {
         super.onStop();
         MetricsLogger.hidden(this, MetricsLogger.OVERVIEW_ACTIVITY);
-        RecentsActivityLaunchState launchState = mConfig.getLaunchState();
         RecentsTaskLoader loader = RecentsTaskLoader.getInstance();
         SystemServicesProxy ssp = loader.getSystemServicesProxy();
         Recents.notifyVisibilityChanged(this, ssp, false);
@@ -438,6 +429,7 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
         // Workaround for b/22542869, if the RecentsActivity is started again, but without going
         // through SystemUI, we need to reset the config launch flags to ensure that we do not
         // wait on the system to send a signal that was never queued.
+        RecentsActivityLaunchState launchState = mConfig.getLaunchState();
         launchState.launchedFromHome = false;
         launchState.launchedFromSearchHome = false;
         launchState.launchedFromAppWithThumbnail = false;
@@ -560,7 +552,7 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
     @Override
     public void onTaskLaunchFailed() {
         // Return to Home
-        dismissRecentsToHomeRaw(true);
+        dismissRecentsToHome(true);
     }
 
     @Override

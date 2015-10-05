@@ -627,8 +627,12 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks,
 
     /** Compute the dim as a function of the scale of this view. */
     int getDimFromTaskProgress() {
+        // TODO: Temporarily disable the dim on the stack
+        /*
         float dim = mMaxDimScale * mDimInterpolator.getInterpolation(1f - mTaskProgress);
         return (int) (dim * 255);
+        */
+        return 0;
     }
 
     /** Update the dim as a function of the scale of this view. */

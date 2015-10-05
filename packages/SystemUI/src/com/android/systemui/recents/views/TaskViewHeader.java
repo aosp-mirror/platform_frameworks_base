@@ -244,11 +244,9 @@ public class TaskViewHeader extends FrameLayout
                 mLightDismissDrawable : mDarkDismissDrawable);
         mDismissButton.setContentDescription(String.format(mDismissContentDescription,
                 t.contentDescription));
-        mMoveTaskButton.setVisibility((mConfig.multiWindowEnabled) ? View.VISIBLE : View.INVISIBLE);
-        if (mConfig.multiWindowEnabled) {
-            updateResizeTaskBarIcon(t);
-            mMoveTaskButton.setOnClickListener(this);
-        }
+        updateResizeTaskBarIcon(t);
+        mMoveTaskButton.setVisibility(View.VISIBLE);
+        mMoveTaskButton.setOnClickListener(this);
 
         // In accessibility, a single click on the focused app info button will show it
         AccessibilityManager am = (AccessibilityManager) getContext().
@@ -263,10 +261,7 @@ public class TaskViewHeader extends FrameLayout
         mTask = null;
         mApplicationIcon.setImageDrawable(null);
         mApplicationIcon.setOnClickListener(null);
-
-        if (mConfig.multiWindowEnabled) {
-            mMoveTaskButton.setOnClickListener(null);
-        }
+        mMoveTaskButton.setOnClickListener(null);
     }
 
     /** Updates the resize task bar button. */
