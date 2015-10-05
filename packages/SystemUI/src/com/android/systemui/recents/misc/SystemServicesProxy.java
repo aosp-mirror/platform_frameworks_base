@@ -16,6 +16,9 @@
 
 package com.android.systemui.recents.misc;
 
+import static android.app.ActivityManager.DOCKED_STACK_ID;
+import static android.app.ActivityManager.INVALID_STACK_ID;
+
 import android.app.ActivityManager;
 import android.app.ActivityManagerNative;
 import android.app.ActivityOptions;
@@ -297,7 +300,7 @@ public class SystemServicesProxy {
         if (mIam == null) return;
 
         try {
-            mIam.moveTaskToDockedStack(taskId, createMode, true);
+            mIam.startActivityFromRecents(taskId, DOCKED_STACK_ID, null);
         } catch (RemoteException e) {
             e.printStackTrace();
         }
@@ -335,7 +338,7 @@ public class SystemServicesProxy {
 
         ActivityManager.StackInfo stackInfo = null;
         try {
-            stackInfo = mIam.getStackInfo(ActivityManager.DOCKED_STACK_ID);
+            stackInfo = mIam.getStackInfo(DOCKED_STACK_ID);
         } catch (RemoteException e) {
             e.printStackTrace();
         }
@@ -722,7 +725,8 @@ public class SystemServicesProxy {
             ActivityOptions options) {
         if (mIam != null) {
             try {
-                mIam.startActivityFromRecents(taskId, options == null ? null : options.toBundle());
+                mIam.startActivityFromRecents(
+                        taskId, INVALID_STACK_ID, options == null ? null : options.toBundle());
                 return true;
             } catch (Exception e) {
                 Console.logError(context,

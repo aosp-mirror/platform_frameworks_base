@@ -191,6 +191,9 @@ public final class ActivityStackSupervisor implements DisplayListener {
     // Force the focus to change to the stack we are moving a task to..
     static final boolean FORCE_FOCUS = true;
 
+    // Restore task from the saved recents if it can't be found in any live stack.
+    static final boolean RESTORE_FROM_RECENTS = true;
+
     // Activity actions an app cannot start if it uses a permission which is not granted.
     private static final ArrayMap<String, String> ACTION_TO_RUNTIME_PERMISSION =
             new ArrayMap<>();
@@ -541,7 +544,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
     }
 
     TaskRecord anyTaskForIdLocked(int id) {
-        return anyTaskForIdLocked(id, true);
+        return anyTaskForIdLocked(id, RESTORE_FROM_RECENTS, INVALID_STACK_ID);
     }
 
     /**
@@ -549,8 +552,10 @@ public final class ActivityStackSupervisor implements DisplayListener {
      * @param id Id of the task we would like returned.
      * @param restoreFromRecents If the id was not in the active list, but was found in recents,
      *                           restore the task from recents to the active list.
+     * @param stackId The stack to restore the task to (default launch stack will be used
+     *                if stackId is {@link android.app.ActivityManager#INVALID_STACK_ID}).
      */
-    TaskRecord anyTaskForIdLocked(int id, boolean restoreFromRecents) {
+    TaskRecord anyTaskForIdLocked(int id, boolean restoreFromRecents, int stackId) {
         int numDisplays = mActivityDisplays.size();
         for (int displayNdx = 0; displayNdx < numDisplays; ++displayNdx) {
             ArrayList<ActivityStack> stacks = mActivityDisplays.valueAt(displayNdx).mStacks;
@@ -575,7 +580,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
             return task;
         }
 
-        if (!restoreRecentTaskLocked(task, INVALID_STACK_ID)) {
+        if (!restoreRecentTaskLocked(task, stackId)) {
             if (DEBUG_RECENTS) Slog.w(TAG_RECENTS,
                     "Couldn't restore task id=" + id + " found in recents");
             return null;
@@ -610,7 +615,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
             if (mCurTaskId <= 0) {
                 mCurTaskId = 1;
             }
-        } while (anyTaskForIdLocked(mCurTaskId, false) != null);
+        } while (anyTaskForIdLocked(mCurTaskId, !RESTORE_FROM_RECENTS, INVALID_STACK_ID) != null);
         return mCurTaskId;
     }
 
@@ -3147,7 +3152,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
      * Restores a recent task to a stack
      * @param task The recent task to be restored.
      * @param stackId The stack to restore the task to (default launch stack will be used
-     *                if stackId is invalid).
+     *                if stackId is {@link android.app.ActivityManager#INVALID_STACK_ID}).
      * @return true if the task has been restored successfully.
      */
     private boolean restoreRecentTaskLocked(TaskRecord task, int stackId) {
@@ -3246,7 +3251,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
             // and then add a new one. This call will tell window manager about this, so it can
             // preserve the old window until the new one is drawn. This prevents having a gap
             // between the removal and addition, in which no window is visible. We also want the
-            // entrace of the new window to be properly animated.
+            // entrance of the new window to be properly animated.
             ActivityRecord r = task.getTopActivity();
             mWindowManager.setReplacingWindow(r.appToken, true /* animate */);
         }

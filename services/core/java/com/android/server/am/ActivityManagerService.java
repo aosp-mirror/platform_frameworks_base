@@ -36,6 +36,7 @@ import static com.android.server.Watchdog.NATIVE_STACKS_OF_INTEREST;
 import static com.android.server.am.ActivityManagerDebugConfig.*;
 import static com.android.server.am.ActivityStackSupervisor.FORCE_FOCUS;
 import static com.android.server.am.ActivityStackSupervisor.ON_TOP;
+import static com.android.server.am.ActivityStackSupervisor.RESTORE_FROM_RECENTS;
 import static com.android.server.am.ActivityStackSupervisor.PRESERVE_WINDOWS;
 import static com.android.server.am.TaskRecord.INVALID_TASK_ID;
 import static com.android.server.am.TaskRecord.LOCK_TASK_AUTH_DONT_LOCK;
@@ -4188,27 +4189,39 @@ public final class ActivityManagerService extends ActivityManagerNative
     }
 
     @Override
-    public final int startActivityFromRecents(int taskId, Bundle options) {
+    public final int startActivityFromRecents(int taskId, int launchStackId, Bundle options) {
         if (checkCallingPermission(START_TASKS_FROM_RECENTS) != PackageManager.PERMISSION_GRANTED) {
             String msg = "Permission Denial: startActivityFromRecents called without " +
                     START_TASKS_FROM_RECENTS;
             Slog.w(TAG, msg);
             throw new SecurityException(msg);
         }
-        return startActivityFromRecentsInner(taskId, options);
+        return startActivityFromRecentsInner(taskId, launchStackId, options);
     }
 
-    final int startActivityFromRecentsInner(int taskId, Bundle options) {
+    final int startActivityFromRecentsInner(int taskId, int launchStackId, Bundle options) {
         final TaskRecord task;
         final int callingUid;
         final String callingPackage;
         final Intent intent;
         final int userId;
         synchronized (this) {
-            task = mStackSupervisor.anyTaskForIdLocked(taskId);
-            if (task == null) {
-                throw new IllegalArgumentException("Task " + taskId + " not found.");
+            if (launchStackId == HOME_STACK_ID) {
+                throw new IllegalArgumentException("startActivityFromRecentsInner: Task "
+                        + taskId + " can't be launch in the home stack.");
             }
+
+            task = mStackSupervisor.anyTaskForIdLocked(taskId, RESTORE_FROM_RECENTS, launchStackId);
+            if (task == null) {
+                throw new IllegalArgumentException(
+                        "startActivityFromRecentsInner: Task " + taskId + " not found.");
+            }
+
+            if (launchStackId != INVALID_STACK_ID && task.stack.mStackId != launchStackId) {
+                mStackSupervisor.moveTaskToStackUncheckedLocked(
+                        task, launchStackId, ON_TOP, FORCE_FOCUS, "startActivityFromRecents");
+            }
+
             if (task.getRootActivity() != null) {
                 moveTaskToFrontLocked(task.taskId, 0, options);
                 return ActivityManager.START_TASK_TO_FRONT;
@@ -8550,7 +8563,8 @@ public final class ActivityManagerService extends ActivityManagerNative
         synchronized (this) {
             enforceCallingPermission(android.Manifest.permission.READ_FRAME_BUFFER,
                     "getTaskThumbnail()");
-            TaskRecord tr = mStackSupervisor.anyTaskForIdLocked(id, false);
+            final TaskRecord tr = mStackSupervisor.anyTaskForIdLocked(
+                    id, !RESTORE_FROM_RECENTS, INVALID_STACK_ID);
             if (tr != null) {
                 return tr.getTaskThumbnailLocked();
             }
@@ -8663,7 +8677,8 @@ public final class ActivityManagerService extends ActivityManagerNative
     @Override
     public void setTaskResizeable(int taskId, boolean resizeable) {
         synchronized (this) {
-            TaskRecord task = mStackSupervisor.anyTaskForIdLocked(taskId, false);
+            final TaskRecord task = mStackSupervisor.anyTaskForIdLocked(
+                    taskId, !RESTORE_FROM_RECENTS, INVALID_STACK_ID);
             if (task == null) {
                 Slog.w(TAG, "setTaskResizeable: taskId=" + taskId + " not found");
                 return;
@@ -8874,7 +8889,8 @@ public final class ActivityManagerService extends ActivityManagerNative
      * @return Returns true if the given task was found and removed.
      */
     private boolean removeTaskByIdLocked(int taskId, boolean killProcess) {
-        TaskRecord tr = mStackSupervisor.anyTaskForIdLocked(taskId, false);
+        final TaskRecord tr = mStackSupervisor.anyTaskForIdLocked(
+                taskId, !RESTORE_FROM_RECENTS, INVALID_STACK_ID);
         if (tr != null) {
             tr.removeTaskActivitiesLocked();
             cleanUpRemovedTaskLocked(tr, killProcess);
@@ -9203,7 +9219,8 @@ public final class ActivityManagerService extends ActivityManagerNative
         long ident = Binder.clearCallingIdentity();
         try {
             synchronized (this) {
-                TaskRecord tr = mStackSupervisor.anyTaskForIdLocked(taskId, false);
+                final TaskRecord tr = mStackSupervisor.anyTaskForIdLocked(
+                        taskId, !RESTORE_FROM_RECENTS, INVALID_STACK_ID);
                 return tr != null && tr.stack != null && tr.stack.isHomeStack();
             }
         } finally {
@@ -21071,7 +21088,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         public void moveToFront() {
             checkCaller();
             // Will bring task to front if it already has a root activity.
-            startActivityFromRecentsInner(mTaskId, null);
+            startActivityFromRecentsInner(mTaskId, INVALID_STACK_ID, null);
         }
 
         @Override
