@@ -106,12 +106,12 @@ public class SurfaceCompositionMeasuringActivity extends Activity implements OnC
 
     class CompositorScore {
         double mSurfaces;
-        double mBitrate;
+        double mBandwidth;
 
         @Override
         public String toString() {
             return DOUBLE_FORMAT.format(mSurfaces) + " surfaces. " +
-                    "Bitrate: " + getReadableMemory((long)mBitrate) + "/s";
+                    "Bandwidth: " + getReadableMemory((long)mBandwidth) + "/s";
         }
     }
 
@@ -131,7 +131,7 @@ public class SurfaceCompositionMeasuringActivity extends Activity implements OnC
         score.mSurfaces = measureCompositionScore(new Measurement(0, 60.0),
                 new Measurement(mViews.size() + 1, 0.0f), pixelFormat);
         // Assume 32 bits per pixel.
-        score.mBitrate = score.mSurfaces * mTargetFPS * mWidth * mHeight * 4.0;
+        score.mBandwidth = score.mSurfaces * mTargetFPS * mWidth * mHeight * 4.0;
         //memAccessTask.stop();
         return score;
     }
