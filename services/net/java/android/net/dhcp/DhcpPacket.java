@@ -673,6 +673,14 @@ abstract class DhcpPacket {
         return new String(bytes, 0, length, StandardCharsets.US_ASCII);
     }
 
+    private static boolean isPacketToOrFromClient(short udpSrcPort, short udpDstPort) {
+        return (udpSrcPort == DHCP_CLIENT) || (udpDstPort == DHCP_CLIENT);
+    }
+
+    private static boolean isPacketServerToServer(short udpSrcPort, short udpDstPort) {
+        return (udpSrcPort == DHCP_SERVER) && (udpDstPort == DHCP_SERVER);
+    }
+
     public static class ParseException extends Exception {
         public ParseException(String msg, Object... args) {
             super(String.format(msg, args));
@@ -791,8 +799,12 @@ abstract class DhcpPacket {
             short udpLen = packet.getShort();
             short udpChkSum = packet.getShort();
 
-            if ((udpSrcPort != DHCP_SERVER) && (udpSrcPort != DHCP_CLIENT)) {
-                throw new ParseException("Invalid source port %d", udpSrcPort);
+            // Only accept packets to or from the well-known client port (expressly permitting
+            // packets from ports other than the well-known server port; http://b/24687559), and
+            // server-to-server packets, e.g. for relays.
+            if (!isPacketToOrFromClient(udpSrcPort, udpDstPort) &&
+                !isPacketServerToServer(udpSrcPort, udpDstPort)) {
+                return null;
             }
         }
 

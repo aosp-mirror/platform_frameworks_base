@@ -514,4 +514,40 @@ public class DhcpPacketTest extends TestCase {
         assertDhcpResults("10.32.158.205/20", "10.32.144.1", "148.88.65.52,148.88.65.53",
                 "lancs.ac.uk", "10.32.255.128", null, 7200, false, dhcpResults);
     }
+
+    @SmallTest
+    public void testUdpServerAnySourcePort() throws Exception {
+        final ByteBuffer packet = ByteBuffer.wrap(HexEncoding.decode((
+            // Ethernet header.
+            "9cd917000000001c2e0000000800" +
+            // IP header.
+            "45a00148000040003d115087d18194fb0a0f7af2" +
+            // UDP header. TODO: fix invalid checksum (due to MAC address obfuscation).
+            // NOTE: The server source port is not the canonical port 67.
+            "C29F004401341268" +
+            // BOOTP header.
+            "02010600d628ba8200000000000000000a0f7af2000000000a0fc818" +
+            // MAC address.
+            "9cd91700000000000000000000000000" +
+            // Server name.
+            "0000000000000000000000000000000000000000000000000000000000000000" +
+            "0000000000000000000000000000000000000000000000000000000000000000" +
+            // File.
+            "0000000000000000000000000000000000000000000000000000000000000000" +
+            "0000000000000000000000000000000000000000000000000000000000000000" +
+            "0000000000000000000000000000000000000000000000000000000000000000" +
+            "0000000000000000000000000000000000000000000000000000000000000000" +
+            // Options.
+            "6382536335010236040a0169fc3304000151800104ffff000003040a0fc817060cd1818003d1819403" +
+            "d18180060f0777766d2e6564751c040a0fffffff000000"
+        ).toCharArray(), false));
+
+        DhcpPacket offerPacket = DhcpPacket.decodeFullPacket(packet, ENCAP_L2);
+        assertTrue(offerPacket instanceof DhcpOfferPacket);
+        assertEquals("9CD917000000", HexDump.toHexString(offerPacket.getClientMac()));
+        DhcpResults dhcpResults = offerPacket.toDhcpResults();
+        assertDhcpResults("10.15.122.242/16", "10.15.200.23",
+                "209.129.128.3,209.129.148.3,209.129.128.6",
+                "wvm.edu", "10.1.105.252", null, 86400, false, dhcpResults);
+    }
 }
