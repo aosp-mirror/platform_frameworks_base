@@ -28,10 +28,21 @@ CanvasState::CanvasState(CanvasStateClient& renderer)
         , mWidth(-1)
         , mHeight(-1)
         , mSaveCount(1)
-        , mFirstSnapshot(new Snapshot)
         , mCanvas(renderer)
-        , mSnapshot(mFirstSnapshot) {
+        , mSnapshot(&mFirstSnapshot) {
+}
 
+CanvasState::~CanvasState() {
+    // First call freeSnapshot on all but mFirstSnapshot
+    // to invoke all the dtors
+    freeAllSnapshots();
+
+    // Now actually release the memory
+    while (mSnapshotPool) {
+        void* temp = mSnapshotPool;
+        mSnapshotPool = mSnapshotPool->previous;
+        free(temp);
+    }
 }
 
 void CanvasState::initializeSaveStack(
@@ -41,16 +52,49 @@ void CanvasState::initializeSaveStack(
     if (mWidth != viewportWidth || mHeight != viewportHeight) {
         mWidth = viewportWidth;
         mHeight = viewportHeight;
-        mFirstSnapshot->initializeViewport(viewportWidth, viewportHeight);
+        mFirstSnapshot.initializeViewport(viewportWidth, viewportHeight);
         mCanvas.onViewportInitialized();
     }
 
-    mSnapshot = new Snapshot(mFirstSnapshot,
+    freeAllSnapshots();
+    mSnapshot = allocSnapshot(&mFirstSnapshot,
             SkCanvas::kMatrix_SaveFlag | SkCanvas::kClip_SaveFlag);
     mSnapshot->setClip(clipLeft, clipTop, clipRight, clipBottom);
     mSnapshot->fbo = mCanvas.getTargetFbo();
     mSnapshot->setRelativeLightCenter(lightCenter);
     mSaveCount = 1;
+}
+
+Snapshot* CanvasState::allocSnapshot(Snapshot* previous, int savecount) {
+    void* memory;
+    if (mSnapshotPool) {
+        memory = mSnapshotPool;
+        mSnapshotPool = mSnapshotPool->previous;
+        mSnapshotPoolCount--;
+    } else {
+        memory = malloc(sizeof(Snapshot));
+    }
+    return new (memory) Snapshot(previous, savecount);
+}
+
+void CanvasState::freeSnapshot(Snapshot* snapshot) {
+    snapshot->~Snapshot();
+    // Arbitrary number, just don't let this grown unbounded
+    if (mSnapshotPoolCount > 10) {
+        free((void*) snapshot);
+    } else {
+        snapshot->previous = mSnapshotPool;
+        mSnapshotPool = snapshot;
+        mSnapshotPoolCount++;
+    }
+}
+
+void CanvasState::freeAllSnapshots() {
+    while (mSnapshot != &mFirstSnapshot) {
+        Snapshot* temp = mSnapshot;
+        mSnapshot = mSnapshot->previous;
+        freeSnapshot(temp);
+    }
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -64,7 +108,7 @@ void CanvasState::initializeSaveStack(
  * stack, and ensures restoreToCount() doesn't call back into subclass overrides.
  */
 int CanvasState::saveSnapshot(int flags) {
-    mSnapshot = new Snapshot(mSnapshot, flags);
+    mSnapshot = allocSnapshot(mSnapshot, flags);
     return mSaveCount++;
 }
 
@@ -76,14 +120,16 @@ int CanvasState::save(int flags) {
  * Guaranteed to restore without side-effects.
  */
 void CanvasState::restoreSnapshot() {
-    sp<Snapshot> toRemove = mSnapshot;
-    sp<Snapshot> toRestore = mSnapshot->previous;
+    Snapshot* toRemove = mSnapshot;
+    Snapshot* toRestore = mSnapshot->previous;
 
     mSaveCount--;
     mSnapshot = toRestore;
 
     // subclass handles restore implementation
     mCanvas.onSnapshotRestored(*toRemove, *toRestore);
+
+    freeSnapshot(toRemove);
 }
 
 void CanvasState::restore() {

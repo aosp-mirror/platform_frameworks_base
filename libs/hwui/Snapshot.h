@@ -83,11 +83,11 @@ public:
  * Each snapshot has a link to a previous snapshot, indicating the previous
  * state of the renderer.
  */
-class Snapshot: public LightRefBase<Snapshot> {
+class Snapshot {
 public:
 
     Snapshot();
-    Snapshot(const sp<Snapshot>& s, int saveFlags);
+    Snapshot(Snapshot* s, int saveFlags);
 
     /**
      * Various flags set on ::flags.
@@ -229,7 +229,7 @@ public:
     /**
      * Previous snapshot.
      */
-    sp<Snapshot> previous;
+    Snapshot* previous;
 
     /**
      * A pointer to the currently active layer.

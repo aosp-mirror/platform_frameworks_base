@@ -44,7 +44,7 @@ Snapshot::Snapshot()
  * Copies the specified snapshot/ The specified snapshot is stored as
  * the previous snapshot.
  */
-Snapshot::Snapshot(const sp<Snapshot>& s, int saveFlags)
+Snapshot::Snapshot(Snapshot* s, int saveFlags)
         : flags(0)
         , previous(s)
         , layer(s->layer)
@@ -148,7 +148,7 @@ void Snapshot::buildScreenSpaceTransform(Matrix4* outTransform) const {
     const Snapshot* current = this;
     do {
         snapshotList.push(current);
-        current = current->previous.get();
+        current = current->previous;
     } while (current);
 
     // traverse the list, adding in each transform that contributes to the total transform
@@ -240,7 +240,7 @@ bool Snapshot::isIgnored() const {
 
 void Snapshot::dump() const {
     ALOGD("Snapshot %p, flags %x, prev %p, height %d, ignored %d, hasComplexClip %d",
-            this, flags, previous.get(), getViewportHeight(), isIgnored(), !mClipArea->isSimple());
+            this, flags, previous, getViewportHeight(), isIgnored(), !mClipArea->isSimple());
     const Rect& clipRect(mClipArea->getClipRect());
     ALOGD("  ClipRect %.1f %.1f %.1f %.1f, clip simple %d",
             clipRect.left, clipRect.top, clipRect.right, clipRect.bottom, mClipArea->isSimple());
