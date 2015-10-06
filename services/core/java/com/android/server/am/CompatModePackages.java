@@ -196,7 +196,7 @@ public final class CompatModePackages {
     }
 
     public boolean getFrontActivityAskCompatModeLocked() {
-        ActivityRecord r = mService.getFocusedStack().topRunningActivityLocked(null);
+        ActivityRecord r = mService.getFocusedStack().topRunningActivityLocked();
         if (r == null) {
             return false;
         }
@@ -208,7 +208,7 @@ public final class CompatModePackages {
     }
 
     public void setFrontActivityAskCompatModeLocked(boolean ask) {
-        ActivityRecord r = mService.getFocusedStack().topRunningActivityLocked(null);
+        ActivityRecord r = mService.getFocusedStack().topRunningActivityLocked();
         if (r != null) {
             setPackageAskCompatModeLocked(r.packageName, ask);
         }
@@ -230,7 +230,7 @@ public final class CompatModePackages {
     }
 
     public int getFrontActivityScreenCompatModeLocked() {
-        ActivityRecord r = mService.getFocusedStack().topRunningActivityLocked(null);
+        ActivityRecord r = mService.getFocusedStack().topRunningActivityLocked();
         if (r == null) {
             return ActivityManager.COMPAT_MODE_UNKNOWN;
         }
@@ -238,7 +238,7 @@ public final class CompatModePackages {
     }
 
     public void setFrontActivityScreenCompatModeLocked(int mode) {
-        ActivityRecord r = mService.getFocusedStack().topRunningActivityLocked(null);
+        ActivityRecord r = mService.getFocusedStack().topRunningActivityLocked();
         if (r == null) {
             Slog.w(TAG, "setFrontActivityScreenCompatMode failed: no top activity");
             return;

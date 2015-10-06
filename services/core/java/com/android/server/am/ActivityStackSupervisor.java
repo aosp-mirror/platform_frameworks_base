@@ -66,7 +66,6 @@ import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.content.res.Configuration;
-import android.graphics.Point;
 import android.graphics.Rect;
 import android.hardware.display.DisplayManager;
 import android.hardware.display.DisplayManager.DisplayListener;
@@ -628,7 +627,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
         if (resumedActivity == null || resumedActivity.app == null) {
             resumedActivity = stack.mPausingActivity;
             if (resumedActivity == null || resumedActivity.app == null) {
-                resumedActivity = stack.topRunningActivityLocked(null);
+                resumedActivity = stack.topRunningActivityLocked();
             }
         }
         return resumedActivity;
@@ -644,7 +643,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
                 if (!isFrontStack(stack)) {
                     continue;
                 }
-                ActivityRecord hr = stack.topRunningActivityLocked(null);
+                ActivityRecord hr = stack.topRunningActivityLocked();
                 if (hr != null) {
                     if (hr.app == null && app.uid == hr.info.applicationInfo.uid
                             && processName.equals(hr.processName)) {
@@ -828,7 +827,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
 
     ActivityRecord topRunningActivityLocked() {
         final ActivityStack focusedStack = mFocusedStack;
-        ActivityRecord r = focusedStack.topRunningActivityLocked(null);
+        ActivityRecord r = focusedStack.topRunningActivityLocked();
         if (r != null) {
             return r;
         }
@@ -838,7 +837,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
         for (int stackNdx = stacks.size() - 1; stackNdx >= 0; --stackNdx) {
             final ActivityStack stack = stacks.get(stackNdx);
             if (stack != focusedStack && isFrontStack(stack)) {
-                r = stack.topRunningActivityLocked(null);
+                r = stack.topRunningActivityLocked();
                 if (r != null) {
                     return r;
                 }
@@ -1101,7 +1100,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
                         }
                     } while (!outResult.timeout && outResult.who == null);
                 } else if (res == ActivityManager.START_TASK_TO_FRONT) {
-                    ActivityRecord r = stack.topRunningActivityLocked(null);
+                    ActivityRecord r = stack.topRunningActivityLocked();
                     if (r.nowVisible && r.state == RESUMED) {
                         outResult.timeout = false;
                         outResult.who = new ComponentName(r.info.packageName, r.info.name);
@@ -2988,7 +2987,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
 
         Trace.traceBegin(TRACE_TAG_ACTIVITY_MANAGER, "am.resizeStack_" + stackId);
 
-        ActivityRecord r = stack.topRunningActivityLocked(null);
+        ActivityRecord r = stack.topRunningActivityLocked();
 
         mTmpBounds.clear();
         mTmpConfigs.clear();
@@ -3113,7 +3112,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
         // to be relaunched due to configuration change.
         boolean kept = true;
         if (overrideConfig != null) {
-            ActivityRecord r = task.topRunningActivityLocked(null);
+            ActivityRecord r = task.topRunningActivityLocked();
             if (r != null) {
                 final ActivityStack stack = task.stack;
                 kept = stack.ensureActivityConfigurationLocked(r, 0, preserveWindow);
@@ -3744,7 +3743,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
             final ArrayList<ActivityStack> stacks = mActivityDisplays.valueAt(displayNdx).mStacks;
             for (int stackNdx = stacks.size() - 1; stackNdx >= 0; --stackNdx) {
                 final ActivityStack stack = stacks.get(stackNdx);
-                final ActivityRecord r = stack.topRunningActivityLocked(null);
+                final ActivityRecord r = stack.topRunningActivityLocked();
                 final ActivityState state = r == null ? DESTROYED : r.state;
                 if (isFrontStack(stack)) {
                     if (r == null) Slog.e(TAG,

@@ -2736,7 +2736,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         synchronized (ActivityManagerService.this) {
             ActivityStack stack = mStackSupervisor.getStack(stackId);
             if (stack != null) {
-                ActivityRecord r = stack.topRunningActivityLocked(null);
+                ActivityRecord r = stack.topRunningActivityLocked();
                 if (r != null) {
                     setFocusedActivityLocked(r, "setFocusedStack");
                     mStackSupervisor.resumeTopActivitiesLocked(stack, null, null);
@@ -2753,7 +2753,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             synchronized (ActivityManagerService.this) {
                 TaskRecord task = mStackSupervisor.anyTaskForIdLocked(taskId);
                 if (task != null) {
-                    ActivityRecord r = task.topRunningActivityLocked(null);
+                    ActivityRecord r = task.topRunningActivityLocked();
                     if (r != null) {
                         setFocusedActivityLocked(r, "setFocusedTask");
                         mStackSupervisor.resumeTopActivitiesLocked(task.stack, null, null);
@@ -11353,7 +11353,7 @@ public final class ActivityManagerService extends ActivityManagerNative
     public boolean isTopActivityImmersive() {
         enforceNotIsolatedCaller("startActivity");
         synchronized (this) {
-            ActivityRecord r = getFocusedStack().topRunningActivityLocked(null);
+            ActivityRecord r = getFocusedStack().topRunningActivityLocked();
             return (r != null) ? r.immersive : false;
         }
     }
@@ -17744,7 +17744,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                 // If the configuration changed, and the caller is not already
                 // in the process of starting an activity, then find the top
                 // activity to check if its configuration needs to change.
-                starting = mainStack.topRunningActivityLocked(null);
+                starting = mainStack.topRunningActivityLocked();
             }
 
             if (starting != null) {

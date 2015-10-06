@@ -557,11 +557,11 @@ final class TaskRecord {
         return null;
     }
 
-    ActivityRecord topRunningActivityLocked(ActivityRecord notTop) {
+    ActivityRecord topRunningActivityLocked() {
         if (stack != null) {
             for (int activityNdx = mActivities.size() - 1; activityNdx >= 0; --activityNdx) {
                 ActivityRecord r = mActivities.get(activityNdx);
-                if (!r.finishing && r != notTop && stack.okToShowLocked(r)) {
+                if (!r.finishing && stack.okToShowLocked(r)) {
                     return r;
                 }
             }

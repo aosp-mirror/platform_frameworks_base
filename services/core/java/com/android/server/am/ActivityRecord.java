@@ -774,7 +774,7 @@ final class ActivityRecord {
         boolean unsent = true;
         if ((state == ActivityState.RESUMED
                 || (service.isSleeping() && task.stack != null
-                    && task.stack.topRunningActivityLocked(null) == this))
+                    && task.stack.topRunningActivityLocked() == this))
                 && app != null && app.thread != null) {
             try {
                 ArrayList<ReferrerIntent> ar = new ArrayList<>(1);
