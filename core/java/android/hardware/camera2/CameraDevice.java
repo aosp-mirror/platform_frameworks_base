@@ -46,7 +46,7 @@ import java.lang.annotation.RetentionPolicy;
  * provide substantially improved capabilities over the older camera
  * API. Applications that target the limited level devices will run unchanged on
  * the full-level devices; if your application requires a full-level device for
- * proper operation, declare the "android.hardware.camera2.full" feature in your
+ * proper operation, declare the "android.hardware.camera.level.full" feature in your
  * manifest.</p>
  *
  * @see CameraManager#openCamera
