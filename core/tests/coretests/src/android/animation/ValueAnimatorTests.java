@@ -618,7 +618,7 @@ public class ValueAnimatorTests extends ActivityInstrumentationTestCase2<BasicAn
     }
 
     @SmallTest
-    public void testASeek() throws Throwable {
+    public void testSeek() throws Throwable {
         final MyListener l1 = new MyListener();
         final MyListener l2 = new MyListener();
         final MyUpdateListener updateListener1 = new MyUpdateListener();
@@ -755,6 +755,186 @@ public class ValueAnimatorTests extends ActivityInstrumentationTestCase2<BasicAn
             }
         });
 
+    }
+
+    @SmallTest
+    public void testSeekWhileRunning() throws Throwable {
+        // Seek one animator to the beginning and the other one to the end when they are running.
+        final MyListener l1 = new MyListener();
+        final MyListener l2 = new MyListener();
+        a1.addListener(l1);
+        a2.addListener(l2);
+        runTestOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                assertFalse(l1.startCalled);
+                assertFalse(l2.startCalled);
+                assertEquals(0f, a1.getAnimatedFraction());
+                assertEquals(0f, a2.getAnimatedFraction());
+                a1.start();
+                a2.start();
+            }
+        });
+        Thread.sleep(POLL_INTERVAL);
+        runTestOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                assertFalse(l1.endCalled);
+                assertFalse(l2.endCalled);
+                assertTrue(a1.isRunning());
+                assertTrue(a2.isRunning());
+                // During the run, seek one to the beginning, the other to the end
+                a1.setCurrentFraction(0f);
+                a2.setCurrentFraction(1f);
+            }
+        });
+        Thread.sleep(POLL_INTERVAL);
+        runTestOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                // Check that a2 has finished due to the seeking, but a1 hasn't finished.
+                assertFalse(l1.endCalled);
+                assertTrue(l2.endCalled);
+                assertEquals(1f, a2.getAnimatedFraction());
+            }
+        });
+
+        Thread.sleep(a1.getTotalDuration());
+        runTestOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                // By now a1 should finish also.
+                assertTrue(l1.endCalled);
+                assertEquals(1f, a1.getAnimatedFraction());
+            }
+        });
+    }
+
+    @SmallTest
+    public void testZeroDuration() throws Throwable {
+        // Run two animators with zero duration, with one running forward and the other one
+        // backward. Check that the animations start and finish with the correct end fractions.
+        a1.setDuration(0);
+        a2.setDuration(0);
+
+        // Set a fraction on an animation with 0-duration
+        final ValueAnimator a3 = ValueAnimator.ofInt(0, 100);
+        a3.setDuration(0);
+        a3.setCurrentFraction(1.0f);
+        assertEquals(1.0f, a3.getAnimatedFraction());
+
+        final MyListener l1 = new MyListener();
+        final MyListener l2 = new MyListener();
+        final MyListener l3 = new MyListener();
+        a1.addListener(l1);
+        a2.addListener(l2);
+        a3.addListener(l3);
+        runTestOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                assertFalse(l1.startCalled);
+                assertFalse(l2.startCalled);
+                assertFalse(l3.startCalled);
+                assertFalse(l1.endCalled);
+                assertFalse(l2.endCalled);
+                assertFalse(l3.endCalled);
+                a1.start();
+                a2.reverse();
+                a3.start();
+            }
+        });
+        Thread.sleep(POLL_INTERVAL);
+        runTestOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                // Check that the animators have started and finished with the right values.
+                assertTrue(l1.startCalled);
+                assertTrue(l2.startCalled);
+                assertTrue(l3.startCalled);
+                assertTrue(l1.endCalled);
+                assertTrue(l2.endCalled);
+                assertTrue(l3.endCalled);
+                assertEquals(1.0f, a1.getAnimatedFraction());
+                assertEquals(0f, a2.getAnimatedFraction());
+                assertEquals(1f, a3.getAnimatedFraction());
+                assertEquals(A1_END_VALUE, a1.getAnimatedValue());
+                assertEquals(A2_START_VALUE, a2.getAnimatedValue());
+                assertEquals(100, a3.getAnimatedValue());
+            }
+        });
+    }
+
+    @SmallTest
+    public void testReverse() throws Throwable {
+        // Prolong animators duration so that we can do multiple checks during their run
+        final ValueAnimator a3 = ValueAnimator.ofInt(0, 100);
+        a1.setDuration(400);
+        a2.setDuration(600);
+        a3.setDuration(400);
+        final MyListener l1 = new MyListener();
+        final MyListener l2 = new MyListener();
+        final MyListener l3 = new MyListener();
+        a1.addListener(l1);
+        a2.addListener(l2);
+        a3.addListener(l3);
+
+        // Reverse three animators, seek one to the beginning and another to the end, and force
+        // to end the third one during reversing.
+        runTestOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                assertFalse(l1.startCalled);
+                assertFalse(l2.startCalled);
+                assertFalse(l3.startCalled);
+                assertFalse(l1.endCalled);
+                assertFalse(l2.endCalled);
+                assertFalse(l3.endCalled);
+                a1.reverse();
+                a2.reverse();
+                a3.reverse();
+            }
+        });
+        Thread.sleep(POLL_INTERVAL);
+        runTestOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                assertTrue(l1.startCalled);
+                assertTrue(l2.startCalled);
+                assertTrue(l3.startCalled);
+
+                a1.setCurrentFraction(0f);
+                a2.setCurrentFraction(1f);
+                a3.end();
+
+                // Check that the fraction has been set, and the getter returns the correct values.
+                assertEquals(1f, a1.getAnimatedFraction());
+                assertEquals(0f, a2.getAnimatedFraction());
+            }
+        });
+        Thread.sleep(POLL_INTERVAL);
+
+        // By now, a2 should have finished due to the seeking. It wouldn't have finished otherwise.
+        runTestOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                // Check that both animations have started, and a2 has finished.
+                assertFalse(l1.endCalled);
+                assertTrue(l2.endCalled);
+                assertTrue(l3.endCalled);
+            }
+        });
+        Thread.sleep(a1.getTotalDuration());
+
+        runTestOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                // Verify that a1 has finished as well.
+                assertTrue(l1.endCalled);
+                assertEquals(0f, a1.getAnimatedFraction());
+                assertEquals(0f, a2.getAnimatedFraction());
+                assertEquals(0f, a3.getAnimatedFraction());
+            }
+        });
     }
 
     class MyUpdateListener implements ValueAnimator.AnimatorUpdateListener {
