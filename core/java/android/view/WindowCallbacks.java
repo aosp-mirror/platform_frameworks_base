@@ -21,6 +21,8 @@ import android.graphics.Rect;
 /**
  * These callbacks are used to communicate window configuration changes while the user is performing
  * window changes.
+ * Note: Note that at the time of onWindowDragResizeStart the content size isn't known. A consumer
+ * should therfore not draw anything before the additional onContentDraw call has arrived.
  * @hide
  */
 public interface WindowCallbacks {
@@ -45,4 +47,9 @@ public interface WindowCallbacks {
      * Called when a drag resize ends.
      */
     void onWindowDragResizeEnd();
+
+    /**
+     * The content will now be drawn to these bounds.
+     */
+    void onContentDraw(int offsetX, int offsetY, int sizeX, int sizeY);
 }
