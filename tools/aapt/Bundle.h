@@ -321,6 +321,7 @@ private:
     android::String8 mFeatureOfPackage;
     android::String8 mFeatureAfterPackage;
     android::String8 mRevisionCode;
+    int         mForcedPackageId;
     const char* mManifestMinSdkVersion;
     const char* mMinSdkVersion;
     const char* mTargetSdkVersion;

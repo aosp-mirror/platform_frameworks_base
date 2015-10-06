@@ -1755,7 +1755,7 @@ ResourceTable::ResourceTable(Bundle* bundle, const String16& assetsPackage, Reso
     , mNumLocal(0)
     , mBundle(bundle)
 {
-    ssize_t packageId = mBundle.getForcedPackageId();
+    ssize_t packageId = mBundle->getForcedPackageId();
     if (packageId == -1) {
         switch (mPackageType) {
             case App:
