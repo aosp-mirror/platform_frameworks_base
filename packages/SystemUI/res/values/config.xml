@@ -243,7 +243,7 @@
     <bool name="doze_pulse_on_notifications">true</bool>
 
     <!-- Doze: when to pulse after a buzzworthy notification arrives -->
-    <string name="doze_pulse_schedule" translatable="false">1s,10s,30s,60s</string>
+    <string name="doze_pulse_schedule" translatable="false">10s,30s,60s</string>
 
     <!-- Doze: maximum number of times the notification pulse schedule can be reset -->
     <integer name="doze_pulse_schedule_resets">2</integer>
