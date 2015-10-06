@@ -140,13 +140,13 @@ public class QSFooter implements OnClickListener, DialogInterface.OnClickListene
         mDialog.setTitle(getTitle(deviceOwner));
         mDialog.setMessage(getMessage(deviceOwner, profileOwner, primaryVpn, profileVpn, managed));
         mDialog.setButton(DialogInterface.BUTTON_POSITIVE, getPositiveButton(), this);
-        if (mSecurityController.isVpnEnabled()) {
-            mDialog.setButton(DialogInterface.BUTTON_NEGATIVE, getNegativeButton(), this);
+        if (mSecurityController.isVpnEnabled() && !mSecurityController.isVpnRestricted()) {
+            mDialog.setButton(DialogInterface.BUTTON_NEGATIVE, getSettingsButton(), this);
         }
         mDialog.show();
     }
 
-    private String getNegativeButton() {
+    private String getSettingsButton() {
         return mContext.getString(R.string.status_bar_settings_settings_button);
     }
 
