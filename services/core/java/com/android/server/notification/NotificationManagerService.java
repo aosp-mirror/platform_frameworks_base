@@ -1602,41 +1602,45 @@ public class NotificationManagerService extends SystemService {
         }
 
         @Override
-        public AutomaticZenRule getAutomaticZenRule(String name) throws RemoteException {
+        public AutomaticZenRule getAutomaticZenRule(String id) throws RemoteException {
+            Preconditions.checkNotNull(id, "Id is null");
             enforcePolicyAccess(Binder.getCallingUid(), "getAutomaticZenRule");
-            return mZenModeHelper.getAutomaticZenRule(name);
+            return mZenModeHelper.getAutomaticZenRule(id);
         }
 
         @Override
-        public boolean addOrUpdateAutomaticZenRule(AutomaticZenRule automaticZenRule)
+        public AutomaticZenRule addAutomaticZenRule(AutomaticZenRule automaticZenRule)
                 throws RemoteException {
             Preconditions.checkNotNull(automaticZenRule, "automaticZenRule is null");
             Preconditions.checkNotNull(automaticZenRule.getName(), "Name is null");
             Preconditions.checkNotNull(automaticZenRule.getOwner(), "Owner is null");
             Preconditions.checkNotNull(automaticZenRule.getConditionId(), "ConditionId is null");
-            enforcePolicyAccess(Binder.getCallingUid(), "addOrUpdateZenModeRule");
+            enforcePolicyAccess(Binder.getCallingUid(), "addAutomaticZenRule");
 
-            return mZenModeHelper.addOrUpdateAutomaticZenRule(automaticZenRule,
-                    "addOrUpdateAutomaticZenRule");
+            return mZenModeHelper.addAutomaticZenRule(automaticZenRule,
+                    "addAutomaticZenRule");
         }
 
         @Override
-        public boolean renameAutomaticZenRule(String oldName, String newName) {
-            Preconditions.checkNotNull(oldName, "oldName is null");
-            Preconditions.checkNotNull(newName, "newName is null");
-            enforcePolicyAccess(Binder.getCallingUid(), "renameAutomaticZenRule");
+        public boolean updateAutomaticZenRule(AutomaticZenRule automaticZenRule)
+                throws RemoteException {
+            Preconditions.checkNotNull(automaticZenRule, "automaticZenRule is null");
+            Preconditions.checkNotNull(automaticZenRule.getName(), "Name is null");
+            Preconditions.checkNotNull(automaticZenRule.getOwner(), "Owner is null");
+            Preconditions.checkNotNull(automaticZenRule.getConditionId(), "ConditionId is null");
+            enforcePolicyAccess(Binder.getCallingUid(), "updateAutomaticZenRule");
 
-            return mZenModeHelper.renameAutomaticZenRule(
-                    oldName, newName, "renameAutomaticZenRule");
+            return mZenModeHelper.updateAutomaticZenRule(automaticZenRule,
+                    "updateAutomaticZenRule");
         }
 
         @Override
-        public boolean removeAutomaticZenRule(String name) throws RemoteException {
-            Preconditions.checkNotNull(name, "Name is null");
+        public boolean removeAutomaticZenRule(String id) throws RemoteException {
+            Preconditions.checkNotNull(id, "Id is null");
             // Verify that they can modify zen rules.
             enforcePolicyAccess(Binder.getCallingUid(), "removeAutomaticZenRule");
 
-            return mZenModeHelper.removeAutomaticZenRule(name, "removeAutomaticZenRule");
+            return mZenModeHelper.removeAutomaticZenRule(id, "removeAutomaticZenRule");
         }
 
         @Override

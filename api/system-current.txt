@@ -5197,7 +5197,7 @@ package android.app {
   }
 
   public class NotificationManager {
-    method public boolean addOrUpdateAutomaticZenRule(android.app.AutomaticZenRule);
+    method public android.app.AutomaticZenRule addAutomaticZenRule(android.app.AutomaticZenRule);
     method public void cancel(int);
     method public void cancel(java.lang.String, int);
     method public void cancelAll();
@@ -5210,9 +5210,9 @@ package android.app {
     method public void notify(int, android.app.Notification);
     method public void notify(java.lang.String, int, android.app.Notification);
     method public boolean removeAutomaticZenRule(java.lang.String);
-    method public boolean renameAutomaticZenRule(java.lang.String, java.lang.String);
     method public final void setInterruptionFilter(int);
     method public void setNotificationPolicy(android.app.NotificationManager.Policy);
+    method public boolean updateAutomaticZenRule(android.app.AutomaticZenRule);
     field public static final java.lang.String ACTION_INTERRUPTION_FILTER_CHANGED = "android.app.action.INTERRUPTION_FILTER_CHANGED";
     field public static final java.lang.String ACTION_NOTIFICATION_POLICY_ACCESS_GRANTED_CHANGED = "android.app.action.NOTIFICATION_POLICY_ACCESS_GRANTED_CHANGED";
     field public static final java.lang.String ACTION_NOTIFICATION_POLICY_CHANGED = "android.app.action.NOTIFICATION_POLICY_CHANGED";
@@ -30939,10 +30939,8 @@ package android.service.notification {
     method public abstract void onRequestConditions(int);
     method public abstract void onSubscribe(android.net.Uri);
     method public abstract void onUnsubscribe(android.net.Uri);
-    field public static final java.lang.String EXTRA_CONDITION_ID = "android.content.automatic.conditionId";
-    field public static final java.lang.String EXTRA_RULE_NAME = "android.content.automatic.ruleName";
+    field public static final java.lang.String EXTRA_RULE_ID = "android.content.automatic.ruleId";
     field public static final java.lang.String META_DATA_CONFIGURATION_ACTIVITY = "android.service.zen.automatic.configurationActivity";
-    field public static final java.lang.String META_DATA_DEFAULT_CONDITION_ID = "android.service.zen.automatic.defaultConditionId";
     field public static final java.lang.String META_DATA_RULE_TYPE = "android.service.zen.automatic.ruleType";
     field public static final java.lang.String SERVICE_INTERFACE = "android.service.notification.ConditionProviderService";
   }
