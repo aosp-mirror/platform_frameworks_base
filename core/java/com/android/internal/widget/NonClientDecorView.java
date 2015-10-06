@@ -110,6 +110,30 @@ public class NonClientDecorView extends LinearLayout
         super(context, attrs, defStyle);
     }
 
+    @Override
+    protected void onAttachedToWindow() {
+        super.onAttachedToWindow();
+        if (!mAttachedCallbacksToRootViewImpl) {
+            // If there is no window callback installed there was no window set before. Set it now.
+            // Note that our ViewRootImpl object will not change.
+            getViewRootImpl().addWindowCallbacks(this);
+            mAttachedCallbacksToRootViewImpl = true;
+        } else if (mFrameRendererThread != null) {
+            // We are resizing and this call happened due to a configuration change. Tell the
+            // renderer about it.
+            mFrameRendererThread.onConfigurationChange();
+        }
+    }
+
+    @Override
+    protected void onDetachedFromWindow() {
+        super.onDetachedFromWindow();
+        if (mAttachedCallbacksToRootViewImpl) {
+            getViewRootImpl().removeWindowCallbacks(this);
+            mAttachedCallbacksToRootViewImpl = false;
+        }
+    }
+
     public void setPhoneWindow(PhoneWindow owner, boolean showDecor, boolean windowHasShadow) {
         mOwner = owner;
         mWindowHasShadow = windowHasShadow;
@@ -121,17 +145,6 @@ public class NonClientDecorView extends LinearLayout
         // By changing the outline provider to BOUNDS, the window can remove its
         // background without removing the shadow.
         mOwner.getDecorView().setOutlineProvider(ViewOutlineProvider.BOUNDS);
-
-        if (!mAttachedCallbacksToRootViewImpl) {
-            // If there is no window callback installed there was no window set before. Set it now.
-            // Note that our ViewRootImpl object will not change.
-            getViewRootImpl().addWindowCallbacks(this);
-            mAttachedCallbacksToRootViewImpl = true;
-        } else if (mFrameRendererThread != null) {
-            // We are resizing and this call happened due to a configuration change. Tell the
-            // renderer about it.
-            mFrameRendererThread.onConfigurationChange();
-        }
 
         findViewById(R.id.maximize_window).setOnClickListener(this);
         findViewById(R.id.close_window).setOnClickListener(this);
@@ -372,10 +385,6 @@ public class NonClientDecorView extends LinearLayout
      */
     private void releaseResources() {
         releaseThreadedRenderer();
-        if (mAttachedCallbacksToRootViewImpl) {
-            ViewRootImpl.removeWindowCallbacks(this);
-            mAttachedCallbacksToRootViewImpl = false;
-        }
     }
 
     /**

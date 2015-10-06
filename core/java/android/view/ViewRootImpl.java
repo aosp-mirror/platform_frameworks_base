@@ -141,10 +141,10 @@ public final class ViewRootImpl implements ViewParent,
 
     static final ArrayList<Runnable> sFirstDrawHandlers = new ArrayList();
     static boolean sFirstDrawComplete = false;
-    static final ArrayList<WindowCallbacks> sWindowCallbacks = new ArrayList();
 
     static final ArrayList<ComponentCallbacks> sConfigCallbacks = new ArrayList();
 
+    final ArrayList<WindowCallbacks> mWindowCallbacks = new ArrayList();
     final Context mContext;
     final IWindowSession mWindowSession;
     final Display mDisplay;
@@ -420,18 +420,18 @@ public final class ViewRootImpl implements ViewParent,
         }
     }
 
-    public static void addWindowCallbacks(WindowCallbacks callback) {
+    public void addWindowCallbacks(WindowCallbacks callback) {
         if (USE_MT_RENDERER) {
-            synchronized (sWindowCallbacks) {
-                sWindowCallbacks.add(callback);
+            synchronized (mWindowCallbacks) {
+                mWindowCallbacks.add(callback);
             }
         }
     }
 
-    public static void removeWindowCallbacks(WindowCallbacks callback) {
+    public void removeWindowCallbacks(WindowCallbacks callback) {
         if (USE_MT_RENDERER) {
-            synchronized (sWindowCallbacks) {
-                sWindowCallbacks.remove(callback);
+            synchronized (mWindowCallbacks) {
+                mWindowCallbacks.remove(callback);
             }
         }
     }
@@ -5592,6 +5592,17 @@ public final class ViewRootImpl implements ViewParent,
                 + " contentInsets=" + contentInsets.toShortString()
                 + " visibleInsets=" + visibleInsets.toShortString()
                 + " reportDraw=" + reportDraw);
+
+        // Tell all listeners that we are resizing the window so that the chrome can get
+        // updated as fast as possible on a separate thread,
+        if (mDragResizing) {
+            synchronized (mWindowCallbacks) {
+                for (int i = mWindowCallbacks.size() - 1; i >= 0; i--) {
+                    mWindowCallbacks.get(i).onWindowSizeIsChanging(frame);
+                }
+            }
+        }
+
         Message msg = mHandler.obtainMessage(reportDraw ? MSG_RESIZED_REPORT : MSG_RESIZED);
         if (mTranslator != null) {
             mTranslator.translateRectInScreenToAppWindow(frame);
@@ -6595,15 +6606,6 @@ public final class ViewRootImpl implements ViewParent,
                 Configuration newConfig) {
             final ViewRootImpl viewAncestor = mViewAncestor.get();
             if (viewAncestor != null) {
-                // Tell all listeners that we are resizing the window so that the chrome can get
-                // updated as fast as possible on a separate thread,
-                if (mViewAncestor.get().mDragResizing) {
-                    synchronized (sWindowCallbacks) {
-                        for (int i = sWindowCallbacks.size() - 1; i >= 0; i--) {
-                            sWindowCallbacks.get(i).onWindowSizeIsChanging(frame);
-                        }
-                    }
-                }
                 viewAncestor.dispatchResized(frame, overscanInsets, contentInsets,
                         visibleInsets, stableInsets, outsets, reportDraw, newConfig);
             }
@@ -6762,9 +6764,9 @@ public final class ViewRootImpl implements ViewParent,
     private void startDragResizing(Rect initialBounds) {
         if (!mDragResizing) {
             mDragResizing = true;
-            synchronized (sWindowCallbacks) {
-                for (int i = sWindowCallbacks.size() - 1; i >= 0; i--) {
-                    sWindowCallbacks.get(i).onWindowDragResizeStart(initialBounds);
+            synchronized (mWindowCallbacks) {
+                for (int i = mWindowCallbacks.size() - 1; i >= 0; i--) {
+                    mWindowCallbacks.get(i).onWindowDragResizeStart(initialBounds);
                 }
             }
             mFullRedrawNeeded = true;
@@ -6777,9 +6779,9 @@ public final class ViewRootImpl implements ViewParent,
     private void endDragResizing() {
         if (mDragResizing) {
             mDragResizing = false;
-            synchronized (sWindowCallbacks) {
-                for (int i = sWindowCallbacks.size() - 1; i >= 0; i--) {
-                    sWindowCallbacks.get(i).onWindowDragResizeEnd();
+            synchronized (mWindowCallbacks) {
+                for (int i = mWindowCallbacks.size() - 1; i >= 0; i--) {
+                    mWindowCallbacks.get(i).onWindowDragResizeEnd();
                 }
             }
             mFullRedrawNeeded = true;
