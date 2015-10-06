@@ -2566,6 +2566,14 @@ public final class ViewRootImpl implements ViewParent,
 
                 dirty.setEmpty();
 
+                // Stage the content drawn size now. It will be transferred to the renderer
+                // shortly before the draw commands get send to the renderer.
+                synchronized (mWindowCallbacks) {
+                    for (int i = mWindowCallbacks.size() - 1; i >= 0; i--) {
+                        mWindowCallbacks.get(i).onContentDraw(mWindowAttributes.surfaceInsets.left,
+                                mWindowAttributes.surfaceInsets.top, mWidth, mHeight);
+                    }
+                }
                 mAttachInfo.mHardwareRenderer.draw(mView, mAttachInfo, this);
             } else {
                 // If we get here with a disabled & requested hardware renderer, something went

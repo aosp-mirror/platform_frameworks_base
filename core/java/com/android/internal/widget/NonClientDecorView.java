@@ -356,6 +356,13 @@ public class NonClientDecorView extends LinearLayout
     }
 
     @Override
+    public void onContentDraw(int xOffset, int yOffset, int xSize, int ySize) {
+        if (mFrameRendererThread != null) {
+            mFrameRendererThread.onContentDraw(xOffset, yOffset, xSize, ySize);
+        }
+    }
+
+    @Override
     public void onWindowDragResizeEnd() {
         releaseThreadedRenderer();
     }
@@ -518,6 +525,38 @@ public class NonClientDecorView extends LinearLayout
         }
 
         /**
+         * The content is about to be drawn and we got the location of where it will be shown.
+         * If a "changeWindowSize" call has already been processed, we will re-issue the call
+         * if the previous call was ignored since the size was unknown.
+         * @param xOffset The x offset where the content is drawn to.
+         * @param yOffset The y offset where the content is drawn to.
+         * @param xSize The width size of the content. This should not be 0.
+         * @param ySize The height of the content.
+         */
+        public void onContentDraw(int xOffset, int yOffset, int xSize, int ySize) {
+            synchronized (this) {
+                final boolean firstCall = mLastContentWidth == 0;
+                // The current content buffer is drawn here.
+                mLastContentWidth = xSize;
+                mLastContentHeight = ySize - mLastCaptionHeight;
+                mLastXOffset = xOffset;
+                mLastYOffset = yOffset;
+
+                mRenderer.setContentDrawBounds(
+                        mLastXOffset,
+                        mLastYOffset + mLastCaptionHeight,
+                        mLastXOffset + mLastContentWidth,
+                        mLastYOffset + mLastCaptionHeight + mLastContentHeight);
+                // If this was the first call and changeWindowSize got already called prior to us,
+                // We should re-issue a changeWindowSize now.
+                if (firstCall && (mLastCaptionHeight != 0 || !mShowDecor)) {
+                    mOldTargetRect.set(0, 0, 0, 0);
+                    pingRenderLocked();
+                }
+            }
+        }
+
+        /**
          * Resizing the frame to fit the new window size.
          * @param newBounds The window bounds which needs to be drawn.
          */
@@ -526,28 +565,23 @@ public class NonClientDecorView extends LinearLayout
 
             // While a configuration change is taking place the view hierarchy might become
             // inaccessible. For that case we remember the previous metrics to avoid flashes.
+            // Note that even when there is no visible caption, the caption child will exist.
             View caption = getChildAt(0);
-            View content = getChildAt(1);
-            if (caption != null && content != null) {
-                int captionHeight = caption.getHeight();
-                int contentWidth = content.getWidth();
-                int contentHeight = content.getHeight();
-                // Get the draw position within our surface (shadow offsets).
-                int[] surfaceOrigin = new int[2];
-                surfaceOrigin[0] = 0;
-                surfaceOrigin[1] = 0;
-                getLocationInSurface(surfaceOrigin);
-                // Only update if a layout has already be performed (which might not be after a
-                // relayout. Otherwise use the previous values for the content.
-                if (captionHeight != 0 && contentWidth != 0 && contentHeight != 0) {
+            if (caption != null) {
+                final int captionHeight = caption.getHeight();
+                // The caption height will probably never dynamically change while we are resizing.
+                // Once set to something other then 0 it should be kept that way.
+                if (captionHeight != 0) {
+                    // Remember the height of the caption.
                     mLastCaptionHeight = captionHeight;
-                    mLastXOffset = surfaceOrigin[0];
-                    mLastYOffset = surfaceOrigin[1];
-                    mLastContentWidth = contentWidth;
-                    mLastContentHeight = contentHeight;
                 }
             }
-
+            // Make sure that the other thread has already prepared the render draw calls for the
+            // content. If any size is 0, we have to wait for it to be drawn first.
+            if ((mLastCaptionHeight == 0 && mShowDecor) ||
+                    mLastContentWidth == 0 || mLastContentHeight == 0) {
+                return;
+            }
             // Since the surface is spanning the entire screen, we have to add the start offset of
             // the bounds to get to the surface location.
             final int left = mLastXOffset + newBounds.left;
@@ -575,13 +609,6 @@ public class NonClientDecorView extends LinearLayout
             // Note: This might not work (calculator for example uses a transparent background).
             canvas.drawColor(0xff808080);
             mBackdropNode.end(canvas);
-
-            // The current content buffer is drawn here.
-            mRenderer.setContentDrawBounds(
-                    mLastXOffset,
-                    mLastYOffset + mLastCaptionHeight,
-                    mLastXOffset + mLastContentWidth,
-                    mLastYOffset + mLastCaptionHeight + mLastContentHeight);
 
             // We need to render both rendered nodes explicitly.
             mRenderer.drawRenderNode(mFrameNode);
