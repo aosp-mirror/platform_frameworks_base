@@ -1755,25 +1755,28 @@ ResourceTable::ResourceTable(Bundle* bundle, const String16& assetsPackage, Reso
     , mNumLocal(0)
     , mBundle(bundle)
 {
-    ssize_t packageId = -1;
-    switch (mPackageType) {
-        case App:
-        case AppFeature:
-            packageId = 0x7f;
-            break;
+    ssize_t packageId = mBundle.getForcedPackageId();
+    if (packageId == -1) {
+        switch (mPackageType) {
+            case App:
+            case AppFeature:
+                packageId = 0x7f;
+                break;
 
-        case System:
-            packageId = 0x01;
-            break;
+            case System:
+                packageId = 0x01;
+                break;
 
-        case SharedLibrary:
-            packageId = 0x00;
-            break;
+            case SharedLibrary:
+                packageId = 0x00;
+                break;
 
-        default:
-            assert(0);
-            break;
+            default:
+                assert(0);
+                break;
+        }
     }
+
     sp<Package> package = new Package(mAssetsPackage, packageId);
     mPackages.add(assetsPackage, package);
     mOrderedPackages.add(package);
