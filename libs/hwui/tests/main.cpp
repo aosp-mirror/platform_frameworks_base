@@ -30,6 +30,8 @@
 
 #include <stdio.h>
 #include <unistd.h>
+#include <getopt.h>
+#include <vector>
 
 using namespace android;
 using namespace android::uirenderer;
@@ -364,34 +366,130 @@ std::map<const char*, testProc, cstr_cmp> gTestMap {
     {"partialinval", TreeContentAnimation::run<PartialInvalTest> },
 };
 
+static int gFrameCount = 150;
+static int gRepeatCount = 1;
+static std::vector<testProc> gRunTests;
+
+static void printHelp() {
+    printf("\
+USAGE: hwuitest [OPTIONS] <TESTNAME>\n\
+\n\
+OPTIONS:\n\
+  -c, --count=NUM      NUM loops a test should run (example, number of frames)\n\
+  -r, --runs=NUM       Repeat the test(s) NUM times\n\
+  -h, --help           Display this help\n\
+  --list               List all tests\n\
+\n");
+}
+
+static void listTests() {
+    printf("Tests: \n");
+    for (auto&& test : gTestMap) {
+        printf("%-20s <TODO DESCRIPTION>\n", test.first);
+    }
+}
+
+static const struct option LONG_OPTIONS[] = {
+    { "frames", required_argument, nullptr, 'f' },
+    { "repeat", required_argument, nullptr, 'r' },
+    { "help", no_argument, nullptr, 'h' },
+    { "list", no_argument, nullptr, 'l' },
+    { 0, 0, 0, 0 }
+};
+
+static const char* SHORT_OPTIONS = "c:r:h";
+
+void parseOptions(int argc, char* argv[]) {
+    int c;
+    // temporary variable
+    int count;
+    bool error = false;
+    opterr = 0;
+
+    while (true) {
+
+        /* getopt_long stores the option index here. */
+        int option_index = 0;
+
+        c = getopt_long(argc, argv, SHORT_OPTIONS, LONG_OPTIONS, &option_index);
+
+        if (c == -1)
+            break;
+
+        switch (c) {
+        case 0:
+            // Option set a flag, don't need to do anything
+            // (although none of the current LONG_OPTIONS do this...)
+            break;
+
+        case 'l':
+            listTests();
+            exit(EXIT_SUCCESS);
+            break;
+
+        case 'c':
+            count = atoi(optarg);
+            if (!count) {
+                fprintf(stderr, "Invalid frames argument '%s'\n", optarg);
+                error = true;
+            } else {
+                gFrameCount = (count > 0 ? count : INT_MAX);
+            }
+            break;
+
+        case 'r':
+            count = atoi(optarg);
+            if (!count) {
+                fprintf(stderr, "Invalid repeat argument '%s'\n", optarg);
+                error = true;
+            } else {
+                gRepeatCount = (count > 0 ? count : INT_MAX);
+            }
+            break;
+
+        case 'h':
+            printHelp();
+            exit(EXIT_SUCCESS);
+            break;
+
+        case '?':
+            fprintf(stderr, "Unrecognized option '%s'\n", argv[optind - 1]);
+            // fall-through
+        default:
+            error = true;
+            break;
+        }
+    }
+
+    if (error) {
+        fprintf(stderr, "Try 'hwuitest --help' for more information.\n");
+        exit(EXIT_FAILURE);
+    }
+
+    /* Print any remaining command line arguments (not options). */
+    if (optind < argc) {
+        do {
+            const char* test = argv[optind++];
+            auto pos = gTestMap.find(test);
+            if (pos == gTestMap.end()) {
+                fprintf(stderr, "Unknown test '%s'\n", test);
+                exit(EXIT_FAILURE);
+            } else {
+                gRunTests.push_back(pos->second);
+            }
+        } while (optind < argc);
+    } else {
+        gRunTests.push_back(gTestMap["shadowgrid"]);
+    }
+}
+
 int main(int argc, char* argv[]) {
-    const char* testName = argc > 1 ? argv[1] : "shadowgrid";
-    testProc proc = gTestMap[testName];
-    if(!proc) {
-        printf("Error: couldn't find test %s\n", testName);
-        return 1;
-    }
-    int loopCount = 1;
-    if (argc > 2) {
-        loopCount = atoi(argv[2]);
-        if (!loopCount) {
-            printf("Invalid loop count!\n");
-            return 1;
+    parseOptions(argc, argv);
+
+    for (int i = 0; i < gRepeatCount; i++) {
+        for (auto&& test : gRunTests) {
+            test(gFrameCount);
         }
-    }
-    int frameCount = 150;
-    if (argc > 3) {
-        frameCount = atoi(argv[3]);
-        if (frameCount < 1) {
-            printf("Invalid frame count!\n");
-            return 1;
-        }
-    }
-    if (loopCount < 0) {
-        loopCount = INT_MAX;
-    }
-    for (int i = 0; i < loopCount; i++) {
-        proc(frameCount);
     }
     printf("Success!\n");
     return 0;
