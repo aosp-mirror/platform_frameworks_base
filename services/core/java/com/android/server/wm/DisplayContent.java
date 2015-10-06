@@ -266,9 +266,16 @@ class DisplayContent {
             final ArrayList<Task> tasks = mStacks.get(stackNdx).getTasks();
             for (int taskNdx = tasks.size() - 1; taskNdx >= 0; --taskNdx) {
                 final Task task = tasks.get(taskNdx);
-                task.getBounds(mTmpRect);
-                if (mTmpRect.contains(x, y)) {
-                    return task.mTaskId;
+                // We need to use the visible frame on the window for any touch-related tests.
+                // Can't use the task's bounds because the original task bounds might be adjusted
+                // to fit the content frame. For example, the presence of the IME adjusting the
+                // windows frames when the app window is the IME target.
+                final WindowState win = task.getTopAppMainWindow();
+                if (win != null) {
+                    win.getVisibleBounds(mTmpRect, !BOUNDS_FOR_TOUCH);
+                    if (mTmpRect.contains(x, y)) {
+                        return task.mTaskId;
+                    }
                 }
             }
         }
@@ -298,7 +305,7 @@ class DisplayContent {
                 // might be adjusted to fit the content frame. (One example is when the
                 // task is put to top-left quadrant, the actual visible frame would not
                 // start at (0,0) after it's adjusted for the status bar.)
-                WindowState win = task.getTopAppMainWindow();
+                final WindowState win = task.getTopAppMainWindow();
                 if (win != null) {
                     win.getVisibleBounds(mTmpRect, !BOUNDS_FOR_TOUCH);
                     mTmpRect.inset(-delta, -delta);
