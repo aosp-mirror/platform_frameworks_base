@@ -20,6 +20,10 @@
             android:label="@string/keyboard_layout_english_us_dvorak_label"
             android:keyboardLayout="@raw/keyboard_layout_english_us_dvorak" />
 
+    <keyboard-layout android:name="keyboard_layout_english_us_workman"
+            android:label="@string/keyboard_layout_english_us_workman_label"
+            android:keyboardLayout="@raw/keyboard_layout_english_us_workman" />
+
     <keyboard-layout android:name="keyboard_layout_german"
             android:label="@string/keyboard_layout_german_label"
             android:keyboardLayout="@raw/keyboard_layout_german" />

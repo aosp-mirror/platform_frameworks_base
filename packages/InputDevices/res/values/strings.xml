@@ -21,6 +21,9 @@
     <!-- US English (Dvorak style) keyboard layout label. [CHAR LIMIT=35] -->
     <string name="keyboard_layout_english_us_dvorak_label">English (US), Dvorak style</string>
 
+    <!-- US English (Workman style) keyboard layout label. [CHAR LIMIT=35] -->
+    <string name="keyboard_layout_english_us_workman_label">English (US), Workman style</string>
+
     <!-- German keyboard layout label. [CHAR LIMIT=35] -->
     <string name="keyboard_layout_german_label">German</string>
 
