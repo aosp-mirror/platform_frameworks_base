@@ -110,6 +110,7 @@ public class ZenModeConfig implements Parcelable {
     private static final String RULE_ATT_COMPONENT = "component";
     private static final String RULE_ATT_ZEN = "zen";
     private static final String RULE_ATT_CONDITION_ID = "conditionId";
+    private static final String RULE_ATT_CREATION_TIME = "creationTime";
 
     public boolean allowCalls = DEFAULT_ALLOW_CALLS;
     public boolean allowRepeatCallers = DEFAULT_ALLOW_REPEAT_CALLERS;
@@ -415,6 +416,7 @@ public class ZenModeConfig implements Parcelable {
                     final String id = parser.getAttributeValue(null, RULE_ATT_ID);
                     final ZenRule automaticRule = readRuleXml(parser);
                     if (id != null && automaticRule != null) {
+                        automaticRule.id = id;
                         rt.automaticRules.put(id, automaticRule);
                     }
                 }
@@ -468,6 +470,7 @@ public class ZenModeConfig implements Parcelable {
         }
         rt.conditionId = safeUri(parser, RULE_ATT_CONDITION_ID);
         rt.component = safeComponentName(parser, RULE_ATT_COMPONENT);
+        rt.creationTime = safeLong(parser, RULE_ATT_CREATION_TIME, 0);
         rt.condition = readConditionXml(parser);
         return rt;
     }
@@ -485,6 +488,7 @@ public class ZenModeConfig implements Parcelable {
         if (rule.conditionId != null) {
             out.attribute(null, RULE_ATT_CONDITION_ID, rule.conditionId.toString());
         }
+        out.attribute(null, RULE_ATT_CREATION_TIME, Long.toString(rule.creationTime));
         if (rule.condition != null) {
             writeConditionXml(rule.condition, out);
         }
@@ -550,6 +554,11 @@ public class ZenModeConfig implements Parcelable {
         final String val = parser.getAttributeValue(null, att);
         if (TextUtils.isEmpty(val)) return null;
         return Uri.parse(val);
+    }
+
+    private static long safeLong(XmlPullParser parser, String att, long defValue) {
+        final String val = parser.getAttributeValue(null, att);
+        return tryParseLong(val, defValue);
     }
 
     public ArraySet<String> getAutomaticRuleNames() {
@@ -943,6 +952,8 @@ public class ZenModeConfig implements Parcelable {
         public Uri conditionId;          // required for automatic
         public Condition condition;      // optional
         public ComponentName component;  // optional
+        public String id;                // required for automatic (unique)
+        public long creationTime;        // required for automatic
 
         public ZenRule() { }
 
@@ -956,6 +967,10 @@ public class ZenModeConfig implements Parcelable {
             conditionId = source.readParcelable(null);
             condition = source.readParcelable(null);
             component = source.readParcelable(null);
+            if (source.readInt() == 1) {
+                id = source.readString();
+            }
+            creationTime = source.readLong();
         }
 
         @Override
@@ -977,6 +992,13 @@ public class ZenModeConfig implements Parcelable {
             dest.writeParcelable(conditionId, 0);
             dest.writeParcelable(condition, 0);
             dest.writeParcelable(component, 0);
+            if (id != null) {
+                dest.writeInt(1);
+                dest.writeString(id);
+            } else {
+                dest.writeInt(0);
+            }
+            dest.writeLong(creationTime);
         }
 
         @Override
@@ -989,6 +1011,8 @@ public class ZenModeConfig implements Parcelable {
                     .append(",conditionId=").append(conditionId)
                     .append(",condition=").append(condition)
                     .append(",component=").append(component)
+                    .append(",id=").append(id)
+                    .append(",creationTime=").append(creationTime)
                     .append(']').toString();
         }
 
@@ -1029,6 +1053,12 @@ public class ZenModeConfig implements Parcelable {
             if (!Objects.equals(component, to.component)) {
                 d.addLine(item, "component", component, to.component);
             }
+            if (!Objects.equals(id, to.id)) {
+                d.addLine(item, "id", id, to.id);
+            }
+            if (creationTime == to.creationTime) {
+                d.addLine(item, "creationTime", creationTime, to.creationTime);
+            }
         }
 
         @Override
@@ -1042,13 +1072,15 @@ public class ZenModeConfig implements Parcelable {
                     && other.zenMode == zenMode
                     && Objects.equals(other.conditionId, conditionId)
                     && Objects.equals(other.condition, condition)
-                    && Objects.equals(other.component, component);
+                    && Objects.equals(other.component, component)
+                    && Objects.equals(other.id, id)
+                    && other.creationTime == creationTime;
         }
 
         @Override
         public int hashCode() {
             return Objects.hash(enabled, snoozing, name, zenMode, conditionId, condition,
-                    component);
+                    component, id, creationTime);
         }
 
         public boolean isAutomaticActive() {
