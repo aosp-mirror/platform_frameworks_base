@@ -646,7 +646,8 @@ application during runtime.</p>
         <code>xxhdpi</code><br/>
         <code>xxxhdpi</code><br/>
         <code>nodpi</code><br/>
-        <code>tvdpi</code>
+        <code>tvdpi</code><br/>
+        <code>anydpi</code>
       </td>
       <td>
         <ul class="nolist">
@@ -667,7 +668,11 @@ to match the device density.</li>
           <li>{@code tvdpi}: Screens somewhere between mdpi and hdpi; approximately 213dpi. This is
 not considered a "primary" density group. It is mostly intended for televisions and most
 apps shouldn't need it&mdash;providing mdpi and hdpi resources is sufficient for most apps and
-the system will scale them as appropriate. This qualifier was introduced with API level 13.</li>
+the system will scale them as appropriate. <em>Added in API Level 13</em></li>
+          <li>{@code anydpi}: This qualifier matches all screen densities and takes precedence over
+other qualifiers. This is useful for
+<a href="{@docRoot}training/material/drawables.html#VectorDrawables">vector drawables</a>.
+<em>Added in API Level 21</em></li>
         </ul>
         <p>There is a 3:4:6:8:12:16 scaling ratio between the six primary densities (ignoring the
 tvdpi density). So, a 9x9 bitmap in ldpi is 12x12 in mdpi, 18x18 in hdpi, 24x24 in xhdpi and so on.
