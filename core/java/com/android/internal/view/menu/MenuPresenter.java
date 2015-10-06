@@ -97,8 +97,10 @@ public interface MenuPresenter {
      * closing. Presenter implementations should close the representation
      * of the menu indicated as necessary and notify a registered callback.
      *
-     * @param menu Menu or submenu that is closing.
-     * @param allMenusAreClosing True if all associated menus are closing.
+     * @param menu the menu or submenu that is closing
+     * @param allMenusAreClosing {@code true} if all displayed menus and
+     *                           submenus are closing, {@code false} if only
+     *                           the specified menu is closing
      */
     public void onCloseMenu(MenuBuilder menu, boolean allMenusAreClosing);
 
