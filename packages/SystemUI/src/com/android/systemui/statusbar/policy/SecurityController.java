@@ -22,6 +22,7 @@ public interface SecurityController {
     String getDeviceOwnerName();
     String getProfileOwnerName();
     boolean isVpnEnabled();
+    boolean isVpnRestricted();
     String getPrimaryVpnName();
     String getProfileVpnName();
     void onUserSwitched(int newUserId);

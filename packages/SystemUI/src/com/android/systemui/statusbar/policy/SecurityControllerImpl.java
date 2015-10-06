@@ -162,6 +162,13 @@ public class SecurityControllerImpl implements SecurityController {
     }
 
     @Override
+    public boolean isVpnRestricted() {
+        UserHandle currentUser = new UserHandle(mCurrentUserId);
+        return mUserManager.getUserInfo(mCurrentUserId).isRestricted()
+                || mUserManager.hasUserRestriction(UserManager.DISALLOW_CONFIG_VPN, currentUser);
+    }
+
+    @Override
     public void removeCallback(SecurityControllerCallback callback) {
         synchronized (mCallbacks) {
             if (callback == null) return;

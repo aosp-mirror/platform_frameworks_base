@@ -350,6 +350,11 @@ public class QsTuner extends Fragment implements Callback {
             }
 
             @Override
+            public boolean isVpnRestricted() {
+                return false;
+            }
+
+            @Override
             public String getPrimaryVpnName() {
                 return null;
             }

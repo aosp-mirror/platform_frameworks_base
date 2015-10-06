@@ -160,6 +160,11 @@ public class CustomQSTileHost extends QSTileHost {
         }
 
         @Override
+        public boolean isVpnRestricted() {
+            return false;
+        }
+
+        @Override
         public String getPrimaryVpnName() {
             return null;
         }
