@@ -159,23 +159,6 @@ public class DropDownListView extends ListView {
         return super.onHoverEvent(ev);
     }
 
-    @Override
-    public boolean onTouchEvent(MotionEvent event) {
-        final int x = (int) event.getX();
-        final int y = (int) event.getY();
-        final int position = pointToPosition(x, y);
-        if (position == INVALID_POSITION) {
-            return super.onTouchEvent(event);
-        }
-
-        if (position != mSelectedPosition) {
-            setSelectedPositionInt(position);
-            setNextSelectedPositionInt(position);
-        }
-
-        return super.onTouchEvent(event);
-    }
-
     /**
      * Handles forwarded events.
      *
