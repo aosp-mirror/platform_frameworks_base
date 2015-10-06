@@ -1804,10 +1804,14 @@ public final class ActivityStackSupervisor implements DisplayListener {
                 return container.mStack;
             }
 
-            // The fullscreen stack is the only stack that can contain any task regardless of if
-            // the task is resizeable or not. So, we let the task go in the fullscreen task if it
-            // is the focus stack.
-            if (mFocusedStack.mStackId == FULLSCREEN_WORKSPACE_STACK_ID
+            // The fullscreen stack can contain any task regardless of if the task is resizeable
+            // or not. So, we let the task go in the fullscreen task if it is the focus stack.
+            // If the freeform stack has focus, and the activity to be launched is resizeable,
+            // we can also put it in the focused stack.
+            final boolean canUseFocusedStack =
+                    mFocusedStack.mStackId == FULLSCREEN_WORKSPACE_STACK_ID
+                    || mFocusedStack.mStackId == FREEFORM_WORKSPACE_STACK_ID && r.info.resizeable;
+            if (canUseFocusedStack
                     && (!newTask || mFocusedStack.mActivityContainer.isEligibleForNewTasks())) {
                 if (DEBUG_FOCUS || DEBUG_STACK) Slog.d(TAG_FOCUS,
                         "computeStackFocus: Have a focused stack=" + mFocusedStack);
