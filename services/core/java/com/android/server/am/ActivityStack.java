@@ -4545,7 +4545,8 @@ final class ActivityStack {
 
         if (mTaskHistory.isEmpty()) {
             if (DEBUG_STACK) Slog.i(TAG_STACK, "removeTask: removing stack=" + this);
-            if (isOnHomeDisplay()) {
+            // We only need to adjust focused stack if this stack is in focus.
+            if (isOnHomeDisplay() && mStackSupervisor.isFrontStack(this)) {
                 String myReason = reason + " leftTaskHistoryEmpty";
                 if (mFullscreen || !adjustFocusToNextVisibleStackLocked(null, myReason)) {
                     mStackSupervisor.moveHomeStackToFront(myReason);
