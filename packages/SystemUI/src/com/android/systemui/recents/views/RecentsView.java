@@ -317,10 +317,10 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
         }
 
         Rect taskStackBounds = new Rect();
-        mConfig.getAvailableTaskStackBounds(new Rect(0, 0, width, height), mSystemInsets.top,
+        mConfig.getTaskStackBounds(new Rect(0, 0, width, height), mSystemInsets.top,
                 mSystemInsets.right, searchBarSpaceBounds, taskStackBounds);
         if (mTaskStackView != null && mTaskStackView.getVisibility() != GONE) {
-            mTaskStackView.setTaskStackBounds(taskStackBounds);
+            mTaskStackView.setTaskStackBounds(taskStackBounds, mSystemInsets);
             mTaskStackView.measure(widthMeasureSpec, heightMeasureSpec);
         }
 

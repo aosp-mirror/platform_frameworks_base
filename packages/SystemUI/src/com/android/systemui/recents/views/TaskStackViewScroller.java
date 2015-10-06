@@ -175,11 +175,11 @@ public class TaskStackViewScroller {
     /**** OverScroller ****/
 
     int progressToScrollRange(float p) {
-        return (int) (p * mLayoutAlgorithm.mStackVisibleRect.height());
+        return (int) (p * mLayoutAlgorithm.mStackRect.height());
     }
 
     float scrollRangeToProgress(int s) {
-        return (float) s / mLayoutAlgorithm.mStackVisibleRect.height();
+        return (float) s / mLayoutAlgorithm.mStackRect.height();
     }
 
     /** Called from the view draw, computes the next scroll. */

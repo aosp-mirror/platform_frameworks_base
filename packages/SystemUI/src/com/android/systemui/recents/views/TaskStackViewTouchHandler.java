@@ -136,6 +136,7 @@ class TaskStackViewTouchHandler implements SwipeHelper.Callback {
             return true;
         }
 
+        TaskStackViewLayoutAlgorithm layoutAlgorithm = mSv.mLayoutAlgorithm;
         boolean wasScrolling = mScroller.isScrolling() ||
                 (mScroller.mScrollAnimator != null && mScroller.mScrollAnimator.isRunning());
         int action = ev.getAction();
@@ -144,7 +145,8 @@ class TaskStackViewTouchHandler implements SwipeHelper.Callback {
                 // Save the touch down info
                 mInitialMotionX = mLastMotionX = (int) ev.getX();
                 mInitialMotionY = mLastMotionY = (int) ev.getY();
-                mInitialP = mLastP = mSv.mLayoutAlgorithm.screenYToCurveProgress(mLastMotionY);
+                mInitialP = mLastP = layoutAlgorithm.sCurve.xToP(mLastMotionY,
+                        layoutAlgorithm.mStackRect);
                 mActivePointerId = ev.getPointerId(0);
                 mActiveTaskView = findViewAtPoint(mLastMotionX, mLastMotionY);
                 // Stop the current scroll if it is still flinging
@@ -177,7 +179,7 @@ class TaskStackViewTouchHandler implements SwipeHelper.Callback {
 
                 mLastMotionX = x;
                 mLastMotionY = y;
-                mLastP = mSv.mLayoutAlgorithm.screenYToCurveProgress(mLastMotionY);
+                mLastP = layoutAlgorithm.sCurve.xToP(mLastMotionY, layoutAlgorithm.mStackRect);
                 break;
             }
             case MotionEvent.ACTION_CANCEL:
@@ -213,13 +215,15 @@ class TaskStackViewTouchHandler implements SwipeHelper.Callback {
         // Update the velocity tracker
         initVelocityTrackerIfNotExists();
 
+        TaskStackViewLayoutAlgorithm layoutAlgorithm = mSv.mLayoutAlgorithm;
         int action = ev.getAction();
         switch (action & MotionEvent.ACTION_MASK) {
             case MotionEvent.ACTION_DOWN: {
                 // Save the touch down info
                 mInitialMotionX = mLastMotionX = (int) ev.getX();
                 mInitialMotionY = mLastMotionY = (int) ev.getY();
-                mInitialP = mLastP = mSv.mLayoutAlgorithm.screenYToCurveProgress(mLastMotionY);
+                mInitialP = mLastP = layoutAlgorithm.sCurve.xToP(mLastMotionY,
+                        layoutAlgorithm.mStackRect);
                 mActivePointerId = ev.getPointerId(0);
                 mActiveTaskView = findViewAtPoint(mLastMotionX, mLastMotionY);
                 // Stop the current scroll if it is still flinging
@@ -240,7 +244,8 @@ class TaskStackViewTouchHandler implements SwipeHelper.Callback {
                 mActivePointerId = ev.getPointerId(index);
                 mLastMotionX = (int) ev.getX(index);
                 mLastMotionY = (int) ev.getY(index);
-                mLastP = mSv.mLayoutAlgorithm.screenYToCurveProgress(mLastMotionY);
+                mLastP = layoutAlgorithm.sCurve.xToP(mLastMotionY,
+                        layoutAlgorithm.mStackRect);
                 break;
             }
             case MotionEvent.ACTION_MOVE: {
@@ -252,7 +257,7 @@ class TaskStackViewTouchHandler implements SwipeHelper.Callback {
                 int x = (int) ev.getX(activePointerIndex);
                 int y = (int) ev.getY(activePointerIndex);
                 int yTotal = Math.abs(y - mInitialMotionY);
-                float curP = mSv.mLayoutAlgorithm.screenYToCurveProgress(y);
+                float curP = layoutAlgorithm.sCurve.xToP(y, layoutAlgorithm.mStackRect);
                 float deltaP = mLastP - curP;
                 if (!mIsScrolling) {
                     if (yTotal > mScrollTouchSlop) {
@@ -279,7 +284,7 @@ class TaskStackViewTouchHandler implements SwipeHelper.Callback {
                 }
                 mLastMotionX = x;
                 mLastMotionY = y;
-                mLastP = mSv.mLayoutAlgorithm.screenYToCurveProgress(mLastMotionY);
+                mLastP = layoutAlgorithm.sCurve.xToP(mLastMotionY, layoutAlgorithm.mStackRect);
                 mTotalPMotion += Math.abs(deltaP);
                 break;
             }
@@ -324,7 +329,7 @@ class TaskStackViewTouchHandler implements SwipeHelper.Callback {
                     mActivePointerId = ev.getPointerId(newPointerIndex);
                     mLastMotionX = (int) ev.getX(newPointerIndex);
                     mLastMotionY = (int) ev.getY(newPointerIndex);
-                    mLastP = mSv.mLayoutAlgorithm.screenYToCurveProgress(mLastMotionY);
+                    mLastP = layoutAlgorithm.sCurve.xToP(mLastMotionY, layoutAlgorithm.mStackRect);
                     mVelocityTracker.clear();
                 }
                 break;
@@ -420,8 +425,6 @@ class TaskStackViewTouchHandler implements SwipeHelper.Callback {
         if (parent != null) {
             parent.requestDisallowInterceptTouchEvent(true);
         }
-        // Fade out the dismiss button
-        mSv.hideDismissAllButton(null);
     }
 
     @Override
@@ -450,8 +453,6 @@ class TaskStackViewTouchHandler implements SwipeHelper.Callback {
         tv.setClipViewInStack(true);
         // Re-enable touch events from this task view
         tv.setTouchEnabled(true);
-        // Restore the dismiss button
-        mSv.showDismissAllButton();
     }
 
     @Override
