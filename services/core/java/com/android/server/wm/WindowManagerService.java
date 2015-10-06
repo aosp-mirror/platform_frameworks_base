@@ -17,6 +17,10 @@
 package com.android.server.wm;
 
 import static android.app.ActivityManager.DOCKED_STACK_CREATE_MODE_TOP_OR_LEFT;
+import static android.app.ActivityManager.DOCKED_STACK_ID;
+import static android.app.ActivityManager.FREEFORM_WORKSPACE_STACK_ID;
+import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
+import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_BEHIND;
 import static android.view.WindowManager.LayoutParams.FIRST_APPLICATION_WINDOW;
 import static android.view.WindowManager.LayoutParams.FIRST_SUB_WINDOW;
 import static android.view.WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM;
@@ -3186,9 +3190,9 @@ public class WindowManagerService extends IWindowManager.Stub
 
     public int getOrientationLocked() {
         if (mDisplayFrozen) {
-            if (mLastWindowForcedOrientation != ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED) {
-                if (DEBUG_ORIENTATION) Slog.v(TAG, "Display is frozen, return "
-                        + mLastWindowForcedOrientation);
+            if (mLastWindowForcedOrientation != SCREEN_ORIENTATION_UNSPECIFIED) {
+                if (DEBUG_ORIENTATION) Slog.v(TAG,
+                        "Display is frozen, return " + mLastWindowForcedOrientation);
                 // If the display is frozen, some activities may be in the middle
                 // of restarting, and thus have removed their old window.  If the
                 // window has the flag to hide the lock screen, then the lock screen
@@ -3210,8 +3214,7 @@ public class WindowManagerService extends IWindowManager.Stub
                     continue;
                 }
                 int req = win.mAttrs.screenOrientation;
-                if((req == ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED) ||
-                        (req == ActivityInfo.SCREEN_ORIENTATION_BEHIND)){
+                if(req == SCREEN_ORIENTATION_UNSPECIFIED || req == SCREEN_ORIENTATION_BEHIND) {
                     continue;
                 }
 
@@ -3221,7 +3224,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 }
                 return (mLastWindowForcedOrientation = req);
             }
-            mLastWindowForcedOrientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
+            mLastWindowForcedOrientation = SCREEN_ORIENTATION_UNSPECIFIED;
 
             if (mPolicy.isKeyguardLocked()) {
                 // The screen is locked and no top system window is requesting an orientation.
@@ -3232,7 +3235,7 @@ public class WindowManagerService extends IWindowManager.Stub
                         null : winShowWhenLocked.mAppToken;
                 if (appShowWhenLocked != null) {
                     int req = appShowWhenLocked.requestedOrientation;
-                    if (req == ActivityInfo.SCREEN_ORIENTATION_BEHIND) {
+                    if (req == SCREEN_ORIENTATION_BEHIND) {
                         req = mLastKeyguardForcedOrientation;
                     }
                     if (DEBUG_ORIENTATION) Slog.v(TAG, "Done at " + appShowWhenLocked
@@ -3245,8 +3248,21 @@ public class WindowManagerService extends IWindowManager.Stub
             }
         }
 
+        final TaskStack dockedStack = mStackIdToStack.get(DOCKED_STACK_ID);
+        final TaskStack freeformStack = mStackIdToStack.get(FREEFORM_WORKSPACE_STACK_ID);
+        if ((dockedStack != null && dockedStack.isVisibleLocked())
+                || (freeformStack != null && freeformStack.isVisibleLocked())) {
+            // We don't let app affect the system orientation when in freeform or docked mode since
+            // they don't occupy the entire display and their request can conflict with other apps.
+            return SCREEN_ORIENTATION_UNSPECIFIED;
+        }
+
         // Top system windows are not requesting an orientation. Start searching from apps.
-        int lastOrientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
+        return getAppSpecifiedOrientation();
+    }
+
+    private int getAppSpecifiedOrientation() {
+        int lastOrientation = SCREEN_ORIENTATION_UNSPECIFIED;
         boolean findingBehind = false;
         boolean lastFullscreen = false;
         // TODO: Multi window.
@@ -3263,19 +3279,16 @@ public class WindowManagerService extends IWindowManager.Stub
                 // if we're about to tear down this window and not seek for
                 // the behind activity, don't use it for orientation
                 if (!findingBehind && !atoken.hidden && atoken.hiddenRequested) {
-                    if (DEBUG_ORIENTATION) Slog.v(TAG, "Skipping " + atoken
-                            + " -- going to hide");
+                    if (DEBUG_ORIENTATION) Slog.v(TAG,
+                            "Skipping " + atoken + " -- going to hide");
                     continue;
                 }
 
                 if (tokenNdx == firstToken) {
-                    // If we have hit a new Task, and the bottom
-                    // of the previous group didn't explicitly say to use
-                    // the orientation behind it, and the last app was
-                    // full screen, then we'll stick with the
-                    // user's orientation.
-                    if (lastOrientation != ActivityInfo.SCREEN_ORIENTATION_BEHIND
-                            && lastFullscreen) {
+                    // If we have hit a new Task, and the bottom of the previous group didn't
+                    // explicitly say to use the orientation behind it, and the last app was
+                    // full screen, then we'll stick with the user's orientation.
+                    if (lastOrientation != SCREEN_ORIENTATION_BEHIND && lastFullscreen) {
                         if (DEBUG_ORIENTATION) Slog.v(TAG, "Done at " + atoken
                                 + " -- end of group, return " + lastOrientation);
                         return lastOrientation;
@@ -3284,8 +3297,8 @@ public class WindowManagerService extends IWindowManager.Stub
 
                 // We ignore any hidden applications on the top.
                 if (atoken.hiddenRequested) {
-                    if (DEBUG_ORIENTATION) Slog.v(TAG, "Skipping " + atoken
-                            + " -- hidden on top");
+                    if (DEBUG_ORIENTATION) Slog.v(TAG,
+                            "Skipping " + atoken + " -- hidden on top");
                     continue;
                 }
 
@@ -3299,23 +3312,22 @@ public class WindowManagerService extends IWindowManager.Stub
                 // to use the orientation behind it, then just take whatever
                 // orientation it has and ignores whatever is under it.
                 lastFullscreen = atoken.appFullscreen;
-                if (lastFullscreen && or != ActivityInfo.SCREEN_ORIENTATION_BEHIND) {
-                    if (DEBUG_ORIENTATION) Slog.v(TAG, "Done at " + atoken
-                            + " -- full screen, return " + or);
+                if (lastFullscreen && or != SCREEN_ORIENTATION_BEHIND) {
+                    if (DEBUG_ORIENTATION) Slog.v(TAG,
+                            "Done at " + atoken + " -- full screen, return " + or);
                     return or;
                 }
                 // If this application has requested an explicit orientation, then use it.
-                if (or != ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
-                        && or != ActivityInfo.SCREEN_ORIENTATION_BEHIND) {
-                    if (DEBUG_ORIENTATION) Slog.v(TAG, "Done at " + atoken
-                            + " -- explicitly set, return " + or);
+                if (or != SCREEN_ORIENTATION_UNSPECIFIED && or != SCREEN_ORIENTATION_BEHIND) {
+                    if (DEBUG_ORIENTATION) Slog.v(TAG,
+                            "Done at " + atoken + " -- explicitly set, return " + or);
                     return or;
                 }
-                findingBehind |= (or == ActivityInfo.SCREEN_ORIENTATION_BEHIND);
+                findingBehind |= (or == SCREEN_ORIENTATION_BEHIND);
             }
         }
-        if (DEBUG_ORIENTATION) Slog.v(TAG, "No app is requesting an orientation, return "
-                + mForcedAppOrientation);
+        if (DEBUG_ORIENTATION) Slog.v(TAG,
+                "No app is requesting an orientation, return " + mForcedAppOrientation);
         // The next app has not been requested to be visible, so we keep the current orientation
         // to prevent freezing/unfreezing the display too early.
         return mForcedAppOrientation;
@@ -3418,7 +3430,6 @@ public class WindowManagerService extends IWindowManager.Stub
         }
     }
 
-    @Override
     public void setNewConfiguration(Configuration config) {
         if (!checkCallingPermission(android.Manifest.permission.MANAGE_APP_TOKENS,
                 "setNewConfiguration()")) {
