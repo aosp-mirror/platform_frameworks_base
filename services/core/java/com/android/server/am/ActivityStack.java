@@ -403,9 +403,9 @@ final class ActivityStack {
         return mStackSupervisor.okToShowLocked(r);
     }
 
-    final ActivityRecord topRunningActivityLocked(ActivityRecord notTop) {
+    final ActivityRecord topRunningActivityLocked() {
         for (int taskNdx = mTaskHistory.size() - 1; taskNdx >= 0; --taskNdx) {
-            ActivityRecord r = mTaskHistory.get(taskNdx).topRunningActivityLocked(notTop);
+            ActivityRecord r = mTaskHistory.get(taskNdx).topRunningActivityLocked();
             if (r != null) {
                 return r;
             }
@@ -689,7 +689,7 @@ final class ActivityStack {
             // NOTE: If {@link TaskRecord#topRunningActivityLocked} return is not null then it is
             // okay to show the activity when locked.
             if (mStackSupervisor.isCurrentProfileLocked(task.userId)
-                    || task.topRunningActivityLocked(null) != null) {
+                    || task.topRunningActivityLocked() != null) {
                 if (DEBUG_TASKS) Slog.d(TAG_TASKS, "switchUserLocked: stack=" + getStackId() +
                         " moving " + task + " to top");
                 mTaskHistory.remove(i);
@@ -1105,7 +1105,7 @@ final class ActivityStack {
                 mStackSupervisor.resumeTopActivitiesLocked(topStack, prev, null);
             } else {
                 mStackSupervisor.checkReadyForSleepLocked();
-                ActivityRecord top = topStack.topRunningActivityLocked(null);
+                ActivityRecord top = topStack.topRunningActivityLocked();
                 if (top == null || (prev != null && top != prev)) {
                     // If there are no more activities available to run,
                     // do resume anyway to start something.  Also if the top
@@ -1326,7 +1326,7 @@ final class ActivityStack {
             if (focusedStackId != HOME_STACK_ID) {
                 return true;
             }
-            ActivityRecord topHomeActivity = focusedStack.topRunningActivityLocked(null);
+            ActivityRecord topHomeActivity = focusedStack.topRunningActivityLocked();
             return topHomeActivity == null || !topHomeActivity.isHomeActivity();
         }
 
@@ -1387,7 +1387,7 @@ final class ActivityStack {
      */
     final void ensureActivitiesVisibleLocked(ActivityRecord starting, int configChanges,
             boolean preserveWindows) {
-        ActivityRecord top = topRunningActivityLocked(null);
+        ActivityRecord top = topRunningActivityLocked();
         if (top == null) {
             return;
         }
@@ -1643,7 +1643,7 @@ final class ActivityStack {
      * starting window displayed then remove that starting window. It is possible that the activity
      * in this state will never resumed in which case that starting window will be orphaned. */
     void cancelInitializingActivities() {
-        final ActivityRecord topActivity = topRunningActivityLocked(null);
+        final ActivityRecord topActivity = topRunningActivityLocked();
         boolean aboveTop = true;
         for (int taskNdx = mTaskHistory.size() - 1; taskNdx >= 0; --taskNdx) {
             final ArrayList<ActivityRecord> activities = mTaskHistory.get(taskNdx).mActivities;
@@ -1719,7 +1719,7 @@ final class ActivityStack {
         cancelInitializingActivities();
 
         // Find the first activity that is not finishing.
-        final ActivityRecord next = topRunningActivityLocked(null);
+        final ActivityRecord next = topRunningActivityLocked();
 
         // Remember how we'll process this pause/resume situation, and ensure
         // that the state is reset however we wind up proceeding.
@@ -2037,7 +2037,7 @@ final class ActivityStack {
                 // We should be all done, but let's just make sure our activity
                 // is still at the top and schedule another run if something
                 // weird happened.
-                ActivityRecord nextNext = topRunningActivityLocked(null);
+                ActivityRecord nextNext = topRunningActivityLocked();
                 if (DEBUG_SWITCH || DEBUG_STATES) Slog.i(TAG_STATES,
                         "Activity config changed during resume: " + next
                         + ", new next: " + nextNext);
@@ -2170,12 +2170,12 @@ final class ActivityStack {
         // Calculate maximum possible position for this task.
         int maxPosition = mTaskHistory.size();
         if (!mStackSupervisor.isCurrentProfileLocked(task.userId)
-                && task.topRunningActivityLocked(null) == null) {
+                && task.topRunningActivityLocked() == null) {
             // Put non-current user tasks below current user tasks.
             while (maxPosition > 0) {
                 final TaskRecord tmpTask = mTaskHistory.get(maxPosition - 1);
                 if (!mStackSupervisor.isCurrentProfileLocked(tmpTask.userId)
-                        || tmpTask.topRunningActivityLocked(null) == null) {
+                        || tmpTask.topRunningActivityLocked() == null) {
                     break;
                 }
                 maxPosition--;
@@ -2217,13 +2217,13 @@ final class ActivityStack {
         int taskNdx = mTaskHistory.size();
         final boolean notShownWhenLocked =
                 (newActivity != null && (newActivity.info.flags & FLAG_SHOW_FOR_ALL_USERS) == 0)
-                || (newActivity == null && task.topRunningActivityLocked(null) == null);
+                || (newActivity == null && task.topRunningActivityLocked() == null);
         if (!mStackSupervisor.isCurrentProfileLocked(task.userId) && notShownWhenLocked) {
             // Put non-current user tasks below current user tasks.
             while (--taskNdx >= 0) {
                 final TaskRecord tmpTask = mTaskHistory.get(taskNdx);
                 if (!mStackSupervisor.isCurrentProfileLocked(tmpTask.userId)
-                        || tmpTask.topRunningActivityLocked(null) == null) {
+                        || tmpTask.topRunningActivityLocked() == null) {
                     break;
                 }
             }
@@ -2769,7 +2769,7 @@ final class ActivityStack {
 
     private void adjustFocusedActivityLocked(ActivityRecord r, String reason) {
         if (mStackSupervisor.isFrontStack(this) && mService.mFocusedActivity == r) {
-            ActivityRecord next = topRunningActivityLocked(null);
+            ActivityRecord next = topRunningActivityLocked();
             final String myReason = reason + " adjustFocus";
             if (next != r) {
                 if (next != null && (mStackId == FREEFORM_WORKSPACE_STACK_ID
@@ -2812,7 +2812,7 @@ final class ActivityStack {
         if (stack == null) {
             return false;
         }
-        final ActivityRecord top = stack.topRunningActivityLocked(null);
+        final ActivityRecord top = stack.topRunningActivityLocked();
         if (top == null) {
             return false;
         }
@@ -2913,7 +2913,7 @@ final class ActivityStack {
     }
 
     final void finishTopRunningActivityLocked(ProcessRecord app, String reason) {
-        ActivityRecord r = topRunningActivityLocked(null);
+        ActivityRecord r = topRunningActivityLocked();
         if (r != null && r.app == app) {
             // If the top running activity is from this crashing
             // process, then terminate it to avoid getting in a loop.
@@ -3618,7 +3618,7 @@ final class ActivityStack {
     void releaseBackgroundResources(ActivityRecord r) {
         if (hasVisibleBehindActivity() &&
                 !mHandler.hasMessages(RELEASE_BACKGROUND_RESOURCES_TIMEOUT_MSG)) {
-            if (r == topRunningActivityLocked(null)) {
+            if (r == topRunningActivityLocked()) {
                 // Don't release the top activity if it has requested to run behind the next
                 // activity.
                 return;
@@ -3767,7 +3767,7 @@ final class ActivityStack {
 
     final void updateTransitLocked(int transit, Bundle options) {
         if (options != null) {
-            ActivityRecord r = topRunningActivityLocked(null);
+            ActivityRecord r = topRunningActivityLocked();
             if (r != null && r.state != ActivityState.RESUMED) {
                 r.updateOptionsLocked(options);
             } else {
@@ -3840,7 +3840,7 @@ final class ActivityStack {
         }
 
         // Set focus to the top running activity of this stack.
-        ActivityRecord r = topRunningActivityLocked(null);
+        ActivityRecord r = topRunningActivityLocked();
         mService.setFocusedActivityLocked(r, reason);
 
         if (DEBUG_TRANSITION) Slog.v(TAG_TRANSITION, "Prepare to front transition: task=" + tr);
@@ -4473,7 +4473,7 @@ final class ActivityStack {
     }
 
     ActivityRecord restartPackage(String packageName) {
-        ActivityRecord starting = topRunningActivityLocked(null);
+        ActivityRecord starting = topRunningActivityLocked();
 
         // All activities that came from the package must be
         // restarted as if there was a config change.
