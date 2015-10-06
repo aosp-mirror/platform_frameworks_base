@@ -70,6 +70,7 @@ public class ZygoteInit {
     private static final String TAG = "Zygote";
 
     private static final String PROPERTY_DISABLE_OPENGL_PRELOADING = "ro.zygote.disable_gl_preload";
+    private static final String PROPERTY_RUNNING_IN_CONTAINER = "ro.boot.container";
 
     private static final String ANDROID_SOCKET_PREFIX = "ANDROID_SOCKET_";
 
@@ -503,7 +504,6 @@ public class ZygoteInit {
     private static boolean startSystemServer(String abiList, String socketName)
             throws MethodAndArgsCaller, RuntimeException {
         long capabilities = posixCapabilitiesAsBits(
-            OsConstants.CAP_BLOCK_SUSPEND,
             OsConstants.CAP_KILL,
             OsConstants.CAP_NET_ADMIN,
             OsConstants.CAP_NET_BIND_SERVICE,
@@ -515,6 +515,10 @@ public class ZygoteInit {
             OsConstants.CAP_SYS_TIME,
             OsConstants.CAP_SYS_TTY_CONFIG
         );
+        /* Containers run without this capability, so avoid setting it in that case */
+        if (!SystemProperties.getBoolean(PROPERTY_RUNNING_IN_CONTAINER, false)) {
+            capabilities |= posixCapabilitiesAsBits(OsConstants.CAP_BLOCK_SUSPEND);
+        }
         /* Hardcoded command line to start the system server */
         String args[] = {
             "--setuid=1000",
