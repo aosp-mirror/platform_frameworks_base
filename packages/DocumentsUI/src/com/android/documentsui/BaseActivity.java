@@ -39,6 +39,7 @@ import android.provider.DocumentsContract.Root;
 import android.support.annotation.LayoutRes;
 import android.support.annotation.Nullable;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -463,6 +464,21 @@ abstract class BaseActivity extends Activity {
         } else {
             super.onBackPressed();
         }
+    }
+
+    @Override
+    public boolean onKeyUp(int keyCode, KeyEvent event) {
+        if (DEBUG) Log.d(mTag, "onKeyUp: keycode = " + keyCode);
+        DirectoryFragment dir = DirectoryFragment.get(getFragmentManager());
+        switch (keyCode) {
+            case KeyEvent.KEYCODE_MOVE_HOME:
+                dir.focusFirstFile();
+                return true;
+            case KeyEvent.KEYCODE_MOVE_END:
+                dir.focusLastFile();
+                return true;
+        }
+        return super.onKeyUp(keyCode, event);
     }
 
     public void onStackPicked(DocumentStack stack) {

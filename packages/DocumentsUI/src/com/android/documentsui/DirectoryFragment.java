@@ -1341,6 +1341,45 @@ public class DirectoryFragment extends Fragment {
         }
     }
 
+    /**
+     * Scrolls to the top of the file list and focuses the first file.
+     */
+    void focusFirstFile() {
+        focusFile(0);
+    }
+
+    /**
+     * Scrolls to the bottom of the file list and focuses the last file.
+     */
+    void focusLastFile() {
+        focusFile(mAdapter.getItemCount() - 1);
+    }
+
+    /**
+     * Scrolls to and then focuses on the file at the given position.
+     */
+    private void focusFile(final int pos) {
+        // Don't smooth scroll; that taxes the system unnecessarily and makes the scroll handling
+        // logic below more complicated.
+        mRecView.scrollToPosition(pos);
+
+        // If the item is already in view, focus it; otherwise, set a one-time listener to focus it
+        // when the scroll is completed.
+        RecyclerView.ViewHolder vh = mRecView.findViewHolderForAdapterPosition(pos);
+        if (vh != null) {
+            vh.itemView.requestFocus();
+        } else {
+            mRecView.addOnScrollListener(
+                    new RecyclerView.OnScrollListener() {
+                        @Override
+                        public void onScrolled(RecyclerView view, int dx, int dy) {
+                            view.findViewHolderForAdapterPosition(pos).itemView.requestFocus();
+                            view.removeOnScrollListener(this);
+                        }
+                    });
+        }
+    }
+
     private void setupDragAndDropOnDirectoryView(View view) {
         // Listen for drops on non-directory items and empty space.
         view.setOnDragListener(mOnDragListener);
