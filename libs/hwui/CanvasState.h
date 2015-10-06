@@ -17,11 +17,11 @@
 #ifndef ANDROID_HWUI_CANVAS_STATE_H
 #define ANDROID_HWUI_CANVAS_STATE_H
 
+#include "Snapshot.h"
+
 #include <SkMatrix.h>
 #include <SkPath.h>
 #include <SkRegion.h>
-
-#include "Snapshot.h"
 
 namespace android {
 namespace uirenderer {
@@ -74,6 +74,7 @@ public:
 class CanvasState {
 public:
     CanvasState(CanvasStateClient& renderer);
+    ~CanvasState();
 
     /**
      * Initializes the first snapshot, computing the projection matrix,
@@ -157,11 +158,15 @@ public:
     int getHeight() const { return mHeight; }
     bool clipIsSimple() const { return currentSnapshot()->clipIsSimple(); }
 
-    inline const Snapshot* currentSnapshot() const { return mSnapshot.get(); }
-    inline Snapshot* writableSnapshot() { return mSnapshot.get(); }
-    inline const Snapshot* firstSnapshot() const { return mFirstSnapshot.get(); }
+    inline const Snapshot* currentSnapshot() const { return mSnapshot; }
+    inline Snapshot* writableSnapshot() { return mSnapshot; }
+    inline const Snapshot* firstSnapshot() const { return &mFirstSnapshot; }
 
 private:
+    Snapshot* allocSnapshot(Snapshot* previous, int savecount);
+    void freeSnapshot(Snapshot* snapshot);
+    void freeAllSnapshots();
+
     /// indicates that the clip has been changed since the last time it was consumed
     bool mDirtyClip;
 
@@ -172,13 +177,18 @@ private:
     int mSaveCount;
 
     /// Base state
-    sp<Snapshot> mFirstSnapshot;
+    Snapshot mFirstSnapshot;
 
     /// Host providing callbacks
     CanvasStateClient& mCanvas;
 
     /// Current state
-    sp<Snapshot> mSnapshot;
+    Snapshot* mSnapshot;
+
+    // Pool of allocated snapshots to re-use
+    // NOTE: The dtors have already been invoked!
+    Snapshot* mSnapshotPool = nullptr;
+    int mSnapshotPoolCount = 0;
 
 }; // class CanvasState
 
