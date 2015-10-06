@@ -2691,6 +2691,13 @@ public abstract class ActivityManagerNative extends Binder implements IActivityM
             reply.writeNoException();
             return true;
         }
+        case REMOVE_STACK: {
+            data.enforceInterface(IActivityManager.descriptor);
+            final int stackId = data.readInt();
+            removeStack(stackId);
+            reply.writeNoException();
+            return true;
+        }
         }
 
         return super.onTransact(code, data, reply, flags);
@@ -6234,6 +6241,18 @@ class ActivityManagerProxy implements IActivityManager
         data.writeInterfaceToken(IActivityManager.descriptor);
         data.writeInt(suppress ? 1 : 0);
         mRemote.transact(SUPPRESS_RESIZE_CONFIG_CHANGES_TRANSACTION, data, reply, 0);
+        reply.readException();
+        data.recycle();
+        reply.recycle();
+    }
+
+    @Override
+    public void removeStack(int stackId) throws RemoteException {
+        Parcel data = Parcel.obtain();
+        Parcel reply = Parcel.obtain();
+        data.writeInterfaceToken(IActivityManager.descriptor);
+        data.writeInt(stackId);
+        mRemote.transact(REMOVE_STACK, data, reply, 0);
         reply.readException();
         data.recycle();
         reply.recycle();

@@ -16,8 +16,8 @@
 
 package android.app;
 
-import android.app.ActivityManager.RunningTaskInfo;
 import android.app.ActivityManager.RunningServiceInfo;
+import android.app.ActivityManager.RunningTaskInfo;
 import android.app.ActivityManager.StackInfo;
 import android.app.assist.AssistContent;
 import android.app.assist.AssistStructure;
@@ -538,6 +538,8 @@ public interface IActivityManager extends IInterface {
 
     public void suppressResizeConfigChanges(boolean suppress) throws RemoteException;
 
+    public void removeStack(int stackId) throws RemoteException;
+
     /*
      * Private non-Binder interfaces
      */
@@ -895,4 +897,5 @@ public interface IActivityManager extends IInterface {
     int REPORT_SIZE_CONFIGURATIONS = IBinder.FIRST_CALL_TRANSACTION + 345;
     int MOVE_TASK_TO_DOCKED_STACK_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION + 346;
     int SUPPRESS_RESIZE_CONFIG_CHANGES_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION + 347;
+    int REMOVE_STACK = IBinder.FIRST_CALL_TRANSACTION + 348;
 }

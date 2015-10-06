@@ -19,6 +19,7 @@ package com.android.server.wm;
 import static android.app.ActivityManager.*;
 import static com.android.server.wm.WindowManagerService.DEBUG_TASK_MOVEMENT;
 import static com.android.server.wm.WindowManagerService.H.RESIZE_STACK;
+import static com.android.server.wm.WindowManagerService.H.UNUSED;
 import static com.android.server.wm.WindowManagerService.TAG;
 
 import android.annotation.IntDef;
@@ -177,9 +178,9 @@ public class TaskStack implements DimLayer.DimLayerUser {
 
         if (mDisplayContent != null) {
             mDisplayContent.mDimBehindController.updateDimLayer(this);
+            mAnimationBackgroundSurface.setBounds(bounds);
         }
 
-        mAnimationBackgroundSurface.setBounds(bounds);
         mBounds.set(bounds);
         mRotation = rotation;
         return true;
@@ -238,7 +239,7 @@ public class TaskStack implements DimLayer.DimLayerUser {
                     // a one-way call. We do this to prevent a deadlock between window manager
                     // lock and activity manager lock been held.
                     mService.mH.sendMessage(
-                            mService.mH.obtainMessage(RESIZE_STACK, mStackId, -1, mBounds));
+                            mService.mH.obtainMessage(RESIZE_STACK, mStackId, UNUSED, mBounds));
                 }
             }
         }
@@ -488,7 +489,7 @@ public class TaskStack implements DimLayer.DimLayerUser {
                     && otherStackId >= FIRST_STATIC_STACK_ID
                     && otherStackId <= LAST_STATIC_STACK_ID) {
                 mService.mH.sendMessage(
-                        mService.mH.obtainMessage(RESIZE_STACK, otherStackId, -1, bounds));
+                        mService.mH.obtainMessage(RESIZE_STACK, otherStackId, UNUSED, bounds));
             }
         }
     }
