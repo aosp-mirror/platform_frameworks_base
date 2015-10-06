@@ -499,7 +499,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
 
     // Amount of time after a call to stopAppSwitches() during which we will
     // prevent further untrusted switches from happening.
-    private static final long APP_SWITCH_DELAY_TIME = 5 * 1000;
+    private static final long APP_SWITCH_DELAY_TIME = 1 * 1000;
 
     /**
      * The time at which we will allow normal application switches again,
