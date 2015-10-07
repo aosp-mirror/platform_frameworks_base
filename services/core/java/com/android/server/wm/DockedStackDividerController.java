@@ -25,16 +25,22 @@ import static android.view.WindowManager.LayoutParams.FLAG_SPLIT_TOUCH;
 import static android.view.WindowManager.LayoutParams.FLAG_TOUCHABLE_WHEN_WAKING;
 import static android.view.WindowManager.LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH;
 import static android.view.WindowManager.LayoutParams.TYPE_DOCK_DIVIDER;
+import static com.android.server.wm.DimLayer.RESIZING_HINT_ALPHA;
+import static com.android.server.wm.DimLayer.RESIZING_HINT_DURATION_MS;
+import static com.android.server.wm.TaskPositioner.SIDE_MARGIN_DIP;
 import static com.android.server.wm.TaskStack.DOCKED_BOTTOM;
 import static com.android.server.wm.TaskStack.DOCKED_LEFT;
 import static com.android.server.wm.TaskStack.DOCKED_RIGHT;
 import static com.android.server.wm.TaskStack.DOCKED_TOP;
+import static com.android.server.wm.WindowManagerService.dipToPixel;
 
 import android.content.Context;
 import android.content.res.Configuration;
 import android.graphics.PixelFormat;
 import android.graphics.Rect;
 import android.os.RemoteException;
+import android.util.Slog;
+import android.view.DisplayInfo;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
@@ -44,11 +50,13 @@ import android.view.WindowManagerGlobal;
 /**
  * Controls showing and hiding of a docked stack divider on the display.
  */
-public class DockedStackDividerController implements View.OnTouchListener {
+public class DockedStackDividerController implements View.OnTouchListener, DimLayer.DimLayerUser {
     private static final String TAG = "DockedStackDivider";
     private final Context mContext;
     private final int mDividerWidth;
     private final DisplayContent mDisplayContent;
+    private final int mSideMargin;
+    private final DimLayer mDimLayer;
     private View mView;
     private Rect mTmpRect = new Rect();
     private Rect mLastResizeRect = new Rect();
@@ -57,12 +65,15 @@ public class DockedStackDividerController implements View.OnTouchListener {
     private TaskStack mTaskStack;
     private Rect mOriginalRect = new Rect();
     private int mDockSide;
+    private boolean mDimLayerVisible;
 
     DockedStackDividerController(Context context, DisplayContent displayContent) {
         mContext = context;
         mDisplayContent = displayContent;
         mDividerWidth = context.getResources().getDimensionPixelSize(
                 com.android.internal.R.dimen.docked_stack_divider_thickness);
+        mSideMargin = dipToPixel(SIDE_MARGIN_DIP, mDisplayContent.getDisplayMetrics());
+        mDimLayer = new DimLayer(displayContent.mService, this, displayContent.getDisplayId());
     }
 
     private void addDivider(Configuration configuration) {
@@ -154,11 +165,17 @@ public class DockedStackDividerController implements View.OnTouchListener {
                 break;
             case MotionEvent.ACTION_MOVE:
                 if (mTaskStack != null) {
-                    resizeStack(event);
+                    final int x = (int) event.getRawX();
+                    final int y = (int) event.getRawY();
+                    resizeStack(x, y);
                 }
                 break;
             case MotionEvent.ACTION_UP:
             case MotionEvent.ACTION_CANCEL:
+                if (mTaskStack != null) {
+                    maybeDismissTaskStack((int) event.getRawX(), (int) event.getRawY());
+                }
+                setDimLayerVisible(false, -1, -1);
                 mTaskStack = null;
                 mDockSide = TaskStack.DOCKED_INVALID;
                 break;
@@ -166,10 +183,88 @@ public class DockedStackDividerController implements View.OnTouchListener {
         return true;
     }
 
-    private void resizeStack(MotionEvent event) {
+    private void maybeDismissTaskStack(int x, int y) {
+        final int distance = distanceFromDockSide(mDockSide, mOriginalRect, x, y);
+        if (distance == -1) {
+            Slog.wtf(TAG, "maybeDismissTaskStack: Unknown dock side=" + mDockSide);
+            return;
+        }
+        if (distance <= mSideMargin) {
+            try {
+                mDisplayContent.mService.mActivityManager.removeStack(mTaskStack.mStackId);
+            } catch (RemoteException e) {
+                // This can't happen because we are in the same process.
+            }
+        }
+    }
+
+    private void updateDimLayer(int x, int y) {
+        final int distance = distanceFromDockSide(mDockSide, mOriginalRect, x, y);
+        if (distance == -1) {
+            Slog.wtf(TAG, "updateDimLayer: Unknown dock side=" + mDockSide);
+            return;
+        }
+        setDimLayerVisible(distance <= mSideMargin, x, y);
+    }
+
+    /**
+     * Provides the distance from the point to the docked side of a rectangle.
+     *
+     * @return non negative distance or -1 on error
+     */
+    private static int distanceFromDockSide(int dockSide, Rect bounds, int x, int y) {
+        switch (dockSide) {
+            case DOCKED_LEFT:
+                return x - bounds.left;
+            case DOCKED_TOP:
+                return y - bounds.top;
+            case DOCKED_RIGHT:
+                return bounds.right - x;
+            case DOCKED_BOTTOM:
+                return bounds.bottom - y;
+        }
+        return -1;
+    }
+
+    private void setDimLayerVisible(boolean visible, int x, int y) {
+        if (visible) {
+            mTmpRect.set(mOriginalRect);
+            switch (mDockSide) {
+                case DOCKED_LEFT:
+                    mTmpRect.right = x;
+                    break;
+                case DOCKED_TOP:
+                    mTmpRect.bottom = y;
+                    break;
+                case DOCKED_RIGHT:
+                    mTmpRect.left = x;
+                    break;
+                case DOCKED_BOTTOM:
+                    mTmpRect.top = y;
+                    break;
+                default:
+                    Slog.wtf(TAG, "setDimLayerVisible: Unknown dock side when setting dim layer="
+                            + mDockSide);
+                    return;
+            }
+            mDimLayer.setBounds(mTmpRect);
+        }
+        if (mDimLayerVisible == visible) {
+            return;
+        }
+        mDimLayerVisible = visible;
+        if (mDimLayerVisible) {
+            mDimLayer.show(mDisplayContent.mService.getDragLayerLocked(), RESIZING_HINT_ALPHA,
+                    RESIZING_HINT_DURATION_MS);
+        } else {
+            mDimLayer.hide();
+        }
+    }
+
+    private void resizeStack(int x, int y) {
         mTmpRect.set(mOriginalRect);
-        final int deltaX = (int) event.getRawX() - mStartX;
-        final int deltaY = (int) event.getRawY() - mStartY;
+        final int deltaX = x - mStartX;
+        final int deltaY = y - mStartY;
         switch (mDockSide) {
             case DOCKED_LEFT:
                 mTmpRect.right += deltaX;
@@ -191,7 +286,9 @@ public class DockedStackDividerController implements View.OnTouchListener {
         try {
             mDisplayContent.mService.mActivityManager.resizeStack(DOCKED_STACK_ID, mTmpRect);
         } catch (RemoteException e) {
+            // This can't happen because we are in the same process.
         }
+        updateDimLayer(x, y);
     }
 
     boolean isResizing() {
@@ -200,5 +297,25 @@ public class DockedStackDividerController implements View.OnTouchListener {
 
     int getWidthAdjustment() {
         return getWidth() / 2;
+    }
+
+    @Override
+    public boolean isFullscreen() {
+        return false;
+    }
+
+    @Override
+    public DisplayInfo getDisplayInfo() {
+        return mDisplayContent.getDisplayInfo();
+    }
+
+    @Override
+    public void getBounds(Rect outBounds) {
+        // This dim layer user doesn't need this.
+    }
+
+    @Override
+    public String toShortString() {
+        return TAG;
     }
 }

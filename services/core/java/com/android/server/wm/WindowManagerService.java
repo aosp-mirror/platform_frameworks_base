@@ -469,6 +469,11 @@ public class WindowManagerService extends IWindowManager.Stub
 
     static int sDockedStackCreateMode = DOCKED_STACK_CREATE_MODE_TOP_OR_LEFT;
 
+    int getDragLayerLocked() {
+        return mPolicy.windowTypeToLayerLw(LayoutParams.TYPE_DRAG) * TYPE_LAYER_MULTIPLIER
+                + TYPE_LAYER_OFFSET;
+    }
+
     class RotationWatcher {
         IRotationWatcher watcher;
         IBinder.DeathRecipient deathRecipient;

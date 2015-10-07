@@ -17572,6 +17572,24 @@ public final class ActivityManagerService extends ActivityManagerNative
     }
 
     @Override
+    public void removeStack(int stackId) {
+        enforceCallingPermission(android.Manifest.permission.MANAGE_ACTIVITY_STACKS,
+                "detahStack()");
+        if (stackId == HOME_STACK_ID) {
+            throw new IllegalArgumentException("Removing home stack is not allowed.");
+        }
+        synchronized (this) {
+            ActivityStack stack = mStackSupervisor.getStack(stackId);
+            if (stack != null) {
+                ArrayList<TaskRecord> tasks = stack.getAllTasks();
+                for (int i = tasks.size() - 1; i >= 0; i--) {
+                    removeTaskByIdLocked(tasks.get(i).taskId, true /* killProcess */);
+                }
+            }
+        }
+    }
+
+    @Override
     public void updatePersistentConfiguration(Configuration values) {
         enforceCallingPermission(android.Manifest.permission.CHANGE_CONFIGURATION,
                 "updateConfiguration()");

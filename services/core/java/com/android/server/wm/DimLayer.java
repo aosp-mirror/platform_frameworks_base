@@ -29,6 +29,10 @@ public class DimLayer {
     private static final String TAG = "DimLayer";
     private static final boolean DEBUG = false;
 
+    public static final float RESIZING_HINT_ALPHA = 0.5f;
+
+    public static final int RESIZING_HINT_DURATION_MS = 0;
+
     /** Actual surface that dims */
     SurfaceControl mDimSurface;
 

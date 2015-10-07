@@ -23,8 +23,11 @@ import static android.app.ActivityManager.RESIZE_MODE_USER;
 import static android.app.ActivityManager.RESIZE_MODE_USER_FORCED;
 import static android.content.res.Configuration.ORIENTATION_LANDSCAPE;
 import static android.os.Trace.TRACE_TAG_WINDOW_MANAGER;
+import static com.android.server.wm.DimLayer.RESIZING_HINT_ALPHA;
+import static com.android.server.wm.DimLayer.RESIZING_HINT_DURATION_MS;
 import static com.android.server.wm.WindowManagerService.DEBUG_TASK_POSITIONING;
 import static com.android.server.wm.WindowManagerService.SHOW_TRANSACTIONS;
+import static com.android.server.wm.WindowManagerService.dipToPixel;
 import static com.android.server.wm.WindowState.MINIMUM_VISIBLE_HEIGHT_IN_DP;
 import static com.android.server.wm.WindowState.MINIMUM_VISIBLE_WIDTH_IN_DP;
 
@@ -60,7 +63,7 @@ class TaskPositioner implements DimLayer.DimLayerUser {
 
     // The margin the pointer position has to be within the side of the screen to be
     // considered at the side of the screen.
-    private static final int SIDE_MARGIN_DIP = 100;
+    static final int SIDE_MARGIN_DIP = 100;
 
     @IntDef(flag = true,
             value = {
@@ -246,7 +249,7 @@ class TaskPositioner implements DimLayer.DimLayerUser {
                 mDisplay.getDisplayId());
         mDragWindowHandle.name = TAG;
         mDragWindowHandle.inputChannel = mServerChannel;
-        mDragWindowHandle.layer = getDragLayerLocked();
+        mDragWindowHandle.layer = mService.getDragLayerLocked();
         mDragWindowHandle.layoutParamsFlags = 0;
         mDragWindowHandle.layoutParamsType = WindowManager.LayoutParams.TYPE_DRAG;
         mDragWindowHandle.dispatchingTimeoutNanos =
@@ -279,9 +282,9 @@ class TaskPositioner implements DimLayer.DimLayerUser {
         mService.pauseRotationLocked();
 
         mDimLayer = new DimLayer(mService, this, mDisplay.getDisplayId());
-        mSideMargin = mService.dipToPixel(SIDE_MARGIN_DIP, mDisplayMetrics);
-        mMinVisibleWidth = mService.dipToPixel(MINIMUM_VISIBLE_WIDTH_IN_DP, mDisplayMetrics);
-        mMinVisibleHeight = mService.dipToPixel(MINIMUM_VISIBLE_HEIGHT_IN_DP, mDisplayMetrics);
+        mSideMargin = dipToPixel(SIDE_MARGIN_DIP, mDisplayMetrics);
+        mMinVisibleWidth = dipToPixel(MINIMUM_VISIBLE_WIDTH_IN_DP, mDisplayMetrics);
+        mMinVisibleHeight = dipToPixel(MINIMUM_VISIBLE_HEIGHT_IN_DP, mDisplayMetrics);
 
         mDragEnded = false;
     }
@@ -455,7 +458,8 @@ class TaskPositioner implements DimLayer.DimLayerUser {
         }
 
         mDimLayer.setBounds(mTmpRect);
-        mDimLayer.show(getDragLayerLocked(), 0.5f, 0);
+        mDimLayer.show(mService.getDragLayerLocked(), RESIZING_HINT_ALPHA,
+                RESIZING_HINT_DURATION_MS);
     }
 
     @Override /** {@link DimLayer.DimLayerUser} */
@@ -476,11 +480,5 @@ class TaskPositioner implements DimLayer.DimLayerUser {
     @Override
     public String toShortString() {
         return TAG;
-    }
-
-    private int getDragLayerLocked() {
-        return mService.mPolicy.windowTypeToLayerLw(WindowManager.LayoutParams.TYPE_DRAG)
-                * WindowManagerService.TYPE_LAYER_MULTIPLIER
-                + WindowManagerService.TYPE_LAYER_OFFSET;
     }
 }
