@@ -27,7 +27,6 @@ import android.net.Network;
 import android.net.NetworkCapabilities;
 import android.net.NetworkRequest;
 import android.net.wifi.ScanSettings;
-import android.net.wifi.WifiChannel;
 import android.os.Binder;
 import android.os.Build;
 import android.os.IBinder;
@@ -440,8 +439,11 @@ public class WifiManager {
     /**
      * A batch of access point scans has been completed and the results areavailable.
      * Call {@link #getBatchedScanResults()} to obtain the results.
-     * @hide pending review
+     * @deprecated This API is nolonger supported.
+     * Use {@link android.net.wifi.WifiScanner} API
+     * @hide
      */
+    @Deprecated
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
     public static final String BATCHED_SCAN_RESULTS_AVAILABLE_ACTION =
             "android.net.wifi.BATCHED_RESULTS";
@@ -904,22 +906,6 @@ public class WifiManager {
         }
     }
 
-    /**
-     * Get a list of available channels for customized scan.
-     *
-     * @see {@link WifiChannel}
-     *
-     * @return the channel list, or null if not available
-     * @hide
-     */
-    public List<WifiChannel> getChannelList() {
-        try {
-            return mService.getChannelList();
-        } catch (RemoteException e) {
-            return null;
-        }
-    }
-
     /* Keep this list in sync with wifi_hal.h */
     /** @hide */
     public static final int WIFI_FEATURE_INFRA            = 0x0001;  // Basic infrastructure mode
@@ -1134,142 +1120,41 @@ public class WifiManager {
      * startLocationRestrictedScan()
      * Trigger a scan which will not make use of DFS channels and is thus not suitable for
      * establishing wifi connection.
+     * @deprecated This API is nolonger supported.
+     * Use {@link android.net.wifi.WifiScanner} API
      * @hide
      */
+    @Deprecated
     @SystemApi
     public boolean startLocationRestrictedScan(WorkSource workSource) {
-        try {
-            mService.startLocationRestrictedScan(workSource);
-            return true;
-        } catch (RemoteException e) {
-            return false;
-        }
-    }
-
-    /**
-     * Request a scan for access points in specified channel list. Each channel is specified by its
-     * frequency in MHz, e.g. "5500" (do NOT include "DFS" even though it is). The availability of
-     * the results is made known later in the same way as {@link #startScan}.
-     *
-     * Note:
-     *
-     * 1. Customized scan is for non-connection purposes, i.e. it won't trigger a wifi connection
-     *    even though it finds some known networks.
-     *
-     * 2. Customized scan result may include access points that is not specified in the channel
-     *    list. An app will need to do frequency filtering if it wants to get pure results for the
-     *    channel list it specified.
-     *
-     * @hide
-     */
-    public boolean startCustomizedScan(ScanSettings requested) {
-        try {
-            mService.startScan(requested, null);
-            return true;
-        } catch (RemoteException e) {
-            return false;
-        }
-    }
-
-    /** @hide */
-    public boolean startCustomizedScan(ScanSettings requested, WorkSource workSource) {
-        try {
-            mService.startScan(requested, workSource);
-            return true;
-        } catch (RemoteException e) {
-            return false;
-        }
-    }
-
-    /**
-     * Request a batched scan for access points.  To end your requested batched scan,
-     * call stopBatchedScan with the same Settings.
-     *
-     * If there are mulitple requests for batched scans, the more demanding settings will
-     * take precidence.
-     *
-     * @param requested {@link BatchedScanSettings} the scan settings requested.
-     * @return false on known error
-     * @hide
-     */
-    public boolean requestBatchedScan(BatchedScanSettings requested) {
-        try {
-            return mService.requestBatchedScan(requested, new Binder(), null);
-        } catch (RemoteException e) { return false; }
-    }
-    /** @hide */
-    public boolean requestBatchedScan(BatchedScanSettings requested, WorkSource workSource) {
-        try {
-            return mService.requestBatchedScan(requested, new Binder(), workSource);
-        } catch (RemoteException e) { return false; }
+        return false;
     }
 
     /**
      * Check if the Batched Scan feature is supported.
      *
      * @return false if not supported.
+     * @deprecated This API is nolonger supported.
+     * Use {@link android.net.wifi.WifiScanner} API
      * @hide
      */
+    @Deprecated
     @SystemApi
     public boolean isBatchedScanSupported() {
-        try {
-            return mService.isBatchedScanSupported();
-        } catch (RemoteException e) { return false; }
-    }
-
-    /**
-     * End a requested batch scan for this applicaiton.  Note that batched scan may
-     * still occur if other apps are using them.
-     *
-     * @param requested {@link BatchedScanSettings} the scan settings you previously requested
-     *        and now wish to stop.  A value of null here will stop all scans requested by the
-     *        calling App.
-     * @hide
-     */
-    public void stopBatchedScan(BatchedScanSettings requested) {
-        try {
-            mService.stopBatchedScan(requested);
-        } catch (RemoteException e) {}
+        return false;
     }
 
     /**
      * Retrieve the latest batched scan result.  This should be called immediately after
      * {@link BATCHED_SCAN_RESULTS_AVAILABLE_ACTION} is received.
+     * @deprecated This API is nolonger supported.
+     * Use {@link android.net.wifi.WifiScanner} API
      * @hide
      */
+    @Deprecated
     @SystemApi
     public List<BatchedScanResult> getBatchedScanResults() {
-        try {
-            return mService.getBatchedScanResults(mContext.getOpPackageName());
-        } catch (RemoteException e) {
-            return null;
-        }
-    }
-
-    /**
-     * Force a re-reading of batched scan results.  This will attempt
-     * to read more information from the chip, but will do so at the expense
-     * of previous data.  Rate limited to the current scan frequency.
-     *
-     * pollBatchedScan will always wait 1 period from the start of the batch
-     * before trying to read from the chip, so if your #scans/batch == 1 this will
-     * have no effect.
-     *
-     * If you had already waited 1 period before calling, this should have
-     * immediate (though async) effect.
-     *
-     * If you call before that 1 period is up this will set up a timer and fetch
-     * results when the 1 period is up.
-     *
-     * Servicing a pollBatchedScan request (immediate or after timed delay) starts a
-     * new batch, so if you were doing 10 scans/batch and called in the 4th scan, you
-     * would get data in the 4th and then again 10 scans later.
-     * @hide
-     */
-    public void pollBatchedScan() {
-        try {
-            mService.pollBatchedScan();
-        } catch (RemoteException e) { }
+        return null;
     }
 
     /**
@@ -1628,48 +1513,6 @@ public class WifiManager {
     public boolean setWifiApConfiguration(WifiConfiguration wifiConfig) {
         try {
             mService.setWifiApConfiguration(wifiConfig);
-            return true;
-        } catch (RemoteException e) {
-            return false;
-        }
-    }
-
-   /**
-     * Start the driver and connect to network.
-     *
-     * This function will over-ride WifiLock and device idle status. For example,
-     * even if the device is idle or there is only a scan-only lock held,
-     * a start wifi would mean that wifi connection is kept active until
-     * a stopWifi() is sent.
-     *
-     * This API is used by WifiStateTracker
-     *
-     * @return {@code true} if the operation succeeds else {@code false}
-     * @hide
-     */
-    public boolean startWifi() {
-        try {
-            mService.startWifi();
-            return true;
-        } catch (RemoteException e) {
-            return false;
-        }
-    }
-
-    /**
-     * Disconnect from a network (if any) and stop the driver.
-     *
-     * This function will over-ride WifiLock and device idle status. Wi-Fi
-     * stays inactive until a startWifi() is issued.
-     *
-     * This API is used by WifiStateTracker
-     *
-     * @return {@code true} if the operation succeeds else {@code false}
-     * @hide
-     */
-    public boolean stopWifi() {
-        try {
-            mService.stopWifi();
             return true;
         } catch (RemoteException e) {
             return false;

@@ -20768,7 +20768,7 @@ package android.net.sip {
 
 package android.net.wifi {
 
-  public class BatchedScanResult implements android.os.Parcelable {
+  public deprecated class BatchedScanResult implements android.os.Parcelable {
     ctor public BatchedScanResult();
     ctor public BatchedScanResult(android.net.wifi.BatchedScanResult);
     method public int describeContents();
@@ -21179,7 +21179,7 @@ package android.net.wifi {
     method public boolean disableNetwork(int);
     method public boolean disconnect();
     method public boolean enableNetwork(int, boolean);
-    method public java.util.List<android.net.wifi.BatchedScanResult> getBatchedScanResults();
+    method public deprecated java.util.List<android.net.wifi.BatchedScanResult> getBatchedScanResults();
     method public java.util.List<android.net.wifi.WifiConfiguration> getConfiguredNetworks();
     method public android.net.wifi.WifiInfo getConnectionInfo();
     method public android.net.wifi.WifiConnectionStatistics getConnectionStatistics();
@@ -21189,7 +21189,7 @@ package android.net.wifi {
     method public java.util.List<android.net.wifi.ScanResult> getScanResults();
     method public int getWifiState();
     method public boolean is5GHzBandSupported();
-    method public boolean isBatchedScanSupported();
+    method public deprecated boolean isBatchedScanSupported();
     method public boolean isDeviceToApRttSupported();
     method public boolean isDeviceToDeviceRttSupported();
     method public boolean isEnhancedPowerReportingSupported();
@@ -21209,7 +21209,7 @@ package android.net.wifi {
     method public void setTdlsEnabled(java.net.InetAddress, boolean);
     method public void setTdlsEnabledWithMacAddress(java.lang.String, boolean);
     method public boolean setWifiEnabled(boolean);
-    method public boolean startLocationRestrictedScan(android.os.WorkSource);
+    method public deprecated boolean startLocationRestrictedScan(android.os.WorkSource);
     method public boolean startScan();
     method public boolean startScan(android.os.WorkSource);
     method public void startWps(android.net.wifi.WpsInfo, android.net.wifi.WifiManager.WpsCallback);
