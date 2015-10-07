@@ -58,7 +58,8 @@ protected:
 
 public:
     virtual void loadPointerResources(PointerResources* outResources) = 0;
-    virtual void loadAdditionalMouseResources(std::map<int, SpriteIcon>* outResources) = 0;
+    virtual void loadAdditionalMouseResources(std::map<int32_t, SpriteIcon>* outResources) = 0;
+    virtual int32_t getDefaultPointerIconId() = 0;
 };
 
 

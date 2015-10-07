@@ -78,7 +78,7 @@ PointerController::PointerController(const sp<PointerControllerPolicyInterface>&
     mLocked.pointerAlpha = 0.0f; // pointer is initially faded
     mLocked.pointerSprite = mSpriteController->createSprite();
     mLocked.pointerIconChanged = false;
-    mLocked.requestedPointerShape = 0;
+    mLocked.requestedPointerShape = mPolicy->getDefaultPointerIconId();
 
     mLocked.buttonState = 0;
 
@@ -512,7 +512,7 @@ void PointerController::updatePointerLocked() {
 
     if (mLocked.pointerIconChanged || mLocked.presentationChanged) {
         if (mLocked.presentation == PRESENTATION_POINTER) {
-            if (mLocked.requestedPointerShape == 0) {
+            if (mLocked.requestedPointerShape == mPolicy->getDefaultPointerIconId()) {
                 mLocked.pointerSprite->setIcon(mLocked.pointerIcon);
             } else {
                 std::map<int, SpriteIcon>::const_iterator iter =

@@ -238,7 +238,8 @@ public:
     /* --- PointerControllerPolicyInterface implementation --- */
 
     virtual void loadPointerResources(PointerResources* outResources);
-    virtual void loadAdditionalMouseResources(std::map<int, SpriteIcon>* outResources);
+    virtual void loadAdditionalMouseResources(std::map<int32_t, SpriteIcon>* outResources);
+    virtual int32_t getDefaultPointerIconId();
 
 private:
     sp<InputManager> mInputManager;
@@ -786,7 +787,7 @@ void NativeInputManager::setPointerIconShape(int32_t iconId) {
   sp<PointerController> controller = mLocked.pointerController.promote();
   if (controller != NULL) {
         // Use 0 (the default icon) for ARROW.
-        controller->updatePointerShape((iconId == POINTER_ICON_STYLE_ARROW) ? 0 : iconId);
+        controller->updatePointerShape(iconId);
   }
 }
 
@@ -1040,15 +1041,19 @@ void NativeInputManager::loadPointerResources(PointerResources* outResources) {
             &outResources->spotAnchor);
 }
 
-void NativeInputManager::loadAdditionalMouseResources(std::map<int, SpriteIcon>* outResources) {
+void NativeInputManager::loadAdditionalMouseResources(std::map<int32_t, SpriteIcon>* outResources) {
     JNIEnv* env = jniEnv();
 
     for (int iconId = POINTER_ICON_STYLE_CONTEXT_MENU; iconId <= POINTER_ICON_STYLE_GRABBING;
              ++iconId) {
         loadSystemIconAsSprite(env, mContextObj, iconId, &((*outResources)[iconId]));
     }
+    loadSystemIconAsSprite(env, mContextObj, POINTER_ICON_STYLE_NULL, &((*outResources)[POINTER_ICON_STYLE_NULL]));
 }
 
+int32_t NativeInputManager::getDefaultPointerIconId() {
+    return POINTER_ICON_STYLE_ARROW;
+}
 
 // ----------------------------------------------------------------------------
 
