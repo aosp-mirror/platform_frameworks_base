@@ -18173,6 +18173,24 @@ package android.mtp {
   public class MtpEvent {
     ctor public MtpEvent();
     method public int getEventCode();
+    field public static final int EVENT_CANCEL_TRANSACTION = 16385; // 0x4001
+    field public static final int EVENT_CAPTURE_COMPLETE = 16397; // 0x400d
+    field public static final int EVENT_DEVICE_INFO_CHANGED = 16392; // 0x4008
+    field public static final int EVENT_DEVICE_PROP_CHANGED = 16390; // 0x4006
+    field public static final int EVENT_DEVICE_RESET = 16395; // 0x400b
+    field public static final int EVENT_OBJECT_ADDED = 16386; // 0x4002
+    field public static final int EVENT_OBJECT_INFO_CHANGED = 16391; // 0x4007
+    field public static final int EVENT_OBJECT_PROP_CHANGED = 51201; // 0xc801
+    field public static final int EVENT_OBJECT_PROP_DESC_CHANGED = 51202; // 0xc802
+    field public static final int EVENT_OBJECT_REFERENCES_CHANGED = 51203; // 0xc803
+    field public static final int EVENT_OBJECT_REMOVED = 16387; // 0x4003
+    field public static final int EVENT_REQUEST_OBJECT_TRANSFER = 16393; // 0x4009
+    field public static final int EVENT_STORAGE_INFO_CHANGED = 16396; // 0x400c
+    field public static final int EVENT_STORE_ADDED = 16388; // 0x4004
+    field public static final int EVENT_STORE_FULL = 16394; // 0x400a
+    field public static final int EVENT_STORE_REMOVED = 16389; // 0x4005
+    field public static final int EVENT_UNDEFINED = 16384; // 0x4000
+    field public static final int EVENT_UNREPORTED_STATUS = 16398; // 0x400e
   }
 
   public final class MtpObjectInfo {
