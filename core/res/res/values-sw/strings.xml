@@ -589,7 +589,7 @@
     <string name="phoneTypeTelex" msgid="3367879952476250512">"Teleksi"</string>
     <string name="phoneTypeTtyTdd" msgid="8606514378585000044">"TTY TDD"</string>
     <string name="phoneTypeWorkMobile" msgid="1311426989184065709">"Nambari ya Simu ya Mkononi ya Kazini"</string>
-    <string name="phoneTypeWorkPager" msgid="649938731231157056">"Kiunda ujumbe cha Kazini"</string>
+    <string name="phoneTypeWorkPager" msgid="649938731231157056">"Peja ya Kazini"</string>
     <string name="phoneTypeAssistant" msgid="5596772636128562884">"Msaidizi"</string>
     <string name="phoneTypeMms" msgid="7254492275502768992">"MMS"</string>
     <string name="eventTypeCustom" msgid="7837586198458073404">"Maalum"</string>
