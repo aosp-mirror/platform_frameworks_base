@@ -24,8 +24,8 @@ and features, and more. You can use In-app Billing to sell products as</p>
     period.</li>
   <li><strong>IAB Sandbox</strong>&mdash;The In-app Billing Sandbox now supports
     testing subscription purchases.</li>
-  <li><strong>IAB v2 shutdown</strong>&mdash;In-app Billing v2 API is deprecated
-    and will be shut down in January 2015. If your app is still using In-app Billing
+  <li><strong>As of January 2015, the In-App Billing v2 API is shut down.
+    If your app is still using In-app Billing
     v2, please migrate to the v3 API as soon as possible.</li>
   <li><strong>Seasonal subscriptions</strong>&mdash;You can now set up a
     recurring <a href="billing_subscriptions.html#user-billing">seasonal

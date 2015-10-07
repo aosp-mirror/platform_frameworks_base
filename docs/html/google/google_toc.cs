@@ -17,17 +17,7 @@
               <span class="en">Reference</span></a></li>
               </ul>
       </li>
-      <li class="nav-section"><div class="nav-section-header"><a href="<?cs var:toroot?>google/play/billing/v2/api.html">
-              <span class="en">Version 2 API</span></a></div>
-              <ul>
-              <li><a href="<?cs var:toroot?>google/play/billing/v2/billing_integrate.html">
-              <span class="en">Implementing the API</span></a></li>
-              <li><a href="<?cs var:toroot?>google/play/billing/v2/billing_subscriptions.html">
-              <span class="en">Subscriptions</span></a></li>
-              <li><a href="<?cs var:toroot?>google/play/billing/v2/billing_reference.html">
-              <span class="en">Reference</span></a></li>
-              </ul>
-      </li>
+
       <li><a href="<?cs var:toroot?>google/play/billing/billing_subscriptions.html">
               <span class="en">Subscriptions</span></a>
       </li>
