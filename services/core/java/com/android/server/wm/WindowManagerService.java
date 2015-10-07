@@ -1163,7 +1163,9 @@ public class WindowManagerService extends IWindowManager.Stub
         for (i = windows.size() - 1; i >= 0; --i) {
             WindowState w = windows.get(i);
             // Dock divider shares the base layer with application windows, but we want to always
-            // keep it above the application windows.
+            // keep it above the application windows. The sharing of the base layer is intended
+            // for window animations, which need to be above the dock divider for the duration
+            // of the animation.
             if (w.mBaseLayer <= myLayer && w.mAttrs.type != TYPE_DOCK_DIVIDER) {
                 break;
             }
@@ -1326,13 +1328,18 @@ public class WindowManagerService extends IWindowManager.Stub
     static boolean canBeImeTarget(WindowState w) {
         final int fl = w.mAttrs.flags
                 & (FLAG_NOT_FOCUSABLE|FLAG_ALT_FOCUSABLE_IM);
+        final int type == w.mAttrs.type;
+        // The dock divider has to sit above the application windows and so does the IME. IME also
+        // needs to sit above the dock divider, so it doesn't get cut in half. We make the dock
+        // divider be a target for IME, so this relationship can occur naturally.
         if (fl == 0 || fl == (FLAG_NOT_FOCUSABLE|FLAG_ALT_FOCUSABLE_IM)
-                || w.mAttrs.type == TYPE_APPLICATION_STARTING) {
+                || type == TYPE_APPLICATION_STARTING || type == TYPE_DOCK_DIVIDER) {
             if (DEBUG_INPUT_METHOD) {
                 Slog.i(TAG, "isVisibleOrAdding " + w + ": " + w.isVisibleOrAdding());
                 if (!w.isVisibleOrAdding()) {
                     Slog.i(TAG, "  mSurface=" + w.mWinAnimator.mSurfaceControl
-                            + " relayoutCalled=" + w.mRelayoutCalled + " viewVis=" + w.mViewVisibility
+                            + " relayoutCalled=" + w.mRelayoutCalled
+                            + " viewVis=" + w.mViewVisibility
                             + " policyVis=" + w.mPolicyVisibility
                             + " policyVisAfterAnim=" + w.mPolicyVisibilityAfterAnim
                             + " attachHid=" + w.mAttachedHidden
