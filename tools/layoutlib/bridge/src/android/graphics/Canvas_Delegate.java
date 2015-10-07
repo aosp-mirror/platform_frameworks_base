@@ -35,6 +35,8 @@ import java.awt.RenderingHints;
 import java.awt.Shape;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Arc2D;
+import java.awt.geom.Path2D;
+import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 
 
@@ -707,6 +709,12 @@ public final class Canvas_Delegate {
                     @Override
                     public void draw(Graphics2D graphics, Paint_Delegate paintDelegate) {
                         Shape shape = pathDelegate.getJavaShape();
+                        Rectangle2D bounds = shape.getBounds2D();
+                        if (bounds.isEmpty()) {
+                            // Apple JRE 1.6 doesn't like drawing empty shapes.
+                            // http://b.android.com/178278
+                            return;
+                        }
                         int style = paintDelegate.getStyle();
 
                         if (style == Paint.Style.FILL.nativeInt ||
