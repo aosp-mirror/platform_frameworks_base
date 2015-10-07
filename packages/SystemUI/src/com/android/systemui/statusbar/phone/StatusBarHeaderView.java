@@ -237,7 +237,7 @@ public class StatusBarHeaderView extends BaseStatusBarHeader implements View.OnC
     @Override
     protected void onAttachedToWindow() {
         super.onAttachedToWindow();
-        TunerService.get(mContext).addTunable(this, QSPanel.QS_PAGED_PANEL);
+        TunerService.get(mContext).addTunable(this, QSPanel.QS_THE_NEW_QS);
     }
 
     @Override
@@ -248,7 +248,7 @@ public class StatusBarHeaderView extends BaseStatusBarHeader implements View.OnC
 
     @Override
     public void onTuningChanged(String key, String newValue) {
-        if (QSPanel.QS_PAGED_PANEL.equals(key)) {
+        if (QSPanel.QS_THE_NEW_QS.equals(key)) {
             mAllowExpand = newValue == null || Integer.parseInt(newValue) == 0;
             if (!mAllowExpand) {
                 setExpanded(false);

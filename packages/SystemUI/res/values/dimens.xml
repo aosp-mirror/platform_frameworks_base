@@ -556,4 +556,7 @@
     <dimen name="fab_margin">16dp</dimen>
     <dimen name="fab_elevation">12dp</dimen>
     <dimen name="fab_press_translation_z">9dp</dimen>
+
+    <!-- TODO: Remove this -->
+    <dimen name="qs_header_neg_padding">-8dp</dimen>
 </resources>

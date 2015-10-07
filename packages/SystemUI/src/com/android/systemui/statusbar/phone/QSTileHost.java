@@ -97,6 +97,10 @@ public class QSTileHost implements QSTile.Host, Tunable {
         TunerService.get(mContext).addTunable(this, TILES_SETTING);
     }
 
+    PhoneStatusBar getPhoneStatusBar() {
+        return mStatusBar;
+    }
+
     public void destroy() {
         TunerService.get(mContext).removeTunable(this);
     }

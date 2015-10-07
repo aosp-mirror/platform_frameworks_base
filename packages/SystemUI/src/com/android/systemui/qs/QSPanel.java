@@ -34,7 +34,6 @@ import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-
 import com.android.internal.logging.MetricsLogger;
 import com.android.systemui.FontSizeUtils;
 import com.android.systemui.R;
@@ -54,8 +53,7 @@ import java.util.Collection;
 public class QSPanel extends FrameLayout implements Tunable {
 
     public static final String QS_SHOW_BRIGHTNESS = "qs_show_brightness";
-    public static final String QS_PAGED_PANEL = "qs_paged_panel";
-    public static final String QS_ALLOW_CUSTOMIZE = "qs_allow_customize";
+    public static final String QS_THE_NEW_QS = "qs_paged_panel";
 
     protected final Context mContext;
     protected final ArrayList<TileRecord> mRecords = new ArrayList<TileRecord>();
@@ -135,8 +133,7 @@ public class QSPanel extends FrameLayout implements Tunable {
     @Override
     protected void onAttachedToWindow() {
         super.onAttachedToWindow();
-        TunerService.get(mContext).addTunable(this,
-                QS_SHOW_BRIGHTNESS, QS_PAGED_PANEL, QS_ALLOW_CUSTOMIZE);
+        TunerService.get(mContext).addTunable(this, QS_SHOW_BRIGHTNESS, QS_THE_NEW_QS);
     }
 
     @Override
@@ -150,14 +147,15 @@ public class QSPanel extends FrameLayout implements Tunable {
         if (QS_SHOW_BRIGHTNESS.equals(key)) {
             mBrightnessView.setVisibility(newValue == null || Integer.parseInt(newValue) != 0
                     ? VISIBLE : GONE);
-        } else if (QS_PAGED_PANEL.equals(key)) {
+        } else if (QS_THE_NEW_QS.equals(key)) {
+            boolean theNewQs = newValue != null && Integer.parseInt(newValue) != 0;
             if (mTileLayout != null) {
                 for (int i = 0; i < mRecords.size(); i++) {
                     mTileLayout.removeTile(mRecords.get(i));
                 }
                 mQsContainer.removeView((View) mTileLayout);
             }
-            int layout = newValue != null && Integer.parseInt(newValue) != 0
+            int layout = theNewQs
                     ? R.layout.qs_paged_tile_layout : R.layout.qs_tile_layout;
             mTileLayout =
                     (QSTileLayout) LayoutInflater.from(mContext).inflate(layout, mQsContainer, false);
@@ -165,8 +163,7 @@ public class QSPanel extends FrameLayout implements Tunable {
             for (int i = 0; i < mRecords.size(); i++) {
                 mTileLayout.addTile(mRecords.get(i));
             }
-        } else if (QS_ALLOW_CUSTOMIZE.equals(key)) {
-            if (newValue != null && Integer.parseInt(newValue) != 0) {
+            if (theNewQs) {
                 mCustomizePanel = (QSCustomizer) LayoutInflater.from(mContext)
                         .inflate(R.layout.qs_customize_panel, null);
                 mCustomizePanel.setHost(mHost);

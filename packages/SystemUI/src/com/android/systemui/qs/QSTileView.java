@@ -267,7 +267,7 @@ public class QSTileView extends ViewGroup {
         final int w = MeasureSpec.getSize(widthMeasureSpec);
         final int h = MeasureSpec.getSize(heightMeasureSpec);
         final int iconSpec = exactly(mIconSizePx);
-        mIcon.measure(MeasureSpec.makeMeasureSpec(w, MeasureSpec.EXACTLY), iconSpec);
+        mIcon.measure(MeasureSpec.makeMeasureSpec(w, getIconMeasureMode()), iconSpec);
         switch (mType) {
             case QS_TYPE_QUICK:
                 mCircle.measure(
@@ -285,6 +285,10 @@ public class QSTileView extends ViewGroup {
                 mIconSizePx + mTilePaddingBelowIconPx + mTilePaddingTopPx);
         mTopBackgroundView.measure(widthMeasureSpec, heightSpec);
         setMeasuredDimension(w, h);
+    }
+
+    protected int getIconMeasureMode() {
+        return MeasureSpec.EXACTLY;
     }
 
     private static int exactly(int size) {

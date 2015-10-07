@@ -1156,7 +1156,7 @@
     <!-- Option to show brightness bar in quick settings [CHAR LIMIT=60] -->
     <string name="show_brightness">Show brightness in Quick Settings</string>
     <!-- Option to use new paging layout in quick settings [CHAR LIMIT=60] -->
-    <string name="qs_paging">Use paging in Quick Settings</string>
+    <string name="qs_paging" translatable="false">Use the new Quick Settings</string>
 
     <!-- Category in the System UI Tuner settings, where new/experimental
          settings are -->
