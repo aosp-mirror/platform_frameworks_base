@@ -161,6 +161,7 @@ public final class CreateInfo implements ICreateInfo {
         "android.content.res.TypedArray#getValueAt",
         "android.content.res.TypedArray#obtain",
         "android.graphics.BitmapFactory#finishDecode",
+        "android.graphics.drawable.GradientDrawable#buildRing",
         "android.graphics.Typeface#getSystemFontConfigLocation",
         "android.os.Handler#sendMessageAtTime",
         "android.os.HandlerThread#run",
