@@ -263,4 +263,7 @@ public abstract class WindowManagerInternal {
       */
     public abstract void setOnHardKeyboardStatusChangeListener(
         OnHardKeyboardStatusChangeListener listener);
+
+    /** Returns true if the stack with the input Id is currently visible. */
+    public abstract boolean isStackVisible(int stackId);
 }
