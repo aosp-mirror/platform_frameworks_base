@@ -32,6 +32,8 @@ namespace test {
 extern DisplayInfo gDisplay;
 #define dp(x) ((x) * android::uirenderer::test::gDisplay.density)
 
+DisplayInfo getBuiltInDisplay();
+
 class TestContext {
 public:
     TestContext();

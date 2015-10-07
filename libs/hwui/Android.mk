@@ -209,6 +209,7 @@ endif
 
 LOCAL_SRC_FILES += \
     tests/TestContext.cpp \
+    tests/TreeContentAnimation.cpp \
     tests/main.cpp
 
 include $(BUILD_EXECUTABLE)
