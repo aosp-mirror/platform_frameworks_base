@@ -144,11 +144,8 @@ public final class CreateInfo implements ICreateInfo {
             InjectMethodRunnable.class,
             InjectMethodRunnables.class,
             /* Java package classes */
-            AutoCloseable.class,
-            Objects.class,
             IntegralToString.class,
             UnsafeByteSequence.class,
-            Charsets.class,
             System_Delegate.class,
             LinkedHashMap_Delegate.class,
         };
@@ -169,6 +166,7 @@ public final class CreateInfo implements ICreateInfo {
         "android.graphics.BitmapFactory#setDensityFromOptions",
         "android.graphics.drawable.GradientDrawable#buildRing",
         "android.graphics.Typeface#getSystemFontConfigLocation",
+        "android.graphics.Typeface#makeFamilyFromParsed",
         "android.os.Handler#sendMessageAtTime",
         "android.os.HandlerThread#run",
         "android.preference.Preference#getView",
@@ -188,6 +186,7 @@ public final class CreateInfo implements ICreateInfo {
         "android.view.WindowManagerGlobal#getWindowManagerService",
         "android.view.inputmethod.InputMethodManager#getInstance",
         "android.view.MenuInflater#registerMenu",
+        "android.view.RenderNode#getMatrix",
         "android.view.RenderNode#nCreate",
         "android.view.RenderNode#nDestroyRenderNode",
         "android.view.RenderNode#nSetElevation",
@@ -200,7 +199,6 @@ public final class CreateInfo implements ICreateInfo {
         "android.view.RenderNode#nGetTranslationZ",
         "android.view.RenderNode#nSetRotation",
         "android.view.RenderNode#nGetRotation",
-        "android.view.RenderNode#getMatrix",
         "android.view.RenderNode#nSetLeft",
         "android.view.RenderNode#nSetTop",
         "android.view.RenderNode#nSetRight",
@@ -216,7 +214,6 @@ public final class CreateInfo implements ICreateInfo {
         "android.view.RenderNode#nGetScaleY",
         "android.view.RenderNode#nIsPivotExplicitlySet",
         "android.view.ViewGroup#drawChild",
-        "android.widget.TimePickerClockDelegate#getAmOrPmKeyCode",
         "com.android.internal.view.menu.MenuBuilder#createNewMenuItem",
         "com.android.internal.util.XmlUtils#convertValueToInt",
         "com.android.internal.textservice.ITextServicesManager$Stub#asInterface",
@@ -224,6 +221,7 @@ public final class CreateInfo implements ICreateInfo {
         "libcore.io.MemoryMappedFile#mmapRO",
         "libcore.io.MemoryMappedFile#close",
         "libcore.io.MemoryMappedFile#bigEndianIterator",
+        "libcore.util.NativeAllocationRegistry#applyFreeFunction",
     };
 
     /**
@@ -274,6 +272,7 @@ public final class CreateInfo implements ICreateInfo {
         "android.os.SystemProperties",
         "android.text.AndroidBidi",
         "android.text.StaticLayout",
+        "android.util.PathParser",
         "android.view.Display",
         "libcore.icu.ICU",
     };
@@ -306,12 +305,9 @@ public final class CreateInfo implements ICreateInfo {
      */
     private final static String[] JAVA_PKG_CLASSES =
         new String[] {
-            "java.lang.AutoCloseable",                         "com.android.tools.layoutlib.java.AutoCloseable",
-            "java.util.Objects",                               "com.android.tools.layoutlib.java.Objects",
-            "java.nio.charset.Charsets",                       "com.android.tools.layoutlib.java.Charsets",
+            "java.nio.charset.Charsets",                       "java.nio.charset.StandardCharsets",
             "java.lang.IntegralToString",                      "com.android.tools.layoutlib.java.IntegralToString",
             "java.lang.UnsafeByteSequence",                    "com.android.tools.layoutlib.java.UnsafeByteSequence",
-            "java.nio.charset.StandardCharsets",               "com.android.tools.layoutlib.java.Charsets",
         };
 
     private final static String[] EXCLUDED_CLASSES =

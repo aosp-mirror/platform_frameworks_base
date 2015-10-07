@@ -75,7 +75,7 @@ public final class Path_Delegate {
         return sManager.getDelegate(nPath);
     }
 
-    public Shape getJavaShape() {
+    public Path2D getJavaShape() {
         return mPath;
     }
 

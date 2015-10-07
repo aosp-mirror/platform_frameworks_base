@@ -25,7 +25,7 @@ import java.nio.ByteBuffer;
 /**
  * Delegate that overrides implementation for certain methods in {@link android.text.Hyphenator}
  * <p/>
- * Through the layoutlib_create tool, selected methods of StaticLayout have been replaced
+ * Through the layoutlib_create tool, selected methods of Hyphenator have been replaced
  * by calls to methods of the same name in this delegate class.
  */
 public class Hyphenator_Delegate {
@@ -39,7 +39,8 @@ public class Hyphenator_Delegate {
         return null;
     }
 
-    /*package*/ static long loadHyphenator(ByteBuffer buf, int offset) {
+    /*package*/ @SuppressWarnings("UnusedParameters")  // TODO implement this.
+    static long loadHyphenator(ByteBuffer buffer, int offset) {
         return sDelegateManager.addNewDelegate(new Hyphenator_Delegate());
     }
 }

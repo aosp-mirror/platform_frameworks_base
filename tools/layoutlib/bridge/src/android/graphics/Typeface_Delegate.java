@@ -24,8 +24,10 @@ import android.graphics.FontFamily_Delegate.FontVariant;
 
 import java.awt.Font;
 import java.io.File;
+import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import static android.graphics.FontFamily_Delegate.getFontLocation;
 
@@ -203,6 +205,17 @@ public final class Typeface_Delegate {
     @LayoutlibDelegate
     /*package*/ static File getSystemFontConfigLocation() {
         return new File(getFontLocation());
+    }
+
+    @LayoutlibDelegate
+    /*package*/ static FontFamily makeFamilyFromParsed(FontListParser.Family family,
+            Map<String, ByteBuffer> bufferForPath) {
+        FontFamily fontFamily = new FontFamily(family.lang, family.variant);
+        for (FontListParser.Font font : family.fonts) {
+            FontFamily_Delegate.addFont(fontFamily.mNativePtr, font.fontName, font.weight,
+                    font.isItalic);
+        }
+        return fontFamily;
     }
 
     // ---- Private delegate/helper methods ----
