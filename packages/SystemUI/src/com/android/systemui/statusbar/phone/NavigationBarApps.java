@@ -812,7 +812,7 @@ class NavigationBarApps extends LinearLayout
                     removeCallbacks(mShowMenuCallback);
                     break;
             }
-            return true;
+            return false;
         }
     }
 
