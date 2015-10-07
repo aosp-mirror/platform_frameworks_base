@@ -625,13 +625,18 @@ public class ValueAnimator extends Animator implements AnimationHandler.Animatio
     /**
      * Gets the current position of the animation in time, which is equal to the current
      * time minus the time that the animation started. An animation that is not yet started will
-     * return a value of zero.
+     * return a value of zero, unless the animation has has its play time set via
+     * {@link #setCurrentPlayTime(long)} or {@link #setCurrentFraction(float)}, in which case
+     * it will return the time that was set.
      *
      * @return The current position in time of the animation.
      */
     public long getCurrentPlayTime() {
-        if (!mInitialized || !mStarted) {
+        if (!mInitialized || (!mStarted && mSeekFraction < 0)) {
             return 0;
+        }
+        if (mSeekFraction >= 0) {
+            return (long) (mUnscaledDuration * mSeekFraction);
         }
         return AnimationUtils.currentAnimationTimeMillis() - mStartTime;
     }
