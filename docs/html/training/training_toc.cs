@@ -2012,8 +2012,7 @@ results."
           </li>
         </ul>
       </li>
-    </ul>
-    <ul>
+
       <li class="nav-section">
       <div class="nav-section-header"><a href="<?cs var:toroot ?>training/testing/ui-testing/index.html"
          description="How to automate your user interface tests for Android apps.">
@@ -2030,8 +2029,7 @@ results."
           </li>
         </ul>
       </li>
-    </ul>
-    <ul>
+
       <li class="nav-section">
       <div class="nav-section-header"><a href="<?cs var:toroot ?>training/testing/unit-testing/index.html"
          description="How to build effective unit tests for Android apps.">
@@ -2048,13 +2046,12 @@ results."
           </li>
         </ul>
       </li>
-    </ul>
-    <ul>
+
       <li><a href="<?cs var:toroot ?>training/testing/performance.html"
-      description="How to automate UI performance testing.">
-            <span class="en">Testing Display Performance</span>
-            </a></li>
-    <ul>
+            description="How to automate UI performance testing.">
+            Testing Display Performance</a>
+      </li>
+    </ul>
   </li>
   <!-- End best Testing -->
 
