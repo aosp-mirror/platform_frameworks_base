@@ -713,6 +713,7 @@ final class WindowState implements WindowManagerPolicy.WindowState {
             mStableFrame.set(mContentFrame);
         } else if (mAttrs.type == TYPE_DOCK_DIVIDER) {
             mDisplayContent.mDividerControllerLocked.positionDockedStackedDivider(mFrame);
+            mContentFrame.set(mFrame);
         } else {
             mContentFrame.set(Math.max(mContentFrame.left, mFrame.left),
                     Math.max(mContentFrame.top, mFrame.top),
