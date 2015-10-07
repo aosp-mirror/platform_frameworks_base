@@ -157,7 +157,6 @@ public final class CreateInfo implements ICreateInfo {
      * The list of methods to rewrite as delegates.
      */
     public final static String[] DELEGATE_METHODS = new String[] {
-        "android.animation.AnimatorInflater#loadAnimator",  // TODO: remove when Path.approximate() is supported.
         "android.app.Fragment#instantiate", //(Landroid/content/Context;Ljava/lang/String;Landroid/os/Bundle;)Landroid/app/Fragment;",
         "android.content.res.Resources$Theme#obtainStyledAttributes",
         "android.content.res.Resources$Theme#resolveAttribute",
@@ -235,6 +234,7 @@ public final class CreateInfo implements ICreateInfo {
         "android.graphics.Path",
         "android.graphics.PathDashPathEffect",
         "android.graphics.PathEffect",
+        "android.graphics.PathMeasure",
         "android.graphics.PixelXorXfermode",
         "android.graphics.PorterDuffColorFilter",
         "android.graphics.PorterDuffXfermode",
