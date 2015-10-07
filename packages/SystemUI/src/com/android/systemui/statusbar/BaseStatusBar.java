@@ -1539,6 +1539,7 @@ public abstract class BaseStatusBar extends SystemUI implements
             if (viableAction != null) {
                 Notification stripped = n.clone();
                 Notification.Builder.stripForDelivery(stripped);
+                stripped.extras.putBoolean("android.rebuild", true);
                 stripped.actions = new Notification.Action[] { viableAction };
                 stripped.extras.putBoolean("android.rebuild.contentView", true);
                 stripped.contentView = null;
@@ -1546,6 +1547,13 @@ public abstract class BaseStatusBar extends SystemUI implements
                 stripped.bigContentView = null;
                 stripped.extras.putBoolean("android.rebuild.hudView", true);
                 stripped.headsUpContentView = null;
+
+                stripped.extras.putParcelable(Notification.EXTRA_LARGE_ICON,
+                        stripped.getLargeIcon());
+                if (SystemProperties.getBoolean("debug.strip_third_line", false)) {
+                    stripped.extras.putCharSequence(Notification.EXTRA_INFO_TEXT, null);
+                    stripped.extras.putCharSequence(Notification.EXTRA_SUMMARY_TEXT, null);
+                }
 
                 Notification rebuilt = Notification.Builder.rebuild(mContext, stripped);
 
@@ -1580,25 +1588,33 @@ public abstract class BaseStatusBar extends SystemUI implements
         if (remoteInput != null) {
             View bigContentView = entry.getExpandedContentView();
             if (bigContentView != null) {
-                inflateRemoteInput(bigContentView, remoteInput, actions);
+                inflateRemoteInput(bigContentView, entry, remoteInput, actions);
             }
             View headsUpContentView = entry.getHeadsUpContentView();
             if (headsUpContentView != null) {
-                inflateRemoteInput(headsUpContentView, remoteInput, actions);
+                inflateRemoteInput(headsUpContentView, entry, remoteInput, actions);
             }
         }
 
     }
 
-    private void inflateRemoteInput(View view, RemoteInput remoteInput,
+    private void inflateRemoteInput(View view, Entry entry, RemoteInput remoteInput,
             Notification.Action[] actions) {
         View actionContainerCandidate = view.findViewById(com.android.internal.R.id.actions);
         if (actionContainerCandidate instanceof ViewGroup) {
             ViewGroup actionContainer = (ViewGroup) actionContainerCandidate;
-            actionContainer.removeAllViews();
-            actionContainer.addView(
-                    RemoteInputView.inflate(mContext, actionContainer, actions[0], remoteInput));
+            RemoteInputView riv = inflateRemoteInputView(actionContainer, entry,
+                    actions[0], remoteInput);
+            if (riv != null) {
+                actionContainer.removeAllViews();
+                actionContainer.addView(riv);
+            }
         }
+    }
+
+    protected RemoteInputView inflateRemoteInputView(ViewGroup root, Entry entry,
+            Notification.Action action, RemoteInput remoteInput) {
+        return null;
     }
 
     private final class NotificationClicker implements View.OnClickListener {

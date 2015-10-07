@@ -25,6 +25,7 @@ import android.app.ActivityManagerNative;
 import android.app.IActivityManager;
 import android.app.Notification;
 import android.app.PendingIntent;
+import android.app.RemoteInput;
 import android.app.StatusBarManager;
 import android.content.BroadcastReceiver;
 import android.content.ComponentCallbacks2;
@@ -82,6 +83,7 @@ import android.view.MotionEvent;
 import android.view.ThreadedRenderer;
 import android.view.VelocityTracker;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.ViewGroup.LayoutParams;
 import android.view.ViewStub;
 import android.view.WindowManager;
@@ -128,6 +130,7 @@ import com.android.systemui.statusbar.KeyguardIndicationController;
 import com.android.systemui.statusbar.NotificationData;
 import com.android.systemui.statusbar.NotificationData.Entry;
 import com.android.systemui.statusbar.NotificationOverflowContainer;
+import com.android.systemui.statusbar.RemoteInputController;
 import com.android.systemui.statusbar.ScrimView;
 import com.android.systemui.statusbar.SignalClusterView;
 import com.android.systemui.statusbar.SpeedBumpView;
@@ -150,6 +153,7 @@ import com.android.systemui.statusbar.policy.LocationControllerImpl;
 import com.android.systemui.statusbar.policy.NetworkControllerImpl;
 import com.android.systemui.statusbar.policy.NextAlarmController;
 import com.android.systemui.statusbar.policy.PreviewInflater;
+import com.android.systemui.statusbar.policy.RemoteInputView;
 import com.android.systemui.statusbar.policy.RotationLockControllerImpl;
 import com.android.systemui.statusbar.policy.SecurityControllerImpl;
 import com.android.systemui.statusbar.policy.UserInfoController;
@@ -298,6 +302,8 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
     Object mQueueLock = new Object();
 
     StatusBarIconController mIconController;
+
+    private RemoteInputController mRemoteInputController;
 
     // expanded notifications
     NotificationPanelView mNotificationPanel; // the sliding/resizing panel within the notification window
@@ -1082,6 +1088,13 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
 
     public StatusBarWindowView getStatusBarWindow() {
         return mStatusBarWindow;
+    }
+
+    @Override
+    protected RemoteInputView inflateRemoteInputView(ViewGroup root, Entry entry,
+            Notification.Action action, RemoteInput remoteInput) {
+        return RemoteInputView.inflate(mContext, root, entry, action, remoteInput,
+                mRemoteInputController);
     }
 
     public int getStatusBarHeight() {
@@ -2840,6 +2853,8 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
     private void addStatusBarWindow() {
         makeStatusBarView();
         mStatusBarWindowManager = new StatusBarWindowManager(mContext);
+        mRemoteInputController = new RemoteInputController(mStatusBarWindowManager,
+                mHeadsUpManager);
         mStatusBarWindowManager.add(mStatusBarWindow, getStatusBarHeight());
     }
 

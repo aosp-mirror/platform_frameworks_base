@@ -123,7 +123,7 @@ public class StatusBarWindowManager {
     private void applyFocusableFlag(State state) {
         boolean panelFocusable = state.statusBarFocusable && state.panelExpanded;
         if (state.keyguardShowing && state.keyguardNeedsInput && state.bouncerShowing
-                || BaseStatusBar.ENABLE_REMOTE_INPUT && panelFocusable) {
+                || BaseStatusBar.ENABLE_REMOTE_INPUT && state.remoteInputActive) {
             mLpChanged.flags &= ~WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
             mLpChanged.flags &= ~WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM;
         } else if (state.isKeyguardShowingAndNotOccluded() || panelFocusable) {
@@ -292,6 +292,11 @@ public class StatusBarWindowManager {
         apply(mCurrentState);
     }
 
+    public void setRemoteInputActive(boolean remoteInputActive) {
+        mCurrentState.remoteInputActive = remoteInputActive;
+        apply(mCurrentState);
+    }
+
     /**
      * Set whether the screen brightness is forced to the value we use for doze mode by the status
      * bar window.
@@ -325,6 +330,8 @@ public class StatusBarWindowManager {
          * The {@link BaseStatusBar} state from the status bar.
          */
         int statusBarState;
+
+        boolean remoteInputActive;
 
         private boolean isKeyguardShowingAndNotOccluded() {
             return keyguardShowing && !keyguardOccluded;

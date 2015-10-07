@@ -17,6 +17,8 @@
 package com.android.systemui.statusbar.policy;
 
 import com.android.systemui.R;
+import com.android.systemui.statusbar.NotificationData;
+import com.android.systemui.statusbar.RemoteInputController;
 
 import android.annotation.NonNull;
 import android.app.Notification;
@@ -33,11 +35,14 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.EditorInfo;
+import android.view.inputmethod.InputConnection;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+
+import java.util.ArrayList;
 
 /**
  * Host for the remote input.
@@ -51,6 +56,8 @@ public class RemoteInputView extends FrameLayout implements View.OnClickListener
     private PendingIntent mPendingIntent;
     private RemoteInput mRemoteInput;
     private Notification.Action mAction;
+    private RemoteInputController mController;
+    private NotificationData.Entry mEntry;
 
     public RemoteInputView(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -85,12 +92,13 @@ public class RemoteInputView extends FrameLayout implements View.OnClickListener
         });
         mEditText.setOnClickListener(this);
         mEditText.setInnerFocusable(false);
+        mEditText.mDefocusListener = this;
     }
 
     private void sendRemoteInput() {
         Bundle results = new Bundle();
         results.putString(mRemoteInput.getResultKey(), mEditText.getText().toString());
-        Intent fillInIntent = new Intent();
+        Intent fillInIntent = new Intent().addFlags(Intent.FLAG_RECEIVER_FOREGROUND);
         RemoteInput.addResultsToIntent(mAction.getRemoteInputs(), fillInIntent,
                 results);
 
@@ -105,7 +113,8 @@ public class RemoteInputView extends FrameLayout implements View.OnClickListener
     }
 
     public static RemoteInputView inflate(Context context, ViewGroup root,
-            Notification.Action action, RemoteInput remoteInput) {
+            NotificationData.Entry entry, Notification.Action action, RemoteInput remoteInput,
+            RemoteInputController controller) {
         RemoteInputView v = (RemoteInputView)
                 LayoutInflater.from(context).inflate(R.layout.remote_input, root, false);
 
@@ -113,6 +122,8 @@ public class RemoteInputView extends FrameLayout implements View.OnClickListener
         v.mPendingIntent = action.actionIntent;
         v.mRemoteInput = remoteInput;
         v.mAction = action;
+        v.mController = controller;
+        v.mEntry = entry;
 
         return v;
     }
@@ -122,13 +133,20 @@ public class RemoteInputView extends FrameLayout implements View.OnClickListener
         if (v == mEditText) {
             if (!mEditText.isFocusable()) {
                 mEditText.setInnerFocusable(true);
-                InputMethodManager imm = InputMethodManager.getInstance();
-                if (imm != null) {
-                    imm.viewClicked(mEditText);
-                    imm.showSoftInput(mEditText, 0);
-                }
+                mController.addRemoteInput(mEntry);
+                mEditText.mShowImeOnInputConnection = true;
             }
         }
+    }
+
+    public void onDefocus() {
+        mController.removeRemoteInput(mEntry);
+    }
+
+    @Override
+    protected void onDetachedFromWindow() {
+        super.onDetachedFromWindow();
+        mController.removeRemoteInput(mEntry);
     }
 
     /**
@@ -138,6 +156,8 @@ public class RemoteInputView extends FrameLayout implements View.OnClickListener
     public static class RemoteEditText extends EditText {
 
         private final Drawable mBackground;
+        private RemoteInputView mDefocusListener;
+        boolean mShowImeOnInputConnection;
 
         public RemoteEditText(Context context, AttributeSet attrs) {
             super(context, attrs);
@@ -147,6 +167,10 @@ public class RemoteInputView extends FrameLayout implements View.OnClickListener
         private void defocusIfNeeded() {
             if (isFocusable() && isEnabled()) {
                 setInnerFocusable(false);
+                if (mDefocusListener != null) {
+                    mDefocusListener.onDefocus();
+                }
+                mShowImeOnInputConnection = false;
             }
         }
 
@@ -173,6 +197,28 @@ public class RemoteInputView extends FrameLayout implements View.OnClickListener
             return super.onKeyPreIme(keyCode, event);
         }
 
+        @Override
+        public InputConnection onCreateInputConnection(EditorInfo outAttrs) {
+            final InputConnection inputConnection = super.onCreateInputConnection(outAttrs);
+
+            if (mShowImeOnInputConnection && inputConnection != null) {
+                final InputMethodManager imm = InputMethodManager.getInstance();
+                if (imm != null) {
+                    // onCreateInputConnection is called by InputMethodManager in the middle of
+                    // setting up the connection to the IME; wait with requesting the IME until that
+                    // work has completed.
+                    post(new Runnable() {
+                        @Override
+                        public void run() {
+                            imm.viewClicked(RemoteEditText.this);
+                            imm.showSoftInput(RemoteEditText.this, 0);
+                        }
+                    });
+                }
+            }
+
+            return inputConnection;
+        }
 
         void setInnerFocusable(boolean focusable) {
             setFocusableInTouchMode(focusable);
