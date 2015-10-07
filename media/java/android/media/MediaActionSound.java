@@ -52,7 +52,7 @@ public class MediaActionSound {
         "/system/media/audio/ui/camera_click.ogg",
         "/system/media/audio/ui/camera_focus.ogg",
         "/system/media/audio/ui/VideoRecord.ogg",
-        "/system/media/audio/ui/VideoRecord.ogg"
+        "/system/media/audio/ui/VideoStop.ogg"
     };
 
     private static final String TAG = "MediaActionSound";
