@@ -32679,6 +32679,7 @@ package android.telecom {
     method public android.telecom.PhoneAccountHandle getAccountHandle();
     method public android.net.Uri getAddress();
     method public int getCapabilities();
+    method public android.os.Bundle getExtras();
     method public int getHighlightColor();
     method public android.graphics.drawable.Icon getIcon();
     method public java.lang.CharSequence getLabel();
@@ -32712,6 +32713,7 @@ package android.telecom {
     method public android.telecom.PhoneAccount build();
     method public android.telecom.PhoneAccount.Builder setAddress(android.net.Uri);
     method public android.telecom.PhoneAccount.Builder setCapabilities(int);
+    method public android.telecom.PhoneAccount.Builder setExtras(android.os.Bundle);
     method public android.telecom.PhoneAccount.Builder setHighlightColor(int);
     method public android.telecom.PhoneAccount.Builder setIcon(android.graphics.drawable.Icon);
     method public android.telecom.PhoneAccount.Builder setShortDescription(java.lang.CharSequence);
