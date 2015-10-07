@@ -57,6 +57,8 @@ public class DockedStackDividerController implements View.OnTouchListener, DimLa
     private final DisplayContent mDisplayContent;
     private final int mSideMargin;
     private final DimLayer mDimLayer;
+    private final int mDisplayWidth;
+    private final int mDisplayHeight;
     private View mView;
     private Rect mTmpRect = new Rect();
     private Rect mLastResizeRect = new Rect();
@@ -70,6 +72,9 @@ public class DockedStackDividerController implements View.OnTouchListener, DimLa
     DockedStackDividerController(Context context, DisplayContent displayContent) {
         mContext = context;
         mDisplayContent = displayContent;
+        final DisplayInfo info = displayContent.getDisplayInfo();
+        mDisplayWidth = info.logicalWidth;
+        mDisplayHeight = info.logicalHeight;
         mDividerWidth = context.getResources().getDimensionPixelSize(
                 com.android.internal.R.dimen.docked_stack_divider_thickness);
         mSideMargin = dipToPixel(SIDE_MARGIN_DIP, mDisplayContent.getDisplayMetrics());
@@ -173,14 +178,33 @@ public class DockedStackDividerController implements View.OnTouchListener, DimLa
             case MotionEvent.ACTION_UP:
             case MotionEvent.ACTION_CANCEL:
                 if (mTaskStack != null) {
-                    maybeDismissTaskStack((int) event.getRawX(), (int) event.getRawY());
+                    final int x = (int) event.getRawX();
+                    final int y = (int) event.getRawY();
+                    // At most one of these will be executed, the other one will exit early.
+                    maybeDismissTaskStack(x, y);
+                    maybeMaximizeTaskStack(x, y);
+                    mTaskStack = null;
                 }
-                setDimLayerVisible(false, -1, -1);
-                mTaskStack = null;
+                setDimLayerVisible(false);
                 mDockSide = TaskStack.DOCKED_INVALID;
                 break;
         }
         return true;
+    }
+
+    private void maybeMaximizeTaskStack(int x, int y) {
+        final int distance = distanceFromFullScreen(mDockSide, x, y);
+        if (distance == -1) {
+            Slog.wtf(TAG, "maybeMaximizeTaskStack: Unknown dock side=" + mDockSide);
+            return;
+        }
+        if (distance <= mSideMargin) {
+            try {
+                mDisplayContent.mService.mActivityManager.resizeStack(mTaskStack.mStackId, null);
+            } catch (RemoteException e) {
+                // This can't happen because we are in the same process.
+            }
+        }
     }
 
     private void maybeDismissTaskStack(int x, int y) {
@@ -199,12 +223,23 @@ public class DockedStackDividerController implements View.OnTouchListener, DimLa
     }
 
     private void updateDimLayer(int x, int y) {
-        final int distance = distanceFromDockSide(mDockSide, mOriginalRect, x, y);
-        if (distance == -1) {
+        final int dismissDistance = distanceFromDockSide(mDockSide, mOriginalRect, x, y);
+        final int maximizeDistance = distanceFromFullScreen(mDockSide, x, y);
+        if (dismissDistance == -1 || maximizeDistance == -1) {
             Slog.wtf(TAG, "updateDimLayer: Unknown dock side=" + mDockSide);
             return;
         }
-        setDimLayerVisible(distance <= mSideMargin, x, y);
+        if (dismissDistance <= mSideMargin && maximizeDistance <= mSideMargin) {
+            Slog.wtf(TAG, "Both dismiss and maximize distances would trigger dim layer.");
+            return;
+        }
+        if (dismissDistance <= mSideMargin) {
+            setDismissDimLayerVisible(x, y);
+        } else if (maximizeDistance <= mSideMargin) {
+            setMaximizeDimLayerVisible(x, y);
+        } else {
+            setDimLayerVisible(false);
+        }
     }
 
     /**
@@ -226,29 +261,68 @@ public class DockedStackDividerController implements View.OnTouchListener, DimLa
         return -1;
     }
 
-    private void setDimLayerVisible(boolean visible, int x, int y) {
-        if (visible) {
-            mTmpRect.set(mOriginalRect);
-            switch (mDockSide) {
-                case DOCKED_LEFT:
-                    mTmpRect.right = x;
-                    break;
-                case DOCKED_TOP:
-                    mTmpRect.bottom = y;
-                    break;
-                case DOCKED_RIGHT:
-                    mTmpRect.left = x;
-                    break;
-                case DOCKED_BOTTOM:
-                    mTmpRect.top = y;
-                    break;
-                default:
-                    Slog.wtf(TAG, "setDimLayerVisible: Unknown dock side when setting dim layer="
-                            + mDockSide);
-                    return;
-            }
-            mDimLayer.setBounds(mTmpRect);
+    private int distanceFromFullScreen(int dockSide, int x, int y) {
+        switch (dockSide) {
+            case DOCKED_LEFT:
+                return mDisplayWidth - x;
+            case DOCKED_TOP:
+                return mDisplayHeight - y;
+            case DOCKED_RIGHT:
+                return x;
+            case DOCKED_BOTTOM:
+                return y;
         }
+        return -1;
+    }
+
+    private void setDismissDimLayerVisible(int x, int y) {
+        mTmpRect.set(mOriginalRect);
+        switch (mDockSide) {
+            case DOCKED_LEFT:
+                mTmpRect.right = x;
+                break;
+            case DOCKED_TOP:
+                mTmpRect.bottom = y;
+                break;
+            case DOCKED_RIGHT:
+                mTmpRect.left = x;
+                break;
+            case DOCKED_BOTTOM:
+                mTmpRect.top = y;
+                break;
+            default:
+                Slog.wtf(TAG, "setDismissDimLayerVisible: Unknown dock side when setting dim "
+                        + "layer=" + mDockSide);
+                return;
+        }
+        mDimLayer.setBounds(mTmpRect);
+        setDimLayerVisible(true);
+    }
+
+    private void setMaximizeDimLayerVisible(int x, int y) {
+        mTmpRect.set(0, 0, mDisplayWidth, mDisplayHeight);
+        switch (mDockSide) {
+            case DOCKED_LEFT:
+                mTmpRect.left = x;
+                break;
+            case DOCKED_TOP:
+                mTmpRect.top = y;
+                break;
+            case DOCKED_RIGHT:
+                mTmpRect.right = x;
+                break;
+            case DOCKED_BOTTOM:
+                mTmpRect.top = y;
+                break;
+            default:
+                Slog.wtf(TAG, "setMaximizeDimLayerVisible: Unknown dock side when setting dim "
+                        + "layer=" + mDockSide);
+        }
+        mDimLayer.setBounds(mTmpRect);
+        setDimLayerVisible(true);
+    }
+
+    private void setDimLayerVisible(boolean visible) {
         if (mDimLayerVisible == visible) {
             return;
         }
