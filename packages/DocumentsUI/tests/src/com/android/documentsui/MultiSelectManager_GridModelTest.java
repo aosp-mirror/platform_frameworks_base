@@ -24,6 +24,7 @@ import android.graphics.Rect;
 import android.support.v7.widget.RecyclerView.OnScrollListener;
 import android.test.AndroidTestCase;
 import android.util.SparseBooleanArray;
+import android.view.View;
 
 import com.android.documentsui.MultiSelectManager.GridModel;
 
@@ -34,14 +35,14 @@ public class MultiSelectManager_GridModelTest extends AndroidTestCase {
     private static final int VIEWPORT_HEIGHT = 500;
 
     private static GridModel model;
-    private static TestHelper helper;
+    private static TestEnvironment env;
     private static SparseBooleanArray lastSelection;
     private static int viewWidth;
 
     private static void setUp(int numChildren, int numColumns) {
-        helper = new TestHelper(numChildren, numColumns);
+        env = new TestEnvironment(numChildren, numColumns);
         viewWidth = VIEW_PADDING_PX + numColumns * (VIEW_PADDING_PX + CHILD_VIEW_EDGE_PX);
-        model = new GridModel(helper);
+        model = new GridModel(env);
         model.addOnSelectionChangedListener(
                 new GridModel.OnSelectionChangedListener() {
                     @Override
@@ -54,7 +55,7 @@ public class MultiSelectManager_GridModelTest extends AndroidTestCase {
     @Override
     public void tearDown() {
         model = null;
-        helper = null;
+        env = null;
         lastSelection = null;
     }
 
@@ -176,12 +177,12 @@ public class MultiSelectManager_GridModelTest extends AndroidTestCase {
     }
 
     private static void scroll(int dy) {
-        assertTrue(helper.verticalOffset + VIEWPORT_HEIGHT + dy <= helper.getTotalHeight());
-        helper.verticalOffset += dy;
+        assertTrue(env.verticalOffset + VIEWPORT_HEIGHT + dy <= env.getTotalHeight());
+        env.verticalOffset += dy;
         model.onScrolled(null, 0, dy);
     }
 
-    private static final class TestHelper implements MultiSelectManager.BandEnvironment {
+    private static final class TestEnvironment implements MultiSelectManager.SelectionEnvironment {
 
         public int horizontalOffset = 0;
         public int verticalOffset = 0;
@@ -189,7 +190,7 @@ public class MultiSelectManager_GridModelTest extends AndroidTestCase {
         private final int mNumRows;
         private final int mNumChildren;
 
-        public TestHelper(int numChildren, int numColumns) {
+        public TestEnvironment(int numChildren, int numColumns) {
             mNumChildren = numChildren;
             mNumColumns = numColumns;
             mNumRows = (int) Math.ceil((double) numChildren / mNumColumns);
@@ -305,6 +306,16 @@ public class MultiSelectManager_GridModelTest extends AndroidTestCase {
 
         @Override
         public void removeCallback(Runnable r) {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public int getAdapterPositionForChildView(View view) {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public void focusItem(int i) {
             throw new UnsupportedOperationException();
         }
     }
