@@ -181,6 +181,7 @@ public class PagedTileLayout extends ViewPager implements QSTileLayout {
         public TilePage(Context context, AttributeSet attrs) {
             super(context, attrs);
             mAllowDual = false;
+            updateResources();
         }
 
         public void setMaxRows(int maxRows) {

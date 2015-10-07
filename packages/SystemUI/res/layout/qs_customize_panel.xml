@@ -20,7 +20,8 @@
     android:layout_height="match_parent"
     android:orientation="vertical"
     android:paddingBottom="@dimen/navigation_bar_size"
-    android:background="?android:attr/windowBackground">
+    android:background="@drawable/qs_customizer_background"
+    android:gravity="center_horizontal">
 
     <FrameLayout
         android:layout_width="match_parent"
@@ -76,10 +77,10 @@
     </FrameLayout>
 
     <com.android.systemui.tuner.AutoScrollView
-        android:layout_width="match_parent"
+        android:layout_width="@dimen/notification_panel_width"
         android:layout_height="0dp"
         android:layout_weight="1"
-        android:paddingTop="8dp"
+        android:paddingTop="12dp"
         android:paddingBottom="8dp"
         android:elevation="2dp">
 
@@ -87,7 +88,9 @@
             android:id="@+id/quick_settings_panel"
             android:background="#0000"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="@dimen/notification_side_padding"
+            android:layout_marginRight="@dimen/notification_side_padding" />
 
     </com.android.systemui.tuner.AutoScrollView>
 

@@ -15,23 +15,19 @@
  */
 package com.android.systemui.qs.customize;
 
+import android.animation.Animator;
 import android.content.ClipData;
 import android.content.Context;
 import android.util.AttributeSet;
 import android.util.TypedValue;
-import android.view.ContextThemeWrapper;
-import android.view.DragEvent;
-import android.view.Menu;
-import android.view.MenuItem;
-import android.view.View;
+import android.view.*;
 import android.view.View.OnClickListener;
-import android.view.ViewGroup;
 import android.widget.LinearLayout;
 import android.widget.Toolbar;
 import android.widget.Toolbar.OnMenuItemClickListener;
-
 import com.android.systemui.R;
 import com.android.systemui.SystemUIApplication;
+import com.android.systemui.qs.QSDetailClipper;
 import com.android.systemui.qs.QSTile.Host.Callback;
 import com.android.systemui.qs.customize.DropButton.OnDropListener;
 import com.android.systemui.statusbar.phone.PhoneStatusBar;
@@ -48,10 +44,11 @@ import java.util.ArrayList;
  * *someday* do fancy animations to get into/out of it.
  */
 public class QSCustomizer extends LinearLayout implements OnMenuItemClickListener, Callback,
-        OnDropListener, OnClickListener {
+        OnDropListener, OnClickListener, Animator.AnimatorListener {
 
     private static final int MENU_SAVE = Menu.FIRST;
     private static final int MENU_RESET = Menu.FIRST + 1;
+    private final QSDetailClipper mClipper;
 
     private PhoneStatusBar mPhoneStatusBar;
 
@@ -69,6 +66,7 @@ public class QSCustomizer extends LinearLayout implements OnMenuItemClickListene
         super(new ContextThemeWrapper(context, android.R.style.Theme_Material), attrs);
         mPhoneStatusBar = ((SystemUIApplication) mContext.getApplicationContext())
                 .getComponent(PhoneStatusBar.class);
+        mClipper = new QSDetailClipper(this);
     }
 
     public void setHost(QSTileHost host) {
@@ -90,8 +88,7 @@ public class QSCustomizer extends LinearLayout implements OnMenuItemClickListene
         mToolbar.setNavigationOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
-                // TODO: Is this all we want...?
-                hide();
+                hide(0, 0);
             }
         });
         mToolbar.setOnMenuItemClickListener(this);
@@ -115,17 +112,18 @@ public class QSCustomizer extends LinearLayout implements OnMenuItemClickListene
         mFab.setOnClickListener(this);
     }
 
-    public void show() {
+    public void show(int x, int y) {
         isShown = true;
         mHost.setSavedTiles();
-        // TODO: Fancy shmancy reveal.
         mPhoneStatusBar.getStatusBarWindow().addView(this);
+        mQsPanel.setListening(true);
+        mClipper.animateCircularClip(x, y, true, this);
     }
 
-    public void hide() {
+    public void hide(int x, int y) {
         isShown = false;
-        // TODO: Similarly awesome or better hide.
-        mPhoneStatusBar.getStatusBarWindow().removeView(this);
+        mQsPanel.setListening(false);
+        mClipper.animateCircularClip(x, y, false, this);
     }
 
     public boolean isCustomizing() {
@@ -146,7 +144,8 @@ public class QSCustomizer extends LinearLayout implements OnMenuItemClickListene
 
     private void save() {
         mHost.saveCurrentTiles();
-        hide();
+        // TODO: At save button.
+        hide(0, 0);
     }
 
     @Override
@@ -196,5 +195,29 @@ public class QSCustomizer extends LinearLayout implements OnMenuItemClickListene
         if (mFab == v) {
             // TODO: Show list of tiles.
         }
+    }
+
+    @Override
+    public void onAnimationEnd(Animator animation) {
+        if (!isShown) {
+            mPhoneStatusBar.getStatusBarWindow().removeView(this);
+        }
+    }
+
+    @Override
+    public void onAnimationCancel(Animator animation) {
+        if (!isShown) {
+            mPhoneStatusBar.getStatusBarWindow().removeView(this);
+        }
+    }
+
+    @Override
+    public void onAnimationStart(Animator animation) {
+        // Don't care.
+    }
+
+    @Override
+    public void onAnimationRepeat(Animator animation) {
+        // Don't care.
     }
 }
