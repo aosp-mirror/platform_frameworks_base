@@ -23,11 +23,12 @@ import static com.android.server.wm.WindowManagerService.DEBUG_LAYERS;
 import static com.android.server.wm.WindowManagerService.DEBUG_ORIENTATION;
 import static com.android.server.wm.WindowManagerService.DEBUG_STARTING_WINDOW;
 import static com.android.server.wm.WindowManagerService.DEBUG_SURFACE_TRACE;
-import static com.android.server.wm.WindowManagerService.SHOW_TRANSACTIONS;
 import static com.android.server.wm.WindowManagerService.DEBUG_VISIBILITY;
+import static com.android.server.wm.WindowManagerService.localLOGV;
 import static com.android.server.wm.WindowManagerService.SHOW_LIGHT_TRANSACTIONS;
 import static com.android.server.wm.WindowManagerService.SHOW_SURFACE_ALLOC;
-import static com.android.server.wm.WindowManagerService.localLOGV;
+import static com.android.server.wm.WindowManagerService.SHOW_TRANSACTIONS;
+import static com.android.server.wm.WindowManagerService.TYPE_LAYER_MULTIPLIER;
 import static com.android.server.wm.WindowSurfacePlacer.SET_ORIENTATION_CHANGE_COMPLETE;
 import static com.android.server.wm.WindowSurfacePlacer.SET_TURN_ON_SCREEN;
 
@@ -66,6 +67,7 @@ import java.util.ArrayList;
  **/
 class WindowStateAnimator {
     static final String TAG = "WindowStateAnimator";
+    static final int WINDOW_FREEZE_LAYER = TYPE_LAYER_MULTIPLIER * 200;
 
     // Unchanging local convenience fields.
     final WindowManagerService mService;
@@ -108,7 +110,7 @@ class WindowStateAnimator {
      */
     boolean mSurfaceDestroyDeferred;
 
-    boolean mDestroyPendingSurfaceUponRedraw;
+    boolean mDestroyPreservedSurfaceUponRedraw;
     float mShownAlpha = 0;
     float mAlpha = 0;
     float mLastAlpha = 0;
@@ -556,12 +558,10 @@ class WindowStateAnimator {
         if (atoken == null || atoken.allDrawn || mWin.mAttrs.type == TYPE_APPLICATION_STARTING) {
             result = performShowLocked();
         }
-        if (mDestroyPendingSurfaceUponRedraw) {
-            mDestroyPendingSurfaceUponRedraw = false;
-            destroyDeferredSurfaceLocked();
-            mService.stopFreezingDisplayLocked();
+        if (mDestroyPreservedSurfaceUponRedraw && result) {
+            mService.mDestroyPreservedSurface.add(mWin);
         }
-        return false;
+        return result;
     }
 
     static class SurfaceTrace extends SurfaceControl {
@@ -779,6 +779,31 @@ class WindowStateAnimator {
                     + " opaque=" + mIsOpaque
                     + " (" + mDsdx + "," + mDtdx + "," + mDsdy + "," + mDtdy + ")";
         }
+    }
+
+    void preserveSurfaceLocked() {
+        if (mDestroyPreservedSurfaceUponRedraw) {
+            return;
+        }
+        if (mSurfaceControl != null) {
+            SurfaceControl.openTransaction();
+            try {
+                mSurfaceControl.setLayer(WINDOW_FREEZE_LAYER);
+            } finally {
+                SurfaceControl.closeTransaction();
+            }
+        }
+        mDestroyPreservedSurfaceUponRedraw = true;
+        mSurfaceDestroyDeferred = true;
+        destroySurfaceLocked();
+    }
+
+    void destroyPreservedSurfaceLocked() {
+        if (!mDestroyPreservedSurfaceUponRedraw) {
+            return;
+        }
+        destroyDeferredSurfaceLocked();
+        mDestroyPreservedSurfaceUponRedraw = false;
     }
 
     SurfaceControl createSurfaceLocked() {

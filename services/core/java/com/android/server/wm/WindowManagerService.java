@@ -400,6 +400,13 @@ public class WindowManagerService extends IWindowManager.Stub
     final ArrayList<WindowState> mDestroySurface = new ArrayList<>();
 
     /**
+     * Windows with a preserved surface waiting to be destroyed. These windows
+     * are going through a surface change. We keep the old surface around until
+     * the first frame on the new surface finishes drawing.
+     */
+    final ArrayList<WindowState> mDestroyPreservedSurface = new ArrayList<>();
+
+    /**
      * Windows that have lost input focus and are waiting for the new
      * focus window to be displayed before they are told about this.
      */
@@ -2617,9 +2624,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 if (win.isDragResizeChanged()) {
                     win.setDragResizing();
                     if (win.mHasSurface) {
-                        winAnimator.mDestroyPendingSurfaceUponRedraw = true;
-                        winAnimator.mSurfaceDestroyDeferred = true;
-                        winAnimator.destroySurfaceLocked();
+                        winAnimator.preserveSurfaceLocked();
                         toBeDisplayed = true;
                     }
                 }
@@ -7782,6 +7787,13 @@ public class WindowManagerService extends IWindowManager.Stub
         }
     }
 
+    void destroyPreservedSurfaceLocked() {
+        for (int i = mDestroyPreservedSurface.size() - 1; i >= 0 ; i--) {
+            final WindowState w = mDestroyPreservedSurface.get(i);
+            w.mWinAnimator.destroyPreservedSurfaceLocked();
+        }
+        mDestroyPreservedSurface.clear();
+    }
     // -------------------------------------------------------------
     // IWindowManager API
     // -------------------------------------------------------------

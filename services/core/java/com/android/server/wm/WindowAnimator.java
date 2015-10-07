@@ -734,6 +734,9 @@ public class WindowAnimator {
         if (!mAnimating && wasAnimating) {
             mWindowPlacerLocked.requestTraversal();
         }
+
+        mService.destroyPreservedSurfaceLocked();
+
         if (WindowManagerService.DEBUG_WINDOW_TRACE) {
             Slog.i(TAG, "!!! animate: exit mAnimating=" + mAnimating
                 + " mBulkUpdateParams=" + Integer.toHexString(mBulkUpdateParams)
