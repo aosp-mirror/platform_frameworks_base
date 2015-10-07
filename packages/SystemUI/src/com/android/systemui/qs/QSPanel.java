@@ -172,7 +172,8 @@ public class QSPanel extends FrameLayout implements Tunable {
                 mCustomizePanel.setHost(mHost);
             } else {
                 if (mCustomizePanel != null && mCustomizePanel.isCustomizing()) {
-                    mCustomizePanel.hide();
+                    mCustomizePanel.hide(mCustomizePanel.getWidth() / 2,
+                            mCustomizePanel.getHeight() / 2);
                 }
                 mCustomizePanel = null;
             }
@@ -242,7 +243,7 @@ public class QSPanel extends FrameLayout implements Tunable {
 
     public void onCollapse() {
         if (mCustomizePanel != null && mCustomizePanel.isCustomizing()) {
-            mCustomizePanel.hide();
+            mCustomizePanel.hide(mCustomizePanel.getWidth() / 2, mCustomizePanel.getHeight() / 2);
         }
     }
 
@@ -382,7 +383,12 @@ public class QSPanel extends FrameLayout implements Tunable {
             public boolean onLongClick(View v) {
                 if (mCustomizePanel != null) {
                     if (!mCustomizePanel.isCustomizing()) {
-                        mCustomizePanel.show();
+                        int[] loc = new int[2];
+                        getLocationInWindow(loc);
+                        int x = r.tileView.getLeft() + r.tileView.getWidth() / 2 + loc[0];
+                        int y = r.tileView.getTop() + mTileLayout.getOffsetTop(r)
+                                + r.tileView.getHeight() / 2 + loc[1];
+                        mCustomizePanel.show(x, y);
                     }
                 } else {
                     r.tile.longClick();
@@ -409,7 +415,7 @@ public class QSPanel extends FrameLayout implements Tunable {
     public void closeDetail() {
         if (mCustomizePanel != null && mCustomizePanel.isCustomizing()) {
             // Treat this as a detail panel for now, to make things easy.
-            mCustomizePanel.hide();
+            mCustomizePanel.hide(mCustomizePanel.getWidth() / 2, mCustomizePanel.getHeight() / 2);
             return;
         }
         showDetail(false, mDetailRecord);
