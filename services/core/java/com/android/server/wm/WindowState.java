@@ -583,12 +583,6 @@ final class WindowState implements WindowManagerPolicy.WindowState {
                 if (mContainingFrame.isEmpty()) {
                     mContainingFrame.set(cf);
                 }
-            } else {
-                // Make sure the containing frame is within the content frame so we don't layout
-                // resized window under screen decorations.
-                if (!mContainingFrame.intersect(cf)) {
-                    mContainingFrame.set(cf);
-                }
             }
             mDisplayFrame.set(mContainingFrame);
         } else {
