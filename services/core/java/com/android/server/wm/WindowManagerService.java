@@ -2452,7 +2452,6 @@ public class WindowManagerService extends IWindowManager.Stub
         boolean configChanged;
         boolean surfaceChanged = false;
         boolean dragResizing = false;
-        boolean animating;
         boolean hasStatusBarPermission =
                 mContext.checkCallingOrSelfPermission(android.Manifest.permission.STATUS_BAR)
                         == PackageManager.PERMISSION_GRANTED;
@@ -2603,16 +2602,12 @@ public class WindowManagerService extends IWindowManager.Stub
 
                 // If we're starting a drag-resize, we'll be changing the surface size as well as
                 // notifying the client to render to with an offset from the surface's top-left.
-                // Do a screen freeze, and keep the old surface until the the first frame drawn to
-                // the new surface comes back, so that we avoid a flash due to mismatching surface
-                // setups on window manager side and client side.
                 if (win.isDragResizeChanged()) {
                     win.setDragResizing();
                     if (win.mHasSurface) {
                         winAnimator.mDestroyPendingSurfaceUponRedraw = true;
                         winAnimator.mSurfaceDestroyDeferred = true;
                         winAnimator.destroySurfaceLocked();
-                        startFreezingDisplayLocked(false, 0, 0);
                         toBeDisplayed = true;
                     }
                 }
