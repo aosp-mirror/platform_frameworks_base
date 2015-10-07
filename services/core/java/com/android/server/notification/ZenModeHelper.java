@@ -315,6 +315,10 @@ public class ZenModeHelper {
         return setConfig(config, reason, true /*setRingerMode*/);
     }
 
+    public void setConfigAsync(ZenModeConfig config, String reason) {
+        mHandler.postSetConfig(config, reason);
+    }
+
     private boolean setConfig(ZenModeConfig config, String reason, boolean setRingerMode) {
         if (config == null || !config.isValid()) {
             Log.w(TAG, "Invalid config in setConfig; " + config);
@@ -743,6 +747,17 @@ public class ZenModeHelper {
     private final class H extends Handler {
         private static final int MSG_DISPATCH = 1;
         private static final int MSG_METRICS = 2;
+        private static final int MSG_SET_CONFIG = 3;
+
+        private final class ConfigMessageData {
+            public final ZenModeConfig config;
+            public final String reason;
+
+            ConfigMessageData(ZenModeConfig config, String reason) {
+                this.config = config;
+                this.reason = reason;
+            }
+        }
 
         private static final long METRICS_PERIOD_MS = 6 * 60 * 60 * 1000;
 
@@ -760,6 +775,10 @@ public class ZenModeHelper {
             sendEmptyMessageDelayed(MSG_METRICS, METRICS_PERIOD_MS);
         }
 
+        private void postSetConfig(ZenModeConfig config, String reason) {
+            sendMessage(obtainMessage(MSG_SET_CONFIG, new ConfigMessageData(config, reason)));
+        }
+
         @Override
         public void handleMessage(Message msg) {
             switch (msg.what) {
@@ -768,6 +787,10 @@ public class ZenModeHelper {
                     break;
                 case MSG_METRICS:
                     mMetrics.emit();
+                    break;
+                case MSG_SET_CONFIG:
+                    ConfigMessageData configData = (ConfigMessageData)msg.obj;
+                    setConfig(configData.config, configData.reason);
                     break;
             }
         }
