@@ -2707,11 +2707,22 @@ public class Editor {
             mIsShowingUp = false;
         }
 
-        private class SuggestionInfo {
+        private final class SuggestionInfo {
             int suggestionStart, suggestionEnd; // range of actual suggestion within text
-            SuggestionSpan suggestionSpan; // the SuggestionSpan that this TextView represents
+
+            // the SuggestionSpan that this TextView represents
+            @Nullable
+            SuggestionSpan suggestionSpan;
+
             int suggestionIndex; // the index of this suggestion inside suggestionSpan
-            SpannableStringBuilder text = new SpannableStringBuilder();
+
+            @Nullable
+            final SpannableStringBuilder text = new SpannableStringBuilder();
+
+            void clear() {
+                suggestionSpan = null;
+                text.clear();
+            }
         }
 
         private class SuggestionAdapter extends BaseAdapter {
@@ -2865,9 +2876,11 @@ public class Editor {
             return Math.min(positionY, displayMetrics.heightPixels - height);
         }
 
-        @Override
-        public void hide() {
-            super.hide();
+        private void hideWithCleanUp() {
+            for (final SuggestionInfo info : mSuggestionInfos) {
+                info.clear();
+            }
+            hide();
         }
 
         private boolean updateSuggestions() {
@@ -3019,7 +3032,7 @@ public class Editor {
                     }
                     mTextView.deleteText_internal(spanUnionStart, spanUnionEnd);
                 }
-                hide();
+                hideWithCleanUp();
                 return;
             }
 
@@ -3027,7 +3040,7 @@ public class Editor {
             final int spanEnd = editable.getSpanEnd(suggestionInfo.suggestionSpan);
             if (spanStart < 0 || spanEnd <= spanStart) {
                 // Span has been removed
-                hide();
+                hideWithCleanUp();
                 return;
             }
 
@@ -3102,7 +3115,7 @@ public class Editor {
                 mTextView.setCursorPosition_internal(newCursorPosition, newCursorPosition);
             }
 
-            hide();
+            hideWithCleanUp();
         }
     }
 

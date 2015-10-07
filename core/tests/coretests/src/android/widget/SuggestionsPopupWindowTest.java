@@ -61,11 +61,13 @@ public class SuggestionsPopupWindowTest extends ActivityInstrumentationTestCase2
         final int expectedHighlightTextColor = tmpTp.getColor();
         final float expectedHighlightTextSize = tmpTp.getTextSize();
 
-        // Create and wait until SuggestionsPopupWindow is shown.
         final EditText editText = (EditText) activity.findViewById(R.id.textview);
         final Editor editor = editText.getEditorForTesting();
         assertNotNull(editor);
-        activity.runOnUiThread(new Runnable() {
+
+        // Request to show SuggestionsPopupWindow.
+        Runnable showSuggestionWindowRunner = new Runnable() {
+            @Override
             public void run() {
                 SpannableStringBuilder ssb = new SpannableStringBuilder();
                 ssb.append(sampleText);
@@ -78,8 +80,7 @@ public class SuggestionsPopupWindowTest extends ActivityInstrumentationTestCase2
                 Selection.setSelection(editText.getText(), singleWordSpanStart, singleWordSpanEnd);
                 editText.onTextContextMenuItem(TextView.ID_REPLACE);
             }
-        });
-        getInstrumentation().waitForIdleSync();
+        };
 
         // In this test, the SuggestionsPopupWindow looks like
         //   abc def ghi
@@ -91,7 +92,8 @@ public class SuggestionsPopupWindowTest extends ActivityInstrumentationTestCase2
         // | DELETE        |
         // -----------------
         // *XX* means that XX is highlighted.
-        activity.runOnUiThread(new Runnable() {
+        Runnable popupVaridator = new Runnable() {
+            @Override
             public void run() {
                 Editor.SuggestionsPopupWindow popupWindow =
                         editor.getSuggestionsPopupWindowForTesting();
@@ -155,6 +157,25 @@ public class SuggestionsPopupWindowTest extends ActivityInstrumentationTestCase2
                     assertEquals(multiWordSpanEnd, spanned.getSpanEnd(taSpan[0]));
                 }
             }
+        };
+
+        // Show the SuggestionWindow and verify the contents.
+        activity.runOnUiThread(showSuggestionWindowRunner);
+        getInstrumentation().waitForIdleSync();
+        activity.runOnUiThread(popupVaridator);
+
+        // Request to hide the SuggestionPopupWindow and wait until it is hidden.
+        activity.runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                editText.setText("");
+            }
         });
+        getInstrumentation().waitForIdleSync();
+
+        // Show and verify the contents again.
+        activity.runOnUiThread(showSuggestionWindowRunner);
+        getInstrumentation().waitForIdleSync();
+        activity.runOnUiThread(popupVaridator);
     }
 }
