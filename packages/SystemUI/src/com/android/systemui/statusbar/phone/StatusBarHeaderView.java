@@ -59,7 +59,7 @@ import java.text.NumberFormat;
  */
 public class StatusBarHeaderView extends RelativeLayout implements View.OnClickListener,
         BatteryController.BatteryStateChangeCallback, NextAlarmController.NextAlarmChangeCallback,
-        EmergencyListener {
+        EmergencyListener, TunerService.Tunable {
 
     private boolean mExpanded;
     private boolean mListening;
@@ -127,6 +127,8 @@ public class StatusBarHeaderView extends RelativeLayout implements View.OnClickL
     private float mCurrentT;
     private boolean mShowingDetail;
     private boolean mDetailTransitioning;
+
+    private boolean mAllowExpand = true;
 
     public StatusBarHeaderView(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -232,6 +234,28 @@ public class StatusBarHeaderView extends RelativeLayout implements View.OnClickL
         updateClockCollapsedMargin();
     }
 
+    @Override
+    protected void onAttachedToWindow() {
+        super.onAttachedToWindow();
+        TunerService.get(mContext).addTunable(this, QSPanel.QS_PAGED_PANEL);
+    }
+
+    @Override
+    protected void onDetachedFromWindow() {
+        super.onDetachedFromWindow();
+        TunerService.get(mContext).removeTunable(this);
+    }
+
+    @Override
+    public void onTuningChanged(String key, String newValue) {
+        if (QSPanel.QS_PAGED_PANEL.equals(key)) {
+            mAllowExpand = newValue == null || Integer.parseInt(newValue) == 0;
+            if (!mAllowExpand) {
+                setExpanded(false);
+            }
+        }
+    }
+
     private void updateClockCollapsedMargin() {
         Resources res = getResources();
         int padding = res.getDimensionPixelSize(R.dimen.clock_collapsed_bottom_margin);
@@ -290,7 +314,7 @@ public class StatusBarHeaderView extends RelativeLayout implements View.OnClickL
     }
 
     public int getExpandedHeight() {
-        return mExpandedHeight;
+        return mAllowExpand ? mExpandedHeight : mCollapsedHeight;
     }
 
     public void setListening(boolean listening) {
@@ -302,6 +326,9 @@ public class StatusBarHeaderView extends RelativeLayout implements View.OnClickL
     }
 
     public void setExpanded(boolean expanded) {
+        if (!mAllowExpand) {
+            expanded = false;
+        }
         boolean changed = expanded != mExpanded;
         mExpanded = expanded;
         if (changed) {
