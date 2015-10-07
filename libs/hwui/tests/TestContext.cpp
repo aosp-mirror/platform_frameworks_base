@@ -22,16 +22,35 @@ namespace test {
 
 static const int IDENT_DISPLAYEVENT = 1;
 
-static DisplayInfo getBuiltInDisplay() {
+static android::DisplayInfo DUMMY_DISPLAY {
+    1080, //w
+    1920, //h
+    320.0, // xdpi
+    320.0, // ydpi
+    60.0, // fps
+    2.0, // density
+    0, // orientation
+    false, // secure?
+    0, // appVsyncOffset
+    0, // presentationDeadline
+    0, // colorTransform
+};
+
+DisplayInfo getBuiltInDisplay() {
+#if !HWUI_NULL_GPU
     DisplayInfo display;
     sp<IBinder> dtoken(SurfaceComposerClient::getBuiltInDisplay(
             ISurfaceComposer::eDisplayIdMain));
     status_t status = SurfaceComposerClient::getDisplayInfo(dtoken, &display);
     LOG_ALWAYS_FATAL_IF(status, "Failed to get display info\n");
     return display;
+#else
+    return DUMMY_DISPLAY;
+#endif
 }
 
-android::DisplayInfo gDisplay = getBuiltInDisplay();
+// Initialize to a dummy default
+android::DisplayInfo gDisplay = DUMMY_DISPLAY;
 
 TestContext::TestContext() {
     mLooper = new Looper(true);
