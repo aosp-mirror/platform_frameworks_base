@@ -869,10 +869,8 @@ public class UserManagerService extends IUserManager.Stub {
         mHandler.post(new Runnable() {
             @Override
             public void run() {
-                synchronized (mRestrictionsLock) {
-                    UserRestrictionsUtils.applyUserRestrictionsLR(
-                            mContext, userId, newRestrictionsFinal, prevRestrictionsFinal);
-                }
+                UserRestrictionsUtils.applyUserRestrictions(
+                        mContext, userId, newRestrictionsFinal, prevRestrictionsFinal);
 
                 final UserRestrictionsListener[] listeners;
                 synchronized (mUserRestrictionsListeners) {
@@ -1811,8 +1809,8 @@ public class UserManagerService extends IUserManager.Stub {
             if (DBG) Slog.i(LOG_TAG, "Stopping user " + userHandle);
             int res;
             try {
-                res = ActivityManagerNative.getDefault().stopUser(userHandle,
-                        new IStopUserCallback.Stub() {
+                res = ActivityManagerNative.getDefault().stopUser(userHandle, /* force= */ true,
+                new IStopUserCallback.Stub() {
                             @Override
                             public void userStopped(int userId) {
                                 finishRemoveUser(userId);

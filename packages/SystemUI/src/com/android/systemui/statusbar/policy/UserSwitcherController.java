@@ -342,7 +342,7 @@ public class UserSwitcherController {
 
     private void stopUserId(int id) {
         try {
-            ActivityManagerNative.getDefault().stopUser(id, null);
+            ActivityManagerNative.getDefault().stopUser(id, /* force= */ false, null);
         } catch (RemoteException e) {
             Log.e(TAG, "Couldn't stop user.", e);
         }
