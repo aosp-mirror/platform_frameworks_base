@@ -51,7 +51,7 @@
     <string name="serviceDisabled" msgid="1937553226592516411">"سرویس غیرفعال شده است."</string>
     <string name="serviceRegistered" msgid="6275019082598102493">"ثبت با موفقیت انجام شد"</string>
     <string name="serviceErased" msgid="1288584695297200972">"پاک کردن با موفقیت انجام شد."</string>
-    <string name="passwordIncorrect" msgid="7612208839450128715">"رمز ورود اشتباه است."</string>
+    <string name="passwordIncorrect" msgid="7612208839450128715">"گذرواژه اشتباه است."</string>
     <string name="mmiComplete" msgid="8232527495411698359">"‏MMI کامل شد."</string>
     <string name="badPin" msgid="9015277645546710014">"‏پین قدیمی که نوشته‎اید صحیح نیست."</string>
     <string name="badPuk" msgid="5487257647081132201">"‏PUK که نوشته‌اید صحیح نیست."</string>
@@ -74,7 +74,7 @@
     <string name="CfMmi" msgid="5123218989141573515">"هدایت تماس"</string>
     <string name="CwMmi" msgid="9129678056795016867">"انتظار تماس"</string>
     <string name="BaMmi" msgid="455193067926770581">"محدودیت تماس"</string>
-    <string name="PwdMmi" msgid="7043715687905254199">"تغییر رمز ورود"</string>
+    <string name="PwdMmi" msgid="7043715687905254199">"تغییر گذرواژه"</string>
     <string name="PinMmi" msgid="3113117780361190304">"تغییر پین"</string>
     <string name="CnipMmi" msgid="3110534680557857162">"شماره تماس حاضر"</string>
     <string name="CnirMmi" msgid="3062102121430548731">"شماره تماس محدود شده"</string>
@@ -495,7 +495,7 @@
     <string name="permdesc_bindCarrierServices" msgid="1391552602551084192">"به دارنده امکان می‌دهد به سرویس‌های شرکت مخابراتی متصل شود. هرگز نباید برای برنامه‌های عادی مورد نیاز باشد."</string>
     <string name="permlab_access_notification_policy" msgid="4247510821662059671">"دسترسی به حالت «مزاحم نشوید»"</string>
     <string name="permdesc_access_notification_policy" msgid="3296832375218749580">"به برنامه امکان می‌دهد پیکربندی «مزاحم نشوید» را بخواند و بنویسد."</string>
-    <string name="policylab_limitPassword" msgid="4497420728857585791">"تنظیم قوانین رمز ورود"</string>
+    <string name="policylab_limitPassword" msgid="4497420728857585791">"تنظیم قوانین گذرواژه"</string>
     <string name="policydesc_limitPassword" msgid="2502021457917874968">"کنترل طول و نوع نویسه‌هایی که در گذرواژه و پین قفل صفحه مجاز است."</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"نمایش تلاش‌های قفل گشایی صفحه"</string>
     <string name="policydesc_watchLogin" product="tablet" msgid="3215729294215070072">"‏تعداد گذرواژه‎های نادرست تایپ شده را هنگام بازکردن قفل صفحه کنترل می‌کند، و اگر دفعات زیادی گذرواژه نادرست وارد شود رایانهٔ لوحی را قفل می‌کند و همه داده‎های رایانهٔ لوحی را پاک می‌کند."</string>
@@ -532,7 +532,7 @@
     <item msgid="7897544654242874543">"محل کار"</item>
     <item msgid="1103601433382158155">"نمابر محل کار"</item>
     <item msgid="1735177144948329370">"نمابر خانه"</item>
-    <item msgid="603878674477207394">"پیجر"</item>
+    <item msgid="603878674477207394">"پی‌جو"</item>
     <item msgid="1650824275177931637">"سایر موارد"</item>
     <item msgid="9192514806975898961">"سفارشی"</item>
   </string-array>
@@ -575,7 +575,7 @@
     <string name="phoneTypeWork" msgid="8863939667059911633">"محل کار"</string>
     <string name="phoneTypeFaxWork" msgid="3517792160008890912">"نمابر محل کار"</string>
     <string name="phoneTypeFaxHome" msgid="2067265972322971467">"نمابر خانه"</string>
-    <string name="phoneTypePager" msgid="7582359955394921732">"پیجر"</string>
+    <string name="phoneTypePager" msgid="7582359955394921732">"پی‌جو"</string>
     <string name="phoneTypeOther" msgid="1544425847868765990">"سایر موارد"</string>
     <string name="phoneTypeCallback" msgid="2712175203065678206">"برگرداندن تماس"</string>
     <string name="phoneTypeCar" msgid="8738360689616716982">"خودرو"</string>
@@ -700,9 +700,9 @@
     <string name="lockscreen_glogin_too_many_attempts" msgid="2751368605287288808">"‏تلاش‎های زیادی برای کشیدن الگو صورت گرفته است"</string>
     <string name="lockscreen_glogin_instructions" msgid="3931816256100707784">"‏برای بازگشایی قفل، با حساب Google خود وارد سیستم شوید."</string>
     <string name="lockscreen_glogin_username_hint" msgid="8846881424106484447">"نام کاربری (ایمیل)"</string>
-    <string name="lockscreen_glogin_password_hint" msgid="5958028383954738528">"رمز ورود"</string>
+    <string name="lockscreen_glogin_password_hint" msgid="5958028383954738528">"گذرواژه"</string>
     <string name="lockscreen_glogin_submit_button" msgid="7130893694795786300">"ورود به سیستم"</string>
-    <string name="lockscreen_glogin_invalid_input" msgid="1364051473347485908">"نام کاربر یا رمز ورود نامعتبر است."</string>
+    <string name="lockscreen_glogin_invalid_input" msgid="1364051473347485908">"نام کاربر یا گذرواژه نامعتبر است."</string>
     <string name="lockscreen_glogin_account_recovery_hint" msgid="1696924763690379073">"‏نام کاربری یا گذرواژهٔ خود را فراموش کردید؟\nاز "<b>"google.com/accounts/recovery"</b>" بازدید کنید."</string>
     <string name="lockscreen_glogin_checking_password" msgid="7114627351286933867">"در حال بررسی..."</string>
     <string name="lockscreen_unlock_label" msgid="737440483220667054">"بازگشایی قفل"</string>
@@ -786,7 +786,7 @@
     <string name="permdesc_addVoicemail" msgid="6604508651428252437">"به برنامه اجازه می‌دهد تا پیام‌ها را به صندوق دریافت پست صوتی شما اضافه کند."</string>
     <string name="permlab_writeGeolocationPermissions" msgid="5962224158955273932">"تغییر مجوزهای مکان جغرافیایی مرورگر"</string>
     <string name="permdesc_writeGeolocationPermissions" msgid="1083743234522638747">"‏به برنامه اجازه می‎دهد تا مجوزهای جغرافیایی مرورگر را تغییر دهد. برنامه‎های مخرب می‎توانند از آن استفاده کنند تا اطلاعات موقعیت مکانی را به سایت‌های وب کتابخانه بفرستند."</string>
-    <string name="save_password_message" msgid="767344687139195790">"می‌خواهید مرورگر این رمز ورود را به خاطر داشته باشد؟"</string>
+    <string name="save_password_message" msgid="767344687139195790">"می‌خواهید مرورگر این گذرواژه را به خاطر داشته باشد؟"</string>
     <string name="save_password_notnow" msgid="6389675316706699758">"اکنون نه"</string>
     <string name="save_password_remember" msgid="6491879678996749466">"به خاطر سپردن"</string>
     <string name="save_password_never" msgid="8274330296785855105">"هیچ‌وقت"</string>
