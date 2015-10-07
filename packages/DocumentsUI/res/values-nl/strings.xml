@@ -20,8 +20,7 @@
     <string name="files_label" msgid="6051402950202690279">"Bestanden"</string>
     <string name="title_open" msgid="4353228937663917801">"Openen vanuit"</string>
     <string name="title_save" msgid="2433679664882857999">"Opslaan in"</string>
-    <!-- no translation found for menu_create_dir (2547620241173881754) -->
-    <skip />
+    <string name="menu_create_dir" msgid="2547620241173881754">"Nieuwe map"</string>
     <string name="menu_grid" msgid="6878021334497835259">"Rasterweergave"</string>
     <string name="menu_list" msgid="7279285939892417279">"Lijstweergave"</string>
     <string name="menu_sort" msgid="7677740407158414452">"Sorteren op"</string>

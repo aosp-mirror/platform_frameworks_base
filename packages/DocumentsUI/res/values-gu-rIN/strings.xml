@@ -20,8 +20,7 @@
     <string name="files_label" msgid="6051402950202690279">"ફાઇલો"</string>
     <string name="title_open" msgid="4353228937663917801">"અહીંથી ખોલો"</string>
     <string name="title_save" msgid="2433679664882857999">"આમાં સાચવો"</string>
-    <!-- no translation found for menu_create_dir (2547620241173881754) -->
-    <skip />
+    <string name="menu_create_dir" msgid="2547620241173881754">"નવું ફોલ્ડર"</string>
     <string name="menu_grid" msgid="6878021334497835259">"ગ્રિડ દૃશ્ય"</string>
     <string name="menu_list" msgid="7279285939892417279">"સૂચિ દૃશ્ય"</string>
     <string name="menu_sort" msgid="7677740407158414452">"આ પ્રમાણે સૉર્ટ કરો"</string>

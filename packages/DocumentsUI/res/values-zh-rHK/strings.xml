@@ -20,8 +20,7 @@
     <string name="files_label" msgid="6051402950202690279">"檔案"</string>
     <string name="title_open" msgid="4353228937663917801">"開啟檔案"</string>
     <string name="title_save" msgid="2433679664882857999">"儲存至"</string>
-    <!-- no translation found for menu_create_dir (2547620241173881754) -->
-    <skip />
+    <string name="menu_create_dir" msgid="2547620241173881754">"新增資料夾"</string>
     <string name="menu_grid" msgid="6878021334497835259">"格狀檢視"</string>
     <string name="menu_list" msgid="7279285939892417279">"清單檢視"</string>
     <string name="menu_sort" msgid="7677740407158414452">"排序方式"</string>
