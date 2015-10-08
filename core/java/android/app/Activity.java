@@ -687,9 +687,15 @@ public class Activity extends ContextThemeWrapper
 
     /** @hide Task isn't finished when activity is finished */
     public static final int DONT_FINISH_TASK_WITH_ACTIVITY = 0;
-    /** @hide Task is finished if the finishing activity is the root of the task */
+    /**
+     * @hide Task is finished if the finishing activity is the root of the task. To preserve the
+     * past behavior the task is also removed from recents.
+     */
     public static final int FINISH_TASK_WITH_ROOT_ACTIVITY = 1;
-    /** @hide Task is finished along with the finishing activity*/
+    /**
+     * @hide Task is finished along with the finishing activity, but it is not removed from
+     * recents.
+     */
     public static final int FINISH_TASK_WITH_ACTIVITY = 2;
 
     static final String FRAGMENTS_TAG = "android:fragments";

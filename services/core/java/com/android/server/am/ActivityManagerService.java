@@ -419,6 +419,9 @@ public final class ActivityManagerService extends ActivityManagerNative
     // Lower delay than APP_BOOST_MESSAGE_DELAY to disable the boost
     static final int APP_BOOST_TIMEOUT = 2500;
 
+    // Used to indicate that a task is removed it should also be removed from recents.
+    private static final boolean REMOVE_FROM_RECENTS = true;
+
     private static native int nativeMigrateToBoost();
     private static native int nativeMigrateFromBoost();
     private boolean mIsBoosted = false;
@@ -4382,12 +4385,16 @@ public final class ActivityManagerService extends ActivityManagerNative
             final long origId = Binder.clearCallingIdentity();
             try {
                 boolean res;
+                final boolean finishWithRootActivity =
+                        finishTask == Activity.FINISH_TASK_WITH_ROOT_ACTIVITY;
                 if (finishTask == Activity.FINISH_TASK_WITH_ACTIVITY
-                        || (finishTask == Activity.FINISH_TASK_WITH_ROOT_ACTIVITY && r == rootR)) {
+                        || (finishWithRootActivity && r == rootR)) {
                     // If requested, remove the task that is associated to this activity only if it
                     // was the root activity in the task. The result code and data is ignored
-                    // because we don't support returning them across task boundaries.
-                    res = removeTaskByIdLocked(tr.taskId, false);
+                    // because we don't support returning them across task boundaries. Also, to
+                    // keep backwards compatibility we remove the task from recents when finishing
+                    // task with root activity.
+                    res = removeTaskByIdLocked(tr.taskId, false, finishWithRootActivity);
                     if (!res) {
                         Slog.i(TAG, "Removing task failed to finish activity");
                     }
@@ -5206,7 +5213,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                             tr.getBaseIntent().getComponent().getPackageName();
                     if (tr.userId != userId) continue;
                     if (!taskPackageName.equals(packageName)) continue;
-                    removeTaskByIdLocked(tr.taskId, false);
+                    removeTaskByIdLocked(tr.taskId, false, REMOVE_FROM_RECENTS);
                 }
             }
 
@@ -8779,9 +8786,12 @@ public final class ActivityManagerService extends ActivityManagerNative
         mWindowManager.executeAppTransition();
     }
 
-    private void cleanUpRemovedTaskLocked(TaskRecord tr, boolean killProcess) {
-        mRecentTasks.remove(tr);
-        tr.removedFromRecents();
+    private void cleanUpRemovedTaskLocked(TaskRecord tr, boolean killProcess,
+            boolean removeFromRecents) {
+        if (removeFromRecents) {
+            mRecentTasks.remove(tr);
+            tr.removedFromRecents();
+        }
         ComponentName component = tr.getBaseIntent().getComponent();
         if (component == null) {
             Slog.w(TAG, "No component for base intent of task: " + tr);
@@ -8858,7 +8868,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             ComponentName cn = tr.intent.getComponent();
             if (cn != null && cn.getPackageName().equals(packageName)) {
                 // If the package name matches, remove the task.
-                removeTaskByIdLocked(tr.taskId, true);
+                removeTaskByIdLocked(tr.taskId, true, REMOVE_FROM_RECENTS);
             }
         }
     }
@@ -8876,7 +8886,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             final boolean sameComponent = cn != null && cn.getPackageName().equals(packageName)
                     && (filterByClasses == null || filterByClasses.contains(cn.getClassName()));
             if (sameComponent) {
-                removeTaskByIdLocked(tr.taskId, false);
+                removeTaskByIdLocked(tr.taskId, false, REMOVE_FROM_RECENTS);
             }
         }
     }
@@ -8886,14 +8896,16 @@ public final class ActivityManagerService extends ActivityManagerNative
      *
      * @param taskId Identifier of the task to be removed.
      * @param killProcess Kill any process associated with the task if possible.
+     * @param removeFromRecents Whether to also remove the task from recents.
      * @return Returns true if the given task was found and removed.
      */
-    private boolean removeTaskByIdLocked(int taskId, boolean killProcess) {
+    private boolean removeTaskByIdLocked(int taskId, boolean killProcess,
+            boolean removeFromRecents) {
         final TaskRecord tr = mStackSupervisor.anyTaskForIdLocked(
                 taskId, !RESTORE_FROM_RECENTS, INVALID_STACK_ID);
         if (tr != null) {
             tr.removeTaskActivitiesLocked();
-            cleanUpRemovedTaskLocked(tr, killProcess);
+            cleanUpRemovedTaskLocked(tr, killProcess, removeFromRecents);
             if (tr.isPersistable) {
                 notifyTaskPersisterLocked(null, true);
             }
@@ -8910,7 +8922,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                     "removeTask()");
             long ident = Binder.clearCallingIdentity();
             try {
-                return removeTaskByIdLocked(taskId, true);
+                return removeTaskByIdLocked(taskId, true, REMOVE_FROM_RECENTS);
             } finally {
                 Binder.restoreCallingIdentity(ident);
             }
@@ -17583,7 +17595,8 @@ public final class ActivityManagerService extends ActivityManagerNative
             if (stack != null) {
                 ArrayList<TaskRecord> tasks = stack.getAllTasks();
                 for (int i = tasks.size() - 1; i >= 0; i--) {
-                    removeTaskByIdLocked(tasks.get(i).taskId, true /* killProcess */);
+                    removeTaskByIdLocked(tasks.get(i).taskId, true /* killProcess */,
+                            !REMOVE_FROM_RECENTS);
                 }
             }
         }
@@ -21075,7 +21088,8 @@ public final class ActivityManagerService extends ActivityManagerNative
             synchronized (ActivityManagerService.this) {
                 long origId = Binder.clearCallingIdentity();
                 try {
-                    if (!removeTaskByIdLocked(mTaskId, false)) {
+                    // We remove the task from recents to preserve backwards
+                    if (!removeTaskByIdLocked(mTaskId, false, REMOVE_FROM_RECENTS)) {
                         throw new IllegalArgumentException("Unable to find task ID " + mTaskId);
                     }
                 } finally {
