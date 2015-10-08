@@ -936,14 +936,15 @@ public class MenuBuilder implements Menu {
     }
     
     /**
-     * Closes the menu.
-     *
-     * @param closeAllMenus {@code true} if all displayed menus and submenus
-     *                      should be completely closed (as when a menu item is
-     *                      selected) or {@code false} if only this menu should
-     *                      be closed
+     * Closes the visible menu.
+     * 
+     * @param allMenusAreClosing Whether the menus are completely closing (true),
+     *            or whether there is another menu coming in this menu's place
+     *            (false). For example, if the menu is closing because a
+     *            sub menu is about to be shown, <var>allMenusAreClosing</var>
+     *            is false.
      */
-    public final void close(boolean closeAllMenus) {
+    public final void close(boolean allMenusAreClosing) {
         if (mIsClosing) return;
 
         mIsClosing = true;
@@ -952,7 +953,7 @@ public class MenuBuilder implements Menu {
             if (presenter == null) {
                 mPresenters.remove(ref);
             } else {
-                presenter.onCloseMenu(this, closeAllMenus);
+                presenter.onCloseMenu(this, allMenusAreClosing);
             }
         }
         mIsClosing = false;
