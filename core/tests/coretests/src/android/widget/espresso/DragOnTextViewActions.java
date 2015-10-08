@@ -20,25 +20,22 @@ import static android.support.test.espresso.matcher.ViewMatchers.isAssignableFro
 import static android.support.test.espresso.matcher.ViewMatchers.isCompletelyDisplayed;
 import static com.android.internal.util.Preconditions.checkNotNull;
 import static org.hamcrest.Matchers.allOf;
-
 import android.annotation.Nullable;
 import android.os.SystemClock;
 import android.support.test.espresso.UiController;
 import android.support.test.espresso.PerformException;
 import android.support.test.espresso.ViewAction;
 import android.support.test.espresso.action.CoordinatesProvider;
-import android.support.test.espresso.action.GeneralClickAction;
 import android.support.test.espresso.action.MotionEvents;
 import android.support.test.espresso.action.PrecisionDescriber;
-import android.support.test.espresso.action.Press;
 import android.support.test.espresso.action.Swiper;
-import android.support.test.espresso.action.Tap;
 import android.support.test.espresso.util.HumanReadables;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewConfiguration;
 import android.widget.TextView;
+
 import org.hamcrest.Matcher;
 
 
@@ -51,11 +48,48 @@ import org.hamcrest.Matcher;
  * <ul>
  */
 public final class DragOnTextViewActions implements ViewAction {
+    public interface Dragger extends Swiper {
+        UiController wrapUiController(UiController uiController);
+    }
 
     /**
      * Executes different "drag on text" types to given positions.
      */
-    public enum Drag implements Swiper {
+    public enum Drag implements Dragger {
+
+        /**
+         * Starts a drag with a mouse down.
+         */
+        MOUSE_DOWN {
+            private DownMotionPerformer downMotion = new DownMotionPerformer() {
+                @Override
+                public MotionEvent perform(
+                        UiController uiController, float[] coordinates, float[] precision) {
+                    MotionEvent downEvent = MotionEvents.sendDown(
+                            uiController, coordinates, precision)
+                            .down;
+                    return downEvent;
+                }
+            };
+
+            @Override
+            public Status sendSwipe(
+                    UiController uiController,
+                    float[] startCoordinates, float[] endCoordinates, float[] precision) {
+                return sendLinearDrag(
+                        uiController, downMotion, startCoordinates, endCoordinates, precision);
+            }
+
+            @Override
+            public String toString() {
+                return "mouse down and drag to select";
+            }
+
+            @Override
+            public UiController wrapUiController(UiController uiController) {
+                return new MouseUiController(uiController);
+            }
+        },
 
         /**
          * Starts a drag with a long-press.
@@ -197,6 +231,11 @@ public final class DragOnTextViewActions implements ViewAction {
 
             return res;
         }
+
+        @Override
+        public UiController wrapUiController(UiController uiController) {
+            return uiController;
+        }
     }
 
     /**
@@ -215,13 +254,13 @@ public final class DragOnTextViewActions implements ViewAction {
         MotionEvent perform(UiController uiController, float[] coordinates, float[] precision);
     }
 
-    private final Swiper mDragger;
+    private final Dragger mDragger;
     private final CoordinatesProvider mStartCoordinatesProvider;
     private final CoordinatesProvider mEndCoordinatesProvider;
     private final PrecisionDescriber mPrecisionDescriber;
 
     public DragOnTextViewActions(
-            Swiper dragger,
+            Dragger dragger,
             CoordinatesProvider startCoordinatesProvider,
             CoordinatesProvider endCoordinatesProvider,
             PrecisionDescriber precisionDescriber) {
@@ -241,6 +280,8 @@ public final class DragOnTextViewActions implements ViewAction {
     public void perform(UiController uiController, View view) {
         checkNotNull(uiController);
         checkNotNull(view);
+
+        uiController = mDragger.wrapUiController(uiController);
 
         float[] startCoordinates = mStartCoordinatesProvider.calculateCoordinates(view);
         float[] endCoordinates = mEndCoordinatesProvider.calculateCoordinates(view);

@@ -124,6 +124,27 @@ public final class TextViewActions {
     }
 
     /**
+     * Returns an action that click then drags by mouse on text from startIndex to endIndex on the
+     * TextView.<br>
+     * <br>
+     * View constraints:
+     * <ul>
+     * <li>must be a TextView displayed on screen
+     * <ul>
+     *
+     * @param startIndex The index of the TextView's text to start a drag from
+     * @param endIndex The index of the TextView's text to end the drag at
+     */
+    public static ViewAction mouseDragOnText(int startIndex, int endIndex) {
+        return actionWithAssertions(
+                new DragOnTextViewActions(
+                        DragOnTextViewActions.Drag.MOUSE_DOWN,
+                        new TextCoordinates(startIndex),
+                        new TextCoordinates(endIndex),
+                        Press.PINPOINT));
+    }
+
+    /**
      * A provider of the x, y coordinates of the text at the specified index in a text view.
      */
     private static final class TextCoordinates implements CoordinatesProvider {
