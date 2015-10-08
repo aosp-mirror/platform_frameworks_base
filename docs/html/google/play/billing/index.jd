@@ -26,7 +26,7 @@ and features, and more. You can use In-app Billing to sell products as</p>
     testing subscription purchases.</li>
   <li><strong>As of January 2015, the In-App Billing v2 API is shut down.
     If your app is still using In-app Billing
-    v2, please migrate to the v3 API as soon as possible.</li>
+    v2, please migrate to the v3 API as soon as possible.</strong></li>
   <li><strong>Seasonal subscriptions</strong>&mdash;You can now set up a
     recurring <a href="billing_subscriptions.html#user-billing">seasonal
     subscription</a> that starts and ends on the same date each year (for
