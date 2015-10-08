@@ -1851,7 +1851,7 @@ public class WebView extends AbsoluteLayout
      * <a href="https://html.spec.whatwg.org/multipage/comms.html#messagechannel">here
      * </a>
      *
-     * The returned message channels are entangled and already in started state.
+     * <p>The returned message channels are entangled and already in started state.</p>
      *
      * @return the two message ports that form the message channel.
      */
