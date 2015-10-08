@@ -19,6 +19,7 @@ package android.os;
 import android.util.Log;
 import android.util.Slog;
 import com.android.internal.util.FastPrintWriter;
+import libcore.io.IoUtils;
 
 import java.io.FileDescriptor;
 import java.io.FileOutputStream;
@@ -342,11 +343,7 @@ public class Binder implements IBinder {
                 try {
                     dump(fd.getFileDescriptor(), args);
                 } finally {
-                    try {
-                        fd.close();
-                    } catch (IOException e) {
-                        // swallowed, not propagated back to the caller
-                    }
+                    IoUtils.closeQuietly(fd);
                 }
             }
             // Write the StrictMode header.
@@ -354,6 +351,31 @@ public class Binder implements IBinder {
                 reply.writeNoException();
             } else {
                 StrictMode.clearGatheredViolations();
+            }
+            return true;
+        } else if (code == SHELL_COMMAND_TRANSACTION) {
+            ParcelFileDescriptor in = data.readFileDescriptor();
+            ParcelFileDescriptor out = data.readFileDescriptor();
+            ParcelFileDescriptor err = data.readFileDescriptor();
+            String[] args = data.readStringArray();
+            ResultReceiver resultReceiver = ResultReceiver.CREATOR.createFromParcel(data);
+            try {
+                if (out != null) {
+                    shellCommand(in != null ? in.getFileDescriptor() : null,
+                            out.getFileDescriptor(),
+                            err != null ? err.getFileDescriptor() : out.getFileDescriptor(),
+                            args, resultReceiver);
+                }
+            } finally {
+                IoUtils.closeQuietly(in);
+                IoUtils.closeQuietly(out);
+                IoUtils.closeQuietly(err);
+                // Write the StrictMode header.
+                if (reply != null) {
+                    reply.writeNoException();
+                } else {
+                    StrictMode.clearGatheredViolations();
+                }
             }
             return true;
         }
@@ -368,33 +390,37 @@ public class Binder implements IBinder {
         FileOutputStream fout = new FileOutputStream(fd);
         PrintWriter pw = new FastPrintWriter(fout);
         try {
-            final String disabled;
-            synchronized (Binder.class) {
-                disabled = sDumpDisabled;
-            }
-            if (disabled == null) {
-                try {
-                    dump(fd, pw, args);
-                } catch (SecurityException e) {
-                    pw.println("Security exception: " + e.getMessage());
-                    throw e;
-                } catch (Throwable e) {
-                    // Unlike usual calls, in this case if an exception gets thrown
-                    // back to us we want to print it back in to the dump data, since
-                    // that is where the caller expects all interesting information to
-                    // go.
-                    pw.println();
-                    pw.println("Exception occurred while dumping:");
-                    e.printStackTrace(pw);
-                }
-            } else {
-                pw.println(sDumpDisabled);
-            }
+            doDump(fd, pw, args);
         } finally {
             pw.flush();
         }
     }
-    
+
+    void doDump(FileDescriptor fd, PrintWriter pw, String[] args) {
+        final String disabled;
+        synchronized (Binder.class) {
+            disabled = sDumpDisabled;
+        }
+        if (disabled == null) {
+            try {
+                dump(fd, pw, args);
+            } catch (SecurityException e) {
+                pw.println("Security exception: " + e.getMessage());
+                throw e;
+            } catch (Throwable e) {
+                // Unlike usual calls, in this case if an exception gets thrown
+                // back to us we want to print it back in to the dump data, since
+                // that is where the caller expects all interesting information to
+                // go.
+                pw.println();
+                pw.println("Exception occurred while dumping:");
+                e.printStackTrace(pw);
+            }
+        } else {
+            pw.println(sDumpDisabled);
+        }
+    }
+
     /**
      * Like {@link #dump(FileDescriptor, String[])}, but ensures the target
      * executes asynchronously.
@@ -423,6 +449,34 @@ public class Binder implements IBinder {
      * @param args additional arguments to the dump request.
      */
     protected void dump(FileDescriptor fd, PrintWriter fout, String[] args) {
+    }
+
+    /**
+     * @param in The raw file descriptor that an input data stream can be read from.
+     * @param out The raw file descriptor that normal command messages should be written to.
+     * @param err The raw file descriptor that command error messages should be written to.
+     * @param args Command-line arguments.
+     * @param resultReceiver Called when the command has finished executing, with the result code.
+     * @throws RemoteException
+     * @hide
+     */
+    public void shellCommand(FileDescriptor in, FileDescriptor out, FileDescriptor err,
+            String[] args, ResultReceiver resultReceiver) throws RemoteException {
+        onShellCommand(in, out, err, args, resultReceiver);
+    }
+
+    /**
+     * Handle a call to {@link #shellCommand}.  The default implementation simply prints
+     * an error message.  Override and replace with your own.
+     * @hide
+     */
+    public void onShellCommand(FileDescriptor in, FileDescriptor out, FileDescriptor err,
+            String[] args, ResultReceiver resultReceiver) throws RemoteException {
+        FileOutputStream fout = new FileOutputStream(err != null ? err : out);
+        PrintWriter pw = new FastPrintWriter(fout);
+        pw.println("No shell command implementation.");
+        pw.flush();
+        resultReceiver.send(0, null);
     }
 
     /**
@@ -584,6 +638,24 @@ final class BinderProxy implements IBinder {
         data.writeStringArray(args);
         try {
             transact(DUMP_TRANSACTION, data, reply, FLAG_ONEWAY);
+        } finally {
+            data.recycle();
+            reply.recycle();
+        }
+    }
+
+    public void shellCommand(FileDescriptor in, FileDescriptor out, FileDescriptor err,
+            String[] args, ResultReceiver resultReceiver) throws RemoteException {
+        Parcel data = Parcel.obtain();
+        Parcel reply = Parcel.obtain();
+        data.writeFileDescriptor(in);
+        data.writeFileDescriptor(out);
+        data.writeFileDescriptor(err);
+        data.writeStringArray(args);
+        resultReceiver.writeToParcel(data, 0);
+        try {
+            transact(SHELL_COMMAND_TRANSACTION, data, reply, 0);
+            reply.readException();
         } finally {
             data.recycle();
             reply.recycle();
