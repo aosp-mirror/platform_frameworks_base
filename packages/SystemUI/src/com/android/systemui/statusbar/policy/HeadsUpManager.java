@@ -102,6 +102,7 @@ public class HeadsUpManager implements ViewTreeObserver.OnComputeInternalInsetsL
     private boolean mHeadsUpGoingAway;
     private boolean mWaitingOnCollapseWhenGoingAway;
     private boolean mIsObserving;
+    private boolean mRemoteInputActive;
 
     public HeadsUpManager(final Context context, View statusBarWindowView) {
         mContext = context;
@@ -536,6 +537,18 @@ public class HeadsUpManager implements ViewTreeObserver.OnComputeInternalInsetsL
         return clicked != null && clicked;
     }
 
+    public void setRemoteInputActive(NotificationData.Entry entry, boolean remoteInputActive) {
+        HeadsUpEntry headsUpEntry = mHeadsUpEntries.get(entry.key);
+        if (headsUpEntry != null && headsUpEntry.remoteInputActive != remoteInputActive) {
+            headsUpEntry.remoteInputActive = remoteInputActive;
+            if (remoteInputActive) {
+                headsUpEntry.removeAutoRemovalCallbacks();
+            } else {
+                headsUpEntry.updateEntry(false /* updatePostTime */);
+            }
+        }
+    }
+
     /**
      * This represents a notification and how long it is in a heads up mode. It also manages its
      * lifecycle automatically when created.
@@ -545,6 +558,7 @@ public class HeadsUpManager implements ViewTreeObserver.OnComputeInternalInsetsL
         public long postTime;
         public long earliestRemovaltime;
         private Runnable mRemoveHeadsUpRunnable;
+        public boolean remoteInputActive;
 
         public void setEntry(final NotificationData.Entry entry) {
             this.entry = entry;
@@ -565,12 +579,18 @@ public class HeadsUpManager implements ViewTreeObserver.OnComputeInternalInsetsL
         }
 
         public void updateEntry() {
+            updateEntry(true);
+        }
+
+        public void updateEntry(boolean updatePostTime) {
             mSortedEntries.remove(HeadsUpEntry.this);
             long currentTime = mClock.currentTimeMillis();
             earliestRemovaltime = currentTime + mMinimumDisplayTime;
-            postTime = Math.max(postTime, currentTime);
+            if (updatePostTime) {
+                postTime = Math.max(postTime, currentTime);
+            }
             removeAutoRemovalCallbacks();
-            if (!hasFullScreenIntent(entry)) {
+            if (!hasFullScreenIntent(entry) && !mRemoteInputActive) {
                 long finishTime = postTime + mHeadsUpNotificationDecay;
                 long removeDelay = Math.max(finishTime - currentTime, mMinimumDisplayTime);
                 mHandler.postDelayed(mRemoveHeadsUpRunnable, removeDelay);
