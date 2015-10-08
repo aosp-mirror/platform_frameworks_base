@@ -18,8 +18,9 @@ package com.android.server.wm;
 
 import java.io.PrintWriter;
 
+import static com.android.server.wm.WindowManagerService.TYPE_LAYER_MULTIPLIER;
 import static com.android.server.wm.WindowStateAnimator.SurfaceTrace;
-
+import static com.android.server.wm.WindowStateAnimator.WINDOW_FREEZE_LAYER;
 import android.content.Context;
 import android.graphics.Matrix;
 import android.graphics.PixelFormat;
@@ -42,7 +43,15 @@ class ScreenRotationAnimation {
     static final boolean TWO_PHASE_ANIMATION = false;
     static final boolean USE_CUSTOM_BLACK_FRAME = false;
 
-    static final int FREEZE_LAYER = WindowManagerService.TYPE_LAYER_MULTIPLIER * 200;
+    /*
+     * Layers for screen rotation animation. We put these layers above
+     * WINDOW_FREEZE_LAYER so that screen freeze will cover all windows.
+     */
+    static final int SCREEN_FREEZE_LAYER_BASE       = WINDOW_FREEZE_LAYER + TYPE_LAYER_MULTIPLIER;
+    static final int SCREEN_FREEZE_LAYER_ENTER      = SCREEN_FREEZE_LAYER_BASE;
+    static final int SCREEN_FREEZE_LAYER_SCREENSHOT = SCREEN_FREEZE_LAYER_BASE + 1;
+    static final int SCREEN_FREEZE_LAYER_EXIT       = SCREEN_FREEZE_LAYER_BASE + 2;
+    static final int SCREEN_FREEZE_LAYER_CUSTOM     = SCREEN_FREEZE_LAYER_BASE + 3;
 
     final Context mContext;
     final DisplayContent mDisplayContent;
@@ -265,7 +274,7 @@ class ScreenRotationAnimation {
                 SurfaceControl.screenshot(SurfaceControl.getBuiltInDisplay(
                         SurfaceControl.BUILT_IN_DISPLAY_ID_MAIN), sur);
                 mSurfaceControl.setLayerStack(display.getLayerStack());
-                mSurfaceControl.setLayer(FREEZE_LAYER + 1);
+                mSurfaceControl.setLayer(SCREEN_FREEZE_LAYER_SCREENSHOT);
                 mSurfaceControl.setAlpha(0);
                 mSurfaceControl.show();
                 sur.destroy();
@@ -545,8 +554,8 @@ class ScreenRotationAnimation {
                 Rect outer = new Rect(-mOriginalWidth*1, -mOriginalHeight*1,
                         mOriginalWidth*2, mOriginalHeight*2);
                 Rect inner = new Rect(0, 0, mOriginalWidth, mOriginalHeight);
-                mCustomBlackFrame = new BlackFrame(session, outer, inner, FREEZE_LAYER + 3,
-                        layerStack, false);
+                mCustomBlackFrame = new BlackFrame(session, outer, inner,
+                        SCREEN_FREEZE_LAYER_CUSTOM, layerStack, false);
                 mCustomBlackFrame.setMatrix(mFrameInitialMatrix);
             } catch (OutOfResourcesException e) {
                 Slog.w(TAG, "Unable to allocate black surface", e);
@@ -585,8 +594,8 @@ class ScreenRotationAnimation {
                             mOriginalWidth*2, mOriginalHeight*2);
                     inner = new Rect(0, 0, mOriginalWidth, mOriginalHeight);
                 }
-                mExitingBlackFrame = new BlackFrame(session, outer, inner, FREEZE_LAYER + 2,
-                        layerStack, mForceDefaultOrientation);
+                mExitingBlackFrame = new BlackFrame(session, outer, inner,
+                        SCREEN_FREEZE_LAYER_EXIT, layerStack, mForceDefaultOrientation);
                 mExitingBlackFrame.setMatrix(mFrameInitialMatrix);
             } catch (OutOfResourcesException e) {
                 Slog.w(TAG, "Unable to allocate black surface", e);
@@ -608,8 +617,8 @@ class ScreenRotationAnimation {
                 Rect outer = new Rect(-finalWidth*1, -finalHeight*1,
                         finalWidth*2, finalHeight*2);
                 Rect inner = new Rect(0, 0, finalWidth, finalHeight);
-                mEnteringBlackFrame = new BlackFrame(session, outer, inner, FREEZE_LAYER,
-                        layerStack, false);
+                mEnteringBlackFrame = new BlackFrame(session, outer, inner,
+                        SCREEN_FREEZE_LAYER_ENTER, layerStack, false);
             } catch (OutOfResourcesException e) {
                 Slog.w(TAG, "Unable to allocate black surface", e);
             } finally {
