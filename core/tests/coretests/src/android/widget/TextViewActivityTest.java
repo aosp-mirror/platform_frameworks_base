@@ -36,6 +36,7 @@ import com.android.frameworks.coretests.R;
 
 import android.test.ActivityInstrumentationTestCase2;
 import android.test.suitebuilder.annotation.SmallTest;
+import android.util.OrientationUtil;
 import android.view.KeyEvent;
 
 /**
@@ -43,14 +44,20 @@ import android.view.KeyEvent;
  */
 public class TextViewActivityTest extends ActivityInstrumentationTestCase2<TextViewActivity>{
 
+    private OrientationUtil mOrientationUtil;
+
     public TextViewActivityTest() {
         super(TextViewActivity.class);
     }
 
+    @Override
+    public void setUp() {
+        mOrientationUtil = OrientationUtil.initializeAndStartActivityIfNotStarted(this);
+        mOrientationUtil.setPortraitOrientation();
+    }
+
     @SmallTest
     public void testTypedTextIsOnScreen() throws Exception {
-        getActivity();
-
         final String helloWorld = "Hello world!";
         onView(withId(R.id.textview)).perform(click());
         onView(withId(R.id.textview)).perform(typeTextIntoFocusedView(helloWorld));
@@ -60,8 +67,6 @@ public class TextViewActivityTest extends ActivityInstrumentationTestCase2<TextV
 
     @SmallTest
     public void testPositionCursorAtTextAtIndex() throws Exception {
-        getActivity();
-
         final String helloWorld = "Hello world!";
         onView(withId(R.id.textview)).perform(click());
         onView(withId(R.id.textview)).perform(typeTextIntoFocusedView(helloWorld));
@@ -74,8 +79,6 @@ public class TextViewActivityTest extends ActivityInstrumentationTestCase2<TextV
 
     @SmallTest
     public void testLongPressToSelect() throws Exception {
-        getActivity();
-
         final String helloWorld = "Hello Kirk!";
         onView(withId(R.id.textview)).perform(click());
         onView(withId(R.id.textview)).perform(typeTextIntoFocusedView(helloWorld));
@@ -87,8 +90,6 @@ public class TextViewActivityTest extends ActivityInstrumentationTestCase2<TextV
 
     @SmallTest
     public void testLongPressEmptySpace() throws Exception {
-        getActivity();
-
         final String helloWorld = "Hello big round sun!";
         onView(withId(R.id.textview)).perform(click());
         onView(withId(R.id.textview)).perform(typeTextIntoFocusedView(helloWorld));
@@ -102,8 +103,6 @@ public class TextViewActivityTest extends ActivityInstrumentationTestCase2<TextV
 
     @SmallTest
     public void testLongPressAndDragToSelect() throws Exception {
-        getActivity();
-
         final String helloWorld = "Hello little handsome boy!";
         onView(withId(R.id.textview)).perform(click());
         onView(withId(R.id.textview)).perform(typeTextIntoFocusedView(helloWorld));
@@ -115,8 +114,6 @@ public class TextViewActivityTest extends ActivityInstrumentationTestCase2<TextV
 
     @SmallTest
     public void testDoubleTapToSelect() throws Exception {
-        getActivity();
-
         final String helloWorld = "Hello SuetYi!";
         onView(withId(R.id.textview)).perform(click());
         onView(withId(R.id.textview)).perform(typeTextIntoFocusedView(helloWorld));
@@ -128,8 +125,6 @@ public class TextViewActivityTest extends ActivityInstrumentationTestCase2<TextV
 
     @SmallTest
     public void testDoubleTapAndDragToSelect() throws Exception {
-        getActivity();
-
         final String helloWorld = "Hello young beautiful girl!";
         onView(withId(R.id.textview)).perform(click());
         onView(withId(R.id.textview)).perform(typeTextIntoFocusedView(helloWorld));
@@ -141,8 +136,6 @@ public class TextViewActivityTest extends ActivityInstrumentationTestCase2<TextV
 
     @SmallTest
     public void testSelectBackwordsByTouch() throws Exception {
-        getActivity();
-
         final String helloWorld = "Hello king of the Jungle!";
         onView(withId(R.id.textview)).perform(click());
         onView(withId(R.id.textview)).perform(typeTextIntoFocusedView(helloWorld));
@@ -154,8 +147,6 @@ public class TextViewActivityTest extends ActivityInstrumentationTestCase2<TextV
 
     @SmallTest
     public void testToolbarAppearsAfterSelection() throws Exception {
-        getActivity();
-
         // It'll be nice to check that the toolbar is not visible (or does not exist) here
         // I can't currently find a way to do this. I'll get to it later.
 
