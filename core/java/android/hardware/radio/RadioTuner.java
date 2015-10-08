@@ -281,6 +281,10 @@ public abstract class RadioTuner {
          */
         public void onTrafficAnnouncement(boolean active) {}
         /**
+         * onEmergencyAnnouncement() is called when an emergency annoucement starts and stops.
+         */
+        public void onEmergencyAnnouncement(boolean active) {}
+        /**
          * onAntennaState() is called when the antenna is connected or disconnected.
          */
         public void onAntennaState(boolean connected) {}

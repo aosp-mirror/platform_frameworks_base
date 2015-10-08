@@ -14919,6 +14919,7 @@ package android.hardware.radio {
 
   public static class RadioManager.FmBandConfig extends android.hardware.radio.RadioManager.BandConfig {
     method public boolean getAf();
+    method public boolean getEa();
     method public boolean getRds();
     method public boolean getStereo();
     method public boolean getTa();
@@ -14930,6 +14931,7 @@ package android.hardware.radio {
     ctor public RadioManager.FmBandConfig.Builder(android.hardware.radio.RadioManager.FmBandConfig);
     method public android.hardware.radio.RadioManager.FmBandConfig build();
     method public android.hardware.radio.RadioManager.FmBandConfig.Builder setAf(boolean);
+    method public android.hardware.radio.RadioManager.FmBandConfig.Builder setEa(boolean);
     method public android.hardware.radio.RadioManager.FmBandConfig.Builder setRds(boolean);
     method public android.hardware.radio.RadioManager.FmBandConfig.Builder setStereo(boolean);
     method public android.hardware.radio.RadioManager.FmBandConfig.Builder setTa(boolean);
@@ -14937,6 +14939,7 @@ package android.hardware.radio {
 
   public static class RadioManager.FmBandDescriptor extends android.hardware.radio.RadioManager.BandDescriptor {
     method public boolean isAfSupported();
+    method public boolean isEaSupported();
     method public boolean isRdsSupported();
     method public boolean isStereoSupported();
     method public boolean isTaSupported();
@@ -14976,6 +14979,7 @@ package android.hardware.radio {
     method public boolean containsKey(java.lang.String);
     method public int describeContents();
     method public android.graphics.Bitmap getBitmap(java.lang.String);
+    method public android.hardware.radio.RadioMetadata.Clock getClock(java.lang.String);
     method public int getInt(java.lang.String);
     method public java.lang.String getString(java.lang.String);
     method public java.util.Set<java.lang.String> keySet();
@@ -14985,6 +14989,7 @@ package android.hardware.radio {
     field public static final java.lang.String METADATA_KEY_ALBUM = "android.hardware.radio.metadata.ALBUM";
     field public static final java.lang.String METADATA_KEY_ART = "android.hardware.radio.metadata.ART";
     field public static final java.lang.String METADATA_KEY_ARTIST = "android.hardware.radio.metadata.ARTIST";
+    field public static final java.lang.String METADATA_KEY_CLOCK = "android.hardware.radio.metadata.CLOCK";
     field public static final java.lang.String METADATA_KEY_GENRE = "android.hardware.radio.metadata.GENRE";
     field public static final java.lang.String METADATA_KEY_ICON = "android.hardware.radio.metadata.ICON";
     field public static final java.lang.String METADATA_KEY_RBDS_PTY = "android.hardware.radio.metadata.RBDS_PTY";
@@ -15000,8 +15005,18 @@ package android.hardware.radio {
     ctor public RadioMetadata.Builder(android.hardware.radio.RadioMetadata);
     method public android.hardware.radio.RadioMetadata build();
     method public android.hardware.radio.RadioMetadata.Builder putBitmap(java.lang.String, android.graphics.Bitmap);
+    method public android.hardware.radio.RadioMetadata.Builder putClock(java.lang.String, long, int);
     method public android.hardware.radio.RadioMetadata.Builder putInt(java.lang.String, int);
     method public android.hardware.radio.RadioMetadata.Builder putString(java.lang.String, java.lang.String);
+  }
+
+  public static final class RadioMetadata.Clock implements android.os.Parcelable {
+    ctor public RadioMetadata.Clock(long, int);
+    method public int describeContents();
+    method public int getTimezoneOffsetMinutes();
+    method public long getUtcEpochSeconds();
+    method public void writeToParcel(android.os.Parcel, int);
+    field public static final android.os.Parcelable.Creator<android.hardware.radio.RadioMetadata.Clock> CREATOR;
   }
 
   public abstract class RadioTuner {
@@ -15032,6 +15047,7 @@ package android.hardware.radio {
     method public void onAntennaState(boolean);
     method public void onConfigurationChanged(android.hardware.radio.RadioManager.BandConfig);
     method public void onControlChanged(boolean);
+    method public void onEmergencyAnnouncement(boolean);
     method public void onError(int);
     method public void onMetadataChanged(android.hardware.radio.RadioMetadata);
     method public void onProgramInfoChanged(android.hardware.radio.RadioManager.ProgramInfo);
