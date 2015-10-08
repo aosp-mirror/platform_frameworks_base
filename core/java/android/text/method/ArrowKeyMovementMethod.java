@@ -238,6 +238,7 @@ public class ArrowKeyMovementMethod extends BaseMovementMethod implements Moveme
             initialScrollY = Touch.getInitialScrollY(widget, buffer);
         }
 
+        boolean wasTouchSelecting = isTouchSelecting(isMouse, buffer);
         boolean handled = Touch.onTouchEvent(widget, buffer, event);
 
         if (widget.didTouchFocusSelect() && !isMouse) {
@@ -301,7 +302,7 @@ public class ArrowKeyMovementMethod extends BaseMovementMethod implements Moveme
                 }
 
                 int offset = widget.getOffsetForPosition(event.getX(), event.getY());
-                if (isTouchSelecting(isMouse, buffer)) {
+                if (wasTouchSelecting) {
                     buffer.removeSpan(LAST_TAP_DOWN);
                     Selection.extendSelection(buffer, offset);
                 }
