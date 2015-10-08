@@ -35,8 +35,7 @@ import android.util.Log;
  * the {@link android.Manifest.permission#BIND_CONDITION_PROVIDER_SERVICE} permission
  * and include an intent filter with the {@link #SERVICE_INTERFACE} action. If you want users to be
  * able to create and update conditions for this service to monitor, include the
- * {@link #META_DATA_RULE_TYPE}, {@link #META_DATA_DEFAULT_CONDITION_ID}, and
- * {@link #META_DATA_CONFIGURATION_ACTIVITY} tags. For example:</p>
+ * {@link #META_DATA_RULE_TYPE} and {@link #META_DATA_CONFIGURATION_ACTIVITY} tags. For example:</p>
  * <pre>
  * &lt;service android:name=".MyConditionProvider"
  *          android:label="&#64;string/service_name"
@@ -47,10 +46,6 @@ import android.util.Log;
  *     &lt;meta-data
  *               android:name="android.service.zen.automatic.ruleType"
  *               android:value="@string/my_condition_rule">
- *           &lt;/meta-data>
- *           &lt;meta-data
- *               android:name="android.service.zen.automatic.defaultConditionId"
- *               android:value="condition://com.my.package/mycondition">
  *           &lt;/meta-data>
  *           &lt;meta-data
  *               android:name="android.service.zen.automatic.configurationActivity"
@@ -82,13 +77,6 @@ public abstract class ConditionProviderService extends Service {
     public static final String META_DATA_RULE_TYPE = "android.service.zen.automatic.ruleType";
 
     /**
-     * The name of the {@code meta-data} tag containing a default Condition {@link Uri} that can
-     * be parsed by this service.
-     */
-    public static final String META_DATA_DEFAULT_CONDITION_ID =
-            "android.service.zen.automatic.defaultConditionId";
-
-    /**
      * The name of the {@code meta-data} tag containing the {@link ComponentName} of an activity
      * that allows users to configure the conditions provided by this service.
      */
@@ -96,17 +84,9 @@ public abstract class ConditionProviderService extends Service {
             "android.service.zen.automatic.configurationActivity";
 
     /**
-     * A condition {@link Uri} extra passed to {@link #META_DATA_CONFIGURATION_ACTIVITY}. If the
-     * condition Uri is modified by that activity, it must be included in the result Intent extras
-     * in order to be persisted.
+     * A String rule id extra passed to {@link #META_DATA_CONFIGURATION_ACTIVITY}.
      */
-    public static final String EXTRA_CONDITION_ID = "android.content.automatic.conditionId";
-
-    /**
-     * A String rule name extra passed to {@link #META_DATA_CONFIGURATION_ACTIVITY}. This extra is
-     * informative only, and will be ignored if included in the result Intent extras.
-     */
-    public static final String EXTRA_RULE_NAME = "android.content.automatic.ruleName";
+    public static final String EXTRA_RULE_ID = "android.content.automatic.ruleId";
 
     /**
      * Called when this service is connected.

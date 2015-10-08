@@ -896,7 +896,7 @@ public class ZenModeConfig implements Parcelable {
         return Global.isValidZenMode(rt) ? rt : defValue;
     }
 
-    public String newRuleId() {
+    public static String newRuleId() {
         return UUID.randomUUID().toString().replace("-", "");
     }
 

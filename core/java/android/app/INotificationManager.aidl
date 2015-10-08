@@ -93,11 +93,11 @@ interface INotificationManager
     String[] getPackagesRequestingNotificationPolicyAccess();
     boolean isNotificationPolicyAccessGrantedForPackage(String pkg);
     void setNotificationPolicyAccessGranted(String pkg, boolean granted);
-    AutomaticZenRule getAutomaticZenRule(String name);
+    AutomaticZenRule getAutomaticZenRule(String id);
     List<AutomaticZenRule> getAutomaticZenRules();
-    boolean addOrUpdateAutomaticZenRule(in AutomaticZenRule automaticZenRule);
-    boolean renameAutomaticZenRule(String oldName, String newName);
-    boolean removeAutomaticZenRule(String name);
+    AutomaticZenRule addAutomaticZenRule(in AutomaticZenRule automaticZenRule);
+    boolean updateAutomaticZenRule(in AutomaticZenRule automaticZenRule);
+    boolean removeAutomaticZenRule(String id);
 
     byte[] getBackupPayload(int user);
     void applyRestore(in byte[] payload, int user);

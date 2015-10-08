@@ -436,48 +436,47 @@ public class NotificationManager
     }
 
     /**
-     * Returns the AutomaticZenRule with the given name, if it exists and the caller has access.
+     * Returns the AutomaticZenRule with the given id, if it exists and the caller has access.
      *
      * <p>
      * Only available if policy access is granted to this package.
      * See {@link #isNotificationPolicyAccessGranted}.
      *
      * <p>
-     * Returns null if there are no zen rules that match the given name, or if the calling package
+     * Returns null if there are no zen rules that match the given id, or if the calling package
      * doesn't own the matching rule. See {@link AutomaticZenRule#getOwner}.
      */
-    public AutomaticZenRule getAutomaticZenRule(String name) {
+    public AutomaticZenRule getAutomaticZenRule(String id) {
         INotificationManager service = getService();
         try {
-            return service.getAutomaticZenRule(name);
+            return service.getAutomaticZenRule(id);
         } catch (RemoteException e) {
         }
         return null;
     }
 
     /**
-     * Creates or updates the given zen rule.
+     * Creates the given zen rule.
      *
      * <p>
      * Only available if policy access is granted to this package.
      * See {@link #isNotificationPolicyAccessGranted}.
      *
-     * <p>
-     * Callers can only update rules that they own. See {@link AutomaticZenRule#getOwner}.
-     * @param automaticZenRule the rule to create or update.
-     * @return Whether the rule was successfully created or updated.
+     * @param automaticZenRule the rule to create.
+     * @return A fully populated {@link AutomaticZenRule} if the rule was persisted successfully,
+     * null otherwise.
      */
-    public boolean addOrUpdateAutomaticZenRule(AutomaticZenRule automaticZenRule) {
+    public AutomaticZenRule addAutomaticZenRule(AutomaticZenRule automaticZenRule) {
         INotificationManager service = getService();
         try {
-            return service.addOrUpdateAutomaticZenRule(automaticZenRule);
+            return service.addAutomaticZenRule(automaticZenRule);
         } catch (RemoteException e) {
         }
-        return false;
+        return null;
     }
 
     /**
-     * Renames a zen rule.
+     * Updates the given zen rule.
      *
      * <p>
      * Only available if policy access is granted to this package.
@@ -485,21 +484,20 @@ public class NotificationManager
      *
      * <p>
      * Callers can only update rules that they own. See {@link AutomaticZenRule#getOwner}.
-     * @param oldName The name of the rule to update.
-     * @param newName The new name for the rule.
+     * @param automaticZenRule the rule to update. 
      * @return Whether the rule was successfully updated.
      */
-    public boolean renameAutomaticZenRule(String oldName, String newName) {
+    public boolean updateAutomaticZenRule(AutomaticZenRule automaticZenRule) {
         INotificationManager service = getService();
         try {
-            return service.renameAutomaticZenRule(oldName, newName);
+            return service.updateAutomaticZenRule(automaticZenRule);
         } catch (RemoteException e) {
         }
         return false;
     }
 
     /**
-     * Deletes the automatic zen rule with the given name.
+     * Deletes the automatic zen rule with the given id.
      *
      * <p>
      * Only available if policy access is granted to this package.
@@ -507,13 +505,13 @@ public class NotificationManager
      *
      * <p>
      * Callers can only delete rules that they own. See {@link AutomaticZenRule#getOwner}.
-     * @param name the name of the rule to delete.
+     * @param id the id of the rule to delete.
      * @return Whether the rule was successfully deleted.
      */
-    public boolean removeAutomaticZenRule(String name) {
+    public boolean removeAutomaticZenRule(String id) {
         INotificationManager service = getService();
         try {
-            return service.removeAutomaticZenRule(name);
+            return service.removeAutomaticZenRule(id);
         } catch (RemoteException e) {
         }
         return false;
