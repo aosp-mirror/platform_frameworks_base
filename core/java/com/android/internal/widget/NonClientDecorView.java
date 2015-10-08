@@ -28,7 +28,6 @@ import android.view.MotionEvent;
 import android.view.RenderNode;
 import android.view.ThreadedRenderer;
 import android.view.View;
-import android.view.ViewRootImpl;
 import android.widget.LinearLayout;
 import android.view.ViewGroup;
 import android.view.ViewOutlineProvider;
@@ -423,6 +422,7 @@ public class NonClientDecorView extends LinearLayout
         private int mLastYOffset;
 
         ResizeFrameThread(ThreadedRenderer renderer, Rect initialBounds) {
+            setName("ResizeFrame");
             mRenderer = renderer;
 
             // Create the render nodes for our frame and backdrop which can be resized independently
@@ -435,7 +435,9 @@ public class NonClientDecorView extends LinearLayout
 
             // Set the initial bounds and draw once so that we do not get a broken frame.
             mTargetRect.set(initialBounds);
-            changeWindowSize(initialBounds);
+            synchronized (this) {
+                changeWindowSizeLocked(initialBounds);
+            }
 
             // Kick off our draw thread.
             start();
@@ -458,10 +460,12 @@ public class NonClientDecorView extends LinearLayout
          * The window got replaced due to a configuration change.
          */
         public void onConfigurationChange() {
-            if (mRenderer != null) {
-                // Enforce a window redraw.
-                mOldTargetRect.set(0, 0, 0, 0);
-                pingRenderLocked();
+            synchronized (this) {
+                if (mRenderer != null) {
+                    // Enforce a window redraw.
+                    mOldTargetRect.set(0, 0, 0, 0);
+                    pingRenderLocked();
+                }
             }
         }
 
@@ -475,7 +479,8 @@ public class NonClientDecorView extends LinearLayout
                     // Invalidate the current content bounds.
                     mRenderer.setContentDrawBounds(0, 0, 0, 0);
 
-                    // Remove the render nodes again (see comment above - better to do that only once).
+                    // Remove the render nodes again
+                    // (see comment above - better to do that only once).
                     mRenderer.removeRenderNode(mFrameNode);
                     mRenderer.removeRenderNode(mBackdropNode);
 
@@ -509,24 +514,23 @@ public class NonClientDecorView extends LinearLayout
          */
         @Override
         public void doFrame(long frameTimeNanos) {
-            if (mRenderer == null) {
-                // Tell the looper to stop. We are done.
-                Looper.myLooper().quit();
-                return;
-            }
-            // Prevent someone from changing this while we are copying.
             synchronized (this) {
+                if (mRenderer == null) {
+                    // Tell the looper to stop. We are done.
+                    Looper.myLooper().quit();
+                    return;
+                }
                 mNewTargetRect.set(mTargetRect);
-            }
-            if (!mNewTargetRect.equals(mOldTargetRect)) {
-                mOldTargetRect.set(mNewTargetRect);
-                changeWindowSize(mNewTargetRect);
+                if (!mNewTargetRect.equals(mOldTargetRect)) {
+                    mOldTargetRect.set(mNewTargetRect);
+                    changeWindowSizeLocked(mNewTargetRect);
+                }
             }
         }
 
         /**
          * The content is about to be drawn and we got the location of where it will be shown.
-         * If a "changeWindowSize" call has already been processed, we will re-issue the call
+         * If a "changeWindowSizeLocked" call has already been processed, we will re-issue the call
          * if the previous call was ignored since the size was unknown.
          * @param xOffset The x offset where the content is drawn to.
          * @param yOffset The y offset where the content is drawn to.
@@ -547,8 +551,8 @@ public class NonClientDecorView extends LinearLayout
                         mLastYOffset + mLastCaptionHeight,
                         mLastXOffset + mLastContentWidth,
                         mLastYOffset + mLastCaptionHeight + mLastContentHeight);
-                // If this was the first call and changeWindowSize got already called prior to us,
-                // We should re-issue a changeWindowSize now.
+                // If this was the first call and changeWindowSizeLocked got already called prior
+                // to us, we should re-issue a changeWindowSizeLocked now.
                 if (firstCall && (mLastCaptionHeight != 0 || !mShowDecor)) {
                     mOldTargetRect.set(0, 0, 0, 0);
                     pingRenderLocked();
@@ -560,9 +564,7 @@ public class NonClientDecorView extends LinearLayout
          * Resizing the frame to fit the new window size.
          * @param newBounds The window bounds which needs to be drawn.
          */
-        private void changeWindowSize(Rect newBounds) {
-            long startTime = System.currentTimeMillis();
-
+        private void changeWindowSizeLocked(Rect newBounds) {
             // While a configuration change is taking place the view hierarchy might become
             // inaccessible. For that case we remember the previous metrics to avoid flashes.
             // Note that even when there is no visible caption, the caption child will exist.
