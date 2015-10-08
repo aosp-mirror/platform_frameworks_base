@@ -66,6 +66,11 @@ page.tags="IntentFilter"
       <li><a href="#PlaySearch">Play music based on a search query</a></li>
     </ol>
   </li>
+  <li><a href="#NewNote">New Note</a>
+    <ol>
+      <li><a href="#CreateNote">Create a note</a></li>
+    </ol>
+  </li>
   <li><a href="#Phone">Phone</a>
     <ol>
       <li><a href="#DialPhone">Initiate a phone call</a></li>
@@ -1776,6 +1781,72 @@ protected void onCreate(Bundle savedInstanceState) {
     }
 }
 </pre>
+
+
+
+
+<h2 id="NewNote">New Note</h2>
+
+<h3 id="CreateNote">Create a note</h3>
+
+<p>To create a new note, use the
+<a href="https://developers.google.com/android/reference/com/google/android/gms/actions/NoteIntents#ACTION_CREATE_NOTE">
+{@code ACTION_CREATE_NOTE}</a> action and specify note details such as the subject and text using extras defined below.</p>
+
+<p class="note"><strong>Note:</strong> Apps must ask for confirmation from the user
+before completing the action.</p>
+
+<dl>
+  <dt><b>Action</b></dt>
+  <dd><a href="https://developers.google.com/android/reference/com/google/android/gms/actions/NoteIntents#ACTION_CREATE_NOTE">
+  {@code ACTION_CREATE_NOTE}</a>
+</dd>
+
+  <dt><b>Data URI Scheme</b></dt>
+  <dd>None</dd>
+
+  <dt><b>MIME Type</b></dt>
+  <dd><a href="https://developer.android.com/reference/org/apache/http/protocol/HTTP.html#PLAIN_TEXT_TYPE">
+{@code PLAIN_TEXT_TYPE}</a></dd>
+  <dd>"*/*"</dd>
+
+
+<dt><b>Extras</b></dt>
+<dd>
+  <dl>
+    <dt><a href="https://developers.google.com/android/reference/com/google/android/gms/actions/NoteIntents#EXTRA_NAME">
+        {@code EXTRA_NAME}</a>
+      <dd>A string indicating the title or subject of the note.</dd>
+    <dt><a href="https://developers.google.com/android/reference/com/google/android/gms/actions/NoteIntents#EXTRA_TEXT">
+       {@code EXTRA_TEXT}</a>
+      <dd>A string indicating the text of the note.</dd>
+  </dl>
+</dd>
+
+
+<p><b>Example intent:</b></p>
+<pre>
+public void createNote(String subject, String text) {
+    Intent intent = new Intent(NoteIntents.ACTION_CREATE_NOTE)
+            .putExtra(NoteIntents.EXTRA_NAME, subject)
+            .putExtra(NoteIntents.EXTRA_TEXT, text);
+    if (intent.resolveActivity(getPackageManager()) != null) {
+        startActivity(intent);
+    }
+}</pre>
+
+
+<p><b>Example intent filter:</b></p>
+<pre>
+&lt;activity ...&gt;
+    &lt;intent-filter&gt;
+        &lt;action android:name="com.google.android.gms.actions.CREATE_NOTE" /&gt;
+        &lt;category android:name="android.intent.category.DEFAULT" /&gt;
+        &lt;data android:mimeType=”*/*”&gt;
+    &lt;/intent-filter&gt;
+&lt;/activity&gt;
+</pre>
+
 
 
 
