@@ -1863,17 +1863,11 @@ public final class ActivityStackSupervisor implements DisplayListener {
 
         boolean overrideBounds = false;
         Rect newBounds = null;
-        if (r.info.resizeable || (inTask != null && inTask.mResizeable)) {
-            if (intent.hasExtra(ActivityOptions.KEY_BOUNDS)) {
+        if (options != null && (r.info.resizeable || (inTask != null && inTask.mResizeable))) {
+            ActivityOptions opts = new ActivityOptions(options);
+            if (opts.hasBounds()) {
                 overrideBounds = true;
-                newBounds = Rect.unflattenFromString(
-                        intent.getStringExtra(ActivityOptions.KEY_BOUNDS));
-            } else if (options != null) {
-                ActivityOptions opts = new ActivityOptions(options);
-                if (opts.hasBounds()) {
-                    overrideBounds = true;
-                    newBounds = opts.getBounds();
-                }
+                newBounds = opts.getBounds();
             }
         }
 
