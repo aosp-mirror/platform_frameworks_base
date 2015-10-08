@@ -10145,5 +10145,12 @@ public class WindowManagerService extends IWindowManager.Stub
             }
         }
 
+        @Override
+        public boolean isStackVisible(int stackId) {
+            synchronized (mWindowMap) {
+                final TaskStack stack = mStackIdToStack.get(stackId);
+                return (stack != null && stack.isVisibleLocked());
+            }
+        }
     }
 }

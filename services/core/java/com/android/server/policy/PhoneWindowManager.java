@@ -16,6 +16,16 @@
 
 package com.android.server.policy;
 
+import static android.app.ActivityManager.DOCKED_STACK_ID;
+import static android.app.ActivityManager.FREEFORM_WORKSPACE_STACK_ID;
+import static android.view.WindowManager.LayoutParams.*;
+import static android.view.WindowManagerPolicy.WindowManagerFuncs.LID_ABSENT;
+import static android.view.WindowManagerPolicy.WindowManagerFuncs.LID_OPEN;
+import static android.view.WindowManagerPolicy.WindowManagerFuncs.LID_CLOSED;
+import static android.view.WindowManagerPolicy.WindowManagerFuncs.CAMERA_LENS_COVER_ABSENT;
+import static android.view.WindowManagerPolicy.WindowManagerFuncs.CAMERA_LENS_UNCOVERED;
+import static android.view.WindowManagerPolicy.WindowManagerFuncs.CAMERA_LENS_COVERED;
+
 import android.app.ActivityManager;
 import android.app.ActivityManagerInternal;
 import android.app.ActivityManagerInternal.SleepToken;
@@ -40,7 +50,6 @@ import android.content.pm.ResolveInfo;
 import android.content.res.CompatibilityInfo;
 import android.content.res.Configuration;
 import android.content.res.Resources;
-import android.content.res.TypedArray;
 import android.database.ContentObserver;
 import android.graphics.PixelFormat;
 import android.graphics.Rect;
@@ -129,14 +138,6 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.HashSet;
 import java.util.List;
-
-import static android.view.WindowManager.LayoutParams.*;
-import static android.view.WindowManagerPolicy.WindowManagerFuncs.LID_ABSENT;
-import static android.view.WindowManagerPolicy.WindowManagerFuncs.LID_OPEN;
-import static android.view.WindowManagerPolicy.WindowManagerFuncs.LID_CLOSED;
-import static android.view.WindowManagerPolicy.WindowManagerFuncs.CAMERA_LENS_COVER_ABSENT;
-import static android.view.WindowManagerPolicy.WindowManagerFuncs.CAMERA_LENS_UNCOVERED;
-import static android.view.WindowManagerPolicy.WindowManagerFuncs.CAMERA_LENS_COVERED;
 
 /**
  * WindowManagerPolicy implementation for the Android phone UI.  This
@@ -4627,7 +4628,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     if (mStatusBarController.setBarShowingLw(true)) {
                         changes |= FINISH_LAYOUT_REDO_LAYOUT;
                     }
-                } else if (topIsFullscreen) {
+                } else if (topIsFullscreen
+                        && !mWindowManagerInternal.isStackVisible(FREEFORM_WORKSPACE_STACK_ID)
+                        && !mWindowManagerInternal.isStackVisible(DOCKED_STACK_ID)) {
                     if (DEBUG_LAYOUT) Slog.v(TAG, "** HIDING status bar");
                     if (mStatusBarController.setBarShowingLw(false)) {
                         changes |= FINISH_LAYOUT_REDO_LAYOUT;
@@ -6714,6 +6717,15 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     }
 
     private int updateSystemBarsLw(WindowState win, int oldVis, int vis) {
+        final boolean dockedStackVisible = mWindowManagerInternal.isStackVisible(DOCKED_STACK_ID);
+        final boolean freeformStackVisible =
+                mWindowManagerInternal.isStackVisible(FREEFORM_WORKSPACE_STACK_ID);
+        final boolean forceShowSystemBars = dockedStackVisible || freeformStackVisible;
+        // TODO(multi-window): Update to force opaque independently for status bar and nav bar.
+        // This will require refactoring the code to have separate vis flag for each bar so it can
+        // be adjusted independently.
+        final boolean forceOpaqueSystemBars = forceShowSystemBars;
+
         // apply translucent bar vis flags
         WindowState transWin = isStatusBarKeyguard() && !mHideLockScreen
                 ? mStatusBar
@@ -6736,7 +6748,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             vis = (vis & ~flags) | (oldVis & flags);
         }
 
-        if (!areTranslucentBarsAllowed() && transWin != mStatusBar) {
+        if ((!areTranslucentBarsAllowed() && transWin != mStatusBar)
+                || forceOpaqueSystemBars) {
             vis &= ~(View.NAVIGATION_BAR_TRANSLUCENT | View.STATUS_BAR_TRANSLUCENT
                     | View.SYSTEM_UI_TRANSPARENT);
         }
@@ -6744,24 +6757,21 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         // update status bar
         boolean immersiveSticky =
                 (vis & View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY) != 0;
-        boolean hideStatusBarWM =
-                mTopFullscreenOpaqueWindowState != null &&
-                (PolicyControl.getWindowFlags(mTopFullscreenOpaqueWindowState, null)
+        final boolean hideStatusBarWM =
+                mTopFullscreenOpaqueWindowState != null
+                && (PolicyControl.getWindowFlags(mTopFullscreenOpaqueWindowState, null)
                         & WindowManager.LayoutParams.FLAG_FULLSCREEN) != 0;
-        boolean hideStatusBarSysui =
+        final boolean hideStatusBarSysui =
                 (vis & View.SYSTEM_UI_FLAG_FULLSCREEN) != 0;
-        boolean hideNavBarSysui =
+        final boolean hideNavBarSysui =
                 (vis & View.SYSTEM_UI_FLAG_HIDE_NAVIGATION) != 0;
 
-        boolean transientStatusBarAllowed =
-                mStatusBar != null && (
-                hideStatusBarWM
-                || (hideStatusBarSysui && immersiveSticky)
-                || statusBarHasFocus);
+        final boolean transientStatusBarAllowed = mStatusBar != null
+                && (statusBarHasFocus || (!forceShowSystemBars
+                        && (hideStatusBarWM || (hideStatusBarSysui && immersiveSticky))));
 
-        boolean transientNavBarAllowed =
-                mNavigationBar != null &&
-                hideNavBarSysui && immersiveSticky;
+        final boolean transientNavBarAllowed = mNavigationBar != null
+                && !forceShowSystemBars && hideNavBarSysui && immersiveSticky;
 
         final long now = SystemClock.uptimeMillis();
         final boolean pendingPanic = mPendingPanicGestureUptime != 0
@@ -6774,11 +6784,11 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             mNavigationBarController.showTransient();
         }
 
-        boolean denyTransientStatus = mStatusBarController.isTransientShowRequested()
+        final boolean denyTransientStatus = mStatusBarController.isTransientShowRequested()
                 && !transientStatusBarAllowed && hideStatusBarSysui;
-        boolean denyTransientNav = mNavigationBarController.isTransientShowRequested()
+        final boolean denyTransientNav = mNavigationBarController.isTransientShowRequested()
                 && !transientNavBarAllowed;
-        if (denyTransientStatus || denyTransientNav) {
+        if (denyTransientStatus || denyTransientNav || forceShowSystemBars) {
             // clear the clearable flags instead
             clearClearableFlagsLw();
             vis &= ~View.SYSTEM_UI_CLEARABLE_FLAGS;
