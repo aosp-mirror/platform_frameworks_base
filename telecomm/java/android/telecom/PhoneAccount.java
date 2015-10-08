@@ -584,9 +584,8 @@ public final class PhoneAccount implements Parcelable {
             out.writeInt(1);
             mIcon.writeToParcel(out, flags);
         }
-
-        out.writeBundle(mExtras);
         out.writeByte((byte) (mIsEnabled ? 1 : 0));
+        out.writeBundle(mExtras);
     }
 
     public static final Creator<PhoneAccount> CREATOR
@@ -628,8 +627,8 @@ public final class PhoneAccount implements Parcelable {
         } else {
             mIcon = null;
         }
-        mExtras = in.readBundle();
         mIsEnabled = in.readByte() == 1;
+        mExtras = in.readBundle();
     }
 
     @Override
@@ -645,7 +644,7 @@ public final class PhoneAccount implements Parcelable {
             sb.append(scheme)
                     .append(" ");
         }
-        sb.append(" Extras : ");
+        sb.append(" Extras: ");
         sb.append(mExtras);
         sb.append("]");
         return sb.toString();
