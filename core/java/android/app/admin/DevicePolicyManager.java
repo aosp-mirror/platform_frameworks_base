@@ -2573,28 +2573,28 @@ public class DevicePolicyManager {
     /**
      * @hide
      * Sets the given package as the device owner.
-     * Same as {@link #setDeviceOwner(String, String)} but without setting a device owner name.
-     * @param packageName the package name of the application to be registered as the device owner.
+     * Same as {@link #setDeviceOwner(ComponentName, String)} but without setting a device owner name.
+     * @param who the component name to be registered as device owner.
      * @return whether the package was successfully registered as the device owner.
      * @throws IllegalArgumentException if the package name is null or invalid
      * @throws IllegalStateException If the preconditions mentioned are not met.
      */
-    public boolean setDeviceOwner(String packageName) {
-        return setDeviceOwner(packageName, null);
+    public boolean setDeviceOwner(ComponentName who) {
+        return setDeviceOwner(who, null);
     }
 
     /**
      * @hide
      */
-    public boolean setDeviceOwner(String packageName, int userId)  {
-        return setDeviceOwner(packageName, null, userId);
+    public boolean setDeviceOwner(ComponentName who, int userId)  {
+        return setDeviceOwner(who, null, userId);
     }
 
     /**
      * @hide
      */
-    public boolean setDeviceOwner(String packageName, String ownerName) {
-        return setDeviceOwner(packageName, ownerName, UserHandle.USER_SYSTEM);
+    public boolean setDeviceOwner(ComponentName who, String ownerName) {
+        return setDeviceOwner(who, ownerName, UserHandle.USER_SYSTEM);
     }
 
     /**
@@ -2605,18 +2605,18 @@ public class DevicePolicyManager {
      * this method.
      * Calling this after the setup phase of the primary user has completed is allowed only if
      * the caller is the shell uid, and there are no additional users and no accounts.
-     * @param packageName the package name of the application to be registered as the device owner.
+     * @param who the component name to be registered as device owner.
      * @param ownerName the human readable name of the institution that owns this device.
      * @param userId ID of the user on which the device owner runs.
      * @return whether the package was successfully registered as the device owner.
      * @throws IllegalArgumentException if the package name is null or invalid
      * @throws IllegalStateException If the preconditions mentioned are not met.
      */
-    public boolean setDeviceOwner(String packageName, String ownerName, int userId)
+    public boolean setDeviceOwner(ComponentName who, String ownerName, int userId)
             throws IllegalArgumentException, IllegalStateException {
         if (mService != null) {
             try {
-                return mService.setDeviceOwner(packageName, ownerName, userId);
+                return mService.setDeviceOwner(who, ownerName, userId);
             } catch (RemoteException re) {
                 Log.w(TAG, "Failed to set device owner");
             }
@@ -2635,14 +2635,15 @@ public class DevicePolicyManager {
      * the setup process.
      * @param packageName the package name of the app, to compare with the registered device owner
      * app, if any.
-     * @return whether or not the package is registered as the device owner app.
+     * @return whether or not the package is registered as the device owner app.  Note this method
+     * does *not* check weather the device owner is actually running on the current user.
      */
     public boolean isDeviceOwnerApp(String packageName) {
         if (mService != null) {
             try {
-                return mService.isDeviceOwner(packageName);
-            } catch (RemoteException re) {
-                Log.w(TAG, "Failed to check device owner");
+                return mService.isDeviceOwnerPackage(packageName);
+            } catch (RemoteException e) {
+                Log.w(TAG, "Failed talking with device policy service", e);
             }
         }
         return false;
@@ -2654,6 +2655,17 @@ public class DevicePolicyManager {
      */
     public boolean isDeviceOwner(String packageName) {
         return isDeviceOwnerApp(packageName);
+    }
+
+    /**
+     * Check whether a given component is registered as a device owner.
+     * Note this method does *not* check weather the device owner is actually running on the current
+     * user.
+     *
+     * @hide
+     */
+    public boolean isDeviceOwner(ComponentName who) {
+        return (who != null) && who.equals(getDeviceOwner());
     }
 
     /**
@@ -2675,12 +2687,28 @@ public class DevicePolicyManager {
         }
     }
 
-    /** @hide */
+    /**
+     * Returns the device owner package name.  Note this method will still return the device owner
+     * package name even if it's running on a different user.
+     *
+     * @hide
+     */
     @SystemApi
     public String getDeviceOwner() {
+        final ComponentName componentName = getDeviceOwnerComponent();
+        return componentName == null ? null : componentName.getPackageName();
+    }
+
+    /**
+     * Returns the device owner name.  Note this method will still return the device owner
+     * name even if it's running on a different user.
+     *
+     * @hide
+     */
+    public String getDeviceOwnerName() {
         if (mService != null) {
             try {
-                return mService.getDeviceOwner();
+                return mService.getDeviceOwnerName();
             } catch (RemoteException re) {
                 Log.w(TAG, "Failed to get device owner");
             }
@@ -2688,11 +2716,16 @@ public class DevicePolicyManager {
         return null;
     }
 
-    /** @hide */
-    public String getDeviceOwnerName() {
+    /**
+     * Returns the device owner component name.  Note this method will still return the device owner
+     * component name even if it's running on a different user.
+     *
+     * @hide
+     */
+    public ComponentName getDeviceOwnerComponent() {
         if (mService != null) {
             try {
-                return mService.getDeviceOwnerName();
+                return mService.getDeviceOwner();
             } catch (RemoteException re) {
                 Log.w(TAG, "Failed to get device owner");
             }
