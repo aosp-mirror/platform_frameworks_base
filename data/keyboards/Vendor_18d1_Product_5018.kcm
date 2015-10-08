@@ -197,6 +197,7 @@ key 1 {
     label:                              '1'
     base:                               '1'
     shift:                              '!'
+    ralt:                               replace ESCAPE
 }
 
 key 2 {
