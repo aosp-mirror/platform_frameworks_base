@@ -1,0 +1,84 @@
+# Copyright (C) 2015 The Android Open Source Project
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+#
+# Key layout for Google Pixel C Keyboard
+#
+
+# Row 1
+key 2     1
+key 3     2
+key 4     3
+key 5     4
+key 6     5
+key 7     6
+key 8     7
+key 9     8
+key 10    9
+key 11    0
+key 12    MINUS
+key 14    DEL         # Backspace
+
+# Row 2
+key 15    TAB
+key 16    Q
+key 17    W
+key 18    E
+key 19    R
+key 20    T
+key 21    Y
+key 22    U
+key 23    I
+key 24    O
+key 25    P
+key 13    EQUALS
+key 28    ENTER
+
+# Row 3
+key 125   META_LEFT   # "Search key"
+key 30    A
+key 31    S
+key 32    D
+key 33    F
+key 34    G
+key 35    H
+key 36    J
+key 37    K
+key 38    L
+key 39    SEMICOLON
+key 40    APOSTROPHE
+
+# Row 4
+key 42    SHIFT_LEFT
+key 44    Z
+key 45    X
+key 46    C
+key 47    V
+key 48    B
+key 49    N
+key 50    M
+key 51    COMMA
+key 52    PERIOD
+key 53    SLASH
+key 54    SHIFT_RIGHT
+
+# Row 5
+key 29    CTRL_LEFT
+key 56    ALT_LEFT
+key 57    SPACE
+key 100   ALT_RIGHT
+key 103   DPAD_UP
+key 105   DPAD_LEFT
+key 106   DPAD_RIGHT
+key 108   DPAD_DOWN
