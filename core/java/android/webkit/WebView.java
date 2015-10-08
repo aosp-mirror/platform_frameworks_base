@@ -20,6 +20,7 @@ import android.annotation.NonNull;
 import android.annotation.SystemApi;
 import android.annotation.Widget;
 import android.content.Context;
+import android.content.Intent;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
@@ -2157,6 +2158,10 @@ public class WebView extends AbsoluteLayout
             WebView.super.setLayoutParams(params);
         }
 
+        public void super_startActivityForResult(Intent intent, int requestCode) {
+            WebView.super.startActivityForResult(intent, requestCode);
+        }
+
         // ---- Access to non-public methods ----
         public void overScrollBy(int deltaX, int deltaY,
                 int scrollX, int scrollY,
@@ -2592,6 +2597,23 @@ public class WebView extends AbsoluteLayout
     public void onFinishTemporaryDetach() {
         super.onFinishTemporaryDetach();
         mProvider.getViewDelegate().onFinishTemporaryDetach();
+    }
+
+    /**
+     * Receive the result from a previous call to {@link #startActivityForResult(Intent, int)}.
+     *
+     * @param requestCode The integer request code originally supplied to
+     *                    startActivityForResult(), allowing you to identify who this
+     *                    result came from.
+     * @param resultCode The integer result code returned by the child activity
+     *                   through its setResult().
+     * @param data An Intent, which can return result data to the caller
+     *               (various data can be attached to Intent "extras").
+     * @hide
+     */
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        mProvider.getViewDelegate().onActivityResult(requestCode, resultCode, data);
     }
 
     /** @hide */

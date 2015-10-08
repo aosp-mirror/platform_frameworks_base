@@ -41884,6 +41884,7 @@ package android.webkit {
     method public void super_scrollTo(int, int);
     method public boolean super_setFrame(int, int, int, int);
     method public void super_setLayoutParams(android.view.ViewGroup.LayoutParams);
+    method public void super_startActivityForResult(android.content.Intent, int);
   }
 
   public static abstract class WebView.VisualStateCallback {
@@ -42118,6 +42119,7 @@ package android.webkit {
   public static abstract interface WebViewProvider.ViewDelegate {
     method public abstract boolean dispatchKeyEvent(android.view.KeyEvent);
     method public abstract android.view.accessibility.AccessibilityNodeProvider getAccessibilityNodeProvider();
+    method public abstract void onActivityResult(int, int, android.content.Intent);
     method public abstract void onAttachedToWindow();
     method public abstract void onConfigurationChanged(android.content.res.Configuration);
     method public abstract android.view.inputmethod.InputConnection onCreateInputConnection(android.view.inputmethod.EditorInfo);

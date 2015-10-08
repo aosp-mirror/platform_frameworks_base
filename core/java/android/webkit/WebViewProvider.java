@@ -18,6 +18,7 @@ package android.webkit;
 
 import android.annotation.SystemApi;
 import android.content.res.Configuration;
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Paint;
@@ -380,6 +381,8 @@ public interface WebViewProvider {
         public void onStartTemporaryDetach();
 
         public void onFinishTemporaryDetach();
+
+        public void onActivityResult(int requestCode, int resultCode, Intent data);
     }
 
     interface ScrollDelegate {
