@@ -488,8 +488,14 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
     }
 
     public void clearContentView() {
-        if (mNonClientDecorView != null && mNonClientDecorView.getChildCount() > 1) {
-            mNonClientDecorView.removeViewAt(1);
+        if (mNonClientDecorView != null) {
+            if (mNonClientDecorView.getChildCount() > 1) {
+                mNonClientDecorView.removeViewAt(1);
+            }
+        } else {
+            // This window doesn't have non client decor, so we need to just remove the children
+            // of the decor view.
+            mDecor.removeAllViews();
         }
     }
 
