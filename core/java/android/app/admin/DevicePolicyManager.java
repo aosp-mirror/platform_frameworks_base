@@ -341,7 +341,8 @@ public class DevicePolicyManager {
 
     /**
      * A String extra indicating the security type of the wifi network in
-     * {@link #EXTRA_PROVISIONING_WIFI_SSID}.
+     * {@link #EXTRA_PROVISIONING_WIFI_SSID} and could be one of {@code NONE}, {@code WPA} or
+     * {@code WEP}.
      *
      * <p>Use in an NFC record with {@link #MIME_TYPE_PROVISIONING_NFC} that starts device owner
      * provisioning via an NFC bump.
