@@ -9180,7 +9180,7 @@ public class WindowManagerService extends IWindowManager.Stub
         synchronized (mWindowMap) {
             int visibility = mPolicy.adjustSystemUiVisibilityLw(mLastStatusBarVisibility);
             updateStatusBarVisibilityLocked(visibility);
-            mWindowPlacerLocked.performSurfacePlacement();
+            mWindowPlacerLocked.requestTraversal();
         }
     }
 
