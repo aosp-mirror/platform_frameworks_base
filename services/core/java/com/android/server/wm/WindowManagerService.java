@@ -9140,9 +9140,9 @@ public class WindowManagerService extends IWindowManager.Stub
     }
 
     // TOOD(multidisplay): StatusBar on multiple screens?
-    void updateStatusBarVisibilityLocked(int visibility) {
+    boolean updateStatusBarVisibilityLocked(int visibility) {
         if (mLastDispatchedSystemUiVisibility == visibility) {
-            return;
+            return false;
         }
         final int globalDiff = (visibility ^ mLastDispatchedSystemUiVisibility)
                 // We are only interested in differences of one of the
@@ -9173,14 +9173,16 @@ public class WindowManagerService extends IWindowManager.Stub
                 // so sorry
             }
         }
+        return true;
     }
 
     @Override
     public void reevaluateStatusBarVisibility() {
         synchronized (mWindowMap) {
             int visibility = mPolicy.adjustSystemUiVisibilityLw(mLastStatusBarVisibility);
-            updateStatusBarVisibilityLocked(visibility);
-            mWindowPlacerLocked.requestTraversal();
+            if (updateStatusBarVisibilityLocked(visibility)) {
+                mWindowPlacerLocked.requestTraversal();
+            }
         }
     }
 
