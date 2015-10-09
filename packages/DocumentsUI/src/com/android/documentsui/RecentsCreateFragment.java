@@ -83,7 +83,7 @@ public class RecentsCreateFragment extends Fragment {
 
         final View view = inflater.inflate(R.layout.fragment_directory, container, false);
 
-        mRecView = (RecyclerView) view.findViewById(R.id.recyclerView);
+        mRecView = (RecyclerView) view.findViewById(R.id.list);
         mRecView.setLayoutManager(new LinearLayoutManager(getContext()));
         mRecView.addOnItemTouchListener(mItemListener);
 
