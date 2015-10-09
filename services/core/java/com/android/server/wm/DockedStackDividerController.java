@@ -57,8 +57,8 @@ public class DockedStackDividerController implements View.OnTouchListener, DimLa
     private final DisplayContent mDisplayContent;
     private final int mSideMargin;
     private final DimLayer mDimLayer;
-    private final int mDisplayWidth;
-    private final int mDisplayHeight;
+    private int mDisplayWidth;
+    private int mDisplayHeight;
     private View mView;
     private Rect mTmpRect = new Rect();
     private Rect mLastResizeRect = new Rect();
@@ -72,9 +72,7 @@ public class DockedStackDividerController implements View.OnTouchListener, DimLa
     DockedStackDividerController(Context context, DisplayContent displayContent) {
         mContext = context;
         mDisplayContent = displayContent;
-        final DisplayInfo info = displayContent.getDisplayInfo();
-        mDisplayWidth = info.logicalWidth;
-        mDisplayHeight = info.logicalHeight;
+        updateDisplayInfo();
         mDividerWidth = context.getResources().getDimensionPixelSize(
                 com.android.internal.R.dimen.docked_stack_divider_thickness);
         mSideMargin = dipToPixel(SIDE_MARGIN_DIP, mDisplayContent.getDisplayMetrics());
@@ -108,6 +106,12 @@ public class DockedStackDividerController implements View.OnTouchListener, DimLa
 
     boolean hasDivider() {
         return mView != null;
+    }
+
+    void updateDisplayInfo() {
+        final DisplayInfo info = mDisplayContent.getDisplayInfo();
+        mDisplayWidth = info.logicalWidth;
+        mDisplayHeight = info.logicalHeight;
     }
 
     void update(Configuration configuration, boolean forceUpdate) {
