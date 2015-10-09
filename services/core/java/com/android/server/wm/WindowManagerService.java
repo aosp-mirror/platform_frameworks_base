@@ -6196,10 +6196,13 @@ public class WindowManagerService extends IWindowManager.Stub
         int retryCount = 0;
         WindowState appWin = null;
 
-        final boolean appIsImTarget = mInputMethodTarget != null
-                && mInputMethodTarget.mAppToken != null
-                && mInputMethodTarget.mAppToken.appToken != null
-                && mInputMethodTarget.mAppToken.appToken.asBinder() == appToken;
+        boolean appIsImTarget;
+        synchronized(mWindowMap) {
+            appIsImTarget = mInputMethodTarget != null
+                    && mInputMethodTarget.mAppToken != null
+                    && mInputMethodTarget.mAppToken.appToken != null
+                    && mInputMethodTarget.mAppToken.appToken.asBinder() == appToken;
+        }
 
         final int aboveAppLayer = (mPolicy.windowTypeToLayerLw(TYPE_APPLICATION) + 1)
                 * TYPE_LAYER_MULTIPLIER + TYPE_LAYER_OFFSET;
