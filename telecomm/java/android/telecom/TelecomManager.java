@@ -447,6 +447,8 @@ public class TelecomManager {
 
     private final Context mContext;
 
+    private final ITelecomService mTelecomServiceOverride;
+
     /**
      * @hide
      */
@@ -458,12 +460,20 @@ public class TelecomManager {
      * @hide
      */
     public TelecomManager(Context context) {
+        this(context, null);
+    }
+
+    /**
+     * @hide
+     */
+    public TelecomManager(Context context, ITelecomService telecomServiceImpl) {
         Context appContext = context.getApplicationContext();
         if (appContext != null) {
             mContext = appContext;
         } else {
             mContext = context;
         }
+        mTelecomServiceOverride = telecomServiceImpl;
     }
 
     /**
@@ -1340,6 +1350,9 @@ public class TelecomManager {
     }
 
     private ITelecomService getTelecomService() {
+        if (mTelecomServiceOverride != null) {
+            return mTelecomServiceOverride;
+        }
         return ITelecomService.Stub.asInterface(ServiceManager.getService(Context.TELECOM_SERVICE));
     }
 
