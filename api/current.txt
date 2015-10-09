@@ -15505,6 +15505,7 @@ package android.media {
     field public static final int BUFFER_FLAG_KEY_FRAME = 1; // 0x1
     field public static final deprecated int BUFFER_FLAG_SYNC_FRAME = 1; // 0x1
     field public static final int CONFIGURE_FLAG_ENCODE = 1; // 0x1
+    field public static final int CRYPTO_MODE_AES_CBC = 2; // 0x2
     field public static final int CRYPTO_MODE_AES_CTR = 1; // 0x1
     field public static final int CRYPTO_MODE_UNENCRYPTED = 0; // 0x0
     field public static final deprecated int INFO_OUTPUT_BUFFERS_CHANGED = -3; // 0xfffffffd
@@ -15556,12 +15557,20 @@ package android.media {
   public static final class MediaCodec.CryptoInfo {
     ctor public MediaCodec.CryptoInfo();
     method public void set(int, int[], int[], byte[], byte[], int);
+    method public void setPattern(android.media.MediaCodec.CryptoInfo.Pattern);
     field public byte[] iv;
     field public byte[] key;
     field public int mode;
     field public int[] numBytesOfClearData;
     field public int[] numBytesOfEncryptedData;
     field public int numSubSamples;
+  }
+
+  public static final class MediaCodec.CryptoInfo.Pattern {
+    ctor public MediaCodec.CryptoInfo.Pattern(int, int);
+    method public int getEncryptBlocks();
+    method public int getSkipBlocks();
+    method public void set(int, int);
   }
 
   public static abstract interface MediaCodec.OnFrameRenderedListener {

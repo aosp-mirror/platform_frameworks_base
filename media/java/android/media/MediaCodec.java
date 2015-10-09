@@ -2179,6 +2179,7 @@ final public class MediaCodec {
     // in media/hardware/CryptoAPI.h !
     public static final int CRYPTO_MODE_UNENCRYPTED = 0;
     public static final int CRYPTO_MODE_AES_CTR     = 1;
+    public static final int CRYPTO_MODE_AES_CBC     = 2;
 
     /**
      * Metadata describing the structure of a (at least partially) encrypted
@@ -2186,27 +2187,14 @@ final public class MediaCodec {
      * A buffer's data is considered to be partitioned into "subSamples",
      * each subSample starts with a (potentially empty) run of plain,
      * unencrypted bytes followed by a (also potentially empty) run of
-     * encrypted bytes.
-     * numBytesOfClearData can be null to indicate that all data is encrypted.
-     * This information encapsulates per-sample metadata as outlined in
-     * ISO/IEC FDIS 23001-7:2011 "Common encryption in ISO base media file format files".
+     * encrypted bytes. If pattern encryption applies, each of the latter runs
+     * is encrypted only partly, according to a repeating pattern of "encrypt"
+     * and "skip" blocks. numBytesOfClearData can be null to indicate that all
+     * data is encrypted. This information encapsulates per-sample metadata as
+     * outlined in ISO/IEC FDIS 23001-7:2011 "Common encryption in ISO base
+     * media file format files".
      */
     public final static class CryptoInfo {
-        public void set(
-                int newNumSubSamples,
-                @NonNull int[] newNumBytesOfClearData,
-                @NonNull int[] newNumBytesOfEncryptedData,
-                @NonNull byte[] newKey,
-                @NonNull byte[] newIV,
-                int newMode) {
-            numSubSamples = newNumSubSamples;
-            numBytesOfClearData = newNumBytesOfClearData;
-            numBytesOfEncryptedData = newNumBytesOfEncryptedData;
-            key = newKey;
-            iv = newIV;
-            mode = newMode;
-        }
-
         /**
          * The number of subSamples that make up the buffer's contents.
          */
@@ -2220,7 +2208,7 @@ final public class MediaCodec {
          */
         public int[] numBytesOfEncryptedData;
         /**
-         * A 16-byte opaque key
+         * A 16-byte key id
          */
         public byte[] key;
         /**
@@ -2229,9 +2217,83 @@ final public class MediaCodec {
         public byte[] iv;
         /**
          * The type of encryption that has been applied,
-         * see {@link #CRYPTO_MODE_UNENCRYPTED} and {@link #CRYPTO_MODE_AES_CTR}.
+         * see {@link #CRYPTO_MODE_UNENCRYPTED}, {@link #CRYPTO_MODE_AES_CTR}
+         * and {@link #CRYPTO_MODE_AES_CBC}
          */
         public int mode;
+
+        /**
+         * Metadata describing encryption pattern for the protected bytes in a subsample.
+         */
+        public final static class Pattern {
+            /**
+             * Number of blocks to be encrypted in the pattern. If zero, pattern
+             * encryption is inoperative.
+             */
+            private int mEncryptBlocks;
+
+            /**
+             * Number of blocks to be skipped (left clear) in the pattern. If zero,
+             * pattern encryption is inoperative.
+             */
+            private int mSkipBlocks;
+
+            /**
+             * Construct a sample encryption pattern given the number of blocks to
+             * encrypt and skip in the pattern.
+             */
+            public Pattern(int blocksToEncrypt, int blocksToSkip) {
+                set(blocksToEncrypt, blocksToSkip);
+            }
+
+            /**
+             * Set the number of blocks to encrypt and skip in a sample encryption
+             * pattern.
+             */
+            public void set(int blocksToEncrypt, int blocksToSkip) {
+                mEncryptBlocks = blocksToEncrypt;
+                mSkipBlocks = blocksToSkip;
+            }
+
+            /**
+             * Return the number of blocks to skip in a sample encryption pattern.
+             */
+            public int getSkipBlocks() {
+                return mSkipBlocks;
+            }
+
+            /**
+             * Return the number of blocks to encrypt in a sample encryption pattern.
+             */
+            public int getEncryptBlocks() {
+                return mEncryptBlocks;
+            }
+        };
+
+        /**
+         * The pattern applicable to the protected data in each subsample.
+         */
+        private Pattern pattern;
+
+        public void set(
+                int newNumSubSamples,
+                @NonNull int[] newNumBytesOfClearData,
+                @NonNull int[] newNumBytesOfEncryptedData,
+                @NonNull byte[] newKey,
+                @NonNull byte[] newIV,
+                int newMode) {
+            numSubSamples = newNumSubSamples;
+            numBytesOfClearData = newNumBytesOfClearData;
+            numBytesOfEncryptedData = newNumBytesOfEncryptedData;
+            key = newKey;
+            iv = newIV;
+            mode = newMode;
+            pattern = new Pattern(0, 0);
+        }
+
+        public void setPattern(Pattern newPattern) {
+            pattern = newPattern;
+        }
 
         @Override
         public String toString() {
