@@ -44,6 +44,15 @@ public class RootInfo implements Durable, Parcelable {
     private static final int VERSION_INIT = 1;
     private static final int VERSION_DROP_TYPE = 2;
 
+    // The values of these constants determine the sort order of various roots in the RootsFragment.
+    public static final int TYPE_IMAGES = 1;
+    public static final int TYPE_VIDEO = 2;
+    public static final int TYPE_AUDIO = 3;
+    public static final int TYPE_RECENTS = 4;
+    public static final int TYPE_DOWNLOADS = 5;
+    public static final int TYPE_LOCAL = 6;
+    public static final int TYPE_CLOUD = 7;
+
     public String authority;
     public String rootId;
     public int flags;
@@ -57,6 +66,7 @@ public class RootInfo implements Durable, Parcelable {
     /** Derived fields that aren't persisted */
     public String[] derivedMimeTypes;
     public int derivedIcon;
+    public int derivedType;
 
     public RootInfo() {
         reset();
@@ -76,6 +86,7 @@ public class RootInfo implements Durable, Parcelable {
 
         derivedMimeTypes = null;
         derivedIcon = 0;
+        derivedType = 0;
     }
 
     @Override
@@ -158,14 +169,23 @@ public class RootInfo implements Durable, Parcelable {
         // TODO: remove these special case icons
         if (isExternalStorage()) {
             derivedIcon = R.drawable.ic_root_sdcard;
+            derivedType = TYPE_LOCAL;
         } else if (isDownloads()) {
             derivedIcon = R.drawable.ic_root_download;
+            derivedType = TYPE_DOWNLOADS;
         } else if (isImages()) {
             derivedIcon = R.drawable.ic_doc_image;
+            derivedType = TYPE_IMAGES;
         } else if (isVideos()) {
             derivedIcon = R.drawable.ic_doc_video;
+            derivedType = TYPE_VIDEO;
         } else if (isAudio()) {
             derivedIcon = R.drawable.ic_doc_audio;
+            derivedType = TYPE_AUDIO;
+        } else if (isRecents()) {
+            derivedType = TYPE_RECENTS;
+        } else {
+            derivedType = TYPE_CLOUD;
         }
     }
 

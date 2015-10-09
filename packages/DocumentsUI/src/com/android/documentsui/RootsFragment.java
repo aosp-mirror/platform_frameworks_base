@@ -286,51 +286,34 @@ public class RootsFragment extends Fragment {
         public RootsAdapter(Context context, Collection<RootInfo> roots, Intent includeApps) {
             super(context, 0);
 
-            RootItem recents = null;
-            RootItem images = null;
-            RootItem videos = null;
-            RootItem audio = null;
-            RootItem downloads = null;
-
-            final List<RootInfo> clouds = new ArrayList<>();
-            final List<RootInfo> locals = new ArrayList<>();
+            final List<RootItem> libraries = new ArrayList<>();
+            final List<RootItem> clouds = new ArrayList<>();
+            final List<RootItem> locals = new ArrayList<>();
 
             for (RootInfo root : roots) {
-                if (root.isRecents()) {
-                    recents = new RootItem(root);
-                } else if (root.isExternalStorage()) {
-                    locals.add(root);
-                } else if (root.isDownloads()) {
-                    downloads = new RootItem(root);
-                } else if (root.isImages()) {
-                    images = new RootItem(root);
-                } else if (root.isVideos()) {
-                    videos = new RootItem(root);
-                } else if (root.isAudio()) {
-                    audio = new RootItem(root);
-                } else {
-                    clouds.add(root);
+                RootItem item = new RootItem(root);
+                switch (root.derivedType) {
+                    case RootInfo.TYPE_LOCAL:
+                        locals.add(item);
+                        break;
+                    case RootInfo.TYPE_CLOUD:
+                        clouds.add(item);
+                        break;
+                    default:
+                        libraries.add(item);
+                        break;
                 }
             }
 
             final RootComparator comp = new RootComparator();
-            Collections.sort(clouds, comp);
+            Collections.sort(libraries, comp);
             Collections.sort(locals, comp);
+            Collections.sort(clouds, comp);
 
-            if (recents != null) add(recents);
-
-            for (RootInfo cloud : clouds) {
-                add(new RootItem(cloud));
-            }
-
-            if (images != null) add(images);
-            if (videos != null) add(videos);
-            if (audio != null) add(audio);
-            if (downloads != null) add(downloads);
-
-            for (RootInfo local : locals) {
-                add(new RootItem(local));
-            }
+            addAll(libraries);
+            add(new SpacerItem());
+            addAll(locals);
+            addAll(clouds);
 
             if (includeApps != null) {
                 final PackageManager pm = context.getPackageManager();
@@ -348,9 +331,7 @@ public class RootsFragment extends Fragment {
 
                 if (apps.size() > 0) {
                     add(new SpacerItem());
-                    for (Item item : apps) {
-                        add(item);
-                    }
+                    addAll(apps);
                 }
             }
         }
@@ -387,15 +368,20 @@ public class RootsFragment extends Fragment {
         }
     }
 
-    public static class RootComparator implements Comparator<RootInfo> {
+    public static class RootComparator implements Comparator<RootItem> {
         @Override
-        public int compare(RootInfo lhs, RootInfo rhs) {
-            final int score = DocumentInfo.compareToIgnoreCaseNullable(lhs.title, rhs.title);
+        public int compare(RootItem lhs, RootItem rhs) {
+            // Sort by root type, then title, then summary.
+            int score = lhs.root.derivedType - rhs.root.derivedType;
             if (score != 0) {
                 return score;
-            } else {
-                return DocumentInfo.compareToIgnoreCaseNullable(lhs.summary, rhs.summary);
             }
+            score = DocumentInfo.compareToIgnoreCaseNullable(lhs.root.title, rhs.root.title);
+            if (score != 0) {
+                return score;
+            }
+
+            return DocumentInfo.compareToIgnoreCaseNullable(lhs.root.summary, rhs.root.summary);
         }
     }
 }
