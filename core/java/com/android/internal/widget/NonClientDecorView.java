@@ -355,9 +355,22 @@ public class NonClientDecorView extends LinearLayout
     }
 
     @Override
-    public void onContentDraw(int xOffset, int yOffset, int xSize, int ySize) {
+    public boolean onContentDrawn(int xOffset, int yOffset, int xSize, int ySize) {
+        if (mFrameRendererThread == null) {
+            return false;
+        }
+        return mFrameRendererThread.onContentDrawn(xOffset, yOffset, xSize, ySize);
+    }
+
+    @Override
+    public void onRequestDraw(boolean reportNextDraw) {
         if (mFrameRendererThread != null) {
-            mFrameRendererThread.onContentDraw(xOffset, yOffset, xSize, ySize);
+            mFrameRendererThread.onRequsetDraw(reportNextDraw);
+        } else if (reportNextDraw) {
+            // If render thread is gone, just report immediately.
+            if (isAttachedToWindow()) {
+                getViewRootImpl().reportDrawFinish();
+            }
         }
     }
 
@@ -422,6 +435,9 @@ public class NonClientDecorView extends LinearLayout
         private int mLastCaptionHeight;
         private int mLastXOffset;
         private int mLastYOffset;
+
+        // Whether to report when next frame is drawn or not.
+        private boolean mReportNextDraw;
 
         ResizeFrameThread(ThreadedRenderer renderer, Rect initialBounds) {
             setName("ResizeFrame");
@@ -518,12 +534,13 @@ public class NonClientDecorView extends LinearLayout
         public void doFrame(long frameTimeNanos) {
             synchronized (this) {
                 if (mRenderer == null) {
+                    reportDrawIfNeeded();
                     // Tell the looper to stop. We are done.
                     Looper.myLooper().quit();
                     return;
                 }
                 mNewTargetRect.set(mTargetRect);
-                if (!mNewTargetRect.equals(mOldTargetRect)) {
+                if (!mNewTargetRect.equals(mOldTargetRect) || mReportNextDraw) {
                     mOldTargetRect.set(mNewTargetRect);
                     changeWindowSizeLocked(mNewTargetRect);
                 }
@@ -538,8 +555,9 @@ public class NonClientDecorView extends LinearLayout
          * @param yOffset The y offset where the content is drawn to.
          * @param xSize The width size of the content. This should not be 0.
          * @param ySize The height of the content.
+         * @return true if a frame should be requested after the content is drawn; false otherwise.
          */
-        public void onContentDraw(int xOffset, int yOffset, int xSize, int ySize) {
+        public boolean onContentDrawn(int xOffset, int yOffset, int xSize, int ySize) {
             synchronized (this) {
                 final boolean firstCall = mLastContentWidth == 0;
                 // The current content buffer is drawn here.
@@ -555,10 +573,15 @@ public class NonClientDecorView extends LinearLayout
                         mLastYOffset + mLastCaptionHeight + mLastContentHeight);
                 // If this was the first call and changeWindowSizeLocked got already called prior
                 // to us, we should re-issue a changeWindowSizeLocked now.
-                if (firstCall && (mLastCaptionHeight != 0 || !mShowDecor)) {
-                    mOldTargetRect.set(0, 0, 0, 0);
-                    pingRenderLocked();
-                }
+                return firstCall && (mLastCaptionHeight != 0 || !mShowDecor);
+            }
+        }
+
+        public void onRequsetDraw(boolean reportNextDraw) {
+            synchronized (this) {
+                mReportNextDraw = reportNextDraw;
+                mOldTargetRect.set(0, 0, 0, 0);
+                pingRenderLocked();
             }
         }
 
@@ -617,6 +640,20 @@ public class NonClientDecorView extends LinearLayout
             // We need to render both rendered nodes explicitly.
             mRenderer.drawRenderNode(mFrameNode);
             mRenderer.drawRenderNode(mBackdropNode);
+
+            reportDrawIfNeeded();
+        }
+
+        /**
+         * Notify view root that a frame has been drawn by us, if it has requested so.
+         */
+        private void reportDrawIfNeeded() {
+            if (mReportNextDraw) {
+                if (isAttachedToWindow()) {
+                    getViewRootImpl().reportDrawFinish();
+                }
+                mReportNextDraw = false;
+            }
         }
 
         /**

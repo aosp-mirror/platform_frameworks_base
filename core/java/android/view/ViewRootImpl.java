@@ -88,6 +88,7 @@ import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
+import java.util.concurrent.CountDownLatch;
 import java.util.HashSet;
 
 /**
@@ -238,6 +239,7 @@ public final class ViewRootImpl implements ViewParent,
     boolean mNewSurfaceNeeded;
     boolean mHasHadWindowFocus;
     boolean mLastWasImTarget;
+    CountDownLatch mWindowDrawCountDown;
 
     boolean mIsDrawing;
     int mLastSystemUiVisibility;
@@ -433,6 +435,12 @@ public final class ViewRootImpl implements ViewParent,
             synchronized (mWindowCallbacks) {
                 mWindowCallbacks.remove(callback);
             }
+        }
+    }
+
+    public void reportDrawFinish() {
+        if (mWindowDrawCountDown != null) {
+            mWindowDrawCountDown.countDown();
         }
     }
 
@@ -2419,6 +2427,17 @@ public final class ViewRootImpl implements ViewParent,
 
         if (mReportNextDraw) {
             mReportNextDraw = false;
+
+            // if we're using multi-thread renderer, wait for the window frame draws
+            if (mWindowDrawCountDown != null) {
+                try {
+                    mWindowDrawCountDown.await();
+                } catch (InterruptedException e) {
+                    Log.e(TAG, "Window redraw count down interruped!");
+                }
+                mWindowDrawCountDown = null;
+            }
+
             if (mAttachInfo.mHardwareRenderer != null) {
                 mAttachInfo.mHardwareRenderer.fence();
             }
@@ -2568,13 +2587,13 @@ public final class ViewRootImpl implements ViewParent,
 
                 // Stage the content drawn size now. It will be transferred to the renderer
                 // shortly before the draw commands get send to the renderer.
-                synchronized (mWindowCallbacks) {
-                    for (int i = mWindowCallbacks.size() - 1; i >= 0; i--) {
-                        mWindowCallbacks.get(i).onContentDraw(mWindowAttributes.surfaceInsets.left,
-                                mWindowAttributes.surfaceInsets.top, mWidth, mHeight);
-                    }
-                }
+                final boolean updated = updateContentDrawBounds();
+
                 mAttachInfo.mHardwareRenderer.draw(mView, mAttachInfo, this);
+
+                if (updated) {
+                    requestDrawWindow();
+                }
             } else {
                 // If we get here with a disabled & requested hardware renderer, something went
                 // wrong (an invalidate posted right before we destroyed the hardware surface
@@ -6793,6 +6812,30 @@ public final class ViewRootImpl implements ViewParent,
                 }
             }
             mFullRedrawNeeded = true;
+        }
+    }
+
+    private boolean updateContentDrawBounds() {
+        boolean updated = false;
+        synchronized (mWindowCallbacks) {
+            for (int i = mWindowCallbacks.size() - 1; i >= 0; i--) {
+                updated |= mWindowCallbacks.get(i).onContentDrawn(
+                        mWindowAttributes.surfaceInsets.left,
+                        mWindowAttributes.surfaceInsets.top,
+                        mWidth, mHeight);
+            }
+        }
+        return updated | (mDragResizing && mReportNextDraw);
+    }
+
+    private void requestDrawWindow() {
+        if (mReportNextDraw) {
+            mWindowDrawCountDown = new CountDownLatch(mWindowCallbacks.size());
+        }
+        synchronized (mWindowCallbacks) {
+            for (int i = mWindowCallbacks.size() - 1; i >= 0; i--) {
+                mWindowCallbacks.get(i).onRequestDraw(mReportNextDraw);
+            }
         }
     }
 
