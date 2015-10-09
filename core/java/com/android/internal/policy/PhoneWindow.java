@@ -4208,10 +4208,9 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
         boolean isApplication = attrs.type == TYPE_BASE_APPLICATION ||
                 attrs.type == TYPE_APPLICATION;
         mWorkspaceId = getWorkspaceId();
-        // Only a non floating application window on one of the allowed worksapces can get a non
+        // Only a non floating application window on one of the allowed workspaces can get a non
         // client decor.
-        if (!isFloating() && isApplication && mWorkspaceId != HOME_STACK_ID &&
-                mWorkspaceId < FIRST_DYNAMIC_STACK_ID) {
+        if (!isFloating() && isApplication && mWorkspaceId < FIRST_DYNAMIC_STACK_ID) {
             // Dependent on the brightness of the used title we either use the
             // dark or the light button frame.
             if (nonClientDecorView == null) {

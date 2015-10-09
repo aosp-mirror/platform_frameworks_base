@@ -398,6 +398,8 @@ public class NonClientDecorView extends LinearLayout
      * It starts with the creation and it ends once someone calls destroy().
      * Any size changes can be passed by a call to setTargetRect will passed to the thread and
      * executed via the Choreographer.
+     * TODO(b/24810450): Separate functionality from non-client-decor so that it can be used
+     * independently.
      */
     private class ResizeFrameThread extends Thread implements Choreographer.FrameCallback {
         // This is containing the last requested size by a resize command. Note that this size might
