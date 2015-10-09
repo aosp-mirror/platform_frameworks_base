@@ -48,6 +48,11 @@ public class LinkPropertiesTest extends TestCase {
     private static LinkAddress LINKADDRV6 = new LinkAddress(ADDRV6, 128);
     private static LinkAddress LINKADDRV6LINKLOCAL = new LinkAddress("fe80::1/64");
 
+    // TODO: replace all calls to NetworkUtils.numericToInetAddress with calls to this method.
+    private InetAddress Address(String addrString) {
+        return NetworkUtils.numericToInetAddress(addrString);
+    }
+
     public void assertLinkPropertiesEqual(LinkProperties source, LinkProperties target) {
         // Check implementation of equals(), element by element.
         assertTrue(source.isIdenticalInterfaceName(target));
@@ -647,5 +652,26 @@ public class LinkPropertiesTest extends TestCase {
         assertTrue(v6lp.isReachable(kLinkLocalDnsWithScope));
         assertTrue(v6lp.isReachable(kOnLinkDns));
         assertTrue(v6lp.isReachable(DNS6));
+
+        // Check isReachable on stacked links. This requires that the source IP address be assigned
+        // on the interface returned by the route lookup.
+        LinkProperties stacked = new LinkProperties();
+
+        // Can't add a stacked link without an interface name.
+        stacked.setInterfaceName("v4-test0");
+        v6lp.addStackedLink(stacked);
+
+        InetAddress stackedAddress = Address("192.0.0.4");
+        LinkAddress stackedLinkAddress = new LinkAddress(stackedAddress, 32);
+        assertFalse(v6lp.isReachable(stackedAddress));
+        stacked.addLinkAddress(stackedLinkAddress);
+        assertFalse(v6lp.isReachable(stackedAddress));
+        stacked.addRoute(new RouteInfo(stackedLinkAddress));
+        assertTrue(stacked.isReachable(stackedAddress));
+        assertTrue(v6lp.isReachable(stackedAddress));
+
+        assertFalse(v6lp.isReachable(DNS1));
+        stacked.addRoute(new RouteInfo((IpPrefix) null, stackedAddress));
+        assertTrue(v6lp.isReachable(DNS1));
     }
 }

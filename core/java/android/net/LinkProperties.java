@@ -667,7 +667,8 @@ public final class LinkProperties implements Parcelable {
      * @return {@code true} if there is an IPv4 address, {@code false} otherwise.
      */
     private boolean hasIPv4AddressOnInterface(String iface) {
-        return (mIfaceName.equals(iface) && hasIPv4Address()) ||
+        // mIfaceName can be null.
+        return (Objects.equals(iface, mIfaceName) && hasIPv4Address()) ||
                 (iface != null && mStackedLinks.containsKey(iface) &&
                         mStackedLinks.get(iface).hasIPv4Address());
     }
