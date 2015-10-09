@@ -3012,7 +3012,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
                 // In this case we make all other static stacks fullscreen and move all
                 // docked stack tasks to the fullscreen stack.
                 for (int i = FIRST_STATIC_STACK_ID; i <= LAST_STATIC_STACK_ID; i++) {
-                    if (i != DOCKED_STACK_ID) {
+                    if (i != DOCKED_STACK_ID && getStack(i) != null) {
                         resizeStackLocked(i, null, preserveWindows);
                     }
                 }
