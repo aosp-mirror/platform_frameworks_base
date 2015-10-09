@@ -164,8 +164,10 @@ public class DockedStackDividerController implements View.OnTouchListener, DimLa
                 mStartY = (int) event.getRawY();
                 synchronized (mDisplayContent.mService.mWindowMap) {
                     mTaskStack = mDisplayContent.getDockedStackLocked();
-                    mTaskStack.getBounds(mOriginalRect);
-                    mDockSide = mTaskStack.getDockSide();
+                    if (mTaskStack != null) {
+                        mTaskStack.getBounds(mOriginalRect);
+                        mDockSide = mTaskStack.getDockSide();
+                    }
                 }
                 break;
             case MotionEvent.ACTION_MOVE:
