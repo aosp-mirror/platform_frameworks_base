@@ -254,8 +254,6 @@ public class Recents extends SystemUI
                     null, mHandler);
         }
 
-        // Initialize some static datastructures
-        TaskStackViewLayoutAlgorithm.initializeCurve();
         // Initialize the static configuration resources
         mConfig = RecentsConfiguration.initialize(mContext, mSystemServicesProxy);
         mStatusBarHeight = res.getDimensionPixelSize(com.android.internal.R.dimen.status_bar_height);
@@ -524,15 +522,16 @@ public class Recents extends SystemUI
                         mStatusBarHeight, mSearchBarBounds);
             }
         }
-        mConfig.getAvailableTaskStackBounds(windowRect,
-                mStatusBarHeight, (mConfig.hasTransposedNavBar ? mNavBarWidth : 0),
+        Rect systemInsets = new Rect(0, mStatusBarHeight,
+                (mConfig.hasTransposedNavBar ? mNavBarWidth : 0),
+                (mConfig.hasTransposedNavBar ? 0 : mNavBarHeight));
+        mConfig.getTaskStackBounds(windowRect, systemInsets.top, systemInsets.right,
                 mSearchBarBounds, mTaskStackBounds);
-        int systemBarBottomInset = mConfig.hasTransposedNavBar ? 0 : mNavBarHeight;
 
         // Rebind the header bar and draw it for the transition
         TaskStackViewLayoutAlgorithm algo = mDummyStackView.getStackAlgorithm();
         Rect taskStackBounds = new Rect(mTaskStackBounds);
-        taskStackBounds.bottom -= systemBarBottomInset;
+        algo.setSystemInsets(systemInsets);
         algo.computeRects(windowRect.width(), windowRect.height(), taskStackBounds);
         Rect taskViewBounds = algo.getUntransformedTaskViewBounds();
         if (!taskViewBounds.equals(mLastTaskViewBounds)) {
@@ -665,8 +664,11 @@ public class Recents extends SystemUI
             TaskStack stack, TaskStackView stackView, boolean isTopTaskHome) {
         preloadIcon(topTask);
 
+        // Update the header bar if necessary
+        reloadHeaderBarLayout(false /* tryAndBindSearchWidget */);
+
         // Update the destination rect
-        mDummyStackView.updateMinMaxScrollForStack(stack, mTriggeredFromAltTab, isTopTaskHome);
+        mDummyStackView.updateMinMaxScrollForStack(stack);
         final Task toTask = new Task();
         final TaskViewTransform toTransform = getThumbnailTransitionTransform(stack, stackView,
                 topTask.id, toTask);
@@ -759,14 +761,13 @@ public class Recents extends SystemUI
         TaskStack stack = sInstanceLoadPlan.getTaskStack();
 
         // Prepare the dummy stack for the transition
-        mDummyStackView.updateMinMaxScrollForStack(stack, mTriggeredFromAltTab, isTopTaskHome);
+        mDummyStackView.updateMinMaxScrollForStack(stack);
         TaskStackViewLayoutAlgorithm.VisibilityReport stackVr =
                 mDummyStackView.computeStackVisibilityReport();
         boolean hasRecentTasks = stack.getTaskCount() > 0;
         boolean useThumbnailTransition = (topTask != null) && !isTopTaskHome && hasRecentTasks;
 
         if (useThumbnailTransition) {
-
             // Try starting with a thumbnail transition
             ActivityOptions opts = getThumbnailTransitionActivityOptions(topTask, stack,
                     mDummyStackView);

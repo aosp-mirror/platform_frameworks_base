@@ -30,7 +30,6 @@ import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityNodeInfo;
 import android.widget.FrameLayout;
 import com.android.systemui.R;
-import com.android.systemui.recents.Constants;
 import com.android.systemui.recents.RecentsActivity;
 import com.android.systemui.recents.RecentsActivityLaunchState;
 import com.android.systemui.recents.RecentsConfiguration;
@@ -43,7 +42,6 @@ import com.android.systemui.recents.misc.Utilities;
 import com.android.systemui.recents.model.RecentsTaskLoader;
 import com.android.systemui.recents.model.Task;
 import com.android.systemui.recents.model.TaskStack;
-import com.android.systemui.statusbar.DismissView;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -77,8 +75,6 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
     ViewPool<TaskView, Task> mViewPool;
     ArrayList<TaskViewTransform> mCurrentTaskTransforms = new ArrayList<>();
     DozeTrigger mUIDozeTrigger;
-    DismissView mDismissAllButton;
-    boolean mDismissAllButtonAnimating;
     int mFocusedTaskIndex = -1;
     int mPrevAccessibilityFocusedIndex = -1;
     // Optimizations
@@ -318,7 +314,7 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
 
             if (boundTranslationsToRect) {
                 transform.translationY = Math.min(transform.translationY,
-                        mLayoutAlgorithm.mViewRect.bottom);
+                        mLayoutAlgorithm.mStackRect.bottom);
             }
             prevTransform = transform;
         }
@@ -342,19 +338,6 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
             boolean isValidVisibleRange = updateStackTransforms(mCurrentTaskTransforms, tasks,
                     stackScroll, visibleRange, false);
 
-            // Inflate and add the dismiss button if necessary
-            if (Constants.DebugFlags.App.EnableDismissAll && mDismissAllButton == null) {
-                mDismissAllButton = (DismissView)
-                        mInflater.inflate(R.layout.recents_dismiss_button, this, false);
-                mDismissAllButton.setOnButtonClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        mStack.removeAllTasks();
-                    }
-                });
-                addView(mDismissAllButton, 0);
-            }
-
             // Return all the invisible children to the pool
             mTmpTaskViewMap.clear();
             List<TaskView> taskViews = getTaskViews();
@@ -369,11 +352,6 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
                 } else {
                     mViewPool.returnViewToPool(tv);
                     reaquireAccessibilityFocus |= (i == mPrevAccessibilityFocusedIndex);
-
-                    // Hide the dismiss button if the front most task is invisible
-                    if (task == mStack.getFrontMostTask()) {
-                        hideDismissAllButton(null);
-                    }
                 }
             }
 
@@ -398,12 +376,6 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
                             mLayoutAlgorithm.getStackTransform(1f, 0f, mTmpTransform, null);
                         }
                         tv.updateViewPropertiesToTaskTransform(mTmpTransform, 0);
-                    }
-
-                    // If we show the front most task view then ensure that the dismiss button
-                    // is visible too.
-                    if (!mAwaitingFirstLayout && (task == mStack.getFrontMostTask())) {
-                        showDismissAllButton();
                     }
                 }
 
@@ -482,10 +454,9 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
     }
 
     /** Updates the min and max virtual scroll bounds */
-    void updateMinMaxScroll(boolean boundScrollToNewMinMax, boolean launchedWithAltTab,
-            boolean launchedFromHome) {
+    void updateMinMaxScroll(boolean boundScrollToNewMinMax) {
         // Compute the min and max scroll values
-        mLayoutAlgorithm.computeMinMaxScroll(mStack.getTasks(), launchedWithAltTab, launchedFromHome);
+        mLayoutAlgorithm.computeMinMaxScroll(mStack.getTasks());
 
         // Debug logging
         if (boundScrollToNewMinMax) {
@@ -545,8 +516,8 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
             if (findClosestToCenter) {
                 // If there is no task focused, then find the task that is closes to the center
                 // of the screen and use that as the currently focused task
-                int x = mLayoutAlgorithm.mStackVisibleRect.centerX();
-                int y = mLayoutAlgorithm.mStackVisibleRect.centerY();
+                int x = mLayoutAlgorithm.mStackRect.centerX();
+                int y = mLayoutAlgorithm.mStackRect.centerY();
                 for (int i = taskViewCount - 1; i >= 0; i--) {
                     TaskView tv = taskViews.get(i);
                     tv.getHitRect(mTmpRect);
@@ -697,7 +668,6 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
         // Synchronize the views
         synchronizeStackViewsWithModel();
         clipTaskViews();
-        updateDismissButtonPosition();
         // Notify accessibility
         sendAccessibilityEvent(AccessibilityEvent.TYPE_VIEW_SCROLLED);
     }
@@ -709,17 +679,16 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
         mLayoutAlgorithm.computeRects(windowWidth, windowHeight, taskStackBounds);
 
         // Update the scroll bounds
-        updateMinMaxScroll(false, launchedWithAltTab, launchedFromHome);
+        updateMinMaxScroll(false);
     }
 
     /**
      * This is ONLY used from AlternateRecentsComponent to update the dummy stack view for purposes
      * of getting the task rect to animate to.
      */
-    public void updateMinMaxScrollForStack(TaskStack stack, boolean launchedWithAltTab,
-            boolean launchedFromHome) {
+    public void updateMinMaxScrollForStack(TaskStack stack) {
         mStack = stack;
-        updateMinMaxScroll(false, launchedWithAltTab, launchedFromHome);
+        updateMinMaxScroll(false);
     }
 
     /**
@@ -730,8 +699,9 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
         return mLayoutAlgorithm.computeStackVisibilityReport(mStack.getTasks());
     }
 
-    public void setTaskStackBounds(Rect taskStackBounds) {
+    public void setTaskStackBounds(Rect taskStackBounds, Rect systemInsets) {
         mTaskStackBounds.set(taskStackBounds);
+        mLayoutAlgorithm.setSystemInsets(systemInsets);
     }
 
     /**
@@ -775,16 +745,6 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
                         MeasureSpec.EXACTLY));
         }
 
-        // Measure the dismiss button
-        if (mDismissAllButton != null) {
-            int taskRectWidth = mLayoutAlgorithm.mTaskRect.width();
-            int dismissAllButtonHeight = getResources().getDimensionPixelSize(
-                    R.dimen.recents_dismiss_all_button_size);
-            mDismissAllButton.measure(
-                    MeasureSpec.makeMeasureSpec(taskRectWidth, MeasureSpec.EXACTLY),
-                    MeasureSpec.makeMeasureSpec(dismissAllButtonHeight, MeasureSpec.EXACTLY));
-        }
-
         setMeasuredDimension(width, height);
     }
 
@@ -811,15 +771,6 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
                     mLayoutAlgorithm.mTaskRect.bottom + mTmpRect.bottom);
         }
 
-        // Layout the dismiss button at the top of the screen, and just translate it accordingly
-        // when synchronizing the views with the model to attach it to the bottom of the front-most
-        // task view
-        if (mDismissAllButton != null) {
-            mDismissAllButton.layout(mLayoutAlgorithm.mTaskRect.left, 0,
-                    mLayoutAlgorithm.mTaskRect.left + mDismissAllButton.getMeasuredWidth(),
-                    mDismissAllButton.getMeasuredHeight());
-        }
-
         if (mAwaitingFirstLayout) {
             mAwaitingFirstLayout = false;
             onFirstLayout();
@@ -828,8 +779,7 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
 
     /** Handler for the first layout. */
     void onFirstLayout() {
-        int offscreenY = mLayoutAlgorithm.mViewRect.bottom -
-                (mLayoutAlgorithm.mTaskRect.top - mLayoutAlgorithm.mViewRect.top);
+        int offscreenY = mLayoutAlgorithm.mStackRect.bottom;
 
         // Find the launch target task
         Task launchTargetTask = null;
@@ -948,9 +898,6 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
                             tv.setFocusedTask(true);
                         }
                     }
-
-                    // Show the dismiss button
-                    showDismissAllButton();
                 }
             });
         }
@@ -962,10 +909,7 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
         mStackScroller.stopScroller();
         mStackScroller.stopBoundScrollAnimation();
         // Animate all the task views out of view
-        ctx.offscreenTranslationY = mLayoutAlgorithm.mViewRect.bottom -
-                (mLayoutAlgorithm.mTaskRect.top - mLayoutAlgorithm.mViewRect.top);
-        // Animate the dismiss-all button
-        hideDismissAllButton(null);
+        ctx.offscreenTranslationY = mLayoutAlgorithm.mStackRect.bottom;
 
         List<TaskView> taskViews = getTaskViews();
         int taskViewCount = taskViews.size();
@@ -979,20 +923,14 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
     public void startDismissAllAnimation(final Runnable postAnimationRunnable) {
         // Clear the focused task
         resetFocusedTask();
-        // Animate the dismiss-all button
-        hideDismissAllButton(new Runnable() {
-            @Override
-            public void run() {
-                List<TaskView> taskViews = getTaskViews();
-                int taskViewCount = taskViews.size();
-                int count = 0;
-                for (int i = taskViewCount - 1; i >= 0; i--) {
-                    TaskView tv = taskViews.get(i);
-                    tv.startDeleteTaskAnimation(i > 0 ? null : postAnimationRunnable, count * 50);
-                    count++;
-                }
-            }
-        });
+        List<TaskView> taskViews = getTaskViews();
+        int taskViewCount = taskViews.size();
+        int count = 0;
+        for (int i = taskViewCount - 1; i >= 0; i--) {
+            TaskView tv = taskViews.get(i);
+            tv.startDeleteTaskAnimation(i > 0 ? null : postAnimationRunnable, count * 50);
+            count++;
+        }
     }
 
     /** Animates a task view in this stack as it launches. */
@@ -1009,69 +947,6 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
                 boolean occludesLaunchTarget = launchTargetTask.group.isTaskAboveTask(t.getTask(),
                         launchTargetTask);
                 t.startLaunchTaskAnimation(null, false, occludesLaunchTarget, lockToTask);
-            }
-        }
-    }
-
-    /** Shows the dismiss button */
-    void showDismissAllButton() {
-        if (mDismissAllButton == null) return;
-
-        if (mDismissAllButtonAnimating || mDismissAllButton.getVisibility() != View.VISIBLE ||
-                Float.compare(mDismissAllButton.getAlpha(), 0f) == 0) {
-            mDismissAllButtonAnimating = true;
-            mDismissAllButton.setVisibility(View.VISIBLE);
-            mDismissAllButton.showClearButton();
-            mDismissAllButton.findViewById(R.id.dismiss_text).setAlpha(1f);
-            mDismissAllButton.setAlpha(0f);
-            mDismissAllButton.animate()
-                    .alpha(1f)
-                    .setDuration(250)
-                    .withEndAction(new Runnable() {
-                        @Override
-                        public void run() {
-                            mDismissAllButtonAnimating = false;
-                        }
-                    })
-                    .start();
-        }
-    }
-
-    /** Hides the dismiss button */
-    void hideDismissAllButton(final Runnable postAnimRunnable) {
-        if (mDismissAllButton == null) return;
-
-        mDismissAllButtonAnimating = true;
-        mDismissAllButton.animate()
-                .alpha(0f)
-                .setDuration(200)
-                .withEndAction(new Runnable() {
-                    @Override
-                    public void run() {
-                        mDismissAllButtonAnimating = false;
-                        mDismissAllButton.setVisibility(View.GONE);
-                        if (postAnimRunnable != null) {
-                            postAnimRunnable.run();
-                        }
-                    }
-                })
-                .start();
-    }
-
-    /** Updates the dismiss button position */
-    void updateDismissButtonPosition() {
-        if (mDismissAllButton == null) return;
-
-        // Update the position of the clear-all button to hang it off the first task view
-        if (mStack.getTaskCount() > 0) {
-            mTmpCoord[0] = mTmpCoord[1] = 0;
-            TaskView tv = getChildViewForTask(mStack.getFrontMostTask());
-            TaskViewTransform transform = mCurrentTaskTransforms.get(mStack.getTaskCount() - 1);
-            if (tv != null && transform.visible) {
-                Utilities.mapCoordInDescendentToSelf(tv, this, mTmpCoord, false);
-                mDismissAllButton.setTranslationY(mTmpCoord[1] + (tv.getScaleY() * tv.getHeight()));
-                mDismissAllButton.setTranslationX(-(mLayoutAlgorithm.mStackRect.width() -
-                        transform.rect.width()) / 2f);
             }
         }
     }
@@ -1133,7 +1008,7 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
 
         // Update the min/max scroll and animate other task views into their new positions
         RecentsActivityLaunchState launchState = mConfig.getLaunchState();
-        updateMinMaxScroll(true, launchState.launchedWithAltTab, launchState.launchedFromHome);
+        updateMinMaxScroll(true);
 
         // Offset the stack by as much as the anchor task would otherwise move back
         if (pullStackForward) {
@@ -1167,9 +1042,6 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
             if (shouldFinishActivity) {
                 mCb.onAllTaskViewsDismissed(null);
             }
-        } else {
-            // Fade the dismiss button back in
-            showDismissAllButton();
         }
     }
 
@@ -1313,8 +1185,7 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
             for (int i = 0; i < taskViewCount; i++) {
                 Task tvTask = taskViews.get(i).getTask();
                 if (taskIndex < mStack.indexOfTask(tvTask)) {
-                    // Offset by 1 if we have a dismiss-all button
-                    insertIndex = i + (Constants.DebugFlags.App.EnableDismissAll ? 1 : 0);
+                    insertIndex = i;
                     break;
                 }
             }

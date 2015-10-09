@@ -154,7 +154,7 @@ public class RecentsConfiguration {
      * Returns the task stack bounds in the current orientation. These bounds do not account for
      * the system insets.
      */
-    public void getAvailableTaskStackBounds(Rect windowBounds, int topInset,
+    public void getTaskStackBounds(Rect windowBounds, int topInset,
             int rightInset, Rect searchBarBounds, Rect taskStackBounds) {
         if (hasTransposedNavBar) {
             // In landscape phones, the search bar appears on the left, but we overlay it on top

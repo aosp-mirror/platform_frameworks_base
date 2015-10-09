@@ -31,8 +31,11 @@ public class TaskViewTransform {
     public float scale = 1f;
     public float alpha = 1f;
     public boolean visible = false;
-    public Rect rect = new Rect();
     float p = 0f;
+
+    // This is a window-space rect that is purely used for coordinating the animation of an app
+    // window into Recents.
+    public Rect rect = new Rect();
 
     public TaskViewTransform() {
         // Do nothing
