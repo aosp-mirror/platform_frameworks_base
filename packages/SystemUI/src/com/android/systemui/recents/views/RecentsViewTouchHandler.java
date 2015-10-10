@@ -148,13 +148,15 @@ class RecentsViewTouchHandler {
             }
             case MotionEvent.ACTION_UP:
             case MotionEvent.ACTION_CANCEL: {
-                ReferenceCountedTrigger postAnimationTrigger = new ReferenceCountedTrigger(
-                        mRv.getContext(), null, null, null);
-                postAnimationTrigger.increment();
-                EventBus.getDefault().send(new DragEndEvent(mDragTask, mTaskView, mDragView,
-                        mLastDockState, postAnimationTrigger));
-                postAnimationTrigger.decrement();
-                break;
+                if (mDragging) {
+                    ReferenceCountedTrigger postAnimationTrigger = new ReferenceCountedTrigger(
+                            mRv.getContext(), null, null, null);
+                    postAnimationTrigger.increment();
+                    EventBus.getDefault().send(new DragEndEvent(mDragTask, mTaskView, mDragView,
+                            mLastDockState, postAnimationTrigger));
+                    postAnimationTrigger.decrement();
+                    break;
+                }
             }
         }
     }
