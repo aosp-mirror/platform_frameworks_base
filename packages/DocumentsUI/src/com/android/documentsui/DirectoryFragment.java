@@ -220,7 +220,7 @@ public class DirectoryFragment extends Fragment {
 
         mEmptyView = view.findViewById(android.R.id.empty);
 
-        mRecView = (RecyclerView) view.findViewById(R.id.recyclerView);
+        mRecView = (RecyclerView) view.findViewById(R.id.list);
         mRecView.setRecyclerListener(
                 new RecyclerListener() {
                     @Override
