@@ -36,7 +36,8 @@ class DockRegion {
             TaskStack.DockState.LEFT, TaskStack.DockState.RIGHT
     };
     public static TaskStack.DockState[] PORTRAIT = {
-            TaskStack.DockState.TOP, TaskStack.DockState.BOTTOM
+            // We only allow docking to the top for now
+            TaskStack.DockState.TOP
     };
 }
 
@@ -53,75 +54,30 @@ class RecentsViewTouchHandler {
 
     private Point mDownPos = new Point();
     private boolean mDragging;
-    private TaskStack.DockState mLastDockState;
+    private TaskStack.DockState mLastDockState = TaskStack.DockState.NONE;
 
     public RecentsViewTouchHandler(RecentsView rv) {
         mRv = rv;
     }
 
+    public TaskStack.DockState getPreferredDockStateForCurrentOrientation() {
+        boolean isLandscape = mRv.getResources().getConfiguration().orientation ==
+                Configuration.ORIENTATION_LANDSCAPE;
+        TaskStack.DockState[] dockStates = isLandscape ?
+                DockRegion.LANDSCAPE : DockRegion.PORTRAIT;
+        return dockStates[0];
+    }
+
     /** Touch preprocessing for handling below */
     public boolean onInterceptTouchEvent(MotionEvent ev) {
-        int action = ev.getAction();
-        switch (action & MotionEvent.ACTION_MASK) {
-            case MotionEvent.ACTION_DOWN:
-                mDownPos.set((int) ev.getX(), (int) ev.getY());
-                break;
-        }
+        handleTouchEvent(ev);
         return mDragging;
     }
 
     /** Handles touch events once we have intercepted them */
     public boolean onTouchEvent(MotionEvent ev) {
-        if (!mDragging) return false;
-
-        boolean isLandscape = mRv.getResources().getConfiguration().orientation ==
-                Configuration.ORIENTATION_LANDSCAPE;
-        int action = ev.getAction();
-        switch (action & MotionEvent.ACTION_MASK) {
-            case MotionEvent.ACTION_DOWN:
-                mDownPos.set((int) ev.getX(), (int) ev.getY());
-                break;
-            case MotionEvent.ACTION_MOVE: {
-                int width = mRv.getMeasuredWidth();
-                int height = mRv.getMeasuredHeight();
-                float evX = ev.getX();
-                float evY = ev.getY();
-                float x = evX - mDragView.getTopLeftOffset().x;
-                float y = evY - mDragView.getTopLeftOffset().y;
-
-                // Update the dock state
-                TaskStack.DockState[] dockStates = isLandscape ?
-                        DockRegion.LANDSCAPE : DockRegion.PORTRAIT;
-                TaskStack.DockState foundDockState = null;
-                for (int i = 0; i < dockStates.length; i++) {
-                    TaskStack.DockState state = dockStates[i];
-                    if (state.touchAreaContainsPoint(width, height, evX, evY)) {
-                        foundDockState = state;
-                        break;
-                    }
-                }
-                if (mLastDockState != foundDockState) {
-                    mLastDockState = foundDockState;
-                    EventBus.getDefault().send(new DragDockStateChangedEvent(mDragTask,
-                            foundDockState));
-                }
-
-                mDragView.setTranslationX(x);
-                mDragView.setTranslationY(y);
-                break;
-            }
-            case MotionEvent.ACTION_UP:
-            case MotionEvent.ACTION_CANCEL: {
-                ReferenceCountedTrigger postAnimationTrigger = new ReferenceCountedTrigger(
-                        mRv.getContext(), null, null, null);
-                postAnimationTrigger.increment();
-                EventBus.getDefault().send(new DragEndEvent(mDragTask, mTaskView, mDragView,
-                        mLastDockState, postAnimationTrigger));
-                postAnimationTrigger.decrement();
-                break;
-            }
-        }
-        return true;
+        handleTouchEvent(ev);
+        return mDragging;
     }
 
     /**** Events ****/
@@ -144,6 +100,62 @@ class RecentsViewTouchHandler {
         mDragTask = null;
         mTaskView = null;
         mDragView = null;
-        mLastDockState = null;
+        mLastDockState = TaskStack.DockState.NONE;
+    }
+
+    /**
+     * Handles dragging touch events
+     * @param ev
+     */
+    private void handleTouchEvent(MotionEvent ev) {
+        boolean isLandscape = mRv.getResources().getConfiguration().orientation ==
+                Configuration.ORIENTATION_LANDSCAPE;
+        int action = ev.getAction();
+        switch (action & MotionEvent.ACTION_MASK) {
+            case MotionEvent.ACTION_DOWN:
+                mDownPos.set((int) ev.getX(), (int) ev.getY());
+                break;
+            case MotionEvent.ACTION_MOVE: {
+                if (mDragging) {
+                    int width = mRv.getMeasuredWidth();
+                    int height = mRv.getMeasuredHeight();
+                    float evX = ev.getX();
+                    float evY = ev.getY();
+                    float x = evX - mDragView.getTopLeftOffset().x;
+                    float y = evY - mDragView.getTopLeftOffset().y;
+
+                    // Update the dock state
+                    TaskStack.DockState[] dockStates = isLandscape ?
+                            DockRegion.LANDSCAPE : DockRegion.PORTRAIT;
+                    TaskStack.DockState foundDockState = TaskStack.DockState.NONE;
+                    for (int i = 0; i < dockStates.length; i++) {
+                        TaskStack.DockState state = dockStates[i];
+                        if (state.touchAreaContainsPoint(width, height, evX, evY)) {
+                            foundDockState = state;
+                            break;
+                        }
+                    }
+                    if (mLastDockState != foundDockState) {
+                        mLastDockState = foundDockState;
+                        EventBus.getDefault().send(new DragDockStateChangedEvent(mDragTask,
+                                foundDockState));
+                    }
+
+                    mDragView.setTranslationX(x);
+                    mDragView.setTranslationY(y);
+                }
+                break;
+            }
+            case MotionEvent.ACTION_UP:
+            case MotionEvent.ACTION_CANCEL: {
+                ReferenceCountedTrigger postAnimationTrigger = new ReferenceCountedTrigger(
+                        mRv.getContext(), null, null, null);
+                postAnimationTrigger.increment();
+                EventBus.getDefault().send(new DragEndEvent(mDragTask, mTaskView, mDragView,
+                        mLastDockState, postAnimationTrigger));
+                postAnimationTrigger.decrement();
+                break;
+            }
+        }
     }
 }
