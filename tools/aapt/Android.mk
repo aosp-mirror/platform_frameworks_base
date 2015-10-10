@@ -93,6 +93,22 @@ LOCAL_STATIC_LIBRARIES_windows := $(aaptHostStaticLibs_windows)
 include $(BUILD_HOST_STATIC_LIBRARY)
 
 # ==========================================================
+# Build the host static library: libc++
+# ==========================================================
+include $(CLEAR_VARS)
+
+LOCAL_MODULE := libc++
+LOCAL_CFLAGS += -Wno-format-y2k -DSTATIC_ANDROIDFW_FOR_TOOLS $(aaptCFlags)
+LOCAL_CPPFLAGS += $(aaptCppFlags)
+ifeq (darwin,$(HOST_OS))
+LOCAL_CFLAGS += -D_DARWIN_UNLIMITED_STREAMS
+endif
+LOCAL_C_INCLUDES += $(aaptCIncludes)
+LOCAL_SRC_FILES := $(aaptSources)
+
+include $(BUILD_HOST_STATIC_LIBRARY)
+
+# ==========================================================
 # Build the host executable: aapt
 # ==========================================================
 include $(CLEAR_VARS)
@@ -106,6 +122,8 @@ LOCAL_LDLIBS_linux := $(aaptHostLdLibs_linux)
 LOCAL_SRC_FILES := $(aaptMain)
 LOCAL_STATIC_LIBRARIES := libaapt $(aaptHostStaticLibs)
 LOCAL_STATIC_LIBRARIES_windows := $(aaptHostStaticLibs_windows)
+LOCAL_WHOLE_STATIC_LIBRARIES := libc++
+LOCAL_CXX_STL := libc++_static
 
 include $(BUILD_HOST_EXECUTABLE)
 
