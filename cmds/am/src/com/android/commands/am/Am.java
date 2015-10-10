@@ -2033,7 +2033,7 @@ public class Am extends BaseCommand {
         }
 
         try {
-            mAm.resizeStack(stackId, bounds);
+            mAm.resizeStack(stackId, bounds, false);
             Thread.sleep(delayMs);
         } catch (RemoteException e) {
             showError("Error: resizing stack " + e);
@@ -2127,8 +2127,8 @@ public class Am extends BaseCommand {
             }
 
             // Resize stacks
-            mAm.resizeStack(currentStackInfo.stackId, currentStackBounds);
-            mAm.resizeStack(newStackInfo.stackId, newStackBounds);
+            mAm.resizeStack(currentStackInfo.stackId, currentStackBounds, false);
+            mAm.resizeStack(newStackInfo.stackId, newStackBounds, false);
         } catch (RemoteException e) {
         }
     }

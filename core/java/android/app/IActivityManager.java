@@ -143,7 +143,7 @@ public interface IActivityManager extends IInterface {
     public void moveTaskToStack(int taskId, int stackId, boolean toTop) throws RemoteException;
     public void moveTaskToDockedStack(int taskId, int createMode, boolean toTop)
             throws RemoteException;
-    public void resizeStack(int stackId, Rect bounds) throws RemoteException;
+    public void resizeStack(int stackId, Rect bounds, boolean allowResizeInDockedMode) throws RemoteException;
     public void positionTaskInStack(int taskId, int stackId, int position) throws RemoteException;
     public List<StackInfo> getAllStackInfos() throws RemoteException;
     public StackInfo getStackInfo(int stackId) throws RemoteException;

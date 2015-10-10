@@ -206,7 +206,8 @@ public class DockedStackDividerController implements View.OnTouchListener, DimLa
         }
         if (distance <= mSideMargin) {
             try {
-                mDisplayContent.mService.mActivityManager.resizeStack(mTaskStack.mStackId, null);
+                mDisplayContent.mService.mActivityManager.resizeStack(
+                        mTaskStack.mStackId, null, true);
             } catch (RemoteException e) {
                 // This can't happen because we are in the same process.
             }
@@ -364,7 +365,7 @@ public class DockedStackDividerController implements View.OnTouchListener, DimLa
         }
         mLastResizeRect.set(mTmpRect);
         try {
-            mDisplayContent.mService.mActivityManager.resizeStack(DOCKED_STACK_ID, mTmpRect);
+            mDisplayContent.mService.mActivityManager.resizeStack(DOCKED_STACK_ID, mTmpRect, true);
         } catch (RemoteException e) {
             // This can't happen because we are in the same process.
         }

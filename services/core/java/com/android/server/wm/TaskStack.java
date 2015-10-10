@@ -238,8 +238,8 @@ public class TaskStack implements DimLayer.DimLayerUser {
                     // Post message to inform activity manager of the bounds change simulating
                     // a one-way call. We do this to prevent a deadlock between window manager
                     // lock and activity manager lock been held.
-                    mService.mH.sendMessage(
-                            mService.mH.obtainMessage(RESIZE_STACK, mStackId, UNUSED, mBounds));
+                    mService.mH.sendMessage(mService.mH.obtainMessage(
+                            RESIZE_STACK, mStackId, 0 /*allowResizeInDockedMode*/, mBounds));
                 }
             }
         }
@@ -399,8 +399,11 @@ public class TaskStack implements DimLayer.DimLayerUser {
             if (dockedStack != null) {
                 dockedStack.getRawBounds(mTmpRect2);
             }
-            getInitialDockedStackBounds(mTmpRect, bounds, mStackId, mTmpRect2,
-                    mDisplayContent.mDividerControllerLocked.getWidthAdjustment());
+            final boolean dockedOnTopOrLeft = WindowManagerService.sDockedStackCreateMode
+                    == DOCKED_STACK_CREATE_MODE_TOP_OR_LEFT;
+            getStackDockedModeBounds(mTmpRect, bounds, mStackId, mTmpRect2,
+                    mDisplayContent.mDividerControllerLocked.getWidthAdjustment(),
+                    dockedOnTopOrLeft);
         }
 
         updateDisplayInfo(bounds);
@@ -413,28 +416,60 @@ public class TaskStack implements DimLayer.DimLayerUser {
         }
     }
 
+    void getStackDockedModeBoundsLocked(Rect outBounds) {
+        if (mStackId == DOCKED_STACK_ID
+                || mStackId > LAST_STATIC_STACK_ID
+                || mDisplayContent == null) {
+            outBounds.set(mBounds);
+            return;
+        }
+
+        final TaskStack dockedStack = mDisplayContent.getDockedStackLocked();
+        if (dockedStack == null) {
+            // Not sure why you are calling this method when there is no docked stack...
+            throw new IllegalStateException(
+                    "Calling getStackDockedModeBoundsLocked() when there is no docked stack.");
+        }
+
+        @DockSide
+        final int dockedSide = dockedStack.getDockSide();
+        if (dockedSide == DOCKED_INVALID) {
+            // Not sure how you got here...Only thing we can do is return current bounds.
+            Slog.e(TAG, "Failed to get valid docked side for docked stack=" + dockedStack);
+            outBounds.set(mBounds);
+            return;
+        }
+
+        mDisplayContent.getLogicalDisplayRect(mTmpRect);
+        dockedStack.getRawBounds(mTmpRect2);
+        final boolean dockedOnTopOrLeft = dockedSide == DOCKED_TOP || dockedSide == DOCKED_LEFT;
+        getStackDockedModeBounds(mTmpRect, outBounds, mStackId, mTmpRect2,
+                mDisplayContent.mDividerControllerLocked.getWidthAdjustment(), dockedOnTopOrLeft);
+
+    }
+
     /**
-     * Outputs the initial bounds a stack should be given the presence of a docked stack on the
-     * display.
+     * Outputs the bounds a stack should be given the presence of a docked stack on the display.
      * @param displayRect The bounds of the display the docked stack is on.
      * @param outBounds Output bounds that should be used for the stack.
      * @param stackId Id of stack we are calculating the bounds for.
      * @param dockedBounds Bounds of the docked stack.
-     * @param adjustment
+     * @param adjustment Additional adjustment to make to the output bounds close to the side of the
+     *                   dock.
+     * @param dockOntopOrLeft If the docked stack is on the top or left side of the screen.
      */
-    private static void getInitialDockedStackBounds(
-            Rect displayRect, Rect outBounds, int stackId, Rect dockedBounds, int adjustment) {
+    private static void getStackDockedModeBounds(
+            Rect displayRect, Rect outBounds, int stackId, Rect dockedBounds, int adjustment,
+            boolean dockOntopOrLeft) {
         final boolean dockedStack = stackId == DOCKED_STACK_ID;
         final boolean splitHorizontally = displayRect.width() > displayRect.height();
-        final boolean topOrLeftCreateMode =
-                WindowManagerService.sDockedStackCreateMode == DOCKED_STACK_CREATE_MODE_TOP_OR_LEFT;
 
         outBounds.set(displayRect);
         if (dockedStack) {
             // The initial bounds of the docked stack when it is created half the screen space and
             // its bounds can be adjusted after that. The bounds of all other stacks are adjusted
             // to occupy whatever screen space the docked stack isn't occupying.
-            if (topOrLeftCreateMode) {
+            if (dockOntopOrLeft) {
                 if (splitHorizontally) {
                     outBounds.right = displayRect.centerX() - adjustment;
                 } else {
@@ -451,7 +486,7 @@ public class TaskStack implements DimLayer.DimLayerUser {
         }
 
         // Other stacks occupy whatever space is left by the docked stack.
-        if (!topOrLeftCreateMode) {
+        if (!dockOntopOrLeft) {
             if (splitHorizontally) {
                 outBounds.right = dockedBounds.left - adjustment;
             } else {
@@ -477,8 +512,10 @@ public class TaskStack implements DimLayer.DimLayerUser {
         final Rect bounds = new Rect();
         mDisplayContent.getLogicalDisplayRect(bounds);
         if (!fullscreen) {
-            getInitialDockedStackBounds(bounds, bounds, FULLSCREEN_WORKSPACE_STACK_ID, dockedBounds,
-                    mDisplayContent.mDividerControllerLocked.getWidth());
+            final boolean dockedOnTopOrLeft = WindowManagerService.sDockedStackCreateMode
+                    == DOCKED_STACK_CREATE_MODE_TOP_OR_LEFT;
+            getStackDockedModeBounds(bounds, bounds, FULLSCREEN_WORKSPACE_STACK_ID, dockedBounds,
+                    mDisplayContent.mDividerControllerLocked.getWidth(), dockedOnTopOrLeft);
         }
 
         final int count = mService.mStackIdToStack.size();
@@ -489,7 +526,8 @@ public class TaskStack implements DimLayer.DimLayerUser {
                     && otherStackId >= FIRST_STATIC_STACK_ID
                     && otherStackId <= LAST_STATIC_STACK_ID) {
                 mService.mH.sendMessage(
-                        mService.mH.obtainMessage(RESIZE_STACK, otherStackId, UNUSED, bounds));
+                        mService.mH.obtainMessage(RESIZE_STACK, otherStackId,
+                                1 /*allowResizeInDockedMode*/, bounds));
             }
         }
     }
