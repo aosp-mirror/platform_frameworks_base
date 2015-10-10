@@ -925,7 +925,7 @@ public class VoiceInteractionManagerService extends SystemService {
                 return;
             }
             synchronized (this) {
-                pw.println("VOICE INTERACTION MANAGER (dumpsys voiceinteraction)\n");
+                pw.println("VOICE INTERACTION MANAGER (dumpsys voiceinteraction)");
                 pw.println("  mEnableService: " + mEnableService);
                 if (mImpl == null) {
                     pw.println("  (No active implementation)");
