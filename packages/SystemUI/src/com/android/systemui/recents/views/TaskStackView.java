@@ -988,7 +988,8 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
     }
 
     @Override
-    public void onStackTaskRemoved(TaskStack stack, Task removedTask, Task newFrontMostTask) {
+    public void onStackTaskRemoved(TaskStack stack, Task removedTask, boolean wasFrontMostTask,
+            Task newFrontMostTask) {
         // Remove the view associated with this task, we can't rely on updateTransforms
         // to work here because the task is no longer in the list
         TaskView tv = getChildViewForTask(removedTask);
@@ -1007,14 +1008,18 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
         }
 
         // Update the min/max scroll and animate other task views into their new positions
-        RecentsActivityLaunchState launchState = mConfig.getLaunchState();
         updateMinMaxScroll(true);
 
-        // Offset the stack by as much as the anchor task would otherwise move back
-        if (pullStackForward) {
+        if (wasFrontMostTask) {
+            // Since the max scroll progress is offset from the bottom of the stack, just scroll
+            // to ensure that the new front most task is now fully visible
+            mStackScroller.setStackScroll(mLayoutAlgorithm.mMaxScrollP);
+        } else if (pullStackForward) {
+            // Otherwise, offset the scroll by half the movement of the anchor task to allow the
+            // tasks behind the removed task to move forward, and the tasks in front to move back
             float anchorTaskScroll = mLayoutAlgorithm.getStackScrollForTask(anchorTask);
             mStackScroller.setStackScroll(mStackScroller.getStackScroll() + (anchorTaskScroll
-                    - prevAnchorTaskScroll));
+                    - prevAnchorTaskScroll) / 2);
             mStackScroller.boundScroll();
         }
 
@@ -1290,6 +1295,7 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
 
         // Remove the task from the view
         mStack.removeTask(task);
+
         // If the dismissed task was focused, then we should focus the new task in the same index
         if (taskWasFocused) {
             ArrayList<Task> tasks = mStack.getTasks();

@@ -171,7 +171,8 @@ public class TaskStack {
         /* Notifies when a task has been added to the stack */
         public void onStackTaskAdded(TaskStack stack, Task t);
         /* Notifies when a task has been removed from the stack */
-        public void onStackTaskRemoved(TaskStack stack, Task removedTask, Task newFrontMostTask);
+        public void onStackTaskRemoved(TaskStack stack, Task removedTask, boolean wasFrontMostTask,
+                                       Task newFrontMostTask);
         /* Notifies when all task has been removed from the stack */
         public void onStackAllTasksRemoved(TaskStack stack, ArrayList<Task> removedTasks);
         /** Notifies when the stack was filtered */
@@ -183,13 +184,13 @@ public class TaskStack {
 
     public enum DockState {
         LEFT(DOCKED_STACK_CREATE_MODE_TOP_OR_LEFT,
-                new RectF(0, 0, 0.25f, 1), new RectF(0, 0, 0.5f, 1), new RectF(0.5f, 0, 1, 1)),
+                new RectF(0, 0, 0.25f, 1), new RectF(0, 0, 0.35f, 1), new RectF(0.65f, 0, 1, 1)),
         TOP(DOCKED_STACK_CREATE_MODE_TOP_OR_LEFT,
-                new RectF(0, 0, 1, 0.25f), new RectF(0, 0, 1, 0.5f), new RectF(0, 0.5f, 1, 1)),
+                new RectF(0, 0, 1, 0.25f), new RectF(0, 0, 1, 0.35f), new RectF(0, 0.65f, 1, 1)),
         RIGHT(DOCKED_STACK_CREATE_MODE_BOTTOM_OR_RIGHT,
-                new RectF(0.75f, 0, 1, 1), new RectF(0.5f, 0, 1, 1), new RectF(0, 0, 0.5f, 1)),
+                new RectF(0.75f, 0, 1, 1), new RectF(0.65f, 0, 1, 1), new RectF(0, 0, 0.35f, 1)),
         BOTTOM(DOCKED_STACK_CREATE_MODE_BOTTOM_OR_RIGHT,
-                new RectF(0, 0.75f, 1, 1), new RectF(0, 0.5f, 1, 1), new RectF(0, 0, 1, 0.5f));
+                new RectF(0, 0.75f, 1, 1), new RectF(0, 0.65f, 1, 1), new RectF(0, 0, 1, 0.35f));
 
         public final int createMode;
         private final RectF touchArea;
@@ -284,6 +285,7 @@ public class TaskStack {
     /** Removes a task */
     public void removeTask(Task t) {
         if (mTaskList.contains(t)) {
+            boolean wasFrontMostTask = (getFrontMostTask() == t);
             removeTaskImpl(t);
             Task newFrontMostTask = getFrontMostTask();
             if (newFrontMostTask != null && newFrontMostTask.lockToTaskEnabled) {
@@ -291,7 +293,7 @@ public class TaskStack {
             }
             if (mCb != null) {
                 // Notify that a task has been removed
-                mCb.onStackTaskRemoved(this, t, newFrontMostTask);
+                mCb.onStackTaskRemoved(this, t, wasFrontMostTask, newFrontMostTask);
             }
         }
     }
@@ -319,7 +321,7 @@ public class TaskStack {
             removeTaskImpl(t);
             if (mCb != null) {
                 // Notify that a task has been removed
-                mCb.onStackTaskRemoved(this, t, null);
+                mCb.onStackTaskRemoved(this, t, false, null);
             }
         }
         mTaskList.set(tasks);
