@@ -807,15 +807,16 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks,
                     dragView.setElevation(getElevation());
                     dragView.setTranslationZ(getTranslationZ());
                     dragView.animate()
-                            .alpha(0.75f)
+                            .scaleX(1.05f)
+                            .scaleY(1.05f)
                             .setDuration(175)
-                            .setInterpolator(new AccelerateInterpolator(1.5f))
-                            .withLayer()
+                            .setInterpolator(mFastOutSlowInInterpolator)
                             .start();
                 }
 
                 @Override
                 public void onViewDetachedFromWindow(View v) {
+                    // Do nothing
                 }
             });
             EventBus.getDefault().register(this, RecentsActivity.EVENT_BUS_PRIORITY + 1);

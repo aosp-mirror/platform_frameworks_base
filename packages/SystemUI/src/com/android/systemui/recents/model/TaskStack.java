@@ -183,16 +183,18 @@ public class TaskStack {
 
 
     public enum DockState {
-        LEFT(DOCKED_STACK_CREATE_MODE_TOP_OR_LEFT,
-                new RectF(0, 0, 0.25f, 1), new RectF(0, 0, 0.35f, 1), new RectF(0.65f, 0, 1, 1)),
-        TOP(DOCKED_STACK_CREATE_MODE_TOP_OR_LEFT,
-                new RectF(0, 0, 1, 0.25f), new RectF(0, 0, 1, 0.35f), new RectF(0, 0.65f, 1, 1)),
-        RIGHT(DOCKED_STACK_CREATE_MODE_BOTTOM_OR_RIGHT,
-                new RectF(0.75f, 0, 1, 1), new RectF(0.65f, 0, 1, 1), new RectF(0, 0, 0.35f, 1)),
-        BOTTOM(DOCKED_STACK_CREATE_MODE_BOTTOM_OR_RIGHT,
-                new RectF(0, 0.75f, 1, 1), new RectF(0, 0.65f, 1, 1), new RectF(0, 0, 1, 0.35f));
+        NONE(-1, 96, null, null, null),
+        LEFT(DOCKED_STACK_CREATE_MODE_TOP_OR_LEFT, 192,
+                new RectF(0, 0, 0.3f, 1), new RectF(0, 0, 0.3f, 1), new RectF(0.7f, 0, 1, 1)),
+        TOP(DOCKED_STACK_CREATE_MODE_TOP_OR_LEFT, 192,
+                new RectF(0, 0, 1, 0.3f), new RectF(0, 0, 1, 0.3f), new RectF(0, 0.7f, 1, 1)),
+        RIGHT(DOCKED_STACK_CREATE_MODE_BOTTOM_OR_RIGHT, 192,
+                new RectF(0.7f, 0, 1, 1), new RectF(0.7f, 0, 1, 1), new RectF(0, 0, 0.3f, 1)),
+        BOTTOM(DOCKED_STACK_CREATE_MODE_BOTTOM_OR_RIGHT, 192,
+                new RectF(0, 0.7f, 1, 1), new RectF(0, 0.7f, 1, 1), new RectF(0, 0, 1, 0.3f));
 
         public final int createMode;
+        public final int dockAreaAlpha;
         private final RectF touchArea;
         private final RectF dockArea;
         private final RectF stackArea;
@@ -202,8 +204,10 @@ public class TaskStack {
          * @param touchArea the area in which touch will initiate this dock state
          * @param stackArea the area for the stack if a task is docked
          */
-        DockState(int createMode, RectF touchArea, RectF dockArea, RectF stackArea) {
+        DockState(int createMode, int dockAreaAlpha, RectF touchArea, RectF dockArea,
+                RectF stackArea) {
             this.createMode = createMode;
+            this.dockAreaAlpha = dockAreaAlpha;
             this.touchArea = touchArea;
             this.dockArea = dockArea;
             this.stackArea = stackArea;
@@ -232,9 +236,13 @@ public class TaskStack {
         /**
          * Returns the stack bounds with the given {@param width} and {@param height}.
          */
-        public Rect getStackBounds(int width, int height) {
-            return new Rect((int) (stackArea.left * width), (int) (stackArea.top * height),
-                    (int) (stackArea.right * width), (int) (stackArea.bottom * height));
+        public Rect getStackBounds(Rect stackRect) {
+            int width = stackRect.width();
+            int height = stackRect.height();
+            return new Rect((int) (stackRect.left + stackArea.left * width),
+                    (int) (stackRect.top + stackArea.top * height),
+                    (int) (stackRect.left + (stackArea.right - stackArea.left) * width),
+                    (int) (stackRect.top + (stackArea.bottom - stackArea.top) * height));
         }
     }
 

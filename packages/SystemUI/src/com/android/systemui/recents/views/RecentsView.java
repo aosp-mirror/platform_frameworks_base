@@ -16,6 +16,8 @@
 
 package com.android.systemui.recents.views;
 
+import android.animation.ObjectAnimator;
+import android.animation.ValueAnimator;
 import android.app.ActivityManager;
 import android.app.ActivityOptions;
 import android.content.Context;
@@ -23,6 +25,7 @@ import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Rect;
 import android.graphics.drawable.ColorDrawable;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.IRemoteCallback;
 import android.os.RemoteException;
@@ -89,6 +92,7 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
     RecentsViewTouchHandler mTouchHandler;
     DragView mDragView;
     ColorDrawable mDockRegionOverlay;
+    ObjectAnimator mDockRegionOverlayAnimator;
 
     Interpolator mFastOutSlowInInterpolator;
 
@@ -114,8 +118,9 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
         mFastOutSlowInInterpolator = AnimationUtils.loadInterpolator(context,
                 com.android.internal.R.interpolator.fast_out_slow_in);
         mTouchHandler = new RecentsViewTouchHandler(this);
-        mDockRegionOverlay = new ColorDrawable(0x66000000);
+        mDockRegionOverlay = new ColorDrawable(0xFFffffff);
         mDockRegionOverlay.setAlpha(0);
+        mDockRegionOverlay.setCallback(this);
     }
 
     /** Sets the callbacks */
@@ -381,6 +386,11 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
         if (mDockRegionOverlay.getAlpha() > 0) {
             mDockRegionOverlay.draw(canvas);
         }
+    }
+
+    @Override
+    protected boolean verifyDrawable(Drawable who) {
+        return super.verifyDrawable(who) || who == mDockRegionOverlay;
     }
 
     /** Notifies each task view of the user interaction. */
@@ -764,19 +774,12 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
         // Add the drag view
         mDragView = event.dragView;
         addView(mDragView);
+
+        updateDockRegion(TaskStack.DockState.NONE);
     }
 
     public final void onBusEvent(DragDockStateChangedEvent event) {
-        // Update the task stack positions, and then
-        if (event.dockState != null) {
-            // Draw an overlay on the bounds of the dock task
-            mDockRegionOverlay.setBounds(
-                    event.dockState.getDockedBounds(getMeasuredWidth(), getMeasuredHeight()));
-            mDockRegionOverlay.setAlpha(255);
-        } else {
-            mDockRegionOverlay.setAlpha(0);
-        }
-        invalidate();
+        updateDockRegion(event.dockState);
     }
 
     public final void onBusEvent(final DragEndEvent event) {
@@ -791,7 +794,7 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
                 invalidate();
 
                 // Dock the new task if we are hovering over a valid dock state
-                if (event.dockState != null) {
+                if (event.dockState != TaskStack.DockState.NONE) {
                     SystemServicesProxy ssp = RecentsTaskLoader.getInstance().getSystemServicesProxy();
                     ssp.setTaskResizeable(event.task.key.id);
                     ssp.dockTask(event.task.key.id, event.dockState.createMode);
@@ -799,22 +802,49 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
                 }
             }
         });
-        if (event.dockState == null) {
+        if (event.dockState == TaskStack.DockState.NONE) {
             // Animate the alpha back to what it was before
             Rect taskBounds = mTaskStackView.getStackAlgorithm().getUntransformedTaskViewBounds();
             int left = taskBounds.left + (int) ((1f - event.taskView.getScaleX()) * taskBounds.width()) / 2;
             int top = taskBounds.top + (int) ((1f - event.taskView.getScaleY()) * taskBounds.height()) / 2;
             event.dragView.animate()
-                    .alpha(1f)
+                    .scaleX(1f)
+                    .scaleY(1f)
                     .translationX(left + event.taskView.getTranslationX())
                     .translationY(top + event.taskView.getTranslationY())
                     .setDuration(175)
-                    .setInterpolator(new AccelerateInterpolator(1.5f))
+                    .setInterpolator(mFastOutSlowInInterpolator)
                     .withEndAction(event.postAnimationTrigger.decrementAsRunnable())
-                    .withLayer()
                     .start();
+
+            // Animate the overlay alpha back to 0
+            updateDockRegionAlpha(0);
         } else {
             event.postAnimationTrigger.decrement();
         }
+    }
+
+    /**
+     * Updates the dock region to match the specified dock state.
+     */
+    private void updateDockRegion(TaskStack.DockState dockState) {
+        TaskStack.DockState boundsDockState = dockState;
+        if (dockState == TaskStack.DockState.NONE) {
+            // If the dock state is null, then use the bounds of the preferred dock state for this
+            // orientation
+            boundsDockState = mTouchHandler.getPreferredDockStateForCurrentOrientation();
+        }
+        mDockRegionOverlay.setBounds(
+                boundsDockState.getDockedBounds(getMeasuredWidth(), getMeasuredHeight()));
+        updateDockRegionAlpha(dockState.dockAreaAlpha);
+    }
+
+    private void updateDockRegionAlpha(int alpha) {
+        if (mDockRegionOverlayAnimator != null) {
+            mDockRegionOverlayAnimator.cancel();
+        }
+        mDockRegionOverlayAnimator = ObjectAnimator.ofInt(mDockRegionOverlay, "alpha", alpha);
+        mDockRegionOverlayAnimator.setDuration(150);
+        mDockRegionOverlayAnimator.start();
     }
 }
