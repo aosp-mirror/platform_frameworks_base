@@ -59,10 +59,171 @@ page.title=Support Library
 <p>This section provides details about the Support Library package releases.</p>
 
 
-
 <div class="toggle-content opened">
-  <p id="rev23-0-1"><a href="#" onclick="return toggleContent(this)">
+  <p id="rev24-1-0"><a href="#" onclick="return toggleContent(this)">
     <img src="{@docRoot}assets/images/triangle-opened.png" class="toggle-content-img" alt=""
+/>Android Support Library, revision 24.1.0</a> <em>(October 2015)</em>
+  </p>
+  <div class="toggle-content-toggleme">
+    <dl>
+      <dt>Changes for <a href="features.html#v4">v4 Support library:</a></dt>
+       <dd>
+        <ul>
+           <li>Added <code>OnScrollChangedListener</code> interface support to the
+            <code>NestedScrollView</code> widget. It
+            allows you to receive callbacks when the scroll X or Y positions change.</li>
+          <li>Added a <code>MediaButtonReceiver</code> class to forward received playback controls
+            to a service that’s managing the <code>MediaSessionCompat</code> class. The
+            <code>MediaSessionCompat</code> class has a
+            constructor that can automatically find a media button receiver in the manifest. A
+            media button receiver is a key part to <a href=
+          "http://developer.android.com/training/managing-audio/volume-playback.html#PlaybackControls">handling
+          playback controls</a> from hardware or bluetooth controls.</li>
+        </ul>
+       </dd>
+
+
+      <dt>Changes for <a href="features.html#v7-appcompat">v7 appcompat library:</a></dt>
+       <dd>
+        <ul>
+          <li>Added material design <code>Seekbar</code> and <code>ImageButton</code> widgets.</li>
+          <li>Updated the <code>ImageView</code> widget to support the tint feature.</li>
+          <li>Updated the look-and-feel of the <code>SwitchCompat</code> widget.</li>
+         </ul>
+       </dd>
+
+      <dt>Changes for <a href="features.html#v7-mediarouter">v7 mediarouter library:</a></dt>
+       <dd>
+        <ul>
+        <li>Added the following features to the <code>MediaRouteChooserDialog</code> class:</li>
+        <ul>
+          <li>Displays a loading page while discovering media route providers.</li>
+          <li>Includes a device type icon for easier device identification.</li>
+          <li>Sorts the routes according to frequency of use in the current app.</li>
+          <li>Supports landscape mode.</li>
+        </ul>
+        </ul>
+        <ul>
+        <li>Added the following features to the <code>MediaRouteControllerDialog</code> class:</li>
+        <ul>
+           <li>Recognizes screen casting and provides a proper description.</li>
+           <li>Supports various album art sizes and aspect ratios, and loads the art asynchronously.</li>
+           <li>Automatically selects the content color based on the primary color of the app.</li>
+           <li>Adjusts the dialog layout based on available screen space on the device.</li>
+           <li>Supports landscape mode.</li>
+        </ul>
+        </ul>
+       </dd>
+
+      <dt>Changes for <a href="features.html#v7-palette">v7 palette library:</a></dt>
+       <dd>
+        <ul>
+          <li>Added the <code>setRegion()</code> method to support extracting color from a specific
+            region of a <code>Bitmap</code> object.</li>
+         </ul>
+       </dd>
+
+      <dt>Changes for <a href="features.html#v7-recyclerview">v7 recyclerview library:</a></dt>
+       <dd>
+        <ul>
+        <li>Added an improved animation API to the <code>ItemAnimator</code> class for better
+          customizations:</li>
+           <ul>
+           <li>Change animations no longer enforce two copies of the <code>ViewHolder</code> object,
+            which enables item content animations. Also, the <code>ItemAnimator</code> object
+            decides whether it wants to reuse the same <code>ViewHolder</code> object or create a
+            new one.</li>
+           <li>The new information record API gives the <code>ItemAnimator</code> class the flexibility
+            to collect data at the correct point in the layout lifecycle. This information is later
+            passed into the animate callbacks.</li>
+            </ul>
+         </ul>
+          <ul>
+          <li>Provided an easy transition plan for this backward-incompatible API change:</li>
+           <ul>
+           <li>If you’ve previously extended the <code>ItemAnimator</code> class, you can change
+            your base class to <code>SimpleItemAnimator</code> and your code should work as before.
+            The <code>SimpleItemAnimator</code> class provides the old API by wrapping the new API.</li>
+           <li>Some methods were removed from the <code>ItemAnimator</code> class. The following
+            code will no longer compile:</li>
+           <pre>recyclerView.getItemAnimator().setSupportsChangeAnimations(false)</pre>
+           <p>You can replace it with:</p>
+           <pre>
+ItemAnimator animator = recyclerView.getItemAnimator();
+if (animator instanceof SimpleItemAnimator) {
+   ((SimpleItemAnimator) animator).setSupportsChangeAnimations(false);
+}
+           </pre>
+          </ul>
+         </ul>
+       </dd>
+
+
+      <dt>Changes for <a href="features.html#v7-preference">v7</a>,
+          <a href="features.html#v14-preference">v14</a>, and
+          <a href="features.html#v17-preference">v17</a> Preference Support library:</dt>
+       <dd>
+        <ul>
+          <li>Removed APIs for controlling <code>EditText</code> dialogs.</li>
+         </ul>
+       </dd>
+
+     <dt>Changes for <a href="features.html#v17-leanback">v17 Leanback Support library:</a></dt>
+      <dd>
+        <ul>
+          <li>Added a version of the <code>GuidedStepFragment</code> class for the Support library
+            (extends <code>android.support.v4.app.Fragment</code>), and improved animations and
+            transitions.</li>
+          <li>Updated the <code>GuidedStepFragment</code> class so it can be placed on top of
+            existing content.</li>
+          <li>Added the ability to annotate different types of search completions to the
+          <code>SearchFragment</code> class.</li>
+          <li>Added staggered slide transition support to the <code>VerticalGridFragment</code>
+            class.</li>
+         </ul>
+       </dd>
+
+
+     <dt>Changes for <a href="features.html#design">Design Support library:</a></dt>
+      <dd>
+        <ul>
+          <li>Added <a href=
+  "https://www.google.com/design/spec/components/text-fields.html#text-fields-character-counter">
+          character counting</a> support to the <code>TextInputLayout</code> widget.</li>
+          <li>Added edge snapping support to the <code>AppBarLayout</code> class by adding the
+            <code>SCROLL_FLAG_SNAP</code> constant. When scrolling ends, if the view is only
+            partially visible, the view is snapped and scrolled to its closest edge.</li>
+          <li>Added support for custom views to the <code>NavigationView</code> class by using the
+            <code>app:actionLayout</code> attribute or <code>MenuItemCompat.setActionView()</code>
+            method.</li>
+         </ul>
+       </dd>
+
+
+     <dt>Changes for <a href="features.html#custom-tabs">Custom Tabs Support library:</a></dt>
+      <dd>
+        <ul>
+          <li>Added the <code>enableUrlBarHiding()</code> method to the <code>CustomTabsIntent</code>
+            class. It lets the client customize whether the URL bar should be hidden automatically
+            on scroll down.</li>
+          <li>Added the <code>setActionButton()</code> method to the <code>CustomTabsSession</code>
+            class. It lets the client
+            change the icon for a custom action button in an already launched custom tab.</li>
+          <li>Added the <code>TAB_SHOWN</code> and <code>TAB_HIDDEN</code> constants as new events
+            for the <code>onNavigationEvent</code> method of the <code>CustomTabsCallback</code>
+            class.</li>
+         </ul>
+       </dd>
+
+    </dl>
+
+  </div>
+</div> <!-- end of collapsible section -->
+
+
+<div class="toggle-content closed">
+  <p id="rev23-0-1"><a href="#" onclick="return toggleContent(this)">
+    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img" alt=""
 />Android Support Library, revision 23.0.1</a> <em>(September 2015)</em>
   </p>
   <div class="toggle-content-toggleme">
