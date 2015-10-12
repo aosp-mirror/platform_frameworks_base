@@ -19,6 +19,7 @@ package com.android.systemui.recents.views;
 import android.content.res.Configuration;
 import android.graphics.Point;
 import android.view.MotionEvent;
+import com.android.systemui.recents.RecentsConfiguration;
 import com.android.systemui.recents.events.EventBus;
 import com.android.systemui.recents.events.ui.dragndrop.DragDockStateChangedEvent;
 import com.android.systemui.recents.events.ui.dragndrop.DragEndEvent;
@@ -32,13 +33,17 @@ import com.android.systemui.recents.model.TaskStack;
  * Represents the dock regions for each orientation.
  */
 class DockRegion {
-    public static TaskStack.DockState[] LANDSCAPE = {
+    public static TaskStack.DockState[] PHONE_LANDSCAPE = {
             TaskStack.DockState.LEFT, TaskStack.DockState.RIGHT
     };
-    public static TaskStack.DockState[] PORTRAIT = {
+    public static TaskStack.DockState[] PHONE_PORTRAIT = {
             // We only allow docking to the top for now
             TaskStack.DockState.TOP
     };
+    public static TaskStack.DockState[] TABLET_LANDSCAPE = {
+            TaskStack.DockState.LEFT, TaskStack.DockState.RIGHT
+    };
+    public static TaskStack.DockState[] TABLET_PORTRAIT = PHONE_PORTRAIT;
 }
 
 /**
@@ -60,12 +65,17 @@ class RecentsViewTouchHandler {
         mRv = rv;
     }
 
-    public TaskStack.DockState getPreferredDockStateForCurrentOrientation() {
+    /**
+     * Returns the preferred dock states for the current orientation.
+     */
+    public TaskStack.DockState[] getDockStatesForCurrentOrientation() {
         boolean isLandscape = mRv.getResources().getConfiguration().orientation ==
                 Configuration.ORIENTATION_LANDSCAPE;
+        RecentsConfiguration config = RecentsConfiguration.getInstance();
         TaskStack.DockState[] dockStates = isLandscape ?
-                DockRegion.LANDSCAPE : DockRegion.PORTRAIT;
-        return dockStates[0];
+                (config.isLargeScreen ? DockRegion.TABLET_LANDSCAPE : DockRegion.PHONE_LANDSCAPE) :
+                (config.isLargeScreen ? DockRegion.TABLET_PORTRAIT : DockRegion.PHONE_PORTRAIT);
+        return dockStates;
     }
 
     /** Touch preprocessing for handling below */
@@ -125,10 +135,9 @@ class RecentsViewTouchHandler {
                     float y = evY - mDragView.getTopLeftOffset().y;
 
                     // Update the dock state
-                    TaskStack.DockState[] dockStates = isLandscape ?
-                            DockRegion.LANDSCAPE : DockRegion.PORTRAIT;
+                    TaskStack.DockState[] dockStates = getDockStatesForCurrentOrientation();
                     TaskStack.DockState foundDockState = TaskStack.DockState.NONE;
-                    for (int i = 0; i < dockStates.length; i++) {
+                    for (int i = dockStates.length - 1; i >= 0; i--) {
                         TaskStack.DockState state = dockStates[i];
                         if (state.touchAreaContainsPoint(width, height, evX, evY)) {
                             foundDockState = state;
