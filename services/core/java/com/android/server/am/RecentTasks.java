@@ -465,7 +465,7 @@ class RecentTasks extends ArrayList<TaskRecord> {
                     if (!sameActivity) {
                         continue;
                     }
-                    if (maxRecents > 0) {
+                    if (maxRecents > 0 && !doTrim) {
                         --maxRecents;
                         continue;
                     }
