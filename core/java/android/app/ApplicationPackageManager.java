@@ -1619,7 +1619,8 @@ final class ApplicationPackageManager extends PackageManager {
         // System apps and apps demanding internal storage can't be moved
         // anywhere else
         if (app.isSystemApp()
-                || app.installLocation == PackageInfo.INSTALL_LOCATION_INTERNAL_ONLY) {
+                || app.installLocation == PackageInfo.INSTALL_LOCATION_INTERNAL_ONLY
+                || app.installLocation == PackageInfo.INSTALL_LOCATION_UNSPECIFIED) {
             return false;
         }
 
