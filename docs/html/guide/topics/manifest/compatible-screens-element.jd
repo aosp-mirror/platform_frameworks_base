@@ -9,7 +9,7 @@ parent.link=manifest-intro.html
 <pre>
 &lt;<a href="#compatible-screens">compatible-screens</a>&gt;
     &lt;<a href="#screen">screen</a> android:<a href="#screenSize">screenSize</a>=["small" | "normal" | "large" | "xlarge"]
-            android:<a href="#screenDensity">screenDensity</a>=["ldpi" | "mdpi" | "hdpi" | "xhdpi"] /&gt;
+            android:<a href="#screenDensity">screenDensity</a>=["ldpi" | "mdpi" | "hdpi" | "xhdpi" | "xxhdpi" | "xxxhdpi"] /&gt;
     ...
 &lt;/compatible-screens&gt;
 </pre>
@@ -94,11 +94,9 @@ href="{@docRoot}guide/practices/screens_support.html#range">Supporting Multiple 
             <li>{@code mdpi}</li>
             <li>{@code hdpi}</li>
             <li>{@code xhdpi}</li>
+            <li>{@code xxhdpi}</li>
+            <li>{@code xxxhdpi}</li>
           </ul>
-          <p class="note"><strong>Note:</strong> This attribute currently does not accept
-          {@code xxhdpi} as a valid value, but you can instead specify {@code 480}
-          as the value, which is the approximate threshold for xhdpi screens.</p>
-
           <p>For information about the different screen densities, see <a
 href="{@docRoot}guide/practices/screens_support.html#range">Supporting Multiple Screens</a>.</p>
         </dd>
@@ -110,8 +108,8 @@ href="{@docRoot}guide/practices/screens_support.html#range">Supporting Multiple 
 <dt>example</dt>
 <dd>
 <p>If your application is compatible with only small and normal screens, regardless
-of screen density, then you must specify eight different {@code &lt;screen&gt;} elements,
-because each screen size has four different density configurations. You must declare each one of
+of screen density, then you must specify twelve different {@code &lt;screen&gt;} elements,
+because each screen size has six different density configurations. You must declare each one of
 these; any combination of size and density that you do <em>not</em> specify is considered a screen
 configuration with which your application is <em>not</em> compatible. Here's what the manifest
 entry looks like if your application is compatible with only small and normal screens:</p>
@@ -125,11 +123,15 @@ entry looks like if your application is compatible with only small and normal sc
         &lt;screen android:screenSize="small" android:screenDensity="mdpi" />
         &lt;screen android:screenSize="small" android:screenDensity="hdpi" />
         &lt;screen android:screenSize="small" android:screenDensity="xhdpi" />
+        &lt;screen android:screenSize="small" android:screenDensity="xxhdpi" />
+        &lt;screen android:screenSize="small" android:screenDensity="xxxhdpi" />
         &lt;!-- all normal size screens -->
         &lt;screen android:screenSize="normal" android:screenDensity="ldpi" />
         &lt;screen android:screenSize="normal" android:screenDensity="mdpi" />
         &lt;screen android:screenSize="normal" android:screenDensity="hdpi" />
         &lt;screen android:screenSize="normal" android:screenDensity="xhdpi" />
+        &lt;screen android:screenSize="normal" android:screenDensity="xxhdpi" />
+        &lt;screen android:screenSize="normal" android:screenDensity="xxxhdpi" />
     &lt;/compatible-screens>
     &lt;application ... >
         ...
