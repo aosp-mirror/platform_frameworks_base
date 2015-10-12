@@ -478,14 +478,6 @@ final class TaskRecord {
     }
 
     /**
-     * Returns true when we have a thumbnail.
-     * @return Returns true if there is a thumbnail.
-     */
-    boolean hasThumbnail() {
-        return mLastThumbnail != null;
-    }
-
-    /**
      * Sets the last thumbnail.
      * @return whether the thumbnail was set
      */
