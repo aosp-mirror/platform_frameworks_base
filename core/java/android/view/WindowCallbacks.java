@@ -49,7 +49,14 @@ public interface WindowCallbacks {
     void onWindowDragResizeEnd();
 
     /**
-     * The content will now be drawn to these bounds.
+     * The content will now be drawn to these bounds. Returns true if
+     * a draw should be requested after the next content draw.
      */
-    void onContentDraw(int offsetX, int offsetY, int sizeX, int sizeY);
+    boolean onContentDrawn(int offsetX, int offsetY, int sizeX, int sizeY);
+
+    /**
+     * Called to request the window to draw one frame.
+     * @param reportNextDraw Whether it should report when the requested draw finishes.
+     */
+    void onRequestDraw(boolean reportNextDraw);
 }
