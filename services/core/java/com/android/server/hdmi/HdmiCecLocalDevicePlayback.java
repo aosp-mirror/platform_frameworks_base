@@ -35,6 +35,8 @@ import java.io.UnsupportedEncodingException;
 import java.util.List;
 import java.util.Locale;
 
+import java.util.List;
+
 /**
  * Represent a logical device of type Playback residing in Android system.
  */
@@ -97,14 +99,12 @@ final class HdmiCecLocalDevicePlayback extends HdmiCecLocalDevice {
     @ServiceThreadOnly
     void oneTouchPlay(IHdmiControlCallback callback) {
         assertRunOnServiceThread();
-        if (hasAction(OneTouchPlayAction.class)) {
-            Slog.w(TAG, "oneTouchPlay already in progress");
-            invokeCallback(callback, HdmiControlManager.RESULT_ALREADY_IN_PROGRESS);
+        List<OneTouchPlayAction> actions = getActions(OneTouchPlayAction.class);
+        if (!actions.isEmpty()) {
+            Slog.i(TAG, "oneTouchPlay already in progress");
+            actions.get(0).addCallback(callback);
             return;
         }
-
-        // TODO: Consider the case of multiple TV sets. For now we always direct the command
-        //       to the primary one.
         OneTouchPlayAction action = OneTouchPlayAction.create(this, Constants.ADDR_TV,
                 callback);
         if (action == null) {
@@ -118,13 +118,14 @@ final class HdmiCecLocalDevicePlayback extends HdmiCecLocalDevice {
     @ServiceThreadOnly
     void queryDisplayStatus(IHdmiControlCallback callback) {
         assertRunOnServiceThread();
-        if (hasAction(DevicePowerStatusAction.class)) {
-            Slog.w(TAG, "queryDisplayStatus already in progress");
-            invokeCallback(callback, HdmiControlManager.RESULT_ALREADY_IN_PROGRESS);
+        List<DevicePowerStatusAction> actions = getActions(DevicePowerStatusAction.class);
+        if (!actions.isEmpty()) {
+            Slog.i(TAG, "queryDisplayStatus already in progress");
+            actions.get(0).addCallback(callback);
             return;
         }
-        DevicePowerStatusAction action = DevicePowerStatusAction.create(this,
-                Constants.ADDR_TV, callback);
+        DevicePowerStatusAction action = DevicePowerStatusAction.create(this, Constants.ADDR_TV,
+                callback);
         if (action == null) {
             Slog.w(TAG, "Cannot initiate queryDisplayStatus");
             invokeCallback(callback, HdmiControlManager.RESULT_EXCEPTION);

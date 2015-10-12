@@ -14491,7 +14491,7 @@ package android.hardware.hdmi {
     field public static final int POWER_STATUS_TRANSIENT_TO_ON = 2; // 0x2
     field public static final int POWER_STATUS_TRANSIENT_TO_STANDBY = 3; // 0x3
     field public static final int POWER_STATUS_UNKNOWN = -1; // 0xffffffff
-    field public static final int RESULT_ALREADY_IN_PROGRESS = 4; // 0x4
+    field public static final deprecated int RESULT_ALREADY_IN_PROGRESS = 4; // 0x4
     field public static final int RESULT_COMMUNICATION_FAILED = 7; // 0x7
     field public static final int RESULT_EXCEPTION = 5; // 0x5
     field public static final int RESULT_INCORRECT_MODE = 6; // 0x6

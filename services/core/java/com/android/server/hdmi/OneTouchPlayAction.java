@@ -21,6 +21,9 @@ import android.hardware.hdmi.HdmiPlaybackClient.OneTouchPlayCallback;
 import android.os.RemoteException;
 import android.util.Slog;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * Feature action that performs one touch play against TV/Display device. This action is initiated
  * via {@link android.hardware.hdmi.HdmiPlaybackClient#oneTouchPlay(OneTouchPlayCallback)} from the
@@ -47,7 +50,7 @@ final class OneTouchPlayAction extends HdmiCecFeatureAction {
     private static final int LOOP_COUNTER_MAX = 10;
 
     private final int mTargetAddress;
-    private final IHdmiControlCallback mCallback;
+    private final List<IHdmiControlCallback> mCallbacks = new ArrayList<>();
 
     private int mPowerStatusCounter = 0;
 
@@ -66,7 +69,7 @@ final class OneTouchPlayAction extends HdmiCecFeatureAction {
             IHdmiControlCallback callback) {
         super(localDevice);
         mTargetAddress = targetAddress;
-        mCallback = callback;
+        addCallback(callback);
     }
 
     @Override
@@ -125,9 +128,15 @@ final class OneTouchPlayAction extends HdmiCecFeatureAction {
         }
     }
 
+    public void addCallback(IHdmiControlCallback callback) {
+        mCallbacks.add(callback);
+    }
+
     private void invokeCallback(int result) {
         try {
-            mCallback.onComplete(result);
+            for (IHdmiControlCallback callback : mCallbacks) {
+                callback.onComplete(result);
+            }
         } catch (RemoteException e) {
             Slog.e(TAG, "Callback failed:" + e);
         }

@@ -93,7 +93,8 @@ public final class HdmiControlManager {
     public static final int RESULT_TIMEOUT = 1;
     public static final int RESULT_SOURCE_NOT_AVAILABLE = 2;
     public static final int RESULT_TARGET_NOT_AVAILABLE = 3;
-    public static final int RESULT_ALREADY_IN_PROGRESS = 4;
+
+    @Deprecated public static final int RESULT_ALREADY_IN_PROGRESS = 4;
     public static final int RESULT_EXCEPTION = 5;
     public static final int RESULT_INCORRECT_MODE = 6;
     public static final int RESULT_COMMUNICATION_FAILED = 7;
