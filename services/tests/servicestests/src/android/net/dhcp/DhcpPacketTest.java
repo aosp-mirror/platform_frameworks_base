@@ -117,7 +117,7 @@ public class DhcpPacketTest extends TestCase {
 
     private void assertDomainAndVendorInfoParses(
             String expectedDomain, byte[] domainBytes,
-            String expectedVendorInfo, byte[] vendorInfoBytes) {
+            String expectedVendorInfo, byte[] vendorInfoBytes) throws Exception {
         ByteBuffer packet = new TestDhcpPacket(DHCP_MESSAGE_TYPE_OFFER)
                 .setDomainBytes(domainBytes)
                 .setVendorInfoBytes(vendorInfoBytes)
@@ -158,17 +158,25 @@ public class DhcpPacketTest extends TestCase {
     }
 
     private void assertLeaseTimeParses(boolean expectValid, Integer rawLeaseTime,
-                                       long leaseTimeMillis, byte[] leaseTimeBytes) {
+            long leaseTimeMillis, byte[] leaseTimeBytes) throws Exception {
         TestDhcpPacket testPacket = new TestDhcpPacket(DHCP_MESSAGE_TYPE_OFFER);
         if (leaseTimeBytes != null) {
             testPacket.setLeaseTimeBytes(leaseTimeBytes);
         }
         ByteBuffer packet = testPacket.build();
-        DhcpPacket offerPacket = DhcpPacket.decodeFullPacket(packet, ENCAP_BOOTP);
+        DhcpPacket offerPacket = null;
+
         if (!expectValid) {
-            assertNull(offerPacket);
+            try {
+                offerPacket = DhcpPacket.decodeFullPacket(packet, ENCAP_BOOTP);
+                fail("Invalid packet parsed successfully: " + offerPacket);
+            } catch (ParseException expected) {
+            }
             return;
         }
+
+        offerPacket = DhcpPacket.decodeFullPacket(packet, ENCAP_BOOTP);
+        assertNotNull(offerPacket);
         assertEquals(rawLeaseTime, offerPacket.mLeaseTime);
         DhcpResults dhcpResults = offerPacket.toDhcpResults();  // Just check this doesn't crash.
         assertEquals(leaseTimeMillis, offerPacket.getLeaseTimeMillis());
@@ -200,14 +208,14 @@ public class DhcpPacketTest extends TestCase {
     }
 
     private void checkIpAddress(String expected, Inet4Address clientIp, Inet4Address yourIp,
-                                byte[] netmaskBytes) {
+                                byte[] netmaskBytes) throws Exception {
         checkIpAddress(expected, DHCP_MESSAGE_TYPE_OFFER, clientIp, yourIp, netmaskBytes);
         checkIpAddress(expected, DHCP_MESSAGE_TYPE_ACK, clientIp, yourIp, netmaskBytes);
     }
 
     private void checkIpAddress(String expected, byte type,
                                 Inet4Address clientIp, Inet4Address yourIp,
-                                byte[] netmaskBytes) {
+                                byte[] netmaskBytes) throws Exception {
         ByteBuffer packet = new TestDhcpPacket(type, clientIp, yourIp)
                 .setNetmaskBytes(netmaskBytes)
                 .build();
@@ -505,5 +513,75 @@ public class DhcpPacketTest extends TestCase {
         DhcpResults dhcpResults = offerPacket.toDhcpResults();
         assertDhcpResults("10.32.158.205/20", "10.32.144.1", "148.88.65.52,148.88.65.53",
                 "lancs.ac.uk", "10.32.255.128", null, 7200, false, dhcpResults);
+    }
+
+    @SmallTest
+    public void testUdpServerAnySourcePort() throws Exception {
+        final ByteBuffer packet = ByteBuffer.wrap(HexEncoding.decode((
+            // Ethernet header.
+            "9cd917000000001c2e0000000800" +
+            // IP header.
+            "45a00148000040003d115087d18194fb0a0f7af2" +
+            // UDP header. TODO: fix invalid checksum (due to MAC address obfuscation).
+            // NOTE: The server source port is not the canonical port 67.
+            "C29F004401341268" +
+            // BOOTP header.
+            "02010600d628ba8200000000000000000a0f7af2000000000a0fc818" +
+            // MAC address.
+            "9cd91700000000000000000000000000" +
+            // Server name.
+            "0000000000000000000000000000000000000000000000000000000000000000" +
+            "0000000000000000000000000000000000000000000000000000000000000000" +
+            // File.
+            "0000000000000000000000000000000000000000000000000000000000000000" +
+            "0000000000000000000000000000000000000000000000000000000000000000" +
+            "0000000000000000000000000000000000000000000000000000000000000000" +
+            "0000000000000000000000000000000000000000000000000000000000000000" +
+            // Options.
+            "6382536335010236040a0169fc3304000151800104ffff000003040a0fc817060cd1818003d1819403" +
+            "d18180060f0777766d2e6564751c040a0fffffff000000"
+        ).toCharArray(), false));
+
+        DhcpPacket offerPacket = DhcpPacket.decodeFullPacket(packet, ENCAP_L2);
+        assertTrue(offerPacket instanceof DhcpOfferPacket);
+        assertEquals("9CD917000000", HexDump.toHexString(offerPacket.getClientMac()));
+        DhcpResults dhcpResults = offerPacket.toDhcpResults();
+        assertDhcpResults("10.15.122.242/16", "10.15.200.23",
+                "209.129.128.3,209.129.148.3,209.129.128.6",
+                "wvm.edu", "10.1.105.252", null, 86400, false, dhcpResults);
+    }
+
+    @SmallTest
+    public void testMultipleRouters() throws Exception {
+        final ByteBuffer packet = ByteBuffer.wrap(HexEncoding.decode((
+            // Ethernet header.
+            "fc3d93000000" + "081735000000" + "0800" +
+            // IP header.
+            "45000148c2370000ff117ac2c0a8bd02ffffffff" +
+            // UDP header. TODO: fix invalid checksum (due to MAC address obfuscation).
+            "0043004401343beb" +
+            // BOOTP header.
+            "0201060027f518e20000800000000000c0a8bd310000000000000000" +
+            // MAC address.
+            "fc3d9300000000000000000000000000" +
+            // Server name.
+            "0000000000000000000000000000000000000000000000000000000000000000" +
+            "0000000000000000000000000000000000000000000000000000000000000000" +
+            // File.
+            "0000000000000000000000000000000000000000000000000000000000000000" +
+            "0000000000000000000000000000000000000000000000000000000000000000" +
+            "0000000000000000000000000000000000000000000000000000000000000000" +
+            "0000000000000000000000000000000000000000000000000000000000000000" +
+            // Options.
+            "638253633501023604c0abbd023304000070803a04000038403b04000062700104ffffff00" +
+            "0308c0a8bd01ffffff0006080808080808080404ff000000000000"
+        ).toCharArray(), false));
+
+        DhcpPacket offerPacket = DhcpPacket.decodeFullPacket(packet, ENCAP_L2);
+        assertTrue(offerPacket instanceof DhcpOfferPacket);
+        assertEquals("FC3D93000000", HexDump.toHexString(offerPacket.getClientMac()));
+        DhcpResults dhcpResults = offerPacket.toDhcpResults();
+        assertDhcpResults("192.168.189.49/24", "192.168.189.1", "8.8.8.8,8.8.4.4",
+                null, "192.171.189.2", null, 28800, false, dhcpResults);
     }
 }

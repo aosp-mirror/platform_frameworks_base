@@ -356,20 +356,21 @@ public class DhcpClient extends BaseDhcpStateMachine {
         public void run() {
             maybeLog("Receive thread started");
             while (!stopped) {
+                int length = 0;  // Or compiler can't tell it's initialized if a parse error occurs.
                 try {
-                    int length = Os.read(mPacketSock, mPacket, 0, mPacket.length);
+                    length = Os.read(mPacketSock, mPacket, 0, mPacket.length);
                     DhcpPacket packet = null;
                     packet = DhcpPacket.decodeFullPacket(mPacket, length, DhcpPacket.ENCAP_L2);
-                    if (packet != null) {
-                        maybeLog("Received packet: " + packet);
-                        sendMessage(CMD_RECEIVED_PACKET, packet);
-                    } else if (PACKET_DBG) {
-                        Log.d(TAG,
-                                "Can't parse packet" + HexDump.dumpHexString(mPacket, 0, length));
-                    }
+                    maybeLog("Received packet: " + packet);
+                    sendMessage(CMD_RECEIVED_PACKET, packet);
                 } catch (IOException|ErrnoException e) {
                     if (!stopped) {
                         Log.e(TAG, "Read error", e);
+                    }
+                } catch (DhcpPacket.ParseException e) {
+                    Log.e(TAG, "Can't parse packet: " + e.getMessage());
+                    if (PACKET_DBG) {
+                        Log.d(TAG, HexDump.dumpHexString(mPacket, 0, length));
                     }
                 }
             }
