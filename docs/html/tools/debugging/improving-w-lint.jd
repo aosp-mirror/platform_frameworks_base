@@ -9,9 +9,9 @@ parent.link=index.html
 
       <ol>
         <li><a href="#overview">Overview</a></li>
-        <li><a href=#studio">Running lint from Android Studio</a></li>
-        <li><a href=#commandline">Running lint from the command-line</a></li>
-         <li><a href=#config">Configuring lint</a>
+        <li><a href="#studio">Running lint from Android Studio</a></li>
+        <li><a href="#commandline">Running lint from the command-line</a></li>
+         <li><a href="#config">Configuring lint</a>
             <ol>
 		<LI><a href="#studio_config">Configuring lint in Android Studio</a></LI>
                 <LI><a href="#pref">Configuring the lint file</a></LI>
@@ -29,12 +29,24 @@ parent.link=index.html
 
 
 <p>
-In addition to testing that your Android application meets its functional requirements, it's important to ensure that your code has no structural problems. Poorly structured code can impact the reliability and efficiency of your Android apps and make your code harder to maintain. For example, if your XML resource files contain unused namespaces, this takes up space and incurs unnecessary processing. Other structural issues, such as use of deprecated elements or API calls that are not supported by the target API versions, might lead to code failing to run correctly.</p>
+In addition to testing that your Android application meets its functional requirements, it's
+important to ensure that your code has no structural problems. Poorly structured code can impact the
+reliability and efficiency of your Android apps and make your code harder to maintain. For example,
+if your XML resource files contain unused namespaces, this takes up space and incurs unnecessary
+processing. Other structural issues, such as use of deprecated elements or API calls that are not
+supported by the target API versions, might lead to code failing to run correctly.</p>
 
 <h2 id="overview">Overview</h2>
 <p>The Android SDK provides a code scanning tool called <a href="{@docRoot}tools/help/lint.html"><code>lint</code></a>
-that can help you to easily identify and correct problems with the structural quality of your code, without having to execute the app or write any test cases. Each problem detected by the tool is reported with a description message and a severity level, so that you can quickly prioritize the critical improvements that need to be made.  You can also configure a problem's severity level to ignore issues that are not relevant for your project, or raise the severity level. The tool has a command-line interface, so you can easily integrate it into your automated testing process.</p>
-<p>The {@code lint} tool checks your Android project source files for potential bugs and optimization improvements for correctness, security, performance, usability, accessibility, and internationalization. You can run {@code lint} from the command-line or from Android Studio.</p>
+that can help you to easily identify and correct problems with the structural quality of your code,
+without having to execute the app or write any test cases. Each problem detected by the tool is
+reported with a description message and a severity level, so that you can quickly prioritize the
+critical improvements that need to be made.  You can also configure a problem's severity level to
+ignore issues that are not relevant for your project, or raise the severity level. The tool has a
+command-line interface, so you can easily integrate it into your automated testing process.</p>
+<p>The {@code lint} tool checks your Android project source files for potential bugs and
+optimization improvements for correctness, security, performance, usability, accessibility, and
+internationalization. You can run {@code lint} from the command-line or from Android Studio.</p>
 
 <p class="note"><strong>Note:</strong> In Android Studio, additional
 <a href="https://www.jetbrains.com/idea/help/inspection-basics.html?search=inspection" class="external-link"
@@ -46,15 +58,23 @@ streamline code review.</p>
 <p class="img-caption"><strong>Figure 1.</strong> Code scanning workflow with the {@code lint} tool</p>
 <dl>
 <dt><b>Application source files</b></dt>
-<dd>The source files consist of files that make up your Android project, including Java and XML files, icons, and ProGuard configuration files. </dd>
+<dd>The source files consist of files that make up your Android project, including Java and XML
+files, icons, and ProGuard configuration files. </dd>
 <dt><b>The <code>lint.xml</code> file</b></dt>
-<dd>A configuration file that you can use to specify any {@code lint} checks that you want to exclude and to customize problem severity levels.</dd>
+<dd>A configuration file that you can use to specify any {@code lint} checks that you want to
+exclude and to customize problem severity levels.</dd>
 <dt><b>The {@code lint} tool</b></dt>
-<dd>A static code scanning tool that you can run on your Android project from the command-line or Android Studio.  The {@code lint} tool checks for structural code problems that could affect the quality and performance of your Android application. It is strongly recommended that you correct any errors that {@code lint} detects before publishing your application.</dd>
+<dd>A static code scanning tool that you can run on your Android project from the command-line or
+Android Studio.  The {@code lint} tool checks for structural code problems that could affect the
+quality and performance of your Android application. It is strongly recommended that you correct any
+errors that {@code lint} detects before publishing your application.</dd>
 <dt><b>Results of {@code lint} checking</b></dt>
-<dd>You can view the results from {@code lint} in the console or in the <strong>Event Log</strong> in Android Studio.  Each issue is identified by the location in the source files where it occurred and a description of the issue.</dd>
+<dd>You can view the results from {@code lint} in the console or in the <strong>Event Log</strong>
+in Android Studio.  Each issue is identified by the location in the source files where it occurred
+and a description of the issue.</dd>
 </dl>
-<p>The {@code lint} tool is automatically installed as part of the Android SDK Tools revision 16 or higher.</p>
+<p>The {@code lint} tool is automatically installed as part of the Android SDK Tools revision 16 or
+higher.</p>
 
 
 <h2 id="studio">Running lint in Android Studio</h2>
@@ -101,14 +121,17 @@ appears so you can specify the desired inspection scope and profile.</p>
 <p>
 To run {@code lint} against a list of files in a project directory:
 <pre>lint [flags] &lt;project directory&gt;</pre>
-<p>For example, you can issue the following command to scan the files under the {@code myproject} directory and its subdirectories. The issue ID  <code>MissingPrefix</code> tells {@code lint} to only scan for XML attributes that are missing the Android namespace prefix.</p>
+<p>For example, you can issue the following command to scan the files under the {@code myproject}
+directory and its subdirectories. The issue ID  <code>MissingPrefix</code> tells {@code lint} to
+only scan for XML attributes that are missing the Android namespace prefix.</p>
 <pre>lint --check MissingPrefix myproject </pre>
 <p>To see the full list of flags and command-line arguments supported by the tool:</p>
 <pre>lint --help</pre>
 </p>
 
 <h3>Example lint output</h3>
-<p>The following example shows the console output when the {@code lint} command is run against a project called Earthquake.  </p>
+<p>The following example shows the console output when the {@code lint} command is run against a
+project called Earthquake.  </p>
 <pre>
 $ lint Earthquake
 
@@ -124,10 +147,17 @@ res/layout/preferences.xml: Warning: The resource R.layout.preferences appears t
 res: Warning: Missing density variation folders in res: drawable-xhdpi [IconMissingDensityFolder]
 0 errors, 4 warnings
 </pre>
-<p>The output above lists four warnings and no errors in this project.  Three warnings ({@code ManifestOrder}, {@code UsesMinSdkAttributes}, and {@code UsesMinSdkAttributes}) were found in the project's <code>AndroidManifest.xml</code> file. The remaining warning ({@code IconMissingDensityFolder}) was found in the <code>Preferences.xml</code> layout file.</p>
+<p>The output above lists four warnings and no errors in this project.  Three warnings
+({@code ManifestOrder}, {@code UsesMinSdkAttributes}, and {@code UnusedResources}) were found in
+the project's <code>AndroidManifest.xml</code> file. The remaining warning
+({@code IconMissingDensityFolder}) was found in the <code>Preferences.xml</code> layout file.</p>
 
 <h2 id="config">Configuring lint</h2>
-<p>By default, when you run a {@code lint} scan, the tool checks for all issues that are supported by {@code lint}.  You can also restrict the issues for {@code lint} to check and assign the severity level for those issues. For example, you can disable {@code lint} checking for specific issues that are not relevant to your project and configure {@code lint} to report non-critical issues at a lower severity level.</p>
+<p>By default, when you run a {@code lint} scan, the tool checks for all issues that are supported
+by {@code lint}.  You can also restrict the issues for {@code lint} to check and assign the severity
+level for those issues. For example, you can disable {@code lint} checking for specific issues that
+are not relevant to your project and configure {@code lint} to report non-critical issues at a lower
+severity level.</p>
 <p>You can configure {@code lint} checking at different levels:</p>
 <ul>
 <LI>Globally, for the entire project</LI>
@@ -161,23 +191,33 @@ inspections are also run whenever you build and run your Android project and mod
 
 <h4>Module and file-specific preferences</h4>
 <ol>
-<LI>Run the {@code lint} tool on your module by right-clicking on your module folder or file in the Project View and selecting  <strong>Analyze &gt; Inspect Code</strong>. This displays the {@code lint} inspection results
+<LI>Run the {@code lint} tool on your module by right-clicking on your module folder or file in the
+Project View and selecting  <strong>Analyze &gt; Inspect Code</strong>. This displays the
+{@code lint} inspection results
 with a list of issues that {@code lint} detected in your module.</LI>
-<li>From the <strong>Lint Warnings</strong> view, use the toolbar options to configure {@code lint} preferences for individual modules and files, and set the issue display options.</li>
+<li>From the <strong>Lint Warnings</strong> view, use the toolbar options to configure {@code lint}
+preferences for individual modules and files, and set the issue display options.</li>
 </ol>
 
 
 <h3 id="pref">Configuring the lint file</h3>
-<p>You can specify your {@code lint} checking preferences in the <code>lint.xml</code> file.  If you are creating this file manually, place it in the root directory of your Android project.  If you are configuring {@code lint} preferences in Android Studio, the <code>lint.xml</code> file is automatically created and added to your Android project for you.</p>
-<p>The <code>lint.xml</code> file consists of an enclosing <code>&lt;lint&gt;</code> parent tag that contains one or more children <code>&lt;issue&gt;</code> elements.  Each <code>&lt;issue&gt;</code> is identified by a unique <code>id</code> attribute value, which is defined by {@code lint}.</p>
+<p>You can specify your {@code lint} checking preferences in the <code>lint.xml</code> file.  If you
+are creating this file manually, place it in the root directory of your Android project.  If you are
+configuring {@code lint} preferences in Android Studio, the <code>lint.xml</code> file is
+automatically created and added to your Android project for you.</p>
+<p>The <code>lint.xml</code> file consists of an enclosing <code>&lt;lint&gt;</code> parent tag that
+contains one or more children <code>&lt;issue&gt;</code> elements.  Each <code>&lt;issue&gt;</code>
+is identified by a unique <code>id</code> attribute value, which is defined by {@code lint}.</p>
 <pre>
 &lt;?xml version="1.0" encoding="UTF-8"?&gt;
     &lt;lint&gt;
         &lt;!-- list of issues to configure --&gt;
 &lt;/lint&gt;
 </pre>
-<p>By setting the severity attribute value in the <code>&lt;issue&gt;</code> tag, you can disable {@code lint} checking for an issue or change the severity level for an issue.  </p>
-<p class="note"><strong>Tip: </strong>To see the full list of issues supported by the {@code lint} tool and their corresponding issue IDs, run the <code>lint --list</code> command.</p>
+<p>By setting the severity attribute value in the <code>&lt;issue&gt;</code> tag, you can disable
+{@code lint} checking for an issue or change the severity level for an issue.  </p>
+<p class="note"><strong>Tip: </strong>To see the full list of issues supported by the {@code lint}
+tool and their corresponding issue IDs, run the <code>lint --list</code> command.</p>
 
 <h4>Sample lint.xml file</h4>
 <p>The following example shows the contents of a <code>lint.xml</code> file.</p>
@@ -212,8 +252,11 @@ with a list of issues that {@code lint} detected in your module.</LI>
 </p>
 
 <h4>Configuring lint checking in Java</h4>
-<p>To disable {@code lint} checking specifically for a Java class or method in your Android project, add the <code>&#64;SuppressLint</code> annotation to that Java code. </p>
-<p>The following example shows how you can turn off {@code lint} checking for the {@code NewApi} issue in the <code>onCreate</code> method.  The {@code lint} tool continues to check for the {@code NewApi} issue in other methods of this class.</p>
+<p>To disable {@code lint} checking specifically for a Java class or method in your Android project,
+add the <code>&#64;SuppressLint</code> annotation to that Java code. </p>
+<p>The following example shows how you can turn off {@code lint} checking for the {@code NewApi}
+issue in the <code>onCreate</code> method.  The {@code lint} tool continues to check for the
+{@code NewApi} issue in other methods of this class.</p>
 <pre>
 &#64;SuppressLint("NewApi")
 &#64;Override
@@ -221,22 +264,30 @@ public void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
     setContentView(R.layout.main);
 </pre>
-<p>The following example shows how to turn off {@code lint} checking for the {@code ParserError} issue in the <code>FeedProvider</code> class:</p>
+<p>The following example shows how to turn off {@code lint} checking for the {@code ParserError}
+issue in the <code>FeedProvider</code> class:</p>
 <pre>
 &#64;SuppressLint("ParserError")
 public class FeedProvider extends ContentProvider {
 </pre>
-<p>To suppress checking for all {@code lint} issues in the Java file, use the {@code all} keyword, like this:</p>
+<p>To suppress checking for all {@code lint} issues in the Java file, use the {@code all} keyword,
+like this:</p>
 <pre>
 &#64;SuppressLint("all")
 </pre>
 
 <h4>Configuring lint checking in XML</h4>
-<p>You can use the <code>tools:ignore</code> attribute to disable {@code lint} checking for specific sections of your XML files.  In order for this attribute to be recognized by the {@code lint} tool, the following namespace value must be included in your XML file:</p>
+<p>You can use the <code>tools:ignore</code> attribute to disable {@code lint} checking for specific
+sections of your XML files.  In order for this attribute to be recognized by the {@code lint} tool,
+the following namespace value must be included in your XML file:</p>
 <pre>
 namespace xmlns:tools="http://schemas.android.com/tools"
 </pre>
-<p>The following example shows how you can turn off {@code lint} checking for the  {@code UnusedResources} issue for the <code>&lt;LinearLayout&gt;</code> element of an XML layout file.  The <code>ignore</code> attribute is inherited by the children elements of the parent element in which the attribute is declared. In this example, the {@code lint} check is also disabled for the child <code>&lt;TextView&gt;</code> element. </p>
+<p>The following example shows how you can turn off {@code lint} checking for the
+{@code UnusedResources} issue for the <code>&lt;LinearLayout&gt;</code> element of an XML layout
+file.  The <code>ignore</code> attribute is inherited by the children elements of the parent element
+in which the attribute is declared. In this example, the {@code lint} check is also disabled for the
+child <code>&lt;TextView&gt;</code> element. </p>
 <pre>
 &lt;LinearLayout 
     xmlns:android="http://schemas.android.com/apk/res/android"
@@ -247,11 +298,13 @@ namespace xmlns:tools="http://schemas.android.com/tools"
         android:text="&#64;string/auto_update_prompt" /&gt;
 &lt;/LinearLayout&gt;
 </pre>
-<p>To disable more than one issue, list the issues to disable in a comma-separated string.  For example:</p>
+<p>To disable more than one issue, list the issues to disable in a comma-separated string.  For
+example:</p>
 <pre>
 tools:ignore="NewApi,StringFormatInvalid"
 </pre>
-<p>To suppress checking for all {@code lint} issues in the XML element, use the {@code all} keyword, like this:</p>
+<p>To suppress checking for all {@code lint} issues in the XML element, use the {@code all} keyword,
+like this:</p>
 <pre>
 tools:ignore="all"
 </pre>
