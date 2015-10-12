@@ -170,7 +170,7 @@
     <string name="accessibility_recents_task_header" msgid="1437183540924535457">"<xliff:g id="APP">%1$s</xliff:g> <xliff:g id="ACTIVITY_LABEL">%2$s</xliff:g>"</string>
     <string name="accessibility_notification_dismissed" msgid="854211387186306927">"Notificació omesa."</string>
     <string name="accessibility_desc_notification_shade" msgid="4690274844447504208">"Àrea de notificacions"</string>
-    <string name="accessibility_desc_quick_settings" msgid="6186378411582437046">"Configuració ràpida."</string>
+    <string name="accessibility_desc_quick_settings" msgid="6186378411582437046">"Configuració ràpida"</string>
     <string name="accessibility_desc_lock_screen" msgid="5625143713611759164">"Pantalla de bloqueig"</string>
     <string name="accessibility_desc_settings" msgid="3417884241751434521">"Configuració"</string>
     <string name="accessibility_desc_recent_apps" msgid="4876900986661819788">"Visió general"</string>
@@ -337,7 +337,7 @@
     <string name="user_new_user_name" msgid="426540612051178753">"Usuari nou"</string>
     <string name="guest_nickname" msgid="8059989128963789678">"Convidat"</string>
     <string name="guest_new_guest" msgid="600537543078847803">"Afegeix un convidat"</string>
-    <string name="guest_exit_guest" msgid="7187359342030096885">"Suprimeix l\'usuari"</string>
+    <string name="guest_exit_guest" msgid="7187359342030096885">"Suprimeix el convidat"</string>
     <string name="guest_exit_guest_dialog_title" msgid="8480693520521766688">"Vols suprimir el convidat?"</string>
     <string name="guest_exit_guest_dialog_message" msgid="4155503224769676625">"Totes les aplicacions i les dades d\'aquesta sessió se suprimiran."</string>
     <string name="guest_exit_guest_dialog_remove" msgid="7402231963862520531">"Suprimeix"</string>

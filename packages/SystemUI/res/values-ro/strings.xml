@@ -159,7 +159,7 @@
     <string name="accessibility_gps_acquiring" msgid="8959333351058967158">"Se obţine GPS."</string>
     <string name="accessibility_tty_enabled" msgid="4613200365379426561">"TeleTypewriter activat."</string>
     <string name="accessibility_ringer_vibrate" msgid="666585363364155055">"Vibrare sonerie."</string>
-    <string name="accessibility_ringer_silent" msgid="9061243307939135383">"Sonerie silenţioasă."</string>
+    <string name="accessibility_ringer_silent" msgid="9061243307939135383">"Sonerie silențioasă."</string>
     <!-- no translation found for accessibility_casting (6887382141726543668) -->
     <skip />
     <string name="accessibility_recents_item_will_be_dismissed" msgid="395770242498031481">"Închideți <xliff:g id="APP">%s</xliff:g>."</string>
