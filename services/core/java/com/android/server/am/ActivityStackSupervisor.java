@@ -3920,7 +3920,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
         mLockTaskModeTasks.add(task);
 
         if (task.mLockTaskUid == -1) {
-            task.mLockTaskUid = task.mCallingUid;
+            task.mLockTaskUid = task.effectiveUid;
         }
 
         if (andResume) {
