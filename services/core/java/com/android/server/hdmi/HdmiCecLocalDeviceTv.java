@@ -732,6 +732,14 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
     @ServiceThreadOnly
     protected boolean handleTextViewOn(HdmiCecMessage message) {
         assertRunOnServiceThread();
+
+        // Note that <Text View On> (and <Image View On>) command won't be handled here in
+        // most cases. A dedicated microcontroller should be in charge while Android system
+        // is in sleep mode, and the command need not be passed up to this service.
+        // The only situation where the command reaches this handler is that sleep mode is
+        // implemented in such a way that Android system is not really put to standby mode
+        // but only the display is set to blank. Then the command leads to the effect of
+        // turning on the display by the invocation of PowerManager.wakeUp().
         if (mService.isPowerStandbyOrTransient() && mAutoWakeup) {
             mService.wakeUp();
         }
