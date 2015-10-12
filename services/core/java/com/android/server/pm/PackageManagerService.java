@@ -8366,6 +8366,7 @@ public class PackageManagerService extends IPackageManager.Stub {
 
         final int[] currentUserIds = UserManagerService.getInstance().getUserIds();
 
+        boolean runtimePermissionsRevoked = false;
         int[] changedRuntimePermissionUserIds = EMPTY_INT_ARRAY;
 
         boolean changedInstallPermission = false;
@@ -8375,6 +8376,17 @@ public class PackageManagerService extends IPackageManager.Stub {
             if (!ps.isSharedUser()) {
                 origPermissions = new PermissionsState(permissionsState);
                 permissionsState.reset();
+            } else {
+                // We need to know only about runtime permission changes since the
+                // calling code always writes the install permissions state but
+                // the runtime ones are written only if changed. The only cases of
+                // changed runtime permissions here are promotion of an install to
+                // runtime and revocation of a runtime from a shared user.
+                changedRuntimePermissionUserIds = revokeUnusedSharedUserPermissionsLPw(
+                        ps.sharedUser, UserManagerService.getInstance().getUserIds());
+                if (!ArrayUtils.isEmpty(changedRuntimePermissionUserIds)) {
+                    runtimePermissionsRevoked = true;
+                }
             }
         }
 
@@ -8590,9 +8602,11 @@ public class PackageManagerService extends IPackageManager.Stub {
             ps.installPermissionsFixed = true;
         }
 
-        // Persist the runtime permissions state for users with changes.
+        // Persist the runtime permissions state for users with changes. If permissions
+        // were revoked because no app in the shared user declares them we have to
+        // write synchronously to avoid losing runtime permissions state.
         for (int userId : changedRuntimePermissionUserIds) {
-            mSettings.writeRuntimePermissionsForUserLPr(userId, false);
+            mSettings.writeRuntimePermissionsForUserLPr(userId, runtimePermissionsRevoked);
         }
     }
 
@@ -12087,6 +12101,66 @@ public class PackageManagerService extends IPackageManager.Stub {
                 mSettings.writeLPr();
             }
         }
+    }
+
+    private int[] revokeUnusedSharedUserPermissionsLPw(SharedUserSetting su, int[] allUserIds) {
+        // Collect all used permissions in the UID
+        ArraySet<String> usedPermissions = new ArraySet<>();
+        final int packageCount = su.packages.size();
+        for (int i = 0; i < packageCount; i++) {
+            PackageSetting ps = su.packages.valueAt(i);
+            if (ps.pkg == null) {
+                continue;
+            }
+            final int requestedPermCount = ps.pkg.requestedPermissions.size();
+            for (int j = 0; j < requestedPermCount; j++) {
+                String permission = ps.pkg.requestedPermissions.get(j);
+                BasePermission bp = mSettings.mPermissions.get(permission);
+                if (bp != null) {
+                    usedPermissions.add(permission);
+                }
+            }
+        }
+
+        PermissionsState permissionsState = su.getPermissionsState();
+        // Prune install permissions
+        List<PermissionState> installPermStates = permissionsState.getInstallPermissionStates();
+        final int installPermCount = installPermStates.size();
+        for (int i = installPermCount - 1; i >= 0;  i--) {
+            PermissionState permissionState = installPermStates.get(i);
+            if (!usedPermissions.contains(permissionState.getName())) {
+                BasePermission bp = mSettings.mPermissions.get(permissionState.getName());
+                if (bp != null) {
+                    permissionsState.revokeInstallPermission(bp);
+                    permissionsState.updatePermissionFlags(bp, UserHandle.USER_ALL,
+                            PackageManager.MASK_PERMISSION_FLAGS, 0);
+                }
+            }
+        }
+
+        int[] runtimePermissionChangedUserIds = EmptyArray.INT;
+
+        // Prune runtime permissions
+        for (int userId : allUserIds) {
+            List<PermissionState> runtimePermStates = permissionsState
+                    .getRuntimePermissionStates(userId);
+            final int runtimePermCount = runtimePermStates.size();
+            for (int i = runtimePermCount - 1; i >= 0; i--) {
+                PermissionState permissionState = runtimePermStates.get(i);
+                if (!usedPermissions.contains(permissionState.getName())) {
+                    BasePermission bp = mSettings.mPermissions.get(permissionState.getName());
+                    if (bp != null) {
+                        permissionsState.revokeRuntimePermission(bp, userId);
+                        permissionsState.updatePermissionFlags(bp, userId,
+                                PackageManager.MASK_PERMISSION_FLAGS, 0);
+                        runtimePermissionChangedUserIds = ArrayUtils.appendInt(
+                                runtimePermissionChangedUserIds, userId);
+                    }
+                }
+            }
+        }
+
+        return runtimePermissionChangedUserIds;
     }
 
     private void updateSettingsLI(PackageParser.Package newPackage, String installerPackageName,
