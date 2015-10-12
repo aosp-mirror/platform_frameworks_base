@@ -167,8 +167,8 @@ namespace {
     }
 }
 
-int idmap_scan(const char *overlay_dir, const char *target_package_name,
-        const char *target_apk_path, const char *idmap_dir)
+int idmap_scan(const char *target_package_name, const char *target_apk_path,
+        const char *idmap_dir, const android::Vector<const char *> *overlay_dirs)
 {
     String8 filename = String8(idmap_dir);
     filename.appendPath("overlays.list");
@@ -176,44 +176,48 @@ int idmap_scan(const char *overlay_dir, const char *target_package_name,
         return EXIT_FAILURE;
     }
 
-    DIR *dir = opendir(overlay_dir);
-    if (dir == NULL) {
-        return EXIT_FAILURE;
-    }
-
     SortedVector<Overlay> overlayVector;
-    struct dirent *dirent;
-    while ((dirent = readdir(dir)) != NULL) {
-        struct stat st;
-        char overlay_apk_path[PATH_MAX + 1];
-        snprintf(overlay_apk_path, PATH_MAX, "%s/%s", overlay_dir, dirent->d_name);
-        if (stat(overlay_apk_path, &st) < 0) {
-            continue;
-        }
-        if (!S_ISREG(st.st_mode)) {
-            continue;
+    const size_t N = overlay_dirs->size();
+    for (size_t i = 0; i < N; ++i) {
+        const char *overlay_dir = overlay_dirs->itemAt(i);
+        DIR *dir = opendir(overlay_dir);
+        if (dir == NULL) {
+            return EXIT_FAILURE;
         }
 
-        int priority = parse_apk(overlay_apk_path, target_package_name);
-        if (priority < 0) {
-            continue;
+        struct dirent *dirent;
+        while ((dirent = readdir(dir)) != NULL) {
+            struct stat st;
+            char overlay_apk_path[PATH_MAX + 1];
+            snprintf(overlay_apk_path, PATH_MAX, "%s/%s", overlay_dir, dirent->d_name);
+            if (stat(overlay_apk_path, &st) < 0) {
+                continue;
+            }
+            if (!S_ISREG(st.st_mode)) {
+                continue;
+            }
+
+            int priority = parse_apk(overlay_apk_path, target_package_name);
+            if (priority < 0) {
+                continue;
+            }
+
+            String8 idmap_path(idmap_dir);
+            idmap_path.appendPath(flatten_path(overlay_apk_path + 1));
+            idmap_path.append("@idmap");
+
+            if (idmap_create_path(target_apk_path, overlay_apk_path, idmap_path.string()) != 0) {
+                ALOGE("error: failed to create idmap for target=%s overlay=%s idmap=%s\n",
+                        target_apk_path, overlay_apk_path, idmap_path.string());
+                continue;
+            }
+
+            Overlay overlay(String8(overlay_apk_path), idmap_path, priority);
+            overlayVector.add(overlay);
         }
 
-        String8 idmap_path(idmap_dir);
-        idmap_path.appendPath(flatten_path(overlay_apk_path + 1));
-        idmap_path.append("@idmap");
-
-        if (idmap_create_path(target_apk_path, overlay_apk_path, idmap_path.string()) != 0) {
-            ALOGE("error: failed to create idmap for target=%s overlay=%s idmap=%s\n",
-                    target_apk_path, overlay_apk_path, idmap_path.string());
-            continue;
-        }
-
-        Overlay overlay(String8(overlay_apk_path), idmap_path, priority);
-        overlayVector.add(overlay);
+        closedir(dir);
     }
-
-    closedir(dir);
 
     if (!writePackagesList(filename.string(), overlayVector)) {
         return EXIT_FAILURE;
