@@ -471,7 +471,7 @@ public final class Debug
        *     </tbody>
        * </table>
        */
-        public String getMemoryStat(String statName) {
+       public String getMemoryStat(String statName) {
             switch(statName) {
                 case "summary.java-heap":
                     return Integer.toString(getSummaryJavaHeap());
@@ -1538,7 +1538,13 @@ href="{@docRoot}guide/developing/tools/traceview.html">Traceview: A Graphical Lo
 
     /**
      * Retrieves information about this processes memory usages. This information is broken down by
-     * how much is in use by dalivk, the native heap, and everything else.
+     * how much is in use by dalvik, the native heap, and everything else.
+     *
+     * <p><b>Note:</b> this method directly retrieves memory information for the give process
+     * from low-level data available to it.  It may not be able to retrieve information about
+     * some protected allocations, such as graphics.  If you want to be sure you can see
+     * all information about allocations by the process, use instead
+     * {@link android.app.ActivityManager#getProcessMemoryInfo(int[])}.</p>
      */
     public static native void getMemoryInfo(MemoryInfo memoryInfo);
 
