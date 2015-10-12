@@ -83,6 +83,11 @@ public final class SignalTileView extends QSTileView {
         layoutIndicator(mOut);
     }
 
+    @Override
+    protected int getIconMeasureMode() {
+        return MeasureSpec.AT_MOST;
+    }
+
     private void layoutIndicator(View indicator) {
         boolean isRtl = getLayoutDirection() == LAYOUT_DIRECTION_RTL;
         int left, right;

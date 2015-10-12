@@ -101,7 +101,7 @@ public class TunerFragment extends PreferenceFragment {
                         }
                     }).show();
         }
-        TunerService.get(getContext()).addTunable(mQsPaging, QSPanel.QS_PAGED_PANEL);
+        TunerService.get(getContext()).addTunable(mQsPaging, QSPanel.QS_THE_NEW_QS);
     }
 
     @Override

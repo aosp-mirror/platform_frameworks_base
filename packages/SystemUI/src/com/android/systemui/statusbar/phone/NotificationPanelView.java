@@ -35,6 +35,7 @@ import android.util.MathUtils;
 import android.view.MotionEvent;
 import android.view.VelocityTracker;
 import android.view.View;
+import android.view.ViewStub;
 import android.view.ViewTreeObserver;
 import android.view.WindowInsets;
 import android.view.accessibility.AccessibilityEvent;
@@ -43,7 +44,6 @@ import android.view.animation.Interpolator;
 import android.view.animation.PathInterpolator;
 import android.widget.FrameLayout;
 import android.widget.TextView;
-
 import com.android.internal.logging.MetricsLogger;
 import com.android.keyguard.KeyguardStatusView;
 import com.android.systemui.DejankUtils;
@@ -64,6 +64,7 @@ import com.android.systemui.statusbar.policy.HeadsUpManager;
 import com.android.systemui.statusbar.policy.KeyguardUserSwitcher;
 import com.android.systemui.statusbar.stack.NotificationStackScrollLayout;
 import com.android.systemui.statusbar.stack.StackStateAnimator;
+import com.android.systemui.tuner.TunerService;
 
 import java.util.List;
 
@@ -71,7 +72,7 @@ public class NotificationPanelView extends PanelView implements
         ExpandableView.OnHeightChangedListener, ObservableScrollView.Listener,
         View.OnClickListener, NotificationStackScrollLayout.OnOverscrollTopChangedListener,
         KeyguardAffordanceHelper.Callback, NotificationStackScrollLayout.OnEmptySpaceClickListener,
-        HeadsUpManager.OnHeadsUpChangedListener {
+        HeadsUpManager.OnHeadsUpChangedListener, TunerService.Tunable {
 
     private static final boolean DEBUG = false;
 
@@ -219,10 +220,13 @@ public class NotificationPanelView extends PanelView implements
     private final Interpolator mTouchResponseInterpolator =
             new PathInterpolator(0.3f, 0f, 0.1f, 1f);
 
+    private boolean mNewQs;
+
     public NotificationPanelView(Context context, AttributeSet attrs) {
         super(context, attrs);
         setWillNotDraw(!DEBUG);
         mFalsingManager = FalsingManager.getInstance(context);
+        TunerService.get(context).addTunable(this, QSPanel.QS_THE_NEW_QS);
     }
 
     public void setStatusBar(PhoneStatusBar bar) {
@@ -230,9 +234,27 @@ public class NotificationPanelView extends PanelView implements
     }
 
     @Override
+    public void onTuningChanged(String key, String newValue) {
+        if (QSPanel.QS_THE_NEW_QS.equals(key)) {
+            boolean b = newValue != null && Integer.parseInt(newValue) != 0;
+            if (mNewQs != b) {
+                if (mHeader != null) {
+                    // We are too late, no good way to re-initialize yet, just die and come back up.
+                    android.os.Process.killProcess(android.os.Process.myPid());
+                } else {
+                    mNewQs = b;
+                }
+            }
+        }
+    }
+
+    @Override
     protected void onFinishInflate() {
         super.onFinishInflate();
-        mHeader = (BaseStatusBarHeader) findViewById(R.id.header);
+        ViewStub stub = (ViewStub) findViewById(R.id.status_bar_header);
+        stub.setLayoutResource(mNewQs
+                ? R.layout.quick_status_bar_expanded_header : R.layout.status_bar_expanded_header);
+        mHeader = (BaseStatusBarHeader) stub.inflate();
         mHeader.setOnClickListener(this);
         mKeyguardStatusBar = (KeyguardStatusBarView) findViewById(R.id.keyguard_header);
         mKeyguardStatusView = (KeyguardStatusView) findViewById(R.id.keyguard_status_view);

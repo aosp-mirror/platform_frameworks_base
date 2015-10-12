@@ -868,13 +868,15 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
                 (SignalClusterView) mHeader.findViewById(R.id.signal_cluster);
         mNetworkController.addSignalCallback(signalCluster);
         mNetworkController.addSignalCallback(signalClusterKeyguard);
-        mNetworkController.addSignalCallback(signalClusterQs);
         signalCluster.setSecurityController(mSecurityController);
         signalCluster.setNetworkController(mNetworkController);
         signalClusterKeyguard.setSecurityController(mSecurityController);
         signalClusterKeyguard.setNetworkController(mNetworkController);
-        signalClusterQs.setSecurityController(mSecurityController);
-        signalClusterQs.setNetworkController(mNetworkController);
+        if (signalClusterQs != null) {
+            mNetworkController.addSignalCallback(signalClusterQs);
+            signalClusterQs.setSecurityController(mSecurityController);
+            signalClusterQs.setNetworkController(mNetworkController);
+        }
         final boolean isAPhone = mNetworkController.hasVoiceCallingFeature();
         if (isAPhone) {
             mNetworkController.addEmergencyListener(mHeader);
