@@ -1029,7 +1029,7 @@
     <string name="adb_active_notification_message" msgid="1016654627626476142">"Toca per desactivar la depuració USB"</string>
     <string name="select_input_method" msgid="8547250819326693584">"Canvia el teclat"</string>
     <string name="configure_input_methods" msgid="4769971288371946846">"Tria els teclats"</string>
-    <string name="show_ime" msgid="9157568568695230830">"Mostra mètode d\'entrada."</string>
+    <string name="show_ime" msgid="9157568568695230830">"Mostra mètode d\'introducció"</string>
     <string name="hardware" msgid="7517821086888990278">"Maquinari"</string>
     <string name="select_keyboard_layout_notification_title" msgid="1407367017263030773">"Selecciona una disposició de teclat"</string>
     <string name="select_keyboard_layout_notification_message" msgid="4465907700449257063">"Toca per seleccionar una disposició de teclat."</string>
