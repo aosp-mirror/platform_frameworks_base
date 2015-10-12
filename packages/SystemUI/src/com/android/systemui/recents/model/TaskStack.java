@@ -16,11 +16,13 @@
 
 package com.android.systemui.recents.model;
 
+import android.animation.ObjectAnimator;
 import android.app.ActivityManager;
 import android.content.Context;
 import android.graphics.Color;
 import android.graphics.Rect;
 import android.graphics.RectF;
+import android.graphics.drawable.ColorDrawable;
 import com.android.systemui.R;
 import com.android.systemui.recents.Constants;
 import com.android.systemui.recents.misc.NamedCounter;
@@ -193,10 +195,37 @@ public class TaskStack {
         BOTTOM(DOCKED_STACK_CREATE_MODE_BOTTOM_OR_RIGHT, 192,
                 new RectF(0, 0.7f, 1, 1), new RectF(0, 0.7f, 1, 1), new RectF(0, 0, 1, 0.3f));
 
+        // Represents the view state of this dock state
+        public class ViewState {
+            public final int dockAreaAlpha;
+            public final ColorDrawable dockAreaOverlay;
+            private ObjectAnimator dockAreaOverlayAnimator;
+
+            private ViewState(int alpha) {
+                dockAreaAlpha = alpha;
+                dockAreaOverlay = new ColorDrawable(0xFFffffff);
+                dockAreaOverlay.setAlpha(0);
+            }
+
+            /**
+             * Creates a new alpha animation.
+             */
+            public void startAlphaAnimation(int alpha, int duration) {
+                if (dockAreaOverlay.getAlpha() != alpha) {
+                    if (dockAreaOverlayAnimator != null) {
+                        dockAreaOverlayAnimator.cancel();
+                    }
+                    dockAreaOverlayAnimator = ObjectAnimator.ofInt(dockAreaOverlay, "alpha", alpha);
+                    dockAreaOverlayAnimator.setDuration(duration);
+                    dockAreaOverlayAnimator.start();
+                }
+            }
+        }
+
         public final int createMode;
-        public final int dockAreaAlpha;
-        private final RectF touchArea;
+        public final ViewState viewState;
         private final RectF dockArea;
+        private final RectF touchArea;
         private final RectF stackArea;
 
         /**
@@ -207,9 +236,9 @@ public class TaskStack {
         DockState(int createMode, int dockAreaAlpha, RectF touchArea, RectF dockArea,
                 RectF stackArea) {
             this.createMode = createMode;
-            this.dockAreaAlpha = dockAreaAlpha;
-            this.touchArea = touchArea;
+            this.viewState = new ViewState(dockAreaAlpha);
             this.dockArea = dockArea;
+            this.touchArea = touchArea;
             this.stackArea = stackArea;
         }
 
