@@ -213,3 +213,27 @@ LOCAL_SRC_FILES += \
     tests/main.cpp
 
 include $(BUILD_EXECUTABLE)
+
+# ------------------------
+# Micro-bench app
+# ---------------------
+include $(CLEAR_VARS)
+
+LOCAL_MODULE_PATH := $(TARGET_OUT_DATA)/local/tmp
+LOCAL_MODULE:= hwuimicro
+LOCAL_MODULE_TAGS := tests
+LOCAL_MODULE_CLASS := EXECUTABLES
+LOCAL_MULTILIB := both
+LOCAL_MODULE_STEM_32 := hwuimicro
+LOCAL_MODULE_STEM_64 := hwuimicro64
+LOCAL_SHARED_LIBRARIES := $(hwui_shared_libraries)
+LOCAL_CFLAGS := $(hwui_cflags)
+LOCAL_C_INCLUDES += bionic/benchmarks/
+
+LOCAL_WHOLE_STATIC_LIBRARIES := libhwui_static
+LOCAL_STATIC_LIBRARIES := libbenchmark libbase
+
+LOCAL_SRC_FILES += \
+    microbench/DisplayListCanvasBench.cpp
+
+include $(BUILD_EXECUTABLE)

@@ -36,14 +36,16 @@ DisplayListData::~DisplayListData() {
 }
 
 void DisplayListData::cleanupResources() {
-    ResourceCache& resourceCache = ResourceCache::getInstance();
-    resourceCache.lock();
+    if (CC_UNLIKELY(patchResources.size())) {
+        ResourceCache& resourceCache = ResourceCache::getInstance();
+        resourceCache.lock();
 
-    for (size_t i = 0; i < patchResources.size(); i++) {
-        resourceCache.decrementRefcountLocked(patchResources[i]);
+        for (size_t i = 0; i < patchResources.size(); i++) {
+            resourceCache.decrementRefcountLocked(patchResources[i]);
+        }
+
+        resourceCache.unlock();
     }
-
-    resourceCache.unlock();
 
     for (size_t i = 0; i < pathResources.size(); i++) {
         const SkPath* path = pathResources[i];
