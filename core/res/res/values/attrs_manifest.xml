@@ -2095,6 +2095,10 @@
             <enum name="hdpi" value="240" />
             <!-- An extra high density screen, approximately 320dpi. -->
             <enum name="xhdpi" value="320" />
+            <!-- An extra extra high density screen, approximately 480dpi. -->
+            <enum name="xxhdpi" value="480" />
+            <!-- An extra extra extra high density screen, approximately 640dpi. -->
+            <enum name="xxxhdpi" value="640" />
         </attr>
     </declare-styleable>
 
