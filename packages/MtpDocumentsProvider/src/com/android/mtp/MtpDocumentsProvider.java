@@ -18,6 +18,7 @@ package com.android.mtp;
 
 import android.content.ContentResolver;
 import android.content.res.AssetFileDescriptor;
+import android.content.res.Resources;
 import android.database.Cursor;
 import android.database.MatrixCursor;
 import android.graphics.Point;
@@ -59,8 +60,8 @@ public class MtpDocumentsProvider extends DocumentsProvider {
     private MtpManager mMtpManager;
     private ContentResolver mResolver;
     private Map<Integer, DeviceToolkit> mDeviceToolkits;
-    private DocumentLoader mDocumentLoaders;
     private RootScanner mRootScanner;
+    private Resources mResources;
 
     /**
      * Provides singleton instance to MtpDocumentsService.
@@ -72,6 +73,7 @@ public class MtpDocumentsProvider extends DocumentsProvider {
     @Override
     public boolean onCreate() {
         sSingleton = this;
+        mResources = getContext().getResources();
         mMtpManager = new MtpManager(getContext());
         mResolver = getContext().getContentResolver();
         mDeviceToolkits = new HashMap<Integer, DeviceToolkit>();
@@ -80,7 +82,8 @@ public class MtpDocumentsProvider extends DocumentsProvider {
     }
 
     @VisibleForTesting
-    void onCreateForTesting(MtpManager mtpManager, ContentResolver resolver) {
+    void onCreateForTesting(Resources resources, MtpManager mtpManager, ContentResolver resolver) {
+        mResources = resources;
         mMtpManager = mtpManager;
         mResolver = resolver;
         mDeviceToolkits = new HashMap<Integer, DeviceToolkit>();
@@ -99,10 +102,8 @@ public class MtpDocumentsProvider extends DocumentsProvider {
             final MatrixCursor.RowBuilder builder = cursor.newRow();
             builder.add(Root.COLUMN_ROOT_ID, rootIdentifier.toRootId());
             builder.add(Root.COLUMN_FLAGS, Root.FLAG_SUPPORTS_IS_CHILD | Root.FLAG_SUPPORTS_CREATE);
-            builder.add(Root.COLUMN_TITLE, root.mDescription);
-            builder.add(
-                    Root.COLUMN_DOCUMENT_ID,
-                    rootIdentifier.toDocumentId());
+            builder.add(Root.COLUMN_TITLE, root.getRootName(mResources));
+            builder.add(Root.COLUMN_DOCUMENT_ID, rootIdentifier.toDocumentId());
             builder.add(Root.COLUMN_AVAILABLE_BYTES , root.mFreeSpace);
         }
         cursor.setNotificationUri(
@@ -143,7 +144,7 @@ public class MtpDocumentsProvider extends DocumentsProvider {
                 if (identifier.mStorageId != root.mStorageId)
                     continue;
                 final MatrixCursor cursor = new MatrixCursor(projection);
-                CursorHelper.addToCursor(root, cursor.newRow());
+                CursorHelper.addToCursor(mResources, root, cursor.newRow());
                 return cursor;
             }
         }

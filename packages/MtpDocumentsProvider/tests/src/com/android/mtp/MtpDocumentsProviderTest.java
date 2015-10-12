@@ -16,19 +16,21 @@
 
 package com.android.mtp;
 
+import android.content.res.Configuration;
+import android.content.res.Resources;
+import android.content.res.Resources.NotFoundException;
 import android.database.Cursor;
 import android.mtp.MtpConstants;
-import android.mtp.MtpObjectInfo.Builder;
 import android.mtp.MtpObjectInfo;
 import android.net.Uri;
 import android.provider.DocumentsContract.Root;
 import android.provider.DocumentsContract;
 import android.test.AndroidTestCase;
+import android.test.mock.MockResources;
 import android.test.suitebuilder.annotation.SmallTest;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.util.Date;
 
 @SmallTest
 public class MtpDocumentsProviderTest extends AndroidTestCase {
@@ -37,13 +39,23 @@ public class MtpDocumentsProviderTest extends AndroidTestCase {
     private TestContentResolver mResolver;
     private MtpDocumentsProvider mProvider;
     private TestMtpManager mMtpManager;
+    private final MockResources mResources = new MockResources() {
+        @Override
+        public String getString(int id) throws NotFoundException {
+            switch (id) {
+                case R.string.root_name:
+                    return "%1$s %2$s";
+            }
+            throw new NotFoundException();
+        }
+    };
 
     @Override
     public void setUp() throws IOException {
         mResolver = new TestContentResolver();
         mMtpManager = new TestMtpManager(getContext());
         mProvider = new MtpDocumentsProvider();
-        mProvider.onCreateForTesting(mMtpManager, mResolver);
+        mProvider.onCreateForTesting(mResources, mMtpManager, mResolver);
     }
 
     public void testOpenAndCloseDevice() throws Exception {
@@ -52,6 +64,7 @@ public class MtpDocumentsProviderTest extends AndroidTestCase {
                 new MtpRoot(
                         0 /* deviceId */,
                         1 /* storageId */,
+                        "Device A" /* device model name */,
                         "Storage A" /* volume description */,
                         1024 /* free space */,
                         2048 /* total space */,
@@ -86,6 +99,7 @@ public class MtpDocumentsProviderTest extends AndroidTestCase {
                 new MtpRoot(
                         0 /* deviceId */,
                         1 /* storageId */,
+                        "Device A" /* device model name */,
                         "Storage A" /* volume description */,
                         1024 /* free space */,
                         2048 /* total space */,
@@ -101,6 +115,7 @@ public class MtpDocumentsProviderTest extends AndroidTestCase {
                 new MtpRoot(
                         0 /* deviceId */,
                         1 /* storageId */,
+                        "Device A" /* device model name */,
                         "Storage A" /* volume description */,
                         1024 /* free space */,
                         2048 /* total space */,
@@ -121,6 +136,7 @@ public class MtpDocumentsProviderTest extends AndroidTestCase {
                 new MtpRoot(
                         0 /* deviceId */,
                         1 /* storageId */,
+                        "Device A" /* device model name */,
                         "Storage A" /* volume description */,
                         1024 /* free space */,
                         2048 /* total space */,
@@ -130,6 +146,7 @@ public class MtpDocumentsProviderTest extends AndroidTestCase {
                 new MtpRoot(
                         1 /* deviceId */,
                         1 /* storageId */,
+                        "Device B" /* device model name */,
                         "Storage B" /* volume description */,
                         2048 /* free space */,
                         4096 /* total space */,
@@ -146,7 +163,7 @@ public class MtpDocumentsProviderTest extends AndroidTestCase {
             assertEquals(Root.FLAG_SUPPORTS_IS_CHILD | Root.FLAG_SUPPORTS_CREATE, cursor.getInt(1));
             // TODO: Add storage icon for MTP devices.
             assertTrue(cursor.isNull(2) /* icon */);
-            assertEquals("Storage A", cursor.getString(3));
+            assertEquals("Device A Storage A", cursor.getString(3));
             assertEquals("0_1_0", cursor.getString(4));
             assertEquals(1024, cursor.getInt(5));
         }
@@ -162,7 +179,7 @@ public class MtpDocumentsProviderTest extends AndroidTestCase {
             assertEquals(Root.FLAG_SUPPORTS_IS_CHILD | Root.FLAG_SUPPORTS_CREATE, cursor.getInt(1));
             // TODO: Add storage icon for MTP devices.
             assertTrue(cursor.isNull(2) /* icon */);
-            assertEquals("Storage B", cursor.getString(3));
+            assertEquals("Device B Storage B", cursor.getString(3));
             assertEquals("1_1_0", cursor.getString(4));
             assertEquals(2048, cursor.getInt(5));
         }
@@ -183,6 +200,7 @@ public class MtpDocumentsProviderTest extends AndroidTestCase {
                 new MtpRoot(
                         1 /* deviceId */,
                         1 /* storageId */,
+                        "Device B" /* device model name */,
                         "Storage B" /* volume description */,
                         2048 /* free space */,
                         4096 /* total space */,
@@ -200,7 +218,7 @@ public class MtpDocumentsProviderTest extends AndroidTestCase {
             assertEquals(Root.FLAG_SUPPORTS_IS_CHILD | Root.FLAG_SUPPORTS_CREATE, cursor.getInt(1));
             // TODO: Add storage icon for MTP devices.
             assertTrue(cursor.isNull(2) /* icon */);
-            assertEquals("Storage B", cursor.getString(3));
+            assertEquals("Device B Storage B", cursor.getString(3));
             assertEquals("1_1_0", cursor.getString(4));
             assertEquals(2048, cursor.getInt(5));
         }
@@ -265,6 +283,7 @@ public class MtpDocumentsProviderTest extends AndroidTestCase {
                 new MtpRoot(
                         0 /* deviceId */,
                         1 /* storageId */,
+                        "Device A" /* device model name */,
                         "Storage A" /* volume description */,
                         1024 /* free space */,
                         4096 /* total space */,
@@ -276,7 +295,7 @@ public class MtpDocumentsProviderTest extends AndroidTestCase {
         cursor.moveToNext();
         assertEquals("0_1_0", cursor.getString(0));
         assertEquals(DocumentsContract.Document.MIME_TYPE_DIR, cursor.getString(1));
-        assertEquals("Storage A", cursor.getString(2));
+        assertEquals("Device A Storage A", cursor.getString(2));
         assertTrue(cursor.isNull(3));
         assertEquals(0, cursor.getInt(4));
         assertEquals(3072, cursor.getInt(5));

@@ -18,12 +18,10 @@ package com.android.mtp;
 
 import android.content.Context;
 import android.mtp.MtpObjectInfo;
-import android.mtp.MtpObjectInfo.Builder;
 import android.os.ParcelFileDescriptor;
 
 import java.io.IOException;
 import java.util.Arrays;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
