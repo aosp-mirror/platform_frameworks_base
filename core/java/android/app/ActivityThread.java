@@ -101,11 +101,13 @@ import android.view.WindowManagerGlobal;
 import android.renderscript.RenderScriptCacheDir;
 import android.security.keystore.AndroidKeyStoreProvider;
 
+import com.android.internal.annotations.GuardedBy;
 import com.android.internal.app.IVoiceInteractor;
 import com.android.internal.content.ReferrerIntent;
 import com.android.internal.os.BinderInternal;
 import com.android.internal.os.RuntimeInit;
 import com.android.internal.os.SamplingProfilerIntegration;
+import com.android.internal.os.SomeArgs;
 import com.android.internal.util.FastPrintWriter;
 import com.android.org.conscrypt.OpenSSLSocketImpl;
 import com.android.org.conscrypt.TrustedCertificateStore;
@@ -163,6 +165,7 @@ public final class ActivityThread {
     private static final boolean DEBUG_SERVICE = false;
     private static final boolean DEBUG_MEMORY_TRIM = false;
     private static final boolean DEBUG_PROVIDER = false;
+    private static final boolean DEBUG_ORDER = false;
     private static final long MIN_TIME_BETWEEN_GCS = 5*1000;
     private static final int SQLITE_MEM_RELEASED_EVENT_LOG_TAG = 75003;
     private static final int LOG_AM_ON_PAUSE_CALLED = 30021;
@@ -174,6 +177,10 @@ public final class ActivityThread {
     public static final int SERVICE_DONE_EXECUTING_START = 1;
     /** Type for IActivityManager.serviceDoneExecuting: done stopping (destroying) service */
     public static final int SERVICE_DONE_EXECUTING_STOP = 2;
+
+    // Details for pausing activity.
+    private static final int USER_LEAVING = 1;
+    private static final int DONT_REPORT = 2;
 
     private ContextImpl mSystemContext;
 
@@ -231,6 +238,12 @@ public final class ActivityThread {
     final ArrayList<ActivityClientRecord> mRelaunchingActivities
             = new ArrayList<ActivityClientRecord>();
     Configuration mPendingConfiguration = null;
+    // Because we merge activity relaunch operations we can't depend on the ordering provided by
+    // the handler messages. We need to introduce secondary ordering mechanism, which will allow
+    // us to drop certain events, if we know that they happened before relaunch we already executed.
+    // This represents the order of receiving the request from AM.
+    @GuardedBy("mResourcesManager")
+    int mLifecycleSeq = 0;
 
     private final ResourcesManager mResourcesManager;
 
@@ -318,6 +331,14 @@ public final class ActivityThread {
         Window mPendingRemoveWindow;
         WindowManager mPendingRemoveWindowManager;
         boolean mPreserveWindow;
+
+        // Set for relaunch requests, indicates the order number of the relaunch operation, so it
+        // can be compared with other lifecycle operations.
+        int relaunchSeq = 0;
+
+        // Can only be accessed from the UI thread. This represents the latest processed message
+        // that is related to lifecycle events/
+        int lastProcessedSeq = 0;
 
         ActivityClientRecord() {
             parent = null;
@@ -592,18 +613,25 @@ public final class ActivityThread {
 
         public final void schedulePauseActivity(IBinder token, boolean finished,
                 boolean userLeaving, int configChanges, boolean dontReport) {
+            int seq = getLifecycleSeq();
+            if (DEBUG_ORDER) Slog.d(TAG, "pauseActivity " + ActivityThread.this
+                    + " operation received seq: " + seq);
             sendMessage(
                     finished ? H.PAUSE_ACTIVITY_FINISHING : H.PAUSE_ACTIVITY,
                     token,
-                    (userLeaving ? 1 : 0) | (dontReport ? 2 : 0),
-                    configChanges);
+                    (userLeaving ? USER_LEAVING : 0) | (dontReport ? DONT_REPORT : 0),
+                    configChanges,
+                    seq);
         }
 
         public final void scheduleStopActivity(IBinder token, boolean showWindow,
                 int configChanges) {
-           sendMessage(
+            int seq = getLifecycleSeq();
+            if (DEBUG_ORDER) Slog.d(TAG, "stopActivity " + ActivityThread.this
+                    + " operation received seq: " + seq);
+            sendMessage(
                 showWindow ? H.STOP_ACTIVITY_SHOW : H.STOP_ACTIVITY_HIDE,
-                token, 0, configChanges);
+                token, 0, configChanges, seq);
         }
 
         public final void scheduleWindowVisibility(IBinder token, boolean showWindow) {
@@ -618,8 +646,11 @@ public final class ActivityThread {
 
         public final void scheduleResumeActivity(IBinder token, int processState,
                 boolean isForward, Bundle resumeArgs) {
+            int seq = getLifecycleSeq();
+            if (DEBUG_ORDER) Slog.d(TAG, "resumeActivity " + ActivityThread.this
+                    + " operation received seq: " + seq);
             updateProcessState(processState, false);
-            sendMessage(H.RESUME_ACTIVITY, token, isForward ? 1 : 0);
+            sendMessage(H.RESUME_ACTIVITY, token, isForward ? 1 : 0, 0, seq);
         }
 
         public final void scheduleSendResult(IBinder token, List<ResultInfo> results) {
@@ -1245,6 +1276,12 @@ public final class ActivityThread {
         }
     }
 
+    private int getLifecycleSeq() {
+        synchronized (mResourcesManager) {
+            return mLifecycleSeq++;
+        }
+    }
+
     private class H extends Handler {
         public static final int LAUNCH_ACTIVITY         = 100;
         public static final int PAUSE_ACTIVITY          = 101;
@@ -1373,29 +1410,34 @@ public final class ActivityThread {
                     handleRelaunchActivity(r);
                     Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
                 } break;
-                case PAUSE_ACTIVITY:
+                case PAUSE_ACTIVITY: {
                     Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER, "activityPause");
-                    handlePauseActivity((IBinder)msg.obj, false, (msg.arg1&1) != 0, msg.arg2,
-                            (msg.arg1&2) != 0);
+                    SomeArgs args = (SomeArgs) msg.obj;
+                    handlePauseActivity((IBinder) args.arg1, false,
+                            (args.argi1 & USER_LEAVING) != 0, args.argi2,
+                            (args.argi1 & DONT_REPORT) != 0, args.argi3);
                     maybeSnapshot();
                     Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
-                    break;
-                case PAUSE_ACTIVITY_FINISHING:
+                } break;
+                case PAUSE_ACTIVITY_FINISHING: {
                     Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER, "activityPause");
-                    handlePauseActivity((IBinder)msg.obj, true, (msg.arg1&1) != 0, msg.arg2,
-                            (msg.arg1&1) != 0);
+                    SomeArgs args = (SomeArgs) msg.obj;
+                    handlePauseActivity((IBinder) args.arg1, true, (args.argi1 & USER_LEAVING) != 0,
+                            args.argi2, (args.argi1 & DONT_REPORT) != 0, args.argi3);
                     Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
-                    break;
-                case STOP_ACTIVITY_SHOW:
+                } break;
+                case STOP_ACTIVITY_SHOW: {
                     Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER, "activityStop");
-                    handleStopActivity((IBinder)msg.obj, true, msg.arg2);
+                    SomeArgs args = (SomeArgs) msg.obj;
+                    handleStopActivity((IBinder) args.arg1, true, args.argi2, args.argi3);
                     Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
-                    break;
-                case STOP_ACTIVITY_HIDE:
+                } break;
+                case STOP_ACTIVITY_HIDE: {
                     Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER, "activityStop");
-                    handleStopActivity((IBinder)msg.obj, false, msg.arg2);
+                    SomeArgs args = (SomeArgs) msg.obj;
+                    handleStopActivity((IBinder) args.arg1, false, args.argi2, args.argi3);
                     Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
-                    break;
+                } break;
                 case SHOW_WINDOW:
                     Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER, "activityShowWindow");
                     handleWindowVisibility((IBinder)msg.obj, true);
@@ -1408,7 +1450,9 @@ public final class ActivityThread {
                     break;
                 case RESUME_ACTIVITY:
                     Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER, "activityResume");
-                    handleResumeActivity((IBinder) msg.obj, true, msg.arg1 != 0, true);
+                    SomeArgs args = (SomeArgs) msg.obj;
+                    handleResumeActivity((IBinder) args.arg1, true, args.argi1 != 0, true,
+                            args.argi3);
                     Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
                     break;
                 case SEND_RESULT:
@@ -1586,6 +1630,10 @@ public final class ActivityThread {
                 case STOP_BINDER_TRACKING_AND_DUMP:
                     handleStopBinderTrackingAndDump((ParcelFileDescriptor) msg.obj);
                     break;
+            }
+            Object obj = msg.obj;
+            if (obj instanceof SomeArgs) {
+                ((SomeArgs) obj).recycle();
             }
             if (DEBUG_MESSAGES) Slog.v(TAG, "<<< done: " + codeToString(msg.what));
         }
@@ -2311,6 +2359,21 @@ public final class ActivityThread {
         mH.sendMessage(msg);
     }
 
+    private void sendMessage(int what, Object obj, int arg1, int arg2, int seq) {
+        if (DEBUG_MESSAGES) Slog.v(
+                TAG, "SCHEDULE " + mH.codeToString(what) + " arg1=" + arg1 + " arg2=" + arg2 +
+                        "seq= " + seq);
+        Message msg = Message.obtain();
+        msg.what = what;
+        SomeArgs args = SomeArgs.obtain();
+        args.arg1 = obj;
+        args.argi1 = arg1;
+        args.argi2 = arg2;
+        args.argi3 = seq;
+        msg.obj = args;
+        mH.sendMessage(msg);
+    }
+
     final void scheduleContextCleanup(ContextImpl context, String who,
             String what) {
         ContextCleanupInfo cci = new ContextCleanupInfo();
@@ -2516,7 +2579,7 @@ public final class ActivityThread {
             reportSizeConfigurations(r);
             Bundle oldState = r.state;
             handleResumeActivity(r.token, false, r.isForward,
-                    !r.activity.mFinished && !r.startsNotResumed);
+                    !r.activity.mFinished && !r.startsNotResumed, r.lastProcessedSeq);
 
             if (!r.activity.mFinished && r.startsNotResumed) {
                 // The activity manager actually wants this one to start out
@@ -3216,14 +3279,19 @@ public final class ActivityThread {
     }
 
     final void handleResumeActivity(IBinder token,
-            boolean clearHide, boolean isForward, boolean reallyResume) {
+            boolean clearHide, boolean isForward, boolean reallyResume, int seq) {
+        ActivityClientRecord r = mActivities.get(token);
+        if (!checkAndUpdateLifecycleSeq(seq, r, "resumeActivity")) {
+            return;
+        }
+
         // If we are getting ready to gc after going to the background, well
         // we are back active so skip it.
         unscheduleGcIdler();
         mSomeActivitiesChanged = true;
 
         // TODO Push resumeArgs into the activity for consideration
-        ActivityClientRecord r = performResumeActivity(token, clearHide);
+        r = performResumeActivity(token, clearHide);
 
         if (r != null) {
             final Activity a = r.activity;
@@ -3400,8 +3468,11 @@ public final class ActivityThread {
     }
 
     private void handlePauseActivity(IBinder token, boolean finished,
-            boolean userLeaving, int configChanges, boolean dontReport) {
+            boolean userLeaving, int configChanges, boolean dontReport, int seq) {
         ActivityClientRecord r = mActivities.get(token);
+        if (!checkAndUpdateLifecycleSeq(seq, r, "pauseActivity")) {
+            return;
+        }
         if (r != null) {
             //Slog.v(TAG, "userLeaving=" + userLeaving + " handling pause of " + r);
             if (userLeaving) {
@@ -3639,8 +3710,11 @@ public final class ActivityThread {
         }
     }
 
-    private void handleStopActivity(IBinder token, boolean show, int configChanges) {
+    private void handleStopActivity(IBinder token, boolean show, int configChanges, int seq) {
         ActivityClientRecord r = mActivities.get(token);
+        if (!checkAndUpdateLifecycleSeq(seq, r, "stopActivity")) {
+            return;
+        }
         r.activity.mConfigChangeFlags |= configChanges;
 
         StopInfo info = new StopInfo();
@@ -3667,6 +3741,20 @@ public final class ActivityThread {
         info.persistentState = r.persistentState;
         mH.post(info);
         mSomeActivitiesChanged = true;
+    }
+
+    private static boolean checkAndUpdateLifecycleSeq(int seq, ActivityClientRecord r,
+            String action) {
+        if (r == null) {
+            return true;
+        }
+        if (seq < r.lastProcessedSeq) {
+            if (DEBUG_ORDER) Slog.d(TAG, action + " for " + r + " ignored, because seq=" + seq
+                    + " < mCurrentLifecycleSeq=" + r.lastProcessedSeq);
+            return false;
+        }
+        r.lastProcessedSeq = seq;
+        return true;
     }
 
     final void performRestartActivity(IBinder token) {
@@ -4070,7 +4158,10 @@ public final class ActivityThread {
                 target.overrideConfig = overrideConfig;
             }
             target.pendingConfigChanges |= configChanges;
+            target.relaunchSeq = getLifecycleSeq();
         }
+        if (DEBUG_ORDER) Slog.d(TAG, "relaunchActivity " + ActivityThread.this
+                + " operation received seq: " + target.relaunchSeq);
     }
 
     private void handleRelaunchActivity(ActivityClientRecord tmp) {
@@ -4115,6 +4206,12 @@ public final class ActivityThread {
             }
         }
 
+        if (tmp.lastProcessedSeq > tmp.relaunchSeq) {
+            Slog.wtf(TAG, "For some reason target: " + tmp + " has lower sequence: "
+                    + tmp.relaunchSeq + " than current sequence: " + tmp.lastProcessedSeq);
+        } else {
+            tmp.lastProcessedSeq = tmp.relaunchSeq;
+        }
         if (tmp.createdConfig != null) {
             // If the activity manager is passing us its current config,
             // assume that is really what we want regardless of what we
@@ -4148,6 +4245,8 @@ public final class ActivityThread {
         r.activity.mConfigChangeFlags |= configChanges;
         r.onlyLocalRequest = tmp.onlyLocalRequest;
         r.mPreserveWindow = tmp.mPreserveWindow;
+        r.lastProcessedSeq = tmp.lastProcessedSeq;
+        r.relaunchSeq = tmp.relaunchSeq;
         Intent currentIntent = r.activity.mIntent;
 
         r.activity.mChangingConfigurations = true;
