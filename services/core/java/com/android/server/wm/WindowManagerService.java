@@ -6875,6 +6875,8 @@ public class WindowManagerService extends IWindowManager.Stub
         WindowState win = null;
         synchronized (mWindowMap) {
             win = windowForClientLocked(null, window, false);
+            // win shouldn't be null here, pass it down to startPositioningLocked
+            // to get warning if it's null.
             if (!startPositioningLocked(win, false /*resize*/, startX, startY)) {
                 return false;
             }
@@ -6889,7 +6891,7 @@ public class WindowManagerService extends IWindowManager.Stub
         WindowState win = null;
         synchronized (mWindowMap) {
             win = displayContent.findWindowForControlPoint(startX, startY);
-            if (!startPositioningLocked(win, true /*resize*/, startX, startY)) {
+            if (win == null || !startPositioningLocked(win, true /*resize*/, startX, startY)) {
                 return;
             }
         }
