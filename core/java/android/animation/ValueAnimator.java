@@ -126,12 +126,6 @@ public class ValueAnimator extends Animator implements AnimationHandler.Animatio
             new AccelerateDecelerateInterpolator();
 
     /**
-     * Used to indicate whether the animation is currently playing in reverse. This causes the
-     * elapsed fraction to be inverted to calculate the appropriate values.
-     */
-    private boolean mPlayingBackwards = false;
-
-    /**
      * Flag to indicate whether this animator is playing in reverse mode, specifically
      * by being started or interrupted by a call to reverse(). This flag is different than
      * mPlayingBackwards, which indicates merely whether the current iteration of the
@@ -141,13 +135,13 @@ public class ValueAnimator extends Animator implements AnimationHandler.Animatio
     private boolean mReversing;
 
     /**
-     * This variable tracks the current iteration that is playing. When mCurrentIteration exceeds the
-     * repeatCount (if repeatCount!=INFINITE), the animation ends
+     * Tracks the overall fraction of the animation, ranging from 0 to mRepeatCount + 1
      */
-    private int mCurrentIteration = 0;
+    private float mOverallFraction = 0f;
 
     /**
      * Tracks current elapsed/eased fraction, for querying in getAnimatedFraction().
+     * This is calculated by interpolating the fraction (range: [0, 1]) in the current iteration.
      */
     private float mCurrentFraction = 0f;
 
@@ -195,12 +189,12 @@ public class ValueAnimator extends Animator implements AnimationHandler.Animatio
     //
 
     // How long the animation should last in ms
-    private long mUnscaledDuration = 300;
-    private long mDuration = (long)(mUnscaledDuration * sDurationScale);
+    private long mDuration = 300;
 
-    // The amount of time in ms to delay starting the animation after start() is called
-    long mStartDelay = 0;
-    private long mUnscaledStartDelay = 0;
+    // The amount of time in ms to delay starting the animation after start() is called. Note
+    // that this start delay is unscaled. When there is a duration scale set on the animator, the
+    // scaling factor will be applied to this delay.
+    private long mStartDelay = 0;
 
     // The number of times the animation will repeat. The default is 0, which means the animation
     // will play only once
@@ -524,13 +518,12 @@ public class ValueAnimator extends Animator implements AnimationHandler.Animatio
             throw new IllegalArgumentException("Animators cannot have negative duration: " +
                     duration);
         }
-        mUnscaledDuration = duration;
-        updateScaledDuration();
+        mDuration = duration;
         return this;
     }
 
-    private void updateScaledDuration() {
-        mDuration = (long)(mUnscaledDuration * sDurationScale);
+    private long getScaledDuration() {
+        return (long)(mDuration * sDurationScale);
     }
 
     /**
@@ -540,7 +533,7 @@ public class ValueAnimator extends Animator implements AnimationHandler.Animatio
      */
     @Override
     public long getDuration() {
-        return mUnscaledDuration;
+        return mDuration;
     }
 
     /**
@@ -551,7 +544,7 @@ public class ValueAnimator extends Animator implements AnimationHandler.Animatio
         if (mRepeatCount == INFINITE) {
             return DURATION_INFINITE;
         } else {
-            return mUnscaledStartDelay + (mUnscaledDuration * (mRepeatCount + 1));
+            return mStartDelay + (mDuration * (mRepeatCount + 1));
         }
     }
 
@@ -566,7 +559,7 @@ public class ValueAnimator extends Animator implements AnimationHandler.Animatio
      * @param playTime The time, in milliseconds, to which the animation is advanced or rewound.
      */
     public void setCurrentPlayTime(long playTime) {
-        float fraction = mUnscaledDuration > 0 ? (float) playTime / mUnscaledDuration : 1;
+        float fraction = mDuration > 0 ? (float) playTime / mDuration : 1;
         setCurrentFraction(fraction);
     }
 
@@ -589,37 +582,82 @@ public class ValueAnimator extends Animator implements AnimationHandler.Animatio
      */
     public void setCurrentFraction(float fraction) {
         initAnimation();
-        if (fraction < 0) {
-            fraction = 0;
-        }
-        int iteration = (int) fraction;
-        if (fraction == 1) {
-            iteration -= 1;
-        } else if (fraction > 1) {
-            if (iteration < (mRepeatCount + 1) || mRepeatCount == INFINITE) {
-                if (mRepeatMode == REVERSE) {
-                    mPlayingBackwards = (iteration % 2) != 0;
-                }
-                fraction = fraction % 1f;
-            } else {
-                fraction = 1;
-                iteration -= 1;
-            }
-        } else {
-            mPlayingBackwards = mReversing;
-        }
-        mCurrentIteration = iteration;
-        long seekTime = (long) (mDuration * fraction);
+        fraction = clampFraction(fraction);
+        long seekTime = (long) (getScaledDuration() * fraction);
         long currentTime = AnimationUtils.currentAnimationTimeMillis();
         mStartTime = currentTime - seekTime;
         mStartTimeCommitted = true; // do not allow start time to be compensated for jank
         if (!mRunning) {
             mSeekFraction = fraction;
         }
-        if (mPlayingBackwards) {
-            fraction = 1f - fraction;
+        mOverallFraction = fraction;
+        final float currentIterationFraction = getCurrentIterationFraction(fraction);
+        animateValue(currentIterationFraction);
+    }
+
+    /**
+     * Calculates current iteration based on the overall fraction. The overall fraction will be
+     * in the range of [0, mRepeatCount + 1]. Both current iteration and fraction in the current
+     * iteration can be derived from it.
+     */
+    private int getCurrentIteration(float fraction) {
+        fraction = clampFraction(fraction);
+        // If the overall fraction is a positive integer, we consider the current iteration to be
+        // complete. In other words, the fraction for the current iteration would be 1, and the
+        // current iteration would be overall fraction - 1.
+        double iteration = Math.floor(fraction);
+        if (fraction == iteration && fraction > 0) {
+            iteration--;
         }
-        animateValue(fraction);
+        return (int) iteration;
+    }
+
+    /**
+     * Calculates the fraction of the current iteration, taking into account whether the animation
+     * should be played backwards. E.g. When the animation is played backwards in an iteration,
+     * the fraction for that iteration will go from 1f to 0f.
+     */
+    private float getCurrentIterationFraction(float fraction) {
+        fraction = clampFraction(fraction);
+        int iteration = getCurrentIteration(fraction);
+        float currentFraction = fraction - iteration;
+        return shouldPlayBackward(iteration) ? 1f - currentFraction : currentFraction;
+    }
+
+    /**
+     * Clamps fraction into the correct range: [0, mRepeatCount + 1]. If repeat count is infinite,
+     * no upper bound will be set for the fraction.
+     *
+     * @param fraction fraction to be clamped
+     * @return fraction clamped into the range of [0, mRepeatCount + 1]
+     */
+    private float clampFraction(float fraction) {
+        if (fraction < 0) {
+            fraction = 0;
+        } else if (mRepeatCount != INFINITE) {
+            fraction = Math.min(fraction, mRepeatCount + 1);
+        }
+        return fraction;
+    }
+
+    /**
+     * Calculates the direction of animation playing (i.e. forward or backward), based on 1)
+     * whether the entire animation is being reversed, 2) repeat mode applied to the current
+     * iteration.
+     */
+    private boolean shouldPlayBackward(int iteration) {
+        if (iteration > 0 && mRepeatMode == REVERSE &&
+                (iteration < (mRepeatCount + 1) || mRepeatCount == INFINITE)) {
+            // if we were seeked to some other iteration in a reversing animator,
+            // figure out the correct direction to start playing based on the iteration
+            if (mReversing) {
+                return (iteration % 2) == 0;
+            } else {
+                return (iteration % 2) != 0;
+            }
+        } else {
+            return mReversing;
+        }
     }
 
     /**
@@ -636,9 +674,10 @@ public class ValueAnimator extends Animator implements AnimationHandler.Animatio
             return 0;
         }
         if (mSeekFraction >= 0) {
-            return (long) (mUnscaledDuration * mSeekFraction);
+            return (long) (mDuration * mSeekFraction);
         }
-        return AnimationUtils.currentAnimationTimeMillis() - mStartTime;
+        float durationScale = sDurationScale == 0 ? 1 : sDurationScale;
+        return (long) ((AnimationUtils.currentAnimationTimeMillis() - mStartTime) / durationScale);
     }
 
     /**
@@ -649,7 +688,7 @@ public class ValueAnimator extends Animator implements AnimationHandler.Animatio
      */
     @Override
     public long getStartDelay() {
-        return mUnscaledStartDelay;
+        return mStartDelay;
     }
 
     /**
@@ -660,8 +699,7 @@ public class ValueAnimator extends Animator implements AnimationHandler.Animatio
      */
     @Override
     public void setStartDelay(long startDelay) {
-        this.mStartDelay = (long)(startDelay * sDurationScale);
-        mUnscaledStartDelay = startDelay;
+        mStartDelay = startDelay;
     }
 
     /**
@@ -907,40 +945,27 @@ public class ValueAnimator extends Animator implements AnimationHandler.Animatio
             throw new AndroidRuntimeException("Animators may only be run on Looper threads");
         }
         mReversing = playBackwards;
-        mPlayingBackwards = playBackwards;
-        if (playBackwards && mSeekFraction != -1) {
-            if (mSeekFraction == 0 && mCurrentIteration == 0) {
-                // special case: reversing from seek-to-0 should act as if not seeked at all
-                mSeekFraction = 0;
-            } else if (mRepeatCount == INFINITE) {
-                mSeekFraction = 1 - (mSeekFraction % 1);
+        // Special case: reversing from seek-to-0 should act as if not seeked at all.
+        if (playBackwards && mSeekFraction != -1 && mSeekFraction != 0) {
+            if (mRepeatCount == INFINITE) {
+                // Calculate the fraction of the current iteration.
+                float fraction = (float) (mSeekFraction - Math.floor(mSeekFraction));
+                mSeekFraction = 1 - fraction;
             } else {
-                mSeekFraction = 1 + mRepeatCount - (mCurrentIteration + mSeekFraction);
-            }
-            mCurrentIteration = (int) mSeekFraction;
-            mSeekFraction = mSeekFraction % 1;
-        }
-        if (mCurrentIteration > 0 && mRepeatMode == REVERSE &&
-                (mCurrentIteration < (mRepeatCount + 1) || mRepeatCount == INFINITE)) {
-            // if we were seeked to some other iteration in a reversing animator,
-            // figure out the correct direction to start playing based on the iteration
-            if (playBackwards) {
-                mPlayingBackwards = (mCurrentIteration % 2) == 0;
-            } else {
-                mPlayingBackwards = (mCurrentIteration % 2) != 0;
+                mSeekFraction = 1 + mRepeatCount - mSeekFraction;
             }
         }
         mStarted = true;
         mPaused = false;
         mRunning = false;
         mAnimationEndRequested = false;
-        updateScaledDuration(); // in case the scale factor has changed since creation time
         AnimationHandler animationHandler = AnimationHandler.getInstance();
-        animationHandler.addAnimationFrameCallback(this, mStartDelay);
+        animationHandler.addAnimationFrameCallback(this, (long) (mStartDelay * sDurationScale));
 
         if (mStartDelay == 0) {
             // If there's no start delay, init the animation and notify start listeners right away
-            // Otherwise, postpone this until the first frame after the start delay.
+            // to be consistent with the previous behavior. Otherwise, postpone this until the first
+            // frame after the start delay.
             startAnimation();
             setCurrentFraction(mSeekFraction == -1 ? 0 : mSeekFraction);
         }
@@ -993,7 +1018,7 @@ public class ValueAnimator extends Animator implements AnimationHandler.Animatio
         } else if (!mInitialized) {
             initAnimation();
         }
-        animateValue(mPlayingBackwards ? 0f : 1f);
+        animateValue(shouldPlayBackward(mRepeatCount) ? 0f : 1f);
         endAnimation();
     }
 
@@ -1034,11 +1059,10 @@ public class ValueAnimator extends Animator implements AnimationHandler.Animatio
      */
     @Override
     public void reverse() {
-        mPlayingBackwards = !mPlayingBackwards;
         if (mRunning) {
             long currentTime = AnimationUtils.currentAnimationTimeMillis();
             long currentPlayTime = currentTime - mStartTime;
-            long timeLeft = mDuration - currentPlayTime;
+            long timeLeft = getScaledDuration() - currentPlayTime;
             mStartTime = currentTime - timeLeft;
             mStartTimeCommitted = true; // do not allow start time to be compensated for jank
             mReversing = !mReversing;
@@ -1085,10 +1109,8 @@ public class ValueAnimator extends Animator implements AnimationHandler.Animatio
         mRunning = false;
         mStarted = false;
         mStartListenersCalled = false;
-        mPlayingBackwards = false;
         mReversing = false;
         mLastFrameTime = 0;
-        mCurrentIteration = 0;
         if (Trace.isTagEnabled(Trace.TRACE_TAG_VIEW)) {
             Trace.asyncTraceEnd(Trace.TRACE_TAG_VIEW, getNameForTrace(),
                     System.identityHashCode(this));
@@ -1106,6 +1128,11 @@ public class ValueAnimator extends Animator implements AnimationHandler.Animatio
         }
         initAnimation();
         mRunning = true;
+        if (mSeekFraction >= 0) {
+            mOverallFraction = mSeekFraction;
+        } else {
+            mOverallFraction = 0f;
+        }
         if (mListeners != null) {
             notifyStartListeners();
         }
@@ -1151,40 +1178,26 @@ public class ValueAnimator extends Animator implements AnimationHandler.Animatio
     boolean animateBasedOnTime(long currentTime) {
         boolean done = false;
         if (mRunning) {
-            float fraction = mDuration > 0 ? (float)(currentTime - mStartTime) / mDuration : 1f;
-            if (mDuration == 0 && mRepeatCount != INFINITE) {
-                // Skip to the end
-                mCurrentIteration = mRepeatCount;
-                if (!mReversing) {
-                    mPlayingBackwards = false;
-                }
-            }
-            if (fraction >= 1f) {
-                if (mCurrentIteration < mRepeatCount || mRepeatCount == INFINITE) {
-                    // Time to repeat
-                    if (mListeners != null) {
-                        int numListeners = mListeners.size();
-                        for (int i = 0; i < numListeners; ++i) {
-                            mListeners.get(i).onAnimationRepeat(this);
-                        }
+            final float fraction = getScaledDuration() > 0 ?
+                    (float)(currentTime - mStartTime) / getScaledDuration() : 1f;
+            final float lastFraction = mOverallFraction;
+            final boolean newIteration = (int) fraction > (int) lastFraction;
+            final boolean lastIterationFinished = (fraction >= mRepeatCount + 1) &&
+                    (mRepeatCount != INFINITE);
+            if (newIteration && !lastIterationFinished) {
+                // Time to repeat
+                if (mListeners != null) {
+                    int numListeners = mListeners.size();
+                    for (int i = 0; i < numListeners; ++i) {
+                        mListeners.get(i).onAnimationRepeat(this);
                     }
-                    if (mRepeatMode == REVERSE) {
-                        mPlayingBackwards = !mPlayingBackwards;
-                    }
-                    mCurrentIteration += (int) fraction;
-                    fraction = fraction % 1f;
-                    mStartTime += mDuration;
-                    // Note: We do not need to update the value of mStartTimeCommitted here
-                    // since we just added a duration offset.
-                } else {
-                    done = true;
-                    fraction = Math.min(fraction, 1.0f);
                 }
+            } else if (lastIterationFinished) {
+                done = true;
             }
-            if (mPlayingBackwards) {
-                fraction = 1f - fraction;
-            }
-            animateValue(fraction);
+            mOverallFraction = clampFraction(fraction);
+            float currentIterationFraction = getCurrentIterationFraction(mOverallFraction);
+            animateValue(currentIterationFraction);
         }
         return done;
     }
@@ -1207,7 +1220,7 @@ public class ValueAnimator extends Animator implements AnimationHandler.Animatio
             if (mSeekFraction < 0) {
                 mStartTime = frameTime;
             } else {
-                long seekTime = (long) (mDuration * mSeekFraction);
+                long seekTime = (long) (getScaledDuration() * mSeekFraction);
                 mStartTime = frameTime - seekTime;
                 mSeekFraction = -1;
             }
@@ -1285,9 +1298,7 @@ public class ValueAnimator extends Animator implements AnimationHandler.Animatio
             anim.mUpdateListeners = new ArrayList<AnimatorUpdateListener>(mUpdateListeners);
         }
         anim.mSeekFraction = -1;
-        anim.mPlayingBackwards = false;
         anim.mReversing = false;
-        anim.mCurrentIteration = 0;
         anim.mInitialized = false;
         anim.mStarted = false;
         anim.mRunning = false;
@@ -1299,6 +1310,7 @@ public class ValueAnimator extends Animator implements AnimationHandler.Animatio
         anim.mAnimationEndRequested = false;
         anim.mPauseTime = 0;
         anim.mLastFrameTime = 0;
+        anim.mOverallFraction = 0;
         anim.mCurrentFraction = 0;
 
         PropertyValuesHolder[] oldValues = mValues;
