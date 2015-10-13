@@ -16,6 +16,7 @@
 
 package com.android.layoutlib.bridge.android;
 
+import android.os.ResultReceiver;
 import com.android.SdkConstants;
 import com.android.ide.common.rendering.api.AssetRepository;
 import com.android.ide.common.rendering.api.ILayoutPullParser;
@@ -1113,6 +1114,11 @@ public final class BridgeContext extends Context {
                 @Override
                 public void dumpAsync(FileDescriptor fd, String[] args) throws RemoteException {
 
+                }
+
+                @Override
+                public void shellCommand(FileDescriptor in, FileDescriptor out, FileDescriptor err,
+                        String[] args, ResultReceiver resultReceiver) {
                 }
 
                 @Override
