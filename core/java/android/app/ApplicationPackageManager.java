@@ -1646,7 +1646,8 @@ public class ApplicationPackageManager extends PackageManager {
             return false;
         }
         if (!forceAllowOnExternal
-                && app.installLocation == PackageInfo.INSTALL_LOCATION_INTERNAL_ONLY) {
+                && (app.installLocation == PackageInfo.INSTALL_LOCATION_INTERNAL_ONLY
+                        || app.installLocation == PackageInfo.INSTALL_LOCATION_UNSPECIFIED)) {
             return false;
         }
 
