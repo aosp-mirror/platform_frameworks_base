@@ -108,6 +108,7 @@ import android.net.LinkProperties;
 import android.net.NetworkIdentity;
 import android.net.NetworkInfo;
 import android.net.NetworkPolicy;
+import android.net.NetworkPolicyManager;
 import android.net.NetworkQuotaInfo;
 import android.net.NetworkState;
 import android.net.NetworkTemplate;
