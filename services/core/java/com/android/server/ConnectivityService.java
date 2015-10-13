@@ -3212,6 +3212,11 @@ public class ConnectivityService extends IConnectivityManager.Stub
             final String profileName = new String(mKeyStore.get(Credentials.LOCKDOWN_VPN));
             final VpnProfile profile = VpnProfile.decode(
                     profileName, mKeyStore.get(Credentials.VPN + profileName));
+            if (profile == null) {
+                Slog.e(TAG, "Lockdown VPN configured invalid profile " + profileName);
+                setLockdownTracker(null);
+                return true;
+            }
             int user = UserHandle.getUserId(Binder.getCallingUid());
             synchronized(mVpns) {
                 setLockdownTracker(new LockdownVpnTracker(mContext, mNetd, this, mVpns.get(user),
