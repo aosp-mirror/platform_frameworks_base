@@ -3228,9 +3228,16 @@ public final class ActivityStackSupervisor implements DisplayListener {
             // Apps may depend on onResume()/onPause() being called in pairs.
             if (wasResumed) {
                 stack.mResumedActivity = r;
+                // Move the stack in which we are placing the task to the front. We don't use
+                // ActivityManagerService.setFocusedActivityLocked, because if the activity is
+                // already focused, the call will short-circuit and do nothing.
+                stack.moveToFront(reason);
+            } else {
+                // We need to not only move the stack to the front, but also have the activity
+                // focused. This will achieve both goals.
+                mService.setFocusedActivityLocked(r, reason);
             }
-            // move the stack in which we are placing the task to the front.
-            stack.moveToFront(reason);
+
         }
 
         return stack;
