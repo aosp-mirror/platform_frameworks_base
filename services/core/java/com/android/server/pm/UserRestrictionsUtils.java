@@ -86,7 +86,6 @@ public class UserRestrictionsUtils {
             String tag) throws IOException {
         serializer.startTag(null, tag);
         for (String key : USER_RESTRICTIONS) {
-            //
             if (restrictions.getBoolean(key)
                     && !NON_PERSIST_USER_RESTRICTIONS.contains(key)) {
                 serializer.attribute(null, key, "true");
@@ -105,6 +104,17 @@ public class UserRestrictionsUtils {
         }
     }
 
+    public static void merge(Bundle dest, Bundle in) {
+        if (in == null) {
+            return;
+        }
+        for (String key : in.keySet()) {
+            if (in.getBoolean(key, false)) {
+                dest.putBoolean(key, true);
+            }
+        }
+    }
+
     public static void dumpRestrictions(PrintWriter pw, String prefix, Bundle restrictions) {
         boolean noneSet = true;
         if (restrictions != null) {
@@ -114,9 +124,11 @@ public class UserRestrictionsUtils {
                     noneSet = false;
                 }
             }
-        }
-        if (noneSet) {
-            pw.println(prefix + "none");
+            if (noneSet) {
+                pw.println(prefix + "none");
+            }
+        } else {
+            pw.println(prefix + "null");
         }
     }
 }

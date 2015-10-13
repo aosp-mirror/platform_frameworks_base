@@ -211,11 +211,14 @@ public class UserManagerTest extends AndroidTestCase {
 
     public void testRestrictions() {
         UserInfo testUser = createUser("User 1", 0);
-        Bundle restrictions = new Bundle();
-        restrictions.putBoolean(UserManager.DISALLOW_INSTALL_APPS, true);
-        restrictions.putBoolean(UserManager.DISALLOW_CONFIG_WIFI, false);
-        mUserManager.setUserRestrictions(restrictions, new UserHandle(testUser.id));
+
+        mUserManager.setUserRestriction(
+                UserManager.DISALLOW_INSTALL_APPS, true, new UserHandle(testUser.id));
+        mUserManager.setUserRestriction(
+                UserManager.DISALLOW_CONFIG_WIFI, false, new UserHandle(testUser.id));
+
         Bundle stored = mUserManager.getUserRestrictions(new UserHandle(testUser.id));
+        // Note this will fail if DO already sets those restrictions.
         assertEquals(stored.getBoolean(UserManager.DISALLOW_CONFIG_WIFI), false);
         assertEquals(stored.getBoolean(UserManager.DISALLOW_UNINSTALL_APPS), false);
         assertEquals(stored.getBoolean(UserManager.DISALLOW_INSTALL_APPS), true);
