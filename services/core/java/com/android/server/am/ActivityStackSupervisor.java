@@ -2973,10 +2973,18 @@ public final class ActivityStackSupervisor implements DisplayListener {
         }
     }
 
-    void resizeStackLocked(int stackId, Rect bounds, boolean preserveWindows) {
+    void resizeStackLocked(int stackId, Rect bounds, boolean preserveWindows,
+            boolean allowResizeInDockedMode) {
         final ActivityStack stack = getStack(stackId);
         if (stack == null) {
             Slog.w(TAG, "resizeStack: stackId " + stackId + " not found.");
+            return;
+        }
+
+        if (!allowResizeInDockedMode
+                && stackId != DOCKED_STACK_ID && getStack(DOCKED_STACK_ID) != null) {
+            // If the docked stack exist we don't allow resizes of stacks not caused by the docked
+            // stack size changing so things don't get out of sync.
             return;
         }
 
@@ -3014,7 +3022,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
                 // docked stack tasks to the fullscreen stack.
                 for (int i = FIRST_STATIC_STACK_ID; i <= LAST_STATIC_STACK_ID; i++) {
                     if (i != DOCKED_STACK_ID && getStack(i) != null) {
-                        resizeStackLocked(i, null, preserveWindows);
+                        resizeStackLocked(i, null, preserveWindows, true);
                     }
                 }
 
@@ -3029,23 +3037,15 @@ public final class ActivityStackSupervisor implements DisplayListener {
             } else {
                 // Docked stacks occupy a dedicated region on screen so the size of all other
                 // static stacks need to be adjusted so they don't overlap with the docked stack.
-                final int leftChange = stack.mBounds.left - bounds.left;
-                final int rightChange = stack.mBounds.right - bounds.right;
-                final int topChange = stack.mBounds.top - bounds.top;
-                final int bottomChange = stack.mBounds.bottom - bounds.bottom;
+                // We get the bounds to use from window manager which has been adjusted for any
+                // screen controls and is also the same for all stacks.
+                mWindowManager.getStackDockedModeBounds(HOME_STACK_ID, tempRect);
 
                 for (int i = FIRST_STATIC_STACK_ID; i <= LAST_STATIC_STACK_ID; i++) {
                     if (i != DOCKED_STACK_ID) {
                         ActivityStack otherStack = getStack(i);
                         if (otherStack != null) {
-                            tempRect.set(otherStack.mBounds);
-                            // We adjust the opposing sides of the other stacks to
-                            // the side in the dock stack that changed.
-                            tempRect.left -= rightChange;
-                            tempRect.right -= leftChange;
-                            tempRect.top -= bottomChange;
-                            tempRect.bottom -= topChange;
-                            resizeStackLocked(i, tempRect, PRESERVE_WINDOWS);
+                            resizeStackLocked(i, tempRect, PRESERVE_WINDOWS, true);
                         }
                     }
                 }

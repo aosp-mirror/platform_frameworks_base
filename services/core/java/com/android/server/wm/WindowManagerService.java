@@ -4617,6 +4617,17 @@ public class WindowManagerService extends IWindowManager.Stub
         }
     }
 
+    public void getStackDockedModeBounds(int stackId, Rect bounds) {
+        synchronized (mWindowMap) {
+            final TaskStack stack = mStackIdToStack.get(stackId);
+            if (stack != null) {
+                stack.getStackDockedModeBoundsLocked(bounds);
+                return;
+            }
+            bounds.setEmpty();
+        }
+    }
+
     public void getStackBounds(int stackId, Rect bounds) {
         synchronized (mWindowMap) {
             final TaskStack stack = mStackIdToStack.get(stackId);
@@ -7779,7 +7790,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 break;
                 case RESIZE_STACK: {
                     try {
-                        mActivityManager.resizeStack(msg.arg1, (Rect) msg.obj);
+                        mActivityManager.resizeStack(msg.arg1, (Rect) msg.obj, msg.arg2 == 1);
                     } catch (RemoteException e) {
                         // This will not happen since we are in the same process.
                     }
