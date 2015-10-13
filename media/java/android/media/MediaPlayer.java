@@ -2243,10 +2243,14 @@ public class MediaPlayer implements SubtitleController.Listener
         final InputStream fIs = is;
         final MediaFormat fFormat = format;
 
-        // Ensure all input streams are closed.  It is also a handy
-        // way to implement timeouts in the future.
-        synchronized(mOpenSubtitleSources) {
-            mOpenSubtitleSources.add(is);
+        if (is != null) {
+            // Ensure all input streams are closed.  It is also a handy
+            // way to implement timeouts in the future.
+            synchronized(mOpenSubtitleSources) {
+                mOpenSubtitleSources.add(is);
+            }
+        } else {
+            Log.w(TAG, "addSubtitleSource called with null InputStream");
         }
 
         // process each subtitle in its own thread
