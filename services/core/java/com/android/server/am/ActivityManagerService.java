@@ -14054,8 +14054,8 @@ public final class ActivityManagerService extends ActivityManagerNative
         pw.print(": ");
         pw.print(name);
         pw.print(" (");
-        pw.print(mProcessList.getMemLevel(adj)/1024);
-        pw.println(" kB)");
+        pw.print(stringifySize(mProcessList.getMemLevel(adj), 1024));
+        pw.println(")");
     }
 
     boolean dumpOomLocked(FileDescriptor fd, PrintWriter pw, String[] args,
@@ -14836,7 +14836,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         for (int i=0; i<items.size(); i++) {
             MemItem mi = items.get(i);
             if (!isCompact) {
-                pw.print(prefix); pw.printf("%7d kB: ", mi.pss); pw.println(mi.label);
+                pw.printf("%s%s: %s\n", prefix, stringifyKBSize(mi.pss), mi.label);
             } else if (mi.isProc) {
                 pw.print("proc,"); pw.print(tag); pw.print(","); pw.print(mi.shortLabel);
                 pw.print(","); pw.print(mi.id); pw.print(","); pw.print(mi.pss);
@@ -14912,7 +14912,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             // short checkin version
             pw.print("time,"); pw.print(uptime); pw.print(","); pw.println(realtime);
         } else {
-            pw.println("Applications Memory Usage (kB):");
+            pw.println("Applications Memory Usage (in Kilobytes):");
             pw.println("Uptime: " + uptime + " Realtime: " + realtime);
         }
     }
@@ -14944,6 +14944,26 @@ public final class ActivityManagerService extends ActivityManagerNative
                 SINGLE_LONG_FORMAT, null, longTmp, null);
         longOut[KSM_VOLATILE] = longTmp[0] * ProcessList.PAGE_SIZE / 1024;
         return longOut;
+    }
+
+    private static String stringifySize(long size, int order) {
+        Locale locale = Locale.US;
+        switch (order) {
+            case 1:
+                return String.format(locale, "%,13d", size);
+            case 1024:
+                return String.format(locale, "%,9dK", size / 1024);
+            case 1024 * 1024:
+                return String.format(locale, "%,5dM", size / 1024 / 1024);
+            case 1024 * 1024 * 1024:
+                return String.format(locale, "%,1dG", size / 1024 / 1024 / 1024);
+            default:
+                throw new IllegalArgumentException("Invalid size order");
+        }
+    }
+
+    private static String stringifyKBSize(long size) {
+        return stringifySize(size * 1024, 1024);
     }
 
     final void dumpApplicationMemoryUsage(FileDescriptor fd,
@@ -15299,8 +15319,8 @@ public final class ActivityManagerService extends ActivityManagerNative
             }
             if (!brief) {
                 if (!isCompact) {
-                    pw.print("Total RAM: "); pw.print(memInfo.getTotalSizeKb());
-                    pw.print(" kB (status ");
+                    pw.print("Total RAM: "); pw.print(stringifyKBSize(memInfo.getTotalSizeKb()));
+                    pw.print(" (status ");
                     switch (mLastMemoryLevel) {
                         case ProcessStats.ADJ_MEM_FACTOR_NORMAL:
                             pw.println("normal)");
@@ -15319,11 +15339,16 @@ public final class ActivityManagerService extends ActivityManagerNative
                             pw.println(")");
                             break;
                     }
-                    pw.print(" Free RAM: "); pw.print(cachedPss + memInfo.getCachedSizeKb()
-                            + memInfo.getFreeSizeKb()); pw.print(" kB (");
-                            pw.print(cachedPss); pw.print(" cached pss + ");
-                            pw.print(memInfo.getCachedSizeKb()); pw.print(" cached kernel + ");
-                            pw.print(memInfo.getFreeSizeKb()); pw.println(" free)");
+                    pw.print(" Free RAM: ");
+                    pw.print(stringifyKBSize(cachedPss + memInfo.getCachedSizeKb()
+                            + memInfo.getFreeSizeKb()));
+                    pw.print(" (");
+                    pw.print(stringifyKBSize(cachedPss));
+                    pw.print(" cached pss + ");
+                    pw.print(stringifyKBSize(memInfo.getCachedSizeKb()));
+                    pw.print(" cached kernel + ");
+                    pw.print(stringifyKBSize(memInfo.getFreeSizeKb()));
+                    pw.println(" free)");
                 } else {
                     pw.print("ram,"); pw.print(memInfo.getTotalSizeKb()); pw.print(",");
                     pw.print(cachedPss + memInfo.getCachedSizeKb()
@@ -15332,24 +15357,25 @@ public final class ActivityManagerService extends ActivityManagerNative
                 }
             }
             if (!isCompact) {
-                pw.print(" Used RAM: "); pw.print(totalPss - cachedPss
-                        + memInfo.getKernelUsedSizeKb()); pw.print(" kB (");
-                        pw.print(totalPss - cachedPss); pw.print(" used pss + ");
-                        pw.print(memInfo.getKernelUsedSizeKb()); pw.print(" kernel)\n");
-                pw.print(" Lost RAM: "); pw.print(memInfo.getTotalSizeKb()
+                pw.print(" Used RAM: "); pw.print(stringifyKBSize(totalPss - cachedPss
+                        + memInfo.getKernelUsedSizeKb())); pw.print(" (");
+                pw.print(stringifyKBSize(totalPss - cachedPss)); pw.print(" used pss + ");
+                pw.print(stringifyKBSize(memInfo.getKernelUsedSizeKb())); pw.print(" kernel)\n");
+                pw.print(" Lost RAM: "); pw.println(stringifyKBSize(memInfo.getTotalSizeKb()
                         - totalPss - memInfo.getFreeSizeKb() - memInfo.getCachedSizeKb()
-                        - memInfo.getKernelUsedSizeKb()); pw.println(" kB");
+                        - memInfo.getKernelUsedSizeKb()));
             }
             if (!brief) {
                 if (memInfo.getZramTotalSizeKb() != 0) {
                     if (!isCompact) {
-                        pw.print("     ZRAM: "); pw.print(memInfo.getZramTotalSizeKb());
-                                pw.print(" kB physical used for ");
-                                pw.print(memInfo.getSwapTotalSizeKb()
-                                        - memInfo.getSwapFreeSizeKb());
-                                pw.print(" kB in swap (");
-                                pw.print(memInfo.getSwapTotalSizeKb());
-                                pw.println(" kB total swap)");
+                        pw.print("     ZRAM: ");
+                        pw.print(stringifyKBSize(memInfo.getZramTotalSizeKb()));
+                                pw.print(" physical used for ");
+                                pw.print(stringifyKBSize(memInfo.getSwapTotalSizeKb()
+                                        - memInfo.getSwapFreeSizeKb()));
+                                pw.print(" in swap (");
+                                pw.print(stringifyKBSize(memInfo.getSwapTotalSizeKb()));
+                                pw.println(" total swap)");
                     } else {
                         pw.print("zram,"); pw.print(memInfo.getZramTotalSizeKb()); pw.print(",");
                                 pw.print(memInfo.getSwapTotalSizeKb()); pw.print(",");
@@ -15360,23 +15386,23 @@ public final class ActivityManagerService extends ActivityManagerNative
                 if (!isCompact) {
                     if (ksm[KSM_SHARING] != 0 || ksm[KSM_SHARED] != 0 || ksm[KSM_UNSHARED] != 0
                             || ksm[KSM_VOLATILE] != 0) {
-                        pw.print("      KSM: "); pw.print(ksm[KSM_SHARING]);
-                                pw.print(" kB saved from shared ");
-                                pw.print(ksm[KSM_SHARED]); pw.println(" kB");
-                        pw.print("           "); pw.print(ksm[KSM_UNSHARED]);
-                                pw.print(" kB unshared; ");
-                                pw.print(ksm[KSM_VOLATILE]); pw.println(" kB volatile");
+                        pw.print("      KSM: "); pw.print(stringifyKBSize(ksm[KSM_SHARING]));
+                                pw.print(" saved from shared ");
+                                pw.print(stringifyKBSize(ksm[KSM_SHARED]));
+                        pw.print("           "); pw.print(stringifyKBSize(ksm[KSM_UNSHARED]));
+                                pw.print(" unshared; ");
+                                pw.print(stringifyKBSize(
+                                             ksm[KSM_VOLATILE])); pw.println(" volatile");
                     }
                     pw.print("   Tuning: ");
                     pw.print(ActivityManager.staticGetMemoryClass());
                     pw.print(" (large ");
                     pw.print(ActivityManager.staticGetLargeMemoryClass());
                     pw.print("), oom ");
-                    pw.print(mProcessList.getMemLevel(ProcessList.CACHED_APP_MAX_ADJ)/1024);
-                    pw.print(" kB");
+                    pw.print(stringifySize(
+                                mProcessList.getMemLevel(ProcessList.CACHED_APP_MAX_ADJ), 1024));
                     pw.print(", restore limit ");
-                    pw.print(mProcessList.getCachedRestoreThresholdKb());
-                    pw.print(" kB");
+                    pw.print(stringifyKBSize(mProcessList.getCachedRestoreThresholdKb()));
                     if (ActivityManager.isLowRamDeviceStatic()) {
                         pw.print(" (low-ram)");
                     }
@@ -15414,12 +15440,12 @@ public final class ActivityManagerService extends ActivityManagerNative
         sb.append(ProcessList.makeProcStateString(procState));
         sb.append(' ');
         ProcessList.appendRamKb(sb, pss);
-        sb.append(" kB: ");
+        sb.append(": ");
         sb.append(name);
         if (memtrack > 0) {
             sb.append(" (");
-            sb.append(memtrack);
-            sb.append(" kB memtrack)");
+            sb.append(stringifyKBSize(memtrack));
+            sb.append(" memtrack)");
         }
     }
 
@@ -15573,11 +15599,11 @@ public final class ActivityManagerService extends ActivityManagerNative
 
         fullJavaBuilder.append("           ");
         ProcessList.appendRamKb(fullJavaBuilder, totalPss);
-        fullJavaBuilder.append(" kB: TOTAL");
+        fullJavaBuilder.append(": TOTAL");
         if (totalMemtrack > 0) {
             fullJavaBuilder.append(" (");
-            fullJavaBuilder.append(totalMemtrack);
-            fullJavaBuilder.append(" kB memtrack)");
+            fullJavaBuilder.append(stringifyKBSize(totalMemtrack));
+            fullJavaBuilder.append(" memtrack)");
         } else {
         }
         fullJavaBuilder.append("\n");
@@ -15589,47 +15615,54 @@ public final class ActivityManagerService extends ActivityManagerNative
         StringBuilder memInfoBuilder = new StringBuilder(1024);
         Debug.getMemInfo(infos);
         memInfoBuilder.append("  MemInfo: ");
-        memInfoBuilder.append(infos[Debug.MEMINFO_SLAB]).append(" kB slab, ");
-        memInfoBuilder.append(infos[Debug.MEMINFO_SHMEM]).append(" kB shmem, ");
-        memInfoBuilder.append(infos[Debug.MEMINFO_VM_ALLOC_USED]).append(" kB vm alloc, ");
-        memInfoBuilder.append(infos[Debug.MEMINFO_PAGE_TABLES]).append(" kB page tables ");
-        memInfoBuilder.append(infos[Debug.MEMINFO_KERNEL_STACK]).append(" kB kernel stack\n");
+        memInfoBuilder.append(stringifyKBSize(infos[Debug.MEMINFO_SLAB])).append(" slab, ");
+        memInfoBuilder.append(stringifyKBSize(infos[Debug.MEMINFO_SHMEM])).append(" shmem, ");
+        memInfoBuilder.append(stringifyKBSize(
+                                  infos[Debug.MEMINFO_VM_ALLOC_USED])).append(" vm alloc, ");
+        memInfoBuilder.append(stringifyKBSize(
+                                  infos[Debug.MEMINFO_PAGE_TABLES])).append(" page tables ");
+        memInfoBuilder.append(stringifyKBSize(
+                                  infos[Debug.MEMINFO_KERNEL_STACK])).append(" kernel stack\n");
         memInfoBuilder.append("           ");
-        memInfoBuilder.append(infos[Debug.MEMINFO_BUFFERS]).append(" kB buffers, ");
-        memInfoBuilder.append(infos[Debug.MEMINFO_CACHED]).append(" kB cached, ");
-        memInfoBuilder.append(infos[Debug.MEMINFO_MAPPED]).append(" kB mapped, ");
-        memInfoBuilder.append(infos[Debug.MEMINFO_FREE]).append(" kB free\n");
+        memInfoBuilder.append(stringifyKBSize(infos[Debug.MEMINFO_BUFFERS])).append(" buffers, ");
+        memInfoBuilder.append(stringifyKBSize(infos[Debug.MEMINFO_CACHED])).append(" cached, ");
+        memInfoBuilder.append(stringifyKBSize(infos[Debug.MEMINFO_MAPPED])).append(" mapped, ");
+        memInfoBuilder.append(stringifyKBSize(infos[Debug.MEMINFO_FREE])).append(" free\n");
         if (infos[Debug.MEMINFO_ZRAM_TOTAL] != 0) {
             memInfoBuilder.append("  ZRAM: ");
-            memInfoBuilder.append(infos[Debug.MEMINFO_ZRAM_TOTAL]);
-            memInfoBuilder.append(" kB RAM, ");
-            memInfoBuilder.append(infos[Debug.MEMINFO_SWAP_TOTAL]);
-            memInfoBuilder.append(" kB swap total, ");
-            memInfoBuilder.append(infos[Debug.MEMINFO_SWAP_FREE]);
-            memInfoBuilder.append(" kB swap free\n");
+            memInfoBuilder.append(stringifyKBSize(infos[Debug.MEMINFO_ZRAM_TOTAL]));
+            memInfoBuilder.append(" RAM, ");
+            memInfoBuilder.append(stringifyKBSize(infos[Debug.MEMINFO_SWAP_TOTAL]));
+            memInfoBuilder.append(" swap total, ");
+            memInfoBuilder.append(stringifyKBSize(infos[Debug.MEMINFO_SWAP_FREE]));
+            memInfoBuilder.append(" swap free\n");
         }
         final long[] ksm = getKsmInfo();
         if (ksm[KSM_SHARING] != 0 || ksm[KSM_SHARED] != 0 || ksm[KSM_UNSHARED] != 0
                 || ksm[KSM_VOLATILE] != 0) {
-            memInfoBuilder.append("  KSM: "); memInfoBuilder.append(ksm[KSM_SHARING]);
-            memInfoBuilder.append(" kB saved from shared ");
-            memInfoBuilder.append(ksm[KSM_SHARED]); memInfoBuilder.append(" kB\n");
-            memInfoBuilder.append("       "); memInfoBuilder.append(ksm[KSM_UNSHARED]);
-            memInfoBuilder.append(" kB unshared; ");
-            memInfoBuilder.append(ksm[KSM_VOLATILE]); memInfoBuilder.append(" kB volatile\n");
+            memInfoBuilder.append("  KSM: ");
+            memInfoBuilder.append(stringifyKBSize(ksm[KSM_SHARING]));
+            memInfoBuilder.append(" saved from shared ");
+            memInfoBuilder.append(stringifyKBSize(ksm[KSM_SHARED]));
+            memInfoBuilder.append("\n       ");
+            memInfoBuilder.append(stringifyKBSize(ksm[KSM_UNSHARED]));
+            memInfoBuilder.append(" unshared; ");
+            memInfoBuilder.append(stringifyKBSize(ksm[KSM_VOLATILE]));
+            memInfoBuilder.append(" volatile\n");
         }
         memInfoBuilder.append("  Free RAM: ");
-        memInfoBuilder.append(cachedPss + memInfo.getCachedSizeKb()
-                + memInfo.getFreeSizeKb());
-        memInfoBuilder.append(" kB\n");
+        memInfoBuilder.append(stringifyKBSize(cachedPss + memInfo.getCachedSizeKb()
+                + memInfo.getFreeSizeKb()));
+        memInfoBuilder.append("\n");
         memInfoBuilder.append("  Used RAM: ");
-        memInfoBuilder.append(totalPss - cachedPss + memInfo.getKernelUsedSizeKb());
-        memInfoBuilder.append(" kB\n");
+        memInfoBuilder.append(stringifyKBSize(
+                                  totalPss - cachedPss + memInfo.getKernelUsedSizeKb()));
+        memInfoBuilder.append("\n");
         memInfoBuilder.append("  Lost RAM: ");
-        memInfoBuilder.append(memInfo.getTotalSizeKb()
+        memInfoBuilder.append(stringifyKBSize(memInfo.getTotalSizeKb()
                 - totalPss - memInfo.getFreeSizeKb() - memInfo.getCachedSizeKb()
-                - memInfo.getKernelUsedSizeKb());
-        memInfoBuilder.append(" kB\n");
+                - memInfo.getKernelUsedSizeKb()));
+        memInfoBuilder.append("\n");
         Slog.i(TAG, "Low on memory:");
         Slog.i(TAG, shortNativeBuilder.toString());
         Slog.i(TAG, fullJavaBuilder.toString());
