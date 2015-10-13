@@ -187,12 +187,19 @@ final class DisplayPowerState {
     }
 
     /**
-     * Dismisses the electron beam surface.
+     * Dismisses the color fade surface.
      */
     public void dismissColorFade() {
         mColorFade.dismiss();
         mColorFadePrepared = false;
         mColorFadeReady = true;
+    }
+
+   /**
+     * Dismisses the color fade resources.
+     */
+    public void dismissColorFadeResources() {
+        mColorFade.dismissResources();
     }
 
     /**
