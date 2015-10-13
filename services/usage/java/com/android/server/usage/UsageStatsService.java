@@ -314,6 +314,8 @@ public class UsageStatsService extends SystemService implements
                 mAppIdleParoled = paroled;
                 if (DEBUG) Slog.d(TAG, "Changing paroled to " + mAppIdleParoled);
                 if (paroled) {
+                    postParoleEndTimeout();
+                } else {
                     mLastAppIdleParoledTime = checkAndGetTimeLocked();
                     postNextParoleTimeout();
                 }
@@ -404,8 +406,6 @@ public class UsageStatsService extends SystemService implements
                 if (timeSinceLastParole > mAppIdleParoleIntervalMillis) {
                     if (DEBUG) Slog.d(TAG, "Crossed default parole interval");
                     setAppIdleParoled(true);
-                    // Make sure it ends at some point
-                    postParoleEndTimeout();
                 } else {
                     if (DEBUG) Slog.d(TAG, "Not long enough to go to parole");
                     postNextParoleTimeout();
@@ -492,7 +492,6 @@ public class UsageStatsService extends SystemService implements
             if (!deviceIdle
                     && timeSinceLastParole >= mAppIdleParoleIntervalMillis) {
                 if (DEBUG) Slog.i(TAG, "Bringing idle apps out of inactive state due to deviceIdleMode=false");
-                postNextParoleTimeout();
                 setAppIdleParoled(true);
             } else if (deviceIdle) {
                 if (DEBUG) Slog.i(TAG, "Device idle, back to prison");
