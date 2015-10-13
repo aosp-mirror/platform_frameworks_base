@@ -16,6 +16,8 @@
 
 package com.android.systemui.recents.views;
 
+import static android.app.ActivityManager.INVALID_STACK_ID;
+
 import android.app.ActivityManager;
 import android.app.ActivityOptions;
 import android.content.Context;
@@ -185,7 +187,8 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
                 TaskView tv = taskViews.get(j);
                 Task task = tv.getTask();
                 if (tv.isFocusedTask()) {
-                    onTaskViewClicked(mTaskStackView, tv, stack, task, false, false, null);
+                    onTaskViewClicked(mTaskStackView, tv, stack, task, false, false, null,
+                            INVALID_STACK_ID);
                     return true;
                 }
             }
@@ -194,7 +197,7 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
     }
 
     /** Launches a given task. */
-    public boolean launchTask(Task task, Rect taskBounds) {
+    public boolean launchTask(Task task, Rect taskBounds, int destinationStack) {
         if (mTaskStackView != null) {
             TaskStack stack = mTaskStackView.getStack();
             // Iterate the stack views and try and find the given task.
@@ -204,7 +207,7 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
                 TaskView tv = taskViews.get(j);
                 if (tv.getTask() == task) {
                     onTaskViewClicked(mTaskStackView, tv, stack, task, false, taskBounds != null,
-                            taskBounds);
+                            taskBounds, destinationStack);
                     return true;
                 }
             }
@@ -226,7 +229,8 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
                     if (tasks.get(j).isLaunchTarget) {
                         Task task = tasks.get(j);
                         TaskView tv = mTaskStackView.getChildViewForTask(task);
-                        onTaskViewClicked(mTaskStackView, tv, stack, task, false, false, null);
+                        onTaskViewClicked(mTaskStackView, tv, stack, task, false, false, null,
+                                INVALID_STACK_ID);
                         return true;
                     }
                 }
@@ -451,12 +455,13 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
     private void postDrawHeaderThumbnailTransitionRunnable(final TaskStackView view,
             final TaskView clickedView, final int offsetX, final int offsetY,
             final float stackScroll,
-            final ActivityOptions.OnAnimationStartedListener animStartedListener) {
+            final ActivityOptions.OnAnimationStartedListener animStartedListener,
+            final int destinationStack) {
         Runnable r = new Runnable() {
             @Override
             public void run() {
                 overrideDrawHeaderThumbnailTransition(view, clickedView, offsetX, offsetY,
-                        stackScroll, animStartedListener);
+                        stackScroll, animStartedListener, destinationStack);
 
             }
         };
@@ -466,9 +471,10 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
 
     private void overrideDrawHeaderThumbnailTransition(TaskStackView stackView,
             TaskView clickedTask, int offsetX, int offsetY, float stackScroll,
-            final ActivityOptions.OnAnimationStartedListener animStartedListener) {
+            final ActivityOptions.OnAnimationStartedListener animStartedListener,
+            int destinationStack) {
         List<AppTransitionAnimationSpec> specs = getAppTransitionAnimationSpecs(stackView,
-                clickedTask, offsetX, offsetY, stackScroll);
+                clickedTask, offsetX, offsetY, stackScroll, destinationStack);
         if (specs == null) {
             return;
         }
@@ -499,8 +505,10 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
     }
 
     private List<AppTransitionAnimationSpec> getAppTransitionAnimationSpecs(TaskStackView stackView,
-            TaskView clickedTask, int offsetX, int offsetY, float stackScroll) {
-        final int targetStackId = clickedTask.getTask().key.stackId;
+            TaskView clickedTask, int offsetX, int offsetY, float stackScroll,
+            int destinationStack) {
+        final int targetStackId = destinationStack != INVALID_STACK_ID ?
+                destinationStack : clickedTask.getTask().key.stackId;
         if (targetStackId != ActivityManager.FREEFORM_WORKSPACE_STACK_ID
                 && targetStackId != ActivityManager.FULLSCREEN_WORKSPACE_STACK_ID) {
             return null;
@@ -604,9 +612,8 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
 
     @Override
     public void onTaskViewClicked(final TaskStackView stackView, final TaskView tv,
-                                  final TaskStack stack, final Task task, final boolean lockToTask,
-                                  final boolean boundsValid, final Rect bounds) {
-
+            final TaskStack stack, final Task task, final boolean lockToTask,
+            final boolean boundsValid, final Rect bounds, int destinationStack) {
         // Notify any callbacks of the launching of a new task
         if (mCb != null) {
             mCb.onTaskViewClicked();
@@ -654,7 +661,7 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
                 };
             }
             postDrawHeaderThumbnailTransitionRunnable(stackView, tv, offsetX, offsetY, stackScroll,
-                    animStartedListener);
+                    animStartedListener, destinationStack);
             opts = ActivityOptions.makeThumbnailAspectScaleUpAnimation(sourceView,
                     Bitmap.createBitmap(1, 1, Bitmap.Config.ALPHA_8).createAshmemBitmap(),
                     offsetX, offsetY, transform.rect.width(), transform.rect.height(),
@@ -810,7 +817,7 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
                     SystemServicesProxy ssp = RecentsTaskLoader.getInstance().getSystemServicesProxy();
                     ssp.setTaskResizeable(event.task.key.id);
                     ssp.dockTask(event.task.key.id, event.dockState.createMode);
-                    launchTask(event.task, null);
+                    launchTask(event.task, null, INVALID_STACK_ID);
                 }
             }
         });

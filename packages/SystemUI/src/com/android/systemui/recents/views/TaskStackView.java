@@ -16,7 +16,10 @@
 
 package com.android.systemui.recents.views;
 
+import static android.app.ActivityManager.INVALID_STACK_ID;
+
 import android.animation.ValueAnimator;
+import android.app.ActivityManager;
 import android.content.ComponentName;
 import android.content.Context;
 import android.graphics.Canvas;
@@ -59,7 +62,7 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
     /** The TaskView callbacks */
     interface TaskStackViewCallbacks {
         public void onTaskViewClicked(TaskStackView stackView, TaskView tv, TaskStack stack, Task t,
-                                      boolean lockToTask, boolean boundsValid, Rect bounds);
+                boolean lockToTask, boolean boundsValid, Rect bounds, int destinationStack);
         public void onAllTaskViewsDismissed(ArrayList<Task> removedTasks);
         public void onTaskStackFilterTriggered();
         public void onTaskStackUnfilterTriggered();
@@ -1227,7 +1230,8 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
         mUIDozeTrigger.stopDozing();
 
         if (mCb != null) {
-            mCb.onTaskViewClicked(this, tv, mStack, task, lockToTask, false, null);
+            mCb.onTaskViewClicked(this, tv, mStack, task, lockToTask, false, null,
+                    INVALID_STACK_ID);
         }
     }
 

@@ -16,6 +16,9 @@
 
 package com.android.systemui.recents;
 
+import static android.app.ActivityManager.DOCKED_STACK_ID;
+import static android.app.ActivityManager.FREEFORM_WORKSPACE_STACK_ID;
+
 import android.app.ActivityManager;
 import android.app.AlertDialog;
 import android.app.Dialog;
@@ -245,7 +248,7 @@ public class RecentsResizeTaskDialog extends DialogFragment {
         // the focus ends on the selected one.
         for (int i = additionalTasks; i >= 0; --i) {
             if (mTasks[i] != null) {
-                mRecentsView.launchTask(mTasks[i], mBounds[i]);
+                mRecentsView.launchTask(mTasks[i], mBounds[i], FREEFORM_WORKSPACE_STACK_ID);
             }
         }
     }
@@ -273,11 +276,11 @@ public class RecentsResizeTaskDialog extends DialogFragment {
         // Dismiss the dialog before trying to launch the task
         dismissAllowingStateLoss();
 
-        if (mTasks[0].key.stackId != ActivityManager.DOCKED_STACK_ID) {
+        if (mTasks[0].key.stackId != DOCKED_STACK_ID) {
             int taskId = mTasks[0].key.id;
             mSsp.setTaskResizeable(taskId);
             mSsp.dockTask(taskId, createMode);
-            mRecentsView.launchTask(mTasks[0], null);
+            mRecentsView.launchTask(mTasks[0], null, DOCKED_STACK_ID);
         } else {
             Toast.makeText(getContext(), "Already docked", Toast.LENGTH_SHORT);
         }
