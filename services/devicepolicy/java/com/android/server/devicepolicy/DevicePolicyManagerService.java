@@ -3700,7 +3700,10 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             return;
         }
         enforceCrossUserPermission(userHandle);
-        enforceNotManagedProfile(userHandle, "set the active password");
+        // Managed Profile password can only be changed when file based encryption is present.
+        if (!"file".equals(SystemProperties.get("ro.crypto.type", "none"))) {
+            enforceNotManagedProfile(userHandle, "set the active password");
+        }
 
         mContext.enforceCallingOrSelfPermission(
                 android.Manifest.permission.BIND_DEVICE_ADMIN, null);
