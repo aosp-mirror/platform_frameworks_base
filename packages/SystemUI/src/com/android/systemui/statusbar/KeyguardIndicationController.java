@@ -200,12 +200,12 @@ public class KeyguardIndicationController {
         switch (mChargingSpeed) {
             case KeyguardUpdateMonitor.BatteryStatus.CHARGING_FAST:
                 chargingId = hasChargingTime
-                        ? R.string.keyguard_indication_charging_time_fast_if_translated
+                        ? R.string.keyguard_indication_charging_time_fast
                         : R.string.keyguard_plugged_in_charging_fast;
                 break;
             case KeyguardUpdateMonitor.BatteryStatus.CHARGING_SLOWLY:
                 chargingId = hasChargingTime
-                        ? R.string.keyguard_indication_charging_time_slowly_if_translated
+                        ? R.string.keyguard_indication_charging_time_slowly
                         : R.string.keyguard_plugged_in_charging_slowly;
                 break;
             default:
