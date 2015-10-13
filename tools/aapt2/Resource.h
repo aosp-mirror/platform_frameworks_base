@@ -78,6 +78,9 @@ struct ResourceName {
     ResourceType type;
     std::u16string entry;
 
+    ResourceName() = default;
+    ResourceName(const StringPiece16& p, ResourceType t, const StringPiece16& e);
+
     bool isValid() const;
     bool operator<(const ResourceName& rhs) const;
     bool operator==(const ResourceName& rhs) const;
@@ -225,6 +228,10 @@ inline ::std::ostream& operator<<(::std::ostream& out, const ResourceType& val) 
 //
 // ResourceName implementation.
 //
+
+inline ResourceName::ResourceName(const StringPiece16& p, ResourceType t, const StringPiece16& e) :
+        package(p.toString()), type(t), entry(e.toString()) {
+}
 
 inline bool ResourceName::isValid() const {
     return !package.empty() && !entry.empty();

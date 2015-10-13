@@ -31,13 +31,24 @@
 
 namespace aapt {
 
+struct ParsedResource;
+
+struct ResourceParserOptions {
+    /**
+     * Optional product name by which to filter resources.
+     * This is like a preprocessor definition in that we strip out resources
+     * that don't match before we compile them.
+     */
+    Maybe<std::u16string> product;
+};
+
 /*
  * Parses an XML file for resources and adds them to a ResourceTable.
  */
 class ResourceParser {
 public:
     ResourceParser(IDiagnostics* diag, ResourceTable* table, const Source& source,
-                   const ConfigDescription& config);
+                   const ConfigDescription& config, const ResourceParserOptions& options = {});
 
     ResourceParser(const ResourceParser&) = delete; // No copy.
 
@@ -62,25 +73,24 @@ private:
     std::unique_ptr<Item> parseXml(XmlPullParser* parser, uint32_t typeMask, bool allowRawValue);
 
     bool parseResources(XmlPullParser* parser);
-    bool parseString(XmlPullParser* parser, const ResourceNameRef& resourceName);
-    bool parseColor(XmlPullParser* parser, const ResourceNameRef& resourceName);
-    bool parsePrimitive(XmlPullParser* parser, const ResourceNameRef& resourceName);
-    bool parsePublic(XmlPullParser* parser, const StringPiece16& name);
-    bool parseAttr(XmlPullParser* parser, const ResourceNameRef& resourceName);
-    std::unique_ptr<Attribute> parseAttrImpl(XmlPullParser* parser,
-                                             ResourceName* resourceName,
-                                             bool weak);
+    bool parseString(XmlPullParser* parser, ParsedResource* outResource);
+    bool parseColor(XmlPullParser* parser, ParsedResource* outResource);
+    bool parsePrimitive(XmlPullParser* parser, ParsedResource* outResource);
+    bool parsePublic(XmlPullParser* parser, ParsedResource* outResource);
+    bool parseAttr(XmlPullParser* parser, ParsedResource* outResource);
+    bool parseAttrImpl(XmlPullParser* parser, ParsedResource* outResource, bool weak);
     Maybe<Attribute::Symbol> parseEnumOrFlagItem(XmlPullParser* parser, const StringPiece16& tag);
-    bool parseStyle(XmlPullParser* parser, const ResourceNameRef& resourceName);
+    bool parseStyle(XmlPullParser* parser, ParsedResource* outResource);
     bool parseStyleItem(XmlPullParser* parser, Style* style);
-    bool parseDeclareStyleable(XmlPullParser* parser, const ResourceNameRef& resourceName);
-    bool parseArray(XmlPullParser* parser, const ResourceNameRef& resourceName, uint32_t typeMask);
-    bool parsePlural(XmlPullParser* parser, const ResourceNameRef& resourceName);
+    bool parseDeclareStyleable(XmlPullParser* parser, ParsedResource* outResource);
+    bool parseArray(XmlPullParser* parser, ParsedResource* outResource, uint32_t typeMask);
+    bool parsePlural(XmlPullParser* parser, ParsedResource* outResource);
 
     IDiagnostics* mDiag;
     ResourceTable* mTable;
     Source mSource;
     ConfigDescription mConfig;
+    ResourceParserOptions mOptions;
 };
 
 } // namespace aapt

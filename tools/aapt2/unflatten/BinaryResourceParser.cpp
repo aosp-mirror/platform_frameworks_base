@@ -27,7 +27,7 @@
 
 #include <androidfw/ResourceTypes.h>
 #include <androidfw/TypeWrappers.h>
-#include <utils/misc.h>
+#include <base/macros.h>
 
 #include <map>
 #include <string>
@@ -289,7 +289,7 @@ bool BinaryResourceParser::parsePackage(const ResChunk_header* chunk) {
     }
 
     // Extract the package name.
-    size_t len = strnlen16((const char16_t*) packageHeader->name, NELEM(packageHeader->name));
+    size_t len = strnlen16((const char16_t*) packageHeader->name, arraysize(packageHeader->name));
     std::u16string packageName;
     packageName.resize(len);
     for (size_t i = 0; i < len; i++) {
@@ -416,13 +416,11 @@ bool BinaryResourceParser::parsePublic(const ResourceTablePackage* package,
             return false;
         }
 
-        const ResourceId resId = {
-                package->id.value(), header->typeId, util::deviceToHost16(entry->entryId) };
+        const ResourceId resId(package->id.value(), header->typeId,
+                               util::deviceToHost16(entry->entryId));
 
-        const ResourceName name = {
-                package->name,
-                *parsedType,
-                util::getString(mKeyPool, entry->key.index).toString() };
+        const ResourceName name(package->name, *parsedType,
+                                util::getString(mKeyPool, entry->key.index).toString());
 
         Source source;
         if (mSourcePool.getError() == NO_ERROR) {
@@ -516,13 +514,11 @@ bool BinaryResourceParser::parseType(const ResourceTablePackage* package,
             continue;
         }
 
-        const ResourceName name = {
-                package->name,
-                *parsedType,
-                util::getString(mKeyPool, util::deviceToHost32(entry->key.index)).toString() };
+        const ResourceName name(package->name, *parsedType,
+                                util::getString(mKeyPool,
+                                                util::deviceToHost32(entry->key.index)).toString());
 
-        const ResourceId resId =
-                { package->id.value(), type->id, static_cast<uint16_t>(it.index()) };
+        const ResourceId resId(package->id.value(), type->id, static_cast<uint16_t>(it.index()));
 
         std::unique_ptr<Value> resourceValue;
         const ResTable_entry_source* sourceBlock = nullptr;
@@ -598,7 +594,9 @@ std::unique_ptr<Item> BinaryResourceParser::parseValue(const ResourceNameRef& na
         StringPiece16 str = util::getString(mValuePool, data);
 
         const ResStringPool_span* spans = mValuePool.styleAt(data);
-        if (spans != nullptr) {
+
+        // Check if the string has a valid style associated with it.
+        if (spans != nullptr && spans->name.index != ResStringPool_span::END) {
             StyleString styleStr = { str.toString() };
             while (spans->name.index != ResStringPool_span::END) {
                 styleStr.spans.push_back(Span{
@@ -662,8 +660,12 @@ std::unique_ptr<Value> BinaryResourceParser::parseMapEntry(const ResourceNameRef
     switch (name.type) {
         case ResourceType::kStyle:
             return parseStyle(name, config, map);
+        case ResourceType::kAttrPrivate:
+            // fallthrough
         case ResourceType::kAttr:
             return parseAttr(name, config, map);
+        case ResourceType::kIntegerArray:
+            // fallthrough
         case ResourceType::kArray:
             return parseArray(name, config, map);
         case ResourceType::kStyleable:
@@ -671,6 +673,7 @@ std::unique_ptr<Value> BinaryResourceParser::parseMapEntry(const ResourceNameRef
         case ResourceType::kPlurals:
             return parsePlural(name, config, map);
         default:
+            assert(false && "unknown map type");
             break;
     }
     return {};

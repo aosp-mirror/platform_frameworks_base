@@ -18,6 +18,7 @@
 #define AAPT_TEST_COMMON_H
 
 #include "ConfigDescription.h"
+#include "Debug.h"
 #include "ResourceTable.h"
 #include "ResourceUtils.h"
 #include "ValueVisitor.h"

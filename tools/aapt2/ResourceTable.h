@@ -176,9 +176,9 @@ public:
     bool markPublicAllowMangled(const ResourceNameRef& name, const ResourceId resId,
                                 const Source& source, IDiagnostics* diag);
     struct SearchResult {
-	ResourceTablePackage* package;
-	ResourceTableType* type;
-	ResourceEntry* entry;
+        ResourceTablePackage* package;
+        ResourceTableType* type;
+        ResourceEntry* entry;
     };
 
     Maybe<SearchResult> findResource(const ResourceNameRef& name);
@@ -208,7 +208,7 @@ public:
 
     ResourceTablePackage* findPackageById(uint8_t id);
 
-    ResourceTablePackage* createPackage(const StringPiece16& name, uint8_t id);
+    ResourceTablePackage* createPackage(const StringPiece16& name, Maybe<uint8_t> id = {});
 
 private:
     ResourceTablePackage* findOrCreatePackage(const StringPiece16& name);
