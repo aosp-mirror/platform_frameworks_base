@@ -50,12 +50,13 @@ public class NetworkPolicyManager {
     public static final int POLICY_ALLOW_BACKGROUND_BATTERY_SAVE = 0x2;
 
     /* RULE_* are not masks and they must be exclusive */
+    public static final int RULE_UNKNOWN = -1;
     /** All network traffic should be allowed. */
-    public static final int RULE_ALLOW_ALL = 0x0;
+    public static final int RULE_ALLOW_ALL = 0;
     /** Reject traffic on metered networks. */
-    public static final int RULE_REJECT_METERED = 0x1;
+    public static final int RULE_REJECT_METERED = 1;
     /** Reject traffic on all networks. */
-    public static final int RULE_REJECT_ALL = 0x2;
+    public static final int RULE_REJECT_ALL = 2;
 
     public static final int FIREWALL_RULE_DEFAULT = 0;
     public static final int FIREWALL_RULE_ALLOW = 1;
@@ -326,25 +327,4 @@ public class NetworkPolicyManager {
         // nothing found above; we can apply policy to UID
         return true;
     }
-
-    /** {@hide} */
-    public static void dumpPolicy(PrintWriter fout, int policy) {
-        fout.write("[");
-        if ((policy & POLICY_REJECT_METERED_BACKGROUND) != 0) {
-            fout.write("REJECT_METERED_BACKGROUND");
-        }
-        fout.write("]");
-    }
-
-    /** {@hide} */
-    public static void dumpRules(PrintWriter fout, int rules) {
-        fout.write("[");
-        if ((rules & RULE_REJECT_METERED) != 0) {
-            fout.write("REJECT_METERED");
-        } else if ((rules & RULE_REJECT_ALL) != 0) {
-            fout.write("REJECT_ALL");
-        }
-        fout.write("]");
-    }
-
 }
