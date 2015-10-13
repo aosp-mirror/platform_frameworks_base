@@ -167,7 +167,6 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks,
         mContent = findViewById(R.id.task_view_content);
         mHeaderView = (TaskViewHeader) findViewById(R.id.task_view_bar);
         mThumbnailView = (TaskViewThumbnail) findViewById(R.id.task_view_thumbnail);
-        mThumbnailView.updateClipToTaskBar(mHeaderView);
         mActionButtonView = findViewById(R.id.lock_to_app_fab);
         mActionButtonView.setOutlineProvider(new ViewOutlineProvider() {
             @Override
@@ -210,6 +209,7 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks,
         mThumbnailView.measure(
                 MeasureSpec.makeMeasureSpec(widthWithoutPadding, MeasureSpec.EXACTLY),
                 MeasureSpec.makeMeasureSpec(widthWithoutPadding, MeasureSpec.EXACTLY));
+        mThumbnailView.updateClipToTaskBar(mHeaderView);
         setMeasuredDimension(width, height);
         invalidateOutline();
     }
@@ -786,8 +786,8 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks,
             // Start listening for drag events
             setClipViewInStack(false);
 
-            int width = (int) (getScaleX() * getWidth());
-            int height = (int) (getScaleY() * getHeight());
+            final int width = (int) (getScaleX() * getWidth());
+            final int height = (int) (getScaleY() * getHeight());
             Bitmap dragBitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
             Canvas c = new Canvas(dragBitmap);
             c.scale(getScaleX(), getScaleY());
@@ -797,7 +797,12 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks,
 
             // Initiate the drag
             final DragView dragView = new DragView(getContext(), dragBitmap, mDownTouchPos);
-            dragView.setOutlineProvider(mViewBounds);
+            dragView.setOutlineProvider(new ViewOutlineProvider() {
+                @Override
+                public void getOutline(View view, Outline outline) {
+                    outline.setRect(0, 0, width, height);
+                }
+            });
             dragView.addOnAttachStateChangeListener(new View.OnAttachStateChangeListener() {
                 @Override
                 public void onViewAttachedToWindow(View v) {
