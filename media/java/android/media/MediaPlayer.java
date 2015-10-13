@@ -479,11 +479,6 @@ import java.lang.ref.WeakReference;
  *     <td>{} </p></td>
  *     <td>This method can be called in any state and calling it does not change
  *         the object state. </p></td></tr>
- * <tr><td>setPlaybackRate</p></td>
- *     <td>any </p></td>
- *     <td>{} </p></td>
- *     <td>This method can be called in any state and calling it does not change
- *         the object state. </p></td></tr>
  * <tr><td>setPlaybackParams</p></td>
  *     <td>any </p></td>
  *     <td>{} </p></td>
