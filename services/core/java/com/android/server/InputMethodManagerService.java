@@ -40,6 +40,7 @@ import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 import org.xmlpull.v1.XmlSerializer;
 
+import android.annotation.Nullable;
 import android.app.ActivityManagerNative;
 import android.app.AppGlobals;
 import android.app.AlertDialog;
@@ -286,8 +287,19 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
     boolean mSystemReady;
 
     /**
-     * Id of the currently selected input method.
+     * Id obtained with {@link InputMethodInfo#getId()} for the currently selected input method.
+     * method.  This is to be synchronized with the secure settings keyed with
+     * {@link Settings.Secure#DEFAULT_INPUT_METHOD}.
+     *
+     * <p>This can be transiently {@code null} when the system is re-initializing input method
+     * settings, e.g., the system locale is just changed.</p>
+     *
+     * <p>Note that {@link #mCurId} is used to track which IME is being connected to
+     * {@link InputMethodManagerService}.</p>
+     *
+     * @see #mCurId
      */
+    @Nullable
     String mCurMethodId;
 
     /**
@@ -317,9 +329,14 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
     EditorInfo mCurAttribute;
 
     /**
-     * The input method ID of the input method service that we are currently
+     * Id obtained with {@link InputMethodInfo#getId()} for the input method that we are currently
      * connected to or in the process of connecting to.
+     *
+     * <p>This can be {@code null} when no input method is connected.</p>
+     *
+     * @see #mCurMethodId
      */
+    @Nullable
     String mCurId;
 
     /**
@@ -967,7 +984,6 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                 || (newLocale != null && !newLocale.equals(mLastSystemLocale))) {
             if (!updateOnlyWhenLocaleChanged) {
                 hideCurrentInputLocked(0, null);
-                mCurMethodId = null;
                 unbindCurrentMethodLocked(true, false);
             }
             if (DEBUG) {
@@ -1523,7 +1539,11 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         channel.dispose();
     }
 
-    void unbindCurrentMethodLocked(boolean reportToClient, boolean savePosition) {
+    void unbindCurrentMethodLocked(boolean resetCurrentMethodAndClient, boolean savePosition) {
+        if (resetCurrentMethodAndClient) {
+            mCurMethodId = null;
+        }
+
         if (mVisibleBound) {
             mContext.unbindService(mVisibleConnection);
             mVisibleBound = false;
@@ -1550,9 +1570,8 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         mCurId = null;
         clearCurMethodLocked();
 
-        if (reportToClient && mCurClient != null) {
-            executeOrSendMessage(mCurClient.client, mCaller.obtainMessageIO(
-                    MSG_UNBIND_METHOD, mCurSeq, mCurClient.client));
+        if (resetCurrentMethodAndClient) {
+            unbindCurrentClientLocked();
         }
     }
 
@@ -1903,13 +1922,11 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                 setInputMethodLocked(id, mSettings.getSelectedInputMethodSubtypeId(id));
             } catch (IllegalArgumentException e) {
                 Slog.w(TAG, "Unknown input method from prefs: " + id, e);
-                mCurMethodId = null;
                 unbindCurrentMethodLocked(true, false);
             }
             mShortcutInputMethodsAndSubtypes.clear();
         } else {
             // There is no longer an input method set, so stop any current one.
-            mCurMethodId = null;
             unbindCurrentMethodLocked(true, false);
         }
         // Here is not the perfect place to reset the switching controller. Ideally
