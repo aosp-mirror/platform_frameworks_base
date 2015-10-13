@@ -20,10 +20,4 @@
     <!-- Date format for display: should match the lockscreen in /policy.  -->
     <string name="system_ui_date_pattern">@*android:string/system_ui_date_pattern</string>
 
-    <!-- DO NOT TRANSLATE - temporary hack to show the speed-less label if no translation is available -->
-    <item type="string" name="keyguard_indication_charging_time_fast_if_translated">@string/keyguard_indication_charging_time</item>
-
-    <!-- DO NOT TRANSLATE - temporary hack to show the speed-less label if no translation is available -->
-    <item type="string" name="keyguard_indication_charging_time_slowly_if_translated">@string/keyguard_indication_charging_time</item>
-
 </resources>
