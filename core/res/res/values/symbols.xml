@@ -2336,4 +2336,6 @@
 
   <java-symbol type="string" name="config_networkPolicyNotificationComponent" />
   <java-symbol type="drawable" name="platlogo_m" />
+
+  <java-symbol type="string" name="config_iccHotswapPromptForRestartDialogComponent" />
 </resources>

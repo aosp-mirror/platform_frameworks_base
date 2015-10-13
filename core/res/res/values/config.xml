@@ -938,6 +938,9 @@
     <!-- Is the device capable of hot swapping an UICC Card -->
     <bool name="config_hotswapCapable">false</bool>
 
+    <!-- Component name of the ICC hotswap prompt for restart dialog -->
+    <string name="config_iccHotswapPromptForRestartDialogComponent" translateable="false">@null</string>
+
     <!-- Enable puk unlockscreen by default.
          If unlock screen is disabled, the puk should be unlocked through Emergency Dialer -->
     <bool name="config_enable_puk_unlock_screen">true</bool>
