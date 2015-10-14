@@ -341,7 +341,8 @@ public class StaticLayout extends Layout {
 
         private void setLocale(Locale locale) {
             if (!locale.equals(mLocale)) {
-                nSetLocale(mNativePtr, locale.toLanguageTag(), Hyphenator.get(locale));
+                nSetLocale(mNativePtr, locale.toLanguageTag(),
+                        Hyphenator.get(locale).getNativePtr());
                 mLocale = locale;
             }
         }
