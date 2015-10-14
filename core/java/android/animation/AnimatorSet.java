@@ -1030,9 +1030,6 @@ public final class AnimatorSet extends Animator {
         }
     }
 
-    /**
-     * @hide
-     */
     @Override
     public long getTotalDuration() {
         updateAnimatorsDuration();

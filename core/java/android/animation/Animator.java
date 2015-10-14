@@ -28,7 +28,6 @@ public abstract class Animator implements Cloneable {
 
     /**
      * The value used to indicate infinite duration (e.g. when Animators repeat infinitely).
-     * @hide
      */
     public static final long DURATION_INFINITE = -1;
     /**
@@ -191,11 +190,18 @@ public abstract class Animator implements Cloneable {
     /**
      * Gets the total duration of the animation, accounting for animation sequences, start delay,
      * and repeating. Return {@link #DURATION_INFINITE} if the duration is infinite.
-     * @hide
-     * TODO: Unhide
+     *
+     * @return  Total time an animation takes to finish, starting from the time {@link #start()}
+     *          is called. {@link #DURATION_INFINITE} will be returned if the animation or any
+     *          child animation repeats infinite times.
      */
     public long getTotalDuration() {
-        return getStartDelay() + getDuration();
+        long duration = getDuration();
+        if (duration == DURATION_INFINITE) {
+            return DURATION_INFINITE;
+        } else {
+            return getStartDelay() + duration;
+        }
     }
 
     /**

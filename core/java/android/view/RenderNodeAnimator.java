@@ -336,9 +336,6 @@ public class RenderNodeAnimator extends Animator {
         return mUnscaledDuration;
     }
 
-    /**
-     * @hide
-     */
     @Override
     public long getTotalDuration() {
         return mUnscaledDuration + mUnscaledStartDelay;
