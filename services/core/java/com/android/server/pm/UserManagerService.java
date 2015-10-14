@@ -356,6 +356,27 @@ public class UserManagerService extends IUserManager.Stub {
     }
 
     @Override
+    public boolean isSameProfileGroup(int userId, int otherUserId) {
+        if (userId == otherUserId) return true;
+        checkManageUsersPermission("check if in the same profile group");
+        synchronized (mPackagesLock) {
+            return isSameProfileGroupLocked(userId, otherUserId);
+        }
+    }
+
+    private boolean isSameProfileGroupLocked(int userId, int otherUserId) {
+        UserInfo userInfo = getUserInfoLocked(userId);
+        if (userInfo == null || userInfo.profileGroupId == UserInfo.NO_PROFILE_GROUP_ID) {
+            return false;
+        }
+        UserInfo otherUserInfo = getUserInfoLocked(otherUserId);
+        if (otherUserInfo == null || otherUserInfo.profileGroupId == UserInfo.NO_PROFILE_GROUP_ID) {
+            return false;
+        }
+        return userInfo.profileGroupId == otherUserInfo.profileGroupId;
+    }
+
+    @Override
     public UserInfo getProfileParent(int userHandle) {
         checkManageUsersPermission("get the profile parent");
         synchronized (mPackagesLock) {

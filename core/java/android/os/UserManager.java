@@ -1093,6 +1093,22 @@ public class UserManager {
     }
 
     /**
+     * Requires {@link android.Manifest.permission#MANAGE_USERS} permission.
+     * @param userId one of the two user ids to check.
+     * @param otherUserId one of the two user ids to check.
+     * @return true if the two user ids are in the same profile group.
+     * @hide
+     */
+    public boolean isSameProfileGroup(int userId, int otherUserId) {
+        try {
+            return mService.isSameProfileGroup(userId, otherUserId);
+        } catch (RemoteException re) {
+            Log.w(TAG, "Could not get user list", re);
+            return false;
+        }
+    }
+
+    /**
      * Returns list of the profiles of userHandle including
      * userHandle itself.
      * Note that this returns only enabled.

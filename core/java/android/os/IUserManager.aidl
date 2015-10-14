@@ -46,6 +46,7 @@ interface IUserManager {
     List<UserInfo> getProfiles(int userHandle, boolean enabledOnly);
     boolean canAddMoreManagedProfiles(int userId);
     UserInfo getProfileParent(int userHandle);
+    boolean isSameProfileGroup(int userId, int otherUserId);
     UserInfo getUserInfo(int userHandle);
     long getUserCreationTime(int userHandle);
     boolean isRestricted();
