@@ -25,6 +25,7 @@ import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.util.AttributeSet;
 import android.util.Log;
+import android.view.InputDevice;
 import android.view.MotionEvent;
 import android.view.ViewConfiguration;
 import android.view.ViewTreeObserver;
@@ -228,8 +229,7 @@ public abstract class PanelView extends FrameLayout {
         }
 
         // On expanding, single mouse click expands the panel instead of dragging.
-        if (isFullyCollapsed() && event.getPointerCount() == 1
-                && event.getToolType(0) == MotionEvent.TOOL_TYPE_MOUSE) {
+        if (isFullyCollapsed() && event.getDevice().getSources() == InputDevice.SOURCE_MOUSE) {
             if (event.getAction() == MotionEvent.ACTION_UP) {
                 expand(true);
             }
