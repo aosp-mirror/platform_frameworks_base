@@ -53,11 +53,15 @@ public class Hyphenator {
         mNativePtr = nativePtr;
     }
 
-    public static long get(@Nullable Locale locale) {
+    public long getNativePtr() {
+        return mNativePtr;
+    }
+
+    public static Hyphenator get(@Nullable Locale locale) {
         synchronized (sLock) {
             Hyphenator result = sMap.get(locale);
             if (result != null) {
-                return result.mNativePtr;
+                return result;
             }
 
             // TODO: Convert this a proper locale-fallback system
@@ -67,7 +71,7 @@ public class Hyphenator {
             result = sMap.get(languageOnlyLocale);
             if (result != null) {
                 sMap.put(locale, result);
-                return result.mNativePtr;
+                return result;
             }
 
             // Fall back to script-only, if available
@@ -80,13 +84,13 @@ public class Hyphenator {
                 result = sMap.get(scriptOnlyLocale);
                 if (result != null) {
                     sMap.put(locale, result);
-                    return result.mNativePtr;
+                    return result;
                 }
             }
 
             sMap.put(locale, sEmptyHyphenator);  // To remember we found nothing.
         }
-        return sEmptyHyphenator.mNativePtr;
+        return sEmptyHyphenator;
     }
 
     private static Hyphenator loadHyphenator(String languageTag) {
