@@ -1192,7 +1192,7 @@ class WindowStateAnimator {
             float y = tmpFloats[Matrix.MTRANS_Y];
             int w = frame.width();
             int h = frame.height();
-            mWin.mShownFrame.set(x, y, x+w, y+h);
+            mWin.mShownPosition.set((int) x, (int) y);
 
             // Now set the alpha...  but because our current hardware
             // can't do alpha transformation on a non-opaque surface,
@@ -1287,13 +1287,13 @@ class WindowStateAnimator {
             float y = tmpFloats[Matrix.MTRANS_Y];
             int w = frame.width();
             int h = frame.height();
-            mWin.mShownFrame.set(x, y, x + w, y + h);
+            mWin.mShownPosition.set((int) x, (int) y);
 
             mShownAlpha = mAlpha;
         } else {
-            mWin.mShownFrame.set(mWin.mFrame);
+            mWin.mShownPosition.set(mWin.mFrame.left, mWin.mFrame.top);
             if (mWin.mXOffset != 0 || mWin.mYOffset != 0) {
-                mWin.mShownFrame.offset(mWin.mXOffset, mWin.mYOffset);
+                mWin.mShownPosition.offset(mWin.mXOffset, mWin.mYOffset);
             }
             mShownAlpha = mAlpha;
             mHaveMatrix = false;
@@ -1458,8 +1458,8 @@ class WindowStateAnimator {
     void setSurfaceBoundariesLocked(final boolean recoveringMemory) {
         final WindowState w = mWin;
 
-        float left = w.mShownFrame.left;
-        float top = w.mShownFrame.top;
+        float left = w.mShownPosition.x;
+        float top = w.mShownPosition.y;
 
         int width;
         int height;
@@ -1701,10 +1701,10 @@ class WindowStateAnimator {
         }
     }
 
-    void setWallpaperOffset(RectF shownFrame) {
+    void setWallpaperOffset(Point shownPosition) {
         final LayoutParams attrs = mWin.getAttrs();
-        final int left = ((int) shownFrame.left) - attrs.surfaceInsets.left;
-        final int top = ((int) shownFrame.top) - attrs.surfaceInsets.top;
+        final int left = shownPosition.x - attrs.surfaceInsets.left;
+        final int top = shownPosition.y - attrs.surfaceInsets.top;
         if (mSurfaceX != left || mSurfaceY != top) {
             if (mAnimating) {
                 // If this window (or its app token) is animating, then the position

@@ -4614,7 +4614,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 final int fl = PolicyControl.getWindowFlags(null, lp);
                 if (localLOGV) {
                     Slog.d(TAG, "frame: " + mTopFullscreenOpaqueWindowState.getFrameLw()
-                            + " shown frame: " + mTopFullscreenOpaqueWindowState.getShownFrameLw());
+                            + " shown position: "
+                            + mTopFullscreenOpaqueWindowState.getShownPositionLw());
                     Slog.d(TAG, "attr: " + mTopFullscreenOpaqueWindowState.getAttrs()
                             + " lp.flags=0x" + Integer.toHexString(fl));
                 }
