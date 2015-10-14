@@ -68,7 +68,7 @@ public class JobServiceContext extends IJobCallback.Stub implements ServiceConne
     private static final int defaultMaxActiveJobsPerService =
             ActivityManager.isLowRamDeviceStatic() ? 1 : 3;
     /** Amount of time a job is allowed to execute for before being considered timed-out. */
-    private static final long EXECUTING_TIMESLICE_MILLIS = 10 * 60 * 1000;
+    private static final long EXECUTING_TIMESLICE_MILLIS = 10 * 60 * 1000;  // 10mins.
     /** Amount of time the JobScheduler will wait for a response from an app for a message. */
     private static final long OP_TIMEOUT_MILLIS = 8 * 1000;
 
