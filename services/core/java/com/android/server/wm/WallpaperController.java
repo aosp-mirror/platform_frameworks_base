@@ -419,7 +419,7 @@ class WallpaperController {
                     winAnimator.computeShownFrameLocked();
                     // No need to lay out the windows - we can just set the wallpaper position
                     // directly.
-                    winAnimator.setWallpaperOffset(wallpaper.mShownFrame);
+                    winAnimator.setWallpaperOffset(wallpaper.mShownPosition);
                     // We only want to be synchronous with one wallpaper.
                     sync = false;
                 }

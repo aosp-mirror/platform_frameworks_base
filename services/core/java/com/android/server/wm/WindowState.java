@@ -29,15 +29,14 @@ import static android.view.WindowManager.LayoutParams.TYPE_INPUT_METHOD;
 import static android.view.WindowManager.LayoutParams.TYPE_INPUT_METHOD_DIALOG;
 import static android.view.WindowManager.LayoutParams.TYPE_WALLPAPER;
 import static com.android.server.wm.WindowManagerService.DEBUG_CONFIGURATION;
-import static com.android.server.wm.WindowManagerService.DEBUG_DIM_LAYER;
 import static com.android.server.wm.WindowManagerService.DEBUG_LAYOUT;
 import static com.android.server.wm.WindowManagerService.DEBUG_ORIENTATION;
 import static com.android.server.wm.WindowManagerService.DEBUG_POWER;
 import static com.android.server.wm.WindowManagerService.DEBUG_RESIZE;
 import static com.android.server.wm.WindowManagerService.DEBUG_VISIBILITY;
 
-import android.app.ActivityManager;
 import android.app.AppOpsManager;
+import android.graphics.Point;
 import android.os.PowerManager;
 import android.os.RemoteCallbackList;
 import android.os.SystemClock;
@@ -159,11 +158,10 @@ final class WindowState implements WindowManagerPolicy.WindowState {
     private boolean mConfigHasChanged;
 
     /**
-     * Actual frame shown on-screen (may be modified by animation).  These
-     * are in the screen's coordinate space (WITH the compatibility scale
-     * applied).
+     * Actual position of the surface shown on-screen (may be modified by animation). These are
+     * in the screen's coordinate space (WITH the compatibility scale applied).
      */
-    final RectF mShownFrame = new RectF();
+    final Point mShownPosition = new Point();
 
     /**
      * Insets that determine the actually visible area.  These are in the application's
@@ -787,8 +785,8 @@ final class WindowState implements WindowManagerPolicy.WindowState {
     }
 
     @Override
-    public RectF getShownFrameLw() {
-        return mShownFrame;
+    public Point getShownPositionLw() {
+        return mShownPosition;
     }
 
     @Override
@@ -1822,7 +1820,7 @@ final class WindowState implements WindowManagerPolicy.WindowState {
             }
         }
         pw.print(prefix); pw.print("mHasSurface="); pw.print(mHasSurface);
-                pw.print(" mShownFrame="); mShownFrame.printShortString(pw);
+                pw.print(" mShownPosition="); mShownPosition.printShortString(pw);
                 pw.print(" isReadyForDisplay()="); pw.println(isReadyForDisplay());
         if (dumpAll) {
             pw.print(prefix); pw.print("mFrame="); mFrame.printShortString(pw);
