@@ -191,7 +191,7 @@ public class CarrierConfigManager {
     public static final String
             KEY_DISABLE_CDMA_ACTIVATION_CODE_BOOL = "disable_cdma_activation_code_bool";
 
-   /**
+    /**
      * Override the platform's notion of a network operator being considered roaming.
      * Value is string array of MCCMNCs to be considered roaming for 3GPP RATs.
      */
@@ -428,6 +428,12 @@ public class CarrierConfigManager {
      */
     public static final String KEY_CSP_ENABLED_BOOL = "csp_enabled_bool";
 
+    /**
+     * Allow user to add APNs
+     * @hide
+     */
+    public static final String KEY_ALLOW_ADDING_APNS_BOOL = "allow_adding_apns_bool";
+
     // These variables are used by the MMS service and exposed through another API, {@link
     // SmsManager}. The variable names and string values are copied from there.
     public static final String KEY_MMS_ALIAS_ENABLED_BOOL = "aliasEnabled";
@@ -550,6 +556,7 @@ public class CarrierConfigManager {
         sDefaults.putString(KEY_CI_ACTION_ON_SYS_UPDATE_EXTRA_STRING, "");
         sDefaults.putString(KEY_CI_ACTION_ON_SYS_UPDATE_EXTRA_VAL_STRING, "");
         sDefaults.putBoolean(KEY_CSP_ENABLED_BOOL, false);
+        sDefaults.putBoolean(KEY_ALLOW_ADDING_APNS_BOOL, true);
         sDefaults.putBoolean(KEY_ALWAYS_SHOW_EMERGENCY_ALERT_ONOFF_BOOL, false);
 
         sDefaults.putStringArray(KEY_GSM_ROAMING_NETWORKS_STRING_ARRAY, null);
