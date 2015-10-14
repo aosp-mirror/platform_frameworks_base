@@ -341,8 +341,10 @@ public class LocationManagerService extends ILocationManager.Stub {
             gpsProvider.disable();
         }
 
-        FlpHardwareProvider flpHardwareProvider = FlpHardwareProvider.getInstance(mContext);
-        if (FlpHardwareProvider.isSupported() && flpHardwareProvider != null) {
+        // it is needed to check if FLP HW provider is supported before accessing the instance, this
+        // avoids an exception to be thrown by the singleton factory method
+        if (FlpHardwareProvider.isSupported()) {
+            FlpHardwareProvider flpHardwareProvider = FlpHardwareProvider.getInstance(mContext);
             flpHardwareProvider.cleanup();
         }
     }
