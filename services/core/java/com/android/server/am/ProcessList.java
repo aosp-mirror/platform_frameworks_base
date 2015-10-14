@@ -49,19 +49,22 @@ final class ProcessList {
 
     // OOM adjustments for processes in various states:
 
+    // Uninitialized value for any major or minor adj fields
+    static final int INVALID_ADJ = -10000;
+
     // Adjustment used in certain places where we don't know it yet.
     // (Generally this is something that is going to be cached, but we
     // don't know the exact value in the cached range to assign yet.)
-    static final int UNKNOWN_ADJ = 16;
+    static final int UNKNOWN_ADJ = 1001;
 
     // This is a process only hosting activities that are not visible,
     // so it can be killed without any disruption.
-    static final int CACHED_APP_MAX_ADJ = 15;
-    static final int CACHED_APP_MIN_ADJ = 9;
+    static final int CACHED_APP_MAX_ADJ = 906;
+    static final int CACHED_APP_MIN_ADJ = 900;
 
     // The B list of SERVICE_ADJ -- these are the old and decrepit
     // services that aren't as shiny and interesting as the ones in the A list.
-    static final int SERVICE_B_ADJ = 8;
+    static final int SERVICE_B_ADJ = 800;
 
     // This is the process of the previous application that the user was in.
     // This process is kept above other things, because it is very common to
@@ -69,34 +72,35 @@ final class ProcessList {
     // task switch (toggling between the two top recent apps) as well as normal
     // UI flow such as clicking on a URI in the e-mail app to view in the browser,
     // and then pressing back to return to e-mail.
-    static final int PREVIOUS_APP_ADJ = 7;
+    static final int PREVIOUS_APP_ADJ = 700;
 
     // This is a process holding the home application -- we want to try
     // avoiding killing it, even if it would normally be in the background,
     // because the user interacts with it so much.
-    static final int HOME_APP_ADJ = 6;
+    static final int HOME_APP_ADJ = 600;
 
     // This is a process holding an application service -- killing it will not
     // have much of an impact as far as the user is concerned.
-    static final int SERVICE_ADJ = 5;
+    static final int SERVICE_ADJ = 500;
 
     // This is a process with a heavy-weight application.  It is in the
     // background, but we want to try to avoid killing it.  Value set in
     // system/rootdir/init.rc on startup.
-    static final int HEAVY_WEIGHT_APP_ADJ = 4;
+    static final int HEAVY_WEIGHT_APP_ADJ = 400;
 
     // This is a process currently hosting a backup operation.  Killing it
     // is not entirely fatal but is generally a bad idea.
-    static final int BACKUP_APP_ADJ = 3;
+    static final int BACKUP_APP_ADJ = 300;
 
     // This is a process only hosting components that are perceptible to the
     // user, and we really want to avoid killing them, but they are not
     // immediately visible. An example is background music playback.
-    static final int PERCEPTIBLE_APP_ADJ = 2;
+    static final int PERCEPTIBLE_APP_ADJ = 200;
 
     // This is a process only hosting activities that are visible to the
     // user, so we'd prefer they don't disappear.
-    static final int VISIBLE_APP_ADJ = 1;
+    static final int VISIBLE_APP_ADJ = 100;
+    static final int VISIBLE_APP_LAYER_MAX = PERCEPTIBLE_APP_ADJ - VISIBLE_APP_ADJ - 1;
 
     // This is the process running the current foreground app.  We'd really
     // rather not kill it!
@@ -104,18 +108,18 @@ final class ProcessList {
 
     // This is a process that the system or a persistent process has bound to,
     // and indicated it is important.
-    static final int PERSISTENT_SERVICE_ADJ = -11;
+    static final int PERSISTENT_SERVICE_ADJ = -700;
 
     // This is a system persistent process, such as telephony.  Definitely
     // don't want to kill it, but doing so is not completely fatal.
-    static final int PERSISTENT_PROC_ADJ = -12;
+    static final int PERSISTENT_PROC_ADJ = -800;
 
     // The system process runs at the default adjustment.
-    static final int SYSTEM_ADJ = -16;
+    static final int SYSTEM_ADJ = -900;
 
     // Special code for native processes that are not being managed by the system (so
     // don't have an oom adj assigned by the system).
-    static final int NATIVE_ADJ = -17;
+    static final int NATIVE_ADJ = -1000;
 
     // Memory pages are 4K.
     static final int PAGE_SIZE = 4*1024;
@@ -159,7 +163,7 @@ final class ProcessList {
     // These must be kept in sync with the definitions in lmkd.c
     //
     // LMK_TARGET <minfree> <minkillprio> ... (up to 6 pairs)
-    // LMK_PROCPRIO <pid> <prio>
+    // LMK_PROCPRIO <pid> <uid> <prio>
     // LMK_PROCREMOVE <pid>
     static final byte LMK_TARGET = 0;
     static final byte LMK_PROCPRIO = 1;

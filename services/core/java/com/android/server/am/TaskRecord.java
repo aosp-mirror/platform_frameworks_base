@@ -221,6 +221,10 @@ final class TaskRecord {
     // default minimal size.
     final int mMinimalSize;
 
+    // Ranking (from top) of this task among all visible tasks. (-1 means it's not visible)
+    // This number will be assigned when we evaluate OOM scores for all visible tasks.
+    int mLayerRank = -1;
+
     Configuration mOverrideConfig = Configuration.EMPTY;
 
     TaskRecord(ActivityManagerService service, int _taskId, ActivityInfo info, Intent _intent,

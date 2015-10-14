@@ -171,10 +171,10 @@ final class ProcessRecord {
     boolean debugging;          // was app launched for debugging?
     boolean waitedForDebugger;  // has process show wait for debugger dialog?
     Dialog waitDialog;          // current wait for debugger dialog
-    
+
     String shortStringName;     // caching of toShortString() result.
     String stringName;          // caching of toString() result.
-    
+
     // These reports are generated & stored when an app gets into an error condition.
     // They will be "null" when all is OK.
     ActivityManager.ProcessErrorStateInfo crashingReport;
@@ -402,7 +402,7 @@ final class ProcessRecord {
             }
         }
     }
-    
+
     ProcessRecord(BatteryStatsImpl _batteryStats, ApplicationInfo _info,
             String _processName, int _uid) {
         mBatteryStats = _batteryStats;
@@ -413,8 +413,8 @@ final class ProcessRecord {
         processName = _processName;
         pkgList.put(_info.packageName, new ProcessStats.ProcessStateHolder(_info.versionCode));
         maxAdj = ProcessList.UNKNOWN_ADJ;
-        curRawAdj = setRawAdj = -100;
-        curAdj = setAdj = -100;
+        curRawAdj = setRawAdj = ProcessList.INVALID_ADJ;
+        curAdj = setAdj = ProcessList.INVALID_ADJ;
         persistent = false;
         removed = false;
         lastStateTime = lastPssTime = nextPssTime = SystemClock.uptimeMillis();
@@ -560,7 +560,7 @@ final class ProcessRecord {
         toShortString(sb);
         return shortStringName = sb.toString();
     }
-    
+
     void toShortString(StringBuilder sb) {
         sb.append(pid);
         sb.append(':');
@@ -585,7 +585,7 @@ final class ProcessRecord {
             }
         }
     }
-    
+
     public String toString() {
         if (stringName != null) {
             return stringName;
@@ -695,7 +695,7 @@ final class ProcessRecord {
             pkgList.put(info.packageName, new ProcessStats.ProcessStateHolder(info.versionCode));
         }
     }
-    
+
     public String[] getPackageList() {
         int size = pkgList.size();
         if (size == 0) {

@@ -5794,7 +5794,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         }
 
         boolean didSomething = killPackageProcessesLocked(packageName, appId, userId,
-                -100, callerWillRestart, true, doit, evenPersistent,
+                ProcessList.INVALID_ADJ, callerWillRestart, true, doit, evenPersistent,
                 packageName == null ? ("stop user " + userId) : ("stop " + packageName));
 
         if (mStackSupervisor.finishDisabledPackageActivitiesLocked(
@@ -6110,7 +6110,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         EventLog.writeEvent(EventLogTags.AM_PROC_BOUND, app.userId, app.pid, app.processName);
 
         app.makeActive(thread, mProcessStats);
-        app.curAdj = app.setAdj = -100;
+        app.curAdj = app.setAdj = ProcessList.INVALID_ADJ;
         app.curSchedGroup = app.setSchedGroup = Process.THREAD_GROUP_DEFAULT;
         app.forcingToForeground = null;
         updateProcessForegroundLocked(app, false, false);
@@ -18057,6 +18057,7 @@ public final class ActivityManagerService extends ActivityManagerNative
 
         // Examine all activities if not already foreground.
         if (!foregroundActivities && activitiesSize > 0) {
+            int minLayer = ProcessList.VISIBLE_APP_LAYER_MAX;
             for (int j = 0; j < activitiesSize; j++) {
                 final ActivityRecord r = app.activities.get(j);
                 if (r.app != app) {
@@ -18077,6 +18078,12 @@ public final class ActivityManagerService extends ActivityManagerNative
                     app.cached = false;
                     app.empty = false;
                     foregroundActivities = true;
+                    if (r.task != null && minLayer > 0) {
+                        final int layer = r.task.mLayerRank;
+                        if (layer >= 0 && minLayer > layer) {
+                            minLayer = layer;
+                        }
+                    }
                     break;
                 } else if (r.state == ActivityState.PAUSING || r.state == ActivityState.PAUSED) {
                     if (adj > ProcessList.PERCEPTIBLE_APP_ADJ) {
@@ -18116,6 +18123,9 @@ public final class ActivityManagerService extends ActivityManagerNative
                         app.adjType = "cch-act";
                     }
                 }
+            }
+            if (adj == ProcessList.VISIBLE_APP_ADJ) {
+                adj += minLayer;
             }
         }
 
@@ -18326,11 +18336,11 @@ public final class ActivityManagerService extends ActivityManagerNative
                                         && clientAdj < ProcessList.PERCEPTIBLE_APP_ADJ
                                         && adj > ProcessList.PERCEPTIBLE_APP_ADJ) {
                                     adj = ProcessList.PERCEPTIBLE_APP_ADJ;
-                                } else if (clientAdj > ProcessList.VISIBLE_APP_ADJ) {
+                                } else if (clientAdj >= ProcessList.PERCEPTIBLE_APP_ADJ) {
                                     adj = clientAdj;
                                 } else {
                                     if (adj > ProcessList.VISIBLE_APP_ADJ) {
-                                        adj = ProcessList.VISIBLE_APP_ADJ;
+                                        adj = Math.max(clientAdj, ProcessList.VISIBLE_APP_ADJ);
                                     }
                                 }
                                 if (!client.cached) {
@@ -19367,6 +19377,8 @@ public final class ActivityManagerService extends ActivityManagerNative
                     "Starting update of " + uidRec);
             uidRec.reset();
         }
+
+        mStackSupervisor.rankTaskLayersIfNeeded();
 
         mAdjSeq++;
         mNewNumServiceProcs = 0;

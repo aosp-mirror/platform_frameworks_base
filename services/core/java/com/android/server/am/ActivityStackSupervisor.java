@@ -357,6 +357,9 @@ public final class ActivityStackSupervisor implements DisplayListener {
     // It will be calculated when the default display gets added.
     private int mDefaultMinimalSizeOfResizeableTask = -1;
 
+    // Whether tasks have moved and we need to rank the tasks before next OOM scoring
+    private boolean mTaskLayersChanged = true;
+
     /**
      * Description of a request to start a new activity, which has been held
      * due to app switches being disabled.
@@ -3609,6 +3612,24 @@ public final class ActivityStackSupervisor implements DisplayListener {
             for (int stackNdx = topStackNdx; stackNdx >= 0; --stackNdx) {
                 final ActivityStack stack = stacks.get(stackNdx);
                 stack.ensureActivitiesVisibleLocked(starting, configChanges, preserveWindows);
+            }
+        }
+    }
+
+    void invalidateTaskLayers() {
+        mTaskLayersChanged = true;
+    }
+
+    void rankTaskLayersIfNeeded() {
+        if (!mTaskLayersChanged) {
+            return;
+        }
+        mTaskLayersChanged = false;
+        for (int displayNdx = 0; displayNdx < mActivityDisplays.size(); displayNdx++) {
+            final ArrayList<ActivityStack> stacks = mActivityDisplays.valueAt(displayNdx).mStacks;
+            int baseLayer = 0;
+            for (int stackNdx = stacks.size() - 1; stackNdx >= 0; --stackNdx) {
+                baseLayer += stacks.get(stackNdx).rankTaskLayers(baseLayer);
             }
         }
     }

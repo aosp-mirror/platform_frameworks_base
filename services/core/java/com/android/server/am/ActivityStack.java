@@ -1378,6 +1378,20 @@ final class ActivityStack {
         return true;
     }
 
+    final int rankTaskLayers(int baseLayer) {
+        int layer = 0;
+        for (int taskNdx = mTaskHistory.size() - 1; taskNdx >= 0; --taskNdx) {
+            final TaskRecord task = mTaskHistory.get(taskNdx);
+            ActivityRecord r = task.topRunningActivityLocked();
+            if (r == null || r.finishing || !r.visible) {
+                task.mLayerRank = -1;
+            } else {
+                task.mLayerRank = baseLayer + layer++;
+            }
+        }
+        return layer;
+    }
+
     /**
      * Make sure that all activities that need to be visible (that is, they
      * currently can be seen by the user) actually are.
@@ -3784,6 +3798,7 @@ final class ActivityStack {
                 task.mLastTimeMoved *= -1;
             }
         }
+        mStackSupervisor.invalidateTaskLayers();
     }
 
     void moveHomeStackTaskToTop(int homeStackTaskType) {
