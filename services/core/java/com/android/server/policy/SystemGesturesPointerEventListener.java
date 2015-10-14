@@ -22,6 +22,7 @@ import android.os.Looper;
 import android.os.SystemClock;
 import android.util.Slog;
 import android.view.GestureDetector;
+import android.view.InputDevice;
 import android.view.MotionEvent;
 import android.view.WindowManagerPolicy.PointerEventListener;
 import android.widget.OverScroller;
@@ -130,8 +131,7 @@ public class SystemGesturesPointerEventListener implements PointerEventListener 
                 }
                 break;
             case MotionEvent.ACTION_HOVER_MOVE:
-                if (event.getPointerCount() == 1
-                        && event.getToolType(0) == MotionEvent.TOOL_TYPE_MOUSE) {
+                if (event.getDevice().getSources() == InputDevice.SOURCE_MOUSE) {
                     if (!mMouseHoveringAtEdge && event.getY() == 0) {
                         mCallbacks.onMouseHoverAtTop();
                         mMouseHoveringAtEdge = true;
