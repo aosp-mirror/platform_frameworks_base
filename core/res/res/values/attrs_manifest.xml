@@ -2197,18 +2197,25 @@
       <attr name="name" />
     </declare-styleable>
 
-    <!-- <code>initial-layout</code> tag allows configuring the initial layout for the activity
-         within multi-window environment. -->
-    <declare-styleable name="AndroidManifestInitialLayout" parent="AndroidManifestActivity">
+    <!-- <code>layout</code> tag allows configuring the layout for the activity within multi-window
+         environment. -->
+    <declare-styleable name="AndroidManifestLayout" parent="AndroidManifestActivity">
         <!-- Initial width of the activity. Can be either a fixed value or fraction, in which case
              the width will be constructed as a fraction of the total available width. -->
-        <attr name="activityWidth" format="dimension|fraction" />
+        <attr name="initialWidth" format="dimension|fraction" />
         <!-- Initial height of the activity. Can be either a fixed value or fraction, in which case
              the height will be constructed as a fraction of the total available height. -->
-        <attr name="activityHeight" format="dimension|fraction" />
+        <attr name="initialHeight" format="dimension|fraction" />
         <!-- Where to initially position the activity inside the available space. Uses constants
              defined in {@link android.view.Gravity}. -->
         <attr name="gravity" />
+        <!-- Minimal height of the activity.
+
+             <p>NOTE: A task's root activity value is applied to all additional activities launched
+             in the task. That is if the root activity of a task set minimal size, then the system
+             will set the same minimal size on all other activities in the task. It will also
+             ignore any other minimal size attributes of non-root activities. -->
+        <attr name="minimalSize" format="dimension" />
     </declare-styleable>
 
 </resources>

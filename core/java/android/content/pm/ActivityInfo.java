@@ -67,7 +67,7 @@ public class ActivityInfo extends ComponentInfo
      * The launch mode style requested by the activity.  From the
      * {@link android.R.attr#launchMode} attribute, one of
      * {@link #LAUNCH_MULTIPLE},
-     * {@link #LAUNCH_SINGLE_TOP}, {@link #LAUNCH_SINGLE_TASK}, or 
+     * {@link #LAUNCH_SINGLE_TOP}, {@link #LAUNCH_SINGLE_TASK}, or
      * {@link #LAUNCH_SINGLE_INSTANCE}.
      */
     public int launchMode;
@@ -140,7 +140,7 @@ public class ActivityInfo extends ComponentInfo
      * Activity.  From the "permission" attribute.
      */
     public String permission;
-    
+
     /**
      * The affinity this activity has for another task in the system.  The
      * string here is the name of the task, often the package name of the
@@ -148,13 +148,13 @@ public class ActivityInfo extends ComponentInfo
      * {@link android.R.attr#taskAffinity} attribute.
      */
     public String taskAffinity;
-    
+
     /**
      * If this is an activity alias, this is the real activity class to run
      * for it.  Otherwise, this is null.
      */
     public String targetActivity;
-    
+
     /**
      * Bit in {@link #flags} indicating whether this activity is able to
      * run in multiple processes.  If
@@ -362,7 +362,7 @@ public class ActivityInfo extends ComponentInfo
      * the {@link android.R.attr#screenOrientation} attribute.
      */
     public static final int SCREEN_ORIENTATION_SENSOR = 4;
-  
+
     /**
      * Constant corresponding to <code>nosensor</code> in
      * the {@link android.R.attr#screenOrientation} attribute.
@@ -427,7 +427,7 @@ public class ActivityInfo extends ComponentInfo
      * The preferred screen orientation this activity would like to run in.
      * From the {@link android.R.attr#screenOrientation} attribute, one of
      * {@link #SCREEN_ORIENTATION_UNSPECIFIED},
-     * {@link #SCREEN_ORIENTATION_LANDSCAPE}, 
+     * {@link #SCREEN_ORIENTATION_LANDSCAPE},
      * {@link #SCREEN_ORIENTATION_PORTRAIT},
      * {@link #SCREEN_ORIENTATION_USER},
      * {@link #SCREEN_ORIENTATION_BEHIND},
@@ -445,7 +445,7 @@ public class ActivityInfo extends ComponentInfo
      */
     @ScreenOrientation
     public int screenOrientation = SCREEN_ORIENTATION_UNSPECIFIED;
-    
+
     /**
      * Bit in {@link #configChanges} that indicates that the activity
      * can itself handle changes to the IMSI MCC.  Set from the
@@ -552,7 +552,7 @@ public class ActivityInfo extends ComponentInfo
      * constant starts at the high bits.
      */
     public static final int CONFIG_FONT_SCALE = 0x40000000;
-    
+
     /** @hide
      * Unfortunately the constants for config changes in native code are
      * different from ActivityInfo. :(  Here are the values we should use for the
@@ -702,7 +702,7 @@ public class ActivityInfo extends ComponentInfo
      */
     public int lockTaskLaunchMode;
 
-    public InitialLayout initialLayout;
+    public Layout layout;
 
     public ActivityInfo() {
     }
@@ -724,7 +724,7 @@ public class ActivityInfo extends ComponentInfo
         maxRecents = orig.maxRecents;
         resizeable = orig.resizeable;
         lockTaskLaunchMode = orig.lockTaskLaunchMode;
-        initialLayout = orig.initialLayout;
+        layout = orig.layout;
     }
 
     /**
@@ -771,10 +771,10 @@ public class ActivityInfo extends ComponentInfo
         }
         pw.println(prefix + "resizeable=" + resizeable + " lockTaskLaunchMode="
                 + lockTaskLaunchModeToString(lockTaskLaunchMode));
-        if (initialLayout != null) {
-            pw.println(prefix + "initialLayout=" + initialLayout.width + "|"
-                    + initialLayout.widthFraction + ", " + initialLayout.height + "|"
-                    + initialLayout.heightFraction + ", " + initialLayout.gravity);
+        if (layout != null) {
+            pw.println(prefix + "initialLayout=" + layout.width + "|"
+                    + layout.widthFraction + ", " + layout.height + "|"
+                    + layout.heightFraction + ", " + layout.gravity);
         }
         super.dumpBack(pw, prefix);
     }
@@ -807,13 +807,14 @@ public class ActivityInfo extends ComponentInfo
         dest.writeInt(maxRecents);
         dest.writeInt(resizeable ? 1 : 0);
         dest.writeInt(lockTaskLaunchMode);
-        if (initialLayout != null) {
+        if (layout != null) {
             dest.writeInt(1);
-            dest.writeInt(initialLayout.width);
-            dest.writeFloat(initialLayout.widthFraction);
-            dest.writeInt(initialLayout.height);
-            dest.writeFloat(initialLayout.heightFraction);
-            dest.writeInt(initialLayout.gravity);
+            dest.writeInt(layout.width);
+            dest.writeFloat(layout.widthFraction);
+            dest.writeInt(layout.height);
+            dest.writeFloat(layout.heightFraction);
+            dest.writeInt(layout.gravity);
+            dest.writeInt(layout.minimalSize);
         } else {
             dest.writeInt(0);
         }
@@ -848,26 +849,28 @@ public class ActivityInfo extends ComponentInfo
         resizeable = (source.readInt() == 1);
         lockTaskLaunchMode = source.readInt();
         if (source.readInt() == 1) {
-            initialLayout = new InitialLayout(source);
+            layout = new Layout(source);
         }
     }
 
-    public static final class InitialLayout {
-        public InitialLayout(int width, float widthFraction, int height, float heightFraction,
-                int gravity) {
+    public static final class Layout {
+        public Layout(int width, float widthFraction, int height, float heightFraction, int gravity,
+                int minimalSize) {
             this.width = width;
             this.widthFraction = widthFraction;
             this.height = height;
             this.heightFraction = heightFraction;
             this.gravity = gravity;
+            this.minimalSize = minimalSize;
         }
 
-        InitialLayout(Parcel source) {
+        Layout(Parcel source) {
             width = source.readInt();
             widthFraction = source.readFloat();
             height = source.readInt();
             heightFraction = source.readFloat();
             gravity = source.readInt();
+            minimalSize = source.readInt();
         }
 
         public final int width;
@@ -875,5 +878,6 @@ public class ActivityInfo extends ComponentInfo
         public final int height;
         public final float heightFraction;
         public final int gravity;
+        public final int minimalSize;
     }
 }

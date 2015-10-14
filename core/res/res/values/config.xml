@@ -2321,7 +2321,7 @@
 
     <!-- Flag indicating device support for EAP SIM, AKA, AKA' -->
     <bool name="config_eap_sim_based_auth_supported">true</bool>
- 
+
     <!-- How long history of previous vibrations should be kept for the dumpsys. -->
     <integer name="config_previousVibrationsDumpLimit">20</integer>
 
@@ -2352,4 +2352,8 @@
     <!-- Name of the component to handle network policy notifications. If present,
          disables NetworkPolicyManagerService's presentation of data-usage notifications. -->
     <string translatable="false" name="config_networkPolicyNotificationComponent"></string>
+
+    <!-- The fraction of display size (lower of height and width) that will be used to determine
+         the default minimal size for resizeable tasks. -->
+    <fraction name="config_displayFractionForDefaultMinimalSizeOfResizeableTask">25%</fraction>
 </resources>

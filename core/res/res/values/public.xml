@@ -2662,8 +2662,9 @@
 
     <public type="attr" name="listMenuViewStyle" />
     <public type="attr" name="subMenuArrow" />
-    <public type="attr" name="activityWidth" />
-    <public type="attr" name="activityHeight" />
+    <public type="attr" name="initialWidth" />
+    <public type="attr" name="initialHeight" />
+    <public type="attr" name="minimalSize" />
     <public type="attr" name="resizeableActivity" />
     <public type="attr" name="titleMargin" />
     <public type="attr" name="titleMarginStart" />

@@ -4572,7 +4572,7 @@ final class ActivityStack {
         // add the task to stack first, mTaskPositioner might need the stack association
         addTask(task, toTop, false);
         if (mTaskPositioner != null) {
-            mTaskPositioner.updateDefaultBounds(task, mTaskHistory, info.initialLayout);
+            mTaskPositioner.updateDefaultBounds(task, mTaskHistory, info.layout);
         } else if (mBounds != null && task.mResizeable) {
             task.updateOverrideConfiguration(mBounds);
         }

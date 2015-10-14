@@ -217,6 +217,9 @@ final class TaskRecord {
     // The information is persisted and used to determine the appropriate stack to launch the
     // task into on restore.
     Rect mLastNonFullscreenBounds = null;
+    // Minimal size for width/height of this task when it's resizeable. -1 means it should use the
+    // default minimal size.
+    final int mMinimalSize;
 
     Configuration mOverrideConfig = Configuration.EMPTY;
 
@@ -235,6 +238,7 @@ final class TaskRecord {
         mCallingUid = info.applicationInfo.uid;
         mCallingPackage = info.packageName;
         setIntent(_intent, info);
+        mMinimalSize = info != null && info.layout != null ? info.layout.minimalSize : -1;
     }
 
     TaskRecord(ActivityManagerService service, int _taskId, ActivityInfo info, Intent _intent,
@@ -263,6 +267,7 @@ final class TaskRecord {
         mTaskToReturnTo = HOME_ACTIVITY_TYPE;
         userId = UserHandle.getUserId(info.applicationInfo.uid);
         lastTaskDescription = _taskDescription;
+        mMinimalSize = info != null && info.layout != null ? info.layout.minimalSize : -1;
     }
 
     private TaskRecord(ActivityManagerService service, int _taskId, Intent _intent,
@@ -310,6 +315,8 @@ final class TaskRecord {
         mCallingPackage = callingPackage;
         mResizeable = resizeable;
         mPrivileged = privileged;
+        ActivityInfo info = mActivities.get(0).info;
+        mMinimalSize = info != null && info.layout != null ? info.layout.minimalSize : -1;
     }
 
     void touchActiveTime() {

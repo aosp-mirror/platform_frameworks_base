@@ -333,10 +333,8 @@ package android {
     field public static final int activatedBackgroundIndicator = 16843517; // 0x10102fd
     field public static final int activityCloseEnterAnimation = 16842938; // 0x10100ba
     field public static final int activityCloseExitAnimation = 16842939; // 0x10100bb
-    field public static final int activityHeight = 16844021; // 0x10104f5
     field public static final int activityOpenEnterAnimation = 16842936; // 0x10100b8
     field public static final int activityOpenExitAnimation = 16842937; // 0x10100b9
-    field public static final int activityWidth = 16844020; // 0x10104f4
     field public static final int addPrintersActivity = 16843750; // 0x10103e6
     field public static final int addStatesFromChildren = 16842992; // 0x10100f0
     field public static final int adjustViewBounds = 16843038; // 0x101011e
@@ -415,7 +413,7 @@ package android {
     field public static final int buttonBarNeutralButtonStyle = 16843914; // 0x101048a
     field public static final int buttonBarPositiveButtonStyle = 16843913; // 0x1010489
     field public static final int buttonBarStyle = 16843566; // 0x101032e
-    field public static final int buttonGravity = 16844029; // 0x10104fd
+    field public static final int buttonGravity = 16844030; // 0x10104fe
     field public static final int buttonStyle = 16842824; // 0x1010048
     field public static final int buttonStyleInset = 16842826; // 0x101004a
     field public static final int buttonStyleSmall = 16842825; // 0x1010049
@@ -465,7 +463,7 @@ package android {
     field public static final int codes = 16843330; // 0x1010242
     field public static final int collapseColumns = 16843083; // 0x101014b
     field public static final int collapseContentDescription = 16843984; // 0x10104d0
-    field public static final int collapseIcon = 16844030; // 0x10104fe
+    field public static final int collapseIcon = 16844031; // 0x10104ff
     field public static final int color = 16843173; // 0x10101a5
     field public static final int colorAccent = 16843829; // 0x1010435
     field public static final int colorActivatedHighlight = 16843664; // 0x1010390
@@ -506,7 +504,7 @@ package android {
     field public static final int contentInsetRight = 16843862; // 0x1010456
     field public static final int contentInsetStart = 16843859; // 0x1010453
     field public static final int contextClickable = 16844007; // 0x10104e7
-    field public static final int contextPopupMenuStyle = 16844032; // 0x1010500
+    field public static final int contextPopupMenuStyle = 16844033; // 0x1010501
     field public static final int controlX1 = 16843772; // 0x10103fc
     field public static final int controlX2 = 16843774; // 0x10103fe
     field public static final int controlY1 = 16843773; // 0x10103fd
@@ -765,8 +763,10 @@ package android {
     field public static final int indicatorStart = 16843729; // 0x10103d1
     field public static final int inflatedId = 16842995; // 0x10100f3
     field public static final int initOrder = 16842778; // 0x101001a
+    field public static final int initialHeight = 16844021; // 0x10104f5
     field public static final int initialKeyguardLayout = 16843714; // 0x10103c2
     field public static final int initialLayout = 16843345; // 0x1010251
+    field public static final int initialWidth = 16844020; // 0x10104f4
     field public static final int innerRadius = 16843359; // 0x101025f
     field public static final int innerRadiusRatio = 16843163; // 0x101019b
     field public static final deprecated int inputMethod = 16843112; // 0x1010168
@@ -872,7 +872,7 @@ package android {
     field public static final int layout_y = 16843136; // 0x1010180
     field public static final int left = 16843181; // 0x10101ad
     field public static final int letterSpacing = 16843958; // 0x10104b6
-    field public static final int level = 16844031; // 0x10104ff
+    field public static final int level = 16844032; // 0x1010500
     field public static final int lineSpacingExtra = 16843287; // 0x1010217
     field public static final int lineSpacingMultiplier = 16843288; // 0x1010218
     field public static final int lines = 16843092; // 0x1010154
@@ -905,7 +905,7 @@ package android {
     field public static final int marqueeRepeatLimit = 16843293; // 0x101021d
     field public static final int matchOrder = 16843855; // 0x101044f
     field public static final int max = 16843062; // 0x1010136
-    field public static final int maxButtonHeight = 16844028; // 0x10104fc
+    field public static final int maxButtonHeight = 16844029; // 0x10104fd
     field public static final int maxDate = 16843584; // 0x1010340
     field public static final int maxEms = 16843095; // 0x1010157
     field public static final int maxHeight = 16843040; // 0x1010120
@@ -933,6 +933,7 @@ package android {
     field public static final int minResizeWidth = 16843669; // 0x1010395
     field public static final int minSdkVersion = 16843276; // 0x101020c
     field public static final int minWidth = 16843071; // 0x101013f
+    field public static final int minimalSize = 16844022; // 0x10104f6
     field public static final int minimumHorizontalAngle = 16843901; // 0x101047d
     field public static final int minimumVerticalAngle = 16843902; // 0x101047e
     field public static final int mipMap = 16843725; // 0x10103cd
@@ -1089,7 +1090,7 @@ package android {
     field public static final int resizeClip = 16843983; // 0x10104cf
     field public static final int resizeMode = 16843619; // 0x1010363
     field public static final int resizeable = 16843405; // 0x101028d
-    field public static final int resizeableActivity = 16844022; // 0x10104f6
+    field public static final int resizeableActivity = 16844023; // 0x10104f7
     field public static final int resource = 16842789; // 0x1010025
     field public static final int restoreAnyVersion = 16843450; // 0x10102ba
     field public static final deprecated int restoreNeedsApplication = 16843421; // 0x101029d
@@ -1317,7 +1318,7 @@ package android {
     field public static final int textAppearanceListItemSmall = 16843679; // 0x101039f
     field public static final int textAppearanceMedium = 16842817; // 0x1010041
     field public static final int textAppearanceMediumInverse = 16842820; // 0x1010044
-    field public static final int textAppearancePopupMenuHeader = 16844033; // 0x1010501
+    field public static final int textAppearancePopupMenuHeader = 16844034; // 0x1010502
     field public static final int textAppearanceSearchResultSubtitle = 16843424; // 0x10102a0
     field public static final int textAppearanceSearchResultTitle = 16843425; // 0x10102a1
     field public static final int textAppearanceSmall = 16842818; // 0x1010042
@@ -1386,11 +1387,11 @@ package android {
     field public static final int tintMode = 16843771; // 0x10103fb
     field public static final int title = 16843233; // 0x10101e1
     field public static final int titleCondensed = 16843234; // 0x10101e2
-    field public static final int titleMargin = 16844023; // 0x10104f7
-    field public static final int titleMarginBottom = 16844027; // 0x10104fb
-    field public static final int titleMarginEnd = 16844025; // 0x10104f9
-    field public static final int titleMarginStart = 16844024; // 0x10104f8
-    field public static final int titleMarginTop = 16844026; // 0x10104fa
+    field public static final int titleMargin = 16844024; // 0x10104f8
+    field public static final int titleMarginBottom = 16844028; // 0x10104fc
+    field public static final int titleMarginEnd = 16844026; // 0x10104fa
+    field public static final int titleMarginStart = 16844025; // 0x10104f9
+    field public static final int titleMarginTop = 16844027; // 0x10104fb
     field public static final int titleTextAppearance = 16843822; // 0x101042e
     field public static final int titleTextColor = 16844003; // 0x10104e3
     field public static final int titleTextStyle = 16843512; // 0x10102f8
@@ -9181,8 +9182,8 @@ package android.content.pm {
     field public int configChanges;
     field public int documentLaunchMode;
     field public int flags;
-    field public android.content.pm.ActivityInfo.InitialLayout initialLayout;
     field public int launchMode;
+    field public android.content.pm.ActivityInfo.Layout layout;
     field public int maxRecents;
     field public java.lang.String parentActivityName;
     field public java.lang.String permission;
@@ -9195,11 +9196,12 @@ package android.content.pm {
     field public int uiOptions;
   }
 
-  public static final class ActivityInfo.InitialLayout {
-    ctor public ActivityInfo.InitialLayout(int, float, int, float, int);
+  public static final class ActivityInfo.Layout {
+    ctor public ActivityInfo.Layout(int, float, int, float, int, int);
     field public final int gravity;
     field public final int height;
     field public final float heightFraction;
+    field public final int minimalSize;
     field public final int width;
     field public final float widthFraction;
   }
