@@ -1820,7 +1820,7 @@
     <permission android:name="android.permission.UPDATE_DEVICE_STATS"
         android:protectionLevel="signature|privileged" />
 
-    <!-- @SystemApi @hide Allows an application to collect battery statistics -->
+    <!-- @SystemApi @hide Allows an application to collect application operation statistics -->
     <permission android:name="android.permission.GET_APP_OPS_STATS"
         android:protectionLevel="signature|privileged|development" />
 
