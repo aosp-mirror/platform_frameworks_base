@@ -162,6 +162,14 @@ class TaskStackViewTouchHandler implements SwipeHelper.Callback {
                 mVelocityTracker.addMovement(createMotionEventForStackScroll(ev));
                 break;
             }
+            case MotionEvent.ACTION_POINTER_DOWN: {
+                final int index = ev.getActionIndex();
+                mActivePointerId = ev.getPointerId(index);
+                mLastMotionX = (int) ev.getX(index);
+                mLastMotionY = (int) ev.getY(index);
+                mLastP = mSv.mLayoutAlgorithm.screenYToCurveProgress(mLastMotionY);
+                break;
+            }
             case MotionEvent.ACTION_MOVE: {
                 if (mActivePointerId == INACTIVE_POINTER_ID) break;
 
@@ -185,6 +193,20 @@ class TaskStackViewTouchHandler implements SwipeHelper.Callback {
                 mLastMotionX = x;
                 mLastMotionY = y;
                 mLastP = mSv.mLayoutAlgorithm.screenYToCurveProgress(mLastMotionY);
+                break;
+            }
+            case MotionEvent.ACTION_POINTER_UP: {
+                int pointerIndex = ev.getActionIndex();
+                int pointerId = ev.getPointerId(pointerIndex);
+                if (pointerId == mActivePointerId) {
+                    // Select a new active pointer id and reset the motion state
+                    final int newPointerIndex = (pointerIndex == 0) ? 1 : 0;
+                    mActivePointerId = ev.getPointerId(newPointerIndex);
+                    mLastMotionX = (int) ev.getX(newPointerIndex);
+                    mLastMotionY = (int) ev.getY(newPointerIndex);
+                    mLastP = mSv.mLayoutAlgorithm.screenYToCurveProgress(mLastMotionY);
+                    mVelocityTracker.clear();
+                }
                 break;
             }
             case MotionEvent.ACTION_CANCEL:
