@@ -162,7 +162,7 @@ class TaskStackViewTouchHandler implements SwipeHelper.Callback {
                 mActivePointerId = ev.getPointerId(index);
                 mLastMotionX = (int) ev.getX(index);
                 mLastMotionY = (int) ev.getY(index);
-                mLastP = mSv.mLayoutAlgorithm.screenYToCurveProgress(mLastMotionY);
+                mLastP = layoutAlgorithm.sCurve.xToP(mLastMotionY, layoutAlgorithm.mStackRect);
                 break;
             }
             case MotionEvent.ACTION_MOVE: {
@@ -199,7 +199,7 @@ class TaskStackViewTouchHandler implements SwipeHelper.Callback {
                     mActivePointerId = ev.getPointerId(newPointerIndex);
                     mLastMotionX = (int) ev.getX(newPointerIndex);
                     mLastMotionY = (int) ev.getY(newPointerIndex);
-                    mLastP = mSv.mLayoutAlgorithm.screenYToCurveProgress(mLastMotionY);
+                    mLastP = layoutAlgorithm.sCurve.xToP(mLastMotionY, layoutAlgorithm.mStackRect);
                     mVelocityTracker.clear();
                 }
                 break;
