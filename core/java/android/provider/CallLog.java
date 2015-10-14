@@ -38,7 +38,6 @@ import android.telecom.PhoneAccountHandle;
 import android.telecom.TelecomManager;
 import android.telephony.PhoneNumberUtils;
 import android.text.TextUtils;
-import android.util.Log;
 
 import com.android.internal.telephony.CallerInfo;
 import com.android.internal.telephony.PhoneConstants;
@@ -406,6 +405,14 @@ public class CallLog {
         public static final String SUB_ID = "sub_id";
 
         /**
+         * The post-dial portion of a dialed number, including any digits dialed after a
+         * {@link TelecomManager#DTMF_CHARACTER_PAUSE} or a {@link
+         * TelecomManager#DTMF_CHARACTER_WAIT} and these characters themselves.
+         * <P>Type: TEXT</P>
+         */
+        public static final String POST_DIAL_DIGITS = "post_dial_digits";
+
+        /**
          * If a successful call is made that is longer than this duration, update the phone number
          * in the ContactsProvider with the normalized version of the number, based on the user's
          * current country code.
@@ -436,7 +443,7 @@ public class CallLog {
         public static Uri addCall(CallerInfo ci, Context context, String number,
                 int presentation, int callType, int features, PhoneAccountHandle accountHandle,
                 long start, int duration, Long dataUsage) {
-            return addCall(ci, context, number, presentation, callType, features, accountHandle,
+            return addCall(ci, context, number, "", presentation, callType, features, accountHandle,
                     start, duration, dataUsage, false, false);
         }
 
@@ -466,10 +473,11 @@ public class CallLog {
          * {@hide}
          */
         public static Uri addCall(CallerInfo ci, Context context, String number,
-                                  int presentation, int callType, int features, PhoneAccountHandle accountHandle,
-                                  long start, int duration, Long dataUsage, boolean addForAllUsers) {
-            return addCall(ci, context, number, presentation, callType, features, accountHandle,
-                    start, duration, dataUsage, addForAllUsers, false);
+                String postDialDigits, int presentation, int callType, int features,
+                PhoneAccountHandle accountHandle, long start, int duration, Long dataUsage,
+                boolean addForAllUsers) {
+            return addCall(ci, context, number, postDialDigits, presentation, callType, features,
+                    accountHandle, start, duration, dataUsage, addForAllUsers, false);
         }
 
         /**
@@ -479,6 +487,8 @@ public class CallLog {
          * if the contact is unknown.
          * @param context the context used to get the ContentResolver
          * @param number the phone number to be added to the calls db
+         * @param postDialDigits the post-dial digits that were dialed after the number,
+         *        if it was outgoing. Otherwise it is ''.
          * @param presentation enum value from PhoneConstants.PRESENTATION_xxx, which
          *        is set by the network and denotes the number presenting rules for
          *        "allowed", "payphone", "restricted" or "unknown"
@@ -499,8 +509,9 @@ public class CallLog {
          * {@hide}
          */
         public static Uri addCall(CallerInfo ci, Context context, String number,
-                int presentation, int callType, int features, PhoneAccountHandle accountHandle,
-                long start, int duration, Long dataUsage, boolean addForAllUsers, boolean is_read) {
+                String postDialDigits, int presentation, int callType, int features,
+                PhoneAccountHandle accountHandle, long start, int duration, Long dataUsage,
+                boolean addForAllUsers, boolean is_read) {
             final ContentResolver resolver = context.getContentResolver();
             int numberPresentation = PRESENTATION_ALLOWED;
 
@@ -551,6 +562,7 @@ public class CallLog {
             ContentValues values = new ContentValues(6);
 
             values.put(NUMBER, number);
+            values.put(POST_DIAL_DIGITS, postDialDigits);
             values.put(NUMBER_PRESENTATION, Integer.valueOf(numberPresentation));
             values.put(TYPE, Integer.valueOf(callType));
             values.put(FEATURES, features);
