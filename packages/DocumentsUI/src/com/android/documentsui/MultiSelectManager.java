@@ -183,6 +183,10 @@ public final class MultiSelectManager implements View.OnKeyListener {
         mCallbacks.add(callback);
     }
 
+    public boolean hasSelection() {
+        return !mSelection.isEmpty();
+    }
+
     /**
      * Returns a Selection object that provides a live view
      * on the current selection.
@@ -217,7 +221,7 @@ public final class MultiSelectManager implements View.OnKeyListener {
      */
     @VisibleForTesting
     public boolean setItemSelected(int position, boolean selected) {
-        if (mSingleSelect && !mSelection.isEmpty()) {
+        if (mSingleSelect && hasSelection()) {
             clearSelectionQuietly();
         }
         return setItemsSelected(position, 1, selected);
@@ -263,7 +267,7 @@ public final class MultiSelectManager implements View.OnKeyListener {
     private void clearSelectionQuietly() {
         mRanger = null;
 
-        if (mSelection.isEmpty()) {
+        if (!hasSelection()) {
             return;
         }
         if (mIntermediateSelection == null) {
@@ -292,7 +296,7 @@ public final class MultiSelectManager implements View.OnKeyListener {
     @VisibleForTesting
     boolean onSingleTapUp(InputEvent input) {
         if (DEBUG) Log.d(TAG, "Processing tap event.");
-        if (mSelection.isEmpty()) {
+        if (!hasSelection()) {
             // if this is a mouse click on an item, start selection mode.
             // TODO:  && input.isPrimaryButtonPressed(), but it is returning false.
             if (input.isOverItem() && input.isMouseEvent()) {
@@ -335,7 +339,7 @@ public final class MultiSelectManager implements View.OnKeyListener {
      *
      * @param position
      */
-    private void toggleSelection(int position) {
+    void toggleSelection(int position) {
         // Position may be special "no position" during certain
         // transitional phases. If so, skip handling of the event.
         if (position == RecyclerView.NO_POSITION) {
@@ -351,7 +355,7 @@ public final class MultiSelectManager implements View.OnKeyListener {
             if (!canSelect) {
                 return;
             }
-            if (mSingleSelect && !mSelection.isEmpty()) {
+            if (mSingleSelect && hasSelection()) {
                 clearSelectionQuietly();
             }
 
@@ -398,7 +402,7 @@ public final class MultiSelectManager implements View.OnKeyListener {
             if (selected) {
                 boolean canSelect = notifyBeforeItemStateChange(i, true);
                 if (canSelect) {
-                    if (mSingleSelect && !mSelection.isEmpty()) {
+                    if (mSingleSelect && hasSelection()) {
                         clearSelectionQuietly();
                     }
                     selectAndNotify(i);
@@ -1959,7 +1963,11 @@ public final class MultiSelectManager implements View.OnKeyListener {
             }
             if (searchDir != -1) {
                 View targetView = view.focusSearch(searchDir);
-                target = mEnvironment.getAdapterPositionForChildView(targetView);
+                // TargetView can be null, for example, if the user pressed <down> at the bottom of
+                // the list.
+                if (targetView != null) {
+                    target = mEnvironment.getAdapterPositionForChildView(targetView);
+                }
             }
         }
 
@@ -1972,18 +1980,13 @@ public final class MultiSelectManager implements View.OnKeyListener {
         mEnvironment.focusItem(target);
 
         if (event.isShiftPressed()) {
-            if (mSelection.isEmpty()) {
+            if (!hasSelection()) {
                 // If there is no selection, start a selection when the user presses shift-arrow.
                 toggleSelection(mEnvironment.getAdapterPositionForChildView(view));
-            } else {
-                // Deal with b/24802917 (selected items can't be focused) by adjusting the
-                // selection sorted the focused item isn't in the selection.
-                target -= Integer.signum(target - mRanger.mBegin);
-                mRanger.snapSelection(target);
             }
-        } else if (!event.isShiftPressed() && !mSelection.isEmpty()) {
-            // If there is a selection, clear it if the user presses arrow with no shift.
-            clearSelection();
+
+            mRanger.snapSelection(target);
+            notifySelectionChanged();
         }
 
         return true;

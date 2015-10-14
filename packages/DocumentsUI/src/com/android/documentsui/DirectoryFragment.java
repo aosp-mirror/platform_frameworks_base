@@ -68,6 +68,7 @@ import android.support.v7.widget.RecyclerView.LayoutManager;
 import android.support.v7.widget.RecyclerView.OnItemTouchListener;
 import android.support.v7.widget.RecyclerView.RecyclerListener;
 import android.support.v7.widget.RecyclerView.ViewHolder;
+import android.support.v7.widget.SimpleItemAnimator;
 import android.text.TextUtils;
 import android.text.format.DateUtils;
 import android.text.format.Formatter;
@@ -79,12 +80,12 @@ import android.util.TypedValue;
 import android.view.ActionMode;
 import android.view.DragEvent;
 import android.view.GestureDetector;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
-import android.view.View.OnLayoutChangeListener;
 import android.view.ViewGroup;
 import android.view.ViewParent;
 import android.widget.ImageView;
@@ -134,6 +135,7 @@ public class DirectoryFragment extends Fragment {
     private Model mModel;
     private MultiSelectManager mSelectionManager;
     private Model.UpdateListener mModelUpdateListener = new ModelUpdateListener();
+    private ItemClickListener mItemClickListener = new ItemClickListener();
 
     private View mEmptyView;
     private RecyclerView mRecView;
@@ -238,7 +240,7 @@ public class DirectoryFragment extends Fragment {
         // TODO: Rather than update columns on layout changes, push this
         // code (or something like it) into GridLayoutManager.
         mRecView.addOnLayoutChangeListener(
-                new OnLayoutChangeListener() {
+                new View.OnLayoutChangeListener() {
 
                     @Override
                     public void onLayoutChange(
@@ -250,6 +252,9 @@ public class DirectoryFragment extends Fragment {
                         }
                     }
                 });
+
+        // TODO: Restore transition animations.  See b/24802917.
+        ((SimpleItemAnimator) mRecView.getItemAnimator()).setSupportsChangeAnimations(false);
 
         // TODO: Add a divider between views (which might use RecyclerView.ItemDecoration).
         if (DEBUG_ENABLE_DND) {
@@ -450,7 +455,10 @@ public class DirectoryFragment extends Fragment {
     }
 
     private boolean onSingleTapUp(MotionEvent e) {
-        if (Events.isTouchEvent(e) && mSelectionManager.getSelection().isEmpty()) {
+        // Only respond to touch events.  Single-click mouse events are selection events and are
+        // handled by the selection manager.  Tap events that occur while the selection manager is
+        // active are also selection events.
+        if (Events.isTouchEvent(e) && !mSelectionManager.hasSelection()) {
             int position = getEventAdapterPosition(e);
             if (position != RecyclerView.NO_POSITION) {
                 return handleViewItem(position);
@@ -825,7 +833,7 @@ public class DirectoryFragment extends Fragment {
         Snackbars.makeSnackbar(activity, message, Snackbar.LENGTH_LONG)
                 .setAction(
                         R.string.undo,
-                        new android.view.View.OnClickListener() {
+                        new View.OnClickListener() {
                             @Override
                             public void onClick(View view) {}
                         })
@@ -889,10 +897,16 @@ public class DirectoryFragment extends Fragment {
     // Provide a reference to the views for each data item
     // Complex data items may need more than one view per item, and
     // you provide access to all the views for a data item in a view holder
-    private static final class DocumentHolder extends RecyclerView.ViewHolder {
+    private static final class DocumentHolder
+            extends RecyclerView.ViewHolder
+            implements View.OnKeyListener
+    {
         // each data item is just a string in this case
         public View view;
         public String docId;  // The stable document id.
+        private ClickListener mClickListener;
+        private View.OnKeyListener mKeyListener;
+
         public DocumentHolder(View view) {
             super(view);
             this.view = view;
@@ -900,6 +914,38 @@ public class DirectoryFragment extends Fragment {
             // So we set it here.  Note that touch mode focus is a separate issue - see
             // View.setFocusableInTouchMode and View.isInTouchMode for more info.
             this.view.setFocusable(true);
+            this.view.setOnKeyListener(this);
+        }
+
+        @Override
+        public boolean onKey(View v, int keyCode, KeyEvent event) {
+            // Intercept enter key-up events, and treat them as clicks.  Forward other events.
+            if (event.getAction() == KeyEvent.ACTION_UP &&
+                    keyCode == KeyEvent.KEYCODE_ENTER) {
+                if (mClickListener != null) {
+                    mClickListener.onClick(this);
+                }
+                return true;
+            } else if (mKeyListener != null) {
+                return mKeyListener.onKey(v, keyCode, event);
+            }
+            return false;
+        }
+
+        public void addClickListener(ClickListener listener) {
+            // Just handle one for now; switch to a list if necessary.
+            checkState(mClickListener == null);
+            mClickListener = listener;
+        }
+
+        public void addOnKeyListener(View.OnKeyListener listener) {
+            // Just handle one for now; switch to a list if necessary.
+            checkState(mKeyListener == null);
+            mKeyListener = listener;
+        }
+
+        interface ClickListener {
+            public void onClick(DocumentHolder doc);
         }
     }
 
@@ -952,10 +998,11 @@ public class DirectoryFragment extends Fragment {
                 default:
                     throw new IllegalStateException("Unsupported layout mode.");
             }
-            // Key event bubbling doesn't work properly, so instead of setting one key listener on
-            // the RecyclerView, we have to set it on each Item.  See b/24865023.
-            item.setOnKeyListener(mSelectionManager);
-            return new DocumentHolder(item);
+
+            DocumentHolder holder = new DocumentHolder(item);
+            holder.addClickListener(mItemClickListener);
+            holder.addOnKeyListener(mSelectionManager);
+            return holder;
         }
 
         @Override
@@ -1954,6 +2001,18 @@ public class DirectoryFragment extends Fragment {
              * Called when an update has been attempted but failed.
              */
             void onModelUpdateFailed(Exception e) {}
+        }
+    }
+
+    private class ItemClickListener implements DocumentHolder.ClickListener {
+        @Override
+        public void onClick(DocumentHolder doc) {
+            final int position = doc.getAdapterPosition();
+            if (mSelectionManager.hasSelection()) {
+                mSelectionManager.toggleSelection(position);
+            } else {
+                handleViewItem(position);
+            }
         }
     }
 
