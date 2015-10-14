@@ -429,7 +429,8 @@ public final class InputMethodInfo implements Parcelable {
 
     public void dump(Printer pw, String prefix) {
         pw.println(prefix + "mId=" + mId
-                + " mSettingsActivityName=" + mSettingsActivityName);
+                + " mSettingsActivityName=" + mSettingsActivityName
+                + " mSupportsSwitchingToNextInputMethod=" + mSupportsSwitchingToNextInputMethod);
         pw.println(prefix + "mIsDefaultResId=0x"
                 + Integer.toHexString(mIsDefaultResId));
         pw.println(prefix + "Service:");
