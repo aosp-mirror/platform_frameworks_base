@@ -441,6 +441,5 @@
     <string name="clock_seconds_desc" msgid="6282693067130470675">"Rodyti laikrodžio sekundes būsenos juostoje. Tai gali paveikti akumuliatoriaus naudojimo laiką."</string>
     <string name="qs_rearrange" msgid="8060918697551068765">"Pertvarkyti sparčiuosius nustatymus"</string>
     <string name="show_brightness" msgid="6613930842805942519">"Rodyti skaistį sparčiuosiuose nustatymuose"</string>
-    <string name="qs_paging" msgid="7020133150248666132">"Naudoti puslapių kaitą sparčiuosiuose nustatymuose"</string>
     <string name="experimental" msgid="6198182315536726162">"Eksperimentinė versija"</string>
 </resources>

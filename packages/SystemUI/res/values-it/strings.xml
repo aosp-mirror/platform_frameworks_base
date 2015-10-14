@@ -441,6 +441,5 @@
     <string name="clock_seconds_desc" msgid="6282693067130470675">"Mostra i secondi nell\'orologio nella barra di stato. Ciò potrebbe ridurre la durata della carica della batteria."</string>
     <string name="qs_rearrange" msgid="8060918697551068765">"Riorganizza Impostazioni rapide"</string>
     <string name="show_brightness" msgid="6613930842805942519">"Mostra luminosità in Impostazioni rapide"</string>
-    <string name="qs_paging" msgid="7020133150248666132">"Utilizza nuovo layout in Impostazioni rapide"</string>
     <string name="experimental" msgid="6198182315536726162">"Sperimentali"</string>
 </resources>

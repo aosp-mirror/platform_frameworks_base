@@ -439,6 +439,5 @@
     <string name="clock_seconds_desc" msgid="6282693067130470675">"ສະ​ແດງວິ​ນາ​ທີ​ໂມງ​ຢູ່​ໃນ​ແຖບ​ສະ​ຖາ​ນະ. ອາດ​ຈະ​ມີ​ຜົນ​ກະ​ທົບ​ຕໍ່​ອາ​ຍຸ​ແບັດ​ເຕີ​ຣີ."</string>
     <string name="qs_rearrange" msgid="8060918697551068765">"ຈັດ​ວາງ​ການ​ຕັ້ງ​ຄ່າ​ດ່ວນ​ຄືນ​ໃໝ່"</string>
     <string name="show_brightness" msgid="6613930842805942519">"ສະ​ແດງ​ຄວາມ​ແຈ້ງ​ຢູ່​ໃນ​ການ​ຕັ້ງ​ຄ່າ​ດ່ວນ"</string>
-    <string name="qs_paging" msgid="7020133150248666132">"ໃຊ້​ການ​ໃສ່​ໜ້າ​ຢູ່​ໃນ​ການ​ຕັ້ງ​ຄ່າ​ດ່ວນ"</string>
     <string name="experimental" msgid="6198182315536726162">"ຍັງຢູ່ໃນການທົດລອງ"</string>
 </resources>

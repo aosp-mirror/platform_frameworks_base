@@ -441,6 +441,5 @@
     <string name="clock_seconds_desc" msgid="6282693067130470675">"ステータスバーに時計の秒を表示します。電池使用量に影響する可能性があります。"</string>
     <string name="qs_rearrange" msgid="8060918697551068765">"クイック設定を並べ替え"</string>
     <string name="show_brightness" msgid="6613930842805942519">"クイック設定に明るさ調整バーを表示する"</string>
-    <string name="qs_paging" msgid="7020133150248666132">"クイック設定でページ設定を使用する"</string>
     <string name="experimental" msgid="6198182315536726162">"試験運用版"</string>
 </resources>

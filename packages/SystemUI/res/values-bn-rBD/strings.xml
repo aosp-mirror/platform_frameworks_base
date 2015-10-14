@@ -439,6 +439,5 @@
     <string name="clock_seconds_desc" msgid="6282693067130470675">"স্থিতি দন্ডে ঘড়ির সেকেন্ড দেখায়৷ ব্যাটারি লাইফকে প্রভাবিত করতে পারে৷"</string>
     <string name="qs_rearrange" msgid="8060918697551068765">"দ্রুত সেটিংসে পুনরায় সাজান"</string>
     <string name="show_brightness" msgid="6613930842805942519">"দ্রুত সেটিংসে উজ্জ্বলতা দেখান"</string>
-    <string name="qs_paging" msgid="7020133150248666132">"দ্রুত সেটিংসে পেজিং ব্যবহার করুন"</string>
     <string name="experimental" msgid="6198182315536726162">"পরীক্ষামূলক"</string>
 </resources>

@@ -439,6 +439,5 @@
     <string name="clock_seconds_desc" msgid="6282693067130470675">"நிலைப் பட்டியில் கடிகார வினாடிகளைக் காட்டும். பேட்டரியின் ஆயுளைக் குறைக்கலாம்."</string>
     <string name="qs_rearrange" msgid="8060918697551068765">"விரைவு அமைப்புகளை மறுவரிசைப்படுத்து"</string>
     <string name="show_brightness" msgid="6613930842805942519">"விரைவு அமைப்புகளில் ஒளிர்வுப் பட்டியைக் காட்டு"</string>
-    <string name="qs_paging" msgid="7020133150248666132">"விரைவு அமைப்புகளில் புதிய பக்கத் தளவமைப்பைப் பயன்படுத்து"</string>
     <string name="experimental" msgid="6198182315536726162">"சோதனை முயற்சி"</string>
 </resources>

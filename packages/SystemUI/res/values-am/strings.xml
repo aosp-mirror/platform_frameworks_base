@@ -439,6 +439,5 @@
     <string name="clock_seconds_desc" msgid="6282693067130470675">"የሰዓት ሰከንዶችን በሁኔታ አሞሌ ውስጥ አሳይ። በባትሪ ዕድሜ ላይ ተጽዕኖ ሊኖርው ይችል ይሆናል።"</string>
     <string name="qs_rearrange" msgid="8060918697551068765">"ፈጣን ቅንብሮችን ዳግም ያደራጁ"</string>
     <string name="show_brightness" msgid="6613930842805942519">"በፈጣን ቅንብሮች ውስጥ ብሩህነትን አሳይ"</string>
-    <string name="qs_paging" msgid="7020133150248666132">"በፈጣን ቅንብሮች ውስጥ ምልክት መጥሪያን ይጠቀሙ"</string>
     <string name="experimental" msgid="6198182315536726162">"የሙከራ"</string>
 </resources>

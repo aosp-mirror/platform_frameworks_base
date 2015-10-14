@@ -439,6 +439,5 @@
     <string name="clock_seconds_desc" msgid="6282693067130470675">"Tunjukkan saat jam dalam bar status. Mungkin menjejaskan hayat bateri."</string>
     <string name="qs_rearrange" msgid="8060918697551068765">"Susun Semula Tetapan Pantas"</string>
     <string name="show_brightness" msgid="6613930842805942519">"Tunjukkan kecerahan dalam Tetapan Pantas"</string>
-    <string name="qs_paging" msgid="7020133150248666132">"Gunakan penghalaman dalam Tetapan Pantas"</string>
     <string name="experimental" msgid="6198182315536726162">"Percubaan"</string>
 </resources>

@@ -439,6 +439,5 @@
     <string name="clock_seconds_desc" msgid="6282693067130470675">"បង្ហាញវិនាទីនៅលើរបារស្ថានភាពអាចនឹងប៉ះពាល់ដល់ថាមពលថ្ម។"</string>
     <string name="qs_rearrange" msgid="8060918697551068765">"រៀបចំការកំណត់រហ័សឡើងវិញ"</string>
     <string name="show_brightness" msgid="6613930842805942519">"បង្ហាញកម្រិតពន្លឺនៅក្នុងការកំណត់រហ័ស"</string>
-    <string name="qs_paging" msgid="7020133150248666132">"ប្រើការចុះទំព័រនៅក្នុងការកំណត់រហ័ស"</string>
     <string name="experimental" msgid="6198182315536726162">"ពិសោធន៍"</string>
 </resources>

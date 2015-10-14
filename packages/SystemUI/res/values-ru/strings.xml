@@ -443,6 +443,5 @@
     <string name="clock_seconds_desc" msgid="6282693067130470675">"Показывать в строке состояния время с точностью до секунды (заряд батареи может расходоваться быстрее)."</string>
     <string name="qs_rearrange" msgid="8060918697551068765">"Изменить порядок Быстрых настроек"</string>
     <string name="show_brightness" msgid="6613930842805942519">"Добавить яркость в Быстрые настройки"</string>
-    <string name="qs_paging" msgid="7020133150248666132">"Разбить Быстрые настройки на страницы"</string>
     <string name="experimental" msgid="6198182315536726162">"Экспериментальная функция"</string>
 </resources>

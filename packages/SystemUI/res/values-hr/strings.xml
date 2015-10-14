@@ -440,6 +440,5 @@
     <string name="clock_seconds_desc" msgid="6282693067130470675">"Prikazuju se sekunde na satu na traci statusa. Može utjecati na trajanje baterije."</string>
     <string name="qs_rearrange" msgid="8060918697551068765">"Promijeni raspored Brzih postavki"</string>
     <string name="show_brightness" msgid="6613930842805942519">"Prikaži svjetlinu u Brzim postavkama"</string>
-    <string name="qs_paging" msgid="7020133150248666132">"Upotrijebi redni broj stranice u Brzim postavkama"</string>
     <string name="experimental" msgid="6198182315536726162">"Eksperimentalno"</string>
 </resources>

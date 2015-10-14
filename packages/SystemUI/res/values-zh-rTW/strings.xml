@@ -441,6 +441,5 @@
     <string name="clock_seconds_desc" msgid="6282693067130470675">"在狀態列中顯示時鐘秒數。這可能會影響電池續航力。"</string>
     <string name="qs_rearrange" msgid="8060918697551068765">"重新排列快速設定"</string>
     <string name="show_brightness" msgid="6613930842805942519">"在快速設定中顯示亮度"</string>
-    <string name="qs_paging" msgid="7020133150248666132">"在快速設定中使用分頁功能"</string>
     <string name="experimental" msgid="6198182315536726162">"實驗性"</string>
 </resources>

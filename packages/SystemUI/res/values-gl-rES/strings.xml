@@ -441,6 +441,5 @@
     <string name="clock_seconds_desc" msgid="6282693067130470675">"Mostra os segundos do reloxo na barra de estado. Pode influír na duración da batería."</string>
     <string name="qs_rearrange" msgid="8060918697551068765">"Reorganizar Configuración rápida"</string>
     <string name="show_brightness" msgid="6613930842805942519">"Mostrar brillo en Configuración rápida"</string>
-    <string name="qs_paging" msgid="7020133150248666132">"Utilizar paxinación en Configuración rápida"</string>
     <string name="experimental" msgid="6198182315536726162">"Experimental"</string>
 </resources>

@@ -67,12 +67,12 @@
     <string name="usb_debugging_secondary_user_message" msgid="8572228137833020196">"‏کاربری که درحال‌حاضر در این دستگاه وارد سیستم شده نمی‌تواند اشکال‌زدای USB را روشن کند. برای استفاده از این ویژگی، لطفاً به کاربر «سرپرست» تغییر حالت دهید."</string>
     <string name="compat_mode_on" msgid="6623839244840638213">"بزرگ‌نمایی برای پر کردن صفحه"</string>
     <string name="compat_mode_off" msgid="4434467572461327898">"گسترده کردن برای پر کردن صفحه"</string>
-    <string name="screenshot_saving_ticker" msgid="7403652894056693515">"در حال ذخیره تصویر صفحه..."</string>
-    <string name="screenshot_saving_title" msgid="8242282144535555697">"در حال ذخیره تصویر صفحه..."</string>
-    <string name="screenshot_saving_text" msgid="2419718443411738818">"تصویر صفحه ذخیره شد."</string>
-    <string name="screenshot_saved_title" msgid="6461865960961414961">"تصویر صفحه گرفته شد."</string>
+    <string name="screenshot_saving_ticker" msgid="7403652894056693515">"در حال ذخیره عکس صفحه‌نمایش..."</string>
+    <string name="screenshot_saving_title" msgid="8242282144535555697">"در حال ذخیره عکس صفحه‌نمایش..."</string>
+    <string name="screenshot_saving_text" msgid="2419718443411738818">"عکس صفحه‌نمایش ذخیره شد."</string>
+    <string name="screenshot_saved_title" msgid="6461865960961414961">"عکس صفحه‌نمایش گرفته شد."</string>
     <string name="screenshot_saved_text" msgid="1152839647677558815">"برای مشاهده عکس صفحه‌نمایشتان، لمس کنید."</string>
-    <string name="screenshot_failed_title" msgid="705781116746922771">"تصویر صفحه گرفته نشد."</string>
+    <string name="screenshot_failed_title" msgid="705781116746922771">"عکس صفحه‌نمایش گرفته نشد."</string>
     <string name="screenshot_failed_text" msgid="1260203058661337274">"به دلیل فضای ذخیره‌سازی کم یا عدم اجازه برنامه یا سازمانتان، نمی‌توان از صفحه عکس گرفت."</string>
     <string name="usb_preference_title" msgid="6551050377388882787">"‏گزینه‌های انتقال فایل USB"</string>
     <string name="use_mtp_button_title" msgid="4333504413563023626">"‏نصب به‌عنوان دستگاه پخش رسانه (MTP)"</string>
@@ -439,6 +439,5 @@
     <string name="clock_seconds_desc" msgid="6282693067130470675">"ثانیه‌های ساعت را در نوار وضعیت نشان می‌دهد. ممکن است بر ماندگاری باتری تأثیر بگذارد."</string>
     <string name="qs_rearrange" msgid="8060918697551068765">"ترتیب مجدد در تنظیمات سریع"</string>
     <string name="show_brightness" msgid="6613930842805942519">"نمایش روشنایی در تنظیمات سریع"</string>
-    <string name="qs_paging" msgid="7020133150248666132">"استفاده از صفحه‌بندی در تنظیمات سریع"</string>
     <string name="experimental" msgid="6198182315536726162">"آزمایشی"</string>
 </resources>
