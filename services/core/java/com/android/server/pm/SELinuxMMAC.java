@@ -100,6 +100,9 @@ public final class SELinuxMMAC {
     private static final String SEAPP_HASH_FILE =
             Environment.getDataDirectory().toString() + "/system/seapp_hash";
 
+    // Append privapp to existing seinfo label
+    private static final String PRIVILEGED_APP_STR = ":privapp";
+
     /**
      * Load the mac_permissions.xml file containing all seinfo assignments used to
      * label apps. The loaded mac_permissions.xml file is determined by the
@@ -312,6 +315,9 @@ public final class SELinuxMMAC {
                 }
             }
         }
+
+        if (pkg.applicationInfo.isPrivilegedApp())
+            pkg.applicationInfo.seinfo += PRIVILEGED_APP_STR;
 
         if (DEBUG_POLICY_INSTALL) {
             Slog.i(TAG, "package (" + pkg.packageName + ") labeled with " +
