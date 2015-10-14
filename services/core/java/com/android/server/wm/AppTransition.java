@@ -760,26 +760,24 @@ public class AppTransition implements Dump {
                     a = createAspectScaledThumbnailEnterNonFullscreenAnimationLocked(
                             containingFrame, surfaceInsets, taskId);
                 } else {
+                    mTmpFromClipRect.set(containingFrame);
+                    // exclude top screen decor (status bar) region from the source clip.
+                    mTmpFromClipRect.top = contentInsets.top;
                     // App window scaling up to become full screen
+                    mTmpToClipRect.set(containingFrame);
                     if (orientation == Configuration.ORIENTATION_PORTRAIT) {
                         // In portrait, we scale the width and clip to the top/left square
                         scale = thumbWidth / appWidth;
                         scaledTopDecor = (int) (scale * contentInsets.top);
                         int unscaledThumbHeight = (int) (thumbHeight / scale);
-                        mTmpFromClipRect.set(containingFrame);
-                        mTmpFromClipRect.bottom = (mTmpFromClipRect.top + unscaledThumbHeight);
-                        mTmpToClipRect.set(containingFrame);
+                        mTmpFromClipRect.bottom = mTmpFromClipRect.top + unscaledThumbHeight;
                     } else {
                         // In landscape, we scale the height and clip to the top/left square
                         scale = thumbHeight / (appHeight - contentInsets.top);
                         scaledTopDecor = (int) (scale * contentInsets.top);
                         int unscaledThumbWidth = (int) (thumbWidth / scale);
-                        mTmpFromClipRect.set(containingFrame);
-                        mTmpFromClipRect.right = (mTmpFromClipRect.left + unscaledThumbWidth);
-                        mTmpToClipRect.set(containingFrame);
+                        mTmpFromClipRect.right = mTmpFromClipRect.left + unscaledThumbWidth;
                     }
-                    // exclude top screen decor (status bar) region from the source clip.
-                    mTmpFromClipRect.top = contentInsets.top;
 
                     mNextAppTransitionInsets.set(contentInsets);
 
@@ -821,25 +819,23 @@ public class AppTransition implements Dump {
             }
             case THUMBNAIL_TRANSITION_EXIT_SCALE_DOWN: {
                 // App window scaling down from full screen
+                mTmpFromClipRect.set(containingFrame);
+                mTmpToClipRect.set(containingFrame);
+                // exclude top screen decor (status bar) region from the destination clip.
+                mTmpToClipRect.top = contentInsets.top;
                 if (orientation == Configuration.ORIENTATION_PORTRAIT) {
                     // In portrait, we scale the width and clip to the top/left square
                     scale = thumbWidth / appWidth;
                     scaledTopDecor = (int) (scale * contentInsets.top);
                     int unscaledThumbHeight = (int) (thumbHeight / scale);
-                    mTmpFromClipRect.set(containingFrame);
-                    mTmpToClipRect.set(containingFrame);
-                    mTmpToClipRect.bottom = (mTmpToClipRect.top + unscaledThumbHeight);
+                    mTmpToClipRect.bottom = mTmpToClipRect.top + unscaledThumbHeight;
                 } else {
                     // In landscape, we scale the height and clip to the top/left square
                     scale = thumbHeight / (appHeight - contentInsets.top);
                     scaledTopDecor = (int) (scale * contentInsets.top);
                     int unscaledThumbWidth = (int) (thumbWidth / scale);
-                    mTmpFromClipRect.set(containingFrame);
-                    mTmpToClipRect.set(containingFrame);
-                    mTmpToClipRect.right = (mTmpToClipRect.left + unscaledThumbWidth);
+                    mTmpToClipRect.right = mTmpToClipRect.left + unscaledThumbWidth;
                 }
-                // exclude top screen decor (status bar) region from the destination clip.
-                mTmpToClipRect.top = contentInsets.top;
 
                 mNextAppTransitionInsets.set(contentInsets);
 
