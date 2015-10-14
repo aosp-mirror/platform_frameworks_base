@@ -1017,7 +1017,15 @@ public class ChooserActivity extends ResolverActivity {
                             final RowScale rs = new RowScale(ChooserRowAdapter.this, 0.f, 1.f)
                                     .setInterpolator(mInterpolator);
                             mServiceTargetScale[i] = rs;
-                            rs.startAnimation();
+                        }
+
+                        // Start the animations in a separate loop.
+                        // The process of starting animations will result in
+                        // binding views to set up initial values, and we must
+                        // have ALL of the new RowScale objects created above before
+                        // we get started.
+                        for (int i = oldRCount; i < rcount; i++) {
+                            mServiceTargetScale[i].startAnimation();
                         }
                     }
 
@@ -1097,17 +1105,19 @@ public class ChooserActivity extends ResolverActivity {
 
             for (int i = 0; i < mColumnCount; i++) {
                 final View v = mChooserListAdapter.createView(row);
+                final int column = i;
                 v.setOnClickListener(new OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        startSelected(holder.itemIndex, false, true);
+                        startSelected(holder.itemIndices[column], false, true);
                     }
                 });
                 v.setOnLongClickListener(new OnLongClickListener() {
                     @Override
                     public boolean onLongClick(View v) {
                         showAppDetails(
-                                mChooserListAdapter.resolveInfoForPosition(holder.itemIndex, true));
+                                mChooserListAdapter.resolveInfoForPosition(
+                                        holder.itemIndices[column], true));
                         return true;
                     }
                 });
@@ -1165,8 +1175,8 @@ public class ChooserActivity extends ResolverActivity {
                 final View v = holder.cells[i];
                 if (start + i <= end) {
                     v.setVisibility(View.VISIBLE);
-                    holder.itemIndex = start + i;
-                    mChooserListAdapter.bindView(holder.itemIndex, v);
+                    holder.itemIndices[i] = start + i;
+                    mChooserListAdapter.bindView(holder.itemIndices[i], v);
                 } else {
                     v.setVisibility(View.GONE);
                 }
@@ -1197,11 +1207,12 @@ public class ChooserActivity extends ResolverActivity {
         final View[] cells;
         final ViewGroup row;
         int measuredRowHeight;
-        int itemIndex;
+        int[] itemIndices;
 
         public RowViewHolder(ViewGroup row, int cellCount) {
             this.row = row;
             this.cells = new View[cellCount];
+            this.itemIndices = new int[cellCount];
         }
 
         public void measure() {
@@ -1389,7 +1400,7 @@ public class ChooserActivity extends ResolverActivity {
                 final View v = mChooserRowAdapter.getView(pos, mCachedView, mListView);
                 int height = ((RowViewHolder) (v.getTag())).measuredRowHeight;
 
-                offset += (int) (height * mChooserRowAdapter.getRowScale(pos) * chooserTargetRows);
+                offset += (int) (height * mChooserRowAdapter.getRowScale(pos));
 
                 if (vt >= 0) {
                     mCachedViewType = vt;
