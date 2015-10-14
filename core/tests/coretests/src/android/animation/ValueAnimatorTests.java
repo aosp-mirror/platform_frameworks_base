@@ -865,6 +865,47 @@ public class ValueAnimatorTests extends ActivityInstrumentationTestCase2<BasicAn
     }
 
     @SmallTest
+    public void testZeroScale() throws Throwable {
+        // Test whether animations would end properly when the scale is forced to be zero
+        float scale = ValueAnimator.getDurationScale();
+        ValueAnimator.setDurationScale(0f);
+
+        // Run two animators, one of which has a start delay, after setting the duration scale to 0
+        a1.setStartDelay(200);
+        final MyListener l1 =  new MyListener();
+        final MyListener l2 = new MyListener();
+        a1.addListener(l1);
+        a2.addListener(l2);
+
+        runTestOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                assertFalse(l1.startCalled);
+                assertFalse(l2.startCalled);
+                assertFalse(l1.endCalled);
+                assertFalse(l2.endCalled);
+
+                a1.start();
+                a2.start();
+            }
+        });
+        Thread.sleep(POLL_INTERVAL);
+
+        runTestOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                assertTrue(l1.startCalled);
+                assertTrue(l2.startCalled);
+                assertTrue(l1.endCalled);
+                assertTrue(l2.endCalled);
+            }
+        });
+
+        // Restore duration scale
+        ValueAnimator.setDurationScale(scale);
+    }
+
+    @SmallTest
     public void testReverse() throws Throwable {
         // Prolong animators duration so that we can do multiple checks during their run
         final ValueAnimator a3 = ValueAnimator.ofInt(0, 100);
