@@ -42,9 +42,9 @@ install</a> instructions.</p>
 JDK 6 or higher (the JRE alone is not sufficient)&mdash;JDK 7 is required when
 developing for Android 5.0 and higher. To check if you
 have JDK installed (and which version), open a terminal and type <code>javac -version</code>.
-If the JDK is not available or the version is lower than 6,
-<a href="http://www.oracle.com/technetwork/java/javase/downloads/index.html" class="external-link"
->go download JDK</a>.</p>
+If the JDK is not available or the version is lower than version 6, download the 
+<a href="http://www.oracle.com/technetwork/java/javase/downloads/jdk7-downloads-1880260.html" class="external-link"
+>Java SE Development Kit 7</a>.</p>
 
 
 <div class="procedure-box">
