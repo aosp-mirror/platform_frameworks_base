@@ -16,6 +16,8 @@
 
 package android.net.http;
 
+import com.android.internal.util.HexDump;
+
 import android.content.Context;
 import android.os.Bundle;
 import android.text.format.DateFormat;
@@ -285,7 +287,7 @@ public class SslCertificate {
         StringBuilder sb = new StringBuilder();
         for (int i = 0; i < bytes.length; i++) {
             byte b = bytes[i];
-            IntegralToString.appendByteAsHex(sb, b, true);
+            HexDump.appendByteAsHex(sb, b, true);
             if (i+1 != bytes.length) {
                 sb.append(':');
             }
