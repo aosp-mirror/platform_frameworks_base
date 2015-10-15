@@ -67,13 +67,8 @@ void DisplayListData::cleanupResources() {
     regions.clear();
 }
 
-#if HWUI_NEW_OPS
-size_t DisplayListData::addChild(RenderNodeOp* op) {
+size_t DisplayListData::addChild(NodeOpType* op) {
     mReferenceHolders.push_back(op->renderNode);
-#else
-size_t DisplayListData::addChild(DrawRenderNodeOp* op) {
-    mReferenceHolders.push_back(op->renderNode);
-#endif
     size_t index = mChildren.size();
     mChildren.push_back(op);
     return index;

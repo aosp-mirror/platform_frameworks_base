@@ -49,8 +49,8 @@ void RenderNode::debugDumpLayers(const char* prefix) {
                 mLayer->wasBuildLayered ? "true" : "false");
     }
     if (mDisplayListData) {
-        for (size_t i = 0; i < mDisplayListData->children().size(); i++) {
-            mDisplayListData->children()[i]->renderNode->debugDumpLayers(prefix);
+        for (auto&& child : mDisplayListData->children()) {
+            child->renderNode->debugDumpLayers(prefix);
         }
     }
 }
@@ -97,12 +97,16 @@ void RenderNode::output(uint32_t level) {
             SkCanvas::kMatrix_SaveFlag | SkCanvas::kClip_SaveFlag);
 
     properties().debugOutputProperties(level);
-    int flags = DisplayListOp::kOpLogFlag_Recurse;
+
     if (mDisplayListData) {
+#if HWUI_NEW_OPS
+        LOG_ALWAYS_FATAL("op dumping unsupported");
+#else
         // TODO: consider printing the chunk boundaries here
-        for (unsigned int i = 0; i < mDisplayListData->displayListOps.size(); i++) {
-            mDisplayListData->displayListOps[i]->output(level, flags);
+        for (auto&& op : mDisplayListData->getOps()) {
+            op->output(level, DisplayListOp::kOpLogFlag_Recurse);
         }
+#endif
     }
 
     ALOGD("%*sDone (%p, %s)", (level - 1) * 2, "", this, getName());
@@ -916,7 +920,12 @@ void RenderNode::issueOperationsOfProjectedChildren(OpenGLRenderer& renderer, T&
     // Transform renderer to match background we're projecting onto
     // (by offsetting canvas by translationX/Y of background rendernode, since only those are set)
     const DisplayListOp* op =
-            (mDisplayListData->displayListOps[mDisplayListData->projectionReceiveIndex]);
+#if HWUI_NEW_OPS
+            nullptr;
+    LOG_ALWAYS_FATAL("unsupported");
+#else
+            (mDisplayListData->getOps()[mDisplayListData->projectionReceiveIndex]);
+#endif
     const DrawRenderNodeOp* backgroundOp = reinterpret_cast<const DrawRenderNodeOp*>(op);
     const RenderProperties& backgroundProps = backgroundOp->renderNode->properties();
     renderer.translate(backgroundProps.getTranslationX(), backgroundProps.getTranslationY());
@@ -997,6 +1006,9 @@ void RenderNode::issueOperations(OpenGLRenderer& renderer, T& handler) {
         setViewProperties<T>(renderer, handler);
     }
 
+#if HWUI_NEW_OPS
+    LOG_ALWAYS_FATAL("legacy op traversal not supported");
+#else
     bool quickRejected = properties().getClipToBounds()
             && renderer.quickRejectConservative(0, 0, properties().getWidth(), properties().getHeight());
     if (!quickRejected) {
@@ -1018,9 +1030,8 @@ void RenderNode::issueOperations(OpenGLRenderer& renderer, T& handler) {
                 issueOperationsOf3dChildren(ChildrenSelectMode::NegativeZChildren,
                         initialTransform, zTranslatedNodes, renderer, handler);
 
-
                 for (size_t opIndex = chunk.beginOpIndex; opIndex < chunk.endOpIndex; opIndex++) {
-                    DisplayListOp *op = mDisplayListData->displayListOps[opIndex];
+                    DisplayListOp *op = mDisplayListData->getOps()[opIndex];
 #if DEBUG_DISPLAY_LIST
                     op->output(handler.level() + 1);
 #endif
@@ -1037,6 +1048,7 @@ void RenderNode::issueOperations(OpenGLRenderer& renderer, T& handler) {
             }
         }
     }
+#endif
 
     DISPLAY_LIST_LOGD("%*sRestoreToCount %d", (handler.level() + 1) * 2, "", restoreTo);
     handler(new (alloc) RestoreToCountOp(restoreTo),

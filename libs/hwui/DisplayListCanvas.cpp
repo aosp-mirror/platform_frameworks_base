@@ -514,8 +514,12 @@ void DisplayListCanvas::flushTranslate() {
 }
 
 size_t DisplayListCanvas::addOpAndUpdateChunk(DisplayListOp* op) {
-    int insertIndex = mDisplayListData->displayListOps.size();
-    mDisplayListData->displayListOps.push_back(op);
+    int insertIndex = mDisplayListData->ops.size();
+#if HWUI_NEW_OPS
+    LOG_ALWAYS_FATAL("unsupported");
+#else
+    mDisplayListData->ops.push_back(op);
+#endif
     if (mDeferredBarrierType != kBarrier_None) {
         // op is first in new chunk
         mDisplayListData->chunks.emplace_back();
