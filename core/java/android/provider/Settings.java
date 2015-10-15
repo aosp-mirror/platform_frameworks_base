@@ -1434,25 +1434,6 @@ public final class Settings {
     }
 
     /**
-     * An app can use this method to check if it is currently allowed to change the network
-     * state. In order to be allowed to do so, an app must first declare either the
-     * {@link android.Manifest.permission#CHANGE_NETWORK_STATE} or
-     * {@link android.Manifest.permission#WRITE_SETTINGS} permission in its manifest. If it
-     * is currently disallowed, it can prompt the user to grant it this capability through a
-     * management UI by sending an Intent with action
-     * {@link android.provider.Settings#ACTION_MANAGE_WRITE_SETTINGS}.
-     *
-     * @param context A context
-     * @return true if the calling app can change the state of network, false otherwise.
-     * @hide
-     */
-    public static boolean canChangeNetworkState(Context context) {
-        int uid = Binder.getCallingUid();
-        return Settings.isCallingPackageAllowedToChangeNetworkState(context, uid, Settings
-                .getPackageNameForUid(context, uid), false);
-    }
-
-    /**
      * System settings, containing miscellaneous system preferences.  This
      * table holds simple name/value pairs.  There are convenience
      * functions for accessing individual settings entries.
@@ -8343,7 +8324,7 @@ public final class Settings {
      * write/modify system settings, as the condition differs for pre-M, M+, and
      * privileged/preinstalled apps. If the provided uid does not match the
      * callingPackage, a negative result will be returned. The caller is expected to have
-     * either WRITE_SETTINGS or CHANGE_NETWORK_STATE permission declared.
+     * the WRITE_SETTINGS permission declared.
      *
      * Note: if the check is successful, the operation of this app will be updated to the
      * current time.
@@ -8359,31 +8340,22 @@ public final class Settings {
     /**
      * Performs a strict and comprehensive check of whether a calling package is allowed to
      * change the state of network, as the condition differs for pre-M, M+, and
-     * privileged/preinstalled apps. If the provided uid does not match the
-     * callingPackage, a negative result will be returned. The caller is expected to have
-     * either of CHANGE_NETWORK_STATE or WRITE_SETTINGS permission declared.
-     * @hide
-     */
-    public static boolean isCallingPackageAllowedToChangeNetworkState(Context context, int uid,
-            String callingPackage, boolean throwException) {
-        return isCallingPackageAllowedToPerformAppOpsProtectedOperation(context, uid,
-                callingPackage, throwException, AppOpsManager.OP_WRITE_SETTINGS,
-                PM_CHANGE_NETWORK_STATE, false);
-    }
-
-    /**
-     * Performs a strict and comprehensive check of whether a calling package is allowed to
-     * change the state of network, as the condition differs for pre-M, M+, and
-     * privileged/preinstalled apps. If the provided uid does not match the
-     * callingPackage, a negative result will be returned. The caller is expected to have
-     * either CHANGE_NETWORK_STATE or WRITE_SETTINGS permission declared.
+     * privileged/preinstalled apps. The caller is expected to have either the
+     * CHANGE_NETWORK_STATE or the WRITE_SETTINGS permission declared. Either of these
+     * permissions allow changing network state; WRITE_SETTINGS is a runtime permission and
+     * can be revoked, but (except in M, excluding M MRs), CHANGE_NETWORK_STATE is a normal
+     * permission and cannot be revoked. See http://b/23597341
      *
-     * Note: if the check is successful, the operation of this app will be updated to the
-     * current time.
+     * Note: if the check succeeds because the application holds WRITE_SETTINGS, the operation
+     * of this app will be updated to the current time.
      * @hide
      */
     public static boolean checkAndNoteChangeNetworkStateOperation(Context context, int uid,
             String callingPackage, boolean throwException) {
+        if (context.checkCallingOrSelfPermission(android.Manifest.permission.CHANGE_NETWORK_STATE)
+                == PackageManager.PERMISSION_GRANTED) {
+            return true;
+        }
         return isCallingPackageAllowedToPerformAppOpsProtectedOperation(context, uid,
                 callingPackage, throwException, AppOpsManager.OP_WRITE_SETTINGS,
                 PM_CHANGE_NETWORK_STATE, true);

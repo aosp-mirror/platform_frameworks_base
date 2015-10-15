@@ -1699,12 +1699,12 @@
         android:protectionLevel="signature|privileged" />
 
     <!-- Allows applications to change network connectivity state.
-         <p>Protection level: signature
+         <p>Protection level: normal
     -->
     <permission android:name="android.permission.CHANGE_NETWORK_STATE"
         android:description="@string/permdesc_changeNetworkState"
         android:label="@string/permlab_changeNetworkState"
-        android:protectionLevel="signature|preinstalled|appop|pre23" />
+        android:protectionLevel="normal" />
 
     <!-- Allows an application to clear the caches of all installed
          applications on the device.
