@@ -19,6 +19,7 @@ package com.android.internal.widget;
 import android.content.Context;
 import android.graphics.Color;
 import android.graphics.Rect;
+import android.graphics.drawable.Drawable;
 import android.os.Looper;
 import android.os.RemoteException;
 import android.util.AttributeSet;
@@ -52,7 +53,7 @@ import com.android.internal.policy.PhoneWindow;
  * <li>The resize handles which allow to resize the window.</li>
  * </ul>
  * After creating the view, the function
- * {@link #setPhoneWindow(PhoneWindow owner, boolean windowHasShadow)} needs to be called to make
+ * {@link #setPhoneWindow} needs to be called to make
  * the connection to it's owning PhoneWindow.
  * Note: At this time the application can change various attributes of the DecorView which
  * will break things (in settle/unexpected ways):
@@ -97,6 +98,9 @@ public class NonClientDecorView extends LinearLayout
     // The resize frame renderer.
     private ResizeFrameThread mFrameRendererThread = null;
 
+    private Drawable mResizingBackgroundDrawable;
+    private Drawable mCaptionBackgroundDrawable;
+
     public NonClientDecorView(Context context) {
         super(context);
     }
@@ -133,10 +137,13 @@ public class NonClientDecorView extends LinearLayout
         }
     }
 
-    public void setPhoneWindow(PhoneWindow owner, boolean showDecor, boolean windowHasShadow) {
+    public void setPhoneWindow(PhoneWindow owner, boolean showDecor, boolean windowHasShadow,
+            Drawable resizingBackgroundDrawable, Drawable captionBackgroundDrawableDrawable) {
         mOwner = owner;
         mWindowHasShadow = windowHasShadow;
         mShowDecor = showDecor;
+        mResizingBackgroundDrawable = resizingBackgroundDrawable;
+        mCaptionBackgroundDrawable = captionBackgroundDrawableDrawable;
         updateCaptionVisibility();
         if (mWindowHasShadow) {
             initializeElevation();
@@ -624,7 +631,8 @@ public class NonClientDecorView extends LinearLayout
             // barely show while the entire screen is moving.
             mFrameNode.setLeftTopRightBottom(left, top, left + width, top + mLastCaptionHeight);
             DisplayListCanvas canvas = mFrameNode.start(width, height);
-            canvas.drawColor(Color.BLACK);
+            mCaptionBackgroundDrawable.setBounds(0, 0, left + width, top + mLastCaptionHeight);
+            mCaptionBackgroundDrawable.draw(canvas);
             mFrameNode.end(canvas);
 
             mBackdropNode.setLeftTopRightBottom(left, top + mLastCaptionHeight, left + width,
@@ -632,9 +640,8 @@ public class NonClientDecorView extends LinearLayout
 
             // The backdrop: clear everything with the background. Clipping is done elsewhere.
             canvas = mBackdropNode.start(width, height - mLastCaptionHeight);
-            // TODO(skuhne): mOwner.getDecorView().mBackgroundFallback.draw(..) - or similar.
-            // Note: This might not work (calculator for example uses a transparent background).
-            canvas.drawColor(0xff808080);
+            mResizingBackgroundDrawable.setBounds(0, 0, left + width, top + height);
+            mResizingBackgroundDrawable.draw(canvas);
             mBackdropNode.end(canvas);
 
             // We need to render both rendered nodes explicitly.

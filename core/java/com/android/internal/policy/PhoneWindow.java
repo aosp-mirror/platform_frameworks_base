@@ -19,7 +19,6 @@ package com.android.internal.policy;
 import static android.app.ActivityManager.FIRST_DYNAMIC_STACK_ID;
 import static android.app.ActivityManager.FREEFORM_WORKSPACE_STACK_ID;
 import static android.app.ActivityManager.FULLSCREEN_WORKSPACE_STACK_ID;
-import static android.app.ActivityManager.HOME_STACK_ID;
 import static android.app.ActivityManager.INVALID_STACK_ID;
 import static android.view.View.MeasureSpec.AT_MOST;
 import static android.view.View.MeasureSpec.EXACTLY;
@@ -32,8 +31,7 @@ import android.animation.Animator;
 import android.animation.ObjectAnimator;
 import android.app.ActivityManagerNative;
 import android.app.SearchManager;
-import android.content.ContextWrapper;
-import android.content.res.Resources;
+import android.graphics.drawable.ColorDrawable;
 import android.os.Build;
 import android.os.UserHandle;
 
@@ -4228,7 +4226,8 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
                 }
             }
             nonClientDecorView.setPhoneWindow(this, hasNonClientDecor(mWorkspaceId),
-                    nonClientDecorHasShadow(mWorkspaceId));
+                    nonClientDecorHasShadow(mWorkspaceId), getResizingBackgroundDrawable(),
+                    mDecor.getContext().getDrawable(R.drawable.non_client_decor_title_focused));
         }
         // Tell the decor if it has a visible non client decor.
         mDecor.enableNonClientDecor(nonClientDecorView != null && hasNonClientDecor(mWorkspaceId));
@@ -5409,7 +5408,7 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
      * @param workspaceId The Id of the workspace which contains this window.
      * @Return Returns true if the window should show a non client decor.
      **/
-    private boolean hasNonClientDecor(int workspaceId) {
+    private static boolean hasNonClientDecor(int workspaceId) {
         return workspaceId == FREEFORM_WORKSPACE_STACK_ID;
     }
 
@@ -5431,5 +5430,45 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
                 context.setTheme(resid);
             }
         }
+    }
+
+    /**
+     * Returns the color used to fill areas the app has not rendered content to yet when the user
+     * is resizing the window of an activity in multi-window mode.
+     * */
+    private Drawable getResizingBackgroundDrawable() {
+        final Context context = mDecor.getContext();
+        final TypedArray windowStyle;
+        if (context instanceof DecorContext) {
+            windowStyle = ((DecorContext) context).getWindowStyle();
+        } else {
+            windowStyle = getWindowStyle();
+        }
+        final int resourceId =
+                windowStyle.getResourceId(R.styleable.Window_windowResizingBackground, 0);
+        if (resourceId != 0) {
+            return context.getDrawable(resourceId);
+        }
+
+        // The app didn't set a resizing background color. In this case we try to use the app's
+        // background drawable for the resizing background.
+        if (mBackgroundResource != 0) {
+            final Drawable drawable = context.getDrawable(mBackgroundResource);
+            if (drawable != null) {
+                return drawable;
+            }
+        }
+
+        // The app background drawable isn't currently set. This might be because the app cleared
+        // it. In this case we try to use the app's background fallback drawable.
+        if (mBackgroundFallbackResource != 0) {
+            final Drawable fallbackDrawable = context.getDrawable(mBackgroundFallbackResource);
+            if (fallbackDrawable != null) {
+                return fallbackDrawable;
+            }
+        }
+
+        return new ColorDrawable(context.getResources().getInteger(
+                com.android.internal.R.integer.config_windowResizingBackgroundColorARGB));
     }
 }

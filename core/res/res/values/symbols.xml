@@ -1956,6 +1956,7 @@
   <java-symbol type="id" name="close_window" />
   <java-symbol type="layout" name="non_client_decor_light" />
   <java-symbol type="layout" name="non_client_decor_dark" />
+  <java-symbol type="drawable" name="non_client_decor_title_focused" />
 
   <!-- From TelephonyProvider -->
   <java-symbol type="xml" name="apns" />
@@ -2330,4 +2331,6 @@
   <java-symbol type="drawable" name="platlogo_m" />
 
   <java-symbol type="string" name="config_iccHotswapPromptForRestartDialogComponent" />
+
+  <java-symbol type="integer" name="config_windowResizingBackgroundColorARGB" />
 </resources>

@@ -2677,6 +2677,7 @@
     <public type="attr" name="level" />
     <public type="attr" name="contextPopupMenuStyle" />
     <public type="attr" name="textAppearancePopupMenuHeader" />
+    <public type="attr" name="windowResizingBackground" />
 
     <public type="style" name="Theme.Material.DayNight" />
     <public type="style" name="Theme.Material.DayNight.DarkActionBar" />
