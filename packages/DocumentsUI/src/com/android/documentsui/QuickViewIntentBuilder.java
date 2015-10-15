@@ -25,11 +25,13 @@ import android.content.ClipDescription;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.content.res.Resources;
 import android.database.Cursor;
 import android.net.Uri;
 import android.provider.DocumentsContract;
 import android.provider.DocumentsContract.Document;
 import android.support.annotation.Nullable;
+import android.text.TextUtils;
 import android.util.Log;
 
 import com.android.documentsui.BaseActivity.DocumentContext;
@@ -43,13 +45,20 @@ final class QuickViewIntentBuilder {
     private final DocumentInfo mDocument;
     private final DocumentContext mContext;
 
-    public ClipData mClipData;
-    public int mDocumentLocation;
-    private PackageManager mPkgManager;
+    private final PackageManager mPkgManager;
+    private final Resources mResources;
+
+    private ClipData mClipData;
+    private int mDocumentLocation;
 
     public QuickViewIntentBuilder(
-            PackageManager pkgManager, DocumentInfo doc, DocumentContext context) {
+            PackageManager pkgManager,
+            Resources resources,
+            DocumentInfo doc,
+            DocumentContext context) {
+
         mPkgManager = pkgManager;
+        mResources = resources;
         mDocument = doc;
         mContext = context;
     }
@@ -61,25 +70,37 @@ final class QuickViewIntentBuilder {
     @Nullable Intent build() {
         if (DEBUG) Log.d(TAG, "Preparing intent for doc:" + mDocument.documentId);
 
+        String trustedPkg = mResources.getString(R.string.trusted_quick_viewer_package);
+
         Intent intent = new Intent(Intent.ACTION_QUICK_VIEW);
         intent.setDataAndType(mDocument.derivedUri, mDocument.mimeType);
-
-        // Try to resolve the intent. If a matching app isn't installed, it won't resolve.
-        ComponentName handler = intent.resolveActivity(mPkgManager);
-        if (handler == null) {
-            return null;
-        }
-
-        Cursor cursor = mContext.getCursor();
-        for (int i = 0; i < cursor.getCount(); i++) {
-            onNextItem(i, cursor);
-        }
-
         intent.setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-        intent.putExtra(Intent.EXTRA_INDEX, mDocumentLocation);
-        intent.setClipData(mClipData);
 
-        return intent;
+        if (TextUtils.isEmpty(trustedPkg)) {
+            if (hasRegisteredHandler(intent)) {
+                return intent;
+            }
+        } else {
+            intent.setPackage(trustedPkg);
+            if (hasRegisteredHandler(intent)) {
+                // We have a trusted handler. Load all of the docs into the intent.
+                Cursor cursor = mContext.getCursor();
+                for (int i = 0; i < cursor.getCount(); i++) {
+                    onNextItem(i, cursor);
+                }
+                intent.putExtra(Intent.EXTRA_INDEX, mDocumentLocation);
+                intent.setClipData(mClipData);
+
+                return intent;
+            }
+        }
+
+        return null;
+    }
+
+    private boolean hasRegisteredHandler(Intent intent) {
+        // Try to resolve the intent. If a matching app isn't installed, it won't resolve.
+        return intent.resolveActivity(mPkgManager) != null;
     }
 
     private void onNextItem(int index, Cursor cursor) {

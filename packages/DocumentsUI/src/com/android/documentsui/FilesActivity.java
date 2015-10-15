@@ -323,17 +323,26 @@ public class FilesActivity extends BaseActivity {
     private void openDocument(DocumentInfo doc, @Nullable DocumentContext siblings) {
         Intent intent = null;
         if (siblings != null) {
-            QuickViewIntentBuilder builder =
-                    new QuickViewIntentBuilder(getPackageManager(), doc, siblings);
+            QuickViewIntentBuilder builder = new QuickViewIntentBuilder(
+                    getPackageManager(), getResources(), doc, siblings);
             intent = builder.build();
         }
 
-        // fallback to traditional VIEW action...
-        if (intent == null) {
-            intent = new Intent(Intent.ACTION_VIEW);
-            intent.setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-            intent.setData(doc.derivedUri);
+        if (intent != null) {
+            // TODO: un-work around issue b/24963914. Should be fixed soon.
+            try {
+                startActivity(intent);
+                return;
+            } catch (SecurityException e) {
+                // carry on to regular view mode.
+                Log.e(TAG, "Caught security error: " + e.getLocalizedMessage());
+            }
         }
+
+        // fallback to traditional VIEW action...
+        intent = new Intent(Intent.ACTION_VIEW);
+        intent.setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+        intent.setData(doc.derivedUri);
 
         if (DEBUG && intent.getClipData() != null) {
             Log.d(TAG, "Starting intent w/ clip data: " + intent.getClipData());
@@ -341,8 +350,9 @@ public class FilesActivity extends BaseActivity {
 
         try {
             startActivity(intent);
-        } catch (ActivityNotFoundException ex2) {
-            Snackbars.makeSnackbar(this, R.string.toast_no_application, Snackbar.LENGTH_SHORT).show();
+        } catch (ActivityNotFoundException e) {
+            Snackbars.makeSnackbar(
+                    this, R.string.toast_no_application, Snackbar.LENGTH_SHORT).show();
         }
     }
 
