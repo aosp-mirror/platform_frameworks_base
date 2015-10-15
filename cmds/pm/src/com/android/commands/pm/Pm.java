@@ -274,7 +274,7 @@ public final class Pm {
             } else if (args.length == 2) {
                 if (args[0].equalsIgnoreCase("-p")) {
                     validCommand = true;
-                    return displayPackageFilePath(args[1]);
+                    return displayPackageFilePath(args[1], UserHandle.USER_OWNER);
                 }
             }
             return 1;
@@ -758,12 +758,25 @@ public final class Pm {
     }
 
     private int runPath() {
+        int userId = UserHandle.USER_OWNER;
+        String option = nextOption();
+        if (option != null && option.equals("--user")) {
+            String optionData = nextOptionData();
+            if (optionData == null || !isNumber(optionData)) {
+                System.err.println("Error: no USER_ID specified");
+                showUsage();
+                return 1;
+            } else {
+                userId = Integer.parseInt(optionData);
+            }
+        }
+
         String pkg = nextArg();
         if (pkg == null) {
             System.err.println("Error: no package specified");
             return 1;
         }
-        return displayPackageFilePath(pkg);
+        return displayPackageFilePath(pkg, userId);
     }
 
     private int runDump() {
@@ -1607,7 +1620,7 @@ public final class Pm {
     }
 
     private int runClear() {
-        int userId = 0;
+        int userId = UserHandle.USER_OWNER;
         String option = nextOption();
         if (option != null && option.equals("--user")) {
             String optionData = nextOptionData();
@@ -1679,7 +1692,7 @@ public final class Pm {
     }
 
     private int runSetEnabledSetting(int state) {
-        int userId = 0;
+        int userId = UserHandle.USER_OWNER;
         String option = nextOption();
         if (option != null && option.equals("--user")) {
             String optionData = nextOptionData();
@@ -1728,7 +1741,7 @@ public final class Pm {
     }
 
     private int runSetHiddenSetting(boolean state) {
-        int userId = 0;
+        int userId = UserHandle.USER_OWNER;
         String option = nextOption();
         if (option != null && option.equals("--user")) {
             String optionData = nextOptionData();
@@ -1933,9 +1946,9 @@ public final class Pm {
      * Displays the package file for a package.
      * @param pckg
      */
-    private int displayPackageFilePath(String pckg) {
+    private int displayPackageFilePath(String pckg, int userId) {
         try {
-            PackageInfo info = mPm.getPackageInfo(pckg, 0, 0);
+            PackageInfo info = mPm.getPackageInfo(pckg, 0, userId);
             if (info != null && info.applicationInfo != null) {
                 System.out.print("package:");
                 System.out.println(info.applicationInfo.sourceDir);
@@ -2074,7 +2087,7 @@ public final class Pm {
         System.err.println("       pm list features");
         System.err.println("       pm list libraries");
         System.err.println("       pm list users");
-        System.err.println("       pm path PACKAGE");
+        System.err.println("       pm path [--user USER_ID] PACKAGE");
         System.err.println("       pm dump PACKAGE");
         System.err.println("       pm install [-lrtsfd] [-i PACKAGE] [--user USER_ID] [PATH]");
         System.err.println("       pm install-create [-lrtsfdp] [-i PACKAGE] [-S BYTES]");
