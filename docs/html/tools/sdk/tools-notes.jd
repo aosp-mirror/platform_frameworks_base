@@ -23,10 +23,39 @@ href="http://tools.android.com/knownissues">http://tools.android.com/knownissues
 
 
 
-
 <div class="toggle-content opened">
   <p><a href="#" onclick="return toggleContent(this)">
     <img src="{@docRoot}assets/images/triangle-opened.png" class="toggle-content-img"
+      alt=""/>SDK Tools, Revision 24.4.0</a> <em>(October 2015)</em>
+  </p>
+
+  <div class="toggle-content-toggleme">
+
+    <dl>
+    <dt>Dependencies:</dt>
+
+    <dd>
+      <ul>
+        <li>Android SDK Platform-tools revision 23 or later.</li>
+      </ul>
+    </dd>
+
+    <dt>General Notes:</dt>
+    <dd>
+      <ul>
+        <li>Updated the emulator so it can display an upgrade notification when a new version is
+        available.</li>
+        <li>Added the ability for the emulator to send basic crash reports. You <em>must</em> opt-in
+        through Android Studio preferences to enable crash report transmission.</li>
+      </ul>
+    </dd>
+
+  </div>
+</div>
+
+<div class="toggle-content closed">
+  <p><a href="#" onclick="return toggleContent(this)">
+    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img"
       alt=""/>SDK Tools, Revision 24.3.4</a> <em>(August 2015)</em>
   </p>
 

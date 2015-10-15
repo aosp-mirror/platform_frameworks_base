@@ -31,22 +31,22 @@ studio.win_notools_exe_checksum=82d0d9c78ec23834956f941a07821be347fcb7bf
 
 
 
-sdk.linux_download=android-sdk_r24.3.4-linux.tgz
-sdk.linux_bytes=309138331
-sdk.linux_checksum=fb293d7bca42e05580be56b1adc22055d46603dd
+sdk.linux_download=android-sdk_r24.4-linux.tgz
+sdk.linux_bytes=320008735
+sdk.linux_checksum=eec87cdb9778718e4073b4ca326a46cdd084f901
 
-sdk.mac_download=android-sdk_r24.3.4-macosx.zip
-sdk.mac_bytes=98340900
-sdk.mac_checksum=128f10fba668ea490cc94a08e505a48a608879b9
+sdk.mac_download=android-sdk_r24.4-macosx.zip
+sdk.mac_bytes=101886955
+sdk.mac_checksum=a9b6f025a9691aef430b19b52e01844dbbcbf6b4
 
-sdk.win_download=android-sdk_r24.3.4-windows.zip
-sdk.win_bytes=187496897
-sdk.win_checksum=4a8718fb4a2bf2128d34b92f23ddd79fc65839e7
+sdk.win_download=android-sdk_r24.4-windows.zip
+sdk.win_bytes=197290202
+sdk.win_checksum=6ab463b85544398c20ab5520f380af7d91379864
 
 
-sdk.win_installer=installer_r24.3.4-windows.exe
-sdk.win_installer_bytes=139477985
-sdk.win_installer_checksum=094dd45f98a31f839feae898b48f23704f2878dd
+sdk.win_installer=installer_r24.4-windows.exe
+sdk.win_installer_bytes=149239901
+sdk.win_installer_checksum=c82ae81c0437a230c2fc0ab4fc7915942a6b3afb
 
 
 
