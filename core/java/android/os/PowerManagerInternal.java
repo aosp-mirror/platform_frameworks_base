@@ -148,7 +148,9 @@ public abstract class PowerManagerInternal {
         public void onLowPowerModeChanged(boolean enabled);
     }
 
-    public abstract void setDeviceIdleMode(boolean enabled);
+    public abstract boolean setDeviceIdleMode(boolean enabled);
+
+    public abstract boolean setLightDeviceIdleMode(boolean enabled);
 
     public abstract void setDeviceIdleWhitelist(int[] appids);
 

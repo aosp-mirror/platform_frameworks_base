@@ -194,6 +194,8 @@ option java_package com.android.server
 34006 device_idle_off_start (reason|3)
 34007 device_idle_off_phase (what|3)
 34008 device_idle_off_complete
+34009 device_idle_light (state|1|5), (reason|3)
+34010 device_idle_light_step
 
 # ---------------------------
 # DisplayManagerService.java

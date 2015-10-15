@@ -910,6 +910,26 @@ public final class PowerManager {
     }
 
     /**
+     * Returns true if the device is currently in light idle mode.  This happens when a device
+     * has had its screen off for a short time, switching it into a batching mode where we
+     * execute jobs, syncs, networking on a batching schedule.  You can monitor for changes to
+     * this state with {@link #ACTION_LIGHT_DEVICE_IDLE_MODE_CHANGED}.
+     *
+     * @return Returns true if currently in active light device idle mode, else false.  This is
+     * when light idle mode restrictions are being actively applied; it will return false if the
+     * device is in a long-term idle mode but currently running a maintenance window where
+     * restrictions have been lifted.
+     * @hide
+     */
+    public boolean isLightDeviceIdleMode() {
+        try {
+            return mService.isLightDeviceIdleMode();
+        } catch (RemoteException e) {
+            return false;
+        }
+    }
+
+    /**
      * Return whether the given application package name is on the device's power whitelist.
      * Apps can be placed on the whitelist through the settings UI invoked by
      * {@link android.provider.Settings#ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS}.
@@ -959,6 +979,15 @@ public final class PowerManager {
     @SdkConstant(SdkConstant.SdkConstantType.BROADCAST_INTENT_ACTION)
     public static final String ACTION_DEVICE_IDLE_MODE_CHANGED
             = "android.os.action.DEVICE_IDLE_MODE_CHANGED";
+
+    /**
+     * Intent that is broadcast when the state of {@link #isLightDeviceIdleMode()} changes.
+     * This broadcast is only sent to registered receivers.
+     * @hide
+     */
+    @SdkConstant(SdkConstant.SdkConstantType.BROADCAST_INTENT_ACTION)
+    public static final String ACTION_LIGHT_DEVICE_IDLE_MODE_CHANGED
+            = "android.os.action.LIGHT_DEVICE_IDLE_MODE_CHANGED";
 
     /**
      * @hide Intent that is broadcast when the set of power save whitelist apps has changed.
