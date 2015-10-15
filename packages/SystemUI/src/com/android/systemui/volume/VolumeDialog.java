@@ -104,6 +104,7 @@ public class VolumeDialog {
     private final SpTexts mSpTexts;
     private final SparseBooleanArray mDynamic = new SparseBooleanArray();
     private final KeyguardManager mKeyguard;
+    private final AudioManager mAudioManager;
     private final int mExpandButtonAnimationDuration;
     private final ZenFooter mZenFooter;
     private final LayoutTransition mLayoutTransition;
@@ -135,6 +136,7 @@ public class VolumeDialog {
         mCallback = callback;
         mSpTexts = new SpTexts(mContext);
         mKeyguard = (KeyguardManager) context.getSystemService(Context.KEYGUARD_SERVICE);
+        mAudioManager = (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
 
         mDialog = new CustomDialog(mContext);
 
@@ -636,7 +638,8 @@ public class VolumeDialog {
     private void updateFooterH() {
         if (D.BUG) Log.d(TAG, "updateFooterH");
         final boolean wasVisible = mZenFooter.getVisibility() == View.VISIBLE;
-        final boolean visible = mState.zenMode != Global.ZEN_MODE_OFF;
+        final boolean visible = mState.zenMode != Global.ZEN_MODE_OFF
+                && mAudioManager.isStreamAffectedByRingerMode(mActiveStream);
         if (wasVisible != visible && !visible) {
             prepareForCollapse();
         }
