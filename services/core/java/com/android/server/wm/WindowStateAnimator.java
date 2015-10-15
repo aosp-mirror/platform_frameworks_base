@@ -1401,9 +1401,8 @@ class WindowStateAnimator {
         clipRect.offset(attrs.surfaceInsets.left, attrs.surfaceInsets.top);
 
         // We don't want to clip to stack bounds windows that are currently doing entrance
-        // animation. This is necessary for docking operation, otherwise the window will be
-        // suddenly cut off.
-        if (!mAnimator.mAnimating) {
+        // animation for docked window, otherwise the animating window will be suddenly cut off.
+        if (!(mAnimator.mAnimating && w.inDockedWorkspace())) {
             adjustCropToStackBounds(w, clipRect);
         }
 
