@@ -305,6 +305,29 @@ to be as high as possible. You can see which permissions were added with each re
   </li>
 </ul>
 
+<div class="sidebox-wrapper">
+<div class="sidebox">
+  <h3 id="special_permissions">Special Permissions</h3>
+  <p>
+    There are a couple of permissions that don't behave like normal and
+    dangerous permissions. {@link android.Manifest.permission#SYSTEM_ALERT_WINDOW
+    SYSTEM_ALERT_WINDOW} and {@link android.Manifest.permission#WRITE_SETTINGS
+    WRITE_SETTINGS} are particularly sensitive, so most apps should not use
+    them. If an app needs one of these permissions, it must declare the
+    permission in the manifest, <em>and</em> send an intent requesting the
+    user's authorization. The system responds to the intent by showing a
+    detailed management screen to the user.
+  </p>
+
+  <p>
+    For details on how to request these permissions, see the {@link
+    android.Manifest.permission#SYSTEM_ALERT_WINDOW SYSTEM_ALERT_WINDOW} and
+    {@link android.Manifest.permission#WRITE_SETTINGS WRITE_SETTINGS} reference
+    entries.
+  </p>
+</div>
+</div>
+
 <h3 id="perm-groups">Permission groups</h3>
 
 <p>
