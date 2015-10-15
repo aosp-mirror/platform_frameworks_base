@@ -528,7 +528,7 @@ void DeferredDisplayList::addDrawOp(OpenGLRenderer& renderer, DrawOp* op) {
     int insertBatchIndex = mBatches.size();
     if (!mBatches.empty()) {
         if (state->mBounds.isEmpty()) {
-            // don't know the bounds for op, so add to last batch and start from scratch on next op
+            // don't know the bounds for op, so create new batch and start from scratch on next op
             DrawBatch* b = new DrawBatch(deferInfo);
             b->add(op, state, deferInfo.opaqueOverBounds);
             mBatches.push_back(b);

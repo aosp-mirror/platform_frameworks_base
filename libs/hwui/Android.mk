@@ -2,6 +2,8 @@ LOCAL_PATH:= $(call my-dir)
 include $(CLEAR_VARS)
 LOCAL_ADDITIONAL_DEPENDENCIES := $(LOCAL_PATH)/Android.mk
 
+HWUI_NEW_OPS := false
+
 hwui_src_files := \
     font/CacheTexture.cpp \
     font/Font.cpp \
@@ -84,6 +86,17 @@ hwui_cflags := \
     -DATRACE_TAG=ATRACE_TAG_VIEW -DLOG_TAG=\"OpenGLRenderer\" \
     -Wall -Wno-unused-parameter -Wunreachable-code \
     -ffast-math -O3 -Werror
+
+
+ifeq (true, $(HWUI_NEW_OPS))
+    hwui_src_files += \
+        BakedOpRenderer.cpp \
+        OpReorderer.cpp \
+        RecordingCanvas.cpp
+
+    hwui_cflags += -DHWUI_NEW_OPS
+
+endif
 
 ifndef HWUI_COMPILE_SYMBOLS
     hwui_cflags += -fvisibility=hidden
@@ -171,6 +184,13 @@ LOCAL_SRC_FILES += \
     unit_tests/DamageAccumulatorTests.cpp \
     unit_tests/LinearAllocatorTests.cpp \
     unit_tests/StringUtilsTests.cpp
+
+ifeq (true, $(HWUI_NEW_OPS))
+    LOCAL_SRC_FILES += \
+        unit_tests/BakedOpStateTests.cpp \
+        unit_tests/RecordingCanvasTests.cpp \
+        unit_tests/OpReordererTests.cpp
+endif
 
 include $(BUILD_NATIVE_TEST)
 

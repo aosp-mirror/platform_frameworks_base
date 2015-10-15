@@ -20,6 +20,7 @@
 
 #include <AnimationContext.h>
 #include <DisplayListCanvas.h>
+#include <RecordingCanvas.h>
 #include <RenderNode.h>
 #include <renderthread/RenderProxy.h>
 #include <renderthread/RenderTask.h>
@@ -39,6 +40,13 @@ using namespace android::uirenderer;
 using namespace android::uirenderer::renderthread;
 using namespace android::uirenderer::test;
 
+#if HWUI_NEW_OPS
+typedef RecordingCanvas TestCanvas;
+#else
+typedef DisplayListCanvas TestCanvas;
+#endif
+
+
 class ContextFactory : public IContextFactory {
 public:
     virtual AnimationContext* createAnimationContext(renderthread::TimeLord& clock) override {
@@ -46,13 +54,13 @@ public:
     }
 };
 
-static DisplayListCanvas* startRecording(RenderNode* node) {
-    DisplayListCanvas* renderer = new DisplayListCanvas(
+static TestCanvas* startRecording(RenderNode* node) {
+    TestCanvas* renderer = new TestCanvas(
             node->stagingProperties().getWidth(), node->stagingProperties().getHeight());
     return renderer;
 }
 
-static void endRecording(DisplayListCanvas* renderer, RenderNode* node) {
+static void endRecording(TestCanvas* renderer, RenderNode* node) {
     node->setStagingDisplayList(renderer->finishRecording());
     delete renderer;
 }
@@ -67,7 +75,7 @@ public:
             frameCount = fc;
         }
     }
-    virtual void createContent(int width, int height, DisplayListCanvas* renderer) = 0;
+    virtual void createContent(int width, int height, TestCanvas* renderer) = 0;
     virtual void doFrame(int frameNr) = 0;
 
     template <class T>
@@ -102,7 +110,7 @@ public:
 
         android::uirenderer::Rect DUMMY;
 
-        DisplayListCanvas* renderer = startRecording(rootNode);
+        TestCanvas* renderer = startRecording(rootNode);
         animation.createContent(width, height, renderer);
         endRecording(renderer, rootNode);
 
@@ -132,7 +140,7 @@ public:
 class ShadowGridAnimation : public TreeContentAnimation {
 public:
     std::vector< sp<RenderNode> > cards;
-    void createContent(int width, int height, DisplayListCanvas* renderer) override {
+    void createContent(int width, int height, TestCanvas* renderer) override {
         renderer->drawColor(0xFFFFFFFF, SkXfermode::kSrcOver_Mode);
         renderer->insertReorderBarrier(true);
 
@@ -163,7 +171,7 @@ private:
         node->mutateStagingProperties().mutableOutline().setShouldClip(true);
         node->setPropertyFieldsDirty(RenderNode::X | RenderNode::Y | RenderNode::Z);
 
-        DisplayListCanvas* renderer = startRecording(node.get());
+        TestCanvas* renderer = startRecording(node.get());
         renderer->drawColor(0xFFEEEEEE, SkXfermode::kSrcOver_Mode);
         endRecording(renderer, node.get());
         return node;
@@ -179,7 +187,7 @@ static Benchmark _ShadowGrid(BenchmarkInfo{
 class ShadowGrid2Animation : public TreeContentAnimation {
 public:
     std::vector< sp<RenderNode> > cards;
-    void createContent(int width, int height, DisplayListCanvas* renderer) override {
+    void createContent(int width, int height, TestCanvas* renderer) override {
         renderer->drawColor(0xFFFFFFFF, SkXfermode::kSrcOver_Mode);
         renderer->insertReorderBarrier(true);
 
@@ -210,7 +218,7 @@ private:
         node->mutateStagingProperties().mutableOutline().setShouldClip(true);
         node->setPropertyFieldsDirty(RenderNode::X | RenderNode::Y | RenderNode::Z);
 
-        DisplayListCanvas* renderer = startRecording(node.get());
+        TestCanvas* renderer = startRecording(node.get());
         renderer->drawColor(0xFFEEEEEE, SkXfermode::kSrcOver_Mode);
         endRecording(renderer, node.get());
         return node;
@@ -226,7 +234,7 @@ static Benchmark _ShadowGrid2(BenchmarkInfo{
 class RectGridAnimation : public TreeContentAnimation {
 public:
     sp<RenderNode> card;
-    void createContent(int width, int height, DisplayListCanvas* renderer) override {
+    void createContent(int width, int height, TestCanvas* renderer) override {
         renderer->drawColor(0xFFFFFFFF, SkXfermode::kSrcOver_Mode);
         renderer->insertReorderBarrier(true);
 
@@ -247,7 +255,7 @@ private:
         node->mutateStagingProperties().setLeftTopRightBottom(x, y, x + width, y + height);
         node->setPropertyFieldsDirty(RenderNode::X | RenderNode::Y);
 
-        DisplayListCanvas* renderer = startRecording(node.get());
+        TestCanvas* renderer = startRecording(node.get());
         renderer->drawColor(0xFFFF00FF, SkXfermode::kSrcOver_Mode);
 
         SkRegion region;
@@ -275,7 +283,7 @@ static Benchmark _RectGrid(BenchmarkInfo{
 class OvalAnimation : public TreeContentAnimation {
 public:
     sp<RenderNode> card;
-    void createContent(int width, int height, DisplayListCanvas* renderer) override {
+    void createContent(int width, int height, TestCanvas* renderer) override {
         renderer->drawColor(0xFFFFFFFF, SkXfermode::kSrcOver_Mode);
         renderer->insertReorderBarrier(true);
 
@@ -297,7 +305,7 @@ private:
         node->mutateStagingProperties().setLeftTopRightBottom(x, y, x + width, y + height);
         node->setPropertyFieldsDirty(RenderNode::X | RenderNode::Y);
 
-        DisplayListCanvas* renderer = startRecording(node.get());
+        TestCanvas* renderer = startRecording(node.get());
 
         SkPaint paint;
         paint.setAntiAlias(true);
@@ -317,7 +325,7 @@ static Benchmark _Oval(BenchmarkInfo{
 class PartialDamageTest : public TreeContentAnimation {
 public:
     std::vector< sp<RenderNode> > cards;
-    void createContent(int width, int height, DisplayListCanvas* renderer) override {
+    void createContent(int width, int height, TestCanvas* renderer) override {
         static SkColor COLORS[] = {
                 0xFFF44336,
                 0xFF9C27B0,
@@ -342,7 +350,7 @@ public:
         cards[0]->mutateStagingProperties().setTranslationY(curFrame);
         cards[0]->setPropertyFieldsDirty(RenderNode::X | RenderNode::Y);
 
-        DisplayListCanvas* renderer = startRecording(cards[0].get());
+        TestCanvas* renderer = startRecording(cards[0].get());
         renderer->drawColor(interpolateColor(curFrame / 150.0f, 0xFFF44336, 0xFFF8BBD0),
                 SkXfermode::kSrcOver_Mode);
         endRecording(renderer, cards[0].get());
@@ -370,7 +378,7 @@ private:
         node->mutateStagingProperties().setLeftTopRightBottom(x, y, x + width, y + height);
         node->setPropertyFieldsDirty(RenderNode::X | RenderNode::Y);
 
-        DisplayListCanvas* renderer = startRecording(node.get());
+        TestCanvas* renderer = startRecording(node.get());
         renderer->drawColor(color, SkXfermode::kSrcOver_Mode);
         endRecording(renderer, node.get());
         return node;
@@ -382,4 +390,44 @@ static Benchmark _PartialDamage(BenchmarkInfo{
     "of them, should be low CPU & GPU load if EGL_EXT_buffer_age or "
     "EGL_KHR_partial_update is supported by the device & are enabled in hwui.",
     TreeContentAnimation::run<PartialDamageTest>
+});
+
+
+class SimpleRectGridAnimation : public TreeContentAnimation {
+public:
+    sp<RenderNode> card;
+    void createContent(int width, int height, TestCanvas* renderer) override {
+        SkPaint paint;
+        paint.setColor(0xFF00FFFF);
+        renderer->drawRect(0, 0, width, height, paint);
+
+        card = createCard(40, 40, 200, 200);
+        renderer->drawRenderNode(card.get());
+    }
+    void doFrame(int frameNr) override {
+        int curFrame = frameNr % 150;
+        card->mutateStagingProperties().setTranslationX(curFrame);
+        card->mutateStagingProperties().setTranslationY(curFrame);
+        card->setPropertyFieldsDirty(RenderNode::X | RenderNode::Y);
+    }
+private:
+    sp<RenderNode> createCard(int x, int y, int width, int height) {
+        sp<RenderNode> node = new RenderNode();
+        node->mutateStagingProperties().setLeftTopRightBottom(x, y, x + width, y + height);
+        node->setPropertyFieldsDirty(RenderNode::X | RenderNode::Y);
+
+        TestCanvas* renderer = startRecording(node.get());
+        SkPaint paint;
+        paint.setColor(0xFFFF00FF);
+        renderer->drawRect(0, 0, width, height, paint);
+
+        endRecording(renderer, node.get());
+        return node;
+    }
+};
+static Benchmark _SimpleRectGrid(BenchmarkInfo{
+    "simplerectgrid",
+    "A simple collection of rects. "
+    "Low CPU/GPU load.",
+    TreeContentAnimation::run<SimpleRectGridAnimation>
 });

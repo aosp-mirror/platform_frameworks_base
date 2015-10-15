@@ -21,7 +21,13 @@
 
 #include "Debug.h"
 #include "DisplayList.h"
+#include "RenderNode.h"
+
+#if HWUI_NEW_OPS
+#include "RecordedOp.h"
+#else
 #include "DisplayListOp.h"
+#endif
 
 namespace android {
 namespace uirenderer {
@@ -61,8 +67,13 @@ void DisplayListData::cleanupResources() {
     regions.clear();
 }
 
+#if HWUI_NEW_OPS
+size_t DisplayListData::addChild(RenderNodeOp* op) {
+    mReferenceHolders.push_back(op->renderNode);
+#else
 size_t DisplayListData::addChild(DrawRenderNodeOp* op) {
-    mReferenceHolders.push_back(op->renderNode());
+    mReferenceHolders.push_back(op->renderNode);
+#endif
     size_t index = mChildren.size();
     mChildren.push_back(op);
     return index;

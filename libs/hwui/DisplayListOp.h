@@ -1397,25 +1397,26 @@ private:
 class DrawRenderNodeOp : public DrawBoundedOp {
     friend class RenderNode; // grant RenderNode access to info of child
     friend class DisplayListData; // grant DisplayListData access to info of child
+    friend class DisplayListCanvas;
 public:
     DrawRenderNodeOp(RenderNode* renderNode, const mat4& transformFromParent, bool clipIsSimple)
             : DrawBoundedOp(0, 0, renderNode->getWidth(), renderNode->getHeight(), nullptr)
-            , mRenderNode(renderNode)
+            , renderNode(renderNode)
             , mRecordedWithPotentialStencilClip(!clipIsSimple || !transformFromParent.isSimple())
             , mTransformFromParent(transformFromParent)
             , mSkipInOrderDraw(false) {}
 
     virtual void defer(DeferStateStruct& deferStruct, int saveCount, int level,
             bool useQuickReject) override {
-        if (mRenderNode->isRenderable() && !mSkipInOrderDraw) {
-            mRenderNode->defer(deferStruct, level + 1);
+        if (renderNode->isRenderable() && !mSkipInOrderDraw) {
+            renderNode->defer(deferStruct, level + 1);
         }
     }
 
     virtual void replay(ReplayStateStruct& replayStruct, int saveCount, int level,
             bool useQuickReject) override {
-        if (mRenderNode->isRenderable() && !mSkipInOrderDraw) {
-            mRenderNode->replay(replayStruct, level + 1);
+        if (renderNode->isRenderable() && !mSkipInOrderDraw) {
+            renderNode->replay(replayStruct, level + 1);
         }
     }
 
@@ -1424,18 +1425,16 @@ public:
     }
 
     virtual void output(int level, uint32_t logFlags) const override {
-        OP_LOG("Draw RenderNode %p %s", mRenderNode, mRenderNode->getName());
-        if (mRenderNode && (logFlags & kOpLogFlag_Recurse)) {
-            mRenderNode->output(level + 1);
+        OP_LOG("Draw RenderNode %p %s", renderNode, renderNode->getName());
+        if (renderNode && (logFlags & kOpLogFlag_Recurse)) {
+            renderNode->output(level + 1);
         }
     }
 
     virtual const char* name() override { return "DrawRenderNode"; }
 
-    RenderNode* renderNode() { return mRenderNode; }
-
 private:
-    RenderNode* mRenderNode;
+    RenderNode* renderNode;
 
     /**
      * This RenderNode was drawn into a DisplayList with the canvas in a state that will likely

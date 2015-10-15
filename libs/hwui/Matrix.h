@@ -126,6 +126,9 @@ public:
     void loadMultiply(const Matrix4& u, const Matrix4& v);
 
     void loadOrtho(float left, float right, float bottom, float top, float near, float far);
+    void loadOrtho(int width, int height) {
+        loadOrtho(0, width, height, 0, -1, 1);
+    }
 
     uint8_t getType() const;
 

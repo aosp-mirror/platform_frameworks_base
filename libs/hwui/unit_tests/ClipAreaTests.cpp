@@ -101,10 +101,9 @@ TEST(ClipArea, paths) {
     EXPECT_FALSE(area.isEmpty());
     EXPECT_FALSE(area.isSimple());
     EXPECT_FALSE(area.isRectangleList());
+
     Rect clipRect(area.getClipRect());
-    clipRect.dump("clipRect");
     Rect expected(0, 0, r * 2, r * 2);
-    expected.dump("expected");
     EXPECT_EQ(expected, clipRect);
     SkRegion clipRegion(area.getClipRegion());
     auto skRect(clipRegion.getBounds());

@@ -71,9 +71,9 @@ public:
     GlopBuilder& setFillTextureLayer(Layer& layer, float alpha);
 
     GlopBuilder& setTransform(const Snapshot& snapshot, const int transformFlags) {
-        setTransform(*snapshot.transform, transformFlags);
-        return *this;
+        return setTransform(*snapshot.transform, transformFlags);
     }
+    GlopBuilder& setTransform(const Matrix4& canvas, const int transformFlags);
 
     GlopBuilder& setModelViewMapUnitToRect(const Rect destination);
     GlopBuilder& setModelViewMapUnitToRectSnap(const Rect destination);
@@ -98,11 +98,12 @@ public:
     GlopBuilder& setRoundRectClipState(const RoundRectClipState* roundRectClipState);
 
     void build();
+
+    static void dump(const Glop& glop);
 private:
     void setFill(int color, float alphaScale,
             SkXfermode::Mode mode, Blend::ModeOrderSwap modeUsage,
             const SkShader* shader, const SkColorFilter* colorFilter);
-    void setTransform(const Matrix4& canvas, const int transformFlags);
 
     enum StageFlags {
         kInitialStage = 0,

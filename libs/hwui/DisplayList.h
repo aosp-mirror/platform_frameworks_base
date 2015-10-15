@@ -55,11 +55,12 @@ class OpenGLRenderer;
 class Rect;
 class Layer;
 
-class ClipRectOp;
-class SaveLayerOp;
-class SaveOp;
-class RestoreToCountOp;
+#if HWUI_NEW_OPS
+struct RecordedOp;
+struct RenderNodeOp;
+#else
 class DrawRenderNodeOp;
+#endif
 
 /**
  * Holds data used in the playback a tree of DisplayLists.
@@ -107,6 +108,7 @@ struct ReplayStateStruct : public PlaybackStateStruct {
  */
 class DisplayListData {
     friend class DisplayListCanvas;
+    friend class RecordingCanvas;
 public:
     struct Chunk {
         // range of included ops in DLD::displayListOps
@@ -139,11 +141,21 @@ public:
     Vector<Functor*> functors;
 
     const std::vector<Chunk>& getChunks() const {
-        return chunks;
+            return chunks;
     }
+#if HWUI_NEW_OPS
+    const std::vector<RecordedOp*>& getOps() const {
+        return ops;
+    }
+#endif
 
+#if HWUI_NEW_OPS
+    size_t addChild(RenderNodeOp* childOp);
+    const std::vector<RenderNodeOp*>& children() { return mChildren; }
+#else
     size_t addChild(DrawRenderNodeOp* childOp);
     const std::vector<DrawRenderNodeOp*>& children() { return mChildren; }
+#endif
 
     void ref(VirtualLightRefBase* prop) {
         mReferenceHolders.push_back(prop);
@@ -157,10 +169,18 @@ public:
     }
 
 private:
+#if HWUI_NEW_OPS
+    std::vector<RecordedOp*> ops;
+#endif
+
     std::vector< sp<VirtualLightRefBase> > mReferenceHolders;
 
+#if HWUI_NEW_OPS
+    std::vector<RenderNodeOp*> mChildren;
+#else
     // list of children display lists for quick, non-drawing traversal
     std::vector<DrawRenderNodeOp*> mChildren;
+#endif
 
     std::vector<Chunk> chunks;
 
