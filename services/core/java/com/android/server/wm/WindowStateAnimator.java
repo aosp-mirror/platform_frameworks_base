@@ -1190,8 +1190,6 @@ class WindowStateAnimator {
             mDtDy = tmpFloats[Matrix.MSCALE_Y];
             float x = tmpFloats[Matrix.MTRANS_X];
             float y = tmpFloats[Matrix.MTRANS_Y];
-            int w = frame.width();
-            int h = frame.height();
             mWin.mShownPosition.set((int) x, (int) y);
 
             // Now set the alpha...  but because our current hardware
