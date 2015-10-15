@@ -4636,7 +4636,6 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
     }
 
     private void removeViewInternal(int index, View view) {
-
         if (mTransition != null) {
             mTransition.removeChild(this, view);
         }
@@ -4729,12 +4728,17 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
     }
 
     private void removeViewsInternal(int start, int count) {
+        final int end = start + count;
+
+        if (start < 0 || count < 0 || end > mChildrenCount) {
+            throw new IndexOutOfBoundsException();
+        }
+
         final View focused = mFocused;
         final boolean detach = mAttachInfo != null;
         boolean clearChildFocus = false;
 
         final View[] children = mChildren;
-        final int end = start + count;
 
         for (int i = start; i < end; i++) {
             final View view = children[i];
