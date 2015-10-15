@@ -570,21 +570,6 @@ static jboolean nativeGetAnimationFrameStats(JNIEnv* env, jclass clazz, jobject 
     return JNI_TRUE;
 }
 
-
-static void nativeDeferTransactionUntil(JNIEnv* env, jclass clazz, jlong nativeObject,
-        jobject handleObject, jlong frameNumber) {
-    auto ctrl = reinterpret_cast<SurfaceControl *>(nativeObject);
-    sp<IBinder> handle = ibinderForJavaObject(env, handleObject);
-
-    ctrl->deferTransactionUntil(handle, frameNumber);
-}
-
-static jobject nativeGetHandle(JNIEnv* env, jclass clazz, jlong nativeObject) {
-    auto ctrl = reinterpret_cast<SurfaceControl *>(nativeObject);
-
-    return javaObjectForIBinder(env, ctrl->getHandle());
-}
-
 // ----------------------------------------------------------------------------
 
 static const JNINativeMethod sSurfaceControlMethods[] = {
@@ -652,10 +637,6 @@ static const JNINativeMethod sSurfaceControlMethods[] = {
             (void*)nativeGetAnimationFrameStats },
     {"nativeSetDisplayPowerMode", "(Landroid/os/IBinder;I)V",
             (void*)nativeSetDisplayPowerMode },
-    {"nativeDeferTransactionUntil", "(JLandroid/os/IBinder;J)V",
-            (void*)nativeDeferTransactionUntil },
-    {"nativeGetHandle", "(J)Landroid/os/IBinder;",
-            (void*)nativeGetHandle }
 };
 
 int register_android_view_SurfaceControl(JNIEnv* env)

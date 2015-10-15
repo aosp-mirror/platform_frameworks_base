@@ -6555,20 +6555,6 @@ public final class ViewRootImpl implements ViewParent,
         }
     }
 
-    long getNextFrameNumber() {
-        long frameNumber = -1;
-        if (mSurfaceHolder != null) {
-            mSurfaceHolder.mSurfaceLock.lock();
-        }
-        if (mSurface.isValid()) {
-            frameNumber =  mSurface.getNextFrameNumber();
-        }
-        if (mSurfaceHolder != null) {
-            mSurfaceHolder.mSurfaceLock.unlock();
-        }
-        return frameNumber;
-    }
-
     class TakenSurfaceHolder extends BaseSurfaceHolder {
         @Override
         public boolean onAllowLockCanvas() {

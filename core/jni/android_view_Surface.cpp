@@ -461,10 +461,6 @@ static jint nativeGetHeight(JNIEnv* env, jclass clazz, jlong nativeObject) {
     anw->query(anw, NATIVE_WINDOW_HEIGHT, &value);
     return value;
 }
-static jlong nativeGetNextFrameNumber(JNIEnv *env, jclass clazz, jlong nativeObject) {
-    Surface* surface = reinterpret_cast<Surface*>(nativeObject);
-    return surface->getNextFrameNumber();
-}
 
 namespace uirenderer {
 
@@ -541,7 +537,6 @@ static const JNINativeMethod gSurfaceMethods[] = {
             (void*)nativeWriteToParcel },
     {"nativeGetWidth", "(J)I", (void*)nativeGetWidth },
     {"nativeGetHeight", "(J)I", (void*)nativeGetHeight },
-    {"nativeGetNextFrameNumber", "(J)J", (void*)nativeGetNextFrameNumber },
 
     // HWUI context
     {"nHwuiCreate", "(JJ)J", (void*) hwui::create },

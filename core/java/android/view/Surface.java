@@ -56,8 +56,6 @@ public class Surface implements Parcelable {
     private static native int nativeGetWidth(long nativeObject);
     private static native int nativeGetHeight(long nativeObject);
 
-    private static native long nativeGetNextFrameNumber(long nativeObject);
-
     public static final Parcelable.Creator<Surface> CREATOR =
             new Parcelable.Creator<Surface>() {
         @Override
@@ -218,18 +216,6 @@ public class Surface implements Parcelable {
     public int getGenerationId() {
         synchronized (mLock) {
             return mGenerationId;
-        }
-    }
-
-    /**
-     * Returns the next frame number which will be dequeued for rendering.
-     * Intended for use with SurfaceFlinger's deferred transactions API.
-     *
-     * @hide
-     */
-    public long getNextFrameNumber() {
-        synchronized (mLock) {
-            return nativeGetNextFrameNumber(mNativeObject);
         }
     }
 
