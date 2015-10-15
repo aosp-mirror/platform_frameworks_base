@@ -17,6 +17,7 @@
 package com.android.server.updates;
 
 import com.android.server.EventLogTags;
+import com.android.internal.util.HexDump;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -155,7 +156,7 @@ public class ConfigUpdateInstallReceiver extends BroadcastReceiver {
         try {
             MessageDigest dgst = MessageDigest.getInstance("SHA512");
             byte[] fingerprint = dgst.digest(content);
-            return IntegralToString.bytesToHexString(fingerprint, false);
+            return HexDump.toHexString(fingerprint, false);
         } catch (NoSuchAlgorithmException e) {
             throw new AssertionError(e);
         }

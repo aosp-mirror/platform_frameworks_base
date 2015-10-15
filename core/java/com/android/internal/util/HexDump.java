@@ -19,28 +19,29 @@ package com.android.internal.util;
 public class HexDump
 {
     private final static char[] HEX_DIGITS = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F' };
-    
+    private final static char[] HEX_LOWER_CASE_DIGITS = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f' };
+
     public static String dumpHexString(byte[] array)
     {
         return dumpHexString(array, 0, array.length);
     }
-    
+
     public static String dumpHexString(byte[] array, int offset, int length)
     {
         StringBuilder result = new StringBuilder();
-        
+
         byte[] line = new byte[16];
         int lineIndex = 0;
-        
+
         result.append("\n0x");
         result.append(toHexString(offset));
-        
+
         for (int i = offset ; i < offset + length ; i++)
         {
             if (lineIndex == 16)
             {
                 result.append(" ");
-                
+
                 for (int j = 0 ; j < 16 ; j++)
                 {
                     if (line[j] > ' ' && line[j] < '~')
@@ -52,20 +53,20 @@ public class HexDump
                         result.append(".");
                     }
                 }
-                
+
                 result.append("\n0x");
                 result.append(toHexString(i));
                 lineIndex = 0;
             }
-            
+
             byte b = array[i];
             result.append(" ");
             result.append(HEX_DIGITS[(b >>> 4) & 0x0F]);
             result.append(HEX_DIGITS[b & 0x0F]);
-            
+
             line[lineIndex++] = b;
         }
-        
+
         if (lineIndex != 16)
         {
             int count = (16 - lineIndex) * 3;
@@ -74,7 +75,7 @@ public class HexDump
             {
                 result.append(" ");
             }
-            
+
             for (int i = 0 ; i < lineIndex ; i++)
             {
                 if (line[i] > ' ' && line[i] < '~')
@@ -87,10 +88,10 @@ public class HexDump
                 }
             }
         }
-        
+
         return result.toString();
     }
-    
+
     public static String toHexString(byte b)
     {
         return toHexString(toByteArray(b));
@@ -98,48 +99,59 @@ public class HexDump
 
     public static String toHexString(byte[] array)
     {
-        return toHexString(array, 0, array.length);
+        return toHexString(array, 0, array.length, true);
     }
-    
+
+    public static String toHexString(byte[] array, boolean upperCase)
+    {
+        return toHexString(array, 0, array.length, upperCase);
+    }
+
     public static String toHexString(byte[] array, int offset, int length)
     {
+        return toHexString(array, offset, length, true);
+    }
+
+    public static String toHexString(byte[] array, int offset, int length, boolean upperCase)
+    {
+        char[] digits = upperCase ? HEX_DIGITS : HEX_LOWER_CASE_DIGITS;
         char[] buf = new char[length * 2];
 
         int bufIndex = 0;
-        for (int i = offset ; i < offset + length; i++) 
+        for (int i = offset ; i < offset + length; i++)
         {
             byte b = array[i];
-            buf[bufIndex++] = HEX_DIGITS[(b >>> 4) & 0x0F];
-            buf[bufIndex++] = HEX_DIGITS[b & 0x0F];
+            buf[bufIndex++] = digits[(b >>> 4) & 0x0F];
+            buf[bufIndex++] = digits[b & 0x0F];
         }
 
-        return new String(buf);        
+        return new String(buf);
     }
-    
+
     public static String toHexString(int i)
     {
         return toHexString(toByteArray(i));
     }
-    
+
     public static byte[] toByteArray(byte b)
     {
         byte[] array = new byte[1];
         array[0] = b;
         return array;
     }
-    
+
     public static byte[] toByteArray(int i)
     {
         byte[] array = new byte[4];
-        
+
         array[3] = (byte)(i & 0xFF);
         array[2] = (byte)((i >> 8) & 0xFF);
         array[1] = (byte)((i >> 16) & 0xFF);
         array[0] = (byte)((i >> 24) & 0xFF);
-        
+
         return array;
     }
-    
+
     private static int toByte(char c)
     {
         if (c >= '0' && c <= '9') return (c - '0');
@@ -148,7 +160,7 @@ public class HexDump
 
         throw new RuntimeException ("Invalid hex char '" + c + "'");
     }
-    
+
     public static byte[] hexStringToByteArray(String hexString)
     {
         int length = hexString.length();
@@ -158,7 +170,15 @@ public class HexDump
         {
             buffer[i / 2] = (byte)((toByte(hexString.charAt(i)) << 4) | toByte(hexString.charAt(i+1)));
         }
-        
+
         return buffer;
-    }    
+    }
+
+    public static StringBuilder appendByteAsHex(StringBuilder sb, byte b, boolean upperCase) {
+        char[] digits = upperCase ? HEX_DIGITS : HEX_LOWER_CASE_DIGITS;
+        sb.append(digits[(b >> 4) & 0xf]);
+        sb.append(digits[b & 0xf]);
+        return sb;
+    }
+
 }
