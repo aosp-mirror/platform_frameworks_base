@@ -60,9 +60,9 @@ page.title=Support Library
 
 
 <div class="toggle-content opened">
-  <p id="rev24-1-0"><a href="#" onclick="return toggleContent(this)">
+  <p id="rev23-1-0"><a href="#" onclick="return toggleContent(this)">
     <img src="{@docRoot}assets/images/triangle-opened.png" class="toggle-content-img" alt=""
-/>Android Support Library, revision 24.1.0</a> <em>(October 2015)</em>
+/>Android Support Library, revision 23.1.0</a> <em>(October 2015)</em>
   </p>
   <div class="toggle-content-toggleme">
     <dl>
