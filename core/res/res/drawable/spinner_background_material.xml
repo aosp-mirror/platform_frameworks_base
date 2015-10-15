@@ -17,18 +17,18 @@
 <layer-list xmlns:android="http://schemas.android.com/apk/res/android"
             android:paddingMode="stack"
             android:paddingStart="0dp"
-            android:paddingEnd="24dp"
+            android:paddingEnd="48dp"
             android:paddingLeft="0dp"
             android:paddingRight="0dp">
     <item
-        android:gravity="end|center_vertical"
-        android:width="24dp"
-        android:height="24dp"
+        android:gravity="end|fill_vertical"
+        android:width="48dp"
         android:drawable="@drawable/control_background_40dp_material" />
 
     <item
         android:drawable="@drawable/ic_spinner_caret"
         android:gravity="end|center_vertical"
         android:width="24dp"
-        android:height="24dp" />
+        android:height="24dp"
+        android:end="12dp" />
 </layer-list>
