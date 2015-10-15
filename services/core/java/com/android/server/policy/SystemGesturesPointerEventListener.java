@@ -131,7 +131,7 @@ public class SystemGesturesPointerEventListener implements PointerEventListener 
                 }
                 break;
             case MotionEvent.ACTION_HOVER_MOVE:
-                if (event.getDevice().getSources() == InputDevice.SOURCE_MOUSE) {
+                if (event.isFromSource(InputDevice.SOURCE_MOUSE)) {
                     if (!mMouseHoveringAtEdge && event.getY() == 0) {
                         mCallbacks.onMouseHoverAtTop();
                         mMouseHoveringAtEdge = true;
