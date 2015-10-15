@@ -16,6 +16,8 @@
 
 package android.content.pm;
 
+import com.android.internal.util.HexDump;
+
 import android.annotation.SystemApi;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -118,7 +120,7 @@ public class ManifestDigest implements Parcelable {
         final int N = mDigest.length;
         for (int i = 0; i < N; i++) {
             final byte b = mDigest[i];
-            IntegralToString.appendByteAsHex(sb, b, false);
+            HexDump.appendByteAsHex(sb, b, false);
             sb.append(',');
         }
         sb.append('}');
