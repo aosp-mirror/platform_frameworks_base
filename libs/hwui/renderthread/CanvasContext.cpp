@@ -266,11 +266,11 @@ void CanvasContext::draw() {
 
     Frame frame = mEglManager.beginFrame(mEglSurface);
 
-#if !HWUI_NEW_OPS
-    if (frame.width() != mCanvas->getViewportWidth()
-            || frame.height() != mCanvas->getViewportHeight()) {
+    if (frame.width() != lastFrameWidth || frame.height() != lastFrameHeight) {
         // can't rely on prior content of window if viewport size changes
         dirty.setEmpty();
+        lastFrameWidth = frame.width();
+        lastFrameHeight = frame.height();
     } else if (mHaveNewSurface || frame.bufferAge() == 0) {
         // New surface needs a full draw
         dirty.setEmpty();
@@ -316,6 +316,18 @@ void CanvasContext::draw() {
     mDamageHistory.next() = screenDirty;
 
     mEglManager.damageFrame(frame, dirty);
+
+#if HWUI_NEW_OPS
+    OpReorderer reorderer;
+    reorderer.defer(dirty, frame.width(), frame.height(), mRenderNodes);
+    BakedOpRenderer::Info info(Caches::getInstance(), mRenderThread.renderState(),
+            frame.width(), frame.height(), mOpaque);
+    // TODO: profiler().draw(mCanvas);
+    reorderer.replayBakedOps<BakedOpRenderer>(&info);
+
+    bool drew = info.didDraw;
+
+#else
     mCanvas->prepareDirty(frame.width(), frame.height(),
             dirty.fLeft, dirty.fTop, dirty.fRight, dirty.fBottom, mOpaque);
 
@@ -426,20 +438,10 @@ void CanvasContext::draw() {
     profiler().draw(mCanvas);
 
     bool drew = mCanvas->finish();
-
+#endif
     // Even if we decided to cancel the frame, from the perspective of jank
     // metrics the frame was swapped at this point
     mCurrentFrameInfo->markSwapBuffers();
-#else
-    OpReorderer reorderer;
-    reorderer.defer(frame.width(), frame.height(), mRenderNodes);
-    BakedOpRenderer::Info info(Caches::getInstance(), mRenderThread.renderState(),
-            frame.width(), frame.height(), mOpaque);
-    reorderer.replayBakedOps<BakedOpRenderer>(&info);
-
-    bool drew = info.didDraw;
-    SkRect screenDirty = SkRect::MakeWH(frame.width(), frame.height());
-#endif
 
     if (drew) {
         if (CC_UNLIKELY(!mEglManager.swapBuffers(frame, screenDirty))) {

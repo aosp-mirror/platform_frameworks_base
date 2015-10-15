@@ -46,6 +46,12 @@ public:
         return snapshot;
     }
 
+    static SkBitmap createSkBitmap(int width, int height) {
+        SkBitmap bitmap;
+        bitmap.setInfo(SkImageInfo::MakeUnknown(width, height));
+        return bitmap;
+    }
+
     template<class CanvasType>
     static std::unique_ptr<DisplayListData> createDLD(int width, int height,
             std::function<void(CanvasType& canvas)> canvasCallback) {

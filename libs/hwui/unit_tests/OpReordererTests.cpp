@@ -50,9 +50,7 @@ public:
 };
 TEST(OpReorderer, simple) {
     auto dld = TestUtils::createDLD<RecordingCanvas>(100, 200, [](RecordingCanvas& canvas) {
-        SkBitmap bitmap;
-        bitmap.setInfo(SkImageInfo::MakeUnknown(25, 25));
-
+        SkBitmap bitmap = TestUtils::createSkBitmap(25, 25);
         canvas.drawRect(0, 0, 100, 200, SkPaint());
         canvas.drawBitmap(bitmap, 10, 10, nullptr);
     });
@@ -81,8 +79,7 @@ public:
 };
 TEST(OpReorderer, simpleBatching) {
     auto dld = TestUtils::createDLD<RecordingCanvas>(200, 200, [](RecordingCanvas& canvas) {
-        SkBitmap bitmap;
-        bitmap.setInfo(SkImageInfo::MakeUnknown(10, 10));
+        SkBitmap bitmap = TestUtils::createSkBitmap(10, 10);
 
         // Alternate between drawing rects and bitmaps, with bitmaps overlapping rects.
         // Rects don't overlap bitmaps, so bitmaps should be brought to front as a group.
@@ -134,14 +131,14 @@ TEST(OpReorderer, renderNode) {
 
     RenderNode* childPtr = child.get();
     sp<RenderNode> parent = TestUtils::createNode<RecordingCanvas>(0, 0, 200, 200, [childPtr](RecordingCanvas& canvas) {
-            SkPaint paint;
-            paint.setColor(SK_ColorDKGRAY);
-            canvas.drawRect(0, 0, 200, 200, paint);
+        SkPaint paint;
+        paint.setColor(SK_ColorDKGRAY);
+        canvas.drawRect(0, 0, 200, 200, paint);
 
-            canvas.save(SkCanvas::kMatrix_SaveFlag | SkCanvas::kClip_SaveFlag);
-            canvas.translate(40, 40);
-            canvas.drawRenderNode(childPtr);
-            canvas.restore();
+        canvas.save(SkCanvas::kMatrix_SaveFlag | SkCanvas::kClip_SaveFlag);
+        canvas.translate(40, 40);
+        canvas.drawRenderNode(childPtr);
+        canvas.restore();
     });
 
     TestUtils::syncNodePropertiesAndDisplayList(child);
@@ -151,10 +148,41 @@ TEST(OpReorderer, renderNode) {
     nodes.push_back(parent.get());
 
     OpReorderer reorderer;
-    reorderer.defer(200, 200, nodes);
+    reorderer.defer(SkRect::MakeWH(200, 200), 200, 200, nodes);
 
     Info info;
     reorderer.replayBakedOps<RenderNodeReceiver>(&info);
+}
+
+class ClippedReceiver {
+public:
+    static void onBitmapOp(Info* info, const BitmapOp& op, const BakedOpState& state) {
+        EXPECT_EQ(0, info->index++);
+        EXPECT_EQ(Rect(10, 20, 30, 40), state.computedState.clippedBounds);
+        EXPECT_EQ(Rect(10, 20, 30, 40), state.computedState.clipRect);
+        EXPECT_TRUE(state.computedState.transform.isIdentity());
+    }
+    UNSUPPORTED_OP(Info, RectOp)
+    UNSUPPORTED_OP(Info, RenderNodeOp)
+    UNSUPPORTED_OP(Info, SimpleRectsOp)
+    static void startFrame(Info& info) {}
+    static void endFrame(Info& info) {}
+};
+TEST(OpReorderer, clipped) {
+    sp<RenderNode> node = TestUtils::createNode<RecordingCanvas>(0, 0, 200, 200, [](RecordingCanvas& canvas) {
+        SkBitmap bitmap = TestUtils::createSkBitmap(200, 200);
+        canvas.drawBitmap(bitmap, 0, 0, nullptr);
+    });
+    TestUtils::syncNodePropertiesAndDisplayList(node);
+    std::vector< sp<RenderNode> > nodes;
+    nodes.push_back(node.get());
+
+    OpReorderer reorderer;
+    reorderer.defer(SkRect::MakeLTRB(10, 20, 30, 40), // clip to small area, should see in receiver
+            200, 200, nodes);
+
+    Info info;
+    reorderer.replayBakedOps<ClippedReceiver>(&info);
 }
 
 }

@@ -212,10 +212,11 @@ OpReorderer::OpReorderer()
         : mCanvasState(sNullClient) {
 }
 
-void OpReorderer::defer(int viewportWidth, int viewportHeight,
+void OpReorderer::defer(const SkRect& clip, int viewportWidth, int viewportHeight,
         const std::vector< sp<RenderNode> >& nodes) {
     mCanvasState.initializeSaveStack(viewportWidth, viewportHeight,
-            0, 0, viewportWidth, viewportHeight, Vector3());
+            clip.fLeft, clip.fTop, clip.fRight, clip.fBottom,
+            Vector3());
     for (const sp<RenderNode>& node : nodes) {
         if (node->nothingToDraw()) continue;
 
@@ -325,7 +326,7 @@ void OpReorderer::onSimpleRectsOp(const SimpleRectsOp& op) {
 // if no target, merging ops still interate to find similar batch to insert after
 void OpReorderer::locateInsertIndex(int batchId, const Rect& clippedBounds,
         BatchBase** targetBatch, size_t* insertBatchIndex) const {
-    for (size_t i = mBatches.size() - 1; i >= mEarliestBatchIndex; i--) {
+    for (int i = mBatches.size() - 1; i >= mEarliestBatchIndex; i--) {
         BatchBase* overBatch = mBatches[i];
 
         if (overBatch == *targetBatch) break;
