@@ -25,6 +25,8 @@
 #include <vector>
 #include <unordered_map>
 
+struct SkRect;
+
 namespace android {
 namespace uirenderer {
 
@@ -57,7 +59,8 @@ public:
     OpReorderer();
 
     // TODO: not final, just presented this way for simplicity. Layers too?
-    void defer(int viewportWidth, int viewportHeight, const std::vector< sp<RenderNode> >& nodes);
+    void defer(const SkRect& clip, int viewportWidth, int viewportHeight,
+            const std::vector< sp<RenderNode> >& nodes);
 
     void defer(int viewportWidth, int viewportHeight,
             const std::vector<DisplayListData::Chunk>& chunks, const std::vector<RecordedOp*>& ops);
@@ -133,7 +136,7 @@ private:
     // contains ResolvedOps and Batches
     LinearAllocator mAllocator;
 
-    size_t mEarliestBatchIndex = 0;
+    int mEarliestBatchIndex = 0;
 };
 
 }; // namespace uirenderer

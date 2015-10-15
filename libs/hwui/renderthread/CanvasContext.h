@@ -141,6 +141,9 @@ private:
 
     void freePrefetechedLayers();
 
+    int lastFrameWidth = 0;
+    int lastFrameHeight = 0;
+
     RenderThread& mRenderThread;
     EglManager& mEglManager;
     sp<ANativeWindow> mNativeWindow;
