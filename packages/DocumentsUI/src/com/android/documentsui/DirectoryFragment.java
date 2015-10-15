@@ -205,9 +205,12 @@ public class DirectoryFragment extends Fragment {
         return builder.toString();
     }
 
-    public static DirectoryFragment get(FragmentManager fm) {
+    public static @Nullable DirectoryFragment get(FragmentManager fm) {
         // TODO: deal with multiple directories shown at once
-        return (DirectoryFragment) fm.findFragmentById(R.id.container_directory);
+        Fragment fragment = fm.findFragmentById(R.id.container_directory);
+        return fragment instanceof DirectoryFragment
+                ? (DirectoryFragment) fragment
+                : null;
     }
 
     @Override

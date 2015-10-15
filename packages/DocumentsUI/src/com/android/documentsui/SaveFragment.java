@@ -23,6 +23,7 @@ import android.content.Context;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -79,6 +80,17 @@ public class SaveFragment extends Fragment {
         mDisplayName = (EditText) view.findViewById(android.R.id.title);
         mDisplayName.addTextChangedListener(mDisplayNameWatcher);
         mDisplayName.setText(getArguments().getString(EXTRA_DISPLAY_NAME));
+        mDisplayName.setOnKeyListener(
+                new View.OnKeyListener() {
+                    @Override
+                    public boolean onKey(View v, int keyCode, KeyEvent event) {
+                        if (keyCode == KeyEvent.KEYCODE_ENTER && mSave.isEnabled()) {
+                            performSave();
+                            return true;
+                        }
+                        return false;
+                    }
+                });
 
         mSave = (Button) view.findViewById(android.R.id.button1);
         mSave.setOnClickListener(mSaveListener);
@@ -113,16 +125,21 @@ public class SaveFragment extends Fragment {
     private View.OnClickListener mSaveListener = new View.OnClickListener() {
         @Override
         public void onClick(View v) {
-            final DocumentsActivity activity = DocumentsActivity.get(SaveFragment.this);
-            if (mReplaceTarget != null) {
-                activity.onSaveRequested(mReplaceTarget);
-            } else {
-                final String mimeType = getArguments().getString(EXTRA_MIME_TYPE);
-                final String displayName = mDisplayName.getText().toString();
-                activity.onSaveRequested(mimeType, displayName);
-            }
+            performSave();
         }
+
     };
+
+    private void performSave() {
+        final DocumentsActivity activity = DocumentsActivity.get(SaveFragment.this);
+        if (mReplaceTarget != null) {
+            activity.onSaveRequested(mReplaceTarget);
+        } else {
+            final String mimeType = getArguments().getString(EXTRA_MIME_TYPE);
+            final String displayName = mDisplayName.getText().toString();
+            activity.onSaveRequested(mimeType, displayName);
+        }
+    }
 
     /**
      * Set given document as target for in-place writing if user hits save
@@ -139,7 +156,11 @@ public class SaveFragment extends Fragment {
         }
     }
 
-    public void setSaveEnabled(boolean enabled) {
+    public void prepareForDirectory(DocumentInfo cwd) {
+        setSaveEnabled(cwd != null && cwd.isCreateSupported());
+    }
+
+    private void setSaveEnabled(boolean enabled) {
         mSave.setEnabled(enabled);
     }
 

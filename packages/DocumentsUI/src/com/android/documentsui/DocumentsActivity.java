@@ -337,7 +337,7 @@ public class DocumentsActivity extends BaseActivity {
 
         if (mState.action == ACTION_CREATE) {
             final FragmentManager fm = getFragmentManager();
-            SaveFragment.get(fm).setSaveEnabled(cwd != null && cwd.isCreateSupported());
+            SaveFragment.get(fm).prepareForDirectory(cwd);
         }
 
         Menus.disableHiddenItems(menu);
