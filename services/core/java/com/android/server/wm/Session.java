@@ -187,12 +187,6 @@ final class Session extends IWindowSession.Stub
         mService.removeWindow(this, window);
     }
 
-    @Override
-    public void repositionChild(IWindow window, int x, int y, long deferTransactionUntilFrame,
-             Rect outFrame) {
-        mService.repositionChild(this, window, x, y, deferTransactionUntilFrame, outFrame);
-    }
-
     public int relayout(IWindow window, int seq, WindowManager.LayoutParams attrs,
             int requestedWidth, int requestedHeight, int viewFlags,
             int flags, Rect outFrame, Rect outOverscanInsets, Rect outContentInsets,

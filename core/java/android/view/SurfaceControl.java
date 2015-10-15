@@ -81,9 +81,6 @@ public class SurfaceControl {
     private static native boolean nativeSetActiveConfig(IBinder displayToken, int id);
     private static native void nativeSetDisplayPowerMode(
             IBinder displayToken, int mode);
-    private static native void nativeDeferTransactionUntil(long nativeObject,
-            IBinder handle, long frame);
-    private static native IBinder nativeGetHandle(long nativeObject);
 
 
     private final CloseGuard mCloseGuard = CloseGuard.get();
@@ -359,14 +356,6 @@ public class SurfaceControl {
     /** end a transaction */
     public static void closeTransaction() {
         nativeCloseTransaction();
-    }
-
-    public void deferTransactionUntil(IBinder handle, long frame) {
-        nativeDeferTransactionUntil(mNativeObject, handle, frame);
-    }
-
-    public IBinder getHandle() {
-        return nativeGetHandle(mNativeObject);
     }
 
     /** flag the transaction as an animation */

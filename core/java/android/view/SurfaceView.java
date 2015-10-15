@@ -448,10 +448,11 @@ public class SurfaceView extends View {
         final boolean sizeChanged = mWidth != myWidth || mHeight != myHeight;
         final boolean visibleChanged = mVisible != mRequestedVisible;
         final boolean layoutSizeChanged = getWidth() != mLayout.width || getHeight() != mLayout.height;
-        final boolean positionChanged = mLeft != mLocation[0] || mTop != mLocation[1];
 
         if (force || creating || formatChanged || sizeChanged || visibleChanged
+            || mLeft != mLocation[0] || mTop != mLocation[1]
             || mUpdateWindowNeeded || mReportDrawNeeded || redrawNeeded || layoutSizeChanged) {
+
             if (DEBUG) Log.i(TAG, "Changes: creating=" + creating
                     + " format=" + formatChanged + " size=" + sizeChanged
                     + " visible=" + visibleChanged
@@ -615,22 +616,11 @@ public class SurfaceView extends View {
                     mSession.performDeferredDestroy(mWindow);
                 }
             } catch (RemoteException ex) {
-                Log.e(TAG, "Exception from relayout", ex);
             }
             if (DEBUG) Log.v(
                 TAG, "Layout: x=" + mLayout.x + " y=" + mLayout.y +
                 " w=" + mLayout.width + " h=" + mLayout.height +
                 ", frame=" + mSurfaceFrame);
-        } else if (positionChanged) { // Only the position has changed
-            mLeft = mLocation[0];
-            mTop = mLocation[1];
-            try {
-                mSession.repositionChild(mWindow, mLeft, mTop,
-                        viewRoot != null ? viewRoot.getNextFrameNumber() : -1,
-                        mWinFrame);
-            } catch (RemoteException ex) {
-                Log.e(TAG, "Exception from relayout", ex);
-            }
         }
     }
 

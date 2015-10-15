@@ -96,23 +96,6 @@ interface IWindowSession {
             out Rect outOutsets, out Configuration outConfig, out Surface outSurface);
 
     /**
-     *  Position a window relative to it's parent (attached) window without triggering
-     *  a full relayout. This action may be deferred until a given frame number
-     *  for the parent window appears. This allows for synchronizing movement of a child
-     *  to repainting the contents of the parent.
-     *
-     *  @param window The window being modified. Must be attached to a parent window
-     *  or this call will fail.
-     *  @param x The new x position
-     *  @param y The new y position
-     *  @param deferTransactionUntilFrame Frame number from our parent (attached) to
-     *  defer this action until.
-     *  @param outFrame Rect in which is placed the new position/size on screen.
-     */
-    void repositionChild(IWindow childWindow, int x, int y, long deferTransactionUntilFrame,
-    out Rect outFrame);
-
-    /**
      * If a call to relayout() asked to have the surface destroy deferred,
      * it must call this once it is okay to destroy that surface.
      */
