@@ -37,6 +37,7 @@ import android.graphics.Region;
 import android.graphics.drawable.Drawable;
 import android.hardware.display.DisplayManager;
 import android.hardware.display.DisplayManager.DisplayListener;
+import android.hardware.input.InputManager;
 import android.media.AudioManager;
 import android.os.Binder;
 import android.os.Build;
@@ -323,6 +324,8 @@ public final class ViewRootImpl implements ViewParent,
     private long mFpsStartTime = -1;
     private long mFpsPrevTime = -1;
     private int mFpsNumFrames;
+
+    private int mPointerIconShape = PointerIcon.STYLE_NOT_SPECIFIED;
 
     /**
      * see {@link #playSoundEffect(int)}
@@ -4167,6 +4170,30 @@ public final class ViewRootImpl implements ViewParent,
 
         private int processPointerEvent(QueuedInputEvent q) {
             final MotionEvent event = (MotionEvent)q.mEvent;
+
+            if (event.getPointerCount() == 1
+                    && event.isFromSource(InputDevice.SOURCE_MOUSE)) {
+                if (event.getActionMasked() == MotionEvent.ACTION_HOVER_ENTER
+                        || event.getActionMasked() == MotionEvent.ACTION_HOVER_EXIT) {
+                    // Other apps or the window manager may change the icon shape outside of
+                    // this app, therefore the icon shape has to be reset on enter/exit event.
+                    mPointerIconShape = PointerIcon.STYLE_NOT_SPECIFIED;
+                }
+
+                final float x = event.getX();
+                final float y = event.getY();
+                if (x >= 0 && x < mView.getWidth() && y >= 0 && y < mView.getHeight()) {
+                    int pointerShape = mView.getPointerShape(event, x, y);
+                    if (pointerShape == PointerIcon.STYLE_NOT_SPECIFIED) {
+                        pointerShape = PointerIcon.STYLE_DEFAULT;
+                    }
+
+                    if (mPointerIconShape != pointerShape) {
+                        mPointerIconShape = pointerShape;
+                        event.getDevice().setPointerShape(pointerShape);
+                    }
+                }
+            }
 
             mAttachInfo.mUnbufferedDispatchRequested = false;
             boolean handled = mView.dispatchPointerEvent(event);

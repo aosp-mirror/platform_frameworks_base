@@ -78,6 +78,7 @@ PointerController::PointerController(const sp<PointerControllerPolicyInterface>&
     mLocked.pointerAlpha = 0.0f; // pointer is initially faded
     mLocked.pointerSprite = mSpriteController->createSprite();
     mLocked.pointerIconChanged = false;
+    mLocked.requestedPointerShape = 0;
 
     mLocked.buttonState = 0;
 
@@ -230,6 +231,10 @@ void PointerController::unfade(Transition transition) {
 
 void PointerController::setPresentation(Presentation presentation) {
     AutoMutex _l(mLock);
+
+    if (presentation == PRESENTATION_POINTER && mLocked.additionalMouseResources.empty()) {
+        mPolicy->loadAdditionalMouseResources(&mLocked.additionalMouseResources);
+    }
 
     if (mLocked.presentation != presentation) {
         mLocked.presentation = presentation;
@@ -391,6 +396,15 @@ void PointerController::setDisplayViewport(int32_t width, int32_t height, int32_
     updatePointerLocked();
 }
 
+void PointerController::updatePointerShape(int iconId) {
+    AutoMutex _l(mLock);
+    if (mLocked.requestedPointerShape != iconId) {
+        mLocked.requestedPointerShape = iconId;
+        mLocked.presentationChanged = true;
+        updatePointerLocked();
+    }
+}
+
 void PointerController::setPointerIcon(const SpriteIcon& icon) {
     AutoMutex _l(mLock);
 
@@ -497,8 +511,22 @@ void PointerController::updatePointerLocked() {
     }
 
     if (mLocked.pointerIconChanged || mLocked.presentationChanged) {
-        mLocked.pointerSprite->setIcon(mLocked.presentation == PRESENTATION_POINTER
-                ? mLocked.pointerIcon : mResources.spotAnchor);
+        if (mLocked.presentation == PRESENTATION_POINTER) {
+            if (mLocked.requestedPointerShape == 0) {
+                mLocked.pointerSprite->setIcon(mLocked.pointerIcon);
+            } else {
+                std::map<int, SpriteIcon>::const_iterator iter =
+                    mLocked.additionalMouseResources.find(mLocked.requestedPointerShape);
+                if (iter != mLocked.additionalMouseResources.end()) {
+                    mLocked.pointerSprite->setIcon(iter->second);
+                } else {
+                    ALOGW("Can't find the resource for icon id %d", mLocked.requestedPointerShape);
+                    mLocked.pointerSprite->setIcon(mLocked.pointerIcon);
+                }
+            }
+        } else {
+            mLocked.pointerSprite->setIcon(mResources.spotAnchor);
+        }
         mLocked.pointerIconChanged = false;
         mLocked.presentationChanged = false;
     }

@@ -19,6 +19,8 @@
 
 #include "SpriteController.h"
 
+#include <map>
+
 #include <ui/DisplayInfo.h>
 #include <input/Input.h>
 #include <inputflinger/PointerControllerInterface.h>
@@ -40,7 +42,6 @@ struct PointerResources {
     SpriteIcon spotAnchor;
 };
 
-
 /*
  * Pointer controller policy interface.
  *
@@ -57,6 +58,7 @@ protected:
 
 public:
     virtual void loadPointerResources(PointerResources* outResources) = 0;
+    virtual void loadAdditionalMouseResources(std::map<int, SpriteIcon>* outResources) = 0;
 };
 
 
@@ -93,6 +95,7 @@ public:
             const uint32_t* spotIdToIndex, BitSet32 spotIdBits);
     virtual void clearSpots();
 
+    void updatePointerShape(int iconId);
     void setDisplayViewport(int32_t width, int32_t height, int32_t orientation);
     void setPointerIcon(const SpriteIcon& icon);
     void setInactivityTimeout(InactivityTimeout inactivityTimeout);
@@ -154,6 +157,10 @@ private:
         sp<Sprite> pointerSprite;
         SpriteIcon pointerIcon;
         bool pointerIconChanged;
+
+        std::map<int, SpriteIcon> additionalMouseResources;
+
+        int32_t requestedPointerShape;
 
         int32_t buttonState;
 

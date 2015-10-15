@@ -7605,6 +7605,44 @@ i
         <attr name="pointerIconSpotTouch" format="reference" />
         <!-- Reference to a pointer icon drawable with STYLE_SPOT_ANCHOR -->
         <attr name="pointerIconSpotAnchor" format="reference" />
+        <!-- Reference to a pointer drawable with STYLE_CONTEXT_MENU -->
+        <attr name="pointerIconContextMenu" format="reference"/>
+        <!-- Reference to a pointer drawable with STYLE_HAND -->
+        <attr name="pointerIconHand" format="reference"/>
+        <!-- Reference to a pointer drawable with STYLE_HELP -->
+        <attr name="pointerIconHelp" format="reference"/>
+        <!-- Reference to a pointer drawable with STYLE_CELL -->
+        <attr name="pointerIconCell" format="reference"/>
+        <!-- Reference to a pointer drawable with STYLE_CROSSHAIR -->
+        <attr name="pointerIconCrosshair" format="reference"/>
+        <!-- Reference to a pointer drawable with STYLE_TEXT -->
+        <attr name="pointerIconText" format="reference"/>
+        <!-- Reference to a pointer drawable with STYLE_VERTICAL_TEXT -->
+        <attr name="pointerIconVerticalText" format="reference"/>
+        <!-- Reference to a pointer drawable with STYLE_ALIAS -->
+        <attr name="pointerIconAlias" format="reference"/>
+        <!-- Reference to a pointer drawable with STYLE_COPY -->
+        <attr name="pointerIconCopy" format="reference"/>
+        <!-- Reference to a pointer drawable with STYLE_NODROP -->
+        <attr name="pointerIconNodrop" format="reference"/>
+        <!-- Reference to a pointer drawable with STYLE_ALL_SCROLL -->
+        <attr name="pointerIconAllScroll" format="reference"/>
+        <!-- Reference to a pointer drawable with STYLE_HORIZONTAL_DOUBLE_ARROW -->
+        <attr name="pointerIconHorizontalDoubleArrow" format="reference"/>
+        <!-- Reference to a pointer drawable with STYLE_VERTICAL_DOUBLE_ARROW -->
+        <attr name="pointerIconVerticalDoubleArrow" format="reference"/>
+        <!-- Reference to a pointer drawable with STYLE_TOP_RIGHT_DIAGONAL_DOUBLE_ARROW -->
+        <attr name="pointerIconTopRightDiagonalDoubleArrow" format="reference"/>
+        <!-- Reference to a pointer drawable with STYLE_TOP_LEFT_DIAGONAL_DOUBLE_ARROW -->
+        <attr name="pointerIconTopLeftDiagonalDoubleArrow" format="reference"/>
+        <!-- Reference to a pointer drawable with STYLE_ZOOM_IN -->
+        <attr name="pointerIconZoomIn" format="reference"/>
+        <!-- Reference to a pointer drawable with STYLE_ZOOM_OUT -->
+        <attr name="pointerIconZoomOut" format="reference"/>
+        <!-- Reference to a pointer drawable with STYLE_GRAB -->
+        <attr name="pointerIconGrab" format="reference"/>
+        <!-- Reference to a pointer drawable with STYLE_GRABBING -->
+        <attr name="pointerIconGrabbing" format="reference"/>
     </declare-styleable>
 
     <declare-styleable name="PointerIcon">

@@ -199,6 +199,7 @@ public:
     void setShowTouches(bool enabled);
     void setInteractive(bool interactive);
     void reloadCalibration();
+    void setPointerIconShape(int32_t iconId);
 
     /* --- InputReaderPolicyInterface implementation --- */
 
@@ -237,6 +238,7 @@ public:
     /* --- PointerControllerPolicyInterface implementation --- */
 
     virtual void loadPointerResources(PointerResources* outResources);
+    virtual void loadAdditionalMouseResources(std::map<int, SpriteIcon>* outResources);
 
 private:
     sp<InputManager> mInputManager;
@@ -779,6 +781,15 @@ void NativeInputManager::reloadCalibration() {
             InputReaderConfiguration::CHANGE_TOUCH_AFFINE_TRANSFORMATION);
 }
 
+void NativeInputManager::setPointerIconShape(int32_t iconId) {
+  AutoMutex _l(mLock);
+  sp<PointerController> controller = mLocked.pointerController.promote();
+  if (controller != NULL) {
+        // Use 0 (the default icon) for ARROW.
+        controller->updatePointerShape((iconId == POINTER_ICON_STYLE_ARROW) ? 0 : iconId);
+  }
+}
+
 TouchAffineTransformation NativeInputManager::getTouchAffineTransformation(
         JNIEnv *env, jfloatArray matrixArr) {
     ScopedFloatArrayRO matrix(env, matrixArr);
@@ -1027,6 +1038,15 @@ void NativeInputManager::loadPointerResources(PointerResources* outResources) {
             &outResources->spotTouch);
     loadSystemIconAsSprite(env, mContextObj, POINTER_ICON_STYLE_SPOT_ANCHOR,
             &outResources->spotAnchor);
+}
+
+void NativeInputManager::loadAdditionalMouseResources(std::map<int, SpriteIcon>* outResources) {
+    JNIEnv* env = jniEnv();
+
+    for (int iconId = POINTER_ICON_STYLE_CONTEXT_MENU; iconId <= POINTER_ICON_STYLE_GRABBING;
+             ++iconId) {
+        loadSystemIconAsSprite(env, mContextObj, iconId, &((*outResources)[iconId]));
+    }
 }
 
 
@@ -1367,6 +1387,11 @@ static void nativeMonitor(JNIEnv* /* env */, jclass /* clazz */, jlong ptr) {
     im->getInputManager()->getDispatcher()->monitor();
 }
 
+static void nativeSetPointerIconShape(JNIEnv* /* env */, jclass /* clazz */, jlong ptr, jint iconId) {
+    NativeInputManager* im = reinterpret_cast<NativeInputManager*>(ptr);
+    im->setPointerIconShape(iconId);
+}
+
 // ----------------------------------------------------------------------------
 
 static const JNINativeMethod gInputManagerMethods[] = {
@@ -1425,6 +1450,8 @@ static const JNINativeMethod gInputManagerMethods[] = {
             (void*) nativeDump },
     { "nativeMonitor", "(J)V",
             (void*) nativeMonitor },
+    { "nativeSetPointerIconShape", "(JI)V",
+            (void*) nativeSetPointerIconShape },
 };
 
 #define FIND_CLASS(var, className) \
