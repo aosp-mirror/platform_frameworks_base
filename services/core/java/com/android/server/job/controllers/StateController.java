@@ -18,6 +18,7 @@ package com.android.server.job.controllers;
 
 import android.content.Context;
 
+import com.android.server.job.JobSchedulerService;
 import com.android.server.job.StateChangedListener;
 
 import java.io.PrintWriter;
@@ -28,7 +29,7 @@ import java.io.PrintWriter;
  * are ready to run, or whether they must be stopped.
  */
 public abstract class StateController {
-    protected static final boolean DEBUG = false;
+    protected static final boolean DEBUG = JobSchedulerService.DEBUG;
     protected Context mContext;
     protected StateChangedListener mStateChangedListener;
     protected boolean mDeviceIdleMode;
