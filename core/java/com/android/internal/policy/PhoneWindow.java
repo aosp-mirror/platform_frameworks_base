@@ -3010,16 +3010,16 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
                 int vis = show ? VISIBLE : INVISIBLE;
                 visibilityChanged = state.targetVisibility != vis;
                 state.targetVisibility = vis;
+                LayoutParams lp = (LayoutParams) view.getLayoutParams();
+                if (lp.height != resolvedHeight || lp.width != resolvedWidth
+                        || lp.gravity != resolvedGravity || lp.rightMargin != rightMargin) {
+                    lp.height = resolvedHeight;
+                    lp.width = resolvedWidth;
+                    lp.gravity = resolvedGravity;
+                    lp.rightMargin = rightMargin;
+                    view.setLayoutParams(lp);
+                }
                 if (show) {
-                    LayoutParams lp = (LayoutParams) view.getLayoutParams();
-                    if (lp.height != resolvedHeight || lp.width != resolvedWidth
-                            || lp.gravity != resolvedGravity || lp.rightMargin != rightMargin) {
-                        lp.height = resolvedHeight;
-                        lp.width = resolvedWidth;
-                        lp.gravity = resolvedGravity;
-                        lp.rightMargin = rightMargin;
-                        view.setLayoutParams(lp);
-                    }
                     view.setBackgroundColor(color);
                 }
             }
