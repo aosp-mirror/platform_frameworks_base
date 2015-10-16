@@ -6,6 +6,7 @@ import android.content.Context;
 import android.app.job.JobInfo;
 import android.app.job.JobInfo.Builder;
 import android.os.PersistableBundle;
+import android.os.SystemClock;
 import android.test.AndroidTestCase;
 import android.test.RenamingDelegatingContext;
 import android.util.Log;
@@ -102,6 +103,14 @@ public class JobStoreTest extends AndroidTestCase {
         Iterator<JobStatus> it = jobStatusSet.iterator();
         JobStatus loaded1 = it.next();
         JobStatus loaded2 = it.next();
+
+        // Reverse them so we know which comparison to make.
+        if (loaded1.getJobId() != 8) {
+            JobStatus tmp = loaded1;
+            loaded1 = loaded2;
+            loaded2 = tmp;
+        }
+
         assertTasksEqual(task1, loaded1.getJob());
         assertTasksEqual(task2, loaded2.getJob());
         assertTrue("JobStore#contains invalid.", mTaskStoreUnderTest.containsJob(taskStatus1));
@@ -141,6 +150,36 @@ public class JobStoreTest extends AndroidTestCase {
         assertEquals("Incorrect # of persisted tasks.", 1, jobStatusSet.size());
         JobStatus loaded = jobStatusSet.iterator().next();
         assertTasksEqual(task, loaded.getJob());
+    }
+
+    public void testMassivePeriodClampedOnRead() throws Exception {
+        final long TEN_SECONDS = 10000L;
+        JobInfo.Builder b = new Builder(8, mComponent)
+                .setPeriodic(TEN_SECONDS)
+                .setPersisted(true);
+        final long invalidLateRuntimeElapsedMillis =
+                SystemClock.elapsedRealtime() + (TEN_SECONDS * 2) + 5000;  // >2P from now.
+        final long invalidEarlyRuntimeElapsedMillis =
+                invalidLateRuntimeElapsedMillis - TEN_SECONDS;  // Early is (late - period).
+        final JobStatus js = new JobStatus(b.build(), SOME_UID,
+                invalidEarlyRuntimeElapsedMillis, invalidLateRuntimeElapsedMillis);
+
+        mTaskStoreUnderTest.add(js);
+        Thread.sleep(IO_WAIT);
+
+        final ArraySet<JobStatus> jobStatusSet = new ArraySet<JobStatus>();
+        mTaskStoreUnderTest.readJobMapFromDisk(jobStatusSet);
+        assertEquals("Incorrect # of persisted tasks.", 1, jobStatusSet.size());
+        JobStatus loaded = jobStatusSet.iterator().next();
+
+        // Assert early runtime was clamped to be under now + period. We can do <= here b/c we'll
+        // call SystemClock.elapsedRealtime after doing the disk i/o.
+        final long newNowElapsed = SystemClock.elapsedRealtime();
+        assertTrue("Early runtime wasn't correctly clamped.",
+                loaded.getEarliestRunTime() <= newNowElapsed + TEN_SECONDS);
+        // Assert late runtime was clamped to be now + period*2.
+        assertTrue("Early runtime wasn't correctly clamped.",
+                loaded.getEarliestRunTime() <= newNowElapsed + TEN_SECONDS*2);
     }
 
     /**
