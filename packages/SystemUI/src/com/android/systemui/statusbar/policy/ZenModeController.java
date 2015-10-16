@@ -27,7 +27,6 @@ public interface ZenModeController {
     void removeCallback(Callback callback);
     void setZen(int zen, Uri conditionId, String reason);
     int getZen();
-    void requestConditions(boolean request);
     ZenRule getManualRule();
     ZenModeConfig getConfig();
     long getNextAlarm();
