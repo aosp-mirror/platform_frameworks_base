@@ -2349,6 +2349,9 @@
          is non-interactive. -->
     <bool name="config_cameraDoubleTapPowerGestureEnabled">true</bool>
 
+    <!-- Default background color to use when resizing a window if the app didn't specify one. -->
+    <integer name="config_windowResizingBackgroundColorARGB">0xFF808080</integer>
+
     <!-- Name of the component to handle network policy notifications. If present,
          disables NetworkPolicyManagerService's presentation of data-usage notifications. -->
     <string translatable="false" name="config_networkPolicyNotificationComponent"></string>

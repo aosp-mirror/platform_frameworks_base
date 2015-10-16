@@ -1516,6 +1516,7 @@ package android {
     field public static final int windowNoTitle = 16842838; // 0x1010056
     field public static final int windowOverscan = 16843727; // 0x10103cf
     field public static final int windowReenterTransition = 16843951; // 0x10104af
+    field public static final int windowResizingBackground = 16844035; // 0x1010503
     field public static final int windowReturnTransition = 16843950; // 0x10104ae
     field public static final int windowSharedElementEnterTransition = 16843833; // 0x1010439
     field public static final int windowSharedElementExitTransition = 16843834; // 0x101043a
