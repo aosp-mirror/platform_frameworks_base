@@ -73,7 +73,7 @@ import com.android.server.job.controllers.TimeController;
  */
 public class JobSchedulerService extends com.android.server.SystemService
         implements StateChangedListener, JobCompletedListener {
-    static final boolean DEBUG = false;
+    public static final boolean DEBUG = false;
     /** The number of concurrent jobs we run at one time. */
     private static final int MAX_JOB_CONTEXTS_COUNT
             = ActivityManager.isLowRamDeviceStatic() ? 1 : 3;
@@ -99,7 +99,7 @@ public class JobSchedulerService extends com.android.server.SystemService
      * Minimum # of connectivity jobs that must be ready in order to force the JMS to schedule
      * things early.
      */
-    static final int MIN_CONNECTIVITY_COUNT = 2;
+    static final int MIN_CONNECTIVITY_COUNT = 1;  // Run connectivity jobs as soon as ready.
     /**
      * Minimum # of jobs (with no particular constraints) for which the JMS will be happy running
      * some work early.
