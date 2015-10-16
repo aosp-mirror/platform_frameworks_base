@@ -578,7 +578,7 @@ public abstract class Window {
     void adjustLayoutParamsForSubWindow(WindowManager.LayoutParams wp) {
         CharSequence curTitle = wp.getTitle();
         if (wp.type >= WindowManager.LayoutParams.FIRST_SUB_WINDOW &&
-            wp.type <= WindowManager.LayoutParams.LAST_SUB_WINDOW) {
+                wp.type <= WindowManager.LayoutParams.LAST_SUB_WINDOW) {
             if (wp.token == null) {
                 View decor = peekDecorView();
                 if (decor != null) {
@@ -588,20 +588,33 @@ public abstract class Window {
             if (curTitle == null || curTitle.length() == 0) {
                 String title;
                 if (wp.type == WindowManager.LayoutParams.TYPE_APPLICATION_MEDIA) {
-                    title="Media";
+                    title = "Media";
                 } else if (wp.type == WindowManager.LayoutParams.TYPE_APPLICATION_MEDIA_OVERLAY) {
-                    title="MediaOvr";
+                    title = "MediaOvr";
                 } else if (wp.type == WindowManager.LayoutParams.TYPE_APPLICATION_PANEL) {
-                    title="Panel";
+                    title = "Panel";
                 } else if (wp.type == WindowManager.LayoutParams.TYPE_APPLICATION_SUB_PANEL) {
-                    title="SubPanel";
+                    title = "SubPanel";
                 } else if (wp.type == WindowManager.LayoutParams.TYPE_APPLICATION_ABOVE_SUB_PANEL) {
-                    title="AboveSubPanel";
+                    title = "AboveSubPanel";
                 } else if (wp.type == WindowManager.LayoutParams.TYPE_APPLICATION_ATTACHED_DIALOG) {
-                    title="AtchDlg";
+                    title = "AtchDlg";
                 } else {
-                    title=Integer.toString(wp.type);
+                    title = Integer.toString(wp.type);
                 }
+                if (mAppName != null) {
+                    title += ":" + mAppName;
+                }
+                wp.setTitle(title);
+            }
+        } else if (wp.type >= WindowManager.LayoutParams.FIRST_SYSTEM_WINDOW &&
+                wp.type <= WindowManager.LayoutParams.LAST_SYSTEM_WINDOW) {
+            // We don't set the app token to this system window because the life cycles should be
+            // independent. If an app creates a system window and then the app goes to the stopped
+            // state, the system window should not be affected (can still show and receive input
+            // events).
+            if (curTitle == null || curTitle.length() == 0) {
+                String title = "Sys" + Integer.toString(wp.type);
                 if (mAppName != null) {
                     title += ":" + mAppName;
                 }
