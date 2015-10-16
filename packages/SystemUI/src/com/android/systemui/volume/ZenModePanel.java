@@ -79,6 +79,7 @@ public class ZenModePanel extends LinearLayout {
     private static final int FOREVER_CONDITION_INDEX = 0;
     private static final int COUNTDOWN_CONDITION_INDEX = 1;
     private static final int COUNTDOWN_ALARM_CONDITION_INDEX = 2;
+    private static final int COUNTDOWN_CONDITION_COUNT = 2;
 
     public static final Intent ZEN_SETTINGS
             = new Intent(Settings.ACTION_ZEN_MODE_SETTINGS);
@@ -89,7 +90,6 @@ public class ZenModePanel extends LinearLayout {
     private final LayoutInflater mInflater;
     private final H mHandler = new H();
     private final ZenPrefs mPrefs;
-    private final IconPulser mIconPulser;
     private final TransitionHelper mTransitionHelper = new TransitionHelper();
     private final Uri mForeverId;
     private final SpTexts mSpTexts;
@@ -126,7 +126,6 @@ public class ZenModePanel extends LinearLayout {
         mContext = context;
         mPrefs = new ZenPrefs();
         mInflater = LayoutInflater.from(mContext.getApplicationContext());
-        mIconPulser = new IconPulser(mContext);
         mForeverId = Condition.newId(mContext).appendPath("forever").build();
         mSpTexts = new SpTexts(mContext);
         mVoiceCapable = Util.isVoiceCapable(mContext);
@@ -297,10 +296,6 @@ public class ZenModePanel extends LinearLayout {
             }
             if (DEBUG) Log.d(mTag, "Initial bucket index: " + mBucketIndex);
 
-            mTimeUntilAlarmCondition = parseExistingTimeCondition(mContext, mExitCondition);
-            if (mTimeUntilAlarmCondition == null) {
-                mTimeUntilAlarmCondition = getTimeUntilNextAlarmCondition();
-            }
             mConditions = null; // reset conditions
             handleUpdateConditions();
         } else {
@@ -311,7 +306,7 @@ public class ZenModePanel extends LinearLayout {
     public void init(ZenModeController controller) {
         mController = controller;
         mCountdownConditionSupported = mController.isCountdownConditionSupported();
-        final int countdownDelta = mCountdownConditionSupported ? 2 : 0;
+        final int countdownDelta = mCountdownConditionSupported ? COUNTDOWN_CONDITION_COUNT : 0;
         final int minConditions = 1 /*forever*/ + countdownDelta;
         for (int i = 0; i < minConditions; i++) {
             mZenConditions.addView(mInflater.inflate(R.layout.zen_mode_condition, this, false));
@@ -489,10 +484,13 @@ public class ZenModePanel extends LinearLayout {
                     COUNTDOWN_CONDITION_INDEX);
         }
         // countdown until alarm
-        if (mCountdownConditionSupported && mTimeUntilAlarmCondition != null) {
-            bind(mTimeUntilAlarmCondition,
-                    mZenConditions.getChildAt(COUNTDOWN_ALARM_CONDITION_INDEX),
-                    COUNTDOWN_ALARM_CONDITION_INDEX);
+        if (mCountdownConditionSupported) {
+            Condition nextAlarmCondition = getTimeUntilNextAlarmCondition();
+            if (nextAlarmCondition != null) {
+                bind(nextAlarmCondition,
+                        mZenConditions.getChildAt(COUNTDOWN_ALARM_CONDITION_INDEX),
+                        COUNTDOWN_ALARM_CONDITION_INDEX);
+            }
         }
         // ensure something is selected
         if (mExpanded && isShown()) {
