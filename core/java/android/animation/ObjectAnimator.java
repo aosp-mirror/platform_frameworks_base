@@ -23,9 +23,9 @@ import android.graphics.Path;
 import android.graphics.PointF;
 import android.util.Log;
 import android.util.Property;
+import android.view.animation.AccelerateDecelerateInterpolator;
 
 import java.lang.ref.WeakReference;
-import java.util.ArrayList;
 
 /**
  * This subclass of {@link ValueAnimator} provides support for animating properties on target objects.
@@ -53,7 +53,8 @@ import java.util.ArrayList;
  * from the target object when the animator starts, just like animators with only one
  * value specified. In addition, an optional interpolator can be specified. The interpolator will
  * be applied on the interval between the keyframe that the interpolator is set on and the previous
- * keyframe. When no interpolator is supplied, the default linear interpolator will be used. </p>
+ * keyframe. When no interpolator is supplied, the default {@link AccelerateDecelerateInterpolator}
+ * will be used. </p>
  *
  * {@sample development/samples/ApiDemos/res/anim/object_animator_pvh_kf_interpolated.xml KeyframeResources}
  *
