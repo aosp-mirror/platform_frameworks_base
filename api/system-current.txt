@@ -25743,7 +25743,8 @@ package android.os {
     ctor public UserHandle(android.os.Parcel);
     method public int describeContents();
     method public int getIdentifier();
-    method public boolean isOwner();
+    method public deprecated boolean isOwner();
+    method public boolean isSystem();
     method public static int myUserId();
     method public static android.os.UserHandle readFromParcel(android.os.Parcel);
     method public void writeToParcel(android.os.Parcel, int);

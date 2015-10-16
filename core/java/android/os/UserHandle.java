@@ -270,11 +270,22 @@ public final class UserHandle implements Parcelable {
      * Returns true if this UserHandle refers to the owner user; false otherwise.
      * @return true if this UserHandle refers to the owner user; false otherwise.
      * @hide
-     * TODO: find an alternative to this Api.
+     * @deprecated please use {@link #isSystem()} or check for
+     * {@link android.content.pm.UserInfo#isPrimary()}
+     * {@link android.content.pm.UserInfo#isAdmin()} based on your particular use case.
      */
     @SystemApi
     public boolean isOwner() {
         return this.equals(OWNER);
+    }
+
+    /**
+     * @return true if this UserHandle refers to the system user; false otherwise.
+     * @hide
+     */
+    @SystemApi
+    public boolean isSystem() {
+        return this.equals(SYSTEM);
     }
 
     /** @hide */
