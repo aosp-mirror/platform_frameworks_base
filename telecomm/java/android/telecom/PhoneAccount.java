@@ -121,6 +121,14 @@ public final class PhoneAccount implements Parcelable {
     public static final int CAPABILITY_CALL_SUBJECT = 0x40;
 
     /**
+     * Flag indicating that this {@code PhoneAccount} should only be used for emergency calls.
+     * <p>
+     * See {@link #getCapabilities}
+     * @hide
+     */
+    public static final int CAPABILITY_EMERGENCY_CALLS_ONLY = 0x80;
+
+    /**
      * URI scheme for telephone number URIs.
      */
     public static final String SCHEME_TEL = "tel";
