@@ -674,24 +674,24 @@ public abstract class Window {
                 }
             }
             if (curTitle == null || curTitle.length() == 0) {
-                String title;
+                final StringBuilder title = new StringBuilder(32);
                 if (wp.type == WindowManager.LayoutParams.TYPE_APPLICATION_MEDIA) {
-                    title = "Media";
+                    title.append("Media");
                 } else if (wp.type == WindowManager.LayoutParams.TYPE_APPLICATION_MEDIA_OVERLAY) {
-                    title = "MediaOvr";
+                    title.append("MediaOvr");
                 } else if (wp.type == WindowManager.LayoutParams.TYPE_APPLICATION_PANEL) {
-                    title = "Panel";
+                    title.append("Panel");
                 } else if (wp.type == WindowManager.LayoutParams.TYPE_APPLICATION_SUB_PANEL) {
-                    title = "SubPanel";
+                    title.append("SubPanel");
                 } else if (wp.type == WindowManager.LayoutParams.TYPE_APPLICATION_ABOVE_SUB_PANEL) {
-                    title = "AboveSubPanel";
+                    title.append("AboveSubPanel");
                 } else if (wp.type == WindowManager.LayoutParams.TYPE_APPLICATION_ATTACHED_DIALOG) {
-                    title = "AtchDlg";
+                    title.append("AtchDlg");
                 } else {
-                    title = Integer.toString(wp.type);
+                    title.append(wp.type);
                 }
                 if (mAppName != null) {
-                    title += ":" + mAppName;
+                    title.append(":").append(mAppName);
                 }
                 wp.setTitle(title);
             }
@@ -702,9 +702,10 @@ public abstract class Window {
             // state, the system window should not be affected (can still show and receive input
             // events).
             if (curTitle == null || curTitle.length() == 0) {
-                String title = "Sys" + Integer.toString(wp.type);
+                final StringBuilder title = new StringBuilder(32);
+                title.append("Sys").append(wp.type);
                 if (mAppName != null) {
-                    title += ":" + mAppName;
+                    title.append(":").append(mAppName);
                 }
                 wp.setTitle(title);
             }
