@@ -140,7 +140,7 @@ public final class HdmiCecMessageValidator {
         // Allow unregistered source for all vendor specific commands, because we don't know
         // how to use the commands at this moment.
         addValidationInfo(Constants.MESSAGE_VENDOR_COMMAND,
-                maxLengthValidator, DEST_DIRECT | SRC_UNREGISTERED);
+                new VariableLengthValidator(1, 14), DEST_DIRECT | SRC_UNREGISTERED);
         addValidationInfo(Constants.MESSAGE_VENDOR_COMMAND_WITH_ID,
                 new VariableLengthValidator(4, 14), DEST_ALL | SRC_UNREGISTERED);
         addValidationInfo(Constants.MESSAGE_VENDOR_REMOTE_BUTTON_DOWN,
