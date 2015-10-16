@@ -66,12 +66,12 @@ class RenderNode;
  * Primary class for storing recorded canvas commands, as well as per-View/ViewGroup display properties.
  *
  * Recording of canvas commands is somewhat similar to SkPicture, except the canvas-recording
- * functionality is split between DisplayListCanvas (which manages the recording), DisplayListData
+ * functionality is split between DisplayListCanvas (which manages the recording), DisplayList
  * (which holds the actual data), and DisplayList (which holds properties and performs playback onto
  * a renderer).
  *
- * Note that DisplayListData is swapped out from beneath an individual DisplayList when a view's
- * recorded stream of canvas operations is refreshed. The DisplayList (and its properties) stay
+ * Note that DisplayList is swapped out from beneath an individual RenderNode when a view's
+ * recorded stream of canvas operations is refreshed. The RenderNode (and its properties) stay
  * attached.
  */
 class RenderNode : public VirtualLightRefBase {
@@ -104,7 +104,7 @@ public:
 
     void debugDumpLayers(const char* prefix);
 
-    ANDROID_API void setStagingDisplayList(DisplayListData* newData);
+    ANDROID_API void setStagingDisplayList(DisplayList* newData);
 
     void computeOrdering();
 
@@ -116,11 +116,11 @@ public:
     void copyTo(proto::RenderNode* node);
 
     bool isRenderable() const {
-        return mDisplayListData && !mDisplayListData->isEmpty();
+        return mDisplayList && !mDisplayList->isEmpty();
     }
 
     bool hasProjectionReceiver() const {
-        return mDisplayListData && mDisplayListData->projectionReceiveIndex >= 0;
+        return mDisplayList && mDisplayList->projectionReceiveIndex >= 0;
     }
 
     const char* getName() const {
@@ -185,16 +185,16 @@ public:
 
     bool nothingToDraw() const {
         const Outline& outline = properties().getOutline();
-        return mDisplayListData == nullptr
+        return mDisplayList == nullptr
                 || properties().getAlpha() <= 0
                 || (outline.getShouldClip() && outline.isEmpty())
                 || properties().getScaleX() == 0
                 || properties().getScaleY() == 0;
     }
 
-    // Only call if RenderNode has DisplayListData...
-    const DisplayListData& getDisplayListData() const {
-        return *mDisplayListData;
+    // Only call if RenderNode has DisplayList...
+    const DisplayList& getDisplayList() const {
+        return *mDisplayList;
     }
 
 private:
@@ -219,7 +219,7 @@ private:
     template <class T>
     inline void setViewProperties(OpenGLRenderer& renderer, T& handler);
 
-    void buildZSortedChildList(const DisplayListData::Chunk& chunk,
+    void buildZSortedChildList(const DisplayList::Chunk& chunk,
             std::vector<ZDrawRenderNodeOpPair>& zTranslatedNodes);
 
     template<class T>
@@ -261,11 +261,11 @@ private:
     void prepareTreeImpl(TreeInfo& info, bool functorsNeedLayer);
     void pushStagingPropertiesChanges(TreeInfo& info);
     void pushStagingDisplayListChanges(TreeInfo& info);
-    void prepareSubTree(TreeInfo& info, bool functorsNeedLayer, DisplayListData* subtree);
+    void prepareSubTree(TreeInfo& info, bool functorsNeedLayer, DisplayList* subtree);
     void applyLayerPropertiesToLayer(TreeInfo& info);
     void prepareLayer(TreeInfo& info, uint32_t dirtyMask);
     void pushLayerUpdate(TreeInfo& info);
-    void deleteDisplayListData();
+    void deleteDisplayList();
     void damageSelf(TreeInfo& info);
 
     void incParentRefCount() { mParentCount++; }
@@ -277,10 +277,10 @@ private:
     RenderProperties mProperties;
     RenderProperties mStagingProperties;
 
-    bool mNeedsDisplayListDataSync;
-    // WARNING: Do not delete this directly, you must go through deleteDisplayListData()!
-    DisplayListData* mDisplayListData;
-    DisplayListData* mStagingDisplayListData;
+    bool mNeedsDisplayListSync;
+    // WARNING: Do not delete this directly, you must go through deleteDisplayList()!
+    DisplayList* mDisplayList;
+    DisplayList* mStagingDisplayList;
 
     friend class AnimatorManager;
     AnimatorManager mAnimatorManager;
@@ -301,7 +301,7 @@ private:
     // When this hits 0 we are no longer in the tree, so any hardware resources
     // (specifically Layers) should be released.
     // This is *NOT* thread-safe, and should therefore only be tracking
-    // mDisplayListData, not mStagingDisplayListData.
+    // mDisplayList, not mStagingDisplayList.
     uint32_t mParentCount;
 }; // class RenderNode
 

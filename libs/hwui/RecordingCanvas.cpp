@@ -29,14 +29,14 @@ RecordingCanvas::RecordingCanvas(size_t width, size_t height)
 }
 
 RecordingCanvas::~RecordingCanvas() {
-    LOG_ALWAYS_FATAL_IF(mDisplayListData,
+    LOG_ALWAYS_FATAL_IF(mDisplayList,
             "Destroyed a RecordingCanvas during a record!");
 }
 
 void RecordingCanvas::reset(int width, int height) {
-    LOG_ALWAYS_FATAL_IF(mDisplayListData,
+    LOG_ALWAYS_FATAL_IF(mDisplayList,
             "prepareDirty called a second time during a recording!");
-    mDisplayListData = new DisplayListData();
+    mDisplayList = new DisplayList();
 
     mState.initializeSaveStack(width, height, 0, 0, width, height, Vector3());
 
@@ -45,18 +45,18 @@ void RecordingCanvas::reset(int width, int height) {
     mRestoreSaveCount = -1;
 }
 
-DisplayListData* RecordingCanvas::finishRecording() {
+DisplayList* RecordingCanvas::finishRecording() {
     mPaintMap.clear();
     mRegionMap.clear();
     mPathMap.clear();
-    DisplayListData* data = mDisplayListData;
-    mDisplayListData = nullptr;
+    DisplayList* displayList = mDisplayList;
+    mDisplayList = nullptr;
     mSkiaCanvasProxy.reset(nullptr);
-    return data;
+    return displayList;
 }
 
 SkCanvas* RecordingCanvas::asSkCanvas() {
-    LOG_ALWAYS_FATAL_IF(!mDisplayListData,
+    LOG_ALWAYS_FATAL_IF(!mDisplayList,
             "attempting to get an SkCanvas when we are not recording!");
     if (!mSkiaCanvasProxy) {
         mSkiaCanvasProxy.reset(new SkiaCanvasProxy(this));
@@ -187,7 +187,7 @@ void RecordingCanvas::drawRect(float left, float top, float right, float bottom,
 void RecordingCanvas::drawSimpleRects(const float* rects, int vertexCount, const SkPaint* paint) {
     if (rects == nullptr) return;
 
-    Vertex* rectData = (Vertex*) mDisplayListData->allocator.alloc(vertexCount * sizeof(Vertex));
+    Vertex* rectData = (Vertex*) mDisplayList->allocator.alloc(vertexCount * sizeof(Vertex));
     Vertex* vertex = rectData;
 
     float left = FLT_MAX;
@@ -345,36 +345,36 @@ void RecordingCanvas::drawRenderNode(RenderNode* renderNode) {
             mState.getRenderTargetClipBounds(),
             renderNode);
     int opIndex = addOp(op);
-    int childIndex = mDisplayListData->addChild(op);
+    int childIndex = mDisplayList->addChild(op);
 
     // update the chunk's child indices
-    DisplayListData::Chunk& chunk = mDisplayListData->chunks.back();
+    DisplayList::Chunk& chunk = mDisplayList->chunks.back();
     chunk.endChildIndex = childIndex + 1;
 
     if (renderNode->stagingProperties().isProjectionReceiver()) {
         // use staging property, since recording on UI thread
-        mDisplayListData->projectionReceiveIndex = opIndex;
+        mDisplayList->projectionReceiveIndex = opIndex;
     }
 }
 
 size_t RecordingCanvas::addOp(RecordedOp* op) {
     // TODO: validate if "addDrawOp" quickrejection logic is useful before adding
-    int insertIndex = mDisplayListData->ops.size();
-    mDisplayListData->ops.push_back(op);
+    int insertIndex = mDisplayList->ops.size();
+    mDisplayList->ops.push_back(op);
     if (mDeferredBarrierType != kBarrier_None) {
         // op is first in new chunk
-        mDisplayListData->chunks.emplace_back();
-        DisplayListData::Chunk& newChunk = mDisplayListData->chunks.back();
+        mDisplayList->chunks.emplace_back();
+        DisplayList::Chunk& newChunk = mDisplayList->chunks.back();
         newChunk.beginOpIndex = insertIndex;
         newChunk.endOpIndex = insertIndex + 1;
         newChunk.reorderChildren = (mDeferredBarrierType == kBarrier_OutOfOrder);
 
-        int nextChildIndex = mDisplayListData->children().size();
+        int nextChildIndex = mDisplayList->children().size();
         newChunk.beginChildIndex = newChunk.endChildIndex = nextChildIndex;
         mDeferredBarrierType = kBarrier_None;
     } else {
         // standard case - append to existing chunk
-        mDisplayListData->chunks.back().endOpIndex = insertIndex + 1;
+        mDisplayList->chunks.back().endOpIndex = insertIndex + 1;
     }
     return insertIndex;
 }

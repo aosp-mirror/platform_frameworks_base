@@ -34,7 +34,7 @@ namespace uirenderer {
 DisplayListCanvas::DisplayListCanvas(int width, int height)
     : mState(*this)
     , mResourceCache(ResourceCache::getInstance())
-    , mDisplayListData(nullptr)
+    , mDisplayList(nullptr)
     , mTranslateX(0.0f)
     , mTranslateY(0.0f)
     , mHasDeferredTranslate(false)
@@ -45,14 +45,14 @@ DisplayListCanvas::DisplayListCanvas(int width, int height)
 }
 
 DisplayListCanvas::~DisplayListCanvas() {
-    LOG_ALWAYS_FATAL_IF(mDisplayListData,
+    LOG_ALWAYS_FATAL_IF(mDisplayList,
             "Destroyed a DisplayListCanvas during a record!");
 }
 
 void DisplayListCanvas::reset(int width, int height) {
-    LOG_ALWAYS_FATAL_IF(mDisplayListData,
+    LOG_ALWAYS_FATAL_IF(mDisplayList,
             "prepareDirty called a second time during a recording!");
-    mDisplayListData = new DisplayListData();
+    mDisplayList = new DisplayList();
 
     mState.initializeSaveStack(width, height,
             0, 0, width, height, Vector3());
@@ -67,26 +67,26 @@ void DisplayListCanvas::reset(int width, int height) {
 // Operations
 ///////////////////////////////////////////////////////////////////////////////
 
-DisplayListData* DisplayListCanvas::finishRecording() {
+DisplayList* DisplayListCanvas::finishRecording() {
     flushRestoreToCount();
     flushTranslate();
 
     mPaintMap.clear();
     mRegionMap.clear();
     mPathMap.clear();
-    DisplayListData* data = mDisplayListData;
-    mDisplayListData = nullptr;
+    DisplayList* displayList = mDisplayList;
+    mDisplayList = nullptr;
     mSkiaCanvasProxy.reset(nullptr);
-    return data;
+    return displayList;
 }
 
 void DisplayListCanvas::callDrawGLFunction(Functor *functor) {
     addDrawOp(new (alloc()) DrawFunctorOp(functor));
-    mDisplayListData->functors.add(functor);
+    mDisplayList->functors.add(functor);
 }
 
 SkCanvas* DisplayListCanvas::asSkCanvas() {
-    LOG_ALWAYS_FATAL_IF(!mDisplayListData,
+    LOG_ALWAYS_FATAL_IF(!mDisplayList,
             "attempting to get an SkCanvas when we are not recording!");
     if (!mSkiaCanvasProxy) {
         mSkiaCanvasProxy.reset(new SkiaCanvasProxy(this));
@@ -219,7 +219,7 @@ void DisplayListCanvas::drawRenderNode(RenderNode* renderNode) {
 void DisplayListCanvas::drawLayer(DeferredLayerUpdater* layerHandle) {
     // We ref the DeferredLayerUpdater due to its thread-safe ref-counting
     // semantics.
-    mDisplayListData->ref(layerHandle);
+    mDisplayList->ref(layerHandle);
     addDrawOp(new (alloc()) DrawLayerOp(layerHandle->backingLayer()));
 }
 
@@ -354,13 +354,13 @@ void DisplayListCanvas::drawRoundRect(
         CanvasPropertyPrimitive* right, CanvasPropertyPrimitive* bottom,
         CanvasPropertyPrimitive* rx, CanvasPropertyPrimitive* ry,
         CanvasPropertyPaint* paint) {
-    mDisplayListData->ref(left);
-    mDisplayListData->ref(top);
-    mDisplayListData->ref(right);
-    mDisplayListData->ref(bottom);
-    mDisplayListData->ref(rx);
-    mDisplayListData->ref(ry);
-    mDisplayListData->ref(paint);
+    mDisplayList->ref(left);
+    mDisplayList->ref(top);
+    mDisplayList->ref(right);
+    mDisplayList->ref(bottom);
+    mDisplayList->ref(rx);
+    mDisplayList->ref(ry);
+    mDisplayList->ref(paint);
     refBitmapsInShader(paint->value.getShader());
     addDrawOp(new (alloc()) DrawRoundRectPropsOp(&left->value, &top->value,
             &right->value, &bottom->value, &rx->value, &ry->value, &paint->value));
@@ -372,10 +372,10 @@ void DisplayListCanvas::drawCircle(float x, float y, float radius, const SkPaint
 
 void DisplayListCanvas::drawCircle(CanvasPropertyPrimitive* x, CanvasPropertyPrimitive* y,
         CanvasPropertyPrimitive* radius, CanvasPropertyPaint* paint) {
-    mDisplayListData->ref(x);
-    mDisplayListData->ref(y);
-    mDisplayListData->ref(radius);
-    mDisplayListData->ref(paint);
+    mDisplayList->ref(x);
+    mDisplayList->ref(y);
+    mDisplayList->ref(radius);
+    mDisplayList->ref(paint);
     refBitmapsInShader(paint->value.getShader());
     addDrawOp(new (alloc()) DrawCirclePropsOp(&x->value, &y->value,
             &radius->value, &paint->value));
@@ -514,26 +514,26 @@ void DisplayListCanvas::flushTranslate() {
 }
 
 size_t DisplayListCanvas::addOpAndUpdateChunk(DisplayListOp* op) {
-    int insertIndex = mDisplayListData->ops.size();
+    int insertIndex = mDisplayList->ops.size();
 #if HWUI_NEW_OPS
     LOG_ALWAYS_FATAL("unsupported");
 #else
-    mDisplayListData->ops.push_back(op);
+    mDisplayList->ops.push_back(op);
 #endif
     if (mDeferredBarrierType != kBarrier_None) {
         // op is first in new chunk
-        mDisplayListData->chunks.emplace_back();
-        DisplayListData::Chunk& newChunk = mDisplayListData->chunks.back();
+        mDisplayList->chunks.emplace_back();
+        DisplayList::Chunk& newChunk = mDisplayList->chunks.back();
         newChunk.beginOpIndex = insertIndex;
         newChunk.endOpIndex = insertIndex + 1;
         newChunk.reorderChildren = (mDeferredBarrierType == kBarrier_OutOfOrder);
 
-        int nextChildIndex = mDisplayListData->children().size();
+        int nextChildIndex = mDisplayList->children().size();
         newChunk.beginChildIndex = newChunk.endChildIndex = nextChildIndex;
         mDeferredBarrierType = kBarrier_None;
     } else {
         // standard case - append to existing chunk
-        mDisplayListData->chunks.back().endOpIndex = insertIndex + 1;
+        mDisplayList->chunks.back().endOpIndex = insertIndex + 1;
     }
     return insertIndex;
 }
@@ -556,22 +556,22 @@ size_t DisplayListCanvas::addDrawOp(DrawOp* op) {
         op->setQuickRejected(rejected);
     }
 
-    mDisplayListData->hasDrawOps = true;
+    mDisplayList->hasDrawOps = true;
     return flushAndAddOp(op);
 }
 
 size_t DisplayListCanvas::addRenderNodeOp(DrawRenderNodeOp* op) {
     int opIndex = addDrawOp(op);
 #if !HWUI_NEW_OPS
-    int childIndex = mDisplayListData->addChild(op);
+    int childIndex = mDisplayList->addChild(op);
 
     // update the chunk's child indices
-    DisplayListData::Chunk& chunk = mDisplayListData->chunks.back();
+    DisplayList::Chunk& chunk = mDisplayList->chunks.back();
     chunk.endChildIndex = childIndex + 1;
 
     if (op->renderNode->stagingProperties().isProjectionReceiver()) {
         // use staging property, since recording on UI thread
-        mDisplayListData->projectionReceiveIndex = opIndex;
+        mDisplayList->projectionReceiveIndex = opIndex;
     }
 #endif
     return opIndex;

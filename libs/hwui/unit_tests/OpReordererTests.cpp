@@ -49,7 +49,7 @@ public:
     static void endFrame(Info& info) {}
 };
 TEST(OpReorderer, simple) {
-    auto dld = TestUtils::createDLD<RecordingCanvas>(100, 200, [](RecordingCanvas& canvas) {
+    auto dld = TestUtils::createDisplayList<RecordingCanvas>(100, 200, [](RecordingCanvas& canvas) {
         SkBitmap bitmap = TestUtils::createSkBitmap(25, 25);
         canvas.drawRect(0, 0, 100, 200, SkPaint());
         canvas.drawBitmap(bitmap, 10, 10, nullptr);
@@ -78,7 +78,7 @@ public:
     static void endFrame(Info& info) {}
 };
 TEST(OpReorderer, simpleBatching) {
-    auto dld = TestUtils::createDLD<RecordingCanvas>(200, 200, [](RecordingCanvas& canvas) {
+    auto dld = TestUtils::createDisplayList<RecordingCanvas>(200, 200, [](RecordingCanvas& canvas) {
         SkBitmap bitmap = TestUtils::createSkBitmap(10, 10);
 
         // Alternate between drawing rects and bitmaps, with bitmaps overlapping rects.

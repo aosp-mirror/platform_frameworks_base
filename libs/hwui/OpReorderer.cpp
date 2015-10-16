@@ -224,15 +224,15 @@ void OpReorderer::defer(const SkRect& clip, int viewportWidth, int viewportHeigh
         mCanvasState.save(SkCanvas::kClip_SaveFlag | SkCanvas::kMatrix_SaveFlag);
         if (node->applyViewProperties(mCanvasState)) {
             // not rejected do ops...
-            const DisplayListData& data = node->getDisplayListData();
-            deferImpl(data.getChunks(), data.getOps());
+            const DisplayList& displayList = node->getDisplayList();
+            deferImpl(displayList.getChunks(), displayList.getOps());
         }
         mCanvasState.restore();
     }
 }
 
 void OpReorderer::defer(int viewportWidth, int viewportHeight,
-        const std::vector<DisplayListData::Chunk>& chunks, const std::vector<RecordedOp*>& ops) {
+        const std::vector<DisplayList::Chunk>& chunks, const std::vector<RecordedOp*>& ops) {
     ATRACE_NAME("prepare drawing commands");
     mCanvasState.initializeSaveStack(viewportWidth, viewportHeight,
             0, 0, viewportWidth, viewportHeight, Vector3());
@@ -247,12 +247,12 @@ void OpReorderer::defer(int viewportWidth, int viewportHeight,
  */
 #define OP_RECIEVER(Type) \
         [](OpReorderer& reorderer, const RecordedOp& op) { reorderer.on##Type(static_cast<const Type&>(op)); },
-void OpReorderer::deferImpl(const std::vector<DisplayListData::Chunk>& chunks,
+void OpReorderer::deferImpl(const std::vector<DisplayList::Chunk>& chunks,
         const std::vector<RecordedOp*>& ops) {
     static std::function<void(OpReorderer& reorderer, const RecordedOp&)> receivers[] = {
         MAP_OPS(OP_RECIEVER)
     };
-    for (const DisplayListData::Chunk& chunk : chunks) {
+    for (const DisplayList::Chunk& chunk : chunks) {
         for (size_t opIndex = chunk.beginOpIndex; opIndex < chunk.endOpIndex; opIndex++) {
             const RecordedOp* op = ops[opIndex];
             receivers[op->opId](*this, *op);
@@ -288,8 +288,8 @@ void OpReorderer::onRenderNodeOp(const RenderNodeOp& op) {
     // apply RenderProperties state
     if (op.renderNode->applyViewProperties(mCanvasState)) {
         // not rejected do ops...
-        const DisplayListData& data = op.renderNode->getDisplayListData();
-        deferImpl(data.getChunks(), data.getOps());
+        const DisplayList& displayList = op.renderNode->getDisplayList();
+        deferImpl(displayList.getChunks(), displayList.getOps());
     }
     mCanvasState.restore();
 }

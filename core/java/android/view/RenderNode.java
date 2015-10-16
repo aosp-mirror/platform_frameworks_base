@@ -198,8 +198,8 @@ public class RenderNode {
      * @see #isValid()
      */
     public void end(DisplayListCanvas canvas) {
-        long renderNodeData = canvas.finishRecording();
-        nSetDisplayListData(mNativeRenderNode, renderNodeData);
+        long displayList = canvas.finishRecording();
+        nSetDisplayList(mNativeRenderNode, displayList);
         canvas.recycle();
         mValid = true;
     }
@@ -209,10 +209,10 @@ public class RenderNode {
      * during destruction of hardware resources, to ensure that we do not hold onto
      * obsolete resources after related resources are gone.
      */
-    public void destroyDisplayListData() {
+    public void discardDisplayList() {
         if (!mValid) return;
 
-        nSetDisplayListData(mNativeRenderNode, 0);
+        nSetDisplayList(mNativeRenderNode, 0);
         mValid = false;
     }
 
@@ -781,7 +781,7 @@ public class RenderNode {
 
     private static native long nCreate(String name);
     private static native void nDestroyRenderNode(long renderNode);
-    private static native void nSetDisplayListData(long renderNode, long newData);
+    private static native void nSetDisplayList(long renderNode, long newData);
 
     // Matrix
 

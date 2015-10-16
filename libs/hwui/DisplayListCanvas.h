@@ -66,7 +66,7 @@ public:
     virtual ~DisplayListCanvas();
 
     void reset(int width, int height);
-    __attribute__((warn_unused_result)) DisplayListData* finishRecording();
+    __attribute__((warn_unused_result)) DisplayList* finishRecording();
 
 // ----------------------------------------------------------------------------
 // HWUI Canvas state operations
@@ -236,7 +236,7 @@ private:
     void flushTranslate();
     void flushReorderBarrier();
 
-    LinearAllocator& alloc() { return mDisplayListData->allocator; }
+    LinearAllocator& alloc() { return mDisplayList->allocator; }
 
     // Each method returns final index of op
     size_t addOpAndUpdateChunk(DisplayListOp* op);
@@ -253,7 +253,7 @@ private:
     inline const T* refBuffer(const T* srcBuffer, int32_t count) {
         if (!srcBuffer) return nullptr;
 
-        T* dstBuffer = (T*) mDisplayListData->allocator.alloc(count * sizeof(T));
+        T* dstBuffer = (T*) mDisplayList->allocator.alloc(count * sizeof(T));
         memcpy(dstBuffer, srcBuffer, count * sizeof(T));
         return dstBuffer;
     }
@@ -268,7 +268,7 @@ private:
         // The points/verbs within the path are refcounted so this copy operation
         // is inexpensive and maintains the generationID of the original path.
         const SkPath* cachedPath = new SkPath(*path);
-        mDisplayListData->pathResources.push_back(cachedPath);
+        mDisplayList->pathResources.push_back(cachedPath);
         return cachedPath;
     }
 
@@ -292,7 +292,7 @@ private:
         if (cachedPaint == nullptr || *cachedPaint != *paint) {
             cachedPaint = new SkPaint(*paint);
             std::unique_ptr<const SkPaint> copy(cachedPaint);
-            mDisplayListData->paints.push_back(std::move(copy));
+            mDisplayList->paints.push_back(std::move(copy));
 
             // replaceValueFor() performs an add if the entry doesn't exist
             mPaintMap.replaceValueFor(key, cachedPaint);
@@ -312,7 +312,7 @@ private:
         if (cachedRegion == nullptr) {
             std::unique_ptr<const SkRegion> copy(new SkRegion(*region));
             cachedRegion = copy.get();
-            mDisplayListData->regions.push_back(std::move(copy));
+            mDisplayList->regions.push_back(std::move(copy));
 
             // replaceValueFor() performs an add if the entry doesn't exist
             mRegionMap.replaceValueFor(region, cachedRegion);
@@ -328,12 +328,12 @@ private:
         // which doesn't seem worth the extra cycles for this unlikely case.
         SkBitmap* localBitmap = new (alloc()) SkBitmap(bitmap);
         alloc().autoDestroy(localBitmap);
-        mDisplayListData->bitmapResources.push_back(localBitmap);
+        mDisplayList->bitmapResources.push_back(localBitmap);
         return localBitmap;
     }
 
     inline const Res_png_9patch* refPatch(const Res_png_9patch* patch) {
-        mDisplayListData->patchResources.push_back(patch);
+        mDisplayList->patchResources.push_back(patch);
         mResourceCache.incrementRefcount(patch);
         return patch;
     }
@@ -343,7 +343,7 @@ private:
     DefaultKeyedVector<const SkRegion*, const SkRegion*> mRegionMap;
 
     ResourceCache& mResourceCache;
-    DisplayListData* mDisplayListData;
+    DisplayList* mDisplayList;
 
     float mTranslateX;
     float mTranslateY;

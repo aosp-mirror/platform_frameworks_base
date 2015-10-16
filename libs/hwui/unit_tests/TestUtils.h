@@ -53,11 +53,11 @@ public:
     }
 
     template<class CanvasType>
-    static std::unique_ptr<DisplayListData> createDLD(int width, int height,
+    static std::unique_ptr<DisplayList> createDisplayList(int width, int height,
             std::function<void(CanvasType& canvas)> canvasCallback) {
         CanvasType canvas(width, height);
         canvasCallback(canvas);
-        return std::unique_ptr<DisplayListData>(canvas.finishRecording());
+        return std::unique_ptr<DisplayList>(canvas.finishRecording());
     }
 
     template<class CanvasType>
