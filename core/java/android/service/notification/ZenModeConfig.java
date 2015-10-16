@@ -41,6 +41,7 @@ import org.xmlpull.v1.XmlSerializer;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.GregorianCalendar;
 import java.util.Locale;
 import java.util.Objects;
 import java.util.UUID;
@@ -661,7 +662,7 @@ public class ZenModeConfig implements Parcelable {
             int userHandle, boolean shortVersion) {
         final int num;
         String summary, line1, line2;
-        final CharSequence formattedTime = getFormattedTime(context, time, minutes, userHandle);
+        final CharSequence formattedTime = getFormattedTime(context, time, userHandle);
         final Resources res = context.getResources();
         if (minutes < 60) {
             // display as minutes
@@ -694,8 +695,7 @@ public class ZenModeConfig implements Parcelable {
 
     public static Condition toNextAlarmCondition(Context context, long now, long alarm,
             int userHandle) {
-        int minutes = Math.round((alarm-now) / (float) MINUTES_MS);
-        final CharSequence formattedTime = getFormattedTime(context, alarm, minutes, userHandle);
+        final CharSequence formattedTime = getFormattedTime(context, alarm, userHandle);
         final Resources res = context.getResources();
         final String line1 = res.getString(R.string.zen_mode_alarm, formattedTime);
         final Uri id = toCountdownConditionId(alarm);
@@ -703,11 +703,15 @@ public class ZenModeConfig implements Parcelable {
                 Condition.FLAG_RELEVANT_NOW);
     }
 
-    private static CharSequence getFormattedTime(Context context, long time, int minutes,
-            int userHandle) {
-        String skeleton = DateFormat.is24HourFormat(context, userHandle) ? "Hm" : "hma";
-        if (minutes > DAY_MINUTES) {
-            skeleton = "EEE " + (DateFormat.is24HourFormat(context, userHandle) ? "Hm" : "hma");
+    private static CharSequence getFormattedTime(Context context, long time, int userHandle) {
+        String skeleton = "EEE " + (DateFormat.is24HourFormat(context, userHandle) ? "Hm" : "hma");
+        GregorianCalendar now = new GregorianCalendar();
+        GregorianCalendar endTime = new GregorianCalendar();
+        endTime.setTimeInMillis(time);
+        if (now.get(Calendar.YEAR) == endTime.get(Calendar.YEAR)
+                && now.get(Calendar.MONTH) == endTime.get(Calendar.MONTH)
+                && now.get(Calendar.DATE) == endTime.get(Calendar.DATE)) {
+            skeleton = DateFormat.is24HourFormat(context, userHandle) ? "Hm" : "hma";
         }
         final String pattern = DateFormat.getBestDateTimePattern(Locale.getDefault(), skeleton);
         return DateFormat.format(pattern, time);
