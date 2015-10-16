@@ -1099,8 +1099,7 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
         // Remove existing volume action.
         removeAction(VolumeControlAction.class);
         sendUserControlPressedAndReleased(getAvrDeviceInfo().getLogicalAddress(),
-                mute ? HdmiCecKeycode.CEC_KEYCODE_MUTE_FUNCTION :
-                        HdmiCecKeycode.CEC_KEYCODE_RESTORE_VOLUME_FUNCTION);
+                HdmiCecKeycode.getMuteKey(mute));
     }
 
     @Override

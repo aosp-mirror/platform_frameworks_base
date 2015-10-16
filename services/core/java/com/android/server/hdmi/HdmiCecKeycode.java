@@ -448,4 +448,20 @@ final class HdmiCecKeycode {
     static boolean isSupportedKeycode(int androidKeycode) {
         return HdmiCecKeycode.androidKeyToCecKey(androidKeycode) != null;
     }
+
+    /**
+     * Returns CEC keycode to control audio mute status.
+     *
+     * @param muting {@code true} if audio is being muted
+     */
+    public static int getMuteKey(boolean muting) {
+        // CEC_KEYCODE_MUTE_FUNCTION, CEC_KEYCODE_RESTORE_VOLUME_FUNCTION are deterministic
+        // commands that ensures the status changes to what we want, while CEC_KEYCODE_MUTE
+        // simply toggles the status.
+        // The former is a better choice in this regard, but there are compatibility issues
+        // observed - many audio receivers don't recognize the commands. We fall back on
+        // CEC_KEYCODE_MUTE for now.
+        // return muting ? CEC_KEYCODE_MUTE_FUNCTION : CEC_KEYCODE_RESTORE_VOLUME_FUNCTION;
+        return CEC_KEYCODE_MUTE;
+    }
 }
