@@ -48,7 +48,7 @@ public class HumanInteractionClassifier extends Classifier {
     private final float mDpi;
 
     private HistoryEvaluator mHistoryEvaluator;
-    private boolean mEnableClassifier = true;
+    private boolean mEnableClassifier = false;
     private int mCurrentType = Classifier.GENERIC;
 
     protected final ContentObserver mSettingsObserver = new ContentObserver(mHandler) {

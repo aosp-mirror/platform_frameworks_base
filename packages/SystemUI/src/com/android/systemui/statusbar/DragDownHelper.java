@@ -149,10 +149,7 @@ public class DragDownHelper implements Gefingerpoken {
     }
 
     private boolean isFalseTouch() {
-        if (mFalsingManager.isClassiferEnabled()) {
-            return mFalsingManager.isFalseTouch();
-        }
-        return !mDraggedFarEnough;
+        return mFalsingManager.isFalseTouch() || !mDraggedFarEnough;
     }
 
     private void captureStartingChild(float x, float y) {

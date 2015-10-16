@@ -27,10 +27,12 @@ public class EndPointRatioClassifier extends StrokeClassifier {
 
     @Override
     public float getFalseTouchEvaluation(int type, Stroke stroke) {
+        float ratio;
         if (stroke.getTotalLength() == 0.0f) {
-            return 1.0f;
+            ratio = 1.0f;
+        } else {
+            ratio = stroke.getEndPointLength() / stroke.getTotalLength();
         }
-        return EndPointRatioEvaluator.evaluate(
-                stroke.getEndPointLength() / stroke.getTotalLength());
+        return EndPointRatioEvaluator.evaluate(ratio);
     }
 }

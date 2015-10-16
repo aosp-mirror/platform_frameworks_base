@@ -20,8 +20,8 @@ public class SpeedAnglesPercentageEvaluator {
     public static float evaluate(float value) {
         float evaluation = 0.0f;
         if (value < 1.00) evaluation++;
-        if (value < 0.95) evaluation++;
         if (value < 0.90) evaluation++;
+        if (value < 0.70) evaluation++;
         return evaluation;
     }
 }

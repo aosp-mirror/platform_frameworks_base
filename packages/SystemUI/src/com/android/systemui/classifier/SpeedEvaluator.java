@@ -19,9 +19,10 @@ package com.android.systemui.classifier;
 public class SpeedEvaluator {
     public static float evaluate(float value) {
         float evaluation = 0.0f;
-        if (value < 4.0 || value > 35.0) evaluation += 1.0;
-        if (value < 2.2) evaluation += 1.0;
-        if (value > 50.0) evaluation += 1.0;
+        if (value < 4.0) evaluation++;
+        if (value < 2.2) evaluation++;
+        if (value > 35.0) evaluation++;
+        if (value > 50.0) evaluation++;
         return evaluation;
     }
 }
