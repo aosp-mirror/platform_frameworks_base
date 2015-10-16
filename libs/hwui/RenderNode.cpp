@@ -49,7 +49,7 @@ void RenderNode::debugDumpLayers(const char* prefix) {
                 mLayer->wasBuildLayered ? "true" : "false");
     }
     if (mDisplayList) {
-        for (auto&& child : mDisplayList->children()) {
+        for (auto&& child : mDisplayList->getChildren()) {
             child->renderNode->debugDumpLayers(prefix);
         }
     }
@@ -178,7 +178,7 @@ void RenderNode::copyTo(proto::RenderNode *pnode) {
 
     pnode->clear_children();
     if (mDisplayList) {
-        for (auto&& child : mDisplayList->children()) {
+        for (auto&& child : mDisplayList->getChildren()) {
             child->renderNode->copyTo(pnode->add_children());
         }
     }
@@ -322,9 +322,9 @@ void RenderNode::prepareTreeImpl(TreeInfo& info, bool functorsNeedLayer) {
 
     bool willHaveFunctor = false;
     if (info.mode == TreeInfo::MODE_FULL && mStagingDisplayList) {
-        willHaveFunctor = !mStagingDisplayList->functors.isEmpty();
+        willHaveFunctor = !mStagingDisplayList->getFunctors().empty();
     } else if (mDisplayList) {
-        willHaveFunctor = !mDisplayList->functors.isEmpty();
+        willHaveFunctor = !mDisplayList->getFunctors().empty();
     }
     bool childFunctorsNeedLayer = mProperties.prepareForFunctorPresence(
             willHaveFunctor, functorsNeedLayer);
@@ -379,7 +379,7 @@ void RenderNode::syncDisplayList() {
     // Make sure we inc first so that we don't fluctuate between 0 and 1,
     // which would thrash the layer cache
     if (mStagingDisplayList) {
-        for (auto&& child : mStagingDisplayList->children()) {
+        for (auto&& child : mStagingDisplayList->getChildren()) {
             child->renderNode->incParentRefCount();
         }
     }
@@ -387,8 +387,8 @@ void RenderNode::syncDisplayList() {
     mDisplayList = mStagingDisplayList;
     mStagingDisplayList = nullptr;
     if (mDisplayList) {
-        for (size_t i = 0; i < mDisplayList->functors.size(); i++) {
-            (*mDisplayList->functors[i])(DrawGlInfo::kModeSync, nullptr);
+        for (size_t i = 0; i < mDisplayList->getFunctors().size(); i++) {
+            (*mDisplayList->getFunctors()[i])(DrawGlInfo::kModeSync, nullptr);
         }
     }
 }
@@ -406,7 +406,7 @@ void RenderNode::pushStagingDisplayListChanges(TreeInfo& info) {
 
 void RenderNode::deleteDisplayList() {
     if (mDisplayList) {
-        for (auto&& child : mDisplayList->children()) {
+        for (auto&& child : mDisplayList->getChildren()) {
             child->renderNode->decParentRefCount();
         }
     }
@@ -417,12 +417,11 @@ void RenderNode::deleteDisplayList() {
 void RenderNode::prepareSubTree(TreeInfo& info, bool functorsNeedLayer, DisplayList* subtree) {
     if (subtree) {
         TextureCache& cache = Caches::getInstance().textureCache;
-        info.out.hasFunctors |= subtree->functors.size();
-        for (size_t i = 0; info.prepareTextures && i < subtree->bitmapResources.size(); i++) {
-            info.prepareTextures = cache.prefetchAndMarkInUse(
-                    info.canvasContext, subtree->bitmapResources[i]);
+        info.out.hasFunctors |= subtree->getFunctors().size();
+        for (auto&& bitmapResource : subtree->getBitmapResources()) {
+            info.prepareTextures = cache.prefetchAndMarkInUse(info.canvasContext, bitmapResource);
         }
-        for (auto&& op : subtree->children()) {
+        for (auto&& op : subtree->getChildren()) {
             RenderNode* childNode = op->renderNode;
 #if HWUI_NEW_OPS
             info.damageAccumulator->pushTransform(&op->localMatrix);
@@ -445,7 +444,7 @@ void RenderNode::destroyHardwareResources() {
         mLayer = nullptr;
     }
     if (mDisplayList) {
-        for (auto&& child : mDisplayList->children()) {
+        for (auto&& child : mDisplayList->getChildren()) {
             child->renderNode->destroyHardwareResources();
         }
         if (mNeedsDisplayListSync) {
@@ -634,8 +633,8 @@ void RenderNode::computeOrdering() {
     // TODO: create temporary DDLOp and call computeOrderingImpl on top DisplayList so that
     // transform properties are applied correctly to top level children
     if (mDisplayList == nullptr) return;
-    for (unsigned int i = 0; i < mDisplayList->children().size(); i++) {
-        DrawRenderNodeOp* childOp = mDisplayList->children()[i];
+    for (unsigned int i = 0; i < mDisplayList->getChildren().size(); i++) {
+        DrawRenderNodeOp* childOp = mDisplayList->getChildren()[i];
         childOp->renderNode->computeOrderingImpl(childOp, &mProjectedNodes, &mat4::identity());
     }
 #endif
@@ -664,11 +663,11 @@ void RenderNode::computeOrderingImpl(
         opState->mSkipInOrderDraw = false;
     }
 
-    if (mDisplayList->children().size() > 0) {
+    if (mDisplayList->getChildren().size() > 0) {
         const bool isProjectionReceiver = mDisplayList->projectionReceiveIndex >= 0;
         bool haveAppliedPropertiesToProjection = false;
-        for (unsigned int i = 0; i < mDisplayList->children().size(); i++) {
-            DrawRenderNodeOp* childOp = mDisplayList->children()[i];
+        for (unsigned int i = 0; i < mDisplayList->getChildren().size(); i++) {
+            DrawRenderNodeOp* childOp = mDisplayList->getChildren()[i];
             RenderNode* child = childOp->renderNode;
 
             std::vector<DrawRenderNodeOp*>* projectionChildren = nullptr;
@@ -756,7 +755,7 @@ void RenderNode::buildZSortedChildList(const DisplayList::Chunk& chunk,
     if (chunk.beginChildIndex == chunk.endChildIndex) return;
 
     for (unsigned int i = chunk.beginChildIndex; i < chunk.endChildIndex; i++) {
-        DrawRenderNodeOp* childOp = mDisplayList->children()[i];
+        DrawRenderNodeOp* childOp = mDisplayList->getChildren()[i];
         RenderNode* child = childOp->renderNode;
         float childZ = child->properties().getZ();
 

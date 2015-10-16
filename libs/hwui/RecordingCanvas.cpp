@@ -369,7 +369,7 @@ size_t RecordingCanvas::addOp(RecordedOp* op) {
         newChunk.endOpIndex = insertIndex + 1;
         newChunk.reorderChildren = (mDeferredBarrierType == kBarrier_OutOfOrder);
 
-        int nextChildIndex = mDisplayList->children().size();
+        int nextChildIndex = mDisplayList->children.size();
         newChunk.beginChildIndex = newChunk.endChildIndex = nextChildIndex;
         mDeferredBarrierType = kBarrier_None;
     } else {

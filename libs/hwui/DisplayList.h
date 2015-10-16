@@ -132,32 +132,22 @@ public:
     DisplayList();
     ~DisplayList();
 
-    // pointers to all ops within display list, pointing into allocator data
-    std::vector<DisplayListOp*> displayListOps;
-
     // index of DisplayListOp restore, after which projected descendents should be drawn
     int projectionReceiveIndex;
 
-    std::vector<const SkBitmap*> bitmapResources;
-    std::vector<const SkPath*> pathResources;
-    std::vector<const Res_png_9patch*> patchResources;
+    const LsaVector<Chunk>& getChunks() const { return chunks; }
+    const LsaVector<BaseOpType*>& getOps() const { return ops; }
 
-    std::vector<std::unique_ptr<const SkPaint>> paints;
-    std::vector<std::unique_ptr<const SkRegion>> regions;
-    Vector<Functor*> functors;
+    const LsaVector<NodeOpType*>& getChildren() const { return children; }
 
-    const std::vector<Chunk>& getChunks() const {
-            return chunks;
-    }
-    const std::vector<BaseOpType*>& getOps() const {
-        return ops;
-    }
+    const LsaVector<const SkBitmap*>& getBitmapResources() const { return bitmapResources; }
+    const LsaVector<Functor*>& getFunctors() const { return functors; }
 
     size_t addChild(NodeOpType* childOp);
-    const std::vector<NodeOpType*>& children() { return mChildren; }
+
 
     void ref(VirtualLightRefBase* prop) {
-        mReferenceHolders.push_back(prop);
+        referenceHolders.push_back(prop);
     }
 
     size_t getUsedSize() {
@@ -168,17 +158,27 @@ public:
     }
 
 private:
-    std::vector<BaseOpType*> ops;
-
-    std::vector< sp<VirtualLightRefBase> > mReferenceHolders;
-
-    // list of children display lists for quick, non-drawing traversal
-    std::vector<NodeOpType*> mChildren;
-
-    std::vector<Chunk> chunks;
-
-    // allocator into which all ops were allocated
+    // allocator into which all ops and LsaVector arrays allocated
     LinearAllocator allocator;
+    LinearStdAllocator<void*> stdAllocator;
+
+    LsaVector<Chunk> chunks;
+    LsaVector<BaseOpType*> ops;
+
+    // list of Ops referring to RenderNode children for quick, non-drawing traversal
+    LsaVector<NodeOpType*> children;
+
+    // Resources - Skia objects + 9 patches referred to by this DisplayList
+    LsaVector<const SkBitmap*> bitmapResources;
+    LsaVector<const SkPath*> pathResources;
+    LsaVector<const Res_png_9patch*> patchResources;
+    LsaVector<std::unique_ptr<const SkPaint>> paints;
+    LsaVector<std::unique_ptr<const SkRegion>> regions;
+    LsaVector< sp<VirtualLightRefBase> > referenceHolders;
+
+    // List of functors
+    LsaVector<Functor*> functors;
+
     bool hasDrawOps;
 
     void cleanupResources();
