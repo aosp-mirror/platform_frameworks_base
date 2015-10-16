@@ -276,8 +276,8 @@ public class Environment {
     }
 
     /**
-     * Return the primary external storage directory. This directory may not
-     * currently be accessible if it has been mounted by the user on their
+     * Return the primary shared/external storage directory. This directory may
+     * not currently be accessible if it has been mounted by the user on their
      * computer, has been removed from the device, or some other problem has
      * happened. You can determine its current state with
      * {@link #getExternalStorageState()}.
@@ -291,12 +291,15 @@ public class Environment {
      * filesystem on a computer.</em>
      * <p>
      * On devices with multiple users (as described by {@link UserManager}),
-     * each user has their own isolated external storage. Applications only have
-     * access to the external storage for the user they're running as.
+     * each user has their own isolated shared storage. Applications only have
+     * access to the shared storage for the user they're running as.
      * <p>
-     * In devices with multiple "external" storage directories, this directory
-     * represents the "primary" external storage that the user will interact
+     * In devices with multiple shared/external storage directories, this
+     * directory represents the primary storage that the user will interact
      * with. Access to secondary storage is available through
+     * {@link Context#getExternalFilesDirs(String)},
+     * {@link Context#getExternalCacheDirs()}, and
+     * {@link Context#getExternalMediaDirs()}.
      * <p>
      * Applications should not directly use this top-level directory, in order
      * to avoid polluting the user's root namespace. Any files that are private
@@ -315,8 +318,9 @@ public class Environment {
      * <p>
      * Starting in {@link android.os.Build.VERSION_CODES#KITKAT}, if your
      * application only needs to store internal data, consider using
-     * {@link Context#getExternalFilesDir(String)} or
-     * {@link Context#getExternalCacheDir()}, which require no permissions to
+     * {@link Context#getExternalFilesDir(String)},
+     * {@link Context#getExternalCacheDir()}, or
+     * {@link Context#getExternalMediaDirs()}, which require no permissions to
      * read or write.
      * <p>
      * This path may change between platform versions, so applications should
@@ -325,8 +329,7 @@ public class Environment {
      * Here is an example of typical code to monitor the state of external
      * storage:
      * <p>
-     * {@sample
-     * development/samples/ApiDemos/src/com/example/android/apis/content/ExternalStorage.java
+     * {@sample development/samples/ApiDemos/src/com/example/android/apis/content/ExternalStorage.java
      * monitor_storage}
      *
      * @see #getExternalStorageState()
@@ -446,32 +449,32 @@ public class Environment {
     public static String DIRECTORY_DOCUMENTS = "Documents";
 
     /**
-     * Get a top-level public external storage directory for placing files of
-     * a particular type.  This is where the user will typically place and
-     * manage their own files, so you should be careful about what you put here
-     * to ensure you don't erase their files or get in the way of their own
+     * Get a top-level shared/external storage directory for placing files of a
+     * particular type. This is where the user will typically place and manage
+     * their own files, so you should be careful about what you put here to
+     * ensure you don't erase their files or get in the way of their own
      * organization.
-     * 
-     * <p>On devices with multiple users (as described by {@link UserManager}),
-     * each user has their own isolated external storage. Applications only
-     * have access to the external storage for the user they're running as.</p>
-     *
-     * <p>Here is an example of typical code to manipulate a picture on
-     * the public external storage:</p>
-     * 
+     * <p>
+     * On devices with multiple users (as described by {@link UserManager}),
+     * each user has their own isolated shared storage. Applications only have
+     * access to the shared storage for the user they're running as.
+     * </p>
+     * <p>
+     * Here is an example of typical code to manipulate a picture on the public
+     * shared storage:
+     * </p>
      * {@sample development/samples/ApiDemos/src/com/example/android/apis/content/ExternalStorage.java
      * public_picture}
      * 
-     * @param type The type of storage directory to return.  Should be one of
-     * {@link #DIRECTORY_MUSIC}, {@link #DIRECTORY_PODCASTS},
-     * {@link #DIRECTORY_RINGTONES}, {@link #DIRECTORY_ALARMS},
-     * {@link #DIRECTORY_NOTIFICATIONS}, {@link #DIRECTORY_PICTURES},
-     * {@link #DIRECTORY_MOVIES}, {@link #DIRECTORY_DOWNLOADS}, or
-     * {@link #DIRECTORY_DCIM}.  May not be null.
-     * 
-     * @return Returns the File path for the directory.  Note that this
-     * directory may not yet exist, so you must make sure it exists before
-     * using it such as with {@link File#mkdirs File.mkdirs()}.
+     * @param type The type of storage directory to return. Should be one of
+     *            {@link #DIRECTORY_MUSIC}, {@link #DIRECTORY_PODCASTS},
+     *            {@link #DIRECTORY_RINGTONES}, {@link #DIRECTORY_ALARMS},
+     *            {@link #DIRECTORY_NOTIFICATIONS}, {@link #DIRECTORY_PICTURES},
+     *            {@link #DIRECTORY_MOVIES}, {@link #DIRECTORY_DOWNLOADS}, or
+     *            {@link #DIRECTORY_DCIM}. May not be null.
+     * @return Returns the File path for the directory. Note that this directory
+     *         may not yet exist, so you must make sure it exists before using
+     *         it such as with {@link File#mkdirs File.mkdirs()}.
      */
     public static File getExternalStoragePublicDirectory(String type) {
         throwIfUserRequired();
@@ -623,7 +626,7 @@ public class Environment {
     public static final String MEDIA_EJECTING = "ejecting";
 
     /**
-     * Returns the current state of the primary "external" storage device.
+     * Returns the current state of the primary shared/external storage media.
      * 
      * @see #getExternalStorageDirectory()
      * @return one of {@link #MEDIA_UNKNOWN}, {@link #MEDIA_REMOVED},
@@ -646,8 +649,8 @@ public class Environment {
     }
 
     /**
-     * Returns the current state of the storage device that provides the given
-     * path.
+     * Returns the current state of the shared/external storage media at the
+     * given path.
      *
      * @return one of {@link #MEDIA_UNKNOWN}, {@link #MEDIA_REMOVED},
      *         {@link #MEDIA_UNMOUNTED}, {@link #MEDIA_CHECKING},
@@ -665,7 +668,8 @@ public class Environment {
     }
 
     /**
-     * Returns whether the primary "external" storage device is removable.
+     * Returns whether the primary shared/external storage media is physically
+     * removable.
      *
      * @return true if the storage device can be removed (such as an SD card),
      *         or false if the storage device is built in and cannot be
@@ -678,8 +682,8 @@ public class Environment {
     }
 
     /**
-     * Returns whether the storage device that provides the given path is
-     * removable.
+     * Returns whether the shared/external storage media at the given path is
+     * physically removable.
      *
      * @return true if the storage device can be removed (such as an SD card),
      *         or false if the storage device is built in and cannot be
@@ -697,9 +701,15 @@ public class Environment {
     }
 
     /**
-     * Returns whether the primary "external" storage device is emulated. If
-     * true, data stored on this device will be stored on a portion of the
-     * internal storage system.
+     * Returns whether the primary shared/external storage media is emulated.
+     * <p>
+     * The contents of emulated storage devices are backed by a private user
+     * data partition, which means there is little benefit to apps storing data
+     * here instead of the private directories returned by
+     * {@link Context#getFilesDir()}, etc.
+     * <p>
+     * This returns true when emulated storage is backed by either internal
+     * storage or an adopted storage device.
      *
      * @see DevicePolicyManager#setStorageEncryption(android.content.ComponentName,
      *      boolean)
@@ -711,9 +721,16 @@ public class Environment {
     }
 
     /**
-     * Returns whether the storage device that provides the given path is
-     * emulated. If true, data stored on this device will be stored on a portion
-     * of the internal storage system.
+     * Returns whether the shared/external storage media at the given path is
+     * emulated.
+     * <p>
+     * The contents of emulated storage devices are backed by a private user
+     * data partition, which means there is little benefit to apps storing data
+     * here instead of the private directories returned by
+     * {@link Context#getFilesDir()}, etc.
+     * <p>
+     * This returns true when emulated storage is backed by either internal
+     * storage or an adopted storage device.
      *
      * @throws IllegalArgumentException if the path is not a valid storage
      *             device.
