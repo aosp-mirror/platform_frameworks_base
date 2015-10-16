@@ -920,7 +920,7 @@ public class ChooserActivity extends ResolverActivity {
         @Override
         public int compare(ChooserTarget lhs, ChooserTarget rhs) {
             // Descending order
-            return (int) Math.signum(lhs.getScore() - rhs.getScore());
+            return (int) Math.signum(rhs.getScore() - lhs.getScore());
         }
     }
 
