@@ -69,8 +69,8 @@ bool TableMerger::doMerge(const Source& src, ResourceTable* srcTable,
 
     for (auto& srcType : srcPackage->types) {
         ResourceTableType* dstType = mMasterPackage->findOrCreateType(srcType->type);
-        if (srcType->publicStatus.isPublic) {
-            if (dstType->publicStatus.isPublic && dstType->id && srcType->id
+        if (srcType->symbolStatus.state == SymbolState::kPublic) {
+            if (dstType->symbolStatus.state == SymbolState::kPublic && dstType->id && srcType->id
                     && dstType->id.value() == srcType->id.value()) {
                 // Both types are public and have different IDs.
                 mContext->getDiagnostics()->error(DiagMessage(src)
@@ -81,7 +81,7 @@ bool TableMerger::doMerge(const Source& src, ResourceTable* srcTable,
                 continue;
             }
 
-            dstType->publicStatus = std::move(srcType->publicStatus);
+            dstType->symbolStatus = std::move(srcType->symbolStatus);
             dstType->id = srcType->id;
         }
 
@@ -94,20 +94,29 @@ bool TableMerger::doMerge(const Source& src, ResourceTable* srcTable,
                 dstEntry = dstType->findOrCreateEntry(srcEntry->name);
             }
 
-            if (srcEntry->publicStatus.isPublic) {
-                if (dstEntry->publicStatus.isPublic && dstEntry->id && srcEntry->id
-                        && dstEntry->id.value() != srcEntry->id.value()) {
-                    // Both entries are public and have different IDs.
-                    mContext->getDiagnostics()->error(DiagMessage(src)
-                                                      << "can not merge entry '"
-                                                      << srcEntry->name
-                                                      << "': conflicting public IDs");
-                    error = true;
-                    continue;
+            if (srcEntry->symbolStatus.state != SymbolState::kUndefined) {
+                if (srcEntry->symbolStatus.state == SymbolState::kPublic) {
+                    if (dstEntry->symbolStatus.state == SymbolState::kPublic &&
+                            dstEntry->id && srcEntry->id &&
+                            dstEntry->id.value() != srcEntry->id.value()) {
+                        // Both entries are public and have different IDs.
+                        mContext->getDiagnostics()->error(DiagMessage(src)
+                                                          << "can not merge entry '"
+                                                          << srcEntry->name
+                                                          << "': conflicting public IDs");
+                        error = true;
+                        continue;
+                    }
+
+                    if (srcEntry->id) {
+                        dstEntry->id = srcEntry->id;
+                    }
                 }
 
-                dstEntry->publicStatus = std::move(srcEntry->publicStatus);
-                dstEntry->id = srcEntry->id;
+                if (dstEntry->symbolStatus.state != SymbolState::kPublic &&
+                        dstEntry->symbolStatus.state != srcEntry->symbolStatus.state) {
+                    dstEntry->symbolStatus = std::move(srcEntry->symbolStatus);
+                }
             }
 
             for (ResourceConfigValue& srcValue : srcEntry->values) {

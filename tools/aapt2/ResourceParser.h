@@ -77,6 +77,7 @@ private:
     bool parseColor(XmlPullParser* parser, ParsedResource* outResource);
     bool parsePrimitive(XmlPullParser* parser, ParsedResource* outResource);
     bool parsePublic(XmlPullParser* parser, ParsedResource* outResource);
+    bool parseSymbol(XmlPullParser* parser, ParsedResource* outResource);
     bool parseAttr(XmlPullParser* parser, ParsedResource* outResource);
     bool parseAttrImpl(XmlPullParser* parser, ParsedResource* outResource, bool weak);
     Maybe<Attribute::Symbol> parseEnumOrFlagItem(XmlPullParser* parser, const StringPiece16& tag);

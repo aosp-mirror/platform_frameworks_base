@@ -61,7 +61,7 @@ bool PrivateAttributeMover::consume(IAaptContext* context, ResourceTable* table)
             continue;
         }
 
-        if (!type->publicStatus.isPublic) {
+        if (type->symbolStatus.state != SymbolState::kPublic) {
             // No public attributes, so we can safely leave these private attributes where they are.
             return true;
         }
@@ -71,7 +71,7 @@ bool PrivateAttributeMover::consume(IAaptContext* context, ResourceTable* table)
 
         moveIf(type->entries, std::back_inserter(privAttrType->entries),
                [](const std::unique_ptr<ResourceEntry>& entry) -> bool {
-                   return !entry->publicStatus.isPublic;
+                   return entry->symbolStatus.state != SymbolState::kPublic;
                });
         break;
     }

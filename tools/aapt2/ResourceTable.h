@@ -31,11 +31,17 @@
 
 namespace aapt {
 
+enum class SymbolState {
+    kUndefined,
+    kPublic,
+    kPrivate
+};
+
 /**
  * The Public status of a resource.
  */
-struct Public {
-    bool isPublic = false;
+struct Symbol {
+    SymbolState state = SymbolState::kUndefined;
     Source source;
     std::u16string comment;
 };
@@ -71,7 +77,7 @@ struct ResourceEntry {
      * Whether this resource is public (and must maintain the same
      * entry ID across builds).
      */
-    Public publicStatus;
+    Symbol symbolStatus;
 
     /**
      * The resource's values for each configuration.
@@ -100,7 +106,7 @@ struct ResourceTableType {
      * Whether this type is public (and must maintain the same
      * type ID across builds).
      */
-    Public publicStatus;
+    Symbol symbolStatus;
 
     /**
      * List of resources for this type.
@@ -171,10 +177,15 @@ public:
                                  const Source& source, std::unique_ptr<Value> value,
                                  IDiagnostics* diag);
 
-    bool markPublic(const ResourceNameRef& name, const ResourceId resId, const Source& source,
-                    IDiagnostics* diag);
-    bool markPublicAllowMangled(const ResourceNameRef& name, const ResourceId resId,
-                                const Source& source, IDiagnostics* diag);
+    bool addResourceAllowMangled(const ResourceNameRef& name, const ResourceId id,
+                                 const ConfigDescription& config,
+                                 const Source& source, std::unique_ptr<Value> value,
+                                 IDiagnostics* diag);
+
+    bool setSymbolState(const ResourceNameRef& name, const ResourceId resId, const Source& source,
+                        SymbolState state, IDiagnostics* diag);
+    bool setSymbolStateAllowMangled(const ResourceNameRef& name, const ResourceId resId,
+                                    const Source& source, SymbolState state, IDiagnostics* diag);
     struct SearchResult {
         ResourceTablePackage* package;
         ResourceTableType* type;
@@ -217,8 +228,9 @@ private:
                          const ConfigDescription& config, const Source& source,
                          std::unique_ptr<Value> value, const char16_t* validChars,
                          IDiagnostics* diag);
-    bool markPublicImpl(const ResourceNameRef& name, const ResourceId resId,
-                        const Source& source, const char16_t* validChars, IDiagnostics* diag);
+    bool setSymbolStateImpl(const ResourceNameRef& name, const ResourceId resId,
+                            const Source& source, SymbolState state, const char16_t* validChars,
+                            IDiagnostics* diag);
 };
 
 } // namespace aapt

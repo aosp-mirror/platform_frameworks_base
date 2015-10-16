@@ -33,6 +33,17 @@ struct JavaClassGeneratorOptions {
      * on resource entries. Default is true.
      */
     bool useFinal = true;
+
+    enum class SymbolTypes {
+        kAll,
+        kPublicPrivate,
+        kPublic,
+    };
+
+    /*
+     *
+     */
+    SymbolTypes types = SymbolTypes::kAll;
 };
 
 /*
@@ -49,7 +60,11 @@ public:
      * We need to generate these symbols in a separate file.
      * Returns true on success.
      */
-    bool generate(const StringPiece16& package, std::ostream* out);
+    bool generate(const StringPiece16& packageNameToGenerate, std::ostream* out);
+
+    bool generate(const StringPiece16& packageNameToGenerate,
+                  const StringPiece16& outputPackageName,
+                  std::ostream* out);
 
     const std::string& getError() const;
 
@@ -63,6 +78,8 @@ private:
                            const std::u16string& entryName,
                            const Styleable* styleable,
                            std::ostream* out);
+
+    bool skipSymbol(SymbolState state);
 
     ResourceTable* mTable;
     JavaClassGeneratorOptions mOptions;

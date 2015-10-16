@@ -65,6 +65,87 @@ TEST(JavaClassGeneratorTest, TransformInvalidJavaIdentifierCharacter) {
               output.find("public static final int hey_dude_cool_attr = 0;"));
 }
 
+TEST(JavaClassGeneratorTest, CorrectPackageNameIsUsed) {
+    std::unique_ptr<ResourceTable> table = test::ResourceTableBuilder()
+            .setPackageId(u"android", 0x01)
+            .addSimple(u"@android:id/one", ResourceId(0x01020000))
+            .addSimple(u"@android:id/com.foo$two", ResourceId(0x01020001))
+            .build();
+
+    JavaClassGenerator generator(table.get(), {});
+    std::stringstream out;
+    ASSERT_TRUE(generator.generate(u"android", u"com.android.internal", &out));
+
+    std::string output = out.str();
+    EXPECT_NE(std::string::npos, output.find("package com.android.internal;"));
+    EXPECT_NE(std::string::npos, output.find("public static final int one = 0x01020000;"));
+    EXPECT_EQ(std::string::npos, output.find("two"));
+    EXPECT_EQ(std::string::npos, output.find("com_foo$two"));
+}
+
+TEST(JavaClassGeneratorTest, AttrPrivateIsWrittenAsAttr) {
+    std::unique_ptr<ResourceTable> table = test::ResourceTableBuilder()
+            .setPackageId(u"android", 0x01)
+            .addSimple(u"@android:^attr-private/one", ResourceId(0x01010000))
+            .build();
+
+    JavaClassGenerator generator(table.get(), {});
+    std::stringstream out;
+    ASSERT_TRUE(generator.generate(u"android", &out));
+
+    std::string output = out.str();
+    EXPECT_NE(std::string::npos, output.find("public static final class attr"));
+    EXPECT_EQ(std::string::npos, output.find("public static final class ^attr-private"));
+}
+
+TEST(JavaClassGeneratorTest, OnlyWritePublicResources) {
+    StdErrDiagnostics diag;
+    std::unique_ptr<ResourceTable> table = test::ResourceTableBuilder()
+            .setPackageId(u"android", 0x01)
+            .addSimple(u"@android:id/one", ResourceId(0x01020000))
+            .addSimple(u"@android:id/two", ResourceId(0x01020001))
+            .addSimple(u"@android:id/three", ResourceId(0x01020002))
+            .build();
+    ASSERT_TRUE(table->setSymbolState(test::parseNameOrDie(u"@android:id/one"), {}, {},
+                                      SymbolState::kPublic, &diag));
+    ASSERT_TRUE(table->setSymbolState(test::parseNameOrDie(u"@android:id/two"), {}, {},
+                                      SymbolState::kPrivate, &diag));
+
+    JavaClassGeneratorOptions options;
+    options.types = JavaClassGeneratorOptions::SymbolTypes::kPublic;
+    {
+        JavaClassGenerator generator(table.get(), options);
+        std::stringstream out;
+        ASSERT_TRUE(generator.generate(u"android", &out));
+        std::string output = out.str();
+        EXPECT_NE(std::string::npos, output.find("public static final int one = 0x01020000;"));
+        EXPECT_EQ(std::string::npos, output.find("two"));
+        EXPECT_EQ(std::string::npos, output.find("three"));
+    }
+
+    options.types = JavaClassGeneratorOptions::SymbolTypes::kPublicPrivate;
+    {
+        JavaClassGenerator generator(table.get(), options);
+        std::stringstream out;
+        ASSERT_TRUE(generator.generate(u"android", &out));
+        std::string output = out.str();
+        EXPECT_NE(std::string::npos, output.find("public static final int one = 0x01020000;"));
+        EXPECT_NE(std::string::npos, output.find("public static final int two = 0x01020001;"));
+        EXPECT_EQ(std::string::npos, output.find("three"));
+    }
+
+    options.types = JavaClassGeneratorOptions::SymbolTypes::kAll;
+    {
+        JavaClassGenerator generator(table.get(), options);
+        std::stringstream out;
+        ASSERT_TRUE(generator.generate(u"android", &out));
+        std::string output = out.str();
+        EXPECT_NE(std::string::npos, output.find("public static final int one = 0x01020000;"));
+        EXPECT_NE(std::string::npos, output.find("public static final int two = 0x01020001;"));
+        EXPECT_NE(std::string::npos, output.find("public static final int three = 0x01020002;"));
+    }
+}
+
 /*
  * TODO(adamlesinski): Re-enable this once we get merging working again.
  * TEST(JavaClassGeneratorTest, EmitPackageMangledSymbols) {

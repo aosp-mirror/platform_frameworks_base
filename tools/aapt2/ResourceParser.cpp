@@ -18,9 +18,10 @@
 #include "ResourceTable.h"
 #include "ResourceUtils.h"
 #include "ResourceValues.h"
-#include "util/Util.h"
 #include "ValueVisitor.h"
 #include "XmlPullParser.h"
+
+#include "util/Util.h"
 
 #include <sstream>
 
@@ -184,7 +185,7 @@ struct ParsedResource {
     ResourceName name;
     Source source;
     ResourceId id;
-    bool markPublic = false;
+    SymbolState symbolState = SymbolState::kUndefined;
     std::unique_ptr<Value> value;
     std::list<ParsedResource> childResources;
 };
@@ -192,8 +193,10 @@ struct ParsedResource {
 // Recursively adds resources to the ResourceTable.
 static bool addResourcesToTable(ResourceTable* table, const ConfigDescription& config,
                                 IDiagnostics* diag, ParsedResource* res) {
-    if (res->markPublic && !table->markPublic(res->name, res->id, res->source, diag)) {
-        return false;
+    if (res->symbolState != SymbolState::kUndefined) {
+        if (!table->setSymbolState(res->name, res->id, res->source, res->symbolState, diag)) {
+            return false;
+        }
     }
 
     if (!res->value) {
@@ -318,6 +321,8 @@ bool ResourceParser::parseResources(XmlPullParser* parser) {
             result = parseAttr(parser, &parsedResource);
         } else if (elementName == u"public") {
             result = parsePublic(parser, &parsedResource);
+        } else if (elementName == u"java-symbol" || elementName == u"symbol") {
+            result = parseSymbol(parser, &parsedResource);
         } else {
             mDiag->warn(DiagMessage(mSource.withLine(parser->getLineNumber()))
                         << "unknown resource type '" << elementName << "'");
@@ -506,7 +511,29 @@ bool ResourceParser::parsePublic(XmlPullParser* parser, ParsedResource* outResou
         outResource->value = util::make_unique<Id>();
     }
 
-    outResource->markPublic = true;
+    outResource->symbolState = SymbolState::kPublic;
+    return true;
+}
+
+bool ResourceParser::parseSymbol(XmlPullParser* parser, ParsedResource* outResource) {
+    const Source source = mSource.withLine(parser->getLineNumber());
+
+    Maybe<StringPiece16> maybeType = findNonEmptyAttribute(parser, u"type");
+    if (!maybeType) {
+        mDiag->error(DiagMessage(source) << "<" << parser->getElementName() << "> must have a "
+                     "'type' attribute");
+        return false;
+    }
+
+    const ResourceType* parsedType = parseResourceType(maybeType.value());
+    if (!parsedType) {
+        mDiag->error(DiagMessage(source) << "invalid resource type '" << maybeType.value()
+                     << "' in <" << parser->getElementName() << ">");
+        return false;
+    }
+
+    outResource->name.type = *parsedType;
+    outResource->symbolState = SymbolState::kPrivate;
     return true;
 }
 

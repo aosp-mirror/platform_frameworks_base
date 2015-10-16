@@ -134,7 +134,14 @@ struct Public_header {
 
 struct Public_entry {
     uint16_t entryId;
-    uint16_t res0;
+
+    enum : uint16_t {
+        kUndefined = 0,
+        kPublic = 1,
+        kPrivate = 2,
+    };
+
+    uint16_t state;
     android::ResStringPool_ref key;
     android::ResStringPool_ref source;
     uint32_t sourceLine;
