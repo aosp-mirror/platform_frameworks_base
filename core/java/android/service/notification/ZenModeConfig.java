@@ -41,6 +41,7 @@ import org.xmlpull.v1.XmlSerializer;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.GregorianCalendar;
 import java.util.Locale;
 import java.util.Objects;
 import java.util.UUID;
@@ -68,6 +69,7 @@ public class ZenModeConfig implements Parcelable {
     public static final int[] MINUTE_BUCKETS = generateMinuteBuckets();
     private static final int SECONDS_MS = 1000;
     private static final int MINUTES_MS = 60 * SECONDS_MS;
+    private static final int DAY_MINUTES = 24 * 60;
     private static final int ZERO_VALUE_MS = 10 * SECONDS_MS;
 
     private static final boolean DEFAULT_ALLOW_CALLS = true;
@@ -652,38 +654,66 @@ public class ZenModeConfig implements Parcelable {
             boolean shortVersion) {
         final long now = System.currentTimeMillis();
         final long millis = minutesFromNow == 0 ? ZERO_VALUE_MS : minutesFromNow * MINUTES_MS;
-        return toTimeCondition(context, now + millis, minutesFromNow, now, userHandle,
-                shortVersion);
+        return toTimeCondition(context, now + millis, minutesFromNow, userHandle, shortVersion);
     }
 
-    public static Condition toTimeCondition(Context context, long time, int minutes, long now,
+    public static Condition toTimeCondition(Context context, long time, int minutes,
             int userHandle, boolean shortVersion) {
-        final int num, summaryResId, line1ResId;
+        final int num;
+        String summary, line1, line2;
+        final CharSequence formattedTime = getFormattedTime(context, time, userHandle);
+        final Resources res = context.getResources();
         if (minutes < 60) {
             // display as minutes
             num = minutes;
-            summaryResId = shortVersion ? R.plurals.zen_mode_duration_minutes_summary_short
+            int summaryResId = shortVersion ? R.plurals.zen_mode_duration_minutes_summary_short
                     : R.plurals.zen_mode_duration_minutes_summary;
-            line1ResId = shortVersion ? R.plurals.zen_mode_duration_minutes_short
+            summary = res.getQuantityString(summaryResId, num, num, formattedTime);
+            int line1ResId = shortVersion ? R.plurals.zen_mode_duration_minutes_short
                     : R.plurals.zen_mode_duration_minutes;
-        } else {
+            line1 = res.getQuantityString(line1ResId, num, num, formattedTime);
+            line2 = res.getString(R.string.zen_mode_until, formattedTime);
+        } else if (minutes < DAY_MINUTES) {
             // display as hours
             num =  Math.round(minutes / 60f);
-            summaryResId = shortVersion ? R.plurals.zen_mode_duration_hours_summary_short
+            int summaryResId = shortVersion ? R.plurals.zen_mode_duration_hours_summary_short
                     : R.plurals.zen_mode_duration_hours_summary;
-            line1ResId = shortVersion ? R.plurals.zen_mode_duration_hours_short
+            summary = res.getQuantityString(summaryResId, num, num, formattedTime);
+            int line1ResId = shortVersion ? R.plurals.zen_mode_duration_hours_short
                     : R.plurals.zen_mode_duration_hours;
+            line1 = res.getQuantityString(line1ResId, num, num, formattedTime);
+            line2 = res.getString(R.string.zen_mode_until, formattedTime);
+        } else {
+            // display as day/time
+            summary = line1 = line2 = res.getString(R.string.zen_mode_until, formattedTime);
         }
-        final String skeleton = DateFormat.is24HourFormat(context, userHandle) ? "Hm" : "hma";
-        final String pattern = DateFormat.getBestDateTimePattern(Locale.getDefault(), skeleton);
-        final CharSequence formattedTime = DateFormat.format(pattern, time);
-        final Resources res = context.getResources();
-        final String summary = res.getQuantityString(summaryResId, num, num, formattedTime);
-        final String line1 = res.getQuantityString(line1ResId, num, num, formattedTime);
-        final String line2 = res.getString(R.string.zen_mode_until, formattedTime);
         final Uri id = toCountdownConditionId(time);
         return new Condition(id, summary, line1, line2, 0, Condition.STATE_TRUE,
                 Condition.FLAG_RELEVANT_NOW);
+    }
+
+    public static Condition toNextAlarmCondition(Context context, long now, long alarm,
+            int userHandle) {
+        final CharSequence formattedTime = getFormattedTime(context, alarm, userHandle);
+        final Resources res = context.getResources();
+        final String line1 = res.getString(R.string.zen_mode_alarm, formattedTime);
+        final Uri id = toCountdownConditionId(alarm);
+        return new Condition(id, "", line1, "", 0, Condition.STATE_TRUE,
+                Condition.FLAG_RELEVANT_NOW);
+    }
+
+    private static CharSequence getFormattedTime(Context context, long time, int userHandle) {
+        String skeleton = "EEE " + (DateFormat.is24HourFormat(context, userHandle) ? "Hm" : "hma");
+        GregorianCalendar now = new GregorianCalendar();
+        GregorianCalendar endTime = new GregorianCalendar();
+        endTime.setTimeInMillis(time);
+        if (now.get(Calendar.YEAR) == endTime.get(Calendar.YEAR)
+                && now.get(Calendar.MONTH) == endTime.get(Calendar.MONTH)
+                && now.get(Calendar.DATE) == endTime.get(Calendar.DATE)) {
+            skeleton = DateFormat.is24HourFormat(context, userHandle) ? "Hm" : "hma";
+        }
+        final String pattern = DateFormat.getBestDateTimePattern(Locale.getDefault(), skeleton);
+        return DateFormat.format(pattern, time);
     }
 
     // ==== Built-in system conditions ====
@@ -883,11 +913,6 @@ public class ZenModeConfig implements Parcelable {
         return UUID.randomUUID().toString().replace("-", "");
     }
 
-    public static String getConditionLine1(Context context, ZenModeConfig config,
-            int userHandle, boolean shortVersion) {
-        return getConditionLine(context, config, userHandle, true /*useLine1*/, shortVersion);
-    }
-
     public static String getConditionSummary(Context context, ZenModeConfig config,
             int userHandle, boolean shortVersion) {
         return getConditionLine(context, config, userHandle, false /*useLine1*/, shortVersion);
@@ -906,8 +931,8 @@ public class ZenModeConfig implements Parcelable {
             if (time > 0) {
                 final long now = System.currentTimeMillis();
                 final long span = time - now;
-                c = toTimeCondition(context,
-                        time, Math.round(span / (float) MINUTES_MS), now, userHandle, shortVersion);
+                c = toTimeCondition(context, time, Math.round(span / (float) MINUTES_MS),
+                        userHandle, shortVersion);
             }
             final String rt = c == null ? "" : useLine1 ? c.line1 : c.summary;
             return TextUtils.isEmpty(rt) ? "" : rt;
