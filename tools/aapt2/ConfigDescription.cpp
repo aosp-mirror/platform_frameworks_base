@@ -17,8 +17,8 @@
 #include "ConfigDescription.h"
 #include "Locale.h"
 #include "SdkConstants.h"
-#include "StringPiece.h"
-#include "Util.h"
+#include "util/StringPiece.h"
+#include "util/Util.h"
 
 #include <androidfw/ResourceTypes.h>
 #include <string>

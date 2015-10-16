@@ -15,12 +15,9 @@
  */
 
 #include "JavaClassGenerator.h"
-#include "Linker.h"
-#include "MockResolver.h"
-#include "ResourceTable.h"
-#include "ResourceTableResolver.h"
-#include "ResourceValues.h"
-#include "Util.h"
+#include "util/Util.h"
+
+#include "test/Builders.h"
 
 #include <gtest/gtest.h>
 #include <sstream>
@@ -28,51 +25,34 @@
 
 namespace aapt {
 
-struct JavaClassGeneratorTest : public ::testing::Test {
-    virtual void SetUp() override {
-        mTable = std::make_shared<ResourceTable>();
-        mTable->setPackage(u"android");
-        mTable->setPackageId(0x01);
-    }
+TEST(JavaClassGeneratorTest, FailWhenEntryIsJavaKeyword) {
+    std::unique_ptr<ResourceTable> table = test::ResourceTableBuilder()
+            .setPackageId(u"android", 0x01)
+            .addSimple(u"@android:id/class", ResourceId(0x01020000))
+            .build();
 
-    bool addResource(const ResourceNameRef& name, ResourceId id) {
-        return mTable->addResource(name, id, {}, SourceLine{ "test.xml", 21 },
-                                   util::make_unique<Id>());
-    }
-
-    std::shared_ptr<ResourceTable> mTable;
-};
-
-TEST_F(JavaClassGeneratorTest, FailWhenEntryIsJavaKeyword) {
-    ASSERT_TRUE(addResource(ResourceName{ {}, ResourceType::kId, u"class" },
-                            ResourceId{ 0x01, 0x02, 0x0000 }));
-
-    JavaClassGenerator generator(mTable, {});
+    JavaClassGenerator generator(table.get(), {});
 
     std::stringstream out;
-    EXPECT_FALSE(generator.generate(mTable->getPackage(), out));
+    EXPECT_FALSE(generator.generate(u"android", &out));
 }
 
-TEST_F(JavaClassGeneratorTest, TransformInvalidJavaIdentifierCharacter) {
-    ASSERT_TRUE(addResource(ResourceName{ {}, ResourceType::kId, u"hey-man" },
-                            ResourceId{ 0x01, 0x02, 0x0000 }));
+TEST(JavaClassGeneratorTest, TransformInvalidJavaIdentifierCharacter) {
+    std::unique_ptr<ResourceTable> table = test::ResourceTableBuilder()
+            .setPackageId(u"android", 0x01)
+            .addSimple(u"@android:id/hey-man", ResourceId(0x01020000))
+            .addSimple(u"@android:attr/cool.attr", ResourceId(0x01010000))
+            .addValue(u"@android:styleable/hey.dude", ResourceId(0x01030000),
+                      test::StyleableBuilder()
+                              .addItem(u"@android:attr/cool.attr", ResourceId(0x01010000))
+                              .build())
+            .build();
 
-    ASSERT_TRUE(addResource(ResourceName{ {}, ResourceType::kAttr, u"cool.attr" },
-                            ResourceId{ 0x01, 0x01, 0x0000 }));
-
-    std::unique_ptr<Styleable> styleable = util::make_unique<Styleable>();
-    Reference ref(ResourceName{ u"android", ResourceType::kAttr, u"cool.attr"});
-    ref.id = ResourceId{ 0x01, 0x01, 0x0000 };
-    styleable->entries.emplace_back(ref);
-
-    ASSERT_TRUE(mTable->addResource(ResourceName{ {}, ResourceType::kStyleable, u"hey.dude" },
-                                    ResourceId{ 0x01, 0x03, 0x0000 }, {},
-                                    SourceLine{ "test.xml", 21 }, std::move(styleable)));
-
-    JavaClassGenerator generator(mTable, {});
+    JavaClassGenerator generator(table.get(), {});
 
     std::stringstream out;
-    EXPECT_TRUE(generator.generate(mTable->getPackage(), out));
+    EXPECT_TRUE(generator.generate(u"android", &out));
+
     std::string output = out.str();
 
     EXPECT_NE(std::string::npos,
@@ -85,14 +65,15 @@ TEST_F(JavaClassGeneratorTest, TransformInvalidJavaIdentifierCharacter) {
               output.find("public static final int hey_dude_cool_attr = 0;"));
 }
 
-
-TEST_F(JavaClassGeneratorTest, EmitPackageMangledSymbols) {
+/*
+ * TODO(adamlesinski): Re-enable this once we get merging working again.
+ * TEST(JavaClassGeneratorTest, EmitPackageMangledSymbols) {
     ASSERT_TRUE(addResource(ResourceName{ {}, ResourceType::kId, u"foo" },
                             ResourceId{ 0x01, 0x02, 0x0000 }));
     ResourceTable table;
     table.setPackage(u"com.lib");
     ASSERT_TRUE(table.addResource(ResourceName{ {}, ResourceType::kId, u"test" }, {},
-                                  SourceLine{ "lib.xml", 33 }, util::make_unique<Id>()));
+                                  Source{ "lib.xml", 33 }, util::make_unique<Id>()));
     ASSERT_TRUE(mTable->merge(std::move(table)));
 
     Linker linker(mTable,
@@ -113,34 +94,29 @@ TEST_F(JavaClassGeneratorTest, EmitPackageMangledSymbols) {
     output = out.str();
     EXPECT_NE(std::string::npos, output.find("int test ="));
     EXPECT_EQ(std::string::npos, output.find("int foo ="));
-}
+}*/
 
-TEST_F(JavaClassGeneratorTest, EmitOtherPackagesAttributesInStyleable) {
-    std::unique_ptr<Styleable> styleable = util::make_unique<Styleable>();
-    styleable->entries.emplace_back(ResourceNameRef{ mTable->getPackage(),
-                                                     ResourceType::kAttr,
-                                                     u"bar" });
-    styleable->entries.emplace_back(ResourceNameRef{ u"com.lib", ResourceType::kAttr, u"bar" });
-    ASSERT_TRUE(mTable->addResource(ResourceName{ {}, ResourceType::kStyleable, u"Foo" }, {}, {},
-                                    std::move(styleable)));
+TEST(JavaClassGeneratorTest, EmitOtherPackagesAttributesInStyleable) {
+    std::unique_ptr<ResourceTable> table = test::ResourceTableBuilder()
+                .setPackageId(u"android", 0x01)
+                .setPackageId(u"com.lib", 0x02)
+                .addSimple(u"@android:attr/bar", ResourceId(0x01010000))
+                .addSimple(u"@com.lib:attr/bar", ResourceId(0x02010000))
+                .addValue(u"@android:styleable/foo", ResourceId(0x01030000),
+                          test::StyleableBuilder()
+                                  .addItem(u"@android:attr/bar", ResourceId(0x01010000))
+                                  .addItem(u"@com.lib:attr/bar", ResourceId(0x02010000))
+                                  .build())
+                .build();
 
-    std::shared_ptr<IResolver> resolver = std::make_shared<MockResolver>(mTable,
-            std::map<ResourceName, ResourceId>({
-                    { ResourceName{ u"android", ResourceType::kAttr, u"bar" },
-                      ResourceId{ 0x01, 0x01, 0x0000 } },
-                    { ResourceName{ u"com.lib", ResourceType::kAttr, u"bar" },
-                      ResourceId{ 0x02, 0x01, 0x0000 } }}));
-
-    Linker linker(mTable, resolver, {});
-    ASSERT_TRUE(linker.linkAndValidate());
-
-    JavaClassGenerator generator(mTable, {});
+    JavaClassGenerator generator(table.get(), {});
 
     std::stringstream out;
-    EXPECT_TRUE(generator.generate(mTable->getPackage(), out));
+    EXPECT_TRUE(generator.generate(u"android", &out));
+
     std::string output = out.str();
-    EXPECT_NE(std::string::npos, output.find("int Foo_bar ="));
-    EXPECT_NE(std::string::npos, output.find("int Foo_com_lib_bar ="));
+    EXPECT_NE(std::string::npos, output.find("int foo_bar ="));
+    EXPECT_NE(std::string::npos, output.find("int foo_com_lib_bar ="));
 }
 
 } // namespace aapt

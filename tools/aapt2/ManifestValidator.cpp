@@ -16,9 +16,9 @@
 
 #include "Logger.h"
 #include "ManifestValidator.h"
-#include "Maybe.h"
+#include "util/Maybe.h"
 #include "Source.h"
-#include "Util.h"
+#include "util/Util.h"
 
 #include <androidfw/ResourceTypes.h>
 

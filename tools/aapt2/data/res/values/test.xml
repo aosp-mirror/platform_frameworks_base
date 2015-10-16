@@ -3,7 +3,7 @@
     <string name="hooha"><font bgcolor="#ffffff">Hey guys!</font> <xliff:g>My</xliff:g> name is <b>Adam</b>. How <b><i>are</i></b> you?</string>
     <public name="hooha" type="string" id="0x7f020001"/>
     <string name="wow">@android:string/ok</string>
-    <public name="image" type="drawable" id="0x7f060000" />
+    <public name="layout_width" type="attr" />
     <attr name="layout_width" format="boolean" />
     <attr name="flags">
         <flag name="complex" value="1" />

@@ -15,8 +15,9 @@
  */
 
 #include "ProguardRules.h"
-#include "Util.h"
 #include "XmlDom.h"
+
+#include "util/Util.h"
 
 #include <memory>
 #include <string>
@@ -61,11 +62,11 @@ public:
 
 protected:
     void addClass(size_t lineNumber, const std::u16string& className) {
-        mKeepSet->addClass(mSource.line(lineNumber), className);
+        mKeepSet->addClass(Source(mSource.path, lineNumber), className);
     }
 
     void addMethod(size_t lineNumber, const std::u16string& methodName) {
-        mKeepSet->addMethod(mSource.line(lineNumber), methodName);
+        mKeepSet->addMethod(Source(mSource.path, lineNumber), methodName);
     }
 
 private:
@@ -186,30 +187,36 @@ struct ManifestVisitor : public BaseVisitor {
     std::u16string mPackage;
 };
 
-bool collectProguardRulesForManifest(const Source& source, xml::Node* node, KeepSet* keepSet) {
+bool collectProguardRulesForManifest(const Source& source, XmlResource* res, KeepSet* keepSet) {
     ManifestVisitor visitor(source, keepSet);
-    node->accept(&visitor);
-    return true;
+    if (res->root) {
+        res->root->accept(&visitor);
+        return true;
+    }
+    return false;
 }
 
-bool collectProguardRules(ResourceType type, const Source& source, xml::Node* node,
-                          KeepSet* keepSet) {
-    switch (type) {
+bool collectProguardRules(const Source& source, XmlResource* res, KeepSet* keepSet) {
+    if (!res->root) {
+        return false;
+    }
+
+    switch (res->file.name.type) {
         case ResourceType::kLayout: {
             LayoutVisitor visitor(source, keepSet);
-            node->accept(&visitor);
+            res->root->accept(&visitor);
             break;
         }
 
         case ResourceType::kXml: {
             XmlResourceVisitor visitor(source, keepSet);
-            node->accept(&visitor);
+            res->root->accept(&visitor);
             break;
         }
 
         case ResourceType::kTransition: {
             TransitionVisitor visitor(source, keepSet);
-            node->accept(&visitor);
+            res->root->accept(&visitor);
             break;
         }
 
@@ -221,14 +228,14 @@ bool collectProguardRules(ResourceType type, const Source& source, xml::Node* no
 
 bool writeKeepSet(std::ostream* out, const KeepSet& keepSet) {
     for (const auto& entry : keepSet.mKeepSet) {
-        for (const SourceLine& source : entry.second) {
+        for (const Source& source : entry.second) {
             *out << "// Referenced at " << source << "\n";
         }
         *out << "-keep class " << entry.first << " { <init>(...); }\n" << std::endl;
     }
 
     for (const auto& entry : keepSet.mKeepMethodSet) {
-        for (const SourceLine& source : entry.second) {
+        for (const Source& source : entry.second) {
             *out << "// Referenced at " << source << "\n";
         }
         *out << "-keepclassmembers class * { *** " << entry.first << "(...); }\n" << std::endl;

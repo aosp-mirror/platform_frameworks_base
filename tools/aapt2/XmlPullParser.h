@@ -17,16 +17,24 @@
 #ifndef AAPT_XML_PULL_PARSER_H
 #define AAPT_XML_PULL_PARSER_H
 
+#include "util/Maybe.h"
+#include "Resource.h"
+#include "util/StringPiece.h"
+
+#include "process/IResourceTableConsumer.h"
+
 #include <algorithm>
+#include <expat.h>
+#include <istream>
 #include <ostream>
+#include <queue>
+#include <stack>
 #include <string>
 #include <vector>
 
-#include "StringPiece.h"
-
 namespace aapt {
 
-class XmlPullParser {
+class XmlPullParser : public IPackageDeclStack {
 public:
     enum class Event {
         kBadDocument,
@@ -41,43 +49,51 @@ public:
         kComment,
     };
 
-    static void skipCurrentElement(XmlPullParser* parser);
+    /**
+     * Skips to the next direct descendant node of the given startDepth,
+     * skipping namespace nodes.
+     *
+     * When nextChildNode returns true, you can expect Comments, Text, and StartElement events.
+     */
+    static bool nextChildNode(XmlPullParser* parser, size_t startDepth);
+    static bool skipCurrentElement(XmlPullParser* parser);
     static bool isGoodEvent(Event event);
 
-    virtual ~XmlPullParser() {}
+    XmlPullParser(std::istream& in);
+    virtual ~XmlPullParser();
 
     /**
      * Returns the current event that is being processed.
      */
-    virtual Event getEvent() const = 0;
+    Event getEvent() const;
 
-    virtual const std::string& getLastError() const = 0;
+    const std::string& getLastError() const;
 
     /**
      * Note, unlike XmlPullParser, the first call to next() will return
      * StartElement of the first element.
      */
-    virtual Event next() = 0;
+    Event next();
 
     //
     // These are available for all nodes.
     //
 
-    virtual const std::u16string& getComment() const = 0;
-    virtual size_t getLineNumber() const = 0;
-    virtual size_t getDepth() const = 0;
+    const std::u16string& getComment() const;
+    size_t getLineNumber() const;
+    size_t getDepth() const;
 
     /**
      * Returns the character data for a Text event.
      */
-    virtual const std::u16string& getText() const = 0;
+    const std::u16string& getText() const;
 
     //
     // Namespace prefix and URI are available for StartNamespace and EndNamespace.
     //
 
-    virtual const std::u16string& getNamespacePrefix() const = 0;
-    virtual const std::u16string& getNamespaceUri() const = 0;
+    const std::u16string& getNamespacePrefix() const;
+    const std::u16string& getNamespaceUri() const;
 
     /*
      * Uses the current stack of namespaces to resolve the package. Eg:
@@ -90,15 +106,17 @@ public:
      * If xmlns:app="http://schemas.android.com/apk/res-auto", then
      * 'package' will be set to 'defaultPackage'.
      */
-    virtual bool applyPackageAlias(std::u16string* package,
-                                   const std::u16string& defaultPackage) const = 0;
+    //
 
     //
     // These are available for StartElement and EndElement.
     //
 
-    virtual const std::u16string& getElementNamespace() const = 0;
-    virtual const std::u16string& getElementName() const = 0;
+    const std::u16string& getElementNamespace() const;
+    const std::u16string& getElementName() const;
+
+    Maybe<ResourceName> transformPackage(const ResourceName& name,
+                                         const StringPiece16& localPackage) const override;
 
     //
     // Remaining methods are for retrieving information about attributes
@@ -121,10 +139,38 @@ public:
 
     using const_iterator = std::vector<Attribute>::const_iterator;
 
-    virtual const_iterator beginAttributes() const = 0;
-    virtual const_iterator endAttributes() const = 0;
-    virtual size_t getAttributeCount() const = 0;
+    const_iterator beginAttributes() const;
+    const_iterator endAttributes() const;
+    size_t getAttributeCount() const;
     const_iterator findAttribute(StringPiece16 namespaceUri, StringPiece16 name) const;
+
+private:
+    static void XMLCALL startNamespaceHandler(void* userData, const char* prefix, const char* uri);
+    static void XMLCALL startElementHandler(void* userData, const char* name, const char** attrs);
+    static void XMLCALL characterDataHandler(void* userData, const char* s, int len);
+    static void XMLCALL endElementHandler(void* userData, const char* name);
+    static void XMLCALL endNamespaceHandler(void* userData, const char* prefix);
+    static void XMLCALL commentDataHandler(void* userData, const char* comment);
+
+    struct EventData {
+        Event event;
+        size_t lineNumber;
+        size_t depth;
+        std::u16string data1;
+        std::u16string data2;
+        std::u16string comment;
+        std::vector<Attribute> attributes;
+    };
+
+    std::istream& mIn;
+    XML_Parser mParser;
+    char mBuffer[16384];
+    std::queue<EventData> mEventQueue;
+    std::string mLastError;
+    const std::u16string mEmpty;
+    size_t mDepth;
+    std::stack<std::u16string> mNamespaceUris;
+    std::vector<std::pair<std::u16string, std::u16string>> mPackageAliases;
 };
 
 //
@@ -146,13 +192,35 @@ inline ::std::ostream& operator<<(::std::ostream& out, XmlPullParser::Event even
     return out;
 }
 
-inline void XmlPullParser::skipCurrentElement(XmlPullParser* parser) {
+inline bool XmlPullParser::nextChildNode(XmlPullParser* parser, size_t startDepth) {
+    Event event;
+
+    // First get back to the start depth.
+    while (isGoodEvent(event = parser->next()) && parser->getDepth() > startDepth + 1) {}
+
+    // Now look for the first good node.
+    while ((event != Event::kEndElement || parser->getDepth() > startDepth) && isGoodEvent(event)) {
+        switch (event) {
+        case Event::kText:
+        case Event::kComment:
+        case Event::kStartElement:
+            return true;
+        default:
+            break;
+        }
+        event = parser->next();
+    }
+    return false;
+}
+
+inline bool XmlPullParser::skipCurrentElement(XmlPullParser* parser) {
     int depth = 1;
     while (depth > 0) {
         switch (parser->next()) {
             case Event::kEndDocument:
+                return true;
             case Event::kBadDocument:
-                return;
+                return false;
             case Event::kStartElement:
                 depth++;
                 break;
@@ -163,6 +231,7 @@ inline void XmlPullParser::skipCurrentElement(XmlPullParser* parser) {
                 break;
         }
     }
+    return true;
 }
 
 inline bool XmlPullParser::isGoodEvent(XmlPullParser::Event event) {

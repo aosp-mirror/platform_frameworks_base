@@ -2,6 +2,6 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.android.app">
     <application
-        android:name=".Activity">
+        android:name=".ActivityMain">
     </application>
 </manifest>

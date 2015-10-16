@@ -15,7 +15,7 @@
  */
 
 #include "ConfigDescription.h"
-#include "StringPiece.h"
+#include "util/StringPiece.h"
 
 #include <gtest/gtest.h>
 #include <string>

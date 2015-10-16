@@ -18,6 +18,7 @@
 #define AAPT_RESOURCE_TABLE_H
 
 #include "ConfigDescription.h"
+#include "Diagnostics.h"
 #include "Resource.h"
 #include "ResourceValues.h"
 #include "Source.h"
@@ -35,7 +36,7 @@ namespace aapt {
  */
 struct Public {
     bool isPublic = false;
-    SourceLine source;
+    Source source;
     std::u16string comment;
 };
 
@@ -44,7 +45,7 @@ struct Public {
  */
 struct ResourceConfigValue {
     ConfigDescription config;
-    SourceLine source;
+    Source source;
     std::u16string comment;
     std::unique_ptr<Value> value;
 };
@@ -54,10 +55,6 @@ struct ResourceConfigValue {
  * varying values for each defined configuration.
  */
 struct ResourceEntry {
-    enum {
-        kUnsetEntryId = 0xffffffffu
-    };
-
     /**
      * The name of the resource. Immutable, as
      * this determines the order of this resource
@@ -68,7 +65,7 @@ struct ResourceEntry {
     /**
      * The entry ID for this resource.
      */
-    size_t entryId;
+    Maybe<uint16_t> id;
 
     /**
      * Whether this resource is public (and must maintain the same
@@ -81,8 +78,7 @@ struct ResourceEntry {
      */
     std::vector<ResourceConfigValue> values;
 
-    inline ResourceEntry(const StringPiece16& _name);
-    inline ResourceEntry(const ResourceEntry* rhs);
+    ResourceEntry(const StringPiece16& name) : name(name.toString()) { }
 };
 
 /**
@@ -90,10 +86,6 @@ struct ResourceEntry {
  * for this type.
  */
 struct ResourceTableType {
-    enum {
-        kUnsetTypeId = 0xffffffffu
-    };
-
     /**
      * The logical type of resource (string, drawable, layout, etc.).
      */
@@ -102,7 +94,7 @@ struct ResourceTableType {
     /**
      * The type ID for this resource.
      */
-    size_t typeId;
+    Maybe<uint8_t> id;
 
     /**
      * Whether this type is public (and must maintain the same
@@ -115,8 +107,30 @@ struct ResourceTableType {
      */
     std::vector<std::unique_ptr<ResourceEntry>> entries;
 
-    ResourceTableType(const ResourceType _type);
-    ResourceTableType(const ResourceTableType* rhs);
+    explicit ResourceTableType(const ResourceType type) : type(type) { }
+
+    ResourceEntry* findEntry(const StringPiece16& name);
+
+    ResourceEntry* findOrCreateEntry(const StringPiece16& name);
+};
+
+enum class PackageType {
+    System,
+    Vendor,
+    App,
+    Dynamic
+};
+
+struct ResourceTablePackage {
+    PackageType type = PackageType::App;
+    Maybe<uint8_t> id;
+    std::u16string name;
+
+    std::vector<std::unique_ptr<ResourceTableType>> types;
+
+    ResourceTableType* findType(ResourceType type);
+
+    ResourceTableType* findOrCreateType(const ResourceType type);
 };
 
 /**
@@ -125,23 +139,28 @@ struct ResourceTableType {
  */
 class ResourceTable {
 public:
-    using iterator = std::vector<std::unique_ptr<ResourceTableType>>::iterator;
-    using const_iterator = std::vector<std::unique_ptr<ResourceTableType>>::const_iterator;
+    ResourceTable() = default;
+    ResourceTable(const ResourceTable&) = delete;
+    ResourceTable& operator=(const ResourceTable&) = delete;
 
-    enum {
-        kUnsetPackageId = 0xffffffff
-    };
-
-    ResourceTable();
-
-    size_t getPackageId() const;
-    void setPackageId(size_t packageId);
-
-    const std::u16string& getPackage() const;
-    void setPackage(const StringPiece16& package);
+    /**
+     * When a collision of resources occurs, this method decides which value to keep.
+     * Returns -1 if the existing value should be chosen.
+     * Returns 0 if the collision can not be resolved (error).
+     * Returns 1 if the incoming value should be chosen.
+     */
+    static int resolveValueCollision(Value* existing, Value* incoming);
 
     bool addResource(const ResourceNameRef& name, const ConfigDescription& config,
-                     const SourceLine& source, std::unique_ptr<Value> value);
+                     const Source& source, std::unique_ptr<Value> value,
+                     IDiagnostics* diag);
+
+    bool addResource(const ResourceNameRef& name, const ResourceId resId,
+                     const ConfigDescription& config, const Source& source,
+                     std::unique_ptr<Value> value, IDiagnostics* diag);
+
+    bool addFileReference(const ResourceNameRef& name, const ConfigDescription& config,
+                          const Source& source, const StringPiece16& path, IDiagnostics* diag);
 
     /**
      * Same as addResource, but doesn't verify the validity of the name. This is used
@@ -149,128 +168,58 @@ public:
      * names.
      */
     bool addResourceAllowMangled(const ResourceNameRef& name, const ConfigDescription& config,
-                                 const SourceLine& source, std::unique_ptr<Value> value);
+                                 const Source& source, std::unique_ptr<Value> value,
+                                 IDiagnostics* diag);
 
-    bool addResource(const ResourceNameRef& name, const ResourceId resId,
-                     const ConfigDescription& config, const SourceLine& source,
-                     std::unique_ptr<Value> value);
-
-    bool markPublic(const ResourceNameRef& name, const ResourceId resId, const SourceLine& source);
+    bool markPublic(const ResourceNameRef& name, const ResourceId resId, const Source& source,
+                    IDiagnostics* diag);
     bool markPublicAllowMangled(const ResourceNameRef& name, const ResourceId resId,
-                                const SourceLine& source);
+                                const Source& source, IDiagnostics* diag);
+    struct SearchResult {
+	ResourceTablePackage* package;
+	ResourceTableType* type;
+	ResourceEntry* entry;
+    };
 
-    /*
-     * Merges the resources from `other` into this table, mangling the names of the resources
-     * if `other` has a different package name.
-     */
-    bool merge(ResourceTable&& other);
+    Maybe<SearchResult> findResource(const ResourceNameRef& name);
 
     /**
-     * Returns the string pool used by this ResourceTable.
-     * Values that reference strings should use this pool to create
-     * their strings.
+     * The string pool used by this resource table. Values that reference strings must use
+     * this pool to create their strings.
+     *
+     * NOTE: `stringPool` must come before `packages` so that it is destroyed after.
+     * When `string pool` references are destroyed (as they will be when `packages`
+     * is destroyed), they decrement a refCount, which would cause invalid
+     * memory access if the pool was already destroyed.
      */
-    StringPool& getValueStringPool();
-    const StringPool& getValueStringPool() const;
+    StringPool stringPool;
 
-    std::tuple<const ResourceTableType*, const ResourceEntry*>
-    findResource(const ResourceNameRef& name) const;
+    /**
+     * The list of packages in this table, sorted alphabetically by package name.
+     */
+    std::vector<std::unique_ptr<ResourceTablePackage>> packages;
 
-    iterator begin();
-    iterator end();
-    const_iterator begin() const;
-    const_iterator end() const;
+    /**
+     * Returns the package struct with the given name, or nullptr if such a package does not
+     * exist. The empty string is a valid package and typically is used to represent the
+     * 'current' package before it is known to the ResourceTable.
+     */
+    ResourceTablePackage* findPackage(const StringPiece16& name);
+
+    ResourceTablePackage* findPackageById(uint8_t id);
+
+    ResourceTablePackage* createPackage(const StringPiece16& name, uint8_t id);
 
 private:
-    std::unique_ptr<ResourceTableType>& findOrCreateType(ResourceType type);
-    std::unique_ptr<ResourceEntry>& findOrCreateEntry(std::unique_ptr<ResourceTableType>& type,
-                                                      const StringPiece16& name);
+    ResourceTablePackage* findOrCreatePackage(const StringPiece16& name);
 
     bool addResourceImpl(const ResourceNameRef& name, const ResourceId resId,
-                         const ConfigDescription& config, const SourceLine& source,
-                         std::unique_ptr<Value> value, const char16_t* validChars);
+                         const ConfigDescription& config, const Source& source,
+                         std::unique_ptr<Value> value, const char16_t* validChars,
+                         IDiagnostics* diag);
     bool markPublicImpl(const ResourceNameRef& name, const ResourceId resId,
-                        const SourceLine& source, const char16_t* validChars);
-
-    std::u16string mPackage;
-    size_t mPackageId;
-
-    // StringPool must come before mTypes so that it is destroyed after.
-    // When StringPool references are destroyed (as they will be when mTypes
-    // is destroyed), they decrement a refCount, which would cause invalid
-    // memory access if the pool was already destroyed.
-    StringPool mValuePool;
-
-    std::vector<std::unique_ptr<ResourceTableType>> mTypes;
+                        const Source& source, const char16_t* validChars, IDiagnostics* diag);
 };
-
-//
-// ResourceEntry implementation.
-//
-
-inline ResourceEntry::ResourceEntry(const StringPiece16& _name) :
-        name(_name.toString()), entryId(kUnsetEntryId) {
-}
-
-inline ResourceEntry::ResourceEntry(const ResourceEntry* rhs) :
-        name(rhs->name), entryId(rhs->entryId), publicStatus(rhs->publicStatus) {
-}
-
-//
-// ResourceTableType implementation.
-//
-
-inline ResourceTableType::ResourceTableType(const ResourceType _type) :
-        type(_type), typeId(kUnsetTypeId) {
-}
-
-inline ResourceTableType::ResourceTableType(const ResourceTableType* rhs) :
-        type(rhs->type), typeId(rhs->typeId), publicStatus(rhs->publicStatus) {
-}
-
-//
-// ResourceTable implementation.
-//
-
-inline StringPool& ResourceTable::getValueStringPool() {
-    return mValuePool;
-}
-
-inline const StringPool& ResourceTable::getValueStringPool() const {
-    return mValuePool;
-}
-
-inline ResourceTable::iterator ResourceTable::begin() {
-    return mTypes.begin();
-}
-
-inline ResourceTable::iterator ResourceTable::end() {
-    return mTypes.end();
-}
-
-inline ResourceTable::const_iterator ResourceTable::begin() const {
-    return mTypes.begin();
-}
-
-inline ResourceTable::const_iterator ResourceTable::end() const {
-    return mTypes.end();
-}
-
-inline const std::u16string& ResourceTable::getPackage() const {
-    return mPackage;
-}
-
-inline size_t ResourceTable::getPackageId() const {
-    return mPackageId;
-}
-
-inline void ResourceTable::setPackage(const StringPiece16& package) {
-    mPackage = package.toString();
-}
-
-inline void ResourceTable::setPackageId(size_t packageId) {
-    mPackageId = packageId;
-}
 
 } // namespace aapt
 
