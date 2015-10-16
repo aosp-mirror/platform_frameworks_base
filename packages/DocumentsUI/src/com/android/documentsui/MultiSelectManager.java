@@ -39,6 +39,7 @@ import android.util.SparseIntArray;
 import android.view.GestureDetector;
 import android.view.GestureDetector.OnDoubleTapListener;
 import android.view.GestureDetector.OnGestureListener;
+import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.View;
 
@@ -56,7 +57,7 @@ import java.util.List;
  * Additionally it can be configured to restrict selection to a single element, @see
  * #setSelectMode.
  */
-public final class MultiSelectManager {
+public final class MultiSelectManager implements View.OnKeyListener {
 
     /** Selection mode for multiple select. **/
     public static final int MODE_MULTIPLE = 0;
@@ -72,6 +73,8 @@ public final class MultiSelectManager {
     private Selection mIntermediateSelection;
 
     private Range mRanger;
+    private SelectionEnvironment mEnvironment;
+
     private final List<MultiSelectManager.Callback> mCallbacks = new ArrayList<>(1);
 
     private Adapter<?> mAdapter;
@@ -95,10 +98,10 @@ public final class MultiSelectManager {
                 new RuntimeItemFinder(recyclerView),
                 mode);
 
+        mEnvironment = new RuntimeSelectionEnvironment(recyclerView);
+
         if (mode == MODE_MULTIPLE) {
-            mBandManager = new BandController(
-                    mHelper,
-                    new RuntimeBandEnvironment(recyclerView));
+            mBandManager = new BandController(mHelper);
         }
 
         GestureDetector.SimpleOnGestureListener listener =
@@ -900,7 +903,7 @@ public final class MultiSelectManager {
      * Provides functionality for BandController. Exists primarily to tests that are
      * fully isolated from RecyclerView.
      */
-    interface BandEnvironment {
+    interface SelectionEnvironment {
         void showBand(Rect rect);
         void hideBand();
         void addOnScrollListener(RecyclerView.OnScrollListener listener);
@@ -913,29 +916,39 @@ public final class MultiSelectManager {
         Point createAbsolutePoint(Point relativePoint);
         Rect getAbsoluteRectForChildViewAt(int index);
         int getAdapterPositionAt(int index);
+        int getAdapterPositionForChildView(View view);
         int getColumnCount();
         int getRowCount();
         int getChildCount();
         int getVisibleChildCount();
+        void focusItem(int position);
     }
 
     /** RvFacade implementation backed by good ol' RecyclerView. */
-    private static final class RuntimeBandEnvironment implements BandEnvironment {
+    private static final class RuntimeSelectionEnvironment implements SelectionEnvironment {
 
         private final RecyclerView mView;
         private final Drawable mBand;
 
         private boolean mIsOverlayShown = false;
 
-        RuntimeBandEnvironment(RecyclerView rv) {
+        RuntimeSelectionEnvironment(RecyclerView rv) {
             mView = rv;
             mBand = mView.getContext().getTheme().getDrawable(R.drawable.band_select_overlay);
         }
 
         @Override
+        public int getAdapterPositionForChildView(View view) {
+            if (view.getParent() == mView) {
+                return mView.getChildAdapterPosition(view);
+            } else {
+                return RecyclerView.NO_POSITION;
+            }
+        }
+
+        @Override
         public int getAdapterPositionAt(int index) {
-            View child = mView.getChildAt(index);
-            return mView.getChildViewHolder(child).getAdapterPosition();
+            return getAdapterPositionForChildView(mView.getChildAt(index));
         }
 
         @Override
@@ -1031,6 +1044,28 @@ public final class MultiSelectManager {
         @Override
         public void hideBand() {
             mView.getOverlay().remove(mBand);
+        }
+
+        @Override
+        public void focusItem(final int pos) {
+            // If the item is already in view, focus it; otherwise, scroll to it and focus it.
+            RecyclerView.ViewHolder vh = mView.findViewHolderForAdapterPosition(pos);
+            if (vh != null) {
+                vh.itemView.requestFocus();
+            } else {
+                // Don't smooth scroll; that taxes the system unnecessarily and makes the scroll
+                // handling logic below more complicated.  See b/24865658.
+                mView.scrollToPosition(pos);
+                // Set a one-time listener to request focus when the scroll has completed.
+                mView.addOnScrollListener(
+                    new RecyclerView.OnScrollListener() {
+                        @Override
+                        public void onScrolled(RecyclerView view, int dx, int dy) {
+                            view.findViewHolderForAdapterPosition(pos).itemView.requestFocus();
+                            view.removeOnScrollListener(this);
+                        }
+                    });
+            }
         }
     }
 
@@ -1175,7 +1210,6 @@ public final class MultiSelectManager {
         private static final int NOT_SET = -1;
 
         private final ItemFinder mItemFinder;
-        private final BandEnvironment mEnvironment;
         private final Runnable mModelBuilder;
 
         @Nullable private Rect mBounds;
@@ -1188,15 +1222,14 @@ public final class MultiSelectManager {
         private long mScrollStartTime = NOT_SET;
         private final Runnable mViewScroller = new ViewScroller();
 
-        public BandController(ItemFinder finder, final BandEnvironment environment) {
+        public BandController(ItemFinder finder) {
             mItemFinder = finder;
-            mEnvironment = environment;
             mEnvironment.addOnScrollListener(this);
 
             mModelBuilder = new Runnable() {
                 @Override
                 public void run() {
-                    mModel = new GridModel(environment);
+                    mModel = new GridModel(mEnvironment);
                     mModel.addOnSelectionChangedListener(BandController.this);
                 }
             };
@@ -1459,7 +1492,7 @@ public final class MultiSelectManager {
         private static final int LOWER_LEFT = LOWER | LEFT;
         private static final int LOWER_RIGHT = LOWER | RIGHT;
 
-        private final BandEnvironment mHelper;
+        private final SelectionEnvironment mHelper;
         private final List<OnSelectionChangedListener> mOnSelectionChangedListeners =
                 new ArrayList<>();
 
@@ -1497,7 +1530,7 @@ public final class MultiSelectManager {
         // should expand from when Shift+click is used.
         private int mPositionNearestOrigin = NOT_SET;
 
-        GridModel(BandEnvironment helper) {
+        GridModel(SelectionEnvironment helper) {
             mHelper = helper;
             mHelper.addOnScrollListener(this);
         }
@@ -2041,4 +2074,72 @@ public final class MultiSelectManager {
             return true;
         }
     }
+
+    // TODO: Might have to move this to a more global level.  e.g. What should happen if the
+    // user taps a file and then presses shift-down?  Currently the RecyclerView never even sees
+    // the key event.  Perhaps install a global key handler to catch those events while in
+    // selection mode?
+    @Override
+    public boolean onKey(View view, int keyCode, KeyEvent event) {
+        // Listen for key-down events.  This allows the handler to respond appropriately when
+        // the user holds down the arrow keys for navigation.
+        if (event.getAction() != KeyEvent.ACTION_DOWN) {
+            return false;
+        }
+
+        int target = RecyclerView.NO_POSITION;
+        if (keyCode == KeyEvent.KEYCODE_MOVE_HOME) {
+            target = 0;
+        } else if (keyCode == KeyEvent.KEYCODE_MOVE_END) {
+            target = mAdapter.getItemCount() - 1;
+        } else {
+            // Find a navigation target based on the arrow key that the user pressed.  Ignore
+            // navigation targets that aren't items in the recycler view.
+            int searchDir = -1;
+            switch (keyCode) {
+                case KeyEvent.KEYCODE_DPAD_UP:
+                    searchDir = View.FOCUS_UP;
+                    break;
+                case KeyEvent.KEYCODE_DPAD_DOWN:
+                    searchDir = View.FOCUS_DOWN;
+                    break;
+                case KeyEvent.KEYCODE_DPAD_LEFT:
+                    searchDir = View.FOCUS_LEFT;
+                    break;
+                case KeyEvent.KEYCODE_DPAD_RIGHT:
+                    searchDir = View.FOCUS_RIGHT;
+                    break;
+            }
+            if (searchDir != -1) {
+                View targetView = view.focusSearch(searchDir);
+                target = mEnvironment.getAdapterPositionForChildView(targetView);
+            }
+        }
+
+        if (target == RecyclerView.NO_POSITION) {
+            // If there is no valid navigation target, don't handle the keypress.
+            return false;
+        }
+
+        // Focus the new file.
+        mEnvironment.focusItem(target);
+
+        if (event.isShiftPressed()) {
+            if (mSelection.isEmpty()) {
+                // If there is no selection, start a selection when the user presses shift-arrow.
+                toggleSelection(mEnvironment.getAdapterPositionForChildView(view));
+            } else {
+                // Deal with b/24802917 (selected items can't be focused) by adjusting the
+                // selection sorted the focused item isn't in the selection.
+                target -= Integer.signum(target - mRanger.mBegin);
+                mRanger.snapSelection(target);
+            }
+        } else if (!event.isShiftPressed() && !mSelection.isEmpty()) {
+            // If there is a selection, clear it if the user presses arrow with no shift.
+            clearSelection();
+        }
+
+        return true;
+    }
+
 }

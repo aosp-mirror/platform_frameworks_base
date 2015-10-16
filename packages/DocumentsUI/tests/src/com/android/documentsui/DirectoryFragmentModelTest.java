@@ -64,7 +64,7 @@ public class DirectoryFragmentModelTest extends AndroidTestCase {
         r.cursor = cursor;
 
         // Instantiate the model with a dummy view adapter and listener that (for now) do nothing.
-        model = new Model(mContext, null, new DummyAdapter());
+        model = new Model(mContext, new DummyAdapter());
         model.addUpdateListener(new DummyListener());
         model.update(r);
     }

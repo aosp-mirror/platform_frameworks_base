@@ -466,25 +466,6 @@ abstract class BaseActivity extends Activity {
         }
     }
 
-    @Override
-    public boolean onKeyUp(int keyCode, KeyEvent event) {
-        if (DEBUG) Log.d(mTag, "onKeyUp: keycode = " + keyCode);
-
-        // TODO: Support for RecentsCreateFragment.
-        DirectoryFragment fragment = DirectoryFragment.get(getFragmentManager());
-        if (fragment != null) {
-            switch (keyCode) {
-                case KeyEvent.KEYCODE_MOVE_HOME:
-                    fragment.focusFirstFile();
-                    return true;
-                case KeyEvent.KEYCODE_MOVE_END:
-                    fragment.focusLastFile();
-                    return true;
-            }
-        }
-        return super.onKeyUp(keyCode, event);
-    }
-
     public void onStackPicked(DocumentStack stack) {
         try {
             // Update the restored stack to ensure we have freshest data
