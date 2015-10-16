@@ -95,4 +95,13 @@ startpage=true
     Learn how to add an <em>Up</em> button to your app bar, so users
     can navigate back to the app's home screen.
   </dd>
+
+  <dt>
+    <b><a href="action-views.html">Action Views and Action Providers</a></b>
+  </dt>
+
+  <dd>
+    Learn how to use these widgets to provide advanced functionality in your
+    app bar.
+  </dd>
 </dl>
