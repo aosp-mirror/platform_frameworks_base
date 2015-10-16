@@ -334,7 +334,8 @@ public class SubscriptionInfo implements Parcelable {
 
     @Override
     public String toString() {
-        return "{id=" + mId + ", iccId=" + mIccId + " simSlotIndex=" + mSimSlotIndex
+        String iccIdToPrint = mIccId != null ? mIccId.substring(0, 9) + "XXXXXXXXXXX" : null;
+        return "{id=" + mId + ", iccId=" + iccIdToPrint + " simSlotIndex=" + mSimSlotIndex
                 + " displayName=" + mDisplayName + " carrierName=" + mCarrierName
                 + " nameSource=" + mNameSource + " iconTint=" + mIconTint
                 + " dataRoaming=" + mDataRoaming + " iconBitmap=" + mIconBitmap + " mcc " + mMcc
