@@ -437,6 +437,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
                     throw new IllegalStateException("Default Display does not exist");
                 }
                 mActivityDisplays.put(displayId, activityDisplay);
+                calculateDefaultMinimalSizeOfResizeableTasks(activityDisplay);
             }
 
             createStackOnDisplay(HOME_STACK_ID, Display.DEFAULT_DISPLAY, true);
