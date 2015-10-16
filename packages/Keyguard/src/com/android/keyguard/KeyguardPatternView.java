@@ -133,10 +133,6 @@ public class KeyguardPatternView extends LinearLayout implements KeyguardSecurit
         mLockPatternView.setSaveEnabled(false);
         mLockPatternView.setOnPatternListener(new UnlockPatternListener());
 
-        // stealth mode will be the same for the life of this screen
-        mLockPatternView.setInStealthMode(!mLockPatternUtils.isVisiblePatternEnabled(
-                KeyguardUpdateMonitor.getCurrentUser()));
-
         // vibrate mode will be the same for the life of this screen
         mLockPatternView.setTactileFeedbackEnabled(mLockPatternUtils.isTactileFeedbackEnabled());
 
@@ -176,6 +172,8 @@ public class KeyguardPatternView extends LinearLayout implements KeyguardSecurit
     @Override
     public void reset() {
         // reset lock pattern
+        mLockPatternView.setInStealthMode(!mLockPatternUtils.isVisiblePatternEnabled(
+                KeyguardUpdateMonitor.getCurrentUser()));
         mLockPatternView.enableInput();
         mLockPatternView.setEnabled(true);
         mLockPatternView.clearPattern();
