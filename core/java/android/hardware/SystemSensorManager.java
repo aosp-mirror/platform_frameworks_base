@@ -78,14 +78,14 @@ public class SystemSensorManager extends SensorManager {
                 sSensorModuleInitialized = true;
                 nativeClassInit();
             }
-        }
 
-        // initialize the sensor list
-        for (int index = 0;;++index) {
-            Sensor sensor = new Sensor();
-            if (!nativeGetSensorAtIndex(mNativeInstance, sensor, index)) break;
-            mFullSensorsList.add(sensor);
-            mHandleToSensor.append(sensor.getHandle(), sensor);
+            // initialize the sensor list
+            for (int index = 0;;++index) {
+                Sensor sensor = new Sensor();
+                if (!nativeGetSensorAtIndex(mNativeInstance, sensor, index)) break;
+                mFullSensorsList.add(sensor);
+                mHandleToSensor.append(sensor.getHandle(), sensor);
+            }
         }
     }
 
