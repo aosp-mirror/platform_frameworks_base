@@ -62,6 +62,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * A class that represents how a persistent notification is to be presented to
@@ -1362,6 +1363,95 @@ public class Notification implements Parcelable
     public Notification publicVersion;
 
     /**
+     * Structure to encapsulate a topic that is shown in Notification settings.
+     * It must include an id and label.
+     */
+    public static class Topic implements Parcelable {
+        private final String id;
+        private final CharSequence label;
+
+        public Topic(String id, CharSequence label) {
+            this.id = id;
+            this.label = safeCharSequence(label);
+        }
+
+        private Topic(Parcel in) {
+            if (in.readInt() != 0) {
+                id = in.readString();
+            } else {
+                id = null;
+            }
+            label = TextUtils.CHAR_SEQUENCE_CREATOR.createFromParcel(in);
+        }
+
+        public String getId() {
+            return id;
+        }
+
+        public CharSequence getLabel() {
+            return label;
+        }
+
+        @Override
+        public String toString() {
+            return new StringBuilder(Topic.class.getSimpleName()).append('[')
+                    .append("id=").append(id)
+                    .append(",label=").append(label)
+                    .append(']').toString();
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (!(o instanceof Topic)) return false;
+            if (o == this) return true;
+            final Topic other = (Topic) o;
+            return Objects.equals(other.id, id)
+                    && Objects.equals(other.label, label);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(id, label);
+        }
+
+        @Override
+        public Topic clone() {
+            return new Topic(id, label);
+        }
+
+        @Override
+        public int describeContents() {
+            return 0;
+        }
+
+        @Override
+        public void writeToParcel(Parcel out, int flags) {
+            if (id != null) {
+                out.writeInt(1);
+                out.writeString(id);
+            } else {
+                out.writeInt(0);
+            }
+            TextUtils.writeToParcel(label, out, flags);
+        }
+        public static final Parcelable.Creator<Topic> CREATOR =
+                new Parcelable.Creator<Topic>() {
+                    public Topic createFromParcel(Parcel in) {
+                        return new Topic(in);
+                    }
+                    public Topic[] newArray(int size) {
+                        return new Topic[size];
+                    }
+                };
+    }
+
+    private Topic[] topics;
+
+    public Topic[] getTopics() {
+        return topics;
+    }
+
+    /**
      * Constructs a Notification object with default values.
      * You might want to consider using {@link Builder} instead.
      */
@@ -1487,6 +1577,8 @@ public class Notification implements Parcelable
         }
 
         color = parcel.readInt();
+
+        topics = parcel.createTypedArray(Topic.CREATOR); // may be null
     }
 
     @Override
@@ -1586,6 +1678,13 @@ public class Notification implements Parcelable
         }
 
         that.color = this.color;
+
+        if (this.topics != null) {
+            that.topics = new Topic[this.topics.length];
+            for(int i=0; i<this.topics.length; i++) {
+                that.topics[i] = this.topics[i].clone();
+            }
+        }
 
         if (!heavy) {
             that.lightenPayload(); // will clean out extras
@@ -1759,6 +1858,8 @@ public class Notification implements Parcelable
         }
 
         parcel.writeInt(color);
+
+        parcel.writeTypedArray(topics, 0); // null ok
     }
 
     /**
@@ -1894,6 +1995,18 @@ public class Notification implements Parcelable
         if (this.publicVersion != null) {
             sb.append(" publicVersion=");
             sb.append(publicVersion.toString());
+        }
+        if (topics != null) {
+            sb.append("topics=[");
+            int N = topics.length;
+            if (N > 0) {
+                for (int i = 0; i < N-1; i++) {
+                    sb.append(topics[i]);
+                    sb.append(',');
+                }
+                sb.append(topics[N-1]);
+            }
+            sb.append("]");
         }
         sb.append(")");
         return sb.toString();
@@ -2105,6 +2218,7 @@ public class Notification implements Parcelable
         private final NotificationColorUtil mColorUtil;
         private ArrayList<String> mPeople;
         private int mColor = COLOR_DEFAULT;
+        private List<Topic> mTopics = new ArrayList<>();
 
         /**
          * The user that built the notification originally.
@@ -2874,6 +2988,19 @@ public class Notification implements Parcelable
             return this;
         }
 
+        /**
+         * Add a topic to this notification. Topics are typically displayed in Notification
+         * settings.
+         * <p>
+         * Every topic must have an id and a textual label.
+         *
+         * @param topic The topic to add.
+         */
+        public Builder addTopic(Topic topic) {
+            mTopics.add(topic);
+            return this;
+        }
+
         private Drawable getProfileBadgeDrawable() {
             // Note: This assumes that the current user can read the profile badge of the
             // originating user.
@@ -3364,6 +3491,10 @@ public class Notification implements Parcelable
                 n.publicVersion = new Notification();
                 mPublicVersion.cloneInto(n.publicVersion, true);
             }
+            if (mTopics.size() > 0) {
+                n.topics = new Topic[mTopics.size()];
+                mTopics.toArray(n.topics);
+            }
             // Note: If you're adding new fields, also update restoreFromNotitification().
             return n;
         }
@@ -3604,6 +3735,10 @@ public class Notification implements Parcelable
             mVisibility = n.visibility;
 
             mPublicVersion = n.publicVersion;
+
+            if (n.topics != null) {
+                Collections.addAll(mTopics, n.topics);
+            }
 
             // Extras.
             Bundle extras = n.extras;
