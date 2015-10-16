@@ -32,7 +32,7 @@ namespace android {
 namespace uirenderer {
 
 class DeferredLayerUpdater;
-class DisplayListData;
+class DisplayList;
 class RenderNode;
 
 namespace renderthread {
@@ -48,7 +48,7 @@ enum SyncResult {
 
 /*
  * This is a special Super Task. It is re-used multiple times by RenderProxy,
- * and contains state (such as layer updaters & new DisplayListDatas) that is
+ * and contains state (such as layer updaters & new DisplayLists) that is
  * tracked across many frames not just a single frame.
  * It is the sync-state task, and will kick off the post-sync draw
  */

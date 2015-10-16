@@ -15385,11 +15385,11 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
 
     private void resetDisplayList() {
         if (mRenderNode.isValid()) {
-            mRenderNode.destroyDisplayListData();
+            mRenderNode.discardDisplayList();
         }
 
         if (mBackgroundRenderNode != null && mBackgroundRenderNode.isValid()) {
-            mBackgroundRenderNode.destroyDisplayListData();
+            mBackgroundRenderNode.discardDisplayList();
         }
     }
 

@@ -32,16 +32,16 @@
 namespace android {
 namespace uirenderer {
 
-DisplayListData::DisplayListData()
+DisplayList::DisplayList()
         : projectionReceiveIndex(-1)
         , hasDrawOps(false) {
 }
 
-DisplayListData::~DisplayListData() {
+DisplayList::~DisplayList() {
     cleanupResources();
 }
 
-void DisplayListData::cleanupResources() {
+void DisplayList::cleanupResources() {
     if (CC_UNLIKELY(patchResources.size())) {
         ResourceCache& resourceCache = ResourceCache::getInstance();
         resourceCache.lock();
@@ -67,7 +67,7 @@ void DisplayListData::cleanupResources() {
     regions.clear();
 }
 
-size_t DisplayListData::addChild(NodeOpType* op) {
+size_t DisplayList::addChild(NodeOpType* op) {
     mReferenceHolders.push_back(op->renderNode);
     size_t index = mChildren.size();
     mChildren.push_back(op);

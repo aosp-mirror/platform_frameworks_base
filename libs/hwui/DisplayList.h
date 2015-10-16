@@ -112,16 +112,16 @@ struct ReplayStateStruct : public PlaybackStateStruct {
 /**
  * Data structure that holds the list of commands used in display list stream
  */
-class DisplayListData {
+class DisplayList {
     friend class DisplayListCanvas;
     friend class RecordingCanvas;
 public:
     struct Chunk {
-        // range of included ops in DLD::displayListOps
+        // range of included ops in DisplayList::ops()
         size_t beginOpIndex;
         size_t endOpIndex;
 
-        // range of included children in DLD::mChildren
+        // range of included children in DisplayList::children()
         size_t beginChildIndex;
         size_t endChildIndex;
 
@@ -129,8 +129,8 @@ public:
         bool reorderChildren;
     };
 
-    DisplayListData();
-    ~DisplayListData();
+    DisplayList();
+    ~DisplayList();
 
     // pointers to all ops within display list, pointing into allocator data
     std::vector<DisplayListOp*> displayListOps;

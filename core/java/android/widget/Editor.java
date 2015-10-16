@@ -392,7 +392,7 @@ public class Editor {
 
         mTextView.removeCallbacks(mShowFloatingToolbar);
 
-        destroyDisplayListsData();
+        discardTextDisplayLists();
 
         if (mSpellChecker != null) {
             mSpellChecker.closeSession();
@@ -408,13 +408,13 @@ public class Editor {
         mTemporaryDetach = false;
     }
 
-    private void destroyDisplayListsData() {
+    private void discardTextDisplayLists() {
         if (mTextRenderNodes != null) {
             for (int i = 0; i < mTextRenderNodes.length; i++) {
                 RenderNode displayList = mTextRenderNodes[i] != null
                         ? mTextRenderNodes[i].renderNode : null;
                 if (displayList != null && displayList.isValid()) {
-                    displayList.destroyDisplayListData();
+                    displayList.discardDisplayList();
                 }
             }
         }

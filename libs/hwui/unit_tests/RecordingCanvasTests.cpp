@@ -23,9 +23,9 @@
 namespace android {
 namespace uirenderer {
 
-static void playbackOps(const std::vector<DisplayListData::Chunk>& chunks,
+static void playbackOps(const std::vector<DisplayList::Chunk>& chunks,
         const std::vector<RecordedOp*>& ops, std::function<void(const RecordedOp&)> opReciever) {
-    for (const DisplayListData::Chunk& chunk : chunks) {
+    for (const DisplayList::Chunk& chunk : chunks) {
         for (size_t opIndex = chunk.beginOpIndex; opIndex < chunk.endOpIndex; opIndex++) {
             opReciever(*ops[opIndex]);
         }
@@ -33,7 +33,7 @@ static void playbackOps(const std::vector<DisplayListData::Chunk>& chunks,
 }
 
 TEST(RecordingCanvas, emptyPlayback) {
-    auto dld = TestUtils::createDLD<RecordingCanvas>(100, 200, [](RecordingCanvas& canvas) {
+    auto dld = TestUtils::createDisplayList<RecordingCanvas>(100, 200, [](RecordingCanvas& canvas) {
         canvas.save(SkCanvas::kMatrix_SaveFlag | SkCanvas::kClip_SaveFlag);
         canvas.restore();
     });
@@ -41,7 +41,7 @@ TEST(RecordingCanvas, emptyPlayback) {
 }
 
 TEST(RecordingCanvas, testSimpleRectRecord) {
-    auto dld = TestUtils::createDLD<RecordingCanvas>(100, 200, [](RecordingCanvas& canvas) {
+    auto dld = TestUtils::createDisplayList<RecordingCanvas>(100, 200, [](RecordingCanvas& canvas) {
         canvas.drawRect(10, 20, 90, 180, SkPaint());
     });
 
@@ -56,7 +56,7 @@ TEST(RecordingCanvas, testSimpleRectRecord) {
 }
 
 TEST(RecordingCanvas, backgroundAndImage) {
-    auto dld = TestUtils::createDLD<RecordingCanvas>(100, 200, [](RecordingCanvas& canvas) {
+    auto dld = TestUtils::createDisplayList<RecordingCanvas>(100, 200, [](RecordingCanvas& canvas) {
         SkBitmap bitmap;
         bitmap.setInfo(SkImageInfo::MakeUnknown(25, 25));
         SkPaint paint;

@@ -38,7 +38,7 @@ namespace uirenderer {
 
 class DeferredLayerUpdater;
 class RenderNode;
-class DisplayListData;
+class DisplayList;
 class Layer;
 class Rect;
 

@@ -33,24 +33,24 @@ typedef RecordingCanvas TestCanvas;
 typedef DisplayListCanvas TestCanvas;
 #endif
 
-BENCHMARK_NO_ARG(BM_DisplayListData_alloc);
-void BM_DisplayListData_alloc::Run(int iters) {
+BENCHMARK_NO_ARG(BM_DisplayList_alloc);
+void BM_DisplayList_alloc::Run(int iters) {
     StartBenchmarkTiming();
     for (int i = 0; i < iters; ++i) {
-        auto data = new DisplayListData();
-        MicroBench::DoNotOptimize(data);
-        delete data;
+        auto displayList = new DisplayList();
+        MicroBench::DoNotOptimize(displayList);
+        delete displayList;
     }
     StopBenchmarkTiming();
 }
 
-BENCHMARK_NO_ARG(BM_DisplayListData_alloc_theoretical);
-void BM_DisplayListData_alloc_theoretical::Run(int iters) {
+BENCHMARK_NO_ARG(BM_DisplayList_alloc_theoretical);
+void BM_DisplayList_alloc_theoretical::Run(int iters) {
     StartBenchmarkTiming();
     for (int i = 0; i < iters; ++i) {
-        auto data = new char[sizeof(DisplayListData)];
-        MicroBench::DoNotOptimize(data);
-        delete[] data;
+        auto displayList = new char[sizeof(DisplayList)];
+        MicroBench::DoNotOptimize(displayList);
+        delete[] displayList;
     }
     StopBenchmarkTiming();
 }
