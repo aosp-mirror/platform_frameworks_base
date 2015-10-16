@@ -49,7 +49,7 @@ included in the platform.</p>
 If you have not used the Support Library before, set up your project to use the <strong>v4</strong>
 library by following the <a href="{@docRoot}tools/support-library/setup.html">Support Library
 Setup</a> document. However, you can also include the <a href=
-"{@docRoot}guide/topics/ui/actionbar.html">action bar</a> in your activities by instead using the
+"{@docRoot}training/appbar/index.html">app bar</a> in your activities by instead using the
 <strong>v7 appcompat</strong> library, which is compatible with Android 2.1 (API level 7)
 and also includes the {@link android.support.v4.app.Fragment} APIs.</p>
 
@@ -152,9 +152,9 @@ public class MainActivity extends FragmentActivity {
 
 <p>If you're using the <a href="{@docRoot}tools/support-library/features.html#v7-appcompat">v7
 appcompat library</a>, your activity should instead extend {@link
-android.support.v7.app.ActionBarActivity}, which is a subclass of {@link
-android.support.v4.app.FragmentActivity} (for more information,
-read <a href="{@docRoot}training/basics/actionbar/index.html">Adding the Action Bar</a>).</p>
+android.support.v7.app.AppCompatActivity}, which is a subclass of {@link
+android.support.v4.app.FragmentActivity}. For more information,
+read <a href="{@docRoot}training/appbar/index.html">Adding the App Bar</a>).</p>
 
 
 <p class="note"><strong>Note:</strong> When you add a fragment to an activity layout by defining
