@@ -24,6 +24,7 @@ import android.os.Handler;
 import android.os.PersistableBundle;
 import android.os.SystemClock;
 import android.os.UserHandle;
+import android.text.format.DateUtils;
 import android.util.AtomicFile;
 import android.util.ArraySet;
 import android.util.Pair;
@@ -552,9 +553,10 @@ public class JobStore {
                 return null;
             }
 
-            Pair<Long, Long> runtimes;
+            // Tuple of (earliest runtime, latest runtime) in elapsed realtime after disk load.
+            Pair<Long, Long> elapsedRuntimes;
             try {
-                runtimes = buildExecutionTimesFromXml(parser);
+                elapsedRuntimes = buildExecutionTimesFromXml(parser);
             } catch (NumberFormatException e) {
                 if (DEBUG) {
                     Slog.d(TAG, "Error parsing execution time parameters, skipping.");
@@ -562,22 +564,45 @@ public class JobStore {
                 return null;
             }
 
+            final long elapsedNow = SystemClock.elapsedRealtime();
             if (XML_TAG_PERIODIC.equals(parser.getName())) {
                 try {
                     String val = parser.getAttributeValue(null, "period");
-                    jobBuilder.setPeriodic(Long.valueOf(val));
+                    final long periodMillis = Long.valueOf(val);
+                    jobBuilder.setPeriodic(periodMillis);
+                    // As a sanity check, cap the recreated run time to be no later than 2 periods
+                    // from now. This is the latest the periodic could be pushed out. This could
+                    // happen if the periodic ran early (at the start of its period), and then the
+                    // device rebooted.
+                    if (elapsedRuntimes.second > elapsedNow + 2 * periodMillis) {
+                        final long clampedEarlyRuntimeElapsed = elapsedNow + periodMillis;
+                        final long clampedLateRuntimeElapsed = elapsedNow + 2 * periodMillis;
+                        Slog.w(TAG,
+                                String.format("Periodic job for uid='%d' persisted run-time is" +
+                                                " too big [%s, %s]. Clamping to [%s,%s]",
+                                        uid,
+                                        DateUtils.formatElapsedTime(elapsedRuntimes.first / 1000),
+                                        DateUtils.formatElapsedTime(elapsedRuntimes.second / 1000),
+                                        DateUtils.formatElapsedTime(
+                                                clampedEarlyRuntimeElapsed / 1000),
+                                        DateUtils.formatElapsedTime(
+                                                clampedLateRuntimeElapsed / 1000))
+                        );
+                        elapsedRuntimes =
+                                Pair.create(clampedEarlyRuntimeElapsed, clampedLateRuntimeElapsed);
+                    }
                 } catch (NumberFormatException e) {
                     Slog.d(TAG, "Error reading periodic execution criteria, skipping.");
                     return null;
                 }
             } else if (XML_TAG_ONEOFF.equals(parser.getName())) {
                 try {
-                    if (runtimes.first != JobStatus.NO_EARLIEST_RUNTIME) {
-                        jobBuilder.setMinimumLatency(runtimes.first - SystemClock.elapsedRealtime());
+                    if (elapsedRuntimes.first != JobStatus.NO_EARLIEST_RUNTIME) {
+                        jobBuilder.setMinimumLatency(elapsedRuntimes.first - elapsedNow);
                     }
-                    if (runtimes.second != JobStatus.NO_LATEST_RUNTIME) {
+                    if (elapsedRuntimes.second != JobStatus.NO_LATEST_RUNTIME) {
                         jobBuilder.setOverrideDeadline(
-                                runtimes.second - SystemClock.elapsedRealtime());
+                                elapsedRuntimes.second - elapsedNow);
                     }
                 } catch (NumberFormatException e) {
                     Slog.d(TAG, "Error reading job execution criteria, skipping.");
@@ -598,7 +623,8 @@ public class JobStore {
             do {
                 eventType = parser.next();
             } while (eventType == XmlPullParser.TEXT);
-            if (!(eventType == XmlPullParser.START_TAG && XML_TAG_EXTRAS.equals(parser.getName()))) {
+            if (!(eventType == XmlPullParser.START_TAG
+                    && XML_TAG_EXTRAS.equals(parser.getName()))) {
                 if (DEBUG) {
                     Slog.d(TAG, "Error reading extras, skipping.");
                 }
@@ -609,7 +635,8 @@ public class JobStore {
             jobBuilder.setExtras(extras);
             parser.nextTag(); // Consume </extras>
 
-            return new JobStatus(jobBuilder.build(), uid, runtimes.first, runtimes.second);
+            return new JobStatus(
+                    jobBuilder.build(), uid, elapsedRuntimes.first, elapsedRuntimes.second);
         }
 
         private JobInfo.Builder buildBuilderFromXml(XmlPullParser parser) throws NumberFormatException {

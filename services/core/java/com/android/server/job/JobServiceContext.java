@@ -62,7 +62,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
  *
  */
 public class JobServiceContext extends IJobCallback.Stub implements ServiceConnection {
-    private static final boolean DEBUG = false;
+    private static final boolean DEBUG = JobSchedulerService.DEBUG;
     private static final String TAG = "JobServiceContext";
     /** Define the maximum # of jobs allowed to run on a service at once. */
     private static final int defaultMaxActiveJobsPerService =
