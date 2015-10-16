@@ -29,8 +29,8 @@ page.image=auto/images/assets/icons/media_app_playback.png
     <ul>
       <li><a href="{@docRoot}samples/MediaBrowserService/index.html">
         MediaBrowserService</a></li>
-      <li><a href="//github.com/googlesamples/android-UniversalMusicPlayer">Universal Media
-      Player</a></li>
+      <li><a href="//github.com/googlesamples/android-UniversalMusicPlayer"
+        class="external-link">Universal Media Player</a></li>
     </ul>
 
     <h2>See Also</h2>
@@ -290,13 +290,20 @@ Auto Audio Apps</a> guidelines.</p>
 
 <p>Your implementation of {@link android.service.media.MediaBrowserService#onGetRoot
 onGetRoot()} returns information about the root node of the menu
-hierarchy. This root node is the parent of the top items your browse hierarchy.
+hierarchy. This root node is the parent of the top items of your browse hierarchy.
 The method is passed information about the calling client. You can use this
 information to decide if the client should have access to your content at all.
 For example, if you want to limit your app's content to a list of approved
-clients, you can compare the passed {@code clientPackageName} to your whitelist.
-If the caller isn't an approved package, you can return null to deny access to
-your content.</p>
+clients, you can compare the passed {@code clientPackageName} to your whitelist
+and verify the certificate used to sign the caller's APK.
+If the caller can't be verified to be an approved package, return null to deny access to
+your content. For an example of an app that validates that the caller is an
+approved app, see the
+<a href="https://github.com/googlesamples/android-UniversalMusicPlayer/blob/master/mobile/src/main/java/com/example/android/uamp/PackageValidator.java"
+class="external-link"><code>PackageValidator</code></a> class in the
+<a href="https://github.com/googlesamples/android-UniversalMusicPlayer"
+class="external-link">Universal Android Music Player</a> sample app.
+</p>
 
 <p>A typical implementation of {@link
 android.service.media.MediaBrowserService#onGetRoot onGetRoot()} might
@@ -307,28 +314,23 @@ look like this:</p>
 public BrowserRoot onGetRoot(String clientPackageName, int clientUid,
     Bundle rootHints) {
 
-    // To ensure you are not allowing any arbitrary app to browse your app's
-    // contents, you need to check the origin:
-    if (!PackageValidator.isCallerAllowed(this, clientPackageName, clientUid)) {
+    // Verify that the specified package is allowed to access your
+    // content! You'll need to write your own logic to do this.
+    if (!isValid(clientPackageName, clientUid)) {
         // If the request comes from an untrusted package, return null.
         // No further calls will be made to other media browsing methods.
-        LogHelper.w(TAG, "OnGetRoot: IGNORING request from untrusted package "
-                + clientPackageName);
+
         return null;
     }
-    if (ANDROID_AUTO_PACKAGE_NAME.equals(clientPackageName)) {
-        // Optional: if your app needs to adapt ads, music library or anything
-        // else that needs to run differently when connected to the car, this
-        // is where you should handle it.
-    }
-    return new BrowserRoot(MEDIA_ID_ROOT, null);
+
+    return new BrowserRoot(MY_MEDIA_ROOT_ID, null);
 }
 </pre>
 
 <p>
   The Auto device client builds the top-level menu by calling {@link
   android.service.media.MediaBrowserService#onLoadChildren onLoadChildren()}
-  with the root node object and getting it's children. The client builds
+  with the root node object and getting its children. The client builds
   submenus by calling the same method with other child nodes. The following
   example code shows a simple implementation of {@link
   android.service.media.MediaBrowserService#onLoadChildren onLoadChildren()} method:
@@ -341,21 +343,30 @@ public void onLoadChildren(final String parentMediaId,
 
     // Assume for example that the music catalog is already loaded/cached.
 
-    List&lt;MediaBrowser.MediaItem&gt; mediaItems = new ArrayList&lt;&gt;();
+    List&lt;MediaItem&gt; mediaItems = new ArrayList&lt;&gt;();
 
     // Check if this is the root menu:
-    if (MEDIA_BROWSER_ROOT.equals(parentMediaId)) {
+    if (MY_MEDIA_ROOT_ID.equals(parentMediaId)) {
 
         // build the MediaItem objects for the top level,
-        // and put them in the &lt;result&gt; list
+        // and put them in the mediaItems list
     } else {
 
         // examine the passed parentMediaId to see which submenu we're at,
-        // and put the children of that menu in the &lt;result&gt; list
+        // and put the children of that menu in the mediaItems list
     }
+    result.sendResult(mediaItems);
 }
 </pre>
 
+<p>
+  For examples of how to implement {@link
+  android.service.media.MediaBrowserService#onLoadChildren onLoadChildren()},
+  see the <a href="{@docRoot}samples/MediaBrowserService/index.html">
+  MediaBrowserService</a> and
+  <a href="https://github.com/googlesamples/android-UniversalMusicPlayer"
+  class="external-link">Universal Android Music Player</a> sample apps.
+</p>
 
 <h2 id="implement_callback">Enable Playback Control</h2>
 
