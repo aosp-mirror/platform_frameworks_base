@@ -627,7 +627,9 @@ public class StaticLayout extends Layout {
 
                 chooseHt = getParagraphSpans(spanned, paraStart, paraEnd, LineHeightSpan.class);
 
-                if (chooseHt.length != 0) {
+                if (chooseHt.length == 0) {
+                    chooseHt = null; // So that out() would not assume it has any contents
+                } else {
                     if (chooseHtv == null ||
                         chooseHtv.length < chooseHt.length) {
                         chooseHtv = ArrayUtils.newUnpaddedIntArray(chooseHt.length);
@@ -810,7 +812,7 @@ public class StaticLayout extends Layout {
 
                     v = out(source, here, endPos,
                             fmAscent, fmDescent, fmTop, fmBottom,
-                            v, spacingmult, spacingadd, chooseHt,chooseHtv, fm, flags[breakIndex],
+                            v, spacingmult, spacingadd, chooseHt, chooseHtv, fm, flags[breakIndex],
                             needMultiply, chdirs, dir, easy, bufEnd, includepad, trackpad,
                             chs, widths, paraStart, ellipsize, ellipsizedWidth,
                             lineWidths[breakIndex], paint, moreChars);
