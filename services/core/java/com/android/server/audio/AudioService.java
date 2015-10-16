@@ -109,6 +109,7 @@ import android.view.accessibility.AccessibilityManager;
 import com.android.internal.util.XmlUtils;
 import com.android.server.EventLogTags;
 import com.android.server.LocalServices;
+import com.android.server.SystemService;
 import com.android.server.pm.UserManagerService;
 
 import org.xmlpull.v1.XmlPullParserException;
@@ -562,6 +563,27 @@ public class AudioService extends IAudioService.Stub {
     // Defines the format for the connection "address" for ALSA devices
     public static String makeAlsaAddressString(int card, int device) {
         return "card=" + card + ";device=" + device + ";";
+    }
+
+    public static final class Lifecycle extends SystemService {
+        private AudioService mService;
+
+        public Lifecycle(Context context) {
+            super(context);
+            mService = new AudioService(context);
+        }
+
+        @Override
+        public void onStart() {
+            publishBinderService(Context.AUDIO_SERVICE, mService);
+        }
+
+        @Override
+        public void onBootPhase(int phase) {
+            if (phase == SystemService.PHASE_ACTIVITY_MANAGER_READY) {
+                mService.systemReady();
+            }
+        }
     }
 
     ///////////////////////////////////////////////////////////////////////////
