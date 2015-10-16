@@ -2886,6 +2886,8 @@ public class WindowManagerService extends IWindowManager.Stub
                     // isn't affected by the window insets.
                     contentInsets.set(win.mContentInsets);
                     appFrame.set(win.mFrame);
+                } else {
+                    appFrame.set(containingFrame);
                 }
             }
 
