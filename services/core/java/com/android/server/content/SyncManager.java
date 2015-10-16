@@ -100,6 +100,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Random;
 import java.util.Set;
 
@@ -3194,7 +3195,7 @@ public class SyncManager {
             if (!smaller.containsKey(key)) {
                 return false;
             }
-            if (!bigger.get(key).equals(smaller.get(key))) {
+            if (!Objects.equals(bigger.get(key), smaller.get(key))) {
                 return false;
             }
         }
@@ -3202,7 +3203,6 @@ public class SyncManager {
     }
 
     /**
-     * TODO: Get rid of this when we separate sync settings extras from dev specified extras.
      * @return true if the provided key is used by the SyncManager in scheduling the sync.
      */
     private static boolean isSyncSetting(String key) {
