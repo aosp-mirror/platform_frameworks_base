@@ -134,6 +134,47 @@ private:
     size_t mDedicatedPageCount;
 };
 
+template <class T>
+class LinearStdAllocator {
+public:
+    typedef T value_type; // needed to implement std::allocator
+    typedef T* pointer; // needed to implement std::allocator
+
+    LinearStdAllocator(LinearAllocator& allocator)
+            : linearAllocator(allocator) {}
+    LinearStdAllocator(const LinearStdAllocator& other)
+            : linearAllocator(other.linearAllocator) {}
+    ~LinearStdAllocator() {}
+
+    // rebind marks that allocators can be rebound to different types
+    template <class U>
+    struct rebind {
+        typedef LinearStdAllocator<U> other;
+    };
+    // enable allocators to be constructed from other templated types
+    template <class U>
+    LinearStdAllocator(const LinearStdAllocator<U>& other)
+            : linearAllocator(other.linearAllocator) {}
+
+    T* allocate(size_t num, const void* = 0) {
+        return (T*)(linearAllocator.alloc(num * sizeof(T)));
+    }
+
+    void deallocate(pointer p, size_t num) {
+        // attempt to rewind, but no guarantees
+        linearAllocator.rewindIfLastAlloc(p, num * sizeof(T));
+    }
+
+    // public so template copy constructor can access
+    LinearAllocator& linearAllocator;
+};
+
+// return that all specializations of LinearStdAllocator are interchangeable
+template <class T1, class T2>
+bool operator== (const LinearStdAllocator<T1>&, const LinearStdAllocator<T2>&) { return true; }
+template <class T1, class T2>
+bool operator!= (const LinearStdAllocator<T1>&, const LinearStdAllocator<T2>&) { return false; }
+
 }; // namespace uirenderer
 }; // namespace android
 

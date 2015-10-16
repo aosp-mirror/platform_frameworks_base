@@ -41,7 +41,7 @@ public:
     virtual ~RecordingCanvas();
 
     void reset(int width, int height);
-    DisplayListData* finishRecording();
+    __attribute__((warn_unused_result)) DisplayListData* finishRecording();
 
 // ----------------------------------------------------------------------------
 // MISC HWUI OPERATIONS - TODO: CATEGORIZE

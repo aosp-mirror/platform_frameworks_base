@@ -52,8 +52,8 @@
 #define ALIGN_PTR(p) ((void*)(ALIGN((size_t)p)))
 
 #if LOG_NDEBUG
-#define ADD_ALLOCATION(size)
-#define RM_ALLOCATION(size)
+#define ADD_ALLOCATION()
+#define RM_ALLOCATION()
 #else
 #include <utils/Thread.h>
 #include <utils/Timers.h>
@@ -65,18 +65,18 @@ static void _logUsageLocked() {
     nsecs_t now = systemTime(SYSTEM_TIME_MONOTONIC);
     if (now > s_nextLog) {
         s_nextLog = now + milliseconds_to_nanoseconds(10);
-        ALOGV("Total memory usage: %zu kb", s_totalAllocations / 1024);
+        ALOGV("Total pages allocated: %zu", s_totalAllocations);
     }
 }
 
-static void _addAllocation(size_t size) {
+static void _addAllocation(int count) {
     android::AutoMutex lock(s_mutex);
-    s_totalAllocations += size;
+    s_totalAllocations += count;
     _logUsageLocked();
 }
 
-#define ADD_ALLOCATION(size) _addAllocation(size);
-#define RM_ALLOCATION(size) _addAllocation(-size);
+#define ADD_ALLOCATION(size) _addAllocation(1);
+#define RM_ALLOCATION(size) _addAllocation(-1);
 #endif
 
 #define min(x,y) (((x) < (y)) ? (x) : (y))
@@ -134,7 +134,7 @@ LinearAllocator::~LinearAllocator(void) {
         Page* next = p->next();
         p->~Page();
         free(p);
-        RM_ALLOCATION(mPageSize);
+        RM_ALLOCATION();
         p = next;
     }
 }
@@ -238,7 +238,7 @@ void LinearAllocator::rewindIfLastAlloc(void* ptr, size_t allocSize) {
 
 LinearAllocator::Page* LinearAllocator::newPage(size_t pageSize) {
     pageSize = ALIGN(pageSize + sizeof(LinearAllocator::Page));
-    ADD_ALLOCATION(pageSize);
+    ADD_ALLOCATION();
     mTotalAllocated += pageSize;
     mPageCount++;
     void* buf = malloc(pageSize);

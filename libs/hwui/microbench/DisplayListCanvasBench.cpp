@@ -15,7 +15,6 @@
  */
 
 #include <benchmark/Benchmark.h>
-#include <utils/Singleton.h>
 
 #include "DisplayList.h"
 #if HWUI_NEW_OPS
@@ -59,13 +58,13 @@ void BM_DisplayListData_alloc_theoretical::Run(int iters) {
 BENCHMARK_NO_ARG(BM_DisplayListCanvas_record_empty);
 void BM_DisplayListCanvas_record_empty::Run(int iters) {
     TestCanvas canvas(100, 100);
-    canvas.finishRecording();
+    delete canvas.finishRecording();
 
     StartBenchmarkTiming();
     for (int i = 0; i < iters; ++i) {
         canvas.reset(100, 100);
         MicroBench::DoNotOptimize(&canvas);
-        canvas.finishRecording();
+        delete canvas.finishRecording();
     }
     StopBenchmarkTiming();
 }
@@ -73,7 +72,7 @@ void BM_DisplayListCanvas_record_empty::Run(int iters) {
 BENCHMARK_NO_ARG(BM_DisplayListCanvas_record_saverestore);
 void BM_DisplayListCanvas_record_saverestore::Run(int iters) {
     TestCanvas canvas(100, 100);
-    canvas.finishRecording();
+    delete canvas.finishRecording();
 
     StartBenchmarkTiming();
     for (int i = 0; i < iters; ++i) {
@@ -83,7 +82,7 @@ void BM_DisplayListCanvas_record_saverestore::Run(int iters) {
         MicroBench::DoNotOptimize(&canvas);
         canvas.restore();
         canvas.restore();
-        canvas.finishRecording();
+        delete canvas.finishRecording();
     }
     StopBenchmarkTiming();
 }
@@ -91,14 +90,14 @@ void BM_DisplayListCanvas_record_saverestore::Run(int iters) {
 BENCHMARK_NO_ARG(BM_DisplayListCanvas_record_translate);
 void BM_DisplayListCanvas_record_translate::Run(int iters) {
     TestCanvas canvas(100, 100);
-    canvas.finishRecording();
+    delete canvas.finishRecording();
 
     StartBenchmarkTiming();
     for (int i = 0; i < iters; ++i) {
         canvas.reset(100, 100);
         canvas.scale(10, 10);
         MicroBench::DoNotOptimize(&canvas);
-        canvas.finishRecording();
+        delete canvas.finishRecording();
     }
     StopBenchmarkTiming();
 }

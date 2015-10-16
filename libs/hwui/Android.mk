@@ -254,6 +254,7 @@ LOCAL_WHOLE_STATIC_LIBRARIES := libhwui_static
 LOCAL_STATIC_LIBRARIES := libbenchmark libbase
 
 LOCAL_SRC_FILES += \
-    microbench/DisplayListCanvasBench.cpp
+    microbench/DisplayListCanvasBench.cpp \
+    microbench/LinearAllocatorBench.cpp
 
 include $(BUILD_EXECUTABLE)

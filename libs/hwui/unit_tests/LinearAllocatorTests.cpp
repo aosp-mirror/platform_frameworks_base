@@ -106,3 +106,31 @@ TEST(LinearAllocator, rewind) {
     // Checking for a double-destroy case
     EXPECT_EQ(destroyed, false);
 }
+
+TEST(LinearStdAllocator, simpleAllocate) {
+    LinearAllocator la;
+    LinearStdAllocator<void*> stdAllocator(la);
+
+    std::vector<char, LinearStdAllocator<char> > v(stdAllocator);
+    v.push_back(0);
+    char* initialLocation = &v[0];
+    v.push_back(10);
+    v.push_back(20);
+    v.push_back(30);
+
+    // expect to have allocated (since no space reserved), so [0] will have moved to
+    // slightly further down in the same LinearAllocator page
+    EXPECT_LT(initialLocation, &v[0]);
+    EXPECT_GT(initialLocation + 20, &v[0]);
+
+    // expect to have allocated again inserting 4 more entries
+    char* lastLocation = &v[0];
+    v.push_back(40);
+    v.push_back(50);
+    v.push_back(60);
+    v.push_back(70);
+
+    EXPECT_LT(lastLocation, &v[0]);
+    EXPECT_GT(lastLocation + 20, &v[0]);
+
+}
