@@ -1326,6 +1326,10 @@ final class WindowState implements WindowManagerPolicy.WindowState {
         }
     }
 
+    boolean inDockedWorkspace() {
+        return mAppToken != null && mAppToken.mTask != null && mAppToken.mTask.inDockedWorkspace();
+    }
+
     private class DeathRecipient implements IBinder.DeathRecipient {
         @Override
         public void binderDied() {
