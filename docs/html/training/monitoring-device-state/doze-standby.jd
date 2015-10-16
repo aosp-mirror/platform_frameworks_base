@@ -421,7 +421,7 @@ $ adb shell am get-inactive &lt;packageName&gt;</pre>
 
 <p>The table below highlights the acceptable use cases for requesting or being on
    the Battery Optimizations exceptions whitelist. In general, your app should not be on the
-   whitelist unless Doze and App Standby break the core function of the app, and there is a
+   whitelist unless Doze or App Standby break the core function of the app or there is a
    technical reason why your app cannot use GCM high-priority messages.</p>
 
    <p>For more information, see <a href="#support_for_other_use_cases">Support for Other Use Cases
@@ -453,7 +453,7 @@ $ adb shell am get-inactive &lt;packageName&gt;</pre>
     <td rowspan="1">Instant messaging, chat, or calling app;
     enterprise VOIP apps</td>
     <td>No, can not use GCM because of technical dependency on another messaging
-    service</td>
+    service or Doze and App Standby break the core function of the app.</td>
     <td style="color:green">Acceptable</td>
     <td></td>
  </tr>
