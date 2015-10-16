@@ -1789,6 +1789,7 @@ public class NotificationStackScrollLayout extends ViewGroup
         ((ExpandableView) child).setOnHeightChangedListener(this);
         generateAddAnimation(child, false /* fromMoreCard */);
         updateAnimationState(child);
+        updateChronometerForChild(child);
         if (canChildBeDismissed(child)) {
             // Make sure the dismissButton is visible and not in the animated state.
             // We need to do this to avoid a race where a clearable notification is added after the
@@ -2298,6 +2299,21 @@ public class NotificationStackScrollLayout extends ViewGroup
         mStackScrollAlgorithm.setIsExpanded(isExpanded);
         if (changed) {
             updateNotificationAnimationStates();
+            updateChronometers();
+        }
+    }
+
+    private void updateChronometers() {
+        int childCount = getChildCount();
+        for (int i = 0; i < childCount; i++) {
+            updateChronometerForChild(getChildAt(i));
+        }
+    }
+
+    private void updateChronometerForChild(View child) {
+        if (child instanceof ExpandableNotificationRow) {
+            ExpandableNotificationRow row = (ExpandableNotificationRow) child;
+            row.setChronometerRunning(mIsExpanded);
         }
     }
 
@@ -2320,6 +2336,7 @@ public class NotificationStackScrollLayout extends ViewGroup
         }
         mStackScrollAlgorithm.onReset(view);
         updateAnimationState(view);
+        updateChronometerForChild(view);
     }
 
     private void updateScrollPositionOnExpandInBottom(ExpandableView view) {
