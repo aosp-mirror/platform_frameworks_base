@@ -170,7 +170,6 @@ public class HeadsUpManager implements ViewTreeObserver.OnComputeInternalInsetsL
      */
     public void showNotification(NotificationData.Entry headsUp) {
         if (DEBUG) Log.v(TAG, "showNotification");
-        MetricsLogger.count(mContext, "note_peek", 1);
         addHeadsUpEntry(headsUp);
         updateNotification(headsUp, true);
         headsUp.setInterruption();
@@ -247,6 +246,9 @@ public class HeadsUpManager implements ViewTreeObserver.OnComputeInternalInsetsL
             return;
         }
         mHasPinnedNotification = hasPinnedNotification;
+        if (mHasPinnedNotification) {
+            MetricsLogger.count(mContext, "note_peek", 1);
+        }
         updateTouchableRegionListener();
         for (OnHeadsUpChangedListener listener : mListeners) {
             listener.onHeadsUpPinnedModeChanged(hasPinnedNotification);
