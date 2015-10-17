@@ -1660,10 +1660,11 @@ static sp<TiffWriter> DngCreator_setup(JNIEnv* env, jobject thiz, uint32_t image
         uint32_t width = static_cast<uint32_t>(entry.data.i32[2]);
         uint32_t height = static_cast<uint32_t>(entry.data.i32[3]);
         if (entry2.count > 0 && entry2.count == lsmWidth * lsmHeight * 4) {
+            // GainMap rectangle is relative to the active area origin.
             err = builder.addGainMapsForMetadata(lsmWidth,
                                                  lsmHeight,
-                                                 ymin,
-                                                 xmin,
+                                                 0,
+                                                 0,
                                                  height,
                                                  width,
                                                  opcodeCfaLayout,
