@@ -301,7 +301,7 @@ final class DefaultPermissionGrantPolicy {
                     mService.mSetupWizardPackage);
             if (setupPackage != null
                     && doesPackageSupportRuntimePermissions(setupPackage)) {
-                grantRuntimePermissionsLPw(setupPackage, PHONE_PERMISSIONS, userId);
+                grantRuntimePermissionsLPw(setupPackage, PHONE_PERMISSIONS, true, userId);
                 grantRuntimePermissionsLPw(setupPackage, CONTACTS_PERMISSIONS, userId);
                 grantRuntimePermissionsLPw(setupPackage, LOCATION_PERMISSIONS, userId);
                 grantRuntimePermissionsLPw(setupPackage, CAMERA_PERMISSIONS, userId);
