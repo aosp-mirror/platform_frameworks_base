@@ -108,7 +108,13 @@ public class JobServiceContext extends IJobCallback.Stub implements ServiceConne
     int mVerb;
     private AtomicBoolean mCancelled = new AtomicBoolean();
 
-    /** All the information maintained about the job currently being executed. */
+    /**
+     * All the information maintained about the job currently being executed.
+     *
+     * Any reads (dereferences) not done from the handler thread must be synchronized on
+     * {@link #mLock}.
+     * Writes can only be done from the handler thread, or {@link #executeRunnableJob(JobStatus)}.
+     */
     private JobStatus mRunningJob;
     /** Binder to the client service. */
     IJobService service;
@@ -192,7 +198,8 @@ public class JobServiceContext extends IJobCallback.Stub implements ServiceConne
      */
     JobStatus getRunningJob() {
         synchronized (mLock) {
-            return mRunningJob;
+            return mRunningJob == null ?
+                    null : new JobStatus(mRunningJob);
         }
     }
 
@@ -253,15 +260,22 @@ public class JobServiceContext extends IJobCallback.Stub implements ServiceConne
      */
     @Override
     public void onServiceConnected(ComponentName name, IBinder service) {
-        if (!name.equals(mRunningJob.getServiceComponent())) {
+        JobStatus runningJob;
+        synchronized (mLock) {
+            // This isn't strictly necessary b/c the JobServiceHandler is running on the main
+            // looper and at this point we can't get any binder callbacks from the client. Better
+            // safe than sorry.
+            runningJob = mRunningJob;
+        }
+        if (runningJob == null || !name.equals(runningJob.getServiceComponent())) {
             mCallbackHandler.obtainMessage(MSG_SHUTDOWN_EXECUTION).sendToTarget();
             return;
         }
         this.service = IJobService.Stub.asInterface(service);
         final PowerManager pm =
                 (PowerManager) mContext.getSystemService(Context.POWER_SERVICE);
-        mWakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, mRunningJob.getTag());
-        mWakeLock.setWorkSource(new WorkSource(mRunningJob.getUid()));
+        mWakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, runningJob.getTag());
+        mWakeLock.setWorkSource(new WorkSource(runningJob.getUid()));
         mWakeLock.setReferenceCounted(false);
         mWakeLock.acquire();
         mCallbackHandler.obtainMessage(MSG_SERVICE_BOUND).sendToTarget();
@@ -279,13 +293,15 @@ public class JobServiceContext extends IJobCallback.Stub implements ServiceConne
      * @return True if the binder calling is coming from the client we expect.
      */
     private boolean verifyCallingUid() {
-        if (mRunningJob == null || Binder.getCallingUid() != mRunningJob.getUid()) {
-            if (DEBUG) {
-                Slog.d(TAG, "Stale callback received, ignoring.");
+        synchronized (mLock) {
+            if (mRunningJob == null || Binder.getCallingUid() != mRunningJob.getUid()) {
+                if (DEBUG) {
+                    Slog.d(TAG, "Stale callback received, ignoring.");
+                }
+                return false;
             }
-            return false;
+            return true;
         }
-        return true;
     }
 
     /**
