@@ -1,0 +1,134 @@
+page.title=Optimizing App-Initiated Network Use
+trainingnavtop=true
+
+@jd:body
+
+<div id="tb-wrapper">
+<div id="tb">
+
+<h2>This lesson teaches you to</h2>
+<ol>
+  <li><a href="#batch-schedule">Batch and Schedule Network Requests</a>
+  <li><a href="#check-connect">Allow System to Check for Connectivity</a></li>
+</ol>
+
+</div>
+</div>
+
+<p>
+  Network traffic initiated by your app can usually be significantly optimized, since you can plan
+  for what network resources it needs and set a schedule for accessing them. By applying careful
+  scheduling, you can create significant periods of rest for the device radio and, thereby, save
+  power. There are several Android APIs that can help with network access scheduling, and some of
+  these functions can coordinate network access for other apps, further optimizing battery
+  performance.
+</p>
+
+<p>
+  This lesson teaches you how to reduce battery consumption by applying techniques for
+  optimizing app-initiated network traffic.
+</p>
+
+
+<h2 id="batch-schedule">Batch and Schedule Network Requests</h2>
+
+<iframe width="448" height="252"
+    src="//www.youtube.com/embed/Ecz5WDZoJok?autohide=1&amp;showinfo=0"
+    frameborder="0" allowfullscreen=""
+    style="float: right; margin: 0 0 20px 20px;"></iframe>
+
+
+<p>
+  On a mobile device, the process of turning on the radio, making a connection, and keeping the
+  radio awake uses a large amount of power. For this reason, processing individual requests at
+  random times can consume significant power and reduce battery life. A more efficient approach is
+  to queue a set of network requests and process them together. This allows the system to pay the
+  power cost of turning on the radio just once, and still get all the data requested by an app.
+</p>
+
+
+<iframe width="448" height="252"
+    src="//www.youtube.com/embed/orlRuEwlDoM?autohide=1&amp;showinfo=0"
+    frameborder="0" allowfullscreen=""
+    style="float: left; margin: 0 20px 20px 0;"></iframe>
+
+<p>
+  Using a network access scheduler API for queuing and processing your app data requests can
+  significantly increase the power efficiency of your app. Schedulers conserve battery power by
+  grouping requests together for the system to process. They can further improve efficiency by
+  delaying some requests until other requests wake up the mobile radio, or waiting until the
+  device is charging. Schedulers defer and batch network requests system-wide, across all apps on
+  the device, which gives them an optimizing advantage over what any individual app can do.
+</p>
+
+
+<h3 id="choosing-scheduler">Choosing a batch-and-scheduling API</h3>
+
+<p>
+  Android provides three different APIs for your app to batch and schedule network requests. For
+  most operations, these techniques are functionally equivalent. These APIs are listed in the
+  following table with the most highly recommended first.
+</p>
+
+<table>
+  <tr>
+    <th>Scheduler</th>
+    <th>Requirements</th>
+    <th>Implementation Ease</th>
+  </tr>
+  <tr>
+    <td style="white-space: nowrap;"><a href="https://developers.google.com/cloud-messaging/network-manager">
+      GCM Network Manager</a></td>
+    <td>GCM Network Manager requires that your app use the Google Play services client library,
+      version 6.1.11 or higher &mdash; use the latest available version.</td>
+    <td>Straightforward</td>
+  </tr>
+  <tr>
+    <td><a href="{@docRoot}reference/android/app/job/JobScheduler.html">Job Scheduler</a></td>
+    <td>Job Scheduler does not require Google Play services, but is available only when targeting
+      Android 5.0 (API level 21) or higher.</td>
+    <td>Straightforward</td>
+  </tr>
+  <tr>
+    <td>
+      <a href="{@docRoot}training/sync-adapters/index.html">Sync Adapter for scheduled syncs</a>
+    </td>
+    <td>Sync Adapter does not require the Google Play services client library and has been
+      available since Android 2.0 (API level 5).</td>
+    <td>Complex</td>
+  </tr>
+</table>
+
+
+<p class="note">
+  <strong>Note:</strong> For scheduled data synchronization, you should <em>always</em> prefer GCM
+  Network Manager or Job Scheduler over Sync Adapter if your requirements allow it.
+</p>
+
+
+<h2 id="check-connect">Allow System to Check for Connectivity</h2>
+
+<p>
+  One of the most serious and unexpected causes of battery drain is when a user travels beyond the
+  reach of any cell tower or access point. In this situation, the user is typically not using their
+  device, but they notice the device getting warm, and then see that the battery is low or has run
+  out.
+</p>
+
+<p>
+  In this scenario, the problem is that an app is running a background process that keeps
+  waking up the mobile radio at regular intervals to search for a cellular signal, but finds none.
+  Searching for a cell signal is one of the most power-draining operations there is.
+</p>
+
+<p>
+  The way to avoid causing this kind of problem for a user with your app is to use a
+  battery-efficient method for checking connectivity. For app-initiated network requests, use a
+  <a href="#choosing-scheduler">scheduler</a>, which automatically uses <a href=
+  "{@docRoot}training/monitoring-device-state/connectivity-monitoring.html">Connectivity
+  Manager</a> to check for connectivity before calling into your app. As a result, if there's no
+  network, the Connectivity Manager conserves battery because it performs the connectivity check
+  itself, without loading the app to run the check. Battery is further conserved because schedulers
+  use <a href="http://en.wikipedia.org/wiki/Exponential_backoff" class="external-link">exponential
+  backoff</a> to check for connectivity less frequently as time progresses.
+</p>
