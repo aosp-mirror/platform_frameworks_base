@@ -37,16 +37,12 @@ import android.util.SparseArray;
 import android.util.SparseBooleanArray;
 import android.util.SparseIntArray;
 import android.view.GestureDetector;
-import android.view.GestureDetector.OnDoubleTapListener;
-import android.view.GestureDetector.OnGestureListener;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.View;
 
 import com.android.documentsui.Events.InputEvent;
 import com.android.documentsui.Events.MotionInputEvent;
-
-import com.google.android.collect.Lists;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -78,30 +74,21 @@ public final class MultiSelectManager implements View.OnKeyListener {
     private final List<MultiSelectManager.Callback> mCallbacks = new ArrayList<>(1);
 
     private Adapter<?> mAdapter;
-    private ItemFinder mHelper;
     private boolean mSingleSelect;
 
     @Nullable private BandController mBandManager;
 
     /**
      * @param recyclerView
-     * @param gestureDelegate Option delegate gesture listener.
      * @param mode Selection mode
-     * @template A gestureDelegate that implements both {@link OnGestureListener}
-     *     and {@link OnDoubleTapListener}
      */
-    public <L extends OnGestureListener & OnDoubleTapListener> MultiSelectManager(
-            final RecyclerView recyclerView, L gestureDelegate, int mode) {
-
-        this(
-                recyclerView.getAdapter(),
-                new RuntimeItemFinder(recyclerView),
-                mode);
+    public MultiSelectManager(final RecyclerView recyclerView, int mode) {
+        this(recyclerView.getAdapter(), mode);
 
         mEnvironment = new RuntimeSelectionEnvironment(recyclerView);
 
         if (mode == MODE_MULTIPLE) {
-            mBandManager = new BandController(mHelper);
+            mBandManager = new BandController();
         }
 
         GestureDetector.SimpleOnGestureListener listener =
@@ -118,15 +105,8 @@ public final class MultiSelectManager implements View.OnKeyListener {
                     }
                 };
 
-        CompositeOnGestureListener compositeListener =
-                new CompositeOnGestureListener(
-                        Lists.<OnGestureListener>newArrayList(listener, gestureDelegate),
-                        Lists.<OnDoubleTapListener>newArrayList(listener, gestureDelegate));
-
-        final GestureDetector detector =
-                new GestureDetector(recyclerView.getContext(), compositeListener);
-
-        detector.setOnDoubleTapListener(compositeListener);
+        final GestureDetector detector = new GestureDetector(recyclerView.getContext(), listener);
+        detector.setOnDoubleTapListener(listener);
 
         recyclerView.addOnItemTouchListener(
                 new RecyclerView.OnItemTouchListener() {
@@ -134,37 +114,15 @@ public final class MultiSelectManager implements View.OnKeyListener {
                     public boolean onInterceptTouchEvent(RecyclerView rv, MotionEvent e) {
                         detector.onTouchEvent(e);
 
-                        if (mBandManager == null) {
-                            return false;
+                        if (mBandManager != null) {
+                            return mBandManager.handleEvent(new MotionInputEvent(e, recyclerView));
                         }
-
-                        // b/23793622 notes the fact that we *never* receiver ACTION_DOWN
-                        // events in onTouchEvent. Where it not for this issue, we'd
-                        // push start handling down into handleInputEvent.
-                        if (mBandManager.shouldStart(e)) {
-                            // endBandSelect is handled in handleInputEvent.
-                            mBandManager.startBandSelect(
-                                    new Point((int) e.getX(), (int) e.getY()));
-                        } else if (mBandManager.isActive()
-                                && Events.isMouseEvent(e)
-                                && Events.isActionUp(e)) {
-                            // Same issue here w b/23793622. The ACTION_UP event
-                            // is only evert dispatched to onTouchEvent when
-                            // there is some associated motion. If a user taps
-                            // mouse, but doesn't move, then band select gets
-                            // started BUT not ended. Causing phantom
-                            // bands to appear when the user later clicks to start
-                            // band select.
-                            mBandManager.handleInputEvent(
-                                    new MotionInputEvent(e, recyclerView));
-                        }
-
-                        return mBandManager.isActive();
+                        return false;
                     }
 
                     @Override
                     public void onTouchEvent(RecyclerView rv, MotionEvent e) {
-                        mBandManager.handleInputEvent(
+                        mBandManager.processInputEvent(
                                 new MotionInputEvent(e, recyclerView));
                     }
                     @Override
@@ -177,13 +135,11 @@ public final class MultiSelectManager implements View.OnKeyListener {
      * @hide
      */
     @VisibleForTesting
-    MultiSelectManager(Adapter<?> adapter, ItemFinder helper, int mode) {
+    MultiSelectManager(Adapter<?> adapter, int mode) {
         checkNotNull(adapter, "'adapter' cannot be null.");
-        checkNotNull(helper, "'helper' cannot be null.");
 
         mSingleSelect = mode == MODE_SINGLE;
 
-        mHelper = helper;
         mAdapter = adapter;
 
         mAdapter.registerAdapterDataObserver(
@@ -874,32 +830,6 @@ public final class MultiSelectManager implements View.OnKeyListener {
     }
 
     /**
-     * Provides functionality for MultiSelectManager. Exists primarily to tests that are
-     * fully isolated from RecyclerView.
-     */
-    interface ItemFinder {
-        int findItemPosition(MotionEvent e);
-    }
-
-    /** ItemFinder implementation backed by good ol' RecyclerView. */
-    private static final class RuntimeItemFinder implements ItemFinder {
-
-        private final RecyclerView mView;
-
-        RuntimeItemFinder(RecyclerView view) {
-            mView = view;
-        }
-
-        @Override
-        public int findItemPosition(MotionEvent e) {
-            View view = mView.findChildViewUnder(e.getX(), e.getY());
-            return view != null
-                    ? mView.getChildAdapterPosition(view)
-                    : RecyclerView.NO_POSITION;
-        }
-    }
-
-    /**
      * Provides functionality for BandController. Exists primarily to tests that are
      * fully isolated from RecyclerView.
      */
@@ -1096,110 +1026,6 @@ public final class MultiSelectManager implements View.OnKeyListener {
     }
 
     /**
-     * A composite {@code OnGestureDetector} that allows us to delegate unhandled
-     * events to an outside party (presumably DirectoryFragment).
-     * @template A gestureDelegate that implements both {@link OnGestureListener}
-     *     and {@link OnDoubleTapListener}
-     */
-    private static final class CompositeOnGestureListener
-            implements OnGestureListener, OnDoubleTapListener {
-
-        private List<OnGestureListener> mGestureListeners;
-        private List<OnDoubleTapListener> mTapListeners;
-
-        public CompositeOnGestureListener(
-                List<OnGestureListener> gestureListeners,
-                List<OnDoubleTapListener> tapListeners) {
-            mGestureListeners = gestureListeners;
-            mTapListeners = tapListeners;
-        }
-
-        @Override
-        public boolean onDown(MotionEvent e) {
-            for (OnGestureListener l : mGestureListeners) {
-                if (l.onDown(e)) {
-                    return true;
-                }
-            }
-            return false;
-        }
-
-        @Override
-        public void onShowPress(MotionEvent e) {
-            for (OnGestureListener l : mGestureListeners) {
-                l.onShowPress(e);
-            }
-        }
-
-        @Override
-        public boolean onSingleTapUp(MotionEvent e) {
-            for (OnGestureListener l : mGestureListeners) {
-                if (l.onSingleTapUp(e)) {
-                    return true;
-                }
-            }
-            return false;
-        }
-
-        @Override
-        public boolean onScroll(MotionEvent e1, MotionEvent e2, float distanceX, float distanceY) {
-            for (OnGestureListener l : mGestureListeners) {
-                if (l.onScroll(e1, e2, distanceX, distanceY)) {
-                    return true;
-                }
-            }
-            return false;
-        }
-
-        @Override
-        public void onLongPress(MotionEvent e) {
-            for (OnGestureListener l : mGestureListeners) {
-                l.onLongPress(e);
-            }
-        }
-
-        @Override
-        public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) {
-            for (OnGestureListener l : mGestureListeners) {
-                if (l.onFling(e1, e2, velocityX, velocityY)) {
-                    return true;
-                }
-            }
-            return false;
-        }
-
-        @Override
-        public boolean onSingleTapConfirmed(MotionEvent e) {
-            for (OnDoubleTapListener listener : mTapListeners) {
-                if (listener.onSingleTapConfirmed(e)) {
-                    return true;
-                }
-            }
-            return false;
-        }
-
-        @Override
-        public boolean onDoubleTap(MotionEvent e) {
-            for (OnDoubleTapListener listener : mTapListeners) {
-                if (listener.onDoubleTap(e)) {
-                    return true;
-                }
-            }
-            return false;
-        }
-
-        @Override
-        public boolean onDoubleTapEvent(MotionEvent e) {
-            for (OnDoubleTapListener listener : mTapListeners) {
-                if (listener.onDoubleTapEvent(e)) {
-                    return true;
-                }
-            }
-            return false;
-        }
-    }
-
-    /**
      * Provides mouse driven band-select support when used in conjunction with {@link RecyclerView}
      * and {@link MultiSelectManager}. This class is responsible for rendering the band select
      * overlay and selecting overlaid items via MultiSelectManager.
@@ -1209,7 +1035,6 @@ public final class MultiSelectManager implements View.OnKeyListener {
 
         private static final int NOT_SET = -1;
 
-        private final ItemFinder mItemFinder;
         private final Runnable mModelBuilder;
 
         @Nullable private Rect mBounds;
@@ -1222,8 +1047,7 @@ public final class MultiSelectManager implements View.OnKeyListener {
         private long mScrollStartTime = NOT_SET;
         private final Runnable mViewScroller = new ViewScroller();
 
-        public BandController(ItemFinder finder) {
-            mItemFinder = finder;
+        public BandController() {
             mEnvironment.addOnScrollListener(this);
 
             mModelBuilder = new Runnable() {
@@ -1233,6 +1057,29 @@ public final class MultiSelectManager implements View.OnKeyListener {
                     mModel.addOnSelectionChangedListener(BandController.this);
                 }
             };
+        }
+
+        public boolean handleEvent(MotionInputEvent e) {
+            // b/23793622 notes the fact that we *never* receive ACTION_DOWN
+            // events in onTouchEvent. Where it not for this issue, we'd
+            // push start handling down into handleInputEvent.
+            if (mBandManager.shouldStart(e)) {
+                // endBandSelect is handled in handleInputEvent.
+                mBandManager.startBandSelect(e.getOrigin());
+            } else if (mBandManager.isActive()
+                    && e.isMouseEvent()
+                    && e.isActionUp()) {
+                // Same issue here w b/23793622. The ACTION_UP event
+                // is only evert dispatched to onTouchEvent when
+                // there is some associated motion. If a user taps
+                // mouse, but doesn't move, then band select gets
+                // started BUT not ended. Causing phantom
+                // bands to appear when the user later clicks to start
+                // band select.
+                mBandManager.processInputEvent(e);
+            }
+
+            return isActive();
         }
 
         private boolean isActive() {
@@ -1253,12 +1100,12 @@ public final class MultiSelectManager implements View.OnKeyListener {
             }
         }
 
-        boolean shouldStart(MotionEvent e) {
+        boolean shouldStart(MotionInputEvent e) {
             return !isActive()
-                    && Events.isMouseEvent(e)  // a mouse
-                    && Events.isActionDown(e)  // the initial button press
+                    && e.isMouseEvent()  // a mouse
+                    && e.isActionDown()  // the initial button press
                     && mAdapter.getItemCount() > 0
-                    && mItemFinder.findItemPosition(e) == RecyclerView.NO_ID;  // in empty space
+                    && e.getItemPosition() == RecyclerView.NO_ID;  // in empty space
         }
 
         boolean shouldStop(InputEvent input) {
@@ -1271,7 +1118,7 @@ public final class MultiSelectManager implements View.OnKeyListener {
          * Processes a MotionEvent by starting, ending, or resizing the band select overlay.
          * @param input
          */
-        private void handleInputEvent(InputEvent input) {
+        private void processInputEvent(InputEvent input) {
             checkArgument(input.isMouseEvent());
 
             if (shouldStop(input)) {
