@@ -2221,6 +2221,7 @@ final class FragmentManagerImpl extends FragmentManager implements LayoutInflate
             // This fragment was retained from a previous instance; get it
             // going now.
             fragment.mInLayout = true;
+            fragment.mHost = mHost;
             // If this fragment is newly instantiated (either right now, or
             // from last saved state), then give it the attributes to
             // initialize itself.
