@@ -1522,6 +1522,7 @@
       <item quantity="other">%d h</item>
     </plurals>
     <string name="zen_mode_until" msgid="7336308492289875088">"Do <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
+    <string name="zen_mode_alarm" msgid="9128205721301330797">"Do <xliff:g id="FORMATTEDTIME">%1$s</xliff:g> (naslednji alarm)"</string>
     <string name="zen_mode_forever" msgid="7420011936770086993">"Dokler tega ne izklopite"</string>
     <string name="zen_mode_forever_dnd" msgid="3792132696572189081">"Dokler ne izklopite načina »ne moti«"</string>
     <string name="zen_mode_rule_name_combination" msgid="191109939968076477">"<xliff:g id="FIRST">%1$s</xliff:g>/<xliff:g id="REST">%2$s</xliff:g>"</string>

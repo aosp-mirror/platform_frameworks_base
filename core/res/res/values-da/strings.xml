@@ -143,7 +143,7 @@
     <string name="fcError" msgid="3327560126588500777">"Forbindelsesproblemer eller ugyldig funktionskode."</string>
     <string name="httpErrorOk" msgid="1191919378083472204">"OK"</string>
     <string name="httpError" msgid="7956392511146698522">"Der opstod en netværksfejl."</string>
-    <string name="httpErrorLookup" msgid="4711687456111963163">"Webadressen kunne ikke findes."</string>
+    <string name="httpErrorLookup" msgid="4711687456111963163">"Webadressen blev ikke fundet."</string>
     <string name="httpErrorUnsupportedAuthScheme" msgid="6299980280442076799">"Ordningen for webstedsgodkendelse understøttes ikke."</string>
     <string name="httpErrorAuth" msgid="1435065629438044534">"Der kunne ikke godkendes."</string>
     <string name="httpErrorProxyAuth" msgid="1788207010559081331">"Godkendelse via proxyserveren mislykkedes."</string>
@@ -155,7 +155,7 @@
     <string name="httpErrorFailedSslHandshake" msgid="96549606000658641">"Der kunne ikke oprettes en sikker forbindelse."</string>
     <string name="httpErrorBadUrl" msgid="3636929722728881972">"Siden kunne ikke åbnes, fordi webadressen er ugyldig."</string>
     <string name="httpErrorFile" msgid="2170788515052558676">"Der kunne ikke fås adgang til filen."</string>
-    <string name="httpErrorFileNotFound" msgid="6203856612042655084">"Den ønskede fil kunne ikke findes."</string>
+    <string name="httpErrorFileNotFound" msgid="6203856612042655084">"Den ønskede fil blev ikke fundet."</string>
     <string name="httpErrorTooManyRequests" msgid="1235396927087188253">"Der behandles for mange anmodninger. Prøv igen senere."</string>
     <string name="notification_title" msgid="8967710025036163822">"Loginfejl for <xliff:g id="ACCOUNT">%1$s</xliff:g>"</string>
     <string name="contentServiceSync" msgid="8353523060269335667">"Synkroniser"</string>
@@ -248,7 +248,7 @@
     <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"undersøge indholdet i et vindue, du interagerer med."</string>
     <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"aktivere Udforsk ved berøring"</string>
     <string name="capability_desc_canRequestTouchExploration" msgid="5800552516779249356">"De emner, der trykkes på, læses højt, og skærmen kan udforskes ved hjælp af bevægelser."</string>
-    <string name="capability_title_canRequestEnhancedWebAccessibility" msgid="1739881766522594073">"aktivere forbedrede webhjælpefunktioner"</string>
+    <string name="capability_title_canRequestEnhancedWebAccessibility" msgid="1739881766522594073">"Aktivér udvidede webhjælpefunktioner"</string>
     <string name="capability_desc_canRequestEnhancedWebAccessibility" msgid="7881063961507511765">"Der installeres muligvis scripts for at gøre appindhold mere tilgængeligt."</string>
     <string name="capability_title_canRequestFilterKeyEvents" msgid="2103440391902412174">"observere tekst, du skriver"</string>
     <string name="capability_desc_canRequestFilterKeyEvents" msgid="7463135292204152818">"Dette omfatter personlige data såsom kreditkortnumre og adgangskoder."</string>
@@ -1488,6 +1488,7 @@
       <item quantity="other">I %d t.</item>
     </plurals>
     <string name="zen_mode_until" msgid="7336308492289875088">"Indtil <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
+    <string name="zen_mode_alarm" msgid="9128205721301330797">"Indtil <xliff:g id="FORMATTEDTIME">%1$s</xliff:g> (næste alarm)"</string>
     <string name="zen_mode_forever" msgid="7420011936770086993">"Indtil du slår denne indstilling fra"</string>
     <string name="zen_mode_forever_dnd" msgid="3792132696572189081">"Indtil du slår \"Forstyr ikke\" fra"</string>
     <string name="zen_mode_rule_name_combination" msgid="191109939968076477">"<xliff:g id="FIRST">%1$s</xliff:g>/<xliff:g id="REST">%2$s</xliff:g>"</string>

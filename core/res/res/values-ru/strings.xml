@@ -914,7 +914,7 @@
     <string name="anr_application_process" msgid="8941757607340481057">"Приложение \"<xliff:g id="APPLICATION">%1$s</xliff:g>\" не отвечает. Закрыть его?"</string>
     <string name="anr_process" msgid="6513209874880517125">"Приложение \"<xliff:g id="PROCESS">%1$s</xliff:g>\" не отвечает.\n\nЗакрыть его?"</string>
     <string name="force_close" msgid="8346072094521265605">"ОК"</string>
-    <string name="report" msgid="4060218260984795706">"Создать отчет"</string>
+    <string name="report" msgid="4060218260984795706">"Отправить отчет"</string>
     <string name="wait" msgid="7147118217226317732">"Подождать"</string>
     <string name="webpage_unresponsive" msgid="3272758351138122503">"Страница не отвечает.\n\nЗакрыть ее?"</string>
     <string name="launch_warning_title" msgid="1547997780506713581">"Приложение перенаправлено"</string>
@@ -1522,6 +1522,7 @@
       <item quantity="other">На %d часа</item>
     </plurals>
     <string name="zen_mode_until" msgid="7336308492289875088">"До <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
+    <string name="zen_mode_alarm" msgid="9128205721301330797">"Следующий сигнал в <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
     <string name="zen_mode_forever" msgid="7420011936770086993">"Пока я не отключу"</string>
     <string name="zen_mode_forever_dnd" msgid="3792132696572189081">"Пока вы не отключите режим \"Не беспокоить\""</string>
     <string name="zen_mode_rule_name_combination" msgid="191109939968076477">"<xliff:g id="FIRST">%1$s</xliff:g> / <xliff:g id="REST">%2$s</xliff:g>"</string>

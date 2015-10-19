@@ -223,7 +223,7 @@
     <string name="global_action_lockdown" msgid="8751542514724332873">"立即锁定"</string>
     <string name="status_bar_notification_info_overflow" msgid="5301981741705354993">"999+"</string>
     <string name="safeMode" msgid="2788228061547930246">"安全模式"</string>
-    <string name="android_system_label" msgid="6577375335728551336">"Android系统"</string>
+    <string name="android_system_label" msgid="6577375335728551336">"Android 系统"</string>
     <string name="user_owner_label" msgid="2804351898001038951">"个人"</string>
     <string name="managed_profile_label" msgid="6260850669674791528">"工作"</string>
     <string name="permgrouplab_contacts" msgid="3657758145679177612">"通讯录"</string>
@@ -1488,6 +1488,7 @@
       <item quantity="one">1 小时</item>
     </plurals>
     <string name="zen_mode_until" msgid="7336308492289875088">"到<xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
+    <string name="zen_mode_alarm" msgid="9128205721301330797">"直到<xliff:g id="FORMATTEDTIME">%1$s</xliff:g>（闹钟下次响铃时）"</string>
     <string name="zen_mode_forever" msgid="7420011936770086993">"直到您将其关闭"</string>
     <string name="zen_mode_forever_dnd" msgid="3792132696572189081">"直到您关闭“勿扰”模式"</string>
     <string name="zen_mode_rule_name_combination" msgid="191109939968076477">"<xliff:g id="FIRST">%1$s</xliff:g> / <xliff:g id="REST">%2$s</xliff:g>"</string>

@@ -227,23 +227,23 @@
     <string name="user_owner_label" msgid="2804351898001038951">"Persoonlik"</string>
     <string name="managed_profile_label" msgid="6260850669674791528">"Werk"</string>
     <string name="permgrouplab_contacts" msgid="3657758145679177612">"Kontakte"</string>
-    <string name="permgroupdesc_contacts" msgid="6951499528303668046">"gaan by jou kontakte in"</string>
+    <string name="permgroupdesc_contacts" msgid="6951499528303668046">"in te gaan by jou kontakte"</string>
     <string name="permgrouplab_location" msgid="7275582855722310164">"Ligging"</string>
-    <string name="permgroupdesc_location" msgid="1346617465127855033">"verkry toegang tot hierdie toestel se ligging"</string>
+    <string name="permgroupdesc_location" msgid="1346617465127855033">"toegang te verkry tot hierdie toestel se ligging"</string>
     <string name="permgrouplab_calendar" msgid="5863508437783683902">"Kalender"</string>
-    <string name="permgroupdesc_calendar" msgid="3889615280211184106">"gaan by jou kalender in"</string>
+    <string name="permgroupdesc_calendar" msgid="3889615280211184106">"by jou kalender in te gaan"</string>
     <string name="permgrouplab_sms" msgid="228308803364967808">"SMS"</string>
-    <string name="permgroupdesc_sms" msgid="4656988620100940350">"stuur en bekyk SMS-boodskappe"</string>
+    <string name="permgroupdesc_sms" msgid="4656988620100940350">"SMS-boodskappe te stuur en te bekyk"</string>
     <string name="permgrouplab_storage" msgid="1971118770546336966">"Stoor"</string>
-    <string name="permgroupdesc_storage" msgid="637758554581589203">"verkry toegang tot foto\'s, media en lêers op jou toestel"</string>
+    <string name="permgroupdesc_storage" msgid="637758554581589203">"toegang te verkry tot foto\'s, media en lêers op jou toestel"</string>
     <string name="permgrouplab_microphone" msgid="171539900250043464">"Mikrofoon"</string>
-    <string name="permgroupdesc_microphone" msgid="4988812113943554584">"neem oudio op"</string>
+    <string name="permgroupdesc_microphone" msgid="4988812113943554584">"oudio op te neem"</string>
     <string name="permgrouplab_camera" msgid="4820372495894586615">"Kamera"</string>
-    <string name="permgroupdesc_camera" msgid="3250611594678347720">"neem foto\'s en neem video op"</string>
+    <string name="permgroupdesc_camera" msgid="3250611594678347720">"foto\'s en video te neem"</string>
     <string name="permgrouplab_phone" msgid="5229115638567440675">"Foon"</string>
-    <string name="permgroupdesc_phone" msgid="6234224354060641055">"maak en bestuur foonoproepe"</string>
+    <string name="permgroupdesc_phone" msgid="6234224354060641055">"foonoproepe te maak en te bestuur"</string>
     <string name="permgrouplab_sensors" msgid="416037179223226722">"Liggaamsensors"</string>
-    <string name="permgroupdesc_sensors" msgid="7147968539346634043">"kry toegang tot sensordata oor jou lewenstekens"</string>
+    <string name="permgroupdesc_sensors" msgid="7147968539346634043">"toegang te verkry tot sensordata oor jou lewenstekens"</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"Haal venster-inhoud op"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"Ondersoek die inhoud van \'n venster waarmee jy interaksie het."</string>
     <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"Skakel Verken deur raak aan"</string>
@@ -272,7 +272,7 @@
     <string name="permdesc_readCellBroadcasts" msgid="6361972776080458979">"Laat die program toe om seluitsending-boodskappe te lees wat deur jou toestel ontvang word. Seluitsending-waarskuwings word in sommige plekke afgelewer om jou van noodsituasies te waarsku. Kwaadwillige programme mag inmeng met die prestasie of die werking van jou toestel wanneer \'n noodgeval se seluitsending ontvang word."</string>
     <string name="permlab_subscribedFeedsRead" msgid="4756609637053353318">"lees ingetekende nuus"</string>
     <string name="permdesc_subscribedFeedsRead" msgid="5557058907906144505">"Laat die program toe om details oor die tans gesinkroniseerde strome te kry."</string>
-    <string name="permlab_sendSms" msgid="7544599214260982981">"stuur en bekyk SMS-boodskappe"</string>
+    <string name="permlab_sendSms" msgid="7544599214260982981">"SMS-boodskappe te stuur en te bekyk"</string>
     <string name="permdesc_sendSms" msgid="7094729298204937667">"Laat die program toe om SMS-boodskappe te stuur. Dit kan tot onverwagse heffings lei. Kwaadwillige programme kan jou geld kos deur boodskappe sonder jou bevestiging te stuur."</string>
     <string name="permlab_readSms" msgid="8745086572213270480">"lees jou teksboodskappe (SMS of MMS)"</string>
     <string name="permdesc_readSms" product="tablet" msgid="2467981548684735522">"Laat die program toe om SMS-boodskappe wat op jou tablet of SIM-kaart gestoor is, te lees. Dit laat die program toe om alle SMS-boodskappe te lees, ongeag van die inhoud of vertroulikheid daarvan."</string>
@@ -1488,6 +1488,7 @@
       <item quantity="one">1 uur lank</item>
     </plurals>
     <string name="zen_mode_until" msgid="7336308492289875088">"Tot <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
+    <string name="zen_mode_alarm" msgid="9128205721301330797">"Tot <xliff:g id="FORMATTEDTIME">%1$s</xliff:g> (volgende wekker)"</string>
     <string name="zen_mode_forever" msgid="7420011936770086993">"Totdat jy dit afskakel"</string>
     <string name="zen_mode_forever_dnd" msgid="3792132696572189081">"Totdat jy Moenie steur nie afskakel"</string>
     <string name="zen_mode_rule_name_combination" msgid="191109939968076477">"<xliff:g id="FIRST">%1$s</xliff:g> / <xliff:g id="REST">%2$s</xliff:g>"</string>
