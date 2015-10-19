@@ -309,7 +309,9 @@ static void read_mapinfo(FILE *fp, stats_t* stats)
                             // This is the regular Dalvik heap.
                             whichHeap = HEAP_DALVIK;
                             subHeap = HEAP_DALVIK_NORMAL;
-                        } else if (strstr(name, "/dev/ashmem/dalvik-large object space") == name) {
+                        } else if (strstr(name, "/dev/ashmem/dalvik-large object space") == name ||
+                                   strstr(name, "/dev/ashmem/dalvik-free list large object space")
+                                       == name) {
                             whichHeap = HEAP_DALVIK;
                             subHeap = HEAP_DALVIK_LARGE;
                         } else if (strstr(name, "/dev/ashmem/dalvik-non moving space") == name) {
