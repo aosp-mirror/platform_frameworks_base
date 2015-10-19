@@ -87,7 +87,6 @@ hwui_cflags := \
     -Wall -Wno-unused-parameter -Wunreachable-code \
     -ffast-math -O3 -Werror
 
-
 ifeq (true, $(HWUI_NEW_OPS))
     hwui_src_files += \
         BakedOpRenderer.cpp \
@@ -154,6 +153,27 @@ LOCAL_EXPORT_C_INCLUDE_DIRS := $(hwui_c_includes) $(call hwui_proto_include)
 include $(BUILD_STATIC_LIBRARY)
 
 # ------------------------
+# static library null gpu
+# ------------------------
+
+include $(CLEAR_VARS)
+
+LOCAL_MODULE_CLASS := STATIC_LIBRARIES
+LOCAL_MODULE := libhwui_static_null_gpu
+LOCAL_SHARED_LIBRARIES := $(hwui_shared_libraries)
+LOCAL_CFLAGS := \
+        $(hwui_cflags) \
+        -DHWUI_NULL_GPU
+LOCAL_SRC_FILES := \
+        $(hwui_src_files) \
+        tests/nullegl.cpp \
+        tests/nullgles.cpp
+LOCAL_C_INCLUDES := $(hwui_c_includes) $(call hwui_proto_include)
+LOCAL_EXPORT_C_INCLUDE_DIRS := $(hwui_c_includes) $(call hwui_proto_include)
+
+include $(BUILD_STATIC_LIBRARY)
+
+# ------------------------
 # shared library
 # ------------------------
 
@@ -175,7 +195,7 @@ include $(CLEAR_VARS)
 LOCAL_MODULE := hwui_unit_tests
 LOCAL_MODULE_TAGS := tests
 LOCAL_SHARED_LIBRARIES := $(hwui_shared_libraries)
-LOCAL_STATIC_LIBRARIES := libhwui_static
+LOCAL_STATIC_LIBRARIES := libhwui_static_null_gpu
 LOCAL_CFLAGS := $(hwui_cflags)
 
 LOCAL_SRC_FILES += \
@@ -210,22 +230,8 @@ LOCAL_MODULE_STEM_64 := hwuitest64
 LOCAL_SHARED_LIBRARIES := $(hwui_shared_libraries)
 LOCAL_CFLAGS := $(hwui_cflags)
 
-HWUI_NULL_GPU := false
-
-ifeq (true, $(HWUI_NULL_GPU))
-    # Only need to specify the includes if we are not linking against
-    # libhwui_static as libhwui_static exports the appropriate includes
-    LOCAL_C_INCLUDES := $(hwui_c_includes) $(call hwui_proto_include)
-
-    LOCAL_SRC_FILES := \
-        $(hwui_src_files) \
-        tests/nullegl.cpp \
-        tests/nullgles.cpp
-
-    LOCAL_CFLAGS += -DHWUI_NULL_GPU
-else
-    LOCAL_WHOLE_STATIC_LIBRARIES := libhwui_static
-endif
+# set to libhwui_static_null_gpu to skip actual GL commands
+LOCAL_WHOLE_STATIC_LIBRARIES := libhwui_static
 
 LOCAL_SRC_FILES += \
     tests/TestContext.cpp \
@@ -250,7 +256,7 @@ LOCAL_SHARED_LIBRARIES := $(hwui_shared_libraries)
 LOCAL_CFLAGS := $(hwui_cflags)
 LOCAL_C_INCLUDES += bionic/benchmarks/
 
-LOCAL_WHOLE_STATIC_LIBRARIES := libhwui_static
+LOCAL_WHOLE_STATIC_LIBRARIES := libhwui_static_null_gpu
 LOCAL_STATIC_LIBRARIES := libbenchmark libbase
 
 LOCAL_SRC_FILES += \
