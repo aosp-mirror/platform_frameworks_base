@@ -1569,16 +1569,16 @@ public class VectorDrawable extends Drawable {
         public boolean onStateChange(int[] stateSet) {
             boolean changed = false;
 
-            if (mStrokeColors != null && mStrokeColors.isStateful()) {
-                final int strokeColor = mStrokeColor;
-                mStrokeColor = mStrokeColors.getColorForState(stateSet, strokeColor);
-                changed |= strokeColor != mStrokeColor;
+            if (mStrokeColors != null) {
+                final int oldStrokeColor = mStrokeColor;
+                mStrokeColor = mStrokeColors.getColorForState(stateSet, oldStrokeColor);
+                changed |= oldStrokeColor != mStrokeColor;
             }
 
-            if (mFillColors != null && mFillColors.isStateful()) {
-                final int fillColor = mFillColor;
-                mFillColor = mFillColors.getColorForState(stateSet, fillColor);
-                changed |= fillColor != mFillColor;
+            if (mFillColors != null) {
+                final int oldFillColor = mFillColor;
+                mFillColor = mFillColors.getColorForState(stateSet, oldFillColor);
+                changed |= oldFillColor != mFillColor;
             }
 
             return changed;
@@ -1586,8 +1586,7 @@ public class VectorDrawable extends Drawable {
 
         @Override
         public boolean isStateful() {
-            return mStrokeColors != null && mStrokeColors.isStateful()
-                    || mFillColors != null && mFillColors.isStateful();
+            return mStrokeColors != null || mFillColors != null;
         }
 
         @Override
@@ -1716,31 +1715,31 @@ public class VectorDrawable extends Drawable {
             final ColorStateList fillColors = a.getColorStateList(
                     R.styleable.VectorDrawablePath_fillColor);
             if (fillColors != null) {
-                mFillColors = fillColors;
+                // If the color state list isn't stateful, discard the state
+                // list and keep the default (e.g. the only) color.
+                mFillColors = fillColors.isStateful() ? fillColors : null;
                 mFillColor = fillColors.getDefaultColor();
             }
 
             final ColorStateList strokeColors = a.getColorStateList(
                     R.styleable.VectorDrawablePath_strokeColor);
             if (strokeColors != null) {
-                mStrokeColors = strokeColors;
+                // If the color state list isn't stateful, discard the state
+                // list and keep the default (e.g. the only) color.
+                mStrokeColors = strokeColors.isStateful() ? strokeColors : null;
                 mStrokeColor = strokeColors.getDefaultColor();
             }
 
-            mFillAlpha = a.getFloat(R.styleable.VectorDrawablePath_fillAlpha,
-                    mFillAlpha);
+            mFillAlpha = a.getFloat(R.styleable.VectorDrawablePath_fillAlpha, mFillAlpha);
             mStrokeLineCap = getStrokeLineCap(a.getInt(
                     R.styleable.VectorDrawablePath_strokeLineCap, -1), mStrokeLineCap);
             mStrokeLineJoin = getStrokeLineJoin(a.getInt(
                     R.styleable.VectorDrawablePath_strokeLineJoin, -1), mStrokeLineJoin);
             mStrokeMiterlimit = a.getFloat(
                     R.styleable.VectorDrawablePath_strokeMiterLimit, mStrokeMiterlimit);
-            mStrokeAlpha = a.getFloat(R.styleable.VectorDrawablePath_strokeAlpha,
-                    mStrokeAlpha);
-            mStrokeWidth = a.getFloat(R.styleable.VectorDrawablePath_strokeWidth,
-                    mStrokeWidth);
-            mTrimPathEnd = a.getFloat(R.styleable.VectorDrawablePath_trimPathEnd,
-                    mTrimPathEnd);
+            mStrokeAlpha = a.getFloat(R.styleable.VectorDrawablePath_strokeAlpha, mStrokeAlpha);
+            mStrokeWidth = a.getFloat(R.styleable.VectorDrawablePath_strokeWidth, mStrokeWidth);
+            mTrimPathEnd = a.getFloat(R.styleable.VectorDrawablePath_trimPathEnd, mTrimPathEnd);
             mTrimPathOffset = a.getFloat(
                     R.styleable.VectorDrawablePath_trimPathOffset, mTrimPathOffset);
             mTrimPathStart = a.getFloat(
