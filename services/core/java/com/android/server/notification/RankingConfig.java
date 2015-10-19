@@ -15,12 +15,20 @@
  */
 package com.android.server.notification;
 
+import android.app.Notification;
+
+import java.util.List;
+
 public interface RankingConfig {
-    int getPackagePriority(String packageName, int uid);
 
-    void setPackagePriority(String packageName, int uid, int priority);
+    List<Notification.Topic> getTopics(String packageName, int uid);
 
-    int getPackageVisibilityOverride(String packageName, int uid);
+    int getTopicPriority(String packageName, int uid, Notification.Topic topic);
 
-    void setPackageVisibilityOverride(String packageName, int uid, int visibility);
+    void setTopicPriority(String packageName, int uid, Notification.Topic topic, int priority);
+
+    int getTopicVisibilityOverride(String packageName, int uid, Notification.Topic topic);
+
+    void setTopicVisibilityOverride(String packageName, int uid, Notification.Topic topic,
+            int visibility);
 }

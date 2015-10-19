@@ -2337,4 +2337,5 @@
   <java-symbol type="string" name="config_iccHotswapPromptForRestartDialogComponent" />
 
   <java-symbol type="string" name="config_packagedKeyboardName" />
+  <java-symbol type="string" name="default_notification_topic_label" />
 </resources>

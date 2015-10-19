@@ -47,11 +47,11 @@ interface INotificationManager
     void setNotificationsEnabledForPackage(String pkg, int uid, boolean enabled);
     boolean areNotificationsEnabledForPackage(String pkg, int uid);
 
-    void setPackagePriority(String pkg, int uid, int priority);
-    int getPackagePriority(String pkg, int uid);
-
-    void setPackageVisibilityOverride(String pkg, int uid, int visibility);
-    int getPackageVisibilityOverride(String pkg, int uid);
+    ParceledListSlice getTopics(String pkg, int uid);
+    void setTopicVisibilityOverride(String pkg, int uid, in Notification.Topic topic, int visibility);
+    int getTopicVisibilityOverride(String pkg, int uid, in Notification.Topic topic);
+    void setTopicPriority(String pkg, int uid, in Notification.Topic topic, int priority);
+    int getTopicPriority(String pkg, int uid, in Notification.Topic topic);
 
     // TODO: Remove this when callers have been migrated to the equivalent
     // INotificationListener method.

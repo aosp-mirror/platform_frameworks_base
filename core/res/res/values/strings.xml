@@ -4072,4 +4072,6 @@
         <item quantity="one"><xliff:g id="count" example="1">%1$d</xliff:g> selected</item>
         <item quantity="other"><xliff:g id="count" example="3">%1$d</xliff:g> selected</item>
     </plurals>
+
+    <string name="default_notification_topic_label">Miscellaneous</string>
 </resources>
