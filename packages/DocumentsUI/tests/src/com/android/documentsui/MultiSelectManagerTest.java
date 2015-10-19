@@ -16,13 +16,9 @@
 
 package com.android.documentsui;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-
 import android.support.v7.widget.RecyclerView;
 import android.test.AndroidTestCase;
 import android.util.SparseBooleanArray;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 
@@ -51,13 +47,11 @@ public class MultiSelectManagerTest extends AndroidTestCase {
     private MultiSelectManager mManager;
     private TestAdapter mAdapter;
     private TestCallback mCallback;
-    private EventHelper mEventHelper;
 
     public void setUp() throws Exception {
         mAdapter = new TestAdapter(items);
         mCallback = new TestCallback();
-        mEventHelper = new EventHelper();
-        mManager = new MultiSelectManager(mAdapter, mEventHelper, MultiSelectManager.MODE_MULTIPLE);
+        mManager = new MultiSelectManager(mAdapter, MultiSelectManager.MODE_MULTIPLE);
         mManager.addCallback(mCallback);
     }
 
@@ -175,7 +169,7 @@ public class MultiSelectManagerTest extends AndroidTestCase {
     }
 
     public void testSingleSelectMode() {
-        mManager = new MultiSelectManager(mAdapter, mEventHelper, MultiSelectManager.MODE_SINGLE);
+        mManager = new MultiSelectManager(mAdapter, MultiSelectManager.MODE_SINGLE);
         mManager.addCallback(mCallback);
         longPress(20);
         tap(13);
@@ -183,7 +177,7 @@ public class MultiSelectManagerTest extends AndroidTestCase {
     }
 
     public void testSingleSelectMode_ShiftTap() {
-        mManager = new MultiSelectManager(mAdapter, mEventHelper, MultiSelectManager.MODE_SINGLE);
+        mManager = new MultiSelectManager(mAdapter, MultiSelectManager.MODE_SINGLE);
         mManager.addCallback(mCallback);
         longPress(13);
         shiftTap(20);
@@ -269,26 +263,13 @@ public class MultiSelectManagerTest extends AndroidTestCase {
         assertEquals(selection.toString(), expected, selection.size());
     }
 
-    private static final class EventHelper implements MultiSelectManager.ItemFinder {
-
-        @Override
-        public int findItemPosition(MotionEvent e) {
-            throw new UnsupportedOperationException();
-        }
-    }
-
     private static final class TestCallback implements MultiSelectManager.Callback {
 
         Set<Integer> ignored = new HashSet<>();
-        private int mLastChangedPosition;
-        private boolean mLastChangedSelected;
         private boolean mSelectionChanged = false;
 
         @Override
-        public void onItemStateChanged(int position, boolean selected) {
-            this.mLastChangedPosition = position;
-            this.mLastChangedSelected = selected;
-        }
+        public void onItemStateChanged(int position, boolean selected) {}
 
         @Override
         public boolean onBeforeItemStateChange(int position, boolean selected) {

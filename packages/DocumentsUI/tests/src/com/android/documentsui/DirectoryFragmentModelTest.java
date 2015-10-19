@@ -22,10 +22,8 @@ import android.content.ContextWrapper;
 import android.database.Cursor;
 import android.database.MatrixCursor;
 import android.provider.DocumentsContract.Document;
-import android.support.v7.widget.RecyclerView.ViewHolder;
 import android.support.v7.widget.RecyclerView;
 import android.test.AndroidTestCase;
-import android.test.MoreAsserts;
 import android.test.mock.MockContentResolver;
 import android.view.ViewGroup;
 

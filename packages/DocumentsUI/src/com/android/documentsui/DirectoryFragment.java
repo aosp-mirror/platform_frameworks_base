@@ -65,6 +65,7 @@ import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.RecyclerView.LayoutManager;
+import android.support.v7.widget.RecyclerView.OnItemTouchListener;
 import android.support.v7.widget.RecyclerView.RecyclerListener;
 import android.support.v7.widget.RecyclerView.ViewHolder;
 import android.text.TextUtils;
@@ -78,7 +79,6 @@ import android.util.TypedValue;
 import android.view.ActionMode;
 import android.view.DragEvent;
 import android.view.GestureDetector;
-import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -97,6 +97,7 @@ import com.android.documentsui.RecentsProvider.StateColumns;
 import com.android.documentsui.model.DocumentInfo;
 import com.android.documentsui.model.DocumentStack;
 import com.android.documentsui.model.RootInfo;
+
 import com.google.common.collect.Lists;
 
 import java.util.ArrayList;
@@ -299,12 +300,29 @@ public class DirectoryFragment extends Fragment {
                     }
                 };
 
+        final GestureDetector detector = new GestureDetector(this.getContext(), listener);
+        detector.setOnDoubleTapListener(listener);
+
+        mRecView.addOnItemTouchListener(
+                new OnItemTouchListener() {
+                    @Override
+                    public boolean onInterceptTouchEvent(RecyclerView rv, MotionEvent e) {
+                        detector.onTouchEvent(e);
+                        return false;
+                    }
+
+                    @Override
+                    public void onTouchEvent(RecyclerView rv, MotionEvent e) {}
+
+                    @Override
+                    public void onRequestDisallowInterceptTouchEvent(boolean disallowIntercept) {}
+                });
+
         // TODO: instead of inserting the view into the constructor, extract listener-creation code
         // and set the listener on the view after the fact.  Then the view doesn't need to be passed
         // into the selection manager.
         mSelectionManager = new MultiSelectManager(
                 mRecView,
-                listener,
                 state.allowMultiple
                     ? MultiSelectManager.MODE_MULTIPLE
                     : MultiSelectManager.MODE_SINGLE);
