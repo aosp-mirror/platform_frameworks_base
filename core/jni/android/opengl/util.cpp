@@ -643,12 +643,6 @@ void util_multiplyMV(JNIEnv *env, jclass clazz,
 
 // ---------------------------------------------------------------------------
 
-extern void setGLDebugLevel(int level);
-void setTracingLevel(JNIEnv *env, jclass clazz, jint level)
-{
-    setGLDebugLevel(level);
-}
-
 static int checkFormat(SkColorType colorType, int format, int type)
 {
     switch(colorType) {
@@ -1103,7 +1097,6 @@ static const JNINativeMethod gUtilsMethods[] = {
     { "native_getType", "(Landroid/graphics/Bitmap;)I", (void*) util_getType },
     { "native_texImage2D", "(IIILandroid/graphics/Bitmap;II)I", (void*)util_texImage2D },
     { "native_texSubImage2D", "(IIIILandroid/graphics/Bitmap;II)I", (void*)util_texSubImage2D },
-    { "setTracingLevel", "(I)V",                        (void*)setTracingLevel },
 };
 
 static const JNINativeMethod gEtc1Methods[] = {

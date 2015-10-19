@@ -120,7 +120,7 @@ public class Am extends BaseCommand {
         out.println(
                 "usage: am [subcommand] [options]\n" +
                 "usage: am start [-D] [-W] [-P <FILE>] [--start-profiler <FILE>]\n" +
-                "               [--sampling INTERVAL] [-R COUNT] [-S] [--opengl-trace]\n" +
+                "               [--sampling INTERVAL] [-R COUNT] [-S]\n" +
                 "               [--track-allocation] [--user <USER_ID> | current] <INTENT>\n" +
                 "       am startservice [--user <USER_ID> | current] <INTENT>\n" +
                 "       am stopservice [--user <USER_ID> | current] <INTENT>\n" +
@@ -182,7 +182,6 @@ public class Am extends BaseCommand {
                 "    -R: repeat the activity launch <COUNT> times.  Prior to each repeat,\n" +
                 "        the top activity will be finished.\n" +
                 "    -S: force stop the target app before starting the activity\n" +
-                "    --opengl-trace: enable tracing of OpenGL functions\n" +
                 "    --track-allocation: enable tracking of object allocations\n" +
                 "    --user <USER_ID> | current: Specify which user to run as; if not\n" +
                 "        specified then run as the current user.\n" +
@@ -739,8 +738,6 @@ public class Am extends BaseCommand {
                 mRepeat = Integer.parseInt(nextArgRequired());
             } else if (opt.equals("-S")) {
                 mStopOption = true;
-            } else if (opt.equals("--opengl-trace")) {
-                mStartFlags |= ActivityManager.START_FLAG_OPENGL_TRACES;
             } else if (opt.equals("--track-allocation")) {
                 mStartFlags |= ActivityManager.START_FLAG_TRACK_ALLOCATION;
             } else if (opt.equals("--user")) {
