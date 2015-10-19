@@ -66,7 +66,7 @@ the new permissions model.</p>
 
 <p>For details on supporting the new permissions model in your app, see
 <a href="{@docRoot}training/permissions/index.html">
-Working with System Permissionss</a>. For tips on how to assess the impact on your app,
+Working with System Permissions</a>. For tips on how to assess the impact on your app,
 see <a href="{@docRoot}training/permissions/best-practices.html#testing">Permissions Best Practices</a>.</p>
 
 <h2 id="behavior-power">Doze and App Standby</h2>
@@ -189,7 +189,7 @@ call the {@link android.view.ActionMode#invalidateContentRect() invalidateConten
 
 <p>If you are using <a href="{@docRoot}tools/support-library/index.html">
 Android Support Library</a> revision 22.2, be aware that floating toolbars are not
-backward-compatible and appcompat takes control over {@link android.view.ActionMode} objects bywith th
+backward-compatible and appcompat takes control over {@link android.view.ActionMode} objects by
 default. This prevents floating toolbars from being displayed. To enable
 {@link android.view.ActionMode} support in an
 {@link android.support.v7.app.AppCompatActivity}, call
