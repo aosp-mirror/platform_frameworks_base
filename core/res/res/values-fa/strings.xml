@@ -397,16 +397,16 @@
     <string name="permdesc_changeWifiMulticastState" product="tv" msgid="9031975661145014160">"‏به برنامه اجازه می‌دهد تا بسته‌هایی را دریافت کند که در شبکه Wi-Fi با استفاده از آدرس‌های چندبخشی نه تنها به تلویزیون شما، بلکه به همه دستگاهها ارسال می‌شود. این حالت نسبت به حالت غیر چندبخشی از انرژی بیشتری استفاده می‌کند."</string>
     <string name="permdesc_changeWifiMulticastState" product="default" msgid="6851949706025349926">"‏به برنامه اجازه می‌دهد به دریافت بسته‌های ارسالی به همه دستگاه‌های موجود در شبکه Wi-Fi با استفاده از آدرس‌های پخش چندگانه و نه فقط به تلفن شما بپردازند. این از توان مصرف بیشتری نسبت به حالت پخش غیرچندگانه استفاده می‌کند."</string>
     <string name="permlab_bluetoothAdmin" msgid="6006967373935926659">"دسترسی به تنظیمات بلوتوث"</string>
-    <string name="permdesc_bluetoothAdmin" product="tablet" msgid="6921177471748882137">"‏به برنامه اجازه می‎دهد تا رایانهٔ لوحی بلوتوث محلی را پیکربندی کرده، دستگاه‌های راه دور را شناسایی کرده و با آن‌ها جفت شود."</string>
+    <string name="permdesc_bluetoothAdmin" product="tablet" msgid="6921177471748882137">"‏به برنامه اجازه می‎دهد تا رایانهٔ لوحی بلوتوث محلی را پیکربندی کرده، دستگاه‌های راه دور را شناسایی کرده و با آن‌ها مرتبط‌سازی شود."</string>
     <string name="permdesc_bluetoothAdmin" product="tv" msgid="3373125682645601429">"به برنامه اجازه می‌دهد تا تلویزیون بلوتوث محلی را پیکربندی کند و دستگاه‌های از راه دور را شناسایی کند و با آنها مرتبط شود."</string>
-    <string name="permdesc_bluetoothAdmin" product="default" msgid="8931682159331542137">"‏به برنامه اجازه می‎دهد تا تلفن بلوتوث محلی را پیکربندی کند و دستگاه‌های راه دور را پیدا کند و با آن‌ها جفت شود."</string>
+    <string name="permdesc_bluetoothAdmin" product="default" msgid="8931682159331542137">"‏به برنامه اجازه می‎دهد تا تلفن بلوتوث محلی را پیکربندی کند و دستگاه‌های راه دور را پیدا کند و با آن‌ها مرتبط‌سازی شود."</string>
     <string name="permlab_accessWimaxState" msgid="4195907010610205703">"‏اتصال و قطع اتصال از WiMAX"</string>
     <string name="permdesc_accessWimaxState" msgid="6360102877261978887">"به برنامه امکان می‌دهد فعال بودن وایمکس و اطلاعات مربوط به هر یک از شبکه‌های وایمکس متصل را مشخص کند."</string>
     <string name="permlab_changeWimaxState" msgid="2405042267131496579">"‏تغییر وضعیت WiMAX"</string>
     <string name="permdesc_changeWimaxState" product="tablet" msgid="3156456504084201805">"به برنامه امکان می‌دهد رایانهٔ لوحی را به شبکه‌های وایمکس متصل کرده یا اتصال آن را از این شبکه‌ها قطع کند."</string>
     <string name="permdesc_changeWimaxState" product="tv" msgid="6022307083934827718">"‏به برنامه اجازه می‌دهد تا تلویزیون را به شبکه‌های WiMAX وصل یا ارتباط آن را با این شبکه‌ها قطع کند."</string>
     <string name="permdesc_changeWimaxState" product="default" msgid="697025043004923798">"‏به برنامه امکان می‎دهد تا تلفن را به شبکه‌های وایمکس متصل کرده یا اتصال آنرا از این شبکه‌ها قطع کند."</string>
-    <string name="permlab_bluetooth" msgid="6127769336339276828">"جفت کردن با دستگاه‌های بلوتوث"</string>
+    <string name="permlab_bluetooth" msgid="6127769336339276828">"مرتبط‌سازی با دستگاه‌های بلوتوث"</string>
     <string name="permdesc_bluetooth" product="tablet" msgid="3480722181852438628">"‏به برنامه اجازه می‎دهد تا پیکربندی بلوتوث در رایانهٔ لوحی را مشاهده کند و اتصال با دستگاه‌های مرتبط را برقرار کرده و بپذیرد."</string>
     <string name="permdesc_bluetooth" product="tv" msgid="3974124940101104206">"به برنامه اجازه می‌دهد تا پیکربندی بلوتوث را در تلویزیون مشاهده کند و اتصالات را با دستگاه‌های مرتبط‌شده ایجاد کند و بپذیرد."</string>
     <string name="permdesc_bluetooth" product="default" msgid="3207106324452312739">"‏به برنامه اجازه می‎دهد تا پیکربندی بلوتوث در تلفن را مشاهده کند، و اتصالات دستگاه‌های مرتبط را برقرار کرده و بپذیرد."</string>
@@ -1143,7 +1143,7 @@
     <string name="gpsNotifTitle" msgid="5446858717157416839">"درخواست موقعیت مکانی"</string>
     <string name="gpsNotifMessage" msgid="1374718023224000702">"درخواست شده توسط <xliff:g id="NAME">%1$s</xliff:g> (<xliff:g id="SERVICE">%2$s</xliff:g>)"</string>
     <string name="gpsVerifYes" msgid="2346566072867213563">"بله"</string>
-    <string name="gpsVerifNo" msgid="1146564937346454865">"خیر"</string>
+    <string name="gpsVerifNo" msgid="1146564937346454865">"نه"</string>
     <string name="sync_too_many_deletes" msgid="5296321850662746890">"از حد مجاز حذف فراتر رفت"</string>
     <string name="sync_too_many_deletes_desc" msgid="496551671008694245">"‏<xliff:g id="NUMBER_OF_DELETED_ITEMS">%1$d</xliff:g> مورد حذف شده برای <xliff:g id="TYPE_OF_SYNC">%2$s</xliff:g>، حساب <xliff:g id="ACCOUNT_NAME">%3$s</xliff:g> وجود دارد. می‎خواهید چه کاری انجام دهید؟"</string>
     <string name="sync_really_delete" msgid="2572600103122596243">"حذف موارد"</string>
@@ -1470,6 +1470,7 @@
       <item quantity="other">‏برای %d ساعت</item>
     </plurals>
     <string name="zen_mode_until" msgid="7336308492289875088">"تا <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
+    <string name="zen_mode_alarm" msgid="9128205721301330797">"تا <xliff:g id="FORMATTEDTIME">%1$s</xliff:g> (هشدار بعدی)"</string>
     <string name="zen_mode_forever" msgid="7420011936770086993">"تا وقتی آن را خاموش کنید"</string>
     <string name="zen_mode_forever_dnd" msgid="3792132696572189081">"تا زمانی که «مزاحم نشوید» را خاموش کنید"</string>
     <string name="zen_mode_rule_name_combination" msgid="191109939968076477">"<xliff:g id="FIRST">%1$s</xliff:g> /‏ <xliff:g id="REST">%2$s</xliff:g>"</string>

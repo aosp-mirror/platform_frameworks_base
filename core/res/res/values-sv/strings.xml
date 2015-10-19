@@ -1182,7 +1182,7 @@
     <string name="shareactionprovider_share_with" msgid="806688056141131819">"Dela med"</string>
     <string name="shareactionprovider_share_with_application" msgid="5627411384638389738">"Dela med <xliff:g id="APPLICATION_NAME">%s</xliff:g>"</string>
     <string name="content_description_sliding_handle" msgid="415975056159262248">"Skärmlåsfunktion. Tryck och dra."</string>
-    <string name="description_target_unlock_tablet" msgid="3833195335629795055">"Lås upp genom att dra."</string>
+    <string name="description_target_unlock_tablet" msgid="3833195335629795055">"Lås upp genom att svepa."</string>
     <string name="keyboard_headset_required_to_hear_password" msgid="7011927352267668657">"Anslut mikrofonlurar om du vill att lösenordet ska läsas upp."</string>
     <string name="keyboard_password_character_no_headset" msgid="2859873770886153678">"Punkt."</string>
     <string name="action_bar_home_description" msgid="5293600496601490216">"Visa startsidan"</string>
@@ -1470,6 +1470,7 @@
       <item quantity="one">I en 1 tim</item>
     </plurals>
     <string name="zen_mode_until" msgid="7336308492289875088">"Till kl. <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
+    <string name="zen_mode_alarm" msgid="9128205721301330797">"Till <xliff:g id="FORMATTEDTIME">%1$s</xliff:g> (nästa alarm)"</string>
     <string name="zen_mode_forever" msgid="7420011936770086993">"Tills du inaktiverar detta"</string>
     <string name="zen_mode_forever_dnd" msgid="3792132696572189081">"Tills du inaktiverar Stör ej"</string>
     <string name="zen_mode_rule_name_combination" msgid="191109939968076477">"<xliff:g id="FIRST">%1$s</xliff:g>/<xliff:g id="REST">%2$s</xliff:g>"</string>
