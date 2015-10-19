@@ -23,6 +23,7 @@
 #include "DisplayListCanvas.h"
 #endif
 #include "microbench/MicroBench.h"
+#include "unit_tests/TestUtils.h"
 
 using namespace android;
 using namespace android::uirenderer;
@@ -96,6 +97,40 @@ void BM_DisplayListCanvas_record_translate::Run(int iters) {
     for (int i = 0; i < iters; ++i) {
         canvas.reset(100, 100);
         canvas.scale(10, 10);
+        MicroBench::DoNotOptimize(&canvas);
+        delete canvas.finishRecording();
+    }
+    StopBenchmarkTiming();
+}
+
+/**
+ * Simulate a simple view drawing a background, overlapped by an image.
+ *
+ * Note that the recording commands are intentionally not perfectly efficient, as the
+ * View system frequently produces unneeded save/restores.
+ */
+BENCHMARK_NO_ARG(BM_DisplayListCanvas_record_simpleBitmapView);
+void BM_DisplayListCanvas_record_simpleBitmapView::Run(int iters) {
+    TestCanvas canvas(100, 100);
+    delete canvas.finishRecording();
+
+    SkPaint rectPaint;
+    SkBitmap iconBitmap = TestUtils::createSkBitmap(80, 80);
+
+    StartBenchmarkTiming();
+    for (int i = 0; i < iters; ++i) {
+        canvas.reset(100, 100);
+        {
+            canvas.save(SkCanvas::kMatrix_SaveFlag | SkCanvas::kClip_SaveFlag);
+            canvas.drawRect(0, 0, 100, 100, rectPaint);
+            canvas.restore();
+        }
+        {
+            canvas.save(SkCanvas::kMatrix_SaveFlag | SkCanvas::kClip_SaveFlag);
+            canvas.translate(10, 10);
+            canvas.drawBitmap(iconBitmap, 0, 0, nullptr);
+            canvas.restore();
+        }
         MicroBench::DoNotOptimize(&canvas);
         delete canvas.finishRecording();
     }

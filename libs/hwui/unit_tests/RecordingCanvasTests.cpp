@@ -23,30 +23,31 @@
 namespace android {
 namespace uirenderer {
 
-static void playbackOps(const std::vector<DisplayList::Chunk>& chunks,
-        const std::vector<RecordedOp*>& ops, std::function<void(const RecordedOp&)> opReciever) {
-    for (const DisplayList::Chunk& chunk : chunks) {
+static void playbackOps(const DisplayList& displayList,
+        std::function<void(const RecordedOp&)> opReciever) {
+    for (const DisplayList::Chunk& chunk : displayList.getChunks()) {
         for (size_t opIndex = chunk.beginOpIndex; opIndex < chunk.endOpIndex; opIndex++) {
-            opReciever(*ops[opIndex]);
+            RecordedOp* op = displayList.getOps()[opIndex];
+            opReciever(*op);
         }
     }
 }
 
 TEST(RecordingCanvas, emptyPlayback) {
-    auto dld = TestUtils::createDisplayList<RecordingCanvas>(100, 200, [](RecordingCanvas& canvas) {
+    auto dl = TestUtils::createDisplayList<RecordingCanvas>(100, 200, [](RecordingCanvas& canvas) {
         canvas.save(SkCanvas::kMatrix_SaveFlag | SkCanvas::kClip_SaveFlag);
         canvas.restore();
     });
-    playbackOps(dld->getChunks(), dld->getOps(), [](const RecordedOp& op) { FAIL(); });
+    playbackOps(*dl, [](const RecordedOp& op) { FAIL(); });
 }
 
 TEST(RecordingCanvas, testSimpleRectRecord) {
-    auto dld = TestUtils::createDisplayList<RecordingCanvas>(100, 200, [](RecordingCanvas& canvas) {
+    auto dl = TestUtils::createDisplayList<RecordingCanvas>(100, 200, [](RecordingCanvas& canvas) {
         canvas.drawRect(10, 20, 90, 180, SkPaint());
     });
 
     int count = 0;
-    playbackOps(dld->getChunks(), dld->getOps(), [&count](const RecordedOp& op) {
+    playbackOps(*dl, [&count](const RecordedOp& op) {
         count++;
         ASSERT_EQ(RecordedOpId::RectOp, op.opId);
         ASSERT_EQ(Rect(0, 0, 100, 200), op.localClipRect);
@@ -56,7 +57,7 @@ TEST(RecordingCanvas, testSimpleRectRecord) {
 }
 
 TEST(RecordingCanvas, backgroundAndImage) {
-    auto dld = TestUtils::createDisplayList<RecordingCanvas>(100, 200, [](RecordingCanvas& canvas) {
+    auto dl = TestUtils::createDisplayList<RecordingCanvas>(100, 200, [](RecordingCanvas& canvas) {
         SkBitmap bitmap;
         bitmap.setInfo(SkImageInfo::MakeUnknown(25, 25));
         SkPaint paint;
@@ -81,7 +82,7 @@ TEST(RecordingCanvas, backgroundAndImage) {
     });
 
     int count = 0;
-    playbackOps(dld->getChunks(), dld->getOps(), [&count](const RecordedOp& op) {
+    playbackOps(*dl, [&count](const RecordedOp& op) {
         if (count == 0) {
             ASSERT_EQ(RecordedOpId::RectOp, op.opId);
             ASSERT_NE(nullptr, op.paint);

@@ -82,7 +82,7 @@ DisplayList* DisplayListCanvas::finishRecording() {
 
 void DisplayListCanvas::callDrawGLFunction(Functor *functor) {
     addDrawOp(new (alloc()) DrawFunctorOp(functor));
-    mDisplayList->functors.add(functor);
+    mDisplayList->functors.push_back(functor);
 }
 
 SkCanvas* DisplayListCanvas::asSkCanvas() {
@@ -528,7 +528,7 @@ size_t DisplayListCanvas::addOpAndUpdateChunk(DisplayListOp* op) {
         newChunk.endOpIndex = insertIndex + 1;
         newChunk.reorderChildren = (mDeferredBarrierType == kBarrier_OutOfOrder);
 
-        int nextChildIndex = mDisplayList->children().size();
+        int nextChildIndex = mDisplayList->children.size();
         newChunk.beginChildIndex = newChunk.endChildIndex = nextChildIndex;
         mDeferredBarrierType = kBarrier_None;
     } else {

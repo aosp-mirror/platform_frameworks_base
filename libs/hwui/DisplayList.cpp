@@ -34,6 +34,17 @@ namespace uirenderer {
 
 DisplayList::DisplayList()
         : projectionReceiveIndex(-1)
+        , stdAllocator(allocator)
+        , chunks(stdAllocator)
+        , ops(stdAllocator)
+        , children(stdAllocator)
+        , bitmapResources(stdAllocator)
+        , pathResources(stdAllocator)
+        , patchResources(stdAllocator)
+        , paints(stdAllocator)
+        , regions(stdAllocator)
+        , referenceHolders(stdAllocator)
+        , functors(stdAllocator)
         , hasDrawOps(false) {
 }
 
@@ -68,9 +79,9 @@ void DisplayList::cleanupResources() {
 }
 
 size_t DisplayList::addChild(NodeOpType* op) {
-    mReferenceHolders.push_back(op->renderNode);
-    size_t index = mChildren.size();
-    mChildren.push_back(op);
+    referenceHolders.push_back(op->renderNode);
+    size_t index = children.size();
+    children.push_back(op);
     return index;
 }
 

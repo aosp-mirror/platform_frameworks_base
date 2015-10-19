@@ -29,6 +29,8 @@
 #include <stddef.h>
 #include <type_traits>
 
+#include <vector>
+
 namespace android {
 namespace uirenderer {
 
@@ -174,6 +176,13 @@ template <class T1, class T2>
 bool operator== (const LinearStdAllocator<T1>&, const LinearStdAllocator<T2>&) { return true; }
 template <class T1, class T2>
 bool operator!= (const LinearStdAllocator<T1>&, const LinearStdAllocator<T2>&) { return false; }
+
+template <class T>
+class LsaVector : public std::vector<T, LinearStdAllocator<T>> {
+public:
+    LsaVector(const LinearStdAllocator<T>& allocator)
+            : std::vector<T, LinearStdAllocator<T>>(allocator) {}
+};
 
 }; // namespace uirenderer
 }; // namespace android

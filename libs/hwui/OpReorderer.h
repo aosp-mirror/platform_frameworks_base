@@ -62,8 +62,7 @@ public:
     void defer(const SkRect& clip, int viewportWidth, int viewportHeight,
             const std::vector< sp<RenderNode> >& nodes);
 
-    void defer(int viewportWidth, int viewportHeight,
-            const std::vector<DisplayList::Chunk>& chunks, const std::vector<RecordedOp*>& ops);
+    void defer(int viewportWidth, int viewportHeight, const DisplayList& displayList);
     typedef std::function<void(void*, const RecordedOp&, const BakedOpState&)> BakedOpReceiver;
 
     /**
@@ -92,8 +91,7 @@ public:
 private:
     BakedOpState* bakeOpState(const RecordedOp& recordedOp);
 
-    void deferImpl(const std::vector<DisplayList::Chunk>& chunks,
-            const std::vector<RecordedOp*>& ops);
+    void deferImpl(const DisplayList& displayList);
 
     void replayBakedOpsImpl(void* arg, BakedOpReceiver* receivers);
 
