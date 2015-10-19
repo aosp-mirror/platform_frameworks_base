@@ -262,6 +262,24 @@ public interface MetricsConstants {
     public static final int TUNER_DEMO_MODE_ON = 236;
     public static final int TUNER_BATTERY_PERCENTAGE = 237;
     public static final int FUELGAUGE_INACTIVE_APPS = 238;
+    public static final int ACTION_ASSIST_LONG_PRESS = 239;
+    public static final int FINGERPRINT_ENROLLING = 240;
+    public static final int FINGERPRINT_FIND_SENSOR = 241;
+    public static final int FINGERPRINT_ENROLL_FINISH = 242;
+    public static final int FINGERPRINT_ENROLL_INTRO = 243;
+    public static final int FINGERPRINT_ENROLL_ONBOARD = 244;
+    public static final int FINGERPRINT_ENROLL_SIDECAR = 245;
+    public static final int FINGERPRINT_ENROLLING_SETUP = 246;
+    public static final int FINGERPRINT_FIND_SENSOR_SETUP = 247;
+    public static final int FINGERPRINT_ENROLL_FINISH_SETUP = 248;
+    public static final int FINGERPRINT_ENROLL_INTRO_SETUP = 249;
+    public static final int FINGERPRINT_ENROLL_ONBOARD_SETUP = 250;
+    public static final int ACTION_FINGERPRINT_ENROLL = 251;
+    public static final int ACTION_FINGERPRINT_AUTH = 252;
+    public static final int ACTION_FINGERPRINT_DELETE = 253;
+    public static final int ACTION_FINGERPRINT_RENAME = 254;
+    public static final int ACTION_DOUBLE_TAP_POWER_CAMERA_GESTURE = 255;
+    public static final int ACTION_WIGGLE_CAMERA_GESTURE = 256;
 
     // These constants must match those in the analytic pipeline, do not edit.
     // Add temporary values to the top of MetricsLogger instead.
