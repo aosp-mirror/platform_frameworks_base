@@ -313,7 +313,7 @@
     <string name="keyguard_more_overflow_text" msgid="9195222469041601365">"+<xliff:g id="NUMBER_OF_NOTIFICATIONS">%d</xliff:g>"</string>
     <string name="speed_bump_explanation" msgid="1288875699658819755">"Mindre brådskande aviseringar nedan"</string>
     <string name="notification_tap_again" msgid="8524949573675922138">"Tryck igen för att öppna"</string>
-    <string name="keyguard_unlock" msgid="8043466894212841998">"Dra uppåt om du vill låsa upp"</string>
+    <string name="keyguard_unlock" msgid="8043466894212841998">"Svep uppåt om du vill låsa upp"</string>
     <string name="phone_hint" msgid="4872890986869209950">"Dra från ikonen och öppna telefonen"</string>
     <string name="voice_hint" msgid="8939888732119726665">"Dra från ikonen och öppna röstassistenten"</string>
     <string name="camera_hint" msgid="7939688436797157483">"Dra från ikonen och öppna kameran"</string>
