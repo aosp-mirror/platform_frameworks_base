@@ -32,16 +32,6 @@ MinikinFontSkia::~MinikinFontSkia() {
     SkSafeUnref(mTypeface);
 }
 
-bool MinikinFontSkia::GetGlyph(uint32_t codepoint, uint32_t *glyph) const {
-    SkPaint paint;
-    paint.setTypeface(mTypeface);
-    paint.setTextEncoding(SkPaint::kUTF32_TextEncoding);
-    uint16_t glyph16;
-    paint.textToGlyphs(&codepoint, sizeof(codepoint), &glyph16);
-    *glyph  = glyph16;
-    return !!glyph16;
-}
-
 static void MinikinFontSkia_SetSkiaPaint(const MinikinFont* font, SkPaint* skPaint, const MinikinPaint& paint) {
     skPaint->setTextEncoding(SkPaint::kGlyphID_TextEncoding);
     skPaint->setTextSize(paint.size);
