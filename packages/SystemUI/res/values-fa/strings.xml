@@ -378,7 +378,7 @@
     <string name="keyguard_indication_trust_disabled" msgid="7412534203633528135">"دستگاه قفل باقی می‌ماند تا زمانی که قفل آن را به صورت دستی باز کنید"</string>
     <string name="hidden_notifications_title" msgid="7139628534207443290">"دریافت سریع‌تر اعلان‌ها"</string>
     <string name="hidden_notifications_text" msgid="2326409389088668981">"قبل از باز کردن قفل آنها را مشاهده کنید"</string>
-    <string name="hidden_notifications_cancel" msgid="3690709735122344913">"خیر، سپاسگزارم"</string>
+    <string name="hidden_notifications_cancel" msgid="3690709735122344913">"نه سپاسگزارم"</string>
     <string name="hidden_notifications_setup" msgid="41079514801976810">"راه‌اندازی"</string>
     <string name="notification_expand_button_text" msgid="1037425494153780718">"مشاهده همه"</string>
     <string name="notification_collapse_button_text" msgid="6883253262134328057">"پنهان کردن همه"</string>
@@ -390,7 +390,7 @@
     <string name="screen_pinning_description" msgid="1346522416878235405">"تا زمانی که پین را بردارید، در نما نگه‌داشته می‌شود. برای برداشتن پین، برگشت و نمای کلی را به صورت هم‌زمان لمس کنید و نگه‌دارید."</string>
     <string name="screen_pinning_description_accessible" msgid="8518446209564202557">"تا زمانی که پین را بردارید، در نما نگه‌داشته می‌شود. برای برداشتن پین، نمای کلی را لمس کنید و نگه‌دارید."</string>
     <string name="screen_pinning_positive" msgid="3783985798366751226">"متوجه شدم"</string>
-    <string name="screen_pinning_negative" msgid="3741602308343880268">"خیر متشکرم"</string>
+    <string name="screen_pinning_negative" msgid="3741602308343880268">"نه سپاسگزارم"</string>
     <string name="quick_settings_reset_confirmation_title" msgid="748792586749897883">"<xliff:g id="TILE_LABEL">%1$s</xliff:g> مخفی شود؟"</string>
     <string name="quick_settings_reset_confirmation_message" msgid="2235970126803317374">"دفعه بعد که آن را روشن کنید، در تنظیمات نشان داده می‌شود."</string>
     <string name="quick_settings_reset_confirmation_button" msgid="2660339101868367515">"پنهان کردن"</string>
