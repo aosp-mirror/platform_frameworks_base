@@ -689,6 +689,8 @@ public class Activity extends ContextThemeWrapper
     private static final String SAVED_DIALOGS_TAG = "android:savedDialogs";
     private static final String SAVED_DIALOG_KEY_PREFIX = "android:dialog_";
     private static final String SAVED_DIALOG_ARGS_KEY_PREFIX = "android:dialog_args_";
+    private static final String HAS_CURENT_PERMISSIONS_REQUEST_KEY =
+            "android:hasCurrentPermissionsRequest";
 
     private static final String REQUEST_PERMISSIONS_WHO_PREFIX = "@android:requestPermissions:";
 
@@ -796,6 +798,8 @@ public class Activity extends ContextThemeWrapper
     ActivityTransitionState mActivityTransitionState = new ActivityTransitionState();
     SharedElementCallback mEnterTransitionListener = SharedElementCallback.NULL_CALLBACK;
     SharedElementCallback mExitTransitionListener = SharedElementCallback.NULL_CALLBACK;
+
+    private boolean mHasCurrentPermissionsRequest;
 
     /** Return the intent that started this activity. */
     public Intent getIntent() {
@@ -1298,6 +1302,7 @@ public class Activity extends ContextThemeWrapper
         onSaveInstanceState(outState);
         saveManagedDialogs(outState);
         mActivityTransitionState.saveState(outState);
+        storeHasCurrentPermissionRequest(outState);
         if (DEBUG_LIFECYCLE) Slog.v(TAG, "onSaveInstanceState " + this + ": " + outState);
     }
 
@@ -1313,6 +1318,7 @@ public class Activity extends ContextThemeWrapper
     final void performSaveInstanceState(Bundle outState, PersistableBundle outPersistentState) {
         onSaveInstanceState(outState, outPersistentState);
         saveManagedDialogs(outState);
+        storeHasCurrentPermissionRequest(outState);
         if (DEBUG_LIFECYCLE) Slog.v(TAG, "onSaveInstanceState " + this + ": " + outState +
                 ", " + outPersistentState);
     }
@@ -3811,8 +3817,15 @@ public class Activity extends ContextThemeWrapper
      * @see #shouldShowRequestPermissionRationale(String)
      */
     public final void requestPermissions(@NonNull String[] permissions, int requestCode) {
+        if (mHasCurrentPermissionsRequest) {
+            Log.w(TAG, "Can reqeust only one set of permissions at a time");
+            // Dispatch the callback with empty arrays which means a cancellation.
+            onRequestPermissionsResult(requestCode, new String[0], new int[0]);
+            return;
+        }
         Intent intent = getPackageManager().buildRequestPermissionsIntent(permissions);
         startActivityForResult(REQUEST_PERMISSIONS_WHO_PREFIX, intent, requestCode, null);
+        mHasCurrentPermissionsRequest = true;
     }
 
     /**
@@ -6234,12 +6247,14 @@ public class Activity extends ContextThemeWrapper
     }
 
     final void performCreate(Bundle icicle) {
+        restoreHasCurrentPermissionRequest(icicle);
         onCreate(icicle);
         mActivityTransitionState.readState(icicle);
         performCreateCommon();
     }
 
     final void performCreate(Bundle icicle, PersistableBundle persistentState) {
+        restoreHasCurrentPermissionRequest(icicle);
         onCreate(icicle, persistentState);
         mActivityTransitionState.readState(icicle);
         performCreateCommon();
@@ -6418,6 +6433,19 @@ public class Activity extends ContextThemeWrapper
         return mResumed;
     }
 
+    private void storeHasCurrentPermissionRequest(Bundle bundle) {
+        if (bundle != null && mHasCurrentPermissionsRequest) {
+            bundle.putBoolean(HAS_CURENT_PERMISSIONS_REQUEST_KEY, true);
+        }
+    }
+
+    private void restoreHasCurrentPermissionRequest(Bundle bundle) {
+        if (bundle != null) {
+            mHasCurrentPermissionsRequest = bundle.getBoolean(
+                    HAS_CURENT_PERMISSIONS_REQUEST_KEY, false);
+        }
+    }
+
     void dispatchActivityResult(String who, int requestCode,
         int resultCode, Intent data) {
         if (false) Log.v(
@@ -6545,6 +6573,7 @@ public class Activity extends ContextThemeWrapper
     }
 
     private void dispatchRequestPermissionsResult(int requestCode, Intent data) {
+        mHasCurrentPermissionsRequest = false;
         // If the package installer crashed we may have not data - best effort.
         String[] permissions = (data != null) ? data.getStringArrayExtra(
                 PackageManager.EXTRA_REQUEST_PERMISSIONS_NAMES) : new String[0];
