@@ -51,7 +51,7 @@
     <string name="serviceDisabled" msgid="1937553226592516411">"سرویس غیرفعال شده است."</string>
     <string name="serviceRegistered" msgid="6275019082598102493">"ثبت با موفقیت انجام شد"</string>
     <string name="serviceErased" msgid="1288584695297200972">"پاک کردن با موفقیت انجام شد."</string>
-    <string name="passwordIncorrect" msgid="7612208839450128715">"رمز ورود اشتباه است."</string>
+    <string name="passwordIncorrect" msgid="7612208839450128715">"گذرواژه اشتباه است."</string>
     <string name="mmiComplete" msgid="8232527495411698359">"‏MMI کامل شد."</string>
     <string name="badPin" msgid="9015277645546710014">"‏پین قدیمی که نوشته‎اید صحیح نیست."</string>
     <string name="badPuk" msgid="5487257647081132201">"‏PUK که نوشته‌اید صحیح نیست."</string>
@@ -74,7 +74,7 @@
     <string name="CfMmi" msgid="5123218989141573515">"هدایت تماس"</string>
     <string name="CwMmi" msgid="9129678056795016867">"انتظار تماس"</string>
     <string name="BaMmi" msgid="455193067926770581">"محدودیت تماس"</string>
-    <string name="PwdMmi" msgid="7043715687905254199">"تغییر رمز ورود"</string>
+    <string name="PwdMmi" msgid="7043715687905254199">"تغییر گذرواژه"</string>
     <string name="PinMmi" msgid="3113117780361190304">"تغییر پین"</string>
     <string name="CnipMmi" msgid="3110534680557857162">"شماره تماس حاضر"</string>
     <string name="CnirMmi" msgid="3062102121430548731">"شماره تماس محدود شده"</string>
@@ -397,16 +397,16 @@
     <string name="permdesc_changeWifiMulticastState" product="tv" msgid="9031975661145014160">"‏به برنامه اجازه می‌دهد تا بسته‌هایی را دریافت کند که در شبکه Wi-Fi با استفاده از آدرس‌های چندبخشی نه تنها به تلویزیون شما، بلکه به همه دستگاهها ارسال می‌شود. این حالت نسبت به حالت غیر چندبخشی از انرژی بیشتری استفاده می‌کند."</string>
     <string name="permdesc_changeWifiMulticastState" product="default" msgid="6851949706025349926">"‏به برنامه اجازه می‌دهد به دریافت بسته‌های ارسالی به همه دستگاه‌های موجود در شبکه Wi-Fi با استفاده از آدرس‌های پخش چندگانه و نه فقط به تلفن شما بپردازند. این از توان مصرف بیشتری نسبت به حالت پخش غیرچندگانه استفاده می‌کند."</string>
     <string name="permlab_bluetoothAdmin" msgid="6006967373935926659">"دسترسی به تنظیمات بلوتوث"</string>
-    <string name="permdesc_bluetoothAdmin" product="tablet" msgid="6921177471748882137">"‏به برنامه اجازه می‎دهد تا رایانهٔ لوحی بلوتوث محلی را پیکربندی کرده، دستگاه‌های راه دور را شناسایی کرده و با آن‌ها جفت شود."</string>
+    <string name="permdesc_bluetoothAdmin" product="tablet" msgid="6921177471748882137">"‏به برنامه اجازه می‎دهد تا رایانهٔ لوحی بلوتوث محلی را پیکربندی کرده، دستگاه‌های راه دور را شناسایی کرده و با آن‌ها مرتبط‌سازی شود."</string>
     <string name="permdesc_bluetoothAdmin" product="tv" msgid="3373125682645601429">"به برنامه اجازه می‌دهد تا تلویزیون بلوتوث محلی را پیکربندی کند و دستگاه‌های از راه دور را شناسایی کند و با آنها مرتبط شود."</string>
-    <string name="permdesc_bluetoothAdmin" product="default" msgid="8931682159331542137">"‏به برنامه اجازه می‎دهد تا تلفن بلوتوث محلی را پیکربندی کند و دستگاه‌های راه دور را پیدا کند و با آن‌ها جفت شود."</string>
+    <string name="permdesc_bluetoothAdmin" product="default" msgid="8931682159331542137">"‏به برنامه اجازه می‎دهد تا تلفن بلوتوث محلی را پیکربندی کند و دستگاه‌های راه دور را پیدا کند و با آن‌ها مرتبط‌سازی شود."</string>
     <string name="permlab_accessWimaxState" msgid="4195907010610205703">"‏اتصال و قطع اتصال از WiMAX"</string>
     <string name="permdesc_accessWimaxState" msgid="6360102877261978887">"به برنامه امکان می‌دهد فعال بودن وایمکس و اطلاعات مربوط به هر یک از شبکه‌های وایمکس متصل را مشخص کند."</string>
     <string name="permlab_changeWimaxState" msgid="2405042267131496579">"‏تغییر وضعیت WiMAX"</string>
     <string name="permdesc_changeWimaxState" product="tablet" msgid="3156456504084201805">"به برنامه امکان می‌دهد رایانهٔ لوحی را به شبکه‌های وایمکس متصل کرده یا اتصال آن را از این شبکه‌ها قطع کند."</string>
     <string name="permdesc_changeWimaxState" product="tv" msgid="6022307083934827718">"‏به برنامه اجازه می‌دهد تا تلویزیون را به شبکه‌های WiMAX وصل یا ارتباط آن را با این شبکه‌ها قطع کند."</string>
     <string name="permdesc_changeWimaxState" product="default" msgid="697025043004923798">"‏به برنامه امکان می‎دهد تا تلفن را به شبکه‌های وایمکس متصل کرده یا اتصال آنرا از این شبکه‌ها قطع کند."</string>
-    <string name="permlab_bluetooth" msgid="6127769336339276828">"جفت کردن با دستگاه‌های بلوتوث"</string>
+    <string name="permlab_bluetooth" msgid="6127769336339276828">"مرتبط‌سازی با دستگاه‌های بلوتوث"</string>
     <string name="permdesc_bluetooth" product="tablet" msgid="3480722181852438628">"‏به برنامه اجازه می‎دهد تا پیکربندی بلوتوث در رایانهٔ لوحی را مشاهده کند و اتصال با دستگاه‌های مرتبط را برقرار کرده و بپذیرد."</string>
     <string name="permdesc_bluetooth" product="tv" msgid="3974124940101104206">"به برنامه اجازه می‌دهد تا پیکربندی بلوتوث را در تلویزیون مشاهده کند و اتصالات را با دستگاه‌های مرتبط‌شده ایجاد کند و بپذیرد."</string>
     <string name="permdesc_bluetooth" product="default" msgid="3207106324452312739">"‏به برنامه اجازه می‎دهد تا پیکربندی بلوتوث در تلفن را مشاهده کند، و اتصالات دستگاه‌های مرتبط را برقرار کرده و بپذیرد."</string>
@@ -495,7 +495,7 @@
     <string name="permdesc_bindCarrierServices" msgid="1391552602551084192">"به دارنده امکان می‌دهد به سرویس‌های شرکت مخابراتی متصل شود. هرگز نباید برای برنامه‌های عادی مورد نیاز باشد."</string>
     <string name="permlab_access_notification_policy" msgid="4247510821662059671">"دسترسی به حالت «مزاحم نشوید»"</string>
     <string name="permdesc_access_notification_policy" msgid="3296832375218749580">"به برنامه امکان می‌دهد پیکربندی «مزاحم نشوید» را بخواند و بنویسد."</string>
-    <string name="policylab_limitPassword" msgid="4497420728857585791">"تنظیم قوانین رمز ورود"</string>
+    <string name="policylab_limitPassword" msgid="4497420728857585791">"تنظیم قوانین گذرواژه"</string>
     <string name="policydesc_limitPassword" msgid="2502021457917874968">"کنترل طول و نوع نویسه‌هایی که در گذرواژه و پین قفل صفحه مجاز است."</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"نمایش تلاش‌های قفل گشایی صفحه"</string>
     <string name="policydesc_watchLogin" product="tablet" msgid="3215729294215070072">"‏تعداد گذرواژه‎های نادرست تایپ شده را هنگام بازکردن قفل صفحه کنترل می‌کند، و اگر دفعات زیادی گذرواژه نادرست وارد شود رایانهٔ لوحی را قفل می‌کند و همه داده‎های رایانهٔ لوحی را پاک می‌کند."</string>
@@ -532,7 +532,7 @@
     <item msgid="7897544654242874543">"محل کار"</item>
     <item msgid="1103601433382158155">"نمابر محل کار"</item>
     <item msgid="1735177144948329370">"نمابر خانه"</item>
-    <item msgid="603878674477207394">"پیجر"</item>
+    <item msgid="603878674477207394">"پی‌جو"</item>
     <item msgid="1650824275177931637">"سایر موارد"</item>
     <item msgid="9192514806975898961">"سفارشی"</item>
   </string-array>
@@ -575,7 +575,7 @@
     <string name="phoneTypeWork" msgid="8863939667059911633">"محل کار"</string>
     <string name="phoneTypeFaxWork" msgid="3517792160008890912">"نمابر محل کار"</string>
     <string name="phoneTypeFaxHome" msgid="2067265972322971467">"نمابر خانه"</string>
-    <string name="phoneTypePager" msgid="7582359955394921732">"پیجر"</string>
+    <string name="phoneTypePager" msgid="7582359955394921732">"پی‌جو"</string>
     <string name="phoneTypeOther" msgid="1544425847868765990">"سایر موارد"</string>
     <string name="phoneTypeCallback" msgid="2712175203065678206">"برگرداندن تماس"</string>
     <string name="phoneTypeCar" msgid="8738360689616716982">"خودرو"</string>
@@ -700,9 +700,9 @@
     <string name="lockscreen_glogin_too_many_attempts" msgid="2751368605287288808">"‏تلاش‎های زیادی برای کشیدن الگو صورت گرفته است"</string>
     <string name="lockscreen_glogin_instructions" msgid="3931816256100707784">"‏برای بازگشایی قفل، با حساب Google خود وارد سیستم شوید."</string>
     <string name="lockscreen_glogin_username_hint" msgid="8846881424106484447">"نام کاربری (ایمیل)"</string>
-    <string name="lockscreen_glogin_password_hint" msgid="5958028383954738528">"رمز ورود"</string>
+    <string name="lockscreen_glogin_password_hint" msgid="5958028383954738528">"گذرواژه"</string>
     <string name="lockscreen_glogin_submit_button" msgid="7130893694795786300">"ورود به سیستم"</string>
-    <string name="lockscreen_glogin_invalid_input" msgid="1364051473347485908">"نام کاربر یا رمز ورود نامعتبر است."</string>
+    <string name="lockscreen_glogin_invalid_input" msgid="1364051473347485908">"نام کاربر یا گذرواژه نامعتبر است."</string>
     <string name="lockscreen_glogin_account_recovery_hint" msgid="1696924763690379073">"‏نام کاربری یا گذرواژهٔ خود را فراموش کردید؟\nاز "<b>"google.com/accounts/recovery"</b>" بازدید کنید."</string>
     <string name="lockscreen_glogin_checking_password" msgid="7114627351286933867">"در حال بررسی..."</string>
     <string name="lockscreen_unlock_label" msgid="737440483220667054">"بازگشایی قفل"</string>
@@ -786,7 +786,7 @@
     <string name="permdesc_addVoicemail" msgid="6604508651428252437">"به برنامه اجازه می‌دهد تا پیام‌ها را به صندوق دریافت پست صوتی شما اضافه کند."</string>
     <string name="permlab_writeGeolocationPermissions" msgid="5962224158955273932">"تغییر مجوزهای مکان جغرافیایی مرورگر"</string>
     <string name="permdesc_writeGeolocationPermissions" msgid="1083743234522638747">"‏به برنامه اجازه می‎دهد تا مجوزهای جغرافیایی مرورگر را تغییر دهد. برنامه‎های مخرب می‎توانند از آن استفاده کنند تا اطلاعات موقعیت مکانی را به سایت‌های وب کتابخانه بفرستند."</string>
-    <string name="save_password_message" msgid="767344687139195790">"می‌خواهید مرورگر این رمز ورود را به خاطر داشته باشد؟"</string>
+    <string name="save_password_message" msgid="767344687139195790">"می‌خواهید مرورگر این گذرواژه را به خاطر داشته باشد؟"</string>
     <string name="save_password_notnow" msgid="6389675316706699758">"اکنون نه"</string>
     <string name="save_password_remember" msgid="6491879678996749466">"به خاطر سپردن"</string>
     <string name="save_password_never" msgid="8274330296785855105">"هیچ‌وقت"</string>
@@ -1161,7 +1161,7 @@
     <string name="gpsNotifTitle" msgid="5446858717157416839">"درخواست موقعیت مکانی"</string>
     <string name="gpsNotifMessage" msgid="1374718023224000702">"درخواست شده توسط <xliff:g id="NAME">%1$s</xliff:g> (<xliff:g id="SERVICE">%2$s</xliff:g>)"</string>
     <string name="gpsVerifYes" msgid="2346566072867213563">"بله"</string>
-    <string name="gpsVerifNo" msgid="1146564937346454865">"خیر"</string>
+    <string name="gpsVerifNo" msgid="1146564937346454865">"نه"</string>
     <string name="sync_too_many_deletes" msgid="5296321850662746890">"از حد مجاز حذف فراتر رفت"</string>
     <string name="sync_too_many_deletes_desc" msgid="496551671008694245">"‏<xliff:g id="NUMBER_OF_DELETED_ITEMS">%1$d</xliff:g> مورد حذف شده برای <xliff:g id="TYPE_OF_SYNC">%2$s</xliff:g>، حساب <xliff:g id="ACCOUNT_NAME">%3$s</xliff:g> وجود دارد. می‎خواهید چه کاری انجام دهید؟"</string>
     <string name="sync_really_delete" msgid="2572600103122596243">"حذف موارد"</string>
@@ -1488,6 +1488,7 @@
       <item quantity="other">‏برای %d ساعت</item>
     </plurals>
     <string name="zen_mode_until" msgid="7336308492289875088">"تا <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
+    <string name="zen_mode_alarm" msgid="9128205721301330797">"تا <xliff:g id="FORMATTEDTIME">%1$s</xliff:g> (هشدار بعدی)"</string>
     <string name="zen_mode_forever" msgid="7420011936770086993">"تا وقتی آن را خاموش کنید"</string>
     <string name="zen_mode_forever_dnd" msgid="3792132696572189081">"تا زمانی که «مزاحم نشوید» را خاموش کنید"</string>
     <string name="zen_mode_rule_name_combination" msgid="191109939968076477">"<xliff:g id="FIRST">%1$s</xliff:g> /‏ <xliff:g id="REST">%2$s</xliff:g>"</string>

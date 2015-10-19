@@ -1488,6 +1488,7 @@
       <item quantity="one">1 மணிநேரத்திற்கு</item>
     </plurals>
     <string name="zen_mode_until" msgid="7336308492289875088">"<xliff:g id="FORMATTEDTIME">%1$s</xliff:g> வரை"</string>
+    <string name="zen_mode_alarm" msgid="9128205721301330797">"<xliff:g id="FORMATTEDTIME">%1$s</xliff:g> மணி (அடுத்த அலாரம்) வரை"</string>
     <string name="zen_mode_forever" msgid="7420011936770086993">"இதை முடக்கும்வரை"</string>
     <string name="zen_mode_forever_dnd" msgid="3792132696572189081">"தொந்தரவு செய்ய வேண்டாம் என்பதை முடக்கும் வரை"</string>
     <string name="zen_mode_rule_name_combination" msgid="191109939968076477">"<xliff:g id="FIRST">%1$s</xliff:g> / <xliff:g id="REST">%2$s</xliff:g>"</string>

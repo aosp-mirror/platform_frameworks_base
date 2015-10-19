@@ -45,7 +45,7 @@
     <string name="defaultVoiceMailAlphaTag" msgid="2660020990097733077">"Mesaj vocal"</string>
     <string name="defaultMsisdnAlphaTag" msgid="2850889754919584674">"MSISDN1"</string>
     <string name="mmiError" msgid="5154499457739052907">"Problemă de conexiune sau cod MMI nevalid."</string>
-    <string name="mmiFdnError" msgid="5224398216385316471">"Operaţia este limitată la numerele cu apelări restricţionate."</string>
+    <string name="mmiFdnError" msgid="5224398216385316471">"Operația este limitată la numerele cu apelări restricţionate."</string>
     <string name="serviceEnabled" msgid="8147278346414714315">"Serviciul a fost activat."</string>
     <string name="serviceEnabledFor" msgid="6856228140453471041">"Serviciul a fost activat pentru:"</string>
     <string name="serviceDisabled" msgid="1937553226592516411">"Serviciul a fost dezactivat."</string>
@@ -73,7 +73,7 @@
     <string name="ColpMmi" msgid="3065121483740183974">"ID-ul liniei conectate"</string>
     <string name="ColrMmi" msgid="4996540314421889589">"Restricționarea ID-ului liniei conectate"</string>
     <string name="CfMmi" msgid="5123218989141573515">"Redirecționarea apelurilor"</string>
-    <string name="CwMmi" msgid="9129678056795016867">"Apel în aşteptare"</string>
+    <string name="CwMmi" msgid="9129678056795016867">"Apel în așteptare"</string>
     <string name="BaMmi" msgid="455193067926770581">"Blocarea apelurilor"</string>
     <string name="PwdMmi" msgid="7043715687905254199">"Modificare parolă"</string>
     <string name="PinMmi" msgid="3113117780361190304">"Cod PIN modificat"</string>
@@ -270,7 +270,7 @@
     <string name="permlab_receiveMms" msgid="1821317344668257098">"primeşte mesaje text (MMS)"</string>
     <string name="permdesc_receiveMms" msgid="533019437263212260">"Permite aplicației să primească și să proceseze mesaje MMS. Acest lucru înseamnă că aplicația ar putea monitoriza sau șterge mesajele trimise pe dispozitivul dvs. fără a vi le arăta."</string>
     <string name="permlab_readCellBroadcasts" msgid="1598328843619646166">"citeşte mesajele cu transmisie celulară"</string>
-    <string name="permdesc_readCellBroadcasts" msgid="6361972776080458979">"Permite aplicației să citească mesajele primite prin transmisie celulară de dispozitivul dvs. Alertele cu transmisie celulară sunt difuzate în unele locații pentru a vă avertiza cu privire la situațiile de urgenţă. Aplicaţiile rău intenţionate pot afecta performanţa sau funcționarea dispozitivului dvs. când este primită o transmisie celulară de urgenţă."</string>
+    <string name="permdesc_readCellBroadcasts" msgid="6361972776080458979">"Permite aplicației să citească mesajele primite prin transmisie celulară de dispozitivul dvs. Alertele cu transmisie celulară sunt difuzate în unele locații pentru a vă avertiza cu privire la situațiile de urgenţă. Aplicaţiile rău intenţionate pot afecta performanța sau funcționarea dispozitivului dvs. când este primită o transmisie celulară de urgenţă."</string>
     <string name="permlab_subscribedFeedsRead" msgid="4756609637053353318">"citire feeduri abonat"</string>
     <string name="permdesc_subscribedFeedsRead" msgid="5557058907906144505">"Permite aplicației să obţină detalii despre feedurile sincronizate în prezent."</string>
     <string name="permlab_sendSms" msgid="7544599214260982981">"trimită și să vadă mesajele SMS"</string>
@@ -635,7 +635,7 @@
     <string name="relationTypeReferredBy" msgid="101573059844135524">"Denumit după"</string>
     <string name="relationTypeRelative" msgid="1799819930085610271">"Rudă"</string>
     <string name="relationTypeSister" msgid="1735983554479076481">"Soră"</string>
-    <string name="relationTypeSpouse" msgid="394136939428698117">"Soţ/Soţie"</string>
+    <string name="relationTypeSpouse" msgid="394136939428698117">"Soț/Soție"</string>
     <string name="sipAddressTypeCustom" msgid="2473580593111590945">"Personalizată"</string>
     <string name="sipAddressTypeHome" msgid="6093598181069359295">"Ecran pornire"</string>
     <string name="sipAddressTypeWork" msgid="6920725730797099047">"Serviciu"</string>
@@ -791,7 +791,7 @@
     <string name="save_password_notnow" msgid="6389675316706699758">"Nu acum"</string>
     <string name="save_password_remember" msgid="6491879678996749466">"Reţineţi"</string>
     <string name="save_password_never" msgid="8274330296785855105">"Niciodată"</string>
-    <string name="open_permission_deny" msgid="7374036708316629800">"Nu aveţi permisiunea de a deschide această pagină."</string>
+    <string name="open_permission_deny" msgid="7374036708316629800">"Nu aveți permisiunea de a deschide această pagină."</string>
     <string name="text_copied" msgid="4985729524670131385">"Text copiat în clipboard."</string>
     <string name="more_item_label" msgid="4650918923083320495">"Mai multe"</string>
     <string name="prepend_shortcut_label" msgid="2572214461676015642">"Meniu+"</string>
@@ -861,7 +861,7 @@
     <string name="selectAll" msgid="6876518925844129331">"Selectați-le pe toate"</string>
     <string name="cut" msgid="3092569408438626261">"Decupaţi"</string>
     <string name="copy" msgid="2681946229533511987">"Copiați"</string>
-    <string name="paste" msgid="5629880836805036433">"Inseraţi"</string>
+    <string name="paste" msgid="5629880836805036433">"Inserați"</string>
     <string name="replace" msgid="5781686059063148930">"Înlocuiţi..."</string>
     <string name="delete" msgid="6098684844021697789">"Ștergeți"</string>
     <string name="copyUrl" msgid="2538211579596067402">"Copiați adresa URL"</string>
@@ -988,7 +988,7 @@
     <string name="accept" msgid="1645267259272829559">"Acceptaţi"</string>
     <string name="decline" msgid="2112225451706137894">"Refuzaţi"</string>
     <string name="wifi_p2p_invitation_sent_title" msgid="1318975185112070734">"Invitaţia a fost trimisă."</string>
-    <string name="wifi_p2p_invitation_to_connect_title" msgid="4958803948658533637">"Invitaţie pentru conectare"</string>
+    <string name="wifi_p2p_invitation_to_connect_title" msgid="4958803948658533637">"Invitație pentru conectare"</string>
     <string name="wifi_p2p_from_message" msgid="570389174731951769">"De la:"</string>
     <string name="wifi_p2p_to_message" msgid="248968974522044099">"Către:"</string>
     <string name="wifi_p2p_enter_pin_message" msgid="5920929550367828970">"Introduceţi codul PIN necesar:"</string>
@@ -1174,7 +1174,7 @@
     <string name="sync_too_many_deletes_desc" msgid="496551671008694245">"Există <xliff:g id="NUMBER_OF_DELETED_ITEMS">%1$d</xliff:g> (de) elemente şterse pentru <xliff:g id="TYPE_OF_SYNC">%2$s</xliff:g>, contul <xliff:g id="ACCOUNT_NAME">%3$s</xliff:g>. Ce doriți să faceţi?"</string>
     <string name="sync_really_delete" msgid="2572600103122596243">"Ștergeți elementele"</string>
     <string name="sync_undo_deletes" msgid="2941317360600338602">"Anulați aceste ştergeri"</string>
-    <string name="sync_do_nothing" msgid="3743764740430821845">"Nu trebuie să luaţi nicio măsură deocamdată"</string>
+    <string name="sync_do_nothing" msgid="3743764740430821845">"Nu trebuie să luați nicio măsură deocamdată"</string>
     <string name="choose_account_label" msgid="5655203089746423927">"Alegeţi un cont"</string>
     <string name="add_account_label" msgid="2935267344849993553">"Adăugaţi un cont"</string>
     <string name="add_account_button_label" msgid="3611982894853435874">"Adăugaţi un cont"</string>
@@ -1505,6 +1505,7 @@
       <item quantity="one">Pentru 1 h</item>
     </plurals>
     <string name="zen_mode_until" msgid="7336308492289875088">"Până la <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
+    <string name="zen_mode_alarm" msgid="9128205721301330797">"Până la <xliff:g id="FORMATTEDTIME">%1$s</xliff:g> (următoarea alarmă)"</string>
     <string name="zen_mode_forever" msgid="7420011936770086993">"Până la dezactivare"</string>
     <string name="zen_mode_forever_dnd" msgid="3792132696572189081">"Până când dezactivați „Nu deranja”"</string>
     <string name="zen_mode_rule_name_combination" msgid="191109939968076477">"<xliff:g id="FIRST">%1$s</xliff:g>/<xliff:g id="REST">%2$s</xliff:g>"</string>

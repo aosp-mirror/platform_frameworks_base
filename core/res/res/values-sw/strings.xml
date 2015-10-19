@@ -589,7 +589,7 @@
     <string name="phoneTypeTelex" msgid="3367879952476250512">"Teleksi"</string>
     <string name="phoneTypeTtyTdd" msgid="8606514378585000044">"TTY TDD"</string>
     <string name="phoneTypeWorkMobile" msgid="1311426989184065709">"Nambari ya Simu ya Mkononi ya Kazini"</string>
-    <string name="phoneTypeWorkPager" msgid="649938731231157056">"Kiunda ujumbe cha Kazini"</string>
+    <string name="phoneTypeWorkPager" msgid="649938731231157056">"Peja ya Kazini"</string>
     <string name="phoneTypeAssistant" msgid="5596772636128562884">"Msaidizi"</string>
     <string name="phoneTypeMms" msgid="7254492275502768992">"MMS"</string>
     <string name="eventTypeCustom" msgid="7837586198458073404">"Maalum"</string>
@@ -1490,6 +1490,7 @@
       <item quantity="one">Kwa saa 1 </item>
     </plurals>
     <string name="zen_mode_until" msgid="7336308492289875088">"Hadi <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
+    <string name="zen_mode_alarm" msgid="9128205721301330797">"Mpaka <xliff:g id="FORMATTEDTIME">%1$s</xliff:g> (kengele inayofuata)"</string>
     <string name="zen_mode_forever" msgid="7420011936770086993">"Hadi utakapozima hili"</string>
     <string name="zen_mode_forever_dnd" msgid="3792132696572189081">"Hadi utakapozima Usinisumbue"</string>
     <string name="zen_mode_rule_name_combination" msgid="191109939968076477">"<xliff:g id="FIRST">%1$s</xliff:g> / <xliff:g id="REST">%2$s</xliff:g>"</string>

@@ -530,8 +530,8 @@
     <item msgid="8901098336658710359">"Nhà riêng"</item>
     <item msgid="869923650527136615">"Di Động"</item>
     <item msgid="7897544654242874543">"Cơ quan"</item>
-    <item msgid="1103601433382158155">"Số fax Cơ quan"</item>
-    <item msgid="1735177144948329370">"Số fax Nhà riêng"</item>
+    <item msgid="1103601433382158155">"Số fax cơ quan"</item>
+    <item msgid="1735177144948329370">"Số fax nhà riêng"</item>
     <item msgid="603878674477207394">"Số máy nhắn tin"</item>
     <item msgid="1650824275177931637">"Khác"</item>
     <item msgid="9192514806975898961">"Tùy chỉnh"</item>
@@ -573,8 +573,8 @@
     <string name="phoneTypeHome" msgid="2570923463033985887">"Nhà riêng"</string>
     <string name="phoneTypeMobile" msgid="6501463557754751037">"Di Động"</string>
     <string name="phoneTypeWork" msgid="8863939667059911633">"Cơ quan"</string>
-    <string name="phoneTypeFaxWork" msgid="3517792160008890912">"Số fax Cơ quan"</string>
-    <string name="phoneTypeFaxHome" msgid="2067265972322971467">"Số fax Nhà riêng"</string>
+    <string name="phoneTypeFaxWork" msgid="3517792160008890912">"Số fax cơ quan"</string>
+    <string name="phoneTypeFaxHome" msgid="2067265972322971467">"Số fax nhà riêng"</string>
     <string name="phoneTypePager" msgid="7582359955394921732">"Số máy nhắn tin"</string>
     <string name="phoneTypeOther" msgid="1544425847868765990">"Khác"</string>
     <string name="phoneTypeCallback" msgid="2712175203065678206">"Số gọi lại"</string>
@@ -586,8 +586,8 @@
     <string name="phoneTypeRadio" msgid="4093738079908667513">"Radio"</string>
     <string name="phoneTypeTelex" msgid="3367879952476250512">"Số telex"</string>
     <string name="phoneTypeTtyTdd" msgid="8606514378585000044">"TTY TDD"</string>
-    <string name="phoneTypeWorkMobile" msgid="1311426989184065709">"Số điện thoại di động tại Cơ quan"</string>
-    <string name="phoneTypeWorkPager" msgid="649938731231157056">"Số Máy nhắn tin tại Cơ quan"</string>
+    <string name="phoneTypeWorkMobile" msgid="1311426989184065709">"Di động tại cơ quan"</string>
+    <string name="phoneTypeWorkPager" msgid="649938731231157056">"Số máy nhắn tin cơ quan"</string>
     <string name="phoneTypeAssistant" msgid="5596772636128562884">"Số điện thoại Hỗ trợ"</string>
     <string name="phoneTypeMms" msgid="7254492275502768992">"MMS"</string>
     <string name="eventTypeCustom" msgid="7837586198458073404">"Tùy chỉnh"</string>
@@ -1488,6 +1488,7 @@
       <item quantity="one">Trong 1 giờ</item>
     </plurals>
     <string name="zen_mode_until" msgid="7336308492289875088">"Cho đến <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
+    <string name="zen_mode_alarm" msgid="9128205721301330797">"Cho tới <xliff:g id="FORMATTEDTIME">%1$s</xliff:g> (cảnh báo tiếp theo)"</string>
     <string name="zen_mode_forever" msgid="7420011936770086993">"Cho đến khi bạn tắt tính năng này"</string>
     <string name="zen_mode_forever_dnd" msgid="3792132696572189081">"Cho đến khi bạn tắt Đừng làm phiền"</string>
     <string name="zen_mode_rule_name_combination" msgid="191109939968076477">"<xliff:g id="FIRST">%1$s</xliff:g> / <xliff:g id="REST">%2$s</xliff:g>"</string>
