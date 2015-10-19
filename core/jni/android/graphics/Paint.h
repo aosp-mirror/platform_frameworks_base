@@ -53,12 +53,12 @@ public:
         return mFontFeatureSettings;
     }
 
-    void setTextLocale(const std::string &textLocale) {
-        mTextLocale = textLocale;
+    void setTextLocales(const std::string &textLocales) {
+        mTextLocales = textLocales;
     }
 
-    const std::string& getTextLocale() const {
-        return mTextLocale;
+    const std::string& getTextLocales() const {
+        return mTextLocales;
     }
 
     void setFontVariant(FontVariant variant) {
@@ -80,7 +80,7 @@ public:
 private:
     float mLetterSpacing = 0;
     std::string mFontFeatureSettings;
-    std::string mTextLocale;
+    std::string mTextLocales;
     FontVariant mFontVariant;
     uint32_t mHyphenEdit = 0;
 };

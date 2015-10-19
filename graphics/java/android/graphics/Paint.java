@@ -1335,7 +1335,7 @@ public class Paint {
             return;
         }
         mLocales = new LocaleList(locale);
-        nSetTextLocale(mNativePaint, locale.toString());
+        nSetTextLocales(mNativePaint, locale.toString());
     }
 
     /**
@@ -1372,8 +1372,7 @@ public class Paint {
         }
         if (locales.equals(mLocales)) return;
         mLocales = locales;
-        // TODO: Pass the whole LocaleList to native code
-        nSetTextLocale(mNativePaint, locales.getPrimary().toString());
+        nSetTextLocales(mNativePaint, locales.toLanguageTags());
     }
 
     /**
@@ -2715,8 +2714,8 @@ public class Paint {
     private static native void nSetTextAlign(long paintPtr,
                                                    int align);
 
-    private static native void nSetTextLocale(long paintPtr,
-                                                    String locale);
+    private static native void nSetTextLocales(long paintPtr,
+                                                    String locales);
 
     private static native float nGetTextAdvances(long paintPtr, long typefacePtr,
             char[] text, int index, int count, int contextIndex, int contextCount,
