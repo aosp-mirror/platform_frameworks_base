@@ -69,7 +69,7 @@ public class RotationLockTile extends QSTile<QSTile.BooleanState> {
 
     @Override
     public Intent getLongClickIntent() {
-        return new Intent(Settings.ACTION_DISPLAY_SETTINGS);
+        return new Intent("android.settings.DISPLAY_ROTATION_SETTINGS");
     }
 
     @Override
