@@ -42,8 +42,6 @@ page.image=/images/android-support-card.png
   <p>
     <a href="http://code.google.com/p/android/issues/entry?template=Developer%20Documentation">
       Report documentation bug</a><br />
-    <a href="https://code.google.com/p/android/issues/entry?template=User%20bug%20report">
-      Report device bug</a><br />
     <a href="https://code.google.com/p/android/issues/entry?template=Developer%20bug%20report">
       Report platform bug</a><br />
   </p>
