@@ -547,9 +547,9 @@ public abstract class LayoutInflater {
                 // Don't retain static reference on context.
                 mConstructorArgs[0] = lastContext;
                 mConstructorArgs[1] = null;
-            }
 
-            Trace.traceEnd(Trace.TRACE_TAG_VIEW);
+                Trace.traceEnd(Trace.TRACE_TAG_VIEW);
+            }
 
             return result;
         }
