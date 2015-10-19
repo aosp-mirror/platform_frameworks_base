@@ -4877,6 +4877,7 @@ package android.app {
     method public android.graphics.drawable.Icon getLargeIcon();
     method public android.graphics.drawable.Icon getSmallIcon();
     method public java.lang.String getSortKey();
+    method public android.app.Notification.Topic[] getTopics();
     method public void writeToParcel(android.os.Parcel, int);
     field public static final android.media.AudioAttributes AUDIO_ATTRIBUTES_DEFAULT;
     field public static final java.lang.String CATEGORY_ALARM = "alarm";
@@ -5041,6 +5042,7 @@ package android.app {
     method public android.app.Notification.Builder addAction(android.app.Notification.Action);
     method public android.app.Notification.Builder addExtras(android.os.Bundle);
     method public android.app.Notification.Builder addPerson(java.lang.String);
+    method public android.app.Notification.Builder addTopic(android.app.Notification.Topic);
     method public android.app.Notification build();
     method public android.app.Notification.Builder extend(android.app.Notification.Extender);
     method public android.os.Bundle getExtras();
@@ -5146,6 +5148,16 @@ package android.app {
     method protected void internalSetSummaryText(java.lang.CharSequence);
     method public void setBuilder(android.app.Notification.Builder);
     field protected android.app.Notification.Builder mBuilder;
+  }
+
+  public static class Notification.Topic implements android.os.Parcelable {
+    ctor public Notification.Topic(java.lang.String, java.lang.CharSequence);
+    method public android.app.Notification.Topic clone();
+    method public int describeContents();
+    method public java.lang.String getId();
+    method public java.lang.CharSequence getLabel();
+    method public void writeToParcel(android.os.Parcel, int);
+    field public static final android.os.Parcelable.Creator<android.app.Notification.Topic> CREATOR;
   }
 
   public static final class Notification.WearableExtender implements android.app.Notification.Extender {
