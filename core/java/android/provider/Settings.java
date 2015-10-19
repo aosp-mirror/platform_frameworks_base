@@ -1417,15 +1417,17 @@ public final class Settings {
     }
 
     /**
-     * An app can use this method to check if it is currently allowed to draw on top of other
-     * apps. In order to be allowed to do so, an app must first declare the
-     * {@link android.Manifest.permission#SYSTEM_ALERT_WINDOW} permission in its manifest. If it
-     * is currently disallowed, it can prompt the user to grant it this capability through a
-     * management UI by sending an Intent with action
-     * {@link android.provider.Settings#ACTION_MANAGE_OVERLAY_PERMISSION}.
+     * Checks if the specified context can draw on top of other apps. As of API
+     * level 23, an app cannot draw on top of other apps unless it declares the
+     * {@link android.Manifest.permission#SYSTEM_ALERT_WINDOW} permission in its
+     * manifest, <em>and</em> the user specifically grants the app this
+     * capability. To prompt the user to grant this approval, the app must send an
+     * intent with the action
+     * {@link android.provider.Settings#ACTION_MANAGE_OVERLAY_PERMISSION}, which
+     * causes the system to display a permission management screen.
      *
-     * @param context A context
-     * @return true if the calling app can draw on top of other apps, false otherwise.
+     * @param context App context.
+     * @return true if the specified context can draw on top of other apps, false otherwise
      */
     public static boolean canDrawOverlays(Context context) {
         int uid = Binder.getCallingUid();
@@ -1439,7 +1441,7 @@ public final class Settings {
      * {@link android.Manifest.permission#CHANGE_NETWORK_STATE} or
      * {@link android.Manifest.permission#WRITE_SETTINGS} permission in its manifest. If it
      * is currently disallowed, it can prompt the user to grant it this capability through a
-     * management UI by sending an Intent with action
+     * management UI by sending an intent with action
      * {@link android.provider.Settings#ACTION_MANAGE_WRITE_SETTINGS}.
      *
      * @param context A context
@@ -3727,14 +3729,16 @@ public final class Settings {
             Secure.WIFI_WATCHDOG_PING_TIMEOUT_MS;
 
         /**
-         * An app can use this method to check if it is currently allowed to write or modify system
-         * settings. In order to gain write access to the system settings, an app must declare the
-         * {@link android.Manifest.permission#WRITE_SETTINGS} permission in its manifest. If it is
-         * currently disallowed, it can prompt the user to grant it this capability through a
-         * management UI by sending an Intent with action
-         * {@link android.provider.Settings#ACTION_MANAGE_WRITE_SETTINGS}.
+         * Checks if the specified app can modify system settings. As of API
+         * level 23, an app cannot modify system settings unless it declares the
+         * {@link android.Manifest.permission#WRITE_SETTINGS}
+         * permission in its manifest, <em>and</em> the user specifically grants
+         * the app this capability. To prompt the user to grant this approval,
+         * the app must send an intent with the action {@link
+         * android.provider.Settings#ACTION_MANAGE_WRITE_SETTINGS}, which causes
+         * the system to display a permission management screen.
          *
-         * @param context A context
+         * @param context App context.
          * @return true if the calling app can write to system settings, false otherwise
          */
         public static boolean canWrite(Context context) {
