@@ -42,9 +42,14 @@ public abstract class FragmentHostCallback<E> extends FragmentContainer {
     private final Handler mHandler;
     final int mWindowAnimations;
     final FragmentManagerImpl mFragmentManager = new FragmentManagerImpl();
+    /** The loader managers for individual fragments [i.e. Fragment#getLoaderManager()] */
     private ArrayMap<String, LoaderManager> mAllLoaderManagers;
+    /** Whether or not fragment loaders should retain their state */
+    private boolean mRetainLoaders;
+    /** The loader manger for the fragment host [i.e. Activity#getLoaderManager()] */
     private LoaderManagerImpl mLoaderManager;
     private boolean mCheckedForLoaderManager;
+    /** Whether or not the fragment host loader manager was started */
     private boolean mLoadersStarted;
 
     public FragmentHostCallback(Context context, Handler handler, int windowAnimations) {
@@ -166,6 +171,10 @@ public abstract class FragmentHostCallback<E> extends FragmentContainer {
         return true;
     }
 
+    boolean getRetainLoaders() {
+        return mRetainLoaders;
+    }
+
     Activity getActivity() {
         return mActivity;
     }
@@ -217,6 +226,8 @@ public abstract class FragmentHostCallback<E> extends FragmentContainer {
     }
 
     void doLoaderStop(boolean retain) {
+        mRetainLoaders = retain;
+
         if (mLoaderManager == null) {
             return;
         }
