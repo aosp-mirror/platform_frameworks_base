@@ -137,7 +137,13 @@ public class TextClock extends TextView {
 
     private boolean mShowCurrentUserTime;
 
-    private final ContentObserver mFormatChangeObserver = new ContentObserver(new Handler()) {
+    private ContentObserver mFormatChangeObserver;
+    private class FormatChangeObserver extends ContentObserver {
+
+        public FormatChangeObserver(Handler handler) {
+            super(handler);
+        }
+
         @Override
         public void onChange(boolean selfChange) {
             chooseFormat();
@@ -553,13 +559,18 @@ public class TextClock extends TextView {
     }
 
     private void registerObserver() {
-        final ContentResolver resolver = getContext().getContentResolver();
-        if (mShowCurrentUserTime) {
-            resolver.registerContentObserver(Settings.System.CONTENT_URI, true,
-                    mFormatChangeObserver, UserHandle.USER_ALL);
-        } else {
-            resolver.registerContentObserver(Settings.System.CONTENT_URI, true,
-                    mFormatChangeObserver);
+        if (isAttachedToWindow()) {
+            if (mFormatChangeObserver == null) {
+                mFormatChangeObserver = new FormatChangeObserver(getHandler());
+            }
+            final ContentResolver resolver = getContext().getContentResolver();
+            if (mShowCurrentUserTime) {
+                resolver.registerContentObserver(Settings.System.CONTENT_URI, true,
+                        mFormatChangeObserver, UserHandle.USER_ALL);
+            } else {
+                resolver.registerContentObserver(Settings.System.CONTENT_URI, true,
+                        mFormatChangeObserver);
+            }
         }
     }
 
@@ -568,8 +579,10 @@ public class TextClock extends TextView {
     }
 
     private void unregisterObserver() {
-        final ContentResolver resolver = getContext().getContentResolver();
-        resolver.unregisterContentObserver(mFormatChangeObserver);
+        if (mFormatChangeObserver != null) {
+            final ContentResolver resolver = getContext().getContentResolver();
+            resolver.unregisterContentObserver(mFormatChangeObserver);
+        }
     }
 
     private void onTimeChanged() {

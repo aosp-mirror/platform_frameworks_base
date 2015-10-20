@@ -96,10 +96,16 @@ public class QuickContactBadge extends ImageView implements OnClickListener {
                 com.android.internal.R.styleable.Theme_quickContactBadgeOverlay);
         styledAttributes.recycle();
 
+        setOnClickListener(this);
+    }
+
+    @Override
+    protected void onAttachedToWindow() {
+        super.onAttachedToWindow();
+
         if (!isInEditMode()) {
             mQueryHandler = new QueryHandler(mContext.getContentResolver());
         }
-        setOnClickListener(this);
     }
 
     @Override

@@ -201,9 +201,6 @@ public class Gallery extends AbsSpinner implements GestureDetector.OnGestureList
 
     public Gallery(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
-        
-        mGestureDetector = new GestureDetector(context, this);
-        mGestureDetector.setIsLongpressEnabled(true);
 
         final TypedArray a = context.obtainStyledAttributes(
                 attrs, com.android.internal.R.styleable.Gallery, defStyleAttr, defStyleRes);
@@ -234,6 +231,16 @@ public class Gallery extends AbsSpinner implements GestureDetector.OnGestureList
         mGroupFlags |= FLAG_USE_CHILD_DRAWING_ORDER;
         
         mGroupFlags |= FLAG_SUPPORT_STATIC_TRANSFORMATIONS;
+    }
+
+    @Override
+    protected void onAttachedToWindow() {
+        super.onAttachedToWindow();
+
+        if (mGestureDetector == null) {
+            mGestureDetector = new GestureDetector(getContext(), this);
+            mGestureDetector.setIsLongpressEnabled(true);
+        }
     }
 
     /**

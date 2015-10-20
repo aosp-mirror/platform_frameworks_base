@@ -45,7 +45,6 @@ import android.graphics.Rect;
 import android.graphics.RectF;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
-import android.os.Handler;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.ParcelableParcel;
@@ -2072,14 +2071,14 @@ public class Editor {
         if (shouldBlink()) {
             mShowCursor = SystemClock.uptimeMillis();
             if (mBlink == null) mBlink = new Blink();
-            mBlink.removeCallbacks(mBlink);
-            mBlink.postAtTime(mBlink, mShowCursor + BLINK);
+            mTextView.removeCallbacks(mBlink);
+            mTextView.postDelayed(mBlink, BLINK);
         } else {
-            if (mBlink != null) mBlink.removeCallbacks(mBlink);
+            if (mBlink != null) mTextView.removeCallbacks(mBlink);
         }
     }
 
-    private class Blink extends Handler implements Runnable {
+    private class Blink implements Runnable {
         private boolean mCancelled;
 
         public void run() {
@@ -2087,20 +2086,20 @@ public class Editor {
                 return;
             }
 
-            removeCallbacks(Blink.this);
+            mTextView.removeCallbacks(this);
 
             if (shouldBlink()) {
                 if (mTextView.getLayout() != null) {
                     mTextView.invalidateCursorPath();
                 }
 
-                postAtTime(this, SystemClock.uptimeMillis() + BLINK);
+                mTextView.postDelayed(this, BLINK);
             }
         }
 
         void cancel() {
             if (!mCancelled) {
-                removeCallbacks(Blink.this);
+                mTextView.removeCallbacks(this);
                 mCancelled = true;
             }
         }
