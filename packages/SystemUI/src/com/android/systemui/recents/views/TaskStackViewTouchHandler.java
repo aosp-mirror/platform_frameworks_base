@@ -26,8 +26,8 @@ import android.view.ViewParent;
 import com.android.internal.logging.MetricsLogger;
 import com.android.systemui.R;
 import com.android.systemui.recents.Constants;
-import com.android.systemui.recents.Recents;
 import com.android.systemui.recents.events.EventBus;
+import com.android.systemui.recents.events.activity.HideRecentsEvent;
 import com.android.systemui.recents.events.ui.DismissTaskEvent;
 
 import java.util.List;
@@ -395,10 +395,7 @@ class TaskStackViewTouchHandler implements SwipeHelper.Callback {
 
         // The user intentionally tapped on the background, which is like a tap on the "desktop".
         // Hide recents and transition to the launcher.
-        /* TODO: Use EventBus for this later
-        Recents recents = Recents.getInstanceAndStartIfNeeded(mSv.getContext());
-        recents.hideRecents(false, true);
-        */
+        EventBus.getDefault().send(new HideRecentsEvent(false, true));
     }
 
     /** Handles generic motion events */
