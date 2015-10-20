@@ -199,6 +199,11 @@
                     android:value="com.android.settings.category.system" />
         </activity>
 
+        <!-- Service used by secondary users to register themselves with the system user. -->
+        <service android:name=".recents.RecentsSystemUserService"
+            android:exported="false"
+            android:permission="com.android.systemui.permission.SELF" />
+
         <!-- Alternate Recents -->
         <activity android:name=".recents.RecentsActivity"
                   android:label="@string/accessibility_desc_recent_apps"
@@ -214,17 +219,6 @@
                 <action android:name="com.android.systemui.recents.TOGGLE_RECENTS" />
             </intent-filter>
         </activity>
-
-        <receiver android:name=".recents.RecentsUserEventProxyReceiver"
-                  android:exported="false">
-            <intent-filter>
-                <action android:name="com.android.systemui.recents.action.SHOW_RECENTS_FOR_USER" />
-                <action android:name="com.android.systemui.recents.action.HIDE_RECENTS_FOR_USER" />
-                <action android:name="com.android.systemui.recents.action.TOGGLE_RECENTS_FOR_USER" />
-                <action android:name="com.android.systemui.recents.action.PRELOAD_RECENTS_FOR_USER" />
-                <action android:name="com.android.systemui.recents.action.CONFIG_CHANGED_FOR_USER" />
-            </intent-filter>
-        </receiver>
 
         <!-- Callback for dismissing screenshot notification after a share target is picked -->
         <receiver android:name=".screenshot.GlobalScreenshot$TargetChosenReceiver"

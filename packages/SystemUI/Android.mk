@@ -3,7 +3,7 @@ include $(CLEAR_VARS)
 
 LOCAL_MODULE_TAGS := optional
 
-LOCAL_SRC_FILES := $(call all-java-files-under, src) $(call all-proto-files-under,src) \
+LOCAL_SRC_FILES := $(call all-java-files-under, src) $(call all-proto-files-under,src) $(call all-Iaidl-files-under, src) \
     src/com/android/systemui/EventLogTags.logtags
 
 LOCAL_STATIC_JAVA_LIBRARIES := Keyguard

@@ -395,8 +395,10 @@ class TaskStackViewTouchHandler implements SwipeHelper.Callback {
 
         // The user intentionally tapped on the background, which is like a tap on the "desktop".
         // Hide recents and transition to the launcher.
+        /* TODO: Use EventBus for this later
         Recents recents = Recents.getInstanceAndStartIfNeeded(mSv.getContext());
-        recents.hideRecents(false /* altTab */, true /* homeKey */);
+        recents.hideRecents(false, true);
+        */
     }
 
     /** Handles generic motion events */
