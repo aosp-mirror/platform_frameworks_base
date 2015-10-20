@@ -222,11 +222,14 @@ public class VectorDrawable extends Drawable {
     // caching the bitmap by default is allowed.
     private boolean mAllowCaching = true;
 
+    /** The density of the display on which this drawable will be rendered. */
+    private int mTargetDensity;
+
     // Given the virtual display setup, the dpi can be different than the inflation's dpi.
     // Therefore, we need to scale the values we got from the getDimension*().
     private int mDpiScaledWidth = 0;
     private int mDpiScaledHeight = 0;
-    private Insets mDpiScaleInsets = Insets.NONE;
+    private Insets mDpiScaledInsets = Insets.NONE;
 
     // Temp variable, only for saving "new" operation at the draw() time.
     private final float[] mTmpFloats = new float[9];
@@ -234,17 +237,37 @@ public class VectorDrawable extends Drawable {
     private final Rect mTmpBounds = new Rect();
 
     public VectorDrawable() {
-        this(null, null);
+        this(new VectorDrawableState(), null);
     }
 
+    /**
+     * The one constructor to rule them all. This is called by all public
+     * constructors to set the state and initialize local properties.
+     */
     private VectorDrawable(@NonNull VectorDrawableState state, @Nullable Resources res) {
-        if (state == null) {
-            mVectorState = new VectorDrawableState();
+        mVectorState = state;
+
+        updateLocalState(res);
+    }
+
+    /**
+     * Initializes local dynamic properties from state. This should be called
+     * after significant state changes, e.g. from the One True Constructor and
+     * after inflating or applying a theme.
+     *
+     * @param res resources of the context in which the drawable will be
+     *            displayed, or {@code null} to use the constant state defaults
+     */
+    private void updateLocalState(Resources res) {
+        if (res != null) {
+            final int densityDpi = res.getDisplayMetrics().densityDpi;
+            mTargetDensity = densityDpi == 0 ? DisplayMetrics.DENSITY_DEFAULT : densityDpi;
         } else {
-            mVectorState = state;
-            mTintFilter = updateTintFilter(mTintFilter, state.mTint, state.mTintMode);
+            mTargetDensity = mVectorState.mVPathRenderer.mSourceDensity;
         }
-        updateDimensionInfo(res, false);
+
+        mTintFilter = updateTintFilter(mTintFilter, mVectorState.mTint, mVectorState.mTintMode);
+        computeVectorSize();
     }
 
     @Override
@@ -416,55 +439,38 @@ public class VectorDrawable extends Drawable {
     /** @hide */
     @Override
     public Insets getOpticalInsets() {
-        return mDpiScaleInsets;
+        return mDpiScaledInsets;
     }
 
     /*
-     * Update the VectorDrawable dimension since the res can be in different Dpi now.
-     * Basically, when a new instance is created or getDimension() is called, we should update
-     * the current VectorDrawable's dimension information.
-     * Only after updateStateFromTypedArray() is called, we should called this and update the
-     * constant state's dpi info, i.e. updateConstantStateDensity == true.
+     * Update local dimensions to adjust for a target density that may differ
+     * from the source density against which the constant state was loaded.
      */
-    void updateDimensionInfo(@Nullable Resources res, boolean updateConstantStateDensity) {
-        if (res != null) {
-            final int densityDpi = res.getDisplayMetrics().densityDpi;
-            final int targetDensity = densityDpi == 0 ? DisplayMetrics.DENSITY_DEFAULT : densityDpi;
+    void computeVectorSize() {
+        final VPathRenderer pathRenderer = mVectorState.mVPathRenderer;
+        final Insets opticalInsets = pathRenderer.mOpticalInsets;
 
-            if (updateConstantStateDensity) {
-                mVectorState.mVPathRenderer.mTargetDensity = targetDensity;
-            } else {
-                final int constantStateDensity = mVectorState.mVPathRenderer.mTargetDensity;
-                if (targetDensity != constantStateDensity && constantStateDensity != 0) {
-                    mDpiScaledWidth = Bitmap.scaleFromDensity(
-                            (int) mVectorState.mVPathRenderer.mBaseWidth, constantStateDensity,
-                            targetDensity);
-                    mDpiScaledHeight = Bitmap.scaleFromDensity(
-                            (int) mVectorState.mVPathRenderer.mBaseHeight,constantStateDensity,
-                            targetDensity);
-                    final int left = Bitmap.scaleFromDensity(
-                            mVectorState.mVPathRenderer.mOpticalInsets.left, constantStateDensity,
-                            targetDensity);
-                    final int right = Bitmap.scaleFromDensity(
-                            mVectorState.mVPathRenderer.mOpticalInsets.right, constantStateDensity,
-                            targetDensity);
-                    final int top = Bitmap.scaleFromDensity(
-                            mVectorState.mVPathRenderer.mOpticalInsets.top, constantStateDensity,
-                            targetDensity);
-                    final int bottom = Bitmap.scaleFromDensity(
-                            mVectorState.mVPathRenderer.mOpticalInsets.bottom, constantStateDensity,
-                            targetDensity);
-                    mDpiScaleInsets = Insets.of(left, top, right, bottom);
-                    return;
-                }
-            }
+        final int sourceDensity = pathRenderer.mSourceDensity;
+        final int targetDensity = mTargetDensity;
+        if (targetDensity != sourceDensity) {
+            mDpiScaledWidth = Bitmap.scaleFromDensity(
+                    (int) pathRenderer.mBaseWidth, sourceDensity, targetDensity);
+            mDpiScaledHeight = Bitmap.scaleFromDensity(
+                    (int) pathRenderer.mBaseHeight,sourceDensity, targetDensity);
+            final int left = Bitmap.scaleFromDensity(
+                    opticalInsets.left, sourceDensity, targetDensity);
+            final int right = Bitmap.scaleFromDensity(
+                    opticalInsets.right, sourceDensity, targetDensity);
+            final int top = Bitmap.scaleFromDensity(
+                    opticalInsets.top, sourceDensity, targetDensity);
+            final int bottom = Bitmap.scaleFromDensity(
+                    opticalInsets.bottom, sourceDensity, targetDensity);
+            mDpiScaledInsets = Insets.of(left, top, right, bottom);
+        } else {
+            mDpiScaledWidth = (int) pathRenderer.mBaseWidth;
+            mDpiScaledHeight = (int) pathRenderer.mBaseHeight;
+            mDpiScaledInsets = opticalInsets;
         }
-        // For all the other cases, like either res is null, constant state is not initialized or
-        // target density is the same as the constant state, we will just use the constant state
-        // dimensions.
-        mDpiScaledWidth = (int) mVectorState.mVPathRenderer.mBaseWidth;
-        mDpiScaledHeight = (int) mVectorState.mVPathRenderer.mBaseHeight;
-        mDpiScaleInsets = mVectorState.mVPathRenderer.mOpticalInsets;
     }
 
     @Override
@@ -487,7 +493,6 @@ public class VectorDrawable extends Drawable {
             try {
                 state.mCacheDirty = true;
                 updateStateFromTypedArray(a);
-                updateDimensionInfo(t.getResources(), true /* update constant state */);
             } catch (XmlPullParserException e) {
                 throw new RuntimeException(e);
             } finally {
@@ -505,8 +510,8 @@ public class VectorDrawable extends Drawable {
             path.applyTheme(t);
         }
 
-        // Update local state.
-        mTintFilter = updateTintFilter(mTintFilter, state.mTint, state.mTintMode);
+        // Update local properties.
+        updateLocalState(t.getResources());
     }
 
     /**
@@ -579,8 +584,8 @@ public class VectorDrawable extends Drawable {
         state.mCacheDirty = true;
         inflateInternal(res, parser, attrs, theme);
 
-        mTintFilter = updateTintFilter(mTintFilter, state.mTint, state.mTintMode);
-        updateDimensionInfo(res, true /* update constant state */);
+        // Update local properties.
+        updateLocalState(res);
     }
 
     private void updateStateFromTypedArray(TypedArray a) throws XmlPullParserException {
@@ -592,6 +597,14 @@ public class VectorDrawable extends Drawable {
 
         // Extract the theme attributes, if any.
         state.mThemeAttrs = a.extractThemeAttrs();
+
+        // The density may have changed since the last update (if any). Any
+        // dimension-type attributes will need their default values scaled.
+        final int densityDpi = a.getResources().getDisplayMetrics().densityDpi;
+        final int newSourceDensity = densityDpi == 0 ? DisplayMetrics.DENSITY_DEFAULT : densityDpi;
+        final int oldSourceDensity = pathRenderer.mSourceDensity;
+        final float densityScale = oldSourceDensity / (float) newSourceDensity;
+        pathRenderer.mSourceDensity = newSourceDensity;
 
         final int tintMode = a.getInt(R.styleable.VectorDrawable_tintMode, -1);
         if (tintMode != -1) {
@@ -620,9 +633,11 @@ public class VectorDrawable extends Drawable {
         }
 
         pathRenderer.mBaseWidth = a.getDimension(
-                R.styleable.VectorDrawable_width, pathRenderer.mBaseWidth);
+                R.styleable.VectorDrawable_width,
+                pathRenderer.mBaseWidth * densityScale);
         pathRenderer.mBaseHeight = a.getDimension(
-                R.styleable.VectorDrawable_height, pathRenderer.mBaseHeight);
+                R.styleable.VectorDrawable_height,
+                pathRenderer.mBaseHeight * densityScale);
 
         if (pathRenderer.mBaseWidth <= 0) {
             throw new XmlPullParserException(a.getPositionDescription() +
@@ -633,13 +648,17 @@ public class VectorDrawable extends Drawable {
         }
 
         final int insetLeft = a.getDimensionPixelSize(
-                R.styleable.VectorDrawable_opticalInsetLeft, pathRenderer.mOpticalInsets.left);
+                R.styleable.VectorDrawable_opticalInsetLeft,
+                (int) (pathRenderer.mOpticalInsets.left * densityScale));
         final int insetTop = a.getDimensionPixelSize(
-                R.styleable.VectorDrawable_opticalInsetTop, pathRenderer.mOpticalInsets.top);
+                R.styleable.VectorDrawable_opticalInsetTop,
+                (int) (pathRenderer.mOpticalInsets.top * densityScale));
         final int insetRight = a.getDimensionPixelSize(
-                R.styleable.VectorDrawable_opticalInsetRight, pathRenderer.mOpticalInsets.right);
+                R.styleable.VectorDrawable_opticalInsetRight,
+                (int) (pathRenderer.mOpticalInsets.right * densityScale));
         final int insetBottom = a.getDimensionPixelSize(
-                R.styleable.VectorDrawable_opticalInsetBottom, pathRenderer.mOpticalInsets.bottom);
+                R.styleable.VectorDrawable_opticalInsetBottom,
+                (int) (pathRenderer.mOpticalInsets.bottom * densityScale));
         pathRenderer.mOpticalInsets = Insets.of(insetLeft, insetTop, insetRight, insetBottom);
 
         final float alphaInFloat = a.getFloat(R.styleable.VectorDrawable_alpha,
@@ -917,7 +936,7 @@ public class VectorDrawable extends Drawable {
         int mRootAlpha = 0xFF;
         String mRootName = null;
 
-        int mTargetDensity = DisplayMetrics.DENSITY_DEFAULT;
+        int mSourceDensity = DisplayMetrics.DENSITY_DEFAULT;
 
         final ArrayMap<String, Object> mVGTargetsMap = new ArrayMap<>();
 
@@ -954,7 +973,7 @@ public class VectorDrawable extends Drawable {
             mChangingConfigurations = copy.mChangingConfigurations;
             mRootAlpha = copy.mRootAlpha;
             mRootName = copy.mRootName;
-            mTargetDensity = copy.mTargetDensity;
+            mSourceDensity = copy.mSourceDensity;
             if (copy.mRootName != null) {
                 mVGTargetsMap.put(copy.mRootName, this);
             }
