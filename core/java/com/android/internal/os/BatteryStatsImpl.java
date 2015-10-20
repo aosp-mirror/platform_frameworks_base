@@ -105,7 +105,7 @@ public final class BatteryStatsImpl extends BatteryStats {
     private static final int MAGIC = 0xBA757475; // 'BATSTATS'
 
     // Current on-disk Parcel version
-    private static final int VERSION = 132 + (USE_OLD_HISTORY ? 1000 : 0);
+    private static final int VERSION = 135 + (USE_OLD_HISTORY ? 1000 : 0);
 
     // Maximum number of items we will record in the history.
     private static final int MAX_HISTORY_ITEMS = 2000;
@@ -338,8 +338,15 @@ public final class BatteryStatsImpl extends BatteryStats {
     boolean mDeviceIdling;
     StopwatchTimer mDeviceIdlingTimer;
 
-    boolean mDeviceIdleModeEnabled;
-    StopwatchTimer mDeviceIdleModeEnabledTimer;
+    boolean mDeviceLightIdling;
+    StopwatchTimer mDeviceLightIdlingTimer;
+
+    int mDeviceIdleMode;
+    long mLastIdleTimeStart;
+    long mLongestLightIdleTime;
+    long mLongestFullIdleTime;
+    StopwatchTimer mDeviceIdleModeLightTimer;
+    StopwatchTimer mDeviceIdleModeFullTimer;
 
     boolean mPhoneOn;
     StopwatchTimer mPhoneOnTimer;
@@ -3219,42 +3226,69 @@ public final class BatteryStatsImpl extends BatteryStats {
         }
     }
 
-    public void noteDeviceIdleModeLocked(boolean enabled, String activeReason, int activeUid) {
+    public void noteDeviceIdleModeLocked(int mode, String activeReason, int activeUid) {
         final long elapsedRealtime = SystemClock.elapsedRealtime();
         final long uptime = SystemClock.uptimeMillis();
-        boolean nowIdling = enabled;
-        if (mDeviceIdling && !enabled && activeReason == null) {
+        boolean nowIdling = mode == DEVICE_IDLE_MODE_FULL;
+        if (mDeviceIdling && !nowIdling && activeReason == null) {
             // We don't go out of general idling mode until explicitly taken out of
             // device idle through going active or significant motion.
             nowIdling = true;
+        }
+        boolean nowLightIdling = mode == DEVICE_IDLE_MODE_LIGHT;
+        if (mDeviceLightIdling && !nowLightIdling && !nowIdling && activeReason == null) {
+            // We don't go out of general light idling mode until explicitly taken out of
+            // device idle through going active or significant motion.
+            nowLightIdling = true;
+        }
+        if (activeReason != null && (mDeviceIdling || mDeviceLightIdling)) {
+            addHistoryEventLocked(elapsedRealtime, uptime, HistoryItem.EVENT_ACTIVE,
+                    activeReason, activeUid);
         }
         if (mDeviceIdling != nowIdling) {
             mDeviceIdling = nowIdling;
             int stepState = nowIdling ? STEP_LEVEL_MODE_DEVICE_IDLE : 0;
             mModStepMode |= (mCurStepMode&STEP_LEVEL_MODE_DEVICE_IDLE) ^ stepState;
             mCurStepMode = (mCurStepMode&~STEP_LEVEL_MODE_DEVICE_IDLE) | stepState;
-            if (enabled) {
+            if (nowIdling) {
                 mDeviceIdlingTimer.startRunningLocked(elapsedRealtime);
             } else {
                 mDeviceIdlingTimer.stopRunningLocked(elapsedRealtime);
             }
         }
-        if (mDeviceIdleModeEnabled != enabled) {
-            mDeviceIdleModeEnabled = enabled;
-            addHistoryEventLocked(elapsedRealtime, uptime, HistoryItem.EVENT_ACTIVE,
-                    activeReason != null ? activeReason : "", activeUid);
-            if (enabled) {
-                mHistoryCur.states2 |= HistoryItem.STATE2_DEVICE_IDLE_FLAG;
-                if (DEBUG_HISTORY) Slog.v(TAG, "Device idle mode enabled to: "
-                        + Integer.toHexString(mHistoryCur.states2));
-                mDeviceIdleModeEnabledTimer.startRunningLocked(elapsedRealtime);
+        if (mDeviceLightIdling != nowLightIdling) {
+            mDeviceLightIdling = nowLightIdling;
+            if (nowLightIdling) {
+                mDeviceLightIdlingTimer.startRunningLocked(elapsedRealtime);
             } else {
-                mHistoryCur.states2 &= ~HistoryItem.STATE2_DEVICE_IDLE_FLAG;
-                if (DEBUG_HISTORY) Slog.v(TAG, "Device idle mode disabled to: "
-                        + Integer.toHexString(mHistoryCur.states2));
-                mDeviceIdleModeEnabledTimer.stopRunningLocked(elapsedRealtime);
+                mDeviceLightIdlingTimer.stopRunningLocked(elapsedRealtime);
             }
+        }
+        if (mDeviceIdleMode != mode) {
+            mHistoryCur.states2 = (mHistoryCur.states2 & ~HistoryItem.STATE2_DEVICE_IDLE_MASK)
+                    | (mode << HistoryItem.STATE2_DEVICE_IDLE_SHIFT);
+            if (DEBUG_HISTORY) Slog.v(TAG, "Device idle mode changed to: "
+                    + Integer.toHexString(mHistoryCur.states2));
             addHistoryRecordLocked(elapsedRealtime, uptime);
+            long lastDuration = elapsedRealtime - mLastIdleTimeStart;
+            mLastIdleTimeStart = elapsedRealtime;
+            if (mDeviceIdleMode == DEVICE_IDLE_MODE_LIGHT) {
+                if (lastDuration > mLongestLightIdleTime) {
+                    mLongestLightIdleTime = lastDuration;
+                }
+                mDeviceIdleModeLightTimer.stopRunningLocked(elapsedRealtime);
+            } else if (mDeviceIdleMode == DEVICE_IDLE_MODE_FULL) {
+                if (lastDuration > mLongestFullIdleTime) {
+                    mLongestFullIdleTime = lastDuration;
+                }
+                mDeviceIdleModeFullTimer.stopRunningLocked(elapsedRealtime);
+            }
+            if (mode == DEVICE_IDLE_MODE_LIGHT) {
+                mDeviceIdleModeLightTimer.startRunningLocked(elapsedRealtime);
+            } else if (mode == DEVICE_IDLE_MODE_FULL) {
+                mDeviceIdleModeFullTimer.startRunningLocked(elapsedRealtime);
+            }
+            mDeviceIdleMode = mode;
         }
     }
 
@@ -4140,20 +4174,55 @@ public final class BatteryStatsImpl extends BatteryStats {
         return mPowerSaveModeEnabledTimer.getCountLocked(which);
     }
 
-    @Override public long getDeviceIdleModeEnabledTime(long elapsedRealtimeUs, int which) {
-        return mDeviceIdleModeEnabledTimer.getTotalTimeLocked(elapsedRealtimeUs, which);
+    @Override public long getDeviceIdleModeTime(int mode, long elapsedRealtimeUs,
+            int which) {
+        switch (mode) {
+            case DEVICE_IDLE_MODE_LIGHT:
+                return mDeviceIdleModeLightTimer.getTotalTimeLocked(elapsedRealtimeUs, which);
+            case DEVICE_IDLE_MODE_FULL:
+                return mDeviceIdleModeFullTimer.getTotalTimeLocked(elapsedRealtimeUs, which);
+        }
+        return 0;
     }
 
-    @Override public int getDeviceIdleModeEnabledCount(int which) {
-        return mDeviceIdleModeEnabledTimer.getCountLocked(which);
+    @Override public int getDeviceIdleModeCount(int mode, int which) {
+        switch (mode) {
+            case DEVICE_IDLE_MODE_LIGHT:
+                return mDeviceIdleModeLightTimer.getCountLocked(which);
+            case DEVICE_IDLE_MODE_FULL:
+                return mDeviceIdleModeFullTimer.getCountLocked(which);
+        }
+        return 0;
     }
 
-    @Override public long getDeviceIdlingTime(long elapsedRealtimeUs, int which) {
-        return mDeviceIdlingTimer.getTotalTimeLocked(elapsedRealtimeUs, which);
+    @Override public long getLongestDeviceIdleModeTime(int mode) {
+        switch (mode) {
+            case DEVICE_IDLE_MODE_LIGHT:
+                return mLongestLightIdleTime;
+            case DEVICE_IDLE_MODE_FULL:
+                return mLongestFullIdleTime;
+        }
+        return 0;
     }
 
-    @Override public int getDeviceIdlingCount(int which) {
-        return mDeviceIdlingTimer.getCountLocked(which);
+    @Override public long getDeviceIdlingTime(int mode, long elapsedRealtimeUs, int which) {
+        switch (mode) {
+            case DEVICE_IDLE_MODE_LIGHT:
+                return mDeviceLightIdlingTimer.getTotalTimeLocked(elapsedRealtimeUs, which);
+            case DEVICE_IDLE_MODE_FULL:
+                return mDeviceIdlingTimer.getTotalTimeLocked(elapsedRealtimeUs, which);
+        }
+        return 0;
+    }
+
+    @Override public int getDeviceIdlingCount(int mode, int which) {
+        switch (mode) {
+            case DEVICE_IDLE_MODE_LIGHT:
+                return mDeviceLightIdlingTimer.getCountLocked(which);
+            case DEVICE_IDLE_MODE_FULL:
+                return mDeviceIdlingTimer.getCountLocked(which);
+        }
+        return 0;
     }
 
     @Override public int getNumConnectivityChange(int which) {
@@ -6855,7 +6924,9 @@ public final class BatteryStatsImpl extends BatteryStats {
         }
         mInteractiveTimer = new StopwatchTimer(null, -10, null, mOnBatteryTimeBase);
         mPowerSaveModeEnabledTimer = new StopwatchTimer(null, -2, null, mOnBatteryTimeBase);
-        mDeviceIdleModeEnabledTimer = new StopwatchTimer(null, -11, null, mOnBatteryTimeBase);
+        mDeviceIdleModeLightTimer = new StopwatchTimer(null, -11, null, mOnBatteryTimeBase);
+        mDeviceIdleModeFullTimer = new StopwatchTimer(null, -14, null, mOnBatteryTimeBase);
+        mDeviceLightIdlingTimer = new StopwatchTimer(null, -15, null, mOnBatteryTimeBase);
         mDeviceIdlingTimer = new StopwatchTimer(null, -12, null, mOnBatteryTimeBase);
         mPhoneOnTimer = new StopwatchTimer(null, -3, null, mOnBatteryTimeBase);
         for (int i=0; i<SignalStrength.NUM_SIGNAL_STRENGTH_BINS; i++) {
@@ -7484,7 +7555,11 @@ public final class BatteryStatsImpl extends BatteryStats {
         }
         mInteractiveTimer.reset(false);
         mPowerSaveModeEnabledTimer.reset(false);
-        mDeviceIdleModeEnabledTimer.reset(false);
+        mLongestLightIdleTime = 0;
+        mLongestFullIdleTime = 0;
+        mDeviceIdleModeLightTimer.reset(false);
+        mDeviceIdleModeFullTimer.reset(false);
+        mDeviceLightIdlingTimer.reset(false);
         mDeviceIdlingTimer.reset(false);
         mPhoneOnTimer.reset(false);
         mAudioOnTimer.reset(false);
@@ -9224,7 +9299,11 @@ public final class BatteryStatsImpl extends BatteryStats {
         mInteractiveTimer.readSummaryFromParcelLocked(in);
         mPhoneOn = false;
         mPowerSaveModeEnabledTimer.readSummaryFromParcelLocked(in);
-        mDeviceIdleModeEnabledTimer.readSummaryFromParcelLocked(in);
+        mLongestLightIdleTime = in.readLong();
+        mLongestFullIdleTime = in.readLong();
+        mDeviceIdleModeLightTimer.readSummaryFromParcelLocked(in);
+        mDeviceIdleModeFullTimer.readSummaryFromParcelLocked(in);
+        mDeviceLightIdlingTimer.readSummaryFromParcelLocked(in);
         mDeviceIdlingTimer.readSummaryFromParcelLocked(in);
         mPhoneOnTimer.readSummaryFromParcelLocked(in);
         for (int i=0; i<SignalStrength.NUM_SIGNAL_STRENGTH_BINS; i++) {
@@ -9558,7 +9637,11 @@ public final class BatteryStatsImpl extends BatteryStats {
         }
         mInteractiveTimer.writeSummaryFromParcelLocked(out, NOWREAL_SYS);
         mPowerSaveModeEnabledTimer.writeSummaryFromParcelLocked(out, NOWREAL_SYS);
-        mDeviceIdleModeEnabledTimer.writeSummaryFromParcelLocked(out, NOWREAL_SYS);
+        out.writeLong(mLongestLightIdleTime);
+        out.writeLong(mLongestFullIdleTime);
+        mDeviceIdleModeLightTimer.writeSummaryFromParcelLocked(out, NOWREAL_SYS);
+        mDeviceIdleModeFullTimer.writeSummaryFromParcelLocked(out, NOWREAL_SYS);
+        mDeviceLightIdlingTimer.writeSummaryFromParcelLocked(out, NOWREAL_SYS);
         mDeviceIdlingTimer.writeSummaryFromParcelLocked(out, NOWREAL_SYS);
         mPhoneOnTimer.writeSummaryFromParcelLocked(out, NOWREAL_SYS);
         for (int i=0; i<SignalStrength.NUM_SIGNAL_STRENGTH_BINS; i++) {
@@ -9892,7 +9975,11 @@ public final class BatteryStatsImpl extends BatteryStats {
         mInteractiveTimer = new StopwatchTimer(null, -10, null, mOnBatteryTimeBase, in);
         mPhoneOn = false;
         mPowerSaveModeEnabledTimer = new StopwatchTimer(null, -2, null, mOnBatteryTimeBase, in);
-        mDeviceIdleModeEnabledTimer = new StopwatchTimer(null, -11, null, mOnBatteryTimeBase, in);
+        mLongestLightIdleTime = in.readLong();
+        mLongestFullIdleTime = in.readLong();
+        mDeviceIdleModeLightTimer = new StopwatchTimer(null, -14, null, mOnBatteryTimeBase, in);
+        mDeviceIdleModeFullTimer = new StopwatchTimer(null, -11, null, mOnBatteryTimeBase, in);
+        mDeviceLightIdlingTimer = new StopwatchTimer(null, -15, null, mOnBatteryTimeBase, in);
         mDeviceIdlingTimer = new StopwatchTimer(null, -12, null, mOnBatteryTimeBase, in);
         mPhoneOnTimer = new StopwatchTimer(null, -3, null, mOnBatteryTimeBase, in);
         for (int i=0; i<SignalStrength.NUM_SIGNAL_STRENGTH_BINS; i++) {
@@ -10053,7 +10140,11 @@ public final class BatteryStatsImpl extends BatteryStats {
         }
         mInteractiveTimer.writeToParcel(out, uSecRealtime);
         mPowerSaveModeEnabledTimer.writeToParcel(out, uSecRealtime);
-        mDeviceIdleModeEnabledTimer.writeToParcel(out, uSecRealtime);
+        out.writeLong(mLongestLightIdleTime);
+        out.writeLong(mLongestFullIdleTime);
+        mDeviceIdleModeLightTimer.writeToParcel(out, uSecRealtime);
+        mDeviceIdleModeFullTimer.writeToParcel(out, uSecRealtime);
+        mDeviceLightIdlingTimer.writeToParcel(out, uSecRealtime);
         mDeviceIdlingTimer.writeToParcel(out, uSecRealtime);
         mPhoneOnTimer.writeToParcel(out, uSecRealtime);
         for (int i=0; i<SignalStrength.NUM_SIGNAL_STRENGTH_BINS; i++) {
@@ -10188,8 +10279,12 @@ public final class BatteryStatsImpl extends BatteryStats {
             mInteractiveTimer.logState(pr, "  ");
             pr.println("*** Power save mode timer:");
             mPowerSaveModeEnabledTimer.logState(pr, "  ");
-            pr.println("*** Device idle mode timer:");
-            mDeviceIdleModeEnabledTimer.logState(pr, "  ");
+            pr.println("*** Device idle mode light timer:");
+            mDeviceIdleModeLightTimer.logState(pr, "  ");
+            pr.println("*** Device idle mode full timer:");
+            mDeviceIdleModeFullTimer.logState(pr, "  ");
+            pr.println("*** Device light idling timer:");
+            mDeviceLightIdlingTimer.logState(pr, "  ");
             pr.println("*** Device idling timer:");
             mDeviceIdlingTimer.logState(pr, "  ");
             pr.println("*** Phone timer:");

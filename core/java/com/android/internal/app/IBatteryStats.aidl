@@ -117,7 +117,7 @@ interface IBatteryStats {
     void noteWifiRadioPowerState(int powerState, long timestampNs);
     void noteNetworkInterfaceType(String iface, int type);
     void noteNetworkStatsEnabled();
-    void noteDeviceIdleMode(boolean enabled, String activeReason, int activeUid);
+    void noteDeviceIdleMode(int mode, String activeReason, int activeUid);
     void setBatteryState(int status, int health, int plugType, int level, int temp, int volt);
     long getAwakeTimeBattery();
     long getAwakeTimePlugged();

@@ -444,6 +444,9 @@ public final class PowerManagerService extends SystemService
     // True if we are currently in device idle mode.
     private boolean mDeviceIdleMode;
 
+    // True if we are currently in light device idle mode.
+    private boolean mLightDeviceIdleMode;
+
     // Set of app ids that we will always respect the wake locks for.
     int[] mDeviceIdleWhitelist = new int[0];
 
@@ -2292,9 +2295,15 @@ public final class PowerManagerService extends SystemService
         }
     }
 
-    private boolean isDeviceIdleModeInternal() {
+    boolean isDeviceIdleModeInternal() {
         synchronized (mLock) {
             return mDeviceIdleMode;
+        }
+    }
+
+    boolean isLightDeviceIdleModeInternal() {
+        synchronized (mLock) {
+            return mLightDeviceIdleMode;
         }
     }
 
@@ -2368,7 +2377,7 @@ public final class PowerManagerService extends SystemService
         }
     }
 
-    void setDeviceIdleModeInternal(boolean enabled) {
+    boolean setDeviceIdleModeInternal(boolean enabled) {
         synchronized (mLock) {
             if (mDeviceIdleMode != enabled) {
                 mDeviceIdleMode = enabled;
@@ -2378,7 +2387,19 @@ public final class PowerManagerService extends SystemService
                 } else {
                     EventLogTags.writeDeviceIdleOffPhase("power");
                 }
+                return true;
             }
+            return false;
+        }
+    }
+
+    boolean setLightDeviceIdleModeInternal(boolean enabled) {
+        synchronized (mLock) {
+            if (mLightDeviceIdleMode != enabled) {
+                mLightDeviceIdleMode = enabled;
+                return true;
+            }
+            return false;
         }
     }
 
@@ -2671,6 +2692,7 @@ public final class PowerManagerService extends SystemService
             pw.println("  mSandmanSummoned=" + mSandmanSummoned);
             pw.println("  mLowPowerModeEnabled=" + mLowPowerModeEnabled);
             pw.println("  mBatteryLevelLow=" + mBatteryLevelLow);
+            pw.println("  mLightDeviceIdleMode=" + mLightDeviceIdleMode);
             pw.println("  mDeviceIdleMode=" + mDeviceIdleMode);
             pw.println("  mDeviceIdleWhitelist=" + Arrays.toString(mDeviceIdleWhitelist));
             pw.println("  mDeviceIdleTempWhitelist=" + Arrays.toString(mDeviceIdleTempWhitelist));
@@ -3308,6 +3330,16 @@ public final class PowerManagerService extends SystemService
             }
         }
 
+        @Override // Binder call
+        public boolean isLightDeviceIdleMode() {
+            final long ident = Binder.clearCallingIdentity();
+            try {
+                return isLightDeviceIdleModeInternal();
+            } finally {
+                Binder.restoreCallingIdentity(ident);
+            }
+        }
+
         /**
          * Reboots the device.
          *
@@ -3576,8 +3608,13 @@ public final class PowerManagerService extends SystemService
         }
 
         @Override
-        public void setDeviceIdleMode(boolean enabled) {
-            setDeviceIdleModeInternal(enabled);
+        public boolean setDeviceIdleMode(boolean enabled) {
+            return setDeviceIdleModeInternal(enabled);
+        }
+
+        @Override
+        public boolean setLightDeviceIdleMode(boolean enabled) {
+            return setLightDeviceIdleModeInternal(enabled);
         }
 
         @Override

@@ -258,7 +258,8 @@ public class SyncManager {
 
     private BroadcastReceiver mDeviceIdleReceiver = new BroadcastReceiver() {
         @Override public void onReceive(Context context, Intent intent) {
-            boolean idle = mPowerManager.isDeviceIdleMode();
+            boolean idle = mPowerManager.isDeviceIdleMode()
+                    || mPowerManager.isLightDeviceIdleMode();
             mDeviceIsIdle = idle;
             if (idle) {
                 cancelActiveSync(
@@ -478,6 +479,7 @@ public class SyncManager {
         context.registerReceiver(mStorageIntentReceiver, intentFilter);
 
         intentFilter = new IntentFilter(PowerManager.ACTION_DEVICE_IDLE_MODE_CHANGED);
+        intentFilter.addAction(PowerManager.ACTION_LIGHT_DEVICE_IDLE_MODE_CHANGED);
         context.registerReceiver(mDeviceIdleReceiver, intentFilter);
 
         intentFilter = new IntentFilter(Intent.ACTION_SHUTDOWN);

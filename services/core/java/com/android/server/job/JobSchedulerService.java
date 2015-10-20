@@ -162,8 +162,12 @@ public class JobSchedulerService extends com.android.server.SystemService
                     Slog.d(TAG, "Removing jobs for user: " + userId);
                 }
                 cancelJobsForUser(userId);
-            } else if (PowerManager.ACTION_DEVICE_IDLE_MODE_CHANGED.equals(intent.getAction())) {
-                updateIdleMode(mPowerManager != null ? mPowerManager.isDeviceIdleMode() : false);
+            } else if (PowerManager.ACTION_LIGHT_DEVICE_IDLE_MODE_CHANGED.equals(intent.getAction())
+                    || PowerManager.ACTION_DEVICE_IDLE_MODE_CHANGED.equals(intent.getAction())) {
+                updateIdleMode(mPowerManager != null
+                        ? (mPowerManager.isDeviceIdleMode()
+                                || mPowerManager.isLightDeviceIdleMode())
+                        : false);
             }
         }
     };
@@ -340,6 +344,7 @@ public class JobSchedulerService extends com.android.server.SystemService
                     mBroadcastReceiver, UserHandle.ALL, filter, null, null);
             final IntentFilter userFilter = new IntentFilter(Intent.ACTION_USER_REMOVED);
             userFilter.addAction(PowerManager.ACTION_DEVICE_IDLE_MODE_CHANGED);
+            userFilter.addAction(PowerManager.ACTION_LIGHT_DEVICE_IDLE_MODE_CHANGED);
             getContext().registerReceiverAsUser(
                     mBroadcastReceiver, UserHandle.ALL, userFilter, null, null);
             mPowerManager = (PowerManager)getContext().getSystemService(Context.POWER_SERVICE);

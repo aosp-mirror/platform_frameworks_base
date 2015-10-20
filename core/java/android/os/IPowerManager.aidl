@@ -47,6 +47,7 @@ interface IPowerManager
     boolean isPowerSaveMode();
     boolean setPowerSaveMode(boolean mode);
     boolean isDeviceIdleMode();
+    boolean isLightDeviceIdleMode();
 
     void reboot(boolean confirm, String reason, boolean wait);
     void shutdown(boolean confirm, String reason, boolean wait);
