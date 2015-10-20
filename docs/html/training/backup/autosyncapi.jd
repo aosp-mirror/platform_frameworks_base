@@ -26,10 +26,18 @@ page.image=images/cards/card-auto-backup_2x.png
 
 <p>
   Users frequently invest time and effort to configure apps just the way they like them. Switching
-  to a new device can cancel out all that careful configuration. Devices running Android 6.0 and
-  higher automatically back up app data to the cloud. The system performs this automatic backup
+  to a new device can cancel out all that careful configuration. For apps whose <a href=
+  "{@docRoot}guide/topics/manifest/uses-sdk-element.html#target">target SDK version</a>
+  is Android 6.0 (API level 23) and higher, devices running Android 6.0 and higher automatically
+  back up app data to the cloud. The system performs this automatic backup
   for nearly all app data by default, and does so without your having to write any additional app
   code.
+</p>
+
+<p class="note">
+<strong>Note:</strong> To protect user privacy, the device user must have opted in to Google
+services for Auto Backup to work. The Google services opt-in dialog appears when the user goes
+through the Setup Wizard or configures the first Google account on the device.
 </p>
 
 <p>
@@ -82,8 +90,8 @@ page.image=images/cards/card-auto-backup_2x.png
 &lt;manifest xmlns:android="http://schemas.android.com/apk/res/android"
         xmlns:tools="http://schemas.android.com/tools"
         package="com.my.appexample"&gt;
-    &lt;uses-sdk android:minSdkVersion="MNC"/&gt;
-    &lt;uses-sdk android:targetSdkVersion="MNC"/&gt;
+    &lt;uses-sdk android:minSdkVersion="23"/&gt;
+    &lt;uses-sdk android:targetSdkVersion="23"/&gt;
     &lt;application ...
 <strong>        android:fullBackupContent="&#64;xml/mybackupscheme"&gt;</strong>
     &lt;/app&gt;
@@ -222,8 +230,8 @@ page.image=images/cards/card-auto-backup_2x.png
 &lt;manifest xmlns:android="http://schemas.android.com/apk/res/android"
         xmlns:tools="http://schemas.android.com/tools"
         package="com.my.appexample"&gt;
-    &lt;uses-sdk android:minSdkVersion="MNC"/&gt;
-    &lt;uses-sdk android:targetSdkVersion="MNC"/&gt;
+    &lt;uses-sdk android:minSdkVersion="23"/&gt;
+    &lt;uses-sdk android:targetSdkVersion="23"/&gt;
     &lt;application ...
 <strong>        android:allowBackup="false"&gt;</strong>
     &lt;/application&gt;
