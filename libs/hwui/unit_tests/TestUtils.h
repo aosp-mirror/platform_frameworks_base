@@ -17,8 +17,11 @@
 #define TEST_UTILS_H
 
 #include <Matrix.h>
-#include <Snapshot.h>
+#include <Rect.h>
 #include <RenderNode.h>
+#include <renderstate/RenderState.h>
+#include <renderthread/RenderThread.h>
+#include <Snapshot.h>
 
 #include <memory>
 
@@ -48,7 +51,9 @@ public:
 
     static SkBitmap createSkBitmap(int width, int height) {
         SkBitmap bitmap;
-        bitmap.setInfo(SkImageInfo::MakeUnknown(width, height));
+        SkImageInfo info = SkImageInfo::MakeUnknown(width, height);
+        bitmap.setInfo(info);
+        bitmap.allocPixels(info);
         return bitmap;
     }
 
@@ -77,6 +82,32 @@ public:
     static void syncNodePropertiesAndDisplayList(sp<RenderNode>& node) {
         node->syncProperties();
         node->syncDisplayList();
+    }
+
+    typedef std::function<void(RenderState& state, Caches& caches)> RtCallback;
+
+    class TestTask : public renderthread::RenderTask {
+    public:
+        TestTask(RtCallback rtCallback)
+                : rtCallback(rtCallback) {}
+        virtual ~TestTask() {}
+        virtual void run() override {
+            // RenderState only valid once RenderThread is running, so queried here
+            RenderState& renderState = renderthread::RenderThread::getInstance().renderState();
+
+            renderState.onGLContextCreated();
+            rtCallback(renderState, Caches::getInstance());
+            renderState.onGLContextDestroyed();
+        };
+        RtCallback rtCallback;
+    };
+
+    /**
+     * NOTE: requires surfaceflinger to run, otherwise this method will wait indefinitely.
+     */
+    static void runOnRenderThread(RtCallback rtCallback) {
+        TestTask task(rtCallback);
+        renderthread::RenderThread::getInstance().queueAndWait(&task);
     }
 }; // class TestUtils
 

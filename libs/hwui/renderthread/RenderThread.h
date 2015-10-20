@@ -39,6 +39,7 @@ class DisplayEventReceiver;
 namespace uirenderer {
 
 class RenderState;
+class TestUtils;
 
 namespace renderthread {
 
@@ -76,6 +77,7 @@ public:
     // RenderThread takes complete ownership of tasks that are queued
     // and will delete them after they are run
     ANDROID_API void queue(RenderTask* task);
+    ANDROID_API void queueAndWait(RenderTask* task);
     ANDROID_API void queueAtFront(RenderTask* task);
     void queueAt(RenderTask* task, nsecs_t runAtNs);
     void remove(RenderTask* task);
@@ -101,6 +103,7 @@ private:
     friend class Singleton<RenderThread>;
     friend class DispatchFrameCallbacks;
     friend class RenderProxy;
+    friend class android::uirenderer::TestUtils;
 
     RenderThread();
     virtual ~RenderThread();
