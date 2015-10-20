@@ -82,6 +82,13 @@ public class JobStatus {
         this.numFailures = numFailures;
     }
 
+    /** Copy constructor. */
+    public JobStatus(JobStatus jobStatus) {
+        this(jobStatus.getJob(), jobStatus.getUid(), jobStatus.getNumFailures());
+        this.earliestRunTimeElapsedMillis = jobStatus.getEarliestRunTime();
+        this.latestRunTimeElapsedMillis = jobStatus.getLatestRunTimeElapsed();
+    }
+
     /** Create a newly scheduled job. */
     public JobStatus(JobInfo job, int uId) {
         this(job, uId, 0);
