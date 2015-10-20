@@ -704,7 +704,7 @@ public class RelativeLayout extends ViewGroup {
             }
 
             final int heightMode;
-            if (params.width == LayoutParams.MATCH_PARENT) {
+            if (params.height == LayoutParams.MATCH_PARENT) {
                 heightMode = MeasureSpec.EXACTLY;
             } else {
                 heightMode = MeasureSpec.AT_MOST;
