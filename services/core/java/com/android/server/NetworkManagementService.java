@@ -2023,9 +2023,9 @@ public class NetworkManagementService extends INetworkManagementService.Stub
     public void setFirewallChainEnabled(int chain, boolean enable) {
         enforceSystemUid();
         synchronized (mQuotaLock) {
-            if (mFirewallChainStates.indexOfKey(chain) >= 0 &&
-                    mFirewallChainStates.get(chain) == enable) {
-                // All is the same, nothing to do.
+            if (mFirewallChainStates.get(chain, false) == enable) {
+                // All is the same, nothing to do.  This relies on the fact that netd has child
+                // chains default detached.
                 return;
             }
             mFirewallChainStates.put(chain, enable);
