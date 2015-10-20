@@ -52,8 +52,8 @@ public:
 // ----------------------------------------------------------------------------
 // CanvasStateClient interface
 // ----------------------------------------------------------------------------
-    virtual void onViewportInitialized() override {}
-    virtual void onSnapshotRestored(const Snapshot& removed, const Snapshot& restored) override {}
+    virtual void onViewportInitialized() override;
+    virtual void onSnapshotRestored(const Snapshot& removed, const Snapshot& restored) override;
     virtual GLuint getTargetFbo() const override { return -1; }
 
 // ----------------------------------------------------------------------------

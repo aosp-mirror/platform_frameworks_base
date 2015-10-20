@@ -929,7 +929,7 @@ void RenderNode::issueOperationsOfProjectedChildren(OpenGLRenderer& renderer, T&
     const RenderProperties& backgroundProps = backgroundOp->renderNode->properties();
     renderer.translate(backgroundProps.getTranslationX(), backgroundProps.getTranslationY());
 
-    // If the projection reciever has an outline, we mask projected content to it
+    // If the projection receiver has an outline, we mask projected content to it
     // (which we know, apriori, are all tessellated paths)
     renderer.setProjectionPathMask(alloc, projectionReceiverOutline);
 

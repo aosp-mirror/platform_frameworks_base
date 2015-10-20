@@ -259,7 +259,7 @@ bool CanvasState::calculateQuickRejectForScissor(float left, float top,
     currentTransform()->mapRect(r);
     r.snapGeometryToPixelBoundaries(snapOut);
 
-    Rect clipRect(currentClipRect());
+    Rect clipRect(currentRenderTargetClip());
     clipRect.snapToPixelBoundaries();
 
     if (!clipRect.intersects(r)) return true;
@@ -287,7 +287,7 @@ bool CanvasState::quickRejectConservative(float left, float top,
     currentTransform()->mapRect(r);
     r.roundOut(); // rounded out to be conservative
 
-    Rect clipRect(currentClipRect());
+    Rect clipRect(currentRenderTargetClip());
     clipRect.snapToPixelBoundaries();
 
     if (!clipRect.intersects(r)) return true;

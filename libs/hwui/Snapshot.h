@@ -158,13 +158,12 @@ public:
     /**
      * Returns the current clip in render target coordinates.
      */
-    const Rect& getRenderTargetClip() { return mClipArea->getClipRect(); }
+    const Rect& getRenderTargetClip() const { return mClipArea->getClipRect(); }
 
     /*
      * Accessor functions so that the clip area can stay private
      */
     bool clipIsEmpty() const { return mClipArea->isEmpty(); }
-    const Rect& getClipRect() const { return mClipArea->getClipRect(); }
     const SkRegion& getClipRegion() const { return mClipArea->getClipRegion(); }
     bool clipIsSimple() const { return mClipArea->isSimple(); }
     const ClipArea& getClipArea() const { return *mClipArea; }

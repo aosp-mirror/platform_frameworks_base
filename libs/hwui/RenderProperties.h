@@ -203,8 +203,8 @@ public:
         return RP_SET(mPrimitiveFields.mProjectBackwards, shouldProject);
     }
 
-    bool setProjectionReceiver(bool shouldRecieve) {
-        return RP_SET(mPrimitiveFields.mProjectionReceiver, shouldRecieve);
+    bool setProjectionReceiver(bool shouldReceive) {
+        return RP_SET(mPrimitiveFields.mProjectionReceiver, shouldReceive);
     }
 
     bool isProjectionReceiver() const {

@@ -31,6 +31,12 @@ namespace uirenderer {
 #define EXPECT_MATRIX_APPROX_EQ(a, b) \
     EXPECT_TRUE(TestUtils::matricesAreApproxEqual(a, b))
 
+#define EXPECT_RECT_APPROX_EQ(a, b) \
+    EXPECT_TRUE(MathUtils::areEqual(a.left, b.left) \
+            && MathUtils::areEqual(a.top, b.top) \
+            && MathUtils::areEqual(a.right, b.right) \
+            && MathUtils::areEqual(a.bottom, b.bottom));
+
 class TestUtils {
 public:
     static bool matricesAreApproxEqual(const Matrix4& a, const Matrix4& b) {

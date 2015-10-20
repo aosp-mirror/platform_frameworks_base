@@ -65,7 +65,7 @@ public:
      * These functions will perform the actual rendering of the individual operations in OpenGL,
      * given the transform/clip and other state built into the BakedOpState object passed in.
      */
-    #define BAKED_OP_RENDERER_METHOD(Type) static void on##Type(Info* info, const Type& op, const BakedOpState& state);
+    #define BAKED_OP_RENDERER_METHOD(Type) static void on##Type(Info& info, const Type& op, const BakedOpState& state);
     MAP_OPS(BAKED_OP_RENDERER_METHOD);
 };
 
