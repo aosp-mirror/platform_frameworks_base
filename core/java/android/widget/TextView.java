@@ -1478,7 +1478,12 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                         }
                     }
                 }
+            } else if (mText instanceof Spannable) {
+                // Reset the selection.
+                stopTextActionMode();
+                Selection.setSelection((Spannable) mText, getSelectionStart(), getSelectionEnd());
             }
+
             if (mEditor.hasSelectionController()) {
                 mEditor.startSelectionActionMode();
             }
