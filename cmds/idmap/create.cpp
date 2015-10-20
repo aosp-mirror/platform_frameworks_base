@@ -57,7 +57,7 @@ fail:
 
     int write_idmap(int fd, const uint32_t *data, size_t size)
     {
-        if (lseek(fd, SEEK_SET, 0) < 0) {
+        if (lseek(fd, 0, SEEK_SET) < 0) {
             return -1;
         }
         size_t bytesLeft = size;
@@ -86,7 +86,7 @@ fail:
 
         char buf[N];
         size_t bytesLeft = N;
-        if (lseek(idmap_fd, SEEK_SET, 0) < 0) {
+        if (lseek(idmap_fd, 0, SEEK_SET) < 0) {
             return true;
         }
         for (;;) {
