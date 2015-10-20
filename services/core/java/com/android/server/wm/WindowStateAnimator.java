@@ -1283,8 +1283,6 @@ class WindowStateAnimator {
             mDtDy = tmpFloats[Matrix.MSCALE_Y];
             float x = tmpFloats[Matrix.MTRANS_X];
             float y = tmpFloats[Matrix.MTRANS_Y];
-            int w = frame.width();
-            int h = frame.height();
             mWin.mShownPosition.set((int) x, (int) y);
 
             mShownAlpha = mAlpha;
@@ -1381,7 +1379,6 @@ class WindowStateAnimator {
             // avoid premature clipping with the system decor rect.
             clipRect.set((mHasClipRect && !fullscreen) ? mClipRect : w.mSystemDecorRect);
         }
-
         // Expand the clip rect for surface insets.
         final WindowManager.LayoutParams attrs = w.mAttrs;
         clipRect.left -= attrs.surfaceInsets.left;
@@ -1395,17 +1392,14 @@ class WindowStateAnimator {
             // clip rect extends outside the system decor rect.
             clipRect.intersect(mClipRect);
         }
-
         // The clip rect was generated assuming (0,0) as the window origin,
         // so we need to translate to match the actual surface coordinates.
         clipRect.offset(attrs.surfaceInsets.left, attrs.surfaceInsets.top);
-
         // We don't want to clip to stack bounds windows that are currently doing entrance
         // animation for docked window, otherwise the animating window will be suddenly cut off.
         if (!(mAnimator.mAnimating && w.inDockedWorkspace())) {
             adjustCropToStackBounds(w, clipRect);
         }
-
         if (!clipRect.equals(mLastClipRect)) {
             mLastClipRect.set(clipRect);
             try {
@@ -1437,18 +1431,18 @@ class WindowStateAnimator {
         if (appToken != null && appToken.mCropWindowsToStack && !appToken.mReplacingWindow) {
             TaskStack stack = w.getTask().mStack;
             stack.getBounds(mTmpStackBounds);
-            final int surfaceX = (int) mSurfaceX;
-            final int surfaceY = (int) mSurfaceY;
+            final int frameX = w.mFrame.left + mWin.mXOffset - w.getAttrs().surfaceInsets.left;
+            final int frameY = w.mFrame.top + mWin.mYOffset - w.getAttrs().surfaceInsets.top;
             // We need to do some acrobatics with surface position, because their clip region is
             // relative to the inside of the surface, but the stack bounds aren't.
             clipRect.left = Math.max(0,
-                    Math.max(mTmpStackBounds.left, surfaceX + clipRect.left) - surfaceX);
+                    Math.max(mTmpStackBounds.left, frameX + clipRect.left) - frameX);
             clipRect.top = Math.max(0,
-                    Math.max(mTmpStackBounds.top, surfaceY + clipRect.top) - surfaceY);
+                    Math.max(mTmpStackBounds.top, frameY + clipRect.top) - frameY);
             clipRect.right = Math.max(0,
-                    Math.min(mTmpStackBounds.right, surfaceX + clipRect.right) - surfaceX);
+                    Math.min(mTmpStackBounds.right, frameX + clipRect.right) - frameX);
             clipRect.bottom = Math.max(0,
-                    Math.min(mTmpStackBounds.bottom, surfaceY + clipRect.bottom) - surfaceY);
+                    Math.min(mTmpStackBounds.bottom, frameY + clipRect.bottom) - frameY);
         }
     }
 
