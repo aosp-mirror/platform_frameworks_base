@@ -2330,4 +2330,6 @@
   <java-symbol type="bool" name="config_cameraDoubleTapPowerGestureEnabled" />
 
   <java-symbol type="drawable" name="platlogo_m" />
+
+  <java-symbol type="string" name="config_packagedKeyboardName" />
 </resources>
