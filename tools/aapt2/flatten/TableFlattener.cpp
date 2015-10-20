@@ -23,9 +23,9 @@
 #include "flatten/TableFlattener.h"
 #include "util/BigBuffer.h"
 
+#include <base/macros.h>
 #include <type_traits>
 #include <numeric>
-#include <utils/misc.h>
 
 using namespace android;
 
@@ -59,20 +59,32 @@ struct FlatEntry {
     uint32_t sourceLine;
 };
 
-struct SymbolWriter {
+class SymbolWriter {
+public:
     struct Entry {
         StringPool::Ref name;
         size_t offset;
     };
 
-    StringPool pool;
     std::vector<Entry> symbols;
 
-    void addSymbol(const ResourceNameRef& name, size_t offset) {
-        symbols.push_back(Entry{ pool.makeRef(name.package.toString() + u":" +
-                                              toString(name.type).toString() + u"/" +
-                                              name.entry.toString()), offset });
+    explicit SymbolWriter(StringPool* pool) : mPool(pool) {
     }
+
+    void addSymbol(const ResourceNameRef& name, size_t offset) {
+        symbols.push_back(Entry{ mPool->makeRef(name.package.toString() + u":" +
+                                               toString(name.type).toString() + u"/" +
+                                               name.entry.toString()), offset });
+    }
+
+    void shiftAllOffsets(size_t offset) {
+        for (Entry& entry : symbols) {
+            entry.offset += offset;
+        }
+    }
+
+private:
+    StringPool* mPool;
 };
 
 struct MapFlattenVisitor : public RawValueVisitor {
@@ -226,15 +238,59 @@ struct MapFlattenVisitor : public RawValueVisitor {
     }
 };
 
-struct PackageFlattener {
+class PackageFlattener {
+public:
+    PackageFlattener(IDiagnostics* diag, TableFlattenerOptions options,
+                     ResourceTablePackage* package, SymbolWriter* symbolWriter,
+                     StringPool* sourcePool) :
+            mDiag(diag), mOptions(options), mPackage(package), mSymbols(symbolWriter),
+            mSourcePool(sourcePool) {
+    }
+
+    bool flattenPackage(BigBuffer* buffer) {
+        ChunkWriter pkgWriter(buffer);
+        ResTable_package* pkgHeader = pkgWriter.startChunk<ResTable_package>(
+                RES_TABLE_PACKAGE_TYPE);
+        pkgHeader->id = util::hostToDevice32(mPackage->id.value());
+
+        if (mPackage->name.size() >= arraysize(pkgHeader->name)) {
+            mDiag->error(DiagMessage() <<
+                         "package name '" << mPackage->name << "' is too long");
+            return false;
+        }
+
+        // Copy the package name in device endianness.
+        strcpy16_htod(pkgHeader->name, arraysize(pkgHeader->name), mPackage->name);
+
+        // Serialize the types. We do this now so that our type and key strings
+        // are populated. We write those first.
+        BigBuffer typeBuffer(1024);
+        flattenTypes(&typeBuffer);
+
+        pkgHeader->typeStrings = util::hostToDevice32(pkgWriter.size());
+        StringPool::flattenUtf16(pkgWriter.getBuffer(), mTypePool);
+
+        pkgHeader->keyStrings = util::hostToDevice32(pkgWriter.size());
+        StringPool::flattenUtf16(pkgWriter.getBuffer(), mKeyPool);
+
+        // Add the ResTable_package header/type/key strings to the offset.
+        mSymbols->shiftAllOffsets(pkgWriter.size());
+
+        // Append the types.
+        buffer->appendBuffer(std::move(typeBuffer));
+
+        pkgWriter.finish();
+        return true;
+    }
+
+private:
     IDiagnostics* mDiag;
     TableFlattenerOptions mOptions;
-    ResourceTable* mTable;
     ResourceTablePackage* mPackage;
-    SymbolWriter mSymbols;
     StringPool mTypePool;
     StringPool mKeyPool;
-    StringPool mSourcePool;
+    SymbolWriter* mSymbols;
+    StringPool* mSourcePool;
 
     template <typename T>
     T* writeEntry(FlatEntry* entry, BigBuffer* buffer) {
@@ -278,8 +334,8 @@ struct PackageFlattener {
             if (Reference* ref = valueCast<Reference>(entry->value)) {
                 if (!ref->id) {
                     assert(ref->name && "reference must have at least a name");
-                    mSymbols.addSymbol(ref->name.value(),
-                                       buffer->size() + offsetof(Res_value, data));
+                    mSymbols->addSymbol(ref->name.value(),
+                                        buffer->size() + offsetof(Res_value, data));
                 }
             }
             Res_value* outValue = buffer->nextBlock<Res_value>();
@@ -289,12 +345,12 @@ struct PackageFlattener {
         } else {
             const size_t beforeEntry = buffer->size();
             ResTable_entry_ext* outEntry = writeEntry<ResTable_entry_ext>(entry, buffer);
-            MapFlattenVisitor visitor(&mSymbols, entry, buffer);
+            MapFlattenVisitor visitor(mSymbols, entry, buffer);
             entry->value->accept(&visitor);
             outEntry->count = util::hostToDevice32(visitor.mEntryCount);
             if (visitor.mParentName) {
-                mSymbols.addSymbol(visitor.mParentName.value(),
-                                   beforeEntry + offsetof(ResTable_entry_ext, parent));
+                mSymbols->addSymbol(visitor.mParentName.value(),
+                                    beforeEntry + offsetof(ResTable_entry_ext, parent));
             } else if (visitor.mParentIdent) {
                 outEntry->parent.ident = util::hostToDevice32(visitor.mParentIdent.value());
             }
@@ -430,7 +486,7 @@ struct PackageFlattener {
                 publicEntry->entryId = util::hostToDevice32(entry->id.value());
                 publicEntry->key.index = util::hostToDevice32(mKeyPool.makeRef(
                         entry->name).getIndex());
-                publicEntry->source.index = util::hostToDevice32(mSourcePool.makeRef(
+                publicEntry->source.index = util::hostToDevice32(mSourcePool->makeRef(
                         util::utf8ToUtf16(entry->publicStatus.source.path)).getIndex());
                 if (entry->publicStatus.source.line) {
                     publicEntry->sourceLine = util::hostToDevice32(
@@ -487,7 +543,7 @@ struct PackageFlattener {
                 for (auto& configValue : entry->values) {
                    configToEntryListMap[configValue.config].push_back(FlatEntry{
                             entry, configValue.value.get(), (uint32_t) keyIndex,
-                            (uint32_t)(mSourcePool.makeRef(util::utf8ToUtf16(
+                            (uint32_t)(mSourcePool->makeRef(util::utf8ToUtf16(
                                     configValue.source.path)).getIndex()),
                             (uint32_t)(configValue.source.line
                                     ? configValue.source.line.value() : 0)
@@ -504,141 +560,113 @@ struct PackageFlattener {
         }
         return true;
     }
-
-    bool flattenPackage(BigBuffer* buffer) {
-        // We must do this before writing the resources, since the string pool IDs may change.
-        mTable->stringPool.sort([](const StringPool::Entry& a, const StringPool::Entry& b) -> bool {
-            int diff = a.context.priority - b.context.priority;
-            if (diff < 0) return true;
-            if (diff > 0) return false;
-            diff = a.context.config.compare(b.context.config);
-            if (diff < 0) return true;
-            if (diff > 0) return false;
-            return a.value < b.value;
-        });
-        mTable->stringPool.prune();
-
-        const size_t beginningIndex = buffer->size();
-
-        BigBuffer typeBuffer(1024);
-        if (!flattenTypes(&typeBuffer)) {
-            return false;
-        }
-
-        ChunkWriter tableWriter(buffer);
-        ResTable_header* tableHeader = tableWriter.startChunk<ResTable_header>(RES_TABLE_TYPE);
-        tableHeader->packageCount = util::hostToDevice32(1);
-
-        SymbolTable_entry* symbolEntryData = nullptr;
-        if (mOptions.useExtendedChunks && !mSymbols.symbols.empty()) {
-            // Sort the offsets so we can scan them linearly.
-            std::sort(mSymbols.symbols.begin(), mSymbols.symbols.end(),
-                      [](const SymbolWriter::Entry& a, const SymbolWriter::Entry& b) -> bool {
-                          return a.offset < b.offset;
-                      });
-
-            ChunkWriter symbolWriter(tableWriter.getBuffer());
-            SymbolTable_header* symbolHeader = symbolWriter.startChunk<SymbolTable_header>(
-                    RES_TABLE_SYMBOL_TABLE_TYPE);
-            symbolHeader->count = util::hostToDevice32(mSymbols.symbols.size());
-
-            symbolEntryData = symbolWriter.nextBlock<SymbolTable_entry>(mSymbols.symbols.size());
-            StringPool::flattenUtf8(symbolWriter.getBuffer(), mSymbols.pool);
-            symbolWriter.finish();
-        }
-
-        if (mOptions.useExtendedChunks && mSourcePool.size() > 0) {
-            // Write out source pool.
-            ChunkWriter srcWriter(tableWriter.getBuffer());
-            srcWriter.startChunk<ResChunk_header>(RES_TABLE_SOURCE_POOL_TYPE);
-            StringPool::flattenUtf8(srcWriter.getBuffer(), mSourcePool);
-            srcWriter.finish();
-        }
-
-        StringPool::flattenUtf8(tableWriter.getBuffer(), mTable->stringPool);
-
-        ChunkWriter pkgWriter(tableWriter.getBuffer());
-        ResTable_package* pkgHeader = pkgWriter.startChunk<ResTable_package>(
-                RES_TABLE_PACKAGE_TYPE);
-        pkgHeader->id = util::hostToDevice32(mPackage->id.value());
-
-        if (mPackage->name.size() >= NELEM(pkgHeader->name)) {
-            mDiag->error(DiagMessage() <<
-                         "package name '" << mPackage->name << "' is too long");
-            return false;
-        }
-
-        strcpy16_htod(pkgHeader->name, NELEM(pkgHeader->name), mPackage->name);
-
-        pkgHeader->typeStrings = util::hostToDevice32(pkgWriter.size());
-        StringPool::flattenUtf16(pkgWriter.getBuffer(), mTypePool);
-
-        pkgHeader->keyStrings = util::hostToDevice32(pkgWriter.size());
-        StringPool::flattenUtf16(pkgWriter.getBuffer(), mKeyPool);
-
-        // Actually write out the symbol entries if we have symbols.
-        if (symbolEntryData) {
-            for (auto& entry : mSymbols.symbols) {
-                symbolEntryData->stringIndex = util::hostToDevice32(entry.name.getIndex());
-
-                // The symbols were all calculated with the typeBuffer offset. We need to
-                // add the beginning of the output buffer.
-                symbolEntryData->offset = util::hostToDevice32(
-                        (pkgWriter.getBuffer()->size() - beginningIndex) + entry.offset);
-
-                symbolEntryData++;
-            }
-        }
-
-        // Write out the types and entries.
-        pkgWriter.getBuffer()->appendBuffer(std::move(typeBuffer));
-
-        pkgWriter.finish();
-        tableWriter.finish();
-        return true;
-    }
 };
 
 } // namespace
 
 bool TableFlattener::consume(IAaptContext* context, ResourceTable* table) {
+    // We must do this before writing the resources, since the string pool IDs may change.
+    table->stringPool.sort([](const StringPool::Entry& a, const StringPool::Entry& b) -> bool {
+        int diff = a.context.priority - b.context.priority;
+        if (diff < 0) return true;
+        if (diff > 0) return false;
+        diff = a.context.config.compare(b.context.config);
+        if (diff < 0) return true;
+        if (diff > 0) return false;
+        return a.value < b.value;
+    });
+    table->stringPool.prune();
+
+    // Write the ResTable header.
+    ChunkWriter tableWriter(mBuffer);
+    ResTable_header* tableHeader = tableWriter.startChunk<ResTable_header>(RES_TABLE_TYPE);
+    tableHeader->packageCount = util::hostToDevice32(table->packages.size());
+
+    // Flatten the values string pool.
+    StringPool::flattenUtf8(tableWriter.getBuffer(), table->stringPool);
+
+    // If we have a reference to a symbol that doesn't exist, we don't know its resource ID.
+    // We encode the name of the symbol along with the offset of where to include the resource ID
+    // once it is found.
+    StringPool symbolPool;
+    std::vector<SymbolWriter::Entry> symbolOffsets;
+
+    // String pool holding the source paths of each value.
+    StringPool sourcePool;
+
+    BigBuffer packageBuffer(1024);
+
+    // Flatten each package.
     for (auto& package : table->packages) {
-        // Only support flattening one package. Since the StringPool is shared between packages
-        // in ResourceTable, we must fail if other packages are present, since their strings
-        // will be included in the final ResourceTable.
-        if (context->getCompilationPackage() != package->name) {
-            context->getDiagnostics()->error(DiagMessage()
-                                             << "resources for package '" << package->name
-                                             << "' can't be flattened when compiling package '"
-                                             << context->getCompilationPackage() << "'");
+        const size_t beforePackageSize = packageBuffer.size();
+
+        // All packages will share a single global symbol pool.
+        SymbolWriter packageSymbolWriter(&symbolPool);
+
+        PackageFlattener flattener(context->getDiagnostics(), mOptions, package.get(),
+                                   &packageSymbolWriter, &sourcePool);
+        if (!flattener.flattenPackage(&packageBuffer)) {
             return false;
         }
 
-        if (!package->id || package->id.value() != context->getPackageId()) {
-            context->getDiagnostics()->error(DiagMessage()
-                                             << "package '" << package->name << "' must have "
-                                             << "package id "
-                                             << std::hex << context->getPackageId() << std::dec);
-            return false;
-        }
+        // The symbols are offset only from their own Package start. Offset them from the
+        // start of the packageBuffer.
+        packageSymbolWriter.shiftAllOffsets(beforePackageSize);
 
-        PackageFlattener flattener = {
-                context->getDiagnostics(),
-                mOptions,
-                table,
-                package.get()
-        };
-
-        if (!flattener.flattenPackage(mBuffer)) {
-            return false;
-        }
-        return true;
+        // Extract all the symbols to offset
+        symbolOffsets.insert(symbolOffsets.end(),
+                             std::make_move_iterator(packageSymbolWriter.symbols.begin()),
+                             std::make_move_iterator(packageSymbolWriter.symbols.end()));
     }
 
-    context->getDiagnostics()->error(DiagMessage()
-                                     << "compilation package '" << context->getCompilationPackage()
-                                     << "' not found");
-    return false;
+    SymbolTable_entry* symbolEntryData = nullptr;
+    if (mOptions.useExtendedChunks) {
+        if (!symbolOffsets.empty()) {
+            // Sort the offsets so we can scan them linearly.
+            std::sort(symbolOffsets.begin(), symbolOffsets.end(),
+                      [](const SymbolWriter::Entry& a, const SymbolWriter::Entry& b) -> bool {
+                          return a.offset < b.offset;
+                      });
+
+            // Write the Symbol header.
+            ChunkWriter symbolWriter(tableWriter.getBuffer());
+            SymbolTable_header* symbolHeader = symbolWriter.startChunk<SymbolTable_header>(
+                    RES_TABLE_SYMBOL_TABLE_TYPE);
+            symbolHeader->count = util::hostToDevice32(symbolOffsets.size());
+
+            symbolEntryData = symbolWriter.nextBlock<SymbolTable_entry>(symbolOffsets.size());
+            StringPool::flattenUtf8(symbolWriter.getBuffer(), symbolPool);
+            symbolWriter.finish();
+        }
+
+        if (sourcePool.size() > 0) {
+            // Write out source pool.
+            ChunkWriter srcWriter(tableWriter.getBuffer());
+            srcWriter.startChunk<ResChunk_header>(RES_TABLE_SOURCE_POOL_TYPE);
+            StringPool::flattenUtf8(srcWriter.getBuffer(), sourcePool);
+            srcWriter.finish();
+        }
+    }
+
+    const size_t beforePackagesSize = tableWriter.size();
+
+    // Finally merge all the packages into the main buffer.
+    tableWriter.getBuffer()->appendBuffer(std::move(packageBuffer));
+
+    // Update the offsets to their final values.
+    if (symbolEntryData) {
+        for (SymbolWriter::Entry& entry : symbolOffsets) {
+            symbolEntryData->stringIndex = util::hostToDevice32(entry.name.getIndex());
+
+            // The symbols were all calculated with the packageBuffer offset. We need to
+            // add the beginning of the output buffer.
+            symbolEntryData->offset = util::hostToDevice32(entry.offset + beforePackagesSize);
+            symbolEntryData++;
+        }
+    }
+
+    tableWriter.finish();
+    return true;
 }
 
 } // namespace aapt

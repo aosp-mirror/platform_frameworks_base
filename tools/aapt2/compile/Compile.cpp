@@ -102,6 +102,7 @@ static Maybe<ResourcePathData> extractResourcePathData(const std::string& path,
 
 struct CompileOptions {
     std::string outputPath;
+    Maybe<std::u16string> product;
     bool verbose = false;
 };
 
@@ -121,8 +122,6 @@ static std::string buildIntermediateFilename(const std::string outDir,
 static bool compileTable(IAaptContext* context, const CompileOptions& options,
                          const ResourcePathData& pathData, const std::string& outputPath) {
     ResourceTable table;
-    table.createPackage(u"", 0x7f);
-
     {
         std::ifstream fin(pathData.source.path, std::ifstream::binary);
         if (!fin) {
@@ -134,12 +133,18 @@ static bool compileTable(IAaptContext* context, const CompileOptions& options,
         // Parse the values file from XML.
         XmlPullParser xmlParser(fin);
         ResourceParser resParser(context->getDiagnostics(), &table, pathData.source,
-                                 pathData.config);
+                                 pathData.config, ResourceParserOptions{ options.product });
         if (!resParser.parse(&xmlParser)) {
             return false;
         }
 
         fin.close();
+    }
+
+    ResourceTablePackage* pkg = table.createPackage(context->getCompilationPackage());
+    if (!pkg->id) {
+        // If no package ID was set while parsing (public identifiers), auto assign an ID.
+        pkg->id = context->getPackageId();
     }
 
     // Assign IDs to prepare the table for flattening.
@@ -325,7 +330,7 @@ public:
     }
 
     uint8_t getPackageId() override {
-       return 0x7f;
+       return 0x0;
     }
 
     ISymbolTable* getExternalSymbols() override {
@@ -340,11 +345,17 @@ public:
 int compile(const std::vector<StringPiece>& args) {
     CompileOptions options;
 
+    Maybe<std::string> product;
     Flags flags = Flags()
             .requiredFlag("-o", "Output path", &options.outputPath)
+            .optionalFlag("--product", "Product type to compile", &product)
             .optionalSwitch("-v", "Enables verbose logging", &options.verbose);
     if (!flags.parse("aapt2 compile", args, &std::cerr)) {
         return 1;
+    }
+
+    if (product) {
+        options.product = util::utf8ToUtf16(product.value());
     }
 
     CompileContext context;

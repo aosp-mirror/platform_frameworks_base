@@ -51,12 +51,6 @@ public:
         mMessage << value;
         return *this;
     }
-/*
-    template <typename T> DiagMessage& operator<<(
-            const ::std::function<::std::ostream&(::std::ostream&)>& f) {
-        f(mMessage);
-        return *this;
-    }*/
 
     DiagMessageActual build() const {
         return DiagMessageActual{ mSource, mMessage.str() };
@@ -72,6 +66,8 @@ struct IDiagnostics {
 };
 
 struct StdErrDiagnostics : public IDiagnostics {
+    size_t mNumErrors = 0;
+
     void emit(const DiagMessage& msg, const char* tag) {
         DiagMessageActual actual = msg.build();
         if (!actual.source.path.empty()) {
@@ -81,7 +77,10 @@ struct StdErrDiagnostics : public IDiagnostics {
     }
 
     void error(const DiagMessage& msg) override {
-        emit(msg, "error: ");
+        if (mNumErrors < 20) {
+            emit(msg, "error: ");
+        }
+        mNumErrors++;
     }
 
     void warn(const DiagMessage& msg) override {

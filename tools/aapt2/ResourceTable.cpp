@@ -62,17 +62,17 @@ ResourceTablePackage* ResourceTable::findPackageById(uint8_t id) {
     return nullptr;
 }
 
-ResourceTablePackage* ResourceTable::createPackage(const StringPiece16& name, uint8_t id) {
+ResourceTablePackage* ResourceTable::createPackage(const StringPiece16& name, Maybe<uint8_t> id) {
     ResourceTablePackage* package = findOrCreatePackage(name);
-    if (!package->id) {
+    if (id && !package->id) {
         package->id = id;
         return package;
     }
 
-    if (package->id.value() == id) {
-        return package;
+    if (id && package->id && package->id.value() != id.value()) {
+        return nullptr;
     }
-    return nullptr;
+    return package;
 }
 
 ResourceTablePackage* ResourceTable::findOrCreatePackage(const StringPiece16& name) {

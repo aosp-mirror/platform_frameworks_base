@@ -39,7 +39,7 @@ bool TableMerger::merge(const Source& src, ResourceTable* table) {
     bool error = false;
     for (auto& package : table->packages) {
         // Warn of packages with an unrelated ID.
-        if (package->id && package->id.value() != desiredPackageId) {
+        if (package->id && package->id.value() != 0x0 && package->id.value() != desiredPackageId) {
             mContext->getDiagnostics()->warn(DiagMessage(src)
                                              << "ignoring package " << package->name);
             continue;

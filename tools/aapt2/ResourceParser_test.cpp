@@ -48,10 +48,12 @@ struct ResourceParserTest : public ::testing::Test {
         mContext = test::ContextBuilder().build();
     }
 
-    ::testing::AssertionResult testParse(const StringPiece& str) {
+    ::testing::AssertionResult testParse(const StringPiece& str,
+                                         Maybe<std::u16string> product = {}) {
         std::stringstream input(kXmlPreamble);
         input << "<resources>\n" << str << "\n</resources>" << std::endl;
-        ResourceParser parser(mContext->getDiagnostics(), &mTable, Source{ "test" }, {});
+        ResourceParser parser(mContext->getDiagnostics(), &mTable, Source{ "test" }, {},
+                              ResourceParserOptions{ product });
         XmlPullParser xmlParser(input);
         if (parser.parse(&xmlParser)) {
             return ::testing::AssertionSuccess();
@@ -314,6 +316,9 @@ TEST_F(ResourceParserTest, ParseAttributesDeclareStyleable) {
     std::string input = "<declare-styleable name=\"foo\">\n"
                         "  <attr name=\"bar\" />\n"
                         "  <attr name=\"bat\" format=\"string|reference\"/>\n"
+                        "  <attr name=\"baz\">\n"
+                        "    <enum name=\"foo\" value=\"1\"/>\n"
+                        "  </attr>\n"
                         "</declare-styleable>";
     ASSERT_TRUE(testParse(input));
 
@@ -325,9 +330,16 @@ TEST_F(ResourceParserTest, ParseAttributesDeclareStyleable) {
     ASSERT_NE(attr, nullptr);
     EXPECT_TRUE(attr->isWeak());
 
+    attr = test::getValue<Attribute>(&mTable, u"@attr/baz");
+    ASSERT_NE(attr, nullptr);
+    EXPECT_TRUE(attr->isWeak());
+    EXPECT_EQ(1u, attr->symbols.size());
+
+    EXPECT_NE(nullptr, test::getValue<Id>(&mTable, u"@id/foo"));
+
     Styleable* styleable = test::getValue<Styleable>(&mTable, u"@styleable/foo");
     ASSERT_NE(styleable, nullptr);
-    ASSERT_EQ(2u, styleable->entries.size());
+    ASSERT_EQ(3u, styleable->entries.size());
 
     EXPECT_EQ(test::parseNameOrDie(u"@attr/bar"), styleable->entries[0].name.value());
     EXPECT_EQ(test::parseNameOrDie(u"@attr/bat"), styleable->entries[1].name.value());
@@ -348,6 +360,14 @@ TEST_F(ResourceParserTest, ParseArray) {
     EXPECT_NE(nullptr, valueCast<Reference>(array->items[0].get()));
     EXPECT_NE(nullptr, valueCast<String>(array->items[1].get()));
     EXPECT_NE(nullptr, valueCast<BinaryPrimitive>(array->items[2].get()));
+}
+
+TEST_F(ResourceParserTest, ParseStringArray) {
+    std::string input = "<string-array name=\"foo\">\n"
+                        "  <item>\"Werk\"</item>\n"
+                        "</string-array>\n";
+    ASSERT_TRUE(testParse(input));
+    EXPECT_NE(nullptr, test::getValue<Array>(&mTable, u"@array/foo"));
 }
 
 TEST_F(ResourceParserTest, ParsePlural) {
@@ -383,6 +403,26 @@ TEST_F(ResourceParserTest, ParsePublicIdAsDefinition) {
 
     Id* id = test::getValue<Id>(&mTable, u"@id/foo");
     ASSERT_NE(nullptr, id);
+}
+
+TEST_F(ResourceParserTest, FilterProductsThatDontMatch) {
+    std::string input = "<string name=\"foo\" product=\"phone\">hi</string>\n"
+                        "<string name=\"foo\" product=\"no-sdcard\">ho</string>\n"
+                        "<string name=\"bar\" product=\"\">wee</string>\n"
+                        "<string name=\"baz\">woo</string>\n";
+    ASSERT_TRUE(testParse(input, std::u16string(u"no-sdcard")));
+
+    String* fooStr = test::getValue<String>(&mTable, u"@string/foo");
+    ASSERT_NE(nullptr, fooStr);
+    EXPECT_EQ(StringPiece16(u"ho"), *fooStr->value);
+
+    EXPECT_NE(nullptr, test::getValue<String>(&mTable, u"@string/bar"));
+    EXPECT_NE(nullptr, test::getValue<String>(&mTable, u"@string/baz"));
+}
+
+TEST_F(ResourceParserTest, FailWhenProductFilterStripsOutAllVersionsOfResource) {
+    std::string input = "<string name=\"foo\" product=\"tablet\">hello</string>\n";
+    ASSERT_FALSE(testParse(input, std::u16string(u"phone")));
 }
 
 } // namespace aapt

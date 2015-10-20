@@ -52,6 +52,7 @@ struct LinkOptions {
     bool staticLib = false;
     bool verbose = false;
     bool outputToDirectory = false;
+    Maybe<std::string> privateSymbols;
 };
 
 struct LinkContext : public IAaptContext {
@@ -400,7 +401,13 @@ struct LinkCommand {
 
         mContext.mNameMangler = util::make_unique<NameMangler>(
                 NameManglerPolicy{ mContext.mCompilationPackage });
-        mContext.mPackageId = 0x7f;
+
+        if (mContext.mCompilationPackage == u"android") {
+            mContext.mPackageId = 0x01;
+        } else {
+            mContext.mPackageId = 0x7f;
+        }
+
         mContext.mSymbols = createSymbolTableFromIncludePaths();
         if (!mContext.mSymbols) {
             return 1;
@@ -689,6 +696,9 @@ int link(const std::vector<StringPiece>& args) {
                             "by -o",
                             &options.outputToDirectory)
             .optionalSwitch("--static-lib", "Generate a static Android library", &options.staticLib)
+            .optionalFlag("--private-symbols", "Package name to use when generating R.java for "
+                          "private symbols. If not specified, public and private symbols will "
+                          "use the application's package name", &options.privateSymbols)
             .optionalSwitch("-v", "Enables verbose logging", &options.verbose);
 
     if (!flags.parse("aapt2 link", args, &std::cerr)) {
