@@ -465,9 +465,6 @@ public class Fragment implements ComponentCallbacks2, OnCreateContextMenuListene
     // If set this fragment is being retained across the current config change.
     boolean mRetaining;
 
-    // If set this fragment's loaders are being retained across the current config change.
-    boolean mRetainLoader;
-
     // If set this fragment has menu items to contribute.
     boolean mHasMenu;
 
@@ -2415,7 +2412,7 @@ public class Fragment implements ComponentCallbacks2, OnCreateContextMenuListene
                 mLoaderManager = mHost.getLoaderManager(mWho, mLoadersStarted, false);
             }
             if (mLoaderManager != null) {
-                if (mRetainLoader) {
+                if (mHost.getRetainLoaders()) {
                     mLoaderManager.doRetain();
                 } else {
                     mLoaderManager.doStop();
