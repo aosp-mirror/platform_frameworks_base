@@ -207,33 +207,7 @@ public class NotificationManager
      */
     public void notify(String tag, int id, Notification notification)
     {
-        int[] idOut = new int[1];
-        INotificationManager service = getService();
-        String pkg = mContext.getPackageName();
-        if (notification.sound != null) {
-            notification.sound = notification.sound.getCanonicalUri();
-            if (StrictMode.vmFileUriExposureEnabled()) {
-                notification.sound.checkFileUriExposed("Notification.sound");
-            }
-        }
-        fixLegacySmallIcon(notification, pkg);
-        if (mContext.getApplicationInfo().targetSdkVersion > Build.VERSION_CODES.LOLLIPOP_MR1) {
-            if (notification.getSmallIcon() == null) {
-                throw new IllegalArgumentException("Invalid notification (no valid small icon): "
-                    + notification);
-            }
-        }
-        if (localLOGV) Log.v(TAG, pkg + ": notify(" + id + ", " + notification + ")");
-        Notification stripped = notification.clone();
-        Builder.stripForDelivery(stripped);
-        try {
-            service.enqueueNotificationWithTag(pkg, mContext.getOpPackageName(), tag, id,
-                    stripped, idOut, UserHandle.myUserId());
-            if (id != idOut[0]) {
-                Log.w(TAG, "notify: id corrupted: sent " + id + ", got back " + idOut[0]);
-            }
-        } catch (RemoteException e) {
-        }
+        notifyAsUser(tag, id, notification, new UserHandle(UserHandle.myUserId()));
     }
 
     /**
@@ -251,12 +225,17 @@ public class NotificationManager
             }
         }
         fixLegacySmallIcon(notification, pkg);
+        if (mContext.getApplicationInfo().targetSdkVersion > Build.VERSION_CODES.LOLLIPOP_MR1) {
+            if (notification.getSmallIcon() == null) {
+                throw new IllegalArgumentException("Invalid notification (no valid small icon): "
+                        + notification);
+            }
+        }
         if (localLOGV) Log.v(TAG, pkg + ": notify(" + id + ", " + notification + ")");
-        Notification stripped = notification.clone();
-        Builder.stripForDelivery(stripped);
+        final Notification copy = notification.clone();
         try {
             service.enqueueNotificationWithTag(pkg, mContext.getOpPackageName(), tag, id,
-                    stripped, idOut, user.getIdentifier());
+                    copy, idOut, user.getIdentifier());
             if (id != idOut[0]) {
                 Log.w(TAG, "notify: id corrupted: sent " + id + ", got back " + idOut[0]);
             }
@@ -287,13 +266,7 @@ public class NotificationManager
      */
     public void cancel(String tag, int id)
     {
-        INotificationManager service = getService();
-        String pkg = mContext.getPackageName();
-        if (localLOGV) Log.v(TAG, pkg + ": cancel(" + id + ")");
-        try {
-            service.cancelNotificationWithTag(pkg, tag, id, UserHandle.myUserId());
-        } catch (RemoteException e) {
-        }
+        cancelAsUser(tag, id, new UserHandle(UserHandle.myUserId()));
     }
 
     /**
