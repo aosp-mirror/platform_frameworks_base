@@ -43,12 +43,10 @@ import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.Environment;
 import android.os.Handler;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.os.storage.VolumeInfo;
-import android.text.TextUtils;
 import android.util.AndroidException;
 
 import com.android.internal.util.ArrayUtils;
@@ -429,6 +427,14 @@ public abstract class PackageManager {
      * @hide
      */
     public static final int INSTALL_FORCE_PERMISSION_PROMPT = 0x00000400;
+
+    /**
+     * Flag parameter for {@link #installPackage} to indicate that this package is
+     * to be installed quickly.
+     *
+     * @hide
+     */
+    public static final int INSTALL_QUICK = 0x00000800;
 
     /**
      * Flag parameter for

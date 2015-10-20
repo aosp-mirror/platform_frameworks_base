@@ -28,7 +28,6 @@ import android.util.Log;
 import android.util.Slog;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -166,12 +165,7 @@ final class PackageDexOptimizer {
                     String oatDir = null;
                     if (dexoptNeeded == DexFile.DEX2OAT_NEEDED) {
                         dexoptType = "dex2oat";
-                        try {
-                            oatDir = createOatDirIfSupported(pkg, dexCodeInstructionSet);
-                        } catch (IOException ioe) {
-                            Slog.w(TAG, "Unable to create oatDir for package: " + pkg.packageName);
-                            return DEX_OPT_FAILED;
-                        }
+                        oatDir = createOatDirIfSupported(pkg, dexCodeInstructionSet);
                     } else if (dexoptNeeded == DexFile.PATCHOAT_NEEDED) {
                         dexoptType = "patchoat";
                     } else if (dexoptNeeded == DexFile.SELF_PATCHOAT_NEEDED) {
@@ -230,8 +224,7 @@ final class PackageDexOptimizer {
      * cannot be created.
      */
     @Nullable
-    private String createOatDirIfSupported(PackageParser.Package pkg, String dexInstructionSet)
-            throws IOException {
+    private String createOatDirIfSupported(PackageParser.Package pkg, String dexInstructionSet) {
         if (!pkg.canHaveOatDir()) {
             return null;
         }

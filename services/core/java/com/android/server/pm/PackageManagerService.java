@@ -10087,6 +10087,10 @@ public class PackageManagerService extends IPackageManager.Stub {
         if (!DEFAULT_VERIFY_ENABLE) {
             return false;
         }
+        // TODO: fix b/25118622; don't bypass verification
+        if (Build.IS_DEBUGGABLE && (installFlags & PackageManager.INSTALL_QUICK) != 0) {
+            return false;
+        }
 
         boolean ensureVerifyAppsEnabled = isUserRestricted(userId, UserManager.ENSURE_VERIFY_APPS);
 
@@ -12412,6 +12416,7 @@ public class PackageManagerService extends IPackageManager.Stub {
         final boolean forwardLocked = ((installFlags & PackageManager.INSTALL_FORWARD_LOCK) != 0);
         final boolean onExternal = (((installFlags & PackageManager.INSTALL_EXTERNAL) != 0)
                 || (args.volumeUuid != null));
+        final boolean quickInstall = ((installFlags & PackageManager.INSTALL_QUICK) != 0);
         boolean replace = false;
         int scanFlags = SCAN_NEW_INSTALL | SCAN_UPDATE_SIGNATURE;
         if (args.move != null) {
@@ -12427,7 +12432,8 @@ public class PackageManagerService extends IPackageManager.Stub {
         final int parseFlags = mDefParseFlags | PackageParser.PARSE_CHATTY
                 | PackageParser.PARSE_ENFORCE_CODE
                 | (forwardLocked ? PackageParser.PARSE_FORWARD_LOCK : 0)
-                | (onExternal ? PackageParser.PARSE_EXTERNAL_STORAGE : 0);
+                | (onExternal ? PackageParser.PARSE_EXTERNAL_STORAGE : 0)
+                | (quickInstall ? PackageParser.PARSE_SKIP_VERIFICATION : 0);
         PackageParser pp = new PackageParser();
         pp.setSeparateProcesses(mSeparateProcesses);
         pp.setDisplayMetrics(mMetrics);
@@ -12457,7 +12463,6 @@ public class PackageManagerService extends IPackageManager.Stub {
         Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "collectCertificates");
         try {
             pp.collectCertificates(pkg, parseFlags);
-            pp.collectManifestDigest(pkg);
         } catch (PackageParserException e) {
             res.setError("Failed collect during installPackageLI", e);
             return;
@@ -12467,6 +12472,16 @@ public class PackageManagerService extends IPackageManager.Stub {
 
         /* If the installer passed in a manifest digest, compare it now. */
         if (args.manifestDigest != null) {
+            Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "collectManifestDigest");
+            try {
+                pp.collectManifestDigest(pkg);
+            } catch (PackageParserException e) {
+                res.setError("Failed collect during installPackageLI", e);
+                return;
+            } finally {
+                Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
+            }
+
             if (DEBUG_INSTALL) {
                 final String parsedManifest = pkg.manifestDigest == null ? "null"
                         : pkg.manifestDigest.toString();
@@ -12644,7 +12659,7 @@ public class PackageManagerService extends IPackageManager.Stub {
             int result = mPackageDexOptimizer
                     .performDexOpt(pkg, null /* instruction sets */, false /* forceDex */,
                             false /* defer */, false /* inclDependencies */,
-                            true /*bootComplete*/, false /*useJit*/);
+                            true /*bootComplete*/, quickInstall /*useJit*/);
             Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
             if (result == PackageDexOptimizer.DEX_OPT_FAILED) {
                 res.setError(INSTALL_FAILED_DEXOPT, "Dexopt failed for " + pkg.codePath);
