@@ -2598,9 +2598,9 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
      * Add or remove a uid to the firewall blacklist for all network ifaces.
      */
     private void enableFirewallChainLocked(int chain, boolean enable) {
-        if (mFirewallChainStates.indexOfKey(chain) >= 0 &&
-                mFirewallChainStates.get(chain) == enable) {
-            // All is the same, nothing to do.
+        if (mFirewallChainStates.get(chain, false) == enable) {
+            // All is the same, nothing to do.  This relies on the fact that netd has child
+            // chains default detached.
             return;
         }
         mFirewallChainStates.put(chain, enable);
