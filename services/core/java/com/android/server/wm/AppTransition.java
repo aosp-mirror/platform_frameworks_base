@@ -16,6 +16,30 @@
 
 package com.android.server.wm;
 
+import static android.view.WindowManagerInternal.AppTransitionListener;
+import static com.android.internal.R.styleable.WindowAnimation_activityCloseEnterAnimation;
+import static com.android.internal.R.styleable.WindowAnimation_activityCloseExitAnimation;
+import static com.android.internal.R.styleable.WindowAnimation_activityOpenEnterAnimation;
+import static com.android.internal.R.styleable.WindowAnimation_activityOpenExitAnimation;
+import static com.android.internal.R.styleable.WindowAnimation_launchTaskBehindSourceAnimation;
+import static com.android.internal.R.styleable.WindowAnimation_launchTaskBehindTargetAnimation;
+import static com.android.internal.R.styleable.WindowAnimation_taskCloseEnterAnimation;
+import static com.android.internal.R.styleable.WindowAnimation_taskCloseExitAnimation;
+import static com.android.internal.R.styleable.WindowAnimation_taskOpenEnterAnimation;
+import static com.android.internal.R.styleable.WindowAnimation_taskOpenExitAnimation;
+import static com.android.internal.R.styleable.WindowAnimation_taskToBackEnterAnimation;
+import static com.android.internal.R.styleable.WindowAnimation_taskToBackExitAnimation;
+import static com.android.internal.R.styleable.WindowAnimation_taskToFrontEnterAnimation;
+import static com.android.internal.R.styleable.WindowAnimation_taskToFrontExitAnimation;
+import static com.android.internal.R.styleable.WindowAnimation_wallpaperCloseEnterAnimation;
+import static com.android.internal.R.styleable.WindowAnimation_wallpaperCloseExitAnimation;
+import static com.android.internal.R.styleable.WindowAnimation_wallpaperIntraCloseEnterAnimation;
+import static com.android.internal.R.styleable.WindowAnimation_wallpaperIntraCloseExitAnimation;
+import static com.android.internal.R.styleable.WindowAnimation_wallpaperIntraOpenEnterAnimation;
+import static com.android.internal.R.styleable.WindowAnimation_wallpaperIntraOpenExitAnimation;
+import static com.android.internal.R.styleable.WindowAnimation_wallpaperOpenEnterAnimation;
+import static com.android.internal.R.styleable.WindowAnimation_wallpaperOpenExitAnimation;
+
 import android.annotation.Nullable;
 import android.content.Context;
 import android.content.res.Configuration;
@@ -48,30 +72,6 @@ import com.android.server.wm.WindowManagerService.H;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
-
-import static android.view.WindowManagerInternal.AppTransitionListener;
-import static com.android.internal.R.styleable.WindowAnimation_activityCloseEnterAnimation;
-import static com.android.internal.R.styleable.WindowAnimation_activityCloseExitAnimation;
-import static com.android.internal.R.styleable.WindowAnimation_activityOpenEnterAnimation;
-import static com.android.internal.R.styleable.WindowAnimation_activityOpenExitAnimation;
-import static com.android.internal.R.styleable.WindowAnimation_launchTaskBehindSourceAnimation;
-import static com.android.internal.R.styleable.WindowAnimation_launchTaskBehindTargetAnimation;
-import static com.android.internal.R.styleable.WindowAnimation_taskCloseEnterAnimation;
-import static com.android.internal.R.styleable.WindowAnimation_taskCloseExitAnimation;
-import static com.android.internal.R.styleable.WindowAnimation_taskOpenEnterAnimation;
-import static com.android.internal.R.styleable.WindowAnimation_taskOpenExitAnimation;
-import static com.android.internal.R.styleable.WindowAnimation_taskToBackEnterAnimation;
-import static com.android.internal.R.styleable.WindowAnimation_taskToBackExitAnimation;
-import static com.android.internal.R.styleable.WindowAnimation_taskToFrontEnterAnimation;
-import static com.android.internal.R.styleable.WindowAnimation_taskToFrontExitAnimation;
-import static com.android.internal.R.styleable.WindowAnimation_wallpaperCloseEnterAnimation;
-import static com.android.internal.R.styleable.WindowAnimation_wallpaperCloseExitAnimation;
-import static com.android.internal.R.styleable.WindowAnimation_wallpaperIntraCloseEnterAnimation;
-import static com.android.internal.R.styleable.WindowAnimation_wallpaperIntraCloseExitAnimation;
-import static com.android.internal.R.styleable.WindowAnimation_wallpaperIntraOpenEnterAnimation;
-import static com.android.internal.R.styleable.WindowAnimation_wallpaperIntraOpenExitAnimation;
-import static com.android.internal.R.styleable.WindowAnimation_wallpaperOpenEnterAnimation;
-import static com.android.internal.R.styleable.WindowAnimation_wallpaperOpenExitAnimation;
 
 // State management of app transitions.  When we are preparing for a
 // transition, mNextAppTransition will be the kind of transition to
@@ -543,14 +543,15 @@ public class AppTransition implements Dump {
 
             final int appWidth = appFrame.width();
             final int appHeight = appFrame.height();
+            // mTmpStartRect will contain an area around the launcher icon that was pressed. We will
+            // clip reveal from that area in the final area of the app.
             getDefaultNextAppTransitionStartRect(mTmpStartRect);
 
             float t = 0f;
             if (appHeight > 0) {
                 t = (float) mTmpStartRect.left / appHeight;
             }
-            int translationY = mClipRevealTranslationY
-                    + (int)(appHeight / 7f * t);
+            int translationY = mClipRevealTranslationY + (int)(appHeight / 7f * t);
 
             int centerX = mTmpStartRect.centerX();
             int centerY = mTmpStartRect.centerY();
@@ -562,15 +563,20 @@ public class AppTransition implements Dump {
                     centerX - halfWidth, centerX + halfWidth, 0, appWidth);
             clipAnimLR.setInterpolator(mClipHorizontalInterpolator);
             clipAnimLR.setDuration((long) (DEFAULT_APP_TRANSITION_DURATION / 2.5f));
+
             Animation clipAnimTB = new ClipRectTBAnimation(centerY - halfHeight - translationY,
                     centerY + halfHeight/ 2 - translationY, 0, appHeight);
             clipAnimTB.setInterpolator(mTouchResponseInterpolator);
             clipAnimTB.setDuration(DEFAULT_APP_TRANSITION_DURATION);
 
-            TranslateYAnimation translateY = new TranslateYAnimation(
-                    Animation.ABSOLUTE, translationY, Animation.ABSOLUTE, 0);
-            translateY.setInterpolator(mLinearOutSlowInInterpolator);
-            translateY.setDuration(DEFAULT_APP_TRANSITION_DURATION);
+            // We might be animating entrance of a docked task, so we need the translate to account
+            // for the app frame in which the window will reside. Every other calculation here
+            // is performed as if the window started at 0,0.
+            translationY -= appFrame.top;
+            TranslateAnimation translate = new TranslateAnimation(-appFrame.left, 0, translationY,
+                    0);
+            translate.setInterpolator(mLinearOutSlowInInterpolator);
+            translate.setDuration(DEFAULT_APP_TRANSITION_DURATION);
 
             // Quick fade-in from icon to app window
             final int alphaDuration = DEFAULT_APP_TRANSITION_DURATION / 4;
@@ -581,7 +587,7 @@ public class AppTransition implements Dump {
             AnimationSet set = new AnimationSet(false);
             set.addAnimation(clipAnimLR);
             set.addAnimation(clipAnimTB);
-            set.addAnimation(translateY);
+            set.addAnimation(translate);
             set.addAnimation(alpha);
             set.setZAdjustment(Animation.ZORDER_TOP);
             set.initialize(appWidth, appHeight, appWidth, appHeight);
