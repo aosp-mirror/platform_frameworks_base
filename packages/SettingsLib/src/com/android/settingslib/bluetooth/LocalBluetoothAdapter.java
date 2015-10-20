@@ -19,6 +19,7 @@ package com.android.settingslib.bluetooth;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothProfile;
+import android.bluetooth.le.BluetoothLeScanner;
 import android.content.Context;
 import android.os.ParcelUuid;
 import android.util.Log;
@@ -104,6 +105,10 @@ public final class LocalBluetoothAdapter {
 
     public int getScanMode() {
         return mAdapter.getScanMode();
+    }
+
+    public BluetoothLeScanner getBluetoothLeScanner() {
+        return mAdapter.getBluetoothLeScanner();
     }
 
     public int getState() {
