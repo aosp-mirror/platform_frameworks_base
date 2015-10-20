@@ -248,7 +248,7 @@ final class PendingIntentRecord extends IIntentSender.Stub {
                 boolean sendFinish = finishedReceiver != null;
                 int userId = key.userId;
                 if (userId == UserHandle.USER_CURRENT) {
-                    userId = owner.getCurrentUserIdLocked();
+                    userId = owner.mUserController.getCurrentUserIdLocked();
                 }
                 switch (key.type) {
                     case ActivityManager.INTENT_SENDER_ACTIVITY:

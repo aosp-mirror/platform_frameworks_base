@@ -97,7 +97,6 @@ import android.provider.Settings.SettingNotFoundException;
 import android.service.voice.IVoiceInteractionSession;
 import android.util.ArrayMap;
 import android.util.ArraySet;
-import android.util.DisplayMetrics;
 import android.util.EventLog;
 import android.util.Slog;
 import android.util.SparseArray;
@@ -2693,7 +2692,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
             // Complete user switch
             if (startingUsers != null) {
                 for (int i = 0; i < startingUsers.size(); i++) {
-                    mService.finishUserSwitch(startingUsers.get(i));
+                    mService.mUserController.finishUserSwitch(startingUsers.get(i));
                 }
             }
             // Complete starting up of background users
@@ -2701,7 +2700,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
                 startingUsers = new ArrayList<UserState>(mStartingBackgroundUsers);
                 mStartingBackgroundUsers.clear();
                 for (int i = 0; i < startingUsers.size(); i++) {
-                    mService.finishUserBoot(startingUsers.get(i));
+                    mService.mUserController.finishUserBoot(startingUsers.get(i));
                 }
             }
         }
@@ -3756,10 +3755,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
     /** Checks whether the userid is a profile of the current user. */
     boolean isCurrentProfileLocked(int userId) {
         if (userId == mCurrentUser) return true;
-        for (int i = 0; i < mService.mCurrentProfileIds.length; i++) {
-            if (mService.mCurrentProfileIds[i] == userId) return true;
-        }
-        return false;
+        return mService.mUserController.isCurrentProfileLocked(userId);
     }
 
     /** Checks whether the activity should be shown for current user. */

@@ -366,7 +366,7 @@ final class ActivityStack {
         mHandler = new ActivityStackHandler(mService.mHandler.getLooper());
         mWindowManager = mService.mWindowManager;
         mStackId = activityContainer.mStackId;
-        mCurrentUser = mService.mCurrentUserId;
+        mCurrentUser = mService.mUserController.mCurrentUserId;
         mRecentTasks = recentTasks;
         mTaskPositioner = mStackId == FREEFORM_WORKSPACE_STACK_ID
                 ? new LaunchingTaskPositioner() : null;
@@ -1819,7 +1819,7 @@ final class ActivityStack {
         // Make sure that the user who owns this activity is started.  If not,
         // we will just leave it as is because someone should be bringing
         // another user's activities to the top of the stack.
-        if (mService.mStartedUsers.get(next.userId) == null) {
+        if (!mService.mUserController.hasStartedUserState(next.userId)) {
             Slog.w(TAG, "Skipping resume of top activity " + next
                     + ": user " + next.userId + " is stopped");
             if (DEBUG_STACK) mStackSupervisor.validateTopActivitiesLocked();
