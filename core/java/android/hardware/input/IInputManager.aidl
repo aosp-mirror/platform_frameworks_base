@@ -61,6 +61,8 @@ interface IInputManager {
     // Registers an input devices changed listener.
     void registerInputDevicesChangedListener(IInputDevicesChangedListener listener);
 
+    // Queries whether the device is currently in tablet mode
+    int isInTabletMode();
     // Registers a tablet mode change listener
     void registerTabletModeChangedListener(ITabletModeChangedListener listener);
 

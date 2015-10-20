@@ -127,6 +127,9 @@
     <!-- Assist -->
     <uses-permission android:name="android.permission.ACCESS_VOICE_INTERACTION_SERVICE" />
 
+    <!-- Listen for keyboard attachment / detachment -->
+    <uses-permission android:name="android.permission.TABLET_MODE" />
+
     <!-- Self permission for internal broadcasts. -->
     <permission android:name="com.android.systemui.permission.SELF"
             android:protectionLevel="signature" />

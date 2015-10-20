@@ -2359,4 +2359,8 @@
     <!-- The fraction of display size (lower of height and width) that will be used to determine
          the default minimal size for resizeable tasks. -->
     <fraction name="config_displayFractionForDefaultMinimalSizeOfResizeableTask">25%</fraction>
+
+    <!-- The BT name of the keyboard packaged with the device. If this is defined, SystemUI will
+         automatically try to pair with it when the device exits tablet mode. -->
+    <string translatable="false" name="config_packagedKeyboardName"></string>
 </resources>

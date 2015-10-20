@@ -1167,4 +1167,14 @@
     <string name="qs_customize_info" translatable="false">Info</string>
     <string name="qs_customize_remove" translatable="false">Remove</string>
 
+    <!-- Dialog title asking if Bluetooth should be enabled [CHAR LIMIT=NONE] -->
+    <string name="enable_bluetooth_title">Turn on Bluetooth?</string>
+
+    <!-- Dialog message explaining why Bluetooth should be enabled when a packaged keyboard is
+         conncted to the device [CHAR LIMIT=NONE] -->
+    <string name="enable_bluetooth_message">To connect your keyboard with your tablet, you first have to turn on Bluetooth.</string>
+
+    <!-- Bluetooth enablement ok text [CHAR LIMIT=40] -->
+    <string name="enable_bluetooth_confirmation_ok">Turn on</string>
+
 </resources>
