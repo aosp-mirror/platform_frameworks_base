@@ -26,6 +26,7 @@ import android.os.AsyncTask;
 import android.provider.Settings;
 import android.text.TextUtils;
 import android.util.Slog;
+import android.view.View.OnAttachStateChangeListener;
 import android.widget.AbsListView;
 import com.android.internal.R;
 import com.android.internal.content.PackageMonitor;
@@ -331,6 +332,18 @@ public class ResolverActivity extends Activity {
         if (isVoiceInteraction()) {
             onSetupVoiceInteraction();
         }
+
+        getWindow().getDecorView().addOnAttachStateChangeListener(
+                new OnAttachStateChangeListener() {
+            @Override
+            public void onViewAttachedToWindow(View v) {
+                v.getViewRootImpl().setDrawDuringWindowsAnimating(true);
+            }
+
+            @Override
+            public void onViewDetachedFromWindow(View v) {
+            }
+        });
     }
 
     /**
