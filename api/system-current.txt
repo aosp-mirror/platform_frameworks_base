@@ -9536,6 +9536,7 @@ package android.content.pm {
     method public void setAppLabel(java.lang.CharSequence);
     method public void setAppPackageName(java.lang.String);
     method public void setGrantedRuntimePermissions(java.lang.String[]);
+    method public void setInstallFlagsQuick();
     method public void setInstallLocation(int);
     method public void setOriginatingUid(int);
     method public void setOriginatingUri(android.net.Uri);
