@@ -143,7 +143,7 @@ private void updateMetadata(MediaData myData) {
     metadataBuilder.putString(MediaMetadata.METADATA_KEY_ARTIST,
             myData.artist);
     // A small bitmap for the artwork is also recommended
-    metadataBuilder.putString(MediaMetadata.METADATA_KEY_ART,
+    metadataBuilder.putBitmap(MediaMetadata.METADATA_KEY_ART,
             myData.artBitmap);
     // Add any other fields you have for your data as well
     mSession.setMetadata(metadataBuilder.build());
