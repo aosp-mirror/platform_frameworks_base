@@ -152,6 +152,11 @@ public class BridgePowerManager implements IPowerManager {
     }
 
     @Override
+    public boolean isLightDeviceIdleMode() throws RemoteException {
+        return false;
+    }
+
+    @Override
     public boolean isScreenBrightnessBoosted() throws RemoteException {
         return false;
     }
