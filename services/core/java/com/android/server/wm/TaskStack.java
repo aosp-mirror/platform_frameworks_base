@@ -16,10 +16,14 @@
 
 package com.android.server.wm;
 
-import static android.app.ActivityManager.*;
+import static android.app.ActivityManager.DOCKED_STACK_CREATE_MODE_TOP_OR_LEFT;
+import static android.app.ActivityManager.DOCKED_STACK_ID;
+import static android.app.ActivityManager.FIRST_STATIC_STACK_ID;
+import static android.app.ActivityManager.FREEFORM_WORKSPACE_STACK_ID;
+import static android.app.ActivityManager.FULLSCREEN_WORKSPACE_STACK_ID;
+import static android.app.ActivityManager.LAST_STATIC_STACK_ID;
 import static com.android.server.wm.WindowManagerService.DEBUG_TASK_MOVEMENT;
 import static com.android.server.wm.WindowManagerService.H.RESIZE_STACK;
-import static com.android.server.wm.WindowManagerService.H.UNUSED;
 import static com.android.server.wm.WindowManagerService.TAG;
 
 import android.annotation.IntDef;
@@ -30,8 +34,8 @@ import android.util.EventLog;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.view.DisplayInfo;
-
 import android.view.Surface;
+
 import com.android.server.EventLogTags;
 
 import java.io.PrintWriter;
@@ -424,11 +428,18 @@ public class TaskStack implements DimLayer.DimLayerUser {
             return;
         }
 
-        final TaskStack dockedStack = mDisplayContent.getDockedStackLocked();
+        final TaskStack dockedStack = mService.mStackIdToStack.get(DOCKED_STACK_ID);
         if (dockedStack == null) {
             // Not sure why you are calling this method when there is no docked stack...
             throw new IllegalStateException(
                     "Calling getStackDockedModeBoundsLocked() when there is no docked stack.");
+        }
+        if (!dockedStack.isVisibleLocked()) {
+            // The docked stack is being dismissed, but we caught before it finished being
+            // dismissed. In that case we want to treat it as if it is not occupying any space and
+            // let others occupy the whole display.
+            mDisplayContent.getLogicalDisplayRect(mTmpRect);
+            return;
         }
 
         @DockSide
