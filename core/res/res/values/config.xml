@@ -2351,4 +2351,8 @@
     <!-- Name of the component to handle network policy notifications. If present,
          disables NetworkPolicyManagerService's presentation of data-usage notifications. -->
     <string translatable="false" name="config_networkPolicyNotificationComponent"></string>
+
+    <!-- The BT name of the keyboard packaged with the device. If this is defined, SystemUI will
+         automatically try to pair with it when the device exits tablet mode. -->
+    <string translatable="false" name="config_packagedKeyboardName"></string>
 </resources>
