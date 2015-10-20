@@ -4182,7 +4182,8 @@ public final class ViewRootImpl implements ViewParent,
 
                 final float x = event.getX();
                 final float y = event.getY();
-                if (x >= 0 && x < mView.getWidth() && y >= 0 && y < mView.getHeight()) {
+                if (event.getActionMasked() != MotionEvent.ACTION_HOVER_EXIT
+                        && x >= 0 && x < mView.getWidth() && y >= 0 && y < mView.getHeight()) {
                     int pointerShape = mView.getPointerShape(event, x, y);
                     if (pointerShape == PointerIcon.STYLE_NOT_SPECIFIED) {
                         pointerShape = PointerIcon.STYLE_DEFAULT;
