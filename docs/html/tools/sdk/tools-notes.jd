@@ -26,6 +26,40 @@ href="http://tools.android.com/knownissues">http://tools.android.com/knownissues
 <div class="toggle-content opened">
   <p><a href="#" onclick="return toggleContent(this)">
     <img src="{@docRoot}assets/images/triangle-opened.png" class="toggle-content-img"
+      alt=""/>SDK Tools, Revision 24.4.1</a> <em>(October 2015)</em>
+  </p>
+
+  <div class="toggle-content-toggleme">
+
+    <dl>
+    <dt>Dependencies:</dt>
+
+    <dd>
+      <ul>
+        <li>Android SDK Platform-tools revision 23 or later.</li>
+      </ul>
+    </dd>
+
+    <dt>General Notes:</dt>
+    <dd>
+      <ul>
+        <li>Fixed a problem where the emulator title bar was hidden off screen.
+        (<a href="http://code.google.com/p/android/issues/detail?id=178344">Issue 178344</a>)</li>
+        <li>Enabled the emulator to resize the user data partition by including e2fsprogs binaries.
+        (<a href="http://code.google.com/p/android/issues/detail?id=189030">Issue 189030</a>)</li>
+        <li>Fixed a regression on the 32-bit Windows OS where the emulator fails to boot Android 6.0
+        (API level 23) through Android 5.0 (API level 21) system images.
+        (<a href="http://code.google.com/p/android/issues/detail?id=188326">Issue 188326</a>)</li>
+      </ul>
+    </dd>
+
+  </div>
+</div>
+
+
+<div class="toggle-content closed">
+  <p><a href="#" onclick="return toggleContent(this)">
+    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img"
       alt=""/>SDK Tools, Revision 24.4.0</a> <em>(October 2015)</em>
   </p>
 
