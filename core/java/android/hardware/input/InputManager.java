@@ -19,6 +19,7 @@ package android.hardware.input;
 import com.android.internal.os.SomeArgs;
 import com.android.internal.util.ArrayUtils;
 
+import android.annotation.IntDef;
 import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
 import android.content.Context;
@@ -39,6 +40,8 @@ import android.util.SparseArray;
 import android.view.InputDevice;
 import android.view.InputEvent;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -178,6 +181,31 @@ public final class InputManager {
      * @hide
      */
     public static final int INJECT_INPUT_EVENT_MODE_WAIT_FOR_FINISH = 2;  // see InputDispatcher.h
+
+    /** @hide */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef({SWITCH_STATE_UNKNOWN, SWITCH_STATE_OFF, SWITCH_STATE_ON})
+    public @interface SwitchState {}
+
+    /**
+     * Switch State: Unknown.
+     *
+     * The system has yet to report a valid value for the switch.
+     * @hide
+     */
+    public static final int SWITCH_STATE_UNKNOWN = -1;
+
+    /**
+     * Switch State: Off.
+     * @hide
+     */
+    public static final int SWITCH_STATE_OFF = 0;
+
+    /**
+     * Switch State: On.
+     * @hide
+     */
+    public static final int SWITCH_STATE_ON = 1;
 
     private InputManager(IInputManager im) {
         mIm = im;
@@ -336,6 +364,23 @@ public final class InputManager {
             }
         }
         return -1;
+    }
+
+    /**
+     * Queries whether the device is in tablet mode.
+     *
+     * @return The tablet switch state which is one of {@link #SWITCH_STATE_UNKNOWN},
+     * {@link #SWITCH_STATE_OFF} or {@link #SWITCH_STATE_ON}.
+     * @hide
+     */
+    @SwitchState
+    public int isInTabletMode() {
+        try {
+            return mIm.isInTabletMode();
+        } catch (RemoteException ex) {
+            Log.w(TAG, "Could not get tablet mode state", ex);
+            return SWITCH_STATE_UNKNOWN;
+        }
     }
 
     /**

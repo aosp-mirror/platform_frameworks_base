@@ -792,8 +792,17 @@ public class InputManagerService extends IInputManager.Stub
     }
 
     @Override // Binder call
+    public int isInTabletMode() {
+        if (!checkCallingPermission(android.Manifest.permission.TABLET_MODE,
+                "isInTabletMode()")) {
+            throw new SecurityException("Requires TABLET_MODE permission");
+        }
+        return getSwitchState(-1, InputDevice.SOURCE_ANY, SW_TABLET_MODE);
+    }
+
+    @Override // Binder call
     public void registerTabletModeChangedListener(ITabletModeChangedListener listener) {
-        if (!checkCallingPermission(android.Manifest.permission.TABLET_MODE_LISTENER,
+        if (!checkCallingPermission(android.Manifest.permission.TABLET_MODE,
                 "registerTabletModeChangedListener()")) {
             throw new SecurityException("Requires TABLET_MODE_LISTENER permission");
         }
@@ -1488,7 +1497,7 @@ public class InputManagerService extends IInputManager.Stub
                     switchMask);
         }
 
-        if ((switchMask & SW_TABLET_MODE) != 0) {
+        if ((switchMask & SW_TABLET_MODE_BIT) != 0) {
             SomeArgs args = SomeArgs.obtain();
             args.argi1 = (int) (whenNanos & 0xFFFFFFFF);
             args.argi2 = (int) (whenNanos >> 32);
