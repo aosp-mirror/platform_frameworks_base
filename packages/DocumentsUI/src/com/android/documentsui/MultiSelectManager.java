@@ -76,6 +76,9 @@ public final class MultiSelectManager implements View.OnKeyListener {
     private Adapter<?> mAdapter;
     private boolean mSingleSelect;
 
+    // Payloads for notifyItemChange to distinguish between selection and other events.
+    public static final String SELECTION_CHANGED_MARKER = "Selection-Changed";
+
     @Nullable private BandController mBandManager;
 
     /**
@@ -460,7 +463,7 @@ public final class MultiSelectManager implements View.OnKeyListener {
         for (int i = lastListener; i > -1; i--) {
             mCallbacks.get(i).onItemStateChanged(position, selected);
         }
-        mAdapter.notifyItemChanged(position);
+        mAdapter.notifyItemChanged(position, SELECTION_CHANGED_MARKER);
     }
 
     /**
