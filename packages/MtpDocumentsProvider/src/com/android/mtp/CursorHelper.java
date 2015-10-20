@@ -16,13 +16,12 @@
 
 package com.android.mtp;
 
+import android.content.res.Resources;
 import android.database.MatrixCursor;
 import android.mtp.MtpConstants;
 import android.mtp.MtpObjectInfo;
 import android.provider.DocumentsContract;
 import android.provider.DocumentsContract.Document;
-
-import java.util.Date;
 
 final class CursorHelper {
     static final int DUMMY_HANDLE_FOR_ROOT = 0;
@@ -30,11 +29,11 @@ final class CursorHelper {
     private CursorHelper() {
     }
 
-    static void addToCursor(MtpRoot root, MatrixCursor.RowBuilder builder) {
+    static void addToCursor(Resources resources, MtpRoot root, MatrixCursor.RowBuilder builder) {
         final Identifier identifier = new Identifier(
                 root.mDeviceId, root.mStorageId, DUMMY_HANDLE_FOR_ROOT);
         builder.add(Document.COLUMN_DOCUMENT_ID, identifier.toDocumentId());
-        builder.add(Document.COLUMN_DISPLAY_NAME, root.mDescription);
+        builder.add(Document.COLUMN_DISPLAY_NAME, root.getRootName(resources));
         builder.add(Document.COLUMN_MIME_TYPE, DocumentsContract.Document.MIME_TYPE_DIR);
         builder.add(Document.COLUMN_LAST_MODIFIED, null);
         builder.add(Document.COLUMN_FLAGS, 0);

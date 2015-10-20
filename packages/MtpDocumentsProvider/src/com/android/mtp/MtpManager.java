@@ -107,7 +107,10 @@ class MtpManager {
             }
             final MtpRoot[] results = new MtpRoot[storageIds.length];
             for (int i = 0; i < storageIds.length; i++) {
-                results[i] = new MtpRoot(deviceId, device.getStorageInfo(storageIds[i]));
+                results[i] = new MtpRoot(
+                        device.getDeviceId(),
+                        device.getDeviceInfo().getModel(),
+                        device.getStorageInfo(storageIds[i]));
             }
             return results;
         }

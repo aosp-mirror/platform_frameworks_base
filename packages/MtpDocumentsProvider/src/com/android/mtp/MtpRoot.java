@@ -16,6 +16,7 @@
 
 package com.android.mtp;
 
+import android.content.res.Resources;
 import android.mtp.MtpStorageInfo;
 
 import com.android.internal.annotations.VisibleForTesting;
@@ -23,6 +24,7 @@ import com.android.internal.annotations.VisibleForTesting;
 class MtpRoot {
     final int mDeviceId;
     final int mStorageId;
+    final String mDeviceModelName;
     final String mDescription;
     final long mFreeSpace;
     final long mMaxCapacity;
@@ -31,21 +33,24 @@ class MtpRoot {
     @VisibleForTesting
     MtpRoot(int deviceId,
             int storageId,
+            String deviceName,
             String description,
             long freeSpace,
             long maxCapacity,
             String volumeIdentifier) {
         mDeviceId = deviceId;
         mStorageId = storageId;
+        mDeviceModelName = deviceName;
         mDescription = description;
         mFreeSpace = freeSpace;
         mMaxCapacity = maxCapacity;
         mVolumeIdentifier = volumeIdentifier;
     }
 
-    MtpRoot(int deviceId, MtpStorageInfo storageInfo) {
+    MtpRoot(int deviceId, String deviceModelName, MtpStorageInfo storageInfo) {
         mDeviceId = deviceId;
         mStorageId = storageInfo.getStorageId();
+        mDeviceModelName = deviceModelName;
         mDescription = storageInfo.getDescription();
         mFreeSpace = storageInfo.getFreeSpace();
         mMaxCapacity = storageInfo.getMaxCapacity();
@@ -59,6 +64,7 @@ class MtpRoot {
         final MtpRoot other = (MtpRoot) object;
         return mDeviceId == other.mDeviceId &&
                 mStorageId == other.mStorageId &&
+                mDeviceModelName.equals(other.mDeviceModelName) &&
                 mDescription.equals(other.mDescription) &&
                 mFreeSpace == other.mFreeSpace &&
                 mMaxCapacity == other.mMaxCapacity &&
@@ -67,7 +73,19 @@ class MtpRoot {
 
     @Override
     public int hashCode() {
-        return mDeviceId ^ mStorageId ^ mDescription.hashCode() ^ ((int) mFreeSpace) ^
-                ((int) mMaxCapacity) ^ mVolumeIdentifier.hashCode();
+        return mDeviceId ^ mStorageId ^ mDeviceModelName.hashCode() ^ mDescription.hashCode() ^
+                ((int) mFreeSpace) ^ ((int) mMaxCapacity) ^ mVolumeIdentifier.hashCode();
+    }
+    
+    @Override
+    public String toString() {
+        return "MtpRoot{Name: " + mDeviceModelName + " " + mDescription + "}";
+    }
+    
+    String getRootName(Resources resources) {
+        return String.format(
+                resources.getString(R.string.root_name),
+                mDeviceModelName,
+                mDescription);
     }
 }

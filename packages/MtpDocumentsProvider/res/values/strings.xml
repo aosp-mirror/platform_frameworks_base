@@ -14,7 +14,11 @@
      limitations under the License.
 -->
 
-<resources>
+<resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <!-- Title of the external storage application [CHAR LIMIT=32] -->
     <string name="app_label">MTP Storage</string>
+    <!-- Name of MTP root shown in UI. Please align the two strings (device
+         model and storage name) in proper order in the language.
+         [CHAR LIMIT=32] -->
+    <string name="root_name"><xliff:g id="device_model" example="Nexus 9">%1$s</xliff:g> <xliff:g id="storage_name" example="Internal Storage">%2$s</xliff:g></string>
 </resources>
