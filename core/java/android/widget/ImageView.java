@@ -234,6 +234,8 @@ public class ImageView extends View {
                 if (w != mDrawableWidth || h != mDrawableHeight) {
                     mDrawableWidth = w;
                     mDrawableHeight = h;
+                    // updates the matrix, which is dependent on the bounds
+                    configureBounds();
                 }
             }
             /* we invalidate the whole view in this case because it's very
