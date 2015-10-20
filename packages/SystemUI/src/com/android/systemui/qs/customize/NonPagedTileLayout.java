@@ -61,6 +61,7 @@ public class NonPagedTileLayout extends LinearLayout implements QSTileLayout, On
     protected void onFinishInflate() {
         super.onFinishInflate();
         mQuickTiles = (QuickTileLayout) findViewById(R.id.quick_tile_layout);
+        mQuickTiles.setVisibility(View.GONE);
         TilePage page = (PagedTileLayout.TilePage) findViewById(R.id.tile_page);
         page.setMaxRows(3 /* First page only gets 3 */);
         mPages.add(page);
@@ -107,12 +108,12 @@ public class NonPagedTileLayout extends LinearLayout implements QSTileLayout, On
         for (int i = 0; i < NT; i++) {
             TileRecord tile = mTiles.get(i);
             if (tile.tile.getTileType() == QSTileView.QS_TYPE_QUICK) {
-                tile.tileView.setType(QSTileView.QS_TYPE_QUICK);
-                mQuickTiles.addView(tile.tileView);
+                // Ignore quick tiles for now.
                 continue;
             }
             mPages.get(index).addTile(tile);
-            if (mPages.get(index).isFull()) {
+            // Keep everything in one layout for now.
+            if (false && mPages.get(index).isFull()) {
                 if (++index == mPages.size()) {
                     LayoutInflater inflater = LayoutInflater.from(mContext);
                     inflater.inflate(R.layout.horizontal_divider, this);

@@ -125,6 +125,7 @@
     <dimen name="pull_span_min">25dp</dimen>
 
     <dimen name="qs_tile_height">88dp</dimen>
+    <dimen name="qs_new_tile_height">100dp</dimen>
     <dimen name="qs_quick_actions_height">88dp</dimen>
     <dimen name="qs_quick_actions_padding">25dp</dimen>
     <dimen name="qs_page_indicator_size">12dp</dimen>
