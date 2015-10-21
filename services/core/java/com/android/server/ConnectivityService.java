@@ -3363,7 +3363,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
                     .setPriority(highPriority ?
                             Notification.PRIORITY_HIGH :
                             Notification.PRIORITY_DEFAULT)
-                    .setDefaults(Notification.DEFAULT_ALL)
+                    .setDefaults(highPriority ? Notification.DEFAULT_ALL : 0)
                     .setOnlyAlertOnce(true)
                     .build();
 
