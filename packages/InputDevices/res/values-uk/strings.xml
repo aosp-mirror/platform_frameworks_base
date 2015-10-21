@@ -3,7 +3,7 @@
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_label" msgid="8016145283189546017">"Пристрої вводу"</string>
     <string name="keyboard_layouts_label" msgid="6688773268302087545">"Клавіатура Android"</string>
-    <string name="keyboard_layout_english_uk_label" msgid="6664258463319999632">"англійська (Великобританія)"</string>
+    <string name="keyboard_layout_english_uk_label" msgid="6664258463319999632">"англійська (Велика Британія)"</string>
     <string name="keyboard_layout_english_us_label" msgid="8994890249649106291">"англійська (США)"</string>
     <string name="keyboard_layout_english_us_intl" msgid="3705168594034233583">"англійська (США), міжнародна"</string>
     <string name="keyboard_layout_english_us_colemak_label" msgid="4194969610343455380">"англійська (США), розкладка Colemak"</string>
