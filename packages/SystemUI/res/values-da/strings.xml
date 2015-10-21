@@ -85,13 +85,13 @@
     <string name="accessibility_search_light" msgid="1103867596330271848">"Søg"</string>
     <string name="accessibility_camera_button" msgid="8064671582820358152">"Kamera"</string>
     <string name="accessibility_phone_button" msgid="6738112589538563574">"Telefon"</string>
-    <string name="accessibility_voice_assist_button" msgid="487611083884852965">"Voice Assist"</string>
+    <string name="accessibility_voice_assist_button" msgid="487611083884852965">"Taleassistent"</string>
     <string name="accessibility_unlock_button" msgid="128158454631118828">"Lås op"</string>
     <string name="accessibility_unlock_button_fingerprint" msgid="8214125623493923751">"Knap til oplåsning. Venter på fingeraftryk"</string>
     <string name="accessibility_unlock_without_fingerprint" msgid="7541705575183694446">"Lås op uden at bruge dit fingeraftryk"</string>
     <string name="unlock_label" msgid="8779712358041029439">"lås op"</string>
     <string name="phone_label" msgid="2320074140205331708">"åbn telefon"</string>
-    <string name="voice_assist_label" msgid="3956854378310019854">"åbn voice assist"</string>
+    <string name="voice_assist_label" msgid="3956854378310019854">"åbn taleassistent"</string>
     <string name="camera_label" msgid="7261107956054836961">"åbn kamera"</string>
     <string name="recents_caption_resize" msgid="3517056471774958200">"Vælg nyt opgavelayout"</string>
     <string name="cancel" msgid="6442560571259935130">"Annuller"</string>
@@ -315,7 +315,7 @@
     <string name="notification_tap_again" msgid="8524949573675922138">"Tryk igen for at åbne"</string>
     <string name="keyguard_unlock" msgid="8043466894212841998">"Stryg opad for at låse op"</string>
     <string name="phone_hint" msgid="4872890986869209950">"Stryg fra telefonikonet"</string>
-    <string name="voice_hint" msgid="8939888732119726665">"Stryg fra ikonet for voice assist"</string>
+    <string name="voice_hint" msgid="8939888732119726665">"Stryg fra mikrofonikonet"</string>
     <string name="camera_hint" msgid="7939688436797157483">"Stryg fra kameraikonet"</string>
     <string name="interruption_level_none_with_warning" msgid="5114872171614161084">"Helt lydløs. Denne handling slukker også skærmlæsere."</string>
     <string name="interruption_level_none" msgid="6000083681244492992">"Total stilhed"</string>
@@ -440,4 +440,10 @@
     <string name="qs_rearrange" msgid="8060918697551068765">"Omarranger Hurtige indstillinger"</string>
     <string name="show_brightness" msgid="6613930842805942519">"Vis lysstyrke i Hurtige indstillinger"</string>
     <string name="experimental" msgid="6198182315536726162">"Eksperimentel"</string>
+    <!-- no translation found for enable_bluetooth_title (5027037706500635269) -->
+    <skip />
+    <!-- no translation found for enable_bluetooth_message (9106595990708985385) -->
+    <skip />
+    <!-- no translation found for enable_bluetooth_confirmation_ok (6258074250948309715) -->
+    <skip />
 </resources>

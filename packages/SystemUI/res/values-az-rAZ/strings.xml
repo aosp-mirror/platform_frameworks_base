@@ -440,4 +440,10 @@
     <string name="qs_rearrange" msgid="8060918697551068765">"Sürətli Ayarları yenidən tənzimləyin"</string>
     <string name="show_brightness" msgid="6613930842805942519">"Sürətli ayarlarda parlaqlılığı göstərin"</string>
     <string name="experimental" msgid="6198182315536726162">"Eksperimental"</string>
+    <!-- no translation found for enable_bluetooth_title (5027037706500635269) -->
+    <skip />
+    <!-- no translation found for enable_bluetooth_message (9106595990708985385) -->
+    <skip />
+    <!-- no translation found for enable_bluetooth_confirmation_ok (6258074250948309715) -->
+    <skip />
 </resources>
