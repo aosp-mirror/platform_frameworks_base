@@ -21,7 +21,7 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="byteShort" msgid="8340973892742019101">"B"</string>
-    <string name="kilobyteShort" msgid="5973789783504771878">"kilobajt"</string>
+    <string name="kilobyteShort" msgid="5973789783504771878">"KB"</string>
     <string name="megabyteShort" msgid="6355851576770428922">"MB"</string>
     <string name="gigabyteShort" msgid="3259882455212193214">"GB"</string>
     <string name="terabyteShort" msgid="231613018159186962">"terabajt"</string>
@@ -45,7 +45,7 @@
     <string name="defaultVoiceMailAlphaTag" msgid="2660020990097733077">"Posta zanore"</string>
     <string name="defaultMsisdnAlphaTag" msgid="2850889754919584674">"MSISDN1"</string>
     <string name="mmiError" msgid="5154499457739052907">"Problem në lidhje ose kod i pavlefshëm MMI-je."</string>
-    <string name="mmiFdnError" msgid="5224398216385316471">"Operacioni kufizohet vetëm në numrat e telefonisë fikse."</string>
+    <string name="mmiFdnError" msgid="5224398216385316471">"Veprimi është i kufizuar vetëm kundrejt numrave me telefonim të përzgjedhur"</string>
     <string name="serviceEnabled" msgid="8147278346414714315">"Shërbimi u aktivizua."</string>
     <string name="serviceEnabledFor" msgid="6856228140453471041">"Shërbimi u aktivizua për:"</string>
     <string name="serviceDisabled" msgid="1937553226592516411">"Shërbimi është çaktivizuar."</string>
@@ -61,10 +61,10 @@
     <string name="needPuk" msgid="919668385956251611">"Karta jote SIM nuk është e kyçur me PUK. Shkruaj kodin PUK për ta shkyçur."</string>
     <string name="needPuk2" msgid="4526033371987193070">"Shkruaj kodin PUK2 për të shkyçur kartën SIM."</string>
     <string name="enablePin" msgid="209412020907207950">"Pa sukses! Aktivizo kyçjen e SIM/RUIM."</string>
-    <plurals name="pinpuk_attempts" formatted="false" msgid="1251012001539225582">
-      <item quantity="other">Të kanë mbetur edhe <xliff:g id="NUMBER_1">%d</xliff:g> tentativa para se karta SIM të kyçet.</item>
-      <item quantity="one">Të ka mbetur edhe <xliff:g id="NUMBER_0">%d</xliff:g> tentativë para se karta SIM të kyçet.</item>
-    </plurals>
+  <plurals name="pinpuk_attempts">
+    <item quantity="one" msgid="6596245285809790142">"Të ka mbetur edhe <xliff:g id="NUMBER">%d</xliff:g> tentativë para se karta SIM të kyçet."</item>
+    <item quantity="other" msgid="7530597808358774740">"Të kanë mbetur edhe <xliff:g id="NUMBER">%d</xliff:g> tentativa para se karta SIM të kyçet."</item>
+  </plurals>
     <string name="imei" msgid="2625429890869005782">"IMEI"</string>
     <string name="meid" msgid="4841221237681254195">"MEID"</string>
     <string name="ClipMmi" msgid="6952821216480289285">"ID-ja e telefonuesit hyrës"</string>
@@ -72,7 +72,7 @@
     <string name="ColpMmi" msgid="3065121483740183974">"ID-ja e linjës së lidhur"</string>
     <string name="ColrMmi" msgid="4996540314421889589">"Kufizimi i ID-së së linjës së lidhur"</string>
     <string name="CfMmi" msgid="5123218989141573515">"Transferimi i telefonatave"</string>
-    <string name="CwMmi" msgid="9129678056795016867">"Telefonatë në pritje"</string>
+    <string name="CwMmi" msgid="9129678056795016867">"Pritja e telefonatave"</string>
     <string name="BaMmi" msgid="455193067926770581">"Bllokimi i telefonatave"</string>
     <string name="PwdMmi" msgid="7043715687905254199">"Ndryshimi i fjalëkalimit"</string>
     <string name="PinMmi" msgid="3113117780361190304">"Ndryshim PIN-i"</string>
@@ -229,13 +229,13 @@
     <string name="permgrouplab_contacts" msgid="3657758145679177612">"Kontaktet"</string>
     <string name="permgroupdesc_contacts" msgid="6951499528303668046">"qasu te kontaktet e tua"</string>
     <string name="permgrouplab_location" msgid="7275582855722310164">"Vendndodhja"</string>
-    <string name="permgroupdesc_location" msgid="1346617465127855033">"qasu te vendndodhja e kësaj pajisjeje"</string>
+    <string name="permgroupdesc_location" msgid="1346617465127855033">"qasjen te vendndodhja e kësaj pajisjeje"</string>
     <string name="permgrouplab_calendar" msgid="5863508437783683902">"Kalendari"</string>
     <string name="permgroupdesc_calendar" msgid="3889615280211184106">"qasu te kalendari yt"</string>
     <string name="permgrouplab_sms" msgid="228308803364967808">"SMS"</string>
     <string name="permgroupdesc_sms" msgid="4656988620100940350">"dërgo dhe shiko mesazhet SMS"</string>
     <string name="permgrouplab_storage" msgid="1971118770546336966">"Hapësira e ruajtjes"</string>
-    <string name="permgroupdesc_storage" msgid="637758554581589203">"qasu te fotografitë, media dhe skedarët në pajisje"</string>
+    <string name="permgroupdesc_storage" msgid="637758554581589203">"qasu te fotografitë, përmbajtjet audio-vizuale dhe skedarët në pajisje"</string>
     <string name="permgrouplab_microphone" msgid="171539900250043464">"Mikrofoni"</string>
     <string name="permgroupdesc_microphone" msgid="4988812113943554584">"regjistro audio"</string>
     <string name="permgrouplab_camera" msgid="4820372495894586615">"Kamera"</string>
@@ -354,6 +354,8 @@
     <string name="permdesc_flashlight" msgid="6522284794568368310">"Lejon aplikacionin të kontrollojë elektrikun."</string>
     <string name="permlab_callPhone" msgid="3925836347681847954">"telefono drejtpërdrejt numrat e telefonit"</string>
     <string name="permdesc_callPhone" msgid="3740797576113760827">"Lejon aplikacionin të telefonojë numra pa ndërhyrjen tënde. Kjo mund të rezultojë në tarifa ose telefonata të papritura. Ki parasysh se kjo nuk e lejon aplikacionin të telefonojë numra urgjence. Aplikacione keqdashëse mund të të kushtojnë para duke kryer telefonata pa konfirmimin tënd."</string>
+    <string name="permlab_accessImsCallService" msgid="3574943847181793918">"qasje në shërbimin e telefonatave IMS"</string>
+    <string name="permdesc_accessImsCallService" msgid="8992884015198298775">"Lejon aplikacionin të përdorë shërbimin IMS për të kryer telefonata pa ndërhyrjen tënde."</string>
     <string name="permlab_readPhoneState" msgid="9178228524507610486">"lexo statusin e telefonit dhe identitetin"</string>
     <string name="permdesc_readPhoneState" msgid="1639212771826125528">"Lejon aplikacionin të hyjë në funksionet telefonike të pajisjes. Kjo leje i mundëson aplikacionit të përcaktojë numrin e telefonit dhe ID-të e pajisjes, nëse një telefonatë është aktive apo nëse numri në distancë është i lidhur me një telefonatë."</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1531731435011495015">"parandalo kalimin e tabletit në fjetje"</string>
@@ -432,6 +434,7 @@
     <string name="fingerprint_name_template" msgid="5870957565512716938">"Gishti <xliff:g id="FINGERID">%d</xliff:g>"</string>
   <string-array name="fingerprint_error_vendor">
   </string-array>
+    <string name="fingerprint_icon_content_description" msgid="2340202869968465936">"Ikona e gjurmës së gishtit"</string>
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"lexo cilësimet e sinkronizimit"</string>
     <string name="permdesc_readSyncSettings" msgid="2706745674569678644">"Lejon aplikacionin të lexojë cilësimet e sinkronizimit për një llogari. Për shembull, kjo mund të përcaktojë nëse aplikacioni \"Kontaktet\" është i sinkronizuar me një llogari."</string>
     <string name="permlab_writeSyncSettings" msgid="5408694875793945314">"ndiz ose fik sinkronizimin"</string>
@@ -490,7 +493,7 @@
     <string name="permdesc_bindCarrierMessagingService" msgid="2762882888502113944">"Lejon zotëruesin të lidhet me ndërfaqen e nivelit të lartë të shërbimit të mesazheve të operatorit. Nuk nevojitet për aplikacione normale."</string>
     <string name="permlab_bindCarrierServices" msgid="3233108656245526783">"lidhu me shërbimet e operatorit celular"</string>
     <string name="permdesc_bindCarrierServices" msgid="1391552602551084192">"Lejon që mbajtësi të lidhet me shërbimet e operatorit celular. Nuk nevojitet për aplikacionet normale."</string>
-    <string name="permlab_access_notification_policy" msgid="4247510821662059671">"qasje në \"Mos shqetëso\""</string>
+    <string name="permlab_access_notification_policy" msgid="4247510821662059671">"qasje te \"Mos shqetëso\""</string>
     <string name="permdesc_access_notification_policy" msgid="3296832375218749580">"Lejon aplikacionin të lexojë dhe shkruajë konfigurimin e \"Mos shqetëso\"."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Cakto rregullat e fjalëkalimit"</string>
     <string name="policydesc_limitPassword" msgid="2502021457917874968">"Kontrollo gjatësinë dhe karakteret e lejuara në fjalëkalimet dhe kodet PIN të kyçjes së ekranit."</string>
@@ -503,7 +506,7 @@
     <string name="policydesc_watchLogin_secondaryUser" product="default" msgid="2185480427217127147">"Monitoro numrin e fjalëkalimeve të shkruara gabim kur shkyç ekranin. Kyçe telefonin ose spastro të gjitha të dhënat e këtij përdoruesi nëse shkruhen shumë fjalëkalime të gabuara."</string>
     <string name="policylab_resetPassword" msgid="4934707632423915395">"Ndryshimin e kyçjes"</string>
     <string name="policydesc_resetPassword" msgid="1278323891710619128">"Ndryshon kyçjen e ekranit."</string>
-    <string name="policylab_forceLock" msgid="2274085384704248431">"Kyçje të ekranit"</string>
+    <string name="policylab_forceLock" msgid="2274085384704248431">"Kyçjen e ekranit"</string>
     <string name="policydesc_forceLock" msgid="1141797588403827138">"Kontrollon si dhe kur të kyçet ekrani."</string>
     <string name="policylab_wipeData" msgid="3910545446758639713">"Fshirjen e të dhënave"</string>
     <string name="policydesc_wipeData" product="tablet" msgid="4306184096067756876">"Fshi të dhënat e tabletit pa paralajmërim duke kryer një rivendosje të të dhënave në gjendje fabrike."</string>
@@ -628,7 +631,7 @@
     <string name="relationTypeMother" msgid="4578571352962758304">"Nënë"</string>
     <string name="relationTypeParent" msgid="4755635567562925226">"Prind"</string>
     <string name="relationTypePartner" msgid="7266490285120262781">"Partner"</string>
-    <string name="relationTypeReferredBy" msgid="101573059844135524">"Referuar nga"</string>
+    <string name="relationTypeReferredBy" msgid="101573059844135524">"I referuar"</string>
     <string name="relationTypeRelative" msgid="1799819930085610271">"I afërm"</string>
     <string name="relationTypeSister" msgid="1735983554479076481">"Motër"</string>
     <string name="relationTypeSpouse" msgid="394136939428698117">"Bashkëshort/e"</string>
@@ -710,6 +713,7 @@
     <string name="lockscreen_access_pattern_cell_added" msgid="6756031208359292487">"Qeliza u shtua"</string>
     <string name="lockscreen_access_pattern_cell_added_verbose" msgid="7264580781744026939">"Qeliza <xliff:g id="CELL_INDEX">%1$s</xliff:g> u shtua"</string>
     <string name="lockscreen_access_pattern_detected" msgid="4988730895554057058">"Modeli përfundoi"</string>
+    <string name="lockscreen_access_pattern_area" msgid="400813207572953209">"Zona e motivit."</string>
     <string name="keyguard_accessibility_widget_changed" msgid="5678624624681400191">"%1$s. Miniaplikacioni %2$d nga %3$d."</string>
     <string name="keyguard_accessibility_add_widget" msgid="8273277058724924654">"Shto miniaplikacion."</string>
     <string name="keyguard_accessibility_widget_empty_slot" msgid="1281505703307930757">"Bosh"</string>
@@ -805,10 +809,10 @@
     <string name="enable_explore_by_touch_warning_message" product="default" msgid="2708199672852373195">"<xliff:g id="ACCESSIBILITY_SERVICE_NAME">%1$s</xliff:g> kërkon të aktivizojë funksionin \"Eksploro me prekje\". Kur aktivizohet \"Eksploro me prekje\", mund të dëgjosh ose të shohësh përshkrime se çfarë ka nën gishtin tënd ose të kryesh gjeste për të bashkëvepruar me telefonin."</string>
     <string name="oneMonthDurationPast" msgid="7396384508953779925">"1 muaj më parë"</string>
     <string name="beforeOneMonthDurationPast" msgid="909134546836499826">"Para 1 muaji"</string>
-    <plurals name="last_num_days" formatted="false" msgid="5104533550723932025">
-      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> ditët e fundit</item>
-      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g> ditën e fundit</item>
-    </plurals>
+  <plurals name="last_num_days">
+    <item quantity="one" msgid="7555846096746489821">"<xliff:g id="COUNT">%d</xliff:g> ditën e fundit"</item>
+    <item quantity="other" msgid="3069992808164318268">"<xliff:g id="COUNT">%d</xliff:g> ditët e fundit"</item>
+  </plurals>
     <string name="last_month" msgid="3959346739979055432">"Muajin e fundit"</string>
     <string name="older" msgid="5211975022815554840">"Më të vjetra"</string>
     <string name="preposition_for_date" msgid="9093949757757445117">"në <xliff:g id="DATE">%s</xliff:g>"</string>
@@ -826,18 +830,18 @@
     <string name="weeks" msgid="6509623834583944518">"javë"</string>
     <string name="year" msgid="4001118221013892076">"vit"</string>
     <string name="years" msgid="6881577717993213522">"vite"</string>
-    <plurals name="duration_seconds" formatted="false" msgid="4527986939729687805">
-      <item quantity="other"><xliff:g id="COUNT">%d</xliff:g> sekonda</item>
-      <item quantity="one">1 sekondë</item>
-    </plurals>
-    <plurals name="duration_minutes" formatted="false" msgid="643786953939956125">
-      <item quantity="other"><xliff:g id="COUNT">%d</xliff:g> minuta</item>
-      <item quantity="one">1 minutë</item>
-    </plurals>
-    <plurals name="duration_hours" formatted="false" msgid="6826233369186668274">
-      <item quantity="other"><xliff:g id="COUNT">%d</xliff:g> orë</item>
-      <item quantity="one">1 orë</item>
-    </plurals>
+  <plurals name="duration_seconds">
+    <item quantity="one" msgid="6962015528372969481">"1 sekondë"</item>
+    <item quantity="other" msgid="1886107766577166786">"<xliff:g id="COUNT">%d</xliff:g> sekonda"</item>
+  </plurals>
+  <plurals name="duration_minutes">
+    <item quantity="one" msgid="4915414002546085617">"1 minutë"</item>
+    <item quantity="other" msgid="3165187169224908775">"<xliff:g id="COUNT">%d</xliff:g> minuta"</item>
+  </plurals>
+  <plurals name="duration_hours">
+    <item quantity="one" msgid="8917467491248809972">"1 orë"</item>
+    <item quantity="other" msgid="3863962854246773930">"<xliff:g id="COUNT">%d</xliff:g> orë"</item>
+  </plurals>
     <string name="VideoView_error_title" msgid="3534509135438353077">"Problem me videon"</string>
     <string name="VideoView_error_text_invalid_progressive_playback" msgid="3186670335938670444">"Kjo video nuk ofrohet për transmetim në këtë pajisje."</string>
     <string name="VideoView_error_text_unknown" msgid="3450439155187810085">"Videoja nuk mund të luhet."</string>
@@ -950,14 +954,14 @@
     <string name="ringtone_silent" msgid="7937634392408977062">"Asnjë"</string>
     <string name="ringtone_picker_title" msgid="3515143939175119094">"Zilet"</string>
     <string name="ringtone_unknown" msgid="5477919988701784788">"Zile e panjohur"</string>
-    <plurals name="wifi_available" formatted="false" msgid="7900333017752027322">
-      <item quantity="other">Rrjete Wi-Fi ofrohen për përdorim</item>
-      <item quantity="one">Një rrjet Wi-Fi ofrohet për përdorim</item>
-    </plurals>
-    <plurals name="wifi_available_detailed" formatted="false" msgid="1140699367193975606">
-      <item quantity="other">Rrjete të hapura Wi-Fi në përdorim</item>
-      <item quantity="one">Rrjet i hapur Wi-Fi në përdorim</item>
-    </plurals>
+  <plurals name="wifi_available">
+    <item quantity="one" msgid="6654123987418168693">"Një rrjet Wi-Fi ofrohet për përdorim"</item>
+    <item quantity="other" msgid="4192424489168397386">"Rrjete Wi-FI që ofrohen për përdorim"</item>
+  </plurals>
+  <plurals name="wifi_available_detailed">
+    <item quantity="one" msgid="1634101450343277345">"Rrjet i hapur Wi-Fi në përdorim"</item>
+    <item quantity="other" msgid="7915895323644292768">"Hap rrjetet Wi-Fi që ofrohen për përdorim"</item>
+  </plurals>
     <string name="wifi_available_sign_in" msgid="9157196203958866662">"Identifikohu në rrjetin Wi-Fi"</string>
     <string name="network_available_sign_in" msgid="1848877297365446605">"Identifikohu në rrjet"</string>
     <!-- no translation found for network_available_sign_in_detailed (8000081941447976118) -->
@@ -1006,7 +1010,7 @@
     <string name="sim_added_message" msgid="7797975656153714319">"Rinise pajisjen për të pasur qasje në rrjetin celular."</string>
     <string name="sim_restart_button" msgid="4722407842815232347">"Rifillo"</string>
     <string name="time_picker_dialog_title" msgid="8349362623068819295">"Cakto kohën"</string>
-    <string name="date_picker_dialog_title" msgid="5879450659453782278">"Cakto datën"</string>
+    <string name="date_picker_dialog_title" msgid="5879450659453782278">"Vendos datën"</string>
     <string name="date_time_set" msgid="5777075614321087758">"Cakto"</string>
     <string name="date_time_done" msgid="2507683751759308828">"U krye!"</string>
     <string name="perms_new_perm_prefix" msgid="8257740710754301407"><font size="12" fgcolor="#ff33b5e5">"E RE: "</font></string>
@@ -1037,15 +1041,9 @@
     <string name="usb_mtp_notification_title" msgid="8396264943589760855">"USB për transferimin e skedarëve"</string>
     <string name="usb_ptp_notification_title" msgid="1347328437083192112">"USB për transferimin e fotografive"</string>
     <string name="usb_midi_notification_title" msgid="4850904915889144654">"USB për MIDI"</string>
-    <string name="usb_cd_installer_notification_title" msgid="6774712827892090754">"I lidhur si instalues"</string>
     <string name="usb_accessory_notification_title" msgid="7848236974087653666">"U lidh me një ndihmës USB-je"</string>
     <string name="usb_notification_message" msgid="7347368030849048437">"Prek për më shumë opsione."</string>
-    <string name="extmedia_format_title" product="nosdcard" msgid="9020092196061007262">"Të formatohet USB-ja?"</string>
-    <string name="extmedia_format_title" product="default" msgid="3648415921526526069">"Të formatohet karta SD?"</string>
-    <string name="extmedia_format_message" product="nosdcard" msgid="3934016853425761078">"Të gjithë skedarët e ruajtur në USB do të fshihen. Ky veprim nuk mund të kthehet mbrapsht!"</string>
-    <string name="extmedia_format_message" product="default" msgid="14131895027543830">"Të gjitha të dhënat e kartës do të humbasin."</string>
-    <string name="extmedia_format_button_format" msgid="4131064560127478695">"Formato"</string>
-    <string name="adb_active_notification_title" msgid="6729044778949189918">"Korrigjuesi i USB-së u lidh"</string>
+    <string name="adb_active_notification_title" msgid="6729044778949189918">"Korrigjuesi i USB-së i lidhur"</string>
     <string name="adb_active_notification_message" msgid="1016654627626476142">"Prek për të çaktivizuar korrigjimin e gabimeve të USB-së."</string>
     <string name="select_input_method" msgid="8547250819326693584">"Ndërro tastierë"</string>
     <string name="configure_input_methods" msgid="4769971288371946846">"Zgjidh tastierat"</string>
@@ -1059,7 +1057,7 @@
     <string name="ext_media_checking_notification_title" msgid="5734005953288045806">"Po përgatit <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="ext_media_checking_notification_message" msgid="4747432538578886744">"Po kontrollon për gabime"</string>
     <string name="ext_media_new_notification_message" msgid="7589986898808506239">"U zbulua karta e re <xliff:g id="NAME">%s</xliff:g>"</string>
-    <string name="ext_media_ready_notification_message" msgid="4083398150380114462">"Për transferimin e fotografive dhe skedarëve \"media\""</string>
+    <string name="ext_media_ready_notification_message" msgid="4083398150380114462">"Për transferimin e fotografive dhe skedarëve të tjerë"</string>
     <string name="ext_media_unmountable_notification_title" msgid="8295123366236989588">"<xliff:g id="NAME">%s</xliff:g> e dëmtuar"</string>
     <string name="ext_media_unmountable_notification_message" msgid="1586311304430052169">"<xliff:g id="NAME">%s</xliff:g> është e dëmtuar. Prek për ta rregulluar."</string>
     <string name="ext_media_unsupported_notification_title" msgid="3797642322958803257">"<xliff:g id="NAME">%s</xliff:g> nuk mbështetet"</string>
@@ -1147,24 +1145,13 @@
     <string name="skip_button_label" msgid="1275362299471631819">"Kapërce"</string>
     <string name="no_matches" msgid="8129421908915840737">"Asnjë përputhje"</string>
     <string name="find_on_page" msgid="1946799233822820384">"Gjej brenda faqes"</string>
-    <plurals name="matches_found" formatted="false" msgid="1210884353962081884">
-      <item quantity="other"><xliff:g id="INDEX">%d</xliff:g> nga gjithsej <xliff:g id="TOTAL">%d</xliff:g></item>
-      <item quantity="one">1 përputhje</item>
-    </plurals>
+  <plurals name="matches_found">
+    <item quantity="one" msgid="8167147081136579439">"1 përputhje"</item>
+    <item quantity="other" msgid="4641872797067609177">"<xliff:g id="INDEX">%d</xliff:g> nga gjithsej <xliff:g id="TOTAL">%d</xliff:g>"</item>
+  </plurals>
     <string name="action_mode_done" msgid="7217581640461922289">"U krye!"</string>
-    <string name="progress_unmounting" product="nosdcard" msgid="3923810448507612746">"Po çmonton USB-në…"</string>
-    <string name="progress_unmounting" product="default" msgid="1327894998409537190">"Po çmonton kartën SD…"</string>
     <string name="progress_erasing" product="nosdcard" msgid="4521573321524340058">"Po fshin USB-në..."</string>
     <string name="progress_erasing" product="default" msgid="6596988875507043042">"Po fshin kartën SD…"</string>
-    <string name="format_error" product="nosdcard" msgid="6299769563624776948">"Nuk mundi ta spastronte USB-në."</string>
-    <string name="format_error" product="default" msgid="7315248696644510935">"Nuk mundi të fshinte kartën SD."</string>
-    <string name="media_bad_removal" msgid="7960864061016603281">"Karta SD u hoq para shkëputjes."</string>
-    <string name="media_checking" product="nosdcard" msgid="418188720009569693">"USB-ja po kontrollohet aktualisht."</string>
-    <string name="media_checking" product="default" msgid="7334762503904827481">"Aktualisht karta SD po kontrollohet."</string>
-    <string name="media_removed" msgid="7001526905057952097">"Karta SD është hequr."</string>
-    <string name="media_shared" product="nosdcard" msgid="5830814349250834225">"USB-ja është aktualisht në përdorim në kompjuter."</string>
-    <string name="media_shared" product="default" msgid="5706130568133540435">"Karta SD është aktualisht në përdorim në kompjuter."</string>
-    <string name="media_unknown_state" msgid="729192782197290385">"Pajisja ruajtëse e jashtme është në gjendje të panjohshme."</string>
     <string name="share" msgid="1778686618230011964">"Shpërnda"</string>
     <string name="find" msgid="4808270900322985960">"Gjej"</string>
     <string name="websearch" msgid="4337157977400211589">"Kërkim në internet"</string>
@@ -1249,7 +1236,7 @@
     <string name="org_unit" msgid="7265981890422070383">"Njësia organizative:"</string>
     <string name="issued_by" msgid="2647584988057481566">"Lëshuar nga:"</string>
     <string name="validity_period" msgid="8818886137545983110">"Vlefshmëria:"</string>
-    <string name="issued_on" msgid="5895017404361397232">"Hedhur në qarkullim më:"</string>
+    <string name="issued_on" msgid="5895017404361397232">"Lëshuar më:"</string>
     <string name="expires_on" msgid="3676242949915959821">"Skadon më:"</string>
     <string name="serial_number" msgid="758814067660862493">"Numri serik:"</string>
     <string name="fingerprints" msgid="4516019619850763049">"Shenjat e gishtave:"</string>
@@ -1439,10 +1426,10 @@
     <string name="restr_pin_create_pin" msgid="8017600000263450337">"Krijo një PIN për modifikimin e kufizimeve"</string>
     <string name="restr_pin_error_doesnt_match" msgid="2224214190906994548">"PIN-et nuk përputhen. Provo sërish."</string>
     <string name="restr_pin_error_too_short" msgid="8173982756265777792">"PIN-i është shumë i shkurtër. Duhet të jetë të paktën 4 shifra."</string>
-    <plurals name="restr_pin_countdown" formatted="false" msgid="9061246974881224688">
-      <item quantity="other">Provo sërish brenda <xliff:g id="COUNT">%d</xliff:g> sekondave</item>
-      <item quantity="one">Provo sërish brenda 1 sekonde</item>
-    </plurals>
+  <plurals name="restr_pin_countdown">
+    <item quantity="one" msgid="311050995198548675">"Provo sërish brenda 1 sekonde"</item>
+    <item quantity="other" msgid="4730868920742952817">"Provo sërish brenda <xliff:g id="COUNT">%d</xliff:g> sekondave"</item>
+  </plurals>
     <string name="restr_pin_try_later" msgid="973144472490532377">"Provo sërish më vonë"</string>
     <string name="immersive_cling_title" msgid="8394201622932303336">"Po shikon ekranin e plotë"</string>
     <string name="immersive_cling_description" msgid="3482371193207536040">"Për të dalë, rrëshqit nga lart poshtë."</string>
@@ -1461,46 +1448,47 @@
     <string name="lock_to_app_toast_locked" msgid="9125176335701699164">"Ekrani është i gozhduar. Anulimi i mbërthimit nuk lejohet nga organizata jote."</string>
     <string name="lock_to_app_start" msgid="6643342070839862795">"Ekrani u gozhdua"</string>
     <string name="lock_to_app_exit" msgid="8598219838213787430">"Ekrani u hoq nga gozhdimi"</string>
-    <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"Kërko PIN-in para se ta zhgozhdosh."</string>
+    <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"Zhgozhdimi kërkon PIN-in"</string>
     <string name="lock_to_app_unlock_pattern" msgid="4182192144797225137">"Kërko model shkyçjeje para heqjes së gozhdimit"</string>
     <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"Kërko fjalëkalim para heqjes nga gozhdimi."</string>
     <string name="package_installed_device_owner" msgid="8420696545959087545">"U instalua nga administratori yt"</string>
     <string name="package_updated_device_owner" msgid="8856631322440187071">"Përditësuar nga administratori"</string>
     <string name="package_deleted_device_owner" msgid="7650577387493101353">"U fshi nga administratori yt"</string>
     <string name="battery_saver_description" msgid="1960431123816253034">"Për të përmirësuar jetëgjatësinë e baterisë, opsioni i kursimit të baterisë ul rendimentin e pajisjes tënde si dhe kufizon dridhjet dhe shumicën e të dhënave në sfond. Mail-i, mesazhet dhe aplikacionet e tjera që sinkronizohen automatikisht mund të mos përditësohen pa i hapur.\n\nKursimi i baterisë çaktivizohet automatikisht kur pajisja vihet në ngarkim."</string>
-    <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="4367877408072000848">
-      <item quantity="other">Për %1$d minuta (deri në <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
-      <item quantity="one">Për një minutë (deri në <xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g>)</item>
-    </plurals>
-    <plurals name="zen_mode_duration_minutes_summary_short" formatted="false" msgid="6830154222366042597">
-      <item quantity="other">Për %1$d minutë (deri në <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
-      <item quantity="one">Për 1 minutë (deri në <xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g>)</item>
-    </plurals>
-    <plurals name="zen_mode_duration_hours_summary" formatted="false" msgid="8152974162096743862">
-      <item quantity="other">Për %1$d orë (deri në <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
-      <item quantity="one">Për një orë (deri në <xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g>)</item>
-    </plurals>
-    <plurals name="zen_mode_duration_hours_summary_short" formatted="false" msgid="4787552595253082371">
-      <item quantity="other">Për %1$d orë (deri në <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
-      <item quantity="one">Për 1 orë (deri në <xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g>)</item>
-    </plurals>
-    <plurals name="zen_mode_duration_minutes" formatted="false" msgid="5127407202506485571">
-      <item quantity="other">Për %d minuta</item>
-      <item quantity="one">Për një minutë</item>
-    </plurals>
-    <plurals name="zen_mode_duration_minutes_short" formatted="false" msgid="2199350154433426128">
-      <item quantity="other">Për %d minuta</item>
-      <item quantity="one">Për 1 minutë</item>
-    </plurals>
-    <plurals name="zen_mode_duration_hours" formatted="false" msgid="3938821308277433854">
-      <item quantity="other">Për %d orë</item>
-      <item quantity="one">Për një orë</item>
-    </plurals>
-    <plurals name="zen_mode_duration_hours_short" formatted="false" msgid="6748277774662434217">
-      <item quantity="other">Për %d orë</item>
-      <item quantity="one">Për 1 orë</item>
-    </plurals>
+  <plurals name="zen_mode_duration_minutes_summary">
+    <item quantity="one" msgid="3177683545388923234">"Për një minutë (deri në <xliff:g id="FORMATTEDTIME">%2$s</xliff:g>)"</item>
+    <item quantity="other" msgid="2787867221129368935">"Për %1$d minuta (deri në <xliff:g id="FORMATTEDTIME">%2$s</xliff:g>)"</item>
+  </plurals>
+  <plurals name="zen_mode_duration_minutes_summary_short">
+    <item quantity="one" msgid="4097046271119330874">"Për 1 minutë (deri në <xliff:g id="FORMATTEDTIME">%2$s</xliff:g>)"</item>
+    <item quantity="other" msgid="9128259640307810602">"Për %1$d minuta (deri në <xliff:g id="FORMATTEDTIME">%2$s</xliff:g>)"</item>
+  </plurals>
+  <plurals name="zen_mode_duration_hours_summary">
+    <item quantity="one" msgid="597194865053253679">"Për një orë (deri në <xliff:g id="FORMATTEDTIME">%2$s</xliff:g>)"</item>
+    <item quantity="other" msgid="2827214920627669898">"Për %1$d orë (deri në <xliff:g id="FORMATTEDTIME">%2$s</xliff:g>)"</item>
+  </plurals>
+  <plurals name="zen_mode_duration_hours_summary_short">
+    <item quantity="one" msgid="342658185856495801">"Për 1 orë (deri në <xliff:g id="FORMATTEDTIME">%2$s</xliff:g>)"</item>
+    <item quantity="other" msgid="6842148190293675591">"Për %1$d orë (deri në <xliff:g id="FORMATTEDTIME">%2$s</xliff:g>)"</item>
+  </plurals>
+  <plurals name="zen_mode_duration_minutes">
+    <item quantity="one" msgid="9040808414992812341">"Për një minutë"</item>
+    <item quantity="other" msgid="6924190729213550991">"Për %d minuta"</item>
+  </plurals>
+  <plurals name="zen_mode_duration_minutes_short">
+    <item quantity="one" msgid="4125166172281866385">"Për 1 minutë"</item>
+    <item quantity="other" msgid="5131202943429775644">"Për %d minuta"</item>
+  </plurals>
+  <plurals name="zen_mode_duration_hours">
+    <item quantity="one" msgid="3480040795582254384">"Për një orë"</item>
+    <item quantity="other" msgid="5408537517529822157">"Për %d orë"</item>
+  </plurals>
+  <plurals name="zen_mode_duration_hours_short">
+    <item quantity="one" msgid="6798191385685158694">"Për 1 orë"</item>
+    <item quantity="other" msgid="8464879049844138499">"Për %d orë"</item>
+  </plurals>
     <string name="zen_mode_until" msgid="7336308492289875088">"Deri në <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
+    <string name="zen_mode_alarm" msgid="9128205721301330797">"Deri në <xliff:g id="FORMATTEDTIME">%1$s</xliff:g> (alarmi tjetër)"</string>
     <string name="zen_mode_forever" msgid="7420011936770086993">"Deri sa ta çaktivizosh këtë"</string>
     <string name="zen_mode_forever_dnd" msgid="3792132696572189081">"Deri sa të çaktivizosh gjendjen \"Mos shqetëso\""</string>
     <string name="zen_mode_rule_name_combination" msgid="191109939968076477">"<xliff:g id="FIRST">%1$s</xliff:g> / <xliff:g id="REST">%2$s</xliff:g>"</string>
@@ -1525,8 +1513,8 @@
     <string name="usb_midi_peripheral_product_name" msgid="4971827859165280403">"Porta periferike USB"</string>
     <string name="floating_toolbar_open_overflow_description" msgid="4797287862999444631">"Opsione të tjera"</string>
     <string name="floating_toolbar_close_overflow_description" msgid="559796923090723804">"Mbylle tejkalimin"</string>
-    <plurals name="selected_count" formatted="false" msgid="7187339492915744615">
-      <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> të zgjedhura</item>
-      <item quantity="one"><xliff:g id="COUNT_0">%1$d</xliff:g> i zgjedhur</item>
-    </plurals>
+  <plurals name="selected_count">
+    <item quantity="one" msgid="8857281055159991036">"<xliff:g id="COUNT">%1$d</xliff:g> i zgjedhur"</item>
+    <item quantity="other" msgid="2608606845335294849">"<xliff:g id="COUNT">%1$d</xliff:g> të zgjedhur"</item>
+  </plurals>
 </resources>

@@ -61,10 +61,10 @@
     <string name="needPuk" msgid="919668385956251611">"Tu tarjeta SIM está bloqueada con PUK. Escribe el código PUK para desbloquearla."</string>
     <string name="needPuk2" msgid="4526033371987193070">"Escribir PUK2 para desbloquear la tarjeta SIM."</string>
     <string name="enablePin" msgid="209412020907207950">"Error; habilita el bloqueo de SIM/RUIM."</string>
-    <plurals name="pinpuk_attempts" formatted="false" msgid="1251012001539225582">
-      <item quantity="other">Tienes <xliff:g id="NUMBER_1">%d</xliff:g> intentos más antes de que se bloquee la tarjeta SIM.</item>
-      <item quantity="one">Tienes <xliff:g id="NUMBER_0">%d</xliff:g> un intento más antes de que se bloquee la tarjeta SIM.</item>
-    </plurals>
+  <plurals name="pinpuk_attempts">
+    <item quantity="one" msgid="6596245285809790142">"Te queda <xliff:g id="NUMBER">%d</xliff:g> intento antes de que se bloquee la tarjeta SIM."</item>
+    <item quantity="other" msgid="7530597808358774740">"Te quedan <xliff:g id="NUMBER">%d</xliff:g> intentos antes de que se bloquee la tarjeta SIM."</item>
+  </plurals>
     <string name="imei" msgid="2625429890869005782">"IMEI"</string>
     <string name="meid" msgid="4841221237681254195">"MEID"</string>
     <string name="ClipMmi" msgid="6952821216480289285">"Identificador de llamadas entrantes"</string>
@@ -354,6 +354,8 @@
     <string name="permdesc_flashlight" msgid="6522284794568368310">"Permite que la aplicación controle la función de linterna."</string>
     <string name="permlab_callPhone" msgid="3925836347681847954">"llamar directamente a números de teléfono"</string>
     <string name="permdesc_callPhone" msgid="3740797576113760827">"Permite que la aplicación haga llamadas a números de teléfono sin intervención del usuario, lo que puede dar lugar a llamadas o cargos inesperados. Ten en cuenta que las aplicaciones no pueden usar este servicio para realizar llamadas a números de emergencia, pero las aplicaciones malintencionadas pueden causarte gastos imprevistos al realizar llamadas sin tu confirmación."</string>
+    <string name="permlab_accessImsCallService" msgid="3574943847181793918">"acceder al servicio IMS para realizar llamadas"</string>
+    <string name="permdesc_accessImsCallService" msgid="8992884015198298775">"Permite que la aplicación utilice el servicio IMS para hacer llamadas sin tu intervención."</string>
     <string name="permlab_readPhoneState" msgid="9178228524507610486">"leer la identidad y el estado del dispositivo"</string>
     <string name="permdesc_readPhoneState" msgid="1639212771826125528">"Permite que la aplicación acceda a las funciones de teléfono del dispositivo. La aplicación puede utilizar este permiso para descubrir identificadores de dispositivos y números de teléfono, para saber si una llamada está activa y para conocer el número remoto con el que se ha establecido conexión mediante una llamada."</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1531731435011495015">"evitar que el tablet entre en estado de inactividad"</string>
@@ -432,6 +434,7 @@
     <string name="fingerprint_name_template" msgid="5870957565512716938">"Dedo <xliff:g id="FINGERID">%d</xliff:g>"</string>
   <string-array name="fingerprint_error_vendor">
   </string-array>
+    <string name="fingerprint_icon_content_description" msgid="2340202869968465936">"Ícono de huella digital"</string>
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"leer la configuración de sincronización"</string>
     <string name="permdesc_readSyncSettings" msgid="2706745674569678644">"Este permiso permite que la aplicación consulte la configuración de sincronización de una cuenta. Esto permite, por ejemplo, determinar si la aplicación Personas está sincronizada con una cuenta."</string>
     <string name="permlab_writeSyncSettings" msgid="5408694875793945314">"activar y desactivar la sincronización"</string>
@@ -624,9 +627,9 @@
     <string name="relationTypeDomesticPartner" msgid="6904807112121122133">"Pareja de hecho"</string>
     <string name="relationTypeFather" msgid="5228034687082050725">"Padre"</string>
     <string name="relationTypeFriend" msgid="7313106762483391262">"Amigo"</string>
-    <string name="relationTypeManager" msgid="6365677861610137895">"Gerente"</string>
+    <string name="relationTypeManager" msgid="6365677861610137895">"Supervisor"</string>
     <string name="relationTypeMother" msgid="4578571352962758304">"Madre"</string>
-    <string name="relationTypeParent" msgid="4755635567562925226">"Padre"</string>
+    <string name="relationTypeParent" msgid="4755635567562925226">"Padre/madre"</string>
     <string name="relationTypePartner" msgid="7266490285120262781">"Socio"</string>
     <string name="relationTypeReferredBy" msgid="101573059844135524">"Recomendado por"</string>
     <string name="relationTypeRelative" msgid="1799819930085610271">"Pariente"</string>
@@ -710,6 +713,7 @@
     <string name="lockscreen_access_pattern_cell_added" msgid="6756031208359292487">"Se agregó una celda."</string>
     <string name="lockscreen_access_pattern_cell_added_verbose" msgid="7264580781744026939">"Se agregó la celda <xliff:g id="CELL_INDEX">%1$s</xliff:g>"</string>
     <string name="lockscreen_access_pattern_detected" msgid="4988730895554057058">"Se completó el patrón"</string>
+    <string name="lockscreen_access_pattern_area" msgid="400813207572953209">"Área de patrón"</string>
     <string name="keyguard_accessibility_widget_changed" msgid="5678624624681400191">"%1$s. Widget %2$d de %3$d"</string>
     <string name="keyguard_accessibility_add_widget" msgid="8273277058724924654">"Agregar widget"</string>
     <string name="keyguard_accessibility_widget_empty_slot" msgid="1281505703307930757">"Vacío"</string>
@@ -805,10 +809,10 @@
     <string name="enable_explore_by_touch_warning_message" product="default" msgid="2708199672852373195">"<xliff:g id="ACCESSIBILITY_SERVICE_NAME">%1$s</xliff:g> desea activar la exploración táctil. Cuando esta función esté activada, podrás escuchar o ver descripciones del contenido seleccionado o usar gestos para interactuar con el dispositivo."</string>
     <string name="oneMonthDurationPast" msgid="7396384508953779925">"Hace 1 mes."</string>
     <string name="beforeOneMonthDurationPast" msgid="909134546836499826">"Anterior a 1 mes atrás"</string>
-    <plurals name="last_num_days" formatted="false" msgid="5104533550723932025">
-      <item quantity="other">Quedan <xliff:g id="COUNT_1">%d</xliff:g> días.</item>
-      <item quantity="one">Queda <xliff:g id="COUNT_0">%d</xliff:g> día.</item>
-    </plurals>
+  <plurals name="last_num_days">
+    <item quantity="one" msgid="7555846096746489821">"En el último <xliff:g id="COUNT">%d</xliff:g> día"</item>
+    <item quantity="other" msgid="3069992808164318268">"Últimos <xliff:g id="COUNT">%d</xliff:g> días"</item>
+  </plurals>
     <string name="last_month" msgid="3959346739979055432">"Último mes"</string>
     <string name="older" msgid="5211975022815554840">"Antiguos"</string>
     <string name="preposition_for_date" msgid="9093949757757445117">"activado <xliff:g id="DATE">%s</xliff:g>"</string>
@@ -826,18 +830,18 @@
     <string name="weeks" msgid="6509623834583944518">"semanas"</string>
     <string name="year" msgid="4001118221013892076">"año"</string>
     <string name="years" msgid="6881577717993213522">"años"</string>
-    <plurals name="duration_seconds" formatted="false" msgid="4527986939729687805">
-      <item quantity="other"><xliff:g id="COUNT">%d</xliff:g> segundos</item>
-      <item quantity="one">1 segundo</item>
-    </plurals>
-    <plurals name="duration_minutes" formatted="false" msgid="643786953939956125">
-      <item quantity="other"><xliff:g id="COUNT">%d</xliff:g> minutos</item>
-      <item quantity="one">1 minuto</item>
-    </plurals>
-    <plurals name="duration_hours" formatted="false" msgid="6826233369186668274">
-      <item quantity="other"><xliff:g id="COUNT">%d</xliff:g> horas</item>
-      <item quantity="one">1 hora</item>
-    </plurals>
+  <plurals name="duration_seconds">
+    <item quantity="one" msgid="6962015528372969481">"1 segundo"</item>
+    <item quantity="other" msgid="1886107766577166786">"<xliff:g id="COUNT">%d</xliff:g> segundos"</item>
+  </plurals>
+  <plurals name="duration_minutes">
+    <item quantity="one" msgid="4915414002546085617">"1 minuto"</item>
+    <item quantity="other" msgid="3165187169224908775">"<xliff:g id="COUNT">%d</xliff:g> minutos"</item>
+  </plurals>
+  <plurals name="duration_hours">
+    <item quantity="one" msgid="8917467491248809972">"1 hora"</item>
+    <item quantity="other" msgid="3863962854246773930">"<xliff:g id="COUNT">%d</xliff:g> horas"</item>
+  </plurals>
     <string name="VideoView_error_title" msgid="3534509135438353077">"Problemas de video"</string>
     <string name="VideoView_error_text_invalid_progressive_playback" msgid="3186670335938670444">"No es posible transmitir este video al dispositivo."</string>
     <string name="VideoView_error_text_unknown" msgid="3450439155187810085">"No se puede reproducir el video."</string>
@@ -950,14 +954,14 @@
     <string name="ringtone_silent" msgid="7937634392408977062">"Ninguno"</string>
     <string name="ringtone_picker_title" msgid="3515143939175119094">"Tonos de llamada"</string>
     <string name="ringtone_unknown" msgid="5477919988701784788">"Tono de llamada desconocido"</string>
-    <plurals name="wifi_available" formatted="false" msgid="7900333017752027322">
-      <item quantity="other">redes de Wi-Fi disponibles</item>
-      <item quantity="one">red de Wi-Fi disponible</item>
-    </plurals>
-    <plurals name="wifi_available_detailed" formatted="false" msgid="1140699367193975606">
-      <item quantity="other">Abrir redes de Wi-Fi disponibles</item>
-      <item quantity="one">Abrir red de Wi-Fi disponible</item>
-    </plurals>
+  <plurals name="wifi_available">
+    <item quantity="one" msgid="6654123987418168693">"Red disponible de Wi-Fi"</item>
+    <item quantity="other" msgid="4192424489168397386">"redes disponibles de Wi-Fi"</item>
+  </plurals>
+  <plurals name="wifi_available_detailed">
+    <item quantity="one" msgid="1634101450343277345">"Abrir red disponible de Wi-Fi"</item>
+    <item quantity="other" msgid="7915895323644292768">"Abrir redes disponibles de Wi-Fi"</item>
+  </plurals>
     <string name="wifi_available_sign_in" msgid="9157196203958866662">"Accede a una red Wi-Fi."</string>
     <string name="network_available_sign_in" msgid="1848877297365446605">"Acceder a la red"</string>
     <!-- no translation found for network_available_sign_in_detailed (8000081941447976118) -->
@@ -1037,14 +1041,8 @@
     <string name="usb_mtp_notification_title" msgid="8396264943589760855">"USB para transferir archivos"</string>
     <string name="usb_ptp_notification_title" msgid="1347328437083192112">"USB para transferir fotos"</string>
     <string name="usb_midi_notification_title" msgid="4850904915889144654">"USB para MIDI"</string>
-    <string name="usb_cd_installer_notification_title" msgid="6774712827892090754">"Conectado como un instalador"</string>
     <string name="usb_accessory_notification_title" msgid="7848236974087653666">"Conectado a un accesorio USB"</string>
     <string name="usb_notification_message" msgid="7347368030849048437">"Toca para ver más opciones."</string>
-    <string name="extmedia_format_title" product="nosdcard" msgid="9020092196061007262">"¿Deseas formatear el almacenamiento USB?"</string>
-    <string name="extmedia_format_title" product="default" msgid="3648415921526526069">"¿Deseas formatear la tarjeta SD?"</string>
-    <string name="extmedia_format_message" product="nosdcard" msgid="3934016853425761078">"Se borrarán todos los archivos guardados en el almacenamiento USB. Esta acción no se puede deshacer."</string>
-    <string name="extmedia_format_message" product="default" msgid="14131895027543830">"Se perderán todos los datos de tu tarjeta."</string>
-    <string name="extmedia_format_button_format" msgid="4131064560127478695">"Formato"</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"Depuración por USB conectada"</string>
     <string name="adb_active_notification_message" msgid="1016654627626476142">"Toca para desactivar la depuración por USB."</string>
     <string name="select_input_method" msgid="8547250819326693584">"Cambiar el teclado"</string>
@@ -1147,24 +1145,13 @@
     <string name="skip_button_label" msgid="1275362299471631819">"Omitir"</string>
     <string name="no_matches" msgid="8129421908915840737">"Sin coincidencias"</string>
     <string name="find_on_page" msgid="1946799233822820384">"Buscar en la página"</string>
-    <plurals name="matches_found" formatted="false" msgid="1210884353962081884">
-      <item quantity="other"><xliff:g id="INDEX">%d</xliff:g> de <xliff:g id="TOTAL">%d</xliff:g></item>
-      <item quantity="one">1 coincidencia</item>
-    </plurals>
+  <plurals name="matches_found">
+    <item quantity="one" msgid="8167147081136579439">"1 coincidencia"</item>
+    <item quantity="other" msgid="4641872797067609177">"<xliff:g id="INDEX">%d</xliff:g> de <xliff:g id="TOTAL">%d</xliff:g>"</item>
+  </plurals>
     <string name="action_mode_done" msgid="7217581640461922289">"Listo"</string>
-    <string name="progress_unmounting" product="nosdcard" msgid="3923810448507612746">"Desactivando almacenamiento USB..."</string>
-    <string name="progress_unmounting" product="default" msgid="1327894998409537190">"Desactivando tarjeta SD..."</string>
     <string name="progress_erasing" product="nosdcard" msgid="4521573321524340058">"Borrando almacenamiento USB..."</string>
     <string name="progress_erasing" product="default" msgid="6596988875507043042">"Borrando tarjeta SD..."</string>
-    <string name="format_error" product="nosdcard" msgid="6299769563624776948">"No se pudo borrar el almacenamiento USB."</string>
-    <string name="format_error" product="default" msgid="7315248696644510935">"No se pudo borrar la tarjeta SD."</string>
-    <string name="media_bad_removal" msgid="7960864061016603281">"Se ha extraído la tarjeta SD antes de ser desmontada."</string>
-    <string name="media_checking" product="nosdcard" msgid="418188720009569693">"Se está verificando el almacenamiento USB en este momento."</string>
-    <string name="media_checking" product="default" msgid="7334762503904827481">"Se está verificando la tarjeta SD en este momento."</string>
-    <string name="media_removed" msgid="7001526905057952097">"Se ha extraído la tarjeta SD."</string>
-    <string name="media_shared" product="nosdcard" msgid="5830814349250834225">"Una computadora está utilizando el almacenamiento USB en este momento."</string>
-    <string name="media_shared" product="default" msgid="5706130568133540435">"Una computadora está utilizando la tarjeta SD en este momento."</string>
-    <string name="media_unknown_state" msgid="729192782197290385">"Medios externos en estado desconocido."</string>
     <string name="share" msgid="1778686618230011964">"Compartir"</string>
     <string name="find" msgid="4808270900322985960">"Buscar"</string>
     <string name="websearch" msgid="4337157977400211589">"Buscar en la Web"</string>
@@ -1439,10 +1426,10 @@
     <string name="restr_pin_create_pin" msgid="8017600000263450337">"Crear PIN para modificar restricciones"</string>
     <string name="restr_pin_error_doesnt_match" msgid="2224214190906994548">"Los PIN no coinciden. Vuelve a intentarlo."</string>
     <string name="restr_pin_error_too_short" msgid="8173982756265777792">"El PIN es demasiado corto. Debe tener al menos 4 dígitos."</string>
-    <plurals name="restr_pin_countdown" formatted="false" msgid="9061246974881224688">
-      <item quantity="other">Vuelve a intentarlo en <xliff:g id="COUNT">%d</xliff:g> segundos.</item>
-      <item quantity="one">Vuelve a intentarlo en 1 segundo.</item>
-    </plurals>
+  <plurals name="restr_pin_countdown">
+    <item quantity="one" msgid="311050995198548675">"Intentar en 1 s"</item>
+    <item quantity="other" msgid="4730868920742952817">"Intentar en <xliff:g id="COUNT">%d</xliff:g> s"</item>
+  </plurals>
     <string name="restr_pin_try_later" msgid="973144472490532377">"Vuelve a intentar más tarde."</string>
     <string name="immersive_cling_title" msgid="8394201622932303336">"Visualización en pantalla completa"</string>
     <string name="immersive_cling_description" msgid="3482371193207536040">"Para salir, desliza el dedo hacia abajo desde la parte superior."</string>
@@ -1468,39 +1455,40 @@
     <string name="package_updated_device_owner" msgid="8856631322440187071">"Actualizado por el administrador"</string>
     <string name="package_deleted_device_owner" msgid="7650577387493101353">"Lo eliminó el administrador."</string>
     <string name="battery_saver_description" msgid="1960431123816253034">"Para ayudar a mejorar la duración de la batería, el ahorro de batería reduce el rendimiento del dispositivo y limita la vibración, los servicios de ubicación y la mayoría de los datos en segundo plano. Es posible que el correo electrónico, la mensajería y otras aplicaciones que se basan en la sincronización no puedan actualizarse, a menos que los abras.\n\nEl ahorro de batería se desactiva de forma automática cuando el dispositivo se está cargando."</string>
-    <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="4367877408072000848">
-      <item quantity="other">Durante %1$d minutos hasta la(s) <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g></item>
-      <item quantity="one">Durante 1 minuto; hasta la(s) <xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g></item>
-    </plurals>
-    <plurals name="zen_mode_duration_minutes_summary_short" formatted="false" msgid="6830154222366042597">
-      <item quantity="other">Durante %1$d minutos hasta la(s) <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g></item>
-      <item quantity="one">Durante 1 minuto hasta la(s) <xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g></item>
-    </plurals>
-    <plurals name="zen_mode_duration_hours_summary" formatted="false" msgid="8152974162096743862">
-      <item quantity="other">Durante %1$d horas, hasta la(s) <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g></item>
-      <item quantity="one">Durante 1 hora; hasta la(s) <xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g></item>
-    </plurals>
-    <plurals name="zen_mode_duration_hours_summary_short" formatted="false" msgid="4787552595253082371">
-      <item quantity="other">Durante %1$d horas hasta la(s) <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g></item>
-      <item quantity="one">Durante 1 hora hasta la(s) <xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g></item>
-    </plurals>
-    <plurals name="zen_mode_duration_minutes" formatted="false" msgid="5127407202506485571">
-      <item quantity="other">Durante %d minutos</item>
-      <item quantity="one">Durante un minuto</item>
-    </plurals>
-    <plurals name="zen_mode_duration_minutes_short" formatted="false" msgid="2199350154433426128">
-      <item quantity="other">Durante %d minutos</item>
-      <item quantity="one">Durante 1 minuto</item>
-    </plurals>
-    <plurals name="zen_mode_duration_hours" formatted="false" msgid="3938821308277433854">
-      <item quantity="other">Durante %d horas</item>
-      <item quantity="one">Durante 1 hora</item>
-    </plurals>
-    <plurals name="zen_mode_duration_hours_short" formatted="false" msgid="6748277774662434217">
-      <item quantity="other">Durante %d horas</item>
-      <item quantity="one">Durante 1 hora</item>
-    </plurals>
+  <plurals name="zen_mode_duration_minutes_summary">
+    <item quantity="one" msgid="3177683545388923234">"Durante 1 minuto; hasta la(s) <xliff:g id="FORMATTEDTIME">%2$s</xliff:g>"</item>
+    <item quantity="other" msgid="2787867221129368935">"Durante %1$d minutos; hasta la(s) <xliff:g id="FORMATTEDTIME">%2$s</xliff:g>"</item>
+  </plurals>
+  <plurals name="zen_mode_duration_minutes_summary_short">
+    <item quantity="one" msgid="4097046271119330874">"Durante 1 min (hasta la hora: <xliff:g id="FORMATTEDTIME">%2$s</xliff:g>)"</item>
+    <item quantity="other" msgid="9128259640307810602">"Durante %1$d min (hasta la hora: <xliff:g id="FORMATTEDTIME">%2$s</xliff:g>)"</item>
+  </plurals>
+  <plurals name="zen_mode_duration_hours_summary">
+    <item quantity="one" msgid="597194865053253679">"Durante 1 hora; hasta la(s) <xliff:g id="FORMATTEDTIME">%2$s</xliff:g>"</item>
+    <item quantity="other" msgid="2827214920627669898">"Durante %1$d horas; hasta la(s) <xliff:g id="FORMATTEDTIME">%2$s</xliff:g>"</item>
+  </plurals>
+  <plurals name="zen_mode_duration_hours_summary_short">
+    <item quantity="one" msgid="342658185856495801">"Durante 1 h (hasta la hora: <xliff:g id="FORMATTEDTIME">%2$s</xliff:g>)"</item>
+    <item quantity="other" msgid="6842148190293675591">"Durante %1$d h (hasta la hora: <xliff:g id="FORMATTEDTIME">%2$s</xliff:g>)"</item>
+  </plurals>
+  <plurals name="zen_mode_duration_minutes">
+    <item quantity="one" msgid="9040808414992812341">"Durante un minuto"</item>
+    <item quantity="other" msgid="6924190729213550991">"Durante %d minutos"</item>
+  </plurals>
+  <plurals name="zen_mode_duration_minutes_short">
+    <item quantity="one" msgid="4125166172281866385">"Durante 1 min"</item>
+    <item quantity="other" msgid="5131202943429775644">"Durante %d min"</item>
+  </plurals>
+  <plurals name="zen_mode_duration_hours">
+    <item quantity="one" msgid="3480040795582254384">"Durante una hora"</item>
+    <item quantity="other" msgid="5408537517529822157">"Durante %d horas"</item>
+  </plurals>
+  <plurals name="zen_mode_duration_hours_short">
+    <item quantity="one" msgid="6798191385685158694">"Durante 1 h"</item>
+    <item quantity="other" msgid="8464879049844138499">"Durante %d h"</item>
+  </plurals>
     <string name="zen_mode_until" msgid="7336308492289875088">"Hasta la(s) <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
+    <string name="zen_mode_alarm" msgid="9128205721301330797">"Hasta la hora <xliff:g id="FORMATTEDTIME">%1$s</xliff:g> (próxima alarma)"</string>
     <string name="zen_mode_forever" msgid="7420011936770086993">"Hasta que lo desactives"</string>
     <string name="zen_mode_forever_dnd" msgid="3792132696572189081">"Hasta que desactives No molestar"</string>
     <string name="zen_mode_rule_name_combination" msgid="191109939968076477">"<xliff:g id="FIRST">%1$s</xliff:g>/<xliff:g id="REST">%2$s</xliff:g>"</string>
@@ -1525,8 +1513,8 @@
     <string name="usb_midi_peripheral_product_name" msgid="4971827859165280403">"Puerto USB de periféricos"</string>
     <string name="floating_toolbar_open_overflow_description" msgid="4797287862999444631">"Más opciones"</string>
     <string name="floating_toolbar_close_overflow_description" msgid="559796923090723804">"Cerrar la barra de herramientas flotante adicional"</string>
-    <plurals name="selected_count" formatted="false" msgid="7187339492915744615">
-      <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> elementos seleccionados</item>
-      <item quantity="one"><xliff:g id="COUNT_0">%1$d</xliff:g> elemento seleccionado</item>
-    </plurals>
+  <plurals name="selected_count">
+    <item quantity="one" msgid="8857281055159991036">"<xliff:g id="COUNT">%1$d</xliff:g> seleccionado"</item>
+    <item quantity="other" msgid="2608606845335294849">"<xliff:g id="COUNT">%1$d</xliff:g> seleccionados"</item>
+  </plurals>
 </resources>

@@ -61,10 +61,10 @@
     <string name="needPuk" msgid="919668385956251611">"ඔබගේ SIM පත පතට PUK අගුළු වැටී ඇත. එම අගුල ඇරීමට PUK කේතය ටයිප් කරන්න."</string>
     <string name="needPuk2" msgid="4526033371987193070">"SIM පතේ අගුළු ඇරීමට PUK2 ටයිප් කරන්න."</string>
     <string name="enablePin" msgid="209412020907207950">"අසාර්ථකයි, SIM/RUIM අඟුල සබල කරන්න."</string>
-    <plurals name="pinpuk_attempts" formatted="false" msgid="1251012001539225582">
-      <item quantity="one">ඔබේ SIM කාඩ් පත අඟුළු වැටීමට පෙර තවත් උත්සාහයන් <xliff:g id="NUMBER_1">%d</xliff:g> ක් ඉතිරිව ඇත.</item>
-      <item quantity="other">ඔබේ SIM කාඩ් පත අඟුළු වැටීමට පෙර තවත් උත්සාහයන් <xliff:g id="NUMBER_1">%d</xliff:g> ක් ඉතිරිව ඇත.</item>
-    </plurals>
+  <plurals name="pinpuk_attempts">
+    <item quantity="one" msgid="6596245285809790142">"SIM කාඩ් පත අඟුළු වැටීමට පෙර ඔබ සතුව තවත් උත්සාහයන් <xliff:g id="NUMBER">%d</xliff:g> ක් ඉතිරිව ඇත."</item>
+    <item quantity="other" msgid="7530597808358774740">"SIM කාඩ් පත අඟුළු වැටීමට පෙර ඔබ සතුව තවත් උත්සාහයන් <xliff:g id="NUMBER">%d</xliff:g> ක් ඉතිරිව ඇත."</item>
+  </plurals>
     <string name="imei" msgid="2625429890869005782">"IMEI"</string>
     <string name="meid" msgid="4841221237681254195">"MEID"</string>
     <string name="ClipMmi" msgid="6952821216480289285">"පැමිණෙන අමතන්නාගේ ID"</string>
@@ -229,7 +229,7 @@
     <string name="permgrouplab_contacts" msgid="3657758145679177612">"සම්බන්ධතා"</string>
     <string name="permgroupdesc_contacts" msgid="6951499528303668046">"ඔබේ සම්බන්ධතාවලට පිවිසෙන්න"</string>
     <string name="permgrouplab_location" msgid="7275582855722310164">"ස්ථානය"</string>
-    <string name="permgroupdesc_location" msgid="1346617465127855033">"මෙම උපාංගයේ ස්ථානය ප්‍රවේශ කිරීම"</string>
+    <string name="permgroupdesc_location" msgid="1346617465127855033">"මෙම උපාංගයේ ස්ථානයට ප්‍රවේශ කරන්න"</string>
     <string name="permgrouplab_calendar" msgid="5863508437783683902">"දින දර්ශනය"</string>
     <string name="permgroupdesc_calendar" msgid="3889615280211184106">"ඔබේ දින දර්ශනයට පිවිසෙන්න"</string>
     <string name="permgrouplab_sms" msgid="228308803364967808">"කෙටි පණිවිඩ"</string>
@@ -354,6 +354,8 @@
     <string name="permdesc_flashlight" msgid="6522284794568368310">"සැණෙළිය පාලනයට යෙදුමට අවසර දෙන්න."</string>
     <string name="permlab_callPhone" msgid="3925836347681847954">"දුරකථන අංක වෙත ඍජුවම අමතන්න"</string>
     <string name="permdesc_callPhone" msgid="3740797576113760827">"ඔබගේ මැදිහත් වීමක් නොමැතිව දුරකථන අංක ඇමතීමට යෙදුමට අවසර දෙන්න. මෙහි ප්‍රතිඑලය වන්නේ අනපේක්ෂිත අයකිරීම් හෝ ඇමතුම් ඇතිවීමයි. මෙයන් හදිසි අංක වලට ඇමතුම් ගැනීමට යෙදුමට අවසර නොදෙන බවට සටහන් කරගන්න. ඔබගේ අනුදැනුමක් නොමැතිව ඇමතුම් ගැනීමෙන් අනිෂ්ට යෙදුම් ඔබගේ මුදල් නිකරුණේ වැය කරයි."</string>
+    <string name="permlab_accessImsCallService" msgid="3574943847181793918">"IMS ඇමතුම් සේවාවට පිවිසෙන්න"</string>
+    <string name="permdesc_accessImsCallService" msgid="8992884015198298775">"ඔබේ මැදිහත්වීමකින් තොරව ඇමතුම් සිදු කිරීමට  IMS සේවාව භාවිතයට යෙදුමට ඉඩ දෙන්න."</string>
     <string name="permlab_readPhoneState" msgid="9178228524507610486">"දුරකථනයේ තත්වය සහ අනන්‍යතාවය කියවීම"</string>
     <string name="permdesc_readPhoneState" msgid="1639212771826125528">"උපාංගයේ දුරකථන විශේෂාංග වෙත පිවිසීමට යෙදුමට අවසර දෙන්න. ඇමතුම සක්‍රිය වුවත් සහ ඇමතුමකින් දුරස්ථ අංකය සම්බන්ධ වුවත් දුරකථන අංකය සහ උපාංග ID හඳුනා ගැනීමට මෙම අවසරය යෙදුමට අවසර දෙයි."</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1531731435011495015">"ටැබ්ලටය නින්දෙන් වැළක්වීම"</string>
@@ -432,6 +434,7 @@
     <string name="fingerprint_name_template" msgid="5870957565512716938">"ඇඟිලි <xliff:g id="FINGERID">%d</xliff:g>"</string>
   <string-array name="fingerprint_error_vendor">
   </string-array>
+    <string name="fingerprint_icon_content_description" msgid="2340202869968465936">"ඇඟිලි සලකුණු නිරූපකය"</string>
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"සමමුහුර්ත සැකසීම් කියවන්න"</string>
     <string name="permdesc_readSyncSettings" msgid="2706745674569678644">"ගිණුම සඳහා සමමුහුර්ත සැකසීම් කියවීමට යෙදුමට අවසර දෙන්න. උදාහරණයක් ලෙස, ගිණුමක් සමඟ පුද්ගල යෙදුම සමමුහුර්ත දැයි මෙයට හඳුනා ගත හැක."</string>
     <string name="permlab_writeSyncSettings" msgid="5408694875793945314">"සමමුහුර්ත කිරීම සක්‍රිය කරන්න සහ අක්‍රිය කරන්න"</string>
@@ -710,6 +713,7 @@
     <string name="lockscreen_access_pattern_cell_added" msgid="6756031208359292487">"කොටුවක් එකතු කරන ලදි"</string>
     <string name="lockscreen_access_pattern_cell_added_verbose" msgid="7264580781744026939">"<xliff:g id="CELL_INDEX">%1$s</xliff:g> කොටුව එකතු කරන ලදි"</string>
     <string name="lockscreen_access_pattern_detected" msgid="4988730895554057058">"රටාව සම්පූර්ණයි"</string>
+    <string name="lockscreen_access_pattern_area" msgid="400813207572953209">"රටා ප්‍රදේශය."</string>
     <!-- String.format failed for translation -->
     <!-- no translation found for keyguard_accessibility_widget_changed (5678624624681400191) -->
     <skip />
@@ -807,10 +811,10 @@
     <string name="enable_explore_by_touch_warning_message" product="default" msgid="2708199672852373195">"ස්පර්ශය වෙතින් ගවේෂණය සක්‍රිය කිරීමට <xliff:g id="ACCESSIBILITY_SERVICE_NAME">%1$s</xliff:g> ට අවශ්‍යයි. ස්පර්ශය වෙතින් ගවේෂණය සක්‍රිය විට, ඔබගේ ඇඟිලිවලට පහළ විස්තර ඇසිය හෝ බැලිය හැක හෝ දුරකථනය සමග අන්තර් ක්‍රියාකාරී වීමට ඉංගිති සිදු කළ හැක."</string>
     <string name="oneMonthDurationPast" msgid="7396384508953779925">"මාස 1 කට පෙර"</string>
     <string name="beforeOneMonthDurationPast" msgid="909134546836499826">"මාස 1 කට පෙර"</string>
-    <plurals name="last_num_days" formatted="false" msgid="5104533550723932025">
-      <item quantity="one">අවසන් දින <xliff:g id="COUNT_1">%d</xliff:g></item>
-      <item quantity="other">අවසන් දින <xliff:g id="COUNT_1">%d</xliff:g></item>
-    </plurals>
+  <plurals name="last_num_days">
+    <item quantity="one" msgid="7555846096746489821">"අවසන් දින <xliff:g id="COUNT">%d</xliff:g>"</item>
+    <item quantity="other" msgid="3069992808164318268">"අන්තිම දවස් <xliff:g id="COUNT">%d</xliff:g>"</item>
+  </plurals>
     <string name="last_month" msgid="3959346739979055432">"අවසාන මාසය"</string>
     <string name="older" msgid="5211975022815554840">"පරණ"</string>
     <string name="preposition_for_date" msgid="9093949757757445117">"<xliff:g id="DATE">%s</xliff:g> වන දා"</string>
@@ -828,18 +832,18 @@
     <string name="weeks" msgid="6509623834583944518">"සති"</string>
     <string name="year" msgid="4001118221013892076">"අවුරුද්ද"</string>
     <string name="years" msgid="6881577717993213522">"අවුරුදු"</string>
-    <plurals name="duration_seconds" formatted="false" msgid="4527986939729687805">
-      <item quantity="one">තත්පර <xliff:g id="COUNT">%d</xliff:g> යි</item>
-      <item quantity="other">තත්පර <xliff:g id="COUNT">%d</xliff:g> යි</item>
-    </plurals>
-    <plurals name="duration_minutes" formatted="false" msgid="643786953939956125">
-      <item quantity="one">මිනිත්තු <xliff:g id="COUNT">%d</xliff:g> යි</item>
-      <item quantity="other">මිනිත්තු <xliff:g id="COUNT">%d</xliff:g> යි</item>
-    </plurals>
-    <plurals name="duration_hours" formatted="false" msgid="6826233369186668274">
-      <item quantity="one">පැය <xliff:g id="COUNT">%d</xliff:g></item>
-      <item quantity="other">පැය <xliff:g id="COUNT">%d</xliff:g></item>
-    </plurals>
+  <plurals name="duration_seconds">
+    <item quantity="one" msgid="6962015528372969481">"තත්පර 1"</item>
+    <item quantity="other" msgid="1886107766577166786">"තත්පර <xliff:g id="COUNT">%d</xliff:g>"</item>
+  </plurals>
+  <plurals name="duration_minutes">
+    <item quantity="one" msgid="4915414002546085617">"මිනිත්තු 1"</item>
+    <item quantity="other" msgid="3165187169224908775">"මිනිත්තු <xliff:g id="COUNT">%d</xliff:g>"</item>
+  </plurals>
+  <plurals name="duration_hours">
+    <item quantity="one" msgid="8917467491248809972">"පැය 1"</item>
+    <item quantity="other" msgid="3863962854246773930">"පැය <xliff:g id="COUNT">%d</xliff:g> ක්"</item>
+  </plurals>
     <string name="VideoView_error_title" msgid="3534509135438353077">"වීඩියෝ ගැටලුව"</string>
     <string name="VideoView_error_text_invalid_progressive_playback" msgid="3186670335938670444">"මේ වීඩියෝව මෙම උපාංගයට ප්‍රවාහනය සඳහා වලංගු නැත."</string>
     <string name="VideoView_error_text_unknown" msgid="3450439155187810085">"මෙම වීඩියෝව ධාවනය කළ නොහැක."</string>
@@ -952,14 +956,14 @@
     <string name="ringtone_silent" msgid="7937634392408977062">"කිසිවක් නැත"</string>
     <string name="ringtone_picker_title" msgid="3515143939175119094">"රිගින්ටෝන"</string>
     <string name="ringtone_unknown" msgid="5477919988701784788">"නොදන්නා රින්ටෝනය"</string>
-    <plurals name="wifi_available" formatted="false" msgid="7900333017752027322">
-      <item quantity="one">Wi-Fi ජාල තිබේ</item>
-      <item quantity="other">Wi-Fi ජාල තිබේ</item>
-    </plurals>
-    <plurals name="wifi_available_detailed" formatted="false" msgid="1140699367193975606">
-      <item quantity="one">විවෘත Wi-Fi ජාල තිබේ</item>
-      <item quantity="other">විවෘත Wi-Fi ජාල තිබේ</item>
-    </plurals>
+  <plurals name="wifi_available">
+    <item quantity="one" msgid="6654123987418168693">"Wi-Fi ජාලයක් තිබේ"</item>
+    <item quantity="other" msgid="4192424489168397386">"Wi-Fi ජාල ඇත"</item>
+  </plurals>
+  <plurals name="wifi_available_detailed">
+    <item quantity="one" msgid="1634101450343277345">"විවෘත Wi-Fi ජාලය ලබාගත හැක"</item>
+    <item quantity="other" msgid="7915895323644292768">"විවෘත Wi-Fi ජාල තිබේ"</item>
+  </plurals>
     <string name="wifi_available_sign_in" msgid="9157196203958866662">"Wi-Fi ජාලයට පුරනය වන්න"</string>
     <string name="network_available_sign_in" msgid="1848877297365446605">"ජාලයට පුරනය වන්න"</string>
     <!-- no translation found for network_available_sign_in_detailed (8000081941447976118) -->
@@ -1039,14 +1043,8 @@
     <string name="usb_mtp_notification_title" msgid="8396264943589760855">"ගොනු හුවමාරුව සඳහා USB"</string>
     <string name="usb_ptp_notification_title" msgid="1347328437083192112">"ඡායාරූප හුවමාරුව සඳහා USB"</string>
     <string name="usb_midi_notification_title" msgid="4850904915889144654">"MIDI සඳහා USB"</string>
-    <string name="usb_cd_installer_notification_title" msgid="6774712827892090754">"ස්ථාපිතයක් ලෙස සම්බන්ධයි"</string>
     <string name="usb_accessory_notification_title" msgid="7848236974087653666">"USB මෙවලමකට සම්බන්ධිතයි"</string>
     <string name="usb_notification_message" msgid="7347368030849048437">"වඩා වැඩි විකල්ප සඳහා ස්පර්ශ කරන්න."</string>
-    <string name="extmedia_format_title" product="nosdcard" msgid="9020092196061007262">"USB ආචයනය ෆෝමැට් කරන්නද?"</string>
-    <string name="extmedia_format_title" product="default" msgid="3648415921526526069">"SD පත ෆෝමැට් කරන්නද?"</string>
-    <string name="extmedia_format_message" product="nosdcard" msgid="3934016853425761078">"ඔබගේ USB ආචයනයේ ඇති සියලුම ගොනු මැකී යනු ඇත. මෙම ක්‍රියාව ආපසු හැරවිය නොහැක!"</string>
-    <string name="extmedia_format_message" product="default" msgid="14131895027543830">"ඔබගේ පතේ සියලු දත්ත නැති වනු ඇත."</string>
-    <string name="extmedia_format_button_format" msgid="4131064560127478695">"ෆෝමැට්"</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"USB නිදොස්කරණය සම්බන්ධිතයි"</string>
     <string name="adb_active_notification_message" msgid="1016654627626476142">"USB නිදොස්කරණය අබල කිරීමට ස්පර්ශ කරන්න."</string>
     <string name="select_input_method" msgid="8547250819326693584">"යතුරු පුවරු වෙනස් කිරීම"</string>
@@ -1149,24 +1147,13 @@
     <string name="skip_button_label" msgid="1275362299471631819">"මඟ හරින්න"</string>
     <string name="no_matches" msgid="8129421908915840737">"ගැලපීම් නැත"</string>
     <string name="find_on_page" msgid="1946799233822820384">"පිටුවෙහි සෙවීම"</string>
-    <plurals name="matches_found" formatted="false" msgid="1210884353962081884">
-      <item quantity="one"><xliff:g id="TOTAL">%d</xliff:g> න් <xliff:g id="INDEX">%d</xliff:g> යි</item>
-      <item quantity="other"><xliff:g id="TOTAL">%d</xliff:g> න් <xliff:g id="INDEX">%d</xliff:g> යි</item>
-    </plurals>
+  <plurals name="matches_found">
+    <item quantity="one" msgid="8167147081136579439">"ගැළපීම් 1 යි"</item>
+    <item quantity="other" msgid="4641872797067609177">"<xliff:g id="TOTAL">%d</xliff:g> කින් <xliff:g id="INDEX">%d</xliff:g>"</item>
+  </plurals>
     <string name="action_mode_done" msgid="7217581640461922289">"හරි"</string>
-    <string name="progress_unmounting" product="nosdcard" msgid="3923810448507612746">"USB ආචයනය ගැලවීම..."</string>
-    <string name="progress_unmounting" product="default" msgid="1327894998409537190">"SD පත ගලවමින්..."</string>
     <string name="progress_erasing" product="nosdcard" msgid="4521573321524340058">"USB ආචයනය මකමින්..."</string>
     <string name="progress_erasing" product="default" msgid="6596988875507043042">"SD පත මකමින්..."</string>
-    <string name="format_error" product="nosdcard" msgid="6299769563624776948">"USB ආචයනය මැකිය නොහැක."</string>
-    <string name="format_error" product="default" msgid="7315248696644510935">"SD පත මැකීමට නොහැකි විය."</string>
-    <string name="media_bad_removal" msgid="7960864061016603281">"ගැලවීමට පෙර SD පත ඉවත්කර ඇත."</string>
-    <string name="media_checking" product="nosdcard" msgid="418188720009569693">"USB ආචයනය මේ වනවිට පරීක්ෂා කරමින් පවතී."</string>
-    <string name="media_checking" product="default" msgid="7334762503904827481">"SD පත දැන් පරීක්ෂා කරමින් පවතී."</string>
-    <string name="media_removed" msgid="7001526905057952097">"SD පත ඉවත් කර ඇත."</string>
-    <string name="media_shared" product="nosdcard" msgid="5830814349250834225">"පරිගණකයක් විසින් දැන් USB ආචයනය භාවිතා කරයි."</string>
-    <string name="media_shared" product="default" msgid="5706130568133540435">"SD පත දැනට පරිගණකයකින් පාවිච්චි කරයි."</string>
-    <string name="media_unknown_state" msgid="729192782197290385">"බාහිර මාධ්‍යය නොදන්නා අවස්ථාවේ පවතියි."</string>
     <string name="share" msgid="1778686618230011964">"බෙදාගන්න"</string>
     <string name="find" msgid="4808270900322985960">"සොයන්න"</string>
     <string name="websearch" msgid="4337157977400211589">"වෙබ් සෙවුම"</string>
@@ -1441,10 +1428,10 @@
     <string name="restr_pin_create_pin" msgid="8017600000263450337">"සිමා වැඩිදියුණු කිරීමට PIN සාදන්න"</string>
     <string name="restr_pin_error_doesnt_match" msgid="2224214190906994548">"PIN නොගැළපෙයි. නැවත උත්සහ කරන්න."</string>
     <string name="restr_pin_error_too_short" msgid="8173982756265777792">"PIN කුඩා වැඩිය. ඉලක්කම් 4 වත් විය යුතුය."</string>
-    <plurals name="restr_pin_countdown" formatted="false" msgid="9061246974881224688">
-      <item quantity="one">තත්පර <xliff:g id="COUNT">%d</xliff:g> කින් නැවත උත්සාහ කරන්න</item>
-      <item quantity="other">තත්පර <xliff:g id="COUNT">%d</xliff:g> කින් නැවත උත්සාහ කරන්න</item>
-    </plurals>
+  <plurals name="restr_pin_countdown">
+    <item quantity="one" msgid="311050995198548675">"තවත් තත්පර 1 කින් යළි උත්සාහ කරන්න"</item>
+    <item quantity="other" msgid="4730868920742952817">"තත්පර <xliff:g id="COUNT">%d</xliff:g> කින් නැවත උත්සහ කරන්න"</item>
+  </plurals>
     <string name="restr_pin_try_later" msgid="973144472490532377">"පසුව නැවත උත්සාහ කරන්න"</string>
     <string name="immersive_cling_title" msgid="8394201622932303336">"මුළු තිරය බලමින්"</string>
     <string name="immersive_cling_description" msgid="3482371193207536040">"ඉවත් වීමට, ඉහළ සිට පහළට ස්වයිප් කරන්න"</string>
@@ -1470,39 +1457,40 @@
     <string name="package_updated_device_owner" msgid="8856631322440187071">"ඔබගේ පරිපාලක විසින් යාවත්කාලීන කරන ලදී"</string>
     <string name="package_deleted_device_owner" msgid="7650577387493101353">"ඔබගේ පරිපාලක විසින් මකන ලද"</string>
     <string name="battery_saver_description" msgid="1960431123816253034">"බැටරි ආයු කාලය වැඩිදියුණු කිරීමට උදවු කිරීමට, බැටරි සුරැකුම ඔබේ උපාංගයේ ක්‍රියාකාරීත්වය අඩුකරන අතර කම්පනය, පිහිටීම් සේවා, සහ බොහෝමයක් පසුබිම් දත්ත සීමා කරයි. ඔබ ඒවා විවෘත නොකරන්නේ නම් මිස ඊමේල්, පණිවිඩකරණය, සහ සමමුහුර්ත කිරීම මත රඳා පවතින වෙනත් යෙදුම් යාවත්කාලීන නොවිය හැකිය.\n\nඔබේ උපාංගය ආරෝපණය වන විට බැටරි සුරැකුම ස්වයංක්‍රියව අක්‍රිය වේ."</string>
-    <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="4367877408072000848">
-      <item quantity="one">මිනිත්තු %1$d ක් සඳහා (<xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g> තෙක්)</item>
-      <item quantity="other">මිනිත්තු %1$d ක් සඳහා (<xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g> තෙක්)</item>
-    </plurals>
-    <plurals name="zen_mode_duration_minutes_summary_short" formatted="false" msgid="6830154222366042597">
-      <item quantity="one">විනාඩි %1$d ක් සඳහා (<xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g> තෙක්)</item>
-      <item quantity="other">විනාඩි %1$d ක් සඳහා (<xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g> තෙක්)</item>
-    </plurals>
-    <plurals name="zen_mode_duration_hours_summary" formatted="false" msgid="8152974162096743862">
-      <item quantity="one">පැය %1$d ක් සඳහා (<xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g> තෙක්)</item>
-      <item quantity="other">පැය %1$d ක් සඳහා (<xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g> තෙක්)</item>
-    </plurals>
-    <plurals name="zen_mode_duration_hours_summary_short" formatted="false" msgid="4787552595253082371">
-      <item quantity="one">පැය %1$d ක් සඳහා (<xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g> තෙක්)</item>
-      <item quantity="other">පැය %1$d ක් සඳහා (<xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g> තෙක්)</item>
-    </plurals>
-    <plurals name="zen_mode_duration_minutes" formatted="false" msgid="5127407202506485571">
-      <item quantity="one">මිනිත්තු %d ක් සඳහා</item>
-      <item quantity="other">මිනිත්තු %d ක් සඳහා</item>
-    </plurals>
-    <plurals name="zen_mode_duration_minutes_short" formatted="false" msgid="2199350154433426128">
-      <item quantity="one">විනාඩි %d ක් සඳහා</item>
-      <item quantity="other">විනාඩි %d ක් සඳහා</item>
-    </plurals>
-    <plurals name="zen_mode_duration_hours" formatted="false" msgid="3938821308277433854">
-      <item quantity="one">පැය %d ක් සඳහා</item>
-      <item quantity="other">පැය %d ක් සඳහා</item>
-    </plurals>
-    <plurals name="zen_mode_duration_hours_short" formatted="false" msgid="6748277774662434217">
-      <item quantity="one">පැය %d ක් සඳහා</item>
-      <item quantity="other">පැය %d ක් සඳහා</item>
-    </plurals>
+  <plurals name="zen_mode_duration_minutes_summary">
+    <item quantity="one" msgid="3177683545388923234">"මිනිත්තු එකක් සඳහා (<xliff:g id="FORMATTEDTIME">%2$s</xliff:g> තෙක්)"</item>
+    <item quantity="other" msgid="2787867221129368935">"මිනිත්තු %1$d සඳහා (<xliff:g id="FORMATTEDTIME">%2$s</xliff:g> තෙක්)"</item>
+  </plurals>
+  <plurals name="zen_mode_duration_minutes_summary_short">
+    <item quantity="one" msgid="4097046271119330874">"මිනි 1ක් සඳහා (<xliff:g id="FORMATTEDTIME">%2$s</xliff:g> වනතෙක්)"</item>
+    <item quantity="other" msgid="9128259640307810602">"මිනි %1$dක් සඳහා (<xliff:g id="FORMATTEDTIME">%2$s</xliff:g> වනතෙක්)"</item>
+  </plurals>
+  <plurals name="zen_mode_duration_hours_summary">
+    <item quantity="one" msgid="597194865053253679">"පැය එකක් සඳහා (<xliff:g id="FORMATTEDTIME">%2$s</xliff:g> තෙක්)"</item>
+    <item quantity="other" msgid="2827214920627669898">"පැය %1$d සඳහා (<xliff:g id="FORMATTEDTIME">%2$s</xliff:g> තෙක්)"</item>
+  </plurals>
+  <plurals name="zen_mode_duration_hours_summary_short">
+    <item quantity="one" msgid="342658185856495801">"පැය 1ක් සඳහා (<xliff:g id="FORMATTEDTIME">%2$s</xliff:g> වනතෙක්)"</item>
+    <item quantity="other" msgid="6842148190293675591">"පැය %1$dක් සඳහා (<xliff:g id="FORMATTEDTIME">%2$s</xliff:g> වනතෙක්)"</item>
+  </plurals>
+  <plurals name="zen_mode_duration_minutes">
+    <item quantity="one" msgid="9040808414992812341">"විනාඩි එකක් සඳහා"</item>
+    <item quantity="other" msgid="6924190729213550991">"විනාඩි %d සඳහා"</item>
+  </plurals>
+  <plurals name="zen_mode_duration_minutes_short">
+    <item quantity="one" msgid="4125166172281866385">"මිනි 1ක් සඳහා"</item>
+    <item quantity="other" msgid="5131202943429775644">"මිනි %dක් සඳහා"</item>
+  </plurals>
+  <plurals name="zen_mode_duration_hours">
+    <item quantity="one" msgid="3480040795582254384">"පැයක් සඳහා"</item>
+    <item quantity="other" msgid="5408537517529822157">"පැය %d ක් සඳහා"</item>
+  </plurals>
+  <plurals name="zen_mode_duration_hours_short">
+    <item quantity="one" msgid="6798191385685158694">"පැය 1ක් සඳහා"</item>
+    <item quantity="other" msgid="8464879049844138499">"පැය %dක් සඳහා"</item>
+  </plurals>
     <string name="zen_mode_until" msgid="7336308492289875088">"<xliff:g id="FORMATTEDTIME">%1$s</xliff:g> තෙක්"</string>
+    <string name="zen_mode_alarm" msgid="9128205721301330797">"<xliff:g id="FORMATTEDTIME">%1$s</xliff:g> තෙක් (ඊළඟ එලාමය)"</string>
     <string name="zen_mode_forever" msgid="7420011936770086993">"ඔබ මෙය අක්‍රිය කරන තුරු"</string>
     <string name="zen_mode_forever_dnd" msgid="3792132696572189081">"බාධා නොකරන්න ඔබ අක්‍රිය කරන තුරු"</string>
     <string name="zen_mode_rule_name_combination" msgid="191109939968076477">"<xliff:g id="FIRST">%1$s</xliff:g> / <xliff:g id="REST">%2$s</xliff:g>"</string>
@@ -1527,8 +1515,8 @@
     <string name="usb_midi_peripheral_product_name" msgid="4971827859165280403">"USB පර්යන්ත තොට"</string>
     <string name="floating_toolbar_open_overflow_description" msgid="4797287862999444631">"තවත් විකල්ප"</string>
     <string name="floating_toolbar_close_overflow_description" msgid="559796923090723804">"ඉතිරී යාම වසන්න"</string>
-    <plurals name="selected_count" formatted="false" msgid="7187339492915744615">
-      <item quantity="one"><xliff:g id="COUNT_1">%1$d</xliff:g> ක් තෝරන ලදි</item>
-      <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> ක් තෝරන ලදි</item>
-    </plurals>
+  <plurals name="selected_count">
+    <item quantity="one" msgid="8857281055159991036">"<xliff:g id="COUNT">%1$d</xliff:g>ක් තෝරන ලදී"</item>
+    <item quantity="other" msgid="2608606845335294849">"<xliff:g id="COUNT">%1$d</xliff:g>ක් තෝරන ලදී"</item>
+  </plurals>
 </resources>
