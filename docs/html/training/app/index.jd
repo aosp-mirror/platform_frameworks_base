@@ -1,4 +1,110 @@
+fullpage=true
 page.title=Android Performance Patterns
-page.tags=app
-
+page.viewport_width=970
+meta.tags="android, performance", "app",
+page.tags="app"
+section.landing=true
+header.hide=1
+carousel=1
+tabbedList=1
+excludeFromSuggestions=true
 @jd:body
+
+
+<section class="dac-expand dac-hero dac-section-light">
+  <div class="wrap">
+    <div class="cols dac-hero-content">
+      <div class="col-1of2 col-push-1of2 dac-hero-figure">
+        <img class="dac-hero-image" src="{@docRoot}images/training/app/madscientist.png" />
+      </div>
+      <div class="col-1of2 col-pull-1of2">
+        <h1 class="dac-hero-title">Android Performance Patterns</h1>
+        <p class="dac-hero-description">
+        Everything you need to know about improving your app’s performance. </p>
+        </p>
+        <a class="dac-hero-cta" href="{@docRoot}training/app/approach.html">
+          <span class="dac-sprite dac-auto-chevron"></span>
+          Test you app's performance
+        </a><br>
+        <a class="dac-hero-cta" href="{@docRoot}training/app/rendering/index.html">
+          <span class="dac-sprite dac-auto-chevron"></span>
+          Improve rendering performance
+        </a><br>
+        <a class="dac-hero-cta" href="{@docRoot}training/app/battery/index.html">
+          <span class="dac-sprite dac-auto-chevron"></span>
+          Improve battery utilization
+        </a><br>
+      </div>
+    </div>
+</section>
+
+
+<section class="dac-section dac-section-light">
+  <div class="wrap">
+
+
+      <p>This series of lessons teaches you how to improve the performance of your
+      Android applications using a workflow of gathering data, analyzing the data, and
+      taking action based on your insights.</p><br>
+
+
+      <h2>Performance actions</h2>
+
+      <dl>
+        <dt>
+          <strong><a href="{@docRoot}training/app/approach.html">
+              Test Your App's Performance</a></strong>
+        </dt>
+        <dd>
+          Learn how to test your app for performance problems. No tools required.<br>
+          Then find out how you can methodically address performance issues
+          following the Performance Improvement Lifecycle.
+        </dd>
+
+        <dt>
+          <strong><a href="{@docRoot}training/app/rendering/index.html">
+            Optimizing Rendering Performance</a></strong>
+        </dt>
+        <dd>
+          Learn how to improve the performance of everything related to drawing
+          and animating the screen. </a></strong>
+        </dd>
+         <dt>
+          <strong><a href="{@docRoot}training/app/battery/index.html">
+            Optimizing Battery Utilization</a></strong>
+        </dt>
+        <dd>
+          Learn how to efficiently use limited battery resources for
+          networking requests. </a></strong>
+        </dd>
+      </dl><br>
+
+      <h2>Resources</h2>
+
+      <dl>
+        <dt>
+          <strong><a href="https://plus.sandbox.google.com/communities/116342551728637785407">
+            Android Performance G+ Community</a></strong>
+          </dt>
+          <dd>
+            Join our G+ community for more information, tips and support. It's all about
+            Performance!
+            <br><b>#perfmatters</b>.
+          </dd>
+          <dt>
+          <strong><a href="https://www.udacity.com/course/android-performance--ud825">
+            Android Performance Course on Udacity</a></strong>
+          </dt>
+          <dd>
+            Dive deeply into Android Performance with this from-the-ground-up course.
+          </dd>
+          <dt>
+          <strong><a href="https://www.youtube.com/playlist?list=PLOU2XLYxmsIKEOXh5TwZEv89aofHzNCiu">Android
+          Performance Patterns on YouTube</a></strong>
+          </dt>
+          <dd>
+            Watch the whole series of Android Performance Patterns videos.
+          </dd>
+        </dl>
+       <br>
+     </div></section>
