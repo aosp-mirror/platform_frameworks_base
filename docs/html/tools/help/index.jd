@@ -134,6 +134,10 @@ files after they have been signed.</dd>
 WYSIWYG editor. It also previews stretched versions of the image, and highlights the area in which
 content is allowed.</dd>
 
+<dt><a href="{@docRoot}tools/help/vector-asset-studio.html">Vector Asset Studio</a></dt>
+    <dd>Helps you add material icons and import Scalable Vector Graphic (SVG) files into your
+    Android Studio project as a drawable resource.</dd>
+
   <dt><a href="{@docRoot}tools/help/etc1tool.html">etc1tool</a></dt>
     <dd>A command line utility that lets you encode PNG images to the ETC1 compression standard and
     decode ETC1 compressed images back to PNG.</dd>
