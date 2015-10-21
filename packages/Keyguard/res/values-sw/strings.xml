@@ -31,6 +31,8 @@
     <string name="keyguard_password_wrong_pin_code" msgid="2422225591006134936">"Msimbo wa PIN usio sahihi."</string>
     <string name="keyguard_charged" msgid="3272223906073492454">"Betri imejaa"</string>
     <string name="keyguard_plugged_in" msgid="9087497435553252863">"Inachaji"</string>
+    <string name="keyguard_plugged_in_charging_fast" msgid="6671162730167305479">"Inachaji kwa kasi"</string>
+    <string name="keyguard_plugged_in_charging_slowly" msgid="1964714661071163229">"Inachaji pole pole"</string>
     <string name="keyguard_low_battery" msgid="8143808018719173859">"Unganisha chaja yako."</string>
     <string name="keyguard_instructions_when_pattern_disabled" msgid="1332288268600329841">"Bonyeza Menyu ili kufungua."</string>
     <string name="keyguard_network_locked_message" msgid="9169717779058037168">"Mtandao umefungwa"</string>
@@ -93,15 +95,15 @@
     <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"Umekosea katika kuweka mchoro wako wa kufungua mara <xliff:g id="NUMBER_0">%d</xliff:g>. Baada ya majaribio <xliff:g id="NUMBER_1">%d</xliff:g> bila kufaulu, utaombwa kufungua kompyuta yako ndogo kwa kutumia akaunti yako ya barua pepe.\n\n Jaribu tena baada ya sekunde <xliff:g id="NUMBER_2">%d</xliff:g>."</string>
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"Umekosea kuchora mchoro wako wa kufungua mara <xliff:g id="NUMBER_0">%d</xliff:g>. Baada ya majaribio <xliff:g id="NUMBER_1">%d</xliff:g> yasiyofaulu, utaombwa kufungua simu yako kwa kutumia akaunti ya barua pepe.\n\n Jaribu tena baada ya sekunde <xliff:g id="NUMBER_2">%d</xliff:g>."</string>
     <string name="kg_password_wrong_pin_code_pukked" msgid="30531039455764924">"Msimbo wa PIN ya SIM usiosahihi sasa lazima uwasiliane na mtoa huduma wako ili ufungue kifaa chako."</string>
-    <plurals name="kg_password_wrong_pin_code" formatted="false" msgid="6721575017538162249">
-      <item quantity="other">Msimbo wa PIN ya SIM si sahihi, umebakisha majaribio <xliff:g id="NUMBER_1">%d</xliff:g>.</item>
-      <item quantity="one">Msimbo wa PIN ya SIM si sahihi, umebakisha majaribio <xliff:g id="NUMBER_0">%d</xliff:g> kabla ya kulazimika kuwasiliana na mtoa huduma wako ili afungue kifaa chako.</item>
-    </plurals>
+  <plurals name="kg_password_wrong_pin_code">
+    <item quantity="one" msgid="8134313997799638254">"Msimbo wa PIN ya SIM usio sahihi, umesalia na majaribio <xliff:g id="NUMBER">%d</xliff:g> kabla ulazimike kuwasiliana na mtoa huduma wako ili ufungue kifaa chako."</item>
+    <item quantity="other" msgid="2215723361575359486">"Msimbo wa PIN ya SIM usio sahihi, umesalia na majaribio <xliff:g id="NUMBER">%d</xliff:g>."</item>
+  </plurals>
     <string name="kg_password_wrong_puk_code_dead" msgid="7077536808291316208">"SIM haiwezi kutumika. Wasiliana na mtoa huduma wako."</string>
-    <plurals name="kg_password_wrong_puk_code" formatted="false" msgid="7576227366999858780">
-      <item quantity="other">Msimbo wa PUK ya SIM si sahihi, umebakisha majaribio <xliff:g id="NUMBER_1">%d</xliff:g> kabla SIM haijafungwa kabisa.</item>
-      <item quantity="one">Msimbo wa PUK ya  SIM si sahihi, umebakisha majaribio <xliff:g id="NUMBER_0">%d</xliff:g> kabla SIM haijfungwa kabisa.</item>
-    </plurals>
+  <plurals name="kg_password_wrong_puk_code">
+    <item quantity="one" msgid="3256893607561060649">"Msimbo wa PUK ya SIM usio sahihi, umesalia na majaribio <xliff:g id="NUMBER">%d</xliff:g> kabla ya SIM kuacha kutumika kabisa."</item>
+    <item quantity="other" msgid="5477305226026342036">"Msimbo wa PUK ya SIM usio sahihi, umesalia na majaribio <xliff:g id="NUMBER">%d</xliff:g> kabla ya SIM kuacha kutumika kabisa."</item>
+  </plurals>
     <string name="kg_password_pin_failed" msgid="6268288093558031564">"Utendakazi wa PIN ya SIM umeshindwa!"</string>
     <string name="kg_password_puk_failed" msgid="2838824369502455984">"Utendakazi wa PUK ya SIM umeshindwa!"</string>
     <string name="kg_pin_accepted" msgid="1448241673570020097">"Msimbo Umekubaliwa!"</string>
@@ -111,20 +113,23 @@
     <string name="kg_prompt_reason_restart_pattern" msgid="489430505491862444">"Mchoro unahitajika unapoanzisha kifaa upya."</string>
     <string name="kg_prompt_reason_restart_pin" msgid="994878216570694974">"PIN inahitajika unapoanzisha kifaa upya."</string>
     <string name="kg_prompt_reason_restart_password" msgid="2375742919528461664">"Nenosiri linahitajika unapoanzisha kifaa upya."</string>
+    <string name="kg_prompt_reason_timeout_pattern" msgid="8930047492617900785">"Mchoro unatakikana ili kuongeza usalama."</string>
+    <string name="kg_prompt_reason_timeout_pin" msgid="7470468607947726377">"PIN inatakikana ili kuongeza usalama."</string>
+    <string name="kg_prompt_reason_timeout_password" msgid="1177412542773936957">"Nenosiri linahitajika ili kuongeza usalama."</string>
     <string name="kg_prompt_reason_switch_profiles_pattern" msgid="3802056699323773969">"Mchoro unahitajika unapobadili wasifu."</string>
     <string name="kg_prompt_reason_switch_profiles_pin" msgid="8108020184731052246">"PIN inahitajika unapobadili wasifu."</string>
     <string name="kg_prompt_reason_switch_profiles_password" msgid="6755997057852042672">"Nenosiri linahitajika unapobadili wasifu."</string>
-    <plurals name="kg_prompt_reason_time_pattern" formatted="false" msgid="2697444392228541853">
-      <item quantity="other">Kifaa hakijafunguliwa kwa saa <xliff:g id="NUMBER_1">%d</xliff:g>. Thibitisha mchoro.</item>
-      <item quantity="one">Kifaa hakijafunguliwa kwa saa <xliff:g id="NUMBER_0">%d</xliff:g>. Thibitisha mchoro.</item>
-    </plurals>
-    <plurals name="kg_prompt_reason_time_pin" formatted="false" msgid="2118758475374354849">
-      <item quantity="other">Kifaa hakijafunguliwa kwa saa <xliff:g id="NUMBER_1">%d</xliff:g>. Thibitisha PIN.</item>
-      <item quantity="one">Kifaa hakijafunguliwa kwa saa <xliff:g id="NUMBER_0">%d</xliff:g>. Thibitisha PIN.</item>
-    </plurals>
-    <plurals name="kg_prompt_reason_time_password" formatted="false" msgid="5132693663364913675">
-      <item quantity="other">Kifaa hakijafunguliwa kwa saa <xliff:g id="NUMBER_1">%d</xliff:g>. Thibitisha nenosiri.</item>
-      <item quantity="one">Kifaa hakijafunguliwa kwa saa <xliff:g id="NUMBER_0">%d</xliff:g>. Thibitisha nenosiri.</item>
-    </plurals>
+  <plurals name="kg_prompt_reason_time_pattern">
+    <item quantity="one" msgid="5598462918459516566">"Kifaa hakijafunguliwa kwa saa <xliff:g id="NUMBER">%d</xliff:g>. Thibitisha mchoro."</item>
+    <item quantity="other" msgid="224518697489572649">"Kifaa hakijafunguliwa kwa saa <xliff:g id="NUMBER">%d</xliff:g>. Thibitisha mchoro."</item>
+  </plurals>
+  <plurals name="kg_prompt_reason_time_pin">
+    <item quantity="one" msgid="3073579168584205350">"Kifaa hakijafunguliwa kwa saa <xliff:g id="NUMBER">%d</xliff:g>. Thibitisha PIN."</item>
+    <item quantity="other" msgid="3282423442327824649">"Kifaa hakijafunguliwa kwa saa <xliff:g id="NUMBER">%d</xliff:g>. Thibitisha PIN."</item>
+  </plurals>
+  <plurals name="kg_prompt_reason_time_password">
+    <item quantity="one" msgid="9062782924671938516">"Kifaa hakijafunguliwa kwa saa <xliff:g id="NUMBER">%d</xliff:g>. Thibitisha nenosiri."</item>
+    <item quantity="other" msgid="1839722302513719629">"Kifaa hakijafunguliwa kwa saa <xliff:g id="NUMBER">%d</xliff:g>. Thibitisha nenosiri."</item>
+  </plurals>
     <string name="fingerprint_not_recognized" msgid="2690661881608146617">"Haitambuliwi"</string>
 </resources>

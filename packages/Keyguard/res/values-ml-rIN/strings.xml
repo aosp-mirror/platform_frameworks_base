@@ -31,6 +31,8 @@
     <string name="keyguard_password_wrong_pin_code" msgid="2422225591006134936">"പിൻ കോഡ് തെറ്റാണ്."</string>
     <string name="keyguard_charged" msgid="3272223906073492454">"ചാർജ്ജുചെയ്‌തു"</string>
     <string name="keyguard_plugged_in" msgid="9087497435553252863">"ചാർജ്ജുചെയ്യുന്നു"</string>
+    <string name="keyguard_plugged_in_charging_fast" msgid="6671162730167305479">"വേഗത്തിൽ ചാർജുചെയ്യുന്നു"</string>
+    <string name="keyguard_plugged_in_charging_slowly" msgid="1964714661071163229">"പതുക്കെ ചാർജുചെയ്യുന്നു"</string>
     <string name="keyguard_low_battery" msgid="8143808018719173859">"നിങ്ങളുടെ ചാർജ്ജർ കണക്റ്റുചെയ്യുക."</string>
     <string name="keyguard_instructions_when_pattern_disabled" msgid="1332288268600329841">"അൺലോക്കുചെയ്യാൻ മെനു അമർത്തുക"</string>
     <string name="keyguard_network_locked_message" msgid="9169717779058037168">"നെറ്റ്‌വർക്ക് ലോക്കുചെയ്‌തു"</string>
@@ -93,15 +95,15 @@
     <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"നിങ്ങളുടെ അൺലോക്ക് പാറ്റേൺ <xliff:g id="NUMBER_0">%d</xliff:g> തവണ തെറ്റായി വരച്ചു. <xliff:g id="NUMBER_1">%d</xliff:g> ശ്രമങ്ങൾ കൂടി വിജയിച്ചില്ലെങ്കിൽ, ഒരു ഇമെയിൽ അക്കൗണ്ട് ഉപയോഗിച്ച് ടാബ്‌ലെറ്റ് അൺലോക്ക് ചെയ്യാൻ നിങ്ങളോട് ആവശ്യപ്പെടും.\n\n <xliff:g id="NUMBER_2">%d</xliff:g> സെക്കൻഡിനുള്ള വീണ്ടും ശ്രമിക്കുക."</string>
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"നിങ്ങളുടെ അൺലോക്ക് പാറ്റേൺ <xliff:g id="NUMBER_0">%d</xliff:g> തവണ തെറ്റായി വരച്ചു. <xliff:g id="NUMBER_1">%d</xliff:g> ശ്രമങ്ങൾ കൂടി വിജയിച്ചില്ലെങ്കിൽ, ഒരു ഇമെയിൽ അക്കൗണ്ട് ഉപയോഗിച്ച് ഫോൺ അൺലോക്ക് ചെയ്യാൻ നിങ്ങളോട് ആവശ്യപ്പെടും.\n\n <xliff:g id="NUMBER_2">%d</xliff:g> സെക്കൻഡിനുള്ള വീണ്ടും ശ്രമിക്കുക."</string>
     <string name="kg_password_wrong_pin_code_pukked" msgid="30531039455764924">"സിം പിൻ കോഡ് തെറ്റാണ്, നിങ്ങളുടെ ഉപകരണം അൺലോക്കുചെയ്യാൻ ഇപ്പോൾ നിങ്ങളുടെ കാരിയറുമായി ബന്ധപ്പെടണം."</string>
-    <plurals name="kg_password_wrong_pin_code" formatted="false" msgid="6721575017538162249">
-      <item quantity="other">SIM PIN കോഡ് തെറ്റാണ്, നിങ്ങൾക്ക് <xliff:g id="NUMBER_1">%d</xliff:g> ശ്രമങ്ങൾ കൂടി ശേഷിക്കുന്നു.</item>
-      <item quantity="one">SIM PIN കോഡ് തെറ്റാണ്, നിങ്ങളുടെ ഉപകരണം അൺലോക്കുചെയ്യാൻ കാരിയറെ ബന്ധപ്പെടേണ്ടതിന് മുമ്പായി <xliff:g id="NUMBER_0">%d</xliff:g> ശ്രമം കൂടി ശേഷിക്കുന്നു.</item>
-    </plurals>
+  <plurals name="kg_password_wrong_pin_code">
+    <item quantity="one" msgid="8134313997799638254">"തെറ്റായ സിം പിൻ കോഡ്, നിങ്ങളുടെ ഉപകരണം അൺലോക്കുചെയ്യാൻ സേവനദാതാവുമായി ബന്ധപ്പെടുന്നതിന് മുമ്പായി നിങ്ങൾക്ക് <xliff:g id="NUMBER">%d</xliff:g> ശ്രമം കൂടി ബാക്കിയുണ്ട്."</item>
+    <item quantity="other" msgid="2215723361575359486">"തെറ്റായ സിം പിൻ കോഡ്, നിങ്ങൾക്ക് <xliff:g id="NUMBER">%d</xliff:g> ശ്രമങ്ങൾ കൂടി ബാക്കിയുണ്ട്."</item>
+  </plurals>
     <string name="kg_password_wrong_puk_code_dead" msgid="7077536808291316208">"സിം ഉപയോഗശൂന്യമാണ്. നിങ്ങളുടെ കാരിയറെ ബന്ധപ്പെടുക."</string>
-    <plurals name="kg_password_wrong_puk_code" formatted="false" msgid="7576227366999858780">
-      <item quantity="other">SIM PUK കോഡ് തെറ്റാണ്, SIM ശാശ്വതമായി ഉപയോഗശൂന്യമാകുന്നതിന് മുമ്പായി നിങ്ങൾക്ക് <xliff:g id="NUMBER_1">%d</xliff:g> ശ്രമങ്ങൾ കൂടി ശേഷിക്കുന്നു.</item>
-      <item quantity="one">SIM PUK കോഡ് തെറ്റാണ്, SIM ശാശ്വതമായി ഉപയോഗശൂന്യമാകുന്നതിന് മുമ്പായി നിങ്ങൾക്ക് <xliff:g id="NUMBER_0">%d</xliff:g> ശ്രമം കൂടി ശേഷിക്കുന്നു.</item>
-    </plurals>
+  <plurals name="kg_password_wrong_puk_code">
+    <item quantity="one" msgid="3256893607561060649">"തെറ്റായ സിം PUK കോഡ്, സിം ശാശ്വതമായി ഉപയോഗശൂന്യമാകുന്നതിന് മുമ്പായി നിങ്ങൾക്ക് <xliff:g id="NUMBER">%d</xliff:g> ശ്രമം കൂടി ബാക്കിയുണ്ട്."</item>
+    <item quantity="other" msgid="5477305226026342036">"തെറ്റായ സിം PUK കോഡ്, സിം ശാശ്വതമായി ഉപയോഗശൂന്യമാകുന്നതിന് മുമ്പായി നിങ്ങൾക്ക് <xliff:g id="NUMBER">%d</xliff:g> ശ്രമങ്ങൾ കൂടി ബാക്കിയുണ്ട്."</item>
+  </plurals>
     <string name="kg_password_pin_failed" msgid="6268288093558031564">"സിം പിൻ പ്രവർത്തനം പരാജയപ്പെട്ടു!"</string>
     <string name="kg_password_puk_failed" msgid="2838824369502455984">"സിം PUK പ്രവർത്തനം പരാജയപ്പെട്ടു!"</string>
     <string name="kg_pin_accepted" msgid="1448241673570020097">"കോഡ് അംഗികരിച്ചു!"</string>
@@ -111,20 +113,23 @@
     <string name="kg_prompt_reason_restart_pattern" msgid="489430505491862444">"ഉപകരണം പുനഃരാരംഭിക്കുമ്പോൾ പാറ്റേൺ ആവശ്യമാണ്."</string>
     <string name="kg_prompt_reason_restart_pin" msgid="994878216570694974">"ഉപകരണം പുനഃരാരംഭിക്കുമ്പോൾ PIN ആവശ്യമാണ്."</string>
     <string name="kg_prompt_reason_restart_password" msgid="2375742919528461664">"ഉപകരണം പുനഃരാരംഭിക്കുമ്പോൾ പാസ്‌വേഡ് ആവശ്യമാണ്."</string>
+    <string name="kg_prompt_reason_timeout_pattern" msgid="8930047492617900785">"അധിക സുരക്ഷയ്ക്ക് പാറ്റേൺ ആവശ്യമാണ്."</string>
+    <string name="kg_prompt_reason_timeout_pin" msgid="7470468607947726377">"അധിക സുരക്ഷയ്ക്ക് PIN ആവശ്യമാണ്."</string>
+    <string name="kg_prompt_reason_timeout_password" msgid="1177412542773936957">"അധിക സുരക്ഷയ്ക്ക് പാസ്‌വേഡ് ആവശ്യമാണ്."</string>
     <string name="kg_prompt_reason_switch_profiles_pattern" msgid="3802056699323773969">"പ്രൊഫൈലുകൾ തമ്മിൽ മാറുമ്പോൾ പാറ്റേൺ ആവശ്യമാണ്."</string>
     <string name="kg_prompt_reason_switch_profiles_pin" msgid="8108020184731052246">"പ്രൊഫൈലുകൾ തമ്മിൽ മാറുമ്പോൾ PIN ആവശ്യമാണ്."</string>
     <string name="kg_prompt_reason_switch_profiles_password" msgid="6755997057852042672">"പ്രൊഫൈലുകൾ തമ്മിൽ മാറുമ്പോൾ പാസ്‌വേഡ് ആവശ്യമാണ്."</string>
-    <plurals name="kg_prompt_reason_time_pattern" formatted="false" msgid="2697444392228541853">
-      <item quantity="other">ഉപകരണം <xliff:g id="NUMBER_1">%d</xliff:g> മണിക്കൂറായി അൺലോക്ക് ചെയ്തിട്ടില്ല. പാറ്റേൺ സ്ഥിരീകരിക്കുക.</item>
-      <item quantity="one">ഉപകരണം <xliff:g id="NUMBER_0">%d</xliff:g> മണിക്കൂറായി അൺലോക്ക് ചെയ്തിട്ടില്ല. പാറ്റേൺ സ്ഥിരീകരിക്കുക.</item>
-    </plurals>
-    <plurals name="kg_prompt_reason_time_pin" formatted="false" msgid="2118758475374354849">
-      <item quantity="other">ഉപകരണം <xliff:g id="NUMBER_1">%d</xliff:g> മണിക്കൂറായി അൺലോക്ക് ചെയ്തിട്ടില്ല. PIN സ്ഥിരീകരിക്കുക.</item>
-      <item quantity="one">ഉപകരണം <xliff:g id="NUMBER_0">%d</xliff:g> മണിക്കൂറായി അൺലോക്ക് ചെയ്തിട്ടില്ല. PIN സ്ഥിരീകരിക്കുക.</item>
-    </plurals>
-    <plurals name="kg_prompt_reason_time_password" formatted="false" msgid="5132693663364913675">
-      <item quantity="other">ഉപകരണം <xliff:g id="NUMBER_1">%d</xliff:g> മണിക്കൂറായി അൺലോക്ക് ചെയ്തിട്ടില്ല. പാസ്‌വേഡ് സ്ഥിരീകരിക്കുക.</item>
-      <item quantity="one">ഉപകരണം <xliff:g id="NUMBER_0">%d</xliff:g> മണിക്കൂറായി അൺലോക്ക് ചെയ്തിട്ടില്ല. പാസ്‌വേഡ് സ്ഥിരീകരിക്കുക.</item>
-    </plurals>
+  <plurals name="kg_prompt_reason_time_pattern">
+    <item quantity="one" msgid="5598462918459516566">"ഉപകരണം <xliff:g id="NUMBER">%d</xliff:g> മണിക്കൂറായി അൺലോക്ക് ചെയ്തിട്ടില്ല. പാറ്റേൺ സ്ഥിരീകരിക്കുക."</item>
+    <item quantity="other" msgid="224518697489572649">"ഉപകരണം <xliff:g id="NUMBER">%d</xliff:g> മണിക്കൂറായി അൺലോക്ക് ചെയ്തിട്ടില്ല. പാറ്റേൺ സ്ഥിരീകരിക്കുക."</item>
+  </plurals>
+  <plurals name="kg_prompt_reason_time_pin">
+    <item quantity="one" msgid="3073579168584205350">"ഉപകരണം <xliff:g id="NUMBER">%d</xliff:g> മണിക്കൂറായി അൺലോക്ക് ചെയ്തിട്ടില്ല. PIN സ്ഥിരീകരിക്കുക."</item>
+    <item quantity="other" msgid="3282423442327824649">"ഉപകരണം <xliff:g id="NUMBER">%d</xliff:g> മണിക്കൂറായി അൺലോക്ക് ചെയ്തിട്ടില്ല. PIN സ്ഥിരീകരിക്കുക."</item>
+  </plurals>
+  <plurals name="kg_prompt_reason_time_password">
+    <item quantity="one" msgid="9062782924671938516">"ഉപകരണം <xliff:g id="NUMBER">%d</xliff:g> മണിക്കൂറായി അൺലോക്ക് ചെയ്തിട്ടില്ല. പാസ്‌വേഡ് സ്ഥിരീകരിക്കുക."</item>
+    <item quantity="other" msgid="1839722302513719629">"ഉപകരണം <xliff:g id="NUMBER">%d</xliff:g> മണിക്കൂറായി അൺലോക്ക് ചെയ്തിട്ടില്ല. പാസ്‌വേഡ് സ്ഥിരീകരിക്കുക."</item>
+  </plurals>
     <string name="fingerprint_not_recognized" msgid="2690661881608146617">"തിരിച്ചറിഞ്ഞില്ല"</string>
 </resources>

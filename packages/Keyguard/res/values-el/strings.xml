@@ -28,9 +28,11 @@
     <string name="keyguard_password_entry_touch_hint" msgid="7858547464982981384"><font size="17">"Αγγίξτε για εισαγ. κωδ. πρόσβ."</font></string>
     <string name="keyguard_password_enter_password_code" msgid="1054721668279049780">"Πληκτρολογήστε τον κωδικό πρόσβασης για ξεκλείδωμα"</string>
     <string name="keyguard_password_enter_pin_password_code" msgid="6391755146112503443">"Πληκτρολογήστε τον αριθμό PIN για ξεκλείδωμα"</string>
-    <string name="keyguard_password_wrong_pin_code" msgid="2422225591006134936">"Εσφαλμένος κωδικός PIN."</string>
+    <string name="keyguard_password_wrong_pin_code" msgid="2422225591006134936">"Λανθασμένος κωδικός PIN."</string>
     <string name="keyguard_charged" msgid="3272223906073492454">"Φορτίστηκε"</string>
     <string name="keyguard_plugged_in" msgid="9087497435553252863">"Φόρτιση"</string>
+    <string name="keyguard_plugged_in_charging_fast" msgid="6671162730167305479">"Ταχύτατη φόρτιση"</string>
+    <string name="keyguard_plugged_in_charging_slowly" msgid="1964714661071163229">"Αργή φόρτιση"</string>
     <string name="keyguard_low_battery" msgid="8143808018719173859">"Συνδέστε τον φορτιστή."</string>
     <string name="keyguard_instructions_when_pattern_disabled" msgid="1332288268600329841">"Πατήστε \"Μενού\" για ξεκλείδωμα."</string>
     <string name="keyguard_network_locked_message" msgid="9169717779058037168">"Το δίκτυο κλειδώθηκε"</string>
@@ -57,8 +59,8 @@
     <string name="keyboardview_keycode_enter" msgid="2985864015076059467">"Enter"</string>
     <string name="kg_forgot_pattern_button_text" msgid="8852021467868220608">"Ξεχάσατε το μοτίβο"</string>
     <string name="kg_wrong_pattern" msgid="1850806070801358830">"Λάθος μοτίβο"</string>
-    <string name="kg_wrong_password" msgid="2333281762128113157">"Εσφαλμένος κωδικός πρόσβασης"</string>
-    <string name="kg_wrong_pin" msgid="1131306510833563801">"Εσφαλμένος κωδικός PIN"</string>
+    <string name="kg_wrong_password" msgid="2333281762128113157">"Λανθασμένος κωδικός πρόσβασης"</string>
+    <string name="kg_wrong_pin" msgid="1131306510833563801">"Λανθασμένος κωδικός PIN"</string>
     <string name="kg_too_many_failed_attempts_countdown" msgid="6358110221603297548">"Δοκιμάστε ξανά σε <xliff:g id="NUMBER">%d</xliff:g> δευτερόλεπτα."</string>
     <string name="kg_pattern_instructions" msgid="398978611683075868">"Σχεδιάστε το μοτίβο σας"</string>
     <string name="kg_sim_pin_instructions" msgid="2319508550934557331">"Εισαγωγή PIN SIM"</string>
@@ -92,16 +94,16 @@
     <string name="kg_failed_attempts_now_erasing_profile" product="default" msgid="4951507352869831265">"Δοκιμάσατε να ξεκλειδώσετε το τηλέφωνο <xliff:g id="NUMBER">%d</xliff:g> φορές χωρίς επιτυχία. Το προφίλ εργασίας θα καταργηθεί, και έτσι θα διαγραφούν όλα τα δεδομένα προφίλ."</string>
     <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"Σχεδιάσατε το μοτίβο ξεκλειδώματος εσφαλμένα <xliff:g id="NUMBER_0">%d</xliff:g> φορές. Μετά από <xliff:g id="NUMBER_1">%d</xliff:g> ανεπιτυχείς προσπάθειες ακόμη, θα σας ζητηθεί να ξεκλειδώσετε το tablet σας με τη χρήση ενός λογαριασμού ηλεκτρονικού ταχυδρομείου.\n\n Δοκιμάστε να συνδεθείτε ξανά σε <xliff:g id="NUMBER_2">%d</xliff:g> δευτερόλεπτα."</string>
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"Σχεδιάσατε το μοτίβο ξεκλειδώματος εσφαλμένα <xliff:g id="NUMBER_0">%d</xliff:g> φορές. Μετά από <xliff:g id="NUMBER_1">%d</xliff:g> ανεπιτυχείς προσπάθειες ακόμη, θα σας ζητηθεί να ξεκλειδώσετε το τηλέφωνό σας με τη χρήση ενός λογαριασμού ηλεκτρονικού ταχυδρομείου.\n\n Δοκιμάστε ξανά σε <xliff:g id="NUMBER_2">%d</xliff:g> δευτερόλεπτα."</string>
-    <string name="kg_password_wrong_pin_code_pukked" msgid="30531039455764924">"Εσφαλμένος κωδικός PIN κάρτας SIM. Θα πρέπει να επικοινωνήσετε με τον πάροχο κινητής τηλεφωνίας σας για να ξεκλειδώσετε τη συσκευή σας."</string>
-    <plurals name="kg_password_wrong_pin_code" formatted="false" msgid="6721575017538162249">
-      <item quantity="other">Εσφαλμένος κωδικός PIN κάρτας SIM. Απομένουν άλλες <xliff:g id="NUMBER_1">%d</xliff:g> προσπάθειες. </item>
-      <item quantity="one">Εσφαλμένος κωδικός PIN κάρτας SIM. Απομένει άλλη <xliff:g id="NUMBER_0">%d</xliff:g> προσπάθεια. Στη συνέχεια, θα πρέπει να επικοινωνήσετε με τον πάροχο κινητής τηλεφωνίας σας για να ξεκλειδώσετε τη συσκευή σας.</item>
-    </plurals>
+    <string name="kg_password_wrong_pin_code_pukked" msgid="30531039455764924">"Λανθασμένος κωδικός PIN κάρτας SIM. Θα πρέπει να επικοινωνήσετε με τον πάροχο κινητής τηλεφωνίας σας για να ξεκλειδώσετε τη συσκευή σας."</string>
+  <plurals name="kg_password_wrong_pin_code">
+    <item quantity="one" msgid="8134313997799638254">"Λανθασμένος κωδικός PIN κάρτας SIM. Απομένει άλλη <xliff:g id="NUMBER">%d</xliff:g> προσπάθεια. Στη συνέχεια, θα πρέπει να επικοινωνήσετε με τον πάροχο κινητής τηλεφωνίας σας για να ξεκλειδώσετε τη συσκευή σας."</item>
+    <item quantity="other" msgid="2215723361575359486">"Λανθασμένος κωδικός PIN κάρτας SIM. Απομένουν <xliff:g id="NUMBER">%d</xliff:g> προσπάθειες."</item>
+  </plurals>
     <string name="kg_password_wrong_puk_code_dead" msgid="7077536808291316208">"Η κάρτα SIM δεν μπορεί να χρησιμοποιηθεί. Επικοινωνήστε με τον πάροχο κινητής τηλεφωνίας σας."</string>
-    <plurals name="kg_password_wrong_puk_code" formatted="false" msgid="7576227366999858780">
-      <item quantity="other">Εσφαλμένος κωδικός PUK κάρτας SIM. Απομένουν άλλες <xliff:g id="NUMBER_1">%d</xliff:g> προσπάθειες προτού να μην είναι πλέον δυνατή η χρήση της κάρτας SIM.</item>
-      <item quantity="one">Εσφαλμένος κωδικός PUK κάρτας SIM. Απομένει άλλη <xliff:g id="NUMBER_0">%d</xliff:g> προσπάθεια προτού να μην είναι πλέον δυνατή η χρήση της κάρτας SIM.</item>
-    </plurals>
+  <plurals name="kg_password_wrong_puk_code">
+    <item quantity="one" msgid="3256893607561060649">"Λανθασμένος κωδικός PUK κάρτας SIM. Απομένει άλλη <xliff:g id="NUMBER">%d</xliff:g> προσπάθεια προτού δεν είναι πλέον δυνατή η χρήση της κάρτας SIM."</item>
+    <item quantity="other" msgid="5477305226026342036">"Λανθασμένος κωδικός PUK κάρτας SIM. Απομένουν <xliff:g id="NUMBER">%d</xliff:g> προσπάθειες προτού δεν είναι πλέον δυνατή η χρήση της κάρτας SIM."</item>
+  </plurals>
     <string name="kg_password_pin_failed" msgid="6268288093558031564">"Αποτυχία λειτουργίας κωδικού PIN κάρτας SIM!"</string>
     <string name="kg_password_puk_failed" msgid="2838824369502455984">"Αποτυχία λειτουργίας κωδικού PUK κάρτας SIM!"</string>
     <string name="kg_pin_accepted" msgid="1448241673570020097">"Αποδεκτός κωδικός!"</string>
@@ -111,20 +113,23 @@
     <string name="kg_prompt_reason_restart_pattern" msgid="489430505491862444">"Απαιτείται μοτίβο κατά την επανεκκίνηση της συσκευής."</string>
     <string name="kg_prompt_reason_restart_pin" msgid="994878216570694974">"Απαιτείται PIN κατά την επανεκκίνηση της συσκευής."</string>
     <string name="kg_prompt_reason_restart_password" msgid="2375742919528461664">"Απαιτείται κωδικός πρόσβασης κατά την επανεκκίνηση της συσκευής."</string>
+    <string name="kg_prompt_reason_timeout_pattern" msgid="8930047492617900785">"Απαιτείται μοτίβο για πρόσθετη ασφάλεια."</string>
+    <string name="kg_prompt_reason_timeout_pin" msgid="7470468607947726377">"Απαιτείται PIN για πρόσθετη ασφάλεια."</string>
+    <string name="kg_prompt_reason_timeout_password" msgid="1177412542773936957">"Απαιτείται κωδικός πρόσβασης για πρόσθετη ασφάλεια."</string>
     <string name="kg_prompt_reason_switch_profiles_pattern" msgid="3802056699323773969">"Απαιτείται μοτίβο κατά την εναλλαγή προφίλ."</string>
     <string name="kg_prompt_reason_switch_profiles_pin" msgid="8108020184731052246">"Απαιτείται PIN κατά την εναλλαγή προφίλ."</string>
     <string name="kg_prompt_reason_switch_profiles_password" msgid="6755997057852042672">"Απαιτείται κωδικός πρόσβασης κατά την εναλλαγή προφίλ."</string>
-    <plurals name="kg_prompt_reason_time_pattern" formatted="false" msgid="2697444392228541853">
-      <item quantity="other">Η συσκευή δεν έχει ξεκλειδωθεί για <xliff:g id="NUMBER_1">%d</xliff:g> ώρες. Επιβεβαιώστε το μοτίβο.</item>
-      <item quantity="one">Η συσκευή δεν έχει ξεκλειδωθεί για <xliff:g id="NUMBER_0">%d</xliff:g> ώρα. Επιβεβαιώστε το μοτίβο.</item>
-    </plurals>
-    <plurals name="kg_prompt_reason_time_pin" formatted="false" msgid="2118758475374354849">
-      <item quantity="other">Η συσκευή δεν έχει ξεκλειδωθεί για <xliff:g id="NUMBER_1">%d</xliff:g> ώρες. Επιβεβαιώστε τον αριθμό PIN.</item>
-      <item quantity="one">Η συσκευή δεν έχει ξεκλειδωθεί για <xliff:g id="NUMBER_0">%d</xliff:g> ώρα. Επιβεβαιώστε τον αριθμό PIN.</item>
-    </plurals>
-    <plurals name="kg_prompt_reason_time_password" formatted="false" msgid="5132693663364913675">
-      <item quantity="other">Η συσκευή δεν έχει ξεκλειδωθεί για <xliff:g id="NUMBER_1">%d</xliff:g> ώρες. Επιβεβαίωση κωδικού πρόσβασης.</item>
-      <item quantity="one">Η συσκευή δεν έχει ξεκλειδωθεί για <xliff:g id="NUMBER_0">%d</xliff:g> ώρα. Επιβεβαίωση κωδικού πρόσβασης.</item>
-    </plurals>
+  <plurals name="kg_prompt_reason_time_pattern">
+    <item quantity="one" msgid="5598462918459516566">"Η συσκευή δεν έχει ξεκλειδωθεί για <xliff:g id="NUMBER">%d</xliff:g> ώρα. Επιβεβαίωση μοτίβου."</item>
+    <item quantity="other" msgid="224518697489572649">"Η συσκευή δεν έχει ξεκλειδωθεί για <xliff:g id="NUMBER">%d</xliff:g> ώρες. Επιβεβαίωση μοτίβου."</item>
+  </plurals>
+  <plurals name="kg_prompt_reason_time_pin">
+    <item quantity="one" msgid="3073579168584205350">"Η συσκευή δεν έχει ξεκλειδωθεί για <xliff:g id="NUMBER">%d</xliff:g> ώρα. Επιβεβαίωση PIN."</item>
+    <item quantity="other" msgid="3282423442327824649">"Η συσκευή δεν έχει ξεκλειδωθεί για <xliff:g id="NUMBER">%d</xliff:g> ώρες. Επιβεβαίωση PIN."</item>
+  </plurals>
+  <plurals name="kg_prompt_reason_time_password">
+    <item quantity="one" msgid="9062782924671938516">"Η συσκευή δεν έχει ξεκλειδωθεί για <xliff:g id="NUMBER">%d</xliff:g> ώρα. Επιβεβαίωση κωδικού πρόσβασης."</item>
+    <item quantity="other" msgid="1839722302513719629">"Η συσκευή δεν έχει ξεκλειδωθεί για <xliff:g id="NUMBER">%d</xliff:g> ώρες. Επιβεβαίωση κωδικού πρόσβασης."</item>
+  </plurals>
     <string name="fingerprint_not_recognized" msgid="2690661881608146617">"Δεν αναγνωρίστηκε"</string>
 </resources>
