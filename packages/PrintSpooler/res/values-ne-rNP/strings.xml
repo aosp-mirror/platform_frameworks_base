@@ -54,10 +54,10 @@
     <string name="print_add_printer" msgid="1088656468360653455">"प्रिन्टर थप्नुहोस्"</string>
     <string name="print_select_printer" msgid="7388760939873368698">"प्रिन्टर चयन गर्नुहोस्"</string>
     <string name="print_forget_printer" msgid="5035287497291910766">"प्रिन्टर बिर्सनुहोस्"</string>
-    <plurals name="print_search_result_count_utterance" formatted="false" msgid="6997663738361080868">
-      <item quantity="other"><xliff:g id="COUNT_1">%1$s</xliff:g> प्रिन्टरहरू भेटिए</item>
-      <item quantity="one"><xliff:g id="COUNT_0">%1$s</xliff:g> प्रिन्टर भेटियो</item>
-    </plurals>
+  <plurals name="print_search_result_count_utterance">
+    <item quantity="one" msgid="4484953260685964252">"<xliff:g id="COUNT">%1$s</xliff:g> प्रिन्टर भेटाइयो"</item>
+    <item quantity="other" msgid="6533817036607128241">"<xliff:g id="COUNT">%1$s</xliff:g> प्रिन्टरहरू भेटाइयो"</item>
+  </plurals>
     <string name="choose_print_service" msgid="3740309762324459694">"प्रिन्ट सेवा छनौट गर्नुहोस्"</string>
     <string name="print_searching_for_printers" msgid="6550424555079932867">"प्रिन्टरहरू खोज्दै"</string>
     <string name="print_no_printers" msgid="4869403323900054866">"कुनै प्रिन्टरहरू भेटाइएन"</string>
@@ -65,10 +65,10 @@
     <string name="cancelling_notification_title_template" msgid="1821759594704703197">"रद्द गरिँदै <xliff:g id="PRINT_JOB_NAME">%1$s</xliff:g>"</string>
     <string name="failed_notification_title_template" msgid="2256217208186530973">"प्रिन्टर त्रुटि <xliff:g id="PRINT_JOB_NAME">%1$s</xliff:g>"</string>
     <string name="blocked_notification_title_template" msgid="1175435827331588646">"प्रिन्टर ब्लक गरियो <xliff:g id="PRINT_JOB_NAME">%1$s</xliff:g>"</string>
-    <plurals name="composite_notification_title_template" formatted="false" msgid="6940956968211733780">
-      <item quantity="other"><xliff:g id="PRINT_JOB_NAME_1">%1$d</xliff:g> कार्यहरू प्रिन्ट गर्नुहोस्</item>
-      <item quantity="one"><xliff:g id="PRINT_JOB_NAME_0">%1$d</xliff:g> कार्य प्रिन्ट गर्नुहोस्</item>
-    </plurals>
+  <plurals name="composite_notification_title_template">
+    <item quantity="one" msgid="5866624638054847057">"<xliff:g id="PRINT_JOB_NAME">%1$d</xliff:g> प्रिन्ट कार्य"</item>
+    <item quantity="other" msgid="8746611264734222865">"<xliff:g id="PRINT_JOB_NAME">%1$d</xliff:g> प्रिन्ट कार्यहरु"</item>
+  </plurals>
     <string name="cancel" msgid="4373674107267141885">"रद्द गर्नुहोस्"</string>
     <string name="restart" msgid="2472034227037808749">"पुनःस्टार्ट गर्नुहोस्"</string>
     <string name="no_connection_to_printer" msgid="2159246915977282728">"प्रिन्टरमा कुनै जडान छैन"</string>
