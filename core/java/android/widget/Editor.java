@@ -16,12 +16,6 @@
 
 package android.widget;
 
-import java.text.BreakIterator;
-import java.util.Arrays;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.List;
-
 import android.R;
 import android.annotation.Nullable;
 import android.app.PendingIntent;
@@ -111,6 +105,12 @@ import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.GrowingArrayUtils;
 import com.android.internal.util.Preconditions;
 import com.android.internal.widget.EditableInputConnection;
+
+import java.text.BreakIterator;
+import java.util.Arrays;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.List;
 
 
 /**
@@ -1004,8 +1004,7 @@ public class Editor {
         }
 
         if (!handled && mTextActionMode != null) {
-            // TODO: Fix dragging in extracted mode.
-            if (touchPositionIsInSelection() && !mTextView.isInExtractedMode()) {
+            if (touchPositionIsInSelection()) {
                 // Start a drag
                 final int start = mTextView.getSelectionStart();
                 final int end = mTextView.getSelectionEnd();
@@ -4867,9 +4866,8 @@ public class Editor {
                         mEndHandle.showAtLocation(endOffset);
 
                         // No longer the first dragging motion, reset.
-                        if (!(mTextView.isInExtractedMode())) {
-                            startSelectionActionMode();
-                        }
+                        startSelectionActionMode();
+
                         mDragAcceleratorActive = false;
                         mStartOffset = -1;
                         mSwitchedLines = false;

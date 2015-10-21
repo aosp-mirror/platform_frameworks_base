@@ -16,6 +16,8 @@
 
 package android.widget;
 
+import static android.os.Build.VERSION_CODES.JELLY_BEAN_MR1;
+
 import android.R;
 import android.annotation.ColorInt;
 import android.annotation.DrawableRes;
@@ -118,14 +120,14 @@ import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.PointerIcon;
 import android.view.View;
-import android.view.ViewParent;
-import android.view.ViewStructure;
 import android.view.ViewConfiguration;
 import android.view.ViewDebug;
 import android.view.ViewGroup.LayoutParams;
-import android.view.ViewRootImpl;
-import android.view.ViewTreeObserver;
 import android.view.ViewHierarchyEncoder;
+import android.view.ViewParent;
+import android.view.ViewRootImpl;
+import android.view.ViewStructure;
+import android.view.ViewTreeObserver;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityManager;
 import android.view.accessibility.AccessibilityNodeInfo;
@@ -152,8 +154,6 @@ import java.io.IOException;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Locale;
-
-import static android.os.Build.VERSION_CODES.JELLY_BEAN_MR1;
 
 /**
  * Displays text to the user and optionally allows them to edit it.  A TextView
@@ -5285,14 +5285,6 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 mEditor.startSelectionActionMode();
             }
             mEditor.mCreatedWithASelection = false;
-        }
-
-        // Phone specific code (there is no ExtractEditText on tablets).
-        // ExtractEditText does not call onFocus when it is displayed, and mHasSelectionOnFocus can
-        // not be set. Do the test here instead.
-        if (isInExtractedMode() && hasSelection() && mEditor != null
-                && mEditor.mTextActionMode == null && isShown() && hasWindowFocus()) {
-            mEditor.startSelectionActionMode();
         }
 
         unregisterForPreDraw();
