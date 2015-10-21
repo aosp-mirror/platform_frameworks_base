@@ -596,7 +596,10 @@ final class DefaultPermissionGrantPolicy {
     private void grantDefaultPermissionsToDefaultSystemDialerAppLPr(
             PackageParser.Package dialerPackage, int userId) {
         if (doesPackageSupportRuntimePermissions(dialerPackage)) {
-            grantRuntimePermissionsLPw(dialerPackage, PHONE_PERMISSIONS, userId);
+            boolean isPhonePermFixed =
+                    mService.hasSystemFeature(PackageManager.FEATURE_WATCH);
+            grantRuntimePermissionsLPw(
+                    dialerPackage, PHONE_PERMISSIONS, isPhonePermFixed, userId);
             grantRuntimePermissionsLPw(dialerPackage, CONTACTS_PERMISSIONS, userId);
             grantRuntimePermissionsLPw(dialerPackage, SMS_PERMISSIONS, userId);
             grantRuntimePermissionsLPw(dialerPackage, MICROPHONE_PERMISSIONS, userId);
