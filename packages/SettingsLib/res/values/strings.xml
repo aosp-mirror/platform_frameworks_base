@@ -225,4 +225,10 @@
 
     <!-- [CHAR LIMIT=NONE] Label of a running process that represents another user -->
     <string name="running_process_item_user_label">User: <xliff:g id="user_name">%1$s</xliff:g></string>
+
+    <!-- Launch defaults preference summary with some set [CHAR LIMIT=40] -->
+    <string name="launch_defaults_some">Some defaults set</string>
+    <!-- Launch defaults preference summary with none set [CHAR LIMIT=40] -->
+    <string name="launch_defaults_none">No defaults set</string>
+
 </resources>
