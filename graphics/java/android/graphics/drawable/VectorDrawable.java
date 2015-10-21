@@ -603,7 +603,7 @@ public class VectorDrawable extends Drawable {
         final int densityDpi = a.getResources().getDisplayMetrics().densityDpi;
         final int newSourceDensity = densityDpi == 0 ? DisplayMetrics.DENSITY_DEFAULT : densityDpi;
         final int oldSourceDensity = pathRenderer.mSourceDensity;
-        final float densityScale = oldSourceDensity / (float) newSourceDensity;
+        final float densityScale = newSourceDensity / (float) oldSourceDensity;
         pathRenderer.mSourceDensity = newSourceDensity;
 
         final int tintMode = a.getInt(R.styleable.VectorDrawable_tintMode, -1);
