@@ -373,6 +373,11 @@ public class ChooserActivity extends ResolverActivity {
         int targetsToQuery = 0;
         for (int i = 0, N = adapter.getDisplayResolveInfoCount(); i < N; i++) {
             final DisplayResolveInfo dri = adapter.getDisplayResolveInfo(i);
+            if (adapter.getScore(dri) == 0) {
+                // A score of 0 means the app hasn't been used in some time;
+                // don't query it as it's not likely to be relevant.
+                continue;
+            }
             final ActivityInfo ai = dri.getResolveInfo().activityInfo;
             final Bundle md = ai.metaData;
             final String serviceName = md != null ? convertServiceName(ai.packageName,
