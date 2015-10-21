@@ -98,10 +98,12 @@ import com.android.documentsui.RecentsProvider.StateColumns;
 import com.android.documentsui.model.DocumentInfo;
 import com.android.documentsui.model.DocumentStack;
 import com.android.documentsui.model.RootInfo;
+import com.android.internal.annotations.GuardedBy;
 
 import com.google.common.collect.Lists;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -1743,6 +1745,9 @@ public class DirectoryFragment extends Fragment {
         private Context mContext;
         private int mCursorCount;
         private boolean mIsLoading;
+        @GuardedBy("mPendingDelete")
+        private Boolean mPendingDelete = false;
+        @GuardedBy("mPendingDelete")
         private SparseBooleanArray mMarkedForDeletion = new SparseBooleanArray();
         private UpdateListener mUpdateListener;
         @Nullable private Cursor mCursor;
@@ -1787,35 +1792,39 @@ public class DirectoryFragment extends Fragment {
         }
 
         int getItemCount() {
-            return mCursorCount - mMarkedForDeletion.size();
+            synchronized(mPendingDelete) {
+                return mCursorCount - mMarkedForDeletion.size();
+            }
         }
 
         Cursor getItem(int position) {
-            // Items marked for deletion are masked out of the UI.  To do this, for every marked
-            // item whose position is less than the requested item position, advance the requested
-            // position by 1.
-            final int originalPos = position;
-            final int size = mMarkedForDeletion.size();
-            for (int i = 0; i < size; ++i) {
-                // It'd be more concise, but less efficient, to iterate over positions while calling
-                // mMarkedForDeletion.get.  Instead, iterate over deleted entries.
-                if (mMarkedForDeletion.keyAt(i) <= position && mMarkedForDeletion.valueAt(i)) {
-                    ++position;
+            synchronized(mPendingDelete) {
+                // Items marked for deletion are masked out of the UI.  To do this, for every marked
+                // item whose position is less than the requested item position, advance the requested
+                // position by 1.
+                final int originalPos = position;
+                final int size = mMarkedForDeletion.size();
+                for (int i = 0; i < size; ++i) {
+                    // It'd be more concise, but less efficient, to iterate over positions while calling
+                    // mMarkedForDeletion.get.  Instead, iterate over deleted entries.
+                    if (mMarkedForDeletion.keyAt(i) <= position && mMarkedForDeletion.valueAt(i)) {
+                        ++position;
+                    }
                 }
-            }
 
-            if (DEBUG && position != originalPos) {
-                Log.d(TAG, "Item position adjusted for deletion.  Original: " + originalPos
-                        + "  Adjusted: " + position);
-            }
+                if (DEBUG && position != originalPos) {
+                    Log.d(TAG, "Item position adjusted for deletion.  Original: " + originalPos
+                            + "  Adjusted: " + position);
+                }
 
-            if (position >= mCursorCount) {
-                throw new IndexOutOfBoundsException("Attempt to retrieve " + position + " of " +
-                        mCursorCount + " items");
-            }
+                if (position >= mCursorCount) {
+                    throw new IndexOutOfBoundsException("Attempt to retrieve " + position + " of " +
+                            mCursorCount + " items");
+                }
 
-            mCursor.moveToPosition(position);
-            return mCursor;
+                mCursor.moveToPosition(position);
+                return mCursor;
+            }
         }
 
         private boolean isEmpty() {
@@ -1848,17 +1857,19 @@ public class DirectoryFragment extends Fragment {
         }
 
         List<DocumentInfo> getDocumentsMarkedForDeletion() {
-            final int size = mMarkedForDeletion.size();
-            List<DocumentInfo> docs =  new ArrayList<>(size);
+            synchronized (mPendingDelete) {
+                final int size = mMarkedForDeletion.size();
+                List<DocumentInfo> docs =  new ArrayList<>(size);
 
-            for (int i = 0; i < size; ++i) {
-                final int position = mMarkedForDeletion.keyAt(i);
-                checkState(position < mCursorCount);
-                mCursor.moveToPosition(position);
-                final DocumentInfo doc = DocumentInfo.fromDirectoryCursor(mCursor);
-                docs.add(doc);
+                for (int i = 0; i < size; ++i) {
+                    final int position = mMarkedForDeletion.keyAt(i);
+                    checkState(position < mCursorCount);
+                    mCursor.moveToPosition(position);
+                    final DocumentInfo doc = DocumentInfo.fromDirectoryCursor(mCursor);
+                    docs.add(doc);
+                }
+                return docs;
             }
-            return docs;
         }
 
         /**
@@ -1869,17 +1880,23 @@ public class DirectoryFragment extends Fragment {
          * @param selected A selection representing the files to delete.
          */
         void markForDeletion(Selection selected) {
-            // Only one deletion operation at a time.
-            checkState(mMarkedForDeletion.size() == 0);
-            // There should never be more to delete than what exists.
-            checkState(mCursorCount >= selected.size());
+            synchronized (mPendingDelete) {
+                mPendingDelete = true;
+                // Only one deletion operation at a time.
+                checkState(mMarkedForDeletion.size() == 0);
+                // There should never be more to delete than what exists.
+                checkState(mCursorCount >= selected.size());
 
-            final int size = selected.size();
-            for (int i = 0; i < size; ++i) {
-                int position = selected.get(i);
-                if (DEBUG) Log.d(TAG, "Marked position " + position + " for deletion");
-                mMarkedForDeletion.append(position, true);
-                mViewAdapter.notifyItemRemoved(position);
+                int[] positions = selected.getAll();
+                Arrays.sort(positions);
+
+                // Walk backwards through the set, since we're removing positions.
+                // Otherwise, positions would change after the first modification.
+                for (int p = positions.length - 1; p >= 0; p--) {
+                    mMarkedForDeletion.append(positions[p], true);
+                    mViewAdapter.notifyItemRemoved(positions[p]);
+                    if (DEBUG) Log.d(TAG, "Scheduled " + positions[p] + " for delete.");
+                }
             }
         }
 
@@ -1888,17 +1905,24 @@ public class DirectoryFragment extends Fragment {
          * unmarked, and restored in the UI.  See {@link #markForDeletion(Selection)}.
          */
         void undoDeletion() {
-            // Iterate over deleted items, temporarily marking them false in the deletion list, and
-            // re-adding them to the UI.
-            final int size = mMarkedForDeletion.size();
-            for (int i = 0; i < size; ++i) {
-                final int position = mMarkedForDeletion.keyAt(i);
-                mMarkedForDeletion.put(position, false);
-                mViewAdapter.notifyItemInserted(position);
+            synchronized (mPendingDelete) {
+                // Iterate over deleted items, temporarily marking them false in the deletion list, and
+                // re-adding them to the UI.
+                final int size = mMarkedForDeletion.size();
+                for (int i = 0; i < size; ++i) {
+                    final int position = mMarkedForDeletion.keyAt(i);
+                    mMarkedForDeletion.put(position, false);
+                    mViewAdapter.notifyItemInserted(position);
+                }
+                resetDeleteData();
             }
+        }
 
-            // Then, clear the deletion list.
-            mMarkedForDeletion.clear();
+        private void resetDeleteData() {
+            synchronized (mPendingDelete) {
+                mPendingDelete = false;
+                mMarkedForDeletion.clear();
+            }
         }
 
         /**
@@ -1909,9 +1933,16 @@ public class DirectoryFragment extends Fragment {
          * snackbars) for errors, info, etc.
          */
         void finalizeDeletion(DeletionListener listener) {
-            final ContentResolver resolver = mContext.getContentResolver();
-            DeleteFilesTask task = new DeleteFilesTask(resolver, listener);
-            task.execute();
+            synchronized (mPendingDelete) {
+                if (mPendingDelete) {
+                    // Necessary to avoid b/25072545. Even when that's resolved, this
+                    // is a nice safe thing to day.
+                    mPendingDelete = false;
+                    final ContentResolver resolver = mContext.getContentResolver();
+                    DeleteFilesTask task = new DeleteFilesTask(resolver, listener);
+                    task.execute();
+                }
+            }
         }
 
         /**
@@ -1968,7 +1999,7 @@ public class DirectoryFragment extends Fragment {
                 } else {
                     if (DEBUG) Log.d(TAG, "Deletion task completed successfully.");
                 }
-                mMarkedForDeletion.clear();
+                resetDeleteData();
 
                 mListener.onCompletion();
             }

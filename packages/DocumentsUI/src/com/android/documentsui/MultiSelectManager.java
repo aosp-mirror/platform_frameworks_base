@@ -601,6 +601,14 @@ public final class MultiSelectManager implements View.OnKeyListener {
             mTotalSelection = new SparseBooleanArray();
         }
 
+        @VisibleForTesting
+        public Selection(int... positions) {
+            this();
+            for (int i = 0; i < positions.length; i++) {
+                add(positions[i]);
+            }
+        }
+
         /**
          * @param position
          * @return true if the position is currently selected.
@@ -621,6 +629,18 @@ public final class MultiSelectManager implements View.OnKeyListener {
          */
         public int get(int index) {
             return mTotalSelection.keyAt(index);
+        }
+
+        /**
+         * Returns an unordered array of selected positions.
+         */
+        public int[] getAll() {
+            final int size = size();
+            int[] positions = new int[size];
+            for (int i = 0; i < size; i++) {
+                positions[i] = get(i);
+            }
+            return positions;
         }
 
         /**

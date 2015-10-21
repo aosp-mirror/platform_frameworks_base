@@ -32,10 +32,6 @@ import com.android.documentsui.MultiSelectManager.Selection;
 import com.android.documentsui.model.DocumentInfo;
 
 import java.util.List;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.TimeUnit;
-
-
 
 public class DirectoryFragmentModelTest extends AndroidTestCase {
 
@@ -117,15 +113,6 @@ public class DirectoryFragmentModelTest extends AndroidTestCase {
         assertEquals("0", docs.get(0).documentId);
         assertEquals("1", docs.get(1).documentId);
         assertEquals("4", docs.get(2).documentId);
-
-        TestDeletionListener testListener = new TestDeletionListener();
-        model.finalizeDeletion(testListener);
-        testListener.waitForDone();
-
-        docs = getDocumentInfo(0, 1, 2);
-        assertEquals("0", docs.get(0).documentId);
-        assertEquals("1", docs.get(1).documentId);
-        assertEquals("2", docs.get(2).documentId);
     }
 
     // Tests that Model.getItem returns the right items after a deletion is undone.
@@ -149,20 +136,12 @@ public class DirectoryFragmentModelTest extends AndroidTestCase {
         };
     }
 
-    private void delete(int... items) {
-        Selection sel = new Selection();
-        for (int item: items) {
-            sel.add(item);
-        }
-        model.markForDeletion(sel);
+    private void delete(int... positions) {
+        model.markForDeletion(new Selection(positions));
     }
 
-    private List<DocumentInfo> getDocumentInfo(int... items) {
-        Selection sel = new Selection();
-        for (int item: items) {
-            sel.add(item);
-        }
-        return model.getDocuments(sel);
+    private List<DocumentInfo> getDocumentInfo(int... positions) {
+        return model.getDocuments(new Selection(positions));
     }
 
     private static class DummyListener extends Model.UpdateListener {
@@ -175,22 +154,6 @@ public class DirectoryFragmentModelTest extends AndroidTestCase {
         public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {}
         public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
             return null;
-        }
-    }
-
-    private static class TestDeletionListener extends Model.DeletionListener {
-        final CountDownLatch mSignal = new CountDownLatch(1);
-
-        @Override
-        public void onCompletion() {
-            mSignal.countDown();
-        }
-
-        public void waitForDone() {
-            try {
-                boolean timeout = mSignal.await(10, TimeUnit.SECONDS);
-                assertTrue("Timed out waiting for deletion completion", timeout);
-            } catch (InterruptedException e) {}
         }
     }
 }
