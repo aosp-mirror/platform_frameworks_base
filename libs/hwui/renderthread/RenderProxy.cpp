@@ -574,12 +574,7 @@ void* RenderProxy::staticPostAndWait(MethodInvokeRenderTask* task) {
     RenderThread& thread = RenderThread::getInstance();
     void* retval;
     task->setReturnPtr(&retval);
-    Mutex mutex;
-    Condition condition;
-    SignalingRenderTask syncTask(task, &mutex, &condition);
-    AutoMutex _lock(mutex);
-    thread.queue(&syncTask);
-    condition.wait(mutex);
+    thread.queueAndWait(task);
     return retval;
 }
 

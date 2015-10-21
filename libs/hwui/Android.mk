@@ -263,4 +263,9 @@ LOCAL_SRC_FILES += \
     microbench/DisplayListCanvasBench.cpp \
     microbench/LinearAllocatorBench.cpp
 
+ifeq (true, $(HWUI_NEW_OPS))
+    LOCAL_SRC_FILES += \
+        microbench/OpReordererBench.cpp
+endif
+
 include $(BUILD_EXECUTABLE)

@@ -312,6 +312,16 @@ void RenderThread::queue(RenderTask* task) {
     }
 }
 
+void RenderThread::queueAndWait(RenderTask* task) {
+    Mutex mutex;
+    Condition condition;
+    SignalingRenderTask syncTask(task, &mutex, &condition);
+
+    AutoMutex _lock(mutex);
+    queue(&syncTask);
+    condition.wait(mutex);
+}
+
 void RenderThread::queueAtFront(RenderTask* task) {
     AutoMutex _lock(mLock);
     mQueue.queueAtFront(task);
