@@ -125,7 +125,7 @@ static void XMLCALL endElementHandler(void* userData, const char* name) {
     Stack* stack = reinterpret_cast<Stack*>(XML_GetUserData(parser));
 
     assert(!stack->nodeStack.empty());
-    stack->nodeStack.top()->comment = std::move(stack->pendingComment);
+    //stack->nodeStack.top()->comment = std::move(stack->pendingComment);
     stack->nodeStack.pop();
 }
 
@@ -194,7 +194,7 @@ std::unique_ptr<XmlResource> inflate(std::istream* in, IDiagnostics* diag, const
 
     XML_ParserFree(parser);
     if (stack.root) {
-        return util::make_unique<XmlResource>(ResourceFile{}, std::move(stack.root));
+        return util::make_unique<XmlResource>(ResourceFile{ {}, {}, source }, std::move(stack.root));
     }
     return {};
 }
@@ -315,6 +315,22 @@ std::unique_ptr<XmlResource> inflate(const void* data, size_t dataLen, IDiagnost
         }
     }
     return util::make_unique<XmlResource>(ResourceFile{}, std::move(root));
+}
+
+Element* findRootElement(Node* node) {
+    if (!node) {
+        return nullptr;
+    }
+
+    Element* el = nullptr;
+    while ((el = nodeCast<Element>(node)) == nullptr) {
+        if (node->children.empty()) {
+            return nullptr;
+        }
+        // We are looking for the first element, and namespaces can only have one child.
+        node = node->children.front().get();
+    }
+    return el;
 }
 
 void Node::addChild(std::unique_ptr<Node> child) {

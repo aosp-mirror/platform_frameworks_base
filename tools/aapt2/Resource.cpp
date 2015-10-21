@@ -36,7 +36,6 @@ StringPiece16 toString(ResourceType type) {
         case ResourceType::kFraction:      return u"fraction";
         case ResourceType::kId:            return u"id";
         case ResourceType::kInteger:       return u"integer";
-        case ResourceType::kIntegerArray:  return u"integer-array";
         case ResourceType::kInterpolator:  return u"interpolator";
         case ResourceType::kLayout:        return u"layout";
         case ResourceType::kMenu:          return u"menu";
@@ -65,7 +64,6 @@ static const std::map<StringPiece16, ResourceType> sResourceTypeMap {
         { u"fraction", ResourceType::kFraction },
         { u"id", ResourceType::kId },
         { u"integer", ResourceType::kInteger },
-        { u"integer-array", ResourceType::kIntegerArray },
         { u"interpolator", ResourceType::kInterpolator },
         { u"layout", ResourceType::kLayout },
         { u"menu", ResourceType::kMenu },

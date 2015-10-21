@@ -14,11 +14,12 @@
  * limitations under the License.
  */
 
-#include "JavaClassGenerator.h"
 #include "NameMangler.h"
 #include "Resource.h"
 #include "ResourceTable.h"
 #include "ResourceValues.h"
+#include "java/AnnotationProcessor.h"
+#include "java/JavaClassGenerator.h"
 #include "util/StringPiece.h"
 
 #include <algorithm>

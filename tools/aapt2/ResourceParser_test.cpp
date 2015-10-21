@@ -414,6 +414,34 @@ TEST_F(ResourceParserTest, IgnoreCommentBeforeEndTag) {
     EXPECT_EQ(value->getComment(), u"One");
 }
 
+TEST_F(ResourceParserTest, ParseNestedComments) {
+    // We only care about declare-styleable and enum/flag attributes because comments
+    // from those end up in R.java
+    std::string input = R"EOF(
+        <declare-styleable name="foo">
+          <!-- The name of the bar -->
+          <attr name="barName" format="string|reference" />
+        </declare-styleable>
+
+        <attr name="foo">
+          <!-- The very first -->
+          <enum name="one" value="1" />
+        </attr>)EOF";
+    ASSERT_TRUE(testParse(input));
+
+    Styleable* styleable = test::getValue<Styleable>(&mTable, u"@styleable/foo");
+    ASSERT_NE(nullptr, styleable);
+    ASSERT_EQ(1u, styleable->entries.size());
+
+    EXPECT_EQ(StringPiece16(u"The name of the bar"), styleable->entries.front().getComment());
+
+    Attribute* attr = test::getValue<Attribute>(&mTable, u"@attr/foo");
+    ASSERT_NE(nullptr, attr);
+    ASSERT_EQ(1u, attr->symbols.size());
+
+    EXPECT_EQ(StringPiece16(u"The very first"), attr->symbols.front().symbol.getComment());
+}
+
 /*
  * Declaring an ID as public should not require a separate definition
  * (as an ID has no value).

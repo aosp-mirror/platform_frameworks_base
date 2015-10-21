@@ -69,10 +69,6 @@ TEST(ResourceTypeTest, ParseResourceTypes) {
     ASSERT_NE(type, nullptr);
     EXPECT_EQ(*type, ResourceType::kInteger);
 
-    type = parseResourceType(u"integer-array");
-    ASSERT_NE(type, nullptr);
-    EXPECT_EQ(*type, ResourceType::kIntegerArray);
-
     type = parseResourceType(u"interpolator");
     ASSERT_NE(type, nullptr);
     EXPECT_EQ(*type, ResourceType::kInterpolator);

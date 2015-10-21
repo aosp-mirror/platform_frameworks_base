@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-#include "ProguardRules.h"
 #include "XmlDom.h"
 
+#include "java/ProguardRules.h"
 #include "util/Util.h"
 
 #include <memory>

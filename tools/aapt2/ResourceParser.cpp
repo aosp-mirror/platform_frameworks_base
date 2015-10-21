@@ -308,6 +308,9 @@ bool ResourceParser::parseResources(XmlPullParser* parser) {
         } else if (elementName == u"dimen") {
             parsedResource.name.type = ResourceType::kDimen;
             result = parsePrimitive(parser, &parsedResource);
+        } else if (elementName == u"fraction") {
+            parsedResource.name.type = ResourceType::kFraction;
+            result = parsePrimitive(parser, &parsedResource);
         } else if (elementName == u"style") {
             parsedResource.name.type = ResourceType::kStyle;
             result = parseStyle(parser, &parsedResource);
@@ -321,7 +324,7 @@ bool ResourceParser::parseResources(XmlPullParser* parser) {
             parsedResource.name.type = ResourceType::kArray;
             result = parseArray(parser, &parsedResource, android::ResTable_map::TYPE_STRING);
         } else if (elementName == u"integer-array") {
-            parsedResource.name.type = ResourceType::kIntegerArray;
+            parsedResource.name.type = ResourceType::kArray;
             result = parseArray(parser, &parsedResource, android::ResTable_map::TYPE_INTEGER);
         } else if (elementName == u"declare-styleable") {
             parsedResource.name.type = ResourceType::kStyleable;
@@ -464,6 +467,8 @@ bool ResourceParser::parsePrimitive(XmlPullParser* parser, ParsedResource* outRe
         typeMask |= android::ResTable_map::TYPE_INTEGER;
         break;
 
+    case ResourceType::kFraction:
+        // fallthrough
     case ResourceType::kDimen:
         typeMask |= android::ResTable_map::TYPE_DIMENSION
                   | android::ResTable_map::TYPE_FLOAT
@@ -576,6 +581,12 @@ static uint32_t parseFormatAttribute(const StringPiece16& str) {
     return mask;
 }
 
+/**
+ * Returns true if the element is <skip> or <eat-comment> and can be safely ignored.
+ */
+static bool shouldIgnoreElement(const StringPiece16& ns, const StringPiece16& name) {
+    return ns.empty() && (name == u"skip" || name == u"eat-comment");
+}
 
 bool ResourceParser::parseAttr(XmlPullParser* parser, ParsedResource* outResource) {
     outResource->source = mSource.withLine(parser->getLineNumber());
@@ -613,25 +624,30 @@ bool ResourceParser::parseAttrImpl(XmlPullParser* parser, ParsedResource* outRes
     bool error = false;
     const size_t depth = parser->getDepth();
     while (XmlPullParser::nextChildNode(parser, depth)) {
-        if (parser->getEvent() != XmlPullParser::Event::kStartElement) {
-            // Skip comments and text.
+        if (parser->getEvent() == XmlPullParser::Event::kComment) {
+            comment = util::trimWhitespace(parser->getComment()).toString();
+            continue;
+        } else if (parser->getEvent() != XmlPullParser::Event::kStartElement) {
+            // Skip text.
             continue;
         }
 
+        const Source itemSource = mSource.withLine(parser->getLineNumber());
         const std::u16string& elementNamespace = parser->getElementNamespace();
         const std::u16string& elementName = parser->getElementName();
-        if (elementNamespace == u"" && (elementName == u"flag" || elementName == u"enum")) {
+        if (elementNamespace.empty() && (elementName == u"flag" || elementName == u"enum")) {
             if (elementName == u"enum") {
                 if (typeMask & android::ResTable_map::TYPE_FLAGS) {
-                    mDiag->error(DiagMessage(mSource.withLine(parser->getLineNumber()))
+                    mDiag->error(DiagMessage(itemSource)
                                  << "can not define an <enum>; already defined a <flag>");
                     error = true;
                     continue;
                 }
                 typeMask |= android::ResTable_map::TYPE_ENUM;
+
             } else if (elementName == u"flag") {
                 if (typeMask & android::ResTable_map::TYPE_ENUM) {
-                    mDiag->error(DiagMessage(mSource.withLine(parser->getLineNumber()))
+                    mDiag->error(DiagMessage(itemSource)
                                  << "can not define a <flag>; already defined an <enum>");
                     error = true;
                     continue;
@@ -642,21 +658,22 @@ bool ResourceParser::parseAttrImpl(XmlPullParser* parser, ParsedResource* outRes
             if (Maybe<Attribute::Symbol> s = parseEnumOrFlagItem(parser, elementName)) {
                 ParsedResource childResource;
                 childResource.name = s.value().symbol.name.value();
-                childResource.source = mSource.withLine(parser->getLineNumber());
+                childResource.source = itemSource;
                 childResource.value = util::make_unique<Id>();
                 outResource->childResources.push_back(std::move(childResource));
+
+                s.value().symbol.setComment(std::move(comment));
+                s.value().symbol.setSource(itemSource);
                 items.push_back(std::move(s.value()));
             } else {
                 error = true;
             }
-        } else if (elementName == u"skip" || elementName == u"eat-comment") {
-            comment = u"";
-
-        } else {
-            mDiag->error(DiagMessage(mSource.withLine(parser->getLineNumber()))
-                         << ":" << elementName << ">");
+        } else if (!shouldIgnoreElement(elementNamespace, elementName)) {
+            mDiag->error(DiagMessage(itemSource) << ":" << elementName << ">");
             error = true;
         }
+
+        comment = {};
     }
 
     if (error) {
@@ -716,10 +733,9 @@ static Maybe<ResourceName> parseXmlAttributeName(StringPiece16 str) {
         p++;
     }
 
-    return ResourceName{ package.toString(), ResourceType::kAttr,
-        name.empty() ? str.toString() : name.toString() };
+    return ResourceName(package.toString(), ResourceType::kAttr,
+                        name.empty() ? str.toString() : name.toString());
 }
-
 
 bool ResourceParser::parseStyleItem(XmlPullParser* parser, Style* style) {
     const Source source = mSource.withLine(parser->getLineNumber());
@@ -783,7 +799,6 @@ bool ResourceParser::parseStyle(XmlPullParser* parser, ParsedResource* outResour
     }
 
     bool error = false;
-    std::u16string comment;
     const size_t depth = parser->getDepth();
     while (XmlPullParser::nextChildNode(parser, depth)) {
         if (parser->getEvent() != XmlPullParser::Event::kStartElement) {
@@ -796,11 +811,7 @@ bool ResourceParser::parseStyle(XmlPullParser* parser, ParsedResource* outResour
         if (elementNamespace == u"" && elementName == u"item") {
             error |= !parseStyleItem(parser, style.get());
 
-        } else if (elementNamespace.empty() &&
-                (elementName == u"skip" || elementName == u"eat-comment")) {
-            comment = u"";
-
-        } else {
+        } else if (!shouldIgnoreElement(elementNamespace, elementName)) {
             mDiag->error(DiagMessage(mSource.withLine(parser->getLineNumber()))
                          << ":" << elementName << ">");
             error = true;
@@ -820,7 +831,6 @@ bool ResourceParser::parseArray(XmlPullParser* parser, ParsedResource* outResour
     const Source source = mSource.withLine(parser->getLineNumber());
     std::unique_ptr<Array> array = util::make_unique<Array>();
 
-    std::u16string comment;
     bool error = false;
     const size_t depth = parser->getDepth();
     while (XmlPullParser::nextChildNode(parser, depth)) {
@@ -839,13 +849,10 @@ bool ResourceParser::parseArray(XmlPullParser* parser, ParsedResource* outResour
                 error = true;
                 continue;
             }
+            item->setSource(itemSource);
             array->items.emplace_back(std::move(item));
 
-        } else if (elementNamespace.empty() &&
-                (elementName == u"skip" || elementName == u"eat-comment")) {
-            comment = u"";
-
-        } else {
+        } else if (!shouldIgnoreElement(elementNamespace, elementName)) {
             mDiag->error(DiagMessage(mSource.withLine(parser->getLineNumber()))
                          << "unknown tag <" << elementNamespace << ":" << elementName << ">");
             error = true;
@@ -864,7 +871,6 @@ bool ResourceParser::parsePlural(XmlPullParser* parser, ParsedResource* outResou
     const Source source = mSource.withLine(parser->getLineNumber());
     std::unique_ptr<Plural> plural = util::make_unique<Plural>();
 
-    std::u16string comment;
     bool error = false;
     const size_t depth = parser->getDepth();
     while (XmlPullParser::nextChildNode(parser, depth)) {
@@ -873,13 +879,14 @@ bool ResourceParser::parsePlural(XmlPullParser* parser, ParsedResource* outResou
             continue;
         }
 
+        const Source itemSource = mSource.withLine(parser->getLineNumber());
         const std::u16string& elementNamespace = parser->getElementNamespace();
         const std::u16string& elementName = parser->getElementName();
         if (elementNamespace.empty() && elementName == u"item") {
             const auto endAttrIter = parser->endAttributes();
             auto attrIter = parser->findAttribute(u"", u"quantity");
             if (attrIter == endAttrIter || attrIter->value.empty()) {
-                mDiag->error(DiagMessage(source) << "<item> in <plurals> requires attribute "
+                mDiag->error(DiagMessage(itemSource) << "<item> in <plurals> requires attribute "
                              << "'quantity'");
                 error = true;
                 continue;
@@ -900,7 +907,7 @@ bool ResourceParser::parsePlural(XmlPullParser* parser, ParsedResource* outResou
             } else if (trimmedQuantity == u"other") {
                 index = Plural::Other;
             } else {
-                mDiag->error(DiagMessage(mSource.withLine(parser->getLineNumber()))
+                mDiag->error(DiagMessage(itemSource)
                              << "<item> in <plural> has invalid value '" << trimmedQuantity
                              << "' for attribute 'quantity'");
                 error = true;
@@ -908,7 +915,7 @@ bool ResourceParser::parsePlural(XmlPullParser* parser, ParsedResource* outResou
             }
 
             if (plural->values[index]) {
-                mDiag->error(DiagMessage(mSource.withLine(parser->getLineNumber()))
+                mDiag->error(DiagMessage(itemSource)
                              << "duplicate quantity '" << trimmedQuantity << "'");
                 error = true;
                 continue;
@@ -918,11 +925,10 @@ bool ResourceParser::parsePlural(XmlPullParser* parser, ParsedResource* outResou
                                                    kNoRawString))) {
                 error = true;
             }
-        } else if (elementNamespace.empty() &&
-                (elementName == u"skip" || elementName == u"eat-comment")) {
-            comment = u"";
-        } else {
-            mDiag->error(DiagMessage(source) << "unknown tag <" << elementNamespace << ":"
+            plural->values[index]->setSource(itemSource);
+
+        } else if (!shouldIgnoreElement(elementNamespace, elementName)) {
+            mDiag->error(DiagMessage(itemSource) << "unknown tag <" << elementNamespace << ":"
                          << elementName << ">");
             error = true;
         }
@@ -944,43 +950,52 @@ bool ResourceParser::parseDeclareStyleable(XmlPullParser* parser, ParsedResource
     bool error = false;
     const size_t depth = parser->getDepth();
     while (XmlPullParser::nextChildNode(parser, depth)) {
-        if (parser->getEvent() != XmlPullParser::Event::kStartElement) {
-            // Ignore text and comments.
+        if (parser->getEvent() == XmlPullParser::Event::kComment) {
+            comment = util::trimWhitespace(parser->getComment()).toString();
+            continue;
+        } else if (parser->getEvent() != XmlPullParser::Event::kStartElement) {
+            // Ignore text.
             continue;
         }
 
+        const Source itemSource = mSource.withLine(parser->getLineNumber());
         const std::u16string& elementNamespace = parser->getElementNamespace();
         const std::u16string& elementName = parser->getElementName();
         if (elementNamespace.empty() && elementName == u"attr") {
             const auto endAttrIter = parser->endAttributes();
             auto attrIter = parser->findAttribute(u"", u"name");
             if (attrIter == endAttrIter || attrIter->value.empty()) {
-                mDiag->error(DiagMessage(source) << "<attr> tag must have a 'name' attribute");
+                mDiag->error(DiagMessage(itemSource) << "<attr> tag must have a 'name' attribute");
                 error = true;
                 continue;
             }
 
+            // Create the ParsedResource that will add the attribute to the table.
             ParsedResource childResource;
             childResource.name = ResourceName({}, ResourceType::kAttr, attrIter->value);
-            childResource.source = mSource.withLine(parser->getLineNumber());
+            childResource.source = itemSource;
+            childResource.comment = std::move(comment);
 
             if (!parseAttrImpl(parser, &childResource, true)) {
                 error = true;
                 continue;
             }
 
-            styleable->entries.push_back(Reference(childResource.name));
+            // Create the reference to this attribute.
+            Reference childRef(childResource.name);
+            childRef.setComment(childResource.comment);
+            childRef.setSource(itemSource);
+            styleable->entries.push_back(std::move(childRef));
+
             outResource->childResources.push_back(std::move(childResource));
 
-        } else if (elementNamespace.empty() &&
-                (elementName == u"skip" || elementName == u"eat-comment")) {
-            comment = u"";
-
-        } else {
-            mDiag->error(DiagMessage(source) << "unknown tag <" << elementNamespace << ":"
+        } else if (!shouldIgnoreElement(elementNamespace, elementName)) {
+            mDiag->error(DiagMessage(itemSource) << "unknown tag <" << elementNamespace << ":"
                          << elementName << ">");
             error = true;
         }
+
+        comment = {};
     }
 
     if (error) {

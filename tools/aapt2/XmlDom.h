@@ -132,6 +132,8 @@ std::unique_ptr<XmlResource> inflate(std::istream* in, IDiagnostics* diag, const
 std::unique_ptr<XmlResource> inflate(const void* data, size_t dataLen, IDiagnostics* diag,
                                      const Source& source);
 
+Element* findRootElement(Node* node);
+
 /**
  * A visitor interface for the different XML Node subtypes. This will not traverse into
  * children. Use Visitor for that.
