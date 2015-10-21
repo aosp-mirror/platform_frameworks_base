@@ -228,11 +228,7 @@ public final class AccessibilityInteractionClient
                 windows = connection.getWindows();
                 Binder.restoreCallingIdentity(identityToken);
                 if (windows != null) {
-                    final int windowCount = windows.size();
-                    for (int i = 0; i < windowCount; i++) {
-                        AccessibilityWindowInfo window = windows.get(i);
-                        sAccessibilityCache.addWindow(window);
-                    }
+                    sAccessibilityCache.setWindows(windows);
                     return windows;
                 }
             } else {
