@@ -61,12 +61,10 @@
     <string name="needPuk" msgid="919668385956251611">"SIM karta je uzamknutá pomocou kódu PUK. Odomknite ju zadaním kódu PUK."</string>
     <string name="needPuk2" msgid="4526033371987193070">"Ak chcete odblokovať SIM kartu, zadajte kód PUK2."</string>
     <string name="enablePin" msgid="209412020907207950">"Neúspešné, povoľte uzamknutie SIM/RUIM."</string>
-    <plurals name="pinpuk_attempts" formatted="false" msgid="1251012001539225582">
-      <item quantity="few">Zostávajú vám <xliff:g id="NUMBER_1">%d</xliff:g> pokusy, potom sa vaša SIM karta uzamkne.</item>
-      <item quantity="many">Zostáva vám <xliff:g id="NUMBER_1">%d</xliff:g> pokusu, potom sa vaša SIM karta uzamkne.</item>
-      <item quantity="other">Zostáva vám <xliff:g id="NUMBER_1">%d</xliff:g> pokusov, potom sa vaša SIM karta uzamkne.</item>
-      <item quantity="one">Zostáva vám <xliff:g id="NUMBER_0">%d</xliff:g> pokus, potom sa vaša SIM karta uzamkne.</item>
-    </plurals>
+  <plurals name="pinpuk_attempts">
+    <item quantity="one" msgid="6596245285809790142">"Zostáva vám <xliff:g id="NUMBER">%d</xliff:g> pokus, než sa vaša SIM karta uzamkne."</item>
+    <item quantity="other" msgid="7530597808358774740">"Počet zostávajúcich pokusov pred uzamknutím SIM karty: <xliff:g id="NUMBER">%d</xliff:g>."</item>
+  </plurals>
     <string name="imei" msgid="2625429890869005782">"IMEI"</string>
     <string name="meid" msgid="4841221237681254195">"MEID"</string>
     <string name="ClipMmi" msgid="6952821216480289285">"Prichádzajúca identifikácia volajúceho"</string>
@@ -356,6 +354,8 @@
     <string name="permdesc_flashlight" msgid="6522284794568368310">"Umožňuje aplikácii ovládať svetlo."</string>
     <string name="permlab_callPhone" msgid="3925836347681847954">"priamo volať na telefónne čísla"</string>
     <string name="permdesc_callPhone" msgid="3740797576113760827">"Umožňuje aplikácii volať telefónne čísla bez vášho zásahu. V dôsledku toho sa môžu účtovať neočakávané poplatky alebo sa môžu uskutočniť neočakávané hovory. Toto povolenie neumožňuje aplikácii volať na čísla tiesňového volania."</string>
+    <string name="permlab_accessImsCallService" msgid="3574943847181793918">"prístup k službe volania IMS"</string>
+    <string name="permdesc_accessImsCallService" msgid="8992884015198298775">"Umožňuje aplikácii používať službu okamžitých správ (IMS) na volanie bez intervencie používateľa."</string>
     <string name="permlab_readPhoneState" msgid="9178228524507610486">"čítať stav a identitu telefónu"</string>
     <string name="permdesc_readPhoneState" msgid="1639212771826125528">"Umožňuje aplikácii pristupovať k telefónnym funkciám zariadenia. Aplikácia s týmto povolením môže určiť telefónne číslo a ID zariadenia, či práve prebieha hovor, a vzdialené číslo, s ktorým je prostredníctvom hovoru nadviazané spojenie."</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1531731435011495015">"zabránenie prechodu tabletu do režimu spánku"</string>
@@ -434,6 +434,7 @@
     <string name="fingerprint_name_template" msgid="5870957565512716938">"Prst: <xliff:g id="FINGERID">%d</xliff:g>"</string>
   <string-array name="fingerprint_error_vendor">
   </string-array>
+    <string name="fingerprint_icon_content_description" msgid="2340202869968465936">"Ikona odtlačku prsta"</string>
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"čítať nastavenia synchronizácie"</string>
     <string name="permdesc_readSyncSettings" msgid="2706745674569678644">"Umožňuje aplikácii čítať nastavenia synchronizácie v účte. Môže napríklad určiť, či je s účtom synchronizovaná aplikácia Ľudia."</string>
     <string name="permlab_writeSyncSettings" msgid="5408694875793945314">"zapnúť alebo vypnúť synchronizáciu"</string>
@@ -712,6 +713,7 @@
     <string name="lockscreen_access_pattern_cell_added" msgid="6756031208359292487">"Bunka bola pridaná"</string>
     <string name="lockscreen_access_pattern_cell_added_verbose" msgid="7264580781744026939">"Bola pridaná bunka <xliff:g id="CELL_INDEX">%1$s</xliff:g>"</string>
     <string name="lockscreen_access_pattern_detected" msgid="4988730895554057058">"Bezpečnostný vzor bol dokončený"</string>
+    <string name="lockscreen_access_pattern_area" msgid="400813207572953209">"Oblasť na zadanie bezpečnostného vzoru."</string>
     <string name="keyguard_accessibility_widget_changed" msgid="5678624624681400191">"%1$s. Miniaplikácia %2$d z %3$d."</string>
     <string name="keyguard_accessibility_add_widget" msgid="8273277058724924654">"Pridať miniaplikáciu."</string>
     <string name="keyguard_accessibility_widget_empty_slot" msgid="1281505703307930757">"Prázdne"</string>
@@ -807,12 +809,10 @@
     <string name="enable_explore_by_touch_warning_message" product="default" msgid="2708199672852373195">"Služba <xliff:g id="ACCESSIBILITY_SERVICE_NAME">%1$s</xliff:g> požaduje povolenie funkcie Preskúmanie dotykom. Ak je funkcia Preskúmanie dotykom zapnutá, môžete počuť alebo vidieť popisy objektov pod vaším prstom alebo ovládať telefón gestami."</string>
     <string name="oneMonthDurationPast" msgid="7396384508953779925">"pred 1 mesiacom"</string>
     <string name="beforeOneMonthDurationPast" msgid="909134546836499826">"Viac ako pred 1 mesiacom"</string>
-    <plurals name="last_num_days" formatted="false" msgid="5104533550723932025">
-      <item quantity="few">Posledné <xliff:g id="COUNT_1">%d</xliff:g> dni</item>
-      <item quantity="many">Posledného <xliff:g id="COUNT_1">%d</xliff:g> dňa</item>
-      <item quantity="other">Posledných <xliff:g id="COUNT_1">%d</xliff:g> dní</item>
-      <item quantity="one">Posledný <xliff:g id="COUNT_0">%d</xliff:g> deň</item>
-    </plurals>
+  <plurals name="last_num_days">
+    <item quantity="one" msgid="7555846096746489821">"Posledný <xliff:g id="COUNT">%d</xliff:g> deň"</item>
+    <item quantity="other" msgid="3069992808164318268">"Posledných <xliff:g id="COUNT">%d</xliff:g> dní"</item>
+  </plurals>
     <string name="last_month" msgid="3959346739979055432">"Minulý mesiac"</string>
     <string name="older" msgid="5211975022815554840">"Staršie"</string>
     <string name="preposition_for_date" msgid="9093949757757445117">"dňa <xliff:g id="DATE">%s</xliff:g>"</string>
@@ -830,24 +830,18 @@
     <string name="weeks" msgid="6509623834583944518">"týždne"</string>
     <string name="year" msgid="4001118221013892076">"rok"</string>
     <string name="years" msgid="6881577717993213522">"roky"</string>
-    <plurals name="duration_seconds" formatted="false" msgid="4527986939729687805">
-      <item quantity="few"><xliff:g id="COUNT">%d</xliff:g> sekundy</item>
-      <item quantity="many"><xliff:g id="COUNT">%d</xliff:g> sekundy</item>
-      <item quantity="other"><xliff:g id="COUNT">%d</xliff:g> sekúnd</item>
-      <item quantity="one">1 sekunda</item>
-    </plurals>
-    <plurals name="duration_minutes" formatted="false" msgid="643786953939956125">
-      <item quantity="few"><xliff:g id="COUNT">%d</xliff:g> minúty</item>
-      <item quantity="many"><xliff:g id="COUNT">%d</xliff:g> minúty</item>
-      <item quantity="other"><xliff:g id="COUNT">%d</xliff:g> minút</item>
-      <item quantity="one">1 minúta</item>
-    </plurals>
-    <plurals name="duration_hours" formatted="false" msgid="6826233369186668274">
-      <item quantity="few"><xliff:g id="COUNT">%d</xliff:g> hodiny</item>
-      <item quantity="many"><xliff:g id="COUNT">%d</xliff:g> hodiny</item>
-      <item quantity="other"><xliff:g id="COUNT">%d</xliff:g> hodín</item>
-      <item quantity="one">1 hodina</item>
-    </plurals>
+  <plurals name="duration_seconds">
+    <item quantity="one" msgid="6962015528372969481">"1 s"</item>
+    <item quantity="other" msgid="1886107766577166786">"<xliff:g id="COUNT">%d</xliff:g> s"</item>
+  </plurals>
+  <plurals name="duration_minutes">
+    <item quantity="one" msgid="4915414002546085617">"1 min."</item>
+    <item quantity="other" msgid="3165187169224908775">"<xliff:g id="COUNT">%d</xliff:g> min."</item>
+  </plurals>
+  <plurals name="duration_hours">
+    <item quantity="one" msgid="8917467491248809972">"1 hod."</item>
+    <item quantity="other" msgid="3863962854246773930">"<xliff:g id="COUNT">%d</xliff:g> hod."</item>
+  </plurals>
     <string name="VideoView_error_title" msgid="3534509135438353077">"Problém s videom"</string>
     <string name="VideoView_error_text_invalid_progressive_playback" msgid="3186670335938670444">"Je nám ľúto, ale toto video sa nedá streamovať do tohto zariadenia."</string>
     <string name="VideoView_error_text_unknown" msgid="3450439155187810085">"Toto video nie je možné prehrať."</string>
@@ -960,18 +954,14 @@
     <string name="ringtone_silent" msgid="7937634392408977062">"Žiadny"</string>
     <string name="ringtone_picker_title" msgid="3515143939175119094">"Tóny zvonenia"</string>
     <string name="ringtone_unknown" msgid="5477919988701784788">"Neznámy tón zvonenia"</string>
-    <plurals name="wifi_available" formatted="false" msgid="7900333017752027322">
-      <item quantity="few">K dispozícii sú siete Wi-Fi</item>
-      <item quantity="many">K dispozícii sú siete Wi-Fi</item>
-      <item quantity="other">K dispozícii sú siete Wi-Fi</item>
-      <item quantity="one">K dispozícii je sieť Wi-Fi</item>
-    </plurals>
-    <plurals name="wifi_available_detailed" formatted="false" msgid="1140699367193975606">
-      <item quantity="few">K dispozícii sú verejné siete Wi-Fi</item>
-      <item quantity="many">K dispozícii sú verejné siete Wi-Fi</item>
-      <item quantity="other">K dispozícii sú verejné siete Wi-Fi</item>
-      <item quantity="one">K dispozícii je verejná sieť Wi-Fi</item>
-    </plurals>
+  <plurals name="wifi_available">
+    <item quantity="one" msgid="6654123987418168693">"K dispozícii je sieť Wi-Fi"</item>
+    <item quantity="other" msgid="4192424489168397386">"K dispozícii sú siete Wi-Fi."</item>
+  </plurals>
+  <plurals name="wifi_available_detailed">
+    <item quantity="one" msgid="1634101450343277345">"K dispozícii je verejná sieť Wi-Fi"</item>
+    <item quantity="other" msgid="7915895323644292768">"K dispozícii sú verejné siete Wi-Fi"</item>
+  </plurals>
     <string name="wifi_available_sign_in" msgid="9157196203958866662">"Prihlásiť sa do siete Wi-Fi"</string>
     <string name="network_available_sign_in" msgid="1848877297365446605">"Prihlásenie do siete"</string>
     <!-- no translation found for network_available_sign_in_detailed (8000081941447976118) -->
@@ -1051,18 +1041,12 @@
     <string name="usb_mtp_notification_title" msgid="8396264943589760855">"USB na prenos súborov"</string>
     <string name="usb_ptp_notification_title" msgid="1347328437083192112">"USB na prenos fotiek"</string>
     <string name="usb_midi_notification_title" msgid="4850904915889144654">"USB na pripojenie zariadenia MIDI"</string>
-    <string name="usb_cd_installer_notification_title" msgid="6774712827892090754">"Pripojené ako inštalátor"</string>
     <string name="usb_accessory_notification_title" msgid="7848236974087653666">"Pripojené k periférnemu zariadeniu USB"</string>
     <string name="usb_notification_message" msgid="7347368030849048437">"Ďalšie možnosti zobrazíte klepnutím."</string>
-    <string name="extmedia_format_title" product="nosdcard" msgid="9020092196061007262">"Formátovať ukladací priestor USB?"</string>
-    <string name="extmedia_format_title" product="default" msgid="3648415921526526069">"Formátovať SD kartu?"</string>
-    <string name="extmedia_format_message" product="nosdcard" msgid="3934016853425761078">"Všetky súbory uložené v ukladacom priestore USB budú vymazané. Táto akcia sa nedá vrátiť späť!"</string>
-    <string name="extmedia_format_message" product="default" msgid="14131895027543830">"Všetky údaje na vašej karte budú stratené."</string>
-    <string name="extmedia_format_button_format" msgid="4131064560127478695">"Formát"</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"Ladenie cez USB pripojené"</string>
-    <string name="adb_active_notification_message" msgid="1016654627626476142">"Klepnutím zakážete ladenie USB"</string>
+    <string name="adb_active_notification_message" msgid="1016654627626476142">"Klepnutím zakážete ladenie cez USB"</string>
     <string name="select_input_method" msgid="8547250819326693584">"Zmeniť klávesnicu"</string>
-    <string name="configure_input_methods" msgid="4769971288371946846">"Vybrať klávesnice"</string>
+    <string name="configure_input_methods" msgid="4769971288371946846">"Vybrať klávesnicu"</string>
     <string name="show_ime" msgid="9157568568695230830">"Zobraziť metódu vstupu"</string>
     <string name="hardware" msgid="7517821086888990278">"Hardvér"</string>
     <string name="select_keyboard_layout_notification_title" msgid="1407367017263030773">"Zvoľte rozloženie klávesnice"</string>
@@ -1161,26 +1145,13 @@
     <string name="skip_button_label" msgid="1275362299471631819">"Preskočiť"</string>
     <string name="no_matches" msgid="8129421908915840737">"Žiadne zhody"</string>
     <string name="find_on_page" msgid="1946799233822820384">"Vyhľadať na stránke"</string>
-    <plurals name="matches_found" formatted="false" msgid="1210884353962081884">
-      <item quantity="few"><xliff:g id="INDEX">%d</xliff:g> z <xliff:g id="TOTAL">%d</xliff:g></item>
-      <item quantity="many"><xliff:g id="INDEX">%d</xliff:g> z <xliff:g id="TOTAL">%d</xliff:g></item>
-      <item quantity="other"><xliff:g id="INDEX">%d</xliff:g> z <xliff:g id="TOTAL">%d</xliff:g></item>
-      <item quantity="one">1 zápas</item>
-    </plurals>
+  <plurals name="matches_found">
+    <item quantity="one" msgid="8167147081136579439">"Počet zhôd: 1"</item>
+    <item quantity="other" msgid="4641872797067609177">"<xliff:g id="INDEX">%d</xliff:g> z <xliff:g id="TOTAL">%d</xliff:g>"</item>
+  </plurals>
     <string name="action_mode_done" msgid="7217581640461922289">"Hotovo"</string>
-    <string name="progress_unmounting" product="nosdcard" msgid="3923810448507612746">"Prebieha odpájanie úložiska USB..."</string>
-    <string name="progress_unmounting" product="default" msgid="1327894998409537190">"Prebieha odpájanie SD karty..."</string>
     <string name="progress_erasing" product="nosdcard" msgid="4521573321524340058">"Prebieha vymazávanie ukladacieho priestoru USB..."</string>
     <string name="progress_erasing" product="default" msgid="6596988875507043042">"Prebieha vymazávanie SD karty..."</string>
-    <string name="format_error" product="nosdcard" msgid="6299769563624776948">"Nepodarilo sa vymazať ukladací priestor USB"</string>
-    <string name="format_error" product="default" msgid="7315248696644510935">"Nepodarilo sa vymazať SD kartu"</string>
-    <string name="media_bad_removal" msgid="7960864061016603281">"SD karta nebola pred odstránením odpojená."</string>
-    <string name="media_checking" product="nosdcard" msgid="418188720009569693">"Prebieha kontrola ukladacieho priestoru USB."</string>
-    <string name="media_checking" product="default" msgid="7334762503904827481">"Prebieha kontrola SD karty."</string>
-    <string name="media_removed" msgid="7001526905057952097">"SD karta bola odstránená."</string>
-    <string name="media_shared" product="nosdcard" msgid="5830814349250834225">"Ukladací priestor USB je momentálne používaný počítačom."</string>
-    <string name="media_shared" product="default" msgid="5706130568133540435">"SD karta sa momentálne používa počítačom."</string>
-    <string name="media_unknown_state" msgid="729192782197290385">"Neznámy stav externého média."</string>
     <string name="share" msgid="1778686618230011964">"Zdieľať"</string>
     <string name="find" msgid="4808270900322985960">"Nájsť"</string>
     <string name="websearch" msgid="4337157977400211589">"Hľadať na webe"</string>
@@ -1455,12 +1426,10 @@
     <string name="restr_pin_create_pin" msgid="8017600000263450337">"Vytvoriť kód PIN pre obmedzenia upravovania"</string>
     <string name="restr_pin_error_doesnt_match" msgid="2224214190906994548">"Kódy PIN sa nezhodujú. Skúste to znova."</string>
     <string name="restr_pin_error_too_short" msgid="8173982756265777792">"Kód PIN je príliš krátky. Musí mať minimálne 4 číslice."</string>
-    <plurals name="restr_pin_countdown" formatted="false" msgid="9061246974881224688">
-      <item quantity="few">Skúste to znova o <xliff:g id="COUNT">%d</xliff:g> sekundy</item>
-      <item quantity="many">Skúste to znova o <xliff:g id="COUNT">%d</xliff:g> sekundy</item>
-      <item quantity="other">Skúste to znova o <xliff:g id="COUNT">%d</xliff:g> sekúnd</item>
-      <item quantity="one">Skúste to znova o 1 sekundu</item>
-    </plurals>
+  <plurals name="restr_pin_countdown">
+    <item quantity="one" msgid="311050995198548675">"Skúste to zas o 1 s"</item>
+    <item quantity="other" msgid="4730868920742952817">"Skúste to zas o <xliff:g id="COUNT">%d</xliff:g> s"</item>
+  </plurals>
     <string name="restr_pin_try_later" msgid="973144472490532377">"Skúste to znova neskôr"</string>
     <string name="immersive_cling_title" msgid="8394201622932303336">"Zobrazenie na celú obrazovku"</string>
     <string name="immersive_cling_description" msgid="3482371193207536040">"Ukončite prejdením prstom z hornej časti nadol."</string>
@@ -1486,55 +1455,40 @@
     <string name="package_updated_device_owner" msgid="8856631322440187071">"Aktualizované správcom"</string>
     <string name="package_deleted_device_owner" msgid="7650577387493101353">"Odstránený správcom"</string>
     <string name="battery_saver_description" msgid="1960431123816253034">"S cieľom predĺžiť výdrž batérie zníži šetrič batérie výkonnosť zariadenia a obmedzí vibrácie, služby určovania polohy a dátové prenosy na pozadí. Pošta, čet a ďalšie aplikácie, ktoré sa spoliehajú na synchronizáciu, sa možno nebudú aktualizovať, dokiaľ ich neotvoríte.\n\nPri nabíjaní zariadenia sa šetrič batérie automaticky vypne."</string>
-    <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="4367877408072000848">
-      <item quantity="few">%1$d minúty (do <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
-      <item quantity="many">%1$d minúty (do <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
-      <item quantity="other">%1$d minút (do <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
-      <item quantity="one">Minútu (do <xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g>)</item>
-    </plurals>
-    <plurals name="zen_mode_duration_minutes_summary_short" formatted="false" msgid="6830154222366042597">
-      <item quantity="few">Na %1$d min (do <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
-      <item quantity="many">Na %1$d min (do <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
-      <item quantity="other">Na %1$d min (do <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
-      <item quantity="one">Na 1 min (do <xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g>)</item>
-    </plurals>
-    <plurals name="zen_mode_duration_hours_summary" formatted="false" msgid="8152974162096743862">
-      <item quantity="few">%1$d hodiny (do <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
-      <item quantity="many">%1$d hodiny (do <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
-      <item quantity="other">%1$d hodín (do <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
-      <item quantity="one">Hodinu (do <xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g>)</item>
-    </plurals>
-    <plurals name="zen_mode_duration_hours_summary_short" formatted="false" msgid="4787552595253082371">
-      <item quantity="few">Na %1$d h (do <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
-      <item quantity="many">Na %1$d h (do <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
-      <item quantity="other">Na %1$d h (do <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
-      <item quantity="one">Na 1 h (do <xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g>)</item>
-    </plurals>
-    <plurals name="zen_mode_duration_minutes" formatted="false" msgid="5127407202506485571">
-      <item quantity="few">%d minúty</item>
-      <item quantity="many">%d minúty</item>
-      <item quantity="other">%d minút</item>
-      <item quantity="one">Minútu</item>
-    </plurals>
-    <plurals name="zen_mode_duration_minutes_short" formatted="false" msgid="2199350154433426128">
-      <item quantity="few">Na %d min</item>
-      <item quantity="many">Na %d min</item>
-      <item quantity="other">Na %d min</item>
-      <item quantity="one">Na 1 min</item>
-    </plurals>
-    <plurals name="zen_mode_duration_hours" formatted="false" msgid="3938821308277433854">
-      <item quantity="few">%d hodiny</item>
-      <item quantity="many">%d hodiny</item>
-      <item quantity="other">%d hodín</item>
-      <item quantity="one">Hodinu</item>
-    </plurals>
-    <plurals name="zen_mode_duration_hours_short" formatted="false" msgid="6748277774662434217">
-      <item quantity="few">Na %d h</item>
-      <item quantity="many">Na %d h</item>
-      <item quantity="other">Na %d h</item>
-      <item quantity="one">Na 1 h</item>
-    </plurals>
+  <plurals name="zen_mode_duration_minutes_summary">
+    <item quantity="one" msgid="3177683545388923234">"Na minútu (do <xliff:g id="FORMATTEDTIME">%2$s</xliff:g>)"</item>
+    <item quantity="other" msgid="2787867221129368935">"Na %1$d min. (do <xliff:g id="FORMATTEDTIME">%2$s</xliff:g>)"</item>
+  </plurals>
+  <plurals name="zen_mode_duration_minutes_summary_short">
+    <item quantity="one" msgid="4097046271119330874">"Na 1 min (do <xliff:g id="FORMATTEDTIME">%2$s</xliff:g>)"</item>
+    <item quantity="other" msgid="9128259640307810602">"Na %1$d min (do <xliff:g id="FORMATTEDTIME">%2$s</xliff:g>)"</item>
+  </plurals>
+  <plurals name="zen_mode_duration_hours_summary">
+    <item quantity="one" msgid="597194865053253679">"Na hodinu (do <xliff:g id="FORMATTEDTIME">%2$s</xliff:g>)"</item>
+    <item quantity="other" msgid="2827214920627669898">"Na %1$d hod. (do <xliff:g id="FORMATTEDTIME">%2$s</xliff:g>)"</item>
+  </plurals>
+  <plurals name="zen_mode_duration_hours_summary_short">
+    <item quantity="one" msgid="342658185856495801">"Na 1 hod (do <xliff:g id="FORMATTEDTIME">%2$s</xliff:g>)"</item>
+    <item quantity="other" msgid="6842148190293675591">"Na %1$d hod (do <xliff:g id="FORMATTEDTIME">%2$s</xliff:g>)"</item>
+  </plurals>
+  <plurals name="zen_mode_duration_minutes">
+    <item quantity="one" msgid="9040808414992812341">"Na jednu minútu"</item>
+    <item quantity="other" msgid="6924190729213550991">"Na %d min"</item>
+  </plurals>
+  <plurals name="zen_mode_duration_minutes_short">
+    <item quantity="one" msgid="4125166172281866385">"Na 1 min"</item>
+    <item quantity="other" msgid="5131202943429775644">"Na %d min"</item>
+  </plurals>
+  <plurals name="zen_mode_duration_hours">
+    <item quantity="one" msgid="3480040795582254384">"Na 1 h"</item>
+    <item quantity="other" msgid="5408537517529822157">"Na %d h"</item>
+  </plurals>
+  <plurals name="zen_mode_duration_hours_short">
+    <item quantity="one" msgid="6798191385685158694">"Na 1 hod"</item>
+    <item quantity="other" msgid="8464879049844138499">"Na %d hod"</item>
+  </plurals>
     <string name="zen_mode_until" msgid="7336308492289875088">"Do <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
+    <string name="zen_mode_alarm" msgid="9128205721301330797">"Do <xliff:g id="FORMATTEDTIME">%1$s</xliff:g> (ďalší budík)"</string>
     <string name="zen_mode_forever" msgid="7420011936770086993">"Dokým túto funkciu nevypnete"</string>
     <string name="zen_mode_forever_dnd" msgid="3792132696572189081">"Dokým nevypnete stav Nerušiť"</string>
     <string name="zen_mode_rule_name_combination" msgid="191109939968076477">"<xliff:g id="FIRST">%1$s</xliff:g> / <xliff:g id="REST">%2$s</xliff:g>"</string>
@@ -1559,10 +1513,8 @@
     <string name="usb_midi_peripheral_product_name" msgid="4971827859165280403">"Port USB pre periférne zariadenia"</string>
     <string name="floating_toolbar_open_overflow_description" msgid="4797287862999444631">"Ďalšie možnosti"</string>
     <string name="floating_toolbar_close_overflow_description" msgid="559796923090723804">"Zatvoriť rozbaľovaciu ponuku"</string>
-    <plurals name="selected_count" formatted="false" msgid="7187339492915744615">
-      <item quantity="few">Vybrané: <xliff:g id="COUNT_1">%1$d</xliff:g></item>
-      <item quantity="many">Vybrané: <xliff:g id="COUNT_1">%1$d</xliff:g></item>
-      <item quantity="other">Vybrané: <xliff:g id="COUNT_1">%1$d</xliff:g></item>
-      <item quantity="one">Vybrané: <xliff:g id="COUNT_0">%1$d</xliff:g></item>
-    </plurals>
+  <plurals name="selected_count">
+    <item quantity="one" msgid="8857281055159991036">"Vybrané: <xliff:g id="COUNT">%1$d</xliff:g>"</item>
+    <item quantity="other" msgid="2608606845335294849">"Vybrané: <xliff:g id="COUNT">%1$d</xliff:g>"</item>
+  </plurals>
 </resources>

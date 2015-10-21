@@ -61,12 +61,10 @@
     <string name="needPuk" msgid="919668385956251611">"SIM-карта заблокирована с помощью кода PUK. Для разблокировки введите код PUK."</string>
     <string name="needPuk2" msgid="4526033371987193070">"Для разблокировки SIM-карты введите PUK2."</string>
     <string name="enablePin" msgid="209412020907207950">"Произошла ошибка. Включите блокировку SIM-карты или карты R-UIM."</string>
-    <plurals name="pinpuk_attempts" formatted="false" msgid="1251012001539225582">
-      <item quantity="one">Осталась <xliff:g id="NUMBER_1">%d</xliff:g> попытка. После этого SIM-карта будет заблокирована.</item>
-      <item quantity="few">Осталось <xliff:g id="NUMBER_1">%d</xliff:g> попытки. После этого SIM-карта будет заблокирована.</item>
-      <item quantity="many">Осталось <xliff:g id="NUMBER_1">%d</xliff:g> попыток. После этого SIM-карта будет заблокирована.</item>
-      <item quantity="other">Осталось <xliff:g id="NUMBER_1">%d</xliff:g> попыток. После этого SIM-карта будет заблокирована.</item>
-    </plurals>
+  <plurals name="pinpuk_attempts">
+    <item quantity="one" msgid="6596245285809790142">"Осталось попыток: <xliff:g id="NUMBER">%d</xliff:g>. После этого SIM-карта будет заблокирована."</item>
+    <item quantity="other" msgid="7530597808358774740">"Осталось попыток: <xliff:g id="NUMBER">%d</xliff:g>. После этого SIM-карта будет заблокирована."</item>
+  </plurals>
     <string name="imei" msgid="2625429890869005782">"IMEI"</string>
     <string name="meid" msgid="4841221237681254195">"MEID"</string>
     <string name="ClipMmi" msgid="6952821216480289285">"Идентификация вызывающего абонента"</string>
@@ -235,9 +233,9 @@
     <string name="permgrouplab_calendar" msgid="5863508437783683902">"Календарь"</string>
     <string name="permgroupdesc_calendar" msgid="3889615280211184106">"доступ к календарю"</string>
     <string name="permgrouplab_sms" msgid="228308803364967808">"SMS"</string>
-    <string name="permgroupdesc_sms" msgid="4656988620100940350">"отправка и просмотр SMS-сообщений"</string>
+    <string name="permgroupdesc_sms" msgid="4656988620100940350">"отправлять и просматривать SMS-сообщения"</string>
     <string name="permgrouplab_storage" msgid="1971118770546336966">"Память"</string>
-    <string name="permgroupdesc_storage" msgid="637758554581589203">"доступ к фотографиям, файлам и мультимедийному контенту на вашем устройстве"</string>
+    <string name="permgroupdesc_storage" msgid="637758554581589203">"доступ к фото, мультимедиа и файлам на вашем устройстве"</string>
     <string name="permgrouplab_microphone" msgid="171539900250043464">"Микрофон"</string>
     <string name="permgroupdesc_microphone" msgid="4988812113943554584">"запись аудио"</string>
     <string name="permgrouplab_camera" msgid="4820372495894586615">"Камера"</string>
@@ -356,6 +354,8 @@
     <string name="permdesc_flashlight" msgid="6522284794568368310">"Приложение сможет контролировать вспышку."</string>
     <string name="permlab_callPhone" msgid="3925836347681847954">"Осуществление телефонных вызовов"</string>
     <string name="permdesc_callPhone" msgid="3740797576113760827">"Приложение сможет без вашего участия звонить на любой номер телефона. Это не относится к номерам экстренных служб. Вредоносные программы смогут совершать вызовы без вашего разрешения, что может привести к непредвиденным расходам."</string>
+    <string name="permlab_accessImsCallService" msgid="3574943847181793918">"совершение звонков с помощью службы IMS"</string>
+    <string name="permdesc_accessImsCallService" msgid="8992884015198298775">"Позволяет приложению совершать звонки с помощью службы IMS без вашего вмешательства."</string>
     <string name="permlab_readPhoneState" msgid="9178228524507610486">"Получение данных о статусе телефона"</string>
     <string name="permdesc_readPhoneState" msgid="1639212771826125528">"Приложение получит доступ к функциям телефона на устройстве. Кроме того, оно сможет определять номера телефонов и серийные номера моделей, состояние активности вызова, а также удаленные номера, с которыми установлено соединение."</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1531731435011495015">"Отключение спящего режима"</string>
@@ -434,6 +434,7 @@
     <string name="fingerprint_name_template" msgid="5870957565512716938">"Палец <xliff:g id="FINGERID">%d</xliff:g>"</string>
   <string-array name="fingerprint_error_vendor">
   </string-array>
+    <string name="fingerprint_icon_content_description" msgid="2340202869968465936">"Значок отпечатка пальца"</string>
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"Просмотр настроек синхронизации"</string>
     <string name="permdesc_readSyncSettings" msgid="2706745674569678644">"Приложение сможет просматривать настройки синхронизации аккаунта, например определять, включена ли синхронизация для приложения \"Контакты\"."</string>
     <string name="permlab_writeSyncSettings" msgid="5408694875793945314">"Включение/выключение синхронизации"</string>
@@ -507,7 +508,7 @@
     <string name="policydesc_resetPassword" msgid="1278323891710619128">"Изменять блокировку экрана."</string>
     <string name="policylab_forceLock" msgid="2274085384704248431">"Блокировка экрана"</string>
     <string name="policydesc_forceLock" msgid="1141797588403827138">"Управлять способом и временем блокировки экрана."</string>
-    <string name="policylab_wipeData" msgid="3910545446758639713">"Удалить все данные"</string>
+    <string name="policylab_wipeData" msgid="3910545446758639713">"Удаление всех данных"</string>
     <string name="policydesc_wipeData" product="tablet" msgid="4306184096067756876">"Удалять все данные на планшетном ПК без предупреждения путем сброса настроек."</string>
     <string name="policydesc_wipeData" product="tv" msgid="5816221315214527028">"Сброс настроек и удаление всех данных на телевизоре без предупреждения."</string>
     <string name="policydesc_wipeData" product="default" msgid="5096895604574188391">"Удалять все данные на телефоне без предупреждения путем сброса настроек."</string>
@@ -630,7 +631,7 @@
     <string name="relationTypeMother" msgid="4578571352962758304">"Мать"</string>
     <string name="relationTypeParent" msgid="4755635567562925226">"Родитель"</string>
     <string name="relationTypePartner" msgid="7266490285120262781">"Партнер"</string>
-    <string name="relationTypeReferredBy" msgid="101573059844135524">"Рекомендуют:"</string>
+    <string name="relationTypeReferredBy" msgid="101573059844135524">"Рекомендован"</string>
     <string name="relationTypeRelative" msgid="1799819930085610271">"Родственник"</string>
     <string name="relationTypeSister" msgid="1735983554479076481">"Сестра"</string>
     <string name="relationTypeSpouse" msgid="394136939428698117">"Супруг(а)"</string>
@@ -712,6 +713,7 @@
     <string name="lockscreen_access_pattern_cell_added" msgid="6756031208359292487">"Ячейка добавлена"</string>
     <string name="lockscreen_access_pattern_cell_added_verbose" msgid="7264580781744026939">"Ячейка <xliff:g id="CELL_INDEX">%1$s</xliff:g> добавлена"</string>
     <string name="lockscreen_access_pattern_detected" msgid="4988730895554057058">"Графический ключ введен"</string>
+    <string name="lockscreen_access_pattern_area" msgid="400813207572953209">"Область ввода графического ключа."</string>
     <string name="keyguard_accessibility_widget_changed" msgid="5678624624681400191">"%1$s. Виджет %2$d из %3$d."</string>
     <string name="keyguard_accessibility_add_widget" msgid="8273277058724924654">"Добавить виджет"</string>
     <string name="keyguard_accessibility_widget_empty_slot" msgid="1281505703307930757">"Пусто"</string>
@@ -807,12 +809,10 @@
     <string name="enable_explore_by_touch_warning_message" product="default" msgid="2708199672852373195">"<xliff:g id="ACCESSIBILITY_SERVICE_NAME">%1$s</xliff:g> хочет включить функцию \"Аудиоподсказки\". Она позволяет прослушивать или просматривать описание элементов, которых вы касаетесь, и управлять телефоном с помощью жестов."</string>
     <string name="oneMonthDurationPast" msgid="7396384508953779925">"1 месяц назад"</string>
     <string name="beforeOneMonthDurationPast" msgid="909134546836499826">"Более месяца назад"</string>
-    <plurals name="last_num_days" formatted="false" msgid="5104533550723932025">
-      <item quantity="one">За последний <xliff:g id="COUNT_1">%d</xliff:g> день</item>
-      <item quantity="few">За последние <xliff:g id="COUNT_1">%d</xliff:g> дня</item>
-      <item quantity="many">За последние <xliff:g id="COUNT_1">%d</xliff:g> дней</item>
-      <item quantity="other">За последние <xliff:g id="COUNT_1">%d</xliff:g> дня</item>
-    </plurals>
+  <plurals name="last_num_days">
+    <item quantity="one" msgid="7555846096746489821">"За последний <xliff:g id="COUNT">%d</xliff:g> день"</item>
+    <item quantity="other" msgid="3069992808164318268">"Последние <xliff:g id="COUNT">%d</xliff:g> дн."</item>
+  </plurals>
     <string name="last_month" msgid="3959346739979055432">"Прошлый месяц"</string>
     <string name="older" msgid="5211975022815554840">"Еще раньше"</string>
     <string name="preposition_for_date" msgid="9093949757757445117">"<xliff:g id="DATE">%s</xliff:g>"</string>
@@ -830,24 +830,18 @@
     <string name="weeks" msgid="6509623834583944518">"нед."</string>
     <string name="year" msgid="4001118221013892076">"г."</string>
     <string name="years" msgid="6881577717993213522">"г."</string>
-    <plurals name="duration_seconds" formatted="false" msgid="4527986939729687805">
-      <item quantity="one"><xliff:g id="COUNT">%d</xliff:g> секунда</item>
-      <item quantity="few"><xliff:g id="COUNT">%d</xliff:g> секунды</item>
-      <item quantity="many"><xliff:g id="COUNT">%d</xliff:g> секунд</item>
-      <item quantity="other"><xliff:g id="COUNT">%d</xliff:g> секунд</item>
-    </plurals>
-    <plurals name="duration_minutes" formatted="false" msgid="643786953939956125">
-      <item quantity="one"><xliff:g id="COUNT">%d</xliff:g> минута</item>
-      <item quantity="few"><xliff:g id="COUNT">%d</xliff:g> минуты</item>
-      <item quantity="many"><xliff:g id="COUNT">%d</xliff:g> минут</item>
-      <item quantity="other"><xliff:g id="COUNT">%d</xliff:g> минут</item>
-    </plurals>
-    <plurals name="duration_hours" formatted="false" msgid="6826233369186668274">
-      <item quantity="one"><xliff:g id="COUNT">%d</xliff:g> час</item>
-      <item quantity="few"><xliff:g id="COUNT">%d</xliff:g> часа</item>
-      <item quantity="many"><xliff:g id="COUNT">%d</xliff:g> часов</item>
-      <item quantity="other"><xliff:g id="COUNT">%d</xliff:g> часов</item>
-    </plurals>
+  <plurals name="duration_seconds">
+    <item quantity="one" msgid="6962015528372969481">"1 сек."</item>
+    <item quantity="other" msgid="1886107766577166786">"<xliff:g id="COUNT">%d</xliff:g> сек."</item>
+  </plurals>
+  <plurals name="duration_minutes">
+    <item quantity="one" msgid="4915414002546085617">"1 мин."</item>
+    <item quantity="other" msgid="3165187169224908775">"<xliff:g id="COUNT">%d</xliff:g> мин."</item>
+  </plurals>
+  <plurals name="duration_hours">
+    <item quantity="one" msgid="8917467491248809972">"1 ч."</item>
+    <item quantity="other" msgid="3863962854246773930">"<xliff:g id="COUNT">%d</xliff:g> ч."</item>
+  </plurals>
     <string name="VideoView_error_title" msgid="3534509135438353077">"Ошибка"</string>
     <string name="VideoView_error_text_invalid_progressive_playback" msgid="3186670335938670444">"Это видео не предназначено для потокового воспроизведения на данном устройстве."</string>
     <string name="VideoView_error_text_unknown" msgid="3450439155187810085">"Не удалось воспроизвести видео."</string>
@@ -910,7 +904,7 @@
     <string name="anr_application_process" msgid="8941757607340481057">"Приложение \"<xliff:g id="APPLICATION">%1$s</xliff:g>\" не отвечает. Закрыть его?"</string>
     <string name="anr_process" msgid="6513209874880517125">"Приложение \"<xliff:g id="PROCESS">%1$s</xliff:g>\" не отвечает.\n\nЗакрыть его?"</string>
     <string name="force_close" msgid="8346072094521265605">"ОК"</string>
-    <string name="report" msgid="4060218260984795706">"Отзыв"</string>
+    <string name="report" msgid="4060218260984795706">"Отправить отчет"</string>
     <string name="wait" msgid="7147118217226317732">"Подождать"</string>
     <string name="webpage_unresponsive" msgid="3272758351138122503">"Страница не отвечает.\n\nЗакрыть ее?"</string>
     <string name="launch_warning_title" msgid="1547997780506713581">"Приложение перенаправлено"</string>
@@ -960,18 +954,14 @@
     <string name="ringtone_silent" msgid="7937634392408977062">"Без звука"</string>
     <string name="ringtone_picker_title" msgid="3515143939175119094">"Мелодии"</string>
     <string name="ringtone_unknown" msgid="5477919988701784788">"Неизвестная мелодия"</string>
-    <plurals name="wifi_available" formatted="false" msgid="7900333017752027322">
-      <item quantity="one">Есть доступные сети Wi-Fi</item>
-      <item quantity="few">Есть доступные сети Wi-Fi</item>
-      <item quantity="many">Есть доступные сети Wi-Fi</item>
-      <item quantity="other">Есть доступные сети Wi-Fi</item>
-    </plurals>
-    <plurals name="wifi_available_detailed" formatted="false" msgid="1140699367193975606">
-      <item quantity="one">Есть открытые сети Wi-Fi</item>
-      <item quantity="few">Есть открытые сети Wi-Fi</item>
-      <item quantity="many">Есть открытые сети Wi-Fi</item>
-      <item quantity="other">Есть открытые сети Wi-Fi</item>
-    </plurals>
+  <plurals name="wifi_available">
+    <item quantity="one" msgid="6654123987418168693">"Доступна сеть Wi-Fi"</item>
+    <item quantity="other" msgid="4192424489168397386">"Доступна сеть Wi-Fi"</item>
+  </plurals>
+  <plurals name="wifi_available_detailed">
+    <item quantity="one" msgid="1634101450343277345">"Найдена доступная сеть Wi-Fi"</item>
+    <item quantity="other" msgid="7915895323644292768">"Найдены доступные сети Wi-Fi"</item>
+  </plurals>
     <string name="wifi_available_sign_in" msgid="9157196203958866662">"Подключение к Wi-Fi"</string>
     <string name="network_available_sign_in" msgid="1848877297365446605">"Регистрация в сети"</string>
     <!-- no translation found for network_available_sign_in_detailed (8000081941447976118) -->
@@ -1051,20 +1041,14 @@
     <string name="usb_mtp_notification_title" msgid="8396264943589760855">"Передача файлов через USB"</string>
     <string name="usb_ptp_notification_title" msgid="1347328437083192112">"Передача фото через USB"</string>
     <string name="usb_midi_notification_title" msgid="4850904915889144654">"MIDI через USB"</string>
-    <string name="usb_cd_installer_notification_title" msgid="6774712827892090754">"Подключен как установщик"</string>
     <string name="usb_accessory_notification_title" msgid="7848236974087653666">"USB-устройство подключено"</string>
-    <string name="usb_notification_message" msgid="7347368030849048437">"Ещё варианты"</string>
-    <string name="extmedia_format_title" product="nosdcard" msgid="9020092196061007262">"Отформатировать USB-накопитель?"</string>
-    <string name="extmedia_format_title" product="default" msgid="3648415921526526069">"Отформатировать SD-карту?"</string>
-    <string name="extmedia_format_message" product="nosdcard" msgid="3934016853425761078">"Все файлы, сохраненные на USB-накопителе, будут удалены. Это действие невозможно отменить."</string>
-    <string name="extmedia_format_message" product="default" msgid="14131895027543830">"Все данные будут удалены с карты."</string>
-    <string name="extmedia_format_button_format" msgid="4131064560127478695">"Формат"</string>
+    <string name="usb_notification_message" msgid="7347368030849048437">"Нажмите, чтобы настроить."</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"Отладка по USB разрешена"</string>
     <string name="adb_active_notification_message" msgid="1016654627626476142">"Нажмите, чтобы отключить отладку по USB."</string>
     <string name="select_input_method" msgid="8547250819326693584">"Выбор раскладки"</string>
     <string name="configure_input_methods" msgid="4769971288371946846">"Выбрать раскладку"</string>
     <string name="show_ime" msgid="9157568568695230830">"Показать способ ввода"</string>
-    <string name="hardware" msgid="7517821086888990278">"Аппаратура"</string>
+    <string name="hardware" msgid="7517821086888990278">"Аппаратная"</string>
     <string name="select_keyboard_layout_notification_title" msgid="1407367017263030773">"Выберите раскладку клавиатуры"</string>
     <string name="select_keyboard_layout_notification_message" msgid="4465907700449257063">"Нажмите, чтобы выбрать раскладку клавиатуры."</string>
     <string name="fast_scroll_alphabet" msgid="5433275485499039199">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
@@ -1152,7 +1136,7 @@
     <string name="no_file_chosen" msgid="6363648562170759465">"Не выбран файл"</string>
     <string name="reset" msgid="2448168080964209908">"Сбросить"</string>
     <string name="submit" msgid="1602335572089911941">"Отправить"</string>
-    <string name="car_mode_disable_notification_title" msgid="3164768212003864316">"Включен режим \"Штурман\""</string>
+    <string name="car_mode_disable_notification_title" msgid="3164768212003864316">"Режим \"В автомобиле\""</string>
     <string name="car_mode_disable_notification_message" msgid="8035230537563503262">"Чтобы выйти, нажмите здесь."</string>
     <string name="tethered_notification_title" msgid="3146694234398202601">"Включен режим модема"</string>
     <string name="tethered_notification_message" msgid="6857031760103062982">"Нажмите для настройки."</string>
@@ -1161,26 +1145,13 @@
     <string name="skip_button_label" msgid="1275362299471631819">"Пропустить"</string>
     <string name="no_matches" msgid="8129421908915840737">"Нет совпадений"</string>
     <string name="find_on_page" msgid="1946799233822820384">"Найти на странице"</string>
-    <plurals name="matches_found" formatted="false" msgid="1210884353962081884">
-      <item quantity="one"><xliff:g id="INDEX">%d</xliff:g> совпадение из <xliff:g id="TOTAL">%d</xliff:g></item>
-      <item quantity="few"><xliff:g id="INDEX">%d</xliff:g> совпадения из <xliff:g id="TOTAL">%d</xliff:g></item>
-      <item quantity="many"><xliff:g id="INDEX">%d</xliff:g> совпадений из <xliff:g id="TOTAL">%d</xliff:g></item>
-      <item quantity="other"><xliff:g id="INDEX">%d</xliff:g> совпадений из <xliff:g id="TOTAL">%d</xliff:g></item>
-    </plurals>
+  <plurals name="matches_found">
+    <item quantity="one" msgid="8167147081136579439">"1 совпадение"</item>
+    <item quantity="other" msgid="4641872797067609177">"<xliff:g id="INDEX">%d</xliff:g> из <xliff:g id="TOTAL">%d</xliff:g>"</item>
+  </plurals>
     <string name="action_mode_done" msgid="7217581640461922289">"Готово"</string>
-    <string name="progress_unmounting" product="nosdcard" msgid="3923810448507612746">"Отключение USB-накопителя..."</string>
-    <string name="progress_unmounting" product="default" msgid="1327894998409537190">"Отключение SD-карты..."</string>
     <string name="progress_erasing" product="nosdcard" msgid="4521573321524340058">"Очистка USB-накопителя..."</string>
     <string name="progress_erasing" product="default" msgid="6596988875507043042">"Очистка SD-карты..."</string>
-    <string name="format_error" product="nosdcard" msgid="6299769563624776948">"Не удалось очистить USB-накопитель."</string>
-    <string name="format_error" product="default" msgid="7315248696644510935">"Не удалось очистить SD-карту."</string>
-    <string name="media_bad_removal" msgid="7960864061016603281">"SD-карта была извлечена до отключения."</string>
-    <string name="media_checking" product="nosdcard" msgid="418188720009569693">"USB-накопитель проверяется."</string>
-    <string name="media_checking" product="default" msgid="7334762503904827481">"Выполняется проверка SD-карты."</string>
-    <string name="media_removed" msgid="7001526905057952097">"SD-карта была отключена."</string>
-    <string name="media_shared" product="nosdcard" msgid="5830814349250834225">"Сейчас USB-накопитель используется компьютером."</string>
-    <string name="media_shared" product="default" msgid="5706130568133540435">"Сейчас SD-карта используется компьютером."</string>
-    <string name="media_unknown_state" msgid="729192782197290385">"Неизвестно состояние внешнего носителя."</string>
     <string name="share" msgid="1778686618230011964">"Отправить"</string>
     <string name="find" msgid="4808270900322985960">"Найти"</string>
     <string name="websearch" msgid="4337157977400211589">"Веб-поиск"</string>
@@ -1237,7 +1208,7 @@
     <string name="action_menu_overflow_description" msgid="2295659037509008453">"Ещё"</string>
     <string name="action_bar_home_description_format" msgid="7965984360903693903">"%1$s, %2$s"</string>
     <string name="action_bar_home_subtitle_description_format" msgid="6985546530471780727">"%1$s, %2$s, %3$s"</string>
-    <string name="storage_internal" msgid="4891916833657929263">"Внутр. память"</string>
+    <string name="storage_internal" msgid="4891916833657929263">"Внутр. накопитель"</string>
     <string name="storage_sd_card" msgid="3282948861378286745">"SD-карта"</string>
     <string name="storage_sd_card_label" msgid="6347111320774379257">"SD-карта <xliff:g id="MANUFACTURER">%s</xliff:g>"</string>
     <string name="storage_usb_drive" msgid="6261899683292244209">"USB-накопитель"</string>
@@ -1357,87 +1328,87 @@
     <string name="error_message_change_not_allowed" msgid="1347282344200417578">"Это действие запрещено администратором"</string>
     <string name="app_not_found" msgid="3429141853498927379">"Невозможно обработать это действие"</string>
     <string name="revoke" msgid="5404479185228271586">"Отменить"</string>
-    <string name="mediasize_iso_a0" msgid="1994474252931294172">"ISO A0 (841х1189 мм)"</string>
-    <string name="mediasize_iso_a1" msgid="3333060421529791786">"ISO A1 (594х841 мм)"</string>
-    <string name="mediasize_iso_a2" msgid="3097535991925798280">"ISO A2 (420х594 мм)"</string>
-    <string name="mediasize_iso_a3" msgid="3023213259314236123">"ISO A3 (297х420 мм)"</string>
-    <string name="mediasize_iso_a4" msgid="231745325296873764">"ISO A4 (210х297 мм)"</string>
-    <string name="mediasize_iso_a5" msgid="3484327407340865411">"ISO A5 (148х210 мм)"</string>
-    <string name="mediasize_iso_a6" msgid="4861908487129577530">"ISO A6 (105х148 мм)"</string>
-    <string name="mediasize_iso_a7" msgid="5890208588072936130">"ISO A7 (74х105 мм)"</string>
-    <string name="mediasize_iso_a8" msgid="4319425041085816612">"ISO A8 (52х74 мм)"</string>
-    <string name="mediasize_iso_a9" msgid="4882220529506432008">"ISO A9 (37х52 мм)"</string>
-    <string name="mediasize_iso_a10" msgid="2382866026365359391">"ISO A10 (26х37 мм)"</string>
-    <string name="mediasize_iso_b0" msgid="3651827147402009675">"ISO B0 (1000х1414 мм)"</string>
-    <string name="mediasize_iso_b1" msgid="6072859628278739957">"ISO B1 (707х1000 мм)"</string>
-    <string name="mediasize_iso_b2" msgid="1348731852150380378">"ISO B2 (500х707 мм)"</string>
-    <string name="mediasize_iso_b3" msgid="2612510181259261379">"ISO B3 (353х500 мм)"</string>
-    <string name="mediasize_iso_b4" msgid="695151378838115434">"ISO B4 (250х353 мм)"</string>
-    <string name="mediasize_iso_b5" msgid="4863754285582212487">"ISO B5 (176х250 мм)"</string>
-    <string name="mediasize_iso_b6" msgid="5305816292139647241">"ISO B6 (125х176 мм)"</string>
-    <string name="mediasize_iso_b7" msgid="531673542602786624">"ISO B7 (88х125 мм)"</string>
-    <string name="mediasize_iso_b8" msgid="9164474595708850034">"ISO B8 (62х88 мм)"</string>
-    <string name="mediasize_iso_b9" msgid="282102976764774160">"ISO B9 (44х62 мм)"</string>
-    <string name="mediasize_iso_b10" msgid="4517141714407898976">"ISO B10 (31х44 мм)"</string>
-    <string name="mediasize_iso_c0" msgid="3103521357901591100">"ISO C0 (917х1297 мм)"</string>
-    <string name="mediasize_iso_c1" msgid="1231954105985048595">"ISO C1 (648х917 мм)"</string>
-    <string name="mediasize_iso_c2" msgid="927702816980087462">"ISO C2 (458х648 мм)"</string>
-    <string name="mediasize_iso_c3" msgid="835154173518304159">"ISO C3 (324х458 мм)"</string>
-    <string name="mediasize_iso_c4" msgid="5095951985108194011">"ISO C4 (229х324 мм)"</string>
-    <string name="mediasize_iso_c5" msgid="1985397450332305739">"ISO C5 (162х229 мм)"</string>
-    <string name="mediasize_iso_c6" msgid="8147421924174693013">"ISO C6 (114х162 мм)"</string>
-    <string name="mediasize_iso_c7" msgid="8993994925276122950">"ISO C7 (81х114 мм)"</string>
-    <string name="mediasize_iso_c8" msgid="6871178104139598957">"ISO C8 (57х81 мм)"</string>
-    <string name="mediasize_iso_c9" msgid="7983532635227561362">"ISO C9 (40х57 мм)"</string>
-    <string name="mediasize_iso_c10" msgid="5040764293406765584">"ISO C10 (28х40 мм)"</string>
-    <string name="mediasize_na_letter" msgid="2841414839888344296">"Letter (216х279 мм)"</string>
-    <string name="mediasize_na_gvrnmt_letter" msgid="5295836838862962809">"Government Letter (203х267 мм)"</string>
-    <string name="mediasize_na_legal" msgid="8621364037680465666">"Legal (216х356 мм)"</string>
-    <string name="mediasize_na_junior_legal" msgid="3309324162155085904">"Junior Legal (203 х 127 мм)"</string>
-    <string name="mediasize_na_ledger" msgid="5567030340509075333">"Ledger (432х279 мм)"</string>
-    <string name="mediasize_na_tabloid" msgid="4571735038501661757">"Tabloid (279х432 мм)"</string>
-    <string name="mediasize_na_index_3x5" msgid="5182901917818625126">"Index Card 3x5 (76x127 мм)"</string>
-    <string name="mediasize_na_index_4x6" msgid="7687620625422312396">"Index Card 4x6 (102x152 мм)"</string>
-    <string name="mediasize_na_index_5x8" msgid="8834215284646872800">"Index Card 5x8 (127x203 мм)"</string>
-    <string name="mediasize_na_monarch" msgid="213639906956550754">"Monarch (184x267 мм)"</string>
-    <string name="mediasize_na_quarto" msgid="835778493593023223">"Quarto (203x254 мм)"</string>
-    <string name="mediasize_na_foolscap" msgid="1573911237983677138">"Foolscap (203x330 мм)"</string>
-    <string name="mediasize_chinese_roc_8k" msgid="3626855847189438896">"ROC 8K (270x390 мм)"</string>
-    <string name="mediasize_chinese_roc_16k" msgid="9182191577022943355">"ROC 16K (195x270 мм)"</string>
-    <string name="mediasize_chinese_prc_1" msgid="4793232644980170500">"PRC 1 (102x165 мм)"</string>
-    <string name="mediasize_chinese_prc_2" msgid="5404109730975720670">"PRC 2 (102x176 мм)"</string>
-    <string name="mediasize_chinese_prc_3" msgid="1335092253339363526">"PRC 3 (125x176 мм)"</string>
-    <string name="mediasize_chinese_prc_4" msgid="9167997800486569834">"PRC 4 (110x208 мм)"</string>
-    <string name="mediasize_chinese_prc_5" msgid="845875168823541497">"PRC 5 (110x220 мм)"</string>
-    <string name="mediasize_chinese_prc_6" msgid="3220325667692648789">"PRC 6 (120x320 мм)"</string>
-    <string name="mediasize_chinese_prc_7" msgid="1776792138507038527">"PRC 7 (160x230 мм)"</string>
-    <string name="mediasize_chinese_prc_8" msgid="1417176642687456692">"PRC 8 (120x309 мм)"</string>
-    <string name="mediasize_chinese_prc_9" msgid="4785983473123798365">"PRC 9 (229x324 мм)"</string>
-    <string name="mediasize_chinese_prc_10" msgid="7847982299391851899">"PRC 10 (324x458 мм)"</string>
-    <string name="mediasize_chinese_prc_16k" msgid="262793383539980677">"PRC 16K (146x215 мм)"</string>
-    <string name="mediasize_chinese_om_pa_kai" msgid="5256815579447959814">"Pa Kai (146x215 мм)"</string>
-    <string name="mediasize_chinese_om_dai_pa_kai" msgid="7336412963441354407">"Dai Pa Kai (275х395 мм)"</string>
-    <string name="mediasize_chinese_om_jurro_ku_kai" msgid="6324465444100490742">"Jurro Ku Kai (275x395 мм)"</string>
-    <string name="mediasize_japanese_jis_b10" msgid="1787262845627694376">"JIS B10 (32x45 мм)"</string>
-    <string name="mediasize_japanese_jis_b9" msgid="3336035783663287470">"JIS B9 (45x64 мм)"</string>
-    <string name="mediasize_japanese_jis_b8" msgid="6195398299104345731">"JIS B8 (64x91 мм)"</string>
-    <string name="mediasize_japanese_jis_b7" msgid="1674621886902828884">"JIS B7 (91x128 мм)"</string>
-    <string name="mediasize_japanese_jis_b6" msgid="4170576286062657435">"JIS B6 (128x182 мм)"</string>
-    <string name="mediasize_japanese_jis_b5" msgid="4899297958100032533">"JIS B5 (182x257 мм)"</string>
-    <string name="mediasize_japanese_jis_b4" msgid="4213158129126666847">"JIS B4 (257x364 мм)"</string>
-    <string name="mediasize_japanese_jis_b3" msgid="8513715307410310696">"JIS B3 (364x515 мм)"</string>
-    <string name="mediasize_japanese_jis_b2" msgid="4777690211897131190">"JIS B2 (515x728 мм)"</string>
-    <string name="mediasize_japanese_jis_b1" msgid="4608142385457034603">"JIS B1 (728x1030 мм)"</string>
-    <string name="mediasize_japanese_jis_b0" msgid="7587108366572243991">"JIS B0 (1030x1456 мм)"</string>
-    <string name="mediasize_japanese_jis_exec" msgid="5244075432263649068">"JIS Exec (216x330 мм)"</string>
-    <string name="mediasize_japanese_chou4" msgid="4941652015032631361">"Chou4 (90x205 мм)"</string>
-    <string name="mediasize_japanese_chou3" msgid="6387319169263957010">"Chou3 (120x235 мм)"</string>
-    <string name="mediasize_japanese_chou2" msgid="1299112025415343982">"Chou2 (111,1x146 мм)"</string>
-    <string name="mediasize_japanese_hagaki" msgid="8070115620644254565">"Hagaki (100x148 мм)"</string>
-    <string name="mediasize_japanese_oufuku" msgid="6049065587307896564">"Oufuku (148x200 мм)"</string>
-    <string name="mediasize_japanese_kahu" msgid="6872696027560065173">"Kaku (240x322,1 мм)"</string>
-    <string name="mediasize_japanese_kaku2" msgid="2359077233775455405">"Kaku2 (240x332 мм)"</string>
-    <string name="mediasize_japanese_you4" msgid="2091777168747058008">"You4 (105x235 мм)"</string>
+    <string name="mediasize_iso_a0" msgid="1994474252931294172">"ISO A0"</string>
+    <string name="mediasize_iso_a1" msgid="3333060421529791786">"ISO A1"</string>
+    <string name="mediasize_iso_a2" msgid="3097535991925798280">"ISO A2"</string>
+    <string name="mediasize_iso_a3" msgid="3023213259314236123">"ISO A3"</string>
+    <string name="mediasize_iso_a4" msgid="231745325296873764">"ISO A4"</string>
+    <string name="mediasize_iso_a5" msgid="3484327407340865411">"ISO A5"</string>
+    <string name="mediasize_iso_a6" msgid="4861908487129577530">"ISO A6"</string>
+    <string name="mediasize_iso_a7" msgid="5890208588072936130">"ISO A7"</string>
+    <string name="mediasize_iso_a8" msgid="4319425041085816612">"ISO A8"</string>
+    <string name="mediasize_iso_a9" msgid="4882220529506432008">"ISO A9"</string>
+    <string name="mediasize_iso_a10" msgid="2382866026365359391">"ISO A10"</string>
+    <string name="mediasize_iso_b0" msgid="3651827147402009675">"ISO B0"</string>
+    <string name="mediasize_iso_b1" msgid="6072859628278739957">"ISO B1"</string>
+    <string name="mediasize_iso_b2" msgid="1348731852150380378">"ISO B2"</string>
+    <string name="mediasize_iso_b3" msgid="2612510181259261379">"ISO B3"</string>
+    <string name="mediasize_iso_b4" msgid="695151378838115434">"ISO B4"</string>
+    <string name="mediasize_iso_b5" msgid="4863754285582212487">"ISO B5"</string>
+    <string name="mediasize_iso_b6" msgid="5305816292139647241">"ISO B6"</string>
+    <string name="mediasize_iso_b7" msgid="531673542602786624">"ISO B7"</string>
+    <string name="mediasize_iso_b8" msgid="9164474595708850034">"ISO B8"</string>
+    <string name="mediasize_iso_b9" msgid="282102976764774160">"ISO B9"</string>
+    <string name="mediasize_iso_b10" msgid="4517141714407898976">"ISO B10"</string>
+    <string name="mediasize_iso_c0" msgid="3103521357901591100">"ISO C0"</string>
+    <string name="mediasize_iso_c1" msgid="1231954105985048595">"ISO C1"</string>
+    <string name="mediasize_iso_c2" msgid="927702816980087462">"ISO C2"</string>
+    <string name="mediasize_iso_c3" msgid="835154173518304159">"ISO C3"</string>
+    <string name="mediasize_iso_c4" msgid="5095951985108194011">"ISO C4"</string>
+    <string name="mediasize_iso_c5" msgid="1985397450332305739">"ISO C5"</string>
+    <string name="mediasize_iso_c6" msgid="8147421924174693013">"ISO C6"</string>
+    <string name="mediasize_iso_c7" msgid="8993994925276122950">"ISO C7"</string>
+    <string name="mediasize_iso_c8" msgid="6871178104139598957">"ISO C8"</string>
+    <string name="mediasize_iso_c9" msgid="7983532635227561362">"ISO C9"</string>
+    <string name="mediasize_iso_c10" msgid="5040764293406765584">"ISO C10"</string>
+    <string name="mediasize_na_letter" msgid="2841414839888344296">"Letter"</string>
+    <string name="mediasize_na_gvrnmt_letter" msgid="5295836838862962809">"Government Letter"</string>
+    <string name="mediasize_na_legal" msgid="8621364037680465666">"Legal"</string>
+    <string name="mediasize_na_junior_legal" msgid="3309324162155085904">"Junior Legal"</string>
+    <string name="mediasize_na_ledger" msgid="5567030340509075333">"Ledger"</string>
+    <string name="mediasize_na_tabloid" msgid="4571735038501661757">"Tabloid"</string>
+    <string name="mediasize_na_index_3x5" msgid="5182901917818625126">"Index Card 3x5"</string>
+    <string name="mediasize_na_index_4x6" msgid="7687620625422312396">"Index Card 4x6"</string>
+    <string name="mediasize_na_index_5x8" msgid="8834215284646872800">"Index Card 5x8"</string>
+    <string name="mediasize_na_monarch" msgid="213639906956550754">"Monarch"</string>
+    <string name="mediasize_na_quarto" msgid="835778493593023223">"Quarto"</string>
+    <string name="mediasize_na_foolscap" msgid="1573911237983677138">"Foolscap"</string>
+    <string name="mediasize_chinese_roc_8k" msgid="3626855847189438896">"ROC 8K"</string>
+    <string name="mediasize_chinese_roc_16k" msgid="9182191577022943355">"ROC 16K"</string>
+    <string name="mediasize_chinese_prc_1" msgid="4793232644980170500">"PRC 1"</string>
+    <string name="mediasize_chinese_prc_2" msgid="5404109730975720670">"PRC 2"</string>
+    <string name="mediasize_chinese_prc_3" msgid="1335092253339363526">"PRC 3"</string>
+    <string name="mediasize_chinese_prc_4" msgid="9167997800486569834">"PRC 4"</string>
+    <string name="mediasize_chinese_prc_5" msgid="845875168823541497">"PRC 5"</string>
+    <string name="mediasize_chinese_prc_6" msgid="3220325667692648789">"PRC 6"</string>
+    <string name="mediasize_chinese_prc_7" msgid="1776792138507038527">"PRC 7"</string>
+    <string name="mediasize_chinese_prc_8" msgid="1417176642687456692">"PRC 8"</string>
+    <string name="mediasize_chinese_prc_9" msgid="4785983473123798365">"PRC 9"</string>
+    <string name="mediasize_chinese_prc_10" msgid="7847982299391851899">"PRC 10"</string>
+    <string name="mediasize_chinese_prc_16k" msgid="262793383539980677">"PRC 16K"</string>
+    <string name="mediasize_chinese_om_pa_kai" msgid="5256815579447959814">"Pa Kai"</string>
+    <string name="mediasize_chinese_om_dai_pa_kai" msgid="7336412963441354407">"Dai Pa Kai"</string>
+    <string name="mediasize_chinese_om_jurro_ku_kai" msgid="6324465444100490742">"Jurro Ku Kai"</string>
+    <string name="mediasize_japanese_jis_b10" msgid="1787262845627694376">"JIS B10"</string>
+    <string name="mediasize_japanese_jis_b9" msgid="3336035783663287470">"JIS B9"</string>
+    <string name="mediasize_japanese_jis_b8" msgid="6195398299104345731">"JIS B8"</string>
+    <string name="mediasize_japanese_jis_b7" msgid="1674621886902828884">"JIS B7"</string>
+    <string name="mediasize_japanese_jis_b6" msgid="4170576286062657435">"JIS B6"</string>
+    <string name="mediasize_japanese_jis_b5" msgid="4899297958100032533">"JIS B5"</string>
+    <string name="mediasize_japanese_jis_b4" msgid="4213158129126666847">"JIS B4"</string>
+    <string name="mediasize_japanese_jis_b3" msgid="8513715307410310696">"JIS B3"</string>
+    <string name="mediasize_japanese_jis_b2" msgid="4777690211897131190">"JIS B2"</string>
+    <string name="mediasize_japanese_jis_b1" msgid="4608142385457034603">"JIS B1"</string>
+    <string name="mediasize_japanese_jis_b0" msgid="7587108366572243991">"JIS B0"</string>
+    <string name="mediasize_japanese_jis_exec" msgid="5244075432263649068">"JIS Exec"</string>
+    <string name="mediasize_japanese_chou4" msgid="4941652015032631361">"Chou4"</string>
+    <string name="mediasize_japanese_chou3" msgid="6387319169263957010">"Chou3"</string>
+    <string name="mediasize_japanese_chou2" msgid="1299112025415343982">"Chou2"</string>
+    <string name="mediasize_japanese_hagaki" msgid="8070115620644254565">"Hagaki"</string>
+    <string name="mediasize_japanese_oufuku" msgid="6049065587307896564">"Oufuku"</string>
+    <string name="mediasize_japanese_kahu" msgid="6872696027560065173">"Kaku"</string>
+    <string name="mediasize_japanese_kaku2" msgid="2359077233775455405">"Kaku2"</string>
+    <string name="mediasize_japanese_you4" msgid="2091777168747058008">"You4"</string>
     <string name="mediasize_unknown_portrait" msgid="3088043641616409762">"Неизвестный вертикальный формат"</string>
     <string name="mediasize_unknown_landscape" msgid="4876995327029361552">"Неизвестный горизонтальный формат"</string>
     <string name="write_fail_reason_cancelled" msgid="7091258378121627624">"Печать отменена"</string>
@@ -1455,12 +1426,10 @@
     <string name="restr_pin_create_pin" msgid="8017600000263450337">"Создайте PIN-код для изменения ограничений."</string>
     <string name="restr_pin_error_doesnt_match" msgid="2224214190906994548">"PIN-коды не совпадают. Повторите попытку."</string>
     <string name="restr_pin_error_too_short" msgid="8173982756265777792">"PIN-код должен содержать не менее 4 символов."</string>
-    <plurals name="restr_pin_countdown" formatted="false" msgid="9061246974881224688">
-      <item quantity="one">Повторите попытку через <xliff:g id="COUNT">%d</xliff:g> секунду</item>
-      <item quantity="few">Повторите попытку через <xliff:g id="COUNT">%d</xliff:g> секунды</item>
-      <item quantity="many">Повторите попытку через <xliff:g id="COUNT">%d</xliff:g> секунд</item>
-      <item quantity="other">Повторите попытку через <xliff:g id="COUNT">%d</xliff:g> секунд</item>
-    </plurals>
+  <plurals name="restr_pin_countdown">
+    <item quantity="one" msgid="311050995198548675">"Повтор через 1 сек."</item>
+    <item quantity="other" msgid="4730868920742952817">"Повтор через <xliff:g id="COUNT">%d</xliff:g> сек."</item>
+  </plurals>
     <string name="restr_pin_try_later" msgid="973144472490532377">"Повторите попытку позже."</string>
     <string name="immersive_cling_title" msgid="8394201622932303336">"Полноэкранный режим"</string>
     <string name="immersive_cling_description" msgid="3482371193207536040">"Чтобы выйти, проведите по экрану сверху вниз."</string>
@@ -1486,55 +1455,40 @@
     <string name="package_updated_device_owner" msgid="8856631322440187071">"Обновлено администратором"</string>
     <string name="package_deleted_device_owner" msgid="7650577387493101353">"Удалено администратором"</string>
     <string name="battery_saver_description" msgid="1960431123816253034">"Чтобы продлить время работы устройства от батареи, в режиме энергосбережения снижается производительность, а также ограничивается использование вибрации, геолокации и фоновой передачи данных. Данные, требующие синхронизации, могут обновляться только когда вы откроете приложение.\n\nРежим энергосбережения автоматически отключается во время зарядки устройства."</string>
-    <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="4367877408072000848">
-      <item quantity="one">%1$d минута (до <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
-      <item quantity="few">%1$d минуты (до <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
-      <item quantity="many">%1$d минут (до <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
-      <item quantity="other">%1$d минут (до <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
-    </plurals>
-    <plurals name="zen_mode_duration_minutes_summary_short" formatted="false" msgid="6830154222366042597">
-      <item quantity="one">На %1$d минуту (до <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
-      <item quantity="few">На %1$d минуты (до <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
-      <item quantity="many">На %1$d минут (до <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
-      <item quantity="other">На %1$d минуты (до <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
-    </plurals>
-    <plurals name="zen_mode_duration_hours_summary" formatted="false" msgid="8152974162096743862">
-      <item quantity="one">%1$d час (до <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
-      <item quantity="few">%1$d часа (до <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
-      <item quantity="many">%1$d часов (до <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
-      <item quantity="other">%1$d часов (до <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
-    </plurals>
-    <plurals name="zen_mode_duration_hours_summary_short" formatted="false" msgid="4787552595253082371">
-      <item quantity="one">На %1$d час (до <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
-      <item quantity="few">На %1$d часа (до <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
-      <item quantity="many">На %1$d часов (до <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
-      <item quantity="other">На %1$d часа (до <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
-    </plurals>
-    <plurals name="zen_mode_duration_minutes" formatted="false" msgid="5127407202506485571">
-      <item quantity="one">%d минута</item>
-      <item quantity="few">%d минуты</item>
-      <item quantity="many">%d минут</item>
-      <item quantity="other">%d минут</item>
-    </plurals>
-    <plurals name="zen_mode_duration_minutes_short" formatted="false" msgid="2199350154433426128">
-      <item quantity="one">На %d минуту</item>
-      <item quantity="few">На %d минуты</item>
-      <item quantity="many">На %d минут</item>
-      <item quantity="other">На %d минуты</item>
-    </plurals>
-    <plurals name="zen_mode_duration_hours" formatted="false" msgid="3938821308277433854">
-      <item quantity="one">%d час</item>
-      <item quantity="few">%d часа</item>
-      <item quantity="many">%d часов</item>
-      <item quantity="other">%d часов</item>
-    </plurals>
-    <plurals name="zen_mode_duration_hours_short" formatted="false" msgid="6748277774662434217">
-      <item quantity="one">На %d час</item>
-      <item quantity="few">На %d часа</item>
-      <item quantity="many">На %d часов</item>
-      <item quantity="other">На %d часа</item>
-    </plurals>
+  <plurals name="zen_mode_duration_minutes_summary">
+    <item quantity="one" msgid="3177683545388923234">"На 1 мин. (до <xliff:g id="FORMATTEDTIME">%2$s</xliff:g>)"</item>
+    <item quantity="other" msgid="2787867221129368935">"На %1$d мин. (до <xliff:g id="FORMATTEDTIME">%2$s</xliff:g>)"</item>
+  </plurals>
+  <plurals name="zen_mode_duration_minutes_summary_short">
+    <item quantity="one" msgid="4097046271119330874">"На 1 мин. (до <xliff:g id="FORMATTEDTIME">%2$s</xliff:g>)"</item>
+    <item quantity="other" msgid="9128259640307810602">"На %1$d мин. (до <xliff:g id="FORMATTEDTIME">%2$s</xliff:g>)"</item>
+  </plurals>
+  <plurals name="zen_mode_duration_hours_summary">
+    <item quantity="one" msgid="597194865053253679">"На 1 ч. (до <xliff:g id="FORMATTEDTIME">%2$s</xliff:g>)"</item>
+    <item quantity="other" msgid="2827214920627669898">"На %1$d ч. (до <xliff:g id="FORMATTEDTIME">%2$s</xliff:g>)"</item>
+  </plurals>
+  <plurals name="zen_mode_duration_hours_summary_short">
+    <item quantity="one" msgid="342658185856495801">"На 1 ч. (до <xliff:g id="FORMATTEDTIME">%2$s</xliff:g>)"</item>
+    <item quantity="other" msgid="6842148190293675591">"На %1$d ч. (до <xliff:g id="FORMATTEDTIME">%2$s</xliff:g>)"</item>
+  </plurals>
+  <plurals name="zen_mode_duration_minutes">
+    <item quantity="one" msgid="9040808414992812341">"1 мин."</item>
+    <item quantity="other" msgid="6924190729213550991">"%d мин."</item>
+  </plurals>
+  <plurals name="zen_mode_duration_minutes_short">
+    <item quantity="one" msgid="4125166172281866385">"На 1 мин."</item>
+    <item quantity="other" msgid="5131202943429775644">"На %d мин."</item>
+  </plurals>
+  <plurals name="zen_mode_duration_hours">
+    <item quantity="one" msgid="3480040795582254384">"1 ч."</item>
+    <item quantity="other" msgid="5408537517529822157">"%d ч."</item>
+  </plurals>
+  <plurals name="zen_mode_duration_hours_short">
+    <item quantity="one" msgid="6798191385685158694">"На 1 ч."</item>
+    <item quantity="other" msgid="8464879049844138499">"На %d ч."</item>
+  </plurals>
     <string name="zen_mode_until" msgid="7336308492289875088">"До <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
+    <string name="zen_mode_alarm" msgid="9128205721301330797">"Следующий сигнал в <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
     <string name="zen_mode_forever" msgid="7420011936770086993">"Пока я не отключу"</string>
     <string name="zen_mode_forever_dnd" msgid="3792132696572189081">"Пока вы не отключите режим \"Не беспокоить\""</string>
     <string name="zen_mode_rule_name_combination" msgid="191109939968076477">"<xliff:g id="FIRST">%1$s</xliff:g> / <xliff:g id="REST">%2$s</xliff:g>"</string>
@@ -1559,10 +1513,8 @@
     <string name="usb_midi_peripheral_product_name" msgid="4971827859165280403">"Внешний USB-порт"</string>
     <string name="floating_toolbar_open_overflow_description" msgid="4797287862999444631">"Ещё"</string>
     <string name="floating_toolbar_close_overflow_description" msgid="559796923090723804">"Закрыть дополнительное меню"</string>
-    <plurals name="selected_count" formatted="false" msgid="7187339492915744615">
-      <item quantity="one">Выбрано: <xliff:g id="COUNT_1">%1$d</xliff:g></item>
-      <item quantity="few">Выбрано: <xliff:g id="COUNT_1">%1$d</xliff:g></item>
-      <item quantity="many">Выбрано: <xliff:g id="COUNT_1">%1$d</xliff:g></item>
-      <item quantity="other">Выбрано: <xliff:g id="COUNT_1">%1$d</xliff:g></item>
-    </plurals>
+  <plurals name="selected_count">
+    <item quantity="one" msgid="8857281055159991036">"Выбрано: <xliff:g id="COUNT">%1$d</xliff:g>"</item>
+    <item quantity="other" msgid="2608606845335294849">"Выбрано: <xliff:g id="COUNT">%1$d</xliff:g>"</item>
+  </plurals>
 </resources>

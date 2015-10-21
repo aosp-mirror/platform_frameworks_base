@@ -61,10 +61,10 @@
     <string name="needPuk" msgid="919668385956251611">"已对SIM卡进行PUK码锁定。请输入PUK码将其解锁。"</string>
     <string name="needPuk2" msgid="4526033371987193070">"输入PUK2码以解锁SIM卡。"</string>
     <string name="enablePin" msgid="209412020907207950">"失败，请开启SIM/RUIM卡锁定设置。"</string>
-    <plurals name="pinpuk_attempts" formatted="false" msgid="1251012001539225582">
-      <item quantity="other">您还可尝试 <xliff:g id="NUMBER_1">%d</xliff:g> 次。如果仍不正确，SIM 卡将被锁定。</item>
-      <item quantity="one">您还可尝试 <xliff:g id="NUMBER_0">%d</xliff:g> 次。如果仍不正确，SIM 卡将被锁定。</item>
-    </plurals>
+  <plurals name="pinpuk_attempts">
+    <item quantity="one" msgid="6596245285809790142">"您还有<xliff:g id="NUMBER">%d</xliff:g>次尝试机会。如果仍然失败，SIM卡将被锁定。"</item>
+    <item quantity="other" msgid="7530597808358774740">"您还有<xliff:g id="NUMBER">%d</xliff:g>次尝试机会。如果仍然失败，SIM卡将被锁定。"</item>
+  </plurals>
     <string name="imei" msgid="2625429890869005782">"IMEI"</string>
     <string name="meid" msgid="4841221237681254195">"MEID"</string>
     <string name="ClipMmi" msgid="6952821216480289285">"来电显示"</string>
@@ -223,7 +223,7 @@
     <string name="global_action_lockdown" msgid="8751542514724332873">"立即锁定"</string>
     <string name="status_bar_notification_info_overflow" msgid="5301981741705354993">"999+"</string>
     <string name="safeMode" msgid="2788228061547930246">"安全模式"</string>
-    <string name="android_system_label" msgid="6577375335728551336">"Android系统"</string>
+    <string name="android_system_label" msgid="6577375335728551336">"Android 系统"</string>
     <string name="user_owner_label" msgid="2804351898001038951">"个人"</string>
     <string name="managed_profile_label" msgid="6260850669674791528">"工作"</string>
     <string name="permgrouplab_contacts" msgid="3657758145679177612">"通讯录"</string>
@@ -354,6 +354,8 @@
     <string name="permdesc_flashlight" msgid="6522284794568368310">"允许应用控制闪光灯。"</string>
     <string name="permlab_callPhone" msgid="3925836347681847954">"直接拨打电话号码"</string>
     <string name="permdesc_callPhone" msgid="3740797576113760827">"允许该应用在您未执行操作的情况下拨打电话号码。此权限可能会导致意外收费或呼叫。请注意，此权限不允许该应用拨打紧急电话号码。恶意应用可通过拨打电话产生相关费用，而无需您的确认。"</string>
+    <string name="permlab_accessImsCallService" msgid="3574943847181793918">"使用即时通讯通话服务"</string>
+    <string name="permdesc_accessImsCallService" msgid="8992884015198298775">"允许应用自行使用即时通讯服务拨打电话。"</string>
     <string name="permlab_readPhoneState" msgid="9178228524507610486">"读取手机状态和身份"</string>
     <string name="permdesc_readPhoneState" msgid="1639212771826125528">"允许该应用访问设备的电话功能。此权限可让该应用确定本机号码和设备 ID、是否正处于通话状态以及拨打的号码。"</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1531731435011495015">"阻止平板电脑进入休眠状态"</string>
@@ -432,6 +434,7 @@
     <string name="fingerprint_name_template" msgid="5870957565512716938">"手指 <xliff:g id="FINGERID">%d</xliff:g>"</string>
   <string-array name="fingerprint_error_vendor">
   </string-array>
+    <string name="fingerprint_icon_content_description" msgid="2340202869968465936">"指纹图标"</string>
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"读取同步设置"</string>
     <string name="permdesc_readSyncSettings" msgid="2706745674569678644">"允许该应用读取某个帐户的同步设置。例如，此权限可确定“联系人”应用是否与某个帐户同步。"</string>
     <string name="permlab_writeSyncSettings" msgid="5408694875793945314">"启用和停用同步"</string>
@@ -710,6 +713,7 @@
     <string name="lockscreen_access_pattern_cell_added" msgid="6756031208359292487">"已添加单元格"</string>
     <string name="lockscreen_access_pattern_cell_added_verbose" msgid="7264580781744026939">"已添加圆点 <xliff:g id="CELL_INDEX">%1$s</xliff:g>"</string>
     <string name="lockscreen_access_pattern_detected" msgid="4988730895554057058">"图案绘制完成"</string>
+    <string name="lockscreen_access_pattern_area" msgid="400813207572953209">"图案区域。"</string>
     <string name="keyguard_accessibility_widget_changed" msgid="5678624624681400191">"%1$s。%3$d的小部件%2$d。"</string>
     <string name="keyguard_accessibility_add_widget" msgid="8273277058724924654">"添加小部件。"</string>
     <string name="keyguard_accessibility_widget_empty_slot" msgid="1281505703307930757">"空白"</string>
@@ -805,10 +809,7 @@
     <string name="enable_explore_by_touch_warning_message" product="default" msgid="2708199672852373195">"<xliff:g id="ACCESSIBILITY_SERVICE_NAME">%1$s</xliff:g>想要启用“触摸浏览”。“触摸浏览”启用后，您可以听到或看到所触摸内容的说明，还可以通过手势操作与手机互动。"</string>
     <string name="oneMonthDurationPast" msgid="7396384508953779925">"1 个月前"</string>
     <string name="beforeOneMonthDurationPast" msgid="909134546836499826">"1 个月前"</string>
-    <plurals name="last_num_days" formatted="false" msgid="5104533550723932025">
-      <item quantity="other">过去 <xliff:g id="COUNT_1">%d</xliff:g> 天</item>
-      <item quantity="one">过去 <xliff:g id="COUNT_0">%d</xliff:g> 天</item>
-    </plurals>
+    <!-- no translation found for last_num_days:one (7555846096746489821) -->
     <string name="last_month" msgid="3959346739979055432">"上个月"</string>
     <string name="older" msgid="5211975022815554840">"往前"</string>
     <string name="preposition_for_date" msgid="9093949757757445117">"日期：<xliff:g id="DATE">%s</xliff:g>"</string>
@@ -826,18 +827,18 @@
     <string name="weeks" msgid="6509623834583944518">"周"</string>
     <string name="year" msgid="4001118221013892076">"年"</string>
     <string name="years" msgid="6881577717993213522">"年"</string>
-    <plurals name="duration_seconds" formatted="false" msgid="4527986939729687805">
-      <item quantity="other"><xliff:g id="COUNT">%d</xliff:g> 秒</item>
-      <item quantity="one">1 秒</item>
-    </plurals>
-    <plurals name="duration_minutes" formatted="false" msgid="643786953939956125">
-      <item quantity="other"><xliff:g id="COUNT">%d</xliff:g> 分钟</item>
-      <item quantity="one">1 分钟</item>
-    </plurals>
-    <plurals name="duration_hours" formatted="false" msgid="6826233369186668274">
-      <item quantity="other"><xliff:g id="COUNT">%d</xliff:g> 小时</item>
-      <item quantity="one">1 小时</item>
-    </plurals>
+  <plurals name="duration_seconds">
+    <item quantity="one" msgid="6962015528372969481">"1秒"</item>
+    <item quantity="other" msgid="1886107766577166786">"<xliff:g id="COUNT">%d</xliff:g>秒"</item>
+  </plurals>
+  <plurals name="duration_minutes">
+    <item quantity="one" msgid="4915414002546085617">"1分钟"</item>
+    <item quantity="other" msgid="3165187169224908775">"<xliff:g id="COUNT">%d</xliff:g>分钟"</item>
+  </plurals>
+  <plurals name="duration_hours">
+    <item quantity="one" msgid="8917467491248809972">"1小时"</item>
+    <item quantity="other" msgid="3863962854246773930">"<xliff:g id="COUNT">%d</xliff:g>小时"</item>
+  </plurals>
     <string name="VideoView_error_title" msgid="3534509135438353077">"视频问题"</string>
     <string name="VideoView_error_text_invalid_progressive_playback" msgid="3186670335938670444">"抱歉，该视频不适合在此设备上播放。"</string>
     <string name="VideoView_error_text_unknown" msgid="3450439155187810085">"无法播放此视频。"</string>
@@ -950,14 +951,14 @@
     <string name="ringtone_silent" msgid="7937634392408977062">"无"</string>
     <string name="ringtone_picker_title" msgid="3515143939175119094">"铃声"</string>
     <string name="ringtone_unknown" msgid="5477919988701784788">"未知铃声"</string>
-    <plurals name="wifi_available" formatted="false" msgid="7900333017752027322">
-      <item quantity="other">有可用的 WLAN 网络</item>
-      <item quantity="one">有可用的 WLAN 网络</item>
-    </plurals>
-    <plurals name="wifi_available_detailed" formatted="false" msgid="1140699367193975606">
-      <item quantity="other">有可用的开放 WLAN 网络</item>
-      <item quantity="one">有可用的开放 WLAN 网络</item>
-    </plurals>
+  <plurals name="wifi_available">
+    <item quantity="one" msgid="6654123987418168693">"有可用的WLAN网络"</item>
+    <item quantity="other" msgid="4192424489168397386">"有可用的WLAN网络"</item>
+  </plurals>
+  <plurals name="wifi_available_detailed">
+    <item quantity="one" msgid="1634101450343277345">"打开可用的WLAN网络"</item>
+    <item quantity="other" msgid="7915895323644292768">"打开可用的WLAN网络"</item>
+  </plurals>
     <string name="wifi_available_sign_in" msgid="9157196203958866662">"登录到WLAN网络"</string>
     <string name="network_available_sign_in" msgid="1848877297365446605">"登录到网络"</string>
     <!-- no translation found for network_available_sign_in_detailed (8000081941447976118) -->
@@ -1037,14 +1038,8 @@
     <string name="usb_mtp_notification_title" msgid="8396264943589760855">"正在通过 USB 传输文件"</string>
     <string name="usb_ptp_notification_title" msgid="1347328437083192112">"正在通过 USB 传输照片"</string>
     <string name="usb_midi_notification_title" msgid="4850904915889144654">"正在通过 USB 连接到 MIDI 接口"</string>
-    <string name="usb_cd_installer_notification_title" msgid="6774712827892090754">"作为安装程序连接"</string>
     <string name="usb_accessory_notification_title" msgid="7848236974087653666">"已连接到USB配件"</string>
     <string name="usb_notification_message" msgid="7347368030849048437">"触摸以查看更多选项。"</string>
-    <string name="extmedia_format_title" product="nosdcard" msgid="9020092196061007262">"格式化USB存储设备吗？"</string>
-    <string name="extmedia_format_title" product="default" msgid="3648415921526526069">"要格式化SD卡吗？"</string>
-    <string name="extmedia_format_message" product="nosdcard" msgid="3934016853425761078">"您的USB存储设备中存储的所有文件都将清除。该操作无法撤消！"</string>
-    <string name="extmedia_format_message" product="default" msgid="14131895027543830">"您卡上的所有数据都会丢失。"</string>
-    <string name="extmedia_format_button_format" msgid="4131064560127478695">"格式化"</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"已连接到USB调试"</string>
     <string name="adb_active_notification_message" msgid="1016654627626476142">"触摸可停用USB调试。"</string>
     <string name="select_input_method" msgid="8547250819326693584">"更改键盘"</string>
@@ -1147,24 +1142,13 @@
     <string name="skip_button_label" msgid="1275362299471631819">"跳过"</string>
     <string name="no_matches" msgid="8129421908915840737">"无匹配项"</string>
     <string name="find_on_page" msgid="1946799233822820384">"在网页上查找"</string>
-    <plurals name="matches_found" formatted="false" msgid="1210884353962081884">
-      <item quantity="other">第 <xliff:g id="INDEX">%d</xliff:g> 条结果（共 <xliff:g id="TOTAL">%d</xliff:g> 条）</item>
-      <item quantity="one">1 条结果</item>
-    </plurals>
+  <plurals name="matches_found">
+    <item quantity="one" msgid="8167147081136579439">"1 个匹配项"</item>
+    <item quantity="other" msgid="4641872797067609177">"第 <xliff:g id="INDEX">%d</xliff:g> 项，共 <xliff:g id="TOTAL">%d</xliff:g> 项"</item>
+  </plurals>
     <string name="action_mode_done" msgid="7217581640461922289">"完成"</string>
-    <string name="progress_unmounting" product="nosdcard" msgid="3923810448507612746">"正在卸载USB存储设备..."</string>
-    <string name="progress_unmounting" product="default" msgid="1327894998409537190">"正在卸载SD卡..."</string>
     <string name="progress_erasing" product="nosdcard" msgid="4521573321524340058">"正在清除USB存储设备的数据..."</string>
     <string name="progress_erasing" product="default" msgid="6596988875507043042">"正在清除SD卡的数据..."</string>
-    <string name="format_error" product="nosdcard" msgid="6299769563624776948">"无法清除USB存储设备。"</string>
-    <string name="format_error" product="default" msgid="7315248696644510935">"无法清除SD卡。"</string>
-    <string name="media_bad_removal" msgid="7960864061016603281">"SD卡尚未卸载就被移除。"</string>
-    <string name="media_checking" product="nosdcard" msgid="418188720009569693">"系统正在检查USB存储设备。"</string>
-    <string name="media_checking" product="default" msgid="7334762503904827481">"目前正在检查SD卡。"</string>
-    <string name="media_removed" msgid="7001526905057952097">"SD卡已移除。"</string>
-    <string name="media_shared" product="nosdcard" msgid="5830814349250834225">"某台计算机正在使用USB存储设备。"</string>
-    <string name="media_shared" product="default" msgid="5706130568133540435">"目前有计算机正在使用SD卡。"</string>
-    <string name="media_unknown_state" msgid="729192782197290385">"外部媒体处于未知状态。"</string>
     <string name="share" msgid="1778686618230011964">"分享"</string>
     <string name="find" msgid="4808270900322985960">"查找"</string>
     <string name="websearch" msgid="4337157977400211589">"网页搜索"</string>
@@ -1439,10 +1423,10 @@
     <string name="restr_pin_create_pin" msgid="8017600000263450337">"设置PIN码，防止他人修改限制条件"</string>
     <string name="restr_pin_error_doesnt_match" msgid="2224214190906994548">"PIN码不符，请重试。"</string>
     <string name="restr_pin_error_too_short" msgid="8173982756265777792">"PIN码太短，至少应包含4位数字。"</string>
-    <plurals name="restr_pin_countdown" formatted="false" msgid="9061246974881224688">
-      <item quantity="other"><xliff:g id="COUNT">%d</xliff:g> 秒后重试</item>
-      <item quantity="one">1 秒后重试</item>
-    </plurals>
+  <plurals name="restr_pin_countdown">
+    <item quantity="one" msgid="311050995198548675">"1秒后重试"</item>
+    <item quantity="other" msgid="4730868920742952817">"<xliff:g id="COUNT">%d</xliff:g>秒后重试"</item>
+  </plurals>
     <string name="restr_pin_try_later" msgid="973144472490532377">"稍后重试"</string>
     <string name="immersive_cling_title" msgid="8394201622932303336">"正在全屏模式下查看"</string>
     <string name="immersive_cling_description" msgid="3482371193207536040">"要退出，请从顶部向下滑动。"</string>
@@ -1468,39 +1452,32 @@
     <string name="package_updated_device_owner" msgid="8856631322440187071">"由您单位的管理员更新"</string>
     <string name="package_deleted_device_owner" msgid="7650577387493101353">"已被管理员删除"</string>
     <string name="battery_saver_description" msgid="1960431123816253034">"为了延长电池的续航时间，节电助手会降低设备的性能，并限制振动、位置信息服务和大部分后台流量。对于电子邮件、聊天工具等依赖于同步功能的应用，可能要打开这类应用时才能收到新信息。\n\n节电助手会在设备充电时自动关闭。"</string>
-    <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="4367877408072000848">
-      <item quantity="other">%1$d 分钟（到<xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>）</item>
-      <item quantity="one">1 分钟（到<xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g>）</item>
-    </plurals>
-    <plurals name="zen_mode_duration_minutes_summary_short" formatted="false" msgid="6830154222366042597">
-      <item quantity="other">%1$d 分钟（到<xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)）</item>
-      <item quantity="one">1 分钟（到<xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g>）</item>
-    </plurals>
-    <plurals name="zen_mode_duration_hours_summary" formatted="false" msgid="8152974162096743862">
-      <item quantity="other">%1$d 小时（到<xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>）</item>
-      <item quantity="one">1 小时（到<xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g>）</item>
-    </plurals>
-    <plurals name="zen_mode_duration_hours_summary_short" formatted="false" msgid="4787552595253082371">
-      <item quantity="other">%1$d 小时（到<xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>）</item>
-      <item quantity="one">1 小时（到<xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g>）</item>
-    </plurals>
-    <plurals name="zen_mode_duration_minutes" formatted="false" msgid="5127407202506485571">
-      <item quantity="other">%d 分钟</item>
-      <item quantity="one">1 分钟</item>
-    </plurals>
-    <plurals name="zen_mode_duration_minutes_short" formatted="false" msgid="2199350154433426128">
-      <item quantity="other">%d 分钟</item>
-      <item quantity="one">1 分钟</item>
-    </plurals>
-    <plurals name="zen_mode_duration_hours" formatted="false" msgid="3938821308277433854">
-      <item quantity="other">%d 小时</item>
-      <item quantity="one">1 小时</item>
-    </plurals>
-    <plurals name="zen_mode_duration_hours_short" formatted="false" msgid="6748277774662434217">
-      <item quantity="other">%d 小时</item>
-      <item quantity="one">1 小时</item>
-    </plurals>
+  <plurals name="zen_mode_duration_minutes_summary">
+    <item quantity="one" msgid="3177683545388923234">"1 分钟（到<xliff:g id="FORMATTEDTIME">%2$s</xliff:g>）"</item>
+    <item quantity="other" msgid="2787867221129368935">"%1$d 分钟（到<xliff:g id="FORMATTEDTIME">%2$s</xliff:g>）"</item>
+  </plurals>
+    <!-- no translation found for zen_mode_duration_minutes_summary_short:one (4097046271119330874) -->
+    <!-- no translation found for zen_mode_duration_minutes_summary_short:other (9128259640307810602) -->
+  <plurals name="zen_mode_duration_hours_summary">
+    <item quantity="one" msgid="597194865053253679">"1 小时（到<xliff:g id="FORMATTEDTIME">%2$s</xliff:g>）"</item>
+    <item quantity="other" msgid="2827214920627669898">"%1$d 小时（到<xliff:g id="FORMATTEDTIME">%2$s</xliff:g>）"</item>
+  </plurals>
+    <!-- no translation found for zen_mode_duration_hours_summary_short:one (342658185856495801) -->
+    <!-- no translation found for zen_mode_duration_hours_summary_short:other (6842148190293675591) -->
+  <plurals name="zen_mode_duration_minutes">
+    <item quantity="one" msgid="9040808414992812341">"1分钟"</item>
+    <item quantity="other" msgid="6924190729213550991">"%d分钟"</item>
+  </plurals>
+    <!-- no translation found for zen_mode_duration_minutes_short:one (4125166172281866385) -->
+    <!-- no translation found for zen_mode_duration_minutes_short:other (5131202943429775644) -->
+  <plurals name="zen_mode_duration_hours">
+    <item quantity="one" msgid="3480040795582254384">"1小时"</item>
+    <item quantity="other" msgid="5408537517529822157">"%d小时"</item>
+  </plurals>
+    <!-- no translation found for zen_mode_duration_hours_short:one (6798191385685158694) -->
+    <!-- no translation found for zen_mode_duration_hours_short:other (8464879049844138499) -->
     <string name="zen_mode_until" msgid="7336308492289875088">"到<xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
+    <string name="zen_mode_alarm" msgid="9128205721301330797">"直到<xliff:g id="FORMATTEDTIME">%1$s</xliff:g>（闹钟下次响铃时）"</string>
     <string name="zen_mode_forever" msgid="7420011936770086993">"直到您将其关闭"</string>
     <string name="zen_mode_forever_dnd" msgid="3792132696572189081">"直到您关闭“勿扰”模式"</string>
     <string name="zen_mode_rule_name_combination" msgid="191109939968076477">"<xliff:g id="FIRST">%1$s</xliff:g> / <xliff:g id="REST">%2$s</xliff:g>"</string>
@@ -1525,8 +1502,6 @@
     <string name="usb_midi_peripheral_product_name" msgid="4971827859165280403">"USB 外设端口"</string>
     <string name="floating_toolbar_open_overflow_description" msgid="4797287862999444631">"更多选项"</string>
     <string name="floating_toolbar_close_overflow_description" msgid="559796923090723804">"关闭工具栏溢出"</string>
-    <plurals name="selected_count" formatted="false" msgid="7187339492915744615">
-      <item quantity="other">已选择 <xliff:g id="COUNT_1">%1$d</xliff:g> 项</item>
-      <item quantity="one">已选择 <xliff:g id="COUNT_0">%1$d</xliff:g> 项</item>
-    </plurals>
+    <!-- no translation found for selected_count:one (8857281055159991036) -->
+    <!-- no translation found for selected_count:other (2608606845335294849) -->
 </resources>

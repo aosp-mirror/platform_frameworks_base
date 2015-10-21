@@ -61,10 +61,10 @@
     <string name="needPuk" msgid="919668385956251611">"A SIM kártya le van zárva a PUK kóddal. A feloldáshoz adja meg a PUK kódot."</string>
     <string name="needPuk2" msgid="4526033371987193070">"A SIM kártya feloldásához adja meg a PUK2 kódot."</string>
     <string name="enablePin" msgid="209412020907207950">"Sikertelen, engedélyezze a SIM-/RUIM-zárolást."</string>
-    <plurals name="pinpuk_attempts" formatted="false" msgid="1251012001539225582">
-      <item quantity="other">Még <xliff:g id="NUMBER_1">%d</xliff:g> próbálkozása van a SIM kártya zárolásáig.</item>
-      <item quantity="one">Még <xliff:g id="NUMBER_0">%d</xliff:g> próbálkozása van a SIM kártya zárolásáig.</item>
-    </plurals>
+  <plurals name="pinpuk_attempts">
+    <item quantity="one" msgid="6596245285809790142">"Még <xliff:g id="NUMBER">%d</xliff:g> próbálkozása van, mielőtt zároljuk a SIM kártyát."</item>
+    <item quantity="other" msgid="7530597808358774740">"Még <xliff:g id="NUMBER">%d</xliff:g> próbálkozása van, mielőtt zároljuk a SIM kártyát."</item>
+  </plurals>
     <string name="imei" msgid="2625429890869005782">"IMEI"</string>
     <string name="meid" msgid="4841221237681254195">"MEID"</string>
     <string name="ClipMmi" msgid="6952821216480289285">"Beérkező hívóazonosító"</string>
@@ -354,6 +354,8 @@
     <string name="permdesc_flashlight" msgid="6522284794568368310">"Lehetővé teszi az alkalmazás számára a vaku vezérlését."</string>
     <string name="permlab_callPhone" msgid="3925836347681847954">"telefonszámok közvetlen hívása"</string>
     <string name="permdesc_callPhone" msgid="3740797576113760827">"Lehetővé teszi az alkalmazás számára, hogy az Ön jóváhagyása nélkül hívjon fel telefonszámokat. Ennek eredményeként váratlan terhelésekkel vagy telefonhívásokkal találkozhat. Vegye figyelembe, hogy ez nem teszi lehetővé segélyhívó számok hívását az alkalmazás számára. A rosszindulatú alkalmazások az Ön jóváhagyása nélkül kezdeményezhetnek hívásokat, így költségek merülhetnek fel."</string>
+    <string name="permlab_accessImsCallService" msgid="3574943847181793918">"hozzáférés az IMS-hívásszolgáltatáshoz"</string>
+    <string name="permdesc_accessImsCallService" msgid="8992884015198298775">"Az alkalmazás az IMS-szolgáltatást használhatja híváskezdeményezéshez az Ön közbeavatkozása nélkül."</string>
     <string name="permlab_readPhoneState" msgid="9178228524507610486">"telefonállapot és azonosító olvasása"</string>
     <string name="permdesc_readPhoneState" msgid="1639212771826125528">"Lehetővé teszi az alkalmazás számára, hogy hozzáférjen az eszköz telefonálási funkcióihoz. Az engedéllyel rendelkező alkalmazás meghatározhatja a telefonszámot és eszközazonosítókat, hogy egy hívás aktív-e, valamint híváskor a másik fél telefonszámát."</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1531731435011495015">"táblagép alvás üzemmódjának megakadályozása"</string>
@@ -432,6 +434,7 @@
     <string name="fingerprint_name_template" msgid="5870957565512716938">"<xliff:g id="FINGERID">%d</xliff:g>. ujj"</string>
   <string-array name="fingerprint_error_vendor">
   </string-array>
+    <string name="fingerprint_icon_content_description" msgid="2340202869968465936">"Ujjlenyomat ikon"</string>
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"szinkronizálási beállítások olvasása"</string>
     <string name="permdesc_readSyncSettings" msgid="2706745674569678644">"Lehetővé teszi az alkalmazás számára egy fiók szinkronizálási beállításainak beolvasását. Például ellenőrizheti, hogy a Személyek alkalmazás szinkronizálva van-e egy fiókkal."</string>
     <string name="permlab_writeSyncSettings" msgid="5408694875793945314">"szinkronizálás be-és kikapcsolása"</string>
@@ -710,6 +713,7 @@
     <string name="lockscreen_access_pattern_cell_added" msgid="6756031208359292487">"Cella hozzáadva"</string>
     <string name="lockscreen_access_pattern_cell_added_verbose" msgid="7264580781744026939">"<xliff:g id="CELL_INDEX">%1$s</xliff:g>. pont hozzáadva"</string>
     <string name="lockscreen_access_pattern_detected" msgid="4988730895554057058">"Minta befejezve"</string>
+    <string name="lockscreen_access_pattern_area" msgid="400813207572953209">"Mintaterület"</string>
     <string name="keyguard_accessibility_widget_changed" msgid="5678624624681400191">"%1$s. Modul %3$d/%2$d"</string>
     <string name="keyguard_accessibility_add_widget" msgid="8273277058724924654">"Modul hozzáadása."</string>
     <string name="keyguard_accessibility_widget_empty_slot" msgid="1281505703307930757">"Üres"</string>
@@ -805,10 +809,10 @@
     <string name="enable_explore_by_touch_warning_message" product="default" msgid="2708199672852373195">"<xliff:g id="ACCESSIBILITY_SERVICE_NAME">%1$s</xliff:g> aktiválni szeretné a Felfedezés érintéssel funkciót. Amikor be van kapcsolva a Felfedezés érintéssel, akkor hallhatja vagy láthatja annak leírását, ami az ujja alatt van, illetve végrehajthat kézmozdulatokat a telefon kezeléséhez."</string>
     <string name="oneMonthDurationPast" msgid="7396384508953779925">"1 hónapja"</string>
     <string name="beforeOneMonthDurationPast" msgid="909134546836499826">"Több mint 1 hónapja"</string>
-    <plurals name="last_num_days" formatted="false" msgid="5104533550723932025">
-      <item quantity="other">A legutóbbi <xliff:g id="COUNT_1">%d</xliff:g> nap</item>
-      <item quantity="one">A legutóbbi <xliff:g id="COUNT_0">%d</xliff:g> nap</item>
-    </plurals>
+  <plurals name="last_num_days">
+    <item quantity="one" msgid="7555846096746489821">"A legutóbbi <xliff:g id="COUNT">%d</xliff:g> nap"</item>
+    <item quantity="other" msgid="3069992808164318268">"Elmúlt <xliff:g id="COUNT">%d</xliff:g> napban"</item>
+  </plurals>
     <string name="last_month" msgid="3959346739979055432">"Múlt hónapban"</string>
     <string name="older" msgid="5211975022815554840">"Régebbi"</string>
     <string name="preposition_for_date" msgid="9093949757757445117">"<xliff:g id="DATE">%s</xliff:g>"</string>
@@ -826,18 +830,18 @@
     <string name="weeks" msgid="6509623834583944518">"hét"</string>
     <string name="year" msgid="4001118221013892076">"év"</string>
     <string name="years" msgid="6881577717993213522">"év"</string>
-    <plurals name="duration_seconds" formatted="false" msgid="4527986939729687805">
-      <item quantity="other"><xliff:g id="COUNT">%d</xliff:g> másodperc</item>
-      <item quantity="one">1 másodperc</item>
-    </plurals>
-    <plurals name="duration_minutes" formatted="false" msgid="643786953939956125">
-      <item quantity="other"><xliff:g id="COUNT">%d</xliff:g> perc</item>
-      <item quantity="one">1 perc</item>
-    </plurals>
-    <plurals name="duration_hours" formatted="false" msgid="6826233369186668274">
-      <item quantity="other"><xliff:g id="COUNT">%d</xliff:g> óra</item>
-      <item quantity="one">1 óra</item>
-    </plurals>
+  <plurals name="duration_seconds">
+    <item quantity="one" msgid="6962015528372969481">"1 másodperc"</item>
+    <item quantity="other" msgid="1886107766577166786">"<xliff:g id="COUNT">%d</xliff:g> másodperc"</item>
+  </plurals>
+  <plurals name="duration_minutes">
+    <item quantity="one" msgid="4915414002546085617">"1 perc"</item>
+    <item quantity="other" msgid="3165187169224908775">"<xliff:g id="COUNT">%d</xliff:g> perc"</item>
+  </plurals>
+  <plurals name="duration_hours">
+    <item quantity="one" msgid="8917467491248809972">"1 óra"</item>
+    <item quantity="other" msgid="3863962854246773930">"<xliff:g id="COUNT">%d</xliff:g> óra"</item>
+  </plurals>
     <string name="VideoView_error_title" msgid="3534509135438353077">"Videoprobléma"</string>
     <string name="VideoView_error_text_invalid_progressive_playback" msgid="3186670335938670444">"Ezt a videót nem lehet megjeleníteni ezen az eszközön."</string>
     <string name="VideoView_error_text_unknown" msgid="3450439155187810085">"Nem lehet lejátszani ezt a videót."</string>
@@ -950,14 +954,14 @@
     <string name="ringtone_silent" msgid="7937634392408977062">"Egyik sem"</string>
     <string name="ringtone_picker_title" msgid="3515143939175119094">"Csengőhangok"</string>
     <string name="ringtone_unknown" msgid="5477919988701784788">"Ismeretlen csengőhang"</string>
-    <plurals name="wifi_available" formatted="false" msgid="7900333017752027322">
-      <item quantity="other">Wi-Fi hálózatok érhetők el</item>
-      <item quantity="one">Van elérhető Wi-Fi hálózat</item>
-    </plurals>
-    <plurals name="wifi_available_detailed" formatted="false" msgid="1140699367193975606">
-      <item quantity="other">Nyílt Wi-Fi hálózatok érhetők el</item>
-      <item quantity="one">Nyílt Wi-Fi hálózat érhető el</item>
-    </plurals>
+  <plurals name="wifi_available">
+    <item quantity="one" msgid="6654123987418168693">"Wi-Fi hálózat elérhető"</item>
+    <item quantity="other" msgid="4192424489168397386">"Wi-Fi hálózatok elérhetők"</item>
+  </plurals>
+  <plurals name="wifi_available_detailed">
+    <item quantity="one" msgid="1634101450343277345">"Nyílt Wi-Fi hálózat elérhető"</item>
+    <item quantity="other" msgid="7915895323644292768">"Nyílt Wi-Fi hálózatok elérhetők"</item>
+  </plurals>
     <string name="wifi_available_sign_in" msgid="9157196203958866662">"Bejelentkezés Wi-Fi hálózatba"</string>
     <string name="network_available_sign_in" msgid="1848877297365446605">"Bejelentkezés a hálózatba"</string>
     <!-- no translation found for network_available_sign_in_detailed (8000081941447976118) -->
@@ -1037,14 +1041,8 @@
     <string name="usb_mtp_notification_title" msgid="8396264943589760855">"USB fájlátvitelhez"</string>
     <string name="usb_ptp_notification_title" msgid="1347328437083192112">"USB fotóátvitelhez"</string>
     <string name="usb_midi_notification_title" msgid="4850904915889144654">"USB MIDI-hez"</string>
-    <string name="usb_cd_installer_notification_title" msgid="6774712827892090754">"Csatlakoztatva telepítőként"</string>
     <string name="usb_accessory_notification_title" msgid="7848236974087653666">"Csatlakoztatva egy USB-kiegészítőhöz"</string>
     <string name="usb_notification_message" msgid="7347368030849048437">"Érintse meg a további lehetőségekhez."</string>
-    <string name="extmedia_format_title" product="nosdcard" msgid="9020092196061007262">"USB-tár formázása?"</string>
-    <string name="extmedia_format_title" product="default" msgid="3648415921526526069">"SD-kártya formázása?"</string>
-    <string name="extmedia_format_message" product="nosdcard" msgid="3934016853425761078">"Az USB-háttértáron tárolt összes fájl törlésre kerül. Ez a művelet nem visszavonható!"</string>
-    <string name="extmedia_format_message" product="default" msgid="14131895027543830">"A kártyán lévő összes adat elvész."</string>
-    <string name="extmedia_format_button_format" msgid="4131064560127478695">"Formázás"</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"USB hibakereső csatlakoztatva"</string>
     <string name="adb_active_notification_message" msgid="1016654627626476142">"Érintse meg az USB hibakeresés kikapcsolásához."</string>
     <string name="select_input_method" msgid="8547250819326693584">"Billentyűzet megváltoztatása"</string>
@@ -1147,24 +1145,13 @@
     <string name="skip_button_label" msgid="1275362299471631819">"Kihagyás"</string>
     <string name="no_matches" msgid="8129421908915840737">"Nincs találat"</string>
     <string name="find_on_page" msgid="1946799233822820384">"Keresés az oldalon"</string>
-    <plurals name="matches_found" formatted="false" msgid="1210884353962081884">
-      <item quantity="other"><xliff:g id="INDEX">%d</xliff:g>/<xliff:g id="TOTAL">%d</xliff:g></item>
-      <item quantity="one">1 találat</item>
-    </plurals>
+  <plurals name="matches_found">
+    <item quantity="one" msgid="8167147081136579439">"1 találat"</item>
+    <item quantity="other" msgid="4641872797067609177">"<xliff:g id="TOTAL">%d</xliff:g>/<xliff:g id="INDEX">%d</xliff:g>"</item>
+  </plurals>
     <string name="action_mode_done" msgid="7217581640461922289">"Kész"</string>
-    <string name="progress_unmounting" product="nosdcard" msgid="3923810448507612746">"Az USB-tár leválasztása..."</string>
-    <string name="progress_unmounting" product="default" msgid="1327894998409537190">"SD-kártya leválasztása..."</string>
     <string name="progress_erasing" product="nosdcard" msgid="4521573321524340058">"Az USB-tár törlése..."</string>
     <string name="progress_erasing" product="default" msgid="6596988875507043042">"Az SD-kártya törlése..."</string>
-    <string name="format_error" product="nosdcard" msgid="6299769563624776948">"Nem lehet törölni az USB-háttértárat"</string>
-    <string name="format_error" product="default" msgid="7315248696644510935">"Nem lehet törölni az SD-kártyát."</string>
-    <string name="media_bad_removal" msgid="7960864061016603281">"Az SD-kártya nem lett lecsatolva, mielőtt eltávolították."</string>
-    <string name="media_checking" product="nosdcard" msgid="418188720009569693">"Az USB-tár ellenőrzése folyamatban van."</string>
-    <string name="media_checking" product="default" msgid="7334762503904827481">"Az SD-kártya ellenőrzése folyamatban van."</string>
-    <string name="media_removed" msgid="7001526905057952097">"Az SD-kártya eltávolításra került."</string>
-    <string name="media_shared" product="nosdcard" msgid="5830814349250834225">"Az USB-tárat jelenleg a számítógép használja."</string>
-    <string name="media_shared" product="default" msgid="5706130568133540435">"Az SD-kártyát jelenleg a számítógép használja."</string>
-    <string name="media_unknown_state" msgid="729192782197290385">"A külső meghajtó állapota ismeretlen."</string>
     <string name="share" msgid="1778686618230011964">"Megosztás"</string>
     <string name="find" msgid="4808270900322985960">"Keresés"</string>
     <string name="websearch" msgid="4337157977400211589">"Webes keresés"</string>
@@ -1439,10 +1426,10 @@
     <string name="restr_pin_create_pin" msgid="8017600000263450337">"PIN kód létrehozása a korlátozások módosításához"</string>
     <string name="restr_pin_error_doesnt_match" msgid="2224214190906994548">"A PIN kódok nem egyeznek. Próbálja újra."</string>
     <string name="restr_pin_error_too_short" msgid="8173982756265777792">"A PIN kód túl rövid. Legalább 4 számjegyből kell állnia."</string>
-    <plurals name="restr_pin_countdown" formatted="false" msgid="9061246974881224688">
-      <item quantity="other">Próbálja újra <xliff:g id="COUNT">%d</xliff:g> másodperc múlva</item>
-      <item quantity="one">Próbálja újra 1 másodperc múlva</item>
-    </plurals>
+  <plurals name="restr_pin_countdown">
+    <item quantity="one" msgid="311050995198548675">"Próbálja újra 1 másodperc múlva"</item>
+    <item quantity="other" msgid="4730868920742952817">"Próbálja újra <xliff:g id="COUNT">%d</xliff:g> másodperc múlva"</item>
+  </plurals>
     <string name="restr_pin_try_later" msgid="973144472490532377">"Próbálkozzon később"</string>
     <string name="immersive_cling_title" msgid="8394201622932303336">"Megtekintése teljes képernyőn"</string>
     <string name="immersive_cling_description" msgid="3482371193207536040">"Kilépéshez csúsztassa ujját fentről lefelé."</string>
@@ -1468,39 +1455,40 @@
     <string name="package_updated_device_owner" msgid="8856631322440187071">"Frissítette a rendszergazda"</string>
     <string name="package_deleted_device_owner" msgid="7650577387493101353">"A rendszergazda törölte"</string>
     <string name="battery_saver_description" msgid="1960431123816253034">"Az akkumulátoridő növelése érdekében az energiatakarékos mód csökkenti az eszköz teljesítményét, és korlátozza a rezgést, a helyszolgáltatásokat, valamint a legtöbb háttéradatot is. Előfordulhat, hogy azok az e-mail-, üzenetküldő és egyéb alkalmazások, amelyek szinkronizálására számít, csak akkor frissítenek, ha megnyitja azokat.\n\nAz energiatakarékos mód automatikusan kikapcsol, ha eszköze töltőn van."</string>
-    <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="4367877408072000848">
-      <item quantity="other">%1$d percen át (eddig: <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
-      <item quantity="one">Egy percen át (eddig: <xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g>)</item>
-    </plurals>
-    <plurals name="zen_mode_duration_minutes_summary_short" formatted="false" msgid="6830154222366042597">
-      <item quantity="other">%1$d percen keresztül (eddig:  <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
-      <item quantity="one">1 percen keresztül (eddig: <xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g>)</item>
-    </plurals>
-    <plurals name="zen_mode_duration_hours_summary" formatted="false" msgid="8152974162096743862">
-      <item quantity="other">%1$d órán át (eddig: <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
-      <item quantity="one">Egy órán át (eddig: <xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g>)</item>
-    </plurals>
-    <plurals name="zen_mode_duration_hours_summary_short" formatted="false" msgid="4787552595253082371">
-      <item quantity="other">%1$d órán keresztül (eddig: <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
-      <item quantity="one">1 órán keresztül (eddig: <xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g>)</item>
-    </plurals>
-    <plurals name="zen_mode_duration_minutes" formatted="false" msgid="5127407202506485571">
-      <item quantity="other">%d percen át</item>
-      <item quantity="one">Egy percen át</item>
-    </plurals>
-    <plurals name="zen_mode_duration_minutes_short" formatted="false" msgid="2199350154433426128">
-      <item quantity="other">%d percen keresztül</item>
-      <item quantity="one">1 percen keresztül</item>
-    </plurals>
-    <plurals name="zen_mode_duration_hours" formatted="false" msgid="3938821308277433854">
-      <item quantity="other">%d órán át</item>
-      <item quantity="one">Egy órán át</item>
-    </plurals>
-    <plurals name="zen_mode_duration_hours_short" formatted="false" msgid="6748277774662434217">
-      <item quantity="other">%d órán keresztül</item>
-      <item quantity="one">1 órán keresztül</item>
-    </plurals>
+  <plurals name="zen_mode_duration_minutes_summary">
+    <item quantity="one" msgid="3177683545388923234">"Egy percre (eddig: <xliff:g id="FORMATTEDTIME">%2$s</xliff:g>)"</item>
+    <item quantity="other" msgid="2787867221129368935">"%1$d percre (eddig: <xliff:g id="FORMATTEDTIME">%2$s</xliff:g>)"</item>
+  </plurals>
+  <plurals name="zen_mode_duration_minutes_summary_short">
+    <item quantity="one" msgid="4097046271119330874">"1 percen keresztül (eddig: <xliff:g id="FORMATTEDTIME">%2$s</xliff:g>)"</item>
+    <item quantity="other" msgid="9128259640307810602">"%1$d percen keresztül (eddig: <xliff:g id="FORMATTEDTIME">%2$s</xliff:g>)"</item>
+  </plurals>
+  <plurals name="zen_mode_duration_hours_summary">
+    <item quantity="one" msgid="597194865053253679">"Egy órára (eddig: <xliff:g id="FORMATTEDTIME">%2$s</xliff:g>)"</item>
+    <item quantity="other" msgid="2827214920627669898">"%1$d órára (eddig: <xliff:g id="FORMATTEDTIME">%2$s</xliff:g>)"</item>
+  </plurals>
+  <plurals name="zen_mode_duration_hours_summary_short">
+    <item quantity="one" msgid="342658185856495801">"1 órán keresztül (eddig: <xliff:g id="FORMATTEDTIME">%2$s</xliff:g>)"</item>
+    <item quantity="other" msgid="6842148190293675591">"%1$d órán keresztül (eddig: <xliff:g id="FORMATTEDTIME">%2$s</xliff:g>)"</item>
+  </plurals>
+  <plurals name="zen_mode_duration_minutes">
+    <item quantity="one" msgid="9040808414992812341">"Egy percen át"</item>
+    <item quantity="other" msgid="6924190729213550991">"%d percen át"</item>
+  </plurals>
+  <plurals name="zen_mode_duration_minutes_short">
+    <item quantity="one" msgid="4125166172281866385">"1 percen keresztül"</item>
+    <item quantity="other" msgid="5131202943429775644">"%d percen keresztül"</item>
+  </plurals>
+  <plurals name="zen_mode_duration_hours">
+    <item quantity="one" msgid="3480040795582254384">"Egy órán át"</item>
+    <item quantity="other" msgid="5408537517529822157">"%d órán át"</item>
+  </plurals>
+  <plurals name="zen_mode_duration_hours_short">
+    <item quantity="one" msgid="6798191385685158694">"1 órán keresztül"</item>
+    <item quantity="other" msgid="8464879049844138499">"%d órán keresztül"</item>
+  </plurals>
     <string name="zen_mode_until" msgid="7336308492289875088">"Eddig: <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
+    <string name="zen_mode_alarm" msgid="9128205721301330797">"Eddig: <xliff:g id="FORMATTEDTIME">%1$s</xliff:g> (ez a következő riasztás)"</string>
     <string name="zen_mode_forever" msgid="7420011936770086993">"Amíg ki nem kapcsolja ezt"</string>
     <string name="zen_mode_forever_dnd" msgid="3792132696572189081">"Amíg ki nem kapcsolja a „Ne zavarjanak” lehetőséget"</string>
     <string name="zen_mode_rule_name_combination" msgid="191109939968076477">"<xliff:g id="FIRST">%1$s</xliff:g> / <xliff:g id="REST">%2$s</xliff:g>"</string>
@@ -1525,8 +1513,8 @@
     <string name="usb_midi_peripheral_product_name" msgid="4971827859165280403">"USB-perifériaport"</string>
     <string name="floating_toolbar_open_overflow_description" msgid="4797287862999444631">"További lehetőségek"</string>
     <string name="floating_toolbar_close_overflow_description" msgid="559796923090723804">"További elemeket tartalmazó eszköztár bezárása"</string>
-    <plurals name="selected_count" formatted="false" msgid="7187339492915744615">
-      <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> kiválasztva</item>
-      <item quantity="one"><xliff:g id="COUNT_0">%1$d</xliff:g> kiválasztva</item>
-    </plurals>
+  <plurals name="selected_count">
+    <item quantity="one" msgid="8857281055159991036">"<xliff:g id="COUNT">%1$d</xliff:g> kiválasztva"</item>
+    <item quantity="other" msgid="2608606845335294849">"<xliff:g id="COUNT">%1$d</xliff:g> kiválasztva"</item>
+  </plurals>
 </resources>

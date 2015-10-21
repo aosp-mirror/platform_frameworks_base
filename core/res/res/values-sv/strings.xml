@@ -61,10 +61,10 @@
     <string name="needPuk" msgid="919668385956251611">"Ditt SIM-kort är PUK-låst. Ange PUK-koden om du vill låsa upp det."</string>
     <string name="needPuk2" msgid="4526033371987193070">"Ange PUK2-koden för att häva spärren av SIM-kortet."</string>
     <string name="enablePin" msgid="209412020907207950">"Försöket misslyckades. Aktivera SIM-/RUIM-lås."</string>
-    <plurals name="pinpuk_attempts" formatted="false" msgid="1251012001539225582">
-      <item quantity="other">Du har <xliff:g id="NUMBER_1">%d</xliff:g> försök kvar innan SIM-kortet låses.</item>
-      <item quantity="one">Du har <xliff:g id="NUMBER_0">%d</xliff:g> försök kvar innan SIM-kortet låses.</item>
-    </plurals>
+  <plurals name="pinpuk_attempts">
+    <item quantity="one" msgid="6596245285809790142">"Du har <xliff:g id="NUMBER">%d</xliff:g> försök kvar innan SIM-kortet låses."</item>
+    <item quantity="other" msgid="7530597808358774740">"Du har <xliff:g id="NUMBER">%d</xliff:g> försök kvar innan SIM-kortet låses."</item>
+  </plurals>
     <string name="imei" msgid="2625429890869005782">"IMEI-kod"</string>
     <string name="meid" msgid="4841221237681254195">"MEID"</string>
     <string name="ClipMmi" msgid="6952821216480289285">"Nummerpresentatör för inkommande samtal"</string>
@@ -163,7 +163,7 @@
     <string name="contentServiceTooManyDeletesNotificationDesc" msgid="8100981435080696431">"För många <xliff:g id="CONTENT_TYPE">%s</xliff:g>-borttagningar."</string>
     <string name="low_memory" product="tablet" msgid="6494019234102154896">"Pekdatorns lagringsutrymme är fullt. Ta bort några filer för att frigöra utrymme."</string>
     <string name="low_memory" product="watch" msgid="4415914910770005166">"Klockans lagringsutrymme är fullt. Ta bort några filer för att frigöra utrymme."</string>
-    <string name="low_memory" product="tv" msgid="516619861191025923">"Lagringsutrymmet på tv:n är fullt. Ta bort några filer för att frigöra utrymme."</string>
+    <string name="low_memory" product="tv" msgid="516619861191025923">"Lagringsutrymmet på TV:n är fullt. Ta bort några filer för att frigöra utrymme."</string>
     <string name="low_memory" product="default" msgid="3475999286680000541">"Mobilens lagringsutrymme är fullt. Ta bort några filer för att frigöra utrymme."</string>
     <string name="ssl_ca_cert_warning" msgid="5848402127455021714">"Nätverket kan vara övervakat"</string>
     <string name="ssl_ca_cert_noti_by_unknown" msgid="4475437862189850602">"Av en okänd tredje part"</string>
@@ -177,7 +177,7 @@
     <string name="factory_reset_message" msgid="4905025204141900666">"Administratörsappen saknar delar eller är skadad och kan inte användas. Enheten kommer nu att rensas. Kontakta administratören om du behöver hjälp."</string>
     <string name="me" msgid="6545696007631404292">"Jag"</string>
     <string name="power_dialog" product="tablet" msgid="8545351420865202853">"Alternativ för surfplattan"</string>
-    <string name="power_dialog" product="tv" msgid="6153888706430556356">"Tv-alternativ"</string>
+    <string name="power_dialog" product="tv" msgid="6153888706430556356">"TV-alternativ"</string>
     <string name="power_dialog" product="default" msgid="1319919075463988638">"Telefonalternativ"</string>
     <string name="silent_mode" msgid="7167703389802618663">"Tyst läge"</string>
     <string name="turn_on_radio" msgid="3912793092339962371">"Aktivera trådlöst"</string>
@@ -195,7 +195,7 @@
     <string name="reboot_to_reset_message" msgid="2432077491101416345">"Startar om …"</string>
     <string name="shutdown_progress" msgid="2281079257329981203">"Avslutar…"</string>
     <string name="shutdown_confirm" product="tablet" msgid="3385745179555731470">"Din surfplatta stängs av."</string>
-    <string name="shutdown_confirm" product="tv" msgid="476672373995075359">"Tv:n stängs av."</string>
+    <string name="shutdown_confirm" product="tv" msgid="476672373995075359">"TV:n stängs av."</string>
     <string name="shutdown_confirm" product="watch" msgid="3490275567476369184">"Klockan stängs av."</string>
     <string name="shutdown_confirm" product="default" msgid="649792175242821353">"Din telefon stängs av."</string>
     <string name="shutdown_confirm_question" msgid="2906544768881136183">"Vill du stänga av?"</string>
@@ -276,7 +276,7 @@
     <string name="permdesc_sendSms" msgid="7094729298204937667">"Tillåter att appen skickar SMS. Detta kan leda till oväntade avgifter. Skadliga appar kan skicka meddelanden utan ditt godkännande vilket kan kosta pengar."</string>
     <string name="permlab_readSms" msgid="8745086572213270480">"läsa dina textmeddelanden (SMS eller MMS)"</string>
     <string name="permdesc_readSms" product="tablet" msgid="2467981548684735522">"Tillåter att appen läser SMS som sparats på surfplattan eller på SIM-kortet. Med den här behörigheten tillåts appen att läsa alla SMS oavsett innehåll eller sekretess."</string>
-    <string name="permdesc_readSms" product="tv" msgid="5102425513647038535">"Tillåter att appen läser sms som har sparats på tv:n eller SIM-kortet. På så sätt kan appen läsa alla sms oavsett innehåll eller sekretess."</string>
+    <string name="permdesc_readSms" product="tv" msgid="5102425513647038535">"Tillåter att appen läser sms som har sparats på TV:n eller SIM-kortet. På så sätt kan appen läsa alla sms oavsett innehåll eller sekretess."</string>
     <string name="permdesc_readSms" product="default" msgid="3695967533457240550">"Tillåter att appen läser SMS som sparats på mobilen eller på SIM-kortet. Med den här behörigheten tillåts appen att läsa alla SMS oavsett innehåll eller sekretess."</string>
     <string name="permlab_receiveWapPush" msgid="5991398711936590410">"ta emot textmeddelanden (WAP)"</string>
     <string name="permdesc_receiveWapPush" msgid="748232190220583385">"Tillåter att appen tar emot och hanterar WAP-meddelanden. Med den här behörigheten kan appen övervaka eller ta bort meddelanden som skickats till dig utan att visa dem för dig."</string>
@@ -294,7 +294,7 @@
     <string name="permdesc_systemAlertWindow" msgid="8584678381972820118">"Tillåter att appen att dras ovanpå andra appar eller delar av användargränssnittet. De kan störa din användning av gränssnittet i olika appar eller ändra vad du tror visas i andra appar."</string>
     <string name="permlab_persistentActivity" msgid="8841113627955563938">"se till att appen alltid körs"</string>
     <string name="permdesc_persistentActivity" product="tablet" msgid="8525189272329086137">"Tillåter att delar av appen läggs beständigt i minnet. Detta kan innebära att det tillgängliga minnet för andra appar begränsas, vilket gör surfplattan långsam."</string>
-    <string name="permdesc_persistentActivity" product="tv" msgid="5086862529499103587">"Tillåter att en app gör vissa delar beständiga i minnet. Det kan begränsa mängden minne som är tillgänglig för andra appar och gör tv:n långsammare."</string>
+    <string name="permdesc_persistentActivity" product="tv" msgid="5086862529499103587">"Tillåter att en app gör vissa delar beständiga i minnet. Det kan begränsa mängden minne som är tillgänglig för andra appar och gör TV:n långsammare."</string>
     <string name="permdesc_persistentActivity" product="default" msgid="4384760047508278272">"Tillåter att delar av appen läggs beständigt i minnet. Detta kan innebära att det tillgängliga minnet för andra appar begränsas, vilket gör mobilen långsam."</string>
     <string name="permlab_getPackageSize" msgid="7472921768357981986">"mäta appens lagringsplats"</string>
     <string name="permdesc_getPackageSize" msgid="3921068154420738296">"Tillåter att appen hämtar kod, data och cachestorlekar"</string>
@@ -306,33 +306,33 @@
     <string name="permdesc_receiveBootCompleted" product="default" msgid="513950589102617504">"Tillåter att appen startar automatiskt när systemet har startats om. Detta kan innebära att det tar längre tid att starta mobilen och att mobilen blir långsammare i och med att appen hela tiden körs i bakgrunden."</string>
     <string name="permlab_broadcastSticky" msgid="7919126372606881614">"Skicka sticky broadcast"</string>
     <string name="permdesc_broadcastSticky" product="tablet" msgid="7749760494399915651">"Tillåter att appen skickar sticky broadcasts, som finns kvar när sändningen är slut. Vid intensiv användning kan mobilen bli långsam eller instabil eftersom minnet överbelastas."</string>
-    <string name="permdesc_broadcastSticky" product="tv" msgid="6839285697565389467">"Tillåter att appen skickar sticky broadcasts som finns kvar när sändningen är slut. Överdriven användning kan göra tv:n seg eller instabil eftersom den använder för mycket minne."</string>
+    <string name="permdesc_broadcastSticky" product="tv" msgid="6839285697565389467">"Tillåter att appen skickar sticky broadcasts som finns kvar när sändningen är slut. Överdriven användning kan göra TV:n seg eller instabil eftersom den använder för mycket minne."</string>
     <string name="permdesc_broadcastSticky" product="default" msgid="2825803764232445091">"Tillåter att appen skickar sticky broadcast, som finns kvar när sändningen är slut. Vid intensiv användning kan mobilen bli långsam eller instabil eftersom minnet överbelastas."</string>
     <string name="permlab_readContacts" msgid="8348481131899886131">"läsa dina kontakter"</string>
     <string name="permdesc_readContacts" product="tablet" msgid="5294866856941149639">"Tillåter att appen läser kontaktuppgifter som sparats på surfplattan, inklusive information om hur ofta du har ringt, skickat e-post till eller på andra sätt kommunicerat med specifika personer. Med den här behörigheten tillåts appen att spara kontaktuppgifter. Skadliga appar kan dela uppgifterna med andra utan din vetskap."</string>
-    <string name="permdesc_readContacts" product="tv" msgid="1839238344654834087">"Tillåter att appen läser data om dina kontakter som sparats på tv:n, bland annat hur ofta du har ringt, skickat e-post eller kommunicerat på andra sätt med enskilda individer. Med den här behörigheten kan appar spara dina kontaktuppgifter och skadliga appar kan dela kontaktuppgifter utan att du vet om det."</string>
+    <string name="permdesc_readContacts" product="tv" msgid="1839238344654834087">"Tillåter att appen läser data om dina kontakter som sparats på TV:n, bland annat hur ofta du har ringt, skickat e-post eller kommunicerat på andra sätt med enskilda individer. Med den här behörigheten kan appar spara dina kontaktuppgifter och skadliga appar kan dela kontaktuppgifter utan att du vet om det."</string>
     <string name="permdesc_readContacts" product="default" msgid="8440654152457300662">"Tillåter att appen läser kontaktuppgifter som sparats på mobilen, inklusive information om hur ofta du har ringt, skickat e-post till eller på andra sätt kommunicerat med specifika personer. Med den här behörigheten tillåts appen att spara kontaktuppgifter. Skadliga appar kan dela uppgifterna med andra utan din vetskap."</string>
     <string name="permlab_writeContacts" msgid="5107492086416793544">"ändra kontakterna"</string>
     <string name="permdesc_writeContacts" product="tablet" msgid="897243932521953602">"Tillåter att appen ändrar kontaktuppgifter som sparats på surfplattan, inklusive information om hur ofta du har ringt, skickat e-post till eller på andra sätt kommunicerat med specifika personer. Med den här behörigheten tillåts appar att ta bort kontaktuppgifter."</string>
-    <string name="permdesc_writeContacts" product="tv" msgid="5438230957000018959">"Tillåter att appen ändrar uppgifterna om dina kontakter som har sparats på tv:n, bland annat hur ofta du har ringt, skickat e-post eller kommunicerat på andra sätt med särskilda kontakter. Med den här behörigheten kan appar ta bort kontaktuppgifter."</string>
+    <string name="permdesc_writeContacts" product="tv" msgid="5438230957000018959">"Tillåter att appen ändrar uppgifterna om dina kontakter som har sparats på TV:n, bland annat hur ofta du har ringt, skickat e-post eller kommunicerat på andra sätt med särskilda kontakter. Med den här behörigheten kan appar ta bort kontaktuppgifter."</string>
     <string name="permdesc_writeContacts" product="default" msgid="589869224625163558">"Tillåter att appen ändrar kontaktuppgifter som sparats på mobilen, inklusive information om hur ofta du har ringt, skickat e-post till eller på andra sätt kommunicerat med specifika personer. Med den här behörigheten tillåts appar att ta bort kontaktuppgifter."</string>
     <string name="permlab_readCallLog" msgid="3478133184624102739">"läs samtalslogg"</string>
     <string name="permdesc_readCallLog" product="tablet" msgid="3700645184870760285">"Tillåter att appen läser pekdatorns samtalslista, inklusive uppgifter om inkommande och utgående samtal. Med den här behörigheten tillåts appen att spara samtalshistoriken. Skadliga appar kan dela uppgifterna med andra utan din vetskap."</string>
-    <string name="permdesc_readCallLog" product="tv" msgid="5611770887047387926">"Tillåter att appen läser tv:ns samtalslista, bland annat data om inkommande och utgående samtal. Med den här behörigheten kan appar spara data i dina samtalslistor och skadliga appar kan dela data i samtalslistor utan att du vet om det."</string>
+    <string name="permdesc_readCallLog" product="tv" msgid="5611770887047387926">"Tillåter att appen läser TV:ns samtalslista, bland annat data om inkommande och utgående samtal. Med den här behörigheten kan appar spara data i dina samtalslistor och skadliga appar kan dela data i samtalslistor utan att du vet om det."</string>
     <string name="permdesc_readCallLog" product="default" msgid="5777725796813217244">"Tillåter att appen läser mobilens samtalslista, inklusive uppgifter om inkommande och utgående samtal. Med den här behörigheten tillåts appen att spara samtalshistoriken. Skadliga appar kan dela uppgifterna med andra utan din vetskap."</string>
     <string name="permlab_writeCallLog" msgid="8552045664743499354">"skriv samtalslogg"</string>
     <string name="permdesc_writeCallLog" product="tablet" msgid="6661806062274119245">"Tillåter att appen gör ändringar i pekdatorns samtalslista, inklusive i uppgifter om inkommande och utgående samtal. Skadliga program kan använda detta för att radera eller ändra din samtalslista."</string>
-    <string name="permdesc_writeCallLog" product="tv" msgid="4225034892248398019">"Tillåter att appen gör ändringar i tv:ns samtalslista, inklusive i uppgifter om inkommande och utgående samtal. Skadliga appar kan använda detta för att rensa eller ändra din samtalslista."</string>
+    <string name="permdesc_writeCallLog" product="tv" msgid="4225034892248398019">"Tillåter att appen gör ändringar i TV:ns samtalslista, inklusive i uppgifter om inkommande och utgående samtal. Skadliga appar kan använda detta för att rensa eller ändra din samtalslista."</string>
     <string name="permdesc_writeCallLog" product="default" msgid="683941736352787842">"Tillåter att appen gör ändringar i mobilens samtalslista, inklusive i uppgifter om inkommande och utgående samtal. Skadliga program kan använda detta för att radera eller ändra din samtalslista."</string>
     <string name="permlab_bodySensors" msgid="4871091374767171066">"kroppssens. (för hjärtat m.m.)"</string>
     <string name="permdesc_bodySensors" product="default" msgid="4380015021754180431">"Ger appen åtkomst till information från sensorer om ditt fysiska tillstånd, till exempel din puls."</string>
     <string name="permlab_readCalendar" msgid="5972727560257612398">"läsa kalenderuppgifter plus konfidentiell information"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="4216462049057658723">"Tillåter att appen läser alla kalenderuppgifter som sparats på surfplattan, inklusive dina vänners eller kollegors uppgifter. Med den här behörigheten kan appen tillåtas att dela eller spara kalenderuppgifter även om de är sekretessbelagda eller känsliga."</string>
-    <string name="permdesc_readCalendar" product="tv" msgid="3191352452242394196">"Tillåter att appen läser alla kalenderhändelser som sparats på tv:n, bland annat de som tillhör vänner eller kollegor. På så sätt kan appen dela eller spara dina kalenderhändelser oavsett sekretess eller känslighet."</string>
+    <string name="permdesc_readCalendar" product="tv" msgid="3191352452242394196">"Tillåter att appen läser alla kalenderhändelser som sparats på TV:n, bland annat de som tillhör vänner eller kollegor. På så sätt kan appen dela eller spara dina kalenderhändelser oavsett sekretess eller känslighet."</string>
     <string name="permdesc_readCalendar" product="default" msgid="7434548682470851583">"Tillåter att appen läser alla kalenderuppgifter som sparats på mobilen, inklusive dina vänners eller kollegors uppgifter. Med den här behörigheten kan appen tillåtas att dela eller spara kalenderuppgifter även om de är sekretessbelagda eller känsliga."</string>
     <string name="permlab_writeCalendar" msgid="8438874755193825647">"lägga till eller ändra kalenderuppgifter och skicka e-post till gäster utan ägarens vetskap"</string>
     <string name="permdesc_writeCalendar" product="tablet" msgid="6679035520113668528">"Tillåter att appen lägger till, tar bort och ändrar sådana händelser som du kan ändra på surfplattan, inklusive dina vänners eller kollegors uppgifter. Detta kan innebära att appen tillåts skicka meddelanden som ser ut att komma från kalenderns ägare eller ändra händelser utan ägarens vetskap."</string>
-    <string name="permdesc_writeCalendar" product="tv" msgid="1273290605500902507">"Tillåter att appen lägger till, tar bort och ändrar händelser som du kan ändra på tv:n, inklusive dina vänners eller kollegors uppgifter. Appen kan på så sätt skicka meddelanden som ser ut att komma från kalenderns ägare eller ändra uppgifter utan ägarens vetskap."</string>
+    <string name="permdesc_writeCalendar" product="tv" msgid="1273290605500902507">"Tillåter att appen lägger till, tar bort och ändrar händelser som du kan ändra på TV:n, inklusive dina vänners eller kollegors uppgifter. Appen kan på så sätt skicka meddelanden som ser ut att komma från kalenderns ägare eller ändra uppgifter utan ägarens vetskap."</string>
     <string name="permdesc_writeCalendar" product="default" msgid="2324469496327249376">"Tillåter att appen lägger till, tar bort och ändrar sådana händelser som du kan ändra på mobilen, inklusive dina vänners eller kollegors uppgifter. Detta kan innebära att appen tillåts skicka meddelanden som ser ut att komma från kalenderns ägare eller ändra händelser utan ägarens vetskap."</string>
     <string name="permlab_accessLocationExtraCommands" msgid="2836308076720553837">"få åtkomst till extra kommandon för platsleverantör"</string>
     <string name="permdesc_accessLocationExtraCommands" msgid="6078307221056649927">"Tillåter att appen får åtkomst till extra kommandon för platsleverantör. Detta kan innebära att appen tillåts störa funktionen för GPS eller andra platskällor."</string>
@@ -354,17 +354,19 @@
     <string name="permdesc_flashlight" msgid="6522284794568368310">"Tillåter att appen styr lampan."</string>
     <string name="permlab_callPhone" msgid="3925836347681847954">"ringa telefonnummer direkt"</string>
     <string name="permdesc_callPhone" msgid="3740797576113760827">"Tillåter att appen ringer telefonnummer utan någon aktiv åtgärd från dig. Detta kan leda till oväntade avgifter och samtal. Observera att appen inte tillåts ringa nödsamtal. Skadliga appar kan ringa utan ditt godkännande och detta kan kosta pengar."</string>
+    <string name="permlab_accessImsCallService" msgid="3574943847181793918">"tillgång till tjänsten för snabbmeddelanden vid samtal"</string>
+    <string name="permdesc_accessImsCallService" msgid="8992884015198298775">"Tillåter att appen använder tjänsten för snabbmeddelanden för att ringa samtal utan åtgärd från dig."</string>
     <string name="permlab_readPhoneState" msgid="9178228524507610486">"läsa telefonens status och identitet"</string>
     <string name="permdesc_readPhoneState" msgid="1639212771826125528">"Tillåter att appen kommer åt enhetens telefonfunktioner. Med den här behörigheten tillåts appen att identifiera mobilens telefonnummer och enhets-ID, om ett samtal pågår och vilket nummer samtalet är kopplat till."</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1531731435011495015">"förhindra att surfplattan går in i viloläge"</string>
-    <string name="permlab_wakeLock" product="tv" msgid="2601193288949154131">"förhindra att tv:n försätts i viloläge"</string>
+    <string name="permlab_wakeLock" product="tv" msgid="2601193288949154131">"förhindra att TV:n försätts i viloläge"</string>
     <string name="permlab_wakeLock" product="default" msgid="573480187941496130">"förhindra att telefonen sätts i viloläge"</string>
     <string name="permdesc_wakeLock" product="tablet" msgid="7311319824400447868">"Tillåter att appen förhindrar att surfplattan går in i viloläge."</string>
-    <string name="permdesc_wakeLock" product="tv" msgid="3208534859208996974">"Tillåter att appen förhindrar att tv:n försätts i viloläge."</string>
+    <string name="permdesc_wakeLock" product="tv" msgid="3208534859208996974">"Tillåter att appen förhindrar att TV:n försätts i viloläge."</string>
     <string name="permdesc_wakeLock" product="default" msgid="8559100677372928754">"Tillåter att appen förhindrar att mobilen går in i viloläge."</string>
     <string name="permlab_transmitIr" msgid="7545858504238530105">"tillåt IR-sändning"</string>
     <string name="permdesc_transmitIr" product="tablet" msgid="5358308854306529170">"Tillåter att appen använder surfplattans IR-sändare."</string>
-    <string name="permdesc_transmitIr" product="tv" msgid="3926790828514867101">"Tillåter att appen använder den infraröda sändaren på tv:n."</string>
+    <string name="permdesc_transmitIr" product="tv" msgid="3926790828514867101">"Tillåter att appen använder den infraröda sändaren på TV:n."</string>
     <string name="permdesc_transmitIr" product="default" msgid="7957763745020300725">"Tillåter att appen använder mobilens IR-sändare."</string>
     <string name="permlab_setWallpaper" msgid="6627192333373465143">"ange bakgrund"</string>
     <string name="permdesc_setWallpaper" msgid="7373447920977624745">"Tillåter att appen anger systemets bakgrund."</string>
@@ -372,11 +374,11 @@
     <string name="permdesc_setWallpaperHints" msgid="8235784384223730091">"Tillåter att appen ger tips om systemets bakgrundsstorlek."</string>
     <string name="permlab_setTimeZone" msgid="2945079801013077340">"ange tidszon"</string>
     <string name="permdesc_setTimeZone" product="tablet" msgid="1676983712315827645">"Tillåter att appen ändrar pekdatorns tidszon."</string>
-    <string name="permdesc_setTimeZone" product="tv" msgid="888864653946175955">"Tillåter att appen ändrar tidszonen på tv:n."</string>
+    <string name="permdesc_setTimeZone" product="tv" msgid="888864653946175955">"Tillåter att appen ändrar tidszonen på TV:n."</string>
     <string name="permdesc_setTimeZone" product="default" msgid="4499943488436633398">"Tillåter att appen ändrar mobilens tidszon."</string>
     <string name="permlab_getAccounts" msgid="1086795467760122114">"hitta konton på enheten"</string>
     <string name="permdesc_getAccounts" product="tablet" msgid="2741496534769660027">"Tillåter att appen hämtar en lista över alla kända konton på surfplattan. Detta kan inkludera konton som har skapats av appar som du har installerat."</string>
-    <string name="permdesc_getAccounts" product="tv" msgid="4190633395633907543">"Tillåter att appen hämtar listan med konton som tv:n kan identifiera. Den kan innehålla konton som skapats av appar som du har installerat."</string>
+    <string name="permdesc_getAccounts" product="tv" msgid="4190633395633907543">"Tillåter att appen hämtar listan med konton som TV:n kan identifiera. Den kan innehålla konton som skapats av appar som du har installerat."</string>
     <string name="permdesc_getAccounts" product="default" msgid="3448316822451807382">"Tillåter att appen hämtar en lista över alla kända konton på mobilen. Detta kan inkludera konton som har skapats av appar som du har installerat."</string>
     <string name="permlab_accessNetworkState" msgid="4951027964348974773">"visa nätverksanslutningar"</string>
     <string name="permdesc_accessNetworkState" msgid="8318964424675960975">"Tillåter att appen kommer åt information om nätverksanslutningarna, till exempel vilka nätverk som finns och är anslutna."</string>
@@ -392,21 +394,21 @@
     <string name="permdesc_changeWifiState" msgid="7137950297386127533">"Tillåter att appen ansluter till och kopplar från Wi-Fi-åtkomstpunkter samt gör ändringar i enhetens konfiguration för Wi-Fi-nätverk."</string>
     <string name="permlab_changeWifiMulticastState" msgid="1368253871483254784">"tillåt Wi-Fi multicast-mottagning"</string>
     <string name="permdesc_changeWifiMulticastState" product="tablet" msgid="7969774021256336548">"Tillåter att appen tar emot paket som skickats med multicast-adress till alla enheter i ett Wi-Fi-nätverk och inte bara till den här surfplattan. Detta drar mer batteri än när multicastläget inte används."</string>
-    <string name="permdesc_changeWifiMulticastState" product="tv" msgid="9031975661145014160">"Tillåter att appen tar emot paket som skickats till alla enheter i ett Wi-Fi-nätverk med multicastadress, inte bara till tv:n. Detta drar mer batteri än när multicastläget inte används."</string>
+    <string name="permdesc_changeWifiMulticastState" product="tv" msgid="9031975661145014160">"Tillåter att appen tar emot paket som skickats till alla enheter i ett Wi-Fi-nätverk med multicastadress, inte bara till TV:n. Detta drar mer batteri än när multicastläget inte används."</string>
     <string name="permdesc_changeWifiMulticastState" product="default" msgid="6851949706025349926">"Tillåter att appen tar emot paket som skickats med multicast-adress till alla enheter i ett Wi-Fi-nätverk och inte bara till den här mobilen. Detta drar mer batteri än när multicastläget inte används."</string>
     <string name="permlab_bluetoothAdmin" msgid="6006967373935926659">"få åtkomst till Bluetooth-inställningar"</string>
     <string name="permdesc_bluetoothAdmin" product="tablet" msgid="6921177471748882137">"Tillåter att appen konfigurerar den lokala Bluetooth-surfplattan samt upptäcker och parkopplar den med fjärranslutna enheter."</string>
-    <string name="permdesc_bluetoothAdmin" product="tv" msgid="3373125682645601429">"Tillåter att appen konfigurerar den lokala Bluetooth-tv:n och identifierar och kopplar den till fjärrenheter."</string>
+    <string name="permdesc_bluetoothAdmin" product="tv" msgid="3373125682645601429">"Tillåter att appen konfigurerar den lokala Bluetooth-TV:n och identifierar och kopplar den till fjärrenheter."</string>
     <string name="permdesc_bluetoothAdmin" product="default" msgid="8931682159331542137">"Tillåter att appen konfigurerar den lokala Bluetooth-mobilen samt upptäcker och parkopplar den med fjärranslutna enheter."</string>
     <string name="permlab_accessWimaxState" msgid="4195907010610205703">"ansluta till och koppla från WiMAX"</string>
     <string name="permdesc_accessWimaxState" msgid="6360102877261978887">"Tillåter att appen avgör om WiMAX är aktiverat och kommer åt information om eventuella anslutna WiMAX-nätverk."</string>
     <string name="permlab_changeWimaxState" msgid="2405042267131496579">"ändra WiMAX-status"</string>
     <string name="permdesc_changeWimaxState" product="tablet" msgid="3156456504084201805">"Tillåter att appen ansluter surfplattan till eller kopplar från WiMAX-nätverk."</string>
-    <string name="permdesc_changeWimaxState" product="tv" msgid="6022307083934827718">"Tillåter att appen ansluter tv:n till och kopplar från tv:n från WiMAX-nätverk."</string>
+    <string name="permdesc_changeWimaxState" product="tv" msgid="6022307083934827718">"Tillåter att appen ansluter TV:n till och kopplar från TV:n från WiMAX-nätverk."</string>
     <string name="permdesc_changeWimaxState" product="default" msgid="697025043004923798">"Tillåter att appen ansluter mobilen till eller kopplar från WiMAX-nätverk."</string>
     <string name="permlab_bluetooth" msgid="6127769336339276828">"koppla till Bluetooth-enheter"</string>
     <string name="permdesc_bluetooth" product="tablet" msgid="3480722181852438628">"Tillåter att appen kommer åt pekdatorns Bluetooth-konfiguration och upprättar och godkänner anslutningar till parkopplade enheter."</string>
-    <string name="permdesc_bluetooth" product="tv" msgid="3974124940101104206">"Tillåter att appen visar konfigurationen av Bluetooth på tv:n och godkänner alla anslutningar till kopplade enheter."</string>
+    <string name="permdesc_bluetooth" product="tv" msgid="3974124940101104206">"Tillåter att appen visar konfigurationen av Bluetooth på TV:n och godkänner alla anslutningar till kopplade enheter."</string>
     <string name="permdesc_bluetooth" product="default" msgid="3207106324452312739">"Tillåter att appen kommer åt mobilens Bluetooth-konfiguration och upprättar och godkänner anslutningar till parkopplade enheter."</string>
     <string name="permlab_nfc" msgid="4423351274757876953">"kontrollera närfältskommunikationen"</string>
     <string name="permdesc_nfc" msgid="7120611819401789907">"Tillåter att appen kommunicerar med etiketter, kort och läsare för närfältskommunikation (NFC)."</string>
@@ -432,6 +434,7 @@
     <string name="fingerprint_name_template" msgid="5870957565512716938">"Finger <xliff:g id="FINGERID">%d</xliff:g>"</string>
   <string-array name="fingerprint_error_vendor">
   </string-array>
+    <string name="fingerprint_icon_content_description" msgid="2340202869968465936">"Ikon för fingeravtryck"</string>
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"läsa synkroniseringsinställningar"</string>
     <string name="permdesc_readSyncSettings" msgid="2706745674569678644">"Tillåter att appen läser synkroniseringsinställningarna för ett konto. Detta kan användas till exempel för att avgöra om appen Personer är synkroniserad med ett konto."</string>
     <string name="permlab_writeSyncSettings" msgid="5408694875793945314">"aktivera/inaktivera synkronisering"</string>
@@ -496,10 +499,10 @@
     <string name="policydesc_limitPassword" msgid="2502021457917874968">"Styr tillåten längd och tillåtna tecken i lösenord och pinkoder för skärmlåset."</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"Övervaka försök att låsa upp skärmen"</string>
     <string name="policydesc_watchLogin" product="tablet" msgid="3215729294215070072">"Övervaka antalet felaktiga lösenord som angetts för skärmlåset och lås surfplattan eller ta bort alla data från surfplattan om för många felaktiga försök görs."</string>
-    <string name="policydesc_watchLogin" product="TV" msgid="2707817988309890256">"Övervakar antalet felaktiga lösenord som skrivits in vid upplåsning av skärmen och låser tv:n eller rensar alla uppgifter på tv:n om för många felaktiga lösenord har skrivits in."</string>
+    <string name="policydesc_watchLogin" product="TV" msgid="2707817988309890256">"Övervakar antalet felaktiga lösenord som skrivits in vid upplåsning av skärmen och låser TV:n eller rensar alla uppgifter på TV:n om för många felaktiga lösenord har skrivits in."</string>
     <string name="policydesc_watchLogin" product="default" msgid="5712323091846761073">"Övervaka antalet felaktiga lösenord som angivits för skärmlåset och lås mobilen eller ta bort alla data från mobilen om för många felaktiga försök görs."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="tablet" msgid="4280246270601044505">"Övervaka antalet felaktiga lösenord som skrivits in vid upplåsning av skärmen och lås surfplattan eller rensa alla uppgifter för den här användaren om för många felaktiga lösenord har skrivits in."</string>
-    <string name="policydesc_watchLogin_secondaryUser" product="TV" msgid="3484832653564483250">"Övervaka antalet felaktiga lösenord som skrivits in vid upplåsning av skärmen och lås tv:n eller rensa alla uppgifter för den här användaren om för många felaktiga lösenord har skrivits in."</string>
+    <string name="policydesc_watchLogin_secondaryUser" product="TV" msgid="3484832653564483250">"Övervaka antalet felaktiga lösenord som skrivits in vid upplåsning av skärmen och lås TV:n eller rensa alla uppgifter för den här användaren om för många felaktiga lösenord har skrivits in."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="default" msgid="2185480427217127147">"Övervaka antalet felaktiga lösenord som skrivits in vid upplåsning av skärmen och lås mobilen eller rensa alla uppgifter för den här användaren om för många felaktiga lösenord har skrivits in."</string>
     <string name="policylab_resetPassword" msgid="4934707632423915395">"Ändra skärmlåset"</string>
     <string name="policydesc_resetPassword" msgid="1278323891710619128">"Ändra skärmlåset."</string>
@@ -507,11 +510,11 @@
     <string name="policydesc_forceLock" msgid="1141797588403827138">"Kontrollera hur och när skärmlåset aktiveras."</string>
     <string name="policylab_wipeData" msgid="3910545446758639713">"Radera all data"</string>
     <string name="policydesc_wipeData" product="tablet" msgid="4306184096067756876">"Ta bort data från surfplattan utan förvarning genom att återställa standardinställningarna."</string>
-    <string name="policydesc_wipeData" product="tv" msgid="5816221315214527028">"Rensar uppgifterna på tv:n utan föregående varning genom att återställa standardinställningarna."</string>
+    <string name="policydesc_wipeData" product="tv" msgid="5816221315214527028">"Rensar uppgifterna på TV:n utan föregående varning genom att återställa standardinställningarna."</string>
     <string name="policydesc_wipeData" product="default" msgid="5096895604574188391">"Ta bort data från mobilen utan förvarning genom att återställa standardinställningarna."</string>
     <string name="policylab_wipeData_secondaryUser" msgid="8362863289455531813">"Radera användaruppgifter"</string>
     <string name="policydesc_wipeData_secondaryUser" product="tablet" msgid="6336255514635308054">"Rensa användarens uppgifter på den här surfplattan utan förvarning."</string>
-    <string name="policydesc_wipeData_secondaryUser" product="tv" msgid="2086473496848351810">"Rensa användarens uppgifter på den här tv:n utan förvarning."</string>
+    <string name="policydesc_wipeData_secondaryUser" product="tv" msgid="2086473496848351810">"Rensa användarens uppgifter på den här TV:n utan förvarning."</string>
     <string name="policydesc_wipeData_secondaryUser" product="default" msgid="6787904546711590238">"Rensa användarens data på den här mobilen utan förvarning."</string>
     <string name="policylab_setGlobalProxy" msgid="2784828293747791446">"Ange global proxyserver"</string>
     <string name="policydesc_setGlobalProxy" msgid="8459859731153370499">"Ange enhetens globala proxy som ska användas när policyn aktiveras. Det är bara enhetens ägare som kan ange global proxy."</string>
@@ -660,7 +663,7 @@
     <string name="faceunlock_multiple_failures" msgid="754137583022792429">"Du har försökt låsa upp med Ansiktslås för många gånger"</string>
     <string name="lockscreen_missing_sim_message_short" msgid="5099439277819215399">"Inget SIM-kort"</string>
     <string name="lockscreen_missing_sim_message" product="tablet" msgid="151659196095791474">"Inget SIM-kort i surfplattan."</string>
-    <string name="lockscreen_missing_sim_message" product="tv" msgid="1943633865476989599">"Det finns inget SIM-kort i tv:n."</string>
+    <string name="lockscreen_missing_sim_message" product="tv" msgid="1943633865476989599">"Det finns inget SIM-kort i TV:n."</string>
     <string name="lockscreen_missing_sim_message" product="default" msgid="2186920585695169078">"Inget SIM-kort i telefonen."</string>
     <string name="lockscreen_missing_sim_instructions" msgid="5372787138023272615">"Sätt i ett SIM-kort."</string>
     <string name="lockscreen_missing_sim_instructions_long" msgid="3526573099019319472">"SIM-kort saknas eller kan inte läsas. Sätt i ett SIM-kort."</string>
@@ -683,13 +686,13 @@
     <string name="lockscreen_too_many_failed_password_attempts_dialog_message" msgid="2725973286239344555">"Du har angett fel lösenord <xliff:g id="NUMBER_0">%d</xliff:g> gånger. \n\nFörsök igen om <xliff:g id="NUMBER_1">%d</xliff:g> sekunder."</string>
     <string name="lockscreen_too_many_failed_pin_attempts_dialog_message" msgid="6216672706545696955">"Du har angett fel lösenord <xliff:g id="NUMBER_0">%d</xliff:g> gånger. \n\nFörsök igen om <xliff:g id="NUMBER_1">%d</xliff:g> sekunder."</string>
     <string name="lockscreen_failed_attempts_almost_glogin" product="tablet" msgid="9191611984625460820">"Du har ritat ditt grafiska lösenord fel <xliff:g id="NUMBER_0">%d</xliff:g> gånger. Efter <xliff:g id="NUMBER_1">%d</xliff:g> försök till ombeds du att låsa upp surfplattan med din Google-inloggning.\n\n Försök igen om  <xliff:g id="NUMBER_2">%d</xliff:g> sekunder."</string>
-    <string name="lockscreen_failed_attempts_almost_glogin" product="tv" msgid="5316664559603394684">"Du har ritat fel mönster för upplåsning <xliff:g id="NUMBER_0">%d</xliff:g> gånger. Efter ytterligare <xliff:g id="NUMBER_1">%d</xliff:g> misslyckade försök blir du ombedd att låsa upp tv:n genom att logga in på Google.\n\n Försök igen om <xliff:g id="NUMBER_2">%d</xliff:g> sekunder."</string>
+    <string name="lockscreen_failed_attempts_almost_glogin" product="tv" msgid="5316664559603394684">"Du har ritat fel mönster för upplåsning <xliff:g id="NUMBER_0">%d</xliff:g> gånger. Efter ytterligare <xliff:g id="NUMBER_1">%d</xliff:g> misslyckade försök blir du ombedd att låsa upp TV:n genom att logga in på Google.\n\n Försök igen om <xliff:g id="NUMBER_2">%d</xliff:g> sekunder."</string>
     <string name="lockscreen_failed_attempts_almost_glogin" product="default" msgid="2590227559763762751">"Du har ritat ditt grafiska lösenord fel <xliff:g id="NUMBER_0">%d</xliff:g> gånger. Efter <xliff:g id="NUMBER_1">%d</xliff:g> försök till ombeds du att låsa upp mobilen med uppgifterna som du använder när du loggar in på Google.\n\n Försök igen om  <xliff:g id="NUMBER_2">%d</xliff:g> sekunder."</string>
     <string name="lockscreen_failed_attempts_almost_at_wipe" product="tablet" msgid="6128106399745755604">"Du har försökt låsa upp surfplattan på fel sätt <xliff:g id="NUMBER_0">%d</xliff:g> gånger. Efter <xliff:g id="NUMBER_1">%d</xliff:g> misslyckade försök till kommer surfplattan att återställas till fabriksinställningarna. Du förlorar då alla användardata."</string>
-    <string name="lockscreen_failed_attempts_almost_at_wipe" product="tv" msgid="950408382418270260">"Du har misslyckats med att låsa upp tv:n <xliff:g id="NUMBER_0">%d</xliff:g> gånger. Efter ytterligare <xliff:g id="NUMBER_1">%d</xliff:g> misslyckade försök kommer tv:n att återställas till standardinställningarna och alla användaruppgifter kommer att gå förlorade."</string>
+    <string name="lockscreen_failed_attempts_almost_at_wipe" product="tv" msgid="950408382418270260">"Du har misslyckats med att låsa upp TV:n <xliff:g id="NUMBER_0">%d</xliff:g> gånger. Efter ytterligare <xliff:g id="NUMBER_1">%d</xliff:g> misslyckade försök kommer TV:n att återställas till standardinställningarna och alla användaruppgifter kommer att gå förlorade."</string>
     <string name="lockscreen_failed_attempts_almost_at_wipe" product="default" msgid="8603565142156826565">"Du har försökt låsa upp mobilen på fel sätt <xliff:g id="NUMBER_0">%d</xliff:g> gånger. Efter <xliff:g id="NUMBER_1">%d</xliff:g> misslyckade försök till kommer mobilen att återställas till fabriksinställningarna. Du förlorar då alla användardata."</string>
     <string name="lockscreen_failed_attempts_now_wiping" product="tablet" msgid="280873516493934365">"Du har försökt låsa upp surfplattan på fel sätt <xliff:g id="NUMBER">%d</xliff:g> gånger. Surfplattan återställs nu till fabriksinställningarna."</string>
-    <string name="lockscreen_failed_attempts_now_wiping" product="tv" msgid="3195755534096192191">"Du har misslyckats med att låsa upp tv:n <xliff:g id="NUMBER">%d</xliff:g> gånger. Tv:n kommer nu att återställas till standardinställningarna."</string>
+    <string name="lockscreen_failed_attempts_now_wiping" product="tv" msgid="3195755534096192191">"Du har misslyckats med att låsa upp TV:n <xliff:g id="NUMBER">%d</xliff:g> gånger. TV:n kommer nu att återställas till standardinställningarna."</string>
     <string name="lockscreen_failed_attempts_now_wiping" product="default" msgid="3025504721764922246">"Du har försökt låsa upp mobilen på fel sätt <xliff:g id="NUMBER">%d</xliff:g> gånger. Mobilen återställs nu till fabriksinställningarna."</string>
     <string name="lockscreen_too_many_failed_attempts_countdown" msgid="6251480343394389665">"Försök igen om <xliff:g id="NUMBER">%d</xliff:g> sekunder."</string>
     <string name="lockscreen_forgot_pattern_button_text" msgid="2626999449610695930">"Glömt ditt grafiska lösenord?"</string>
@@ -710,6 +713,7 @@
     <string name="lockscreen_access_pattern_cell_added" msgid="6756031208359292487">"En cell har lagts till"</string>
     <string name="lockscreen_access_pattern_cell_added_verbose" msgid="7264580781744026939">"Cell <xliff:g id="CELL_INDEX">%1$s</xliff:g> har lagts till"</string>
     <string name="lockscreen_access_pattern_detected" msgid="4988730895554057058">"Grafiskt lösenord har slutförts"</string>
+    <string name="lockscreen_access_pattern_area" msgid="400813207572953209">"Fält för grafiskt lösenord."</string>
     <string name="keyguard_accessibility_widget_changed" msgid="5678624624681400191">"%1$s. Widget %2$d av %3$d."</string>
     <string name="keyguard_accessibility_add_widget" msgid="8273277058724924654">"Lägg till en widget."</string>
     <string name="keyguard_accessibility_widget_empty_slot" msgid="1281505703307930757">"Tom"</string>
@@ -774,7 +778,7 @@
     <string name="permdesc_readHistoryBookmarks" msgid="8462378226600439658">"Tillåter att appen läser historiken för besökta sidor och alla bokmärken i webbläsaren. Observera att den här behörigheten kanske inte är tillämplig för webbläsare från tredje part eller andra appar med surffunktion."</string>
     <string name="permlab_writeHistoryBookmarks" msgid="3714785165273314490">"skriva bokmärken och historik på webben"</string>
     <string name="permdesc_writeHistoryBookmarks" product="tablet" msgid="6825527469145760922">"Tillåter att appen ändrar historiken för besökta sidor i webbläsaren eller bokmärken som sparats på surfplattan. Det kan innebära att appen kan ta bort eller ändra webbläsarinformation. Observera att den här behörigheten kanske inte är tillämplig för webbläsare från tredje part eller andra appar med surffunktion."</string>
-    <string name="permdesc_writeHistoryBookmarks" product="tv" msgid="7007393823197766548">"Tillåter att appen ändrar webbläsarens historik eller bokmärken som har sparats på tv:n. Appen kan därmed rensa eller ändra uppgifter i webbläsaren. Obs! Den här behörigheten kanske inte gäller för webbläsare från tredje part eller andra appar med webbfunktioner."</string>
+    <string name="permdesc_writeHistoryBookmarks" product="tv" msgid="7007393823197766548">"Tillåter att appen ändrar webbläsarens historik eller bokmärken som har sparats på TV:n. Appen kan därmed rensa eller ändra uppgifter i webbläsaren. Obs! Den här behörigheten kanske inte gäller för webbläsare från tredje part eller andra appar med webbfunktioner."</string>
     <string name="permdesc_writeHistoryBookmarks" product="default" msgid="8497389531014185509">"Tillåter att appen ändrar historiken för besökta sidor i webbläsaren eller bokmärken som sparats på telefonen. Det kan innebära att appen kan ta bort eller ändra webbläsarinformation. Observera att den här behörigheten kanske inte är tillämplig för webbläsare från tredje part eller andra appar med surffunktion."</string>
     <string name="permlab_setAlarm" msgid="1379294556362091814">"ställa in ett alarm"</string>
     <string name="permdesc_setAlarm" msgid="316392039157473848">"Tillåter att appen ställer in ett alarm i en befintlig alarmapp. Vissa alarmappar har inte den här funktionen."</string>
@@ -805,10 +809,10 @@
     <string name="enable_explore_by_touch_warning_message" product="default" msgid="2708199672852373195">"<xliff:g id="ACCESSIBILITY_SERVICE_NAME">%1$s</xliff:g> vill aktivera Explore by Touch. När funktionen är aktiv kan du höra eller se beskrivningar av vad du har under fingret eller utföra gester för att göra saker med telefonen."</string>
     <string name="oneMonthDurationPast" msgid="7396384508953779925">"för 1 månad sedan"</string>
     <string name="beforeOneMonthDurationPast" msgid="909134546836499826">"För mer än en månad sedan"</string>
-    <plurals name="last_num_days" formatted="false" msgid="5104533550723932025">
-      <item quantity="other">De senaste <xliff:g id="COUNT_1">%d</xliff:g> dagarna</item>
-      <item quantity="one">Den senaste dagen (<xliff:g id="COUNT_0">%d</xliff:g>)</item>
-    </plurals>
+  <plurals name="last_num_days">
+    <item quantity="one" msgid="7555846096746489821">"Den senaste dagen (<xliff:g id="COUNT">%d</xliff:g>)"</item>
+    <item quantity="other" msgid="3069992808164318268">"De senaste <xliff:g id="COUNT">%d</xliff:g> dagarna"</item>
+  </plurals>
     <string name="last_month" msgid="3959346739979055432">"Föregående månad"</string>
     <string name="older" msgid="5211975022815554840">"Äldre"</string>
     <string name="preposition_for_date" msgid="9093949757757445117">"den <xliff:g id="DATE">%s</xliff:g>"</string>
@@ -826,18 +830,18 @@
     <string name="weeks" msgid="6509623834583944518">"veckor"</string>
     <string name="year" msgid="4001118221013892076">"år"</string>
     <string name="years" msgid="6881577717993213522">"år"</string>
-    <plurals name="duration_seconds" formatted="false" msgid="4527986939729687805">
-      <item quantity="other"><xliff:g id="COUNT">%d</xliff:g> sekunder</item>
-      <item quantity="one">1 sekund</item>
-    </plurals>
-    <plurals name="duration_minutes" formatted="false" msgid="643786953939956125">
-      <item quantity="other"><xliff:g id="COUNT">%d</xliff:g> minuter</item>
-      <item quantity="one">1 minut</item>
-    </plurals>
-    <plurals name="duration_hours" formatted="false" msgid="6826233369186668274">
-      <item quantity="other"><xliff:g id="COUNT">%d</xliff:g> timmar</item>
-      <item quantity="one">1 timme</item>
-    </plurals>
+  <plurals name="duration_seconds">
+    <item quantity="one" msgid="6962015528372969481">"1 sekund"</item>
+    <item quantity="other" msgid="1886107766577166786">"<xliff:g id="COUNT">%d</xliff:g> sekunder"</item>
+  </plurals>
+  <plurals name="duration_minutes">
+    <item quantity="one" msgid="4915414002546085617">"1 minut"</item>
+    <item quantity="other" msgid="3165187169224908775">"<xliff:g id="COUNT">%d</xliff:g> minuter"</item>
+  </plurals>
+  <plurals name="duration_hours">
+    <item quantity="one" msgid="8917467491248809972">"1 timme"</item>
+    <item quantity="other" msgid="3863962854246773930">"<xliff:g id="COUNT">%d</xliff:g> timmar"</item>
+  </plurals>
     <string name="VideoView_error_title" msgid="3534509135438353077">"Videoproblem"</string>
     <string name="VideoView_error_text_invalid_progressive_playback" msgid="3186670335938670444">"Videon kan tyvärr inte spelas upp i den här enheten."</string>
     <string name="VideoView_error_text_unknown" msgid="3450439155187810085">"Det går inte att spela upp videon."</string>
@@ -849,7 +853,7 @@
     <string name="Midnight" msgid="5630806906897892201">"Midnatt"</string>
     <string name="elapsed_time_short_format_mm_ss" msgid="4431555943828711473">"<xliff:g id="MINUTES">%1$02d</xliff:g>:<xliff:g id="SECONDS">%2$02d</xliff:g>"</string>
     <string name="elapsed_time_short_format_h_mm_ss" msgid="1846071997616654124">"<xliff:g id="HOURS">%1$d</xliff:g>:<xliff:g id="MINUTES">%2$02d</xliff:g>:<xliff:g id="SECONDS">%3$02d</xliff:g>"</string>
-    <string name="selectAll" msgid="6876518925844129331">"Välj alla"</string>
+    <string name="selectAll" msgid="6876518925844129331">"Markera allt"</string>
     <string name="cut" msgid="3092569408438626261">"Klipp ut"</string>
     <string name="copy" msgid="2681946229533511987">"Kopiera"</string>
     <string name="paste" msgid="5629880836805036433">"Klistra in"</string>
@@ -950,14 +954,14 @@
     <string name="ringtone_silent" msgid="7937634392408977062">"Ingen"</string>
     <string name="ringtone_picker_title" msgid="3515143939175119094">"Ringsignaler"</string>
     <string name="ringtone_unknown" msgid="5477919988701784788">"Okänd ringsignal"</string>
-    <plurals name="wifi_available" formatted="false" msgid="7900333017752027322">
-      <item quantity="other">Wi-Fi-nätverk är tillgängliga</item>
-      <item quantity="one">Wi-Fi-nätverk är tillgängligt</item>
-    </plurals>
-    <plurals name="wifi_available_detailed" formatted="false" msgid="1140699367193975606">
-      <item quantity="other">Öppna Wi-Fi-nätverk är tillgängliga</item>
-      <item quantity="one">Öppet Wi-Fi-nätverk är tillgängligt</item>
-    </plurals>
+  <plurals name="wifi_available">
+    <item quantity="one" msgid="6654123987418168693">"Wi-Fi-nätverk är tillgängliga"</item>
+    <item quantity="other" msgid="4192424489168397386">"Wi-Fi-nätverk är tillgängliga"</item>
+  </plurals>
+  <plurals name="wifi_available_detailed">
+    <item quantity="one" msgid="1634101450343277345">"Öppna Wi-Fi-nätverk är tillgängliga"</item>
+    <item quantity="other" msgid="7915895323644292768">"Öppna Wi-Fi-nätverk är tillgängliga"</item>
+  </plurals>
     <string name="wifi_available_sign_in" msgid="9157196203958866662">"Logga in på ett Wi-Fi-nätverk"</string>
     <string name="network_available_sign_in" msgid="1848877297365446605">"Logga in på nätverket"</string>
     <!-- no translation found for network_available_sign_in_detailed (8000081941447976118) -->
@@ -983,7 +987,7 @@
     <string name="wifi_p2p_enter_pin_message" msgid="5920929550367828970">"Ange den obligatoriska PIN-koden:"</string>
     <string name="wifi_p2p_show_pin_message" msgid="8530563323880921094">"PIN-kod:"</string>
     <string name="wifi_p2p_frequency_conflict_message" product="tablet" msgid="8012981257742232475">"Surfplattans Wi-Fi-anslutning kommer tillfälligt att avbrytas när den är ansluten till <xliff:g id="DEVICE_NAME">%1$s</xliff:g>"</string>
-    <string name="wifi_p2p_frequency_conflict_message" product="tv" msgid="3087858235069421128">"Tv:n kopplas tillfälligt från Wi-Fi-nätverket när den är ansluten till <xliff:g id="DEVICE_NAME">%1$s</xliff:g>"</string>
+    <string name="wifi_p2p_frequency_conflict_message" product="tv" msgid="3087858235069421128">"TV:n kopplas tillfälligt från Wi-Fi-nätverket när den är ansluten till <xliff:g id="DEVICE_NAME">%1$s</xliff:g>"</string>
     <string name="wifi_p2p_frequency_conflict_message" product="default" msgid="7363907213787469151">"Mobilen kommer tillfälligt att kopplas från Wi-Fi när den är ansluten till <xliff:g id="DEVICE_NAME">%1$s</xliff:g>"</string>
     <string name="select_character" msgid="3365550120617701745">"Infoga tecken"</string>
     <string name="sms_control_title" msgid="7296612781128917719">"Skickar SMS"</string>
@@ -1037,14 +1041,8 @@
     <string name="usb_mtp_notification_title" msgid="8396264943589760855">"USB för överföring av filer"</string>
     <string name="usb_ptp_notification_title" msgid="1347328437083192112">"USB för överföring av foton"</string>
     <string name="usb_midi_notification_title" msgid="4850904915889144654">"USB för MIDI"</string>
-    <string name="usb_cd_installer_notification_title" msgid="6774712827892090754">"Ansluten som installationsprogram"</string>
     <string name="usb_accessory_notification_title" msgid="7848236974087653666">"Ansluten till ett USB-tillbehör"</string>
     <string name="usb_notification_message" msgid="7347368030849048437">"Visa fler alternativ genom att trycka."</string>
-    <string name="extmedia_format_title" product="nosdcard" msgid="9020092196061007262">"Formatera USB-enhet?"</string>
-    <string name="extmedia_format_title" product="default" msgid="3648415921526526069">"Vill du formatera SD-kortet?"</string>
-    <string name="extmedia_format_message" product="nosdcard" msgid="3934016853425761078">"Alla filer på USB-lagringsenheten kommer att raderas. Åtgärden kan inte ångras!"</string>
-    <string name="extmedia_format_message" product="default" msgid="14131895027543830">"Alla data på kortet försvinner."</string>
-    <string name="extmedia_format_button_format" msgid="4131064560127478695">"Format"</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"USB-felsökning ansluten"</string>
     <string name="adb_active_notification_message" msgid="1016654627626476142">"Tryck om du vill inaktivera USB-felsökning."</string>
     <string name="select_input_method" msgid="8547250819326693584">"Byt tangentbord"</string>
@@ -1147,24 +1145,13 @@
     <string name="skip_button_label" msgid="1275362299471631819">"Hoppa över"</string>
     <string name="no_matches" msgid="8129421908915840737">"Inga träffar"</string>
     <string name="find_on_page" msgid="1946799233822820384">"Sök på sidan"</string>
-    <plurals name="matches_found" formatted="false" msgid="1210884353962081884">
-      <item quantity="other"><xliff:g id="INDEX">%d</xliff:g> av <xliff:g id="TOTAL">%d</xliff:g></item>
-      <item quantity="one">1 träff</item>
-    </plurals>
+  <plurals name="matches_found">
+    <item quantity="one" msgid="8167147081136579439">"1 träff"</item>
+    <item quantity="other" msgid="4641872797067609177">"<xliff:g id="INDEX">%d</xliff:g> av <xliff:g id="TOTAL">%d</xliff:g>"</item>
+  </plurals>
     <string name="action_mode_done" msgid="7217581640461922289">"Klar"</string>
-    <string name="progress_unmounting" product="nosdcard" msgid="3923810448507612746">"Monterar bort USB-lagringsenhet ..."</string>
-    <string name="progress_unmounting" product="default" msgid="1327894998409537190">"Monterar bort SD-kort ..."</string>
     <string name="progress_erasing" product="nosdcard" msgid="4521573321524340058">"Raderar USB-lagring ..."</string>
     <string name="progress_erasing" product="default" msgid="6596988875507043042">"Raderar SD-kort ..."</string>
-    <string name="format_error" product="nosdcard" msgid="6299769563624776948">"Det gick inte att radera informationen på USB-enheten."</string>
-    <string name="format_error" product="default" msgid="7315248696644510935">"Det gick inte att radera informationen på SD-kortet."</string>
-    <string name="media_bad_removal" msgid="7960864061016603281">"SD-kortet demonterades inte innan det togs bort."</string>
-    <string name="media_checking" product="nosdcard" msgid="418188720009569693">"USB-lagringsenheten kontrolleras."</string>
-    <string name="media_checking" product="default" msgid="7334762503904827481">"SD-kortet kontrolleras."</string>
-    <string name="media_removed" msgid="7001526905057952097">"SD-kortet har tagits bort."</string>
-    <string name="media_shared" product="nosdcard" msgid="5830814349250834225">"USB-lagringsenheten används av en dator."</string>
-    <string name="media_shared" product="default" msgid="5706130568133540435">"SD-kortet används för närvarande av en dator."</string>
-    <string name="media_unknown_state" msgid="729192782197290385">"Externa media i okänt tillstånd."</string>
     <string name="share" msgid="1778686618230011964">"Dela"</string>
     <string name="find" msgid="4808270900322985960">"Sök efter"</string>
     <string name="websearch" msgid="4337157977400211589">"Webbsökning"</string>
@@ -1213,7 +1200,7 @@
     <string name="shareactionprovider_share_with" msgid="806688056141131819">"Dela med"</string>
     <string name="shareactionprovider_share_with_application" msgid="5627411384638389738">"Dela med <xliff:g id="APPLICATION_NAME">%s</xliff:g>"</string>
     <string name="content_description_sliding_handle" msgid="415975056159262248">"Skärmlåsfunktion. Tryck och dra."</string>
-    <string name="description_target_unlock_tablet" msgid="3833195335629795055">"Lås upp genom att dra."</string>
+    <string name="description_target_unlock_tablet" msgid="3833195335629795055">"Lås upp genom att svepa."</string>
     <string name="keyboard_headset_required_to_hear_password" msgid="7011927352267668657">"Anslut mikrofonlurar om du vill att lösenordet ska läsas upp."</string>
     <string name="keyboard_password_character_no_headset" msgid="2859873770886153678">"Punkt."</string>
     <string name="action_bar_home_description" msgid="5293600496601490216">"Visa startsidan"</string>
@@ -1221,7 +1208,7 @@
     <string name="action_menu_overflow_description" msgid="2295659037509008453">"Fler alternativ"</string>
     <string name="action_bar_home_description_format" msgid="7965984360903693903">"%1$s, %2$s"</string>
     <string name="action_bar_home_subtitle_description_format" msgid="6985546530471780727">"%1$s, %2$s, %3$s"</string>
-    <string name="storage_internal" msgid="4891916833657929263">"Internminne"</string>
+    <string name="storage_internal" msgid="4891916833657929263">"lagring"</string>
     <string name="storage_sd_card" msgid="3282948861378286745">"SD-kort"</string>
     <string name="storage_sd_card_label" msgid="6347111320774379257">"SD-kort (<xliff:g id="MANUFACTURER">%s</xliff:g>)"</string>
     <string name="storage_usb_drive" msgid="6261899683292244209">"USB-enhet"</string>
@@ -1266,7 +1253,7 @@
     <string name="activity_resolver_use_once" msgid="2404644797149173758">"Bara en gång"</string>
     <string name="activity_resolver_work_profiles_support" msgid="185598180676883455">"%1$s har inte stöd för arbetsprofil"</string>
     <string name="default_audio_route_name" product="tablet" msgid="4617053898167127471">"Surfplatta"</string>
-    <string name="default_audio_route_name" product="tv" msgid="9158088547603019321">"Tv"</string>
+    <string name="default_audio_route_name" product="tv" msgid="9158088547603019321">"TV"</string>
     <string name="default_audio_route_name" product="default" msgid="4239291273420140123">"Mobil"</string>
     <string name="default_audio_route_name_headphones" msgid="8119971843803439110">"Hörlurar"</string>
     <string name="default_audio_route_name_dock_speakers" msgid="6240602982276591864">"Dockningsstationens högtalare"</string>
@@ -1320,13 +1307,13 @@
     <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="7813713389422226531">"Du har angett fel lösenord <xliff:g id="NUMBER_0">%d</xliff:g> gånger. \n\nFörsök igen om <xliff:g id="NUMBER_1">%d</xliff:g> sekunder."</string>
     <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="74089475965050805">"Du har ritat ditt grafiska lösenord fel <xliff:g id="NUMBER_0">%d</xliff:g> gånger. \n\nFörsök igen om <xliff:g id="NUMBER_1">%d</xliff:g> sekunder."</string>
     <string name="kg_failed_attempts_almost_at_wipe" product="tablet" msgid="1575557200627128949">"Du har försökt låsa upp mobilen på fel sätt <xliff:g id="NUMBER_0">%d</xliff:g> gånger. Efter ytterligare <xliff:g id="NUMBER_1">%d</xliff:g> misslyckade försök återställs surfplattan till fabriksinställningarna. Du förlorar då alla användardata."</string>
-    <string name="kg_failed_attempts_almost_at_wipe" product="tv" msgid="5621231220154419413">"Du har misslyckats med att låsa upp tv:n <xliff:g id="NUMBER_0">%d</xliff:g> gånger. Efter ytterligare <xliff:g id="NUMBER_1">%d</xliff:g> misslyckade försök kommer tv:n att återställas till standardinställningarna och alla användaruppgifter kommer att gå förlorade."</string>
+    <string name="kg_failed_attempts_almost_at_wipe" product="tv" msgid="5621231220154419413">"Du har misslyckats med att låsa upp TV:n <xliff:g id="NUMBER_0">%d</xliff:g> gånger. Efter ytterligare <xliff:g id="NUMBER_1">%d</xliff:g> misslyckade försök kommer TV:n att återställas till standardinställningarna och alla användaruppgifter kommer att gå förlorade."</string>
     <string name="kg_failed_attempts_almost_at_wipe" product="default" msgid="4051015943038199910">"Du har försökt låsa upp mobilen på fel sätt <xliff:g id="NUMBER_0">%d</xliff:g> gånger. Efter ytterligare <xliff:g id="NUMBER_1">%d</xliff:g> misslyckade försök återställs mobilen till fabriksinställningarna. Du förlorar då alla användardata."</string>
     <string name="kg_failed_attempts_now_wiping" product="tablet" msgid="2072996269148483637">"Du har försökt låsa upp surfplattan på fel sätt <xliff:g id="NUMBER">%d</xliff:g> gånger. Surfplattan återställs nu till fabriksinställningarna."</string>
-    <string name="kg_failed_attempts_now_wiping" product="tv" msgid="4987878286750741463">"Du har misslyckats med att låsa upp tv:n <xliff:g id="NUMBER">%d</xliff:g> gånger. Tv:n kommer nu att återställas till standardinställningarna."</string>
+    <string name="kg_failed_attempts_now_wiping" product="tv" msgid="4987878286750741463">"Du har misslyckats med att låsa upp TV:n <xliff:g id="NUMBER">%d</xliff:g> gånger. TV:n kommer nu att återställas till standardinställningarna."</string>
     <string name="kg_failed_attempts_now_wiping" product="default" msgid="4817627474419471518">"Du har försökt låsa upp mobilen på fel sätt <xliff:g id="NUMBER">%d</xliff:g> gånger. Mobilen återställs nu till fabriksinställningarna."</string>
     <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"Du har ritat ditt grafiska lösenord fel <xliff:g id="NUMBER_0">%d</xliff:g> gånger. Efter ytterligare <xliff:g id="NUMBER_1">%d</xliff:g> försök ombeds du låsa upp surfplattan med ett e-postkonto.\n\n Försök igen om <xliff:g id="NUMBER_2">%d</xliff:g> sekunder."</string>
-    <string name="kg_failed_attempts_almost_at_login" product="tv" msgid="4224651132862313471">"Du har ritat fel mönster för upplåsning <xliff:g id="NUMBER_0">%d</xliff:g> gånger. Efter ytterligare <xliff:g id="NUMBER_1">%d</xliff:g> misslyckade försök blir du ombedd att låsa upp tv:n via ett e-postkonto.\n\n Försök igen om <xliff:g id="NUMBER_2">%d</xliff:g> sekunder."</string>
+    <string name="kg_failed_attempts_almost_at_login" product="tv" msgid="4224651132862313471">"Du har ritat fel mönster för upplåsning <xliff:g id="NUMBER_0">%d</xliff:g> gånger. Efter ytterligare <xliff:g id="NUMBER_1">%d</xliff:g> misslyckade försök blir du ombedd att låsa upp TV:n via ett e-postkonto.\n\n Försök igen om <xliff:g id="NUMBER_2">%d</xliff:g> sekunder."</string>
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"Du har ritat ditt grafiska lösenord fel <xliff:g id="NUMBER_0">%d</xliff:g> gånger. Efter ytterligare <xliff:g id="NUMBER_1">%d</xliff:g> försök ombeds du låsa upp mobilen med hjälp av ett e-postkonto.\n\n Försök igen om <xliff:g id="NUMBER_2">%d</xliff:g> sekunder."</string>
     <string name="kg_text_message_separator" product="default" msgid="4160700433287233771">" – "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="7899202978204438708">"Ta bort"</string>
@@ -1439,10 +1426,10 @@
     <string name="restr_pin_create_pin" msgid="8017600000263450337">"Skapa en pinkod om du vill ändra begränsningar"</string>
     <string name="restr_pin_error_doesnt_match" msgid="2224214190906994548">"Pinkoderna stämmer inte överens. Försök igen."</string>
     <string name="restr_pin_error_too_short" msgid="8173982756265777792">"Pinkoden är för kort. Måste vara minst fyra siffror."</string>
-    <plurals name="restr_pin_countdown" formatted="false" msgid="9061246974881224688">
-      <item quantity="other">Försök igen om <xliff:g id="COUNT">%d</xliff:g> sekunder</item>
-      <item quantity="one">Försök igen om en sekund</item>
-    </plurals>
+  <plurals name="restr_pin_countdown">
+    <item quantity="one" msgid="311050995198548675">"Försök igen om en sekund"</item>
+    <item quantity="other" msgid="4730868920742952817">"Försök igen om <xliff:g id="COUNT">%d</xliff:g> sekunder"</item>
+  </plurals>
     <string name="restr_pin_try_later" msgid="973144472490532377">"Försök igen senare"</string>
     <string name="immersive_cling_title" msgid="8394201622932303336">"Visar på fullskärm"</string>
     <string name="immersive_cling_description" msgid="3482371193207536040">"Dra nedåt från skärmens överkant för att avsluta."</string>
@@ -1468,39 +1455,40 @@
     <string name="package_updated_device_owner" msgid="8856631322440187071">"Uppdaterat av administratören"</string>
     <string name="package_deleted_device_owner" msgid="7650577387493101353">"Paketet har raderats av administratören"</string>
     <string name="battery_saver_description" msgid="1960431123816253034">"I batterisparläget reduceras enhetens prestanda så att batteriet ska räcka längre och vibration, platstjänster samt den mesta användningen av bakgrundsdata begränsas. Det kan hända att appar för e-post, sms och annat som kräver synkronisering inte uppdateras förrän du öppnar dem.\n\nBatterisparläget inaktiveras automatiskt när enheten laddas."</string>
-    <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="4367877408072000848">
-      <item quantity="other">I %1$d minuter (till kl. <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
-      <item quantity="one">I en minut (till kl. <xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g>)</item>
-    </plurals>
-    <plurals name="zen_mode_duration_minutes_summary_short" formatted="false" msgid="6830154222366042597">
-      <item quantity="other">I %1$d min (t.o.m. <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
-      <item quantity="one">I 1 min (t.o.m. <xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g>)</item>
-    </plurals>
-    <plurals name="zen_mode_duration_hours_summary" formatted="false" msgid="8152974162096743862">
-      <item quantity="other">I %1$d timmar (till kl. <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
-      <item quantity="one">I en timme (till kl. <xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g>)</item>
-    </plurals>
-    <plurals name="zen_mode_duration_hours_summary_short" formatted="false" msgid="4787552595253082371">
-      <item quantity="other">I %1$d tim (t.o.m. <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
-      <item quantity="one">I 1 tim (t.o.m. <xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g>)</item>
-    </plurals>
-    <plurals name="zen_mode_duration_minutes" formatted="false" msgid="5127407202506485571">
-      <item quantity="other">I %d minuter</item>
-      <item quantity="one">I en minut</item>
-    </plurals>
-    <plurals name="zen_mode_duration_minutes_short" formatted="false" msgid="2199350154433426128">
-      <item quantity="other">I %d min</item>
-      <item quantity="one">I 1 min</item>
-    </plurals>
-    <plurals name="zen_mode_duration_hours" formatted="false" msgid="3938821308277433854">
-      <item quantity="other">I %d timmar</item>
-      <item quantity="one">I en timme</item>
-    </plurals>
-    <plurals name="zen_mode_duration_hours_short" formatted="false" msgid="6748277774662434217">
-      <item quantity="other">I %d tim</item>
-      <item quantity="one">I en 1 tim</item>
-    </plurals>
+  <plurals name="zen_mode_duration_minutes_summary">
+    <item quantity="one" msgid="3177683545388923234">"I en minut (till kl. <xliff:g id="FORMATTEDTIME">%2$s</xliff:g>)"</item>
+    <item quantity="other" msgid="2787867221129368935">"I %1$d minuter (till kl. <xliff:g id="FORMATTEDTIME">%2$s</xliff:g>)"</item>
+  </plurals>
+  <plurals name="zen_mode_duration_minutes_summary_short">
+    <item quantity="one" msgid="4097046271119330874">"I 1 min (t.o.m. <xliff:g id="FORMATTEDTIME">%2$s</xliff:g>)"</item>
+    <item quantity="other" msgid="9128259640307810602">"I %1$d min (t.o.m. <xliff:g id="FORMATTEDTIME">%2$s</xliff:g>)"</item>
+  </plurals>
+  <plurals name="zen_mode_duration_hours_summary">
+    <item quantity="one" msgid="597194865053253679">"I en timme (till kl. <xliff:g id="FORMATTEDTIME">%2$s</xliff:g>)"</item>
+    <item quantity="other" msgid="2827214920627669898">"I %1$d timmar (till kl. <xliff:g id="FORMATTEDTIME">%2$s</xliff:g>)"</item>
+  </plurals>
+  <plurals name="zen_mode_duration_hours_summary_short">
+    <item quantity="one" msgid="342658185856495801">"I 1 tim (t.o.m. <xliff:g id="FORMATTEDTIME">%2$s</xliff:g>)"</item>
+    <item quantity="other" msgid="6842148190293675591">"I %1$d tim (t.o.m. <xliff:g id="FORMATTEDTIME">%2$s</xliff:g>)"</item>
+  </plurals>
+  <plurals name="zen_mode_duration_minutes">
+    <item quantity="one" msgid="9040808414992812341">"I en minut"</item>
+    <item quantity="other" msgid="6924190729213550991">"I %d minuter"</item>
+  </plurals>
+  <plurals name="zen_mode_duration_minutes_short">
+    <item quantity="one" msgid="4125166172281866385">"I 1 min"</item>
+    <item quantity="other" msgid="5131202943429775644">"I %d min"</item>
+  </plurals>
+  <plurals name="zen_mode_duration_hours">
+    <item quantity="one" msgid="3480040795582254384">"I en timme"</item>
+    <item quantity="other" msgid="5408537517529822157">"I %d timmar"</item>
+  </plurals>
+  <plurals name="zen_mode_duration_hours_short">
+    <item quantity="one" msgid="6798191385685158694">"I 1 tim"</item>
+    <item quantity="other" msgid="8464879049844138499">"I %d tim"</item>
+  </plurals>
     <string name="zen_mode_until" msgid="7336308492289875088">"Till kl. <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
+    <string name="zen_mode_alarm" msgid="9128205721301330797">"Till <xliff:g id="FORMATTEDTIME">%1$s</xliff:g> (nästa alarm)"</string>
     <string name="zen_mode_forever" msgid="7420011936770086993">"Tills du inaktiverar detta"</string>
     <string name="zen_mode_forever_dnd" msgid="3792132696572189081">"Tills du inaktiverar Stör ej"</string>
     <string name="zen_mode_rule_name_combination" msgid="191109939968076477">"<xliff:g id="FIRST">%1$s</xliff:g>/<xliff:g id="REST">%2$s</xliff:g>"</string>
@@ -1525,8 +1513,8 @@
     <string name="usb_midi_peripheral_product_name" msgid="4971827859165280403">"USB-port för kringutrustning"</string>
     <string name="floating_toolbar_open_overflow_description" msgid="4797287862999444631">"Fler alternativ"</string>
     <string name="floating_toolbar_close_overflow_description" msgid="559796923090723804">"Dölj utökat verktygsfält"</string>
-    <plurals name="selected_count" formatted="false" msgid="7187339492915744615">
-      <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> har valts</item>
-      <item quantity="one"><xliff:g id="COUNT_0">%1$d</xliff:g> har valts</item>
-    </plurals>
+  <plurals name="selected_count">
+    <item quantity="one" msgid="8857281055159991036">"Har valt <xliff:g id="COUNT">%1$d</xliff:g>"</item>
+    <item quantity="other" msgid="2608606845335294849">"Har valt <xliff:g id="COUNT">%1$d</xliff:g>"</item>
+  </plurals>
 </resources>
