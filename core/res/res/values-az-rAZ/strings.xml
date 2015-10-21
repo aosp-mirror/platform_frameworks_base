@@ -650,7 +650,7 @@
     <string name="keyguard_password_wrong_pin_code" msgid="2422225591006134936">"Yanlış PIN kodu."</string>
     <string name="keyguard_label_text" msgid="861796461028298424">"Kilidi açmaq üçün Menyu, sonra 0 basın."</string>
     <string name="emergency_call_dialog_number_for_display" msgid="696192103195090970">"Təcili nömrə"</string>
-    <string name="lockscreen_carrier_default" msgid="8963839242565653192">"Xidmət yoxdur."</string>
+    <string name="lockscreen_carrier_default" msgid="6169005837238288522">"Xidmət yoxdur"</string>
     <string name="lockscreen_screen_locked" msgid="7288443074806832904">"Ekran kilidlənib."</string>
     <string name="lockscreen_instructions_when_pattern_enabled" msgid="46154051614126049">"Təcili zəng kilidini açmaq və ya yerləşdirmək üçün Menyu düyməsinə basın."</string>
     <string name="lockscreen_instructions_when_pattern_disabled" msgid="686260028797158364">"Kilidi açmaq üçün Menyu düyməsinə basın."</string>

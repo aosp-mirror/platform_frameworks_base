@@ -219,7 +219,7 @@
     <string name="global_actions_airplane_mode_off_status" msgid="5075070442854490296">"Flytilstand er slået FRA"</string>
     <string name="global_action_settings" msgid="1756531602592545966">"Indstillinger"</string>
     <string name="global_action_assist" msgid="3892832961594295030">"Assistance"</string>
-    <string name="global_action_voice_assist" msgid="7751191495200504480">"Voice Assist"</string>
+    <string name="global_action_voice_assist" msgid="7751191495200504480">"Taleassistent"</string>
     <string name="global_action_lockdown" msgid="8751542514724332873">"Lås nu"</string>
     <string name="status_bar_notification_info_overflow" msgid="5301981741705354993">"999+"</string>
     <string name="safeMode" msgid="2788228061547930246">"Sikker tilstand"</string>
@@ -650,7 +650,7 @@
     <string name="keyguard_password_wrong_pin_code" msgid="2422225591006134936">"Forkert pinkode."</string>
     <string name="keyguard_label_text" msgid="861796461028298424">"Tryk på Menu og dernæst på 0 for at låse op."</string>
     <string name="emergency_call_dialog_number_for_display" msgid="696192103195090970">"Nødnummer"</string>
-    <string name="lockscreen_carrier_default" msgid="8963839242565653192">"Ingen dækning."</string>
+    <string name="lockscreen_carrier_default" msgid="6169005837238288522">"Ingen dækning"</string>
     <string name="lockscreen_screen_locked" msgid="7288443074806832904">"Skærmen er låst."</string>
     <string name="lockscreen_instructions_when_pattern_enabled" msgid="46154051614126049">"Tryk på Menu for at låse op eller foretage et nødopkald."</string>
     <string name="lockscreen_instructions_when_pattern_disabled" msgid="686260028797158364">"Tryk på Menu for at låse op."</string>

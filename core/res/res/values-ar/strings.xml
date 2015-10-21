@@ -654,7 +654,7 @@
     <string name="keyguard_password_wrong_pin_code" msgid="2422225591006134936">"‏رمز PIN غير صحيح."</string>
     <string name="keyguard_label_text" msgid="861796461028298424">"لإلغاء التأمين، اضغط على \"القائمة\" ثم على 0."</string>
     <string name="emergency_call_dialog_number_for_display" msgid="696192103195090970">"رقم الطوارئ"</string>
-    <string name="lockscreen_carrier_default" msgid="8963839242565653192">"لا تتوفر خدمة"</string>
+    <string name="lockscreen_carrier_default" msgid="6169005837238288522">"لا خدمة"</string>
     <string name="lockscreen_screen_locked" msgid="7288443074806832904">"الشاشة مؤمّنة."</string>
     <string name="lockscreen_instructions_when_pattern_enabled" msgid="46154051614126049">"اضغط على \"القائمة\" لإلغاء التأمين أو إجراء اتصال بالطوارئ."</string>
     <string name="lockscreen_instructions_when_pattern_disabled" msgid="686260028797158364">"اضغط على \"القائمة\" لإلغاء التأمين."</string>

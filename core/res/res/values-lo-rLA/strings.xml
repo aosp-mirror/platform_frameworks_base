@@ -650,7 +650,7 @@
     <string name="keyguard_password_wrong_pin_code" msgid="2422225591006134936">"ລະຫັດ PIN ບໍ່ຖືກຕ້ອງ."</string>
     <string name="keyguard_label_text" msgid="861796461028298424">"ເພື່ອປົດລັອກ, ໃຫ້ກົດເມນູ ແລ້ວກົດ 0."</string>
     <string name="emergency_call_dialog_number_for_display" msgid="696192103195090970">"ເບີໂທສຸກເສີນ"</string>
-    <string name="lockscreen_carrier_default" msgid="8963839242565653192">"ບໍ່ມີບໍລິການ."</string>
+    <string name="lockscreen_carrier_default" msgid="6169005837238288522">"ບໍ່ມີບໍລິການ"</string>
     <string name="lockscreen_screen_locked" msgid="7288443074806832904">"ລັອກໜ້າຈໍແລ້ວ."</string>
     <string name="lockscreen_instructions_when_pattern_enabled" msgid="46154051614126049">"ກົດ ເມນູ ເພື່ອປົດລັອກ ຫຼື ໂທອອກຫາເບີສຸກເສີນ."</string>
     <string name="lockscreen_instructions_when_pattern_disabled" msgid="686260028797158364">"ກົດ \"ເມນູ\" ເພື່ອປົດລັອກ."</string>
