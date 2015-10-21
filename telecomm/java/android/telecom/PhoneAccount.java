@@ -52,6 +52,32 @@ import java.util.MissingResourceException;
 public final class PhoneAccount implements Parcelable {
 
     /**
+     * {@link PhoneAccount} extras key (see {@link PhoneAccount#getExtras()}) which determines the
+     * maximum permitted length of a call subject specified via the
+     * {@link TelecomManager#EXTRA_CALL_SUBJECT} extra on an
+     * {@link android.content.Intent#ACTION_CALL} intent.  Ultimately a {@link ConnectionService} is
+     * responsible for enforcing the maximum call subject length when sending the message, however
+     * this extra is provided so that the user interface can proactively limit the length of the
+     * call subject as the user types it.
+     */
+    public static final String EXTRA_CALL_SUBJECT_MAX_LENGTH =
+            "android.telecom.extra.CALL_SUBJECT_MAX_LENGTH";
+
+    /**
+     * {@link PhoneAccount} extras key (see {@link PhoneAccount#getExtras()}) which determines the
+     * character encoding to be used when determining the length of messages.
+     * The user interface can use this when determining the number of characters the user may type
+     * in a call subject.  If empty-string, the call subject message size limit will be enforced on
+     * a 1:1 basis.  That is, each character will count towards the messages size limit as a single
+     * character.  If a character encoding is specified, the message size limit will be based on the
+     * number of bytes in the message per the specified encoding.  See
+     * {@link #EXTRA_CALL_SUBJECT_MAX_LENGTH} for more information on the call subject maximum
+     * length.
+     */
+    public static final String EXTRA_CALL_SUBJECT_CHARACTER_ENCODING =
+            "android.telecom.extra.CALL_SUBJECT_CHARACTER_ENCODING";
+
+    /**
      * Flag indicating that this {@code PhoneAccount} can act as a connection manager for
      * other connections. The {@link ConnectionService} associated with this {@code PhoneAccount}
      * will be allowed to manage phone calls including using its own proprietary phone-call
@@ -213,6 +239,7 @@ public final class PhoneAccount implements Parcelable {
             mSupportedUriSchemes.addAll(phoneAccount.getSupportedUriSchemes());
             mIcon = phoneAccount.getIcon();
             mIsEnabled = phoneAccount.isEnabled();
+            mExtras = phoneAccount.getExtras();
         }
 
         /**
