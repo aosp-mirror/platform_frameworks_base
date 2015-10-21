@@ -440,4 +440,10 @@
     <string name="qs_rearrange" msgid="8060918697551068765">"Жылдам параметрлерді қайта реттеу"</string>
     <string name="show_brightness" msgid="6613930842805942519">"Жылдам параметрлерде жарықтықты көрсету"</string>
     <string name="experimental" msgid="6198182315536726162">"Эксперименттік"</string>
+    <!-- no translation found for enable_bluetooth_title (5027037706500635269) -->
+    <skip />
+    <!-- no translation found for enable_bluetooth_message (9106595990708985385) -->
+    <skip />
+    <!-- no translation found for enable_bluetooth_confirmation_ok (6258074250948309715) -->
+    <skip />
 </resources>
