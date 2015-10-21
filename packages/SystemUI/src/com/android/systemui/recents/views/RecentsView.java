@@ -800,8 +800,7 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
                 // Dock the new task if we are hovering over a valid dock state
                 if (event.dockState != TaskStack.DockState.NONE) {
                     SystemServicesProxy ssp = Recents.getSystemServices();
-                    ssp.setTaskResizeable(event.task.key.id);
-                    ssp.dockTask(event.task.key.id, event.dockState.createMode);
+                    ssp.startTaskInDockedMode(event.task.key.id, event.dockState.createMode);
                     launchTask(event.task, null, INVALID_STACK_ID);
                 }
             }

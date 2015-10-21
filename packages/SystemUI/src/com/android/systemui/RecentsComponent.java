@@ -27,4 +27,9 @@ public interface RecentsComponent {
     void cancelPreloadingRecents();
     void showNextAffiliatedTask();
     void showPrevAffiliatedTask();
+
+    /**
+     * Docks the top-most task and opens recents.
+     */
+    void dockTopTask();
 }

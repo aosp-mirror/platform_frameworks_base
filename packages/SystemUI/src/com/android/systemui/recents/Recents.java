@@ -284,6 +284,11 @@ public class Recents extends SystemUI
     }
 
     @Override
+    public void dockTopTask() {
+        mImpl.dockTopTask();
+    }
+
+    @Override
     public void showNextAffiliatedTask() {
         mImpl.showNextAffiliatedTask();
     }
