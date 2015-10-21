@@ -1431,8 +1431,14 @@ class WindowStateAnimator {
         if (appToken != null && appToken.mCropWindowsToStack && !appToken.mReplacingWindow) {
             TaskStack stack = w.getTask().mStack;
             stack.getBounds(mTmpStackBounds);
-            final int frameX = w.mFrame.left + mWin.mXOffset - w.getAttrs().surfaceInsets.left;
-            final int frameY = w.mFrame.top + mWin.mYOffset - w.getAttrs().surfaceInsets.top;
+            // When we resize we use the big surface approach, which means we can't trust the
+            // window frame bounds anymore. Instead, the window will be placed at 0, 0, but to avoid
+            // hardcoding it, we use surface coordinates.
+            final boolean isResizing = w.isDragResizing();
+            final int frameX = isResizing ? (int) mSurfaceX :
+                    w.mFrame.left + mWin.mXOffset - w.getAttrs().surfaceInsets.left;
+            final int frameY = isResizing ? (int) mSurfaceY :
+                    w.mFrame.top + mWin.mYOffset - w.getAttrs().surfaceInsets.top;
             // We need to do some acrobatics with surface position, because their clip region is
             // relative to the inside of the surface, but the stack bounds aren't.
             clipRect.left = Math.max(0,
