@@ -428,4 +428,10 @@
     <string name="tuner_toast" msgid="603429811084428439">"ಅಭಿನಂದನೆಗಳು! ಸಿಸ್ಟಮ್ UI ಟ್ಯೂನರ್ ಅನ್ನು ಸೆಟ್ಟಿಂಗ್‌ಗಳಿಗೆ ಸೇರಿಸಲಾಗಿದೆ"</string>
     <string name="remove_from_settings" msgid="8389591916603406378">"ಸೆಟ್ಟಿಂಗ್‌ಗಳಿಂದ ತೆಗೆದುಹಾಕಿ"</string>
     <string name="remove_from_settings_prompt" msgid="6069085993355887748">"ಸೆಟ್ಟಿಂಗ್‌ಗಳಿಂದ ಸಿಸ್ಟಮ್ UI ಟ್ಯೂನರ್ ತೆಗೆದುಹಾಕುವುದೇ ಮತ್ತು ಅದರ ಎಲ್ಲಾ ವೈಶಿಷ್ಟ್ಯಗಳನ್ನು ಬಳಸುವುದನ್ನು ನಿಲ್ಲಿಸುವುದೇ?"</string>
+    <!-- no translation found for enable_bluetooth_title (5027037706500635269) -->
+    <skip />
+    <!-- no translation found for enable_bluetooth_message (9106595990708985385) -->
+    <skip />
+    <!-- no translation found for enable_bluetooth_confirmation_ok (6258074250948309715) -->
+    <skip />
 </resources>

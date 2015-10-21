@@ -428,4 +428,10 @@
     <string name="tuner_toast" msgid="603429811084428439">"Til hamingju! Fínstillingum kerfisviðmóts hefur verið bætt við stillingar"</string>
     <string name="remove_from_settings" msgid="8389591916603406378">"Fjarlægja úr stillingum"</string>
     <string name="remove_from_settings_prompt" msgid="6069085993355887748">"Viltu fjarlægja fínstillingar kerfisviðmóts úr stillingum og hætta að nota eiginleika þeirra?"</string>
+    <!-- no translation found for enable_bluetooth_title (5027037706500635269) -->
+    <skip />
+    <!-- no translation found for enable_bluetooth_message (9106595990708985385) -->
+    <skip />
+    <!-- no translation found for enable_bluetooth_confirmation_ok (6258074250948309715) -->
+    <skip />
 </resources>

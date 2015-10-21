@@ -428,4 +428,10 @@
     <string name="tuner_toast" msgid="603429811084428439">"ဂုဏ်ပြုပါရစေ! စနစ် UI ဖမ်းစက်ကို ဆက်တင်ထဲသို့ ထည့်ပြီးပြီ။"</string>
     <string name="remove_from_settings" msgid="8389591916603406378">"ဆက်တင် အထဲမှ ဖယ်ရှားရန်"</string>
     <string name="remove_from_settings_prompt" msgid="6069085993355887748">"ဆက်တင် အထဲမှ စနစ် UI ဖမ်းစက်ကို ဖယ်ရှားလျက် ၎င်း၏ အင်္ဂါရပ်များ အားလုံး အသုံးပြုမှု ရပ်တန့်ရမလား?"</string>
+    <!-- no translation found for enable_bluetooth_title (5027037706500635269) -->
+    <skip />
+    <!-- no translation found for enable_bluetooth_message (9106595990708985385) -->
+    <skip />
+    <!-- no translation found for enable_bluetooth_confirmation_ok (6258074250948309715) -->
+    <skip />
 </resources>

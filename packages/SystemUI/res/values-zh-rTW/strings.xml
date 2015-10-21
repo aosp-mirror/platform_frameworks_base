@@ -430,4 +430,10 @@
     <string name="tuner_toast" msgid="603429811084428439">"恭喜！系統使用者介面調整精靈已新增到設定中"</string>
     <string name="remove_from_settings" msgid="8389591916603406378">"從設定中移除"</string>
     <string name="remove_from_settings_prompt" msgid="6069085993355887748">"要將系統使用者介面調整精靈從設定中移除，並停止使用所有相關功能嗎？"</string>
+    <!-- no translation found for enable_bluetooth_title (5027037706500635269) -->
+    <skip />
+    <!-- no translation found for enable_bluetooth_message (9106595990708985385) -->
+    <skip />
+    <!-- no translation found for enable_bluetooth_confirmation_ok (6258074250948309715) -->
+    <skip />
 </resources>

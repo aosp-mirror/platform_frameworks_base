@@ -428,4 +428,10 @@
     <string name="tuner_toast" msgid="603429811084428439">"Urime! Sintonizuesi i Sistemit të Ndërfaqes së Përdoruesit u shtua te Cilësimet"</string>
     <string name="remove_from_settings" msgid="8389591916603406378">"Hiqe nga Cilësimet"</string>
     <string name="remove_from_settings_prompt" msgid="6069085993355887748">"Të hiqet Sintonizuesi i Sistemit të Ndërfaqes së Përdoruesit nga Cilësimet dhe të ndërpritet përdorimi i të gjitha funksioneve të tij?"</string>
+    <!-- no translation found for enable_bluetooth_title (5027037706500635269) -->
+    <skip />
+    <!-- no translation found for enable_bluetooth_message (9106595990708985385) -->
+    <skip />
+    <!-- no translation found for enable_bluetooth_confirmation_ok (6258074250948309715) -->
+    <skip />
 </resources>

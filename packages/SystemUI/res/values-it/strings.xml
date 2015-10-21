@@ -430,4 +430,10 @@
     <string name="tuner_toast" msgid="603429811084428439">"Complimenti! Il sintetizzatore interfaccia utente di sistema è stato aggiunto alle impostazioni."</string>
     <string name="remove_from_settings" msgid="8389591916603406378">"Rimuovi dalle impostazioni"</string>
     <string name="remove_from_settings_prompt" msgid="6069085993355887748">"Vuoi rimuovere il sintetizzatore interfaccia utente di sistema dalle impostazioni e smettere di utilizzare tutte le sue funzioni?"</string>
+    <!-- no translation found for enable_bluetooth_title (5027037706500635269) -->
+    <skip />
+    <!-- no translation found for enable_bluetooth_message (9106595990708985385) -->
+    <skip />
+    <!-- no translation found for enable_bluetooth_confirmation_ok (6258074250948309715) -->
+    <skip />
 </resources>

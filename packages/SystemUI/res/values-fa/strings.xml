@@ -428,4 +428,10 @@
     <string name="tuner_toast" msgid="603429811084428439">"تبریک می‌گوییم! «تنظیم‌کننده واسط کاربری سیستم» به «تنظیمات» اضافه شد"</string>
     <string name="remove_from_settings" msgid="8389591916603406378">"حذف از تنظیمات"</string>
     <string name="remove_from_settings_prompt" msgid="6069085993355887748">"«تنظیم‌کننده واسط کاربری سیستم» از تنظیمات حذف شود و همه ویژگی‌های آن متوقف شوند؟"</string>
+    <!-- no translation found for enable_bluetooth_title (5027037706500635269) -->
+    <skip />
+    <!-- no translation found for enable_bluetooth_message (9106595990708985385) -->
+    <skip />
+    <!-- no translation found for enable_bluetooth_confirmation_ok (6258074250948309715) -->
+    <skip />
 </resources>

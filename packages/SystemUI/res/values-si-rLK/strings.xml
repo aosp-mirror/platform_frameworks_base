@@ -428,4 +428,10 @@
     <string name="tuner_toast" msgid="603429811084428439">"සුබ පැතුම්! පද්ධති UI සුසරකය සැකසීම් වෙත එක් කර ඇත"</string>
     <string name="remove_from_settings" msgid="8389591916603406378">"සැකසීම් වෙතින් ඉවත් කරන්න"</string>
     <string name="remove_from_settings_prompt" msgid="6069085993355887748">"සැකසීම් වෙතින් පද්ධති UI සුසරකය ඉවත් කර සහ එහි සියලු අංග භාවිතය නවත් වන්නද?"</string>
+    <!-- no translation found for enable_bluetooth_title (5027037706500635269) -->
+    <skip />
+    <!-- no translation found for enable_bluetooth_message (9106595990708985385) -->
+    <skip />
+    <!-- no translation found for enable_bluetooth_confirmation_ok (6258074250948309715) -->
+    <skip />
 </resources>
