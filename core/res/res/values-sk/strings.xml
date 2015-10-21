@@ -652,7 +652,7 @@
     <string name="keyguard_password_wrong_pin_code" msgid="2422225591006134936">"Nesprávny kód PIN."</string>
     <string name="keyguard_label_text" msgid="861796461028298424">"Ak chcete telefón odomknúť, stlačte Menu a následne 0."</string>
     <string name="emergency_call_dialog_number_for_display" msgid="696192103195090970">"Číslo tiesňového volania"</string>
-    <string name="lockscreen_carrier_default" msgid="8963839242565653192">"Žiadny signál"</string>
+    <string name="lockscreen_carrier_default" msgid="6169005837238288522">"Žiadny signál"</string>
     <string name="lockscreen_screen_locked" msgid="7288443074806832904">"Obrazovka je uzamknutá."</string>
     <string name="lockscreen_instructions_when_pattern_enabled" msgid="46154051614126049">"Ak chcete odomknúť telefón alebo uskutočniť tiesňové volanie, stlačte Menu."</string>
     <string name="lockscreen_instructions_when_pattern_disabled" msgid="686260028797158364">"Telefón odomknete stlačením tlačidla Menu."</string>

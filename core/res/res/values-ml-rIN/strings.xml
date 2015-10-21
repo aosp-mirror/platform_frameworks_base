@@ -650,7 +650,7 @@
     <string name="keyguard_password_wrong_pin_code" msgid="2422225591006134936">"പിൻ കോഡ് തെറ്റാണ്."</string>
     <string name="keyguard_label_text" msgid="861796461028298424">"അൺലോക്ക് ചെയ്യുന്നതിന് മെനു, 0 എന്നിവ അമർത്തുക."</string>
     <string name="emergency_call_dialog_number_for_display" msgid="696192103195090970">"അടിയന്തര നമ്പർ"</string>
-    <string name="lockscreen_carrier_default" msgid="8963839242565653192">"സേവനമില്ല"</string>
+    <string name="lockscreen_carrier_default" msgid="6169005837238288522">"സേവനമില്ല"</string>
     <string name="lockscreen_screen_locked" msgid="7288443074806832904">"സ്‌ക്രീൻ ലോക്കുചെയ്‌തു."</string>
     <string name="lockscreen_instructions_when_pattern_enabled" msgid="46154051614126049">"അൺലോക്ക് ചെയ്യുന്നതിനായി മെനു അമർത്തുക അല്ലെങ്കിൽ അടിയന്തര കോൾ വിളിക്കുക."</string>
     <string name="lockscreen_instructions_when_pattern_disabled" msgid="686260028797158364">"അൺലോക്കുചെയ്യാൻ മെനു അമർത്തുക."</string>
