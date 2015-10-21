@@ -25,10 +25,10 @@
     <string name="status_bar_recent_inspect_item_title" msgid="7793624864528818569">"பயன்பாட்டுத் தகவல்"</string>
     <string name="status_bar_no_recent_apps" msgid="7374907845131203189">"சமீபத்திய திரைகள் இங்கு தோன்றும்"</string>
     <string name="status_bar_accessibility_dismiss_recents" msgid="4576076075226540105">"சமீபத்திய பயன்பாடுகளை நிராகரி"</string>
-    <plurals name="status_bar_accessibility_recent_apps" formatted="false" msgid="9138535907802238759">
-      <item quantity="other">மேலோட்டப் பார்வையில் %d திரைகள்</item>
-      <item quantity="one">மேலோட்டப் பார்வையில் 1 திரை</item>
-    </plurals>
+  <plurals name="status_bar_accessibility_recent_apps">
+    <item quantity="one" msgid="3969335317929254918">"மேலோட்டப் பார்வையில் 1 திரை"</item>
+    <item quantity="other" msgid="5523506463832158203">"மேலோட்டப் பார்வையில் %d திரைகள்"</item>
+  </plurals>
     <string name="status_bar_no_notifications_title" msgid="4755261167193833213">"அறிவிப்புகள் இல்லை"</string>
     <string name="status_bar_ongoing_events_title" msgid="1682504513316879202">"செயலில் இருக்கும்"</string>
     <string name="status_bar_latest_events_title" msgid="6594767438577593172">"அறிவிப்புகள்"</string>
@@ -114,12 +114,6 @@
     <string name="accessibility_data_two_bars" msgid="6166018492360432091">"தரவின் சிக்னல் இரண்டு கோடு வரை உள்ளது."</string>
     <string name="accessibility_data_three_bars" msgid="9167670452395038520">"தரவு சிக்னல் மூன்று கோட்டில் உள்ளது."</string>
     <string name="accessibility_data_signal_full" msgid="2708384608124519369">"தரவு சிக்னல் முழுமையாக உள்ளது."</string>
-    <string name="accessibility_wifi_off" msgid="3177380296697933627">"Wifi முடக்கப்பட்டது."</string>
-    <string name="accessibility_no_wifi" msgid="1425476551827924474">"Wifi துண்டிக்கப்பட்டது."</string>
-    <string name="accessibility_wifi_one_bar" msgid="7735893178010724377">"Wifi ஒரு கோடு."</string>
-    <string name="accessibility_wifi_two_bars" msgid="4994274250497262434">"Wifi இரண்டு கோடுகள்."</string>
-    <string name="accessibility_wifi_three_bars" msgid="3495755044276588384">"Wifi மூன்று கோடுகள்."</string>
-    <string name="accessibility_wifi_signal_full" msgid="6853561303586480376">"Wifi சிக்னல் முழுமையாக உள்ளது."</string>
     <string name="accessibility_wifi_name" msgid="7202151365171148501">"<xliff:g id="WIFI">%s</xliff:g>க்கு இணைக்கப்பட்டது."</string>
     <string name="accessibility_bluetooth_name" msgid="8441517146585531676">"<xliff:g id="BLUETOOTH">%s</xliff:g>க்கு இணைக்கப்பட்டது."</string>
     <string name="accessibility_no_wimax" msgid="4329180129727630368">"WiMAX இல்லை."</string>
@@ -331,6 +325,8 @@
     <string name="interruption_level_priority_twoline" msgid="1564715335217164124">"முன்னுரிமைகள்\nமட்டும்"</string>
     <string name="interruption_level_alarms_twoline" msgid="3266909566410106146">"அலாரங்கள்\nமட்டும்"</string>
     <string name="keyguard_indication_charging_time" msgid="1757251776872835768">"சார்ஜாகிறது (முழு சார்ஜிற்கு <xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g> ஆகும்)"</string>
+    <string name="keyguard_indication_charging_time_fast" msgid="9018981952053914986">"வேகமாக சார்ஜாகிறது (முழு சார்ஜிற்கு: <xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g>)"</string>
+    <string name="keyguard_indication_charging_time_slowly" msgid="955252797961724952">"மெதுவாக சார்ஜாகிறது (முழு சார்ஜிற்கு: <xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g>)"</string>
     <string name="accessibility_multi_user_switch_switcher" msgid="7305948938141024937">"பயனரை மாற்று"</string>
     <string name="accessibility_multi_user_switch_switcher_with_current" msgid="8434880595284601601">"பயனரை மாற்று, தற்போதைய பயனர் <xliff:g id="CURRENT_USER_NAME">%s</xliff:g>"</string>
     <string name="accessibility_multi_user_switch_inactive" msgid="1424081831468083402">"தற்போதைய பயனர்: <xliff:g id="CURRENT_USER_NAME">%s</xliff:g>"</string>
@@ -343,7 +339,7 @@
     <string name="guest_exit_guest_dialog_title" msgid="8480693520521766688">"அழைக்கப்பட்டவரை அகற்றவா?"</string>
     <string name="guest_exit_guest_dialog_message" msgid="4155503224769676625">"இந்த அமர்வின் எல்லா பயன்பாடுகளும், தரவும் நீக்கப்படும்."</string>
     <string name="guest_exit_guest_dialog_remove" msgid="7402231963862520531">"அகற்று"</string>
-    <string name="guest_wipe_session_title" msgid="6419439912885956132">"வரவேற்கிறோம்!"</string>
+    <string name="guest_wipe_session_title" msgid="6419439912885956132">"நல்வரவு!"</string>
     <string name="guest_wipe_session_message" msgid="8476238178270112811">"உங்கள் அமர்வைத் தொடர விருப்பமா?"</string>
     <string name="guest_wipe_session_wipe" msgid="5065558566939858884">"மீண்டும் தொடங்கு"</string>
     <string name="guest_wipe_session_dontwipe" msgid="1401113462524894716">"தொடரவும்"</string>
@@ -404,7 +400,7 @@
     <string name="volumeui_notification_title" msgid="4906770126345910955">"ஒலியளவு செய்தி: <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="volumeui_notification_text" msgid="1826889705095768656">"அசலை மீட்டமைக்கத் தொடவும்."</string>
     <string name="managed_profile_foreground_toast" msgid="5421487114739245972">"பணி சுயவிவரத்தைப் பயன்படுத்துகிறீர்கள்"</string>
-    <string name="system_ui_tuner" msgid="3442596010150119600">"System UI ட்யூனர்"</string>
+    <string name="system_ui_tuner" msgid="708224127392452018">"System UI Tuner"</string>
     <string name="show_battery_percentage" msgid="5444136600512968798">"உள்ளிணைந்த பேட்டரி சதவீதத்தைக் காட்டு"</string>
     <string name="show_battery_percentage_summary" msgid="3215025775576786037">"சார்ஜ் செய்யாத போது, நிலைப் பட்டி ஐகானின் உள்ளே பேட்டரி அளவு சதவீதத்தைக் காட்டும்"</string>
     <string name="quick_settings" msgid="10042998191725428">"உடனடி அமைப்புகள்"</string>
@@ -425,4 +421,17 @@
     <string name="accessibility_quick_settings_detail" msgid="2579369091672902101">"விரைவு அமைப்புகள், <xliff:g id="TITLE">%s</xliff:g>."</string>
     <string name="accessibility_status_bar_hotspot" msgid="4099381329956402865">"ஹாட்ஸ்பாட்"</string>
     <string name="accessibility_managed_profile" msgid="6613641363112584120">"பணி சுயவிவரம்"</string>
+    <string name="tuner_warning_title" msgid="7094689930793031682">"சில வேடிக்கையாக இருந்தாலும் கவனம் தேவை"</string>
+    <string name="tuner_warning" msgid="8730648121973575701">"System UI Tuner, Android பயனர் இடைமுகத்தை மாற்றவும் தனிப்பயனாக்கவும் கூடுதல் வழிகளை வழங்குகிறது. இந்தப் பரிசோதனைக்குரிய அம்சங்கள் எதிர்கால வெளியீடுகளில் மாற்றப்படலாம், இடைநிறுத்தப்படலாம் அல்லது தோன்றாமல் போகலாம். கவனத்துடன் தொடரவும்."</string>
+    <string name="tuner_persistent_warning" msgid="8597333795565621795">"இந்தப் பரிசோதனைக்குரிய அம்சங்கள் எதிர்கால வெளியீடுகளில் மாற்றப்படலாம், இடைநிறுத்தப்படலாம் அல்லது தோன்றாமல் போகலாம். கவனத்துடன் தொடரவும்."</string>
+    <string name="got_it" msgid="2239653834387972602">"சரி"</string>
+    <string name="tuner_toast" msgid="603429811084428439">"வாழ்த்துகள்! அமைப்புகளில் System UI Tuner சேர்க்கப்பட்டது"</string>
+    <string name="remove_from_settings" msgid="8389591916603406378">"அமைப்புகளிலிருந்து அகற்று"</string>
+    <string name="remove_from_settings_prompt" msgid="6069085993355887748">"அமைப்புகளிலிருந்து System UI Tunerஐ அகற்றிவிட்டு, அதன் எல்லா அம்சங்களையும் பயன்படுத்துவதை நிறுத்தவா?"</string>
+    <!-- no translation found for enable_bluetooth_title (5027037706500635269) -->
+    <skip />
+    <!-- no translation found for enable_bluetooth_message (9106595990708985385) -->
+    <skip />
+    <!-- no translation found for enable_bluetooth_confirmation_ok (6258074250948309715) -->
+    <skip />
 </resources>

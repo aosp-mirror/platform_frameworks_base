@@ -25,12 +25,10 @@
     <string name="status_bar_recent_inspect_item_title" msgid="7793624864528818569">"פרטי אפליקציה"</string>
     <string name="status_bar_no_recent_apps" msgid="7374907845131203189">"המסכים האחרונים מופיעים כאן"</string>
     <string name="status_bar_accessibility_dismiss_recents" msgid="4576076075226540105">"סגור אפליקציות אחרונות"</string>
-    <plurals name="status_bar_accessibility_recent_apps" formatted="false" msgid="9138535907802238759">
-      <item quantity="two">‏%d מסכים ב’סקירה‘</item>
-      <item quantity="many">‏%d מסכים ב’סקירה‘</item>
-      <item quantity="other">‏%d מסכים ב’סקירה‘</item>
-      <item quantity="one">מסך אחד ב’סקירה‘</item>
-    </plurals>
+  <plurals name="status_bar_accessibility_recent_apps">
+    <item quantity="one" msgid="3969335317929254918">"מסך אחד ב\'סקירה\'"</item>
+    <item quantity="other" msgid="5523506463832158203">"‏%d מסכים ב\'סקירה\'"</item>
+  </plurals>
     <string name="status_bar_no_notifications_title" msgid="4755261167193833213">"אין התראות"</string>
     <string name="status_bar_ongoing_events_title" msgid="1682504513316879202">"מתמשך"</string>
     <string name="status_bar_latest_events_title" msgid="6594767438577593172">"התראות"</string>
@@ -62,11 +60,11 @@
     <string name="label_view" msgid="6304565553218192990">"הצג"</string>
     <string name="always_use_device" msgid="1450287437017315906">"‏השתמש כברירת מחדל עבור מכשיר USB זה"</string>
     <string name="always_use_accessory" msgid="1210954576979621596">"‏השתמש כברירת מחדל עבור אביזר USB זה"</string>
-    <string name="usb_debugging_title" msgid="4513918393387141949">"‏האם לאפשר ניקוי באגים ב-USB?"</string>
+    <string name="usb_debugging_title" msgid="4513918393387141949">"‏האם לאפשר ניפוי באגים ב-USB?"</string>
     <string name="usb_debugging_message" msgid="2220143855912376496">"‏טביעת האצבע של מפתח ה-RSA של המחשב היא:\n<xliff:g id="FINGERPRINT">%1$s</xliff:g>"</string>
     <string name="usb_debugging_always" msgid="303335496705863070">"אפשר תמיד ממחשב זה"</string>
-    <string name="usb_debugging_secondary_user_title" msgid="6353808721761220421">"‏לא ניתן לבצע ניקוי באגים ב-USB"</string>
-    <string name="usb_debugging_secondary_user_message" msgid="6011931347142270156">"‏המכשיר המחובר כעת אל המכשיר הזה אינו יכול להפעיל ניקוי באגים ב-USB. כדי להשתמש בתכונה הזו יש לעבור אל המשתמש הראשי, “<xliff:g id="NAME">%s</xliff:g>”."</string>
+    <string name="usb_debugging_secondary_user_title" msgid="6353808721761220421">"‏לא ניתן לבצע ניפוי באגים ב-USB"</string>
+    <string name="usb_debugging_secondary_user_message" msgid="6011931347142270156">"‏המכשיר המחובר כעת אל המכשיר הזה אינו יכול להפעיל ניפוי באגים ב-USB. כדי להשתמש בתכונה הזו יש לעבור אל המשתמש הראשי, “<xliff:g id="NAME">%s</xliff:g>”."</string>
     <string name="compat_mode_on" msgid="6623839244840638213">"הגדל תצוגה כדי למלא את המסך"</string>
     <string name="compat_mode_off" msgid="4434467572461327898">"מתח כדי למלא את המסך"</string>
     <string name="screenshot_saving_ticker" msgid="7403652894056693515">"שומר צילום מסך..."</string>
@@ -116,12 +114,6 @@
     <string name="accessibility_data_two_bars" msgid="6166018492360432091">"שני פסים של נתונים."</string>
     <string name="accessibility_data_three_bars" msgid="9167670452395038520">"שלושה פסים של נתונים."</string>
     <string name="accessibility_data_signal_full" msgid="2708384608124519369">"אות הנתונים מלא."</string>
-    <string name="accessibility_wifi_off" msgid="3177380296697933627">"‏Wi-Fi כבוי."</string>
-    <string name="accessibility_no_wifi" msgid="1425476551827924474">"‏Wi-Fi מנותק."</string>
-    <string name="accessibility_wifi_one_bar" msgid="7735893178010724377">"‏פס אחד של Wi-Fi."</string>
-    <string name="accessibility_wifi_two_bars" msgid="4994274250497262434">"‏שני פסים של Wi-Fi."</string>
-    <string name="accessibility_wifi_three_bars" msgid="3495755044276588384">"‏שלושה פסים של Wi-Fi."</string>
-    <string name="accessibility_wifi_signal_full" msgid="6853561303586480376">"‏אות ה-Wi-Fi מלא."</string>
     <string name="accessibility_wifi_name" msgid="7202151365171148501">"מחובר אל <xliff:g id="WIFI">%s</xliff:g>."</string>
     <string name="accessibility_bluetooth_name" msgid="8441517146585531676">"מחובר אל <xliff:g id="BLUETOOTH">%s</xliff:g>."</string>
     <string name="accessibility_no_wimax" msgid="4329180129727630368">"‏ללא WiMAX."</string>
@@ -333,6 +325,8 @@
     <string name="interruption_level_priority_twoline" msgid="1564715335217164124">"התראות בעדיפות\nבלבד"</string>
     <string name="interruption_level_alarms_twoline" msgid="3266909566410106146">"התראות\nבלבד"</string>
     <string name="keyguard_indication_charging_time" msgid="1757251776872835768">"טוען (<xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g> עד לסיום)"</string>
+    <string name="keyguard_indication_charging_time_fast" msgid="9018981952053914986">"בטעינה מהירה (<xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g> עד למילוי)"</string>
+    <string name="keyguard_indication_charging_time_slowly" msgid="955252797961724952">"בטעינה איטית (<xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g> עד למילוי)"</string>
     <string name="accessibility_multi_user_switch_switcher" msgid="7305948938141024937">"החלפת משתמש"</string>
     <string name="accessibility_multi_user_switch_switcher_with_current" msgid="8434880595284601601">"החלף משתמש. המשתמש הנוכחי הוא <xliff:g id="CURRENT_USER_NAME">%s</xliff:g>"</string>
     <string name="accessibility_multi_user_switch_inactive" msgid="1424081831468083402">"משתמש נוכחי <xliff:g id="CURRENT_USER_NAME">%s</xliff:g>"</string>
@@ -345,7 +339,7 @@
     <string name="guest_exit_guest_dialog_title" msgid="8480693520521766688">"להסיר אורח?"</string>
     <string name="guest_exit_guest_dialog_message" msgid="4155503224769676625">"כל האפליקציות והנתונים בפעילות זו באתר יימחקו."</string>
     <string name="guest_exit_guest_dialog_remove" msgid="7402231963862520531">"הסר"</string>
-    <string name="guest_wipe_session_title" msgid="6419439912885956132">"ברוך שובך, אורח!"</string>
+    <string name="guest_wipe_session_title" msgid="6419439912885956132">"שמחים לראותך שוב!"</string>
     <string name="guest_wipe_session_message" msgid="8476238178270112811">"האם ברצונך להמשיך בפעילות באתר?"</string>
     <string name="guest_wipe_session_wipe" msgid="5065558566939858884">"התחל מחדש"</string>
     <string name="guest_wipe_session_dontwipe" msgid="1401113462524894716">"כן, המשך"</string>
@@ -406,7 +400,7 @@
     <string name="volumeui_notification_title" msgid="4906770126345910955">"<xliff:g id="APP_NAME">%1$s</xliff:g> הוא תיבת הדו-שיח של עוצמת הקול"</string>
     <string name="volumeui_notification_text" msgid="1826889705095768656">"גע כדי לשחזר את עוצמת הקול המקורית."</string>
     <string name="managed_profile_foreground_toast" msgid="5421487114739245972">"אתה משתמש בפרופיל העבודה שלך"</string>
-    <string name="system_ui_tuner" msgid="3442596010150119600">"SystemUI Tuner"</string>
+    <string name="system_ui_tuner" msgid="708224127392452018">"System UI Tuner"</string>
     <string name="show_battery_percentage" msgid="5444136600512968798">"הצג בשורת הסטטוס את אחוז עוצמת הסוללה"</string>
     <string name="show_battery_percentage_summary" msgid="3215025775576786037">"הצג את אחוז עוצמת הסוללה בתוך הסמל שבשורת הסטטוס כשהמכשיר אינו בטעינה"</string>
     <string name="quick_settings" msgid="10042998191725428">"הגדרות מהירות"</string>
@@ -427,4 +421,17 @@
     <string name="accessibility_quick_settings_detail" msgid="2579369091672902101">"הגדרות מהירות, <xliff:g id="TITLE">%s</xliff:g>."</string>
     <string name="accessibility_status_bar_hotspot" msgid="4099381329956402865">"נקודה לשיתוף אינטרנט"</string>
     <string name="accessibility_managed_profile" msgid="6613641363112584120">"פרופיל עבודה"</string>
+    <string name="tuner_warning_title" msgid="7094689930793031682">"מהנה בשביל חלק מהאנשים, אבל לא בשביל כולם"</string>
+    <string name="tuner_warning" msgid="8730648121973575701">"‏System UI Tuner מספק לך דרכים נוספות להתאים אישית את ממשק המשתמש של Android. התכונות הניסיוניות האלה עשויות להשתנות, להתקלקל או להיעלם בגרסאות עתידיות. המשך בזהירות."</string>
+    <string name="tuner_persistent_warning" msgid="8597333795565621795">"התכונות הניסיוניות האלה עשויות להשתנות, להתקלקל או להיעלם בגרסאות עתידיות. המשך בזהירות."</string>
+    <string name="got_it" msgid="2239653834387972602">"הבנתי"</string>
+    <string name="tuner_toast" msgid="603429811084428439">"‏מזל טוב! System UI Tuner נוסף ל\'הגדרות\'"</string>
+    <string name="remove_from_settings" msgid="8389591916603406378">"הסר מההגדרות"</string>
+    <string name="remove_from_settings_prompt" msgid="6069085993355887748">"‏האם להסיר את System UI Tuner ולהפסיק להשתמש בכל התכונות שלו?"</string>
+    <!-- no translation found for enable_bluetooth_title (5027037706500635269) -->
+    <skip />
+    <!-- no translation found for enable_bluetooth_message (9106595990708985385) -->
+    <skip />
+    <!-- no translation found for enable_bluetooth_confirmation_ok (6258074250948309715) -->
+    <skip />
 </resources>

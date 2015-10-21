@@ -25,10 +25,10 @@
     <string name="status_bar_recent_inspect_item_title" msgid="7793624864528818569">"Program Info"</string>
     <string name="status_bar_no_recent_apps" msgid="7374907845131203189">"Jou onlangse skerms verskyn hier"</string>
     <string name="status_bar_accessibility_dismiss_recents" msgid="4576076075226540105">"Maak onlangse programme toe"</string>
-    <plurals name="status_bar_accessibility_recent_apps" formatted="false" msgid="9138535907802238759">
-      <item quantity="other">%d skerms in Oorsig</item>
-      <item quantity="one">1 skerm in Oorsig</item>
-    </plurals>
+  <plurals name="status_bar_accessibility_recent_apps">
+    <item quantity="one" msgid="3969335317929254918">"1 skerm in Oorsig"</item>
+    <item quantity="other" msgid="5523506463832158203">"%d skerms in Oorsig"</item>
+  </plurals>
     <string name="status_bar_no_notifications_title" msgid="4755261167193833213">"Geen kennisgewings"</string>
     <string name="status_bar_ongoing_events_title" msgid="1682504513316879202">"Voortdurend"</string>
     <string name="status_bar_latest_events_title" msgid="6594767438577593172">"Kennisgewings"</string>
@@ -114,12 +114,6 @@
     <string name="accessibility_data_two_bars" msgid="6166018492360432091">"Data, twee stawe."</string>
     <string name="accessibility_data_three_bars" msgid="9167670452395038520">"Data, drie stawe."</string>
     <string name="accessibility_data_signal_full" msgid="2708384608124519369">"Datasein vol."</string>
-    <string name="accessibility_wifi_off" msgid="3177380296697933627">"Wi-Fi af."</string>
-    <string name="accessibility_no_wifi" msgid="1425476551827924474">"Wi-Fi is ontkoppel."</string>
-    <string name="accessibility_wifi_one_bar" msgid="7735893178010724377">"Wi-Fi een staaf."</string>
-    <string name="accessibility_wifi_two_bars" msgid="4994274250497262434">"Wi-Fi twee stawe."</string>
-    <string name="accessibility_wifi_three_bars" msgid="3495755044276588384">"Wi-Fi drie stawe."</string>
-    <string name="accessibility_wifi_signal_full" msgid="6853561303586480376">"Wi-Fi-sein vol."</string>
     <string name="accessibility_wifi_name" msgid="7202151365171148501">"Gekoppel aan <xliff:g id="WIFI">%s</xliff:g>."</string>
     <string name="accessibility_bluetooth_name" msgid="8441517146585531676">"Gekoppel aan <xliff:g id="BLUETOOTH">%s</xliff:g>."</string>
     <string name="accessibility_no_wimax" msgid="4329180129727630368">"Geen WiMAX nie."</string>
@@ -331,6 +325,8 @@
     <string name="interruption_level_priority_twoline" msgid="1564715335217164124">"Net\nprioriteit"</string>
     <string name="interruption_level_alarms_twoline" msgid="3266909566410106146">"Net\nwekkers"</string>
     <string name="keyguard_indication_charging_time" msgid="1757251776872835768">"Laai tans (<xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g> tot vol)"</string>
+    <string name="keyguard_indication_charging_time_fast" msgid="9018981952053914986">"Laai tans vinnig (<xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g> tot vol)"</string>
+    <string name="keyguard_indication_charging_time_slowly" msgid="955252797961724952">"Laai tans stadig (<xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g> tot vol)"</string>
     <string name="accessibility_multi_user_switch_switcher" msgid="7305948938141024937">"Wissel gebruiker"</string>
     <string name="accessibility_multi_user_switch_switcher_with_current" msgid="8434880595284601601">"Wissel gebruiker, huidige gebruiker <xliff:g id="CURRENT_USER_NAME">%s</xliff:g>"</string>
     <string name="accessibility_multi_user_switch_inactive" msgid="1424081831468083402">"Huidige gebruiker <xliff:g id="CURRENT_USER_NAME">%s</xliff:g>"</string>
@@ -404,7 +400,7 @@
     <string name="volumeui_notification_title" msgid="4906770126345910955">"<xliff:g id="APP_NAME">%1$s</xliff:g> is die volumedialoog"</string>
     <string name="volumeui_notification_text" msgid="1826889705095768656">"Raak om die oorspronklike terug te stel."</string>
     <string name="managed_profile_foreground_toast" msgid="5421487114739245972">"Jy gebruik tans jou werkprofiel"</string>
-    <string name="system_ui_tuner" msgid="3442596010150119600">"Stelsel-UI-ontvanger"</string>
+    <string name="system_ui_tuner" msgid="708224127392452018">"Stelsel-UI-ontvanger"</string>
     <string name="show_battery_percentage" msgid="5444136600512968798">"Wys persentasie van ingebedde battery"</string>
     <string name="show_battery_percentage_summary" msgid="3215025775576786037">"Wys batteryvlakpersentasie binne die statusbalkikoon wanneer dit nie laai nie"</string>
     <string name="quick_settings" msgid="10042998191725428">"Kitsinstellings"</string>
@@ -425,4 +421,17 @@
     <string name="accessibility_quick_settings_detail" msgid="2579369091672902101">"Kitsinstellings, <xliff:g id="TITLE">%s</xliff:g>."</string>
     <string name="accessibility_status_bar_hotspot" msgid="4099381329956402865">"Warmkol"</string>
     <string name="accessibility_managed_profile" msgid="6613641363112584120">"Werkprofiel"</string>
+    <string name="tuner_warning_title" msgid="7094689930793031682">"Pret vir party mense, maar nie vir almal nie"</string>
+    <string name="tuner_warning" msgid="8730648121973575701">"Stelsel-UI-ontvanger gee jou ekstra maniere om die Android-gebruikerkoppelvlak in te stel en te pasmaak. Hierdie eksperimentele kenmerke kan in toekomstige uitreikings verander, breek of verdwyn. Gaan versigtig voort."</string>
+    <string name="tuner_persistent_warning" msgid="8597333795565621795">"Hierdie eksperimentele kenmerke kan in toekomstige weergawes verander, breek of verdwyn. Gaan versigtig voort."</string>
+    <string name="got_it" msgid="2239653834387972602">"Het dit"</string>
+    <string name="tuner_toast" msgid="603429811084428439">"Geluk! Stelsel-UI-ontvanger is by Instellings gevoeg"</string>
+    <string name="remove_from_settings" msgid="8389591916603406378">"Verwyder uit Instellings"</string>
+    <string name="remove_from_settings_prompt" msgid="6069085993355887748">"Verwyder Stelsel-UI-ontvanger uit Instellings en staak die gebruik van al sy kenmerke?"</string>
+    <!-- no translation found for enable_bluetooth_title (5027037706500635269) -->
+    <skip />
+    <!-- no translation found for enable_bluetooth_message (9106595990708985385) -->
+    <skip />
+    <!-- no translation found for enable_bluetooth_confirmation_ok (6258074250948309715) -->
+    <skip />
 </resources>

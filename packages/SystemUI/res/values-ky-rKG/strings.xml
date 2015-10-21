@@ -19,75 +19,54 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <!-- no translation found for app_label (7164937344850004466) -->
-    <skip />
-    <!-- no translation found for status_bar_clear_all_button (7774721344716731603) -->
-    <skip />
+    <string name="app_label" msgid="7164937344850004466">"Тутум UI"</string>
+    <string name="status_bar_clear_all_button" msgid="7774721344716731603">"Тазалоо"</string>
     <string name="status_bar_recent_remove_item_title" msgid="6026395868129852968">"Тизмеден алып салуу"</string>
     <string name="status_bar_recent_inspect_item_title" msgid="7793624864528818569">"Колдонмо тууралуу"</string>
     <string name="status_bar_no_recent_apps" msgid="7374907845131203189">"Акыркы экрандарыңыз бул жерден көрүнөт"</string>
     <string name="status_bar_accessibility_dismiss_recents" msgid="4576076075226540105">"Акыркы колдонмолорду жок кылуу"</string>
-    <plurals name="status_bar_accessibility_recent_apps" formatted="false" msgid="9138535907802238759">
-      <item quantity="other">%d экран Көз жүгүртүүдө</item>
-      <item quantity="one">1 экран Көз жүгүртүүдө</item>
-    </plurals>
-    <!-- no translation found for status_bar_no_notifications_title (4755261167193833213) -->
-    <skip />
-    <!-- no translation found for status_bar_ongoing_events_title (1682504513316879202) -->
-    <skip />
-    <!-- no translation found for status_bar_latest_events_title (6594767438577593172) -->
-    <skip />
+  <plurals name="status_bar_accessibility_recent_apps">
+    <item quantity="one" msgid="3969335317929254918">"1 экран Көз жүгүртүүдө"</item>
+    <item quantity="other" msgid="5523506463832158203">"%d экран Көз жүгүртүүдө"</item>
+  </plurals>
+    <string name="status_bar_no_notifications_title" msgid="4755261167193833213">"Эскертмелер жок"</string>
+    <string name="status_bar_ongoing_events_title" msgid="1682504513316879202">"Учурдагы"</string>
+    <string name="status_bar_latest_events_title" msgid="6594767438577593172">"Эскертмелер"</string>
     <string name="battery_low_title" msgid="6456385927409742437">"Батареянын кубаты аз"</string>
     <string name="battery_low_percent_format" msgid="2900940511201380775">"<xliff:g id="PERCENTAGE">%s</xliff:g> калды"</string>
     <string name="battery_low_percent_format_saver_started" msgid="6859235584035338833">"<xliff:g id="PERCENTAGE">%s</xliff:g> калды. Батареянын кубатын үнөмдөгүч күйүк."</string>
-    <!-- no translation found for invalid_charger (4549105996740522523) -->
-    <skip />
+    <string name="invalid_charger" msgid="4549105996740522523">"USB менен кубаттоо колдоого алынбайт.\nБерилген заряддагычты гана колдонуңуз."</string>
     <string name="invalid_charger_title" msgid="3515740382572798460">"USB аркылуу кубаттоого болбойт."</string>
     <string name="invalid_charger_text" msgid="5474997287953892710">"Коштолгон кубаттагычты гана колдонуңуз."</string>
     <string name="battery_low_why" msgid="4553600287639198111">"Жөндөөлөр"</string>
     <string name="battery_saver_confirmation_title" msgid="5299585433050361634">"Батареянын кубатын үнөмдөгүч күйгүзүлсүнбү?"</string>
     <string name="battery_saver_confirmation_ok" msgid="7507968430447930257">"Күйгүзүү"</string>
     <string name="battery_saver_start_action" msgid="5576697451677486320">"Батареянын кубатын үнөмдөгүчтү иштетүү"</string>
-    <!-- no translation found for status_bar_settings_settings_button (3023889916699270224) -->
-    <skip />
-    <!-- no translation found for status_bar_settings_wifi_button (1733928151698311923) -->
-    <skip />
-    <!-- no translation found for status_bar_settings_auto_rotation (3790482541357798421) -->
-    <skip />
-    <!-- no translation found for status_bar_settings_mute_label (554682549917429396) -->
-    <skip />
-    <!-- no translation found for status_bar_settings_auto_brightness_label (511453614962324674) -->
-    <skip />
-    <!-- no translation found for status_bar_settings_notifications (397146176280905137) -->
-    <skip />
-    <!-- no translation found for bluetooth_tethered (7094101612161133267) -->
-    <skip />
+    <string name="status_bar_settings_settings_button" msgid="3023889916699270224">"Жөндөөлөр"</string>
+    <string name="status_bar_settings_wifi_button" msgid="1733928151698311923">"Wi‑Fi"</string>
+    <string name="status_bar_settings_auto_rotation" msgid="3790482541357798421">"Экранды авто-тегеретүү"</string>
+    <string name="status_bar_settings_mute_label" msgid="554682549917429396">"ҮНСҮЗ"</string>
+    <string name="status_bar_settings_auto_brightness_label" msgid="511453614962324674">"АВТО"</string>
+    <string name="status_bar_settings_notifications" msgid="397146176280905137">"Эскертмелер"</string>
+    <string name="bluetooth_tethered" msgid="7094101612161133267">"Bluetooth жалгашты"</string>
     <string name="status_bar_input_method_settings_configure_input_methods" msgid="3504292471512317827">"Киргизүү ыкмасын тууралоо"</string>
     <string name="status_bar_use_physical_keyboard" msgid="7551903084416057810">"Аппараттык тергич"</string>
     <string name="usb_device_permission_prompt" msgid="834698001271562057">"<xliff:g id="APPLICATION">%1$s</xliff:g> колдонмосуна USB түзмөккө жеткенге уруксат берилсинби?"</string>
     <string name="usb_accessory_permission_prompt" msgid="5171775411178865750">"<xliff:g id="APPLICATION">%1$s</xliff:g> колдонмосуна USB аксессуарына жеткенге уруксат берилсинби?"</string>
-    <!-- no translation found for usb_device_confirm_prompt (5161205258635253206) -->
-    <skip />
-    <!-- no translation found for usb_accessory_confirm_prompt (3808984931830229888) -->
-    <skip />
+    <string name="usb_device_confirm_prompt" msgid="5161205258635253206">"USB түзмөк туташканда <xliff:g id="ACTIVITY">%1$s</xliff:g> ачылсынбы?"</string>
+    <string name="usb_accessory_confirm_prompt" msgid="3808984931830229888">"USB шайманы туташканда <xliff:g id="ACTIVITY">%1$s</xliff:g> ачылсынбы?"</string>
     <string name="usb_accessory_uri_prompt" msgid="513450621413733343">"Эч бир орнотулган колдонмо USB аксессуар м-н иштебейт. Кенен маалыматтар: <xliff:g id="URL">%1$s</xliff:g>"</string>
-    <!-- no translation found for title_usb_accessory (4966265263465181372) -->
-    <skip />
-    <!-- no translation found for label_view (6304565553218192990) -->
-    <skip />
-    <!-- no translation found for always_use_device (1450287437017315906) -->
-    <skip />
-    <!-- no translation found for always_use_accessory (1210954576979621596) -->
-    <skip />
+    <string name="title_usb_accessory" msgid="4966265263465181372">"USB шайманы"</string>
+    <string name="label_view" msgid="6304565553218192990">"Карап көрүү"</string>
+    <string name="always_use_device" msgid="1450287437017315906">"USB түзмөгү үчүн демейки боюнча колдонулсун"</string>
+    <string name="always_use_accessory" msgid="1210954576979621596">"Бул USB шайманы үчүн демейки боюнча колдонулсун"</string>
     <string name="usb_debugging_title" msgid="4513918393387141949">"USB аркылуу жөндөөгө уруксат берилсинби?"</string>
     <string name="usb_debugging_message" msgid="2220143855912376496">"Компүтердин RSA ачкычынын контролдук суммасы:\n<xliff:g id="FINGERPRINT">%1$s</xliff:g>"</string>
     <string name="usb_debugging_always" msgid="303335496705863070">"Бул компүтерден дайыма уруксат берилсин"</string>
     <string name="usb_debugging_secondary_user_title" msgid="6353808721761220421">"USB мүчүлүштүктөрүн оңдоого уруксат жок"</string>
     <string name="usb_debugging_secondary_user_message" msgid="6011931347142270156">"Учурда ушул түзмөккө кирген колдонуучу USB мүчүлүштүктөрүн оңдоо функциясын күйгүзө албайт. Бул функцияны урунуу үчүн, негизги колдонуучунун каттоо эсебине которулуңуз “<xliff:g id="NAME">%s</xliff:g>”."</string>
-    <!-- no translation found for compat_mode_on (6623839244840638213) -->
-    <skip />
-    <!-- no translation found for compat_mode_off (4434467572461327898) -->
-    <skip />
+    <string name="compat_mode_on" msgid="6623839244840638213">"Экрнд тлтр ү. чен өлч өзг"</string>
+    <string name="compat_mode_off" msgid="4434467572461327898">"Экранды толтуруу ү-н чоюу"</string>
     <string name="screenshot_saving_ticker" msgid="7403652894056693515">"Скриншот сакталууда…"</string>
     <string name="screenshot_saving_title" msgid="8242282144535555697">"Скриншот сакталууда..."</string>
     <string name="screenshot_saving_text" msgid="2419718443411738818">"Скриншот сакталууда."</string>
@@ -95,12 +74,9 @@
     <string name="screenshot_saved_text" msgid="1152839647677558815">"Тийип, скриншотту көрүңүз."</string>
     <string name="screenshot_failed_title" msgid="705781116746922771">"Скриншот кылынбай жатат."</string>
     <string name="screenshot_failed_text" msgid="1260203058661337274">"Сактагыч орду чектелүү болгондуктан скриншот тарта албайт, же буга колдонмо же ишканаңыз тарабынан уруксат жок."</string>
-    <!-- no translation found for usb_preference_title (6551050377388882787) -->
-    <skip />
-    <!-- no translation found for use_mtp_button_title (4333504413563023626) -->
-    <skip />
-    <!-- no translation found for use_ptp_button_title (7517127540301625751) -->
-    <skip />
+    <string name="usb_preference_title" msgid="6551050377388882787">"USB менен файл өткөрүү мүмкүнчүлүктөрү"</string>
+    <string name="use_mtp_button_title" msgid="4333504413563023626">"Медиа ойноткуч катары кошуу (MTP)"</string>
+    <string name="use_ptp_button_title" msgid="7517127540301625751">"Камера катары кошуу (PTP)"</string>
     <string name="installer_cd_button_title" msgid="2312667578562201583">"MacOS үчүн Android File Transfer колдонмосун орнотуу"</string>
     <string name="accessibility_back" msgid="567011538994429120">"Артка"</string>
     <string name="accessibility_home" msgid="8217216074895377641">"Үйгө"</string>
@@ -118,8 +94,7 @@
     <string name="voice_assist_label" msgid="3956854378310019854">"үн жардамчысысын ачуу"</string>
     <string name="camera_label" msgid="7261107956054836961">"камераны ачуу"</string>
     <string name="recents_caption_resize" msgid="3517056471774958200">"Жаңы тапшырманын планын тандаңыз"</string>
-    <!-- no translation found for cancel (6442560571259935130) -->
-    <skip />
+    <string name="cancel" msgid="6442560571259935130">"Жокко чыгаруу"</string>
     <string name="accessibility_compatibility_zoom_button" msgid="8461115318742350699">"Масштабды сыйыштыруу баскычы."</string>
     <string name="accessibility_compatibility_zoom_example" msgid="4220687294564945780">"Кичинекейди чоң экранга масштабдоо."</string>
     <string name="accessibility_bluetooth_connected" msgid="2707027633242983370">"Bluetooth байланышта"</string>
@@ -139,12 +114,6 @@
     <string name="accessibility_data_two_bars" msgid="6166018492360432091">"Мобилдик интернеттин сигналы эки таякча."</string>
     <string name="accessibility_data_three_bars" msgid="9167670452395038520">"Мобилдик интернеттин сигналы үч таякча."</string>
     <string name="accessibility_data_signal_full" msgid="2708384608124519369">"Мобилдик интернеттин сигналы толук."</string>
-    <string name="accessibility_wifi_off" msgid="3177380296697933627">"Wifi өчүк."</string>
-    <string name="accessibility_no_wifi" msgid="1425476551827924474">"Wifi туташуусу жок."</string>
-    <string name="accessibility_wifi_one_bar" msgid="7735893178010724377">"Wifi бир таякча."</string>
-    <string name="accessibility_wifi_two_bars" msgid="4994274250497262434">"Wifi эки таякча."</string>
-    <string name="accessibility_wifi_three_bars" msgid="3495755044276588384">"Wifi үч таякча."</string>
-    <string name="accessibility_wifi_signal_full" msgid="6853561303586480376">"Wifi сигналы толук."</string>
     <string name="accessibility_wifi_name" msgid="7202151365171148501">"<xliff:g id="WIFI">%s</xliff:g> менен туташкан."</string>
     <string name="accessibility_bluetooth_name" msgid="8441517146585531676">"<xliff:g id="BLUETOOTH">%s</xliff:g> менен туташкан."</string>
     <string name="accessibility_no_wimax" msgid="4329180129727630368">"WiMAX туташуусу жок."</string>
@@ -356,6 +325,8 @@
     <string name="interruption_level_priority_twoline" msgid="1564715335217164124">"Артыкчылыктуу\nгана"</string>
     <string name="interruption_level_alarms_twoline" msgid="3266909566410106146">"Ойготкучтар\nгана"</string>
     <string name="keyguard_indication_charging_time" msgid="1757251776872835768">"Кубатталууда (<xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g> толгонго чейин)"</string>
+    <string name="keyguard_indication_charging_time_fast" msgid="9018981952053914986">"Тез кубатталууда (толгонго чейин <xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g> калды)"</string>
+    <string name="keyguard_indication_charging_time_slowly" msgid="955252797961724952">"Жай кубатталууда (толгонго чейин <xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g> калды)"</string>
     <string name="accessibility_multi_user_switch_switcher" msgid="7305948938141024937">"Колдонуучуну которуу"</string>
     <string name="accessibility_multi_user_switch_switcher_with_current" msgid="8434880595284601601">"Колдонуучуну күйгүзүү, учурдагы колдонуучу <xliff:g id="CURRENT_USER_NAME">%s</xliff:g>"</string>
     <string name="accessibility_multi_user_switch_inactive" msgid="1424081831468083402">"Учурдагы колдонуучу <xliff:g id="CURRENT_USER_NAME">%s</xliff:g>"</string>
@@ -429,7 +400,7 @@
     <string name="volumeui_notification_title" msgid="4906770126345910955">"<xliff:g id="APP_NAME">%1$s</xliff:g> үндү катуулатуу диалогу"</string>
     <string name="volumeui_notification_text" msgid="1826889705095768656">"Түпнусканы калыбына келтирүү үчүн тийип коюңуз."</string>
     <string name="managed_profile_foreground_toast" msgid="5421487114739245972">"Жумуш профилиңизди колдонуп жатасыз"</string>
-    <string name="system_ui_tuner" msgid="3442596010150119600">"SystemUI tuner"</string>
+    <string name="system_ui_tuner" msgid="708224127392452018">"System UI Tuner"</string>
     <string name="show_battery_percentage" msgid="5444136600512968798">"Батарянын кубатнын деңгээли пайыз менен көрсөтлсүн"</string>
     <string name="show_battery_percentage_summary" msgid="3215025775576786037">"Түзмөк кубаттанбай турганда, батареянын деңгээли статус тилкесинде көрүнүп турат"</string>
     <string name="quick_settings" msgid="10042998191725428">"Ыкчам жөндөөлөр"</string>
@@ -450,4 +421,17 @@
     <string name="accessibility_quick_settings_detail" msgid="2579369091672902101">"Ыкчам жөндөөлөр, <xliff:g id="TITLE">%s</xliff:g>."</string>
     <string name="accessibility_status_bar_hotspot" msgid="4099381329956402865">"Туташуу чекити"</string>
     <string name="accessibility_managed_profile" msgid="6613641363112584120">"Жумуш профили"</string>
+    <string name="tuner_warning_title" msgid="7094689930793031682">"Баарына эле жага бербейт"</string>
+    <string name="tuner_warning" msgid="8730648121973575701">"System UI Tuner Android колдонуучу интерфейсин жөнгө салып жана ыңгайлаштыруунун кошумча ыкмаларын сунуштайт. Бул сынамык функциялар кийинки чыгарылыштарда өзгөрүлүп, бузулуп же жоголуп кетиши мүмкүн. Абайлап колдонуңуз."</string>
+    <string name="tuner_persistent_warning" msgid="8597333795565621795">"Бул сынамык функциялар кийинки чыгарылыштарда өзгөрүлүп, бузулуп же жоголуп кетиши мүмкүн. Абайлап колдонуңуз."</string>
+    <string name="got_it" msgid="2239653834387972602">"Түшүндүм"</string>
+    <string name="tuner_toast" msgid="603429811084428439">"Куттуктайбыз! Жөндөөлөргө System UI Tuner кошулду"</string>
+    <string name="remove_from_settings" msgid="8389591916603406378">"Жөндөөлөрдөн алып салуу"</string>
+    <string name="remove_from_settings_prompt" msgid="6069085993355887748">"System UI Tuner Жөндөөлөрдөн алынып салынып, анын бардык функциялары токтотулсунбу?"</string>
+    <!-- no translation found for enable_bluetooth_title (5027037706500635269) -->
+    <skip />
+    <!-- no translation found for enable_bluetooth_message (9106595990708985385) -->
+    <skip />
+    <!-- no translation found for enable_bluetooth_confirmation_ok (6258074250948309715) -->
+    <skip />
 </resources>

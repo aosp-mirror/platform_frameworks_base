@@ -25,10 +25,10 @@
     <string name="status_bar_recent_inspect_item_title" msgid="7793624864528818569">"Sovelluksen tiedot"</string>
     <string name="status_bar_no_recent_apps" msgid="7374907845131203189">"Äskettäin käytetyt ruudut näkyvät tässä"</string>
     <string name="status_bar_accessibility_dismiss_recents" msgid="4576076075226540105">"Hylkää viimeaikaiset sovellukset"</string>
-    <plurals name="status_bar_accessibility_recent_apps" formatted="false" msgid="9138535907802238759">
-      <item quantity="other">%d näyttöä Yleistä-kohdassa</item>
-      <item quantity="one">1 näyttö Yleistä-kohdassa</item>
-    </plurals>
+  <plurals name="status_bar_accessibility_recent_apps">
+    <item quantity="one" msgid="3969335317929254918">"1 näyttö Viimeisimmät-kohdassa"</item>
+    <item quantity="other" msgid="5523506463832158203">"%d näyttöä Viimeisimmät-kohdassa"</item>
+  </plurals>
     <string name="status_bar_no_notifications_title" msgid="4755261167193833213">"Ei ilmoituksia"</string>
     <string name="status_bar_ongoing_events_title" msgid="1682504513316879202">"Käynnissä olevat"</string>
     <string name="status_bar_latest_events_title" msgid="6594767438577593172">"Ilmoitukset"</string>
@@ -44,7 +44,7 @@
     <string name="battery_saver_start_action" msgid="5576697451677486320">"Ota virransäästö käyttöön"</string>
     <string name="status_bar_settings_settings_button" msgid="3023889916699270224">"Asetukset"</string>
     <string name="status_bar_settings_wifi_button" msgid="1733928151698311923">"Wi-Fi"</string>
-    <string name="status_bar_settings_auto_rotation" msgid="3790482541357798421">"Kierrä näyttöä automaattisesti"</string>
+    <string name="status_bar_settings_auto_rotation" msgid="3790482541357798421">"Näytön automaattinen kierto"</string>
     <string name="status_bar_settings_mute_label" msgid="554682549917429396">"ÄÄNET."</string>
     <string name="status_bar_settings_auto_brightness_label" msgid="511453614962324674">"AUTO"</string>
     <string name="status_bar_settings_notifications" msgid="397146176280905137">"Ilmoitukset"</string>
@@ -114,12 +114,6 @@
     <string name="accessibility_data_two_bars" msgid="6166018492360432091">"Datasignaali - kaksi palkkia."</string>
     <string name="accessibility_data_three_bars" msgid="9167670452395038520">"Datasignaali - kolme palkkia"</string>
     <string name="accessibility_data_signal_full" msgid="2708384608124519369">"Vahva kuuluvuus."</string>
-    <string name="accessibility_wifi_off" msgid="3177380296697933627">"Wi-Fi pois käytöstä."</string>
-    <string name="accessibility_no_wifi" msgid="1425476551827924474">"Ei Wi-Fi-yhteyttä."</string>
-    <string name="accessibility_wifi_one_bar" msgid="7735893178010724377">"Wi-Fi-signaali – yksi palkki."</string>
-    <string name="accessibility_wifi_two_bars" msgid="4994274250497262434">"Wi-Fi-signaali – kaksi palkkia."</string>
-    <string name="accessibility_wifi_three_bars" msgid="3495755044276588384">"Wi-Fi-signaali – kolme palkkia."</string>
-    <string name="accessibility_wifi_signal_full" msgid="6853561303586480376">"Vahva Wi-Fi-signaali."</string>
     <string name="accessibility_wifi_name" msgid="7202151365171148501">"Yhteys: <xliff:g id="WIFI">%s</xliff:g>."</string>
     <string name="accessibility_bluetooth_name" msgid="8441517146585531676">"Yhteys: <xliff:g id="BLUETOOTH">%s</xliff:g>."</string>
     <string name="accessibility_no_wimax" msgid="4329180129727630368">"Ei WiMAX-yhteyttä."</string>
@@ -331,6 +325,8 @@
     <string name="interruption_level_priority_twoline" msgid="1564715335217164124">"Vain\ntärkeät"</string>
     <string name="interruption_level_alarms_twoline" msgid="3266909566410106146">"Vain\nherätykset"</string>
     <string name="keyguard_indication_charging_time" msgid="1757251776872835768">"Ladataan (<xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g> kunnes täynnä)"</string>
+    <string name="keyguard_indication_charging_time_fast" msgid="9018981952053914986">"Nopea lataus (latausaikaa jäljellä <xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g>)"</string>
+    <string name="keyguard_indication_charging_time_slowly" msgid="955252797961724952">"Hidas lataus (latausaikaa jäljellä <xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g>)"</string>
     <string name="accessibility_multi_user_switch_switcher" msgid="7305948938141024937">"Vaihda käyttäjää"</string>
     <string name="accessibility_multi_user_switch_switcher_with_current" msgid="8434880595284601601">"Vaihda käyttäjä (nyt <xliff:g id="CURRENT_USER_NAME">%s</xliff:g>)"</string>
     <string name="accessibility_multi_user_switch_inactive" msgid="1424081831468083402">"Nykyinen käyttäjä: <xliff:g id="CURRENT_USER_NAME">%s</xliff:g>"</string>
@@ -404,7 +400,7 @@
     <string name="volumeui_notification_title" msgid="4906770126345910955">"<xliff:g id="APP_NAME">%1$s</xliff:g> on äänenvoimakkuusvalinta."</string>
     <string name="volumeui_notification_text" msgid="1826889705095768656">"Palauta alkuperäinen koskettamalla."</string>
     <string name="managed_profile_foreground_toast" msgid="5421487114739245972">"Käytät työprofiilia."</string>
-    <string name="system_ui_tuner" msgid="3442596010150119600">"SystemUI-viritin"</string>
+    <string name="system_ui_tuner" msgid="708224127392452018">"System UI Tuner"</string>
     <string name="show_battery_percentage" msgid="5444136600512968798">"Näytä akun varaus kuvakkeessa"</string>
     <string name="show_battery_percentage_summary" msgid="3215025775576786037">"Näyttää akun varausprosentin tilapalkin kuvakkeessa, kun laitetta ei ladata."</string>
     <string name="quick_settings" msgid="10042998191725428">"Pika-asetukset"</string>
@@ -425,4 +421,17 @@
     <string name="accessibility_quick_settings_detail" msgid="2579369091672902101">"Pika-asetukset, <xliff:g id="TITLE">%s</xliff:g>."</string>
     <string name="accessibility_status_bar_hotspot" msgid="4099381329956402865">"Hotspot"</string>
     <string name="accessibility_managed_profile" msgid="6613641363112584120">"Työprofiili"</string>
+    <string name="tuner_warning_title" msgid="7094689930793031682">"Ei sovellu kaikkien käyttöön"</string>
+    <string name="tuner_warning" msgid="8730648121973575701">"System UI Tuner antaa lisämahdollisuuksia Android-käyttöliittymän muokkaamiseen. Nämä kokeelliset ominaisuudet voivat muuttua, lakata toimimasta tai kadota milloin tahansa. Jatka omalla vastuullasi."</string>
+    <string name="tuner_persistent_warning" msgid="8597333795565621795">"Nämä kokeelliset ominaisuudet voivat muuttua, lakata toimimasta tai kadota milloin tahansa. Jatka omalla vastuullasi."</string>
+    <string name="got_it" msgid="2239653834387972602">"Selvä"</string>
+    <string name="tuner_toast" msgid="603429811084428439">"Hienoa! System UI Tuner on nyt lisätty Asetuksiin."</string>
+    <string name="remove_from_settings" msgid="8389591916603406378">"Poista Asetuksista"</string>
+    <string name="remove_from_settings_prompt" msgid="6069085993355887748">"Haluatko poistaa System UI Tunerin Asetuksista ja lopettaa sen ominaisuuksien käytön?"</string>
+    <!-- no translation found for enable_bluetooth_title (5027037706500635269) -->
+    <skip />
+    <!-- no translation found for enable_bluetooth_message (9106595990708985385) -->
+    <skip />
+    <!-- no translation found for enable_bluetooth_confirmation_ok (6258074250948309715) -->
+    <skip />
 </resources>

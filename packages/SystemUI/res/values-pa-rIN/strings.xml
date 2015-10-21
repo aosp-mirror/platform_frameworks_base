@@ -25,10 +25,10 @@
     <string name="status_bar_recent_inspect_item_title" msgid="7793624864528818569">"ਐਪ ਜਾਣਕਾਰੀ"</string>
     <string name="status_bar_no_recent_apps" msgid="7374907845131203189">"ਤੁਹਾਡੀਆਂ ਹਾਲੀਆ ਸਕ੍ਰੀਨਾਂ ਇੱਥੇ ਪ੍ਰਗਟ ਹੋਣਗੀਆਂ"</string>
     <string name="status_bar_accessibility_dismiss_recents" msgid="4576076075226540105">"ਹਾਲੀਆ ਐਪਸ ਰੱਦ ਕਰੋ"</string>
-    <plurals name="status_bar_accessibility_recent_apps" formatted="false" msgid="9138535907802238759">
-      <item quantity="one">ਰੂਪ-ਰੇਖਾ ਵਿੱਚ %d ਸਕ੍ਰੀਨਾਂ</item>
-      <item quantity="other">ਰੂਪ-ਰੇਖਾ ਵਿੱਚ %d ਸਕ੍ਰੀਨਾਂ</item>
-    </plurals>
+  <plurals name="status_bar_accessibility_recent_apps">
+    <item quantity="one" msgid="3969335317929254918">"ਰੂਪ-ਰੇਖਾ ਵਿੱਚ 1 ਸਕ੍ਰੀਨ"</item>
+    <item quantity="other" msgid="5523506463832158203">"ਰੂਪ-ਰੇਖਾ ਵਿੱਚ %d ਸਕ੍ਰੀਨਾਂ"</item>
+  </plurals>
     <string name="status_bar_no_notifications_title" msgid="4755261167193833213">"ਕੋਈ ਸੂਚਨਾਵਾਂ ਨਹੀਂ"</string>
     <string name="status_bar_ongoing_events_title" msgid="1682504513316879202">"ਜਾਰੀ"</string>
     <string name="status_bar_latest_events_title" msgid="6594767438577593172">"ਸੂਚਨਾਵਾਂ"</string>
@@ -114,12 +114,6 @@
     <string name="accessibility_data_two_bars" msgid="6166018492360432091">"ਡਾਟਾ ਦੋ ਬਾਰਸ।"</string>
     <string name="accessibility_data_three_bars" msgid="9167670452395038520">"ਡਾਟਾ ਤਿੰਨ ਬਾਰ।"</string>
     <string name="accessibility_data_signal_full" msgid="2708384608124519369">"ਡਾਟਾ ਸਿਗਨਲ ਪੂਰਾ।"</string>
-    <string name="accessibility_wifi_off" msgid="3177380296697933627">"Wifi ਬੰਦ।"</string>
-    <string name="accessibility_no_wifi" msgid="1425476551827924474">"Wifi ਡਿਸਕਨੈਕਟ ਕੀਤਾ।"</string>
-    <string name="accessibility_wifi_one_bar" msgid="7735893178010724377">"Wifi ਇੱਕ ਬਾਰ।"</string>
-    <string name="accessibility_wifi_two_bars" msgid="4994274250497262434">"Wifi ਦੋ ਬਾਰਸ।"</string>
-    <string name="accessibility_wifi_three_bars" msgid="3495755044276588384">"Wifi ਤਿੰਨ ਬਾਰਸ।"</string>
-    <string name="accessibility_wifi_signal_full" msgid="6853561303586480376">"Wifi ਸਿਗਨਲ ਪੂਰਾ।"</string>
     <string name="accessibility_wifi_name" msgid="7202151365171148501">"<xliff:g id="WIFI">%s</xliff:g> ਨਾਲ ਕਨੈਕਟ ਕੀਤਾ।"</string>
     <string name="accessibility_bluetooth_name" msgid="8441517146585531676">"<xliff:g id="BLUETOOTH">%s</xliff:g> ਨਾਲ ਕਨੈਕਟ ਕੀਤਾ।"</string>
     <string name="accessibility_no_wimax" msgid="4329180129727630368">"ਕੋਈ WiMAX ਨਹੀਂ।"</string>
@@ -331,6 +325,8 @@
     <string name="interruption_level_priority_twoline" msgid="1564715335217164124">"ਕੇਵਲ\nਤਰਜੀਹੀ"</string>
     <string name="interruption_level_alarms_twoline" msgid="3266909566410106146">"ਕੇਵਲ\nਅਲਾਰਮ"</string>
     <string name="keyguard_indication_charging_time" msgid="1757251776872835768">"ਚਾਰਜਿੰਗ (<xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g> ਪੂਰਾ ਹੋਣ ਤੱਕ)"</string>
+    <string name="keyguard_indication_charging_time_fast" msgid="9018981952053914986">"ਤੇਜ਼ੀ ਨਾਲ ਚਾਰਜ ਹੋ ਰਹੀ ਹੈ (<xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g> ਪੂਰੀ ਹੋਣ ਤੱਕ)"</string>
+    <string name="keyguard_indication_charging_time_slowly" msgid="955252797961724952">"ਹੌਲੀ-ਹੌਲੀ ਚਾਰਜ ਹੋ ਰਹੀ ਹੈ (<xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g> ਪੂਰੀ ਹੋਣ ਤੱਕ)"</string>
     <string name="accessibility_multi_user_switch_switcher" msgid="7305948938141024937">"ਉਪਭੋਗਤਾ ਸਵਿਚ ਕਰੋ"</string>
     <string name="accessibility_multi_user_switch_switcher_with_current" msgid="8434880595284601601">"ਉਪਭੋਗਤਾ, ਵਰਤਮਾਨ ਉਪਭੋਗਤਾ ਸਵਿਚ ਕਰੋ<xliff:g id="CURRENT_USER_NAME">%s</xliff:g>"</string>
     <string name="accessibility_multi_user_switch_inactive" msgid="1424081831468083402">"ਮੌਜੂਦਾ ਉਪਭੋਗਤਾ <xliff:g id="CURRENT_USER_NAME">%s</xliff:g>"</string>
@@ -404,7 +400,7 @@
     <string name="volumeui_notification_title" msgid="4906770126345910955">"<xliff:g id="APP_NAME">%1$s</xliff:g> ਵੋਲਯੂਮ ਡਾਇਲੌਗ ਹੈ"</string>
     <string name="volumeui_notification_text" msgid="1826889705095768656">"ਅਸਲੀ ਨੂੰ ਰੀਸਟੋਰ ਕਰਨ ਲਈ ਛੋਹਵੋ।"</string>
     <string name="managed_profile_foreground_toast" msgid="5421487114739245972">"ਤੁਸੀਂ ਆਪਣੀ ਕੰਮ ਪ੍ਰੋਫਾਈਲ ਵਰਤ ਰਹੇ ਹੋ"</string>
-    <string name="system_ui_tuner" msgid="3442596010150119600">"SystemUI ਟਿਊਨਰ"</string>
+    <string name="system_ui_tuner" msgid="708224127392452018">"System UI ਟਿਊਨਰ"</string>
     <string name="show_battery_percentage" msgid="5444136600512968798">"ਜੋਡ਼ੀ ਗਈ ਬੈਟਰੀ ਪ੍ਰਤਿਸ਼ਤਤਾ ਦਿਖਾਓ"</string>
     <string name="show_battery_percentage_summary" msgid="3215025775576786037">"ਜਦੋਂ ਚਾਰਜ ਨਾ ਹੋ ਰਹੀ ਹੋਵੇ ਤਾਂ ਸਥਿਤੀ ਬਾਰ ਦੇ ਅੰਦਰ ਬੈਟਰੀ ਪੱਧਰ ਪ੍ਰਤਿਸ਼ਤਤਾ ਦਿਖਾਓ"</string>
     <string name="quick_settings" msgid="10042998191725428">"ਤਤਕਾਲ ਸੈੱਟਿੰਗਜ਼"</string>
@@ -425,4 +421,17 @@
     <string name="accessibility_quick_settings_detail" msgid="2579369091672902101">"ਤਤਕਾਲ ਸੈਟਿੰਗਾਂ, <xliff:g id="TITLE">%s</xliff:g>।"</string>
     <string name="accessibility_status_bar_hotspot" msgid="4099381329956402865">"ਹੌਟਸਪੌਟ"</string>
     <string name="accessibility_managed_profile" msgid="6613641363112584120">"ਕੰਮ ਪ੍ਰੋਫਾਈਲ"</string>
+    <string name="tuner_warning_title" msgid="7094689930793031682">"ਕੁਝ ਵਾਸਤੇ ਤਾਂ ਮਜ਼ੇਦਾਰ ਹੈ ਲੇਕਿਨ ਸਾਰਿਆਂ ਵਾਸਤੇ ਨਹੀਂ"</string>
+    <string name="tuner_warning" msgid="8730648121973575701">"ਸਿਸਟਮ UI ਟਿਊਨਰ ਤੁਹਾਨੂੰ Android ਉਪਭੋਗਤਾ ਇੰਟਰਫੇਸ ਤਬਦੀਲ ਕਰਨ ਅਤੇ ਅਨੁਕੂਲਿਤ ਕਰਨ ਲਈ ਵਾਧੂ ਤਰੀਕੇ ਦਿੰਦਾ ਹੈ। ਇਹ ਪ੍ਰਯੋਗਾਤਮਿਕ ਵਿਸ਼ੇਸ਼ਤਾਵਾਂ ਭਵਿੱਖ ਦੀ ਰੀਲੀਜ਼ ਵਿੱਚ ਬਦਲ ਸਕਦੀਆਂ ਹਨ, ਟੁੱਟ ਸਕਦੀਆਂ ਹਨ, ਜਾਂ ਅਲੋਪ ਹੋ ਸਕਦੀਆਂ ਹਨ। ਸਾਵਧਾਨੀ ਨਾਲ ਅੱਗੇ ਵੱਧੋ।"</string>
+    <string name="tuner_persistent_warning" msgid="8597333795565621795">"ਇਹ ਪ੍ਰਯੋਗਾਤਮਿਕ ਵਿਸ਼ੇਸ਼ਤਾਵਾਂ ਭਵਿੱਖ ਦੀ ਰੀਲੀਜ਼ ਵਿੱਚ ਬਦਲ ਸਕਦੀਆਂ ਹਨ, ਟੁੱਟ ਸਕਦੀਆਂ ਹਨ, ਜਾਂ ਅਲੋਪ ਹੋ ਸਕਦੀਆਂ ਹਨ। ਸਾਵਧਾਨੀ ਨਾਲ ਅੱਗੇ ਵੱਧੋ।"</string>
+    <string name="got_it" msgid="2239653834387972602">"ਸਮਝ ਗਿਆ"</string>
+    <string name="tuner_toast" msgid="603429811084428439">"ਵਧਾਈਆਂ! ਸਿਸਟਮ UI ਟਿਊਨਰ ਨੂੰ ਸੈਟਿੰਗਜ਼ ਵਿੱਚ ਜੋੜਿਆ ਗਿਆ ਹੈ"</string>
+    <string name="remove_from_settings" msgid="8389591916603406378">"ਸੈਟਿੰਗਜ਼ ਤੋਂ ਹਟਾਓ"</string>
+    <string name="remove_from_settings_prompt" msgid="6069085993355887748">"ਕੀ ਸੈਟਿੰਗਜ਼ ਤੋਂ ਸਿਸਟਮ UI ਟਿਊਨਰ ਨੂੰ ਹਟਾਉਣਾ ਹੈ ਅਤੇ ਇਸਦੀਆਂ ਸਾਰੀਆਂ ਵਿਸ਼ੇਸ਼ਤਾਵਾਂ ਨੂੰ ਉਪਯੋਗ ਕਰਨ ਤੋਂ ਰੋਕਣਾ ਹੈ?"</string>
+    <!-- no translation found for enable_bluetooth_title (5027037706500635269) -->
+    <skip />
+    <!-- no translation found for enable_bluetooth_message (9106595990708985385) -->
+    <skip />
+    <!-- no translation found for enable_bluetooth_confirmation_ok (6258074250948309715) -->
+    <skip />
 </resources>

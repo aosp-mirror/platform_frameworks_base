@@ -25,12 +25,10 @@
     <string name="status_bar_recent_inspect_item_title" msgid="7793624864528818569">"О приложении"</string>
     <string name="status_bar_no_recent_apps" msgid="7374907845131203189">"Здесь будут показаны недавние приложения."</string>
     <string name="status_bar_accessibility_dismiss_recents" msgid="4576076075226540105">"Закрыть недавние приложения"</string>
-    <plurals name="status_bar_accessibility_recent_apps" formatted="false" msgid="9138535907802238759">
-      <item quantity="one">Показан %d экран</item>
-      <item quantity="few">Показано %d экрана</item>
-      <item quantity="many">Показано %d экранов</item>
-      <item quantity="other">Показано %d экранов</item>
-    </plurals>
+  <plurals name="status_bar_accessibility_recent_apps">
+    <item quantity="one" msgid="3969335317929254918">"В обзоре 1 экран."</item>
+    <item quantity="other" msgid="5523506463832158203">"Экранов в обзоре: %d."</item>
+  </plurals>
     <string name="status_bar_no_notifications_title" msgid="4755261167193833213">"Нет уведомлений"</string>
     <string name="status_bar_ongoing_events_title" msgid="1682504513316879202">"Текущие"</string>
     <string name="status_bar_latest_events_title" msgid="6594767438577593172">"Уведомления"</string>
@@ -116,12 +114,6 @@
     <string name="accessibility_data_two_bars" msgid="6166018492360432091">"Сигнал передачи данных: два деления."</string>
     <string name="accessibility_data_three_bars" msgid="9167670452395038520">"Сигнал передачи данных: три деления."</string>
     <string name="accessibility_data_signal_full" msgid="2708384608124519369">"Надежный сигнал передачи данных."</string>
-    <string name="accessibility_wifi_off" msgid="3177380296697933627">"Wi-Fi выключен"</string>
-    <string name="accessibility_no_wifi" msgid="1425476551827924474">"Wi-Fi выключен"</string>
-    <string name="accessibility_wifi_one_bar" msgid="7735893178010724377">"Wi-Fi: одно деление"</string>
-    <string name="accessibility_wifi_two_bars" msgid="4994274250497262434">"Wi-Fi: два деления"</string>
-    <string name="accessibility_wifi_three_bars" msgid="3495755044276588384">"Wi-Fi: три деления"</string>
-    <string name="accessibility_wifi_signal_full" msgid="6853561303586480376">"Wi-Fi: надежный сигнал"</string>
     <string name="accessibility_wifi_name" msgid="7202151365171148501">"<xliff:g id="WIFI">%s</xliff:g>: подключено."</string>
     <string name="accessibility_bluetooth_name" msgid="8441517146585531676">"<xliff:g id="BLUETOOTH">%s</xliff:g>: подключено."</string>
     <string name="accessibility_no_wimax" msgid="4329180129727630368">"Нет сигнала WiMAX."</string>
@@ -275,7 +267,7 @@
     <string name="quick_settings_wifi_no_network" msgid="2221993077220856376">"Нет сети"</string>
     <string name="quick_settings_wifi_off_label" msgid="7558778100843885864">"Wi-Fi выкл."</string>
     <string name="quick_settings_wifi_detail_empty_text" msgid="269990350383909226">"Не удалось найти доступные сети Wi-Fi"</string>
-    <string name="quick_settings_cast_title" msgid="7709016546426454729">"Wi-Fi-монитор"</string>
+    <string name="quick_settings_cast_title" msgid="7709016546426454729">"Трансляция"</string>
     <string name="quick_settings_casting" msgid="6601710681033353316">"Передача изображения"</string>
     <string name="quick_settings_cast_device_default_name" msgid="5367253104742382945">"Безымянное устройство"</string>
     <string name="quick_settings_cast_device_default_description" msgid="2484573682378634413">"Готово к передаче"</string>
@@ -316,7 +308,7 @@
     <string name="description_target_search" msgid="3091587249776033139">"Поиск"</string>
     <string name="description_direction_up" msgid="7169032478259485180">"Проведите вверх, чтобы <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>."</string>
     <string name="description_direction_left" msgid="7207478719805562165">"Проведите влево, чтобы <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>."</string>
-    <string name="zen_priority_introduction" msgid="3070506961866919502">"Вибрация и звуки будут отключены. Вы услышите только сигналы будильника, напоминания, уведомления о мероприятиях и звонки от выбранных абонентов."</string>
+    <string name="zen_priority_introduction" msgid="3070506961866919502">"Вас не будут отвлекать звуки и вибрация, за исключением сигналов будильника, напоминаний, уведомлений о мероприятиях и звонков от помеченных контактов."</string>
     <string name="zen_priority_customize_button" msgid="7948043278226955063">"Настроить"</string>
     <string name="zen_silence_introduction_voice" msgid="2284540992298200729">"В этом режиме будут отключены вибросигнал и все звуки (в том числе для будильника, музыкального проигрывателя, игр и видео). При этом вы сможете разговаривать по телефону."</string>
     <string name="zen_silence_introduction" msgid="3137882381093271568">"В этом режиме будут отключены вибросигнал и все звуки (в том числе для будильника, музыкального проигрывателя, игр и видео)."</string>
@@ -335,6 +327,8 @@
     <string name="interruption_level_priority_twoline" msgid="1564715335217164124">"Только\nважные"</string>
     <string name="interruption_level_alarms_twoline" msgid="3266909566410106146">"Только\nбудильник"</string>
     <string name="keyguard_indication_charging_time" msgid="1757251776872835768">"Зарядка батареи (осталось <xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g>)"</string>
+    <string name="keyguard_indication_charging_time_fast" msgid="9018981952053914986">"Быстрая зарядка (осталось <xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g>)"</string>
+    <string name="keyguard_indication_charging_time_slowly" msgid="955252797961724952">"Медленная зарядка (осталось <xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g>)"</string>
     <string name="accessibility_multi_user_switch_switcher" msgid="7305948938141024937">"Сменить пользователя."</string>
     <string name="accessibility_multi_user_switch_switcher_with_current" msgid="8434880595284601601">"Сменить аккаунт. Вход выполнен под именем <xliff:g id="CURRENT_USER_NAME">%s</xliff:g>."</string>
     <string name="accessibility_multi_user_switch_inactive" msgid="1424081831468083402">"Выбран аккаунт пользователя <xliff:g id="CURRENT_USER_NAME">%s</xliff:g>"</string>
@@ -408,7 +402,7 @@
     <string name="volumeui_notification_title" msgid="4906770126345910955">"Приложение <xliff:g id="APP_NAME">%1$s</xliff:g> назначено регулятором громкости"</string>
     <string name="volumeui_notification_text" msgid="1826889705095768656">"Нажмите, чтобы восстановить приложение по умолчанию."</string>
     <string name="managed_profile_foreground_toast" msgid="5421487114739245972">"Вы перешли в рабочий профиль"</string>
-    <string name="system_ui_tuner" msgid="3442596010150119600">"SystemUI Tuner"</string>
+    <string name="system_ui_tuner" msgid="708224127392452018">"System UI Tuner"</string>
     <string name="show_battery_percentage" msgid="5444136600512968798">"Показывать уровень заряда батареи в процентах"</string>
     <string name="show_battery_percentage_summary" msgid="3215025775576786037">"Когда устройство работает в автономном режиме, процент заряда батареи показан в строке состояния"</string>
     <string name="quick_settings" msgid="10042998191725428">"Быстрые настройки"</string>
@@ -429,4 +423,17 @@
     <string name="accessibility_quick_settings_detail" msgid="2579369091672902101">"Быстрые настройки, <xliff:g id="TITLE">%s</xliff:g>."</string>
     <string name="accessibility_status_bar_hotspot" msgid="4099381329956402865">"Точка доступа"</string>
     <string name="accessibility_managed_profile" msgid="6613641363112584120">"Рабочий профиль"</string>
+    <string name="tuner_warning_title" msgid="7094689930793031682">"Внимание!"</string>
+    <string name="tuner_warning" msgid="8730648121973575701">"System UI Tuner позволяет настраивать интерфейс устройства Android по вашему вкусу. В будущем эта экспериментальная функция может измениться, перестать работать или исчезнуть."</string>
+    <string name="tuner_persistent_warning" msgid="8597333795565621795">"Это экспериментальная функция. В будущем она может измениться, перестать работать или исчезнуть."</string>
+    <string name="got_it" msgid="2239653834387972602">"ОК"</string>
+    <string name="tuner_toast" msgid="603429811084428439">"Функция System UI Tuner добавлена в меню настроек"</string>
+    <string name="remove_from_settings" msgid="8389591916603406378">"Удалить из настроек"</string>
+    <string name="remove_from_settings_prompt" msgid="6069085993355887748">"Убрать функцию System UI Tuner из меню настроек и прекратить ее работу?"</string>
+    <!-- no translation found for enable_bluetooth_title (5027037706500635269) -->
+    <skip />
+    <!-- no translation found for enable_bluetooth_message (9106595990708985385) -->
+    <skip />
+    <!-- no translation found for enable_bluetooth_confirmation_ok (6258074250948309715) -->
+    <skip />
 </resources>

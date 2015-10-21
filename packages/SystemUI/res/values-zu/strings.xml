@@ -25,10 +25,10 @@
     <string name="status_bar_recent_inspect_item_title" msgid="7793624864528818569">"Ulwazi lwensiza"</string>
     <string name="status_bar_no_recent_apps" msgid="7374907845131203189">"Izikrini zakho zakamuva zivela lapha"</string>
     <string name="status_bar_accessibility_dismiss_recents" msgid="4576076075226540105">"Susa izinhlelo zokusebenza zakamumva"</string>
-    <plurals name="status_bar_accessibility_recent_apps" formatted="false" msgid="9138535907802238759">
-      <item quantity="one">%d izikrini eziku-Buka konke</item>
-      <item quantity="other">%d izikrini eziku-Buka konke</item>
-    </plurals>
+  <plurals name="status_bar_accessibility_recent_apps">
+    <item quantity="one" msgid="3969335317929254918">"1 isikrini esiku-Buka konke"</item>
+    <item quantity="other" msgid="5523506463832158203">"%d wezikrini eziku-Buka konke"</item>
+  </plurals>
     <string name="status_bar_no_notifications_title" msgid="4755261167193833213">"Azikho izaziso"</string>
     <string name="status_bar_ongoing_events_title" msgid="1682504513316879202">"Okuqhubekayo"</string>
     <string name="status_bar_latest_events_title" msgid="6594767438577593172">"Izaziso"</string>
@@ -114,12 +114,6 @@
     <string name="accessibility_data_two_bars" msgid="6166018492360432091">"Amabha amabili edatha"</string>
     <string name="accessibility_data_three_bars" msgid="9167670452395038520">"Amabha amathathu edatha"</string>
     <string name="accessibility_data_signal_full" msgid="2708384608124519369">"Igcwele i-signal yedatha"</string>
-    <string name="accessibility_wifi_off" msgid="3177380296697933627">"I-Wi-Fi ivaliwe."</string>
-    <string name="accessibility_no_wifi" msgid="1425476551827924474">"I-Wi-Fi ayixhunywanga."</string>
-    <string name="accessibility_wifi_one_bar" msgid="7735893178010724377">"Ibha elilodwa le-Wi-Fi."</string>
-    <string name="accessibility_wifi_two_bars" msgid="4994274250497262434">"Amabha amabili we-Wi-Fi."</string>
-    <string name="accessibility_wifi_three_bars" msgid="3495755044276588384">"Amabha amathathu we-Wi-Fi."</string>
-    <string name="accessibility_wifi_signal_full" msgid="6853561303586480376">"Isiginali ye-Wi-Fi igcwele."</string>
     <string name="accessibility_wifi_name" msgid="7202151365171148501">"Xhuma ku-<xliff:g id="WIFI">%s</xliff:g>."</string>
     <string name="accessibility_bluetooth_name" msgid="8441517146585531676">"Xhuma ku-<xliff:g id="BLUETOOTH">%s</xliff:g>."</string>
     <string name="accessibility_no_wimax" msgid="4329180129727630368">"Ayikho i-WiMAX."</string>
@@ -331,6 +325,8 @@
     <string name="interruption_level_priority_twoline" msgid="1564715335217164124">"Okubalulekile\nkuphela"</string>
     <string name="interruption_level_alarms_twoline" msgid="3266909566410106146">"Ama-alamu\nkuphela"</string>
     <string name="keyguard_indication_charging_time" msgid="1757251776872835768">"Iyashaja (<xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g> ize igcwale)"</string>
+    <string name="keyguard_indication_charging_time_fast" msgid="9018981952053914986">"Iyashaja ngokushesha (<xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g> ize igcwale)"</string>
+    <string name="keyguard_indication_charging_time_slowly" msgid="955252797961724952">"Iyashaja kancane (<xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g> ize igcwale)"</string>
     <string name="accessibility_multi_user_switch_switcher" msgid="7305948938141024937">"Shintsha umsebenzisi"</string>
     <string name="accessibility_multi_user_switch_switcher_with_current" msgid="8434880595284601601">"Shintsha umsebenzisi, umsebenzisi wamanje ngu-<xliff:g id="CURRENT_USER_NAME">%s</xliff:g>"</string>
     <string name="accessibility_multi_user_switch_inactive" msgid="1424081831468083402">"Umsebenzisi wamanje <xliff:g id="CURRENT_USER_NAME">%s</xliff:g>"</string>
@@ -404,7 +400,7 @@
     <string name="volumeui_notification_title" msgid="4906770126345910955">"I-<xliff:g id="APP_NAME">%1$s</xliff:g> yingxoxo yevolumu"</string>
     <string name="volumeui_notification_text" msgid="1826889705095768656">"Thinta ukuze ubuyisele kokwangempela."</string>
     <string name="managed_profile_foreground_toast" msgid="5421487114739245972">"Usebenzisa iphrofayela yakho yomsebenzi"</string>
-    <string name="system_ui_tuner" msgid="3442596010150119600">"Isishuni se-UI yesistimu"</string>
+    <string name="system_ui_tuner" msgid="708224127392452018">"Isishuni se-UI yesistimu"</string>
     <string name="show_battery_percentage" msgid="5444136600512968798">"Bonisa amaphesenti ebhethri elinamathiselwe"</string>
     <string name="show_battery_percentage_summary" msgid="3215025775576786037">"Bonisa amaphesenti eleveli yebhethri ngaphakathi kwesithonjana sebha yesimo uma kungashajwa"</string>
     <string name="quick_settings" msgid="10042998191725428">"Izilungiselelo ezisheshayo"</string>
@@ -425,4 +421,17 @@
     <string name="accessibility_quick_settings_detail" msgid="2579369091672902101">"Izilungiselelo ezisheshayo, <xliff:g id="TITLE">%s</xliff:g>."</string>
     <string name="accessibility_status_bar_hotspot" msgid="4099381329956402865">"I-Hotspot"</string>
     <string name="accessibility_managed_profile" msgid="6613641363112584120">"Iphrofayela yomsebenzi"</string>
+    <string name="tuner_warning_title" msgid="7094689930793031682">"Kuyajabulisa kwabanye kodwa hhayi bonke"</string>
+    <string name="tuner_warning" msgid="8730648121973575701">"Isishuni se-UI sesistimu sikunika izindlela ezingeziwe zokuhlobisa nokwenza ngezifiso isixhumanisi sokubona se-Android. Lezi zici zesilingo zingashintsha, zephuke, noma zinyamalale ekukhishweni kwangakusasa. Qhubeka ngokuqaphela."</string>
+    <string name="tuner_persistent_warning" msgid="8597333795565621795">"Lezi zici zesilingo zingashintsha, zephuke, noma zinyamalale ekukhishweni kwangakusasa. Qhubeka ngokuqaphela."</string>
+    <string name="got_it" msgid="2239653834387972602">"Ngiyezwa"</string>
+    <string name="tuner_toast" msgid="603429811084428439">"Siyakuhalalisela! Isishuni se-UI sesistimu singeziwe kuzilungiselelo"</string>
+    <string name="remove_from_settings" msgid="8389591916603406378">"Susa kusuka kuzilungiselelo"</string>
+    <string name="remove_from_settings_prompt" msgid="6069085993355887748">"Susa isishuni se-UI yesistimu kusuka kuzilungiselelo futhi uyeke ukusebenzisa zonke izici zakhona?"</string>
+    <!-- no translation found for enable_bluetooth_title (5027037706500635269) -->
+    <skip />
+    <!-- no translation found for enable_bluetooth_message (9106595990708985385) -->
+    <skip />
+    <!-- no translation found for enable_bluetooth_confirmation_ok (6258074250948309715) -->
+    <skip />
 </resources>

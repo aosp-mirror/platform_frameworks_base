@@ -25,10 +25,10 @@
     <string name="status_bar_recent_inspect_item_title" msgid="7793624864528818569">"Ilova haqida"</string>
     <string name="status_bar_no_recent_apps" msgid="7374907845131203189">"Yaqinda ish-gan ilovalar bu yerda ko‘rinadi"</string>
     <string name="status_bar_accessibility_dismiss_recents" msgid="4576076075226540105">"So‘nggi dasturlarni tozalash"</string>
-    <plurals name="status_bar_accessibility_recent_apps" formatted="false" msgid="9138535907802238759">
-      <item quantity="other">Umumiy ma’lumot bo‘limida %d ta ekran bor</item>
-      <item quantity="one">Umumiy ma’lumot bo‘limida 1 ta ekran bor</item>
-    </plurals>
+  <plurals name="status_bar_accessibility_recent_apps">
+    <item quantity="one" msgid="3969335317929254918">"“Umumiy nazar” oynasida 1 ta ekran bor"</item>
+    <item quantity="other" msgid="5523506463832158203">"“Umumiy nazar” oynasida %d ta ekran bor"</item>
+  </plurals>
     <string name="status_bar_no_notifications_title" msgid="4755261167193833213">"Eslatmalar - yo‘q"</string>
     <string name="status_bar_ongoing_events_title" msgid="1682504513316879202">"Joriy"</string>
     <string name="status_bar_latest_events_title" msgid="6594767438577593172">"Eslatmalar"</string>
@@ -82,7 +82,7 @@
     <string name="accessibility_home" msgid="8217216074895377641">"Uyga"</string>
     <string name="accessibility_menu" msgid="316839303324695949">"Menyu"</string>
     <string name="accessibility_recent" msgid="5208608566793607626">"Umumiy nazar"</string>
-    <string name="accessibility_search_light" msgid="1103867596330271848">"Izlash"</string>
+    <string name="accessibility_search_light" msgid="1103867596330271848">"Qidirish"</string>
     <string name="accessibility_camera_button" msgid="8064671582820358152">"Kamera"</string>
     <string name="accessibility_phone_button" msgid="6738112589538563574">"Telefon"</string>
     <string name="accessibility_voice_assist_button" msgid="487611083884852965">"Ovozli yordam"</string>
@@ -114,12 +114,6 @@
     <string name="accessibility_data_two_bars" msgid="6166018492360432091">"Ma’lumotlar ikkita panelda."</string>
     <string name="accessibility_data_three_bars" msgid="9167670452395038520">"Ma’lumotlar uchta panelda."</string>
     <string name="accessibility_data_signal_full" msgid="2708384608124519369">"Ma’lumot uzatish signali to‘liq."</string>
-    <string name="accessibility_wifi_off" msgid="3177380296697933627">"Wifi o‘chirilgan."</string>
-    <string name="accessibility_no_wifi" msgid="1425476551827924474">"Wifi ulanmagan."</string>
-    <string name="accessibility_wifi_one_bar" msgid="7735893178010724377">"Bitta ustunli Wifi."</string>
-    <string name="accessibility_wifi_two_bars" msgid="4994274250497262434">"Ikkita ustunli Wifi."</string>
-    <string name="accessibility_wifi_three_bars" msgid="3495755044276588384">"Uchta ustunli Wifi."</string>
-    <string name="accessibility_wifi_signal_full" msgid="6853561303586480376">"To‘liq signalli Wifi."</string>
     <string name="accessibility_wifi_name" msgid="7202151365171148501">"Ulangan: <xliff:g id="WIFI">%s</xliff:g>."</string>
     <string name="accessibility_bluetooth_name" msgid="8441517146585531676">"Ulangan: <xliff:g id="BLUETOOTH">%s</xliff:g>."</string>
     <string name="accessibility_no_wimax" msgid="4329180129727630368">"WiMAX tarmog‘i yo‘q."</string>
@@ -136,8 +130,8 @@
     <string name="accessibility_two_bars" msgid="6437363648385206679">"Ikkita ustun."</string>
     <string name="accessibility_three_bars" msgid="2648241415119396648">"Uchta ustun."</string>
     <string name="accessibility_signal_full" msgid="9122922886519676839">"Signal to‘liq."</string>
-    <string name="accessibility_desc_on" msgid="2385254693624345265">"Yoqilgan."</string>
-    <string name="accessibility_desc_off" msgid="6475508157786853157">"O‘chirilgan."</string>
+    <string name="accessibility_desc_on" msgid="2385254693624345265">"Yoniq"</string>
+    <string name="accessibility_desc_off" msgid="6475508157786853157">"O‘chiq"</string>
     <string name="accessibility_desc_connected" msgid="8366256693719499665">"Ulangan."</string>
     <string name="accessibility_desc_connecting" msgid="3812924520316280149">"Ulanmoqda…"</string>
     <string name="accessibility_data_connection_gprs" msgid="1606477224486747751">"GPRS"</string>
@@ -151,7 +145,7 @@
     <string name="accessibility_data_connection_roaming" msgid="5977362333466556094">"Rouming"</string>
     <string name="accessibility_data_connection_edge" msgid="4477457051631979278">"Edge"</string>
     <string name="accessibility_data_connection_wifi" msgid="2324496756590645221">"Wi-Fi"</string>
-    <string name="accessibility_no_sim" msgid="8274017118472455155">"SIM karta yo‘q."</string>
+    <string name="accessibility_no_sim" msgid="8274017118472455155">"SIM-karta yo‘q."</string>
     <string name="accessibility_bluetooth_tether" msgid="4102784498140271969">"Bluetooth modem"</string>
     <string name="accessibility_airplane_mode" msgid="834748999790763092">"Parvoz rejimi"</string>
     <string name="accessibility_no_sims" msgid="3957997018324995781">"Hech qanday SIM-karta yo‘q."</string>
@@ -309,7 +303,7 @@
     <string name="expanded_header_battery_charging_with_time" msgid="457559884275395376">"<xliff:g id="CHARGING_TIME">%s</xliff:g>da to‘ladi"</string>
     <string name="expanded_header_battery_not_charging" msgid="4798147152367049732">"Quvvat olmayapti"</string>
     <string name="ssl_ca_cert_warning" msgid="9005954106902053641">"Tarmoq nazorat\nostida bo‘lishi mumkin"</string>
-    <string name="description_target_search" msgid="3091587249776033139">"Izlash"</string>
+    <string name="description_target_search" msgid="3091587249776033139">"Qidirish"</string>
     <string name="description_direction_up" msgid="7169032478259485180">"<xliff:g id="TARGET_DESCRIPTION">%s</xliff:g> uchun yuqoriga suring."</string>
     <string name="description_direction_left" msgid="7207478719805562165">"<xliff:g id="TARGET_DESCRIPTION">%s</xliff:g> uchun chapga suring."</string>
     <string name="zen_priority_introduction" msgid="3070506961866919502">"Turli ovoz va tebranishlar endi sizni bezovta qilmaydi. Biroq uyg‘otkich signallari, eslatmalar, tadbirlar haqidagi bildirishnomalar va siz tanlagan abonentlardan kelgan qo‘ng‘iroqlar bundan mustasno."</string>
@@ -331,6 +325,8 @@
     <string name="interruption_level_priority_twoline" msgid="1564715335217164124">"Faqat\nmuhimlar"</string>
     <string name="interruption_level_alarms_twoline" msgid="3266909566410106146">"Faqat\nsignallar"</string>
     <string name="keyguard_indication_charging_time" msgid="1757251776872835768">"Quvvat olmoqda (<xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g>da to‘ladi)"</string>
+    <string name="keyguard_indication_charging_time_fast" msgid="9018981952053914986">"Tez quvvat olmoqda (to‘lishiga <xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g> qoldi)"</string>
+    <string name="keyguard_indication_charging_time_slowly" msgid="955252797961724952">"Sekin quvvat olmoqda (to‘lishiga <xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g> qoldi)"</string>
     <string name="accessibility_multi_user_switch_switcher" msgid="7305948938141024937">"Foydalanuvchini almashtirish"</string>
     <string name="accessibility_multi_user_switch_switcher_with_current" msgid="8434880595284601601">"Foydalanuvchini o‘zgartirish. Joriy foydalanuvchi – <xliff:g id="CURRENT_USER_NAME">%s</xliff:g>"</string>
     <string name="accessibility_multi_user_switch_inactive" msgid="1424081831468083402">"Joriy foydalanuvchi <xliff:g id="CURRENT_USER_NAME">%s</xliff:g>"</string>
@@ -404,7 +400,7 @@
     <string name="volumeui_notification_title" msgid="4906770126345910955">"<xliff:g id="APP_NAME">%1$s</xliff:g> ovoz balandligini boshqaradi"</string>
     <string name="volumeui_notification_text" msgid="1826889705095768656">"Aslini tiklash uchun bosing."</string>
     <string name="managed_profile_foreground_toast" msgid="5421487114739245972">"Siz ishchi profildan foydalanmoqdasiz"</string>
-    <string name="system_ui_tuner" msgid="3442596010150119600">"SystemUI Tuner"</string>
+    <string name="system_ui_tuner" msgid="708224127392452018">"SystemUI Tuner"</string>
     <string name="show_battery_percentage" msgid="5444136600512968798">"Batareya foizi ko‘rsatilsin"</string>
     <string name="show_battery_percentage_summary" msgid="3215025775576786037">"Batareya quvvat olmayotgan vaqtda uning foizi holat qatorida ko‘rsatilsin"</string>
     <string name="quick_settings" msgid="10042998191725428">"Tezkor sozlamalar"</string>
@@ -425,4 +421,17 @@
     <string name="accessibility_quick_settings_detail" msgid="2579369091672902101">"Tezkor sozlamalar, <xliff:g id="TITLE">%s</xliff:g>."</string>
     <string name="accessibility_status_bar_hotspot" msgid="4099381329956402865">"Ulanish nuqtasi"</string>
     <string name="accessibility_managed_profile" msgid="6613641363112584120">"Ishchi profil"</string>
+    <string name="tuner_warning_title" msgid="7094689930793031682">"Diqqat!"</string>
+    <string name="tuner_warning" msgid="8730648121973575701">"System UI Tuner yordamida siz Android foydalanuvchi interfeysini tuzatish va o‘zingizga moslashtirishingiz mumkin. Ushbu tajribaviy funksiyalar o‘zgarishi, buzilishi yoki keyingi versiyalarda olib tashlanishi mumkin. Ehtiyot bo‘lib davom eting."</string>
+    <string name="tuner_persistent_warning" msgid="8597333795565621795">"Ushbu tajribaviy funksiyalar o‘zgarishi, buzilishi yoki keyingi versiyalarda olib tashlanishi mumkin. Ehtiyot bo‘lib davom eting."</string>
+    <string name="got_it" msgid="2239653834387972602">"OK"</string>
+    <string name="tuner_toast" msgid="603429811084428439">"Tabriklaymiz! System UI Tuner Sozlamalarga qo‘shildi."</string>
+    <string name="remove_from_settings" msgid="8389591916603406378">"Sozlamalardan olib tashlash"</string>
+    <string name="remove_from_settings_prompt" msgid="6069085993355887748">"System UI Tuner Sozlamalardan olib tashlanib, uning barcha funksiyalaridan foydalanish to‘xtatilsinmi?"</string>
+    <!-- no translation found for enable_bluetooth_title (5027037706500635269) -->
+    <skip />
+    <!-- no translation found for enable_bluetooth_message (9106595990708985385) -->
+    <skip />
+    <!-- no translation found for enable_bluetooth_confirmation_ok (6258074250948309715) -->
+    <skip />
 </resources>

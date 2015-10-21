@@ -25,8 +25,10 @@
     <string name="status_bar_recent_inspect_item_title" msgid="7793624864528818569">"Апп мэдээлэл"</string>
     <string name="status_bar_no_recent_apps" msgid="7374907845131203189">"Таны саяхны дэлгэц энд харагдах болно"</string>
     <string name="status_bar_accessibility_dismiss_recents" msgid="4576076075226540105">"Сүүлийн апп-уудыг хаах"</string>
-    <!-- String.format failed for translation -->
-    <!-- no translation found for status_bar_accessibility_recent_apps (9138535907802238759) -->
+  <plurals name="status_bar_accessibility_recent_apps">
+    <item quantity="one" msgid="3969335317929254918">"Тойм дээр 1 дэлгэц"</item>
+    <item quantity="other" msgid="5523506463832158203">"Тойм дээрх %d дэлгэц"</item>
+  </plurals>
     <string name="status_bar_no_notifications_title" msgid="4755261167193833213">"Мэдэгдэл байхгүй"</string>
     <string name="status_bar_ongoing_events_title" msgid="1682504513316879202">"Гарсан"</string>
     <string name="status_bar_latest_events_title" msgid="6594767438577593172">"Мэдэгдэл"</string>
@@ -112,12 +114,6 @@
     <string name="accessibility_data_two_bars" msgid="6166018492360432091">"Дата хоёр баганатай."</string>
     <string name="accessibility_data_three_bars" msgid="9167670452395038520">"Дата гурван баганатай."</string>
     <string name="accessibility_data_signal_full" msgid="2708384608124519369">"Дата дохио дүүрэн."</string>
-    <string name="accessibility_wifi_off" msgid="3177380296697933627">"Wifi унтарсан."</string>
-    <string name="accessibility_no_wifi" msgid="1425476551827924474">"Wifi салав."</string>
-    <string name="accessibility_wifi_one_bar" msgid="7735893178010724377">"Wifi нэг баганатай."</string>
-    <string name="accessibility_wifi_two_bars" msgid="4994274250497262434">"Wifi хоёр баганатай."</string>
-    <string name="accessibility_wifi_three_bars" msgid="3495755044276588384">"Wifi гурван баганатай."</string>
-    <string name="accessibility_wifi_signal_full" msgid="6853561303586480376">"Wifi дохио дүүрэн."</string>
     <string name="accessibility_wifi_name" msgid="7202151365171148501">"<xliff:g id="WIFI">%s</xliff:g>-тай холбогдсон."</string>
     <string name="accessibility_bluetooth_name" msgid="8441517146585531676">"<xliff:g id="BLUETOOTH">%s</xliff:g>-тай холбогдсон."</string>
     <string name="accessibility_no_wimax" msgid="4329180129727630368">"WiMAX байхгүй."</string>
@@ -329,6 +325,8 @@
     <string name="interruption_level_priority_twoline" msgid="1564715335217164124">"Зөвхөн\nхамгийн чухлыг"</string>
     <string name="interruption_level_alarms_twoline" msgid="3266909566410106146">"Зөвхөн\nсэрүүлэг"</string>
     <string name="keyguard_indication_charging_time" msgid="1757251776872835768">"Цэнэглэж байна (дүүргэхэд <xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g>)"</string>
+    <string name="keyguard_indication_charging_time_fast" msgid="9018981952053914986">"Цэнэглэж байна (дүүргэхэд <xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g> шаардлагатай)"</string>
+    <string name="keyguard_indication_charging_time_slowly" msgid="955252797961724952">"Цэнэглэж байна (дүүргэхэд <xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g> шаардлагатай)"</string>
     <string name="accessibility_multi_user_switch_switcher" msgid="7305948938141024937">"Хэрэглэгчийг сэлгэх"</string>
     <string name="accessibility_multi_user_switch_switcher_with_current" msgid="8434880595284601601">"Хэрэглэгчийг сэлгэх, одоогийн хэрэглэгч <xliff:g id="CURRENT_USER_NAME">%s</xliff:g>"</string>
     <string name="accessibility_multi_user_switch_inactive" msgid="1424081831468083402">"Одоогийн хэрэглэгч <xliff:g id="CURRENT_USER_NAME">%s</xliff:g>"</string>
@@ -402,7 +400,7 @@
     <string name="volumeui_notification_title" msgid="4906770126345910955">"<xliff:g id="APP_NAME">%1$s</xliff:g> нь дууны диалог юм."</string>
     <string name="volumeui_notification_text" msgid="1826889705095768656">"Анхны хувилбарыг эргүүлэн хадгалахыг хүсвэл хүрнэ үү."</string>
     <string name="managed_profile_foreground_toast" msgid="5421487114739245972">"Та өөрийн ажлын профайлыг ашиглаж байна"</string>
-    <string name="system_ui_tuner" msgid="3442596010150119600">"System UI tuner"</string>
+    <string name="system_ui_tuner" msgid="708224127392452018">"Системийн UI Тохируулагч"</string>
     <string name="show_battery_percentage" msgid="5444136600512968798">"Залгаатай тэжээлийн хувийг харуулах"</string>
     <string name="show_battery_percentage_summary" msgid="3215025775576786037">"Тэжээлийн хувийг цэнэглээгүй байх үед статусын хэсэгт харуулна уу"</string>
     <string name="quick_settings" msgid="10042998191725428">"Түргэвчилсэн Tохиргоо"</string>
@@ -423,4 +421,17 @@
     <string name="accessibility_quick_settings_detail" msgid="2579369091672902101">"Түргэн Тохиргоо, <xliff:g id="TITLE">%s</xliff:g>."</string>
     <string name="accessibility_status_bar_hotspot" msgid="4099381329956402865">"Сүлжээний цэг"</string>
     <string name="accessibility_managed_profile" msgid="6613641363112584120">"Ажлын профайл"</string>
+    <string name="tuner_warning_title" msgid="7094689930793031682">"Зарим хүнд хөгжилтэй байж болох ч бүх хүнд тийм биш"</string>
+    <string name="tuner_warning" msgid="8730648121973575701">"Системийн UI Tохируулагч нь Android хэрэглэгчийн интерфэйсийг тааруулах, өөрчлөх нэмэлт аргыг зааж өгөх болно. Эдгээр туршилтын тохиргоо нь цаашид өөрчлөгдөх, эвдрэх, алга болох магадлалтай. Үйлдлийг болгоомжтой хийнэ үү."</string>
+    <string name="tuner_persistent_warning" msgid="8597333795565621795">"Эдгээр туршилтын тохиргоо нь цаашид өөрчлөгдөх, эвдрэх, алга болох магадлалтай. Үйлдлийг болгоомжтой хийнэ үү."</string>
+    <string name="got_it" msgid="2239653834387972602">"Ойлголоо"</string>
+    <string name="tuner_toast" msgid="603429811084428439">"Баяр хүргэе! Системийн UI Tохируулагчийг тохиргоонд нэмлээ"</string>
+    <string name="remove_from_settings" msgid="8389591916603406378">"Тохиргооноос устгах"</string>
+    <string name="remove_from_settings_prompt" msgid="6069085993355887748">"Системийн UI Тохируулагчийг тохиргооноос устгаж, үүнтэй холбоотой бүх тохиргоог ашиглахаа болих уу?"</string>
+    <!-- no translation found for enable_bluetooth_title (5027037706500635269) -->
+    <skip />
+    <!-- no translation found for enable_bluetooth_message (9106595990708985385) -->
+    <skip />
+    <!-- no translation found for enable_bluetooth_confirmation_ok (6258074250948309715) -->
+    <skip />
 </resources>

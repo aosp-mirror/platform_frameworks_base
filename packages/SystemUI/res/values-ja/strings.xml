@@ -25,10 +25,10 @@
     <string name="status_bar_recent_inspect_item_title" msgid="7793624864528818569">"アプリ情報"</string>
     <string name="status_bar_no_recent_apps" msgid="7374907845131203189">"ここに最近の画面が表示されます"</string>
     <string name="status_bar_accessibility_dismiss_recents" msgid="4576076075226540105">"最近使ったアプリをクリア"</string>
-    <plurals name="status_bar_accessibility_recent_apps" formatted="false" msgid="9138535907802238759">
-      <item quantity="other">[最近]に%d個の画面があります</item>
-      <item quantity="one">[最近]に1個の画面があります</item>
-    </plurals>
+  <plurals name="status_bar_accessibility_recent_apps">
+    <item quantity="one" msgid="3969335317929254918">"[最近]に1個の画面があります"</item>
+    <item quantity="other" msgid="5523506463832158203">"[最近]に%d個の画面があります"</item>
+  </plurals>
     <string name="status_bar_no_notifications_title" msgid="4755261167193833213">"通知なし"</string>
     <string name="status_bar_ongoing_events_title" msgid="1682504513316879202">"実行中"</string>
     <string name="status_bar_latest_events_title" msgid="6594767438577593172">"通知"</string>
@@ -88,7 +88,7 @@
     <string name="accessibility_voice_assist_button" msgid="487611083884852965">"音声アシスト"</string>
     <string name="accessibility_unlock_button" msgid="128158454631118828">"ロック解除"</string>
     <string name="accessibility_unlock_button_fingerprint" msgid="8214125623493923751">"ロック解除ボタン、指紋を待っています"</string>
-    <string name="accessibility_unlock_without_fingerprint" msgid="7541705575183694446">"指紋を使用せずにロック解除"</string>
+    <string name="accessibility_unlock_without_fingerprint" msgid="7541705575183694446">"指紋認証を使用せずにロック解除"</string>
     <string name="unlock_label" msgid="8779712358041029439">"ロック解除"</string>
     <string name="phone_label" msgid="2320074140205331708">"電話を起動"</string>
     <string name="voice_assist_label" msgid="3956854378310019854">"音声アシストを開く"</string>
@@ -114,12 +114,6 @@
     <string name="accessibility_data_two_bars" msgid="6166018492360432091">"データ信号:レベル2"</string>
     <string name="accessibility_data_three_bars" msgid="9167670452395038520">"データ信号:レベル3"</string>
     <string name="accessibility_data_signal_full" msgid="2708384608124519369">"データ信号:フル"</string>
-    <string name="accessibility_wifi_off" msgid="3177380296697933627">"Wi-Fi OFF"</string>
-    <string name="accessibility_no_wifi" msgid="1425476551827924474">"Wi-Fiが切断されました。"</string>
-    <string name="accessibility_wifi_one_bar" msgid="7735893178010724377">"Wi-Fiレベル1"</string>
-    <string name="accessibility_wifi_two_bars" msgid="4994274250497262434">"Wi-Fiレベル2"</string>
-    <string name="accessibility_wifi_three_bars" msgid="3495755044276588384">"Wi-Fiレベル3"</string>
-    <string name="accessibility_wifi_signal_full" msgid="6853561303586480376">"Wi-Fi電波フル"</string>
     <string name="accessibility_wifi_name" msgid="7202151365171148501">"<xliff:g id="WIFI">%s</xliff:g>に接続しました。"</string>
     <string name="accessibility_bluetooth_name" msgid="8441517146585531676">"<xliff:g id="BLUETOOTH">%s</xliff:g>に接続しました。"</string>
     <string name="accessibility_no_wimax" msgid="4329180129727630368">"WiMAX電波状態:圏外"</string>
@@ -333,10 +327,12 @@
     <string name="interruption_level_priority_twoline" msgid="1564715335217164124">"重要な\n通知のみ"</string>
     <string name="interruption_level_alarms_twoline" msgid="3266909566410106146">"アラーム\nのみ"</string>
     <string name="keyguard_indication_charging_time" msgid="1757251776872835768">"充電中（フル充電まで<xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g>）"</string>
+    <string name="keyguard_indication_charging_time_fast" msgid="9018981952053914986">"急速充電中（完了まで<xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g>）"</string>
+    <string name="keyguard_indication_charging_time_slowly" msgid="955252797961724952">"低速充電中（完了まで<xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g>）"</string>
     <string name="accessibility_multi_user_switch_switcher" msgid="7305948938141024937">"ユーザーを切り替える"</string>
     <string name="accessibility_multi_user_switch_switcher_with_current" msgid="8434880595284601601">"ユーザーを切り替える、現在のユーザーは<xliff:g id="CURRENT_USER_NAME">%s</xliff:g>"</string>
     <string name="accessibility_multi_user_switch_inactive" msgid="1424081831468083402">"現在のユーザー: <xliff:g id="CURRENT_USER_NAME">%s</xliff:g>"</string>
-    <string name="accessibility_multi_user_switch_quick_contact" msgid="3020367729287990475">"プロフィールを表示"</string>
+    <string name="accessibility_multi_user_switch_quick_contact" msgid="3020367729287990475">"プロファイルを表示"</string>
     <string name="user_add_user" msgid="5110251524486079492">"ユーザーを追加"</string>
     <string name="user_new_user_name" msgid="426540612051178753">"新しいユーザー"</string>
     <string name="guest_nickname" msgid="8059989128963789678">"ゲスト"</string>
@@ -364,10 +360,10 @@
     <string name="media_projection_action_text" msgid="8470872969457985954">"今すぐ開始"</string>
     <string name="empty_shade_text" msgid="708135716272867002">"通知はありません"</string>
     <string name="device_owned_footer" msgid="3802752663326030053">"端末が監視されている可能性があります"</string>
-    <string name="profile_owned_footer" msgid="8021888108553696069">"プロフィールが監視されている可能性があります"</string>
+    <string name="profile_owned_footer" msgid="8021888108553696069">"プロファイルが監視されている可能性があります"</string>
     <string name="vpn_footer" msgid="2388611096129106812">"ネットワークが監視されている可能性があります"</string>
     <string name="monitoring_title_device_owned" msgid="7121079311903859610">"端末の監視"</string>
-    <string name="monitoring_title_profile_owned" msgid="6790109874733501487">"プロフィールの監視"</string>
+    <string name="monitoring_title_profile_owned" msgid="6790109874733501487">"プロファイルの監視"</string>
     <string name="monitoring_title" msgid="169206259253048106">"ネットワーク監視"</string>
     <string name="disable_vpn" msgid="4435534311510272506">"VPNを無効にする"</string>
     <string name="disconnect_vpn" msgid="1324915059568548655">"VPNを切断"</string>
@@ -406,7 +402,7 @@
     <string name="volumeui_notification_title" msgid="4906770126345910955">"<xliff:g id="APP_NAME">%1$s</xliff:g>を音量ダイアログとして使用"</string>
     <string name="volumeui_notification_text" msgid="1826889705095768656">"タップすると元の音量ダイアログが復元されます。"</string>
     <string name="managed_profile_foreground_toast" msgid="5421487114739245972">"仕事用プロファイルを使用しています"</string>
-    <string name="system_ui_tuner" msgid="3442596010150119600">"System UI tuner"</string>
+    <string name="system_ui_tuner" msgid="708224127392452018">"システムUI調整ツール"</string>
     <string name="show_battery_percentage" msgid="5444136600512968798">"内蔵電池の残量の割合を表示する"</string>
     <string name="show_battery_percentage_summary" msgid="3215025775576786037">"充電していないときには電池残量の割合をステータスバーアイコンに表示する"</string>
     <string name="quick_settings" msgid="10042998191725428">"クイック設定"</string>
@@ -427,4 +423,17 @@
     <string name="accessibility_quick_settings_detail" msgid="2579369091672902101">"クイック設定、<xliff:g id="TITLE">%s</xliff:g>。"</string>
     <string name="accessibility_status_bar_hotspot" msgid="4099381329956402865">"アクセスポイント"</string>
     <string name="accessibility_managed_profile" msgid="6613641363112584120">"仕事用プロファイル"</string>
+    <string name="tuner_warning_title" msgid="7094689930793031682">"一部の方のみお楽しみいただける限定公開ツール"</string>
+    <string name="tuner_warning" msgid="8730648121973575701">"システムUI調整ツールでは、Androidユーザーインターフェースの調整やカスタマイズを行えます。これらの試験運用機能は今後のリリースで変更となったり、中止となったり、削除されたりする可能性がありますのでご注意ください。"</string>
+    <string name="tuner_persistent_warning" msgid="8597333795565621795">"これらの試験運用機能は今後のリリースで変更となったり、中止となったり、削除されたりする可能性がありますのでご注意ください。"</string>
+    <string name="got_it" msgid="2239653834387972602">"OK"</string>
+    <string name="tuner_toast" msgid="603429811084428439">"システムUI調整ツールを設定に追加しました"</string>
+    <string name="remove_from_settings" msgid="8389591916603406378">"設定から削除"</string>
+    <string name="remove_from_settings_prompt" msgid="6069085993355887748">"設定からシステムUI調整ツールを削除して、全機能の使用を停止しますか？"</string>
+    <!-- no translation found for enable_bluetooth_title (5027037706500635269) -->
+    <skip />
+    <!-- no translation found for enable_bluetooth_message (9106595990708985385) -->
+    <skip />
+    <!-- no translation found for enable_bluetooth_confirmation_ok (6258074250948309715) -->
+    <skip />
 </resources>

@@ -25,10 +25,10 @@
     <string name="status_bar_recent_inspect_item_title" msgid="7793624864528818569">"Uygulama bilgileri"</string>
     <string name="status_bar_no_recent_apps" msgid="7374907845131203189">"Son ekranlarınız burada görünür"</string>
     <string name="status_bar_accessibility_dismiss_recents" msgid="4576076075226540105">"Son uygulamaları kapat"</string>
-    <plurals name="status_bar_accessibility_recent_apps" formatted="false" msgid="9138535907802238759">
-      <item quantity="other">Genel Bakış\'ta %d ekran</item>
-      <item quantity="one">Genel Bakış\'ta 1 ekran</item>
-    </plurals>
+  <plurals name="status_bar_accessibility_recent_apps">
+    <item quantity="one" msgid="3969335317929254918">"Genel Bakış\'ta 1 ekran"</item>
+    <item quantity="other" msgid="5523506463832158203">"Genel Bakış\'ta %d ekran"</item>
+  </plurals>
     <string name="status_bar_no_notifications_title" msgid="4755261167193833213">"Bildirim yok"</string>
     <string name="status_bar_ongoing_events_title" msgid="1682504513316879202">"Sürüyor"</string>
     <string name="status_bar_latest_events_title" msgid="6594767438577593172">"Bildirimler"</string>
@@ -114,12 +114,6 @@
     <string name="accessibility_data_two_bars" msgid="6166018492360432091">"Veri sinyali iki çubuk."</string>
     <string name="accessibility_data_three_bars" msgid="9167670452395038520">"Veri sinyali üç çubuk."</string>
     <string name="accessibility_data_signal_full" msgid="2708384608124519369">"Veri sinyali tam."</string>
-    <string name="accessibility_wifi_off" msgid="3177380296697933627">"Kablosuz kapalı."</string>
-    <string name="accessibility_no_wifi" msgid="1425476551827924474">"Kablosuz bağlantı kesildi."</string>
-    <string name="accessibility_wifi_one_bar" msgid="7735893178010724377">"Kablosuz sinyali bir çubuk."</string>
-    <string name="accessibility_wifi_two_bars" msgid="4994274250497262434">"Kablosuz sinyali iki çubuk."</string>
-    <string name="accessibility_wifi_three_bars" msgid="3495755044276588384">"Kablosuz sinyali üç çubuk."</string>
-    <string name="accessibility_wifi_signal_full" msgid="6853561303586480376">"Kablosuz sinyali tam."</string>
     <string name="accessibility_wifi_name" msgid="7202151365171148501">"<xliff:g id="WIFI">%s</xliff:g> ile bağlı."</string>
     <string name="accessibility_bluetooth_name" msgid="8441517146585531676">"<xliff:g id="BLUETOOTH">%s</xliff:g> ile bağlı."</string>
     <string name="accessibility_no_wimax" msgid="4329180129727630368">"WiMAX yok."</string>
@@ -209,10 +203,10 @@
     <string name="accessibility_quick_settings_close" msgid="3115847794692516306">"Paneli kapat."</string>
     <string name="accessibility_quick_settings_more_time" msgid="3659274935356197708">"Daha uzun süre."</string>
     <string name="accessibility_quick_settings_less_time" msgid="2404728746293515623">"Daha kısa süre."</string>
-    <string name="accessibility_quick_settings_flashlight_off" msgid="4936432000069786988">"Flaş ışığı kapalı."</string>
-    <string name="accessibility_quick_settings_flashlight_on" msgid="2003479320007841077">"Flaş ışığı açık."</string>
-    <string name="accessibility_quick_settings_flashlight_changed_off" msgid="3303701786768224304">"Flaş ışığı kapatıldı."</string>
-    <string name="accessibility_quick_settings_flashlight_changed_on" msgid="6531793301533894686">"Flaş ışığı açıldı."</string>
+    <string name="accessibility_quick_settings_flashlight_off" msgid="4936432000069786988">"El feneri kapalı."</string>
+    <string name="accessibility_quick_settings_flashlight_on" msgid="2003479320007841077">"El feneri açık."</string>
+    <string name="accessibility_quick_settings_flashlight_changed_off" msgid="3303701786768224304">"El feneri kapatıldı."</string>
+    <string name="accessibility_quick_settings_flashlight_changed_on" msgid="6531793301533894686">"El feneri açıldı."</string>
     <string name="accessibility_quick_settings_color_inversion_changed_off" msgid="4406577213290173911">"Renkleri ters çevirme işlevi kapatıldı."</string>
     <string name="accessibility_quick_settings_color_inversion_changed_on" msgid="6897462320184911126">"Renkleri ters çevirme işlevi açıldı."</string>
     <string name="accessibility_quick_settings_hotspot_changed_off" msgid="5004708003447561394">"Mobil hotspot kapatıldı."</string>
@@ -331,6 +325,8 @@
     <string name="interruption_level_priority_twoline" msgid="1564715335217164124">"Yalnızca\nöncelik"</string>
     <string name="interruption_level_alarms_twoline" msgid="3266909566410106146">"Yalnızca\nalarmlar"</string>
     <string name="keyguard_indication_charging_time" msgid="1757251776872835768">"Şarj oluyor (tamamen dolmasına <xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g> kaldı)"</string>
+    <string name="keyguard_indication_charging_time_fast" msgid="9018981952053914986">"Hızlı şarj oluyor (tam dolmasına <xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g> kaldı)"</string>
+    <string name="keyguard_indication_charging_time_slowly" msgid="955252797961724952">"Yavaş şarj oluyor (tam dolmasına <xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g> kaldı)"</string>
     <string name="accessibility_multi_user_switch_switcher" msgid="7305948938141024937">"Kullanıcı değiştirme"</string>
     <string name="accessibility_multi_user_switch_switcher_with_current" msgid="8434880595284601601">"Kullanıcı değiştir. Geçerli kullanıcı: <xliff:g id="CURRENT_USER_NAME">%s</xliff:g>"</string>
     <string name="accessibility_multi_user_switch_inactive" msgid="1424081831468083402">"Geçerli kullanıcı: <xliff:g id="CURRENT_USER_NAME">%s</xliff:g>"</string>
@@ -404,7 +400,7 @@
     <string name="volumeui_notification_title" msgid="4906770126345910955">"<xliff:g id="APP_NAME">%1$s</xliff:g> ses denetimi iletişim kutusu olarak ayarlandı"</string>
     <string name="volumeui_notification_text" msgid="1826889705095768656">"Orijinali geri yüklemek için dokunun."</string>
     <string name="managed_profile_foreground_toast" msgid="5421487114739245972">"İş profilinizi kullanıyorsunuz"</string>
-    <string name="system_ui_tuner" msgid="3442596010150119600">"Sistem Arayüzü ayarlayıcısı"</string>
+    <string name="system_ui_tuner" msgid="708224127392452018">"Sistem Arayüzü Ayarlayıcısı"</string>
     <string name="show_battery_percentage" msgid="5444136600512968798">"Yerleşik pil yüzdesini göster"</string>
     <string name="show_battery_percentage_summary" msgid="3215025775576786037">"Şarj olmazken durum çubuğu simgesinin içinde pil düzeyi yüzdesini göster"</string>
     <string name="quick_settings" msgid="10042998191725428">"Hızlı Ayarlar"</string>
@@ -425,4 +421,17 @@
     <string name="accessibility_quick_settings_detail" msgid="2579369091672902101">"Hızlı Ayarlar, <xliff:g id="TITLE">%s</xliff:g>."</string>
     <string name="accessibility_status_bar_hotspot" msgid="4099381329956402865">"Hotspot"</string>
     <string name="accessibility_managed_profile" msgid="6613641363112584120">"İş profili"</string>
+    <string name="tuner_warning_title" msgid="7094689930793031682">"Bazıları için eğlenceliyken diğerleri için olmayabilir"</string>
+    <string name="tuner_warning" msgid="8730648121973575701">"Sistem Kullanıcı Arayüzü Ayarlayıcı, Android kullanıcı arayüzünde değişiklikler yapmanız ve arayüzü özelleştirmeniz için ekstra yollar sağlar. Bu deneysel özellikler değişebilir, bozulabilir veya gelecekteki sürümlerde yer almayabilir. Dikkatli bir şekilde devam edin."</string>
+    <string name="tuner_persistent_warning" msgid="8597333795565621795">"Bu deneysel özellikler değişebilir, bozulabilir veya gelecekteki sürümlerde yer almayabilir. Dikkatli bir şekilde devam edin."</string>
+    <string name="got_it" msgid="2239653834387972602">"Anladım"</string>
+    <string name="tuner_toast" msgid="603429811084428439">"Tebrikler! Sistem Kullanıcı Arayüzü Ayarlayıcı Ayarlar\'a eklendi"</string>
+    <string name="remove_from_settings" msgid="8389591916603406378">"Ayarlar\'dan kaldır"</string>
+    <string name="remove_from_settings_prompt" msgid="6069085993355887748">"Sistem Kullanıcı Arayüzü Ayarlayıcısı Ayarlar\'dan kaldırılsın ve tüm özelliklerinin kullanılması durdurulsun mu?"</string>
+    <!-- no translation found for enable_bluetooth_title (5027037706500635269) -->
+    <skip />
+    <!-- no translation found for enable_bluetooth_message (9106595990708985385) -->
+    <skip />
+    <!-- no translation found for enable_bluetooth_confirmation_ok (6258074250948309715) -->
+    <skip />
 </resources>

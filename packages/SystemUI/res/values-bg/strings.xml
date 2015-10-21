@@ -25,10 +25,10 @@
     <string name="status_bar_recent_inspect_item_title" msgid="7793624864528818569">"Информация за приложението"</string>
     <string name="status_bar_no_recent_apps" msgid="7374907845131203189">"Скорошните ви екрани се показват тук"</string>
     <string name="status_bar_accessibility_dismiss_recents" msgid="4576076075226540105">"Отхвърляне на скорошните приложения"</string>
-    <plurals name="status_bar_accessibility_recent_apps" formatted="false" msgid="9138535907802238759">
-      <item quantity="other">%d екрана в панела за общ преглед</item>
-      <item quantity="one">1 екран в панела за общ преглед</item>
-    </plurals>
+  <plurals name="status_bar_accessibility_recent_apps">
+    <item quantity="one" msgid="3969335317929254918">"1 екран в панела за общ преглед"</item>
+    <item quantity="other" msgid="5523506463832158203">"%d екрана в панела за общ преглед"</item>
+  </plurals>
     <string name="status_bar_no_notifications_title" msgid="4755261167193833213">"Няма известия"</string>
     <string name="status_bar_ongoing_events_title" msgid="1682504513316879202">"В момента"</string>
     <string name="status_bar_latest_events_title" msgid="6594767438577593172">"Известия"</string>
@@ -114,12 +114,6 @@
     <string name="accessibility_data_two_bars" msgid="6166018492360432091">"Данните са с две чертички."</string>
     <string name="accessibility_data_three_bars" msgid="9167670452395038520">"Данните са с три чертички."</string>
     <string name="accessibility_data_signal_full" msgid="2708384608124519369">"Сигналът за данни е пълен."</string>
-    <string name="accessibility_wifi_off" msgid="3177380296697933627">"Wi-Fi е изключен."</string>
-    <string name="accessibility_no_wifi" msgid="1425476551827924474">"Няма връзка с Wi-Fi."</string>
-    <string name="accessibility_wifi_one_bar" msgid="7735893178010724377">"Wi-Fi е с една чертичка."</string>
-    <string name="accessibility_wifi_two_bars" msgid="4994274250497262434">"Wi-Fi е с две чертички."</string>
-    <string name="accessibility_wifi_three_bars" msgid="3495755044276588384">"Wi-Fi е с три чертички."</string>
-    <string name="accessibility_wifi_signal_full" msgid="6853561303586480376">"Сигналът за Wi-Fi е пълен."</string>
     <string name="accessibility_wifi_name" msgid="7202151365171148501">"Има връзка с <xliff:g id="WIFI">%s</xliff:g>."</string>
     <string name="accessibility_bluetooth_name" msgid="8441517146585531676">"Има връзка с <xliff:g id="BLUETOOTH">%s</xliff:g>."</string>
     <string name="accessibility_no_wimax" msgid="4329180129727630368">"Няма WiMAX."</string>
@@ -331,6 +325,8 @@
     <string name="interruption_level_priority_twoline" msgid="1564715335217164124">"Само\nс приоритет"</string>
     <string name="interruption_level_alarms_twoline" msgid="3266909566410106146">"Само\nбудилници"</string>
     <string name="keyguard_indication_charging_time" msgid="1757251776872835768">"Зарежда се (<xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g> до пълно зареждане)"</string>
+    <string name="keyguard_indication_charging_time_fast" msgid="9018981952053914986">"Зарежда се бързо (<xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g> до пълно зареждане)"</string>
+    <string name="keyguard_indication_charging_time_slowly" msgid="955252797961724952">"Зарежда се бавно (<xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g> до пълно зареждане)"</string>
     <string name="accessibility_multi_user_switch_switcher" msgid="7305948938141024937">"Превключване между потребителите"</string>
     <string name="accessibility_multi_user_switch_switcher_with_current" msgid="8434880595284601601">"Превключване на потребителя – текущият е <xliff:g id="CURRENT_USER_NAME">%s</xliff:g>"</string>
     <string name="accessibility_multi_user_switch_inactive" msgid="1424081831468083402">"Текущ потребител – <xliff:g id="CURRENT_USER_NAME">%s</xliff:g>"</string>
@@ -404,7 +400,7 @@
     <string name="volumeui_notification_title" msgid="4906770126345910955">"<xliff:g id="APP_NAME">%1$s</xliff:g> изпълнява ролята на диалоговия прозорец за силата на звука"</string>
     <string name="volumeui_notification_text" msgid="1826889705095768656">"Докоснете, за да възстановите оригинала."</string>
     <string name="managed_profile_foreground_toast" msgid="5421487114739245972">"Използвате служебния си потребителски профил"</string>
-    <string name="system_ui_tuner" msgid="3442596010150119600">"Тунер на системния ПИ"</string>
+    <string name="system_ui_tuner" msgid="708224127392452018">"Тунер на системния потребителски интерфейс"</string>
     <string name="show_battery_percentage" msgid="5444136600512968798">"Показване на процента на вградената батерия"</string>
     <string name="show_battery_percentage_summary" msgid="3215025775576786037">"Показване на процента на нивото на батерията в иконата на лентата на състоянието, когато не се зарежда"</string>
     <string name="quick_settings" msgid="10042998191725428">"Бързи настройки"</string>
@@ -425,4 +421,17 @@
     <string name="accessibility_quick_settings_detail" msgid="2579369091672902101">"Бързи настройки (<xliff:g id="TITLE">%s</xliff:g>)."</string>
     <string name="accessibility_status_bar_hotspot" msgid="4099381329956402865">"Точка за достъп"</string>
     <string name="accessibility_managed_profile" msgid="6613641363112584120">"Потребителски профил в Work"</string>
+    <string name="tuner_warning_title" msgid="7094689930793031682">"Забавно – но не за всички"</string>
+    <string name="tuner_warning" msgid="8730648121973575701">"Тунерът на системния потребителски интерфейс ви предоставя допълнителни възможности за прецизиране и персонализиране на практическата работа с Android. Тези експериментални функции може да се променят, повредят или да изчезнат в бъдещите версии. Действайте внимателно."</string>
+    <string name="tuner_persistent_warning" msgid="8597333795565621795">"Тези експериментални функции може да се променят, повредят или да изчезнат в бъдещите версии. Действайте внимателно."</string>
+    <string name="got_it" msgid="2239653834387972602">"Разбрах"</string>
+    <string name="tuner_toast" msgid="603429811084428439">"Поздравления! Тунерът на системния потребителски интерфейс е добавен към „Настройки“"</string>
+    <string name="remove_from_settings" msgid="8389591916603406378">"Премахване от „Настройки“"</string>
+    <string name="remove_from_settings_prompt" msgid="6069085993355887748">"Да се премахне ли от „Настройки“ тунерът на системния потребителски интерфейс и да се спре ли използването на всичките му функции?"</string>
+    <!-- no translation found for enable_bluetooth_title (5027037706500635269) -->
+    <skip />
+    <!-- no translation found for enable_bluetooth_message (9106595990708985385) -->
+    <skip />
+    <!-- no translation found for enable_bluetooth_confirmation_ok (6258074250948309715) -->
+    <skip />
 </resources>

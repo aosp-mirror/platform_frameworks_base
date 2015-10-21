@@ -25,10 +25,10 @@
     <string name="status_bar_recent_inspect_item_title" msgid="7793624864528818569">"ಅಪ್ಲಿಕೇಶನ್ ಮಾಹಿತಿ"</string>
     <string name="status_bar_no_recent_apps" msgid="7374907845131203189">"ನಿಮ್ಮ ಇತ್ತೀಚಿನ ಪರದೆಗಳು ಇಲ್ಲಿ ಕಾಣಿಸಿಕೊಳ್ಳುತ್ತವೆ"</string>
     <string name="status_bar_accessibility_dismiss_recents" msgid="4576076075226540105">"ಇತ್ತೀಚಿನ ಅಪ್ಲಿಕೇಶನ್‌ಗಳನ್ನು ವಜಾಗೊಳಿಸು"</string>
-    <plurals name="status_bar_accessibility_recent_apps" formatted="false" msgid="9138535907802238759">
-      <item quantity="one">ಸಮಗ್ರ ನೋಟದಲ್ಲಿರುವ %d ಪರದೆಗಳು</item>
-      <item quantity="other">ಸಮಗ್ರ ನೋಟದಲ್ಲಿರುವ %d ಪರದೆಗಳು</item>
-    </plurals>
+  <plurals name="status_bar_accessibility_recent_apps">
+    <item quantity="one" msgid="3969335317929254918">"ಸಮಗ್ರ ನೋಟದಲ್ಲಿರುವ 1 ಪರದೆ"</item>
+    <item quantity="other" msgid="5523506463832158203">"ಸಮಗ್ರ ನೋಟದಲ್ಲಿರುವ %d ಪರದೆಗಳು"</item>
+  </plurals>
     <string name="status_bar_no_notifications_title" msgid="4755261167193833213">"ಯಾವುದೇ ಅಧಿಸೂಚನೆಗಳಿಲ್ಲ"</string>
     <string name="status_bar_ongoing_events_title" msgid="1682504513316879202">"ಚಾಲ್ತಿಯಲ್ಲಿರುವ"</string>
     <string name="status_bar_latest_events_title" msgid="6594767438577593172">"ಅಧಿಸೂಚನೆಗಳು"</string>
@@ -114,12 +114,6 @@
     <string name="accessibility_data_two_bars" msgid="6166018492360432091">"ಡೇಟಾ ಎರಡು ಪಟ್ಟಿಗಳು."</string>
     <string name="accessibility_data_three_bars" msgid="9167670452395038520">"ಡೇಟಾ ಮೂರು ಪಟ್ಟಿಗಳು."</string>
     <string name="accessibility_data_signal_full" msgid="2708384608124519369">"ಡೇಟಾ ಸಂಕೇತ ತುಂಬಿದೆ."</string>
-    <string name="accessibility_wifi_off" msgid="3177380296697933627">"ವೈಫೈ ಆಫ್."</string>
-    <string name="accessibility_no_wifi" msgid="1425476551827924474">"ವೈಫೈ ಸಂಪರ್ಕ ಕಡಿತಗೊಂಡಿದೆ."</string>
-    <string name="accessibility_wifi_one_bar" msgid="7735893178010724377">"ವೈಫೈ ಒಂದು ಪಟ್ಟಿ."</string>
-    <string name="accessibility_wifi_two_bars" msgid="4994274250497262434">"ವೈಫೈ ಎರಡು ಪಟ್ಟಿಗಳು."</string>
-    <string name="accessibility_wifi_three_bars" msgid="3495755044276588384">"ವೈಫೈ ಮೂರು ಪಟ್ಟಿಗಳು."</string>
-    <string name="accessibility_wifi_signal_full" msgid="6853561303586480376">"ವೈಫೈ ಸಿಗ್ನಲ್‌‌ ಪೂರ್ತಿ ಇದೆ."</string>
     <string name="accessibility_wifi_name" msgid="7202151365171148501">"<xliff:g id="WIFI">%s</xliff:g> ಗೆ ಸಂಪರ್ಕಪಡಿಸಲಾಗಿದೆ."</string>
     <string name="accessibility_bluetooth_name" msgid="8441517146585531676">"<xliff:g id="BLUETOOTH">%s</xliff:g> ಗೆ ಸಂಪರ್ಕಪಡಿಸಲಾಗಿದೆ."</string>
     <string name="accessibility_no_wimax" msgid="4329180129727630368">"WiMAX ಸಂಕೇತವಿಲ್ಲ."</string>
@@ -331,6 +325,8 @@
     <string name="interruption_level_priority_twoline" msgid="1564715335217164124">"ಆದ್ಯತೆ\nಮಾತ್ರ"</string>
     <string name="interruption_level_alarms_twoline" msgid="3266909566410106146">"ಅಲಾರಮ್‌ಗಳು\nಮಾತ್ರ"</string>
     <string name="keyguard_indication_charging_time" msgid="1757251776872835768">"ಚಾರ್ಜ್ ಆಗುತ್ತಿದೆ ( ಪೂರ್ತಿ ಆಗುವವರೆಗೆ <xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g>)"</string>
+    <string name="keyguard_indication_charging_time_fast" msgid="9018981952053914986">"ವೇಗವಾಗಿ ಚಾರ್ಜ್ ಆಗುತ್ತಿದೆ (ಪೂರ್ಣಗೊಳ್ಳಲು <xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g>)"</string>
+    <string name="keyguard_indication_charging_time_slowly" msgid="955252797961724952">"ನಿಧಾನ ಚಾರ್ಜ್ ಆಗುತ್ತಿದೆ (ಪೂರ್ಣಗೊಳ್ಳಲು <xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g>)"</string>
     <string name="accessibility_multi_user_switch_switcher" msgid="7305948938141024937">"ಬಳಕೆದಾರರನ್ನು ಬದಲಿಸಿ"</string>
     <string name="accessibility_multi_user_switch_switcher_with_current" msgid="8434880595284601601">"ಬಳಕೆದಾರರನ್ನು ಬದಲಿಸಿ, ಪ್ರಸ್ತುತ ಬಳಕೆದಾರ <xliff:g id="CURRENT_USER_NAME">%s</xliff:g>"</string>
     <string name="accessibility_multi_user_switch_inactive" msgid="1424081831468083402">"<xliff:g id="CURRENT_USER_NAME">%s</xliff:g> ಪ್ರಸ್ತುತ ಬಳಕೆದಾರ"</string>
@@ -404,7 +400,7 @@
     <string name="volumeui_notification_title" msgid="4906770126345910955">"<xliff:g id="APP_NAME">%1$s</xliff:g> ವಾಲ್ಯೂಮ್ ಸಂವಾದವಾಗಿದೆ"</string>
     <string name="volumeui_notification_text" msgid="1826889705095768656">"ಮೂಲ ಮರುಸ್ಥಾಪಿಸಲು ಸ್ಪರ್ಶಿಸಿ."</string>
     <string name="managed_profile_foreground_toast" msgid="5421487114739245972">"ನಿಮ್ಮ ಕೆಲಸದ ಪ್ರೊಫೈಲ್‌ ಅನ್ನು ನೀವು ಬಳಸುತ್ತಿರುವಿರಿ"</string>
-    <string name="system_ui_tuner" msgid="3442596010150119600">"ಸಿಸ್ಟಮ್ UI ಟ್ಯೂನರ್"</string>
+    <string name="system_ui_tuner" msgid="708224127392452018">"ಸಿಸ್ಟಮ್ UI ಟ್ಯೂನರ್"</string>
     <string name="show_battery_percentage" msgid="5444136600512968798">"ಎಂಬೆಡ್ ಮಾಡಲಾದ ಬ್ಯಾಟರಿ ಶೇಕಡಾ ತೋರಿಸಿ"</string>
     <string name="show_battery_percentage_summary" msgid="3215025775576786037">"ಚಾರ್ಜ್ ಮಾಡದಿರುವಾಗ ಸ್ಥಿತಿ ಪಟ್ಟಿ ಐಕಾನ್ ಒಳಗೆ ಬ್ಯಾಟರಿ ಮಟ್ಟದ ಶೇಕಡಾವನ್ನು ತೋರಿಸಿ"</string>
     <string name="quick_settings" msgid="10042998191725428">"ತ್ವರಿತ ಸೆಟ್ಟಿಂಗ್‍ಗಳು"</string>
@@ -425,4 +421,17 @@
     <string name="accessibility_quick_settings_detail" msgid="2579369091672902101">"ತ್ವರಿತ ಸೆಟ್ಟಿಂಗ್‍ಗಳು, <xliff:g id="TITLE">%s</xliff:g>."</string>
     <string name="accessibility_status_bar_hotspot" msgid="4099381329956402865">"ಹಾಟ್‌ಸ್ಪಾಟ್"</string>
     <string name="accessibility_managed_profile" msgid="6613641363112584120">"ಕೆಲಸದ ಪ್ರೊಫೈಲ್"</string>
+    <string name="tuner_warning_title" msgid="7094689930793031682">"ಕೆಲವರಿಗೆ ಮೋಜು ಆಗಿದೆ ಎಲ್ಲರಿಗೆ ಇಲ್ಲ"</string>
+    <string name="tuner_warning" msgid="8730648121973575701">"ಸಿಸ್ಟಮ್ UI ಟ್ಯೂನರ್ ನಿಮಗೆ Android ಬಳಕೆದಾರ ಅಂತರಸಂಪರ್ಕವನ್ನು ಸರಿಪಡಿಸಲು ಮತ್ತು ಕಸ್ಟಮೈಸ್ ಮಾಡಲು ಹೆಚ್ಚುವರಿ ಮಾರ್ಗಗಳನ್ನು ನೀಡುತ್ತದೆ. ಈ ಪ್ರಾಯೋಗಿಕ ವೈಶಿಷ್ಟ್ಯಗಳು ಭವಿಷ್ಯದ ಬಿಡುಗಡೆಗಳಲ್ಲಿ ಬದಲಾಗಬಹುದು, ವಿರಾಮವಾಗಬಹುದು ಅಥವಾ ಕಾಣಿಸಿಕೊಳ್ಳದಿರಬಹುದು. ಎಚ್ಚರಿಕೆಯಿಂದ ಮುಂದುವರಿಯಿರಿ."</string>
+    <string name="tuner_persistent_warning" msgid="8597333795565621795">"ಈ ಪ್ರಾಯೋಗಿಕ ವೈಶಿಷ್ಟ್ಯಗಳು ಭವಿಷ್ಯದ ಬಿಡುಗಡೆಗಳಲ್ಲಿ ಬದಲಾಗಬಹುದು, ವಿರಾಮವಾಗಬಹುದು ಅಥವಾ ಕಾಣಿಸಿಕೊಳ್ಳದಿರಬಹುದು. ಎಚ್ಚರಿಕೆಯಿಂದ ಮುಂದುವರಿಯಿರಿ."</string>
+    <string name="got_it" msgid="2239653834387972602">"ಅರ್ಥವಾಯಿತು"</string>
+    <string name="tuner_toast" msgid="603429811084428439">"ಅಭಿನಂದನೆಗಳು! ಸಿಸ್ಟಮ್ UI ಟ್ಯೂನರ್ ಅನ್ನು ಸೆಟ್ಟಿಂಗ್‌ಗಳಿಗೆ ಸೇರಿಸಲಾಗಿದೆ"</string>
+    <string name="remove_from_settings" msgid="8389591916603406378">"ಸೆಟ್ಟಿಂಗ್‌ಗಳಿಂದ ತೆಗೆದುಹಾಕಿ"</string>
+    <string name="remove_from_settings_prompt" msgid="6069085993355887748">"ಸೆಟ್ಟಿಂಗ್‌ಗಳಿಂದ ಸಿಸ್ಟಮ್ UI ಟ್ಯೂನರ್ ತೆಗೆದುಹಾಕುವುದೇ ಮತ್ತು ಅದರ ಎಲ್ಲಾ ವೈಶಿಷ್ಟ್ಯಗಳನ್ನು ಬಳಸುವುದನ್ನು ನಿಲ್ಲಿಸುವುದೇ?"</string>
+    <!-- no translation found for enable_bluetooth_title (5027037706500635269) -->
+    <skip />
+    <!-- no translation found for enable_bluetooth_message (9106595990708985385) -->
+    <skip />
+    <!-- no translation found for enable_bluetooth_confirmation_ok (6258074250948309715) -->
+    <skip />
 </resources>

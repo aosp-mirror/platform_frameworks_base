@@ -25,10 +25,10 @@
     <string name="status_bar_recent_inspect_item_title" msgid="7793624864528818569">"Oplysninger om appen"</string>
     <string name="status_bar_no_recent_apps" msgid="7374907845131203189">"Dine seneste skærme vises her"</string>
     <string name="status_bar_accessibility_dismiss_recents" msgid="4576076075226540105">"Luk de seneste apps"</string>
-    <plurals name="status_bar_accessibility_recent_apps" formatted="false" msgid="9138535907802238759">
-      <item quantity="one">%d skærmbilleder i Oversigt</item>
-      <item quantity="other">%d skærmbilleder i Oversigt</item>
-    </plurals>
+  <plurals name="status_bar_accessibility_recent_apps">
+    <item quantity="one" msgid="3969335317929254918">"Ét skærmbillede i Oversigt"</item>
+    <item quantity="other" msgid="5523506463832158203">"%d skærmbilleder i Oversigt"</item>
+  </plurals>
     <string name="status_bar_no_notifications_title" msgid="4755261167193833213">"Ingen underretninger"</string>
     <string name="status_bar_ongoing_events_title" msgid="1682504513316879202">"I gang"</string>
     <string name="status_bar_latest_events_title" msgid="6594767438577593172">"Underretninger"</string>
@@ -85,13 +85,13 @@
     <string name="accessibility_search_light" msgid="1103867596330271848">"Søg"</string>
     <string name="accessibility_camera_button" msgid="8064671582820358152">"Kamera"</string>
     <string name="accessibility_phone_button" msgid="6738112589538563574">"Telefon"</string>
-    <string name="accessibility_voice_assist_button" msgid="487611083884852965">"Voice Assist"</string>
+    <string name="accessibility_voice_assist_button" msgid="487611083884852965">"Taleassistent"</string>
     <string name="accessibility_unlock_button" msgid="128158454631118828">"Lås op"</string>
     <string name="accessibility_unlock_button_fingerprint" msgid="8214125623493923751">"Knap til oplåsning. Venter på fingeraftryk"</string>
     <string name="accessibility_unlock_without_fingerprint" msgid="7541705575183694446">"Lås op uden at bruge dit fingeraftryk"</string>
     <string name="unlock_label" msgid="8779712358041029439">"lås op"</string>
     <string name="phone_label" msgid="2320074140205331708">"åbn telefon"</string>
-    <string name="voice_assist_label" msgid="3956854378310019854">"åbn voice assist"</string>
+    <string name="voice_assist_label" msgid="3956854378310019854">"åbn taleassistent"</string>
     <string name="camera_label" msgid="7261107956054836961">"åbn kamera"</string>
     <string name="recents_caption_resize" msgid="3517056471774958200">"Vælg nyt opgavelayout"</string>
     <string name="cancel" msgid="6442560571259935130">"Annuller"</string>
@@ -114,12 +114,6 @@
     <string name="accessibility_data_two_bars" msgid="6166018492360432091">"Data to bjælker."</string>
     <string name="accessibility_data_three_bars" msgid="9167670452395038520">"Data tre bjælker."</string>
     <string name="accessibility_data_signal_full" msgid="2708384608124519369">"Datasignal fuldt."</string>
-    <string name="accessibility_wifi_off" msgid="3177380296697933627">"Wi-Fi slået fra."</string>
-    <string name="accessibility_no_wifi" msgid="1425476551827924474">"Wi-Fi er afbrudt."</string>
-    <string name="accessibility_wifi_one_bar" msgid="7735893178010724377">"Wi-Fi én bjælke."</string>
-    <string name="accessibility_wifi_two_bars" msgid="4994274250497262434">"Wi-Fi to bjælker."</string>
-    <string name="accessibility_wifi_three_bars" msgid="3495755044276588384">"Wi-Fi tre bjælker."</string>
-    <string name="accessibility_wifi_signal_full" msgid="6853561303586480376">"Wi-Fi fuldt signal."</string>
     <string name="accessibility_wifi_name" msgid="7202151365171148501">"Tilsluttet <xliff:g id="WIFI">%s</xliff:g>."</string>
     <string name="accessibility_bluetooth_name" msgid="8441517146585531676">"Tilsluttet <xliff:g id="BLUETOOTH">%s</xliff:g>."</string>
     <string name="accessibility_no_wimax" msgid="4329180129727630368">"Ingen WiMAX."</string>
@@ -189,12 +183,12 @@
     <string name="accessibility_quick_settings_airplane_on" msgid="6406141469157599296">"Flytilstand er slået til."</string>
     <string name="accessibility_quick_settings_airplane_changed_off" msgid="66846307818850664">"Flytilstand er slået fra."</string>
     <string name="accessibility_quick_settings_airplane_changed_on" msgid="8983005603505087728">"Flytilstand er slået til."</string>
-    <string name="accessibility_quick_settings_dnd_priority_on" msgid="1448402297221249355">"\"Vil ikke forstyrres\" er slået til, kun prioritet."</string>
-    <string name="accessibility_quick_settings_dnd_none_on" msgid="6882582132662613537">"\"Vil ikke forstyrres\" er slået til, total stilhed."</string>
-    <string name="accessibility_quick_settings_dnd_alarms_on" msgid="9152834845587554157">"\"Vil ikke forstyrres\" er slået til, kun alarmer."</string>
-    <string name="accessibility_quick_settings_dnd_off" msgid="2371832603753738581">"\"Vil ikke forstyrres\" er slået fra."</string>
-    <string name="accessibility_quick_settings_dnd_changed_off" msgid="898107593453022935">"\"Vil ikke forstyrres\" er slået fra."</string>
-    <string name="accessibility_quick_settings_dnd_changed_on" msgid="4483780856613561039">"\"Vil ikke forstyrres\" er slået til."</string>
+    <string name="accessibility_quick_settings_dnd_priority_on" msgid="1448402297221249355">"\"Forstyr ikke\" er slået til, kun prioritet."</string>
+    <string name="accessibility_quick_settings_dnd_none_on" msgid="6882582132662613537">"\"Forstyr ikke\" er slået til, total stilhed."</string>
+    <string name="accessibility_quick_settings_dnd_alarms_on" msgid="9152834845587554157">"\"Forstyr ikke\" er slået til, kun alarmer."</string>
+    <string name="accessibility_quick_settings_dnd_off" msgid="2371832603753738581">"\"Forstyr ikke\" er slået fra."</string>
+    <string name="accessibility_quick_settings_dnd_changed_off" msgid="898107593453022935">"\"Forstyr ikke\" er slået fra."</string>
+    <string name="accessibility_quick_settings_dnd_changed_on" msgid="4483780856613561039">"\"Forstyr ikke\" er slået til."</string>
     <string name="accessibility_quick_settings_bluetooth_off" msgid="2133631372372064339">"Bluetooth er slået fra."</string>
     <string name="accessibility_quick_settings_bluetooth_on" msgid="7681999166216621838">"Bluetooth er slået til."</string>
     <string name="accessibility_quick_settings_bluetooth_connecting" msgid="6953242966685343855">"Opretter forbindelse til Bluetooth."</string>
@@ -242,7 +236,7 @@
     <string name="dessert_case" msgid="1295161776223959221">"Dessertcase"</string>
     <string name="start_dreams" msgid="7219575858348719790">"Dagdrøm"</string>
     <string name="ethernet_label" msgid="7967563676324087464">"Ethernet"</string>
-    <string name="quick_settings_dnd_label" msgid="8735855737575028208">"Vil ikke forstyrres"</string>
+    <string name="quick_settings_dnd_label" msgid="8735855737575028208">"Forstyr ikke"</string>
     <string name="quick_settings_dnd_priority_label" msgid="483232950670692036">"Kun prioritet"</string>
     <string name="quick_settings_dnd_alarms_label" msgid="2559229444312445858">"Kun Alarmer"</string>
     <string name="quick_settings_dnd_none_label" msgid="5025477807123029478">"Total stilhed"</string>
@@ -321,7 +315,7 @@
     <string name="notification_tap_again" msgid="8524949573675922138">"Tryk igen for at åbne"</string>
     <string name="keyguard_unlock" msgid="8043466894212841998">"Stryg opad for at låse op"</string>
     <string name="phone_hint" msgid="4872890986869209950">"Stryg fra telefonikonet"</string>
-    <string name="voice_hint" msgid="8939888732119726665">"Stryg fra ikonet for voice assist"</string>
+    <string name="voice_hint" msgid="8939888732119726665">"Stryg fra mikrofonikonet"</string>
     <string name="camera_hint" msgid="7939688436797157483">"Stryg fra kameraikonet"</string>
     <string name="interruption_level_none_with_warning" msgid="5114872171614161084">"Helt lydløs. Denne handling slukker også skærmlæsere."</string>
     <string name="interruption_level_none" msgid="6000083681244492992">"Total stilhed"</string>
@@ -331,6 +325,8 @@
     <string name="interruption_level_priority_twoline" msgid="1564715335217164124">"Kun\nprioritet"</string>
     <string name="interruption_level_alarms_twoline" msgid="3266909566410106146">"Kun\nalarmer"</string>
     <string name="keyguard_indication_charging_time" msgid="1757251776872835768">"Oplader (fuldt opladet om <xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g>)"</string>
+    <string name="keyguard_indication_charging_time_fast" msgid="9018981952053914986">"Hurtig opladning (fuldt opladet om <xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g>)"</string>
+    <string name="keyguard_indication_charging_time_slowly" msgid="955252797961724952">"Langsom opladning (fuldt opladet om <xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g>)"</string>
     <string name="accessibility_multi_user_switch_switcher" msgid="7305948938141024937">"Skift bruger"</string>
     <string name="accessibility_multi_user_switch_switcher_with_current" msgid="8434880595284601601">"Skift bruger. Nuværende bruger er <xliff:g id="CURRENT_USER_NAME">%s</xliff:g>"</string>
     <string name="accessibility_multi_user_switch_inactive" msgid="1424081831468083402">"Nuværende bruger: <xliff:g id="CURRENT_USER_NAME">%s</xliff:g>"</string>
@@ -404,7 +400,7 @@
     <string name="volumeui_notification_title" msgid="4906770126345910955">"<xliff:g id="APP_NAME">%1$s</xliff:g> er dialogboksen for lydstyrke"</string>
     <string name="volumeui_notification_text" msgid="1826889705095768656">"Tryk for at gendanne originalen."</string>
     <string name="managed_profile_foreground_toast" msgid="5421487114739245972">"Du bruger din arbejdsprofil"</string>
-    <string name="system_ui_tuner" msgid="3442596010150119600">"System UI tuner"</string>
+    <string name="system_ui_tuner" msgid="708224127392452018">"System UI Tuner"</string>
     <string name="show_battery_percentage" msgid="5444136600512968798">"Vis procent for det indbyggede batteri"</string>
     <string name="show_battery_percentage_summary" msgid="3215025775576786037">"Vis procenttallet for batteriniveauet i ikonet for statusbjælken, når der ikke oplades"</string>
     <string name="quick_settings" msgid="10042998191725428">"Hurtige indstillinger"</string>
@@ -425,4 +421,17 @@
     <string name="accessibility_quick_settings_detail" msgid="2579369091672902101">"Hurtigindstillinger <xliff:g id="TITLE">%s</xliff:g>."</string>
     <string name="accessibility_status_bar_hotspot" msgid="4099381329956402865">"Hotspot"</string>
     <string name="accessibility_managed_profile" msgid="6613641363112584120">"Arbejdsprofil"</string>
+    <string name="tuner_warning_title" msgid="7094689930793031682">"Sjovt for nogle, men ikke for alle"</string>
+    <string name="tuner_warning" msgid="8730648121973575701">"System UI Tuner giver dig flere muligheder for at justere og tilpasse Android-brugerfladen. Disse eksperimentelle funktioner kan ændres, gå i stykker eller forsvinde i fremtidige udgivelser. Vær forsigtig, hvis du fortsætter."</string>
+    <string name="tuner_persistent_warning" msgid="8597333795565621795">"Disse eksperimentelle funktioner kan ændres, gå i stykker eller forsvinde i fremtidige udgivelser. Vær forsigtig, hvis du fortsætter."</string>
+    <string name="got_it" msgid="2239653834387972602">"OK"</string>
+    <string name="tuner_toast" msgid="603429811084428439">"System UI Tuner blev føjet til Indstillinger"</string>
+    <string name="remove_from_settings" msgid="8389591916603406378">"Fjern fra Indstillinger"</string>
+    <string name="remove_from_settings_prompt" msgid="6069085993355887748">"Vil du fjerne System UI Tuner fra Indstillinger og stoppe med at bruge alle dens funktioner?"</string>
+    <!-- no translation found for enable_bluetooth_title (5027037706500635269) -->
+    <skip />
+    <!-- no translation found for enable_bluetooth_message (9106595990708985385) -->
+    <skip />
+    <!-- no translation found for enable_bluetooth_confirmation_ok (6258074250948309715) -->
+    <skip />
 </resources>

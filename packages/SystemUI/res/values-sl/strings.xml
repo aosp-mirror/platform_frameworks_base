@@ -25,12 +25,10 @@
     <string name="status_bar_recent_inspect_item_title" msgid="7793624864528818569">"Podatki o aplikaciji"</string>
     <string name="status_bar_no_recent_apps" msgid="7374907845131203189">"Vaši nedavni zasloni so prikazani tu"</string>
     <string name="status_bar_accessibility_dismiss_recents" msgid="4576076075226540105">"Zapre nedavne aplikacije"</string>
-    <plurals name="status_bar_accessibility_recent_apps" formatted="false" msgid="9138535907802238759">
-      <item quantity="one">%d zaslon v pregledu</item>
-      <item quantity="two">%d zaslona v pregledu</item>
-      <item quantity="few">%d zasloni v pregledu</item>
-      <item quantity="other">%d zaslonov v pregledu</item>
-    </plurals>
+  <plurals name="status_bar_accessibility_recent_apps">
+    <item quantity="one" msgid="3969335317929254918">"En zaslon v Pregledu"</item>
+    <item quantity="other" msgid="5523506463832158203">"Št. zaslonov v Pregledu: %d"</item>
+  </plurals>
     <string name="status_bar_no_notifications_title" msgid="4755261167193833213">"Ni obvestil"</string>
     <string name="status_bar_ongoing_events_title" msgid="1682504513316879202">"Trenutno"</string>
     <string name="status_bar_latest_events_title" msgid="6594767438577593172">"Obvestila"</string>
@@ -116,12 +114,6 @@
     <string name="accessibility_data_two_bars" msgid="6166018492360432091">"Podatki z dvema črticama."</string>
     <string name="accessibility_data_three_bars" msgid="9167670452395038520">"Podatki s tremi črticami."</string>
     <string name="accessibility_data_signal_full" msgid="2708384608124519369">"Podatkovni signal poln."</string>
-    <string name="accessibility_wifi_off" msgid="3177380296697933627">"Wi-Fi je izklopljen."</string>
-    <string name="accessibility_no_wifi" msgid="1425476551827924474">"Povezava Wi-Fi je prekinjena."</string>
-    <string name="accessibility_wifi_one_bar" msgid="7735893178010724377">"Wi-Fi z eno črtico."</string>
-    <string name="accessibility_wifi_two_bars" msgid="4994274250497262434">"Wi-Fi z dvema črticama."</string>
-    <string name="accessibility_wifi_three_bars" msgid="3495755044276588384">"Wi-Fi s tremi črticami."</string>
-    <string name="accessibility_wifi_signal_full" msgid="6853561303586480376">"Poln signal Wi-Fi."</string>
     <string name="accessibility_wifi_name" msgid="7202151365171148501">"Povezava vzpostavljena z: <xliff:g id="WIFI">%s</xliff:g>."</string>
     <string name="accessibility_bluetooth_name" msgid="8441517146585531676">"Povezava vzpostavljena z: <xliff:g id="BLUETOOTH">%s</xliff:g>."</string>
     <string name="accessibility_no_wimax" msgid="4329180129727630368">"Ni signala WiMAX."</string>
@@ -333,6 +325,8 @@
     <string name="interruption_level_priority_twoline" msgid="1564715335217164124">"Samo\nprednostno"</string>
     <string name="interruption_level_alarms_twoline" msgid="3266909566410106146">"Samo\nalarmi"</string>
     <string name="keyguard_indication_charging_time" msgid="1757251776872835768">"Polnjenje (<xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g> do napolnjenosti)"</string>
+    <string name="keyguard_indication_charging_time_fast" msgid="9018981952053914986">"Hitro polnjenje (<xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g> do napolnjenosti)"</string>
+    <string name="keyguard_indication_charging_time_slowly" msgid="955252797961724952">"Počasno polnjenje (<xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g> do napolnjenosti)"</string>
     <string name="accessibility_multi_user_switch_switcher" msgid="7305948938141024937">"Preklop med uporabniki"</string>
     <string name="accessibility_multi_user_switch_switcher_with_current" msgid="8434880595284601601">"Preklop med uporabniki, trenutni uporabnik <xliff:g id="CURRENT_USER_NAME">%s</xliff:g>"</string>
     <string name="accessibility_multi_user_switch_inactive" msgid="1424081831468083402">"Trenutni uporabnik: <xliff:g id="CURRENT_USER_NAME">%s</xliff:g>"</string>
@@ -406,7 +400,7 @@
     <string name="volumeui_notification_title" msgid="4906770126345910955">"<xliff:g id="APP_NAME">%1$s</xliff:g> je pogovorno okno glede prostornine"</string>
     <string name="volumeui_notification_text" msgid="1826889705095768656">"Dotaknite se, če želite obnoviti izvirnik."</string>
     <string name="managed_profile_foreground_toast" msgid="5421487114739245972">"Uporabljate delovni profil"</string>
-    <string name="system_ui_tuner" msgid="3442596010150119600">"Uglaševalnik uporabniškega vmesnika sistema"</string>
+    <string name="system_ui_tuner" msgid="708224127392452018">"Uglaševalnik uporabniškega vmesnika sistema"</string>
     <string name="show_battery_percentage" msgid="5444136600512968798">"Prikaži odstotek napolnjenosti vgraj. akumulatorja"</string>
     <string name="show_battery_percentage_summary" msgid="3215025775576786037">"Prikaz odstotka napolnjenosti akumulatorja znotraj ikone v vrstici stanja, ko se ne polni"</string>
     <string name="quick_settings" msgid="10042998191725428">"Hitre nastavitve"</string>
@@ -427,4 +421,17 @@
     <string name="accessibility_quick_settings_detail" msgid="2579369091672902101">"Hitre nastavitve, <xliff:g id="TITLE">%s</xliff:g>."</string>
     <string name="accessibility_status_bar_hotspot" msgid="4099381329956402865">"Dostopna točka"</string>
     <string name="accessibility_managed_profile" msgid="6613641363112584120">"Delovni profil"</string>
+    <string name="tuner_warning_title" msgid="7094689930793031682">"Zabavno za nekatere, a ne za vse"</string>
+    <string name="tuner_warning" msgid="8730648121973575701">"Uglaševalnik uporabniškega vmesnika sistema vam omogoča dodatne načine za spreminjanje in prilagajanje uporabniškega vmesnika Android. Te poskusne funkcije lahko v prihodnjih izdajah kadar koli izginejo, se spremenijo ali pokvarijo. Bodite previdni."</string>
+    <string name="tuner_persistent_warning" msgid="8597333795565621795">"Te poskusne funkcije lahko v prihodnjih izdajah kadar koli izginejo, se spremenijo ali pokvarijo. Bodite previdni."</string>
+    <string name="got_it" msgid="2239653834387972602">"Razumem"</string>
+    <string name="tuner_toast" msgid="603429811084428439">"Čestitke! Uglaševalnik uporabniškega vmesnika sistema je bil dodan v nastavitve."</string>
+    <string name="remove_from_settings" msgid="8389591916603406378">"Odstrani iz nastavitev"</string>
+    <string name="remove_from_settings_prompt" msgid="6069085993355887748">"Ali želite odstraniti Uglaševalnik uporabniškega vmesnika sistema iz nastavitev in prenehati uporabljati vse njegove funkcije?"</string>
+    <!-- no translation found for enable_bluetooth_title (5027037706500635269) -->
+    <skip />
+    <!-- no translation found for enable_bluetooth_message (9106595990708985385) -->
+    <skip />
+    <!-- no translation found for enable_bluetooth_confirmation_ok (6258074250948309715) -->
+    <skip />
 </resources>

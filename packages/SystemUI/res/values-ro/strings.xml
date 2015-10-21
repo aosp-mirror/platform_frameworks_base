@@ -20,16 +20,15 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_label" msgid="7164937344850004466">"UI sistem"</string>
-    <string name="status_bar_clear_all_button" msgid="7774721344716731603">"Ștergeţi"</string>
+    <string name="status_bar_clear_all_button" msgid="7774721344716731603">"Ștergeți"</string>
     <string name="status_bar_recent_remove_item_title" msgid="6026395868129852968">"Eliminaţi din listă"</string>
-    <string name="status_bar_recent_inspect_item_title" msgid="7793624864528818569">"Informaţii despre aplicație"</string>
+    <string name="status_bar_recent_inspect_item_title" msgid="7793624864528818569">"Informații despre aplicație"</string>
     <string name="status_bar_no_recent_apps" msgid="7374907845131203189">"Ecranele dvs. recente apar aici"</string>
     <string name="status_bar_accessibility_dismiss_recents" msgid="4576076075226540105">"Renunţaţi la aplicațiile recente"</string>
-    <plurals name="status_bar_accessibility_recent_apps" formatted="false" msgid="9138535907802238759">
-      <item quantity="few">%d ecrane în Recente</item>
-      <item quantity="other">%d de ecrane în Recente</item>
-      <item quantity="one">Un ecran în Recente</item>
-    </plurals>
+  <plurals name="status_bar_accessibility_recent_apps">
+    <item quantity="one" msgid="3969335317929254918">"1 ecran în Vizualizare generală"</item>
+    <item quantity="other" msgid="5523506463832158203">"%d ecrane în Vizualizare generală"</item>
+  </plurals>
     <string name="status_bar_no_notifications_title" msgid="4755261167193833213">"Nicio notificare"</string>
     <string name="status_bar_ongoing_events_title" msgid="1682504513316879202">"În desfăşurare"</string>
     <string name="status_bar_latest_events_title" msgid="6594767438577593172">"Notificări"</string>
@@ -52,8 +51,8 @@
     <string name="bluetooth_tethered" msgid="7094101612161133267">"Conectat prin tethering prin Bluetooth"</string>
     <string name="status_bar_input_method_settings_configure_input_methods" msgid="3504292471512317827">"Setaţi metode introducere text"</string>
     <string name="status_bar_use_physical_keyboard" msgid="7551903084416057810">"Tastatură fizică"</string>
-    <string name="usb_device_permission_prompt" msgid="834698001271562057">"Permiteţi aplicației <xliff:g id="APPLICATION">%1$s</xliff:g> să acceseze dispozitivul USB?"</string>
-    <string name="usb_accessory_permission_prompt" msgid="5171775411178865750">"Permiteţi aplicației <xliff:g id="APPLICATION">%1$s</xliff:g> să acceseze accesoriul USB?"</string>
+    <string name="usb_device_permission_prompt" msgid="834698001271562057">"Permiteți aplicației <xliff:g id="APPLICATION">%1$s</xliff:g> să acceseze dispozitivul USB?"</string>
+    <string name="usb_accessory_permission_prompt" msgid="5171775411178865750">"Permiteți aplicației <xliff:g id="APPLICATION">%1$s</xliff:g> să acceseze accesoriul USB?"</string>
     <string name="usb_device_confirm_prompt" msgid="5161205258635253206">"Deschideţi <xliff:g id="ACTIVITY">%1$s</xliff:g> la conectarea acestui dispozitiv USB?"</string>
     <string name="usb_accessory_confirm_prompt" msgid="3808984931830229888">"Deschideţi <xliff:g id="ACTIVITY">%1$s</xliff:g> la conectarea acestui accesoriu USB?"</string>
     <string name="usb_accessory_uri_prompt" msgid="513450621413733343">"Aplic. instal. nu funcţ. cu acest acces. USB. Aflaţi despre acest accesoriu la <xliff:g id="URL">%1$s</xliff:g>"</string>
@@ -61,9 +60,9 @@
     <string name="label_view" msgid="6304565553218192990">"Afişaţi"</string>
     <string name="always_use_device" msgid="1450287437017315906">"Utilizaţi în mod prestabilit pt. acest dispoz. USB"</string>
     <string name="always_use_accessory" msgid="1210954576979621596">"Utiliz. în mod prestabilit pt. acest accesoriu USB"</string>
-    <string name="usb_debugging_title" msgid="4513918393387141949">"Permiteţi depanarea USB?"</string>
+    <string name="usb_debugging_title" msgid="4513918393387141949">"Permiteți depanarea USB?"</string>
     <string name="usb_debugging_message" msgid="2220143855912376496">"Amprenta digitală din cheia RSA a computerului este:\n<xliff:g id="FINGERPRINT">%1$s</xliff:g>"</string>
-    <string name="usb_debugging_always" msgid="303335496705863070">"Permiteţi întotdeauna de pe acest computer"</string>
+    <string name="usb_debugging_always" msgid="303335496705863070">"Permiteți întotdeauna de pe acest computer"</string>
     <string name="usb_debugging_secondary_user_title" msgid="6353808721761220421">"Remedierea erorilor prin USB nu este permisă"</string>
     <string name="usb_debugging_secondary_user_message" msgid="6011931347142270156">"Utilizatorul conectat momentan pe acest dispozitiv nu poate activa remedierea erorilor prin USB. Pentru a folosi această funcție, comutați la utilizatorul principal „<xliff:g id="NAME">%s</xliff:g>”."</string>
     <string name="compat_mode_on" msgid="6623839244840638213">"Zoom pt. a umple ecranul"</string>
@@ -72,13 +71,13 @@
     <string name="screenshot_saving_title" msgid="8242282144535555697">"Se salvează captura de ecran..."</string>
     <string name="screenshot_saving_text" msgid="2419718443411738818">"Captura de ecran este salvată."</string>
     <string name="screenshot_saved_title" msgid="6461865960961414961">"Captură de ecran realizată."</string>
-    <string name="screenshot_saved_text" msgid="1152839647677558815">"Atingeţi pentru a vedea captura de ecran."</string>
+    <string name="screenshot_saved_text" msgid="1152839647677558815">"Atingeți pentru a vedea captura de ecran."</string>
     <string name="screenshot_failed_title" msgid="705781116746922771">"Captura de ecran nu a putut fi realizată."</string>
     <string name="screenshot_failed_text" msgid="1260203058661337274">"Captură de ecran impos. de realizat: spațiu de stoc. limitat sau nu este permisă de apl. sau de organiz."</string>
-    <string name="usb_preference_title" msgid="6551050377388882787">"Opţiuni pentru transferul de fişiere prin USB"</string>
+    <string name="usb_preference_title" msgid="6551050377388882787">"Opţiuni pentru transferul de fișiere prin USB"</string>
     <string name="use_mtp_button_title" msgid="4333504413563023626">"Montaţi ca player media (MTP)"</string>
     <string name="use_ptp_button_title" msgid="7517127540301625751">"Montaţi drept cameră foto (PTP)"</string>
-    <string name="installer_cd_button_title" msgid="2312667578562201583">"Instal. aplic. Transfer de fişiere Android pt. Mac"</string>
+    <string name="installer_cd_button_title" msgid="2312667578562201583">"Instal. aplic. Transfer de fișiere Android pt. Mac"</string>
     <string name="accessibility_back" msgid="567011538994429120">"Înapoi"</string>
     <string name="accessibility_home" msgid="8217216074895377641">"Ecranul de pornire"</string>
     <string name="accessibility_menu" msgid="316839303324695949">"Meniu"</string>
@@ -115,12 +114,6 @@
     <string name="accessibility_data_two_bars" msgid="6166018492360432091">"Semnal pentru date: două bare."</string>
     <string name="accessibility_data_three_bars" msgid="9167670452395038520">"Semnal pentru date: trei bare."</string>
     <string name="accessibility_data_signal_full" msgid="2708384608124519369">"Semnal pentru date: complet."</string>
-    <string name="accessibility_wifi_off" msgid="3177380296697933627">"Wi-Fi dezactivat."</string>
-    <string name="accessibility_no_wifi" msgid="1425476551827924474">"Wi-Fi deconectat."</string>
-    <string name="accessibility_wifi_one_bar" msgid="7735893178010724377">"Semnal Wi-Fi: o bară."</string>
-    <string name="accessibility_wifi_two_bars" msgid="4994274250497262434">"Semnal Wi-Fi: două bare."</string>
-    <string name="accessibility_wifi_three_bars" msgid="3495755044276588384">"Semnal Wi-Fi: trei bare."</string>
-    <string name="accessibility_wifi_signal_full" msgid="6853561303586480376">"Semnal Wi-Fi: complet."</string>
     <string name="accessibility_wifi_name" msgid="7202151365171148501">"Conectat la <xliff:g id="WIFI">%s</xliff:g>."</string>
     <string name="accessibility_bluetooth_name" msgid="8441517146585531676">"Conectat la <xliff:g id="BLUETOOTH">%s</xliff:g>."</string>
     <string name="accessibility_no_wimax" msgid="4329180129727630368">"Fără WiMAX."</string>
@@ -160,12 +153,12 @@
     <string name="accessibility_battery_level" msgid="7451474187113371965">"Baterie: <xliff:g id="NUMBER">%d</xliff:g> procente."</string>
     <string name="accessibility_settings_button" msgid="799583911231893380">"Setări de sistem."</string>
     <string name="accessibility_notifications_button" msgid="4498000369779421892">"Notificări."</string>
-    <string name="accessibility_remove_notification" msgid="3603099514902182350">"Ștergeţi notificarea."</string>
+    <string name="accessibility_remove_notification" msgid="3603099514902182350">"Ștergeți notificarea."</string>
     <string name="accessibility_gps_enabled" msgid="3511469499240123019">"GPS activat."</string>
     <string name="accessibility_gps_acquiring" msgid="8959333351058967158">"Se obţine GPS."</string>
     <string name="accessibility_tty_enabled" msgid="4613200365379426561">"TeleTypewriter activat."</string>
     <string name="accessibility_ringer_vibrate" msgid="666585363364155055">"Vibrare sonerie."</string>
-    <string name="accessibility_ringer_silent" msgid="9061243307939135383">"Sonerie silenţioasă."</string>
+    <string name="accessibility_ringer_silent" msgid="9061243307939135383">"Sonerie silențioasă."</string>
     <!-- no translation found for accessibility_casting (6887382141726543668) -->
     <skip />
     <string name="accessibility_recents_item_will_be_dismissed" msgid="395770242498031481">"Închideți <xliff:g id="APP">%s</xliff:g>."</string>
@@ -229,9 +222,9 @@
     <string name="status_bar_settings_signal_meter_disconnected" msgid="1940231521274147771">"Fără conex. internet"</string>
     <string name="status_bar_settings_signal_meter_wifi_nossid" msgid="6557486452774597820">"Wi-Fi conectat"</string>
     <string name="gps_notification_searching_text" msgid="8574247005642736060">"Se caută GPS"</string>
-    <string name="gps_notification_found_text" msgid="4619274244146446464">"Locaţie setată prin GPS"</string>
+    <string name="gps_notification_found_text" msgid="4619274244146446464">"Locație setată prin GPS"</string>
     <string name="accessibility_location_active" msgid="2427290146138169014">"Solicitări locație active"</string>
-    <string name="accessibility_clear_all" msgid="5235938559247164925">"Ștergeţi toate notificările."</string>
+    <string name="accessibility_clear_all" msgid="5235938559247164925">"Ștergeți toate notificările."</string>
     <string name="status_bar_notification_inspect_item_title" msgid="5668348142410115323">"Setări pentru notificări"</string>
     <string name="status_bar_notification_app_settings_title" msgid="5525260160341558869">"Setări <xliff:g id="APP_NAME">%s</xliff:g>"</string>
     <string name="accessibility_rotation_lock_off" msgid="4062780228931590069">"Ecranul se va roti în mod automat."</string>
@@ -269,7 +262,7 @@
     <string name="quick_settings_user_new_user" msgid="9030521362023479778">"Utilizator nou"</string>
     <string name="quick_settings_wifi_label" msgid="9135344704899546041">"Wi-Fi"</string>
     <string name="quick_settings_wifi_not_connected" msgid="7171904845345573431">"Neconectat"</string>
-    <string name="quick_settings_wifi_no_network" msgid="2221993077220856376">"Nicio reţea"</string>
+    <string name="quick_settings_wifi_no_network" msgid="2221993077220856376">"Nicio rețea"</string>
     <string name="quick_settings_wifi_off_label" msgid="7558778100843885864">"Wi-Fi deconectat"</string>
     <string name="quick_settings_wifi_detail_empty_text" msgid="269990350383909226">"Nicio rețea Wi-Fi disponibilă"</string>
     <string name="quick_settings_cast_title" msgid="7709016546426454729">"Proiectați"</string>
@@ -310,7 +303,7 @@
     <string name="expanded_header_battery_charging_with_time" msgid="457559884275395376">"<xliff:g id="CHARGING_TIME">%s</xliff:g> până la încărcare completă"</string>
     <string name="expanded_header_battery_not_charging" msgid="4798147152367049732">"Nu se încarcă"</string>
     <string name="ssl_ca_cert_warning" msgid="9005954106902053641">"Rețeaua poate\nfi monitorizată"</string>
-    <string name="description_target_search" msgid="3091587249776033139">"Căutaţi"</string>
+    <string name="description_target_search" msgid="3091587249776033139">"Căutați"</string>
     <string name="description_direction_up" msgid="7169032478259485180">"Glisaţi în sus pentru <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>."</string>
     <string name="description_direction_left" msgid="7207478719805562165">"Glisaţi spre stânga pentru <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>."</string>
     <string name="zen_priority_introduction" msgid="3070506961866919502">"Nu veți fi deranjat(ă) de sunete și vibrații, exceptând alarmele, mementourile, evenimentele și apelanții pe care îi menționați."</string>
@@ -332,6 +325,8 @@
     <string name="interruption_level_priority_twoline" msgid="1564715335217164124">"Numai\ncu prioritate"</string>
     <string name="interruption_level_alarms_twoline" msgid="3266909566410106146">"Numai\nalarme"</string>
     <string name="keyguard_indication_charging_time" msgid="1757251776872835768">"Se încarcă (<xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g> până la finalizare)"</string>
+    <string name="keyguard_indication_charging_time_fast" msgid="9018981952053914986">"Se încarcă rapid (<xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g> până la finalizare)"</string>
+    <string name="keyguard_indication_charging_time_slowly" msgid="955252797961724952">"Se încarcă lent (<xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g> până la finalizare)"</string>
     <string name="accessibility_multi_user_switch_switcher" msgid="7305948938141024937">"Comutați între utilizatori"</string>
     <string name="accessibility_multi_user_switch_switcher_with_current" msgid="8434880595284601601">"Schimbați utilizatorul (utilizator actual <xliff:g id="CURRENT_USER_NAME">%s</xliff:g>)"</string>
     <string name="accessibility_multi_user_switch_inactive" msgid="1424081831468083402">"Utilizator actual <xliff:g id="CURRENT_USER_NAME">%s</xliff:g>"</string>
@@ -405,7 +400,7 @@
     <string name="volumeui_notification_title" msgid="4906770126345910955">"<xliff:g id="APP_NAME">%1$s</xliff:g> afișează caseta de dialog pentru volum"</string>
     <string name="volumeui_notification_text" msgid="1826889705095768656">"Atingeți pentru a reveni la setarea inițială."</string>
     <string name="managed_profile_foreground_toast" msgid="5421487114739245972">"Acum folosiți profilul de serviciu"</string>
-    <string name="system_ui_tuner" msgid="3442596010150119600">"System UI tuner"</string>
+    <string name="system_ui_tuner" msgid="708224127392452018">"System UI Tuner"</string>
     <string name="show_battery_percentage" msgid="5444136600512968798">"Afișați procentajul bateriei încorporat"</string>
     <string name="show_battery_percentage_summary" msgid="3215025775576786037">"Afișați procentajul cu nivelul bateriei în interiorul pictogramei din bara de stare, atunci când nu se încarcă"</string>
     <string name="quick_settings" msgid="10042998191725428">"Setări rapide"</string>
@@ -426,4 +421,17 @@
     <string name="accessibility_quick_settings_detail" msgid="2579369091672902101">"Setări rapide, <xliff:g id="TITLE">%s</xliff:g>."</string>
     <string name="accessibility_status_bar_hotspot" msgid="4099381329956402865">"Hotspot"</string>
     <string name="accessibility_managed_profile" msgid="6613641363112584120">"Profil de serviciu"</string>
+    <string name="tuner_warning_title" msgid="7094689930793031682">"Distractiv pentru unii, dar nu pentru toată lumea"</string>
+    <string name="tuner_warning" msgid="8730648121973575701">"System UI Tuner vă oferă modalități suplimentare de a ajusta și a personaliza interfața de utilizare Android. Aceste funcții experimentale pot să se schimbe, să se blocheze sau să dispară din versiunile viitoare. Continuați cu prudență."</string>
+    <string name="tuner_persistent_warning" msgid="8597333795565621795">"Aceste funcții experimentale pot să se schimbe, să se blocheze sau să dispară din versiunile viitoare. Continuați cu prudență."</string>
+    <string name="got_it" msgid="2239653834387972602">"Am înțeles"</string>
+    <string name="tuner_toast" msgid="603429811084428439">"Felicitări! System UI Tuner a fost adăugat în Setări"</string>
+    <string name="remove_from_settings" msgid="8389591916603406378">"Eliminați din Setări"</string>
+    <string name="remove_from_settings_prompt" msgid="6069085993355887748">"Eliminați System UI Tuner din Setări și încetați utilizarea tuturor funcțiilor sale?"</string>
+    <!-- no translation found for enable_bluetooth_title (5027037706500635269) -->
+    <skip />
+    <!-- no translation found for enable_bluetooth_message (9106595990708985385) -->
+    <skip />
+    <!-- no translation found for enable_bluetooth_confirmation_ok (6258074250948309715) -->
+    <skip />
 </resources>

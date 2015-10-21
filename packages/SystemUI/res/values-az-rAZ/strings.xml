@@ -25,10 +25,10 @@
     <string name="status_bar_recent_inspect_item_title" msgid="7793624864528818569">"Tətbiq infosu"</string>
     <string name="status_bar_no_recent_apps" msgid="7374907845131203189">"Your recent screens appear here"</string>
     <string name="status_bar_accessibility_dismiss_recents" msgid="4576076075226540105">"Son tətbiqləri kənarlaşdır"</string>
-    <plurals name="status_bar_accessibility_recent_apps" formatted="false" msgid="9138535907802238759">
-      <item quantity="other"> İcmalda %d ekran</item>
-      <item quantity="one">İcmalda 1 ekran</item>
-    </plurals>
+  <plurals name="status_bar_accessibility_recent_apps">
+    <item quantity="one" msgid="3969335317929254918">"İcmalda 1 ekran"</item>
+    <item quantity="other" msgid="5523506463832158203">"İcmalda %d ekran"</item>
+  </plurals>
     <string name="status_bar_no_notifications_title" msgid="4755261167193833213">"Bildiriş yoxdu"</string>
     <string name="status_bar_ongoing_events_title" msgid="1682504513316879202">"Davam edir"</string>
     <string name="status_bar_latest_events_title" msgid="6594767438577593172">"Bildirişlər"</string>
@@ -114,12 +114,6 @@
     <string name="accessibility_data_two_bars" msgid="6166018492360432091">"Data iki xətdir."</string>
     <string name="accessibility_data_three_bars" msgid="9167670452395038520">"Data üç xətdir."</string>
     <string name="accessibility_data_signal_full" msgid="2708384608124519369">"Data siqnalı tamdır."</string>
-    <string name="accessibility_wifi_off" msgid="3177380296697933627">"Wifi sönülüdür."</string>
-    <string name="accessibility_no_wifi" msgid="1425476551827924474">"Wifi bağlantı kəsildi."</string>
-    <string name="accessibility_wifi_one_bar" msgid="7735893178010724377">"Wifi bir xətdir."</string>
-    <string name="accessibility_wifi_two_bars" msgid="4994274250497262434">"Wifi iki xətdir."</string>
-    <string name="accessibility_wifi_three_bars" msgid="3495755044276588384">"Wifi üç xətdir."</string>
-    <string name="accessibility_wifi_signal_full" msgid="6853561303586480376">"Wifi siqnalı tamdır."</string>
     <string name="accessibility_wifi_name" msgid="7202151365171148501">"<xliff:g id="WIFI">%s</xliff:g> üzərindən qoşuldu."</string>
     <string name="accessibility_bluetooth_name" msgid="8441517146585531676">"<xliff:g id="BLUETOOTH">%s</xliff:g> üzərindən qoşuldu."</string>
     <string name="accessibility_no_wimax" msgid="4329180129727630368">"WiMAX yoxdur."</string>
@@ -331,6 +325,8 @@
     <string name="interruption_level_priority_twoline" msgid="1564715335217164124">"Yalnız\nprioritet"</string>
     <string name="interruption_level_alarms_twoline" msgid="3266909566410106146">"Yalnız\nalarmlar"</string>
     <string name="keyguard_indication_charging_time" msgid="1757251776872835768">"Qidalanır (<xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g> dolana kimi)"</string>
+    <string name="keyguard_indication_charging_time_fast" msgid="9018981952053914986">"Sürətli qidalanır (<xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g> dolana kimi)"</string>
+    <string name="keyguard_indication_charging_time_slowly" msgid="955252797961724952">"Ləng qidalanır (<xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g> dolana kimi)"</string>
     <string name="accessibility_multi_user_switch_switcher" msgid="7305948938141024937">"Switch user"</string>
     <string name="accessibility_multi_user_switch_switcher_with_current" msgid="8434880595284601601">"İstifadəçiləri dəyişin, indiki istifadəçi: <xliff:g id="CURRENT_USER_NAME">%s</xliff:g>"</string>
     <string name="accessibility_multi_user_switch_inactive" msgid="1424081831468083402">"Cari istifadəçi <xliff:g id="CURRENT_USER_NAME">%s</xliff:g>"</string>
@@ -404,7 +400,7 @@
     <string name="volumeui_notification_title" msgid="4906770126345910955">"<xliff:g id="APP_NAME">%1$s</xliff:g> proqramı səs səviyyəsi dialoqudur"</string>
     <string name="volumeui_notification_text" msgid="1826889705095768656">"Orijinalı bərpa etmək üçün toxun."</string>
     <string name="managed_profile_foreground_toast" msgid="5421487114739245972">"İş profilinizi istifadə edirsiniz"</string>
-    <string name="system_ui_tuner" msgid="3442596010150119600">"Sistem UI tuner"</string>
+    <string name="system_ui_tuner" msgid="708224127392452018">"System UI Tuner"</string>
     <string name="show_battery_percentage" msgid="5444136600512968798">"Daxil batareya faizini göstərin"</string>
     <string name="show_battery_percentage_summary" msgid="3215025775576786037">"Elektrik şəbəsinə qoşulu olmayan zaman batareya səviyyəsini status paneli ikonası daxilində göstərin"</string>
     <string name="quick_settings" msgid="10042998191725428">"Sürətli Ayarlar"</string>
@@ -425,4 +421,17 @@
     <string name="accessibility_quick_settings_detail" msgid="2579369091672902101">"Sürətli Ayarlar, <xliff:g id="TITLE">%s</xliff:g>."</string>
     <string name="accessibility_status_bar_hotspot" msgid="4099381329956402865">"Hotspot"</string>
     <string name="accessibility_managed_profile" msgid="6613641363112584120">"İş profili"</string>
+    <string name="tuner_warning_title" msgid="7094689930793031682">"Hamı üçün deyil, bəziləri üçün əyləncəli"</string>
+    <string name="tuner_warning" msgid="8730648121973575701">"System UI Tuner Android istifadəçi interfeysini dəyişdirmək və fərdiləşdirmək üçün Sizə ekstra yollar təklif edir."</string>
+    <string name="tuner_persistent_warning" msgid="8597333795565621795">"Bu eksperimental funksiyalar gələcək buraxılışlarda dəyişə, məhv ola və ya yoxa çıxa bilər. Ehtiyatlı olun."</string>
+    <string name="got_it" msgid="2239653834387972602">"Anladım"</string>
+    <string name="tuner_toast" msgid="603429811084428439">"Təbriklər! System UI Tuner Ayarlara əlavə edildi"</string>
+    <string name="remove_from_settings" msgid="8389591916603406378">"Ayarlardan Silin"</string>
+    <string name="remove_from_settings_prompt" msgid="6069085993355887748">"System UI Tuner Ayarlardan silinsin və onun bütün funksiyalarından istifadə dayandırılsın?"</string>
+    <!-- no translation found for enable_bluetooth_title (5027037706500635269) -->
+    <skip />
+    <!-- no translation found for enable_bluetooth_message (9106595990708985385) -->
+    <skip />
+    <!-- no translation found for enable_bluetooth_confirmation_ok (6258074250948309715) -->
+    <skip />
 </resources>

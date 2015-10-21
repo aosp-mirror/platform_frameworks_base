@@ -25,10 +25,10 @@
     <string name="status_bar_recent_inspect_item_title" msgid="7793624864528818569">"Impormasyon ng app"</string>
     <string name="status_bar_no_recent_apps" msgid="7374907845131203189">"Lumalabas dito ang iyong kamakailang screen"</string>
     <string name="status_bar_accessibility_dismiss_recents" msgid="4576076075226540105">"Huwag pansinin ang kamakailang apps"</string>
-    <plurals name="status_bar_accessibility_recent_apps" formatted="false" msgid="9138535907802238759">
-      <item quantity="one">%d screen sa Pangkalahatang-ideya</item>
-      <item quantity="other">%d na screen sa Pangkalahatang-ideya</item>
-    </plurals>
+  <plurals name="status_bar_accessibility_recent_apps">
+    <item quantity="one" msgid="3969335317929254918">"1 screen sa Overview"</item>
+    <item quantity="other" msgid="5523506463832158203">"%d (na) screen sa Overview"</item>
+  </plurals>
     <string name="status_bar_no_notifications_title" msgid="4755261167193833213">"Walang mga notification"</string>
     <string name="status_bar_ongoing_events_title" msgid="1682504513316879202">"Nagpapatuloy"</string>
     <string name="status_bar_latest_events_title" msgid="6594767438577593172">"Mga Notification"</string>
@@ -114,12 +114,6 @@
     <string name="accessibility_data_two_bars" msgid="6166018492360432091">"Data na dalawang bar."</string>
     <string name="accessibility_data_three_bars" msgid="9167670452395038520">"Data na tatlong bar."</string>
     <string name="accessibility_data_signal_full" msgid="2708384608124519369">"Puno ang signal ng data."</string>
-    <string name="accessibility_wifi_off" msgid="3177380296697933627">"Naka-off ang Wifi."</string>
-    <string name="accessibility_no_wifi" msgid="1425476551827924474">"Nakadiskonekta ang Wifi."</string>
-    <string name="accessibility_wifi_one_bar" msgid="7735893178010724377">"May isang bar ang WiFi."</string>
-    <string name="accessibility_wifi_two_bars" msgid="4994274250497262434">"May dalawang bar ang Wifi."</string>
-    <string name="accessibility_wifi_three_bars" msgid="3495755044276588384">"May tatlong bar ang Wifi."</string>
-    <string name="accessibility_wifi_signal_full" msgid="6853561303586480376">"Puno ang signal ng WiFi."</string>
     <string name="accessibility_wifi_name" msgid="7202151365171148501">"Nakakonekta sa <xliff:g id="WIFI">%s</xliff:g>."</string>
     <string name="accessibility_bluetooth_name" msgid="8441517146585531676">"Nakakonekta sa <xliff:g id="BLUETOOTH">%s</xliff:g>."</string>
     <string name="accessibility_no_wimax" msgid="4329180129727630368">"Walang WiMAX."</string>
@@ -279,7 +273,7 @@
     <string name="quick_settings_brightness_dialog_title" msgid="8599674057673605368">"Brightness"</string>
     <string name="quick_settings_brightness_dialog_auto_brightness_label" msgid="5064982743784071218">"AUTO"</string>
     <string name="quick_settings_inversion_label" msgid="8790919884718619648">"I-invert ang mga kulay"</string>
-    <string name="quick_settings_color_space_label" msgid="853443689745584770">"Mode ng pagtatama ng kulay"</string>
+    <string name="quick_settings_color_space_label" msgid="853443689745584770">"Correction mode ng kulay"</string>
     <string name="quick_settings_more_settings" msgid="326112621462813682">"Marami pang setting"</string>
     <string name="quick_settings_done" msgid="3402999958839153376">"Tapos na"</string>
     <string name="quick_settings_connected" msgid="1722253542984847487">"Nakakonekta"</string>
@@ -331,6 +325,8 @@
     <string name="interruption_level_priority_twoline" msgid="1564715335217164124">"Priyoridad\nlang"</string>
     <string name="interruption_level_alarms_twoline" msgid="3266909566410106146">"Mga alarm\nlang"</string>
     <string name="keyguard_indication_charging_time" msgid="1757251776872835768">"Nagtsa-charge (<xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g> hanggang mapuno)"</string>
+    <string name="keyguard_indication_charging_time_fast" msgid="9018981952053914986">"Mabilis mag-charge (<xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g> hanggang sa mapuno)"</string>
+    <string name="keyguard_indication_charging_time_slowly" msgid="955252797961724952">"Mabagal mag-charge (<xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g> hanggang sa mapuno)"</string>
     <string name="accessibility_multi_user_switch_switcher" msgid="7305948938141024937">"Magpalit ng user"</string>
     <string name="accessibility_multi_user_switch_switcher_with_current" msgid="8434880595284601601">"Magpalit ng user, kasalukuyang user <xliff:g id="CURRENT_USER_NAME">%s</xliff:g>"</string>
     <string name="accessibility_multi_user_switch_inactive" msgid="1424081831468083402">"Kasalukuyang user <xliff:g id="CURRENT_USER_NAME">%s</xliff:g>"</string>
@@ -404,7 +400,7 @@
     <string name="volumeui_notification_title" msgid="4906770126345910955">"Ang <xliff:g id="APP_NAME">%1$s</xliff:g> ang volume dialog"</string>
     <string name="volumeui_notification_text" msgid="1826889705095768656">"Pindutin upang ibalik ang orihinal."</string>
     <string name="managed_profile_foreground_toast" msgid="5421487114739245972">"Ginagamit mo ang iyong profile sa trabaho"</string>
-    <string name="system_ui_tuner" msgid="3442596010150119600">"Tuner ng System UI"</string>
+    <string name="system_ui_tuner" msgid="708224127392452018">"Tuner ng System UI"</string>
     <string name="show_battery_percentage" msgid="5444136600512968798">"Ipakita ang naka-embed na porsyento ng baterya"</string>
     <string name="show_battery_percentage_summary" msgid="3215025775576786037">"Ipakita ang porsyento ng antas ng baterya na nasa icon ng status bar kapag nagcha-charge"</string>
     <string name="quick_settings" msgid="10042998191725428">"Mga Maikling Setting"</string>
@@ -425,4 +421,17 @@
     <string name="accessibility_quick_settings_detail" msgid="2579369091672902101">"Mga Maikling Setting, <xliff:g id="TITLE">%s</xliff:g>."</string>
     <string name="accessibility_status_bar_hotspot" msgid="4099381329956402865">"Hotspot"</string>
     <string name="accessibility_managed_profile" msgid="6613641363112584120">"Profile sa trabaho"</string>
+    <string name="tuner_warning_title" msgid="7094689930793031682">"Masaya para sa ilan ngunit hindi para sa lahat"</string>
+    <string name="tuner_warning" msgid="8730648121973575701">"Nagbibigay sa iyo ang Tuner ng System UI ng mga karagdagang paraan upang baguhin at i-customize ang user interface ng Android. Ang mga pang-eksperimentong feature na ito ay maaaring magbago, masira o mawala sa mga pagpapalabas sa hinaharap. Magpatuloy nang may pag-iingat."</string>
+    <string name="tuner_persistent_warning" msgid="8597333795565621795">"Ang mga pang-eksperimentong feature na ito ay maaaring magbago, masira o mawala sa mga pagpapalabas sa hinaharap. Magpatuloy nang may pag-iingat."</string>
+    <string name="got_it" msgid="2239653834387972602">"Naintindihan ko"</string>
+    <string name="tuner_toast" msgid="603429811084428439">"Binabati kita! Naidagdag na ang Tuner ng System UI sa Mga Setting"</string>
+    <string name="remove_from_settings" msgid="8389591916603406378">"Alisin sa Mga Setting"</string>
+    <string name="remove_from_settings_prompt" msgid="6069085993355887748">"Alisin ang Tuner ng System UI sa Mga Setting at ihinto ang paggamit ng lahat ng feature nito?"</string>
+    <!-- no translation found for enable_bluetooth_title (5027037706500635269) -->
+    <skip />
+    <!-- no translation found for enable_bluetooth_message (9106595990708985385) -->
+    <skip />
+    <!-- no translation found for enable_bluetooth_confirmation_ok (6258074250948309715) -->
+    <skip />
 </resources>

@@ -25,10 +25,10 @@
     <string name="status_bar_recent_inspect_item_title" msgid="7793624864528818569">"Informations sur l\'application"</string>
     <string name="status_bar_no_recent_apps" msgid="7374907845131203189">"Vos écrans récents s\'affichent ici"</string>
     <string name="status_bar_accessibility_dismiss_recents" msgid="4576076075226540105">"Masquer les applications récentes"</string>
-    <plurals name="status_bar_accessibility_recent_apps" formatted="false" msgid="9138535907802238759">
-      <item quantity="one">Aperçu de %d écran</item>
-      <item quantity="other">Aperçu de %d écrans</item>
-    </plurals>
+  <plurals name="status_bar_accessibility_recent_apps">
+    <item quantity="one" msgid="3969335317929254918">"1 écran dans Aperçu"</item>
+    <item quantity="other" msgid="5523506463832158203">"%d écrans dans Aperçu"</item>
+  </plurals>
     <string name="status_bar_no_notifications_title" msgid="4755261167193833213">"Aucune notification"</string>
     <string name="status_bar_ongoing_events_title" msgid="1682504513316879202">"En cours"</string>
     <string name="status_bar_latest_events_title" msgid="6594767438577593172">"Notifications"</string>
@@ -114,12 +114,6 @@
     <string name="accessibility_data_two_bars" msgid="6166018492360432091">"Signal moyen"</string>
     <string name="accessibility_data_three_bars" msgid="9167670452395038520">"Signal bon"</string>
     <string name="accessibility_data_signal_full" msgid="2708384608124519369">"Signal excellent"</string>
-    <string name="accessibility_wifi_off" msgid="3177380296697933627">"Wi-Fi désactivé"</string>
-    <string name="accessibility_no_wifi" msgid="1425476551827924474">"Wi-Fi déconnecté"</string>
-    <string name="accessibility_wifi_one_bar" msgid="7735893178010724377">"Signal Wi-Fi faible"</string>
-    <string name="accessibility_wifi_two_bars" msgid="4994274250497262434">"Signal Wi-Fi moyen"</string>
-    <string name="accessibility_wifi_three_bars" msgid="3495755044276588384">"Signal Wi-Fi bon"</string>
-    <string name="accessibility_wifi_signal_full" msgid="6853561303586480376">"Signal Wi-Fi excellent"</string>
     <string name="accessibility_wifi_name" msgid="7202151365171148501">"Connecté à : <xliff:g id="WIFI">%s</xliff:g>"</string>
     <string name="accessibility_bluetooth_name" msgid="8441517146585531676">"Connecté à : <xliff:g id="BLUETOOTH">%s</xliff:g>"</string>
     <string name="accessibility_no_wimax" msgid="4329180129727630368">"Aucun signal WiMAX"</string>
@@ -333,6 +327,8 @@
     <string name="interruption_level_priority_twoline" msgid="1564715335217164124">"Priorités\nuniquement"</string>
     <string name="interruption_level_alarms_twoline" msgid="3266909566410106146">"Alarmes\nuniquement"</string>
     <string name="keyguard_indication_charging_time" msgid="1757251776872835768">"Charge en cours... (chargée à 100 %% dans <xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g>)"</string>
+    <string name="keyguard_indication_charging_time_fast" msgid="9018981952053914986">"Charge rapide en cours... (chargé dans <xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g>)"</string>
+    <string name="keyguard_indication_charging_time_slowly" msgid="955252797961724952">"Charge lente en cours... (chargé dans <xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g>)"</string>
     <string name="accessibility_multi_user_switch_switcher" msgid="7305948938141024937">"Changer d\'utilisateur"</string>
     <string name="accessibility_multi_user_switch_switcher_with_current" msgid="8434880595284601601">"Changer d\'utilisateur (utilisateur actuel <xliff:g id="CURRENT_USER_NAME">%s</xliff:g>)"</string>
     <string name="accessibility_multi_user_switch_inactive" msgid="1424081831468083402">"Utilisateur actuel : <xliff:g id="CURRENT_USER_NAME">%s</xliff:g>"</string>
@@ -406,7 +402,7 @@
     <string name="volumeui_notification_title" msgid="4906770126345910955">"<xliff:g id="APP_NAME">%1$s</xliff:g> correspond à la boîte de dialogue du volume"</string>
     <string name="volumeui_notification_text" msgid="1826889705095768656">"Touchez pour restaurer l\'original."</string>
     <string name="managed_profile_foreground_toast" msgid="5421487114739245972">"Vous utilisez votre profil professionnel."</string>
-    <string name="system_ui_tuner" msgid="3442596010150119600">"Paramètres SystemUI"</string>
+    <string name="system_ui_tuner" msgid="708224127392452018">"System UI Tuner"</string>
     <string name="show_battery_percentage" msgid="5444136600512968798">"Afficher le pourcentage intégré de charge"</string>
     <string name="show_battery_percentage_summary" msgid="3215025775576786037">"Afficher le pourcentage correspondant au niveau de la pile dans l\'icône de la barre d\'état lorsque l\'appareil n\'est pas en charge."</string>
     <string name="quick_settings" msgid="10042998191725428">"Paramètres rapides"</string>
@@ -427,4 +423,17 @@
     <string name="accessibility_quick_settings_detail" msgid="2579369091672902101">"Configuration rapide – <xliff:g id="TITLE">%s</xliff:g>."</string>
     <string name="accessibility_status_bar_hotspot" msgid="4099381329956402865">"Point d\'accès sans fil"</string>
     <string name="accessibility_managed_profile" msgid="6613641363112584120">"Profil professionnel"</string>
+    <string name="tuner_warning_title" msgid="7094689930793031682">"Divertissant pour certains, mais pas pour tous"</string>
+    <string name="tuner_warning" msgid="8730648121973575701">"System UI Tuner vous propose de nouvelles manières d\'adapter et de personnaliser l\'interface utilisateur d\'Android. Ces fonctionnalités expérimentales peuvent être modifiées, cesser de fonctionner ou disparaître dans les versions futures. À utiliser avec prudence."</string>
+    <string name="tuner_persistent_warning" msgid="8597333795565621795">"Ces fonctionnalités expérimentales peuvent être modifiées, cesser de fonctionner ou disparaître dans les versions futures. À utiliser avec prudence."</string>
+    <string name="got_it" msgid="2239653834387972602">"J\'ai compris"</string>
+    <string name="tuner_toast" msgid="603429811084428439">"Félicitations! System UI Tuner a bien été ajouté aux paramètres."</string>
+    <string name="remove_from_settings" msgid="8389591916603406378">"Supprimer des paramètres"</string>
+    <string name="remove_from_settings_prompt" msgid="6069085993355887748">"Supprimer « System UI Tuner » des paramètres et arrêter d\'utiliser toutes ses fonctionnalités?"</string>
+    <!-- no translation found for enable_bluetooth_title (5027037706500635269) -->
+    <skip />
+    <!-- no translation found for enable_bluetooth_message (9106595990708985385) -->
+    <skip />
+    <!-- no translation found for enable_bluetooth_confirmation_ok (6258074250948309715) -->
+    <skip />
 </resources>

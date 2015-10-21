@@ -25,10 +25,10 @@
     <string name="status_bar_recent_inspect_item_title" msgid="7793624864528818569">"အပ်ပလီကေးရှင်း အချက်အလက်များ"</string>
     <string name="status_bar_no_recent_apps" msgid="7374907845131203189">"သင်၏ မကြာမီက မျက်နှာပြင်များ ဒီမှာ ပေါ်လာကြမည်"</string>
     <string name="status_bar_accessibility_dismiss_recents" msgid="4576076075226540105">"လတ်တလောအပ်ပလီကေးရှင်းများအား ဖယ်ထုတ်မည်"</string>
-    <plurals name="status_bar_accessibility_recent_apps" formatted="false" msgid="9138535907802238759">
-      <item quantity="other">ခြုံကြည့်မှုထဲမှ မျက်နှာပြင် %d ခု</item>
-      <item quantity="one">ခြုံကြည့်မှုထဲမှ မျက်နှာပြင် 1 ခု</item>
-    </plurals>
+  <plurals name="status_bar_accessibility_recent_apps">
+    <item quantity="one" msgid="3969335317929254918">"ခြုံကြည့်မှု ထဲက မျက်နှာပြင် ၁ ခု"</item>
+    <item quantity="other" msgid="5523506463832158203">"ခြုံကြည့်မှု ထဲက မျက်နှာပြင် %d ခု"</item>
+  </plurals>
     <string name="status_bar_no_notifications_title" msgid="4755261167193833213">"အကြောင်းကြားချက်များ မရှိ"</string>
     <string name="status_bar_ongoing_events_title" msgid="1682504513316879202">"လက်ရှိအသုံးပြုမှု"</string>
     <string name="status_bar_latest_events_title" msgid="6594767438577593172">"အကြောင်းကြားချက်များ။"</string>
@@ -114,12 +114,6 @@
     <string name="accessibility_data_two_bars" msgid="6166018492360432091">"ဒေတာထုတ်လွှင့်မှု ၂ဘားဖမ်းမိခြင်း။"</string>
     <string name="accessibility_data_three_bars" msgid="9167670452395038520">"ဒေတာသုံးဘား။"</string>
     <string name="accessibility_data_signal_full" msgid="2708384608124519369">"ဒေတာထုတ်လွှင့်မှုအပြည့်ဖမ်းမိခြင်း"</string>
-    <string name="accessibility_wifi_off" msgid="3177380296697933627">"ဝိုင်ဖိုင် မရှိ"</string>
-    <string name="accessibility_no_wifi" msgid="1425476551827924474">"ဝိုင်ဖိုင် ချိတ်ဆက်ထားမှု မရှိပါ"</string>
-    <string name="accessibility_wifi_one_bar" msgid="7735893178010724377">"ဝိုင်ဖိုင် ၁ ဘားရှိ"</string>
-    <string name="accessibility_wifi_two_bars" msgid="4994274250497262434">"ဝိုင်ဖိုင် ၂ ဘား"</string>
-    <string name="accessibility_wifi_three_bars" msgid="3495755044276588384">"ဝိုင်ဖိုင် ၃ ဘား"</string>
-    <string name="accessibility_wifi_signal_full" msgid="6853561303586480376">"ဝိုင်ဖိုင် အပြည့်ရှိ"</string>
     <string name="accessibility_wifi_name" msgid="7202151365171148501">"<xliff:g id="WIFI">%s</xliff:g>သို့ ချိတ်ဆက်ထား။"</string>
     <string name="accessibility_bluetooth_name" msgid="8441517146585531676">"<xliff:g id="BLUETOOTH">%s</xliff:g>သို့ ချိတ်ဆက်ထား"</string>
     <string name="accessibility_no_wimax" msgid="4329180129727630368">"ဝိုက်မက်စ် မရှိပါ"</string>
@@ -331,6 +325,8 @@
     <string name="interruption_level_priority_twoline" msgid="1564715335217164124">"ဦးစားပေးမှု\nသာ"</string>
     <string name="interruption_level_alarms_twoline" msgid="3266909566410106146">"နှိုးစက်များ\nသာ"</string>
     <string name="keyguard_indication_charging_time" msgid="1757251776872835768">"(<xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g> အပြည့် အထိ) အားသွင်းနေ"</string>
+    <string name="keyguard_indication_charging_time_fast" msgid="9018981952053914986">"လျှင်မြန်စွာအားသွင်းခြင်း (<xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g> ပြည့်သည်အထိ)"</string>
+    <string name="keyguard_indication_charging_time_slowly" msgid="955252797961724952">"နှေးကွေးစွာ အားသွင်းခြင်း (<xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g> ပြည့်သည်အထိ)"</string>
     <string name="accessibility_multi_user_switch_switcher" msgid="7305948938141024937">"အသုံးပြုသူကို ပြောင်းလဲရန်"</string>
     <string name="accessibility_multi_user_switch_switcher_with_current" msgid="8434880595284601601">"အသုံးပြုသူကို ပြောင်းရန်၊ လက်ရှိ အသုံးပြုသူ <xliff:g id="CURRENT_USER_NAME">%s</xliff:g>"</string>
     <string name="accessibility_multi_user_switch_inactive" msgid="1424081831468083402">"လတ်တလော သုံးစွဲသူ <xliff:g id="CURRENT_USER_NAME">%s</xliff:g>"</string>
@@ -404,7 +400,7 @@
     <string name="volumeui_notification_title" msgid="4906770126345910955">"<xliff:g id="APP_NAME">%1$s</xliff:g> သည် အသံဒိုင်ယာလော့ခ်ဖြစ်သည်"</string>
     <string name="volumeui_notification_text" msgid="1826889705095768656">"မူရင်းအားပြန်လည်သိမ်းဆည်းရန် ထိပါ။"</string>
     <string name="managed_profile_foreground_toast" msgid="5421487114739245972">"သင်သည် အလုပ်ပရိုဖိုင်းအား သုံးနေသည်"</string>
-    <string name="system_ui_tuner" msgid="3442596010150119600">"System UI tuner"</string>
+    <string name="system_ui_tuner" msgid="708224127392452018">"စနစ် UI ဖမ်းစက်"</string>
     <string name="show_battery_percentage" msgid="5444136600512968798">"မြုတ်ထားသည့် ဘတ်ထရီ ရာခိုင်နှုန်းကို ပြပါ"</string>
     <string name="show_battery_percentage_summary" msgid="3215025775576786037">"အားမသွင်းနေစဉ်တွင် ဘတ်ထရီအဆင့် ရာခိုင်နှုန်းကို အခြေနေပြဘား အိုင်ကွန်တွင် ပြပါ"</string>
     <string name="quick_settings" msgid="10042998191725428">"အမြန် ဆက်တင်များ"</string>
@@ -425,4 +421,17 @@
     <string name="accessibility_quick_settings_detail" msgid="2579369091672902101">"အမြန်ချိန်ညှိခြင်း၊ <xliff:g id="TITLE">%s</xliff:g>။"</string>
     <string name="accessibility_status_bar_hotspot" msgid="4099381329956402865">"ဟော့စပေါ့"</string>
     <string name="accessibility_managed_profile" msgid="6613641363112584120">"အလုပ် ပရိုဖိုင်"</string>
+    <string name="tuner_warning_title" msgid="7094689930793031682">"အချို့သူများ အတွက် ပျော်စရာ ဖြစ်ပေမဲ့ အားလုံး အတွက် မဟုတ်ပါ"</string>
+    <string name="tuner_warning" msgid="8730648121973575701">"စနစ် UI ဖမ်းစက်က သင့်အတွက် Android အသုံးပြုသူ အင်တာဖေ့စ်ကို ပြောင်းကြည့်ရန် နှင့် စိတ်ကြိုက်ပြုလုပ်ရန် နည်းလမ်း အပိုများကို သင့်အတွက် စီစဉ်ပေးသည်။ ဤ စမ်းသပ်ရေး အင်္ဂါရပ်များမှာ ပြောင်းလဲ၊ ကျိုးပျက် သို့မဟုတ် ပျောက်ကွယ် သွားနိုင်သည်။ သတိထားလျက် ဆက်လက် ဆောင်ရွက်ပါ။"</string>
+    <string name="tuner_persistent_warning" msgid="8597333795565621795">"ဤ စမ်းသပ်ရေး အင်္ဂါရပ်များမှာ ပြောင်းလဲ၊ ကျိုးပျက် သို့မဟုတ် ပျောက်ကွယ် သွားနိုင်သည်။ သတိထားလျက် ဆက်လက် ဆောင်ရွက်ပါ။"</string>
+    <string name="got_it" msgid="2239653834387972602">"ရပါပြီ"</string>
+    <string name="tuner_toast" msgid="603429811084428439">"ဂုဏ်ပြုပါရစေ! စနစ် UI ဖမ်းစက်ကို ဆက်တင်ထဲသို့ ထည့်ပြီးပြီ။"</string>
+    <string name="remove_from_settings" msgid="8389591916603406378">"ဆက်တင် အထဲမှ ဖယ်ရှားရန်"</string>
+    <string name="remove_from_settings_prompt" msgid="6069085993355887748">"ဆက်တင် အထဲမှ စနစ် UI ဖမ်းစက်ကို ဖယ်ရှားလျက် ၎င်း၏ အင်္ဂါရပ်များ အားလုံး အသုံးပြုမှု ရပ်တန့်ရမလား?"</string>
+    <!-- no translation found for enable_bluetooth_title (5027037706500635269) -->
+    <skip />
+    <!-- no translation found for enable_bluetooth_message (9106595990708985385) -->
+    <skip />
+    <!-- no translation found for enable_bluetooth_confirmation_ok (6258074250948309715) -->
+    <skip />
 </resources>

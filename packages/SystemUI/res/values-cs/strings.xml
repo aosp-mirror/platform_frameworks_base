@@ -25,12 +25,10 @@
     <string name="status_bar_recent_inspect_item_title" msgid="7793624864528818569">"Informace o aplikaci"</string>
     <string name="status_bar_no_recent_apps" msgid="7374907845131203189">"Zde budou zobrazeny vaše poslední obrazovky"</string>
     <string name="status_bar_accessibility_dismiss_recents" msgid="4576076075226540105">"Zavřít nové aplikace"</string>
-    <plurals name="status_bar_accessibility_recent_apps" formatted="false" msgid="9138535907802238759">
-      <item quantity="few">%d obrazovky v Přehledu</item>
-      <item quantity="many">%d obrazovky v Přehledu</item>
-      <item quantity="other">%d obrazovek v Přehledu</item>
-      <item quantity="one">1 obrazovka v Přehledu</item>
-    </plurals>
+  <plurals name="status_bar_accessibility_recent_apps">
+    <item quantity="one" msgid="3969335317929254918">"1 obrazovka v Přehledu"</item>
+    <item quantity="other" msgid="5523506463832158203">"Počet obrazovek v Přehledu: %d"</item>
+  </plurals>
     <string name="status_bar_no_notifications_title" msgid="4755261167193833213">"Žádná oznámení"</string>
     <string name="status_bar_ongoing_events_title" msgid="1682504513316879202">"Probíhající"</string>
     <string name="status_bar_latest_events_title" msgid="6594767438577593172">"Oznámení"</string>
@@ -116,12 +114,6 @@
     <string name="accessibility_data_two_bars" msgid="6166018492360432091">"Dvě čárky signálu datové sítě."</string>
     <string name="accessibility_data_three_bars" msgid="9167670452395038520">"Tři čárky signálu datové sítě."</string>
     <string name="accessibility_data_signal_full" msgid="2708384608124519369">"Plný signál datové sítě."</string>
-    <string name="accessibility_wifi_off" msgid="3177380296697933627">"Síť Wi-Fi je vypnuta."</string>
-    <string name="accessibility_no_wifi" msgid="1425476551827924474">"Síť Wi-Fi odpojena."</string>
-    <string name="accessibility_wifi_one_bar" msgid="7735893178010724377">"Jedna čárka signálu sítě Wi-Fi."</string>
-    <string name="accessibility_wifi_two_bars" msgid="4994274250497262434">"Dvě čárky signálu sítě Wi-Fi."</string>
-    <string name="accessibility_wifi_three_bars" msgid="3495755044276588384">"Tři čárky signálu sítě Wi-Fi."</string>
-    <string name="accessibility_wifi_signal_full" msgid="6853561303586480376">"Plný signál sítě Wi-Fi."</string>
     <string name="accessibility_wifi_name" msgid="7202151365171148501">"Připojeno k zařízení <xliff:g id="WIFI">%s</xliff:g>."</string>
     <string name="accessibility_bluetooth_name" msgid="8441517146585531676">"Připojeno k zařízení <xliff:g id="BLUETOOTH">%s</xliff:g>."</string>
     <string name="accessibility_no_wimax" msgid="4329180129727630368">"Žádný signál sítě WiMAX."</string>
@@ -335,6 +327,8 @@
     <string name="interruption_level_priority_twoline" msgid="1564715335217164124">"Pouze\nprioritní"</string>
     <string name="interruption_level_alarms_twoline" msgid="3266909566410106146">"Pouze\nbudíky"</string>
     <string name="keyguard_indication_charging_time" msgid="1757251776872835768">"Nabíjení (plně nabito za <xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g>)"</string>
+    <string name="keyguard_indication_charging_time_fast" msgid="9018981952053914986">"Rychlé nabíjení (plně nabito za <xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g>)"</string>
+    <string name="keyguard_indication_charging_time_slowly" msgid="955252797961724952">"Pomalé nabíjení (plně nabito za <xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g>)"</string>
     <string name="accessibility_multi_user_switch_switcher" msgid="7305948938141024937">"Přepnout uživatele"</string>
     <string name="accessibility_multi_user_switch_switcher_with_current" msgid="8434880595284601601">"Přepnout uživatele, aktuální uživatel: <xliff:g id="CURRENT_USER_NAME">%s</xliff:g>"</string>
     <string name="accessibility_multi_user_switch_inactive" msgid="1424081831468083402">"Aktuální uživatel <xliff:g id="CURRENT_USER_NAME">%s</xliff:g>"</string>
@@ -408,7 +402,7 @@
     <string name="volumeui_notification_title" msgid="4906770126345910955">"<xliff:g id="APP_NAME">%1$s</xliff:g> je dialog hlasitosti"</string>
     <string name="volumeui_notification_text" msgid="1826889705095768656">"Klepnutím obnovíte originál."</string>
     <string name="managed_profile_foreground_toast" msgid="5421487114739245972">"Používáte pracovní profil"</string>
-    <string name="system_ui_tuner" msgid="3442596010150119600">"Nástroj na ladění uživatelského rozhraní systému"</string>
+    <string name="system_ui_tuner" msgid="708224127392452018">"Nástroj na ladění uživatelského rozhraní systému"</string>
     <string name="show_battery_percentage" msgid="5444136600512968798">"Zobrazovat vložené procento nabití baterie"</string>
     <string name="show_battery_percentage_summary" msgid="3215025775576786037">"Když neprobíhá nabíjení, zobrazit v ikoně na stavovém řádku procento nabití baterie"</string>
     <string name="quick_settings" msgid="10042998191725428">"Rychlé nastavení"</string>
@@ -429,4 +423,17 @@
     <string name="accessibility_quick_settings_detail" msgid="2579369091672902101">"Rychlé nastavení <xliff:g id="TITLE">%s</xliff:g>."</string>
     <string name="accessibility_status_bar_hotspot" msgid="4099381329956402865">"Hotspot"</string>
     <string name="accessibility_managed_profile" msgid="6613641363112584120">"Pracovní profil"</string>
+    <string name="tuner_warning_title" msgid="7094689930793031682">"Zábava, která není pro každého"</string>
+    <string name="tuner_warning" msgid="8730648121973575701">"Nástroj na ladění uživatelského rozhraní systému vám nabízí další způsoby, jak si vyladit a přizpůsobit uživatelské rozhraní Android. Tyto experimentální funkce mohou v dalších verzích chybět, nefungovat nebo být změněny. Postupujte proto prosím opatrně."</string>
+    <string name="tuner_persistent_warning" msgid="8597333795565621795">"Tyto experimentální funkce mohou v dalších verzích chybět, nefungovat nebo být změněny. Postupujte proto prosím opatrně."</string>
+    <string name="got_it" msgid="2239653834387972602">"Rozumím"</string>
+    <string name="tuner_toast" msgid="603429811084428439">"Úspěch! Do Nastavení byl přidán nástroj na ladění uživatelského rozhraní systému."</string>
+    <string name="remove_from_settings" msgid="8389591916603406378">"Odstranit z Nastavení"</string>
+    <string name="remove_from_settings_prompt" msgid="6069085993355887748">"Chcete nástroj na ladění uživatelského rozhraní systému odstranit z Nastavení a přestat používat všechny jeho funkce?"</string>
+    <!-- no translation found for enable_bluetooth_title (5027037706500635269) -->
+    <skip />
+    <!-- no translation found for enable_bluetooth_message (9106595990708985385) -->
+    <skip />
+    <!-- no translation found for enable_bluetooth_confirmation_ok (6258074250948309715) -->
+    <skip />
 </resources>

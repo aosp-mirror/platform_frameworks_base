@@ -25,12 +25,10 @@
     <string name="status_bar_recent_inspect_item_title" msgid="7793624864528818569">"Про додаток"</string>
     <string name="status_bar_no_recent_apps" msgid="7374907845131203189">"Ваші останні екрани відображаються тут"</string>
     <string name="status_bar_accessibility_dismiss_recents" msgid="4576076075226540105">"Відхилити останні програми"</string>
-    <plurals name="status_bar_accessibility_recent_apps" formatted="false" msgid="9138535907802238759">
-      <item quantity="one">На панелі огляду %d екран</item>
-      <item quantity="few">На панелі огляду %d екрани</item>
-      <item quantity="many">На панелі огляду %d екранів</item>
-      <item quantity="other">На панелі огляду %d екрана</item>
-    </plurals>
+  <plurals name="status_bar_accessibility_recent_apps">
+    <item quantity="one" msgid="3969335317929254918">"Показано 1 екран"</item>
+    <item quantity="other" msgid="5523506463832158203">"Показано екранів: %d"</item>
+  </plurals>
     <string name="status_bar_no_notifications_title" msgid="4755261167193833213">"Немає сповіщень"</string>
     <string name="status_bar_ongoing_events_title" msgid="1682504513316879202">"Поточні"</string>
     <string name="status_bar_latest_events_title" msgid="6594767438577593172">"Сповіщення"</string>
@@ -116,12 +114,6 @@
     <string name="accessibility_data_two_bars" msgid="6166018492360432091">"Дві смужки сигналу даних."</string>
     <string name="accessibility_data_three_bars" msgid="9167670452395038520">"Три смужки сигналу даних."</string>
     <string name="accessibility_data_signal_full" msgid="2708384608124519369">"Максимальний сигнал даних."</string>
-    <string name="accessibility_wifi_off" msgid="3177380296697933627">"Wi-Fi вимкнено."</string>
-    <string name="accessibility_no_wifi" msgid="1425476551827924474">"Wi-Fi від’єднано."</string>
-    <string name="accessibility_wifi_one_bar" msgid="7735893178010724377">"Одна смужка сигналу Wi-Fi."</string>
-    <string name="accessibility_wifi_two_bars" msgid="4994274250497262434">"Дві смужки сигналу Wi-Fi."</string>
-    <string name="accessibility_wifi_three_bars" msgid="3495755044276588384">"Три смужки сигналу Wi-Fi."</string>
-    <string name="accessibility_wifi_signal_full" msgid="6853561303586480376">"Максимальний сигнал Wi-Fi."</string>
     <string name="accessibility_wifi_name" msgid="7202151365171148501">"Підключено до <xliff:g id="WIFI">%s</xliff:g>."</string>
     <string name="accessibility_bluetooth_name" msgid="8441517146585531676">"Підключено до <xliff:g id="BLUETOOTH">%s</xliff:g>."</string>
     <string name="accessibility_no_wimax" msgid="4329180129727630368">"Немає сигналу WiMAX."</string>
@@ -276,7 +268,7 @@
     <string name="quick_settings_cast_title" msgid="7709016546426454729">"Трансляція"</string>
     <string name="quick_settings_casting" msgid="6601710681033353316">"Трансляція"</string>
     <string name="quick_settings_cast_device_default_name" msgid="5367253104742382945">"Пристрій без назви"</string>
-    <string name="quick_settings_cast_device_default_description" msgid="2484573682378634413">"Можна транслювати"</string>
+    <string name="quick_settings_cast_device_default_description" msgid="2484573682378634413">"Готово до трансляції"</string>
     <string name="quick_settings_cast_detail_empty_text" msgid="311785821261640623">"Немає пристроїв"</string>
     <string name="quick_settings_brightness_dialog_title" msgid="8599674057673605368">"Яскравість"</string>
     <string name="quick_settings_brightness_dialog_auto_brightness_label" msgid="5064982743784071218">"АВТО"</string>
@@ -333,6 +325,8 @@
     <string name="interruption_level_priority_twoline" msgid="1564715335217164124">"Лише\nприорітетні"</string>
     <string name="interruption_level_alarms_twoline" msgid="3266909566410106146">"Лише\nсигнали"</string>
     <string name="keyguard_indication_charging_time" msgid="1757251776872835768">"Заряджання (<xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g> до повного зарядження)"</string>
+    <string name="keyguard_indication_charging_time_fast" msgid="9018981952053914986">"Швидке заряджання (<xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g> до повного заряду)"</string>
+    <string name="keyguard_indication_charging_time_slowly" msgid="955252797961724952">"Повільне заряджання (<xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g> до повного заряду)"</string>
     <string name="accessibility_multi_user_switch_switcher" msgid="7305948938141024937">"Змінити користувача"</string>
     <string name="accessibility_multi_user_switch_switcher_with_current" msgid="8434880595284601601">"Змінити користувача, поточний користувач – <xliff:g id="CURRENT_USER_NAME">%s</xliff:g>"</string>
     <string name="accessibility_multi_user_switch_inactive" msgid="1424081831468083402">"Поточний користувач: <xliff:g id="CURRENT_USER_NAME">%s</xliff:g>"</string>
@@ -406,7 +400,7 @@
     <string name="volumeui_notification_title" msgid="4906770126345910955">"<xliff:g id="APP_NAME">%1$s</xliff:g> призначено регулятором гучності"</string>
     <string name="volumeui_notification_text" msgid="1826889705095768656">"Торкніться, щоб відновити оригінал."</string>
     <string name="managed_profile_foreground_toast" msgid="5421487114739245972">"Ви в робочому профілі"</string>
-    <string name="system_ui_tuner" msgid="3442596010150119600">"Тюнер System UI"</string>
+    <string name="system_ui_tuner" msgid="708224127392452018">"System UI Tuner"</string>
     <string name="show_battery_percentage" msgid="5444136600512968798">"Показувати заряд акумулятора у відсотках"</string>
     <string name="show_battery_percentage_summary" msgid="3215025775576786037">"Показувати заряд акумулятора у відсотках в рядку стану, коли пристрій не заряджається"</string>
     <string name="quick_settings" msgid="10042998191725428">"Швидкі налаштування"</string>
@@ -427,4 +421,17 @@
     <string name="accessibility_quick_settings_detail" msgid="2579369091672902101">"Швидкі налаштування, <xliff:g id="TITLE">%s</xliff:g>."</string>
     <string name="accessibility_status_bar_hotspot" msgid="4099381329956402865">"Точка доступу"</string>
     <string name="accessibility_managed_profile" msgid="6613641363112584120">"Робочий профіль"</string>
+    <string name="tuner_warning_title" msgid="7094689930793031682">"Це цікаво, але будьте обачні"</string>
+    <string name="tuner_warning" msgid="8730648121973575701">"System UI Tuner пропонує нові способи налаштувати та персоналізувати інтерфейс користувача Android. Ці експериментальні функції можуть змінюватися, не працювати чи зникати в майбутніх версіях. Будьте обачні."</string>
+    <string name="tuner_persistent_warning" msgid="8597333795565621795">"Ці експериментальні функції можуть змінюватися, не працювати чи зникати в майбутніх версіях. Будьте обачні."</string>
+    <string name="got_it" msgid="2239653834387972602">"Зрозуміло"</string>
+    <string name="tuner_toast" msgid="603429811084428439">"Вітаємо! System UI Tuner установлено в додатку Налаштування"</string>
+    <string name="remove_from_settings" msgid="8389591916603406378">"Видалити з додатка Налаштування"</string>
+    <string name="remove_from_settings_prompt" msgid="6069085993355887748">"Видалити інструмент System UI Tuner із додатка Налаштування та припинити користуватися всіма його функціями?"</string>
+    <!-- no translation found for enable_bluetooth_title (5027037706500635269) -->
+    <skip />
+    <!-- no translation found for enable_bluetooth_message (9106595990708985385) -->
+    <skip />
+    <!-- no translation found for enable_bluetooth_confirmation_ok (6258074250948309715) -->
+    <skip />
 </resources>

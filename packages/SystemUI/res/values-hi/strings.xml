@@ -25,10 +25,10 @@
     <string name="status_bar_recent_inspect_item_title" msgid="7793624864528818569">"ऐप्स की जानकारी"</string>
     <string name="status_bar_no_recent_apps" msgid="7374907845131203189">"आपकी हाल की स्‍क्रीन यहां दिखाई देती हैं"</string>
     <string name="status_bar_accessibility_dismiss_recents" msgid="4576076075226540105">"हाल ही के ऐप्स  खारिज करें"</string>
-    <plurals name="status_bar_accessibility_recent_apps" formatted="false" msgid="9138535907802238759">
-      <item quantity="one">अवलोकन में %d स्‍क्रीन</item>
-      <item quantity="other">अवलोकन में %d स्‍क्रीन</item>
-    </plurals>
+  <plurals name="status_bar_accessibility_recent_apps">
+    <item quantity="one" msgid="3969335317929254918">"अवलोकन मेें 1 स्क्रीन"</item>
+    <item quantity="other" msgid="5523506463832158203">"अवलोकन में %d स्क्रीन"</item>
+  </plurals>
     <string name="status_bar_no_notifications_title" msgid="4755261167193833213">"कोई नोटिफिकेशन नहीं"</string>
     <string name="status_bar_ongoing_events_title" msgid="1682504513316879202">"ऑनगोइंग"</string>
     <string name="status_bar_latest_events_title" msgid="6594767438577593172">"सूचनाएं"</string>
@@ -41,7 +41,7 @@
     <string name="battery_low_why" msgid="4553600287639198111">"सेटिंग"</string>
     <string name="battery_saver_confirmation_title" msgid="5299585433050361634">"बैटरी बचतकर्ता चालू करें?"</string>
     <string name="battery_saver_confirmation_ok" msgid="7507968430447930257">"चालू करें"</string>
-    <string name="battery_saver_start_action" msgid="5576697451677486320">"बैटरी बचतकर्ता को चालू करें"</string>
+    <string name="battery_saver_start_action" msgid="5576697451677486320">"बैटरी बचाएँ"</string>
     <string name="status_bar_settings_settings_button" msgid="3023889916699270224">"सेटिंग"</string>
     <string name="status_bar_settings_wifi_button" msgid="1733928151698311923">"वाई-फ़ाई"</string>
     <string name="status_bar_settings_auto_rotation" msgid="3790482541357798421">"स्‍क्रीन अपनेआप घुमाएं"</string>
@@ -114,12 +114,6 @@
     <string name="accessibility_data_two_bars" msgid="6166018492360432091">"डेटा दो बार."</string>
     <string name="accessibility_data_three_bars" msgid="9167670452395038520">"डेटा तीन बार."</string>
     <string name="accessibility_data_signal_full" msgid="2708384608124519369">"पूर्ण डेटा सि‍ग्‍नल."</string>
-    <string name="accessibility_wifi_off" msgid="3177380296697933627">"Wifi बंद."</string>
-    <string name="accessibility_no_wifi" msgid="1425476551827924474">"Wifi डिस्कनेक्ट है."</string>
-    <string name="accessibility_wifi_one_bar" msgid="7735893178010724377">"WiFi एक बार."</string>
-    <string name="accessibility_wifi_two_bars" msgid="4994274250497262434">"WiFi दो बार."</string>
-    <string name="accessibility_wifi_three_bars" msgid="3495755044276588384">"WiFi तीन बार."</string>
-    <string name="accessibility_wifi_signal_full" msgid="6853561303586480376">"पूर्ण WiFi सि‍ग्‍नल."</string>
     <string name="accessibility_wifi_name" msgid="7202151365171148501">"<xliff:g id="WIFI">%s</xliff:g> से कनेक्ट किया गया."</string>
     <string name="accessibility_bluetooth_name" msgid="8441517146585531676">"<xliff:g id="BLUETOOTH">%s</xliff:g> से कनेक्ट किया गया."</string>
     <string name="accessibility_no_wimax" msgid="4329180129727630368">"WiMAX नहीं."</string>
@@ -331,6 +325,8 @@
     <string name="interruption_level_priority_twoline" msgid="1564715335217164124">"केवल\nप्राथमिकता"</string>
     <string name="interruption_level_alarms_twoline" msgid="3266909566410106146">"केवल\nअलार्म"</string>
     <string name="keyguard_indication_charging_time" msgid="1757251776872835768">"चार्ज हो रहा है (पूरा होने में <xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g> बाकी)"</string>
+    <string name="keyguard_indication_charging_time_fast" msgid="9018981952053914986">"तेज़ी से चार्ज हो रहा है (<xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g> में हो जाएगा)"</string>
+    <string name="keyguard_indication_charging_time_slowly" msgid="955252797961724952">"धीरे चार्ज हो रहा है (<xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g> में पूरा हो जाएगा)"</string>
     <string name="accessibility_multi_user_switch_switcher" msgid="7305948938141024937">"उपयोगकर्ता स्विच करें"</string>
     <string name="accessibility_multi_user_switch_switcher_with_current" msgid="8434880595284601601">"उपयोगकर्ता स्विच करें, वर्तमान उपयोगकर्ता <xliff:g id="CURRENT_USER_NAME">%s</xliff:g>"</string>
     <string name="accessibility_multi_user_switch_inactive" msgid="1424081831468083402">"वर्तमान उपयोगकर्ता <xliff:g id="CURRENT_USER_NAME">%s</xliff:g>"</string>
@@ -404,7 +400,7 @@
     <string name="volumeui_notification_title" msgid="4906770126345910955">"<xliff:g id="APP_NAME">%1$s</xliff:g> वॉल्यूम संवाद है"</string>
     <string name="volumeui_notification_text" msgid="1826889705095768656">"मूल वॉल्यूम को फिर से लाने के लिए स्पर्श करें."</string>
     <string name="managed_profile_foreground_toast" msgid="5421487114739245972">"आप अपनी कार्य प्रोफ़ाइल का उपयोग कर रहे हैं"</string>
-    <string name="system_ui_tuner" msgid="3442596010150119600">"System UI ट्यूनर"</string>
+    <string name="system_ui_tuner" msgid="708224127392452018">"सिस्टम UI ट्यूनर"</string>
     <string name="show_battery_percentage" msgid="5444136600512968798">"एम्बेड किया गया बैटरी प्रतिशत दिखाएं"</string>
     <string name="show_battery_percentage_summary" msgid="3215025775576786037">"जब चार्ज नहीं किया जा रहा हो तब स्थिति बार आइकन में बैटरी स्तर का प्रतिशत दिखाएं"</string>
     <string name="quick_settings" msgid="10042998191725428">"तेज़ सेटिंग"</string>
@@ -425,4 +421,17 @@
     <string name="accessibility_quick_settings_detail" msgid="2579369091672902101">"तेज़ सेटिंग, <xliff:g id="TITLE">%s</xliff:g>."</string>
     <string name="accessibility_status_bar_hotspot" msgid="4099381329956402865">"हॉटस्पॉट"</string>
     <string name="accessibility_managed_profile" msgid="6613641363112584120">"कार्य प्रोफ़ाइल"</string>
+    <string name="tuner_warning_title" msgid="7094689930793031682">"कुछ के लिए मज़ेदार लेकिन सबके लिए नहीं"</string>
+    <string name="tuner_warning" msgid="8730648121973575701">"सिस्टम UI ट्यूनर आपको Android उपयोगकर्ता इंटरफ़ेस में सुधार करने और उसे कस्टमाइज़ करने के अतिरिक्त तरीके प्रदान करता है. ये प्रयोगात्मक सुविधाएं आगामी रिलीज़ में बदल सकती हैं, रुक सकती हैं या दिखाई देना बंद हो सकती हैं. सावधानी से आगे बढ़ें."</string>
+    <string name="tuner_persistent_warning" msgid="8597333795565621795">"ये प्रयोगात्मक सुविधाएं आगामी रिलीज़ में बदल सकती हैं, रुक सकती हैं या दिखाई देना बंद हो सकती हैं. सावधानी से आगे बढ़ें."</string>
+    <string name="got_it" msgid="2239653834387972602">"समझ लिया"</string>
+    <string name="tuner_toast" msgid="603429811084428439">"बधाई हो! सिस्टम UI ट्यूनर को सेटिंग में जोड़ दिया गया है"</string>
+    <string name="remove_from_settings" msgid="8389591916603406378">"सेटिंग से निकालें"</string>
+    <string name="remove_from_settings_prompt" msgid="6069085993355887748">"सेटिंग से सिस्टम UI ट्यूनर निकालें और इसकी सभी सुविधाओं का उपयोग रोक दें?"</string>
+    <!-- no translation found for enable_bluetooth_title (5027037706500635269) -->
+    <skip />
+    <!-- no translation found for enable_bluetooth_message (9106595990708985385) -->
+    <skip />
+    <!-- no translation found for enable_bluetooth_confirmation_ok (6258074250948309715) -->
+    <skip />
 </resources>

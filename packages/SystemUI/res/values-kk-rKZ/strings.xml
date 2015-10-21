@@ -25,10 +25,10 @@
     <string name="status_bar_recent_inspect_item_title" msgid="7793624864528818569">"Қолданба ақпараты"</string>
     <string name="status_bar_no_recent_apps" msgid="7374907845131203189">"Мұнда жақындағы экрандар көрсетіледі"</string>
     <string name="status_bar_accessibility_dismiss_recents" msgid="4576076075226540105">"Жуықта қолданылған қолданбаларды қоспау"</string>
-    <plurals name="status_bar_accessibility_recent_apps" formatted="false" msgid="9138535907802238759">
-      <item quantity="other">«Шолу» ішінде %d экран</item>
-      <item quantity="one">«Шолу» ішінде 1 экран</item>
-    </plurals>
+  <plurals name="status_bar_accessibility_recent_apps">
+    <item quantity="one" msgid="3969335317929254918">"«Шолу» ішінде 1 экран"</item>
+    <item quantity="other" msgid="5523506463832158203">"«Шолу» ішінде %d экран"</item>
+  </plurals>
     <string name="status_bar_no_notifications_title" msgid="4755261167193833213">"Хабарлар жоқ"</string>
     <string name="status_bar_ongoing_events_title" msgid="1682504513316879202">"Ағымдағы"</string>
     <string name="status_bar_latest_events_title" msgid="6594767438577593172">"Хабарлар"</string>
@@ -114,12 +114,6 @@
     <string name="accessibility_data_two_bars" msgid="6166018492360432091">"Дерекқор екі баған."</string>
     <string name="accessibility_data_three_bars" msgid="9167670452395038520">"Дерекқор үш баған."</string>
     <string name="accessibility_data_signal_full" msgid="2708384608124519369">"Дерекқор сигналы толы."</string>
-    <string name="accessibility_wifi_off" msgid="3177380296697933627">"Wifi өшірулі."</string>
-    <string name="accessibility_no_wifi" msgid="1425476551827924474">"Wifi ажыратылған."</string>
-    <string name="accessibility_wifi_one_bar" msgid="7735893178010724377">"Wifi бір жолақ."</string>
-    <string name="accessibility_wifi_two_bars" msgid="4994274250497262434">"Wifi екі жолақ."</string>
-    <string name="accessibility_wifi_three_bars" msgid="3495755044276588384">"Wifi үш жолақ."</string>
-    <string name="accessibility_wifi_signal_full" msgid="6853561303586480376">"Wifi сигналы толық."</string>
     <string name="accessibility_wifi_name" msgid="7202151365171148501">"<xliff:g id="WIFI">%s</xliff:g> қосылған."</string>
     <string name="accessibility_bluetooth_name" msgid="8441517146585531676">"<xliff:g id="BLUETOOTH">%s</xliff:g> қосылған."</string>
     <string name="accessibility_no_wimax" msgid="4329180129727630368">"WiMAX сигналы жоқ."</string>
@@ -331,6 +325,8 @@
     <string name="interruption_level_priority_twoline" msgid="1564715335217164124">"Тек\nбасымдық"</string>
     <string name="interruption_level_alarms_twoline" msgid="3266909566410106146">"Тек\nдабылдар"</string>
     <string name="keyguard_indication_charging_time" msgid="1757251776872835768">"Зарядталуда (толғанша <xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g>)"</string>
+    <string name="keyguard_indication_charging_time_fast" msgid="9018981952053914986">"Жылдам зарядталуда (толғанша <xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g>)"</string>
+    <string name="keyguard_indication_charging_time_slowly" msgid="955252797961724952">"Баяу зарядталуда (толғанша <xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g>)"</string>
     <string name="accessibility_multi_user_switch_switcher" msgid="7305948938141024937">"Пайдаланушыны ауыстыру"</string>
     <string name="accessibility_multi_user_switch_switcher_with_current" msgid="8434880595284601601">"Пайдаланушыны ауыстыру, ағымдағы пайдаланушы <xliff:g id="CURRENT_USER_NAME">%s</xliff:g>"</string>
     <string name="accessibility_multi_user_switch_inactive" msgid="1424081831468083402">"Ағымдағы пайдаланушы: <xliff:g id="CURRENT_USER_NAME">%s</xliff:g>"</string>
@@ -404,7 +400,7 @@
     <string name="volumeui_notification_title" msgid="4906770126345910955">"<xliff:g id="APP_NAME">%1$s</xliff:g> — көлем диалогтық терезесі"</string>
     <string name="volumeui_notification_text" msgid="1826889705095768656">"Түпнұсқаны қалпына келтіру үшін түртіңіз."</string>
     <string name="managed_profile_foreground_toast" msgid="5421487114739245972">"Сіз жұмыс профиліңізді пайдаланып жатырсыз"</string>
-    <string name="system_ui_tuner" msgid="3442596010150119600">"Жүйе интерфейсінің тюнері"</string>
+    <string name="system_ui_tuner" msgid="708224127392452018">"Жүйелік пайдаланушылық интерфейс тюнері"</string>
     <string name="show_battery_percentage" msgid="5444136600512968798">"Ендірілген батарея пайыздық шамасын көрсету"</string>
     <string name="show_battery_percentage_summary" msgid="3215025775576786037">"Зарядталмай тұрғанда, күй жолағы белгішесінің ішінде батарея деңгейінің пайыздық шамасын көрсетеді"</string>
     <string name="quick_settings" msgid="10042998191725428">"Жылдам параметрлер"</string>
@@ -425,4 +421,17 @@
     <string name="accessibility_quick_settings_detail" msgid="2579369091672902101">"Жылдам параметрлер, <xliff:g id="TITLE">%s</xliff:g>."</string>
     <string name="accessibility_status_bar_hotspot" msgid="4099381329956402865">"Хот-спот"</string>
     <string name="accessibility_managed_profile" msgid="6613641363112584120">"Жұмыс профилі"</string>
+    <string name="tuner_warning_title" msgid="7094689930793031682">"Кейбіреулерге қызық, бірақ барлығына емес"</string>
+    <string name="tuner_warning" msgid="8730648121973575701">"Жүйелік пайдаланушылық интерфейс тюнері Android пайдаланушылық интерфейсін реттеудің қосымша жолдарын береді. Бұл эксперименттік мүмкіндіктер болашақ шығарылымдарда өзгеруі, бұзылуы немесе жоғалуы мүмкін. Сақтықпен жалғастырыңыз."</string>
+    <string name="tuner_persistent_warning" msgid="8597333795565621795">"Бұл эксперименттік мүмкіндіктер болашақ шығарылымдарда өзгеруі, бұзылуы немесе жоғалуы мүмкін. Сақтықпен жалғастырыңыз."</string>
+    <string name="got_it" msgid="2239653834387972602">"Түсіндім"</string>
+    <string name="tuner_toast" msgid="603429811084428439">"Құттықтаймыз! Жүйелік пайдаланушылық интерфейс тюнері \"Параметрлер\" тармағына қосылды"</string>
+    <string name="remove_from_settings" msgid="8389591916603406378">"Параметрлерден жою"</string>
+    <string name="remove_from_settings_prompt" msgid="6069085993355887748">"Жүйелік пайдаланушылық интерфейс тюнерін \"Параметрлер\" тармағынан жойып, оның барлық мүмкіндіктерін пайдалануды тоқтату керек пе?"</string>
+    <!-- no translation found for enable_bluetooth_title (5027037706500635269) -->
+    <skip />
+    <!-- no translation found for enable_bluetooth_message (9106595990708985385) -->
+    <skip />
+    <!-- no translation found for enable_bluetooth_confirmation_ok (6258074250948309715) -->
+    <skip />
 </resources>

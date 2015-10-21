@@ -25,10 +25,10 @@
     <string name="status_bar_recent_inspect_item_title" msgid="7793624864528818569">"ព័ត៌មាន​កម្មវិធី"</string>
     <string name="status_bar_no_recent_apps" msgid="7374907845131203189">"អេក្រង់​បច្ចុប្បន្ន​របស់​អ្នក​បង្ហាញ​នៅ​ទីនេះ"</string>
     <string name="status_bar_accessibility_dismiss_recents" msgid="4576076075226540105">"បដិសេធ​កម្មវិធី​ថ្មីៗ"</string>
-    <plurals name="status_bar_accessibility_recent_apps" formatted="false" msgid="9138535907802238759">
-      <item quantity="other">អេក្រង់ %d ក្នុងទិដ្ឋភាព</item>
-      <item quantity="one">អេក្រង់ 1 ក្នុងទិដ្ឋភាព</item>
-    </plurals>
+  <plurals name="status_bar_accessibility_recent_apps">
+    <item quantity="one" msgid="3969335317929254918">"អេក្រង់​ 1 ក្នុង​ទិដ្ឋភាព"</item>
+    <item quantity="other" msgid="5523506463832158203">"អេក្រង់ %d ក្នុង​ទិដ្ឋភាព"</item>
+  </plurals>
     <string name="status_bar_no_notifications_title" msgid="4755261167193833213">"គ្មាន​ការ​ជូន​ដំណឹង"</string>
     <string name="status_bar_ongoing_events_title" msgid="1682504513316879202">"បន្ត"</string>
     <string name="status_bar_latest_events_title" msgid="6594767438577593172">"ការ​ជូន​ដំណឹង"</string>
@@ -114,12 +114,6 @@
     <string name="accessibility_data_two_bars" msgid="6166018492360432091">"ទិន្នន័យ​ពីរ​​កាំ។"</string>
     <string name="accessibility_data_three_bars" msgid="9167670452395038520">"ទិន្នន័យ​បី​កាំ។"</string>
     <string name="accessibility_data_signal_full" msgid="2708384608124519369">"សញ្ញា​ទិន្នន័យ​ពេញ។"</string>
-    <string name="accessibility_wifi_off" msgid="3177380296697933627">"បិទ​វ៉ាយហ្វាយ។"</string>
-    <string name="accessibility_no_wifi" msgid="1425476551827924474">"បាន​ផ្ដាច់​វ៉ាយហ្វាយ។"</string>
-    <string name="accessibility_wifi_one_bar" msgid="7735893178010724377">"សញ្ញា​វ៉ាយហ្វាយ​មួយ​កាំ។"</string>
-    <string name="accessibility_wifi_two_bars" msgid="4994274250497262434">"សេវា​វ៉ាយហ្វាយ​ពីរ​កាំ។"</string>
-    <string name="accessibility_wifi_three_bars" msgid="3495755044276588384">"វ៉ាយហ្វាយ​បី​កាំ។"</string>
-    <string name="accessibility_wifi_signal_full" msgid="6853561303586480376">"សញ្ញា​វ៉ាយហ្វាយ​ពេញ។"</string>
     <string name="accessibility_wifi_name" msgid="7202151365171148501">"បាន​ភ្ជាប់​ទៅ <xliff:g id="WIFI">%s</xliff:g> ។"</string>
     <string name="accessibility_bluetooth_name" msgid="8441517146585531676">"បាន​ភ្ជាប់​ទៅ <xliff:g id="BLUETOOTH">%s</xliff:g> ។"</string>
     <string name="accessibility_no_wimax" msgid="4329180129727630368">"គ្មាន WiMAX ។"</string>
@@ -331,6 +325,8 @@
     <string name="interruption_level_priority_twoline" msgid="1564715335217164124">"អាទិភាព\nប៉ុណ្ណោះ"</string>
     <string name="interruption_level_alarms_twoline" msgid="3266909566410106146">"សំឡេងរោទ៍\nប៉ុណ្ណោះ"</string>
     <string name="keyguard_indication_charging_time" msgid="1757251776872835768">"កំពុង​បញ្ចូល​ថ្ម (<xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g> ទើប​ពេញ)"</string>
+    <string name="keyguard_indication_charging_time_fast" msgid="9018981952053914986">"ថ្មកំពុងសាកលឿន (<xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g> ទើបពេញ)"</string>
+    <string name="keyguard_indication_charging_time_slowly" msgid="955252797961724952">"ថ្មកំពុងសាកយឺតៗ (<xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g> ទើបពេញ)"</string>
     <string name="accessibility_multi_user_switch_switcher" msgid="7305948938141024937">"ប្ដូរ​អ្នក​ប្រើ"</string>
     <string name="accessibility_multi_user_switch_switcher_with_current" msgid="8434880595284601601">"ប្ដូរ​អ្នកប្រើ ​អ្នកប្រើ​បច្ចុប្បន្ន <xliff:g id="CURRENT_USER_NAME">%s</xliff:g>"</string>
     <string name="accessibility_multi_user_switch_inactive" msgid="1424081831468083402">"អ្នកប្រើបច្ចុប្បន្ន <xliff:g id="CURRENT_USER_NAME">%s</xliff:g>"</string>
@@ -404,7 +400,7 @@
     <string name="volumeui_notification_title" msgid="4906770126345910955">"<xliff:g id="APP_NAME">%1$s</xliff:g> គឺជាប្រអប់សម្លេង"</string>
     <string name="volumeui_notification_text" msgid="1826889705095768656">"ប៉ះដើម្បីស្តារច្បាប់ដើម។"</string>
     <string name="managed_profile_foreground_toast" msgid="5421487114739245972">"អ្នកកំពុងប្រើប្រវត្តិរូបការងាររបស់អ្នក"</string>
-    <string name="system_ui_tuner" msgid="3442596010150119600">"ឧបករណ៍ចាប់ SystemUI"</string>
+    <string name="system_ui_tuner" msgid="708224127392452018">"កម្មវិធីសម្រួល UI ប្រព័ន្ធ"</string>
     <string name="show_battery_percentage" msgid="5444136600512968798">"បង្ហាញភាគរយថាមពលថ្មដែលបានបង្កប់"</string>
     <string name="show_battery_percentage_summary" msgid="3215025775576786037">"បង្ហាញភាគរយនៃកម្រិតថាមពលថ្មនៅក្នុងរូបតំណាងរបារស្ថានភាពនៅពេលមិនសាកថ្ម"</string>
     <string name="quick_settings" msgid="10042998191725428">"ការកំណត់រហ័ស"</string>
@@ -425,4 +421,17 @@
     <string name="accessibility_quick_settings_detail" msgid="2579369091672902101">"ការកំណត់រហ័ស <xliff:g id="TITLE">%s</xliff:g>។"</string>
     <string name="accessibility_status_bar_hotspot" msgid="4099381329956402865">"ហតស្ប៉ត"</string>
     <string name="accessibility_managed_profile" msgid="6613641363112584120">"ប្រវត្តិរូបការងារ"</string>
+    <string name="tuner_warning_title" msgid="7094689930793031682">"ល្អសម្រាប់អ្នកប្រើមួយចំនួន តែមិនសម្រាប់គ្រប់គ្នាទេ"</string>
+    <string name="tuner_warning" msgid="8730648121973575701">"កម្មវិធីសម្រួល UI ប្រព័ន្ធផ្តល់ជូនអ្នកនូវមធ្យោបាយបន្ថែមទៀតដើម្បីកែសម្រួល និងប្តូរចំណុចប្រទាក់អ្នកប្រើ Android តាមបំណង។ លក្ខណៈពិសេសសាកល្បងនេះអាចនឹងផ្លាស់ប្តូរ បំបែក ឬបាត់បង់បន្ទាប់ពីការចេញផ្សាយនាពេលអនាគត។ សូមបន្តដោយប្រុងប្រយ័ត្ន។"</string>
+    <string name="tuner_persistent_warning" msgid="8597333795565621795">"លក្ខណៈពិសេសសាកល្បងនេះអាចនឹងផ្លាស់ប្តូរ បំបែក ឬបាត់បង់បន្ទាប់ពីការចេញផ្សាយនាពេលអនាគត។ សូមបន្តដោយប្រុងប្រយ័ត្ន។"</string>
+    <string name="got_it" msgid="2239653834387972602">"យល់ហើយ"</string>
+    <string name="tuner_toast" msgid="603429811084428439">"សូមអបអរសាទរ! កម្មវិធីសម្រួល UI ប្រព័ន្ធត្រូវបានបន្ថែមទៅការកំណត់ហើយ"</string>
+    <string name="remove_from_settings" msgid="8389591916603406378">"យកចេញពីការកំណត់"</string>
+    <string name="remove_from_settings_prompt" msgid="6069085993355887748">"យកកម្មវិធីសម្រួល UI ប្រព័ន្ធចេញពីការកំណត់ ហើយឈប់ប្រើលក្ខណៈពិសេសរបស់វាទាំងអស់?"</string>
+    <!-- no translation found for enable_bluetooth_title (5027037706500635269) -->
+    <skip />
+    <!-- no translation found for enable_bluetooth_message (9106595990708985385) -->
+    <skip />
+    <!-- no translation found for enable_bluetooth_confirmation_ok (6258074250948309715) -->
+    <skip />
 </resources>

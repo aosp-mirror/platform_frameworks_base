@@ -25,10 +25,10 @@
     <string name="status_bar_recent_inspect_item_title" msgid="7793624864528818569">"Info om appen"</string>
     <string name="status_bar_no_recent_apps" msgid="7374907845131203189">"De sist brukte skjermene dine vises her"</string>
     <string name="status_bar_accessibility_dismiss_recents" msgid="4576076075226540105">"Avvis nylige apper"</string>
-    <plurals name="status_bar_accessibility_recent_apps" formatted="false" msgid="9138535907802238759">
-      <item quantity="other">%d skjermer i oversikten</item>
-      <item quantity="one">1 skjerm i oversikten</item>
-    </plurals>
+  <plurals name="status_bar_accessibility_recent_apps">
+    <item quantity="one" msgid="3969335317929254918">"1 skjerm i Oversikten"</item>
+    <item quantity="other" msgid="5523506463832158203">"%d skjermer i Oversikten"</item>
+  </plurals>
     <string name="status_bar_no_notifications_title" msgid="4755261167193833213">"Ingen varslinger"</string>
     <string name="status_bar_ongoing_events_title" msgid="1682504513316879202">"Aktiviteter"</string>
     <string name="status_bar_latest_events_title" msgid="6594767438577593172">"Varsler"</string>
@@ -114,12 +114,6 @@
     <string name="accessibility_data_two_bars" msgid="6166018492360432091">"Data – to stolper."</string>
     <string name="accessibility_data_three_bars" msgid="9167670452395038520">"Data – tre stolper."</string>
     <string name="accessibility_data_signal_full" msgid="2708384608124519369">"Datasignal er fullt."</string>
-    <string name="accessibility_wifi_off" msgid="3177380296697933627">"Wi-Fi er av."</string>
-    <string name="accessibility_no_wifi" msgid="1425476551827924474">"Wi-Fi er frakoblet."</string>
-    <string name="accessibility_wifi_one_bar" msgid="7735893178010724377">"Wi-Fi – én stolpe."</string>
-    <string name="accessibility_wifi_two_bars" msgid="4994274250497262434">"Wi-Fi – to stolper."</string>
-    <string name="accessibility_wifi_three_bars" msgid="3495755044276588384">"Wi-Fi – tre stolper."</string>
-    <string name="accessibility_wifi_signal_full" msgid="6853561303586480376">"Wi-Fi-signal er ved full styrke."</string>
     <string name="accessibility_wifi_name" msgid="7202151365171148501">"Koblet til <xliff:g id="WIFI">%s</xliff:g>."</string>
     <string name="accessibility_bluetooth_name" msgid="8441517146585531676">"Koblet til <xliff:g id="BLUETOOTH">%s</xliff:g>."</string>
     <string name="accessibility_no_wimax" msgid="4329180129727630368">"Ingen WiMAX."</string>
@@ -331,6 +325,8 @@
     <string name="interruption_level_priority_twoline" msgid="1564715335217164124">"Bare\nPrioritet"</string>
     <string name="interruption_level_alarms_twoline" msgid="3266909566410106146">"Bare\nalarmer"</string>
     <string name="keyguard_indication_charging_time" msgid="1757251776872835768">"Lader (fulladet om <xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g>)"</string>
+    <string name="keyguard_indication_charging_time_fast" msgid="9018981952053914986">"Lader raskt (fulladet om <xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g>)"</string>
+    <string name="keyguard_indication_charging_time_slowly" msgid="955252797961724952">"Lader sakte (fulladet om <xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g>)"</string>
     <string name="accessibility_multi_user_switch_switcher" msgid="7305948938141024937">"Bytt bruker"</string>
     <string name="accessibility_multi_user_switch_switcher_with_current" msgid="8434880595284601601">"Bytt bruker, gjeldende bruker er <xliff:g id="CURRENT_USER_NAME">%s</xliff:g>"</string>
     <string name="accessibility_multi_user_switch_inactive" msgid="1424081831468083402">"Gjeldende bruker: <xliff:g id="CURRENT_USER_NAME">%s</xliff:g>"</string>
@@ -404,7 +400,7 @@
     <string name="volumeui_notification_title" msgid="4906770126345910955">"<xliff:g id="APP_NAME">%1$s</xliff:g> er volumdialogen"</string>
     <string name="volumeui_notification_text" msgid="1826889705095768656">"Trykk for å gå tilbake til den opprinnelige volumdialogen."</string>
     <string name="managed_profile_foreground_toast" msgid="5421487114739245972">"Du bruker jobbprofilen din"</string>
-    <string name="system_ui_tuner" msgid="3442596010150119600">"SystemUI Tuner"</string>
+    <string name="system_ui_tuner" msgid="708224127392452018">"System UI Tuner"</string>
     <string name="show_battery_percentage" msgid="5444136600512968798">"Vis prosent for det innebygde batteriet"</string>
     <string name="show_battery_percentage_summary" msgid="3215025775576786037">"Vis batterinivåprosenten inni statusfeltikonet når du ikke lader"</string>
     <string name="quick_settings" msgid="10042998191725428">"Hurtiginnstillinger"</string>
@@ -425,4 +421,17 @@
     <string name="accessibility_quick_settings_detail" msgid="2579369091672902101">"Hurtiginnstillinger, <xliff:g id="TITLE">%s</xliff:g>."</string>
     <string name="accessibility_status_bar_hotspot" msgid="4099381329956402865">"Wi-Fi-sone"</string>
     <string name="accessibility_managed_profile" msgid="6613641363112584120">"Work-profil"</string>
+    <string name="tuner_warning_title" msgid="7094689930793031682">"Gøy for noen – ikke for alle"</string>
+    <string name="tuner_warning" msgid="8730648121973575701">"Med System UI Tuner har du flere måter å justere og tilpasse Android-brukergrensesnittet på. Disse eksperimentelle funksjonene kan endres, avbrytes eller fjernes i fremtidige utgivelser. Fortsett med forbehold."</string>
+    <string name="tuner_persistent_warning" msgid="8597333795565621795">"Disse eksperimentelle funksjonene kan endres, avbrytes eller fjernes i fremtidige utgivelser. Fortsett med forbehold."</string>
+    <string name="got_it" msgid="2239653834387972602">"Greit"</string>
+    <string name="tuner_toast" msgid="603429811084428439">"Gratulerer! System UI Tuner er lagt til i Innstillinger"</string>
+    <string name="remove_from_settings" msgid="8389591916603406378">"Fjern fra Innstillinger"</string>
+    <string name="remove_from_settings_prompt" msgid="6069085993355887748">"Vil du fjerne System UI Tuner fra Innstillinger og slutte å bruke alle de tilknyttede funksjonene?"</string>
+    <!-- no translation found for enable_bluetooth_title (5027037706500635269) -->
+    <skip />
+    <!-- no translation found for enable_bluetooth_message (9106595990708985385) -->
+    <skip />
+    <!-- no translation found for enable_bluetooth_confirmation_ok (6258074250948309715) -->
+    <skip />
 </resources>

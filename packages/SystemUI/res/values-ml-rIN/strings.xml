@@ -22,13 +22,13 @@
     <string name="app_label" msgid="7164937344850004466">"സിസ്റ്റം UI"</string>
     <string name="status_bar_clear_all_button" msgid="7774721344716731603">"മായ്‌ക്കുക"</string>
     <string name="status_bar_recent_remove_item_title" msgid="6026395868129852968">"ലിസ്‌റ്റിൽ നിന്നും നീക്കംചെയ്യുക"</string>
-    <string name="status_bar_recent_inspect_item_title" msgid="7793624864528818569">"അപ്ലിക്കേഷൻ വിവരം"</string>
+    <string name="status_bar_recent_inspect_item_title" msgid="7793624864528818569">"ആപ്പ് വിവരം"</string>
     <string name="status_bar_no_recent_apps" msgid="7374907845131203189">"നിങ്ങളുടെ പുതിയ സ്ക്രീനുകൾ ഇവിടെ ദൃശ്യമാകുന്നു"</string>
     <string name="status_bar_accessibility_dismiss_recents" msgid="4576076075226540105">"സമീപകാല അപ്ലിക്കേഷനുകൾ നിരസിക്കുക"</string>
-    <plurals name="status_bar_accessibility_recent_apps" formatted="false" msgid="9138535907802238759">
-      <item quantity="other">ചുരുക്കവിവരണത്തിലെ %d സ്‌ക്രീനുകൾ</item>
-      <item quantity="one">ചുരുക്കവിവരണത്തിലെ ഒരു സ്‌ക്രീൻ</item>
-    </plurals>
+  <plurals name="status_bar_accessibility_recent_apps">
+    <item quantity="one" msgid="3969335317929254918">"കാഴ്ചയിലെ ഒരു സ്‌ക്രീൻ"</item>
+    <item quantity="other" msgid="5523506463832158203">"കാഴ്ചയിലെ %d സ്‌ക്രീനുകൾ"</item>
+  </plurals>
     <string name="status_bar_no_notifications_title" msgid="4755261167193833213">"അറിയിപ്പുകൾ ഒന്നുമില്ല"</string>
     <string name="status_bar_ongoing_events_title" msgid="1682504513316879202">"നടന്നുകൊണ്ടിരിക്കുന്നവ"</string>
     <string name="status_bar_latest_events_title" msgid="6594767438577593172">"അറിയിപ്പുകൾ"</string>
@@ -43,7 +43,7 @@
     <string name="battery_saver_confirmation_ok" msgid="7507968430447930257">"ഓൺ ചെയ്യുക"</string>
     <string name="battery_saver_start_action" msgid="5576697451677486320">"ബാറ്ററി സേവർ ഓണാക്കുക"</string>
     <string name="status_bar_settings_settings_button" msgid="3023889916699270224">"ക്രമീകരണങ്ങൾ"</string>
-    <string name="status_bar_settings_wifi_button" msgid="1733928151698311923">"Wi-Fi"</string>
+    <string name="status_bar_settings_wifi_button" msgid="1733928151698311923">"വൈഫൈ"</string>
     <string name="status_bar_settings_auto_rotation" msgid="3790482541357798421">"സ്‌ക്രീൻ സ്വയമേതിരിക്കുക"</string>
     <string name="status_bar_settings_mute_label" msgid="554682549917429396">"മ്യൂട്ടുചെയ്യുക"</string>
     <string name="status_bar_settings_auto_brightness_label" msgid="511453614962324674">"യാന്ത്രികം"</string>
@@ -114,12 +114,6 @@
     <string name="accessibility_data_two_bars" msgid="6166018492360432091">"ഡാറ്റ രണ്ട് ബാറുകൾ."</string>
     <string name="accessibility_data_three_bars" msgid="9167670452395038520">"ഡാറ്റ മൂന്ന് ബാർ."</string>
     <string name="accessibility_data_signal_full" msgid="2708384608124519369">"ഡാറ്റ സിഗ്‌നൽ പൂർണ്ണമാണ്."</string>
-    <string name="accessibility_wifi_off" msgid="3177380296697933627">"വൈഫൈ ഓഫാണ്."</string>
-    <string name="accessibility_no_wifi" msgid="1425476551827924474">"വൈഫൈ വിച്ഛേദിച്ചു."</string>
-    <string name="accessibility_wifi_one_bar" msgid="7735893178010724377">"വൈഫൈ ഒരു ബാർ."</string>
-    <string name="accessibility_wifi_two_bars" msgid="4994274250497262434">"വൈഫൈ രണ്ട് ബാറുകൾ."</string>
-    <string name="accessibility_wifi_three_bars" msgid="3495755044276588384">"വൈഫൈ മൂന്ന് ബാറുകൾ."</string>
-    <string name="accessibility_wifi_signal_full" msgid="6853561303586480376">"വൈഫൈ മികച്ച സിഗ്‌നൽ."</string>
     <string name="accessibility_wifi_name" msgid="7202151365171148501">"<xliff:g id="WIFI">%s</xliff:g> എന്നതിലേക്ക് കണക്‌റ്റുചെയ്‌തു."</string>
     <string name="accessibility_bluetooth_name" msgid="8441517146585531676">"<xliff:g id="BLUETOOTH">%s</xliff:g> എന്നതിലേക്ക് കണക്‌റ്റുചെയ്‌തു."</string>
     <string name="accessibility_no_wimax" msgid="4329180129727630368">"WiMAX ഇല്ല."</string>
@@ -150,7 +144,7 @@
     <string name="accessibility_data_connection_cdma" msgid="6132648193978823023">"CDMA"</string>
     <string name="accessibility_data_connection_roaming" msgid="5977362333466556094">"റോമിംഗ്"</string>
     <string name="accessibility_data_connection_edge" msgid="4477457051631979278">"Edge"</string>
-    <string name="accessibility_data_connection_wifi" msgid="2324496756590645221">"Wi-Fi"</string>
+    <string name="accessibility_data_connection_wifi" msgid="2324496756590645221">"വൈഫൈ"</string>
     <string name="accessibility_no_sim" msgid="8274017118472455155">"സിം ഇല്ല."</string>
     <string name="accessibility_bluetooth_tether" msgid="4102784498140271969">"ബ്ലൂടൂത്ത് ടെതറിംഗ്."</string>
     <string name="accessibility_airplane_mode" msgid="834748999790763092">"ഫ്ലൈറ്റ് മോഡ്."</string>
@@ -209,10 +203,10 @@
     <string name="accessibility_quick_settings_close" msgid="3115847794692516306">"പാനൽ അടയ്‌ക്കുക."</string>
     <string name="accessibility_quick_settings_more_time" msgid="3659274935356197708">"കൂടുതൽ സമയം."</string>
     <string name="accessibility_quick_settings_less_time" msgid="2404728746293515623">"സമയം കുറയ്‌ക്കുക."</string>
-    <string name="accessibility_quick_settings_flashlight_off" msgid="4936432000069786988">"ഫ്ലാഷ്‌ലൈറ്റ് ഓഫാണ്."</string>
-    <string name="accessibility_quick_settings_flashlight_on" msgid="2003479320007841077">"ഫ്ലാഷ്‌ലൈറ്റ് ഓണാണ്."</string>
-    <string name="accessibility_quick_settings_flashlight_changed_off" msgid="3303701786768224304">"ഫ്ലാഷ്‌ലൈറ്റ് ഓഫാക്കി."</string>
-    <string name="accessibility_quick_settings_flashlight_changed_on" msgid="6531793301533894686">"ഫ്ലാഷ്‌ലൈറ്റ് ഓണാക്കി."</string>
+    <string name="accessibility_quick_settings_flashlight_off" msgid="4936432000069786988">"ടോർച്ച് ഓഫാണ്."</string>
+    <string name="accessibility_quick_settings_flashlight_on" msgid="2003479320007841077">"ടോർച്ച് ഓണാണ്."</string>
+    <string name="accessibility_quick_settings_flashlight_changed_off" msgid="3303701786768224304">"ടോർച്ച് ഓഫാക്കി."</string>
+    <string name="accessibility_quick_settings_flashlight_changed_on" msgid="6531793301533894686">"ടോർച്ച് ഓണാക്കി."</string>
     <string name="accessibility_quick_settings_color_inversion_changed_off" msgid="4406577213290173911">"വർണ്ണ വൈപരീത്യം ഓഫാക്കി."</string>
     <string name="accessibility_quick_settings_color_inversion_changed_on" msgid="6897462320184911126">"വർണ്ണ വൈപരീത്യം ഓണാക്കി."</string>
     <string name="accessibility_quick_settings_hotspot_changed_off" msgid="5004708003447561394">"മൊബൈൽ ഹോട്ട്‌സ്‌പോട്ട് ഓഫാക്കി."</string>
@@ -226,7 +220,7 @@
     <string name="data_usage_disabled_dialog" msgid="8453242888903772524">"നിങ്ങൾ നേരത്തെ ക്രമീകരിച്ച ഡാറ്റ പരിധിയിലെത്തിയതിനാൽ, ഈ സൈക്കിളിന്റെ അവശേഷിക്കുന്ന ഡാറ്റ ഉപയോഗം, ഉപകരണം താൽക്കാലികമായി നിർത്തി.\n\nപുനരാരംഭിക്കുന്നത്, നിങ്ങളുടെ കാരിയറിൽ നിന്ന് നിരക്കുകൾക്ക് ഇടയാക്കാം."</string>
     <string name="data_usage_disabled_dialog_enable" msgid="1412395410306390593">"പുനരാരംഭിക്കുക"</string>
     <string name="status_bar_settings_signal_meter_disconnected" msgid="1940231521274147771">"ഇന്റർനെറ്റ് കണക്ഷൻ ഇല്ല"</string>
-    <string name="status_bar_settings_signal_meter_wifi_nossid" msgid="6557486452774597820">"Wi-Fi കണക്‌റ്റുചെയ്‌തു"</string>
+    <string name="status_bar_settings_signal_meter_wifi_nossid" msgid="6557486452774597820">"വൈഫൈ കണക്‌റ്റുചെയ്‌തു"</string>
     <string name="gps_notification_searching_text" msgid="8574247005642736060">"GPS-നായി തിരയുന്നു"</string>
     <string name="gps_notification_found_text" msgid="4619274244146446464">"ലൊക്കേഷൻ സജ്ജീകരിച്ചത് GPS ആണ്"</string>
     <string name="accessibility_location_active" msgid="2427290146138169014">"ലൊക്കേഷൻ അഭ്യർത്ഥനകൾ സജീവമാണ്"</string>
@@ -251,7 +245,7 @@
     <string name="quick_settings_bluetooth_off_label" msgid="8159652146149219937">"ബ്ലൂടൂത്ത് ഓഫുചെയ്യുക"</string>
     <string name="quick_settings_bluetooth_detail_empty_text" msgid="4910015762433302860">"ജോടിയാക്കിയ ഉപകരണങ്ങളൊന്നും ലഭ്യമല്ല"</string>
     <string name="quick_settings_brightness_label" msgid="6968372297018755815">"തെളിച്ചം"</string>
-    <string name="quick_settings_rotation_unlocked_label" msgid="7305323031808150099">"ഓട്ടോ റൊട്ടേറ്റ്"</string>
+    <string name="quick_settings_rotation_unlocked_label" msgid="7305323031808150099">"ആവശ്യാനുസരണം തിരിയുക"</string>
     <string name="quick_settings_rotation_locked_label" msgid="6359205706154282377">"റൊട്ടേഷൻ ലോക്കുചെയ്‌തു"</string>
     <string name="quick_settings_rotation_locked_portrait_label" msgid="5102691921442135053">"പോർട്രെയ്‌റ്റ്"</string>
     <string name="quick_settings_rotation_locked_landscape_label" msgid="8553157770061178719">"ലാൻഡ്‌സ്‌കേപ്പ്"</string>
@@ -266,11 +260,11 @@
     <string name="quick_settings_user_label" msgid="5238995632130897840">"ഞാന്‍"</string>
     <string name="quick_settings_user_title" msgid="4467690427642392403">"ഉപയോക്താവ്"</string>
     <string name="quick_settings_user_new_user" msgid="9030521362023479778">"പുതിയ ഉപയോക്താവ്"</string>
-    <string name="quick_settings_wifi_label" msgid="9135344704899546041">"Wi-Fi"</string>
+    <string name="quick_settings_wifi_label" msgid="9135344704899546041">"വൈഫൈ"</string>
     <string name="quick_settings_wifi_not_connected" msgid="7171904845345573431">"കണ‌ക്റ്റുചെയ്‌തിട്ടില്ല"</string>
     <string name="quick_settings_wifi_no_network" msgid="2221993077220856376">"നെറ്റ്‌വർക്ക് ഒന്നുമില്ല"</string>
-    <string name="quick_settings_wifi_off_label" msgid="7558778100843885864">"Wi-Fi ഓഫുചെയ്യുക"</string>
-    <string name="quick_settings_wifi_detail_empty_text" msgid="269990350383909226">"Wi-Fi നെറ്റ്‌വർക്കുകളൊന്നും ലഭ്യമല്ല"</string>
+    <string name="quick_settings_wifi_off_label" msgid="7558778100843885864">"വൈഫൈ ഓഫുചെയ്യുക"</string>
+    <string name="quick_settings_wifi_detail_empty_text" msgid="269990350383909226">"വൈഫൈ നെറ്റ്‌വർക്കുകളൊന്നും ലഭ്യമല്ല"</string>
     <string name="quick_settings_cast_title" msgid="7709016546426454729">"കാസ്‌റ്റുചെയ്യുക"</string>
     <string name="quick_settings_casting" msgid="6601710681033353316">"കാസ്റ്റുചെയ്യുന്നു"</string>
     <string name="quick_settings_cast_device_default_name" msgid="5367253104742382945">"പേരിടാത്ത ഉപകരണം"</string>
@@ -287,7 +281,7 @@
     <string name="quick_settings_tethering_label" msgid="7153452060448575549">"ടെതറിംഗ്"</string>
     <string name="quick_settings_hotspot_label" msgid="6046917934974004879">"ഹോട്ട്‌സ്‌പോട്ട്"</string>
     <string name="quick_settings_notifications_label" msgid="4818156442169154523">"അറിയിപ്പുകൾ"</string>
-    <string name="quick_settings_flashlight_label" msgid="2133093497691661546">"ഫ്ലാഷ്‌ലൈറ്റ്"</string>
+    <string name="quick_settings_flashlight_label" msgid="2133093497691661546">"ടോർച്ച്"</string>
     <string name="quick_settings_cellular_detail_title" msgid="8575062783675171695">"സെല്ലുലാർ ഡാറ്റ"</string>
     <string name="quick_settings_cellular_detail_data_usage" msgid="1964260360259312002">"ഡാറ്റ ഉപയോഗം"</string>
     <string name="quick_settings_cellular_detail_remaining_data" msgid="722715415543541249">"ശേഷിക്കുന്ന ഡാറ്റ"</string>
@@ -296,7 +290,7 @@
     <string name="quick_settings_cellular_detail_data_limit" msgid="56011158504994128">"<xliff:g id="DATA_LIMIT">%s</xliff:g> പരിധി"</string>
     <string name="quick_settings_cellular_detail_data_warning" msgid="2440098045692399009">"<xliff:g id="DATA_LIMIT">%s</xliff:g> മുന്നറിയിപ്പ്"</string>
     <string name="recents_empty_message" msgid="8682129509540827999">"നിങ്ങളുടെ പുതിയ സ്ക്രീനുകൾ ഇവിടെ ദൃശ്യമാകുന്നു"</string>
-    <string name="recents_app_info_button_label" msgid="2890317189376000030">"അപ്ലിക്കേഷൻ വിവരം"</string>
+    <string name="recents_app_info_button_label" msgid="2890317189376000030">"ആപ്പ് വിവരം"</string>
     <string name="recents_lock_to_app_button_label" msgid="6942899049072506044">"സ്ക്രീൻ പിൻ ചെയ്യൽ"</string>
     <string name="recents_search_bar_label" msgid="8074997400187836677">"തിരയുക"</string>
     <string name="recents_launch_error_message" msgid="2969287838120550506">"<xliff:g id="APP">%s</xliff:g> ആരംഭിക്കാനായില്ല."</string>
@@ -331,6 +325,8 @@
     <string name="interruption_level_priority_twoline" msgid="1564715335217164124">"മുൻഗണന\nമാത്രം"</string>
     <string name="interruption_level_alarms_twoline" msgid="3266909566410106146">"അലാറങ്ങൾ\nമാത്രം"</string>
     <string name="keyguard_indication_charging_time" msgid="1757251776872835768">"ചാർജ്ജുചെയ്യുന്നു (പൂർണ്ണമാകുന്നതിന്, <xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g>)"</string>
+    <string name="keyguard_indication_charging_time_fast" msgid="9018981952053914986">"വേഗത്തിൽ ചാർജുചെയ്യുന്നു (പൂർണ്ണമാകാൻ <xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g>)"</string>
+    <string name="keyguard_indication_charging_time_slowly" msgid="955252797961724952">"പതുക്കെ ചാർജുചെയ്യുന്നു (പൂർണ്ണമാകാൻ <xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g>)"</string>
     <string name="accessibility_multi_user_switch_switcher" msgid="7305948938141024937">"ഉപയോക്താവ് മാറുക"</string>
     <string name="accessibility_multi_user_switch_switcher_with_current" msgid="8434880595284601601">"ഉപയോക്താവിനെ മാറ്റുക, <xliff:g id="CURRENT_USER_NAME">%s</xliff:g> എന്നയാളാണ് നിലവിലുള്ള ഉപയോക്താവ്"</string>
     <string name="accessibility_multi_user_switch_inactive" msgid="1424081831468083402">"നിലവിലെ ഉപയോക്താവ് <xliff:g id="CURRENT_USER_NAME">%s</xliff:g>"</string>
@@ -404,7 +400,7 @@
     <string name="volumeui_notification_title" msgid="4906770126345910955">"<xliff:g id="APP_NAME">%1$s</xliff:g>, വോളിയം ഡയലോഗാണ്"</string>
     <string name="volumeui_notification_text" msgid="1826889705095768656">"ആദ്യത്തേത് പുനഃസ്ഥാപിക്കാൻ സ്‌പർശിക്കുക."</string>
     <string name="managed_profile_foreground_toast" msgid="5421487114739245972">"നിങ്ങൾ ഉപയോഗിക്കുന്നത് ഔദ്യോഗിക പ്രൊഫൈലാണ്"</string>
-    <string name="system_ui_tuner" msgid="3442596010150119600">"System UI ട്യൂണർ"</string>
+    <string name="system_ui_tuner" msgid="708224127392452018">"സിസ്റ്റം UI ട്യൂണർ"</string>
     <string name="show_battery_percentage" msgid="5444136600512968798">"എംബഡ് ചെയ്‌ത ബാറ്ററി ശതമാനം കാണിക്കുക"</string>
     <string name="show_battery_percentage_summary" msgid="3215025775576786037">"ചാർജ്ജുചെയ്യാതിരിക്കുമ്പോൾ സ്റ്റാറ്റസ് ബാർ ഐക്കണിൽ ബാറ്ററി ലെവൽ ശതമാനം കാണിക്കുക"</string>
     <string name="quick_settings" msgid="10042998191725428">"ദ്രുത ക്രമീകരണം"</string>
@@ -425,4 +421,17 @@
     <string name="accessibility_quick_settings_detail" msgid="2579369091672902101">"ദ്രുത ക്രമീകരണം, <xliff:g id="TITLE">%s</xliff:g>."</string>
     <string name="accessibility_status_bar_hotspot" msgid="4099381329956402865">"ഹോട്ട്‌സ്‌പോട്ട്"</string>
     <string name="accessibility_managed_profile" msgid="6613641363112584120">"ഔദ്യോഗിക പ്രൊഫൈൽ"</string>
+    <string name="tuner_warning_title" msgid="7094689930793031682">"ചിലർക്ക് വിനോദം, എന്നാൽ എല്ലാവർക്കുമില്ല"</string>
+    <string name="tuner_warning" msgid="8730648121973575701">"Android ഉപയോക്തൃ ഇന്റർഫേസ് ആവശ്യമുള്ള രീതിയിൽ മാറ്റുന്നതിനും ഇഷ്ടാനുസൃതമാക്കുന്നതിനും സിസ്റ്റം UI ട്യൂണർ നിങ്ങൾക്ക് അധിക വഴികൾ നൽകുന്നു. ഭാവി റിലീസുകളിൽ ഈ പരീക്ഷണാത്മക ഫീച്ചറുകൾ മാറ്റുകയോ നിർത്തുകയോ അപ്രത്യക്ഷമാവുകയോ ചെയ്തേക്കാം. ശ്രദ്ധയോടെ മുന്നോട്ടുപോകുക."</string>
+    <string name="tuner_persistent_warning" msgid="8597333795565621795">"ഭാവി റിലീസുകളിൽ ഈ പരീക്ഷണാത്മക ഫീച്ചറുകൾ മാറ്റുകയോ നിർത്തുകയോ അപ്രത്യക്ഷമാവുകയോ ചെയ്തേക്കാം. ശ്രദ്ധയോടെ മുന്നോട്ടുപോകുക."</string>
+    <string name="got_it" msgid="2239653834387972602">"മനസ്സിലായി"</string>
+    <string name="tuner_toast" msgid="603429811084428439">"അഭിനന്ദനങ്ങൾ! ക്രമീകരണത്തിലേക്ക് സിസ്റ്റം UI ട്യൂണർ ചേർത്തിരിക്കുന്നു"</string>
+    <string name="remove_from_settings" msgid="8389591916603406378">"ക്രമീകരണത്തിൽ നിന്ന് നീക്കംചെയ്യുക"</string>
+    <string name="remove_from_settings_prompt" msgid="6069085993355887748">"ക്രമീകരണത്തിൽ നിന്ന് സിസ്റ്റം UI ട്യൂണർ നീക്കംചെയ്യുകയും അതിന്റെ ഫീച്ചറുകളെല്ലാം ഉപയോഗിക്കുന്നത് നിർത്തുകയും ചെയ്യണോ?"</string>
+    <!-- no translation found for enable_bluetooth_title (5027037706500635269) -->
+    <skip />
+    <!-- no translation found for enable_bluetooth_message (9106595990708985385) -->
+    <skip />
+    <!-- no translation found for enable_bluetooth_confirmation_ok (6258074250948309715) -->
+    <skip />
 </resources>

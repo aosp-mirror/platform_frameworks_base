@@ -25,10 +25,10 @@
     <string name="status_bar_recent_inspect_item_title" msgid="7793624864528818569">"Aplikazioaren informazioa"</string>
     <string name="status_bar_no_recent_apps" msgid="7374907845131203189">"Ikusitako azken pantailak erakusten dira hemen"</string>
     <string name="status_bar_accessibility_dismiss_recents" msgid="4576076075226540105">"Baztertu azken aplikazioak"</string>
-    <plurals name="status_bar_accessibility_recent_apps" formatted="false" msgid="9138535907802238759">
-      <item quantity="other">%d pantaila daude ikuspegi orokorrean</item>
-      <item quantity="one">Pantaila bat dago ikuspegi orokorrean</item>
-    </plurals>
+  <plurals name="status_bar_accessibility_recent_apps">
+    <item quantity="one" msgid="3969335317929254918">"Pantaila bat dago ikuspegi orokorrean"</item>
+    <item quantity="other" msgid="5523506463832158203">"%d pantaila daude ikuspegi orokorrean"</item>
+  </plurals>
     <string name="status_bar_no_notifications_title" msgid="4755261167193833213">"Ez dago jakinarazpenik"</string>
     <string name="status_bar_ongoing_events_title" msgid="1682504513316879202">"Abian"</string>
     <string name="status_bar_latest_events_title" msgid="6594767438577593172">"Jakinarazpenak"</string>
@@ -114,12 +114,6 @@
     <string name="accessibility_data_two_bars" msgid="6166018492360432091">"Datu-seinaleak bi barra ditu."</string>
     <string name="accessibility_data_three_bars" msgid="9167670452395038520">"Datu-seinaleak hiru barra ditu."</string>
     <string name="accessibility_data_signal_full" msgid="2708384608124519369">"Datu-seinale osoa."</string>
-    <string name="accessibility_wifi_off" msgid="3177380296697933627">"Wi-Fi konexioa desaktibatuta dago."</string>
-    <string name="accessibility_no_wifi" msgid="1425476551827924474">"Wi-Fi konexioa desaktibatu da."</string>
-    <string name="accessibility_wifi_one_bar" msgid="7735893178010724377">"Wi-Fi sarearen barra bat."</string>
-    <string name="accessibility_wifi_two_bars" msgid="4994274250497262434">"Wi-Fi sarearen bi barra."</string>
-    <string name="accessibility_wifi_three_bars" msgid="3495755044276588384">"Wi-Fi sarearen hiru barra."</string>
-    <string name="accessibility_wifi_signal_full" msgid="6853561303586480376">"Wi-Fi sarearen seinalea osoa."</string>
     <string name="accessibility_wifi_name" msgid="7202151365171148501">"<xliff:g id="WIFI">%s</xliff:g> sarera konektatuta."</string>
     <string name="accessibility_bluetooth_name" msgid="8441517146585531676">"<xliff:g id="BLUETOOTH">%s</xliff:g> gailura konektatuta."</string>
     <string name="accessibility_no_wimax" msgid="4329180129727630368">"WiMAX gabe."</string>
@@ -331,6 +325,8 @@
     <string name="interruption_level_priority_twoline" msgid="1564715335217164124">"Lehentasunezkoak\nsoilik"</string>
     <string name="interruption_level_alarms_twoline" msgid="3266909566410106146">"Alarmak\nsoilik"</string>
     <string name="keyguard_indication_charging_time" msgid="1757251776872835768">"Kargatzen (<xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g> guztiz kargatu arte)"</string>
+    <string name="keyguard_indication_charging_time_fast" msgid="9018981952053914986">"Bizkor kargatzen (<xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g> guztiz kargatu arte)"</string>
+    <string name="keyguard_indication_charging_time_slowly" msgid="955252797961724952">"Mantso kargatzen (<xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g> guztiz kargatu arte)"</string>
     <string name="accessibility_multi_user_switch_switcher" msgid="7305948938141024937">"Aldatu erabiltzailea"</string>
     <string name="accessibility_multi_user_switch_switcher_with_current" msgid="8434880595284601601">"Aldatu erabiltzailez. <xliff:g id="CURRENT_USER_NAME">%s</xliff:g> da saioa hasita duena."</string>
     <string name="accessibility_multi_user_switch_inactive" msgid="1424081831468083402">"Uneko erabiltzailea: <xliff:g id="CURRENT_USER_NAME">%s</xliff:g>"</string>
@@ -404,7 +400,7 @@
     <string name="volumeui_notification_title" msgid="4906770126345910955">"<xliff:g id="APP_NAME">%1$s</xliff:g> da bolumenaren leihoa"</string>
     <string name="volumeui_notification_text" msgid="1826889705095768656">"Ukitu jatorrizkora leheneratzeko"</string>
     <string name="managed_profile_foreground_toast" msgid="5421487114739245972">"Work profila erabiltzen ari zara"</string>
-    <string name="system_ui_tuner" msgid="3442596010150119600">"Sistemako erabiltzaile-interfazearen konfiguratzailea"</string>
+    <string name="system_ui_tuner" msgid="708224127392452018">"Sistemako erabiltzaile-interfazearen konfiguratzailea"</string>
     <string name="show_battery_percentage" msgid="5444136600512968798">"Erakutsi txertatutako bateriaren ehunekoa"</string>
     <string name="show_battery_percentage_summary" msgid="3215025775576786037">"Erakutsi bateria-mailaren ehunekoa egoera-barraren ikonoan, kargatzen ari ez denean"</string>
     <string name="quick_settings" msgid="10042998191725428">"Ezarpen bizkorrak"</string>
@@ -425,4 +421,17 @@
     <string name="accessibility_quick_settings_detail" msgid="2579369091672902101">"Ezarpen bizkorrak: <xliff:g id="TITLE">%s</xliff:g>."</string>
     <string name="accessibility_status_bar_hotspot" msgid="4099381329956402865">"Sare publikoa"</string>
     <string name="accessibility_managed_profile" msgid="6613641363112584120">"Work profila"</string>
+    <string name="tuner_warning_title" msgid="7094689930793031682">"Dibertsioa batzuentzat, baina ez guztientzat"</string>
+    <string name="tuner_warning" msgid="8730648121973575701">"Sistemako erabiltzaile-interfazearen konfiguratzaileak Android erabiltzaile-interfazea moldatzeko eta pertsonalizatzeko modu gehiago eskaintzen dizkizu. Baliteke eginbide esperimental horiek hurrengo kaleratzeetan aldatuta, etenda edo desagertuta egotea. Kontuz erabili."</string>
+    <string name="tuner_persistent_warning" msgid="8597333795565621795">"Baliteke eginbide esperimental horiek hurrengo kaleratzeetan aldatuta, etenda edo desagertuta egotea. Kontuz erabili."</string>
+    <string name="got_it" msgid="2239653834387972602">"Ados"</string>
+    <string name="tuner_toast" msgid="603429811084428439">"Zorionak! Sistemako erabiltzaile-interfazearen konfiguratzailea Ezarpenak atalean gehitu da"</string>
+    <string name="remove_from_settings" msgid="8389591916603406378">"Kendu Ezarpenak ataletik"</string>
+    <string name="remove_from_settings_prompt" msgid="6069085993355887748">"Sistemako erabiltzaile-interfazearen konfiguratzailea ezarpenetatik kendu nahi duzu, eta haren eginbide guztiak erabiltzeari utzi nahi diozu?"</string>
+    <!-- no translation found for enable_bluetooth_title (5027037706500635269) -->
+    <skip />
+    <!-- no translation found for enable_bluetooth_message (9106595990708985385) -->
+    <skip />
+    <!-- no translation found for enable_bluetooth_confirmation_ok (6258074250948309715) -->
+    <skip />
 </resources>

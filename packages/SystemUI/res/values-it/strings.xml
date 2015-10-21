@@ -25,10 +25,10 @@
     <string name="status_bar_recent_inspect_item_title" msgid="7793624864528818569">"Informazioni applicazione"</string>
     <string name="status_bar_no_recent_apps" msgid="7374907845131203189">"Le tue schermate recenti vengono visualizzate in questa sezione"</string>
     <string name="status_bar_accessibility_dismiss_recents" msgid="4576076075226540105">"Ignora app recenti"</string>
-    <plurals name="status_bar_accessibility_recent_apps" formatted="false" msgid="9138535907802238759">
-      <item quantity="other">%d schermate in Panoramica</item>
-      <item quantity="one">1 schermata in Panoramica</item>
-    </plurals>
+  <plurals name="status_bar_accessibility_recent_apps">
+    <item quantity="one" msgid="3969335317929254918">"1 schermata in Panoramica"</item>
+    <item quantity="other" msgid="5523506463832158203">"%d schermate in Panoramica"</item>
+  </plurals>
     <string name="status_bar_no_notifications_title" msgid="4755261167193833213">"Nessuna notifica"</string>
     <string name="status_bar_ongoing_events_title" msgid="1682504513316879202">"In corso"</string>
     <string name="status_bar_latest_events_title" msgid="6594767438577593172">"Notifiche"</string>
@@ -114,12 +114,6 @@
     <string name="accessibility_data_two_bars" msgid="6166018492360432091">"Dati: due barre."</string>
     <string name="accessibility_data_three_bars" msgid="9167670452395038520">"Dati: tre barre."</string>
     <string name="accessibility_data_signal_full" msgid="2708384608124519369">"Massimo segnale dati."</string>
-    <string name="accessibility_wifi_off" msgid="3177380296697933627">"Wi-Fi non attivo."</string>
-    <string name="accessibility_no_wifi" msgid="1425476551827924474">"Rete Wi-Fi scollegata."</string>
-    <string name="accessibility_wifi_one_bar" msgid="7735893178010724377">"Wi-Fi: una barra."</string>
-    <string name="accessibility_wifi_two_bars" msgid="4994274250497262434">"Wi-Fi: due barre."</string>
-    <string name="accessibility_wifi_three_bars" msgid="3495755044276588384">"Wi-Fi: tre barre."</string>
-    <string name="accessibility_wifi_signal_full" msgid="6853561303586480376">"Massimo segnale Wi-Fi."</string>
     <string name="accessibility_wifi_name" msgid="7202151365171148501">"Connesso a <xliff:g id="WIFI">%s</xliff:g>."</string>
     <string name="accessibility_bluetooth_name" msgid="8441517146585531676">"Connesso a <xliff:g id="BLUETOOTH">%s</xliff:g>."</string>
     <string name="accessibility_no_wimax" msgid="4329180129727630368">"Nessun segnale WiMAX."</string>
@@ -333,6 +327,8 @@
     <string name="interruption_level_priority_twoline" msgid="1564715335217164124">"Solo con\npriorità"</string>
     <string name="interruption_level_alarms_twoline" msgid="3266909566410106146">"Solo\nsveglie"</string>
     <string name="keyguard_indication_charging_time" msgid="1757251776872835768">"In carica (<xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g> al termine)"</string>
+    <string name="keyguard_indication_charging_time_fast" msgid="9018981952053914986">"Ricarica veloce (<xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g> al termine)"</string>
+    <string name="keyguard_indication_charging_time_slowly" msgid="955252797961724952">"Ricarica lenta (<xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g> al termine)"</string>
     <string name="accessibility_multi_user_switch_switcher" msgid="7305948938141024937">"Cambio utente"</string>
     <string name="accessibility_multi_user_switch_switcher_with_current" msgid="8434880595284601601">"Cambia utente, utente corrente <xliff:g id="CURRENT_USER_NAME">%s</xliff:g>"</string>
     <string name="accessibility_multi_user_switch_inactive" msgid="1424081831468083402">"Utente corrente <xliff:g id="CURRENT_USER_NAME">%s</xliff:g>"</string>
@@ -354,7 +350,7 @@
     <string name="guest_notification_remove_action" msgid="8820670703892101990">"RIMUOVI OSPITE"</string>
     <string name="user_add_user_title" msgid="4553596395824132638">"Aggiungere un nuovo utente?"</string>
     <string name="user_add_user_message_short" msgid="2161624834066214559">"Il nuovo utente, una volta aggiunto, deve impostare il proprio spazio.\n\nQualsiasi utente può aggiornare le app per tutti gli altri."</string>
-    <string name="battery_saver_notification_title" msgid="237918726750955859">"Risparmio batteria attivo"</string>
+    <string name="battery_saver_notification_title" msgid="237918726750955859">"Risparmio energetico attivo"</string>
     <string name="battery_saver_notification_text" msgid="820318788126672692">"Riduce le prestazioni e i dati in background"</string>
     <string name="battery_saver_notification_action_text" msgid="109158658238110382">"Disattiva risparmio energetico"</string>
     <string name="notification_hidden_text" msgid="1135169301897151909">"Contenuti nascosti"</string>
@@ -406,7 +402,7 @@
     <string name="volumeui_notification_title" msgid="4906770126345910955">"<xliff:g id="APP_NAME">%1$s</xliff:g> rappresenta la finestra di dialogo relativa al volume"</string>
     <string name="volumeui_notification_text" msgid="1826889705095768656">"Tocca per ripristinare l\'originale."</string>
     <string name="managed_profile_foreground_toast" msgid="5421487114739245972">"Stai utilizzando il profilo di lavoro"</string>
-    <string name="system_ui_tuner" msgid="3442596010150119600">"Sintonizzatore UI sistema"</string>
+    <string name="system_ui_tuner" msgid="708224127392452018">"Sintetizzatore interfaccia utente di sistema"</string>
     <string name="show_battery_percentage" msgid="5444136600512968798">"Mostra percentuale batteria incorporata"</string>
     <string name="show_battery_percentage_summary" msgid="3215025775576786037">"Mostra la percentuale di carica della batteria nell\'icona della barra di stato quando non è in carica"</string>
     <string name="quick_settings" msgid="10042998191725428">"Impostazioni rapide"</string>
@@ -427,4 +423,17 @@
     <string name="accessibility_quick_settings_detail" msgid="2579369091672902101">"Impostazioni rapide: <xliff:g id="TITLE">%s</xliff:g>."</string>
     <string name="accessibility_status_bar_hotspot" msgid="4099381329956402865">"Hotspot"</string>
     <string name="accessibility_managed_profile" msgid="6613641363112584120">"Profilo di lavoro"</string>
+    <string name="tuner_warning_title" msgid="7094689930793031682">"Il divertimento riservato a pochi eletti"</string>
+    <string name="tuner_warning" msgid="8730648121973575701">"Il sintetizzatore interfaccia utente di sistema mette a disposizione altri metodi per modificare e personalizzare l\'interfaccia utente di Android. Queste funzioni sperimentali potrebbero cambiare, interrompersi o scomparire nelle versioni successive. Procedi con cautela."</string>
+    <string name="tuner_persistent_warning" msgid="8597333795565621795">"Queste funzioni sperimentali potrebbero cambiare, interrompersi o scomparire nelle versioni successive. Procedi con cautela."</string>
+    <string name="got_it" msgid="2239653834387972602">"OK"</string>
+    <string name="tuner_toast" msgid="603429811084428439">"Complimenti! Il sintetizzatore interfaccia utente di sistema è stato aggiunto alle impostazioni."</string>
+    <string name="remove_from_settings" msgid="8389591916603406378">"Rimuovi dalle impostazioni"</string>
+    <string name="remove_from_settings_prompt" msgid="6069085993355887748">"Vuoi rimuovere il sintetizzatore interfaccia utente di sistema dalle impostazioni e smettere di utilizzare tutte le sue funzioni?"</string>
+    <!-- no translation found for enable_bluetooth_title (5027037706500635269) -->
+    <skip />
+    <!-- no translation found for enable_bluetooth_message (9106595990708985385) -->
+    <skip />
+    <!-- no translation found for enable_bluetooth_confirmation_ok (6258074250948309715) -->
+    <skip />
 </resources>
