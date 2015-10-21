@@ -18,7 +18,7 @@
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_label" msgid="2783841764617238354">"दस्तावेज़"</string>
     <string name="title_open" msgid="4353228937663917801">"यहां से खोलें"</string>
-    <string name="title_save" msgid="2433679664882857999">"यहां जोड़ें"</string>
+    <string name="title_save" msgid="2433679664882857999">"यहां सहेजें"</string>
     <string name="menu_create_dir" msgid="5947289605844398389">"फ़ोल्डर बनाएं"</string>
     <string name="menu_grid" msgid="6878021334497835259">"ग्रिड दृश्य"</string>
     <string name="menu_list" msgid="7279285939892417279">"सूची दृश्य"</string>
@@ -59,15 +59,15 @@
     <string name="share_via" msgid="8966594246261344259">"इसके द्वारा साझा करें"</string>
     <string name="copy_notification_title" msgid="6374299806748219777">"फ़ाइलें कॉपी हो रही हैं"</string>
     <string name="copy_remaining" msgid="6283790937387975095">"<xliff:g id="DURATION">%s</xliff:g> शेष"</string>
-    <plurals name="copy_begin" formatted="false" msgid="9071199452634086365">
-      <item quantity="one"><xliff:g id="COUNT_1">%1$d</xliff:g> फ़ाइलें कॉपी की जा रही हैं.</item>
-      <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> फ़ाइलें कॉपी की जा रही हैं.</item>
-    </plurals>
+  <plurals name="copy_begin">
+    <item quantity="one" msgid="7775181564278455087">"<xliff:g id="COUNT">%1$d</xliff:g> फ़ाइल कॉपी की जा रही है."</item>
+    <item quantity="other" msgid="5175026054495572228">"<xliff:g id="COUNT">%1$d</xliff:g> फ़ाइलें कॉपी की जा रही हैं."</item>
+  </plurals>
     <string name="copy_preparing" msgid="3896202461003039386">"कॉपी करने की तैयारी हो रही है…"</string>
-    <plurals name="copy_error_notification_title" formatted="false" msgid="5267616889076217261">
-      <item quantity="one"><xliff:g id="COUNT_1">%1$d</xliff:g> फ़ाइलों की कॉपी नहीं बनाई जा सकती</item>
-      <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> फ़ाइलों की कॉपी नहीं बनाई जा सकती</item>
-    </plurals>
+  <plurals name="copy_error_notification_title">
+    <item quantity="one" msgid="2515407675631145507">"<xliff:g id="COUNT">%1$d</xliff:g> फ़ाइल को कॉपी नहीं किया जा सका"</item>
+    <item quantity="other" msgid="7124097894673644954">"<xliff:g id="COUNT">%1$d</xliff:g> फ़ाइलों को कॉपी नहीं किया जा सका"</item>
+  </plurals>
     <string name="notification_touch_for_details" msgid="4483108577842961665">"विवरण देखने के लिए स्पर्श करें"</string>
     <string name="retry" msgid="7564024179122207376">"पुन: प्रयास करें"</string>
     <string name="copy_failure_alert_content" msgid="3715575000297709082">"इन फ़ाइलों की कॉपी नहीं बनाई गई: <xliff:g id="LIST">%1$s</xliff:g>"</string>

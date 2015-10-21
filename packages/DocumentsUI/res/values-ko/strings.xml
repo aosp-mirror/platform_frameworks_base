@@ -59,15 +59,15 @@
     <string name="share_via" msgid="8966594246261344259">"공유 방법"</string>
     <string name="copy_notification_title" msgid="6374299806748219777">"파일 복사 중"</string>
     <string name="copy_remaining" msgid="6283790937387975095">"<xliff:g id="DURATION">%s</xliff:g> 남음"</string>
-    <plurals name="copy_begin" formatted="false" msgid="9071199452634086365">
-      <item quantity="other">파일 <xliff:g id="COUNT_1">%1$d</xliff:g>개를 복사합니다.</item>
-      <item quantity="one">파일 <xliff:g id="COUNT_0">%1$d</xliff:g>개를 복사합니다.</item>
-    </plurals>
+  <plurals name="copy_begin">
+    <item quantity="one" msgid="7775181564278455087">"파일 <xliff:g id="COUNT">%1$d</xliff:g>개를 복사하는 중입니다."</item>
+    <item quantity="other" msgid="5175026054495572228">"파일 <xliff:g id="COUNT">%1$d</xliff:g>개를 복사하는 중입니다."</item>
+  </plurals>
     <string name="copy_preparing" msgid="3896202461003039386">"사본 준비 중…"</string>
-    <plurals name="copy_error_notification_title" formatted="false" msgid="5267616889076217261">
-      <item quantity="other">파일 <xliff:g id="COUNT_1">%1$d</xliff:g>개를 복사할 수 없습니다.</item>
-      <item quantity="one">파일 <xliff:g id="COUNT_0">%1$d</xliff:g>개를 복사할 수 없습니다.</item>
-    </plurals>
+  <plurals name="copy_error_notification_title">
+    <item quantity="one" msgid="2515407675631145507">"파일 <xliff:g id="COUNT">%1$d</xliff:g>개를 복사할 수 없습니다."</item>
+    <item quantity="other" msgid="7124097894673644954">"파일 <xliff:g id="COUNT">%1$d</xliff:g>개를 복사할 수 없습니다."</item>
+  </plurals>
     <string name="notification_touch_for_details" msgid="4483108577842961665">"세부정보를 보려면 터치하세요."</string>
     <string name="retry" msgid="7564024179122207376">"다시 시도"</string>
     <string name="copy_failure_alert_content" msgid="3715575000297709082">"다음 파일이 복사되지 않았습니다. <xliff:g id="LIST">%1$s</xliff:g>"</string>

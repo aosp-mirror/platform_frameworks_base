@@ -59,15 +59,15 @@
     <string name="share_via" msgid="8966594246261344259">"Deel via"</string>
     <string name="copy_notification_title" msgid="6374299806748219777">"Kopieer tans lêers"</string>
     <string name="copy_remaining" msgid="6283790937387975095">"<xliff:g id="DURATION">%s</xliff:g> oor"</string>
-    <plurals name="copy_begin" formatted="false" msgid="9071199452634086365">
-      <item quantity="other">Kopieer tans <xliff:g id="COUNT_1">%1$d</xliff:g> lêers.</item>
-      <item quantity="one">Kopieer tans <xliff:g id="COUNT_0">%1$d</xliff:g> lêer.</item>
-    </plurals>
+  <plurals name="copy_begin">
+    <item quantity="one" msgid="7775181564278455087">"Kopieer tans <xliff:g id="COUNT">%1$d</xliff:g> lêer."</item>
+    <item quantity="other" msgid="5175026054495572228">"Kopieer tans <xliff:g id="COUNT">%1$d</xliff:g> lêers."</item>
+  </plurals>
     <string name="copy_preparing" msgid="3896202461003039386">"Maak tans gereed vir kopieer …"</string>
-    <plurals name="copy_error_notification_title" formatted="false" msgid="5267616889076217261">
-      <item quantity="other">Kon <xliff:g id="COUNT_1">%1$d</xliff:g> lêers nie kopieer nie</item>
-      <item quantity="one">Kon <xliff:g id="COUNT_0">%1$d</xliff:g> lêer nie kopieer nie</item>
-    </plurals>
+  <plurals name="copy_error_notification_title">
+    <item quantity="one" msgid="2515407675631145507">"Kon <xliff:g id="COUNT">%1$d</xliff:g> lêer nie kopieer nie"</item>
+    <item quantity="other" msgid="7124097894673644954">"Kon <xliff:g id="COUNT">%1$d</xliff:g> lêers nie kopieer nie"</item>
+  </plurals>
     <string name="notification_touch_for_details" msgid="4483108577842961665">"Raak om besonderhede te bekyk"</string>
     <string name="retry" msgid="7564024179122207376">"Herprobeer"</string>
     <string name="copy_failure_alert_content" msgid="3715575000297709082">"Hierdie lêers is nie gekopieer nie: <xliff:g id="LIST">%1$s</xliff:g>"</string>

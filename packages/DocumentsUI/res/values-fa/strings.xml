@@ -21,8 +21,8 @@
     <string name="title_save" msgid="2433679664882857999">"ذخیره در"</string>
     <string name="menu_create_dir" msgid="5947289605844398389">"ایجاد پوشه"</string>
     <string name="menu_grid" msgid="6878021334497835259">"نمای جدولی"</string>
-    <string name="menu_list" msgid="7279285939892417279">"نمای فهرست‌وار"</string>
-    <string name="menu_sort" msgid="7677740407158414452">"مرتب‌سازی بر اساس"</string>
+    <string name="menu_list" msgid="7279285939892417279">"نمای فهرستی"</string>
+    <string name="menu_sort" msgid="7677740407158414452">"مرتب‌سازی براساس"</string>
     <string name="menu_search" msgid="3816712084502856974">"جستجو"</string>
     <string name="menu_settings" msgid="6008033148948428823">"تنظیمات"</string>
     <string name="menu_open" msgid="432922957274920903">"باز کردن"</string>
@@ -39,9 +39,9 @@
     <string name="menu_file_size_hide" msgid="8881975928502581042">"پنهان کردن اندازه فایل"</string>
     <string name="button_select" msgid="527196987259139214">"انتخاب"</string>
     <string name="button_copy" msgid="8706475544635021302">"کپی"</string>
-    <string name="sort_name" msgid="9183560467917256779">"بر اساس نام"</string>
-    <string name="sort_date" msgid="586080032956151448">"بر اساس تاریخ اصلاح"</string>
-    <string name="sort_size" msgid="3350681319735474741">"بر اساس اندازه"</string>
+    <string name="sort_name" msgid="9183560467917256779">"براساس نام"</string>
+    <string name="sort_date" msgid="586080032956151448">"براساس تاریخ اصلاح"</string>
+    <string name="sort_size" msgid="3350681319735474741">"براساس اندازه"</string>
     <string name="drawer_open" msgid="4545466532430226949">"نمایش ریشه‌ها"</string>
     <string name="drawer_close" msgid="7602734368552123318">"پنهان کردن ریشه‌ها"</string>
     <string name="save_error" msgid="6167009778003223664">"ذخیره سند انجام نشد"</string>
@@ -59,15 +59,15 @@
     <string name="share_via" msgid="8966594246261344259">"اشتراک‌گذاری از طریق"</string>
     <string name="copy_notification_title" msgid="6374299806748219777">"در حال کپی کردن فایل‌ها"</string>
     <string name="copy_remaining" msgid="6283790937387975095">"<xliff:g id="DURATION">%s</xliff:g> باقی‌مانده"</string>
-    <plurals name="copy_begin" formatted="false" msgid="9071199452634086365">
-      <item quantity="one">در حال کپی کردن <xliff:g id="COUNT_1">%1$d</xliff:g> فایل.</item>
-      <item quantity="other">در حال کپی کردن <xliff:g id="COUNT_1">%1$d</xliff:g> فایل.</item>
-    </plurals>
+  <plurals name="copy_begin">
+    <item quantity="one" msgid="7775181564278455087">"در حال کپی کردن <xliff:g id="COUNT">%1$d</xliff:g> فایل."</item>
+    <item quantity="other" msgid="5175026054495572228">"در حال کپی کردن <xliff:g id="COUNT">%1$d</xliff:g> فایل."</item>
+  </plurals>
     <string name="copy_preparing" msgid="3896202461003039386">"در حال آماده‌سازی برای کپی..."</string>
-    <plurals name="copy_error_notification_title" formatted="false" msgid="5267616889076217261">
-      <item quantity="one">‏<xliff:g id="COUNT_1">%1$d</xliff:g> فایل کپی نشد</item>
-      <item quantity="other">‏<xliff:g id="COUNT_1">%1$d</xliff:g> فایل کپی نشد</item>
-    </plurals>
+  <plurals name="copy_error_notification_title">
+    <item quantity="one" msgid="2515407675631145507">"<xliff:g id="COUNT">%1$d</xliff:g> فایل کپی نشد"</item>
+    <item quantity="other" msgid="7124097894673644954">"<xliff:g id="COUNT">%1$d</xliff:g> فایل کپی نشد"</item>
+  </plurals>
     <string name="notification_touch_for_details" msgid="4483108577842961665">"برای مشاهده جزئیات لمس کنید"</string>
     <string name="retry" msgid="7564024179122207376">"امتحان مجدد"</string>
     <string name="copy_failure_alert_content" msgid="3715575000297709082">"این فایل‌ها کپی نشدند: <xliff:g id="LIST">%1$s</xliff:g>"</string>

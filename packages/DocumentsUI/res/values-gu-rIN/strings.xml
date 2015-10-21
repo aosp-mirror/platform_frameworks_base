@@ -31,18 +31,18 @@
     <string name="menu_delete" msgid="8138799623850614177">"કાઢી નાખો"</string>
     <string name="menu_select_all" msgid="8323579667348729928">"બધા પસંદ કરો"</string>
     <string name="menu_copy" msgid="3612326052677229148">"આના પર કૉપિ કરો…"</string>
-    <string name="menu_advanced_show" product="nosdcard" msgid="4693652895715631401">"આંતરિક સ્ટોરેજ દર્શાવો"</string>
-    <string name="menu_advanced_show" product="default" msgid="5792182900084144261">"SD કાર્ડ દર્શાવો"</string>
+    <string name="menu_advanced_show" product="nosdcard" msgid="4693652895715631401">"આંતરિક સ્ટોરેજ બતાવો"</string>
+    <string name="menu_advanced_show" product="default" msgid="5792182900084144261">"SD કાર્ડ બતાવો"</string>
     <string name="menu_advanced_hide" product="nosdcard" msgid="4218809952721972589">"આંતરિક સંગ્રહ છુપાવો"</string>
     <string name="menu_advanced_hide" product="default" msgid="4845869969015718848">"SD કાર્ડ છુપાવો"</string>
-    <string name="menu_file_size_show" msgid="3240323619260823076">"ફાઇલ કદ દર્શાવો"</string>
+    <string name="menu_file_size_show" msgid="3240323619260823076">"ફાઇલ કદ બતાવો"</string>
     <string name="menu_file_size_hide" msgid="8881975928502581042">"ફાઇલ કદ છુપાવો"</string>
     <string name="button_select" msgid="527196987259139214">"પસંદ કરો"</string>
     <string name="button_copy" msgid="8706475544635021302">"કૉપિ કરો"</string>
     <string name="sort_name" msgid="9183560467917256779">"નામ દ્વારા"</string>
     <string name="sort_date" msgid="586080032956151448">"સંશોધન તારીખ દ્વારા"</string>
     <string name="sort_size" msgid="3350681319735474741">"કદ દ્વારા"</string>
-    <string name="drawer_open" msgid="4545466532430226949">"રૂટ્સ દર્શાવો"</string>
+    <string name="drawer_open" msgid="4545466532430226949">"રૂટ્સ બતાવો"</string>
     <string name="drawer_close" msgid="7602734368552123318">"રૂટ્સ છુપાવો"</string>
     <string name="save_error" msgid="6167009778003223664">"દસ્તાવેજ સાચવવામાં નિષ્ફળ થયાં."</string>
     <string name="create_error" msgid="3735649141335444215">"ફોલ્ડર બનાવવામાં નિષ્ફળ થયા"</string>
@@ -52,22 +52,22 @@
     <string name="root_type_service" msgid="2178854894416775409">"સંગ્રહ સેવાઓ"</string>
     <string name="root_type_shortcut" msgid="3318760609471618093">"શોર્ટકટ્સ"</string>
     <string name="root_type_device" msgid="7121342474653483538">"ઉપકરણો"</string>
-    <string name="root_type_apps" msgid="8838065367985945189">"વધુ એપ્લિકેશન્સ"</string>
+    <string name="root_type_apps" msgid="8838065367985945189">"વધુ એપ્લિકેશનો"</string>
     <string name="empty" msgid="7858882803708117596">"કોઈ આઇટમ્સ નથી"</string>
     <string name="toast_no_application" msgid="1339885974067891667">"ફાઇલ ખોલી શકાતી નથી"</string>
     <string name="toast_failed_delete" msgid="2180678019407244069">"કેટલાક દસ્તાવેજો કાઢી નાખવામાં અસમર્થ"</string>
     <string name="share_via" msgid="8966594246261344259">"આના દ્વારા શેર કરો"</string>
     <string name="copy_notification_title" msgid="6374299806748219777">"ફાઇલો કૉપિ કરી રહ્યાં છે"</string>
     <string name="copy_remaining" msgid="6283790937387975095">"<xliff:g id="DURATION">%s</xliff:g> બાકી"</string>
-    <plurals name="copy_begin" formatted="false" msgid="9071199452634086365">
-      <item quantity="one"><xliff:g id="COUNT_1">%1$d</xliff:g> ફાઇલો કૉપિ કરી રહ્યાં છે.</item>
-      <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> ફાઇલો કૉપિ કરી રહ્યાં છે.</item>
-    </plurals>
+  <plurals name="copy_begin">
+    <item quantity="one" msgid="7775181564278455087">"<xliff:g id="COUNT">%1$d</xliff:g> ફાઇલ કૉપિ કરી રહ્યાં છે."</item>
+    <item quantity="other" msgid="5175026054495572228">"<xliff:g id="COUNT">%1$d</xliff:g> ફાઇલ કૉપિ કરી રહ્યાં છે."</item>
+  </plurals>
     <string name="copy_preparing" msgid="3896202461003039386">"કૉપિ માટે તૈયારી કરી રહ્યું છે…"</string>
-    <plurals name="copy_error_notification_title" formatted="false" msgid="5267616889076217261">
-      <item quantity="one"><xliff:g id="COUNT_1">%1$d</xliff:g> ફાઇલો કૉપિ કરી શકાઈ નથી</item>
-      <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> ફાઇલો કૉપિ કરી શકાઈ નથી</item>
-    </plurals>
+  <plurals name="copy_error_notification_title">
+    <item quantity="one" msgid="2515407675631145507">"<xliff:g id="COUNT">%1$d</xliff:g> ફાઇલ કૉપિ કરી શક્યાં નથી"</item>
+    <item quantity="other" msgid="7124097894673644954">"<xliff:g id="COUNT">%1$d</xliff:g> ફાઇલ કૉપિ કરી શક્યાં નથી"</item>
+  </plurals>
     <string name="notification_touch_for_details" msgid="4483108577842961665">"વિગતો જોવા માટે ટચ કરો"</string>
     <string name="retry" msgid="7564024179122207376">"ફરી પ્રયાસ કરો"</string>
     <string name="copy_failure_alert_content" msgid="3715575000297709082">"આ ફાઇલો કૉપિ કરી નહોતી: <xliff:g id="LIST">%1$s</xliff:g>"</string>
