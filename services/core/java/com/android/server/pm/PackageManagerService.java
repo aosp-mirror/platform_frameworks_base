@@ -7554,8 +7554,8 @@ public class PackageManagerService extends IPackageManager.Stub {
         // We would never need to extract libs for forward-locked and external packages,
         // since the container service will do it for us. We shouldn't attempt to
         // extract libs from system app when it was not updated.
-        if (pkg.isForwardLocked() || isExternal(pkg) ||
-            (isSystemApp(pkg) && !pkg.isUpdatedSystemApp()) ) {
+        if (pkg.isForwardLocked() || pkg.applicationInfo.isExternalAsec() ||
+                (isSystemApp(pkg) && !pkg.isUpdatedSystemApp())) {
             extractLibs = false;
         }
 
@@ -7832,7 +7832,7 @@ public class PackageManagerService extends IPackageManager.Stub {
         final String codePath = pkg.codePath;
         final File codeFile = new File(codePath);
         final boolean bundledApp = info.isSystemApp() && !info.isUpdatedSystemApp();
-        final boolean asecApp = info.isForwardLocked() || isExternal(info);
+        final boolean asecApp = info.isForwardLocked() || info.isExternalAsec();
 
         info.nativeLibraryRootDir = null;
         info.nativeLibraryRootRequiresIsa = false;
@@ -13650,7 +13650,7 @@ public class PackageManagerService extends IPackageManager.Stub {
             if (ps != null) {
                 libDirRoot = ps.legacyNativeLibraryPathString;
             }
-            if (p != null && (isExternal(p) || p.isForwardLocked())) {
+            if (p != null && (p.isForwardLocked() || p.applicationInfo.isExternalAsec())) {
                 final long token = Binder.clearCallingIdentity();
                 try {
                     String secureContainerId = cidFromCodePath(p.applicationInfo.getBaseCodePath());
