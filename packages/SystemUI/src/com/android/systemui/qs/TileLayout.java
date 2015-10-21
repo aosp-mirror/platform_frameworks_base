@@ -67,7 +67,7 @@ public class TileLayout extends ViewGroup implements QSTileLayout {
     public void updateResources() {
         final Resources res = mContext.getResources();
         final int columns = Math.max(1, res.getInteger(R.integer.quick_settings_num_columns));
-        mCellHeight = res.getDimensionPixelSize(R.dimen.qs_tile_height);
+        mCellHeight = getCellHeight();
         mCellWidth = (int) (mCellHeight * TILE_ASPECT);
         mLargeCellHeight = mAllowDual ? res.getDimensionPixelSize(R.dimen.qs_dual_tile_height)
                 : mCellHeight;
@@ -77,6 +77,10 @@ public class TileLayout extends ViewGroup implements QSTileLayout {
             mColumns = columns;
             postInvalidate();
         }
+    }
+
+    protected int getCellHeight() {
+        return mContext.getResources().getDimensionPixelSize(R.dimen.qs_tile_height);
     }
 
     @Override

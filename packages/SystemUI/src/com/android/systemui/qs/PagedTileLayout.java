@@ -75,8 +75,6 @@ public class PagedTileLayout extends ViewPager implements QSTileLayout {
     @Override
     public void setTileVisibility(TileRecord tile, int visibility) {
         tile.tileView.setVisibility(visibility);
-//        // TODO: Do something smarter here.
-//        distributeTiles();
     }
 
     @Override
@@ -104,8 +102,7 @@ public class PagedTileLayout extends ViewPager implements QSTileLayout {
         for (int i = 0; i < NT; i++) {
             TileRecord tile = mTiles.get(i);
             if (tile.tile.getTileType() == QSTileView.QS_TYPE_QUICK) {
-                tile.tileView.setType(QSTileView.QS_TYPE_QUICK);
-                mFirstPage.mQuickQuickTiles.addView(tile.tileView);
+                // Don't show any quick tiles for now.
                 continue;
             }
             if (mPages.get(index).isFull()) {
@@ -161,6 +158,7 @@ public class PagedTileLayout extends ViewPager implements QSTileLayout {
         protected void onFinishInflate() {
             super.onFinishInflate();
             mQuickQuickTiles = (LinearLayout) findViewById(R.id.quick_tile_layout);
+            mQuickQuickTiles.setVisibility(View.GONE);
             mTilePage = (TilePage) findViewById(R.id.tile_page);
             // Less rows on first page, because it needs room for the quick tiles.
             mTilePage.mMaxRows = 3;
@@ -176,7 +174,7 @@ public class PagedTileLayout extends ViewPager implements QSTileLayout {
     }
 
     public static class TilePage extends TileLayout {
-        private int mMaxRows = 4;
+        private int mMaxRows = 3;
 
         public TilePage(Context context, AttributeSet attrs) {
             super(context, attrs);
@@ -186,6 +184,11 @@ public class PagedTileLayout extends ViewPager implements QSTileLayout {
 
         public void setMaxRows(int maxRows) {
             mMaxRows = maxRows;
+        }
+
+        @Override
+        protected int getCellHeight() {
+            return mContext.getResources().getDimensionPixelSize(R.dimen.qs_new_tile_height);
         }
 
         private void clear() {

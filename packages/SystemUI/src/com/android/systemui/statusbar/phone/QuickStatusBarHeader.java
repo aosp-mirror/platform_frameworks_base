@@ -20,7 +20,9 @@ import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Rect;
 import android.graphics.drawable.Animatable;
+import android.graphics.drawable.RippleDrawable;
 import android.util.AttributeSet;
 import android.view.View;
 import android.view.ViewGroup;
@@ -28,6 +30,7 @@ import android.widget.ImageView;
 import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
+
 import com.android.systemui.R;
 import com.android.systemui.qs.QSPanel;
 import com.android.systemui.qs.QSTile;
@@ -86,6 +89,20 @@ public class QuickStatusBarHeader extends BaseStatusBarHeader implements
         mQsDetailHeaderTitle = (TextView) mQsDetailHeader.findViewById(android.R.id.title);
         mQsDetailHeaderSwitch = (Switch) mQsDetailHeader.findViewById(android.R.id.toggle);
         mQsDetailHeaderProgress = (ImageView) findViewById(R.id.qs_detail_header_progress);
+
+        // RenderThread is doing more harm than good when touching the header (to expand quick
+        // settings), so disable it for this view
+        ((RippleDrawable) getBackground()).setForceSoftware(true);
+        ((RippleDrawable) mSettingsButton.getBackground()).setForceSoftware(true);
+
+        addOnLayoutChangeListener(new View.OnLayoutChangeListener() {
+            @Override
+            public void onLayoutChange(View v, int left, int top, int right,
+                    int bottom, int oldLeft, int oldTop, int oldRight, int oldBottom) {
+                setClipBounds(new Rect(getPaddingLeft(), 0, getWidth() - getPaddingRight(),
+                        getHeight()));
+            }
+        });
     }
 
     @Override

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-** Copyright 2015, The Android Open Source Project
+** Copyright 2012, The Android Open Source Project
 **
 ** Licensed under the Apache License, Version 2.0 (the "License"); 
 ** you may not use this file except in compliance with the License. 
@@ -32,55 +32,21 @@
     android:focusable="true"
     >
 
+    <com.android.systemui.qs.QuickQSPanel
+        android:id="@+id/quick_qs_panel"
+        android:background="#0000"
+        android:layout_width="142dp"
+        android:layout_height="match_parent"
+        android:layout_alignParentEnd="true" />
+
     <LinearLayout
         android:id="@+id/expanded_group"
-        android:layout_width="match_parent"
+        android:layout_width="wrap_content"
         android:layout_height="match_parent"
-        android:paddingEnd="12dp"
-        android:orientation="horizontal">
-
-        <com.android.systemui.statusbar.AlphaOptimizedButton android:id="@+id/alarm_status"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="4dp"
-            android:drawablePadding="6dp"
-            android:drawableStart="@drawable/ic_access_alarms_small"
-            android:textColor="#64ffffff"
-            android:textAppearance="@style/TextAppearance.StatusBar.Expanded.Date"
-            android:paddingEnd="6dp"
-            android:paddingStart="6dp"
-            android:paddingTop="16dp"
-            android:paddingBottom="16dp"
-            android:background="?android:attr/selectableItemBackground"
-            android:visibility="gone"
-            />
-
-        <com.android.systemui.statusbar.policy.DateView android:id="@+id/date"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="16dp"
-            android:singleLine="true"
-            android:textAppearance="@style/TextAppearance.StatusBar.Expanded.Date"
-            android:layout_below="@id/clock"
-            systemui:datePattern="EEE"
-            android:gravity="center_vertical"
-            android:textSize="20sp"
-            android:paddingTop="16dp"
-            android:layout_marginBottom="@dimen/clock_collapsed_bottom_margin" />
-
-        <include layout="@layout/split_clock_view"
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:layout_marginStart="16dp"
-            android:layout_marginTop="16dp"
-            android:id="@+id/clock"
-            />
-
-        <Space
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1" />
-
+        android:clipChildren="false"
+        android:clipToPadding="false"
+        android:orientation="horizontal"
+        android:layout_alignParentEnd="true">
         <com.android.systemui.statusbar.AlphaOptimizedFrameLayout
             android:id="@+id/settings_button_container"
             android:layout_width="48dp"
@@ -105,7 +71,56 @@
                 android:src="@drawable/tuner" />
 
         </com.android.systemui.statusbar.AlphaOptimizedFrameLayout>
+
+        <ImageView
+            android:layout_width="48dp"
+            android:layout_height="match_parent"
+            android:src="@drawable/ic_expand_less"
+            android:tint="@android:color/white" />
     </LinearLayout>
+
+    <FrameLayout
+        android:id="@+id/date_group"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="@dimen/clock_collapsed_bottom_margin"
+        android:layout_alignParentBottom="true">
+        <com.android.systemui.statusbar.policy.DateView android:id="@+id/date_collapsed"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:singleLine="true"
+            android:textAppearance="@style/TextAppearance.StatusBar.Expanded.Date"
+            android:layout_below="@id/clock"
+            systemui:datePattern="@string/abbrev_wday_month_day_no_year_alarm"
+            />
+    </FrameLayout>
+
+    <include layout="@layout/split_clock_view"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_above="@id/date_group"
+        android:id="@+id/clock"
+        />
+
+    <com.android.systemui.statusbar.AlphaOptimizedButton android:id="@+id/alarm_status"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_toEndOf="@id/date_group"
+        android:layout_marginBottom="4dp"
+        android:drawablePadding="6dp"
+        android:drawableStart="@drawable/ic_access_alarms_small"
+        android:textColor="#64ffffff"
+        android:textAppearance="@style/TextAppearance.StatusBar.Expanded.Date"
+        android:paddingEnd="6dp"
+        android:paddingStart="6dp"
+        android:paddingTop="16dp"
+        android:paddingBottom="16dp"
+        android:background="?android:attr/selectableItemBackground"
+        android:visibility="gone"
+        />
 
     <include
         android:id="@+id/qs_detail_header"
@@ -114,12 +129,6 @@
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
         />
-
-    <com.android.systemui.qs.QuickQSPanel
-        android:id="@+id/quick_qs_panel"
-        android:background="#0000"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent" />
 
     <com.android.systemui.statusbar.AlphaOptimizedImageView
         android:id="@+id/qs_detail_header_progress"

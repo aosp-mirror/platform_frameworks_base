@@ -84,7 +84,7 @@ public class QSCustomizer extends LinearLayout implements OnMenuItemClickListene
         TypedValue value = new TypedValue();
         mContext.getTheme().resolveAttribute(android.R.attr.homeAsUpIndicator, value, true);
         mToolbar.setNavigationIcon(
-                getResources().getDrawable(value.resourceId, mContext.getTheme()));
+                getResources().getDrawable(R.drawable.ic_close_white, mContext.getTheme()));
         mToolbar.setNavigationOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -193,7 +193,8 @@ public class QSCustomizer extends LinearLayout implements OnMenuItemClickListene
     @Override
     public void onClick(View v) {
         if (mFab == v) {
-            // TODO: Show list of tiles.
+            SystemUIDialog dialog = new SystemUIDialog(mContext);
+            dialog.show();
         }
     }
 

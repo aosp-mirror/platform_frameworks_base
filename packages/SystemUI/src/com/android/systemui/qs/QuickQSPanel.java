@@ -60,7 +60,7 @@ public class QuickQSPanel extends QSPanel {
             if (tile.getTileType() == QSTileView.QS_TYPE_QUICK) {
                 quickTiles.add(tile);
             }
-            if (quickTiles.size() == 4) {
+            if (quickTiles.size() == 2) {
                 break;
             }
         }

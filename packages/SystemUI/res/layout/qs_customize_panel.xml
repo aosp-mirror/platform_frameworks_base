@@ -19,14 +19,13 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:paddingBottom="@dimen/navigation_bar_size"
     android:background="@drawable/qs_customizer_background"
     android:gravity="center_horizontal">
 
     <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="?android:attr/colorPrimary">
+        android:background="@drawable/notification_header_bg">
 
         <LinearLayout
             android:id="@+id/drag_buttons"
@@ -72,8 +71,8 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:navigationContentDescription="@*android:string/action_bar_up_description"
-            style="?android:attr/toolbarStyle"
-            android:background="?android:attr/colorPrimary" />
+            android:background="@drawable/notification_header_bg"
+            style="?android:attr/toolbarStyle" />
     </FrameLayout>
 
     <com.android.systemui.tuner.AutoScrollView
@@ -104,5 +103,11 @@
         android:layout_marginBottom="@dimen/fab_margin"
         android:elevation="@dimen/fab_elevation"
         android:background="@drawable/fab_background" />
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/navigation_bar_size"
+        android:layout_gravity="bottom"
+        android:background="#ff000000" />
 
 </com.android.systemui.qs.customize.QSCustomizer>
