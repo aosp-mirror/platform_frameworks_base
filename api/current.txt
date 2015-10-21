@@ -35330,8 +35330,10 @@ package android.view {
     field public static final int KEYCODE_CLEAR = 28; // 0x1c
     field public static final int KEYCODE_COMMA = 55; // 0x37
     field public static final int KEYCODE_CONTACTS = 207; // 0xcf
+    field public static final int KEYCODE_COPY = 278; // 0x116
     field public static final int KEYCODE_CTRL_LEFT = 113; // 0x71
     field public static final int KEYCODE_CTRL_RIGHT = 114; // 0x72
+    field public static final int KEYCODE_CUT = 277; // 0x115
     field public static final int KEYCODE_D = 32; // 0x20
     field public static final int KEYCODE_DEL = 67; // 0x43
     field public static final int KEYCODE_DPAD_CENTER = 23; // 0x17
@@ -35449,6 +35451,7 @@ package android.view {
     field public static final int KEYCODE_PAGE_DOWN = 93; // 0x5d
     field public static final int KEYCODE_PAGE_UP = 92; // 0x5c
     field public static final int KEYCODE_PAIRING = 225; // 0xe1
+    field public static final int KEYCODE_PASTE = 279; // 0x117
     field public static final int KEYCODE_PERIOD = 56; // 0x38
     field public static final int KEYCODE_PICTSYMBOLS = 94; // 0x5e
     field public static final int KEYCODE_PLUS = 81; // 0x51

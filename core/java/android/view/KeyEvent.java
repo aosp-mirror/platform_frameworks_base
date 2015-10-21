@@ -790,8 +790,14 @@ public class KeyEvent extends InputEvent implements Parcelable {
     public static final int KEYCODE_MEDIA_STEP_BACKWARD = 275;
     /** Key code constant: put device to sleep unless a wakelock is held. */
     public static final int KEYCODE_SOFT_SLEEP = 276;
+    /** Key code constant: Cut key. */
+    public static final int KEYCODE_CUT = 277;
+    /** Key code constant: Copy key. */
+    public static final int KEYCODE_COPY = 278;
+    /** Key code constant: Paste key. */
+    public static final int KEYCODE_PASTE = 279;
 
-    private static final int LAST_KEYCODE = KEYCODE_SOFT_SLEEP;
+    private static final int LAST_KEYCODE = KEYCODE_PASTE;
 
     // NOTE: If you add a new keycode here you must also add it to:
     //  isSystem()
