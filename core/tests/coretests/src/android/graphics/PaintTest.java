@@ -20,6 +20,9 @@ import android.graphics.Paint;
 import android.test.InstrumentationTestCase;
 import android.test.suitebuilder.annotation.SmallTest;
 
+import java.util.Arrays;
+import java.util.HashSet;
+
 /**
  * PaintTest tests {@link Paint}.
  */
@@ -92,6 +95,65 @@ public class PaintTest extends InstrumentationTestCase {
             paint.getTextWidths(String.valueOf(testCase.mText), widths);
             assertEquals("Text width of '" + testCase.mText + "' with hinting is not expected.",
                     testCase.mWidthWithHinting, widths);
+        }
+    }
+
+    private static class HasGlyphTestCase {
+        public final int mBaseCodepoint;
+        public final HashSet<Integer> mVariationSelectors;
+
+        public HasGlyphTestCase(int baseCodepoint, Integer[] variationSelectors) {
+            mBaseCodepoint = baseCodepoint;
+            mVariationSelectors = new HashSet<>(Arrays.asList(variationSelectors));
+        }
+    }
+
+    private static String codePointsToString(int[] codepoints) {
+        StringBuilder sb = new StringBuilder();
+        for (int codepoint : codepoints) {
+            sb.append(Character.toChars(codepoint));
+        }
+        return sb.toString();
+    }
+
+    public void testHasGlyph_variationSelectors() {
+        final Typeface fontTypeface = Typeface.createFromAsset(
+                getInstrumentation().getContext().getAssets(), "fonts/hasGlyphTestFont.ttf");
+        Paint p = new Paint();
+        p.setTypeface(fontTypeface);
+
+        // Usually latin letters U+0061..U+0064 and Mahjong Tiles U+1F000..U+1F003 don't have
+        // variation selectors.  This test may fail if system pre-installed fonts have a variation
+        // selector support for U+0061..U+0064 and U+1F000..U+1F003.
+        HasGlyphTestCase[] HAS_GLYPH_TEST_CASES = {
+            new HasGlyphTestCase(0x0061, new Integer[] {0xFE00, 0xE0100, 0xE0101, 0xE0102}),
+            new HasGlyphTestCase(0x0062, new Integer[] {0xFE01, 0xE0101, 0xE0102, 0xE0103}),
+            new HasGlyphTestCase(0x0063, new Integer[] {}),
+            new HasGlyphTestCase(0x0064, new Integer[] {0xFE02, 0xE0102, 0xE0103}),
+
+            new HasGlyphTestCase(0x1F000, new Integer[] {0xFE00, 0xE0100, 0xE0101, 0xE0102}),
+            new HasGlyphTestCase(0x1F001, new Integer[] {0xFE01, 0xE0101, 0xE0102, 0xE0103}),
+            new HasGlyphTestCase(0x1F002, new Integer[] {}),
+            new HasGlyphTestCase(0x1F003, new Integer[] {0xFE02, 0xE0102, 0xE0103}),
+        };
+
+        for (HasGlyphTestCase testCase : HAS_GLYPH_TEST_CASES) {
+            for (int vs = 0xFE00; vs <= 0xE01EF; ++vs) {
+                // Move to variation selector supplements after variation selectors.
+                if (vs == 0xFF00) {
+                    vs = 0xE0100;
+                }
+                final String signature =
+                        "hasGlyph(U+" + Integer.toHexString(testCase.mBaseCodepoint) +
+                        " U+" + Integer.toHexString(vs) + ")";
+                final String testString =
+                        codePointsToString(new int[] {testCase.mBaseCodepoint, vs});
+                if (testCase.mVariationSelectors.contains(vs)) {
+                    assertTrue(signature + " is expected to be true", p.hasGlyph(testString));
+                } else {
+                    assertFalse(signature + " is expected to be false", p.hasGlyph(testString));
+                }
+            }
         }
     }
 }

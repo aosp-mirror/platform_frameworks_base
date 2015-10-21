@@ -40,6 +40,8 @@ public:
             TypefaceImpl* typeface, const uint16_t* buf, size_t start, size_t count,
             size_t bufSize);
 
+    static bool hasVariationSelector(TypefaceImpl* typeface, uint32_t codepoint, uint32_t vs);
+
     static float xOffsetForTextAlign(Paint* paint, const Layout& layout);
 
     static float hOffsetForTextAlign(Paint* paint, const Layout& layout, const SkPath& path);

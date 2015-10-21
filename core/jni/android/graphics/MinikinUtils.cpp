@@ -63,6 +63,11 @@ void MinikinUtils::doLayout(Layout* layout, const Paint* paint, int bidiFlags,
     layout->doLayout(buf, start, count, bufSize, bidiFlags, minikinStyle, minikinPaint);
 }
 
+bool MinikinUtils::hasVariationSelector(TypefaceImpl* typeface, uint32_t codepoint, uint32_t vs) {
+    const TypefaceImpl* resolvedFace = TypefaceImpl_resolveDefault(typeface);
+    return resolvedFace->fFontCollection->hasVariationSelector(codepoint, vs);
+}
+
 float MinikinUtils::xOffsetForTextAlign(Paint* paint, const Layout& layout) {
     switch (paint->getTextAlign()) {
         case Paint::kCenter_Align:

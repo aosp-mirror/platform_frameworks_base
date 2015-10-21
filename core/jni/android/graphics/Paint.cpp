@@ -39,6 +39,7 @@
 
 #include <minikin/GraphemeBreak.h>
 #include <minikin/Measurement.h>
+#include <unicode/utf16.h>
 #include "MinikinSkia.h"
 #include "MinikinUtils.h"
 #include "Paint.h"
@@ -852,45 +853,44 @@ namespace PaintGlue {
         return false;
     }
 
-    static jboolean hasGlyphVariation(const Paint* paint, TypefaceImpl* typeface, jint bidiFlags,
-            const jchar* chars, size_t size) {
-        // TODO: query font for whether character has variation selector; requires a corresponding
-        // function in Minikin.
-        return false;
-    }
-
     static jboolean hasGlyph(JNIEnv *env, jclass, jlong paintHandle, jlong typefaceHandle,
             jint bidiFlags, jstring string) {
         const Paint* paint = reinterpret_cast<Paint*>(paintHandle);
         TypefaceImpl* typeface = reinterpret_cast<TypefaceImpl*>(typefaceHandle);
         ScopedStringChars str(env, string);
 
-        /* start by rejecting variation selectors (not supported yet) */
+        /* Start by rejecting unsupported base code point and variation selector pairs. */
         size_t nChars = 0;
+        const uint32_t kStartOfString = 0xFFFFFFFF;
+        uint32_t prevCp = kStartOfString;
         for (size_t i = 0; i < str.size(); i++) {
-            jchar c = str[i];
-            if (0xDC00 <= c && c <= 0xDFFF) {
+            jchar cu = str[i];
+            uint32_t cp = cu;
+            if (U16_IS_TRAIL(cu)) {
                 // invalid UTF-16, unpaired trailing surrogate
                 return false;
-            } else if (0xD800 <= c && c <= 0xDBFF) {
+            } else if (U16_IS_LEAD(cu)) {
                 if (i + 1 == str.size()) {
                     // invalid UTF-16, unpaired leading surrogate at end of string
                     return false;
                 }
                 i++;
-                jchar c2 = str[i];
-                if (!(0xDC00 <= c2 && c2 <= 0xDFFF)) {
+                jchar cu2 = str[i];
+                if (!U16_IS_TRAIL(cu2)) {
                     // invalid UTF-16, unpaired leading surrogate
                     return false;
                 }
-                // UTF-16 encoding of range U+E0100..U+E01EF is DB40 DD00 .. DB40 DDEF
-                if (c == 0xDB40 && 0xDD00 <= c2 && c2 <= 0xDDEF) {
-                    return hasGlyphVariation(paint, typeface, bidiFlags, str.get(), str.size());
-                }
-            } else if (0xFE00 <= c && c <= 0xFE0F) {
-                return hasGlyphVariation(paint, typeface, bidiFlags, str.get(), str.size());
+                cp = U16_GET_SUPPLEMENTARY(cu, cu2);
+            }
+
+            if (prevCp != kStartOfString &&
+                ((0xFE00 <= cp && cp <= 0xFE0F) || (0xE0100 <= cp && cp <= 0xE01EF)) &&
+                !MinikinUtils::hasVariationSelector(typeface, prevCp, cp)) {
+                // No font has a glyph for the code point and variation selector pair.
+                return false;
             }
             nChars++;
+            prevCp = cp;
         }
         Layout layout;
         MinikinUtils::doLayout(&layout, paint, bidiFlags, typeface, str.get(), 0, str.size(),
