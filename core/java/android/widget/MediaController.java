@@ -20,8 +20,6 @@ import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.PixelFormat;
 import android.media.AudioManager;
-import android.os.Handler;
-import android.os.Message;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.Gravity;
@@ -83,8 +81,6 @@ public class MediaController extends FrameLayout {
     private boolean mShowing;
     private boolean mDragging;
     private static final int sDefaultTimeout = 3000;
-    private static final int FADE_OUT = 1;
-    private static final int SHOW_PROGRESS = 2;
     private final boolean mUseFastForward;
     private boolean mFromXml;
     private boolean mListenersSet;
@@ -373,12 +369,11 @@ public class MediaController extends FrameLayout {
         // cause the progress bar to be updated even if mShowing
         // was already true.  This happens, for example, if we're
         // paused with the progress bar showing the user hits play.
-        mHandler.sendEmptyMessage(SHOW_PROGRESS);
+        post(mShowProgress);
 
         if (timeout != 0 && !mAccessibilityManager.isTouchExplorationEnabled()) {
-            mHandler.removeMessages(FADE_OUT);
-            Message msg = mHandler.obtainMessage(FADE_OUT);
-            mHandler.sendMessageDelayed(msg, timeout);
+            removeCallbacks(mFadeOut);
+            postDelayed(mFadeOut, timeout);
         }
     }
 
@@ -395,7 +390,7 @@ public class MediaController extends FrameLayout {
 
         if (mShowing) {
             try {
-                mHandler.removeMessages(SHOW_PROGRESS);
+                removeCallbacks(mShowProgress);
                 mWindowManager.removeView(mDecor);
             } catch (IllegalArgumentException ex) {
                 Log.w("MediaController", "already removed");
@@ -404,21 +399,19 @@ public class MediaController extends FrameLayout {
         }
     }
 
-    private final Handler mHandler = new Handler() {
+    private final Runnable mFadeOut = new Runnable() {
         @Override
-        public void handleMessage(Message msg) {
-            int pos;
-            switch (msg.what) {
-                case FADE_OUT:
-                    hide();
-                    break;
-                case SHOW_PROGRESS:
-                    pos = setProgress();
-                    if (!mDragging && mShowing && mPlayer.isPlaying()) {
-                        msg = obtainMessage(SHOW_PROGRESS);
-                        sendMessageDelayed(msg, 1000 - (pos % 1000));
-                    }
-                    break;
+        public void run() {
+            hide();
+        }
+    };
+
+    private final Runnable mShowProgress = new Runnable() {
+        @Override
+        public void run() {
+            int pos = setProgress();
+            if (!mDragging && mShowing && mPlayer.isPlaying()) {
+                postDelayed(mShowProgress, 1000 - (pos % 1000));
             }
         }
     };
@@ -587,7 +580,7 @@ public class MediaController extends FrameLayout {
             // the seekbar and b) once the user is done dragging the thumb
             // we will post one of these messages to the queue again and
             // this ensures that there will be exactly one message queued up.
-            mHandler.removeMessages(SHOW_PROGRESS);
+            removeCallbacks(mShowProgress);
         }
 
         @Override
@@ -615,7 +608,7 @@ public class MediaController extends FrameLayout {
             // Ensure that progress is properly updated in the future,
             // the call to show() does not guarantee this because it is a
             // no-op if we are already showing.
-            mHandler.sendEmptyMessage(SHOW_PROGRESS);
+            post(mShowProgress);
         }
     };
 

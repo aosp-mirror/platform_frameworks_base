@@ -60,18 +60,18 @@ public class DigitalClock extends TextView {
         if (mCalendar == null) {
             mCalendar = Calendar.getInstance();
         }
-
-        mFormatChangeObserver = new FormatChangeObserver();
-        getContext().getContentResolver().registerContentObserver(
-                Settings.System.CONTENT_URI, true, mFormatChangeObserver);
-
-        setFormat();
     }
 
     @Override
     protected void onAttachedToWindow() {
         mTickerStopped = false;
         super.onAttachedToWindow();
+
+        mFormatChangeObserver = new FormatChangeObserver();
+        getContext().getContentResolver().registerContentObserver(
+                Settings.System.CONTENT_URI, true, mFormatChangeObserver);
+        setFormat();
+
         mHandler = new Handler();
 
         /**
@@ -95,6 +95,8 @@ public class DigitalClock extends TextView {
     protected void onDetachedFromWindow() {
         super.onDetachedFromWindow();
         mTickerStopped = true;
+        getContext().getContentResolver().unregisterContentObserver(
+                mFormatChangeObserver);
     }
 
     private void setFormat() {

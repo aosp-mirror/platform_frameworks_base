@@ -73,8 +73,6 @@ public class Chronometer extends TextView {
     private OnChronometerTickListener mOnChronometerTickListener;
     private StringBuilder mRecycle = new StringBuilder(8);
     
-    private static final int TICK_WHAT = 2;
-    
     /**
      * Initialize this Chronometer object.
      * Sets the base to the current time.
@@ -259,20 +257,21 @@ public class Chronometer extends TextView {
             if (running) {
                 updateText(SystemClock.elapsedRealtime());
                 dispatchChronometerTick();
-                mHandler.sendMessageDelayed(Message.obtain(mHandler, TICK_WHAT), 1000);
+                postDelayed(mTickRunnable, 1000);
             } else {
-                mHandler.removeMessages(TICK_WHAT);
+                removeCallbacks(mTickRunnable);
             }
             mRunning = running;
         }
     }
-    
-    private Handler mHandler = new Handler() {
-        public void handleMessage(Message m) {
+
+    private final Runnable mTickRunnable = new Runnable() {
+        @Override
+        public void run() {
             if (mRunning) {
                 updateText(SystemClock.elapsedRealtime());
                 dispatchChronometerTick();
-                sendMessageDelayed(Message.obtain(this, TICK_WHAT), 1000);
+                postDelayed(mTickRunnable, 1000);
             }
         }
     };
