@@ -14,10 +14,16 @@
      limitations under the License.
 -->
 
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<com.android.documentsui.DocListItem xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:background="@drawable/item_doc_list_background">
+    android:background="@drawable/item_doc_list_background"
+    android:orientation="horizontal">
+  
+    <View
+        android:id="@+id/focus_indicator"
+        android:layout_width="4dp"
+        android:layout_height="match_parent" />
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -131,4 +137,4 @@
 
     </LinearLayout>
 
-</FrameLayout>
+</com.android.documentsui.DocListItem>
