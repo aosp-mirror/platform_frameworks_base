@@ -582,6 +582,13 @@ public class HeadsUpManager implements ViewTreeObserver.OnComputeInternalInsetsL
 
         @Override
         public int compareTo(HeadsUpEntry o) {
+            boolean selfFullscreen = hasFullScreenIntent(entry);
+            boolean otherFullscreen = hasFullScreenIntent(o.entry);
+            if (selfFullscreen && !otherFullscreen) {
+                return -1;
+            } else if (!selfFullscreen && otherFullscreen) {
+                return 1;
+            }
             return postTime < o.postTime ? 1
                     : postTime == o.postTime ? entry.key.compareTo(o.entry.key)
                             : -1;
