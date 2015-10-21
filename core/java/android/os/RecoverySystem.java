@@ -341,6 +341,10 @@ public class RecoverySystem {
         } finally {
             uncryptFile.close();
         }
+        // UNCRYPT_FILE needs to be readable by system server on bootup.
+        if (!UNCRYPT_FILE.setReadable(true, false)) {
+            Log.e(TAG, "Error setting readable for " + UNCRYPT_FILE.getCanonicalPath());
+        }
         Log.w(TAG, "!!! REBOOTING TO INSTALL " + filename + " !!!");
 
         // If the package is on the /data partition, write the block map file
@@ -499,6 +503,25 @@ public class RecoverySystem {
             Log.i(TAG, "No recovery log file");
         } catch (IOException e) {
             Log.e(TAG, "Error reading recovery log", e);
+        }
+
+        if (UNCRYPT_FILE.exists()) {
+            String filename = null;
+            try {
+                filename = FileUtils.readTextFile(UNCRYPT_FILE, 0, null);
+            } catch (IOException e) {
+                Log.e(TAG, "Error reading uncrypt file", e);
+            }
+
+            // Remove the OTA package on /data that has been (possibly
+            // partially) processed. (Bug: 24973532)
+            if (filename != null && filename.startsWith("/data")) {
+                if (UNCRYPT_FILE.delete()) {
+                    Log.i(TAG, "Deleted: " + filename);
+                } else {
+                    Log.e(TAG, "Can't delete: " + filename);
+                }
+            }
         }
 
         // Delete everything in RECOVERY_DIR except those beginning
