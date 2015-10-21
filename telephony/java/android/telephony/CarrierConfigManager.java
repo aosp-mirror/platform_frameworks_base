@@ -268,6 +268,13 @@ public class CarrierConfigManager {
             = "carrier_allow_turnoff_ims_bool";
 
     /**
+     * Flag specifying whether Generic Bootstrapping Architecture capable SIM is required for IMS.
+     * @hide
+     */
+    public static final String KEY_CARRIER_IMS_GBA_REQUIRED_BOOL
+            = "carrier_ims_gba_required_bool";
+
+    /**
      * Flag specifying whether IMS instant lettering is available for the carrier.  {@code True} if
      * instant lettering is available for the carrier, {@code false} otherwise.
      * @hide
@@ -503,6 +510,7 @@ public class CarrierConfigManager {
         sDefaults.putBoolean(KEY_CARRIER_VOLTE_PROVISIONING_REQUIRED_BOOL, false);
         sDefaults.putBoolean(KEY_CARRIER_VOLTE_TTY_SUPPORTED_BOOL, true);
         sDefaults.putBoolean(KEY_CARRIER_ALLOW_TURNOFF_IMS_BOOL, true);
+        sDefaults.putBoolean(KEY_CARRIER_IMS_GBA_REQUIRED_BOOL, false);
         sDefaults.putBoolean(KEY_CARRIER_INSTANT_LETTERING_AVAILABLE_BOOL, false);
         sDefaults.putString(KEY_CARRIER_INSTANT_LETTERING_INVALID_CHARS_STRING, "");
         sDefaults.putString(KEY_CARRIER_INSTANT_LETTERING_ESCAPED_CHARS_STRING, "");
