@@ -1409,14 +1409,6 @@ var RESOURCE_COLLECTIONS = {
       "https://support.google.com/googleplay/answer/2651410"
     ]
   },
-  "marshmallow/landing/resources": {
-    "title": "",
-    "resources": [
-      "about/versions/marshmallow/android-6.0-changes.html",
-      "about/versions/marshmallow/android-6.0.html",
-      "about/versions/marshmallow/samples.html"
-    ]
-  },
   "autolanding": {
     "title": "",
     "resources": [
@@ -1643,9 +1635,9 @@ var RESOURCE_COLLECTIONS = {
   "marshmallow/landing/resources": {
     "title": "",
     "resources": [
-       "about/versions/marshmallow/android-6.0-changes.html",
        "about/versions/marshmallow/android-6.0.html",
-       "about/versions/marshmallow/samples.html"
+       "about/versions/marshmallow/samples.html",
+       "https://developers.google.com/android/nexus/images"
     ]
   },
   "marshmallow/landing/videos": {
