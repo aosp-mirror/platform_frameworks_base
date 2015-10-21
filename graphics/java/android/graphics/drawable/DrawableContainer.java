@@ -29,6 +29,7 @@ import android.graphics.PixelFormat;
 import android.graphics.Rect;
 import android.graphics.PorterDuff.Mode;
 import android.os.SystemClock;
+import android.util.DisplayMetrics;
 import android.util.LayoutDirection;
 import android.util.SparseArray;
 import android.view.View;
@@ -581,6 +582,17 @@ public class DrawableContainer extends Drawable implements Drawable.Callback {
         return mCurrDrawable;
     }
 
+    /**
+     * Updates the source density based on the resources used to inflate
+     * density-dependent values. Implementing classes should call this method
+     * during inflation.
+     *
+     * @param res the resources used to inflate density-dependent values
+     */
+    final void updateDensity(Resources res) {
+        mDrawableContainerState.updateDensity(res);
+    }
+
     @Override
     public void applyTheme(Theme theme) {
         mDrawableContainerState.applyTheme(theme);
@@ -638,22 +650,22 @@ public class DrawableContainer extends Drawable implements Drawable.Callback {
      */
     public abstract static class DrawableContainerState extends ConstantState {
         final DrawableContainer mOwner;
-        final Resources mRes;
 
-        SparseArray<ConstantStateFuture> mDrawableFutures;
-
+        Resources mSourceRes;
+        int mDensity = DisplayMetrics.DENSITY_DEFAULT;
         int mChangingConfigurations;
         int mChildrenChangingConfigurations;
 
+        SparseArray<ConstantStateFuture> mDrawableFutures;
         Drawable[] mDrawables;
         int mNumChildren;
 
         boolean mVariablePadding = false;
-        boolean mPaddingChecked;
+        boolean mCheckedPadding;
         Rect mConstantPadding;
 
         boolean mConstantSize = false;
-        boolean mComputedConstantSize;
+        boolean mCheckedConstantSize;
         int mConstantWidth;
         int mConstantHeight;
         int mConstantMinimumWidth;
@@ -689,7 +701,13 @@ public class DrawableContainer extends Drawable implements Drawable.Callback {
         DrawableContainerState(DrawableContainerState orig, DrawableContainer owner,
                 Resources res) {
             mOwner = owner;
-            mRes = res != null ? res : orig != null ? orig.mRes : null;
+
+            final Resources sourceRes = res != null ? res : (orig != null ? orig.mSourceRes : null);
+            mSourceRes = sourceRes;
+
+            final int densityDpi = sourceRes == null ? 0 : sourceRes.getDisplayMetrics().densityDpi;
+            final int sourceDensity = densityDpi == 0 ? DisplayMetrics.DENSITY_DEFAULT : densityDpi;
+            mDensity = sourceDensity;
 
             if (orig != null) {
                 mChangingConfigurations = orig.mChangingConfigurations;
@@ -713,21 +731,30 @@ public class DrawableContainer extends Drawable implements Drawable.Callback {
                 mHasTintList = orig.mHasTintList;
                 mHasTintMode = orig.mHasTintMode;
 
-                // Cloning the following values may require creating futures.
-                mConstantPadding = orig.getConstantPadding();
-                mPaddingChecked = true;
+                if (orig.mDensity == sourceDensity) {
+                    if (orig.mCheckedPadding) {
+                        mConstantPadding = new Rect(orig.mConstantPadding);
+                        mCheckedPadding = true;
+                    }
 
-                mConstantWidth = orig.getConstantWidth();
-                mConstantHeight = orig.getConstantHeight();
-                mConstantMinimumWidth = orig.getConstantMinimumWidth();
-                mConstantMinimumHeight = orig.getConstantMinimumHeight();
-                mComputedConstantSize = true;
+                    if (orig.mCheckedConstantSize) {
+                        mConstantWidth = orig.mConstantWidth;
+                        mConstantHeight = orig.mConstantHeight;
+                        mConstantMinimumWidth = orig.mConstantMinimumWidth;
+                        mConstantMinimumHeight = orig.mConstantMinimumHeight;
+                        mCheckedConstantSize = true;
+                    }
+                }
 
-                mOpacity = orig.getOpacity();
-                mCheckedOpacity = true;
+                if (orig.mCheckedOpacity) {
+                    mOpacity = orig.mOpacity;
+                    mCheckedOpacity = true;
+                }
 
-                mStateful = orig.isStateful();
-                mCheckedStateful = true;
+                if (orig.mCheckedStateful) {
+                    mStateful = orig.mStateful;
+                    mCheckedStateful = true;
+                }
 
                 // Postpone cloning children and futures until we're absolutely
                 // sure that we're done computing values for the original state.
@@ -783,8 +810,8 @@ public class DrawableContainer extends Drawable implements Drawable.Callback {
             mCheckedOpacity = false;
 
             mConstantPadding = null;
-            mPaddingChecked = false;
-            mComputedConstantSize = false;
+            mCheckedPadding = false;
+            mCheckedConstantSize = false;
 
             return pos;
         }
@@ -863,6 +890,31 @@ public class DrawableContainer extends Drawable implements Drawable.Callback {
             return changed;
         }
 
+        /**
+         * Updates the source density based on the resources used to inflate
+         * density-dependent values.
+         *
+         * @param res the resources used to inflate density-dependent values
+         */
+        final void updateDensity(Resources res) {
+            if (mSourceRes != null) {
+                mSourceRes = res;
+            }
+
+            // The density may have changed since the last update (if any). Any
+            // dimension-type attributes will need their default values scaled.
+            final int densityDpi = res.getDisplayMetrics().densityDpi;
+            final int newSourceDensity = densityDpi == 0 ?
+                    DisplayMetrics.DENSITY_DEFAULT : densityDpi;
+            final int oldSourceDensity = mDensity;
+            mDensity = newSourceDensity;
+
+            if (oldSourceDensity != newSourceDensity) {
+                mCheckedConstantSize = false;
+                mCheckedPadding = false;
+            }
+        }
+
         final void applyTheme(Theme theme) {
             if (theme != null) {
                 createAllFutures();
@@ -877,6 +929,8 @@ public class DrawableContainer extends Drawable implements Drawable.Callback {
                         mChildrenChangingConfigurations |= drawables[i].getChangingConfigurations();
                     }
                 }
+
+                updateDensity(theme.getResources());
             }
         }
 
@@ -941,7 +995,7 @@ public class DrawableContainer extends Drawable implements Drawable.Callback {
                 return null;
             }
 
-            if ((mConstantPadding != null) || mPaddingChecked) {
+            if ((mConstantPadding != null) || mCheckedPadding) {
                 return mConstantPadding;
             }
 
@@ -961,7 +1015,7 @@ public class DrawableContainer extends Drawable implements Drawable.Callback {
                 }
             }
 
-            mPaddingChecked = true;
+            mCheckedPadding = true;
             return (mConstantPadding = r);
         }
 
@@ -974,7 +1028,7 @@ public class DrawableContainer extends Drawable implements Drawable.Callback {
         }
 
         public final int getConstantWidth() {
-            if (!mComputedConstantSize) {
+            if (!mCheckedConstantSize) {
                 computeConstantSize();
             }
 
@@ -982,7 +1036,7 @@ public class DrawableContainer extends Drawable implements Drawable.Callback {
         }
 
         public final int getConstantHeight() {
-            if (!mComputedConstantSize) {
+            if (!mCheckedConstantSize) {
                 computeConstantSize();
             }
 
@@ -990,7 +1044,7 @@ public class DrawableContainer extends Drawable implements Drawable.Callback {
         }
 
         public final int getConstantMinimumWidth() {
-            if (!mComputedConstantSize) {
+            if (!mCheckedConstantSize) {
                 computeConstantSize();
             }
 
@@ -998,7 +1052,7 @@ public class DrawableContainer extends Drawable implements Drawable.Callback {
         }
 
         public final int getConstantMinimumHeight() {
-            if (!mComputedConstantSize) {
+            if (!mCheckedConstantSize) {
                 computeConstantSize();
             }
 
@@ -1006,7 +1060,7 @@ public class DrawableContainer extends Drawable implements Drawable.Callback {
         }
 
         protected void computeConstantSize() {
-            mComputedConstantSize = true;
+            mCheckedConstantSize = true;
 
             createAllFutures();
 
@@ -1146,10 +1200,10 @@ public class DrawableContainer extends Drawable implements Drawable.Callback {
              */
             public Drawable get(DrawableContainerState state) {
                 final Drawable result;
-                if (state.mRes == null) {
+                if (state.mSourceRes == null) {
                     result = mConstantState.newDrawable();
                 } else {
-                    result = mConstantState.newDrawable(state.mRes);
+                    result = mConstantState.newDrawable(state.mSourceRes);
                 }
                 result.setLayoutDirection(state.mLayoutDirection);
                 result.setCallback(state.mOwner);
