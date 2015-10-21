@@ -584,6 +584,19 @@ DISTRIBUTE_RESOURCES = DISTRIBUTE_RESOURCES.concat([
     "titleFriendly": ""
   },
   {
+    "lang": "en",
+    "group": "",
+    "tags": [],
+    "url": "https://developers.google.com/android/nexus/images",
+    "timestamp": 1194884220000,
+    "image": "images/cards/card-download_16-9_2x.png",
+    "title": "System Images",
+    "summary": "Download system images for Marshmallow.",
+    "keywords": [],
+    "type": "support",
+    "titleFriendly": ""
+  },
+  {
     "lang": "zh-cn",
     "group": "",
     "tags": [],
