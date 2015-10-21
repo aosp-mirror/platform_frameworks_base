@@ -176,7 +176,7 @@ public class EventConditionProvider extends SystemConditionProviderService {
         }
         mTrackers.clear();
         for (UserHandle user : UserManager.get(mContext).getUserProfiles()) {
-            final Context context = user.isOwner() ? mContext : getContextForUser(mContext, user);
+            final Context context = user.isSystem() ? mContext : getContextForUser(mContext, user);
             if (context == null) {
                 Slog.w(TAG, "Unable to create context for user " + user.getIdentifier());
                 continue;

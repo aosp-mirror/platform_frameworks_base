@@ -3494,7 +3494,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         final UserHandle caller = mInjector.binderGetCallingUserHandle();
         // If there is a profile owner, redirect to that; otherwise query the device owner.
         ComponentName aliasChooser = getProfileOwner(caller.getIdentifier());
-        if (aliasChooser == null && caller.isOwner()) {
+        if (aliasChooser == null && caller.isSystem()) {
             ActiveAdmin deviceOwnerAdmin = getDeviceOwnerAdminLocked();
             if (deviceOwnerAdmin != null) {
                 aliasChooser = deviceOwnerAdmin.info.getComponent();
