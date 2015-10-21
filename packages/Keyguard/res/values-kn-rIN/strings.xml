@@ -31,6 +31,8 @@
     <string name="keyguard_password_wrong_pin_code" msgid="2422225591006134936">"ತಪ್ಪಾದ ಪಿನ್‌ ಕೋಡ್."</string>
     <string name="keyguard_charged" msgid="3272223906073492454">"ಚಾರ್ಜ್ ಆಗಿದೆ"</string>
     <string name="keyguard_plugged_in" msgid="9087497435553252863">"ಚಾರ್ಜ್ ಆಗುತ್ತಿದೆ"</string>
+    <string name="keyguard_plugged_in_charging_fast" msgid="6671162730167305479">"ವೇಗವಾಗಿ ಚಾರ್ಜ್ ಮಾಡಲಾಗುತ್ತಿದೆ"</string>
+    <string name="keyguard_plugged_in_charging_slowly" msgid="1964714661071163229">"ನಿಧಾನವಾಗಿ ಚಾರ್ಜ್ ಮಾಡಲಾಗುತ್ತಿದೆ"</string>
     <string name="keyguard_low_battery" msgid="8143808018719173859">"ನಿಮ್ಮ ಚಾರ್ಜರ್ ಸಂಪರ್ಕಗೊಳಿಸಿ."</string>
     <string name="keyguard_instructions_when_pattern_disabled" msgid="1332288268600329841">"ಅನ್‌ಲಾಕ್ ಮಾಡಲು ಮೆನು ಕ್ಲಿಕ್ ಮಾಡಿ."</string>
     <string name="keyguard_network_locked_message" msgid="9169717779058037168">"ನೆಟ್‌ವರ್ಕ್ ಲಾಕ್ ಆಗಿದೆ"</string>
@@ -93,38 +95,41 @@
     <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"ನಿಮ್ಮ ಅನ್‍‍ಲಾಕ್ ಪ್ಯಾಟರ್ನ್ ಅನ್ನು ನೀವು <xliff:g id="NUMBER_0">%d</xliff:g> ಬಾರಿ ತಪ್ಪಾಗಿ ಡ್ರಾ ಮಾಡಿರುವಿರಿ. <xliff:g id="NUMBER_1">%d</xliff:g> ಹೆಚ್ಚಿನ ವಿಫಲ ಪ್ರಯತ್ನಗಳ ಬಳಿಕ, ನಿಮ್ಮ ಇಮೇಲ್ ಖಾತೆಯನ್ನು ಬಳಸಿಕೊಂಡು ನಿಮ್ಮ ಟ್ಯಾಬ್ಲೆಟ್ ಅನ್‌ಲಾಕ್ ಮಾಡುವಂತೆ ನಿಮ್ಮಲ್ಲಿ ಕೇಳಿಕೊಳ್ಳಲಾಗುತ್ತದೆ.\n\n <xliff:g id="NUMBER_2">%d</xliff:g> ಸೆಕೆಂಡುಗಳಲ್ಲಿ ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ."</string>
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"ನಿಮ್ಮ ಅನ್‍‍ಲಾಕ್ ಪ್ಯಾಟರ್ನ್ ಅನ್ನು ನೀವು <xliff:g id="NUMBER_0">%d</xliff:g> ಬಾರಿ ತಪ್ಪಾಗಿ ಡ್ರಾ ಮಾಡಿರುವಿರಿ. <xliff:g id="NUMBER_1">%d</xliff:g> ಹೆಚ್ಚಿನ ವಿಫಲ ಪ್ರಯತ್ನಗಳ ಬಳಿಕ, ನಿಮ್ಮ ಇಮೇಲ್ ಖಾತೆಯನ್ನು ಬಳಸಿಕೊಂಡು ನಿಮ್ಮ ಫೋನ್ ಅನ್‌ಲಾಕ್ ಮಾಡುವಂತೆ ನಿಮ್ಮಲ್ಲಿ ಕೇಳಿಕೊಳ್ಳಲಾಗುತ್ತದೆ.\n\n <xliff:g id="NUMBER_2">%d</xliff:g> ಸೆಕೆಂಡುಗಳಲ್ಲಿ ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ."</string>
     <string name="kg_password_wrong_pin_code_pukked" msgid="30531039455764924">"ಸಿಮ್‌ ಪಿನ್‌ ಕೋಡ್ ತಪ್ಪಾಗಿದೆ, ನಿಮ್ಮ ಸಾಧನವನ್ನು ಅನ್‌ಲಾಕ್ ಮಾಡಲು ನೀವು ಈ ಕೂಡಲೇ ನಿಮ್ಮ ವಾಹಕವನ್ನು ಸಂಪರ್ಕಿಸಬೇಕು."</string>
-    <plurals name="kg_password_wrong_pin_code" formatted="false" msgid="6721575017538162249">
-      <item quantity="one">ಸಿಮ್‌ ಪಿನ್ ಕೋಡ್‌ ತಪ್ಪಾಗಿದೆ, ನಿಮ್ಮಲ್ಲಿ <xliff:g id="NUMBER_1">%d</xliff:g> ಪ್ರಯತ್ನಗಳು ಬಾಕಿ ಉಳಿದಿವೆ.</item>
-      <item quantity="other">ಸಿಮ್‌ ಪಿನ್ ಕೋಡ್‌ ತಪ್ಪಾಗಿದೆ, ನಿಮ್ಮಲ್ಲಿ <xliff:g id="NUMBER_1">%d</xliff:g> ಪ್ರಯತ್ನಗಳು ಬಾಕಿ ಉಳಿದಿವೆ.</item>
-    </plurals>
+  <plurals name="kg_password_wrong_pin_code">
+    <item quantity="one" msgid="8134313997799638254">"ತಪ್ಪಾಗಿರುವ ಸಿಮ್‌ ಪಿನ್‌ ಕೋಡ್, ನಿಮ್ಮ ಸಾಧನವನ್ನು ಅನ್‌ಲಾಕ್ ಮಾಡುವ ಸಲುವಾಗಿ ನಿಮ್ಮ ವಾಹಕವನ್ನು ನೀವು ಸಂಪರ್ಕಿಸುವುದಕ್ಕೂ ಮೊದಲು ನಿಮ್ಮಲ್ಲಿ <xliff:g id="NUMBER">%d</xliff:g> ಪ್ರಯತ್ನಗಳು ಬಾಕಿ ಉಳಿದಿವೆ."</item>
+    <item quantity="other" msgid="2215723361575359486">"ತಪ್ಪಾಗಿರುವ ಸಿಮ್‌ ಪಿನ್‌ ಕೋಡ್, ನಿಮ್ಮಲ್ಲಿ <xliff:g id="NUMBER">%d</xliff:g> ಪ್ರಯತ್ನಗಳು ಬಾಕಿ ಉಳಿದಿವೆ."</item>
+  </plurals>
     <string name="kg_password_wrong_puk_code_dead" msgid="7077536808291316208">"ಸಿಮ್‌ ನಿಷ್ಪ್ರಯೋಜಕವಾಗಿದೆ. ನಿಮ್ಮ ವಾಹಕವನ್ನು ಸಂಪರ್ಕಿಸಿ."</string>
-    <plurals name="kg_password_wrong_puk_code" formatted="false" msgid="7576227366999858780">
-      <item quantity="one">ತಪ್ಪಾಗಿರುವ ಸಿಮ್‌ PUK ಕೋಡ್‌, ಸಿಮ್‌ ಶಾಶ್ವತವಾಗಿ ನಿಷ್ಪ್ರಯೋಜಕವಾಗುವುದಕ್ಕೂ ಮೊದಲು ನಿಮ್ಮಲ್ಲಿ <xliff:g id="NUMBER_1">%d</xliff:g> ಪ್ರಯತ್ನಗಳು ಬಾಕಿ ಉಳಿದಿವೆ.</item>
-      <item quantity="other">ತಪ್ಪಾಗಿರುವ ಸಿಮ್‌ PUK ಕೋಡ್‌, ಸಿಮ್‌ ಶಾಶ್ವತವಾಗಿ ನಿಷ್ಪ್ರಯೋಜಕವಾಗುವುದಕ್ಕೂ ಮೊದಲು ನಿಮ್ಮಲ್ಲಿ <xliff:g id="NUMBER_1">%d</xliff:g> ಪ್ರಯತ್ನಗಳು ಬಾಕಿ ಉಳಿದಿವೆ.</item>
-    </plurals>
+  <plurals name="kg_password_wrong_puk_code">
+    <item quantity="one" msgid="3256893607561060649">"ತಪ್ಪಾಗಿರುವ ಸಿಮ್‌ PUK ಕೋಡ್, ಸಿಮ್‌ ಶಾಶ್ವತವಾಗಿ ನಿಷ್ಪ್ರಯೋಜಕವಾಗುವುದಕ್ಕೂ ಮೊದಲು ನಿಮ್ಮಲ್ಲಿ <xliff:g id="NUMBER">%d</xliff:g> ಪ್ರಯತ್ನ ಬಾಕಿ ಉಳಿದಿದೆ."</item>
+    <item quantity="other" msgid="5477305226026342036">"ತಪ್ಪಾಗಿರುವ ಸಿಮ್‌ PUK ಕೋಡ್, ಸಿಮ್‌ ಶಾಶ್ವತವಾಗಿ ನಿಷ್ಪ್ರಯೋಜಕವಾಗುವುದಕ್ಕೂ ಮೊದಲು ನಿಮ್ಮಲ್ಲಿ <xliff:g id="NUMBER">%d</xliff:g> ಪ್ರಯತ್ನಗಳು ಬಾಕಿ ಉಳಿದಿವೆ."</item>
+  </plurals>
     <string name="kg_password_pin_failed" msgid="6268288093558031564">"ಸಿಮ್‌ ಪಿನ್‌ ಕಾರ್ಯಾಚರಣೆ ವಿಫಲಗೊಂಡಿದೆ!"</string>
     <string name="kg_password_puk_failed" msgid="2838824369502455984">"ಸಿಮ್‌ PUK ಕಾರ್ಯಾಚರಣೆ ವಿಫಲಗೊಂಡಿದೆ!"</string>
     <string name="kg_pin_accepted" msgid="1448241673570020097">"ಕೋಡ್ ಅಂಗೀಕೃತವಾಗಿದೆ!"</string>
     <string name="keyguard_carrier_default" msgid="8700650403054042153">"ಯಾವುದೇ ಸೇವೆಯಿಲ್ಲ."</string>
     <string name="accessibility_ime_switch_button" msgid="5032926134740456424">"ಇನ್‌ಪುಟ್ ವಿಧಾನ ಬದಲಿಸು ಬಟನ್."</string>
     <string name="airplane_mode" msgid="3122107900897202805">"ಏರ್‌ಪ್ಲೇನ್ ಮೋಡ್"</string>
-    <string name="kg_prompt_reason_restart_pattern" msgid="489430505491862444">"ನೀವು ಸಾಧನವನ್ನು ಮರುಪ್ರಾರಂಭಿಸಿದಾಗ ನಮೂನೆ ಅಗತ್ಯವಿರುತ್ತದೆ."</string>
+    <string name="kg_prompt_reason_restart_pattern" msgid="489430505491862444">"ನೀವು ಸಾಧನವನ್ನು ಮರುಪ್ರಾರಂಭಿಸಿದಾಗ ಪ್ಯಾಟರ್ನ್ ಅಗತ್ಯವಿರುತ್ತದೆ."</string>
     <string name="kg_prompt_reason_restart_pin" msgid="994878216570694974">"ನೀವು ಸಾಧನವನ್ನು ಮರುಪ್ರಾರಂಭಿಸಿದಾಗ ಪಿನ್ ಅಗತ್ಯವಿರುತ್ತದೆ."</string>
     <string name="kg_prompt_reason_restart_password" msgid="2375742919528461664">"ನೀವು ಸಾಧನವನ್ನು ಮರುಪ್ರಾರಂಭಿಸಿದಾಗ ಪಾಸ್‌ವರ್ಡ್ ಅಗತ್ಯವಿರುತ್ತದೆ."</string>
-    <string name="kg_prompt_reason_switch_profiles_pattern" msgid="3802056699323773969">"ನೀವು ಪ್ರೊಫೈಲ್ ಬದಲಾಯಿಸಿದಾಗ ನಮೂನೆ ಅಗತ್ಯವಿರುತ್ತದೆ."</string>
+    <string name="kg_prompt_reason_timeout_pattern" msgid="8930047492617900785">"ಹೆಚ್ಚುವರಿ ಭದ್ರತೆಗೆ ಪ್ಯಾಟರ್ನ್ ಅಗತ್ಯವಿದೆ."</string>
+    <string name="kg_prompt_reason_timeout_pin" msgid="7470468607947726377">"ಹೆಚ್ಚುವರಿ ಭದ್ರತೆಗೆ ಪಿನ್ ಅಗತ್ಯವಿದೆ."</string>
+    <string name="kg_prompt_reason_timeout_password" msgid="1177412542773936957">"ಹೆಚ್ಚುವರಿ ಭದ್ರತೆಗಾಗಿ ಪಾಸ್‌ವರ್ಡ್ ಅಗತ್ಯವಿದೆ."</string>
+    <string name="kg_prompt_reason_switch_profiles_pattern" msgid="3802056699323773969">"ನೀವು ಪ್ರೊಫೈಲ್ ಬದಲಾಯಿಸಿದಾಗ ಪ್ಯಾಟರ್ನ್ ಅಗತ್ಯವಿರುತ್ತದೆ."</string>
     <string name="kg_prompt_reason_switch_profiles_pin" msgid="8108020184731052246">"ನೀವು ಪ್ರೊಫೈಲ್ ಬದಲಾಯಿಸಿದಾಗ ಪಿನ್ ಅಗತ್ಯವಿರುತ್ತದೆ."</string>
     <string name="kg_prompt_reason_switch_profiles_password" msgid="6755997057852042672">"ನೀವು ಪ್ರೊಫೈಲ್ ಬದಲಾಯಿಸಿದಾಗ ಪಾಸ್‌ವರ್ಡ್‌ ಅಗತ್ಯವಿರುತ್ತದೆ."</string>
-    <plurals name="kg_prompt_reason_time_pattern" formatted="false" msgid="2697444392228541853">
-      <item quantity="one">ಸಾಧನವನ್ನು <xliff:g id="NUMBER_1">%d</xliff:g> ಗಂಟೆಗಳ ಕಾಲ ಅನ್‌ಲಾಕ್‌ ಮಾಡಲಾಗಿಲ್ಲ. ನಮೂನೆಯನ್ನು ಖಚಿತಪಡಿಸಿ.</item>
-      <item quantity="other">ಸಾಧನವನ್ನು <xliff:g id="NUMBER_1">%d</xliff:g> ಗಂಟೆಗಳ ಕಾಲ ಅನ್‌ಲಾಕ್‌ ಮಾಡಲಾಗಿಲ್ಲ. ನಮೂನೆಯನ್ನು ಖಚಿತಪಡಿಸಿ.</item>
-    </plurals>
-    <plurals name="kg_prompt_reason_time_pin" formatted="false" msgid="2118758475374354849">
-      <item quantity="one">ಸಾಧನವನ್ನು <xliff:g id="NUMBER_1">%d</xliff:g> ಗಂಟೆಗಳ ಕಾಲ ಅನ್‌ಲಾಕ್‌ ಮಾಡಲಾಗಿಲ್ಲ. ಪಿನ್ ದೃಢೀಕರಿಸಿ.</item>
-      <item quantity="other">ಸಾಧನವನ್ನು <xliff:g id="NUMBER_1">%d</xliff:g> ಗಂಟೆಗಳ ಕಾಲ ಅನ್‌ಲಾಕ್‌ ಮಾಡಲಾಗಿಲ್ಲ. ಪಿನ್ ದೃಢೀಕರಿಸಿ.</item>
-    </plurals>
-    <plurals name="kg_prompt_reason_time_password" formatted="false" msgid="5132693663364913675">
-      <item quantity="one">ಸಾಧನವನ್ನು <xliff:g id="NUMBER_1">%d</xliff:g> ಗಂಟೆಗಳ ಕಾಲ ಅನ್‌ಲಾಕ್‌ ಮಾಡಲಾಗಿಲ್ಲ. ಪಾಸ್‌ವರ್ಡ್‌ ಖಚಿತಪಡಿಸಿ.</item>
-      <item quantity="other">ಸಾಧನವನ್ನು <xliff:g id="NUMBER_1">%d</xliff:g> ಗಂಟೆಗಳ ಕಾಲ ಅನ್‌ಲಾಕ್‌ ಮಾಡಲಾಗಿಲ್ಲ. ಪಾಸ್‌ವರ್ಡ್‌ ಖಚಿತಪಡಿಸಿ.</item>
-    </plurals>
+  <plurals name="kg_prompt_reason_time_pattern">
+    <item quantity="one" msgid="5598462918459516566">"ಸಾಧನವನ್ನು <xliff:g id="NUMBER">%d</xliff:g> ಗಂಟೆ ಕಾಲ ಅನ್‌ಲಾಕ್ ಮಾಡಲಾಗಿಲ್ಲ. ಪ್ಯಾಟರ್ನ್ ಖಚಿತಪಡಿಸಿ."</item>
+    <item quantity="other" msgid="224518697489572649">"ಸಾಧನವನ್ನು <xliff:g id="NUMBER">%d</xliff:g> ಗಂಟೆಗಳ ಕಾಲ ಅನ್‌ಲಾಕ್ ಮಾಡಲಾಗಿಲ್ಲ. ಪ್ಯಾಟರ್ನ್ ಖಚಿತಪಡಿಸಿ."</item>
+  </plurals>
+  <plurals name="kg_prompt_reason_time_pin">
+    <item quantity="one" msgid="3073579168584205350">"ಸಾಧನವನ್ನು <xliff:g id="NUMBER">%d</xliff:g> ಗಂಟೆ ಕಾಲ ಅನ್‌ಲಾಕ್ ಮಾಡಲಾಗಿಲ್ಲ. ಪಿನ್‌ ಖಚಿತಪಡಿಸಿ."</item>
+    <item quantity="other" msgid="3282423442327824649">"ಸಾಧನವನ್ನು <xliff:g id="NUMBER">%d</xliff:g> ಗಂಟೆಗಳ ಕಾಲ ಅನ್‌ಲಾಕ್ ಮಾಡಲಾಗಿಲ್ಲ. ಪಿನ್‌ ಖಚಿತಪಡಿಸಿ."</item>
+  </plurals>
+  <plurals name="kg_prompt_reason_time_password">
+    <item quantity="one" msgid="9062782924671938516">"ಸಾಧನವನ್ನು <xliff:g id="NUMBER">%d</xliff:g> ಗಂಟೆ ಕಾಲ ಅನ್‌ಲಾಕ್ ಮಾಡಲಾಗಿಲ್ಲ. ಪಾಸ್‌ವರ್ಡ್‌ ಖಚಿತಪಡಿಸಿ."</item>
+    <item quantity="other" msgid="1839722302513719629">"ಸಾಧನವನ್ನು <xliff:g id="NUMBER">%d</xliff:g> ಗಂಟೆಗಳ ಕಾಲ ಅನ್‌ಲಾಕ್ ಮಾಡಲಾಗಿಲ್ಲ. ಪಾಸ್‌ವರ್ಡ್‌ ಖಚಿತಪಡಿಸಿ."</item>
+  </plurals>
     <string name="fingerprint_not_recognized" msgid="2690661881608146617">"ಗುರುತಿಸಲಾಗಿಲ್ಲ"</string>
 </resources>

@@ -31,6 +31,8 @@
     <string name="keyguard_password_wrong_pin_code" msgid="2422225591006134936">"รหัส PIN ไม่ถูกต้อง"</string>
     <string name="keyguard_charged" msgid="3272223906073492454">"ชาร์จแล้ว"</string>
     <string name="keyguard_plugged_in" msgid="9087497435553252863">"กำลังชาร์จ"</string>
+    <string name="keyguard_plugged_in_charging_fast" msgid="6671162730167305479">"กำลังชาร์จเร็ว"</string>
+    <string name="keyguard_plugged_in_charging_slowly" msgid="1964714661071163229">"กำลังชาร์จช้า"</string>
     <string name="keyguard_low_battery" msgid="8143808018719173859">"เสียบที่ชาร์จของคุณ"</string>
     <string name="keyguard_instructions_when_pattern_disabled" msgid="1332288268600329841">"กด \"เมนู\" เพื่อปลดล็อก"</string>
     <string name="keyguard_network_locked_message" msgid="9169717779058037168">"เครือข่ายล็อก"</string>
@@ -93,15 +95,15 @@
     <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"คุณวาดรูปแบบการปลดล็อกไม่ถูกต้อง <xliff:g id="NUMBER_0">%d</xliff:g> ครั้งแล้ว หากทำไม่สำเร็จอีก <xliff:g id="NUMBER_1">%d</xliff:g> ครั้ง ระบบจะขอให้คุณปลดล็อกแท็บเล็ตโดยใช้บัญชีอีเมล\n\n โปรดลองอีกครั้งใน <xliff:g id="NUMBER_2">%d</xliff:g> วินาที"</string>
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"คุณวาดรูปแบบการปลดล็อกไม่ถูกต้อง <xliff:g id="NUMBER_0">%d</xliff:g> ครั้งแล้ว หากทำไม่สำเร็จอีก <xliff:g id="NUMBER_1">%d</xliff:g> ครั้ง ระบบจะขอให้คุณปลดล็อกโทรศัพท์โดยใช้ับัญชีอีเมล\n\n โปรดลองอีกครั้งในอีก <xliff:g id="NUMBER_2">%d</xliff:g> วินาที"</string>
     <string name="kg_password_wrong_pin_code_pukked" msgid="30531039455764924">"รหัส PIN ของซิมไม่ถูกต้อง ตอนนี้คุณต้องติดต่อผู้ให้บริการเพื่อปลดล็อกอุปกรณ์ของคุณ"</string>
-    <plurals name="kg_password_wrong_pin_code" formatted="false" msgid="6721575017538162249">
-      <item quantity="other">รหัส PIN ของซิมไม่ถูกต้อง คุณพยายามได้อีก <xliff:g id="NUMBER_1">%d</xliff:g> ครั้ง</item>
-      <item quantity="one">รหัส PIN ของซิมไม่ถูกต้อง คุณพยายามได้อีก <xliff:g id="NUMBER_0">%d</xliff:g> ครั้งก่อนที่จะต้องติดต่อผู้ให้บริการเพื่อปลดล็อกอุปกรณ์ของคุณ</item>
-    </plurals>
+  <plurals name="kg_password_wrong_pin_code">
+    <item quantity="one" msgid="8134313997799638254">"รหัส PIN ของซิมไม่ถูกต้อง คุณพยายามได้อีก <xliff:g id="NUMBER">%d</xliff:g> ครั้งก่อนที่จะต้องติดต่อผู้ให้บริการเพื่อปลดล็อกอุปกรณ์ของคุณ"</item>
+    <item quantity="other" msgid="2215723361575359486">"รหัส PIN ของซิมไม่ถูกต้อง คุณพยายามได้อีก <xliff:g id="NUMBER">%d</xliff:g> ครั้ง"</item>
+  </plurals>
     <string name="kg_password_wrong_puk_code_dead" msgid="7077536808291316208">"ซิมไม่สามารถใช้งานได้ ติดต่อผู้ให้บริการของคุณ"</string>
-    <plurals name="kg_password_wrong_puk_code" formatted="false" msgid="7576227366999858780">
-      <item quantity="other">รหัส PUK ของซิมไม่ถูกต้อง คุณพยายามได้อีก <xliff:g id="NUMBER_1">%d</xliff:g> ครั้งก่อนที่ซิมจะไม่สามารถใช้งานได้อย่างถาวร</item>
-      <item quantity="one">รหัส PUK ของซิมไม่ถูกต้อง คุณพยายามได้อีก <xliff:g id="NUMBER_0">%d</xliff:g> ครั้งก่อนที่ซิมจะไม่สามารถใช้งานได้อย่างถาวร</item>
-    </plurals>
+  <plurals name="kg_password_wrong_puk_code">
+    <item quantity="one" msgid="3256893607561060649">"รหัส PUK ของซิมไม่ถูกต้อง คุณพยายามได้อีก <xliff:g id="NUMBER">%d</xliff:g> ครั้งก่อนที่ซิมจะไม่สามารถใช้งานได้อย่างถาวร"</item>
+    <item quantity="other" msgid="5477305226026342036">"รหัส PUK ของซิมไม่ถูกต้อง คุณพยายามได้อีก <xliff:g id="NUMBER">%d</xliff:g> ครั้งก่อนที่ซิมจะไม่สามารถใช้งานได้อย่างถาวร"</item>
+  </plurals>
     <string name="kg_password_pin_failed" msgid="6268288093558031564">"การปลดล็อกด้วย PIN ของซิมล้มเหลว!"</string>
     <string name="kg_password_puk_failed" msgid="2838824369502455984">"การปลดล็อกด้วย PUK ของซิมล้มเหลว!"</string>
     <string name="kg_pin_accepted" msgid="1448241673570020097">"รหัสได้รับการยอมรับ!"</string>
@@ -111,20 +113,23 @@
     <string name="kg_prompt_reason_restart_pattern" msgid="489430505491862444">"ต้องใช้รูปแบบเมื่อคุณรีสตาร์ทอุปกรณ์"</string>
     <string name="kg_prompt_reason_restart_pin" msgid="994878216570694974">"ต้องใช้ PIN เมื่อคุณรีสตาร์ทอุปกรณ์"</string>
     <string name="kg_prompt_reason_restart_password" msgid="2375742919528461664">"ต้องใช้รหัสผ่านเมื่อคุณรีสตาร์ทอุปกรณ์"</string>
+    <string name="kg_prompt_reason_timeout_pattern" msgid="8930047492617900785">"ต้องใช้รูปแบบเพื่อความปลอดภัยเพิ่มเติม"</string>
+    <string name="kg_prompt_reason_timeout_pin" msgid="7470468607947726377">"ต้องใช้ PIN เพื่อความปลอดภัยเพิ่มเติม"</string>
+    <string name="kg_prompt_reason_timeout_password" msgid="1177412542773936957">"ต้องใช้รหัสผ่านเพื่อความปลอดภัยเพิ่มเติม"</string>
     <string name="kg_prompt_reason_switch_profiles_pattern" msgid="3802056699323773969">"ต้องใช้รูปแบบเมื่อคุณเปลี่ยนโปรไฟล์"</string>
     <string name="kg_prompt_reason_switch_profiles_pin" msgid="8108020184731052246">"ต้องใช้ PIN เมื่อคุณเปลี่ยนโปรไฟล์"</string>
     <string name="kg_prompt_reason_switch_profiles_password" msgid="6755997057852042672">"ต้องใช้รหัสผ่านเมื่อคุณเปลี่ยนโปรไฟล์"</string>
-    <plurals name="kg_prompt_reason_time_pattern" formatted="false" msgid="2697444392228541853">
-      <item quantity="other">ไม่มีการปลดล็อกอุปกรณ์เป็นเวลา <xliff:g id="NUMBER_1">%d</xliff:g> ชั่วโมง ยืนยันรูปแบบ</item>
-      <item quantity="one">ไม่มีการปลดล็อกอุปกรณ์เป็นเวลา <xliff:g id="NUMBER_0">%d</xliff:g> ชั่วโมง ยืนยันรูปแบบ </item>
-    </plurals>
-    <plurals name="kg_prompt_reason_time_pin" formatted="false" msgid="2118758475374354849">
-      <item quantity="other">ไม่มีการปลดล็อกอุปกรณ์เป็นเวลา <xliff:g id="NUMBER_1">%d</xliff:g> ชั่วโมง ยืนยัน PIN</item>
-      <item quantity="one">ไม่มีการปลดล็อกอุปกรณ์เป็นเวลา <xliff:g id="NUMBER_0">%d</xliff:g> ชั่วโมง ยืนยัน PIN</item>
-    </plurals>
-    <plurals name="kg_prompt_reason_time_password" formatted="false" msgid="5132693663364913675">
-      <item quantity="other">ไม่มีการปลดล็อกอุปกรณ์เป็นเวลา <xliff:g id="NUMBER_1">%d</xliff:g> ชั่วโมง ยืนยันรหัสผ่าน</item>
-      <item quantity="one">ไม่มีการปลดล็อกอุปกรณ์เป็นเวลา <xliff:g id="NUMBER_0">%d</xliff:g> ชั่วโมง ยืนยันรหัสผ่าน</item>
-    </plurals>
+  <plurals name="kg_prompt_reason_time_pattern">
+    <item quantity="one" msgid="5598462918459516566">"ไม่มีการปลดล็อกอุปกรณ์เป็นเวลา <xliff:g id="NUMBER">%d</xliff:g> ชั่วโมง โปรดยืนยันรูปแบบ"</item>
+    <item quantity="other" msgid="224518697489572649">"ไม่มีการปลดล็อกอุปกรณ์เป็นเวลา <xliff:g id="NUMBER">%d</xliff:g> ชั่วโมง โปรดยืนยันรูปแบบ"</item>
+  </plurals>
+  <plurals name="kg_prompt_reason_time_pin">
+    <item quantity="one" msgid="3073579168584205350">"ไม่มีการปลดล็อกอุปกรณ์เป็นเวลา <xliff:g id="NUMBER">%d</xliff:g> ชั่วโมง โปรดยืนยัน PIN"</item>
+    <item quantity="other" msgid="3282423442327824649">"ไม่มีการปลดล็อกอุปกรณ์เป็นเวลา <xliff:g id="NUMBER">%d</xliff:g> ชั่วโมง โปรดยืนยัน PIN"</item>
+  </plurals>
+  <plurals name="kg_prompt_reason_time_password">
+    <item quantity="one" msgid="9062782924671938516">"ไม่มีการปลดล็อกอุปกรณ์เป็นเวลา <xliff:g id="NUMBER">%d</xliff:g> ชั่วโมง โปรดยืนยันรหัสผ่าน"</item>
+    <item quantity="other" msgid="1839722302513719629">"ไม่มีการปลดล็อกอุปกรณ์เป็นเวลา <xliff:g id="NUMBER">%d</xliff:g> ชั่วโมง โปรดยืนยันรหัสผ่าน"</item>
+  </plurals>
     <string name="fingerprint_not_recognized" msgid="2690661881608146617">"ไม่รู้จัก"</string>
 </resources>

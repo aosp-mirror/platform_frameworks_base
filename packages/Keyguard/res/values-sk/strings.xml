@@ -31,6 +31,8 @@
     <string name="keyguard_password_wrong_pin_code" msgid="2422225591006134936">"Nesprávny kód PIN."</string>
     <string name="keyguard_charged" msgid="3272223906073492454">"Batéria je nabitá"</string>
     <string name="keyguard_plugged_in" msgid="9087497435553252863">"Nabíja sa"</string>
+    <string name="keyguard_plugged_in_charging_fast" msgid="6671162730167305479">"Rýchle nabíjanie"</string>
+    <string name="keyguard_plugged_in_charging_slowly" msgid="1964714661071163229">"Pomalé nabíjanie"</string>
     <string name="keyguard_low_battery" msgid="8143808018719173859">"Pripojte nabíjačku."</string>
     <string name="keyguard_instructions_when_pattern_disabled" msgid="1332288268600329841">"Telefón odomknete stlačením tlačidla Menu."</string>
     <string name="keyguard_network_locked_message" msgid="9169717779058037168">"Sieť je zablokovaná"</string>
@@ -93,19 +95,15 @@
     <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"<xliff:g id="NUMBER_0">%d</xliff:g>-krát ste nesprávne nakreslili svoj bezpečnostný vzor. Po ďalších <xliff:g id="NUMBER_1">%d</xliff:g> neúspešných pokusoch sa zobrazí výzva na odomknutie tabletu pomocou e-mailového účtu.\n\n Skúste to znova o <xliff:g id="NUMBER_2">%d</xliff:g> s."</string>
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"<xliff:g id="NUMBER_0">%d</xliff:g>-krát ste nesprávne nakreslili svoj bezpečnostný vzor. Po <xliff:g id="NUMBER_1">%d</xliff:g> ďalších neúspešných pokusoch sa zobrazí výzva na odomknutie telefónu pomocou e-mailového účtu.\n\n Skúste to znova o <xliff:g id="NUMBER_2">%d</xliff:g> s."</string>
     <string name="kg_password_wrong_pin_code_pukked" msgid="30531039455764924">"Nesprávny kód PIN SIM karty. Teraz musíte kontaktovať svojho operátora, aby vám odomkol zariadenie."</string>
-    <plurals name="kg_password_wrong_pin_code" formatted="false" msgid="6721575017538162249">
-      <item quantity="few">Nesprávny kód PIN SIM karty. Zostávajú vám <xliff:g id="NUMBER_1">%d</xliff:g> pokusy.</item>
-      <item quantity="many">Nesprávny kód PIN SIM karty. Zostáva vám <xliff:g id="NUMBER_1">%d</xliff:g> pokusu.</item>
-      <item quantity="other">Nesprávny kód PIN SIM karty. Zostáva vám <xliff:g id="NUMBER_1">%d</xliff:g> pokusov.</item>
-      <item quantity="one">Nesprávny kód PIN SIM karty. Zostáva vám <xliff:g id="NUMBER_0">%d</xliff:g> pokus, potom budete musieť kontaktovať svojho operátora, aby vám odomkol zariadenie.</item>
-    </plurals>
+  <plurals name="kg_password_wrong_pin_code">
+    <item quantity="one" msgid="8134313997799638254">"Nesprávny kód PIN SIM karty. Zostáva vám <xliff:g id="NUMBER">%d</xliff:g> pokus, inak budete musieť kontaktovať svojho operátora, aby vám odomkol zariadenie."</item>
+    <item quantity="other" msgid="2215723361575359486">"Nesprávny kód PIN SIM karty. Počet zostávajúcich pokusov: <xliff:g id="NUMBER">%d</xliff:g>."</item>
+  </plurals>
     <string name="kg_password_wrong_puk_code_dead" msgid="7077536808291316208">"SIM karta je nepoužiteľná. Kontaktujte svojho operátora."</string>
-    <plurals name="kg_password_wrong_puk_code" formatted="false" msgid="7576227366999858780">
-      <item quantity="few">Nesprávny kód PUK SIM karty. Zostávajú vám <xliff:g id="NUMBER_1">%d</xliff:g> pokusy, potom sa SIM karta natrvalo zablokuje.</item>
-      <item quantity="many">Nesprávny kód PUK SIM karty. Zostáva vám <xliff:g id="NUMBER_1">%d</xliff:g> pokusu, potom sa SIM karta natrvalo zablokuje.</item>
-      <item quantity="other">Nesprávny kód PUK SIM karty. Zostáva vám <xliff:g id="NUMBER_1">%d</xliff:g> pokusov, potom sa SIM karta natrvalo zablokuje.</item>
-      <item quantity="one">Nesprávny kód PUK SIM karty. Zostáva vám <xliff:g id="NUMBER_0">%d</xliff:g> pokus, potom sa SIM karta natrvalo zablokuje.</item>
-    </plurals>
+  <plurals name="kg_password_wrong_puk_code">
+    <item quantity="one" msgid="3256893607561060649">"Nesprávny kód PUK SIM karty. Zostáva vám <xliff:g id="NUMBER">%d</xliff:g> pokus, inak sa vaša SIM karta natrvalo zablokuje."</item>
+    <item quantity="other" msgid="5477305226026342036">"Nesprávny kód PUK SIM karty. Počet zostávajúcich pokusov pred trvalým zablokovaním SIM karty: <xliff:g id="NUMBER">%d</xliff:g>."</item>
+  </plurals>
     <string name="kg_password_pin_failed" msgid="6268288093558031564">"Operácia kódu PIN SIM karty zlyhala!"</string>
     <string name="kg_password_puk_failed" msgid="2838824369502455984">"Operácia kódu PUK SIM karty zlyhala!"</string>
     <string name="kg_pin_accepted" msgid="1448241673570020097">"Kód bol prijatý!"</string>
@@ -115,26 +113,23 @@
     <string name="kg_prompt_reason_restart_pattern" msgid="489430505491862444">"Pri reštartovaní zariadenia sa vyžaduje bezpečnostný vzor."</string>
     <string name="kg_prompt_reason_restart_pin" msgid="994878216570694974">"Pri reštartovaní zariadenia sa vyžaduje kód PIN."</string>
     <string name="kg_prompt_reason_restart_password" msgid="2375742919528461664">"Pri reštartovaní zariadenia sa vyžaduje heslo."</string>
+    <string name="kg_prompt_reason_timeout_pattern" msgid="8930047492617900785">"Na ďalšie zabezpečenie sa vyžaduje vzor."</string>
+    <string name="kg_prompt_reason_timeout_pin" msgid="7470468607947726377">"Na ďalšie zabezpečenie sa vyžaduje kód PIN."</string>
+    <string name="kg_prompt_reason_timeout_password" msgid="1177412542773936957">"Na ďalšie zabezpečenie sa vyžaduje heslo."</string>
     <string name="kg_prompt_reason_switch_profiles_pattern" msgid="3802056699323773969">"Po prepnutí profilov sa vyžaduje bezpečnostný vzor."</string>
     <string name="kg_prompt_reason_switch_profiles_pin" msgid="8108020184731052246">"Po prepnutí profilov sa vyžaduje kód PIN."</string>
     <string name="kg_prompt_reason_switch_profiles_password" msgid="6755997057852042672">"Po prepnutí profilov sa vyžaduje heslo."</string>
-    <plurals name="kg_prompt_reason_time_pattern" formatted="false" msgid="2697444392228541853">
-      <item quantity="few">Zariadenie nebolo odomknuté <xliff:g id="NUMBER_1">%d</xliff:g> hodiny. Potvrďte vzor.</item>
-      <item quantity="many">Zariadenie nebolo odomknuté <xliff:g id="NUMBER_1">%d</xliff:g> hodiny. Potvrďte vzor.</item>
-      <item quantity="other">Zariadenie nebolo odomknuté <xliff:g id="NUMBER_1">%d</xliff:g> hodín. Potvrďte vzor.</item>
-      <item quantity="one">Zariadenie nebolo odomknuté <xliff:g id="NUMBER_0">%d</xliff:g> hodinu. Potvrďte vzor.</item>
-    </plurals>
-    <plurals name="kg_prompt_reason_time_pin" formatted="false" msgid="2118758475374354849">
-      <item quantity="few">Zariadenie nebolo odomknuté <xliff:g id="NUMBER_1">%d</xliff:g> hodiny. Potvrďte kód PIN.</item>
-      <item quantity="many">Zariadenie nebolo odomknuté <xliff:g id="NUMBER_1">%d</xliff:g> hodiny. Potvrďte kód PIN.</item>
-      <item quantity="other">Zariadenie nebolo odomknuté <xliff:g id="NUMBER_1">%d</xliff:g> hodín. Potvrďte kód PIN.</item>
-      <item quantity="one">Zariadenie nebolo odomknuté <xliff:g id="NUMBER_0">%d</xliff:g> hodinu. Potvrďte kód PIN.</item>
-    </plurals>
-    <plurals name="kg_prompt_reason_time_password" formatted="false" msgid="5132693663364913675">
-      <item quantity="few">Zariadenie nebolo odomknuté <xliff:g id="NUMBER_1">%d</xliff:g> hodiny. Potvrďte heslo.</item>
-      <item quantity="many">Zariadenie nebolo odomknuté <xliff:g id="NUMBER_1">%d</xliff:g> hodiny. Potvrďte heslo.</item>
-      <item quantity="other">Zariadenie nebolo odomknuté <xliff:g id="NUMBER_1">%d</xliff:g> hodín. Potvrďte heslo.</item>
-      <item quantity="one">Zariadenie nebolo odomknuté <xliff:g id="NUMBER_0">%d</xliff:g> hodinu. Potvrďte heslo.</item>
-    </plurals>
+  <plurals name="kg_prompt_reason_time_pattern">
+    <item quantity="one" msgid="5598462918459516566">"Zariadenie nebolo odomknuté <xliff:g id="NUMBER">%d</xliff:g> hodinu. Potvrďte vzor."</item>
+    <item quantity="other" msgid="224518697489572649">"Zariadenie nebolo odomknuté niekoľko hodín (počet: <xliff:g id="NUMBER">%d</xliff:g>). Potvrďte vzor."</item>
+  </plurals>
+  <plurals name="kg_prompt_reason_time_pin">
+    <item quantity="one" msgid="3073579168584205350">"Zariadenie nebolo odomknuté <xliff:g id="NUMBER">%d</xliff:g> hodinu. Potvrďte kód PIN."</item>
+    <item quantity="other" msgid="3282423442327824649">"Zariadenie nebolo odomknuté niekoľko hodín (počet: <xliff:g id="NUMBER">%d</xliff:g>). Potvrďte kód PIN."</item>
+  </plurals>
+  <plurals name="kg_prompt_reason_time_password">
+    <item quantity="one" msgid="9062782924671938516">"Zariadenie nebolo odomknuté <xliff:g id="NUMBER">%d</xliff:g> hodinu. Potvrďte heslo."</item>
+    <item quantity="other" msgid="1839722302513719629">"Zariadenie nebolo odomknuté niekoľko hodín (počet: <xliff:g id="NUMBER">%d</xliff:g>). Potvrďte heslo."</item>
+  </plurals>
     <string name="fingerprint_not_recognized" msgid="2690661881608146617">"Nebol rozpoznaný"</string>
 </resources>

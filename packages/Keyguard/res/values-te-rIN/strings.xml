@@ -31,6 +31,8 @@
     <string name="keyguard_password_wrong_pin_code" msgid="2422225591006134936">"చెల్లని పిన్‌ కోడ్."</string>
     <string name="keyguard_charged" msgid="3272223906073492454">"ఛార్జ్ అయింది"</string>
     <string name="keyguard_plugged_in" msgid="9087497435553252863">"ఛార్జ్ అవుతోంది"</string>
+    <string name="keyguard_plugged_in_charging_fast" msgid="6671162730167305479">"వేగంగా ఛార్జ్ అవుతోంది"</string>
+    <string name="keyguard_plugged_in_charging_slowly" msgid="1964714661071163229">"నెమ్మదిగా ఛార్జ్ అవుతోంది"</string>
     <string name="keyguard_low_battery" msgid="8143808018719173859">"మీ ఛార్జర్‌ను కనెక్ట్ చేయండి."</string>
     <string name="keyguard_instructions_when_pattern_disabled" msgid="1332288268600329841">"అన్‌లాక్ చేయడానికి మెను నొక్కండి."</string>
     <string name="keyguard_network_locked_message" msgid="9169717779058037168">"నెట్‌వర్క్ లాక్ చేయబడింది"</string>
@@ -93,15 +95,15 @@
     <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"మీరు మీ అన్‌లాక్ నమూనాను <xliff:g id="NUMBER_0">%d</xliff:g> సార్లు తప్పుగా గీసారు. మరో <xliff:g id="NUMBER_1">%d</xliff:g> విఫల ప్రయత్నాల తర్వాత, ఇమెయిల్ ఖాతాను ఉపయోగించి మీ టాబ్లెట్‌ను అన్‌లాక్ చేయాల్సిందిగా మిమ్మల్ని అడుగుతారు.\n\n <xliff:g id="NUMBER_2">%d</xliff:g> సెకన్లలో మళ్లీ ప్రయత్నించండి."</string>
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"మీరు మీ అన్‌లాక్ నమూనాను <xliff:g id="NUMBER_0">%d</xliff:g> సార్లు తప్పుగా గీసారు. మరో <xliff:g id="NUMBER_1">%d</xliff:g> విఫల ప్రయత్నాల తర్వాత, ఇమెయిల్ ఖాతాను ఉపయోగించి మీ ఫోన్‌ను అన్‌లాక్ చేయాల్సిందిగా మిమ్మల్ని అడుగుతారు.\n\n <xliff:g id="NUMBER_2">%d</xliff:g> సెకన్లలో మళ్లీ ప్రయత్నించండి."</string>
     <string name="kg_password_wrong_pin_code_pukked" msgid="30531039455764924">"సిమ్ పిన్ కోడ్ చెల్లదు, మీరు ఇప్పుడు మీ పరికరాన్ని అన్‌లాక్ చేయడానికి తప్పనిసరిగా మీ క్యారియర్‌ను సంప్రదించండి."</string>
-    <plurals name="kg_password_wrong_pin_code" formatted="false" msgid="6721575017538162249">
-      <item quantity="other">SIM PIN కోడ్ చెల్లదు, మీకు <xliff:g id="NUMBER_1">%d</xliff:g> ప్రయత్నాలు మిగిలి ఉన్నాయి.</item>
-      <item quantity="one">SIM PIN కోడ్ చెల్లదు, మీరు మీ పరికరాన్ని అన్‌లాక్ చేయడానికి తప్పనిసరిగా మీ క్యారియర్‌ను సంప్రదించడానికి ముందు మీకు <xliff:g id="NUMBER_0">%d</xliff:g> ప్రయత్నం మిగిలి ఉంది.</item>
-    </plurals>
+  <plurals name="kg_password_wrong_pin_code">
+    <item quantity="one" msgid="8134313997799638254">"సిమ్ పిన్ కోడ్ చెల్లదు, మీరు మీ పరికరాన్ని అన్‌లాక్ చేయడానికి తప్పనిసరిగా మీ క్యారియర్‌ను సంప్రదించాల్సిన పరిస్థితి ఏర్పడకుండా ఉండటానికి మీకు <xliff:g id="NUMBER">%d</xliff:g> ప్రయత్నం మిగిలి ఉంది."</item>
+    <item quantity="other" msgid="2215723361575359486">"సిమ్ పిన్ కోడ్ చెల్లదు, మీకు <xliff:g id="NUMBER">%d</xliff:g> ప్రయత్నాలు మిగిలి ఉన్నాయి."</item>
+  </plurals>
     <string name="kg_password_wrong_puk_code_dead" msgid="7077536808291316208">"సిమ్ నిరుపయోగమైనది. మీ క్యారియర్‌ను సంప్రదించండి."</string>
-    <plurals name="kg_password_wrong_puk_code" formatted="false" msgid="7576227366999858780">
-      <item quantity="other">SIM PUK కోడ్ చెల్లదు, SIM శాశ్వతంగా నిరుపయోగం కాకుండా ఉండటానికి మీకు <xliff:g id="NUMBER_1">%d</xliff:g> ప్రయత్నాలు మిగిలి ఉన్నాయి.</item>
-      <item quantity="one">SIM PUK కోడ్ చెల్లదు, SIM శాశ్వతంగా నిరుపయోగం కాకుండా ఉండటానికి మీకు <xliff:g id="NUMBER_0">%d</xliff:g> ప్రయత్నం మిగిలి ఉంది.</item>
-    </plurals>
+  <plurals name="kg_password_wrong_puk_code">
+    <item quantity="one" msgid="3256893607561060649">"సిమ్ PUK కోడ్ చెల్లదు, సిమ్ శాశ్వతంగా నిరుపయోగం కాకుండా ఉండటానికి మీకు <xliff:g id="NUMBER">%d</xliff:g> ప్రయత్నం మిగిలి ఉంది."</item>
+    <item quantity="other" msgid="5477305226026342036">"సిమ్ PUK కోడ్ చెల్లదు, సిమ్ శాశ్వతంగా నిరుపయోగం కాకుండా ఉండటానికి మీకు <xliff:g id="NUMBER">%d</xliff:g> ప్రయత్నాలు మిగిలి ఉన్నాయి."</item>
+  </plurals>
     <string name="kg_password_pin_failed" msgid="6268288093558031564">"సిమ్ పిన్ చర్య విఫలమైంది!"</string>
     <string name="kg_password_puk_failed" msgid="2838824369502455984">"సిమ్ PUK చర్య విఫలమైంది!"</string>
     <string name="kg_pin_accepted" msgid="1448241673570020097">"కోడ్ ఆమోదించబడింది!"</string>
@@ -111,20 +113,23 @@
     <string name="kg_prompt_reason_restart_pattern" msgid="489430505491862444">"మీరు పరికరాన్ని పునఃప్రారంభించినప్పుడు నమూనా అవసరం."</string>
     <string name="kg_prompt_reason_restart_pin" msgid="994878216570694974">"మీరు పరికరాన్ని పునఃప్రారంభించినప్పుడు PIN అవసరం."</string>
     <string name="kg_prompt_reason_restart_password" msgid="2375742919528461664">"మీరు పరికరాన్ని పునఃప్రారంభించినప్పుడు పాస్‌వర్డ్ అవసరం."</string>
+    <string name="kg_prompt_reason_timeout_pattern" msgid="8930047492617900785">"అదనపు భద్రత కోసం నమూనా అవసరం."</string>
+    <string name="kg_prompt_reason_timeout_pin" msgid="7470468607947726377">"అదనపు భద్రత కోసం PIN అవసరం."</string>
+    <string name="kg_prompt_reason_timeout_password" msgid="1177412542773936957">"అదనపు భద్రత కోసం పాస్‌వర్డ్ అవసరం."</string>
     <string name="kg_prompt_reason_switch_profiles_pattern" msgid="3802056699323773969">"మీరు ప్రొఫైల్‌లను మార్చినప్పుడు నమూనా అవసరం."</string>
     <string name="kg_prompt_reason_switch_profiles_pin" msgid="8108020184731052246">"మీరు ప్రొఫైల్‌లను మార్చినప్పుడు PIN అవసరం."</string>
     <string name="kg_prompt_reason_switch_profiles_password" msgid="6755997057852042672">"మీరు ప్రొఫైల్‌లను మార్చినప్పుడు పాస్‌వర్డ్ అవసరం."</string>
-    <plurals name="kg_prompt_reason_time_pattern" formatted="false" msgid="2697444392228541853">
-      <item quantity="other">పరికరం <xliff:g id="NUMBER_1">%d</xliff:g> గంటల పాటు అన్‌లాక్ చేయబడలేదు. నమూనాను నిర్ధారించండి.</item>
-      <item quantity="one">పరికరం <xliff:g id="NUMBER_0">%d</xliff:g> గంట పాటు అన్‌లాక్ చేయబడలేదు. నమూనాను నిర్ధారించండి.</item>
-    </plurals>
-    <plurals name="kg_prompt_reason_time_pin" formatted="false" msgid="2118758475374354849">
-      <item quantity="other">పరికరం <xliff:g id="NUMBER_1">%d</xliff:g> గంటల పాటు అన్‌లాక్ చేయబడలేదు. PINను నిర్ధారించండి.</item>
-      <item quantity="one">పరికరం <xliff:g id="NUMBER_0">%d</xliff:g> గంట పాటు అన్‌లాక్ చేయబడలేదు. PINను నిర్ధారించండి.</item>
-    </plurals>
-    <plurals name="kg_prompt_reason_time_password" formatted="false" msgid="5132693663364913675">
-      <item quantity="other">పరికరం <xliff:g id="NUMBER_1">%d</xliff:g> గంటల పాటు అన్‌లాక్ చేయబడలేదు. పాస్‌వర్డ్‌ని నిర్ధారించండి.</item>
-      <item quantity="one">పరికరం <xliff:g id="NUMBER_0">%d</xliff:g> గంట పాటు అన్‌లాక్ చేయబడలేదు. పాస్‌వర్డ్‌ని నిర్ధారించండి.</item>
-    </plurals>
+  <plurals name="kg_prompt_reason_time_pattern">
+    <item quantity="one" msgid="5598462918459516566">"పరికరం <xliff:g id="NUMBER">%d</xliff:g> గంటగా అన్‌లాక్ చేయలేదు. నమూనాను నిర్ధారించండి."</item>
+    <item quantity="other" msgid="224518697489572649">"పరికరం <xliff:g id="NUMBER">%d</xliff:g> గంటలుగా అన్‌లాక్ చేయలేదు. నమూనాను నిర్ధారించండి."</item>
+  </plurals>
+  <plurals name="kg_prompt_reason_time_pin">
+    <item quantity="one" msgid="3073579168584205350">"పరికరం <xliff:g id="NUMBER">%d</xliff:g> గంటగా అన్‌లాక్ చేయలేదు. PINను నిర్ధారించండి."</item>
+    <item quantity="other" msgid="3282423442327824649">"పరికరం <xliff:g id="NUMBER">%d</xliff:g> గంటలుగా అన్‌లాక్ చేయలేదు. PINను నిర్ధారించండి."</item>
+  </plurals>
+  <plurals name="kg_prompt_reason_time_password">
+    <item quantity="one" msgid="9062782924671938516">"పరికరం <xliff:g id="NUMBER">%d</xliff:g> గంటగా అన్‌లాక్ చేయలేదు. పాస్‌వర్డ్‌ను నిర్ధారించండి."</item>
+    <item quantity="other" msgid="1839722302513719629">"పరికరం <xliff:g id="NUMBER">%d</xliff:g> గంటలుగా అన్‌లాక్ చేయలేదు. పాస్‌వర్డ్‌ను నిర్ధారించండి."</item>
+  </plurals>
     <string name="fingerprint_not_recognized" msgid="2690661881608146617">"గుర్తించలేదు"</string>
 </resources>
