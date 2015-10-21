@@ -30,7 +30,11 @@ public class SystemUIDialog extends AlertDialog {
     private final Context mContext;
 
     public SystemUIDialog(Context context) {
-        super(context, R.style.Theme_SystemUI_Dialog);
+        this(context, R.style.Theme_SystemUI_Dialog);
+    }
+
+    public SystemUIDialog(Context context, int theme) {
+        super(context, theme);
         mContext = context;
 
         getWindow().setType(WindowManager.LayoutParams.TYPE_STATUS_BAR_PANEL);

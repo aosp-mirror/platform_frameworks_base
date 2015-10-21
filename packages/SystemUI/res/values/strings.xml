@@ -1166,5 +1166,6 @@
     <string name="qs_customize" translatable="false">Allow long-press customize in Quick Settings</string>
     <string name="qs_customize_info" translatable="false">Info</string>
     <string name="qs_customize_remove" translatable="false">Remove</string>
+    <string name="no_tiles_add" translatable="false">No tiles to add</string>
 
 </resources>

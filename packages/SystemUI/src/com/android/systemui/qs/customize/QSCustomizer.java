@@ -18,18 +18,31 @@ package com.android.systemui.qs.customize;
 import android.animation.Animator;
 import android.content.ClipData;
 import android.content.Context;
+import android.content.DialogInterface;
+import android.content.DialogInterface.OnCancelListener;
+import android.content.DialogInterface.OnDismissListener;
 import android.util.AttributeSet;
 import android.util.TypedValue;
-import android.view.*;
+import android.view.ContextThemeWrapper;
+import android.view.DragEvent;
+import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuItem;
+import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.ViewGroup;
+import android.view.WindowManager;
 import android.widget.LinearLayout;
+import android.widget.ListView;
 import android.widget.Toolbar;
 import android.widget.Toolbar.OnMenuItemClickListener;
+
 import com.android.systemui.R;
 import com.android.systemui.SystemUIApplication;
 import com.android.systemui.qs.QSDetailClipper;
 import com.android.systemui.qs.QSTile.Host.Callback;
 import com.android.systemui.qs.customize.DropButton.OnDropListener;
+import com.android.systemui.qs.customize.TileAdapter.TileSelectedListener;
 import com.android.systemui.statusbar.phone.PhoneStatusBar;
 import com.android.systemui.statusbar.phone.QSTileHost;
 import com.android.systemui.statusbar.phone.SystemUIDialog;
@@ -44,7 +57,8 @@ import java.util.ArrayList;
  * *someday* do fancy animations to get into/out of it.
  */
 public class QSCustomizer extends LinearLayout implements OnMenuItemClickListener, Callback,
-        OnDropListener, OnClickListener, Animator.AnimatorListener {
+        OnDropListener, OnClickListener, Animator.AnimatorListener, TileSelectedListener,
+        OnCancelListener, OnDismissListener {
 
     private static final int MENU_SAVE = Menu.FIRST;
     private static final int MENU_RESET = Menu.FIRST + 1;
@@ -61,6 +75,7 @@ public class QSCustomizer extends LinearLayout implements OnMenuItemClickListene
     private DropButton mInfoButton;
     private DropButton mRemoveButton;
     private FloatingActionButton mFab;
+    private SystemUIDialog mDialog;
 
     public QSCustomizer(Context context, AttributeSet attrs) {
         super(new ContextThemeWrapper(context, android.R.style.Theme_Material), attrs);
@@ -162,6 +177,14 @@ public class QSCustomizer extends LinearLayout implements OnMenuItemClickListene
     }
 
     @Override
+    public void onTileSelected(String spec) {
+        if (mDialog != null) {
+            mHost.addTile(spec);
+            mDialog.dismiss();
+        }
+    }
+
+    @Override
     public void onTilesChanged() {
         mQsPanel.setTiles(mHost.getTiles());
     }
@@ -193,9 +216,38 @@ public class QSCustomizer extends LinearLayout implements OnMenuItemClickListene
     @Override
     public void onClick(View v) {
         if (mFab == v) {
-            SystemUIDialog dialog = new SystemUIDialog(mContext);
-            dialog.show();
+            mDialog = new SystemUIDialog(mContext,
+                    android.R.style.Theme_Material_Dialog);
+            View view = LayoutInflater.from(mContext).inflate(R.layout.qs_add_tiles_list, null);
+            ListView listView = (ListView) view.findViewById(android.R.id.list);
+            TileAdapter adapter = new TileAdapter(mContext, mHost.getTiles(), mHost);
+            adapter.setListener(this);
+            listView.setDivider(null);
+            listView.setDividerHeight(0);
+            listView.setAdapter(adapter);
+            listView.setEmptyView(view.findViewById(R.id.empty_text));
+            mDialog.setView(view);
+            mDialog.setOnDismissListener(this);
+            mDialog.setOnCancelListener(this);
+            mDialog.show();
+            // Too lazy to figure out what this will be now, but it should probably be something
+            // besides just a dialog.
+            // For now, just make it big.
+            WindowManager.LayoutParams params = mDialog.getWindow().getAttributes();
+            params.width = WindowManager.LayoutParams.MATCH_PARENT;
+            params.height = WindowManager.LayoutParams.WRAP_CONTENT;
+            mDialog.getWindow().setAttributes(params);
         }
+    }
+
+    @Override
+    public void onDismiss(DialogInterface dialog) {
+        mDialog = null;
+    }
+
+    @Override
+    public void onCancel(DialogInterface dialog) {
+        mDialog = null;
     }
 
     @Override

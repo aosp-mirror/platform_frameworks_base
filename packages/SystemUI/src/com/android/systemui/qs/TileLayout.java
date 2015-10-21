@@ -72,7 +72,8 @@ public class TileLayout extends ViewGroup implements QSTileLayout {
         mLargeCellHeight = mAllowDual ? res.getDimensionPixelSize(R.dimen.qs_dual_tile_height)
                 : mCellHeight;
         mLargeCellWidth = mAllowDual ? (int) (mLargeCellHeight * TILE_ASPECT) : mCellWidth;
-        mDualTileUnderlap = res.getDimensionPixelSize(R.dimen.qs_dual_tile_padding_vertical);
+        mDualTileUnderlap = mAllowDual
+                ? res.getDimensionPixelSize(R.dimen.qs_dual_tile_padding_vertical) : 0;
         if (mColumns != columns) {
             mColumns = columns;
             postInvalidate();

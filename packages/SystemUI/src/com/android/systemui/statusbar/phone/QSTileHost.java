@@ -246,7 +246,7 @@ public class QSTileHost implements QSTile.Host, Tunable {
         }
     }
 
-    protected QSTile<?> createTile(String tileSpec) {
+    public QSTile<?> createTile(String tileSpec) {
         if (tileSpec.equals("wifi")) return new WifiTile(this, false);
         else if (tileSpec.equals("bt")) return new BluetoothTile(this, false);
         else if (tileSpec.equals("inversion")) return new ColorInversionTile(this);
@@ -272,6 +272,7 @@ public class QSTileHost implements QSTile.Host, Tunable {
         else if (tileSpec.equals("qlock")) return new QLockTile(this);
         // Intent tiles.
         else if (tileSpec.startsWith(IntentTile.PREFIX)) return IntentTile.create(this,tileSpec);
+        else if (tileSpec.startsWith(CustomTile.PREFIX)) return CustomTile.create(this,tileSpec);
         else throw new IllegalArgumentException("Bad tile spec: " + tileSpec);
     }
 
