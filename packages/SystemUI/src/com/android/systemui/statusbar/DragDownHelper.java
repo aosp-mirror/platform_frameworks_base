@@ -134,6 +134,8 @@ public class DragDownHelper implements Gefingerpoken {
                         (int) (y - mInitialTouchY))) {
                     if (mStartingChild == null) {
                         mDragDownCallback.setEmptyDragAmount(0f);
+                    } else {
+                        mCallback.setUserLockedChild(mStartingChild, false);
                     }
                     mDraggingDown = false;
                 } else {
@@ -180,6 +182,7 @@ public class DragDownHelper implements Gefingerpoken {
 
     private void cancelExpansion(final ExpandableView child) {
         if (child.getContentHeight() == child.getMinHeight()) {
+            mCallback.setUserLockedChild(child, false);
             return;
         }
         ObjectAnimator anim = ObjectAnimator.ofInt(child, "contentHeight",

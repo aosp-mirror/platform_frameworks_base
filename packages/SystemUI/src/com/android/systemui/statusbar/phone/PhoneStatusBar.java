@@ -3986,9 +3986,6 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
             mNotificationPanel.animateToFullShade(0 /* delay */);
             setBarState(StatusBarState.SHADE_LOCKED);
             updateKeyguardState(false /* goingToFullShade */, false /* fromShadeLocked */);
-            if (row != null) {
-                row.setUserLocked(false);
-            }
         }
     }
 
