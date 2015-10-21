@@ -59,17 +59,15 @@
     <string name="share_via" msgid="8966594246261344259">"Делите преко"</string>
     <string name="copy_notification_title" msgid="6374299806748219777">"Копирање датотека"</string>
     <string name="copy_remaining" msgid="6283790937387975095">"Још <xliff:g id="DURATION">%s</xliff:g>"</string>
-    <plurals name="copy_begin" formatted="false" msgid="9071199452634086365">
-      <item quantity="one">Копирање <xliff:g id="COUNT_1">%1$d</xliff:g> датотеке.</item>
-      <item quantity="few">Копирање <xliff:g id="COUNT_1">%1$d</xliff:g> датотеке.</item>
-      <item quantity="other">Копирање <xliff:g id="COUNT_1">%1$d</xliff:g> датотека.</item>
-    </plurals>
+  <plurals name="copy_begin">
+    <item quantity="one" msgid="7775181564278455087">"Копира се <xliff:g id="COUNT">%1$d</xliff:g> датотека."</item>
+    <item quantity="other" msgid="5175026054495572228">"Копирају се датотеке: <xliff:g id="COUNT">%1$d</xliff:g>."</item>
+  </plurals>
     <string name="copy_preparing" msgid="3896202461003039386">"Припрема се копирање…"</string>
-    <plurals name="copy_error_notification_title" formatted="false" msgid="5267616889076217261">
-      <item quantity="one">Нисмо успели да копирамо <xliff:g id="COUNT_1">%1$d</xliff:g> датотеку</item>
-      <item quantity="few">Нисмо успели да копирамо <xliff:g id="COUNT_1">%1$d</xliff:g> датотеке</item>
-      <item quantity="other">Нисмо успели да копирамо <xliff:g id="COUNT_1">%1$d</xliff:g> датотека</item>
-    </plurals>
+  <plurals name="copy_error_notification_title">
+    <item quantity="one" msgid="2515407675631145507">"Нисмо успели да копирамо <xliff:g id="COUNT">%1$d</xliff:g> датотеку"</item>
+    <item quantity="other" msgid="7124097894673644954">"Нисмо успели да копирамо <xliff:g id="COUNT">%1$d</xliff:g> датотеке(а)"</item>
+  </plurals>
     <string name="notification_touch_for_details" msgid="4483108577842961665">"Додирните да бисте видели детаље"</string>
     <string name="retry" msgid="7564024179122207376">"Покушај поново"</string>
     <string name="copy_failure_alert_content" msgid="3715575000297709082">"Следеће датотеке нису копиране: <xliff:g id="LIST">%1$s</xliff:g>"</string>
