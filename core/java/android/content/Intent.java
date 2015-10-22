@@ -3458,6 +3458,13 @@ public class Intent implements Parcelable, Cloneable {
     public static final String EXTRA_INTENT = "android.intent.extra.INTENT";
 
     /**
+     * An int representing the user id to be used.
+     *
+     * @hide
+     */
+    public static final String EXTRA_USER_ID = "android.intent.extra.USER_ID";
+
+    /**
      * An Intent[] describing additional, alternate choices you would like shown with
      * {@link #ACTION_CHOOSER}.
      *

@@ -58,6 +58,7 @@ import android.app.IActivityContainer;
 import android.app.IActivityContainerCallback;
 import android.app.IActivityManager;
 import android.app.IApplicationThread;
+import android.app.KeyguardManager;
 import android.app.PendingIntent;
 import android.app.ProfilerInfo;
 import android.app.ActivityManager.RunningTaskInfo;
@@ -75,6 +76,7 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
+import android.content.pm.UserInfo;
 import android.content.res.Configuration;
 import android.graphics.Rect;
 import android.hardware.display.DisplayManager;
@@ -97,10 +99,13 @@ import android.os.Process;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.SystemClock;
+import android.os.SystemProperties;
 import android.os.Trace;
 import android.os.TransactionTooLargeException;
 import android.os.UserHandle;
+import android.os.UserManager;
 import android.os.WorkSource;
+import android.os.storage.StorageManager;
 import android.provider.MediaStore;
 import android.provider.Settings;
 import android.provider.Settings.SettingNotFoundException;
@@ -1662,6 +1667,38 @@ public final class ActivityStackSupervisor implements DisplayListener {
             }
         }
 
+        UserInfo user = getUserInfo(userId);
+        // TODO: Timeout for work challenge
+        if (user.isManagedProfile()
+                && mService.mContext.getSystemService(StorageManager.class)
+                    .isPerUserEncryptionEnabled()) {
+            KeyguardManager km = (KeyguardManager) mService.mContext
+                    .getSystemService(Context.KEYGUARD_SERVICE);
+
+            IIntentSender target = mService.getIntentSenderLocked(
+                    ActivityManager.INTENT_SENDER_ACTIVITY, callingPackage,
+                    Binder.getCallingUid(), userId, null, null, 0, new Intent[]{ intent },
+                    new String[]{ resolvedType },
+                    PendingIntent.FLAG_CANCEL_CURRENT | PendingIntent.FLAG_ONE_SHOT
+                            | PendingIntent.FLAG_IMMUTABLE, null);
+            int flags = intent.getFlags();
+            intent = km.createConfirmDeviceCredentialIntent(null, null);
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK
+                    | Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS);
+            intent.putExtra(Intent.EXTRA_PACKAGE_NAME, aInfo.packageName);
+            intent.putExtra(Intent.EXTRA_INTENT, new IntentSender(target));
+            intent.putExtra(Intent.EXTRA_USER_ID, userId);
+            intent.setFlags(flags);
+
+            resolvedType = null;
+            callingUid = realCallingUid;
+            callingPid = realCallingPid;
+
+            UserInfo parent = UserManager.get(mService.mContext).getProfileParent(userId);
+            aInfo = resolveActivity(intent, null, PackageManager.MATCH_DEFAULT_ONLY
+                    | ActivityManagerService.STOCK_PM_FLAGS, null, parent.id);
+        }
+
         if (abort) {
             if (resultRecord != null) {
                 resultStack.sendActivityResultLocked(-1, resultRecord, resultWho, requestCode,
@@ -1723,6 +1760,15 @@ public final class ActivityStackSupervisor implements DisplayListener {
             notifyActivityDrawnForKeyguard();
         }
         return err;
+    }
+
+    private UserInfo getUserInfo(int userId) {
+        final long identity = Binder.clearCallingIdentity();
+        try {
+            return UserManager.get(mService.mContext).getUserInfo(userId);
+        } finally {
+            Binder.restoreCallingIdentity(identity);
+        }
     }
 
     private int getComponentRestrictionForCallingPackage(ActivityInfo activityInfo,
