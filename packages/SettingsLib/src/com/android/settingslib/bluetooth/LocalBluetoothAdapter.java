@@ -162,6 +162,10 @@ public final class LocalBluetoothAdapter {
                 if (a2dp != null && a2dp.isA2dpPlaying()) {
                     return;
                 }
+                A2dpSinkProfile a2dpSink = mProfileManager.getA2dpSinkProfile();
+                if ((a2dpSink != null) && (a2dpSink.isA2dpPlaying())){
+                    return;
+                }
             }
 
             if (mAdapter.startDiscovery()) {

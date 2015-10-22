@@ -283,6 +283,8 @@ public final class BluetoothClass implements Parcelable {
     public static final int PROFILE_PANU = 4;
     /** @hide */
     public static final int PROFILE_NAP = 5;
+    /** @hide */
+    public static final int PROFILE_A2DP_SINK = 6;
 
     /**
      * Check class bits for possible bluetooth profile support.
@@ -306,6 +308,21 @@ public final class BluetoothClass implements Parcelable {
                 case Device.AUDIO_VIDEO_HEADPHONES:
                 case Device.AUDIO_VIDEO_LOUDSPEAKER:
                 case Device.AUDIO_VIDEO_CAR_AUDIO:
+                    return true;
+                default:
+                    return false;
+            }
+        } else if (profile == PROFILE_A2DP_SINK) {
+            if (hasService(Service.CAPTURE)) {
+                return true;
+            }
+            // By the A2DP spec, srcs must indicate the CAPTURE service.
+            // However if some device that do not, we try to
+            // match on some other class bits.
+            switch (getDeviceClass()) {
+                case Device.AUDIO_VIDEO_HIFI_AUDIO:
+                case Device.AUDIO_VIDEO_SET_TOP_BOX:
+                case Device.AUDIO_VIDEO_VCR :
                     return true;
                 default:
                     return false;
