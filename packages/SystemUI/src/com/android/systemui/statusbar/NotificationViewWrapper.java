@@ -30,6 +30,7 @@ public abstract class NotificationViewWrapper {
     private static final String TAG_BIG_PICTURE = "bigPicture";
 
     protected final View mView;
+    private boolean mSubTextVisible = true;
 
     public static NotificationViewWrapper wrap(Context ctx, View v) {
         if (v.getId() == com.android.internal.R.id.status_bar_latest_event_content) {
@@ -63,7 +64,9 @@ public abstract class NotificationViewWrapper {
     /**
      * Notifies this wrapper that the content of the view might have changed.
      */
-    public void notifyContentUpdated() {}
+    public void notifyContentUpdated() {
+        setSubTextVisible(mSubTextVisible);
+    }
 
     /**
      * @return true if this template might need to be clipped with a round rect to make it look
@@ -71,5 +74,13 @@ public abstract class NotificationViewWrapper {
      */
     public boolean needsRoundRectClipping() {
         return false;
+    }
+
+    /**
+     * Change the subTextVisibility
+     * @param visible Should the subtext be visible
+     */
+    public void setSubTextVisible(boolean visible) {
+        mSubTextVisible = visible;
     }
 }

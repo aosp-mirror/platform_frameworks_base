@@ -33,9 +33,9 @@ import android.widget.ImageView;
 
 import com.android.systemui.R;
 import com.android.systemui.classifier.FalsingManager;
+import com.android.systemui.statusbar.notification.NotificationHeaderView;
 import com.android.systemui.statusbar.phone.NotificationGroupManager;
 import com.android.systemui.statusbar.stack.NotificationChildrenContainer;
-import com.android.systemui.statusbar.notification.NotificationHeaderView;
 import com.android.systemui.statusbar.stack.StackScrollState;
 import com.android.systemui.statusbar.stack.StackStateAnimator;
 import com.android.systemui.statusbar.stack.StackViewState;
@@ -376,6 +376,19 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
     public void setEntry(NotificationData.Entry entry) {
         mEntry = entry;
         setStatusBarNotification(entry.notification);
+    }
+
+    public CharSequence getSubText() {
+        Notification notification = mStatusBarNotification.getNotification();
+        CharSequence subText = notification.extras.getCharSequence(Notification.EXTRA_SUMMARY_TEXT);
+        if (subText == null) {
+            subText = notification.extras.getCharSequence(Notification.EXTRA_SUB_TEXT);
+        }
+        return subText;
+    }
+
+    public void setContentSubTextVisible(boolean visible) {
+        mPrivateLayout.setSubTextVisible(visible);
     }
 
     public interface ExpansionLogger {

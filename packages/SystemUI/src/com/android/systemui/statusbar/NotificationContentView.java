@@ -442,4 +442,16 @@ public class NotificationContentView extends FrameLayout {
     public void setShowingLegacyBackground(boolean showing) {
         mShowingLegacyBackground = showing;
     }
+
+    public void setSubTextVisible(boolean visible) {
+        if (mExpandedChild != null) {
+            mExpandedWrapper.setSubTextVisible(visible);
+        }
+        if (mContractedChild != null) {
+            mContractedWrapper.setSubTextVisible(visible);
+        }
+        if (mHeadsUpChild != null) {
+            mHeadsUpWrapper.setSubTextVisible(visible);
+        }
+    }
 }

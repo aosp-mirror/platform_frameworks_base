@@ -27,10 +27,12 @@ import android.graphics.ColorMatrixColorFilter;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffColorFilter;
 import android.graphics.drawable.Drawable;
+import android.text.TextUtils;
 import android.view.View;
 import android.view.animation.AnimationUtils;
 import android.view.animation.Interpolator;
 import android.widget.ImageView;
+import android.widget.TextView;
 
 import com.android.systemui.R;
 import com.android.systemui.ViewInvertHelper;
@@ -55,6 +57,11 @@ public class NotificationTemplateViewWrapper extends NotificationViewWrapper {
 
     /** Whether the icon needs to be forced grayscale when in dark mode. */
     private boolean mIconForceGraysaleWhenDark;
+    private TextView mSubText;
+    private TextView mInfoText;
+    private View mProfileBadge;
+    private View mThirdLineDivider;
+    private View mThirdLine;
 
     protected NotificationTemplateViewWrapper(Context ctx, View view) {
         super(view);
@@ -76,6 +83,11 @@ public class NotificationTemplateViewWrapper extends NotificationViewWrapper {
         mIcon = resolveIcon(largeIcon, rightIcon);
         mPicture = resolvePicture(largeIcon);
         mIconBackgroundColor = resolveBackgroundColor(mIcon);
+        mSubText = (TextView) mView.findViewById(com.android.internal.R.id.text);
+        mInfoText = (TextView) mView.findViewById(com.android.internal.R.id.info);
+        mProfileBadge = mView.findViewById(com.android.internal.R.id.profile_badge_line3);
+        mThirdLineDivider = mView.findViewById(com.android.internal.R.id.overflow_divider);
+        mThirdLine = mView.findViewById(com.android.internal.R.id.line3);
 
         // If the icon already has a color filter, we assume that we already forced the icon to be
         // white when we created the notification.
@@ -227,6 +239,43 @@ public class NotificationTemplateViewWrapper extends NotificationViewWrapper {
             target.setColorFilter(new ColorMatrixColorFilter(mGrayscaleColorMatrix));
         } else {
             target.setColorFilter(null);
+        }
+    }
+
+    @Override
+    public void setSubTextVisible(boolean visible) {
+        if (mSubText == null) {
+            return;
+        }
+        boolean subTextAvailable = !TextUtils.isEmpty(mSubText.getText());
+        if (visible && subTextAvailable) {
+            mSubText.setVisibility(View.VISIBLE);
+        } else {
+            mSubText.setVisibility(View.GONE);
+        }
+        // TODO: figure out what to do with the number (same place as contentInfo)
+        // work profile badge. For now we hide it since it looks nicer.
+        boolean infoAvailable = !TextUtils.isEmpty(mInfoText.getText());
+        if (visible && infoAvailable) {
+            mInfoText.setVisibility(View.VISIBLE);
+        } else {
+            mInfoText.setVisibility(View.GONE);
+        }
+        boolean showThirdLine = (visible && (infoAvailable || subTextAvailable))
+                || mProfileBadge.getVisibility() == View.VISIBLE;
+        if (mThirdLineDivider != null) {
+            if (showThirdLine) {
+                mThirdLineDivider.setVisibility(View.VISIBLE);
+            } else {
+                mThirdLineDivider.setVisibility(View.GONE);
+            }
+        }
+        if (mThirdLine != null) {
+            if (showThirdLine) {
+                mThirdLine.setVisibility(View.VISIBLE);
+            } else {
+                mThirdLine.setVisibility(View.GONE);
+            }
         }
     }
 
