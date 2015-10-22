@@ -598,8 +598,6 @@ public class UserManagerService extends IUserManager.Stub {
 
     @Override
     public Bundle getUserRestrictions(int userId) {
-        // checkManageUsersPermission("getUserRestrictions");
-
         synchronized (mPackagesLock) {
             Bundle restrictions = mUserRestrictions.get(userId);
             return restrictions != null ? new Bundle(restrictions) : new Bundle();
@@ -1588,7 +1586,7 @@ public class UserManagerService extends IUserManager.Stub {
     public Bundle getApplicationRestrictionsForUser(String packageName, int userId) {
         if (UserHandle.getCallingUserId() != userId
                 || !UserHandle.isSameApp(Binder.getCallingUid(), getUidForPackage(packageName))) {
-            checkManageUsersPermission("Only system can get restrictions for other users/apps");
+            checkManageUsersPermission("get application restrictions for other users/apps");
         }
         synchronized (mPackagesLock) {
             // Read the restrictions from XML
@@ -1599,10 +1597,7 @@ public class UserManagerService extends IUserManager.Stub {
     @Override
     public void setApplicationRestrictions(String packageName, Bundle restrictions,
             int userId) {
-        if (UserHandle.getCallingUserId() != userId
-                || !UserHandle.isSameApp(Binder.getCallingUid(), getUidForPackage(packageName))) {
-            checkManageUsersPermission("Only system can set restrictions for other users/apps");
-        }
+        checkManageUsersPermission("set application restrictions");
         synchronized (mPackagesLock) {
             if (restrictions == null || restrictions.isEmpty()) {
                 cleanAppRestrictionsForPackage(packageName, userId);
@@ -1623,7 +1618,7 @@ public class UserManagerService extends IUserManager.Stub {
 
     @Override
     public void removeRestrictions() {
-        checkManageUsersPermission("Only system can remove restrictions");
+        checkManageUsersPermission("remove restrictions");
         final int userHandle = UserHandle.getCallingUserId();
         removeRestrictionsForUser(userHandle, true);
     }
