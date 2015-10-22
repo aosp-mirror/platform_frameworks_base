@@ -1,4 +1,48 @@
-page.title=Optimizing Battery Life
+page.title=Battery Performance
 page.tags=battery
+page.metaDescription=Learn how to optimize your app to reduce battery drain and use power-hungry resources efficiently.
+page.article=true
 
 @jd:body
+
+
+<iframe width="448" height="252"
+    src="//www.youtube.com/embed/9i1_PnPpd3g?autohide=1&amp;showinfo=0"
+    frameborder="0" allowfullscreen=""
+    style="float: right; margin: 0 0 20px 20px;"></iframe>
+
+<p>
+  Users want their devices to run as long as possible on a single charge of battery. As an app
+  developer, you should strive to make your app draw the minimum amount of power from the battery
+  without sacrificing responsiveness, speed or latency for the user. You can take steps to optimize
+  your app for maximum battery life by following the guidelines in this course. In many cases,
+  you can minimize battery consumption and still get the same amount of work done by being
+  more efficient.
+</p>
+
+<p>
+  When users notice their battery does not get them through the day, they commonly check their
+  device's Settings to find the offending app, where they can easily uninstall it. You should
+  analyze your app to see if it is a leading source of battery drain, and take steps to prevent
+  excessive battery consumption.
+</p>
+
+<p>
+  These lessons show you how to analyze your app for common sources of battery drain and fix them
+  in your app.
+</p>
+
+<h2>Lessons</h2>
+
+<dl>
+  <dt>
+    <b><a href="{@docRoot}training/app/battery/network/index.html">
+        Reducing Network Battery Drain</a></b>
+  </dt>
+
+  <dd>
+    Learn how to analyze your app's use of network resources and optimize it to reduce
+    power consumption.
+  </dd>
+
+</dl>
