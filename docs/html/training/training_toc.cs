@@ -1464,6 +1464,24 @@ results."
         </ul>
       </li>
 
+            <li class="nav-section">
+        <div class="nav-section-header">
+          <a href="<?cs var:toroot ?>training/snackbar/index.html"
+             description=
+             "How to use the support library's Snackbar widget to display a
+             brief pop-up message."
+            >Showing Pop-Up Messages</a>
+        </div>
+        <ul>
+          <li><a href="<?cs var:toroot ?>training/snackbar/showing.html"
+            >Building and Displaying a Pop-Up Message</a>
+          </li>
+          <li><a href="<?cs var:toroot ?>training/snackbar/action.html"
+            >Adding an Action to a Message</a>
+          </li>
+        </ul>
+      </li>
+
       <li class="nav-section">
         <div class="nav-section-header">
           <a href="<?cs var:toroot ?>training/custom-views/index.html"
