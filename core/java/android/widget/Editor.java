@@ -4260,10 +4260,14 @@ public class Editor {
             positionAtCursorOffset(offset, false);
         }
 
+        /**
+         * @param offset Cursor offset. Must be in [-1, length].
+         * @param parentScrolled If the parent has been scrolled or not.
+         */
         @Override
         protected void positionAtCursorOffset(int offset, boolean parentScrolled) {
             super.positionAtCursorOffset(offset, parentScrolled);
-            mInWord = !getWordIteratorWithText().isBoundary(offset);
+            mInWord = (offset != -1) && !getWordIteratorWithText().isBoundary(offset);
         }
 
         @Override
@@ -4496,10 +4500,14 @@ public class Editor {
             positionAtCursorOffset(offset, false);
         }
 
+        /**
+         * @param offset Cursor offset. Must be in [-1, length].
+         * @param parentScrolled If the parent has been scrolled or not.
+         */
         @Override
         protected void positionAtCursorOffset(int offset, boolean parentScrolled) {
             super.positionAtCursorOffset(offset, parentScrolled);
-            mInWord = !getWordIteratorWithText().isBoundary(offset);
+            mInWord = (offset != -1) && !getWordIteratorWithText().isBoundary(offset);
         }
 
         @Override
