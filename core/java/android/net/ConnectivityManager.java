@@ -895,8 +895,12 @@ public class ConnectivityManager {
      * Tells the underlying networking system that the caller wants to
      * begin using the named feature. The interpretation of {@code feature}
      * is completely up to each networking implementation.
-     * <p>This method requires the caller to hold the permission
-     * {@link android.Manifest.permission#CHANGE_NETWORK_STATE}.
+     *
+     * <p>This method requires the caller to hold either the
+     * {@link android.Manifest.permission#CHANGE_NETWORK_STATE} permission
+     * or the ability to modify system settings as determined by
+     * {@link android.provider.Settings.System#canWrite}.</p>
+     *
      * @param networkType specifies which network the request pertains to
      * @param feature the name of the feature to be used
      * @return an integer value representing the outcome of the request.
@@ -946,8 +950,12 @@ public class ConnectivityManager {
      * Tells the underlying networking system that the caller is finished
      * using the named feature. The interpretation of {@code feature}
      * is completely up to each networking implementation.
-     * <p>This method requires the caller to hold the permission
-     * {@link android.Manifest.permission#CHANGE_NETWORK_STATE}.
+     *
+     * <p>This method requires the caller to hold either the
+     * {@link android.Manifest.permission#CHANGE_NETWORK_STATE} permission
+     * or the ability to modify system settings as determined by
+     * {@link android.provider.Settings.System#canWrite}.</p>
+     *
      * @param networkType specifies which network the request pertains to
      * @param feature the name of the feature that is no longer needed
      * @return an integer value representing the outcome of the request.
@@ -1333,8 +1341,12 @@ public class ConnectivityManager {
      * Ensure that a network route exists to deliver traffic to the specified
      * host via the specified network interface. An attempt to add a route that
      * already exists is ignored, but treated as successful.
-     * <p>This method requires the caller to hold the permission
-     * {@link android.Manifest.permission#CHANGE_NETWORK_STATE}.
+     *
+     * <p>This method requires the caller to hold either the
+     * {@link android.Manifest.permission#CHANGE_NETWORK_STATE} permission
+     * or the ability to modify system settings as determined by
+     * {@link android.provider.Settings.System#canWrite}.</p>
+     *
      * @param networkType the type of the network over which traffic to the specified
      * host is to be routed
      * @param hostAddress the IP address of the host to which the route is desired
@@ -1354,8 +1366,12 @@ public class ConnectivityManager {
      * Ensure that a network route exists to deliver traffic to the specified
      * host via the specified network interface. An attempt to add a route that
      * already exists is ignored, but treated as successful.
-     * <p>This method requires the caller to hold the permission
-     * {@link android.Manifest.permission#CHANGE_NETWORK_STATE}.
+     *
+     * <p>This method requires the caller to hold either the
+     * {@link android.Manifest.permission#CHANGE_NETWORK_STATE} permission
+     * or the ability to modify system settings as determined by
+     * {@link android.provider.Settings.System#canWrite}.</p>
+     *
      * @param networkType the type of the network over which traffic to the specified
      * host is to be routed
      * @param hostAddress the IP address of the host to which the route is desired
@@ -1555,6 +1571,13 @@ public class ConnectivityManager {
         return (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
     }
 
+    /** {@hide} */
+    public static final void enforceChangePermission(Context context) {
+        int uid = Binder.getCallingUid();
+        Settings.checkAndNoteChangeNetworkStateOperation(context, uid, Settings
+                .getPackageNameForUid(context, uid), true /* throwException */);
+    }
+
     /** {@hide */
     public static final void enforceTetherChangePermission(Context context) {
         if (context.getResources().getStringArray(
@@ -1565,8 +1588,8 @@ public class ConnectivityManager {
                     android.Manifest.permission.CONNECTIVITY_INTERNAL, "ConnectivityService");
         } else {
             int uid = Binder.getCallingUid();
-            Settings.checkAndNoteChangeNetworkStateOperation(context, uid, Settings
-                    .getPackageNameForUid(context, uid), true);
+            Settings.checkAndNoteWriteSettingsOperation(context, uid, Settings
+                    .getPackageNameForUid(context, uid), true /* throwException */);
         }
     }
 
@@ -1671,8 +1694,11 @@ public class ConnectivityManager {
      * allowed between the tethered devices and this device, though upstream net
      * access will of course fail until an upstream network interface becomes
      * active.
-     * <p>This method requires the caller to hold the permission
-     * {@link android.Manifest.permission#CHANGE_NETWORK_STATE}.
+     *
+     * <p>This method requires the caller to hold either the
+     * {@link android.Manifest.permission#CHANGE_NETWORK_STATE} permission
+     * or the ability to modify system settings as determined by
+     * {@link android.provider.Settings.System#canWrite}.</p>
      *
      * @param iface the interface name to tether.
      * @return error a {@code TETHER_ERROR} value indicating success or failure type
@@ -1689,8 +1715,11 @@ public class ConnectivityManager {
 
     /**
      * Stop tethering the named interface.
-     * <p>This method requires the caller to hold the permission
-     * {@link android.Manifest.permission#CHANGE_NETWORK_STATE}.
+     *
+     * <p>This method requires the caller to hold either the
+     * {@link android.Manifest.permission#CHANGE_NETWORK_STATE} permission
+     * or the ability to modify system settings as determined by
+     * {@link android.provider.Settings.System#canWrite}.</p>
      *
      * @param iface the interface name to untether.
      * @return error a {@code TETHER_ERROR} value indicating success or failure type
@@ -1790,8 +1819,11 @@ public class ConnectivityManager {
      * attempt to switch to Rndis and subsequently tether the resulting
      * interface on {@code true} or turn off tethering and switch off
      * Rndis on {@code false}.
-     * <p>This method requires the caller to hold the permission
-     * {@link android.Manifest.permission#CHANGE_NETWORK_STATE}.
+     *
+     * <p>This method requires the caller to hold either the
+     * {@link android.Manifest.permission#CHANGE_NETWORK_STATE} permission
+     * or the ability to modify system settings as determined by
+     * {@link android.provider.Settings.System#canWrite}.</p>
      *
      * @param enable a boolean - {@code true} to enable tethering
      * @return error a {@code TETHER_ERROR} value indicating success or failure type
@@ -2461,8 +2493,11 @@ public class ConnectivityManager {
      * network may never attain, and whether a network will attain these states
      * is unknown prior to bringing up the network so the framework does not
      * know how to go about satisfing a request with these capabilities.
-     * <p>This method requires the caller to hold the permission
-     * {@link android.Manifest.permission#CHANGE_NETWORK_STATE}.
+     *
+     * <p>This method requires the caller to hold either the
+     * {@link android.Manifest.permission#CHANGE_NETWORK_STATE} permission
+     * or the ability to modify system settings as determined by
+     * {@link android.provider.Settings.System#canWrite}.</p>
      *
      * @param request {@link NetworkRequest} describing this request.
      * @param networkCallback The {@link NetworkCallback} to be utilized for this
@@ -2484,8 +2519,12 @@ public class ConnectivityManager {
      * network is not found within the given time (in milliseconds) the
      * {@link NetworkCallback#unavailable} callback is called.  The request must
      * still be released normally by calling {@link releaseNetworkRequest}.
-     * <p>This method requires the caller to hold the permission
-     * {@link android.Manifest.permission#CHANGE_NETWORK_STATE}.
+     *
+     * <p>This method requires the caller to hold either the
+     * {@link android.Manifest.permission#CHANGE_NETWORK_STATE} permission
+     * or the ability to modify system settings as determined by
+     * {@link android.provider.Settings.System#canWrite}.</p>
+     *
      * @param request {@link NetworkRequest} describing this request.
      * @param networkCallback The callbacks to be utilized for this request.  Note
      *                        the callbacks must not be shared - they uniquely specify
@@ -2558,8 +2597,12 @@ public class ConnectivityManager {
      * network may never attain, and whether a network will attain these states
      * is unknown prior to bringing up the network so the framework does not
      * know how to go about satisfing a request with these capabilities.
-     * <p>This method requires the caller to hold the permission
-     * {@link android.Manifest.permission#CHANGE_NETWORK_STATE}.
+     *
+     * <p>This method requires the caller to hold either the
+     * {@link android.Manifest.permission#CHANGE_NETWORK_STATE} permission
+     * or the ability to modify system settings as determined by
+     * {@link android.provider.Settings.System#canWrite}.</p>
+     *
      * @param request {@link NetworkRequest} describing this request.
      * @param operation Action to perform when the network is available (corresponds
      *                  to the {@link NetworkCallback#onAvailable} call.  Typically
