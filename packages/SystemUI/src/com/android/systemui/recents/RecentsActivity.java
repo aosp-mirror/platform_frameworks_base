@@ -39,6 +39,9 @@ import com.android.internal.logging.MetricsLogger;
 import com.android.systemui.R;
 import com.android.systemui.recents.events.EventBus;
 import com.android.systemui.recents.events.activity.AppWidgetProviderChangedEvent;
+import com.android.systemui.recents.events.activity.EnterRecentsWindowAnimationStartedEvent;
+import com.android.systemui.recents.events.activity.HideRecentsEvent;
+import com.android.systemui.recents.events.activity.ToggleRecentsEvent;
 import com.android.systemui.recents.events.component.RecentsVisibilityChangedEvent;
 import com.android.systemui.recents.events.component.ScreenPinningRequestEvent;
 import com.android.systemui.recents.events.ui.DismissTaskEvent;
@@ -121,36 +124,6 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
             }
         }
     }
-
-    /**
-     * Broadcast receiver to handle messages from AlternateRecentsComponent.
-     */
-    final BroadcastReceiver mServiceBroadcastReceiver = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            String action = intent.getAction();
-            if (action.equals(RecentsImpl.ACTION_HIDE_RECENTS_ACTIVITY)) {
-                if (intent.getBooleanExtra(RecentsImpl.EXTRA_TRIGGERED_FROM_ALT_TAB, false)) {
-                    // If we are hiding from releasing Alt-Tab, dismiss Recents to the focused app
-                    dismissRecentsToFocusedTaskOrHome(false);
-                } else if (intent.getBooleanExtra(RecentsImpl.EXTRA_TRIGGERED_FROM_HOME_KEY, false)) {
-                    // Otherwise, dismiss Recents to Home
-                    dismissRecentsToHome(true);
-                } else {
-                    // Do nothing
-                }
-            } else if (action.equals(RecentsImpl.ACTION_TOGGLE_RECENTS_ACTIVITY)) {
-                // If we are toggling Recents, then first unfilter any filtered stacks first
-                dismissRecentsToFocusedTaskOrHome(true);
-            } else if (action.equals(RecentsImpl.ACTION_START_ENTER_ANIMATION)) {
-                // Trigger the enter animation
-                onEnterAnimationTriggered();
-                // Notify the fallback receiver that we have successfully got the broadcast
-                // See AlternateRecentsComponent.onAnimationStarted()
-                setResultCode(Activity.RESULT_OK);
-            }
-        }
-    };
 
     /**
      * Broadcast receiver to handle messages from the system
@@ -298,7 +271,6 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
                     null, mFinishLaunchHomeRunnable, null);
             mRecentsView.startExitToHomeAnimation(
                     new ViewAnimation.TaskViewExitContext(exitTrigger));
-            mScrimViews.startExitRecentsAnimation();
         } else {
             mFinishLaunchHomeRunnable.run();
         }
@@ -377,13 +349,6 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
         // Notify that recents is now visible
         EventBus.getDefault().send(new RecentsVisibilityChangedEvent(this, ssp, true));
 
-        // Register the broadcast receiver to handle messages from our service
-        IntentFilter filter = new IntentFilter();
-        filter.addAction(RecentsImpl.ACTION_HIDE_RECENTS_ACTIVITY);
-        filter.addAction(RecentsImpl.ACTION_TOGGLE_RECENTS_ACTIVITY);
-        filter.addAction(RecentsImpl.ACTION_START_ENTER_ANIMATION);
-        registerReceiver(mServiceBroadcastReceiver, filter);
-
         // Register any broadcast receivers for the task loader
         mPackageMonitor.register(this);
 
@@ -396,7 +361,7 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
         boolean wasLaunchedByAm = !launchState.launchedFromHome &&
                 !launchState.launchedFromAppWithThumbnail;
         if (launchState.launchedHasConfigurationChanged || wasLaunchedByAm) {
-            onEnterAnimationTriggered();
+            EventBus.getDefault().send(new EnterRecentsWindowAnimationStartedEvent());
         }
 
         if (!launchState.launchedHasConfigurationChanged) {
@@ -426,9 +391,6 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
         // Notify the views that we are no longer visible
         mRecentsView.onRecentsHidden();
 
-        // Unregister the RecentsService receiver
-        unregisterReceiver(mServiceBroadcastReceiver);
-
         // Unregister any broadcast receivers for the task loader
         mPackageMonitor.unregister();
 
@@ -456,26 +418,16 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
         EventBus.getDefault().unregister(this);
     }
 
-    public void onEnterAnimationTriggered() {
-        // Try and start the enter animation (or restart it on configuration changed)
-        ReferenceCountedTrigger t = new ReferenceCountedTrigger(this, null, null, null);
-        ViewAnimation.TaskViewEnterContext ctx = new ViewAnimation.TaskViewEnterContext(t);
-        mRecentsView.startEnterRecentsAnimation(ctx);
+    @Override
+    public void onAttachedToWindow() {
+        super.onAttachedToWindow();
+        EventBus.getDefault().register(mScrimViews, EVENT_BUS_PRIORITY);
+    }
 
-        if (mSearchWidgetInfo != null) {
-            ctx.postAnimationTrigger.addLastDecrementRunnable(new Runnable() {
-                @Override
-                public void run() {
-                    // Start listening for widget package changes if there is one bound
-                    if (mAppWidgetHost != null) {
-                        mAppWidgetHost.startListening();
-                    }
-                }
-            });
-        }
-
-        // Animate the SystemUI scrim views
-        mScrimViews.startEnterRecentsAnimation();
+    @Override
+    public void onDetachedFromWindow() {
+        super.onDetachedFromWindow();
+        EventBus.getDefault().unregister(mScrimViews);
     }
 
     @Override
@@ -546,12 +498,6 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
     /**** RecentsView.RecentsViewCallbacks Implementation ****/
 
     @Override
-    public void onExitToHomeAnimationTriggered() {
-        // Animate the SystemUI scrim views out
-        mScrimViews.startExitRecentsAnimation();
-    }
-
-    @Override
     public void onTaskViewClicked() {
     }
 
@@ -567,20 +513,45 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
     }
 
     @Override
-    public void onScreenPinningRequest() {
-        RecentsTaskLoader loader = RecentsTaskLoader.getInstance();
-        SystemServicesProxy ssp = loader.getSystemServicesProxy();
-        EventBus.getDefault().send(new ScreenPinningRequestEvent(this, ssp));
-
-        MetricsLogger.count(this, "overview_screen_pinned", 1);
-    }
-
-    @Override
     public void runAfterPause(Runnable r) {
         mAfterPauseRunnable = r;
     }
 
     /**** EventBus events ****/
+
+    public final void onBusEvent(ToggleRecentsEvent event) {
+        dismissRecentsToFocusedTaskOrHome(true /* checkFilteredStackState */);
+    }
+
+    public final void onBusEvent(HideRecentsEvent event) {
+        if (event.triggeredFromAltTab) {
+            // If we are hiding from releasing Alt-Tab, dismiss Recents to the focused app
+            dismissRecentsToFocusedTaskOrHome(false /* checkFilteredStackState */);
+        } else if (event.triggeredFromHomeKey) {
+            // Otherwise, dismiss Recents to Home
+            dismissRecentsToHome(true /* checkFilteredStackState */);
+        } else {
+            // Do nothing
+        }
+    }
+
+    public final void onBusEvent(EnterRecentsWindowAnimationStartedEvent event) {
+        // Try and start the enter animation (or restart it on configuration changed)
+        ReferenceCountedTrigger t = new ReferenceCountedTrigger(this, null, null, null);
+        ViewAnimation.TaskViewEnterContext ctx = new ViewAnimation.TaskViewEnterContext(t);
+        mRecentsView.startEnterRecentsAnimation(ctx);
+        if (mSearchWidgetInfo != null) {
+            ctx.postAnimationTrigger.addLastDecrementRunnable(new Runnable() {
+                @Override
+                public void run() {
+                    // Start listening for widget package changes if there is one bound
+                    if (mAppWidgetHost != null) {
+                        mAppWidgetHost.startListening();
+                    }
+                }
+            });
+        }
+    }
 
     public final void onBusEvent(AppWidgetProviderChangedEvent event) {
         refreshSearchWidgetView();
@@ -623,6 +594,10 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
     public final void onBusEvent(DragEndEvent event) {
         // Unlock the orientation when dragging completes
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_BEHIND);
+    }
+
+    public final void onBusEvent(ScreenPinningRequestEvent event) {
+        MetricsLogger.count(this, "overview_screen_pinned", 1);
     }
 
     private void refreshSearchWidgetView() {

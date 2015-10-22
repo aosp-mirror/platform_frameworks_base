@@ -16,9 +16,6 @@
 
 package com.android.systemui.recents;
 
-import static android.app.ActivityManager.DOCKED_STACK_ID;
-import static android.app.ActivityManager.FREEFORM_WORKSPACE_STACK_ID;
-
 import android.app.ActivityManager;
 import android.app.AlertDialog;
 import android.app.Dialog;
@@ -36,6 +33,9 @@ import com.android.systemui.recents.misc.SystemServicesProxy;
 import com.android.systemui.recents.model.RecentsTaskLoader;
 import com.android.systemui.recents.model.Task;
 import com.android.systemui.recents.views.RecentsView;
+
+import static android.app.ActivityManager.DOCKED_STACK_ID;
+import static android.app.ActivityManager.FREEFORM_WORKSPACE_STACK_ID;
 
 /**
  * A helper for the dialogs that show when task debugging is on.

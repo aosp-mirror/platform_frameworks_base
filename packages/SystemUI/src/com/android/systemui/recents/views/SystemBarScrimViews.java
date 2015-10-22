@@ -24,6 +24,8 @@ import android.view.animation.Interpolator;
 import com.android.systemui.R;
 import com.android.systemui.recents.RecentsActivityLaunchState;
 import com.android.systemui.recents.RecentsConfiguration;
+import com.android.systemui.recents.events.activity.DismissRecentsToHomeAnimationStarted;
+import com.android.systemui.recents.events.activity.EnterRecentsWindowAnimationStartedEvent;
 
 /** Manages the scrims for the various system bars. */
 public class SystemBarScrimViews {
@@ -74,10 +76,12 @@ public class SystemBarScrimViews {
                 View.VISIBLE : View.INVISIBLE);
     }
 
+    /**** EventBus events ****/
+
     /**
      * Starts animating the scrim views when entering Recents.
      */
-    public void startEnterRecentsAnimation() {
+    public final void onBusEvent(EnterRecentsWindowAnimationStartedEvent event) {
         RecentsActivityLaunchState launchState = mConfig.getLaunchState();
         int transitionEnterFromAppDelay = mContext.getResources().getInteger(
                 R.integer.recents_enter_from_app_transition_duration);
@@ -124,7 +128,7 @@ public class SystemBarScrimViews {
      * Starts animating the scrim views when leaving Recents (either via launching a task, or
      * going home).
      */
-    public void startExitRecentsAnimation() {
+    public final void onBusEvent(DismissRecentsToHomeAnimationStarted event) {
         int taskViewExitToAppDuration = mContext.getResources().getInteger(
                 R.integer.recents_task_exit_to_app_duration);
         if (mHasStatusBarScrim && mShouldAnimateStatusBarScrim) {

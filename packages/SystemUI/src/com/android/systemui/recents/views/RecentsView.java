@@ -16,8 +16,6 @@
 
 package com.android.systemui.recents.views;
 
-import static android.app.ActivityManager.INVALID_STACK_ID;
-
 import android.app.ActivityManager;
 import android.app.ActivityOptions;
 import android.content.Context;
@@ -48,6 +46,8 @@ import com.android.systemui.recents.RecentsActivity;
 import com.android.systemui.recents.RecentsAppWidgetHostView;
 import com.android.systemui.recents.RecentsConfiguration;
 import com.android.systemui.recents.events.EventBus;
+import com.android.systemui.recents.events.activity.DismissRecentsToHomeAnimationStarted;
+import com.android.systemui.recents.events.component.ScreenPinningRequestEvent;
 import com.android.systemui.recents.events.ui.DismissTaskEvent;
 import com.android.systemui.recents.events.ui.dragndrop.DragDockStateChangedEvent;
 import com.android.systemui.recents.events.ui.dragndrop.DragEndEvent;
@@ -59,6 +59,8 @@ import com.android.systemui.recents.model.TaskStack;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import static android.app.ActivityManager.INVALID_STACK_ID;
 
 /**
  * This view is the the top level layout that contains TaskStacks (which are laid out according
@@ -75,8 +77,6 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
         public void onTaskViewClicked();
         public void onTaskLaunchFailed();
         public void onAllTaskViewsDismissed();
-        public void onExitToHomeAnimationTriggered();
-        public void onScreenPinningRequest();
         public void runAfterPause(Runnable r);
     }
 
@@ -261,7 +261,7 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
         ctx.postAnimationTrigger.decrement();
 
         // Notify of the exit animation
-        mCb.onExitToHomeAnimationTriggered();
+        EventBus.getDefault().send(new DismissRecentsToHomeAnimationStarted());
     }
 
     /** Adds the search bar */
@@ -652,7 +652,10 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
                             postDelayed(new Runnable() {
                                 @Override
                                 public void run() {
-                                    mCb.onScreenPinningRequest();
+                                    RecentsTaskLoader loader = RecentsTaskLoader.getInstance();
+                                    SystemServicesProxy ssp = loader.getSystemServicesProxy();
+                                    EventBus.getDefault().send(new ScreenPinningRequestEvent(
+                                            getContext(), ssp));
                                 }
                             }, 350);
                             mTriggered = true;
@@ -684,7 +687,10 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
                     if (ssp.startActivityFromRecents(getContext(), task.key.id,
                             task.activityLabel, launchOpts)) {
                         if (screenPinningRequested) {
-                            mCb.onScreenPinningRequest();
+                            RecentsTaskLoader loader = RecentsTaskLoader.getInstance();
+                            SystemServicesProxy ssp = loader.getSystemServicesProxy();
+                            EventBus.getDefault().send(new ScreenPinningRequestEvent(
+                                    getContext(), ssp));
                         }
                     } else {
                         // Dismiss the task and return the user to home if we fail to

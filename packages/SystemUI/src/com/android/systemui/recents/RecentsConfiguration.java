@@ -22,7 +22,6 @@ import android.graphics.Rect;
 import android.provider.Settings;
 import com.android.systemui.R;
 import com.android.systemui.recents.misc.SystemServicesProxy;
-import com.android.systemui.recents.model.RecentsTaskLoader;
 
 /**
  * Application resources that can be retrieved from the application context and are not specifically

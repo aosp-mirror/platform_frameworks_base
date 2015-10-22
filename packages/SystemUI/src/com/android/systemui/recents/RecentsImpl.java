@@ -16,12 +16,10 @@
 
 package com.android.systemui.recents;
 
-import android.app.Activity;
 import android.app.ActivityManager;
 import android.app.ActivityOptions;
 import android.app.ITaskStackListener;
 import android.content.ActivityNotFoundException;
-import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.Resources;
@@ -39,6 +37,10 @@ import com.android.internal.logging.MetricsLogger;
 import com.android.systemui.Prefs;
 import com.android.systemui.R;
 import com.android.systemui.SystemUIApplication;
+import com.android.systemui.recents.events.EventBus;
+import com.android.systemui.recents.events.activity.EnterRecentsWindowAnimationStartedEvent;
+import com.android.systemui.recents.events.activity.HideRecentsEvent;
+import com.android.systemui.recents.events.activity.ToggleRecentsEvent;
 import com.android.systemui.recents.events.component.RecentsVisibilityChangedEvent;
 import com.android.systemui.recents.events.component.ScreenPinningRequestEvent;
 import com.android.systemui.recents.misc.Console;
@@ -65,14 +67,7 @@ public class RecentsImpl extends IRecentsNonSystemUserCallbacks.Stub
 
     private final static String TAG = "RecentsImpl";
 
-    final public static String EXTRA_TRIGGERED_FROM_ALT_TAB = "triggeredFromAltTab";
-    final public static String EXTRA_TRIGGERED_FROM_HOME_KEY = "triggeredFromHomeKey";
-
-    final public static String ACTION_START_ENTER_ANIMATION = "action_start_enter_animation";
-    final public static String ACTION_TOGGLE_RECENTS_ACTIVITY = "action_toggle_recents_activity";
-    final public static String ACTION_HIDE_RECENTS_ACTIVITY = "action_hide_recents_activity";
-
-    final static int sMinToggleDelay = 350;
+    private final static int sMinToggleDelay = 350;
 
     public final static String RECENTS_PACKAGE = "com.android.systemui";
     public final static String RECENTS_ACTIVITY = "com.android.systemui.recents.RecentsActivity";
@@ -256,10 +251,8 @@ public class RecentsImpl extends IRecentsNonSystemUserCallbacks.Stub
         if (mBootCompleted) {
             // Defer to the activity to handle hiding recents, if it handles it, then it must still
             // be visible
-            Intent intent = createLocalBroadcastIntent(mContext, ACTION_HIDE_RECENTS_ACTIVITY);
-            intent.putExtra(EXTRA_TRIGGERED_FROM_ALT_TAB, triggeredFromAltTab);
-            intent.putExtra(EXTRA_TRIGGERED_FROM_HOME_KEY, triggeredFromHomeKey);
-            mContext.sendBroadcastAsUser(intent, UserHandle.CURRENT);
+            EventBus.getDefault().send(new HideRecentsEvent(triggeredFromAltTab,
+                    triggeredFromHomeKey));
         }
     }
 
@@ -281,8 +274,7 @@ public class RecentsImpl extends IRecentsNonSystemUserCallbacks.Stub
             MutableBoolean isTopTaskHome = new MutableBoolean(true);
             if (topTask != null && mSystemServicesProxy.isRecentsTopMost(topTask, isTopTaskHome)) {
                 // Notify recents to toggle itself
-                Intent intent = createLocalBroadcastIntent(mContext, ACTION_TOGGLE_RECENTS_ACTIVITY);
-                mContext.sendBroadcastAsUser(intent, UserHandle.CURRENT);
+                EventBus.getDefault().send(new ToggleRecentsEvent());
                 mLastToggleTime = SystemClock.elapsedRealtime();
                 return;
             } else {
@@ -719,51 +711,14 @@ public class RecentsImpl extends IRecentsNonSystemUserCallbacks.Stub
         mCanReuseTaskStackViews = true;
     }
 
-    /**
-     * Creates a new broadcast intent to send to the Recents activity.
-     * TODO: Use EventBus
-     */
-    private Intent createLocalBroadcastIntent(Context context, String action) {
-        Intent intent = new Intent(action);
-        intent.setPackage(context.getPackageName());
-        intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT |
-                Intent.FLAG_RECEIVER_FOREGROUND);
-        return intent;
-    }
-
     /**** OnAnimationStartedListener Implementation ****/
 
     @Override
     public void onAnimationStarted() {
         // Notify recents to start the enter animation
-        // TODO: Use EventBus
         if (!mStartAnimationTriggered) {
-            // There can be a race condition between the start animation callback and
-            // the start of the new activity (where we register the receiver that listens
-            // to this broadcast, so we add our own receiver and if that gets called, then
-            // we know the activity has not yet started and we can retry sending the broadcast.
-            BroadcastReceiver fallbackReceiver = new BroadcastReceiver() {
-                @Override
-                public void onReceive(Context context, Intent intent) {
-                    if (getResultCode() == Activity.RESULT_OK) {
-                        mStartAnimationTriggered = true;
-                        return;
-                    }
-
-                    // Schedule for the broadcast to be sent again after some time
-                    mHandler.postDelayed(new Runnable() {
-                        @Override
-                        public void run() {
-                            onAnimationStarted();
-                        }
-                    }, 25);
-                }
-            };
-
-            // Send the broadcast to notify Recents that the animation has started
-            Intent intent = createLocalBroadcastIntent(mContext, ACTION_START_ENTER_ANIMATION);
-            mContext.sendOrderedBroadcastAsUser(intent, UserHandle.CURRENT, null,
-                    fallbackReceiver, null, Activity.RESULT_CANCELED, null, null);
+            mStartAnimationTriggered = true;
+            EventBus.getDefault().send(new EnterRecentsWindowAnimationStartedEvent());
         }
     }
 }

@@ -17,7 +17,6 @@
 package com.android.systemui.recents.model;
 
 import android.animation.ObjectAnimator;
-import android.app.ActivityManager;
 import android.content.Context;
 import android.graphics.Color;
 import android.graphics.Rect;

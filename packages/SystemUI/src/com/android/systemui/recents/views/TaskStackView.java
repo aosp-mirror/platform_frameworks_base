@@ -16,10 +16,7 @@
 
 package com.android.systemui.recents.views;
 
-import static android.app.ActivityManager.INVALID_STACK_ID;
-
 import android.animation.ValueAnimator;
-import android.app.ActivityManager;
 import android.content.ComponentName;
 import android.content.Context;
 import android.graphics.Canvas;
@@ -52,6 +49,8 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+
+import static android.app.ActivityManager.INVALID_STACK_ID;
 
 
 /* The visual representation of a task stack view */
