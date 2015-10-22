@@ -33,6 +33,7 @@ import com.android.internal.logging.MetricsLogger;
 import com.android.systemui.R;
 import com.android.systemui.statusbar.ExpandableNotificationRow;
 import com.android.systemui.statusbar.NotificationData;
+import com.android.systemui.statusbar.phone.NotificationGroupManager;
 import com.android.systemui.statusbar.phone.PhoneStatusBar;
 
 import java.io.FileDescriptor;
@@ -85,6 +86,7 @@ public class HeadsUpManager implements ViewTreeObserver.OnComputeInternalInsetsL
     private final int mStatusBarHeight;
     private final int mNotificationsTopPadding;
     private final Context mContext;
+    private final NotificationGroupManager mGroupManager;
     private PhoneStatusBar mBar;
     private int mSnoozeLengthMs;
     private ContentObserver mSettingsObserver;
@@ -104,7 +106,8 @@ public class HeadsUpManager implements ViewTreeObserver.OnComputeInternalInsetsL
     private boolean mIsObserving;
     private boolean mRemoteInputActive;
 
-    public HeadsUpManager(final Context context, View statusBarWindowView) {
+    public HeadsUpManager(final Context context, View statusBarWindowView,
+                          NotificationGroupManager groupManager) {
         mContext = context;
         Resources resources = mContext.getResources();
         mTouchAcceptanceDelay = resources.getInteger(R.integer.touch_acceptance_delay);
@@ -132,6 +135,7 @@ public class HeadsUpManager implements ViewTreeObserver.OnComputeInternalInsetsL
                 Settings.Global.getUriFor(SETTING_HEADS_UP_SNOOZE_LENGTH_MS), false,
                 mSettingsObserver);
         mStatusBarWindowView = statusBarWindowView;
+        mGroupManager = groupManager;
         mStatusBarHeight = resources.getDimensionPixelSize(
                 com.android.internal.R.dimen.status_bar_height);
         mNotificationsTopPadding = context.getResources()
@@ -181,12 +185,12 @@ public class HeadsUpManager implements ViewTreeObserver.OnComputeInternalInsetsL
     public void updateNotification(NotificationData.Entry headsUp, boolean alert) {
         if (DEBUG) Log.v(TAG, "updateNotification");
 
-        headsUp.row.setChildrenExpanded(false /* expanded */, false /* animated */);
         headsUp.row.sendAccessibilityEvent(AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED);
 
         if (alert) {
             HeadsUpEntry headsUpEntry = mHeadsUpEntries.get(headsUp.key);
             headsUpEntry.updateEntry();
+            mGroupManager.onEntryHeadsUped(headsUp);
             setEntryPinned(headsUpEntry, shouldHeadsUpBecomePinned(headsUp));
         }
     }

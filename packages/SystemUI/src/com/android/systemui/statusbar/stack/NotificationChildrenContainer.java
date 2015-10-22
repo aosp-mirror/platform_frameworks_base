@@ -24,7 +24,8 @@ import android.view.ViewGroup;
 
 import com.android.systemui.R;
 import com.android.systemui.statusbar.ExpandableNotificationRow;
-import com.android.systemui.statusbar.ExpandableView;
+import com.android.systemui.statusbar.notification.HybridNotificationView;
+import com.android.systemui.statusbar.notification.HybridNotificationViewManager;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -34,6 +35,10 @@ import java.util.List;
  */
 public class NotificationChildrenContainer extends ViewGroup {
 
+    private static final int NUMBER_OF_CHILDREN_WHEN_COLLAPSED = 2;
+    private static final int NUMBER_OF_CHILDREN_WHEN_SYSTEM_EXPANDED = 5;
+    private static final int NUMBER_OF_CHILDREN_WHEN_CHILDREN_EXPANDED = 8;
+
     private final int mChildPadding;
     private final int mDividerHeight;
     private final int mMaxNotificationHeight;
@@ -42,6 +47,12 @@ public class NotificationChildrenContainer extends ViewGroup {
     private final int mNotificationHeaderHeight;
     private final int mNotificationAppearDistance;
     private final float mHeaderTopPaddingSubstraction;
+    private final HybridNotificationViewManager mHybridViewManager;
+    private final float mCollapsedBottompadding;
+    private boolean mChildrenExpanded;
+    private ExpandableNotificationRow mNotificationParent;
+    private HybridNotificationView mGroupOverflowContainer;
+    private ViewState mGroupOverFlowState;
 
     public NotificationChildrenContainer(Context context) {
         this(context, null);
@@ -69,6 +80,8 @@ public class NotificationChildrenContainer extends ViewGroup {
         mNotificationHeaderHeight = getResources().getDimensionPixelSize(
                 R.dimen.notification_header_height);
         mHeaderTopPaddingSubstraction = 2 * getResources().getDisplayMetrics().density;
+        mCollapsedBottompadding = 10 * getResources().getDisplayMetrics().density;
+        mHybridViewManager = new HybridNotificationViewManager(getContext(), this);
     }
 
     @Override
@@ -78,14 +91,6 @@ public class NotificationChildrenContainer extends ViewGroup {
         for (int i = 0; i < childCount; i++) {
             View child = mChildren.get(i);
             boolean viewGone = child.getVisibility() == View.GONE;
-            if (i != 0) {
-                View divider = mDividers.get(i - 1);
-                int dividerVisibility = divider.getVisibility();
-                int newVisibility = viewGone ? INVISIBLE : VISIBLE;
-                if (dividerVisibility != newVisibility) {
-                    divider.setVisibility(newVisibility);
-                }
-            }
             if (viewGone) {
                 continue;
             }
@@ -95,6 +100,10 @@ public class NotificationChildrenContainer extends ViewGroup {
             } else {
                 firstChild = false;
             }
+        }
+        if (mGroupOverflowContainer != null) {
+            mGroupOverflowContainer.layout(0, 0, getWidth(),
+                    mGroupOverflowContainer.getMeasuredHeight());
         }
     }
 
@@ -115,9 +124,6 @@ public class NotificationChildrenContainer extends ViewGroup {
         boolean firstChild = true;
         for (int i = 0; i < childCount; i++) {
             View child = mChildren.get(i);
-            if (child.getVisibility() == View.GONE) {
-                continue;
-            }
             child.measure(widthMeasureSpec, newHeightSpec);
             height += child.getMeasuredHeight();
             if (!firstChild) {
@@ -130,9 +136,9 @@ public class NotificationChildrenContainer extends ViewGroup {
             }
         }
         int width = MeasureSpec.getSize(widthMeasureSpec);
-        height = hasFixedHeight ? ownMaxHeight
-                : isHeightLimited ? Math.min(ownMaxHeight, height)
-                : height;
+        if (mGroupOverflowContainer != null) {
+            mGroupOverflowContainer.measure(widthMeasureSpec, newHeightSpec);
+        }
         setMeasuredDimension(width, height);
     }
 
@@ -151,8 +157,7 @@ public class NotificationChildrenContainer extends ViewGroup {
             addView(divider);
             mDividers.add(Math.max(newIndex - 1, 0), divider);
         }
-        // TODO: adapt background corners
-        // TODO: fix overdraw
+        updateGroupOverflow();
     }
 
     public void removeNotification(ExpandableNotificationRow row) {
@@ -164,7 +169,26 @@ public class NotificationChildrenContainer extends ViewGroup {
             removeView(divider);
         }
         row.setSystemChildExpanded(false);
-        // TODO: adapt background corners
+        updateGroupOverflow();
+    }
+
+    public void updateGroupOverflow() {
+        int childCount = mChildren.size();
+        int maxAllowedVisibleChildren = getMaxAllowedVisibleChildren(true /* likeCollapsed */);
+        boolean hasOverflow = childCount > maxAllowedVisibleChildren;
+        int lastVisibleIndex = hasOverflow ? maxAllowedVisibleChildren - 2
+                : maxAllowedVisibleChildren - 1;
+        if (hasOverflow) {
+            mGroupOverflowContainer = mHybridViewManager.bindFromNotificationGroup(
+                    mGroupOverflowContainer, mChildren, lastVisibleIndex + 1);
+            if (mGroupOverFlowState == null) {
+                mGroupOverFlowState = new ViewState();
+            }
+        } else if (mGroupOverflowContainer != null) {
+            removeView(mGroupOverflowContainer);
+            mGroupOverflowContainer = null;
+            mGroupOverFlowState = null;
+        }
     }
 
     private View inflateDivider() {
@@ -196,31 +220,51 @@ public class NotificationChildrenContainer extends ViewGroup {
                 result = true;
             }
         }
-
-        // Let's make the first child expanded!
-        boolean first = true;
-        for (int i = 0; i < childOrder.size(); i++) {
-            ExpandableNotificationRow child = childOrder.get(i);
-            child.setSystemChildExpanded(first);
-            first = false;
-        }
+        updateExpansionStates();
         return result;
     }
 
+    private void updateExpansionStates() {
+        // Let's make the first child expanded if the parent is
+        for (int i = 0; i < mChildren.size(); i++) {
+            ExpandableNotificationRow child = mChildren.get(i);
+            child.setSystemChildExpanded(false);
+        }
+    }
+
+    /**
+     *
+     * @return the intrinsic size of this children container, i.e the natural fully expanded state
+     */
     public int getIntrinsicHeight() {
-        int childCount = mChildren.size();
+        int maxAllowedVisibleChildren = getMaxAllowedVisibleChildren();
+        return getIntrinsicHeight(maxAllowedVisibleChildren);
+    }
+
+    /**
+     * @return the intrinsic height with a number of children given
+     *         in @param maxAllowedVisibleChildren
+     */
+    private int getIntrinsicHeight(float maxAllowedVisibleChildren) {
         int intrinsicHeight = 0;
         int visibleChildren = 0;
+        int childCount = mChildren.size();
         for (int i = 0; i < childCount; i++) {
+            if (visibleChildren >= maxAllowedVisibleChildren) {
+                break;
+            }
             ExpandableNotificationRow child = mChildren.get(i);
-            if (child.getVisibility() == View.GONE) {
-                continue;
+            if (i == 0 && child.hasSameBgColor(mNotificationParent)) {
+                intrinsicHeight -= mHeaderTopPaddingSubstraction;
             }
             intrinsicHeight += child.getIntrinsicHeight();
             visibleChildren++;
         }
         if (visibleChildren > 0) {
             intrinsicHeight += (visibleChildren - 1) * mDividerHeight;
+        }
+        if (!mChildrenExpanded) {
+            intrinsicHeight += mCollapsedBottompadding;
         }
         return intrinsicHeight;
     }
@@ -235,15 +279,21 @@ public class NotificationChildrenContainer extends ViewGroup {
         int childCount = mChildren.size();
         int yPosition = mNotificationHeaderHeight;
         boolean firstChild = true;
+        int maxAllowedVisibleChildren = getMaxAllowedVisibleChildren();
+        boolean hasOverflow = !mChildrenExpanded && childCount > maxAllowedVisibleChildren
+                && maxAllowedVisibleChildren != NUMBER_OF_CHILDREN_WHEN_CHILDREN_EXPANDED;
+        int lastVisibleIndex = hasOverflow
+                ? maxAllowedVisibleChildren - 2
+                : maxAllowedVisibleChildren - 1;
         for (int i = 0; i < childCount; i++) {
             ExpandableNotificationRow child = mChildren.get(i);
-            if (child.getVisibility() == View.GONE) {
-                continue;
-            }
             if (!firstChild) {
                 // There's a divider
                 yPosition += mChildPadding;
             } else {
+                if (child.hasSameBgColor(mNotificationParent)) {
+                    yPosition -= mHeaderTopPaddingSubstraction;
+                }
                 firstChild = false;
             }
             StackViewState childState = resultState.getViewStateForView(child);
@@ -255,36 +305,61 @@ public class NotificationChildrenContainer extends ViewGroup {
             childState.dark = parentState.dark;
             childState.hideSensitive = parentState.hideSensitive;
             childState.belowSpeedBump = parentState.belowSpeedBump;
-            childState.scale =  parentState.scale;
+            childState.scale =  1.0f;
             childState.clipTopAmount = 0;
             childState.topOverLap = 0;
+            boolean visible = i <= lastVisibleIndex;
+            childState.alpha = visible ? 1 : 0;
             childState.location = parentState.location;
             yPosition += intrinsicHeight;
         }
+        if (mGroupOverflowContainer != null) {
+            mGroupOverFlowState.initFrom(mGroupOverflowContainer);
+            if (hasOverflow) {
+                StackViewState firstOverflowState =
+                        resultState.getViewStateForView(mChildren.get(lastVisibleIndex + 1));
+                mGroupOverFlowState.yTranslation = firstOverflowState.yTranslation;
+            }
+            mGroupOverFlowState.alpha = mChildrenExpanded || !hasOverflow ? 0.0f : 1.0f;
+        }
+    }
+
+    private int getMaxAllowedVisibleChildren() {
+        return getMaxAllowedVisibleChildren(false /* likeCollapsed */);
+    }
+
+    private int getMaxAllowedVisibleChildren(boolean likeCollapsed) {
+        if (!likeCollapsed && (mChildrenExpanded || mNotificationParent.isUserLocked())) {
+            return NUMBER_OF_CHILDREN_WHEN_CHILDREN_EXPANDED;
+        }
+        if (mNotificationParent.isExpanded()) {
+            return NUMBER_OF_CHILDREN_WHEN_SYSTEM_EXPANDED;
+        }
+        return NUMBER_OF_CHILDREN_WHEN_COLLAPSED;
     }
 
     public void applyState(StackScrollState state) {
         int childCount = mChildren.size();
         boolean firstChild = true;
-        ViewState dividerState = new ViewState();
+        ViewState tmpState = new ViewState();
         for (int i = 0; i < childCount; i++) {
             ExpandableNotificationRow child = mChildren.get(i);
             StackViewState viewState = state.getViewStateForView(child);
-            if (child.getVisibility() == View.GONE) {
-                continue;
-            }
             if (!firstChild) {
                 // layout the divider
                 View divider = mDividers.get(i - 1);
-                dividerState.initFrom(divider);
-                dividerState.yTranslation = (int) (viewState.yTranslation
+                tmpState.initFrom(divider);
+                tmpState.yTranslation = (int) (viewState.yTranslation
                         - (mChildPadding + mDividerHeight) / 2.0f);
-                dividerState.alpha = 1;
-                state.applyViewState(divider, dividerState);
+                tmpState.alpha = mChildrenExpanded && viewState.alpha != 0 ? 0.5f : 0;
+                state.applyViewState(divider, tmpState);
             } else {
                 firstChild = false;
             }
             state.applyState(child, viewState);
+        }
+        if (mGroupOverflowContainer != null) {
+            state.applyViewState(mGroupOverflowContainer, mGroupOverFlowState);
         }
     }
 
@@ -295,6 +370,10 @@ public class NotificationChildrenContainer extends ViewGroup {
      * @param state the new state we animate to
      */
     public void prepareExpansionChanged(StackScrollState state) {
+        if (true) {
+            // TODO: do something that makes sense
+            return;
+        }
         int childCount = mChildren.size();
         boolean firstChild = true;
         StackViewState sourceState = new StackViewState();
@@ -302,9 +381,6 @@ public class NotificationChildrenContainer extends ViewGroup {
         for (int i = 0; i < childCount; i++) {
             ExpandableNotificationRow child = mChildren.get(i);
             StackViewState viewState = state.getViewStateForView(child);
-            if (child.getVisibility() == View.GONE) {
-                continue;
-            }
             if (!firstChild) {
                 // layout the divider
                 View divider = mDividers.get(i - 1);
@@ -321,23 +397,17 @@ public class NotificationChildrenContainer extends ViewGroup {
             sourceState.yTranslation += mNotificationAppearDistance;
             state.applyState(child, sourceState);
         }
-        mCollapseButton.setAlpha(0);
-        mCollapseDivider.setAlpha(0);
-        mCollapseDivider.setTranslationY(mNotificationAppearDistance / 4);
     }
 
     public void startAnimationToState(StackScrollState state, StackStateAnimator stateAnimator,
             boolean withDelays, long baseDelay, long duration) {
         int childCount = mChildren.size();
         boolean firstChild = true;
-        ViewState dividerState = new ViewState();
+        ViewState tmpState = new ViewState();
         int notGoneIndex = 0;
         for (int i = 0; i < childCount; i++) {
             ExpandableNotificationRow child = mChildren.get(i);
             StackViewState viewState = state.getViewStateForView(child);
-            if (child.getVisibility() == View.GONE) {
-                continue;
-            }
             int difference = Math.min(StackStateAnimator.DELAY_EFFECT_MAX_INDEX_DIFFERENCE_CHILDREN,
                     notGoneIndex + 1);
             long delay = withDelays
@@ -347,16 +417,19 @@ public class NotificationChildrenContainer extends ViewGroup {
             if (!firstChild) {
                 // layout the divider
                 View divider = mDividers.get(i - 1);
-                dividerState.initFrom(divider);
-                dividerState.yTranslation = viewState.yTranslation
+                tmpState.initFrom(divider);
+                tmpState.yTranslation = viewState.yTranslation
                         - (mChildPadding + mDividerHeight) / 2.0f;
-                dividerState.alpha = 1;
-                stateAnimator.startViewAnimations(divider, dividerState, delay, duration);
+                tmpState.alpha = mChildrenExpanded && viewState.alpha != 0 ? 0.5f : 0;;
+                stateAnimator.startViewAnimations(divider, tmpState, delay, duration);
             } else {
                 firstChild = false;
             }
             stateAnimator.startStackAnimations(child, viewState, state, -1, delay);
             notGoneIndex++;
+        }
+        if (mGroupOverflowContainer != null) {
+            stateAnimator.startViewAnimations(mGroupOverflowContainer, mGroupOverFlowState, -1, 0);
         }
     }
 
@@ -375,7 +448,15 @@ public class NotificationChildrenContainer extends ViewGroup {
         return null;
     }
 
-    public void setTintColor(int color) {
-        ExpandableNotificationRow.applyTint(mCollapseDivider, color);
+    public void setChildrenExpanded(boolean childrenExpanded) {
+        mChildrenExpanded = childrenExpanded;
+    }
+
+    public int getMaxContentHeight() {
+        return getIntrinsicHeight(NUMBER_OF_CHILDREN_WHEN_CHILDREN_EXPANDED);
+    }
+
+    public int getMinHeight() {
+        return getIntrinsicHeight(getMaxAllowedVisibleChildren(true /* forceCollapsed */));
     }
 }

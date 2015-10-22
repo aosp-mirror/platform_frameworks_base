@@ -361,7 +361,7 @@ public class StackScrollAlgorithm {
                     // handle the notgoneIndex for the children as well
                     List<ExpandableNotificationRow> children =
                             row.getNotificationChildren();
-                    if (row.areChildrenExpanded() && children != null) {
+                    if (row.isSummaryWithChildren() && children != null) {
                         for (ExpandableNotificationRow childRow : children) {
                             if (childRow.getVisibility() != View.GONE) {
                                 StackViewState childState

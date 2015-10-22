@@ -21,7 +21,6 @@ import android.service.notification.StatusBarNotification;
 
 import com.android.systemui.statusbar.ExpandableNotificationRow;
 import com.android.systemui.statusbar.NotificationData;
-import com.android.systemui.statusbar.StatusBarState;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -93,21 +92,8 @@ public class NotificationGroupManager {
         if (group.children.isEmpty()) {
             if (group.summary == null) {
                 mGroupMap.remove(groupKey);
-            } else {
-                if (group.expanded) {
-                    // only the summary is left. Change it to unexpanded in a few ms. We do this to
-                    // avoid raceconditions
-                    removed.row.post(new Runnable() {
-                        @Override
-                        public void run() {
-                            if (group.children.isEmpty()) {
-                                setGroupExpanded(sbn, false);
-                            }
-                        }
-                    });
-                } else {
-                    group.summary.row.updateNotificationHeader();
-                }
+            } else if (!group.expanded) {
+                group.summary.row.updateNotificationHeader();
             }
         }
     }
@@ -155,9 +141,6 @@ public class NotificationGroupManager {
     }
 
     public boolean hasGroupChildren(StatusBarNotification sbn) {
-        if (areGroupsProhibited()) {
-            return false;
-        }
         if (!sbn.getNotification().isGroupSummary()) {
             return false;
         }
@@ -166,29 +149,6 @@ public class NotificationGroupManager {
             return false;
         }
         return !group.children.isEmpty();
-    }
-
-    public void setStatusBarState(int newState) {
-        if (mBarState == newState) {
-            return;
-        }
-        boolean prohibitedBefore = areGroupsProhibited();
-        mBarState = newState;
-        boolean nowProhibited = areGroupsProhibited();
-        if (nowProhibited != prohibitedBefore) {
-            if (nowProhibited) {
-                for (NotificationGroup group : mGroupMap.values()) {
-                    if (group.expanded) {
-                        setGroupExpanded(group, false);
-                    }
-                }
-            }
-            mListener.onGroupsProhibitedChanged();
-        }
-    }
-
-    private boolean areGroupsProhibited() {
-        return mBarState == StatusBarState.KEYGUARD;
     }
 
     /**
@@ -226,6 +186,18 @@ public class NotificationGroupManager {
                 : group.summary.row;
     }
 
+    public void onEntryHeadsUped(NotificationData.Entry headsUp) {
+        // TODO: handle this nicely
+    }
+
+    public void toggleGroupExpansion(StatusBarNotification sbn) {
+        NotificationGroup group = mGroupMap.get(sbn.getGroupKey());
+        if (group == null) {
+            return;
+        }
+        setGroupExpanded(group, !group.expanded);
+    }
+
     public static class NotificationGroup {
         public final HashSet<NotificationData.Entry> children = new HashSet<>();
         public NotificationData.Entry summary;
@@ -240,11 +212,6 @@ public class NotificationGroupManager {
          * @param expanded a boolean indicating the new expanded state
          */
         void onGroupExpansionChanged(ExpandableNotificationRow changedRow, boolean expanded);
-
-        /**
-         * Children group policy has changed and children may no be prohibited or allowed.
-         */
-        void onGroupsProhibitedChanged();
 
         /**
          * A group of children just received a summary notification and should therefore become

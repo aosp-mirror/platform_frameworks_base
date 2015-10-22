@@ -70,9 +70,9 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
     private boolean mIsSystemExpanded;
 
     /**
-     * Whether the notification expansion is disabled. This is the case on Keyguard.
+     * Whether the notification is on the keyguard and the expansion is disabled.
      */
-    private boolean mExpansionDisabled;
+    private boolean mOnKeyguard;
 
     private NotificationContentView mPublicLayout;
     private NotificationContentView mPrivateLayout;
@@ -162,6 +162,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
 
     private void setStatusBarNotification(StatusBarNotification statusBarNotification) {
         mStatusBarNotification = statusBarNotification;
+        mPrivateLayout.setStatusBarNotification(statusBarNotification);
         updateVetoButton();
         onChildrenCountChanged();
     }
@@ -185,6 +186,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
 
     public void setGroupManager(NotificationGroupManager groupManager) {
         mGroupManager = groupManager;
+        mPrivateLayout.setGroupManager(groupManager);
     }
 
     public void addChildNotification(ExpandableNotificationRow row) {
@@ -225,6 +227,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
     public void setIsChildInGroup(boolean isChildInGroup, ExpandableNotificationRow parent) {
         mChildInGroup = BaseStatusBar.ENABLE_CHILD_NOTIFICATIONS && isChildInGroup;
         mShowNoBackground = mChildInGroup && hasSameBgColor(parent);
+        mPrivateLayout.setIsChildInGroup(mShowNoBackground);
         updateBackground();
     }
 
@@ -265,34 +268,34 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
     }
 
     public void getChildrenStates(StackScrollState resultState) {
-        if (mChildrenExpanded) {
+        if (mIsSummaryWithChildren) {
             StackViewState parentState = resultState.getViewStateForView(this);
             mChildrenContainer.getState(resultState, parentState);
         }
     }
 
     public void applyChildrenState(StackScrollState state) {
-        if (mChildrenExpanded) {
+        if (mIsSummaryWithChildren) {
             mChildrenContainer.applyState(state);
         }
     }
 
     public void prepareExpansionChanged(StackScrollState state) {
-        if (mChildrenExpanded) {
+        if (mIsSummaryWithChildren) {
             mChildrenContainer.prepareExpansionChanged(state);
         }
     }
 
     public void startChildAnimation(StackScrollState finalState,
             StackStateAnimator stateAnimator, boolean withDelays, long delay, long duration) {
-        if (mChildrenExpanded) {
+        if (mIsSummaryWithChildren) {
             mChildrenContainer.startAnimationToState(finalState, stateAnimator, withDelays, delay,
                     duration);
         }
     }
 
     public ExpandableNotificationRow getViewAtPosition(float y) {
-        if (!mChildrenExpanded) {
+        if (!mIsSummaryWithChildren || !mChildrenExpanded) {
             return this;
         } else {
             ExpandableNotificationRow view = mChildrenContainer.getViewAtPosition(y);
@@ -416,7 +419,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
         mSensitive = false;
         mShowingPublicInitialized = false;
         mIsSystemExpanded = false;
-        mExpansionDisabled = false;
+        mOnKeyguard = false;
         mPublicLayout.reset(mIsHeadsUp);
         mPrivateLayout.reset(mIsHeadsUp);
         resetHeight();
@@ -580,16 +583,19 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
             mIsSystemExpanded = expand;
             notifyHeightChanged(false /* needsAnimation */);
             logExpansionEvent(false, wasExpanded);
+            if (mChildrenContainer != null) {
+                mChildrenContainer.updateGroupOverflow();
+            }
         }
     }
 
     /**
-     * @param expansionDisabled whether to prevent notification expansion
+     * @param onKeyguard whether to prevent notification expansion
      */
-    public void setExpansionDisabled(boolean expansionDisabled) {
-        if (expansionDisabled != mExpansionDisabled) {
+    public void setOnKeyguard(boolean onKeyguard) {
+        if (onKeyguard != mOnKeyguard) {
             final boolean wasExpanded = isExpanded();
-            mExpansionDisabled = expansionDisabled;
+            mOnKeyguard = onKeyguard;
             logExpansionEvent(false, wasExpanded);
             if (wasExpanded != isExpanded()) {
                 notifyHeightChanged(false  /* needsAnimation */);
@@ -622,23 +628,22 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
             return getActualHeight();
         }
         boolean inExpansionState = isExpanded();
-        int maxContentHeight;
         if (mSensitive && mHideSensitiveForIntrinsicHeight) {
             return mRowMinHeight;
+        } else if (mIsSummaryWithChildren && !mOnKeyguard) {
+            return mChildrenContainer.getIntrinsicHeight()
+                    + mNotificationHeader.getHeight();
         } else if (mIsHeadsUp) {
             if (inExpansionState) {
-                maxContentHeight = Math.max(mMaxExpandHeight, mHeadsUpHeight);
+                return Math.max(mMaxExpandHeight, mHeadsUpHeight);
             } else {
-                maxContentHeight = Math.max(mRowMinHeight, mHeadsUpHeight);
+                return Math.max(mRowMinHeight, mHeadsUpHeight);
             }
-        } else if ((!inExpansionState && !mChildrenExpanded)) {
-            maxContentHeight = mRowMinHeight;
-        } else if (mChildrenExpanded) {
-            maxContentHeight = mChildrenContainer.getIntrinsicHeight();
+        } else if (!inExpansionState || (mChildInGroup && !isGroupExpanded())) {
+            return getMinHeight();
         } else {
-            maxContentHeight = getMaxExpandHeight();
+            return getMaxExpandHeight();
         }
-        return maxContentHeight;
     }
 
     private boolean isGroupExpanded() {
@@ -670,8 +675,8 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
      *
      * @return whether the view state is currently expanded.
      */
-    private boolean isExpanded() {
-        return !mExpansionDisabled
+    public boolean isExpanded() {
+        return !mOnKeyguard
                 && (!hasUserChangedExpansion() && (isSystemExpanded() || isSystemChildExpanded())
                 || isUserExpanded());
     }
@@ -778,6 +783,9 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
 
     public void setChildrenExpanded(boolean expanded, boolean animate) {
         mChildrenExpanded = expanded;
+        if (mChildrenContainer != null) {
+            mChildrenContainer.setChildrenExpanded(expanded);
+        }
     }
 
     public void updateNotificationHeader() {
@@ -844,12 +852,20 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
 
     @Override
     public int getMaxContentHeight() {
+        if (mIsSummaryWithChildren && !mShowingPublic) {
+            return mChildrenContainer.getMaxContentHeight()
+                    + mNotificationHeader.getHeight();
+        }
         NotificationContentView showingLayout = getShowingLayout();
         return showingLayout.getMaxHeight();
     }
 
     @Override
     public int getMinHeight() {
+        if (mIsSummaryWithChildren && !mOnKeyguard) {
+            return mChildrenContainer.getMinHeight()
+                    + mNotificationHeader.getHeight();
+        }
         NotificationContentView showingLayout = getShowingLayout();
         return showingLayout.getMinHeight();
     }

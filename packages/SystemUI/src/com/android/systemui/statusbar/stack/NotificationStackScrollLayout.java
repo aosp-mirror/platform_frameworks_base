@@ -1726,7 +1726,7 @@ public class NotificationStackScrollLayout extends ViewGroup
             ExpandableNotificationRow groupSummary =
                     mGroupManager.getGroupSummary(row.getStatusBarNotification());
             if (groupSummary != null && groupSummary != row) {
-                return !groupSummary.areChildrenExpanded();
+                return row.getVisibility() == View.INVISIBLE;
             }
         }
         return false;
@@ -2797,10 +2797,6 @@ public class NotificationStackScrollLayout extends ViewGroup
         }
         changedRow.setChildrenExpanded(expanded, animated);
         onHeightChanged(changedRow, false /* needsAnimation */);
-    }
-
-    @Override
-    public void onGroupsProhibitedChanged() {
     }
 
     @Override

@@ -65,7 +65,7 @@ public class StackScrollState {
                 ExpandableNotificationRow row = (ExpandableNotificationRow) child;
                 List<ExpandableNotificationRow> children =
                         row.getNotificationChildren();
-                if (row.areChildrenExpanded() && children != null) {
+                if (row.isSummaryWithChildren() && children != null) {
                     for (ExpandableNotificationRow childRow : children) {
                         resetViewState(childRow);
                     }
