@@ -16,9 +16,6 @@
 
 package com.android.systemui.recents.misc;
 
-import static android.app.ActivityManager.DOCKED_STACK_ID;
-import static android.app.ActivityManager.INVALID_STACK_ID;
-
 import android.app.ActivityManager;
 import android.app.ActivityManagerNative;
 import android.app.ActivityOptions;
@@ -55,6 +52,7 @@ import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
 import android.os.SystemProperties;
 import android.os.UserHandle;
+import android.os.UserManager;
 import android.provider.Settings;
 import android.util.Log;
 import android.util.MutableBoolean;
@@ -66,13 +64,16 @@ import com.android.internal.app.AssistUtils;
 import com.android.systemui.Prefs;
 import com.android.systemui.R;
 import com.android.systemui.recents.Constants;
-import com.android.systemui.recents.Recents;
+import com.android.systemui.recents.RecentsImpl;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Random;
+
+import static android.app.ActivityManager.DOCKED_STACK_ID;
+import static android.app.ActivityManager.INVALID_STACK_ID;
 
 /**
  * Acts as a shim around the real system services that we need to access data from, and provides
@@ -100,6 +101,7 @@ public class SystemServicesProxy {
     IPackageManager mIpm;
     AssistUtils mAssistUtils;
     WindowManager mWm;
+    UserManager mUm;
     Display mDisplay;
     String mRecentsPackage;
     ComponentName mAssistComponent;
@@ -122,6 +124,7 @@ public class SystemServicesProxy {
         mIpm = AppGlobals.getPackageManager();
         mAssistUtils = new AssistUtils(context);
         mWm = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
+        mUm = UserManager.get(context);
         mDisplay = mWm.getDefaultDisplay();
         mRecentsPackage = context.getPackageName();
         mBgThreadHandler = new Handler(sBgThread.getLooper());
@@ -244,8 +247,8 @@ public class SystemServicesProxy {
             ComponentName topActivity = topTask.topActivity;
 
             // Check if the front most activity is recents
-            if (topActivity.getPackageName().equals(Recents.sRecentsPackage) &&
-                    topActivity.getClassName().equals(Recents.sRecentsActivity)) {
+            if (topActivity.getPackageName().equals(RecentsImpl.RECENTS_PACKAGE) &&
+                    topActivity.getClassName().equals(RecentsImpl.RECENTS_ACTIVITY)) {
                 if (isHomeTopMost != null) {
                     isHomeTopMost.value = false;
                 }
@@ -552,12 +555,27 @@ public class SystemServicesProxy {
     }
 
     /**
-     * Returns whether the foreground user is the owner.
+     * Returns whether the provided {@param userId} represents the system user.
      */
-    public boolean isForegroundUserSystem() {
-        if (mAm == null) return false;
+    public boolean isSystemUser(int userId) {
+        return userId == UserHandle.USER_SYSTEM;
+    }
 
-        return mAm.getCurrentUser() == UserHandle.USER_SYSTEM;
+    /**
+     * Returns the current user id.
+     */
+    public int getCurrentUser() {
+        if (mAm == null) return 0;
+
+        return mAm.getCurrentUser();
+    }
+
+    /**
+     * Returns the processes user id.
+     */
+    public int getProcessUser() {
+        if (mUm == null) return 0;
+        return mUm.getUserHandle();
     }
 
     /**

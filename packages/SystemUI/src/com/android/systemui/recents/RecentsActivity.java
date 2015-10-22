@@ -39,6 +39,8 @@ import com.android.internal.logging.MetricsLogger;
 import com.android.systemui.R;
 import com.android.systemui.recents.events.EventBus;
 import com.android.systemui.recents.events.activity.AppWidgetProviderChangedEvent;
+import com.android.systemui.recents.events.component.RecentsVisibilityChangedEvent;
+import com.android.systemui.recents.events.component.ScreenPinningRequestEvent;
 import com.android.systemui.recents.events.ui.DismissTaskEvent;
 import com.android.systemui.recents.events.ui.ResizeTaskEvent;
 import com.android.systemui.recents.events.ui.ShowApplicationInfoEvent;
@@ -127,20 +129,20 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
         @Override
         public void onReceive(Context context, Intent intent) {
             String action = intent.getAction();
-            if (action.equals(Recents.ACTION_HIDE_RECENTS_ACTIVITY)) {
-                if (intent.getBooleanExtra(Recents.EXTRA_TRIGGERED_FROM_ALT_TAB, false)) {
+            if (action.equals(RecentsImpl.ACTION_HIDE_RECENTS_ACTIVITY)) {
+                if (intent.getBooleanExtra(RecentsImpl.EXTRA_TRIGGERED_FROM_ALT_TAB, false)) {
                     // If we are hiding from releasing Alt-Tab, dismiss Recents to the focused app
                     dismissRecentsToFocusedTaskOrHome(false);
-                } else if (intent.getBooleanExtra(Recents.EXTRA_TRIGGERED_FROM_HOME_KEY, false)) {
+                } else if (intent.getBooleanExtra(RecentsImpl.EXTRA_TRIGGERED_FROM_HOME_KEY, false)) {
                     // Otherwise, dismiss Recents to Home
                     dismissRecentsToHome(true);
                 } else {
                     // Do nothing
                 }
-            } else if (action.equals(Recents.ACTION_TOGGLE_RECENTS_ACTIVITY)) {
+            } else if (action.equals(RecentsImpl.ACTION_TOGGLE_RECENTS_ACTIVITY)) {
                 // If we are toggling Recents, then first unfilter any filtered stacks first
                 dismissRecentsToFocusedTaskOrHome(true);
-            } else if (action.equals(Recents.ACTION_START_ENTER_ANIMATION)) {
+            } else if (action.equals(RecentsImpl.ACTION_START_ENTER_ANIMATION)) {
                 // Trigger the enter animation
                 onEnterAnimationTriggered();
                 // Notify the fallback receiver that we have successfully got the broadcast
@@ -174,7 +176,7 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
         // If AlternateRecentsComponent has preloaded a load plan, then use that to prevent
         // reconstructing the task stack
         RecentsTaskLoader loader = RecentsTaskLoader.getInstance();
-        RecentsTaskLoadPlan plan = Recents.consumeInstanceLoadPlan();
+        RecentsTaskLoadPlan plan = RecentsImpl.consumeInstanceLoadPlan();
         if (plan == null) {
             plan = loader.createLoadPlan(this);
         }
@@ -371,13 +373,15 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
         MetricsLogger.visible(this, MetricsLogger.OVERVIEW_ACTIVITY);
         RecentsTaskLoader loader = RecentsTaskLoader.getInstance();
         SystemServicesProxy ssp = loader.getSystemServicesProxy();
-        Recents.notifyVisibilityChanged(this, ssp, true);
+
+        // Notify that recents is now visible
+        EventBus.getDefault().send(new RecentsVisibilityChangedEvent(this, ssp, true));
 
         // Register the broadcast receiver to handle messages from our service
         IntentFilter filter = new IntentFilter();
-        filter.addAction(Recents.ACTION_HIDE_RECENTS_ACTIVITY);
-        filter.addAction(Recents.ACTION_TOGGLE_RECENTS_ACTIVITY);
-        filter.addAction(Recents.ACTION_START_ENTER_ANIMATION);
+        filter.addAction(RecentsImpl.ACTION_HIDE_RECENTS_ACTIVITY);
+        filter.addAction(RecentsImpl.ACTION_TOGGLE_RECENTS_ACTIVITY);
+        filter.addAction(RecentsImpl.ACTION_START_ENTER_ANIMATION);
         registerReceiver(mServiceBroadcastReceiver, filter);
 
         // Register any broadcast receivers for the task loader
@@ -415,7 +419,9 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
         MetricsLogger.hidden(this, MetricsLogger.OVERVIEW_ACTIVITY);
         RecentsTaskLoader loader = RecentsTaskLoader.getInstance();
         SystemServicesProxy ssp = loader.getSystemServicesProxy();
-        Recents.notifyVisibilityChanged(this, ssp, false);
+
+        // Notify that recents is now hidden
+        EventBus.getDefault().send(new RecentsVisibilityChangedEvent(this, ssp, false));
 
         // Notify the views that we are no longer visible
         mRecentsView.onRecentsHidden();
@@ -564,7 +570,7 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
     public void onScreenPinningRequest() {
         RecentsTaskLoader loader = RecentsTaskLoader.getInstance();
         SystemServicesProxy ssp = loader.getSystemServicesProxy();
-        Recents.startScreenPinning(this, ssp);
+        EventBus.getDefault().send(new ScreenPinningRequestEvent(this, ssp));
 
         MetricsLogger.count(this, "overview_screen_pinned", 1);
     }
