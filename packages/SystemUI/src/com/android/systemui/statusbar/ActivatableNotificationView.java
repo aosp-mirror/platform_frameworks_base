@@ -340,7 +340,7 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
             return;
         }
         mDark = dark;
-        if (!dark && fade) {
+        if (!dark && fade && !shouldHideBackground()) {
             if (mActivated) {
                 mBackgroundDimmed.setVisibility(View.VISIBLE);
                 mBackgroundNormal.setVisibility(View.VISIBLE);
@@ -428,10 +428,12 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
     private void fadeDimmedBackground() {
         mBackgroundDimmed.animate().cancel();
         mBackgroundNormal.animate().cancel();
-        if (mDimmed) {
-            mBackgroundDimmed.setVisibility(View.VISIBLE);
-        } else {
-            mBackgroundNormal.setVisibility(View.VISIBLE);
+        if (!shouldHideBackground()) {
+            if (mDimmed) {
+                mBackgroundDimmed.setVisibility(View.VISIBLE);
+            } else {
+                mBackgroundNormal.setVisibility(View.VISIBLE);
+            }
         }
         float startAlpha = mDimmed ? 1f : 0;
         float endAlpha = mDimmed ? 0 : 1f;
@@ -466,9 +468,9 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
         mBackgroundAnimator.start();
     }
 
-    private void updateBackground() {
+    protected void updateBackground() {
         cancelFadeAnimations();
-        if (mDark) {
+        if (shouldHideBackground()) {
             mBackgroundDimmed.setVisibility(View.INVISIBLE);
             mBackgroundNormal.setVisibility(View.INVISIBLE);
         } else if (mDimmed) {
@@ -480,6 +482,10 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
             mBackgroundNormal.setAlpha(1f);
             removeCallbacks(mTapTimeoutRunnable);
         }
+    }
+
+    protected boolean shouldHideBackground() {
+        return mDark;
     }
 
     private void cancelFadeAnimations() {
@@ -676,7 +682,7 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
 
     protected abstract View getContentView();
 
-    private int getBgColor() {
+    public int getBgColor() {
         if (mBgTint != 0) {
             return mBgTint;
         } else if (mShowingLegacyBackground) {
@@ -737,6 +743,10 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
         setTintColor(0);
         setShowingLegacyBackground(false);
         setBelowSpeedBump(false);
+    }
+
+    public boolean hasSameBgColor(ActivatableNotificationView otherView) {
+        return getBgColor() == otherView.getBgColor();
     }
 
     public interface OnActivatedListener {

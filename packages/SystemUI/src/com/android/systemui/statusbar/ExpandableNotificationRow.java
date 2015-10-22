@@ -16,7 +16,6 @@
 
 package com.android.systemui.statusbar;
 
-import android.app.Notification;
 import android.content.Context;
 import android.graphics.drawable.AnimatedVectorDrawable;
 import android.graphics.drawable.AnimationDrawable;
@@ -35,7 +34,6 @@ import android.widget.ImageView;
 import com.android.systemui.R;
 import com.android.systemui.classifier.FalsingManager;
 import com.android.systemui.statusbar.phone.NotificationGroupManager;
-import com.android.systemui.statusbar.phone.PhoneStatusBar;
 import com.android.systemui.statusbar.stack.NotificationChildrenContainer;
 import com.android.systemui.statusbar.notification.NotificationHeaderView;
 import com.android.systemui.statusbar.stack.StackScrollState;
@@ -104,6 +102,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
 
     private boolean mJustClicked;
     private NotificationData.Entry mEntry;
+    private boolean mShowNoBackground;
     private boolean mChildInGroup;
 
     public NotificationContentView getPrivateLayout() {
@@ -225,6 +224,13 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
      */
     public void setIsChildInGroup(boolean isChildInGroup, ExpandableNotificationRow parent) {
         mChildInGroup = BaseStatusBar.ENABLE_CHILD_NOTIFICATIONS && isChildInGroup;
+        mShowNoBackground = mChildInGroup && hasSameBgColor(parent);
+        updateBackground();
+    }
+
+    @Override
+    protected boolean shouldHideBackground() {
+        return super.shouldHideBackground() || mShowNoBackground;
     }
 
     @Override
