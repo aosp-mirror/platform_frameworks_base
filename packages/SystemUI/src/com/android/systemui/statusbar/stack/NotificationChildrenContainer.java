@@ -452,6 +452,10 @@ public class NotificationChildrenContainer extends ViewGroup {
         mChildrenExpanded = childrenExpanded;
     }
 
+    public void setNotificationParent(ExpandableNotificationRow parent) {
+        mNotificationParent = parent;
+    }
+
     public int getMaxContentHeight() {
         return getIntrinsicHeight(NUMBER_OF_CHILDREN_WHEN_CHILDREN_EXPANDED);
     }

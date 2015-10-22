@@ -21,8 +21,6 @@ import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.ObjectAnimator;
 import android.content.Context;
-import android.media.AudioAttributes;
-import android.os.Vibrator;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.HapticFeedbackConstants;
@@ -144,8 +142,8 @@ public class ExpandHelper implements Gefingerpoken {
         public float getHeight() {
             return mView.getActualHeight();
         }
-        public int getNaturalHeight(int maximum) {
-            return Math.min(maximum, mView.getMaxContentHeight());
+        public int getNaturalHeight() {
+            return mView.getMaxContentHeight();
         }
     }
 
@@ -194,7 +192,7 @@ public class ExpandHelper implements Gefingerpoken {
 
     private float clamp(float target) {
         float out = target;
-        out = out < mSmallSize ? mSmallSize : (out > mLargeSize ? mLargeSize : out);
+        out = out < mSmallSize ? mSmallSize : out;
         out = out > mNaturalHeight ? mNaturalHeight : out;
         return out;
     }
@@ -381,8 +379,8 @@ public class ExpandHelper implements Gefingerpoken {
     }
 
     private boolean isFullyExpanded(ExpandableView underFocus) {
-        return underFocus.areChildrenExpanded() || underFocus.getIntrinsicHeight()
-                - underFocus.getBottomDecorHeight() == underFocus.getMaxContentHeight();
+        return underFocus.getIntrinsicHeight() == underFocus.getMaxContentHeight()
+                && (!underFocus.isSummaryWithChildren() || underFocus.areChildrenExpanded());
     }
 
     @Override
@@ -452,9 +450,7 @@ public class ExpandHelper implements Gefingerpoken {
                     mScaler.setHeight(newHeight);
                     mLastMotionY = ev.getRawY();
                     if (isFinished) {
-                        mCallback.setUserExpandedChild(mResizedView, expanded);
                         mCallback.expansionStateChanged(false);
-                        return false;
                     } else {
                         mCallback.expansionStateChanged(true);
                     }
@@ -509,9 +505,11 @@ public class ExpandHelper implements Gefingerpoken {
         mScaler.setView(v);
         mOldHeight = mScaler.getHeight();
         mCurrentHeight = mOldHeight;
-        if (mCallback.canChildBeExpanded(v)) {
+        boolean canBeExpanded = mCallback.canChildBeExpanded(v);
+        if (canBeExpanded) {
             if (DEBUG) Log.d(TAG, "working on an expandable child");
-            mNaturalHeight = mScaler.getNaturalHeight(mLargeSize);
+            mNaturalHeight = mScaler.getNaturalHeight();
+            mSmallSize = v.getMinHeight();
         } else {
             if (DEBUG) Log.d(TAG, "working on a non-expandable child");
             mNaturalHeight = mOldHeight;
@@ -527,19 +525,22 @@ public class ExpandHelper implements Gefingerpoken {
         if (DEBUG) Log.d(TAG, "scale in finishing on view: " + mResizedView);
 
         float currentHeight = mScaler.getHeight();
-        float targetHeight = mSmallSize;
         float h = mScaler.getHeight();
         final boolean wasClosed = (mOldHeight == mSmallSize);
+        boolean nowExpanded;
+        int naturalHeight = mScaler.getNaturalHeight();
         if (wasClosed) {
-            targetHeight = (force || currentHeight > mSmallSize) ? mNaturalHeight : mSmallSize;
+            nowExpanded = (force || currentHeight > mOldHeight);
         } else {
-            targetHeight = (force || currentHeight < mNaturalHeight) ? mSmallSize : mNaturalHeight;
+            nowExpanded = !force && currentHeight >= mOldHeight;
         }
+        nowExpanded |= mNaturalHeight == mSmallSize;
         if (mScaleAnimation.isRunning()) {
             mScaleAnimation.cancel();
         }
-        mCallback.setUserExpandedChild(mResizedView, targetHeight == mNaturalHeight);
+        mCallback.setUserExpandedChild(mResizedView, nowExpanded);
         mCallback.expansionStateChanged(false);
+        float targetHeight = nowExpanded ? naturalHeight : mSmallSize;
         if (targetHeight != currentHeight) {
             mScaleAnimation.setFloatValues(targetHeight);
             mScaleAnimation.setupStartValues();

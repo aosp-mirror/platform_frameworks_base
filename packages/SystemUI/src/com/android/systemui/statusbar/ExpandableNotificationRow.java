@@ -104,6 +104,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
     private NotificationData.Entry mEntry;
     private boolean mShowNoBackground;
     private boolean mChildInGroup;
+    private ExpandableNotificationRow mNotificationParent;
 
     public NotificationContentView getPrivateLayout() {
         return mPrivateLayout;
@@ -220,12 +221,17 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
         return mChildInGroup;
     }
 
+    public ExpandableNotificationRow getNotificationParent() {
+        return mNotificationParent;
+    }
+
     /**
      * @param isChildInGroup Is this notification now in a group
      * @param parent the new parent notification
      */
     public void setIsChildInGroup(boolean isChildInGroup, ExpandableNotificationRow parent) {
         mChildInGroup = BaseStatusBar.ENABLE_CHILD_NOTIFICATIONS && isChildInGroup;
+        mNotificationParent = isChildInGroup ? parent : null;
         mShowNoBackground = mChildInGroup && hasSameBgColor(parent);
         mPrivateLayout.setIsChildInGroup(mShowNoBackground);
         updateBackground();
@@ -472,6 +478,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
             @Override
             public void onInflate(ViewStub stub, View inflated) {
                 mChildrenContainer = (NotificationChildrenContainer) inflated;
+                mChildrenContainer.setNotificationParent(ExpandableNotificationRow.this);
             }
         });
         mVetoButton = findViewById(R.id.veto);
@@ -520,6 +527,9 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
     }
 
     public boolean isExpandable() {
+        if (mIsSummaryWithChildren && !mShowingPublic) {
+            return !mChildrenExpanded;
+        }
         return mExpandable;
     }
 
@@ -544,7 +554,21 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
      * @param userExpanded whether the user wants this notification to be expanded
      */
     public void setUserExpanded(boolean userExpanded) {
+        setUserExpanded(userExpanded, false /* allowChildExpansion */);
+    }
+
+    /**
+     * Set this notification to be expanded by the user
+     *
+     * @param userExpanded whether the user wants this notification to be expanded
+     * @param allowChildExpansion whether a call to this method allows expanding children
+     */
+    public void setUserExpanded(boolean userExpanded, boolean allowChildExpansion) {
         mFalsingManager.setNotificationExpanded();
+        if (mIsSummaryWithChildren && !mShowingPublic && allowChildExpansion) {
+            mGroupManager.setGroupExpanded(mStatusBarNotification, userExpanded);
+            return;
+        }
         if (userExpanded && !mExpandable) return;
         final boolean wasExpanded = isExpanded();
         mHasUserChangedExpansion = true;
