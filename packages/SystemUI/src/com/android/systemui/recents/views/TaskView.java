@@ -759,7 +759,7 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks,
     }
 
     @Override
-    public void onMultiStackDebugTaskStackIdChanged() {
+    public void onTaskStackIdChanged() {
         mHeaderView.rebindToTask(mTask);
     }
 

@@ -34,6 +34,7 @@ import com.android.systemui.recents.events.EventBus;
 import com.android.systemui.recents.events.component.RecentsVisibilityChangedEvent;
 import com.android.systemui.recents.events.component.ScreenPinningRequestEvent;
 import com.android.systemui.recents.misc.SystemServicesProxy;
+import com.android.systemui.recents.model.RecentsTaskLoader;
 
 import java.util.ArrayList;
 
@@ -51,7 +52,9 @@ public class Recents extends SystemUI
     public final static int EVENT_BUS_PRIORITY = 1;
     public final static int BIND_TO_SYSTEM_USER_RETRY_DELAY = 5000;
 
-    private SystemServicesProxy mSystemServicesProxy;
+    private static SystemServicesProxy sSystemServicesProxy;
+    private static RecentsTaskLoader sTaskLoader;
+
     private Handler mHandler;
     private RecentsImpl mImpl;
 
@@ -118,20 +121,30 @@ public class Recents extends SystemUI
         return mSystemUserCallbacks;
     }
 
+    public static RecentsTaskLoader getTaskLoader() {
+        return sTaskLoader;
+    }
+
+    public static SystemServicesProxy getSystemServices() {
+        return sSystemServicesProxy;
+    }
+
     @Override
     public void start() {
-        mSystemServicesProxy = new SystemServicesProxy(mContext);
+        sSystemServicesProxy = new SystemServicesProxy(mContext);
+        sTaskLoader = new RecentsTaskLoader(mContext);
         mHandler = new Handler();
         mImpl = new RecentsImpl(mContext);
 
         // Register with the event bus
         EventBus.getDefault().register(this, EVENT_BUS_PRIORITY);
+        EventBus.getDefault().register(sTaskLoader, EVENT_BUS_PRIORITY);
 
         // Due to the fact that RecentsActivity is per-user, we need to establish and interface for
         // the system user's Recents component to pass events (like show/hide/toggleRecents) to the
         // secondary user, and vice versa (like visibility change, screen pinning).
-        final int processUser = mSystemServicesProxy.getProcessUser();
-        if (mSystemServicesProxy.isSystemUser(processUser)) {
+        final int processUser = sSystemServicesProxy.getProcessUser();
+        if (sSystemServicesProxy.isSystemUser(processUser)) {
             // For the system user, initialize an instance of the interface that we can pass to the
             // secondary user
             mSystemUserCallbacks = new RecentsSystemUser(mContext, mImpl);
@@ -153,8 +166,8 @@ public class Recents extends SystemUI
      */
     @Override
     public void showRecents(boolean triggeredFromAltTab, View statusBarView) {
-        int currentUser = mSystemServicesProxy.getCurrentUser();
-        if (mSystemServicesProxy.isSystemUser(currentUser)) {
+        int currentUser = sSystemServicesProxy.getCurrentUser();
+        if (sSystemServicesProxy.isSystemUser(currentUser)) {
             mImpl.showRecents(triggeredFromAltTab);
         } else {
             if (mSystemUserCallbacks != null) {
@@ -178,8 +191,8 @@ public class Recents extends SystemUI
      */
     @Override
     public void hideRecents(boolean triggeredFromAltTab, boolean triggeredFromHomeKey) {
-        int currentUser = mSystemServicesProxy.getCurrentUser();
-        if (mSystemServicesProxy.isSystemUser(currentUser)) {
+        int currentUser = sSystemServicesProxy.getCurrentUser();
+        if (sSystemServicesProxy.isSystemUser(currentUser)) {
             mImpl.hideRecents(triggeredFromAltTab, triggeredFromHomeKey);
         } else {
             if (mSystemUserCallbacks != null) {
@@ -203,8 +216,8 @@ public class Recents extends SystemUI
      */
     @Override
     public void toggleRecents(Display display, int layoutDirection, View statusBarView) {
-        int currentUser = mSystemServicesProxy.getCurrentUser();
-        if (mSystemServicesProxy.isSystemUser(currentUser)) {
+        int currentUser = sSystemServicesProxy.getCurrentUser();
+        if (sSystemServicesProxy.isSystemUser(currentUser)) {
             mImpl.toggleRecents();
         } else {
             if (mSystemUserCallbacks != null) {
@@ -228,8 +241,8 @@ public class Recents extends SystemUI
      */
     @Override
     public void preloadRecents() {
-        int currentUser = mSystemServicesProxy.getCurrentUser();
-        if (mSystemServicesProxy.isSystemUser(currentUser)) {
+        int currentUser = sSystemServicesProxy.getCurrentUser();
+        if (sSystemServicesProxy.isSystemUser(currentUser)) {
             mImpl.preloadRecents();
         } else {
             if (mSystemUserCallbacks != null) {
@@ -250,8 +263,8 @@ public class Recents extends SystemUI
 
     @Override
     public void cancelPreloadingRecents() {
-        int currentUser = mSystemServicesProxy.getCurrentUser();
-        if (mSystemServicesProxy.isSystemUser(currentUser)) {
+        int currentUser = sSystemServicesProxy.getCurrentUser();
+        if (sSystemServicesProxy.isSystemUser(currentUser)) {
             mImpl.cancelPreloadingRecents();
         } else {
             if (mSystemUserCallbacks != null) {
@@ -284,8 +297,8 @@ public class Recents extends SystemUI
      * Updates on configuration change.
      */
     public void onConfigurationChanged(Configuration newConfig) {
-        int currentUser = mSystemServicesProxy.getCurrentUser();
-        if (mSystemServicesProxy.isSystemUser(currentUser)) {
+        int currentUser = sSystemServicesProxy.getCurrentUser();
+        if (sSystemServicesProxy.isSystemUser(currentUser)) {
             mImpl.onConfigurationChanged();
         } else {
             if (mSystemUserCallbacks != null) {
@@ -350,7 +363,7 @@ public class Recents extends SystemUI
      * Attempts to register with the system user.
      */
     private void registerWithSystemUser() {
-        final int processUser = mSystemServicesProxy.getProcessUser();
+        final int processUser = sSystemServicesProxy.getProcessUser();
         postToSystemUser(new Runnable() {
             @Override
             public void run() {

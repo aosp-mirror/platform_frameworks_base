@@ -97,8 +97,8 @@ public class RecentsImpl extends IRecentsNonSystemUserCallbacks.Stub
             /*
             RecentsConfiguration config = RecentsConfiguration.getInstance();
             if (config.svelteLevel == RecentsConfiguration.SVELTE_NONE) {
-                RecentsTaskLoader loader = RecentsTaskLoader.getInstance();
-                SystemServicesProxy ssp = loader.getSystemServicesProxy();
+                RecentsTaskLoader loader = Recents.getTaskLoader();
+                SystemServicesProxy ssp = Recents.getSystemServices();
                 ActivityManager.RunningTaskInfo runningTaskInfo = ssp.getTopMostTask();
 
                 // Load the next task only if we aren't svelte
@@ -121,10 +121,9 @@ public class RecentsImpl extends IRecentsNonSystemUserCallbacks.Stub
         }
     }
 
-    static RecentsTaskLoadPlan sInstanceLoadPlan;
+    private static RecentsTaskLoadPlan sInstanceLoadPlan;
 
     Context mContext;
-    SystemServicesProxy mSystemServicesProxy;
     Handler mHandler;
     TaskStackListenerImpl mTaskStackListener;
     RecentsAppWidgetHost mAppWidgetHost;
@@ -158,19 +157,18 @@ public class RecentsImpl extends IRecentsNonSystemUserCallbacks.Stub
 
     public RecentsImpl(Context context) {
         mContext = context;
-        mSystemServicesProxy = new SystemServicesProxy(mContext);
         mHandler = new Handler();
         mAppWidgetHost = new RecentsAppWidgetHost(mContext, Constants.Values.App.AppWidgetHostId);
         Resources res = mContext.getResources();
-        RecentsTaskLoader.initialize(mContext);
         LayoutInflater inflater = LayoutInflater.from(mContext);
 
         // Register the task stack listener
         mTaskStackListener = new TaskStackListenerImpl(mHandler);
-        mSystemServicesProxy.registerTaskStackListener(mTaskStackListener);
+        SystemServicesProxy ssp = Recents.getSystemServices();
+        ssp.registerTaskStackListener(mTaskStackListener);
 
         // Initialize the static configuration resources
-        mConfig = RecentsConfiguration.initialize(mContext, mSystemServicesProxy);
+        mConfig = RecentsConfiguration.initialize(mContext, ssp);
         mStatusBarHeight = res.getDimensionPixelSize(com.android.internal.R.dimen.status_bar_height);
         mNavBarHeight = res.getDimensionPixelSize(com.android.internal.R.dimen.navigation_bar_height);
         mNavBarWidth = res.getDimensionPixelSize(com.android.internal.R.dimen.navigation_bar_width);
@@ -182,7 +180,7 @@ public class RecentsImpl extends IRecentsNonSystemUserCallbacks.Stub
 
         // When we start, preload the data associated with the previous recent tasks.
         // We can use a new plan since the caches will be the same.
-        RecentsTaskLoader loader = RecentsTaskLoader.getInstance();
+        RecentsTaskLoader loader = Recents.getTaskLoader();
         RecentsTaskLoadPlan plan = loader.createLoadPlan(mContext);
         loader.preloadTasks(plan, true /* isTopTaskHome */);
         RecentsTaskLoadPlan.Options launchOpts = new RecentsTaskLoadPlan.Options();
@@ -236,9 +234,10 @@ public class RecentsImpl extends IRecentsNonSystemUserCallbacks.Stub
 
         try {
             // Check if the top task is in the home stack, and start the recents activity
-            ActivityManager.RunningTaskInfo topTask = mSystemServicesProxy.getTopMostTask();
+            SystemServicesProxy ssp = Recents.getSystemServices();
+            ActivityManager.RunningTaskInfo topTask = ssp.getTopMostTask();
             MutableBoolean isTopTaskHome = new MutableBoolean(true);
-            if (topTask == null || !mSystemServicesProxy.isRecentsTopMost(topTask, isTopTaskHome)) {
+            if (topTask == null || !ssp.isRecentsTopMost(topTask, isTopTaskHome)) {
                 startRecentsActivity(topTask, isTopTaskHome.value);
             }
         } catch (ActivityNotFoundException e) {
@@ -251,7 +250,7 @@ public class RecentsImpl extends IRecentsNonSystemUserCallbacks.Stub
         if (mBootCompleted) {
             // Defer to the activity to handle hiding recents, if it handles it, then it must still
             // be visible
-            EventBus.getDefault().send(new HideRecentsEvent(triggeredFromAltTab,
+            EventBus.getDefault().post(new HideRecentsEvent(triggeredFromAltTab,
                     triggeredFromHomeKey));
         }
     }
@@ -270,11 +269,12 @@ public class RecentsImpl extends IRecentsNonSystemUserCallbacks.Stub
 
             // If Recents is the front most activity, then we should just communicate with it
             // directly to launch the first task or dismiss itself
-            ActivityManager.RunningTaskInfo topTask = mSystemServicesProxy.getTopMostTask();
+            SystemServicesProxy ssp = Recents.getSystemServices();
+            ActivityManager.RunningTaskInfo topTask = ssp.getTopMostTask();
             MutableBoolean isTopTaskHome = new MutableBoolean(true);
-            if (topTask != null && mSystemServicesProxy.isRecentsTopMost(topTask, isTopTaskHome)) {
+            if (topTask != null && ssp.isRecentsTopMost(topTask, isTopTaskHome)) {
                 // Notify recents to toggle itself
-                EventBus.getDefault().send(new ToggleRecentsEvent());
+                EventBus.getDefault().post(new ToggleRecentsEvent());
                 mLastToggleTime = SystemClock.elapsedRealtime();
                 return;
             } else {
@@ -290,11 +290,12 @@ public class RecentsImpl extends IRecentsNonSystemUserCallbacks.Stub
     public void preloadRecents() {
         // Preload only the raw task list into a new load plan (which will be consumed by the
         // RecentsActivity) only if there is a task to animate to.
-        ActivityManager.RunningTaskInfo topTask = mSystemServicesProxy.getTopMostTask();
+        SystemServicesProxy ssp = Recents.getSystemServices();
+        ActivityManager.RunningTaskInfo topTask = ssp.getTopMostTask();
         MutableBoolean topTaskHome = new MutableBoolean(true);
-        RecentsTaskLoader loader = RecentsTaskLoader.getInstance();
+        RecentsTaskLoader loader = Recents.getTaskLoader();
         sInstanceLoadPlan = loader.createLoadPlan(mContext);
-        if (topTask != null && !mSystemServicesProxy.isRecentsTopMost(topTask, topTaskHome)) {
+        if (topTask != null && !ssp.isRecentsTopMost(topTask, topTaskHome)) {
             sInstanceLoadPlan.preloadRawTasks(topTaskHome.value);
             loader.preloadTasks(sInstanceLoadPlan, topTaskHome.value);
             TaskStack stack = sInstanceLoadPlan.getTaskStack();
@@ -311,8 +312,9 @@ public class RecentsImpl extends IRecentsNonSystemUserCallbacks.Stub
 
     public void showRelativeAffiliatedTask(boolean showNextTask) {
         // Return early if there is no focused stack
-        int focusedStackId = mSystemServicesProxy.getFocusedStack();
-        RecentsTaskLoader loader = RecentsTaskLoader.getInstance();
+        SystemServicesProxy ssp = Recents.getSystemServices();
+        int focusedStackId = ssp.getFocusedStack();
+        RecentsTaskLoader loader = Recents.getTaskLoader();
         RecentsTaskLoadPlan plan = loader.createLoadPlan(mContext);
         loader.preloadTasks(plan, true /* isTopTaskHome */);
         TaskStack focusedStack = plan.getTaskStack();
@@ -320,11 +322,11 @@ public class RecentsImpl extends IRecentsNonSystemUserCallbacks.Stub
         // Return early if there are no tasks in the focused stack
         if (focusedStack == null || focusedStack.getTaskCount() == 0) return;
 
-        ActivityManager.RunningTaskInfo runningTask = mSystemServicesProxy.getTopMostTask();
+        ActivityManager.RunningTaskInfo runningTask = ssp.getTopMostTask();
         // Return early if there is no running task (can't determine affiliated tasks in this case)
         if (runningTask == null) return;
         // Return early if the running task is in the home stack (optimization)
-        if (mSystemServicesProxy.isInHomeStack(runningTask.id)) return;
+        if (ssp.isInHomeStack(runningTask.id)) return;
 
         // Find the task in the recents list
         ArrayList<Task> tasks = focusedStack.getTasks();
@@ -360,11 +362,11 @@ public class RecentsImpl extends IRecentsNonSystemUserCallbacks.Stub
         if (toTask == null) {
             if (numAffiliatedTasks > 1) {
                 if (showNextTask) {
-                    mSystemServicesProxy.startInPlaceAnimationOnFrontMostApplication(
+                    ssp.startInPlaceAnimationOnFrontMostApplication(
                             ActivityOptions.makeCustomInPlaceAnimation(mContext,
                                     R.anim.recents_launch_next_affiliated_task_bounce));
                 } else {
-                    mSystemServicesProxy.startInPlaceAnimationOnFrontMostApplication(
+                    ssp.startInPlaceAnimationOnFrontMostApplication(
                             ActivityOptions.makeCustomInPlaceAnimation(mContext,
                                     R.anim.recents_launch_prev_affiliated_task_bounce));
                 }
@@ -378,10 +380,9 @@ public class RecentsImpl extends IRecentsNonSystemUserCallbacks.Stub
         // Launch the task
         if (toTask.isActive) {
             // Bring an active task to the foreground
-            mSystemServicesProxy.moveTaskToFront(toTask.key.id, launchOpts);
+            ssp.moveTaskToFront(toTask.key.id, launchOpts);
         } else {
-            mSystemServicesProxy.startActivityFromRecents(mContext, toTask.key.id,
-                    toTask.activityLabel, launchOpts);
+            ssp.startActivityFromRecents(mContext, toTask.key.id, toTask.activityLabel, launchOpts);
         }
     }
 
@@ -414,18 +415,18 @@ public class RecentsImpl extends IRecentsNonSystemUserCallbacks.Stub
      *                               is not already bound (can be expensive)
      */
     private void reloadHeaderBarLayout(boolean tryAndBindSearchWidget) {
-        Rect windowRect = mSystemServicesProxy.getWindowRect();
+        SystemServicesProxy ssp = Recents.getSystemServices();
+        Rect windowRect = ssp.getWindowRect();
 
         // Update the configuration for the current state
-        mConfig.update(mContext, mSystemServicesProxy, mSystemServicesProxy.getWindowRect());
+        mConfig.update(mContext, ssp, ssp.getWindowRect());
 
         if (tryAndBindSearchWidget) {
             // Try and pre-emptively bind the search widget on startup to ensure that we
             // have the right thumbnail bounds to animate to.
             // Note: We have to reload the widget id before we get the task stack bounds below
-            if (mSystemServicesProxy.getOrBindSearchAppWidget(mContext, mAppWidgetHost) != null) {
-                mConfig.getSearchBarBounds(windowRect,
-                        mStatusBarHeight, mSearchBarBounds);
+            if (ssp.getOrBindSearchAppWidget(mContext, mAppWidgetHost) != null) {
+                mConfig.getSearchBarBounds(windowRect, mStatusBarHeight, mSearchBarBounds);
             }
         }
         Rect systemInsets = new Rect(0, mStatusBarHeight,
@@ -463,7 +464,7 @@ public class RecentsImpl extends IRecentsNonSystemUserCallbacks.Stub
         launchOpts.runningTaskId = task.id;
         launchOpts.loadThumbnails = false;
         launchOpts.onlyLoadForCache = true;
-        RecentsTaskLoader.getInstance().loadTasks(mContext, sInstanceLoadPlan, launchOpts);
+        Recents.getTaskLoader().loadTasks(mContext, sInstanceLoadPlan, launchOpts);
     }
 
     /**
@@ -500,7 +501,6 @@ public class RecentsImpl extends IRecentsNonSystemUserCallbacks.Stub
      * Creates the activity options for a unknown state->recents transition.
      */
     private ActivityOptions getUnknownTransitionActivityOptions() {
-        mStartAnimationTriggered = false;
         return ActivityOptions.makeCustomAnimation(mContext,
                 R.anim.recents_from_unknown_enter,
                 R.anim.recents_from_unknown_exit,
@@ -511,7 +511,6 @@ public class RecentsImpl extends IRecentsNonSystemUserCallbacks.Stub
      * Creates the activity options for a home->recents transition.
      */
     private ActivityOptions getHomeTransitionActivityOptions(boolean fromSearchHome) {
-        mStartAnimationTriggered = false;
         if (fromSearchHome) {
             return ActivityOptions.makeCustomAnimation(mContext,
                     R.anim.recents_from_search_launcher_enter,
@@ -547,7 +546,6 @@ public class RecentsImpl extends IRecentsNonSystemUserCallbacks.Stub
             thumbnail = drawThumbnailTransitionBitmap(toTask, toTransform);
         }
         if (thumbnail != null) {
-            mStartAnimationTriggered = false;
             return ActivityOptions.makeThumbnailAspectScaleDownAnimation(mDummyStackView,
                     thumbnail, toTaskRect.left, toTaskRect.top, toTaskRect.width(),
                     toTaskRect.height(), mHandler, this);
@@ -621,7 +619,8 @@ public class RecentsImpl extends IRecentsNonSystemUserCallbacks.Stub
      */
     private void startRecentsActivity(ActivityManager.RunningTaskInfo topTask,
             boolean isTopTaskHome) {
-        RecentsTaskLoader loader = RecentsTaskLoader.getInstance();
+        SystemServicesProxy ssp = Recents.getSystemServices();
+        RecentsTaskLoader loader = Recents.getTaskLoader();
 
         // Update the header bar if necessary
         reloadHeaderBarLayout(false /* tryAndBindSearchWidget */);
@@ -660,9 +659,9 @@ public class RecentsImpl extends IRecentsNonSystemUserCallbacks.Stub
             // If there is no thumbnail transition, but is launching from home into recents, then
             // use a quick home transition and do the animation from home
             if (hasRecentTasks) {
-                String homeActivityPackage = mSystemServicesProxy.getHomeActivityPackageName();
-                String searchWidgetPackage =
-                        Prefs.getString(mContext, Prefs.Key.SEARCH_APP_WIDGET_PACKAGE, null);
+                String homeActivityPackage = ssp.getHomeActivityPackageName();
+                String searchWidgetPackage = Prefs.getString(mContext,
+                        Prefs.Key.SEARCH_APP_WIDGET_PACKAGE, null);
 
                 // Determine whether we are coming from a search owned home activity
                 boolean fromSearchHome = (homeActivityPackage != null) &&
@@ -686,6 +685,8 @@ public class RecentsImpl extends IRecentsNonSystemUserCallbacks.Stub
     private void startRecentsActivity(ActivityManager.RunningTaskInfo topTask,
               ActivityOptions opts, boolean fromHome, boolean fromSearchHome, boolean fromThumbnail,
               TaskStackViewLayoutAlgorithm.VisibilityReport vr) {
+        mStartAnimationTriggered = false;
+
         // Update the configuration based on the launch options
         RecentsActivityLaunchState launchState = mConfig.getLaunchState();
         launchState.launchedFromHome = fromSearchHome || fromHome;
@@ -718,7 +719,7 @@ public class RecentsImpl extends IRecentsNonSystemUserCallbacks.Stub
         // Notify recents to start the enter animation
         if (!mStartAnimationTriggered) {
             mStartAnimationTriggered = true;
-            EventBus.getDefault().send(new EnterRecentsWindowAnimationStartedEvent());
+            EventBus.getDefault().post(new EnterRecentsWindowAnimationStartedEvent());
         }
     }
 }

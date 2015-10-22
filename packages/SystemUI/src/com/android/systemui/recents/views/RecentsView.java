@@ -42,6 +42,7 @@ import android.widget.FrameLayout;
 import com.android.internal.logging.MetricsLogger;
 import com.android.systemui.R;
 import com.android.systemui.recents.Constants;
+import com.android.systemui.recents.Recents;
 import com.android.systemui.recents.RecentsActivity;
 import com.android.systemui.recents.RecentsAppWidgetHostView;
 import com.android.systemui.recents.RecentsConfiguration;
@@ -53,7 +54,6 @@ import com.android.systemui.recents.events.ui.dragndrop.DragDockStateChangedEven
 import com.android.systemui.recents.events.ui.dragndrop.DragEndEvent;
 import com.android.systemui.recents.events.ui.dragndrop.DragStartEvent;
 import com.android.systemui.recents.misc.SystemServicesProxy;
-import com.android.systemui.recents.model.RecentsTaskLoader;
 import com.android.systemui.recents.model.Task;
 import com.android.systemui.recents.model.TaskStack;
 
@@ -404,14 +404,6 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
         return super.verifyDrawable(who);
     }
 
-    /** Notifies each task view of the user interaction. */
-    public void onUserInteraction() {
-        // Get the first stack view
-        if (mTaskStackView != null) {
-            mTaskStackView.onUserInteraction();
-        }
-    }
-
     /** Focuses the next task in the first stack view */
     public void focusNextTask(boolean forward) {
         // Get the first stack view
@@ -637,8 +629,7 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
         }
 
         // Compute the thumbnail to scale up from
-        final SystemServicesProxy ssp =
-                RecentsTaskLoader.getInstance().getSystemServicesProxy();
+        final SystemServicesProxy ssp = Recents.getSystemServices();
         ActivityOptions opts = null;
         ActivityOptions.OnAnimationStartedListener animStartedListener = null;
         if (task.thumbnail != null && task.thumbnail.getWidth() > 0 &&
@@ -652,8 +643,6 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
                             postDelayed(new Runnable() {
                                 @Override
                                 public void run() {
-                                    RecentsTaskLoader loader = RecentsTaskLoader.getInstance();
-                                    SystemServicesProxy ssp = loader.getSystemServicesProxy();
                                     EventBus.getDefault().send(new ScreenPinningRequestEvent(
                                             getContext(), ssp));
                                 }
@@ -687,8 +676,6 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
                     if (ssp.startActivityFromRecents(getContext(), task.key.id,
                             task.activityLabel, launchOpts)) {
                         if (screenPinningRequested) {
-                            RecentsTaskLoader loader = RecentsTaskLoader.getInstance();
-                            SystemServicesProxy ssp = loader.getSystemServicesProxy();
                             EventBus.getDefault().send(new ScreenPinningRequestEvent(
                                     getContext(), ssp));
                         }
@@ -746,14 +733,6 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
 
         // Keep track of all-deletions
         MetricsLogger.count(getContext(), "overview_task_all_dismissed", 1);
-    }
-
-    /** Final callback after Recents is finally hidden. */
-    public void onRecentsHidden() {
-        // Notify each task stack view
-        if (mTaskStackView != null) {
-            mTaskStackView.onRecentsHidden();
-        }
     }
 
     @Override
@@ -820,7 +799,7 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
 
                 // Dock the new task if we are hovering over a valid dock state
                 if (event.dockState != TaskStack.DockState.NONE) {
-                    SystemServicesProxy ssp = RecentsTaskLoader.getInstance().getSystemServicesProxy();
+                    SystemServicesProxy ssp = Recents.getSystemServices();
                     ssp.setTaskResizeable(event.task.key.id);
                     ssp.dockTask(event.task.key.id, event.dockState.createMode);
                     launchTask(event.task, null, INVALID_STACK_ID);

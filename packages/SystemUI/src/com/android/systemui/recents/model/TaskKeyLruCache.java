@@ -17,47 +17,52 @@
 package com.android.systemui.recents.model;
 
 import android.util.LruCache;
-
-import java.util.HashMap;
+import android.util.SparseArray;
 
 /**
- * An LRU cache that internally support querying the keys as well as values.  We use this to keep
- * track of the task metadata to determine when to invalidate the cache when tasks have been
- * updated. Generally, this cache will return the last known cache value for the requested task
- * key.
+ * A mapping of {@link Task.TaskKey} to value, with additional LRU functionality where the least
+ * recently referenced key/values will be evicted as more values than the given cache size are
+ * inserted.
+ *
+ * In addition, this also allows the caller to invalidate cached values for keys that have since
+ * changed.
  */
-public class KeyStoreLruCache<V> {
-    // We keep a set of keys that are associated with the LRU cache, so that we can find out
-    // information about the Task that was previously in the cache.
-    HashMap<Integer, Task.TaskKey> mTaskKeys = new HashMap<Integer, Task.TaskKey>();
-    // The cache implementation, mapping task id -> value
-    LruCache<Integer, V> mCache;
+public class TaskKeyLruCache<V> {
 
-    public KeyStoreLruCache(int cacheSize) {
+    private final SparseArray<Task.TaskKey> mKeys = new SparseArray<>();
+    private final LruCache<Integer, V> mCache;
+
+    public TaskKeyLruCache(int cacheSize) {
         mCache = new LruCache<Integer, V>(cacheSize) {
 
             @Override
             protected void entryRemoved(boolean evicted, Integer taskId, V oldV, V newV) {
-                mTaskKeys.remove(taskId);
+                mKeys.remove(taskId);
             }
         };
     }
 
-    /** Gets a specific entry in the cache. */
+    /**
+     * Gets a specific entry in the cache with the specified key, regardless of whether the cached
+     * value is valid or not.
+     */
     final V get(Task.TaskKey key) {
         return mCache.get(key.id);
     }
 
     /**
-     * Returns the value only if the Task has not updated since the last time it was in the cache.
+     * Returns the value only if the key is valid (has not been updated since the last time it was
+     * in the cache)
      */
     final V getAndInvalidateIfModified(Task.TaskKey key) {
-        Task.TaskKey lastKey = mTaskKeys.get(key.id);
-        if (lastKey != null && (lastKey.lastActiveTime < key.lastActiveTime)) {
-            // The task has updated (been made active since the last time it was put into the
-            // LRU cache) so invalidate that item in the cache
-            remove(key);
-            return null;
+        Task.TaskKey lastKey = mKeys.get(key.id);
+        if (lastKey != null) {
+            if ((lastKey.stackId != key.stackId) || (lastKey.lastActiveTime < key.lastActiveTime)) {
+                // The task has updated (been made active since the last time it was put into the
+                // LRU cache) or the stack id for the task has changed, invalidate that cache item
+                remove(key);
+                return null;
+            }
         }
         // Either the task does not exist in the cache, or the last active time is the same as
         // the key specified, so return what is in the cache
@@ -66,25 +71,20 @@ public class KeyStoreLruCache<V> {
 
     /** Puts an entry in the cache for a specific key. */
     final void put(Task.TaskKey key, V value) {
+        mKeys.put(key.id, key);
         mCache.put(key.id, value);
-        mTaskKeys.put(key.id, key);
     }
 
     /** Removes a cache entry for a specific key. */
     final void remove(Task.TaskKey key) {
+        mKeys.remove(key.id);
         mCache.remove(key.id);
-        mTaskKeys.remove(key.id);
     }
 
     /** Removes all the entries in the cache. */
     final void evictAll() {
         mCache.evictAll();
-        mTaskKeys.clear();
-    }
-
-    /** Returns the size of the cache. */
-    final int size() {
-        return mCache.size();
+        mKeys.clear();
     }
 
     /** Trims the cache to a specific size */

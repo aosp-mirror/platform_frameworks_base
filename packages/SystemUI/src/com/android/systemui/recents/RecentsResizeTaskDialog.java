@@ -30,7 +30,6 @@ import android.widget.Button;
 import android.widget.Toast;
 import com.android.systemui.R;
 import com.android.systemui.recents.misc.SystemServicesProxy;
-import com.android.systemui.recents.model.RecentsTaskLoader;
 import com.android.systemui.recents.model.Task;
 import com.android.systemui.recents.views.RecentsView;
 
@@ -80,7 +79,6 @@ public class RecentsResizeTaskDialog extends DialogFragment {
     private View mResizeTaskDialogContent;
     private RecentsActivity mRecentsActivity;
     private RecentsView mRecentsView;
-    private SystemServicesProxy mSsp;
     private Rect[] mBounds = {new Rect(), new Rect(), new Rect(), new Rect()};
     private Task[] mTasks = {null, null, null, null};
 
@@ -93,7 +91,6 @@ public class RecentsResizeTaskDialog extends DialogFragment {
     public RecentsResizeTaskDialog(FragmentManager mgr, RecentsActivity activity) {
         mFragmentManager = mgr;
         mRecentsActivity = activity;
-        mSsp = RecentsTaskLoader.getInstance().getSystemServicesProxy();
     }
 
     /** Shows the resize-task dialog. */
@@ -144,7 +141,8 @@ public class RecentsResizeTaskDialog extends DialogFragment {
 
     /** Helper function to place window(s) on the display according to an arrangement request. */
     private void placeTasks(int arrangement) {
-        Rect rect = mSsp.getDisplayRect();
+        SystemServicesProxy ssp = Recents.getSystemServices();
+        Rect rect = ssp.getDisplayRect();
         for (int i = 0; i < mBounds.length; ++i) {
             mBounds[i].set(rect);
             if (i != 0) {
@@ -240,7 +238,7 @@ public class RecentsResizeTaskDialog extends DialogFragment {
         // current app configuration.
         for (int i = additionalTasks; i >= 0; --i) {
             if (mTasks[i] != null) {
-                mSsp.setTaskResizeable(mTasks[i].key.id);
+                ssp.setTaskResizeable(mTasks[i].key.id);
             }
         }
 
@@ -278,8 +276,9 @@ public class RecentsResizeTaskDialog extends DialogFragment {
 
         if (mTasks[0].key.stackId != DOCKED_STACK_ID) {
             int taskId = mTasks[0].key.id;
-            mSsp.setTaskResizeable(taskId);
-            mSsp.dockTask(taskId, createMode);
+            SystemServicesProxy ssp = Recents.getSystemServices();
+            ssp.setTaskResizeable(taskId);
+            ssp.dockTask(taskId, createMode);
             mRecentsView.launchTask(mTasks[0], null, DOCKED_STACK_ID);
         } else {
             Toast.makeText(getContext(), "Already docked", Toast.LENGTH_SHORT);

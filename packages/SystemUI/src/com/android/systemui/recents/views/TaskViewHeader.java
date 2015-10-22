@@ -48,13 +48,12 @@ import android.widget.TextView;
 import com.android.internal.logging.MetricsLogger;
 import com.android.systemui.R;
 import com.android.systemui.recents.Constants;
-import com.android.systemui.recents.RecentsConfiguration;
+import com.android.systemui.recents.Recents;
 import com.android.systemui.recents.events.EventBus;
 import com.android.systemui.recents.events.ui.ResizeTaskEvent;
 import com.android.systemui.recents.events.ui.ShowApplicationInfoEvent;
 import com.android.systemui.recents.misc.SystemServicesProxy;
 import com.android.systemui.recents.misc.Utilities;
-import com.android.systemui.recents.model.RecentsTaskLoader;
 import com.android.systemui.recents.model.Task;
 
 
@@ -62,8 +61,6 @@ import com.android.systemui.recents.model.Task;
 public class TaskViewHeader extends FrameLayout
         implements View.OnClickListener, View.OnLongClickListener {
 
-    RecentsConfiguration mConfig;
-    private SystemServicesProxy mSsp;
     Task mTask;
 
     // Header views
@@ -111,8 +108,6 @@ public class TaskViewHeader extends FrameLayout
 
     public TaskViewHeader(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
-        mConfig = RecentsConfiguration.getInstance();
-        mSsp = RecentsTaskLoader.getInstance().getSystemServicesProxy();
         setWillNotDraw(false);
         setClipToOutline(true);
         setOutlineProvider(new ViewOutlineProvider() {
@@ -266,8 +261,9 @@ public class TaskViewHeader extends FrameLayout
 
     /** Updates the resize task bar button. */
     void updateResizeTaskBarIcon(Task t) {
-        Rect display = mSsp.getWindowRect();
-        Rect taskRect = mSsp.getTaskBounds(t.key.id);
+        SystemServicesProxy ssp = Recents.getSystemServices();
+        Rect display = ssp.getWindowRect();
+        Rect taskRect = ssp.getTaskBounds(t.key.id);
         int resId = R.drawable.star;
         if (display.equals(taskRect) || taskRect.isEmpty()) {
             resId = R.drawable.vector_drawable_place_fullscreen;
