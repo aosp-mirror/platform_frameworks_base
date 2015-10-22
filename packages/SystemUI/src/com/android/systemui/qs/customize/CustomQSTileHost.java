@@ -49,7 +49,7 @@ public class CustomQSTileHost extends QSTileHost {
     }
 
     @Override
-    protected QSTile<?> createTile(String tileSpec) {
+    public QSTile<?> createTile(String tileSpec) {
         QSTile<?> tile = super.createTile(tileSpec);
         tile.setTileSpec(tileSpec);
         return tile;
@@ -111,6 +111,11 @@ public class CustomQSTileHost extends QSTileHost {
     @Override
     protected List<String> loadTileSpecs(String tileList) {
         return mTiles;
+    }
+
+    public void addTile(String spec) {
+        mTiles.add(spec);
+        super.onTuningChanged(TILES_SETTING, null);
     }
 
     public void replace(String oldTile, String newTile) {

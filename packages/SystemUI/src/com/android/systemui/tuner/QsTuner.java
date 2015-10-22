@@ -211,7 +211,7 @@ public class QsTuner extends Fragment implements Callback {
         }
 
         @Override
-        protected QSTile<?> createTile(String tileSpec) {
+        public QSTile<?> createTile(String tileSpec) {
             return new DraggableTile(this, tileSpec);
         }
 

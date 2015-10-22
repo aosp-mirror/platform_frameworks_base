@@ -43,7 +43,7 @@ public class DropButton extends TextView implements OnDragListener {
     }
 
     private void setHovering(boolean hovering) {
-        setAlpha(hovering ? .5f : 1);
+        setAlpha(hovering ? .3f : 1);
     }
 
     @Override

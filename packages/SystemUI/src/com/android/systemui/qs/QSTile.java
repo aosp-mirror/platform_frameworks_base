@@ -137,7 +137,7 @@ public abstract class QSTile<TState extends State> implements Listenable {
         mHandler.obtainMessage(H.SHOW_DETAIL, show ? 1 : 0, 0).sendToTarget();
     }
 
-    protected final void refreshState() {
+    public final void refreshState() {
         refreshState(null);
     }
 
@@ -357,6 +357,19 @@ public abstract class QSTile<TState extends State> implements Listenable {
         @Override
         public int hashCode() {
             return Icon.class.hashCode();
+        }
+    }
+
+    public static class DrawableIcon extends Icon {
+        protected final Drawable mDrawable;
+
+        public DrawableIcon(Drawable drawable) {
+            mDrawable = drawable;
+        }
+
+        @Override
+        public Drawable getDrawable(Context context) {
+            return mDrawable;
         }
     }
 
