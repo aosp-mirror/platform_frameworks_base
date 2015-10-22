@@ -137,6 +137,8 @@ void EglManager::initExtensions() {
     StringCollection extensions(eglQueryString(mEglDisplay, EGL_EXTENSIONS));
     EglExtensions.bufferAge = extensions.has("EGL_EXT_buffer_age");
     EglExtensions.setDamage = extensions.has("EGL_KHR_partial_update");
+    LOG_ALWAYS_FATAL_IF(!extensions.has("EGL_KHR_swap_buffers_with_damage"),
+            "Missing required extension EGL_KHR_swap_buffers_with_damage");
 }
 
 bool EglManager::hasEglContext() {
