@@ -220,6 +220,16 @@ bool ResourceTable::addResourceAllowMangled(const ResourceNameRef& name,
                            kValidNameMangledChars, diag);
 }
 
+bool ResourceTable::addResourceAllowMangled(const ResourceNameRef& name,
+                                            const ResourceId id,
+                                            const ConfigDescription& config,
+                                            const Source& source,
+                                            std::unique_ptr<Value> value,
+                                            IDiagnostics* diag) {
+    return addResourceImpl(name, id, config, source, std::move(value),
+                           kValidNameMangledChars, diag);
+}
+
 bool ResourceTable::addResourceImpl(const ResourceNameRef& name, const ResourceId resId,
                                     const ConfigDescription& config, const Source& source,
                                     std::unique_ptr<Value> value, const char16_t* validChars,
@@ -305,19 +315,25 @@ bool ResourceTable::addResourceImpl(const ResourceNameRef& name, const ResourceI
     return true;
 }
 
-bool ResourceTable::markPublic(const ResourceNameRef& name, const ResourceId resId,
-                               const Source& source, IDiagnostics* diag) {
-    return markPublicImpl(name, resId, source, kValidNameChars, diag);
+bool ResourceTable::setSymbolState(const ResourceNameRef& name, const ResourceId resId,
+                                   const Source& source, SymbolState state, IDiagnostics* diag) {
+    return setSymbolStateImpl(name, resId, source, state, kValidNameChars, diag);
 }
 
-bool ResourceTable::markPublicAllowMangled(const ResourceNameRef& name, const ResourceId resId,
-                                           const Source& source, IDiagnostics* diag) {
-    return markPublicImpl(name, resId, source, kValidNameMangledChars, diag);
+bool ResourceTable::setSymbolStateAllowMangled(const ResourceNameRef& name, const ResourceId resId,
+                                               const Source& source, SymbolState state,
+                                               IDiagnostics* diag) {
+    return setSymbolStateImpl(name, resId, source, state, kValidNameMangledChars, diag);
 }
 
-bool ResourceTable::markPublicImpl(const ResourceNameRef& name, const ResourceId resId,
-                                   const Source& source, const char16_t* validChars,
-                                   IDiagnostics* diag) {
+bool ResourceTable::setSymbolStateImpl(const ResourceNameRef& name, const ResourceId resId,
+                                       const Source& source, SymbolState state,
+                                       const char16_t* validChars, IDiagnostics* diag) {
+    if (state == SymbolState::kUndefined) {
+        // Nothing to do.
+        return true;
+    }
+
     auto badCharIter = util::findNonAlphaNumericAndNotInSet(name.entry, validChars);
     if (badCharIter != name.entry.end()) {
         diag->error(DiagMessage(source)
@@ -371,9 +387,18 @@ bool ResourceTable::markPublicImpl(const ResourceNameRef& name, const ResourceId
         return false;
     }
 
-    type->publicStatus.isPublic = true;
-    entry->publicStatus.isPublic = true;
-    entry->publicStatus.source = source;
+    // Only mark the type state as public, it doesn't care about being private.
+    if (state == SymbolState::kPublic) {
+        type->symbolStatus.state = SymbolState::kPublic;
+    }
+
+    // Downgrading to a private symbol from a public one is not allowed.
+    if (entry->symbolStatus.state != SymbolState::kPublic) {
+        if (entry->symbolStatus.state != state) {
+            entry->symbolStatus.state = state;
+            entry->symbolStatus.source = source;
+        }
+    }
 
     if (resId.isValid()) {
         package->id = resId.packageId();

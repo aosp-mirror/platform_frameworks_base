@@ -77,6 +77,18 @@ static std::u16string transform(const StringPiece16& symbol) {
     return output;
 }
 
+bool JavaClassGenerator::skipSymbol(SymbolState state) {
+    switch (mOptions.types) {
+    case JavaClassGeneratorOptions::SymbolTypes::kAll:
+        return false;
+    case JavaClassGeneratorOptions::SymbolTypes::kPublicPrivate:
+        return state == SymbolState::kUndefined;
+    case JavaClassGeneratorOptions::SymbolTypes::kPublic:
+        return state != SymbolState::kPublic;
+    }
+    return true;
+}
+
 void JavaClassGenerator::generateStyleable(const StringPiece16& packageNameToGenerate,
                                            const std::u16string& entryName,
                                            const Styleable* styleable,
@@ -121,7 +133,7 @@ void JavaClassGenerator::generateStyleable(const StringPiece16& packageNameToGen
         // We may reference IDs from other packages, so prefix the entry name with
         // the package.
         const ResourceNameRef& itemName = sortedAttributes[i].second;
-        if (packageNameToGenerate != itemName.package) {
+        if (!itemName.package.empty() && packageNameToGenerate != itemName.package) {
             *out << "_" << transform(itemName.package);
         }
         *out << "_" << transform(itemName.entry) << " = " << i << ";\n";
@@ -137,7 +149,11 @@ bool JavaClassGenerator::generateType(const StringPiece16& packageNameToGenerate
     std::u16string unmangledPackage;
     std::u16string unmangledName;
     for (const auto& entry : type->entries) {
-        ResourceId id = { package->id.value(), type->id.value(), entry->id.value() };
+        if (skipSymbol(entry->symbolStatus.state)) {
+            continue;
+        }
+
+        ResourceId id(package->id.value(), type->id.value(), entry->id.value());
         assert(id.isValid());
 
         unmangledName = entry->name;
@@ -157,7 +173,7 @@ bool JavaClassGenerator::generateType(const StringPiece16& packageNameToGenerate
         }
 
         if (!isValidSymbol(unmangledName)) {
-            ResourceNameRef resourceName = { packageNameToGenerate, type->type, unmangledName };
+            ResourceNameRef resourceName(packageNameToGenerate, type->type, unmangledName);
             std::stringstream err;
             err << "invalid symbol name '" << resourceName << "'";
             mError = err.str();
@@ -177,13 +193,24 @@ bool JavaClassGenerator::generateType(const StringPiece16& packageNameToGenerate
 }
 
 bool JavaClassGenerator::generate(const StringPiece16& packageNameToGenerate, std::ostream* out) {
-    generateHeader(packageNameToGenerate, out);
+    return generate(packageNameToGenerate, packageNameToGenerate, out);
+}
+
+bool JavaClassGenerator::generate(const StringPiece16& packageNameToGenerate,
+                                  const StringPiece16& outPackageName, std::ostream* out) {
+    generateHeader(outPackageName, out);
 
     *out << "public final class R {\n";
 
     for (const auto& package : mTable->packages) {
         for (const auto& type : package->types) {
-            *out << "    public static final class " << type->type << " {\n";
+            StringPiece16 typeStr;
+            if (type->type == ResourceType::kAttrPrivate) {
+                typeStr = toString(ResourceType::kAttr);
+            } else {
+                typeStr = toString(type->type);
+            }
+            *out << "    public static final class " << typeStr << " {\n";
             if (!generateType(packageNameToGenerate, package.get(), type.get(), out)) {
                 return false;
             }
@@ -195,5 +222,7 @@ bool JavaClassGenerator::generate(const StringPiece16& packageNameToGenerate, st
     out->flush();
     return true;
 }
+
+
 
 } // namespace aapt

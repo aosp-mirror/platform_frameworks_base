@@ -124,17 +124,18 @@ void Debug::printTable(ResourceTable* table) {
             }
 
             for (const ResourceEntry* entry : sortedEntries) {
-                ResourceId id = {
-                        package->id ? package->id.value() : uint8_t(0),
-                        type->id ? type->id.value() : uint8_t(0),
-                        entry->id ? entry->id.value() : uint16_t(0)
-                };
+                ResourceId id(package->id ? package->id.value() : uint8_t(0),
+                              type->id ? type->id.value() : uint8_t(0),
+                              entry->id ? entry->id.value() : uint16_t(0));
+                ResourceName name(package->name, type->type, entry->name);
 
-                ResourceName name = { package->name, type->type, entry->name };
                 std::cout << "    spec resource " << id << " " << name;
-                if (entry->publicStatus.isPublic) {
-                    std::cout << " PUBLIC";
+                switch (entry->symbolStatus.state) {
+                case SymbolState::kPublic: std::cout << " PUBLIC"; break;
+                case SymbolState::kPrivate: std::cout << " _PRIVATE_"; break;
+                default: break;
                 }
+
                 std::cout << std::endl;
 
                 PrintVisitor visitor;

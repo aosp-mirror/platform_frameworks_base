@@ -429,7 +429,19 @@ bool BinaryResourceParser::parsePublic(const ResourceTablePackage* package,
             source.line = util::deviceToHost32(entry->sourceLine);
         }
 
-        if (!mTable->markPublicAllowMangled(name, resId, source, mContext->getDiagnostics())) {
+        SymbolState state = SymbolState::kUndefined;
+        switch (util::deviceToHost16(entry->state)) {
+        case Public_entry::kPrivate:
+            state = SymbolState::kPrivate;
+            break;
+
+        case Public_entry::kPublic:
+            state = SymbolState::kPublic;
+            break;
+        }
+
+        if (!mTable->setSymbolStateAllowMangled(name, resId, source, state,
+                                                mContext->getDiagnostics())) {
             return false;
         }
 
@@ -564,8 +576,9 @@ bool BinaryResourceParser::parseType(const ResourceTablePackage* package,
         }
 
         if ((entry->flags & ResTable_entry::FLAG_PUBLIC) != 0) {
-            if (!mTable->markPublicAllowMangled(name, resId, mSource.withLine(0),
-                                                mContext->getDiagnostics())) {
+            if (!mTable->setSymbolStateAllowMangled(name, resId, mSource.withLine(0),
+                                                    SymbolState::kPublic,
+                                                    mContext->getDiagnostics())) {
                 return false;
             }
         }

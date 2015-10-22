@@ -52,7 +52,7 @@ struct LinkOptions {
     bool staticLib = false;
     bool verbose = false;
     bool outputToDirectory = false;
-    Maybe<std::string> privateSymbols;
+    Maybe<std::u16string> privateSymbols;
 };
 
 struct LinkContext : public IAaptContext {
@@ -328,13 +328,14 @@ struct LinkCommand {
         return true;
     }
 
-    bool writeJavaFile(ResourceTable* table, const StringPiece16& package) {
+    bool writeJavaFile(ResourceTable* table, const StringPiece16& packageNameToGenerate,
+                       const StringPiece16& outPackage, JavaClassGeneratorOptions javaOptions) {
         if (!mOptions.generateJavaClassPath) {
             return true;
         }
 
         std::string outPath = mOptions.generateJavaClassPath.value();
-        file::appendPath(&outPath, file::packageToPath(util::utf16ToUtf8(package)));
+        file::appendPath(&outPath, file::packageToPath(util::utf16ToUtf8(outPackage)));
         file::mkdirs(outPath);
         file::appendPath(&outPath, "R.java");
 
@@ -344,13 +345,8 @@ struct LinkCommand {
             return false;
         }
 
-        JavaClassGeneratorOptions javaOptions;
-        if (mOptions.staticLib) {
-            javaOptions.useFinal = false;
-        }
-
         JavaClassGenerator generator(table, javaOptions);
-        if (!generator.generate(mContext.getCompilationPackage(), &fout)) {
+        if (!generator.generate(packageNameToGenerate, outPackage, &fout)) {
             mContext.getDiagnostics()->error(DiagMessage(outPath) << generator.getError());
             return false;
         }
@@ -652,8 +648,34 @@ struct LinkCommand {
         }
 
         if (mOptions.generateJavaClassPath) {
-            if (!writeJavaFile(&mergedTable, mContext.getCompilationPackage())) {
-                return 1;
+            JavaClassGeneratorOptions options;
+            if (mOptions.staticLib) {
+                options.useFinal = false;
+            }
+
+            if (mOptions.privateSymbols) {
+                // If we defined a private symbols package, we only emit Public symbols
+                // to the original package, and private and public symbols to the private package.
+
+                options.types = JavaClassGeneratorOptions::SymbolTypes::kPublic;
+                if (!writeJavaFile(&mergedTable, mContext.getCompilationPackage(),
+                                   mContext.getCompilationPackage(), options)) {
+                    return 1;
+                }
+
+                options.types = JavaClassGeneratorOptions::SymbolTypes::kPublicPrivate;
+                if (!writeJavaFile(&mergedTable, mContext.getCompilationPackage(),
+                                   mOptions.privateSymbols.value(), options)) {
+                    return 1;
+                }
+
+            } else {
+                // Emit Everything.
+
+                if (!writeJavaFile(&mergedTable, mContext.getCompilationPackage(),
+                                   mContext.getCompilationPackage(), options)) {
+                    return 1;
+                }
             }
         }
 
@@ -680,6 +702,7 @@ struct LinkCommand {
 
 int link(const std::vector<StringPiece>& args) {
     LinkOptions options;
+    Maybe<std::string> privateSymbolsPackage;
     Flags flags = Flags()
             .requiredFlag("-o", "Output path", &options.outputPath)
             .requiredFlag("--manifest", "Path to the Android manifest to build",
@@ -698,11 +721,15 @@ int link(const std::vector<StringPiece>& args) {
             .optionalSwitch("--static-lib", "Generate a static Android library", &options.staticLib)
             .optionalFlag("--private-symbols", "Package name to use when generating R.java for "
                           "private symbols. If not specified, public and private symbols will "
-                          "use the application's package name", &options.privateSymbols)
+                          "use the application's package name", &privateSymbolsPackage)
             .optionalSwitch("-v", "Enables verbose logging", &options.verbose);
 
     if (!flags.parse("aapt2 link", args, &std::cerr)) {
         return 1;
+    }
+
+    if (privateSymbolsPackage) {
+        options.privateSymbols = util::utf8ToUtf16(privateSymbolsPackage.value());
     }
 
     LinkCommand cmd = { options };

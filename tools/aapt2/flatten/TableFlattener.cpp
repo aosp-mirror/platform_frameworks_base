@@ -300,7 +300,7 @@ private:
 
         T* result = buffer->nextBlock<T>();
         ResTable_entry* outEntry = (ResTable_entry*)(result);
-        if (entry->entry->publicStatus.isPublic) {
+        if (entry->entry->symbolStatus.state == SymbolState::kPublic) {
             outEntry->flags |= ResTable_entry::FLAG_PUBLIC;
         }
 
@@ -455,7 +455,7 @@ private:
 
             // Populate the config masks for this entry.
 
-            if (entry->publicStatus.isPublic) {
+            if (entry->symbolStatus.state == SymbolState::kPublic) {
                 configMasks[entry->id.value()] |=
                         util::hostToDevice32(ResTable_typeSpec::SPEC_PUBLIC);
             }
@@ -480,17 +480,31 @@ private:
         publicHeader->typeId = type->id.value();
 
         for (ResourceEntry* entry : *sortedEntries) {
-            if (entry->publicStatus.isPublic) {
+            if (entry->symbolStatus.state != SymbolState::kUndefined) {
                 // Write the public status of this entry.
                 Public_entry* publicEntry = publicWriter.nextBlock<Public_entry>();
                 publicEntry->entryId = util::hostToDevice32(entry->id.value());
                 publicEntry->key.index = util::hostToDevice32(mKeyPool.makeRef(
                         entry->name).getIndex());
                 publicEntry->source.index = util::hostToDevice32(mSourcePool->makeRef(
-                        util::utf8ToUtf16(entry->publicStatus.source.path)).getIndex());
-                if (entry->publicStatus.source.line) {
+                        util::utf8ToUtf16(entry->symbolStatus.source.path)).getIndex());
+                if (entry->symbolStatus.source.line) {
                     publicEntry->sourceLine = util::hostToDevice32(
-                            entry->publicStatus.source.line.value());
+                            entry->symbolStatus.source.line.value());
+                }
+
+                switch (entry->symbolStatus.state) {
+                case SymbolState::kPrivate:
+                    publicEntry->state = Public_entry::kPrivate;
+                    break;
+
+                case SymbolState::kPublic:
+                    publicEntry->state = Public_entry::kPublic;
+                    break;
+
+                default:
+                    assert(false && "should not serialize any other state");
+                    break;
                 }
 
                 // Don't hostToDevice until the last step.

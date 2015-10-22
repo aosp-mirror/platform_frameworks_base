@@ -87,8 +87,9 @@ public:
 
     ResourceTableBuilder& addValue(const StringPiece16& name, ResourceId id,
                                    const ConfigDescription& config, std::unique_ptr<Value> value) {
-        bool result = mTable->addResource(parseNameOrDie(name), id, config, {}, std::move(value),
-                                          &mDiagnostics);
+        ResourceName resName = parseNameOrDie(name);
+        bool result = mTable->addResourceAllowMangled(resName, id, config, {}, std::move(value),
+                                                      &mDiagnostics);
         assert(result);
         return *this;
     }

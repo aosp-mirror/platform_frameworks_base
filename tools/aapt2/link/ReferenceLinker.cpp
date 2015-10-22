@@ -249,10 +249,13 @@ bool ReferenceLinker::consume(IAaptContext* context, ResourceTable* table) {
     for (auto& package : table->packages) {
         for (auto& type : package->types) {
             for (auto& entry : type->entries) {
-                // A public entry with no values will not be encoded properly.
-                if (entry->publicStatus.isPublic && entry->values.empty()) {
-                    context->getDiagnostics()->error(DiagMessage(entry->publicStatus.source)
-                                                     << "No value for public resource");
+                // Symbol state information may be lost if there is no value for the resource.
+                if (entry->symbolStatus.state != SymbolState::kUndefined && entry->values.empty()) {
+                    context->getDiagnostics()->error(
+                            DiagMessage(entry->symbolStatus.source)
+                            << "no definition for declared symbol '"
+                            << ResourceNameRef(package->name, type->type, entry->name)
+                            << "'");
                     error = true;
                 }
 
