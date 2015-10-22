@@ -112,13 +112,34 @@ class WindowSurfacePlacer {
     private int mPreferredModeId = 0;
 
     private boolean mTraversalScheduled;
+    private int mDeferDepth = 0;
 
     public WindowSurfacePlacer(WindowManagerService service) {
         mService = service;
         mWallpaperControllerLocked = mService.mWallpaperControllerLocked;
     }
 
+    /**
+     * See {@link WindowManagerService#deferSurfaceLayout()}
+     */
+    void deferLayout() {
+        mDeferDepth++;
+    }
+
+    /**
+     * See {@link WindowManagerService#continueSurfaceLayout()}
+     */
+    void continueLayout() {
+        mDeferDepth--;
+        if (mDeferDepth <= 0) {
+            performSurfacePlacement();
+        }
+    }
+
     final void performSurfacePlacement() {
+        if (mDeferDepth > 0) {
+            return;
+        }
         int loopCount = 6;
         do {
             mTraversalScheduled = false;

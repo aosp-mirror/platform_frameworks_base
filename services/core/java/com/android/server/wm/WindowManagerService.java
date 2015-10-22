@@ -4679,7 +4679,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 throw new IllegalArgumentException("resizeStack: stackId " + stackId
                         + " not found.");
             }
-            if (stack.setBounds(bounds, configs, taskBounds)) {
+            if (stack.setBounds(bounds, configs, taskBounds) && stack.isVisibleLocked()) {
                 stack.resizeWindows();
                 stack.getDisplayContent().layoutNeeded = true;
                 mWindowPlacerLocked.performSurfacePlacement();
@@ -4729,6 +4729,26 @@ public class WindowManagerService extends IWindowManager.Stub
                 task.getDisplayContent().layoutNeeded = true;
                 mWindowPlacerLocked.performSurfacePlacement();
             }
+        }
+    }
+
+    /**
+     * Starts deferring layout passes. Useful when doing multiple changes but to optimize
+     * performance, only one layout pass should be done. This can be called multiple times, and
+     * layouting will be resumed once the last caller has called {@link #continueSurfaceLayout}
+     */
+    public void deferSurfaceLayout() {
+        synchronized (mWindowMap) {
+            mWindowPlacerLocked.deferLayout();
+        }
+    }
+
+    /**
+     * Resumes layout passes after deferring them. See {@link #deferSurfaceLayout()}
+     */
+    public void continueSurfaceLayout() {
+        synchronized (mWindowMap) {
+            mWindowPlacerLocked.continueLayout();
         }
     }
 
