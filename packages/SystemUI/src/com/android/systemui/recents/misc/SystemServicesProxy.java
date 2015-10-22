@@ -266,17 +266,6 @@ public class SystemServicesProxy {
         return null;
     }
 
-    /** Allow a task to resize. */
-    public void setTaskResizeable(int taskId) {
-        if (mIam == null) return;
-
-        try {
-            mIam.setTaskResizeable(taskId, true);
-        } catch (RemoteException e) {
-            e.printStackTrace();
-        }
-    }
-
     /**
      * Resizes the given task to the new bounds.
      */
@@ -746,8 +735,6 @@ public class SystemServicesProxy {
             ActivityOptions options) {
         if (mIam != null) {
             try {
-                // TODO: Remove when compatibility story is figured out.
-                setTaskResizeable(taskId);
                 mIam.startActivityFromRecents(
                         taskId, INVALID_STACK_ID, options == null ? null : options.toBundle());
                 return true;

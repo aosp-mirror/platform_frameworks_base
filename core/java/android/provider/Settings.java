@@ -6277,6 +6277,15 @@ public final class Settings {
         */
        public static final String FORCE_ALLOW_ON_EXTERNAL = "force_allow_on_external";
 
+        /**
+         * Whether any activity can be resized. When this is true, any
+         * activity, regardless of manifest values, can be resized for multi-window.
+         * (0 = false, 1 = true)
+         * @hide
+         */
+        public static final String DEVELOPMENT_FORCE_RESIZABLE_ACTIVITIES
+                = "force_resizable_activities";
+
        /**
         * Whether user has enabled development settings.
         */
