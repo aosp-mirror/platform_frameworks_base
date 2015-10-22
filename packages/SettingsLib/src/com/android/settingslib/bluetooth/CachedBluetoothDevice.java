@@ -846,7 +846,8 @@ public final class CachedBluetoothDevice implements Comparable<CachedBluetoothDe
 
                 case BluetoothProfile.STATE_DISCONNECTED:
                     if (profile.isProfileReady()) {
-                        if (profile instanceof A2dpProfile) {
+                        if ((profile instanceof A2dpProfile)||
+                            (profile instanceof A2dpSinkProfile)){
                             a2dpNotConnected = true;
                         } else if (profile instanceof HeadsetProfile) {
                             headsetNotConnected = true;
