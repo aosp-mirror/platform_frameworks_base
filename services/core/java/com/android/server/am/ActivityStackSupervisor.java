@@ -296,10 +296,6 @@ public final class ActivityStackSupervisor implements DisplayListener {
     /** Set when we have taken too long waiting to go to sleep. */
     boolean mSleepTimeout = false;
 
-    /** Indicates if we are running on a Leanback-only (TV) device. Only initialized after
-     * setWindowManager is called. **/
-    private boolean mLeanbackOnlyDevice;
-
     /**
      * We don't want to allow the device to go to sleep while in the process
      * of launching an activity.  This is primarily to allow alarm intent
@@ -447,9 +443,6 @@ public final class ActivityStackSupervisor implements DisplayListener {
             mHomeStack = mFocusedStack = mLastFocusedStack = getStack(HOME_STACK_ID);
 
             mInputManagerInternal = LocalServices.getService(InputManagerInternal.class);
-
-            // Initialize this here, now that we can get a valid reference to PackageManager.
-            mLeanbackOnlyDevice = isLeanbackOnlyDevice();
         }
     }
 
@@ -1781,70 +1774,68 @@ public final class ActivityStackSupervisor implements DisplayListener {
     ActivityStack computeStackFocus(ActivityRecord r, boolean newTask, Rect bounds) {
         final TaskRecord task = r.task;
 
-        // On leanback only devices we should keep all activities in the same stack.
-        if (!mLeanbackOnlyDevice &&
-                (r.isApplicationActivity() || (task != null && task.isApplicationTask()))) {
+        if (!(r.isApplicationActivity() || (task != null && task.isApplicationTask()))) {
+            return mHomeStack;
+        }
 
-            ActivityStack stack;
+        ActivityStack stack;
 
-            if (task != null && task.stack != null) {
-                stack = task.stack;
-                if (stack.isOnHomeDisplay()) {
-                    if (mFocusedStack != stack) {
-                        if (DEBUG_FOCUS || DEBUG_STACK) Slog.d(TAG_FOCUS,
-                                "computeStackFocus: Setting " + "focused stack to r=" + r
-                                + " task=" + task);
-                    } else {
-                        if (DEBUG_FOCUS || DEBUG_STACK) Slog.d(TAG_FOCUS,
-                            "computeStackFocus: Focused stack already=" + mFocusedStack);
-                    }
-                }
-                return stack;
-            }
-
-            final ActivityContainer container = r.mInitialActivityContainer;
-            if (container != null) {
-                // The first time put it on the desired stack, after this put on task stack.
-                r.mInitialActivityContainer = null;
-                return container.mStack;
-            }
-
-            // The fullscreen stack can contain any task regardless of if the task is resizeable
-            // or not. So, we let the task go in the fullscreen task if it is the focus stack.
-            // If the freeform stack has focus, and the activity to be launched is resizeable,
-            // we can also put it in the focused stack.
-            final boolean canUseFocusedStack =
-                    mFocusedStack.mStackId == FULLSCREEN_WORKSPACE_STACK_ID
-                    || mFocusedStack.mStackId == FREEFORM_WORKSPACE_STACK_ID && r.info.resizeable;
-            if (canUseFocusedStack
-                    && (!newTask || mFocusedStack.mActivityContainer.isEligibleForNewTasks())) {
-                if (DEBUG_FOCUS || DEBUG_STACK) Slog.d(TAG_FOCUS,
-                        "computeStackFocus: Have a focused stack=" + mFocusedStack);
-                return mFocusedStack;
-            }
-
-            // We first try to put the task in the first dynamic stack.
-            final ArrayList<ActivityStack> homeDisplayStacks = mHomeStack.mStacks;
-            for (int stackNdx = homeDisplayStacks.size() - 1; stackNdx >= 0; --stackNdx) {
-                stack = homeDisplayStacks.get(stackNdx);
-                final boolean isDynamicStack = stack.mStackId >= FIRST_DYNAMIC_STACK_ID;
-                if (isDynamicStack) {
+        if (task != null && task.stack != null) {
+            stack = task.stack;
+            if (stack.isOnHomeDisplay()) {
+                if (mFocusedStack != stack) {
                     if (DEBUG_FOCUS || DEBUG_STACK) Slog.d(TAG_FOCUS,
-                            "computeStackFocus: Setting focused stack=" + stack);
-                    return stack;
+                            "computeStackFocus: Setting " + "focused stack to r=" + r
+                            + " task=" + task);
+                } else {
+                    if (DEBUG_FOCUS || DEBUG_STACK) Slog.d(TAG_FOCUS,
+                        "computeStackFocus: Focused stack already=" + mFocusedStack);
                 }
             }
-
-            // If there is no suitable dynamic stack then we figure out which static stack to use.
-            final int stackId = task != null ? task.getLaunchStackId() :
-                        bounds != null ? FREEFORM_WORKSPACE_STACK_ID :
-                                         FULLSCREEN_WORKSPACE_STACK_ID;
-            stack = getStack(stackId, CREATE_IF_NEEDED, ON_TOP);
-            if (DEBUG_FOCUS || DEBUG_STACK) Slog.d(TAG_FOCUS, "computeStackFocus: New stack r="
-                    + r + " stackId=" + stack.mStackId);
             return stack;
         }
-        return mHomeStack;
+
+        final ActivityContainer container = r.mInitialActivityContainer;
+        if (container != null) {
+            // The first time put it on the desired stack, after this put on task stack.
+            r.mInitialActivityContainer = null;
+            return container.mStack;
+        }
+
+        // The fullscreen stack can contain any task regardless of if the task is resizeable
+        // or not. So, we let the task go in the fullscreen task if it is the focus stack.
+        // If the freeform stack has focus, and the activity to be launched is resizeable,
+        // we can also put it in the focused stack.
+        final boolean canUseFocusedStack =
+                mFocusedStack.mStackId == FULLSCREEN_WORKSPACE_STACK_ID
+                || mFocusedStack.mStackId == FREEFORM_WORKSPACE_STACK_ID && r.info.resizeable;
+        if (canUseFocusedStack
+                && (!newTask || mFocusedStack.mActivityContainer.isEligibleForNewTasks())) {
+            if (DEBUG_FOCUS || DEBUG_STACK) Slog.d(TAG_FOCUS,
+                    "computeStackFocus: Have a focused stack=" + mFocusedStack);
+            return mFocusedStack;
+        }
+
+        // We first try to put the task in the first dynamic stack.
+        final ArrayList<ActivityStack> homeDisplayStacks = mHomeStack.mStacks;
+        for (int stackNdx = homeDisplayStacks.size() - 1; stackNdx >= 0; --stackNdx) {
+            stack = homeDisplayStacks.get(stackNdx);
+            final boolean isDynamicStack = stack.mStackId >= FIRST_DYNAMIC_STACK_ID;
+            if (isDynamicStack) {
+                if (DEBUG_FOCUS || DEBUG_STACK) Slog.d(TAG_FOCUS,
+                        "computeStackFocus: Setting focused stack=" + stack);
+                return stack;
+            }
+        }
+
+        // If there is no suitable dynamic stack then we figure out which static stack to use.
+        final int stackId = task != null ? task.getLaunchStackId() :
+                    bounds != null ? FREEFORM_WORKSPACE_STACK_ID :
+                                     FULLSCREEN_WORKSPACE_STACK_ID;
+        stack = getStack(stackId, CREATE_IF_NEEDED, ON_TOP);
+        if (DEBUG_FOCUS || DEBUG_STACK) Slog.d(TAG_FOCUS, "computeStackFocus: New stack r="
+                + r + " stackId=" + stack.mStackId);
+        return stack;
     }
 
     boolean setFocusedStack(ActivityRecord r, String reason) {
@@ -3199,7 +3190,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
      */
     private boolean restoreRecentTaskLocked(TaskRecord task, int stackId) {
         if (stackId == INVALID_STACK_ID) {
-            stackId = mLeanbackOnlyDevice ? mHomeStack.mStackId : task.getLaunchStackId();
+            stackId = task.getLaunchStackId();
         }
         if (task.stack != null) {
             // Task has already been restored once. See if we need to do anything more
@@ -4926,18 +4917,6 @@ public final class ActivityStackSupervisor implements DisplayListener {
         public String toString() {
             return "VirtualActivityDisplay={" + mDisplayId + "}";
         }
-    }
-
-    private boolean isLeanbackOnlyDevice() {
-        boolean onLeanbackOnly = false;
-        try {
-            onLeanbackOnly = AppGlobals.getPackageManager().hasSystemFeature(
-                    PackageManager.FEATURE_LEANBACK_ONLY);
-        } catch (RemoteException e) {
-            // noop
-        }
-
-        return onLeanbackOnly;
     }
 
     /**
