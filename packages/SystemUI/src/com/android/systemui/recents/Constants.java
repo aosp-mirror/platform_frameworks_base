@@ -38,7 +38,7 @@ public class Constants {
             // Enables the filtering of tasks according to their grouping
             public static final boolean EnableTaskFiltering = false;
             // Enables dismiss-all
-            public static final boolean EnableDismissAll = false;
+            public static final boolean EnableDismissAll = true;
             // Enables debug mode
             public static final boolean EnableDebugMode = false;
             // Enables the search bar layout
