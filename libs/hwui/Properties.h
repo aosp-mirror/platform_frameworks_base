@@ -142,13 +142,6 @@ enum DebugLevel {
 #define PROPERTY_SKIP_EMPTY_DAMAGE "debug.hwui.skip_empty_damage"
 
 /**
- * Setting this property will enable or disable usage of EGL_KHR_swap_buffers_with_damage
- * See: https://www.khronos.org/registry/egl/extensions/KHR/EGL_KHR_swap_buffers_with_damage.txt
- * Default is "true"
- */
-#define PROPERTY_SWAP_WITH_DAMAGE "debug.hwui.swap_with_damage"
-
-/**
  * Controls whether or not HWUI will use the EGL_EXT_buffer_age extension
  * to do partial invalidates. Setting this to "false" will fall back to
  * using BUFFER_PRESERVED instead
@@ -271,8 +264,6 @@ public:
     static bool showDirtyRegions;
     // TODO: Remove after stabilization period
     static bool skipEmptyFrames;
-    // TODO: Remove after stabilization period
-    static bool swapBuffersWithDamage;
     static bool useBufferAge;
     static bool enablePartialUpdates;
 

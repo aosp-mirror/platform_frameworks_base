@@ -29,7 +29,6 @@ bool Properties::debugLayersUpdates = false;
 bool Properties::debugOverdraw = false;
 bool Properties::showDirtyRegions = false;
 bool Properties::skipEmptyFrames = true;
-bool Properties::swapBuffersWithDamage = true;
 bool Properties::useBufferAge = true;
 bool Properties::enablePartialUpdates = true;
 
@@ -117,7 +116,6 @@ bool Properties::load() {
     }
 
     skipEmptyFrames = property_get_bool(PROPERTY_SKIP_EMPTY_DAMAGE, true);
-    swapBuffersWithDamage = property_get_bool(PROPERTY_SWAP_WITH_DAMAGE, true);
     useBufferAge = property_get_bool(PROPERTY_USE_BUFFER_AGE, true);
     enablePartialUpdates = property_get_bool(PROPERTY_ENABLE_PARTIAL_UPDATES, true);
 
