@@ -110,6 +110,7 @@ public class StateListDrawable extends DrawableContainer {
         final TypedArray a = obtainAttributes(r, theme, attrs, R.styleable.StateListDrawable);
         super.inflateWithAttributes(r, parser, a, R.styleable.StateListDrawable_visible);
         updateStateFromTypedArray(a);
+        updateDensity(r);
         a.recycle();
 
         inflateChildElements(r, parser, attrs, theme);

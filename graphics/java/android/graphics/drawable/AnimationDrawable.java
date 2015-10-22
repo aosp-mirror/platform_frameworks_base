@@ -291,6 +291,7 @@ public class AnimationDrawable extends DrawableContainer implements Runnable, An
         final TypedArray a = obtainAttributes(r, theme, attrs, R.styleable.AnimationDrawable);
         super.inflateWithAttributes(r, parser, a, R.styleable.AnimationDrawable_visible);
         updateStateFromTypedArray(a);
+        updateDensity(r);
         a.recycle();
 
         inflateChildElements(r, parser, attrs, theme);
