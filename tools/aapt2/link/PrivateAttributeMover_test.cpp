@@ -30,13 +30,9 @@ TEST(PrivateAttributeMoverTest, MovePrivateAttributes) {
             .addSimple(u"@android:attr/privateA")
             .addSimple(u"@android:attr/publicB")
             .addSimple(u"@android:attr/privateB")
+            .setSymbolState(u"@android:attr/publicA", ResourceId(0x01010000), SymbolState::kPublic)
+            .setSymbolState(u"@android:attr/publicB", ResourceId(0x01010000), SymbolState::kPublic)
             .build();
-    ASSERT_TRUE(table->setSymbolState(test::parseNameOrDie(u"@android:attr/publicA"),
-                                      ResourceId(0x01010000), {}, SymbolState::kPublic,
-                                      context->getDiagnostics()));
-    ASSERT_TRUE(table->setSymbolState(test::parseNameOrDie(u"@android:attr/publicB"),
-                                      ResourceId(0x01010002), {}, SymbolState::kPublic,
-                                      context->getDiagnostics()));
 
     PrivateAttributeMover mover;
     ASSERT_TRUE(mover.consume(context.get(), table.get()));

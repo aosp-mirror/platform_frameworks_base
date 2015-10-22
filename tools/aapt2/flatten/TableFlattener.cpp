@@ -292,7 +292,7 @@ private:
     SymbolWriter* mSymbols;
     StringPool* mSourcePool;
 
-    template <typename T>
+    template <typename T, bool IsItem>
     T* writeEntry(FlatEntry* entry, BigBuffer* buffer) {
         static_assert(std::is_same<ResTable_entry, T>::value ||
                       std::is_same<ResTable_entry_ext, T>::value,
@@ -308,7 +308,7 @@ private:
             outEntry->flags |= ResTable_entry::FLAG_WEAK;
         }
 
-        if (!entry->value->isItem()) {
+        if (!IsItem) {
             outEntry->flags |= ResTable_entry::FLAG_COMPLEX;
         }
 
@@ -329,8 +329,8 @@ private:
     }
 
     bool flattenValue(FlatEntry* entry, BigBuffer* buffer) {
-        if (entry->value->isItem()) {
-            writeEntry<ResTable_entry>(entry, buffer);
+        if (Item* item = valueCast<Item>(entry->value)) {
+            writeEntry<ResTable_entry, true>(entry, buffer);
             if (Reference* ref = valueCast<Reference>(entry->value)) {
                 if (!ref->id) {
                     assert(ref->name && "reference must have at least a name");
@@ -339,12 +339,12 @@ private:
                 }
             }
             Res_value* outValue = buffer->nextBlock<Res_value>();
-            bool result = static_cast<Item*>(entry->value)->flatten(outValue);
+            bool result = item->flatten(outValue);
             assert(result && "flatten failed");
             outValue->size = util::hostToDevice16(sizeof(*outValue));
         } else {
             const size_t beforeEntry = buffer->size();
-            ResTable_entry_ext* outEntry = writeEntry<ResTable_entry_ext>(entry, buffer);
+            ResTable_entry_ext* outEntry = writeEntry<ResTable_entry_ext, false>(entry, buffer);
             MapFlattenVisitor visitor(mSymbols, entry, buffer);
             entry->value->accept(&visitor);
             outEntry->count = util::hostToDevice32(visitor.mEntryCount);
@@ -551,17 +551,27 @@ private:
             // configuration available. Here we reverse this to match the binary table.
             std::map<ConfigDescription, std::vector<FlatEntry>> configToEntryListMap;
             for (ResourceEntry* entry : sortedEntries) {
-                const size_t keyIndex = mKeyPool.makeRef(entry->name).getIndex();
+                const uint32_t keyIndex = (uint32_t) mKeyPool.makeRef(entry->name).getIndex();
 
                 // Group values by configuration.
                 for (auto& configValue : entry->values) {
-                   configToEntryListMap[configValue.config].push_back(FlatEntry{
-                            entry, configValue.value.get(), (uint32_t) keyIndex,
-                            (uint32_t)(mSourcePool->makeRef(util::utf8ToUtf16(
-                                    configValue.source.path)).getIndex()),
-                            (uint32_t)(configValue.source.line
-                                    ? configValue.source.line.value() : 0)
-                   });
+                    Value* value = configValue.value.get();
+
+                    const StringPool::Ref sourceRef = mSourcePool->makeRef(
+                            util::utf8ToUtf16(value->getSource().path));
+
+                    uint32_t lineNumber = 0;
+                    if (value->getSource().line) {
+                        lineNumber = value->getSource().line.value();
+                    }
+
+                    configToEntryListMap[configValue.config]
+                            .push_back(FlatEntry{
+                                    entry,
+                                    value,
+                                    keyIndex,
+                                    (uint32_t) sourceRef.getIndex(),
+                                    lineNumber });
                 }
             }
 

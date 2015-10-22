@@ -47,12 +47,10 @@ struct Symbol {
 };
 
 /**
- * The resource value for a specific configuration.
+ * Represents a value defined for a given configuration.
  */
 struct ResourceConfigValue {
     ConfigDescription config;
-    Source source;
-    std::u16string comment;
     std::unique_ptr<Value> value;
 };
 
@@ -158,12 +156,11 @@ public:
     static int resolveValueCollision(Value* existing, Value* incoming);
 
     bool addResource(const ResourceNameRef& name, const ConfigDescription& config,
-                     const Source& source, std::unique_ptr<Value> value,
-                     IDiagnostics* diag);
+                     std::unique_ptr<Value> value, IDiagnostics* diag);
 
     bool addResource(const ResourceNameRef& name, const ResourceId resId,
-                     const ConfigDescription& config, const Source& source,
-                     std::unique_ptr<Value> value, IDiagnostics* diag);
+                     const ConfigDescription& config, std::unique_ptr<Value> value,
+                     IDiagnostics* diag);
 
     bool addFileReference(const ResourceNameRef& name, const ConfigDescription& config,
                           const Source& source, const StringPiece16& path, IDiagnostics* diag);
@@ -174,18 +171,18 @@ public:
      * names.
      */
     bool addResourceAllowMangled(const ResourceNameRef& name, const ConfigDescription& config,
-                                 const Source& source, std::unique_ptr<Value> value,
-                                 IDiagnostics* diag);
+                                 std::unique_ptr<Value> value, IDiagnostics* diag);
 
     bool addResourceAllowMangled(const ResourceNameRef& name, const ResourceId id,
-                                 const ConfigDescription& config,
-                                 const Source& source, std::unique_ptr<Value> value,
+                                 const ConfigDescription& config, std::unique_ptr<Value> value,
                                  IDiagnostics* diag);
 
-    bool setSymbolState(const ResourceNameRef& name, const ResourceId resId, const Source& source,
-                        SymbolState state, IDiagnostics* diag);
+    bool setSymbolState(const ResourceNameRef& name, const ResourceId resId,
+                        const Symbol& symbol, IDiagnostics* diag);
+
     bool setSymbolStateAllowMangled(const ResourceNameRef& name, const ResourceId resId,
-                                    const Source& source, SymbolState state, IDiagnostics* diag);
+                                    const Symbol& symbol, IDiagnostics* diag);
+
     struct SearchResult {
         ResourceTablePackage* package;
         ResourceTableType* type;
@@ -224,13 +221,11 @@ public:
 private:
     ResourceTablePackage* findOrCreatePackage(const StringPiece16& name);
 
-    bool addResourceImpl(const ResourceNameRef& name, const ResourceId resId,
-                         const ConfigDescription& config, const Source& source,
-                         std::unique_ptr<Value> value, const char16_t* validChars,
-                         IDiagnostics* diag);
-    bool setSymbolStateImpl(const ResourceNameRef& name, const ResourceId resId,
-                            const Source& source, SymbolState state, const char16_t* validChars,
-                            IDiagnostics* diag);
+    bool addResourceImpl(const ResourceNameRef& name, ResourceId resId,
+                         const ConfigDescription& config, std::unique_ptr<Value> value,
+                         const char16_t* validChars, IDiagnostics* diag);
+    bool setSymbolStateImpl(const ResourceNameRef& name, ResourceId resId,
+                            const Symbol& symbol, const char16_t* validChars, IDiagnostics* diag);
 };
 
 } // namespace aapt

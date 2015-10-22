@@ -19,6 +19,7 @@
 #include "ValueVisitor.h"
 
 #include "link/TableMerger.h"
+#include "util/Comparators.h"
 #include "util/Util.h"
 
 #include <cassert>
@@ -120,27 +121,24 @@ bool TableMerger::doMerge(const Source& src, ResourceTable* srcTable,
             }
 
             for (ResourceConfigValue& srcValue : srcEntry->values) {
-                auto cmp = [](const ResourceConfigValue& a,
-                              const ConfigDescription& b) -> bool {
-                    return a.config < b;
-                };
-
                 auto iter = std::lower_bound(dstEntry->values.begin(), dstEntry->values.end(),
-                                             srcValue.config, cmp);
+                                             srcValue.config, cmp::lessThan);
 
                 if (iter != dstEntry->values.end() && iter->config == srcValue.config) {
                     const int collisionResult = ResourceTable::resolveValueCollision(
                             iter->value.get(), srcValue.value.get());
                     if (collisionResult == 0) {
                         // Error!
-                        ResourceNameRef resourceName =
-                                { srcPackage->name, srcType->type, srcEntry->name };
-                        mContext->getDiagnostics()->error(DiagMessage(srcValue.source)
+                        ResourceNameRef resourceName(srcPackage->name,
+                                                     srcType->type,
+                                                     srcEntry->name);
+
+                        mContext->getDiagnostics()->error(DiagMessage(srcValue.value->getSource())
                                                           << "resource '" << resourceName
                                                           << "' has a conflicting value for "
                                                           << "configuration ("
                                                           << srcValue.config << ")");
-                        mContext->getDiagnostics()->note(DiagMessage(iter->source)
+                        mContext->getDiagnostics()->note(DiagMessage(iter->value->getSource())
                                                          << "originally defined here");
                         error = true;
                         continue;
@@ -150,16 +148,12 @@ bool TableMerger::doMerge(const Source& src, ResourceTable* srcTable,
                     }
 
                 } else {
-                    // Insert a new value.
-                    iter = dstEntry->values.insert(iter,
-                                                   ResourceConfigValue{ srcValue.config });
+                    // Insert a place holder value. We will fill it in below.
+                    iter = dstEntry->values.insert(iter, ResourceConfigValue{ srcValue.config });
                 }
 
-                iter->source = std::move(srcValue.source);
-                iter->comment = std::move(srcValue.comment);
                 if (manglePackage) {
-                    iter->value = cloneAndMangle(srcTable, srcPackage->name,
-                                                 srcValue.value.get());
+                    iter->value = cloneAndMangle(srcTable, srcPackage->name, srcValue.value.get());
                 } else {
                     iter->value = clone(srcValue.value.get());
                 }
@@ -179,7 +173,11 @@ std::unique_ptr<Value> TableMerger::cloneAndMangle(ResourceTable* table,
             std::u16string mangledEntry = NameMangler::mangleEntry(package, entry.toString());
             std::u16string newPath = prefix.toString() + mangledEntry + suffix.toString();
             mFilesToMerge.push(FileToMerge{ table, *f->path, newPath });
-            return util::make_unique<FileReference>(mMasterTable->stringPool.makeRef(newPath));
+            std::unique_ptr<FileReference> fileRef = util::make_unique<FileReference>(
+                    mMasterTable->stringPool.makeRef(newPath));
+            fileRef->setComment(f->getComment());
+            fileRef->setSource(f->getSource());
+            return std::move(fileRef);
         }
     }
     return clone(value);

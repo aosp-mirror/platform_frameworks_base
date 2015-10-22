@@ -66,26 +66,30 @@ private:
     bool parseTypeSpec(const android::ResChunk_header* chunk);
     bool parseType(const ResourceTablePackage* package, const android::ResChunk_header* chunk);
 
-    std::unique_ptr<Item> parseValue(const ResourceNameRef& name,
-            const ConfigDescription& config, const android::Res_value* value, uint16_t flags);
+    std::unique_ptr<Item> parseValue(const ResourceNameRef& name, const ConfigDescription& config,
+                                     const android::Res_value* value, uint16_t flags);
 
     std::unique_ptr<Value> parseMapEntry(const ResourceNameRef& name,
-            const ConfigDescription& config, const android::ResTable_map_entry* map);
+                                         const ConfigDescription& config,
+                                         const android::ResTable_map_entry* map);
 
-    std::unique_ptr<Style> parseStyle(const ResourceNameRef& name,
-            const ConfigDescription& config, const android::ResTable_map_entry* map);
+    std::unique_ptr<Style> parseStyle(const ResourceNameRef& name, const ConfigDescription& config,
+                                      const android::ResTable_map_entry* map);
 
     std::unique_ptr<Attribute> parseAttr(const ResourceNameRef& name,
-            const ConfigDescription& config, const android::ResTable_map_entry* map);
+                                         const ConfigDescription& config,
+                                         const android::ResTable_map_entry* map);
 
-    std::unique_ptr<Array> parseArray(const ResourceNameRef& name,
-            const ConfigDescription& config, const android::ResTable_map_entry* map);
+    std::unique_ptr<Array> parseArray(const ResourceNameRef& name, const ConfigDescription& config,
+                                      const android::ResTable_map_entry* map);
 
     std::unique_ptr<Plural> parsePlural(const ResourceNameRef& name,
-            const ConfigDescription& config, const android::ResTable_map_entry* map);
+                                        const ConfigDescription& config,
+                                        const android::ResTable_map_entry* map);
 
     std::unique_ptr<Styleable> parseStyleable(const ResourceNameRef& name,
-            const ConfigDescription& config, const android::ResTable_map_entry* map);
+                                              const ConfigDescription& config,
+                                              const android::ResTable_map_entry* map);
 
     IAaptContext* mContext;
     ResourceTable* mTable;

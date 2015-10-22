@@ -41,15 +41,40 @@ struct Value {
 	virtual ~Value() = default;
 
     /**
-     * Whether or not this is an Item.
-     */
-    virtual bool isItem() const;
-
-    /**
      * Whether this value is weak and can be overridden without
      * warning or error. Default for base class is false.
      */
     virtual bool isWeak() const;
+
+    /**
+     * Returns the source where this value was defined.
+     */
+    const Source& getSource() const {
+        return mSource;
+    }
+
+    void setSource(const Source& source) {
+        mSource = source;
+    }
+
+    void setSource(Source&& source) {
+        mSource = std::move(source);
+    }
+
+    /**
+     * Returns the comment that was associated with this resource.
+     */
+    StringPiece16 getComment() const {
+        return mComment;
+    }
+
+    void setComment(const StringPiece16& str) {
+        mComment = str.toString();
+    }
+
+    void setComment(std::u16string&& str) {
+        mComment = std::move(str);
+    }
 
     /**
      * Calls the appropriate overload of ValueVisitor.
@@ -65,6 +90,10 @@ struct Value {
      * Human readable printout of this value.
      */
     virtual void print(std::ostream* out) const = 0;
+
+private:
+    Source mSource;
+    std::u16string mComment;
 };
 
 /**
@@ -79,11 +108,6 @@ struct BaseValue : public Value {
  * A resource item with a single value. This maps to android::ResTable_entry.
  */
 struct Item : public Value {
-    /**
-     * An Item is, of course, an Item.
-     */
-    virtual bool isItem() const override;
-
     /**
      * Clone the Item.
      */

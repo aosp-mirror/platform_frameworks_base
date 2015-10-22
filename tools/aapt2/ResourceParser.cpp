@@ -186,6 +186,7 @@ struct ParsedResource {
     Source source;
     ResourceId id;
     SymbolState symbolState = SymbolState::kUndefined;
+    std::u16string comment;
     std::unique_ptr<Value> value;
     std::list<ParsedResource> childResources;
 };
@@ -194,7 +195,11 @@ struct ParsedResource {
 static bool addResourcesToTable(ResourceTable* table, const ConfigDescription& config,
                                 IDiagnostics* diag, ParsedResource* res) {
     if (res->symbolState != SymbolState::kUndefined) {
-        if (!table->setSymbolState(res->name, res->id, res->source, res->symbolState, diag)) {
+        Symbol symbol;
+        symbol.state = res->symbolState;
+        symbol.source = res->source;
+        symbol.comment = res->comment;
+        if (!table->setSymbolState(res->name, res->id, symbol, diag)) {
             return false;
         }
     }
@@ -203,7 +208,11 @@ static bool addResourcesToTable(ResourceTable* table, const ConfigDescription& c
         return true;
     }
 
-    if (!table->addResource(res->name, res->id, config, res->source, std::move(res->value), diag)) {
+    // Attach the comment, source and config to the value.
+    res->value->setComment(std::move(res->comment));
+    res->value->setSource(std::move(res->source));
+
+    if (!table->addResource(res->name, res->id, config, std::move(res->value), diag)) {
         return false;
     }
 
@@ -275,6 +284,7 @@ bool ResourceParser::parseResources(XmlPullParser* parser) {
         ParsedResource parsedResource;
         parsedResource.name.entry = maybeName.value().toString();
         parsedResource.source = mSource.withLine(parser->getLineNumber());
+        parsedResource.comment = std::move(comment);
 
         bool result = true;
         if (elementName == u"id") {
@@ -368,8 +378,8 @@ enum {
  * an Item. If allowRawValue is false, nullptr is returned in this
  * case.
  */
-std::unique_ptr<Item> ResourceParser::parseXml(XmlPullParser* parser, uint32_t typeMask,
-                                               bool allowRawValue) {
+std::unique_ptr<Item> ResourceParser::parseXml(XmlPullParser* parser, const uint32_t typeMask,
+                                               const bool allowRawValue) {
     const size_t beginXmlLine = parser->getLineNumber();
 
     std::u16string rawValue;
@@ -386,8 +396,9 @@ std::unique_ptr<Item> ResourceParser::parseXml(XmlPullParser* parser, uint32_t t
 
     auto onCreateReference = [&](const ResourceName& name) {
         // name.package can be empty here, as it will assume the package name of the table.
-        mTable->addResource(name, {}, mSource.withLine(beginXmlLine), util::make_unique<Id>(),
-                            mDiag);
+        std::unique_ptr<Id> id = util::make_unique<Id>();
+        id->setSource(mSource.withLine(beginXmlLine));
+        mTable->addResource(name, {}, std::move(id), mDiag);
     };
 
     // Process the raw value.
@@ -411,11 +422,12 @@ std::unique_ptr<Item> ResourceParser::parseXml(XmlPullParser* parser, uint32_t t
                 mTable->stringPool.makeRef(styleString.str, StringPool::Context{ 1, mConfig }));
     }
 
-    // We can't parse this so return a RawString if we are allowed.
     if (allowRawValue) {
+        // We can't parse this so return a RawString if we are allowed.
         return util::make_unique<RawString>(
                 mTable->stringPool.makeRef(rawValue, StringPool::Context{ 1, mConfig }));
     }
+
     return {};
 }
 
@@ -683,8 +695,8 @@ Maybe<Attribute::Symbol> ResourceParser::parseEnumOrFlagItem(XmlPullParser* pars
     }
 
     return Attribute::Symbol{
-        Reference(ResourceName{ {}, ResourceType::kId, maybeName.value().toString() }),
-                val.data };
+            Reference(ResourceName({}, ResourceType::kId, maybeName.value().toString())),
+            val.data };
 }
 
 static Maybe<ResourceName> parseXmlAttributeName(StringPiece16 str) {

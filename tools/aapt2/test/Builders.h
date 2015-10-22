@@ -43,7 +43,7 @@ public:
         return *this;
     }
 
-    ResourceTableBuilder& addSimple(const StringPiece16& name, ResourceId id = {}) {
+    ResourceTableBuilder& addSimple(const StringPiece16& name, const ResourceId id = {}) {
         return addValue(name, id, util::make_unique<Id>());
     }
 
@@ -51,7 +51,7 @@ public:
         return addReference(name, {}, ref);
     }
 
-    ResourceTableBuilder& addReference(const StringPiece16& name, ResourceId id,
+    ResourceTableBuilder& addReference(const StringPiece16& name, const ResourceId id,
                                        const StringPiece16& ref) {
         return addValue(name, id, util::make_unique<Reference>(parseNameOrDie(ref)));
     }
@@ -60,7 +60,7 @@ public:
         return addString(name, {}, str);
     }
 
-    ResourceTableBuilder& addString(const StringPiece16& name, ResourceId id,
+    ResourceTableBuilder& addString(const StringPiece16& name, const ResourceId id,
                                     const StringPiece16& str) {
         return addValue(name, id, util::make_unique<String>(mTable->stringPool.makeRef(str)));
     }
@@ -69,27 +69,39 @@ public:
         return addFileReference(name, {}, path);
     }
 
-    ResourceTableBuilder& addFileReference(const StringPiece16& name, ResourceId id,
+    ResourceTableBuilder& addFileReference(const StringPiece16& name, const ResourceId id,
                                            const StringPiece16& path) {
         return addValue(name, id,
                         util::make_unique<FileReference>(mTable->stringPool.makeRef(path)));
     }
 
 
-    ResourceTableBuilder& addValue(const StringPiece16& name, std::unique_ptr<Value> value) {
+    ResourceTableBuilder& addValue(const StringPiece16& name,
+                                   std::unique_ptr<Value> value) {
         return addValue(name, {}, std::move(value));
     }
 
-    ResourceTableBuilder& addValue(const StringPiece16& name, ResourceId id,
+    ResourceTableBuilder& addValue(const StringPiece16& name, const ResourceId id,
                                        std::unique_ptr<Value> value) {
         return addValue(name, id, {}, std::move(value));
     }
 
-    ResourceTableBuilder& addValue(const StringPiece16& name, ResourceId id,
-                                   const ConfigDescription& config, std::unique_ptr<Value> value) {
+    ResourceTableBuilder& addValue(const StringPiece16& name, const ResourceId id,
+                                   const ConfigDescription& config,
+                                   std::unique_ptr<Value> value) {
         ResourceName resName = parseNameOrDie(name);
-        bool result = mTable->addResourceAllowMangled(resName, id, config, {}, std::move(value),
+        bool result = mTable->addResourceAllowMangled(resName, id, config, std::move(value),
                                                       &mDiagnostics);
+        assert(result);
+        return *this;
+    }
+
+    ResourceTableBuilder& setSymbolState(const StringPiece16& name, ResourceId id,
+                                         SymbolState state) {
+        ResourceName resName = parseNameOrDie(name);
+        Symbol symbol;
+        symbol.state = state;
+        bool result = mTable->setSymbolStateAllowMangled(resName, id, symbol, &mDiagnostics);
         assert(result);
         return *this;
     }
@@ -105,6 +117,32 @@ inline std::unique_ptr<Reference> buildReference(const StringPiece16& ref,
     reference->id = id;
     return reference;
 }
+
+template <typename T>
+class ValueBuilder {
+private:
+    std::unique_ptr<Value> mValue;
+
+public:
+    template <typename... Args>
+    ValueBuilder(Args&&... args) : mValue(new T{ std::forward<Args>(args)... }) {
+    }
+
+    template <typename... Args>
+    ValueBuilder& setSource(Args&&... args) {
+        mValue->setSource(Source{ std::forward<Args>(args)... });
+        return *this;
+    }
+
+    ValueBuilder& setComment(const StringPiece16& str) {
+        mValue->setComment(str);
+        return *this;
+    }
+
+    std::unique_ptr<Value> build() {
+        return std::move(mValue);
+    }
+};
 
 class AttributeBuilder {
 private:

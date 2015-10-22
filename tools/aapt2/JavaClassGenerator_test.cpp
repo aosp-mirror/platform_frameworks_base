@@ -105,11 +105,9 @@ TEST(JavaClassGeneratorTest, OnlyWritePublicResources) {
             .addSimple(u"@android:id/one", ResourceId(0x01020000))
             .addSimple(u"@android:id/two", ResourceId(0x01020001))
             .addSimple(u"@android:id/three", ResourceId(0x01020002))
+            .setSymbolState(u"@android:id/one", ResourceId(0x01020000), SymbolState::kPublic)
+            .setSymbolState(u"@android:id/two", ResourceId(0x01020001), SymbolState::kPrivate)
             .build();
-    ASSERT_TRUE(table->setSymbolState(test::parseNameOrDie(u"@android:id/one"), {}, {},
-                                      SymbolState::kPublic, &diag));
-    ASSERT_TRUE(table->setSymbolState(test::parseNameOrDie(u"@android:id/two"), {}, {},
-                                      SymbolState::kPrivate, &diag));
 
     JavaClassGeneratorOptions options;
     options.types = JavaClassGeneratorOptions::SymbolTypes::kPublic;

@@ -19,7 +19,7 @@
 #include "ResourceValues.h"
 #include "util/Util.h"
 
-#include "test/Common.h"
+#include "test/Builders.h"
 
 #include <algorithm>
 #include <gtest/gtest.h>
@@ -42,22 +42,26 @@ TEST_F(ResourceTableTest, FailToAddResourceWithBadName) {
     ResourceTable table;
 
     EXPECT_FALSE(table.addResource(
-            ResourceNameRef{ u"android", ResourceType::kId, u"hey,there" },
-            {}, Source{ "test.xml", 21 },
-            util::make_unique<Id>(), &mDiagnostics));
+            ResourceNameRef(u"android", ResourceType::kId, u"hey,there"),
+            ConfigDescription{},
+            test::ValueBuilder<Id>().setSource("test.xml", 21u).build(),
+            &mDiagnostics));
 
     EXPECT_FALSE(table.addResource(
-            ResourceNameRef{ u"android", ResourceType::kId, u"hey:there" },
-            {}, Source{ "test.xml", 21 },
-            util::make_unique<Id>(), &mDiagnostics));
+            ResourceNameRef(u"android", ResourceType::kId, u"hey:there"),
+            ConfigDescription{},
+            test::ValueBuilder<Id>().setSource("test.xml", 21u).build(),
+            &mDiagnostics));
 }
 
 TEST_F(ResourceTableTest, AddOneResource) {
     ResourceTable table;
 
-    EXPECT_TRUE(table.addResource(test::parseNameOrDie(u"@android:attr/id"), {},
-                                  Source{ "test/path/file.xml", 23 },
-                                  util::make_unique<Id>(), &mDiagnostics));
+    EXPECT_TRUE(table.addResource(test::parseNameOrDie(u"@android:attr/id"),
+                                  ConfigDescription{},
+                                  test::ValueBuilder<Id>()
+                                          .setSource("test/path/file.xml", 23u).build(),
+                                  &mDiagnostics));
 
     ASSERT_NE(nullptr, test::getValue<Id>(&table, u"@android:attr/id"));
 }
@@ -71,23 +75,29 @@ TEST_F(ResourceTableTest, AddMultipleResources) {
 
     EXPECT_TRUE(table.addResource(
             test::parseNameOrDie(u"@android:attr/layout_width"),
-            config, Source{ "test/path/file.xml", 10 },
-            util::make_unique<Id>(), &mDiagnostics));
+            config,
+            test::ValueBuilder<Id>().setSource("test/path/file.xml", 10u).build(),
+            &mDiagnostics));
 
     EXPECT_TRUE(table.addResource(
             test::parseNameOrDie(u"@android:attr/id"),
-            config, Source{ "test/path/file.xml", 12 },
-            util::make_unique<Id>(), &mDiagnostics));
+            config,
+            test::ValueBuilder<Id>().setSource("test/path/file.xml", 12u).build(),
+            &mDiagnostics));
 
     EXPECT_TRUE(table.addResource(
             test::parseNameOrDie(u"@android:string/ok"),
-            config, Source{ "test/path/file.xml", 14 },
-            util::make_unique<Id>(), &mDiagnostics));
+            config,
+            test::ValueBuilder<Id>().setSource("test/path/file.xml", 14u).build(),
+            &mDiagnostics));
 
     EXPECT_TRUE(table.addResource(
             test::parseNameOrDie(u"@android:string/ok"),
-            languageConfig, Source{ "test/path/file.xml", 20 },
-            util::make_unique<BinaryPrimitive>(android::Res_value{}), &mDiagnostics));
+            languageConfig,
+            test::ValueBuilder<BinaryPrimitive>(android::Res_value{})
+                    .setSource("test/path/file.xml", 20u)
+                    .build(),
+            &mDiagnostics));
 
     ASSERT_NE(nullptr, test::getValue<Id>(&table, u"@android:attr/layout_width"));
     ASSERT_NE(nullptr, test::getValue<Id>(&table, u"@android:attr/id"));
@@ -99,14 +109,14 @@ TEST_F(ResourceTableTest, AddMultipleResources) {
 TEST_F(ResourceTableTest, OverrideWeakResourceValue) {
     ResourceTable table;
 
-    ASSERT_TRUE(table.addResource(test::parseNameOrDie(u"@android:attr/foo"), {}, {},
+    ASSERT_TRUE(table.addResource(test::parseNameOrDie(u"@android:attr/foo"), ConfigDescription{},
                                   util::make_unique<Attribute>(true), &mDiagnostics));
 
     Attribute* attr = test::getValue<Attribute>(&table, u"@android:attr/foo");
     ASSERT_NE(nullptr, attr);
     EXPECT_TRUE(attr->isWeak());
 
-    ASSERT_TRUE(table.addResource(test::parseNameOrDie(u"@android:attr/foo"), {}, {},
+    ASSERT_TRUE(table.addResource(test::parseNameOrDie(u"@android:attr/foo"), ConfigDescription{},
                                   util::make_unique<Attribute>(false), &mDiagnostics));
 
     attr = test::getValue<Attribute>(&table, u"@android:attr/foo");

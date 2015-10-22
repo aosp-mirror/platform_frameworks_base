@@ -115,6 +115,18 @@ struct DynCastVisitor : public RawValueVisitor {
 };
 
 /**
+ * Specialization that checks if the value is an Item.
+ */
+template <>
+struct DynCastVisitor<Item> : public RawValueVisitor {
+    Item* value = nullptr;
+
+    void visitItem(Item* item) override {
+        value = item;
+    }
+};
+
+/**
  * Returns a valid pointer to T if the Value is of subtype T.
  * Otherwise, returns nullptr.
  */

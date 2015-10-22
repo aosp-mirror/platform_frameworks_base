@@ -19,6 +19,8 @@
 #include "ResourceTable.h"
 #include "ResourceValues.h"
 #include "ValueVisitor.h"
+
+#include "util/Comparators.h"
 #include "util/Util.h"
 
 #include <algorithm>
@@ -28,10 +30,6 @@
 #include <tuple>
 
 namespace aapt {
-
-static bool compareConfigs(const ResourceConfigValue& lhs, const ConfigDescription& rhs) {
-    return lhs.config < rhs;
-}
 
 static bool lessThanType(const std::unique_ptr<ResourceTableType>& lhs, ResourceType rhs) {
     return lhs->type < rhs;
@@ -191,52 +189,50 @@ static constexpr const char16_t* kValidNameChars = u"._-";
 static constexpr const char16_t* kValidNameMangledChars = u"._-$";
 
 bool ResourceTable::addResource(const ResourceNameRef& name, const ConfigDescription& config,
-                                const Source& source, std::unique_ptr<Value> value,
-                                IDiagnostics* diag) {
-    return addResourceImpl(name, ResourceId{}, config, source, std::move(value), kValidNameChars,
-                           diag);
+                                std::unique_ptr<Value> value, IDiagnostics* diag) {
+    return addResourceImpl(name, {}, config, std::move(value), kValidNameChars, diag);
 }
 
 bool ResourceTable::addResource(const ResourceNameRef& name, const ResourceId resId,
-                                const ConfigDescription& config, const Source& source,
-                                std::unique_ptr<Value> value, IDiagnostics* diag) {
-    return addResourceImpl(name, resId, config, source, std::move(value), kValidNameChars, diag);
+                                const ConfigDescription& config, std::unique_ptr<Value> value,
+                                IDiagnostics* diag) {
+    return addResourceImpl(name, resId, config, std::move(value), kValidNameChars, diag);
 }
 
 bool ResourceTable::addFileReference(const ResourceNameRef& name, const ConfigDescription& config,
                                      const Source& source, const StringPiece16& path,
                                      IDiagnostics* diag) {
-    return addResourceImpl(name, ResourceId{}, config, source,
-                           util::make_unique<FileReference>(stringPool.makeRef(path)),
-                           kValidNameChars, diag);
+    std::unique_ptr<FileReference> fileRef = util::make_unique<FileReference>(
+            stringPool.makeRef(path));
+    fileRef->setSource(source);
+    return addResourceImpl(name, ResourceId{}, config, std::move(fileRef), kValidNameChars, diag);
 }
 
 bool ResourceTable::addResourceAllowMangled(const ResourceNameRef& name,
                                             const ConfigDescription& config,
-                                            const Source& source,
                                             std::unique_ptr<Value> value,
                                             IDiagnostics* diag) {
-    return addResourceImpl(name, ResourceId{}, config, source, std::move(value),
-                           kValidNameMangledChars, diag);
+    return addResourceImpl(name, ResourceId{}, config, std::move(value), kValidNameMangledChars,
+                           diag);
 }
 
 bool ResourceTable::addResourceAllowMangled(const ResourceNameRef& name,
                                             const ResourceId id,
                                             const ConfigDescription& config,
-                                            const Source& source,
                                             std::unique_ptr<Value> value,
                                             IDiagnostics* diag) {
-    return addResourceImpl(name, id, config, source, std::move(value),
-                           kValidNameMangledChars, diag);
+    return addResourceImpl(name, id, config, std::move(value), kValidNameMangledChars, diag);
 }
 
 bool ResourceTable::addResourceImpl(const ResourceNameRef& name, const ResourceId resId,
-                                    const ConfigDescription& config, const Source& source,
-                                    std::unique_ptr<Value> value, const char16_t* validChars,
-                                    IDiagnostics* diag) {
+                                    const ConfigDescription& config, std::unique_ptr<Value> value,
+                                    const char16_t* validChars, IDiagnostics* diag) {
+    assert(value && "value can't be nullptr");
+    assert(diag && "diagnostics can't be nullptr");
+
     auto badCharIter = util::findNonAlphaNumericAndNotInSet(name.entry, validChars);
     if (badCharIter != name.entry.end()) {
-        diag->error(DiagMessage(source)
+        diag->error(DiagMessage(value->getSource())
                     << "resource '"
                     << name
                     << "' has invalid entry name '"
@@ -249,7 +245,7 @@ bool ResourceTable::addResourceImpl(const ResourceNameRef& name, const ResourceI
 
     ResourceTablePackage* package = findOrCreatePackage(name.package);
     if (resId.isValid() && package->id && package->id.value() != resId.packageId()) {
-        diag->error(DiagMessage(source)
+        diag->error(DiagMessage(value->getSource())
                     << "trying to add resource '"
                     << name
                     << "' with ID "
@@ -263,7 +259,7 @@ bool ResourceTable::addResourceImpl(const ResourceNameRef& name, const ResourceI
 
     ResourceTableType* type = package->findOrCreateType(name.type);
     if (resId.isValid() && type->id && type->id.value() != resId.typeId()) {
-        diag->error(DiagMessage(source)
+        diag->error(DiagMessage(value->getSource())
                     << "trying to add resource '"
                     << name
                     << "' with ID "
@@ -277,7 +273,7 @@ bool ResourceTable::addResourceImpl(const ResourceNameRef& name, const ResourceI
 
     ResourceEntry* entry = type->findOrCreateEntry(name.entry);
     if (resId.isValid() && entry->id && entry->id.value() != resId.entryId()) {
-        diag->error(DiagMessage(source)
+        diag->error(DiagMessage(value->getSource())
                     << "trying to add resource '"
                     << name
                     << "' with ID "
@@ -288,20 +284,20 @@ bool ResourceTable::addResourceImpl(const ResourceNameRef& name, const ResourceI
     }
 
     const auto endIter = entry->values.end();
-    auto iter = std::lower_bound(entry->values.begin(), endIter, config, compareConfigs);
+    auto iter = std::lower_bound(entry->values.begin(), endIter, config, cmp::lessThan);
     if (iter == endIter || iter->config != config) {
         // This resource did not exist before, add it.
-        entry->values.insert(iter, ResourceConfigValue{ config, source, {}, std::move(value) });
+        entry->values.insert(iter, ResourceConfigValue{ config, std::move(value) });
     } else {
         int collisionResult = resolveValueCollision(iter->value.get(), value.get());
         if (collisionResult > 0) {
             // Take the incoming value.
-            *iter = ResourceConfigValue{ config, source, {}, std::move(value) };
+            iter->value = std::move(value);
         } else if (collisionResult == 0) {
-            diag->error(DiagMessage(source)
+            diag->error(DiagMessage(value->getSource())
                         << "duplicate value for resource '" << name << "' "
-                        << "with config '" << iter->config << "'");
-            diag->error(DiagMessage(iter->source)
+                        << "with config '" << config << "'");
+            diag->error(DiagMessage(iter->value->getSource())
                         << "resource previously defined here");
             return false;
         }
@@ -316,27 +312,29 @@ bool ResourceTable::addResourceImpl(const ResourceNameRef& name, const ResourceI
 }
 
 bool ResourceTable::setSymbolState(const ResourceNameRef& name, const ResourceId resId,
-                                   const Source& source, SymbolState state, IDiagnostics* diag) {
-    return setSymbolStateImpl(name, resId, source, state, kValidNameChars, diag);
+                                   const Symbol& symbol, IDiagnostics* diag) {
+    return setSymbolStateImpl(name, resId, symbol, kValidNameChars, diag);
 }
 
-bool ResourceTable::setSymbolStateAllowMangled(const ResourceNameRef& name, const ResourceId resId,
-                                               const Source& source, SymbolState state,
-                                               IDiagnostics* diag) {
-    return setSymbolStateImpl(name, resId, source, state, kValidNameMangledChars, diag);
+bool ResourceTable::setSymbolStateAllowMangled(const ResourceNameRef& name,
+                                               const ResourceId resId,
+                                               const Symbol& symbol, IDiagnostics* diag) {
+    return setSymbolStateImpl(name, resId, symbol, kValidNameMangledChars, diag);
 }
 
 bool ResourceTable::setSymbolStateImpl(const ResourceNameRef& name, const ResourceId resId,
-                                       const Source& source, SymbolState state,
-                                       const char16_t* validChars, IDiagnostics* diag) {
-    if (state == SymbolState::kUndefined) {
+                                       const Symbol& symbol, const char16_t* validChars,
+                                       IDiagnostics* diag) {
+    assert(diag && "diagnostics can't be nullptr");
+
+    if (symbol.state == SymbolState::kUndefined) {
         // Nothing to do.
         return true;
     }
 
     auto badCharIter = util::findNonAlphaNumericAndNotInSet(name.entry, validChars);
     if (badCharIter != name.entry.end()) {
-        diag->error(DiagMessage(source)
+        diag->error(DiagMessage(symbol.source)
                     << "resource '"
                     << name
                     << "' has invalid entry name '"
@@ -349,7 +347,7 @@ bool ResourceTable::setSymbolStateImpl(const ResourceNameRef& name, const Resour
 
     ResourceTablePackage* package = findOrCreatePackage(name.package);
     if (resId.isValid() && package->id && package->id.value() != resId.packageId()) {
-        diag->error(DiagMessage(source)
+        diag->error(DiagMessage(symbol.source)
                     << "trying to add resource '"
                     << name
                     << "' with ID "
@@ -363,7 +361,7 @@ bool ResourceTable::setSymbolStateImpl(const ResourceNameRef& name, const Resour
 
     ResourceTableType* type = package->findOrCreateType(name.type);
     if (resId.isValid() && type->id && type->id.value() != resId.typeId()) {
-        diag->error(DiagMessage(source)
+        diag->error(DiagMessage(symbol.source)
                     << "trying to add resource '"
                     << name
                     << "' with ID "
@@ -377,7 +375,7 @@ bool ResourceTable::setSymbolStateImpl(const ResourceNameRef& name, const Resour
 
     ResourceEntry* entry = type->findOrCreateEntry(name.entry);
     if (resId.isValid() && entry->id && entry->id.value() != resId.entryId()) {
-        diag->error(DiagMessage(source)
+        diag->error(DiagMessage(symbol.source)
                     << "trying to add resource '"
                     << name
                     << "' with ID "
@@ -388,15 +386,14 @@ bool ResourceTable::setSymbolStateImpl(const ResourceNameRef& name, const Resour
     }
 
     // Only mark the type state as public, it doesn't care about being private.
-    if (state == SymbolState::kPublic) {
+    if (symbol.state == SymbolState::kPublic) {
         type->symbolStatus.state = SymbolState::kPublic;
     }
 
     // Downgrading to a private symbol from a public one is not allowed.
     if (entry->symbolStatus.state != SymbolState::kPublic) {
-        if (entry->symbolStatus.state != state) {
-            entry->symbolStatus.state = state;
-            entry->symbolStatus.source = source;
+        if (entry->symbolStatus.state != symbol.state) {
+            entry->symbolStatus = std::move(symbol);
         }
     }
 
