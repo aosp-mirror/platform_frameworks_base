@@ -16,13 +16,17 @@
   -->
 
 <selector xmlns:android="http://schemas.android.com/apk/res/android">
-    <item
-        android:state_enabled="false"
-        android:color="?attr/textColorSecondaryInverse"
-        android:alpha="?attr/disabledAlpha" />
-    <item
-        android:state_activated="true"
-        android:color="?attr/textColorPrimaryInverse" />
-    <item
-        android:color="?attr/textColorSecondaryInverse" />
+    <item android:state_focused="true">
+        <layer-list>
+            <item android:gravity="bottom"
+                  android:height="10dp">
+                <shape android:shape="line"
+                       android:tint="?attr/textColorPrimaryInverse">
+                    <stroke android:color="@color/white"
+                            android:width="2dp" />
+                </shape>
+            </item>
+        </layer-list>
+    </item>
+    <item android:drawable="@color/transparent" />
 </selector>

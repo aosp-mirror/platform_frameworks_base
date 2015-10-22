@@ -29,6 +29,8 @@ import com.android.internal.R;
 
 import java.util.Locale;
 
+import libcore.icu.LocaleData;
+
 /**
  * A widget for selecting the time of day, in either 24-hour or AM/PM mode.
  * <p>
@@ -301,6 +303,16 @@ public class TimePicker extends FrameLayout {
      */
     public static interface ValidationCallback {
         void onValidationChanged(boolean valid);
+    }
+
+    static String[] getAmPmStrings(Context context) {
+        final Locale locale = context.getResources().getConfiguration().locale;
+        final LocaleData d = LocaleData.get(locale);
+
+        final String[] result = new String[2];
+        result[0] = d.amPm[0].length() > 4 ? d.narrowAm : d.amPm[0];
+        result[1] = d.amPm[1].length() > 4 ? d.narrowPm : d.amPm[1];
+        return result;
     }
 
     /**
