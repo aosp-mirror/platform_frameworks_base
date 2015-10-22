@@ -44,6 +44,7 @@ import android.os.SystemClock;
 import android.os.UserHandle;
 import android.util.EventLog;
 import android.util.Slog;
+import android.util.TimeUtils;
 import com.android.server.DeviceIdleController;
 
 import static com.android.server.am.ActivityManagerDebugConfig.*;
@@ -1284,6 +1285,7 @@ public final class BroadcastQueue {
 
     final boolean dumpLocked(FileDescriptor fd, PrintWriter pw, String[] args,
             int opti, boolean dumpAll, String dumpPackage, boolean needSep) {
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         if (mParallelBroadcasts.size() > 0 || mOrderedBroadcasts.size() > 0
                 || mPendingBroadcast != null) {
             boolean printed = false;
@@ -1301,7 +1303,7 @@ public final class BroadcastQueue {
                     pw.println("  Active broadcasts [" + mQueueName + "]:");
                 }
                 pw.println("  Active Broadcast " + mQueueName + " #" + i + ":");
-                br.dump(pw, "    ");
+                br.dump(pw, "    ", sdf);
             }
             printed = false;
             needSep = true;
@@ -1319,7 +1321,7 @@ public final class BroadcastQueue {
                     pw.println("  Active ordered broadcasts [" + mQueueName + "]:");
                 }
                 pw.println("  Active Ordered Broadcast " + mQueueName + " #" + i + ":");
-                mOrderedBroadcasts.get(i).dump(pw, "    ");
+                mOrderedBroadcasts.get(i).dump(pw, "    ", sdf);
             }
             if (dumpPackage == null || (mPendingBroadcast != null
                     && dumpPackage.equals(mPendingBroadcast.callerPackage))) {
@@ -1328,7 +1330,7 @@ public final class BroadcastQueue {
                 }
                 pw.println("  Pending broadcast [" + mQueueName + "]:");
                 if (mPendingBroadcast != null) {
-                    mPendingBroadcast.dump(pw, "    ");
+                    mPendingBroadcast.dump(pw, "    ", sdf);
                 } else {
                     pw.println("    (null)");
                 }
@@ -1366,7 +1368,7 @@ public final class BroadcastQueue {
             if (dumpAll) {
                 pw.print("  Historical Broadcast " + mQueueName + " #");
                         pw.print(i); pw.println(":");
-                r.dump(pw, "    ");
+                r.dump(pw, "    ", sdf);
             } else {
                 pw.print("  #"); pw.print(i); pw.print(": "); pw.println(r);
                 pw.print("    ");
@@ -1400,7 +1402,6 @@ public final class BroadcastQueue {
             }
             // done skipping; dump the remainder of the ring. 'i' is still the ordinal within
             // the overall broadcast history.
-            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
             do {
                 ringIndex = ringAdvance(ringIndex, -1, MAX_BROADCAST_SUMMARY_HISTORY);
                 Intent intent = mBroadcastSummaryHistory[ringIndex];
@@ -1422,9 +1423,19 @@ public final class BroadcastQueue {
                 i++;
                 pw.print("  #"); pw.print(i); pw.print(": ");
                 pw.println(intent.toShortString(false, true, true, false));
-                pw.print("    enq="); pw.print(sdf.format(new Date(mSummaryHistoryEnqueueTime[ringIndex])));
-                pw.print(" disp="); pw.print(sdf.format(new Date(mSummaryHistoryDispatchTime[ringIndex])));
-                pw.print(" fin="); pw.println(sdf.format(new Date(mSummaryHistoryFinishTime[ringIndex])));
+                pw.print("    ");
+                TimeUtils.formatDuration(mSummaryHistoryDispatchTime[ringIndex]
+                        - mSummaryHistoryEnqueueTime[ringIndex], pw);
+                pw.print(" dispatch ");
+                TimeUtils.formatDuration(mSummaryHistoryFinishTime[ringIndex]
+                        - mSummaryHistoryDispatchTime[ringIndex], pw);
+                pw.println(" finish");
+                pw.print("    enq=");
+                pw.print(sdf.format(new Date(mSummaryHistoryEnqueueTime[ringIndex])));
+                pw.print(" disp=");
+                pw.print(sdf.format(new Date(mSummaryHistoryDispatchTime[ringIndex])));
+                pw.print(" fin=");
+                pw.println(sdf.format(new Date(mSummaryHistoryFinishTime[ringIndex])));
                 Bundle bundle = intent.getExtras();
                 if (bundle != null) {
                     pw.print("    extras: "); pw.println(bundle.toString());
