@@ -18,6 +18,7 @@ package com.android.mtp;
 
 import android.content.res.Resources;
 import android.database.MatrixCursor;
+import android.media.MediaFile;
 import android.mtp.MtpConstants;
 import android.mtp.MtpObjectInfo;
 import android.provider.DocumentsContract;
@@ -70,30 +71,18 @@ final class CursorHelper {
     }
 
     static String formatTypeToMimeType(int format) {
-        // TODO: Add complete list of mime types.
-        switch (format) {
-            case MtpConstants.FORMAT_ASSOCIATION:
-                return DocumentsContract.Document.MIME_TYPE_DIR;
-            case MtpConstants.FORMAT_MP3:
-                return "audio/mp3";
-            case MtpConstants.FORMAT_EXIF_JPEG:
-                return "image/jpeg";
-            default:
-                return "application/octet-stream";
+        if (format == MtpConstants.FORMAT_ASSOCIATION) {
+            return DocumentsContract.Document.MIME_TYPE_DIR;
+        } else {
+            return MediaFile.getMimeTypeForFormatCode(format);
         }
     }
 
-    static int mimeTypeToFormatType(String mimeType) {
-        // TODO: Add complete list of mime types.
-        switch (mimeType.toLowerCase()) {
-            case Document.MIME_TYPE_DIR:
-                return MtpConstants.FORMAT_ASSOCIATION;
-            case "audio/mp3":
-                return MtpConstants.FORMAT_MP3;
-            case "image/jpeg":
-                return MtpConstants.FORMAT_EXIF_JPEG;
-            default:
-                return MtpConstants.FORMAT_UNDEFINED;
+    static int mimeTypeToFormatType(String fileName, String mimeType) {
+        if (Document.MIME_TYPE_DIR.equals(mimeType)) {
+            return MtpConstants.FORMAT_ASSOCIATION;
+        } else {
+            return MediaFile.getFormatCode(fileName, mimeType);
         }
     }
 }

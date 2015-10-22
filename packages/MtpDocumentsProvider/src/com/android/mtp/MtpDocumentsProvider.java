@@ -242,7 +242,7 @@ public class MtpDocumentsProvider extends DocumentsProvider {
                     new MtpObjectInfo.Builder()
                             .setStorageId(parentId.mStorageId)
                             .setParent(parentId.mObjectHandle)
-                            .setFormat(CursorHelper.mimeTypeToFormatType(mimeType))
+                            .setFormat(CursorHelper.mimeTypeToFormatType(displayName, mimeType))
                             .setName(displayName)
                             .build(), pipe[1]);
             final String documentId = new Identifier(parentId.mDeviceId, parentId.mStorageId,
