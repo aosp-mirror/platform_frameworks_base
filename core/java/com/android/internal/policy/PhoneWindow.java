@@ -123,6 +123,7 @@ import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.view.animation.Interpolator;
 import android.widget.FrameLayout;
+import android.widget.LinearLayout;
 import android.widget.ImageView;
 import android.widget.PopupWindow;
 import android.widget.ProgressBar;
@@ -465,6 +466,30 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
         final Callback cb = getCallback();
         if (cb != null && !isDestroyed()) {
             cb.onContentChanged();
+        }
+    }
+
+    @Override
+    public void setDecorView(int layoutResID) {
+        View v = mLayoutInflater.inflate(layoutResID, null);
+        setDecorView(v);
+    }
+
+    @Override
+    public void setDecorView(View view) {
+        if (mContentParent == null) {
+            installDecor();
+        }
+
+        LinearLayout clientDecorPlaceholder =
+                (LinearLayout) findViewById(R.id.client_decor_placeholder);
+
+        if (clientDecorPlaceholder != null) {
+            clientDecorPlaceholder.removeAllViews();
+
+            if (view != null) {
+                clientDecorPlaceholder.addView(view);
+            }
         }
     }
 
