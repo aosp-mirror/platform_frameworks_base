@@ -2834,7 +2834,7 @@ public class TelephonyManager {
     /**
      * Returns all observed cell information from all radios on the
      * device including the primary and neighboring cells. This does
-     * not cause or change the rate of PhoneStateListner#onCellInfoChanged.
+     * not cause or change the rate of PhoneStateListener#onCellInfoChanged.
      *<p>
      * The list can include one or more of {@link android.telephony.CellInfoGsm CellInfoGsm},
      * {@link android.telephony.CellInfoCdma CellInfoCdma},
@@ -2847,6 +2847,9 @@ public class TelephonyManager {
      * This is preferred over using getCellLocation although for older
      * devices this may return null in which case getCellLocation should
      * be called.
+     *<p>
+     * This API will return valid data for registered cells on devices with
+     * {@link android.content.pm.PackageManager#FEATURE_TELEPHONY}
      *<p>
      * @return List of CellInfo or null if info unavailable.
      *
