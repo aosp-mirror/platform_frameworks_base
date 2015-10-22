@@ -1450,10 +1450,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
     }
 
     private void enforceChangePermission() {
-        int uid = Binder.getCallingUid();
-        Settings.checkAndNoteChangeNetworkStateOperation(mContext, uid, Settings
-                .getPackageNameForUid(mContext, uid), true);
-
+        ConnectivityManager.enforceChangePermission(mContext);
     }
 
     private void enforceTetherAccessPermission() {
