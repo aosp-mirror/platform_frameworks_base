@@ -23,6 +23,7 @@ import android.bluetooth.BluetoothManager;
 import android.bluetooth.le.BluetoothLeScanner;
 import android.bluetooth.le.ScanCallback;
 import android.bluetooth.le.ScanFilter;
+import android.bluetooth.le.ScanRecord;
 import android.bluetooth.le.ScanResult;
 import android.bluetooth.le.ScanSettings;
 import android.content.ContentResolver;
@@ -230,17 +231,19 @@ public class KeyboardUI extends SystemUI implements InputManager.OnTabletModeCha
         }
 
         CachedBluetoothDevice device = getPairedKeyboard();
-        if ((mState == STATE_WAITING_FOR_TABLET_MODE_EXIT || mState == STATE_WAITING_FOR_BLUETOOTH)
-                && device != null) {
-            // If we're just coming out of tablet mode or BT just turned on,
-            // then we want to go ahead and automatically connect to the
-            // keyboard. We want to avoid this in other cases because we might
-            // be spuriously called after the user has manually disconnected
-            // the keyboard, meaning we shouldn't try to automtically connect
-            // it again.
-            mState = STATE_PAIRED;
-            device.connect(false);
-            return;
+        if (mState == STATE_WAITING_FOR_TABLET_MODE_EXIT || mState == STATE_WAITING_FOR_BLUETOOTH) {
+            if (device != null) {
+                // If we're just coming out of tablet mode or BT just turned on,
+                // then we want to go ahead and automatically connect to the
+                // keyboard. We want to avoid this in other cases because we might
+                // be spuriously called after the user has manually disconnected
+                // the keyboard, meaning we shouldn't try to automtically connect
+                // it again.
+                mState = STATE_PAIRED;
+                device.connect(false);
+                return;
+            }
+            mCachedDeviceManager.clearNonBondedDevices();
         }
 
         device = getDiscoveredKeyboard();
@@ -459,21 +462,36 @@ public class KeyboardUI extends SystemUI implements InputManager.OnTabletModeCha
     }
 
     private final class KeyboardScanCallback extends ScanCallback {
+
+        private boolean isDeviceDiscoverable(ScanResult result) {
+            final ScanRecord scanRecord = result.getScanRecord();
+            final int flags = scanRecord.getAdvertiseFlags();
+            final int BT_DISCOVERABLE_MASK = 0x03;
+
+            return (flags & BT_DISCOVERABLE_MASK) != 0;
+        }
+
         @Override
         public void onBatchScanResults(List<ScanResult> results) {
             if (DEBUG) {
                 Slog.d(TAG, "onBatchScanResults(" + results.size() + ")");
             }
-            if (!results.isEmpty()) {
-                BluetoothDevice bestDevice = results.get(0).getDevice();
-                int bestRssi = results.get(0).getRssi();
-                final int N = results.size();
-                for (int i = 0; i < N; i++) {
-                    ScanResult r = results.get(i);
-                    if (r.getRssi() > bestRssi) {
-                        bestDevice = r.getDevice();
-                    }
+
+            BluetoothDevice bestDevice = null;
+            int bestRssi = Integer.MIN_VALUE;
+
+            for (ScanResult result : results) {
+                if (DEBUG) {
+                    Slog.d(TAG, "onBatchScanResults: considering " + result);
                 }
+
+                if (isDeviceDiscoverable(result) && result.getRssi() > bestRssi) {
+                    bestDevice = result.getDevice();
+                    bestRssi = result.getRssi();
+                }
+            }
+
+            if (bestDevice != null) {
                 mHandler.obtainMessage(MSG_ON_BLUETOOTH_DEVICE_ADDED, bestDevice).sendToTarget();
             }
         }
@@ -491,8 +509,14 @@ public class KeyboardUI extends SystemUI implements InputManager.OnTabletModeCha
             if (DEBUG) {
                 Slog.d(TAG, "onScanResult(" + callbackType + ", " + result + ")");
             }
-            mHandler.obtainMessage(MSG_ON_BLUETOOTH_DEVICE_ADDED,
-                    result.getDevice()).sendToTarget();
+
+            if (isDeviceDiscoverable(result)) {
+                mHandler.obtainMessage(MSG_ON_BLUETOOTH_DEVICE_ADDED,
+                        result.getDevice()).sendToTarget();
+            } else if (DEBUG) {
+                Slog.d(TAG, "onScanResult: device " + result.getDevice() +
+                       " is not discoverable, ignoring");
+            }
         }
     }
 
