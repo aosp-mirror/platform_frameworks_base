@@ -32,6 +32,7 @@ import android.util.PrintWriterPrinter;
 import android.util.TimeUtils;
 
 import java.io.PrintWriter;
+import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
@@ -88,7 +89,7 @@ final class BroadcastRecord extends Binder {
     ComponentName curComponent; // the receiver class that is currently running.
     ActivityInfo curReceiver;   // info about the receiver that is currently running.
 
-    void dump(PrintWriter pw, String prefix) {
+    void dump(PrintWriter pw, String prefix, SimpleDateFormat sdf) {
         final long now = SystemClock.uptimeMillis();
 
         pw.print(prefix); pw.print(this); pw.print(" to user "); pw.println(userId);
@@ -114,13 +115,19 @@ final class BroadcastRecord extends Binder {
             pw.print(prefix); pw.print("options="); pw.println(options.toBundle());
         }
         pw.print(prefix); pw.print("enqueueClockTime=");
-                pw.print(new Date(enqueueClockTime));
+                pw.print(sdf.format(new Date(enqueueClockTime)));
                 pw.print(" dispatchClockTime=");
-                pw.println(new Date(dispatchClockTime));
+                pw.println(sdf.format(new Date(dispatchClockTime)));
         pw.print(prefix); pw.print("dispatchTime=");
                 TimeUtils.formatDuration(dispatchTime, now, pw);
+                pw.print(" (");
+                TimeUtils.formatDuration(dispatchClockTime-enqueueClockTime, pw);
+                pw.print(" since enq)");
         if (finishTime != 0) {
             pw.print(" finishTime="); TimeUtils.formatDuration(finishTime, now, pw);
+            pw.print(" (");
+            TimeUtils.formatDuration(finishTime-dispatchTime, pw);
+            pw.print(" since disp)");
         } else {
             pw.print(" receiverTime="); TimeUtils.formatDuration(receiverTime, now, pw);
         }
