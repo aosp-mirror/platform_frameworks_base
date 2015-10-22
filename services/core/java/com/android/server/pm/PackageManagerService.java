@@ -4811,18 +4811,13 @@ public class PackageManagerService extends IPackageManager.Stub {
             // First try to add the "always" resolution(s) for the current user, if any
             if (alwaysList.size() > 0) {
                 result.addAll(alwaysList);
-            // if there is an "always" for the parent user, add it.
-            } else if (xpDomainInfo != null && xpDomainInfo.bestDomainVerificationStatus
-                    == INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_ALWAYS) {
-                result.add(xpDomainInfo.resolveInfo);
             } else {
                 // Add all undefined apps as we want them to appear in the disambiguation dialog.
                 result.addAll(undefinedList);
+                // Maybe add one for the other profile.
                 if (xpDomainInfo != null && (
                         xpDomainInfo.bestDomainVerificationStatus
-                        == INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_UNDEFINED
-                        || xpDomainInfo.bestDomainVerificationStatus
-                        == INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_ASK)) {
+                        != INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_NEVER)) {
                     result.add(xpDomainInfo.resolveInfo);
                 }
                 includeBrowser = true;
