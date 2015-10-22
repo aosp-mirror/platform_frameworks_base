@@ -41596,6 +41596,7 @@ package android.webkit {
     method public abstract java.lang.String getDefaultTextEncodingName();
     method public static java.lang.String getDefaultUserAgent(android.content.Context);
     method public abstract deprecated android.webkit.WebSettings.ZoomDensity getDefaultZoom();
+    method public abstract int getDisabledActionModeMenuItems();
     method public abstract boolean getDisplayZoomControls();
     method public abstract boolean getDomStorageEnabled();
     method public abstract java.lang.String getFantasyFontFamily();
@@ -41645,6 +41646,7 @@ package android.webkit {
     method public abstract void setDefaultFontSize(int);
     method public abstract void setDefaultTextEncodingName(java.lang.String);
     method public abstract deprecated void setDefaultZoom(android.webkit.WebSettings.ZoomDensity);
+    method public abstract void setDisabledActionModeMenuItems(int);
     method public abstract void setDisplayZoomControls(boolean);
     method public abstract void setDomStorageEnabled(boolean);
     method public abstract deprecated void setEnableSmoothTransition(boolean);
@@ -41689,6 +41691,10 @@ package android.webkit {
     field public static final int LOAD_DEFAULT = -1; // 0xffffffff
     field public static final deprecated int LOAD_NORMAL = 0; // 0x0
     field public static final int LOAD_NO_CACHE = 2; // 0x2
+    field public static final int MENU_ITEM_NONE = 0; // 0x0
+    field public static final int MENU_ITEM_PROCESS_TEXT = 4; // 0x4
+    field public static final int MENU_ITEM_SHARE = 1; // 0x1
+    field public static final int MENU_ITEM_WEB_SEARCH = 2; // 0x2
     field public static final int MIXED_CONTENT_ALWAYS_ALLOW = 0; // 0x0
     field public static final int MIXED_CONTENT_COMPATIBILITY_MODE = 2; // 0x2
     field public static final int MIXED_CONTENT_NEVER_ALLOW = 1; // 0x1
