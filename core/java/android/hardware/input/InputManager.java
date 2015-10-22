@@ -108,13 +108,14 @@ public final class InputManager {
      * of a key character map for a particular keyboard layout.  The label on the receiver
      * is used to name the collection of keyboard layouts provided by this receiver in the
      * keyboard layout settings.
-     * <pre></code>
+     * <pre><code>
      * &lt;?xml version="1.0" encoding="utf-8"?>
      * &lt;keyboard-layouts xmlns:android="http://schemas.android.com/apk/res/android">
      *     &lt;keyboard-layout android:name="keyboard_layout_english_us"
      *             android:label="@string/keyboard_layout_english_us_label"
      *             android:keyboardLayout="@raw/keyboard_layout_english_us" />
      * &lt;/keyboard-layouts>
+     * </pre></code>
      * </p><p>
      * The <code>android:name</code> attribute specifies an identifier by which
      * the keyboard layout will be known in the package.
