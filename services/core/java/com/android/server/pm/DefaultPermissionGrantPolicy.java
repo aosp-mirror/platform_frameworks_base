@@ -586,6 +586,8 @@ final class DefaultPermissionGrantPolicy {
                     grantRuntimePermissionsLPw(wearHomePackage, PHONE_PERMISSIONS, true, userId);
                     grantRuntimePermissionsLPw(wearHomePackage, MICROPHONE_PERMISSIONS, false,
                             userId);
+                    grantRuntimePermissionsLPw(wearHomePackage, LOCATION_PERMISSIONS, false,
+                            userId);
                 }
             }
 
