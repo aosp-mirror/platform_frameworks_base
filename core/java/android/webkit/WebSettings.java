@@ -1363,4 +1363,50 @@ public abstract class WebSettings {
      * offscreen but attached to a window.
      */
     public abstract boolean getOffscreenPreRaster();
+
+    /**
+     * Disables the action mode menu items according to {@code menuItems} flag.
+     * @param menuItems an integer field flag for the menu items to be disabled.
+     */
+    public abstract void setDisabledActionModeMenuItems(int menuItems);
+
+    /**
+     * Gets the action mode menu items that are disabled, expressed in an integer field flag.
+     * The default value is {@link #MENU_ITEM_NONE}
+     *
+     * @return all the disabled menu item flags combined with OR.
+     */
+    public abstract int getDisabledActionModeMenuItems();
+
+    /**
+     * Used with {@link #setDisabledActionModeMenuItems}.
+     *
+     * No menu items should be disabled.
+     */
+    public static final int MENU_ITEM_NONE = 0;
+
+    /**
+     * Used with {@link #setDisabledActionModeMenuItems}.
+     *
+     * Disable menu item "Share".
+     */
+    public static final int MENU_ITEM_SHARE = 1 << 0;
+
+    /**
+     * Used with {@link #setDisabledActionModeMenuItems}.
+     *
+     * Disable menu item "Web Search".
+     */
+    public static final int MENU_ITEM_WEB_SEARCH = 1 << 1;
+
+    /**
+     * Used with {@link #setDisabledActionModeMenuItems}.
+     *
+     * Disable all the action mode menu items for text processing.
+     * By default WebView searches for activities that are able to handle
+     * {@link android.content.Intent#ACTION_PROCESS_TEXT} and show them in the
+     * action mode menu. If this flag is set via {@link
+     * #setDisabledActionModeMenuItems}, these menu items will be disabled.
+     */
+    public static final int MENU_ITEM_PROCESS_TEXT = 1 << 2;
 }
