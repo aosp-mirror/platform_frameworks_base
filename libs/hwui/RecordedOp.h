@@ -41,7 +41,10 @@ struct Vertex;
         OP_FN(BitmapOp) \
         OP_FN(RectOp) \
         OP_FN(RenderNodeOp) \
-        OP_FN(SimpleRectsOp)
+        OP_FN(SimpleRectsOp) \
+        OP_FN(BeginLayerOp) \
+        OP_FN(EndLayerOp) \
+        OP_FN(LayerOp)
 
 // Generate OpId enum
 #define IDENTITY_FN(Type) Type,
@@ -110,6 +113,31 @@ struct SimpleRectsOp : RecordedOp { // Filled, no AA (TODO: better name?)
             , vertexCount(vertexCount) {}
     Vertex* vertices;
     const size_t vertexCount;
+};
+
+/**
+ * Stateful operation! denotes the creation of an off-screen layer,
+ * and that commands following will render into it.
+ */
+struct BeginLayerOp : RecordedOp {
+    BeginLayerOp(BASE_PARAMS)
+            : SUPER(BeginLayerOp) {}
+};
+
+/**
+ * Stateful operation! Denotes end of off-screen layer, and that
+ * commands since last BeginLayerOp should be drawn into parent FBO.
+ *
+ * State in this op is empty, it just serves to signal that a layer has been finished.
+ */
+struct EndLayerOp : RecordedOp {
+    EndLayerOp()
+            : RecordedOp(RecordedOpId::EndLayerOp, Rect(0, 0), Matrix4::identity(), Rect(0, 0), nullptr) {}
+};
+
+struct LayerOp : RecordedOp {
+    LayerOp(BASE_PARAMS)
+            : SUPER(LayerOp) {}
 };
 
 }; // namespace uirenderer

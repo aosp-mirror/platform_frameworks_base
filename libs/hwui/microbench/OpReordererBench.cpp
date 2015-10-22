@@ -65,7 +65,7 @@ void BM_OpReorderer_deferAndRender::Run(int iters) {
             MicroBench::DoNotOptimize(&reorderer);
 
             BakedOpRenderer::Info info(caches, renderState, 200, 200, true);
-            reorderer.replayBakedOps<BakedOpRenderer>(&info);
+            reorderer.replayBakedOps<BakedOpRenderer>(info);
         }
         StopBenchmarkTiming();
     });

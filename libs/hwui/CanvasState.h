@@ -147,7 +147,7 @@ public:
     void setInvisible(bool value) { mSnapshot->invisible = value; }
 
     inline const mat4* currentTransform() const { return currentSnapshot()->transform; }
-    inline const Rect& currentClipRect() const { return currentSnapshot()->getClipRect(); }
+    inline const Rect& currentRenderTargetClip() const { return currentSnapshot()->getRenderTargetClip(); }
     inline Region* currentRegion() const { return currentSnapshot()->region; }
     inline int currentFlags() const { return currentSnapshot()->flags; }
     const Vector3& currentLightCenter() const { return currentSnapshot()->getRelativeLightCenter(); }

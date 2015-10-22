@@ -74,53 +74,64 @@ void BakedOpRenderer::endFrame(Info& info) {
 #endif
 }
 
-void BakedOpRenderer::onRenderNodeOp(Info*, const RenderNodeOp&, const BakedOpState&) {
+void BakedOpRenderer::onRenderNodeOp(Info&, const RenderNodeOp&, const BakedOpState&) {
     LOG_ALWAYS_FATAL("unsupported operation");
 }
 
-void BakedOpRenderer::onBitmapOp(Info* info, const BitmapOp& op, const BakedOpState& state) {
-    info->caches.textureState().activateTexture(0); // TODO: should this be automatic, and/or elsewhere?
-    Texture* texture = info->getTexture(op.bitmap);
+void BakedOpRenderer::onBitmapOp(Info& info, const BitmapOp& op, const BakedOpState& state) {
+    info.caches.textureState().activateTexture(0); // TODO: should this be automatic, and/or elsewhere?
+    Texture* texture = info.getTexture(op.bitmap);
     if (!texture) return;
     const AutoTexture autoCleanup(texture);
 
     const int textureFillFlags = (op.bitmap->colorType() == kAlpha_8_SkColorType)
             ? TextureFillFlags::IsAlphaMaskTexture : TextureFillFlags::None;
     Glop glop;
-    GlopBuilder(info->renderState, info->caches, &glop)
+    GlopBuilder(info.renderState, info.caches, &glop)
             .setRoundRectClipState(state.roundRectClipState)
             .setMeshTexturedUnitQuad(texture->uvMapper)
             .setFillTexturePaint(*texture, textureFillFlags, op.paint, state.alpha)
             .setTransform(state.computedState.transform, TransformFlags::None)
             .setModelViewMapUnitToRectSnap(Rect(0, 0, texture->width, texture->height))
             .build();
-    info->renderGlop(state, glop);
+    info.renderGlop(state, glop);
 }
 
-void BakedOpRenderer::onRectOp(Info* info, const RectOp& op, const BakedOpState& state) {
+void BakedOpRenderer::onRectOp(Info& info, const RectOp& op, const BakedOpState& state) {
     Glop glop;
-    GlopBuilder(info->renderState, info->caches, &glop)
+    GlopBuilder(info.renderState, info.caches, &glop)
             .setRoundRectClipState(state.roundRectClipState)
             .setMeshUnitQuad()
             .setFillPaint(*op.paint, state.alpha)
             .setTransform(state.computedState.transform, TransformFlags::None)
             .setModelViewMapUnitToRect(op.unmappedBounds)
             .build();
-    info->renderGlop(state, glop);
+    info.renderGlop(state, glop);
 }
 
-void BakedOpRenderer::onSimpleRectsOp(Info* info, const SimpleRectsOp& op, const BakedOpState& state) {
+void BakedOpRenderer::onSimpleRectsOp(Info& info, const SimpleRectsOp& op, const BakedOpState& state) {
     Glop glop;
-    GlopBuilder(info->renderState, info->caches, &glop)
+    GlopBuilder(info.renderState, info.caches, &glop)
             .setRoundRectClipState(state.roundRectClipState)
             .setMeshIndexedQuads(&op.vertices[0], op.vertexCount / 4)
             .setFillPaint(*op.paint, state.alpha)
             .setTransform(state.computedState.transform, TransformFlags::None)
             .setModelViewOffsetRect(0, 0, op.unmappedBounds)
             .build();
-    info->renderGlop(state, glop);
+    info.renderGlop(state, glop);
 }
 
+void BakedOpRenderer::onBeginLayerOp(Info& info, const BeginLayerOp& op, const BakedOpState& state) {
+    LOG_ALWAYS_FATAL("unsupported operation");
+}
+
+void BakedOpRenderer::onEndLayerOp(Info& info, const EndLayerOp& op, const BakedOpState& state) {
+    LOG_ALWAYS_FATAL("unsupported operation");
+}
+
+void BakedOpRenderer::onLayerOp(Info& info, const LayerOp& op, const BakedOpState& state) {
+    LOG_ALWAYS_FATAL("unsupported operation");
+}
 
 } // namespace uirenderer
 } // namespace android

@@ -68,7 +68,7 @@ public:
         // resolvedClipRect = intersect(parentMatrix * localClip, parentClip)
         clipRect = recordedOp.localClipRect;
         snapshot.transform->mapRect(clipRect);
-        clipRect.doIntersect(snapshot.getClipRect());
+        clipRect.doIntersect(snapshot.getRenderTargetClip());
         clipRect.snapToPixelBoundaries();
 
         // resolvedClippedBounds = intersect(resolvedMatrix * opBounds, resolvedClipRect)

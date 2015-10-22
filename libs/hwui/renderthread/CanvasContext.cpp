@@ -323,7 +323,7 @@ void CanvasContext::draw() {
     BakedOpRenderer::Info info(Caches::getInstance(), mRenderThread.renderState(),
             frame.width(), frame.height(), mOpaque);
     // TODO: profiler().draw(mCanvas);
-    reorderer.replayBakedOps<BakedOpRenderer>(&info);
+    reorderer.replayBakedOps<BakedOpRenderer>(info);
 
     bool drew = info.didDraw;
 

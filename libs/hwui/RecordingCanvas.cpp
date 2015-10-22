@@ -73,6 +73,20 @@ SkCanvas* RecordingCanvas::asSkCanvas() {
 }
 
 // ----------------------------------------------------------------------------
+// CanvasStateClient implementation
+// ----------------------------------------------------------------------------
+
+void RecordingCanvas::onViewportInitialized() {
+
+}
+
+void RecordingCanvas::onSnapshotRestored(const Snapshot& removed, const Snapshot& restored) {
+    if (removed.flags & Snapshot::kFlagIsFboLayer) {
+        addOp(new (alloc()) EndLayerOp());
+    }
+}
+
+// ----------------------------------------------------------------------------
 // android/graphics/Canvas state operations
 // ----------------------------------------------------------------------------
 // Save (layer)
@@ -97,8 +111,66 @@ void RecordingCanvas::restoreToCount(int saveCount) {
 
 int RecordingCanvas::saveLayer(float left, float top, float right, float bottom, const SkPaint* paint,
         SkCanvas::SaveFlags flags) {
-    LOG_ALWAYS_FATAL("TODO");
-    return 0;
+    if (!(flags & SkCanvas::kClipToLayer_SaveFlag)) {
+        LOG_ALWAYS_FATAL("unclipped layers not supported");
+    }
+    // force matrix/clip isolation for layer
+    flags |= SkCanvas::kClip_SaveFlag | SkCanvas::kMatrix_SaveFlag;
+
+
+    const Snapshot& previous = *mState.currentSnapshot();
+
+    // initialize the snapshot as though it almost represents an FBO layer so deferred draw
+    // operations will be able to store and restore the current clip and transform info, and
+    // quick rejection will be correct (for display lists)
+
+    const Rect untransformedBounds(left, top, right, bottom);
+
+    // determine clipped bounds relative to previous viewport.
+    Rect visibleBounds = untransformedBounds;
+    previous.transform->mapRect(visibleBounds);
+
+
+    visibleBounds.doIntersect(previous.getRenderTargetClip());
+    visibleBounds.snapToPixelBoundaries();
+
+    Rect previousViewport(0, 0, previous.getViewportWidth(), previous.getViewportHeight());
+    visibleBounds.doIntersect(previousViewport);
+
+    // Map visible bounds back to layer space, and intersect with parameter bounds
+    Rect layerBounds = visibleBounds;
+    Matrix4 inverse;
+    inverse.loadInverse(*previous.transform);
+    inverse.mapRect(layerBounds);
+    layerBounds.doIntersect(untransformedBounds);
+
+    int saveValue = mState.save((int) flags);
+    Snapshot& snapshot = *mState.writableSnapshot();
+
+    // layerBounds is now original bounds, but with clipped to clip
+    // and viewport to ensure it's minimal size.
+    if (layerBounds.isEmpty() || untransformedBounds.isEmpty()) {
+        // Don't bother recording layer, since it's been rejected
+        snapshot.resetClip(0, 0, 0, 0);
+        return saveValue;
+    }
+
+    snapshot.flags |= Snapshot::kFlagFboTarget | Snapshot::kFlagIsFboLayer;
+    snapshot.initializeViewport(untransformedBounds.getWidth(), untransformedBounds.getHeight());
+    snapshot.resetTransform(-untransformedBounds.left, -untransformedBounds.top, 0.0f);
+
+    Rect clip = layerBounds;
+    clip.translate(-untransformedBounds.left, -untransformedBounds.top);
+    snapshot.resetClip(clip.left, clip.top, clip.right, clip.bottom);
+    snapshot.roundRectClipState = nullptr;
+
+    addOp(new (alloc()) BeginLayerOp(
+            Rect(left, top, right, bottom),
+            *previous.transform, // transform to *draw* with
+            previous.getRenderTargetClip(), // clip to *draw* with
+            refPaint(paint)));
+
+    return saveValue;
 }
 
 // Matrix

@@ -54,19 +54,63 @@ namespace OpBatchType {
     };
 }
 
-class OpReorderer {
+class OpReorderer : public CanvasStateClient {
+    typedef std::function<void(void*, const RecordedOp&, const BakedOpState&)> BakedOpReceiver;
+
+    /**
+     * Stores the deferred render operations and state used to compute ordering
+     * for a single FBO/layer.
+     */
+    class LayerReorderer {
+    public:
+        // iterate back toward target to see if anything drawn since should overlap the new op
+        // if no target, merging ops still iterate to find similar batch to insert after
+        void locateInsertIndex(int batchId, const Rect& clippedBounds,
+                BatchBase** targetBatch, size_t* insertBatchIndex) const;
+
+        void deferUnmergeableOp(LinearAllocator& allocator, BakedOpState* op, batchid_t batchId);
+
+        // insertion point of a new batch, will hopefully be immediately after similar batch
+        // (generally, should be similar shader)
+        void deferMergeableOp(LinearAllocator& allocator,
+                BakedOpState* op, batchid_t batchId, mergeid_t mergeId);
+
+        void replayBakedOpsImpl(void* arg, BakedOpReceiver* receivers) const;
+
+        void clear() {
+            mBatches.clear();
+        }
+
+        void dump() const;
+
+        const BeginLayerOp* beginLayerOp = nullptr;
+
+    private:
+        std::vector<BatchBase*> mBatches;
+
+        /**
+         * Maps the mergeid_t returned by an op's getMergeId() to the most recently seen
+         * MergingDrawBatch of that id. These ids are unique per draw type and guaranteed to not
+         * collide, which avoids the need to resolve mergeid collisions.
+         */
+        std::unordered_map<mergeid_t, MergingOpBatch*> mMergingBatchLookup[OpBatchType::Count];
+
+        // Maps batch ids to the most recent *non-merging* batch of that id
+        OpBatch* mBatchLookup[OpBatchType::Count] = { nullptr };
+
+    };
 public:
     OpReorderer();
+    virtual ~OpReorderer() {}
 
     // TODO: not final, just presented this way for simplicity. Layers too?
     void defer(const SkRect& clip, int viewportWidth, int viewportHeight,
             const std::vector< sp<RenderNode> >& nodes);
 
     void defer(int viewportWidth, int viewportHeight, const DisplayList& displayList);
-    typedef std::function<void(void*, const RecordedOp&, const BakedOpState&)> BakedOpReceiver;
 
     /**
-     * replayBakedOps() is templated based on what class will recieve ops being replayed.
+     * replayBakedOps() is templated based on what class will receive ops being replayed.
      *
      * It constructs a lookup array of lambdas, which allows a recorded BakeOpState to use
      * state->op->opId to lookup a receiver that will be called when the op is replayed.
@@ -77,19 +121,37 @@ public:
      */
 #define BAKED_OP_RECEIVER(Type) \
     [](void* internalArg, const RecordedOp& op, const BakedOpState& state) { \
-        StaticReceiver::on##Type(static_cast<Arg*>(internalArg), static_cast<const Type&>(op), state); \
+        StaticReceiver::on##Type(*(static_cast<Arg*>(internalArg)), static_cast<const Type&>(op), state); \
     },
     template <typename StaticReceiver, typename Arg>
-    void replayBakedOps(Arg* arg) {
+    void replayBakedOps(Arg& arg) {
         static BakedOpReceiver receivers[] = {
             MAP_OPS(BAKED_OP_RECEIVER)
         };
-        StaticReceiver::startFrame(*arg);
-        replayBakedOpsImpl((void*)arg, receivers);
-        StaticReceiver::endFrame(*arg);
+        StaticReceiver::startFrame(arg);
+        replayBakedOpsImpl((void*)&arg, receivers);
+        StaticReceiver::endFrame(arg);
     }
+
+    void dump() const {
+        for (auto&& layer : mLayerReorderers) {
+            layer.dump();
+        }
+    }
+
+    ///////////////////////////////////////////////////////////////////
+    /// CanvasStateClient interface
+    ///////////////////////////////////////////////////////////////////
+    virtual void onViewportInitialized() override;
+    virtual void onSnapshotRestored(const Snapshot& removed, const Snapshot& restored) override;
+    virtual GLuint getTargetFbo() const override { return 0; }
+
 private:
-    BakedOpState* bakeOpState(const RecordedOp& recordedOp);
+    LayerReorderer& currentLayer() { return mLayerReorderers[mLayerStack.back()]; }
+
+    BakedOpState* tryBakeOpState(const RecordedOp& recordedOp) {
+        return BakedOpState::tryConstruct(mAllocator, *mCanvasState.currentSnapshot(), recordedOp);
+    }
 
     void deferImpl(const DisplayList& displayList);
 
@@ -105,36 +167,27 @@ private:
     void on##Type(const Type& op);
     MAP_OPS(INTERNAL_OP_HANDLER)
 
-    // iterate back toward target to see if anything drawn since should overlap the new op
-    // if no target, merging ops still iterate to find similar batch to insert after
-    void locateInsertIndex(int batchId, const Rect& clippedBounds,
-            BatchBase** targetBatch, size_t* insertBatchIndex) const;
+    // List of every deferred layer's render state. Replayed in reverse order to render a frame.
+    std::vector<LayerReorderer> mLayerReorderers;
 
-    void deferUnmergeableOp(BakedOpState* op, batchid_t batchId);
+    /*
+     * Stack of indices within mLayerReorderers representing currently active layers. If drawing
+     * layerA within a layerB, will contain, in order:
+     *  - 0 (representing FBO 0, always present)
+     *  - layerB's index
+     *  - layerA's index
+     *
+     * Note that this doesn't vector doesn't always map onto all values of mLayerReorderers. When a
+     * layer is finished deferring, it will still be represented in mLayerReorderers, but it's index
+     * won't be in mLayerStack. This is because it can be replayed, but can't have any more drawing
+     * ops added to it.
+    */
+    std::vector<size_t> mLayerStack;
 
-    // insertion point of a new batch, will hopefully be immediately after similar batch
-    // (generally, should be similar shader)
-    void deferMergeableOp(BakedOpState* op, batchid_t batchId, mergeid_t mergeId);
-
-    void dump();
-
-    std::vector<BatchBase*> mBatches;
-
-    /**
-     * Maps the mergeid_t returned by an op's getMergeId() to the most recently seen
-     * MergingDrawBatch of that id. These ids are unique per draw type and guaranteed to not
-     * collide, which avoids the need to resolve mergeid collisions.
-     */
-    std::unordered_map<mergeid_t, MergingOpBatch*> mMergingBatches[OpBatchType::Count];
-
-    // Maps batch ids to the most recent *non-merging* batch of that id
-    OpBatch* mBatchLookup[OpBatchType::Count] = { nullptr };
     CanvasState mCanvasState;
 
     // contains ResolvedOps and Batches
     LinearAllocator mAllocator;
-
-    int mEarliestBatchIndex = 0;
 };
 
 }; // namespace uirenderer

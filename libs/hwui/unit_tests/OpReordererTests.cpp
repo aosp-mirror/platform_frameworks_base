@@ -27,26 +27,69 @@
 namespace android {
 namespace uirenderer {
 
-#define UNSUPPORTED_OP(Info, Type) \
-        static void on##Type(Info*, const Type&, const BakedOpState&) { FAIL(); }
+/**
+ * Class that redirects static operation dispatch to virtual methods on a Client class.
+ *
+ * The client is recreated for every op (so data cannot be persisted between operations), but the
+ * virtual dispatch allows for default behaviors to be specified without enumerating each operation
+ * for every test.
+ *
+ * onXXXOp methods fail by default - tests should override ops they expect
+ * startFrame/endFrame do nothing by default - tests should override to intercept
+ */
+template<class CustomClient, class Arg>
+class TestReceiver {
+public:
+#define CLIENT_METHOD(Type) \
+    virtual void on##Type(Arg&, const Type&, const BakedOpState&) { FAIL(); }
+    class Client {
+    public:
+        virtual ~Client() {};
+        MAP_OPS(CLIENT_METHOD)
+
+        virtual void startFrame(Arg& info) {}
+        virtual void endFrame(Arg& info) {}
+    };
+
+#define DISPATCHER_METHOD(Type) \
+    static void on##Type(Arg& arg, const Type& op, const BakedOpState& state) { \
+        CustomClient client; client.on##Type(arg, op, state); \
+    }
+    MAP_OPS(DISPATCHER_METHOD)
+
+    static void startFrame(Arg& info) {
+        CustomClient client;
+        client.startFrame(info);
+    }
+
+    static void endFrame(Arg& info) {
+        CustomClient client;
+        client.endFrame(info);
+    }
+};
 
 class Info {
 public:
     int index = 0;
 };
 
-class SimpleReceiver {
+// Receiver class which will fail if it receives any ops
+class FailReceiver : public TestReceiver<FailReceiver, Info>::Client {};
+
+class SimpleReceiver : public TestReceiver<SimpleReceiver, Info>::Client {
 public:
-    static void onBitmapOp(Info* info, const BitmapOp& op, const BakedOpState& state) {
-        EXPECT_EQ(1, info->index++);
+    void startFrame(Info& info) override {
+        EXPECT_EQ(0, info.index++);
     }
-    static void onRectOp(Info* info, const RectOp& op, const BakedOpState& state) {
-        EXPECT_EQ(0, info->index++);
+    void onRectOp(Info& info, const RectOp& op, const BakedOpState& state) override {
+        EXPECT_EQ(1, info.index++);
     }
-    UNSUPPORTED_OP(Info, RenderNodeOp)
-    UNSUPPORTED_OP(Info, SimpleRectsOp)
-    static void startFrame(Info& info) {}
-    static void endFrame(Info& info) {}
+    void onBitmapOp(Info& info, const BitmapOp& op, const BakedOpState& state) override {
+        EXPECT_EQ(2, info.index++);
+    }
+    void endFrame(Info& info) override {
+        EXPECT_EQ(3, info.index++);
+    }
 };
 TEST(OpReorderer, simple) {
     auto dl = TestUtils::createDisplayList<RecordingCanvas>(100, 200, [](RecordingCanvas& canvas) {
@@ -54,28 +97,39 @@ TEST(OpReorderer, simple) {
         canvas.drawRect(0, 0, 100, 200, SkPaint());
         canvas.drawBitmap(bitmap, 10, 10, nullptr);
     });
-
     OpReorderer reorderer;
     reorderer.defer(200, 200, *dl);
 
     Info info;
-    reorderer.replayBakedOps<SimpleReceiver>(&info);
+    reorderer.replayBakedOps<TestReceiver<SimpleReceiver, Info>>(info);
+    EXPECT_EQ(4, info.index); // 2 ops + start + end
+}
+
+
+TEST(OpReorderer, simpleRejection) {
+    auto dl = TestUtils::createDisplayList<RecordingCanvas>(200, 200, [](RecordingCanvas& canvas) {
+        canvas.save(SkCanvas::kMatrix_SaveFlag | SkCanvas::kClip_SaveFlag);
+        canvas.clipRect(200, 200, 400, 400, SkRegion::kIntersect_Op); // intersection should be empty
+        canvas.drawRect(0, 0, 400, 400, SkPaint());
+        canvas.restore();
+    });
+    OpReorderer reorderer;
+    reorderer.defer(200, 200, *dl);
+
+    Info info;
+    reorderer.replayBakedOps<TestReceiver<FailReceiver, Info>>(info);
 }
 
 
 static int SIMPLE_BATCHING_LOOPS = 5;
-class SimpleBatchingReceiver {
+class SimpleBatchingReceiver : public TestReceiver<SimpleBatchingReceiver, Info>::Client {
 public:
-    static void onBitmapOp(Info* info, const BitmapOp& op, const BakedOpState& state) {
-        EXPECT_TRUE(info->index++ >= SIMPLE_BATCHING_LOOPS);
+    void onBitmapOp(Info& info, const BitmapOp& op, const BakedOpState& state) override {
+        EXPECT_TRUE(info.index++ >= SIMPLE_BATCHING_LOOPS);
     }
-    static void onRectOp(Info* info, const RectOp& op, const BakedOpState& state) {
-        EXPECT_TRUE(info->index++ < SIMPLE_BATCHING_LOOPS);
+    void onRectOp(Info& info, const RectOp& op, const BakedOpState& state) override {
+        EXPECT_TRUE(info.index++ < SIMPLE_BATCHING_LOOPS);
     }
-    UNSUPPORTED_OP(Info, RenderNodeOp)
-    UNSUPPORTED_OP(Info, SimpleRectsOp)
-    static void startFrame(Info& info) {}
-    static void endFrame(Info& info) {}
 };
 TEST(OpReorderer, simpleBatching) {
     auto dl = TestUtils::createDisplayList<RecordingCanvas>(200, 200, [](RecordingCanvas& canvas) {
@@ -96,15 +150,14 @@ TEST(OpReorderer, simpleBatching) {
     reorderer.defer(200, 200, *dl);
 
     Info info;
-    reorderer.replayBakedOps<SimpleBatchingReceiver>(&info);
+    reorderer.replayBakedOps<TestReceiver<SimpleBatchingReceiver, Info>>(info);
     EXPECT_EQ(2 * SIMPLE_BATCHING_LOOPS, info.index); // 2 x loops ops, because no merging (TODO: force no merging)
 }
 
-class RenderNodeReceiver {
+class RenderNodeReceiver : public TestReceiver<RenderNodeReceiver, Info>::Client {
 public:
-    UNSUPPORTED_OP(Info, BitmapOp)
-    static void onRectOp(Info* info, const RectOp& op, const BakedOpState& state) {
-        switch(info->index++) {
+    void onRectOp(Info& info, const RectOp& op, const BakedOpState& state) override {
+        switch(info.index++) {
         case 0:
             EXPECT_EQ(Rect(0, 0, 200, 200), state.computedState.clippedBounds);
             EXPECT_EQ(SK_ColorDKGRAY, op.paint->getColor());
@@ -117,10 +170,6 @@ public:
             FAIL();
         }
     }
-    UNSUPPORTED_OP(Info, RenderNodeOp)
-    UNSUPPORTED_OP(Info, SimpleRectsOp)
-    static void startFrame(Info& info) {}
-    static void endFrame(Info& info) {}
 };
 TEST(OpReorderer, renderNode) {
     sp<RenderNode> child = TestUtils::createNode<RecordingCanvas>(10, 10, 110, 110, [](RecordingCanvas& canvas) {
@@ -151,22 +200,17 @@ TEST(OpReorderer, renderNode) {
     reorderer.defer(SkRect::MakeWH(200, 200), 200, 200, nodes);
 
     Info info;
-    reorderer.replayBakedOps<RenderNodeReceiver>(&info);
+    reorderer.replayBakedOps<TestReceiver<RenderNodeReceiver, Info>>(info);
 }
 
-class ClippedReceiver {
+class ClippedReceiver : public TestReceiver<ClippedReceiver, Info>::Client {
 public:
-    static void onBitmapOp(Info* info, const BitmapOp& op, const BakedOpState& state) {
-        EXPECT_EQ(0, info->index++);
+    void onBitmapOp(Info& info, const BitmapOp& op, const BakedOpState& state) override {
+        EXPECT_EQ(0, info.index++);
         EXPECT_EQ(Rect(10, 20, 30, 40), state.computedState.clippedBounds);
         EXPECT_EQ(Rect(10, 20, 30, 40), state.computedState.clipRect);
         EXPECT_TRUE(state.computedState.transform.isIdentity());
     }
-    UNSUPPORTED_OP(Info, RectOp)
-    UNSUPPORTED_OP(Info, RenderNodeOp)
-    UNSUPPORTED_OP(Info, SimpleRectsOp)
-    static void startFrame(Info& info) {}
-    static void endFrame(Info& info) {}
 };
 TEST(OpReorderer, clipped) {
     sp<RenderNode> node = TestUtils::createNode<RecordingCanvas>(0, 0, 200, 200, [](RecordingCanvas& canvas) {
@@ -182,8 +226,106 @@ TEST(OpReorderer, clipped) {
             200, 200, nodes);
 
     Info info;
-    reorderer.replayBakedOps<ClippedReceiver>(&info);
+    reorderer.replayBakedOps<TestReceiver<ClippedReceiver, Info>>(info);
 }
 
+
+class SaveLayerSimpleReceiver : public TestReceiver<SaveLayerSimpleReceiver, Info>::Client {
+public:
+    void onRectOp(Info& info, const RectOp& op, const BakedOpState& state) override {
+        EXPECT_EQ(0, info.index++);
+        EXPECT_EQ(Rect(10, 10, 190, 190), op.unmappedBounds);
+        EXPECT_EQ(Rect(0, 0, 180, 180), state.computedState.clippedBounds);
+        EXPECT_EQ(Rect(0, 0, 180, 180), state.computedState.clipRect);
+
+        Matrix4 expectedTransform;
+        expectedTransform.loadTranslate(-10, -10, 0);
+        EXPECT_MATRIX_APPROX_EQ(expectedTransform, state.computedState.transform);
+    }
+    void onLayerOp(Info& info, const LayerOp& op, const BakedOpState& state) override {
+        EXPECT_EQ(1, info.index++);
+        EXPECT_EQ(Rect(10, 10, 190, 190), state.computedState.clippedBounds);
+        EXPECT_EQ(Rect(0, 0, 200, 200), state.computedState.clipRect);
+        EXPECT_TRUE(state.computedState.transform.isIdentity());
+    }
+};
+TEST(OpReorderer, saveLayerSimple) {
+    auto dl = TestUtils::createDisplayList<RecordingCanvas>(200, 200, [](RecordingCanvas& canvas) {
+        canvas.saveLayerAlpha(10, 10, 190, 190, 128, SkCanvas::kClipToLayer_SaveFlag);
+        canvas.drawRect(10, 10, 190, 190, SkPaint());
+        canvas.restore();
+    });
+
+    OpReorderer reorderer;
+    reorderer.defer(200, 200, *dl);
+
+    Info info;
+    reorderer.replayBakedOps<TestReceiver<SaveLayerSimpleReceiver, Info>>(info);
+    EXPECT_EQ(2, info.index);
 }
+
+
+// saveLayer1 {rect1, saveLayer2 { rect2 } } will play back as rect2, rect1, layerOp2, layerOp1
+class SaveLayerNestedReceiver : public TestReceiver<SaveLayerNestedReceiver, Info>::Client {
+public:
+    void onRectOp(Info& info, const RectOp& op, const BakedOpState& state) override {
+        const int index = info.index++;
+        if (index == 0) {
+            EXPECT_EQ(Rect(0, 0, 400, 400), op.unmappedBounds); // inner rect
+        } else if (index == 1) {
+            EXPECT_EQ(Rect(0, 0, 800, 800), op.unmappedBounds); // outer rect
+        } else { FAIL(); }
+    }
+    void onLayerOp(Info& info, const LayerOp& op, const BakedOpState& state) override {
+        const int index = info.index++;
+        if (index == 2) {
+            EXPECT_EQ(Rect(0, 0, 400, 400), op.unmappedBounds); // inner layer
+        } else if (index == 3) {
+            EXPECT_EQ(Rect(0, 0, 800, 800), op.unmappedBounds); // outer layer
+        } else { FAIL(); }
+    }
+};
+TEST(OpReorderer, saveLayerNested) {
+    auto dl = TestUtils::createDisplayList<RecordingCanvas>(800, 800, [](RecordingCanvas& canvas) {
+        canvas.saveLayerAlpha(0, 0, 800, 800, 128, SkCanvas::kClipToLayer_SaveFlag);
+        {
+            canvas.drawRect(0, 0, 800, 800, SkPaint());
+            canvas.saveLayerAlpha(0, 0, 400, 400, 128, SkCanvas::kClipToLayer_SaveFlag);
+            {
+                canvas.drawRect(0, 0, 400, 400, SkPaint());
+            }
+            canvas.restore();
+        }
+        canvas.restore();
+    });
+
+    OpReorderer reorderer;
+    reorderer.defer(800, 800, *dl);
+
+    Info info;
+    reorderer.replayBakedOps<TestReceiver<SaveLayerNestedReceiver, Info>>(info);
+    EXPECT_EQ(4, info.index);
 }
+
+TEST(OpReorderer, saveLayerContentRejection) {
+    auto dl = TestUtils::createDisplayList<RecordingCanvas>(200, 200, [](RecordingCanvas& canvas) {
+        canvas.save(SkCanvas::kMatrix_SaveFlag | SkCanvas::kClip_SaveFlag);
+        canvas.clipRect(200, 200, 400, 400, SkRegion::kIntersect_Op);
+        canvas.saveLayerAlpha(200, 200, 400, 400, 128, SkCanvas::kClipToLayer_SaveFlag);
+
+        // draw within save layer may still be recorded, but shouldn't be drawn
+        canvas.drawRect(200, 200, 400, 400, SkPaint());
+
+        canvas.restore();
+        canvas.restore();
+    });
+    OpReorderer reorderer;
+    reorderer.defer(200, 200, *dl);
+    Info info;
+
+    // should see no ops, even within the layer, since the layer should be rejected
+    reorderer.replayBakedOps<TestReceiver<FailReceiver, Info>>(info);
+}
+
+} // namespace uirenderer
+} // namespace android

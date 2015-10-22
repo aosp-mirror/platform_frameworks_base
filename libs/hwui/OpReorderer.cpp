@@ -52,7 +52,8 @@ public:
     const std::vector<BakedOpState*>& getOps() const { return mOps; }
 
     void dump() const {
-        ALOGD("    Batch %p, merging %d, bounds " RECT_STRING, this, mMerging, RECT_ARGS(mBounds));
+        ALOGD("    Batch %p, id %d, merging %d, count %d, bounds " RECT_STRING,
+                this, mBatchId, mMerging, mOps.size(), RECT_ARGS(mBounds));
     }
 protected:
     batchid_t mBatchId;
@@ -201,16 +202,105 @@ private:
     Rect mClipRect;
 };
 
-class NullClient: public CanvasStateClient {
-    void onViewportInitialized() override {}
-    void onSnapshotRestored(const Snapshot& removed, const Snapshot& restored) {}
-    GLuint getTargetFbo() const override { return 0; }
-};
-static NullClient sNullClient;
+// iterate back toward target to see if anything drawn since should overlap the new op
+// if no target, merging ops still interate to find similar batch to insert after
+void OpReorderer::LayerReorderer::locateInsertIndex(int batchId, const Rect& clippedBounds,
+        BatchBase** targetBatch, size_t* insertBatchIndex) const {
+    for (int i = mBatches.size() - 1; i >= 0; i--) {
+        BatchBase* overBatch = mBatches[i];
+
+        if (overBatch == *targetBatch) break;
+
+        // TODO: also consider shader shared between batch types
+        if (batchId == overBatch->getBatchId()) {
+            *insertBatchIndex = i + 1;
+            if (!*targetBatch) break; // found insert position, quit
+        }
+
+        if (overBatch->intersects(clippedBounds)) {
+            // NOTE: it may be possible to optimize for special cases where two operations
+            // of the same batch/paint could swap order, such as with a non-mergeable
+            // (clipped) and a mergeable text operation
+            *targetBatch = nullptr;
+            break;
+        }
+    }
+}
+
+void OpReorderer::LayerReorderer::deferUnmergeableOp(LinearAllocator& allocator,
+        BakedOpState* op, batchid_t batchId) {
+    OpBatch* targetBatch = mBatchLookup[batchId];
+
+    size_t insertBatchIndex = mBatches.size();
+    if (targetBatch) {
+        locateInsertIndex(batchId, op->computedState.clippedBounds,
+                (BatchBase**)(&targetBatch), &insertBatchIndex);
+    }
+
+    if (targetBatch) {
+        targetBatch->batchOp(op);
+    } else  {
+        // new non-merging batch
+        targetBatch = new (allocator) OpBatch(batchId, op);
+        mBatchLookup[batchId] = targetBatch;
+        mBatches.insert(mBatches.begin() + insertBatchIndex, targetBatch);
+    }
+}
+
+// insertion point of a new batch, will hopefully be immediately after similar batch
+// (generally, should be similar shader)
+void OpReorderer::LayerReorderer::deferMergeableOp(LinearAllocator& allocator,
+        BakedOpState* op, batchid_t batchId, mergeid_t mergeId) {
+    MergingOpBatch* targetBatch = nullptr;
+
+    // Try to merge with any existing batch with same mergeId
+    auto getResult = mMergingBatchLookup[batchId].find(mergeId);
+    if (getResult != mMergingBatchLookup[batchId].end()) {
+        targetBatch = getResult->second;
+        if (!targetBatch->canMergeWith(op)) {
+            targetBatch = nullptr;
+        }
+    }
+
+    size_t insertBatchIndex = mBatches.size();
+    locateInsertIndex(batchId, op->computedState.clippedBounds,
+            (BatchBase**)(&targetBatch), &insertBatchIndex);
+
+    if (targetBatch) {
+        targetBatch->mergeOp(op);
+    } else  {
+        // new merging batch
+        targetBatch = new (allocator) MergingOpBatch(batchId, op);
+        mMergingBatchLookup[batchId].insert(std::make_pair(mergeId, targetBatch));
+
+        mBatches.insert(mBatches.begin() + insertBatchIndex, targetBatch);
+    }
+}
+
+void OpReorderer::LayerReorderer::replayBakedOpsImpl(void* arg, BakedOpReceiver* receivers) const {
+    for (const BatchBase* batch : mBatches) {
+        // TODO: different behavior based on batch->isMerging()
+        for (const BakedOpState* op : batch->getOps()) {
+            receivers[op->op->opId](arg, *op->op, *op);
+        }
+    }
+}
+
+void OpReorderer::LayerReorderer::dump() const {
+    for (const BatchBase* batch : mBatches) {
+        batch->dump();
+    }
+}
 
 OpReorderer::OpReorderer()
-        : mCanvasState(sNullClient) {
+        : mCanvasState(*this) {
+    mLayerReorderers.emplace_back();
+    mLayerStack.push_back(0);
 }
+
+void OpReorderer::onViewportInitialized() {}
+
+void OpReorderer::onSnapshotRestored(const Snapshot& removed, const Snapshot& restored) {}
 
 void OpReorderer::defer(const SkRect& clip, int viewportWidth, int viewportHeight,
         const std::vector< sp<RenderNode> >& nodes) {
@@ -244,11 +334,11 @@ void OpReorderer::defer(int viewportWidth, int viewportHeight, const DisplayList
  * This allows opIds embedded in the RecordedOps to be used for dispatching to these lambdas. E.g. a
  * BitmapOp op then would be dispatched to OpReorderer::onBitmapOp(const BitmapOp&)
  */
-#define OP_RECIEVER(Type) \
+#define OP_RECEIVER(Type) \
         [](OpReorderer& reorderer, const RecordedOp& op) { reorderer.on##Type(static_cast<const Type&>(op)); },
 void OpReorderer::deferImpl(const DisplayList& displayList) {
     static std::function<void(OpReorderer& reorderer, const RecordedOp&)> receivers[] = {
-        MAP_OPS(OP_RECIEVER)
+        MAP_OPS(OP_RECEIVER)
     };
     for (const DisplayList::Chunk& chunk : displayList.getChunks()) {
         for (size_t opIndex = chunk.beginOpIndex; opIndex < chunk.endOpIndex; opIndex++) {
@@ -260,23 +350,18 @@ void OpReorderer::deferImpl(const DisplayList& displayList) {
 
 void OpReorderer::replayBakedOpsImpl(void* arg, BakedOpReceiver* receivers) {
     ATRACE_NAME("flush drawing commands");
-    for (const BatchBase* batch : mBatches) {
-        // TODO: different behavior based on batch->isMerging()
-        for (const BakedOpState* op : batch->getOps()) {
-            receivers[op->op->opId](arg, *op->op, *op);
-        }
+    // Relay through layers in reverse order, since layers
+    // later in the list will be drawn by earlier ones
+    for (int i = mLayerReorderers.size() - 1; i >= 0; i--) {
+        mLayerReorderers[i].replayBakedOpsImpl(arg, receivers);
     }
-}
-
-BakedOpState* OpReorderer::bakeOpState(const RecordedOp& recordedOp) {
-    return BakedOpState::tryConstruct(mAllocator, *mCanvasState.currentSnapshot(), recordedOp);
 }
 
 void OpReorderer::onRenderNodeOp(const RenderNodeOp& op) {
     if (op.renderNode->nothingToDraw()) {
         return;
     }
-    mCanvasState.save(SkCanvas::kClip_SaveFlag | SkCanvas::kMatrix_SaveFlag);
+    int count = mCanvasState.save(SkCanvas::kClip_SaveFlag | SkCanvas::kMatrix_SaveFlag);
 
     // apply state from RecordedOp
     mCanvasState.concatMatrix(op.localMatrix);
@@ -285,10 +370,10 @@ void OpReorderer::onRenderNodeOp(const RenderNodeOp& op) {
 
     // apply RenderProperties state
     if (op.renderNode->applyViewProperties(mCanvasState)) {
-        // not rejected do ops...
+        // if node not rejected based on properties, do ops...
         deferImpl(op.renderNode->getDisplayList());
     }
-    mCanvasState.restore();
+    mCanvasState.restoreToCount(count);
 }
 
 static batchid_t tessellatedBatchId(const SkPaint& paint) {
@@ -298,104 +383,70 @@ static batchid_t tessellatedBatchId(const SkPaint& paint) {
 }
 
 void OpReorderer::onBitmapOp(const BitmapOp& op) {
-    BakedOpState* bakedStateOp = bakeOpState(op);
+    BakedOpState* bakedStateOp = tryBakeOpState(op);
     if (!bakedStateOp) return; // quick rejected
 
     mergeid_t mergeId = (mergeid_t) op.bitmap->getGenerationID();
     // TODO: AssetAtlas
-
-    deferMergeableOp(bakedStateOp, OpBatchType::Bitmap, mergeId);
+    currentLayer().deferMergeableOp(mAllocator, bakedStateOp, OpBatchType::Bitmap, mergeId);
 }
 
 void OpReorderer::onRectOp(const RectOp& op) {
-    BakedOpState* bakedStateOp = bakeOpState(op);
+    BakedOpState* bakedStateOp = tryBakeOpState(op);
     if (!bakedStateOp) return; // quick rejected
-    deferUnmergeableOp(bakedStateOp, tessellatedBatchId(*op.paint));
+    currentLayer().deferUnmergeableOp(mAllocator, bakedStateOp, tessellatedBatchId(*op.paint));
 }
 
 void OpReorderer::onSimpleRectsOp(const SimpleRectsOp& op) {
-    BakedOpState* bakedStateOp = bakeOpState(op);
+    BakedOpState* bakedStateOp = tryBakeOpState(op);
     if (!bakedStateOp) return; // quick rejected
-    deferUnmergeableOp(bakedStateOp, OpBatchType::Vertices);
+    currentLayer().deferUnmergeableOp(mAllocator, bakedStateOp, OpBatchType::Vertices);
 }
 
-// iterate back toward target to see if anything drawn since should overlap the new op
-// if no target, merging ops still interate to find similar batch to insert after
-void OpReorderer::locateInsertIndex(int batchId, const Rect& clippedBounds,
-        BatchBase** targetBatch, size_t* insertBatchIndex) const {
-    for (int i = mBatches.size() - 1; i >= mEarliestBatchIndex; i--) {
-        BatchBase* overBatch = mBatches[i];
+// TODO: test rejection at defer time, where the bounds become empty
+void OpReorderer::onBeginLayerOp(const BeginLayerOp& op) {
+    mCanvasState.save(SkCanvas::kClip_SaveFlag | SkCanvas::kMatrix_SaveFlag);
+    mCanvasState.writableSnapshot()->transform->loadIdentity();
+    mCanvasState.writableSnapshot()->initializeViewport(
+            (int) op.unmappedBounds.getWidth(), (int) op.unmappedBounds.getHeight());
+    mCanvasState.writableSnapshot()->roundRectClipState = nullptr;
 
-        if (overBatch == *targetBatch) break;
-
-        // TODO: also consider shader shared between batch types
-        if (batchId == overBatch->getBatchId()) {
-            *insertBatchIndex = i + 1;
-            if (!*targetBatch) break; // found insert position, quit
-        }
-
-        if (overBatch->intersects(clippedBounds)) {
-            // NOTE: it may be possible to optimize for special cases where two operations
-            // of the same batch/paint could swap order, such as with a non-mergeable
-            // (clipped) and a mergeable text operation
-            *targetBatch = nullptr;
-            break;
-        }
-    }
+    // create a new layer, and push its index on the stack
+    mLayerStack.push_back(mLayerReorderers.size());
+    mLayerReorderers.emplace_back();
+    mLayerReorderers.back().beginLayerOp = &op;
 }
 
-void OpReorderer::deferUnmergeableOp(BakedOpState* op, batchid_t batchId) {
-    OpBatch* targetBatch = mBatchLookup[batchId];
+void OpReorderer::onEndLayerOp(const EndLayerOp& /* ignored */) {
+    mCanvasState.restore();
 
-    size_t insertBatchIndex = mBatches.size();
-    if (targetBatch) {
-        locateInsertIndex(batchId, op->computedState.clippedBounds,
-                (BatchBase**)(&targetBatch), &insertBatchIndex);
-    }
+    const BeginLayerOp& beginLayerOp = *currentLayer().beginLayerOp;
 
-    if (targetBatch) {
-        targetBatch->batchOp(op);
-    } else  {
-        // new non-merging batch
-        targetBatch = new (mAllocator) OpBatch(batchId, op);
-        mBatchLookup[batchId] = targetBatch;
-        mBatches.insert(mBatches.begin() + insertBatchIndex, targetBatch);
-    }
-}
+    // pop finished layer off of the stack
+    int finishedLayerIndex = mLayerStack.back();
+    mLayerStack.pop_back();
 
-// insertion point of a new batch, will hopefully be immediately after similar batch
-// (generally, should be similar shader)
-void OpReorderer::deferMergeableOp(BakedOpState* op, batchid_t batchId, mergeid_t mergeId) {
-    MergingOpBatch* targetBatch = nullptr;
+    // record the draw operation into the previous layer's list of draw commands
+    // uses state from the associated beginLayerOp, since it has all the state needed for drawing
+    LayerOp* drawLayerOp = new (mAllocator) LayerOp(
+            beginLayerOp.unmappedBounds,
+            beginLayerOp.localMatrix,
+            beginLayerOp.localClipRect,
+            beginLayerOp.paint);
+    BakedOpState* bakedOpState = tryBakeOpState(*drawLayerOp);
 
-    // Try to merge with any existing batch with same mergeId
-    auto getResult = mMergingBatches[batchId].find(mergeId);
-    if (getResult != mMergingBatches[batchId].end()) {
-        targetBatch = getResult->second;
-        if (!targetBatch->canMergeWith(op)) {
-            targetBatch = nullptr;
-        }
-    }
-
-    size_t insertBatchIndex = mBatches.size();
-    locateInsertIndex(batchId, op->computedState.clippedBounds,
-            (BatchBase**)(&targetBatch), &insertBatchIndex);
-
-    if (targetBatch) {
-        targetBatch->mergeOp(op);
-    } else  {
-        // new merging batch
-        targetBatch = new (mAllocator) MergingOpBatch(batchId, op);
-        mMergingBatches[batchId].insert(std::make_pair(mergeId, targetBatch));
-
-        mBatches.insert(mBatches.begin() + insertBatchIndex, targetBatch);
+    if (bakedOpState) {
+        // Layer will be drawn into parent layer (which is now current, since we popped mLayerStack)
+        currentLayer().deferUnmergeableOp(mAllocator, bakedOpState, OpBatchType::Bitmap);
+    } else {
+        // Layer won't be drawn - delete its drawing batches to prevent it from doing any work
+        mLayerReorderers[finishedLayerIndex].clear();
+        return;
     }
 }
 
-void OpReorderer::dump() {
-    for (const BatchBase* batch : mBatches) {
-        batch->dump();
-    }
+void OpReorderer::onLayerOp(const LayerOp& op) {
+    LOG_ALWAYS_FATAL("unsupported");
 }
 
 } // namespace uirenderer

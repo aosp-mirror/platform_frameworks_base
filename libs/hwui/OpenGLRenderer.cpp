@@ -223,7 +223,7 @@ void OpenGLRenderer::resumeAfterLayer() {
 void OpenGLRenderer::callDrawGLFunction(Functor* functor, Rect& dirty) {
     if (mState.currentlyIgnored()) return;
 
-    Rect clip(mState.currentClipRect());
+    Rect clip(mState.currentRenderTargetClip());
     clip.snapToPixelBoundaries();
 
     // Since we don't know what the functor will draw, let's dirty
@@ -488,7 +488,7 @@ void OpenGLRenderer::calculateLayerBoundsAndClip(Rect& bounds, Rect& clip, bool 
     currentTransform()->mapRect(bounds);
 
     // Layers only make sense if they are in the framebuffer's bounds
-    bounds.doIntersect(mState.currentClipRect());
+    bounds.doIntersect(mState.currentRenderTargetClip());
     if (!bounds.isEmpty()) {
         // We cannot work with sub-pixels in this case
         bounds.snapToPixelBoundaries();
@@ -1036,7 +1036,7 @@ void OpenGLRenderer::dirtyLayer(const float left, const float top,
 }
 
 void OpenGLRenderer::dirtyLayerUnchecked(Rect& bounds, Region* region) {
-    bounds.doIntersect(mState.currentClipRect());
+    bounds.doIntersect(mState.currentRenderTargetClip());
     if (!bounds.isEmpty()) {
         bounds.snapToPixelBoundaries();
         android::Rect dirty(bounds.left, bounds.top, bounds.right, bounds.bottom);
@@ -1084,7 +1084,7 @@ void OpenGLRenderer::clearLayerRegions() {
                 .setMeshIndexedQuads(&mesh[0], quadCount)
                 .setFillClear()
                 .setTransform(*currentSnapshot(), transformFlags)
-                .setModelViewOffsetRect(0, 0, Rect(currentSnapshot()->getClipRect()))
+                .setModelViewOffsetRect(0, 0, Rect(currentSnapshot()->getRenderTargetClip()))
                 .build();
         renderGlop(glop, GlopRenderType::LayerClear);
 
@@ -1099,7 +1099,7 @@ void OpenGLRenderer::clearLayerRegions() {
 ///////////////////////////////////////////////////////////////////////////////
 
 bool OpenGLRenderer::storeDisplayState(DeferredDisplayState& state, int stateDeferFlags) {
-    const Rect& currentClip = mState.currentClipRect();
+    const Rect& currentClip = mState.currentRenderTargetClip();
     const mat4* currentMatrix = currentTransform();
 
     if (stateDeferFlags & kStateDeferFlag_Draw) {
@@ -1187,7 +1187,7 @@ void OpenGLRenderer::setupMergedMultiDraw(const Rect* clipRect) {
 ///////////////////////////////////////////////////////////////////////////////
 
 void OpenGLRenderer::setScissorFromClip() {
-    Rect clip(mState.currentClipRect());
+    Rect clip(mState.currentRenderTargetClip());
     clip.snapToPixelBoundaries();
 
     if (mRenderState.scissor().set(clip.left, getViewportHeight() - clip.bottom,
@@ -1430,7 +1430,7 @@ void OpenGLRenderer::drawRenderNode(RenderNode* renderNode, Rect& dirty, int32_t
             return;
         }
 
-        DeferredDisplayList deferredList(mState.currentClipRect());
+        DeferredDisplayList deferredList(mState.currentRenderTargetClip());
         DeferStateStruct deferStruct(deferredList, *this, replayFlags);
         renderNode->defer(deferStruct, 0);
 
@@ -1765,7 +1765,7 @@ void OpenGLRenderer::drawColor(int color, SkXfermode::Mode mode) {
     // No need to check against the clip, we fill the clip region
     if (mState.currentlyIgnored()) return;
 
-    Rect clip(mState.currentClipRect());
+    Rect clip(mState.currentRenderTargetClip());
     clip.snapToPixelBoundaries();
 
     SkPaint paint;
@@ -2030,7 +2030,7 @@ void OpenGLRenderer::drawPosText(const char* text, int bytesCount, int count,
     }
     fontRenderer.setTextureFiltering(linearFilter);
 
-    const Rect& clip(pureTranslate ? writableSnapshot()->getClipRect() : writableSnapshot()->getLocalClip());
+    const Rect& clip(pureTranslate ? writableSnapshot()->getRenderTargetClip() : writableSnapshot()->getLocalClip());
     Rect bounds(FLT_MAX / 2.0f, FLT_MAX / 2.0f, FLT_MIN / 2.0f, FLT_MIN / 2.0f);
 
     TextDrawFunctor functor(this, x, y, pureTranslate, alpha, mode, paint);
@@ -2191,7 +2191,7 @@ void OpenGLRenderer::drawText(const char* text, int bytesCount, int count, float
     fontRenderer.setTextureFiltering(linearFilter);
 
     // TODO: Implement better clipping for scaled/rotated text
-    const Rect* clip = !pureTranslate ? nullptr : &mState.currentClipRect();
+    const Rect* clip = !pureTranslate ? nullptr : &mState.currentRenderTargetClip();
     Rect layerBounds(FLT_MAX / 2.0f, FLT_MAX / 2.0f, FLT_MIN / 2.0f, FLT_MIN / 2.0f);
 
     bool status;

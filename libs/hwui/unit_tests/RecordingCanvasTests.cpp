@@ -24,11 +24,11 @@ namespace android {
 namespace uirenderer {
 
 static void playbackOps(const DisplayList& displayList,
-        std::function<void(const RecordedOp&)> opReciever) {
+        std::function<void(const RecordedOp&)> opReceiver) {
     for (const DisplayList::Chunk& chunk : displayList.getChunks()) {
         for (size_t opIndex = chunk.beginOpIndex; opIndex < chunk.endOpIndex; opIndex++) {
             RecordedOp* op = displayList.getOps()[opIndex];
-            opReciever(*op);
+            opReceiver(*op);
         }
     }
 }
@@ -109,5 +109,123 @@ TEST(RecordingCanvas, backgroundAndImage) {
     ASSERT_EQ(2, count); // two draws observed
 }
 
+TEST(RecordingCanvas, saveLayerSimple) {
+    auto dl = TestUtils::createDisplayList<RecordingCanvas>(200, 200, [](RecordingCanvas& canvas) {
+        canvas.saveLayerAlpha(10, 20, 190, 180, 128, SkCanvas::kARGB_ClipLayer_SaveFlag);
+        canvas.drawRect(10, 20, 190, 180, SkPaint());
+        canvas.restore();
+    });
+    int count = 0;
+    playbackOps(*dl, [&count](const RecordedOp& op) {
+        Matrix4 expectedMatrix;
+        switch(count++) {
+        case 0:
+            EXPECT_EQ(RecordedOpId::BeginLayerOp, op.opId);
+            // TODO: add asserts
+            break;
+        case 1:
+            EXPECT_EQ(RecordedOpId::RectOp, op.opId);
+            EXPECT_EQ(Rect(0, 0, 180, 160), op.localClipRect);
+            EXPECT_EQ(Rect(10, 20, 190, 180), op.unmappedBounds);
+            expectedMatrix.loadTranslate(-10, -20, 0);
+            EXPECT_MATRIX_APPROX_EQ(expectedMatrix, op.localMatrix);
+            break;
+        case 2:
+            EXPECT_EQ(RecordedOpId::EndLayerOp, op.opId);
+            // TODO: add asserts
+            break;
+        default:
+            FAIL();
+        }
+    });
+    EXPECT_EQ(3, count);
 }
+
+TEST(RecordingCanvas, saveLayerViewportCrop) {
+    auto dl = TestUtils::createDisplayList<RecordingCanvas>(200, 200, [](RecordingCanvas& canvas) {
+        // shouldn't matter, since saveLayer will clip to its bounds
+        canvas.clipRect(-1000, -1000, 1000, 1000, SkRegion::kReplace_Op);
+
+        canvas.saveLayerAlpha(100, 100, 300, 300, 128, SkCanvas::kARGB_ClipLayer_SaveFlag);
+        canvas.drawRect(0, 0, 400, 400, SkPaint());
+        canvas.restore();
+    });
+    int count = 0;
+    playbackOps(*dl, [&count](const RecordedOp& op) {
+        if (count++ == 1) {
+            Matrix4 expectedMatrix;
+            EXPECT_EQ(RecordedOpId::RectOp, op.opId);
+
+            // recorded clip rect should be intersection of
+            // viewport and saveLayer bounds, in layer space
+            EXPECT_EQ(Rect(0, 0, 100, 100), op.localClipRect);
+            EXPECT_EQ(Rect(0, 0, 400, 400), op.unmappedBounds);
+            expectedMatrix.loadTranslate(-100, -100, 0);
+            EXPECT_MATRIX_APPROX_EQ(expectedMatrix, op.localMatrix);
+        }
+    });
+    EXPECT_EQ(3, count);
 }
+
+TEST(RecordingCanvas, saveLayerRotateUnclipped) {
+    auto dl = TestUtils::createDisplayList<RecordingCanvas>(200, 200, [](RecordingCanvas& canvas) {
+        canvas.save(SkCanvas::kMatrix_SaveFlag | SkCanvas::kClip_SaveFlag);
+        canvas.translate(100, 100);
+        canvas.rotate(45);
+        canvas.translate(-50, -50);
+
+        canvas.saveLayerAlpha(0, 0, 100, 100, 128, SkCanvas::kARGB_ClipLayer_SaveFlag);
+        canvas.drawRect(0, 0, 100, 100, SkPaint());
+        canvas.restore();
+
+        canvas.restore();
+    });
+    int count = 0;
+    playbackOps(*dl, [&count](const RecordedOp& op) {
+        if (count++ == 1) {
+            Matrix4 expectedMatrix;
+            EXPECT_EQ(RecordedOpId::RectOp, op.opId);
+
+            // recorded rect doesn't see rotate, since recorded relative to saveLayer bounds
+            EXPECT_EQ(Rect(0, 0, 100, 100), op.localClipRect);
+            EXPECT_EQ(Rect(0, 0, 100, 100), op.unmappedBounds);
+            expectedMatrix.loadIdentity();
+            EXPECT_MATRIX_APPROX_EQ(expectedMatrix, op.localMatrix);
+        }
+    });
+    EXPECT_EQ(3, count);
+}
+
+TEST(RecordingCanvas, saveLayerRotateClipped) {
+    auto dl = TestUtils::createDisplayList<RecordingCanvas>(200, 200, [](RecordingCanvas& canvas) {
+        canvas.save(SkCanvas::kMatrix_SaveFlag | SkCanvas::kClip_SaveFlag);
+        canvas.translate(100, 100);
+        canvas.rotate(45);
+        canvas.translate(-200, -200);
+
+        // area of saveLayer will be clipped to parent viewport, so we ask for 400x400...
+        canvas.saveLayerAlpha(0, 0, 400, 400, 128, SkCanvas::kARGB_ClipLayer_SaveFlag);
+        canvas.drawRect(0, 0, 400, 400, SkPaint());
+        canvas.restore();
+
+        canvas.restore();
+    });
+    int count = 0;
+    playbackOps(*dl, [&count](const RecordedOp& op) {
+        if (count++ == 1) {
+            Matrix4 expectedMatrix;
+            EXPECT_EQ(RecordedOpId::RectOp, op.opId);
+
+            // ...and get about 58.6, 58.6, 341.4 341.4, because the bounds are clipped by
+            // the parent 200x200 viewport, but prior to rotation
+            EXPECT_RECT_APPROX_EQ(Rect(58.57864, 58.57864, 341.42136, 341.42136), op.localClipRect);
+            EXPECT_EQ(Rect(0, 0, 400, 400), op.unmappedBounds);
+            expectedMatrix.loadIdentity();
+            EXPECT_MATRIX_APPROX_EQ(expectedMatrix, op.localMatrix);
+        }
+    });
+    EXPECT_EQ(3, count);
+}
+
+} // namespace uirenderer
+} // namespace android
