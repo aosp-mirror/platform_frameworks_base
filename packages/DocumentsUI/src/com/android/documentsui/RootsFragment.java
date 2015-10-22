@@ -287,33 +287,24 @@ public class RootsFragment extends Fragment {
             super(context, 0);
 
             final List<RootItem> libraries = new ArrayList<>();
-            final List<RootItem> clouds = new ArrayList<>();
-            final List<RootItem> locals = new ArrayList<>();
+            final List<RootItem> others = new ArrayList<>();
 
-            for (RootInfo root : roots) {
-                RootItem item = new RootItem(root);
-                switch (root.derivedType) {
-                    case RootInfo.TYPE_LOCAL:
-                        locals.add(item);
-                        break;
-                    case RootInfo.TYPE_CLOUD:
-                        clouds.add(item);
-                        break;
-                    default:
-                        libraries.add(item);
-                        break;
+            for (final RootInfo root : roots) {
+                final RootItem item = new RootItem(root);
+                if (root.isLibrary()) {
+                    libraries.add(item);
+                } else {
+                    others.add(item);
                 }
             }
 
             final RootComparator comp = new RootComparator();
             Collections.sort(libraries, comp);
-            Collections.sort(locals, comp);
-            Collections.sort(clouds, comp);
+            Collections.sort(others, comp);
 
             addAll(libraries);
             add(new SpacerItem());
-            addAll(locals);
-            addAll(clouds);
+            addAll(others);
 
             if (includeApps != null) {
                 final PackageManager pm = context.getPackageManager();
