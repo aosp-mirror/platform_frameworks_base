@@ -60,7 +60,8 @@ public abstract class ExpandableView extends FrameLayout {
 
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-        int ownMaxHeight = mMaxViewHeight;
+        boolean limitViewHeight = shouldLimitViewHeight();
+        int ownMaxHeight = limitViewHeight ? mMaxViewHeight : Integer.MAX_VALUE;
         int heightMode = MeasureSpec.getMode(heightMeasureSpec);
         boolean hasFixedHeight = heightMode == MeasureSpec.EXACTLY;
         if (hasFixedHeight) {
@@ -72,7 +73,7 @@ public abstract class ExpandableView extends FrameLayout {
         int childCount = getChildCount();
         for (int i = 0; i < childCount; i++) {
             View child = getChildAt(i);
-            if (child.getVisibility() == GONE || isChildInvisible(child)) {
+            if (child.getVisibility() == GONE) {
                 continue;
             }
             int childHeightSpec = newHeightSpec;
@@ -80,7 +81,7 @@ public abstract class ExpandableView extends FrameLayout {
             if (layoutParams.height != ViewGroup.LayoutParams.MATCH_PARENT) {
                 if (layoutParams.height >= 0) {
                     // An actual height is set
-                    childHeightSpec = layoutParams.height > ownMaxHeight
+                    childHeightSpec = layoutParams.height > ownMaxHeight && limitViewHeight
                         ? MeasureSpec.makeMeasureSpec(ownMaxHeight, MeasureSpec.EXACTLY)
                         : MeasureSpec.makeMeasureSpec(layoutParams.height, MeasureSpec.EXACTLY);
                 }
@@ -107,6 +108,10 @@ public abstract class ExpandableView extends FrameLayout {
             ownHeight += mBottomDecorHeight;
         }
         setMeasuredDimension(width, ownHeight);
+    }
+
+    protected boolean shouldLimitViewHeight() {
+        return true;
     }
 
     @Override
@@ -362,10 +367,7 @@ public abstract class ExpandableView extends FrameLayout {
         return mActualHeight - getBottomDecorHeight();
     }
 
-    /**
-     * @return whether the given child can be ignored for layouting and measuring purposes
-     */
-    protected boolean isChildInvisible(View child) {
+    public boolean isSummaryWithChildren() {
         return false;
     }
 

@@ -205,6 +205,20 @@ public class NotificationGroupManager {
         return true;
     }
 
+    /**
+     * @return whether a given notification is a summary in a group which has children
+     */
+    public boolean isSummaryOfGroup(StatusBarNotification sbn) {
+        if (sbn.getNotification().isGroupChild()) {
+            return false;
+        }
+        NotificationGroup group = mGroupMap.get(sbn.getGroupKey());
+        if (group == null) {
+            return false;
+        }
+        return !group.children.isEmpty();
+    }
+
     public ExpandableNotificationRow getGroupSummary(StatusBarNotification sbn) {
         NotificationGroup group = mGroupMap.get(sbn.getGroupKey());
         return group == null ? null

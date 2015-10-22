@@ -97,6 +97,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
     private NotificationGroupManager mGroupManager;
     private View mExpandButtonContainer;
     private boolean mChildrenExpanded;
+    private boolean mIsSummaryWithChildren;
     private NotificationChildrenContainer mChildrenContainer;
     private ValueAnimator mChildExpandAnimator;
     private float mChildrenExpandProgress;
@@ -115,6 +116,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
     private FalsingManager mFalsingManager;
 
     private boolean mJustClicked;
+    private boolean mChildInGroup;
 
     public NotificationContentView getPrivateLayout() {
         return mPrivateLayout;
@@ -175,6 +177,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
         mStatusBarNotification = statusBarNotification;
         updateVetoButton();
         updateExpandButton();
+        onChildrenCountChanged();
     }
 
     public StatusBarNotification getStatusBarNotification() {
@@ -213,12 +216,33 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
             mChildrenContainerStub.inflate();
         }
         mChildrenContainer.addNotification(row, childIndex);
+        onChildrenCountChanged();
+        row.setIsChildInGroup(true, this);
     }
 
     public void removeChildNotification(ExpandableNotificationRow row) {
         if (mChildrenContainer != null) {
             mChildrenContainer.removeNotification(row);
         }
+        onChildrenCountChanged();
+        row.setIsChildInGroup(false, null);
+    }
+
+    public boolean isChildInGroup() {
+        return mChildInGroup;
+    }
+
+    /**
+     * @param isChildInGroup Is this notification now in a group
+     * @param parent the new parent notification
+     */
+    public void setIsChildInGroup(boolean isChildInGroup, ExpandableNotificationRow parent) {
+        mChildInGroup = BaseStatusBar.ENABLE_CHILD_NOTIFICATIONS && isChildInGroup;
+    }
+
+    @Override
+    public boolean isSummaryWithChildren() {
+        return mIsSummaryWithChildren;
     }
 
     @Override
@@ -663,6 +687,15 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
         return BaseStatusBar.ENABLE_CHILD_NOTIFICATIONS && !mIsHeadsUp;
     }
 
+    private void onChildrenCountChanged() {
+        mIsSummaryWithChildren  = BaseStatusBar.ENABLE_CHILD_NOTIFICATIONS
+                && mGroupManager.hasGroupChildren(mStatusBarNotification);
+        if (mIsSummaryWithChildren && mChildrenContainer == null) {
+            mChildrenContainerStub.inflate();
+        }
+        updateChildrenVisibility(true);
+    }
+
     /**
      * Check whether the view state is currently expanded. This is given by the system in {@link
      * #setSystemExpanded(boolean)} and can be overridden by user expansion or
@@ -694,15 +727,6 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
             applyExpansionToLayout();
         }
         mWasReset = false;
-    }
-
-    @Override
-    protected boolean isChildInvisible(View child) {
-
-        // We don't want to layout the ChildrenContainer if this is a heads-up view, otherwise the
-        // view will get too high and the shadows will be off.
-        boolean isInvisibleChildContainer = child == mChildrenContainer && mIsHeadsUp;
-        return super.isChildInvisible(child) || isInvisibleChildContainer;
     }
 
     private void updateMaxHeights() {
@@ -747,7 +771,8 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
             mPublicLayout.setAlpha(1f);
             mPrivateLayout.setAlpha(1f);
             mPublicLayout.setVisibility(mShowingPublic ? View.VISIBLE : View.INVISIBLE);
-            mPrivateLayout.setVisibility(mShowingPublic ? View.INVISIBLE : View.VISIBLE);
+            mPrivateLayout.setVisibility(!mShowingPublic && !mIsSummaryWithChildren ? View.VISIBLE
+                    : View.INVISIBLE);
         } else {
             animateShowingPublic(delay, duration);
         }
@@ -942,6 +967,11 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
     public int getMinHeight() {
         NotificationContentView showingLayout = getShowingLayout();
         return showingLayout.getMinHeight();
+    }
+
+    @Override
+    protected boolean shouldLimitViewHeight() {
+        return !mIsSummaryWithChildren;
     }
 
     @Override
