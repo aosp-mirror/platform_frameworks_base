@@ -152,11 +152,11 @@ key 128   MEDIA_STOP
 # key 130 "KEY_PROPS"
 # key 131 "KEY_UNDO"
 # key 132 "KEY_FRONT"
-# key 133 "KEY_COPY"
+key 133   COPY
 # key 134 "KEY_OPEN"
-# key 135 "KEY_PASTE"
+key 135   PASTE
 # key 136 "KEY_FIND"
-# key 137 "KEY_CUT"
+key 137   CUT
 # key 138 "KEY_HELP"
 key 139   MENU
 key 140   CALCULATOR
