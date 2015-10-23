@@ -25035,6 +25035,7 @@ package android.provider {
     field public static final int OUTGOING_TYPE = 2; // 0x2
     field public static final java.lang.String PHONE_ACCOUNT_COMPONENT_NAME = "subscription_component_name";
     field public static final java.lang.String PHONE_ACCOUNT_ID = "subscription_id";
+    field public static final java.lang.String POST_DIAL_DIGITS = "post_dial_digits";
     field public static final int PRESENTATION_ALLOWED = 1; // 0x1
     field public static final int PRESENTATION_PAYPHONE = 4; // 0x4
     field public static final int PRESENTATION_RESTRICTED = 2; // 0x2
