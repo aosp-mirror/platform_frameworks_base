@@ -23,12 +23,12 @@
 namespace android {
 
 Paint::Paint() : SkPaint(),
-        mLetterSpacing(0), mFontFeatureSettings(), mTextLocale(), mFontVariant(VARIANT_DEFAULT) {
+        mLetterSpacing(0), mFontFeatureSettings(), mTextLocales(), mFontVariant(VARIANT_DEFAULT) {
 }
 
 Paint::Paint(const Paint& paint) : SkPaint(paint),
         mLetterSpacing(paint.mLetterSpacing), mFontFeatureSettings(paint.mFontFeatureSettings),
-        mTextLocale(paint.mTextLocale), mFontVariant(paint.mFontVariant),
+        mTextLocales(paint.mTextLocales), mFontVariant(paint.mFontVariant),
         mHyphenEdit(paint.mHyphenEdit) {
 }
 
@@ -39,7 +39,7 @@ Paint& Paint::operator=(const Paint& other) {
     SkPaint::operator=(other);
     mLetterSpacing = other.mLetterSpacing;
     mFontFeatureSettings = other.mFontFeatureSettings;
-    mTextLocale = other.mTextLocale;
+    mTextLocales = other.mTextLocales;
     mFontVariant = other.mFontVariant;
     mHyphenEdit = other.mHyphenEdit;
     return *this;
@@ -49,7 +49,7 @@ bool operator==(const Paint& a, const Paint& b) {
     return static_cast<const SkPaint&>(a) == static_cast<const SkPaint&>(b)
             && a.mLetterSpacing == b.mLetterSpacing
             && a.mFontFeatureSettings == b.mFontFeatureSettings
-            && a.mTextLocale == b.mTextLocale
+            && a.mTextLocales == b.mTextLocales
             && a.mFontVariant == b.mFontVariant
             && a.mHyphenEdit == b.mHyphenEdit;
 }

@@ -33,11 +33,11 @@ FontStyle MinikinUtils::prepareMinikinPaint(MinikinPaint* minikinPaint, FontColl
     FontStyle resolved = resolvedFace->fStyle;
 
     /* Prepare minikin FontStyle */
-    const std::string& lang = paint->getTextLocale();
-    FontLanguage minikinLang(lang.c_str(), lang.size());
+    const std::string& langs = paint->getTextLocales();
+    FontLanguages minikinLangs(langs.c_str(), langs.size());
     FontVariant minikinVariant = (paint->getFontVariant() == VARIANT_ELEGANT) ? VARIANT_ELEGANT
             : VARIANT_COMPACT;
-    FontStyle minikinStyle(minikinLang, minikinVariant, resolved.getWeight(), resolved.getItalic());
+    FontStyle minikinStyle(minikinLangs, minikinVariant, resolved.getWeight(), resolved.getItalic());
 
     /* Prepare minikin Paint */
     // Note: it would be nice to handle fractional size values (it would improve smooth zoom

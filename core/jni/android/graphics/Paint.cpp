@@ -43,12 +43,10 @@
 #include "Paint.h"
 #include "TypefaceImpl.h"
 
-#include <vector>
+#include <cassert>
+#include <cstring>
 #include <memory>
-
-// temporary for debugging
-#include <Caches.h>
-#include <utils/Log.h>
+#include <vector>
 
 namespace android {
 
@@ -71,12 +69,12 @@ static void defaultSettingsForAndroid(Paint* paint) {
     paint->setTextEncoding(Paint::kGlyphID_TextEncoding);
 }
 
-struct LocaleCacheEntry {
-    std::string javaLocale;
-    std::string languageTag;
+struct LocalesCacheEntry {
+    std::string javaLocales;
+    std::string languageTags;
 };
 
-static thread_local LocaleCacheEntry sSingleEntryLocaleCache;
+static thread_local LocalesCacheEntry sSingleEntryLocalesCache;
 
 namespace PaintGlue {
     enum MoveOpt {
@@ -360,17 +358,57 @@ namespace PaintGlue {
         output[0] = '\0';
     }
 
-    static void setTextLocale(JNIEnv* env, jobject clazz, jlong objHandle, jstring locale) {
-        Paint* obj = reinterpret_cast<Paint*>(objHandle);
-        ScopedUtfChars localeChars(env, locale);
-        if (sSingleEntryLocaleCache.javaLocale != localeChars.c_str()) {
-            sSingleEntryLocaleCache.javaLocale = localeChars.c_str();
-            char langTag[ULOC_FULLNAME_CAPACITY];
-            toLanguageTag(langTag, ULOC_FULLNAME_CAPACITY, localeChars.c_str());
-            sSingleEntryLocaleCache.languageTag = langTag;
+    static void toLanguageTags(std::string* output, const char* locales) {
+        if (output == NULL) {
+            return;
+        }
+        if (locales == NULL) {
+            output->clear();
+            return;
         }
 
-        obj->setTextLocale(sSingleEntryLocaleCache.languageTag);
+        char langTag[ULOC_FULLNAME_CAPACITY];
+        const char* commaLoc = strchr(locales, ',');
+        if (commaLoc == NULL) {
+            assert(locales[0] != '\0');  // the string should not be empty
+            toLanguageTag(langTag, ULOC_FULLNAME_CAPACITY, locales);
+            *output = langTag;
+            return;
+        }
+
+        size_t len = strlen(locales);
+        char locale[len];
+        output->clear();
+        output->reserve(len);
+        const char* lastStart = locales;
+        do {
+            assert(lastStart > commaLoc);  // the substring should not be empty
+            strncpy(locale, lastStart, commaLoc - lastStart);
+            locale[commaLoc - lastStart] = '\0';
+            toLanguageTag(langTag, ULOC_FULLNAME_CAPACITY, locale);
+            if (langTag[0] != '\0') {
+                output->append(langTag);
+                output->push_back(',');
+            }
+            lastStart = commaLoc + 1;
+            commaLoc = strchr(lastStart, ',');
+        } while (commaLoc != NULL);
+        assert(lastStart[0] != '\0');  // the final substring should not be empty
+        toLanguageTag(langTag, ULOC_FULLNAME_CAPACITY, lastStart);
+        if (langTag[0] != '\0') {
+            output->append(langTag);
+        }
+    }
+
+    static void setTextLocales(JNIEnv* env, jobject clazz, jlong objHandle, jstring locales) {
+        Paint* obj = reinterpret_cast<Paint*>(objHandle);
+        ScopedUtfChars localesChars(env, locales);
+        if (sSingleEntryLocalesCache.javaLocales != localesChars.c_str()) {
+            sSingleEntryLocalesCache.javaLocales = localesChars.c_str();
+            toLanguageTags(&sSingleEntryLocalesCache.languageTags, localesChars.c_str());
+        }
+
+        obj->setTextLocales(sSingleEntryLocalesCache.languageTags);
     }
 
     static jboolean isElegantTextHeight(JNIEnv* env, jobject, jlong paintHandle) {
@@ -952,7 +990,7 @@ static const JNINativeMethod methods[] = {
     {"nSetRasterizer","!(JJ)J", (void*) PaintGlue::setRasterizer},
     {"nGetTextAlign","!(J)I", (void*) PaintGlue::getTextAlign},
     {"nSetTextAlign","!(JI)V", (void*) PaintGlue::setTextAlign},
-    {"nSetTextLocale","!(JLjava/lang/String;)V", (void*) PaintGlue::setTextLocale},
+    {"nSetTextLocales","!(JLjava/lang/String;)V", (void*) PaintGlue::setTextLocales},
     {"nIsElegantTextHeight","!(J)Z", (void*) PaintGlue::isElegantTextHeight},
     {"nSetElegantTextHeight","!(JZ)V", (void*) PaintGlue::setElegantTextHeight},
     {"nGetTextSize","!(J)F", (void*) PaintGlue::getTextSize},

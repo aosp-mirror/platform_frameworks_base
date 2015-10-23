@@ -37,6 +37,11 @@ import java.util.Locale;
  */
 public final class LocaleList {
     private final Locale[] mList;
+    // This is a comma-separated list of the locales in the LocaleList created at construction time,
+    // basically the result of running each locale's toLanguageTag() method and concatenating them
+    // with commas in between.
+    private final String mStringRepresentation;
+
     private static final Locale[] sEmptyList = new Locale[0];
     private static final LocaleList sEmptyLocaleList = new LocaleList();
 
@@ -95,15 +100,9 @@ public final class LocaleList {
         return sb.toString();
     }
 
+    @NonNull
     public String toLanguageTags() {
-        StringBuilder sb = new StringBuilder();
-        for (int i = 0; i < mList.length; ++i) {
-            sb.append(mList[i].toLanguageTag());
-            if (i < mList.length - 1) {
-                sb.append(',');
-            }
-        }
-        return sb.toString();
+        return mStringRepresentation;
     }
 
     /**
@@ -112,6 +111,7 @@ public final class LocaleList {
      */
     public LocaleList() {
         mList = sEmptyList;
+        mStringRepresentation = "";
     }
 
     /**
@@ -121,9 +121,11 @@ public final class LocaleList {
     public LocaleList(@Nullable Locale locale) {
         if (locale == null) {
             mList = sEmptyList;
+            mStringRepresentation = "";
         } else {
             mList = new Locale[1];
             mList[0] = (Locale) locale.clone();
+            mStringRepresentation = locale.toLanguageTag();
         }
     }
 
@@ -134,9 +136,11 @@ public final class LocaleList {
     public LocaleList(@Nullable Locale[] list) {
         if (list == null || list.length == 0) {
             mList = sEmptyList;
+            mStringRepresentation = "";
         } else {
             final Locale[] localeList = new Locale[list.length];
             final HashSet<Locale> seenLocales = new HashSet<Locale>();
+            final StringBuilder sb = new StringBuilder();
             for (int i = 0; i < list.length; ++i) {
                 final Locale l = list[i];
                 if (l == null) {
@@ -144,11 +148,17 @@ public final class LocaleList {
                 } else if (seenLocales.contains(l)) {
                     throw new IllegalArgumentException();
                 } else {
-                    seenLocales.add(l);
-                    localeList[i] = (Locale) l.clone();
+                    final Locale localeClone = (Locale) l.clone();
+                    localeList[i] = localeClone;
+                    sb.append(localeClone.toLanguageTag());
+                    if (i < list.length - 1) {
+                        sb.append(',');
+                    }
+                    seenLocales.add(localeClone);
                 }
             }
             mList = localeList;
+            mStringRepresentation = sb.toString();
         }
     }
 
