@@ -46,8 +46,6 @@ import android.graphics.Rect;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.HandlerThread;
 import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
 import android.os.SystemProperties;
@@ -61,6 +59,7 @@ import android.view.Display;
 import android.view.WindowManager;
 import android.view.accessibility.AccessibilityManager;
 import com.android.internal.app.AssistUtils;
+import com.android.internal.os.BackgroundThread;
 import com.android.systemui.Prefs;
 import com.android.systemui.R;
 import com.android.systemui.recents.Constants;
@@ -83,12 +82,8 @@ public class SystemServicesProxy {
     final static String TAG = "SystemServicesProxy";
 
     final static BitmapFactory.Options sBitmapOptions;
-    final static HandlerThread sBgThread;
 
     static {
-        sBgThread = new HandlerThread("Recents-SystemServicesProxy",
-                android.os.Process.THREAD_PRIORITY_BACKGROUND);
-        sBgThread.start();
         sBitmapOptions = new BitmapFactory.Options();
         sBitmapOptions.inMutable = true;
     }
@@ -105,8 +100,6 @@ public class SystemServicesProxy {
     Display mDisplay;
     String mRecentsPackage;
     ComponentName mAssistComponent;
-
-    Handler mBgThreadHandler;
 
     Bitmap mDummyIcon;
     int mDummyThumbnailWidth;
@@ -127,7 +120,6 @@ public class SystemServicesProxy {
         mUm = UserManager.get(context);
         mDisplay = mWm.getDefaultDisplay();
         mRecentsPackage = context.getPackageName();
-        mBgThreadHandler = new Handler(sBgThread.getLooper());
 
         // Get the dummy thumbnail width/heights
         Resources res = context.getResources();
@@ -418,7 +410,7 @@ public class SystemServicesProxy {
         if (Constants.DebugFlags.App.EnableSystemServicesProxy) return;
 
         // Remove the task.
-        mBgThreadHandler.post(new Runnable() {
+        BackgroundThread.getHandler().post(new Runnable() {
             @Override
             public void run() {
                 mAm.removeTask(taskId);
