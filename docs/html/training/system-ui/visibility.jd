@@ -19,7 +19,7 @@ trainingnavtop=true
 
 <ul>
     <li>
-        <a href="{@docRoot}guide/topics/ui/actionbar.html">Action Bar</a> API Guide
+        <a href="{@docRoot}training/appbar/index.html">Adding the App Bar</a>
     </li>
     <li>
         <a href="{@docRoot}design/index.html">

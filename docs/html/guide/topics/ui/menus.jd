@@ -47,7 +47,7 @@ parent.link=index.html
 
   <h2>See also</h2>
   <ol>
-    <li><a href="{@docRoot}guide/topics/ui/actionbar.html">Action Bar</a></li>
+    <li><a href="{@docRoot}training/appbar/index.html">Adding the App Bar</a></li>
     <li><a href="{@docRoot}guide/topics/resources/menu-resource.html">Menu Resource</a></li>
     <li><a
 href="http://android-developers.blogspot.com/2012/01/say-goodbye-to-menu-button.html">Say
@@ -62,7 +62,7 @@ actions and other options in your activities.</p>
 
 <p>Beginning with Android 3.0 (API level 11), Android-powered devices are no longer required to
 provide a dedicated <em>Menu</em> button. With this change, Android apps should migrate away from a
-dependence on the traditional 6-item menu panel and instead provide an action bar to present common
+dependence on the traditional 6-item menu panel and instead provide an app bar to present common
 user actions.</p>
 
 <p>Although the design and user experience for some menu items have changed, the semantics to define
@@ -71,14 +71,14 @@ guide shows how to create the three fundamental types of menus or action present
 versions of Android:</p>
 
 <dl>
-  <dt><strong>Options menu and action bar</strong></dt>
+  <dt><strong>Options menu and app bar</strong></dt>
     <dd>The <a href="#options-menu">options menu</a> is the primary collection of menu items for an
 activity. It's where you should place actions that have a global impact on the app, such as
 "Search," "Compose email," and "Settings."
   <p>If you're developing for Android 2.3 or lower, users can
 reveal the options menu panel by pressing the <em>Menu</em> button.</p>
-  <p>On Android 3.0 and higher, items from the options menu are presented by the <a
-href="{@docRoot}guide/topics/ui/actionbar.html">action bar</a> as a combination of on-screen action
+  <p>On Android 3.0 and higher, items from the options menu are presented by the
+  app bar as a combination of on-screen action
 items and overflow options. Beginning with Android 3.0, the <em>Menu</em> button is deprecated (some
 devices
 don't have one), so you should migrate toward using the action bar to provide access to actions and
@@ -173,8 +173,8 @@ when the user selects it.</dd>
   <dt>{@code android:title}</dt>
     <dd>A reference to a string to use as the item's title.</dd>
   <dt>{@code android:showAsAction}</dt>
-    <dd>Specifies when and how this item should appear as an action item in the <a
-href="{@docRoot}guide/topics/ui/actionbar.html">action bar</a>.</dd>
+    <dd>Specifies when and how this item should appear as an action item in the
+      app bar.</dd>
 </dl>
 
 <p>These are the most important attributes you should use, but there are many more available.
@@ -233,25 +233,20 @@ the sixth item and the rest into the overflow menu, which the user can open by s
 <em>More</em>.</li>
 
   <li>If you've developed your application for <strong>Android 3.0 (API level 11) and
-higher</strong>, items from the options menu are available in the <a
-href="{@docRoot}guide/topics/ui/actionbar.html">action bar</a>. By default, the system
+higher</strong>, items from the options menu are available in the 
+app bar. By default, the system
 places all items in the action overflow, which the user can reveal with the action overflow icon on
-the right side of the action bar (or by pressing the device <em>Menu</em> button, if available). To
+the right side of the app bar (or by pressing the device <em>Menu</em> button, if available). To
 enable
-quick access to important actions, you can promote a few items to appear in the action bar by adding
+quick access to important actions, you can promote a few items to appear in the app bar by adding
 {@code android:showAsAction="ifRoom"} to the corresponding {@code &lt;item&gt;} elements (see figure
-2). <p>For more information about action items and other action bar behaviors, see the <a
-href="{@docRoot}guide/topics/ui/actionbar.html">Action Bar</a> guide. </p>
-<p class="note"><strong>Note:</strong> Even if you're <em>not</em> developing for Android 3.0 or
-higher, you can build your own action bar layout for a similar effect. For an example of how you can
-support older versions of Android with an action bar, see the <a
-href="{@docRoot}resources/samples/ActionBarCompat/index.html">Action Bar Compatibility</a>
-sample.</p>
+2). <p>For more information about action items and other app bar behaviors, see the <a
+href="{@docRoot}training/appbar/index.html">Adding the App Bar</a> training class. </p>
 </li>
 </ul>
 
 <img src="{@docRoot}images/ui/actionbar.png" alt="" />
-<p class="img-caption"><strong>Figure 2.</strong> Action bar from the <a
+<p class="img-caption"><strong>Figure 2.</strong> App bar from the <a
 href="{@docRoot}resources/samples/HoneycombGallery/index.html">Honeycomb Gallery</a> app, showing
 navigation tabs and a camera action item (plus the action overflow button).</p>
 
@@ -285,13 +280,13 @@ properties with {@link android.view.MenuItem} APIs.</p>
 android.app.Activity#onCreateOptionsMenu(Menu) onCreateOptionsMenu()} to create the options menu
 when the user opens the menu for the first time. If you've developed for Android 3.0 and higher, the
 system calls {@link android.app.Activity#onCreateOptionsMenu(Menu) onCreateOptionsMenu()} when
-starting the activity, in order to show items to the action bar.</p>
+starting the activity, in order to show items to the app bar.</p>
 
 
 
 <h3 id="RespondingOptionsMenu">Handling click events</h3>
 
-<p>When the user selects an item from the options menu (including action items in the action bar),
+<p>When the user selects an item from the options menu (including action items in the app bar),
 the system calls your activity's {@link android.app.Activity#onOptionsItemSelected(MenuItem)
 onOptionsItemSelected()} method. This method passes the {@link android.view.MenuItem} selected. You
 can identify the item by calling {@link android.view.MenuItem#getItemId()}, which returns the unique
@@ -370,7 +365,7 @@ onPrepareOptionsMenu()} each time the user opens the options menu (presses the <
 button).</p>
 
 <p>On Android 3.0 and higher, the options menu is considered to always be open when menu items are
-presented in the action bar. When an event occurs and you want to perform a menu update, you must
+presented in the app bar. When an event occurs and you want to perform a menu update, you must
 call {@link android.app.Activity#invalidateOptionsMenu invalidateOptionsMenu()} to request that the
 system call {@link android.app.Activity#onPrepareOptionsMenu(Menu) onPrepareOptionsMenu()}.</p>
 
@@ -505,8 +500,8 @@ and the contextual action bar disappears when the user deselects all items, pres
 or selects the <em>Done</em> action on the left side of the bar.</p>
 
 <p class="note"><strong>Note:</strong> The contextual action bar is not necessarily
-associated with the <a href="{@docRoot}guide/topics/ui/actionbar.html">action bar</a>. They operate
-independently, even though the contextual action bar visually overtakes the action bar
+associated with the app bar. They operate
+independently, even though the contextual action bar visually overtakes the app bar
 position.</p>
 
 <p>If you're developing for Android 3.0 (API level 11) or higher, you

@@ -982,16 +982,17 @@ href="{@docRoot}guide/topics/ui/themes.html">Styles and Themes</a> developer gui
     <tr><th>Value</th><th>Description</th></tr>
     <tr><td>{@code "none"}</td><td>No extra UI options. This is the default.</td></tr>
     <tr><td>{@code "splitActionBarWhenNarrow"}</td><td>Add a bar at
-the bottom of the screen to display action items in the {@link android.app.ActionBar}, when
+the bottom of the screen to display action items in the <em>app bar</em> (also known as the
+<em>action bar</em>), when
 constrained for horizontal space (such as when in portrait mode on a handset). Instead of a small
-number of action items appearing in the action bar at the top of the screen, the action bar is
+number of action items appearing in the app bar at the top of the screen, the app bar is
 split into the top navigation section and the bottom bar for action items. This ensures a reasonable
 amount of space is made available not only for the action items, but also for navigation and title
 elements at the top. Menu items are not split across the two bars; they always appear
 together.</td></tr>
   </table>
-  <p>For more information about the action bar, see the <a
-href="{@docRoot}guide/topics/ui/actionbar.html">Action Bar</a> developer guide.</p>
+  <p>For more information about the app bar, see the <a
+href="{@docRoot}training/appbar/index.html">Adding the App Bar</a> training class.</p>
   <p>This attribute was added in API level 14.</p>
 </dd>
 
