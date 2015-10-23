@@ -16,6 +16,6 @@
 
 <resources>
     <bool name="productivity_device">true</bool>
-    <!-- intentionally unset. Vendors should set this in an overlay. -->
+    <!-- Intentionally unset. Vendors should set this in an overlay. -->
     <string name="trusted_quick_viewer_package"></string>
 </resources>

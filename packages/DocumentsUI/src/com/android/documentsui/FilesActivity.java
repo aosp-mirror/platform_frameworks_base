@@ -334,12 +334,12 @@ public class FilesActivity extends BaseActivity {
                 startActivity(intent);
                 return;
             } catch (SecurityException e) {
-                // carry on to regular view mode.
+                // Carry on to regular view mode.
                 Log.e(TAG, "Caught security error: " + e.getLocalizedMessage());
             }
         }
 
-        // fallback to traditional VIEW action...
+        // Fallback to traditional VIEW action...
         intent = new Intent(Intent.ACTION_VIEW);
         intent.setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
         intent.setData(doc.derivedUri);
