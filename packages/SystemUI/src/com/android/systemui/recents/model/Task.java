@@ -38,38 +38,11 @@ public class Task {
         public void onTaskDataUnloaded();
 
         /* Notifies when a task's stack id has changed. */
-        public void onMultiStackDebugTaskStackIdChanged();
-    }
-
-    /** The ComponentNameKey represents the unique primary key for a component
-     * belonging to a specified user. */
-    public static class ComponentNameKey {
-        final ComponentName component;
-        final int userId;
-
-        public ComponentNameKey(ComponentName cn, int user) {
-            component = cn;
-            userId = user;
-        }
-
-        @Override
-        public int hashCode() {
-            return Objects.hash(component, userId);
-        }
-
-        @Override
-        public boolean equals(Object o) {
-            if (!(o instanceof ComponentNameKey)) {
-                return false;
-            }
-            return component.equals(((ComponentNameKey) o).component) &&
-                    userId == ((ComponentNameKey) o).userId;
-        }
+        public void onTaskStackIdChanged();
     }
 
     /* The Task Key represents the unique primary key for the task */
     public static class TaskKey {
-        final ComponentNameKey mComponentNameKey;
         public final int id;
         public int stackId;
         public final Intent baseIntent;
@@ -79,7 +52,6 @@ public class Task {
 
         public TaskKey(int id, int stackId, Intent intent, int userId, long firstActiveTime,
                 long lastActiveTime) {
-            mComponentNameKey = new ComponentNameKey(intent.getComponent(), userId);
             this.id = id;
             this.stackId = stackId;
             this.baseIntent = intent;
@@ -88,9 +60,8 @@ public class Task {
             this.lastActiveTime = lastActiveTime;
         }
 
-        /** Returns the component name key for this task. */
-        public ComponentNameKey getComponentNameKey() {
-            return mComponentNameKey;
+        public ComponentName getComponent() {
+            return this.baseIntent.getComponent();
         }
 
         @Override
@@ -113,7 +84,7 @@ public class Task {
                     + "s: " + stackId + ", "
                     + "u: " + userId + ", "
                     + "lat: " + lastActiveTime + ", "
-                    + baseIntent.getComponent().getPackageName();
+                    + getComponent().getPackageName();
         }
     }
 
@@ -134,7 +105,8 @@ public class Task {
     public boolean lockToTaskEnabled;
     public Bitmap icon;
     public String iconFilename;
-    TaskCallbacks mCb;
+
+    private TaskCallbacks mCb;
 
     public Task() {
         // Do nothing
@@ -194,7 +166,7 @@ public class Task {
     public void setStackId(int stackId) {
         key.stackId = stackId;
         if (mCb != null) {
-            mCb.onMultiStackDebugTaskStackIdChanged();
+            mCb.onTaskStackIdChanged();
         }
     }
 
@@ -229,7 +201,7 @@ public class Task {
         if (group != null) {
             groupAffiliation = Integer.toString(group.affiliation);
         }
-        return "Task (" + groupAffiliation + "): " + key.baseIntent.getComponent().getPackageName() +
+        return "Task (" + groupAffiliation + "): " + key.getComponent().getPackageName() +
                 " [" + super.toString() + "]";
     }
 }

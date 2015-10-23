@@ -30,16 +30,18 @@ import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityNodeInfo;
 import android.widget.FrameLayout;
 import com.android.systemui.R;
+import com.android.systemui.recents.Recents;
 import com.android.systemui.recents.RecentsActivity;
 import com.android.systemui.recents.RecentsActivityLaunchState;
 import com.android.systemui.recents.RecentsConfiguration;
 import com.android.systemui.recents.events.EventBus;
 import com.android.systemui.recents.events.activity.PackagesChangedEvent;
+import com.android.systemui.recents.events.component.RecentsVisibilityChangedEvent;
 import com.android.systemui.recents.events.ui.DismissTaskEvent;
+import com.android.systemui.recents.events.ui.UserInteractionEvent;
 import com.android.systemui.recents.misc.DozeTrigger;
 import com.android.systemui.recents.misc.SystemServicesProxy;
 import com.android.systemui.recents.misc.Utilities;
-import com.android.systemui.recents.model.RecentsTaskLoader;
 import com.android.systemui.recents.model.Task;
 import com.android.systemui.recents.model.TaskStack;
 
@@ -330,8 +332,7 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
     /** Synchronizes the views with the model */
     boolean synchronizeStackViewsWithModel() {
         if (mStackViewsDirty) {
-            RecentsTaskLoader loader = RecentsTaskLoader.getInstance();
-            SystemServicesProxy ssp = loader.getSystemServicesProxy();
+            SystemServicesProxy ssp = Recents.getSystemServices();
 
             // Get all the task transforms
             ArrayList<Task> tasks = mStack.getTasks();
@@ -876,8 +877,7 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
                     // Poke the dozer to restart the trigger after the animation completes
                     mUIDozeTrigger.poke();
 
-                    RecentsTaskLoader loader = RecentsTaskLoader.getInstance();
-                    SystemServicesProxy ssp = loader.getSystemServicesProxy();
+                    SystemServicesProxy ssp = Recents.getSystemServices();
                     List<TaskView> taskViews = getTaskViews();
                     int taskViewCount = taskViews.size();
                     if (taskViewCount > 0) {
@@ -953,19 +953,8 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
         }
     }
 
-    /** Final callback after Recents is finally hidden. */
-    void onRecentsHidden() {
-        reset();
-    }
-
     public boolean isTransformedTouchPointInView(float x, float y, View child) {
         return isTransformedTouchPointInView(x, y, child, null);
-    }
-
-    /** Pokes the dozer on user interaction. */
-    void onUserInteraction() {
-        // Poke the doze trigger if it is dozing
-        mUIDozeTrigger.poke();
     }
 
     @Override
@@ -1148,7 +1137,7 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
         }
 
         // Report that this tasks's data is no longer being used
-        RecentsTaskLoader.getInstance().unloadTaskData(task);
+        Recents.getTaskLoader().unloadTaskData(task);
 
         // Detach the view from the hierarchy
         detachViewFromParent(tv);
@@ -1172,7 +1161,7 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
         tv.onTaskBound(task);
 
         // Load the task data
-        RecentsTaskLoader.getInstance().loadTaskData(task);
+        Recents.getTaskLoader().loadTaskData(task);
 
         // If the doze trigger has already fired, then update the state for this task view
         tv.setNoUserInteractionState();
@@ -1261,14 +1250,14 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
 
     public final void onBusEvent(PackagesChangedEvent event) {
         // Compute which components need to be removed
-        HashSet<ComponentName> removedComponents = event.monitor.computeComponentsRemoved(
-                mStack.getTaskKeys(), event.packageName, event.userId);
+        HashSet<ComponentName> removedComponents = mStack.computeComponentsRemoved(
+                event.packageName, event.userId);
 
         // For other tasks, just remove them directly if they no longer exist
         ArrayList<Task> tasks = mStack.getTasks();
         for (int i = tasks.size() - 1; i >= 0; i--) {
             final Task t = tasks.get(i);
-            if (removedComponents.contains(t.key.baseIntent.getComponent())) {
+            if (removedComponents.contains(t.key.getComponent())) {
                 TaskView tv = getChildViewForTask(t);
                 if (tv != null) {
                     // For visible children, defer removing the task until after the animation
@@ -1313,6 +1302,17 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
                     nextTv.setFocusedTask(launchState.launchedWithAltTab);
                 }
             }
+        }
+    }
+
+    public final void onBusEvent(UserInteractionEvent event) {
+        // Poke the doze trigger on user interaction
+        mUIDozeTrigger.poke();
+    }
+
+    public final void onBusEvent(RecentsVisibilityChangedEvent event) {
+        if (!event.visible) {
+            reset();
         }
     }
 }

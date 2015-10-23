@@ -47,6 +47,7 @@ import com.android.systemui.recents.events.component.ScreenPinningRequestEvent;
 import com.android.systemui.recents.events.ui.DismissTaskEvent;
 import com.android.systemui.recents.events.ui.ResizeTaskEvent;
 import com.android.systemui.recents.events.ui.ShowApplicationInfoEvent;
+import com.android.systemui.recents.events.ui.UserInteractionEvent;
 import com.android.systemui.recents.events.ui.dragndrop.DragEndEvent;
 import com.android.systemui.recents.events.ui.dragndrop.DragStartEvent;
 import com.android.systemui.recents.misc.Console;
@@ -137,7 +138,7 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
                 dismissRecentsToHomeIfVisible(false);
             } else if (action.equals(SearchManager.INTENT_GLOBAL_SEARCH_ACTIVITY_CHANGED)) {
                 // When the search activity changes, update the search widget view
-                SystemServicesProxy ssp = RecentsTaskLoader.getInstance().getSystemServicesProxy();
+                SystemServicesProxy ssp = Recents.getSystemServices();
                 mSearchWidgetInfo = ssp.getOrBindSearchAppWidget(context, mAppWidgetHost);
                 refreshSearchWidgetView();
             }
@@ -148,7 +149,7 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
     void updateRecentsTasks() {
         // If AlternateRecentsComponent has preloaded a load plan, then use that to prevent
         // reconstructing the task stack
-        RecentsTaskLoader loader = RecentsTaskLoader.getInstance();
+        RecentsTaskLoader loader = Recents.getTaskLoader();
         RecentsTaskLoadPlan plan = RecentsImpl.consumeInstanceLoadPlan();
         if (plan == null) {
             plan = loader.createLoadPlan(this);
@@ -241,7 +242,7 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
     /** Dismisses recents if we are already visible and the intent is to toggle the recents view */
     boolean dismissRecentsToFocusedTaskOrHome(boolean checkFilteredStackState) {
         RecentsActivityLaunchState launchState = mConfig.getLaunchState();
-        SystemServicesProxy ssp = RecentsTaskLoader.getInstance().getSystemServicesProxy();
+        SystemServicesProxy ssp = Recents.getSystemServices();
         if (ssp.isRecentsTopMost(ssp.getTopMostTask(), null)) {
             // If we currently have filtered stacks, then unfilter those first
             if (checkFilteredStackState &&
@@ -284,7 +285,7 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
 
     /** Dismisses Recents directly to Home if we currently aren't transitioning. */
     boolean dismissRecentsToHomeIfVisible(boolean animated) {
-        SystemServicesProxy ssp = RecentsTaskLoader.getInstance().getSystemServicesProxy();
+        SystemServicesProxy ssp = Recents.getSystemServices();
         if (ssp.isRecentsTopMost(ssp.getTopMostTask(), null)) {
             // Return to Home
             dismissRecentsToHome(animated);
@@ -301,16 +302,11 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
         // Register this activity with the event bus
         EventBus.getDefault().register(this, EVENT_BUS_PRIORITY);
 
-        // For the non-primary user, ensure that the SystemServicesProxy and configuration is
-        // initialized
-        RecentsTaskLoader.initialize(this);
-        SystemServicesProxy ssp = RecentsTaskLoader.getInstance().getSystemServicesProxy();
-        mConfig = RecentsConfiguration.initialize(this, ssp);
-        mConfig.update(this, ssp, ssp.getWindowRect());
-        mPackageMonitor = new RecentsPackageMonitor();
-
         // Initialize the widget host (the host id is static and does not change)
+        mConfig = RecentsConfiguration.getInstance();
         mAppWidgetHost = new RecentsAppWidgetHost(this, Constants.Values.App.AppWidgetHostId);
+        mPackageMonitor = new RecentsPackageMonitor();
+        mPackageMonitor.register(this);
 
         // Set the Recents layout
         setContentView(R.layout.recents);
@@ -323,6 +319,7 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
         mScrimViews = new SystemBarScrimViews(this);
 
         // Bind the search app widget when we first start up
+        SystemServicesProxy ssp = Recents.getSystemServices();
         mSearchWidgetInfo = ssp.getOrBindSearchAppWidget(this, mAppWidgetHost);
 
         // Register the broadcast receiver to handle messages when the screen is turned off
@@ -341,16 +338,6 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
     @Override
     protected void onStart() {
         super.onStart();
-        RecentsActivityLaunchState launchState = mConfig.getLaunchState();
-        MetricsLogger.visible(this, MetricsLogger.OVERVIEW_ACTIVITY);
-        RecentsTaskLoader loader = RecentsTaskLoader.getInstance();
-        SystemServicesProxy ssp = loader.getSystemServicesProxy();
-
-        // Notify that recents is now visible
-        EventBus.getDefault().send(new RecentsVisibilityChangedEvent(this, ssp, true));
-
-        // Register any broadcast receivers for the task loader
-        mPackageMonitor.register(this);
 
         // Update the recent tasks
         updateRecentsTasks();
@@ -358,6 +345,7 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
         // If this is a new instance from a configuration change, then we have to manually trigger
         // the enter animation state, or if recents was relaunched by AM, without going through
         // the normal mechanisms
+        RecentsActivityLaunchState launchState = mConfig.getLaunchState();
         boolean wasLaunchedByAm = !launchState.launchedFromHome &&
                 !launchState.launchedFromAppWithThumbnail;
         if (launchState.launchedHasConfigurationChanged || wasLaunchedByAm) {
@@ -367,6 +355,12 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
         if (!launchState.launchedHasConfigurationChanged) {
             mRecentsView.disableLayersForOneFrame();
         }
+
+        // Notify that recents is now visible
+        SystemServicesProxy ssp = Recents.getSystemServices();
+        EventBus.getDefault().send(new RecentsVisibilityChangedEvent(this, ssp, true));
+
+        MetricsLogger.visible(this, MetricsLogger.OVERVIEW_ACTIVITY);
     }
 
     @Override
@@ -381,18 +375,10 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
     @Override
     protected void onStop() {
         super.onStop();
-        MetricsLogger.hidden(this, MetricsLogger.OVERVIEW_ACTIVITY);
-        RecentsTaskLoader loader = RecentsTaskLoader.getInstance();
-        SystemServicesProxy ssp = loader.getSystemServicesProxy();
 
         // Notify that recents is now hidden
+        SystemServicesProxy ssp = Recents.getSystemServices();
         EventBus.getDefault().send(new RecentsVisibilityChangedEvent(this, ssp, false));
-
-        // Notify the views that we are no longer visible
-        mRecentsView.onRecentsHidden();
-
-        // Unregister any broadcast receivers for the task loader
-        mPackageMonitor.unregister();
 
         // Workaround for b/22542869, if the RecentsActivity is started again, but without going
         // through SystemUI, we need to reset the config launch flags to ensure that we do not
@@ -404,6 +390,8 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
         launchState.launchedToTaskId = -1;
         launchState.launchedWithAltTab = false;
         launchState.launchedHasConfigurationChanged = false;
+
+        MetricsLogger.hidden(this, MetricsLogger.OVERVIEW_ACTIVITY);
     }
 
     @Override
@@ -412,6 +400,9 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
 
         // Unregister the system broadcast receivers
         unregisterReceiver(mSystemBroadcastReceiver);
+
+        // Unregister any broadcast receivers for the task loader
+        mPackageMonitor.unregister();
 
         // Stop listening for widget package changes if there was one bound
         mAppWidgetHost.stopListening();
@@ -432,7 +423,7 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
 
     @Override
     public void onTrimMemory(int level) {
-        RecentsTaskLoader loader = RecentsTaskLoader.getInstance();
+        RecentsTaskLoader loader = Recents.getTaskLoader();
         if (loader != null) {
             loader.onTrimMemory(level);
         }
@@ -477,7 +468,7 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
 
     @Override
     public void onUserInteraction() {
-        mRecentsView.onUserInteraction();
+        EventBus.getDefault().send(new UserInteractionEvent());
     }
 
     @Override
@@ -559,9 +550,8 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
 
     public final void onBusEvent(ShowApplicationInfoEvent event) {
         // Create a new task stack with the application info details activity
-        Intent baseIntent = event.task.key.baseIntent;
         Intent intent = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS,
-                Uri.fromParts("package", baseIntent.getComponent().getPackageName(), null));
+                Uri.fromParts("package", event.task.key.getComponent().getPackageName(), null));
         intent.setComponent(intent.resolveActivity(getPackageManager()));
         TaskStackBuilder.create(this)
                 .addNextIntentWithParentStack(intent).startActivities(null,
@@ -573,11 +563,12 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
 
     public final void onBusEvent(DismissTaskEvent event) {
         // Remove any stored data from the loader
-        RecentsTaskLoader loader = RecentsTaskLoader.getInstance();
+        RecentsTaskLoader loader = Recents.getTaskLoader();
         loader.deleteTaskData(event.task, false);
 
         // Remove the task from activity manager
-        loader.getSystemServicesProxy().removeTask(event.task.key.id);
+        SystemServicesProxy ssp = Recents.getSystemServices();
+        ssp.removeTask(event.task.key.id);
     }
 
     public final void onBusEvent(ResizeTaskEvent event) {
@@ -602,7 +593,7 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
 
     private void refreshSearchWidgetView() {
         if (mSearchWidgetInfo != null) {
-            SystemServicesProxy ssp = RecentsTaskLoader.getInstance().getSystemServicesProxy();
+            SystemServicesProxy ssp = Recents.getSystemServices();
             int searchWidgetId = ssp.getSearchAppWidgetId(this);
             mSearchWidgetHostView = (RecentsAppWidgetHostView) mAppWidgetHost.createView(
                     this, searchWidgetId, mSearchWidgetInfo);

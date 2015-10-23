@@ -16,17 +16,11 @@
 
 package com.android.systemui.recents.model;
 
-import android.content.ComponentName;
 import android.content.Context;
-import android.os.Looper;
 import android.os.UserHandle;
 import com.android.internal.content.PackageMonitor;
 import com.android.systemui.recents.events.EventBus;
 import com.android.systemui.recents.events.activity.PackagesChangedEvent;
-import com.android.systemui.recents.misc.SystemServicesProxy;
-
-import java.util.HashSet;
-import java.util.List;
 
 /**
  * The package monitor listens for changes from PackageManager to update the contents of the
@@ -38,8 +32,9 @@ public class RecentsPackageMonitor extends PackageMonitor {
     public void register(Context context) {
         try {
             // We register for events from all users, but will cross-reference them with
-            // packages for the current user and any profiles they have
-            register(context, Looper.getMainLooper(), UserHandle.ALL, true);
+            // packages for the current user and any profiles they have.  Passing null into the
+            // call also ensures that events are handled in a background thread.
+            register(context, null, UserHandle.ALL, true);
         } catch (IllegalStateException e) {
             e.printStackTrace();
         }
@@ -57,9 +52,9 @@ public class RecentsPackageMonitor extends PackageMonitor {
 
     @Override
     public void onPackageRemoved(String packageName, int uid) {
-        // Notify callbacks that a package has changed
+        // Notify callbacks on the main thread that a package has changed
         final int eventUserId = getChangingUserId();
-        EventBus.getDefault().send(new PackagesChangedEvent(this, packageName, eventUserId));
+        EventBus.getDefault().post(new PackagesChangedEvent(this, packageName, eventUserId));
     }
 
     @Override
@@ -70,39 +65,8 @@ public class RecentsPackageMonitor extends PackageMonitor {
 
     @Override
     public void onPackageModified(String packageName) {
-        // Notify callbacks that a package has changed
+        // Notify callbacks on the main thread that a package has changed
         final int eventUserId = getChangingUserId();
-        EventBus.getDefault().send(new PackagesChangedEvent(this, packageName, eventUserId));
-    }
-
-    /**
-     * Computes the components that have been removed as a result of a change in the specified
-     * package.
-     */
-    public HashSet<ComponentName> computeComponentsRemoved(List<Task.TaskKey> taskKeys,
-            String packageName, int userId) {
-        // Identify all the tasks that should be removed as a result of the package being removed.
-        // Using a set to ensure that we callback once per unique component.
-        HashSet<ComponentName> existingComponents = new HashSet<ComponentName>();
-        HashSet<ComponentName> removedComponents = new HashSet<ComponentName>();
-        for (Task.TaskKey t : taskKeys) {
-            // Skip if this doesn't apply to the current user
-            if (t.userId != userId) continue;
-
-            ComponentName cn = t.baseIntent.getComponent();
-            if (cn.getPackageName().equals(packageName)) {
-                if (existingComponents.contains(cn)) {
-                    // If we know that the component still exists in the package, then skip
-                    continue;
-                }
-                SystemServicesProxy ssp = RecentsTaskLoader.getInstance().getSystemServicesProxy();
-                if (ssp.getActivityInfo(cn, userId) != null) {
-                    existingComponents.add(cn);
-                } else {
-                    removedComponents.add(cn);
-                }
-            }
-        }
-        return removedComponents;
+        EventBus.getDefault().post(new PackagesChangedEvent(this, packageName, eventUserId));
     }
 }

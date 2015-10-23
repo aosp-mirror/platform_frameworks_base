@@ -23,12 +23,12 @@ import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
 import android.os.UserHandle;
 import android.util.Log;
+import com.android.systemui.recents.Recents;
 import com.android.systemui.recents.RecentsConfiguration;
 import com.android.systemui.recents.misc.SystemServicesProxy;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 
 
@@ -41,8 +41,10 @@ import java.util.List;
  *      options specified, such that we can transition into the Recents activity seamlessly
  */
 public class RecentsTaskLoadPlan {
-    static String TAG = "RecentsTaskLoadPlan";
-    static boolean DEBUG = false;
+    private static String TAG = "RecentsTaskLoadPlan";
+    private static boolean DEBUG = false;
+
+    private static int INVALID_TASK_ID = -1;
 
     /** The set of conditions to load tasks. */
     public static class Options {
@@ -57,25 +59,22 @@ public class RecentsTaskLoadPlan {
 
     Context mContext;
     RecentsConfiguration mConfig;
-    SystemServicesProxy mSystemServicesProxy;
 
     List<ActivityManager.RecentTaskInfo> mRawTasks;
     TaskStack mStack;
-    HashMap<Task.ComponentNameKey, ActivityInfoHandle> mActivityInfoCache =
-            new HashMap<Task.ComponentNameKey, ActivityInfoHandle>();
 
     /** Package level ctor */
-    RecentsTaskLoadPlan(Context context, RecentsConfiguration config, SystemServicesProxy ssp) {
+    RecentsTaskLoadPlan(Context context, RecentsConfiguration config) {
         mContext = context;
         mConfig = config;
-        mSystemServicesProxy = ssp;
     }
 
     /**
      * An optimization to preload the raw list of tasks.
      */
     public synchronized void preloadRawTasks(boolean isTopTaskHome) {
-        mRawTasks = mSystemServicesProxy.getRecentTasks(ActivityManager.getMaxRecentTasksStatic(),
+        SystemServicesProxy ssp = Recents.getSystemServices();
+        mRawTasks = ssp.getRecentTasks(ActivityManager.getMaxRecentTasksStatic(),
                 UserHandle.CURRENT.getIdentifier(), isTopTaskHome);
         Collections.reverse(mRawTasks);
 
@@ -87,12 +86,10 @@ public class RecentsTaskLoadPlan {
      * have a list of all the recent tasks with their metadata, not including icons or
      * thumbnails which were not cached and have to be loaded.
      */
-    synchronized void preloadPlan(RecentsTaskLoader loader, boolean isTopTaskHome) {
+    public synchronized void preloadPlan(RecentsTaskLoader loader, boolean isTopTaskHome) {
         if (DEBUG) Log.d(TAG, "preloadPlan");
 
-        // This activity info cache will be used for both preloadPlan() and executePlan()
-        mActivityInfoCache.clear();
-
+        SystemServicesProxy ssp = Recents.getSystemServices();
         Resources res = mContext.getResources();
         ArrayList<Task> stackTasks = new ArrayList<>();
         if (mRawTasks == null) {
@@ -106,30 +103,14 @@ public class RecentsTaskLoadPlan {
             Task.TaskKey taskKey = new Task.TaskKey(t.persistentId, t.stackId, t.baseIntent,
                     t.userId, t.firstActiveTime, t.lastActiveTime);
 
-            // Get an existing activity info handle if possible
-            Task.ComponentNameKey cnKey = taskKey.getComponentNameKey();
-            ActivityInfoHandle infoHandle;
-            boolean hadCachedActivityInfo = false;
-            if (mActivityInfoCache.containsKey(cnKey)) {
-                infoHandle = mActivityInfoCache.get(cnKey);
-                hadCachedActivityInfo = true;
-            } else {
-                infoHandle = new ActivityInfoHandle();
-            }
-
             // Load the label, icon, and color
             String activityLabel = loader.getAndUpdateActivityLabel(taskKey, t.taskDescription,
-                    mSystemServicesProxy, infoHandle);
+                    ssp);
             String contentDescription = loader.getAndUpdateContentDescription(taskKey,
-                    activityLabel, mSystemServicesProxy, res);
-            Drawable activityIcon = loader.getAndUpdateActivityIcon(taskKey, t.taskDescription,
-                    mSystemServicesProxy, res, infoHandle, false);
-            int activityColor = loader.getActivityPrimaryColor(t.taskDescription, res);
-
-            // Update the activity info cache
-            if (!hadCachedActivityInfo && infoHandle.info != null) {
-                mActivityInfoCache.put(cnKey, infoHandle);
-            }
+                    activityLabel, ssp, res);
+            Drawable activityIcon = loader.getAndUpdateActivityIcon(taskKey, t.taskDescription, ssp,
+                    res, false);
+            int activityColor = loader.getActivityPrimaryColor(t.taskDescription);
 
             Bitmap icon = t.taskDescription != null
                     ? t.taskDescription.getInMemoryIcon()
@@ -139,11 +120,11 @@ public class RecentsTaskLoadPlan {
                     : null;
 
             // Add the task to the stack
-            Task task = new Task(taskKey, (t.id != RecentsTaskLoader.INVALID_TASK_ID),
-                    t.affiliatedTaskId, t.affiliatedTaskColor, activityLabel, contentDescription,
-                    activityIcon, activityColor, (i == (taskCount - 1)), mConfig.lockToAppEnabled,
-                    icon, iconFilename);
-            task.thumbnail = loader.getAndUpdateThumbnail(taskKey, mSystemServicesProxy, false);
+            Task task = new Task(taskKey, (t.id != INVALID_TASK_ID), t.affiliatedTaskId,
+                    t.affiliatedTaskColor, activityLabel, contentDescription, activityIcon,
+                    activityColor, (i == (taskCount - 1)), mConfig.lockToAppEnabled, icon,
+                    iconFilename);
+            task.thumbnail = loader.getAndUpdateThumbnail(taskKey, ssp, false);
             if (DEBUG) Log.d(TAG, "\tthumbnail: " + taskKey + ", " + task.thumbnail);
 
             stackTasks.add(task);
@@ -158,12 +139,13 @@ public class RecentsTaskLoadPlan {
     /**
      * Called to apply the actual loading based on the specified conditions.
      */
-    synchronized void executePlan(Options opts, RecentsTaskLoader loader,
+    public synchronized void executePlan(Options opts, RecentsTaskLoader loader,
             TaskResourceLoadQueue loadQueue) {
         if (DEBUG) Log.d(TAG, "executePlan, # tasks: " + opts.numVisibleTasks +
                 ", # thumbnails: " + opts.numVisibleTaskThumbnails +
                 ", running task id: " + opts.runningTaskId);
 
+        SystemServicesProxy ssp = Recents.getSystemServices();
         Resources res = mContext.getResources();
 
         // Iterate through each of the tasks and load them according to the load conditions.
@@ -173,17 +155,6 @@ public class RecentsTaskLoadPlan {
             ActivityManager.RecentTaskInfo t = mRawTasks.get(i);
             Task task = tasks.get(i);
             Task.TaskKey taskKey = task.key;
-
-            // Get an existing activity info handle if possible
-            Task.ComponentNameKey cnKey = taskKey.getComponentNameKey();
-            ActivityInfoHandle infoHandle;
-            boolean hadCachedActivityInfo = false;
-            if (mActivityInfoCache.containsKey(cnKey)) {
-                infoHandle = mActivityInfoCache.get(cnKey);
-                hadCachedActivityInfo = true;
-            } else {
-                infoHandle = new ActivityInfoHandle();
-            }
 
             boolean isRunningTask = (task.key.id == opts.runningTaskId);
             boolean isVisibleTask = i >= (taskCount - opts.numVisibleTasks);
@@ -197,25 +168,19 @@ public class RecentsTaskLoadPlan {
             if (opts.loadIcons && (isRunningTask || isVisibleTask)) {
                 if (task.activityIcon == null) {
                     if (DEBUG) Log.d(TAG, "\tLoading icon: " + taskKey);
-                    task.activityIcon = loader.getAndUpdateActivityIcon(taskKey,
-                            t.taskDescription, mSystemServicesProxy, res, infoHandle, true);
+                    task.activityIcon = loader.getAndUpdateActivityIcon(taskKey, t.taskDescription,
+                            ssp, res, true);
                 }
             }
             if (opts.loadThumbnails && (isRunningTask || isVisibleThumbnail)) {
                 if (task.thumbnail == null || isRunningTask) {
                     if (DEBUG) Log.d(TAG, "\tLoading thumbnail: " + taskKey);
                     if (mConfig.svelteLevel <= RecentsConfiguration.SVELTE_LIMIT_CACHE) {
-                        task.thumbnail = loader.getAndUpdateThumbnail(taskKey,
-                                mSystemServicesProxy, true);
+                        task.thumbnail = loader.getAndUpdateThumbnail(taskKey, ssp, true);
                     } else if (mConfig.svelteLevel == RecentsConfiguration.SVELTE_DISABLE_CACHE) {
                         loadQueue.addTask(task);
                     }
                 }
-            }
-
-            // Update the activity info cache
-            if (!hadCachedActivityInfo && infoHandle.info != null) {
-                mActivityInfoCache.put(cnKey, infoHandle);
             }
         }
     }

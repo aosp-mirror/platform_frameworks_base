@@ -208,7 +208,7 @@ public class EventBus extends BroadcastReceiver {
      *
      * Events should not be edited by subscribers.
      */
-    public static class Event {
+    public static class Event implements Cloneable {
         // Indicates that this event's dispatch should be traced and logged to logcat
         boolean trace;
         // Indicates that this event must be posted on the EventBus's looper thread before invocation
@@ -218,6 +218,14 @@ public class EventBus extends BroadcastReceiver {
 
         // Only accessible from derived events
         protected Event() {}
+
+        @Override
+        protected Object clone() throws CloneNotSupportedException {
+            Event evt = (Event) super.clone();
+            // When cloning an event, reset the cancelled-dispatch state
+            evt.cancelled = false;
+            return evt;
+        }
     }
 
     /**

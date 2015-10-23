@@ -17,6 +17,7 @@
 package com.android.systemui.recents.model;
 
 import android.animation.ObjectAnimator;
+import android.content.ComponentName;
 import android.content.Context;
 import android.graphics.Color;
 import android.graphics.Rect;
@@ -24,13 +25,16 @@ import android.graphics.RectF;
 import android.graphics.drawable.ColorDrawable;
 import com.android.systemui.R;
 import com.android.systemui.recents.Constants;
+import com.android.systemui.recents.Recents;
 import com.android.systemui.recents.misc.NamedCounter;
+import com.android.systemui.recents.misc.SystemServicesProxy;
 import com.android.systemui.recents.misc.Utilities;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Random;
 
@@ -423,8 +427,8 @@ public class TaskStack {
         boolean filtered = mTaskList.setFilter(new TaskFilter() {
             @Override
             public boolean acceptTask(Task at, int i) {
-                return t.key.baseIntent.getComponent().getPackageName().equals(
-                        at.key.baseIntent.getComponent().getPackageName());
+                return t.key.getComponent().getPackageName().equals(
+                        at.key.getComponent().getPackageName());
             }
         });
         if (filtered && mCb != null) {
@@ -489,7 +493,7 @@ public class TaskStack {
             int groupCountDown = Constants.DebugFlags.App.TaskAffiliationsGroupCount;
             for (int i = 0; i < taskCount; i++) {
                 Task t = tasks.get(i);
-                String packageName = t.key.baseIntent.getComponent().getPackageName();
+                String packageName = t.key.getComponent().getPackageName();
                 packageName = "pkg";
                 TaskGrouping group;
                 if (packageName.equals(prevPackage) && groupCountDown > 0) {
@@ -574,6 +578,37 @@ public class TaskStack {
                 }
             }
         }
+    }
+
+    /**
+     * Computes the components of tasks in this stack that have been removed as a result of a change
+     * in the specified package.
+     */
+    public HashSet<ComponentName> computeComponentsRemoved(String packageName, int userId) {
+        // Identify all the tasks that should be removed as a result of the package being removed.
+        // Using a set to ensure that we callback once per unique component.
+        SystemServicesProxy ssp = Recents.getSystemServices();
+        HashSet<ComponentName> existingComponents = new HashSet<>();
+        HashSet<ComponentName> removedComponents = new HashSet<>();
+        ArrayList<Task.TaskKey> taskKeys = getTaskKeys();
+        for (Task.TaskKey t : taskKeys) {
+            // Skip if this doesn't apply to the current user
+            if (t.userId != userId) continue;
+
+            ComponentName cn = t.getComponent();
+            if (cn.getPackageName().equals(packageName)) {
+                if (existingComponents.contains(cn)) {
+                    // If we know that the component still exists in the package, then skip
+                    continue;
+                }
+                if (ssp.getActivityInfo(cn, userId) != null) {
+                    existingComponents.add(cn);
+                } else {
+                    removedComponents.add(cn);
+                }
+            }
+        }
+        return removedComponents;
     }
 
     @Override

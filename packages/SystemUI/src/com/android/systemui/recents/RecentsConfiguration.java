@@ -111,8 +111,7 @@ public class RecentsConfiguration {
     void update(Context context, SystemServicesProxy ssp, Rect windowRect) {
         // Only update resources that can change after the first load, either through developer
         // settings or via multi window
-        lockToAppEnabled = ssp.getSystemSetting(context,
-                Settings.System.LOCK_TO_APP_ENABLED) != 0;
+        lockToAppEnabled = ssp.getSystemSetting(context, Settings.System.LOCK_TO_APP_ENABLED) != 0;
         hasDockedTasks = ssp.hasDockedTask();
 
         // Recompute some values based on the given state, since we can not rely on the resource
@@ -143,8 +142,10 @@ public class RecentsConfiguration {
         return mLaunchState;
     }
 
-    /** Called when the configuration has changed, and we want to reset any configuration specific
-     * members. */
+    /**
+     * Called when the configuration has changed, and we want to reset any configuration specific
+     * members.
+     */
     public void updateOnConfigurationChange() {
         mLaunchState.updateOnConfigurationChange();
     }
