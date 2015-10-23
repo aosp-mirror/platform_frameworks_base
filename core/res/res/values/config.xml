@@ -1249,6 +1249,9 @@
     <!-- Operating volatage for bluetooth controller. 0 by default-->
     <integer translatable="false" name="config_bluetooth_operating_voltage_mv">4</integer>
 
+    <!-- Whether supported profiles should be reloaded upon enabling bluetooth -->
+    <bool name="config_bluetooth_reload_supported_profiles_when_enabled">false</bool>
+
     <!-- The default data-use polling period. -->
     <integer name="config_datause_polling_period_sec">600</integer>
 
