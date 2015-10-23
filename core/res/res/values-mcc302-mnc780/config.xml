@@ -21,25 +21,6 @@
      for different hardware and product builds. -->
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
 
-    <!-- Array of ConnectivityManager.TYPE_xxxx values allowable for tethering -->
-    <!-- Common options are [1, 4] for TYPE_WIFI and TYPE_MOBILE_DUN or
-    <!== [0,1,5,7] for TYPE_MOBILE, TYPE_WIFI, TYPE_MOBILE_HIPRI and TYPE_BLUETOOTH -->
-    <integer-array translatable="false" name="config_tether_upstream_types">
-      <item>1</item>
-      <item>4</item>
-      <item>7</item>
-      <item>9</item>
-    </integer-array>
-
-    <!-- String containing the apn value for tethering.  May be overriden by secure settings
-         TETHER_DUN_APN.  Value is a comma separated series of strings:
-         "name,apn,proxy,port,username,password,server,mmsc,mmsproxy,mmsport,mcc,mnc,auth,type",
-         Or string format of ApnSettingV3.
-         note that empty fields can be ommitted: "name,apn,,,,,,,,,310,260,,DUN" -->
-    <string-array translatable="false" name="config_tether_apndata">
-      <item>SaskTel Tethering,inet.stm.sk.ca,,,,,,,,,302,780,,DUN</item>
-    </string-array>
-
     <!-- Don't use roaming icon for considered operators -->
     <string-array translatable="false" name="config_operatorConsideredNonRoaming">
         <item>302</item>
