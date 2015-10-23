@@ -39,16 +39,53 @@ select <strong>Android Studio > Check for updates</strong>).</p>
 <p>The sections below provide notes about successive releases of
 Android Studio, as denoted by revision number. </p>
 
-
 <div class="toggle-content opened">
   <p><a href="#" onclick="return toggleContent(this)">
     <img src="{@docRoot}assets/images/triangle-opened.png" class="toggle-content-img"
+      alt=""/>Android Studio v1.4.1</a> <em>(October 2015)</em>
+  </p>
+  <div class="toggle-content-toggleme">
+    <p>Fixes and enhancements:</p>
+  <ul>
+    <li>Fixed a Gradle model caching issue that could lead to excessive Gradle syncing when the IDE
+    was restarted.
+    </li>
+    <li>Fixed a native debugging deadlock issue.
+    </li>
+    <li>Fixed an issue blocking users of the Subversion 1.9 version control system.
+    </li>
+    <li>Fixed a <em>Device Chooser</em> dialog problem where after connecting a device that was
+    unauthorized you could no longer select the emulator. <a href="http://b.android.com/189658">Issue: 189658</a>
+    </li>
+    <li>Fixed incorrect translation error reporting for locales that have a region qualifier and a
+    translation in the region (but not in the base locale). <a href="http://b.android.com/188577">Issue: 188577</a>
+    </li>
+    <li>Fixed a deadlock issue in the Theme Editor related to its interaction with the Layout
+    Editor. <a href="http://b.android.com/188070">Issue: 188070</a>
+    </li>
+    <li>Fixed a Theme Editor reload and edit conflict causing attributes to not properly update.
+    <a href="http://b.android.com/187726">Issue: 187726</a>
+    </li>
+    <li>Improved Theme Editor performance.
+    </li>
+    <li>Fixed an issue where the <code>android:required</code> attribute was ignored in the manifest.
+    <a href="http://b.android.com/187665">Issue: 187665</a>
+    </li>
+  </ul>
+  </div>
+</div>
+
+
+<div class="toggle-content closed">
+  <p><a href="#" onclick="return toggleContent(this)">
+    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img"
       alt=""/>Android Studio v1.4.0</a> <em>(September 2015)</em>
   </p>
   <div class="toggle-content-toggleme">
     <p>Fixes and enhancements:</p>
   <ul>
-    <li>Added the Vector Asset Studio tool for importing vector graphics, such as material icons
+    <li>Added the <a href="{@docRoot}tools/help/vector-asset-studio.html">Vector Asset Studio</a>
+      tool for importing vector graphics, such as material icons
       and SVG files. To use this tool, in the Android view of the Project window, right-click the
       <strong>res</strong> folder and select <strong>New</strong> &gt; <strong>Vector Asset</strong>.
     </li>
