@@ -27,6 +27,7 @@ hwui_src_files := \
     utils/LinearAllocator.cpp \
     utils/NinePatchImpl.cpp \
     utils/StringUtils.cpp \
+    utils/TestWindowContext.cpp \
     AmbientShadow.cpp \
     AnimationContext.cpp \
     Animator.cpp \
