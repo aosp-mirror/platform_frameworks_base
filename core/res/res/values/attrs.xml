@@ -323,14 +323,10 @@
         <attr name="windowBackground" format="reference" />
         <!-- Drawable to draw selectively within the inset areas when the windowBackground
              has been set to null. This protects against seeing visual garbage in the
-             surface when the app has not drawn any content into this area. -->
+             surface when the app has not drawn any content into this area. One example is
+             when the user is resizing a window of an activity that has
+             {@link android.R.attr#resizeableActivity} set for multi-window mode. -->
         <attr name="windowBackgroundFallback" format="reference" />
-        <!-- Drawable used to fill in areas the app has not rendered content to yet when the user is
-             resizing the window of an activity that has {@link android.R.attr#resizeableActivity}
-             set for multi-window mode. If unset, the system will try to use windowBackground if
-             set, then windowBackgroundFallback if set. Otherwise, the system default resizing
-             background color -->
-        <attr name="windowResizingBackground" format="reference" />
         <!-- Drawable to use as a frame around the window. -->
         <attr name="windowFrame" format="reference" />
         <!-- Flag indicating whether there should be no title on this window. -->
@@ -1850,7 +1846,6 @@ i
     <declare-styleable name="Window">
         <attr name="windowBackground" />
         <attr name="windowBackgroundFallback" />
-        <attr name="windowResizingBackground" />
         <attr name="windowContentOverlay" />
         <attr name="windowFrame" />
         <attr name="windowNoTitle" />

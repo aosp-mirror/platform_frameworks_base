@@ -2332,7 +2332,5 @@
 
   <java-symbol type="string" name="config_iccHotswapPromptForRestartDialogComponent" />
 
-  <java-symbol type="integer" name="config_windowResizingBackgroundColorARGB" />
-
   <java-symbol type="string" name="config_packagedKeyboardName" />
 </resources>

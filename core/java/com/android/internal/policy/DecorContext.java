@@ -17,7 +17,6 @@
 package com.android.internal.policy;
 
 import android.content.Context;
-import android.content.res.TypedArray;
 import android.view.ContextThemeWrapper;
 import android.view.WindowManager;
 import android.view.WindowManagerImpl;
@@ -31,7 +30,6 @@ import android.view.WindowManagerImpl;
 class DecorContext extends ContextThemeWrapper {
     private PhoneWindow mPhoneWindow;
     private WindowManager mWindowManager;
-    private TypedArray mWindowStyle;
 
     public DecorContext(Context context) {
         super(context, null);
@@ -53,14 +51,5 @@ class DecorContext extends ContextThemeWrapper {
             return mWindowManager;
         }
         return super.getSystemService(name);
-    }
-
-    public TypedArray getWindowStyle() {
-        synchronized (this) {
-            if (mWindowStyle == null) {
-                mWindowStyle = obtainStyledAttributes(com.android.internal.R.styleable.Window);
-            }
-            return mWindowStyle;
-        }
     }
 }

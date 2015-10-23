@@ -36,7 +36,6 @@
     <style name="RecentsTheme.Wallpaper">
         <!-- Wallpaper -->
         <item name="android:windowBackground">@color/transparent</item>
-        <item name="android:windowResizingBackground">@color/transparent</item>
         <item name="android:colorBackgroundCacheHint">@null</item>
         <item name="android:windowShowWallpaper">true</item>
     </style>

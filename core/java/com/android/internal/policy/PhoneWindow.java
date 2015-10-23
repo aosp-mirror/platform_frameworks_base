@@ -31,7 +31,6 @@ import android.animation.Animator;
 import android.animation.ObjectAnimator;
 import android.app.ActivityManagerNative;
 import android.app.SearchManager;
-import android.graphics.drawable.ColorDrawable;
 import android.os.Build;
 import android.os.UserHandle;
 
@@ -5438,20 +5437,7 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
      * */
     private Drawable getResizingBackgroundDrawable() {
         final Context context = mDecor.getContext();
-        final TypedArray windowStyle;
-        if (context instanceof DecorContext) {
-            windowStyle = ((DecorContext) context).getWindowStyle();
-        } else {
-            windowStyle = getWindowStyle();
-        }
-        final int resourceId =
-                windowStyle.getResourceId(R.styleable.Window_windowResizingBackground, 0);
-        if (resourceId != 0) {
-            return context.getDrawable(resourceId);
-        }
 
-        // The app didn't set a resizing background color. In this case we try to use the app's
-        // background drawable for the resizing background.
         if (mBackgroundResource != 0) {
             final Drawable drawable = context.getDrawable(mBackgroundResource);
             if (drawable != null) {
@@ -5459,8 +5445,6 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
             }
         }
 
-        // The app background drawable isn't currently set. This might be because the app cleared
-        // it. In this case we try to use the app's background fallback drawable.
         if (mBackgroundFallbackResource != 0) {
             final Drawable fallbackDrawable = context.getDrawable(mBackgroundFallbackResource);
             if (fallbackDrawable != null) {
@@ -5468,7 +5452,9 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
             }
         }
 
-        return new ColorDrawable(context.getResources().getInteger(
-                com.android.internal.R.integer.config_windowResizingBackgroundColorARGB));
+        // We shouldn't really get here as the background fallback should be always available since
+        // it is defaulted by the system.
+        Log.w(TAG, "Failed to find background drawable for PhoneWindow=" + this);
+        return null;
     }
 }
