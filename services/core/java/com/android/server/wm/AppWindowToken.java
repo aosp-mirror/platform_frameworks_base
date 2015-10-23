@@ -52,6 +52,13 @@ class AppWindowToken extends WindowToken {
 
     final boolean voiceInteraction;
 
+    // Whether the window has a saved surface from last pause, which can be
+    // used to start an entering animation earlier.
+    boolean mHasSavedSurface;
+
+    // Whether we're performing an entering animation with a saved surface.
+    boolean mAnimatingWithSavedSurface;
+
     Task mTask;
     boolean appFullscreen;
     int requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
@@ -260,10 +267,13 @@ class AppWindowToken extends WindowToken {
         final int N = allAppWindows.size();
         for (int i=0; i<N; i++) {
             WindowState win = allAppWindows.get(i);
+            // If we're animating with a saved surface, we're already visible.
+            // Return true so that the alpha doesn't get cleared.
             if (!win.mAppFreezing
-                    && (win.mViewVisibility == View.VISIBLE ||
-                        (win.mWinAnimator.isAnimating() &&
-                                !service.mAppTransition.isTransitionSet()))
+                    && (win.mViewVisibility == View.VISIBLE
+                    || mAnimatingWithSavedSurface
+                    || (win.mWinAnimator.isAnimating() &&
+                            !service.mAppTransition.isTransitionSet()))
                     && !win.mDestroying && win.isDrawnLw()) {
                 return true;
             }

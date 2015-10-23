@@ -300,7 +300,8 @@ public class AppWindowAnimator {
                 return false;
             }
 
-            if ((mAppToken.allDrawn || animating || mAppToken.startingDisplayed)
+            if ((mAppToken.allDrawn || mAppToken.mAnimatingWithSavedSurface
+                    || animating || mAppToken.startingDisplayed)
                     && animation != null) {
                 if (!animating) {
                     if (DEBUG_ANIM) Slog.v(TAG,

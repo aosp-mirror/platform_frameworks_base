@@ -18,6 +18,7 @@ package com.android.server.wm;
 
 import static android.app.ActivityManager.DOCKED_STACK_ID;
 import static android.app.ActivityManager.FREEFORM_WORKSPACE_STACK_ID;
+import static android.app.ActivityManager.HOME_STACK_ID;
 import static android.app.ActivityManager.PINNED_STACK_ID;
 import static android.app.ActivityManager.RESIZE_MODE_SYSTEM_SCREEN_ROTATION;
 import static com.android.server.wm.WindowManagerService.TAG;
@@ -322,6 +323,10 @@ class Task implements DimLayer.DimLayerUser {
     boolean showForAllUsers() {
         final int tokensCount = mAppTokens.size();
         return (tokensCount != 0) && mAppTokens.get(tokensCount - 1).showForAllUsers;
+    }
+
+    boolean inHomeStack() {
+        return mStack != null && mStack.mStackId == HOME_STACK_ID;
     }
 
     boolean inFreeformWorkspace() {

@@ -17,6 +17,7 @@ import static android.view.WindowManagerPolicy.FINISH_LAYOUT_REDO_LAYOUT;
 import static android.view.WindowManagerPolicy.FINISH_LAYOUT_REDO_WALLPAPER;
 import static com.android.server.wm.WindowManagerService.DEBUG;
 import static com.android.server.wm.WindowManagerService.DEBUG_ADD_REMOVE;
+import static com.android.server.wm.WindowManagerService.DEBUG_ANIM;
 import static com.android.server.wm.WindowManagerService.DEBUG_APP_TRANSITIONS;
 import static com.android.server.wm.WindowManagerService.DEBUG_LAYOUT;
 import static com.android.server.wm.WindowManagerService.DEBUG_LAYOUT_REPEATS;
@@ -340,6 +341,10 @@ class WindowSurfacePlacer {
                 // Don't remove this window until rotation has completed.
                 continue;
             }
+            // Discard the saved surface if window size is changed, it can't be reused.
+            if (win.mAppToken != null && win.mAppToken.mHasSavedSurface) {
+                win.mWinAnimator.destroySurfaceLocked();
+            }
             win.reportResized();
             mService.mResizingWindows.remove(i);
         }
@@ -371,7 +376,9 @@ class WindowSurfacePlacer {
                 if (mWallpaperControllerLocked.isWallpaperTarget(win)) {
                     wallpaperDestroyed = true;
                 }
-                win.mWinAnimator.destroySurfaceLocked();
+                if (!win.saveSurfaceIfNeeded()) {
+                    win.mWinAnimator.destroySurfaceLocked();
+                }
             } while (i > 0);
             mService.mDestroySurface.clear();
         }
@@ -1174,6 +1181,18 @@ class WindowSurfacePlacer {
                 }
             }
             createThumbnailAppAnimator(transit, wtoken, topOpeningLayer, topClosingLayer);
+
+            if (wtoken.mHasSavedSurface) {
+                if (DEBUG_APP_TRANSITIONS || DEBUG_ANIM) Slog.v(TAG,
+                        "Early start of animation: " + wtoken + ", allDrawn=" + wtoken.allDrawn);
+
+                for (int j = 0; j < wtoken.windows.size(); j++) {
+                    WindowState ws = wtoken.windows.get(j);
+                    ws.mWinAnimator.mDrawState = WindowStateAnimator.READY_TO_SHOW;
+                }
+                wtoken.mHasSavedSurface = false;
+                wtoken.mAnimatingWithSavedSurface = true;
+            }
         }
 
         AppWindowAnimator openingAppAnimator = (topOpeningApp == null) ?  null :
@@ -1219,6 +1238,10 @@ class WindowSurfacePlacer {
                         + wtoken.allDrawn + " startingDisplayed="
                         + wtoken.startingDisplayed + " startingMoved="
                         + wtoken.startingMoved);
+
+                if (wtoken.mHasSavedSurface || wtoken.mAnimatingWithSavedSurface) {
+                    continue;
+                }
                 if (!wtoken.allDrawn && !wtoken.startingDisplayed && !wtoken.startingMoved) {
                     return false;
                 }

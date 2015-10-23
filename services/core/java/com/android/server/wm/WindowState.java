@@ -36,6 +36,7 @@ import static com.android.server.wm.WindowManagerService.DEBUG_POWER;
 import static com.android.server.wm.WindowManagerService.DEBUG_RESIZE;
 import static com.android.server.wm.WindowManagerService.DEBUG_VISIBILITY;
 
+import android.app.ActivityManager;
 import android.app.AppOpsManager;
 import android.graphics.Point;
 import android.os.PowerManager;
@@ -1502,6 +1503,31 @@ final class WindowState implements WindowManagerPolicy.WindowState {
 
     boolean isClosing() {
         return mExiting || (mService.mClosingApps.contains(mAppToken));
+    }
+
+    boolean saveSurfaceIfNeeded() {
+        if (ActivityManager.isLowRamDeviceStatic()) {
+            // Don't save surfaces on Svelte devices.
+            return false;
+        }
+
+        Task task = getTask();
+        if (task == null || task.inHomeStack()) {
+            // Don't save surfaces for home stack apps. These usually resume and draw
+            // first frame very fast. Saving surfaces are mostly a waste of memory.
+            return false;
+        }
+
+        // We want to save surface if the app's windows are "allDrawn", or if we're
+        // currently animating with save surfaces. (If the app didn't even finish
+        // drawing when the user exits, but we have a saved surface from last time,
+        // we still want to keep that surface.)
+        if (mAppToken.allDrawn || mAppToken.mAnimatingWithSavedSurface) {
+            mAppToken.mHasSavedSurface = true;
+            return true;
+        }
+
+        return false;
     }
 
     @Override

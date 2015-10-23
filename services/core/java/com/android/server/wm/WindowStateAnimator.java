@@ -535,6 +535,7 @@ class WindowStateAnimator {
             mDrawState = COMMIT_DRAW_PENDING;
             return true;
         }
+
         return false;
     }
 
@@ -554,7 +555,8 @@ class WindowStateAnimator {
         mDrawState = READY_TO_SHOW;
         boolean result = false;
         final AppWindowToken atoken = mWin.mAppToken;
-        if (atoken == null || atoken.allDrawn || mWin.mAttrs.type == TYPE_APPLICATION_STARTING) {
+        if (atoken == null || atoken.allDrawn || atoken.mAnimatingWithSavedSurface ||
+                mWin.mAttrs.type == TYPE_APPLICATION_STARTING) {
             result = performShowLocked();
         }
         if (mDestroyPreservedSurfaceUponRedraw && result) {
@@ -995,12 +997,16 @@ class WindowStateAnimator {
     }
 
     void destroySurfaceLocked() {
-        if (mWin.mAppToken != null && mWin == mWin.mAppToken.startingWindow) {
-            mWin.mAppToken.startingDisplayed = false;
+        final AppWindowToken wtoken = mWin.mAppToken;
+        if (wtoken != null) {
+            wtoken.mHasSavedSurface = false;
+            wtoken.mAnimatingWithSavedSurface = false;
+            if (mWin == wtoken.startingWindow) {
+                wtoken.startingDisplayed = false;
+            }
         }
 
         if (mSurfaceControl != null) {
-
             int i = mWin.mChildWindows.size();
             while (i > 0) {
                 i--;
