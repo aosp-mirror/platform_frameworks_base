@@ -1410,9 +1410,11 @@ public class KeyboardView extends View implements View.OnClickListener {
     }
 
     private void removeMessages() {
-        mHandler.removeMessages(MSG_REPEAT);
-        mHandler.removeMessages(MSG_LONGPRESS);
-        mHandler.removeMessages(MSG_SHOW_PREVIEW);
+        if (mHandler != null) {
+            mHandler.removeMessages(MSG_REPEAT);
+            mHandler.removeMessages(MSG_LONGPRESS);
+            mHandler.removeMessages(MSG_SHOW_PREVIEW);
+        }
     }
 
     @Override
