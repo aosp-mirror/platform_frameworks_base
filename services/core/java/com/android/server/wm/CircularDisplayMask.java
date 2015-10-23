@@ -56,7 +56,7 @@ class CircularDisplayMask {
             int screenOffset, int maskThickness) {
         mScreenSize = new Point();
         display.getSize(mScreenSize);
-        if (mScreenSize.x != mScreenSize.y) {
+        if (mScreenSize.x != mScreenSize.y + screenOffset) {
             Slog.w(TAG, "Screen dimensions of displayId = " + display.getDisplayId() +
                     "are not equal, circularMask will not be drawn.");
             mDimensionsUnequal = true;
