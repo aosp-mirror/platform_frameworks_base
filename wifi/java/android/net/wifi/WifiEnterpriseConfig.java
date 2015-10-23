@@ -101,9 +101,18 @@ public class WifiEnterpriseConfig implements Parcelable {
     public static final String REALM_KEY           = "realm";
     /** @hide */
     public static final String PLMN_KEY            = "plmn";
+    /** @hide */
+    public static final String PHASE1_KEY          = "phase1";
 
+    /** {@hide} */
+    public static final String ENABLE_TLS_1_2 = "\"tls_disable_tlsv1_2=0\"";
+    /** {@hide} */
+    public static final String DISABLE_TLS_1_2 = "\"tls_disable_tlsv1_2=1\"";
 
     private HashMap<String, String> mFields = new HashMap<String, String>();
+    //By default, we enable TLS1.2. However, due to a known bug on some radius, we may disable it to
+    // fall back to TLS 1.1.
+    private boolean mTls12Enable =  true;
     private X509Certificate mCaCert;
     private PrivateKey mClientPrivateKey;
     private X509Certificate mClientCertificate;
@@ -149,6 +158,7 @@ public class WifiEnterpriseConfig implements Parcelable {
         }
 
         writeCertificate(dest, mClientCertificate);
+        dest.writeInt(mTls12Enable ? 1: 0);
     }
 
     private void writeCertificate(Parcel dest, X509Certificate cert) {
@@ -196,6 +206,7 @@ public class WifiEnterpriseConfig implements Parcelable {
 
                     enterpriseConfig.mClientPrivateKey = userKey;
                     enterpriseConfig.mClientCertificate = readCertificate(in);
+                    enterpriseConfig.mTls12Enable = (in.readInt() == 1);
                     return enterpriseConfig;
                 }
 
@@ -297,6 +308,26 @@ public class WifiEnterpriseConfig implements Parcelable {
             default:
                 throw new IllegalArgumentException("Unknown EAP method");
         }
+    }
+
+    /**
+     * Set the TLS version
+     * @param enable: true -- enable TLS1.2  false -- disable TLS1.2
+     * @hide
+     */
+    public void setTls12Enable(boolean enable) {
+        mTls12Enable = enable;
+        mFields.put(PHASE1_KEY,
+                enable ? ENABLE_TLS_1_2 : DISABLE_TLS_1_2);
+    }
+
+    /**
+     * Get the TLS1.2 enabled or not
+     * @return eap method configured
+     * @hide
+     */
+    public boolean getTls12Enable() {
+        return mTls12Enable;
     }
 
     /**
