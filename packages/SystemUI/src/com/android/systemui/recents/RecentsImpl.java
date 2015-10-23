@@ -26,10 +26,10 @@ import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Rect;
-import android.os.AsyncTask;
 import android.os.Handler;
 import android.os.SystemClock;
 import android.os.UserHandle;
+import android.util.Log;
 import android.util.MutableBoolean;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -44,6 +44,7 @@ import com.android.systemui.recents.events.activity.ToggleRecentsEvent;
 import com.android.systemui.recents.events.component.RecentsVisibilityChangedEvent;
 import com.android.systemui.recents.events.component.ScreenPinningRequestEvent;
 import com.android.systemui.recents.misc.Console;
+import com.android.systemui.recents.misc.ForegroundThread;
 import com.android.systemui.recents.misc.SystemServicesProxy;
 import com.android.systemui.recents.model.RecentsTaskLoadPlan;
 import com.android.systemui.recents.model.RecentsTaskLoader;
@@ -66,6 +67,7 @@ public class RecentsImpl extends IRecentsNonSystemUserCallbacks.Stub
         implements ActivityOptions.OnAnimationStartedListener {
 
     private final static String TAG = "RecentsImpl";
+    private final static boolean DEBUG = false;
 
     private final static int sMinToggleDelay = 350;
 
@@ -161,6 +163,9 @@ public class RecentsImpl extends IRecentsNonSystemUserCallbacks.Stub
         mAppWidgetHost = new RecentsAppWidgetHost(mContext, Constants.Values.App.AppWidgetHostId);
         Resources res = mContext.getResources();
         LayoutInflater inflater = LayoutInflater.from(mContext);
+
+        // Initialize the static foreground thread
+        ForegroundThread.get();
 
         // Register the task stack listener
         mTaskStackListener = new TaskStackListenerImpl(mHandler);
@@ -300,6 +305,8 @@ public class RecentsImpl extends IRecentsNonSystemUserCallbacks.Stub
             loader.preloadTasks(sInstanceLoadPlan, topTaskHome.value);
             TaskStack stack = sInstanceLoadPlan.getTaskStack();
             if (stack.getTaskCount() > 0) {
+                // We try and draw the thumbnail transition bitmap in parallel before
+                // toggle/show recents is called
                 preCacheThumbnailTransitionBitmapAsync(topTask, stack, mDummyStackView);
             }
         }
@@ -458,7 +465,6 @@ public class RecentsImpl extends IRecentsNonSystemUserCallbacks.Stub
      * Preloads the icon of a task.
      */
     private void preloadIcon(ActivityManager.RunningTaskInfo task) {
-
         // Ensure that we load the running task's icon
         RecentsTaskLoadPlan.Options launchOpts = new RecentsTaskLoadPlan.Options();
         launchOpts.runningTaskId = task.id;
@@ -483,18 +489,19 @@ public class RecentsImpl extends IRecentsNonSystemUserCallbacks.Stub
         final Task toTask = new Task();
         final TaskViewTransform toTransform = getThumbnailTransitionTransform(stack, stackView,
                 topTask.id, toTask);
-        new AsyncTask<Void, Void, Bitmap>() {
+        ForegroundThread.getHandler().post(new Runnable() {
             @Override
-            protected Bitmap doInBackground(Void... params) {
-                return drawThumbnailTransitionBitmap(toTask, toTransform);
+            public void run() {
+                final Bitmap transitionBitmap = drawThumbnailTransitionBitmap(toTask, toTransform);
+                mHandler.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        mThumbnailTransitionBitmapCache = transitionBitmap;
+                        mThumbnailTransitionBitmapCacheKey = toTask;
+                    }
+                });
             }
-
-            @Override
-            protected void onPostExecute(Bitmap bitmap) {
-                mThumbnailTransitionBitmapCache = bitmap;
-                mThumbnailTransitionBitmapCacheKey = toTask;
-            }
-        }.execute();
+        });
     }
 
     /**
