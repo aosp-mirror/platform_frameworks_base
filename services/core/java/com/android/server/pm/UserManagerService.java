@@ -44,6 +44,7 @@ import android.os.Parcelable;
 import android.os.Process;
 import android.os.RemoteException;
 import android.os.ServiceManager;
+import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.os.storage.StorageManager;
@@ -138,11 +139,6 @@ public class UserManagerService extends IUserManager.Stub {
     // Maximum number of managed profiles permitted per user is 1. This cannot be increased
     // without first making sure that the rest of the framework is prepared for it.
     private static final int MAX_MANAGED_PROFILES = 1;
-
-    /**
-     * Flag indicating whether device credentials are shared among same-user profiles.
-     */
-    private static final boolean CONFIG_PROFILES_SHARE_CREDENTIAL = true;
 
     static final int WRITE_USER_MSG = 1;
     static final int WRITE_USER_DELAY = 2*1000;  // 2 seconds
@@ -343,7 +339,7 @@ public class UserManagerService extends IUserManager.Stub {
     @Override
     public int getCredentialOwnerProfile(int userHandle) {
         checkManageUsersPermission("get the credential owner");
-        if (CONFIG_PROFILES_SHARE_CREDENTIAL) {
+        if (!"file".equals(SystemProperties.get("ro.crypto.type", "none"))) {
             synchronized (mPackagesLock) {
                 UserInfo profileParent = getProfileParentLocked(userHandle);
                 if (profileParent != null) {
