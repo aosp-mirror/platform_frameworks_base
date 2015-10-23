@@ -64,6 +64,10 @@ void UNUSED(T... t) {}
     case RS_TYPE_FLOAT_32:                                                              \
         len = _env->GetArrayLength((jfloatArray)data);                                  \
         ptr = _env->GetFloatArrayElements((jfloatArray)data, flag);                     \
+        if (ptr == nullptr) {                                                           \
+            ALOGE("Failed to get Java array elements.");                                \
+            return;                                                                     \
+        }                                                                               \
         typeBytes = 4;                                                                  \
         if (usePadding) {                                                               \
             srcPtr = ptr;                                                               \
@@ -89,6 +93,10 @@ void UNUSED(T... t) {}
     case RS_TYPE_FLOAT_64:                                                              \
         len = _env->GetArrayLength((jdoubleArray)data);                                 \
         ptr = _env->GetDoubleArrayElements((jdoubleArray)data, flag);                   \
+        if (ptr == nullptr) {                                                           \
+            ALOGE("Failed to get Java array elements.");                                \
+            return;                                                                     \
+        }                                                                               \
         typeBytes = 8;                                                                  \
         if (usePadding) {                                                               \
             srcPtr = ptr;                                                               \
@@ -115,6 +123,10 @@ void UNUSED(T... t) {}
     case RS_TYPE_UNSIGNED_8:                                                            \
         len = _env->GetArrayLength((jbyteArray)data);                                   \
         ptr = _env->GetByteArrayElements((jbyteArray)data, flag);                       \
+        if (ptr == nullptr) {                                                           \
+            ALOGE("Failed to get Java array elements.");                                \
+            return;                                                                     \
+        }                                                                               \
         typeBytes = 1;                                                                  \
         if (usePadding) {                                                               \
             srcPtr = ptr;                                                               \
@@ -141,6 +153,10 @@ void UNUSED(T... t) {}
     case RS_TYPE_UNSIGNED_16:                                                           \
         len = _env->GetArrayLength((jshortArray)data);                                  \
         ptr = _env->GetShortArrayElements((jshortArray)data, flag);                     \
+        if (ptr == nullptr) {                                                           \
+            ALOGE("Failed to get Java array elements.");                                \
+            return;                                                                     \
+        }                                                                               \
         typeBytes = 2;                                                                  \
         if (usePadding) {                                                               \
             srcPtr = ptr;                                                               \
@@ -167,6 +183,10 @@ void UNUSED(T... t) {}
     case RS_TYPE_UNSIGNED_32:                                                           \
         len = _env->GetArrayLength((jintArray)data);                                    \
         ptr = _env->GetIntArrayElements((jintArray)data, flag);                         \
+        if (ptr == nullptr) {                                                           \
+            ALOGE("Failed to get Java array elements.");                                \
+            return;                                                                     \
+        }                                                                               \
         typeBytes = 4;                                                                  \
         if (usePadding) {                                                               \
             srcPtr = ptr;                                                               \
@@ -193,6 +213,10 @@ void UNUSED(T... t) {}
     case RS_TYPE_UNSIGNED_64:                                                           \
         len = _env->GetArrayLength((jlongArray)data);                                   \
         ptr = _env->GetLongArrayElements((jlongArray)data, flag);                       \
+        if (ptr == nullptr) {                                                           \
+            ALOGE("Failed to get Java array elements.");                                \
+            return;                                                                     \
+        }                                                                               \
         typeBytes = 8;                                                                  \
         if (usePadding) {                                                               \
             srcPtr = ptr;                                                               \
@@ -332,16 +356,40 @@ nClosureCreate(JNIEnv *_env, jobject _this, jlong con, jlong kernelID,
 
   jlong* jFieldIDs = _env->GetLongArrayElements(fieldIDArray, nullptr);
   jsize fieldIDs_length = _env->GetArrayLength(fieldIDArray);
+  if (jFieldIDs == nullptr) {
+      ALOGE("Failed to get Java array elements: fieldIDs.");
+      return ret;
+  }
+
   jlong* jValues = _env->GetLongArrayElements(valueArray, nullptr);
   jsize values_length = _env->GetArrayLength(valueArray);
+  if (jValues == nullptr) {
+      ALOGE("Failed to get Java array elements: values.");
+      return ret;
+  }
+
   jint* jSizes = _env->GetIntArrayElements(sizeArray, nullptr);
   jsize sizes_length = _env->GetArrayLength(sizeArray);
+  if (jSizes == nullptr) {
+      ALOGE("Failed to get Java array elements: sizes.");
+      return ret;
+  }
+
   jlong* jDepClosures =
       _env->GetLongArrayElements(depClosureArray, nullptr);
   jsize depClosures_length = _env->GetArrayLength(depClosureArray);
+  if (jDepClosures == nullptr) {
+      ALOGE("Failed to get Java array elements: depClosures.");
+      return ret;
+  }
+
   jlong* jDepFieldIDs =
       _env->GetLongArrayElements(depFieldIDArray, nullptr);
   jsize depFieldIDs_length = _env->GetArrayLength(depFieldIDArray);
+  if (jDepFieldIDs == nullptr) {
+      ALOGE("Failed to get Java array elements: depFieldIDs.");
+      return ret;
+  }
 
   size_t numValues, numDependencies;
   RsScriptFieldID* fieldIDs;
@@ -435,12 +483,31 @@ nInvokeClosureCreate(JNIEnv *_env, jobject _this, jlong con, jlong invokeID,
 
   jbyte* jParams = _env->GetByteArrayElements(paramArray, nullptr);
   jsize jParamLength = _env->GetArrayLength(paramArray);
+  if (jParams == nullptr) {
+      ALOGE("Failed to get Java array elements: params.");
+      return ret;
+  }
+
   jlong* jFieldIDs = _env->GetLongArrayElements(fieldIDArray, nullptr);
   jsize fieldIDs_length = _env->GetArrayLength(fieldIDArray);
+  if (jFieldIDs == nullptr) {
+      ALOGE("Failed to get Java array elements: fieldIDs.");
+      return ret;
+  }
+
   jlong* jValues = _env->GetLongArrayElements(valueArray, nullptr);
   jsize values_length = _env->GetArrayLength(valueArray);
+  if (jValues == nullptr) {
+      ALOGE("Failed to get Java array elements: values.");
+      return ret;
+  }
+
   jint* jSizes = _env->GetIntArrayElements(sizeArray, nullptr);
   jsize sizes_length = _env->GetArrayLength(sizeArray);
+  if (jSizes == nullptr) {
+      ALOGE("Failed to get Java array elements: sizes.");
+      return ret;
+  }
 
   size_t numValues;
   RsScriptFieldID* fieldIDs;
@@ -515,6 +582,10 @@ nScriptGroup2Create(JNIEnv *_env, jobject _this, jlong con, jstring name,
 
   jlong* jClosures = _env->GetLongArrayElements(closureArray, nullptr);
   jsize numClosures = _env->GetArrayLength(closureArray);
+  if (jClosures == nullptr) {
+      ALOGE("Failed to get Java array elements: closures.");
+      return ret;
+  }
 
   RsClosure* closures;
 
@@ -720,6 +791,11 @@ nAssignName(JNIEnv *_env, jobject _this, jlong con, jlong obj, jbyteArray str)
     }
     jint len = _env->GetArrayLength(str);
     jbyte * cptr = (jbyte *) _env->GetPrimitiveArrayCritical(str, 0);
+    if (cptr == nullptr) {
+        ALOGE("Failed to get Java array elements");
+        return;
+    }
+
     rsAssignName((RsContext)con, (void *)obj, (const char *)cptr, len);
     _env->ReleasePrimitiveArrayCritical(str, cptr, JNI_ABORT);
 }
@@ -916,6 +992,10 @@ nContextGetUserMessage(JNIEnv *_env, jobject _this, jlong con, jintArray data)
         ALOGD("nContextGetMessage, con(%p), len(%i)", (RsContext)con, len);
     }
     jint *ptr = _env->GetIntArrayElements(data, nullptr);
+    if (ptr == nullptr) {
+        ALOGE("Failed to get Java array elements");
+        return 0;
+    }
     size_t receiveLen;
     uint32_t subID;
     int id = rsContextGetMessage((RsContext)con,
@@ -936,6 +1016,10 @@ nContextPeekMessage(JNIEnv *_env, jobject _this, jlong con, jintArray auxData)
         ALOGD("nContextPeekMessage, con(%p)", (RsContext)con);
     }
     jint *auxDataPtr = _env->GetIntArrayElements(auxData, nullptr);
+    if (auxDataPtr == nullptr) {
+        ALOGE("Failed to get Java array elements");
+        return 0;
+    }
     size_t receiveLen;
     uint32_t subID;
     int id = rsContextPeekMessage((RsContext)con, &receiveLen, sizeof(receiveLen),
@@ -970,6 +1054,10 @@ nContextSendMessage(JNIEnv *_env, jobject _this, jlong con, jint id, jintArray d
     if (data) {
         len = _env->GetArrayLength(data);
         ptr = _env->GetIntArrayElements(data, nullptr);
+        if (ptr == nullptr) {
+            ALOGE("Failed to get Java array elements");
+            return;
+        }
     }
     if (kLogApi) {
         ALOGD("nContextSendMessage, con(%p), id(%i), len(%i)", (RsContext)con, id, len);
@@ -1004,7 +1092,15 @@ nElementCreate2(JNIEnv *_env, jobject _this, jlong con,
     }
 
     jlong *jIds = _env->GetLongArrayElements(_ids, nullptr);
+    if (jIds == nullptr) {
+        ALOGE("Failed to get Java array elements: ids");
+        return 0;
+    }
     jint *jArraySizes = _env->GetIntArrayElements(_arraySizes, nullptr);
+    if (jArraySizes == nullptr) {
+        ALOGE("Failed to get Java array elements: arraySizes");
+        return 0;
+    }
 
     RsElement *ids = (RsElement*)malloc(fieldCount * sizeof(RsElement));
     uint32_t *arraySizes = (uint32_t *)malloc(fieldCount * sizeof(uint32_t));
@@ -1311,6 +1407,10 @@ nAllocationElementData(JNIEnv *_env, jobject _this, jlong con, jlong alloc,
               sizeBytes);
     }
     jbyte *ptr = _env->GetByteArrayElements(data, nullptr);
+    if (ptr == nullptr) {
+        ALOGE("Failed to get Java array elements");
+        return;
+    }
     rsAllocationElementData((RsContext)con, (RsAllocation)alloc,
                             xoff, yoff, zoff,
                             lod, ptr, sizeBytes, compIdx);
@@ -1449,6 +1549,10 @@ nAllocationElementRead(JNIEnv *_env, jobject _this, jlong con, jlong alloc,
               sizeBytes);
     }
     jbyte *ptr = _env->GetByteArrayElements(data, nullptr);
+    if (ptr == nullptr) {
+        ALOGE("Failed to get Java array elements");
+        return;
+    }
     rsAllocationElementRead((RsContext)con, (RsAllocation)alloc,
                             xoff, yoff, zoff,
                             lod, ptr, sizeBytes, compIdx);
@@ -1775,6 +1879,10 @@ nScriptSetVarV(JNIEnv *_env, jobject _this, jlong con, jlong script, jint slot, 
     }
     jint len = _env->GetArrayLength(data);
     jbyte *ptr = _env->GetByteArrayElements(data, nullptr);
+    if (ptr == nullptr) {
+        ALOGE("Failed to get Java array elements");
+        return;
+    }
     rsScriptSetVarV((RsContext)con, (RsScript)script, slot, ptr, len);
     _env->ReleaseByteArrayElements(data, ptr, JNI_ABORT);
 }
@@ -1787,6 +1895,10 @@ nScriptGetVarV(JNIEnv *_env, jobject _this, jlong con, jlong script, jint slot, 
     }
     jint len = _env->GetArrayLength(data);
     jbyte *ptr = _env->GetByteArrayElements(data, nullptr);
+    if (ptr == nullptr) {
+        ALOGE("Failed to get Java array elements");
+        return;
+    }
     rsScriptGetVarV((RsContext)con, (RsScript)script, slot, ptr, len);
     _env->ReleaseByteArrayElements(data, ptr, 0);
 }
@@ -1800,8 +1912,16 @@ nScriptSetVarVE(JNIEnv *_env, jobject _this, jlong con, jlong script, jint slot,
     }
     jint len = _env->GetArrayLength(data);
     jbyte *ptr = _env->GetByteArrayElements(data, nullptr);
+    if (ptr == nullptr) {
+        ALOGE("Failed to get Java array elements");
+        return;
+    }
     jint dimsLen = _env->GetArrayLength(dims) * sizeof(int);
     jint *dimsPtr = _env->GetIntArrayElements(dims, nullptr);
+    if (dimsPtr == nullptr) {
+        ALOGE("Failed to get Java array elements");
+        return;
+    }
     rsScriptSetVarVE((RsContext)con, (RsScript)script, slot, ptr, len, (RsElement)elem,
                      (const uint32_t*) dimsPtr, dimsLen);
     _env->ReleaseByteArrayElements(data, ptr, JNI_ABORT);
@@ -1819,6 +1939,10 @@ nScriptSetTimeZone(JNIEnv *_env, jobject _this, jlong con, jlong script, jbyteAr
     jint length = _env->GetArrayLength(timeZone);
     jbyte* timeZone_ptr;
     timeZone_ptr = (jbyte *) _env->GetPrimitiveArrayCritical(timeZone, (jboolean *)0);
+    if (timeZone_ptr == nullptr) {
+        ALOGE("Failed to get Java array elements");
+        return;
+    }
 
     rsScriptSetTimeZone((RsContext)con, (RsScript)script, (const char *)timeZone_ptr, length);
 
@@ -1844,6 +1968,10 @@ nScriptInvokeV(JNIEnv *_env, jobject _this, jlong con, jlong script, jint slot, 
     }
     jint len = _env->GetArrayLength(data);
     jbyte *ptr = _env->GetByteArrayElements(data, nullptr);
+    if (ptr == nullptr) {
+        ALOGE("Failed to get Java array elements");
+        return;
+    }
     rsScriptInvokeV((RsContext)con, (RsScript)script, slot, ptr, len);
     _env->ReleaseByteArrayElements(data, ptr, JNI_ABORT);
 }
@@ -1870,8 +1998,12 @@ nScriptForEach(JNIEnv *_env, jobject _this, jlong con, jlong script, jint slot,
             return;
         }
 
-        // TODO (b/20760800): Check in_ptr is not null
         in_ptr = _env->GetLongArrayElements(ains, nullptr);
+        if (in_ptr == nullptr) {
+            ALOGE("Failed to get Java array elements");
+            return;
+        }
+
         if (sizeof(RsAllocation) == sizeof(jlong)) {
             in_allocs = (RsAllocation*)in_ptr;
 
@@ -1897,6 +2029,10 @@ nScriptForEach(JNIEnv *_env, jobject _this, jlong con, jlong script, jint slot,
     if (params != nullptr) {
         param_len = _env->GetArrayLength(params);
         param_ptr = _env->GetByteArrayElements(params, nullptr);
+        if (param_ptr == nullptr) {
+            ALOGE("Failed to get Java array elements");
+            return;
+        }
     }
 
     RsScriptCall sc, *sca = nullptr;
@@ -1908,6 +2044,10 @@ nScriptForEach(JNIEnv *_env, jobject _this, jlong con, jlong script, jint slot,
     if (limits != nullptr) {
         limit_len = _env->GetArrayLength(limits);
         limit_ptr = _env->GetIntArrayElements(limits, nullptr);
+        if (limit_ptr == nullptr) {
+            ALOGE("Failed to get Java array elements");
+            return;
+        }
 
         assert(limit_len == 6);
         UNUSED(limit_len);  // As the assert might not be compiled.
@@ -1966,6 +2106,10 @@ nScriptReduce(JNIEnv *_env, jobject _this, jlong con, jlong script, jint slot,
     if (limits != nullptr) {
         limit_len = _env->GetArrayLength(limits);
         limit_ptr = _env->GetIntArrayElements(limits, nullptr);
+        if (limit_ptr == nullptr) {
+            ALOGE("Failed to get Java array elements");
+            return;
+        }
 
         // We expect to be passed an array [x1, x2] which specifies
         // the sub-range for a 1-dimensional reduction.
@@ -2037,6 +2181,10 @@ nScriptCCreate(JNIEnv *_env, jobject _this, jlong con,
     }
     script_ptr = (jbyte *)
         _env->GetPrimitiveArrayCritical(scriptRef, (jboolean *)0);
+    if (script_ptr == nullptr) {
+        ALOGE("Failed to get Java array elements");
+        return ret;
+    }
 
     //rsScriptCSetText((RsContext)con, (const char *)script_ptr, length);
 
@@ -2104,6 +2252,10 @@ nScriptGroupCreate(JNIEnv *_env, jobject _this, jlong con, jlongArray _kernels, 
 
     jint kernelsLen = _env->GetArrayLength(_kernels);
     jlong *jKernelsPtr = _env->GetLongArrayElements(_kernels, nullptr);
+    if (jKernelsPtr == nullptr) {
+        ALOGE("Failed to get Java array elements: kernels");
+        return 0;
+    }
     RsScriptKernelID* kernelsPtr = (RsScriptKernelID*) malloc(sizeof(RsScriptKernelID) * kernelsLen);
     for(int i = 0; i < kernelsLen; ++i) {
         kernelsPtr[i] = (RsScriptKernelID)jKernelsPtr[i];
@@ -2111,6 +2263,10 @@ nScriptGroupCreate(JNIEnv *_env, jobject _this, jlong con, jlongArray _kernels, 
 
     jint srcLen = _env->GetArrayLength(_src);
     jlong *jSrcPtr = _env->GetLongArrayElements(_src, nullptr);
+    if (jSrcPtr == nullptr) {
+        ALOGE("Failed to get Java array elements: src");
+        return 0;
+    }
     RsScriptKernelID* srcPtr = (RsScriptKernelID*) malloc(sizeof(RsScriptKernelID) * srcLen);
     for(int i = 0; i < srcLen; ++i) {
         srcPtr[i] = (RsScriptKernelID)jSrcPtr[i];
@@ -2118,6 +2274,10 @@ nScriptGroupCreate(JNIEnv *_env, jobject _this, jlong con, jlongArray _kernels, 
 
     jint dstkLen = _env->GetArrayLength(_dstk);
     jlong *jDstkPtr = _env->GetLongArrayElements(_dstk, nullptr);
+    if (jDstkPtr == nullptr) {
+        ALOGE("Failed to get Java array elements: dstk");
+        return 0;
+    }
     RsScriptKernelID* dstkPtr = (RsScriptKernelID*) malloc(sizeof(RsScriptKernelID) * dstkLen);
     for(int i = 0; i < dstkLen; ++i) {
         dstkPtr[i] = (RsScriptKernelID)jDstkPtr[i];
@@ -2125,6 +2285,10 @@ nScriptGroupCreate(JNIEnv *_env, jobject _this, jlong con, jlongArray _kernels, 
 
     jint dstfLen = _env->GetArrayLength(_dstf);
     jlong *jDstfPtr = _env->GetLongArrayElements(_dstf, nullptr);
+    if (jDstfPtr == nullptr) {
+        ALOGE("Failed to get Java array elements: dstf");
+        return 0;
+    }
     RsScriptKernelID* dstfPtr = (RsScriptKernelID*) malloc(sizeof(RsScriptKernelID) * dstfLen);
     for(int i = 0; i < dstfLen; ++i) {
         dstfPtr[i] = (RsScriptKernelID)jDstfPtr[i];
@@ -2132,6 +2296,10 @@ nScriptGroupCreate(JNIEnv *_env, jobject _this, jlong con, jlongArray _kernels, 
 
     jint typesLen = _env->GetArrayLength(_types);
     jlong *jTypesPtr = _env->GetLongArrayElements(_types, nullptr);
+    if (jTypesPtr == nullptr) {
+        ALOGE("Failed to get Java array elements: types");
+        return 0;
+    }
     RsType* typesPtr = (RsType*) malloc(sizeof(RsType) * typesLen);
     for(int i = 0; i < typesLen; ++i) {
         typesPtr[i] = (RsType)jTypesPtr[i];
@@ -2244,6 +2412,10 @@ nProgramFragmentCreate(JNIEnv *_env, jobject _this, jlong con, jstring shader,
     AutoJavaStringToUTF8 shaderUTF(_env, shader);
     jlong *jParamPtr = _env->GetLongArrayElements(params, nullptr);
     jint paramLen = _env->GetArrayLength(params);
+    if (jParamPtr == nullptr) {
+        ALOGE("Failed to get Java array elements");
+        return 0;
+    }
 
     int texCount = _env->GetArrayLength(texNames);
     AutoJavaStringArrayToUTF8 names(_env, texNames, texCount);
@@ -2277,6 +2449,10 @@ nProgramVertexCreate(JNIEnv *_env, jobject _this, jlong con, jstring shader,
     AutoJavaStringToUTF8 shaderUTF(_env, shader);
     jlong *jParamPtr = _env->GetLongArrayElements(params, nullptr);
     jint paramLen = _env->GetArrayLength(params);
+    if (jParamPtr == nullptr) {
+        ALOGE("Failed to get Java array elements");
+        return 0;
+    }
 
     if (kLogApi) {
         ALOGD("nProgramVertexCreate, con(%p), paramLen(%i)", (RsContext)con, paramLen);
@@ -2392,6 +2568,10 @@ nMeshCreate(JNIEnv *_env, jobject _this, jlong con, jlongArray _vtx, jlongArray 
 
     jint vtxLen = _env->GetArrayLength(_vtx);
     jlong *jVtxPtr = _env->GetLongArrayElements(_vtx, nullptr);
+    if (jVtxPtr == nullptr) {
+        ALOGE("Failed to get Java array elements: vtx");
+        return 0;
+    }
     RsAllocation* vtxPtr = (RsAllocation*) malloc(sizeof(RsAllocation) * vtxLen);
     for(int i = 0; i < vtxLen; ++i) {
         vtxPtr[i] = (RsAllocation)(uintptr_t)jVtxPtr[i];
@@ -2399,6 +2579,10 @@ nMeshCreate(JNIEnv *_env, jobject _this, jlong con, jlongArray _vtx, jlongArray 
 
     jint idxLen = _env->GetArrayLength(_idx);
     jlong *jIdxPtr = _env->GetLongArrayElements(_idx, nullptr);
+    if (jIdxPtr == nullptr) {
+        ALOGE("Failed to get Java array elements: idx");
+        return 0;
+    }
     RsAllocation* idxPtr = (RsAllocation*) malloc(sizeof(RsAllocation) * idxLen);
     for(int i = 0; i < idxLen; ++i) {
         idxPtr[i] = (RsAllocation)(uintptr_t)jIdxPtr[i];
@@ -2406,6 +2590,10 @@ nMeshCreate(JNIEnv *_env, jobject _this, jlong con, jlongArray _vtx, jlongArray 
 
     jint primLen = _env->GetArrayLength(_prim);
     jint *primPtr = _env->GetIntArrayElements(_prim, nullptr);
+    if (primPtr == nullptr) {
+        ALOGE("Failed to get Java array elements: prim");
+        return 0;
+    }
 
     jlong id = (jlong)(uintptr_t)rsMeshCreate((RsContext)con,
                                (RsAllocation *)vtxPtr, vtxLen,
