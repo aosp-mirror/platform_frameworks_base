@@ -1024,7 +1024,9 @@ public class TelecomManager {
      * If there is a ringing incoming call, this method accepts the call on behalf of the user.
      * TODO: L-release - need to convert all invocation of ITelecmmService#answerRingingCall to use
      * this method (clockwork & gearhead).
-     *
+     * If the incoming call is a video call, the call will be answered with the same video state as
+     * the incoming call requests.  This means, for example, that an incoming call requesting
+     * {@link VideoProfile#STATE_BIDIRECTIONAL} will be answered, accepting that state.
      * @hide
      */
     @SystemApi
@@ -1035,6 +1037,24 @@ public class TelecomManager {
             }
         } catch (RemoteException e) {
             Log.e(TAG, "Error calling ITelecomService#acceptRingingCall", e);
+        }
+    }
+
+    /**
+     * If there is a ringing incoming call, this method accepts the call on behalf of the user,
+     * with the specified video state.
+     *
+     * @param videoState The desired video state to answer the call with.
+     * @hide
+     */
+    @SystemApi
+    public void acceptRingingCall(int videoState) {
+        try {
+            if (isServiceConnected()) {
+                getTelecomService().acceptRingingCallWithVideoState(videoState);
+            }
+        } catch (RemoteException e) {
+            Log.e(TAG, "Error calling ITelecomService#acceptRingingCallWithVideoState", e);
         }
     }
 

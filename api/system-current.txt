@@ -32707,6 +32707,7 @@ package android.telecom {
 
   public class TelecomManager {
     method public void acceptRingingCall();
+    method public void acceptRingingCall(int);
     method public void addNewIncomingCall(android.telecom.PhoneAccountHandle, android.os.Bundle);
     method public void addNewUnknownCall(android.telecom.PhoneAccountHandle, android.os.Bundle);
     method public void cancelMissedCallsNotification();

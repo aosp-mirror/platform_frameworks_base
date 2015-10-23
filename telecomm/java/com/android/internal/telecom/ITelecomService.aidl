@@ -178,6 +178,11 @@ interface ITelecomService {
     void acceptRingingCall();
 
     /**
+     * @see TelecomServiceImpl#acceptRingingCallWithVideoState(int)
+     */
+    void acceptRingingCallWithVideoState(int videoState);
+
+    /**
      * @see TelecomServiceImpl#cancelMissedCallsNotification
      */
     void cancelMissedCallsNotification(String callingPackage);
