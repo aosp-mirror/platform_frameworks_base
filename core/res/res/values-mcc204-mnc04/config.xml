@@ -44,14 +44,5 @@
         <item>false</item>
     </string-array>
 
-    <!-- String containing the apn value for tethering.  May be overriden by secure settings
-         TETHER_DUN_APN.  Value is a comma separated series of strings:
-         "name,apn,proxy,port,username,password,server,mmsc,mmsproxy,mmsport,mcc,mnc,auth,type",
-         Or string format of ApnSettingV3.
-         note that empty fields can be ommitted: "name,apn,,,,,,,,,310,260,,DUN" -->
-    <string-array translatable="false" name="config_tether_apndata">
-        <item>[ApnSettingV3]SaskTel Tethering,inet.stm.sk.ca,,,,,,,,,204,04,,DUN,,,true,0,,,,,,,gid,5A</item>
-    </string-array>
-
     <string translatable="false" name="prohibit_manual_network_selection_in_gobal_mode">true;BAE0000000000000</string>
 </resources>
