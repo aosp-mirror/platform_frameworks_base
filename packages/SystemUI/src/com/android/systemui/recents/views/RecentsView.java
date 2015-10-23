@@ -594,8 +594,8 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
 
         final int left = pts[0] + offsetX;
         final int top = pts[1] + offsetY;
-        final Rect rect = new Rect(left, top, left + transform.rect.width(),
-                top + transform.rect.height());
+        final Rect rect = new Rect(left, top, left + (int) transform.rect.width(),
+                top + (int) transform.rect.height());
 
         return new AppTransitionAnimationSpec(taskId, b, rect);
     }
@@ -622,7 +622,7 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
             // and then offset to the expected transform rect, but bound this to just
             // outside the display rect (to ensure we don't animate from too far away)
             sourceView = stackView;
-            offsetX = transform.rect.left;
+            offsetX = (int) transform.rect.left;
             offsetY = getMeasuredHeight();
         } else {
             sourceView = tv.mThumbnailView;
@@ -656,7 +656,7 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
                     animStartedListener, destinationStack);
             opts = ActivityOptions.makeThumbnailAspectScaleUpAnimation(sourceView,
                     Bitmap.createBitmap(1, 1, Bitmap.Config.ALPHA_8).createAshmemBitmap(),
-                    offsetX, offsetY, transform.rect.width(), transform.rect.height(),
+                    offsetX, offsetY, (int) transform.rect.width(), (int) transform.rect.height(),
                     sourceView.getHandler(), animStartedListener);
         } else {
             opts = ActivityOptions.makeBasic();

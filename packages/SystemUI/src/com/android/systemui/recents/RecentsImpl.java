@@ -26,10 +26,10 @@ import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Rect;
+import android.graphics.RectF;
 import android.os.Handler;
 import android.os.SystemClock;
 import android.os.UserHandle;
-import android.util.Log;
 import android.util.MutableBoolean;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -540,7 +540,7 @@ public class RecentsImpl extends IRecentsNonSystemUserCallbacks.Stub
         Task toTask = new Task();
         TaskViewTransform toTransform = getThumbnailTransitionTransform(stack, stackView,
                 topTask.id, toTask);
-        Rect toTaskRect = toTransform.rect;
+        RectF toTaskRect = toTransform.rect;
         Bitmap thumbnail;
         if (mThumbnailTransitionBitmapCacheKey != null
                 && mThumbnailTransitionBitmapCacheKey.key != null
@@ -554,8 +554,8 @@ public class RecentsImpl extends IRecentsNonSystemUserCallbacks.Stub
         }
         if (thumbnail != null) {
             return ActivityOptions.makeThumbnailAspectScaleDownAnimation(mDummyStackView,
-                    thumbnail, toTaskRect.left, toTaskRect.top, toTaskRect.width(),
-                    toTaskRect.height(), mHandler, this);
+                    thumbnail, (int) toTaskRect.left, (int) toTaskRect.top,
+                    (int) toTaskRect.width(), (int) toTaskRect.height(), mHandler, this);
         }
 
         // If both the screenshot and thumbnail fails, then just fall back to the default transition
