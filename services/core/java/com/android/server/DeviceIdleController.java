@@ -1280,7 +1280,6 @@ public class DeviceIdleController extends SystemService
                 if (DEBUG) Slog.d(TAG, "Moved from STATE_IDLE_PENDING to STATE_SENSING.");
                 EventLogTags.writeDeviceIdle(mState, "step");
                 scheduleSensingAlarmLocked(mConstants.SENSING_TIMEOUT);
-                cancelSensingAlarmLocked();
                 cancelLocatingLocked();
                 mAnyMotionDetector.checkForAnyMotion();
                 mNotMoving = false;
@@ -1292,7 +1291,6 @@ public class DeviceIdleController extends SystemService
                 mState = STATE_LOCATING;
                 if (DEBUG) Slog.d(TAG, "Moved from STATE_SENSING to STATE_LOCATING.");
                 EventLogTags.writeDeviceIdle(mState, "step");
-                cancelSensingAlarmLocked();
                 scheduleSensingAlarmLocked(mConstants.LOCATING_TIMEOUT);
                 mLocating = true;
                 mLocationManager.requestLocationUpdates(mLocationRequest, mGenericLocationListener,
@@ -1350,6 +1348,7 @@ public class DeviceIdleController extends SystemService
             mState = STATE_ACTIVE;
             mInactiveTimeout = timeout;
             EventLogTags.writeDeviceIdle(mState, type);
+            cancelSensingAlarmLocked();
             becomeInactiveIfAppropriateLocked();
         }
     }
