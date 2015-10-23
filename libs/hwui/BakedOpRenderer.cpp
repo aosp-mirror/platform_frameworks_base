@@ -25,6 +25,15 @@
 namespace android {
 namespace uirenderer {
 
+void BakedOpRenderer::Info::setViewport(uint32_t width, uint32_t height) {
+    viewportWidth = width;
+    viewportHeight = height;
+    orthoMatrix.loadOrtho(viewportWidth, viewportHeight);
+
+    renderState.setViewport(width, height);
+    renderState.blend().syncEnabled();
+}
+
 Texture* BakedOpRenderer::Info::getTexture(const SkBitmap* bitmap) {
     Texture* texture = renderState.assetAtlas().getEntryTexture(bitmap);
     if (!texture) {
@@ -45,9 +54,54 @@ void BakedOpRenderer::Info::renderGlop(const BakedOpState& state, const Glop& gl
     didDraw = true;
 }
 
-void BakedOpRenderer::startFrame(Info& info) {
-    info.renderState.setViewport(info.viewportWidth, info.viewportHeight);
-    info.renderState.blend().syncEnabled();
+Layer* BakedOpRenderer::startLayer(Info& info, uint32_t width, uint32_t height) {
+    info.caches.textureState().activateTexture(0);
+    Layer* layer = info.caches.layerCache.get(info.renderState, width, height);
+    LOG_ALWAYS_FATAL_IF(!layer, "need layer...");
+
+    info.layer = layer;
+    layer->texCoords.set(0.0f, width / float(layer->getHeight()),
+            height / float(layer->getWidth()), 0.0f);
+
+    layer->setFbo(info.renderState.genFramebuffer());
+    info.renderState.bindFramebuffer(layer->getFbo());
+    layer->bindTexture();
+
+    // Initialize the texture if needed
+    if (layer->isEmpty()) {
+        layer->allocateTexture();
+        layer->setEmpty(false);
+    }
+
+    // attach the texture to the FBO
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D,
+            layer->getTextureId(), 0);
+    LOG_ALWAYS_FATAL_IF(GLUtils::dumpGLErrors(), "startLayer FAILED");
+    LOG_ALWAYS_FATAL_IF(glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE,
+            "framebuffer incomplete!");
+
+    // Clear the FBO
+    info.renderState.scissor().setEnabled(false);
+    glClear(GL_COLOR_BUFFER_BIT);
+
+    // Change the viewport & ortho projection
+    info.setViewport(width, height);
+    return layer;
+}
+
+void BakedOpRenderer::endLayer(Info& info) {
+    Layer* layer = info.layer;
+    info.layer = nullptr;
+
+    // Detach the texture from the FBO
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, 0, 0);
+    LOG_ALWAYS_FATAL_IF(GLUtils::dumpGLErrors(), "endLayer FAILED");
+    layer->removeFbo(false);
+}
+
+void BakedOpRenderer::startFrame(Info& info, uint32_t width, uint32_t height) {
+    info.renderState.bindFramebuffer(0);
+    info.setViewport(width, height);
     Caches::getInstance().clearGarbage();
 
     if (!info.opaque) {
@@ -130,7 +184,31 @@ void BakedOpRenderer::onEndLayerOp(Info& info, const EndLayerOp& op, const Baked
 }
 
 void BakedOpRenderer::onLayerOp(Info& info, const LayerOp& op, const BakedOpState& state) {
-    LOG_ALWAYS_FATAL("unsupported operation");
+    Layer* layer = *op.layerHandle;
+
+    // TODO: make this work for HW layers
+    layer->setPaint(op.paint);
+    layer->setBlend(true);
+    float layerAlpha = (layer->getAlpha() / 255.0f) * state.alpha;
+
+    const bool tryToSnap = state.computedState.transform.isPureTranslate();
+    Glop glop;
+    GlopBuilder(info.renderState, info.caches, &glop)
+            .setRoundRectClipState(state.roundRectClipState)
+            .setMeshTexturedUvQuad(nullptr, layer->texCoords)
+            .setFillLayer(layer->getTexture(), layer->getColorFilter(), layerAlpha, layer->getMode(), Blend::ModeOrderSwap::NoSwap)
+            .setTransform(state.computedState.transform, TransformFlags::None)
+            .setModelViewMapUnitToRectOptionalSnap(tryToSnap, op.unmappedBounds)
+            .build();
+    info.renderGlop(state, glop);
+
+    // return layer to cache, since each clipped savelayer is only drawn once.
+    layer->setConvexMask(nullptr);
+    if (!info.caches.layerCache.put(layer)) {
+        // Failing to add the layer to the cache should happen only if the layer is too large
+        LAYER_LOGD("Deleting layer");
+        layer->decStrong(nullptr);
+    }
 }
 
 } // namespace uirenderer

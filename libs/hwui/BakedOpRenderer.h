@@ -25,20 +25,20 @@ namespace uirenderer {
 
 class Caches;
 struct Glop;
+class Layer;
 class RenderState;
 
 class BakedOpRenderer {
 public:
     class Info {
     public:
-        Info(Caches& caches, RenderState& renderState, int viewportWidth, int viewportHeight, bool opaque)
+        Info(Caches& caches, RenderState& renderState, bool opaque)
                 : renderState(renderState)
                 , caches(caches)
-                , opaque(opaque)
-                , viewportWidth(viewportWidth)
-                , viewportHeight(viewportHeight) {
-            orthoMatrix.loadOrtho(viewportWidth, viewportHeight);
+                , opaque(opaque) {
         }
+
+        void setViewport(uint32_t width, uint32_t height);
 
         Texture* getTexture(const SkBitmap* bitmap);
 
@@ -47,16 +47,19 @@ public:
         Caches& caches;
 
         bool didDraw = false;
-        bool opaque;
 
+        Layer* layer = nullptr;
 
         // where should these live? layer state object?
-        int viewportWidth;
-        int viewportHeight;
+        bool opaque;
+        uint32_t viewportWidth = 0;
+        uint32_t viewportHeight = 0;
         Matrix4 orthoMatrix;
     };
 
-    static void startFrame(Info& info);
+    static Layer* startLayer(Info& info, uint32_t width, uint32_t height);
+    static void endLayer(Info& info);
+    static void startFrame(Info& info, uint32_t width, uint32_t height);
     static void endFrame(Info& info);
 
     /**

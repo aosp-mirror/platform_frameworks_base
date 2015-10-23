@@ -318,10 +318,8 @@ void CanvasContext::draw() {
     mEglManager.damageFrame(frame, dirty);
 
 #if HWUI_NEW_OPS
-    OpReorderer reorderer;
-    reorderer.defer(dirty, frame.width(), frame.height(), mRenderNodes);
-    BakedOpRenderer::Info info(Caches::getInstance(), mRenderThread.renderState(),
-            frame.width(), frame.height(), mOpaque);
+    OpReorderer reorderer(dirty, frame.width(), frame.height(), mRenderNodes);
+    BakedOpRenderer::Info info(Caches::getInstance(), mRenderThread.renderState(), mOpaque);
     // TODO: profiler().draw(mCanvas);
     reorderer.replayBakedOps<BakedOpRenderer>(info);
 

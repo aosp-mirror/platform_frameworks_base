@@ -155,8 +155,7 @@ void Layer::removeFbo(bool flush) {
 
     if (fbo) {
         if (flush) LayerRenderer::flushLayer(renderState, this);
-        // If put fails the cache will delete the FBO
-        caches.fboCache.put(fbo);
+        renderState.deleteFramebuffer(fbo);
         fbo = 0;
     }
 }

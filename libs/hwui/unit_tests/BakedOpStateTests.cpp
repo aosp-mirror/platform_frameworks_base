@@ -85,13 +85,5 @@ TEST(BakedOpState, constructAndReject) {
     }
 }
 
-#define UNSUPPORTED_OP(Info, Type) \
-        static void on##Type(Info*, const Type&, const BakedOpState&) { FAIL(); }
-
-class Info {
-public:
-    int index = 0;
-};
-
 }
 }

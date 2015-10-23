@@ -125,6 +125,21 @@ void RenderState::bindFramebuffer(GLuint fbo) {
     }
 }
 
+GLuint RenderState::genFramebuffer() {
+    GLuint ret;
+    glGenFramebuffers(1, &ret);
+    return ret;
+}
+
+void RenderState::deleteFramebuffer(GLuint fbo) {
+    if (mFramebuffer == fbo) {
+        // GL defines that deleting the currently bound FBO rebinds FBO 0.
+        // Reflect this in our cached value.
+        mFramebuffer = 0;
+    }
+    glDeleteFramebuffers(1, &fbo);
+}
+
 void RenderState::invokeFunctor(Functor* functor, DrawGlInfo::Mode mode, DrawGlInfo* info) {
     if (mode == DrawGlInfo::kModeProcessNoContext) {
         // If there's no context we don't need to interrupt as there's
