@@ -5983,8 +5983,8 @@ public class WindowManagerService extends IWindowManager.Stub
                 if (visible) {
                     // TODO(multi-display): support multiple displays
                     if (mCircularDisplayMask == null) {
-                        int screenOffset = mContext.getResources().getDimensionPixelSize(
-                                com.android.internal.R.dimen.circular_display_mask_offset);
+                        int screenOffset = mContext.getResources().getInteger(
+                                com.android.internal.R.integer.config_windowOutsetBottom);
                         int maskThickness = mContext.getResources().getDimensionPixelSize(
                                 com.android.internal.R.dimen.circular_display_mask_thickness);
 
