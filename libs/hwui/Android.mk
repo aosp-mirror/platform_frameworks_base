@@ -84,8 +84,7 @@ hwui_src_files := \
 hwui_cflags := \
     -DEGL_EGLEXT_PROTOTYPES -DGL_GLEXT_PROTOTYPES \
     -DATRACE_TAG=ATRACE_TAG_VIEW -DLOG_TAG=\"OpenGLRenderer\" \
-    -Wall -Wno-unused-parameter -Wunreachable-code \
-    -ffast-math -O3 -Werror
+    -Wall -Wno-unused-parameter -Wunreachable-code -Werror
 
 ifeq (true, $(HWUI_NEW_OPS))
     hwui_src_files += \
@@ -261,7 +260,8 @@ LOCAL_STATIC_LIBRARIES := libbenchmark libbase
 
 LOCAL_SRC_FILES += \
     microbench/DisplayListCanvasBench.cpp \
-    microbench/LinearAllocatorBench.cpp
+    microbench/LinearAllocatorBench.cpp \
+    microbench/ShadowBench.cpp
 
 ifeq (true, $(HWUI_NEW_OPS))
     LOCAL_SRC_FILES += \
