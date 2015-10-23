@@ -135,8 +135,8 @@ public:
     }
 
 
-    void dump() {
-        ALOGD("Vector3[%.2f, %.2f, %.2f]", x, y, z);
+    void dump(const char* label = "Vector3") const {
+        ALOGD("%s[%.2f, %.2f, %.2f]", label, x, y, z);
     }
 };
 

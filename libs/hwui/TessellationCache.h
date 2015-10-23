@@ -17,16 +17,22 @@
 #ifndef ANDROID_HWUI_TESSELLATION_CACHE_H
 #define ANDROID_HWUI_TESSELLATION_CACHE_H
 
-#include <utils/LruCache.h>
-#include <utils/Mutex.h>
-
 #include "Debug.h"
+#include "Matrix.h"
+#include "Rect.h"
+#include "Vector.h"
+#include "thread/TaskProcessor.h"
 #include "utils/Macros.h"
 #include "utils/Pair.h"
 
+#include <SkPaint.h>
+
+#include <utils/LruCache.h>
+#include <utils/Mutex.h>
+#include <utils/StrongPointer.h>
+
 class SkBitmap;
 class SkCanvas;
-class SkPaint;
 class SkPath;
 struct SkRect;
 
@@ -184,6 +190,13 @@ private:
     BufferPairRemovedListener mBufferPairRemovedListener;
 
 }; // class TessellationCache
+
+void tessellateShadows(
+        const Matrix4* drawTransform, const Rect* localClip,
+        bool isCasterOpaque, const SkPath* casterPerimeter,
+        const Matrix4* casterTransformXY, const Matrix4* casterTransformZ,
+        const Vector3& lightCenter, float lightRadius,
+        VertexBuffer& ambientBuffer, VertexBuffer& spotBuffer);
 
 }; // namespace uirenderer
 }; // namespace android

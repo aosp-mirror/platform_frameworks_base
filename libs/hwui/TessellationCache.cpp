@@ -217,7 +217,7 @@ static void reverseVertexArray(Vertex* polygon, int len) {
     }
 }
 
-static void tessellateShadows(
+void tessellateShadows(
         const Matrix4* drawTransform, const Rect* localClip,
         bool isCasterOpaque, const SkPath* casterPerimeter,
         const Matrix4* casterTransformXY, const Matrix4* casterTransformZ,
