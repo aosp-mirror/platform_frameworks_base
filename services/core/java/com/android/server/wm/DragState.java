@@ -265,21 +265,27 @@ class DragState {
     }
 
     void broadcastDragEndedLw() {
+        final int myPid = Process.myPid();
+
         if (WindowManagerService.DEBUG_DRAG) {
             Slog.d(WindowManagerService.TAG, "broadcasting DRAG_ENDED");
         }
-        DragEvent evt = DragEvent.obtain(DragEvent.ACTION_DRAG_ENDED,
-                0, 0, null, null, null, null, mDragResult);
-        for (WindowState ws: mNotifiedWindows) {
+        for (WindowState ws : mNotifiedWindows) {
+            DragEvent evt = DragEvent.obtain(DragEvent.ACTION_DRAG_ENDED,
+                    0, 0, null, null, null, null, mDragResult);
             try {
                 ws.mClient.dispatchDragEvent(evt);
             } catch (RemoteException e) {
                 Slog.w(WindowManagerService.TAG, "Unable to drag-end window " + ws);
             }
+            // if the current window is in the same process,
+            // the dispatch has already recycled the event
+            if (myPid != ws.mSession.mPid) {
+                evt.recycle();
+            }
         }
         mNotifiedWindows.clear();
         mDragInProgress = false;
-        evt.recycle();
     }
 
     void endDragLw() {
