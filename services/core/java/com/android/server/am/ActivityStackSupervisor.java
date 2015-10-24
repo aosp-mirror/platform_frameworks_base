@@ -3325,13 +3325,14 @@ public final class ActivityStackSupervisor implements DisplayListener {
             return false;
         }
 
-        final TaskRecord task = r.task;
-        if (!task.mResizeable) {
-            Slog.w(TAG, "moveTopStackActivityToPinnedStackLocked: Activity not resizeable"
+        if (!r.info.supportsPip) {
+            Slog.w(TAG,
+                    "moveTopStackActivityToPinnedStackLocked: Picture-In-Picture not supported for "
                     + " r=" + r);
             return false;
         }
 
+        final TaskRecord task = r.task;
         if (task.mActivities.size() == 1) {
             // There is only one activity in the task. So, we can just move the task over to the
             // pinned stack without re-parenting the activity in a different task.

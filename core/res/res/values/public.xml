@@ -2666,6 +2666,7 @@
     <public type="attr" name="initialHeight" />
     <public type="attr" name="minimalSize" />
     <public type="attr" name="resizeableActivity" />
+    <public type="attr" name="supportsPictureInPicture" />
     <public type="attr" name="titleMargin" />
     <public type="attr" name="titleMarginStart" />
     <public type="attr" name="titleMarginEnd" />

@@ -1059,7 +1059,7 @@
          at the same time.
 
          <p>The default value is <code>false</code> for applications with
-         <code>targetSdkVersion</code> lesser than {@link android.os.Build.VERSION_CODES#M} and
+         <code>targetSdkVersion</code> lesser than {@link android.os.Build.VERSION_CODES#N} and
          <code>true</code> otherwise.
 
          <p>NOTE: A task's root activity value is applied to all additional activities launched in
@@ -1067,10 +1067,23 @@
          all other activities in the task as resizeable and will not if the root activity isn't
          resizeable.
 
-         <p>NOTE: The value of {@link android.R.attr#screenOrientation} will be ignored for
-         resizeable activities as the system doesn't support fixed orientation on a resizeable
-         activity. -->
+         <p>NOTE: The value of {@link android.R.attr#screenOrientation} is ignored for
+         resizeable activities when in multi-window mode. -->
     <attr name="resizeableActivity" format="boolean" />
+
+    <!-- Indicates that the activity supports the picture-in-picture (PiP) form of multi-window.
+         While it makes sense to be able to resize most activities types in multi-window mode when
+         {@link android.R.attr#resizeableActivity} is set. It only makes sense to put specific types
+         of activities in PiP mode of multi-window. For example, activities that play video. When
+         set the activity will be allowed to enter PiP mode when the system deems it appropriate on
+         devices that support PiP.
+
+         <p>The default value is <code>false</code> for applications with
+         <code>targetSdkVersion</code> lesser than {@link android.os.Build.VERSION_CODES#N} and
+         <code>true</code> otherwise.
+
+         <p>NOTE: Attribute is only used if {@link android.R.attr#resizeableActivity} is true. -->
+    <attr name="supportsPictureInPicture" format="boolean" />
 
     <!-- This value indicates how tasks rooted at this activity will behave in lockTask mode.
          While in lockTask mode the system will not launch non-permitted tasks until
@@ -1826,6 +1839,7 @@
         <attr name="relinquishTaskIdentity" />
         <attr name="resumeWhilePausing" />
         <attr name="resizeableActivity" />
+        <attr name="supportsPictureInPicture" />
         <attr name="lockTaskMode" />
         <attr name="showForAllUsers" />
     </declare-styleable>
