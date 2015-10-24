@@ -367,6 +367,7 @@ public class AppWindowAnimator {
         return false;
     }
 
+    // This must be called while inside a transaction.
     boolean showAllWindowsLocked() {
         boolean isAnimating = false;
         final int NW = mAllAppWinAnimators.size();
