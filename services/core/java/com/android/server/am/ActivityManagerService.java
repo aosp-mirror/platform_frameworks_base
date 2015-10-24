@@ -79,7 +79,6 @@ import android.service.voice.VoiceInteractionSession;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.DebugUtils;
-import android.util.SparseIntArray;
 import android.view.Display;
 
 import com.android.internal.R;
@@ -205,7 +204,6 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.IPermissionController;
 import android.os.IProcessInfoService;
-import android.os.IRemoteCallback;
 import android.os.IUserManager;
 import android.os.Looper;
 import android.os.Message;
@@ -370,16 +368,9 @@ public final class ActivityManagerService extends ActivityManagerNative
     // How long we wait until we timeout on key dispatching during instrumentation.
     static final int INSTRUMENTATION_KEY_DISPATCHING_TIMEOUT = 60*1000;
 
-    // Amount of time we wait for observers to handle a user switch before
-    // giving up on them and unfreezing the screen.
-    static final int USER_SWITCH_TIMEOUT = 2*1000;
-
     // This is the amount of time an app needs to be running a foreground service before
     // we will consider it to be doing interaction for usage stats.
     static final int SERVICE_USAGE_INTERACTION_TIME = 30*60*1000;
-
-    // Maximum number of users we allow to be running at a time.
-    static final int MAX_RUNNING_USERS = 3;
 
     // How long to wait in getAssistContextExtras for the activity and foreground services
     // to respond with the result.
@@ -504,6 +495,8 @@ public final class ActivityManagerService extends ActivityManagerNative
      * The package name of the DeviceOwner. This package is not permitted to have its data cleared.
      */
     String mDeviceOwnerName;
+
+    final UserController mUserController;
 
     public class PendingAssistExtras extends Binder implements Runnable {
         public final ActivityRecord activity;
@@ -705,32 +698,6 @@ public final class ActivityManagerService extends ActivityManagerNative
      * Track all uids that have actively running processes.
      */
     final SparseArray<UidRecord> mActiveUids = new SparseArray<>();
-
-    /**
-     * Which users have been started, so are allowed to run code.
-     */
-    final SparseArray<UserState> mStartedUsers = new SparseArray<>();
-
-    /**
-     * LRU list of history of current users.  Most recently current is at the end.
-     */
-    final ArrayList<Integer> mUserLru = new ArrayList<Integer>();
-
-    /**
-     * Constant array of the users that are currently started.
-     */
-    int[] mStartedUserArray = new int[] { 0 };
-
-    /**
-     * Registered observers of the user switching mechanics.
-     */
-    final RemoteCallbackList<IUserSwitchObserver> mUserSwitchObservers
-            = new RemoteCallbackList<IUserSwitchObserver>();
-
-    /**
-     * Currently active user switch.
-     */
-    Object mCurUserSwitchCallback;
 
     /**
      * Packages that the user has asked to have run in screen size
@@ -1300,19 +1267,6 @@ public final class ActivityManagerService extends ActivityManagerNative
 
     final ActivityThread mSystemThread;
 
-    // Holds the current foreground user's id
-    int mCurrentUserId = 0;
-    // Holds the target user's id during a user switch
-    int mTargetUserId = UserHandle.USER_NULL;
-    // If there are multiple profiles for the current user, their ids are here
-    // Currently only the primary user can have managed profiles
-    int[] mCurrentProfileIds = new int[] {}; // Accessed by ActivityStack
-
-    /**
-     * Mapping from each known user ID to the profile group ID it is associated with.
-     */
-    SparseIntArray mUserProfileGroupIdsSelfLocked = new SparseIntArray();
-
     private UserManagerService mUserManager;
 
     private final class AppDeathRecipient implements IBinder.DeathRecipient {
@@ -1442,7 +1396,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                     boolean isBackground = (UserHandle.getAppId(proc.uid)
                             >= Process.FIRST_APPLICATION_UID
                             && proc.pid != MY_PID);
-                    for (int userId : mCurrentProfileIds) {
+                    for (int userId : mUserController.mCurrentProfileIds) {
                         isBackground &= (proc.userId != userId);
                     }
                     if (isBackground && !showBackground) {
@@ -1829,15 +1783,15 @@ public final class ActivityManagerService extends ActivityManagerNative
                 break;
             }
             case REPORT_USER_SWITCH_MSG: {
-                dispatchUserSwitch((UserState) msg.obj, msg.arg1, msg.arg2);
+                mUserController.dispatchUserSwitch((UserState) msg.obj, msg.arg1, msg.arg2);
                 break;
             }
             case CONTINUE_USER_SWITCH_MSG: {
-                continueUserSwitch((UserState) msg.obj, msg.arg1, msg.arg2);
+                mUserController.continueUserSwitch((UserState) msg.obj, msg.arg1, msg.arg2);
                 break;
             }
             case USER_SWITCH_TIMEOUT_MSG: {
-                timeoutUserSwitch((UserState) msg.obj, msg.arg1, msg.arg2);
+                mUserController.timeoutUserSwitch((UserState) msg.obj, msg.arg1, msg.arg2);
                 break;
             }
             case IMMERSIVE_MODE_LOCK_MSG: {
@@ -1866,7 +1820,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             }
             case START_PROFILES_MSG: {
                 synchronized (ActivityManagerService.this) {
-                    startProfilesLocked();
+                    mUserController.startProfilesLocked();
                 }
                 break;
             }
@@ -2057,14 +2011,14 @@ public final class ActivityManagerService extends ActivityManagerNative
                 }
             } break;
             case FOREGROUND_PROFILE_CHANGED_MSG: {
-                dispatchForegroundProfileChanged(msg.arg1);
+                mUserController.dispatchForegroundProfileChanged(msg.arg1);
             } break;
             case REPORT_TIME_TRACKER_MSG: {
                 AppTimeTracker tracker = (AppTimeTracker)msg.obj;
                 tracker.deliverResult(mContext);
             } break;
             case REPORT_USER_SWITCH_COMPLETE_MSG: {
-                dispatchUserSwitchComplete(msg.arg1);
+                mUserController.dispatchUserSwitchComplete(msg.arg1);
             } break;
             case SHUTDOWN_UI_AUTOMATION_CONNECTION_MSG: {
                 IUiAutomationConnection connection = (IUiAutomationConnection) msg.obj;
@@ -2386,10 +2340,7 @@ public final class ActivityManagerService extends ActivityManagerNative
 
         mGrantFile = new AtomicFile(new File(systemDir, "urigrants.xml"));
 
-        // User 0 is the first and only user that runs at boot.
-        mStartedUsers.put(UserHandle.USER_SYSTEM, new UserState(UserHandle.SYSTEM, true));
-        mUserLru.add(UserHandle.USER_SYSTEM);
-        updateStartedUserArrayLocked();
+        mUserController = new UserController(this);
 
         GL_ES_VERSION = SystemProperties.getInt("ro.opengles.version",
             ConfigurationInfo.GL_ES_VERSION_UNDEFINED);
@@ -5566,16 +5517,6 @@ public final class ActivityManagerService extends ActivityManagerNative
                 null, false, false, MY_PID, Process.SYSTEM_UID, UserHandle.getUserId(uid));
     }
 
-    private void forceStopUserLocked(int userId, String reason) {
-        forceStopPackageLocked(null, -1, false, false, true, false, false, userId, reason);
-        Intent intent = new Intent(Intent.ACTION_USER_STOPPED);
-        intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY
-                | Intent.FLAG_RECEIVER_FOREGROUND);
-        intent.putExtra(Intent.EXTRA_USER_HANDLE, userId);
-        broadcastIntentLocked(null, null, intent,
-                null, null, 0, null, null, null, AppOpsManager.OP_NONE,
-                null, false, false, MY_PID, Process.SYSTEM_UID, UserHandle.USER_ALL);
-    }
 
     private final boolean killPackageProcessesLocked(String packageName, int appId,
             int userId, int minOomAdj, boolean callerWillRestart, boolean allowRestart,
@@ -5739,7 +5680,7 @@ public final class ActivityManagerService extends ActivityManagerNative
 
     }
 
-    private final boolean forceStopPackageLocked(String packageName, int appId,
+    final boolean forceStopPackageLocked(String packageName, int appId,
             boolean callerWillRestart, boolean purgeCache, boolean doit,
             boolean evenPersistent, boolean uninstalling, int userId, String reason) {
         int i;
@@ -6460,32 +6401,18 @@ public final class ActivityManagerService extends ActivityManagerNative
                     || "".equals(SystemProperties.get("vold.encrypt_progress"))) {
                     SystemProperties.set("dev.bootcomplete", "1");
                 }
-                for (int i=0; i<mStartedUsers.size(); i++) {
-                    UserState uss = mStartedUsers.valueAt(i);
-                    if (uss.mState == UserState.STATE_BOOTING) {
-                        uss.mState = UserState.STATE_RUNNING;
-                        final int userId = mStartedUsers.keyAt(i);
-                        Intent intent = new Intent(Intent.ACTION_BOOT_COMPLETED, null);
-                        intent.putExtra(Intent.EXTRA_USER_HANDLE, userId);
-                        intent.addFlags(Intent.FLAG_RECEIVER_NO_ABORT);
-                        broadcastIntentLocked(null, null, intent, null,
-                                new IIntentReceiver.Stub() {
-                                    @Override
-                                    public void performReceive(Intent intent, int resultCode,
-                                            String data, Bundle extras, boolean ordered,
-                                            boolean sticky, int sendingUser) {
-                                        synchronized (ActivityManagerService.this) {
-                                            requestPssAllProcsLocked(SystemClock.uptimeMillis(),
-                                                    true, false);
-                                        }
-                                    }
-                                },
-                                0, null, null,
-                                new String[] {android.Manifest.permission.RECEIVE_BOOT_COMPLETED},
-                                AppOpsManager.OP_NONE, null, true, false,
-                                MY_PID, Process.SYSTEM_UID, userId);
-                    }
-                }
+                mUserController.sendBootCompletedLocked(
+                        new IIntentReceiver.Stub() {
+                            @Override
+                            public void performReceive(Intent intent, int resultCode,
+                                    String data, Bundle extras, boolean ordered,
+                                    boolean sticky, int sendingUser) {
+                                synchronized (ActivityManagerService.this) {
+                                    requestPssAllProcsLocked(SystemClock.uptimeMillis(),
+                                            true, false);
+                                }
+                            }
+                        });
                 scheduleStartProfilesLocked();
             }
         }
@@ -9492,7 +9419,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         boolean checkedGrants = false;
         if (checkUser) {
             // Looking for cross-user grants before enforcing the typical cross-users permissions
-            int tmpTargetUserId = unsafeConvertIncomingUser(userId);
+            int tmpTargetUserId = unsafeConvertIncomingUserLocked(userId);
             if (tmpTargetUserId != UserHandle.getUserId(callingUid)) {
                 if (checkAuthorityGrants(callingUid, cpi, tmpTargetUserId, checkUser)) {
                     return null;
@@ -10338,7 +10265,9 @@ public final class ActivityManagerService extends ActivityManagerNative
         int callingPid = Binder.getCallingPid();
         long ident = 0;
         boolean clearedIdentity = false;
-        userId = unsafeConvertIncomingUser(userId);
+        synchronized (this) {
+            userId = unsafeConvertIncomingUserLocked(userId);
+        }
         if (canClearIdentity(callingPid, callingUid, userId)) {
             clearedIdentity = true;
             ident = Binder.clearCallingIdentity();
@@ -11005,8 +10934,9 @@ public final class ActivityManagerService extends ActivityManagerNative
 
     @Override
     public boolean isAssistDataAllowedOnCurrentActivity() {
-        int userId = mCurrentUserId;
+        int userId;
         synchronized (this) {
+            userId = mUserController.mCurrentUserId;
             ActivityRecord activity = getFocusedStack().topActivity();
             if (activity == null) {
                 return false;
@@ -11929,7 +11859,7 @@ public final class ActivityManagerService extends ActivityManagerNative
 
             // Make sure we have the current profile info, since it is needed for
             // security checks.
-            updateCurrentProfileIdsLocked();
+            mUserController.updateCurrentProfileIdsLocked();
 
             mRecentTasks.clear();
             mRecentTasks.addAll(mTaskPersister.restoreTasksLocked(
@@ -12036,18 +11966,20 @@ public final class ActivityManagerService extends ActivityManagerNative
 
         retrieveSettings();
         loadResourcesOnSystemReady();
-
+        final int currentUserId;
         synchronized (this) {
+            currentUserId = mUserController.mCurrentUserId;
             readGrantedUriPermissionsLocked();
         }
 
         if (goingCallback != null) goingCallback.run();
 
+
         mBatteryStatsService.noteEvent(BatteryStats.HistoryItem.EVENT_USER_RUNNING_START,
-                Integer.toString(mCurrentUserId), mCurrentUserId);
+                Integer.toString(currentUserId), currentUserId);
         mBatteryStatsService.noteEvent(BatteryStats.HistoryItem.EVENT_USER_FOREGROUND_START,
-                Integer.toString(mCurrentUserId), mCurrentUserId);
-        mSystemServiceManager.startUser(mCurrentUserId);
+                Integer.toString(currentUserId), currentUserId);
+        mSystemServiceManager.startUser(currentUserId);
 
         synchronized (this) {
             if (mFactoryTest != FactoryTest.FACTORY_TEST_LOW_LEVEL) {
@@ -12075,7 +12007,7 @@ public final class ActivityManagerService extends ActivityManagerNative
 
             // Start up initial activity.
             mBooting = true;
-            startHomeActivityLocked(mCurrentUserId, "systemReady");
+            startHomeActivityLocked(currentUserId, "systemReady");
 
             try {
                 if (AppGlobals.getPackageManager().hasSystemUidErrors()) {
@@ -12096,13 +12028,14 @@ public final class ActivityManagerService extends ActivityManagerNative
                 Intent intent = new Intent(Intent.ACTION_USER_STARTED);
                 intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY
                         | Intent.FLAG_RECEIVER_FOREGROUND);
-                intent.putExtra(Intent.EXTRA_USER_HANDLE, mCurrentUserId);
+                intent.putExtra(Intent.EXTRA_USER_HANDLE, currentUserId);
                 broadcastIntentLocked(null, null, intent,
                         null, null, 0, null, null, null, AppOpsManager.OP_NONE,
-                        null, false, false, MY_PID, Process.SYSTEM_UID, mCurrentUserId);
+                        null, false, false, MY_PID, Process.SYSTEM_UID,
+                        currentUserId);
                 intent = new Intent(Intent.ACTION_USER_STARTING);
                 intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY);
-                intent.putExtra(Intent.EXTRA_USER_HANDLE, mCurrentUserId);
+                intent.putExtra(Intent.EXTRA_USER_HANDLE, currentUserId);
                 broadcastIntentLocked(null, null, intent,
                         null, new IIntentReceiver.Stub() {
                             @Override
@@ -12119,7 +12052,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                 Binder.restoreCallingIdentity(ident);
             }
             mStackSupervisor.resumeTopActivitiesLocked();
-            sendUserSwitchBroadcastsLocked(-1, mCurrentUserId);
+            sendUserSwitchBroadcastsLocked(-1, currentUserId);
         }
     }
 
@@ -12318,7 +12251,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         // launching the report UI under a different user.
         app.errorReportReceiver = null;
 
-        for (int userId : mCurrentProfileIds) {
+        for (int userId : mUserController.mCurrentProfileIds) {
             if (app.userId == userId) {
                 app.errorReportReceiver = ApplicationErrorReport.getErrorReportReceiver(
                         mContext, app.info.packageName, app.info.flags);
@@ -13775,38 +13708,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         if (dumpPackage == null) {
             pw.println();
             needSep = false;
-            pw.println("  mStartedUsers:");
-            for (int i=0; i<mStartedUsers.size(); i++) {
-                UserState uss = mStartedUsers.valueAt(i);
-                pw.print("    User #"); pw.print(uss.mHandle.getIdentifier());
-                        pw.print(": "); uss.dump("", pw);
-            }
-            pw.print("  mStartedUserArray: [");
-            for (int i=0; i<mStartedUserArray.length; i++) {
-                if (i > 0) pw.print(", ");
-                pw.print(mStartedUserArray[i]);
-            }
-            pw.println("]");
-            pw.print("  mUserLru: [");
-            for (int i=0; i<mUserLru.size(); i++) {
-                if (i > 0) pw.print(", ");
-                pw.print(mUserLru.get(i));
-            }
-            pw.println("]");
-            if (dumpAll) {
-                pw.print("  mStartedUserArray: "); pw.println(Arrays.toString(mStartedUserArray));
-            }
-            synchronized (mUserProfileGroupIdsSelfLocked) {
-                if (mUserProfileGroupIdsSelfLocked.size() > 0) {
-                    pw.println("  mUserProfileGroupIds:");
-                    for (int i=0; i<mUserProfileGroupIdsSelfLocked.size(); i++) {
-                        pw.print("    User #");
-                        pw.print(mUserProfileGroupIdsSelfLocked.keyAt(i));
-                        pw.print(" -> profile #");
-                        pw.println(mUserProfileGroupIdsSelfLocked.valueAt(i));
-                    }
-                }
-            }
+            mUserController.dump(pw, dumpAll);
         }
         if (mHomeProcess != null && (dumpPackage == null
                 || mHomeProcess.pkgList.containsKey(dumpPackage))) {
@@ -16098,9 +16000,9 @@ public final class ActivityManagerService extends ActivityManagerNative
                 requireFull ? ALLOW_FULL_ONLY : ALLOW_NON_FULL, name, callerPackage);
     }
 
-    int unsafeConvertIncomingUser(int userId) {
+    int unsafeConvertIncomingUserLocked(int userId) {
         return (userId == UserHandle.USER_CURRENT || userId == UserHandle.USER_CURRENT_OR_SELF)
-                ? mCurrentUserId : userId;
+                ? mUserController.mCurrentUserId : userId;
     }
 
     int handleIncomingUser(int callingPid, int callingUid, int userId, boolean allowAll,
@@ -16116,7 +16018,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         // the value the caller will receive and someone else changing it.
         // We assume that USER_CURRENT_OR_SELF will use the current user; later
         // we will switch to the calling user if access to the current user fails.
-        int targetUserId = unsafeConvertIncomingUser(userId);
+        int targetUserId = unsafeConvertIncomingUserLocked(userId);
 
         if (callingUid != 0 && callingUid != Process.SYSTEM_UID) {
             final boolean allow;
@@ -16137,14 +16039,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             } else if (allowMode == ALLOW_NON_FULL_IN_PROFILE) {
                 // We may or may not allow this depending on whether the two users are
                 // in the same profile.
-                synchronized (mUserProfileGroupIdsSelfLocked) {
-                    int callingProfile = mUserProfileGroupIdsSelfLocked.get(callingUserId,
-                            UserInfo.NO_PROFILE_GROUP_ID);
-                    int targetProfile = mUserProfileGroupIdsSelfLocked.get(targetUserId,
-                            UserInfo.NO_PROFILE_GROUP_ID);
-                    allow = callingProfile != UserInfo.NO_PROFILE_GROUP_ID
-                            && callingProfile == targetProfile;
-                }
+                allow = mUserController.isSameProfileGroup(callingUserId, targetUserId);
             } else {
                 throw new IllegalArgumentException("Unknown mode: " + allowMode);
             }
@@ -16763,7 +16658,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         return receivers;
     }
 
-    private final int broadcastIntentLocked(ProcessRecord callerApp,
+    final int broadcastIntentLocked(ProcessRecord callerApp,
             String callerPackage, Intent intent, String resolvedType,
             IIntentReceiver resultTo, int resultCode, String resultData,
             Bundle resultExtras, String[] requiredPermissions, int appOp, Bundle options,
@@ -17080,7 +16975,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         int[] users;
         if (userId == UserHandle.USER_ALL) {
             // Caller wants broadcast to go to all started users.
-            users = mStartedUserArray;
+            users = mUserController.getStartedUserArrayLocked();
         } else {
             // Caller wants broadcast to go to one specific user.
             users = new int[] {userId};
@@ -17667,6 +17562,12 @@ public final class ActivityManagerService extends ActivityManagerNative
             Binder.restoreCallingIdentity(origId);
         }
     }
+    void updateUserConfigurationLocked() {
+        Configuration configuration = new Configuration(mConfiguration);
+        Settings.System.getConfigurationForUser(mContext.getContentResolver(), configuration,
+                mUserController.mCurrentUserId);
+        updateConfigurationLocked(configuration, null, false);
+    }
 
     boolean updateConfigurationLocked(Configuration values,
             ActivityRecord starting, boolean initLocale) {
@@ -17712,7 +17613,8 @@ public final class ActivityManagerService extends ActivityManagerNative
                 newConfig.seq = mConfigurationSeq;
                 mConfiguration = newConfig;
                 Slog.i(TAG, "Config changes=" + Integer.toHexString(changes) + " " + newConfig);
-                mUsageStatsService.reportConfigurationChange(newConfig, mCurrentUserId);
+                mUsageStatsService.reportConfigurationChange(newConfig,
+                        mUserController.mCurrentUserId);
                 //mUsageStatsService.noteStartConfig(newConfig);
 
                 final Configuration configCopy = new Configuration(mConfiguration);
@@ -19196,7 +19098,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             String authority) {
         if (app == null) return;
         if (app.curProcState <= ActivityManager.PROCESS_STATE_IMPORTANT_FOREGROUND) {
-            UserState userState = mStartedUsers.get(app.userId);
+            UserState userState = mUserController.getStartedUserState(app.userId);
             if (userState == null) return;
             final long now = SystemClock.elapsedRealtime();
             Long lastReported = userState.mProviderLastReportedFg.get(authority);
@@ -20076,42 +19978,16 @@ public final class ActivityManagerService extends ActivityManagerNative
      */
     @Override
     public boolean startUserInBackground(final int userId) {
-        return startUser(userId, /* foreground */ false);
+        return mUserController.startUser(userId, /* foreground */ false);
     }
 
     /**
      * Start user, if its not already running, and bring it to foreground.
      */
     boolean startUserInForeground(final int userId, Dialog dlg) {
-        boolean result = startUser(userId, /* foreground */ true);
+        boolean result = mUserController.startUser(userId, /* foreground */ true);
         dlg.dismiss();
         return result;
-    }
-
-    /**
-     * Refreshes the list of users related to the current user when either a
-     * user switch happens or when a new related user is started in the
-     * background.
-     */
-    private void updateCurrentProfileIdsLocked() {
-        final List<UserInfo> profiles = getUserManagerLocked().getProfiles(
-                mCurrentUserId, false /* enabledOnly */);
-        int[] currentProfileIds = new int[profiles.size()]; // profiles will not be null
-        for (int i = 0; i < currentProfileIds.length; i++) {
-            currentProfileIds[i] = profiles.get(i).id;
-        }
-        mCurrentProfileIds = currentProfileIds;
-
-        synchronized (mUserProfileGroupIdsSelfLocked) {
-            mUserProfileGroupIdsSelfLocked.clear();
-            final List<UserInfo> users = getUserManagerLocked().getUsers(false);
-            for (int i = 0; i < users.size(); i++) {
-                UserInfo user = users.get(i);
-                if (user.profileGroupId != UserInfo.NO_PROFILE_GROUP_ID) {
-                    mUserProfileGroupIdsSelfLocked.put(user.id, user.profileGroupId);
-                }
-            }
-        }
     }
 
     private Set<Integer> getProfileIdsLocked(int userId) {
@@ -20139,7 +20015,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                 return false;
             }
             userName = userInfo.name;
-            mTargetUserId = userId;
+            mUserController.mTargetUserId = userId;
         }
         mUiHandler.removeMessages(START_USER_SWITCH_MSG);
         mUiHandler.sendMessage(mUiHandler.obtainMessage(START_USER_SWITCH_MSG, userId, 0, userName));
@@ -20151,186 +20027,6 @@ public final class ActivityManagerService extends ActivityManagerNative
         Dialog d = new UserSwitchingDialog(this, mContext, userId, userName,
                 true /* above system */);
         d.show();
-    }
-
-    private boolean startUser(final int userId, final boolean foreground) {
-        if (checkCallingPermission(INTERACT_ACROSS_USERS_FULL)
-                != PackageManager.PERMISSION_GRANTED) {
-            String msg = "Permission Denial: switchUser() from pid="
-                    + Binder.getCallingPid()
-                    + ", uid=" + Binder.getCallingUid()
-                    + " requires " + INTERACT_ACROSS_USERS_FULL;
-            Slog.w(TAG, msg);
-            throw new SecurityException(msg);
-        }
-
-        if (DEBUG_MU) Slog.i(TAG_MU, "starting userid:" + userId + " fore:" + foreground);
-
-        final long ident = Binder.clearCallingIdentity();
-        try {
-            synchronized (this) {
-                final int oldUserId = mCurrentUserId;
-                if (oldUserId == userId) {
-                    return true;
-                }
-
-                mStackSupervisor.setLockTaskModeLocked(null, ActivityManager.LOCK_TASK_MODE_NONE,
-                        "startUser", false);
-
-                final UserInfo userInfo = getUserManagerLocked().getUserInfo(userId);
-                if (userInfo == null) {
-                    Slog.w(TAG, "No user info for user #" + userId);
-                    return false;
-                }
-                if (foreground && userInfo.isManagedProfile()) {
-                    Slog.w(TAG, "Cannot switch to User #" + userId + ": not a full user");
-                    return false;
-                }
-
-                if (foreground) {
-                    mWindowManager.startFreezingScreen(R.anim.screen_user_exit,
-                            R.anim.screen_user_enter);
-                }
-
-                boolean needStart = false;
-
-                // If the user we are switching to is not currently started, then
-                // we need to start it now.
-                if (mStartedUsers.get(userId) == null) {
-                    mStartedUsers.put(userId, new UserState(new UserHandle(userId), false));
-                    updateStartedUserArrayLocked();
-                    needStart = true;
-                }
-
-                final Integer userIdInt = Integer.valueOf(userId);
-                mUserLru.remove(userIdInt);
-                mUserLru.add(userIdInt);
-
-                if (foreground) {
-                    mCurrentUserId = userId;
-                    updateUserConfigurationLocked();
-                    mTargetUserId = UserHandle.USER_NULL; // reset, mCurrentUserId has caught up
-                    updateCurrentProfileIdsLocked();
-                    mWindowManager.setCurrentUser(userId, mCurrentProfileIds);
-                    // Once the internal notion of the active user has switched, we lock the device
-                    // with the option to show the user switcher on the keyguard.
-                    mWindowManager.lockNow(null);
-                } else {
-                    final Integer currentUserIdInt = Integer.valueOf(mCurrentUserId);
-                    updateCurrentProfileIdsLocked();
-                    mWindowManager.setCurrentProfileIds(mCurrentProfileIds);
-                    mUserLru.remove(currentUserIdInt);
-                    mUserLru.add(currentUserIdInt);
-                }
-
-                final UserState uss = mStartedUsers.get(userId);
-
-                // Make sure user is in the started state.  If it is currently
-                // stopping, we need to knock that off.
-                if (uss.mState == UserState.STATE_STOPPING) {
-                    // If we are stopping, we haven't sent ACTION_SHUTDOWN,
-                    // so we can just fairly silently bring the user back from
-                    // the almost-dead.
-                    uss.mState = UserState.STATE_RUNNING;
-                    updateStartedUserArrayLocked();
-                    needStart = true;
-                } else if (uss.mState == UserState.STATE_SHUTDOWN) {
-                    // This means ACTION_SHUTDOWN has been sent, so we will
-                    // need to treat this as a new boot of the user.
-                    uss.mState = UserState.STATE_BOOTING;
-                    updateStartedUserArrayLocked();
-                    needStart = true;
-                }
-
-                if (uss.mState == UserState.STATE_BOOTING) {
-                    // Booting up a new user, need to tell system services about it.
-                    // Note that this is on the same handler as scheduling of broadcasts,
-                    // which is important because it needs to go first.
-                    mHandler.sendMessage(mHandler.obtainMessage(SYSTEM_USER_START_MSG, userId, 0));
-                }
-
-                if (foreground) {
-                    mHandler.sendMessage(mHandler.obtainMessage(SYSTEM_USER_CURRENT_MSG, userId,
-                            oldUserId));
-                    mHandler.removeMessages(REPORT_USER_SWITCH_MSG);
-                    mHandler.removeMessages(USER_SWITCH_TIMEOUT_MSG);
-                    mHandler.sendMessage(mHandler.obtainMessage(REPORT_USER_SWITCH_MSG,
-                            oldUserId, userId, uss));
-                    mHandler.sendMessageDelayed(mHandler.obtainMessage(USER_SWITCH_TIMEOUT_MSG,
-                            oldUserId, userId, uss), USER_SWITCH_TIMEOUT);
-                }
-
-                if (needStart) {
-                    // Send USER_STARTED broadcast
-                    Intent intent = new Intent(Intent.ACTION_USER_STARTED);
-                    intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY
-                            | Intent.FLAG_RECEIVER_FOREGROUND);
-                    intent.putExtra(Intent.EXTRA_USER_HANDLE, userId);
-                    broadcastIntentLocked(null, null, intent,
-                            null, null, 0, null, null, null, AppOpsManager.OP_NONE,
-                            null, false, false, MY_PID, Process.SYSTEM_UID, userId);
-                }
-
-                if ((userInfo.flags&UserInfo.FLAG_INITIALIZED) == 0) {
-                    if (userId != UserHandle.USER_SYSTEM) {
-                        Intent intent = new Intent(Intent.ACTION_USER_INITIALIZE);
-                        intent.addFlags(Intent.FLAG_RECEIVER_FOREGROUND);
-                        broadcastIntentLocked(null, null, intent, null,
-                                new IIntentReceiver.Stub() {
-                                    public void performReceive(Intent intent, int resultCode,
-                                            String data, Bundle extras, boolean ordered,
-                                            boolean sticky, int sendingUser) {
-                                        onUserInitialized(uss, foreground, oldUserId, userId);
-                                    }
-                                }, 0, null, null, null, AppOpsManager.OP_NONE,
-                                null, true, false, MY_PID, Process.SYSTEM_UID, userId);
-                        uss.initializing = true;
-                    } else {
-                        getUserManagerLocked().makeInitialized(userInfo.id);
-                    }
-                }
-
-                if (foreground) {
-                    if (!uss.initializing) {
-                        moveUserToForegroundLocked(uss, oldUserId, userId);
-                    }
-                } else {
-                    mStackSupervisor.startBackgroundUserLocked(userId, uss);
-                }
-
-                if (needStart) {
-                    Intent intent = new Intent(Intent.ACTION_USER_STARTING);
-                    intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY);
-                    intent.putExtra(Intent.EXTRA_USER_HANDLE, userId);
-                    broadcastIntentLocked(null, null, intent,
-                            null, new IIntentReceiver.Stub() {
-                                @Override
-                                public void performReceive(Intent intent, int resultCode,
-                                        String data, Bundle extras, boolean ordered, boolean sticky,
-                                        int sendingUser) throws RemoteException {
-                                }
-                            }, 0, null, null,
-                            new String[] {INTERACT_ACROSS_USERS}, AppOpsManager.OP_NONE,
-                            null, true, false, MY_PID, Process.SYSTEM_UID, UserHandle.USER_ALL);
-                }
-            }
-        } finally {
-            Binder.restoreCallingIdentity(ident);
-        }
-
-        return true;
-    }
-
-    void dispatchForegroundProfileChanged(int userId) {
-        final int N = mUserSwitchObservers.beginBroadcast();
-        for (int i = 0; i < N; i++) {
-            try {
-                mUserSwitchObservers.getBroadcastItem(i).onForegroundProfileSwitch(userId);
-            } catch (RemoteException e) {
-                // Ignore
-            }
-        }
-        mUserSwitchObservers.finishBroadcast();
     }
 
     void sendUserSwitchBroadcastsLocked(int oldUserId, int newUserId) {
@@ -20381,150 +20077,6 @@ public final class ActivityManagerService extends ActivityManagerNative
         }
     }
 
-    void dispatchUserSwitch(final UserState uss, final int oldUserId,
-            final int newUserId) {
-        final int N = mUserSwitchObservers.beginBroadcast();
-        if (N > 0) {
-            final IRemoteCallback callback = new IRemoteCallback.Stub() {
-                int mCount = 0;
-                @Override
-                public void sendResult(Bundle data) throws RemoteException {
-                    synchronized (ActivityManagerService.this) {
-                        if (mCurUserSwitchCallback == this) {
-                            mCount++;
-                            if (mCount == N) {
-                                sendContinueUserSwitchLocked(uss, oldUserId, newUserId);
-                            }
-                        }
-                    }
-                }
-            };
-            synchronized (this) {
-                uss.switching = true;
-                mCurUserSwitchCallback = callback;
-            }
-            for (int i=0; i<N; i++) {
-                try {
-                    mUserSwitchObservers.getBroadcastItem(i).onUserSwitching(
-                            newUserId, callback);
-                } catch (RemoteException e) {
-                }
-            }
-        } else {
-            synchronized (this) {
-                sendContinueUserSwitchLocked(uss, oldUserId, newUserId);
-            }
-        }
-        mUserSwitchObservers.finishBroadcast();
-    }
-
-    void timeoutUserSwitch(UserState uss, int oldUserId, int newUserId) {
-        synchronized (this) {
-            Slog.w(TAG, "User switch timeout: from " + oldUserId + " to " + newUserId);
-            sendContinueUserSwitchLocked(uss, oldUserId, newUserId);
-        }
-    }
-
-    void sendContinueUserSwitchLocked(UserState uss, int oldUserId, int newUserId) {
-        mCurUserSwitchCallback = null;
-        mHandler.removeMessages(USER_SWITCH_TIMEOUT_MSG);
-        mHandler.sendMessage(mHandler.obtainMessage(CONTINUE_USER_SWITCH_MSG,
-                oldUserId, newUserId, uss));
-    }
-
-    void onUserInitialized(UserState uss, boolean foreground, int oldUserId, int newUserId) {
-        synchronized (this) {
-            if (foreground) {
-                moveUserToForegroundLocked(uss, oldUserId, newUserId);
-            }
-        }
-
-        completeSwitchAndInitialize(uss, newUserId, true, false);
-    }
-
-    void moveUserToForegroundLocked(UserState uss, int oldUserId, int newUserId) {
-        boolean homeInFront = mStackSupervisor.switchUserLocked(newUserId, uss);
-        if (homeInFront) {
-            startHomeActivityLocked(newUserId, "moveUserToFroreground");
-        } else {
-            mStackSupervisor.resumeTopActivitiesLocked();
-        }
-        EventLogTags.writeAmSwitchUser(newUserId);
-        getUserManagerLocked().onUserForeground(newUserId);
-        sendUserSwitchBroadcastsLocked(oldUserId, newUserId);
-    }
-
-    private void updateUserConfigurationLocked() {
-        Configuration configuration = new Configuration(mConfiguration);
-        Settings.System.getConfigurationForUser(mContext.getContentResolver(), configuration,
-                mCurrentUserId);
-        updateConfigurationLocked(configuration, null, false);
-    }
-
-    void continueUserSwitch(UserState uss, int oldUserId, int newUserId) {
-        completeSwitchAndInitialize(uss, newUserId, false, true);
-    }
-
-    void completeSwitchAndInitialize(UserState uss, int newUserId,
-            boolean clearInitializing, boolean clearSwitching) {
-        boolean unfrozen = false;
-        synchronized (this) {
-            if (clearInitializing) {
-                uss.initializing = false;
-                getUserManagerLocked().makeInitialized(uss.mHandle.getIdentifier());
-            }
-            if (clearSwitching) {
-                uss.switching = false;
-            }
-            if (!uss.switching && !uss.initializing) {
-                mWindowManager.stopFreezingScreen();
-                unfrozen = true;
-            }
-        }
-        if (unfrozen) {
-            mHandler.removeMessages(REPORT_USER_SWITCH_COMPLETE_MSG);
-            mHandler.sendMessage(mHandler.obtainMessage(REPORT_USER_SWITCH_COMPLETE_MSG,
-                    newUserId, 0));
-        }
-        stopGuestUserIfBackground();
-    }
-
-    /** Called on handler thread */
-    void dispatchUserSwitchComplete(int userId) {
-        final int observerCount = mUserSwitchObservers.beginBroadcast();
-        for (int i = 0; i < observerCount; i++) {
-            try {
-                mUserSwitchObservers.getBroadcastItem(i).onUserSwitchComplete(userId);
-            } catch (RemoteException e) {
-            }
-        }
-        mUserSwitchObservers.finishBroadcast();
-    }
-
-    /**
-     * Stops the guest user if it has gone to the background.
-     */
-    private void stopGuestUserIfBackground() {
-        synchronized (this) {
-            final int num = mUserLru.size();
-            for (int i = 0; i < num; i++) {
-                Integer oldUserId = mUserLru.get(i);
-                UserState oldUss = mStartedUsers.get(oldUserId);
-                if (oldUserId == UserHandle.USER_SYSTEM || oldUserId == mCurrentUserId
-                        || oldUss.mState == UserState.STATE_STOPPING
-                        || oldUss.mState == UserState.STATE_SHUTDOWN) {
-                    continue;
-                }
-                UserInfo userInfo = mUserManager.getUserInfo(oldUserId);
-                if (userInfo.isGuest()) {
-                    // This is a user to be stopped.
-                    stopUserLocked(oldUserId, null);
-                    break;
-                }
-            }
-        }
-    }
-
     void scheduleStartProfilesLocked() {
         if (!mHandler.hasMessages(START_PROFILES_MSG)) {
             mHandler.sendMessageDelayed(mHandler.obtainMessage(START_PROFILES_MSG),
@@ -20532,229 +20084,9 @@ public final class ActivityManagerService extends ActivityManagerNative
         }
     }
 
-    void startProfilesLocked() {
-        if (DEBUG_MU) Slog.i(TAG_MU, "startProfilesLocked");
-        List<UserInfo> profiles = getUserManagerLocked().getProfiles(
-                mCurrentUserId, false /* enabledOnly */);
-        List<UserInfo> toStart = new ArrayList<UserInfo>(profiles.size());
-        for (UserInfo user : profiles) {
-            if ((user.flags & UserInfo.FLAG_INITIALIZED) == UserInfo.FLAG_INITIALIZED
-                    && user.id != mCurrentUserId) {
-                toStart.add(user);
-            }
-        }
-        final int n = toStart.size();
-        int i = 0;
-        for (; i < n && i < (MAX_RUNNING_USERS - 1); ++i) {
-            startUserInBackground(toStart.get(i).id);
-        }
-        if (i < n) {
-            Slog.w(TAG_MU, "More profiles than MAX_RUNNING_USERS");
-        }
-    }
-
-    void finishUserBoot(UserState uss) {
-        synchronized (this) {
-            if (uss.mState == UserState.STATE_BOOTING
-                    && mStartedUsers.get(uss.mHandle.getIdentifier()) == uss) {
-                uss.mState = UserState.STATE_RUNNING;
-                final int userId = uss.mHandle.getIdentifier();
-                Intent intent = new Intent(Intent.ACTION_BOOT_COMPLETED, null);
-                intent.putExtra(Intent.EXTRA_USER_HANDLE, userId);
-                intent.addFlags(Intent.FLAG_RECEIVER_NO_ABORT);
-                broadcastIntentLocked(null, null, intent,
-                        null, null, 0, null, null,
-                        new String[] {android.Manifest.permission.RECEIVE_BOOT_COMPLETED},
-                        AppOpsManager.OP_NONE, null, true, false, MY_PID, Process.SYSTEM_UID,
-                        userId);
-            }
-        }
-    }
-
-    void finishUserSwitch(UserState uss) {
-        synchronized (this) {
-            finishUserBoot(uss);
-
-            startProfilesLocked();
-
-            int num = mUserLru.size();
-            int i = 0;
-            while (num > MAX_RUNNING_USERS && i < mUserLru.size()) {
-                Integer oldUserId = mUserLru.get(i);
-                UserState oldUss = mStartedUsers.get(oldUserId);
-                if (oldUss == null) {
-                    // Shouldn't happen, but be sane if it does.
-                    mUserLru.remove(i);
-                    num--;
-                    continue;
-                }
-                if (oldUss.mState == UserState.STATE_STOPPING
-                        || oldUss.mState == UserState.STATE_SHUTDOWN) {
-                    // This user is already stopping, doesn't count.
-                    num--;
-                    i++;
-                    continue;
-                }
-                if (oldUserId == UserHandle.USER_SYSTEM || oldUserId == mCurrentUserId) {
-                    // Owner/System user and current user can't be stopped. We count it as running
-                    // when it is not a pure system user.
-                    if (UserInfo.isSystemOnly(oldUserId)) {
-                        num--;
-                    }
-                    i++;
-                    continue;
-                }
-                // This is a user to be stopped.
-                stopUserLocked(oldUserId, null);
-                num--;
-                i++;
-            }
-        }
-    }
-
     @Override
     public int stopUser(final int userId, final IStopUserCallback callback) {
-        if (checkCallingPermission(INTERACT_ACROSS_USERS_FULL)
-                != PackageManager.PERMISSION_GRANTED) {
-            String msg = "Permission Denial: switchUser() from pid="
-                    + Binder.getCallingPid()
-                    + ", uid=" + Binder.getCallingUid()
-                    + " requires " + INTERACT_ACROSS_USERS_FULL;
-            Slog.w(TAG, msg);
-            throw new SecurityException(msg);
-        }
-        if (userId < 0 || userId == UserHandle.USER_SYSTEM) {
-            throw new IllegalArgumentException("Can't stop system user " + userId);
-        }
-        enforceShellRestriction(UserManager.DISALLOW_DEBUGGING_FEATURES, userId);
-        synchronized (this) {
-            return stopUserLocked(userId, callback);
-        }
-    }
-
-    private int stopUserLocked(final int userId, final IStopUserCallback callback) {
-        if (DEBUG_MU) Slog.i(TAG_MU, "stopUserLocked userId=" + userId);
-        if (mCurrentUserId == userId && mTargetUserId == UserHandle.USER_NULL) {
-            return ActivityManager.USER_OP_IS_CURRENT;
-        }
-
-        final UserState uss = mStartedUsers.get(userId);
-        if (uss == null) {
-            // User is not started, nothing to do...  but we do need to
-            // callback if requested.
-            if (callback != null) {
-                mHandler.post(new Runnable() {
-                    @Override
-                    public void run() {
-                        try {
-                            callback.userStopped(userId);
-                        } catch (RemoteException e) {
-                        }
-                    }
-                });
-            }
-            return ActivityManager.USER_OP_SUCCESS;
-        }
-
-        if (callback != null) {
-            uss.mStopCallbacks.add(callback);
-        }
-
-        if (uss.mState != UserState.STATE_STOPPING
-                && uss.mState != UserState.STATE_SHUTDOWN) {
-            uss.mState = UserState.STATE_STOPPING;
-            updateStartedUserArrayLocked();
-
-            long ident = Binder.clearCallingIdentity();
-            try {
-                // We are going to broadcast ACTION_USER_STOPPING and then
-                // once that is done send a final ACTION_SHUTDOWN and then
-                // stop the user.
-                final Intent stoppingIntent = new Intent(Intent.ACTION_USER_STOPPING);
-                stoppingIntent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY);
-                stoppingIntent.putExtra(Intent.EXTRA_USER_HANDLE, userId);
-                stoppingIntent.putExtra(Intent.EXTRA_SHUTDOWN_USERSPACE_ONLY, true);
-                final Intent shutdownIntent = new Intent(Intent.ACTION_SHUTDOWN);
-                // This is the result receiver for the final shutdown broadcast.
-                final IIntentReceiver shutdownReceiver = new IIntentReceiver.Stub() {
-                    @Override
-                    public void performReceive(Intent intent, int resultCode, String data,
-                            Bundle extras, boolean ordered, boolean sticky, int sendingUser) {
-                        finishUserStop(uss);
-                    }
-                };
-                // This is the result receiver for the initial stopping broadcast.
-                final IIntentReceiver stoppingReceiver = new IIntentReceiver.Stub() {
-                    @Override
-                    public void performReceive(Intent intent, int resultCode, String data,
-                            Bundle extras, boolean ordered, boolean sticky, int sendingUser) {
-                        // On to the next.
-                        synchronized (ActivityManagerService.this) {
-                            if (uss.mState != UserState.STATE_STOPPING) {
-                                // Whoops, we are being started back up.  Abort, abort!
-                                return;
-                            }
-                            uss.mState = UserState.STATE_SHUTDOWN;
-                        }
-                        mBatteryStatsService.noteEvent(
-                                BatteryStats.HistoryItem.EVENT_USER_RUNNING_FINISH,
-                                Integer.toString(userId), userId);
-                        mSystemServiceManager.stopUser(userId);
-                        broadcastIntentLocked(null, null, shutdownIntent,
-                                null, shutdownReceiver, 0, null, null, null, AppOpsManager.OP_NONE,
-                                null, true, false, MY_PID, Process.SYSTEM_UID, userId);
-                    }
-                };
-                // Kick things off.
-                broadcastIntentLocked(null, null, stoppingIntent,
-                        null, stoppingReceiver, 0, null, null,
-                        new String[] {INTERACT_ACROSS_USERS}, AppOpsManager.OP_NONE,
-                        null, true, false, MY_PID, Process.SYSTEM_UID, UserHandle.USER_ALL);
-            } finally {
-                Binder.restoreCallingIdentity(ident);
-            }
-        }
-
-        return ActivityManager.USER_OP_SUCCESS;
-    }
-
-    void finishUserStop(UserState uss) {
-        final int userId = uss.mHandle.getIdentifier();
-        boolean stopped;
-        ArrayList<IStopUserCallback> callbacks;
-        synchronized (this) {
-            callbacks = new ArrayList<IStopUserCallback>(uss.mStopCallbacks);
-            if (mStartedUsers.get(userId) != uss) {
-                stopped = false;
-            } else if (uss.mState != UserState.STATE_SHUTDOWN) {
-                stopped = false;
-            } else {
-                stopped = true;
-                // User can no longer run.
-                mStartedUsers.remove(userId);
-                mUserLru.remove(Integer.valueOf(userId));
-                updateStartedUserArrayLocked();
-
-                // Clean up all state and processes associated with the user.
-                // Kill all the processes for the user.
-                forceStopUserLocked(userId, "finish user");
-            }
-        }
-
-        for (int i=0; i<callbacks.size(); i++) {
-            try {
-                if (stopped) callbacks.get(i).userStopped(userId);
-                else callbacks.get(i).userStopAborted(userId);
-            } catch (RemoteException e) {
-            }
-        }
-
-        if (stopped) {
-            mSystemServiceManager.cleanupUser(userId);
-            synchronized (this) {
-                mStackSupervisor.removeUserLocked(userId);
-            }
-        }
+        return mUserController.stopUser(userId, callback);
     }
 
     void onUserRemovedLocked(int userId) {
@@ -20763,25 +20095,7 @@ public final class ActivityManagerService extends ActivityManagerNative
 
     @Override
     public UserInfo getCurrentUser() {
-        if ((checkCallingPermission(INTERACT_ACROSS_USERS)
-                != PackageManager.PERMISSION_GRANTED) && (
-                checkCallingPermission(INTERACT_ACROSS_USERS_FULL)
-                != PackageManager.PERMISSION_GRANTED)) {
-            String msg = "Permission Denial: getCurrentUser() from pid="
-                    + Binder.getCallingPid()
-                    + ", uid=" + Binder.getCallingUid()
-                    + " requires " + INTERACT_ACROSS_USERS;
-            Slog.w(TAG, msg);
-            throw new SecurityException(msg);
-        }
-        synchronized (this) {
-            int userId = mTargetUserId != UserHandle.USER_NULL ? mTargetUserId : mCurrentUserId;
-            return getUserManagerLocked().getUserInfo(userId);
-        }
-    }
-
-    int getCurrentUserIdLocked() {
-        return mTargetUserId != UserHandle.USER_NULL ? mTargetUserId : mCurrentUserId;
+        return mUserController.getCurrentUser();
     }
 
     @Override
@@ -20801,7 +20115,7 @@ public final class ActivityManagerService extends ActivityManagerNative
     }
 
     boolean isUserRunningLocked(int userId, boolean orStopped) {
-        UserState state = mStartedUsers.get(userId);
+        UserState state = mUserController.getStartedUserState(userId);
         if (state == null) {
             return false;
         }
@@ -20824,50 +20138,18 @@ public final class ActivityManagerService extends ActivityManagerNative
             throw new SecurityException(msg);
         }
         synchronized (this) {
-            return mStartedUserArray;
-        }
-    }
-
-    private void updateStartedUserArrayLocked() {
-        int num = 0;
-        for (int i=0; i<mStartedUsers.size();  i++) {
-            UserState uss = mStartedUsers.valueAt(i);
-            // This list does not include stopping users.
-            if (uss.mState != UserState.STATE_STOPPING
-                    && uss.mState != UserState.STATE_SHUTDOWN) {
-                num++;
-            }
-        }
-        mStartedUserArray = new int[num];
-        num = 0;
-        for (int i=0; i<mStartedUsers.size();  i++) {
-            UserState uss = mStartedUsers.valueAt(i);
-            if (uss.mState != UserState.STATE_STOPPING
-                    && uss.mState != UserState.STATE_SHUTDOWN) {
-                mStartedUserArray[num] = mStartedUsers.keyAt(i);
-                num++;
-            }
+            return mUserController.getStartedUserArrayLocked();
         }
     }
 
     @Override
     public void registerUserSwitchObserver(IUserSwitchObserver observer) {
-        if (checkCallingPermission(INTERACT_ACROSS_USERS_FULL)
-                != PackageManager.PERMISSION_GRANTED) {
-            String msg = "Permission Denial: registerUserSwitchObserver() from pid="
-                    + Binder.getCallingPid()
-                    + ", uid=" + Binder.getCallingUid()
-                    + " requires " + INTERACT_ACROSS_USERS_FULL;
-            Slog.w(TAG, msg);
-            throw new SecurityException(msg);
-        }
-
-        mUserSwitchObservers.register(observer);
+        mUserController.registerUserSwitchObserver(observer);
     }
 
     @Override
     public void unregisterUserSwitchObserver(IUserSwitchObserver observer) {
-        mUserSwitchObservers.unregister(observer);
+        mUserController.unregisterUserSwitchObserver(observer);
     }
 
     int[] getUsersLocked() {

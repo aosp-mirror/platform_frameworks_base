@@ -355,7 +355,8 @@ public final class ActiveServices {
 
         final ServiceMap smap = getServiceMap(r.userId);
         boolean addToStarting = false;
-        if (!callerFg && r.app == null && mAm.mStartedUsers.get(r.userId) != null) {
+        if (!callerFg && r.app == null
+                && mAm.mUserController.hasStartedUserState(r.userId)) {
             ProcessRecord proc = mAm.getProcessRecordLocked(r.processName, r.appInfo.uid, false);
             if (proc == null || proc.curProcState > ActivityManager.PROCESS_STATE_RECEIVER) {
                 // If this is not coming from a foreground caller, then we may want
@@ -1401,7 +1402,7 @@ public final class ActiveServices {
 
         // Make sure that the user who owns this service is started.  If not,
         // we don't want to allow it to run.
-        if (mAm.mStartedUsers.get(r.userId) == null) {
+        if (!mAm.mUserController.hasStartedUserState(r.userId)) {
             String msg = "Unable to launch app "
                     + r.appInfo.packageName + "/"
                     + r.appInfo.uid + " for service "
