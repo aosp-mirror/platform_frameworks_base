@@ -74,6 +74,7 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
     RecentsConfiguration mConfig;
     RecentsPackageMonitor mPackageMonitor;
     long mLastTabKeyEventTime;
+    boolean mFinishedOnStartup;
 
     // Top level views
     RecentsView mRecentsView;
@@ -298,6 +299,16 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        mFinishedOnStartup = false;
+
+        // In the case that the activity starts up before the Recents component has initialized
+        // (usually when debugging/pushing the SysUI apk), just finish this activity.
+        SystemServicesProxy ssp = Recents.getSystemServices();
+        if (ssp == null) {
+            mFinishedOnStartup = true;
+            finish();
+            return;
+        }
 
         // Register this activity with the event bus
         EventBus.getDefault().register(this, EVENT_BUS_PRIORITY);
@@ -319,7 +330,6 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
         mScrimViews = new SystemBarScrimViews(this);
 
         // Bind the search app widget when we first start up
-        SystemServicesProxy ssp = Recents.getSystemServices();
         mSearchWidgetInfo = ssp.getOrBindSearchAppWidget(this, mAppWidgetHost);
 
         // Register the broadcast receiver to handle messages when the screen is turned off
@@ -397,6 +407,11 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
     @Override
     protected void onDestroy() {
         super.onDestroy();
+
+        // In the case that the activity finished on startup, just skip the unregistration below
+        if (mFinishedOnStartup) {
+            return;
+        }
 
         // Unregister the system broadcast receivers
         unregisterReceiver(mSystemBroadcastReceiver);

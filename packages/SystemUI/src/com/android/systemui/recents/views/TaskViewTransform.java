@@ -17,7 +17,7 @@
 package com.android.systemui.recents.views;
 
 import android.animation.ValueAnimator;
-import android.graphics.Rect;
+import android.graphics.RectF;
 import android.view.View;
 import android.view.ViewPropertyAnimator;
 import android.view.animation.Interpolator;
@@ -35,7 +35,7 @@ public class TaskViewTransform {
 
     // This is a window-space rect that is purely used for coordinating the animation of an app
     // window into Recents.
-    public Rect rect = new Rect();
+    public RectF rect = new RectF();
 
     public TaskViewTransform() {
         // Do nothing

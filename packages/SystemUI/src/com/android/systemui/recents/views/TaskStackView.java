@@ -20,8 +20,8 @@ import android.animation.ValueAnimator;
 import android.content.ComponentName;
 import android.content.Context;
 import android.graphics.Canvas;
-import android.graphics.Matrix;
 import android.graphics.Rect;
+import android.graphics.RectF;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -89,11 +89,11 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
     boolean mStartEnterAnimationRequestedAfterLayout;
     boolean mStartEnterAnimationCompleted;
     ViewAnimation.TaskViewEnterContext mStartEnterAnimationContext;
+
     Rect mTaskStackBounds = new Rect();
     int[] mTmpVisibleRange = new int[2];
-    float[] mTmpCoord = new float[2];
-    Matrix mTmpMatrix = new Matrix();
     Rect mTmpRect = new Rect();
+    RectF mTmpTaskRect = new RectF();
     TaskViewTransform mTmpTransform = new TaskViewTransform();
     HashMap<Task, TaskView> mTmpTaskViewMap = new HashMap<>();
     ArrayList<TaskView> mTaskViews = new ArrayList<>();
@@ -412,23 +412,24 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
         return false;
     }
 
-    /** Updates the clip for each of the task views. */
+    /**
+     * Updates the clip for each of the task views from back to front.
+     */
     void clipTaskViews() {
         // Update the clip on each task child
         List<TaskView> taskViews = getTaskViews();
+        TaskView tmpTv = null;
         int taskViewCount = taskViews.size();
-        for (int i = 0; i < taskViewCount - 1; i++) {
+        for (int i = 0; i < taskViewCount; i++) {
             TaskView tv = taskViews.get(i);
-            TaskView nextTv = null;
-            TaskView tmpTv = null;
+            TaskView frontTv = null;
             int clipBottom = 0;
-            if (tv.shouldClipViewInStack()) {
+            if (i < (taskViewCount - 1) && tv.shouldClipViewInStack()) {
                 // Find the next view to clip against
-                int nextIndex = i;
-                while (nextIndex < (taskViewCount - 1)) {
-                    tmpTv = taskViews.get(++nextIndex);
-                    if (tmpTv != null && tmpTv.shouldClipViewInStack()) {
-                        nextTv = tmpTv;
+                for (int j = i + 1; j < taskViewCount; j++) {
+                    tmpTv = taskViews.get(j);
+                    if (tmpTv.shouldClipViewInStack()) {
+                        frontTv = tmpTv;
                         break;
                     }
                 }
@@ -436,22 +437,22 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
                 // Clip against the next view, this is just an approximation since we are
                 // stacked and we can make assumptions about the visibility of the this
                 // task relative to the ones in front of it.
-                if (nextTv != null) {
-                    // Map the top edge of next task view into the local space of the current
-                    // task view to find the clip amount in local space
-                    mTmpCoord[0] = mTmpCoord[1] = 0;
-                    Utilities.mapCoordInDescendentToSelf(nextTv, this, mTmpCoord, false);
-                    Utilities.mapCoordInSelfToDescendent(tv, this, mTmpCoord, mTmpMatrix);
-                    clipBottom = (int) Math.floor(tv.getMeasuredHeight() - mTmpCoord[1]
-                            - nextTv.getPaddingTop() - 1);
+                if (frontTv != null) {
+                    mTmpTaskRect.set(mLayoutAlgorithm.mTaskRect);
+                    mTmpTaskRect.offset(0, tv.getTranslationY());
+                    Utilities.scaleRectAboutCenter(mTmpTaskRect, tv.getScaleX());
+                    float taskBottom = mTmpTaskRect.bottom;
+                    mTmpTaskRect.set(mLayoutAlgorithm.mTaskRect);
+                    mTmpTaskRect.offset(0, frontTv.getTranslationY());
+                    Utilities.scaleRectAboutCenter(mTmpTaskRect, frontTv.getScaleX());
+                    float frontTaskTop = mTmpTaskRect.top;
+                    if (frontTaskTop < taskBottom) {
+                        // Map the stack view space coordinate (the rects) to view space
+                        clipBottom = (int) ((taskBottom - frontTaskTop) / tv.getScaleX()) - 1;
+                    }
                 }
             }
             tv.getViewBounds().setClipBottom(clipBottom);
-        }
-        if (taskViewCount > 0) {
-            // The front most task should never be clipped
-            TaskView tv = taskViews.get(taskViewCount - 1);
-            tv.getViewBounds().setClipBottom(0);
         }
         mStackViewsClipDirty = false;
     }

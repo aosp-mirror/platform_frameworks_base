@@ -18,12 +18,9 @@ package com.android.systemui.recents.misc;
 
 import android.animation.Animator;
 import android.graphics.Color;
-import android.graphics.Matrix;
-import android.graphics.Rect;
+import android.graphics.RectF;
 import android.view.View;
 import android.view.ViewParent;
-
-import java.util.ArrayList;
 
 /* Common code */
 public class Utilities {
@@ -45,91 +42,17 @@ public class Utilities {
     }
 
     /** Scales a rect about its centroid */
-    public static void scaleRectAboutCenter(Rect r, float scale) {
+    public static void scaleRectAboutCenter(RectF r, float scale) {
         if (scale != 1.0f) {
-            int cx = r.centerX();
-            int cy = r.centerY();
+            float cx = r.centerX();
+            float cy = r.centerY();
             r.offset(-cx, -cy);
-            r.left = (int) (r.left * scale + 0.5f);
-            r.top = (int) (r.top * scale + 0.5f);
-            r.right = (int) (r.right * scale + 0.5f);
-            r.bottom = (int) (r.bottom * scale + 0.5f);
+            r.left *= scale;
+            r.top *= scale;
+            r.right *= scale;
+            r.bottom *= scale;
             r.offset(cx, cy);
         }
-    }
-
-    /** Maps a coorindate in a descendant view into the parent. */
-    public static float mapCoordInDescendentToSelf(View descendant, View root,
-            float[] coord, boolean includeRootScroll) {
-        ArrayList<View> ancestorChain = new ArrayList<View>();
-
-        float[] pt = {coord[0], coord[1]};
-
-        View v = descendant;
-        while(v != root && v != null) {
-            ancestorChain.add(v);
-            v = (View) v.getParent();
-        }
-        ancestorChain.add(root);
-
-        float scale = 1.0f;
-        int count = ancestorChain.size();
-        for (int i = 0; i < count; i++) {
-            View v0 = ancestorChain.get(i);
-            // For TextViews, scroll has a meaning which relates to the text position
-            // which is very strange... ignore the scroll.
-            if (v0 != descendant || includeRootScroll) {
-                pt[0] -= v0.getScrollX();
-                pt[1] -= v0.getScrollY();
-            }
-
-            v0.getMatrix().mapPoints(pt);
-            pt[0] += v0.getLeft();
-            pt[1] += v0.getTop();
-            scale *= v0.getScaleX();
-        }
-
-        coord[0] = pt[0];
-        coord[1] = pt[1];
-        return scale;
-    }
-
-    /** Maps a coordinate in the root to a descendent. */
-    public static float mapCoordInSelfToDescendent(View descendant, View root,
-            float[] coord, Matrix tmpInverseMatrix) {
-        ArrayList<View> ancestorChain = new ArrayList<View>();
-
-        float[] pt = {coord[0], coord[1]};
-
-        View v = descendant;
-        while(v != root) {
-            ancestorChain.add(v);
-            v = (View) v.getParent();
-        }
-        ancestorChain.add(root);
-
-        float scale = 1.0f;
-        int count = ancestorChain.size();
-        tmpInverseMatrix.set(Matrix.IDENTITY_MATRIX);
-        for (int i = count - 1; i >= 0; i--) {
-            View ancestor = ancestorChain.get(i);
-            View next = i > 0 ? ancestorChain.get(i-1) : null;
-
-            pt[0] += ancestor.getScrollX();
-            pt[1] += ancestor.getScrollY();
-
-            if (next != null) {
-                pt[0] -= next.getLeft();
-                pt[1] -= next.getTop();
-                next.getMatrix().invert(tmpInverseMatrix);
-                tmpInverseMatrix.mapPoints(pt);
-                scale *= next.getScaleX();
-            }
-        }
-
-        coord[0] = pt[0];
-        coord[1] = pt[1];
-        return scale;
     }
 
     /** Calculates the constrast between two colors, using the algorithm provided by the WCAG v2. */
