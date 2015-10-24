@@ -4435,6 +4435,10 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
                 }
             }
         }
+
+        if (mCurrentDragStartEvent != null && child.getVisibility() == VISIBLE) {
+            notifyChildOfDragStart(child);
+        }
     }
 
     private void addInArray(View child, int index) {
@@ -4685,6 +4689,10 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
             if (index < oldIndex) {
                 mTransientIndices.set(i, oldIndex - 1);
             }
+        }
+
+        if (mCurrentDragStartEvent != null) {
+            mChildrenInterestedInDrag.remove(view);
         }
     }
 
