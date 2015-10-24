@@ -77,7 +77,6 @@ class DragState {
         mSurfaceControl = surface;
         mFlags = flags;
         mLocalWin = localWin;
-        mUid = Binder.getCallingUid();
         mNotifiedWindows = new ArrayList<WindowState>();
     }
 
