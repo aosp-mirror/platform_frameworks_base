@@ -434,10 +434,17 @@ public class ActivityManager {
     public static final int DOCKED_STACK_ID = FREEFORM_WORKSPACE_STACK_ID + 1;
 
     /**
+     * ID of stack that always on top (always visible) when it exist.
+     * Mainly used for this in Picture-in-Picture mode.
+     * @hide
+     */
+    public static final int PINNED_STACK_ID = DOCKED_STACK_ID + 1;
+
+    /**
      * Last static stack stack ID.
      * @hide
      */
-    public static final int LAST_STATIC_STACK_ID = DOCKED_STACK_ID;
+    public static final int LAST_STATIC_STACK_ID = PINNED_STACK_ID;
 
     /**
      * Start of ID range used by stacks that are created dynamically.

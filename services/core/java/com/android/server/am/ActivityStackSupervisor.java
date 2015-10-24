@@ -3293,7 +3293,8 @@ public final class ActivityStackSupervisor implements DisplayListener {
             return;
         }
         final String reason = "moveTaskToStack";
-        if (stackId == DOCKED_STACK_ID || stackId == FULLSCREEN_WORKSPACE_STACK_ID) {
+        if (stackId == DOCKED_STACK_ID || stackId == PINNED_STACK_ID
+                || stackId == FULLSCREEN_WORKSPACE_STACK_ID) {
             // We are about to relaunch the activity because its configuration changed due to
             // being maximized, i.e. size change. The activity will first remove the old window
             // and then add a new one. This call will tell window manager about this, so it can
@@ -3314,7 +3315,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
                 && task.mBounds == null && task.mLastNonFullscreenBounds != null) {
             resizeTaskLocked(task, task.mLastNonFullscreenBounds,
                     RESIZE_MODE_SYSTEM, !PRESERVE_WINDOWS);
-        } else if (stackId == DOCKED_STACK_ID) {
+        } else if (stackId == DOCKED_STACK_ID || stackId == PINNED_STACK_ID) {
             resizeTaskLocked(task, stack.mBounds,
                     RESIZE_MODE_SYSTEM, !PRESERVE_WINDOWS);
         }

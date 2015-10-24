@@ -22,6 +22,7 @@ import static android.app.ActivityManager.FREEFORM_WORKSPACE_STACK_ID;
 import static android.app.ActivityManager.FULLSCREEN_WORKSPACE_STACK_ID;
 import static android.app.ActivityManager.HOME_STACK_ID;
 import static android.app.ActivityManager.LAST_STATIC_STACK_ID;
+import static android.app.ActivityManager.PINNED_STACK_ID;
 import static android.content.pm.ActivityInfo.FLAG_SHOW_FOR_ALL_USERS;
 
 import static com.android.server.am.ActivityManagerDebugConfig.*;
@@ -253,6 +254,9 @@ final class ActivityStack {
 
     private final LaunchingTaskPositioner mTaskPositioner;
 
+    // If the bounds of task contained in this stack should be persisted across power cycles.
+    final boolean mPersistTaskBounds;
+
     static final int PAUSE_TIMEOUT_MSG = ActivityManagerService.FIRST_ACTIVITY_STACK_MSG + 1;
     static final int DESTROY_TIMEOUT_MSG = ActivityManagerService.FIRST_ACTIVITY_STACK_MSG + 2;
     static final int LAUNCH_TICK_MSG = ActivityManagerService.FIRST_ACTIVITY_STACK_MSG + 3;
@@ -354,10 +358,6 @@ final class ActivityStack {
         return count;
     }
 
-    int numTasks() {
-        return mTaskHistory.size();
-    }
-
     ActivityStack(ActivityStackSupervisor.ActivityContainer activityContainer,
             RecentTasks recentTasks) {
         mActivityContainer = activityContainer;
@@ -370,6 +370,7 @@ final class ActivityStack {
         mRecentTasks = recentTasks;
         mTaskPositioner = mStackId == FREEFORM_WORKSPACE_STACK_ID
                 ? new LaunchingTaskPositioner() : null;
+        mPersistTaskBounds = mStackId != DOCKED_STACK_ID && mStackId != PINNED_STACK_ID;
     }
 
     void attachDisplay(ActivityStackSupervisor.ActivityDisplay activityDisplay, boolean onTop) {
@@ -1306,6 +1307,11 @@ final class ActivityStack {
             return true;
         }
 
+        if (mStackId == PINNED_STACK_ID) {
+            // Pinned stack is always visible if it exist.
+            return true;
+        }
+
         final int stackIndex = mStacks.indexOf(this);
 
         if (stackIndex == mStacks.size() - 1) {
@@ -1328,8 +1334,9 @@ final class ActivityStack {
         }
 
         final int belowFocusedIndex = mStacks.indexOf(focusedStack) - 1;
-        if (focusedStackId == DOCKED_STACK_ID && stackIndex == belowFocusedIndex) {
-            // Stacks directly behind the docked stack are always visible.
+        if ((focusedStackId == DOCKED_STACK_ID || focusedStackId == PINNED_STACK_ID)
+                && stackIndex == belowFocusedIndex) {
+            // Stacks directly behind the docked or pinned stack are always visible.
             return true;
         }
 
@@ -1343,9 +1350,10 @@ final class ActivityStack {
             }
             if (belowFocusedIndex >= 0) {
                 final ActivityStack stack = mStacks.get(belowFocusedIndex);
-                if (stack.mStackId == DOCKED_STACK_ID && stackIndex == (belowFocusedIndex - 1)) {
-                    // The stack behind the docked stack is also visible so we can have a complete
-                    // backdrop to the translucent activity when the docked stack is up.
+                if ((stack.mStackId == DOCKED_STACK_ID || stack.mStackId == PINNED_STACK_ID)
+                        && stackIndex == (belowFocusedIndex - 1)) {
+                    // The stack behind the docked or pinned stack is also visible so we can have a
+                    // complete backdrop to the translucent activity when the docked stack is up.
                     return true;
                 }
             }
@@ -2784,9 +2792,10 @@ final class ActivityStack {
             final String myReason = reason + " adjustFocus";
             if (next != r) {
                 if (next != null && (mStackId == FREEFORM_WORKSPACE_STACK_ID
-                        || mStackId == DOCKED_STACK_ID)) {
-                    // For freeform and docked stacks we always keep the focus within the stack as
-                    // long as there is a running activity in the stack that we can adjust focus to.
+                        || mStackId == DOCKED_STACK_ID || mStackId == PINNED_STACK_ID)) {
+                    // For freeform, docked, and pinned stacks we always keep the focus within the
+                    // stack as long as there is a running activity in the stack that we can adjust
+                    // focus to.
                     mService.setFocusedActivityLocked(next, myReason);
                     return;
                 } else {
