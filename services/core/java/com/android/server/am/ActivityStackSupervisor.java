@@ -3265,23 +3265,8 @@ public final class ActivityStackSupervisor implements DisplayListener {
 
         // If the task had focus before (or we're requested to move focus),
         // move focus to the new stack.
-        if (forceFocus || wasFocused) {
-            // If the task owns the last resumed activity, transfer that together,
-            // so that we don't resume the same activity again in the new stack.
-            // Apps may depend on onResume()/onPause() being called in pairs.
-            if (wasResumed) {
-                stack.mResumedActivity = r;
-                // Move the stack in which we are placing the task to the front. We don't use
-                // ActivityManagerService.setFocusedActivityLocked, because if the activity is
-                // already focused, the call will short-circuit and do nothing.
-                stack.moveToFront(reason);
-            } else {
-                // We need to not only move the stack to the front, but also have the activity
-                // focused. This will achieve both goals.
-                mService.setFocusedActivityLocked(r, reason);
-            }
-
-        }
+        stack.setFocusAndResumeStateIfNeeded(
+                r, forceFocus || wasFocused, wasResumed, reason);
 
         return stack;
     }
@@ -3324,6 +3309,45 @@ public final class ActivityStackSupervisor implements DisplayListener {
         // the visibility of the stack / windows.
         ensureActivitiesVisibleLocked(null, 0, !PRESERVE_WINDOWS);
         resumeTopActivitiesLocked();
+    }
+
+    boolean moveTopStackActivityToPinnedStackLocked(int stackId, Rect bounds) {
+        final ActivityStack stack = getStack(stackId, !CREATE_IF_NEEDED, !ON_TOP);
+        if (stack == null) {
+            throw new IllegalArgumentException(
+                    "moveTopStackActivityToPinnedStackLocked: Unknown stackId=" + stackId);
+        }
+
+        final ActivityRecord r = stack.topRunningActivityLocked();
+        if (r == null) {
+            Slog.w(TAG, "moveTopStackActivityToPinnedStackLocked: No top running activity"
+                    + " in stack=" + stack);
+            return false;
+        }
+
+        final TaskRecord task = r.task;
+        if (!task.mResizeable) {
+            Slog.w(TAG, "moveTopStackActivityToPinnedStackLocked: Activity not resizeable"
+                    + " r=" + r);
+            return false;
+        }
+
+        if (task.mActivities.size() == 1) {
+            // There is only one activity in the task. So, we can just move the task over to the
+            // pinned stack without re-parenting the activity in a different task.
+            moveTaskToStackLocked(task.taskId, PINNED_STACK_ID, ON_TOP, FORCE_FOCUS);
+        } else {
+            final ActivityStack pinnedStack = getStack(PINNED_STACK_ID, CREATE_IF_NEEDED, ON_TOP);
+            pinnedStack.moveActivityToStack(r);
+        }
+
+        resizeStackLocked(PINNED_STACK_ID, bounds, PRESERVE_WINDOWS, true);
+
+        // The task might have already been running and its visibility needs to be synchronized with
+        // the visibility of the stack / windows.
+        ensureActivitiesVisibleLocked(null, 0, !PRESERVE_WINDOWS);
+        resumeTopActivitiesLocked();
+        return true;
     }
 
     void positionTaskInStackLocked(int taskId, int stackId, int position) {

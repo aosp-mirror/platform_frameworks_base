@@ -4642,6 +4642,51 @@ final class ActivityStack {
         r.taskConfigOverride = task.mOverrideConfig;
     }
 
+    void setFocusAndResumeStateIfNeeded(
+            ActivityRecord r, boolean setFocus, boolean setResume, String reason) {
+        // If the activity had focus before move focus to this stack.
+        if (setFocus) {
+            // If the activity owns the last resumed activity, transfer that together,
+            // so that we don't resume the same activity again in the new stack.
+            // Apps may depend on onResume()/onPause() being called in pairs.
+            if (setResume) {
+                mResumedActivity = r;
+                // Move the stack in which we are placing the activity to the front. We don't use
+                // ActivityManagerService.setFocusedActivityLocked, because if the activity is
+                // already focused, the call will short-circuit and do nothing.
+                moveToFront(reason);
+            } else {
+                // We need to not only move the stack to the front, but also have the activity
+                // focused. This will achieve both goals.
+                mService.setFocusedActivityLocked(r, reason);
+            }
+        }
+    }
+
+    /**
+     * Moves the input activity from its current stack to this one.
+     * NOTE: The current task of the activity isn't moved to this stack. Instead a new task is
+     * created on this stack which the activity is added to.
+     * */
+    void moveActivityToStack(ActivityRecord r) {
+        final ActivityStack prevStack = r.task.stack;
+        if (prevStack.mStackId == mStackId) {
+            // You are already in the right stack silly...
+            return;
+        }
+
+        final boolean wasFocused = mStackSupervisor.isFrontStack(prevStack)
+                && (mStackSupervisor.topRunningActivityLocked() == r);
+        final boolean wasResumed = wasFocused && (prevStack.mResumedActivity == r);
+
+        final TaskRecord task = createTaskRecord(
+                mStackSupervisor.getNextTaskId(), r.info, r.intent, null, null, true);
+        r.setTask(task, null);
+        task.addActivityToTop(r);
+        setAppTask(r, task);
+        setFocusAndResumeStateIfNeeded(r, wasFocused, wasResumed, "moveActivityToStack");
+    }
+
     private void setAppTask(ActivityRecord r, TaskRecord task) {
         final Rect bounds = task.getLaunchBounds();
         task.updateOverrideConfiguration(bounds);

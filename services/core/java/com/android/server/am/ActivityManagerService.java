@@ -9083,6 +9083,29 @@ public final class ActivityManagerService extends ActivityManagerNative
         }
     }
 
+    /**
+     * Moves the top activity in the input stackId to the pinned stack.
+     *
+     * @param stackId Id of stack to move the top activity to pinned stack.
+     * @param bounds Bounds to use for pinned stack.
+     *
+     * @return True if the top activity of the input stack was successfully moved to the pinned
+     *          stack.
+     */
+    @Override
+    public boolean moveTopActivityToPinnedStack(int stackId, Rect bounds) {
+        enforceCallingPermission(android.Manifest.permission.MANAGE_ACTIVITY_STACKS,
+                "moveTopActivityToPinnedStack()");
+        synchronized (this) {
+            long ident = Binder.clearCallingIdentity();
+            try {
+                return mStackSupervisor.moveTopStackActivityToPinnedStackLocked(stackId, bounds);
+            } finally {
+                Binder.restoreCallingIdentity(ident);
+            }
+        }
+    }
+
     @Override
     public void resizeStack(int stackId, Rect bounds, boolean allowResizeInDockedMode) {
         enforceCallingPermission(android.Manifest.permission.MANAGE_ACTIVITY_STACKS,

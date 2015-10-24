@@ -755,6 +755,16 @@ public abstract class ActivityManagerNative extends Binder implements IActivityM
             return true;
         }
 
+        case MOVE_TOP_ACTIVITY_TO_PINNED_STACK: {
+            data.enforceInterface(IActivityManager.descriptor);
+            final int stackId = data.readInt();
+            final Rect r = Rect.CREATOR.createFromParcel(data);
+            final boolean res = moveTopActivityToPinnedStack(stackId, r);
+            reply.writeNoException();
+            reply.writeInt(res ? 1 : 0);
+            return true;
+        }
+
         case RESIZE_STACK_TRANSACTION: {
             data.enforceInterface(IActivityManager.descriptor);
             final int stackId = data.readInt();
@@ -3553,6 +3563,22 @@ class ActivityManagerProxy implements IActivityManager
         reply.readException();
         data.recycle();
         reply.recycle();
+    }
+    @Override
+    public boolean moveTopActivityToPinnedStack(int stackId, Rect r)
+        throws RemoteException
+    {
+        Parcel data = Parcel.obtain();
+        Parcel reply = Parcel.obtain();
+        data.writeInterfaceToken(IActivityManager.descriptor);
+        data.writeInt(stackId);
+        r.writeToParcel(data, 0);
+        mRemote.transact(MOVE_TOP_ACTIVITY_TO_PINNED_STACK, data, reply, 0);
+        reply.readException();
+        final boolean res = reply.readInt() != 0;
+        data.recycle();
+        reply.recycle();
+        return res;
     }
     @Override
     public void resizeStack(int stackId, Rect r, boolean allowResizeInDockedMode)
