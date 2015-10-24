@@ -730,6 +730,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     private int mTorchTimeout;
     private PendingIntent mTorchOffPendingIntent;
 
+    private boolean mGlobalActionsOnLockScreen;
+
     private class PolicyHandler extends Handler {
         @Override
         public void handleMessage(Message msg) {
@@ -949,7 +951,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             resolver.registerContentObserver(Settings.System.getUriFor(
                     Settings.System.RING_HOME_BUTTON_BEHAVIOR), false, this,
                     UserHandle.USER_ALL);
-
+            resolver.registerContentObserver(Settings.System.getUriFor(
+                    Settings.System.LOCKSCREEN_DISABLE_POWER_MENU), false, this,
+                    UserHandle.USER_ALL);
             updateSettings();
         }
 
@@ -1412,12 +1416,17 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     }
 
     private void powerLongPress() {
-        final int behavior = mResolvedLongPressOnPowerBehavior;
+        int behavior = mResolvedLongPressOnPowerBehavior;
         switch (behavior) {
             case LONG_PRESS_POWER_NOTHING:
                 break;
             case LONG_PRESS_POWER_GLOBAL_ACTIONS:
                 mPowerKeyHandled = true;
+                final boolean keyguardShowing = isKeyguardShowingAndNotOccluded();
+                if (keyguardShowing && isKeyguardSecure(mCurrentUserId) &&
+                        !mGlobalActionsOnLockScreen) {
+                    return;
+                }
                 performHapticFeedback(HapticFeedbackConstants.LONG_PRESS, false,
                         "Power - Long Press - Global Actions");
                 showGlobalActionsInternal();
@@ -2478,6 +2487,10 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
             mKillAppLongpressBack = Settings.System.getInt(resolver,
                     Settings.System.KILL_APP_LONGPRESS_BACK, 0) == 1;
+
+            mGlobalActionsOnLockScreen = Settings.System.getIntForUser(resolver,
+                    Settings.System.LOCKSCREEN_DISABLE_POWER_MENU, 0,
+                    UserHandle.USER_CURRENT) == 0;
         }
         if (updateRotation) {
             updateRotation(true);
