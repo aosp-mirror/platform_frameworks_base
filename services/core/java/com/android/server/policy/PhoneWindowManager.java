@@ -1432,7 +1432,14 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 if (!performHapticFeedbackLw(null, HapticFeedbackConstants.LONG_PRESS, false)) {
                     performAuditoryFeedbackForAccessibilityIfNeed();
                 }
+                boolean locked = isStatusBarKeyguard() && isKeyguardSecure(mCurrentUserId);
+                boolean globalActionsOnLockScreen = Settings.System.getIntForUser(mContext.getContentResolver(),
+                            Settings.System.LOCKSCREEN_ENABLE_POWER_MENU, 1, UserHandle.USER_CURRENT) == 1;
+                if (locked && !globalActionsOnLockScreen) {
+                    behavior = LONG_PRESS_POWER_NOTHING;
+                } else {
                     showGlobalActionsInternal();
+                }
                 break;
             case LONG_PRESS_POWER_SHUT_OFF:
             case LONG_PRESS_POWER_SHUT_OFF_NO_CONFIRM:
