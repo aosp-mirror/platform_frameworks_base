@@ -45,6 +45,7 @@ import android.os.Trace;
 import android.os.UserHandle;
 import android.provider.DeviceConfig;
 import android.provider.DeviceConfig.Properties;
+import android.provider.Settings;
 import android.util.ArraySet;
 import android.util.Log;
 import android.view.View;
@@ -68,6 +69,7 @@ import com.android.systemui.statusbar.phone.ScrimState;
 import com.android.systemui.statusbar.phone.ShadeController;
 import com.android.systemui.statusbar.phone.StatusBarWindowController;
 import com.android.systemui.statusbar.policy.KeyguardMonitor;
+import com.android.systemui.tuner.TunerService;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -87,9 +89,12 @@ import dagger.Lazy;
  * notification, which this class keeps track of.
  */
 @Singleton
-public class NotificationMediaManager implements Dumpable {
+public class NotificationMediaManager implements Dumpable, TunerService.Tunable {
     private static final String TAG = "NotificationMediaManager";
     public static final boolean DEBUG_MEDIA = false;
+
+    private static final String LOCKSCREEN_MEDIA_METADATA =
+            "system:" + Settings.System.LOCKSCREEN_MEDIA_METADATA;
 
     private final StatusBarStateController mStatusBarStateController
             = Dependency.get(StatusBarStateController.class);
@@ -139,6 +144,8 @@ public class NotificationMediaManager implements Dumpable {
     private ImageView mBackdropBack;
 
     private boolean mShowCompactMediaSeekbar;
+    private boolean mShowMediaMetadata;
+
     private final DeviceConfig.OnPropertiesChangedListener mPropertiesChangedListener =
             new DeviceConfig.OnPropertiesChangedListener() {
         @Override
@@ -218,6 +225,17 @@ public class NotificationMediaManager implements Dumpable {
         DeviceConfig.addOnPropertiesChangedListener(DeviceConfig.NAMESPACE_SYSTEMUI,
                 mContext.getMainExecutor(),
                 mPropertiesChangedListener);
+
+        final TunerService tunerService = Dependency.get(TunerService.class);
+        tunerService.addTunable(this, LOCKSCREEN_MEDIA_METADATA);
+    }
+
+    @Override
+    public void onTuningChanged(String key, String newValue) {
+        if (LOCKSCREEN_MEDIA_METADATA.equals(key)) {
+            mShowMediaMetadata = TunerService.parseIntegerSwitch(newValue, true);
+            dispatchUpdateMediaMetaData(false /* changed */, true /* allowAnimation */);
+        }
     }
 
     public static boolean isPlayingState(int state) {
@@ -527,7 +545,7 @@ public class NotificationMediaManager implements Dumpable {
         StatusBarWindowController windowController = mStatusBarWindowController.get();
         boolean hideBecauseOccluded = shadeController != null && shadeController.isOccluded();
 
-        final boolean hasArtwork = artworkDrawable != null;
+        final boolean hasArtwork = mShowMediaMetadata && artworkDrawable != null;
         mColorExtractor.setHasMediaArtwork(hasMediaArtwork);
         if (mScrimController != null) {
             mScrimController.setHasBackdrop(hasArtwork);
