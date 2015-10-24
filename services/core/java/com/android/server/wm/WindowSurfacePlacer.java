@@ -1147,7 +1147,16 @@ class WindowSurfacePlacer {
             for (int j = 0; j < windowsCount; j++) {
                 appAnimator.mAllAppWinAnimators.add(wtoken.allAppWindows.get(j).mWinAnimator);
             }
-            mService.mAnimator.mAnimating |= appAnimator.showAllWindowsLocked();
+            if (SHOW_LIGHT_TRANSACTIONS) Slog.i(TAG,
+                    ">>> OPEN TRANSACTION handleAppTransitionReadyLocked()");
+            SurfaceControl.openTransaction();
+            try {
+                mService.mAnimator.mAnimating |= appAnimator.showAllWindowsLocked();
+            } finally {
+                SurfaceControl.closeTransaction();
+                if (SHOW_LIGHT_TRANSACTIONS) Slog.i(TAG,
+                        "<<< CLOSE TRANSACTION handleAppTransitionReadyLocked()");
+            }
             mService.mAnimator.mAppWindowAnimating |= appAnimator.isAnimating();
 
             int topOpeningLayer = 0;
