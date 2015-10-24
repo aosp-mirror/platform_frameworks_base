@@ -3642,8 +3642,15 @@ public final class Settings {
         public static final String BATTERY_LIGHT_PULSE = "battery_light_pulse";
 
         /**
+         * Whether to show low battery notification
+         * @hide
+         */
+        public static final String BATTERY_LOW_NOTIFICATION = "battery_low_notification";
+
+        /**
          * custom carrier label. The value is
          * String.
+         * @hide
          */
         public static final String CUSTOM_CARRIER_LABEL = "custom_carrier_label";
 

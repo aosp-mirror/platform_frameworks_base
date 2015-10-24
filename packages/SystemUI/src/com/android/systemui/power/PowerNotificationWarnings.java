@@ -131,7 +131,8 @@ public class PowerNotificationWarnings implements PowerUI.WarningsUI {
         if (mInvalidCharger) {
             showInvalidChargerNotification();
             mShowing = SHOWING_INVALID_CHARGER;
-        } else if (mWarning) {
+        } else if (mWarning && (Settings.System.getIntForUser(mContext.getContentResolver(),
+            	    Settings.System.BATTERY_LOW_NOTIFICATION, 1, UserHandle.USER_CURRENT) == 1)) {
             showWarningNotification();
             mShowing = SHOWING_WARNING;
         } else {
