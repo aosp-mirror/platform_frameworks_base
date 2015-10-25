@@ -1808,8 +1808,6 @@ class WindowStateAnimator {
                     + Debug.getCallers(3));
         }
         if (mDrawState == READY_TO_SHOW && mWin.isReadyForDisplayIgnoringKeyguard()) {
-            if (SHOW_TRANSACTIONS || DEBUG_ORIENTATION)
-                WindowManagerService.logSurface(mWin, "SHOW (performShowLocked)", null);
             if (DEBUG_VISIBILITY || (DEBUG_STARTING_WINDOW &&
                     mWin.mAttrs.type == WindowManager.LayoutParams.TYPE_APPLICATION_STARTING)) {
                 Slog.v(TAG, "Showing " + this
