@@ -114,11 +114,14 @@ class AppWindowToken extends WindowToken {
     // This application will have its window replaced due to relaunch. This allows window manager
     // to differentiate between simple removal of a window and replacement. In the latter case it
     // will preserve the old window until the new one is drawn.
-    boolean mReplacingWindow;
+    boolean mWillReplaceWindow;
     // If true, the replaced window was already requested to be removed.
     boolean mReplacingRemoveRequested;
     // Whether the replacement of the window should trigger app transition animation.
     boolean mAnimateReplacingWindow;
+    // If not null, the window that will be used to replace the old one. This is being set when
+    // the window is added and unset when this window reports its first draw.
+    WindowState mReplacingWindow;
 
     AppWindowToken(WindowManagerService _service, IApplicationToken _token,
             boolean _voiceInteraction) {

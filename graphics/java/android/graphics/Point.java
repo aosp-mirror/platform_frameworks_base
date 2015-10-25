@@ -99,7 +99,7 @@ public class Point implements Parcelable {
 
     /** @hide */
     public void printShortString(PrintWriter pw) {
-        pw.println("["); pw.print(x); pw.print(","); pw.print(y); pw.print("]");
+        pw.print("["); pw.print(x); pw.print(","); pw.print(y); pw.print("]");
     }
 
     /**

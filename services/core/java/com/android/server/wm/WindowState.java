@@ -28,6 +28,7 @@ import static android.view.WindowManager.LayoutParams.TYPE_DOCK_DIVIDER;
 import static android.view.WindowManager.LayoutParams.TYPE_INPUT_METHOD;
 import static android.view.WindowManager.LayoutParams.TYPE_INPUT_METHOD_DIALOG;
 import static android.view.WindowManager.LayoutParams.TYPE_WALLPAPER;
+import static com.android.server.wm.WindowManagerService.DEBUG_ADD_REMOVE;
 import static com.android.server.wm.WindowManagerService.DEBUG_CONFIGURATION;
 import static com.android.server.wm.WindowManagerService.DEBUG_LAYOUT;
 import static com.android.server.wm.WindowManagerService.DEBUG_ORIENTATION;
@@ -55,7 +56,6 @@ import android.content.res.Configuration;
 import android.graphics.Matrix;
 import android.graphics.PixelFormat;
 import android.graphics.Rect;
-import android.graphics.RectF;
 import android.graphics.Region;
 import android.os.IBinder;
 import android.os.RemoteException;
@@ -446,7 +446,8 @@ final class WindowState implements WindowManagerPolicy.WindowState {
                     + WindowManagerService.TYPE_LAYER_OFFSET;
             mSubLayer = mPolicy.subWindowTypeToLayerLw(a.type);
             mAttachedWindow = attachedWindow;
-            if (WindowManagerService.DEBUG_ADD_REMOVE) Slog.v(TAG, "Adding " + this + " to " + mAttachedWindow);
+            if (WindowManagerService.DEBUG_ADD_REMOVE) Slog.v(TAG, "Adding " + this + " to "
+                    + mAttachedWindow);
 
             final WindowList childWindows = mAttachedWindow.mChildWindows;
             final int numChildWindows = childWindows.size();
@@ -552,7 +553,7 @@ final class WindowState implements WindowManagerPolicy.WindowState {
     @Override
     public void computeFrameLw(Rect pf, Rect df, Rect of, Rect cf, Rect vf, Rect dcf, Rect sf,
             Rect osf) {
-        if (mAppToken != null && mAppToken.mReplacingWindow
+        if (mAppToken != null && mAppToken.mWillReplaceWindow
                 && (mExiting || !mAppToken.mReplacingRemoveRequested)) {
             // This window is being replaced and either already got information that it's being
             // removed or we are still waiting for some information. Because of this we don't
@@ -1307,10 +1308,12 @@ final class WindowState implements WindowManagerPolicy.WindowState {
 
     void maybeRemoveReplacedWindow() {
         AppWindowToken token = mAppToken;
-        if (token != null && token.mReplacingWindow) {
-            token.mReplacingWindow = false;
+        if (token != null && token.mWillReplaceWindow && token.mReplacingWindow == this) {
+            if (DEBUG_ADD_REMOVE) Slog.d(TAG, "Removing replacing window: " + this);
+            token.mWillReplaceWindow = false;
             token.mAnimateReplacingWindow = false;
             token.mReplacingRemoveRequested = false;
+            token.mReplacingWindow = null;
             for (int i = token.allAppWindows.size() - 1; i >= 0; i--) {
                 WindowState win = token.allAppWindows.get(i);
                 if (win.mExiting) {
