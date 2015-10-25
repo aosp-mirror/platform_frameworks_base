@@ -2869,6 +2869,7 @@ public class WindowManagerService extends IWindowManager.Stub
             Rect surfaceInsets = null;
             final boolean fullscreen = win != null && win.isFullscreen(width, height);
             final boolean freeform = win != null && win.inFreeformWorkspace();
+            final boolean docked = win != null && win.inDockedWorkspace();
             if (win != null) {
                 // Containing frame will usually cover the whole screen, including dialog windows.
                 // For freeform workspace windows it will not cover the whole screen and it also
@@ -2880,10 +2881,11 @@ public class WindowManagerService extends IWindowManager.Stub
                     containingFrame.set(win.mContainingFrame);
                 }
                 surfaceInsets = win.getAttrs().surfaceInsets;
-                if (fullscreen) {
+                if (fullscreen || docked) {
                     // For fullscreen windows use the window frames and insets to set the thumbnail
-                    // clip. For none-fullscreen windows we use the app display region so the clip
-                    // isn't affected by the window insets.
+                    // clip. For non-fullscreen windows we use the app display region so the clip
+                    // isn't affected by the window insets. Docked windows are cropped to the system
+                    // decorations, so we need tell the animation about it too.
                     contentInsets.set(win.mContentInsets);
                     appFrame.set(win.mFrame);
                 } else {
@@ -2899,6 +2901,15 @@ public class WindowManagerService extends IWindowManager.Stub
                 // screen gets the enter animation. Both appear in the mOpeningApps set.
                 enter = false;
             }
+            if (DEBUG_APP_TRANSITIONS) Slog.d(TAG, "Loading animation for app transition."
+                    + " transit=" + AppTransition.appTransitionToString(transit)
+                    + " enter=" + enter
+                    + " containingWidth=" + containingWidth
+                    + " containingHeight=" + containingHeight
+                    + " containingFrame=" + containingFrame
+                    + " contentInsets=" + contentInsets
+                    + " surfaceInsets=" + surfaceInsets
+                    + " appFrame=" + appFrame);
             Animation a = mAppTransition.loadAnimation(lp, transit, enter, containingWidth,
                     containingHeight, mCurConfiguration.orientation, containingFrame, contentInsets,
                     surfaceInsets, appFrame, isVoiceInteraction, freeform, atoken.mTask.mTaskId);

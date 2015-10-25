@@ -1006,7 +1006,7 @@ public class AppTransition implements Dump {
     }
 
     private Animation createRelaunchAnimation(int appWidth, int appHeight,
-            Rect containingFrame) {
+            Rect containingFrame, Rect contentInsets) {
         getDefaultNextAppTransitionStartRect(mTmpFromClipRect);
         final int left = mTmpFromClipRect.left;
         final int top = mTmpFromClipRect.top;
@@ -1016,7 +1016,11 @@ public class AppTransition implements Dump {
         float fromWidth = mTmpFromClipRect.width();
         float toWidth = mTmpToClipRect.width();
         float fromHeight = mTmpFromClipRect.height();
-        float toHeight = mTmpToClipRect.height();
+        // While the window might span the whole display, the actual content will be cropped to the
+        // system decoration frame, for example when the window is docked. We need to take into
+        // account the visible height when constructing the animation.
+        float toHeight = mTmpToClipRect.height() - contentInsets.top - contentInsets.bottom;
+        int translateAdjustment = 0;
         if (fromWidth <= toWidth && fromHeight <= toHeight) {
             // The final window is larger in both dimensions than current window (e.g. we are
             // maximizing), so we can simply unclip the new window and there will be no disappearing
@@ -1026,12 +1030,17 @@ public class AppTransition implements Dump {
             // The disappearing window has one larger dimension. We need to apply scaling, so the
             // first frame of the entry animation matches the old window.
             set.addAnimation(new ScaleAnimation(fromWidth / toWidth, 1, fromHeight / toHeight, 1));
+            // We might not be going exactly full screen, but instead be aligned under the status
+            // bar using cropping. We still need to account for the cropped part, which will also
+            // be scaled.
+            translateAdjustment = (int) (contentInsets.top * fromHeight / toHeight);
         }
 
-        // We might not be going exactly full screen, but instead be aligned under the status bar.
-        // We need to take this into account when creating the translate animation.
+        // We animate the translation from the old position of the removed window, to the new
+        // position of the added window. The latter might not be full screen, for example docked for
+        // docked windows.
         TranslateAnimation translate = new TranslateAnimation(left - containingFrame.left,
-                0, top - containingFrame.top, 0);
+                0, top - containingFrame.top - translateAdjustment, 0);
         set.addAnimation(translate);
         set.setDuration(DEFAULT_APP_TRANSITION_DURATION);
         set.setZAdjustment(Animation.ZORDER_TOP);
@@ -1075,7 +1084,7 @@ public class AppTransition implements Dump {
                     + " anim=" + a + " transit=" + appTransitionToString(transit)
                     + " isEntrance=" + enter + " Callers=" + Debug.getCallers(3));
         } else if (transit == TRANSIT_ACTIVITY_RELAUNCH) {
-            a = createRelaunchAnimation(appWidth, appHeight, containingFrame);
+            a = createRelaunchAnimation(appWidth, appHeight, containingFrame, contentInsets);
             if (DEBUG_APP_TRANSITIONS || DEBUG_ANIM) Slog.v(TAG,
                     "applyAnimation:"
                     + " anim=" + a + " nextAppTransition=" + mNextAppTransition
