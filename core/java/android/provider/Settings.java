@@ -5712,6 +5712,13 @@ public final class Settings {
         public static final String ASSISTANT = "assistant";
 
         /**
+         * Whether to allow killing of the foreground application
+         * by long-pressing the back key
+         * @hide
+         */
+        public static final String RAS_KILL_APP_LONG_PRESS_BACK_KEY = "ras_kill_app_long_press_back_key";
+
+        /**
          * This are the settings to be backed up.
          *
          * NOTE: Settings are backed up and restored in the order they appear
