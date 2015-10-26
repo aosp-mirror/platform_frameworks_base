@@ -95,15 +95,15 @@
     <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"आपने अपने अनलॉक आकार को <xliff:g id="NUMBER_0">%d</xliff:g> बार गलत तरीके से आरेखित किया है. <xliff:g id="NUMBER_1">%d</xliff:g> और असफल प्रयासों के बाद, आपसे अपने टेबलेट को किसी ईमेल खाते के उपयोग से अनलॉक करने के लिए कहा जाएगा.\n\n <xliff:g id="NUMBER_2">%d</xliff:g> सेकंड में पुन: प्रयास करें."</string>
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"आपने अपने अनलॉक आकार को <xliff:g id="NUMBER_0">%d</xliff:g> बार गलत तरीके से आरेखित किया है. <xliff:g id="NUMBER_1">%d</xliff:g> और असफल प्रयासों के बाद, आपसे अपने फ़ोन को किसी ईमेल खाते का उपयोग करके अनलॉक करने के लिए कहा जाएगा.\n\n <xliff:g id="NUMBER_2">%d</xliff:g> सेकंड में पुन: प्रयास करें."</string>
     <string name="kg_password_wrong_pin_code_pukked" msgid="30531039455764924">"गलत सिम PIN कोड अपने डिवाइस को अनलॉक करने के लिए अब आपको अपने वाहक से संपर्क करना होगा."</string>
-  <plurals name="kg_password_wrong_pin_code">
-    <item quantity="one" msgid="8134313997799638254">"गलत सिम PIN कोड, अपने डिवाइस को अनलॉक करने के लिए अपने वाहक से संपर्क करने से पहले आपके पास <xliff:g id="NUMBER">%d</xliff:g> प्रयास शेष है."</item>
-    <item quantity="other" msgid="2215723361575359486">"गलत सिम PIN कोड, आपके पास <xliff:g id="NUMBER">%d</xliff:g> प्रयास शेष हैं."</item>
-  </plurals>
+    <plurals name="kg_password_wrong_pin_code" formatted="false" msgid="6721575017538162249">
+      <item quantity="one">गलत सिम PIN कोड, आपके पास <xliff:g id="NUMBER_1">%d</xliff:g> प्रयास शेष हैं.</item>
+      <item quantity="other">गलत सिम PIN कोड, आपके पास <xliff:g id="NUMBER_1">%d</xliff:g> प्रयास शेष हैं.</item>
+    </plurals>
     <string name="kg_password_wrong_puk_code_dead" msgid="7077536808291316208">"सिम अनुपयोगी है. अपने वाहक से संपर्क करें."</string>
-  <plurals name="kg_password_wrong_puk_code">
-    <item quantity="one" msgid="3256893607561060649">"गलत सिम PUK कोड, सिम के स्थायी रूप से अनुपयोगी हो जाने से पहले आपके पास <xliff:g id="NUMBER">%d</xliff:g> प्रयास शेष है."</item>
-    <item quantity="other" msgid="5477305226026342036">"गलत सिम PUK कोड, सिम के स्थायी रूप से अनुपयोगी हो जाने से पहले आपके पास <xliff:g id="NUMBER">%d</xliff:g> प्रयास शेष हैं."</item>
-  </plurals>
+    <plurals name="kg_password_wrong_puk_code" formatted="false" msgid="7576227366999858780">
+      <item quantity="one">गलत सिम PUK कोड, सिम के स्थायी रूप से अनुपयोगी हो जाने से पहले आपके पास <xliff:g id="NUMBER_1">%d</xliff:g> प्रयास शेष हैं.</item>
+      <item quantity="other">गलत सिम PUK कोड, सिम के स्थायी रूप से अनुपयोगी हो जाने से पहले आपके पास <xliff:g id="NUMBER_1">%d</xliff:g> प्रयास शेष हैं.</item>
+    </plurals>
     <string name="kg_password_pin_failed" msgid="6268288093558031564">"सिम PIN की कार्यवाही विफल रही!"</string>
     <string name="kg_password_puk_failed" msgid="2838824369502455984">"सिम PUK की कार्यवाही विफल रही!"</string>
     <string name="kg_pin_accepted" msgid="1448241673570020097">"कोड स्वीकार किया गया!"</string>
@@ -119,17 +119,17 @@
     <string name="kg_prompt_reason_switch_profiles_pattern" msgid="3802056699323773969">"प्रोफ़ाइल में स्विच करते समय पैटर्न की आवश्यकता होती है."</string>
     <string name="kg_prompt_reason_switch_profiles_pin" msgid="8108020184731052246">"प्रोफ़ाइल में स्विच करते समय पिन की आवश्यकता होती है."</string>
     <string name="kg_prompt_reason_switch_profiles_password" msgid="6755997057852042672">"प्रोफ़ाइल में स्विच करते समय पासवर्ड की आवश्यकता होती है."</string>
-  <plurals name="kg_prompt_reason_time_pattern">
-    <item quantity="one" msgid="5598462918459516566">"डिवाइस <xliff:g id="NUMBER">%d</xliff:g> घंटे से अनलॉक नहीं किया गया है. पैटर्न की पुष्टि करें."</item>
-    <item quantity="other" msgid="224518697489572649">"डिवाइस <xliff:g id="NUMBER">%d</xliff:g> घंटे से अनलॉक नहीं किया गया है. पैटर्न की पुष्टि करें."</item>
-  </plurals>
-  <plurals name="kg_prompt_reason_time_pin">
-    <item quantity="one" msgid="3073579168584205350">"डिवाइस <xliff:g id="NUMBER">%d</xliff:g> घंटे से अनलॉक नहीं किया गया है. पिन की पुष्टि करें."</item>
-    <item quantity="other" msgid="3282423442327824649">"डिवाइस <xliff:g id="NUMBER">%d</xliff:g> घंटे से अनलॉक नहीं किया गया है. पिन की पुष्टि करें."</item>
-  </plurals>
-  <plurals name="kg_prompt_reason_time_password">
-    <item quantity="one" msgid="9062782924671938516">"डिवाइस <xliff:g id="NUMBER">%d</xliff:g> घंटे से अनलॉक नहीं किया गया है. पासवर्ड की पुष्टि करें."</item>
-    <item quantity="other" msgid="1839722302513719629">"डिवाइस <xliff:g id="NUMBER">%d</xliff:g> घंटे से अनलॉक नहीं किया गया है. पासवर्ड की पुष्टि करें."</item>
-  </plurals>
+    <plurals name="kg_prompt_reason_time_pattern" formatted="false" msgid="2697444392228541853">
+      <item quantity="one">डिवाइस <xliff:g id="NUMBER_1">%d</xliff:g> घंटे से अनलॉक नहीं किया गया है. पैटर्न की पुष्टि करें.</item>
+      <item quantity="other">डिवाइस <xliff:g id="NUMBER_1">%d</xliff:g> घंटे से अनलॉक नहीं किया गया है. पैटर्न की पुष्टि करें.</item>
+    </plurals>
+    <plurals name="kg_prompt_reason_time_pin" formatted="false" msgid="2118758475374354849">
+      <item quantity="one">डिवाइस <xliff:g id="NUMBER_1">%d</xliff:g> घंटे से अनलॉक नहीं किया गया है. पिन की पुष्‍टि करें.</item>
+      <item quantity="other">डिवाइस <xliff:g id="NUMBER_1">%d</xliff:g> घंटे से अनलॉक नहीं किया गया है. पिन की पुष्‍टि करें.</item>
+    </plurals>
+    <plurals name="kg_prompt_reason_time_password" formatted="false" msgid="5132693663364913675">
+      <item quantity="one">डिवाइस <xliff:g id="NUMBER_1">%d</xliff:g> घंटे से अनलॉक नहीं किया गया है. पासवर्ड की पुष्टि करें.</item>
+      <item quantity="other">डिवाइस <xliff:g id="NUMBER_1">%d</xliff:g> घंटे से अनलॉक नहीं किया गया है. पासवर्ड की पुष्टि करें.</item>
+    </plurals>
     <string name="fingerprint_not_recognized" msgid="2690661881608146617">"पहचाना नहीं गया"</string>
 </resources>

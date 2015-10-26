@@ -95,15 +95,15 @@
     <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"Dibujaste incorrectamente tu patrón de desbloqueo <xliff:g id="NUMBER_0">%d</xliff:g> veces. Luego de <xliff:g id="NUMBER_1">%d</xliff:g> intentos incorrectos más, se te solicitará que desbloquees tu tablet mediante el uso de una cuenta de correo.\n\n Vuelve a intentarlo en <xliff:g id="NUMBER_2">%d</xliff:g> segundos."</string>
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"Dibujaste incorrectamente tu patrón de desbloqueo <xliff:g id="NUMBER_0">%d</xliff:g> veces. Luego de <xliff:g id="NUMBER_1">%d</xliff:g> intentos incorrectos más, se te solicitará que desbloquees tu dispositivo mediante el uso de una cuenta de correo.\n\n Vuelve a intentarlo en <xliff:g id="NUMBER_2">%d</xliff:g> segundos."</string>
     <string name="kg_password_wrong_pin_code_pukked" msgid="30531039455764924">"El código PIN de la tarjeta SIM es incorrecto. Debes comunicarte con el proveedor para desbloquear el dispositivo."</string>
-  <plurals name="kg_password_wrong_pin_code">
-    <item quantity="one" msgid="8134313997799638254">"El código PIN de la tarjeta SIM es incorrecto. Te queda <xliff:g id="NUMBER">%d</xliff:g> intento antes de que debas comunicarte con el proveedor para desbloquear el dispositivo."</item>
-    <item quantity="other" msgid="2215723361575359486">"El código PIN de la tarjeta SIM es incorrecto. Te quedan <xliff:g id="NUMBER">%d</xliff:g> intentos."</item>
-  </plurals>
+    <plurals name="kg_password_wrong_pin_code" formatted="false" msgid="6721575017538162249">
+      <item quantity="other">El código PIN de la tarjeta SIM es incorrecto. Tienes <xliff:g id="NUMBER_1">%d</xliff:g> intentos más.</item>
+      <item quantity="one">El código PIN de la tarjeta SIM es incorrecto. Tienes <xliff:g id="NUMBER_0">%d</xliff:g> intento más antes de que debas comunicarte con el proveedor para desbloquear el dispositivo.</item>
+    </plurals>
     <string name="kg_password_wrong_puk_code_dead" msgid="7077536808291316208">"La tarjeta SIM no se puede utilizar. Comunícate con el proveedor."</string>
-  <plurals name="kg_password_wrong_puk_code">
-    <item quantity="one" msgid="3256893607561060649">"El código PUK de la tarjeta SIM es incorrecto. Te queda <xliff:g id="NUMBER">%d</xliff:g> intento antes de que la tarjeta SIM quede inutilizable permanentemente."</item>
-    <item quantity="other" msgid="5477305226026342036">"El código PUK de la tarjeta SIM es incorrecto. Te quedan <xliff:g id="NUMBER">%d</xliff:g> intentos antes de que la tarjeta SIM quede inutilizable permanentemente."</item>
-  </plurals>
+    <plurals name="kg_password_wrong_puk_code" formatted="false" msgid="7576227366999858780">
+      <item quantity="other">El código PUK de la tarjeta SIM es incorrecto. Tienes <xliff:g id="NUMBER_1">%d</xliff:g> intentos más antes de que la tarjeta SIM quede inutilizable de forma permanente.</item>
+      <item quantity="one">El código PUK de la tarjeta SIM es incorrecto. Tienes <xliff:g id="NUMBER_0">%d</xliff:g> intento más antes de que la tarjeta SIM quede inutilizable de forma permanente.</item>
+    </plurals>
     <string name="kg_password_pin_failed" msgid="6268288093558031564">"Error al desbloquear la tarjeta SIM con el PIN"</string>
     <string name="kg_password_puk_failed" msgid="2838824369502455984">"Error al desbloquear la tarjeta SIM con el PUK"</string>
     <string name="kg_pin_accepted" msgid="1448241673570020097">"Código aceptado"</string>
@@ -119,17 +119,17 @@
     <string name="kg_prompt_reason_switch_profiles_pattern" msgid="3802056699323773969">"Se solicita el patrón al cambiar de perfil."</string>
     <string name="kg_prompt_reason_switch_profiles_pin" msgid="8108020184731052246">"Se solicita el PIN al cambiar de perfil."</string>
     <string name="kg_prompt_reason_switch_profiles_password" msgid="6755997057852042672">"Se solicita la contraseña al cambiar de perfil."</string>
-  <plurals name="kg_prompt_reason_time_pattern">
-    <item quantity="one" msgid="5598462918459516566">"El dispositivo no se desbloqueó durante <xliff:g id="NUMBER">%d</xliff:g> hora. Confirma el patrón."</item>
-    <item quantity="other" msgid="224518697489572649">"El dispositivo no se desbloqueó durante <xliff:g id="NUMBER">%d</xliff:g> horas. Confirma el patrón."</item>
-  </plurals>
-  <plurals name="kg_prompt_reason_time_pin">
-    <item quantity="one" msgid="3073579168584205350">"El dispositivo no se desbloqueó durante <xliff:g id="NUMBER">%d</xliff:g> hora. Confirma el PIN."</item>
-    <item quantity="other" msgid="3282423442327824649">"El dispositivo no se desbloqueó durante <xliff:g id="NUMBER">%d</xliff:g> horas. Confirma el PIN."</item>
-  </plurals>
-  <plurals name="kg_prompt_reason_time_password">
-    <item quantity="one" msgid="9062782924671938516">"El dispositivo no se desbloqueó durante <xliff:g id="NUMBER">%d</xliff:g> hora. Confirma la contraseña."</item>
-    <item quantity="other" msgid="1839722302513719629">"El dispositivo no se desbloqueó durante <xliff:g id="NUMBER">%d</xliff:g> horas. Confirma la contraseña."</item>
-  </plurals>
+    <plurals name="kg_prompt_reason_time_pattern" formatted="false" msgid="2697444392228541853">
+      <item quantity="other">Hace <xliff:g id="NUMBER_1">%d</xliff:g> horas que no se desbloquea el dispositivo. Confirma el patrón.</item>
+      <item quantity="one">Hace <xliff:g id="NUMBER_0">%d</xliff:g> hora que no se desbloquea el dispositivo. Confirma el patrón.</item>
+    </plurals>
+    <plurals name="kg_prompt_reason_time_pin" formatted="false" msgid="2118758475374354849">
+      <item quantity="other">Hace <xliff:g id="NUMBER_1">%d</xliff:g> horas que no se desbloquea el dispositivo. Confirma el PIN.</item>
+      <item quantity="one">Hace <xliff:g id="NUMBER_0">%d</xliff:g> hora que no se desbloquea el dispositivo. Confirma el PIN.</item>
+    </plurals>
+    <plurals name="kg_prompt_reason_time_password" formatted="false" msgid="5132693663364913675">
+      <item quantity="other">Hace <xliff:g id="NUMBER_1">%d</xliff:g> horas que no se desbloquea el dispositivo. Confirma la contraseña.</item>
+      <item quantity="one">Hace <xliff:g id="NUMBER_0">%d</xliff:g> hora que no se desbloquea el dispositivo. Confirma la contraseña.</item>
+    </plurals>
     <string name="fingerprint_not_recognized" msgid="2690661881608146617">"No reconocido"</string>
 </resources>

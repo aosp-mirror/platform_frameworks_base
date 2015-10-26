@@ -95,15 +95,19 @@
     <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"Vzorec za odklepanje ste <xliff:g id="NUMBER_0">%d</xliff:g>-krat napačno vnesli. Po nadaljnjih <xliff:g id="NUMBER_1">%d</xliff:g> neuspešnih poskusih boste pozvani, da tablični računalnik odklenete z e-poštnim računom.\n\nPoskusite znova čez <xliff:g id="NUMBER_2">%d</xliff:g> s."</string>
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"Vzorec za odklepanje ste <xliff:g id="NUMBER_0">%d</xliff:g>-krat napačno vnesli. Po nadaljnjih <xliff:g id="NUMBER_1">%d</xliff:g> neuspešnih poskusih boste pozvani, da odklenete telefon z Googlovimi podatki za prijavo.\n\nPoskusite znova čez <xliff:g id="NUMBER_2">%d</xliff:g> s."</string>
     <string name="kg_password_wrong_pin_code_pukked" msgid="30531039455764924">"Napačna koda PIN kartice SIM. Zdaj se boste morali za odklenitev naprave obrniti na operaterja."</string>
-  <plurals name="kg_password_wrong_pin_code">
-    <item quantity="one" msgid="8134313997799638254">"Napačna koda PIN kartice SIM. Na voljo imate še <xliff:g id="NUMBER">%d</xliff:g> poskus. Potem se boste morali za odklenitev naprave obrniti na operaterja."</item>
-    <item quantity="other" msgid="2215723361575359486">"Napačna koda PIN kartice SIM. Poskusite lahko še <xliff:g id="NUMBER">%d</xliff:g>-krat."</item>
-  </plurals>
+    <plurals name="kg_password_wrong_pin_code" formatted="false" msgid="6721575017538162249">
+      <item quantity="one">Napačna koda PIN kartice SIM. Na voljo imate še <xliff:g id="NUMBER_1">%d</xliff:g> poskus.</item>
+      <item quantity="two">Napačna koda PIN kartice SIM. Na voljo imate še <xliff:g id="NUMBER_1">%d</xliff:g> poskusa.</item>
+      <item quantity="few">Napačna koda PIN kartice SIM. Na voljo imate še <xliff:g id="NUMBER_1">%d</xliff:g> poskuse.</item>
+      <item quantity="other">Napačna koda PIN kartice SIM. Na voljo imate še <xliff:g id="NUMBER_1">%d</xliff:g> poskusov.</item>
+    </plurals>
     <string name="kg_password_wrong_puk_code_dead" msgid="7077536808291316208">"Kartica SIM ni več uporabna. Obrnite se na operaterja."</string>
-  <plurals name="kg_password_wrong_puk_code">
-    <item quantity="one" msgid="3256893607561060649">"Napačna koda PUK kartice SIM. Na voljo imate še <xliff:g id="NUMBER">%d</xliff:g> poskus. Potem bo kartica SIM postala trajno neuporabna."</item>
-    <item quantity="other" msgid="5477305226026342036">"Napačna koda PUK kartice SIM. Poskusite lahko še <xliff:g id="NUMBER">%d</xliff:g>-krat. Potem bo kartica SIM postala trajno neuporabna."</item>
-  </plurals>
+    <plurals name="kg_password_wrong_puk_code" formatted="false" msgid="7576227366999858780">
+      <item quantity="one">Napačna koda PUK kartice SIM. Na voljo imate še <xliff:g id="NUMBER_1">%d</xliff:g> poskus. Potem bo kartica SIM postala trajno neuporabna.</item>
+      <item quantity="two">Napačna koda PUK kartice SIM. Na voljo imate še <xliff:g id="NUMBER_1">%d</xliff:g> poskusa. Potem bo kartica SIM postala trajno neuporabna.</item>
+      <item quantity="few">Napačna koda PUK kartice SIM. Na voljo imate še <xliff:g id="NUMBER_1">%d</xliff:g> poskuse. Potem bo kartica SIM postala trajno neuporabna.</item>
+      <item quantity="other">Napačna koda PUK kartice SIM. Na voljo imate še <xliff:g id="NUMBER_1">%d</xliff:g> poskusov. Potem bo kartica SIM postala trajno neuporabna.</item>
+    </plurals>
     <string name="kg_password_pin_failed" msgid="6268288093558031564">"Postopek za odklepanje s kodo PIN kartice SIM ni uspel."</string>
     <string name="kg_password_puk_failed" msgid="2838824369502455984">"Postopek za odklepanje s kodo PUK kartice SIM ni uspel."</string>
     <string name="kg_pin_accepted" msgid="1448241673570020097">"Koda je sprejeta."</string>
@@ -119,17 +123,23 @@
     <string name="kg_prompt_reason_switch_profiles_pattern" msgid="3802056699323773969">"Po preklopu profilov je treba vnesti vzorec."</string>
     <string name="kg_prompt_reason_switch_profiles_pin" msgid="8108020184731052246">"Po preklopu profilov je treba vnesti kodo PIN."</string>
     <string name="kg_prompt_reason_switch_profiles_password" msgid="6755997057852042672">"Po preklopu profilov je treba vnesti geslo."</string>
-  <plurals name="kg_prompt_reason_time_pattern">
-    <item quantity="one" msgid="5598462918459516566">"Naprava ni bila odklenjena <xliff:g id="NUMBER">%d</xliff:g> uro. Potrdite vzorec."</item>
-    <item quantity="other" msgid="224518697489572649">"Naprava ni bila odklenjena več ur (<xliff:g id="NUMBER">%d</xliff:g>). Potrdite vzorec."</item>
-  </plurals>
-  <plurals name="kg_prompt_reason_time_pin">
-    <item quantity="one" msgid="3073579168584205350">"Naprava ni bila odklenjena <xliff:g id="NUMBER">%d</xliff:g> uro. Potrdite kodo PIN."</item>
-    <item quantity="other" msgid="3282423442327824649">"Naprava ni bila odklenjena več ur (<xliff:g id="NUMBER">%d</xliff:g>). Potrdite kodo PIN."</item>
-  </plurals>
-  <plurals name="kg_prompt_reason_time_password">
-    <item quantity="one" msgid="9062782924671938516">"Naprava ni bila odklenjena <xliff:g id="NUMBER">%d</xliff:g> uro. Potrdite geslo."</item>
-    <item quantity="other" msgid="1839722302513719629">"Naprava ni bila odklenjena več ur (<xliff:g id="NUMBER">%d</xliff:g>). Potrdite geslo."</item>
-  </plurals>
+    <plurals name="kg_prompt_reason_time_pattern" formatted="false" msgid="2697444392228541853">
+      <item quantity="one">Naprava ni bila odklenjena <xliff:g id="NUMBER_1">%d</xliff:g> uro. Potrdite vzorec.</item>
+      <item quantity="two">Naprava ni bila odklenjena <xliff:g id="NUMBER_1">%d</xliff:g> uri. Potrdite vzorec.</item>
+      <item quantity="few">Naprava ni bila odklenjena <xliff:g id="NUMBER_1">%d</xliff:g> ure. Potrdite vzorec.</item>
+      <item quantity="other">Naprava ni bila odklenjena <xliff:g id="NUMBER_1">%d</xliff:g> ur. Potrdite vzorec.</item>
+    </plurals>
+    <plurals name="kg_prompt_reason_time_pin" formatted="false" msgid="2118758475374354849">
+      <item quantity="one">Naprava ni bila odklenjena <xliff:g id="NUMBER_1">%d</xliff:g> uro. Potrdite kodo PIN.</item>
+      <item quantity="two">Naprava ni bila odklenjena <xliff:g id="NUMBER_1">%d</xliff:g> uri. Potrdite kodo PIN.</item>
+      <item quantity="few">Naprava ni bila odklenjena <xliff:g id="NUMBER_1">%d</xliff:g> ure. Potrdite kodo PIN.</item>
+      <item quantity="other">Naprava ni bila odklenjena <xliff:g id="NUMBER_1">%d</xliff:g> ur. Potrdite kodo PIN.</item>
+    </plurals>
+    <plurals name="kg_prompt_reason_time_password" formatted="false" msgid="5132693663364913675">
+      <item quantity="one">Naprava ni bila odklenjena <xliff:g id="NUMBER_1">%d</xliff:g> uro. Potrdite geslo.</item>
+      <item quantity="two">Naprava ni bila odklenjena <xliff:g id="NUMBER_1">%d</xliff:g> uri. Potrdite geslo.</item>
+      <item quantity="few">Naprava ni bila odklenjena <xliff:g id="NUMBER_1">%d</xliff:g> ure. Potrdite geslo.</item>
+      <item quantity="other">Naprava ni bila odklenjena <xliff:g id="NUMBER_1">%d</xliff:g> ur. Potrdite geslo.</item>
+    </plurals>
     <string name="fingerprint_not_recognized" msgid="2690661881608146617">"Ni prepoznano"</string>
 </resources>

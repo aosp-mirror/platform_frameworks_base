@@ -95,15 +95,17 @@
     <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"Jūs nepareizi norādījāt atbloķēšanas kombināciju <xliff:g id="NUMBER_0">%d</xliff:g> reizes. Pēc vēl <xliff:g id="NUMBER_1">%d</xliff:g> neveiksmīgiem mēģinājumiem planšetdators būs jāatbloķē, izmantojot e-pasta kontu.\n\nMēģiniet vēlreiz pēc <xliff:g id="NUMBER_2">%d</xliff:g> sekundēm."</string>
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"Jūs nepareizi norādījāt atbloķēšanas kombināciju <xliff:g id="NUMBER_0">%d</xliff:g> reizes. Pēc vēl <xliff:g id="NUMBER_1">%d</xliff:g> neveiksmīgiem mēģinājumiem tālrunis būs jāatbloķē, izmantojot e-pasta kontu.\n\nMēģiniet vēlreiz pēc <xliff:g id="NUMBER_2">%d</xliff:g> sekundēm."</string>
     <string name="kg_password_wrong_pin_code_pukked" msgid="30531039455764924">"Nepareizs SIM kartes PIN kods. Lai atbloķētu ierīci, sazinieties ar mobilo sakaru operatoru."</string>
-  <plurals name="kg_password_wrong_pin_code">
-    <item quantity="one" msgid="8134313997799638254">"Nepareizs SIM kartes PIN kods. Varat mēģināt vēl <xliff:g id="NUMBER">%d</xliff:g> reizi. Kļūdas gadījumā būs jāsazinās ar mobilo sakaru operatoru, lai tas atbloķētu jūsu ierīci."</item>
-    <item quantity="other" msgid="2215723361575359486">"Nepareizs SIM kartes PIN kods. Varat mēģināt vēl <xliff:g id="NUMBER">%d</xliff:g> reizi(-es)."</item>
-  </plurals>
+    <plurals name="kg_password_wrong_pin_code" formatted="false" msgid="6721575017538162249">
+      <item quantity="zero">Nepareizs SIM kartes PIN kods. Varat mēģināt vēl <xliff:g id="NUMBER_1">%d</xliff:g> reizes.</item>
+      <item quantity="one">Nepareizs SIM kartes PIN kods. Varat mēģināt vēl <xliff:g id="NUMBER_1">%d</xliff:g> reizi.</item>
+      <item quantity="other">Nepareizs SIM kartes PIN kods. Varat mēģināt vēl <xliff:g id="NUMBER_1">%d</xliff:g> reizes.</item>
+    </plurals>
     <string name="kg_password_wrong_puk_code_dead" msgid="7077536808291316208">"SIM karte nav izmantojama. Sazinieties ar mobilo sakaru operatoru."</string>
-  <plurals name="kg_password_wrong_puk_code">
-    <item quantity="one" msgid="3256893607561060649">"Nepareizs SIM kartes PUK kods. Varat mēģināt vēl <xliff:g id="NUMBER">%d</xliff:g> reizi. Kļūdas gadījumā SIM karte kļūs neizmantojama."</item>
-    <item quantity="other" msgid="5477305226026342036">"Nepareizs SIM kartes PUK kods. Varat mēģināt vēl <xliff:g id="NUMBER">%d</xliff:g> reizi(-es). Kļūdas gadījumā SIM karte kļūs neizmantojama."</item>
-  </plurals>
+    <plurals name="kg_password_wrong_puk_code" formatted="false" msgid="7576227366999858780">
+      <item quantity="zero">Nepareizs SIM kartes PUK kods. Varat mēģināt vēl <xliff:g id="NUMBER_1">%d</xliff:g> reizes. Pēdējā mēģinājuma kļūdas gadījumā SIM karte kļūs neizmantojama.</item>
+      <item quantity="one">Nepareizs SIM kartes PUK kods. Varat mēģināt vēl <xliff:g id="NUMBER_1">%d</xliff:g> reizi. Pēdējā mēģinājuma kļūdas gadījumā SIM karte kļūs neizmantojama.</item>
+      <item quantity="other">Nepareizs SIM kartes PUK kods. Varat mēģināt vēl <xliff:g id="NUMBER_1">%d</xliff:g> reizes. Pēdējā mēģinājuma kļūdas gadījumā SIM karte kļūs neizmantojama.</item>
+    </plurals>
     <string name="kg_password_pin_failed" msgid="6268288093558031564">"SIM kartes PIN koda ievadīšana neizdevās."</string>
     <string name="kg_password_puk_failed" msgid="2838824369502455984">"SIM kartes PUK koda ievadīšana neizdevās."</string>
     <string name="kg_pin_accepted" msgid="1448241673570020097">"Kods ir pieņemts!"</string>
@@ -119,17 +121,20 @@
     <string name="kg_prompt_reason_switch_profiles_pattern" msgid="3802056699323773969">"Mainot profilu, ir jāievada kombinācija."</string>
     <string name="kg_prompt_reason_switch_profiles_pin" msgid="8108020184731052246">"Mainot profilu, ir jāievada PIN."</string>
     <string name="kg_prompt_reason_switch_profiles_password" msgid="6755997057852042672">"Mainot profilu, ir jāievada parole."</string>
-  <plurals name="kg_prompt_reason_time_pattern">
-    <item quantity="one" msgid="5598462918459516566">"Ierīce nav bijusi atbloķēta <xliff:g id="NUMBER">%d</xliff:g> stundu. Apstipriniet kombināciju."</item>
-    <item quantity="other" msgid="224518697489572649">"Ierīce nav bijusi atbloķēta <xliff:g id="NUMBER">%d</xliff:g> h. Apstipriniet kombināciju."</item>
-  </plurals>
-  <plurals name="kg_prompt_reason_time_pin">
-    <item quantity="one" msgid="3073579168584205350">"Ierīce nav bijusi atbloķēta <xliff:g id="NUMBER">%d</xliff:g> stundu. Apstipriniet PIN kodu."</item>
-    <item quantity="other" msgid="3282423442327824649">"Ierīce nav bijusi atbloķēta <xliff:g id="NUMBER">%d</xliff:g> h. Apstipriniet PIN kodu."</item>
-  </plurals>
-  <plurals name="kg_prompt_reason_time_password">
-    <item quantity="one" msgid="9062782924671938516">"Ierīce nav bijusi atbloķēta <xliff:g id="NUMBER">%d</xliff:g> stundu. Apstipriniet paroli."</item>
-    <item quantity="other" msgid="1839722302513719629">"Ierīce nav bijusi atbloķēta <xliff:g id="NUMBER">%d</xliff:g> h. Apstipriniet paroli."</item>
-  </plurals>
+    <plurals name="kg_prompt_reason_time_pattern" formatted="false" msgid="2697444392228541853">
+      <item quantity="zero">Ierīce nav tikusi atbloķēta <xliff:g id="NUMBER_1">%d</xliff:g> stundas. Apstipriniet kombināciju.</item>
+      <item quantity="one">Ierīce nav tikusi atbloķēta <xliff:g id="NUMBER_1">%d</xliff:g> stundu. Apstipriniet kombināciju.</item>
+      <item quantity="other">Ierīce nav tikusi atbloķēta <xliff:g id="NUMBER_1">%d</xliff:g> stundas. Apstipriniet kombināciju.</item>
+    </plurals>
+    <plurals name="kg_prompt_reason_time_pin" formatted="false" msgid="2118758475374354849">
+      <item quantity="zero">Ierīce nav tikusi atbloķēta <xliff:g id="NUMBER_1">%d</xliff:g> stundas. Apstipriniet PIN.</item>
+      <item quantity="one">Ierīce nav tikusi atbloķēta <xliff:g id="NUMBER_1">%d</xliff:g> stundu. Apstipriniet PIN.</item>
+      <item quantity="other">Ierīce nav tikusi atbloķēta <xliff:g id="NUMBER_1">%d</xliff:g> stundas. Apstipriniet PIN.</item>
+    </plurals>
+    <plurals name="kg_prompt_reason_time_password" formatted="false" msgid="5132693663364913675">
+      <item quantity="zero">Ierīce nav tikusi atbloķēta <xliff:g id="NUMBER_1">%d</xliff:g> stundas. Apstipriniet paroli.</item>
+      <item quantity="one">Ierīce nav tikusi atbloķēta <xliff:g id="NUMBER_1">%d</xliff:g> stundu. Apstipriniet paroli.</item>
+      <item quantity="other">Ierīce nav tikusi atbloķēta <xliff:g id="NUMBER_1">%d</xliff:g> stundas. Apstipriniet paroli.</item>
+    </plurals>
     <string name="fingerprint_not_recognized" msgid="2690661881608146617">"Nav atpazīts"</string>
 </resources>

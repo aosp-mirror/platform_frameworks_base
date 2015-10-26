@@ -95,15 +95,15 @@
     <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"<xliff:g id="NUMBER_0">%d</xliff:g> tentativi errati di inserimento della sequenza di sblocco. Dopo altri <xliff:g id="NUMBER_1">%d</xliff:g> tentativi falliti, ti verrà chiesto di sbloccare il tablet con un account email.\n\n Riprova tra <xliff:g id="NUMBER_2">%d</xliff:g> secondi."</string>
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"<xliff:g id="NUMBER_0">%d</xliff:g> tentativi errati di inserimento della sequenza di sblocco. Dopo altri <xliff:g id="NUMBER_1">%d</xliff:g> tentativi falliti, ti verrà chiesto di sbloccare il telefono con un account email.\n\n Riprova tra <xliff:g id="NUMBER_2">%d</xliff:g> secondi."</string>
     <string name="kg_password_wrong_pin_code_pukked" msgid="30531039455764924">"Codice PIN della SIM errato. Devi contattare l\'operatore per sbloccare il dispositivo."</string>
-  <plurals name="kg_password_wrong_pin_code">
-    <item quantity="one" msgid="8134313997799638254">"Codice PIN della SIM errato. Hai ancora <xliff:g id="NUMBER">%d</xliff:g> tentativo a disposizione, dopodiché dovrai contattare l\'operatore per sbloccare il dispositivo."</item>
-    <item quantity="other" msgid="2215723361575359486">"Codice PIN della SIM errato. Hai ancora <xliff:g id="NUMBER">%d</xliff:g> tentativi a disposizione."</item>
-  </plurals>
+    <plurals name="kg_password_wrong_pin_code" formatted="false" msgid="6721575017538162249">
+      <item quantity="other">Codice PIN della SIM errato. Hai ancora <xliff:g id="NUMBER_1">%d</xliff:g> tentativi a disposizione.</item>
+      <item quantity="one">Codice PIN della SIM errato. Hai ancora <xliff:g id="NUMBER_0">%d</xliff:g> tentativo a disposizione, dopodiché dovrai contattare l\'operatore per sbloccare il dispositivo.</item>
+    </plurals>
     <string name="kg_password_wrong_puk_code_dead" msgid="7077536808291316208">"SIM inutilizzabile. Contatta il tuo operatore."</string>
-  <plurals name="kg_password_wrong_puk_code">
-    <item quantity="one" msgid="3256893607561060649">"Codice PUK della SIM errato. Hai ancora <xliff:g id="NUMBER">%d</xliff:g> tentativo a disposizione prima che la SIM diventi definitivamente inutilizzabile."</item>
-    <item quantity="other" msgid="5477305226026342036">"Codice PUK della SIM errato. Hai ancora <xliff:g id="NUMBER">%d</xliff:g> tentativi a disposizione prima che la SIM diventi definitivamente inutilizzabile."</item>
-  </plurals>
+    <plurals name="kg_password_wrong_puk_code" formatted="false" msgid="7576227366999858780">
+      <item quantity="other">Codice PUK della SIM errato. Hai ancora <xliff:g id="NUMBER_1">%d</xliff:g> tentativi a disposizione prima che la SIM diventi definitivamente inutilizzabile.</item>
+      <item quantity="one">Codice PUK della SIM errato. Hai ancora <xliff:g id="NUMBER_0">%d</xliff:g> tentativo a disposizione prima che la SIM diventi definitivamente inutilizzabile.</item>
+    </plurals>
     <string name="kg_password_pin_failed" msgid="6268288093558031564">"Operazione con PIN della SIM non riuscita."</string>
     <string name="kg_password_puk_failed" msgid="2838824369502455984">"Operazione con PUK della SIM non riuscita."</string>
     <string name="kg_pin_accepted" msgid="1448241673570020097">"Codice accettato."</string>
@@ -119,17 +119,17 @@
     <string name="kg_prompt_reason_switch_profiles_pattern" msgid="3802056699323773969">"Sequenza obbligatoria dopo aver cambiato profilo."</string>
     <string name="kg_prompt_reason_switch_profiles_pin" msgid="8108020184731052246">"PIN obbligatorio dopo aver cambiato profilo."</string>
     <string name="kg_prompt_reason_switch_profiles_password" msgid="6755997057852042672">"Password obbligatoria dopo aver cambiato profilo."</string>
-  <plurals name="kg_prompt_reason_time_pattern">
-    <item quantity="one" msgid="5598462918459516566">"Il dispositivo non viene sbloccato da <xliff:g id="NUMBER">%d</xliff:g> ora. Conferma la sequenza."</item>
-    <item quantity="other" msgid="224518697489572649">"Il dispositivo non viene sbloccato da <xliff:g id="NUMBER">%d</xliff:g> ore. Conferma la sequenza."</item>
-  </plurals>
-  <plurals name="kg_prompt_reason_time_pin">
-    <item quantity="one" msgid="3073579168584205350">"Il dispositivo non viene sbloccato da <xliff:g id="NUMBER">%d</xliff:g> ora. Conferma il PIN."</item>
-    <item quantity="other" msgid="3282423442327824649">"Il dispositivo non viene sbloccato da <xliff:g id="NUMBER">%d</xliff:g> ore. Conferma il PIN."</item>
-  </plurals>
-  <plurals name="kg_prompt_reason_time_password">
-    <item quantity="one" msgid="9062782924671938516">"Il dispositivo non viene sbloccato da <xliff:g id="NUMBER">%d</xliff:g> ora. Conferma la password."</item>
-    <item quantity="other" msgid="1839722302513719629">"Il dispositivo non viene sbloccato da <xliff:g id="NUMBER">%d</xliff:g> ore. Conferma la password."</item>
-  </plurals>
+    <plurals name="kg_prompt_reason_time_pattern" formatted="false" msgid="2697444392228541853">
+      <item quantity="other">Il dispositivo non viene sbloccato da <xliff:g id="NUMBER_1">%d</xliff:g> ore. Conferma la sequenza.</item>
+      <item quantity="one">Il dispositivo non viene sbloccato da <xliff:g id="NUMBER_0">%d</xliff:g> ora. Conferma la sequenza.</item>
+    </plurals>
+    <plurals name="kg_prompt_reason_time_pin" formatted="false" msgid="2118758475374354849">
+      <item quantity="other">Il dispositivo non viene sbloccato da <xliff:g id="NUMBER_1">%d</xliff:g> ore. Conferma il PIN.</item>
+      <item quantity="one">Il dispositivo non viene sbloccato da <xliff:g id="NUMBER_0">%d</xliff:g> ora. Conferma il PIN.</item>
+    </plurals>
+    <plurals name="kg_prompt_reason_time_password" formatted="false" msgid="5132693663364913675">
+      <item quantity="other">Il dispositivo non viene sbloccato da <xliff:g id="NUMBER_1">%d</xliff:g> ore. Conferma la password.</item>
+      <item quantity="one">Il dispositivo non viene sbloccato da <xliff:g id="NUMBER_0">%d</xliff:g> ora. Conferma la password.</item>
+    </plurals>
     <string name="fingerprint_not_recognized" msgid="2690661881608146617">"Non riconosciuto"</string>
 </resources>

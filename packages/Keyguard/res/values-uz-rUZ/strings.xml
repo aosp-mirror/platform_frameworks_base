@@ -95,15 +95,15 @@
     <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"Siz chizmali kalitni  <xliff:g id="NUMBER_0">%d</xliff:g> marta noto‘g‘ri kiritdingiz. <xliff:g id="NUMBER_1">%d</xliff:g> marta muvaffaqiyatsiz urinishdan so‘ng, sizdan e-pochtangizdan foydalanib, planshet qulfini ochishingiz so‘raladi.\n\n <xliff:g id="NUMBER_2">%d</xliff:g> soniyadan so‘ng yana urinib ko‘ring."</string>
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"Siz chizmali kalitni <xliff:g id="NUMBER_0">%d</xliff:g> marta noto‘g‘ri chizdingiz. <xliff:g id="NUMBER_1">%d</xliff:g> marta muvaffaqiyatsiz urinishdan so‘ng, sizdan e-pochtangizdan foydalanib, telefon qulfini ochishingiz so‘raladi.\n\n <xliff:g id="NUMBER_2">%d</xliff:g> soniyadan so‘ng yana urinib ko‘ring."</string>
     <string name="kg_password_wrong_pin_code_pukked" msgid="30531039455764924">"SIM-karta PIN kodi noto‘g‘ri. Qurilma qulfini ochish uchun aloqa operatoringiz bilan bog‘laning."</string>
-  <plurals name="kg_password_wrong_pin_code">
-    <item quantity="one" msgid="8134313997799638254">"SIM-karta PIN kodi noto‘g‘ri terildi, yana <xliff:g id="NUMBER">%d</xliff:g> marta uirinib ko‘rishingiz mumkin, urinishlar tugagandan keyin qurilmangizni qulfdan chiqarish uchun aloqa operatoringiz bilan bog‘lanishingiz kerak."</item>
-    <item quantity="other" msgid="2215723361575359486">"SIM-karta PIN kodi noto‘g‘ri terildi, yana <xliff:g id="NUMBER">%d</xliff:g> marta urinib ko‘rishingiz mumkin."</item>
-  </plurals>
+    <plurals name="kg_password_wrong_pin_code" formatted="false" msgid="6721575017538162249">
+      <item quantity="other">SIM kartaning PIN kodi noto‘g‘ri. Sizda yana <xliff:g id="NUMBER_1">%d</xliff:g> ta urinish qoldi.</item>
+      <item quantity="one">SIM kartaning PIN kodi noto‘g‘ri. Qurilmani qulfdan chiqarish uchun sizda yana <xliff:g id="NUMBER_0">%d</xliff:g> ta urinish qoldi.</item>
+    </plurals>
     <string name="kg_password_wrong_puk_code_dead" msgid="7077536808291316208">"SIM kartadan foydalanib bo‘lmaydi. Aloqa operatoringiz bilan bog‘laning."</string>
-  <plurals name="kg_password_wrong_puk_code">
-    <item quantity="one" msgid="3256893607561060649">"SIM-karta PUK kodi noto‘g‘ri terildi, yana <xliff:g id="NUMBER">%d</xliff:g> marta urinib ko‘rganingizdan so‘ng, SIM-kartadan umuman foydalanib bo‘lmaydi."</item>
-    <item quantity="other" msgid="5477305226026342036">"SIM-karta PUK kodi noto‘g‘ri terildi, yana <xliff:g id="NUMBER">%d</xliff:g> marta urinib ko‘rganingizdan so‘ng, SIM-kartadan umuman foydalanib bo‘lmaydi."</item>
-  </plurals>
+    <plurals name="kg_password_wrong_puk_code" formatted="false" msgid="7576227366999858780">
+      <item quantity="other">SIM-kartaning PUK kodi noto‘g‘ri kiritildi. Yana <xliff:g id="NUMBER_1">%d</xliff:g> ta muvaffaqiyatsiz urinishdan so‘ng SIM-karta butunlay ishdan chiqadi.</item>
+      <item quantity="one">SIM-kartaning PUK kodi noto‘g‘ri kiritildi. Yana <xliff:g id="NUMBER_0">%d</xliff:g> ta muvaffaqiyatsiz urinishdan so‘ng SIM-karta butunlay ishdan chiqadi.</item>
+    </plurals>
     <string name="kg_password_pin_failed" msgid="6268288093558031564">"SIM-karta PIN jarayoni amalga oshmadi!"</string>
     <string name="kg_password_puk_failed" msgid="2838824369502455984">"SIM-karta PUK jarayoni amalga oshmadi!"</string>
     <string name="kg_pin_accepted" msgid="1448241673570020097">"Kod qabul qilindi!"</string>
@@ -119,17 +119,17 @@
     <string name="kg_prompt_reason_switch_profiles_pattern" msgid="3802056699323773969">"Profilni amlashtirishda chizmali kalit talab qilinadi."</string>
     <string name="kg_prompt_reason_switch_profiles_pin" msgid="8108020184731052246">"Profilni amlashtirishda PIN-kod talab qilinadi."</string>
     <string name="kg_prompt_reason_switch_profiles_password" msgid="6755997057852042672">"Profilni amlashtirishda parol talab qilinadi."</string>
-  <plurals name="kg_prompt_reason_time_pattern">
-    <item quantity="one" msgid="5598462918459516566">"Qurilma <xliff:g id="NUMBER">%d</xliff:g> soatdan beri qulfdan chiqarilgani yo‘q. Chizmali kalitni tasdiqlang."</item>
-    <item quantity="other" msgid="224518697489572649">"Qurilma <xliff:g id="NUMBER">%d</xliff:g> soatdan beri qulfdan chiqarilgani yo‘q. Chizmali kalitni tasdiqlang."</item>
-  </plurals>
-  <plurals name="kg_prompt_reason_time_pin">
-    <item quantity="one" msgid="3073579168584205350">"Qurilma <xliff:g id="NUMBER">%d</xliff:g> soatdan beri qulfdan chiqarilgani yo‘q. PIN-kodni tasdiqlang."</item>
-    <item quantity="other" msgid="3282423442327824649">"Qurilma <xliff:g id="NUMBER">%d</xliff:g> soatdan beri qulfdan chiqarilgani yo‘q. PIN-kodni tasdiqlang."</item>
-  </plurals>
-  <plurals name="kg_prompt_reason_time_password">
-    <item quantity="one" msgid="9062782924671938516">"Qurilma <xliff:g id="NUMBER">%d</xliff:g> soatdan beri qulfdan chiqarilgani yo‘q. Parolni tasdiqlang."</item>
-    <item quantity="other" msgid="1839722302513719629">"Qurilma <xliff:g id="NUMBER">%d</xliff:g> soatdan beri qulfdan chiqarilgani yo‘q. Parolni tasdiqlang."</item>
-  </plurals>
+    <plurals name="kg_prompt_reason_time_pattern" formatted="false" msgid="2697444392228541853">
+      <item quantity="other">Qurilma <xliff:g id="NUMBER_1">%d</xliff:g> soatdan beri qulfdan chiqarilgani yo‘q. Chizmali kalitni yana bir marta kiriting.</item>
+      <item quantity="one">Qurilma <xliff:g id="NUMBER_0">%d</xliff:g> soatdan beri qulfdan chiqarilgani yo‘q. Chizmali kalitni yana bir marta kiriting.</item>
+    </plurals>
+    <plurals name="kg_prompt_reason_time_pin" formatted="false" msgid="2118758475374354849">
+      <item quantity="other">Qurilma <xliff:g id="NUMBER_1">%d</xliff:g> soatdan beri qulfdan chiqarilgani yo‘q. PIN-kodni yana bir marta kiriting.</item>
+      <item quantity="one">Qurilma <xliff:g id="NUMBER_0">%d</xliff:g> soatdan beri qulfdan chiqarilgani yo‘q. PIN-kodni yana bir marta kiriting.</item>
+    </plurals>
+    <plurals name="kg_prompt_reason_time_password" formatted="false" msgid="5132693663364913675">
+      <item quantity="other">Qurilma <xliff:g id="NUMBER_1">%d</xliff:g> soatdan beri qulfdan chiqarilgani yo‘q. Parolni yana bir marta kiriting.</item>
+      <item quantity="one">Qurilma <xliff:g id="NUMBER_0">%d</xliff:g> soatdan beri qulfdan chiqarilgani yo‘q. Parolni yana bir marta kiriting.</item>
+    </plurals>
     <string name="fingerprint_not_recognized" msgid="2690661881608146617">"Aniqlanmadi"</string>
 </resources>

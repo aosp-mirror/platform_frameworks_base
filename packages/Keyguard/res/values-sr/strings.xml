@@ -95,15 +95,17 @@
     <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"Нацртали сте шаблон за откључавање нетачно <xliff:g id="NUMBER_0">%d</xliff:g> пута. После још <xliff:g id="NUMBER_1">%d</xliff:g> неуспешна(их) покушаја, од вас ће бити затражено да откључате таблет помоћу налога е-поште.\n\nПокушајте поново за <xliff:g id="NUMBER_2">%d</xliff:g> секунде(и)."</string>
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"Нацртали сте шаблон за откључавање нетачно <xliff:g id="NUMBER_0">%d</xliff:g> пута. После још <xliff:g id="NUMBER_1">%d</xliff:g> неуспешна(их) покушаја, од вас ће бити затражено да откључате телефон помоћу налога е-поште.\n\nПокушајте поново за <xliff:g id="NUMBER_2">%d</xliff:g> секунде(и)."</string>
     <string name="kg_password_wrong_pin_code_pukked" msgid="30531039455764924">"Нетачан SIM PIN кôд. Сада морате да контактирате мобилног оператера да бисте откључали уређај."</string>
-  <plurals name="kg_password_wrong_pin_code">
-    <item quantity="one" msgid="8134313997799638254">"Нетачан SIM PIN кôд. Имате још <xliff:g id="NUMBER">%d</xliff:g> покушај, а онда морате да контактирате мобилног оператера да бисте откључали уређај."</item>
-    <item quantity="other" msgid="2215723361575359486">"Нетачан SIM PIN кôд. Имате још <xliff:g id="NUMBER">%d</xliff:g> покушаја."</item>
-  </plurals>
+    <plurals name="kg_password_wrong_pin_code" formatted="false" msgid="6721575017538162249">
+      <item quantity="one">Нетачан SIM PIN кôд. Имате још <xliff:g id="NUMBER_1">%d</xliff:g> покушај.</item>
+      <item quantity="few">Нетачан SIM PIN кôд. Имате још <xliff:g id="NUMBER_1">%d</xliff:g> покушаја.</item>
+      <item quantity="other">Нетачан SIM PIN кôд. Имате још <xliff:g id="NUMBER_1">%d</xliff:g> покушаја.</item>
+    </plurals>
     <string name="kg_password_wrong_puk_code_dead" msgid="7077536808291316208">"SIM картица је неупотребљива. Контактирајте мобилног оператера."</string>
-  <plurals name="kg_password_wrong_puk_code">
-    <item quantity="one" msgid="3256893607561060649">"Нетачан SIM PUK кôд. Имате још <xliff:g id="NUMBER">%d</xliff:g> покушај пре него што SIM картица постане трајно неупотребљива."</item>
-    <item quantity="other" msgid="5477305226026342036">"Нетачан SIM PUK кôд. Имате још <xliff:g id="NUMBER">%d</xliff:g> покушаја пре него што SIM картица постане трајно неупотребљива."</item>
-  </plurals>
+    <plurals name="kg_password_wrong_puk_code" formatted="false" msgid="7576227366999858780">
+      <item quantity="one">Нетачан SIM PUK кôд. Имате још <xliff:g id="NUMBER_1">%d</xliff:g> покушај пре него што SIM картица постане трајно неупотребљива.</item>
+      <item quantity="few">Нетачан SIM PUK кôд. Имате још <xliff:g id="NUMBER_1">%d</xliff:g> покушаја пре него што SIM картица постане трајно неупотребљива.</item>
+      <item quantity="other">Нетачан SIM PUK кôд. Имате још <xliff:g id="NUMBER_1">%d</xliff:g> покушаја пре него што SIM картица постане трајно неупотребљива.</item>
+    </plurals>
     <string name="kg_password_pin_failed" msgid="6268288093558031564">"Радња са SIM PIN кодом није успела!"</string>
     <string name="kg_password_puk_failed" msgid="2838824369502455984">"Радња са SIM PUK кодом није успела!"</string>
     <string name="kg_pin_accepted" msgid="1448241673570020097">"Кôд је прихваћен!"</string>
@@ -119,17 +121,20 @@
     <string name="kg_prompt_reason_switch_profiles_pattern" msgid="3802056699323773969">"Шаблон је обавезан када прелазите са једног профила на други."</string>
     <string name="kg_prompt_reason_switch_profiles_pin" msgid="8108020184731052246">"PIN је обавезан када прелазите са једног профила на други."</string>
     <string name="kg_prompt_reason_switch_profiles_password" msgid="6755997057852042672">"Лозинка је обавезна када прелазите са једног профила на други."</string>
-  <plurals name="kg_prompt_reason_time_pattern">
-    <item quantity="one" msgid="5598462918459516566">"Нисте откључали уређај <xliff:g id="NUMBER">%d</xliff:g> сат. Потврдите шаблон."</item>
-    <item quantity="other" msgid="224518697489572649">"Нисте откључали уређај <xliff:g id="NUMBER">%d</xliff:g> сата(и). Потврдите шаблон."</item>
-  </plurals>
-  <plurals name="kg_prompt_reason_time_pin">
-    <item quantity="one" msgid="3073579168584205350">"Нисте откључали уређај <xliff:g id="NUMBER">%d</xliff:g> сат. Потврдите PIN."</item>
-    <item quantity="other" msgid="3282423442327824649">"Нисте откључали уређај <xliff:g id="NUMBER">%d</xliff:g> сата(и). Потврдите PIN."</item>
-  </plurals>
-  <plurals name="kg_prompt_reason_time_password">
-    <item quantity="one" msgid="9062782924671938516">"Нисте откључали уређај <xliff:g id="NUMBER">%d</xliff:g> сат. Потврдите лозинку."</item>
-    <item quantity="other" msgid="1839722302513719629">"Нисте откључали уређај <xliff:g id="NUMBER">%d</xliff:g> сата(и). Потврдите лозинку."</item>
-  </plurals>
+    <plurals name="kg_prompt_reason_time_pattern" formatted="false" msgid="2697444392228541853">
+      <item quantity="one">Нисте откључали уређај <xliff:g id="NUMBER_1">%d</xliff:g> сат. Потврдите шаблон.</item>
+      <item quantity="few">Нисте откључали уређај <xliff:g id="NUMBER_1">%d</xliff:g> сата. Потврдите шаблон.</item>
+      <item quantity="other">Нисте откључали уређај <xliff:g id="NUMBER_1">%d</xliff:g> сати. Потврдите шаблон.</item>
+    </plurals>
+    <plurals name="kg_prompt_reason_time_pin" formatted="false" msgid="2118758475374354849">
+      <item quantity="one">Нисте откључали уређај <xliff:g id="NUMBER_1">%d</xliff:g> сат. Потврдите PIN.</item>
+      <item quantity="few">Нисте откључали уређај <xliff:g id="NUMBER_1">%d</xliff:g> сата. Потврдите PIN.</item>
+      <item quantity="other">Нисте откључали уређај <xliff:g id="NUMBER_1">%d</xliff:g> сати. Потврдите PIN.</item>
+    </plurals>
+    <plurals name="kg_prompt_reason_time_password" formatted="false" msgid="5132693663364913675">
+      <item quantity="one">Нисте откључали уређај <xliff:g id="NUMBER_1">%d</xliff:g> сат. Потврдите лозинку.</item>
+      <item quantity="few">Нисте откључали уређај <xliff:g id="NUMBER_1">%d</xliff:g> сата. Потврдите лозинку.</item>
+      <item quantity="other">Нисте откључали уређај <xliff:g id="NUMBER_1">%d</xliff:g> сати. Потврдите лозинку.</item>
+    </plurals>
     <string name="fingerprint_not_recognized" msgid="2690661881608146617">"Није препознат"</string>
 </resources>

@@ -95,15 +95,15 @@
     <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"Сиз бөгөттөн чыгаруу үлгүсүн <xliff:g id="NUMBER_0">%d</xliff:g> жолу туура эмес көрсөттүңүз. Дагы <xliff:g id="NUMBER_1">%d</xliff:g> ийгиликсиз аракеттен кийин, планшетиңизди эмейл эсебиңиз аркылуу бөгөттөн чыгаруу талап кылынат.\n\n <xliff:g id="NUMBER_2">%d</xliff:g> секундадан кийин кайра аракеттениңиз."</string>
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"Сиз бөгөттөн чыгаруу үлгүсүн <xliff:g id="NUMBER_0">%d</xliff:g> жолу туура эмес көрсөттүңүз. Дагы <xliff:g id="NUMBER_1">%d</xliff:g> ийгиликсиз аракеттен кийин, телефонуңузду эмейл эсебиңиз аркылуу бөгөттөн чыгаруу талап кылынат.\n\n <xliff:g id="NUMBER_2">%d</xliff:g> секундадан кийин кайра аракеттениңиз."</string>
     <string name="kg_password_wrong_pin_code_pukked" msgid="30531039455764924">"SIM-карта PIN-коду туура эмес. Эми түзмөктү бөгөттөн чыгарыш үчүн операторуңузга кайрылышыңыз керек."</string>
-  <plurals name="kg_password_wrong_pin_code">
-    <item quantity="one" msgid="8134313997799638254">"SIM PIN-коду туура эмес, сиз түзмөктү бөгөттөн чыгарыш үчүн операторуңузга кайрылганга <xliff:g id="NUMBER">%d</xliff:g> аракет калды."</item>
-    <item quantity="other" msgid="2215723361575359486">"SIM PIN-коду туура эмес, сизде <xliff:g id="NUMBER">%d</xliff:g> аракет калды."</item>
-  </plurals>
+    <plurals name="kg_password_wrong_pin_code" formatted="false" msgid="6721575017538162249">
+      <item quantity="other">SIM PIN-коду туура эмес, сизде <xliff:g id="NUMBER_1">%d</xliff:g> аракет калды.</item>
+      <item quantity="one">SIM PIN-коду туура эмес, сизде <xliff:g id="NUMBER_0">%d</xliff:g> аракет калды. Болбосо, түзмөктүн кулпусун ачуу үчүн операторуңузга кайрылышыңыз керек.</item>
+    </plurals>
     <string name="kg_password_wrong_puk_code_dead" msgid="7077536808291316208">"SIM-карта жараксыз. Операторуңузга кайрылыңыз."</string>
-  <plurals name="kg_password_wrong_puk_code">
-    <item quantity="one" msgid="3256893607561060649">"SIM PUK-коду туура эмес, SIM биротоло жарактан чыгаарына <xliff:g id="NUMBER">%d</xliff:g> аракет калды."</item>
-    <item quantity="other" msgid="5477305226026342036">"SIM PUK-коду туура эмес, SIM биротоло жарактан чыгаарына <xliff:g id="NUMBER">%d</xliff:g> аракет калды."</item>
-  </plurals>
+    <plurals name="kg_password_wrong_puk_code" formatted="false" msgid="7576227366999858780">
+      <item quantity="other">SIM PUK-коду туура эмес, SIM биротоло жарактан чыгаарынан мурун сизде <xliff:g id="NUMBER_1">%d</xliff:g> аракет калды.</item>
+      <item quantity="one">SIM PUK-коду туура эмес, SIM биротоло жарактан чыгаарынан мурун сизде <xliff:g id="NUMBER_0">%d</xliff:g> аракет калды.</item>
+    </plurals>
     <string name="kg_password_pin_failed" msgid="6268288093558031564">"SIM-картанын PIN-кодун ачуу кыйрады!"</string>
     <string name="kg_password_puk_failed" msgid="2838824369502455984">"SIM-картанын PUK-кодун ачуу кыйрады!"</string>
     <string name="kg_pin_accepted" msgid="1448241673570020097">"Код кабыл алынды!"</string>
@@ -119,17 +119,17 @@
     <string name="kg_prompt_reason_switch_profiles_pattern" msgid="3802056699323773969">"Профилдерди которгонуңузда сүрөт үлгүсү керектелет."</string>
     <string name="kg_prompt_reason_switch_profiles_pin" msgid="8108020184731052246">"Профилдерди которгонуңузда PIN керектелет."</string>
     <string name="kg_prompt_reason_switch_profiles_password" msgid="6755997057852042672">"Профилдерди которгонуңузда сырсөз керектелет."</string>
-  <plurals name="kg_prompt_reason_time_pattern">
-    <item quantity="one" msgid="5598462918459516566">"Түзмөктүн кулпусу <xliff:g id="NUMBER">%d</xliff:g> саат бою ачылган жок. Үлгүнү ырастаңыз."</item>
-    <item quantity="other" msgid="224518697489572649">"Түзмөктүн кулпусу <xliff:g id="NUMBER">%d</xliff:g> саат бою ачылган жок. Үлгүнү ырастаңыз."</item>
-  </plurals>
-  <plurals name="kg_prompt_reason_time_pin">
-    <item quantity="one" msgid="3073579168584205350">"Түзмөктүн кулпусу <xliff:g id="NUMBER">%d</xliff:g> саат бою ачылган жок. PIN кодду ырастаңыз."</item>
-    <item quantity="other" msgid="3282423442327824649">"Түзмөктүн кулпусу <xliff:g id="NUMBER">%d</xliff:g> саат бою ачылган жок. PIN кодду ырастаңыз."</item>
-  </plurals>
-  <plurals name="kg_prompt_reason_time_password">
-    <item quantity="one" msgid="9062782924671938516">"Түзмөктүн кулпусу <xliff:g id="NUMBER">%d</xliff:g> саат бою ачылган жок. Сырсөздү ырастаңыз."</item>
-    <item quantity="other" msgid="1839722302513719629">"Түзмөктүн кулпусу <xliff:g id="NUMBER">%d</xliff:g> саат бою ачылган жок. Сырсөздү ырастаңыз."</item>
-  </plurals>
+    <plurals name="kg_prompt_reason_time_pattern" formatted="false" msgid="2697444392228541853">
+      <item quantity="other">Түзмөктүн кулпусу <xliff:g id="NUMBER_1">%d</xliff:g> саат бою ачылган жок. Cүрөт үлгүсүн ырастаңыз.</item>
+      <item quantity="one">Түзмөктүн кулпусу <xliff:g id="NUMBER_0">%d</xliff:g> саат бою ачылган жок. Cүрөт үлгүсүн ырастаңыз.</item>
+    </plurals>
+    <plurals name="kg_prompt_reason_time_pin" formatted="false" msgid="2118758475374354849">
+      <item quantity="other">Түзмөктүн кулпусу <xliff:g id="NUMBER_1">%d</xliff:g> саат бою ачылган жок. PIN\'ди ырастаңыз.</item>
+      <item quantity="one">Түзмөктүн кулпусу <xliff:g id="NUMBER_0">%d</xliff:g> саат бою ачылган жок. PIN\'ди ырастаңыз.</item>
+    </plurals>
+    <plurals name="kg_prompt_reason_time_password" formatted="false" msgid="5132693663364913675">
+      <item quantity="other">Түзмөктүн кулпусу <xliff:g id="NUMBER_1">%d</xliff:g> саат бою ачылган жок. Сырсөздү ырастаңыз.</item>
+      <item quantity="one">Түзмөктүн кулпусу <xliff:g id="NUMBER_0">%d</xliff:g> саат бою ачылган жок. Сырсөздү ырастаңыз.</item>
+    </plurals>
     <string name="fingerprint_not_recognized" msgid="2690661881608146617">"Таанылган жок"</string>
 </resources>
