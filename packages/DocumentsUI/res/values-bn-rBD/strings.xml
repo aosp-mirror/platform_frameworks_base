@@ -59,15 +59,15 @@
     <string name="share_via" msgid="8966594246261344259">"এর মাধ্যমে ভাগ করুন"</string>
     <string name="copy_notification_title" msgid="6374299806748219777">"ফাইলগুলি অনুলিপি করা হচ্ছে"</string>
     <string name="copy_remaining" msgid="6283790937387975095">"<xliff:g id="DURATION">%s</xliff:g> বাকি"</string>
-  <plurals name="copy_begin">
-    <item quantity="one" msgid="7775181564278455087">"<xliff:g id="COUNT">%1$d</xliff:g>টি ফাইল প্রতিলিপি করা হচ্ছে৷"</item>
-    <item quantity="other" msgid="5175026054495572228">"<xliff:g id="COUNT">%1$d</xliff:g>টি ফাইল প্রতিলিপি করা হচ্ছে৷"</item>
-  </plurals>
+    <plurals name="copy_begin" formatted="false" msgid="9071199452634086365">
+      <item quantity="one"><xliff:g id="COUNT_1">%1$d</xliff:g>টি ফাইল অনুলিপি করা হচ্ছে৷</item>
+      <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g>টি ফাইল অনুলিপি করা হচ্ছে৷</item>
+    </plurals>
     <string name="copy_preparing" msgid="3896202461003039386">"অনুলিপি করার জন্য প্রস্তুত করা হচ্ছে..."</string>
-  <plurals name="copy_error_notification_title">
-    <item quantity="one" msgid="2515407675631145507">"<xliff:g id="COUNT">%1$d</xliff:g>টি ফাইলের প্রতিলিপি করা যায়নি"</item>
-    <item quantity="other" msgid="7124097894673644954">"<xliff:g id="COUNT">%1$d</xliff:g>টি ফাইলের প্রতিলিপি করা যায়নি"</item>
-  </plurals>
+    <plurals name="copy_error_notification_title" formatted="false" msgid="5267616889076217261">
+      <item quantity="one"><xliff:g id="COUNT_1">%1$d</xliff:g>টি ফাইলের প্রতিলিপি করা যায়নি</item>
+      <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g>টি ফাইলের প্রতিলিপি করা যায়নি</item>
+    </plurals>
     <string name="notification_touch_for_details" msgid="4483108577842961665">"বিশদ বিবরণ দেখতে স্পর্শ করুন"</string>
     <string name="retry" msgid="7564024179122207376">"পুনরায় চেষ্টা করুন"</string>
     <string name="copy_failure_alert_content" msgid="3715575000297709082">"এই ফাইলগুলির প্রতিলিপি করা হয় নি: <xliff:g id="LIST">%1$s</xliff:g>"</string>

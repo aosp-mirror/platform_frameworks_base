@@ -59,15 +59,15 @@
     <string name="share_via" msgid="8966594246261344259">"ແບ່ງປັນຜ່ານ"</string>
     <string name="copy_notification_title" msgid="6374299806748219777">"ກຳ​ລັງ​ອັດ​ສຳ​ເນົາ​ໄຟ​ລ໌"</string>
     <string name="copy_remaining" msgid="6283790937387975095">"<xliff:g id="DURATION">%s</xliff:g> ຍັງ​ເຫຼືອ​ຢູ່"</string>
-  <plurals name="copy_begin">
-    <item quantity="one" msgid="7775181564278455087">"ກຳ​ລັງ​ອັດ​ສຳ​ເນົາ <xliff:g id="COUNT">%1$d</xliff:g> ໄຟ​ລ໌."</item>
-    <item quantity="other" msgid="5175026054495572228">"ກຳ​ລັງ​ອັດ​ສຳ​ເນົາ <xliff:g id="COUNT">%1$d</xliff:g> ໄຟ​ລ໌."</item>
-  </plurals>
+    <plurals name="copy_begin" formatted="false" msgid="9071199452634086365">
+      <item quantity="other">ກຳ​ລັງ​ອັດ​ສຳ​ເນົາ <xliff:g id="COUNT_1">%1$d</xliff:g> ໄຟ​ລ໌.</item>
+      <item quantity="one">ກຳ​ລັງ​ອັດ​ສຳ​ເນົາ <xliff:g id="COUNT_0">%1$d</xliff:g> ໄຟ​ລ໌.</item>
+    </plurals>
     <string name="copy_preparing" msgid="3896202461003039386">"ກຳ​ລັງ​ກຽມ​ອັດ​ສຳ​ເນົາ…"</string>
-  <plurals name="copy_error_notification_title">
-    <item quantity="one" msgid="2515407675631145507">"ບໍ່​ສາ​ມາດອັດ​ສຳ​ເນົາ <xliff:g id="COUNT">%1$d</xliff:g> ໄຟ​ລ໌ໄດ້"</item>
-    <item quantity="other" msgid="7124097894673644954">"ບໍ່​ສາ​ມາດອັດ​ສຳ​ເນົາ <xliff:g id="COUNT">%1$d</xliff:g> ໄຟ​ລ໌​ໄດ້"</item>
-  </plurals>
+    <plurals name="copy_error_notification_title" formatted="false" msgid="5267616889076217261">
+      <item quantity="other">ບໍ່​ສາ​ມາດ​ອັດ​ສຳ​ເນົາ <xliff:g id="COUNT_1">%1$d</xliff:g> ໄຟ​ລ໌​ໄດ້</item>
+      <item quantity="one">ບໍ່​ສາ​ມາດ​ອັດ​ສຳ​ເນົາ <xliff:g id="COUNT_0">%1$d</xliff:g> ໄຟ​ລ໌​ໄດ້</item>
+    </plurals>
     <string name="notification_touch_for_details" msgid="4483108577842961665">"ສຳ​ພັດເພື່ອເບິ່ງລາຍລະອຽດ"</string>
     <string name="retry" msgid="7564024179122207376">"ລອງໃໝ່"</string>
     <string name="copy_failure_alert_content" msgid="3715575000297709082">"ໄຟ​ລ໌​ເຫຼົ່າ​ນີ້​ບໍ່​ຖື​ກ​ອັດ​ສຳ​ເນົາ: <xliff:g id="LIST">%1$s</xliff:g>"</string>

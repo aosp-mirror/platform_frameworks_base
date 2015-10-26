@@ -59,15 +59,15 @@
     <string name="share_via" msgid="8966594246261344259">"దీని ద్వారా భాగస్వామ్యం చేయండి"</string>
     <string name="copy_notification_title" msgid="6374299806748219777">"ఫైల్‌లు కాపీ అవుతున్నాయి"</string>
     <string name="copy_remaining" msgid="6283790937387975095">"<xliff:g id="DURATION">%s</xliff:g> మిగిలి ఉంది"</string>
-  <plurals name="copy_begin">
-    <item quantity="one" msgid="7775181564278455087">"<xliff:g id="COUNT">%1$d</xliff:g> ఫైల్‌ను కాపీ చేస్తోంది."</item>
-    <item quantity="other" msgid="5175026054495572228">"<xliff:g id="COUNT">%1$d</xliff:g> ఫైల్‌లను కాపీ చేస్తోంది."</item>
-  </plurals>
+    <plurals name="copy_begin" formatted="false" msgid="9071199452634086365">
+      <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> ఫైల్‌లను కాపీ చేస్తోంది.</item>
+      <item quantity="one"><xliff:g id="COUNT_0">%1$d</xliff:g> ఫైల్‌ను కాపీ చేస్తోంది.</item>
+    </plurals>
     <string name="copy_preparing" msgid="3896202461003039386">"కాపీ చేయడానికి సిద్ధం చేస్తోంది…"</string>
-  <plurals name="copy_error_notification_title">
-    <item quantity="one" msgid="2515407675631145507">"<xliff:g id="COUNT">%1$d</xliff:g> ఫైల్‌ను కాపీ చేయలేకపోయింది"</item>
-    <item quantity="other" msgid="7124097894673644954">"<xliff:g id="COUNT">%1$d</xliff:g> ఫైల్‌లను కాపీ చేయలేకపోయింది"</item>
-  </plurals>
+    <plurals name="copy_error_notification_title" formatted="false" msgid="5267616889076217261">
+      <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> ఫైల్‌లను కాపీ చేయలేకపోయింది</item>
+      <item quantity="one"><xliff:g id="COUNT_0">%1$d</xliff:g> ఫైల్‌ను కాపీ చేయలేకపోయింది</item>
+    </plurals>
     <string name="notification_touch_for_details" msgid="4483108577842961665">"వివరాలను వీక్షించడానికి తాకండి"</string>
     <string name="retry" msgid="7564024179122207376">"మళ్లీ ప్రయత్నించు"</string>
     <string name="copy_failure_alert_content" msgid="3715575000297709082">"ఈ ఫైల్‌లు కాపీ చేయబడలేదు: <xliff:g id="LIST">%1$s</xliff:g>"</string>
