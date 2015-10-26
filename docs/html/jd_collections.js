@@ -1670,12 +1670,4 @@ var RESOURCE_COLLECTIONS = {
       "training/testing/performance.html"
     ]
   },
-  "app/landing/videos": {
-    "title": "",
-    "resources": [
-       "https://www.youtube.com/watch?v=CaMTIgxCSqU",
-       "https://www.youtube.com/watch?v=OrLEoIsMIAc",
-       "https://www.youtube.com/watch?v=bSOREVMEFnM"
-    ]
-  },
 }

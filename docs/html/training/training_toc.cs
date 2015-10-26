@@ -1848,11 +1848,10 @@ results."
       </a>
     </div>
     <ul>
-
       <li>
         <a href="<?cs var:toroot ?>training/app/approach.html"
           description=
-          "How to approach performance testing, analysis and making improvements to you app."
+          "How to approach performance testing, analysis and making improvement to you app."
           >Gather, Insight, Action</a>
       </li>
 
@@ -1861,28 +1860,27 @@ results."
           <a href="<?cs var:toroot ?>training/app/rendering/index.html"
             description=
             "How to analyze app rendering performance and improve the speed and smoothness
-            of your user interface.">
-            Optimizing Rendering Performance</a>
+            of your user interface."
+            >Rendering Performance</a>
         </div>
-          <ul>
-            <li><a href="<?cs var:toroot ?>training/app/rendering/overdraw.html">
-              Reducing Overdraw
-            </a>
-            </li>
-            <li><a href="<?cs var:toroot ?>training/app/rendering/profile-gpu.html">
-              Improving GPU Rendering Performance
-            </a>
-            </li>
-            <li><a href="<?cs var:toroot ?>training/app/rendering/hierarchies.html">
-              Simplifying Complex View Hierarchies
-            </a>
-            </li>
-            <li><a href="<?cs var:toroot ?>training/app/rendering/rendering-checklist.html">
-              Rendering Issues and Solutions Checklist
-            </a>
-            </li>
-          </ul>
-        </li><!-- end of Rendering Performance-->
+        <ul>
+          <li>
+            <a href="<?cs var:toroot ?>training/app/rendering/gpu.html">
+            Optimizing Rendering
+          </a>
+          </li>
+          <li>
+            <a href="<?cs var:toroot ?>training/app/rendering/overdraw.html">
+            Reducing Overdraw
+          </a>
+          </li>
+          <li>
+            <a href="<?cs var:toroot ?>training/app/rendering/view-hierarchy.html">
+            Optimizing View Hierarchies
+          </a>
+          </li>
+        </ul>
+      </li> <!-- end of Rendering Performance-->
 
       <li class="nav-section">
         <div class="nav-section-header">
