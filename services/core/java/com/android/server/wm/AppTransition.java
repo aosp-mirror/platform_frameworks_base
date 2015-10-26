@@ -456,10 +456,12 @@ public class AppTransition implements Dump {
         return -startPos / denom;
     }
 
-    private Animation createScaleUpAnimationLocked(
-            int transit, boolean enter, int appWidth, int appHeight) {
-        Animation a = null;
+    private Animation createScaleUpAnimationLocked(int transit, boolean enter,
+            Rect containingFrame) {
+        Animation a;
         getDefaultNextAppTransitionStartRect(mTmpStartRect);
+        final int appWidth = containingFrame.width();
+        final int appHeight = containingFrame.height();
         if (enter) {
             // Entering app zooms out from the center of the initial rect.
             float scaleW = mTmpStartRect.width() / (float) appWidth;
@@ -746,10 +748,11 @@ public class AppTransition implements Dump {
      * activity that is leaving, and the activity that is entering.
      */
     Animation createAspectScaledThumbnailEnterExitAnimationLocked(int thumbTransitState,
-            int appWidth, int appHeight, int orientation, int transit, Rect containingFrame,
-            Rect contentInsets, @Nullable Rect surfaceInsets, boolean resizedWindow,
-            int taskId) {
+            int orientation, int transit, Rect containingFrame, Rect contentInsets,
+            @Nullable Rect surfaceInsets, boolean freeform, int taskId) {
         Animation a;
+        final int appWidth = containingFrame.width();
+        final int appHeight = containingFrame.height();
         getDefaultNextAppTransitionStartRect(mTmpStartRect);
         final int thumbWidthI = mTmpStartRect.width();
         final float thumbWidth = thumbWidthI > 0 ? thumbWidthI : 1;
@@ -762,7 +765,7 @@ public class AppTransition implements Dump {
 
         switch (thumbTransitState) {
             case THUMBNAIL_TRANSITION_ENTER_SCALE_UP: {
-                if (resizedWindow) {
+                if (freeform) {
                     a = createAspectScaledThumbnailEnterNonFullscreenAnimationLocked(
                             containingFrame, surfaceInsets, taskId);
                 } else {
@@ -953,8 +956,10 @@ public class AppTransition implements Dump {
      * This animation is created when we are doing a thumbnail transition, for the activity that is
      * leaving, and the activity that is entering.
      */
-    Animation createThumbnailEnterExitAnimationLocked(int thumbTransitState, int appWidth,
-            int appHeight, int transit, int taskId) {
+    Animation createThumbnailEnterExitAnimationLocked(int thumbTransitState, Rect containingFrame,
+            int transit, int taskId) {
+        final int appWidth = containingFrame.width();
+        final int appHeight = containingFrame.height();
         Bitmap thumbnailHeader = getAppTransitionThumbnailHeader(taskId);
         Animation a;
         getDefaultNextAppTransitionStartRect(mTmpStartRect);
@@ -1016,13 +1021,13 @@ public class AppTransition implements Dump {
         return prepareThumbnailAnimation(a, appWidth, appHeight, transit);
     }
 
-    private Animation createRelaunchAnimation(int appWidth, int appHeight,
-            Rect containingFrame, Rect contentInsets) {
+    private Animation createRelaunchAnimation(Rect containingFrame, Rect contentInsets) {
         getDefaultNextAppTransitionStartRect(mTmpFromClipRect);
         final int left = mTmpFromClipRect.left;
         final int top = mTmpFromClipRect.top;
         mTmpFromClipRect.offset(-left, -top);
-        mTmpToClipRect.set(0, 0, appWidth, appHeight);
+        // TODO: Isn't that strange that we ignore exact position of the containingFrame?
+        mTmpToClipRect.set(0, 0, containingFrame.width(), containingFrame.height());
         AnimationSet set = new AnimationSet(true);
         float fromWidth = mTmpFromClipRect.width();
         float toWidth = mTmpToClipRect.width();
@@ -1069,10 +1074,30 @@ public class AppTransition implements Dump {
                 && mNextAppTransitionType != NEXT_TRANSIT_TYPE_CLIP_REVEAL;
     }
 
+    /**
+     *
+     * @param frame These are the bounds of the window when it finishes the animation. This is where
+     *              the animation must usually finish in entrance animation, as the next frame will
+     *              display the window at these coordinates. In case of exit animation, this is
+     *              where the animation must start, as the frame before the animation is displaying
+     *              the window at these bounds.
+     * @param insets Knowing where the window will be positioned is not enough. Some parts of the
+     *               window might be obscured, usually by the system windows (status bar and
+     *               navigation bar) and we use content insets to convey that information. This
+     *               usually affects the animation aspects vertically, as the system decoration is
+     *               at the top and the bottom. For example when we animate from full screen to
+     *               recents, we want to exclude the covered parts, because they won't match the
+     *               thumbnail after the last frame is executed.
+     * @param surfaceInsets In rare situation the surface is larger than the content and we need to
+     *                      know about this to make the animation frames match. We currently use
+     *                      this for freeform windows, which have larger surfaces to display
+     *                      shadows. When we animate them from recents, we want to match the content
+     *                      to the recents thumbnail and hence need to account for the surface being
+     *                      bigger.
+     */
     Animation loadAnimation(WindowManager.LayoutParams lp, int transit, boolean enter,
-            int appWidth, int appHeight, int orientation, Rect containingFrame, Rect contentInsets,
-            @Nullable Rect surfaceInsets, Rect appFrame, boolean isVoiceInteraction,
-            boolean resizedWindow, int taskId) {
+            int orientation, Rect frame, Rect insets, @Nullable Rect surfaceInsets,
+            boolean isVoiceInteraction, boolean freeform, int taskId) {
         Animation a;
         if (isVoiceInteraction && (transit == TRANSIT_ACTIVITY_OPEN
                 || transit == TRANSIT_TASK_OPEN
@@ -1095,7 +1120,7 @@ public class AppTransition implements Dump {
                     + " anim=" + a + " transit=" + appTransitionToString(transit)
                     + " isEntrance=" + enter + " Callers=" + Debug.getCallers(3));
         } else if (transit == TRANSIT_ACTIVITY_RELAUNCH) {
-            a = createRelaunchAnimation(appWidth, appHeight, containingFrame, contentInsets);
+            a = createRelaunchAnimation(frame, insets);
             if (DEBUG_APP_TRANSITIONS || DEBUG_ANIM) Slog.v(TAG,
                     "applyAnimation:"
                     + " anim=" + a + " nextAppTransition=" + mNextAppTransition
@@ -1117,14 +1142,14 @@ public class AppTransition implements Dump {
                     + " transit=" + appTransitionToString(transit)
                     + " Callers=" + Debug.getCallers(3));
         } else if (mNextAppTransitionType == NEXT_TRANSIT_TYPE_CLIP_REVEAL) {
-            a = createClipRevealAnimationLocked(transit, enter, appFrame);
+            a = createClipRevealAnimationLocked(transit, enter, frame);
             if (DEBUG_APP_TRANSITIONS || DEBUG_ANIM) Slog.v(TAG,
                     "applyAnimation:"
                             + " anim=" + a + " nextAppTransition=ANIM_CLIP_REVEAL"
                             + " transit=" + appTransitionToString(transit)
                             + " Callers=" + Debug.getCallers(3));
         } else if (mNextAppTransitionType == NEXT_TRANSIT_TYPE_SCALE_UP) {
-            a = createScaleUpAnimationLocked(transit, enter, appWidth, appHeight);
+            a = createScaleUpAnimationLocked(transit, enter, frame);
             if (DEBUG_APP_TRANSITIONS || DEBUG_ANIM) Slog.v(TAG,
                     "applyAnimation:"
                     + " anim=" + a + " nextAppTransition=ANIM_SCALE_UP"
@@ -1135,7 +1160,7 @@ public class AppTransition implements Dump {
             mNextAppTransitionScaleUp =
                     (mNextAppTransitionType == NEXT_TRANSIT_TYPE_THUMBNAIL_SCALE_UP);
             a = createThumbnailEnterExitAnimationLocked(getThumbnailTransitionState(enter),
-                    appWidth, appHeight, transit, taskId);
+                    frame, transit, taskId);
             if (DEBUG_APP_TRANSITIONS || DEBUG_ANIM) {
                 String animName = mNextAppTransitionScaleUp ?
                         "ANIM_THUMBNAIL_SCALE_UP" : "ANIM_THUMBNAIL_SCALE_DOWN";
@@ -1149,8 +1174,8 @@ public class AppTransition implements Dump {
             mNextAppTransitionScaleUp =
                     (mNextAppTransitionType == NEXT_TRANSIT_TYPE_THUMBNAIL_ASPECT_SCALE_UP);
             a = createAspectScaledThumbnailEnterExitAnimationLocked(
-                    getThumbnailTransitionState(enter), appWidth, appHeight, orientation, transit,
-                    containingFrame, contentInsets, surfaceInsets, resizedWindow, taskId);
+                    getThumbnailTransitionState(enter), orientation, transit, frame,
+                    insets, surfaceInsets, freeform, taskId);
             if (DEBUG_APP_TRANSITIONS || DEBUG_ANIM) {
                 String animName = mNextAppTransitionScaleUp ?
                         "ANIM_THUMBNAIL_ASPECT_SCALE_UP" : "ANIM_THUMBNAIL_ASPECT_SCALE_DOWN";

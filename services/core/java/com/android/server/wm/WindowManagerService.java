@@ -2871,10 +2871,9 @@ public class WindowManagerService extends IWindowManager.Stub
                     "applyAnimation: atoken=" + atoken);
 
             // Determine the visible rect to calculate the thumbnail clip
-            WindowState win = atoken.findMainWindow();
-            Rect containingFrame = new Rect(0, 0, width, height);
-            Rect contentInsets = new Rect();
-            Rect appFrame = new Rect(0, 0, width, height);
+            final WindowState win = atoken.findMainWindow();
+            final Rect frame = new Rect(0, 0, width, height);
+            final Rect insets = new Rect();
             Rect surfaceInsets = null;
             final boolean fullscreen = win != null && win.isFullscreen(width, height);
             final boolean freeform = win != null && win.inFreeformWorkspace();
@@ -2885,25 +2884,19 @@ public class WindowManagerService extends IWindowManager.Stub
                 // won't exactly match the final freeform window frame (e.g. when overlapping with
                 // the status bar). In that case we need to use the final frame.
                 if (freeform) {
-                    containingFrame.set(win.mFrame);
+                    frame.set(win.mFrame);
                 } else {
-                    containingFrame.set(win.mContainingFrame);
+                    frame.set(win.mContainingFrame);
                 }
                 surfaceInsets = win.getAttrs().surfaceInsets;
                 if (fullscreen || docked) {
                     // For fullscreen windows use the window frames and insets to set the thumbnail
                     // clip. For non-fullscreen windows we use the app display region so the clip
-                    // isn't affected by the window insets. Docked windows are cropped to the system
-                    // decorations, so we need tell the animation about it too.
-                    contentInsets.set(win.mContentInsets);
-                    appFrame.set(win.mFrame);
-                } else {
-                    appFrame.set(containingFrame);
+                    // isn't affected by the window insets.
+                    insets.set(win.mContentInsets);
                 }
             }
 
-            final int containingWidth = containingFrame.width();
-            final int containingHeight = containingFrame.height();
             if (atoken.mLaunchTaskBehind) {
                 // Differentiate the two animations. This one which is briefly on the screen
                 // gets the !enter animation, and the other activity which remains on the
@@ -2911,17 +2904,11 @@ public class WindowManagerService extends IWindowManager.Stub
                 enter = false;
             }
             if (DEBUG_APP_TRANSITIONS) Slog.d(TAG, "Loading animation for app transition."
-                    + " transit=" + AppTransition.appTransitionToString(transit)
-                    + " enter=" + enter
-                    + " containingWidth=" + containingWidth
-                    + " containingHeight=" + containingHeight
-                    + " containingFrame=" + containingFrame
-                    + " contentInsets=" + contentInsets
-                    + " surfaceInsets=" + surfaceInsets
-                    + " appFrame=" + appFrame);
-            Animation a = mAppTransition.loadAnimation(lp, transit, enter, containingWidth,
-                    containingHeight, mCurConfiguration.orientation, containingFrame, contentInsets,
-                    surfaceInsets, appFrame, isVoiceInteraction, freeform, atoken.mTask.mTaskId);
+                    + " transit=" + AppTransition.appTransitionToString(transit) + " enter=" + enter
+                    + " frame=" + frame + " insets=" + insets + " surfaceInsets=" + surfaceInsets);
+            Animation a = mAppTransition.loadAnimation(lp, transit, enter,
+                    mCurConfiguration.orientation, frame, insets, surfaceInsets, isVoiceInteraction,
+                    freeform, atoken.mTask.mTaskId);
             if (a != null) {
                 if (DEBUG_ANIM) {
                     RuntimeException e = null;
@@ -2931,6 +2918,8 @@ public class WindowManagerService extends IWindowManager.Stub
                     }
                     Slog.v(TAG, "Loaded animation " + a + " for " + atoken, e);
                 }
+                final int containingWidth = frame.width();
+                final int containingHeight = frame.height();
                 atoken.mAppAnimator.setAnimation(a, containingWidth, containingHeight,
                         mAppTransition.canSkipFirstFrame());
             }
