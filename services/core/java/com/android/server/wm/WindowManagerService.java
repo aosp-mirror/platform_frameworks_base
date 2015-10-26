@@ -2687,9 +2687,16 @@ public class WindowManagerService extends IWindowManager.Stub
                 if (winAnimator.mSurfaceControl != null) {
                     if (DEBUG_VISIBILITY) Slog.i(TAG, "Relayout invis " + win
                             + ": mExiting=" + win.mExiting);
+                    // If we are using a saved surface to do enter animation, just let the
+                    // animation run and don't destroy the surface. This could happen when
+                    // the app sets visibility to invisible for the first time after resume,
+                    // or when the user exits immediately after a resume. In both cases, we
+                    // don't want to destroy the saved surface.
+                    final boolean isAnimatingWithSavedSurface =
+                            win.mAppToken != null && win.mAppToken.mAnimatingWithSavedSurface;
                     // If we are not currently running the exit animation, we
                     // need to see about starting one.
-                    if (!win.mExiting) {
+                    if (!win.mExiting && !isAnimatingWithSavedSurface) {
                         surfaceChanged = true;
                         // Try starting an animation; if there isn't one, we
                         // can destroy the surface right away.
@@ -2847,6 +2854,12 @@ public class WindowManagerService extends IWindowManager.Stub
                     if ((win.mAttrs.flags & FLAG_SHOW_WALLPAPER) != 0) {
                         getDefaultDisplayContentLocked().pendingLayoutChanges |=
                                 WindowManagerPolicy.FINISH_LAYOUT_REDO_WALLPAPER;
+                    }
+                    if (win.mAppToken != null) {
+                        // App has drawn something to its windows, we're no longer animating with
+                        // the saved surfaces. If the user exits now, we only want to save again
+                        // if allDrawn is true.
+                        win.mAppToken.mAnimatingWithSavedSurface = false;
                     }
                     win.setDisplayLayoutNeeded();
                     mWindowPlacerLocked.requestTraversal();

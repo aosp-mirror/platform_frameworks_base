@@ -413,7 +413,7 @@ public class WindowAnimator {
 
             final AppWindowToken atoken = win.mAppToken;
             if (winAnimator.mDrawState == WindowStateAnimator.READY_TO_SHOW) {
-                if (atoken == null || atoken.allDrawn) {
+                if (atoken == null || atoken.allDrawn || atoken.mAnimatingWithSavedSurface) {
                     if (winAnimator.performShowLocked()) {
                         setPendingLayoutChanges(displayId,
                                 WindowManagerPolicy.FINISH_LAYOUT_REDO_ANIM);

@@ -2876,12 +2876,15 @@ public final class ActivityStackSupervisor implements DisplayListener {
         }
 
         if (stackId != task.stack.mStackId) {
-            moveTaskToStackUncheckedLocked(task, stackId, ON_TOP, FORCE_FOCUS, reason);
-        } else {
-            task.stack.moveTaskToFrontLocked(task, false /* noAnimation */, options,
-                task.getTopActivity() == null ? null : task.getTopActivity().appTimeTracker,
-                reason);
+            moveTaskToStackUncheckedLocked(task, stackId, ON_TOP, !FORCE_FOCUS, reason);
+
+            // moveTaskToStackUncheckedLocked() should already placed the task on top,
+            // still need moveTaskToFrontLocked() below for any transition settings.
         }
+
+        final ActivityRecord r = task.getTopActivity();
+        task.stack.moveTaskToFrontLocked(task, false /* noAnimation */, options,
+                r == null ? null : r.appTimeTracker, reason);
 
         if (DEBUG_STACK) Slog.d(TAG_STACK,
                 "findTaskToMoveToFront: moved to front of stack=" + task.stack);
