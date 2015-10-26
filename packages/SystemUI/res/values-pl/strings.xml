@@ -430,10 +430,7 @@
     <string name="tuner_toast" msgid="603429811084428439">"Gratulujemy, Kalibrator System UI został dodany do Ustawień"</string>
     <string name="remove_from_settings" msgid="8389591916603406378">"Usuń z Ustawień"</string>
     <string name="remove_from_settings_prompt" msgid="6069085993355887748">"Usunąć Kalibrator System UI z Ustawień i przestać używać wszystkich jego funkcji?"</string>
-    <!-- no translation found for enable_bluetooth_title (5027037706500635269) -->
-    <skip />
-    <!-- no translation found for enable_bluetooth_message (9106595990708985385) -->
-    <skip />
-    <!-- no translation found for enable_bluetooth_confirmation_ok (6258074250948309715) -->
-    <skip />
+    <string name="enable_bluetooth_title" msgid="5027037706500635269">"Włączyć Bluetooth?"</string>
+    <string name="enable_bluetooth_message" msgid="9106595990708985385">"Aby połączyć klawiaturę z tabletem, musisz najpierw włączyć Bluetooth."</string>
+    <string name="enable_bluetooth_confirmation_ok" msgid="6258074250948309715">"Włącz"</string>
 </resources>

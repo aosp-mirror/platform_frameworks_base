@@ -429,10 +429,7 @@
     <string name="tuner_toast" msgid="603429811084428439">"Felicitări! System UI Tuner a fost adăugat în Setări"</string>
     <string name="remove_from_settings" msgid="8389591916603406378">"Eliminați din Setări"</string>
     <string name="remove_from_settings_prompt" msgid="6069085993355887748">"Eliminați System UI Tuner din Setări și încetați utilizarea tuturor funcțiilor sale?"</string>
-    <!-- no translation found for enable_bluetooth_title (5027037706500635269) -->
-    <skip />
-    <!-- no translation found for enable_bluetooth_message (9106595990708985385) -->
-    <skip />
-    <!-- no translation found for enable_bluetooth_confirmation_ok (6258074250948309715) -->
-    <skip />
+    <string name="enable_bluetooth_title" msgid="5027037706500635269">"Activați Bluetooth?"</string>
+    <string name="enable_bluetooth_message" msgid="9106595990708985385">"Pentru a conecta tastatura la tabletă, mai întâi trebuie să activați Bluetooth."</string>
+    <string name="enable_bluetooth_confirmation_ok" msgid="6258074250948309715">"Activați"</string>
 </resources>
