@@ -59,15 +59,15 @@
     <string name="share_via" msgid="8966594246261344259">"Ibahagi sa pamamagitan ng"</string>
     <string name="copy_notification_title" msgid="6374299806748219777">"Kinokopya ang mga file"</string>
     <string name="copy_remaining" msgid="6283790937387975095">"<xliff:g id="DURATION">%s</xliff:g> na lang ang natitira"</string>
-  <plurals name="copy_begin">
-    <item quantity="one" msgid="7775181564278455087">"Kinokopya ang <xliff:g id="COUNT">%1$d</xliff:g> file."</item>
-    <item quantity="other" msgid="5175026054495572228">"Kinokopya ang <xliff:g id="COUNT">%1$d</xliff:g> (na) file."</item>
-  </plurals>
+    <plurals name="copy_begin" formatted="false" msgid="9071199452634086365">
+      <item quantity="one">Kumokopya ng <xliff:g id="COUNT_1">%1$d</xliff:g> file.</item>
+      <item quantity="other">Kumokopya ng <xliff:g id="COUNT_1">%1$d</xliff:g> na file.</item>
+    </plurals>
     <string name="copy_preparing" msgid="3896202461003039386">"Naghahanda para sa pagkopya…"</string>
-  <plurals name="copy_error_notification_title">
-    <item quantity="one" msgid="2515407675631145507">"Hindi makopya ang <xliff:g id="COUNT">%1$d</xliff:g> file"</item>
-    <item quantity="other" msgid="7124097894673644954">"Hindi makopya ang <xliff:g id="COUNT">%1$d</xliff:g> (na) file"</item>
-  </plurals>
+    <plurals name="copy_error_notification_title" formatted="false" msgid="5267616889076217261">
+      <item quantity="one">Hindi makopya ang <xliff:g id="COUNT_1">%1$d</xliff:g> file</item>
+      <item quantity="other">Hindi makopya ang <xliff:g id="COUNT_1">%1$d</xliff:g> na file</item>
+    </plurals>
     <string name="notification_touch_for_details" msgid="4483108577842961665">"Pindutin upang tingnan ang mga detalye"</string>
     <string name="retry" msgid="7564024179122207376">"Subukang muli"</string>
     <string name="copy_failure_alert_content" msgid="3715575000297709082">"Hindi nakopya ang mga file na ito: <xliff:g id="LIST">%1$s</xliff:g>"</string>

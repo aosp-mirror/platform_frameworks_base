@@ -59,15 +59,19 @@
     <string name="share_via" msgid="8966594246261344259">"Zdieľať"</string>
     <string name="copy_notification_title" msgid="6374299806748219777">"Kopírovanie súborov"</string>
     <string name="copy_remaining" msgid="6283790937387975095">"Zostáva: <xliff:g id="DURATION">%s</xliff:g>"</string>
-  <plurals name="copy_begin">
-    <item quantity="one" msgid="7775181564278455087">"Kopíruje sa <xliff:g id="COUNT">%1$d</xliff:g> súbor."</item>
-    <item quantity="other" msgid="5175026054495572228">"Kopírujú sa súbory (počet: <xliff:g id="COUNT">%1$d</xliff:g>)."</item>
-  </plurals>
+    <plurals name="copy_begin" formatted="false" msgid="9071199452634086365">
+      <item quantity="few">Kopírujú sa <xliff:g id="COUNT_1">%1$d</xliff:g> súbory.</item>
+      <item quantity="many">Kopíruje sa <xliff:g id="COUNT_1">%1$d</xliff:g> súboru.</item>
+      <item quantity="other">Kopíruje sa <xliff:g id="COUNT_1">%1$d</xliff:g> súborov.</item>
+      <item quantity="one">Kopíruje sa <xliff:g id="COUNT_0">%1$d</xliff:g> súbor.</item>
+    </plurals>
     <string name="copy_preparing" msgid="3896202461003039386">"Pripravuje sa na kopírovanie..."</string>
-  <plurals name="copy_error_notification_title">
-    <item quantity="one" msgid="2515407675631145507">"Nepodarilo sa skopírovať <xliff:g id="COUNT">%1$d</xliff:g> súbor"</item>
-    <item quantity="other" msgid="7124097894673644954">"Nepodarilo sa skopírovať niekoľko súborov (<xliff:g id="COUNT">%1$d</xliff:g>)"</item>
-  </plurals>
+    <plurals name="copy_error_notification_title" formatted="false" msgid="5267616889076217261">
+      <item quantity="few">Zlyhalo kopírovanie <xliff:g id="COUNT_1">%1$d</xliff:g> súborov</item>
+      <item quantity="many">Zlyhalo kopírovanie <xliff:g id="COUNT_1">%1$d</xliff:g> súboru</item>
+      <item quantity="other">Zlyhalo kopírovanie <xliff:g id="COUNT_1">%1$d</xliff:g> súborov</item>
+      <item quantity="one">Zlyhalo kopírovanie <xliff:g id="COUNT_0">%1$d</xliff:g> súboru</item>
+    </plurals>
     <string name="notification_touch_for_details" msgid="4483108577842961665">"Klepnutím zobrazíte podrobné informácie"</string>
     <string name="retry" msgid="7564024179122207376">"Skúsiť znova"</string>
     <string name="copy_failure_alert_content" msgid="3715575000297709082">"Tieto súbory neboli skopírované: <xliff:g id="LIST">%1$s</xliff:g>"</string>
