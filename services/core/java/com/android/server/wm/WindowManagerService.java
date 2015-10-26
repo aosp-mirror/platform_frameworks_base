@@ -6972,7 +6972,7 @@ public class WindowManagerService extends IWindowManager.Stub
                     + " asbinder=" + window.asBinder());
         }
 
-        final int callerPid = Binder.getCallingPid();
+        final int callerUid = Binder.getCallingUid();
         final long origId = Binder.clearCallingIdentity();
         IBinder token = null;
 
@@ -6997,6 +6997,7 @@ public class WindowManagerService extends IWindowManager.Stub
                         final IBinder winBinder = window.asBinder();
                         token = new Binder();
                         mDragState = new DragState(this, token, surface, flags, winBinder);
+                        mDragState.mUid = callerUid;
                         token = mDragState.mToken = new Binder();
 
                         // 5 second timeout for this window to actually begin the drag
