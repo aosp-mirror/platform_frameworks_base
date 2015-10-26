@@ -39,6 +39,8 @@ public class Constants {
             public static final boolean EnableDismissAll = false;
             // Enables the thumbnail alpha on the front-most task
             public static final boolean EnableThumbnailAlphaOnFrontmost = false;
+            // This disables the search bar integration
+            public static final boolean DisableSearchBar = true;
             // This disables the bitmap and icon caches
             public static final boolean DisableBackgroundCache = false;
             // Enables the simulated task affiliations

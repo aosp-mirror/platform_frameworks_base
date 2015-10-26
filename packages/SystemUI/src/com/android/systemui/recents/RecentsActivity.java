@@ -206,15 +206,19 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
                 mEmptyView = mEmptyViewStub.inflate();
             }
             mEmptyView.setVisibility(View.VISIBLE);
-            mRecentsView.setSearchBarVisibility(View.GONE);
+            if (!Constants.DebugFlags.App.DisableSearchBar) {
+                mRecentsView.setSearchBarVisibility(View.GONE);
+            }
         } else {
             if (mEmptyView != null) {
                 mEmptyView.setVisibility(View.GONE);
             }
-            if (mRecentsView.hasValidSearchBar()) {
-                mRecentsView.setSearchBarVisibility(View.VISIBLE);
-            } else {
-                refreshSearchWidgetView();
+            if (!Constants.DebugFlags.App.DisableSearchBar) {
+                if (mRecentsView.hasValidSearchBar()) {
+                    mRecentsView.setSearchBarVisibility(View.VISIBLE);
+                } else {
+                    refreshSearchWidgetView();
+                }
             }
         }
 
@@ -315,7 +319,9 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
 
         // Initialize the widget host (the host id is static and does not change)
         mConfig = RecentsConfiguration.getInstance();
-        mAppWidgetHost = new RecentsAppWidgetHost(this, Constants.Values.App.AppWidgetHostId);
+        if (!Constants.DebugFlags.App.DisableSearchBar) {
+            mAppWidgetHost = new RecentsAppWidgetHost(this, Constants.Values.App.AppWidgetHostId);
+        }
         mPackageMonitor = new RecentsPackageMonitor();
         mPackageMonitor.register(this);
 
@@ -330,12 +336,16 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
         mScrimViews = new SystemBarScrimViews(this);
 
         // Bind the search app widget when we first start up
-        mSearchWidgetInfo = ssp.getOrBindSearchAppWidget(this, mAppWidgetHost);
+        if (!Constants.DebugFlags.App.DisableSearchBar) {
+            mSearchWidgetInfo = ssp.getOrBindSearchAppWidget(this, mAppWidgetHost);
+        }
 
         // Register the broadcast receiver to handle messages when the screen is turned off
         IntentFilter filter = new IntentFilter();
         filter.addAction(Intent.ACTION_SCREEN_OFF);
-        filter.addAction(SearchManager.INTENT_GLOBAL_SEARCH_ACTIVITY_CHANGED);
+        if (!Constants.DebugFlags.App.DisableSearchBar) {
+            filter.addAction(SearchManager.INTENT_GLOBAL_SEARCH_ACTIVITY_CHANGED);
+        }
         registerReceiver(mSystemBroadcastReceiver, filter);
     }
 
@@ -420,7 +430,10 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
         mPackageMonitor.unregister();
 
         // Stop listening for widget package changes if there was one bound
-        mAppWidgetHost.stopListening();
+        if (!Constants.DebugFlags.App.DisableSearchBar) {
+            mAppWidgetHost.stopListening();
+        }
+
         EventBus.getDefault().unregister(this);
     }
 
@@ -551,7 +564,7 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
                 @Override
                 public void run() {
                     // Start listening for widget package changes if there is one bound
-                    if (mAppWidgetHost != null) {
+                    if (!Constants.DebugFlags.App.DisableSearchBar && mAppWidgetHost != null) {
                         mAppWidgetHost.startListening();
                     }
                 }

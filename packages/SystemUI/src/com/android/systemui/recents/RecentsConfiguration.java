@@ -165,7 +165,8 @@ public class RecentsConfiguration {
         } else {
             // In portrait, the search bar appears on the top (which already has the inset)
             int swInset = getInsetToSmallestWidth(windowBounds.right - windowBounds.left);
-            taskStackBounds.set(windowBounds.left + swInset, searchBarBounds.bottom,
+            int top = searchBarBounds.isEmpty() ? topInset : 0;
+            taskStackBounds.set(windowBounds.left + swInset, searchBarBounds.bottom + top,
                     windowBounds.right - swInset, windowBounds.bottom);
         }
     }

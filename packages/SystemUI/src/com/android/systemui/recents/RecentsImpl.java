@@ -428,7 +428,7 @@ public class RecentsImpl extends IRecentsNonSystemUserCallbacks.Stub
         // Update the configuration for the current state
         mConfig.update(mContext, ssp, ssp.getWindowRect());
 
-        if (tryAndBindSearchWidget) {
+        if (!Constants.DebugFlags.App.DisableSearchBar && tryAndBindSearchWidget) {
             // Try and pre-emptively bind the search widget on startup to ensure that we
             // have the right thumbnail bounds to animate to.
             // Note: We have to reload the widget id before we get the task stack bounds below
@@ -665,7 +665,7 @@ public class RecentsImpl extends IRecentsNonSystemUserCallbacks.Stub
         if (!useThumbnailTransition) {
             // If there is no thumbnail transition, but is launching from home into recents, then
             // use a quick home transition and do the animation from home
-            if (hasRecentTasks) {
+            if (!Constants.DebugFlags.App.DisableSearchBar && hasRecentTasks) {
                 String homeActivityPackage = ssp.getHomeActivityPackageName();
                 String searchWidgetPackage = Prefs.getString(mContext,
                         Prefs.Key.SEARCH_APP_WIDGET_PACKAGE, null);
