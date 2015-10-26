@@ -87,7 +87,7 @@
     <string name="CLIRDefaultOffNextCallOn" msgid="6179425182856418465">"कलर ID पूर्वनिर्धारितदेखि प्रतिबन्धित छैन। अर्को कल: प्रतिबन्धित छ"</string>
     <string name="CLIRDefaultOffNextCallOff" msgid="2567998633124408552">"कलर ID पूर्वनिर्धारितको लागि रोकावट छैन। अर्को कल: रोकावट छैन"</string>
     <string name="serviceNotProvisioned" msgid="8614830180508686666">"सेवाको व्यवस्था छैन।"</string>
-    <string name="CLIRPermanent" msgid="3377371145926835671">"तपाईं कलर ID सेटिङ परिवर्तन गर्न सक्नुहुन्न।"</string>
+    <string name="CLIRPermanent" msgid="3377371145926835671">"तपाईँ कलर ID सेटिङ परिवर्तन गर्न सक्नुहुन्न।"</string>
     <string name="RestrictedChangedTitle" msgid="5592189398956187498">"प्रतिबन्धित पहुँच परिवर्तन भएको छ"</string>
     <string name="RestrictedOnData" msgid="8653794784690065540">"डेटा सेवा रोकिएको छ।"</string>
     <string name="RestrictedOnEmergency" msgid="6581163779072833665">"आपतकालीन सेवा रोकिएको छ।"</string>
@@ -198,7 +198,7 @@
     <string name="shutdown_confirm" product="tv" msgid="476672373995075359">"तपाईंको TV बन्द हुनेछ।"</string>
     <string name="shutdown_confirm" product="watch" msgid="3490275567476369184">"तपाईँको घडी बन्द गरिने छ।"</string>
     <string name="shutdown_confirm" product="default" msgid="649792175242821353">"तपाईँको फोन बन्द हुने छ।"</string>
-    <string name="shutdown_confirm_question" msgid="2906544768881136183">"के तपाईं बन्द गर्न चाहनुहुन्छ?"</string>
+    <string name="shutdown_confirm_question" msgid="2906544768881136183">"के तपाईँ बन्द गर्न चाहनुहुन्छ?"</string>
     <string name="reboot_safemode_title" msgid="7054509914500140361">"सुरक्षित मोडमा पुनःबुट गर्नुहोस्"</string>
     <string name="reboot_safemode_confirm" msgid="55293944502784668">"सुरक्षित मोडमा तपाईँ पुनःबुट गर्न चाहनु हुन्छ? तपाईँले स्थापना गरेका सबै तेस्रो पक्षका अनुप्रयोगहरूलाई असक्षम गराउने छ।"</string>
     <string name="recent_tasks_title" msgid="3691764623638127888">"नयाँ"</string>
@@ -786,7 +786,7 @@
     <string name="permdesc_addVoicemail" msgid="6604508651428252437">"तपाईँको भ्वाइसमेल इनबक्समा सन्देश थप्नको लागि अनुप्रयोगलाई अनुमति दिन्छ।"</string>
     <string name="permlab_writeGeolocationPermissions" msgid="5962224158955273932">"भूस्थान अनुमतिहरू ब्राउजर परिवर्तन गर्नुहोस्"</string>
     <string name="permdesc_writeGeolocationPermissions" msgid="1083743234522638747">"ब्राउजरको भू-स्थान अनुमतिहरू परिमार्जन गर्न अनुप्रयोगलाई अनुमति दिन्छ। खराब अनुप्रयोगहरूले  स्थान सूचना मनपरी वेब साइटहरूमा पठाउने अनुमतिको लागि यसलाई प्रयोग गर्न सक्छन्।"</string>
-    <string name="save_password_message" msgid="767344687139195790">"के तपाईं ब्राउजरले यो पासवर्ड सम्झेको चाहनुहुन्छ?"</string>
+    <string name="save_password_message" msgid="767344687139195790">"के तपाईँ ब्राउजरले यो पासवर्ड सम्झेको चाहनुहुन्छ?"</string>
     <string name="save_password_notnow" msgid="6389675316706699758">"अहिले होइन"</string>
     <string name="save_password_remember" msgid="6491879678996749466">"सम्झनुहोस्"</string>
     <string name="save_password_never" msgid="8274330296785855105">"कहिल्यै पनि होइन"</string>
@@ -906,13 +906,13 @@
     <string name="aerr_process" msgid="4507058997035697579">"दुर्भाग्यवश, प्रक्रिया <xliff:g id="PROCESS">%1$s</xliff:g> बन्द भयो।"</string>
     <string name="anr_title" msgid="4351948481459135709"></string>
     <string name="anr_activity_application" msgid="1904477189057199066">"<xliff:g id="APPLICATION">%2$s</xliff:g>ले कार्य गरिरहेको छैन।\n\nके तपाईँ यसलाई बन्द गर्न चाहनु हुन्छ?"</string>
-    <string name="anr_activity_process" msgid="5776209883299089767">"गतिविधि <xliff:g id="ACTIVITY">%1$s</xliff:g> ले प्रतिक्रिया देखाइरहेको छैन।\n\nके तपाईं यसलाई बन्द गर्न चाहनु हुन्छ?"</string>
+    <string name="anr_activity_process" msgid="5776209883299089767">"गतिविधि <xliff:g id="ACTIVITY">%1$s</xliff:g> ले प्रतिक्रिया देखाइरहेको छैन।\n\nके तपाईँ यसलाई बन्द गर्न चाहनु हुन्छ?"</string>
     <string name="anr_application_process" msgid="8941757607340481057">"<xliff:g id="APPLICATION">%1$s</xliff:g> जवाफ दिइरहेको छैन। के तपाईँ यसलाई बन्द गर्न चाहनु हुन्छ?"</string>
     <string name="anr_process" msgid="6513209874880517125">"प्रक्रिया <xliff:g id="PROCESS">%1$s</xliff:g>ले कार्य गरिरहेको छैन।\n\nके तपाईँ यसलाई बन्द गर्न चाहनु हुन्छ?"</string>
     <string name="force_close" msgid="8346072094521265605">"ठिक छ"</string>
     <string name="report" msgid="4060218260984795706">"रिपोर्ट गर्नुहोस्"</string>
     <string name="wait" msgid="7147118217226317732">"प्रतीक्षा गर्नुहोस्"</string>
-    <string name="webpage_unresponsive" msgid="3272758351138122503">"पृष्ठ गैर जिम्मेवारी भएको छ।\n\nके तपाईं यसलाई बन्द गर्न चाहनुहुन्छ?"</string>
+    <string name="webpage_unresponsive" msgid="3272758351138122503">"पृष्ठ गैर जिम्मेवारी भएको छ।\n\nके तपाईँ यसलाई बन्द गर्न चाहनुहुन्छ?"</string>
     <string name="launch_warning_title" msgid="1547997780506713581">"अनुप्रयोग पुनः निर्देशीत"</string>
     <string name="launch_warning_replace" msgid="6202498949970281412">"<xliff:g id="APP_NAME">%1$s</xliff:g> अहिले चलिरहेको छ।"</string>
     <string name="launch_warning_original" msgid="188102023021668683">"<xliff:g id="APP_NAME">%1$s</xliff:g> वास्तविक सुरुवात भएको थियो।"</string>
@@ -1025,8 +1025,8 @@
     <string name="perm_costs_money" msgid="4902470324142151116">"सायद तपाईँलाई पैसा पर्न सक्छ।"</string>
     <string name="usb_storage_activity_title" msgid="4465055157209648641">"USB ठूलो भण्डारण"</string>
     <string name="usb_storage_title" msgid="5901459041398751495">"USB जोडिएको छ"</string>
-    <string name="usb_storage_message" product="nosdcard" msgid="3308538094316477839">"तपाईं आफ्नो कम्प्युटरमा USB मार्फत जडान हुनुभयो। तलको बटन टच गर्नुहोस् यदि तपाईं आफ्नो कम्प्युटर र एन्ड्रोइडको USB भण्डारण बीच फाइलहरू प्रतिलिपि गर्न चाहनुहुन्छ भने।"</string>
-    <string name="usb_storage_message" product="default" msgid="805351000446037811">"तपाईं आफ्नो कम्प्युटरमा USB मार्फत जडान हुनुभयो। तलको बटन टच गर्नुहोस् यदि तपाईं आफ्नो कम्प्युटर र एन्ड्रोइडको SD कार्ड बीच फाइलहरू प्रतिलिपि गर्न चाहनुहुन्छ भने।"</string>
+    <string name="usb_storage_message" product="nosdcard" msgid="3308538094316477839">"तपाईँ आफ्नो कम्प्युटरमा USB मार्फत जडान हुनुभयो। तलको बटन टच गर्नुहोस् यदि तपाईँ आफ्नो कम्प्युटर र एन्ड्रोइडको USB भण्डारण बीच फाइलहरू प्रतिलिपि गर्न चाहनुहुन्छ भने।"</string>
+    <string name="usb_storage_message" product="default" msgid="805351000446037811">"तपाईँ आफ्नो कम्प्युटरमा USB मार्फत जडान हुनुभयो। तलको बटन टच गर्नुहोस् यदि तपाईँ आफ्नो कम्प्युटर र एन्ड्रोइडको SD कार्ड बीच फाइलहरू प्रतिलिपि गर्न चाहनुहुन्छ भने।"</string>
     <string name="usb_storage_button_mount" msgid="1052259930369508235">"USB भण्डारण चालु गर्नुहोस्"</string>
     <string name="usb_storage_error_message" product="nosdcard" msgid="3017045217365540658">"USB आम भण्डारणको लागि तपाईँको USB भण्डारण प्रयोग गर्दा एउटा समस्या भयो।"</string>
     <string name="usb_storage_error_message" product="default" msgid="2876018512716970313">"USB आम भण्डारणको लागि तपाईँको SD कार्ड प्रयोग गर्दा एउटा समस्या भयो।"</string>
@@ -1121,7 +1121,7 @@
     <string name="deny" msgid="2081879885755434506">"अस्वीकार गर्नुहोस्"</string>
     <string name="permission_request_notification_title" msgid="6486759795926237907">"अनुरोध गरिएको अनुमति"</string>
     <string name="permission_request_notification_with_subtitle" msgid="8530393139639560189">\n"खाता <xliff:g id="ACCOUNT">%s</xliff:g>को लागि अनुरोध गरिएको अनुमति।"</string>
-    <string name="forward_intent_to_owner" msgid="1207197447013960896">"तपाईं तपाईँको कार्य प्रोफाइल बाहिर यो अनुप्रयोग प्रयोग गरिरहनु भएको छ"</string>
+    <string name="forward_intent_to_owner" msgid="1207197447013960896">"तपाईँ तपाईँको कार्य प्रोफाइल बाहिर यो अनुप्रयोग प्रयोग गरिरहनु भएको छ"</string>
     <string name="forward_intent_to_work" msgid="621480743856004612">"तपाईँ आफ्नो कार्य प्रोफाइलमा यो अनुप्रयोग प्रयोग गरिरहनु भएको छ"</string>
     <string name="input_method_binding_label" msgid="1283557179944992649">"इनपुट विधि"</string>
     <string name="sync_binding_label" msgid="3687969138375092423">"सिङ्क गर्नुहोस्"</string>
@@ -1169,7 +1169,7 @@
     <string name="gpsVerifYes" msgid="2346566072867213563">"हो"</string>
     <string name="gpsVerifNo" msgid="1146564937346454865">"होइन"</string>
     <string name="sync_too_many_deletes" msgid="5296321850662746890">"सीमा नाघेकाहरू मेट्नुहोस्"</string>
-    <string name="sync_too_many_deletes_desc" msgid="496551671008694245">"त्यहाँ <xliff:g id="NUMBER_OF_DELETED_ITEMS">%1$d</xliff:g> मेटाइएका आइटमहरू छन् <xliff:g id="TYPE_OF_SYNC">%2$s</xliff:g>को लागि, खाता <xliff:g id="ACCOUNT_NAME">%3$s</xliff:g>। तपाईं के गर्न चाहनु हुन्छ?"</string>
+    <string name="sync_too_many_deletes_desc" msgid="496551671008694245">"त्यहाँ <xliff:g id="NUMBER_OF_DELETED_ITEMS">%1$d</xliff:g> मेटाइएका आइटमहरू छन् <xliff:g id="TYPE_OF_SYNC">%2$s</xliff:g>को लागि, खाता <xliff:g id="ACCOUNT_NAME">%3$s</xliff:g>। तपाईँ के गर्न चाहनु हुन्छ?"</string>
     <string name="sync_really_delete" msgid="2572600103122596243">"वस्तुहरू मेट्नुहोस्"</string>
     <string name="sync_undo_deletes" msgid="2941317360600338602">"मेटिएकाहरू पूर्ववत बनाउनुहोस्।"</string>
     <string name="sync_do_nothing" msgid="3743764740430821845">"अहिलेको लागि केही नगर्नुहोस्"</string>
