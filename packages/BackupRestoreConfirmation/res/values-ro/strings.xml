@@ -35,5 +35,5 @@
     <string name="toast_backup_ended" msgid="3818080769548726424">"Copierea de rezervă a fost finalizată"</string>
     <string name="toast_restore_started" msgid="7881679218971277385">"Se porneşte restabilirea..."</string>
     <string name="toast_restore_ended" msgid="1764041639199696132">"Restabilirea s-a încheiat"</string>
-    <string name="toast_timeout" msgid="5276598587087626877">"Operaţia a expirat"</string>
+    <string name="toast_timeout" msgid="5276598587087626877">"Operația a expirat"</string>
 </resources>
