@@ -39212,6 +39212,7 @@ package android.webkit {
     method public abstract android.net.Uri getUrl();
     method public abstract boolean hasGesture();
     method public abstract boolean isForMainFrame();
+    method public abstract boolean isRedirect();
   }
 
   public class WebResourceResponse {
@@ -39574,7 +39575,8 @@ package android.webkit {
     method public deprecated android.webkit.WebResourceResponse shouldInterceptRequest(android.webkit.WebView, java.lang.String);
     method public android.webkit.WebResourceResponse shouldInterceptRequest(android.webkit.WebView, android.webkit.WebResourceRequest);
     method public boolean shouldOverrideKeyEvent(android.webkit.WebView, android.view.KeyEvent);
-    method public boolean shouldOverrideUrlLoading(android.webkit.WebView, java.lang.String);
+    method public deprecated boolean shouldOverrideUrlLoading(android.webkit.WebView, java.lang.String);
+    method public boolean shouldOverrideUrlLoading(android.webkit.WebView, android.webkit.WebResourceRequest);
     field public static final int ERROR_AUTHENTICATION = -4; // 0xfffffffc
     field public static final int ERROR_BAD_URL = -12; // 0xfffffff4
     field public static final int ERROR_CONNECT = -6; // 0xfffffffa

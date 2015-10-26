@@ -38,9 +38,39 @@ public class WebViewClient {
      * @param url The url to be loaded.
      * @return True if the host application wants to leave the current WebView
      *         and handle the url itself, otherwise return false.
+     * @deprecated Use {@link #shouldOverrideUrlLoading(WebView, WebResourceRequest)
+     *             shouldOverrideUrlLoading(WebView, WebResourceRequest)} instead.
      */
+    @Deprecated
     public boolean shouldOverrideUrlLoading(WebView view, String url) {
         return false;
+    }
+
+    /**
+     * Give the host application a chance to take over the control when a new
+     * url is about to be loaded in the current WebView. If WebViewClient is not
+     * provided, by default WebView will ask Activity Manager to choose the
+     * proper handler for the url. If WebViewClient is provided, return true
+     * means the host application handles the url, while return false means the
+     * current WebView handles the url.
+     *
+     * <p>Notes:
+     * <ul>
+     * <li>This method is not called for requests using the POST &quot;method&quot;.</li>
+     * <li>This method is also called for subframes with non-http schemes, thus it is
+     * strongly disadvised to unconditionally call {@link WebView#loadUrl(String)}
+     * with the request's url from inside the method and then return true,
+     * as this will make WebView to attempt loading a non-http url, and thus fail.</li>
+     * </ul>
+     * </p>
+     *
+     * @param view The WebView that is initiating the callback.
+     * @param request Object containing the details of the request.
+     * @return True if the host application wants to leave the current WebView
+     *         and handle the url itself, otherwise return false.
+     */
+    public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) {
+        return shouldOverrideUrlLoading(view, request.getUrl().toString());
     }
 
     /**
