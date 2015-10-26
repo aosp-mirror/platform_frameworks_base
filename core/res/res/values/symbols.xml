@@ -274,6 +274,7 @@
   <java-symbol type="bool" name="config_ui_enableFadingMarquee" />
   <java-symbol type="bool" name="config_use_strict_phone_number_comparation" />
   <java-symbol type="bool" name="config_voice_capable" />
+  <java-symbol type="bool" name="config_requireCallCapableAccountForHandle" />
   <java-symbol type="bool" name="config_user_notification_of_restrictied_mobile_access" />
   <java-symbol type="bool" name="config_wifiDisplaySupportsProtectedBuffers" />
   <java-symbol type="bool" name="preferences_prefer_dual_pane" />
