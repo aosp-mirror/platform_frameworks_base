@@ -25,10 +25,10 @@
     <string name="status_bar_recent_inspect_item_title" msgid="7793624864528818569">"Program Info"</string>
     <string name="status_bar_no_recent_apps" msgid="7374907845131203189">"Jou onlangse skerms verskyn hier"</string>
     <string name="status_bar_accessibility_dismiss_recents" msgid="4576076075226540105">"Maak onlangse programme toe"</string>
-  <plurals name="status_bar_accessibility_recent_apps">
-    <item quantity="one" msgid="3969335317929254918">"1 skerm in Oorsig"</item>
-    <item quantity="other" msgid="5523506463832158203">"%d skerms in Oorsig"</item>
-  </plurals>
+    <plurals name="status_bar_accessibility_recent_apps" formatted="false" msgid="9138535907802238759">
+      <item quantity="other">%d skerms in Oorsig</item>
+      <item quantity="one">1 skerm in Oorsig</item>
+    </plurals>
     <string name="status_bar_no_notifications_title" msgid="4755261167193833213">"Geen kennisgewings"</string>
     <string name="status_bar_ongoing_events_title" msgid="1682504513316879202">"Voortdurend"</string>
     <string name="status_bar_latest_events_title" msgid="6594767438577593172">"Kennisgewings"</string>
@@ -428,10 +428,7 @@
     <string name="tuner_toast" msgid="603429811084428439">"Geluk! Stelsel-UI-ontvanger is by Instellings gevoeg"</string>
     <string name="remove_from_settings" msgid="8389591916603406378">"Verwyder uit Instellings"</string>
     <string name="remove_from_settings_prompt" msgid="6069085993355887748">"Verwyder Stelsel-UI-ontvanger uit Instellings en staak die gebruik van al sy kenmerke?"</string>
-    <!-- no translation found for enable_bluetooth_title (5027037706500635269) -->
-    <skip />
-    <!-- no translation found for enable_bluetooth_message (9106595990708985385) -->
-    <skip />
-    <!-- no translation found for enable_bluetooth_confirmation_ok (6258074250948309715) -->
-    <skip />
+    <string name="enable_bluetooth_title" msgid="5027037706500635269">"Skakel Bluetooth aan?"</string>
+    <string name="enable_bluetooth_message" msgid="9106595990708985385">"Jy moet Bluetooth aanskakel om jou sleutelbord aan jou tablet te koppel."</string>
+    <string name="enable_bluetooth_confirmation_ok" msgid="6258074250948309715">"Skakel aan"</string>
 </resources>

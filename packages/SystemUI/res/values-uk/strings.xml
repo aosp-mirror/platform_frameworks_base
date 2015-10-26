@@ -25,10 +25,12 @@
     <string name="status_bar_recent_inspect_item_title" msgid="7793624864528818569">"Про додаток"</string>
     <string name="status_bar_no_recent_apps" msgid="7374907845131203189">"Ваші останні екрани відображаються тут"</string>
     <string name="status_bar_accessibility_dismiss_recents" msgid="4576076075226540105">"Відхилити останні програми"</string>
-  <plurals name="status_bar_accessibility_recent_apps">
-    <item quantity="one" msgid="3969335317929254918">"Показано 1 екран"</item>
-    <item quantity="other" msgid="5523506463832158203">"Показано екранів: %d"</item>
-  </plurals>
+    <plurals name="status_bar_accessibility_recent_apps" formatted="false" msgid="9138535907802238759">
+      <item quantity="one">На панелі огляду %d екран</item>
+      <item quantity="few">На панелі огляду %d екрани</item>
+      <item quantity="many">На панелі огляду %d екранів</item>
+      <item quantity="other">На панелі огляду %d екрана</item>
+    </plurals>
     <string name="status_bar_no_notifications_title" msgid="4755261167193833213">"Немає сповіщень"</string>
     <string name="status_bar_ongoing_events_title" msgid="1682504513316879202">"Поточні"</string>
     <string name="status_bar_latest_events_title" msgid="6594767438577593172">"Сповіщення"</string>
@@ -428,10 +430,7 @@
     <string name="tuner_toast" msgid="603429811084428439">"Вітаємо! System UI Tuner установлено в додатку Налаштування"</string>
     <string name="remove_from_settings" msgid="8389591916603406378">"Видалити з додатка Налаштування"</string>
     <string name="remove_from_settings_prompt" msgid="6069085993355887748">"Видалити інструмент System UI Tuner із додатка Налаштування та припинити користуватися всіма його функціями?"</string>
-    <!-- no translation found for enable_bluetooth_title (5027037706500635269) -->
-    <skip />
-    <!-- no translation found for enable_bluetooth_message (9106595990708985385) -->
-    <skip />
-    <!-- no translation found for enable_bluetooth_confirmation_ok (6258074250948309715) -->
-    <skip />
+    <string name="enable_bluetooth_title" msgid="5027037706500635269">"Увімкнути Bluetooth?"</string>
+    <string name="enable_bluetooth_message" msgid="9106595990708985385">"Щоб під’єднати клавіатуру до планшета, спершу потрібно ввімкнути Bluetooth."</string>
+    <string name="enable_bluetooth_confirmation_ok" msgid="6258074250948309715">"Увімкнути"</string>
 </resources>

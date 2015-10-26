@@ -25,10 +25,12 @@
     <string name="status_bar_recent_inspect_item_title" msgid="7793624864528818569">"Informacje o aplikacji"</string>
     <string name="status_bar_no_recent_apps" msgid="7374907845131203189">"Tutaj pojawią się ostatnie ekrany"</string>
     <string name="status_bar_accessibility_dismiss_recents" msgid="4576076075226540105">"Ukryj ostatnie aplikacje"</string>
-  <plurals name="status_bar_accessibility_recent_apps">
-    <item quantity="one" msgid="3969335317929254918">"1 ekran w widoku przeglądu"</item>
-    <item quantity="other" msgid="5523506463832158203">"Ekrany w widoku przeglądu: %d"</item>
-  </plurals>
+    <plurals name="status_bar_accessibility_recent_apps" formatted="false" msgid="9138535907802238759">
+      <item quantity="few">%d ekrany w widoku przeglądu</item>
+      <item quantity="many">%d ekranów w widoku przeglądu</item>
+      <item quantity="other">%d ekranu w widoku przeglądu</item>
+      <item quantity="one">1 ekran w widoku przeglądu</item>
+    </plurals>
     <string name="status_bar_no_notifications_title" msgid="4755261167193833213">"Brak powiadomień"</string>
     <string name="status_bar_ongoing_events_title" msgid="1682504513316879202">"Bieżące"</string>
     <string name="status_bar_latest_events_title" msgid="6594767438577593172">"Powiadomienia"</string>
@@ -428,10 +430,7 @@
     <string name="tuner_toast" msgid="603429811084428439">"Gratulujemy, Kalibrator System UI został dodany do Ustawień"</string>
     <string name="remove_from_settings" msgid="8389591916603406378">"Usuń z Ustawień"</string>
     <string name="remove_from_settings_prompt" msgid="6069085993355887748">"Usunąć Kalibrator System UI z Ustawień i przestać używać wszystkich jego funkcji?"</string>
-    <!-- no translation found for enable_bluetooth_title (5027037706500635269) -->
-    <skip />
-    <!-- no translation found for enable_bluetooth_message (9106595990708985385) -->
-    <skip />
-    <!-- no translation found for enable_bluetooth_confirmation_ok (6258074250948309715) -->
-    <skip />
+    <string name="enable_bluetooth_title" msgid="5027037706500635269">"Włączyć Bluetooth?"</string>
+    <string name="enable_bluetooth_message" msgid="9106595990708985385">"Aby połączyć klawiaturę z tabletem, musisz najpierw włączyć Bluetooth."</string>
+    <string name="enable_bluetooth_confirmation_ok" msgid="6258074250948309715">"Włącz"</string>
 </resources>

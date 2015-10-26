@@ -25,10 +25,11 @@
     <string name="status_bar_recent_inspect_item_title" msgid="7793624864528818569">"Informacije o aplikaciji"</string>
     <string name="status_bar_no_recent_apps" msgid="7374907845131203189">"Ovdje se pojavljuju vaši nedavni zasloni"</string>
     <string name="status_bar_accessibility_dismiss_recents" msgid="4576076075226540105">"Odbaci nedavne aplikacije"</string>
-  <plurals name="status_bar_accessibility_recent_apps">
-    <item quantity="one" msgid="3969335317929254918">"1 zaslon u Pregledu"</item>
-    <item quantity="other" msgid="5523506463832158203">"Broj zaslona u Pregledu: %d"</item>
-  </plurals>
+    <plurals name="status_bar_accessibility_recent_apps" formatted="false" msgid="9138535907802238759">
+      <item quantity="one">%d zaslon u Pregledu</item>
+      <item quantity="few">%d zaslona u Pregledu</item>
+      <item quantity="other">%d zaslona u Pregledu</item>
+    </plurals>
     <string name="status_bar_no_notifications_title" msgid="4755261167193833213">"Bez obavijesti"</string>
     <string name="status_bar_ongoing_events_title" msgid="1682504513316879202">"U tijeku"</string>
     <string name="status_bar_latest_events_title" msgid="6594767438577593172">"Obavijesti"</string>
@@ -428,10 +429,7 @@
     <string name="tuner_toast" msgid="603429811084428439">"Čestitamo! Ugađanje korisničkog sučelja sustava dodano je u Postavke"</string>
     <string name="remove_from_settings" msgid="8389591916603406378">"Ukloni iz Postavki"</string>
     <string name="remove_from_settings_prompt" msgid="6069085993355887748">"Želite li ukloniti Ugađanje korisničkog sučelja sustava iz Postavki i prestati upotrebljavati njegove značajke?"</string>
-    <!-- no translation found for enable_bluetooth_title (5027037706500635269) -->
-    <skip />
-    <!-- no translation found for enable_bluetooth_message (9106595990708985385) -->
-    <skip />
-    <!-- no translation found for enable_bluetooth_confirmation_ok (6258074250948309715) -->
-    <skip />
+    <string name="enable_bluetooth_title" msgid="5027037706500635269">"Želite li uključiti Bluetooth?"</string>
+    <string name="enable_bluetooth_message" msgid="9106595990708985385">"Da biste povezali tipkovnicu s tabletom, morate uključiti Bluetooth."</string>
+    <string name="enable_bluetooth_confirmation_ok" msgid="6258074250948309715">"Uključi"</string>
 </resources>

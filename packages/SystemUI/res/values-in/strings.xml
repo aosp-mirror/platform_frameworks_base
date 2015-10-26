@@ -25,10 +25,10 @@
     <string name="status_bar_recent_inspect_item_title" msgid="7793624864528818569">"Info aplikasi"</string>
     <string name="status_bar_no_recent_apps" msgid="7374907845131203189">"Layar terkini Anda muncul di sini"</string>
     <string name="status_bar_accessibility_dismiss_recents" msgid="4576076075226540105">"Tutup aplikasi terbaru"</string>
-  <plurals name="status_bar_accessibility_recent_apps">
-    <item quantity="one" msgid="3969335317929254918">"1 layar dalam Ringkasan"</item>
-    <item quantity="other" msgid="5523506463832158203">"%d layar dalam Ringkasan"</item>
-  </plurals>
+    <plurals name="status_bar_accessibility_recent_apps" formatted="false" msgid="9138535907802238759">
+      <item quantity="other">%d layar dalam Ringkasan</item>
+      <item quantity="one">1 layar dalam Ringkasan</item>
+    </plurals>
     <string name="status_bar_no_notifications_title" msgid="4755261167193833213">"Tidak ada pemberitahuan"</string>
     <string name="status_bar_ongoing_events_title" msgid="1682504513316879202">"Berkelanjutan"</string>
     <string name="status_bar_latest_events_title" msgid="6594767438577593172">"Notifikasi"</string>
@@ -428,10 +428,7 @@
     <string name="tuner_toast" msgid="603429811084428439">"Selamat! Penyetel Antarmuka Pengguna Sistem telah ditambahkan ke Setelan"</string>
     <string name="remove_from_settings" msgid="8389591916603406378">"Hapus dari Setelan"</string>
     <string name="remove_from_settings_prompt" msgid="6069085993355887748">"Hapus Penyetel Antarmuka Pengguna Sistem dari Setelan dan berhenti menggunakan semua fiturnya?"</string>
-    <!-- no translation found for enable_bluetooth_title (5027037706500635269) -->
-    <skip />
-    <!-- no translation found for enable_bluetooth_message (9106595990708985385) -->
-    <skip />
-    <!-- no translation found for enable_bluetooth_confirmation_ok (6258074250948309715) -->
-    <skip />
+    <string name="enable_bluetooth_title" msgid="5027037706500635269">"Aktifkan Bluetooth?"</string>
+    <string name="enable_bluetooth_message" msgid="9106595990708985385">"Untuk menghubungkan keyboard dengan tablet, terlebih dahulu aktifkan Bluetooth."</string>
+    <string name="enable_bluetooth_confirmation_ok" msgid="6258074250948309715">"Aktifkan"</string>
 </resources>

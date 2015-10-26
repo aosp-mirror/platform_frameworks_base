@@ -25,10 +25,11 @@
     <string name="status_bar_recent_inspect_item_title" msgid="7793624864528818569">"Informații despre aplicație"</string>
     <string name="status_bar_no_recent_apps" msgid="7374907845131203189">"Ecranele dvs. recente apar aici"</string>
     <string name="status_bar_accessibility_dismiss_recents" msgid="4576076075226540105">"Renunţaţi la aplicațiile recente"</string>
-  <plurals name="status_bar_accessibility_recent_apps">
-    <item quantity="one" msgid="3969335317929254918">"1 ecran în Vizualizare generală"</item>
-    <item quantity="other" msgid="5523506463832158203">"%d ecrane în Vizualizare generală"</item>
-  </plurals>
+    <plurals name="status_bar_accessibility_recent_apps" formatted="false" msgid="9138535907802238759">
+      <item quantity="few">%d ecrane în Recente</item>
+      <item quantity="other">%d de ecrane în Recente</item>
+      <item quantity="one">Un ecran în Recente</item>
+    </plurals>
     <string name="status_bar_no_notifications_title" msgid="4755261167193833213">"Nicio notificare"</string>
     <string name="status_bar_ongoing_events_title" msgid="1682504513316879202">"În desfăşurare"</string>
     <string name="status_bar_latest_events_title" msgid="6594767438577593172">"Notificări"</string>
@@ -428,10 +429,7 @@
     <string name="tuner_toast" msgid="603429811084428439">"Felicitări! System UI Tuner a fost adăugat în Setări"</string>
     <string name="remove_from_settings" msgid="8389591916603406378">"Eliminați din Setări"</string>
     <string name="remove_from_settings_prompt" msgid="6069085993355887748">"Eliminați System UI Tuner din Setări și încetați utilizarea tuturor funcțiilor sale?"</string>
-    <!-- no translation found for enable_bluetooth_title (5027037706500635269) -->
-    <skip />
-    <!-- no translation found for enable_bluetooth_message (9106595990708985385) -->
-    <skip />
-    <!-- no translation found for enable_bluetooth_confirmation_ok (6258074250948309715) -->
-    <skip />
+    <string name="enable_bluetooth_title" msgid="5027037706500635269">"Activați Bluetooth?"</string>
+    <string name="enable_bluetooth_message" msgid="9106595990708985385">"Pentru a conecta tastatura la tabletă, mai întâi trebuie să activați Bluetooth."</string>
+    <string name="enable_bluetooth_confirmation_ok" msgid="6258074250948309715">"Activați"</string>
 </resources>

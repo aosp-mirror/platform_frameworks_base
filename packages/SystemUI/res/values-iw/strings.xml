@@ -25,10 +25,12 @@
     <string name="status_bar_recent_inspect_item_title" msgid="7793624864528818569">"פרטי אפליקציה"</string>
     <string name="status_bar_no_recent_apps" msgid="7374907845131203189">"המסכים האחרונים מופיעים כאן"</string>
     <string name="status_bar_accessibility_dismiss_recents" msgid="4576076075226540105">"סגור אפליקציות אחרונות"</string>
-  <plurals name="status_bar_accessibility_recent_apps">
-    <item quantity="one" msgid="3969335317929254918">"מסך אחד ב\'סקירה\'"</item>
-    <item quantity="other" msgid="5523506463832158203">"‏%d מסכים ב\'סקירה\'"</item>
-  </plurals>
+    <plurals name="status_bar_accessibility_recent_apps" formatted="false" msgid="9138535907802238759">
+      <item quantity="two">‏%d מסכים ב’סקירה‘</item>
+      <item quantity="many">‏%d מסכים ב’סקירה‘</item>
+      <item quantity="other">‏%d מסכים ב’סקירה‘</item>
+      <item quantity="one">מסך אחד ב’סקירה‘</item>
+    </plurals>
     <string name="status_bar_no_notifications_title" msgid="4755261167193833213">"אין התראות"</string>
     <string name="status_bar_ongoing_events_title" msgid="1682504513316879202">"מתמשך"</string>
     <string name="status_bar_latest_events_title" msgid="6594767438577593172">"התראות"</string>
@@ -428,10 +430,7 @@
     <string name="tuner_toast" msgid="603429811084428439">"‏מזל טוב! System UI Tuner נוסף ל\'הגדרות\'"</string>
     <string name="remove_from_settings" msgid="8389591916603406378">"הסר מההגדרות"</string>
     <string name="remove_from_settings_prompt" msgid="6069085993355887748">"‏האם להסיר את System UI Tuner ולהפסיק להשתמש בכל התכונות שלו?"</string>
-    <!-- no translation found for enable_bluetooth_title (5027037706500635269) -->
-    <skip />
-    <!-- no translation found for enable_bluetooth_message (9106595990708985385) -->
-    <skip />
-    <!-- no translation found for enable_bluetooth_confirmation_ok (6258074250948309715) -->
-    <skip />
+    <string name="enable_bluetooth_title" msgid="5027037706500635269">"‏האם להפעיל את ה-Bluetooth?"</string>
+    <string name="enable_bluetooth_message" msgid="9106595990708985385">"‏כדי לחבר את המקלדת לטאבלט, תחילה עליך להפעיל את ה-Bluetooth."</string>
+    <string name="enable_bluetooth_confirmation_ok" msgid="6258074250948309715">"הפעל"</string>
 </resources>

@@ -25,10 +25,10 @@
     <string name="status_bar_recent_inspect_item_title" msgid="7793624864528818569">"ആപ്പ് വിവരം"</string>
     <string name="status_bar_no_recent_apps" msgid="7374907845131203189">"നിങ്ങളുടെ പുതിയ സ്ക്രീനുകൾ ഇവിടെ ദൃശ്യമാകുന്നു"</string>
     <string name="status_bar_accessibility_dismiss_recents" msgid="4576076075226540105">"സമീപകാല അപ്ലിക്കേഷനുകൾ നിരസിക്കുക"</string>
-  <plurals name="status_bar_accessibility_recent_apps">
-    <item quantity="one" msgid="3969335317929254918">"കാഴ്ചയിലെ ഒരു സ്‌ക്രീൻ"</item>
-    <item quantity="other" msgid="5523506463832158203">"കാഴ്ചയിലെ %d സ്‌ക്രീനുകൾ"</item>
-  </plurals>
+    <plurals name="status_bar_accessibility_recent_apps" formatted="false" msgid="9138535907802238759">
+      <item quantity="other">ചുരുക്കവിവരണത്തിലെ %d സ്‌ക്രീനുകൾ</item>
+      <item quantity="one">ചുരുക്കവിവരണത്തിലെ ഒരു സ്‌ക്രീൻ</item>
+    </plurals>
     <string name="status_bar_no_notifications_title" msgid="4755261167193833213">"അറിയിപ്പുകൾ ഒന്നുമില്ല"</string>
     <string name="status_bar_ongoing_events_title" msgid="1682504513316879202">"നടന്നുകൊണ്ടിരിക്കുന്നവ"</string>
     <string name="status_bar_latest_events_title" msgid="6594767438577593172">"അറിയിപ്പുകൾ"</string>
@@ -428,10 +428,7 @@
     <string name="tuner_toast" msgid="603429811084428439">"അഭിനന്ദനങ്ങൾ! ക്രമീകരണത്തിലേക്ക് സിസ്റ്റം UI ട്യൂണർ ചേർത്തിരിക്കുന്നു"</string>
     <string name="remove_from_settings" msgid="8389591916603406378">"ക്രമീകരണത്തിൽ നിന്ന് നീക്കംചെയ്യുക"</string>
     <string name="remove_from_settings_prompt" msgid="6069085993355887748">"ക്രമീകരണത്തിൽ നിന്ന് സിസ്റ്റം UI ട്യൂണർ നീക്കംചെയ്യുകയും അതിന്റെ ഫീച്ചറുകളെല്ലാം ഉപയോഗിക്കുന്നത് നിർത്തുകയും ചെയ്യണോ?"</string>
-    <!-- no translation found for enable_bluetooth_title (5027037706500635269) -->
-    <skip />
-    <!-- no translation found for enable_bluetooth_message (9106595990708985385) -->
-    <skip />
-    <!-- no translation found for enable_bluetooth_confirmation_ok (6258074250948309715) -->
-    <skip />
+    <string name="enable_bluetooth_title" msgid="5027037706500635269">"Bluetooth ഓണാക്കണോ?"</string>
+    <string name="enable_bluetooth_message" msgid="9106595990708985385">"നിങ്ങളുടെ ടാബ്‌ലെറ്റുമായി കീബോർഡ് കണക്റ്റുചെയ്യുന്നതിന്, ആദ്യം Bluetooth ഓണാക്കേണ്ടതുണ്ട്."</string>
+    <string name="enable_bluetooth_confirmation_ok" msgid="6258074250948309715">"ഓണാക്കുക"</string>
 </resources>

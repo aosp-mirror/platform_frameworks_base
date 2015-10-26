@@ -25,10 +25,10 @@
     <string name="status_bar_recent_inspect_item_title" msgid="7793624864528818569">"Uygulama bilgileri"</string>
     <string name="status_bar_no_recent_apps" msgid="7374907845131203189">"Son ekranlarınız burada görünür"</string>
     <string name="status_bar_accessibility_dismiss_recents" msgid="4576076075226540105">"Son uygulamaları kapat"</string>
-  <plurals name="status_bar_accessibility_recent_apps">
-    <item quantity="one" msgid="3969335317929254918">"Genel Bakış\'ta 1 ekran"</item>
-    <item quantity="other" msgid="5523506463832158203">"Genel Bakış\'ta %d ekran"</item>
-  </plurals>
+    <plurals name="status_bar_accessibility_recent_apps" formatted="false" msgid="9138535907802238759">
+      <item quantity="other">Genel Bakış\'ta %d ekran</item>
+      <item quantity="one">Genel Bakış\'ta 1 ekran</item>
+    </plurals>
     <string name="status_bar_no_notifications_title" msgid="4755261167193833213">"Bildirim yok"</string>
     <string name="status_bar_ongoing_events_title" msgid="1682504513316879202">"Sürüyor"</string>
     <string name="status_bar_latest_events_title" msgid="6594767438577593172">"Bildirimler"</string>
@@ -428,10 +428,7 @@
     <string name="tuner_toast" msgid="603429811084428439">"Tebrikler! Sistem Kullanıcı Arayüzü Ayarlayıcı Ayarlar\'a eklendi"</string>
     <string name="remove_from_settings" msgid="8389591916603406378">"Ayarlar\'dan kaldır"</string>
     <string name="remove_from_settings_prompt" msgid="6069085993355887748">"Sistem Kullanıcı Arayüzü Ayarlayıcısı Ayarlar\'dan kaldırılsın ve tüm özelliklerinin kullanılması durdurulsun mu?"</string>
-    <!-- no translation found for enable_bluetooth_title (5027037706500635269) -->
-    <skip />
-    <!-- no translation found for enable_bluetooth_message (9106595990708985385) -->
-    <skip />
-    <!-- no translation found for enable_bluetooth_confirmation_ok (6258074250948309715) -->
-    <skip />
+    <string name="enable_bluetooth_title" msgid="5027037706500635269">"Bluetooth açılsın mı?"</string>
+    <string name="enable_bluetooth_message" msgid="9106595990708985385">"Klavyenizi tabletinize bağlamak için önce Bluetooth\'u açmanız gerekir."</string>
+    <string name="enable_bluetooth_confirmation_ok" msgid="6258074250948309715">"Aç"</string>
 </resources>

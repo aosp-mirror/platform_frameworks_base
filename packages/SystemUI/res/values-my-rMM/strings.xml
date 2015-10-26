@@ -25,10 +25,10 @@
     <string name="status_bar_recent_inspect_item_title" msgid="7793624864528818569">"အပ်ပလီကေးရှင်း အချက်အလက်များ"</string>
     <string name="status_bar_no_recent_apps" msgid="7374907845131203189">"သင်၏ မကြာမီက မျက်နှာပြင်များ ဒီမှာ ပေါ်လာကြမည်"</string>
     <string name="status_bar_accessibility_dismiss_recents" msgid="4576076075226540105">"လတ်တလောအပ်ပလီကေးရှင်းများအား ဖယ်ထုတ်မည်"</string>
-  <plurals name="status_bar_accessibility_recent_apps">
-    <item quantity="one" msgid="3969335317929254918">"ခြုံကြည့်မှု ထဲက မျက်နှာပြင် ၁ ခု"</item>
-    <item quantity="other" msgid="5523506463832158203">"ခြုံကြည့်မှု ထဲက မျက်နှာပြင် %d ခု"</item>
-  </plurals>
+    <plurals name="status_bar_accessibility_recent_apps" formatted="false" msgid="9138535907802238759">
+      <item quantity="other">ခြုံကြည့်မှုထဲမှ မျက်နှာပြင် %d ခု</item>
+      <item quantity="one">ခြုံကြည့်မှုထဲမှ မျက်နှာပြင် 1 ခု</item>
+    </plurals>
     <string name="status_bar_no_notifications_title" msgid="4755261167193833213">"အကြောင်းကြားချက်များ မရှိ"</string>
     <string name="status_bar_ongoing_events_title" msgid="1682504513316879202">"လက်ရှိအသုံးပြုမှု"</string>
     <string name="status_bar_latest_events_title" msgid="6594767438577593172">"အကြောင်းကြားချက်များ။"</string>
@@ -428,10 +428,7 @@
     <string name="tuner_toast" msgid="603429811084428439">"ဂုဏ်ပြုပါရစေ! စနစ် UI ဖမ်းစက်ကို ဆက်တင်ထဲသို့ ထည့်ပြီးပြီ။"</string>
     <string name="remove_from_settings" msgid="8389591916603406378">"ဆက်တင် အထဲမှ ဖယ်ရှားရန်"</string>
     <string name="remove_from_settings_prompt" msgid="6069085993355887748">"ဆက်တင် အထဲမှ စနစ် UI ဖမ်းစက်ကို ဖယ်ရှားလျက် ၎င်း၏ အင်္ဂါရပ်များ အားလုံး အသုံးပြုမှု ရပ်တန့်ရမလား?"</string>
-    <!-- no translation found for enable_bluetooth_title (5027037706500635269) -->
-    <skip />
-    <!-- no translation found for enable_bluetooth_message (9106595990708985385) -->
-    <skip />
-    <!-- no translation found for enable_bluetooth_confirmation_ok (6258074250948309715) -->
-    <skip />
+    <string name="enable_bluetooth_title" msgid="5027037706500635269">"ဘလူးတုသ် ဖွင့်ရမလား။"</string>
+    <string name="enable_bluetooth_message" msgid="9106595990708985385">"ကီးဘုတ်ကို တပ်ဘလက်နှင့် ချိတ်ဆက်ရန်၊ ပမထဦးစွာ ဘလူးတုသ်ကို ဖွင့်ပါ။"</string>
+    <string name="enable_bluetooth_confirmation_ok" msgid="6258074250948309715">"ဖွင့်ပါ"</string>
 </resources>

@@ -25,10 +25,10 @@
     <string name="status_bar_recent_inspect_item_title" msgid="7793624864528818569">"Info om appen"</string>
     <string name="status_bar_no_recent_apps" msgid="7374907845131203189">"Dina senaste skärmar visas här"</string>
     <string name="status_bar_accessibility_dismiss_recents" msgid="4576076075226540105">"Avvisa nya appar"</string>
-  <plurals name="status_bar_accessibility_recent_apps">
-    <item quantity="one" msgid="3969335317929254918">"En skärm i Översikten"</item>
-    <item quantity="other" msgid="5523506463832158203">"%d skärmar i Översikten"</item>
-  </plurals>
+    <plurals name="status_bar_accessibility_recent_apps" formatted="false" msgid="9138535907802238759">
+      <item quantity="other">%d skärmar i översikten</item>
+      <item quantity="one">En skärm i översikten</item>
+    </plurals>
     <string name="status_bar_no_notifications_title" msgid="4755261167193833213">"Inga aviseringar"</string>
     <string name="status_bar_ongoing_events_title" msgid="1682504513316879202">"Pågående"</string>
     <string name="status_bar_latest_events_title" msgid="6594767438577593172">"Meddelanden"</string>
@@ -314,9 +314,9 @@
     <string name="speed_bump_explanation" msgid="1288875699658819755">"Mindre brådskande aviseringar nedan"</string>
     <string name="notification_tap_again" msgid="8524949573675922138">"Tryck igen för att öppna"</string>
     <string name="keyguard_unlock" msgid="8043466894212841998">"Svep uppåt om du vill låsa upp"</string>
-    <string name="phone_hint" msgid="4872890986869209950">"Dra från ikonen och öppna telefonen"</string>
-    <string name="voice_hint" msgid="8939888732119726665">"Dra från ikonen och öppna röstassistenten"</string>
-    <string name="camera_hint" msgid="7939688436797157483">"Dra från ikonen och öppna kameran"</string>
+    <string name="phone_hint" msgid="4872890986869209950">"Svep från ikonen och öppna telefonen"</string>
+    <string name="voice_hint" msgid="8939888732119726665">"Svep från ikonen och öppna röstassistenten"</string>
+    <string name="camera_hint" msgid="7939688436797157483">"Svep från ikonen och öppna kameran"</string>
     <string name="interruption_level_none_with_warning" msgid="5114872171614161084">"Total tystnad. Även skärmläsningsprogram tystas."</string>
     <string name="interruption_level_none" msgid="6000083681244492992">"Helt tyst"</string>
     <string name="interruption_level_priority" msgid="6426766465363855505">"Bara prioriterade"</string>
@@ -428,10 +428,7 @@
     <string name="tuner_toast" msgid="603429811084428439">"Grattis! Inställningar för systemgränssnitt har lagts till i inställningarna."</string>
     <string name="remove_from_settings" msgid="8389591916603406378">"Ta bort från inställningarna"</string>
     <string name="remove_from_settings_prompt" msgid="6069085993355887748">"Vill du ta bort inställningar för systemgränssnitt från inställningarna och sluta använda alla tillhörande funktioner?"</string>
-    <!-- no translation found for enable_bluetooth_title (5027037706500635269) -->
-    <skip />
-    <!-- no translation found for enable_bluetooth_message (9106595990708985385) -->
-    <skip />
-    <!-- no translation found for enable_bluetooth_confirmation_ok (6258074250948309715) -->
-    <skip />
+    <string name="enable_bluetooth_title" msgid="5027037706500635269">"Vill du aktivera Bluetooth?"</string>
+    <string name="enable_bluetooth_message" msgid="9106595990708985385">"Om du vill ansluta tangentbordet till surfplattan måste du först aktivera Bluetooth."</string>
+    <string name="enable_bluetooth_confirmation_ok" msgid="6258074250948309715">"Aktivera"</string>
 </resources>

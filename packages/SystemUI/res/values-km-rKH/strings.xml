@@ -25,10 +25,10 @@
     <string name="status_bar_recent_inspect_item_title" msgid="7793624864528818569">"ព័ត៌មាន​កម្មវិធី"</string>
     <string name="status_bar_no_recent_apps" msgid="7374907845131203189">"អេក្រង់​បច្ចុប្បន្ន​របស់​អ្នក​បង្ហាញ​នៅ​ទីនេះ"</string>
     <string name="status_bar_accessibility_dismiss_recents" msgid="4576076075226540105">"បដិសេធ​កម្មវិធី​ថ្មីៗ"</string>
-  <plurals name="status_bar_accessibility_recent_apps">
-    <item quantity="one" msgid="3969335317929254918">"អេក្រង់​ 1 ក្នុង​ទិដ្ឋភាព"</item>
-    <item quantity="other" msgid="5523506463832158203">"អេក្រង់ %d ក្នុង​ទិដ្ឋភាព"</item>
-  </plurals>
+    <plurals name="status_bar_accessibility_recent_apps" formatted="false" msgid="9138535907802238759">
+      <item quantity="other">អេក្រង់ %d ក្នុងទិដ្ឋភាព</item>
+      <item quantity="one">អេក្រង់ 1 ក្នុងទិដ្ឋភាព</item>
+    </plurals>
     <string name="status_bar_no_notifications_title" msgid="4755261167193833213">"គ្មាន​ការ​ជូន​ដំណឹង"</string>
     <string name="status_bar_ongoing_events_title" msgid="1682504513316879202">"បន្ត"</string>
     <string name="status_bar_latest_events_title" msgid="6594767438577593172">"ការ​ជូន​ដំណឹង"</string>
@@ -428,10 +428,7 @@
     <string name="tuner_toast" msgid="603429811084428439">"សូមអបអរសាទរ! កម្មវិធីសម្រួល UI ប្រព័ន្ធត្រូវបានបន្ថែមទៅការកំណត់ហើយ"</string>
     <string name="remove_from_settings" msgid="8389591916603406378">"យកចេញពីការកំណត់"</string>
     <string name="remove_from_settings_prompt" msgid="6069085993355887748">"យកកម្មវិធីសម្រួល UI ប្រព័ន្ធចេញពីការកំណត់ ហើយឈប់ប្រើលក្ខណៈពិសេសរបស់វាទាំងអស់?"</string>
-    <!-- no translation found for enable_bluetooth_title (5027037706500635269) -->
-    <skip />
-    <!-- no translation found for enable_bluetooth_message (9106595990708985385) -->
-    <skip />
-    <!-- no translation found for enable_bluetooth_confirmation_ok (6258074250948309715) -->
-    <skip />
+    <string name="enable_bluetooth_title" msgid="5027037706500635269">"បើកប៊្លូធូសឬ?"</string>
+    <string name="enable_bluetooth_message" msgid="9106595990708985385">"ដើម្បីភ្ជាប់ក្តារចុចរបស់អ្នកជាមួយនឹងថេប្លេតរបស់អ្នក អ្នកត្រូវតែបើកប៊្លូធូសជាមុនសិន។"</string>
+    <string name="enable_bluetooth_confirmation_ok" msgid="6258074250948309715">"បើក"</string>
 </resources>

@@ -25,10 +25,10 @@
     <string name="status_bar_recent_inspect_item_title" msgid="7793624864528818569">"অ্যাপ্লিকেশানের তথ্য"</string>
     <string name="status_bar_no_recent_apps" msgid="7374907845131203189">"আপনার সাম্প্রতিক স্ক্রীনগুলো এখানে দেখা যাবে"</string>
     <string name="status_bar_accessibility_dismiss_recents" msgid="4576076075226540105">"সাম্প্রতিক অ্যাপ্লিকেশানগুলি খারিজ করুন"</string>
-  <plurals name="status_bar_accessibility_recent_apps">
-    <item quantity="one" msgid="3969335317929254918">"এক নজরে-এ ১টি স্ক্রীন"</item>
-    <item quantity="other" msgid="5523506463832158203">"এক নজরে-এ %dটি স্ক্রীন"</item>
-  </plurals>
+    <plurals name="status_bar_accessibility_recent_apps" formatted="false" msgid="9138535907802238759">
+      <item quantity="one">ওভারভিউ-এ %dটি স্ক্রীন</item>
+      <item quantity="other">ওভারভিউ-এ %dটি স্ক্রীন</item>
+    </plurals>
     <string name="status_bar_no_notifications_title" msgid="4755261167193833213">"কোনো বিজ্ঞপ্তি নেই"</string>
     <string name="status_bar_ongoing_events_title" msgid="1682504513316879202">"চলতে-থাকা"</string>
     <string name="status_bar_latest_events_title" msgid="6594767438577593172">"বিজ্ঞপ্তিগুলি"</string>
@@ -428,10 +428,7 @@
     <string name="tuner_toast" msgid="603429811084428439">"অভিনন্দন! সেটিংস -এ সিস্টেম UI টিউনার যোগ করা হয়েছে"</string>
     <string name="remove_from_settings" msgid="8389591916603406378">"সেটিংস থেকে সরান"</string>
     <string name="remove_from_settings_prompt" msgid="6069085993355887748">"সেটিংস থেকে সিস্টেম UI টিউনার সরাতে এবং এটির সমস্ত বৈশিষ্ট্য ব্যবহার করা বন্ধ করতে চান?"</string>
-    <!-- no translation found for enable_bluetooth_title (5027037706500635269) -->
-    <skip />
-    <!-- no translation found for enable_bluetooth_message (9106595990708985385) -->
-    <skip />
-    <!-- no translation found for enable_bluetooth_confirmation_ok (6258074250948309715) -->
-    <skip />
+    <string name="enable_bluetooth_title" msgid="5027037706500635269">"Bluetooth চালু করবেন?"</string>
+    <string name="enable_bluetooth_message" msgid="9106595990708985385">"আপনার ট্যাবলেটের সাথে আপনার কীবোর্ড সংযুক্ত করতে, আপনাকে প্রথমে Bluetooth চালু করতে হবে।"</string>
+    <string name="enable_bluetooth_confirmation_ok" msgid="6258074250948309715">"চালু করুন"</string>
 </resources>
