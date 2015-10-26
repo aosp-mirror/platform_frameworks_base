@@ -83,16 +83,15 @@ void BM_TessellateShadows_roundrect_opaque::Run(int iters) {
     ShadowTestData shadowData;
     createShadowTestData(&shadowData);
     SkPath path;
-    path.reset();
-    path.addRoundRect(SkRect::MakeLTRB(0, 0, 100, 100), 5, 5);
+    path.addRoundRect(SkRect::MakeWH(100, 100), 5, 5);
 
     StartBenchmarkTiming();
     for (int i = 0; i < iters; i++) {
-        std::unique_ptr<VertexBuffer> ambient(new VertexBuffer);
-        std::unique_ptr<VertexBuffer> spot(new VertexBuffer);
-        tessellateShadows(shadowData, true, path, ambient.get(), spot.get());
-        MicroBench::DoNotOptimize(ambient.get());
-        MicroBench::DoNotOptimize(spot.get());
+        VertexBuffer ambient;
+        VertexBuffer spot;
+        tessellateShadows(shadowData, true, path, &ambient, &spot);
+        MicroBench::DoNotOptimize(&ambient);
+        MicroBench::DoNotOptimize(&spot);
     }
     StopBenchmarkTiming();
 }
