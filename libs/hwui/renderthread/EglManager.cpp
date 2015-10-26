@@ -333,7 +333,7 @@ bool EglManager::swapBuffers(const Frame& frame, const SkRect& screenDirty) {
     if (CC_LIKELY(err == EGL_SUCCESS)) {
         return true;
     }
-    if (err == EGL_BAD_SURFACE) {
+    if (err == EGL_BAD_SURFACE || err == EGL_BAD_NATIVE_WINDOW) {
         // For some reason our surface was destroyed out from under us
         // This really shouldn't happen, but if it does we can recover easily
         // by just not trying to use the surface anymore
