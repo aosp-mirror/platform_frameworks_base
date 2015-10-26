@@ -14,7 +14,7 @@
      limitations under the License.
 -->
 
-<com.android.documentsui.DocListItem xmlns:android="http://schemas.android.com/apk/res/android"
+<com.android.documentsui.ListItem xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:background="@drawable/item_doc_list_background"
@@ -137,4 +137,4 @@
 
     </LinearLayout>
 
-</com.android.documentsui.DocListItem>
+</com.android.documentsui.ListItem>
