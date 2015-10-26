@@ -16,13 +16,6 @@
 
 #include "RenderNode.h"
 
-#include <algorithm>
-#include <string>
-
-#include <SkCanvas.h>
-#include <algorithm>
-
-
 #include "DamageAccumulator.h"
 #include "Debug.h"
 #if HWUI_NEW_OPS
@@ -38,6 +31,12 @@
 
 #include "protos/hwui.pb.h"
 #include "protos/ProtoHelpers.h"
+
+#include <SkCanvas.h>
+
+#include <algorithm>
+#include <sstream>
+#include <string>
 
 namespace android {
 namespace uirenderer {
@@ -269,9 +268,16 @@ void RenderNode::pushLayerUpdate(TreeInfo& info) {
     if (!mLayer) {
         Caches::getInstance().dumpMemoryUsage();
         if (info.errorHandler) {
-            std::string msg = "Unable to create layer for ";
-            msg += getName();
-            info.errorHandler->onError(msg);
+            std::ostringstream err;
+            err << "Unable to create layer for " << getName();
+            const int maxTextureSize = Caches::getInstance().maxTextureSize;
+            if (getWidth() > maxTextureSize || getHeight() > maxTextureSize) {
+                err << ", size " << getWidth() << "x" << getHeight()
+                        << " exceeds max size " << maxTextureSize;
+            } else {
+                err << ", see logcat for more info";
+            }
+            info.errorHandler->onError(err.str());
         }
         return;
     }

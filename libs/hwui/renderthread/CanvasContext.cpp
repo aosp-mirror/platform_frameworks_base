@@ -266,11 +266,11 @@ void CanvasContext::draw() {
 
     Frame frame = mEglManager.beginFrame(mEglSurface);
 
-    if (frame.width() != lastFrameWidth || frame.height() != lastFrameHeight) {
+    if (frame.width() != mLastFrameWidth || frame.height() != mLastFrameHeight) {
         // can't rely on prior content of window if viewport size changes
         dirty.setEmpty();
-        lastFrameWidth = frame.width();
-        lastFrameHeight = frame.height();
+        mLastFrameWidth = frame.width();
+        mLastFrameHeight = frame.height();
     } else if (mHaveNewSurface || frame.bufferAge() == 0) {
         // New surface needs a full draw
         dirty.setEmpty();
