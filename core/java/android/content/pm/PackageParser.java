@@ -3220,6 +3220,9 @@ public class PackageParser {
                     R.styleable.AndroidManifestActivity_resizeableActivity,
                     owner.applicationInfo.targetSdkVersion >= Build.VERSION_CODES.N);
 
+            a.info.supportsPip = a.info.resizeable ? sa.getBoolean(
+                    R.styleable.AndroidManifestActivity_supportsPictureInPicture, false) : false;
+
             a.info.screenOrientation = sa.getInt(
                     R.styleable.AndroidManifestActivity_screenOrientation,
                     ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED);

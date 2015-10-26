@@ -154,7 +154,7 @@ public class Am extends BaseCommand {
                 "       am stack movetask <TASK_ID> <STACK_ID> [true|false]\n" +
                 "       am stack resize <STACK_ID> <LEFT,TOP,RIGHT,BOTTOM>\n" +
                 "       am stack size-docked-stack-test: <STEP_SIZE> <l|t|r|b> [DELAY_MS]\n" +
-                "       am stack split <STACK_ID> <v|h> [INTENT]\n" +
+                "       am stack move-top-activity-to-pinned-stack: <STACK_ID> <LEFT,TOP,RIGHT,BOTTOM>\n" +
                 "       am stack positiontask <TASK_ID> <STACK_ID> <POSITION>\n" +
                 "       am stack list\n" +
                 "       am stack info <STACK_ID>\n" +
@@ -297,11 +297,9 @@ public class Am extends BaseCommand {
                 "   <STEP_SIZE> increments from the side <l>eft, <t>op, <r>ight, or <b>ottom\n" +
                 "   applying the optional [DELAY_MS] between each step.\n" +
                 "\n" +
-                "am stack split: split <STACK_ID> into 2 stacks <v>ertically or <h>orizontally\n" +
-                "   starting the new stack with [INTENT] if specified. If [INTENT] isn't\n" +
-                "   specified and the current stack has more than one task, then the top task\n" +
-                "   of the current task will be moved to the new stack. Command will also force\n" +
-                "   all current tasks in both stacks to be resizeable.\n" +
+                "am stack move-top-activity-to-pinned-stack: moves the top activity from\n" +
+                "   <STACK_ID> to the pinned stack using <LEFT,TOP,RIGHT,BOTTOM> for the\n" +
+                "   bounds of the pinned stack.\n" +
                 "\n" +
                 "am stack positiontask: place <TASK_ID> in <STACK_ID> at <POSITION>" +
                 "\n" +
@@ -1954,25 +1952,34 @@ public class Am extends BaseCommand {
 
     private void runStack() throws Exception {
         String op = nextArgRequired();
-        if (op.equals("start")) {
-            runStackStart();
-        } else if (op.equals("movetask")) {
-            runStackMoveTask();
-        } else if (op.equals("resize")) {
-            runStackResize();
-        } else if (op.equals("positiontask")) {
-            runStackPositionTask();
-        } else if (op.equals("list")) {
-            runStackList();
-        } else if (op.equals("info")) {
-            runStackInfo();
-        } else if (op.equals("split")) {
-            runStackSplit();
-        } else if (op.equals("size-docked-stack-test")) {
-            runStackSizeDockedStackTest();
-        } else {
-            showError("Error: unknown command '" + op + "'");
-            return;
+        switch (op) {
+            case "start":
+                runStackStart();
+                break;
+            case "movetask":
+                runStackMoveTask();
+                break;
+            case "resize":
+                runStackResize();
+                break;
+            case "positiontask":
+                runStackPositionTask();
+                break;
+            case "list":
+                runStackList();
+                break;
+            case "info":
+                runStackInfo();
+                break;
+            case "move-top-activity-to-pinned-stack":
+                runMoveTopActivityToPinnedStack();
+                break;
+            case "size-docked-stack-test":
+                runStackSizeDockedStackTest();
+                break;
+            default:
+                showError("Error: unknown command '" + op + "'");
+                break;
         }
     }
 
@@ -2072,61 +2079,21 @@ public class Am extends BaseCommand {
         }
     }
 
-    private void runStackSplit() throws Exception {
-        final int stackId = Integer.valueOf(nextArgRequired());
-        final String splitDirection = nextArgRequired();
-        Intent intent = null;
-        try {
-            intent = makeIntent(UserHandle.USER_CURRENT);
-        } catch (IllegalArgumentException e) {
-            // no intent supplied.
+    private void runMoveTopActivityToPinnedStack() throws Exception {
+        int stackId = Integer.valueOf(nextArgRequired());
+        final Rect bounds = getBounds();
+        if (bounds == null) {
+            System.err.println("Error: invalid input bounds");
+            return;
         }
 
         try {
-            final StackInfo currentStackInfo = mAm.getStackInfo(stackId);
-            // Calculate bounds for new and current stack.
-            final Rect currentStackBounds = new Rect(currentStackInfo.bounds);
-            final Rect newStackBounds = new Rect(currentStackInfo.bounds);
-            if ("v".equals(splitDirection)) {
-                currentStackBounds.right = newStackBounds.left = currentStackInfo.bounds.centerX();
-            } else if ("h".equals(splitDirection)) {
-                currentStackBounds.bottom = newStackBounds.top = currentStackInfo.bounds.centerY();
-            } else {
-                showError("Error: unknown split direction '" + splitDirection + "'");
-                return;
+            if (!mAm.moveTopActivityToPinnedStack(stackId, bounds)) {
+                showError("Didn't move top activity to pinned stack.");
             }
-
-            // Create new stack
-            IActivityContainer container = mAm.createStackOnDisplay(currentStackInfo.displayId);
-            if (container == null) {
-                showError("Error: Unable to create new stack...");
-            }
-
-            final int newStackId = container.getStackId();
-
-            if (intent != null) {
-                container.startActivity(intent);
-            } else if (currentStackInfo.taskIds != null && currentStackInfo.taskIds.length > 1) {
-                // Move top task over to new stack
-                mAm.moveTaskToStack(currentStackInfo.taskIds[currentStackInfo.taskIds.length - 1],
-                        newStackId, true);
-            }
-
-            final StackInfo newStackInfo = mAm.getStackInfo(newStackId);
-
-            // Make all tasks in the stacks resizeable.
-            for (int taskId : currentStackInfo.taskIds) {
-                mAm.setTaskResizeable(taskId, true);
-            }
-
-            for (int taskId : newStackInfo.taskIds) {
-                mAm.setTaskResizeable(taskId, true);
-            }
-
-            // Resize stacks
-            mAm.resizeStack(currentStackInfo.stackId, currentStackBounds, false);
-            mAm.resizeStack(newStackInfo.stackId, newStackBounds, false);
         } catch (RemoteException e) {
+            showError("Unable to move top activity: " + e);
+            return;
         }
     }
 

@@ -24,6 +24,7 @@ import static android.app.ActivityManager.FREEFORM_WORKSPACE_STACK_ID;
 import static android.app.ActivityManager.FULLSCREEN_WORKSPACE_STACK_ID;
 import static android.app.ActivityManager.HOME_STACK_ID;
 import static android.app.ActivityManager.INVALID_STACK_ID;
+import static android.app.ActivityManager.PINNED_STACK_ID;
 import static android.app.ActivityManager.RESIZE_MODE_PRESERVE_WINDOW;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 import static com.android.internal.util.XmlUtils.readBooleanAttribute;
@@ -8638,9 +8639,10 @@ public final class ActivityManagerService extends ActivityManagerNative
                 // - a non-null bounds on a non-freeform (fullscreen OR docked) task moves
                 //   that task to freeform
                 // - otherwise the task is not moved
-                // Note it's not allowed to resize a home stack task, or a docked task.
+                // Note it's not allowed to resize a home, docked, or pinned stack task.
                 int stackId = task.stack.mStackId;
-                if (stackId == HOME_STACK_ID || stackId == DOCKED_STACK_ID) {
+                if (stackId == HOME_STACK_ID || stackId == DOCKED_STACK_ID
+                        || stackId == PINNED_STACK_ID) {
                     throw new IllegalArgumentException("trying to resizeTask on a "
                             + "home or docked task");
                 }
@@ -9075,6 +9077,29 @@ public final class ActivityManagerService extends ActivityManagerNative
                 mWindowManager.setDockedStackCreateMode(createMode);
                 mStackSupervisor.moveTaskToStackLocked(
                         taskId, DOCKED_STACK_ID, toTop, !FORCE_FOCUS);
+            } finally {
+                Binder.restoreCallingIdentity(ident);
+            }
+        }
+    }
+
+    /**
+     * Moves the top activity in the input stackId to the pinned stack.
+     *
+     * @param stackId Id of stack to move the top activity to pinned stack.
+     * @param bounds Bounds to use for pinned stack.
+     *
+     * @return True if the top activity of the input stack was successfully moved to the pinned
+     *          stack.
+     */
+    @Override
+    public boolean moveTopActivityToPinnedStack(int stackId, Rect bounds) {
+        enforceCallingPermission(android.Manifest.permission.MANAGE_ACTIVITY_STACKS,
+                "moveTopActivityToPinnedStack()");
+        synchronized (this) {
+            long ident = Binder.clearCallingIdentity();
+            try {
+                return mStackSupervisor.moveTopStackActivityToPinnedStackLocked(stackId, bounds);
             } finally {
                 Binder.restoreCallingIdentity(ident);
             }

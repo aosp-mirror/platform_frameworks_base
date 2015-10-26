@@ -671,6 +671,13 @@ public class ActivityInfo extends ComponentInfo
      */
     public boolean resizeable;
 
+    /**
+     * Value indicating if the activity is supports picture-in-picture form of multi-window mode.
+     * See {@link android.R.attr#supportsPictureInPicture}.
+     * @hide
+     */
+    public boolean supportsPip;
+
     /** @hide */
     public static final int LOCK_TASK_LAUNCH_MODE_DEFAULT = 0;
     /** @hide */
@@ -723,6 +730,7 @@ public class ActivityInfo extends ComponentInfo
         parentActivityName = orig.parentActivityName;
         maxRecents = orig.maxRecents;
         resizeable = orig.resizeable;
+        supportsPip = orig.supportsPip;
         lockTaskLaunchMode = orig.lockTaskLaunchMode;
         layout = orig.layout;
     }
@@ -769,8 +777,8 @@ public class ActivityInfo extends ComponentInfo
         if (uiOptions != 0) {
             pw.println(prefix + " uiOptions=0x" + Integer.toHexString(uiOptions));
         }
-        pw.println(prefix + "resizeable=" + resizeable + " lockTaskLaunchMode="
-                + lockTaskLaunchModeToString(lockTaskLaunchMode));
+        pw.println(prefix + "resizeable=" + resizeable + " supportsPip=" + supportsPip);
+        pw.println(prefix + "lockTaskLaunchMode=" + lockTaskLaunchModeToString(lockTaskLaunchMode));
         if (layout != null) {
             pw.println(prefix + "initialLayout=" + layout.width + "|"
                     + layout.widthFraction + ", " + layout.height + "|"
@@ -806,6 +814,7 @@ public class ActivityInfo extends ComponentInfo
         dest.writeInt(persistableMode);
         dest.writeInt(maxRecents);
         dest.writeInt(resizeable ? 1 : 0);
+        dest.writeInt(supportsPip ? 1 : 0);
         dest.writeInt(lockTaskLaunchMode);
         if (layout != null) {
             dest.writeInt(1);
@@ -847,6 +856,7 @@ public class ActivityInfo extends ComponentInfo
         persistableMode = source.readInt();
         maxRecents = source.readInt();
         resizeable = (source.readInt() == 1);
+        supportsPip = (source.readInt() == 1);
         lockTaskLaunchMode = source.readInt();
         if (source.readInt() == 1) {
             layout = new Layout(source);

@@ -17,12 +17,14 @@
 package com.android.server.wm;
 
 import static android.app.ActivityManager.DOCKED_STACK_ID;
+import static android.app.ActivityManager.FREEFORM_WORKSPACE_STACK_ID;
+import static android.app.ActivityManager.PINNED_STACK_ID;
 import static android.app.ActivityManager.RESIZE_MODE_SYSTEM_SCREEN_ROTATION;
 import static com.android.server.wm.WindowManagerService.TAG;
 import static com.android.server.wm.WindowManagerService.DEBUG_RESIZE;
 import static com.android.server.wm.WindowManagerService.DEBUG_STACK;
 import static com.android.server.wm.WindowManagerService.H.RESIZE_TASK;
-import static android.app.ActivityManager.FREEFORM_WORKSPACE_STACK_ID;
+
 
 import android.content.res.Configuration;
 import android.graphics.Rect;
@@ -187,7 +189,8 @@ class Task implements DimLayer.DimLayerUser {
                 bounds = mTmpRect;
                 mFullscreen = true;
             } else {
-                if (mStack.mStackId != FREEFORM_WORKSPACE_STACK_ID || bounds.isEmpty()) {
+                if ((mStack.mStackId != FREEFORM_WORKSPACE_STACK_ID
+                        && mStack.mStackId != PINNED_STACK_ID) || bounds.isEmpty()) {
                     // ensure bounds are entirely within the display rect
                     if (!bounds.intersect(mTmpRect)) {
                         // Can't set bounds outside the containing display...Sorry!
@@ -241,8 +244,7 @@ class Task implements DimLayer.DimLayerUser {
     private boolean useCurrentBounds() {
         final DisplayContent displayContent = mStack.getDisplayContent();
         if (mFullscreen
-                || mStack.mStackId == FREEFORM_WORKSPACE_STACK_ID
-                || mStack.mStackId == DOCKED_STACK_ID
+                || mStack.allowTaskResize()
                 || displayContent == null
                 || displayContent.getDockedStackLocked() != null) {
             return true;
