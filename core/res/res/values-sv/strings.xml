@@ -1414,7 +1414,7 @@
     </plurals>
     <string name="restr_pin_try_later" msgid="973144472490532377">"Försök igen senare"</string>
     <string name="immersive_cling_title" msgid="8394201622932303336">"Visar på fullskärm"</string>
-    <string name="immersive_cling_description" msgid="3482371193207536040">"Dra nedåt från skärmens överkant för att avsluta."</string>
+    <string name="immersive_cling_description" msgid="3482371193207536040">"Svep nedåt från skärmens överkant för att avsluta."</string>
     <string name="immersive_cling_positive" msgid="5016839404568297683">"OK"</string>
     <string name="done_label" msgid="2093726099505892398">"Klart"</string>
     <string name="hour_picker_description" msgid="6698199186859736512">"Cirkelreglage för timmar"</string>
