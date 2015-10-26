@@ -1579,12 +1579,6 @@ public class NotificationManagerService extends SystemService {
         }
 
         @Override
-        public boolean setZenModeConfig(ZenModeConfig config, String reason) {
-            checkCallerIsSystem();
-            return mZenModeHelper.setConfig(config, reason);
-        }
-
-        @Override
         public void setZenMode(int mode, Uri conditionId, String reason) throws RemoteException {
             enforceSystemOrSystemUIOrVolume("INotificationManager.setZenMode");
             final long identity = Binder.clearCallingIdentity();
@@ -1667,12 +1661,6 @@ public class NotificationManagerService extends SystemService {
                     mConditionProviders.notifyConditions(pkg, info, conditions);
                 }
             });
-        }
-
-        @Override
-        public void requestZenModeConditions(IConditionListener callback, int relevance) {
-            enforceSystemOrSystemUIOrVolume("INotificationManager.requestZenModeConditions");
-            mZenModeHelper.requestZenModeConditions(callback, relevance);
         }
 
         private void enforceSystemOrSystemUIOrVolume(String message) {
