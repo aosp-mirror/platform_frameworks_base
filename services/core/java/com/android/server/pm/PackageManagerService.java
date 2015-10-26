@@ -2276,7 +2276,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                         mSettings.enableSystemPackageLPw(packageName);
 
                         try {
-                            scanPackageTracedLI(scanFile, reparseFlags, scanFlags, 0, UserHandle.SYSTEM);
+                            scanPackageTracedLI(scanFile, reparseFlags, scanFlags, 0, null);
                         } catch (PackageManagerException e) {
                             Slog.e(TAG, "Failed to parse original system package: "
                                     + e.getMessage());
@@ -5685,7 +5685,7 @@ public class PackageManagerService extends IPackageManager.Stub {
             }
             try {
                 scanPackageTracedLI(file, parseFlags | PackageParser.PARSE_MUST_BE_APK,
-                        scanFlags, currentTime, UserHandle.SYSTEM);
+                        scanFlags, currentTime, null);
             } catch (PackageManagerException e) {
                 Slog.w(TAG, "Failed to parse " + file + ": " + e.getMessage());
 
@@ -5791,8 +5791,6 @@ public class PackageManagerService extends IPackageManager.Stub {
      */
     private PackageParser.Package scanPackageLI(File scanFile, int parseFlags, int scanFlags,
             long currentTime, UserHandle user) throws PackageManagerException {
-        Preconditions.checkNotNull(user);
-
         if (DEBUG_INSTALL) Slog.d(TAG, "Parsing: " + scanFile);
         parseFlags |= mDefParseFlags;
         PackageParser pp = new PackageParser();
@@ -12141,7 +12139,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                 int oldScanFlags = SCAN_UPDATE_SIGNATURE | SCAN_UPDATE_TIME;
                 try {
                     scanPackageTracedLI(restoreFile, oldParseFlags, oldScanFlags, origUpdateTime,
-                            UserHandle.SYSTEM);
+                            null);
                 } catch (PackageManagerException e) {
                     Slog.e(TAG, "Failed to restore package : " + pkgName + " after failed upgrade: "
                             + e.getMessage());
@@ -13276,8 +13274,7 @@ public class PackageManagerService extends IPackageManager.Stub {
 
         final PackageParser.Package newPkg;
         try {
-            newPkg = scanPackageTracedLI(disabledPs.codePath, parseFlags, SCAN_NO_PATHS, 0,
-                    UserHandle.SYSTEM);
+            newPkg = scanPackageTracedLI(disabledPs.codePath, parseFlags, SCAN_NO_PATHS, 0, null);
         } catch (PackageManagerException e) {
             Slog.w(TAG, "Failed to restore system package:" + newPs.name + ": " + e.getMessage());
             return false;
@@ -15841,8 +15838,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                 synchronized (mInstallLock) {
                     PackageParser.Package pkg = null;
                     try {
-                        pkg = scanPackageTracedLI(new File(codePath), parseFlags, 0, 0,
-                                UserHandle.SYSTEM);
+                        pkg = scanPackageTracedLI(new File(codePath), parseFlags, 0, 0, null);
                     } catch (PackageManagerException e) {
                         Slog.w(TAG, "Failed to scan " + codePath + ": " + e.getMessage());
                     }
@@ -16005,8 +16001,7 @@ public class PackageManagerService extends IPackageManager.Stub {
             synchronized (mInstallLock) {
                 final PackageParser.Package pkg;
                 try {
-                    pkg = scanPackageTracedLI(ps.codePath, parseFlags, SCAN_INITIAL, 0,
-                            UserHandle.SYSTEM);
+                    pkg = scanPackageTracedLI(ps.codePath, parseFlags, SCAN_INITIAL, 0, null);
                     loaded.add(pkg.applicationInfo);
                 } catch (PackageManagerException e) {
                     Slog.w(TAG, "Failed to scan " + ps.codePath + ": " + e.getMessage());
