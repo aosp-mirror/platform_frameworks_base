@@ -61,10 +61,10 @@
     <string name="needPuk" msgid="919668385956251611">"Your SIM card is PUK-locked. Type the PUK code to unlock it."</string>
     <string name="needPuk2" msgid="4526033371987193070">"Type PUK2 to unblock SIM card."</string>
     <string name="enablePin" msgid="209412020907207950">"Unsuccessful, enable SIM/RUIM Lock."</string>
-  <plurals name="pinpuk_attempts">
-    <item quantity="one" msgid="6596245285809790142">"You have <xliff:g id="NUMBER">%d</xliff:g> remaining attempt/s before SIM is locked."</item>
-    <item quantity="other" msgid="7530597808358774740">"You have <xliff:g id="NUMBER">%d</xliff:g> remaining attempt/s before SIM is locked."</item>
-  </plurals>
+    <plurals name="pinpuk_attempts" formatted="false" msgid="1251012001539225582">
+      <item quantity="other">You have <xliff:g id="NUMBER_1">%d</xliff:g> remaining attempts before SIM is locked.</item>
+      <item quantity="one">You have <xliff:g id="NUMBER_0">%d</xliff:g> remaining attempt before SIM is locked.</item>
+    </plurals>
     <string name="imei" msgid="2625429890869005782">"IMEI"</string>
     <string name="meid" msgid="4841221237681254195">"MEID"</string>
     <string name="ClipMmi" msgid="6952821216480289285">"Incoming Caller ID"</string>
@@ -809,10 +809,10 @@
     <string name="enable_explore_by_touch_warning_message" product="default" msgid="2708199672852373195">"<xliff:g id="ACCESSIBILITY_SERVICE_NAME">%1$s</xliff:g> wants to enable Explore by Touch. When Explore by Touch is turned on, you can hear or see descriptions of what\'s under your finger or perform gestures to interact with the phone."</string>
     <string name="oneMonthDurationPast" msgid="7396384508953779925">"1 month ago"</string>
     <string name="beforeOneMonthDurationPast" msgid="909134546836499826">"Before 1 month ago"</string>
-  <plurals name="last_num_days">
-    <item quantity="one" msgid="7555846096746489821">"Last <xliff:g id="COUNT">%d</xliff:g> days"</item>
-    <item quantity="other" msgid="3069992808164318268">"Last <xliff:g id="COUNT">%d</xliff:g> days"</item>
-  </plurals>
+    <plurals name="last_num_days" formatted="false" msgid="5104533550723932025">
+      <item quantity="other">Last <xliff:g id="COUNT_1">%d</xliff:g> days</item>
+      <item quantity="one">Last <xliff:g id="COUNT_0">%d</xliff:g> day</item>
+    </plurals>
     <string name="last_month" msgid="3959346739979055432">"Last month"</string>
     <string name="older" msgid="5211975022815554840">"Older"</string>
     <string name="preposition_for_date" msgid="9093949757757445117">"on <xliff:g id="DATE">%s</xliff:g>"</string>
@@ -830,18 +830,18 @@
     <string name="weeks" msgid="6509623834583944518">"weeks"</string>
     <string name="year" msgid="4001118221013892076">"year"</string>
     <string name="years" msgid="6881577717993213522">"years"</string>
-  <plurals name="duration_seconds">
-    <item quantity="one" msgid="6962015528372969481">"1 second"</item>
-    <item quantity="other" msgid="1886107766577166786">"<xliff:g id="COUNT">%d</xliff:g> seconds"</item>
-  </plurals>
-  <plurals name="duration_minutes">
-    <item quantity="one" msgid="4915414002546085617">"1 minute"</item>
-    <item quantity="other" msgid="3165187169224908775">"<xliff:g id="COUNT">%d</xliff:g> minutes"</item>
-  </plurals>
-  <plurals name="duration_hours">
-    <item quantity="one" msgid="8917467491248809972">"1 hour"</item>
-    <item quantity="other" msgid="3863962854246773930">"<xliff:g id="COUNT">%d</xliff:g> hours"</item>
-  </plurals>
+    <plurals name="duration_seconds" formatted="false" msgid="4527986939729687805">
+      <item quantity="other"><xliff:g id="COUNT">%d</xliff:g> seconds</item>
+      <item quantity="one">1 second</item>
+    </plurals>
+    <plurals name="duration_minutes" formatted="false" msgid="643786953939956125">
+      <item quantity="other"><xliff:g id="COUNT">%d</xliff:g> minutes</item>
+      <item quantity="one">1 minute</item>
+    </plurals>
+    <plurals name="duration_hours" formatted="false" msgid="6826233369186668274">
+      <item quantity="other"><xliff:g id="COUNT">%d</xliff:g> hours</item>
+      <item quantity="one">1 hour</item>
+    </plurals>
     <string name="VideoView_error_title" msgid="3534509135438353077">"Video problem"</string>
     <string name="VideoView_error_text_invalid_progressive_playback" msgid="3186670335938670444">"This video isn\'t valid for streaming to this device."</string>
     <string name="VideoView_error_text_unknown" msgid="3450439155187810085">"Can\'t play this video."</string>
@@ -954,14 +954,14 @@
     <string name="ringtone_silent" msgid="7937634392408977062">"None"</string>
     <string name="ringtone_picker_title" msgid="3515143939175119094">"Ringtones"</string>
     <string name="ringtone_unknown" msgid="5477919988701784788">"Unknown ringtone"</string>
-  <plurals name="wifi_available">
-    <item quantity="one" msgid="6654123987418168693">"Wi-Fi network available"</item>
-    <item quantity="other" msgid="4192424489168397386">"Wi-Fi networks available"</item>
-  </plurals>
-  <plurals name="wifi_available_detailed">
-    <item quantity="one" msgid="1634101450343277345">"Open available Wi-Fi network"</item>
-    <item quantity="other" msgid="7915895323644292768">"Open Wi-Fi networks available"</item>
-  </plurals>
+    <plurals name="wifi_available" formatted="false" msgid="7900333017752027322">
+      <item quantity="other">Wi-Fi networks available</item>
+      <item quantity="one">Wi-Fi network available</item>
+    </plurals>
+    <plurals name="wifi_available_detailed" formatted="false" msgid="1140699367193975606">
+      <item quantity="other">Open Wi-Fi networks available</item>
+      <item quantity="one">Open Wi-Fi network available</item>
+    </plurals>
     <string name="wifi_available_sign_in" msgid="9157196203958866662">"Sign in to a Wi-Fi network"</string>
     <string name="network_available_sign_in" msgid="1848877297365446605">"Sign in to network"</string>
     <!-- no translation found for network_available_sign_in_detailed (8000081941447976118) -->
@@ -1145,10 +1145,10 @@
     <string name="skip_button_label" msgid="1275362299471631819">"Skip"</string>
     <string name="no_matches" msgid="8129421908915840737">"No matches"</string>
     <string name="find_on_page" msgid="1946799233822820384">"Find on page"</string>
-  <plurals name="matches_found">
-    <item quantity="one" msgid="8167147081136579439">"1 Match"</item>
-    <item quantity="other" msgid="4641872797067609177">"<xliff:g id="INDEX">%d</xliff:g> of <xliff:g id="TOTAL">%d</xliff:g>"</item>
-  </plurals>
+    <plurals name="matches_found" formatted="false" msgid="1210884353962081884">
+      <item quantity="other"><xliff:g id="INDEX">%d</xliff:g> of <xliff:g id="TOTAL">%d</xliff:g></item>
+      <item quantity="one">1 match</item>
+    </plurals>
     <string name="action_mode_done" msgid="7217581640461922289">"Done"</string>
     <string name="progress_erasing" product="nosdcard" msgid="4521573321524340058">"Erasing USB storage..."</string>
     <string name="progress_erasing" product="default" msgid="6596988875507043042">"Erasing SD card…"</string>
@@ -1426,10 +1426,10 @@
     <string name="restr_pin_create_pin" msgid="8017600000263450337">"Create a PIN for modifying restrictions"</string>
     <string name="restr_pin_error_doesnt_match" msgid="2224214190906994548">"PINs don\'t match. Try again."</string>
     <string name="restr_pin_error_too_short" msgid="8173982756265777792">"PIN is too short. Must be at least 4 digits."</string>
-  <plurals name="restr_pin_countdown">
-    <item quantity="one" msgid="311050995198548675">"Try again in 1 second"</item>
-    <item quantity="other" msgid="4730868920742952817">"Try again in <xliff:g id="COUNT">%d</xliff:g> seconds"</item>
-  </plurals>
+    <plurals name="restr_pin_countdown" formatted="false" msgid="9061246974881224688">
+      <item quantity="other">Try again in <xliff:g id="COUNT">%d</xliff:g> seconds</item>
+      <item quantity="one">Try again in 1 second</item>
+    </plurals>
     <string name="restr_pin_try_later" msgid="973144472490532377">"Try again later"</string>
     <string name="immersive_cling_title" msgid="8394201622932303336">"Viewing full screen"</string>
     <string name="immersive_cling_description" msgid="3482371193207536040">"To exit, swipe down from the top."</string>
@@ -1455,38 +1455,38 @@
     <string name="package_updated_device_owner" msgid="8856631322440187071">"Updated by your administrator"</string>
     <string name="package_deleted_device_owner" msgid="7650577387493101353">"Deleted by your administrator"</string>
     <string name="battery_saver_description" msgid="1960431123816253034">"To help improve battery life, battery saver reduces your device’s performance and limits vibration, location services and most background data. Email, messaging, and other apps that rely on syncing may not update unless you open them.\n\nBattery saver turns off automatically when your device is charging."</string>
-  <plurals name="zen_mode_duration_minutes_summary">
-    <item quantity="one" msgid="3177683545388923234">"For one minute (until <xliff:g id="FORMATTEDTIME">%2$s</xliff:g>)"</item>
-    <item quantity="other" msgid="2787867221129368935">"For %1$d minutes (until <xliff:g id="FORMATTEDTIME">%2$s</xliff:g>)"</item>
-  </plurals>
-  <plurals name="zen_mode_duration_minutes_summary_short">
-    <item quantity="one" msgid="4097046271119330874">"For 1 min (until <xliff:g id="FORMATTEDTIME">%2$s</xliff:g>)"</item>
-    <item quantity="other" msgid="9128259640307810602">"For %1$d min (until <xliff:g id="FORMATTEDTIME">%2$s</xliff:g>)"</item>
-  </plurals>
-  <plurals name="zen_mode_duration_hours_summary">
-    <item quantity="one" msgid="597194865053253679">"For one hour (until <xliff:g id="FORMATTEDTIME">%2$s</xliff:g>)"</item>
-    <item quantity="other" msgid="2827214920627669898">"For %1$d hours (until <xliff:g id="FORMATTEDTIME">%2$s</xliff:g>)"</item>
-  </plurals>
-  <plurals name="zen_mode_duration_hours_summary_short">
-    <item quantity="one" msgid="342658185856495801">"For 1 hr (until <xliff:g id="FORMATTEDTIME">%2$s</xliff:g>)"</item>
-    <item quantity="other" msgid="6842148190293675591">"For %1$d hr (until <xliff:g id="FORMATTEDTIME">%2$s</xliff:g>)"</item>
-  </plurals>
-  <plurals name="zen_mode_duration_minutes">
-    <item quantity="one" msgid="9040808414992812341">"For one minute"</item>
-    <item quantity="other" msgid="6924190729213550991">"For %d minutes"</item>
-  </plurals>
-  <plurals name="zen_mode_duration_minutes_short">
-    <item quantity="one" msgid="4125166172281866385">"For 1 min"</item>
-    <item quantity="other" msgid="5131202943429775644">"For %d min"</item>
-  </plurals>
-  <plurals name="zen_mode_duration_hours">
-    <item quantity="one" msgid="3480040795582254384">"For one hour"</item>
-    <item quantity="other" msgid="5408537517529822157">"For %d hours"</item>
-  </plurals>
-  <plurals name="zen_mode_duration_hours_short">
-    <item quantity="one" msgid="6798191385685158694">"For 1 hr"</item>
-    <item quantity="other" msgid="8464879049844138499">"For %d hr"</item>
-  </plurals>
+    <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="4367877408072000848">
+      <item quantity="other">For %1$d minutes (until <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
+      <item quantity="one">For one minute (until <xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g>)</item>
+    </plurals>
+    <plurals name="zen_mode_duration_minutes_summary_short" formatted="false" msgid="6830154222366042597">
+      <item quantity="other">For %1$d min (until <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
+      <item quantity="one">For 1 min (until <xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g>)</item>
+    </plurals>
+    <plurals name="zen_mode_duration_hours_summary" formatted="false" msgid="8152974162096743862">
+      <item quantity="other">For %1$d hours (until <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
+      <item quantity="one">For one hour (until <xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g>)</item>
+    </plurals>
+    <plurals name="zen_mode_duration_hours_summary_short" formatted="false" msgid="4787552595253082371">
+      <item quantity="other">For %1$d hr (until <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
+      <item quantity="one">For 1 hr (until <xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g>)</item>
+    </plurals>
+    <plurals name="zen_mode_duration_minutes" formatted="false" msgid="5127407202506485571">
+      <item quantity="other">For %d minutes</item>
+      <item quantity="one">For one minute</item>
+    </plurals>
+    <plurals name="zen_mode_duration_minutes_short" formatted="false" msgid="2199350154433426128">
+      <item quantity="other">For %d min</item>
+      <item quantity="one">For 1 min</item>
+    </plurals>
+    <plurals name="zen_mode_duration_hours" formatted="false" msgid="3938821308277433854">
+      <item quantity="other">For %d hours</item>
+      <item quantity="one">For one hour</item>
+    </plurals>
+    <plurals name="zen_mode_duration_hours_short" formatted="false" msgid="6748277774662434217">
+      <item quantity="other">For %d hr</item>
+      <item quantity="one">For 1 hr</item>
+    </plurals>
     <string name="zen_mode_until" msgid="7336308492289875088">"Until <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
     <string name="zen_mode_alarm" msgid="9128205721301330797">"Until <xliff:g id="FORMATTEDTIME">%1$s</xliff:g> (next alarm)"</string>
     <string name="zen_mode_forever" msgid="7420011936770086993">"Until you turn this off"</string>
@@ -1513,8 +1513,8 @@
     <string name="usb_midi_peripheral_product_name" msgid="4971827859165280403">"USB Peripheral Port"</string>
     <string name="floating_toolbar_open_overflow_description" msgid="4797287862999444631">"More options"</string>
     <string name="floating_toolbar_close_overflow_description" msgid="559796923090723804">"Close overflow"</string>
-  <plurals name="selected_count">
-    <item quantity="one" msgid="8857281055159991036">"<xliff:g id="COUNT">%1$d</xliff:g> selected"</item>
-    <item quantity="other" msgid="2608606845335294849">"<xliff:g id="COUNT">%1$d</xliff:g> selected"</item>
-  </plurals>
+    <plurals name="selected_count" formatted="false" msgid="7187339492915744615">
+      <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> selected</item>
+      <item quantity="one"><xliff:g id="COUNT_0">%1$d</xliff:g> selected</item>
+    </plurals>
 </resources>

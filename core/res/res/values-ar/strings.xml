@@ -61,10 +61,14 @@
     <string name="needPuk" msgid="919668385956251611">"‏شريحة SIM مؤمّنة بكود PUK. اكتب كود PUK لإلغاء تأمينها."</string>
     <string name="needPuk2" msgid="4526033371987193070">"‏اكتب PUK2 لإلغاء تأمين شريحة SIM."</string>
     <string name="enablePin" msgid="209412020907207950">"‏محاولة غير ناجحة، مكّن قفل SIM/RUIM."</string>
-  <plurals name="pinpuk_attempts">
-    <item quantity="one" msgid="6596245285809790142">"‏يتبقى لديك محاولة واحدة (<xliff:g id="NUMBER">%d</xliff:g>) يتم بعدها قفل شريحة SIM."</item>
-    <item quantity="other" msgid="7530597808358774740">"‏يتبقى لديك <xliff:g id="NUMBER">%d</xliff:g> من المحاولات يتم بعدها قفل شريحة SIM."</item>
-  </plurals>
+    <plurals name="pinpuk_attempts" formatted="false" msgid="1251012001539225582">
+      <item quantity="zero">‏لم يتبق لديك أية محاولات (<xliff:g id="NUMBER_1">%d</xliff:g>) يتم بعدها قفل شريحة SIM.</item>
+      <item quantity="two">‏يتبقى لديك محاولتان (<xliff:g id="NUMBER_1">%d</xliff:g>) يتم بعدهما قفل شريحة SIM.</item>
+      <item quantity="few">‏يتبقى لديك <xliff:g id="NUMBER_1">%d</xliff:g> محاولات يتم بعدها قفل شريحة SIM.</item>
+      <item quantity="many">‏يتبقى لديك <xliff:g id="NUMBER_1">%d</xliff:g> محاولة يتم بعدها قفل شريحة SIM.</item>
+      <item quantity="other">‏يتبقى لديك <xliff:g id="NUMBER_1">%d</xliff:g> من المحاولات يتم بعدها قفل شريحة SIM.</item>
+      <item quantity="one">‏يتبقى لديك محاولة واحدة (<xliff:g id="NUMBER_0">%d</xliff:g>) يتم بعدها قفل شريحة SIM.</item>
+    </plurals>
     <string name="imei" msgid="2625429890869005782">"IMEI"</string>
     <string name="meid" msgid="4841221237681254195">"MEID"</string>
     <string name="ClipMmi" msgid="6952821216480289285">"معرف المتصل الوارد"</string>
@@ -809,10 +813,14 @@
     <string name="enable_explore_by_touch_warning_message" product="default" msgid="2708199672852373195">"‏يريد <xliff:g id="ACCESSIBILITY_SERVICE_NAME">%1$s</xliff:g> تمكين ميزة Explore by Touch. عند تشغيل ميزة Explore by Touch، سيكون بإمكانك سماع أو مشاهدة أوصاف لما تحت إصبعك أو إجراء إيماءات للتفاعل مع الهاتف."</string>
     <string name="oneMonthDurationPast" msgid="7396384508953779925">"قبل شهر واحد"</string>
     <string name="beforeOneMonthDurationPast" msgid="909134546836499826">"قبل شهر واحد"</string>
-  <plurals name="last_num_days">
-    <item quantity="one" msgid="7555846096746489821">"آخر <xliff:g id="COUNT">%d</xliff:g> من الأيام"</item>
-    <item quantity="other" msgid="3069992808164318268">"آخر <xliff:g id="COUNT">%d</xliff:g> من الأيام"</item>
-  </plurals>
+    <plurals name="last_num_days" formatted="false" msgid="5104533550723932025">
+      <item quantity="zero">آخر <xliff:g id="COUNT_1">%d</xliff:g> من الأيام</item>
+      <item quantity="two">آخر يومين (<xliff:g id="COUNT_1">%d</xliff:g>)</item>
+      <item quantity="few">آخر <xliff:g id="COUNT_1">%d</xliff:g> أيام</item>
+      <item quantity="many">آخر <xliff:g id="COUNT_1">%d</xliff:g> يومًا</item>
+      <item quantity="other">آخر <xliff:g id="COUNT_1">%d</xliff:g> من الأيام</item>
+      <item quantity="one">آخر <xliff:g id="COUNT_0">%d</xliff:g> يوم</item>
+    </plurals>
     <string name="last_month" msgid="3959346739979055432">"الشهر الماضي"</string>
     <string name="older" msgid="5211975022815554840">"أقدم"</string>
     <string name="preposition_for_date" msgid="9093949757757445117">"في <xliff:g id="DATE">%s</xliff:g>"</string>
@@ -830,18 +838,30 @@
     <string name="weeks" msgid="6509623834583944518">"أسابيع"</string>
     <string name="year" msgid="4001118221013892076">"سنة"</string>
     <string name="years" msgid="6881577717993213522">"أعوام"</string>
-  <plurals name="duration_seconds">
-    <item quantity="one" msgid="6962015528372969481">"ثانية واحدة"</item>
-    <item quantity="other" msgid="1886107766577166786">"<xliff:g id="COUNT">%d</xliff:g> من الثواني"</item>
-  </plurals>
-  <plurals name="duration_minutes">
-    <item quantity="one" msgid="4915414002546085617">"دقيقة واحدة"</item>
-    <item quantity="other" msgid="3165187169224908775">"<xliff:g id="COUNT">%d</xliff:g> من الدقائق"</item>
-  </plurals>
-  <plurals name="duration_hours">
-    <item quantity="one" msgid="8917467491248809972">"ساعة واحدة"</item>
-    <item quantity="other" msgid="3863962854246773930">"<xliff:g id="COUNT">%d</xliff:g> من الساعات"</item>
-  </plurals>
+    <plurals name="duration_seconds" formatted="false" msgid="4527986939729687805">
+      <item quantity="zero">أقل من ثانية (<xliff:g id="COUNT">%d</xliff:g>)</item>
+      <item quantity="two">ثانيتان (<xliff:g id="COUNT">%d</xliff:g>)</item>
+      <item quantity="few"><xliff:g id="COUNT">%d</xliff:g> ثوانٍ</item>
+      <item quantity="many"><xliff:g id="COUNT">%d</xliff:g> ثانية</item>
+      <item quantity="other"><xliff:g id="COUNT">%d</xliff:g> من الثواني</item>
+      <item quantity="one">ثانية واحدة</item>
+    </plurals>
+    <plurals name="duration_minutes" formatted="false" msgid="643786953939956125">
+      <item quantity="zero">أقل من دقيقة (<xliff:g id="COUNT">%d</xliff:g>)</item>
+      <item quantity="two">دقيقتان (<xliff:g id="COUNT">%d</xliff:g>)</item>
+      <item quantity="few"><xliff:g id="COUNT">%d</xliff:g> دقائق</item>
+      <item quantity="many"><xliff:g id="COUNT">%d</xliff:g> دقيقة</item>
+      <item quantity="other"><xliff:g id="COUNT">%d</xliff:g> من الدقائق</item>
+      <item quantity="one">دقيقة واحدة</item>
+    </plurals>
+    <plurals name="duration_hours" formatted="false" msgid="6826233369186668274">
+      <item quantity="zero">أقل من ساعة (<xliff:g id="COUNT">%d</xliff:g>)</item>
+      <item quantity="two">ساعتان (<xliff:g id="COUNT">%d</xliff:g>)</item>
+      <item quantity="few"><xliff:g id="COUNT">%d</xliff:g> ساعات</item>
+      <item quantity="many"><xliff:g id="COUNT">%d</xliff:g> ساعة</item>
+      <item quantity="other"><xliff:g id="COUNT">%d</xliff:g> من الساعات</item>
+      <item quantity="one">ساعة واحدة</item>
+    </plurals>
     <string name="VideoView_error_title" msgid="3534509135438353077">"مشكلة في الفيديو"</string>
     <string name="VideoView_error_text_invalid_progressive_playback" msgid="3186670335938670444">"عذرًا، هذا الفيديو غير صالح للبث على هذا الجهاز."</string>
     <string name="VideoView_error_text_unknown" msgid="3450439155187810085">"لا يمكنك تشغيل هذا الفيديو."</string>
@@ -954,14 +974,22 @@
     <string name="ringtone_silent" msgid="7937634392408977062">"لا شيء"</string>
     <string name="ringtone_picker_title" msgid="3515143939175119094">"نغمات الرنين"</string>
     <string name="ringtone_unknown" msgid="5477919988701784788">"نغمة رنين غير معروفة"</string>
-  <plurals name="wifi_available">
-    <item quantity="one" msgid="6654123987418168693">"‏شبكة Wi-Fi متاحة"</item>
-    <item quantity="other" msgid="4192424489168397386">"‏شبكات Wi-Fi متاحة"</item>
-  </plurals>
-  <plurals name="wifi_available_detailed">
-    <item quantity="one" msgid="1634101450343277345">"‏هناك شبكة Wi-Fi مفتوحة متاحة"</item>
-    <item quantity="other" msgid="7915895323644292768">"‏هناك شبكات Wi-Fi مفتوحة متاحة"</item>
-  </plurals>
+    <plurals name="wifi_available" formatted="false" msgid="7900333017752027322">
+      <item quantity="zero">‏لا تتوفر أية شبكات Wi-Fi</item>
+      <item quantity="two">‏تتوفر شبكتا Wi-Fi</item>
+      <item quantity="few">‏تتوفر شبكات Wi-Fi</item>
+      <item quantity="many">‏تتوفر شبكات Wi-Fi</item>
+      <item quantity="other">‏تتوفر شبكات Wi-Fi</item>
+      <item quantity="one">‏تتوفر شبكة Wi-Fi واحدة</item>
+    </plurals>
+    <plurals name="wifi_available_detailed" formatted="false" msgid="1140699367193975606">
+      <item quantity="zero">‏لا تتوفر أية شبكات Wi-Fi مفتوحة</item>
+      <item quantity="two">‏تتوفر شبكتا Wi-Fi مفتوحتان</item>
+      <item quantity="few">‏تتوفر شبكات Wi-Fi مفتوحة</item>
+      <item quantity="many">‏تتوفر شبكات Wi-Fi مفتوحة</item>
+      <item quantity="other">‏تتوفر شبكات Wi-Fi مفتوحة</item>
+      <item quantity="one">‏تتوفر شبكة Wi-Fi واحدة مفتوحة</item>
+    </plurals>
     <string name="wifi_available_sign_in" msgid="9157196203958866662">"‏تسجيل الدخول إلى شبكة Wi-Fi"</string>
     <string name="network_available_sign_in" msgid="1848877297365446605">"تسجيل الدخول إلى الشبكة"</string>
     <!-- no translation found for network_available_sign_in_detailed (8000081941447976118) -->
@@ -1145,10 +1173,14 @@
     <string name="skip_button_label" msgid="1275362299471631819">"تخطٍ"</string>
     <string name="no_matches" msgid="8129421908915840737">"ليس هناك أية مطابقات"</string>
     <string name="find_on_page" msgid="1946799233822820384">"بحث في الصفحة"</string>
-  <plurals name="matches_found">
-    <item quantity="one" msgid="8167147081136579439">"مطابقة واحدة"</item>
-    <item quantity="other" msgid="4641872797067609177">"<xliff:g id="INDEX">%d</xliff:g> من <xliff:g id="TOTAL">%d</xliff:g>"</item>
-  </plurals>
+    <plurals name="matches_found" formatted="false" msgid="1210884353962081884">
+      <item quantity="zero"><xliff:g id="INDEX">%d</xliff:g> من <xliff:g id="TOTAL">%d</xliff:g></item>
+      <item quantity="two"><xliff:g id="INDEX">%d</xliff:g> من <xliff:g id="TOTAL">%d</xliff:g></item>
+      <item quantity="few"><xliff:g id="INDEX">%d</xliff:g> من <xliff:g id="TOTAL">%d</xliff:g></item>
+      <item quantity="many"><xliff:g id="INDEX">%d</xliff:g> من <xliff:g id="TOTAL">%d</xliff:g></item>
+      <item quantity="other"><xliff:g id="INDEX">%d</xliff:g> من <xliff:g id="TOTAL">%d</xliff:g></item>
+      <item quantity="one">مباراة واحدة</item>
+    </plurals>
     <string name="action_mode_done" msgid="7217581640461922289">"تم"</string>
     <string name="progress_erasing" product="nosdcard" msgid="4521573321524340058">"‏جارٍ محو وحدة تخزين USB..."</string>
     <string name="progress_erasing" product="default" msgid="6596988875507043042">"‏جارٍ محو بطاقة SD..."</string>
@@ -1426,10 +1458,14 @@
     <string name="restr_pin_create_pin" msgid="8017600000263450337">"إنشاء رقم تعريف شخصي لتعديل القيود"</string>
     <string name="restr_pin_error_doesnt_match" msgid="2224214190906994548">"أرقام التعريف الشخصية لا تتطابق، أعد المحاولة."</string>
     <string name="restr_pin_error_too_short" msgid="8173982756265777792">"‏رمز PIN أقصر مما يلزم، يجب ألا يقل عن 4 أرقام. "</string>
-  <plurals name="restr_pin_countdown">
-    <item quantity="one" msgid="311050995198548675">"أعد المحاولة خلال ثانية واحدة."</item>
-    <item quantity="other" msgid="4730868920742952817">"أعد المحاولة خلال <xliff:g id="COUNT">%d</xliff:g> ثانية"</item>
-  </plurals>
+    <plurals name="restr_pin_countdown" formatted="false" msgid="9061246974881224688">
+      <item quantity="zero">حاول مرة أخرى خلال أقل من ثانية <xliff:g id="COUNT">%d</xliff:g></item>
+      <item quantity="two">حاول مرة أخرى خلال ثانيتين (<xliff:g id="COUNT">%d</xliff:g>)</item>
+      <item quantity="few">حاول مرة أخرى خلال <xliff:g id="COUNT">%d</xliff:g> ثوانٍ</item>
+      <item quantity="many">حاول مرة أخرى خلال <xliff:g id="COUNT">%d</xliff:g> ثانية</item>
+      <item quantity="other">حاول مرة أخرى خلال <xliff:g id="COUNT">%d</xliff:g> من الثواني</item>
+      <item quantity="one">حاول مرة أخرى خلال ثانية واحدة</item>
+    </plurals>
     <string name="restr_pin_try_later" msgid="973144472490532377">"أعد المحاولة لاحقًا"</string>
     <string name="immersive_cling_title" msgid="8394201622932303336">"جارٍ العرض بملء الشاشة"</string>
     <string name="immersive_cling_description" msgid="3482371193207536040">"للخروج، مرر بسرعة من أعلى إلى أسفل."</string>
@@ -1455,38 +1491,70 @@
     <string name="package_updated_device_owner" msgid="8856631322440187071">"تم التحديث بواسطة المشرف"</string>
     <string name="package_deleted_device_owner" msgid="7650577387493101353">"تم حذف الحزمة عن طريق المشرف"</string>
     <string name="battery_saver_description" msgid="1960431123816253034">"للمساعدة في تحسين عمر البطارية، يساعد موفر البطارية في تقليل أداء الجهاز ويفرض قيدًا على الاهتزاز وخدمات الموقع ومعظم بيانات الخلفية. قد لا يتم تحديث البريد الإلكتروني والمراسلة والتطبيقات الأخرى التي تعتمد على المزامنة ما لم تفتحها.\n\nيتم إيقاف موفر البطارية تلقائيًا أثناء شحن الجهاز."</string>
-  <plurals name="zen_mode_duration_minutes_summary">
-    <item quantity="one" msgid="3177683545388923234">"لمدة دقيقة واحدة (حتى <xliff:g id="FORMATTEDTIME">%2$s</xliff:g>)"</item>
-    <item quantity="other" msgid="2787867221129368935">"‏لمدة %1$d من الدقائق (حتى <xliff:g id="FORMATTEDTIME">%2$s</xliff:g>)"</item>
-  </plurals>
-  <plurals name="zen_mode_duration_minutes_summary_short">
-    <item quantity="one" msgid="4097046271119330874">"لمدة دقيقة (حتى <xliff:g id="FORMATTEDTIME">%2$s</xliff:g>)"</item>
-    <item quantity="other" msgid="9128259640307810602">"‏لمدة %1$d دقيقة (حتى <xliff:g id="FORMATTEDTIME">%2$s</xliff:g>)"</item>
-  </plurals>
-  <plurals name="zen_mode_duration_hours_summary">
-    <item quantity="one" msgid="597194865053253679">"لمدة ساعة واحدة (حتى <xliff:g id="FORMATTEDTIME">%2$s</xliff:g>)"</item>
-    <item quantity="other" msgid="2827214920627669898">"‏لمدة %1$d من الساعات (حتى <xliff:g id="FORMATTEDTIME">%2$s</xliff:g>)"</item>
-  </plurals>
-  <plurals name="zen_mode_duration_hours_summary_short">
-    <item quantity="one" msgid="342658185856495801">"لمدة ساعة (حتى <xliff:g id="FORMATTEDTIME">%2$s</xliff:g>)"</item>
-    <item quantity="other" msgid="6842148190293675591">"‏لمدة %1$d ساعة (حتى <xliff:g id="FORMATTEDTIME">%2$s</xliff:g>)"</item>
-  </plurals>
-  <plurals name="zen_mode_duration_minutes">
-    <item quantity="one" msgid="9040808414992812341">"لمدة دقيقة واحدة"</item>
-    <item quantity="other" msgid="6924190729213550991">"‏لمدة %d من الدقائق"</item>
-  </plurals>
-  <plurals name="zen_mode_duration_minutes_short">
-    <item quantity="one" msgid="4125166172281866385">"لمدة دقيقة"</item>
-    <item quantity="other" msgid="5131202943429775644">"‏لمدة %d دقيقة"</item>
-  </plurals>
-  <plurals name="zen_mode_duration_hours">
-    <item quantity="one" msgid="3480040795582254384">"لمدة ساعة واحدة"</item>
-    <item quantity="other" msgid="5408537517529822157">"‏لمدة %d من الساعات"</item>
-  </plurals>
-  <plurals name="zen_mode_duration_hours_short">
-    <item quantity="one" msgid="6798191385685158694">"لمدة ساعة"</item>
-    <item quantity="other" msgid="8464879049844138499">"‏لمدة %d ساعة"</item>
-  </plurals>
+    <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="4367877408072000848">
+      <item quantity="zero">‏لمدة أقل من دقيقة (%1$d) (حتى <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
+      <item quantity="two">‏لمدة دقيقتين (%1$d) (حتى <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
+      <item quantity="few">‏لمدة %1$d دقائق (حتى <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
+      <item quantity="many">‏لمدة %1$d دقيقة (حتى <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
+      <item quantity="other">‏لمدة %1$d من الدقائق (حتى <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
+      <item quantity="one">لمدة دقيقة واحدة (حتى <xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g>)</item>
+    </plurals>
+    <plurals name="zen_mode_duration_minutes_summary_short" formatted="false" msgid="6830154222366042597">
+      <item quantity="zero">لمدة أقل من دقيقة (حتى <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
+      <item quantity="two">لمدة دقيقتين (حتى <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
+      <item quantity="few">‏لمدة %1$d دقائق (حتى <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
+      <item quantity="many">‏لمدة %1$d دقيقة (حتى <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
+      <item quantity="other">‏لمدة %1$d من الدقائق (حتى <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
+      <item quantity="one">لمدة دقيقة (حتى <xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g>)</item>
+    </plurals>
+    <plurals name="zen_mode_duration_hours_summary" formatted="false" msgid="8152974162096743862">
+      <item quantity="zero">‏لمدة أقل من ساعة (%1$d) (حتى <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
+      <item quantity="two">‏لمدة ساعتين (%1$d) (حتى <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
+      <item quantity="few">‏لمدة %1$d ساعات (حتى <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
+      <item quantity="many">‏لمدة %1$d ساعة (حتى <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
+      <item quantity="other">‏لمدة %1$d من الساعات (حتى <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
+      <item quantity="one">لمدة ساعة واحدة (حتى <xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g>)</item>
+    </plurals>
+    <plurals name="zen_mode_duration_hours_summary_short" formatted="false" msgid="4787552595253082371">
+      <item quantity="zero">لمدة أقل من ساعة (حتى <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
+      <item quantity="two">لمدة ساعتين (حتى <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
+      <item quantity="few">‏لمدة %1$d ساعات (حتى <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
+      <item quantity="many">‏لمدة %1$d ساعة (حتى <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
+      <item quantity="other">‏لمدة %1$d من الساعات (حتى <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
+      <item quantity="one">لمدة ساعة (حتى <xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g>)</item>
+    </plurals>
+    <plurals name="zen_mode_duration_minutes" formatted="false" msgid="5127407202506485571">
+      <item quantity="zero">‏لمدة أقل من دقيقة (%d)</item>
+      <item quantity="two">‏لمدة دقيقتين (%d)</item>
+      <item quantity="few">‏لمدة %d دقائق</item>
+      <item quantity="many">‏لمدة %d دقيقة</item>
+      <item quantity="other">‏لمدة %d من الدقائق</item>
+      <item quantity="one">لمدة دقيقة واحدة</item>
+    </plurals>
+    <plurals name="zen_mode_duration_minutes_short" formatted="false" msgid="2199350154433426128">
+      <item quantity="zero">لمدة أقل من دقيقة</item>
+      <item quantity="two">لمدة دقيقتين</item>
+      <item quantity="few">‏لمدة %d دقائق</item>
+      <item quantity="many">‏لمدة %d دقيقة</item>
+      <item quantity="other">‏لمدة %d من الدقائق</item>
+      <item quantity="one">لمدة دقيقة</item>
+    </plurals>
+    <plurals name="zen_mode_duration_hours" formatted="false" msgid="3938821308277433854">
+      <item quantity="zero">‏لمدة أقل من ساعة (%d)</item>
+      <item quantity="two">‏لمدة ساعتين (%d)</item>
+      <item quantity="few">‏لمدة %d ساعات</item>
+      <item quantity="many">‏لمدة %d ساعة</item>
+      <item quantity="other">‏لمدة %d من الساعات</item>
+      <item quantity="one">لمدة ساعة واحدة</item>
+    </plurals>
+    <plurals name="zen_mode_duration_hours_short" formatted="false" msgid="6748277774662434217">
+      <item quantity="zero">لمدة أقل من ساعة</item>
+      <item quantity="two">لمدة ساعتين</item>
+      <item quantity="few">‏لمدة %d ساعات</item>
+      <item quantity="many">‏لمدة %d ساعة</item>
+      <item quantity="other">‏لمدة %d من الساعات</item>
+      <item quantity="one">لمدة ساعة</item>
+    </plurals>
     <string name="zen_mode_until" msgid="7336308492289875088">"حتى <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
     <string name="zen_mode_alarm" msgid="9128205721301330797">"حتى <xliff:g id="FORMATTEDTIME">%1$s</xliff:g> (التنبيه التالي)"</string>
     <string name="zen_mode_forever" msgid="7420011936770086993">"لحين تعطيل هذا الإعداد"</string>
@@ -1513,8 +1581,12 @@
     <string name="usb_midi_peripheral_product_name" msgid="4971827859165280403">"‏منفذ الأجهزة الطرفية المزودة بكابل USB"</string>
     <string name="floating_toolbar_open_overflow_description" msgid="4797287862999444631">"خيارات أخرى"</string>
     <string name="floating_toolbar_close_overflow_description" msgid="559796923090723804">"إغلاق التجاوز"</string>
-  <plurals name="selected_count">
-    <item quantity="one" msgid="8857281055159991036">"تم تحديد <xliff:g id="COUNT">%1$d</xliff:g>"</item>
-    <item quantity="other" msgid="2608606845335294849">"تم تحديد <xliff:g id="COUNT">%1$d</xliff:g>"</item>
-  </plurals>
+    <plurals name="selected_count" formatted="false" msgid="7187339492915744615">
+      <item quantity="zero">تم تحديد <xliff:g id="COUNT_1">%1$d</xliff:g> من العناصر</item>
+      <item quantity="two">تم تحديد عنصرين (<xliff:g id="COUNT_1">%1$d</xliff:g>)</item>
+      <item quantity="few">تم تحديد <xliff:g id="COUNT_1">%1$d</xliff:g> عناصر</item>
+      <item quantity="many">تم تحديد <xliff:g id="COUNT_1">%1$d</xliff:g> عنصرًا</item>
+      <item quantity="other">تم تحديد <xliff:g id="COUNT_1">%1$d</xliff:g> من العناصر</item>
+      <item quantity="one">تم تحديد <xliff:g id="COUNT_0">%1$d</xliff:g> عنصر</item>
+    </plurals>
 </resources>

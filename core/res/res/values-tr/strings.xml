@@ -61,10 +61,10 @@
     <string name="needPuk" msgid="919668385956251611">"SIM kartınızın PUK kilidi devrede. Kilidi açmak için PUK kodunu yazın."</string>
     <string name="needPuk2" msgid="4526033371987193070">"Engellenen SIM kartı açmak için PUK2 kodunu yazın."</string>
     <string name="enablePin" msgid="209412020907207950">"Başarısız. SIM/RUIM Kilidini etkinleştirin."</string>
-  <plurals name="pinpuk_attempts">
-    <item quantity="one" msgid="6596245285809790142">"SIM kilitlenmeden önce <xliff:g id="NUMBER">%d</xliff:g> deneme hakkınız kaldı."</item>
-    <item quantity="other" msgid="7530597808358774740">"SIM kilitlenmeden önce <xliff:g id="NUMBER">%d</xliff:g> deneme hakkınız kaldı."</item>
-  </plurals>
+    <plurals name="pinpuk_attempts" formatted="false" msgid="1251012001539225582">
+      <item quantity="other">SIM kilitlenmeden önce <xliff:g id="NUMBER_1">%d</xliff:g> deneme hakkınız kaldı.</item>
+      <item quantity="one">SIM kilitlenmeden önce <xliff:g id="NUMBER_0">%d</xliff:g> deneme hakkınız kaldı.</item>
+    </plurals>
     <string name="imei" msgid="2625429890869005782">"IMEI"</string>
     <string name="meid" msgid="4841221237681254195">"MEID"</string>
     <string name="ClipMmi" msgid="6952821216480289285">"Gelen Çağrı Kimliği"</string>
@@ -809,10 +809,10 @@
     <string name="enable_explore_by_touch_warning_message" product="default" msgid="2708199672852373195">"<xliff:g id="ACCESSIBILITY_SERVICE_NAME">%1$s</xliff:g>, Dokunarak Keşfet özelliğini etkinleştirmek istiyor. Dokunarak Keşfet açık olduğunda parmağınızın altındaki öğelere ait açıklamaları duyabilir veya görebilir ya da telefonla etkileşimde bulunmak için birtakım hareketler yapabilirsiniz."</string>
     <string name="oneMonthDurationPast" msgid="7396384508953779925">"1 ay önce"</string>
     <string name="beforeOneMonthDurationPast" msgid="909134546836499826">"1 ay önce"</string>
-  <plurals name="last_num_days">
-    <item quantity="one" msgid="7555846096746489821">"Son <xliff:g id="COUNT">%d</xliff:g> gün"</item>
-    <item quantity="other" msgid="3069992808164318268">"Son <xliff:g id="COUNT">%d</xliff:g> gün"</item>
-  </plurals>
+    <plurals name="last_num_days" formatted="false" msgid="5104533550723932025">
+      <item quantity="other">Son <xliff:g id="COUNT_1">%d</xliff:g> gün</item>
+      <item quantity="one">Son <xliff:g id="COUNT_0">%d</xliff:g> gün</item>
+    </plurals>
     <string name="last_month" msgid="3959346739979055432">"Son ay"</string>
     <string name="older" msgid="5211975022815554840">"Daha eski"</string>
     <string name="preposition_for_date" msgid="9093949757757445117">"<xliff:g id="DATE">%s</xliff:g>"</string>
@@ -830,18 +830,18 @@
     <string name="weeks" msgid="6509623834583944518">"hafta"</string>
     <string name="year" msgid="4001118221013892076">"yıl"</string>
     <string name="years" msgid="6881577717993213522">"yıl"</string>
-  <plurals name="duration_seconds">
-    <item quantity="one" msgid="6962015528372969481">"1 saniye"</item>
-    <item quantity="other" msgid="1886107766577166786">"<xliff:g id="COUNT">%d</xliff:g> saniye"</item>
-  </plurals>
-  <plurals name="duration_minutes">
-    <item quantity="one" msgid="4915414002546085617">"1 dakika"</item>
-    <item quantity="other" msgid="3165187169224908775">"<xliff:g id="COUNT">%d</xliff:g> dakika"</item>
-  </plurals>
-  <plurals name="duration_hours">
-    <item quantity="one" msgid="8917467491248809972">"1 saat"</item>
-    <item quantity="other" msgid="3863962854246773930">"<xliff:g id="COUNT">%d</xliff:g> saat"</item>
-  </plurals>
+    <plurals name="duration_seconds" formatted="false" msgid="4527986939729687805">
+      <item quantity="other"><xliff:g id="COUNT">%d</xliff:g> saniye</item>
+      <item quantity="one">1 saniye</item>
+    </plurals>
+    <plurals name="duration_minutes" formatted="false" msgid="643786953939956125">
+      <item quantity="other"><xliff:g id="COUNT">%d</xliff:g> dakika</item>
+      <item quantity="one">1 dakika</item>
+    </plurals>
+    <plurals name="duration_hours" formatted="false" msgid="6826233369186668274">
+      <item quantity="other"><xliff:g id="COUNT">%d</xliff:g> saat</item>
+      <item quantity="one">1 saat</item>
+    </plurals>
     <string name="VideoView_error_title" msgid="3534509135438353077">"Video sorunu"</string>
     <string name="VideoView_error_text_invalid_progressive_playback" msgid="3186670335938670444">"Bu video bu cihazda akış için uygun değil."</string>
     <string name="VideoView_error_text_unknown" msgid="3450439155187810085">"Bu video oynatılamıyor."</string>
@@ -954,14 +954,14 @@
     <string name="ringtone_silent" msgid="7937634392408977062">"Yok"</string>
     <string name="ringtone_picker_title" msgid="3515143939175119094">"Zil sesleri"</string>
     <string name="ringtone_unknown" msgid="5477919988701784788">"Bilinmeyen zil sesi"</string>
-  <plurals name="wifi_available">
-    <item quantity="one" msgid="6654123987418168693">"Kablosuz ağ var"</item>
-    <item quantity="other" msgid="4192424489168397386">"Kablosuz ağlar var"</item>
-  </plurals>
-  <plurals name="wifi_available_detailed">
-    <item quantity="one" msgid="1634101450343277345">"Kullanılabilir kablosuz ağı aç"</item>
-    <item quantity="other" msgid="7915895323644292768">"Kullanılabilir kablosuz ağları aç"</item>
-  </plurals>
+    <plurals name="wifi_available" formatted="false" msgid="7900333017752027322">
+      <item quantity="other">Kablosuz ağlar var</item>
+      <item quantity="one">Kablosuz ağ var</item>
+    </plurals>
+    <plurals name="wifi_available_detailed" formatted="false" msgid="1140699367193975606">
+      <item quantity="other">Kullanılabilir Kablosuz ağları aç</item>
+      <item quantity="one">Kullanılabilir Kablosuz ağı aç</item>
+    </plurals>
     <string name="wifi_available_sign_in" msgid="9157196203958866662">"Kablosuz ağda oturum açın"</string>
     <string name="network_available_sign_in" msgid="1848877297365446605">"Ağda oturum açın"</string>
     <!-- no translation found for network_available_sign_in_detailed (8000081941447976118) -->
@@ -1145,10 +1145,10 @@
     <string name="skip_button_label" msgid="1275362299471631819">"Atla"</string>
     <string name="no_matches" msgid="8129421908915840737">"Eşleşme yok"</string>
     <string name="find_on_page" msgid="1946799233822820384">"Sayfada bul"</string>
-  <plurals name="matches_found">
-    <item quantity="one" msgid="8167147081136579439">"1 eşleşme"</item>
-    <item quantity="other" msgid="4641872797067609177">"<xliff:g id="INDEX">%d</xliff:g> / <xliff:g id="TOTAL">%d</xliff:g>"</item>
-  </plurals>
+    <plurals name="matches_found" formatted="false" msgid="1210884353962081884">
+      <item quantity="other"><xliff:g id="INDEX">%d</xliff:g>/<xliff:g id="TOTAL">%d</xliff:g></item>
+      <item quantity="one">1 eşleşme</item>
+    </plurals>
     <string name="action_mode_done" msgid="7217581640461922289">"Bitti"</string>
     <string name="progress_erasing" product="nosdcard" msgid="4521573321524340058">"USB bellek siliniyor…"</string>
     <string name="progress_erasing" product="default" msgid="6596988875507043042">"SD kart siliniyor…"</string>
@@ -1426,10 +1426,10 @@
     <string name="restr_pin_create_pin" msgid="8017600000263450337">"Kısıtlamaları değiştirmek için PIN oluşturun"</string>
     <string name="restr_pin_error_doesnt_match" msgid="2224214190906994548">"PIN\'ler eşleşmiyor. Tekrar deneyin."</string>
     <string name="restr_pin_error_too_short" msgid="8173982756265777792">"PIN çok kısa. En az 4 basamaklı olmalı."</string>
-  <plurals name="restr_pin_countdown">
-    <item quantity="one" msgid="311050995198548675">"1 saniye içinde tekrar deneyin"</item>
-    <item quantity="other" msgid="4730868920742952817">"<xliff:g id="COUNT">%d</xliff:g> saniye içinde tekrar deneyin"</item>
-  </plurals>
+    <plurals name="restr_pin_countdown" formatted="false" msgid="9061246974881224688">
+      <item quantity="other"><xliff:g id="COUNT">%d</xliff:g> saniye içinde tekrar deneyin</item>
+      <item quantity="one">1 saniye içinde tekrar deneyin</item>
+    </plurals>
     <string name="restr_pin_try_later" msgid="973144472490532377">"Daha sonra tekrar deneyin"</string>
     <string name="immersive_cling_title" msgid="8394201622932303336">"Tam ekran olarak görüntüleme"</string>
     <string name="immersive_cling_description" msgid="3482371193207536040">"Çıkmak için yukarıdan aşağıya doğru hızlıca kaydırın."</string>
@@ -1455,38 +1455,38 @@
     <string name="package_updated_device_owner" msgid="8856631322440187071">"Yöneticiniz tarafından güncellendi"</string>
     <string name="package_deleted_device_owner" msgid="7650577387493101353">"Yöneticiniz tarafından silindi"</string>
     <string name="battery_saver_description" msgid="1960431123816253034">"Pil tasarrufu özelliği, pil ömrünü iyileştirmeye yardımcı olmak için cihazın performansını düşürür, titreşimi, konum hizmetlerini ve arka plan verilerinin çoğunu sınırlar. Senkronizasyona dayalı olarak çalışan e-posta, mesajlaşma uygulamaları ve diğer uygulamalar, bunları açmadığınız sürece güncellenmeyebilir.\n\nCihazınız şarj olurken pil tasarrufu otomatik olarak kapatılır."</string>
-  <plurals name="zen_mode_duration_minutes_summary">
-    <item quantity="one" msgid="3177683545388923234">"Bir dakika için (şu saate kadar: <xliff:g id="FORMATTEDTIME">%2$s</xliff:g>)"</item>
-    <item quantity="other" msgid="2787867221129368935">"%1$d dakika için (şu saate kadar: <xliff:g id="FORMATTEDTIME">%2$s</xliff:g>)"</item>
-  </plurals>
-  <plurals name="zen_mode_duration_minutes_summary_short">
-    <item quantity="one" msgid="4097046271119330874">"1 dk. için (şu saate kadar: <xliff:g id="FORMATTEDTIME">%2$s</xliff:g>)"</item>
-    <item quantity="other" msgid="9128259640307810602">"%1$d dk. için (şu saate kadar: <xliff:g id="FORMATTEDTIME">%2$s</xliff:g>)"</item>
-  </plurals>
-  <plurals name="zen_mode_duration_hours_summary">
-    <item quantity="one" msgid="597194865053253679">"Bir saat için (şu saate kadar: <xliff:g id="FORMATTEDTIME">%2$s</xliff:g>)"</item>
-    <item quantity="other" msgid="2827214920627669898">"%1$d saat için (şu saate kadar: <xliff:g id="FORMATTEDTIME">%2$s</xliff:g>)"</item>
-  </plurals>
-  <plurals name="zen_mode_duration_hours_summary_short">
-    <item quantity="one" msgid="342658185856495801">"1 sa. için (şu saate kadar: <xliff:g id="FORMATTEDTIME">%2$s</xliff:g>)"</item>
-    <item quantity="other" msgid="6842148190293675591">"%1$d sa. için (şu saate kadar: <xliff:g id="FORMATTEDTIME">%2$s</xliff:g>)"</item>
-  </plurals>
-  <plurals name="zen_mode_duration_minutes">
-    <item quantity="one" msgid="9040808414992812341">"Bir dakika süreyle"</item>
-    <item quantity="other" msgid="6924190729213550991">"%d dakika süreyle"</item>
-  </plurals>
-  <plurals name="zen_mode_duration_minutes_short">
-    <item quantity="one" msgid="4125166172281866385">"1 dk. için"</item>
-    <item quantity="other" msgid="5131202943429775644">"%d dk. için"</item>
-  </plurals>
-  <plurals name="zen_mode_duration_hours">
-    <item quantity="one" msgid="3480040795582254384">"Bir saat süreyle"</item>
-    <item quantity="other" msgid="5408537517529822157">"%d saat süreyle"</item>
-  </plurals>
-  <plurals name="zen_mode_duration_hours_short">
-    <item quantity="one" msgid="6798191385685158694">"1 sa. için"</item>
-    <item quantity="other" msgid="8464879049844138499">"%d sa. için"</item>
-  </plurals>
+    <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="4367877408072000848">
+      <item quantity="other">%1$d dakika için (şu saate kadar: <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
+      <item quantity="one">Bir dakika için (şu saate kadar: <xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g>)</item>
+    </plurals>
+    <plurals name="zen_mode_duration_minutes_summary_short" formatted="false" msgid="6830154222366042597">
+      <item quantity="other">%1$d dakika için (şu saate kadar: <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
+      <item quantity="one">1 dakika için (şu saate kadar: <xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g>)</item>
+    </plurals>
+    <plurals name="zen_mode_duration_hours_summary" formatted="false" msgid="8152974162096743862">
+      <item quantity="other">%1$d saat için (şu saate kadar: <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
+      <item quantity="one">Bir saat için (şu saate kadar: <xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g>)</item>
+    </plurals>
+    <plurals name="zen_mode_duration_hours_summary_short" formatted="false" msgid="4787552595253082371">
+      <item quantity="other">%1$d saat için (şu saate kadar: <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
+      <item quantity="one">1 saat için (şu saate kadar: <xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g>)</item>
+    </plurals>
+    <plurals name="zen_mode_duration_minutes" formatted="false" msgid="5127407202506485571">
+      <item quantity="other">%d dakika süreyle</item>
+      <item quantity="one">Bir dakika süreyle</item>
+    </plurals>
+    <plurals name="zen_mode_duration_minutes_short" formatted="false" msgid="2199350154433426128">
+      <item quantity="other">%d dakika için</item>
+      <item quantity="one">1 dakika için</item>
+    </plurals>
+    <plurals name="zen_mode_duration_hours" formatted="false" msgid="3938821308277433854">
+      <item quantity="other">%d saat için</item>
+      <item quantity="one">Bir saat için</item>
+    </plurals>
+    <plurals name="zen_mode_duration_hours_short" formatted="false" msgid="6748277774662434217">
+      <item quantity="other">%d saat için</item>
+      <item quantity="one">1 saat için</item>
+    </plurals>
     <string name="zen_mode_until" msgid="7336308492289875088">"Şu saate kadar: <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
     <string name="zen_mode_alarm" msgid="9128205721301330797">"<xliff:g id="FORMATTEDTIME">%1$s</xliff:g> (sonraki alarma) saatine kadar"</string>
     <string name="zen_mode_forever" msgid="7420011936770086993">"Siz bunu kapatana kadar"</string>
@@ -1513,8 +1513,8 @@
     <string name="usb_midi_peripheral_product_name" msgid="4971827859165280403">"USB Çevre Birimi Bağlantı Noktası"</string>
     <string name="floating_toolbar_open_overflow_description" msgid="4797287862999444631">"Diğer seçenekler"</string>
     <string name="floating_toolbar_close_overflow_description" msgid="559796923090723804">"Taşan araç çubuğunu kapat"</string>
-  <plurals name="selected_count">
-    <item quantity="one" msgid="8857281055159991036">"<xliff:g id="COUNT">%1$d</xliff:g> tane seçildi"</item>
-    <item quantity="other" msgid="2608606845335294849">"<xliff:g id="COUNT">%1$d</xliff:g> tane seçildi"</item>
-  </plurals>
+    <plurals name="selected_count" formatted="false" msgid="7187339492915744615">
+      <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> öğe seçildi</item>
+      <item quantity="one"><xliff:g id="COUNT_0">%1$d</xliff:g> öğe seçildi</item>
+    </plurals>
 </resources>

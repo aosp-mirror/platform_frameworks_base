@@ -61,10 +61,10 @@
     <string name="needPuk" msgid="919668385956251611">"Η κάρτα SIM έχει κλειδωθεί με κωδικό PUK. Πληκτρολογήστε τον κωδικό PUK για να την ξεκλειδώσετε."</string>
     <string name="needPuk2" msgid="4526033371987193070">"Πληκτρολογήστε τον κωδικό PUK2 για την κατάργηση αποκλεισμού της κάρτας SIM."</string>
     <string name="enablePin" msgid="209412020907207950">"Ανεπιτυχής προσπάθεια. Ενεργοποιήστε το Κλείδωμα SIM/RUIM."</string>
-  <plurals name="pinpuk_attempts">
-    <item quantity="one" msgid="6596245285809790142">"Απομένει άλλη <xliff:g id="NUMBER">%d</xliff:g> προσπάθεια προτού η κάρτα SIM κλειδωθεί."</item>
-    <item quantity="other" msgid="7530597808358774740">"Απομένουν <xliff:g id="NUMBER">%d</xliff:g> προσπάθειες προτού η κάρτα SIM κλειδωθεί."</item>
-  </plurals>
+    <plurals name="pinpuk_attempts" formatted="false" msgid="1251012001539225582">
+      <item quantity="other">Απομένουν άλλες <xliff:g id="NUMBER_1">%d</xliff:g> προσπάθειες προτού κλειδωθεί η κάρτα SIM.</item>
+      <item quantity="one">Απομένει άλλη <xliff:g id="NUMBER_0">%d</xliff:g> προσπάθεια προτού κλειδωθεί η κάρτα SIM.</item>
+    </plurals>
     <string name="imei" msgid="2625429890869005782">"IMEI"</string>
     <string name="meid" msgid="4841221237681254195">"MEID"</string>
     <string name="ClipMmi" msgid="6952821216480289285">"Εισερχόμενη αναγνώριση κλήσης"</string>
@@ -809,10 +809,10 @@
     <string name="enable_explore_by_touch_warning_message" product="default" msgid="2708199672852373195">"Η υπηρεσία <xliff:g id="ACCESSIBILITY_SERVICE_NAME">%1$s</xliff:g> απαιτεί ενεργοποίηση της Εξερεύνησης μέσω αφής. Όταν είναι ενεργοποιημένη η Εξερεύνηση μέσω αφής, μπορείτε να δείτε ή να ακούσετε περιγραφές για τις επιλογές που βρίσκονται κάτω από το δάχτυλό σας ή να κάνετε κινήσεις αλληλεπίδρασης με το τηλέφωνό σας."</string>
     <string name="oneMonthDurationPast" msgid="7396384508953779925">"πριν από 1 μήνα"</string>
     <string name="beforeOneMonthDurationPast" msgid="909134546836499826">"Παλαιότερα από 1 μήνα"</string>
-  <plurals name="last_num_days">
-    <item quantity="one" msgid="7555846096746489821">"Τελευταία <xliff:g id="COUNT">%d</xliff:g> ημέρα"</item>
-    <item quantity="other" msgid="3069992808164318268">"Τελευταίες <xliff:g id="COUNT">%d</xliff:g> ημέρες"</item>
-  </plurals>
+    <plurals name="last_num_days" formatted="false" msgid="5104533550723932025">
+      <item quantity="other">Τελευταίες <xliff:g id="COUNT_1">%d</xliff:g> ημέρες</item>
+      <item quantity="one">Τελευταία <xliff:g id="COUNT_0">%d</xliff:g> ημέρα</item>
+    </plurals>
     <string name="last_month" msgid="3959346739979055432">"Τελευταίος μήνας"</string>
     <string name="older" msgid="5211975022815554840">"Παλαιότερα"</string>
     <string name="preposition_for_date" msgid="9093949757757445117">"στις <xliff:g id="DATE">%s</xliff:g>"</string>
@@ -830,18 +830,18 @@
     <string name="weeks" msgid="6509623834583944518">"εβδομάδες"</string>
     <string name="year" msgid="4001118221013892076">"έτος"</string>
     <string name="years" msgid="6881577717993213522">"έτη"</string>
-  <plurals name="duration_seconds">
-    <item quantity="one" msgid="6962015528372969481">"1 δευτερόλεπτο"</item>
-    <item quantity="other" msgid="1886107766577166786">"<xliff:g id="COUNT">%d</xliff:g> δευτερόλεπτα"</item>
-  </plurals>
-  <plurals name="duration_minutes">
-    <item quantity="one" msgid="4915414002546085617">"1 λεπτό"</item>
-    <item quantity="other" msgid="3165187169224908775">"<xliff:g id="COUNT">%d</xliff:g> λεπτά"</item>
-  </plurals>
-  <plurals name="duration_hours">
-    <item quantity="one" msgid="8917467491248809972">"1 ώρα"</item>
-    <item quantity="other" msgid="3863962854246773930">"<xliff:g id="COUNT">%d</xliff:g> ώρες"</item>
-  </plurals>
+    <plurals name="duration_seconds" formatted="false" msgid="4527986939729687805">
+      <item quantity="other"><xliff:g id="COUNT">%d</xliff:g> δευτερόλεπτα</item>
+      <item quantity="one">1 δευτερόλεπτο</item>
+    </plurals>
+    <plurals name="duration_minutes" formatted="false" msgid="643786953939956125">
+      <item quantity="other"><xliff:g id="COUNT">%d</xliff:g> λεπτά</item>
+      <item quantity="one">1 λεπτό</item>
+    </plurals>
+    <plurals name="duration_hours" formatted="false" msgid="6826233369186668274">
+      <item quantity="other"><xliff:g id="COUNT">%d</xliff:g> ώρες</item>
+      <item quantity="one">1 ώρα</item>
+    </plurals>
     <string name="VideoView_error_title" msgid="3534509135438353077">"Πρόβλημα με το βίντεο"</string>
     <string name="VideoView_error_text_invalid_progressive_playback" msgid="3186670335938670444">"Αυτό το βίντεο δεν είναι έγκυρο για ροή σε αυτή τη συσκευή."</string>
     <string name="VideoView_error_text_unknown" msgid="3450439155187810085">"Δεν μπορείτε να αναπαράγετε αυτό το βίντεο."</string>
@@ -954,14 +954,14 @@
     <string name="ringtone_silent" msgid="7937634392408977062">"Κανένας"</string>
     <string name="ringtone_picker_title" msgid="3515143939175119094">"Ήχοι κλήσης"</string>
     <string name="ringtone_unknown" msgid="5477919988701784788">"Άγνωστος ήχος κλήσης"</string>
-  <plurals name="wifi_available">
-    <item quantity="one" msgid="6654123987418168693">"Υπάρχει διαθέσιμο δίκτυο Wi-Fi"</item>
-    <item quantity="other" msgid="4192424489168397386">"Υπάρχουν διαθέσιμα δίκτυα Wi-Fi"</item>
-  </plurals>
-  <plurals name="wifi_available_detailed">
-    <item quantity="one" msgid="1634101450343277345">"Υπάρχει διαθέσιμο ανοικτό δίκτυο Wi-Fi"</item>
-    <item quantity="other" msgid="7915895323644292768">"Υπάρχουν διαθέσιμα ανοικτά δίκτυα Wi-Fi"</item>
-  </plurals>
+    <plurals name="wifi_available" formatted="false" msgid="7900333017752027322">
+      <item quantity="other">Υπάρχουν διαθέσιμα δίκτυα Wi-Fi</item>
+      <item quantity="one">Υπάρχει διαθέσιμο δίκτυο Wi-Fi</item>
+    </plurals>
+    <plurals name="wifi_available_detailed" formatted="false" msgid="1140699367193975606">
+      <item quantity="other">Υπάρχουν διαθέσιμα ανοικτά δίκτυα Wi-Fi</item>
+      <item quantity="one">Υπάρχει διαθέσιμο ανοικτό δίκτυο Wi-Fi</item>
+    </plurals>
     <string name="wifi_available_sign_in" msgid="9157196203958866662">"Συνδεθείτε στο δίκτυο Wi-Fi"</string>
     <string name="network_available_sign_in" msgid="1848877297365446605">"Σύνδεση στο δίκτυο"</string>
     <!-- no translation found for network_available_sign_in_detailed (8000081941447976118) -->
@@ -1145,10 +1145,10 @@
     <string name="skip_button_label" msgid="1275362299471631819">"Παράλειψη"</string>
     <string name="no_matches" msgid="8129421908915840737">"Δεν υπάρχουν αποτελέσματα"</string>
     <string name="find_on_page" msgid="1946799233822820384">"Εύρεση στη σελίδα"</string>
-  <plurals name="matches_found">
-    <item quantity="one" msgid="8167147081136579439">"1 αποτέλεσμα"</item>
-    <item quantity="other" msgid="4641872797067609177">"<xliff:g id="INDEX">%d</xliff:g> από <xliff:g id="TOTAL">%d</xliff:g>"</item>
-  </plurals>
+    <plurals name="matches_found" formatted="false" msgid="1210884353962081884">
+      <item quantity="other"><xliff:g id="INDEX">%d</xliff:g> από <xliff:g id="TOTAL">%d</xliff:g></item>
+      <item quantity="one">1 αντιστοιχία</item>
+    </plurals>
     <string name="action_mode_done" msgid="7217581640461922289">"Τέλος"</string>
     <string name="progress_erasing" product="nosdcard" msgid="4521573321524340058">"Διαγραφή χώρου αποθήκευσης USB..."</string>
     <string name="progress_erasing" product="default" msgid="6596988875507043042">"Διαγραφή κάρτας SD..."</string>
@@ -1426,10 +1426,10 @@
     <string name="restr_pin_create_pin" msgid="8017600000263450337">"Δημιουργία PIN για τροποποίηση περιορισμών"</string>
     <string name="restr_pin_error_doesnt_match" msgid="2224214190906994548">"Τα PIN δεν συμφωνούν. Προσπαθήστε ξανά."</string>
     <string name="restr_pin_error_too_short" msgid="8173982756265777792">"Το PIN είναι υπερβολικά μικρό. Πρέπει να έχει μέγεθος τουλάχιστον 4 χαρακτήρων."</string>
-  <plurals name="restr_pin_countdown">
-    <item quantity="one" msgid="311050995198548675">"Επανάληψη σε 1 δευτ."</item>
-    <item quantity="other" msgid="4730868920742952817">"Επανάληψη σε <xliff:g id="COUNT">%d</xliff:g> δευτ."</item>
-  </plurals>
+    <plurals name="restr_pin_countdown" formatted="false" msgid="9061246974881224688">
+      <item quantity="other">Δοκιμάστε ξανά σε <xliff:g id="COUNT">%d</xliff:g> δευτερόλεπτα</item>
+      <item quantity="one">Δοκιμάστε ξανά σε 1 δευτερόλεπτο</item>
+    </plurals>
     <string name="restr_pin_try_later" msgid="973144472490532377">"Δοκιμάστε ξανά αργότερα"</string>
     <string name="immersive_cling_title" msgid="8394201622932303336">"Προβολή σε πλήρη οθόνη"</string>
     <string name="immersive_cling_description" msgid="3482371193207536040">"Για έξοδο, σύρετε προς τα κάτω από το επάνω μέρος."</string>
@@ -1455,38 +1455,38 @@
     <string name="package_updated_device_owner" msgid="8856631322440187071">"Ενημερώθηκε από το διαχειριστή σας"</string>
     <string name="package_deleted_device_owner" msgid="7650577387493101353">"Διαγράφηκε από το διαχειριστή σας"</string>
     <string name="battery_saver_description" msgid="1960431123816253034">"Προκειμένου να βελτιώσει τη διάρκεια ζωής της μπαταρίας σας, η Εξοικονόμηση μπαταρίας μειώνει την απόδοση της συσκευής σας και περιορίζει λειτουργίες όπως η δόνηση, οι υπηρεσίες τοποθεσίας και τα περισσότερα δεδομένα παρασκηνίου. Το ηλεκτρονικό ταχυδρομείο, η ανταλλαγή μηνυμάτων και άλλες εφαρμογές που βασίζονται στο συγχρονισμό ενδέχεται να μην ενημερώνονται έως ότου τις ανοίξετε.\n\nΗ Εξοικονόμηση μπαταρίας απενεργοποιείται αυτόματα όταν η συσκευή σας φορτίζει."</string>
-  <plurals name="zen_mode_duration_minutes_summary">
-    <item quantity="one" msgid="3177683545388923234">"Για ένα λεπτό (έως τις <xliff:g id="FORMATTEDTIME">%2$s</xliff:g>)"</item>
-    <item quantity="other" msgid="2787867221129368935">"Για %1$d λεπτά (έως τις <xliff:g id="FORMATTEDTIME">%2$s</xliff:g>)"</item>
-  </plurals>
-  <plurals name="zen_mode_duration_minutes_summary_short">
-    <item quantity="one" msgid="4097046271119330874">"Για 1 λεπτό (μέχρι τις <xliff:g id="FORMATTEDTIME">%2$s</xliff:g>)"</item>
-    <item quantity="other" msgid="9128259640307810602">"Για %1$d λεπτά (μέχρι τις <xliff:g id="FORMATTEDTIME">%2$s</xliff:g>)"</item>
-  </plurals>
-  <plurals name="zen_mode_duration_hours_summary">
-    <item quantity="one" msgid="597194865053253679">"Για μία ώρα (έως τις <xliff:g id="FORMATTEDTIME">%2$s</xliff:g>)"</item>
-    <item quantity="other" msgid="2827214920627669898">"Για %1$d ώρες (έως τις <xliff:g id="FORMATTEDTIME">%2$s</xliff:g>)"</item>
-  </plurals>
-  <plurals name="zen_mode_duration_hours_summary_short">
-    <item quantity="one" msgid="342658185856495801">"Για 1 ώρα (μέχρι τις <xliff:g id="FORMATTEDTIME">%2$s</xliff:g>)"</item>
-    <item quantity="other" msgid="6842148190293675591">"Για %1$d ώρες (μέχρι τις <xliff:g id="FORMATTEDTIME">%2$s</xliff:g>)"</item>
-  </plurals>
-  <plurals name="zen_mode_duration_minutes">
-    <item quantity="one" msgid="9040808414992812341">"Για ένα λεπτό"</item>
-    <item quantity="other" msgid="6924190729213550991">"Για %d λεπτά"</item>
-  </plurals>
-  <plurals name="zen_mode_duration_minutes_short">
-    <item quantity="one" msgid="4125166172281866385">"Για 1 λεπτό"</item>
-    <item quantity="other" msgid="5131202943429775644">"Για %d λεπτά"</item>
-  </plurals>
-  <plurals name="zen_mode_duration_hours">
-    <item quantity="one" msgid="3480040795582254384">"Για μία ώρα"</item>
-    <item quantity="other" msgid="5408537517529822157">"Για %d ώρες"</item>
-  </plurals>
-  <plurals name="zen_mode_duration_hours_short">
-    <item quantity="one" msgid="6798191385685158694">"Για 1 ώρα"</item>
-    <item quantity="other" msgid="8464879049844138499">"Για %d ώρες"</item>
-  </plurals>
+    <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="4367877408072000848">
+      <item quantity="other">Για %1$d λεπτά (έως τις <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
+      <item quantity="one">Για ένα λεπτό (έως τις <xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g>)</item>
+    </plurals>
+    <plurals name="zen_mode_duration_minutes_summary_short" formatted="false" msgid="6830154222366042597">
+      <item quantity="other">Για %1$d λεπτά (μέχρι <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
+      <item quantity="one">Για 1 λεπτό (μέχρι <xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g>)</item>
+    </plurals>
+    <plurals name="zen_mode_duration_hours_summary" formatted="false" msgid="8152974162096743862">
+      <item quantity="other">Για %1$d ώρες (έως τις <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
+      <item quantity="one">Για μία ώρα (έως τις <xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g>)</item>
+    </plurals>
+    <plurals name="zen_mode_duration_hours_summary_short" formatted="false" msgid="4787552595253082371">
+      <item quantity="other">Για %1$d ώρες (μέχρι <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
+      <item quantity="one">Για 1 ώρα (μέχρι <xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g>)</item>
+    </plurals>
+    <plurals name="zen_mode_duration_minutes" formatted="false" msgid="5127407202506485571">
+      <item quantity="other">Για %d λεπτά</item>
+      <item quantity="one">Για ένα λεπτό</item>
+    </plurals>
+    <plurals name="zen_mode_duration_minutes_short" formatted="false" msgid="2199350154433426128">
+      <item quantity="other">Για %d λεπτά</item>
+      <item quantity="one">Για 1 λεπτό</item>
+    </plurals>
+    <plurals name="zen_mode_duration_hours" formatted="false" msgid="3938821308277433854">
+      <item quantity="other">Για %d ώρες</item>
+      <item quantity="one">Για μία ώρα</item>
+    </plurals>
+    <plurals name="zen_mode_duration_hours_short" formatted="false" msgid="6748277774662434217">
+      <item quantity="other">Για %d ώρες</item>
+      <item quantity="one">Για 1 ώρα</item>
+    </plurals>
     <string name="zen_mode_until" msgid="7336308492289875088">"Έως τις <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
     <string name="zen_mode_alarm" msgid="9128205721301330797">"Μέχρι τις <xliff:g id="FORMATTEDTIME">%1$s</xliff:g> (επόμενο ξυπνητήρι)"</string>
     <string name="zen_mode_forever" msgid="7420011936770086993">"Μέχρι να το απενεργοποιήσετε"</string>
@@ -1513,8 +1513,8 @@
     <string name="usb_midi_peripheral_product_name" msgid="4971827859165280403">"Περιφερειακή θύρα USB"</string>
     <string name="floating_toolbar_open_overflow_description" msgid="4797287862999444631">"Περισσότερες επιλογές"</string>
     <string name="floating_toolbar_close_overflow_description" msgid="559796923090723804">"Κλείσιμο υπερχείλισης"</string>
-  <plurals name="selected_count">
-    <item quantity="one" msgid="8857281055159991036">"Επιλέχθηκε <xliff:g id="COUNT">%1$d</xliff:g>"</item>
-    <item quantity="other" msgid="2608606845335294849">"Επιλέχθηκαν <xliff:g id="COUNT">%1$d</xliff:g>"</item>
-  </plurals>
+    <plurals name="selected_count" formatted="false" msgid="7187339492915744615">
+      <item quantity="other">Επιλέχτηκαν <xliff:g id="COUNT_1">%1$d</xliff:g></item>
+      <item quantity="one">Επιλέχτηκε <xliff:g id="COUNT_0">%1$d</xliff:g></item>
+    </plurals>
 </resources>

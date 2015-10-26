@@ -61,10 +61,10 @@
     <string name="needPuk" msgid="919668385956251611">"Kadi yako ya SIM imefungwa na PUK. Anika msimbo wa PUK ili kuifungua."</string>
     <string name="needPuk2" msgid="4526033371987193070">"Chapisha PUK2 ili kufungua SIM kadi."</string>
     <string name="enablePin" msgid="209412020907207950">"Imeshindwa, washa ufungaji wa SIM/RUIM."</string>
-  <plurals name="pinpuk_attempts">
-    <item quantity="one" msgid="6596245285809790142">"Umesalia na majaribio <xliff:g id="NUMBER">%d</xliff:g> kabla ya SIM kufungwa."</item>
-    <item quantity="other" msgid="7530597808358774740">"Umesalia na majaribio <xliff:g id="NUMBER">%d</xliff:g> kabla ya SIM kufungwa."</item>
-  </plurals>
+    <plurals name="pinpuk_attempts" formatted="false" msgid="1251012001539225582">
+      <item quantity="other">Umebakisha majaribio <xliff:g id="NUMBER_1">%d</xliff:g> kabla SIM haijafungwa.</item>
+      <item quantity="one">Umebakisha majaribio <xliff:g id="NUMBER_0">%d</xliff:g> kabla SIM haijafungwa.</item>
+    </plurals>
     <string name="imei" msgid="2625429890869005782">"IMEI"</string>
     <string name="meid" msgid="4841221237681254195">"MEID"</string>
     <string name="ClipMmi" msgid="6952821216480289285">"Kitambulisho cha Mpigaji wa Simu Inayoingia"</string>
@@ -811,10 +811,10 @@
     <string name="enable_explore_by_touch_warning_message" product="default" msgid="2708199672852373195">"<xliff:g id="ACCESSIBILITY_SERVICE_NAME">%1$s</xliff:g> inataka kuwezesha Kuchunguza kwa Kugusa. Wakati Kuchunguza kwa Kugusa kumewezeshwa, unaweza kusikia au kuona maelezo ya kilicho chini ya kidole chako au kutumia ishara ili kuingiliana na simu."</string>
     <string name="oneMonthDurationPast" msgid="7396384508953779925">"Mwezi 1 uliopita"</string>
     <string name="beforeOneMonthDurationPast" msgid="909134546836499826">"Kabla ya mwezi 1 uliopita"</string>
-  <plurals name="last_num_days">
-    <item quantity="one" msgid="7555846096746489821">"Siku <xliff:g id="COUNT">%d</xliff:g> iliyopita"</item>
-    <item quantity="other" msgid="3069992808164318268">"Siku <xliff:g id="COUNT">%d</xliff:g> zilizopita"</item>
-  </plurals>
+    <plurals name="last_num_days" formatted="false" msgid="5104533550723932025">
+      <item quantity="other">Siku <xliff:g id="COUNT_1">%d</xliff:g> zilizopita</item>
+      <item quantity="one">Siku <xliff:g id="COUNT_0">%d</xliff:g> iliyopita</item>
+    </plurals>
     <string name="last_month" msgid="3959346739979055432">"Mwezi uliopita"</string>
     <string name="older" msgid="5211975022815554840">"Kuukuu zaidi"</string>
     <string name="preposition_for_date" msgid="9093949757757445117">"tarehe <xliff:g id="DATE">%s</xliff:g>"</string>
@@ -832,18 +832,18 @@
     <string name="weeks" msgid="6509623834583944518">"wiki"</string>
     <string name="year" msgid="4001118221013892076">"mwaka"</string>
     <string name="years" msgid="6881577717993213522">"miaka"</string>
-  <plurals name="duration_seconds">
-    <item quantity="one" msgid="6962015528372969481">"Sekunde 1"</item>
-    <item quantity="other" msgid="1886107766577166786">"Sekunde <xliff:g id="COUNT">%d</xliff:g>"</item>
-  </plurals>
-  <plurals name="duration_minutes">
-    <item quantity="one" msgid="4915414002546085617">"Dakika 1"</item>
-    <item quantity="other" msgid="3165187169224908775">"Dakika <xliff:g id="COUNT">%d</xliff:g>"</item>
-  </plurals>
-  <plurals name="duration_hours">
-    <item quantity="one" msgid="8917467491248809972">"Saa 1"</item>
-    <item quantity="other" msgid="3863962854246773930">"Saa <xliff:g id="COUNT">%d</xliff:g>"</item>
-  </plurals>
+    <plurals name="duration_seconds" formatted="false" msgid="4527986939729687805">
+      <item quantity="other">Sekunde <xliff:g id="COUNT">%d</xliff:g></item>
+      <item quantity="one">Sekunde 1</item>
+    </plurals>
+    <plurals name="duration_minutes" formatted="false" msgid="643786953939956125">
+      <item quantity="other">Dakika <xliff:g id="COUNT">%d</xliff:g></item>
+      <item quantity="one">Dakika 1</item>
+    </plurals>
+    <plurals name="duration_hours" formatted="false" msgid="6826233369186668274">
+      <item quantity="other">Saa <xliff:g id="COUNT">%d</xliff:g></item>
+      <item quantity="one">Saa 1</item>
+    </plurals>
     <string name="VideoView_error_title" msgid="3534509135438353077">"Shida ya video"</string>
     <string name="VideoView_error_text_invalid_progressive_playback" msgid="3186670335938670444">"Video hii si halali kutiririshwa kwa kifaa hiki."</string>
     <string name="VideoView_error_text_unknown" msgid="3450439155187810085">"Haiwezi kucheza video hii."</string>
@@ -956,14 +956,14 @@
     <string name="ringtone_silent" msgid="7937634392408977062">"Hamna"</string>
     <string name="ringtone_picker_title" msgid="3515143939175119094">"Toni za mlio"</string>
     <string name="ringtone_unknown" msgid="5477919988701784788">"Mlio amabo haujulikani"</string>
-  <plurals name="wifi_available">
-    <item quantity="one" msgid="6654123987418168693">"Mtandao wa Wi-Fi unapatikana"</item>
-    <item quantity="other" msgid="4192424489168397386">"Mitandao ya Wi-Fi inapatikana"</item>
-  </plurals>
-  <plurals name="wifi_available_detailed">
-    <item quantity="one" msgid="1634101450343277345">"Fungua mtandao wa Wi-Fi unaopatikana"</item>
-    <item quantity="other" msgid="7915895323644292768">"Fungua mitandao ya Wi-Fi inayopatikana"</item>
-  </plurals>
+    <plurals name="wifi_available" formatted="false" msgid="7900333017752027322">
+      <item quantity="other">Mitandao ya Wi-Fi inapatikana</item>
+      <item quantity="one">Mtandao wa Wi-Fi unapatikana</item>
+    </plurals>
+    <plurals name="wifi_available_detailed" formatted="false" msgid="1140699367193975606">
+      <item quantity="other">Fungua mitandao ya Wi-Fi inayopatikana</item>
+      <item quantity="one">Fungua mtandao wa Wi-Fi unaopatikana</item>
+    </plurals>
     <string name="wifi_available_sign_in" msgid="9157196203958866662">"Ingia kwa mtandao wa Wi-Fi"</string>
     <string name="network_available_sign_in" msgid="1848877297365446605">"Ingia katika mtandao"</string>
     <!-- no translation found for network_available_sign_in_detailed (8000081941447976118) -->
@@ -1147,10 +1147,10 @@
     <string name="skip_button_label" msgid="1275362299471631819">"Ruka"</string>
     <string name="no_matches" msgid="8129421908915840737">"Hakuna vinavyolingana"</string>
     <string name="find_on_page" msgid="1946799233822820384">"Pata kwenye ukurasa"</string>
-  <plurals name="matches_found">
-    <item quantity="one" msgid="8167147081136579439">"Linganisho 1"</item>
-    <item quantity="other" msgid="4641872797067609177">"<xliff:g id="INDEX">%d</xliff:g> ya <xliff:g id="TOTAL">%d</xliff:g>"</item>
-  </plurals>
+    <plurals name="matches_found" formatted="false" msgid="1210884353962081884">
+      <item quantity="other"><xliff:g id="INDEX">%d</xliff:g> kati ya <xliff:g id="TOTAL">%d</xliff:g></item>
+      <item quantity="one">1 inayolingana</item>
+    </plurals>
     <string name="action_mode_done" msgid="7217581640461922289">"Nimemaliza"</string>
     <string name="progress_erasing" product="nosdcard" msgid="4521573321524340058">"Inafuta hifadhi ya USB..."</string>
     <string name="progress_erasing" product="default" msgid="6596988875507043042">"Inafuta kadi ya SD..."</string>
@@ -1428,10 +1428,10 @@
     <string name="restr_pin_create_pin" msgid="8017600000263450337">"Unda PIN ya kurekebisha vikwazo"</string>
     <string name="restr_pin_error_doesnt_match" msgid="2224214190906994548">"PIN hazilingani. Jaribu tena."</string>
     <string name="restr_pin_error_too_short" msgid="8173982756265777792">"PIN ni fupi mno. Lazima iwe angalau tarakimu 4."</string>
-  <plurals name="restr_pin_countdown">
-    <item quantity="one" msgid="311050995198548675">"Jaribu tena baada ya sekunde 1"</item>
-    <item quantity="other" msgid="4730868920742952817">"Jaribu tena baada ya sekunde <xliff:g id="COUNT">%d</xliff:g>"</item>
-  </plurals>
+    <plurals name="restr_pin_countdown" formatted="false" msgid="9061246974881224688">
+      <item quantity="other">Jaribu tena baada ya sekunde <xliff:g id="COUNT">%d</xliff:g></item>
+      <item quantity="one">Jaribu tena baada ya sekunde 1</item>
+    </plurals>
     <string name="restr_pin_try_later" msgid="973144472490532377">"Jaribu tena baadaye"</string>
     <string name="immersive_cling_title" msgid="8394201622932303336">"Unatazama skrini nzima"</string>
     <string name="immersive_cling_description" msgid="3482371193207536040">"Ili kuondoka, telezesha kidole chini kutoka sehemu ya juu."</string>
@@ -1457,38 +1457,38 @@
     <string name="package_updated_device_owner" msgid="8856631322440187071">"Kimesasiswa na msimamizi wako"</string>
     <string name="package_deleted_device_owner" msgid="7650577387493101353">"Kilifutwa na msimamizi wako"</string>
     <string name="battery_saver_description" msgid="1960431123816253034">"Kusaidia kuboresha muda wa matumizi ya betri, inayookoa betri hupunguza utendaji wa kifaa chako na kupunguza mtetemo, huduma za utambuzi wa mahali, na data nyingi ya chini chini. Barua pepe, ujumbe na programu nyingine zinazotege,ea usawazishaji huenda zisisasishwe usipozifungua.\n\nInayookoa betri hujizima kiotomatiki kifaa chako kinapokuwa kinachaji."</string>
-  <plurals name="zen_mode_duration_minutes_summary">
-    <item quantity="one" msgid="3177683545388923234">"Kwa dakika moja (hadi <xliff:g id="FORMATTEDTIME">%2$s</xliff:g>)"</item>
-    <item quantity="other" msgid="2787867221129368935">"Kwa dakika %1$d (hadi <xliff:g id="FORMATTEDTIME">%2$s</xliff:g>)"</item>
-  </plurals>
-  <plurals name="zen_mode_duration_minutes_summary_short">
-    <item quantity="one" msgid="4097046271119330874">"Kwa dakika 1 (mpaka <xliff:g id="FORMATTEDTIME">%2$s</xliff:g>)"</item>
-    <item quantity="other" msgid="9128259640307810602">"Kwa dakika %1$d (mpaka <xliff:g id="FORMATTEDTIME">%2$s</xliff:g>)"</item>
-  </plurals>
-  <plurals name="zen_mode_duration_hours_summary">
-    <item quantity="one" msgid="597194865053253679">"Kwa saa moja (hadi <xliff:g id="FORMATTEDTIME">%2$s</xliff:g>)"</item>
-    <item quantity="other" msgid="2827214920627669898">"Kwa saa %1$d (hadi <xliff:g id="FORMATTEDTIME">%2$s</xliff:g>)"</item>
-  </plurals>
-  <plurals name="zen_mode_duration_hours_summary_short">
-    <item quantity="one" msgid="342658185856495801">"Kwa saa 1 (mpaka <xliff:g id="FORMATTEDTIME">%2$s</xliff:g>)"</item>
-    <item quantity="other" msgid="6842148190293675591">"Kwa saa %1$d (mpaka <xliff:g id="FORMATTEDTIME">%2$s</xliff:g> )"</item>
-  </plurals>
-  <plurals name="zen_mode_duration_minutes">
-    <item quantity="one" msgid="9040808414992812341">"Kwa dakika moja"</item>
-    <item quantity="other" msgid="6924190729213550991">"Kwa dakika %d"</item>
-  </plurals>
-  <plurals name="zen_mode_duration_minutes_short">
-    <item quantity="one" msgid="4125166172281866385">"Kwa dakika 1"</item>
-    <item quantity="other" msgid="5131202943429775644">"Kwa dakika %d"</item>
-  </plurals>
-  <plurals name="zen_mode_duration_hours">
-    <item quantity="one" msgid="3480040795582254384">"Kwa saa moja"</item>
-    <item quantity="other" msgid="5408537517529822157">"Kwa saa %d"</item>
-  </plurals>
-  <plurals name="zen_mode_duration_hours_short">
-    <item quantity="one" msgid="6798191385685158694">"Kwa saa 1"</item>
-    <item quantity="other" msgid="8464879049844138499">"Kwa saa %d"</item>
-  </plurals>
+    <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="4367877408072000848">
+      <item quantity="other">Kwa dakika %1$d (hadi <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
+      <item quantity="one">Kwa dakika moja (hadi <xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g>)</item>
+    </plurals>
+    <plurals name="zen_mode_duration_minutes_summary_short" formatted="false" msgid="6830154222366042597">
+      <item quantity="other">Kwa dakika %1$d (mpaka <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
+      <item quantity="one">Kwa dakika 1 (mpaka <xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g>)</item>
+    </plurals>
+    <plurals name="zen_mode_duration_hours_summary" formatted="false" msgid="8152974162096743862">
+      <item quantity="other">Kwa saa %1$d (hadi <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
+      <item quantity="one">Kwa saa moja (hadi <xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g>)</item>
+    </plurals>
+    <plurals name="zen_mode_duration_hours_summary_short" formatted="false" msgid="4787552595253082371">
+      <item quantity="other">Kwa saa %1$d (mpaka <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
+      <item quantity="one">Kwa saa 1 (mpaka <xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g>)</item>
+    </plurals>
+    <plurals name="zen_mode_duration_minutes" formatted="false" msgid="5127407202506485571">
+      <item quantity="other">Kwa dakika %d</item>
+      <item quantity="one">Kwa dakika moja</item>
+    </plurals>
+    <plurals name="zen_mode_duration_minutes_short" formatted="false" msgid="2199350154433426128">
+      <item quantity="other">Kwa dakika %d</item>
+      <item quantity="one">Kwa dakika 1</item>
+    </plurals>
+    <plurals name="zen_mode_duration_hours" formatted="false" msgid="3938821308277433854">
+      <item quantity="other">Kwa saa %d</item>
+      <item quantity="one">Kwa saa moja</item>
+    </plurals>
+    <plurals name="zen_mode_duration_hours_short" formatted="false" msgid="6748277774662434217">
+      <item quantity="other">Kwa saa %d </item>
+      <item quantity="one">Kwa saa 1 </item>
+    </plurals>
     <string name="zen_mode_until" msgid="7336308492289875088">"Hadi <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
     <string name="zen_mode_alarm" msgid="9128205721301330797">"Mpaka <xliff:g id="FORMATTEDTIME">%1$s</xliff:g> (kengele inayofuata)"</string>
     <string name="zen_mode_forever" msgid="7420011936770086993">"Hadi utakapozima hili"</string>
@@ -1515,8 +1515,8 @@
     <string name="usb_midi_peripheral_product_name" msgid="4971827859165280403">"Mlango wa USB wa Pembeni"</string>
     <string name="floating_toolbar_open_overflow_description" msgid="4797287862999444631">"Chaguo zaidi"</string>
     <string name="floating_toolbar_close_overflow_description" msgid="559796923090723804">"Funga vipengee vya ziada"</string>
-  <plurals name="selected_count">
-    <item quantity="one" msgid="8857281055159991036">"<xliff:g id="COUNT">%1$d</xliff:g> imechaguliwa"</item>
-    <item quantity="other" msgid="2608606845335294849">"<xliff:g id="COUNT">%1$d</xliff:g> zimechaguliwa"</item>
-  </plurals>
+    <plurals name="selected_count" formatted="false" msgid="7187339492915744615">
+      <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> vimechaguliwa</item>
+      <item quantity="one"><xliff:g id="COUNT_0">%1$d</xliff:g> kimechaguliwa</item>
+    </plurals>
 </resources>
