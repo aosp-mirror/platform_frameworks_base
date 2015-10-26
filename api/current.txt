@@ -36462,6 +36462,7 @@ package android.view {
     method public boolean performHapticFeedback(int);
     method public boolean performHapticFeedback(int, int);
     method public boolean performLongClick();
+    method public boolean performLongClick(float, float);
     method public void playSoundEffect(int);
     method public boolean post(java.lang.Runnable);
     method public boolean postDelayed(java.lang.Runnable, long);

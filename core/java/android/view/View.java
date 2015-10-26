@@ -5341,21 +5341,53 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     }
 
     /**
-     * Call this view's OnLongClickListener, if it is defined. Invokes the context menu if the
-     * OnLongClickListener did not consume the event.
+     * Calls this view's OnLongClickListener, if it is defined. Invokes the
+     * context menu if the OnLongClickListener did not consume the event.
      *
-     * @return True if one of the above receivers consumed the event, false otherwise.
+     * @return {@code true} if one of the above receivers consumed the event,
+     *         {@code false} otherwise
      */
     public boolean performLongClick() {
+        return performLongClickInternal(false, 0, 0);
+    }
+
+    /**
+     * Calls this view's OnLongClickListener, if it is defined. Invokes the
+     * context menu if the OnLongClickListener did not consume the event,
+     * anchoring it to an (x,y) coordinate.
+     *
+     * @param x x coordinate of the anchoring touch event
+     * @param y y coordinate of the anchoring touch event
+     * @return {@code true} if one of the above receivers consumed the event,
+     *         {@code false} otherwise
+     */
+    public boolean performLongClick(float x, float y) {
+        return performLongClickInternal(true, x, y);
+    }
+
+    /**
+     * Calls this view's OnLongClickListener, if it is defined. Invokes the
+     * context menu if the OnLongClickListener did not consume the event,
+     * optionally anchoring it to an (x,y) coordinate.
+     *
+     * @param isAnchored whether this long click is anchored to a touch event
+     * @param x x coordinate of the anchoring touch event, ignored if
+     *          {@code isAnchored} is set to {@code false}
+     * @param y y coordinate of the anchoring touch event, ignored if
+     *          {@code isAnchored} is set to {@code false}
+     * @return {@code true} if one of the above receivers consumed the event,
+     *         {@code false} otherwise
+     */
+    private boolean performLongClickInternal(boolean isAnchored, float x, float y) {
         sendAccessibilityEvent(AccessibilityEvent.TYPE_VIEW_LONG_CLICKED);
 
         boolean handled = false;
-        ListenerInfo li = mListenerInfo;
+        final ListenerInfo li = mListenerInfo;
         if (li != null && li.mOnLongClickListener != null) {
             handled = li.mOnLongClickListener.onLongClick(View.this);
         }
         if (!handled) {
-            handled = showContextMenu();
+            handled = isAnchored ? showContextMenu(x, y) : showContextMenu();
         }
         if (handled) {
             performHapticFeedback(HapticFeedbackConstants.LONG_PRESS);
@@ -10002,32 +10034,36 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * KeyEvent.Callback.onKeyDown()}: perform press of the view
      * when {@link KeyEvent#KEYCODE_DPAD_CENTER} or {@link KeyEvent#KEYCODE_ENTER}
      * is released, if the view is enabled and clickable.
+     * <p>
+     * Key presses in software keyboards will generally NOT trigger this
+     * listener, although some may elect to do so in some situations. Do not
+     * rely on this to catch software key presses.
      *
-     * <p>Key presses in software keyboards will generally NOT trigger this listener,
-     * although some may elect to do so in some situations. Do not rely on this to
-     * catch software key presses.
-     *
-     * @param keyCode A key code that represents the button pressed, from
-     *                {@link android.view.KeyEvent}.
-     * @param event   The KeyEvent object that defines the button action.
+     * @param keyCode a key code that represents the button pressed, from
+     *                {@link android.view.KeyEvent}
+     * @param event the KeyEvent object that defines the button action
      */
     public boolean onKeyDown(int keyCode, KeyEvent event) {
-        boolean result = false;
-
         if (KeyEvent.isConfirmKey(keyCode)) {
             if ((mViewFlags & ENABLED_MASK) == DISABLED) {
                 return true;
             }
-            // Long clickable items don't necessarily have to be clickable
-            if (((mViewFlags & CLICKABLE) == CLICKABLE ||
-                    (mViewFlags & LONG_CLICKABLE) == LONG_CLICKABLE) &&
-                    (event.getRepeatCount() == 0)) {
-                setPressed(true);
-                checkForLongClick(0);
+
+            // Long clickable items don't necessarily have to be clickable.
+            if (((mViewFlags & CLICKABLE) == CLICKABLE
+                    || (mViewFlags & LONG_CLICKABLE) == LONG_CLICKABLE)
+                    && (event.getRepeatCount() == 0)) {
+                // For the purposes of menu anchoring and drawable hotspots,
+                // key events are considered to be at the center of the view.
+                final float x = getWidth() / 2f;
+                final float y = getHeight() / 2f;
+                setPressed(true, x, y);
+                checkForLongClick(0, x, y);
                 return true;
             }
         }
-        return result;
+
+        return false;
     }
 
     /**
@@ -10555,7 +10591,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                     } else {
                         // Not inside a scrolling container, so show the feedback right away
                         setPressed(true, x, y);
-                        checkForLongClick(0);
+                        checkForLongClick(0, x, y);
                     }
                     break;
 
@@ -19992,13 +20028,14 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         }
     }
 
-    private void checkForLongClick(int delayOffset) {
+    private void checkForLongClick(int delayOffset, float x, float y) {
         if ((mViewFlags & LONG_CLICKABLE) == LONG_CLICKABLE) {
             mHasPerformedLongPress = false;
 
             if (mPendingCheckForLongPress == null) {
                 mPendingCheckForLongPress = new CheckForLongPress();
             }
+            mPendingCheckForLongPress.setAnchor(x, y);
             mPendingCheckForLongPress.rememberWindowAttachCount();
             postDelayed(mPendingCheckForLongPress,
                     ViewConfiguration.getLongPressTimeout() - delayOffset);
@@ -21354,15 +21391,22 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
 
     private final class CheckForLongPress implements Runnable {
         private int mOriginalWindowAttachCount;
+        private float mX;
+        private float mY;
 
         @Override
         public void run() {
             if (isPressed() && (mParent != null)
                     && mOriginalWindowAttachCount == mWindowAttachCount) {
-                if (performLongClick()) {
+                if (performLongClick(mX, mY)) {
                     mHasPerformedLongPress = true;
                 }
             }
+        }
+
+        public void setAnchor(float x, float y) {
+            mX = x;
+            mY = y;
         }
 
         public void rememberWindowAttachCount() {
@@ -21378,7 +21422,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         public void run() {
             mPrivateFlags &= ~PFLAG_PREPRESSED;
             setPressed(true, x, y);
-            checkForLongClick(ViewConfiguration.getTapTimeout());
+            checkForLongClick(ViewConfiguration.getTapTimeout(), x, y);
         }
     }
 
