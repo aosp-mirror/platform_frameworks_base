@@ -17,4 +17,3 @@ LOCAL_CERTIFICATE := platform
 
 include $(BUILD_PACKAGE)
 
-include $(LOCAL_PATH)/../testing/TestDocumentsProvider/Android.mk
