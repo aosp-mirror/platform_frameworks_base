@@ -61,10 +61,10 @@
     <string name="needPuk" msgid="919668385956251611">"Вашата СИМ картичка е заклучена со ПУК код. Внесете го ПУК кодот за да се отклучи."</string>
     <string name="needPuk2" msgid="4526033371987193070">"Внесете го ПУК2 кодот за да се одблокира СИМ картичката."</string>
     <string name="enablePin" msgid="209412020907207950">"Неуспешно, овозможи заклучување на SIM/RUIM."</string>
-  <plurals name="pinpuk_attempts">
-    <item quantity="one" msgid="6596245285809790142">"Ви преостанува уште <xliff:g id="NUMBER">%d</xliff:g> обид, а потоа СИМ картичката ќе се заклучи."</item>
-    <item quantity="other" msgid="7530597808358774740">"Ви преостануваат уште <xliff:g id="NUMBER">%d</xliff:g> обиди, а потоа СИМ картичката ќе се заклучи."</item>
-  </plurals>
+    <plurals name="pinpuk_attempts" formatted="false" msgid="1251012001539225582">
+      <item quantity="one">Ви преостануваат уште <xliff:g id="NUMBER_1">%d</xliff:g> обид пред СИМ-картичката да се заклучи.</item>
+      <item quantity="other">Ви преостануваат уште <xliff:g id="NUMBER_1">%d</xliff:g> обиди пред СИМ-картичката да се заклучи.</item>
+    </plurals>
     <string name="imei" msgid="2625429890869005782">"IMEI"</string>
     <string name="meid" msgid="4841221237681254195">"MEID"</string>
     <string name="ClipMmi" msgid="6952821216480289285">"ИД на дојдовен повикувач"</string>
@@ -809,10 +809,10 @@
     <string name="enable_explore_by_touch_warning_message" product="default" msgid="2708199672852373195">"<xliff:g id="ACCESSIBILITY_SERVICE_NAME">%1$s</xliff:g> сака да овозможи „Истражувај со допир“. Кога е вклучено „Истражувај со допир“, може да се слушнат или да се видат описи на она што е под вашиот прст или да се прават движења за комуницирање со телефонот."</string>
     <string name="oneMonthDurationPast" msgid="7396384508953779925">"Пред 1 месец"</string>
     <string name="beforeOneMonthDurationPast" msgid="909134546836499826">"Пред повеќе од 1 месец"</string>
-  <plurals name="last_num_days">
-    <item quantity="one" msgid="7555846096746489821">"Последниот <xliff:g id="COUNT">%d</xliff:g> ден"</item>
-    <item quantity="other" msgid="3069992808164318268">"Последните <xliff:g id="COUNT">%d</xliff:g> дена"</item>
-  </plurals>
+    <plurals name="last_num_days" formatted="false" msgid="5104533550723932025">
+      <item quantity="one">Последните <xliff:g id="COUNT_1">%d</xliff:g> ден</item>
+      <item quantity="other">Последните <xliff:g id="COUNT_1">%d</xliff:g> дена</item>
+    </plurals>
     <string name="last_month" msgid="3959346739979055432">"Минатиот месец"</string>
     <string name="older" msgid="5211975022815554840">"Постари"</string>
     <string name="preposition_for_date" msgid="9093949757757445117">"на <xliff:g id="DATE">%s</xliff:g>"</string>
@@ -830,18 +830,18 @@
     <string name="weeks" msgid="6509623834583944518">"седмици"</string>
     <string name="year" msgid="4001118221013892076">"година"</string>
     <string name="years" msgid="6881577717993213522">"години"</string>
-  <plurals name="duration_seconds">
-    <item quantity="one" msgid="6962015528372969481">"1 секунда"</item>
-    <item quantity="other" msgid="1886107766577166786">"<xliff:g id="COUNT">%d</xliff:g> секунди"</item>
-  </plurals>
-  <plurals name="duration_minutes">
-    <item quantity="one" msgid="4915414002546085617">"1 минута"</item>
-    <item quantity="other" msgid="3165187169224908775">"<xliff:g id="COUNT">%d</xliff:g> минути"</item>
-  </plurals>
-  <plurals name="duration_hours">
-    <item quantity="one" msgid="8917467491248809972">"1 час"</item>
-    <item quantity="other" msgid="3863962854246773930">"<xliff:g id="COUNT">%d</xliff:g> часа"</item>
-  </plurals>
+    <plurals name="duration_seconds" formatted="false" msgid="4527986939729687805">
+      <item quantity="one"><xliff:g id="COUNT">%d</xliff:g> секунда</item>
+      <item quantity="other"><xliff:g id="COUNT">%d</xliff:g> секунди</item>
+    </plurals>
+    <plurals name="duration_minutes" formatted="false" msgid="643786953939956125">
+      <item quantity="one"><xliff:g id="COUNT">%d</xliff:g> минута</item>
+      <item quantity="other"><xliff:g id="COUNT">%d</xliff:g> минути</item>
+    </plurals>
+    <plurals name="duration_hours" formatted="false" msgid="6826233369186668274">
+      <item quantity="one"><xliff:g id="COUNT">%d</xliff:g> час</item>
+      <item quantity="other"><xliff:g id="COUNT">%d</xliff:g> часа</item>
+    </plurals>
     <string name="VideoView_error_title" msgid="3534509135438353077">"Проблем со видео"</string>
     <string name="VideoView_error_text_invalid_progressive_playback" msgid="3186670335938670444">"Видеово не е важечко за постојан тек до уредов."</string>
     <string name="VideoView_error_text_unknown" msgid="3450439155187810085">"Ова видео не може да се пушти."</string>
@@ -954,14 +954,14 @@
     <string name="ringtone_silent" msgid="7937634392408977062">"Ниедна"</string>
     <string name="ringtone_picker_title" msgid="3515143939175119094">"Мелодии"</string>
     <string name="ringtone_unknown" msgid="5477919988701784788">"Непозната мелодија"</string>
-  <plurals name="wifi_available">
-    <item quantity="one" msgid="6654123987418168693">"Wi-Fi мрежа е достапна"</item>
-    <item quantity="other" msgid="4192424489168397386">"Wi-Fi мрежи се достапни"</item>
-  </plurals>
-  <plurals name="wifi_available_detailed">
-    <item quantity="one" msgid="1634101450343277345">"Отворена Wi-Fi мрежа е достапна"</item>
-    <item quantity="other" msgid="7915895323644292768">"Отворени Wi-Fi мрежи се достапни"</item>
-  </plurals>
+    <plurals name="wifi_available" formatted="false" msgid="7900333017752027322">
+      <item quantity="one">Wi-Fi мрежи се достапни</item>
+      <item quantity="other">Wi-Fi мрежи се достапни</item>
+    </plurals>
+    <plurals name="wifi_available_detailed" formatted="false" msgid="1140699367193975606">
+      <item quantity="one">Отворени Wi-Fi мрежи се достапни</item>
+      <item quantity="other">Отворени Wi-Fi мрежи се достапни</item>
+    </plurals>
     <string name="wifi_available_sign_in" msgid="9157196203958866662">"Најавете се на мрежа на Wi-Fi"</string>
     <string name="network_available_sign_in" msgid="1848877297365446605">"Најавете се на мрежа"</string>
     <!-- no translation found for network_available_sign_in_detailed (8000081941447976118) -->
@@ -1145,10 +1145,10 @@
     <string name="skip_button_label" msgid="1275362299471631819">"Прескокни"</string>
     <string name="no_matches" msgid="8129421908915840737">"Нема совпаѓања"</string>
     <string name="find_on_page" msgid="1946799233822820384">"Пронајди на страница"</string>
-  <plurals name="matches_found">
-    <item quantity="one" msgid="8167147081136579439">"1 совпаѓање"</item>
-    <item quantity="other" msgid="4641872797067609177">"<xliff:g id="INDEX">%d</xliff:g> од <xliff:g id="TOTAL">%d</xliff:g>"</item>
-  </plurals>
+    <plurals name="matches_found" formatted="false" msgid="1210884353962081884">
+      <item quantity="one"><xliff:g id="INDEX">%d</xliff:g> од <xliff:g id="TOTAL">%d</xliff:g></item>
+      <item quantity="other"><xliff:g id="INDEX">%d</xliff:g> од <xliff:g id="TOTAL">%d</xliff:g></item>
+    </plurals>
     <string name="action_mode_done" msgid="7217581640461922289">"Готово"</string>
     <string name="progress_erasing" product="nosdcard" msgid="4521573321524340058">"Бришење УСБ меморија..."</string>
     <string name="progress_erasing" product="default" msgid="6596988875507043042">"Бришење СД картичка..."</string>
@@ -1428,10 +1428,10 @@
     <string name="restr_pin_create_pin" msgid="8017600000263450337">"Создади ПИН за измена на ограничувањата"</string>
     <string name="restr_pin_error_doesnt_match" msgid="2224214190906994548">"ПИН кодовите не се совпаѓаат. Обиди се повторно."</string>
     <string name="restr_pin_error_too_short" msgid="8173982756265777792">"ПИН кодот е премногу краток. Мора да има најмалку 4 цифри."</string>
-  <plurals name="restr_pin_countdown">
-    <item quantity="one" msgid="311050995198548675">"Обидете се повторно за 1 секунда"</item>
-    <item quantity="other" msgid="4730868920742952817">"Обидете се повторно за <xliff:g id="COUNT">%d</xliff:g> секунди"</item>
-  </plurals>
+    <plurals name="restr_pin_countdown" formatted="false" msgid="9061246974881224688">
+      <item quantity="one">Обидете се повторно по <xliff:g id="COUNT">%d</xliff:g> секунда</item>
+      <item quantity="other">Обидете се повторно по <xliff:g id="COUNT">%d</xliff:g> секунди</item>
+    </plurals>
     <string name="restr_pin_try_later" msgid="973144472490532377">"Обиди се повторно подоцна"</string>
     <string name="immersive_cling_title" msgid="8394201622932303336">"Се прикажува на цел екран"</string>
     <string name="immersive_cling_description" msgid="3482371193207536040">"За да излезете, повлечете одозгора надолу."</string>
@@ -1457,38 +1457,38 @@
     <string name="package_updated_device_owner" msgid="8856631322440187071">"Ажурирано од администраторот"</string>
     <string name="package_deleted_device_owner" msgid="7650577387493101353">"Избришано од администраторот"</string>
     <string name="battery_saver_description" msgid="1960431123816253034">"За да ви помогне да ја подобрите трајноста на батеријата, штедачот на батеријата ја намалува изведбата на уредот и го ограничува вибрирањето, услугите за локација и повеќето податоци од заднина. Е-поштата, испраќањето пораки и другите апликации кои се потпираат на синхронизација можеби нема да се ажурираат доколку не ги отворите.\n\nШтедачот на батеријата автоматски се исклучува кога уредот се полни."</string>
-  <plurals name="zen_mode_duration_minutes_summary">
-    <item quantity="one" msgid="3177683545388923234">"Една минута (до <xliff:g id="FORMATTEDTIME">%2$s</xliff:g>)"</item>
-    <item quantity="other" msgid="2787867221129368935">"%1$d минути (до <xliff:g id="FORMATTEDTIME">%2$s</xliff:g>)"</item>
-  </plurals>
-  <plurals name="zen_mode_duration_minutes_summary_short">
-    <item quantity="one" msgid="4097046271119330874">"1 мин. (до <xliff:g id="FORMATTEDTIME">%2$s</xliff:g>)"</item>
-    <item quantity="other" msgid="9128259640307810602">"%1$d мин. (до <xliff:g id="FORMATTEDTIME">%2$s</xliff:g>)"</item>
-  </plurals>
-  <plurals name="zen_mode_duration_hours_summary">
-    <item quantity="one" msgid="597194865053253679">"Еден час (до <xliff:g id="FORMATTEDTIME">%2$s</xliff:g>)"</item>
-    <item quantity="other" msgid="2827214920627669898">"%1$d часа (до <xliff:g id="FORMATTEDTIME">%2$s</xliff:g>)"</item>
-  </plurals>
-  <plurals name="zen_mode_duration_hours_summary_short">
-    <item quantity="one" msgid="342658185856495801">"1 ч. (до <xliff:g id="FORMATTEDTIME">%2$s</xliff:g>)"</item>
-    <item quantity="other" msgid="6842148190293675591">"%1$d ч. (до <xliff:g id="FORMATTEDTIME">%2$s</xliff:g>)"</item>
-  </plurals>
-  <plurals name="zen_mode_duration_minutes">
-    <item quantity="one" msgid="9040808414992812341">"За една минута"</item>
-    <item quantity="other" msgid="6924190729213550991">"За %d минути"</item>
-  </plurals>
-  <plurals name="zen_mode_duration_minutes_short">
-    <item quantity="one" msgid="4125166172281866385">"1 мин."</item>
-    <item quantity="other" msgid="5131202943429775644">"%d мин."</item>
-  </plurals>
-  <plurals name="zen_mode_duration_hours">
-    <item quantity="one" msgid="3480040795582254384">"За еден час"</item>
-    <item quantity="other" msgid="5408537517529822157">"За %d часа"</item>
-  </plurals>
-  <plurals name="zen_mode_duration_hours_short">
-    <item quantity="one" msgid="6798191385685158694">"1 ч."</item>
-    <item quantity="other" msgid="8464879049844138499">"%d ч."</item>
-  </plurals>
+    <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="4367877408072000848">
+      <item quantity="one">За %1$d минута (до <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
+      <item quantity="other">За %1$d минути (до <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
+    </plurals>
+    <plurals name="zen_mode_duration_minutes_summary_short" formatted="false" msgid="6830154222366042597">
+      <item quantity="one">За %1$d мин. (до <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
+      <item quantity="other">За %1$d мин. (до <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
+    </plurals>
+    <plurals name="zen_mode_duration_hours_summary" formatted="false" msgid="8152974162096743862">
+      <item quantity="one">За %1$d час (до <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
+      <item quantity="other">За %1$d часа (до <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
+    </plurals>
+    <plurals name="zen_mode_duration_hours_summary_short" formatted="false" msgid="4787552595253082371">
+      <item quantity="one">За %1$d ч. (до <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
+      <item quantity="other">За %1$d ч. (до <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
+    </plurals>
+    <plurals name="zen_mode_duration_minutes" formatted="false" msgid="5127407202506485571">
+      <item quantity="one">За %d минута</item>
+      <item quantity="other">За %d минути</item>
+    </plurals>
+    <plurals name="zen_mode_duration_minutes_short" formatted="false" msgid="2199350154433426128">
+      <item quantity="one">За %d мин.</item>
+      <item quantity="other">За %d мин.</item>
+    </plurals>
+    <plurals name="zen_mode_duration_hours" formatted="false" msgid="3938821308277433854">
+      <item quantity="one">За % d час</item>
+      <item quantity="other">За % d часа</item>
+    </plurals>
+    <plurals name="zen_mode_duration_hours_short" formatted="false" msgid="6748277774662434217">
+      <item quantity="one">За %d ч.</item>
+      <item quantity="other">За %d ч.</item>
+    </plurals>
     <string name="zen_mode_until" msgid="7336308492289875088">"До <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
     <string name="zen_mode_alarm" msgid="9128205721301330797">"До <xliff:g id="FORMATTEDTIME">%1$s</xliff:g> (следниот аларм)"</string>
     <string name="zen_mode_forever" msgid="7420011936770086993">"Додека не го исклучите"</string>
@@ -1515,8 +1515,8 @@
     <string name="usb_midi_peripheral_product_name" msgid="4971827859165280403">"Надворешна порта на УСБ"</string>
     <string name="floating_toolbar_open_overflow_description" msgid="4797287862999444631">"Повеќе опции"</string>
     <string name="floating_toolbar_close_overflow_description" msgid="559796923090723804">"Затвори прелевање"</string>
-  <plurals name="selected_count">
-    <item quantity="one" msgid="8857281055159991036">"Избрана е <xliff:g id="COUNT">%1$d</xliff:g>"</item>
-    <item quantity="other" msgid="2608606845335294849">"Избрани се <xliff:g id="COUNT">%1$d</xliff:g>"</item>
-  </plurals>
+    <plurals name="selected_count" formatted="false" msgid="7187339492915744615">
+      <item quantity="one"><xliff:g id="COUNT_1">%1$d</xliff:g> е избрана</item>
+      <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> се избрани</item>
+    </plurals>
 </resources>

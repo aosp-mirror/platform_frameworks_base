@@ -61,10 +61,10 @@
     <string name="needPuk" msgid="919668385956251611">"ស៊ីមកាត​​របស់​អ្នក​ជាប់​កូដ PUK ។ បញ្ចូល​កូដ PUK ដើម្បី​ដោះ​សោ។"</string>
     <string name="needPuk2" msgid="4526033371987193070">"បញ្ចូល​កូដ PUK2 ដើម្បី​ដោះ​សោ​ស៊ីម​កាត។"</string>
     <string name="enablePin" msgid="209412020907207950">"បរាជ័យ, បើក​ការ​ចាក់សោ​ស៊ី​ម / RUIM ។"</string>
-  <plurals name="pinpuk_attempts">
-    <item quantity="one" msgid="6596245285809790142">"អ្នក​មាន <xliff:g id="NUMBER">%d</xliff:g> ការ​ព្យាយាម​ដែល​នៅសល់​មុន​ពេល​ស៊ី​ម​ត្រូវ​បាន​ចាក់សោ​។"</item>
-    <item quantity="other" msgid="7530597808358774740">"អ្នក​មាន <xliff:g id="NUMBER">%d</xliff:g> ការ​ព្យាយាម​ដែល​នៅសល់​មុន​ពេល​ស៊ី​ម​ត្រូវ​បាន​ចាក់សោ​។"</item>
-  </plurals>
+    <plurals name="pinpuk_attempts" formatted="false" msgid="1251012001539225582">
+      <item quantity="other">អ្នកនៅសល់ការព្យាយាម <xliff:g id="NUMBER_1">%d</xliff:g> ដងទៀត មុនពេលស៊ីមត្រូវចាក់សោ។</item>
+      <item quantity="one">អ្នកនៅសល់ការព្យាយាម <xliff:g id="NUMBER_0">%d</xliff:g> ដងទៀត មុនពេលស៊ីមត្រូវចាក់សោ។</item>
+    </plurals>
     <string name="imei" msgid="2625429890869005782">"IMEI"</string>
     <string name="meid" msgid="4841221237681254195">"MEID"</string>
     <string name="ClipMmi" msgid="6952821216480289285">"លេខ​សម្គាល់​អ្នក​ហៅ​​ចូល​"</string>
@@ -809,10 +809,10 @@
     <string name="enable_explore_by_touch_warning_message" product="default" msgid="2708199672852373195">"<xliff:g id="ACCESSIBILITY_SERVICE_NAME">%1$s</xliff:g> ចង់​បើក​ការ​រុករ​ក​ដោយ​ប៉ះ។ ពេល​រុករក​ដោយ​ប៉ះ​ត្រូវ​បាន​បើក​​ អ្នក​អាច​ស្ដាប់​ឮ​ ឬ​ឃើញ​ការ​ពណ៌នា​អ្វី​ដែល​នៅ​ក្រោម​ម្រាមដៃ​របស់​អ្នក​​ ឬ​អនុវត្ត​កាយវិការ​ដើម្បី​មាន​អន្តរកម្ម​ជា​មួយ​ទូរស័ព្ទ។"</string>
     <string name="oneMonthDurationPast" msgid="7396384508953779925">"1 ខែ​មុន"</string>
     <string name="beforeOneMonthDurationPast" msgid="909134546836499826">"មុន​ពេល ១ ខែ​មុន"</string>
-  <plurals name="last_num_days">
-    <item quantity="one" msgid="7555846096746489821">"<xliff:g id="COUNT">%d</xliff:g> ថ្ងៃចុងក្រោយ"</item>
-    <item quantity="other" msgid="3069992808164318268">"<xliff:g id="COUNT">%d</xliff:g> ថ្ងៃ​ចុងក្រោយ"</item>
-  </plurals>
+    <plurals name="last_num_days" formatted="false" msgid="5104533550723932025">
+      <item quantity="other"> <xliff:g id="COUNT_1">%d</xliff:g> ថ្ងៃចុងក្រោយ</item>
+      <item quantity="one"> <xliff:g id="COUNT_0">%d</xliff:g> ថ្ងៃចុងក្រោយ</item>
+    </plurals>
     <string name="last_month" msgid="3959346739979055432">"ខែ​មុន"</string>
     <string name="older" msgid="5211975022815554840">"ចាស់​ជាង"</string>
     <string name="preposition_for_date" msgid="9093949757757445117">"នៅ <xliff:g id="DATE">%s</xliff:g>"</string>
@@ -830,18 +830,18 @@
     <string name="weeks" msgid="6509623834583944518">"សប្ដាហ៍​"</string>
     <string name="year" msgid="4001118221013892076">"ឆ្នាំ​"</string>
     <string name="years" msgid="6881577717993213522">"ឆ្នាំ​"</string>
-  <plurals name="duration_seconds">
-    <item quantity="one" msgid="6962015528372969481">"1 វិនាទី"</item>
-    <item quantity="other" msgid="1886107766577166786">"<xliff:g id="COUNT">%d</xliff:g> វិនាទី"</item>
-  </plurals>
-  <plurals name="duration_minutes">
-    <item quantity="one" msgid="4915414002546085617">"១ នាទី"</item>
-    <item quantity="other" msgid="3165187169224908775">"<xliff:g id="COUNT">%d</xliff:g> នាទី"</item>
-  </plurals>
-  <plurals name="duration_hours">
-    <item quantity="one" msgid="8917467491248809972">"១ ម៉ោង"</item>
-    <item quantity="other" msgid="3863962854246773930">"<xliff:g id="COUNT">%d</xliff:g> ម៉ោង"</item>
-  </plurals>
+    <plurals name="duration_seconds" formatted="false" msgid="4527986939729687805">
+      <item quantity="other"><xliff:g id="COUNT">%d</xliff:g> វិនាទី</item>
+      <item quantity="one">1 វិនាទី</item>
+    </plurals>
+    <plurals name="duration_minutes" formatted="false" msgid="643786953939956125">
+      <item quantity="other"><xliff:g id="COUNT">%d</xliff:g> នាទី</item>
+      <item quantity="one">1 នាទី</item>
+    </plurals>
+    <plurals name="duration_hours" formatted="false" msgid="6826233369186668274">
+      <item quantity="other"><xliff:g id="COUNT">%d</xliff:g> ម៉ោង</item>
+      <item quantity="one">1 ម៉ោង</item>
+    </plurals>
     <string name="VideoView_error_title" msgid="3534509135438353077">"បញ្ហា​វីដេអូ"</string>
     <string name="VideoView_error_text_invalid_progressive_playback" msgid="3186670335938670444">"វីដេអូ​នេះ​មិន​ត្រឹមត្រូវ​សម្រាប់​​ចរន្ត​ចូល​ឧបករណ៍​នេះ។"</string>
     <string name="VideoView_error_text_unknown" msgid="3450439155187810085">"មិន​អាច​ចាក់​វីដេអូ​នេះ។"</string>
@@ -956,14 +956,14 @@
     <string name="ringtone_silent" msgid="7937634392408977062">"គ្មាន"</string>
     <string name="ringtone_picker_title" msgid="3515143939175119094">"សំឡេង​រោទ៍"</string>
     <string name="ringtone_unknown" msgid="5477919988701784788">"សំឡេង​រោទ៍​មិន​ស្គាល់"</string>
-  <plurals name="wifi_available">
-    <item quantity="one" msgid="6654123987418168693">"មាន​បណ្ដាញ​វ៉ាយហ្វាយ"</item>
-    <item quantity="other" msgid="4192424489168397386">"មាន​បណ្ដាញ​វ៉ាយហ្វាយ"</item>
-  </plurals>
-  <plurals name="wifi_available_detailed">
-    <item quantity="one" msgid="1634101450343277345">"បើក​បណ្ដាញ​វ៉ាយហ្វាយ​​ដែល​មាន"</item>
-    <item quantity="other" msgid="7915895323644292768">"មាន​បណ្ដាញ​វ៉ាយហ្វាយ​បើក"</item>
-  </plurals>
+    <plurals name="wifi_available" formatted="false" msgid="7900333017752027322">
+      <item quantity="other">មានបណ្តាញ Wi-Fi</item>
+      <item quantity="one">មានបណ្តាញ Wi-Fi</item>
+    </plurals>
+    <plurals name="wifi_available_detailed" formatted="false" msgid="1140699367193975606">
+      <item quantity="other">បើកបណ្តាញ Wi-Fi ដែលមាន</item>
+      <item quantity="one">បើកបណ្តាញ Wi-Fi ដែលមាន</item>
+    </plurals>
     <string name="wifi_available_sign_in" msgid="9157196203958866662">"ចូល​បណ្ដាញ​វ៉ាយហ្វាយ"</string>
     <string name="network_available_sign_in" msgid="1848877297365446605">"ចូលទៅបណ្តាញ"</string>
     <!-- no translation found for network_available_sign_in_detailed (8000081941447976118) -->
@@ -1147,10 +1147,10 @@
     <string name="skip_button_label" msgid="1275362299471631819">"រំលង"</string>
     <string name="no_matches" msgid="8129421908915840737">"គ្មាន​ការ​ផ្គូផ្គង"</string>
     <string name="find_on_page" msgid="1946799233822820384">"រក​ក្នុង​ទំព័រ"</string>
-  <plurals name="matches_found">
-    <item quantity="one" msgid="8167147081136579439">"១ ប្រកួត"</item>
-    <item quantity="other" msgid="4641872797067609177">"<xliff:g id="INDEX">%d</xliff:g> នៃ <xliff:g id="TOTAL">%d</xliff:g>"</item>
-  </plurals>
+    <plurals name="matches_found" formatted="false" msgid="1210884353962081884">
+      <item quantity="other"><xliff:g id="INDEX">%d</xliff:g> នៃ <xliff:g id="TOTAL">%d</xliff:g></item>
+      <item quantity="one">ការប្រកួត 1</item>
+    </plurals>
     <string name="action_mode_done" msgid="7217581640461922289">"រួចរាល់"</string>
     <string name="progress_erasing" product="nosdcard" msgid="4521573321524340058">"កំពុង​លុប​ឧបករណ៍​ផ្ទុក​យូអេសប៊ី..."</string>
     <string name="progress_erasing" product="default" msgid="6596988875507043042">"កំពុង​លុប​កាត​អេសឌី..."</string>
@@ -1428,10 +1428,10 @@
     <string name="restr_pin_create_pin" msgid="8017600000263450337">"បង្កើត​កូដ PIN សម្រាប់​កែ​ការ​ដាក់​កម្រិត"</string>
     <string name="restr_pin_error_doesnt_match" msgid="2224214190906994548">"កូដ PIN មិន​ដូច​គ្នា។ ព្យាយាម​ម្ដង​ទៀត។"</string>
     <string name="restr_pin_error_too_short" msgid="8173982756265777792">"កូដ​ PIN ខ្លី​ពេក។ ត្រូវ​តែ​មាន​យ៉ាង​ហោច​ណាស់ ៤ តួ។"</string>
-  <plurals name="restr_pin_countdown">
-    <item quantity="one" msgid="311050995198548675">"ព្យាយាម​ម្ដង​ទៀត​ក្នុង​រយៈ​ពេល​ ១​វិនាទី។"</item>
-    <item quantity="other" msgid="4730868920742952817">"សូម​ព្យាយាម​ម្ដង​ទៀត​ក្នុង​រយៈពេល <xliff:g id="COUNT">%d</xliff:g> វិនាទី"</item>
-  </plurals>
+    <plurals name="restr_pin_countdown" formatted="false" msgid="9061246974881224688">
+      <item quantity="other">ព្យាយាមម្តងទៀតក្នុងរយៈពេល <xliff:g id="COUNT">%d</xliff:g> វិនាទី</item>
+      <item quantity="one">ព្យាយាមម្តងទៀតក្នុងរយៈពេល 1 វិនាទី</item>
+    </plurals>
     <string name="restr_pin_try_later" msgid="973144472490532377">"សូម​ព្យាយាម​ម្ដងទៀត​នៅ​ពេល​ក្រោយ។"</string>
     <string name="immersive_cling_title" msgid="8394201622932303336">"កំពុងមើលពេញអេក្រង់"</string>
     <string name="immersive_cling_description" msgid="3482371193207536040">"ដើម្បីចាកចេញ សូមអូសពីលើចុះក្រោម។"</string>
@@ -1457,38 +1457,38 @@
     <string name="package_updated_device_owner" msgid="8856631322440187071">"បានធ្វើបច្ចុប្បន្នភាពដោយអ្នកគ្រប់គ្រងរបស់អ្នក"</string>
     <string name="package_deleted_device_owner" msgid="7650577387493101353">"បានលុបដោយអ្នកគ្រប់គ្រងរបស់អ្នក"</string>
     <string name="battery_saver_description" msgid="1960431123816253034">"ដើម្បីជួយឲ្យថាមពលថ្មប្រសើរឡើង កម្មវិធីសន្សំសំចៃថាមពលថ្មកាត់បន្ថយប្រតិបត្តិការឧបករណ៍របស់អ្នក និងកម្រិតភាពញ័រ សេវាកម្មទីតាំង និងទិន្នន័យផ្ទៃខាងក្រោយស្ទើរតែទាំងអស់។ ការផ្ញើសារអ៊ីម៉ែល និងកម្មវិធីផ្សេងទៀតដែលពឹងផ្អែកលើការធ្វើសមកាលកម្មអាចនឹងមិនធ្វើបច្ចុប្បន្នភាពទេ លុះត្រាតែអ្នកបើកពួកវា។\n\nកម្មវិធីសន្សំសំចៃបិទដោយស្វ័យប្រវត្តិ នៅពេលដែលឧបករណ៍របស់អ្នកកំពុងសាកថ្ម។"</string>
-  <plurals name="zen_mode_duration_minutes_summary">
-    <item quantity="one" msgid="3177683545388923234">"សម្រាប់​មួយ​នាទី (រហូត​ដល់ <xliff:g id="FORMATTEDTIME">%2$s</xliff:g>)"</item>
-    <item quantity="other" msgid="2787867221129368935">"សម្រាប់ %1$d នាទី​ (រហូត​ដល់ <xliff:g id="FORMATTEDTIME">%2$s</xliff:g>)"</item>
-  </plurals>
-  <plurals name="zen_mode_duration_minutes_summary_short">
-    <item quantity="one" msgid="4097046271119330874">"រយៈពេល 1 នាទី (រហូតដល់ <xliff:g id="FORMATTEDTIME">%2$s</xliff:g>)"</item>
-    <item quantity="other" msgid="9128259640307810602">"រយៈពេល %1$d នាទី (រហូតដល់ <xliff:g id="FORMATTEDTIME">%2$s</xliff:g>)"</item>
-  </plurals>
-  <plurals name="zen_mode_duration_hours_summary">
-    <item quantity="one" msgid="597194865053253679">"សម្រាប់​មួយ​ម៉ោង (រហូត​ដល់ <xliff:g id="FORMATTEDTIME">%2$s</xliff:g>)"</item>
-    <item quantity="other" msgid="2827214920627669898">"សម្រាប់ %1$d ម៉ោង (រហូត​ដល់ <xliff:g id="FORMATTEDTIME">%2$s</xliff:g>)"</item>
-  </plurals>
-  <plurals name="zen_mode_duration_hours_summary_short">
-    <item quantity="one" msgid="342658185856495801">"រយៈពេល 1 ម៉ោង (រហូតដល់ <xliff:g id="FORMATTEDTIME">%2$s</xliff:g>)"</item>
-    <item quantity="other" msgid="6842148190293675591">"រយៈពេល %1$d ម៉ោង (រហូតដល់ <xliff:g id="FORMATTEDTIME">%2$s</xliff:g>)"</item>
-  </plurals>
-  <plurals name="zen_mode_duration_minutes">
-    <item quantity="one" msgid="9040808414992812341">"សម្រាប់​មួយ​នាទី"</item>
-    <item quantity="other" msgid="6924190729213550991">"សម្រាប់ %d នាទី"</item>
-  </plurals>
-  <plurals name="zen_mode_duration_minutes_short">
-    <item quantity="one" msgid="4125166172281866385">"រយៈពេល 1 នាទី"</item>
-    <item quantity="other" msgid="5131202943429775644">"រយៈពេល %d នាទី"</item>
-  </plurals>
-  <plurals name="zen_mode_duration_hours">
-    <item quantity="one" msgid="3480040795582254384">"សម្រាប់​មួយ​ម៉ោង"</item>
-    <item quantity="other" msgid="5408537517529822157">"សម្រាប់ %d ម៉ោង"</item>
-  </plurals>
-  <plurals name="zen_mode_duration_hours_short">
-    <item quantity="one" msgid="6798191385685158694">"រយៈពេល 1 ម៉ោង"</item>
-    <item quantity="other" msgid="8464879049844138499">"រយៈពេល %d ម៉ោង"</item>
-  </plurals>
+    <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="4367877408072000848">
+      <item quantity="other">រយៈពេល %1$d នាទី (រហូតដល់ <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
+      <item quantity="one">រយៈពេលមួយនាទី (រហូតដល់ <xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g>)</item>
+    </plurals>
+    <plurals name="zen_mode_duration_minutes_summary_short" formatted="false" msgid="6830154222366042597">
+      <item quantity="other">អស់រយៈពេល %1$d នាទី (រហូតដល់ <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
+      <item quantity="one">អស់រយៈពេល 1 នាទី (រហូតដល់ <xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g>)</item>
+    </plurals>
+    <plurals name="zen_mode_duration_hours_summary" formatted="false" msgid="8152974162096743862">
+      <item quantity="other">រយៈពេល %1$d ម៉ោង (រហូតដល់ <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
+      <item quantity="one">រយៈពេលមួយម៉ោង (រហូតដល់ <xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g>)</item>
+    </plurals>
+    <plurals name="zen_mode_duration_hours_summary_short" formatted="false" msgid="4787552595253082371">
+      <item quantity="other">អស់រយៈពេល %1$d ម៉ោង (រហូតដល់ <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
+      <item quantity="one">អស់រយៈពេល 1 ម៉ោង (រហូតដល់ <xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g>)</item>
+    </plurals>
+    <plurals name="zen_mode_duration_minutes" formatted="false" msgid="5127407202506485571">
+      <item quantity="other">រយៈពេល %d នាទី</item>
+      <item quantity="one">រយៈពេលមួយនាទី</item>
+    </plurals>
+    <plurals name="zen_mode_duration_minutes_short" formatted="false" msgid="2199350154433426128">
+      <item quantity="other">អស់រយៈពេល %d នាទី</item>
+      <item quantity="one">អស់រយៈពេល 1 នាទី</item>
+    </plurals>
+    <plurals name="zen_mode_duration_hours" formatted="false" msgid="3938821308277433854">
+      <item quantity="other">រយៈពេល %d ម៉ោង</item>
+      <item quantity="one">រយៈពេលមួយម៉ោង</item>
+    </plurals>
+    <plurals name="zen_mode_duration_hours_short" formatted="false" msgid="6748277774662434217">
+      <item quantity="other">អស់រយៈពេល %d ម៉ោង</item>
+      <item quantity="one">អស់រយៈពេល 1 ម៉ោង</item>
+    </plurals>
     <string name="zen_mode_until" msgid="7336308492289875088">"រហូត​ដល់ <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
     <string name="zen_mode_alarm" msgid="9128205721301330797">"រហូតដល់ <xliff:g id="FORMATTEDTIME">%1$s</xliff:g> (ម៉ោងរោទិ៍បន្ទាប់)"</string>
     <string name="zen_mode_forever" msgid="7420011936770086993">"រហូត​ដល់ពេល​​អ្នក​បិទ​វា"</string>
@@ -1515,8 +1515,8 @@
     <string name="usb_midi_peripheral_product_name" msgid="4971827859165280403">"ឧបករណ៍រន្ធ USB បន្ថែម"</string>
     <string name="floating_toolbar_open_overflow_description" msgid="4797287862999444631">"ជម្រើសច្រើនទៀត"</string>
     <string name="floating_toolbar_close_overflow_description" msgid="559796923090723804">"បិទលើសចំណុះ"</string>
-  <plurals name="selected_count">
-    <item quantity="one" msgid="8857281055159991036">"បានជ្រើស <xliff:g id="COUNT">%1$d</xliff:g>"</item>
-    <item quantity="other" msgid="2608606845335294849">"បានជ្រើស <xliff:g id="COUNT">%1$d</xliff:g>"</item>
-  </plurals>
+    <plurals name="selected_count" formatted="false" msgid="7187339492915744615">
+      <item quantity="other">បានជ្រើស <xliff:g id="COUNT_1">%1$d</xliff:g></item>
+      <item quantity="one">បានជ្រើស <xliff:g id="COUNT_0">%1$d</xliff:g></item>
+    </plurals>
 </resources>

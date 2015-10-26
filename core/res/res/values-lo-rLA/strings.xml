@@ -61,10 +61,10 @@
     <string name="needPuk" msgid="919668385956251611">"ຊິມກາດຂອງທ່ານຖືກລັອກດ້ວຍລະຫັດ PUK. ໃຫ້ພິມລະຫັດ PUK ເພື່ອປົດລັອກມັນ."</string>
     <string name="needPuk2" msgid="4526033371987193070">"ພິມ PUK2 ເພື່ອປົດລັອກ SIM card."</string>
     <string name="enablePin" msgid="209412020907207950">"ບໍ່ສຳເລັດ, ເປີດນໍາໃຊ້ການລັອກຂອງ SIM/RUIM."</string>
-  <plurals name="pinpuk_attempts">
-    <item quantity="one" msgid="6596245285809790142">"ທ່ານສາມາດລອງໄດ້ອີກ <xliff:g id="NUMBER">%d</xliff:g> ເທື່ອກ່ອນທີ່ SIM ຂອງທ່ານຈະຖືກລັອກ."</item>
-    <item quantity="other" msgid="7530597808358774740">"ທ່ານສາມາດລອງໄດ້ອີກ <xliff:g id="NUMBER">%d</xliff:g> ເທື່ອກ່ອນທີ່ SIM ຂອງທ່ານຈະຖືກລັອກ."</item>
-  </plurals>
+    <plurals name="pinpuk_attempts" formatted="false" msgid="1251012001539225582">
+      <item quantity="other">ທ່ານສາມາດລອງໄດ້ອີກ <xliff:g id="NUMBER_1">%d</xliff:g> ເທື່ອກ່ອນທີ່ SIM ຂອງທ່ານຈະຖືກລັອກ.</item>
+      <item quantity="one">ທ່ານສາມາດລອງໄດ້ອີກ <xliff:g id="NUMBER_0">%d</xliff:g> ເທື່ອກ່ອນທີ່ SIM ຂອງທ່ານຈະຖືກລັອກ.</item>
+    </plurals>
     <string name="imei" msgid="2625429890869005782">"IMEI"</string>
     <string name="meid" msgid="4841221237681254195">"MEID"</string>
     <string name="ClipMmi" msgid="6952821216480289285">"ໝາຍເລກຜູ່ໂທເຂົ້າ"</string>
@@ -809,10 +809,10 @@
     <string name="enable_explore_by_touch_warning_message" product="default" msgid="2708199672852373195">"<xliff:g id="ACCESSIBILITY_SERVICE_NAME">%1$s</xliff:g> ຕ້ອງການເປີດນຳໃຊ້ \"ການສຳຫຼວດໂດຍສຳພັດ\". ເມື່ອເປີດ \"ການສຳຫຼວດໂດຍສຳພັດ\" ແລ້ວ ທ່ານຈະສາມາດໄດ້ຍິນ ຫຼືເຫັນຄຳບັນຍາຍວ່າມີຫຍັງຢູ່ກ້ອງນິ້ວມືຂອງທ່ານ ຫຼືໃຊ້ຮູບແບບການເຄື່ອນໄຫວເພື່ອໂຕ້ຕອບກັບໂທລະສັບ."</string>
     <string name="oneMonthDurationPast" msgid="7396384508953779925">"1 ເດືອນກ່ອນຫນ້ານີ້"</string>
     <string name="beforeOneMonthDurationPast" msgid="909134546836499826">"ຫຼາຍກວ່າ 1 ເດືອນກ່ອນ"</string>
-  <plurals name="last_num_days">
-    <item quantity="one" msgid="7555846096746489821">"<xliff:g id="COUNT">%d</xliff:g> ວັນສຸດ​ທ້າຍ"</item>
-    <item quantity="other" msgid="3069992808164318268">"<xliff:g id="COUNT">%d</xliff:g> ມື້ທີ່ຜ່ານມາ"</item>
-  </plurals>
+    <plurals name="last_num_days" formatted="false" msgid="5104533550723932025">
+      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> ວັນ​ສຸດ​ທ້າຍ</item>
+      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g> ວັນ​ສຸດ​ທ້າຍ</item>
+    </plurals>
     <string name="last_month" msgid="3959346739979055432">"ເດືອນແລ້ວ"</string>
     <string name="older" msgid="5211975022815554840">"ເກົ່າກວ່າ"</string>
     <string name="preposition_for_date" msgid="9093949757757445117">"ວັນທີ <xliff:g id="DATE">%s</xliff:g>"</string>
@@ -830,18 +830,18 @@
     <string name="weeks" msgid="6509623834583944518">"ອາທິດ"</string>
     <string name="year" msgid="4001118221013892076">"ປີ"</string>
     <string name="years" msgid="6881577717993213522">"ປິ"</string>
-  <plurals name="duration_seconds">
-    <item quantity="one" msgid="6962015528372969481">"1 ວິນາທີ"</item>
-    <item quantity="other" msgid="1886107766577166786">"<xliff:g id="COUNT">%d</xliff:g> ວິນາທີ"</item>
-  </plurals>
-  <plurals name="duration_minutes">
-    <item quantity="one" msgid="4915414002546085617">"1 ນາ​ທີ"</item>
-    <item quantity="other" msgid="3165187169224908775">"<xliff:g id="COUNT">%d</xliff:g> ນາທີ"</item>
-  </plurals>
-  <plurals name="duration_hours">
-    <item quantity="one" msgid="8917467491248809972">"1 ຊົ່ວ​ໂມງ"</item>
-    <item quantity="other" msgid="3863962854246773930">"<xliff:g id="COUNT">%d</xliff:g> ຊົ່ວໂມງ"</item>
-  </plurals>
+    <plurals name="duration_seconds" formatted="false" msgid="4527986939729687805">
+      <item quantity="other"><xliff:g id="COUNT">%d</xliff:g> ວິ​ນາ​ທີ</item>
+      <item quantity="one">1ວິ​ນາ​ທີ</item>
+    </plurals>
+    <plurals name="duration_minutes" formatted="false" msgid="643786953939956125">
+      <item quantity="other"><xliff:g id="COUNT">%d</xliff:g> ນາທີ</item>
+      <item quantity="one">1 ນາທີ</item>
+    </plurals>
+    <plurals name="duration_hours" formatted="false" msgid="6826233369186668274">
+      <item quantity="other"><xliff:g id="COUNT">%d</xliff:g> ຊົ່ວໂມງ</item>
+      <item quantity="one">1 ຊົ່ວໂມງ</item>
+    </plurals>
     <string name="VideoView_error_title" msgid="3534509135438353077">"ບັນຫາວິດີໂອ"</string>
     <string name="VideoView_error_text_invalid_progressive_playback" msgid="3186670335938670444">"ວິດີໂອນີ້ບໍ່ຖືກຕ້ອງສຳລັບການສະແດງໃນອຸປະກອນນີ້."</string>
     <string name="VideoView_error_text_unknown" msgid="3450439155187810085">"ບໍ່ສາມາດຫຼິ້ນວິດີໂອນີ້ໄດ້."</string>
@@ -954,14 +954,14 @@
     <string name="ringtone_silent" msgid="7937634392408977062">"ບໍ່ມີ"</string>
     <string name="ringtone_picker_title" msgid="3515143939175119094">"ຣິງໂທນ"</string>
     <string name="ringtone_unknown" msgid="5477919988701784788">"ຣິງໂທນທີ່ບໍ່ຮູ້ຈັກ"</string>
-  <plurals name="wifi_available">
-    <item quantity="one" msgid="6654123987418168693">"ເຄືອຂ່າຍ Wi-Fi ທີ່ພົບ"</item>
-    <item quantity="other" msgid="4192424489168397386">"ມີເຄືອຂ່າຍ Wi​-Fi ໃຫ້ໃຊ້"</item>
-  </plurals>
-  <plurals name="wifi_available_detailed">
-    <item quantity="one" msgid="1634101450343277345">"ເປີດ Wi-Fi ເຄືອຂ່າຍທີ່ມີ"</item>
-    <item quantity="other" msgid="7915895323644292768">"ເຄືອຂ່າຍ Wi-Fi ແບບເປີດທີ່ພົບ"</item>
-  </plurals>
+    <plurals name="wifi_available" formatted="false" msgid="7900333017752027322">
+      <item quantity="other">ເຄືອຂ່າຍ Wi-Fi ທີ່ມີໃຫ້</item>
+      <item quantity="one">ເຄືອຂ່າຍ Wi-Fi ທີ່ມີໃຫ້</item>
+    </plurals>
+    <plurals name="wifi_available_detailed" formatted="false" msgid="1140699367193975606">
+      <item quantity="other">ເປີດເຄືອຂ່າຍ Wi-Fi  ທີ່ມີໃຫ້</item>
+      <item quantity="one">ເປີດເຄືອຂ່າຍ Wi-Fi  ທີ່ມີໃຫ້</item>
+    </plurals>
     <string name="wifi_available_sign_in" msgid="9157196203958866662">"ເຂົ້າສູ່ລະບົບເຄືອຂ່າຍ Wi-Fi"</string>
     <string name="network_available_sign_in" msgid="1848877297365446605">"ລົງຊື່ເຂົ້າເຄືອຂ່າຍ"</string>
     <!-- no translation found for network_available_sign_in_detailed (8000081941447976118) -->
@@ -1145,10 +1145,10 @@
     <string name="skip_button_label" msgid="1275362299471631819">"ຂ້າມ"</string>
     <string name="no_matches" msgid="8129421908915840737">"ບໍ່ພົບຜົນການຊອກຫາ"</string>
     <string name="find_on_page" msgid="1946799233822820384">"ຊອກໃນໜ້າ"</string>
-  <plurals name="matches_found">
-    <item quantity="one" msgid="8167147081136579439">"1 ກົງກັນ"</item>
-    <item quantity="other" msgid="4641872797067609177">"<xliff:g id="INDEX">%d</xliff:g> ຈາກທັງໝົດ <xliff:g id="TOTAL">%d</xliff:g>"</item>
-  </plurals>
+    <plurals name="matches_found" formatted="false" msgid="1210884353962081884">
+      <item quantity="other"><xliff:g id="INDEX">%d</xliff:g> ໃນ <xliff:g id="TOTAL">%d</xliff:g></item>
+      <item quantity="one">1 ກົງກັນ</item>
+    </plurals>
     <string name="action_mode_done" msgid="7217581640461922289">"ແລ້ວໆ"</string>
     <string name="progress_erasing" product="nosdcard" msgid="4521573321524340058">"ກຳລັງລຶບ ບ່ອນຈັດເກັບຂໍ້ມູນ USB …"</string>
     <string name="progress_erasing" product="default" msgid="6596988875507043042">"ກຳລັງລຶບ​ SD card..."</string>
@@ -1426,10 +1426,10 @@
     <string name="restr_pin_create_pin" msgid="8017600000263450337">"ສ້າງ PIN ສໍາ​ລັບ​ການ​ປັບ​ປຸງ​ຂໍ້ຈໍາ​ກັດ​"</string>
     <string name="restr_pin_error_doesnt_match" msgid="2224214190906994548">"PIN ບໍ່​ກົງກັນ. ລອງໃໝ່ອີກຄັ້ງ​."</string>
     <string name="restr_pin_error_too_short" msgid="8173982756265777792">"PIN ​ສັ້ນ​ເກີນ​ໄປ​. ຕ້ອງມີຢ່າງໜ້ອຍ 4 ຫຼັກ​."</string>
-  <plurals name="restr_pin_countdown">
-    <item quantity="one" msgid="311050995198548675">"ລອງໃໝ່ໃນອີກ 1 ວິນາທີ"</item>
-    <item quantity="other" msgid="4730868920742952817">"ລອງໃໝ່ໃນອີກ <xliff:g id="COUNT">%d</xliff:g> ວິນາທີ"</item>
-  </plurals>
+    <plurals name="restr_pin_countdown" formatted="false" msgid="9061246974881224688">
+      <item quantity="other">ລອງໃໝ່ໃນອີກ <xliff:g id="COUNT">%d</xliff:g> ລອງໃໝ່ໃນອີກ 1 ວິນາທີ</item>
+      <item quantity="one">ລອງໃໝ່ໃນອີກ 1 ວິນາທີ</item>
+    </plurals>
     <string name="restr_pin_try_later" msgid="973144472490532377">"ລອງໃໝ່ອີກຄັ້ງໃນພາຍຫລັງ."</string>
     <string name="immersive_cling_title" msgid="8394201622932303336">"ການ​ເບິ່ງ​ເຕັມ​ໜ້າ​ຈໍ"</string>
     <string name="immersive_cling_description" msgid="3482371193207536040">"ເພື່ອ​ອອກ, ຮູດ​ລົງ​ລຸ່ມ​ຈາກ​ດ້ານ​ເທິງ."</string>
@@ -1455,38 +1455,38 @@
     <string name="package_updated_device_owner" msgid="8856631322440187071">"ອັບ​ເດດ​ໂດຍ​ຜູ້​ຄວບ​ຄຸມ​ຂອງ​ທ່ານ​ແລ້ວ"</string>
     <string name="package_deleted_device_owner" msgid="7650577387493101353">"ຖືກ​ຜູ້​ຄວບ​ຄຸມ​ຂອງ​ທ່ານ​ລຶບ​ໄປ​ແລ້ວ"</string>
     <string name="battery_saver_description" msgid="1960431123816253034">"ເພື່ອ​ຊ່ວຍ​ເພີ່ມ​ອາ​ຍຸ​ແບັດ​ເຕີ​ຣີ, ຕົວ​ປະ​ຢັດ​ໄຟ​ແບັດ​ເຕີ​ຣີ​ຫຼຸດ​ປະ​ສິດ​ທິ​ພາບ​ການ​ເຮັດ​ວຽກ​ຂອງ​ອຸ​ປະ​ກອນ​ຂອງ​ທ່ານ​ລົງ ແລະ​ຈຳ​ກັດ​ການ​ສັ່ນ, ການ​ບໍ​ລິ​ການ​ຫາທີ່ຕັ້ງ, ແລະ​ຂໍ້​ມູນ​ພື້ນ​ຫຼັງ​ເກືອບ​ທັງ​ໝົດ. ອີ​ເມວ, ການ​ສົ່ງ​ຂໍ້​ຄວາມ, ແລະ​ແອັບອື່ນໆ​ທີ່ອາ​ໄສການ​ຊິງ​ຄ໌​ອາດ​ຈະ​ບໍ່​ອັບ​ເດດ ນອກ​ຈາກວ່າ​ທ່ານ​ເປີດ​ມັນ.\n\nຕົວ​ປະ​ຢັດ​ໄຟ​ແບັດ​ເຕີ​ຣີຈະ​ປິດ​ອັດ​ຕະ​ໂນ​ມັດ ເມື່ອ​ອຸ​ປະ​ກອນ​ຂອງ​ທ່ານ​ກຳ​ລັງ​ສາກຢູ່."</string>
-  <plurals name="zen_mode_duration_minutes_summary">
-    <item quantity="one" msgid="3177683545388923234">"​ເປັນ​ເວ​ລາ 1 ນາ​ທີ (ຈົນ​ຮອດ <xliff:g id="FORMATTEDTIME">%2$s</xliff:g>)"</item>
-    <item quantity="other" msgid="2787867221129368935">"​ເປັນ​ເວ​ລາ %1$d ​ນາ​ທີ (ຈົນ​ຮອດ <xliff:g id="FORMATTEDTIME">%2$s</xliff:g>)"</item>
-  </plurals>
-  <plurals name="zen_mode_duration_minutes_summary_short">
-    <item quantity="one" msgid="4097046271119330874">"ເປັນ​ເວ​ລາ 1 ນ​ທ (ຈົນຮອດ <xliff:g id="FORMATTEDTIME">%2$s</xliff:g>)"</item>
-    <item quantity="other" msgid="9128259640307810602">"ເປັນ​ເວ​ລາ %1$d ນ​ທ (ຈົນຮອດ <xliff:g id="FORMATTEDTIME">%2$s</xliff:g>)"</item>
-  </plurals>
-  <plurals name="zen_mode_duration_hours_summary">
-    <item quantity="one" msgid="597194865053253679">"​ເປັນ​ເວ​ລາ 1 ຊົ່ວ​ໂມງ (ຈົນ​ຮອດ <xliff:g id="FORMATTEDTIME">%2$s</xliff:g>)"</item>
-    <item quantity="other" msgid="2827214920627669898">"​ເປັນ​ເວ​ລາ %1$d ​ຊົ່ວ​ໂມງ (​ຈົນ​ຮອດ <xliff:g id="FORMATTEDTIME">%2$s</xliff:g>)"</item>
-  </plurals>
-  <plurals name="zen_mode_duration_hours_summary_short">
-    <item quantity="one" msgid="342658185856495801">"ເປັນ​ເວ​ລາ 1 ຊມ (ຈົນ​ຮອດ <xliff:g id="FORMATTEDTIME">%2$s</xliff:g>)"</item>
-    <item quantity="other" msgid="6842148190293675591">"ເປັນ​ເວ​ລາ %1$d ຊມ (​ຈົນຮອດ <xliff:g id="FORMATTEDTIME">%2$s</xliff:g>)"</item>
-  </plurals>
-  <plurals name="zen_mode_duration_minutes">
-    <item quantity="one" msgid="9040808414992812341">"ເປັນ​ເວລາ​ນຶ່ງ​ນາ​ທີ"</item>
-    <item quantity="other" msgid="6924190729213550991">"ເປັນ​ເວລາ %d ນາ​ທີ"</item>
-  </plurals>
-  <plurals name="zen_mode_duration_minutes_short">
-    <item quantity="one" msgid="4125166172281866385">"ເປັນ​ເວ​ລາ 1 ນ​ທ"</item>
-    <item quantity="other" msgid="5131202943429775644">"ເປັນ​ເວ​ລາ %d ນ​ທ"</item>
-  </plurals>
-  <plurals name="zen_mode_duration_hours">
-    <item quantity="one" msgid="3480040795582254384">"ເປັນ​ເວລາ​ນຶ່ງ​ຊົ່ວ​ໂມງ"</item>
-    <item quantity="other" msgid="5408537517529822157">"ເປັນ​ເວລາ %d ຊົ່ວ​ໂມງ"</item>
-  </plurals>
-  <plurals name="zen_mode_duration_hours_short">
-    <item quantity="one" msgid="6798191385685158694">"ເປັນ​ເວ​ລາ 1 ຊມ"</item>
-    <item quantity="other" msgid="8464879049844138499">"ເປັນ​ເວ​ລາ %d ຊມ"</item>
-  </plurals>
+    <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="4367877408072000848">
+      <item quantity="other">ເປັນ​ເວ​ລາ %1$d ນາ​ທີ (ຈົນ​ຮອດ <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
+      <item quantity="one">​ເປັນ​ເວ​ລາ 1 ນາ​ທີ (ຈົນ​ຮອດ <xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g>)</item>
+    </plurals>
+    <plurals name="zen_mode_duration_minutes_summary_short" formatted="false" msgid="6830154222366042597">
+      <item quantity="other">ເປັນ​ເວ​ລາ %1$d ນ​ທ (ຈົນ​ກ່​ວາ <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
+      <item quantity="one">ເປັນ​ເວ​ລາ 1 ນ​ທ (ຈົນ​ກ່​ວາ <xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g>)</item>
+    </plurals>
+    <plurals name="zen_mode_duration_hours_summary" formatted="false" msgid="8152974162096743862">
+      <item quantity="other">ເປັນ​ເວ​ລາ %1$d ຊົ່ວ​ໂມງ (ຈົນ​ຮອດ <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
+      <item quantity="one">ເປັນ​ເວ​ລາ 1 ຊົ່ວ​ໂມງ (ຈົນ​ຮອດ <xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g>)</item>
+    </plurals>
+    <plurals name="zen_mode_duration_hours_summary_short" formatted="false" msgid="4787552595253082371">
+      <item quantity="other">ເປັນ​ເວ​ລາ %1$d ຊມ (ຈົນ​ກ່​ວາ <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
+      <item quantity="one">ເປັນ​ເວ​ລາ 1 ຊມ (ຈົນ​ກ່​ວາ) <xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g>)</item>
+    </plurals>
+    <plurals name="zen_mode_duration_minutes" formatted="false" msgid="5127407202506485571">
+      <item quantity="other">ເປັນ​ເວ​ລາ %d ນາ​ທີ</item>
+      <item quantity="one">ເປັນ​ເວລາໜຶ່ງ​ນາ​ທີ</item>
+    </plurals>
+    <plurals name="zen_mode_duration_minutes_short" formatted="false" msgid="2199350154433426128">
+      <item quantity="other">ເປັນ​ເວ​ລາ %d ນ​ທ</item>
+      <item quantity="one">ເປັນ​ເວ​ລາ 1 ນ​ທ</item>
+    </plurals>
+    <plurals name="zen_mode_duration_hours" formatted="false" msgid="3938821308277433854">
+      <item quantity="other">ເປັນ​ເວລາ​ %d ຊົ່ວ​ໂມງ</item>
+      <item quantity="one">ເປັນ​ເວລາໜຶ່ງ​ຊົ່ວ​ໂມງ</item>
+    </plurals>
+    <plurals name="zen_mode_duration_hours_short" formatted="false" msgid="6748277774662434217">
+      <item quantity="other">ເປັນ​ເວ​ລາ %d ຊມ</item>
+      <item quantity="one">ເປັນ​ເວ​ລາ 1 ຊມ</item>
+    </plurals>
     <string name="zen_mode_until" msgid="7336308492289875088">"ຈົນ​ຮອດ <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
     <string name="zen_mode_alarm" msgid="9128205721301330797">"ຈົນ​ກ​່​ວາ <xliff:g id="FORMATTEDTIME">%1$s</xliff:g> (ສັນ​ຍານ​ເຕືອນ​ຕໍ່ໄປ​)"</string>
     <string name="zen_mode_forever" msgid="7420011936770086993">"ຈົນກວ່າ​ທ່ານ​ຈະ​ປິດ​"</string>
@@ -1513,8 +1513,8 @@
     <string name="usb_midi_peripheral_product_name" msgid="4971827859165280403">"ຜອດ​ຮອບນອກ USB"</string>
     <string name="floating_toolbar_open_overflow_description" msgid="4797287862999444631">"ໂຕ​ເລືອກ​ເພີ່ມ​ເຕີມ"</string>
     <string name="floating_toolbar_close_overflow_description" msgid="559796923090723804">"ປິດ​ການ​ໄຫຼ​ລົ້ນ​ອອກ​ມາ"</string>
-  <plurals name="selected_count">
-    <item quantity="one" msgid="8857281055159991036">"<xliff:g id="COUNT">%1$d</xliff:g> ຖືກ​ເລືອກ​ແລ້ວ"</item>
-    <item quantity="other" msgid="2608606845335294849">"<xliff:g id="COUNT">%1$d</xliff:g> ຖືກ​ເລືອກ​ແລ້ວ"</item>
-  </plurals>
+    <plurals name="selected_count" formatted="false" msgid="7187339492915744615">
+      <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> ຖືກເລືອກ​ແລ້ວ</item>
+      <item quantity="one"><xliff:g id="COUNT_0">%1$d</xliff:g> ຖືກເລືອກ​ແລ້ວ</item>
+    </plurals>
 </resources>

@@ -61,10 +61,11 @@
     <string name="needPuk" msgid="919668385956251611">"Cardul SIM este blocat cu codul PUK. Introduceţi codul PUK pentru a-l debloca."</string>
     <string name="needPuk2" msgid="4526033371987193070">"Introduceți codul PUK2 pentru a debloca cardul SIM."</string>
     <string name="enablePin" msgid="209412020907207950">"Operațiunea nu a reușit. Activați blocarea cardului SIM/RUIM."</string>
-  <plurals name="pinpuk_attempts">
-    <item quantity="one" msgid="6596245285809790142">"V-a mai rămas <xliff:g id="NUMBER">%d</xliff:g> încercare până la blocarea cardului SIM."</item>
-    <item quantity="other" msgid="7530597808358774740">"V-au mai rămas <xliff:g id="NUMBER">%d</xliff:g> încercări până la blocarea cardului SIM."</item>
-  </plurals>
+    <plurals name="pinpuk_attempts" formatted="false" msgid="1251012001539225582">
+      <item quantity="few">V-au mai rămas <xliff:g id="NUMBER_1">%d</xliff:g> încercări până la blocarea cardului SIM.</item>
+      <item quantity="other">V-au mai rămas <xliff:g id="NUMBER_1">%d</xliff:g> de încercări până la blocarea cardului SIM.</item>
+      <item quantity="one">V-a mai rămas <xliff:g id="NUMBER_0">%d</xliff:g> încercare până la blocarea cardului SIM.</item>
+    </plurals>
     <string name="imei" msgid="2625429890869005782">"IMEI"</string>
     <string name="meid" msgid="4841221237681254195">"MEID"</string>
     <string name="ClipMmi" msgid="6952821216480289285">"ID apelant de primire"</string>
@@ -809,10 +810,11 @@
     <string name="enable_explore_by_touch_warning_message" product="default" msgid="2708199672852373195">"<xliff:g id="ACCESSIBILITY_SERVICE_NAME">%1$s</xliff:g> doreşte să activeze funcţia Explorați prin atingere. Când această funcție este activată, puteți auzi sau vedea descrieri pentru ceea ce se află sub degetul dvs. sau puteți efectua gesturi pentru a interacţiona cu telefonul."</string>
     <string name="oneMonthDurationPast" msgid="7396384508953779925">"cu 1 lună în urmă"</string>
     <string name="beforeOneMonthDurationPast" msgid="909134546836499826">"Cu mai mult de 1 lună în urmă"</string>
-  <plurals name="last_num_days">
-    <item quantity="one" msgid="7555846096746489821">"Ultima <xliff:g id="COUNT">%d</xliff:g> zi"</item>
-    <item quantity="other" msgid="3069992808164318268">"Ultimele <xliff:g id="COUNT">%d</xliff:g> de zile"</item>
-  </plurals>
+    <plurals name="last_num_days" formatted="false" msgid="5104533550723932025">
+      <item quantity="few">Ultimele <xliff:g id="COUNT_1">%d</xliff:g> zile</item>
+      <item quantity="other">Ultimele <xliff:g id="COUNT_1">%d</xliff:g> de zile</item>
+      <item quantity="one">Ultima <xliff:g id="COUNT_0">%d</xliff:g> zi</item>
+    </plurals>
     <string name="last_month" msgid="3959346739979055432">"Luna trecută"</string>
     <string name="older" msgid="5211975022815554840">"Mai vechi"</string>
     <string name="preposition_for_date" msgid="9093949757757445117">"pe <xliff:g id="DATE">%s</xliff:g>"</string>
@@ -830,18 +832,21 @@
     <string name="weeks" msgid="6509623834583944518">"săptămâni"</string>
     <string name="year" msgid="4001118221013892076">"an"</string>
     <string name="years" msgid="6881577717993213522">"ani"</string>
-  <plurals name="duration_seconds">
-    <item quantity="one" msgid="6962015528372969481">"O secundă"</item>
-    <item quantity="other" msgid="1886107766577166786">"<xliff:g id="COUNT">%d</xliff:g> (de) secunde"</item>
-  </plurals>
-  <plurals name="duration_minutes">
-    <item quantity="one" msgid="4915414002546085617">"Un minut"</item>
-    <item quantity="other" msgid="3165187169224908775">"<xliff:g id="COUNT">%d</xliff:g> (de) minute"</item>
-  </plurals>
-  <plurals name="duration_hours">
-    <item quantity="one" msgid="8917467491248809972">"O oră"</item>
-    <item quantity="other" msgid="3863962854246773930">"<xliff:g id="COUNT">%d</xliff:g> (de) ore"</item>
-  </plurals>
+    <plurals name="duration_seconds" formatted="false" msgid="4527986939729687805">
+      <item quantity="few"><xliff:g id="COUNT">%d</xliff:g> secunde</item>
+      <item quantity="other"><xliff:g id="COUNT">%d</xliff:g> de secunde</item>
+      <item quantity="one">O secundă</item>
+    </plurals>
+    <plurals name="duration_minutes" formatted="false" msgid="643786953939956125">
+      <item quantity="few"><xliff:g id="COUNT">%d</xliff:g> minute</item>
+      <item quantity="other"><xliff:g id="COUNT">%d</xliff:g> de minute</item>
+      <item quantity="one">Un minut</item>
+    </plurals>
+    <plurals name="duration_hours" formatted="false" msgid="6826233369186668274">
+      <item quantity="few"><xliff:g id="COUNT">%d</xliff:g> ore</item>
+      <item quantity="other"><xliff:g id="COUNT">%d</xliff:g> de ore</item>
+      <item quantity="one">O oră</item>
+    </plurals>
     <string name="VideoView_error_title" msgid="3534509135438353077">"Problemă video"</string>
     <string name="VideoView_error_text_invalid_progressive_playback" msgid="3186670335938670444">"Acest fişier video nu este valid pentru a fi transmis în flux către acest dispozitiv."</string>
     <string name="VideoView_error_text_unknown" msgid="3450439155187810085">"Nu puteți reda acest videoclip"</string>
@@ -954,14 +959,16 @@
     <string name="ringtone_silent" msgid="7937634392408977062">"Niciunul"</string>
     <string name="ringtone_picker_title" msgid="3515143939175119094">"Tonuri de apel"</string>
     <string name="ringtone_unknown" msgid="5477919988701784788">"Ton de apel necunoscut"</string>
-  <plurals name="wifi_available">
-    <item quantity="one" msgid="6654123987418168693">"Rețea Wi-Fi disponibilă"</item>
-    <item quantity="other" msgid="4192424489168397386">"Rețele Wi-Fi disponibile"</item>
-  </plurals>
-  <plurals name="wifi_available_detailed">
-    <item quantity="one" msgid="1634101450343277345">"Rețea Wi-Fi deschisă disponibilă"</item>
-    <item quantity="other" msgid="7915895323644292768">"Rețele Wi-Fi deschise disponibile"</item>
-  </plurals>
+    <plurals name="wifi_available" formatted="false" msgid="7900333017752027322">
+      <item quantity="few">Rețele Wi-Fi disponibile</item>
+      <item quantity="other">Rețele Wi-Fi disponibile</item>
+      <item quantity="one">Rețea Wi-Fi disponibilă</item>
+    </plurals>
+    <plurals name="wifi_available_detailed" formatted="false" msgid="1140699367193975606">
+      <item quantity="few">Rețele Wi-Fi deschise disponibile</item>
+      <item quantity="other">Rețele Wi-Fi deschise disponibile</item>
+      <item quantity="one">Rețea Wi-Fi deschisă disponibilă</item>
+    </plurals>
     <string name="wifi_available_sign_in" msgid="9157196203958866662">"Conectați-vă la reţeaua Wi-Fi"</string>
     <string name="network_available_sign_in" msgid="1848877297365446605">"Conectați-vă la rețea"</string>
     <!-- no translation found for network_available_sign_in_detailed (8000081941447976118) -->
@@ -1145,10 +1152,11 @@
     <string name="skip_button_label" msgid="1275362299471631819">"Omiteţi"</string>
     <string name="no_matches" msgid="8129421908915840737">"Nicio potrivire"</string>
     <string name="find_on_page" msgid="1946799233822820384">"Găsiţi pe pagină"</string>
-  <plurals name="matches_found">
-    <item quantity="one" msgid="8167147081136579439">"1 potrivire"</item>
-    <item quantity="other" msgid="4641872797067609177">"<xliff:g id="INDEX">%d</xliff:g> din <xliff:g id="TOTAL">%d</xliff:g>"</item>
-  </plurals>
+    <plurals name="matches_found" formatted="false" msgid="1210884353962081884">
+      <item quantity="few"><xliff:g id="INDEX">%d</xliff:g> din <xliff:g id="TOTAL">%d</xliff:g></item>
+      <item quantity="other"><xliff:g id="INDEX">%d</xliff:g> din <xliff:g id="TOTAL">%d</xliff:g></item>
+      <item quantity="one">Un rezultat</item>
+    </plurals>
     <string name="action_mode_done" msgid="7217581640461922289">"Terminat"</string>
     <string name="progress_erasing" product="nosdcard" msgid="4521573321524340058">"Se șterge stocarea USB..."</string>
     <string name="progress_erasing" product="default" msgid="6596988875507043042">"Se șterge cardul SD..."</string>
@@ -1426,10 +1434,11 @@
     <string name="restr_pin_create_pin" msgid="8017600000263450337">"Creați un cod PIN pentru modificarea restricțiilor"</string>
     <string name="restr_pin_error_doesnt_match" msgid="2224214190906994548">"Codurile PIN nu se potrivesc. Încercați din nou."</string>
     <string name="restr_pin_error_too_short" msgid="8173982756265777792">"Codul PIN este prea scurt. Trebuie să aibă cel puțin 4 cifre."</string>
-  <plurals name="restr_pin_countdown">
-    <item quantity="one" msgid="311050995198548675">"Reîncercați în 1 sec."</item>
-    <item quantity="other" msgid="4730868920742952817">"Reîncercați în <xliff:g id="COUNT">%d</xliff:g> sec."</item>
-  </plurals>
+    <plurals name="restr_pin_countdown" formatted="false" msgid="9061246974881224688">
+      <item quantity="few">Reîncercați în <xliff:g id="COUNT">%d</xliff:g> secunde</item>
+      <item quantity="other">Reîncercați în <xliff:g id="COUNT">%d</xliff:g> de secunde</item>
+      <item quantity="one">Reîncercați într-o secundă</item>
+    </plurals>
     <string name="restr_pin_try_later" msgid="973144472490532377">"Reîncercați mai târziu"</string>
     <string name="immersive_cling_title" msgid="8394201622932303336">"Vizualizare pe ecran complet"</string>
     <string name="immersive_cling_description" msgid="3482371193207536040">"Pentru a ieși, glisați de sus în jos."</string>
@@ -1455,38 +1464,46 @@
     <string name="package_updated_device_owner" msgid="8856631322440187071">"Actualizat de un administrator"</string>
     <string name="package_deleted_device_owner" msgid="7650577387493101353">"Șters de administrator"</string>
     <string name="battery_saver_description" msgid="1960431123816253034">"Pentru a îmbunătăți autonomia bateriei, funcția de economisire a energiei reduce performanțele dispozitivului și limitează vibrațiile, serviciile de localizare și majoritatea datelor de fundal. Este posibil ca e-mailurile, mesageria și alte aplicații care depind de sincronizare să nu se actualizeze dacă nu le deschideți.\n\nFuncția de economisire a energiei se dezactivează automat când dispozitivul se încarcă."</string>
-  <plurals name="zen_mode_duration_minutes_summary">
-    <item quantity="one" msgid="3177683545388923234">"Timp de un minut (până la <xliff:g id="FORMATTEDTIME">%2$s</xliff:g>)"</item>
-    <item quantity="other" msgid="2787867221129368935">"Timp de %1$d (de) minute (până la <xliff:g id="FORMATTEDTIME">%2$s</xliff:g>)"</item>
-  </plurals>
-  <plurals name="zen_mode_duration_minutes_summary_short">
-    <item quantity="one" msgid="4097046271119330874">"Pentru 1 min. (până la <xliff:g id="FORMATTEDTIME">%2$s</xliff:g>)"</item>
-    <item quantity="other" msgid="9128259640307810602">"Pentru %1$d min. (până la <xliff:g id="FORMATTEDTIME">%2$s</xliff:g>)"</item>
-  </plurals>
-  <plurals name="zen_mode_duration_hours_summary">
-    <item quantity="one" msgid="597194865053253679">"Timp de o oră (până la <xliff:g id="FORMATTEDTIME">%2$s</xliff:g>)"</item>
-    <item quantity="other" msgid="2827214920627669898">"Timp de %1$d (de) ore (până la <xliff:g id="FORMATTEDTIME">%2$s</xliff:g>)"</item>
-  </plurals>
-  <plurals name="zen_mode_duration_hours_summary_short">
-    <item quantity="one" msgid="342658185856495801">"Pentru 1 h (până la <xliff:g id="FORMATTEDTIME">%2$s</xliff:g>)"</item>
-    <item quantity="other" msgid="6842148190293675591">"Pentru %1$d h (până la <xliff:g id="FORMATTEDTIME">%2$s</xliff:g>)"</item>
-  </plurals>
-  <plurals name="zen_mode_duration_minutes">
-    <item quantity="one" msgid="9040808414992812341">"Timp de un minut"</item>
-    <item quantity="other" msgid="6924190729213550991">"Timp de %d (de) minute"</item>
-  </plurals>
-  <plurals name="zen_mode_duration_minutes_short">
-    <item quantity="one" msgid="4125166172281866385">"Pentru 1 min."</item>
-    <item quantity="other" msgid="5131202943429775644">"Pentru %d min."</item>
-  </plurals>
-  <plurals name="zen_mode_duration_hours">
-    <item quantity="one" msgid="3480040795582254384">"Timp de o oră"</item>
-    <item quantity="other" msgid="5408537517529822157">"Timp de %d (de) ore"</item>
-  </plurals>
-  <plurals name="zen_mode_duration_hours_short">
-    <item quantity="one" msgid="6798191385685158694">"Pentru 1 h"</item>
-    <item quantity="other" msgid="8464879049844138499">"Pentru %d h"</item>
-  </plurals>
+    <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="4367877408072000848">
+      <item quantity="few">Timp de %1$d minute (până la <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
+      <item quantity="other">Timp de %1$d de minute (până la <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
+      <item quantity="one">Timp de un minut (până la <xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g>)</item>
+    </plurals>
+    <plurals name="zen_mode_duration_minutes_summary_short" formatted="false" msgid="6830154222366042597">
+      <item quantity="few">Pentru %1$d min. (până la <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
+      <item quantity="other">Pentru %1$d min. (până la <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
+      <item quantity="one">Pentru 1 min. (până la <xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g>)</item>
+    </plurals>
+    <plurals name="zen_mode_duration_hours_summary" formatted="false" msgid="8152974162096743862">
+      <item quantity="few">Timp de %1$d ore (până la <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
+      <item quantity="other">Timp de %1$d de ore (până la <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
+      <item quantity="one">Timp de o oră (până la <xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g>)</item>
+    </plurals>
+    <plurals name="zen_mode_duration_hours_summary_short" formatted="false" msgid="4787552595253082371">
+      <item quantity="few">Pentru %1$d h (până la <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
+      <item quantity="other">Pentru %1$d h (până la <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
+      <item quantity="one">Pentru 1 h (până la <xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g>)</item>
+    </plurals>
+    <plurals name="zen_mode_duration_minutes" formatted="false" msgid="5127407202506485571">
+      <item quantity="few">Timp de %d minute</item>
+      <item quantity="other">Timp de %d de minute</item>
+      <item quantity="one">Timp de un minut</item>
+    </plurals>
+    <plurals name="zen_mode_duration_minutes_short" formatted="false" msgid="2199350154433426128">
+      <item quantity="few">Pentru %d min.</item>
+      <item quantity="other">Pentru %d min.</item>
+      <item quantity="one">Pentru 1 min.</item>
+    </plurals>
+    <plurals name="zen_mode_duration_hours" formatted="false" msgid="3938821308277433854">
+      <item quantity="few">Timp de %d ore</item>
+      <item quantity="other">Timp de %d de ore</item>
+      <item quantity="one">Timp de o oră</item>
+    </plurals>
+    <plurals name="zen_mode_duration_hours_short" formatted="false" msgid="6748277774662434217">
+      <item quantity="few">Pentru %d h</item>
+      <item quantity="other">Pentru %d h</item>
+      <item quantity="one">Pentru 1 h</item>
+    </plurals>
     <string name="zen_mode_until" msgid="7336308492289875088">"Până la <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
     <string name="zen_mode_alarm" msgid="9128205721301330797">"Până la <xliff:g id="FORMATTEDTIME">%1$s</xliff:g> (următoarea alarmă)"</string>
     <string name="zen_mode_forever" msgid="7420011936770086993">"Până la dezactivare"</string>
@@ -1513,8 +1530,9 @@
     <string name="usb_midi_peripheral_product_name" msgid="4971827859165280403">"Port USB periferic"</string>
     <string name="floating_toolbar_open_overflow_description" msgid="4797287862999444631">"Mai multe opțiuni"</string>
     <string name="floating_toolbar_close_overflow_description" msgid="559796923090723804">"Închideți meniul suplimentar"</string>
-  <plurals name="selected_count">
-    <item quantity="one" msgid="8857281055159991036">"<xliff:g id="COUNT">%1$d</xliff:g> selectat"</item>
-    <item quantity="other" msgid="2608606845335294849">"<xliff:g id="COUNT">%1$d</xliff:g> selectate"</item>
-  </plurals>
+    <plurals name="selected_count" formatted="false" msgid="7187339492915744615">
+      <item quantity="few"><xliff:g id="COUNT_1">%1$d</xliff:g> selectate</item>
+      <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> selectate</item>
+      <item quantity="one"><xliff:g id="COUNT_0">%1$d</xliff:g> selectat</item>
+    </plurals>
 </resources>

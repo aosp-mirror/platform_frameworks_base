@@ -61,10 +61,10 @@
     <string name="needPuk" msgid="919668385956251611">"‏سیم کارت شما با PUK قفل شده است. کد PUK را برای بازگشایی آن بنویسید."</string>
     <string name="needPuk2" msgid="4526033371987193070">"‏PUK2 را برای بازگشایی قفل سیم کارت بنویسید."</string>
     <string name="enablePin" msgid="209412020907207950">"‏ناموفق بود، قفل سیم/RUIM را فعال کنید."</string>
-  <plurals name="pinpuk_attempts">
-    <item quantity="one" msgid="6596245285809790142">"<xliff:g id="NUMBER">%d</xliff:g> بار دیگر می‌توانید تلاش کنید و پس از آن سیم کارت قفل می‌شود."</item>
-    <item quantity="other" msgid="7530597808358774740">"<xliff:g id="NUMBER">%d</xliff:g> بار دیگر می‌توانید تلاش کنید و پس از آن سیم کارت قفل می‌شود."</item>
-  </plurals>
+    <plurals name="pinpuk_attempts" formatted="false" msgid="1251012001539225582">
+      <item quantity="one"><xliff:g id="NUMBER_1">%d</xliff:g> بار دیگر می‌توانید تلاش کنید و پس از آن سیم‌کارت قفل می‌شود.</item>
+      <item quantity="other"><xliff:g id="NUMBER_1">%d</xliff:g> بار دیگر می‌توانید تلاش کنید و پس از آن سیم‌کارت قفل می‌شود.</item>
+    </plurals>
     <string name="imei" msgid="2625429890869005782">"IMEI"</string>
     <string name="meid" msgid="4841221237681254195">"MEID"</string>
     <string name="ClipMmi" msgid="6952821216480289285">"شناسه تماس گیرنده ورودی"</string>
@@ -809,10 +809,10 @@
     <string name="enable_explore_by_touch_warning_message" product="default" msgid="2708199672852373195">"<xliff:g id="ACCESSIBILITY_SERVICE_NAME">%1$s</xliff:g> می‌خواهد «کاوش با لمس» را فعال کند. وقتی «کاوش با لمس» فعال است، می‌توانید توضیحاتی را برای آنچه که زیر انگشت شما است مشاهده کرده یا بشنوید یا برای استفاده از تلفن خود از حرکات استفاده کنید."</string>
     <string name="oneMonthDurationPast" msgid="7396384508953779925">"۱ ماه قبل"</string>
     <string name="beforeOneMonthDurationPast" msgid="909134546836499826">"قبل از ۱ ماه گذشته"</string>
-  <plurals name="last_num_days">
-    <item quantity="one" msgid="7555846096746489821">"<xliff:g id="COUNT">%d</xliff:g> روز گذشته"</item>
-    <item quantity="other" msgid="3069992808164318268">"<xliff:g id="COUNT">%d</xliff:g> روز گذشته"</item>
-  </plurals>
+    <plurals name="last_num_days" formatted="false" msgid="5104533550723932025">
+      <item quantity="one"><xliff:g id="COUNT_1">%d</xliff:g> روز قبل</item>
+      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> روز قبل</item>
+    </plurals>
     <string name="last_month" msgid="3959346739979055432">"ماه گذشته"</string>
     <string name="older" msgid="5211975022815554840">"قدیمی تر"</string>
     <string name="preposition_for_date" msgid="9093949757757445117">"در <xliff:g id="DATE">%s</xliff:g>"</string>
@@ -830,18 +830,18 @@
     <string name="weeks" msgid="6509623834583944518">"هفته"</string>
     <string name="year" msgid="4001118221013892076">"سال"</string>
     <string name="years" msgid="6881577717993213522">"سال"</string>
-  <plurals name="duration_seconds">
-    <item quantity="one" msgid="6962015528372969481">"۱ ثانیه"</item>
-    <item quantity="other" msgid="1886107766577166786">"<xliff:g id="COUNT">%d</xliff:g> ثانیه"</item>
-  </plurals>
-  <plurals name="duration_minutes">
-    <item quantity="one" msgid="4915414002546085617">"۱ دقیقه"</item>
-    <item quantity="other" msgid="3165187169224908775">"<xliff:g id="COUNT">%d</xliff:g> دقیقه"</item>
-  </plurals>
-  <plurals name="duration_hours">
-    <item quantity="one" msgid="8917467491248809972">"۱ ساعت"</item>
-    <item quantity="other" msgid="3863962854246773930">"<xliff:g id="COUNT">%d</xliff:g> ساعت"</item>
-  </plurals>
+    <plurals name="duration_seconds" formatted="false" msgid="4527986939729687805">
+      <item quantity="one"><xliff:g id="COUNT">%d</xliff:g> ثانیه</item>
+      <item quantity="other"><xliff:g id="COUNT">%d</xliff:g> ثانیه</item>
+    </plurals>
+    <plurals name="duration_minutes" formatted="false" msgid="643786953939956125">
+      <item quantity="one"><xliff:g id="COUNT">%d</xliff:g> دقیقه</item>
+      <item quantity="other"><xliff:g id="COUNT">%d</xliff:g> دقیقه</item>
+    </plurals>
+    <plurals name="duration_hours" formatted="false" msgid="6826233369186668274">
+      <item quantity="one"><xliff:g id="COUNT">%d</xliff:g> ساعت</item>
+      <item quantity="other"><xliff:g id="COUNT">%d</xliff:g> ساعت</item>
+    </plurals>
     <string name="VideoView_error_title" msgid="3534509135438353077">"مشکل در ویدیو"</string>
     <string name="VideoView_error_text_invalid_progressive_playback" msgid="3186670335938670444">"متأسفیم، این ویدیو برای پخش جریانی با این دستگاه معتبر نیست."</string>
     <string name="VideoView_error_text_unknown" msgid="3450439155187810085">"پخش این ویدیو ممکن نیست."</string>
@@ -954,14 +954,14 @@
     <string name="ringtone_silent" msgid="7937634392408977062">"هیچ‌کدام"</string>
     <string name="ringtone_picker_title" msgid="3515143939175119094">"آهنگ‌های زنگ"</string>
     <string name="ringtone_unknown" msgid="5477919988701784788">"آهنگ زنگ ناشناس"</string>
-  <plurals name="wifi_available">
-    <item quantity="one" msgid="6654123987418168693">"‏شبکه Wi-Fi موجود است"</item>
-    <item quantity="other" msgid="4192424489168397386">"‏شبکه‌های Wi-Fi موجود هستند"</item>
-  </plurals>
-  <plurals name="wifi_available_detailed">
-    <item quantity="one" msgid="1634101450343277345">"‏شبکه Wi-Fi موجود را باز کنید"</item>
-    <item quantity="other" msgid="7915895323644292768">"‏شبکه‌های Wi-Fi موجود را باز کنید"</item>
-  </plurals>
+    <plurals name="wifi_available" formatted="false" msgid="7900333017752027322">
+      <item quantity="one">‏شبکه Wi-Fi در دسترس</item>
+      <item quantity="other">‏شبکه‌ Wi-Fi در دسترس</item>
+    </plurals>
+    <plurals name="wifi_available_detailed" formatted="false" msgid="1140699367193975606">
+      <item quantity="one">‏شبکه Wi-Fi باز در دسترس</item>
+      <item quantity="other">‏شبکه‌ Wi-Fi باز در دسترس</item>
+    </plurals>
     <string name="wifi_available_sign_in" msgid="9157196203958866662">"‏ورود به شبکه Wi-Fi"</string>
     <string name="network_available_sign_in" msgid="1848877297365446605">"ورود به سیستم شبکه"</string>
     <!-- no translation found for network_available_sign_in_detailed (8000081941447976118) -->
@@ -1145,10 +1145,10 @@
     <string name="skip_button_label" msgid="1275362299471631819">"پرش"</string>
     <string name="no_matches" msgid="8129421908915840737">"مورد منطبقی موجود نیست"</string>
     <string name="find_on_page" msgid="1946799233822820384">"یافتن در صفحه"</string>
-  <plurals name="matches_found">
-    <item quantity="one" msgid="8167147081136579439">"1 مورد منطبق"</item>
-    <item quantity="other" msgid="4641872797067609177">"<xliff:g id="INDEX">%d</xliff:g> از <xliff:g id="TOTAL">%d</xliff:g>"</item>
-  </plurals>
+    <plurals name="matches_found" formatted="false" msgid="1210884353962081884">
+      <item quantity="one"><xliff:g id="INDEX">%d</xliff:g> از <xliff:g id="TOTAL">%d</xliff:g></item>
+      <item quantity="other"><xliff:g id="INDEX">%d</xliff:g> از <xliff:g id="TOTAL">%d</xliff:g></item>
+    </plurals>
     <string name="action_mode_done" msgid="7217581640461922289">"تمام"</string>
     <string name="progress_erasing" product="nosdcard" msgid="4521573321524340058">"‏در حال پاک کردن حافظهٔ USB..."</string>
     <string name="progress_erasing" product="default" msgid="6596988875507043042">"‏در حال پاک کردن کارت SD..."</string>
@@ -1426,10 +1426,10 @@
     <string name="restr_pin_create_pin" msgid="8017600000263450337">"یک پین برای تغییر محدودیت‌ها ایجاد کنید"</string>
     <string name="restr_pin_error_doesnt_match" msgid="2224214190906994548">"پین‌ها مطابقت ندارند. دوباره امتحان کنید."</string>
     <string name="restr_pin_error_too_short" msgid="8173982756265777792">"پین بیش از حد کوتاه است. باید حداقل ۴ رقم باشد."</string>
-  <plurals name="restr_pin_countdown">
-    <item quantity="one" msgid="311050995198548675">"امتحان پس از ۱ ثانیه"</item>
-    <item quantity="other" msgid="4730868920742952817">"امتحان پس از <xliff:g id="COUNT">%d</xliff:g> ثانیه"</item>
-  </plurals>
+    <plurals name="restr_pin_countdown" formatted="false" msgid="9061246974881224688">
+      <item quantity="one"><xliff:g id="COUNT">%d</xliff:g> ثانیه دیگر دوباره امتحان کنید</item>
+      <item quantity="other"><xliff:g id="COUNT">%d</xliff:g> ثانیه دیگر دوباره امتحان کنید</item>
+    </plurals>
     <string name="restr_pin_try_later" msgid="973144472490532377">"بعداً دوباره امتحان کنید"</string>
     <string name="immersive_cling_title" msgid="8394201622932303336">"مشاهده در حالت تمام صفحه"</string>
     <string name="immersive_cling_description" msgid="3482371193207536040">"برای خروج، انگشتتان را از بالای صفحه به پایین بکشید."</string>
@@ -1455,38 +1455,38 @@
     <string name="package_updated_device_owner" msgid="8856631322440187071">"توسط سرپرست شما به‌روزرسانی شد"</string>
     <string name="package_deleted_device_owner" msgid="7650577387493101353">"توسط سرپرستتان حذف شد"</string>
     <string name="battery_saver_description" msgid="1960431123816253034">"برای کمک به بهبود عمر باتری، بهینه‌سازی باتری عملکرد دستگاهتان را کاهش می‌دهد و لرزش، سرویس‌های مبتنی بر مکان، و دسترسی به اکثر داده‌ها در پس‌زمینه را محدود می‌کند. ایمیل، پیام‌رسانی و برنامه‌های دیگری که به همگام‌سازی وابسته‌اند، تا زمانی‌که آن‌ها را باز نکنید نمی‌توانند به‌روز شوند.\n\nبهینه‌سازی باتری به‌صورت خودکار در هنگام شارژ شدن دستگاه خاموش می‌شود."</string>
-  <plurals name="zen_mode_duration_minutes_summary">
-    <item quantity="one" msgid="3177683545388923234">"به مدت یک دقیقه (تا <xliff:g id="FORMATTEDTIME">%2$s</xliff:g>)"</item>
-    <item quantity="other" msgid="2787867221129368935">"‏به مدت %1$d دقیقه (تا <xliff:g id="FORMATTEDTIME">%2$s</xliff:g>)"</item>
-  </plurals>
-  <plurals name="zen_mode_duration_minutes_summary_short">
-    <item quantity="one" msgid="4097046271119330874">"به مدت ۱ د (تا <xliff:g id="FORMATTEDTIME">%2$s</xliff:g>)"</item>
-    <item quantity="other" msgid="9128259640307810602">"‏به مدت %1$d د (تا <xliff:g id="FORMATTEDTIME">%2$s</xliff:g>)"</item>
-  </plurals>
-  <plurals name="zen_mode_duration_hours_summary">
-    <item quantity="one" msgid="597194865053253679">"به مدت یک ساعت (تا <xliff:g id="FORMATTEDTIME">%2$s</xliff:g>)"</item>
-    <item quantity="other" msgid="2827214920627669898">"‏به مدت %1$d ساعت (تا <xliff:g id="FORMATTEDTIME">%2$s</xliff:g>)"</item>
-  </plurals>
-  <plurals name="zen_mode_duration_hours_summary_short">
-    <item quantity="one" msgid="342658185856495801">"به مدت ۱ س (تا <xliff:g id="FORMATTEDTIME">%2$s</xliff:g>)"</item>
-    <item quantity="other" msgid="6842148190293675591">"‏به مدت %1$d س (تا <xliff:g id="FORMATTEDTIME">%2$s</xliff:g>)"</item>
-  </plurals>
-  <plurals name="zen_mode_duration_minutes">
-    <item quantity="one" msgid="9040808414992812341">"برای یک دقیقه"</item>
-    <item quantity="other" msgid="6924190729213550991">"‏برای %d دقیقه"</item>
-  </plurals>
-  <plurals name="zen_mode_duration_minutes_short">
-    <item quantity="one" msgid="4125166172281866385">"به مدت ۱ د"</item>
-    <item quantity="other" msgid="5131202943429775644">"‏به مدت %d د"</item>
-  </plurals>
-  <plurals name="zen_mode_duration_hours">
-    <item quantity="one" msgid="3480040795582254384">"برای یک ساعت"</item>
-    <item quantity="other" msgid="5408537517529822157">"‏برای %d ساعت"</item>
-  </plurals>
-  <plurals name="zen_mode_duration_hours_short">
-    <item quantity="one" msgid="6798191385685158694">"به مدت ۱ س"</item>
-    <item quantity="other" msgid="8464879049844138499">"‏به مدت %d س"</item>
-  </plurals>
+    <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="4367877408072000848">
+      <item quantity="one">‏به مدت %1$d دقیقه (تا <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
+      <item quantity="other">‏به مدت %1$d دقیقه (تا <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
+    </plurals>
+    <plurals name="zen_mode_duration_minutes_summary_short" formatted="false" msgid="6830154222366042597">
+      <item quantity="one">‏برای %1$d دقیقه (تا <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
+      <item quantity="other">‏برای %1$d دقیقه (تا <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
+    </plurals>
+    <plurals name="zen_mode_duration_hours_summary" formatted="false" msgid="8152974162096743862">
+      <item quantity="one">‏به مدت %1$d ساعت (تا <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
+      <item quantity="other">‏به مدت %1$d ساعت (تا <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
+    </plurals>
+    <plurals name="zen_mode_duration_hours_summary_short" formatted="false" msgid="4787552595253082371">
+      <item quantity="one">‏برای %1$d ساعت (تا <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
+      <item quantity="other">‏برای %1$d ساعت (تا <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
+    </plurals>
+    <plurals name="zen_mode_duration_minutes" formatted="false" msgid="5127407202506485571">
+      <item quantity="one">‏به مدت %d دقیقه</item>
+      <item quantity="other">‏به مدت %d دقیقه</item>
+    </plurals>
+    <plurals name="zen_mode_duration_minutes_short" formatted="false" msgid="2199350154433426128">
+      <item quantity="one">‏برای %d دقیقه</item>
+      <item quantity="other">‏برای %d دقیقه</item>
+    </plurals>
+    <plurals name="zen_mode_duration_hours" formatted="false" msgid="3938821308277433854">
+      <item quantity="one">‏به مدت %d ساعت</item>
+      <item quantity="other">‏به مدت %d ساعت</item>
+    </plurals>
+    <plurals name="zen_mode_duration_hours_short" formatted="false" msgid="6748277774662434217">
+      <item quantity="one">‏برای %d ساعت</item>
+      <item quantity="other">‏برای %d ساعت</item>
+    </plurals>
     <string name="zen_mode_until" msgid="7336308492289875088">"تا <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
     <string name="zen_mode_alarm" msgid="9128205721301330797">"تا <xliff:g id="FORMATTEDTIME">%1$s</xliff:g> (هشدار بعدی)"</string>
     <string name="zen_mode_forever" msgid="7420011936770086993">"تا وقتی آن را خاموش کنید"</string>
@@ -1513,8 +1513,8 @@
     <string name="usb_midi_peripheral_product_name" msgid="4971827859165280403">"‏درگاه جانبی USB"</string>
     <string name="floating_toolbar_open_overflow_description" msgid="4797287862999444631">"گزینه‌های بیشتر"</string>
     <string name="floating_toolbar_close_overflow_description" msgid="559796923090723804">"بستن منوی سرریز"</string>
-  <plurals name="selected_count">
-    <item quantity="one" msgid="8857281055159991036">"<xliff:g id="COUNT">%1$d</xliff:g> مورد انتخاب‌شده"</item>
-    <item quantity="other" msgid="2608606845335294849">"<xliff:g id="COUNT">%1$d</xliff:g> مورد انتخاب‌شده"</item>
-  </plurals>
+    <plurals name="selected_count" formatted="false" msgid="7187339492915744615">
+      <item quantity="one">‏<xliff:g id="COUNT_1">%1$d</xliff:g> انتخاب شد</item>
+      <item quantity="other">‏<xliff:g id="COUNT_1">%1$d</xliff:g> انتخاب شد</item>
+    </plurals>
 </resources>

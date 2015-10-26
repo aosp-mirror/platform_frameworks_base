@@ -61,10 +61,10 @@
     <string name="needPuk" msgid="919668385956251611">"ਤੁਹਾਡਾ SIM ਕਾਰਡ PUK-ਲੌਕਡ ਹੈ। ਇਸਨੂੰ ਅਨਲੌਕ ਕਰਨ ਲਈ PUK ਕੋਡ ਟਾਈਪ ਕਰੋ।"</string>
     <string name="needPuk2" msgid="4526033371987193070">"SIM ਕਾਰਡ ਅਨਬਲੌਕ ਕਰਨ ਲਈ PUK2 ਟਾਈਪ ਕਰੋ।"</string>
     <string name="enablePin" msgid="209412020907207950">"ਅਸਫਲ, SIM/RUIM ਲੌਕ ਨੂੰ ਸਮਰੱਥ ਬਣਾਓ।"</string>
-  <plurals name="pinpuk_attempts">
-    <item quantity="one" msgid="6596245285809790142">"ਇਸਤੋਂ ਪਹਿਲਾਂ ਕਿ SIM ਲੌਕ ਹੋਵੇ, ਤੁਹਾਡੇ ਕੋਲ <xliff:g id="NUMBER">%d</xliff:g> ਕੋਸ਼ਿਸ਼ਾਂ ਬਾਕੀ ਹਨ।"</item>
-    <item quantity="other" msgid="7530597808358774740">"ਇਸਤੋਂ ਪਹਿਲਾਂ ਕਿ SIM ਲੌਕ ਹੋਵੇ, ਤੁਹਾਡੇ ਕੋਲ <xliff:g id="NUMBER">%d</xliff:g> ਕੋਸ਼ਿਸ਼ਾਂ ਬਾਕੀ ਹਨ।"</item>
-  </plurals>
+    <plurals name="pinpuk_attempts" formatted="false" msgid="1251012001539225582">
+      <item quantity="one">ਇਸਤੋਂ ਪਹਿਲਾਂ ਕਿ SIM ਲੌਕ ਹੋਵੇ, ਤੁਹਾਡੇ ਕੋਲ <xliff:g id="NUMBER_1">%d</xliff:g> ਕੋਸ਼ਿਸ਼ਾਂ ਬਾਕੀ ਹਨ।</item>
+      <item quantity="other">ਇਸਤੋਂ ਪਹਿਲਾਂ ਕਿ SIM ਲੌਕ ਹੋਵੇ, ਤੁਹਾਡੇ ਕੋਲ <xliff:g id="NUMBER_1">%d</xliff:g> ਕੋਸ਼ਿਸ਼ਾਂ ਬਾਕੀ ਹਨ।</item>
+    </plurals>
     <string name="imei" msgid="2625429890869005782">"IMEI"</string>
     <string name="meid" msgid="4841221237681254195">"MEID"</string>
     <string name="ClipMmi" msgid="6952821216480289285">"ਇਨਕਮਿੰਗ ਕਾਲਰ ID"</string>
@@ -809,10 +809,10 @@
     <string name="enable_explore_by_touch_warning_message" product="default" msgid="2708199672852373195">"<xliff:g id="ACCESSIBILITY_SERVICE_NAME">%1$s</xliff:g> ਐਕਪਲੋਰ ਬਾਇ ਟਚ ਨੂੰ ਸਮਰੱਥ ਬਣਾਉਣਾ ਚਾਹੁੰਦਾ ਹੈ। ਜਦੋਂ ਐਕਸਪਲੋਰ ਬਾਇ ਟਚ ਨੂੰ ਚਾਲੂ ਕੀਤਾ ਜਾਂਦਾ ਹੈ, ਤਾਂ ਤੁਸੀਂ ਇਸ ਬਾਰੇ ਵੇਰਵੇ ਸੁਣ ਜਾਂ ਦੇਖ ਸਕਦੇ ਹੋ ਤਿ ਤੁਹਾਡੀ ਉਂਗਲੀ ਦੇ ਹੇਠਾਂ ਕੀ ਹੈ ਜਾਂ ਫੋਨ ਨਾਲ ਇੰਟਰੈਕਟ ਕਰਨ ਲਈ ਸੰਕੇਤ ਪਰਫੌਰਮ ਕਰ ਸਕਦੇ ਹੋ।"</string>
     <string name="oneMonthDurationPast" msgid="7396384508953779925">"1 ਮਹੀਨੇ ਪਹਿਲਾਂ"</string>
     <string name="beforeOneMonthDurationPast" msgid="909134546836499826">"1 ਮਹੀਨਾ ਪਹਿਲਾਂ ਤੋਂ ਪਹਿਲਾਂ"</string>
-  <plurals name="last_num_days">
-    <item quantity="one" msgid="7555846096746489821">"ਆਖਰੀ <xliff:g id="COUNT">%d</xliff:g> ਦਿਨ"</item>
-    <item quantity="other" msgid="3069992808164318268">"ਪਿਛਲੇ <xliff:g id="COUNT">%d</xliff:g> ਦਿਨਾਂ ਵਿੱਚ"</item>
-  </plurals>
+    <plurals name="last_num_days" formatted="false" msgid="5104533550723932025">
+      <item quantity="one">ਪਿਛਲੇ<xliff:g id="COUNT_1">%d</xliff:g> ਦਿਨਾਂ ਵਿੱਚ</item>
+      <item quantity="other">ਪਿਛਲੇ <xliff:g id="COUNT_1">%d</xliff:g> ਦਿਨਾਂ ਵਿੱਚ</item>
+    </plurals>
     <string name="last_month" msgid="3959346739979055432">"ਪਿਛਲੇ ਮਹੀਨੇ"</string>
     <string name="older" msgid="5211975022815554840">"ਪੁਰਾਣੇ"</string>
     <string name="preposition_for_date" msgid="9093949757757445117">"<xliff:g id="DATE">%s</xliff:g> ਨੂੰ"</string>
@@ -830,18 +830,18 @@
     <string name="weeks" msgid="6509623834583944518">"ਹਫਤੇ"</string>
     <string name="year" msgid="4001118221013892076">"ਸਾਲ"</string>
     <string name="years" msgid="6881577717993213522">"ਸਾਲ"</string>
-  <plurals name="duration_seconds">
-    <item quantity="one" msgid="6962015528372969481">"1 ਸਕਿੰਟ"</item>
-    <item quantity="other" msgid="1886107766577166786">"<xliff:g id="COUNT">%d</xliff:g> ਸਕਿੰਟ"</item>
-  </plurals>
-  <plurals name="duration_minutes">
-    <item quantity="one" msgid="4915414002546085617">"1 ਮਿੰਟ"</item>
-    <item quantity="other" msgid="3165187169224908775">"<xliff:g id="COUNT">%d</xliff:g> ਮਿੰਟ"</item>
-  </plurals>
-  <plurals name="duration_hours">
-    <item quantity="one" msgid="8917467491248809972">"1 ਘੰਟਾ"</item>
-    <item quantity="other" msgid="3863962854246773930">"<xliff:g id="COUNT">%d</xliff:g> ਘੰਟੇ"</item>
-  </plurals>
+    <plurals name="duration_seconds" formatted="false" msgid="4527986939729687805">
+      <item quantity="one"><xliff:g id="COUNT">%d</xliff:g> ਸਕਿੰਟ</item>
+      <item quantity="other"><xliff:g id="COUNT">%d</xliff:g> ਸਕਿੰਟ</item>
+    </plurals>
+    <plurals name="duration_minutes" formatted="false" msgid="643786953939956125">
+      <item quantity="one"><xliff:g id="COUNT">%d</xliff:g> ਮਿੰਟ</item>
+      <item quantity="other"><xliff:g id="COUNT">%d</xliff:g> ਮਿੰਟ</item>
+    </plurals>
+    <plurals name="duration_hours" formatted="false" msgid="6826233369186668274">
+      <item quantity="one"><xliff:g id="COUNT">%d</xliff:g> ਘੰਟੇ</item>
+      <item quantity="other"><xliff:g id="COUNT">%d</xliff:g> ਘੰਟੇ</item>
+    </plurals>
     <string name="VideoView_error_title" msgid="3534509135438353077">"ਵੀਡੀਓ ਸਮੱਸਿਆ"</string>
     <string name="VideoView_error_text_invalid_progressive_playback" msgid="3186670335938670444">"ਇਹ ਵੀਡੀਓ ਇਸ ਡਿਵਾਈਸ ਤੇ ਸਟ੍ਰੀਮਿੰਗ ਲਈ ਪ੍ਰਮਾਣਿਕ ਨਹੀਂ ਹੈ।"</string>
     <string name="VideoView_error_text_unknown" msgid="3450439155187810085">"ਇਹ ਵੀਡੀਓ ਪਲੇ ਨਹੀਂ ਕਰ ਸਕਦਾ।"</string>
@@ -954,14 +954,14 @@
     <string name="ringtone_silent" msgid="7937634392408977062">"ਕੋਈ ਨਹੀਂ"</string>
     <string name="ringtone_picker_title" msgid="3515143939175119094">"ਰਿੰਗਟੋਨਾਂ"</string>
     <string name="ringtone_unknown" msgid="5477919988701784788">"ਅਗਿਆਤ ਰਿੰਗਟੋਨ"</string>
-  <plurals name="wifi_available">
-    <item quantity="one" msgid="6654123987418168693">"Wi-Fi ਨੈਟਵਰਕ ਉਪਲਬਧ"</item>
-    <item quantity="other" msgid="4192424489168397386">"Wi-Fi ਨੈਟਵਰਕ ਉਪਲਬਧ"</item>
-  </plurals>
-  <plurals name="wifi_available_detailed">
-    <item quantity="one" msgid="1634101450343277345">"ਉਪਲਬਧ Wi-Fi ਨੈਟਵਰਕ ਖੋਲ੍ਹੋ"</item>
-    <item quantity="other" msgid="7915895323644292768">"ਉਪਲਬਧ Wi-Fi ਨੈਟਵਰਕ ਖੋਲ੍ਹੋ"</item>
-  </plurals>
+    <plurals name="wifi_available" formatted="false" msgid="7900333017752027322">
+      <item quantity="one">Wi-Fi ਨੈਟਵਰਕਸ ਉਪਲਬਧ</item>
+      <item quantity="other">Wi-Fi ਨੈਟਵਰਕਸ ਉਪਲਬਧ</item>
+    </plurals>
+    <plurals name="wifi_available_detailed" formatted="false" msgid="1140699367193975606">
+      <item quantity="one">ਉਪਲਬਧ Wi-Fi ਨੈਟਵਰਕ ਖੋਲ੍ਹੋ</item>
+      <item quantity="other">ਉਪਲਬਧ Wi-Fi ਨੈਟਵਰਕ ਖੋਲ੍ਹੋ</item>
+    </plurals>
     <string name="wifi_available_sign_in" msgid="9157196203958866662">"Wi-Fi ਨੈੱਟਵਰਕ ਵਿੱਚ ਸਾਈਨ ਇਨ ਕਰੋ"</string>
     <string name="network_available_sign_in" msgid="1848877297365446605">"ਨੈਟਵਰਕ ਤੇ ਸਾਈਨ ਇਨ ਕਰੋ"</string>
     <!-- no translation found for network_available_sign_in_detailed (8000081941447976118) -->
@@ -1145,10 +1145,10 @@
     <string name="skip_button_label" msgid="1275362299471631819">"ਛੱਡੋ"</string>
     <string name="no_matches" msgid="8129421908915840737">"ਕੋਈ ਮੇਲ ਨਹੀਂ"</string>
     <string name="find_on_page" msgid="1946799233822820384">"ਸਫ਼ੇ ਤੇ ਲੱਭੋ"</string>
-  <plurals name="matches_found">
-    <item quantity="one" msgid="8167147081136579439">"1 ਮੇਲ"</item>
-    <item quantity="other" msgid="4641872797067609177">"<xliff:g id="TOTAL">%d</xliff:g> ਦਾ <xliff:g id="INDEX">%d</xliff:g>"</item>
-  </plurals>
+    <plurals name="matches_found" formatted="false" msgid="1210884353962081884">
+      <item quantity="one"><xliff:g id="INDEX">%d</xliff:g> </item>
+      <item quantity="other"><xliff:g id="INDEX">%d</xliff:g> </item>
+    </plurals>
     <string name="action_mode_done" msgid="7217581640461922289">"ਹੋ ਗਿਆ"</string>
     <string name="progress_erasing" product="nosdcard" msgid="4521573321524340058">"USB ਸਟੋਰੇਜ ਮਿਟਾ ਰਿਹਾ ਹੈ…"</string>
     <string name="progress_erasing" product="default" msgid="6596988875507043042">"SD ਕਾਰਡ ਮਿਟਾ ਰਿਹਾ ਹੈ…"</string>
@@ -1426,10 +1426,10 @@
     <string name="restr_pin_create_pin" msgid="8017600000263450337">"ਪ੍ਰਤਿਬੰਧ ਸੰਸ਼ੋਧਿਤ ਕਰਨ ਲਈ ਇੱਕ PIN ਬਣਾਓ"</string>
     <string name="restr_pin_error_doesnt_match" msgid="2224214190906994548">"PIN ਮੇਲ ਨਹੀਂ ਖਾਂਦੇ। ਦੁਬਾਰਾ ਕੋਸ਼ਿਸ਼ ਕਰੋ।"</string>
     <string name="restr_pin_error_too_short" msgid="8173982756265777792">"PIN ਬਹੁਤ ਜ਼ਿਆਦਾ ਛੋਟਾ ਹੈ। ਘੱਟੋ-ਘੱਟ 4 ਅੰਕ ਹੋਣੇ ਚਾਹੀਦੇ ਹਨ।"</string>
-  <plurals name="restr_pin_countdown">
-    <item quantity="one" msgid="311050995198548675">"1 ਸਕਿੰਟ ਵਿੱਚ ਦੁਬਾਰਾ ਕੋਸ਼ਿਸ਼ ਕਰੋ"</item>
-    <item quantity="other" msgid="4730868920742952817">"<xliff:g id="COUNT">%d</xliff:g> ਸਕਿੰਟਾਂ ਵਿੱਚ ਦੁਬਾਰਾ ਕੋਸ਼ਿਸ਼ ਕਰੋ"</item>
-  </plurals>
+    <plurals name="restr_pin_countdown" formatted="false" msgid="9061246974881224688">
+      <item quantity="one"> <xliff:g id="COUNT">%d</xliff:g> ਸਕਿੰਟਾਂ ਵਿੱਚ ਦੁਬਾਰਾ ਕੋਸ਼ਿਸ਼ ਕਰੋ</item>
+      <item quantity="other"> <xliff:g id="COUNT">%d</xliff:g> ਸਕਿੰਟਾਂ ਵਿੱਚ ਦੁਬਾਰਾ ਕੋਸ਼ਿਸ਼ ਕਰੋ</item>
+    </plurals>
     <string name="restr_pin_try_later" msgid="973144472490532377">"ਬਾਅਦ ਵਿੱਚ ਦੁਬਾਰਾ ਕੋਸ਼ਿਸ਼ ਕਰੋ।"</string>
     <string name="immersive_cling_title" msgid="8394201622932303336">"ਪੂਰੀ ਸਕ੍ਰੀਨ ਦੇਖ ਰਿਹਾ ਹੈ"</string>
     <string name="immersive_cling_description" msgid="3482371193207536040">"ਬਾਹਰ ਜਾਣ ਲਈ, ਟੌਪ ਤੋਂ ਹੇਠਾਂ ਸਵਾਈਪ ਕਰੋ।"</string>
@@ -1455,38 +1455,38 @@
     <string name="package_updated_device_owner" msgid="8856631322440187071">"ਤੁਹਾਡੇ ਪ੍ਰਸ਼ਾਸਕ ਦੁਆਰਾ ਅਪਡੇਟ ਕੀਤਾ ਗਿਆ"</string>
     <string name="package_deleted_device_owner" msgid="7650577387493101353">"ਤੁਹਾਡੇ ਪ੍ਰਬੰਧਕ ਵੱਲੋਂ ਮਿਟਾਇਆ ਗਿਆ"</string>
     <string name="battery_saver_description" msgid="1960431123816253034">"ਬੈਟਰੀ ਸਮਰੱਥਾ ਨੂੰ ਬਿਹਤਰ ਸਹਾਇਤਾ ਕਰਨ ਲਈ, ਬੈਟਰੀ ਸੇਵਰ ਤੁਹਾਡੀ ਡਿਵਾਈਸ ਦਾ ਪ੍ਰਦਰਸ਼ਨ ਘਟਾਉਂਦਾ ਹੈ ਅਤੇ ਵਾਈਬ੍ਰੇਸ਼ਨ, ਨਿਰਧਾਰਿਤ ਸਥਾਨ ਸੇਵਾਵਾਂ ਅਤੇ ਜ਼ਿਆਦਾਤਰ ਪਿਛੋਕੜ ਡਾਟਾ ਨੂੰ ਸੀਮਿਤ ਕਰਦਾ ਹੈ। ਈਮੇਲ, ਮੈਸੇਜਿੰਗ ਅਤੇ ਹੋਰ ਐਪਸ, ਜੋ ਸਿੰਕਿੰਗ ਤੇ ਨਿਰਭਰ ਹਨ, ਉਹ ਉਦੋਂ ਤੱਕ ਅਪਡੇਟ ਨਹੀਂ ਕੀਤੇ ਜਾ ਸਕਦੇ ਜਦੋਂ ਤੱਕ ਤੁਸੀਂ ਉਹਨਾਂ ਨੂੰ ਖੋਲ੍ਹਦੇ ਨਹੀਂ।\n\nਬੈਟਰੀ ਸੇਵਰ ਆਟੋਮੈਟਿਕਲੀ ਬੰਦ ਹੁੰਦਾ ਹੈ ਜਦੋਂ ਤੁਹਾਡੀ ਡਿਵਾਈਸ ਚਾਰਜ ਹੋ ਰਹੀ ਹੁੰਦੀ ਹੈ।"</string>
-  <plurals name="zen_mode_duration_minutes_summary">
-    <item quantity="one" msgid="3177683545388923234">"ਇੱਕ ਮਿੰਟ ਤੱਕ (<xliff:g id="FORMATTEDTIME">%2$s</xliff:g> ਤੱਕ)"</item>
-    <item quantity="other" msgid="2787867221129368935">"%1$d ਮਿੰਟਾਂ ਤੱਕ (<xliff:g id="FORMATTEDTIME">%2$s</xliff:g> ਤੱਕ)"</item>
-  </plurals>
-  <plurals name="zen_mode_duration_minutes_summary_short">
-    <item quantity="one" msgid="4097046271119330874">"(<xliff:g id="FORMATTEDTIME">%2$s</xliff:g> ਤੱਕ) 1 ਮਿੰਟ ਲਈ"</item>
-    <item quantity="other" msgid="9128259640307810602">"(<xliff:g id="FORMATTEDTIME">%2$s</xliff:g> ਤੱਕ) %1$d ਮਿੰਟ ਲਈ"</item>
-  </plurals>
-  <plurals name="zen_mode_duration_hours_summary">
-    <item quantity="one" msgid="597194865053253679">"ਇੱਕ ਘੰਟੇ ਤੱਕ (<xliff:g id="FORMATTEDTIME">%2$s</xliff:g> ਤੱਕ)"</item>
-    <item quantity="other" msgid="2827214920627669898">"%1$d ਘੰਟਿਆਂ ਤੱਕ (<xliff:g id="FORMATTEDTIME">%2$s</xliff:g> ਤੱਕ)"</item>
-  </plurals>
-  <plurals name="zen_mode_duration_hours_summary_short">
-    <item quantity="one" msgid="342658185856495801">"(<xliff:g id="FORMATTEDTIME">%2$s</xliff:g> ਤੱਕ) 1 ਘੰਟੇ ਲਈ"</item>
-    <item quantity="other" msgid="6842148190293675591">"%1$d ਘੰਟੇ ਲਈ (<xliff:g id="FORMATTEDTIME">%2$s</xliff:g> ਤੱਕ)"</item>
-  </plurals>
-  <plurals name="zen_mode_duration_minutes">
-    <item quantity="one" msgid="9040808414992812341">"ਇੱਕ ਮਿੰਟ ਤੱਕ"</item>
-    <item quantity="other" msgid="6924190729213550991">"%d ਮਿੰਟਾਂ ਤੱਕ"</item>
-  </plurals>
-  <plurals name="zen_mode_duration_minutes_short">
-    <item quantity="one" msgid="4125166172281866385">"1 ਮਿੰਟ ਲਈ"</item>
-    <item quantity="other" msgid="5131202943429775644">"%d ਮਿੰਟ ਲਈ"</item>
-  </plurals>
-  <plurals name="zen_mode_duration_hours">
-    <item quantity="one" msgid="3480040795582254384">"ਇੱਕ ਘੰਟੇ ਤੱਕ"</item>
-    <item quantity="other" msgid="5408537517529822157">"%d ਘੰਟਿਆਂ ਤੱਕ"</item>
-  </plurals>
-  <plurals name="zen_mode_duration_hours_short">
-    <item quantity="one" msgid="6798191385685158694">"1 ਘੰਟੇ ਲਈ"</item>
-    <item quantity="other" msgid="8464879049844138499">"%d ਘੰਟੇ ਲਈ"</item>
-  </plurals>
+    <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="4367877408072000848">
+      <item quantity="one">%1$d ਮਿੰਟਾਂ ਤੱਕ (<xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g> ਤੱਕ) </item>
+      <item quantity="other">%1$d ਮਿੰਟਾਂ ਤੱਕ (<xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g> ਤੱਕ)</item>
+    </plurals>
+    <plurals name="zen_mode_duration_minutes_summary_short" formatted="false" msgid="6830154222366042597">
+      <item quantity="one">%1$d ਮਿੰਟਾਂ ਲਈ (<xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g> ਤੱਕ)</item>
+      <item quantity="other">%1$d ਮਿੰਟਾਂ ਲਈ (<xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g> ਤੱਕ)</item>
+    </plurals>
+    <plurals name="zen_mode_duration_hours_summary" formatted="false" msgid="8152974162096743862">
+      <item quantity="one">%1$d ਘੰਟਿਆਂ ਤੱਕ (<xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g> ਤੱਕ)</item>
+      <item quantity="other">%1$d ਘੰਟਿਆਂ ਤੱਕ (<xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g> ਤੱਕ)</item>
+    </plurals>
+    <plurals name="zen_mode_duration_hours_summary_short" formatted="false" msgid="4787552595253082371">
+      <item quantity="one">%1$d ਘੰਟਿਆਂ ਲਈ (<xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g> ਤੱਕ)</item>
+      <item quantity="other">%1$d ਘੰਟਿਆਂ ਲਈ (<xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g> ਤੱਕ)</item>
+    </plurals>
+    <plurals name="zen_mode_duration_minutes" formatted="false" msgid="5127407202506485571">
+      <item quantity="one">%d ਮਿੰਟਾਂ ਤੱਕ</item>
+      <item quantity="other">%d ਮਿੰਟਾਂ ਤੱਕ</item>
+    </plurals>
+    <plurals name="zen_mode_duration_minutes_short" formatted="false" msgid="2199350154433426128">
+      <item quantity="one">%d ਮਿੰਟਾਂ ਲਈ</item>
+      <item quantity="other">%d ਮਿੰਟਾਂ ਲਈ</item>
+    </plurals>
+    <plurals name="zen_mode_duration_hours" formatted="false" msgid="3938821308277433854">
+      <item quantity="one">%d ਘੰਟਿਆਂ ਤੱਕ</item>
+      <item quantity="other">%d ਘੰਟਿਆਂ ਤੱਕ</item>
+    </plurals>
+    <plurals name="zen_mode_duration_hours_short" formatted="false" msgid="6748277774662434217">
+      <item quantity="one">%d ਘੰਟਿਆਂ ਲਈ</item>
+      <item quantity="other">%d ਘੰਟਿਆਂ ਲਈ</item>
+    </plurals>
     <string name="zen_mode_until" msgid="7336308492289875088">"<xliff:g id="FORMATTEDTIME">%1$s</xliff:g> ਤੱਕ"</string>
     <string name="zen_mode_alarm" msgid="9128205721301330797">"<xliff:g id="FORMATTEDTIME">%1$s</xliff:g> ਤੱਕ (ਅਗਲਾ ਅਲਾਰਮ)"</string>
     <string name="zen_mode_forever" msgid="7420011936770086993">"ਜਦੋਂ ਤੱਕ ਤੁਸੀਂ ਇਸਨੂੰ ਬੰਦ ਨਹੀਂ ਕਰਦੇ ਹੋ"</string>
@@ -1513,8 +1513,8 @@
     <string name="usb_midi_peripheral_product_name" msgid="4971827859165280403">"USB ਪੈਰੀਫੈਰਲ ਪੋਰਟ"</string>
     <string name="floating_toolbar_open_overflow_description" msgid="4797287862999444631">"ਹੋਰ ਚੋਣਾਂ"</string>
     <string name="floating_toolbar_close_overflow_description" msgid="559796923090723804">"ਓਵਰਫਲੋ ਬੰਦ ਕਰੋ"</string>
-  <plurals name="selected_count">
-    <item quantity="one" msgid="8857281055159991036">"<xliff:g id="COUNT">%1$d</xliff:g> ਚੁਣੀਆ"</item>
-    <item quantity="other" msgid="2608606845335294849">"<xliff:g id="COUNT">%1$d</xliff:g> ਚੁਣੀਆ"</item>
-  </plurals>
+    <plurals name="selected_count" formatted="false" msgid="7187339492915744615">
+      <item quantity="one"><xliff:g id="COUNT_1">%1$d</xliff:g> ਚੁਣਿਆ ਗਿਆ</item>
+      <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> ਚੁਣਿਆ ਗਿਆ</item>
+    </plurals>
 </resources>
