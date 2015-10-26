@@ -34,14 +34,14 @@ import com.android.systemui.recents.model.TaskStack;
  */
 class DockRegion {
     public static TaskStack.DockState[] PHONE_LANDSCAPE = {
-            TaskStack.DockState.LEFT, TaskStack.DockState.RIGHT
+            TaskStack.DockState.LEFT
     };
     public static TaskStack.DockState[] PHONE_PORTRAIT = {
             // We only allow docking to the top for now
             TaskStack.DockState.TOP
     };
     public static TaskStack.DockState[] TABLET_LANDSCAPE = {
-            TaskStack.DockState.LEFT, TaskStack.DockState.RIGHT
+            TaskStack.DockState.LEFT
     };
     public static TaskStack.DockState[] TABLET_PORTRAIT = PHONE_PORTRAIT;
 }
