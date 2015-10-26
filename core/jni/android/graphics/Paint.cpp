@@ -28,6 +28,7 @@
 #include "SkBlurDrawLooper.h"
 #include "SkColorFilter.h"
 #include "SkMaskFilter.h"
+#include "SkPath.h"
 #include "SkRasterizer.h"
 #include "SkShader.h"
 #include "SkTypeface.h"
