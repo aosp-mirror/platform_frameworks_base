@@ -8,6 +8,8 @@
     <string name="keyboard_layout_english_us_intl" msgid="3705168594034233583">"Engleză (SUA), stil internațional"</string>
     <string name="keyboard_layout_english_us_colemak_label" msgid="4194969610343455380">"Engleză (SUA), stil Colemak"</string>
     <string name="keyboard_layout_english_us_dvorak_label" msgid="793528923171145202">"Engleză (SUA), stil Dvorak"</string>
+    <!-- no translation found for keyboard_layout_english_us_workman_label (2944541595262173111) -->
+    <skip />
     <string name="keyboard_layout_german_label" msgid="8451565865467909999">"Germană"</string>
     <string name="keyboard_layout_french_label" msgid="813450119589383723">"Franceză"</string>
     <string name="keyboard_layout_french_ca_label" msgid="365352601060604832">"Franceză (Canada)"</string>
