@@ -42,7 +42,7 @@ public class StackScrollAlgorithm {
     private static final int MAX_ITEMS_IN_BOTTOM_STACK = 3;
     private static final int MAX_ITEMS_IN_TOP_STACK = 3;
 
-    public static final float DIMMED_SCALE = 0.95f;
+    public static final float DIMMED_SCALE = 0.98f;
 
     private int mPaddingBetweenElements;
     private int mCollapsedSize;

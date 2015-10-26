@@ -77,7 +77,9 @@ public class NotificationContentView extends FrameLayout {
     private boolean mIsHeadsUp;
     private boolean mShowingLegacyBackground;
     private boolean mIsChildInGroup;
+    private ExpandableNotificationRow mContainingNotification;
     private StatusBarNotification mStatusBarNotification;
+    private NotificationGroupManager mGroupManager;
 
     private final ViewTreeObserver.OnPreDrawListener mEnableAnimationPredrawListener
             = new ViewTreeObserver.OnPreDrawListener() {
@@ -96,7 +98,17 @@ public class NotificationContentView extends FrameLayout {
                     mRoundRectRadius);
         }
     };
-    private NotificationGroupManager mGroupManager;
+    private OnClickListener mExpandClickListener = new OnClickListener() {
+        @Override
+        public void onClick(View v) {
+            if (mGroupManager.isSummaryOfGroup(mStatusBarNotification)) {
+                mGroupManager.toggleGroupExpansion(mStatusBarNotification);
+            } else {
+                mContainingNotification.setUserExpanded(!mContainingNotification.isExpanded());
+                mContainingNotification.notifyHeightChanged(true);
+            }
+        }
+    };
 
     public NotificationContentView(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -488,6 +500,10 @@ public class NotificationContentView extends FrameLayout {
         updateSingleLineView();
     }
 
+    public void setContainingNotification(ExpandableNotificationRow notification) {
+        mContainingNotification = notification;
+    }
+
     public void setStatusBarNotification(StatusBarNotification statusBarNotification) {
         mStatusBarNotification = statusBarNotification;
         updateSingleLineView();
@@ -514,5 +530,20 @@ public class NotificationContentView extends FrameLayout {
 
     public void setGroupManager(NotificationGroupManager groupManager) {
         mGroupManager = groupManager;
+    }
+
+    public void updateExpandButtons() {
+        if (mExpandedChild != null) {
+            mExpandedWrapper.updateExpandability(mContainingNotification.isExpandable(),
+                    mExpandClickListener);
+        }
+        if (mContractedChild != null) {
+            mContractedWrapper.updateExpandability(mContainingNotification.isExpandable(),
+                    mExpandClickListener);
+        }
+        if (mHeadsUpChild != null) {
+            mHeadsUpWrapper.updateExpandability(mContainingNotification.isExpandable(),
+                    mExpandClickListener);
+        }
     }
 }

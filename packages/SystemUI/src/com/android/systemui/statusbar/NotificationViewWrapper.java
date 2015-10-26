@@ -83,4 +83,12 @@ public abstract class NotificationViewWrapper {
     public void setSubTextVisible(boolean visible) {
         mSubTextVisible = visible;
     }
+
+    /**
+     * Update the appearance of the expand button.
+     *
+     * @param expandable should this view be expandable
+     * @param onClickListener the listener to invoke when the expand affordance is clicked on
+     */
+    public void updateExpandability(boolean expandable, View.OnClickListener onClickListener) {}
 }

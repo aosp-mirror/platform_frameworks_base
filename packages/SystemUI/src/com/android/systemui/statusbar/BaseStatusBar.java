@@ -40,7 +40,6 @@ import android.content.pm.UserInfo;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.database.ContentObserver;
-import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.Icon;
 import android.os.AsyncTask;
@@ -1498,18 +1497,6 @@ public abstract class BaseStatusBar extends SystemUI implements
 
             Drawable iconDrawable = StatusBarIconView.getIcon(mContext, ic);
             icon.setImageDrawable(iconDrawable);
-            if (entry.targetSdk >= Build.VERSION_CODES.LOLLIPOP
-                    || mNotificationColorUtil.isGrayscaleIcon(iconDrawable)) {
-                icon.setBackgroundResource(
-                        com.android.internal.R.drawable.notification_icon_legacy_bg);
-                int padding = mContext.getResources().getDimensionPixelSize(
-                        com.android.internal.R.dimen.notification_large_icon_circle_padding);
-                icon.setPadding(padding, padding, padding, padding);
-                if (sbn.getNotification().color != Notification.COLOR_DEFAULT) {
-                    icon.getBackground().setColorFilter(
-                            sbn.getNotification().color, PorterDuff.Mode.SRC_ATOP);
-                }
-            }
 
             if (profileBadge != null) {
                 Drawable profileDrawable = mContext.getPackageManager().getUserBadgeForDensity(
@@ -1535,11 +1522,6 @@ public abstract class BaseStatusBar extends SystemUI implements
                 text.setTextAppearance(mContext,
                         R.style.TextAppearance_Material_Notification_Parenthetical);
             }
-
-            int topPadding = Notification.Builder.calculateTopPadding(mContext,
-                    false /* hasThreeLines */,
-                    mContext.getResources().getConfiguration().fontScale);
-            title.setPadding(0, topPadding, 0, 0);
 
             contentContainerPublic.setContractedChild(publicViewLocal);
             entry.autoRedacted = true;

@@ -452,6 +452,8 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
         super.onFinishInflate();
         mPublicLayout = (NotificationContentView) findViewById(R.id.expandedPublic);
         mPrivateLayout = (NotificationContentView) findViewById(R.id.expanded);
+        mPublicLayout.setContainingNotification(this);
+        mPrivateLayout.setContainingNotification(this);
         mGutsStub = (ViewStub) findViewById(R.id.notification_guts_stub);
         mGutsStub.setOnInflateListener(new ViewStub.OnInflateListener() {
             @Override
@@ -534,6 +536,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
 
     public void setExpandable(boolean expandable) {
         mExpandable = expandable;
+        mPrivateLayout.updateExpandButtons();
     }
 
     /**
@@ -686,6 +689,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
         if (mIsSummaryWithChildren && mChildrenContainer == null) {
             mChildrenContainerStub.inflate();
         }
+        mPrivateLayout.updateExpandButtons();
         updateNotificationHeader();
         updateChildrenVisibility(true);
     }
@@ -771,6 +775,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
             animateShowingPublic(delay, duration);
         }
 
+        mPrivateLayout.updateExpandButtons();
         updateVetoButton();
         mShowingPublicInitialized = true;
     }

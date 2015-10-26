@@ -1638,6 +1638,47 @@ public class RemoteViews implements Parcelable, Filter {
     }
 
     /**
+     * Helper action to set layout margin on a View.
+     */
+    private class ViewMarginEndAction extends Action {
+        public ViewMarginEndAction(int viewId, int end) {
+            this.viewId = viewId;
+            this.end = end;
+        }
+
+        public ViewMarginEndAction(Parcel parcel) {
+            viewId = parcel.readInt();
+            end = parcel.readInt();
+        }
+
+        public void writeToParcel(Parcel dest, int flags) {
+            dest.writeInt(TAG);
+            dest.writeInt(viewId);
+            dest.writeInt(end);
+        }
+
+        @Override
+        public void apply(View root, ViewGroup rootParent, OnClickHandler handler) {
+            final View target = root.findViewById(viewId);
+            if (target == null) {
+                return;
+            }
+            ViewGroup.LayoutParams layoutParams = target.getLayoutParams();
+            if (layoutParams instanceof ViewGroup.MarginLayoutParams) {
+                ((ViewGroup.MarginLayoutParams) layoutParams).setMarginEnd(end);
+            }
+        }
+
+        public String getActionName() {
+            return "ViewMarginEndAction";
+        }
+
+        int end;
+
+        public final static int TAG = 19;
+    }
+
+    /**
      * Helper action to set a color filter on a compound drawable on a TextView. Supports relative
      * (s/t/e/b) or cardinal (l/t/r/b) arrangement.
      */
@@ -1941,6 +1982,9 @@ public class RemoteViews implements Parcelable, Filter {
                             break;
                         case SetRemoteInputsAction.TAG:
                             mActions.add(new SetRemoteInputsAction(parcel));
+                            break;
+                        case ViewMarginEndAction.TAG:
+                            mActions.add(new ViewMarginEndAction(parcel));
                             break;
                         default:
                             throw new ActionException("Tag " + tag + " not found");
@@ -2546,6 +2590,19 @@ public class RemoteViews implements Parcelable, Filter {
      */
     public void setViewPadding(int viewId, int left, int top, int right, int bottom) {
         addAction(new ViewPaddingAction(viewId, left, top, right, bottom));
+    }
+
+    /**
+     * @hide
+     * Equivalent to calling {@link android.view.ViewGroup.MarginLayoutParams#setMarginEnd(int)}.
+     * Only works if the {@link View#getLayoutParams()} supports margins.
+     * Hidden for now since we don't want to support this for all different layout margins yet.
+     *
+     * @param viewId The id of the view to change
+     * @param endMargin the left padding in pixels
+     */
+    public void setViewLayoutMarginEnd(int viewId, int endMargin) {
+        addAction(new ViewMarginEndAction(viewId, endMargin));
     }
 
     /**

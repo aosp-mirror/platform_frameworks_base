@@ -49,10 +49,10 @@
     <dimen name="notification_single_line_height">32sp</dimen>
 
     <!-- Height of a small notification in the status bar -->
-    <dimen name="notification_min_height">64dp</dimen>
+    <dimen name="notification_min_height">84dp</dimen>
 
     <!-- Height of a large notification in the status bar -->
-    <dimen name="notification_max_height">256dp</dimen>
+    <dimen name="notification_max_height">276dp</dimen>
 
     <!-- Height of a medium notification in the status bar -->
     <dimen name="notification_mid_height">128dp</dimen>
@@ -258,7 +258,7 @@
 
     <!-- bottom_stack_peek_amount + notification_min_height
          + notification_collapse_second_card_padding -->
-    <dimen name="min_stack_height">84dp</dimen>
+    <dimen name="min_stack_height">104dp</dimen>
 
     <!-- The height of the area before the bottom stack in which the notifications slow down -->
     <dimen name="bottom_stack_slow_down_length">12dp</dimen>
@@ -276,7 +276,7 @@
     <dimen name="notification_padding_dimmed">0dp</dimen>
 
     <!-- The padding between the individual notification cards. -->
-    <dimen name="notification_padding">4dp</dimen>
+    <dimen name="notification_padding">2dp</dimen>
 
     <!-- The minimum amount of top overscroll to go to the quick settings. -->
     <dimen name="min_top_overscroll_to_qs">36dp</dimen>
@@ -296,7 +296,7 @@
     <!-- Falsing threshold used when dismissing notifications from the lockscreen. -->
     <dimen name="swipe_helper_falsing_threshold">70dp</dimen>
 
-    <dimen name="notifications_top_padding">8dp</dimen>
+    <dimen name="notifications_top_padding">4dp</dimen>
     
     <!-- Minimum distance the user has to drag down to go to the full shade. -->
     <dimen name="keyguard_drag_down_min_distance">100dp</dimen>

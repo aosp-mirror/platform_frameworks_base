@@ -17,9 +17,9 @@
 
 <merge xmlns:android="http://schemas.android.com/apk/res/android">
     <LinearLayout
+        android:id="@+id/line2"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginEnd="8dp"
         android:orientation="horizontal"
         android:gravity="center_vertical"
         >
@@ -51,7 +51,6 @@
         android:layout="@layout/notification_template_progressbar"
         android:layout_width="match_parent"
         android:layout_height="15dp"
-        android:layout_marginEnd="8dp"
         android:visibility="gone"
         android:layout_weight="0"
         />

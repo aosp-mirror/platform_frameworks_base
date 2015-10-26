@@ -130,6 +130,24 @@
     <!-- Default padding for dialogs. -->
     <dimen name="dialog_padding">16dp</dimen>
 
+    <!-- The margin on the start of the content view -->
+    <dimen name="notification_content_margin_start">16dp</dimen>
+
+    <!-- The margin on the end of the content view -->
+    <dimen name="notification_content_margin_end">16dp</dimen>
+
+    <!-- The margin on the end of the content view with a picture.-->
+    <dimen name="notification_content_picture_margin">56dp</dimen>
+
+    <!-- height of the content margin to accomodate for the header -->
+    <dimen name="notification_content_margin_top">30dp</dimen>
+
+    <!-- height of notification header view if present -->
+    <dimen name="notification_header_height">32dp</dimen>
+
+    <!-- Height of a small notification in the status bar -->
+    <dimen name="notification_min_height">84dp</dimen>
+
     <!-- The width of the big icons in notifications. -->
     <dimen name="notification_large_icon_width">64dp</dimen>
     <!-- The width of the big icons in notifications. -->

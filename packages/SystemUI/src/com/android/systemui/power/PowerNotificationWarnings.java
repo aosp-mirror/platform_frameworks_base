@@ -36,7 +36,6 @@ import android.os.SystemClock;
 import android.os.UserHandle;
 import android.provider.Settings;
 import android.util.Slog;
-import android.view.View;
 
 import com.android.systemui.R;
 import com.android.systemui.statusbar.phone.PhoneStatusBar;
@@ -162,9 +161,6 @@ public class PowerNotificationWarnings implements PowerUI.WarningsUI {
                 .setColor(mContext.getColor(
                         com.android.internal.R.color.system_notification_accent_color));
         final Notification n = nb.build();
-        if (n.headsUpContentView != null) {
-            n.headsUpContentView.setViewVisibility(com.android.internal.R.id.right_icon, View.GONE);
-        }
         mNoMan.notifyAsUser(TAG_NOTIFICATION, R.id.notification_power, n, UserHandle.ALL);
     }
 
@@ -200,9 +196,6 @@ public class PowerNotificationWarnings implements PowerUI.WarningsUI {
             mPlaySound = false;
         }
         final Notification n = nb.build();
-        if (n.headsUpContentView != null) {
-            n.headsUpContentView.setViewVisibility(com.android.internal.R.id.right_icon, View.GONE);
-        }
         mNoMan.notifyAsUser(TAG_NOTIFICATION, R.id.notification_power, n, UserHandle.ALL);
     }
 

@@ -25,6 +25,7 @@ import android.annotation.SystemApi;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.res.ColorStateList;
 import android.graphics.Bitmap;
@@ -44,8 +45,8 @@ import android.os.Parcelable;
 import android.os.SystemClock;
 import android.os.UserHandle;
 import android.text.TextUtils;
+import android.util.LayoutDirection;
 import android.util.Log;
-import android.util.MathUtils;
 import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.View;
@@ -2999,25 +3000,35 @@ public class Notification implements Parcelable
         }
 
         private void resetStandardTemplate(RemoteViews contentView) {
-            removeLargeIconBackground(contentView);
-            contentView.setViewPadding(R.id.icon, 0, 0, 0, 0);
-            contentView.setImageViewResource(R.id.icon, 0);
-            contentView.setInt(R.id.icon, "setBackgroundResource", 0);
+            resetHeader(contentView);
+            resetContentMargins(contentView);
             contentView.setViewVisibility(R.id.right_icon, View.GONE);
-            contentView.setInt(R.id.right_icon, "setBackgroundResource", 0);
-            contentView.setImageViewResource(R.id.right_icon, 0);
-            contentView.setImageViewResource(R.id.icon, 0);
             contentView.setTextViewText(R.id.title, null);
             contentView.setTextViewText(R.id.text, null);
             unshrinkLine3Text(contentView);
             contentView.setTextViewText(R.id.text2, null);
             contentView.setViewVisibility(R.id.text2, View.GONE);
             contentView.setViewVisibility(R.id.info, View.GONE);
-            contentView.setViewVisibility(R.id.time, View.GONE);
             contentView.setViewVisibility(R.id.line3, View.GONE);
             contentView.setViewVisibility(R.id.overflow_divider, View.GONE);
             contentView.setViewVisibility(R.id.progress, View.GONE);
+        }
+
+        private void resetHeader(RemoteViews contentView) {
+            contentView.setImageViewResource(R.id.icon, 0);
+            contentView.setTextViewText(R.id.app_name_text, null);
             contentView.setViewVisibility(R.id.chronometer, View.GONE);
+            contentView.setViewVisibility(R.id.expand_button, View.GONE);
+            contentView.setViewVisibility(R.id.sub_text_time_divider, View.GONE);
+            contentView.setViewVisibility(R.id.header_sub_text, View.GONE);
+            contentView.setViewVisibility(R.id.app_title_sub_text_divider, View.GONE);
+            contentView.setViewVisibility(R.id.number_of_children, View.GONE);
+        }
+
+        private void resetContentMargins(RemoteViews contentView) {
+            contentView.setViewLayoutMarginEnd(R.id.line1, 0);
+            contentView.setViewLayoutMarginEnd(R.id.line2, 0);
+            contentView.setViewLayoutMarginEnd(R.id.line3, 0);
         }
 
         private RemoteViews applyStandardTemplate(int resId) {
@@ -3033,21 +3044,13 @@ public class Notification implements Parcelable
             resetStandardTemplate(contentView);
 
             boolean showLine3 = false;
+            // TODO: look into line3 shrinking
             boolean showLine2 = false;
             boolean contentTextInLine2 = false;
             final Bundle ex = mN.extras;
 
-            if (mN.mLargeIcon != null) {
-                contentView.setImageViewIcon(R.id.icon, mN.mLargeIcon);
-                processLargeLegacyIcon(mN.mLargeIcon, contentView);
-                contentView.setImageViewIcon(R.id.right_icon, mN.mSmallIcon);
-                contentView.setViewVisibility(R.id.right_icon, View.VISIBLE);
-                processSmallRightIcon(mN.mSmallIcon, contentView);
-            } else { // small icon at left
-                contentView.setImageViewIcon(R.id.icon, mN.mSmallIcon);
-                contentView.setViewVisibility(R.id.icon, View.VISIBLE);
-                processSmallIconAsLarge(mN.mSmallIcon, contentView);
-            }
+            bindNotificationHeader(contentView);
+            bindLargeIcon(contentView);
             if (ex.getCharSequence(EXTRA_TITLE) != null) {
                 contentView.setTextViewText(R.id.title,
                         processLegacyText(ex.getCharSequence(EXTRA_TITLE)));
@@ -3079,64 +3082,31 @@ public class Notification implements Parcelable
                 contentView.setViewVisibility(R.id.info, View.GONE);
             }
 
-            // Need to show three lines?
-            if (ex.getCharSequence(EXTRA_SUB_TEXT) != null) {
-                contentView.setTextViewText(R.id.text,
-                        processLegacyText(ex.getCharSequence(EXTRA_SUB_TEXT)));
-                if (ex.getCharSequence(EXTRA_TEXT) != null) {
-                    contentView.setTextViewText(R.id.text2,
-                            processLegacyText(ex.getCharSequence(EXTRA_TEXT)));
-                    contentView.setViewVisibility(R.id.text2, View.VISIBLE);
-                    showLine2 = true;
-                    contentTextInLine2 = true;
-                } else {
-                    contentView.setViewVisibility(R.id.text2, View.GONE);
-                }
-            } else {
-                contentView.setViewVisibility(R.id.text2, View.GONE);
-                final int max = ex.getInt(EXTRA_PROGRESS_MAX, 0);
-                final int progress = ex.getInt(EXTRA_PROGRESS, 0);
-                final boolean ind = ex.getBoolean(EXTRA_PROGRESS_INDETERMINATE);
-                if (hasProgress && (max != 0 || ind)) {
-                    contentView.setViewVisibility(R.id.progress, View.VISIBLE);
-                    contentView.setProgressBar(
+            contentView.setViewVisibility(R.id.text2, View.GONE);
+            final int max = ex.getInt(EXTRA_PROGRESS_MAX, 0);
+            final int progress = ex.getInt(EXTRA_PROGRESS, 0);
+            final boolean ind = ex.getBoolean(EXTRA_PROGRESS_INDETERMINATE);
+            if (hasProgress && (max != 0 || ind)) {
+                contentView.setViewVisibility(R.id.progress, View.VISIBLE);
+                contentView.setProgressBar(
                             R.id.progress, max, progress, ind);
-                    contentView.setProgressBackgroundTintList(
-                            R.id.progress, ColorStateList.valueOf(mContext.getColor(
-                                    R.color.notification_progress_background_color)));
+                contentView.setProgressBackgroundTintList(
+                        R.id.progress, ColorStateList.valueOf(mContext.getColor(
+                                R.color.notification_progress_background_color)));
                     if (mN.color != COLOR_DEFAULT) {
                         ColorStateList colorStateList = ColorStateList.valueOf(mN.color);
-                        contentView.setProgressTintList(R.id.progress, colorStateList);
-                        contentView.setProgressIndeterminateTintList(R.id.progress, colorStateList);
-                    }
-                    showLine2 = true;
-                } else {
-                    contentView.setViewVisibility(R.id.progress, View.GONE);
+                    contentView.setProgressTintList(R.id.progress, colorStateList);
+                    contentView.setProgressIndeterminateTintList(R.id.progress, colorStateList);
                 }
+                showLine2 = true;
+            } else {
+                contentView.setViewVisibility(R.id.progress, View.GONE);
             }
             if (showLine2) {
 
                 // need to shrink all the type to make sure everything fits
                 shrinkLine3Text(contentView);
             }
-
-            if (showsTimeOrChronometer()) {
-                if (ex.getBoolean(EXTRA_SHOW_CHRONOMETER)) {
-                    contentView.setViewVisibility(R.id.chronometer, View.VISIBLE);
-                    contentView.setLong(R.id.chronometer, "setBase",
-                            mN.when + (SystemClock.elapsedRealtime() - System.currentTimeMillis()));
-                    contentView.setBoolean(R.id.chronometer, "setStarted", true);
-                } else {
-                    contentView.setViewVisibility(R.id.time, View.VISIBLE);
-                    contentView.setLong(R.id.time, "setTime", mN.when);
-                }
-            }
-
-            // Adjust padding depending on line count and font size.
-            contentView.setViewPadding(R.id.line1, 0,
-                    calculateTopPadding(mContext, hasThreeLines(),
-                            mContext.getResources().getConfiguration().fontScale),
-                    0, 0);
 
             // We want to add badge to first line of text.
             boolean addedBadge = addProfileBadge(contentView,
@@ -3148,9 +3118,80 @@ public class Notification implements Parcelable
 
             // Note getStandardView may hide line 3 again.
             contentView.setViewVisibility(R.id.line3, showLine3 ? View.VISIBLE : View.GONE);
-            contentView.setViewVisibility(R.id.overflow_divider,
-                    showLine3 ? View.VISIBLE : View.GONE);
+            contentView.setViewVisibility(R.id.overflow_divider, showLine3 ? View.VISIBLE : View.GONE);
             return contentView;
+        }
+
+        private void bindLargeIcon(RemoteViews contentView) {
+            if (mN.mLargeIcon != null) {
+                contentView.setViewVisibility(R.id.right_icon, View.VISIBLE);
+                contentView.setImageViewIcon(R.id.right_icon, mN.mLargeIcon);
+                processLargeLegacyIcon(mN.mLargeIcon, contentView);
+                int endMargin = mContext.getResources().getDimensionPixelSize(
+                        R.dimen.notification_content_picture_margin);
+                contentView.setViewLayoutMarginEnd(R.id.line1, endMargin);
+                contentView.setViewLayoutMarginEnd(R.id.line2, endMargin);
+                contentView.setViewLayoutMarginEnd(R.id.line3, endMargin);
+            }
+        }
+
+        private void bindNotificationHeader(RemoteViews contentView) {
+            bindSmallIcon(contentView);
+            bindHeaderAppName(contentView);
+            bindHeaderSubText(contentView, mN.extras.getCharSequence(EXTRA_SUB_TEXT));
+            bindHeaderChronometerAndTime(contentView);
+            bindExpandButton(contentView);
+        }
+
+        private void bindExpandButton(RemoteViews contentView) {
+            contentView.setDrawableParameters(R.id.expand_button, false, -1, resolveColor(),
+                    PorterDuff.Mode.SRC_ATOP, -1);
+        }
+
+        private void bindHeaderChronometerAndTime(RemoteViews contentView) {
+            if (showsTimeOrChronometer()) {
+                contentView.setViewVisibility(R.id.sub_text_time_divider, View.VISIBLE);
+                if (mN.extras.getBoolean(EXTRA_SHOW_CHRONOMETER)) {
+                    contentView.setViewVisibility(R.id.chronometer, View.VISIBLE);
+                    contentView.setLong(R.id.chronometer, "setBase",
+                            mN.when + (SystemClock.elapsedRealtime() - System.currentTimeMillis()));
+                    contentView.setBoolean(R.id.chronometer, "setStarted", true);
+                } else {
+                    contentView.setViewVisibility(R.id.time, View.VISIBLE);
+                    contentView.setLong(R.id.time, "setTime", mN.when);
+                }
+            }
+        }
+
+        private void bindHeaderSubText(RemoteViews contentView, CharSequence subText) {
+            if (subText != null) {
+                // TODO: Remove the span entirely to only have the string with propper formating.
+                contentView.setTextViewText(R.id.header_sub_text, processLegacyText(subText));
+                contentView.setViewVisibility(R.id.header_sub_text, View.VISIBLE);
+                contentView.setViewVisibility(R.id.app_title_sub_text_divider, View.VISIBLE);
+            }
+        }
+
+        private void bindHeaderAppName(RemoteViews contentView) {
+            PackageManager packageManager = mContext.getPackageManager();
+            ApplicationInfo info = null;
+            try {
+                info = packageManager.getApplicationInfo(mContext.getApplicationInfo().packageName,
+                        0);
+            } catch (final NameNotFoundException e) {
+                return;
+            }
+            CharSequence appName = info != null ? packageManager.getApplicationLabel(info)
+                    : null;
+            if (TextUtils.isEmpty(appName)) {
+                return;
+            }
+            contentView.setTextViewText(R.id.app_name_text, appName);
+        }
+
+        private void bindSmallIcon(RemoteViews contentView) {
+            contentView.setImageViewIcon(R.id.icon, mN.mSmallIcon);
+            processSmallIconColor(mN.mSmallIcon, contentView);
         }
 
         /**
@@ -3183,25 +3224,6 @@ public class Notification implements Parcelable
             boolean hasLine2 = (subText != null && text != null) ||
                     (hasProgress && subText == null && (max != 0 || ind));
             return hasLine2 && hasLine3;
-        }
-
-        /**
-         * @hide
-         */
-        public static int calculateTopPadding(Context ctx, boolean hasThreeLines,
-                float fontScale) {
-            int padding = ctx.getResources().getDimensionPixelSize(hasThreeLines
-                    ? R.dimen.notification_top_pad_narrow
-                    : R.dimen.notification_top_pad);
-            int largePadding = ctx.getResources().getDimensionPixelSize(hasThreeLines
-                    ? R.dimen.notification_top_pad_large_text_narrow
-                    : R.dimen.notification_top_pad_large_text);
-            float largeFactor = (MathUtils.constrain(fontScale, 1.0f, LARGE_TEXT_SCALE) - 1f)
-                    / (LARGE_TEXT_SCALE - 1f);
-
-            // Linearly interpolate the padding between large and normal with the font scale ranging
-            // from 1f to LARGE_TEXT_SCALE
-            return Math.round((1 - largeFactor) * padding + largeFactor * largePadding);
         }
 
         private void resetStandardTemplateWithActions(RemoteViews big) {
@@ -3330,83 +3352,26 @@ public class Notification implements Parcelable
         }
 
         /**
-         * Apply any necessary background to smallIcons being used in the largeIcon spot.
+         * Apply any necessariy colors to the small icon
          */
-        private void processSmallIconAsLarge(Icon largeIcon, RemoteViews contentView) {
-            if (!isLegacy()) {
-                contentView.setDrawableParameters(R.id.icon, false, -1,
-                        0xFFFFFFFF,
+        private void processSmallIconColor(Icon smallIcon, RemoteViews contentView) {
+            if (!isLegacy() || getColorUtil().isGrayscaleIcon(mContext, smallIcon)) {
+                contentView.setDrawableParameters(R.id.icon, false, -1, resolveColor(),
                         PorterDuff.Mode.SRC_ATOP, -1);
-                applyLargeIconBackground(contentView);
-            } else {
-                if (getColorUtil().isGrayscaleIcon(mContext, largeIcon)) {
-                    applyLargeIconBackground(contentView);
-                }
             }
         }
 
         /**
-         * Apply any necessary background to a largeIcon if it's a fake smallIcon (that is,
+         * Make the largeIcon dark if it's a fake smallIcon (that is,
          * if it's grayscale).
          */
         // TODO: also check bounds, transparency, that sort of thing.
         private void processLargeLegacyIcon(Icon largeIcon, RemoteViews contentView) {
             if (largeIcon != null && isLegacy()
                     && getColorUtil().isGrayscaleIcon(mContext, largeIcon)) {
-                applyLargeIconBackground(contentView);
-            } else {
-                removeLargeIconBackground(contentView);
-            }
-        }
-
-        /**
-         * Add a colored circle behind the largeIcon slot.
-         */
-        private void applyLargeIconBackground(RemoteViews contentView) {
-            contentView.setInt(R.id.icon, "setBackgroundResource",
-                    R.drawable.notification_icon_legacy_bg);
-
-            contentView.setDrawableParameters(
-                    R.id.icon,
-                    true,
-                    -1,
-                    resolveColor(),
-                    PorterDuff.Mode.SRC_ATOP,
-                    -1);
-
-            int padding = mContext.getResources().getDimensionPixelSize(
-                    R.dimen.notification_large_icon_circle_padding);
-            contentView.setViewPadding(R.id.icon, padding, padding, padding, padding);
-        }
-
-        private void removeLargeIconBackground(RemoteViews contentView) {
-            contentView.setInt(R.id.icon, "setBackgroundResource", 0);
-        }
-
-        /**
-         * Recolor small icons when used in the R.id.right_icon slot.
-         */
-        private void processSmallRightIcon(Icon smallIcon, RemoteViews contentView) {
-            if (!isLegacy()) {
-                contentView.setDrawableParameters(R.id.right_icon, false, -1,
-                        0xFFFFFFFF,
+                // resolve color will fall back to the default when legacy
+                contentView.setDrawableParameters(R.id.icon, false, -1, resolveColor(),
                         PorterDuff.Mode.SRC_ATOP, -1);
-            }
-            final boolean gray = isLegacy()
-                    && smallIcon.getType() == Icon.TYPE_RESOURCE
-                    && getColorUtil().isGrayscaleIcon(mContext, smallIcon.getResId());
-            if (!isLegacy() || gray) {
-                contentView.setInt(R.id.right_icon,
-                        "setBackgroundResource",
-                        R.drawable.notification_icon_legacy_bg);
-
-                contentView.setDrawableParameters(
-                        R.id.right_icon,
-                        true,
-                        -1,
-                        resolveColor(),
-                        PorterDuff.Mode.SRC_ATOP,
-                        -1);
             }
         }
 
@@ -3418,7 +3383,7 @@ public class Notification implements Parcelable
 
         private int resolveColor() {
             if (mN.color == COLOR_DEFAULT) {
-                return mContext.getColor(R.color.notification_icon_bg_color);
+                return mContext.getColor(R.color.notification_icon_default_color);
             }
             return mN.color;
         }
@@ -3622,19 +3587,19 @@ public class Notification implements Parcelable
                 contentView.setViewVisibility(R.id.line1, View.VISIBLE);
             }
 
-            // The last line defaults to the subtext, but can be replaced by mSummaryText
-            final CharSequence overflowText =
-                    mSummaryTextSet ? mSummaryText
-                                    : mBuilder.getAllExtras().getCharSequence(EXTRA_SUB_TEXT);
-            if (overflowText != null) {
-                contentView.setTextViewText(R.id.text, mBuilder.processLegacyText(overflowText));
+            final CharSequence overflowText = mSummaryTextSet ? mSummaryText : null;
+            final CharSequence subText = mBuilder.mN.extras.getCharSequence(EXTRA_SUB_TEXT);
+            boolean showSummaryOnBottom = overflowText != null && !overflowText.equals(subText);
+            if (showSummaryOnBottom) {
+                contentView
+                        .setTextViewText(R.id.text, mBuilder.processLegacyText(overflowText));
                 contentView.setViewVisibility(R.id.overflow_divider, View.VISIBLE);
                 contentView.setViewVisibility(R.id.line3, View.VISIBLE);
             } else {
                 // Clear text in case we use the line to show the profile badge.
-                contentView.setTextViewText(R.id.text, "");
-                contentView.setViewVisibility(R.id.overflow_divider, View.GONE);
-                contentView.setViewVisibility(R.id.line3, View.GONE);
+                contentView.setTextViewText(com.android.internal.R.id.text, "");
+                contentView.setViewVisibility(com.android.internal.R.id.overflow_divider, View.GONE);
+                contentView.setViewVisibility(com.android.internal.R.id.line3, View.GONE);
             }
 
             return contentView;
@@ -3663,19 +3628,6 @@ public class Notification implements Parcelable
          */
         public RemoteViews makeHeadsUpContentView() {
             return null;
-        }
-
-        /**
-         * Changes the padding of the first line such that the big and small content view have the
-         * same top padding.
-         *
-         * @hide
-         */
-        protected void applyTopPadding(RemoteViews contentView) {
-            int topPadding = Builder.calculateTopPadding(mBuilder.mContext,
-                    mBuilder.hasThreeLines(),
-                    mBuilder.mContext.getResources().getConfiguration().fontScale);
-            contentView.setViewPadding(R.id.line1, 0, topPadding, 0, 0);
         }
 
         /**
@@ -3853,8 +3805,6 @@ public class Notification implements Parcelable
 
             contentView.setImageViewBitmap(R.id.big_picture, mPicture);
 
-            applyTopPadding(contentView);
-
             boolean twoTextLines = mBuilder.getAllExtras().getCharSequence(EXTRA_SUB_TEXT) != null
                     && mBuilder.getAllExtras().getCharSequence(EXTRA_TEXT) != null;
             mBuilder.addProfileBadge(contentView,
@@ -3984,8 +3934,6 @@ public class Notification implements Parcelable
             contentView.setViewVisibility(R.id.big_text, View.VISIBLE);
             contentView.setInt(R.id.big_text, "setMaxLines", calculateMaxLines());
             contentView.setViewVisibility(R.id.text2, View.GONE);
-
-            applyTopPadding(contentView);
 
             mBuilder.shrinkLine3Text(contentView);
 
@@ -4138,8 +4086,6 @@ public class Notification implements Parcelable
 
             contentView.setViewVisibility(R.id.inbox_more,
                     mTexts.size() > rowIds.length ? View.VISIBLE : View.GONE);
-
-            applyTopPadding(contentView);
 
             mBuilder.shrinkLine3Text(contentView);
 
@@ -4334,7 +4280,6 @@ public class Notification implements Parcelable
             }
             styleText(big);
             hideRightIcon(big);
-            applyTopPadding(big);
             big.setViewVisibility(android.R.id.progress, View.GONE);
             return big;
         }
