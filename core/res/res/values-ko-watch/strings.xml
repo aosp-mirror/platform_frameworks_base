@@ -21,4 +21,26 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="android_upgrading_apk" msgid="1090732262010398759">"앱 <xliff:g id="NUMBER_1">%2$d</xliff:g>개 중 <xliff:g id="NUMBER_0">%1$d</xliff:g>개"</string>
+    <string name="permgrouplab_sensors" msgid="202675452368612754">"센서"</string>
+    <string name="permgrouplab_contactswear" msgid="2340286500790908344">"주소록에 액세스"</string>
+    <string name="permgrouplab_locationwear" msgid="6275317222482780209">"이 시계 위치에 액세스"</string>
+    <string name="permgrouplab_calendarwear" msgid="441900844045065081">"캘린더에 액세스"</string>
+    <string name="permgrouplab_smswear" msgid="6849506550342974220">"SMS 메시지 보내기 및 보기"</string>
+    <string name="permgrouplab_storagewear" msgid="1003807594193602313">"시계의 사진, 미디어, 파일에 액세스"</string>
+    <string name="permgrouplab_microphonewear" msgid="1047561180980891136">"오디오 녹음"</string>
+    <string name="permgrouplab_camerawear" msgid="4543951283103407017">"사진 찍기 및 동영상 녹화"</string>
+    <string name="permgrouplab_phonewear" msgid="134365036753766126">"전화 걸기 및 관리"</string>
+    <string name="permgrouplab_sensorswear" msgid="1429324744329327663">"생체 신호에 관한 센서 데이터에 액세스"</string>
+    <string name="permlab_statusBarServicewear" msgid="2469402818964691034">"상태 표시줄에 위치"</string>
+    <string name="permlab_bodySensorswear" msgid="7857941041202791873">"신체 센서(예: 심박수 모니터)에 액세스"</string>
+    <string name="permlab_accessFineLocationwear" msgid="5584423486924377563">"정확한 위치(GPS 및 네트워크 기반)에 액세스"</string>
+    <string name="permlab_accessCoarseLocationwear" msgid="5880746016230166090">"대략적인 위치(네트워크 기반)에 액세스"</string>
+    <string name="permlab_sim_communicationwear" msgid="1899198085342781874">"SIM에 명령어 보내기"</string>
+    <string name="permlab_createNetworkSocketswear" msgid="6467042386273822913">"전체 네트워크 액세스 권한 보유"</string>
+    <string name="permlab_manageProfileAndDeviceOwnerswear" msgid="7313340516937821847">"프로필 및 기기 소유자 관리"</string>
+    <string name="permlab_changeWimaxStatewear" msgid="3828470843939853744">"WiMAX 상태 변경"</string>
+    <string name="permlab_handoverStatuswear" msgid="4835786819716499249">"Android Beam 전송 상태 수신"</string>
+    <string name="permlab_route_media_outputwear" msgid="8737024341474587192">"미디어 출력 연결"</string>
+    <string name="permlab_readInstallSessionswear" msgid="9059478058685861989">"설치 세션 읽기"</string>
+    <string name="permlab_requestInstallPackageswear" msgid="4982025836783539503">"패키지 설치 요청"</string>
 </resources>

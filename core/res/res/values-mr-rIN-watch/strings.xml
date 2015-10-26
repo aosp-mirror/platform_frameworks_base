@@ -21,4 +21,26 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="android_upgrading_apk" msgid="1090732262010398759">"<xliff:g id="NUMBER_1">%2$d</xliff:g> पैकी <xliff:g id="NUMBER_0">%1$d</xliff:g> अॅप"</string>
+    <string name="permgrouplab_sensors" msgid="202675452368612754">"सेन्सर"</string>
+    <string name="permgrouplab_contactswear" msgid="2340286500790908344">"आपल्या संपर्कांमध्ये प्रवेश करा"</string>
+    <string name="permgrouplab_locationwear" msgid="6275317222482780209">"या घड्याळाच्या स्थानामध्ये प्रवेश करा"</string>
+    <string name="permgrouplab_calendarwear" msgid="441900844045065081">"आपल्या कॅलेंडरमध्ये प्रवेश करा"</string>
+    <string name="permgrouplab_smswear" msgid="6849506550342974220">"SMS संदेश पाठवा आणि पहा"</string>
+    <string name="permgrouplab_storagewear" msgid="1003807594193602313">"आपल्‍या घड्याळावरील फोटो, मीडिया आणि फायलींमध्‍ये प्रवेश करा"</string>
+    <string name="permgrouplab_microphonewear" msgid="1047561180980891136">"ऑडिओ रेकॉर्ड करा"</string>
+    <string name="permgrouplab_camerawear" msgid="4543951283103407017">"चित्रे घ्या आणि व्हिडिओ रेकॉर्ड करा"</string>
+    <string name="permgrouplab_phonewear" msgid="134365036753766126">"फोन कॉल करा आणि व्यवस्थापित करा"</string>
+    <string name="permgrouplab_sensorswear" msgid="1429324744329327663">"आपल्‍या महत्त्वाच्या मापनांविषयी सेन्सर डेटामध्‍ये प्रवेश करा"</string>
+    <string name="permlab_statusBarServicewear" msgid="2469402818964691034">"स्टेटस बार होऊ द्या"</string>
+    <string name="permlab_bodySensorswear" msgid="7857941041202791873">"शरीर सेन्सरमध्ये (हृदय गती मॉनिटरसारखे) प्रवेश करा"</string>
+    <string name="permlab_accessFineLocationwear" msgid="5584423486924377563">"अचूक स्थानामध्ये (GPS आणि नेटवर्क-आधारित) प्रवेश करा"</string>
+    <string name="permlab_accessCoarseLocationwear" msgid="5880746016230166090">"अंदाजे स्‍थानामध्ये (नेटवर्क-आधारित) प्रवेश करा"</string>
+    <string name="permlab_sim_communicationwear" msgid="1899198085342781874">"सिमला आदेश पाठवा"</string>
+    <string name="permlab_createNetworkSocketswear" msgid="6467042386273822913">"पूर्ण नेटवर्क प्रवेश आहे"</string>
+    <string name="permlab_manageProfileAndDeviceOwnerswear" msgid="7313340516937821847">"प्रोफाईल आणि डिव्हाइस मालक व्यवस्थापित करा"</string>
+    <string name="permlab_changeWimaxStatewear" msgid="3828470843939853744">"WiMAX स्थिती बदला"</string>
+    <string name="permlab_handoverStatuswear" msgid="4835786819716499249">"Android बीम स्थानांतरण स्थिती प्राप्त करा"</string>
+    <string name="permlab_route_media_outputwear" msgid="8737024341474587192">"मीडिया आउटपुट मार्गस्थ करा"</string>
+    <string name="permlab_readInstallSessionswear" msgid="9059478058685861989">"स्‍थापना सत्र वाचा"</string>
+    <string name="permlab_requestInstallPackageswear" msgid="4982025836783539503">"पॅकेज स्थापित करण्यासाठी विनंती करा"</string>
 </resources>

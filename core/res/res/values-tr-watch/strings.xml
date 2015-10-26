@@ -21,4 +21,26 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="android_upgrading_apk" msgid="1090732262010398759">"Uygulama <xliff:g id="NUMBER_0">%1$d</xliff:g> / <xliff:g id="NUMBER_1">%2$d</xliff:g>."</string>
+    <string name="permgrouplab_sensors" msgid="202675452368612754">"Sensörler"</string>
+    <string name="permgrouplab_contactswear" msgid="2340286500790908344">"kişilerinize erişme"</string>
+    <string name="permgrouplab_locationwear" msgid="6275317222482780209">"bu saatin konum bilgilerine erişme"</string>
+    <string name="permgrouplab_calendarwear" msgid="441900844045065081">"takviminize erişme"</string>
+    <string name="permgrouplab_smswear" msgid="6849506550342974220">"SMS iletileri gönderme ve görüntüleme"</string>
+    <string name="permgrouplab_storagewear" msgid="1003807594193602313">"saatinizdeki fotoğraflara, medyaya ve dosyalara erişme"</string>
+    <string name="permgrouplab_microphonewear" msgid="1047561180980891136">"ses kaydetme"</string>
+    <string name="permgrouplab_camerawear" msgid="4543951283103407017">"fotoğraf çekme ve video kaydetme"</string>
+    <string name="permgrouplab_phonewear" msgid="134365036753766126">"telefon aramaları yapma ve çağrıları yönetme"</string>
+    <string name="permgrouplab_sensorswear" msgid="1429324744329327663">"hayati belirtilerinizle ilgili sensör verilerine erişme"</string>
+    <string name="permlab_statusBarServicewear" msgid="2469402818964691034">"durum çubuğunda olma"</string>
+    <string name="permlab_bodySensorswear" msgid="7857941041202791873">"vücut sensörlerine erişme (nabız takip cihazları gibi)"</string>
+    <string name="permlab_accessFineLocationwear" msgid="5584423486924377563">"konumunuza hassas olarak erişme (GPS ve ağ tabanlı)"</string>
+    <string name="permlab_accessCoarseLocationwear" msgid="5880746016230166090">"konumunuza yaklaşık olarak erişme (ağ tabanlı)"</string>
+    <string name="permlab_sim_communicationwear" msgid="1899198085342781874">"SIM karta komut gönderme"</string>
+    <string name="permlab_createNetworkSocketswear" msgid="6467042386273822913">"tam ağ erişimine sahip olma"</string>
+    <string name="permlab_manageProfileAndDeviceOwnerswear" msgid="7313340516937821847">"profili ve cihaz sahiplerini yönetme"</string>
+    <string name="permlab_changeWimaxStatewear" msgid="3828470843939853744">"WiMAX durumunu değiştirme"</string>
+    <string name="permlab_handoverStatuswear" msgid="4835786819716499249">"Android Beam aktarım durumunu alma"</string>
+    <string name="permlab_route_media_outputwear" msgid="8737024341474587192">"medya çıkışını yönlendirme"</string>
+    <string name="permlab_readInstallSessionswear" msgid="9059478058685861989">"yükleme oturumlarını okuma"</string>
+    <string name="permlab_requestInstallPackageswear" msgid="4982025836783539503">"paketleri yükleme isteğinde bulunma"</string>
 </resources>

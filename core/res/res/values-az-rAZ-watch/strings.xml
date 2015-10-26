@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 
+/* //device/apps/common/assets/res/any/strings.xml
+**
+** Copyright 2015, The Android Open Source Project
+**
+** Licensed under the Apache License, Version 2.0 (the "License");
+** you may not use this file except in compliance with the License.
+** You may obtain a copy of the License at
+**
+**     http://www.apache.org/licenses/LICENSE-2.0
+**
+** Unless required by applicable law or agreed to in writing, software
+** distributed under the License is distributed on an "AS IS" BASIS,
+** WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+** See the License for the specific language governing permissions and
+** limitations under the License.
+*/
+ -->
+
+<resources xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <string name="android_upgrading_apk" msgid="1090732262010398759">"Tətbiq <xliff:g id="NUMBER_0">%1$d</xliff:g>/<xliff:g id="NUMBER_1">%2$d</xliff:g>."</string>
+    <string name="permgrouplab_sensors" msgid="202675452368612754">"Sensorlar"</string>
+    <string name="permgrouplab_contactswear" msgid="2340286500790908344">"kontaktlarınıza daxil olun"</string>
+    <string name="permgrouplab_locationwear" msgid="6275317222482780209">"bu saatın məkanına giriş"</string>
+    <string name="permgrouplab_calendarwear" msgid="441900844045065081">"təqvimə daxil olun"</string>
+    <string name="permgrouplab_smswear" msgid="6849506550342974220">"göndərin və SMS mesajlarına baxın"</string>
+    <string name="permgrouplab_storagewear" msgid="1003807594193602313">"Saatınızda foto, media və fayllara daxil olun"</string>
+    <string name="permgrouplab_microphonewear" msgid="1047561180980891136">"səsi qeydə alın"</string>
+    <string name="permgrouplab_camerawear" msgid="4543951283103407017">"şəkil çəkin və video yazın"</string>
+    <string name="permgrouplab_phonewear" msgid="134365036753766126">"telefon zəngləri edin və onları idarə edin"</string>
+    <string name="permgrouplab_sensorswear" msgid="1429324744329327663">"Həyati əlamətlər haqqında sensor dataya daxil olun"</string>
+    <string name="permlab_statusBarServicewear" msgid="2469402818964691034">"status paneli edin"</string>
+    <string name="permlab_bodySensorswear" msgid="7857941041202791873">"bədən sensorlarına (ürək döyüntüsü monitorları kimi) giriş"</string>
+    <string name="permlab_accessFineLocationwear" msgid="5584423486924377563">"dəqiq məkana (GPS və şəbəkə əsasında) giriş"</string>
+    <string name="permlab_accessCoarseLocationwear" msgid="5880746016230166090">"təxmini məkana (şəbəkə əsaslı) giriş"</string>
+    <string name="permlab_sim_communicationwear" msgid="1899198085342781874">"əmrləri SIM\'ə göndərin"</string>
+    <string name="permlab_createNetworkSocketswear" msgid="6467042386273822913">"tam şəbəkə girişi var"</string>
+    <string name="permlab_manageProfileAndDeviceOwnerswear" msgid="7313340516937821847">"profil və cihaz sahiblərini idarə edin"</string>
+    <string name="permlab_changeWimaxStatewear" msgid="3828470843939853744">"WiMAX vəziyyətini dəyişin"</string>
+    <string name="permlab_handoverStatuswear" msgid="4835786819716499249">"Android Beam transfer statusunu əldə edin"</string>
+    <string name="permlab_route_media_outputwear" msgid="8737024341474587192">"media çıxışını yönləndirin"</string>
+    <string name="permlab_readInstallSessionswear" msgid="9059478058685861989">"quraşdırma sessiyalarını oxuyun"</string>
+    <string name="permlab_requestInstallPackageswear" msgid="4982025836783539503">"paketləri quraşdırma sorğusu"</string>
+</resources>

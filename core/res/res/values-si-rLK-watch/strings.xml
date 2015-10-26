@@ -21,4 +21,26 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="android_upgrading_apk" msgid="1090732262010398759">"<xliff:g id="NUMBER_0">%1$d</xliff:g> හි <xliff:g id="NUMBER_1">%2$d</xliff:g> යෙදුම."</string>
+    <string name="permgrouplab_sensors" msgid="202675452368612754">"සංවේදක"</string>
+    <string name="permgrouplab_contactswear" msgid="2340286500790908344">"ඔබේ සම්බන්ධතාවලට පිවිසීම"</string>
+    <string name="permgrouplab_locationwear" msgid="6275317222482780209">"මෙම ඔරලෝසුවෙහි ස්ථානයට පිවිසීම"</string>
+    <string name="permgrouplab_calendarwear" msgid="441900844045065081">"ඔබේ දින දර්ශනයට පිවිසීම"</string>
+    <string name="permgrouplab_smswear" msgid="6849506550342974220">"SMS පණිවිඩ යැවීම සහ බැලීම"</string>
+    <string name="permgrouplab_storagewear" msgid="1003807594193602313">"ඔබේ ඔරලෝසුවේ ඇති ඡායාරූප, මාධ්‍ය සහ ගොනුවලට පිවිසීම"</string>
+    <string name="permgrouplab_microphonewear" msgid="1047561180980891136">"ශ්‍රව්‍ය පටිගත කිරීම"</string>
+    <string name="permgrouplab_camerawear" msgid="4543951283103407017">"පින්තූර ගැනීම සහ වීඩියෝ පටිගත කිරීම"</string>
+    <string name="permgrouplab_phonewear" msgid="134365036753766126">"දුරකථන ඇමතුම් සිදු කිරීම සහ කළමනාකරණය කිරීම"</string>
+    <string name="permgrouplab_sensorswear" msgid="1429324744329327663">"ඔබේ ජෛව ලක්ෂණ පිළිබඳ සංවේදක දත්ත වෙත පිවිසීම"</string>
+    <string name="permlab_statusBarServicewear" msgid="2469402818964691034">"තත්ත්ව තීරුව බවට පත්වීම"</string>
+    <string name="permlab_bodySensorswear" msgid="7857941041202791873">"දේහ සංවේදකවලට (හෘද ස්පන්දන වේග මොනිටර වැනි) පිවිසීම"</string>
+    <string name="permlab_accessFineLocationwear" msgid="5584423486924377563">"නිවැරදි ස්ථානයට (GPS සහ ජාලය පදනම් කරගත්) පිවිසීම"</string>
+    <string name="permlab_accessCoarseLocationwear" msgid="5880746016230166090">"ආසන්නතම ස්ථානයට (ජාලය-පාදක වූ) පිවිසීම"</string>
+    <string name="permlab_sim_communicationwear" msgid="1899198085342781874">"SIM වෙත විධාන යැවීම"</string>
+    <string name="permlab_createNetworkSocketswear" msgid="6467042386273822913">"සම්පූර්ණ ජාල ප්‍රවේශය තබා ගැනීම"</string>
+    <string name="permlab_manageProfileAndDeviceOwnerswear" msgid="7313340516937821847">"පැතිකඩ සහ උපාංග හිමිකරුවන් කළමනාකරණය කිරීම"</string>
+    <string name="permlab_changeWimaxStatewear" msgid="3828470843939853744">"WiMAX තත්ත්වය වෙනස් කිරීම"</string>
+    <string name="permlab_handoverStatuswear" msgid="4835786819716499249">"Android කදම්බ හුවමාරු තත්ත්වය ලබා ගැනීම"</string>
+    <string name="permlab_route_media_outputwear" msgid="8737024341474587192">"මාධ්‍ය ප්‍රතිදානය මාර්ගගත කිරීම"</string>
+    <string name="permlab_readInstallSessionswear" msgid="9059478058685861989">"ස්ථාපන සැසි කියවීම"</string>
+    <string name="permlab_requestInstallPackageswear" msgid="4982025836783539503">"ස්ථාපන පැකේජ ඉල්ලීම"</string>
 </resources>

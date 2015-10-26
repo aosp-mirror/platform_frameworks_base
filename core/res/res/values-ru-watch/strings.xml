@@ -21,4 +21,26 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="android_upgrading_apk" msgid="1090732262010398759">"Приложение <xliff:g id="NUMBER_0">%1$d</xliff:g> из <xliff:g id="NUMBER_1">%2$d</xliff:g>"</string>
+    <string name="permgrouplab_sensors" msgid="202675452368612754">"Датчики"</string>
+    <string name="permgrouplab_contactswear" msgid="2340286500790908344">"доступ к контактам"</string>
+    <string name="permgrouplab_locationwear" msgid="6275317222482780209">"доступ к местоположению часов"</string>
+    <string name="permgrouplab_calendarwear" msgid="441900844045065081">"доступ к календарю"</string>
+    <string name="permgrouplab_smswear" msgid="6849506550342974220">"отправка и просмотр SMS-сообщений"</string>
+    <string name="permgrouplab_storagewear" msgid="1003807594193602313">"доступ к фото, медиа и файлам на часах"</string>
+    <string name="permgrouplab_microphonewear" msgid="1047561180980891136">"запись аудио"</string>
+    <string name="permgrouplab_camerawear" msgid="4543951283103407017">"фото- и видеосъемка"</string>
+    <string name="permgrouplab_phonewear" msgid="134365036753766126">"осуществление телефонных звонков и управление ими"</string>
+    <string name="permgrouplab_sensorswear" msgid="1429324744329327663">"доступ к данным датчиков о состоянии организма"</string>
+    <string name="permlab_statusBarServicewear" msgid="2469402818964691034">"замена строки состояния"</string>
+    <string name="permlab_bodySensorswear" msgid="7857941041202791873">"доступ к датчикам (например, пульсометру)"</string>
+    <string name="permlab_accessFineLocationwear" msgid="5584423486924377563">"доступ к точному местоположению (на основе GPS и данных сети)"</string>
+    <string name="permlab_accessCoarseLocationwear" msgid="5880746016230166090">"доступ к примерному местоположению (на основе данных сети)"</string>
+    <string name="permlab_sim_communicationwear" msgid="1899198085342781874">"отправка команд SIM-карте"</string>
+    <string name="permlab_createNetworkSocketswear" msgid="6467042386273822913">"неограниченный доступ к Интернету"</string>
+    <string name="permlab_manageProfileAndDeviceOwnerswear" msgid="7313340516937821847">"управление профилями и владельцами"</string>
+    <string name="permlab_changeWimaxStatewear" msgid="3828470843939853744">"изменение статуса WiMAX"</string>
+    <string name="permlab_handoverStatuswear" msgid="4835786819716499249">"получение статуса передачи Android Beam"</string>
+    <string name="permlab_route_media_outputwear" msgid="8737024341474587192">"перенаправление мультимедийных данных"</string>
+    <string name="permlab_readInstallSessionswear" msgid="9059478058685861989">"чтение данных о сеансах установки"</string>
+    <string name="permlab_requestInstallPackageswear" msgid="4982025836783539503">"разрешение на установку пакетов"</string>
 </resources>
