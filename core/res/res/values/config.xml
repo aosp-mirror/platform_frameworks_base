@@ -1288,6 +1288,10 @@
          device is data-only. -->
     <bool name="config_voice_capable">true</bool>
 
+    <!-- Flag indicating that an outbound call must have a call capable phone account
+         that has declared it can process the call's handle. -->
+    <bool name="config_requireCallCapableAccountForHandle">false</bool>
+
     <!-- Flag indicating if the user is notified when the mobile network access is restricted -->
     <bool name="config_user_notification_of_restrictied_mobile_access">true</bool>
 
