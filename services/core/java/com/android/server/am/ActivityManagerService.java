@@ -3844,8 +3844,8 @@ public final class ActivityManagerService extends ActivityManagerNative
             Intent intent, String resolvedType, IBinder resultTo, String resultWho, int requestCode,
             int startFlags, ProfilerInfo profilerInfo, Bundle options) {
         return startActivityAsUser(caller, callingPackage, intent, resolvedType, resultTo,
-            resultWho, requestCode, startFlags, profilerInfo, options,
-            UserHandle.getCallingUserId());
+                resultWho, requestCode, startFlags, profilerInfo, options,
+                UserHandle.getCallingUserId());
     }
 
     @Override
@@ -4152,7 +4152,12 @@ public final class ActivityManagerService extends ActivityManagerNative
             Slog.w(TAG, msg);
             throw new SecurityException(msg);
         }
-        return startActivityFromRecentsInner(taskId, launchStackId, options);
+        final long origId = Binder.clearCallingIdentity();
+        try {
+            return startActivityFromRecentsInner(taskId, launchStackId, options);
+        } finally {
+            Binder.restoreCallingIdentity(origId);
+        }
     }
 
     final int startActivityFromRecentsInner(int taskId, int launchStackId, Bundle options) {
@@ -4174,8 +4179,12 @@ public final class ActivityManagerService extends ActivityManagerNative
             }
 
             if (launchStackId != INVALID_STACK_ID && task.stack.mStackId != launchStackId) {
-                mStackSupervisor.moveTaskToStackUncheckedLocked(
-                        task, launchStackId, ON_TOP, FORCE_FOCUS, "startActivityFromRecents");
+                if (launchStackId == DOCKED_STACK_ID && options != null) {
+                    ActivityOptions activityOptions = new ActivityOptions(options);
+                    mWindowManager.setDockedStackCreateMode(activityOptions.getDockCreateMode());
+                }
+                mStackSupervisor.moveTaskToStackLocked(
+                        taskId, launchStackId, ON_TOP, FORCE_FOCUS, "startActivityFromRecents");
             }
 
             if (task.getRootActivity() != null) {
@@ -9029,7 +9038,8 @@ public final class ActivityManagerService extends ActivityManagerNative
                 }
                 if (DEBUG_STACK) Slog.d(TAG_STACK, "moveActivityToStack: moving r=" + r
                         + " to stackId=" + stackId);
-                mStackSupervisor.moveTaskToStackLocked(r.task.taskId, stackId, ON_TOP, !FORCE_FOCUS);
+                mStackSupervisor.moveTaskToStackLocked(r.task.taskId, stackId, ON_TOP, !FORCE_FOCUS,
+                        "moveActivityToStack");
             } finally {
                 Binder.restoreCallingIdentity(ident);
             }
@@ -9049,7 +9059,8 @@ public final class ActivityManagerService extends ActivityManagerNative
             try {
                 if (DEBUG_STACK) Slog.d(TAG_STACK, "moveTaskToStack: moving task=" + taskId
                         + " to stackId=" + stackId + " toTop=" + toTop);
-                mStackSupervisor.moveTaskToStackLocked(taskId, stackId, toTop, !FORCE_FOCUS);
+                mStackSupervisor.moveTaskToStackLocked(taskId, stackId, toTop, !FORCE_FOCUS,
+                        "moveTaskToStack");
             } finally {
                 Binder.restoreCallingIdentity(ident);
             }
@@ -9078,7 +9089,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                         + " to createMode=" + createMode + " toTop=" + toTop);
                 mWindowManager.setDockedStackCreateMode(createMode);
                 mStackSupervisor.moveTaskToStackLocked(
-                        taskId, DOCKED_STACK_ID, toTop, !FORCE_FOCUS);
+                        taskId, DOCKED_STACK_ID, toTop, !FORCE_FOCUS, "moveTaskToDockedStack");
             } finally {
                 Binder.restoreCallingIdentity(ident);
             }

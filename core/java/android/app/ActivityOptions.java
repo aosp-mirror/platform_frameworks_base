@@ -16,6 +16,8 @@
 
 package android.app;
 
+import static android.app.ActivityManager.DOCKED_STACK_CREATE_MODE_TOP_OR_LEFT;
+
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
@@ -127,6 +129,12 @@ public class ActivityOptions {
     public static final String KEY_ANIM_START_LISTENER = "android:activity.animStartListener";
 
     /**
+     * Where the docked stack should be positioned.
+     * @hide
+     */
+    private static final String KEY_DOCK_CREATE_MODE = "android:activity.dockCreateMode";
+
+    /**
      * For Activity transitions, the calling Activity's TransitionListener used to
      * notify the called Activity when the shared element and the exit transitions
      * complete.
@@ -190,6 +198,7 @@ public class ActivityOptions {
     private int mResultCode;
     private int mExitCoordinatorIndex;
     private PendingIntent mUsageTimeReport;
+    private int mDockCreateMode = DOCKED_STACK_CREATE_MODE_TOP_OR_LEFT;
 
     /**
      * Create an ActivityOptions specifying a custom animation to run when
@@ -688,6 +697,7 @@ public class ActivityOptions {
                 mExitCoordinatorIndex = opts.getInt(KEY_EXIT_COORDINATOR_INDEX);
                 break;
         }
+        mDockCreateMode = opts.getInt(KEY_DOCK_CREATE_MODE, DOCKED_STACK_CREATE_MODE_TOP_OR_LEFT);
     }
 
     /** @hide */
@@ -804,6 +814,14 @@ public class ActivityOptions {
         if (options != null) {
             (new ActivityOptions(options)).abort();
         }
+    }
+
+    /** @hide */
+    public int getDockCreateMode() { return mDockCreateMode; }
+
+    /** @hide */
+    public void setDockCreateMode(int dockCreateMode) {
+        mDockCreateMode = dockCreateMode;
     }
 
     /**
@@ -945,6 +963,7 @@ public class ActivityOptions {
                 b.putInt(KEY_EXIT_COORDINATOR_INDEX, mExitCoordinatorIndex);
                 break;
         }
+        b.putInt(KEY_DOCK_CREATE_MODE, mDockCreateMode);
 
         return b;
     }

@@ -3032,7 +3032,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
                     final int count = tasks.size();
                     for (int i = 0; i < count; i++) {
                         moveTaskToStackLocked(tasks.get(i).taskId,
-                                FULLSCREEN_WORKSPACE_STACK_ID, ON_TOP, FORCE_FOCUS);
+                                FULLSCREEN_WORKSPACE_STACK_ID, ON_TOP, FORCE_FOCUS, "resizeStack");
                     }
 
                     // stack shouldn't contain anymore activities, so nothing to resume.
@@ -3267,13 +3267,13 @@ public final class ActivityStackSupervisor implements DisplayListener {
         return stack;
     }
 
-    void moveTaskToStackLocked(int taskId, int stackId, boolean toTop, boolean forceFocus) {
+    void moveTaskToStackLocked(int taskId, int stackId, boolean toTop, boolean forceFocus,
+            String reason) {
         final TaskRecord task = anyTaskForIdLocked(taskId);
         if (task == null) {
             Slog.w(TAG, "moveTaskToStack: no task for id=" + taskId);
             return;
         }
-        final String reason = "moveTaskToStack";
         if (stackId == DOCKED_STACK_ID || stackId == PINNED_STACK_ID
                 || stackId == FULLSCREEN_WORKSPACE_STACK_ID) {
             // We are about to relaunch the activity because its configuration changed due to
@@ -3286,7 +3286,8 @@ public final class ActivityStackSupervisor implements DisplayListener {
             mWindowManager.setReplacingWindow(r.appToken, true /* animate */);
         }
         final ActivityStack stack =
-                moveTaskToStackUncheckedLocked(task, stackId, toTop, forceFocus, reason);
+                moveTaskToStackUncheckedLocked(task, stackId, toTop, forceFocus,
+                        "moveTaskToStack:" + reason);
 
         // Make sure the task has the appropriate bounds/size for the stack it is in.
         if (stackId == FULLSCREEN_WORKSPACE_STACK_ID && task.mBounds != null) {
@@ -3332,7 +3333,8 @@ public final class ActivityStackSupervisor implements DisplayListener {
         if (task.mActivities.size() == 1) {
             // There is only one activity in the task. So, we can just move the task over to the
             // pinned stack without re-parenting the activity in a different task.
-            moveTaskToStackLocked(task.taskId, PINNED_STACK_ID, ON_TOP, FORCE_FOCUS);
+            moveTaskToStackLocked(task.taskId, PINNED_STACK_ID, ON_TOP, FORCE_FOCUS,
+                    "moveTopActivityToPinnedStack");
         } else {
             final ActivityStack pinnedStack = getStack(PINNED_STACK_ID, CREATE_IF_NEEDED, ON_TOP);
             pinnedStack.moveActivityToStack(r);
