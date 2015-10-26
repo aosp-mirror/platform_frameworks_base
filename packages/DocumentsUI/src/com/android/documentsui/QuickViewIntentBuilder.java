@@ -92,6 +92,8 @@ final class QuickViewIntentBuilder {
                 intent.setClipData(mClipData);
 
                 return intent;
+            } else {
+                Log.e(TAG, "Can't resolve trusted quick view package: " + trustedPkg);
             }
         }
 
