@@ -54,10 +54,10 @@
     <string name="print_add_printer" msgid="1088656468360653455">"ເພີ່ມເຄື່ອງພິມ"</string>
     <string name="print_select_printer" msgid="7388760939873368698">"ເລືອກເຄື່ອງພິມ"</string>
     <string name="print_forget_printer" msgid="5035287497291910766">"ລືມເຄື່ອງພິມ"</string>
-  <plurals name="print_search_result_count_utterance">
-    <item quantity="one" msgid="4484953260685964252">"ພົບ <xliff:g id="COUNT">%1$s</xliff:g> ເຄື່ອງພິມ"</item>
-    <item quantity="other" msgid="6533817036607128241">"ພົບ <xliff:g id="COUNT">%1$s</xliff:g> ເຄື່ອງພິມ"</item>
-  </plurals>
+    <plurals name="print_search_result_count_utterance" formatted="false" msgid="6997663738361080868">
+      <item quantity="other"><xliff:g id="COUNT_1">%1$s</xliff:g> ເຄື່ອງ​ພິມ​ຖືກ​ພົບ​ແລ້ວ</item>
+      <item quantity="one"><xliff:g id="COUNT_0">%1$s</xliff:g> ເຄື່ອງ​ພິມ​ຖືກ​ພົບ​ແລ້ວ</item>
+    </plurals>
     <string name="choose_print_service" msgid="3740309762324459694">"ເລືອກບໍລິການການພິມ"</string>
     <string name="print_searching_for_printers" msgid="6550424555079932867">"ກຳລັງຊອກຫາເຄື່ອງພິມ"</string>
     <string name="print_no_printers" msgid="4869403323900054866">"ບໍ່ພົບເຄື່ອງພິມ"</string>
@@ -65,10 +65,10 @@
     <string name="cancelling_notification_title_template" msgid="1821759594704703197">"ກຳລັງຍົກເລີກ <xliff:g id="PRINT_JOB_NAME">%1$s</xliff:g>"</string>
     <string name="failed_notification_title_template" msgid="2256217208186530973">"ເຄື່ອງພິມເກີດຂໍ້ຜິດພາດ <xliff:g id="PRINT_JOB_NAME">%1$s</xliff:g>"</string>
     <string name="blocked_notification_title_template" msgid="1175435827331588646">"ເຄື່ອງພິມຖືກບລອກ <xliff:g id="PRINT_JOB_NAME">%1$s</xliff:g>"</string>
-  <plurals name="composite_notification_title_template">
-    <item quantity="one" msgid="5866624638054847057">"ງານພິມ <xliff:g id="PRINT_JOB_NAME">%1$d</xliff:g>"</item>
-    <item quantity="other" msgid="8746611264734222865">"ງານພິມ <xliff:g id="PRINT_JOB_NAME">%1$d</xliff:g>"</item>
-  </plurals>
+    <plurals name="composite_notification_title_template" formatted="false" msgid="6940956968211733780">
+      <item quantity="other"><xliff:g id="PRINT_JOB_NAME_1">%1$d</xliff:g> ງານ​ພິມ</item>
+      <item quantity="one"><xliff:g id="PRINT_JOB_NAME_0">%1$d</xliff:g> ງານ​ພິມ</item>
+    </plurals>
     <string name="cancel" msgid="4373674107267141885">"ຍົກເລີກ"</string>
     <string name="restart" msgid="2472034227037808749">"ປິດເປີດໃໝ່"</string>
     <string name="no_connection_to_printer" msgid="2159246915977282728">"ບໍ່ມີການເຊື່ອມຕໍ່ຫາເຄື່ອງພິມ"</string>
