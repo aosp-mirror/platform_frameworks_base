@@ -513,7 +513,7 @@ public final class CameraManager {
      * {@link CameraManager#registerAvailabilityCallback} to be notified of such availability
      * changes.</p>
      *
-     * @see registerAvailabilityCallback
+     * @see #registerAvailabilityCallback
      */
     public static abstract class AvailabilityCallback {
 
