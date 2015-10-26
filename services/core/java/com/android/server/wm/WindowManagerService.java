@@ -1327,8 +1327,14 @@ public class WindowManagerService extends IWindowManager.Stub
             addAttachedWindowToListLocked(win, addToToken);
         }
 
-        if (win.mAppToken != null && addToToken) {
-            win.mAppToken.allAppWindows.add(win);
+        final AppWindowToken appToken = win.mAppToken;
+        if (appToken != null) {
+            if (addToToken) {
+                appToken.allAppWindows.add(win);
+            }
+            if (appToken.mWillReplaceWindow) {
+                appToken.mReplacingWindow = win;
+            }
         }
     }
 
@@ -2053,7 +2059,7 @@ public class WindowManagerService extends IWindowManager.Stub
     }
 
     private void prepareWindowReplacementTransition(AppWindowToken atoken) {
-        if (atoken == null || !atoken.mReplacingWindow || !atoken.mAnimateReplacingWindow) {
+        if (atoken == null || !atoken.mWillReplaceWindow || !atoken.mAnimateReplacingWindow) {
             return;
         }
         atoken.allDrawn = false;
@@ -2157,6 +2163,8 @@ public class WindowManagerService extends IWindowManager.Stub
                 + " isAnimating=" + win.mWinAnimator.isAnimating()
                 + " app-animation="
                 + (win.mAppToken != null ? win.mAppToken.mAppAnimator.animation : null)
+                + " mWillReplaceWindow="
+                + (win.mAppToken != null ? win.mAppToken.mWillReplaceWindow : false)
                 + " inPendingTransaction="
                 + (win.mAppToken != null ? win.mAppToken.inPendingTransaction : false)
                 + " mDisplayFrozen=" + mDisplayFrozen);
@@ -2168,8 +2176,8 @@ public class WindowManagerService extends IWindowManager.Stub
         // animation wouldn't be seen.
         if (win.mHasSurface && okToDisplay()) {
             final AppWindowToken appToken = win.mAppToken;
-            if (appToken != null && appToken.mReplacingWindow) {
-                // This window is going to be replaced. We need to kepp it around until the new one
+            if (appToken != null && appToken.mWillReplaceWindow) {
+                // This window is going to be replaced. We need to keep it around until the new one
                 // gets added, then we will get rid of this one.
                 if (DEBUG_ADD_REMOVE) Slog.v(TAG, "Preserving " + win + " until the new one is "
                         + "added");
@@ -2833,7 +2841,8 @@ public class WindowManagerService extends IWindowManager.Stub
         try {
             synchronized (mWindowMap) {
                 WindowState win = windowForClientLocked(session, client, false);
-                if (DEBUG_ADD_REMOVE) Slog.d(TAG, "finishDrawingWindow: " + win);
+                if (DEBUG_ADD_REMOVE) Slog.d(TAG, "finishDrawingWindow: " + win + " mDrawState="
+                        + (win != null ? win.mWinAnimator.drawStateToString() : "null"));
                 if (win != null && win.mWinAnimator.finishDrawingLocked()) {
                     if ((win.mAttrs.flags & FLAG_SHOW_WALLPAPER) != 0) {
                         getDefaultDisplayContentLocked().pendingLayoutChanges |=
@@ -3920,7 +3929,7 @@ public class WindowManagerService extends IWindowManager.Stub
         // transition animation
         // * or this is an opening app and windows are being replaced.
         if (wtoken.hidden == visible || (wtoken.hidden && wtoken.mIsExiting) ||
-                (visible && wtoken.mReplacingWindow)) {
+                (visible && wtoken.mWillReplaceWindow)) {
             boolean changed = false;
             if (DEBUG_APP_TRANSITIONS) Slog.v(
                 TAG, "Changing app " + wtoken + " hidden=" + wtoken.hidden
@@ -8358,7 +8367,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 final int numTokens = tokens.size();
                 for (int tokenNdx = 0; tokenNdx < numTokens; ++tokenNdx) {
                     final AppWindowToken wtoken = tokens.get(tokenNdx);
-                    if (wtoken.mIsExiting && !wtoken.mReplacingWindow) {
+                    if (wtoken.mIsExiting && !wtoken.mWillReplaceWindow) {
                         continue;
                     }
                     i = reAddAppWindowsLocked(displayContent, i, wtoken);
@@ -8428,7 +8437,8 @@ public class WindowManagerService extends IWindowManager.Stub
             } else if (wtoken != null) {
                 winAnimator.mAnimLayer =
                         w.mLayer + wtoken.mAppAnimator.animLayerAdjustment;
-                if (wtoken.mReplacingWindow && wtoken.mAnimateReplacingWindow) {
+                if (wtoken.mWillReplaceWindow && wtoken.mAnimateReplacingWindow &&
+                        wtoken.mReplacingWindow != w) {
                     // We know that we will be animating a relaunching window in the near future,
                     // which will receive a z-order increase. We want the replaced window to
                     // immediately receive the same treatment, e.g. to be above the dock divider.
@@ -9974,7 +9984,9 @@ public class WindowManagerService extends IWindowManager.Stub
                 Slog.w(TAG, "Attempted to set replacing window on non-existing app token " + token);
                 return;
             }
-            appWindowToken.mReplacingWindow = true;
+            if (DEBUG_ADD_REMOVE) Slog.d(TAG, "Marking app token " + appWindowToken
+                    + " as replacing window.");
+            appWindowToken.mWillReplaceWindow = true;
             appWindowToken.mAnimateReplacingWindow = animate;
         }
     }

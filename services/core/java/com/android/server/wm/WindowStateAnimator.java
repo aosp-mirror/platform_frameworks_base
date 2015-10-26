@@ -38,7 +38,6 @@ import android.graphics.PixelFormat;
 import android.graphics.Point;
 import android.graphics.PointF;
 import android.graphics.Rect;
-import android.graphics.RectF;
 import android.graphics.Region;
 import android.os.Debug;
 import android.os.RemoteException;
@@ -1428,7 +1427,7 @@ class WindowStateAnimator {
         // living in a different stack. If we suddenly crop it to the new stack bounds, it might
         // get cut off. We don't want it to happen, so we let it ignore the stack bounds until it
         // gets removed. The window that will replace it will abide them.
-        if (appToken != null && appToken.mCropWindowsToStack && !appToken.mReplacingWindow) {
+        if (appToken != null && appToken.mCropWindowsToStack && !appToken.mWillReplaceWindow) {
             TaskStack stack = w.getTask().mStack;
             stack.getBounds(mTmpStackBounds);
             // When we resize we use the big surface approach, which means we can't trust the
@@ -1854,8 +1853,7 @@ class WindowStateAnimator {
                 }
             }
 
-            if (mWin.mAttrs.type != TYPE_APPLICATION_STARTING
-                    && mWin.mAppToken != null) {
+            if (mWin.mAttrs.type != TYPE_APPLICATION_STARTING && mWin.mAppToken != null) {
                 mWin.mAppToken.firstWindowDrawn = true;
 
                 if (mWin.mAppToken.startingData != null) {
