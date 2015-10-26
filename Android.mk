@@ -686,7 +686,7 @@ html_dirs := \
 # Common sources for doc check and api check
 common_src_files := \
 	$(call find-other-html-files, $(html_dirs)) \
-	$(addprefix ../../libcore/, $(libcore_to_document)) \
+	$(addprefix ../../, $(libcore_to_document)) \
 	$(addprefix ../../external/junit/, $(junit_to_document))
 
 # These are relative to frameworks/base
