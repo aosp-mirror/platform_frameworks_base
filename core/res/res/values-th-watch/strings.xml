@@ -21,4 +21,26 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="android_upgrading_apk" msgid="1090732262010398759">"แอป <xliff:g id="NUMBER_0">%1$d</xliff:g> จาก <xliff:g id="NUMBER_1">%2$d</xliff:g> แอป"</string>
+    <string name="permgrouplab_sensors" msgid="202675452368612754">"เซ็นเซอร์"</string>
+    <string name="permgrouplab_contactswear" msgid="2340286500790908344">"เข้าถึงรายชื่อติดต่อ"</string>
+    <string name="permgrouplab_locationwear" msgid="6275317222482780209">"เข้าถึงตำแหน่งของนาฬิกานี้"</string>
+    <string name="permgrouplab_calendarwear" msgid="441900844045065081">"เข้าถึงปฏิทิน"</string>
+    <string name="permgrouplab_smswear" msgid="6849506550342974220">"ส่งและดูข้อความ SMS"</string>
+    <string name="permgrouplab_storagewear" msgid="1003807594193602313">"เข้าถึงรูปภาพ สื่อ และไฟล์ในนาฬิกา"</string>
+    <string name="permgrouplab_microphonewear" msgid="1047561180980891136">"บันทึกเสียง"</string>
+    <string name="permgrouplab_camerawear" msgid="4543951283103407017">"ถ่ายภาพและบันทึกวิดีโอ"</string>
+    <string name="permgrouplab_phonewear" msgid="134365036753766126">"โทรและจัดการการโทร"</string>
+    <string name="permgrouplab_sensorswear" msgid="1429324744329327663">"เข้าถึงข้อมูลเซ็นเซอร์เกี่ยวกับสัญญาณชีพของคุณ"</string>
+    <string name="permlab_statusBarServicewear" msgid="2469402818964691034">"เป็นแถบสถานะ"</string>
+    <string name="permlab_bodySensorswear" msgid="7857941041202791873">"เข้าถึงเซ็นเซอร์สำหรับร่างกาย (เช่น เครื่องติดตามดูอัตราการเต้นของหัวใจ)"</string>
+    <string name="permlab_accessFineLocationwear" msgid="5584423486924377563">"เข้าถึงตำแหน่งที่แม่นยำ (อิงจาก GPS และเครือข่าย)"</string>
+    <string name="permlab_accessCoarseLocationwear" msgid="5880746016230166090">"เข้าถึงตำแหน่งโดยประมาณ (อิงจากเครือข่าย)"</string>
+    <string name="permlab_sim_communicationwear" msgid="1899198085342781874">"ส่งคำสั่งไปยังซิม"</string>
+    <string name="permlab_createNetworkSocketswear" msgid="6467042386273822913">"มีสิทธิ์เข้าถึงเครือข่ายเต็มรูปแบบ"</string>
+    <string name="permlab_manageProfileAndDeviceOwnerswear" msgid="7313340516937821847">"จัดการเจ้าของโปรไฟล์และอุปกรณ์"</string>
+    <string name="permlab_changeWimaxStatewear" msgid="3828470843939853744">"เปลี่ยนสถานะของ WiMAX"</string>
+    <string name="permlab_handoverStatuswear" msgid="4835786819716499249">"รับสถานะการโอน Android Beam"</string>
+    <string name="permlab_route_media_outputwear" msgid="8737024341474587192">"กำหนดเส้นทางเอาต์พุตของสื่อ"</string>
+    <string name="permlab_readInstallSessionswear" msgid="9059478058685861989">"อ่านเซสชันการติดตั้ง"</string>
+    <string name="permlab_requestInstallPackageswear" msgid="4982025836783539503">"ขอติดตั้งแพ็กเกจ"</string>
 </resources>

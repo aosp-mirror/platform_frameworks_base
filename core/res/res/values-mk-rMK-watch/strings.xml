@@ -21,4 +21,26 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="android_upgrading_apk" msgid="1090732262010398759">"Апликац. <xliff:g id="NUMBER_0">%1$d</xliff:g> од <xliff:g id="NUMBER_1">%2$d</xliff:g>."</string>
+    <string name="permgrouplab_sensors" msgid="202675452368612754">"Сензори"</string>
+    <string name="permgrouplab_contactswear" msgid="2340286500790908344">"пристапи до контактите"</string>
+    <string name="permgrouplab_locationwear" msgid="6275317222482780209">"пристапи до локацијата на часовникот"</string>
+    <string name="permgrouplab_calendarwear" msgid="441900844045065081">"пристапи до календарот"</string>
+    <string name="permgrouplab_smswear" msgid="6849506550342974220">"испраќај и прикажувај СМС-пораки"</string>
+    <string name="permgrouplab_storagewear" msgid="1003807594193602313">"пристапи до фотографиите, медиумите и датотеките на часовникот"</string>
+    <string name="permgrouplab_microphonewear" msgid="1047561180980891136">"снимај аудио"</string>
+    <string name="permgrouplab_camerawear" msgid="4543951283103407017">"фотографирај и снимај видео"</string>
+    <string name="permgrouplab_phonewear" msgid="134365036753766126">"повикувај и управувај со телефонски повици"</string>
+    <string name="permgrouplab_sensorswear" msgid="1429324744329327663">"пристапи до податоците од сензорите за виталните знаци"</string>
+    <string name="permlab_statusBarServicewear" msgid="2469402818964691034">"биди статусната лента"</string>
+    <string name="permlab_bodySensorswear" msgid="7857941041202791873">"пристапи до телесните сензори (како монитори за ритам на срце)"</string>
+    <string name="permlab_accessFineLocationwear" msgid="5584423486924377563">"пристапи до прецизната локација (ГПС и врз база на мрежа)"</string>
+    <string name="permlab_accessCoarseLocationwear" msgid="5880746016230166090">"пристапи до приближната локација (врз база на мрежа)"</string>
+    <string name="permlab_sim_communicationwear" msgid="1899198085342781874">"испраќај наредби до СИМ-картичката"</string>
+    <string name="permlab_createNetworkSocketswear" msgid="6467042386273822913">"добиј целосен пристап до мрежата"</string>
+    <string name="permlab_manageProfileAndDeviceOwnerswear" msgid="7313340516937821847">"управувај со сопствениците на профил и уред"</string>
+    <string name="permlab_changeWimaxStatewear" msgid="3828470843939853744">"промени ја состојбата на WiMAX"</string>
+    <string name="permlab_handoverStatuswear" msgid="4835786819716499249">"добиј статус на пренос на Android Beam"</string>
+    <string name="permlab_route_media_outputwear" msgid="8737024341474587192">"насочи излез за медиуми"</string>
+    <string name="permlab_readInstallSessionswear" msgid="9059478058685861989">"читај сесии на инсталирање"</string>
+    <string name="permlab_requestInstallPackageswear" msgid="4982025836783539503">"барај пакети за инсталирање"</string>
 </resources>

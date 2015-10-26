@@ -21,4 +21,26 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="android_upgrading_apk" msgid="1090732262010398759">"应用：<xliff:g id="NUMBER_0">%1$d</xliff:g> / <xliff:g id="NUMBER_1">%2$d</xliff:g>。"</string>
+    <string name="permgrouplab_sensors" msgid="202675452368612754">"传感器"</string>
+    <string name="permgrouplab_contactswear" msgid="2340286500790908344">"使用您的通讯录"</string>
+    <string name="permgrouplab_locationwear" msgid="6275317222482780209">"访问此手表的位置信息"</string>
+    <string name="permgrouplab_calendarwear" msgid="441900844045065081">"访问您的日历"</string>
+    <string name="permgrouplab_smswear" msgid="6849506550342974220">"发送和查看短信"</string>
+    <string name="permgrouplab_storagewear" msgid="1003807594193602313">"访问您手表中的照片、媒体和文件"</string>
+    <string name="permgrouplab_microphonewear" msgid="1047561180980891136">"录制音频"</string>
+    <string name="permgrouplab_camerawear" msgid="4543951283103407017">"拍摄照片和录制视频"</string>
+    <string name="permgrouplab_phonewear" msgid="134365036753766126">"拨打电话和管理通话"</string>
+    <string name="permgrouplab_sensorswear" msgid="1429324744329327663">"访问与您的生命体征相关的传感器数据"</string>
+    <string name="permlab_statusBarServicewear" msgid="2469402818964691034">"用作状态栏"</string>
+    <string name="permlab_bodySensorswear" msgid="7857941041202791873">"访问身体传感器（如心率监测器）"</string>
+    <string name="permlab_accessFineLocationwear" msgid="5584423486924377563">"访问确切位置信息（以 GPS 和网络为依据）"</string>
+    <string name="permlab_accessCoarseLocationwear" msgid="5880746016230166090">"访问大致位置信息（以网络为依据）"</string>
+    <string name="permlab_sim_communicationwear" msgid="1899198085342781874">"向 SIM 卡发送命令"</string>
+    <string name="permlab_createNetworkSocketswear" msgid="6467042386273822913">"拥有完全的网络访问权限"</string>
+    <string name="permlab_manageProfileAndDeviceOwnerswear" msgid="7313340516937821847">"管理个人资料和设备所有者"</string>
+    <string name="permlab_changeWimaxStatewear" msgid="3828470843939853744">"更改 WiMAX 状态"</string>
+    <string name="permlab_handoverStatuswear" msgid="4835786819716499249">"接收 Android Beam 的传输状态"</string>
+    <string name="permlab_route_media_outputwear" msgid="8737024341474587192">"更改媒体输出线路"</string>
+    <string name="permlab_readInstallSessionswear" msgid="9059478058685861989">"读取安装会话"</string>
+    <string name="permlab_requestInstallPackageswear" msgid="4982025836783539503">"请求安装文件包"</string>
 </resources>

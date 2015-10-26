@@ -21,4 +21,26 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="android_upgrading_apk" msgid="1090732262010398759">"Aplicación <xliff:g id="NUMBER_0">%1$d</xliff:g> de <xliff:g id="NUMBER_1">%2$d</xliff:g>"</string>
+    <string name="permgrouplab_sensors" msgid="202675452368612754">"Sensores"</string>
+    <string name="permgrouplab_contactswear" msgid="2340286500790908344">"acceder a los contactos"</string>
+    <string name="permgrouplab_locationwear" msgid="6275317222482780209">"acceder a la ubicación de este reloj"</string>
+    <string name="permgrouplab_calendarwear" msgid="441900844045065081">"acceder al calendario"</string>
+    <string name="permgrouplab_smswear" msgid="6849506550342974220">"enviar y ver mensajes SMS"</string>
+    <string name="permgrouplab_storagewear" msgid="1003807594193602313">"acceder a las fotos, el contenido multimedia y los archivos del reloj"</string>
+    <string name="permgrouplab_microphonewear" msgid="1047561180980891136">"grabar audio"</string>
+    <string name="permgrouplab_camerawear" msgid="4543951283103407017">"tomar fotografías y grabar videos"</string>
+    <string name="permgrouplab_phonewear" msgid="134365036753766126">"realizar y administrar llamadas telefónicas"</string>
+    <string name="permgrouplab_sensorswear" msgid="1429324744329327663">"acceder a los datos del sensor acerca de tus signos vitales"</string>
+    <string name="permlab_statusBarServicewear" msgid="2469402818964691034">"aparecer en la barra de estado"</string>
+    <string name="permlab_bodySensorswear" msgid="7857941041202791873">"acceder a los sensores corporales (como los monitores de frecuencia cardíaca)"</string>
+    <string name="permlab_accessFineLocationwear" msgid="5584423486924377563">"acceder a la ubicación precisa (según el GPS y la red)"</string>
+    <string name="permlab_accessCoarseLocationwear" msgid="5880746016230166090">"acceder a la ubicación aproximada (según la red)"</string>
+    <string name="permlab_sim_communicationwear" msgid="1899198085342781874">"enviar comandos a la tarjeta SIM"</string>
+    <string name="permlab_createNetworkSocketswear" msgid="6467042386273822913">"permitir acceso completo a la red"</string>
+    <string name="permlab_manageProfileAndDeviceOwnerswear" msgid="7313340516937821847">"administrar perfiles de propietarios y propietario del dispositivo"</string>
+    <string name="permlab_changeWimaxStatewear" msgid="3828470843939853744">"cambiar estado de WiMAX"</string>
+    <string name="permlab_handoverStatuswear" msgid="4835786819716499249">"recibir estado de transferencias de Android Beam"</string>
+    <string name="permlab_route_media_outputwear" msgid="8737024341474587192">"dirigir salida de medios"</string>
+    <string name="permlab_readInstallSessionswear" msgid="9059478058685861989">"leer sesiones de instalación"</string>
+    <string name="permlab_requestInstallPackageswear" msgid="4982025836783539503">"solicitar la instalación de paquetes"</string>
 </resources>

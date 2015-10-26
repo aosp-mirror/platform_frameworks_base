@@ -21,4 +21,26 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="android_upgrading_apk" msgid="1090732262010398759">"აპი <xliff:g id="NUMBER_0">%1$d</xliff:g>, სულ <xliff:g id="NUMBER_1">%2$d</xliff:g>-დან."</string>
+    <string name="permgrouplab_sensors" msgid="202675452368612754">"სენსორები"</string>
+    <string name="permgrouplab_contactswear" msgid="2340286500790908344">"თქვენს კონტაქტებზე წვდომა"</string>
+    <string name="permgrouplab_locationwear" msgid="6275317222482780209">"ამ ნახვის მდებარეობაზე წვდომა"</string>
+    <string name="permgrouplab_calendarwear" msgid="441900844045065081">"თქვენს კალენდარზე წვდომა"</string>
+    <string name="permgrouplab_smswear" msgid="6849506550342974220">"SMS შეტყობინებების გაგზავნა და ნახვა"</string>
+    <string name="permgrouplab_storagewear" msgid="1003807594193602313">"თქვენს სანახავ ფოტოებზე, მედიაზე და ფაილებზე წვდომა"</string>
+    <string name="permgrouplab_microphonewear" msgid="1047561180980891136">"აუდიოს ჩაწერა"</string>
+    <string name="permgrouplab_camerawear" msgid="4543951283103407017">"ფოტოებისა და ვიდეოების გადაღება"</string>
+    <string name="permgrouplab_phonewear" msgid="134365036753766126">"სატელეფონო ზარების გაშვება და მართვა"</string>
+    <string name="permgrouplab_sensorswear" msgid="1429324744329327663">"თქვენი სასიცოცხლო ნიშნების შესახებ სენეორის მონაცემებზე წვდომა"</string>
+    <string name="permlab_statusBarServicewear" msgid="2469402818964691034">"სტატუსის ზოლის ჩანაცვლება"</string>
+    <string name="permlab_bodySensorswear" msgid="7857941041202791873">"სხეულის სენსორებზე (როგორიცაა გულისცემის სიხშირე) წვდომა"</string>
+    <string name="permlab_accessFineLocationwear" msgid="5584423486924377563">"ზუსტ მდებარეობაზე წვდომა (GPS-ის და ქსელის მიხედვით)"</string>
+    <string name="permlab_accessCoarseLocationwear" msgid="5880746016230166090">"მიახლოებით მდებარეობაზე წვდომა (ქსელის მიხედვით)"</string>
+    <string name="permlab_sim_communicationwear" msgid="1899198085342781874">"ბრძანებების SIM-ზე გაგზავნა"</string>
+    <string name="permlab_createNetworkSocketswear" msgid="6467042386273822913">"მთელ ქსელზე წვდომის მიღება"</string>
+    <string name="permlab_manageProfileAndDeviceOwnerswear" msgid="7313340516937821847">"პროფილისა და მოწყობილობის მფლობელების მართვა"</string>
+    <string name="permlab_changeWimaxStatewear" msgid="3828470843939853744">"WiMAX-ის მდგომარეობის შეცვლა"</string>
+    <string name="permlab_handoverStatuswear" msgid="4835786819716499249">"Android სხივით გადაცემის სტატუსის მიღება"</string>
+    <string name="permlab_route_media_outputwear" msgid="8737024341474587192">"მედიის მონაცემების მარშრუტიზაცია"</string>
+    <string name="permlab_readInstallSessionswear" msgid="9059478058685861989">"ინსტალაციის სესიების წაკითხვა"</string>
+    <string name="permlab_requestInstallPackageswear" msgid="4982025836783539503">"პაკეტების ინსტალაციის მოთხოვნა"</string>
 </resources>

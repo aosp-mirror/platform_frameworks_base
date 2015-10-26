@@ -21,4 +21,26 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="android_upgrading_apk" msgid="1090732262010398759">"Programu ya <xliff:g id="NUMBER_0">%1$d</xliff:g> kati ya <xliff:g id="NUMBER_1">%2$d</xliff:g>."</string>
+    <string name="permgrouplab_sensors" msgid="202675452368612754">"Vihisi"</string>
+    <string name="permgrouplab_contactswear" msgid="2340286500790908344">"fikia anwani zako"</string>
+    <string name="permgrouplab_locationwear" msgid="6275317222482780209">"tambua mahali saa hii ilipo"</string>
+    <string name="permgrouplab_calendarwear" msgid="441900844045065081">"fikia kalenda yako"</string>
+    <string name="permgrouplab_smswear" msgid="6849506550342974220">"tuma na uangalie ujumbe wa SMS"</string>
+    <string name="permgrouplab_storagewear" msgid="1003807594193602313">"fikia picha, maudhui na faili kwenye saa yako"</string>
+    <string name="permgrouplab_microphonewear" msgid="1047561180980891136">"rekodi sauti"</string>
+    <string name="permgrouplab_camerawear" msgid="4543951283103407017">"piga picha na urekodi video"</string>
+    <string name="permgrouplab_phonewear" msgid="134365036753766126">"piga na udhibiti simu"</string>
+    <string name="permgrouplab_sensorswear" msgid="1429324744329327663">"fikia data ya kihisi kuhusu alama zako muhimu"</string>
+    <string name="permlab_statusBarServicewear" msgid="2469402818964691034">"kuwa sehemu ya arifa"</string>
+    <string name="permlab_bodySensorswear" msgid="7857941041202791873">"fikia vihisi vya mwili (kama vifuatiliaji vya mapigo ya moyo)"</string>
+    <string name="permlab_accessFineLocationwear" msgid="5584423486924377563">"fikia mahali halisi (inategemea mtandao na GPS)"</string>
+    <string name="permlab_accessCoarseLocationwear" msgid="5880746016230166090">"fikia mahali karibu na hapo (inategemea mtandao)"</string>
+    <string name="permlab_sim_communicationwear" msgid="1899198085342781874">"tuma amri kwenye SIM"</string>
+    <string name="permlab_createNetworkSocketswear" msgid="6467042386273822913">"pata ufikiaji kamili wa mtandao"</string>
+    <string name="permlab_manageProfileAndDeviceOwnerswear" msgid="7313340516937821847">"simamia wamiliki wa wasifu na vifaa"</string>
+    <string name="permlab_changeWimaxStatewear" msgid="3828470843939853744">"badilisha hali ya WiMAX"</string>
+    <string name="permlab_handoverStatuswear" msgid="4835786819716499249">"pokea hali ya uhamisho wa Boriti ya Android"</string>
+    <string name="permlab_route_media_outputwear" msgid="8737024341474587192">"tuma njia ya kutoa maudhui"</string>
+    <string name="permlab_readInstallSessionswear" msgid="9059478058685861989">"soma vipindi vya kusakinisha"</string>
+    <string name="permlab_requestInstallPackageswear" msgid="4982025836783539503">"omba ruhusa ya kusakinisha vifurushi"</string>
 </resources>
