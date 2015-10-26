@@ -778,11 +778,17 @@ public class AppTransition implements Dump {
                         int unscaledThumbHeight = (int) (thumbHeight / scale);
                         mTmpFromClipRect.bottom = mTmpFromClipRect.top + unscaledThumbHeight;
                     } else {
-                        // In landscape, we scale the height and clip to the top/left square
-                        scale = thumbHeight / (appHeight - contentInsets.top);
+                        // In landscape, we scale the height and clip to the top/left square. We
+                        // only scale the part that is not covered by status bar and the nav bar.
+                        scale = thumbHeight / (appHeight - contentInsets.top
+                                - contentInsets.bottom);
                         scaledTopDecor = (int) (scale * contentInsets.top);
                         int unscaledThumbWidth = (int) (thumbWidth / scale);
                         mTmpFromClipRect.right = mTmpFromClipRect.left + unscaledThumbWidth;
+                        // This removes the navigation bar from the first frame, so it better
+                        // matches the thumbnail. We need to do this explicitly in landscape,
+                        // because in portrait we already crop vertically.
+                        mTmpFromClipRect.bottom = mTmpFromClipRect.bottom - contentInsets.bottom;
                     }
 
                     mNextAppTransitionInsets.set(contentInsets);
@@ -836,11 +842,16 @@ public class AppTransition implements Dump {
                     int unscaledThumbHeight = (int) (thumbHeight / scale);
                     mTmpToClipRect.bottom = mTmpToClipRect.top + unscaledThumbHeight;
                 } else {
-                    // In landscape, we scale the height and clip to the top/left square
-                    scale = thumbHeight / (appHeight - contentInsets.top);
+                    // In landscape, we scale the height and clip to the top/left square. We only
+                    // scale the part that is not covered by status bar and the nav bar.
+                    scale = thumbHeight / (appHeight - contentInsets.top - contentInsets.bottom);
                     scaledTopDecor = (int) (scale * contentInsets.top);
                     int unscaledThumbWidth = (int) (thumbWidth / scale);
                     mTmpToClipRect.right = mTmpToClipRect.left + unscaledThumbWidth;
+                    // This removes the navigation bar from the last frame, so it better matches the
+                    // thumbnail. We need to do this explicitly in landscape, because in portrait we
+                    // already crop vertically.
+                    mTmpToClipRect.bottom = mTmpToClipRect.bottom - contentInsets.bottom;
                 }
 
                 mNextAppTransitionInsets.set(contentInsets);
