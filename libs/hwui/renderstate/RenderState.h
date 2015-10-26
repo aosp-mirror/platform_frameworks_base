@@ -57,7 +57,10 @@ public:
     void getViewport(GLsizei* outWidth, GLsizei* outHeight);
 
     void bindFramebuffer(GLuint fbo);
-    GLint getFramebuffer() { return mFramebuffer; }
+    GLuint getFramebuffer() { return mFramebuffer; }
+    GLuint genFramebuffer();
+    void deleteFramebuffer(GLuint fbo);
+
 
     void invokeFunctor(Functor* functor, DrawGlInfo::Mode mode, DrawGlInfo* info);
 

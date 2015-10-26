@@ -35,19 +35,22 @@ namespace uirenderer {
  * for every test.
  *
  * onXXXOp methods fail by default - tests should override ops they expect
+ * startLayer fails by default - tests should override if expected
  * startFrame/endFrame do nothing by default - tests should override to intercept
  */
 template<class CustomClient, class Arg>
 class TestReceiver {
 public:
 #define CLIENT_METHOD(Type) \
-    virtual void on##Type(Arg&, const Type&, const BakedOpState&) { FAIL(); }
+    virtual void on##Type(Arg&, const Type&, const BakedOpState&) { ADD_FAILURE(); }
     class Client {
     public:
         virtual ~Client() {};
         MAP_OPS(CLIENT_METHOD)
 
-        virtual void startFrame(Arg& info) {}
+        virtual Layer* startLayer(Arg& info, uint32_t width, uint32_t height) { ADD_FAILURE(); return nullptr; }
+        virtual void endLayer(Arg& info) { ADD_FAILURE(); }
+        virtual void startFrame(Arg& info, uint32_t width, uint32_t height) {}
         virtual void endFrame(Arg& info) {}
     };
 
@@ -57,11 +60,18 @@ public:
     }
     MAP_OPS(DISPATCHER_METHOD)
 
-    static void startFrame(Arg& info) {
+    static Layer* startLayer(Arg& info, uint32_t width, uint32_t height) {
         CustomClient client;
-        client.startFrame(info);
+        return client.startLayer(info, width, height);
     }
-
+    static void endLayer(Arg& info) {
+        CustomClient client;
+        client.endLayer(info);
+    }
+    static void startFrame(Arg& info, uint32_t width, uint32_t height) {
+        CustomClient client;
+        client.startFrame(info, width, height);
+    }
     static void endFrame(Arg& info) {
         CustomClient client;
         client.endFrame(info);
@@ -78,8 +88,10 @@ class FailReceiver : public TestReceiver<FailReceiver, Info>::Client {};
 
 class SimpleReceiver : public TestReceiver<SimpleReceiver, Info>::Client {
 public:
-    void startFrame(Info& info) override {
+    void startFrame(Info& info, uint32_t width, uint32_t height) override {
         EXPECT_EQ(0, info.index++);
+        EXPECT_EQ(100u, width);
+        EXPECT_EQ(200u, height);
     }
     void onRectOp(Info& info, const RectOp& op, const BakedOpState& state) override {
         EXPECT_EQ(1, info.index++);
@@ -97,8 +109,7 @@ TEST(OpReorderer, simple) {
         canvas.drawRect(0, 0, 100, 200, SkPaint());
         canvas.drawBitmap(bitmap, 10, 10, nullptr);
     });
-    OpReorderer reorderer;
-    reorderer.defer(200, 200, *dl);
+    OpReorderer reorderer(100, 200, *dl);
 
     Info info;
     reorderer.replayBakedOps<TestReceiver<SimpleReceiver, Info>>(info);
@@ -113,8 +124,7 @@ TEST(OpReorderer, simpleRejection) {
         canvas.drawRect(0, 0, 400, 400, SkPaint());
         canvas.restore();
     });
-    OpReorderer reorderer;
-    reorderer.defer(200, 200, *dl);
+    OpReorderer reorderer(200, 200, *dl);
 
     Info info;
     reorderer.replayBakedOps<TestReceiver<FailReceiver, Info>>(info);
@@ -146,8 +156,7 @@ TEST(OpReorderer, simpleBatching) {
         canvas.restore();
     });
 
-    OpReorderer reorderer;
-    reorderer.defer(200, 200, *dl);
+    OpReorderer reorderer(200, 200, *dl);
 
     Info info;
     reorderer.replayBakedOps<TestReceiver<SimpleBatchingReceiver, Info>>(info);
@@ -167,7 +176,7 @@ public:
             EXPECT_EQ(SK_ColorWHITE, op.paint->getColor());
             break;
         default:
-            FAIL();
+            ADD_FAILURE();
         }
     }
 };
@@ -196,8 +205,7 @@ TEST(OpReorderer, renderNode) {
     std::vector< sp<RenderNode> > nodes;
     nodes.push_back(parent.get());
 
-    OpReorderer reorderer;
-    reorderer.defer(SkRect::MakeWH(200, 200), 200, 200, nodes);
+    OpReorderer reorderer(SkRect::MakeWH(200, 200), 200, 200, nodes);
 
     Info info;
     reorderer.replayBakedOps<TestReceiver<RenderNodeReceiver, Info>>(info);
@@ -221,8 +229,7 @@ TEST(OpReorderer, clipped) {
     std::vector< sp<RenderNode> > nodes;
     nodes.push_back(node.get());
 
-    OpReorderer reorderer;
-    reorderer.defer(SkRect::MakeLTRB(10, 20, 30, 40), // clip to small area, should see in receiver
+    OpReorderer reorderer(SkRect::MakeLTRB(10, 20, 30, 40), // clip to small area, should see in receiver
             200, 200, nodes);
 
     Info info;
@@ -232,8 +239,17 @@ TEST(OpReorderer, clipped) {
 
 class SaveLayerSimpleReceiver : public TestReceiver<SaveLayerSimpleReceiver, Info>::Client {
 public:
-    void onRectOp(Info& info, const RectOp& op, const BakedOpState& state) override {
+    Layer* startLayer(Info& info, uint32_t width, uint32_t height) override {
         EXPECT_EQ(0, info.index++);
+        EXPECT_EQ(180u, width);
+        EXPECT_EQ(180u, height);
+        return nullptr;
+    }
+    void endLayer(Info& info) override {
+        EXPECT_EQ(2, info.index++);
+    }
+    void onRectOp(Info& info, const RectOp& op, const BakedOpState& state) override {
+        EXPECT_EQ(1, info.index++);
         EXPECT_EQ(Rect(10, 10, 190, 190), op.unmappedBounds);
         EXPECT_EQ(Rect(0, 0, 180, 180), state.computedState.clippedBounds);
         EXPECT_EQ(Rect(0, 0, 180, 180), state.computedState.clipRect);
@@ -243,7 +259,7 @@ public:
         EXPECT_MATRIX_APPROX_EQ(expectedTransform, state.computedState.transform);
     }
     void onLayerOp(Info& info, const LayerOp& op, const BakedOpState& state) override {
-        EXPECT_EQ(1, info.index++);
+        EXPECT_EQ(3, info.index++);
         EXPECT_EQ(Rect(10, 10, 190, 190), state.computedState.clippedBounds);
         EXPECT_EQ(Rect(0, 0, 200, 200), state.computedState.clipRect);
         EXPECT_TRUE(state.computedState.transform.isIdentity());
@@ -256,33 +272,61 @@ TEST(OpReorderer, saveLayerSimple) {
         canvas.restore();
     });
 
-    OpReorderer reorderer;
-    reorderer.defer(200, 200, *dl);
+    OpReorderer reorderer(200, 200, *dl);
 
     Info info;
     reorderer.replayBakedOps<TestReceiver<SaveLayerSimpleReceiver, Info>>(info);
-    EXPECT_EQ(2, info.index);
+    EXPECT_EQ(4, info.index);
 }
 
 
-// saveLayer1 {rect1, saveLayer2 { rect2 } } will play back as rect2, rect1, layerOp2, layerOp1
+/* saveLayer1 {rect1, saveLayer2 { rect2 } } will play back as:
+ * - startLayer2, rect2 endLayer2
+ * - startLayer1, rect1, drawLayer2, endLayer1
+ * - startFrame, layerOp1, endFrame
+ */
 class SaveLayerNestedReceiver : public TestReceiver<SaveLayerNestedReceiver, Info>::Client {
 public:
-    void onRectOp(Info& info, const RectOp& op, const BakedOpState& state) override {
+    Layer* startLayer(Info& info, uint32_t width, uint32_t height) override {
         const int index = info.index++;
         if (index == 0) {
+            EXPECT_EQ(400u, width);
+            EXPECT_EQ(400u, height);
+            return (Layer*) 0x400;
+        } else if (index == 3) {
+            EXPECT_EQ(800u, width);
+            EXPECT_EQ(800u, height);
+            return (Layer*) 0x800;
+        } else { ADD_FAILURE(); }
+        return (Layer*) nullptr;
+    }
+    void endLayer(Info& info) override {
+        int index = info.index++;
+        EXPECT_TRUE(index == 2 || index == 6);
+    }
+    void startFrame(Info& info, uint32_t width, uint32_t height) override {
+        EXPECT_EQ(7, info.index++);
+    }
+    void endFrame(Info& info) override {
+        EXPECT_EQ(9, info.index++);
+    }
+    void onRectOp(Info& info, const RectOp& op, const BakedOpState& state) override {
+        const int index = info.index++;
+        if (index == 1) {
             EXPECT_EQ(Rect(0, 0, 400, 400), op.unmappedBounds); // inner rect
-        } else if (index == 1) {
+        } else if (index == 4) {
             EXPECT_EQ(Rect(0, 0, 800, 800), op.unmappedBounds); // outer rect
-        } else { FAIL(); }
+        } else { ADD_FAILURE(); }
     }
     void onLayerOp(Info& info, const LayerOp& op, const BakedOpState& state) override {
         const int index = info.index++;
-        if (index == 2) {
+        if (index == 5) {
+            EXPECT_EQ((Layer*)0x400, *op.layerHandle);
             EXPECT_EQ(Rect(0, 0, 400, 400), op.unmappedBounds); // inner layer
-        } else if (index == 3) {
+        } else if (index == 8) {
+            EXPECT_EQ((Layer*)0x800, *op.layerHandle);
             EXPECT_EQ(Rect(0, 0, 800, 800), op.unmappedBounds); // outer layer
-        } else { FAIL(); }
+        } else { ADD_FAILURE(); }
     }
 };
 TEST(OpReorderer, saveLayerNested) {
@@ -299,12 +343,11 @@ TEST(OpReorderer, saveLayerNested) {
         canvas.restore();
     });
 
-    OpReorderer reorderer;
-    reorderer.defer(800, 800, *dl);
+    OpReorderer reorderer(800, 800, *dl);
 
     Info info;
     reorderer.replayBakedOps<TestReceiver<SaveLayerNestedReceiver, Info>>(info);
-    EXPECT_EQ(4, info.index);
+    EXPECT_EQ(10, info.index);
 }
 
 TEST(OpReorderer, saveLayerContentRejection) {
@@ -319,8 +362,7 @@ TEST(OpReorderer, saveLayerContentRejection) {
         canvas.restore();
         canvas.restore();
     });
-    OpReorderer reorderer;
-    reorderer.defer(200, 200, *dl);
+    OpReorderer reorderer(200, 200, *dl);
     Info info;
 
     // should see no ops, even within the layer, since the layer should be rejected

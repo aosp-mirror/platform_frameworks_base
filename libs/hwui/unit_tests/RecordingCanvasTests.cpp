@@ -38,7 +38,7 @@ TEST(RecordingCanvas, emptyPlayback) {
         canvas.save(SkCanvas::kMatrix_SaveFlag | SkCanvas::kClip_SaveFlag);
         canvas.restore();
     });
-    playbackOps(*dl, [](const RecordedOp& op) { FAIL(); });
+    playbackOps(*dl, [](const RecordedOp& op) { ADD_FAILURE(); });
 }
 
 TEST(RecordingCanvas, testSimpleRectRecord) {
@@ -135,7 +135,7 @@ TEST(RecordingCanvas, saveLayerSimple) {
             // TODO: add asserts
             break;
         default:
-            FAIL();
+            ADD_FAILURE();
         }
     });
     EXPECT_EQ(3, count);

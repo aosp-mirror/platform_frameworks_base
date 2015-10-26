@@ -54,15 +54,10 @@ public:
     }
 };
 
-static TestCanvas* startRecording(RenderNode* node) {
-    TestCanvas* renderer = new TestCanvas(
-            node->stagingProperties().getWidth(), node->stagingProperties().getHeight());
-    return renderer;
-}
-
-static void endRecording(TestCanvas* renderer, RenderNode* node) {
-    node->setStagingDisplayList(renderer->finishRecording());
-    delete renderer;
+static void recordNode(RenderNode& node, std::function<void(TestCanvas&)> contentCallback) {
+    TestCanvas canvas(node.stagingProperties().getWidth(), node.stagingProperties().getHeight());
+    contentCallback(canvas);
+    node.setStagingDisplayList(canvas.finishRecording());
 }
 
 class TreeContentAnimation {
@@ -75,7 +70,7 @@ public:
             frameCount = fc;
         }
     }
-    virtual void createContent(int width, int height, TestCanvas* renderer) = 0;
+    virtual void createContent(int width, int height, TestCanvas* canvas) = 0;
     virtual void doFrame(int frameNr) = 0;
 
     template <class T>
@@ -108,11 +103,9 @@ public:
         proxy->setup(width, height, dp(800.0f), 255 * 0.075, 255 * 0.15);
         proxy->setLightCenter((Vector3){lightX, dp(-200.0f), dp(800.0f)});
 
-        android::uirenderer::Rect DUMMY;
-
-        TestCanvas* renderer = startRecording(rootNode);
-        animation.createContent(width, height, renderer);
-        endRecording(renderer, rootNode);
+        recordNode(*rootNode, [&animation, width, height](TestCanvas& canvas) {
+            animation.createContent(width, height, &canvas); //TODO: no&
+        });
 
         // Do a few cold runs then reset the stats so that the caches are all hot
         for (int i = 0; i < 3; i++) {
@@ -140,19 +133,19 @@ public:
 class ShadowGridAnimation : public TreeContentAnimation {
 public:
     std::vector< sp<RenderNode> > cards;
-    void createContent(int width, int height, TestCanvas* renderer) override {
-        renderer->drawColor(0xFFFFFFFF, SkXfermode::kSrcOver_Mode);
-        renderer->insertReorderBarrier(true);
+    void createContent(int width, int height, TestCanvas* canvas) override {
+        canvas->drawColor(0xFFFFFFFF, SkXfermode::kSrcOver_Mode);
+        canvas->insertReorderBarrier(true);
 
         for (int x = dp(16); x < (width - dp(116)); x += dp(116)) {
             for (int y = dp(16); y < (height - dp(116)); y += dp(116)) {
                 sp<RenderNode> card = createCard(x, y, dp(100), dp(100));
-                renderer->drawRenderNode(card.get());
+                canvas->drawRenderNode(card.get());
                 cards.push_back(card);
             }
         }
 
-        renderer->insertReorderBarrier(false);
+        canvas->insertReorderBarrier(false);
     }
     void doFrame(int frameNr) override {
         int curFrame = frameNr % 150;
@@ -171,9 +164,9 @@ private:
         node->mutateStagingProperties().mutableOutline().setShouldClip(true);
         node->setPropertyFieldsDirty(RenderNode::X | RenderNode::Y | RenderNode::Z);
 
-        TestCanvas* renderer = startRecording(node.get());
-        renderer->drawColor(0xFFEEEEEE, SkXfermode::kSrcOver_Mode);
-        endRecording(renderer, node.get());
+        recordNode(*node, [](TestCanvas& canvas) {
+            canvas.drawColor(0xFFEEEEEE, SkXfermode::kSrcOver_Mode);
+        });
         return node;
     }
 };
@@ -187,19 +180,19 @@ static Benchmark _ShadowGrid(BenchmarkInfo{
 class ShadowGrid2Animation : public TreeContentAnimation {
 public:
     std::vector< sp<RenderNode> > cards;
-    void createContent(int width, int height, TestCanvas* renderer) override {
-        renderer->drawColor(0xFFFFFFFF, SkXfermode::kSrcOver_Mode);
-        renderer->insertReorderBarrier(true);
+    void createContent(int width, int height, TestCanvas* canvas) override {
+        canvas->drawColor(0xFFFFFFFF, SkXfermode::kSrcOver_Mode);
+        canvas->insertReorderBarrier(true);
 
         for (int x = dp(8); x < (width - dp(58)); x += dp(58)) {
             for (int y = dp(8); y < (height - dp(58)); y += dp(58)) {
                 sp<RenderNode> card = createCard(x, y, dp(50), dp(50));
-                renderer->drawRenderNode(card.get());
+                canvas->drawRenderNode(card.get());
                 cards.push_back(card);
             }
         }
 
-        renderer->insertReorderBarrier(false);
+        canvas->insertReorderBarrier(false);
     }
     void doFrame(int frameNr) override {
         int curFrame = frameNr % 150;
@@ -218,9 +211,9 @@ private:
         node->mutateStagingProperties().mutableOutline().setShouldClip(true);
         node->setPropertyFieldsDirty(RenderNode::X | RenderNode::Y | RenderNode::Z);
 
-        TestCanvas* renderer = startRecording(node.get());
-        renderer->drawColor(0xFFEEEEEE, SkXfermode::kSrcOver_Mode);
-        endRecording(renderer, node.get());
+        recordNode(*node, [](TestCanvas& canvas) {
+            canvas.drawColor(0xFFEEEEEE, SkXfermode::kSrcOver_Mode);
+        });
         return node;
     }
 };
@@ -233,44 +226,36 @@ static Benchmark _ShadowGrid2(BenchmarkInfo{
 
 class RectGridAnimation : public TreeContentAnimation {
 public:
-    sp<RenderNode> card;
-    void createContent(int width, int height, TestCanvas* renderer) override {
-        renderer->drawColor(0xFFFFFFFF, SkXfermode::kSrcOver_Mode);
-        renderer->insertReorderBarrier(true);
+    sp<RenderNode> card = new RenderNode();
+    void createContent(int width, int height, TestCanvas* canvas) override {
+        canvas->drawColor(0xFFFFFFFF, SkXfermode::kSrcOver_Mode);
+        canvas->insertReorderBarrier(true);
 
-        card = createCard(40, 40, 200, 200);
-        renderer->drawRenderNode(card.get());
+        card->mutateStagingProperties().setLeftTopRightBottom(50, 50, 250, 250);
+        card->setPropertyFieldsDirty(RenderNode::X | RenderNode::Y);
+        recordNode(*card, [](TestCanvas& canvas) {
+            canvas.drawColor(0xFFFF00FF, SkXfermode::kSrcOver_Mode);
 
-        renderer->insertReorderBarrier(false);
+            SkRegion region;
+            for (int xOffset = 0; xOffset < 200; xOffset+=2) {
+                for (int yOffset = 0; yOffset < 200; yOffset+=2) {
+                    region.op(xOffset, yOffset, xOffset + 1, yOffset + 1, SkRegion::kUnion_Op);
+                }
+            }
+
+            SkPaint paint;
+            paint.setColor(0xff00ffff);
+            canvas.drawRegion(region, paint);
+        });
+        canvas->drawRenderNode(card.get());
+
+        canvas->insertReorderBarrier(false);
     }
     void doFrame(int frameNr) override {
         int curFrame = frameNr % 150;
         card->mutateStagingProperties().setTranslationX(curFrame);
         card->mutateStagingProperties().setTranslationY(curFrame);
         card->setPropertyFieldsDirty(RenderNode::X | RenderNode::Y);
-    }
-private:
-    sp<RenderNode> createCard(int x, int y, int width, int height) {
-        sp<RenderNode> node = new RenderNode();
-        node->mutateStagingProperties().setLeftTopRightBottom(x, y, x + width, y + height);
-        node->setPropertyFieldsDirty(RenderNode::X | RenderNode::Y);
-
-        TestCanvas* renderer = startRecording(node.get());
-        renderer->drawColor(0xFFFF00FF, SkXfermode::kSrcOver_Mode);
-
-        SkRegion region;
-        for (int xOffset = 0; xOffset < width; xOffset+=2) {
-            for (int yOffset = 0; yOffset < height; yOffset+=2) {
-                region.op(xOffset, yOffset, xOffset + 1, yOffset + 1, SkRegion::kUnion_Op);
-            }
-        }
-
-        SkPaint paint;
-        paint.setColor(0xff00ffff);
-        renderer->drawRegion(region, paint);
-
-        endRecording(renderer, node.get());
-        return node;
     }
 };
 static Benchmark _RectGrid(BenchmarkInfo{
@@ -282,15 +267,22 @@ static Benchmark _RectGrid(BenchmarkInfo{
 
 class OvalAnimation : public TreeContentAnimation {
 public:
-    sp<RenderNode> card;
-    void createContent(int width, int height, TestCanvas* renderer) override {
-        renderer->drawColor(0xFFFFFFFF, SkXfermode::kSrcOver_Mode);
-        renderer->insertReorderBarrier(true);
+    sp<RenderNode> card = new RenderNode();
+    void createContent(int width, int height, TestCanvas* canvas) override {
+        canvas->drawColor(0xFFFFFFFF, SkXfermode::kSrcOver_Mode);
+        canvas->insertReorderBarrier(true);
 
-        card = createCard(40, 40, 400, 400);
-        renderer->drawRenderNode(card.get());
+        card->mutateStagingProperties().setLeftTopRightBottom(0, 0, 200, 200);
+        card->setPropertyFieldsDirty(RenderNode::X | RenderNode::Y);
+        recordNode(*card, [](TestCanvas& canvas) {
+            SkPaint paint;
+            paint.setAntiAlias(true);
+            paint.setColor(0xFF000000);
+            canvas.drawOval(0, 0, 200, 200, paint);
+        });
+        canvas->drawRenderNode(card.get());
 
-        renderer->insertReorderBarrier(false);
+        canvas->insertReorderBarrier(false);
     }
 
     void doFrame(int frameNr) override {
@@ -298,22 +290,6 @@ public:
         card->mutateStagingProperties().setTranslationX(curFrame);
         card->mutateStagingProperties().setTranslationY(curFrame);
         card->setPropertyFieldsDirty(RenderNode::X | RenderNode::Y);
-    }
-private:
-    sp<RenderNode> createCard(int x, int y, int width, int height) {
-        sp<RenderNode> node = new RenderNode();
-        node->mutateStagingProperties().setLeftTopRightBottom(x, y, x + width, y + height);
-        node->setPropertyFieldsDirty(RenderNode::X | RenderNode::Y);
-
-        TestCanvas* renderer = startRecording(node.get());
-
-        SkPaint paint;
-        paint.setAntiAlias(true);
-        paint.setColor(0xFF000000);
-        renderer->drawOval(0, 0, width, height, paint);
-
-        endRecording(renderer, node.get());
-        return node;
     }
 };
 static Benchmark _Oval(BenchmarkInfo{
@@ -325,7 +301,7 @@ static Benchmark _Oval(BenchmarkInfo{
 class PartialDamageTest : public TreeContentAnimation {
 public:
     std::vector< sp<RenderNode> > cards;
-    void createContent(int width, int height, TestCanvas* renderer) override {
+    void createContent(int width, int height, TestCanvas* canvas) override {
         static SkColor COLORS[] = {
                 0xFFF44336,
                 0xFF9C27B0,
@@ -333,13 +309,13 @@ public:
                 0xFF4CAF50,
         };
 
-        renderer->drawColor(0xFFFFFFFF, SkXfermode::kSrcOver_Mode);
+        canvas->drawColor(0xFFFFFFFF, SkXfermode::kSrcOver_Mode);
 
         for (int x = dp(16); x < (width - dp(116)); x += dp(116)) {
             for (int y = dp(16); y < (height - dp(116)); y += dp(116)) {
                 sp<RenderNode> card = createCard(x, y, dp(100), dp(100),
                         COLORS[static_cast<int>((y / dp(116))) % 4]);
-                renderer->drawRenderNode(card.get());
+                canvas->drawRenderNode(card.get());
                 cards.push_back(card);
             }
         }
@@ -350,10 +326,10 @@ public:
         cards[0]->mutateStagingProperties().setTranslationY(curFrame);
         cards[0]->setPropertyFieldsDirty(RenderNode::X | RenderNode::Y);
 
-        TestCanvas* renderer = startRecording(cards[0].get());
-        renderer->drawColor(interpolateColor(curFrame / 150.0f, 0xFFF44336, 0xFFF8BBD0),
-                SkXfermode::kSrcOver_Mode);
-        endRecording(renderer, cards[0].get());
+        recordNode(*cards[0], [curFrame](TestCanvas& canvas) {
+            canvas.drawColor(interpolateColor(curFrame / 150.0f, 0xFFF44336, 0xFFF8BBD0),
+                    SkXfermode::kSrcOver_Mode);
+        });
     }
 
     static SkColor interpolateColor(float fraction, SkColor start, SkColor end) {
@@ -378,9 +354,9 @@ private:
         node->mutateStagingProperties().setLeftTopRightBottom(x, y, x + width, y + height);
         node->setPropertyFieldsDirty(RenderNode::X | RenderNode::Y);
 
-        TestCanvas* renderer = startRecording(node.get());
-        renderer->drawColor(color, SkXfermode::kSrcOver_Mode);
-        endRecording(renderer, node.get());
+        recordNode(*node, [color](TestCanvas& canvas) {
+            canvas.drawColor(color, SkXfermode::kSrcOver_Mode);
+        });
         return node;
     }
 };
@@ -393,16 +369,24 @@ static Benchmark _PartialDamage(BenchmarkInfo{
 });
 
 
-class SimpleRectGridAnimation : public TreeContentAnimation {
+class SaveLayerAnimation : public TreeContentAnimation {
 public:
-    sp<RenderNode> card;
-    void createContent(int width, int height, TestCanvas* renderer) override {
-        SkPaint paint;
-        paint.setColor(0xFF00FFFF);
-        renderer->drawRect(0, 0, width, height, paint);
+    sp<RenderNode> card = new RenderNode();
+    void createContent(int width, int height, TestCanvas* canvas) override {
+        canvas->drawColor(0xFFFFFFFF, SkXfermode::kSrcOver_Mode); // background
 
-        card = createCard(40, 40, 200, 200);
-        renderer->drawRenderNode(card.get());
+        card->mutateStagingProperties().setLeftTopRightBottom(0, 0, 200, 200);
+        card->setPropertyFieldsDirty(RenderNode::X | RenderNode::Y);
+        recordNode(*card, [](TestCanvas& canvas) {
+            canvas.saveLayerAlpha(0, 0, 200, 200, 128, SkCanvas::kClipToLayer_SaveFlag);
+            canvas.drawColor(0xFF00FF00, SkXfermode::kSrcOver_Mode); // outer, unclipped
+            canvas.saveLayerAlpha(50, 50, 150, 150, 128, SkCanvas::kClipToLayer_SaveFlag);
+            canvas.drawColor(0xFF0000FF, SkXfermode::kSrcOver_Mode); // inner, clipped
+            canvas.restore();
+            canvas.restore();
+        });
+
+        canvas->drawRenderNode(card.get());
     }
     void doFrame(int frameNr) override {
         int curFrame = frameNr % 150;
@@ -410,24 +394,10 @@ public:
         card->mutateStagingProperties().setTranslationY(curFrame);
         card->setPropertyFieldsDirty(RenderNode::X | RenderNode::Y);
     }
-private:
-    sp<RenderNode> createCard(int x, int y, int width, int height) {
-        sp<RenderNode> node = new RenderNode();
-        node->mutateStagingProperties().setLeftTopRightBottom(x, y, x + width, y + height);
-        node->setPropertyFieldsDirty(RenderNode::X | RenderNode::Y);
-
-        TestCanvas* renderer = startRecording(node.get());
-        SkPaint paint;
-        paint.setColor(0xFFFF00FF);
-        renderer->drawRect(0, 0, width, height, paint);
-
-        endRecording(renderer, node.get());
-        return node;
-    }
 };
-static Benchmark _SimpleRectGrid(BenchmarkInfo{
-    "simplerectgrid",
-    "A simple collection of rects. "
-    "Low CPU/GPU load.",
-    TreeContentAnimation::run<SimpleRectGridAnimation>
+static Benchmark _SaveLayer(BenchmarkInfo{
+    "savelayer",
+    "A nested pair of clipped saveLayer operations. "
+    "Tests the clipped saveLayer codepath. Draws content into offscreen buffers and back again.",
+    TreeContentAnimation::run<SaveLayerAnimation>
 });

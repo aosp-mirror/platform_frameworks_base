@@ -203,7 +203,7 @@ private:
 };
 
 // iterate back toward target to see if anything drawn since should overlap the new op
-// if no target, merging ops still interate to find similar batch to insert after
+// if no target, merging ops still iterate to find similar batch to insert after
 void OpReorderer::LayerReorderer::locateInsertIndex(int batchId, const Rect& clippedBounds,
         BatchBase** targetBatch, size_t* insertBatchIndex) const {
     for (int i = mBatches.size() - 1; i >= 0; i--) {
@@ -292,18 +292,14 @@ void OpReorderer::LayerReorderer::dump() const {
     }
 }
 
-OpReorderer::OpReorderer()
+OpReorderer::OpReorderer(const SkRect& clip, uint32_t viewportWidth, uint32_t viewportHeight,
+        const std::vector< sp<RenderNode> >& nodes)
         : mCanvasState(*this) {
-    mLayerReorderers.emplace_back();
+    ATRACE_NAME("prepare drawing commands");
+
+    mLayerReorderers.emplace_back(viewportWidth, viewportHeight);
     mLayerStack.push_back(0);
-}
 
-void OpReorderer::onViewportInitialized() {}
-
-void OpReorderer::onSnapshotRestored(const Snapshot& removed, const Snapshot& restored) {}
-
-void OpReorderer::defer(const SkRect& clip, int viewportWidth, int viewportHeight,
-        const std::vector< sp<RenderNode> >& nodes) {
     mCanvasState.initializeSaveStack(viewportWidth, viewportHeight,
             clip.fLeft, clip.fTop, clip.fRight, clip.fBottom,
             Vector3());
@@ -321,12 +317,21 @@ void OpReorderer::defer(const SkRect& clip, int viewportWidth, int viewportHeigh
     }
 }
 
-void OpReorderer::defer(int viewportWidth, int viewportHeight, const DisplayList& displayList) {
+OpReorderer::OpReorderer(int viewportWidth, int viewportHeight, const DisplayList& displayList)
+        : mCanvasState(*this) {
     ATRACE_NAME("prepare drawing commands");
+
+    mLayerReorderers.emplace_back(viewportWidth, viewportHeight);
+    mLayerStack.push_back(0);
+
     mCanvasState.initializeSaveStack(viewportWidth, viewportHeight,
             0, 0, viewportWidth, viewportHeight, Vector3());
     deferImpl(displayList);
 }
+
+void OpReorderer::onViewportInitialized() {}
+
+void OpReorderer::onSnapshotRestored(const Snapshot& removed, const Snapshot& restored) {}
 
 /**
  * Used to define a list of lambdas referencing private OpReorderer::onXXXXOp() methods.
@@ -350,11 +355,6 @@ void OpReorderer::deferImpl(const DisplayList& displayList) {
 
 void OpReorderer::replayBakedOpsImpl(void* arg, BakedOpReceiver* receivers) {
     ATRACE_NAME("flush drawing commands");
-    // Relay through layers in reverse order, since layers
-    // later in the list will be drawn by earlier ones
-    for (int i = mLayerReorderers.size() - 1; i >= 0; i--) {
-        mLayerReorderers[i].replayBakedOpsImpl(arg, receivers);
-    }
 }
 
 void OpReorderer::onRenderNodeOp(const RenderNodeOp& op) {
@@ -405,15 +405,17 @@ void OpReorderer::onSimpleRectsOp(const SimpleRectsOp& op) {
 
 // TODO: test rejection at defer time, where the bounds become empty
 void OpReorderer::onBeginLayerOp(const BeginLayerOp& op) {
+    const uint32_t layerWidth = (uint32_t) op.unmappedBounds.getWidth();
+    const uint32_t layerHeight = (uint32_t) op.unmappedBounds.getHeight();
+
     mCanvasState.save(SkCanvas::kClip_SaveFlag | SkCanvas::kMatrix_SaveFlag);
     mCanvasState.writableSnapshot()->transform->loadIdentity();
-    mCanvasState.writableSnapshot()->initializeViewport(
-            (int) op.unmappedBounds.getWidth(), (int) op.unmappedBounds.getHeight());
+    mCanvasState.writableSnapshot()->initializeViewport(layerWidth, layerHeight);
     mCanvasState.writableSnapshot()->roundRectClipState = nullptr;
 
     // create a new layer, and push its index on the stack
     mLayerStack.push_back(mLayerReorderers.size());
-    mLayerReorderers.emplace_back();
+    mLayerReorderers.emplace_back(layerWidth, layerHeight);
     mLayerReorderers.back().beginLayerOp = &op;
 }
 
@@ -432,7 +434,8 @@ void OpReorderer::onEndLayerOp(const EndLayerOp& /* ignored */) {
             beginLayerOp.unmappedBounds,
             beginLayerOp.localMatrix,
             beginLayerOp.localClipRect,
-            beginLayerOp.paint);
+            beginLayerOp.paint,
+            &mLayerReorderers[finishedLayerIndex].layer);
     BakedOpState* bakedOpState = tryBakeOpState(*drawLayerOp);
 
     if (bakedOpState) {

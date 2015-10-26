@@ -63,6 +63,10 @@ class OpReorderer : public CanvasStateClient {
      */
     class LayerReorderer {
     public:
+        LayerReorderer(uint32_t width, uint32_t height)
+                : width(width)
+                , height(height) {}
+
         // iterate back toward target to see if anything drawn since should overlap the new op
         // if no target, merging ops still iterate to find similar batch to insert after
         void locateInsertIndex(int batchId, const Rect& clippedBounds,
@@ -77,15 +81,22 @@ class OpReorderer : public CanvasStateClient {
 
         void replayBakedOpsImpl(void* arg, BakedOpReceiver* receivers) const;
 
+        bool empty() const {
+            return mBatches.empty();
+        }
+
         void clear() {
             mBatches.clear();
         }
 
         void dump() const;
 
+        Layer* layer = nullptr;
         const BeginLayerOp* beginLayerOp = nullptr;
-
+        const uint32_t width;
+        const uint32_t height;
     private:
+
         std::vector<BatchBase*> mBatches;
 
         /**
@@ -100,14 +111,13 @@ class OpReorderer : public CanvasStateClient {
 
     };
 public:
-    OpReorderer();
-    virtual ~OpReorderer() {}
-
     // TODO: not final, just presented this way for simplicity. Layers too?
-    void defer(const SkRect& clip, int viewportWidth, int viewportHeight,
+    OpReorderer(const SkRect& clip, uint32_t viewportWidth, uint32_t viewportHeight,
             const std::vector< sp<RenderNode> >& nodes);
 
-    void defer(int viewportWidth, int viewportHeight, const DisplayList& displayList);
+    OpReorderer(int viewportWidth, int viewportHeight, const DisplayList& displayList);
+
+    virtual ~OpReorderer() {}
 
     /**
      * replayBakedOps() is templated based on what class will receive ops being replayed.
@@ -128,8 +138,21 @@ public:
         static BakedOpReceiver receivers[] = {
             MAP_OPS(BAKED_OP_RECEIVER)
         };
-        StaticReceiver::startFrame(arg);
-        replayBakedOpsImpl((void*)&arg, receivers);
+
+        // Relay through layers in reverse order, since layers
+        // later in the list will be drawn by earlier ones
+        for (int i = mLayerReorderers.size() - 1; i >= 1; i--) {
+            LayerReorderer& layer = mLayerReorderers[i];
+            if (!layer.empty()) {
+                layer.layer = StaticReceiver::startLayer(arg, layer.width, layer.height);
+                layer.replayBakedOpsImpl((void*)&arg, receivers);
+                StaticReceiver::endLayer(arg);
+            }
+        }
+
+        const LayerReorderer& fbo0 = mLayerReorderers[0];
+        StaticReceiver::startFrame(arg, fbo0.width, fbo0.height);
+        fbo0.replayBakedOpsImpl((void*)&arg, receivers);
         StaticReceiver::endFrame(arg);
     }
 

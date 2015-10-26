@@ -189,7 +189,7 @@ Layer* LayerRenderer::createRenderLayer(RenderState& renderState, uint32_t width
     LAYER_RENDERER_LOGD("Requesting new render layer %dx%d", width, height);
 
     Caches& caches = Caches::getInstance();
-    GLuint fbo = caches.fboCache.get();
+    GLuint fbo = renderState.genFramebuffer();
     if (!fbo) {
         ALOGW("Could not obtain an FBO");
         return nullptr;
@@ -204,7 +204,7 @@ Layer* LayerRenderer::createRenderLayer(RenderState& renderState, uint32_t width
 
     // We first obtain a layer before comparing against the max texture size
     // because layers are not allocated at the exact desired size. They are
-    // always created slighly larger to improve recycling
+    // always created slightly larger to improve recycling
     const uint32_t maxTextureSize = caches.maxTextureSize;
     if (layer->getWidth() > maxTextureSize || layer->getHeight() > maxTextureSize) {
         ALOGW("Layer exceeds max. dimensions supported by the GPU (%dx%d, max=%dx%d)",
@@ -357,7 +357,7 @@ bool LayerRenderer::copyLayer(RenderState& renderState, Layer* layer, SkBitmap* 
             && bitmap->width() <= caches.maxTextureSize
             && bitmap->height() <= caches.maxTextureSize) {
 
-        GLuint fbo = caches.fboCache.get();
+        GLuint fbo = renderState.getFramebuffer();
         if (!fbo) {
             ALOGW("Could not obtain an FBO");
             return false;
@@ -465,7 +465,7 @@ error:
         layer->setAlpha(alpha, mode);
         layer->setFbo(previousLayerFbo);
         caches.textureState().deleteTexture(texture);
-        caches.fboCache.put(fbo);
+        renderState.deleteFramebuffer(fbo);
         renderState.setViewport(previousViewportWidth, previousViewportHeight);
 
         return status;
