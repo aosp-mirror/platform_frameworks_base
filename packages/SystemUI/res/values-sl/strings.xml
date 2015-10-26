@@ -430,10 +430,7 @@
     <string name="tuner_toast" msgid="603429811084428439">"Čestitke! Uglaševalnik uporabniškega vmesnika sistema je bil dodan v nastavitve."</string>
     <string name="remove_from_settings" msgid="8389591916603406378">"Odstrani iz nastavitev"</string>
     <string name="remove_from_settings_prompt" msgid="6069085993355887748">"Ali želite odstraniti Uglaševalnik uporabniškega vmesnika sistema iz nastavitev in prenehati uporabljati vse njegove funkcije?"</string>
-    <!-- no translation found for enable_bluetooth_title (5027037706500635269) -->
-    <skip />
-    <!-- no translation found for enable_bluetooth_message (9106595990708985385) -->
-    <skip />
-    <!-- no translation found for enable_bluetooth_confirmation_ok (6258074250948309715) -->
-    <skip />
+    <string name="enable_bluetooth_title" msgid="5027037706500635269">"Želite vklopiti Bluetooth?"</string>
+    <string name="enable_bluetooth_message" msgid="9106595990708985385">"Če želite povezati tipkovnico in tablični računalnik, vklopite Bluetooth."</string>
+    <string name="enable_bluetooth_confirmation_ok" msgid="6258074250948309715">"Vklop"</string>
 </resources>

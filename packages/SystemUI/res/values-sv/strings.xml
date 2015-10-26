@@ -314,9 +314,9 @@
     <string name="speed_bump_explanation" msgid="1288875699658819755">"Mindre brådskande aviseringar nedan"</string>
     <string name="notification_tap_again" msgid="8524949573675922138">"Tryck igen för att öppna"</string>
     <string name="keyguard_unlock" msgid="8043466894212841998">"Svep uppåt om du vill låsa upp"</string>
-    <string name="phone_hint" msgid="4872890986869209950">"Dra från ikonen och öppna telefonen"</string>
-    <string name="voice_hint" msgid="8939888732119726665">"Dra från ikonen och öppna röstassistenten"</string>
-    <string name="camera_hint" msgid="7939688436797157483">"Dra från ikonen och öppna kameran"</string>
+    <string name="phone_hint" msgid="4872890986869209950">"Svep från ikonen och öppna telefonen"</string>
+    <string name="voice_hint" msgid="8939888732119726665">"Svep från ikonen och öppna röstassistenten"</string>
+    <string name="camera_hint" msgid="7939688436797157483">"Svep från ikonen och öppna kameran"</string>
     <string name="interruption_level_none_with_warning" msgid="5114872171614161084">"Total tystnad. Även skärmläsningsprogram tystas."</string>
     <string name="interruption_level_none" msgid="6000083681244492992">"Helt tyst"</string>
     <string name="interruption_level_priority" msgid="6426766465363855505">"Bara prioriterade"</string>
@@ -428,10 +428,7 @@
     <string name="tuner_toast" msgid="603429811084428439">"Grattis! Inställningar för systemgränssnitt har lagts till i inställningarna."</string>
     <string name="remove_from_settings" msgid="8389591916603406378">"Ta bort från inställningarna"</string>
     <string name="remove_from_settings_prompt" msgid="6069085993355887748">"Vill du ta bort inställningar för systemgränssnitt från inställningarna och sluta använda alla tillhörande funktioner?"</string>
-    <!-- no translation found for enable_bluetooth_title (5027037706500635269) -->
-    <skip />
-    <!-- no translation found for enable_bluetooth_message (9106595990708985385) -->
-    <skip />
-    <!-- no translation found for enable_bluetooth_confirmation_ok (6258074250948309715) -->
-    <skip />
+    <string name="enable_bluetooth_title" msgid="5027037706500635269">"Vill du aktivera Bluetooth?"</string>
+    <string name="enable_bluetooth_message" msgid="9106595990708985385">"Om du vill ansluta tangentbordet till surfplattan måste du först aktivera Bluetooth."</string>
+    <string name="enable_bluetooth_confirmation_ok" msgid="6258074250948309715">"Aktivera"</string>
 </resources>

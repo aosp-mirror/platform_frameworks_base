@@ -428,10 +428,7 @@
     <string name="tuner_toast" msgid="603429811084428439">"Systeem-UI-tuner is toegevoegd aan Instellingen"</string>
     <string name="remove_from_settings" msgid="8389591916603406378">"Verwijderen uit Instellingen"</string>
     <string name="remove_from_settings_prompt" msgid="6069085993355887748">"Systeem-UI-tuner uit Instellingen verwijderen en het gebruik van alle functies daarvan stopzetten?"</string>
-    <!-- no translation found for enable_bluetooth_title (5027037706500635269) -->
-    <skip />
-    <!-- no translation found for enable_bluetooth_message (9106595990708985385) -->
-    <skip />
-    <!-- no translation found for enable_bluetooth_confirmation_ok (6258074250948309715) -->
-    <skip />
+    <string name="enable_bluetooth_title" msgid="5027037706500635269">"Bluetooth inschakelen?"</string>
+    <string name="enable_bluetooth_message" msgid="9106595990708985385">"Als je je toetsenbord wilt verbinden met je tablet, moet je eerst Bluetooth inschakelen."</string>
+    <string name="enable_bluetooth_confirmation_ok" msgid="6258074250948309715">"Inschakelen"</string>
 </resources>

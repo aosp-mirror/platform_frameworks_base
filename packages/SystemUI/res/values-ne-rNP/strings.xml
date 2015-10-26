@@ -374,7 +374,7 @@
     <string name="monitoring_description_app_personal" msgid="484599052118316268">"तपाईँ <xliff:g id="APPLICATION">%1$s</xliff:g> सँग जडित हुनुहुन्छ जसले इ-मेल, अनुप्रयोगहरू र वेबसाइट लगायतका तपाईँको निजी नेटवर्क गतिविधिका अनुगमन गर्न सक्छ।"</string>
     <string name="monitoring_description_app_work" msgid="1754325860918060897">"तपाईँको कार्य प्रोफाइल <xliff:g id="ORGANIZATION">%1$s</xliff:g> द्वारा व्यवस्थापन गरिन्छ। यो <xliff:g id="APPLICATION">%2$s</xliff:g> सँग जोडिएको छ जसले इमेल, अनुप्रयोगहरू, र वेबसाइटहरू लगायतका तपाईँका नेटवर्क गतिविधि अनुगमन गर्न सक्छ।\n\nथप जानकारीको लागि, आफ्नो प्रशासकलाई सम्पर्क गर्नुहोस्।"</string>
     <string name="monitoring_description_app_personal_work" msgid="4946600443852045903">"तपाईँको कार्य प्रोफाइल <xliff:g id="ORGANIZATION">%1$s</xliff:g> द्वारा व्यवस्थापन गरिन्छ। यो <xliff:g id="APPLICATION_WORK">%2$s</xliff:g> सँग जोडिएको छ जसले इमेल, अनुप्रयोगहरू, र वेबसाइटहरू लगायतका तपाईँका नेटवर्क गतिविधि अनुगमन गर्न सक्छ।\n\nतपाईँ <xliff:g id="APPLICATION_PERSONAL">%3$s</xliff:g> सँग पनि जडित हुनुहुन्छ, जसले तपाईँको व्यक्तिगत नेटवर्क गतिविधि अनुगमन गर्न सक्छ।"</string>
-    <string name="monitoring_description_vpn_app_device_owned" msgid="4970443827043261703">"तपाईंको उपकरण <xliff:g id="ORGANIZATION">%1$s</xliff:g> द्वारा व्यवस्थित गरिन्छ।\n\nतपाईंको प्रशासकले तपाईँको यन्त्र र त्यसको स्थान जानकारीमार्फत सेटिङहरू,  कर्पोरेट पहुँच, अनुप्रयोगहरू, तपाईँको यन्त्रसँग सम्बद्ध डेटा  र तपाईँको यन्त्रको स्थान जानकारीको अनुगमन र व्यवस्थापन गर्न सक्छ।\n\nतपाईं <xliff:g id="APPLICATION">%2$s</xliff:g> सँग जडित हुनुहुन्छ जसले इमेल, अनुप्रयोगहरू, र वेबसाइटहरू लगायतका तपाईँका नेटवर्क गतिविधिका अनुगमन गर्न सक्छ।\n\nथप जानकारीको लागि तपाईको प्रशासकलाई सम्पर्क गर्नुहोस्।"</string>
+    <string name="monitoring_description_vpn_app_device_owned" msgid="4970443827043261703">"तपाईँको उपकरण <xliff:g id="ORGANIZATION">%1$s</xliff:g> द्वारा व्यवस्थित गरिन्छ।\n\nतपाईँको प्रशासकले तपाईँको यन्त्र र त्यसको स्थान जानकारीमार्फत सेटिङहरू,  कर्पोरेट पहुँच, अनुप्रयोगहरू, तपाईँको यन्त्रसँग सम्बद्ध डेटा  र तपाईँको यन्त्रको स्थान जानकारीको अनुगमन र व्यवस्थापन गर्न सक्छ।\n\nतपाईँ <xliff:g id="APPLICATION">%2$s</xliff:g> सँग जडित हुनुहुन्छ जसले इमेल, अनुप्रयोगहरू, र वेबसाइटहरू लगायतका तपाईँका नेटवर्क गतिविधिका अनुगमन गर्न सक्छ।\n\nथप जानकारीको लागि तपाईको प्रशासकलाई सम्पर्क गर्नुहोस्।"</string>
     <string name="keyguard_indication_trust_disabled" msgid="7412534203633528135">"तपाईँले नखोले सम्म उपकरण बन्द रहनेछ"</string>
     <string name="hidden_notifications_title" msgid="7139628534207443290">"छिटो सूचनाहरू प्राप्त गर्नुहोस्"</string>
     <string name="hidden_notifications_text" msgid="2326409389088668981">"तपाईँले अनलक गर्नअघि तिनीहरूलाई हेर्नुहोस्"</string>
@@ -387,12 +387,12 @@
     <string name="accessibility_volume_expand" msgid="5946812790999244205">"विस्तार गर्नुहोस्"</string>
     <string name="accessibility_volume_collapse" msgid="3609549593031810875">"संक्षिप्त पार्नुहोस्"</string>
     <string name="screen_pinning_title" msgid="3273740381976175811">"पर्दा राखेका छ"</string>
-    <string name="screen_pinning_description" msgid="1346522416878235405">"तपाईं अनपिन सम्म यो दृश्य मा राख्छ। छुनुहोस् र अनपिन फिर्ता र सिंहावलोकन नै समय मा पकड।"</string>
-    <string name="screen_pinning_description_accessible" msgid="8518446209564202557">"तपाईं अनपिन सम्म यो दृश्य मा राख्छ। छुनुहोस् र अनपिन गर्न सिंहावलोकन पकड।"</string>
+    <string name="screen_pinning_description" msgid="1346522416878235405">"तपाईँ अनपिन सम्म यो दृश्य मा राख्छ। छुनुहोस् र अनपिन फिर्ता र सिंहावलोकन नै समय मा पकड।"</string>
+    <string name="screen_pinning_description_accessible" msgid="8518446209564202557">"तपाईँ अनपिन सम्म यो दृश्य मा राख्छ। छुनुहोस् र अनपिन गर्न सिंहावलोकन पकड।"</string>
     <string name="screen_pinning_positive" msgid="3783985798366751226">"बुझेँ"</string>
     <string name="screen_pinning_negative" msgid="3741602308343880268">"धन्यवाद पर्दैन"</string>
     <string name="quick_settings_reset_confirmation_title" msgid="748792586749897883">"लुकाउनुहुन्छ <xliff:g id="TILE_LABEL">%1$s</xliff:g>?"</string>
-    <string name="quick_settings_reset_confirmation_message" msgid="2235970126803317374">"यो तपाईं सेटिङ् मा यो बारी अर्को समय देखापर्नेछ।"</string>
+    <string name="quick_settings_reset_confirmation_message" msgid="2235970126803317374">"यो तपाईँ सेटिङ् मा यो बारी अर्को समय देखापर्नेछ।"</string>
     <string name="quick_settings_reset_confirmation_button" msgid="2660339101868367515">"लुकाउनुहोस्"</string>
     <string name="volumeui_prompt_message" msgid="918680947433389110">"<xliff:g id="APP_NAME">%1$s</xliff:g> भोल्यूम संवाद बन्न चाहन्छ।"</string>
     <string name="volumeui_prompt_allow" msgid="7954396902482228786">"अनुमति दिनुहोस्"</string>
@@ -428,10 +428,7 @@
     <string name="tuner_toast" msgid="603429811084428439">"बधाईँ छ! सेटिङहरूमा प्रणाली UI ट्युनर थप गरिएको छ"</string>
     <string name="remove_from_settings" msgid="8389591916603406378">"सेटिङहरूबाट हटाउनुहोस्"</string>
     <string name="remove_from_settings_prompt" msgid="6069085993355887748">"प्रणाली UI ट्युनर सेटिङहरूबाट हटाउने र यसका सबै सुविधाहरू प्रयोग गर्न रोक्ने हो?"</string>
-    <!-- no translation found for enable_bluetooth_title (5027037706500635269) -->
-    <skip />
-    <!-- no translation found for enable_bluetooth_message (9106595990708985385) -->
-    <skip />
-    <!-- no translation found for enable_bluetooth_confirmation_ok (6258074250948309715) -->
-    <skip />
+    <string name="enable_bluetooth_title" msgid="5027037706500635269">"ब्लुटुथ सक्रिय पार्नुहुन्छ?"</string>
+    <string name="enable_bluetooth_message" msgid="9106595990708985385">"आफ्नो ट्याब्लेटसँग किबोर्ड जोड्न, पहिले तपाईँले ब्लुटुथ सक्रिय गर्नुपर्छ।"</string>
+    <string name="enable_bluetooth_confirmation_ok" msgid="6258074250948309715">"सक्रिय पार्नुहोस्"</string>
 </resources>
