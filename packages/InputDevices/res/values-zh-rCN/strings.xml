@@ -8,6 +8,8 @@
     <string name="keyboard_layout_english_us_intl" msgid="3705168594034233583">"英语（美国），国际风格"</string>
     <string name="keyboard_layout_english_us_colemak_label" msgid="4194969610343455380">"英语（美国），Colemak 风格"</string>
     <string name="keyboard_layout_english_us_dvorak_label" msgid="793528923171145202">"英语（美国），Dvorak 风格"</string>
+    <!-- no translation found for keyboard_layout_english_us_workman_label (2944541595262173111) -->
+    <skip />
     <string name="keyboard_layout_german_label" msgid="8451565865467909999">"德语"</string>
     <string name="keyboard_layout_french_label" msgid="813450119589383723">"法语"</string>
     <string name="keyboard_layout_french_ca_label" msgid="365352601060604832">"法语（加拿大）"</string>
