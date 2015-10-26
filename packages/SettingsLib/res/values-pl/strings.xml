@@ -69,7 +69,7 @@
     <string name="bluetooth_headset_profile_summary_use_for" msgid="8705753622443862627">"Użyj dla funkcji audio telefonu"</string>
     <string name="bluetooth_opp_profile_summary_use_for" msgid="1255674547144769756">"Użyj do transferu plików"</string>
     <string name="bluetooth_hid_profile_summary_use_for" msgid="232727040453645139">"Użyj do wprowadzania"</string>
-    <string name="bluetooth_pairing_accept" msgid="6163520056536604875">"Powiąż"</string>
+    <string name="bluetooth_pairing_accept" msgid="6163520056536604875">"Sparuj"</string>
     <string name="bluetooth_pairing_accept_all_caps" msgid="6061699265220789149">"SPARUJ"</string>
     <string name="bluetooth_pairing_decline" msgid="4185420413578948140">"Anuluj"</string>
     <string name="bluetooth_pairing_will_share_phonebook" msgid="4982239145676394429">"Parowanie spowoduje przyznanie dostępu do historii połączeń i Twoich kontaktów w trakcie połączenia."</string>
