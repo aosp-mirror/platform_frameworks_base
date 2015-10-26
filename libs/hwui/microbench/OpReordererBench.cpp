@@ -60,10 +60,10 @@ void BM_OpReorderer_deferAndRender::Run(int iters) {
         StartBenchmarkTiming();
         for (int i = 0; i < iters; i++) {
             OpReorderer reorderer(200, 200, *sReorderingDisplayList);
-            MicroBench::DoNotOptimize(&reorderer);
 
-            BakedOpRenderer::Info info(caches, renderState, true);
-            reorderer.replayBakedOps<BakedOpRenderer>(info);
+            BakedOpRenderer renderer(caches, renderState, true);
+            reorderer.replayBakedOps<BakedOpDispatcher>(renderer);
+            MicroBench::DoNotOptimize(&renderer);
         }
         StopBenchmarkTiming();
     });

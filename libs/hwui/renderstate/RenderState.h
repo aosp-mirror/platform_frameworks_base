@@ -16,23 +16,24 @@
 #ifndef RENDERSTATE_H
 #define RENDERSTATE_H
 
-#include <set>
-#include <GLES2/gl2.h>
-#include <GLES2/gl2ext.h>
-#include <utils/Mutex.h>
-#include <utils/Functor.h>
-#include <utils/RefBase.h>
-#include <private/hwui/DrawGlInfo.h>
-#include <renderstate/Blend.h>
-
 #include "AssetAtlas.h"
 #include "Caches.h"
 #include "Glop.h"
+#include "renderstate/Blend.h"
 #include "renderstate/MeshState.h"
 #include "renderstate/PixelBufferState.h"
 #include "renderstate/Scissor.h"
 #include "renderstate/Stencil.h"
 #include "utils/Macros.h"
+
+#include <set>
+#include <GLES2/gl2.h>
+#include <GLES2/gl2ext.h>
+#include <ui/Region.h>
+#include <utils/Mutex.h>
+#include <utils/Functor.h>
+#include <utils/RefBase.h>
+#include <private/hwui/DrawGlInfo.h>
 
 namespace android {
 namespace uirenderer {
@@ -49,6 +50,8 @@ class RenderThread;
 // wrapper of Caches for users to migrate to.
 class RenderState {
     PREVENT_COPY_AND_ASSIGN(RenderState);
+    friend class renderthread::RenderThread;
+    friend class Caches;
 public:
     void onGLContextCreated();
     void onGLContextDestroyed();
@@ -60,7 +63,6 @@ public:
     GLuint getFramebuffer() { return mFramebuffer; }
     GLuint genFramebuffer();
     void deleteFramebuffer(GLuint fbo);
-
 
     void invokeFunctor(Functor* functor, DrawGlInfo::Mode mode, DrawGlInfo* info);
 
@@ -96,10 +98,8 @@ public:
     Stencil& stencil() { return *mStencil; }
 
     void dump();
-private:
-    friend class renderthread::RenderThread;
-    friend class Caches;
 
+private:
     void interruptForFunctorInvoke();
     void resumeFromFunctorInvoke();
     void assertOnGLThread();

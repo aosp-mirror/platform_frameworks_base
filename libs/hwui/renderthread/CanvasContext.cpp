@@ -319,11 +319,11 @@ void CanvasContext::draw() {
 
 #if HWUI_NEW_OPS
     OpReorderer reorderer(dirty, frame.width(), frame.height(), mRenderNodes);
-    BakedOpRenderer::Info info(Caches::getInstance(), mRenderThread.renderState(), mOpaque);
+    BakedOpRenderer renderer(Caches::getInstance(), mRenderThread.renderState(), mOpaque);
     // TODO: profiler().draw(mCanvas);
-    reorderer.replayBakedOps<BakedOpRenderer>(info);
+    reorderer.replayBakedOps<BakedOpDispatcher>(renderer);
 
-    bool drew = info.didDraw;
+    bool drew = renderer.didDraw();
 
 #else
     mCanvas->prepareDirty(frame.width(), frame.height(),

@@ -277,7 +277,8 @@ void OpReorderer::LayerReorderer::deferMergeableOp(LinearAllocator& allocator,
     }
 }
 
-void OpReorderer::LayerReorderer::replayBakedOpsImpl(void* arg, BakedOpReceiver* receivers) const {
+void OpReorderer::LayerReorderer::replayBakedOpsImpl(void* arg, BakedOpDispatcher* receivers) const {
+    ATRACE_NAME("flush drawing commands");
     for (const BatchBase* batch : mBatches) {
         // TODO: different behavior based on batch->isMerging()
         for (const BakedOpState* op : batch->getOps()) {
@@ -351,10 +352,6 @@ void OpReorderer::deferImpl(const DisplayList& displayList) {
             receivers[op->opId](*this, *op);
         }
     }
-}
-
-void OpReorderer::replayBakedOpsImpl(void* arg, BakedOpReceiver* receivers) {
-    ATRACE_NAME("flush drawing commands");
 }
 
 void OpReorderer::onRenderNodeOp(const RenderNodeOp& op) {
@@ -435,7 +432,7 @@ void OpReorderer::onEndLayerOp(const EndLayerOp& /* ignored */) {
             beginLayerOp.localMatrix,
             beginLayerOp.localClipRect,
             beginLayerOp.paint,
-            &mLayerReorderers[finishedLayerIndex].layer);
+            &mLayerReorderers[finishedLayerIndex].offscreenBuffer);
     BakedOpState* bakedOpState = tryBakeOpState(*drawLayerOp);
 
     if (bakedOpState) {

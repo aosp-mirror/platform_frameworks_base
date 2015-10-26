@@ -29,7 +29,7 @@ class SkPaint;
 namespace android {
 namespace uirenderer {
 
-class Layer;
+class OffscreenBuffer;
 class RenderNode;
 struct Vertex;
 
@@ -137,12 +137,12 @@ struct EndLayerOp : RecordedOp {
 };
 
 struct LayerOp : RecordedOp {
-    LayerOp(BASE_PARAMS, Layer** layerHandle)
+    LayerOp(BASE_PARAMS, OffscreenBuffer** layerHandle)
             : SUPER(LayerOp)
             , layerHandle(layerHandle) {}
     // Records a handle to the Layer object, since the Layer itself won't be
     // constructed until after this operation is constructed.
-    Layer** layerHandle;
+    OffscreenBuffer** layerHandle;
 };
 
 }; // namespace uirenderer

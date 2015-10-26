@@ -27,80 +27,67 @@
 namespace android {
 namespace uirenderer {
 
+
 /**
- * Class that redirects static operation dispatch to virtual methods on a Client class.
+ * Virtual class implemented by each test to redirect static operation / state transitions to
+ * virtual methods.
  *
- * The client is recreated for every op (so data cannot be persisted between operations), but the
- * virtual dispatch allows for default behaviors to be specified without enumerating each operation
- * for every test.
+ * Virtual dispatch allows for default behaviors to be specified (very common case in below tests),
+ * and allows Renderer vs Dispatching behavior to be merged.
  *
  * onXXXOp methods fail by default - tests should override ops they expect
  * startLayer fails by default - tests should override if expected
  * startFrame/endFrame do nothing by default - tests should override to intercept
  */
-template<class CustomClient, class Arg>
-class TestReceiver {
+class TestRendererBase {
 public:
-#define CLIENT_METHOD(Type) \
-    virtual void on##Type(Arg&, const Type&, const BakedOpState&) { ADD_FAILURE(); }
-    class Client {
-    public:
-        virtual ~Client() {};
-        MAP_OPS(CLIENT_METHOD)
+    virtual ~TestRendererBase() {}
+    virtual OffscreenBuffer* startLayer(uint32_t width, uint32_t height) { ADD_FAILURE(); return nullptr; }
+    virtual void endLayer() { ADD_FAILURE(); }
+    virtual void startFrame(uint32_t width, uint32_t height) {}
+    virtual void endFrame() {}
 
-        virtual Layer* startLayer(Arg& info, uint32_t width, uint32_t height) { ADD_FAILURE(); return nullptr; }
-        virtual void endLayer(Arg& info) { ADD_FAILURE(); }
-        virtual void startFrame(Arg& info, uint32_t width, uint32_t height) {}
-        virtual void endFrame(Arg& info) {}
-    };
+    // define virtual defaults for direct
+#define BASE_OP_METHOD(Type) \
+    virtual void on##Type(const Type&, const BakedOpState&) { ADD_FAILURE(); }
+    MAP_OPS(BASE_OP_METHOD)
+    int getIndex() { return mIndex; }
 
+protected:
+    int mIndex = 0;
+};
+
+/**
+ * Dispatches all static methods to similar formed methods on renderer, which fail by default but
+ * are overriden by subclasses per test.
+ */
+class TestDispatcher {
+public:
 #define DISPATCHER_METHOD(Type) \
-    static void on##Type(Arg& arg, const Type& op, const BakedOpState& state) { \
-        CustomClient client; client.on##Type(arg, op, state); \
+    static void on##Type(TestRendererBase& renderer, const Type& op, const BakedOpState& state) { \
+        renderer.on##Type(op, state); \
     }
-    MAP_OPS(DISPATCHER_METHOD)
-
-    static Layer* startLayer(Arg& info, uint32_t width, uint32_t height) {
-        CustomClient client;
-        return client.startLayer(info, width, height);
-    }
-    static void endLayer(Arg& info) {
-        CustomClient client;
-        client.endLayer(info);
-    }
-    static void startFrame(Arg& info, uint32_t width, uint32_t height) {
-        CustomClient client;
-        client.startFrame(info, width, height);
-    }
-    static void endFrame(Arg& info) {
-        CustomClient client;
-        client.endFrame(info);
-    }
+    MAP_OPS(DISPATCHER_METHOD);
 };
 
-class Info {
-public:
-    int index = 0;
-};
 
-// Receiver class which will fail if it receives any ops
-class FailReceiver : public TestReceiver<FailReceiver, Info>::Client {};
+class FailRenderer : public TestRendererBase {};
 
-class SimpleReceiver : public TestReceiver<SimpleReceiver, Info>::Client {
+class SimpleTestRenderer : public TestRendererBase {
 public:
-    void startFrame(Info& info, uint32_t width, uint32_t height) override {
-        EXPECT_EQ(0, info.index++);
+    void startFrame(uint32_t width, uint32_t height) override {
+        EXPECT_EQ(0, mIndex++);
         EXPECT_EQ(100u, width);
         EXPECT_EQ(200u, height);
     }
-    void onRectOp(Info& info, const RectOp& op, const BakedOpState& state) override {
-        EXPECT_EQ(1, info.index++);
+    void onRectOp(const RectOp& op, const BakedOpState& state) override {
+        EXPECT_EQ(1, mIndex++);
     }
-    void onBitmapOp(Info& info, const BitmapOp& op, const BakedOpState& state) override {
-        EXPECT_EQ(2, info.index++);
+    void onBitmapOp(const BitmapOp& op, const BakedOpState& state) override {
+        EXPECT_EQ(2, mIndex++);
     }
-    void endFrame(Info& info) override {
-        EXPECT_EQ(3, info.index++);
+    void endFrame() override {
+        EXPECT_EQ(3, mIndex++);
     }
 };
 TEST(OpReorderer, simple) {
@@ -111,9 +98,9 @@ TEST(OpReorderer, simple) {
     });
     OpReorderer reorderer(100, 200, *dl);
 
-    Info info;
-    reorderer.replayBakedOps<TestReceiver<SimpleReceiver, Info>>(info);
-    EXPECT_EQ(4, info.index); // 2 ops + start + end
+    SimpleTestRenderer renderer;
+    reorderer.replayBakedOps<TestDispatcher>(renderer);
+    EXPECT_EQ(4, renderer.getIndex()); // 2 ops + start + end
 }
 
 
@@ -126,19 +113,19 @@ TEST(OpReorderer, simpleRejection) {
     });
     OpReorderer reorderer(200, 200, *dl);
 
-    Info info;
-    reorderer.replayBakedOps<TestReceiver<FailReceiver, Info>>(info);
+    FailRenderer renderer;
+    reorderer.replayBakedOps<TestDispatcher>(renderer);
 }
 
 
 static int SIMPLE_BATCHING_LOOPS = 5;
-class SimpleBatchingReceiver : public TestReceiver<SimpleBatchingReceiver, Info>::Client {
+class SimpleBatchingTestRenderer : public TestRendererBase {
 public:
-    void onBitmapOp(Info& info, const BitmapOp& op, const BakedOpState& state) override {
-        EXPECT_TRUE(info.index++ >= SIMPLE_BATCHING_LOOPS);
+    void onBitmapOp(const BitmapOp& op, const BakedOpState& state) override {
+        EXPECT_TRUE(mIndex++ >= SIMPLE_BATCHING_LOOPS);
     }
-    void onRectOp(Info& info, const RectOp& op, const BakedOpState& state) override {
-        EXPECT_TRUE(info.index++ < SIMPLE_BATCHING_LOOPS);
+    void onRectOp(const RectOp& op, const BakedOpState& state) override {
+        EXPECT_TRUE(mIndex++ < SIMPLE_BATCHING_LOOPS);
     }
 };
 TEST(OpReorderer, simpleBatching) {
@@ -158,15 +145,15 @@ TEST(OpReorderer, simpleBatching) {
 
     OpReorderer reorderer(200, 200, *dl);
 
-    Info info;
-    reorderer.replayBakedOps<TestReceiver<SimpleBatchingReceiver, Info>>(info);
-    EXPECT_EQ(2 * SIMPLE_BATCHING_LOOPS, info.index); // 2 x loops ops, because no merging (TODO: force no merging)
+    SimpleBatchingTestRenderer renderer;
+    reorderer.replayBakedOps<TestDispatcher>(renderer);
+    EXPECT_EQ(2 * SIMPLE_BATCHING_LOOPS, renderer.getIndex()); // 2 x loops ops, because no merging (TODO: force no merging)
 }
 
-class RenderNodeReceiver : public TestReceiver<RenderNodeReceiver, Info>::Client {
+class RenderNodeTestRenderer : public TestRendererBase {
 public:
-    void onRectOp(Info& info, const RectOp& op, const BakedOpState& state) override {
-        switch(info.index++) {
+    void onRectOp(const RectOp& op, const BakedOpState& state) override {
+        switch(mIndex++) {
         case 0:
             EXPECT_EQ(Rect(0, 0, 200, 200), state.computedState.clippedBounds);
             EXPECT_EQ(SK_ColorDKGRAY, op.paint->getColor());
@@ -207,14 +194,14 @@ TEST(OpReorderer, renderNode) {
 
     OpReorderer reorderer(SkRect::MakeWH(200, 200), 200, 200, nodes);
 
-    Info info;
-    reorderer.replayBakedOps<TestReceiver<RenderNodeReceiver, Info>>(info);
+    RenderNodeTestRenderer renderer;
+    reorderer.replayBakedOps<TestDispatcher>(renderer);
 }
 
-class ClippedReceiver : public TestReceiver<ClippedReceiver, Info>::Client {
+class ClippedTestRenderer : public TestRendererBase {
 public:
-    void onBitmapOp(Info& info, const BitmapOp& op, const BakedOpState& state) override {
-        EXPECT_EQ(0, info.index++);
+    void onBitmapOp(const BitmapOp& op, const BakedOpState& state) override {
+        EXPECT_EQ(0, mIndex++);
         EXPECT_EQ(Rect(10, 20, 30, 40), state.computedState.clippedBounds);
         EXPECT_EQ(Rect(10, 20, 30, 40), state.computedState.clipRect);
         EXPECT_TRUE(state.computedState.transform.isIdentity());
@@ -232,24 +219,24 @@ TEST(OpReorderer, clipped) {
     OpReorderer reorderer(SkRect::MakeLTRB(10, 20, 30, 40), // clip to small area, should see in receiver
             200, 200, nodes);
 
-    Info info;
-    reorderer.replayBakedOps<TestReceiver<ClippedReceiver, Info>>(info);
+    ClippedTestRenderer renderer;
+    reorderer.replayBakedOps<TestDispatcher>(renderer);
 }
 
 
-class SaveLayerSimpleReceiver : public TestReceiver<SaveLayerSimpleReceiver, Info>::Client {
+class SaveLayerSimpleTestRenderer : public TestRendererBase {
 public:
-    Layer* startLayer(Info& info, uint32_t width, uint32_t height) override {
-        EXPECT_EQ(0, info.index++);
+    OffscreenBuffer* startLayer(uint32_t width, uint32_t height) override {
+        EXPECT_EQ(0, mIndex++);
         EXPECT_EQ(180u, width);
         EXPECT_EQ(180u, height);
         return nullptr;
     }
-    void endLayer(Info& info) override {
-        EXPECT_EQ(2, info.index++);
+    void endLayer() override {
+        EXPECT_EQ(2, mIndex++);
     }
-    void onRectOp(Info& info, const RectOp& op, const BakedOpState& state) override {
-        EXPECT_EQ(1, info.index++);
+    void onRectOp(const RectOp& op, const BakedOpState& state) override {
+        EXPECT_EQ(1, mIndex++);
         EXPECT_EQ(Rect(10, 10, 190, 190), op.unmappedBounds);
         EXPECT_EQ(Rect(0, 0, 180, 180), state.computedState.clippedBounds);
         EXPECT_EQ(Rect(0, 0, 180, 180), state.computedState.clipRect);
@@ -258,8 +245,8 @@ public:
         expectedTransform.loadTranslate(-10, -10, 0);
         EXPECT_MATRIX_APPROX_EQ(expectedTransform, state.computedState.transform);
     }
-    void onLayerOp(Info& info, const LayerOp& op, const BakedOpState& state) override {
-        EXPECT_EQ(3, info.index++);
+    void onLayerOp(const LayerOp& op, const BakedOpState& state) override {
+        EXPECT_EQ(3, mIndex++);
         EXPECT_EQ(Rect(10, 10, 190, 190), state.computedState.clippedBounds);
         EXPECT_EQ(Rect(0, 0, 200, 200), state.computedState.clipRect);
         EXPECT_TRUE(state.computedState.transform.isIdentity());
@@ -274,9 +261,9 @@ TEST(OpReorderer, saveLayerSimple) {
 
     OpReorderer reorderer(200, 200, *dl);
 
-    Info info;
-    reorderer.replayBakedOps<TestReceiver<SaveLayerSimpleReceiver, Info>>(info);
-    EXPECT_EQ(4, info.index);
+    SaveLayerSimpleTestRenderer renderer;
+    reorderer.replayBakedOps<TestDispatcher>(renderer);
+    EXPECT_EQ(4, renderer.getIndex());
 }
 
 
@@ -285,46 +272,46 @@ TEST(OpReorderer, saveLayerSimple) {
  * - startLayer1, rect1, drawLayer2, endLayer1
  * - startFrame, layerOp1, endFrame
  */
-class SaveLayerNestedReceiver : public TestReceiver<SaveLayerNestedReceiver, Info>::Client {
+class SaveLayerNestedTestRenderer : public TestRendererBase {
 public:
-    Layer* startLayer(Info& info, uint32_t width, uint32_t height) override {
-        const int index = info.index++;
+    OffscreenBuffer* startLayer(uint32_t width, uint32_t height) override {
+        const int index = mIndex++;
         if (index == 0) {
             EXPECT_EQ(400u, width);
             EXPECT_EQ(400u, height);
-            return (Layer*) 0x400;
+            return (OffscreenBuffer*) 0x400;
         } else if (index == 3) {
             EXPECT_EQ(800u, width);
             EXPECT_EQ(800u, height);
-            return (Layer*) 0x800;
+            return (OffscreenBuffer*) 0x800;
         } else { ADD_FAILURE(); }
-        return (Layer*) nullptr;
+        return (OffscreenBuffer*) nullptr;
     }
-    void endLayer(Info& info) override {
-        int index = info.index++;
+    void endLayer() override {
+        int index = mIndex++;
         EXPECT_TRUE(index == 2 || index == 6);
     }
-    void startFrame(Info& info, uint32_t width, uint32_t height) override {
-        EXPECT_EQ(7, info.index++);
+    void startFrame(uint32_t width, uint32_t height) override {
+        EXPECT_EQ(7, mIndex++);
     }
-    void endFrame(Info& info) override {
-        EXPECT_EQ(9, info.index++);
+    void endFrame() override {
+        EXPECT_EQ(9, mIndex++);
     }
-    void onRectOp(Info& info, const RectOp& op, const BakedOpState& state) override {
-        const int index = info.index++;
+    void onRectOp(const RectOp& op, const BakedOpState& state) override {
+        const int index = mIndex++;
         if (index == 1) {
             EXPECT_EQ(Rect(0, 0, 400, 400), op.unmappedBounds); // inner rect
         } else if (index == 4) {
             EXPECT_EQ(Rect(0, 0, 800, 800), op.unmappedBounds); // outer rect
         } else { ADD_FAILURE(); }
     }
-    void onLayerOp(Info& info, const LayerOp& op, const BakedOpState& state) override {
-        const int index = info.index++;
+    void onLayerOp(const LayerOp& op, const BakedOpState& state) override {
+        const int index = mIndex++;
         if (index == 5) {
-            EXPECT_EQ((Layer*)0x400, *op.layerHandle);
+            EXPECT_EQ((OffscreenBuffer*)0x400, *op.layerHandle);
             EXPECT_EQ(Rect(0, 0, 400, 400), op.unmappedBounds); // inner layer
         } else if (index == 8) {
-            EXPECT_EQ((Layer*)0x800, *op.layerHandle);
+            EXPECT_EQ((OffscreenBuffer*)0x800, *op.layerHandle);
             EXPECT_EQ(Rect(0, 0, 800, 800), op.unmappedBounds); // outer layer
         } else { ADD_FAILURE(); }
     }
@@ -345,9 +332,9 @@ TEST(OpReorderer, saveLayerNested) {
 
     OpReorderer reorderer(800, 800, *dl);
 
-    Info info;
-    reorderer.replayBakedOps<TestReceiver<SaveLayerNestedReceiver, Info>>(info);
-    EXPECT_EQ(10, info.index);
+    SaveLayerNestedTestRenderer renderer;
+    reorderer.replayBakedOps<TestDispatcher>(renderer);
+    EXPECT_EQ(10, renderer.getIndex());
 }
 
 TEST(OpReorderer, saveLayerContentRejection) {
@@ -363,10 +350,10 @@ TEST(OpReorderer, saveLayerContentRejection) {
         canvas.restore();
     });
     OpReorderer reorderer(200, 200, *dl);
-    Info info;
 
+    FailRenderer renderer;
     // should see no ops, even within the layer, since the layer should be rejected
-    reorderer.replayBakedOps<TestReceiver<FailReceiver, Info>>(info);
+    reorderer.replayBakedOps<TestDispatcher>(renderer);
 }
 
 } // namespace uirenderer
