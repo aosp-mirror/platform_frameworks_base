@@ -95,15 +95,15 @@
     <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"Bạn đã <xliff:g id="NUMBER_0">%d</xliff:g> lần vẽ không chính xác hình mở khóa của mình. Sau <xliff:g id="NUMBER_1">%d</xliff:g> lần thử không thành công nữa, bạn sẽ được yêu cầu mở khóa máy tính bảng bằng tài khoản email.\n\n Vui lòng thử lại sau <xliff:g id="NUMBER_2">%d</xliff:g> giây."</string>
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"Bạn đã <xliff:g id="NUMBER_0">%d</xliff:g> lần vẽ không chính xác hình mở khóa của mình. Sau <xliff:g id="NUMBER_1">%d</xliff:g> lần thử không thành công nữa, bạn sẽ được yêu cầu mở khóa điện thoại bằng tài khoản email.\n\n Vui lòng thử lại sau <xliff:g id="NUMBER_2">%d</xliff:g> giây."</string>
     <string name="kg_password_wrong_pin_code_pukked" msgid="30531039455764924">"Mã PIN của SIM không chính xác, bây giờ bạn phải liên hệ với nhà cung cấp dịch vụ để mở khóa thiết bị của bạn."</string>
-  <plurals name="kg_password_wrong_pin_code">
-    <item quantity="one" msgid="8134313997799638254">"Mã PIN của SIM không chính xác, bạn còn <xliff:g id="NUMBER">%d</xliff:g> lần thử trước khi bạn phải liên hệ với nhà cung cấp dịch vụ để mở khóa thiết bị của bạn."</item>
-    <item quantity="other" msgid="2215723361575359486">"Mã PIN của SIM không chính xác, bạn còn <xliff:g id="NUMBER">%d</xliff:g> lần thử."</item>
-  </plurals>
+    <plurals name="kg_password_wrong_pin_code" formatted="false" msgid="6721575017538162249">
+      <item quantity="other">Mã PIN của SIM không chính xác, bạn còn  <xliff:g id="NUMBER_1">%d</xliff:g> lần thử.</item>
+      <item quantity="one">Mã PIN của SIM không chính xác, bạn còn  <xliff:g id="NUMBER_0">%d</xliff:g> lần thử trước khi bạn phải liên hệ với nhà cung cấp dịch vụ để mở khóa thiết bị của mình.</item>
+    </plurals>
     <string name="kg_password_wrong_puk_code_dead" msgid="7077536808291316208">"SIM không thể sử dụng được. Liên hệ với nhà cung cấp dịch vụ của bạn."</string>
-  <plurals name="kg_password_wrong_puk_code">
-    <item quantity="one" msgid="3256893607561060649">"Mã PUK của SIM không chính xác, bạn còn <xliff:g id="NUMBER">%d</xliff:g> lần thử trước khi SIM vĩnh viễn không thể sử dụng được."</item>
-    <item quantity="other" msgid="5477305226026342036">"Mã PUK của SIM không chính xác, bạn còn <xliff:g id="NUMBER">%d</xliff:g> lần thử trước khi SIM vĩnh viễn không thể sử dụng được."</item>
-  </plurals>
+    <plurals name="kg_password_wrong_puk_code" formatted="false" msgid="7576227366999858780">
+      <item quantity="other">Mã PUK của SIM không chính xác, bạn còn  <xliff:g id="NUMBER_1">%d</xliff:g> lần thử trước khi SIM vĩnh viễn không sử dụng được.</item>
+      <item quantity="one">Mã PUK của SIM không chính xác, bạn còn  <xliff:g id="NUMBER_0">%d</xliff:g> lần thử trước khi SIM vĩnh viễn không thể sử dụng được.</item>
+    </plurals>
     <string name="kg_password_pin_failed" msgid="6268288093558031564">"Thao tác mã PIN của SIM không thành công!"</string>
     <string name="kg_password_puk_failed" msgid="2838824369502455984">"Thao tác mã PUK của SIM không thành công!"</string>
     <string name="kg_pin_accepted" msgid="1448241673570020097">"Mã được chấp nhận!"</string>
@@ -119,17 +119,17 @@
     <string name="kg_prompt_reason_switch_profiles_pattern" msgid="3802056699323773969">"Yêu cầu hình khi bạn chuyển đổi hồ sơ."</string>
     <string name="kg_prompt_reason_switch_profiles_pin" msgid="8108020184731052246">"Yêu cầu mã PIN khi bạn chuyển đổi hồ sơ."</string>
     <string name="kg_prompt_reason_switch_profiles_password" msgid="6755997057852042672">"Yêu cầu mật khẩu khi bạn chuyển đổi hồ sơ."</string>
-  <plurals name="kg_prompt_reason_time_pattern">
-    <item quantity="one" msgid="5598462918459516566">"Thiết bị đã không được mở khóa trong <xliff:g id="NUMBER">%d</xliff:g> giờ. Hãy xác nhận hình mở khóa."</item>
-    <item quantity="other" msgid="224518697489572649">"Thiết bị đã không được mở khóa trong <xliff:g id="NUMBER">%d</xliff:g> giờ. Hãy xác nhận hình mở khóa."</item>
-  </plurals>
-  <plurals name="kg_prompt_reason_time_pin">
-    <item quantity="one" msgid="3073579168584205350">"Thiết bị đã không được mở khóa trong <xliff:g id="NUMBER">%d</xliff:g> giờ. Hãy xác nhận mã PIN."</item>
-    <item quantity="other" msgid="3282423442327824649">"Thiết bị đã không được mở khóa trong <xliff:g id="NUMBER">%d</xliff:g> giờ. Hãy xác nhận mã PIN."</item>
-  </plurals>
-  <plurals name="kg_prompt_reason_time_password">
-    <item quantity="one" msgid="9062782924671938516">"Thiết bị đã không được mở khóa trong <xliff:g id="NUMBER">%d</xliff:g> giờ. Hãy xác nhận mật khẩu."</item>
-    <item quantity="other" msgid="1839722302513719629">"Thiết bị đã không được mở khóa trong <xliff:g id="NUMBER">%d</xliff:g> giờ. Hãy xác nhận mật khẩu."</item>
-  </plurals>
+    <plurals name="kg_prompt_reason_time_pattern" formatted="false" msgid="2697444392228541853">
+      <item quantity="other">Thiết bị đã không được mở khóa trong <xliff:g id="NUMBER_1">%d</xliff:g> giờ. Xác nhận hình.</item>
+      <item quantity="one">Thiết bị đã không được mở khóa trong <xliff:g id="NUMBER_0">%d</xliff:g> giờ. Xác nhận hình.</item>
+    </plurals>
+    <plurals name="kg_prompt_reason_time_pin" formatted="false" msgid="2118758475374354849">
+      <item quantity="other">Thiết bị đã không được mở khóa trong <xliff:g id="NUMBER_1">%d</xliff:g> giờ. Xác nhận mã PIN.</item>
+      <item quantity="one">Thiết bị đã không được mở khóa trong <xliff:g id="NUMBER_0">%d</xliff:g> giờ. Xác nhận mã PIN.</item>
+    </plurals>
+    <plurals name="kg_prompt_reason_time_password" formatted="false" msgid="5132693663364913675">
+      <item quantity="other">Thiết bị đã không được mở khóa trong <xliff:g id="NUMBER_1">%d</xliff:g> giờ. Xác nhận mật khẩu.</item>
+      <item quantity="one">Thiết bị đã không được mở khóa trong <xliff:g id="NUMBER_0">%d</xliff:g> giờ. Xác nhận mật khẩu.</item>
+    </plurals>
     <string name="fingerprint_not_recognized" msgid="2690661881608146617">"Không nhận dạng được"</string>
 </resources>

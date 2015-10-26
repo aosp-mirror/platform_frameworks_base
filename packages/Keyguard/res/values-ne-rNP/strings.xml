@@ -82,28 +82,28 @@
     <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="74089475965050805">"तपाईँले तपाईँको अनलक ढाँचा गलत तरिकाले <xliff:g id="NUMBER_0">%d</xliff:g> पटक खिच्नु भएको छ। \n\n <xliff:g id="NUMBER_1">%d</xliff:g> सेकेन्डमा फेरि कोसिस गर्नुहोस्।"</string>
     <string name="kg_failed_attempts_almost_at_wipe" product="tablet" msgid="8774056606869646621">"तपाईंले गलत तरिकाले ट्याब्लेट अनलक गर्ने प्रयास गर्नु भएको छ<xliff:g id="NUMBER_0">%d</xliff:g>पटक।  <xliff:g id="NUMBER_1">%d</xliff:g> थप असफल प्रयासहरूपछि, यो ट्याब्लेट रिसेट हुनेछ जसले आफ्नो सम्पूर्ण डेटा मेट्नेछ।"</string>
     <string name="kg_failed_attempts_almost_at_wipe" product="default" msgid="1843331751334128428">"तपाईंले गलत तरिकाले फोन अनलक गर्ने प्रयास गर्नु भएको छ <xliff:g id="NUMBER_0">%d</xliff:g> पटक। पछि <xliff:g id="NUMBER_1">%d</xliff:g> थप असफल प्रयासहरूपछि, यो फोन  रिसेट हुनेछ जसले सम्पूर्ण डेटा मेटाउनेछ।।"</string>
-    <string name="kg_failed_attempts_now_wiping" product="tablet" msgid="258925501999698032">"तपाईं गलत तरिकाले ट्याब्लेट अनलक गर्ने प्रयास गर्नु भएको छ <xliff:g id="NUMBER">%d</xliff:g> पटक। यो ट्याब्लेट रिेसेट गरिनेछ जसले सम्पूर्ण डेटा मेट्नेछ।"</string>
+    <string name="kg_failed_attempts_now_wiping" product="tablet" msgid="258925501999698032">"तपाईँ गलत तरिकाले ट्याब्लेट अनलक गर्ने प्रयास गर्नु भएको छ <xliff:g id="NUMBER">%d</xliff:g> पटक। यो ट्याब्लेट रिेसेट गरिनेछ जसले सम्पूर्ण डेटा मेट्नेछ।"</string>
     <string name="kg_failed_attempts_now_wiping" product="default" msgid="7154028908459817066">"तपाईंले गलत तरिकाले फोन अनलक गर्ने प्रयास गर्नु भएको छ <xliff:g id="NUMBER">%d</xliff:g> पटक। यो फोन रिसेट गरिनेछ जसले सम्पूर्ण डेटा मेट्नेछ।"</string>
     <string name="kg_failed_attempts_almost_at_erase_user" product="tablet" msgid="6159955099372112688">"तपाईंले गलत तरिकाले  ट्याब्लेट अनलक गर्ने प्रयास गर्नु भएको छ<xliff:g id="NUMBER_0">%d</xliff:g> पटक।  <xliff:g id="NUMBER_1">%d</xliff:g> थप असफल प्रयासहरूपछि, यो प्रयोगकर्ता हटाइनेछ जसले सम्पूर्ण प्रयोगकर्ता डेटा मेट्नेछ।"</string>
     <string name="kg_failed_attempts_almost_at_erase_user" product="default" msgid="6945823186629369880">"तपाईंले गलत तरिकाले फोन अनलक गर्ने प्रयास गर्नु भएको छ <xliff:g id="NUMBER_0">%d</xliff:g> पटक। <xliff:g id="NUMBER_1">%d</xliff:g> थप असफल प्रयासहरूपछि, यो प्रयोगकर्ता हटाइनेछ जसले  सबै प्रयोगकर्ता डेटा मेट्नेछ।"</string>
     <string name="kg_failed_attempts_now_erasing_user" product="tablet" msgid="3963486905355778734">"तपाईंले गलत तरिकाले ट्याब्लेट अनलक गर्ने प्रयास गर्नु भएको छ<xliff:g id="NUMBER">%d</xliff:g> पटक। यो प्रयोगकर्ता हटाइनेछ जसले सम्पूर्ण प्रयोगकर्ता डेटा मेट्नेछ ।"</string>
     <string name="kg_failed_attempts_now_erasing_user" product="default" msgid="7729009752252111673">"तपाईंले गलत तरिकाले फोन अनलक गर्ने प्रयास गर्नु भएको छ<xliff:g id="NUMBER">%d</xliff:g> पटक। यो प्रयोगकर्ता हटाइनेछ जसले सम्पूर्ण प्रयोगकर्ता डेटा मेट्नेछ।"</string>
-    <string name="kg_failed_attempts_almost_at_erase_profile" product="tablet" msgid="4621778507387853694">"तपाईं गलत तरिकाले ट्याब्लेट अनलक गर्ने प्रयास गर्नु भएको छ<xliff:g id="NUMBER_0">%d</xliff:g> पटक। <xliff:g id="NUMBER_1">%d</xliff:g> थप असफल प्रयासहरूपछि, काम प्रोफाइल हटाइनेछ जसले सबै प्रोफाइल डेटा मेट्नेछ।"</string>
+    <string name="kg_failed_attempts_almost_at_erase_profile" product="tablet" msgid="4621778507387853694">"तपाईँ गलत तरिकाले ट्याब्लेट अनलक गर्ने प्रयास गर्नु भएको छ<xliff:g id="NUMBER_0">%d</xliff:g> पटक। <xliff:g id="NUMBER_1">%d</xliff:g> थप असफल प्रयासहरूपछि, काम प्रोफाइल हटाइनेछ जसले सबै प्रोफाइल डेटा मेट्नेछ।"</string>
     <string name="kg_failed_attempts_almost_at_erase_profile" product="default" msgid="6853071165802933545">"तपाईंले गलत तरिकाले फोन अनलक गर्ने प्रयास गर्नु भएको छ <xliff:g id="NUMBER_0">%d</xliff:g> पटक। <xliff:g id="NUMBER_1">%d</xliff:g> थप असफल प्रयासहरूपछि , काम प्रोफाइल हटाइनेछ जसले सबै प्रोफाइल डेटा मेट्नेछ।"</string>
-    <string name="kg_failed_attempts_now_erasing_profile" product="tablet" msgid="4686386497449912146">"तपाईं गलत तरिकाले ट्याब्लेट अनलक गर्ने प्रयास गर्नु भएको छ<xliff:g id="NUMBER">%d</xliff:g> पटक। काम प्रोफाइल हटाइनेछ जसले सम्पूर्ण  प्रोफाइल डेटा मेट्नेछ ।"</string>
+    <string name="kg_failed_attempts_now_erasing_profile" product="tablet" msgid="4686386497449912146">"तपाईँ गलत तरिकाले ट्याब्लेट अनलक गर्ने प्रयास गर्नु भएको छ<xliff:g id="NUMBER">%d</xliff:g> पटक। काम प्रोफाइल हटाइनेछ जसले सम्पूर्ण  प्रोफाइल डेटा मेट्नेछ ।"</string>
     <string name="kg_failed_attempts_now_erasing_profile" product="default" msgid="4951507352869831265">"तपाईंले गलत तरिकाले फोन अनलक गर्ने प्रयास गर्नु भएको छ <xliff:g id="NUMBER">%d</xliff:g> पटक। काम प्रोफाइल हटाइनेछ जसले सम्पूर्ण प्रोफाइल डेटा मेट्नेछ।"</string>
     <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"तपाईंले गलत तरिकाले आफ्नो अनलक ढाँचा <xliff:g id="NUMBER_0">%d</xliff:g> पटक कोर्नुभयो। <xliff:g id="NUMBER_1">%d</xliff:g> विफल प्रयत्नहरू पछि, तपाईंलाई आफ्नो ट्याब्लेट इमेल खाता प्रयोग गरेर अनलक गर्न सोधिने छ।\n\n फेरि प्रयास गर्नुहोस् <xliff:g id="NUMBER_2">%d</xliff:g> सेकेन्डहरूमा।"</string>
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"तपाईँले आफ्नो अनलक ढाँचा गलत रूपमा <xliff:g id="NUMBER_0">%d</xliff:g> पटक तान्नु भएको छ। <xliff:g id="NUMBER_1">%d</xliff:g> धेरै असफल प्रयासहरूपछि, तपाईँलाई एउटा इमेल खाताको प्रयोग गरेर तपाईँको फोन अनलक गर्न सोधिने छ।\n\n फेरि <xliff:g id="NUMBER_2">%d</xliff:g> सेकेन्डमा प्रयास गर्नुहोस्।"</string>
     <string name="kg_password_wrong_pin_code_pukked" msgid="30531039455764924">"SIM PIN कोड गलत छ। अब तपाईंले अाफ्नो उपकरण खोल्नलाई तपाईंको वाहकसँग सम्पर्क गर्नै पर्दर।"</string>
-  <plurals name="kg_password_wrong_pin_code">
-    <item quantity="one" msgid="8134313997799638254">"SIM PIN कोड गलत छ, तपाईंले अाफ्नो उपकरण खोल्नलाई तपाईंको वाहकसँग सम्पर्क गर्नै पर्दछ यस अघि तपाईंसँग <xliff:g id="NUMBER">%d</xliff:g> बाँकी प्रयास छ।"</item>
-    <item quantity="other" msgid="2215723361575359486">"SIM PIN कोड गलत छ, तपाईंसँग <xliff:g id="NUMBER">%d</xliff:g> बाँकी प्रयासहरू छन्।"</item>
-  </plurals>
+    <plurals name="kg_password_wrong_pin_code" formatted="false" msgid="6721575017538162249">
+      <item quantity="other"> गलत SIM PIN कोड, तपाईँ सँग <xliff:g id="NUMBER_1">%d</xliff:g> पटक प्रयास बाँकी छ।</item>
+      <item quantity="one">SIM PIN कोड गलत छ, तपाईँले अाफ्नो यन्त्र खोल्नलाई तपाईँको वाहकसँग सम्पर्क गर्नै पर्न अघि तपाईँसँग <xliff:g id="NUMBER_0">%d</xliff:g> पटक प्रयास बाँकी छ।</item>
+    </plurals>
     <string name="kg_password_wrong_puk_code_dead" msgid="7077536808291316208">"SIM प्रयोग बिहिन छ। तपाईंको वाहकलाई सम्पर्क गर्नुहोस्।"</string>
-  <plurals name="kg_password_wrong_puk_code">
-    <item quantity="one" msgid="3256893607561060649">"SIM PUK कोड गलत छ, तपाईंसँग SIM स्थायी रूपमा काम नलाग्ने हुनु अघि <xliff:g id="NUMBER">%d</xliff:g> बाँकी प्रयास छ।"</item>
-    <item quantity="other" msgid="5477305226026342036">"SIM PUK कोड गलत छ, तपाईंसँग SIM स्थायी रूपमा काम नलाग्ने हुनु अघि <xliff:g id="NUMBER">%d</xliff:g> बाँकी प्रयासहरू छन्।"</item>
-  </plurals>
+    <plurals name="kg_password_wrong_puk_code" formatted="false" msgid="7576227366999858780">
+      <item quantity="other">SIM PUK कोड गलत छ, तपाईंसँग SIM स्थायी रूपमा काम नलाग्ने हुनु अघि <xliff:g id="NUMBER_1">%d</xliff:g> पटक प्रयास बाँकी छ।</item>
+      <item quantity="one">SIM PUK कोड गलत छ, तपाईंसँग SIM स्थायी रूपमा काम नलाग्ने हुनु अघि <xliff:g id="NUMBER_0">%d</xliff:g> पटक प्रयास बाँकी छ।</item>
+    </plurals>
     <string name="kg_password_pin_failed" msgid="6268288093558031564">"SIM PIN राख्‍ने कार्य बिफल भयो!"</string>
     <string name="kg_password_puk_failed" msgid="2838824369502455984">"SIM PUK राख्‍ने कार्य बिफल भयो!"</string>
     <string name="kg_pin_accepted" msgid="1448241673570020097">"कोड स्वीकृत!"</string>
@@ -119,17 +119,17 @@
     <string name="kg_prompt_reason_switch_profiles_pattern" msgid="3802056699323773969">"प्रोफाइल फेर्न तपाईँलाई ढाँचा चाहिन्छ।"</string>
     <string name="kg_prompt_reason_switch_profiles_pin" msgid="8108020184731052246">"प्रोफाइल फेर्न तपाईँलाई PIN चाहिन्छ।"</string>
     <string name="kg_prompt_reason_switch_profiles_password" msgid="6755997057852042672">"प्रोफाइल फेर्न तपाईँलाई पासवर्ड चाहिन्छ।"</string>
-  <plurals name="kg_prompt_reason_time_pattern">
-    <item quantity="one" msgid="5598462918459516566">"यन्त्र <xliff:g id="NUMBER">%d</xliff:g> घन्टा देखि अनलक गरिएको छैन। ढाँचा पुष्टि गर्नुहोस्।"</item>
-    <item quantity="other" msgid="224518697489572649">"यन्त्र <xliff:g id="NUMBER">%d</xliff:g> घन्टा देखि अनलक गरिएको छैन। ढाँचा पुष्टि गर्नुहोस्।"</item>
-  </plurals>
-  <plurals name="kg_prompt_reason_time_pin">
-    <item quantity="one" msgid="3073579168584205350">"यन्त्र <xliff:g id="NUMBER">%d</xliff:g> घन्टा देखि अनलक गरिएको छैन। PIN पुष्टि गर्नुहोस्।"</item>
-    <item quantity="other" msgid="3282423442327824649">"यन्त्र <xliff:g id="NUMBER">%d</xliff:g> घन्टा देखि अनलक गरिएको छैन। PIN पुष्टि गर्नुहोस्।"</item>
-  </plurals>
-  <plurals name="kg_prompt_reason_time_password">
-    <item quantity="one" msgid="9062782924671938516">"यन्त्र <xliff:g id="NUMBER">%d</xliff:g> घन्टा देखि अनलक गरिएको छैन। पासवर्ड पुष्टि गर्नुहोस्।"</item>
-    <item quantity="other" msgid="1839722302513719629">"यन्त्र <xliff:g id="NUMBER">%d</xliff:g> घन्टा देखि अनलक गरिएको छैन। पासवर्ड पुष्टि गर्नुहोस्।"</item>
-  </plurals>
+    <plurals name="kg_prompt_reason_time_pattern" formatted="false" msgid="2697444392228541853">
+      <item quantity="other"> यन्त्र <xliff:g id="NUMBER_1">%d</xliff:g> घन्टा देखि अनलक भएको छैन। ढाँचा पुष्टि गर्नुहोस्।</item>
+      <item quantity="one"> यन्त्र <xliff:g id="NUMBER_0">%d</xliff:g> घन्टा देखि अनलक भएको छैन। ढाँचा पुष्टि गर्नुहोस्। </item>
+    </plurals>
+    <plurals name="kg_prompt_reason_time_pin" formatted="false" msgid="2118758475374354849">
+      <item quantity="other"> यन्त्र <xliff:g id="NUMBER_1">%d</xliff:g> घन्टा देखि अनलक भएको छैन। PIN पुष्टि गर्नुहोस्।</item>
+      <item quantity="one"> यन्त्र <xliff:g id="NUMBER_0">%d</xliff:g> घन्टा देखि अनलक भएको छैन। PIN पुष्टि गर्नुहोस्।</item>
+    </plurals>
+    <plurals name="kg_prompt_reason_time_password" formatted="false" msgid="5132693663364913675">
+      <item quantity="other"> यन्त्र <xliff:g id="NUMBER_1">%d</xliff:g> घन्टा देखि अनलक भएको छैन। पासवर्ड पुष्टि गर्नुहोस्।</item>
+      <item quantity="one"> यन्त्र <xliff:g id="NUMBER_0">%d</xliff:g> घन्टा देखि अनलक भएको छैन। पासवर्ड पुष्टि गर्नुहोस्।</item>
+    </plurals>
     <string name="fingerprint_not_recognized" msgid="2690661881608146617">"चिनिएको छैन"</string>
 </resources>

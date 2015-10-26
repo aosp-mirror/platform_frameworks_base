@@ -95,15 +95,17 @@
     <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"Aţi desenat incorect modelul pentru deblocare de <xliff:g id="NUMBER_0">%d</xliff:g> ori. După încă <xliff:g id="NUMBER_1">%d</xliff:g> încercări nereuşite, vi se va solicita să deblocaţi tableta cu ajutorul unui cont de e-mail.\n\n Încercați din nou peste <xliff:g id="NUMBER_2">%d</xliff:g> (de) secunde."</string>
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"Aţi desenat incorect modelul pentru deblocare de <xliff:g id="NUMBER_0">%d</xliff:g> ori. După încă <xliff:g id="NUMBER_1">%d</xliff:g> încercări nereuşite, vi se va solicita să deblocaţi telefonul cu ajutorul unui cont de e-mail.\n\n Încercați din nou peste <xliff:g id="NUMBER_2">%d</xliff:g> (de) secunde."</string>
     <string name="kg_password_wrong_pin_code_pukked" msgid="30531039455764924">"Codul PIN pentru cardul SIM este incorect. Contactați operatorul pentru a vă debloca dispozitivul."</string>
-  <plurals name="kg_password_wrong_pin_code">
-    <item quantity="one" msgid="8134313997799638254">"Codul PIN pentru cardul SIM este incorect. V-a mai rămas <xliff:g id="NUMBER">%d</xliff:g> încercare, după care va trebui să contactați operatorul pentru a vă debloca dispozitivul."</item>
-    <item quantity="other" msgid="2215723361575359486">"Codul PIN pentru cardul SIM este incorect. V-au mai rămas <xliff:g id="NUMBER">%d</xliff:g> încercări."</item>
-  </plurals>
+    <plurals name="kg_password_wrong_pin_code" formatted="false" msgid="6721575017538162249">
+      <item quantity="few">Codul PIN pentru cardul SIM este incorect. V-au mai rămas <xliff:g id="NUMBER_1">%d</xliff:g> încercări.</item>
+      <item quantity="other">Codul PIN pentru cardul SIM este incorect. V-au mai rămas <xliff:g id="NUMBER_1">%d</xliff:g> de încercări.</item>
+      <item quantity="one">Codul PIN pentru cardul SIM este incorect. V-a mai rămas <xliff:g id="NUMBER_0">%d</xliff:g> încercare, după care va trebui să contactați operatorul pentru a vă debloca dispozitivul.</item>
+    </plurals>
     <string name="kg_password_wrong_puk_code_dead" msgid="7077536808291316208">"Cardul SIM nu poate fi utilizat. Contactați operatorul."</string>
-  <plurals name="kg_password_wrong_puk_code">
-    <item quantity="one" msgid="3256893607561060649">"Codul PUK pentru cardul SIM este incorect. V-a mai rămas <xliff:g id="NUMBER">%d</xliff:g> încercare până când cardul SIM va deveni inutilizabil definitiv."</item>
-    <item quantity="other" msgid="5477305226026342036">"Codul PUK pentru cardul SIM este incorect. V-au mai rămas <xliff:g id="NUMBER">%d</xliff:g> încercări până când cardul SIM va deveni inutilizabil definitiv."</item>
-  </plurals>
+    <plurals name="kg_password_wrong_puk_code" formatted="false" msgid="7576227366999858780">
+      <item quantity="few">Codul PUK pentru cardul SIM este incorect. V-au mai rămas <xliff:g id="NUMBER_1">%d</xliff:g> încercări până când cardul SIM va deveni inutilizabil definitiv.</item>
+      <item quantity="other">Codul PUK pentru cardul SIM este incorect. V-au mai rămas <xliff:g id="NUMBER_1">%d</xliff:g> de încercări până când cardul SIM va deveni inutilizabil definitiv.</item>
+      <item quantity="one">Codul PUK pentru cardul SIM este incorect. V-a mai rămas <xliff:g id="NUMBER_0">%d</xliff:g> încercare până când cardul SIM va deveni inutilizabil definitiv.</item>
+    </plurals>
     <string name="kg_password_pin_failed" msgid="6268288093558031564">"Deblocarea cu ajutorul codului PIN pentru cardul SIM nu a reușit!"</string>
     <string name="kg_password_puk_failed" msgid="2838824369502455984">"Deblocarea cu ajutorul codului PUK pentru cardul SIM nu a reușit!"</string>
     <string name="kg_pin_accepted" msgid="1448241673570020097">"Cod acceptat!"</string>
@@ -119,17 +121,20 @@
     <string name="kg_prompt_reason_switch_profiles_pattern" msgid="3802056699323773969">"Când comutați între profiluri este necesar să introduceți modelul."</string>
     <string name="kg_prompt_reason_switch_profiles_pin" msgid="8108020184731052246">"Când comutați între profiluri este necesar să introduceți codul PIN."</string>
     <string name="kg_prompt_reason_switch_profiles_password" msgid="6755997057852042672">"Când comutați între profiluri este necesar să introduceți parola."</string>
-  <plurals name="kg_prompt_reason_time_pattern">
-    <item quantity="one" msgid="5598462918459516566">"Dispozitivul nu a fost deblocat de <xliff:g id="NUMBER">%d</xliff:g> oră. Confirmați modelul."</item>
-    <item quantity="other" msgid="224518697489572649">"Dispozitivul nu a fost deblocat de <xliff:g id="NUMBER">%d</xliff:g> (de) ore. Confirmați modelul."</item>
-  </plurals>
-  <plurals name="kg_prompt_reason_time_pin">
-    <item quantity="one" msgid="3073579168584205350">"Dispozitivul nu a fost deblocat de <xliff:g id="NUMBER">%d</xliff:g> oră. Confirmați codul PIN."</item>
-    <item quantity="other" msgid="3282423442327824649">"Dispozitivul nu a fost deblocat de <xliff:g id="NUMBER">%d</xliff:g> (de) ore. Confirmați codul PIN."</item>
-  </plurals>
-  <plurals name="kg_prompt_reason_time_password">
-    <item quantity="one" msgid="9062782924671938516">"Dispozitivul nu a fost deblocat de <xliff:g id="NUMBER">%d</xliff:g> oră. Confirmați parola."</item>
-    <item quantity="other" msgid="1839722302513719629">"Dispozitivul nu a fost deblocat de <xliff:g id="NUMBER">%d</xliff:g> (de) ore. Confirmați parola."</item>
-  </plurals>
+    <plurals name="kg_prompt_reason_time_pattern" formatted="false" msgid="2697444392228541853">
+      <item quantity="few">Dispozitivul nu a fost deblocat de <xliff:g id="NUMBER_1">%d</xliff:g> ore. Confirmați modelul.</item>
+      <item quantity="other">Dispozitivul nu a fost deblocat de <xliff:g id="NUMBER_1">%d</xliff:g> de ore. Confirmați modelul.</item>
+      <item quantity="one">Dispozitivul nu a fost deblocat de <xliff:g id="NUMBER_0">%d</xliff:g> oră. Confirmați modelul.</item>
+    </plurals>
+    <plurals name="kg_prompt_reason_time_pin" formatted="false" msgid="2118758475374354849">
+      <item quantity="few">Dispozitivul nu a fost deblocat de <xliff:g id="NUMBER_1">%d</xliff:g> ore. Confirmați codul PIN.</item>
+      <item quantity="other">Dispozitivul nu a fost deblocat de <xliff:g id="NUMBER_1">%d</xliff:g> de ore. Confirmați codul PIN.</item>
+      <item quantity="one">Dispozitivul nu a fost deblocat de <xliff:g id="NUMBER_0">%d</xliff:g> oră. Confirmați codul PIN.</item>
+    </plurals>
+    <plurals name="kg_prompt_reason_time_password" formatted="false" msgid="5132693663364913675">
+      <item quantity="few">Dispozitivul nu a fost deblocat de <xliff:g id="NUMBER_1">%d</xliff:g> ore. Confirmați parola.</item>
+      <item quantity="other">Dispozitivul nu a fost deblocat de <xliff:g id="NUMBER_1">%d</xliff:g> de ore. Confirmați parola.</item>
+      <item quantity="one">Dispozitivul nu a fost deblocat de <xliff:g id="NUMBER_0">%d</xliff:g> oră. Confirmați parola.</item>
+    </plurals>
     <string name="fingerprint_not_recognized" msgid="2690661881608146617">"Nu este recunoscută"</string>
 </resources>

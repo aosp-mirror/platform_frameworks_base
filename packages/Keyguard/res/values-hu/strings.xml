@@ -95,15 +95,15 @@
     <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"<xliff:g id="NUMBER_0">%d</xliff:g> alkalommal helytelenül rajzolta le a feloldási mintát. További <xliff:g id="NUMBER_1">%d</xliff:g> sikertelen kísérlet után egy e-mail fiók használatával kell feloldania a táblagépét.\n\n Kérjük, próbálja újra <xliff:g id="NUMBER_2">%d</xliff:g> másodperc múlva."</string>
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"<xliff:g id="NUMBER_0">%d</xliff:g> alkalommal helytelenül rajzolta le a feloldási mintát. További <xliff:g id="NUMBER_1">%d</xliff:g> sikertelen kísérlet után egy e-mail fiók használatával kell feloldania a telefonját.\n\n Kérjük, próbálja újra <xliff:g id="NUMBER_2">%d</xliff:g> másodperc múlva."</string>
     <string name="kg_password_wrong_pin_code_pukked" msgid="30531039455764924">"Helytelen PIN kód a SIM kártyához; vegye fel a kapcsolatot szolgáltatójával az eszköz feloldásához."</string>
-  <plurals name="kg_password_wrong_pin_code">
-    <item quantity="one" msgid="8134313997799638254">"Helytelen PIN kód a SIM kártyához; még <xliff:g id="NUMBER">%d</xliff:g> próbálkozása van, mielőtt fel kellene vennie a kapcsolatot szolgáltatójával az eszköz feloldásához."</item>
-    <item quantity="other" msgid="2215723361575359486">"Helytelen PIN kód a SIM kártyához; még <xliff:g id="NUMBER">%d</xliff:g> próbálkozása van."</item>
-  </plurals>
+    <plurals name="kg_password_wrong_pin_code" formatted="false" msgid="6721575017538162249">
+      <item quantity="other">A SIM kártya PIN kódja helytelen. <xliff:g id="NUMBER_1">%d</xliff:g> próbálkozás maradt.</item>
+      <item quantity="one">A SIM kártya PIN kódja helytelen. <xliff:g id="NUMBER_0">%d</xliff:g> próbálkozás maradt. Utána a szolgáltatótól kell feloldást kérnie.</item>
+    </plurals>
     <string name="kg_password_wrong_puk_code_dead" msgid="7077536808291316208">"A SIM kártya használhatatlan. Vegye fel a kapcsolatot szolgáltatójával."</string>
-  <plurals name="kg_password_wrong_puk_code">
-    <item quantity="one" msgid="3256893607561060649">"Helytelen PUK kód a SIM kártyához; még <xliff:g id="NUMBER">%d</xliff:g> próbálkozása van, mielőtt a SIM kártya végleg használhatatlan lesz."</item>
-    <item quantity="other" msgid="5477305226026342036">"Helytelen PUK kód a SIM kártyához; még <xliff:g id="NUMBER">%d</xliff:g> próbálkozása van, mielőtt a SIM kártya végleg használhatatlan lesz."</item>
-  </plurals>
+    <plurals name="kg_password_wrong_puk_code" formatted="false" msgid="7576227366999858780">
+      <item quantity="other">Helytelen PUK kód a SIM kártyához. Még <xliff:g id="NUMBER_1">%d</xliff:g> próbálkozása van, mielőtt a SIM kártya végleg használhatatlanná válik.</item>
+      <item quantity="one">Helytelen PUK kód a SIM kártyához. Még <xliff:g id="NUMBER_0">%d</xliff:g> próbálkozása van, mielőtt a SIM kártya végleg használhatatlanná válik.</item>
+    </plurals>
     <string name="kg_password_pin_failed" msgid="6268288093558031564">"A SIM kártya PIN-művelete sikertelen!"</string>
     <string name="kg_password_puk_failed" msgid="2838824369502455984">"A SIM kártya PUK-művelete sikertelen!"</string>
     <string name="kg_pin_accepted" msgid="1448241673570020097">"Kód elfogadva."</string>
@@ -119,17 +119,17 @@
     <string name="kg_prompt_reason_switch_profiles_pattern" msgid="3802056699323773969">"Ha vált a profilok között, meg kell adnia a mintát."</string>
     <string name="kg_prompt_reason_switch_profiles_pin" msgid="8108020184731052246">"Ha vált a profilok között, meg kell adnia a PIN kódot."</string>
     <string name="kg_prompt_reason_switch_profiles_password" msgid="6755997057852042672">"Ha vált a profilok között, meg kell adnia a jelszót."</string>
-  <plurals name="kg_prompt_reason_time_pattern">
-    <item quantity="one" msgid="5598462918459516566">"Az eszköz zárolása <xliff:g id="NUMBER">%d</xliff:g> órája nem lett feloldva. Adja meg a mintát."</item>
-    <item quantity="other" msgid="224518697489572649">"Az eszköz zárolása <xliff:g id="NUMBER">%d</xliff:g> órája nem lett feloldva. Adja meg a mintát."</item>
-  </plurals>
-  <plurals name="kg_prompt_reason_time_pin">
-    <item quantity="one" msgid="3073579168584205350">"Az eszköz zárolása <xliff:g id="NUMBER">%d</xliff:g> órája nem lett feloldva. Adja meg a PIN-kódot."</item>
-    <item quantity="other" msgid="3282423442327824649">"Az eszköz zárolása <xliff:g id="NUMBER">%d</xliff:g> órája nem lett feloldva. Adja meg a PIN-kódot."</item>
-  </plurals>
-  <plurals name="kg_prompt_reason_time_password">
-    <item quantity="one" msgid="9062782924671938516">"Az eszköz zárolása <xliff:g id="NUMBER">%d</xliff:g> órája nem lett feloldva. Adja meg a jelszót."</item>
-    <item quantity="other" msgid="1839722302513719629">"Az eszköz zárolása <xliff:g id="NUMBER">%d</xliff:g> órája nem lett feloldva. Adja meg a jelszót."</item>
-  </plurals>
+    <plurals name="kg_prompt_reason_time_pattern" formatted="false" msgid="2697444392228541853">
+      <item quantity="other">Az eszköz zárolása <xliff:g id="NUMBER_1">%d</xliff:g> órája nem lett feloldva. Erősítse meg a mintát.</item>
+      <item quantity="one">Az eszköz zárolása <xliff:g id="NUMBER_0">%d</xliff:g> órája nem lett feloldva. Erősítse meg a mintát.</item>
+    </plurals>
+    <plurals name="kg_prompt_reason_time_pin" formatted="false" msgid="2118758475374354849">
+      <item quantity="other">Az eszköz zárolása <xliff:g id="NUMBER_1">%d</xliff:g> órája nem lett feloldva. Erősítse meg a PIN kódot.</item>
+      <item quantity="one">Az eszköz zárolása <xliff:g id="NUMBER_0">%d</xliff:g> órája nem lett feloldva. Erősítse meg a PIN kódot.</item>
+    </plurals>
+    <plurals name="kg_prompt_reason_time_password" formatted="false" msgid="5132693663364913675">
+      <item quantity="other">Az eszköz zárolása <xliff:g id="NUMBER_1">%d</xliff:g> órája nem lett feloldva. Erősítse meg a jelszót.</item>
+      <item quantity="one">Az eszköz zárolása <xliff:g id="NUMBER_0">%d</xliff:g> órája nem lett feloldva. Erősítse meg a jelszót.</item>
+    </plurals>
     <string name="fingerprint_not_recognized" msgid="2690661881608146617">"Nem sikerült felismerni"</string>
 </resources>

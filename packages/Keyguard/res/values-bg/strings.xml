@@ -95,15 +95,15 @@
     <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"Начертахте неправилно фигурата си за отключване <xliff:g id="NUMBER_0">%d</xliff:g> пъти. След още <xliff:g id="NUMBER_1">%d</xliff:g> неуспешни опита ще бъдете помолени да отключите таблета посредством имейл адрес.\n\n Опитайте отново след <xliff:g id="NUMBER_2">%d</xliff:g> секунди."</string>
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"Начертахте неправилно фигурата си за отключване <xliff:g id="NUMBER_0">%d</xliff:g> пъти. След още <xliff:g id="NUMBER_1">%d</xliff:g> неуспешни опита ще бъдете помолени да отключите телефона посредством имейл адрес.\n\n Опитайте отново след <xliff:g id="NUMBER_2">%d</xliff:g> секунди."</string>
     <string name="kg_password_wrong_pin_code_pukked" msgid="30531039455764924">"Неправилен ПИН код за SIM картата – сега трябва да се свържете с оператора си, за да отключите устройството."</string>
-  <plurals name="kg_password_wrong_pin_code">
-    <item quantity="one" msgid="8134313997799638254">"Неправилен ПИН код за SIM картата – остава ви <xliff:g id="NUMBER">%d</xliff:g> опит, преди да трябва да се свържете с оператора си, за да отключите устройството."</item>
-    <item quantity="other" msgid="2215723361575359486">"Неправилен ПИН код за SIM картата – остават ви <xliff:g id="NUMBER">%d</xliff:g> опита."</item>
-  </plurals>
+    <plurals name="kg_password_wrong_pin_code" formatted="false" msgid="6721575017538162249">
+      <item quantity="other">Неправилен ПИН код за SIM картата – остават ви <xliff:g id="NUMBER_1">%d</xliff:g> опита.</item>
+      <item quantity="one">Неправилен ПИН код за SIM картата – остава ви <xliff:g id="NUMBER_0">%d</xliff:g> опит, преди да трябва да се свържете с оператора си, за да отключите устройството.</item>
+    </plurals>
     <string name="kg_password_wrong_puk_code_dead" msgid="7077536808291316208">"SIM картата е неизползваема. Свържете се с оператора си."</string>
-  <plurals name="kg_password_wrong_puk_code">
-    <item quantity="one" msgid="3256893607561060649">"Неправилен PUK код за SIM картата – остава ви <xliff:g id="NUMBER">%d</xliff:g> опит, преди SIM картата да стане неизползваема завинаги."</item>
-    <item quantity="other" msgid="5477305226026342036">"Неправилен PUK код за SIM картата – остават ви <xliff:g id="NUMBER">%d</xliff:g> опита, преди SIM картата да стане неизползваема завинаги."</item>
-  </plurals>
+    <plurals name="kg_password_wrong_puk_code" formatted="false" msgid="7576227366999858780">
+      <item quantity="other">Неправилен PUK код за SIM картата – остават ви <xliff:g id="NUMBER_1">%d</xliff:g> опита, преди тя да стане неизползваема завинаги.</item>
+      <item quantity="one">Неправилен PUK код за SIM картата – остава ви <xliff:g id="NUMBER_0">%d</xliff:g> опит, преди тя да стане неизползваема завинаги.</item>
+    </plurals>
     <string name="kg_password_pin_failed" msgid="6268288093558031564">"Операцията с ПИН кода за SIM картата не бе успешна!"</string>
     <string name="kg_password_puk_failed" msgid="2838824369502455984">"Операцията с PUK кода за SIM картата не бе успешна!"</string>
     <string name="kg_pin_accepted" msgid="1448241673570020097">"Кодът е приет!"</string>
@@ -119,17 +119,17 @@
     <string name="kg_prompt_reason_switch_profiles_pattern" msgid="3802056699323773969">"При превключване между потребителските профили се изисква фигура."</string>
     <string name="kg_prompt_reason_switch_profiles_pin" msgid="8108020184731052246">"При превключване между потребителските профили се изисква ПИН код."</string>
     <string name="kg_prompt_reason_switch_profiles_password" msgid="6755997057852042672">"При превключване между потребителските профили се изисква парола."</string>
-  <plurals name="kg_prompt_reason_time_pattern">
-    <item quantity="one" msgid="5598462918459516566">"Устройството не е отключвано от <xliff:g id="NUMBER">%d</xliff:g> час. Потвърдете фигурата."</item>
-    <item quantity="other" msgid="224518697489572649">"Устройството не е отключвано от <xliff:g id="NUMBER">%d</xliff:g> часа. Потвърдете фигурата."</item>
-  </plurals>
-  <plurals name="kg_prompt_reason_time_pin">
-    <item quantity="one" msgid="3073579168584205350">"Устройството не е отключвано от <xliff:g id="NUMBER">%d</xliff:g> час. Потвърдете ПИН кода."</item>
-    <item quantity="other" msgid="3282423442327824649">"Устройството не е отключвано от <xliff:g id="NUMBER">%d</xliff:g> часа. Потвърдете ПИН кода."</item>
-  </plurals>
-  <plurals name="kg_prompt_reason_time_password">
-    <item quantity="one" msgid="9062782924671938516">"Устройството не е отключвано от <xliff:g id="NUMBER">%d</xliff:g> час. Потвърдете паролата."</item>
-    <item quantity="other" msgid="1839722302513719629">"Устройството не е отключвано от <xliff:g id="NUMBER">%d</xliff:g> часа. Потвърдете паролата."</item>
-  </plurals>
+    <plurals name="kg_prompt_reason_time_pattern" formatted="false" msgid="2697444392228541853">
+      <item quantity="other">Устройството не е отключвано от <xliff:g id="NUMBER_1">%d</xliff:g> часа. Потвърдете фигурата.</item>
+      <item quantity="one">Устройството не е отключвано от <xliff:g id="NUMBER_0">%d</xliff:g> час. Потвърдете фигурата.</item>
+    </plurals>
+    <plurals name="kg_prompt_reason_time_pin" formatted="false" msgid="2118758475374354849">
+      <item quantity="other">Устройството не е отключвано от <xliff:g id="NUMBER_1">%d</xliff:g> часа. Потвърдете ПИН кода.</item>
+      <item quantity="one">Устройството не е отключвано от <xliff:g id="NUMBER_0">%d</xliff:g> час. Потвърдете ПИН кода.</item>
+    </plurals>
+    <plurals name="kg_prompt_reason_time_password" formatted="false" msgid="5132693663364913675">
+      <item quantity="other">Устройството не е отключвано от <xliff:g id="NUMBER_1">%d</xliff:g> часа. Потвърдете паролата.</item>
+      <item quantity="one">Устройството не е отключвано от <xliff:g id="NUMBER_0">%d</xliff:g> час. Потвърдете паролата.</item>
+    </plurals>
     <string name="fingerprint_not_recognized" msgid="2690661881608146617">"Не е разпознато"</string>
 </resources>

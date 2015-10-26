@@ -95,15 +95,15 @@
     <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"আপনি আপনার আনলকের প্যাটার্ন আঁকার ক্ষেত্রে <xliff:g id="NUMBER_0">%d</xliff:g> বার ভুল করেছেন৷ আর <xliff:g id="NUMBER_1">%d</xliff:g> বার অসফল প্রচেষ্টা করা হলে আপনাকে একটি ইমেল অ্যাকাউন্ট মারফত আপনার ট্যাবলেট আনলক করতে বলা হবে৷\n\n <xliff:g id="NUMBER_2">%d</xliff:g> সেকেন্ডের মধ্যে আবার চেষ্টা করুন৷"</string>
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"আপনি আপনার আনলকের প্যাটার্ন আঁকার ক্ষেত্রে <xliff:g id="NUMBER_0">%d</xliff:g> বার ভুল করেছেন৷ আর <xliff:g id="NUMBER_1">%d</xliff:g> বার অসফল প্রচেষ্টা করা হলে আপনাকে একটি ইমেল অ্যাকাউন্ট মারফত আপনার ফোন আনলক করতে বলা হবে৷\n\n <xliff:g id="NUMBER_2">%d</xliff:g> সেকেন্ডের মধ্যে আবার চেষ্টা করুন৷"</string>
     <string name="kg_password_wrong_pin_code_pukked" msgid="30531039455764924">"ভুল সিম পিন কোড, আপনার ডিভাইসটি আনলক করতে এখন আপনাকে অবশ্যই আপনার ক্যারিয়ারের সাথে যোগাযোগ করতে হবে৷"</string>
-  <plurals name="kg_password_wrong_pin_code">
-    <item quantity="one" msgid="8134313997799638254">"ভুল সিম পিন কোড, আপনার কাছে আর <xliff:g id="NUMBER">%d</xliff:g>টি প্রচেষ্টা বাকি রয়েছে, তার পরে আপনার ডিভাইসটি আনলক করতে আপনাকে অবশ্যই আপনার ক্যারিয়ারের সাথে যোগাযোগ করতে হবে৷"</item>
-    <item quantity="other" msgid="2215723361575359486">"ভুল সিম পিন কোড, আপনার কাছে আর <xliff:g id="NUMBER">%d</xliff:g>টি প্রচেষ্টা বাকি রয়েছে৷"</item>
-  </plurals>
+    <plurals name="kg_password_wrong_pin_code" formatted="false" msgid="6721575017538162249">
+      <item quantity="one">ভুল SIM পিন কোড, আপনার কাছে আর <xliff:g id="NUMBER_1">%d</xliff:g>টি প্রচেষ্টা বাকি রয়েছে৷</item>
+      <item quantity="other">ভুল SIM পিন কোড, আপনার কাছে আর <xliff:g id="NUMBER_1">%d</xliff:g>টি প্রচেষ্টা বাকি রয়েছে৷</item>
+    </plurals>
     <string name="kg_password_wrong_puk_code_dead" msgid="7077536808291316208">"SIMটি ব্যবহারের অযোগ্য৷ আপনার ক্যারিয়ারের সাথে যোগাযোগ করুন৷"</string>
-  <plurals name="kg_password_wrong_puk_code">
-    <item quantity="one" msgid="3256893607561060649">"ভুল সিম PUK কোড, আপনার কাছে আর <xliff:g id="NUMBER">%d</xliff:g>টি প্রচেষ্টা বাকি রয়েছে এটির পরেই আপনার সিম স্থায়ীভাবে অব্যবহারযোগ্য হবে৷"</item>
-    <item quantity="other" msgid="5477305226026342036">"ভুল সিম PUK কোড, আপনার কাছে আর <xliff:g id="NUMBER">%d</xliff:g>টি প্রচেষ্টা বাকি রয়েছে এটির পরেই আপনার সিম স্থায়ীভাবে অব্যবহারযোগ্য হবে৷"</item>
-  </plurals>
+    <plurals name="kg_password_wrong_puk_code" formatted="false" msgid="7576227366999858780">
+      <item quantity="one">ভুল SIM PUK কোড, আপনার কাছে আর <xliff:g id="NUMBER_1">%d</xliff:g>টি প্রচেষ্টা বাকি রয়েছে এটির পরেই আপনার SIM স্থায়ীভাবে অব্যবহারযোগ্য হবে৷</item>
+      <item quantity="other">ভুল SIM PUK কোড, আপনার কাছে আর <xliff:g id="NUMBER_1">%d</xliff:g>টি প্রচেষ্টা বাকি রয়েছে এটির পরেই আপনার SIM স্থায়ীভাবে অব্যবহারযোগ্য হবে৷</item>
+    </plurals>
     <string name="kg_password_pin_failed" msgid="6268288093558031564">"সিম পিন ক্রিয়াকলাপটি ব্যর্থ হয়েছে!"</string>
     <string name="kg_password_puk_failed" msgid="2838824369502455984">"সিম PUK ক্রিয়াকলাপটি ব্যর্থ হয়েছে!"</string>
     <string name="kg_pin_accepted" msgid="1448241673570020097">"কোড স্বীকৃত হয়েছে!"</string>
@@ -119,17 +119,17 @@
     <string name="kg_prompt_reason_switch_profiles_pattern" msgid="3802056699323773969">"যখন আপনি প্রোফাইলগুলি পাল্টাবেন তখন প্যাটার্নের প্রয়োজন হবে৷"</string>
     <string name="kg_prompt_reason_switch_profiles_pin" msgid="8108020184731052246">"যখন আপনি প্রোফাইলগুলি পাল্টাবেন তখন পিন এর প্রয়োজন হবে৷"</string>
     <string name="kg_prompt_reason_switch_profiles_password" msgid="6755997057852042672">"যখন আপনি প্রোফাইলগুলি পাল্টাবেন তখন পাসওয়ার্ডের প্রয়োজন হবে৷"</string>
-  <plurals name="kg_prompt_reason_time_pattern">
-    <item quantity="one" msgid="5598462918459516566">"<xliff:g id="NUMBER">%d</xliff:g> ঘন্টার জন্য ডিভাইস আনলক করা হয়নি৷ প্যাটার্ন নিশ্চিত করুন৷"</item>
-    <item quantity="other" msgid="224518697489572649">"<xliff:g id="NUMBER">%d</xliff:g> ঘন্টার জন্য ডিভাইস আনলক করা হয়নি৷ প্যাটার্ন নিশ্চিত করুন৷"</item>
-  </plurals>
-  <plurals name="kg_prompt_reason_time_pin">
-    <item quantity="one" msgid="3073579168584205350">"<xliff:g id="NUMBER">%d</xliff:g> ঘন্টার জন্য ডিভাইস আনলক করা হয়নি৷ পিন নিশ্চিত করুন৷"</item>
-    <item quantity="other" msgid="3282423442327824649">"<xliff:g id="NUMBER">%d</xliff:g> ঘন্টার জন্য ডিভাইস আনলক করা হয়নি৷ পিন নিশ্চিত করুন৷"</item>
-  </plurals>
-  <plurals name="kg_prompt_reason_time_password">
-    <item quantity="one" msgid="9062782924671938516">"<xliff:g id="NUMBER">%d</xliff:g> ঘন্টার জন্য ডিভাইস আনলক করা যায়নি৷ পাসওয়ার্ড নিশ্চিত করুন৷"</item>
-    <item quantity="other" msgid="1839722302513719629">"<xliff:g id="NUMBER">%d</xliff:g> ঘন্টার জন্য ডিভাইস আনলক করা হয়নি৷ পাসওয়ার্ড নিশ্চিত করুন৷"</item>
-  </plurals>
+    <plurals name="kg_prompt_reason_time_pattern" formatted="false" msgid="2697444392228541853">
+      <item quantity="one">ডিভাইস <xliff:g id="NUMBER_1">%d</xliff:g> ঘন্টার জন্য আনলক করা হয়নি। প্যাটার্ন নিশ্চিত করুন।</item>
+      <item quantity="other">ডিভাইস <xliff:g id="NUMBER_1">%d</xliff:g> ঘন্টার জন্য আনলক করা হয়নি। প্যাটার্ন নিশ্চিত করুন।</item>
+    </plurals>
+    <plurals name="kg_prompt_reason_time_pin" formatted="false" msgid="2118758475374354849">
+      <item quantity="one">ডিভাইস <xliff:g id="NUMBER_1">%d</xliff:g> ঘন্টার জন্য আনলক করা হয়নি। পিন নিশ্চিত করুন৷</item>
+      <item quantity="other">ডিভাইস <xliff:g id="NUMBER_1">%d</xliff:g> ঘন্টার জন্য আনলক করা হয়নি। পিন নিশ্চিত করুন৷</item>
+    </plurals>
+    <plurals name="kg_prompt_reason_time_password" formatted="false" msgid="5132693663364913675">
+      <item quantity="one">ডিভাইস <xliff:g id="NUMBER_1">%d</xliff:g> ঘন্টার জন্য আনলক করা হয়নি। পাসওয়ার্ড নিশ্চিত করুন৷</item>
+      <item quantity="other">ডিভাইস <xliff:g id="NUMBER_1">%d</xliff:g> ঘন্টার জন্য আনলক করা হয়নি। পাসওয়ার্ড নিশ্চিত করুন৷</item>
+    </plurals>
     <string name="fingerprint_not_recognized" msgid="2690661881608146617">"স্বীকৃত নয়"</string>
 </resources>
