@@ -95,6 +95,7 @@ class AlarmManagerService extends SystemService {
     static final boolean DEBUG_VALIDATE = localLOGV || false;
     static final boolean DEBUG_ALARM_CLOCK = localLOGV || false;
     static final boolean RECORD_ALARMS_IN_HISTORY = true;
+    static final boolean RECORD_DEVICE_IDLE_ALARMS = false;
     static final int ALARM_EVENT = 1;
     static final String TIMEZONE_PROPERTY = "persist.sys.timezone";
 
@@ -143,6 +144,16 @@ class AlarmManagerService extends SystemService {
      * used to determine the earliest we can dispatch the next such alarm.
      */
     final SparseLongArray mLastAllowWhileIdleDispatch = new SparseLongArray();
+
+    final static class IdleDispatchEntry {
+        int uid;
+        String pkg;
+        String tag;
+        String op;
+        long elapsedRealtime;
+        long argRealtime;
+    }
+    final ArrayList<IdleDispatchEntry> mAllowWhileIdleDispatches = new ArrayList();
 
     /**
      * Broadcast options to use for FLAG_ALLOW_WHILE_IDLE.
@@ -700,6 +711,14 @@ class AlarmManagerService extends SystemService {
     }
 
     void restorePendingWhileIdleAlarmsLocked() {
+        if (RECORD_DEVICE_IDLE_ALARMS) {
+            IdleDispatchEntry ent = new IdleDispatchEntry();
+            ent.uid = 0;
+            ent.pkg = "FINISH IDLE";
+            ent.elapsedRealtime = SystemClock.elapsedRealtime();
+            mAllowWhileIdleDispatches.add(ent);
+        }
+
         // Bring pending alarms back into the main list.
         if (mPendingWhileIdleAlarms.size() > 0) {
             ArrayList<Alarm> alarms = mPendingWhileIdleAlarms;
@@ -1006,6 +1025,19 @@ class AlarmManagerService extends SystemService {
             }
         }
 
+        if (RECORD_DEVICE_IDLE_ALARMS) {
+            if ((a.flags & AlarmManager.FLAG_ALLOW_WHILE_IDLE) != 0) {
+                IdleDispatchEntry ent = new IdleDispatchEntry();
+                ent.uid = a.uid;
+                ent.pkg = a.operation.getCreatorPackage();
+                ent.tag = a.operation.getTag("");
+                ent.op = "SET";
+                ent.elapsedRealtime = SystemClock.elapsedRealtime();
+                ent.argRealtime = a.whenElapsed;
+                mAllowWhileIdleDispatches.add(ent);
+            }
+        }
+
         int whichBatch = ((a.flags&AlarmManager.FLAG_STANDALONE) != 0)
                 ? -1 : attemptCoalesceLocked(a.whenElapsed, a.maxWhenElapsed);
         if (whichBatch < 0) {
@@ -1028,6 +1060,15 @@ class AlarmManagerService extends SystemService {
         boolean needRebatch = false;
 
         if ((a.flags&AlarmManager.FLAG_IDLE_UNTIL) != 0) {
+            if (RECORD_DEVICE_IDLE_ALARMS) {
+                if (mPendingIdleUntil == null) {
+                    IdleDispatchEntry ent = new IdleDispatchEntry();
+                    ent.uid = 0;
+                    ent.pkg = "START IDLE";
+                    ent.elapsedRealtime = SystemClock.elapsedRealtime();
+                    mAllowWhileIdleDispatches.add(ent);
+                }
+            }
             mPendingIdleUntil = a;
             mConstants.updateAllowWhileIdleMinTimeLocked();
             needRebatch = true;
@@ -1396,6 +1437,32 @@ class AlarmManagerService extends SystemService {
                         pw.print("      ");
                                 pw.print(fs.mTag);
                                 pw.println();
+                    }
+                }
+            }
+
+            if (RECORD_DEVICE_IDLE_ALARMS) {
+                pw.println();
+                pw.println("  Allow while idle dispatches:");
+                for (int i = 0; i < mAllowWhileIdleDispatches.size(); i++) {
+                    IdleDispatchEntry ent = mAllowWhileIdleDispatches.get(i);
+                    pw.print("    ");
+                    TimeUtils.formatDuration(ent.elapsedRealtime, nowELAPSED, pw);
+                    pw.print(": ");
+                    UserHandle.formatUid(pw, ent.uid);
+                    pw.print(":");
+                    pw.println(ent.pkg);
+                    if (ent.op != null) {
+                        pw.print("      ");
+                        pw.print(ent.op);
+                        pw.print(" / ");
+                        pw.print(ent.tag);
+                        if (ent.argRealtime != 0) {
+                            pw.print(" (");
+                            TimeUtils.formatDuration(ent.argRealtime, nowELAPSED, pw);
+                            pw.print(")");
+                        }
+                        pw.println();
                     }
                 }
             }
@@ -1862,6 +1929,16 @@ class AlarmManagerService extends SystemService {
                         if (alarm.maxWhenElapsed < minTime) {
                             alarm.maxWhenElapsed = minTime;
                         }
+                        if (RECORD_DEVICE_IDLE_ALARMS) {
+                            IdleDispatchEntry ent = new IdleDispatchEntry();
+                            ent.uid = alarm.uid;
+                            ent.pkg = alarm.operation.getCreatorPackage();
+                            ent.tag = alarm.operation.getTag("");
+                            ent.op = "RESCHEDULE";
+                            ent.elapsedRealtime = nowELAPSED;
+                            ent.argRealtime = lastTime;
+                            mAllowWhileIdleDispatches.add(ent);
+                        }
                         setImplLocked(alarm, true, false);
                         continue;
                     }
@@ -2130,6 +2207,15 @@ class AlarmManagerService extends SystemService {
                 if (allowWhileIdle) {
                     // Record the last time this uid handled an ALLOW_WHILE_IDLE alarm.
                     mLastAllowWhileIdleDispatch.put(alarm.uid, nowELAPSED);
+                    if (RECORD_DEVICE_IDLE_ALARMS) {
+                        IdleDispatchEntry ent = new IdleDispatchEntry();
+                        ent.uid = alarm.uid;
+                        ent.pkg = alarm.operation.getCreatorPackage();
+                        ent.tag = alarm.operation.getTag("");
+                        ent.op = "DELIVER";
+                        ent.elapsedRealtime = nowELAPSED;
+                        mAllowWhileIdleDispatches.add(ent);
+                    }
                 }
 
                 final BroadcastStats bs = inflight.mBroadcastStats;
