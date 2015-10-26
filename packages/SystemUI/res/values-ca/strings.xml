@@ -439,13 +439,10 @@
     <string name="activity_not_found" msgid="348423244327799974">"L\'aplicació no està instal·lada al dispositiu"</string>
     <string name="clock_seconds" msgid="7689554147579179507">"Mostra els segons del rellotge"</string>
     <string name="clock_seconds_desc" msgid="6282693067130470675">"Mostra els segons del rellotge a la barra d\'estat. Això pot afectar la durada de la bateria."</string>
-    <string name="qs_rearrange" msgid="8060918697551068765">"Torna a ordenar la Configuració ràpida"</string>
-    <string name="show_brightness" msgid="6613930842805942519">"Mostra la brillantor a la Configuració ràpida"</string>
+    <string name="qs_rearrange" msgid="8060918697551068765">"Reorganitza Configuració ràpida"</string>
+    <string name="show_brightness" msgid="6613930842805942519">"Mostra la brillantor a Configuració ràpida"</string>
     <string name="experimental" msgid="6198182315536726162">"Experimental"</string>
-    <!-- no translation found for enable_bluetooth_title (5027037706500635269) -->
-    <skip />
-    <!-- no translation found for enable_bluetooth_message (9106595990708985385) -->
-    <skip />
-    <!-- no translation found for enable_bluetooth_confirmation_ok (6258074250948309715) -->
-    <skip />
+    <string name="enable_bluetooth_title" msgid="5027037706500635269">"Vols activar el Bluetooth?"</string>
+    <string name="enable_bluetooth_message" msgid="9106595990708985385">"Per connectar el teclat amb la tauleta, primer has d\'activar el Bluetooth."</string>
+    <string name="enable_bluetooth_confirmation_ok" msgid="6258074250948309715">"Activa"</string>
 </resources>

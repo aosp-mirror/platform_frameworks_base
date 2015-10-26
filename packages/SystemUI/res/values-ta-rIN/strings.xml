@@ -440,10 +440,7 @@
     <string name="qs_rearrange" msgid="8060918697551068765">"விரைவு அமைப்புகளை மறுவரிசைப்படுத்து"</string>
     <string name="show_brightness" msgid="6613930842805942519">"விரைவு அமைப்புகளில் ஒளிர்வுப் பட்டியைக் காட்டு"</string>
     <string name="experimental" msgid="6198182315536726162">"சோதனை முயற்சி"</string>
-    <!-- no translation found for enable_bluetooth_title (5027037706500635269) -->
-    <skip />
-    <!-- no translation found for enable_bluetooth_message (9106595990708985385) -->
-    <skip />
-    <!-- no translation found for enable_bluetooth_confirmation_ok (6258074250948309715) -->
-    <skip />
+    <string name="enable_bluetooth_title" msgid="5027037706500635269">"புளூடூத்தை இயக்கவா?"</string>
+    <string name="enable_bluetooth_message" msgid="9106595990708985385">"உங்கள் டேப்லெட்டுடன் விசைப்பலகையை இணைக்க, முதலில் புளூடூத்தை இயக்க வேண்டும்."</string>
+    <string name="enable_bluetooth_confirmation_ok" msgid="6258074250948309715">"இயக்கு"</string>
 </resources>

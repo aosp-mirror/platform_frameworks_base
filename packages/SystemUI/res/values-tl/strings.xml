@@ -440,10 +440,7 @@
     <string name="qs_rearrange" msgid="8060918697551068765">"Ayusing Muli ang Mga Mabilisang Setting"</string>
     <string name="show_brightness" msgid="6613930842805942519">"Ipakita ang liwanag sa Mga Mabilisang Setting"</string>
     <string name="experimental" msgid="6198182315536726162">"Pang-eksperimento"</string>
-    <!-- no translation found for enable_bluetooth_title (5027037706500635269) -->
-    <skip />
-    <!-- no translation found for enable_bluetooth_message (9106595990708985385) -->
-    <skip />
-    <!-- no translation found for enable_bluetooth_confirmation_ok (6258074250948309715) -->
-    <skip />
+    <string name="enable_bluetooth_title" msgid="5027037706500635269">"I-on ang Bluetooth?"</string>
+    <string name="enable_bluetooth_message" msgid="9106595990708985385">"Upang ikonekta ang iyong keyboard sa iyong tablet, kailangan mo munang i-on ang Bluetooth."</string>
+    <string name="enable_bluetooth_confirmation_ok" msgid="6258074250948309715">"I-on"</string>
 </resources>
