@@ -428,10 +428,7 @@
     <string name="tuner_toast" msgid="603429811084428439">"ਵਧਾਈਆਂ! ਸਿਸਟਮ UI ਟਿਊਨਰ ਨੂੰ ਸੈਟਿੰਗਜ਼ ਵਿੱਚ ਜੋੜਿਆ ਗਿਆ ਹੈ"</string>
     <string name="remove_from_settings" msgid="8389591916603406378">"ਸੈਟਿੰਗਜ਼ ਤੋਂ ਹਟਾਓ"</string>
     <string name="remove_from_settings_prompt" msgid="6069085993355887748">"ਕੀ ਸੈਟਿੰਗਜ਼ ਤੋਂ ਸਿਸਟਮ UI ਟਿਊਨਰ ਨੂੰ ਹਟਾਉਣਾ ਹੈ ਅਤੇ ਇਸਦੀਆਂ ਸਾਰੀਆਂ ਵਿਸ਼ੇਸ਼ਤਾਵਾਂ ਨੂੰ ਉਪਯੋਗ ਕਰਨ ਤੋਂ ਰੋਕਣਾ ਹੈ?"</string>
-    <!-- no translation found for enable_bluetooth_title (5027037706500635269) -->
-    <skip />
-    <!-- no translation found for enable_bluetooth_message (9106595990708985385) -->
-    <skip />
-    <!-- no translation found for enable_bluetooth_confirmation_ok (6258074250948309715) -->
-    <skip />
+    <string name="enable_bluetooth_title" msgid="5027037706500635269">"Bluetooth ਚਾਲੂ ਕਰੋ?"</string>
+    <string name="enable_bluetooth_message" msgid="9106595990708985385">"ਆਪਣੇ ਟੈਬਲੇਟ ਨਾਲ ਆਪਣਾ ਕੀ-ਬੋਰਡ ਕਨੈਕਟ ਕਰਨ ਲਈ, ਤੁਹਾਨੂੰ ਪਹਿਲਾਂ Bluetooth ਚਾਲੂ ਕਰਨ ਦੀ ਜ਼ਰੂਰਤ ਹੈ।"</string>
+    <string name="enable_bluetooth_confirmation_ok" msgid="6258074250948309715">"ਚਾਲੂ ਕਰੋ"</string>
 </resources>

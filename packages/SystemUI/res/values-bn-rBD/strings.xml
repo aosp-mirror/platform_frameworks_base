@@ -428,10 +428,7 @@
     <string name="tuner_toast" msgid="603429811084428439">"অভিনন্দন! সেটিংস -এ সিস্টেম UI টিউনার যোগ করা হয়েছে"</string>
     <string name="remove_from_settings" msgid="8389591916603406378">"সেটিংস থেকে সরান"</string>
     <string name="remove_from_settings_prompt" msgid="6069085993355887748">"সেটিংস থেকে সিস্টেম UI টিউনার সরাতে এবং এটির সমস্ত বৈশিষ্ট্য ব্যবহার করা বন্ধ করতে চান?"</string>
-    <!-- no translation found for enable_bluetooth_title (5027037706500635269) -->
-    <skip />
-    <!-- no translation found for enable_bluetooth_message (9106595990708985385) -->
-    <skip />
-    <!-- no translation found for enable_bluetooth_confirmation_ok (6258074250948309715) -->
-    <skip />
+    <string name="enable_bluetooth_title" msgid="5027037706500635269">"Bluetooth চালু করবেন?"</string>
+    <string name="enable_bluetooth_message" msgid="9106595990708985385">"আপনার ট্যাবলেটের সাথে আপনার কীবোর্ড সংযুক্ত করতে, আপনাকে প্রথমে Bluetooth চালু করতে হবে।"</string>
+    <string name="enable_bluetooth_confirmation_ok" msgid="6258074250948309715">"চালু করুন"</string>
 </resources>
