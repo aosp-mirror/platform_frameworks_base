@@ -1223,6 +1223,27 @@ nAllocationSyncAll(JNIEnv *_env, jobject _this, jlong con, jlong a, jint bits)
     rsAllocationSyncAll((RsContext)con, (RsAllocation)a, (RsAllocationUsageType)bits);
 }
 
+static void
+nAllocationSetupBufferQueue(JNIEnv *_env, jobject _this, jlong con, jlong alloc, jint numAlloc)
+{
+    if (kLogApi) {
+        ALOGD("nAllocationSetupBufferQueue, con(%p), alloc(%p), numAlloc(%d)", (RsContext)con,
+              (RsAllocation)alloc, numAlloc);
+    }
+    rsAllocationSetupBufferQueue((RsContext)con, (RsAllocation)alloc, (uint32_t)numAlloc);
+}
+
+static void
+nAllocationShareBufferQueue(JNIEnv *_env, jobject _this, jlong con, jlong alloc1, jlong alloc2)
+{
+    if (kLogApi) {
+        ALOGD("nAllocationShareBufferQueue, con(%p), alloc1(%p), alloc2(%p)", (RsContext)con,
+              (RsAllocation)alloc1, (RsAllocation)alloc2);
+    }
+
+    rsAllocationShareBufferQueue((RsContext)con, (RsAllocation)alloc1, (RsAllocation)alloc2);
+}
+
 static jobject
 nAllocationGetSurface(JNIEnv *_env, jobject _this, jlong con, jlong a)
 {
@@ -1265,15 +1286,14 @@ nAllocationIoSend(JNIEnv *_env, jobject _this, jlong con, jlong alloc)
     rsAllocationIoSend((RsContext)con, (RsAllocation)alloc);
 }
 
-static void
+static jlong
 nAllocationIoReceive(JNIEnv *_env, jobject _this, jlong con, jlong alloc)
 {
     if (kLogApi) {
         ALOGD("nAllocationIoReceive, con(%p), alloc(%p)", (RsContext)con, (RsAllocation)alloc);
     }
-    rsAllocationIoReceive((RsContext)con, (RsAllocation)alloc);
+    return (jlong) rsAllocationIoReceive((RsContext)con, (RsAllocation)alloc);
 }
-
 
 static void
 nAllocationGenerateMipmaps(JNIEnv *_env, jobject _this, jlong con, jlong alloc)
@@ -2856,10 +2876,12 @@ static const JNINativeMethod methods[] = {
 {"rsnAllocationCopyToBitmap",        "(JJLandroid/graphics/Bitmap;)V",        (void*)nAllocationCopyToBitmap },
 
 {"rsnAllocationSyncAll",             "(JJI)V",                                (void*)nAllocationSyncAll },
+{"rsnAllocationSetupBufferQueue",    "(JJI)V",                                (void*)nAllocationSetupBufferQueue },
+{"rsnAllocationShareBufferQueue",    "(JJJ)V",                                (void*)nAllocationShareBufferQueue },
 {"rsnAllocationGetSurface",          "(JJ)Landroid/view/Surface;",            (void*)nAllocationGetSurface },
 {"rsnAllocationSetSurface",          "(JJLandroid/view/Surface;)V",           (void*)nAllocationSetSurface },
 {"rsnAllocationIoSend",              "(JJ)V",                                 (void*)nAllocationIoSend },
-{"rsnAllocationIoReceive",           "(JJ)V",                                 (void*)nAllocationIoReceive },
+{"rsnAllocationIoReceive",           "(JJ)J",                                 (void*)nAllocationIoReceive },
 {"rsnAllocationData1D",              "(JJIIILjava/lang/Object;IIIZ)V",        (void*)nAllocationData1D },
 {"rsnAllocationElementData",         "(JJIIIII[BI)V",                         (void*)nAllocationElementData },
 {"rsnAllocationData2D",              "(JJIIIIIILjava/lang/Object;IIIZ)V",     (void*)nAllocationData2D },
