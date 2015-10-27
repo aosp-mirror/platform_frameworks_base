@@ -22153,6 +22153,7 @@ package android.opengl {
     field public static final int GL_ACTIVE_PROGRAM = 33369; // 0x8259
     field public static final int GL_ACTIVE_RESOURCES = 37621; // 0x92f5
     field public static final int GL_ACTIVE_VARIABLES = 37637; // 0x9305
+    field public static final int GL_ALL_BARRIER_BITS = -1; // 0xffffffff
     field public static final int GL_ALL_SHADER_BITS = -1; // 0xffffffff
     field public static final int GL_ARRAY_SIZE = 37627; // 0x92fb
     field public static final int GL_ARRAY_STRIDE = 37630; // 0x92fe
@@ -22176,6 +22177,7 @@ package android.opengl {
     field public static final int GL_DISPATCH_INDIRECT_BUFFER_BINDING = 37103; // 0x90ef
     field public static final int GL_DRAW_INDIRECT_BUFFER = 36671; // 0x8f3f
     field public static final int GL_DRAW_INDIRECT_BUFFER_BINDING = 36675; // 0x8f43
+    field public static final int GL_ELEMENT_ARRAY_BARRIER_BIT = 2; // 0x2
     field public static final int GL_FRAGMENT_SHADER_BIT = 2; // 0x2
     field public static final int GL_FRAMEBUFFER_BARRIER_BIT = 1024; // 0x400
     field public static final int GL_FRAMEBUFFER_DEFAULT_FIXED_SAMPLE_LOCATIONS = 37652; // 0x9314
@@ -22265,6 +22267,7 @@ package android.opengl {
     field public static final int GL_SAMPLE_MASK = 36433; // 0x8e51
     field public static final int GL_SAMPLE_MASK_VALUE = 36434; // 0x8e52
     field public static final int GL_SAMPLE_POSITION = 36432; // 0x8e50
+    field public static final int GL_SHADER_IMAGE_ACCESS_BARRIER_BIT = 32; // 0x20
     field public static final int GL_SHADER_STORAGE_BARRIER_BIT = 8192; // 0x2000
     field public static final int GL_SHADER_STORAGE_BLOCK = 37606; // 0x92e6
     field public static final int GL_SHADER_STORAGE_BUFFER = 37074; // 0x90d2
@@ -22310,6 +22313,7 @@ package android.opengl {
     field public static final int GL_UNSIGNED_INT_IMAGE_3D = 36964; // 0x9064
     field public static final int GL_UNSIGNED_INT_IMAGE_CUBE = 36966; // 0x9066
     field public static final int GL_UNSIGNED_INT_SAMPLER_2D_MULTISAMPLE = 37130; // 0x910a
+    field public static final int GL_VERTEX_ATTRIB_ARRAY_BARRIER_BIT = 1; // 0x1
     field public static final int GL_VERTEX_ATTRIB_BINDING = 33492; // 0x82d4
     field public static final int GL_VERTEX_ATTRIB_RELATIVE_OFFSET = 33493; // 0x82d5
     field public static final int GL_VERTEX_BINDING_BUFFER = 36687; // 0x8f4f
