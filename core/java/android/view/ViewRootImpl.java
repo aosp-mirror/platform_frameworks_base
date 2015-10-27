@@ -4191,7 +4191,10 @@ public final class ViewRootImpl implements ViewParent,
 
                     if (mPointerIconShape != pointerShape) {
                         mPointerIconShape = pointerShape;
-                        event.getDevice().setPointerShape(pointerShape);
+                        final InputDevice inputDevice = event.getDevice();
+                        if (inputDevice != null) {
+                            inputDevice.setPointerShape(pointerShape);
+                        }
                     }
                 } else if (event.getActionMasked() == MotionEvent.ACTION_HOVER_MOVE) {
                     mPointerIconShape = PointerIcon.STYLE_NOT_SPECIFIED;
