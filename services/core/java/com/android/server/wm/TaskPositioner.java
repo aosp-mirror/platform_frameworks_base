@@ -18,7 +18,7 @@ package com.android.server.wm;
 
 import static android.app.ActivityManager.DOCKED_STACK_CREATE_MODE_BOTTOM_OR_RIGHT;
 import static android.app.ActivityManager.DOCKED_STACK_CREATE_MODE_TOP_OR_LEFT;
-import static android.app.ActivityManager.FREEFORM_WORKSPACE_STACK_ID;
+import static android.app.ActivityManager.StackId.FREEFORM_WORKSPACE_STACK_ID;
 import static android.app.ActivityManager.RESIZE_MODE_USER;
 import static android.app.ActivityManager.RESIZE_MODE_USER_FORCED;
 import static android.content.res.Configuration.ORIENTATION_LANDSCAPE;

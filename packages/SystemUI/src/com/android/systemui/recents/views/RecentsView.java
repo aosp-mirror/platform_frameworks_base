@@ -60,7 +60,9 @@ import com.android.systemui.recents.model.TaskStack;
 import java.util.ArrayList;
 import java.util.List;
 
-import static android.app.ActivityManager.INVALID_STACK_ID;
+import static android.app.ActivityManager.StackId.FULLSCREEN_WORKSPACE_STACK_ID;
+import static android.app.ActivityManager.StackId.FREEFORM_WORKSPACE_STACK_ID;
+import static android.app.ActivityManager.StackId.INVALID_STACK_ID;
 
 /**
  * This view is the the top level layout that contains TaskStacks (which are laid out according
@@ -488,14 +490,14 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
             int destinationStack) {
         final int targetStackId = destinationStack != INVALID_STACK_ID ?
                 destinationStack : clickedTask.getTask().key.stackId;
-        if (targetStackId != ActivityManager.FREEFORM_WORKSPACE_STACK_ID
-                && targetStackId != ActivityManager.FULLSCREEN_WORKSPACE_STACK_ID) {
+        if (targetStackId != FREEFORM_WORKSPACE_STACK_ID
+                && targetStackId != FULLSCREEN_WORKSPACE_STACK_ID) {
             return null;
         }
         // If this is a full screen stack, the transition will be towards the single, full screen
         // task. We only need the transition spec for this task.
         List<AppTransitionAnimationSpec> specs = new ArrayList<>();
-        if (targetStackId == ActivityManager.FULLSCREEN_WORKSPACE_STACK_ID) {
+        if (targetStackId == FULLSCREEN_WORKSPACE_STACK_ID) {
             specs.add(createThumbnailHeaderAnimationSpec(
                     stackView, offsetX, offsetY, stackScroll, clickedTask,
                     clickedTask.getTask().key.id, ADD_HEADER_BITMAP));

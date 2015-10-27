@@ -16,7 +16,7 @@
 
 package com.android.systemui.recents;
 
-import static android.app.ActivityManager.FREEFORM_WORKSPACE_STACK_ID;
+import static android.app.ActivityManager.StackId.FREEFORM_WORKSPACE_STACK_ID;
 
 import android.app.ActivityManager;
 import android.app.ActivityOptions;

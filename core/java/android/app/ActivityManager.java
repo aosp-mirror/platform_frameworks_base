@@ -73,7 +73,6 @@ import java.util.List;
  */
 public class ActivityManager {
     private static String TAG = "ActivityManager";
-    private static boolean localLOGV = false;
 
     private static int gMaxRecentTasks = -1;
 
@@ -397,60 +396,112 @@ public class ActivityManager {
      */
     public static final int COMPAT_MODE_TOGGLE = 2;
 
-    /**
-     * Invalid stack ID.
-     * @hide
-     */
-    public static final int INVALID_STACK_ID = -1;
+    /** @hide */
+    public static class StackId {
+        /** Invalid stack ID. */
+        public static final int INVALID_STACK_ID = -1;
 
-    /**
-     * First static stack ID.
-     * @hide
-     */
-    public static final int FIRST_STATIC_STACK_ID = 0;
+        /** First static stack ID. */
+        public static final int FIRST_STATIC_STACK_ID = 0;
 
-    /**
-     * Home activity stack ID.
-     * @hide
-     */
-    public static final int HOME_STACK_ID = FIRST_STATIC_STACK_ID;
+        /** Home activity stack ID. */
+        public static final int HOME_STACK_ID = FIRST_STATIC_STACK_ID;
 
-    /**
-     * ID of stack where fullscreen activities are normally launched into.
-     * @hide
-     */
-    public static final int FULLSCREEN_WORKSPACE_STACK_ID = 1;
+        /** ID of stack where fullscreen activities are normally launched into. */
+        public static final int FULLSCREEN_WORKSPACE_STACK_ID = 1;
 
-    /**
-     * ID of stack where freeform/resized activities are normally launched into.
-     * @hide
-     */
-    public static final int FREEFORM_WORKSPACE_STACK_ID = FULLSCREEN_WORKSPACE_STACK_ID + 1;
+        /** ID of stack where freeform/resized activities are normally launched into. */
+        public static final int FREEFORM_WORKSPACE_STACK_ID = FULLSCREEN_WORKSPACE_STACK_ID + 1;
 
-    /**
-     * ID of stack that occupies a dedicated region of the screen.
-     * @hide
-     */
-    public static final int DOCKED_STACK_ID = FREEFORM_WORKSPACE_STACK_ID + 1;
+        /** ID of stack that occupies a dedicated region of the screen. */
+        public static final int DOCKED_STACK_ID = FREEFORM_WORKSPACE_STACK_ID + 1;
 
-    /**
-     * ID of stack that always on top (always visible) when it exist.
-     * Mainly used for this in Picture-in-Picture mode.
-     * @hide
-     */
-    public static final int PINNED_STACK_ID = DOCKED_STACK_ID + 1;
+        /** ID of stack that always on top (always visible) when it exist. */
+        public static final int PINNED_STACK_ID = DOCKED_STACK_ID + 1;
 
-    /**
-     * Last static stack stack ID.
-     * @hide
-     */
-    public static final int LAST_STATIC_STACK_ID = PINNED_STACK_ID;
+        /** Last static stack stack ID. */
+        public static final int LAST_STATIC_STACK_ID = PINNED_STACK_ID;
 
-    /**
-     * Start of ID range used by stacks that are created dynamically.
-     * @hide
-     */
-    public static final int FIRST_DYNAMIC_STACK_ID = LAST_STATIC_STACK_ID + 1;
+        /** Start of ID range used by stacks that are created dynamically. */
+        public static final int FIRST_DYNAMIC_STACK_ID = LAST_STATIC_STACK_ID + 1;
+
+        public static boolean isStaticStack(int stackId) {
+            return stackId >= FIRST_STATIC_STACK_ID && stackId <= LAST_STATIC_STACK_ID;
+        }
+
+        /**
+         * Returns true if the activities contained in the input stack display a shadow around
+         * their border.
+         */
+        public static boolean hasWindowShadow(int stackId) {
+            return stackId == FREEFORM_WORKSPACE_STACK_ID || stackId == PINNED_STACK_ID;
+        }
+
+        /**
+         * Returns true if the activities contained in the input stack display a decor view.
+         */
+        public static boolean hasWindowDecor(int stackId) {
+            return stackId == FREEFORM_WORKSPACE_STACK_ID;
+        }
+
+        /**
+         * Returns true if the tasks contained in the stack can be resized independently of the
+         * stack.
+         */
+        public static boolean isTaskResizeAllowed(int stackId) {
+            return stackId == FREEFORM_WORKSPACE_STACK_ID;
+        }
+
+        /**
+         * Returns true if the task bounds should persist across power cycles.
+         */
+        public static boolean persistTaskBounds(int stackId) {
+            return isStaticStack(stackId) &&
+                    stackId != DOCKED_STACK_ID && stackId != PINNED_STACK_ID;
+        }
+
+        /**
+         * Returns true if dynamic stacks are allowed to be visible behind the input stack.
+         */
+        public static boolean isDynamicStacksVisibleBehindAllowed(int stackId) {
+            return stackId == PINNED_STACK_ID;
+        }
+
+        /**
+         * Returns true if we try to maintain focus in the current stack when the top activity
+         * finishes.
+         */
+        public static boolean keepFocusInStackIfPossible(int stackId) {
+            return stackId == FREEFORM_WORKSPACE_STACK_ID
+                    || stackId == DOCKED_STACK_ID || stackId == PINNED_STACK_ID;
+        }
+
+        /**
+         * Returns true if Stack size is affected by the docked stack changing size.
+         */
+        public static boolean isResizeableByDockedStack(int stackId) {
+            return isStaticStack(stackId) &&
+                    stackId != DOCKED_STACK_ID && stackId != PINNED_STACK_ID;
+        }
+
+        /**
+         * Returns true if the size of tasks in the input stack are affected by the docked stack
+         * changing size.
+         */
+        public static boolean isTaskResizeableByDockedStack(int stackId) {
+            return isStaticStack(stackId) && stackId != FREEFORM_WORKSPACE_STACK_ID
+                    && stackId != DOCKED_STACK_ID && stackId != PINNED_STACK_ID;
+        }
+
+        /**
+         * Returns true if the windows of tasks being moved to this stack should be preserved so
+         * there isn't a display gap.
+         */
+        public static boolean preserveWindowOnTaskMove(int stackId) {
+            return stackId == FULLSCREEN_WORKSPACE_STACK_ID
+                    || stackId == DOCKED_STACK_ID || stackId == PINNED_STACK_ID;
+        }
+    }
 
     /**
      * Input parameter to {@link android.app.IActivityManager#moveTaskToDockedStack} which

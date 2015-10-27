@@ -2728,8 +2728,8 @@ public class Activity extends ContextThemeWrapper
     /**
      * Called to move the window and its activity/task to a different stack container.
      * For example, a window can move between
-     * {@link android.app.ActivityManager#FULLSCREEN_WORKSPACE_STACK_ID} stack and
-     * {@link android.app.ActivityManager#FREEFORM_WORKSPACE_STACK_ID} stack.
+     * {@link android.app.ActivityManager.StackId#FULLSCREEN_WORKSPACE_STACK_ID} stack and
+     * {@link android.app.ActivityManager.StackId#FREEFORM_WORKSPACE_STACK_ID} stack.
      *
      * @param stackId stack Id to change to.
      * @hide

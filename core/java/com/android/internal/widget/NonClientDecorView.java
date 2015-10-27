@@ -16,8 +16,9 @@
 
 package com.android.internal.widget;
 
+import static android.app.ActivityManager.StackId.FULLSCREEN_WORKSPACE_STACK_ID;
+
 import android.content.Context;
-import android.graphics.Color;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.os.Looper;
@@ -332,8 +333,7 @@ public class NonClientDecorView extends LinearLayout
         Window.WindowControllerCallback callback = mOwner.getWindowControllerCallback();
         if (callback != null) {
             try {
-                callback.changeWindowStack(
-                        android.app.ActivityManager.FULLSCREEN_WORKSPACE_STACK_ID);
+                callback.changeWindowStack(FULLSCREEN_WORKSPACE_STACK_ID);
             } catch (RemoteException ex) {
                 Log.e(TAG, "Cannot change task workspace.");
             }

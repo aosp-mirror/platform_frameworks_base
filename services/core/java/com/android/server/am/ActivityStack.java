@@ -16,14 +16,11 @@
 
 package com.android.server.am;
 
-import static android.app.ActivityManager.DOCKED_STACK_ID;
-import static android.app.ActivityManager.FIRST_STATIC_STACK_ID;
-import static android.app.ActivityManager.FREEFORM_WORKSPACE_STACK_ID;
-import static android.app.ActivityManager.FULLSCREEN_WORKSPACE_STACK_ID;
-import static android.app.ActivityManager.HOME_STACK_ID;
-import static android.app.ActivityManager.INVALID_STACK_ID;
-import static android.app.ActivityManager.LAST_STATIC_STACK_ID;
-import static android.app.ActivityManager.PINNED_STACK_ID;
+import static android.app.ActivityManager.StackId.DOCKED_STACK_ID;
+import static android.app.ActivityManager.StackId.FREEFORM_WORKSPACE_STACK_ID;
+import static android.app.ActivityManager.StackId.FULLSCREEN_WORKSPACE_STACK_ID;
+import static android.app.ActivityManager.StackId.HOME_STACK_ID;
+import static android.app.ActivityManager.StackId.PINNED_STACK_ID;
 import static android.content.pm.ActivityInfo.FLAG_SHOW_FOR_ALL_USERS;
 
 import static com.android.server.am.ActivityManagerDebugConfig.*;
@@ -49,6 +46,7 @@ import com.android.server.wm.WindowManagerService;
 
 import android.app.Activity;
 import android.app.ActivityManager;
+import android.app.ActivityManager.StackId;
 import android.app.ActivityOptions;
 import android.app.AppGlobals;
 import android.app.IActivityController;
@@ -255,9 +253,6 @@ final class ActivityStack {
 
     private final LaunchingTaskPositioner mTaskPositioner;
 
-    // If the bounds of task contained in this stack should be persisted across power cycles.
-    final boolean mPersistTaskBounds;
-
     static final int PAUSE_TIMEOUT_MSG = ActivityManagerService.FIRST_ACTIVITY_STACK_MSG + 1;
     static final int DESTROY_TIMEOUT_MSG = ActivityManagerService.FIRST_ACTIVITY_STACK_MSG + 2;
     static final int LAUNCH_TICK_MSG = ActivityManagerService.FIRST_ACTIVITY_STACK_MSG + 3;
@@ -371,7 +366,6 @@ final class ActivityStack {
         mRecentTasks = recentTasks;
         mTaskPositioner = mStackId == FREEFORM_WORKSPACE_STACK_ID
                 ? new LaunchingTaskPositioner() : null;
-        mPersistTaskBounds = mStackId != DOCKED_STACK_ID && mStackId != PINNED_STACK_ID;
     }
 
     void attachDisplay(ActivityStackSupervisor.ActivityDisplay activityDisplay, boolean onTop) {
@@ -1365,7 +1359,7 @@ final class ActivityStack {
             }
         }
 
-        if (mStackId >= FIRST_STATIC_STACK_ID && mStackId <= LAST_STATIC_STACK_ID) {
+        if (StackId.isStaticStack(mStackId)) {
             // Visibility of any static stack should have been determined by the conditions above.
             return false;
         }
@@ -1377,9 +1371,7 @@ final class ActivityStack {
                 continue;
             }
 
-            if (stack.mStackId == FREEFORM_WORKSPACE_STACK_ID
-                    || stack.mStackId == HOME_STACK_ID
-                    || stack.mStackId == FULLSCREEN_WORKSPACE_STACK_ID) {
+            if (!StackId.isDynamicStacksVisibleBehindAllowed(stack.mStackId)) {
                 // These stacks can't have any dynamic stacks visible behind them.
                 return false;
             }
@@ -2797,8 +2789,7 @@ final class ActivityStack {
             ActivityRecord next = topRunningActivityLocked();
             final String myReason = reason + " adjustFocus";
             if (next != r) {
-                if (next != null && (mStackId == FREEFORM_WORKSPACE_STACK_ID
-                        || mStackId == DOCKED_STACK_ID || mStackId == PINNED_STACK_ID)) {
+                if (next != null && StackId.keepFocusInStackIfPossible(mStackId)) {
                     // For freeform, docked, and pinned stacks we always keep the focus within the
                     // stack as long as there is a running activity in the stack that we can adjust
                     // focus to.

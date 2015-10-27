@@ -16,11 +16,8 @@
 
 package com.android.internal.policy;
 
-import static android.app.ActivityManager.FIRST_DYNAMIC_STACK_ID;
-import static android.app.ActivityManager.FREEFORM_WORKSPACE_STACK_ID;
-import static android.app.ActivityManager.FULLSCREEN_WORKSPACE_STACK_ID;
-import static android.app.ActivityManager.INVALID_STACK_ID;
-import static android.app.ActivityManager.PINNED_STACK_ID;
+import static android.app.ActivityManager.StackId.FULLSCREEN_WORKSPACE_STACK_ID;
+import static android.app.ActivityManager.StackId.INVALID_STACK_ID;
 import static android.view.View.MeasureSpec.AT_MOST;
 import static android.view.View.MeasureSpec.EXACTLY;
 import static android.view.View.MeasureSpec.getMode;
@@ -30,6 +27,7 @@ import static android.view.WindowManager.LayoutParams.*;
 
 import android.animation.Animator;
 import android.animation.ObjectAnimator;
+import android.app.ActivityManager.StackId;
 import android.app.ActivityManagerNative;
 import android.app.SearchManager;
 import android.os.Build;
@@ -712,9 +710,9 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
             if (mWorkspaceId != workspaceId) {
                 mWorkspaceId = workspaceId;
                 // We might have to change the kind of surface before we do anything else.
-                mNonClientDecorView.phoneWindowUpdated(hasNonClientDecor(mWorkspaceId),
-                        nonClientDecorHasShadow(mWorkspaceId));
-                mDecor.enableNonClientDecor(hasNonClientDecor(workspaceId));
+                mNonClientDecorView.phoneWindowUpdated(StackId.hasWindowDecor(mWorkspaceId),
+                        StackId.hasWindowShadow(mWorkspaceId));
+                mDecor.enableNonClientDecor(StackId.hasWindowDecor(workspaceId));
             }
         }
     }
@@ -3710,7 +3708,7 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
          * @return Returns true when the window has a shadow created by the non client decor.
          **/
         private boolean windowHasShadow() {
-            return windowHasNonClientDecor() && nonClientDecorHasShadow(mWindow.mWorkspaceId);
+            return windowHasNonClientDecor() && StackId.hasWindowShadow(mWindow.mWorkspaceId);
         }
 
         void setWindow(PhoneWindow phoneWindow) {
@@ -4209,7 +4207,7 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
         mWorkspaceId = getWorkspaceId();
         // Only a non floating application window on one of the allowed workspaces can get a non
         // client decor.
-        if (!isFloating() && isApplication && mWorkspaceId < FIRST_DYNAMIC_STACK_ID) {
+        if (!isFloating() && isApplication && StackId.isStaticStack(mWorkspaceId)) {
             // Dependent on the brightness of the used title we either use the
             // dark or the light button frame.
             if (nonClientDecorView == null) {
@@ -4225,12 +4223,13 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
                             R.layout.non_client_decor_light, null);
                 }
             }
-            nonClientDecorView.setPhoneWindow(this, hasNonClientDecor(mWorkspaceId),
-                    nonClientDecorHasShadow(mWorkspaceId), getResizingBackgroundDrawable(),
+            nonClientDecorView.setPhoneWindow(this, StackId.hasWindowDecor(mWorkspaceId),
+                    StackId.hasWindowShadow(mWorkspaceId), getResizingBackgroundDrawable(),
                     mDecor.getContext().getDrawable(R.drawable.non_client_decor_title_focused));
         }
         // Tell the decor if it has a visible non client decor.
-        mDecor.enableNonClientDecor(nonClientDecorView != null && hasNonClientDecor(mWorkspaceId));
+        mDecor.enableNonClientDecor(
+                nonClientDecorView != null&& StackId.hasWindowDecor(mWorkspaceId));
 
         return nonClientDecorView;
     }
@@ -5401,24 +5400,6 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
             return FULLSCREEN_WORKSPACE_STACK_ID;
         }
         return workspaceId;
-    }
-
-    /**
-     * Determines if the window should show a non client decor for the workspace it is in.
-     * @param workspaceId The Id of the workspace which contains this window.
-     * @Return Returns true if the window should show a non client decor.
-     **/
-    private static boolean hasNonClientDecor(int workspaceId) {
-        return workspaceId == FREEFORM_WORKSPACE_STACK_ID;
-    }
-
-    /**
-     * Determines if the window should show a shadow or not, dependent on the workspace.
-     * @param workspaceId The Id of the workspace which contains this window.
-     * @Return Returns true if the window should show a shadow.
-     **/
-    private static boolean nonClientDecorHasShadow(int workspaceId) {
-        return workspaceId == FREEFORM_WORKSPACE_STACK_ID || workspaceId == PINNED_STACK_ID;
     }
 
     @Override
