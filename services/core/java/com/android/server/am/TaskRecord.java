@@ -318,7 +318,7 @@ final class TaskRecord {
         mNextAffiliateTaskId = nextTaskId;
         mCallingUid = callingUid;
         mCallingPackage = callingPackage;
-        mResizeable = resizeable;
+        mResizeable = resizeable || mService.mForceResizableActivites;
         mPrivileged = privileged;
         ActivityInfo info = mActivities.get(0).info;
         mMinimalSize = info != null && info.layout != null ? info.layout.minimalSize : -1;
@@ -420,7 +420,7 @@ final class TaskRecord {
         } else {
             autoRemoveRecents = false;
         }
-        mResizeable = info.resizeable;
+        mResizeable = info.resizeable || mService.mForceResizableActivites;
         mLockTaskMode = info.lockTaskLaunchMode;
         mPrivileged = (info.applicationInfo.privateFlags & PRIVATE_FLAG_PRIVILEGED) != 0;
         setLockTaskAuth();
@@ -626,6 +626,9 @@ final class TaskRecord {
         // Only set this based on the first activity
         if (mActivities.isEmpty()) {
             taskType = r.mActivityType;
+            if (taskType == HOME_ACTIVITY_TYPE && mService.mForceResizableActivites) {
+                mResizeable = r.info.resizeable;
+            }
             isPersistable = r.isPersistable();
             mCallingUid = r.launchedFromUid;
             mCallingPackage = r.launchedFromPackage;

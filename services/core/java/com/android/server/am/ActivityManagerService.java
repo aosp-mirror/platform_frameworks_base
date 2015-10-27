@@ -75,6 +75,7 @@ import android.os.WorkSource;
 import android.os.storage.IMountService;
 import android.os.storage.MountServiceInternal;
 import android.os.storage.StorageManager;
+import android.provider.Settings.Global;
 import android.service.voice.IVoiceInteractionSession;
 import android.service.voice.VoiceInteractionSession;
 import android.util.ArrayMap;
@@ -1189,6 +1190,7 @@ public final class ActivityManagerService extends ActivityManagerNative
     String mOrigDebugApp = null;
     boolean mOrigWaitForDebugger = false;
     boolean mAlwaysFinishActivities = false;
+    boolean mForceResizableActivites;
     IActivityController mController = null;
     String mProfileApp = null;
     ProcessRecord mProfileProc = null;
@@ -11638,14 +11640,17 @@ public final class ActivityManagerService extends ActivityManagerNative
 
     private void retrieveSettings() {
         final ContentResolver resolver = mContext.getContentResolver();
-        String debugApp = Settings.Global.getString(
-            resolver, Settings.Global.DEBUG_APP);
+        String debugApp = Settings.Global.getString(resolver, Settings.Global.DEBUG_APP);
         boolean waitForDebugger = Settings.Global.getInt(
             resolver, Settings.Global.WAIT_FOR_DEBUGGER, 0) != 0;
         boolean alwaysFinishActivities = Settings.Global.getInt(
             resolver, Settings.Global.ALWAYS_FINISH_ACTIVITIES, 0) != 0;
         boolean forceRtl = Settings.Global.getInt(
                 resolver, Settings.Global.DEVELOPMENT_FORCE_RTL, 0) != 0;
+        int defaultForceResizable = Build.IS_DEBUGGABLE ? 1 : 0;
+        boolean forceResizable = Settings.Global.getInt(
+                resolver, Global.DEVELOPMENT_FORCE_RESIZABLE_ACTIVITIES,
+                defaultForceResizable) != 0;
         // Transfer any global setting for forcing RTL layout, into a System Property
         SystemProperties.set(Settings.Global.DEVELOPMENT_FORCE_RTL, forceRtl ? "1":"0");
 
@@ -11660,6 +11665,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             mDebugApp = mOrigDebugApp = debugApp;
             mWaitForDebugger = mOrigWaitForDebugger = waitForDebugger;
             mAlwaysFinishActivities = alwaysFinishActivities;
+            mForceResizableActivites = forceResizable;
             // This happens before any activities are started, so we can
             // change mConfiguration in-place.
             updateConfigurationLocked(configuration, null, true);
