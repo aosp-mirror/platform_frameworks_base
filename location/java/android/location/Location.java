@@ -257,11 +257,13 @@ public class Location implements Parcelable {
             int deg = Integer.parseInt(degrees);
             double min;
             double sec = 0.0;
+            boolean secPresent = false;
 
             if (st.hasMoreTokens()) {
                 min = Integer.parseInt(minutes);
                 String seconds = st.nextToken();
                 sec = Double.parseDouble(seconds);
+                secPresent = true;
             } else {
                 min = Double.parseDouble(minutes);
             }
@@ -273,11 +275,15 @@ public class Location implements Parcelable {
             if ((deg < 0.0) || (deg > 179 && !isNegative180)) {
                 throw new IllegalArgumentException("coordinate=" + coordinate);
             }
-            if (min < 0 || min > 59) {
+
+            // min must be in [0, 59] if seconds are present, otherwise [0.0, 60.0)
+            if (min < 0 || min >= 60 || (secPresent && (min > 59))) {
                 throw new IllegalArgumentException("coordinate=" +
                         coordinate);
             }
-            if (sec < 0 || sec > 59) {
+
+            // sec must be in [0.0, 60.0)
+            if (sec < 0 || sec >= 60) {
                 throw new IllegalArgumentException("coordinate=" +
                         coordinate);
             }
