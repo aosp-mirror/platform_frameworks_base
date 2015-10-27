@@ -2,6 +2,7 @@ package com.android.mtp;
 
 import android.content.ContentValues;
 import android.content.Context;
+import android.content.res.Resources;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
@@ -84,7 +85,7 @@ class MtpDatabase {
     }
 
     @VisibleForTesting
-    void putRootDocument(MtpRoot root) throws Exception {
+    void putRootDocument(Resources resources, MtpRoot root) throws Exception {
         database.beginTransaction();
         try {
             final ContentValues values = new ContentValues();
@@ -92,7 +93,7 @@ class MtpDatabase {
             values.put(COLUMN_STORAGE_ID, root.mStorageId);
             values.putNull(COLUMN_OBJECT_HANDLE);
             values.put(Document.COLUMN_MIME_TYPE, DocumentsContract.Document.MIME_TYPE_DIR);
-            values.put(Document.COLUMN_DISPLAY_NAME, root.mDescription);
+            values.put(Document.COLUMN_DISPLAY_NAME, root.getRootName(resources));
             values.putNull(Document.COLUMN_SUMMARY);
             values.putNull(Document.COLUMN_LAST_MODIFIED);
             values.putNull(Document.COLUMN_ICON);
