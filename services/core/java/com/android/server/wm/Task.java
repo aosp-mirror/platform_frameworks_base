@@ -342,6 +342,11 @@ class Task implements DimLayer.DimLayerUser {
         return tokensCount > 0 ? mAppTokens.get(tokensCount - 1).findMainWindow() : null;
     }
 
+    AppWindowToken getTopAppWindowToken() {
+        final int tokensCount = mAppTokens.size();
+        return tokensCount > 0 ? mAppTokens.get(tokensCount - 1) : null;
+    }
+
     @Override
     public boolean isFullscreen() {
         if (useCurrentBounds()) {

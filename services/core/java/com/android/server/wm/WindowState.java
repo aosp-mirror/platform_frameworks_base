@@ -29,6 +29,8 @@ import static android.view.WindowManager.LayoutParams.TYPE_INPUT_METHOD;
 import static android.view.WindowManager.LayoutParams.TYPE_INPUT_METHOD_DIALOG;
 import static android.view.WindowManager.LayoutParams.TYPE_WALLPAPER;
 import static com.android.server.wm.WindowManagerService.DEBUG_ADD_REMOVE;
+import static com.android.server.wm.WindowManagerService.DEBUG_ANIM;
+import static com.android.server.wm.WindowManagerService.DEBUG_APP_TRANSITIONS;
 import static com.android.server.wm.WindowManagerService.DEBUG_CONFIGURATION;
 import static com.android.server.wm.WindowManagerService.DEBUG_LAYOUT;
 import static com.android.server.wm.WindowManagerService.DEBUG_ORIENTATION;
@@ -1505,29 +1507,26 @@ final class WindowState implements WindowManagerPolicy.WindowState {
         return mExiting || (mService.mClosingApps.contains(mAppToken));
     }
 
-    boolean saveSurfaceIfNeeded() {
+    boolean isAnimatingWithSavedSurface() {
+        return mAppToken != null && mAppToken.mAnimatingWithSavedSurface;
+    }
+
+    boolean shouldSaveSurface() {
         if (ActivityManager.isLowRamDeviceStatic()) {
             // Don't save surfaces on Svelte devices.
             return false;
         }
 
         Task task = getTask();
-        if (task == null || task.inHomeStack()) {
+        if (task == null || task.inHomeStack()
+                || task.getTopAppWindowToken() != mAppToken) {
             // Don't save surfaces for home stack apps. These usually resume and draw
             // first frame very fast. Saving surfaces are mostly a waste of memory.
+            // Don't save if the window is not the topmost window.
             return false;
         }
 
-        // We want to save surface if the app's windows are "allDrawn", or if we're
-        // currently animating with save surfaces. (If the app didn't even finish
-        // drawing when the user exits, but we have a saved surface from last time,
-        // we still want to keep that surface.)
-        if (mAppToken.allDrawn || mAppToken.mAnimatingWithSavedSurface) {
-            mAppToken.mHasSavedSurface = true;
-            return true;
-        }
-
-        return false;
+        return mAppToken.shouldSaveSurface();
     }
 
     @Override

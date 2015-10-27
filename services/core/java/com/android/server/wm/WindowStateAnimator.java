@@ -525,6 +525,12 @@ class WindowStateAnimator {
             Slog.v(TAG, "Finishing drawing window " + mWin + ": mDrawState="
                     + drawStateToString());
         }
+        if (mWin.mAppToken != null) {
+            // App has drawn something to its windows, we're no longer animating with
+            // the saved surfaces. If the user exits now, we only want to save again
+            // if allDrawn is true.
+            mWin.mAppToken.mAnimatingWithSavedSurface = false;
+        }
         if (mDrawState == DRAW_PENDING) {
             if (DEBUG_SURFACE_TRACE || DEBUG_ANIM || SHOW_TRANSACTIONS || DEBUG_ORIENTATION)
                 Slog.v(TAG, "finishDrawingLocked: mDrawState=COMMIT_DRAW_PENDING " + this + " in "

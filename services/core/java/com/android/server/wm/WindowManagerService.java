@@ -2637,6 +2637,11 @@ public class WindowManagerService extends IWindowManager.Stub
                     }
                 }
                 dragResizing = win.isDragResizing();
+                if (win.isAnimatingWithSavedSurface()) {
+                    // If we're animating with a saved surface now, request client to report draw.
+                    // We still need to know when the real thing is drawn.
+                    toBeDisplayed = true;
+                }
                 try {
                     if (!win.mHasSurface) {
                         surfaceChanged = true;
@@ -2692,11 +2697,9 @@ public class WindowManagerService extends IWindowManager.Stub
                     // the app sets visibility to invisible for the first time after resume,
                     // or when the user exits immediately after a resume. In both cases, we
                     // don't want to destroy the saved surface.
-                    final boolean isAnimatingWithSavedSurface =
-                            win.mAppToken != null && win.mAppToken.mAnimatingWithSavedSurface;
                     // If we are not currently running the exit animation, we
                     // need to see about starting one.
-                    if (!win.mExiting && !isAnimatingWithSavedSurface) {
+                    if (!win.mExiting && !win.isAnimatingWithSavedSurface()) {
                         surfaceChanged = true;
                         // Try starting an animation; if there isn't one, we
                         // can destroy the surface right away.
@@ -2722,7 +2725,9 @@ public class WindowManagerService extends IWindowManager.Stub
                             if (mInputMethodWindow == win) {
                                 mInputMethodWindow = null;
                             }
-                            winAnimator.destroySurfaceLocked();
+                            if (!win.shouldSaveSurface()) {
+                                winAnimator.destroySurfaceLocked();
+                            }
                         }
                         //TODO (multidisplay): Magnification is supported only for the default
                         if (mAccessibilityController != null
@@ -2854,12 +2859,6 @@ public class WindowManagerService extends IWindowManager.Stub
                     if ((win.mAttrs.flags & FLAG_SHOW_WALLPAPER) != 0) {
                         getDefaultDisplayContentLocked().pendingLayoutChanges |=
                                 WindowManagerPolicy.FINISH_LAYOUT_REDO_WALLPAPER;
-                    }
-                    if (win.mAppToken != null) {
-                        // App has drawn something to its windows, we're no longer animating with
-                        // the saved surfaces. If the user exits now, we only want to save again
-                        // if allDrawn is true.
-                        win.mAppToken.mAnimatingWithSavedSurface = false;
                     }
                     win.setDisplayLayoutNeeded();
                     mWindowPlacerLocked.requestTraversal();
@@ -6112,6 +6111,10 @@ public class WindowManagerService extends IWindowManager.Stub
         final WindowList windows = displayContent.getWindowList();
         for (int i = windows.size() - 1; i >= 0; i--) {
             WindowState w = windows.get(i);
+            // Discard surface after orientation change, these can't be reused.
+            if (w.mAppToken != null) {
+                w.mAppToken.destroySavedSurfaces();
+            }
             if (w.mHasSurface) {
                 if (DEBUG_ORIENTATION) Slog.v(TAG, "Set mOrientationChanging of " + w);
                 w.mOrientationChanging = true;
@@ -8767,12 +8770,14 @@ public class WindowManagerService extends IWindowManager.Stub
                         } else if (ws.mAppToken != null && ws.mAppToken.clientHidden) {
                             Slog.w(TAG, "LEAKED SURFACE (app token hidden): "
                                     + ws + " surface=" + wsa.mSurfaceControl
-                                    + " token=" + ws.mAppToken);
+                                    + " token=" + ws.mAppToken
+                                    + " saved=" + ws.mAppToken.mHasSavedSurface);
                             if (SHOW_TRANSACTIONS) logSurface(ws, "LEAK DESTROY", null);
                             wsa.mSurfaceControl.destroy();
                             wsa.mSurfaceShown = false;
                             wsa.mSurfaceControl = null;
                             ws.mHasSurface = false;
+                            ws.mAppToken.mHasSavedSurface = false;
                             leakedSurface = true;
                         }
                     }

@@ -363,8 +363,8 @@ class WindowSurfacePlacer {
                 continue;
             }
             // Discard the saved surface if window size is changed, it can't be reused.
-            if (win.mAppToken != null && win.mAppToken.mHasSavedSurface) {
-                win.mWinAnimator.destroySurfaceLocked();
+            if (win.mAppToken != null) {
+                win.mAppToken.destroySavedSurfaces();
             }
             win.reportResized();
             mService.mResizingWindows.remove(i);
@@ -397,7 +397,7 @@ class WindowSurfacePlacer {
                 if (mWallpaperControllerLocked.isWallpaperTarget(win)) {
                     wallpaperDestroyed = true;
                 }
-                if (!win.saveSurfaceIfNeeded()) {
+                if (!win.shouldSaveSurface()) {
                     win.mWinAnimator.destroySurfaceLocked();
                 }
             } while (i > 0);
@@ -1191,7 +1191,10 @@ class WindowSurfacePlacer {
             if (animLp != null) {
                 int layer = -1;
                 for (int j = 0; j < wtoken.windows.size(); j++) {
-                    WindowState win = wtoken.windows.get(j);
+                    final WindowState win = wtoken.windows.get(j);
+                    // Clearing the mExiting flag before entering animation. It will be set
+                    // to true if app window is removed, or window relayout to invisible.
+                    win.mExiting = false;
                     if (win.mWinAnimator.mAnimLayer > layer) {
                         layer = win.mWinAnimator.mAnimLayer;
                     }
@@ -1203,17 +1206,7 @@ class WindowSurfacePlacer {
             }
             createThumbnailAppAnimator(transit, wtoken, topOpeningLayer, topClosingLayer);
 
-            if (wtoken.mHasSavedSurface) {
-                if (DEBUG_APP_TRANSITIONS || DEBUG_ANIM) Slog.v(TAG,
-                        "Early start of animation: " + wtoken + ", allDrawn=" + wtoken.allDrawn);
-
-                for (int j = 0; j < wtoken.windows.size(); j++) {
-                    WindowState ws = wtoken.windows.get(j);
-                    ws.mWinAnimator.mDrawState = WindowStateAnimator.READY_TO_SHOW;
-                }
-                wtoken.mHasSavedSurface = false;
-                wtoken.mAnimatingWithSavedSurface = true;
-            }
+            wtoken.restoreSavedSurfaces();
         }
 
         AppWindowAnimator openingAppAnimator = (topOpeningApp == null) ?  null :

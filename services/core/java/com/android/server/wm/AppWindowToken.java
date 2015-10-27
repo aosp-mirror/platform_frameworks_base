@@ -17,6 +17,9 @@
 package com.android.server.wm;
 
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_STARTING;
+import static com.android.server.wm.WindowManagerService.DEBUG_ANIM;
+import static com.android.server.wm.WindowManagerService.DEBUG_APP_TRANSITIONS;
+import static com.android.server.wm.WindowManagerService.TAG;
 
 import com.android.server.input.InputApplicationHandle;
 import com.android.server.wm.WindowManagerService.H;
@@ -293,6 +296,52 @@ class AppWindowToken extends WindowToken {
                         + " not found.");
             }
             task.mStack.mExitingAppTokens.remove(this);
+        }
+    }
+
+    /**
+     * Checks whether we should save surfaces for this app.
+     *
+     * @return true if the surfaces should be saved, false otherwise.
+     */
+    boolean shouldSaveSurface() {
+        // We want to save surface if the app's windows are "allDrawn", or if we're
+        // currently animating with save surfaces. (If the app didn't even finish
+        // drawing when the user exits, but we have a saved surface from last time,
+        // we still want to keep that surface.)
+        mHasSavedSurface = allDrawn || mAnimatingWithSavedSurface;
+        if (mHasSavedSurface) {
+            if (DEBUG_APP_TRANSITIONS || DEBUG_ANIM) Slog.v(TAG,
+                    "Saving surface: " + this);
+            return true;
+        }
+        return false;
+    }
+
+    void restoreSavedSurfaces() {
+        if (!mHasSavedSurface) {
+            return;
+        }
+
+        if (DEBUG_APP_TRANSITIONS || DEBUG_ANIM) Slog.v(TAG,
+                "Restoring saved surfaces: " + this + ", allDrawn=" + allDrawn);
+
+        mHasSavedSurface = false;
+        mAnimatingWithSavedSurface = true;
+        for (int i = windows.size() - 1; i >= 0; i--) {
+            WindowState ws = windows.get(i);
+            ws.mWinAnimator.mDrawState = WindowStateAnimator.READY_TO_SHOW;
+        }
+    }
+
+    void destroySavedSurfaces() {
+        if (mHasSavedSurface) {
+            if (DEBUG_APP_TRANSITIONS || DEBUG_ANIM) Slog.v(TAG,
+                    "Destroying saved surface: " + this);
+            for (int i = windows.size() - 1; i >= 0; i--) {
+                final WindowState win = windows.get(i);
+                win.mWinAnimator.destroySurfaceLocked();
+            }
         }
     }
 
