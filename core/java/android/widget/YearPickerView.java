@@ -38,8 +38,6 @@ class YearPickerView extends ListView {
 
     private OnYearSelectedListener mOnYearSelectedListener;
 
-    private long mCurrentTimeMillis;
-
     public YearPickerView(Context context, AttributeSet attrs) {
         this(context, attrs, R.attr.listViewStyle);
     }
@@ -77,10 +75,6 @@ class YearPickerView extends ListView {
 
     public void setOnYearSelectedListener(OnYearSelectedListener listener) {
         mOnYearSelectedListener = listener;
-    }
-
-    public void setDate(long currentTimeMillis) {
-        mCurrentTimeMillis = currentTimeMillis;
     }
 
     /**

@@ -1095,7 +1095,16 @@ public class ViewPager extends ViewGroup {
                     View child = getChildAt(i);
                     ii = infoForChild(child);
                     if (ii != null && ii.position == mCurItem) {
-                        if (child.requestFocus(focusDirection)) {
+                        final Rect focusRect;
+                        if (currentFocused == null) {
+                            focusRect = null;
+                        } else {
+                            focusRect = mTempRect;
+                            currentFocused.getFocusedRect(mTempRect);
+                            offsetDescendantRectToMyCoords(currentFocused, mTempRect);
+                            offsetRectIntoDescendantCoords(child, mTempRect);
+                        }
+                        if (child.requestFocus(focusDirection, focusRect)) {
                             break;
                         }
                     }
@@ -1319,6 +1328,11 @@ public class ViewPager extends ViewGroup {
                 child.setDrawingCacheEnabled(false);
             }
         }
+    }
+
+    public Object getCurrent() {
+        final ItemInfo itemInfo = infoForPosition(getCurrentItem());
+        return itemInfo == null ? null : itemInfo.object;
     }
 
     @Override

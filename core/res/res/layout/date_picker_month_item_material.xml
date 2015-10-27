@@ -21,4 +21,5 @@
     android:layout_height="wrap_content"
     android:paddingStart="@dimen/day_picker_padding_horizontal"
     android:paddingEnd="@dimen/day_picker_padding_horizontal"
-    android:paddingTop="@dimen/day_picker_padding_top" />
+    android:paddingTop="@dimen/day_picker_padding_top"
+    android:focusable="true"/>

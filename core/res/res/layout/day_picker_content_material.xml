@@ -33,7 +33,9 @@
         android:src="@drawable/ic_chevron_start"
         android:background="?attr/selectableItemBackgroundBorderless"
         android:contentDescription="@string/date_picker_prev_month_button"
-        android:visibility="invisible" />
+        android:visibility="invisible"
+        android:nextFocusForward="@+id/next"
+        android:nextFocusDown="@+id/month_view" />
 
     <ImageButton
         android:id="@+id/next"
@@ -44,6 +46,8 @@
         android:src="@drawable/ic_chevron_end"
         android:background="?attr/selectableItemBackgroundBorderless"
         android:contentDescription="@string/date_picker_next_month_button"
-        android:visibility="invisible" />
+        android:visibility="invisible"
+        android:nextFocusForward="@+id/month_view"
+        android:nextFocusDown="@+id/month_view"/>
 
 </FrameLayout>
