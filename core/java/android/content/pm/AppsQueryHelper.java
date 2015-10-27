@@ -23,6 +23,8 @@ import android.content.Intent;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.util.ArraySet;
+import android.view.inputmethod.InputMethodInfo;
+import android.view.inputmethod.InputMethodManager;
 
 import com.android.internal.annotations.VisibleForTesting;
 
@@ -46,6 +48,14 @@ public class AppsQueryHelper {
      */
     public static int GET_APPS_WITH_INTERACT_ACROSS_USERS_PERM = 1 << 1;
 
+    /**
+     * Return all input methods that are marked as default.
+     * <p>When this flag is set, {@code user} specified in
+     * {@link #queryApps(int, boolean, UserHandle)} must be
+     * {@link UserHandle#myUserId user of the current process}.
+     */
+    public static int GET_DEFAULT_IMES = 1 << 2;
+
     private final Context mContext;
     private List<ApplicationInfo> mAllApps;
 
@@ -56,13 +66,14 @@ public class AppsQueryHelper {
     /**
      * Return a List of all packages that satisfy a specified criteria.
      * @param flags search flags. Use any combination of {@link #GET_NON_LAUNCHABLE_APPS},
-     * {@link #GET_APPS_WITH_INTERACT_ACROSS_USERS_PERM}
+     * {@link #GET_APPS_WITH_INTERACT_ACROSS_USERS_PERM} or {@link #GET_DEFAULT_IMES}.
      * @param systemAppsOnly if true, only system apps will be returned
      * @param user user, whose apps are queried
      */
     public List<String> queryApps(int flags, boolean systemAppsOnly, UserHandle user) {
         boolean nonLaunchableApps = (flags & GET_NON_LAUNCHABLE_APPS) > 0;
         boolean interactAcrossUsers = (flags & GET_APPS_WITH_INTERACT_ACROSS_USERS_PERM) > 0;
+        boolean defaultImes = (flags & GET_DEFAULT_IMES) > 0;
         if (mAllApps == null) {
             mAllApps = getAllApps(user.getIdentifier());
         }
@@ -118,6 +129,33 @@ public class AppsQueryHelper {
             }
         }
 
+        if (defaultImes) {
+            if (UserHandle.myUserId() != user.getIdentifier()) {
+                throw new IllegalArgumentException("Specified user handle " + user
+                        + " is not a user of the current process.");
+            }
+            List<InputMethodInfo> imis = getInputMethodList();
+            int imisSize = imis.size();
+            ArraySet<String> defaultImePackages = new ArraySet<>();
+            for (int i = 0; i < imisSize; i++) {
+                InputMethodInfo imi = imis.get(i);
+                if (imi.isDefault(mContext)) {
+                    defaultImePackages.add(imi.getPackageName());
+                }
+            }
+            final int allAppsSize = mAllApps.size();
+            for (int i = 0; i < allAppsSize; i++) {
+                final ApplicationInfo appInfo = mAllApps.get(i);
+                if (systemAppsOnly && !appInfo.isSystemApp()) {
+                    continue;
+                }
+                final String packageName = appInfo.packageName;
+                if (defaultImePackages.contains(packageName)) {
+                    result.add(packageName);
+                }
+            }
+        }
+
         return result;
     }
 
@@ -149,5 +187,13 @@ public class AppsQueryHelper {
         } catch (RemoteException e) {
             throw new IllegalStateException("Package manager has died", e);
         }
+    }
+
+    @VisibleForTesting
+    @SuppressWarnings("unchecked")
+    protected List<InputMethodInfo> getInputMethodList() {
+        InputMethodManager imm = (InputMethodManager)
+                mContext.getSystemService(Context.INPUT_METHOD_SERVICE);
+        return imm.getInputMethodList();
     }
 }
