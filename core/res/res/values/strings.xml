@@ -621,7 +621,7 @@
     <string name="permdesc_statusBar">Allows the app to disable the status bar or add and remove system icons.</string>
 
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permlab_statusBarService">status bar</string>
+    <string name="permlab_statusBarService">be the status bar</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permdesc_statusBarService">Allows the app to be the status bar.</string>
 
@@ -718,7 +718,7 @@
        discover information about which applications are used on the device.</string>
 
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permlab_manageProfileAndDeviceOwners">Manage profile and device owners</string>
+    <string name="permlab_manageProfileAndDeviceOwners">manage profile and device owners</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to set the profile/device owners.
      [CHAR LIMIT=NONE] -->
     <string name="permdesc_manageProfileAndDeviceOwners">Allows apps to set the profile owners and the device owner.</string>
@@ -882,7 +882,7 @@
         Malicious apps may use this to erase or modify your call log.</string>
 
     <!-- Title of the body sensors permission, listed so the user can decide whether to allow the application to access body sensor data. [CHAR LIMIT=30] -->
-    <string name="permlab_bodySensors">body sensors (like heart rate monitors)
+    <string name="permlab_bodySensors">access body sensors (like heart rate monitors)
     </string>
     <!-- Description of the body sensors permission, listed so the user can decide whether to allow the application to access data from body sensors. [CHAR LIMIT=NONE] -->
     <string name="permdesc_bodySensors" product="default">Allows the app to access data from sensors
@@ -936,7 +936,7 @@
         with the operation of the GPS or other location sources.</string>
 
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permlab_accessFineLocation">precise location (GPS and
+    <string name="permlab_accessFineLocation">access precise location (GPS and
       network-based)</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permdesc_accessFineLocation">Allows the app to get your
@@ -947,7 +947,7 @@
       battery power.</string>
 
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permlab_accessCoarseLocation">approximate location
+    <string name="permlab_accessCoarseLocation">access approximate location
       (network-based)</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permdesc_accessCoarseLocation">Allows the app to get your
@@ -970,7 +970,7 @@
       without your confirmation.</string>
 
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permlab_sim_communication">sim communication</string>
+    <string name="permlab_sim_communication">send commands to the SIM</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permdesc_sim_communication">Allows the app to send commands to the SIM. This is very dangerous.</string>
 
@@ -1077,7 +1077,7 @@
       connected.</string>
 
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permlab_createNetworkSockets">full network access</string>
+    <string name="permlab_createNetworkSockets">have full network access</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permdesc_createNetworkSockets">Allows the app to create
      network sockets and use custom network protocols. The browser and other
@@ -1141,7 +1141,7 @@
      WiMAX is enabled and information about any WiMAX networks that are
      connected. </string>
 
-    <string name="permlab_changeWimaxState">Change WiMAX state</string>
+    <string name="permlab_changeWimaxState">change WiMAX state</string>
     <string name="permdesc_changeWimaxState" product="tablet">Allows the app to
       connect the tablet to and disconnect the tablet from WiMAX networks.</string>
     <string name="permdesc_changeWimaxState" product="tv">Allows the app to
@@ -1346,7 +1346,7 @@
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permdesc_accessDrmCertificates">Allows an application to provision and use DRM certficates. Should never be needed for normal apps.</string>
 
-    <string name="permlab_handoverStatus">Receive Android Beam transfer status</string>
+    <string name="permlab_handoverStatus">receive Android Beam transfer status</string>
     <string name="permdesc_handoverStatus">Allows this application to receive information about current Android Beam transfers</string>
 
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
@@ -3018,17 +3018,17 @@
     <string name="activity_list_empty">No matching activities found.</string>
 
     <!-- Title of an application permission that lets an application route media output. -->
-    <string name="permlab_route_media_output">Route media output</string>
+    <string name="permlab_route_media_output">route media output</string>
     <!-- Description of an application permission that lets an application route media output. -->
     <string name="permdesc_route_media_output">Allows an application to route media output to other external devices.</string>
 
     <!-- Title of an application permission that lets it read install sessions. -->
-    <string name="permlab_readInstallSessions">Read install sessions</string>
+    <string name="permlab_readInstallSessions">read install sessions</string>
     <!-- Description of an application permission that lets it read install sessions. -->
     <string name="permdesc_readInstallSessions">Allows an application to read install sessions. This allows it to see details about active package installations.</string>
 
     <!-- Title of an application permission that lets it read install sessions. -->
-    <string name="permlab_requestInstallPackages">Request install packages</string>
+    <string name="permlab_requestInstallPackages">request install packages</string>
     <!-- Description of an application permission that lets it read install sessions. -->
     <string name="permdesc_requestInstallPackages">Allows an application to request installation of packages.</string>
 
