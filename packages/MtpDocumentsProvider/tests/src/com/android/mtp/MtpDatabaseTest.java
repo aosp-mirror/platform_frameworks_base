@@ -23,6 +23,8 @@ public class MtpDatabaseTest extends AndroidTestCase {
         DocumentsContract.Document.COLUMN_SIZE
     };
 
+    private final TestResources resources = new TestResources();
+
     @Override
     public void tearDown() {
         MtpDatabase.deleteDatabase(getContext());
@@ -30,35 +32,10 @@ public class MtpDatabaseTest extends AndroidTestCase {
 
     public void testPutRootDocument() throws Exception {
         final MtpDatabase database = new MtpDatabase(getContext());
-        final MtpRoot root = new MtpRoot(
-                0,
-                1,
-                "Device A",
-                "Storage",
-                1000,
-                2000,
-                "");
-        database.putRootDocument(root);
-
-        final MtpRoot duplicatedNameRoot = new MtpRoot(
-                0,
-                2,
-                "Device A",
-                "Storage",
-                1000,
-                2000,
-                "");
-        database.putRootDocument(duplicatedNameRoot);
-
-        final MtpRoot strangeNameRoot = new MtpRoot(
-                0,
-                3,
-                "Device A",
-                "/@#%&<>Storage",
-                1000,
-                2000,
-                "");
-        database.putRootDocument(strangeNameRoot);
+        database.putRootDocument(resources, new MtpRoot(0, 1, "Device", "Storage", 1000, 2000, ""));
+        database.putRootDocument(resources, new MtpRoot(0, 2, "Device", "Storage", 1000, 2000, ""));
+        database.putRootDocument(
+                resources, new MtpRoot(0, 3, "Device", "/@#%&<>Storage", 1000, 2000, ""));
 
         final Cursor cursor = database.queryChildDocuments(COLUMN_NAMES);
         assertEquals(3, cursor.getCount());
@@ -69,7 +46,7 @@ public class MtpDatabaseTest extends AndroidTestCase {
         assertEquals("storageId", 1, cursor.getInt(2));
         assertTrue("objectHandle", cursor.isNull(3));
         assertEquals("mimeType", DocumentsContract.Document.MIME_TYPE_DIR, cursor.getString(4));
-        assertEquals("displayName", "Storage", cursor.getString(5));
+        assertEquals("displayName", "Device Storage", cursor.getString(5));
         assertTrue("summary", cursor.isNull(6));
         assertTrue("lastModified", cursor.isNull(7));
         assertTrue("icon", cursor.isNull(8));
@@ -78,11 +55,11 @@ public class MtpDatabaseTest extends AndroidTestCase {
 
         cursor.moveToNext();
         assertEquals("documentId", 2, cursor.getInt(0));
-        assertEquals("displayName", "Storage", cursor.getString(5));
+        assertEquals("displayName", "Device Storage", cursor.getString(5));
 
         cursor.moveToNext();
         assertEquals("documentId", 3, cursor.getInt(0));
-        assertEquals("displayName", "/@#%&<>Storage", cursor.getString(5));
+        assertEquals("displayName", "Device /@#%&<>Storage", cursor.getString(5));
 
         cursor.close();
     }
