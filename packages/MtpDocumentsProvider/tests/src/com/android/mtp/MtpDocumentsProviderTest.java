@@ -16,9 +16,6 @@
 
 package com.android.mtp;
 
-import android.content.res.Configuration;
-import android.content.res.Resources;
-import android.content.res.Resources.NotFoundException;
 import android.database.Cursor;
 import android.mtp.MtpConstants;
 import android.mtp.MtpObjectInfo;
@@ -26,7 +23,6 @@ import android.net.Uri;
 import android.provider.DocumentsContract.Root;
 import android.provider.DocumentsContract;
 import android.test.AndroidTestCase;
-import android.test.mock.MockResources;
 import android.test.suitebuilder.annotation.SmallTest;
 
 import java.io.FileNotFoundException;
@@ -39,16 +35,7 @@ public class MtpDocumentsProviderTest extends AndroidTestCase {
     private TestContentResolver mResolver;
     private MtpDocumentsProvider mProvider;
     private TestMtpManager mMtpManager;
-    private final MockResources mResources = new MockResources() {
-        @Override
-        public String getString(int id) throws NotFoundException {
-            switch (id) {
-                case R.string.root_name:
-                    return "%1$s %2$s";
-            }
-            throw new NotFoundException();
-        }
-    };
+    private final TestResources mResources = new TestResources();
 
     @Override
     public void setUp() throws IOException {
