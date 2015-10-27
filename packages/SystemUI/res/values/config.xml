@@ -136,7 +136,7 @@
     <integer name="touch_acceptance_delay">700</integer>
 
     <!-- The duration in seconds to wait before the dismiss buttons are shown. -->
-    <integer name="recents_task_bar_dismiss_delay_seconds">1</integer>
+    <integer name="recents_task_bar_dismiss_delay_seconds">1000</integer>
 
     <!-- The min animation duration for animating views that are currently visible. -->
     <integer name="recents_filter_animate_current_views_duration">250</integer>

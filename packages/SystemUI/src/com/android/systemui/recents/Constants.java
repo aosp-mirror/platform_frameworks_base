@@ -37,6 +37,8 @@ public class Constants {
             public static final boolean EnableTaskFiltering = false;
             // Enables dismiss-all
             public static final boolean EnableDismissAll = false;
+            // Enables fast-toggling
+            public static final boolean EnableFastToggleRecents = false;
             // Enables the thumbnail alpha on the front-most task
             public static final boolean EnableThumbnailAlphaOnFrontmost = false;
             // This disables the search bar integration

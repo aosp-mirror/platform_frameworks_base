@@ -28,7 +28,7 @@ import com.android.systemui.R;
 import com.android.systemui.recents.Constants;
 import com.android.systemui.recents.events.EventBus;
 import com.android.systemui.recents.events.activity.HideRecentsEvent;
-import com.android.systemui.recents.events.ui.DismissTaskEvent;
+import com.android.systemui.recents.events.ui.DismissTaskViewEvent;
 
 import java.util.List;
 
@@ -408,13 +408,9 @@ class TaskStackViewTouchHandler implements SwipeHelper.Callback {
                     // Find the front most task and scroll the next task to the front
                     float vScroll = ev.getAxisValue(MotionEvent.AXIS_VSCROLL);
                     if (vScroll > 0) {
-                        if (mSv.ensureFocusedTask(true)) {
-                            mSv.focusNextTask(true, false);
-                        }
+                        mSv.setRelativeFocusedTask(true, false /* animated */);
                     } else {
-                        if (mSv.ensureFocusedTask(true)) {
-                            mSv.focusNextTask(false, false);
-                        }
+                        mSv.setRelativeFocusedTask(false, false /* animated */);
                     }
                     return true;
             }
@@ -461,7 +457,7 @@ class TaskStackViewTouchHandler implements SwipeHelper.Callback {
         // Re-enable touch events from this task view
         tv.setTouchEnabled(true);
         // Remove the task view from the stack
-        EventBus.getDefault().send(new DismissTaskEvent(tv.getTask(), tv));
+        EventBus.getDefault().send(new DismissTaskViewEvent(tv.getTask(), tv));
         // Keep track of deletions by keyboard
         MetricsLogger.histogram(tv.getContext(), "overview_task_dismissed_source",
                 Constants.Metrics.DismissSourceSwipeGesture);

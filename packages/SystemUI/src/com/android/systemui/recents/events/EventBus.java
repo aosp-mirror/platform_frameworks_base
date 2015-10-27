@@ -200,7 +200,8 @@ class EventHandlerMethod {
  */
 public class EventBus extends BroadcastReceiver {
 
-    public static final String TAG = "EventBus";
+    private static final String TAG = "EventBus";
+    private static final boolean DEBUG_TRACE_ALL = false;
 
     /**
      * An event super class that allows us to track internal event state across subscriber
@@ -276,9 +277,6 @@ public class EventBus extends BroadcastReceiver {
 
     // The default priority of all subscribers
     private static final int DEFAULT_SUBSCRIBER_PRIORITY = 1;
-
-    // Used for debugging everything
-    private static final boolean DEBUG_TRACE_ALL = false;
 
     // Orders the handlers by priority and registration time
     private static final Comparator<EventHandler> EVENT_HANDLER_COMPARATOR = new Comparator<EventHandler>() {

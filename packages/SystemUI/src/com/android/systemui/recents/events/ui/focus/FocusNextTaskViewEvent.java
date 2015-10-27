@@ -14,22 +14,13 @@
  * limitations under the License.
  */
 
-package com.android.systemui.recents.events.ui;
+package com.android.systemui.recents.events.ui.focus;
 
 import com.android.systemui.recents.events.EventBus;
-import com.android.systemui.recents.model.Task;
-import com.android.systemui.recents.views.TaskView;
 
 /**
- * This is sent when a {@link TaskView} has been dismissed.
+ * Focuses the next task view in the stack.
  */
-public class DismissTaskEvent extends EventBus.Event {
-
-    public final Task task;
-    public final TaskView taskView;
-
-    public DismissTaskEvent(Task task, TaskView taskView) {
-        this.task = task;
-        this.taskView = taskView;
-    }
+public class FocusNextTaskViewEvent extends EventBus.Event {
+    // Simple event
 }

@@ -32,6 +32,7 @@ import android.os.Bundle;
 import android.os.SystemClock;
 import android.os.UserHandle;
 import android.provider.Settings;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.ViewStub;
@@ -41,16 +42,21 @@ import com.android.systemui.recents.events.EventBus;
 import com.android.systemui.recents.events.activity.AppWidgetProviderChangedEvent;
 import com.android.systemui.recents.events.activity.EnterRecentsWindowAnimationStartedEvent;
 import com.android.systemui.recents.events.activity.HideRecentsEvent;
+import com.android.systemui.recents.events.activity.IterateRecentsEvent;
 import com.android.systemui.recents.events.activity.ToggleRecentsEvent;
 import com.android.systemui.recents.events.component.RecentsVisibilityChangedEvent;
 import com.android.systemui.recents.events.component.ScreenPinningRequestEvent;
-import com.android.systemui.recents.events.ui.DismissTaskEvent;
+import com.android.systemui.recents.events.ui.DismissTaskViewEvent;
 import com.android.systemui.recents.events.ui.ResizeTaskEvent;
 import com.android.systemui.recents.events.ui.ShowApplicationInfoEvent;
 import com.android.systemui.recents.events.ui.UserInteractionEvent;
 import com.android.systemui.recents.events.ui.dragndrop.DragEndEvent;
 import com.android.systemui.recents.events.ui.dragndrop.DragStartEvent;
+import com.android.systemui.recents.events.ui.focus.DismissFocusedTaskViewEvent;
+import com.android.systemui.recents.events.ui.focus.FocusNextTaskViewEvent;
+import com.android.systemui.recents.events.ui.focus.FocusPreviousTaskViewEvent;
 import com.android.systemui.recents.misc.Console;
+import com.android.systemui.recents.misc.DozeTrigger;
 import com.android.systemui.recents.misc.ReferenceCountedTrigger;
 import com.android.systemui.recents.misc.SystemServicesProxy;
 import com.android.systemui.recents.model.RecentsPackageMonitor;
@@ -68,6 +74,9 @@ import java.util.ArrayList;
  * The main Recents activity that is started from AlternateRecentsComponent.
  */
 public class RecentsActivity extends Activity implements RecentsView.RecentsViewCallbacks {
+
+    private final static String TAG = "RecentsActivity";
+    private final static boolean DEBUG = false;
 
     public final static int EVENT_BUS_PRIORITY = Recents.EVENT_BUS_PRIORITY + 1;
 
@@ -95,6 +104,14 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
 
     // Runnable to be executed after we paused ourselves
     Runnable mAfterPauseRunnable;
+
+    // The trigger to automatically launch the current task
+    DozeTrigger mIterateTrigger = new DozeTrigger(500, new Runnable() {
+        @Override
+        public void run() {
+            boolean dismissed = dismissRecentsToFocusedTask(false);
+        }
+    });
 
     /**
      * A common Runnable to finish Recents either by calling finish() (with a custom animation) or
@@ -244,7 +261,24 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
         MetricsLogger.histogram(this, "overview_task_count", taskCount);
     }
 
-    /** Dismisses recents if we are already visible and the intent is to toggle the recents view */
+    /**
+     * Dismisses recents if we are already visible and the intent is to toggle the recents view.
+     */
+    boolean dismissRecentsToFocusedTask(boolean checkFilteredStackState) {
+        SystemServicesProxy ssp = Recents.getSystemServices();
+        if (ssp.isRecentsTopMost(ssp.getTopMostTask(), null)) {
+            // If we currently have filtered stacks, then unfilter those first
+            if (checkFilteredStackState &&
+                    mRecentsView.unfilterFilteredStacks()) return true;
+            // If we have a focused Task, launch that Task now
+            if (mRecentsView.launchFocusedTask()) return true;
+        }
+        return false;
+    }
+
+    /**
+     * Dismisses recents if we are already visible and the intent is to toggle the recents view.
+     */
     boolean dismissRecentsToFocusedTaskOrHome(boolean checkFilteredStackState) {
         RecentsActivityLaunchState launchState = mConfig.getLaunchState();
         SystemServicesProxy ssp = Recents.getSystemServices();
@@ -390,6 +424,11 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
             mRecentsView.post(mAfterPauseRunnable);
             mAfterPauseRunnable = null;
         }
+
+        if (Constants.DebugFlags.App.EnableFastToggleRecents) {
+            // Stop the fast-toggle dozer
+            mIterateTrigger.stopDozing();
+        }
     }
 
     @Override
@@ -467,22 +506,27 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
                 if (event.getRepeatCount() <= 0 || hasRepKeyTimeElapsed) {
                     // Focus the next task in the stack
                     final boolean backward = event.isShiftPressed();
-                    mRecentsView.focusNextTask(!backward);
+                    if (backward) {
+                        EventBus.getDefault().send(new FocusPreviousTaskViewEvent());
+                    } else {
+                        EventBus.getDefault().send(new FocusNextTaskViewEvent());
+                    }
                     mLastTabKeyEventTime = SystemClock.elapsedRealtime();
                 }
                 return true;
             }
             case KeyEvent.KEYCODE_DPAD_UP: {
-                mRecentsView.focusNextTask(true);
+                EventBus.getDefault().send(new FocusNextTaskViewEvent());
                 return true;
             }
             case KeyEvent.KEYCODE_DPAD_DOWN: {
-                mRecentsView.focusNextTask(false);
+                EventBus.getDefault().send(new FocusPreviousTaskViewEvent());
                 return true;
             }
             case KeyEvent.KEYCODE_DEL:
             case KeyEvent.KEYCODE_FORWARD_DEL: {
-                mRecentsView.dismissFocusedTask();
+                EventBus.getDefault().send(new DismissFocusedTaskViewEvent());
+
                 // Keep track of deletions by keyboard
                 MetricsLogger.histogram(this, "overview_task_dismissed_source",
                         Constants.Metrics.DismissSourceKeyboard);
@@ -542,6 +586,16 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
         dismissRecentsToFocusedTaskOrHome(true /* checkFilteredStackState */);
     }
 
+    public final void onBusEvent(IterateRecentsEvent event) {
+        // Focus the next task
+        EventBus.getDefault().send(new FocusNextTaskViewEvent());
+        mIterateTrigger.poke();
+    }
+
+    public final void onBusEvent(UserInteractionEvent event) {
+        mIterateTrigger.stopDozing();
+    }
+
     public final void onBusEvent(HideRecentsEvent event) {
         if (event.triggeredFromAltTab) {
             // If we are hiding from releasing Alt-Tab, dismiss Recents to the focused app
@@ -558,7 +612,7 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
         // Try and start the enter animation (or restart it on configuration changed)
         ReferenceCountedTrigger t = new ReferenceCountedTrigger(this, null, null, null);
         ViewAnimation.TaskViewEnterContext ctx = new ViewAnimation.TaskViewEnterContext(t);
-        mRecentsView.startEnterRecentsAnimation(ctx);
+        ctx.postAnimationTrigger.increment();
         if (mSearchWidgetInfo != null) {
             ctx.postAnimationTrigger.addLastDecrementRunnable(new Runnable() {
                 @Override
@@ -570,6 +624,20 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
                 }
             });
         }
+        ctx.postAnimationTrigger.addLastDecrementRunnable(new Runnable() {
+            @Override
+            public void run() {
+                // If we are not launching with alt-tab and fast-toggle is enabled, then start
+                // the dozer now
+                RecentsActivityLaunchState launchState = mConfig.getLaunchState();
+                if (Constants.DebugFlags.App.EnableFastToggleRecents &&
+                        !launchState.launchedWithAltTab) {
+                    mIterateTrigger.startDozing();
+                }
+            }
+        });
+        mRecentsView.startEnterRecentsAnimation(ctx);
+        ctx.postAnimationTrigger.decrement();
     }
 
     public final void onBusEvent(AppWidgetProviderChangedEvent event) {
@@ -589,7 +657,7 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
         MetricsLogger.count(this, "overview_app_info", 1);
     }
 
-    public final void onBusEvent(DismissTaskEvent event) {
+    public final void onBusEvent(DismissTaskViewEvent event) {
         // Remove any stored data from the loader
         RecentsTaskLoader loader = Recents.getTaskLoader();
         loader.deleteTaskData(event.task, false);

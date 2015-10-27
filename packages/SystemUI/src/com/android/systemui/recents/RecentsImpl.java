@@ -40,6 +40,7 @@ import com.android.systemui.SystemUIApplication;
 import com.android.systemui.recents.events.EventBus;
 import com.android.systemui.recents.events.activity.EnterRecentsWindowAnimationStartedEvent;
 import com.android.systemui.recents.events.activity.HideRecentsEvent;
+import com.android.systemui.recents.events.activity.IterateRecentsEvent;
 import com.android.systemui.recents.events.activity.ToggleRecentsEvent;
 import com.android.systemui.recents.events.component.RecentsVisibilityChangedEvent;
 import com.android.systemui.recents.events.component.ScreenPinningRequestEvent;
@@ -265,26 +266,38 @@ public class RecentsImpl extends IRecentsNonSystemUserCallbacks.Stub
         mTriggeredFromAltTab = false;
 
         try {
-            // If the user has toggled it too quickly, then just eat up the event here (it's better
-            // than showing a janky screenshot).
-            // NOTE: Ideally, the screenshot mechanism would take the window transform into account
-            if ((SystemClock.elapsedRealtime() - mLastToggleTime) < sMinToggleDelay) {
-                return;
-            }
-
-            // If Recents is the front most activity, then we should just communicate with it
-            // directly to launch the first task or dismiss itself
             SystemServicesProxy ssp = Recents.getSystemServices();
             ActivityManager.RunningTaskInfo topTask = ssp.getTopMostTask();
             MutableBoolean isTopTaskHome = new MutableBoolean(true);
             if (topTask != null && ssp.isRecentsTopMost(topTask, isTopTaskHome)) {
-                // Notify recents to toggle itself
-                EventBus.getDefault().post(new ToggleRecentsEvent());
-                mLastToggleTime = SystemClock.elapsedRealtime();
+                if (Constants.DebugFlags.App.EnableFastToggleRecents) {
+                    // Notify recents to move onto the next task
+                    EventBus.getDefault().post(new IterateRecentsEvent());
+                } else {
+                    // If the user has toggled it too quickly, then just eat up the event here (it's
+                    // better than showing a janky screenshot).
+                    // NOTE: Ideally, the screenshot mechanism would take the window transform into
+                    // account
+                    if ((SystemClock.elapsedRealtime() - mLastToggleTime) < sMinToggleDelay) {
+                        return;
+                    }
+
+                    EventBus.getDefault().post(new ToggleRecentsEvent());
+                    mLastToggleTime = SystemClock.elapsedRealtime();
+                }
                 return;
             } else {
+                // If the user has toggled it too quickly, then just eat up the event here (it's
+                // better than showing a janky screenshot).
+                // NOTE: Ideally, the screenshot mechanism would take the window transform into
+                // account
+                if ((SystemClock.elapsedRealtime() - mLastToggleTime) < sMinToggleDelay) {
+                    return;
+                }
+
                 // Otherwise, start the recents activity
                 startRecentsActivity(topTask, isTopTaskHome.value);
+                mLastToggleTime = SystemClock.elapsedRealtime();
             }
         } catch (ActivityNotFoundException e) {
             Console.logRawError("Failed to launch RecentAppsIntent", e);

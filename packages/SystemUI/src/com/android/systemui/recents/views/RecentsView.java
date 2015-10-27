@@ -49,7 +49,7 @@ import com.android.systemui.recents.RecentsConfiguration;
 import com.android.systemui.recents.events.EventBus;
 import com.android.systemui.recents.events.activity.DismissRecentsToHomeAnimationStarted;
 import com.android.systemui.recents.events.component.ScreenPinningRequestEvent;
-import com.android.systemui.recents.events.ui.DismissTaskEvent;
+import com.android.systemui.recents.events.ui.DismissTaskViewEvent;
 import com.android.systemui.recents.events.ui.dragndrop.DragDockStateChangedEvent;
 import com.android.systemui.recents.events.ui.dragndrop.DragEndEvent;
 import com.android.systemui.recents.events.ui.dragndrop.DragStartEvent;
@@ -69,6 +69,7 @@ import static android.app.ActivityManager.INVALID_STACK_ID;
 public class RecentsView extends FrameLayout implements TaskStackView.TaskStackViewCallbacks {
 
     private static final String TAG = "RecentsView";
+    private static final boolean DEBUG = false;
 
     private static final boolean ADD_HEADER_BITMAP = true;
 
@@ -404,22 +405,6 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
         return super.verifyDrawable(who);
     }
 
-    /** Focuses the next task in the first stack view */
-    public void focusNextTask(boolean forward) {
-        // Get the first stack view
-        if (mTaskStackView != null) {
-            mTaskStackView.focusNextTask(forward, true);
-        }
-    }
-
-    /** Dismisses the focused task. */
-    public void dismissFocusedTask() {
-        // Get the first stack view
-        if (mTaskStackView != null) {
-            mTaskStackView.dismissFocusedTask();
-        }
-    }
-
     /** Unfilters any filtered stacks */
     public boolean unfilterFilteredStacks() {
         if (mStacks != null) {
@@ -562,7 +547,7 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
         // Disable any focused state before we draw the header
         // Upfront the processing of the thumbnail
         if (tv.isFocusedTask()) {
-            tv.unsetFocusedTask();
+            tv.setFocusedState(false, false /* animated */, false /* requestViewFocus */);
         }
         TaskViewTransform transform = new TaskViewTransform();
         transform = stackView.getStackAlgorithm().getStackTransform(tv.mTask, stackScroll,
@@ -682,7 +667,7 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
                     } else {
                         // Dismiss the task and return the user to home if we fail to
                         // launch the task
-                        EventBus.getDefault().send(new DismissTaskEvent(task, tv));
+                        EventBus.getDefault().send(new DismissTaskViewEvent(task, tv));
                         if (mCb != null) {
                             mCb.onTaskLaunchFailed();
                         }
