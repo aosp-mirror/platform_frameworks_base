@@ -268,9 +268,9 @@ public class ArrowKeyMovementMethod extends BaseMovementMethod implements Moveme
                 // Cursor can be active at any location in the text while mouse pointer can start
                 // selection from a totally different location. Use LAST_TAP_DOWN span to ensure
                 // text selection will start from mouse pointer location.
+                final int startOffset = buffer.getSpanStart(LAST_TAP_DOWN);
                 if (isMouse && Touch.isSelectionStarted(buffer)) {
-                    int offset = buffer.getSpanStart(LAST_TAP_DOWN);
-                    Selection.setSelection(buffer, offset);
+                    Selection.setSelection(buffer, startOffset);
                 }
 
                 if (isTouchSelecting(isMouse, buffer) && handled) {
@@ -285,9 +285,9 @@ public class ArrowKeyMovementMethod extends BaseMovementMethod implements Moveme
                     // Update selection as we're moving the selection area.
 
                     // Get the current touch position
-                    int offset = widget.getOffsetForPosition(event.getX(), event.getY());
-
-                    Selection.extendSelection(buffer, offset);
+                    final int offset = widget.getOffsetForPosition(event.getX(), event.getY());
+                    Selection.setSelection(buffer, Math.min(startOffset, offset),
+                            Math.max(startOffset, offset));
                     return true;
                 }
             } else if (action == MotionEvent.ACTION_UP) {
@@ -301,10 +301,12 @@ public class ArrowKeyMovementMethod extends BaseMovementMethod implements Moveme
                     return true;
                 }
 
-                int offset = widget.getOffsetForPosition(event.getX(), event.getY());
                 if (wasTouchSelecting) {
+                    final int startOffset = buffer.getSpanStart(LAST_TAP_DOWN);
+                    final int endOffset = widget.getOffsetForPosition(event.getX(), event.getY());
+                    Selection.setSelection(buffer, Math.min(startOffset, endOffset),
+                            Math.max(startOffset, endOffset));
                     buffer.removeSpan(LAST_TAP_DOWN);
-                    Selection.extendSelection(buffer, offset);
                 }
 
                 MetaKeyKeyListener.adjustMetaAfterKeypress(buffer);

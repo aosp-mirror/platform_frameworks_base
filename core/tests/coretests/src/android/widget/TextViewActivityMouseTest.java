@@ -49,4 +49,17 @@ public class TextViewActivityMouseTest extends ActivityInstrumentationTestCase2<
 
         onView(withId(R.id.textview)).check(hasSelection("llo wor"));
     }
+
+    @SmallTest
+    public void testSelectTextByDrag_reverse() throws Exception {
+        getActivity();
+
+        final String helloWorld = "Hello world!";
+        onView(withId(R.id.textview)).perform(click());
+        onView(withId(R.id.textview)).perform(typeTextIntoFocusedView(helloWorld));
+        onView(withId(R.id.textview)).perform(
+                mouseDragOnText( helloWorld.indexOf("ld!"), helloWorld.indexOf("llo")));
+
+        onView(withId(R.id.textview)).check(hasSelection("llo wor"));
+    }
 }
