@@ -247,8 +247,10 @@ public class SystemServicesProxy {
                 return true;
             }
 
+            // Note, this is only valid because we currently only allow the recents and home
+            // activities in the home stack
             if (isHomeTopMost != null) {
-                isHomeTopMost.value = isInHomeStack(topTask.id);
+                isHomeTopMost.value = SystemServicesProxy.isHomeStack(topTask.stackId);
             }
         }
         return false;
@@ -313,16 +315,18 @@ public class SystemServicesProxy {
         }
     }
 
-    /** Returns whether the specified task is in the home stack */
-    public boolean isInHomeStack(int taskId) {
-        if (mAm == null) return false;
+    /**
+     * Returns whether the given stack id is the home stack id.
+     */
+    public static boolean isHomeStack(int stackId) {
+        return stackId == ActivityManager.HOME_STACK_ID;
+    }
 
-        // If we are mocking, then just return false
-        if (Constants.DebugFlags.App.EnableSystemServicesProxy) {
-            return false;
-        }
-
-        return mAm.isInHomeStack(taskId);
+    /**
+     * Returns whether the given stack id is the freeform workspace stack id.
+     */
+    public static boolean isFreeformStack(int stackId) {
+        return stackId == ActivityManager.FREEFORM_WORKSPACE_STACK_ID;
     }
 
     /**

@@ -21,6 +21,7 @@ import static android.app.ActivityManager.FIRST_STATIC_STACK_ID;
 import static android.app.ActivityManager.FREEFORM_WORKSPACE_STACK_ID;
 import static android.app.ActivityManager.FULLSCREEN_WORKSPACE_STACK_ID;
 import static android.app.ActivityManager.HOME_STACK_ID;
+import static android.app.ActivityManager.INVALID_STACK_ID;
 import static android.app.ActivityManager.LAST_STATIC_STACK_ID;
 import static android.content.pm.ActivityInfo.FLAG_SHOW_FOR_ALL_USERS;
 
@@ -4366,6 +4367,7 @@ final class ActivityStack {
 
             RunningTaskInfo ci = new RunningTaskInfo();
             ci.id = task.taskId;
+            ci.stackId = (task.stack == null) ? INVALID_STACK_ID : task.stack.getStackId();
             ci.baseActivity = r.intent.getComponent();
             ci.topActivity = top.intent.getComponent();
             ci.lastActiveTime = task.lastActiveTime;
