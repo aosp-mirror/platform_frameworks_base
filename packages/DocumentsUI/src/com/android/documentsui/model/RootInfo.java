@@ -51,7 +51,8 @@ public class RootInfo implements Durable, Parcelable {
     public static final int TYPE_RECENTS = 4;
     public static final int TYPE_DOWNLOADS = 5;
     public static final int TYPE_LOCAL = 6;
-    public static final int TYPE_CLOUD = 7;
+    public static final int TYPE_MTP = 7;
+    public static final int TYPE_CLOUD = 8;
 
     public String authority;
     public String rootId;
@@ -184,6 +185,8 @@ public class RootInfo implements Durable, Parcelable {
             derivedType = TYPE_AUDIO;
         } else if (isRecents()) {
             derivedType = TYPE_RECENTS;
+        } else if (isMtp()) {
+            derivedType = TYPE_MTP;
         } else {
             derivedType = TYPE_CLOUD;
         }
@@ -214,6 +217,15 @@ public class RootInfo implements Durable, Parcelable {
     public boolean isAudio() {
         return "com.android.providers.media.documents".equals(authority)
                 && "audio_root".equals(rootId);
+    }
+
+    public boolean isMtp() {
+        return "com.android.mtp.documents".equals(authority);
+    }
+
+    public boolean isLibrary() {
+        return derivedType == TYPE_IMAGES || derivedType == TYPE_VIDEO || derivedType == TYPE_AUDIO
+                || derivedType == TYPE_RECENTS || derivedType == TYPE_DOWNLOADS;
     }
 
     @Override
