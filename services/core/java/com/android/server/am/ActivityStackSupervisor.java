@@ -2991,84 +2991,87 @@ public final class ActivityStackSupervisor implements DisplayListener {
         }
 
         Trace.traceBegin(TRACE_TAG_ACTIVITY_MANAGER, "am.resizeStack_" + stackId);
+        mWindowManager.deferSurfaceLayout();
+        try {
+            ActivityRecord r = stack.topRunningActivityLocked();
 
-        ActivityRecord r = stack.topRunningActivityLocked();
-
-        mTmpBounds.clear();
-        mTmpConfigs.clear();
-        ArrayList<TaskRecord> tasks = stack.getAllTasks();
-        for (int i = tasks.size() - 1; i >= 0; i--) {
-            TaskRecord task = tasks.get(i);
-            if (task.mResizeable) {
-                if (stack.mStackId == FREEFORM_WORKSPACE_STACK_ID) {
-                    // For freeform stack we don't adjust the size of the tasks to match that
-                    // of the stack, but we do try to make sure the tasks are still contained
-                    // with the bounds of the stack.
-                    tempRect2.set(task.mBounds);
-                    fitWithinBounds(tempRect2, bounds);
-                    task.updateOverrideConfiguration(tempRect2);
-                } else {
-                    task.updateOverrideConfiguration(bounds);
-                }
-            }
-
-            mTmpConfigs.put(task.taskId, task.mOverrideConfig);
-            mTmpBounds.put(task.taskId, task.mBounds);
-        }
-        stack.mFullscreen = mWindowManager.resizeStack(stackId, bounds, mTmpConfigs, mTmpBounds);
-        if (stack.mStackId == DOCKED_STACK_ID) {
-            // Dock stack funness...Yay!
-            if (stack.mFullscreen) {
-                // The dock stack went fullscreen which is kinda like dismissing it.
-                // In this case we make all other static stacks fullscreen and move all
-                // docked stack tasks to the fullscreen stack.
-                for (int i = FIRST_STATIC_STACK_ID; i <= LAST_STATIC_STACK_ID; i++) {
-                    if (i != DOCKED_STACK_ID && getStack(i) != null) {
-                        resizeStackLocked(i, null, preserveWindows, true);
+            mTmpBounds.clear();
+            mTmpConfigs.clear();
+            ArrayList<TaskRecord> tasks = stack.getAllTasks();
+            for (int i = tasks.size() - 1; i >= 0; i--) {
+                TaskRecord task = tasks.get(i);
+                if (task.mResizeable) {
+                    if (stack.mStackId == FREEFORM_WORKSPACE_STACK_ID) {
+                        // For freeform stack we don't adjust the size of the tasks to match that
+                        // of the stack, but we do try to make sure the tasks are still contained
+                        // with the bounds of the stack.
+                        tempRect2.set(task.mBounds);
+                        fitWithinBounds(tempRect2, bounds);
+                        task.updateOverrideConfiguration(tempRect2);
+                    } else {
+                        task.updateOverrideConfiguration(bounds);
                     }
                 }
 
-                final int count = tasks.size();
-                for (int i = 0; i < count; i++) {
-                    moveTaskToStackLocked(tasks.get(i).taskId,
-                            FULLSCREEN_WORKSPACE_STACK_ID, ON_TOP, FORCE_FOCUS);
-                }
+                mTmpConfigs.put(task.taskId, task.mOverrideConfig);
+                mTmpBounds.put(task.taskId, task.mBounds);
+            }
+            stack.mFullscreen = mWindowManager.resizeStack(stackId, bounds, mTmpConfigs, mTmpBounds);
+            if (stack.mStackId == DOCKED_STACK_ID) {
+                // Dock stack funness...Yay!
+                if (stack.mFullscreen) {
+                    // The dock stack went fullscreen which is kinda like dismissing it.
+                    // In this case we make all other static stacks fullscreen and move all
+                    // docked stack tasks to the fullscreen stack.
+                    for (int i = FIRST_STATIC_STACK_ID; i <= LAST_STATIC_STACK_ID; i++) {
+                        if (i != DOCKED_STACK_ID && getStack(i) != null) {
+                            resizeStackLocked(i, null, preserveWindows, true);
+                        }
+                    }
 
-                // stack shouldn't contain anymore activities, so nothing to resume.
-                r = null;
-            } else {
-                // Docked stacks occupy a dedicated region on screen so the size of all other
-                // static stacks need to be adjusted so they don't overlap with the docked stack.
-                // We get the bounds to use from window manager which has been adjusted for any
-                // screen controls and is also the same for all stacks.
-                mWindowManager.getStackDockedModeBounds(HOME_STACK_ID, tempRect);
+                    final int count = tasks.size();
+                    for (int i = 0; i < count; i++) {
+                        moveTaskToStackLocked(tasks.get(i).taskId,
+                                FULLSCREEN_WORKSPACE_STACK_ID, ON_TOP, FORCE_FOCUS);
+                    }
 
-                for (int i = FIRST_STATIC_STACK_ID; i <= LAST_STATIC_STACK_ID; i++) {
-                    if (i != DOCKED_STACK_ID) {
-                        ActivityStack otherStack = getStack(i);
-                        if (otherStack != null) {
-                            resizeStackLocked(i, tempRect, PRESERVE_WINDOWS, true);
+                    // stack shouldn't contain anymore activities, so nothing to resume.
+                    r = null;
+                } else {
+                    // Docked stacks occupy a dedicated region on screen so the size of all other
+                    // static stacks need to be adjusted so they don't overlap with the docked stack.
+                    // We get the bounds to use from window manager which has been adjusted for any
+                    // screen controls and is also the same for all stacks.
+                    mWindowManager.getStackDockedModeBounds(HOME_STACK_ID, tempRect);
+
+                    for (int i = FIRST_STATIC_STACK_ID; i <= LAST_STATIC_STACK_ID; i++) {
+                        if (i != DOCKED_STACK_ID) {
+                            ActivityStack otherStack = getStack(i);
+                            if (otherStack != null) {
+                                resizeStackLocked(i, tempRect, PRESERVE_WINDOWS, true);
+                            }
                         }
                     }
                 }
+                // Since we are resizing the stack, all other operations should strive to preserve
+                // windows.
+                preserveWindows = true;
             }
-            // Since we are resizing the stack, all other operations should strive to preserve
-            // windows.
-            preserveWindows = true;
-        }
-        stack.setBounds(bounds);
+            stack.setBounds(bounds);
 
-        if (r != null) {
-            final boolean updated = stack.ensureActivityConfigurationLocked(r, 0, preserveWindows);
-            // And we need to make sure at this point that all other activities
-            // are made visible with the correct configuration.
-            ensureActivitiesVisibleLocked(r, 0, preserveWindows);
-            if (!updated) {
-                resumeTopActivitiesLocked(stack, null, null);
+            if (r != null) {
+                final boolean updated = stack.ensureActivityConfigurationLocked(r, 0, preserveWindows);
+                // And we need to make sure at this point that all other activities
+                // are made visible with the correct configuration.
+                ensureActivitiesVisibleLocked(r, 0, preserveWindows);
+                if (!updated) {
+                    resumeTopActivitiesLocked(stack, null, null);
+                }
             }
+        } finally {
+            mWindowManager.continueSurfaceLayout();
+            Trace.traceEnd(TRACE_TAG_ACTIVITY_MANAGER);
         }
-
-        Trace.traceEnd(TRACE_TAG_ACTIVITY_MANAGER);
     }
 
     void resizeTaskLocked(TaskRecord task, Rect bounds, int resizeMode, boolean preserveWindow) {
