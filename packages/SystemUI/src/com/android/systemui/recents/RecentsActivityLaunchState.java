@@ -56,7 +56,7 @@ public class RecentsActivityLaunchState {
 
     /** Returns whether the status bar scrim should be animated when shown for the first time. */
     public boolean shouldAnimateStatusBarScrim() {
-        return launchedFromHome;
+        return true;
     }
 
     /** Returns whether the status bar scrim should be visible. */
@@ -72,6 +72,6 @@ public class RecentsActivityLaunchState {
     /** Returns whether the nav bar scrim should be visible. */
     public boolean hasNavBarScrim() {
         // Only show the scrim if we have recent tasks, and if the nav bar is not transposed
-        return !launchedWithNoRecentTasks && mConfig.hasTransposedNavBar;
+        return !launchedWithNoRecentTasks && !mConfig.hasTransposedNavBar;
     }
 }
