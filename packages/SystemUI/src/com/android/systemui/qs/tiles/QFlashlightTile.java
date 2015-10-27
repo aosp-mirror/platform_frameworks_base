@@ -16,13 +16,21 @@
 
 package com.android.systemui.qs.tiles;
 
+import android.content.Context;
+import com.android.systemui.QSQuickTileView;
+import com.android.systemui.qs.QSTileBaseView;
 import com.android.systemui.qs.QSTileView;
 
-/** Quick settings tile: Wifi **/
+/** Quick settings tile: Flashlight **/
 public class QFlashlightTile extends FlashlightTile {
 
     public QFlashlightTile(Host host) {
         super(host);
+    }
+
+    @Override
+    public QSTileBaseView createTileView(Context context) {
+        return new QSQuickTileView(context);
     }
 
     @Override
