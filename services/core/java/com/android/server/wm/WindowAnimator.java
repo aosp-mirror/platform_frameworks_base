@@ -31,6 +31,7 @@ import static com.android.server.wm.WindowSurfacePlacer.SET_WALLPAPER_ACTION_PEN
 
 import android.content.Context;
 import android.os.RemoteException;
+import android.os.Trace;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.util.TimeUtils;
@@ -731,8 +732,15 @@ public class WindowAnimator {
             mWindowPlacerLocked.requestTraversal();
         }
 
+        if (mAnimating && !wasAnimating && Trace.isTagEnabled(Trace.TRACE_TAG_WINDOW_MANAGER)) {
+            Trace.asyncTraceBegin(Trace.TRACE_TAG_WINDOW_MANAGER, "animating", 0);
+        }
+
         if (!mAnimating && wasAnimating) {
             mWindowPlacerLocked.requestTraversal();
+            if (Trace.isTagEnabled(Trace.TRACE_TAG_WINDOW_MANAGER)) {
+                Trace.asyncTraceEnd(Trace.TRACE_TAG_WINDOW_MANAGER, "animating", 0);
+            }
         }
 
         mService.destroyPreservedSurfaceLocked();
