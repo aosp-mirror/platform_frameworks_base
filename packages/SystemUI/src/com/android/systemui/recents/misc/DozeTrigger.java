@@ -19,8 +19,8 @@ package com.android.systemui.recents.misc;
 import android.os.Handler;
 
 /**
- * A dozer is a class that fires a trigger after it falls asleep.  You can occasionally poke it to
- * wake it up, but it will fall asleep if left untouched.
+ * A dozer is a class that fires a trigger after it falls asleep.
+ * You can occasionally poke the trigger to wake it up, but it will fall asleep if left untouched.
  */
 public class DozeTrigger {
 
@@ -28,7 +28,7 @@ public class DozeTrigger {
 
     boolean mIsDozing;
     boolean mHasTriggered;
-    int mDozeDurationSeconds;
+    int mDozeDurationMilliseconds;
     Runnable mSleepRunnable;
 
     // Sleep-runnable
@@ -41,9 +41,9 @@ public class DozeTrigger {
         }
     };
 
-    public DozeTrigger(int dozeDurationSeconds, Runnable sleepRunnable) {
+    public DozeTrigger(int dozeDurationMilliseconds, Runnable sleepRunnable) {
         mHandler = new Handler();
-        mDozeDurationSeconds = dozeDurationSeconds;
+        mDozeDurationMilliseconds = dozeDurationMilliseconds;
         mSleepRunnable = sleepRunnable;
     }
 
@@ -69,7 +69,7 @@ public class DozeTrigger {
     /** Poke this dozer to wake it up for a little bit. */
     void forcePoke() {
         mHandler.removeCallbacks(mDozeRunnable);
-        mHandler.postDelayed(mDozeRunnable, mDozeDurationSeconds * 1000);
+        mHandler.postDelayed(mDozeRunnable, mDozeDurationMilliseconds);
         mIsDozing = true;
     }
 

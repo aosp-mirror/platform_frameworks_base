@@ -29,8 +29,8 @@ import android.graphics.Paint;
 import android.graphics.Point;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffColorFilter;
-import android.graphics.Rect;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewOutlineProvider;
@@ -40,13 +40,15 @@ import android.view.animation.Interpolator;
 import android.widget.FrameLayout;
 import com.android.systemui.R;
 import com.android.systemui.recents.Constants;
+import com.android.systemui.recents.Recents;
 import com.android.systemui.recents.RecentsActivity;
 import com.android.systemui.recents.RecentsActivityLaunchState;
 import com.android.systemui.recents.RecentsConfiguration;
 import com.android.systemui.recents.events.EventBus;
-import com.android.systemui.recents.events.ui.DismissTaskEvent;
+import com.android.systemui.recents.events.ui.DismissTaskViewEvent;
 import com.android.systemui.recents.events.ui.dragndrop.DragEndEvent;
 import com.android.systemui.recents.events.ui.dragndrop.DragStartEvent;
+import com.android.systemui.recents.misc.SystemServicesProxy;
 import com.android.systemui.recents.misc.Utilities;
 import com.android.systemui.recents.model.Task;
 import com.android.systemui.statusbar.phone.PhoneStatusBar;
@@ -55,11 +57,13 @@ import com.android.systemui.statusbar.phone.PhoneStatusBar;
 public class TaskView extends FrameLayout implements Task.TaskCallbacks,
         View.OnClickListener, View.OnLongClickListener {
 
+    private final static String TAG = "TaskView";
+    private final static boolean DEBUG = false;
+
     /** The TaskView callbacks */
     interface TaskViewCallbacks {
         public void onTaskViewClicked(TaskView tv, Task task, boolean lockToTask);
         public void onTaskViewClipStateChanged(TaskView tv);
-        public void onTaskViewFocusChanged(TaskView tv, boolean focused);
     }
 
     RecentsConfiguration mConfig;
@@ -76,6 +80,7 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks,
     Task mTask;
     boolean mTaskDataLoaded;
     boolean mIsFocused;
+    boolean mIsFocusAnimated;
     boolean mFocusAnimationsEnabled;
     boolean mClipViewInStack;
     AnimateableViewBounds mViewBounds;
@@ -397,15 +402,6 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks,
             ctx.postAnimationTrigger.increment();
             startDelay = delay;
         }
-
-        // Enable the focus animations from this point onwards so that they aren't affected by the
-        // window transitions
-        postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                enableFocusAnimations();
-            }
-        }, startDelay);
     }
 
     public void fadeInActionButton(int delay, int duration) {
@@ -547,7 +543,7 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks,
         startDeleteTaskAnimation(new Runnable() {
             @Override
             public void run() {
-                EventBus.getDefault().send(new DismissTaskEvent(mTask, tv));
+                EventBus.getDefault().send(new DismissTaskViewEvent(mTask, tv));
             }
         }, 0);
     }
@@ -620,6 +616,8 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks,
                 anim.addListener(postAnimRunnable);
             }
             anim.start();
+        } else {
+            postAnimRunnable.onAnimationEnd(null);
         }
     }
 
@@ -641,58 +639,32 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks,
     /**** View focus state ****/
 
     /**
-     * Sets the focused task explicitly. We need a separate flag because requestFocus() won't happen
-     * if the view is not currently visible, or we are in touch state (where we still want to keep
-     * track of focus).
+     * Explicitly sets the focused state of this task.
      */
-    public void setFocusedTask(boolean animateFocusedState) {
-        mIsFocused = true;
-        if (mFocusAnimationsEnabled) {
-            // Focus the header bar
-            mHeaderView.onTaskViewFocusChanged(true, animateFocusedState);
-        }
-        // Update the thumbnail alpha with the focus
-        mThumbnailView.onFocusChanged(true);
-        // Call the callback
-        if (mCb != null) {
-            mCb.onTaskViewFocusChanged(this, true);
-        }
-        // Workaround, we don't always want it focusable in touch mode, but we want the first task
-        // to be focused after the enter-recents animation, which can be triggered from either touch
-        // or keyboard
-        setFocusableInTouchMode(true);
-        requestFocus();
-        setFocusableInTouchMode(false);
-        invalidate();
-    }
-
-    /**
-     * Unsets the focused task explicitly.
-     */
-    void unsetFocusedTask() {
-        mIsFocused = false;
-        if (mFocusAnimationsEnabled) {
-            // Un-focus the header bar
-            mHeaderView.onTaskViewFocusChanged(false, true);
+    public void setFocusedState(boolean isFocused, boolean animated, boolean requestViewFocus) {
+        if (DEBUG) {
+            Log.d(TAG, "setFocusedState: " + mTask.activityLabel + " focused: " + isFocused +
+                    " mIsFocused: " + mIsFocused + " animated: " + animated +
+                    " requestViewFocus: " + requestViewFocus + " isFocused(): " + isFocused() +
+                    " isAccessibilityFocused(): " + isAccessibilityFocused());
         }
 
-        // Update the thumbnail alpha with the focus
-        mThumbnailView.onFocusChanged(false);
-        // Call the callback
-        if (mCb != null) {
-            mCb.onTaskViewFocusChanged(this, false);
-        }
-        invalidate();
-    }
-
-    /**
-     * Updates the explicitly focused state when the view focus changes.
-     */
-    @Override
-    protected void onFocusChanged(boolean gainFocus, int direction, Rect previouslyFocusedRect) {
-        super.onFocusChanged(gainFocus, direction, previouslyFocusedRect);
-        if (!gainFocus) {
-            unsetFocusedTask();
+        SystemServicesProxy ssp = Recents.getSystemServices();
+        mIsFocused = isFocused;
+        mIsFocusAnimated = animated;
+        mHeaderView.onTaskViewFocusChanged(isFocused, animated);
+        mThumbnailView.onFocusChanged(isFocused);
+        if (isFocused) {
+            if (requestViewFocus && !isFocused()) {
+                requestFocus();
+            }
+            if (requestViewFocus && !isAccessibilityFocused() && ssp.isTouchExplorationEnabled()) {
+                requestAccessibilityFocus();
+            }
+        } else {
+            if (isAccessibilityFocused() && ssp.isTouchExplorationEnabled()) {
+                clearAccessibilityFocus();
+            }
         }
     }
 
@@ -700,17 +672,14 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks,
      * Returns whether we have explicitly been focused.
      */
     public boolean isFocusedTask() {
-        return mIsFocused || isFocused();
+        return mIsFocused;
     }
 
-    /** Enables all focus animations. */
-    void enableFocusAnimations() {
-        boolean wasFocusAnimationsEnabled = mFocusAnimationsEnabled;
-        mFocusAnimationsEnabled = true;
-        if (mIsFocused && !wasFocusAnimationsEnabled) {
-            // Re-notify the header if we were focused and animations were not previously enabled
-            mHeaderView.onTaskViewFocusChanged(true, true);
-        }
+    /**
+     * Returns whether this focused task is animated.
+     */
+    public boolean isFocusAnimated() {
+        return mIsFocusAnimated;
     }
 
     public void disableLayersForOneFrame() {

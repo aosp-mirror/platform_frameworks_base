@@ -39,7 +39,6 @@ import android.graphics.drawable.RippleDrawable;
 import android.util.AttributeSet;
 import android.view.View;
 import android.view.ViewOutlineProvider;
-import android.view.accessibility.AccessibilityManager;
 import android.view.animation.AnimationUtils;
 import android.view.animation.Interpolator;
 import android.widget.FrameLayout;
@@ -244,9 +243,8 @@ public class TaskViewHeader extends FrameLayout
         mMoveTaskButton.setOnClickListener(this);
 
         // In accessibility, a single click on the focused app info button will show it
-        AccessibilityManager am = (AccessibilityManager) getContext().
-                getSystemService(Context.ACCESSIBILITY_SERVICE);
-        if (am != null && am.isEnabled()) {
+        SystemServicesProxy ssp = Recents.getSystemServices();
+        if (ssp.isTouchExplorationEnabled()) {
             mApplicationIcon.setOnClickListener(this);
         }
     }
@@ -369,9 +367,6 @@ public class TaskViewHeader extends FrameLayout
 
     /** Notifies the associated TaskView has been focused. */
     void onTaskViewFocusChanged(boolean focused, boolean animateFocusedState) {
-        // If we are not animating the visible state, just return
-        if (!animateFocusedState) return;
-
         boolean isRunning = false;
         if (mFocusAnimator != null) {
             isRunning = mFocusAnimator.isRunning();
@@ -379,6 +374,9 @@ public class TaskViewHeader extends FrameLayout
         }
 
         if (focused) {
+            // If we are not animating the visible state, just return
+            if (!animateFocusedState) return;
+
             int currentColor = mBackgroundColor;
             int secondaryColor = getSecondaryColor(mCurrentPrimaryColor, mCurrentPrimaryColorIsDark);
             int[][] states = new int[][] {
