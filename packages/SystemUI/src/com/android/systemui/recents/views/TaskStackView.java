@@ -773,10 +773,15 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
 
         // Set the task focused state without requesting view focus, and leave the focus animations
         // until after the enter-animation
-        RecentsActivityLaunchState launchState = mConfig.getLaunchState();
-        int taskOffset = launchState.launchedFromHome ? -1 : -2;
-        setFocusedTask(mStack.getTaskCount() + taskOffset, false /* scrollToTask */,
-                false /* animated */, false /* requestViewFocus */);
+        if (!Constants.DebugFlags.App.EnableFastToggleRecents && launchTargetTask != null) {
+            setFocusedTask(mStack.indexOfTask(launchTargetTask), false /* scrollToTask */,
+                    false /* animated */, false /* requestViewFocus */);
+        } else {
+            RecentsActivityLaunchState launchState = mConfig.getLaunchState();
+            int taskOffset = launchState.launchedFromHome ? -1 : -2;
+            setFocusedTask(mStack.getTaskCount() + taskOffset, false /* scrollToTask */,
+                    false /* animated */, false /* requestViewFocus */);
+        }
 
         // Start dozing
         mUIDozeTrigger.startDozing();
