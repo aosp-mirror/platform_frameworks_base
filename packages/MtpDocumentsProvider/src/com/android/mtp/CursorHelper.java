@@ -24,6 +24,9 @@ import android.mtp.MtpObjectInfo;
 import android.provider.DocumentsContract;
 import android.provider.DocumentsContract.Document;
 
+/**
+ * TODO Remove this class after we switch to use MtpDatabase.
+ */
 final class CursorHelper {
     static final int DUMMY_HANDLE_FOR_ROOT = 0;
 

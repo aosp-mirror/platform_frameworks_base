@@ -1,9 +1,26 @@
+/*
+ * Copyright (C) 2015 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package com.android.mtp;
 
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.res.Resources;
 import android.database.Cursor;
+import android.database.DatabaseUtils;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.mtp.MtpObjectInfo;
@@ -12,9 +29,7 @@ import android.provider.DocumentsContract.Document;
 
 import com.android.internal.annotations.VisibleForTesting;
 
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
+import java.util.Objects;
 
 /**
  * Database for MTP objects.
@@ -30,26 +45,60 @@ import java.nio.charset.StandardCharsets;
  * by comparing the directory structure and object name.
  *
  * TODO: Remove @VisibleForTesting annotation when we start to use this class.
+ * TODO: Improve performance by SQL optimization.
  */
 @VisibleForTesting
 class MtpDatabase {
     private static final int VERSION = 1;
     private static final String NAME = "mtp";
 
-    private static final String TABLE_MTP_DOCUMENTS = "MtpDocuments";
+    private static final String TABLE_DOCUMENTS = "Documents";
 
     static final String COLUMN_DEVICE_ID = "device_id";
     static final String COLUMN_STORAGE_ID = "storage_id";
     static final String COLUMN_OBJECT_HANDLE = "object_handle";
+    static final String COLUMN_PARENT_DOCUMENT_ID = "parent_document_id";
+    static final String COLUMN_ROW_STATE = "row_state";
+
+    /**
+     * The state represents that the row has a valid object handle.
+     */
+    static final int ROW_STATE_MAPPED = 0;
+
+    /**
+     * The state represents that the object handle was cleared because the MTP session closed.
+     * External application can still fetch the unmapped documents. If the external application
+     * tries to open an unmapped document, the provider resolves the document with new object handle
+     * ahead.
+     */
+    static final int ROW_STATE_UNMAPPED = 1;
+
+    /**
+     * The state represents the raw has a valid object handle but it may be going to be merged into
+     * another unmapped row. After fetching all documents under the parent, the database tries to
+     * map the mapping document and the unmapped document in order to keep old document ID alive.
+     */
+    static final int ROW_STATE_MAPPING = 2;
+
+    private static final String SELECTION_DOCUMENT_ID =
+            DocumentsContract.Document.COLUMN_DOCUMENT_ID + " = ?";
+    private static final String SELECTION_ROOT_DOCUMENTS =
+            COLUMN_DEVICE_ID + " = ? AND " + COLUMN_PARENT_DOCUMENT_ID + " IS NULL";
+    private static final String SELECTION_ROOT_DOCUMENTS_WITH_STATE =
+            SELECTION_ROOT_DOCUMENTS + " AND " + COLUMN_ROW_STATE + " = ?";
+
+    static class ParentNotFoundException extends Exception {}
 
     private static class OpenHelper extends SQLiteOpenHelper {
-        private static final String CREATE_TABLE_QUERY =
-                "CREATE TABLE " + TABLE_MTP_DOCUMENTS + " (" +
+        private static final String QUERY_CREATE_DOCUMENTS =
+                "CREATE TABLE " + TABLE_DOCUMENTS + " (" +
                 DocumentsContract.Document.COLUMN_DOCUMENT_ID +
                     " INTEGER PRIMARY KEY AUTOINCREMENT," +
                 COLUMN_DEVICE_ID + " INTEGER NOT NULL," +
-                COLUMN_STORAGE_ID + " INTEGER NOT NULL," +
+                COLUMN_STORAGE_ID + " INTEGER," +
                 COLUMN_OBJECT_HANDLE + " INTEGER," +
+                COLUMN_PARENT_DOCUMENT_ID + " INTEGER," +
+                COLUMN_ROW_STATE + " INTEGER NOT NULL," +
                 DocumentsContract.Document.COLUMN_MIME_TYPE + " TEXT," +
                 DocumentsContract.Document.COLUMN_DISPLAY_NAME + " TEXT NOT NULL," +
                 DocumentsContract.Document.COLUMN_SUMMARY + " TEXT," +
@@ -64,7 +113,7 @@ class MtpDatabase {
 
         @Override
         public void onCreate(SQLiteDatabase db) {
-            db.execSQL(CREATE_TABLE_QUERY);
+            db.execSQL(QUERY_CREATE_DOCUMENTS);
         }
 
         @Override
@@ -88,27 +137,57 @@ class MtpDatabase {
 
     @VisibleForTesting
     Cursor queryChildDocuments(String[] columnNames) {
-        return database.query(TABLE_MTP_DOCUMENTS, columnNames, null, null, null, null, null);
+        return database.query(
+                TABLE_DOCUMENTS,
+                columnNames,
+                COLUMN_ROW_STATE + " IN (?, ?)",
+                strings(ROW_STATE_MAPPED, ROW_STATE_UNMAPPED),
+                null,
+                null,
+                null);
     }
 
     @VisibleForTesting
-    void putRootDocument(Resources resources, MtpRoot root) throws Exception {
+    Cursor queryChildDocuments(String[] columnNames, String parentDocumentId) {
+        return database.query(
+                TABLE_DOCUMENTS,
+                columnNames,
+                COLUMN_ROW_STATE + " IN (?, ?) AND " + COLUMN_PARENT_DOCUMENT_ID + " = ?",
+                strings(ROW_STATE_MAPPED, ROW_STATE_UNMAPPED, parentDocumentId),
+                null,
+                null,
+                null);
+    }
+
+    /**
+     * Puts the roots into the database.
+     * If the database found another unmapped document that shares the same name with the root,
+     * the document may be merged into the unmapped document. In that case, the database marks the
+     * root as 'mapping' and wait for {@link #resolveRootDocuments(int)} is invoked.
+     * @param deviceId Device ID of roots.
+     * @param resources Resources used to get localized root name.
+     * @param roots Roots added to the database.
+     */
+    @VisibleForTesting
+    void putRootDocuments(int deviceId, Resources resources, MtpRoot[] roots) {
         database.beginTransaction();
         try {
+            // Add roots to database.
             final ContentValues values = new ContentValues();
-            values.put(COLUMN_DEVICE_ID, root.mDeviceId);
-            values.put(COLUMN_STORAGE_ID, root.mStorageId);
-            values.putNull(COLUMN_OBJECT_HANDLE);
-            values.put(Document.COLUMN_MIME_TYPE, DocumentsContract.Document.MIME_TYPE_DIR);
-            values.put(Document.COLUMN_DISPLAY_NAME, root.getRootName(resources));
-            values.putNull(Document.COLUMN_SUMMARY);
-            values.putNull(Document.COLUMN_LAST_MODIFIED);
-            values.putNull(Document.COLUMN_ICON);
-            values.put(Document.COLUMN_FLAGS, 0);
-            values.put(Document.COLUMN_SIZE,
-                    (int) Math.min(root.mMaxCapacity - root.mFreeSpace, Integer.MAX_VALUE));
-            if (database.insert(TABLE_MTP_DOCUMENTS, null, values) == -1) {
-                throw new Exception("Failed to add root document.");
+            for (int i = 0; i < roots.length; i++) {
+                getRootDocumentValues(values, resources, roots[i]);
+                final String displayName =
+                        values.getAsString(DocumentsContract.Document.COLUMN_DISPLAY_NAME);
+                final long numUnmapped = DatabaseUtils.queryNumEntries(
+                        database,
+                        TABLE_DOCUMENTS,
+                        SELECTION_ROOT_DOCUMENTS_WITH_STATE + " AND " +
+                        DocumentsContract.Document.COLUMN_DISPLAY_NAME + " = ?",
+                        strings(deviceId, ROW_STATE_UNMAPPED, displayName));
+                if (numUnmapped != 0) {
+                    values.put(COLUMN_ROW_STATE, ROW_STATE_MAPPING);
+                }
+                database.insert(TABLE_DOCUMENTS, null, values);
             }
             database.setTransactionSuccessful();
         } finally {
@@ -138,6 +217,9 @@ class MtpDatabase {
             values.put(COLUMN_DEVICE_ID, deviceId);
             values.put(COLUMN_STORAGE_ID, info.getStorageId());
             values.put(COLUMN_OBJECT_HANDLE, info.getObjectHandle());
+            // TODO: Specify correct document ID.
+            values.putNull(COLUMN_PARENT_DOCUMENT_ID);
+            values.put(COLUMN_ROW_STATE, ROW_STATE_MAPPED);
             values.put(Document.COLUMN_MIME_TYPE, mimeType);
             values.put(Document.COLUMN_DISPLAY_NAME, info.getName());
             values.putNull(Document.COLUMN_SUMMARY);
@@ -147,17 +229,177 @@ class MtpDatabase {
             values.putNull(Document.COLUMN_ICON);
             values.put(Document.COLUMN_FLAGS, flag);
             values.put(Document.COLUMN_SIZE, info.getCompressedSize());
-            if (database.insert(TABLE_MTP_DOCUMENTS, null, values) == -1) {
+            if (database.insert(TABLE_DOCUMENTS, null, values) == -1) {
                 throw new Exception("Failed to add document.");
             }
+
             database.setTransactionSuccessful();
         } finally {
             database.endTransaction();
         }
     }
 
+    /**
+     * Clears MTP related identifier.
+     * It clears MTP's object handle and storage ID that are not stable over MTP sessions and mark
+     * the all documents as 'unmapped'. It also remove 'mapping' rows as mapping is cancelled now.
+     */
     @VisibleForTesting
-    private String escape(String s) throws UnsupportedEncodingException {
-        return URLEncoder.encode(s, StandardCharsets.UTF_8.name());
+    void clearMapping() {
+        database.beginTransaction();
+        try {
+            database.delete(
+                    TABLE_DOCUMENTS, COLUMN_ROW_STATE + " = ?", strings(ROW_STATE_MAPPING));
+            final ContentValues values = new ContentValues();
+            values.putNull(COLUMN_OBJECT_HANDLE);
+            values.putNull(COLUMN_STORAGE_ID);
+            values.put(COLUMN_ROW_STATE, ROW_STATE_UNMAPPED);
+            database.update(TABLE_DOCUMENTS, values, null, null);
+            database.setTransactionSuccessful();
+        } finally {
+            database.endTransaction();
+        }
+    }
+
+    /**
+     * Maps 'unmapped' document and 'mapping' document that don't have document but shares the same
+     * name.
+     * If the database does not find corresponding 'mapping' document, it just removes 'unmapped'
+     * document from the database.
+     * @param deviceId Device ID of roots which the method tries to resolve.
+     */
+    @VisibleForTesting
+    void resolveRootDocuments(int deviceId) {
+        database.beginTransaction();
+        try {
+            // Get 1-to-1 mapping of unmapped document and mapping document.
+            final String unmappedIdQuery = createStateFilter(
+                    ROW_STATE_UNMAPPED, DocumentsContract.Document.COLUMN_DOCUMENT_ID);
+            final String mappingIdQuery = createStateFilter(
+                    ROW_STATE_MAPPING, DocumentsContract.Document.COLUMN_DOCUMENT_ID);
+            // SQL should be like:
+            // SELECT group_concat(CASE WHEN raw_state = 1 THEN document_id ELSE NULL END),
+            //        group_concat(CASE WHEN raw_state = 2 THEN document_id ELSE NULL END)
+            // WHERE device_id = ? AND parent_document_id IS NULL
+            // GROUP BY display_name
+            // HAVING count(CASE WHEN raw_state = 1 THEN document_id ELSE NULL END) = 1 AND
+            //        count(CASE WHEN raw_state = 2 THEN document_id ELSE NULL END) = 1
+            final Cursor mergingCursor = database.query(
+                    TABLE_DOCUMENTS,
+                    new String[] {
+                            "group_concat(" + unmappedIdQuery + ")",
+                            "group_concat(" + mappingIdQuery + ")"
+                    },
+                    SELECTION_ROOT_DOCUMENTS,
+                    strings(deviceId),
+                    DocumentsContract.Document.COLUMN_DISPLAY_NAME,
+                    "count(" + unmappedIdQuery + ") = 1 AND count(" + mappingIdQuery + ") = 1",
+                    null);
+
+            final ContentValues values = new ContentValues();
+            while (mergingCursor.moveToNext()) {
+                final String unmappedId = mergingCursor.getString(0);
+                final String mappingId = mergingCursor.getString(1);
+
+                // Obtain the new values including the latest object handle from mapping row.
+                final Cursor mappingCursor = database.query(
+                        TABLE_DOCUMENTS,
+                        null,
+                        SELECTION_DOCUMENT_ID,
+                        new String[] { mappingId },
+                        null,
+                        null,
+                        null);
+                mappingCursor.moveToNext();
+                values.clear();
+                DatabaseUtils.cursorRowToContentValues(mappingCursor, values);
+                mappingCursor.close();
+                values.remove(DocumentsContract.Document.COLUMN_DOCUMENT_ID);
+
+                // Set the new values into unmapped documents and get it back to 'normal' state.
+                values.put(COLUMN_ROW_STATE, ROW_STATE_MAPPED);
+                database.update(
+                        TABLE_DOCUMENTS,
+                        values,
+                        SELECTION_DOCUMENT_ID,
+                        new String[] { unmappedId });
+
+                // Delete 'mapping' row.
+                database.delete(
+                        TABLE_DOCUMENTS,
+                        SELECTION_DOCUMENT_ID,
+                        new String[] { mappingId });
+            }
+            mergingCursor.close();
+
+            // Delete all unmapped rows that cannot be mapped.
+            database.delete(
+                    TABLE_DOCUMENTS,
+                    SELECTION_ROOT_DOCUMENTS_WITH_STATE,
+                    strings(deviceId, ROW_STATE_UNMAPPED));
+
+            // The database cannot find old document ID for the mapping rows.
+            // Turn the all mapping rows into mapped state, which means the rows become to be
+            // valid with new document ID.
+            values.clear();
+            values.put(COLUMN_ROW_STATE, ROW_STATE_MAPPED);
+            database.update(
+                    TABLE_DOCUMENTS,
+                    values,
+                    SELECTION_ROOT_DOCUMENTS_WITH_STATE,
+                    strings(deviceId, ROW_STATE_MAPPING));
+            database.setTransactionSuccessful();
+        } finally {
+            database.endTransaction();
+        }
+    }
+
+    /**
+     * Gets {@link ContentValues} for the given root.
+     * @param values {@link ContentValues} that receives values.
+     * @param resources Resources used to get localized root name.
+     * @param root Root to be converted {@link ContentValues}.
+     */
+    private static void getRootDocumentValues(
+            ContentValues values, Resources resources, MtpRoot root) {
+        values.clear();
+        values.put(COLUMN_DEVICE_ID, root.mDeviceId);
+        values.put(COLUMN_STORAGE_ID, root.mStorageId);
+        values.putNull(COLUMN_OBJECT_HANDLE);
+        values.putNull(COLUMN_PARENT_DOCUMENT_ID);
+        values.put(COLUMN_ROW_STATE, ROW_STATE_MAPPED);
+        values.put(Document.COLUMN_MIME_TYPE, DocumentsContract.Document.MIME_TYPE_DIR);
+        values.put(Document.COLUMN_DISPLAY_NAME, root.getRootName(resources));
+        values.putNull(Document.COLUMN_SUMMARY);
+        values.putNull(Document.COLUMN_LAST_MODIFIED);
+        values.putNull(Document.COLUMN_ICON);
+        values.put(Document.COLUMN_FLAGS, 0);
+        values.put(Document.COLUMN_SIZE,
+                (int) Math.min(root.mMaxCapacity - root.mFreeSpace, Integer.MAX_VALUE));
+    }
+
+    /**
+     * Converts values into string array.
+     * @param args Values converted into string array.
+     * @return String array.
+     */
+    private static String[] strings(Object... args) {
+        final String[] results = new String[args.length];
+        for (int i = 0; i < args.length; i++) {
+            results[i] = Objects.toString(args[i]);
+        }
+        return results;
+    }
+
+    /**
+     * Gets SQL expression that represents the given value or NULL depends on the row state.
+     * @param state Expected row state.
+     * @param a SQL value.
+     * @return Expression that represents a if the row state is expected one, and represents NULL
+     *     otherwise.
+     */
+    private static String createStateFilter(int state, String a) {
+        return "CASE WHEN " + COLUMN_ROW_STATE + " = " + Integer.toString(state) +
+                " THEN " + a + " ELSE NULL END";
     }
 }
