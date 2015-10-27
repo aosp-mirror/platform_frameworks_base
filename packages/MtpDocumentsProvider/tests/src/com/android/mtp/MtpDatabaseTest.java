@@ -1,6 +1,5 @@
 package com.android.mtp;
 
-
 import android.database.Cursor;
 import android.mtp.MtpConstants;
 import android.mtp.MtpObjectInfo;
@@ -15,7 +14,6 @@ public class MtpDatabaseTest extends AndroidTestCase {
         MtpDatabase.COLUMN_DEVICE_ID,
         MtpDatabase.COLUMN_STORAGE_ID,
         MtpDatabase.COLUMN_OBJECT_HANDLE,
-        MtpDatabase.COLUMN_FULL_PATH,
         DocumentsContract.Document.COLUMN_MIME_TYPE,
         DocumentsContract.Document.COLUMN_DISPLAY_NAME,
         DocumentsContract.Document.COLUMN_SUMMARY,
@@ -70,22 +68,23 @@ public class MtpDatabaseTest extends AndroidTestCase {
         assertEquals("deviceId", 0, cursor.getInt(1));
         assertEquals("storageId", 1, cursor.getInt(2));
         assertTrue("objectHandle", cursor.isNull(3));
-        assertEquals("fullPath", "/0/Storage", cursor.getString(4));
-        assertEquals("mimeType", DocumentsContract.Document.MIME_TYPE_DIR, cursor.getString(5));
-        assertEquals("displayName", "Storage", cursor.getString(6));
-        assertTrue("summary", cursor.isNull(7));
-        assertTrue("lastModified", cursor.isNull(8));
-        assertTrue("icon", cursor.isNull(9));
-        assertEquals("flag", 0, cursor.getInt(10));
-        assertEquals("size", 1000, cursor.getInt(11));
+        assertEquals("mimeType", DocumentsContract.Document.MIME_TYPE_DIR, cursor.getString(4));
+        assertEquals("displayName", "Storage", cursor.getString(5));
+        assertTrue("summary", cursor.isNull(6));
+        assertTrue("lastModified", cursor.isNull(7));
+        assertTrue("icon", cursor.isNull(8));
+        assertEquals("flag", 0, cursor.getInt(9));
+        assertEquals("size", 1000, cursor.getInt(10));
 
         cursor.moveToNext();
         assertEquals("documentId", 2, cursor.getInt(0));
-        assertEquals("fullPath", "/0/Storage", cursor.getString(4));
+        assertEquals("displayName", "Storage", cursor.getString(5));
 
         cursor.moveToNext();
         assertEquals("documentId", 3, cursor.getInt(0));
-        assertEquals("fullPath", "/0/%2F%40%23%25%26%3C%3EStorage", cursor.getString(4));
+        assertEquals("displayName", "/@#%&<>Storage", cursor.getString(5));
+
+        cursor.close();
     }
 
     public void testPutDocument() throws Exception {
@@ -96,7 +95,7 @@ public class MtpDatabaseTest extends AndroidTestCase {
         builder.setStorageId(5);
         builder.setFormat(MtpConstants.FORMAT_TEXT);
         builder.setCompressedSize(1000);
-        database.putDocument(0, "/0/Storage", builder.build());
+        database.putDocument(0, builder.build());
 
         final Cursor cursor = database.queryChildDocuments(COLUMN_NAMES);
         assertEquals(1, cursor.getCount());
@@ -105,17 +104,16 @@ public class MtpDatabaseTest extends AndroidTestCase {
         assertEquals("deviceId", 0, cursor.getInt(1));
         assertEquals("storageId", 5, cursor.getInt(2));
         assertEquals("objectHandle", 100, cursor.getInt(3));
-        assertEquals("fullPath", "/0/Storage/test.txt", cursor.getString(4));
-        assertEquals("mimeType", "text/plain", cursor.getString(5));
-        assertEquals("displayName", "test.txt", cursor.getString(6));
-        assertTrue("summary", cursor.isNull(7));
-        assertTrue("lastModified", cursor.isNull(8));
-        assertTrue("icon", cursor.isNull(9));
+        assertEquals("mimeType", "text/plain", cursor.getString(4));
+        assertEquals("displayName", "test.txt", cursor.getString(5));
+        assertTrue("summary", cursor.isNull(6));
+        assertTrue("lastModified", cursor.isNull(7));
+        assertTrue("icon", cursor.isNull(8));
         assertEquals(
                 "flag",
                 DocumentsContract.Document.FLAG_SUPPORTS_DELETE |
                 DocumentsContract.Document.FLAG_SUPPORTS_WRITE,
-                cursor.getInt(10));
-        assertEquals("size", 1000, cursor.getInt(11));
+                cursor.getInt(9));
+        assertEquals("size", 1000, cursor.getInt(10));
     }
 }

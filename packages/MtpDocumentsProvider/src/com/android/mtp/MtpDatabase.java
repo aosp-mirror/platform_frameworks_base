@@ -30,10 +30,9 @@ class MtpDatabase {
 
     private static final String TABLE_MTP_DOCUMENTS = "MtpDocuments";
 
-    static final String COLUMN_DEVICE_ID = "deviceId";
-    static final String COLUMN_STORAGE_ID = "storageId";
-    static final String COLUMN_OBJECT_HANDLE = "objectHandle";
-    static final String COLUMN_FULL_PATH = "fullPath";
+    static final String COLUMN_DEVICE_ID = "device_id";
+    static final String COLUMN_STORAGE_ID = "storage_id";
+    static final String COLUMN_OBJECT_HANDLE = "object_handle";
 
     private static class OpenHelper extends SQLiteOpenHelper {
         private static final String CREATE_TABLE_QUERY =
@@ -43,7 +42,6 @@ class MtpDatabase {
                 COLUMN_DEVICE_ID + " INTEGER NOT NULL," +
                 COLUMN_STORAGE_ID + " INTEGER NOT NULL," +
                 COLUMN_OBJECT_HANDLE + " INTEGER," +
-                COLUMN_FULL_PATH + " TEXT NOT NULL," +
                 DocumentsContract.Document.COLUMN_MIME_TYPE + " TEXT," +
                 DocumentsContract.Document.COLUMN_DISPLAY_NAME + " TEXT NOT NULL," +
                 DocumentsContract.Document.COLUMN_SUMMARY + " TEXT," +
@@ -93,8 +91,6 @@ class MtpDatabase {
             values.put(COLUMN_DEVICE_ID, root.mDeviceId);
             values.put(COLUMN_STORAGE_ID, root.mStorageId);
             values.putNull(COLUMN_OBJECT_HANDLE);
-            values.put(
-                    COLUMN_FULL_PATH, "/" + root.mDeviceId + "/" + escape(root.mDescription));
             values.put(Document.COLUMN_MIME_TYPE, DocumentsContract.Document.MIME_TYPE_DIR);
             values.put(Document.COLUMN_DISPLAY_NAME, root.mDescription);
             values.putNull(Document.COLUMN_SUMMARY);
@@ -113,7 +109,7 @@ class MtpDatabase {
     }
 
     @VisibleForTesting
-    void putDocument(int deviceId, String parentFullPath, MtpObjectInfo info) throws Exception {
+    void putDocument(int deviceId, MtpObjectInfo info) throws Exception {
         database.beginTransaction();
         try {
             final String mimeType = CursorHelper.formatTypeToMimeType(info.getFormat());
@@ -134,9 +130,7 @@ class MtpDatabase {
             values.put(COLUMN_DEVICE_ID, deviceId);
             values.put(COLUMN_STORAGE_ID, info.getStorageId());
             values.put(COLUMN_OBJECT_HANDLE, info.getObjectHandle());
-            values.put(COLUMN_FULL_PATH, parentFullPath + "/" + escape(info.getName()));
-            values.put(
-                    Document.COLUMN_MIME_TYPE, CursorHelper.formatTypeToMimeType(info.getFormat()));
+            values.put(Document.COLUMN_MIME_TYPE, mimeType);
             values.put(Document.COLUMN_DISPLAY_NAME, info.getName());
             values.putNull(Document.COLUMN_SUMMARY);
             values.put(
