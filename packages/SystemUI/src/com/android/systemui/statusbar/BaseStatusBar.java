@@ -217,7 +217,7 @@ public abstract class BaseStatusBar extends SystemUI implements
 
     private boolean mDeviceProvisioned = false;
 
-    private RecentsComponent mRecents;
+    protected RecentsComponent mRecents;
 
     protected int mZenMode;
 

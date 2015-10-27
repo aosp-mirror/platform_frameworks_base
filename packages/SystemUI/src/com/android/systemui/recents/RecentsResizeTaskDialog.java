@@ -234,14 +234,6 @@ public class RecentsResizeTaskDialog extends DialogFragment {
         dismissAllowingStateLoss();
         mRecentsActivity.dismissRecentsToHomeWithoutTransitionAnimation();
 
-        // In debug mode, we force all task to be resizeable regardless of the
-        // current app configuration.
-        for (int i = additionalTasks; i >= 0; --i) {
-            if (mTasks[i] != null) {
-                ssp.setTaskResizeable(mTasks[i].key.id);
-            }
-        }
-
         // Show tasks as they might not be currently visible - beginning with the oldest so that
         // the focus ends on the selected one.
         for (int i = additionalTasks; i >= 0; --i) {
@@ -277,8 +269,7 @@ public class RecentsResizeTaskDialog extends DialogFragment {
         if (mTasks[0].key.stackId != DOCKED_STACK_ID) {
             int taskId = mTasks[0].key.id;
             SystemServicesProxy ssp = Recents.getSystemServices();
-            ssp.setTaskResizeable(taskId);
-            ssp.dockTask(taskId, createMode);
+            ssp.startTaskInDockedMode(taskId, createMode);
             mRecentsView.launchTask(mTasks[0], null, DOCKED_STACK_ID);
         } else {
             Toast.makeText(getContext(), "Already docked", Toast.LENGTH_SHORT);

@@ -214,11 +214,8 @@ public class ScreenPinningRequest implements View.OnClickListener {
                         .setVisibility(View.INVISIBLE);
             }
 
-            final int description = mAccessibilityService.isEnabled()
-                    ? R.string.screen_pinning_description_accessible
-                    : R.string.screen_pinning_description;
             ((TextView) mLayout.findViewById(R.id.screen_pinning_description))
-                    .setText(description);
+                    .setText(R.string.screen_pinning_description);
             final int backBgVisibility =
                     mAccessibilityService.isEnabled() ? View.INVISIBLE : View.VISIBLE;
             mLayout.findViewById(R.id.screen_pinning_back_bg).setVisibility(backBgVisibility);

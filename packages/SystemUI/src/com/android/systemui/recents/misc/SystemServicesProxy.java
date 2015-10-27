@@ -290,12 +290,23 @@ public class SystemServicesProxy {
         }
     }
 
-    /** Docks a task to the side of the screen. */
-    public void dockTask(int taskId, int createMode) {
+    /** Docks a task to the side of the screen and starts it. */
+    public void startTaskInDockedMode(int taskId, int createMode) {
         if (mIam == null) return;
 
         try {
             mIam.startActivityFromRecents(taskId, DOCKED_STACK_ID, null);
+        } catch (RemoteException e) {
+            e.printStackTrace();
+        }
+    }
+
+    /** Docks an already resumed task to the side of the screen. */
+    public void moveTaskToDockedStack(int taskId, int createMode) {
+        if (mIam == null) return;
+
+        try {
+            mIam.moveTaskToDockedStack(taskId, createMode, true /* onTop */);
         } catch (RemoteException e) {
             e.printStackTrace();
         }
@@ -735,6 +746,8 @@ public class SystemServicesProxy {
             ActivityOptions options) {
         if (mIam != null) {
             try {
+                // TODO: Remove when compatibility story is figured out.
+                setTaskResizeable(taskId);
                 mIam.startActivityFromRecents(
                         taskId, INVALID_STACK_ID, options == null ? null : options.toBundle());
                 return true;
