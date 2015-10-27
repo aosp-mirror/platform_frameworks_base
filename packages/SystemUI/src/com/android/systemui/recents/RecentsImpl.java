@@ -346,7 +346,7 @@ public class RecentsImpl extends IRecentsNonSystemUserCallbacks.Stub
         // Return early if there is no running task (can't determine affiliated tasks in this case)
         if (runningTask == null) return;
         // Return early if the running task is in the home stack (optimization)
-        if (ssp.isInHomeStack(runningTask.id)) return;
+        if (SystemServicesProxy.isHomeStack(runningTask.stackId)) return;
 
         // Find the task in the recents list
         ArrayList<Task> tasks = focusedStack.getTasks();

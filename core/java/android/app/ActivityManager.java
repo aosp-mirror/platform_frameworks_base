@@ -1200,6 +1200,12 @@ public class ActivityManager {
         public int id;
 
         /**
+         * The stack that currently contains this task.
+         * @hide
+         */
+        public int stackId;
+
+        /**
          * The component launched as the first activity in the task.  This can
          * be considered the "application" of this task.
          */
@@ -1248,6 +1254,7 @@ public class ActivityManager {
 
         public void writeToParcel(Parcel dest, int flags) {
             dest.writeInt(id);
+            dest.writeInt(stackId);
             ComponentName.writeToParcel(baseActivity, dest);
             ComponentName.writeToParcel(topActivity, dest);
             if (thumbnail != null) {
@@ -1264,6 +1271,7 @@ public class ActivityManager {
 
         public void readFromParcel(Parcel source) {
             id = source.readInt();
+            stackId = source.readInt();
             baseActivity = ComponentName.readFromParcel(source);
             topActivity = ComponentName.readFromParcel(source);
             if (source.readInt() != 0) {
