@@ -17,6 +17,7 @@
 package com.android.systemui.statusbar;
 
 import android.app.Notification;
+import android.content.Context;
 import android.os.SystemClock;
 import android.service.notification.NotificationListenerService;
 import android.service.notification.NotificationListenerService.Ranking;
@@ -24,6 +25,7 @@ import android.service.notification.NotificationListenerService.RankingMap;
 import android.service.notification.StatusBarNotification;
 import android.util.ArrayMap;
 import android.view.View;
+import android.widget.RemoteViews;
 
 import com.android.systemui.statusbar.phone.NotificationGroupManager;
 import com.android.systemui.statusbar.policy.HeadsUpManager;
@@ -53,6 +55,10 @@ public class NotificationData {
         public boolean legacy; // whether the notification has a legacy, dark background
         public int targetSdk;
         private long lastFullScreenIntentLaunchTime = NOT_LAUNCHED_YET;
+        public RemoteViews cachedContentView;
+        public RemoteViews cachedBigContentView;
+        public RemoteViews cachedHeadsUpContentView;
+        public RemoteViews cachedPublicContentView;
 
         public Entry(StatusBarNotification n, StatusBarIconView ic) {
             this.key = n.getKey();
@@ -96,6 +102,67 @@ public class NotificationData {
 
         public View getPublicContentView() {
             return row.getPublicLayout().getContractedChild();
+        }
+
+        public boolean cacheContentViews(Context ctx, Notification updatedNotification) {
+            boolean cached = false;
+            if (updatedNotification != null) {
+                final Notification.Builder updatedNotificationBuilder
+                        = Notification.Builder.recoverBuilder(ctx, updatedNotification);
+                final RemoteViews newContentView = updatedNotificationBuilder.makeContentView();
+                if (!compareRemoteViews(cachedContentView, newContentView)) {
+                    cachedContentView = newContentView;
+                    cached |= true;
+                }
+                final RemoteViews newBigContentView =
+                        updatedNotificationBuilder.makeBigContentView();
+                if (!compareRemoteViews(cachedBigContentView, newBigContentView)) {
+                    cachedBigContentView = newBigContentView;
+                    cached |= true;
+                }
+                final RemoteViews newHeadsUpContentView =
+                        updatedNotificationBuilder.makeHeadsUpContentView();
+                if (!compareRemoteViews(cachedHeadsUpContentView, newBigContentView)) {
+                    cachedHeadsUpContentView = newHeadsUpContentView;
+                    cached |= true;
+                }
+                final Notification updatedPublicNotification = updatedNotification.publicVersion;
+                final RemoteViews newPubContentView = (updatedPublicNotification != null)
+                        ? Notification.Builder.recoverBuilder(
+                                ctx, updatedPublicNotification).makeContentView()
+                        : null;
+                if (!compareRemoteViews(cachedPublicContentView, newPubContentView)) {
+                    cachedPublicContentView = newPubContentView;
+                    cached |= true;
+                }
+            } else {
+                final Notification.Builder builder
+                        = Notification.Builder.recoverBuilder(ctx, notification.getNotification());
+
+                cachedContentView = builder.makeContentView();
+                cachedBigContentView = builder.makeBigContentView();
+                cachedHeadsUpContentView = builder.makeHeadsUpContentView();
+
+                final Notification publicNotification =
+                        notification.getNotification().publicVersion;
+                if (publicNotification != null) {
+                    final Notification.Builder publicBuilder
+                            = Notification.Builder.recoverBuilder(ctx, publicNotification);
+                    cachedPublicContentView = publicBuilder.makeContentView();
+                }
+                cached = true;
+            }
+            return cached;
+        }
+
+        // Returns true if the RemoteViews are the same.
+        private boolean compareRemoteViews(final RemoteViews a, final RemoteViews b) {
+            return (a == null && b == null) ||
+                    (a != null && b != null
+                    && b.getPackage() != null
+                    && a.getPackage() != null
+                    && a.getPackage().equals(b.getPackage())
+                    && a.getLayoutId() == b.getLayoutId());
         }
 
         public void notifyFullScreenIntentLaunched() {

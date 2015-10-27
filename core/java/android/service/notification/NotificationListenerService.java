@@ -31,6 +31,7 @@ import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.Icon;
 import android.graphics.Bitmap;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.Parcel;
@@ -472,9 +473,10 @@ public abstract class NotificationListenerService extends Service {
                 StatusBarNotification sbn = list.get(i);
                 Notification notification = sbn.getNotification();
                 try {
-                    Builder.rebuild(getContext(), notification);
                     // convert icon metadata to legacy format for older clients
                     createLegacyIconExtras(notification);
+                    // populate remote views for older clients.
+                    maybePopulateRemoteViews(notification);
                 } catch (IllegalArgumentException e) {
                     if (corruptNotifications == null) {
                         corruptNotifications = new ArrayList<>(N);
@@ -676,6 +678,18 @@ public abstract class NotificationListenerService extends Service {
         }
     }
 
+    /**
+     * Populates remote views for pre-N targeting apps.
+     */
+    private void maybePopulateRemoteViews(Notification notification) {
+        if (getContext().getApplicationInfo().targetSdkVersion < Build.VERSION_CODES.N) {
+            Builder builder = Builder.recoverBuilder(getContext(), notification);
+            notification.contentView = builder.makeContentView();
+            notification.bigContentView = builder.makeBigContentView();
+            notification.headsUpContentView = builder.makeHeadsUpContentView();
+        }
+    }
+
     private class INotificationListenerWrapper extends INotificationListener.Stub {
         @Override
         public void onNotificationPosted(IStatusBarNotificationHolder sbnHolder,
@@ -689,9 +703,10 @@ public abstract class NotificationListenerService extends Service {
             }
 
             try {
-                Notification.Builder.rebuild(getContext(), sbn.getNotification());
+                Notification notification = sbn.getNotification();
                 // convert icon metadata to legacy format for older clients
                 createLegacyIconExtras(sbn.getNotification());
+                maybePopulateRemoteViews(sbn.getNotification());
             } catch (IllegalArgumentException e) {
                 // drop corrupt notification
                 sbn = null;

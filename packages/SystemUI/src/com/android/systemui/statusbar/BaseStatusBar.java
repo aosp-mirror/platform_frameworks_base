@@ -1275,19 +1275,21 @@ public abstract class BaseStatusBar extends SystemUI implements
 
         int maxHeight = mRowMaxHeight;
         final StatusBarNotification sbn = entry.notification;
-        RemoteViews contentView = sbn.getNotification().contentView;
-        RemoteViews bigContentView = sbn.getNotification().bigContentView;
-        RemoteViews headsUpContentView = sbn.getNotification().headsUpContentView;
+        entry.cacheContentViews(mContext, null);
+
+        final RemoteViews contentView = entry.cachedContentView;
+        final RemoteViews bigContentView = entry.cachedBigContentView;
+        final RemoteViews headsUpContentView = entry.cachedHeadsUpContentView;
+        final RemoteViews publicContentView = entry.cachedPublicContentView;
 
         if (contentView == null) {
+            Log.v(TAG, "no contentView for: " + sbn.getNotification());
             return false;
         }
 
         if (DEBUG) {
-            Log.v(TAG, "publicNotification: " + sbn.getNotification().publicVersion);
+            Log.v(TAG, "publicContentView: " + publicContentView);
         }
-
-        Notification publicNotification = sbn.getNotification().publicVersion;
 
         ExpandableNotificationRow row;
 
@@ -1377,9 +1379,9 @@ public abstract class BaseStatusBar extends SystemUI implements
 
         // now the public version
         View publicViewLocal = null;
-        if (publicNotification != null) {
+        if (publicContentView != null) {
             try {
-                publicViewLocal = publicNotification.contentView.apply(
+                publicViewLocal = publicContentView.apply(
                         sbn.getPackageContext(mContext),
                         contentContainerPublic, mOnClickHandler);
 
@@ -1537,30 +1539,9 @@ public abstract class BaseStatusBar extends SystemUI implements
             }
 
             if (viableAction != null) {
-                Notification stripped = n.clone();
-                Notification.Builder.stripForDelivery(stripped);
-                stripped.extras.putBoolean("android.rebuild", true);
-                stripped.actions = new Notification.Action[] { viableAction };
-                stripped.extras.putBoolean("android.rebuild.contentView", true);
-                stripped.contentView = null;
-                stripped.extras.putBoolean("android.rebuild.bigView", true);
-                stripped.bigContentView = null;
-                stripped.extras.putBoolean("android.rebuild.hudView", true);
-                stripped.headsUpContentView = null;
-
-                stripped.extras.putParcelable(Notification.EXTRA_LARGE_ICON,
-                        stripped.getLargeIcon());
-                if (SystemProperties.getBoolean("debug.strip_third_line", false)) {
-                    stripped.extras.putCharSequence(Notification.EXTRA_INFO_TEXT, null);
-                    stripped.extras.putCharSequence(Notification.EXTRA_SUMMARY_TEXT, null);
-                }
-
-                Notification rebuilt = Notification.Builder.rebuild(mContext, stripped);
-
-                n.actions = rebuilt.actions;
-                n.bigContentView = rebuilt.bigContentView;
-                n.headsUpContentView = rebuilt.headsUpContentView;
-                n.publicVersion = rebuilt.publicVersion;
+                Notification.Builder rebuilder = Notification.Builder.recoverBuilder(mContext, n);
+                rebuilder.setActions(viableAction);
+                rebuilder.build(); // will rewrite n
             }
         }
     }
@@ -2034,12 +2015,15 @@ public abstract class BaseStatusBar extends SystemUI implements
         }
 
         Notification n = notification.getNotification();
-        if (DEBUG) {
-            logUpdate(entry, n);
-        }
-        boolean applyInPlace = shouldApplyInPlace(entry, n);
+
+        boolean applyInPlace = !entry.cacheContentViews(mContext, notification.getNotification());
         boolean shouldInterrupt = shouldInterrupt(entry, notification);
         boolean alertAgain = alertAgain(entry, n);
+        if (DEBUG) {
+            Log.d(TAG, "applyInPlace=" + applyInPlace
+                    + " shouldInterrupt=" + shouldInterrupt
+                    + " alertAgain=" + alertAgain);
+        }
 
         entry.notification = notification;
         mGroupManager.onEntryUpdated(entry, entry.notification);
@@ -2104,101 +2088,32 @@ public abstract class BaseStatusBar extends SystemUI implements
     protected abstract void updateHeadsUp(String key, Entry entry, boolean shouldInterrupt,
             boolean alertAgain);
 
-    private void logUpdate(Entry oldEntry, Notification n) {
-        StatusBarNotification oldNotification = oldEntry.notification;
-        Log.d(TAG, "old notification: when=" + oldNotification.getNotification().when
-                + " ongoing=" + oldNotification.isOngoing()
-                + " expanded=" + oldEntry.getContentView()
-                + " contentView=" + oldNotification.getNotification().contentView
-                + " bigContentView=" + oldNotification.getNotification().bigContentView
-                + " publicView=" + oldNotification.getNotification().publicVersion
-                + " rowParent=" + oldEntry.row.getParent());
-        Log.d(TAG, "new notification: when=" + n.when
-                + " ongoing=" + oldNotification.isOngoing()
-                + " contentView=" + n.contentView
-                + " bigContentView=" + n.bigContentView
-                + " publicView=" + n.publicVersion);
-    }
-
-    /**
-     * @return whether we can just reapply the RemoteViews from a notification in-place when it is
-     * updated
-     */
-    private boolean shouldApplyInPlace(Entry entry, Notification n) {
-        StatusBarNotification oldNotification = entry.notification;
-        // XXX: modify when we do something more intelligent with the two content views
-        final RemoteViews oldContentView = oldNotification.getNotification().contentView;
-        final RemoteViews contentView = n.contentView;
-        final RemoteViews oldBigContentView = oldNotification.getNotification().bigContentView;
-        final RemoteViews bigContentView = n.bigContentView;
-        final RemoteViews oldHeadsUpContentView
-                = oldNotification.getNotification().headsUpContentView;
-        final RemoteViews headsUpContentView = n.headsUpContentView;
-        final Notification oldPublicNotification = oldNotification.getNotification().publicVersion;
-        final RemoteViews oldPublicContentView = oldPublicNotification != null
-                ? oldPublicNotification.contentView : null;
-        final Notification publicNotification = n.publicVersion;
-        final RemoteViews publicContentView = publicNotification != null
-                ? publicNotification.contentView : null;
-        boolean contentsUnchanged = entry.getContentView() != null
-                && contentView.getPackage() != null
-                && oldContentView.getPackage() != null
-                && oldContentView.getPackage().equals(contentView.getPackage())
-                && oldContentView.getLayoutId() == contentView.getLayoutId();
-        // large view may be null
-        boolean bigContentsUnchanged =
-                (entry.getExpandedContentView() == null && bigContentView == null)
-                || ((entry.getExpandedContentView() != null && bigContentView != null)
-                    && bigContentView.getPackage() != null
-                    && oldBigContentView.getPackage() != null
-                    && oldBigContentView.getPackage().equals(bigContentView.getPackage())
-                    && oldBigContentView.getLayoutId() == bigContentView.getLayoutId());
-        boolean headsUpContentsUnchanged =
-                (oldHeadsUpContentView == null && headsUpContentView == null)
-                || ((oldHeadsUpContentView != null && headsUpContentView != null)
-                    && headsUpContentView.getPackage() != null
-                    && oldHeadsUpContentView.getPackage() != null
-                    && oldHeadsUpContentView.getPackage().equals(headsUpContentView.getPackage())
-                    && oldHeadsUpContentView.getLayoutId() == headsUpContentView.getLayoutId());
-        boolean publicUnchanged  =
-                (oldPublicContentView == null && publicContentView == null)
-                || ((oldPublicContentView != null && publicContentView != null)
-                        && publicContentView.getPackage() != null
-                        && oldPublicContentView.getPackage() != null
-                        && oldPublicContentView.getPackage().equals(publicContentView.getPackage())
-                        && oldPublicContentView.getLayoutId() == publicContentView.getLayoutId());
-        return contentsUnchanged && bigContentsUnchanged && headsUpContentsUnchanged
-                && publicUnchanged;
-    }
-
-    private void updateNotificationViews(Entry entry, StatusBarNotification notification) {
-        final RemoteViews contentView = notification.getNotification().contentView;
-        final RemoteViews bigContentView = notification.getNotification().bigContentView;
-        final RemoteViews headsUpContentView = notification.getNotification().headsUpContentView;
-        final Notification publicVersion = notification.getNotification().publicVersion;
-        final RemoteViews publicContentView = publicVersion != null ? publicVersion.contentView
-                : null;
+    private void updateNotificationViews(Entry entry, StatusBarNotification sbn) {
+        final RemoteViews contentView = entry.cachedContentView;
+        final RemoteViews bigContentView = entry.cachedBigContentView;
+        final RemoteViews headsUpContentView = entry.cachedHeadsUpContentView;
+        final RemoteViews publicContentView = entry.cachedPublicContentView;
 
         // Reapply the RemoteViews
         contentView.reapply(mContext, entry.getContentView(), mOnClickHandler);
         if (bigContentView != null && entry.getExpandedContentView() != null) {
-            bigContentView.reapply(notification.getPackageContext(mContext),
+            bigContentView.reapply(sbn.getPackageContext(mContext),
                     entry.getExpandedContentView(),
                     mOnClickHandler);
         }
         View headsUpChild = entry.getHeadsUpContentView();
         if (headsUpContentView != null && headsUpChild != null) {
-            headsUpContentView.reapply(notification.getPackageContext(mContext),
+            headsUpContentView.reapply(sbn.getPackageContext(mContext),
                     headsUpChild, mOnClickHandler);
         }
         if (publicContentView != null && entry.getPublicContentView() != null) {
-            publicContentView.reapply(notification.getPackageContext(mContext),
+            publicContentView.reapply(sbn.getPackageContext(mContext),
                     entry.getPublicContentView(), mOnClickHandler);
         }
         // update the contentIntent
-        mNotificationClicker.register(entry.row, notification);
+        mNotificationClicker.register(entry.row, sbn);
 
-        entry.row.setStatusBarNotification(notification);
+        entry.row.setStatusBarNotification(sbn);
         entry.row.notifyContentUpdated();
         entry.row.resetHeight();
 

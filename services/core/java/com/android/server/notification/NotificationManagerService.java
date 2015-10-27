@@ -2146,13 +2146,6 @@ public class NotificationManagerService extends SystemService {
                     + " id=" + id + " notification=" + notification);
         }
 
-        if (notification.getSmallIcon() != null) {
-            if (!notification.isValid()) {
-                throw new IllegalArgumentException("Invalid notification (): pkg=" + pkg
-                        + " id=" + id + " notification=" + notification);
-            }
-        }
-
         mHandler.post(new Runnable() {
             @Override
             public void run() {
