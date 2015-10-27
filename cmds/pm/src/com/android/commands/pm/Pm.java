@@ -283,7 +283,7 @@ public final class Pm {
             } else if (args.length == 2) {
                 if (args[0].equalsIgnoreCase("-p")) {
                     validCommand = true;
-                    return displayPackageFilePath(args[1], UserHandle.USER_OWNER);
+                    return displayPackageFilePath(args[1], UserHandle.USER_SYSTEM);
                 }
             }
             return 1;
@@ -767,7 +767,7 @@ public final class Pm {
     }
 
     private int runPath() {
-        int userId = UserHandle.USER_OWNER;
+        int userId = UserHandle.USER_SYSTEM;
         String option = nextOption();
         if (option != null && option.equals("--user")) {
             String optionData = nextOptionData();
@@ -1650,7 +1650,7 @@ public final class Pm {
     }
 
     private int runClear() {
-        int userId = UserHandle.USER_OWNER;
+        int userId = UserHandle.USER_SYSTEM;
         String option = nextOption();
         if (option != null && option.equals("--user")) {
             String optionData = nextOptionData();
@@ -1722,7 +1722,7 @@ public final class Pm {
     }
 
     private int runSetEnabledSetting(int state) {
-        int userId = UserHandle.USER_OWNER;
+        int userId = UserHandle.USER_SYSTEM;
         String option = nextOption();
         if (option != null && option.equals("--user")) {
             String optionData = nextOptionData();
@@ -1771,7 +1771,7 @@ public final class Pm {
     }
 
     private int runSetHiddenSetting(boolean state) {
-        int userId = UserHandle.USER_OWNER;
+        int userId = UserHandle.USER_SYSTEM;
         String option = nextOption();
         if (option != null && option.equals("--user")) {
             String optionData = nextOptionData();
