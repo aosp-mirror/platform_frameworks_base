@@ -30,7 +30,6 @@ import android.util.Slog;
 import android.util.Xml;
 
 import com.android.internal.util.FastXmlSerializer;
-import com.android.internal.util.Preconditions;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
@@ -75,6 +74,7 @@ class Owners {
     private static final String ATTR_PACKAGE = "package";
     private static final String ATTR_COMPONENT_NAME = "component";
     private static final String ATTR_USERID = "userId";
+    private static final String ATTR_USER_RESTRICTIONS_MIGRATED = "userRestrictionsMigrated";
 
     private static final String TAG_SYSTEM_UPDATE_POLICY = "system-update-policy";
 
@@ -155,7 +155,16 @@ class Owners {
             Slog.e(TAG, "Invalid user id for device owner user: " + userId);
             return;
         }
-        mDeviceOwner = new OwnerInfo(ownerName, admin);
+        // For a newly set DO, there's no need for migration.
+        setDeviceOwnerWithRestrictionsMigrated(admin, ownerName, userId,
+                /* userRestrictionsMigrated =*/ true);
+    }
+
+    // Note this should be only called during migration.  Normally when DO is set,
+    // userRestrictionsMigrated should always be true.
+    void setDeviceOwnerWithRestrictionsMigrated(ComponentName admin, String ownerName, int userId,
+            boolean userRestrictionsMigrated) {
+        mDeviceOwner = new OwnerInfo(ownerName, admin, userRestrictionsMigrated);
         mDeviceOwnerUserId = userId;
     }
 
@@ -165,7 +174,9 @@ class Owners {
     }
 
     void setProfileOwner(ComponentName admin, String ownerName, int userId) {
-        mProfileOwners.put(userId, new OwnerInfo(ownerName, admin));
+        // For a newly set PO, there's no need for migration.
+        mProfileOwners.put(userId, new OwnerInfo(ownerName, admin,
+                /* userRestrictionsMigrated =*/ true));
     }
 
     void removeProfileOwner(int userId) {
@@ -207,6 +218,38 @@ class Owners {
         return mDeviceOwner != null;
     }
 
+    /**
+     * @return true if user restrictions need to be migrated for DO.
+     */
+    boolean getDeviceOwnerUserRestrictionsNeedsMigration() {
+        return mDeviceOwner != null && !mDeviceOwner.userRestrictionsMigrated;
+    }
+
+    /**
+     * @return true if user restrictions need to be migrated for PO.
+     */
+    boolean getProfileOwnerUserRestrictionsNeedsMigration(int userId) {
+        OwnerInfo profileOwner = mProfileOwners.get(userId);
+        return profileOwner != null && !profileOwner.userRestrictionsMigrated;
+    }
+
+    /** Sets the user restrictions migrated flag, and also writes to the file. */
+    void setDeviceOwnerUserRestrictionsMigrated() {
+        if (mDeviceOwner != null) {
+            mDeviceOwner.userRestrictionsMigrated = true;
+        }
+        writeDeviceOwner();
+    }
+
+    /** Sets the user restrictions migrated flag, and also writes to the file.  */
+    void setProfileOwnerUserRestrictionsMigrated(int userId) {
+        OwnerInfo profileOwner = mProfileOwners.get(userId);
+        if (profileOwner != null) {
+            profileOwner.userRestrictionsMigrated = true;
+        }
+        writeProfileOwner(userId);
+    }
+
     private boolean readLegacyOwnerFile(File file) {
         if (!file.exists()) {
             // Already migrated or the device has no owners.
@@ -226,7 +269,8 @@ class Owners {
                 if (tag.equals(TAG_DEVICE_OWNER)) {
                     String name = parser.getAttributeValue(null, ATTR_NAME);
                     String packageName = parser.getAttributeValue(null, ATTR_PACKAGE);
-                    mDeviceOwner = new OwnerInfo(name, packageName);
+                    mDeviceOwner = new OwnerInfo(name, packageName,
+                            /* userRestrictionsMigrated =*/ false);
                     mDeviceOwnerUserId = UserHandle.USER_SYSTEM;
                 } else if (tag.equals(TAG_DEVICE_INITIALIZER)) {
                     // Deprecated tag
@@ -241,7 +285,8 @@ class Owners {
                         ComponentName admin = ComponentName.unflattenFromString(
                                 profileOwnerComponentStr);
                         if (admin != null) {
-                            profileOwnerInfo = new OwnerInfo(profileOwnerName, admin);
+                            profileOwnerInfo = new OwnerInfo(profileOwnerName, admin,
+                                /* userRestrictionsMigrated =*/ false);
                         } else {
                             // This shouldn't happen but switch from package name -> component name
                             // might have written bad device owner files. b/17652534
@@ -250,7 +295,8 @@ class Owners {
                         }
                     }
                     if (profileOwnerInfo == null) {
-                        profileOwnerInfo = new OwnerInfo(profileOwnerName, profileOwnerPackageName);
+                        profileOwnerInfo = new OwnerInfo(profileOwnerName, profileOwnerPackageName,
+                                /* userRestrictionsMigrated =*/ false);
                     }
                     mProfileOwners.put(userId, profileOwnerInfo);
                 } else if (TAG_SYSTEM_UPDATE_POLICY.equals(tag)) {
@@ -503,21 +549,24 @@ class Owners {
         }
     }
 
-    private static class OwnerInfo {
+    static class OwnerInfo {
         public final String name;
         public final String packageName;
         public final ComponentName admin;
+        public boolean userRestrictionsMigrated;
 
-        public OwnerInfo(String name, String packageName) {
+        public OwnerInfo(String name, String packageName, boolean userRestrictionsMigrated) {
             this.name = name;
             this.packageName = packageName;
             this.admin = new ComponentName(packageName, "");
+            this.userRestrictionsMigrated = userRestrictionsMigrated;
         }
 
-        public OwnerInfo(String name, ComponentName admin) {
+        public OwnerInfo(String name, ComponentName admin, boolean userRestrictionsMigrated) {
             this.name = name;
             this.admin = admin;
             this.packageName = admin.getPackageName();
+            this.userRestrictionsMigrated = userRestrictionsMigrated;
         }
 
         public void writeToXml(XmlSerializer out, String tag) throws IOException {
@@ -529,6 +578,8 @@ class Owners {
             if (admin != null) {
                 out.attribute(null, ATTR_COMPONENT_NAME, admin.flattenToString());
             }
+            out.attribute(null, ATTR_USER_RESTRICTIONS_MIGRATED,
+                    String.valueOf(userRestrictionsMigrated));
             out.endTag(null, tag);
         }
 
@@ -537,12 +588,16 @@ class Owners {
             final String name = parser.getAttributeValue(null, ATTR_NAME);
             final String componentName =
                     parser.getAttributeValue(null, ATTR_COMPONENT_NAME);
+            final String userRestrictionsMigratedStr =
+                    parser.getAttributeValue(null, ATTR_USER_RESTRICTIONS_MIGRATED);
+            final boolean userRestrictionsMigrated =
+                    ("true".equals(userRestrictionsMigratedStr));
 
             // Has component name?  If so, return [name, component]
             if (componentName != null) {
                 final ComponentName admin = ComponentName.unflattenFromString(componentName);
                 if (admin != null) {
-                    return new OwnerInfo(name, admin);
+                    return new OwnerInfo(name, admin, userRestrictionsMigrated);
                 } else {
                     // This shouldn't happen but switch from package name -> component name
                     // might have written bad device owner files. b/17652534
@@ -552,7 +607,7 @@ class Owners {
             }
 
             // Else, build with [name, package]
-            return new OwnerInfo(name, packageName);
+            return new OwnerInfo(name, packageName, userRestrictionsMigrated);
         }
 
         public void dump(String prefix, PrintWriter pw) {

@@ -16,6 +16,8 @@
 
 package com.android.server.devicepolicy;
 
+import com.google.android.collect.Sets;
+
 import static android.Manifest.permission.MANAGE_CA_CERTIFICATES;
 import static android.app.admin.DevicePolicyManager.PASSWORD_QUALITY_COMPLEX;
 import static android.app.admin.DevicePolicyManager.WIPE_EXTERNAL_STORAGE;
@@ -88,6 +90,7 @@ import android.os.SystemClock;
 import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.os.UserManager;
+import android.os.UserManagerInternal;
 import android.os.storage.StorageManager;
 import android.provider.ContactsContract.QuickContact;
 import android.provider.ContactsInternal;
@@ -183,8 +186,6 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     private static final int MONITORING_CERT_NOTIFICATION_ID = R.string.ssl_ca_cert_warning;
     private static final int PROFILE_WIPED_NOTIFICATION_ID = 1001;
 
-    private static final boolean DBG = false;
-
     private static final String ATTR_PERMISSION_PROVIDER = "permission-provider";
     private static final String ATTR_SETUP_COMPLETE = "setup-complete";
     private static final String ATTR_PERMISSION_POLICY = "permission-policy";
@@ -274,6 +275,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     final Injector mInjector;
     final IPackageManager mIPackageManager;
     final UserManager mUserManager;
+    final UserManagerInternal mUserManagerInternal;
 
     final LocalService mLocalService;
 
@@ -357,8 +359,10 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                     getSendingUserId());
             if (Intent.ACTION_BOOT_COMPLETED.equals(action)
                     || ACTION_EXPIRED_PASSWORD_NOTIFICATION.equals(action)) {
-                if (DBG) Slog.v(LOG_TAG, "Sending password expiration notifications for action "
-                        + action + " for user " + userHandle);
+                if (VERBOSE_LOG) {
+                    Slog.v(LOG_TAG, "Sending password expiration notifications for action "
+                            + action + " for user " + userHandle);
+                }
                 mHandler.post(new Runnable() {
                     @Override
                     public void run() {
@@ -1014,7 +1018,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
 
     private void handlePackagesChanged(String packageName, int userHandle) {
         boolean removed = false;
-        if (DBG) Slog.d(LOG_TAG, "Handling package changes for user " + userHandle);
+        if (VERBOSE_LOG) Slog.d(LOG_TAG, "Handling package changes for user " + userHandle);
         DevicePolicyData policy = getUserData(userHandle);
         synchronized (this) {
             for (int i = policy.mAdminList.size() - 1; i >= 0; i--) {
@@ -1077,6 +1081,10 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
 
         UserManager getUserManager() {
             return UserManager.get(mContext);
+        }
+
+        UserManagerInternal getUserManagerInternal() {
+            return LocalServices.getService(UserManagerInternal.class);
         }
 
         NotificationManager getNotificationManager() {
@@ -1233,6 +1241,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         mOwners = Preconditions.checkNotNull(injector.newOwners());
 
         mUserManager = Preconditions.checkNotNull(injector.getUserManager());
+        mUserManagerInternal = Preconditions.checkNotNull(injector.getUserManagerInternal());
         mIPackageManager = Preconditions.checkNotNull(injector.getIPackageManager());
 
         mLocalService = new LocalService();
@@ -1327,10 +1336,13 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         synchronized (this) {
             mOwners.load();
             findOwnerComponentIfNecessaryLocked();
+            migrateUserRestrictionsIfNecessaryLocked();
 
             // TODO PO may not have a class name either due to b/17652534.  Address that too.
 
             updateDeviceOwnerLocked();
+
+            // TODO Notify UM to update restrictions (?)
         }
     }
 
@@ -1350,12 +1362,111 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         if (doComponent == null) {
             Slog.e(LOG_TAG, "Device-owner isn't registered as device-admin");
         } else {
-            mOwners.setDeviceOwner(
+            mOwners.setDeviceOwnerWithRestrictionsMigrated(
                     doComponent,
                     mOwners.getDeviceOwnerName(),
-                    mOwners.getDeviceOwnerUserId());
+                    mOwners.getDeviceOwnerUserId(),
+                    !mOwners.getDeviceOwnerUserRestrictionsNeedsMigration());
             mOwners.writeDeviceOwner();
+            if (VERBOSE_LOG) {
+                Log.v(LOG_TAG, "Device owner component filled in");
+            }
         }
+    }
+
+    /**
+     * We didn't use to persist user restrictions for each owners but only persisted in user
+     * manager.
+     */
+    private void migrateUserRestrictionsIfNecessaryLocked() {
+        boolean migrated = false;
+        // Migrate for the DO.  Basically all restrictions should be considered to be set by DO,
+        // except for the "system controlled" ones.
+        if (mOwners.getDeviceOwnerUserRestrictionsNeedsMigration()) {
+            if (VERBOSE_LOG) {
+                Log.v(LOG_TAG, "Migrating DO user restrictions");
+            }
+            migrated = true;
+
+            // Migrate user 0 restrictions to DO, except for "system" restrictions.
+            final ActiveAdmin deviceOwnerAdmin = getDeviceOwnerAdminLocked();
+
+            migrateUserRestrictionsForUser(UserHandle.SYSTEM, deviceOwnerAdmin,
+                    /* exceptionList =*/ UserRestrictionsUtils.SYSTEM_CONTROLLED_USER_RESTRICTIONS);
+
+            mOwners.setDeviceOwnerUserRestrictionsMigrated();
+        }
+
+        // Migrate for POs.  We have a few more exceptions.
+        final Set<String> normalExceptionList = Sets.newArraySet(
+                UserManager.DISALLOW_OUTGOING_CALLS,
+                UserManager.DISALLOW_SMS);
+        normalExceptionList.addAll(UserRestrictionsUtils.SYSTEM_CONTROLLED_USER_RESTRICTIONS);
+
+        final Set<String> managedExceptionList = new ArraySet<>(normalExceptionList.size() + 1);
+        managedExceptionList.addAll(normalExceptionList);
+        managedExceptionList.add(UserManager.DISALLOW_WALLPAPER);
+
+        for (UserInfo ui : mUserManager.getUsers()) {
+            final int userId = ui.id;
+            if (mOwners.getProfileOwnerUserRestrictionsNeedsMigration(userId)) {
+                if (userId != UserHandle.USER_SYSTEM) {
+                    if (VERBOSE_LOG) {
+                        Log.v(LOG_TAG, "Migrating PO user restrictions for user " + userId);
+                    }
+                    migrated = true;
+
+                    final ActiveAdmin profileOwnerAdmin = getProfileOwnerAdminLocked(userId);
+
+                    final Set<String> exceptionList =
+                            ui.isManagedProfile() ? managedExceptionList : normalExceptionList;
+
+                    migrateUserRestrictionsForUser(ui.getUserHandle(), profileOwnerAdmin,
+                            exceptionList);
+                }
+
+                mOwners.setProfileOwnerUserRestrictionsMigrated(userId);
+            }
+        }
+        if (VERBOSE_LOG && migrated) {
+            Log.v(LOG_TAG, "User restrictions migrated.");
+        }
+    }
+
+    private void migrateUserRestrictionsForUser(UserHandle user, ActiveAdmin admin,
+            Set<String> exceptionList) {
+        final Bundle origRestrictions = mUserManagerInternal.getBaseUserRestrictions(
+                user.getIdentifier());
+
+        final Bundle newSystemRestrictions = new Bundle();
+        final Bundle newOwnerRestrictions = new Bundle();
+
+        for (String key : origRestrictions.keySet()) {
+            if (!origRestrictions.getBoolean(key)) {
+                continue;
+            }
+            if (exceptionList.contains(key)) {
+                newSystemRestrictions.putBoolean(key, true);
+            } else {
+                newOwnerRestrictions.putBoolean(key, true);
+            }
+        }
+
+        if (VERBOSE_LOG) {
+            Log.v(LOG_TAG, "origRestrictions=" + origRestrictions);
+            Log.v(LOG_TAG, "newSystemRestrictions=" + newSystemRestrictions);
+            Log.v(LOG_TAG, "newOwnerRestrictions=" + newOwnerRestrictions);
+        }
+        mUserManagerInternal.setBaseUserRestrictionsByDpmsForMigration(user.getIdentifier(),
+                newSystemRestrictions);
+
+        if (admin != null) {
+            admin.ensureUserRestrictions().clear();
+            admin.ensureUserRestrictions().putAll(newOwnerRestrictions);
+        } else {
+            Slog.w(LOG_TAG, "ActiveAdmin for DO/PO not found. user=" + user.getIdentifier());
+        }
+        saveSettingsLocked(user.getIdentifier());
     }
 
     private ComponentName findAdminComponentWithPackageLocked(String packageName, int userId) {
@@ -1373,7 +1484,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 nFound++;
             }
         }
-        if (nFound > 0) {
+        if (nFound > 1) {
             Slog.w(LOG_TAG, "Multiple DA found; assume the first one is DO.");
         }
         return found;
@@ -1636,6 +1747,9 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 ? mInjector.getDevicePolicyFilePathForSystemUser() + DEVICE_POLICIES_XML
                 : new File(mInjector.environmentGetUserSystemDirectory(userHandle),
                         DEVICE_POLICIES_XML).getAbsolutePath();
+        if (VERBOSE_LOG) {
+            Log.v(LOG_TAG, "Opening " + base);
+        }
         return new JournaledFile(new File(base), new File(base + ".tmp"));
     }
 
@@ -1808,7 +1922,8 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                     try {
                         DeviceAdminInfo dai = findAdmin(
                                 ComponentName.unflattenFromString(name), userHandle);
-                        if (DBG && (UserHandle.getUserId(dai.getActivityInfo().applicationInfo.uid)
+                        if (VERBOSE_LOG
+                                && (UserHandle.getUserId(dai.getActivityInfo().applicationInfo.uid)
                                 != userHandle)) {
                             Slog.w(LOG_TAG, "findAdmin returned an incorrect uid "
                                     + dai.getActivityInfo().applicationInfo.uid + " for user "
@@ -1988,8 +2103,10 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             long token = mInjector.binderClearCallingIdentity();
             try {
                 String value = cameraDisabled ? "1" : "0";
-                if (DBG) Slog.v(LOG_TAG, "Change in camera state ["
-                        + cameraPropertyForUser + "] = " + value);
+                if (VERBOSE_LOG) {
+                    Slog.v(LOG_TAG, "Change in camera state ["
+                            + cameraPropertyForUser + "] = " + value);
+                }
                 mInjector.systemPropertiesSet(cameraPropertyForUser, value);
             } finally {
                 mInjector.binderRestoreCallingIdentity(token);
@@ -4513,8 +4630,10 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         }
         UserHandle callingUser = mInjector.binderGetCallingUserHandle();
         // Check if this is the profile owner who is calling
-        getActiveAdminForCallerLocked(who, DeviceAdminInfo.USES_POLICY_PROFILE_OWNER);
+        final ActiveAdmin admin =
+                getActiveAdminForCallerLocked(who, DeviceAdminInfo.USES_POLICY_PROFILE_OWNER);
         synchronized (this) {
+            admin.userRestrictions = null;
             clearUserPoliciesLocked(callingUser);
             final int userId = callingUser.getIdentifier();
             mOwners.removeProfileOwner(userId);
@@ -4533,35 +4652,16 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
 
         final long ident = mInjector.binderClearCallingIdentity();
         try {
-            clearUserRestrictions(userHandle);
             mIPackageManager.updatePermissionFlagsForAllApps(
                     PackageManager.FLAG_PERMISSION_POLICY_FIXED,
                     0  /* flagValues */, userHandle.getIdentifier());
+            // TODO This will not revert audio mute restrictions if they were set.  b/24981972
+            synchronized (mUserManagerInternal.getUserRestrictionsLock()) {
+                mUserManagerInternal.updateEffectiveUserRestrictionsRL(userHandle.getIdentifier());
+            }
         } catch (RemoteException re) {
         } finally {
             mInjector.binderRestoreCallingIdentity(ident);
-        }
-    }
-
-
-    private void clearUserRestrictions(UserHandle userHandle) {
-        Bundle userRestrictions = mUserManager.getUserRestrictions();
-        mUserManager.setUserRestrictions(new Bundle(), userHandle);
-        if (userRestrictions.getBoolean(UserManager.DISALLOW_ADJUST_VOLUME)) {
-            try {
-                mInjector.getIAudioService().setMasterMute(true, 0, mContext.getPackageName(),
-                        userHandle.getIdentifier());
-            } catch (RemoteException e) {
-                // Not much we can do here.
-            }
-        }
-        if (userRestrictions.getBoolean(UserManager.DISALLOW_UNMUTE_MICROPHONE)) {
-            try {
-                mInjector.getIAudioService().setMicrophoneMute(true, mContext.getPackageName(),
-                        userHandle.getIdentifier());
-            } catch (RemoteException e) {
-                // Not much we can do here.
-            }
         }
     }
 
@@ -5503,95 +5603,123 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     }
 
     @Override
-    public void setUserRestriction(ComponentName who, String key, boolean enabled) {
+    public void setUserRestriction(ComponentName who, String key, boolean enabledFromThisOwner) {
         Preconditions.checkNotNull(who, "ComponentName is null");
         final int userHandle = mInjector.userHandleGetCallingUserId();
         final UserHandle user = new UserHandle(userHandle);
-        synchronized (this) {
-            ActiveAdmin activeAdmin =
-                    getActiveAdminForCallerLocked(who, DeviceAdminInfo.USES_POLICY_PROFILE_OWNER);
-            boolean isDeviceOwner = isDeviceOwner(who);
-            if (!isDeviceOwner && userHandle != UserHandle.USER_SYSTEM
-                    && DEVICE_OWNER_USER_RESTRICTIONS.contains(key)) {
-                throw new SecurityException("Profile owners cannot set user restriction " + key);
-            }
-            if (IMMUTABLE_USER_RESTRICTIONS.contains(key)) {
-                throw new SecurityException("User restriction " + key + " cannot be changed");
-            }
-            boolean alreadyRestricted = mUserManager.hasUserRestriction(key, user);
+        synchronized (mUserManagerInternal.getUserRestrictionsLock()) {
+            synchronized (this) {
+                ActiveAdmin activeAdmin =
+                        getActiveAdminForCallerLocked(who,
+                                DeviceAdminInfo.USES_POLICY_PROFILE_OWNER);
+                boolean isDeviceOwner = isDeviceOwner(who);
+                if (!isDeviceOwner && userHandle != UserHandle.USER_SYSTEM
+                        && DEVICE_OWNER_USER_RESTRICTIONS.contains(key)) {
+                    throw new SecurityException(
+                            "Profile owners cannot set user restriction " + key);
+                }
+                if (IMMUTABLE_USER_RESTRICTIONS.contains(key)) {
+                    throw new SecurityException("User restriction " + key + " cannot be changed");
+                }
 
-            long id = mInjector.binderClearCallingIdentity();
-            try {
-                if (enabled && !alreadyRestricted) {
-                    if (UserManager.DISALLOW_UNMUTE_MICROPHONE.equals(key)) {
-                        mInjector.getIAudioService()
-                                .setMicrophoneMute(true, mContext.getPackageName(), userHandle);
-                    } else if (UserManager.DISALLOW_ADJUST_VOLUME.equals(key)) {
-                        mInjector.getIAudioService()
-                                .setMasterMute(true, 0, mContext.getPackageName(), userHandle);
-                    } else if (UserManager.DISALLOW_CONFIG_WIFI.equals(key)) {
-                        mInjector.settingsSecurePutIntForUser(
-                                Settings.Secure.WIFI_NETWORKS_AVAILABLE_NOTIFICATION_ON, 0,
-                                userHandle);
-                    } else if (UserManager.DISALLOW_SHARE_LOCATION.equals(key)) {
-                        mInjector.settingsSecurePutIntForUser(
-                                Settings.Secure.LOCATION_MODE, Settings.Secure.LOCATION_MODE_OFF,
-                                userHandle);
-                        mInjector.settingsSecurePutStringForUser(
-                                Settings.Secure.LOCATION_PROVIDERS_ALLOWED, "",
-                                userHandle);
-                    } else if (UserManager.DISALLOW_DEBUGGING_FEATURES.equals(key)) {
-                        // Only disable adb if changing for system user, since it is global
-                        // TODO: should this be admin user?
-                        if (userHandle == UserHandle.USER_SYSTEM) {
+                final long id = mInjector.binderClearCallingIdentity();
+                try {
+                    // Original value.
+                    final boolean alreadyRestricted = mUserManager.hasUserRestriction(key, user);
+
+                    // Save the restriction to ActiveAdmin.
+                    // TODO When DO sets a restriction, it'll always be treated as device-wide.
+                    // If there'll be a policy that can be set by both, we'll need scoping support,
+                    // and need to have another Bundle in DO active admin to hold restrictions as
+                    // PO.
+                    activeAdmin.ensureUserRestrictions().putBoolean(key, enabledFromThisOwner);
+                    saveSettingsLocked(userHandle);
+
+                    // Tell UserManager the new value.  Note this needs to be done before calling
+                    // into AudioService, because AS will check AppOps that'll be updated by UM.
+                    if (isDeviceOwner) {
+                        mUserManagerInternal.updateEffectiveUserRestrictionsForAllUsersRL();
+                    } else {
+                        mUserManagerInternal.updateEffectiveUserRestrictionsRL(userHandle);
+                    }
+
+                    // New value.
+                    final boolean enabled = mUserManager.hasUserRestriction(key, user);
+
+                    // TODO The rest of the code should move to UserManagerService.
+
+                    if (enabled && !alreadyRestricted) {
+                        if (UserManager.DISALLOW_UNMUTE_MICROPHONE.equals(key)) {
+                            mInjector.getIAudioService()
+                                    .setMicrophoneMute(true, mContext.getPackageName(), userHandle);
+                        } else if (UserManager.DISALLOW_ADJUST_VOLUME.equals(key)) {
+                            mInjector.getIAudioService()
+                                    .setMasterMute(true, 0, mContext.getPackageName(), userHandle);
+                        } else if (UserManager.DISALLOW_CONFIG_WIFI.equals(key)) {
+                            mInjector.settingsSecurePutIntForUser(
+                                    Settings.Secure.WIFI_NETWORKS_AVAILABLE_NOTIFICATION_ON, 0,
+                                    userHandle);
+                        } else if (UserManager.DISALLOW_SHARE_LOCATION.equals(key)) {
+                            mInjector.settingsSecurePutIntForUser(
+                                    Settings.Secure.LOCATION_MODE,
+                                    Settings.Secure.LOCATION_MODE_OFF,
+                                    userHandle);
+                            mInjector.settingsSecurePutStringForUser(
+                                    Settings.Secure.LOCATION_PROVIDERS_ALLOWED, "",
+                                    userHandle);
+                        } else if (UserManager.DISALLOW_DEBUGGING_FEATURES.equals(key)) {
+                            // Only disable adb if changing for system user, since it is global
+                            // TODO: should this be admin user?
+                            if (userHandle == UserHandle.USER_SYSTEM) {
+                                mInjector.settingsGlobalPutStringForUser(
+                                        Settings.Global.ADB_ENABLED, "0", userHandle);
+                            }
+                        } else if (UserManager.ENSURE_VERIFY_APPS.equals(key)) {
                             mInjector.settingsGlobalPutStringForUser(
-                                    Settings.Global.ADB_ENABLED, "0", userHandle);
+                                    Settings.Global.PACKAGE_VERIFIER_ENABLE, "1",
+                                    userHandle);
+                            mInjector.settingsGlobalPutStringForUser(
+                                    Settings.Global.PACKAGE_VERIFIER_INCLUDE_ADB, "1",
+                                    userHandle);
+                        } else if (UserManager.DISALLOW_INSTALL_UNKNOWN_SOURCES.equals(key)) {
+                            mInjector.settingsSecurePutIntForUser(
+                                    Settings.Secure.INSTALL_NON_MARKET_APPS, 0,
+                                    userHandle);
                         }
-                    } else if (UserManager.ENSURE_VERIFY_APPS.equals(key)) {
-                        mInjector.settingsGlobalPutStringForUser(
-                                Settings.Global.PACKAGE_VERIFIER_ENABLE, "1",
-                                userHandle);
-                        mInjector.settingsGlobalPutStringForUser(
-                                Settings.Global.PACKAGE_VERIFIER_INCLUDE_ADB, "1",
-                                userHandle);
-                    } else if (UserManager.DISALLOW_INSTALL_UNKNOWN_SOURCES.equals(key)) {
-                        mInjector.settingsSecurePutIntForUser(
-                                Settings.Secure.INSTALL_NON_MARKET_APPS, 0,
-                                userHandle);
                     }
-                }
-                mUserManager.setUserRestriction(key, enabled, user);
-                activeAdmin.ensureUserRestrictions().putBoolean(key, enabled);
-                saveSettingsLocked(userHandle);
 
-                if (enabled != alreadyRestricted) {
-                    if (UserManager.DISALLOW_SHARE_LOCATION.equals(key)) {
-                        // Send out notifications however as some clients may want to reread the
-                        // value which actually changed due to a restriction having been applied.
-                        final String property = Settings.Secure.SYS_PROP_SETTING_VERSION;
-                        long version = mInjector.systemPropertiesGetLong(property, 0) + 1;
-                        mInjector.systemPropertiesSet(property, Long.toString(version));
+                    if (enabled != alreadyRestricted) {
+                        if (UserManager.DISALLOW_SHARE_LOCATION.equals(key)) {
+                            // Send out notifications however as some clients may want to reread the
+                            // value which actually changed due to a restriction having been
+                            // applied.
+                            final String property = Settings.Secure.SYS_PROP_SETTING_VERSION;
+                            long version = mInjector.systemPropertiesGetLong(property, 0) + 1;
+                            mInjector.systemPropertiesSet(property, Long.toString(version));
 
-                        final String name = Settings.Secure.LOCATION_PROVIDERS_ALLOWED;
-                        Uri url = Uri.withAppendedPath(Settings.Secure.CONTENT_URI, name);
-                        mContext.getContentResolver().notifyChange(url, null, true, userHandle);
+                            final String name = Settings.Secure.LOCATION_PROVIDERS_ALLOWED;
+                            Uri url = Uri.withAppendedPath(Settings.Secure.CONTENT_URI, name);
+                            mContext.getContentResolver().notifyChange(url, null, true, userHandle);
+                        }
                     }
-                }
-                if (!enabled && alreadyRestricted) {
-                    if (UserManager.DISALLOW_UNMUTE_MICROPHONE.equals(key)) {
-                        mInjector.getIAudioService()
-                                .setMicrophoneMute(false, mContext.getPackageName(), userHandle);
-                    } else if (UserManager.DISALLOW_ADJUST_VOLUME.equals(key)) {
-                        mInjector.getIAudioService()
-                                .setMasterMute(false, 0, mContext.getPackageName(), userHandle);
+                    if (!enabled && alreadyRestricted) {
+                        if (UserManager.DISALLOW_UNMUTE_MICROPHONE.equals(key)) {
+                            mInjector.getIAudioService()
+                                    .setMicrophoneMute(false, mContext.getPackageName(),
+                                            userHandle);
+                        } else if (UserManager.DISALLOW_ADJUST_VOLUME.equals(key)) {
+                            mInjector.getIAudioService()
+                                    .setMasterMute(false, 0, mContext.getPackageName(), userHandle);
+                        }
                     }
+                } catch (RemoteException re) {
+                    Slog.e(LOG_TAG, "Failed to talk to AudioService.", re);
+                } finally {
+                    mInjector.binderRestoreCallingIdentity(id);
                 }
-            } catch (RemoteException re) {
-                Slog.e(LOG_TAG, "Failed to talk to AudioService.", re);
-            } finally {
-                mInjector.binderRestoreCallingIdentity(id);
+
+                sendChangedNotification(userHandle);
             }
-            sendChangedNotification(userHandle);
         }
     }
 
@@ -5650,7 +5778,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             long id = mInjector.binderClearCallingIdentity();
 
             try {
-                if (DBG) {
+                if (VERBOSE_LOG) {
                     Slog.v(LOG_TAG, "installing " + packageName + " for "
                             + userId);
                 }
@@ -5705,7 +5833,9 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                         0, // no flags
                         primaryUser.id);
 
-                if (DBG) Slog.d(LOG_TAG, "Enabling system activities: " + activitiesToEnable);
+                if (VERBOSE_LOG) {
+                    Slog.d(LOG_TAG, "Enabling system activities: " + activitiesToEnable);
+                }
                 int numberOfAppsInstalled = 0;
                 if (activitiesToEnable != null) {
                     for (ResolveInfo info : activitiesToEnable) {
@@ -6275,7 +6405,8 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         }
     }
 
-    private final class LocalService extends DevicePolicyManagerInternal {
+    @VisibleForTesting
+    final class LocalService extends DevicePolicyManagerInternal {
         private List<OnCrossProfileWidgetProvidersChangeListener> mWidgetProviderListeners;
 
         @Override
@@ -6319,6 +6450,30 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             final int userId = UserHandle.getUserId(uid);
             synchronized(DevicePolicyManagerService.this) {
                 return getActiveAdminWithPolicyForUidLocked(null, reqPolicy, uid) != null;
+            }
+        }
+
+        @Override
+        public Bundle getComposedUserRestrictions(int userId, Bundle inBundle) {
+            synchronized (DevicePolicyManagerService.this) {
+                final ActiveAdmin deviceOwner = getDeviceOwnerAdminLocked();
+                final ActiveAdmin profileOwner = getProfileOwnerAdminLocked(userId);
+
+                final Bundle deviceOwnerRestrictions =
+                        deviceOwner == null ? null : deviceOwner.userRestrictions;
+                final Bundle profileOwnerRestrictions =
+                        profileOwner == null ? null : profileOwner.userRestrictions;
+
+                if (deviceOwnerRestrictions == null && profileOwnerRestrictions == null) {
+                    // No restrictions to merge.
+                    return inBundle;
+                }
+
+                final Bundle composed = new Bundle(inBundle);
+                UserRestrictionsUtils.merge(composed, deviceOwnerRestrictions);
+                UserRestrictionsUtils.merge(composed, profileOwnerRestrictions);
+
+                return composed;
             }
         }
 

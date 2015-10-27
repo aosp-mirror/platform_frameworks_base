@@ -36,6 +36,7 @@ import android.os.PowerManager.WakeLock;
 import android.os.PowerManagerInternal;
 import android.os.UserHandle;
 import android.os.UserManager;
+import android.os.UserManagerInternal;
 import android.test.mock.MockContentResolver;
 import android.test.mock.MockContext;
 import android.view.IWindowManager;
@@ -203,6 +204,7 @@ public class DpmMockContext extends MockContext {
     public final EnvironmentForMock environment;
     public final SystemPropertiesForMock systemProperties;
     public final UserManager userManager;
+    public final UserManagerInternal userManagerInternal;
     public final UserManagerForMock userManagerForMock;
     public final PowerManagerForMock powerManager;
     public final PowerManagerInternal powerManagerInternal;
@@ -233,6 +235,7 @@ public class DpmMockContext extends MockContext {
         environment = mock(EnvironmentForMock.class);
         systemProperties= mock(SystemPropertiesForMock.class);
         userManager = mock(UserManager.class);
+        userManagerInternal = mock(UserManagerInternal.class);
         userManagerForMock = mock(UserManagerForMock.class);
         powerManager = mock(PowerManagerForMock.class);
         powerManagerInternal = mock(PowerManagerInternal.class);
@@ -257,6 +260,9 @@ public class DpmMockContext extends MockContext {
 
         // System user is always running.
         setUserRunning(UserHandle.USER_SYSTEM, true);
+
+        // This method must return an object.
+        when(userManagerInternal.getUserRestrictionsLock()).thenReturn(new Object());
     }
 
     public File addUser(int userId, int flags) {

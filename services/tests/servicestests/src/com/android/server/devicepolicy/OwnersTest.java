@@ -47,31 +47,6 @@ import static org.mockito.Mockito.when;
  (mmma frameworks/base/services/tests/servicestests/ for non-ninja build)
  */
 public class OwnersTest extends DpmTestBase {
-    private String readAsset(String assetPath) throws IOException {
-        final StringBuilder sb = new StringBuilder();
-        try (BufferedReader br = new BufferedReader(
-                new InputStreamReader(
-                        mRealTestContext.getResources().getAssets().open(assetPath)))) {
-            String line;
-            while ((line = br.readLine()) != null) {
-                sb.append(line);
-                sb.append(System.lineSeparator());
-            }
-        }
-        return sb.toString();
-    }
-
-    private void createLegacyFile(File path, String content)
-            throws IOException {
-        path.getParentFile().mkdirs();
-
-        try (FileWriter writer = new FileWriter(path)) {
-            Log.i(TAG, "Writing to " + path);
-            Log.i(TAG, content);
-            writer.write(content);
-        }
-    }
-
     public void testUpgrade01() throws Exception {
         getContext().addUsers(10, 11, 20, 21);
 
@@ -79,8 +54,8 @@ public class OwnersTest extends DpmTestBase {
         {
             final OwnersTestable owners = new OwnersTestable(getContext());
 
-            createLegacyFile(owners.getLegacyConfigFileWithTestOverride(),
-                    readAsset("OwnersTest/test01/input.xml"));
+            DpmTestUtils.writeToFile(owners.getLegacyConfigFileWithTestOverride(),
+                    DpmTestUtils.readAsset(mRealTestContext, "OwnersTest/test01/input.xml"));
 
             owners.load();
 
@@ -99,6 +74,12 @@ public class OwnersTest extends DpmTestBase {
             assertEquals(UserHandle.USER_NULL, owners.getDeviceOwnerUserId());
             assertNull(owners.getSystemUpdatePolicy());
             assertEquals(0, owners.getProfileOwnerKeys().size());
+
+            assertFalse(owners.getDeviceOwnerUserRestrictionsNeedsMigration());
+            assertFalse(owners.getProfileOwnerUserRestrictionsNeedsMigration(10));
+            assertFalse(owners.getProfileOwnerUserRestrictionsNeedsMigration(11));
+            assertFalse(owners.getProfileOwnerUserRestrictionsNeedsMigration(20));
+            assertFalse(owners.getProfileOwnerUserRestrictionsNeedsMigration(21));
         }
 
         // Then re-read and check.
@@ -110,6 +91,12 @@ public class OwnersTest extends DpmTestBase {
             assertEquals(UserHandle.USER_NULL, owners.getDeviceOwnerUserId());
             assertNull(owners.getSystemUpdatePolicy());
             assertEquals(0, owners.getProfileOwnerKeys().size());
+
+            assertFalse(owners.getDeviceOwnerUserRestrictionsNeedsMigration());
+            assertFalse(owners.getProfileOwnerUserRestrictionsNeedsMigration(10));
+            assertFalse(owners.getProfileOwnerUserRestrictionsNeedsMigration(11));
+            assertFalse(owners.getProfileOwnerUserRestrictionsNeedsMigration(20));
+            assertFalse(owners.getProfileOwnerUserRestrictionsNeedsMigration(21));
         }
     }
 
@@ -120,8 +107,8 @@ public class OwnersTest extends DpmTestBase {
         {
             final OwnersTestable owners = new OwnersTestable(getContext());
 
-            createLegacyFile(owners.getLegacyConfigFileWithTestOverride(),
-                    readAsset("OwnersTest/test02/input.xml"));
+            DpmTestUtils.writeToFile(owners.getLegacyConfigFileWithTestOverride(),
+                    DpmTestUtils.readAsset(mRealTestContext, "OwnersTest/test02/input.xml"));
 
             owners.load();
 
@@ -142,6 +129,12 @@ public class OwnersTest extends DpmTestBase {
 
             assertNull(owners.getSystemUpdatePolicy());
             assertEquals(0, owners.getProfileOwnerKeys().size());
+
+            assertTrue(owners.getDeviceOwnerUserRestrictionsNeedsMigration());
+            assertFalse(owners.getProfileOwnerUserRestrictionsNeedsMigration(10));
+            assertFalse(owners.getProfileOwnerUserRestrictionsNeedsMigration(11));
+            assertFalse(owners.getProfileOwnerUserRestrictionsNeedsMigration(20));
+            assertFalse(owners.getProfileOwnerUserRestrictionsNeedsMigration(21));
         }
 
         // Then re-read and check.
@@ -156,6 +149,12 @@ public class OwnersTest extends DpmTestBase {
 
             assertNull(owners.getSystemUpdatePolicy());
             assertEquals(0, owners.getProfileOwnerKeys().size());
+
+            assertTrue(owners.getDeviceOwnerUserRestrictionsNeedsMigration());
+            assertFalse(owners.getProfileOwnerUserRestrictionsNeedsMigration(10));
+            assertFalse(owners.getProfileOwnerUserRestrictionsNeedsMigration(11));
+            assertFalse(owners.getProfileOwnerUserRestrictionsNeedsMigration(20));
+            assertFalse(owners.getProfileOwnerUserRestrictionsNeedsMigration(21));
         }
     }
 
@@ -166,8 +165,8 @@ public class OwnersTest extends DpmTestBase {
         {
             final OwnersTestable owners = new OwnersTestable(getContext());
 
-            createLegacyFile(owners.getLegacyConfigFileWithTestOverride(),
-                    readAsset("OwnersTest/test03/input.xml"));
+            DpmTestUtils.writeToFile(owners.getLegacyConfigFileWithTestOverride(),
+                    DpmTestUtils.readAsset(mRealTestContext, "OwnersTest/test03/input.xml"));
 
             owners.load();
 
@@ -196,6 +195,12 @@ public class OwnersTest extends DpmTestBase {
                     owners.getProfileOwnerComponent(11));
             assertEquals("1", owners.getProfileOwnerName(11));
             assertEquals("com.google.android.testdpc1", owners.getProfileOwnerPackage(11));
+
+            assertFalse(owners.getDeviceOwnerUserRestrictionsNeedsMigration());
+            assertTrue(owners.getProfileOwnerUserRestrictionsNeedsMigration(10));
+            assertTrue(owners.getProfileOwnerUserRestrictionsNeedsMigration(11));
+            assertFalse(owners.getProfileOwnerUserRestrictionsNeedsMigration(20));
+            assertFalse(owners.getProfileOwnerUserRestrictionsNeedsMigration(21));
         }
 
         // Then re-read and check.
@@ -218,9 +223,19 @@ public class OwnersTest extends DpmTestBase {
                     owners.getProfileOwnerComponent(11));
             assertEquals("1", owners.getProfileOwnerName(11));
             assertEquals("com.google.android.testdpc1", owners.getProfileOwnerPackage(11));
+
+            assertFalse(owners.getDeviceOwnerUserRestrictionsNeedsMigration());
+            assertTrue(owners.getProfileOwnerUserRestrictionsNeedsMigration(10));
+            assertTrue(owners.getProfileOwnerUserRestrictionsNeedsMigration(11));
+            assertFalse(owners.getProfileOwnerUserRestrictionsNeedsMigration(20));
+            assertFalse(owners.getProfileOwnerUserRestrictionsNeedsMigration(21));
         }
     }
 
+    /**
+     * Note this also tests {@link Owners#setDeviceOwnerUserRestrictionsMigrated()}
+     * and {@link  Owners#setProfileOwnerUserRestrictionsMigrated(int)}.
+     */
     public void testUpgrade04() throws Exception {
         getContext().addUsers(10, 11, 20, 21);
 
@@ -228,8 +243,8 @@ public class OwnersTest extends DpmTestBase {
         {
             final OwnersTestable owners = new OwnersTestable(getContext());
 
-            createLegacyFile(owners.getLegacyConfigFileWithTestOverride(),
-                    readAsset("OwnersTest/test04/input.xml"));
+            DpmTestUtils.writeToFile(owners.getLegacyConfigFileWithTestOverride(),
+                    DpmTestUtils.readAsset(mRealTestContext, "OwnersTest/test04/input.xml"));
 
             owners.load();
 
@@ -262,6 +277,12 @@ public class OwnersTest extends DpmTestBase {
                     owners.getProfileOwnerComponent(11));
             assertEquals("1", owners.getProfileOwnerName(11));
             assertEquals("com.google.android.testdpc1", owners.getProfileOwnerPackage(11));
+
+            assertTrue(owners.getDeviceOwnerUserRestrictionsNeedsMigration());
+            assertTrue(owners.getProfileOwnerUserRestrictionsNeedsMigration(10));
+            assertTrue(owners.getProfileOwnerUserRestrictionsNeedsMigration(11));
+            assertFalse(owners.getProfileOwnerUserRestrictionsNeedsMigration(20));
+            assertFalse(owners.getProfileOwnerUserRestrictionsNeedsMigration(21));
         }
 
         // Then re-read and check.
@@ -288,6 +309,40 @@ public class OwnersTest extends DpmTestBase {
                     owners.getProfileOwnerComponent(11));
             assertEquals("1", owners.getProfileOwnerName(11));
             assertEquals("com.google.android.testdpc1", owners.getProfileOwnerPackage(11));
+
+            assertTrue(owners.getDeviceOwnerUserRestrictionsNeedsMigration());
+            assertTrue(owners.getProfileOwnerUserRestrictionsNeedsMigration(10));
+            assertTrue(owners.getProfileOwnerUserRestrictionsNeedsMigration(11));
+            assertFalse(owners.getProfileOwnerUserRestrictionsNeedsMigration(20));
+            assertFalse(owners.getProfileOwnerUserRestrictionsNeedsMigration(21));
+
+            owners.setDeviceOwnerUserRestrictionsMigrated();
+        }
+
+        {
+            final OwnersTestable owners = new OwnersTestable(getContext());
+            owners.load();
+
+            assertFalse(owners.getDeviceOwnerUserRestrictionsNeedsMigration());
+            assertTrue(owners.getProfileOwnerUserRestrictionsNeedsMigration(10));
+            assertTrue(owners.getProfileOwnerUserRestrictionsNeedsMigration(11));
+            assertFalse(owners.getProfileOwnerUserRestrictionsNeedsMigration(20));
+            assertFalse(owners.getProfileOwnerUserRestrictionsNeedsMigration(21));
+
+            owners.setProfileOwnerUserRestrictionsMigrated(11);
+        }
+
+        {
+            final OwnersTestable owners = new OwnersTestable(getContext());
+            owners.load();
+
+            assertFalse(owners.getDeviceOwnerUserRestrictionsNeedsMigration());
+            assertTrue(owners.getProfileOwnerUserRestrictionsNeedsMigration(10));
+            assertFalse(owners.getProfileOwnerUserRestrictionsNeedsMigration(11));
+            assertFalse(owners.getProfileOwnerUserRestrictionsNeedsMigration(20));
+            assertFalse(owners.getProfileOwnerUserRestrictionsNeedsMigration(21));
+
+            owners.setProfileOwnerUserRestrictionsMigrated(11);
         }
     }
 
@@ -298,8 +353,8 @@ public class OwnersTest extends DpmTestBase {
         {
             final OwnersTestable owners = new OwnersTestable(getContext());
 
-            createLegacyFile(owners.getLegacyConfigFileWithTestOverride(),
-                    readAsset("OwnersTest/test05/input.xml"));
+            DpmTestUtils.writeToFile(owners.getLegacyConfigFileWithTestOverride(),
+                    DpmTestUtils.readAsset(mRealTestContext, "OwnersTest/test05/input.xml"));
 
             owners.load();
 
@@ -319,6 +374,12 @@ public class OwnersTest extends DpmTestBase {
 
             assertNull(owners.getSystemUpdatePolicy());
             assertEquals(0, owners.getProfileOwnerKeys().size());
+
+            assertFalse(owners.getDeviceOwnerUserRestrictionsNeedsMigration());
+            assertFalse(owners.getProfileOwnerUserRestrictionsNeedsMigration(10));
+            assertFalse(owners.getProfileOwnerUserRestrictionsNeedsMigration(11));
+            assertFalse(owners.getProfileOwnerUserRestrictionsNeedsMigration(20));
+            assertFalse(owners.getProfileOwnerUserRestrictionsNeedsMigration(21));
         }
 
         // Then re-read and check.
@@ -332,6 +393,12 @@ public class OwnersTest extends DpmTestBase {
 
             assertNull(owners.getSystemUpdatePolicy());
             assertEquals(0, owners.getProfileOwnerKeys().size());
+
+            assertFalse(owners.getDeviceOwnerUserRestrictionsNeedsMigration());
+            assertFalse(owners.getProfileOwnerUserRestrictionsNeedsMigration(10));
+            assertFalse(owners.getProfileOwnerUserRestrictionsNeedsMigration(11));
+            assertFalse(owners.getProfileOwnerUserRestrictionsNeedsMigration(20));
+            assertFalse(owners.getProfileOwnerUserRestrictionsNeedsMigration(21));
         }
     }
 
@@ -342,8 +409,8 @@ public class OwnersTest extends DpmTestBase {
         {
             final OwnersTestable owners = new OwnersTestable(getContext());
 
-            createLegacyFile(owners.getLegacyConfigFileWithTestOverride(),
-                    readAsset("OwnersTest/test06/input.xml"));
+            DpmTestUtils.writeToFile(owners.getLegacyConfigFileWithTestOverride(),
+                    DpmTestUtils.readAsset(mRealTestContext, "OwnersTest/test06/input.xml"));
 
             owners.load();
 
@@ -362,6 +429,12 @@ public class OwnersTest extends DpmTestBase {
 
             assertNotNull(owners.getSystemUpdatePolicy());
             assertEquals(5, owners.getSystemUpdatePolicy().getPolicyType());
+
+            assertFalse(owners.getDeviceOwnerUserRestrictionsNeedsMigration());
+            assertFalse(owners.getProfileOwnerUserRestrictionsNeedsMigration(10));
+            assertFalse(owners.getProfileOwnerUserRestrictionsNeedsMigration(11));
+            assertFalse(owners.getProfileOwnerUserRestrictionsNeedsMigration(20));
+            assertFalse(owners.getProfileOwnerUserRestrictionsNeedsMigration(21));
         }
 
         // Then re-read and check.
@@ -375,6 +448,12 @@ public class OwnersTest extends DpmTestBase {
 
             assertNotNull(owners.getSystemUpdatePolicy());
             assertEquals(5, owners.getSystemUpdatePolicy().getPolicyType());
+
+            assertFalse(owners.getDeviceOwnerUserRestrictionsNeedsMigration());
+            assertFalse(owners.getProfileOwnerUserRestrictionsNeedsMigration(10));
+            assertFalse(owners.getProfileOwnerUserRestrictionsNeedsMigration(11));
+            assertFalse(owners.getProfileOwnerUserRestrictionsNeedsMigration(20));
+            assertFalse(owners.getProfileOwnerUserRestrictionsNeedsMigration(21));
         }
     }
 
@@ -384,8 +463,8 @@ public class OwnersTest extends DpmTestBase {
         final OwnersTestable owners = new OwnersTestable(getContext());
 
         // First, migrate to create new-style config files.
-        createLegacyFile(owners.getLegacyConfigFileWithTestOverride(),
-                readAsset("OwnersTest/test04/input.xml"));
+        DpmTestUtils.writeToFile(owners.getLegacyConfigFileWithTestOverride(),
+                DpmTestUtils.readAsset(mRealTestContext, "OwnersTest/test04/input.xml"));
 
         owners.load();
 

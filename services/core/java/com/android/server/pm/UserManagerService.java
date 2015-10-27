@@ -16,14 +16,15 @@
 
 package com.android.server.pm;
 
-import android.accounts.Account;
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.app.Activity;
 import android.app.ActivityManager;
 import android.app.ActivityManagerInternal;
 import android.app.ActivityManagerNative;
 import android.app.IStopUserCallback;
 import android.app.admin.DevicePolicyManager;
+import android.app.admin.DevicePolicyManagerInternal;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -46,6 +47,7 @@ import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.UserHandle;
 import android.os.UserManager;
+import android.os.UserManagerInternal;
 import android.os.storage.StorageManager;
 import android.os.storage.VolumeInfo;
 import android.system.ErrnoException;
@@ -59,9 +61,11 @@ import android.util.SparseBooleanArray;
 import android.util.TimeUtils;
 import android.util.Xml;
 
+import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.app.IAppOpsService;
 import com.android.internal.util.FastXmlSerializer;
+import com.android.internal.util.Preconditions;
 import com.android.internal.util.XmlUtils;
 import com.android.server.LocalServices;
 
@@ -83,11 +87,18 @@ import java.util.List;
 
 import libcore.io.IoUtils;
 
+/**
+ * Service for {@link UserManager}.
+ *
+ * Method naming convention:
+ * - Methods suffixed with "Locked" should be called within the {@code this} lock.
+ * - Methods suffixed with "RL" should be called within the {@link #mRestrictionsLock} lock.
+ */
 public class UserManagerService extends IUserManager.Stub {
 
     private static final String LOG_TAG = "UserManagerService";
 
-    private static final boolean DBG = false;
+    private static final boolean DBG = false; // DO NOT SUBMIT WITH TRUE
 
     private static final String TAG_NAME = "name";
     private static final String ATTR_FLAGS = "flags";
@@ -160,7 +171,38 @@ public class UserManagerService extends IUserManager.Stub {
     private final File mUserListFile;
 
     private final SparseArray<UserInfo> mUsers = new SparseArray<UserInfo>();
-    private final SparseArray<Bundle> mUserRestrictions = new SparseArray<Bundle>();
+
+    private final Object mRestrictionsLock = new Object();
+
+    /**
+     * User restrictions set via UserManager.  This doesn't include restrictions set by
+     * device owner / profile owners.
+     *
+     * DO NOT Change existing {@link Bundle} in it.  When changing a restriction for a user,
+     * a new {@link Bundle} should always be created and set.  This is because a {@link Bundle}
+     * maybe shared between {@link #mBaseUserRestrictions} and
+     * {@link #mCachedEffectiveUserRestrictions}, but they should always updated separately.
+     * (Otherwise we won't be able to detect what restrictions have changed in
+     * {@link #updateUserRestrictionsInternalRL).
+     */
+    @GuardedBy("mRestrictionsLock")
+    private final SparseArray<Bundle> mBaseUserRestrictions = new SparseArray<>();
+
+    /**
+     * Cached user restrictions that are in effect -- i.e. {@link #mBaseUserRestrictions} combined
+     * with device / profile owner restrictions.  We'll initialize it lazily; use
+     * {@link #getEffectiveUserRestrictions} to access it.
+     *
+     * DO NOT Change existing {@link Bundle} in it.  When changing a restriction for a user,
+     * a new {@link Bundle} should always be created and set.  This is because a {@link Bundle}
+     * maybe shared between {@link #mBaseUserRestrictions} and
+     * {@link #mCachedEffectiveUserRestrictions}, but they should always updated separately.
+     * (Otherwise we won't be able to detect what restrictions have changed in
+     * {@link #updateUserRestrictionsInternalRL).
+     */
+    @GuardedBy("mRestrictionsLock")
+    private final SparseArray<Bundle> mCachedEffectiveUserRestrictions = new SparseArray<>();
+
     private final Bundle mGuestRestrictions = new Bundle();
 
     /**
@@ -175,6 +217,8 @@ public class UserManagerService extends IUserManager.Stub {
     private int mUserVersion = 0;
 
     private IAppOpsService mAppOpsService;
+
+    private final LocalService mLocalService;
 
     private static UserManagerService sInstance;
 
@@ -231,6 +275,8 @@ public class UserManagerService extends IUserManager.Stub {
                 sInstance = this;
             }
         }
+        mLocalService = new LocalService();
+        LocalServices.addService(UserManagerInternal.class, mLocalService);
     }
 
     void systemReady() {
@@ -258,8 +304,9 @@ public class UserManagerService extends IUserManager.Stub {
         mAppOpsService = IAppOpsService.Stub.asInterface(
                 ServiceManager.getService(Context.APP_OPS_SERVICE));
         for (int i = 0; i < mUserIds.length; ++i) {
+            final int userId = mUserIds[i];
             try {
-                mAppOpsService.setUserRestrictions(mUserRestrictions.get(mUserIds[i]), mUserIds[i]);
+                mAppOpsService.setUserRestrictions(getEffectiveUserRestrictions(userId), userId);
             } catch (RemoteException e) {
                 Log.w(LOG_TAG, "Unable to notify AppOpsService of UserRestrictions");
             }
@@ -588,75 +635,171 @@ public class UserManagerService extends IUserManager.Stub {
         }
     }
 
-    @Override
-    public boolean hasUserRestriction(String restrictionKey, int userId) {
-        synchronized (mPackagesLock) {
-            Bundle restrictions = mUserRestrictions.get(userId);
-            return restrictions != null && restrictions.getBoolean(restrictionKey);
+    @GuardedBy("mRestrictionsLock")
+    private Bundle computeEffectiveUserRestrictionsRL(int userId) {
+        final DevicePolicyManagerInternal dpmi =
+                LocalServices.getService(DevicePolicyManagerInternal.class);
+        final Bundle systemRestrictions = mBaseUserRestrictions.get(userId);
+
+        final Bundle effective;
+        if (dpmi == null) {
+            // TODO Make sure it's because DPMS is disabled and not because we called it too early.
+            effective = systemRestrictions;
+        } else {
+            effective = dpmi.getComposedUserRestrictions(userId, systemRestrictions);
+        }
+        return effective;
+    }
+
+    @GuardedBy("mRestrictionsLock")
+    private void invalidateEffectiveUserRestrictionsRL(int userId) {
+        if (DBG) {
+            Log.d(LOG_TAG, "invalidateEffectiveUserRestrictions userId=" + userId);
+        }
+        mCachedEffectiveUserRestrictions.remove(userId);
+    }
+
+    private Bundle getEffectiveUserRestrictions(int userId) {
+        synchronized (mRestrictionsLock) {
+            Bundle restrictions = mCachedEffectiveUserRestrictions.get(userId);
+            if (restrictions == null) {
+                restrictions = computeEffectiveUserRestrictionsRL(userId);
+                mCachedEffectiveUserRestrictions.put(userId, restrictions);
+            }
+            return restrictions;
         }
     }
 
+    /** @return a specific user restriction that's in effect currently. */
+    @Override
+    public boolean hasUserRestriction(String restrictionKey, int userId) {
+        Bundle restrictions = getEffectiveUserRestrictions(userId);
+        return restrictions != null && restrictions.getBoolean(restrictionKey);
+    }
+
+    /**
+     * @return UserRestrictions that are in effect currently.  This always returns a new
+     * {@link Bundle}.
+     */
     @Override
     public Bundle getUserRestrictions(int userId) {
-        synchronized (mPackagesLock) {
-            Bundle restrictions = mUserRestrictions.get(userId);
-            return restrictions != null ? new Bundle(restrictions) : new Bundle();
-        }
+        Bundle restrictions = getEffectiveUserRestrictions(userId);
+        return restrictions != null ? new Bundle(restrictions) : new Bundle();
     }
 
     @Override
     public void setUserRestriction(String key, boolean value, int userId) {
         checkManageUsersPermission("setUserRestriction");
-        synchronized (mPackagesLock) {
-            if (!UserRestrictionsUtils.SYSTEM_CONTROLLED_USER_RESTRICTIONS.contains(key)) {
-                Bundle restrictions = getUserRestrictions(userId);
-                restrictions.putBoolean(key, value);
-                setUserRestrictionsInternalLocked(restrictions, userId);
-            }
+        if (!UserRestrictionsUtils.SYSTEM_CONTROLLED_USER_RESTRICTIONS.contains(key)) {
+            setUserRestrictionNoCheck(key, value, userId);
         }
     }
 
     @Override
     public void setSystemControlledUserRestriction(String key, boolean value, int userId) {
         checkSystemOrRoot("setSystemControlledUserRestriction");
-        synchronized (mPackagesLock) {
-            Bundle restrictions = getUserRestrictions(userId);
-            restrictions.putBoolean(key, value);
-            setUserRestrictionsInternalLocked(restrictions, userId);
+        setUserRestrictionNoCheck(key, value, userId);
+    }
+
+    private void setUserRestrictionNoCheck(String key, boolean value, int userId) {
+        synchronized (mRestrictionsLock) {
+            // Note we can't modify Bundles stored in mBaseUserRestrictions directly, so create
+            // a copy.
+            final Bundle newRestrictions = new Bundle();
+            UserRestrictionsUtils.merge(newRestrictions, mBaseUserRestrictions.get(userId));
+            newRestrictions.putBoolean(key, value);
+
+            updateUserRestrictionsInternalRL(newRestrictions, userId);
         }
     }
 
-    @Override
-    public void setUserRestrictions(Bundle restrictions, int userId) {
-        checkManageUsersPermission("setUserRestrictions");
-        if (restrictions == null) return;
-
-        synchronized (mPackagesLock) {
-            final Bundle oldUserRestrictions = mUserRestrictions.get(userId);
-            // Restore the original state of system controlled restrictions from oldUserRestrictions
-            for (String key : UserRestrictionsUtils.SYSTEM_CONTROLLED_USER_RESTRICTIONS) {
-                restrictions.remove(key);
-                if (oldUserRestrictions.containsKey(key)) {
-                    restrictions.putBoolean(key, oldUserRestrictions.getBoolean(key));
-                }
-            }
-            setUserRestrictionsInternalLocked(restrictions, userId);
+    /**
+     * Optionally updating user restrictions, calculate the effective user restrictions by
+     * consulting {@link com.android.server.devicepolicy.DevicePolicyManagerService} and also
+     * apply it to {@link com.android.server.AppOpsService}.
+     * TODO applyUserRestrictionsLocked() should also apply to system settings.
+     *
+     * @param newRestrictions User restrictions to set.  If null, only the effective restrictions
+     *     will be updated.  Note don't pass an existing Bundle in {@link #mBaseUserRestrictions}
+     *     or {@link #mCachedEffectiveUserRestrictions}; that'll most likely cause a sub
+     * @param userId target user ID.
+     */
+    @GuardedBy("mRestrictionsLock")
+    private void updateUserRestrictionsInternalRL(
+            @Nullable Bundle newRestrictions, int userId) {
+        if (DBG) {
+            Log.d(LOG_TAG, "updateUserRestrictionsInternalLocked userId=" + userId
+                    + " bundle=" + newRestrictions);
         }
+        final Bundle prevRestrictions = getEffectiveUserRestrictions(userId);
+
+        // Update system restrictions.
+        if (newRestrictions != null) {
+            // If newRestrictions == the current one, it's probably a bug.
+            Preconditions.checkState(mBaseUserRestrictions.get(userId) != newRestrictions);
+            Preconditions.checkState(mCachedEffectiveUserRestrictions.get(userId)
+                    != newRestrictions);
+            mBaseUserRestrictions.put(userId, newRestrictions);
+        }
+
+        mCachedEffectiveUserRestrictions.put(
+                userId, computeEffectiveUserRestrictionsRL(userId));
+
+        applyUserRestrictionsRL(userId, mBaseUserRestrictions.get(userId), prevRestrictions);
     }
 
-    private void setUserRestrictionsInternalLocked(Bundle restrictions, int userId) {
-        final Bundle userRestrictions = mUserRestrictions.get(userId);
-        userRestrictions.clear();
-        userRestrictions.putAll(restrictions);
-        long token = Binder.clearCallingIdentity();
+    @GuardedBy("mRestrictionsLock")
+    private void applyUserRestrictionsRL(int userId,
+            Bundle newRestrictions, Bundle prevRestrictions) {
+        final long token = Binder.clearCallingIdentity();
         try {
-        mAppOpsService.setUserRestrictions(userRestrictions, userId);
+            mAppOpsService.setUserRestrictions(newRestrictions, userId);
         } catch (RemoteException e) {
             Log.w(LOG_TAG, "Unable to notify AppOpsService of UserRestrictions");
         } finally {
             Binder.restoreCallingIdentity(token);
         }
-        scheduleWriteUserLocked(mUsers.get(userId));
+
+        // TODO Move the code from DPMS.setUserRestriction().
+    }
+
+    @GuardedBy("mRestrictionsLock")
+    private void updateEffectiveUserRestrictionsRL(int userId) {
+        updateUserRestrictionsInternalRL(null, userId);
+    }
+
+    @GuardedBy("mRestrictionsLock")
+    private void updateEffectiveUserRestrictionsForAllUsersRL() {
+        // First, invalidate all cached values.
+        synchronized (mRestrictionsLock) {
+            mCachedEffectiveUserRestrictions.clear();
+        }
+        // We don't want to call into ActivityManagerNative while taking a lock, so we'll call
+        // it on a handler.
+        final Runnable r = new Runnable() {
+            @Override
+            public void run() {
+                // Then get the list of running users.
+                final int[] runningUsers;
+                try {
+                    runningUsers = ActivityManagerNative.getDefault().getRunningUserIds();
+                } catch (RemoteException e) {
+                    Log.w(LOG_TAG, "Unable to access ActivityManagerNative");
+                    return;
+                }
+                // Then re-calculate the effective restrictions and apply, only for running users.
+                // It's okay if a new user has started after the getRunningUserIds() call,
+                // because we'll do the same thing (re-calculate the restrictions and apply)
+                // when we start a user.
+                // TODO: "Apply restrictions upon user start hasn't been implemented.  Implement it.
+                synchronized (mRestrictionsLock) {
+                    for (int i = 0; i < runningUsers.length; i++) {
+                        updateUserRestrictionsInternalRL(null, runningUsers[i]);
+                    }
+                }
+            }
+        };
+        mHandler.post(r);
     }
 
     /**
@@ -926,7 +1069,9 @@ public class UserManagerService extends IUserManager.Stub {
         mUserVersion = USER_VERSION;
 
         Bundle restrictions = new Bundle();
-        mUserRestrictions.append(UserHandle.USER_SYSTEM, restrictions);
+        synchronized (mRestrictionsLock) {
+            mBaseUserRestrictions.append(UserHandle.USER_SYSTEM, restrictions);
+        }
 
         updateUserIdsLocked();
         initDefaultGuestRestrictions();
@@ -989,9 +1134,13 @@ public class UserManagerService extends IUserManager.Stub {
             serializer.startTag(null, TAG_NAME);
             serializer.text(userInfo.name);
             serializer.endTag(null, TAG_NAME);
-            Bundle restrictions = mUserRestrictions.get(userInfo.id);
+            Bundle restrictions;
+            synchronized (mRestrictionsLock) {
+                restrictions = mBaseUserRestrictions.get(userInfo.id);
+            }
             if (restrictions != null) {
-                UserRestrictionsUtils.writeRestrictions(serializer, restrictions, TAG_RESTRICTIONS);
+                UserRestrictionsUtils
+                        .writeRestrictions(serializer, restrictions, TAG_RESTRICTIONS);
             }
             serializer.endTag(null, TAG_USER);
 
@@ -1131,7 +1280,9 @@ public class UserManagerService extends IUserManager.Stub {
             userInfo.guestToRemove = guestToRemove;
             userInfo.profileGroupId = profileGroupId;
             userInfo.restrictedProfileParentId = restrictedProfileParentId;
-            mUserRestrictions.append(id, restrictions);
+            synchronized (mRestrictionsLock) {
+                mBaseUserRestrictions.append(id, restrictions);
+            }
             return userInfo;
 
         } catch (IOException ioe) {
@@ -1333,7 +1484,9 @@ public class UserManagerService extends IUserManager.Stub {
                     scheduleWriteUserLocked(userInfo);
                     updateUserIdsLocked();
                     Bundle restrictions = new Bundle();
-                    mUserRestrictions.append(userId, restrictions);
+                    synchronized (mRestrictionsLock) {
+                        mBaseUserRestrictions.append(userId, restrictions);
+                    }
                 }
             }
             mPm.newUserCreated(userId);
@@ -1613,25 +1766,6 @@ public class UserManagerService extends IUserManager.Stub {
             changeIntent.setPackage(packageName);
             changeIntent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY);
             mContext.sendBroadcastAsUser(changeIntent, new UserHandle(userId));
-        }
-    }
-
-    @Override
-    public void removeRestrictions() {
-        checkManageUsersPermission("remove restrictions");
-        final int userHandle = UserHandle.getCallingUserId();
-        removeRestrictionsForUser(userHandle, true);
-    }
-
-    private void removeRestrictionsForUser(final int userHandle, boolean unhideApps) {
-        synchronized (mPackagesLock) {
-            // Remove all user restrictions
-            setUserRestrictions(new Bundle(), userHandle);
-            // Remove any app restrictions
-            cleanAppRestrictions(userHandle);
-        }
-        if (unhideApps) {
-            unhideAllInstalledAppsForUser(userHandle);
         }
     }
 
@@ -2062,7 +2196,10 @@ public class UserManagerService extends IUserManager.Stub {
                 }
                 pw.println("    Restrictions:");
                 UserRestrictionsUtils.dumpRestrictions(
-                        pw, "      ", mUserRestrictions.get(user.id));
+                        pw, "      ", mBaseUserRestrictions.get(user.id));
+                pw.println("    Effective restrictions:");
+                UserRestrictionsUtils.dumpRestrictions(
+                        pw, "      ", mCachedEffectiveUserRestrictions.get(user.id));
             }
             pw.println();
             pw.println("Guest restrictions:");
@@ -2094,5 +2231,50 @@ public class UserManagerService extends IUserManager.Stub {
      */
     boolean isInitialized(int userId) {
         return (getUserInfo(userId).flags & UserInfo.FLAG_INITIALIZED) != 0;
+    }
+
+    private class LocalService extends UserManagerInternal {
+
+        @Override
+        public Object getUserRestrictionsLock() {
+            return mRestrictionsLock;
+        }
+
+        @Override
+        @GuardedBy("mRestrictionsLock")
+        public void updateEffectiveUserRestrictionsRL(int userId) {
+            UserManagerService.this.updateEffectiveUserRestrictionsRL(userId);
+        }
+
+        @Override
+        @GuardedBy("mRestrictionsLock")
+        public void updateEffectiveUserRestrictionsForAllUsersRL() {
+            UserManagerService.this.updateEffectiveUserRestrictionsForAllUsersRL();
+        }
+
+        @Override
+        public Bundle getBaseUserRestrictions(int userId) {
+            synchronized (mRestrictionsLock) {
+                return mBaseUserRestrictions.get(userId);
+            }
+        }
+
+        @Override
+        public void setBaseUserRestrictionsByDpmsForMigration(
+                int userId, Bundle baseRestrictions) {
+            synchronized (mRestrictionsLock) {
+                mBaseUserRestrictions.put(userId, new Bundle(baseRestrictions));
+                invalidateEffectiveUserRestrictionsRL(userId);
+            }
+
+            synchronized (mPackagesLock) {
+                final UserInfo userInfo = mUsers.get(userId);
+                if (userInfo != null) {
+                    writeUserLocked(userInfo);
+                } else {
+                    Slog.w(LOG_TAG, "UserInfo not found for " + userId);
+                }
+            }
+        }
     }
 }

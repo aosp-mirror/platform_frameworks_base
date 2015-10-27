@@ -27,6 +27,7 @@ import android.os.Looper;
 import android.os.PowerManagerInternal;
 import android.os.UserHandle;
 import android.os.UserManager;
+import android.os.UserManagerInternal;
 import android.view.IWindowManager;
 
 import java.io.File;
@@ -107,6 +108,11 @@ public class DevicePolicyManagerServiceTestable extends DevicePolicyManagerServi
         }
 
         @Override
+        UserManagerInternal getUserManagerInternal() {
+            return context.userManagerInternal;
+        }
+
+        @Override
         PowerManagerInternal getPowerManagerInternal() {
             return context.powerManagerInternal;
         }
@@ -153,7 +159,7 @@ public class DevicePolicyManagerServiceTestable extends DevicePolicyManagerServi
 
         @Override
         String getDevicePolicyFilePathForSystemUser() {
-            return context.systemUserDataDir.getAbsolutePath();
+            return context.systemUserDataDir.getAbsolutePath() + "/";
         }
 
         @Override

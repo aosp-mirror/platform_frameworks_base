@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8' standalone='yes' ?>
+<policies setup-complete="true">
+    <admin name="com.google.android.gms/com.google.android.gms.mdm.receivers.MdmDeviceAdminReceiver">
+    </admin>
+    <admin name="com.android.frameworks.servicestests/com.android.server.devicepolicy.DummyDeviceAdmins$Admin1">
+    </admin>
+</policies>

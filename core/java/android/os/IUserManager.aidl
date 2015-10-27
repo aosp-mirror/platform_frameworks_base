@@ -55,14 +55,12 @@ interface IUserManager {
     int getUserHandle(int userSerialNumber);
     Bundle getUserRestrictions(int userHandle);
     boolean hasUserRestriction(in String restrictionKey, int userHandle);
-    void setUserRestrictions(in Bundle restrictions, int userHandle);
     void setUserRestriction(String key, boolean value, int userId);
     void setSystemControlledUserRestriction(String key, boolean value, int userId);
     void setApplicationRestrictions(in String packageName, in Bundle restrictions,
             int userHandle);
     Bundle getApplicationRestrictions(in String packageName);
     Bundle getApplicationRestrictionsForUser(in String packageName, int userHandle);
-    void removeRestrictions();
     void setDefaultGuestRestrictions(in Bundle restrictions);
     Bundle getDefaultGuestRestrictions();
     boolean markGuestForDeletion(int userHandle);

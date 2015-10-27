@@ -21,6 +21,7 @@ import android.annotation.SystemApi;
 import android.app.ActivityManager;
 import android.app.ActivityManagerNative;
 import android.app.admin.DevicePolicyManager;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.pm.UserInfo;
 import android.content.res.Resources;
@@ -55,7 +56,8 @@ public class UserManager {
      *
      * <p/>Key for user restrictions.
      * <p/>Type: Boolean
-     * @see #setUserRestrictions(Bundle)
+     * @see DevicePolicyManager#addUserRestriction(ComponentName, String)
+     * @see DevicePolicyManager#clearUserRestriction(ComponentName, String)
      * @see #getUserRestrictions()
      */
     public static final String DISALLOW_MODIFY_ACCOUNTS = "no_modify_accounts";
@@ -67,7 +69,8 @@ public class UserManager {
      *
      * <p/>Key for user restrictions.
      * <p/>Type: Boolean
-     * @see #setUserRestrictions(Bundle)
+     * @see DevicePolicyManager#addUserRestriction(ComponentName, String)
+     * @see DevicePolicyManager#clearUserRestriction(ComponentName, String)
      * @see #getUserRestrictions()
      */
     public static final String DISALLOW_CONFIG_WIFI = "no_config_wifi";
@@ -78,7 +81,8 @@ public class UserManager {
      *
      * <p/>Key for user restrictions.
      * <p/>Type: Boolean
-     * @see #setUserRestrictions(Bundle)
+     * @see DevicePolicyManager#addUserRestriction(ComponentName, String)
+     * @see DevicePolicyManager#clearUserRestriction(ComponentName, String)
      * @see #getUserRestrictions()
      */
     public static final String DISALLOW_INSTALL_APPS = "no_install_apps";
@@ -89,7 +93,8 @@ public class UserManager {
      *
      * <p/>Key for user restrictions.
      * <p/>Type: Boolean
-     * @see #setUserRestrictions(Bundle)
+     * @see DevicePolicyManager#addUserRestriction(ComponentName, String)
+     * @see DevicePolicyManager#clearUserRestriction(ComponentName, String)
      * @see #getUserRestrictions()
      */
     public static final String DISALLOW_UNINSTALL_APPS = "no_uninstall_apps";
@@ -102,7 +107,8 @@ public class UserManager {
      *
      * <p/>Key for user restrictions.
      * <p/>Type: Boolean
-     * @see #setUserRestrictions(Bundle)
+     * @see DevicePolicyManager#addUserRestriction(ComponentName, String)
+     * @see DevicePolicyManager#clearUserRestriction(ComponentName, String)
      * @see #getUserRestrictions()
      */
     public static final String DISALLOW_SHARE_LOCATION = "no_share_location";
@@ -114,7 +120,8 @@ public class UserManager {
      *
      * <p/>Key for user restrictions.
      * <p/>Type: Boolean
-     * @see #setUserRestrictions(Bundle)
+     * @see DevicePolicyManager#addUserRestriction(ComponentName, String)
+     * @see DevicePolicyManager#clearUserRestriction(ComponentName, String)
      * @see #getUserRestrictions()
      */
     public static final String DISALLOW_INSTALL_UNKNOWN_SOURCES = "no_install_unknown_sources";
@@ -127,7 +134,8 @@ public class UserManager {
      *
      * <p/>Key for user restrictions.
      * <p/>Type: Boolean
-     * @see #setUserRestrictions(Bundle)
+     * @see DevicePolicyManager#addUserRestriction(ComponentName, String)
+     * @see DevicePolicyManager#clearUserRestriction(ComponentName, String)
      * @see #getUserRestrictions()
      */
     public static final String DISALLOW_CONFIG_BLUETOOTH = "no_config_bluetooth";
@@ -139,7 +147,8 @@ public class UserManager {
      *
      * <p/>Key for user restrictions.
      * <p/>Type: Boolean
-     * @see #setUserRestrictions(Bundle)
+     * @see DevicePolicyManager#addUserRestriction(ComponentName, String)
+     * @see DevicePolicyManager#clearUserRestriction(ComponentName, String)
      * @see #getUserRestrictions()
      */
     public static final String DISALLOW_USB_FILE_TRANSFER = "no_usb_file_transfer";
@@ -150,7 +159,8 @@ public class UserManager {
      *
      * <p/>Key for user restrictions.
      * <p/>Type: Boolean
-     * @see #setUserRestrictions(Bundle)
+     * @see DevicePolicyManager#addUserRestriction(ComponentName, String)
+     * @see DevicePolicyManager#clearUserRestriction(ComponentName, String)
      * @see #getUserRestrictions()
      */
     public static final String DISALLOW_CONFIG_CREDENTIALS = "no_config_credentials";
@@ -163,7 +173,8 @@ public class UserManager {
      *
      * <p/>Key for user restrictions.
      * <p/>Type: Boolean
-     * @see #setUserRestrictions(Bundle)
+     * @see DevicePolicyManager#addUserRestriction(ComponentName, String)
+     * @see DevicePolicyManager#clearUserRestriction(ComponentName, String)
      * @see #getUserRestrictions()
      */
     public static final String DISALLOW_REMOVE_USER = "no_remove_user";
@@ -174,7 +185,8 @@ public class UserManager {
      *
      * <p/>Key for user restrictions.
      * <p/>Type: Boolean
-     * @see #setUserRestrictions(Bundle)
+     * @see DevicePolicyManager#addUserRestriction(ComponentName, String)
+     * @see DevicePolicyManager#clearUserRestriction(ComponentName, String)
      * @see #getUserRestrictions()
      */
     public static final String DISALLOW_DEBUGGING_FEATURES = "no_debugging_features";
@@ -187,7 +199,8 @@ public class UserManager {
      *
      * <p/>Key for user restrictions.
      * <p/>Type: Boolean
-     * @see #setUserRestrictions(Bundle)
+     * @see DevicePolicyManager#addUserRestriction(ComponentName, String)
+     * @see DevicePolicyManager#clearUserRestriction(ComponentName, String)
      * @see #getUserRestrictions()
      */
     public static final String DISALLOW_CONFIG_VPN = "no_config_vpn";
@@ -199,7 +212,8 @@ public class UserManager {
      *
      * <p/>Key for user restrictions.
      * <p/>Type: Boolean
-     * @see #setUserRestrictions(Bundle)
+     * @see DevicePolicyManager#addUserRestriction(ComponentName, String)
+     * @see DevicePolicyManager#clearUserRestriction(ComponentName, String)
      * @see #getUserRestrictions()
      */
     public static final String DISALLOW_CONFIG_TETHERING = "no_config_tethering";
@@ -213,7 +227,8 @@ public class UserManager {
      *
      * <p/>Key for user restrictions.
      * <p/>Type: Boolean
-     * @see #setUserRestrictions(Bundle)
+     * @see DevicePolicyManager#addUserRestriction(ComponentName, String)
+     * @see DevicePolicyManager#clearUserRestriction(ComponentName, String)
      * @see #getUserRestrictions()
      */
     public static final String DISALLOW_NETWORK_RESET = "no_network_reset";
@@ -227,7 +242,8 @@ public class UserManager {
      *
      * <p/>Key for user restrictions.
      * <p/>Type: Boolean
-     * @see #setUserRestrictions(Bundle)
+     * @see DevicePolicyManager#addUserRestriction(ComponentName, String)
+     * @see DevicePolicyManager#clearUserRestriction(ComponentName, String)
      * @see #getUserRestrictions()
      */
     public static final String DISALLOW_FACTORY_RESET = "no_factory_reset";
@@ -241,7 +257,8 @@ public class UserManager {
      *
      * <p/>Key for user restrictions.
      * <p/>Type: Boolean
-     * @see #setUserRestrictions(Bundle)
+     * @see DevicePolicyManager#addUserRestriction(ComponentName, String)
+     * @see DevicePolicyManager#clearUserRestriction(ComponentName, String)
      * @see #getUserRestrictions()
      */
     public static final String DISALLOW_ADD_USER = "no_add_user";
@@ -252,7 +269,8 @@ public class UserManager {
      *
      * <p/>Key for user restrictions.
      * <p/>Type: Boolean
-     * @see #setUserRestrictions(Bundle)
+     * @see DevicePolicyManager#addUserRestriction(ComponentName, String)
+     * @see DevicePolicyManager#clearUserRestriction(ComponentName, String)
      * @see #getUserRestrictions()
      */
     public static final String ENSURE_VERIFY_APPS = "ensure_verify_apps";
@@ -266,7 +284,8 @@ public class UserManager {
      *
      * <p/>Key for user restrictions.
      * <p/>Type: Boolean
-     * @see #setUserRestrictions(Bundle)
+     * @see DevicePolicyManager#addUserRestriction(ComponentName, String)
+     * @see DevicePolicyManager#clearUserRestriction(ComponentName, String)
      * @see #getUserRestrictions()
      */
     public static final String DISALLOW_CONFIG_CELL_BROADCASTS = "no_config_cell_broadcasts";
@@ -280,7 +299,8 @@ public class UserManager {
      *
      * <p/>Key for user restrictions.
      * <p/>Type: Boolean
-     * @see #setUserRestrictions(Bundle)
+     * @see DevicePolicyManager#addUserRestriction(ComponentName, String)
+     * @see DevicePolicyManager#clearUserRestriction(ComponentName, String)
      * @see #getUserRestrictions()
      */
     public static final String DISALLOW_CONFIG_MOBILE_NETWORKS = "no_config_mobile_networks";
@@ -300,7 +320,8 @@ public class UserManager {
      *
      * <p/>Key for user restrictions.
      * <p/>Type: Boolean
-     * @see #setUserRestrictions(Bundle)
+     * @see DevicePolicyManager#addUserRestriction(ComponentName, String)
+     * @see DevicePolicyManager#clearUserRestriction(ComponentName, String)
      * @see #getUserRestrictions()
      */
     public static final String DISALLOW_APPS_CONTROL = "no_control_apps";
@@ -312,7 +333,8 @@ public class UserManager {
      *
      * <p/>Key for user restrictions.
      * <p/>Type: Boolean
-     * @see #setUserRestrictions(Bundle)
+     * @see DevicePolicyManager#addUserRestriction(ComponentName, String)
+     * @see DevicePolicyManager#clearUserRestriction(ComponentName, String)
      * @see #getUserRestrictions()
      */
     public static final String DISALLOW_MOUNT_PHYSICAL_MEDIA = "no_physical_media";
@@ -324,7 +346,8 @@ public class UserManager {
      *
      * <p/>Key for user restrictions.
      * <p/>Type: Boolean
-     * @see #setUserRestrictions(Bundle)
+     * @see DevicePolicyManager#addUserRestriction(ComponentName, String)
+     * @see DevicePolicyManager#clearUserRestriction(ComponentName, String)
      * @see #getUserRestrictions()
      */
     public static final String DISALLOW_UNMUTE_MICROPHONE = "no_unmute_microphone";
@@ -336,7 +359,8 @@ public class UserManager {
      *
      * <p/>Key for user restrictions.
      * <p/>Type: Boolean
-     * @see #setUserRestrictions(Bundle)
+     * @see DevicePolicyManager#addUserRestriction(ComponentName, String)
+     * @see DevicePolicyManager#clearUserRestriction(ComponentName, String)
      * @see #getUserRestrictions()
      */
     public static final String DISALLOW_ADJUST_VOLUME = "no_adjust_volume";
@@ -350,7 +374,8 @@ public class UserManager {
      *
      * <p/>Key for user restrictions.
      * <p/>Type: Boolean
-     * @see #setUserRestrictions(Bundle)
+     * @see DevicePolicyManager#addUserRestriction(ComponentName, String)
+     * @see DevicePolicyManager#clearUserRestriction(ComponentName, String)
      * @see #getUserRestrictions()
      */
     public static final String DISALLOW_OUTGOING_CALLS = "no_outgoing_calls";
@@ -361,7 +386,8 @@ public class UserManager {
      *
      * <p/>Key for user restrictions.
      * <p/>Type: Boolean
-     * @see #setUserRestrictions(Bundle)
+     * @see DevicePolicyManager#addUserRestriction(ComponentName, String)
+     * @see DevicePolicyManager#clearUserRestriction(ComponentName, String)
      * @see #getUserRestrictions()
      */
     public static final String DISALLOW_SMS = "no_sms";
@@ -373,7 +399,8 @@ public class UserManager {
      *
      * <p/>Key for user restrictions.
      * <p/>Type: Boolean
-     * @see #setUserRestrictions(Bundle)
+     * @see DevicePolicyManager#addUserRestriction(ComponentName, String)
+     * @see DevicePolicyManager#clearUserRestriction(ComponentName, String)
      * @see #getUserRestrictions()
      */
     public static final String DISALLOW_FUN = "no_fun";
@@ -393,7 +420,8 @@ public class UserManager {
      *
      * <p/>Key for user restrictions.
      * <p/>Type: Boolean
-     * @see #setUserRestrictions(Bundle)
+     * @see DevicePolicyManager#addUserRestriction(ComponentName, String)
+     * @see DevicePolicyManager#clearUserRestriction(ComponentName, String)
      * @see #getUserRestrictions()
      */
     public static final String DISALLOW_CREATE_WINDOWS = "no_create_windows";
@@ -406,7 +434,8 @@ public class UserManager {
      *
      * <p/>Key for user restrictions.
      * <p/>Type: Boolean
-     * @see #setUserRestrictions(Bundle)
+     * @see DevicePolicyManager#addUserRestriction(ComponentName, String)
+     * @see DevicePolicyManager#clearUserRestriction(ComponentName, String)
      * @see #getUserRestrictions()
      */
     public static final String DISALLOW_CROSS_PROFILE_COPY_PASTE = "no_cross_profile_copy_paste";
@@ -417,7 +446,8 @@ public class UserManager {
      *
      * <p/>Key for user restrictions.
      * <p/>Type: Boolean
-     * @see #setUserRestrictions(Bundle)
+     * @see DevicePolicyManager#addUserRestriction(ComponentName, String)
+     * @see DevicePolicyManager#clearUserRestriction(ComponentName, String)
      * @see #getUserRestrictions()
      */
     public static final String DISALLOW_OUTGOING_BEAM = "no_outgoing_beam";
@@ -426,7 +456,8 @@ public class UserManager {
      * Hidden user restriction to disallow access to wallpaper manager APIs. This user restriction
      * is always set for managed profiles.
      * @hide
-     * @see #setUserRestrictions(Bundle)
+     * @see DevicePolicyManager#addUserRestriction(ComponentName, String)
+     * @see DevicePolicyManager#clearUserRestriction(ComponentName, String)
      * @see #getUserRestrictions()
      */
     public static final String DISALLOW_WALLPAPER = "no_wallpaper";
@@ -438,7 +469,8 @@ public class UserManager {
      *
      * <p/>Key for user restrictions.
      * <p/>Type: Boolean
-     * @see #setUserRestrictions(Bundle)
+     * @see DevicePolicyManager#addUserRestriction(ComponentName, String)
+     * @see DevicePolicyManager#clearUserRestriction(ComponentName, String)
      * @see #getUserRestrictions()
      */
     public static final String DISALLOW_SAFE_BOOT = "no_safe_boot";
@@ -447,7 +479,8 @@ public class UserManager {
      * Specifies if a user is not allowed to record audio. This restriction is always enabled for
      * background users. The default value is <code>false</code>.
      *
-     * @see #setUserRestrictions(Bundle)
+     * @see DevicePolicyManager#addUserRestriction(ComponentName, String)
+     * @see DevicePolicyManager#clearUserRestriction(ComponentName, String)
      * @see #getUserRestrictions()
      * @hide
      */
@@ -466,7 +499,8 @@ public class UserManager {
      *
      * <p/>Key for user restrictions.
      * <p/>Type: Boolean
-     * @see #setUserRestrictions(Bundle)
+     * @see DevicePolicyManager#addUserRestriction(ComponentName, String)
+     * @see DevicePolicyManager#clearUserRestriction(ComponentName, String)
      * @see #getUserRestrictions()
      */
     public static final String ALLOW_PARENT_PROFILE_APP_LINKING
@@ -740,36 +774,20 @@ public class UserManager {
     }
 
     /**
-     * Sets all the user-wide restrictions for this user.
-     * Requires the MANAGE_USERS permission.
-     * @param restrictions the Bundle containing all the restrictions.
-     * @deprecated use {@link android.app.admin.DevicePolicyManager#addUserRestriction(
-     * android.content.ComponentName, String)} or
-     * {@link android.app.admin.DevicePolicyManager#clearUserRestriction(
-     * android.content.ComponentName, String)} instead.
+     * This will no longer work.  Use {@link #setUserRestriction(String, boolean)} instead.
      */
     @Deprecated
     public void setUserRestrictions(Bundle restrictions) {
-        setUserRestrictions(restrictions, Process.myUserHandle());
+        throw new UnsupportedOperationException("This method is no longer supported");
     }
 
     /**
-     * Sets all the user-wide restrictions for the specified user.
-     * Requires the MANAGE_USERS permission.
-     * @param restrictions the Bundle containing all the restrictions.
-     * @param userHandle the UserHandle of the user for whom to set the restrictions.
-     * @deprecated use {@link android.app.admin.DevicePolicyManager#addUserRestriction(
-     * android.content.ComponentName, String)} or
-     * {@link android.app.admin.DevicePolicyManager#clearUserRestriction(
-     * android.content.ComponentName, String)} instead.
+     * This will no longer work.  Use {@link #setUserRestriction(String, boolean, UserHandle)}
+     * instead.
      */
     @Deprecated
     public void setUserRestrictions(Bundle restrictions, UserHandle userHandle) {
-        try {
-            mService.setUserRestrictions(restrictions, userHandle.getIdentifier());
-        } catch (RemoteException re) {
-            Log.w(TAG, "Could not set user restrictions", re);
-        }
+        throw new UnsupportedOperationException("This method is no longer supported");
     }
 
     /**
@@ -784,9 +802,7 @@ public class UserManager {
      */
     @Deprecated
     public void setUserRestriction(String key, boolean value) {
-        Bundle bundle = getUserRestrictions();
-        bundle.putBoolean(key, value);
-        setUserRestrictions(bundle);
+        setUserRestriction(key, value, Process.myUserHandle());
     }
 
     /**
@@ -882,9 +898,8 @@ public class UserManager {
         try {
             user = mService.createUser(name, flags);
             if (user != null && !user.isAdmin()) {
-                Bundle userRestrictions = mService.getUserRestrictions(user.id);
-                addDefaultUserRestrictions(userRestrictions);
-                mService.setUserRestrictions(userRestrictions, user.id);
+                mService.setUserRestriction(DISALLOW_SMS, true, user.id);
+                mService.setUserRestriction(DISALLOW_OUTGOING_CALLS, true, user.id);
             }
         } catch (RemoteException re) {
             Log.w(TAG, "Could not create a user", re);
@@ -899,25 +914,20 @@ public class UserManager {
      * @hide
      */
     public UserInfo createGuest(Context context, String name) {
-        UserInfo guest = createUser(name, UserInfo.FLAG_GUEST);
-        if (guest != null) {
-            Settings.Secure.putStringForUser(context.getContentResolver(),
-                    Settings.Secure.SKIP_FIRST_USE_HINTS, "1", guest.id);
-            try {
-                Bundle guestRestrictions = mService.getDefaultGuestRestrictions();
-                guestRestrictions.putBoolean(DISALLOW_SMS, true);
-                guestRestrictions.putBoolean(DISALLOW_INSTALL_UNKNOWN_SOURCES, true);
-                mService.setUserRestrictions(guestRestrictions, guest.id);
-            } catch (RemoteException re) {
-                Log.w(TAG, "Could not update guest restrictions");
+        UserInfo guest = null;
+        try {
+            guest = mService.createUser(name, UserInfo.FLAG_GUEST);
+            if (guest != null) {
+                Settings.Secure.putStringForUser(context.getContentResolver(),
+                        Settings.Secure.SKIP_FIRST_USE_HINTS, "1", guest.id);
+
+                mService.setUserRestriction(DISALLOW_SMS, true, guest.id);
+                mService.setUserRestriction(DISALLOW_INSTALL_UNKNOWN_SOURCES, true, guest.id);
             }
+        } catch (RemoteException re) {
+            Log.w(TAG, "Could not create a user", re);
         }
         return guest;
-    }
-
-    private static void addDefaultUserRestrictions(Bundle restrictions) {
-        restrictions.putBoolean(DISALLOW_OUTGOING_CALLS, true);
-        restrictions.putBoolean(DISALLOW_SMS, true);
     }
 
     /**
@@ -1463,15 +1473,6 @@ public class UserManager {
      */
     public boolean setRestrictionsChallenge(String newPin) {
         return false;
-    }
-
-    /** @hide */
-    public void removeRestrictions() {
-        try {
-            mService.removeRestrictions();
-        } catch (RemoteException re) {
-            Log.w(TAG, "Could not change restrictions pin");
-        }
     }
 
     /**
