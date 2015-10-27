@@ -1500,7 +1500,7 @@ public class DeviceIdleController extends SystemService
                 mState = STATE_SENSING;
                 if (DEBUG) Slog.d(TAG, "Moved from STATE_IDLE_PENDING to STATE_SENSING.");
                 EventLogTags.writeDeviceIdle(mState, "step");
-                cancelAlarmLocked();
+                scheduleAlarmLocked(mConstants.SENSING_TIMEOUT, false);
                 cancelLocatingLocked();
                 mAnyMotionDetector.checkForAnyMotion();
                 mNotMoving = false;
