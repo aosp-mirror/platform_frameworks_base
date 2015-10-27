@@ -1713,13 +1713,14 @@ public class PackageManagerService extends IPackageManager.Stub {
             return;
         }
 
-        PermissionsState permissionsState = sb.getPermissionsState();
-
-        for (String permission : pkg.requestedPermissions) {
-            BasePermission bp = mSettings.mPermissions.get(permission);
-            if (bp != null && bp.isRuntime() && (grantedPermissions == null
-                    || ArrayUtils.contains(grantedPermissions, permission))) {
-                permissionsState.grantRuntimePermission(bp, userId);
+        synchronized (mPackages) {
+            for (String permission : pkg.requestedPermissions) {
+                BasePermission bp = mSettings.mPermissions.get(permission);
+                if (bp != null && (bp.isRuntime() || bp.isDevelopment())
+                        && (grantedPermissions == null
+                               || ArrayUtils.contains(grantedPermissions, permission))) {
+                    grantRuntimePermission(pkg.packageName, permission, userId);
+                }
             }
         }
     }
@@ -3519,7 +3520,8 @@ public class PackageManagerService extends IPackageManager.Stub {
                             killUid(appId, userId, KILL_APP_REASON_GIDS_CHANGED);
                         }
                     });
-                } break;
+                }
+                break;
             }
 
             mOnPermissionChangeListeners.onPermissionsChanged(uid);
