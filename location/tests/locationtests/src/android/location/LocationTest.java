@@ -16,6 +16,7 @@
 
 package android.location;
 
+import android.os.Parcel;
 import android.test.suitebuilder.annotation.SmallTest;
 
 import junit.framework.TestCase;
@@ -225,6 +226,40 @@ public class LocationTest extends TestCase {
         assertEquals(message, loc.getBearing(), 0, 0);
     }
 
+    public void testParcel() {
+        final double expectedLat = 33;
+        final double expectedLon = -122;
+        final float expectedAccuracy = 15;
+        final float expectedSpeed = 5;
+        Location loc = new Location("test");
+        loc.setLatitude(expectedLat);
+        loc.setLongitude(expectedLon);
+        loc.setAccuracy(expectedAccuracy);
+        loc.setSpeed(expectedSpeed);
+
+        // Serialize location object into bytes via parcelable capability
+        Parcel parcel = Parcel.obtain();
+        loc.writeToParcel(parcel, 0);
+        byte[] rawBytes = parcel.marshall();
+        parcel.recycle();
+
+        // Turn the bytes back into a location object
+        parcel = Parcel.obtain();
+        parcel.unmarshall(rawBytes, 0, rawBytes.length);
+        parcel.setDataPosition(0);
+        Location deserialized = Location.CREATOR.createFromParcel(parcel);
+        parcel.recycle();
+
+        assertEquals(expectedLat, deserialized.getLatitude());
+        assertEquals(expectedLon, deserialized.getLongitude());
+        assertEquals(expectedAccuracy, deserialized.getAccuracy());
+        assertTrue(deserialized.hasAccuracy());
+        assertEquals(expectedSpeed, deserialized.getSpeed());
+        assertTrue(deserialized.hasSpeed());
+        assertFalse(deserialized.hasBearing());
+        assertFalse(deserialized.hasAltitude());
+        assertFalse(deserialized.isFromMockProvider());
+    }
 }
 
 
