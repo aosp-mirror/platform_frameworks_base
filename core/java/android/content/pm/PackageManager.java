@@ -1702,6 +1702,15 @@ public abstract class PackageManager {
     public static final String FEATURE_BACKUP = "android.software.backup";
 
     /**
+     * Feature for {@link #getSystemAvailableFeatures} and
+     * {@link #hasSystemFeature}: The device supports freeform window management.
+     * Windows have title bars and can be moved and resized.
+     */
+    @SdkConstant(SdkConstantType.FEATURE)
+    public static final String FEATURE_FREEFORM_WINDOW_MANAGEMENT
+            = "android.software.freeform_window_management";
+
+    /**
      * Feature for {@link #getSystemAvailableFeatures} and {@link #hasSystemFeature}:
      * The device supports creating secondary users and managed profiles via
      * {@link DevicePolicyManager}.
