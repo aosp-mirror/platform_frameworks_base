@@ -162,7 +162,7 @@
   <java-symbol type="id" name="submit_area" />
   <java-symbol type="id" name="switch_new" />
   <java-symbol type="id" name="switch_old" />
-  <java-symbol type="id" name="switchWidget" />
+  <java-symbol type="id" name="switch_widget" />
   <java-symbol type="id" name="text" />
   <java-symbol type="id" name="time" />
   <java-symbol type="id" name="time_current" />

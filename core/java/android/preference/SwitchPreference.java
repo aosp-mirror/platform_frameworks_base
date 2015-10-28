@@ -122,7 +122,7 @@ public class SwitchPreference extends TwoStatePreference {
     protected void onBindView(View view) {
         super.onBindView(view);
 
-        View checkableView = view.findViewById(com.android.internal.R.id.switchWidget);
+        View checkableView = view.findViewById(com.android.internal.R.id.switch_widget);
         if (checkableView != null && checkableView instanceof Checkable) {
             if (checkableView instanceof Switch) {
                 final Switch switchView = (Switch) checkableView;

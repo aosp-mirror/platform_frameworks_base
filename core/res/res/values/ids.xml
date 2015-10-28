@@ -23,12 +23,14 @@
   <item type="id" name="empty" />
   <item type="id" name="hint" />
   <item type="id" name="icon" />
+  <item type="id" name="icon_frame" />
   <item type="id" name="icon_badge" />
   <item type="id" name="icon1" />
   <item type="id" name="icon2" />
   <item type="id" name="input" />
   <item type="id" name="left_icon" />
   <item type="id" name="list" />
+  <item type="id" name="list_container" />
   <item type="id" name="menu" />
   <item type="id" name="message" />
   <item type="id" name="primary" />
@@ -48,6 +50,7 @@
   <item type="id" name="lock_screen" />
   <item type="id" name="edit" />
   <item type="id" name="widget_frame" />
+  <item type="id" name="switch_widget" />
   <item type="id" name="button1" />
   <item type="id" name="button2" />
   <item type="id" name="button3" />

@@ -2681,6 +2681,7 @@
     <public type="attr" name="windowBackgroundFallback" />
     <public type="attr" name="forceDeviceEncrypted" />
     <public type="attr" name="encryptionAware" />
+    <public type="attr" name="preferenceFragmentStyle" />
 
     <public type="style" name="Theme.Material.DayNight" />
     <public type="style" name="Theme.Material.DayNight.DarkActionBar" />
@@ -2701,5 +2702,8 @@
     <public type="style" name="Theme.Material.DayNight.DialogWhenLarge.DarkActionBar" />
 
     <public type="id" name="accessibilityActionSetProgress" />
+    <public type="id" name="icon_frame" />
+    <public type="id" name="list_container" />
+    <public type="id" name="switch_widget" />
 
 </resources>

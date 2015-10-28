@@ -7714,6 +7714,7 @@ i
     <declare-styleable name="PreferenceFragment">
         <!-- The layout for the PreferenceFragment. This should rarely need to be changed. -->
         <attr name="layout" />
+        <attr name="divider" />
     </declare-styleable>
 
     <!-- Base attributes available to PreferenceActivity. -->

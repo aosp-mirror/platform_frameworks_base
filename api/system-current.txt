@@ -1025,6 +1025,7 @@ package android {
     field public static final int port = 16842793; // 0x1010029
     field public static final int positiveButtonText = 16843253; // 0x10101f5
     field public static final int preferenceCategoryStyle = 16842892; // 0x101008c
+    field public static final int preferenceFragmentStyle = 16844039; // 0x1010507
     field public static final int preferenceInformationStyle = 16842893; // 0x101008d
     field public static final int preferenceLayoutChild = 16842900; // 0x1010094
     field public static final int preferenceScreenStyle = 16842891; // 0x101008b
@@ -1806,11 +1807,13 @@ package android {
     field public static final int icon = 16908294; // 0x1020006
     field public static final int icon1 = 16908295; // 0x1020007
     field public static final int icon2 = 16908296; // 0x1020008
+    field public static final int icon_frame = 16908350; // 0x102003e
     field public static final int input = 16908297; // 0x1020009
     field public static final int inputArea = 16908318; // 0x102001e
     field public static final int inputExtractEditText = 16908325; // 0x1020025
     field public static final int keyboardView = 16908326; // 0x1020026
     field public static final int list = 16908298; // 0x102000a
+    field public static final int list_container = 16908351; // 0x102003f
     field public static final int mask = 16908334; // 0x102002e
     field public static final int message = 16908299; // 0x102000b
     field public static final int navigationBarBackground = 16908336; // 0x1020030
@@ -1830,6 +1833,7 @@ package android {
     field public static final int stopSelectingText = 16908329; // 0x1020029
     field public static final int summary = 16908304; // 0x1020010
     field public static final int switchInputMethod = 16908324; // 0x1020024
+    field public static final int switch_widget = 16908352; // 0x1020040
     field public static final int tabcontent = 16908305; // 0x1020011
     field public static final int tabhost = 16908306; // 0x1020012
     field public static final int tabs = 16908307; // 0x1020013

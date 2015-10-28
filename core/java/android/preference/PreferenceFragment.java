@@ -23,14 +23,15 @@ import android.app.Fragment;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.TypedArray;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
 import android.view.View.OnKeyListener;
+import android.view.ViewGroup;
 import android.widget.ListView;
 
 /**
@@ -176,6 +177,27 @@ public abstract class PreferenceFragment extends Fragment implements
         a.recycle();
 
         return inflater.inflate(mLayoutResId, container, false);
+    }
+
+    @Override
+    public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+
+        TypedArray a = getActivity().obtainStyledAttributes(null,
+                com.android.internal.R.styleable.PreferenceFragment,
+                com.android.internal.R.attr.preferenceFragmentStyle,
+                0);
+
+        ListView lv = (ListView) view.findViewById(android.R.id.list);
+        if (lv != null) {
+            Drawable divider =
+                    a.getDrawable(com.android.internal.R.styleable.PreferenceFragment_divider);
+            if (divider != null) {
+                lv.setDivider(divider);
+            }
+        }
+
+        a.recycle();
     }
 
     @Override
