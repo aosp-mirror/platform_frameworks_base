@@ -269,9 +269,6 @@
     <!-- Duration of the expansion animation in the volume dialog -->
     <item name="volume_expand_animation_duration" type="integer">300</item>
 
-    <!-- Whether to show a "shelf" of apps at the bottom of the screen. -->
-    <bool name="config_enableAppShelf">false</bool>
-
     <!-- Whether to show the full screen user switcher. -->
     <bool name="config_enableFullscreenUserSwitcher">false</bool>
 

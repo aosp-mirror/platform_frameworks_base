@@ -33,6 +33,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.IPackageManager;
+import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.database.ContentObserver;
@@ -246,15 +247,25 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
      * Prudently disable QS and notifications.  */
     private static final boolean ONLY_CORE_APPS;
 
+    /* If true, the device supports freeform window management.
+     * This affects the status bar UI. */
+    private static final boolean FREEFORM_WINDOW_MANAGEMENT;
+
     static {
         boolean onlyCoreApps;
+        boolean freeformWindowManagement;
         try {
-            onlyCoreApps = IPackageManager.Stub.asInterface(ServiceManager.getService("package"))
-                    .isOnlyCoreApps();
+            IPackageManager packageManager =
+                    IPackageManager.Stub.asInterface(ServiceManager.getService("package"));
+            onlyCoreApps = packageManager.isOnlyCoreApps();
+            freeformWindowManagement = packageManager.hasSystemFeature(
+                    PackageManager.FEATURE_FREEFORM_WINDOW_MANAGEMENT);
         } catch (RemoteException e) {
             onlyCoreApps = false;
+            freeformWindowManagement = false;
         }
         ONLY_CORE_APPS = onlyCoreApps;
+        FREEFORM_WINDOW_MANAGEMENT = freeformWindowManagement;
     }
 
     PhoneStatusBarPolicy mIconPolicy;
@@ -982,8 +993,8 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         if (shelfOverride != DEFAULT) {
             return shelfOverride != 0;
         }
-        // Otherwise default to the build setting.
-        return mContext.getResources().getBoolean(R.bool.config_enableAppShelf);
+        // Otherwise default to the platform feature.
+        return FREEFORM_WINDOW_MANAGEMENT;
     }
 
     private void clearAllNotifications() {
