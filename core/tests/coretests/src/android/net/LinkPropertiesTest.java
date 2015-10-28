@@ -561,9 +561,13 @@ public class LinkPropertiesTest extends TestCase {
         assertTrue(v46lp.isProvisioned());
 
         assertEquals(ProvisioningChange.STILL_PROVISIONED,
+                LinkProperties.compareProvisioning(v4lp, v46lp));
+        assertEquals(ProvisioningChange.STILL_PROVISIONED,
                 LinkProperties.compareProvisioning(v6lp, v46lp));
         assertEquals(ProvisioningChange.LOST_PROVISIONING,
                 LinkProperties.compareProvisioning(v46lp, v6lp));
+        assertEquals(ProvisioningChange.LOST_PROVISIONING,
+                LinkProperties.compareProvisioning(v46lp, v4lp));
 
         // Check that losing and gaining a secondary router does not change
         // the provisioning status.
