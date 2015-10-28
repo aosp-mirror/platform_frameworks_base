@@ -1537,12 +1537,20 @@ status_t buildResources(Bundle* bundle, const sp<AaptAssets>& assets, sp<ApkBuil
     std::queue<CompileResourceWorkItem>& workQueue = table.getWorkQueue();
     while (!workQueue.empty()) {
         CompileResourceWorkItem& workItem = workQueue.front();
-        err = compileXmlFile(bundle, assets, workItem.resourceName, workItem.file, &table, xmlFlags);
+        int xmlCompilationFlags = xmlFlags | XML_COMPILE_PARSE_VALUES
+                | XML_COMPILE_ASSIGN_ATTRIBUTE_IDS;
+        if (!workItem.needsCompiling) {
+            xmlCompilationFlags &= ~XML_COMPILE_ASSIGN_ATTRIBUTE_IDS;
+            xmlCompilationFlags &= ~XML_COMPILE_PARSE_VALUES;
+        }
+        err = compileXmlFile(bundle, assets, workItem.resourceName, workItem.xmlRoot,
+                             workItem.file, &table, xmlCompilationFlags);
+
         if (err == NO_ERROR) {
             assets->addResource(workItem.resPath.getPathLeaf(),
-                    workItem.resPath,
-                    workItem.file,
-                    workItem.file->getResourceType());
+                                workItem.resPath,
+                                workItem.file,
+                                workItem.file->getResourceType());
         } else {
             hasErrors = true;
         }
@@ -1737,9 +1745,7 @@ status_t buildResources(Bundle* bundle, const sp<AaptAssets>& assets, sp<ApkBuil
             manifestFile->getGroupEntry(),
             manifestFile->getResourceType());
     err = compileXmlFile(bundle, assets, String16(), manifestFile,
-            outManifestFile, &table,
-            XML_COMPILE_ASSIGN_ATTRIBUTE_IDS
-            | XML_COMPILE_STRIP_WHITESPACE | XML_COMPILE_STRIP_RAW_VALUES);
+            outManifestFile, &table, XML_COMPILE_STANDARD_RESOURCE & ~XML_COMPILE_STRIP_COMMENTS);
     if (err < NO_ERROR) {
         return err;
     }
