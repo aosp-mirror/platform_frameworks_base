@@ -141,8 +141,8 @@ private:
 
     void freePrefetechedLayers();
 
-    int lastFrameWidth = 0;
-    int lastFrameHeight = 0;
+    EGLint mLastFrameWidth = 0;
+    EGLint mLastFrameHeight = 0;
 
     RenderThread& mRenderThread;
     EglManager& mEglManager;
