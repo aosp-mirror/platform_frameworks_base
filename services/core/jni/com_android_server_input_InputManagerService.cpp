@@ -152,16 +152,21 @@ static jobject getInputWindowHandleObjLocalRef(JNIEnv* env,
             getInputWindowHandleObjLocalRef(env);
 }
 
-static void loadSystemIconAsSprite(JNIEnv* env, jobject contextObj, int32_t style,
-        SpriteIcon* outSpriteIcon) {
-    PointerIcon pointerIcon;
+static void loadSystemIconAsSpriteWithPointerIcon(JNIEnv* env, jobject contextObj, int32_t style,
+        PointerIcon* outPointerIcon, SpriteIcon* outSpriteIcon) {
     status_t status = android_view_PointerIcon_loadSystemIcon(env,
-            contextObj, style, &pointerIcon);
+            contextObj, style, outPointerIcon);
     if (!status) {
-        pointerIcon.bitmap.copyTo(&outSpriteIcon->bitmap, kN32_SkColorType);
-        outSpriteIcon->hotSpotX = pointerIcon.hotSpotX;
-        outSpriteIcon->hotSpotY = pointerIcon.hotSpotY;
+        outPointerIcon->bitmap.copyTo(&outSpriteIcon->bitmap, kN32_SkColorType);
+        outSpriteIcon->hotSpotX = outPointerIcon->hotSpotX;
+        outSpriteIcon->hotSpotY = outPointerIcon->hotSpotY;
     }
+}
+
+static void loadSystemIconAsSprite(JNIEnv* env, jobject contextObj, int32_t style,
+                                   SpriteIcon* outSpriteIcon) {
+    PointerIcon pointerIcon;
+    loadSystemIconAsSpriteWithPointerIcon(env, contextObj, style, &pointerIcon, outSpriteIcon);
 }
 
 enum {
@@ -238,7 +243,8 @@ public:
     /* --- PointerControllerPolicyInterface implementation --- */
 
     virtual void loadPointerResources(PointerResources* outResources);
-    virtual void loadAdditionalMouseResources(std::map<int32_t, SpriteIcon>* outResources);
+    virtual void loadAdditionalMouseResources(std::map<int32_t, SpriteIcon>* outResources,
+            std::map<int32_t, PointerAnimation>* outAnimationResources);
     virtual int32_t getDefaultPointerIconId();
 
 private:
@@ -1041,14 +1047,31 @@ void NativeInputManager::loadPointerResources(PointerResources* outResources) {
             &outResources->spotAnchor);
 }
 
-void NativeInputManager::loadAdditionalMouseResources(std::map<int32_t, SpriteIcon>* outResources) {
+void NativeInputManager::loadAdditionalMouseResources(std::map<int32_t, SpriteIcon>* outResources,
+        std::map<int32_t, PointerAnimation>* outAnimationResources) {
     JNIEnv* env = jniEnv();
 
     for (int iconId = POINTER_ICON_STYLE_CONTEXT_MENU; iconId <= POINTER_ICON_STYLE_GRABBING;
              ++iconId) {
-        loadSystemIconAsSprite(env, mContextObj, iconId, &((*outResources)[iconId]));
+        PointerIcon pointerIcon;
+        loadSystemIconAsSpriteWithPointerIcon(
+                env, mContextObj, iconId, &pointerIcon, &((*outResources)[iconId]));
+        if (!pointerIcon.bitmapFrames.empty()) {
+            PointerAnimation& animationData = (*outAnimationResources)[iconId];
+            size_t numFrames = pointerIcon.bitmapFrames.size() + 1;
+            animationData.durationPerFrame =
+                    milliseconds_to_nanoseconds(pointerIcon.durationPerFrame);
+            animationData.animationFrames.reserve(numFrames);
+            animationData.animationFrames.push_back(SpriteIcon(
+                    pointerIcon.bitmap, pointerIcon.hotSpotX, pointerIcon.hotSpotY));
+            for (size_t i = 0; i < numFrames - 1; ++i) {
+              animationData.animationFrames.push_back(SpriteIcon(
+                      pointerIcon.bitmapFrames[i], pointerIcon.hotSpotX, pointerIcon.hotSpotY));
+            }
+        }
     }
-    loadSystemIconAsSprite(env, mContextObj, POINTER_ICON_STYLE_NULL, &((*outResources)[POINTER_ICON_STYLE_NULL]));
+    loadSystemIconAsSprite(env, mContextObj, POINTER_ICON_STYLE_NULL,
+            &((*outResources)[POINTER_ICON_STYLE_NULL]));
 }
 
 int32_t NativeInputManager::getDefaultPointerIconId() {

@@ -7631,6 +7631,8 @@ i
         <attr name="pointerIconHand" format="reference"/>
         <!-- Reference to a pointer drawable with STYLE_HELP -->
         <attr name="pointerIconHelp" format="reference"/>
+        <!-- Reference to a pointer drawable with STYLE_WAIT -->
+        <attr name="pointerIconWait" format="reference"/>
         <!-- Reference to a pointer drawable with STYLE_CELL -->
         <attr name="pointerIconCell" format="reference"/>
         <!-- Reference to a pointer drawable with STYLE_CROSSHAIR -->

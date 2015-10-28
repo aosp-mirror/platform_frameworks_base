@@ -24,6 +24,7 @@ import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.content.res.XmlResourceParser;
 import android.graphics.Bitmap;
+import android.graphics.drawable.AnimationDrawable;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Parcel;
@@ -142,6 +143,10 @@ public final class PointerIcon implements Parcelable {
     private Bitmap mBitmap;
     private float mHotSpotX;
     private float mHotSpotY;
+    // The bitmaps for the additional frame of animated pointer icon. Note that the first frame
+    // will be stored in mBitmap.
+    private Bitmap mBitmapFrames[];
+    private int mDurationPerFrame;
 
     private PointerIcon(int style) {
         mStyle = style;
@@ -472,6 +477,36 @@ public final class PointerIcon implements Parcelable {
         } else {
             drawable = context.getDrawable(bitmapRes);
         }
+        if (drawable instanceof AnimationDrawable) {
+            // Extract animation frame bitmaps.
+            final AnimationDrawable animationDrawable = (AnimationDrawable) drawable;
+            final int frames = animationDrawable.getNumberOfFrames();
+            drawable = animationDrawable.getFrame(0);
+            if (frames == 1) {
+                Log.w(TAG, "Animation icon with single frame -- simply treating the first "
+                        + "frame as a normal bitmap icon.");
+            } else {
+                // Assumes they have the exact duration.
+                mDurationPerFrame = animationDrawable.getDuration(0);
+                mBitmapFrames = new Bitmap[frames - 1];
+                final int width = drawable.getIntrinsicWidth();
+                final int height = drawable.getIntrinsicHeight();
+                for (int i = 1; i < frames; ++i) {
+                    Drawable drawableFrame = animationDrawable.getFrame(i);
+                    if (!(drawableFrame instanceof BitmapDrawable)) {
+                        throw new IllegalArgumentException("Frame of an animated pointer icon "
+                                + "must refer to a bitmap drawable.");
+                    }
+                    if (drawableFrame.getIntrinsicWidth() != width ||
+                        drawableFrame.getIntrinsicHeight() != height) {
+                        throw new IllegalArgumentException("The bitmap size of " + i + "-th frame "
+                                + "is different. All frames should have the exact same size and "
+                                + "share the same hotspot.");
+                    }
+                    mBitmapFrames[i - 1] = ((BitmapDrawable)drawableFrame).getBitmap();
+                }
+            }
+        }
         if (!(drawable instanceof BitmapDrawable)) {
             throw new IllegalArgumentException("<pointer-icon> bitmap attribute must "
                     + "refer to a bitmap drawable.");
@@ -509,8 +544,7 @@ public final class PointerIcon implements Parcelable {
             case STYLE_HELP:
                 return com.android.internal.R.styleable.Pointer_pointerIconHelp;
             case STYLE_WAIT:
-                // falls back to the default icon because no animation support.
-                return com.android.internal.R.styleable.Pointer_pointerIconArrow;
+                return com.android.internal.R.styleable.Pointer_pointerIconWait;
             case STYLE_CELL:
                 return com.android.internal.R.styleable.Pointer_pointerIconCell;
             case STYLE_CROSSHAIR:

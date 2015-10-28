@@ -86,6 +86,9 @@ PointerController::PointerController(const sp<PointerControllerPolicyInterface>&
     mLocked.pointerIconChanged = false;
     mLocked.requestedPointerShape = mPolicy->getDefaultPointerIconId();
 
+    mLocked.animationFrameIndex = 0;
+    mLocked.lastFrameUpdatedTime = 0;
+
     mLocked.buttonState = 0;
 
     loadResources();
@@ -239,7 +242,8 @@ void PointerController::setPresentation(Presentation presentation) {
     AutoMutex _l(mLock);
 
     if (presentation == PRESENTATION_POINTER && mLocked.additionalMouseResources.empty()) {
-        mPolicy->loadAdditionalMouseResources(&mLocked.additionalMouseResources);
+        mPolicy->loadAdditionalMouseResources(&mLocked.additionalMouseResources,
+                                              &mLocked.animationResources);
     }
 
     if (mLocked.presentation != presentation) {
@@ -402,7 +406,7 @@ void PointerController::setDisplayViewport(int32_t width, int32_t height, int32_
     updatePointerLocked();
 }
 
-void PointerController::updatePointerShape(int iconId) {
+void PointerController::updatePointerShape(int32_t iconId) {
     AutoMutex _l(mLock);
     if (mLocked.requestedPointerShape != iconId) {
         mLocked.requestedPointerShape = iconId;
@@ -462,8 +466,17 @@ int PointerController::handleEvent(int /* fd */, int events, void* /* data */) {
 void PointerController::doAnimate(nsecs_t timestamp) {
     AutoMutex _l(mLock);
 
-    bool keepAnimating = false;
     mLocked.animationPending = false;
+
+    bool keepFading = doFadingAnimationLocked(timestamp);
+    bool keepBitmapFlipping = doBitmapAnimationLocked(timestamp);
+    if (keepFading || keepBitmapFlipping) {
+        startAnimationLocked();
+    }
+}
+
+bool PointerController::doFadingAnimationLocked(nsecs_t timestamp) {
+    bool keepAnimating = false;
     nsecs_t frameDelay = timestamp - mLocked.animationTime;
 
     // Animate pointer fade.
@@ -501,10 +514,32 @@ void PointerController::doAnimate(nsecs_t timestamp) {
             }
         }
     }
+    return keepAnimating;
+}
 
-    if (keepAnimating) {
-        startAnimationLocked();
+bool PointerController::doBitmapAnimationLocked(nsecs_t timestamp) {
+    std::map<int32_t, PointerAnimation>::const_iterator iter = mLocked.animationResources.find(
+            mLocked.requestedPointerShape);
+    if (iter == mLocked.animationResources.end()) {
+        return false;
     }
+
+    if (timestamp - mLocked.lastFrameUpdatedTime > iter->second.durationPerFrame) {
+        mSpriteController->openTransaction();
+
+        int incr = (timestamp - mLocked.lastFrameUpdatedTime) / iter->second.durationPerFrame;
+        mLocked.animationFrameIndex += incr;
+        mLocked.lastFrameUpdatedTime += iter->second.durationPerFrame * incr;
+        while (mLocked.animationFrameIndex >= iter->second.animationFrames.size()) {
+            mLocked.animationFrameIndex -= iter->second.animationFrames.size();
+        }
+        mLocked.pointerSprite->setIcon(iter->second.animationFrames[mLocked.animationFrameIndex]);
+
+        mSpriteController->closeTransaction();
+    }
+
+    // Keep animating.
+    return true;
 }
 
 void PointerController::doInactivityTimeout() {
@@ -549,9 +584,16 @@ void PointerController::updatePointerLocked() {
             if (mLocked.requestedPointerShape == mPolicy->getDefaultPointerIconId()) {
                 mLocked.pointerSprite->setIcon(mLocked.pointerIcon);
             } else {
-                std::map<int, SpriteIcon>::const_iterator iter =
+                std::map<int32_t, SpriteIcon>::const_iterator iter =
                     mLocked.additionalMouseResources.find(mLocked.requestedPointerShape);
                 if (iter != mLocked.additionalMouseResources.end()) {
+                    std::map<int32_t, PointerAnimation>::const_iterator anim_iter =
+                            mLocked.animationResources.find(mLocked.requestedPointerShape);
+                    if (anim_iter != mLocked.animationResources.end()) {
+                        mLocked.animationFrameIndex = 0;
+                        mLocked.lastFrameUpdatedTime = systemTime(SYSTEM_TIME_MONOTONIC);
+                        startAnimationLocked();
+                    }
                     mLocked.pointerSprite->setIcon(iter->second);
                 } else {
                     ALOGW("Can't find the resource for icon id %d", mLocked.requestedPointerShape);
