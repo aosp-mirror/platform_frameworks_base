@@ -58,6 +58,7 @@ import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.view.animation.Interpolator;
 import android.widget.ImageView;
+import android.widget.Toast;
 
 import com.android.internal.messages.SystemMessageProto.SystemMessage;
 import com.android.systemui.R;
@@ -900,6 +901,7 @@ class GlobalScreenshot {
             final Uri uri = Uri.parse(intent.getStringExtra(SCREENSHOT_URI_ID));
             nm.cancel(SystemMessage.NOTE_GLOBAL_SCREENSHOT);
 
+            Toast.makeText(context, R.string.delete_screenshot_toast, Toast.LENGTH_SHORT).show();
             // And delete the image from the media store
             new DeleteImageInBackgroundTask(context).execute(uri);
         }
