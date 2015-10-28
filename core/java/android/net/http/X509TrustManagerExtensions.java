@@ -16,6 +16,8 @@
 
 package android.net.http;
 
+import android.annotation.SystemApi;
+
 import com.android.org.conscrypt.TrustManagerImpl;
 
 import java.security.cert.CertificateException;
@@ -79,5 +81,16 @@ public class X509TrustManagerExtensions {
      */
     public boolean isUserAddedCertificate(X509Certificate cert) {
         return mDelegate.isUserAddedCertificate(cert);
+    }
+
+    /**
+     * Returns {@code true} if the TrustManager uses the same trust configuration for the provided
+     * hostnames.
+     *
+     * @hide
+     */
+    @SystemApi
+    public boolean isSameTrustConfiguration(String hostname1, String hostname2) {
+        return true;
     }
 }
