@@ -66,8 +66,6 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks,
         public void onTaskViewClipStateChanged(TaskView tv);
     }
 
-    RecentsConfiguration mConfig;
-
     float mTaskProgress;
     ObjectAnimator mTaskProgressAnimator;
     float mMaxDimScale;
@@ -121,8 +119,8 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks,
 
     public TaskView(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
+        RecentsConfiguration config = Recents.getConfiguration();
         Resources res = context.getResources();
-        mConfig = RecentsConfiguration.getInstance();
         mMaxDimScale = res.getInteger(R.integer.recents_max_task_stack_view_dim) / 255f;
         mClipViewInStack = true;
         mViewBounds = new AnimateableViewBounds(this, res.getDimensionPixelSize(
@@ -135,8 +133,8 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks,
                 com.android.internal.R.interpolator.decelerate_quint);
         setTaskProgress(getTaskProgress());
         setDim(getDim());
-        if (mConfig.fakeShadows) {
-            setBackground(new FakeShadowDrawable(res, mConfig));
+        if (config.fakeShadows) {
+            setBackground(new FakeShadowDrawable(res, config));
         }
         setOutlineProvider(mViewBounds);
     }
@@ -224,9 +222,11 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks,
 
     void updateViewPropertiesToTaskTransform(TaskViewTransform toTransform, int duration,
                                              ValueAnimator.AnimatorUpdateListener updateCallback) {
+        RecentsConfiguration config = Recents.getConfiguration();
+
         // Apply the transform
         toTransform.applyToTaskView(this, duration, mFastOutSlowInInterpolator, false,
-                !mConfig.fakeShadows, updateCallback);
+                !config.fakeShadows, updateCallback);
 
         // Update the task progress
         Utilities.cancelAnimationWithoutCallbacks(mTaskProgressAnimator);
@@ -277,7 +277,8 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks,
      * first layout because the actual animation into recents may take a long time. */
     void prepareEnterRecentsAnimation(boolean isTaskViewLaunchTargetTask,
                                              boolean occludesLaunchTarget, int offscreenY) {
-        RecentsActivityLaunchState launchState = mConfig.getLaunchState();
+        RecentsConfiguration config = Recents.getConfiguration();
+        RecentsActivityLaunchState launchState = config.getLaunchState();
         int initialDim = getDim();
         if (launchState.launchedHasConfigurationChanged) {
             // Just load the views as-is
@@ -307,7 +308,8 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks,
 
     /** Animates this task view as it enters recents */
     void startEnterRecentsAnimation(final ViewAnimation.TaskViewEnterContext ctx) {
-        RecentsActivityLaunchState launchState = mConfig.getLaunchState();
+        RecentsConfiguration config = Recents.getConfiguration();
+        RecentsActivityLaunchState launchState = config.getLaunchState();
         Resources res = mContext.getResources();
         final TaskViewTransform transform = ctx.currentTaskTransform;
         final int transitionEnterFromAppDelay = res.getInteger(
@@ -322,7 +324,6 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks,
                 R.integer.recents_task_enter_from_home_stagger_delay);
         final int taskViewAffiliateGroupEnterOffset = res.getDimensionPixelSize(
                 R.dimen.recents_task_view_affiliate_group_enter_offset);
-        int startDelay = 0;
 
         if (launchState.launchedFromAppWithThumbnail) {
             if (mTask.isLaunchTarget) {
@@ -371,7 +372,6 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks,
                     ctx.postAnimationTrigger.increment();
                 }
             }
-            startDelay = transitionEnterFromAppDelay;
 
         } else if (launchState.launchedFromHome) {
             // Animate the tasks up
@@ -381,7 +381,7 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks,
 
             setScaleX(transform.scale);
             setScaleY(transform.scale);
-            if (!mConfig.fakeShadows) {
+            if (!config.fakeShadows) {
                 animate().translationZ(transform.translationZ);
             }
             animate()
@@ -400,7 +400,6 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks,
                     })
                     .start();
             ctx.postAnimationTrigger.increment();
-            startDelay = delay;
         }
     }
 
@@ -580,8 +579,10 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks,
 
     /** Returns the current dim. */
     public void setDim(int dim) {
+        RecentsConfiguration config = Recents.getConfiguration();
+
         mDimAlpha = dim;
-        if (mConfig.useHardwareLayers) {
+        if (config.useHardwareLayers) {
             // Defer setting hardware layers if we have not yet measured, or there is no dim to draw
             if (getMeasuredWidth() > 0 && getMeasuredHeight() > 0) {
                 mDimColorFilter.setColor(Color.argb(mDimAlpha, 0, 0, 0));
@@ -703,13 +704,14 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks,
 
     @Override
     public void onTaskDataLoaded() {
+        RecentsConfiguration config = Recents.getConfiguration();
         if (mThumbnailView != null && mHeaderView != null) {
             // Bind each of the views to the new task data
             mThumbnailView.rebindToTask(mTask);
             mHeaderView.rebindToTask(mTask);
             // Rebind any listeners
             mActionButtonView.setOnClickListener(this);
-            setOnLongClickListener(mConfig.hasDockedTasks ? null : this);
+            setOnLongClickListener(config.hasDockedTasks ? null : this);
         }
         mTaskDataLoaded = true;
     }

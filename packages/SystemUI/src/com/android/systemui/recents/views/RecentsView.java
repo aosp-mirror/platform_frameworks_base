@@ -81,7 +81,6 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
         public void runAfterPause(Runnable r);
     }
 
-    RecentsConfiguration mConfig;
     LayoutInflater mInflater;
 
     ArrayList<TaskStack> mStacks;
@@ -117,7 +116,6 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
     public RecentsView(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
         setWillNotDraw(false);
-        mConfig = RecentsConfiguration.getInstance();
         mInflater = LayoutInflater.from(context);
         mFastOutSlowInInterpolator = AnimationUtils.loadInterpolator(context,
                 com.android.internal.R.interpolator.fast_out_slow_in);
@@ -131,7 +129,8 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
 
     /** Set/get the bsp root node */
     public void setTaskStack(TaskStack stack) {
-        if (mConfig.getLaunchState().launchedReuseTaskStackViews) {
+        RecentsConfiguration config = Recents.getConfiguration();
+        if (config.getLaunchState().launchedReuseTaskStackViews) {
             if (mTaskStackView != null) {
                 // If onRecentsHidden is not triggered, we need to the stack view again here
                 mTaskStackView.reset();
@@ -311,13 +310,14 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
      */
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+        RecentsConfiguration config = Recents.getConfiguration();
         int width = MeasureSpec.getSize(widthMeasureSpec);
         int height = MeasureSpec.getSize(heightMeasureSpec);
 
         // Get the search bar bounds and measure the search bar layout
         Rect searchBarSpaceBounds = new Rect();
         if (mSearchBar != null) {
-            mConfig.getSearchBarBounds(new Rect(0, 0, width, height), mSystemInsets.top,
+            config.getSearchBarBounds(new Rect(0, 0, width, height), mSystemInsets.top,
                     searchBarSpaceBounds);
             mSearchBar.measure(
                     MeasureSpec.makeMeasureSpec(searchBarSpaceBounds.width(), MeasureSpec.EXACTLY),
@@ -325,7 +325,7 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
         }
 
         Rect taskStackBounds = new Rect();
-        mConfig.getTaskStackBounds(new Rect(0, 0, width, height), mSystemInsets.top,
+        config.getTaskStackBounds(new Rect(0, 0, width, height), mSystemInsets.top,
                 mSystemInsets.right, searchBarSpaceBounds, taskStackBounds);
         if (mTaskStackView != null && mTaskStackView.getVisibility() != GONE) {
             mTaskStackView.setTaskStackBounds(taskStackBounds, mSystemInsets);
@@ -346,11 +346,13 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
      */
     @Override
     protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
+        RecentsConfiguration config = Recents.getConfiguration();
+
         // Get the search bar bounds so that we lay it out
         Rect measuredRect = new Rect(0, 0, getMeasuredWidth(), getMeasuredHeight());
         Rect searchBarSpaceBounds = new Rect();
         if (mSearchBar != null) {
-            mConfig.getSearchBarBounds(measuredRect,
+            config.getSearchBarBounds(measuredRect,
                     mSystemInsets.top, searchBarSpaceBounds);
             mSearchBar.layout(searchBarSpaceBounds.left, searchBarSpaceBounds.top,
                     searchBarSpaceBounds.right, searchBarSpaceBounds.bottom);

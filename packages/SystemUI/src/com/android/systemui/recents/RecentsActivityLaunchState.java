@@ -28,8 +28,6 @@ package com.android.systemui.recents;
  */
 public class RecentsActivityLaunchState {
 
-    public RecentsConfiguration mConfig;
-
     public boolean launchedWithAltTab;
     public boolean launchedWithNoRecentTasks;
     public boolean launchedFromAppWithThumbnail;
@@ -40,10 +38,6 @@ public class RecentsActivityLaunchState {
     public int launchedToTaskId;
     public int launchedNumVisibleTasks;
     public int launchedNumVisibleThumbnails;
-
-    RecentsActivityLaunchState(RecentsConfiguration config) {
-        mConfig = config;
-    }
 
     /** Called when the configuration has changed, and we want to reset any configuration specific
      * members. */
@@ -72,6 +66,7 @@ public class RecentsActivityLaunchState {
     /** Returns whether the nav bar scrim should be visible. */
     public boolean hasNavBarScrim() {
         // Only show the scrim if we have recent tasks, and if the nav bar is not transposed
-        return !launchedWithNoRecentTasks && !mConfig.hasTransposedNavBar;
+        RecentsConfiguration config = Recents.getConfiguration();
+        return !launchedWithNoRecentTasks && !config.hasTransposedNavBar;
     }
 }

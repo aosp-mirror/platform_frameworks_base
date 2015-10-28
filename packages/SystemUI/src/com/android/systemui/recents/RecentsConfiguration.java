@@ -28,7 +28,6 @@ import com.android.systemui.recents.misc.SystemServicesProxy;
  * tied to the current activity.
  */
 public class RecentsConfiguration {
-    static RecentsConfiguration sInstance;
 
     private static final int LARGE_SCREEN_MIN_DP = 600;
     private static final int XLARGE_SCREEN_MIN_DP = 720;
@@ -53,7 +52,7 @@ public class RecentsConfiguration {
     public static final int SVELTE_DISABLE_LOADING = 3;
 
     // Launch states
-    public RecentsActivityLaunchState mLaunchState = new RecentsActivityLaunchState(this);
+    public RecentsActivityLaunchState mLaunchState = new RecentsActivityLaunchState();
 
     // TODO: Values determined by the current context, needs to be refactored into something that is
     //       agnostic of the activity context, but still calculable from the Recents component for
@@ -79,10 +78,10 @@ public class RecentsConfiguration {
     /** Dev options and global settings */
     public boolean lockToAppEnabled;
 
-    /** Private constructor */
-    private RecentsConfiguration(Context context, SystemServicesProxy ssp) {
+    public RecentsConfiguration(Context context) {
         // Load only resources that can not change after the first load either through developer
         // settings or via multi window
+        SystemServicesProxy ssp = Recents.getSystemServices();
         Context appContext = context.getApplicationContext();
         Resources res = appContext.getResources();
         useHardwareLayers = res.getBoolean(R.bool.config_recents_use_hardware_layers);
@@ -119,19 +118,6 @@ public class RecentsConfiguration {
         boolean isLandscape = windowRect.width() > windowRect.height();
         hasTransposedNavBar = isLandscape && isLargeScreen && !isXLargeScreen;
         hasTransposedSearchBar = isLandscape && isLargeScreen && !isXLargeScreen;
-    }
-
-    /** Updates the configuration to the current context */
-    public static RecentsConfiguration initialize(Context context, SystemServicesProxy ssp) {
-        if (sInstance == null) {
-            sInstance = new RecentsConfiguration(context, ssp);
-        }
-        return sInstance;
-    }
-
-    /** Returns the current recents configuration */
-    public static RecentsConfiguration getInstance() {
-        return sInstance;
     }
 
     /**

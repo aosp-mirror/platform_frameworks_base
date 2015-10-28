@@ -23,11 +23,11 @@ import android.graphics.Canvas;
 import android.graphics.Rect;
 import android.graphics.RectF;
 import android.os.Bundle;
-import android.os.SystemService;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityNodeInfo;
 import android.widget.FrameLayout;
@@ -77,7 +77,6 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
         public void onTaskStackFilterTriggered();
         public void onTaskStackUnfilterTriggered();
     }
-    RecentsConfiguration mConfig;
 
     TaskStack mStack;
     TaskStackViewLayoutAlgorithm mLayoutAlgorithm;
@@ -121,7 +120,6 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
         super(context);
         // Set the stack first
         setStack(stack);
-        mConfig = RecentsConfiguration.getInstance();
         mViewPool = new ViewPool<>(context, this);
         mInflater = LayoutInflater.from(context);
         mLayoutAlgorithm = new TaskStackViewLayoutAlgorithm(context);
@@ -774,7 +772,8 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
             setFocusedTask(mStack.indexOfTask(launchTargetTask), false /* scrollToTask */,
                     false /* animated */, false /* requestViewFocus */);
         } else {
-            RecentsActivityLaunchState launchState = mConfig.getLaunchState();
+            RecentsConfiguration config = Recents.getConfiguration();
+            RecentsActivityLaunchState launchState = config.getLaunchState();
             int taskOffset = launchState.launchedFromHome ? -1 : -2;
             setFocusedTask(mStack.getTaskCount() + taskOffset, false /* scrollToTask */,
                     false /* animated */, false /* requestViewFocus */);
@@ -834,7 +833,8 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
                     // animate the focused state if we are alt-tabbing now, after the window enter
                     // animation is completed
                     if (mFocusedTaskIndex != -1) {
-                        RecentsActivityLaunchState launchState = mConfig.getLaunchState();
+                        RecentsConfiguration config = Recents.getConfiguration();
+                        RecentsActivityLaunchState launchState = config.getLaunchState();
                         setFocusedTask(mFocusedTaskIndex, false /* scrollToTask */,
                                 launchState.launchedWithAltTab);
                     }
@@ -1250,7 +1250,8 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
         if (taskWasFocused || ssp.isTouchExplorationEnabled()) {
             // If the dismissed task was focused or if we are in touch exploration mode, then focus
             // the next task
-            RecentsActivityLaunchState launchState = mConfig.getLaunchState();
+            RecentsConfiguration config = Recents.getConfiguration();
+            RecentsActivityLaunchState launchState = config.getLaunchState();
             setFocusedTask(taskIndex - 1, true /* scrollToTask */, launchState.launchedWithAltTab);
         }
     }

@@ -80,7 +80,6 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
 
     public final static int EVENT_BUS_PRIORITY = Recents.EVENT_BUS_PRIORITY + 1;
 
-    RecentsConfiguration mConfig;
     RecentsPackageMonitor mPackageMonitor;
     long mLastTabKeyEventTime;
     boolean mFinishedOnStartup;
@@ -174,7 +173,8 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
         }
 
         // Start loading tasks according to the load plan
-        RecentsActivityLaunchState launchState = mConfig.getLaunchState();
+        RecentsConfiguration config = Recents.getConfiguration();
+        RecentsActivityLaunchState launchState = config.getLaunchState();
         if (!plan.hasTasks()) {
             loader.preloadTasks(plan, launchState.launchedFromHome);
         }
@@ -280,7 +280,8 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
      * Dismisses recents if we are already visible and the intent is to toggle the recents view.
      */
     boolean dismissRecentsToFocusedTaskOrHome(boolean checkFilteredStackState) {
-        RecentsActivityLaunchState launchState = mConfig.getLaunchState();
+        RecentsConfiguration config = Recents.getConfiguration();
+        RecentsActivityLaunchState launchState = config.getLaunchState();
         SystemServicesProxy ssp = Recents.getSystemServices();
         if (ssp.isRecentsTopMost(ssp.getTopMostTask(), null)) {
             // If we currently have filtered stacks, then unfilter those first
@@ -352,7 +353,6 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
         EventBus.getDefault().register(this, EVENT_BUS_PRIORITY);
 
         // Initialize the widget host (the host id is static and does not change)
-        mConfig = RecentsConfiguration.getInstance();
         if (!Constants.DebugFlags.App.DisableSearchBar) {
             mAppWidgetHost = new RecentsAppWidgetHost(this, Constants.Values.App.AppWidgetHostId);
         }
@@ -399,7 +399,8 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
         // If this is a new instance from a configuration change, then we have to manually trigger
         // the enter animation state, or if recents was relaunched by AM, without going through
         // the normal mechanisms
-        RecentsActivityLaunchState launchState = mConfig.getLaunchState();
+        RecentsConfiguration config = Recents.getConfiguration();
+        RecentsActivityLaunchState launchState = config.getLaunchState();
         boolean wasLaunchedByAm = !launchState.launchedFromHome &&
                 !launchState.launchedFromAppWithThumbnail;
         if (launchState.launchedHasConfigurationChanged || wasLaunchedByAm) {
@@ -442,7 +443,8 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
         // Workaround for b/22542869, if the RecentsActivity is started again, but without going
         // through SystemUI, we need to reset the config launch flags to ensure that we do not
         // wait on the system to send a signal that was never queued.
-        RecentsActivityLaunchState launchState = mConfig.getLaunchState();
+        RecentsConfiguration config = Recents.getConfiguration();
+        RecentsActivityLaunchState launchState = config.getLaunchState();
         launchState.launchedFromHome = false;
         launchState.launchedFromSearchHome = false;
         launchState.launchedFromAppWithThumbnail = false;
@@ -629,7 +631,8 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
             public void run() {
                 // If we are not launching with alt-tab and fast-toggle is enabled, then start
                 // the dozer now
-                RecentsActivityLaunchState launchState = mConfig.getLaunchState();
+                RecentsConfiguration config = Recents.getConfiguration();
+                RecentsActivityLaunchState launchState = config.getLaunchState();
                 if (Constants.DebugFlags.App.EnableFastToggleRecents &&
                         !launchState.launchedWithAltTab) {
                     mIterateTrigger.startDozing();

@@ -20,12 +20,11 @@ import android.graphics.Outline;
 import android.graphics.Rect;
 import android.view.View;
 import android.view.ViewOutlineProvider;
+import com.android.systemui.recents.Recents;
 import com.android.systemui.recents.RecentsConfiguration;
 
 /* An outline provider that has a clip and outline that can be animated. */
 public class AnimateableViewBounds extends ViewOutlineProvider {
-
-    RecentsConfiguration mConfig;
 
     TaskView mSourceView;
     Rect mClipRect = new Rect();
@@ -35,7 +34,6 @@ public class AnimateableViewBounds extends ViewOutlineProvider {
     final float mMinAlpha = 0.25f;
 
     public AnimateableViewBounds(TaskView source, int cornerRadius) {
-        mConfig = RecentsConfiguration.getInstance();
         mSourceView = source;
         mCornerRadius = cornerRadius;
         setClipBottom(getClipBottom());
@@ -64,7 +62,9 @@ public class AnimateableViewBounds extends ViewOutlineProvider {
             mClipRect.bottom = bottom;
             mSourceView.invalidateOutline();
             updateClipBounds();
-            if (!mConfig.useHardwareLayers) {
+
+            RecentsConfiguration config = Recents.getConfiguration();
+            if (!config.useHardwareLayers) {
                 mSourceView.mThumbnailView.updateThumbnailVisibility(
                         bottom - mSourceView.getPaddingBottom());
             }
