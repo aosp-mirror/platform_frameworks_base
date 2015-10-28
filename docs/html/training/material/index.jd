@@ -59,3 +59,22 @@ specification</a> and use the new components and functionality available in Andr
   <dt><a href="{@docRoot}training/material/compatibility.html">Maintaining Compatibility</a></dt>
   <dd>Learn how to maintain compatibility with platform versions earlier than Android 5.0.</dd>
 </dl>
+
+<h2>Video Training</h2>
+
+<div class="wrap">
+  <div class="cols">
+    <div class="col-1of2">
+      <p>If you prefer to learn through interactive video training, check out this online course
+      about material design for Android developers.</p>
+      <p><a href="https://www.udacity.com/course/ud862" class="button">
+        Start the video course</a>
+      </p>
+    </div>
+    <div class="col-1of2">
+      <iframe width="300" height="169"
+      src="//www.youtube.com/embed/eKJ3aMGM-WM?autohide=1&amp;showinfo=0"
+      frameborder="0" allowfullscreen="" style="float: right; margin: 0 0 20px 20px;"></iframe>
+    </div>
+  </div>
+</div>
