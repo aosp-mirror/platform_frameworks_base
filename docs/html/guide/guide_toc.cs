@@ -183,7 +183,7 @@
       <li><a href="<?cs var:toroot ?>guide/topics/manifest/uses-feature-element.html">&lt;uses-feature&gt;</a></li> <!-- ##api level 4## -->
       <li><a href="<?cs var:toroot ?>guide/topics/manifest/uses-library-element.html">&lt;uses-library&gt;</a></li>
       <li><a href="<?cs var:toroot ?>guide/topics/manifest/uses-permission-element.html">&lt;uses-permission&gt;</a></li>
-      <li><a href="<?cs var:toroot ?>guide/topics/manifest/uses-permission-sdk23-element.html">&lt;uses-permission-sdk23&gt;</a></li>
+      <li><a href="<?cs var:toroot ?>guide/topics/manifest/uses-permission-sdk-23-element.html">&lt;uses-permission-sdk-23&gt;</a></li>
       <li><a href="<?cs var:toroot ?>guide/topics/manifest/uses-sdk-element.html">&lt;uses-sdk&gt;</a></li>
     </ul>
   </li><!-- end of the manifest file -->
