@@ -393,8 +393,8 @@
     <string name="accessibility_volume_expand" msgid="5946812790999244205">"विस्तृत करा"</string>
     <string name="accessibility_volume_collapse" msgid="3609549593031810875">"संकुचित करा"</string>
     <string name="screen_pinning_title" msgid="3273740381976175811">"स्क्रीन पिन केलेली आहे"</string>
-    <string name="screen_pinning_description" msgid="1346522416878235405">"हे आपण अनपिन करेपर्यंत दृश्यामध्ये ते ठेवते. अनपिन करण्यासाठी एकाच वेळी परत आणि अलीकडील ला स्पर्श करा आणि धरून ठेवा आणि विहंगावलोकन करा."</string>
-    <string name="screen_pinning_description_accessible" msgid="8518446209564202557">"हे आपण अनपिन करेपर्यंत दृश्यामध्ये ते ठेवते. अनपिन करण्यासाठी स्पर्श करा आणि धरून ठेवा."</string>
+    <!-- no translation found for screen_pinning_description (3577937698406151604) -->
+    <skip />
     <string name="screen_pinning_positive" msgid="3783985798366751226">"समजले"</string>
     <string name="screen_pinning_negative" msgid="3741602308343880268">"नाही धन्यवाद"</string>
     <string name="quick_settings_reset_confirmation_title" msgid="748792586749897883">"<xliff:g id="TILE_LABEL">%1$s</xliff:g> लपवायचे?"</string>

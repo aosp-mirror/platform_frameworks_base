@@ -393,8 +393,8 @@
     <string name="accessibility_volume_expand" msgid="5946812790999244205">"Zgjeroje"</string>
     <string name="accessibility_volume_collapse" msgid="3609549593031810875">"Mbylle"</string>
     <string name="screen_pinning_title" msgid="3273740381976175811">"Ekrani u gozhdua"</string>
-    <string name="screen_pinning_description" msgid="1346522416878235405">"Kjo e ruan në pamje derisa e heq nga gozhdimi. Prek dhe mbaj shtypur njëkohësisht \"Prapa\" dhe \"Përmbledhje\" për ta hequr nga gozhdimi."</string>
-    <string name="screen_pinning_description_accessible" msgid="8518446209564202557">"Kjo e ruan në pamje derisa e heq nga gozhdimi. Prek dhe mbaj shtypur njëkohësisht \"Përmbledhje\" për ta hequr nga gozhdimi."</string>
+    <!-- no translation found for screen_pinning_description (3577937698406151604) -->
+    <skip />
     <string name="screen_pinning_positive" msgid="3783985798366751226">"E kuptova!"</string>
     <string name="screen_pinning_negative" msgid="3741602308343880268">"Jo, faleminderit!"</string>
     <string name="quick_settings_reset_confirmation_title" msgid="748792586749897883">"Të fshihet <xliff:g id="TILE_LABEL">%1$s</xliff:g>?"</string>

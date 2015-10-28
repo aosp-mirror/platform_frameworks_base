@@ -395,8 +395,8 @@
     <string name="accessibility_volume_expand" msgid="5946812790999244205">"Expandir"</string>
     <string name="accessibility_volume_collapse" msgid="3609549593031810875">"Recolher"</string>
     <string name="screen_pinning_title" msgid="3273740381976175811">"A tela está fixada"</string>
-    <string name="screen_pinning_description" msgid="1346522416878235405">"Ela é mantida à vista até que seja liberada. Toque em \"Voltar\" e \"Visão Geral\" e mantenha essas opções pressionadas ao mesmo tempo para liberar."</string>
-    <string name="screen_pinning_description_accessible" msgid="8518446209564202557">"Ela é mantida à vista até que seja liberada. Toque em \"Visão geral\" e mantenha essa opção pressionada para liberar."</string>
+    <!-- no translation found for screen_pinning_description (3577937698406151604) -->
+    <skip />
     <string name="screen_pinning_positive" msgid="3783985798366751226">"Entendi"</string>
     <string name="screen_pinning_negative" msgid="3741602308343880268">"Não, obrigado"</string>
     <string name="quick_settings_reset_confirmation_title" msgid="748792586749897883">"Esconder <xliff:g id="TILE_LABEL">%1$s</xliff:g>?"</string>

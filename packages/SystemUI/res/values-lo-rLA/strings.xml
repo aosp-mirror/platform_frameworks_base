@@ -393,8 +393,8 @@
     <string name="accessibility_volume_expand" msgid="5946812790999244205">"ຂະຫຍາຍ"</string>
     <string name="accessibility_volume_collapse" msgid="3609549593031810875">"ຫຍໍ້ລົງ"</string>
     <string name="screen_pinning_title" msgid="3273740381976175811">"ປັກ​ໝຸດໜ້າ​ຈໍ​ແລ້ວ"</string>
-    <string name="screen_pinning_description" msgid="1346522416878235405">"ມັນ​ຈະ​ຮັກ​ສາ​ໜ້າ​ຈໍ​ໄວ້​ໃນ​ມຸມມອງ​ຂອງ​ທ່ານ​ຈົນ​ກວ່າ​ທ່ານ​ຈະ​ຖອດ​ໝຸດ. ​ແຕະ​ປຸ່ມ ກັບ​ຄືນ ແລະ ພາບ​ຮວມ​ ຄ້າງ​ໄວ້​ພ້ອມ​ກັນ​ເພື່ອ​ຖອດ​ໝຸດ."</string>
-    <string name="screen_pinning_description_accessible" msgid="8518446209564202557">"ມັນ​ຈະ​ຮັກ​ສາ​ໜ້າ​ຈໍ​ໄວ້​ໃນ​ມຸມມອງ​ຂອງ​ທ່ານ​ຈົນ​ກວ່າ​ທ່ານ​ຈະ​ຖອດ​ໝຸດ. ​ແຕະ​ປຸ່ມ ພາບ​ຮວມ​ ຄ້າງ​ໄວ້​ເພື່ອ​ຖອດ​ໝຸດ."</string>
+    <!-- no translation found for screen_pinning_description (3577937698406151604) -->
+    <skip />
     <string name="screen_pinning_positive" msgid="3783985798366751226">"ເຂົ້າໃຈແລ້ວ"</string>
     <string name="screen_pinning_negative" msgid="3741602308343880268">"ບໍ່, ຂອບໃຈ"</string>
     <string name="quick_settings_reset_confirmation_title" msgid="748792586749897883">"ເຊື່ອງ <xliff:g id="TILE_LABEL">%1$s</xliff:g> ຫຼື​ບໍ່?"</string>

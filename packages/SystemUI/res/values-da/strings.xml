@@ -393,8 +393,8 @@
     <string name="accessibility_volume_expand" msgid="5946812790999244205">"Udvid"</string>
     <string name="accessibility_volume_collapse" msgid="3609549593031810875">"Skjul"</string>
     <string name="screen_pinning_title" msgid="3273740381976175811">"Skærmen er fastgjort"</string>
-    <string name="screen_pinning_description" msgid="1346522416878235405">"Dette fastholder den i visningen, indtil du frigør den. Tryk på Tilbage og Oversigt på samme tid, og hold dem nede for at frigøre denne skærm."</string>
-    <string name="screen_pinning_description_accessible" msgid="8518446209564202557">"Dette fastholder den i visningen, indtil du frigør den. Tryk på Oversigt, og hold den nede for at frigøre denne skærm."</string>
+    <!-- no translation found for screen_pinning_description (3577937698406151604) -->
+    <skip />
     <string name="screen_pinning_positive" msgid="3783985798366751226">"OK, det er forstået"</string>
     <string name="screen_pinning_negative" msgid="3741602308343880268">"Nej tak"</string>
     <string name="quick_settings_reset_confirmation_title" msgid="748792586749897883">"Vil du skjule <xliff:g id="TILE_LABEL">%1$s</xliff:g>?"</string>

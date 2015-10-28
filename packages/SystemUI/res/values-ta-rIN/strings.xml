@@ -393,8 +393,8 @@
     <string name="accessibility_volume_expand" msgid="5946812790999244205">"விரிவாக்கு"</string>
     <string name="accessibility_volume_collapse" msgid="3609549593031810875">"சுருக்கு"</string>
     <string name="screen_pinning_title" msgid="3273740381976175811">"திரை பொருத்தப்பட்டது"</string>
-    <string name="screen_pinning_description" msgid="1346522416878235405">"பொருத்தியதை விலக்கும்வரை இதைக் காட்சியில் வைக்கும். விலக்க, பின் மற்றும் மேலோட்டப் பார்வையை ஒரே நேரத்தில் தொட்டுப் பிடிக்கவும்."</string>
-    <string name="screen_pinning_description_accessible" msgid="8518446209564202557">"பொருத்தியதை விலக்கும்வரை இதைக் காட்சியில் வைக்கும். விலக்க, மேலோட்டப் பார்வையைத் தொட்டுப் பிடிக்கவும்."</string>
+    <!-- no translation found for screen_pinning_description (3577937698406151604) -->
+    <skip />
     <string name="screen_pinning_positive" msgid="3783985798366751226">"புரிந்தது"</string>
     <string name="screen_pinning_negative" msgid="3741602308343880268">"வேண்டாம்"</string>
     <string name="quick_settings_reset_confirmation_title" msgid="748792586749897883">"<xliff:g id="TILE_LABEL">%1$s</xliff:g>ஐ மறைக்கவா?"</string>
