@@ -12106,7 +12106,8 @@ public final class ActivityManagerService extends ActivityManagerNative
             AppsQueryHelper queryHelper = new AppsQueryHelper(mContext);
             Set<String> enableApps = new HashSet<>();
             enableApps.addAll(queryHelper.queryApps(AppsQueryHelper.GET_NON_LAUNCHABLE_APPS
-                            | AppsQueryHelper.GET_APPS_WITH_INTERACT_ACROSS_USERS_PERM,
+                            | AppsQueryHelper.GET_APPS_WITH_INTERACT_ACROSS_USERS_PERM
+                            | AppsQueryHelper.GET_DEFAULT_IMES,
                             /* systemAppsOnly */ true, UserHandle.SYSTEM));
             ArraySet<String> wlApps = SystemConfig.getInstance().getSystemUserWhitelistedApps();
             enableApps.addAll(wlApps);
