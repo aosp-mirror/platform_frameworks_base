@@ -393,8 +393,8 @@
     <string name="accessibility_volume_expand" msgid="5946812790999244205">"Разгъване"</string>
     <string name="accessibility_volume_collapse" msgid="3609549593031810875">"Свиване"</string>
     <string name="screen_pinning_title" msgid="3273740381976175811">"Екранът е фиксиран"</string>
-    <string name="screen_pinning_description" msgid="1346522416878235405">"Така екранът ще се показва, докато не го освободите. За да направите това, докоснете и задръжте бутона за връщане назад и този за общ преглед едновременно."</string>
-    <string name="screen_pinning_description_accessible" msgid="8518446209564202557">"Така екранът ще се показва, докато не го освободите. За да направите това, докоснете и задръжте бутона за общ преглед."</string>
+    <!-- no translation found for screen_pinning_description (3577937698406151604) -->
+    <skip />
     <string name="screen_pinning_positive" msgid="3783985798366751226">"Разбрах"</string>
     <string name="screen_pinning_negative" msgid="3741602308343880268">"Не, благодаря"</string>
     <string name="quick_settings_reset_confirmation_title" msgid="748792586749897883">"Да се скрие ли „<xliff:g id="TILE_LABEL">%1$s</xliff:g>“?"</string>

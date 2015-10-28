@@ -395,8 +395,8 @@
     <string name="accessibility_volume_expand" msgid="5946812790999244205">"展開"</string>
     <string name="accessibility_volume_collapse" msgid="3609549593031810875">"折りたたむ"</string>
     <string name="screen_pinning_title" msgid="3273740381976175811">"画面が固定されました"</string>
-    <string name="screen_pinning_description" msgid="1346522416878235405">"固定を解除するまで画面が常に表示されるようになります。[戻る]と[最近]を同時に押し続けると固定が解除されます。"</string>
-    <string name="screen_pinning_description_accessible" msgid="8518446209564202557">"固定を解除するまで画面が常に表示されるようになります。[最近]を押し続けると固定が解除されます。"</string>
+    <!-- no translation found for screen_pinning_description (3577937698406151604) -->
+    <skip />
     <string name="screen_pinning_positive" msgid="3783985798366751226">"はい"</string>
     <string name="screen_pinning_negative" msgid="3741602308343880268">"いいえ"</string>
     <string name="quick_settings_reset_confirmation_title" msgid="748792586749897883">"<xliff:g id="TILE_LABEL">%1$s</xliff:g>を非表示にしますか？"</string>

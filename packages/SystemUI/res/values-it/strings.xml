@@ -395,8 +395,8 @@
     <string name="accessibility_volume_expand" msgid="5946812790999244205">"Espandi"</string>
     <string name="accessibility_volume_collapse" msgid="3609549593031810875">"Comprimi"</string>
     <string name="screen_pinning_title" msgid="3273740381976175811">"La schermata è bloccata"</string>
-    <string name="screen_pinning_description" msgid="1346522416878235405">"La schermata rimane visibile finché la sblocchi. Tocca e tieni premuti contemporaneamente Indietro e Panoramica per sbloccare."</string>
-    <string name="screen_pinning_description_accessible" msgid="8518446209564202557">"La schermata rimane visibile finché la sblocchi. Tocca Panoramica e tieni premuto per sbloccare."</string>
+    <!-- no translation found for screen_pinning_description (3577937698406151604) -->
+    <skip />
     <string name="screen_pinning_positive" msgid="3783985798366751226">"OK"</string>
     <string name="screen_pinning_negative" msgid="3741602308343880268">"No, grazie"</string>
     <string name="quick_settings_reset_confirmation_title" msgid="748792586749897883">"Nascondere <xliff:g id="TILE_LABEL">%1$s</xliff:g>?"</string>

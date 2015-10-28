@@ -393,8 +393,8 @@
     <string name="accessibility_volume_expand" msgid="5946812790999244205">"Palawakin"</string>
     <string name="accessibility_volume_collapse" msgid="3609549593031810875">"I-collapse"</string>
     <string name="screen_pinning_title" msgid="3273740381976175811">"Naka-pin ang screen"</string>
-    <string name="screen_pinning_description" msgid="1346522416878235405">"Pinapanatili nitong nasa view ito hanggang sa mag-unpin ka. Pindutin nang matagal ang Bumalik at Pangkalahatang-ideya nang sabay upang mag-unpin."</string>
-    <string name="screen_pinning_description_accessible" msgid="8518446209564202557">"Pinapanatili nitong nasa view ito hanggang sa mag-unpin ka. Pindutin nang matagal ang Pangkalahatang-ideya upang mag-unpin."</string>
+    <!-- no translation found for screen_pinning_description (3577937698406151604) -->
+    <skip />
     <string name="screen_pinning_positive" msgid="3783985798366751226">"Nakuha ko"</string>
     <string name="screen_pinning_negative" msgid="3741602308343880268">"Hindi, salamat na lang"</string>
     <string name="quick_settings_reset_confirmation_title" msgid="748792586749897883">"Itago ang <xliff:g id="TILE_LABEL">%1$s</xliff:g>?"</string>

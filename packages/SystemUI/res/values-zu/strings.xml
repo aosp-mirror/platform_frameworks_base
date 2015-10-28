@@ -393,8 +393,8 @@
     <string name="accessibility_volume_expand" msgid="5946812790999244205">"Nweba"</string>
     <string name="accessibility_volume_collapse" msgid="3609549593031810875">"Goqa"</string>
     <string name="screen_pinning_title" msgid="3273740381976175811">"Isikrini siphiniwe"</string>
-    <string name="screen_pinning_description" msgid="1346522416878235405">"Lokhu kukugcina kubukeka uze ususe ukuphina. Thinta futhi ubambe u-Emuva no-Ukubuka konke ngesikhathi esisodwa ukuze ususe ukuphina."</string>
-    <string name="screen_pinning_description_accessible" msgid="8518446209564202557">"Lokhu kukugcina kubukeka uze ususe ukuphina. Thinta futhi ubambe u-Ukubuka konke ukuze ususe ukuphina."</string>
+    <!-- no translation found for screen_pinning_description (3577937698406151604) -->
+    <skip />
     <string name="screen_pinning_positive" msgid="3783985798366751226">"Ngiyitholile"</string>
     <string name="screen_pinning_negative" msgid="3741602308343880268">"Cha ngiyabonga"</string>
     <string name="quick_settings_reset_confirmation_title" msgid="748792586749897883">"Fihla i-<xliff:g id="TILE_LABEL">%1$s</xliff:g>?"</string>

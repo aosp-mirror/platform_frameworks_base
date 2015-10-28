@@ -393,8 +393,8 @@
     <string name="accessibility_volume_expand" msgid="5946812790999244205">"ขยาย"</string>
     <string name="accessibility_volume_collapse" msgid="3609549593031810875">"ยุบ"</string>
     <string name="screen_pinning_title" msgid="3273740381976175811">"ตรึงหน้าจอแล้ว"</string>
-    <string name="screen_pinning_description" msgid="1346522416878235405">"การดำเนินการนี้จะเปิดหน้าจอนี้ไว้เสมอจนกว่าคุณจะเลิกตรึง แตะ \"กลับ\" และ \"ภาพรวม\" พร้อมกันค้างไว้เพื่อเลิกตรึง"</string>
-    <string name="screen_pinning_description_accessible" msgid="8518446209564202557">"การดำเนินการนี้จะเปิดหน้าจอนี้ไว้เสมอจนกว่าคุณจะเลิกตรึง แตะ \"ภาพรวม\" ค้างไว้เพื่อเลิกตรึง"</string>
+    <!-- no translation found for screen_pinning_description (3577937698406151604) -->
+    <skip />
     <string name="screen_pinning_positive" msgid="3783985798366751226">"รับทราบ"</string>
     <string name="screen_pinning_negative" msgid="3741602308343880268">"ไม่เป็นไร ขอบคุณ"</string>
     <string name="quick_settings_reset_confirmation_title" msgid="748792586749897883">"ซ่อน <xliff:g id="TILE_LABEL">%1$s</xliff:g> ไหม"</string>

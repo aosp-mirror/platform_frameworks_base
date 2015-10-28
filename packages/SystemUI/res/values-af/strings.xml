@@ -393,8 +393,8 @@
     <string name="accessibility_volume_expand" msgid="5946812790999244205">"Vou uit"</string>
     <string name="accessibility_volume_collapse" msgid="3609549593031810875">"Vou in"</string>
     <string name="screen_pinning_title" msgid="3273740381976175811">"Skerm is vasgespeld"</string>
-    <string name="screen_pinning_description" msgid="1346522416878235405">"Dit hou dit in sig totdat jy dit ontspeld. Raak en hou Terug en Oorsig op dieselfde tyd om te ontspeld."</string>
-    <string name="screen_pinning_description_accessible" msgid="8518446209564202557">"Dit hou dit in sig totdat jy ontspeld. Raak en hou Oorsig om te ontspeld."</string>
+    <!-- no translation found for screen_pinning_description (3577937698406151604) -->
+    <skip />
     <string name="screen_pinning_positive" msgid="3783985798366751226">"Het dit"</string>
     <string name="screen_pinning_negative" msgid="3741602308343880268">"Nee, dankie"</string>
     <string name="quick_settings_reset_confirmation_title" msgid="748792586749897883">"Versteek <xliff:g id="TILE_LABEL">%1$s</xliff:g>?"</string>
