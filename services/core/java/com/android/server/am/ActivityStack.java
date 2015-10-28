@@ -530,25 +530,35 @@ final class ActivityStack {
      * @param task If non-null, the task will be moved to the top of the stack.
      * */
     void moveToFront(String reason, TaskRecord task) {
-        if (isAttached()) {
-            final ActivityStack lastFocusStack = mStacks.get(mStacks.size() - 1);
-            // Need to move this stack to the front before calling
-            // {@link ActivityStackSupervisor#setFocusStack} below.
-            mStacks.remove(this);
-            mStacks.add(this);
+        if (!isAttached()) {
+            return;
+        }
 
-            // TODO(multi-display): Needs to also work if focus is moving to the non-home display.
-            if (isOnHomeDisplay()) {
-                mStackSupervisor.setFocusStack(reason, lastFocusStack);
+        mStacks.remove(this);
+        int addIndex = mStacks.size();
+
+        if (addIndex > 0) {
+            final ActivityStack topStack = mStacks.get(addIndex - 1);
+            if (topStack.mStackId == PINNED_STACK_ID && topStack != this) {
+                // The pinned stack is always the top most stack (always-on-top).
+                // So, stack is moved just below the pinned stack.
+                addIndex--;
             }
-            if (task != null) {
-                insertTaskAtTop(task, null);
-            } else {
-                task = topTask();
-            }
-            if (task != null) {
-                mWindowManager.moveTaskToTop(task.taskId);
-            }
+        }
+
+        mStacks.add(addIndex, this);
+
+        // TODO(multi-display): Needs to also work if focus is moving to the non-home display.
+        if (isOnHomeDisplay()) {
+            mStackSupervisor.setFocusStack(reason, this);
+        }
+        if (task != null) {
+            insertTaskAtTop(task, null);
+        } else {
+            task = topTask();
+        }
+        if (task != null) {
+            mWindowManager.moveTaskToTop(task.taskId);
         }
     }
 
@@ -1304,12 +1314,7 @@ final class ActivityStack {
             return false;
         }
 
-        if (mStackSupervisor.isFrontStack(this)) {
-            return true;
-        }
-
-        if (mStackId == PINNED_STACK_ID) {
-            // Pinned stack is always visible if it exist.
+        if (mStackSupervisor.isFrontStack(this) || mStackSupervisor.isFocusedStack(this)) {
             return true;
         }
 
@@ -2041,7 +2046,7 @@ final class ActivityStack {
             // Have the window manager re-evaluate the orientation of
             // the screen based on the new activity order.
             boolean notUpdated = true;
-            if (mStackSupervisor.isFrontStack(this)) {
+            if (mStackSupervisor.isFocusedStack(this)) {
                 Configuration config = mWindowManager.updateOrientationFromAppTokens(
                         mService.mConfiguration,
                         next.mayFreezeScreenLocked(next.app) ? next.appToken : null);
@@ -2788,7 +2793,7 @@ final class ActivityStack {
     }
 
     private void adjustFocusedActivityLocked(ActivityRecord r, String reason) {
-        if (mStackSupervisor.isFrontStack(this) && mService.mFocusedActivity == r) {
+        if (mStackSupervisor.isFocusedStack(this) && mService.mFocusedActivity == r) {
             ActivityRecord next = topRunningActivityLocked();
             final String myReason = reason + " adjustFocus";
             if (next != r) {
@@ -3395,7 +3400,7 @@ final class ActivityStack {
         if (task != null && task.removeActivity(r)) {
             if (DEBUG_STACK) Slog.i(TAG_STACK,
                     "removeActivityFromHistoryLocked: last activity removed from " + this);
-            if (mStackSupervisor.isFrontStack(this) && task == topTask() &&
+            if (mStackSupervisor.isFocusedStack(this) && task == topTask() &&
                     task.isOverHomeStack()) {
                 mStackSupervisor.moveHomeStackTaskToTop(task.getTaskToReturnTo(), reason);
             }
@@ -4569,7 +4574,7 @@ final class ActivityStack {
         if (mTaskHistory.isEmpty()) {
             if (DEBUG_STACK) Slog.i(TAG_STACK, "removeTask: removing stack=" + this);
             // We only need to adjust focused stack if this stack is in focus.
-            if (isOnHomeDisplay() && mStackSupervisor.isFrontStack(this)) {
+            if (isOnHomeDisplay() && mStackSupervisor.isFocusedStack(this)) {
                 String myReason = reason + " leftTaskHistoryEmpty";
                 if (mFullscreen || !adjustFocusToNextVisibleStackLocked(null, myReason)) {
                     mStackSupervisor.moveHomeStackToFront(myReason);
@@ -4677,7 +4682,7 @@ final class ActivityStack {
             return;
         }
 
-        final boolean wasFocused = mStackSupervisor.isFrontStack(prevStack)
+        final boolean wasFocused = mStackSupervisor.isFocusedStack(prevStack)
                 && (mStackSupervisor.topRunningActivityLocked() == r);
         final boolean wasResumed = wasFocused && (prevStack.mResumedActivity == r);
 

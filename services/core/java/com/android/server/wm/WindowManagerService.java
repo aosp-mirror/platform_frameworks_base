@@ -3284,10 +3284,8 @@ public class WindowManagerService extends IWindowManager.Stub
             }
         }
 
-        final TaskStack dockedStack = mStackIdToStack.get(DOCKED_STACK_ID);
-        final TaskStack freeformStack = mStackIdToStack.get(FREEFORM_WORKSPACE_STACK_ID);
-        if ((dockedStack != null && dockedStack.isVisibleLocked())
-                || (freeformStack != null && freeformStack.isVisibleLocked())) {
+        if (isStackVisibleLocked(DOCKED_STACK_ID)
+                || isStackVisibleLocked(FREEFORM_WORKSPACE_STACK_ID)) {
             // We don't let app affect the system orientation when in freeform or docked mode since
             // they don't occupy the entire display and their request can conflict with other apps.
             return SCREEN_ORIENTATION_UNSPECIFIED;
@@ -4516,6 +4514,11 @@ public class WindowManagerService extends IWindowManager.Stub
         } finally {
             Binder.restoreCallingIdentity(origId);
         }
+    }
+
+    boolean isStackVisibleLocked(int stackId) {
+        final TaskStack stack = mStackIdToStack.get(stackId);
+        return (stack != null && stack.isVisibleLocked());
     }
 
     public void setDockedStackCreateMode(int mode) {
@@ -10214,8 +10217,7 @@ public class WindowManagerService extends IWindowManager.Stub
         @Override
         public boolean isStackVisible(int stackId) {
             synchronized (mWindowMap) {
-                final TaskStack stack = mStackIdToStack.get(stackId);
-                return (stack != null && stack.isVisibleLocked());
+                return WindowManagerService.this.isStackVisibleLocked(stackId);
             }
         }
     }

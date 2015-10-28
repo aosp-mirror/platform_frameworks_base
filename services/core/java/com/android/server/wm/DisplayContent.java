@@ -18,7 +18,7 @@ package com.android.server.wm;
 
 import static android.app.ActivityManager.DOCKED_STACK_ID;
 import static android.app.ActivityManager.HOME_STACK_ID;
-
+import static android.app.ActivityManager.PINNED_STACK_ID;
 import static com.android.server.wm.WindowManagerService.DEBUG_VISIBILITY;
 import static com.android.server.wm.WindowManagerService.TAG;
 import static com.android.server.wm.WindowState.RESIZE_HANDLE_WIDTH_IN_DP;
@@ -243,10 +243,30 @@ class DisplayContent {
     }
 
     void moveStack(TaskStack stack, boolean toTop) {
+        if (stack.mStackId == PINNED_STACK_ID && !toTop) {
+            // Pinned stack is always-on-top silly...
+            Slog.w(TAG, "Ignoring move of always-on-top stack=" + stack + " to bottom");
+            return;
+        }
+
         if (!mStacks.remove(stack)) {
             Slog.wtf(TAG, "moving stack that was not added: " + stack, new Throwable());
         }
-        mStacks.add(toTop ? mStacks.size() : 0, stack);
+
+        int addIndex = toTop ? mStacks.size() : 0;
+
+        if (toTop
+                && mService.isStackVisibleLocked(PINNED_STACK_ID)
+                && stack.mStackId != PINNED_STACK_ID) {
+            // The pinned stack is always the top most stack (always-on-top) when it is visible.
+            // So, stack is moved just below the pinned stack.
+            addIndex--;
+            TaskStack topStack = mStacks.get(addIndex);
+            if (topStack.mStackId != PINNED_STACK_ID) {
+                throw new IllegalStateException("Pinned stack isn't top stack??? " + mStacks);
+            }
+        }
+        mStacks.add(addIndex, stack);
     }
 
     void detachStack(TaskStack stack) {
