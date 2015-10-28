@@ -3803,8 +3803,8 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             return;
         }
         enforceCrossUserPermission(userHandle);
-        // Managed Profile password can only be changed when file based encryption is present.
-        if (!"file".equals(SystemProperties.get("ro.crypto.type", "none"))) {
+        // Managed Profile password can only be changed when per user encryption is present.
+        if (!mContext.getSystemService(StorageManager.class).isPerUserEncryptionEnabled()) {
             enforceNotManagedProfile(userHandle, "set the active password");
         }
 
