@@ -17,6 +17,8 @@
 package com.android.server.wm;
 
 import static android.view.WindowManager.LayoutParams.TYPE_DOCK_DIVIDER;
+import static com.android.server.wm.WindowManagerService.DEBUG_FOCUS_LIGHT;
+import static com.android.server.wm.WindowManagerService.DEBUG_INPUT;
 import static com.android.server.wm.WindowState.BOUNDS_FOR_TOUCH;
 import android.app.ActivityManagerNative;
 import android.graphics.Rect;
@@ -179,7 +181,17 @@ final class InputMonitor implements InputManagerService.WindowManagerCallbacks {
         if (modal && child.mAppToken != null) {
             // Limit the outer touch to the activity stack region.
             flags |= WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL;
-            child.getVisibleBounds(mTmpRect, BOUNDS_FOR_TOUCH);
+            // If this is a modal window we need to dismiss it if it's not full screen and the touch
+            // happens outside of the frame that displays the content. This means we need to
+            // intercept touches outside of that window. The dim layer user associated with the
+            // window (task or stack) will give us the good bounds, as they would be used to display
+            // the dim layer.
+            final DimLayer.DimLayerUser dimLayerUser = child.getDimLayerUser();
+            if (dimLayerUser != null) {
+                dimLayerUser.getBounds(mTmpRect);
+            } else {
+                child.getVisibleBounds(mTmpRect, BOUNDS_FOR_TOUCH);
+            }
             inputWindowHandle.touchableRegion.set(mTmpRect);
         } else {
             // Not modal or full screen modal
@@ -227,7 +239,9 @@ final class InputMonitor implements InputManagerService.WindowManagerCallbacks {
             inputWindowHandle.scaleFactor = 1;
         }
 
-
+        if (DEBUG_INPUT) {
+            Slog.d(WindowManagerService.TAG, "addInputWindowHandle: " + inputWindowHandle);
+        }
         addInputWindowHandleLw(inputWindowHandle);
     }
 
@@ -428,7 +442,7 @@ final class InputMonitor implements InputManagerService.WindowManagerCallbacks {
      * Layer assignment is assumed to be complete by the time this is called.
      */
     public void setInputFocusLw(WindowState newWindow, boolean updateInputWindows) {
-        if (WindowManagerService.DEBUG_FOCUS_LIGHT || WindowManagerService.DEBUG_INPUT) {
+        if (DEBUG_FOCUS_LIGHT || DEBUG_INPUT) {
             Slog.d(WindowManagerService.TAG, "Input focus has changed to " + newWindow);
         }
 
@@ -464,7 +478,7 @@ final class InputMonitor implements InputManagerService.WindowManagerCallbacks {
 
     public void pauseDispatchingLw(WindowToken window) {
         if (! window.paused) {
-            if (WindowManagerService.DEBUG_INPUT) {
+            if (DEBUG_INPUT) {
                 Slog.v(WindowManagerService.TAG, "Pausing WindowToken " + window);
             }
 
@@ -475,7 +489,7 @@ final class InputMonitor implements InputManagerService.WindowManagerCallbacks {
 
     public void resumeDispatchingLw(WindowToken window) {
         if (window.paused) {
-            if (WindowManagerService.DEBUG_INPUT) {
+            if (DEBUG_INPUT) {
                 Slog.v(WindowManagerService.TAG, "Resuming WindowToken " + window);
             }
 
@@ -486,7 +500,7 @@ final class InputMonitor implements InputManagerService.WindowManagerCallbacks {
 
     public void freezeInputDispatchingLw() {
         if (! mInputDispatchFrozen) {
-            if (WindowManagerService.DEBUG_INPUT) {
+            if (DEBUG_INPUT) {
                 Slog.v(WindowManagerService.TAG, "Freezing input dispatching");
             }
 
@@ -497,7 +511,7 @@ final class InputMonitor implements InputManagerService.WindowManagerCallbacks {
 
     public void thawInputDispatchingLw() {
         if (mInputDispatchFrozen) {
-            if (WindowManagerService.DEBUG_INPUT) {
+            if (DEBUG_INPUT) {
                 Slog.v(WindowManagerService.TAG, "Thawing input dispatching");
             }
 
@@ -508,7 +522,7 @@ final class InputMonitor implements InputManagerService.WindowManagerCallbacks {
 
     public void setEventDispatchingLw(boolean enabled) {
         if (mInputDispatchEnabled != enabled) {
-            if (WindowManagerService.DEBUG_INPUT) {
+            if (DEBUG_INPUT) {
                 Slog.v(WindowManagerService.TAG, "Setting event dispatching to " + enabled);
             }
 

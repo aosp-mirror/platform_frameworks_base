@@ -100,6 +100,17 @@ public final class InputWindowHandle {
     }
 
     @Override
+    public String toString() {
+        return new StringBuilder(name)
+                .append(", layer=").append(layer)
+                .append(", frame=[").append(frameLeft).append(",").append(frameTop).append(",")
+                        .append(frameRight).append(",").append(frameBottom).append("]")
+                .append(", touchableRegion=").append(touchableRegion)
+                .toString();
+
+    }
+
+    @Override
     protected void finalize() throws Throwable {
         try {
             nativeDispose();
