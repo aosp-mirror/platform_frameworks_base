@@ -409,18 +409,20 @@ public class RippleDrawable extends LayerDrawable {
     }
 
     @Override
-    public void inflate(Resources r, XmlPullParser parser, AttributeSet attrs, Theme theme)
+    public void inflate(@NonNull Resources r, @NonNull XmlPullParser parser,
+            @NonNull AttributeSet attrs, @Nullable Theme theme)
             throws XmlPullParserException, IOException {
         final TypedArray a = obtainAttributes(r, theme, attrs, R.styleable.RippleDrawable);
-        updateStateFromTypedArray(a);
-        a.recycle();
 
         // Force padding default to STACK before inflating.
         setPaddingMode(PADDING_MODE_STACK);
 
+        // Inflation will advance the XmlPullParser and AttributeSet.
         super.inflate(r, parser, attrs, theme);
 
-        setTargetDensity(r.getDisplayMetrics());
+        updateStateFromTypedArray(a);
+        verifyRequiredAttributes(a);
+        a.recycle();
 
         updateLocalState();
     }
@@ -461,7 +463,7 @@ public class RippleDrawable extends LayerDrawable {
     /**
      * Initializes the constant state from the values in the typed array.
      */
-    private void updateStateFromTypedArray(TypedArray a) throws XmlPullParserException {
+    private void updateStateFromTypedArray(@NonNull TypedArray a) throws XmlPullParserException {
         final RippleState state = mState;
 
         // Account for any configuration changes.
@@ -477,11 +479,9 @@ public class RippleDrawable extends LayerDrawable {
 
         mState.mMaxRadius = a.getDimensionPixelSize(
                 R.styleable.RippleDrawable_radius, mState.mMaxRadius);
-
-        verifyRequiredAttributes(a);
     }
 
-    private void verifyRequiredAttributes(TypedArray a) throws XmlPullParserException {
+    private void verifyRequiredAttributes(@NonNull TypedArray a) throws XmlPullParserException {
         if (mState.mColor == null && (mState.mTouchThemeAttrs == null
                 || mState.mTouchThemeAttrs[R.styleable.RippleDrawable_color] == 0)) {
             throw new XmlPullParserException(a.getPositionDescription() +
@@ -489,20 +489,8 @@ public class RippleDrawable extends LayerDrawable {
         }
     }
 
-    /**
-     * Set the density at which this drawable will be rendered.
-     *
-     * @param metrics The display metrics for this drawable.
-     */
-    private void setTargetDensity(DisplayMetrics metrics) {
-        if (mDensity != metrics.density) {
-            mDensity = metrics.density;
-            invalidateSelf(false);
-        }
-    }
-
     @Override
-    public void applyTheme(Theme t) {
+    public void applyTheme(@NonNull Theme t) {
         super.applyTheme(t);
 
         final RippleState state = mState;
@@ -515,6 +503,7 @@ public class RippleDrawable extends LayerDrawable {
                     R.styleable.RippleDrawable);
             try {
                 updateStateFromTypedArray(a);
+                verifyRequiredAttributes(a);
             } catch (XmlPullParserException e) {
                 throw new RuntimeException(e);
             } finally {
@@ -555,7 +544,8 @@ public class RippleDrawable extends LayerDrawable {
             mBackground = new RippleBackground(this, mHotspotBounds, mForceSoftware);
         }
 
-        mBackground.setup(mState.mMaxRadius, mDensity);
+        final float densityScale = mState.mDensity * DisplayMetrics.DENSITY_DEFAULT_SCALE;
+        mBackground.setup(mState.mMaxRadius, densityScale);
         mBackground.enter(focused);
     }
 
@@ -1002,6 +992,23 @@ public class RippleDrawable extends LayerDrawable {
                 mTouchThemeAttrs = origs.mTouchThemeAttrs;
                 mColor = origs.mColor;
                 mMaxRadius = origs.mMaxRadius;
+
+                if (origs.mDensity != mDensity) {
+                    applyDensityScaling(orig.mDensity, mDensity);
+                }
+            }
+        }
+
+        @Override
+        protected void onDensityChanged(int sourceDensity, int targetDensity) {
+            super.onDensityChanged(sourceDensity, targetDensity);
+
+            applyDensityScaling(sourceDensity, targetDensity);
+        }
+
+        private void applyDensityScaling(int sourceDensity, int targetDensity) {
+            if (mMaxRadius != RADIUS_AUTO) {
+                mMaxRadius = Bitmap.scaleFromDensity(mMaxRadius, sourceDensity, targetDensity);
             }
         }
 
