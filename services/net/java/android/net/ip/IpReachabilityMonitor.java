@@ -403,7 +403,6 @@ public class IpReachabilityMonitor {
 
     // TODO: simply the number of objects by making this extend Thread.
     private final class NetlinkSocketObserver implements Runnable {
-        private static final String TAG = "NetlinkSocketObserver";
         private NetlinkSocket mSocket;
 
         @Override
