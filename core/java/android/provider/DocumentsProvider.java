@@ -31,6 +31,7 @@ import static android.provider.DocumentsContract.getTreeDocumentId;
 import static android.provider.DocumentsContract.isTreeUri;
 
 import android.annotation.CallSuper;
+import android.content.ClipDescription;
 import android.content.ContentProvider;
 import android.content.ContentResolver;
 import android.content.ContentValues;
@@ -502,6 +503,29 @@ public abstract class DocumentsProvider extends ContentProvider {
     }
 
     /**
+     * Open and return the document in a format matching the specified MIME
+     * type filter.
+     * <p>
+     * A provider may perform a conversion if the documents's MIME type is not
+     * matching the specified MIME type filter.
+     *
+     * @param documentId the document to return.
+     * @param mimeTypeFilter the MIME type filter for the requested format. May
+     *            be *\/*, which matches any MIME type.
+     * @param opts extra options from the client. Specific to the content
+     *            provider.
+     * @param signal used by the caller to signal if the request should be
+     *            cancelled. May be null.
+     * @see Document#FLAG_SUPPORTS_TYPED_DOCUMENT
+     */
+    @SuppressWarnings("unused")
+    public AssetFileDescriptor openTypedDocument(
+            String documentId, String mimeTypeFilter, Bundle opts, CancellationSignal signal)
+            throws FileNotFoundException {
+        throw new UnsupportedOperationException("Typed documents not supported");
+    }
+
+    /**
      * Implementation is provided by the parent class. Cannot be overriden.
      *
      * @see #queryRoots(String[])
@@ -846,34 +870,50 @@ public abstract class DocumentsProvider extends ContentProvider {
      * Implementation is provided by the parent class. Cannot be overriden.
      *
      * @see #openDocumentThumbnail(String, Point, CancellationSignal)
+     * @see #openTypedDocument(String, String, Bundle, CancellationSignal)
      */
     @Override
     public final AssetFileDescriptor openTypedAssetFile(Uri uri, String mimeTypeFilter, Bundle opts)
             throws FileNotFoundException {
-        enforceTree(uri);
-        if (opts != null && opts.containsKey(ContentResolver.EXTRA_SIZE)) {
-            final Point sizeHint = opts.getParcelable(ContentResolver.EXTRA_SIZE);
-            return openDocumentThumbnail(getDocumentId(uri), sizeHint, null);
-        } else {
-            return super.openTypedAssetFile(uri, mimeTypeFilter, opts);
-        }
+        return openTypedAssetFileImpl(uri, mimeTypeFilter, opts, null);
     }
 
     /**
      * Implementation is provided by the parent class. Cannot be overriden.
      *
      * @see #openDocumentThumbnail(String, Point, CancellationSignal)
+     * @see #openTypedDocument(String, String, Bundle, CancellationSignal)
      */
     @Override
     public final AssetFileDescriptor openTypedAssetFile(
             Uri uri, String mimeTypeFilter, Bundle opts, CancellationSignal signal)
             throws FileNotFoundException {
+        return openTypedAssetFileImpl(uri, mimeTypeFilter, opts, signal);
+    }
+
+    /**
+     * @hide
+     */
+    private final AssetFileDescriptor openTypedAssetFileImpl(
+            Uri uri, String mimeTypeFilter, Bundle opts, CancellationSignal signal)
+            throws FileNotFoundException {
         enforceTree(uri);
+        final String documentId = getDocumentId(uri);
         if (opts != null && opts.containsKey(ContentResolver.EXTRA_SIZE)) {
             final Point sizeHint = opts.getParcelable(ContentResolver.EXTRA_SIZE);
-            return openDocumentThumbnail(getDocumentId(uri), sizeHint, signal);
-        } else {
-            return super.openTypedAssetFile(uri, mimeTypeFilter, opts, signal);
+            return openDocumentThumbnail(documentId, sizeHint, signal);
         }
+        if ("*/*".equals(mimeTypeFilter)) {
+             // If they can take anything, the untyped open call is good enough.
+             return openAssetFile(uri, "r");
+        }
+        final String baseType = getType(uri);
+        if (baseType != null && ClipDescription.compareMimeTypes(baseType, mimeTypeFilter)) {
+            // Use old untyped open call if this provider has a type for this
+            // URI and it matches the request.
+            return openAssetFile(uri, "r");
+        }
+        // For any other yet unhandled case, let the provider subclass handle it.
+        return openTypedDocument(documentId, mimeTypeFilter, opts, signal);
     }
 }

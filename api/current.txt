@@ -26218,6 +26218,7 @@ package android.provider {
     field public static final int FLAG_SUPPORTS_MOVE = 256; // 0x100
     field public static final int FLAG_SUPPORTS_RENAME = 64; // 0x40
     field public static final int FLAG_SUPPORTS_THUMBNAIL = 1; // 0x1
+    field public static final int FLAG_SUPPORTS_TYPED_DOCUMENT = 512; // 0x200
     field public static final int FLAG_SUPPORTS_WRITE = 2; // 0x2
     field public static final java.lang.String MIME_TYPE_DIR = "vnd.android.document/directory";
   }
@@ -26255,6 +26256,7 @@ package android.provider {
     method public final android.os.ParcelFileDescriptor openFile(android.net.Uri, java.lang.String, android.os.CancellationSignal) throws java.io.FileNotFoundException;
     method public final android.content.res.AssetFileDescriptor openTypedAssetFile(android.net.Uri, java.lang.String, android.os.Bundle) throws java.io.FileNotFoundException;
     method public final android.content.res.AssetFileDescriptor openTypedAssetFile(android.net.Uri, java.lang.String, android.os.Bundle, android.os.CancellationSignal) throws java.io.FileNotFoundException;
+    method public android.content.res.AssetFileDescriptor openTypedDocument(java.lang.String, java.lang.String, android.os.Bundle, android.os.CancellationSignal) throws java.io.FileNotFoundException;
     method public final android.database.Cursor query(android.net.Uri, java.lang.String[], java.lang.String, java.lang.String[], java.lang.String);
     method public abstract android.database.Cursor queryChildDocuments(java.lang.String, java.lang.String[], java.lang.String) throws java.io.FileNotFoundException;
     method public abstract android.database.Cursor queryDocument(java.lang.String, java.lang.String[]) throws java.io.FileNotFoundException;
