@@ -19,7 +19,7 @@ parent.link=activities.html
     <li><a href="#CommunicatingWithActivity">Communicating with the Activity</a>
       <ol>
         <li><a href="#EventCallbacks">Creating event callbacks to the activity</a></li>
-        <li><a href="#ActionBar">Adding items to the Action Bar</a></li>
+        <li><a href="#ActionBar">Adding items to the App Bar</a></li>
       </ol>
     </li>
     <li><a href="#Lifecycle">Handling the Fragment Lifecycle</a>
@@ -603,11 +603,11 @@ href="{@docRoot}guide/topics/providers/content-providers.html">Content Providers
 
 
 
-<h3 id="ActionBar">Adding items to the Action Bar</h3>
+<h3 id="ActionBar">Adding items to the App Bar</h3>
 
 <p>Your fragments can contribute menu items to the activity's <a
 href="{@docRoot}guide/topics/ui/menus.html#options-menu">Options Menu</a> (and, consequently, the <a
-href="{@docRoot}guide/topics/ui/actionbar.html">Action Bar</a>) by implementing
+href="{@docRoot}training/appbar/index.html">app bar</a>) by implementing
 {@link android.app.Fragment#onCreateOptionsMenu(Menu,MenuInflater) onCreateOptionsMenu()}. In order
 for this method to receive calls, however, you must call {@link
 android.app.Fragment#setHasOptionsMenu(boolean) setHasOptionsMenu()} during {@link
@@ -634,8 +634,8 @@ handle the selected item, then the event is passed to the fragment's callback. T
 the Options Menu and context menus.</p>
 
 <p>For more information about menus, see the <a
-href="{@docRoot}guide/topics/ui/menus.html">Menus</a> and <a
-href="{@docRoot}guide/topics/ui/actionbar.html">Action Bar</a> developer guides.</p>
+href="{@docRoot}guide/topics/ui/menus.html">Menus</a> developer guide and the <a
+href="{@docRoot}training/appbar/index.html">App Bar</a> training class.</p>
 
 
 

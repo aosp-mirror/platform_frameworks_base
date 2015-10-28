@@ -134,8 +134,7 @@ data, and displays the search results.</p></li>
       <li>Or, a {@link android.widget.SearchView} widget
         <p>Using the search widget allows you to put the search box anywhere in your activity.
 Instead of putting it in your activity layout, you should usually use
-{@link android.widget.SearchView} as an 
-<a href="{@docRoot}guide/topics/ui/actionbar.html#ActionView">action view in the Action Bar</a>.</p>
+{@link android.widget.SearchView} as an action view in the app bar.</p>
       </li>
     </ul>
   </li>
@@ -493,10 +492,10 @@ the Android system and other apps, you should label your button with the Android
 available from the <a href="{@docRoot}design/downloads/index.html#action-bar-icon-pack">Action Bar
 Icon Pack</a>.</p>
 
-<p class="note"><strong>Note:</strong> If your app uses the <a
-href="{@docRoot}guide/topics/ui/actionbar.html">action bar</a>, then you should not use
+<p class="note"><strong>Note:</strong> If your app uses an <a
+href="{@docRoot}training/appbar/index.html">app bar</a>, then you should not use
 the search dialog for your search interface. Instead, use the <a href="#UsingSearchWidget">search
-widget</a> as a collapsible view in the action bar.</p>
+widget</a> as a collapsible view in the app bar.</p>
 
 <p>You can also enable "type-to-search" functionality, which activates the search dialog when the
 user starts typing on the keyboard&mdash;the keystrokes are inserted into the search dialog. You can
@@ -680,10 +679,9 @@ android.widget.SearchView} widget as an "action view" in the Action Bar.</p>
 
 <p>The {@link android.widget.SearchView} widget is available in Android 3.0 and higher. If
 you're developing your application for Android 3.0 and have decided to use the search widget, we
-recommend that you insert the search widget as an <a
-href="{@docRoot}guide/topics/ui/actionbar.html#ActionView">action view in the Action Bar</a>,
+recommend that you insert the search widget as an action view in the app bar,
 instead of using the search dialog (and instead of placing the search widget in your activity
-layout). For example, figure 2 shows the search widget in the Action Bar.</p>
+layout). For example, figure 2 shows the search widget in the app bar.</p>
 
 <p>The search widget provides the same functionality as the search dialog. It starts the appropriate
 activity when the user executes a search, and it can provide search suggestions and perform voice
@@ -707,8 +705,8 @@ android.app.SearchableInfo} object that represents your searchable configuration
 android.app.SearchManager#getSearchableInfo getSearchableInfo()} on {@link
 android.app.SearchManager}.</p>
 
-<p>For example, if you're using a {@link android.widget.SearchView} as an action view in the <a
-href="{@docRoot}guide/topics/ui/actionbar.html">Action Bar</a>, you should enable the widget
+<p>For example, if you're using a {@link android.widget.SearchView} as an action view in the
+<a href="{@docRoot}training/appbar/index.html">app bar</a>, you should enable the widget
 during the {@link android.app.Activity#onCreateOptionsMenu onCreateOptionsMenu()} callback:</p>
 
 <pre>
@@ -738,9 +736,8 @@ with some callback methods and event listeners. For more information, see the re
 documentation for {@link android.widget.SearchView} and its nested interfaces for the
 appropriate event listeners.</p>
 
-<p>For more information about action views in the Action Bar, read the <a
-href="{@docRoot}guide/topics/ui/actionbar.html#ActionView">Action Bar</a> developer guide (which
-includes sample code for adding a search widget as an action view).</p>
+<p>For more information about action views in the Action Bar, see
+<a href="{@docRoot}training/appbar/action-views.html">Action Views and Action Providers</a>.</p>
 
 
 <h3 id="WidgetFeatures">Other search widget features</h3>
