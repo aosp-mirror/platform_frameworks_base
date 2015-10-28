@@ -27,6 +27,7 @@
 #include "renderstate/RenderState.h"
 #include "renderstate/Stencil.h"
 #include "protos/hwui.pb.h"
+#include "utils/TimeUtils.h"
 
 #if HWUI_NEW_OPS
 #include "BakedOpRenderer.h"
@@ -108,6 +109,7 @@ void CanvasContext::setSurface(ANativeWindow* window) {
         const bool preserveBuffer = (mSwapBehavior != kSwap_discardBuffer);
         mBufferPreserved = mEglManager.setPreserveBuffer(mEglSurface, preserveBuffer);
         mHaveNewSurface = true;
+        mSwapHistory.clear();
         makeCurrent();
     } else {
         mRenderThread.removeFrameCallback(this);
@@ -217,13 +219,30 @@ void CanvasContext::prepareTree(TreeInfo& info, int64_t* uiFrameInfo,
         return;
     }
 
-    int runningBehind = 0;
-    // TODO: This query is moderately expensive, investigate adding some sort
-    // of fast-path based off when we last called eglSwapBuffers() as well as
-    // last vsync time. Or something.
-    mNativeWindow->query(mNativeWindow.get(),
-            NATIVE_WINDOW_CONSUMER_RUNNING_BEHIND, &runningBehind);
-    info.out.canDrawThisFrame = !runningBehind;
+    if (CC_LIKELY(mSwapHistory.size())) {
+        nsecs_t latestVsync = mRenderThread.timeLord().latestVsync();
+        const SwapHistory& lastSwap = mSwapHistory.back();
+        int vsyncDelta = std::abs(lastSwap.vsyncTime - latestVsync);
+        // The slight fudge-factor is to deal with cases where
+        // the vsync was estimated due to being slow handling the signal.
+        // See the logic in TimeLord#computeFrameTimeNanos or in
+        // Choreographer.java for details on when this happens
+        if (vsyncDelta < 2_ms) {
+            // Already drew for this vsync pulse, UI draw request missed
+            // the deadline for RT animations
+            info.out.canDrawThisFrame = false;
+        } else if (lastSwap.swapTime < latestVsync) {
+            info.out.canDrawThisFrame = true;
+        } else {
+            // We're maybe behind? Find out for sure
+            int runningBehind = 0;
+            mNativeWindow->query(mNativeWindow.get(),
+                    NATIVE_WINDOW_CONSUMER_RUNNING_BEHIND, &runningBehind);
+            info.out.canDrawThisFrame = !runningBehind;
+        }
+    } else {
+        info.out.canDrawThisFrame = true;
+    }
 
     if (!info.out.canDrawThisFrame) {
         mCurrentFrameInfo->addFlag(FrameInfoFlags::SkippedFrame);
@@ -297,7 +316,7 @@ void CanvasContext::draw() {
     // last frame so there's nothing to union() against
     // Therefore we only care about the > 1 case.
     if (frame.bufferAge() > 1) {
-        if (frame.bufferAge() > (int) mDamageHistory.size()) {
+        if (frame.bufferAge() > (int) mSwapHistory.size()) {
             // We don't have enough history to handle this old of a buffer
             // Just do a full-draw
             dirty.set(0, 0, frame.width(), frame.height());
@@ -305,15 +324,12 @@ void CanvasContext::draw() {
             // At this point we haven't yet added the latest frame
             // to the damage history (happens below)
             // So we need to damage
-            for (int i = mDamageHistory.size() - 1;
-                    i > ((int) mDamageHistory.size()) - frame.bufferAge(); i--) {
-                dirty.join(mDamageHistory[i]);
+            for (int i = mSwapHistory.size() - 1;
+                    i > ((int) mSwapHistory.size()) - frame.bufferAge(); i--) {
+                dirty.join(mSwapHistory[i].damage);
             }
         }
     }
-
-    // Add the screen damage to the ring buffer.
-    mDamageHistory.next() = screenDirty;
 
     mEglManager.damageFrame(frame, dirty);
 
@@ -445,6 +461,10 @@ void CanvasContext::draw() {
         if (CC_UNLIKELY(!mEglManager.swapBuffers(frame, screenDirty))) {
             setSurface(nullptr);
         }
+        SwapHistory& swap = mSwapHistory.next();
+        swap.damage = screenDirty;
+        swap.swapTime = systemTime(CLOCK_MONOTONIC);
+        swap.vsyncTime = mRenderThread.timeLord().latestVsync();
         mHaveNewSurface = false;
     }
 

@@ -150,7 +150,13 @@ private:
     EGLSurface mEglSurface = EGL_NO_SURFACE;
     bool mBufferPreserved = false;
     SwapBehavior mSwapBehavior = kSwap_default;
-    RingBuffer<SkRect, 3> mDamageHistory;
+    struct SwapHistory {
+        SkRect damage;
+        nsecs_t vsyncTime;
+        nsecs_t swapTime;
+    };
+
+    RingBuffer<SwapHistory, 3> mSwapHistory;
 
     bool mOpaque;
     OpenGLRenderer* mCanvas = nullptr;
