@@ -50,7 +50,7 @@ public class AnimatedRotateDrawable extends DrawableWrapper implements Animatabl
      * Creates a new animated rotating drawable with no wrapped drawable.
      */
     public AnimatedRotateDrawable() {
-        this(new AnimatedRotateState(null), null);
+        this(new AnimatedRotateState(null, null), null);
     }
 
     @Override
@@ -126,57 +126,21 @@ public class AnimatedRotateDrawable extends DrawableWrapper implements Animatabl
             @NonNull AttributeSet attrs, @Nullable Theme theme)
             throws XmlPullParserException, IOException {
         final TypedArray a = obtainAttributes(r, theme, attrs, R.styleable.AnimatedRotateDrawable);
-        super.inflateWithAttributes(r, parser, a, R.styleable.AnimatedRotateDrawable_visible);
+
+        // Inflation will advance the XmlPullParser and AttributeSet.
+        super.inflate(r, parser, attrs, theme);
 
         updateStateFromTypedArray(a);
-        inflateChildDrawable(r, parser, attrs, theme);
         verifyRequiredAttributes(a);
         a.recycle();
 
         updateLocalState();
     }
 
-    private void verifyRequiredAttributes(TypedArray a) throws XmlPullParserException {
-        // If we're not waiting on a theme, verify required attributes.
-        if (getDrawable() == null && (mState.mThemeAttrs == null
-                || mState.mThemeAttrs[R.styleable.AnimatedRotateDrawable_drawable] == 0)) {
-            throw new XmlPullParserException(a.getPositionDescription()
-                    + ": <animated-rotate> tag requires a 'drawable' attribute or "
-                    + "child tag defining a drawable");
-        }
-    }
-
     @Override
-    void updateStateFromTypedArray(TypedArray a) {
-        super.updateStateFromTypedArray(a);
+    public void applyTheme(@NonNull Theme t) {
+        super.applyTheme(t);
 
-        final AnimatedRotateState state = mState;
-
-        if (a.hasValue(R.styleable.AnimatedRotateDrawable_pivotX)) {
-            final TypedValue tv = a.peekValue(R.styleable.AnimatedRotateDrawable_pivotX);
-            state.mPivotXRel = tv.type == TypedValue.TYPE_FRACTION;
-            state.mPivotX = state.mPivotXRel ? tv.getFraction(1.0f, 1.0f) : tv.getFloat();
-        }
-
-        if (a.hasValue(R.styleable.AnimatedRotateDrawable_pivotY)) {
-            final TypedValue tv = a.peekValue(R.styleable.AnimatedRotateDrawable_pivotY);
-            state.mPivotYRel = tv.type == TypedValue.TYPE_FRACTION;
-            state.mPivotY = state.mPivotYRel ? tv.getFraction(1.0f, 1.0f) : tv.getFloat();
-        }
-
-        setFramesCount(a.getInt(
-                R.styleable.AnimatedRotateDrawable_framesCount, state.mFramesCount));
-        setFramesDuration(a.getInt(
-                R.styleable.AnimatedRotateDrawable_frameDuration, state.mFrameDuration));
-
-        final Drawable dr = a.getDrawable(R.styleable.AnimatedRotateDrawable_drawable);
-        if (dr != null) {
-            setDrawable(dr);
-        }
-    }
-
-    @Override
-    public void applyTheme(@Nullable Theme t) {
         final AnimatedRotateState state = mState;
         if (state == null) {
             return;
@@ -195,11 +159,47 @@ public class AnimatedRotateDrawable extends DrawableWrapper implements Animatabl
             }
         }
 
-        // The drawable may have changed as a result of applying the theme, so
-        // apply the theme to the wrapped drawable last.
-        super.applyTheme(t);
-
         updateLocalState();
+    }
+
+    private void verifyRequiredAttributes(@NonNull TypedArray a) throws XmlPullParserException {
+        // If we're not waiting on a theme, verify required attributes.
+        if (getDrawable() == null && (mState.mThemeAttrs == null
+                || mState.mThemeAttrs[R.styleable.AnimatedRotateDrawable_drawable] == 0)) {
+            throw new XmlPullParserException(a.getPositionDescription()
+                    + ": <animated-rotate> tag requires a 'drawable' attribute or "
+                    + "child tag defining a drawable");
+        }
+    }
+
+    private void updateStateFromTypedArray(@NonNull TypedArray a) {
+        final AnimatedRotateState state = mState;
+        if (state == null) {
+            return;
+        }
+
+        // Account for any configuration changes.
+        state.mChangingConfigurations |= a.getChangingConfigurations();
+
+        // Extract the theme attributes, if any.
+        state.mThemeAttrs = a.extractThemeAttrs();
+
+        if (a.hasValue(R.styleable.AnimatedRotateDrawable_pivotX)) {
+            final TypedValue tv = a.peekValue(R.styleable.AnimatedRotateDrawable_pivotX);
+            state.mPivotXRel = tv.type == TypedValue.TYPE_FRACTION;
+            state.mPivotX = state.mPivotXRel ? tv.getFraction(1.0f, 1.0f) : tv.getFloat();
+        }
+
+        if (a.hasValue(R.styleable.AnimatedRotateDrawable_pivotY)) {
+            final TypedValue tv = a.peekValue(R.styleable.AnimatedRotateDrawable_pivotY);
+            state.mPivotYRel = tv.type == TypedValue.TYPE_FRACTION;
+            state.mPivotY = state.mPivotYRel ? tv.getFraction(1.0f, 1.0f) : tv.getFloat();
+        }
+
+        setFramesCount(a.getInt(
+                R.styleable.AnimatedRotateDrawable_framesCount, state.mFramesCount));
+        setFramesDuration(a.getInt(
+                R.styleable.AnimatedRotateDrawable_frameDuration, state.mFrameDuration));
     }
 
     public void setFramesCount(int framesCount) {
@@ -211,7 +211,15 @@ public class AnimatedRotateDrawable extends DrawableWrapper implements Animatabl
         mState.mFrameDuration = framesDuration;
     }
 
+    @Override
+    DrawableWrapperState mutateConstantState() {
+        mState = new AnimatedRotateState(mState, null);
+        return mState;
+    }
+
     static final class AnimatedRotateState extends DrawableWrapper.DrawableWrapperState {
+        private int[] mThemeAttrs;
+
         boolean mPivotXRel = false;
         float mPivotX = 0;
         boolean mPivotYRel = false;
@@ -219,8 +227,8 @@ public class AnimatedRotateDrawable extends DrawableWrapper implements Animatabl
         int mFrameDuration = 150;
         int mFramesCount = 12;
 
-        public AnimatedRotateState(AnimatedRotateState orig) {
-            super(orig);
+        public AnimatedRotateState(AnimatedRotateState orig, Resources res) {
+            super(orig, res);
 
             if (orig != null) {
                 mPivotXRel = orig.mPivotXRel;
