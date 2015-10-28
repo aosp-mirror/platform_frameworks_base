@@ -8,8 +8,7 @@
     <string name="keyboard_layout_english_us_intl" msgid="3705168594034233583">"અંગ્રેજી (યુએસ), આંતરરાષ્ટ્રીય શૈલી"</string>
     <string name="keyboard_layout_english_us_colemak_label" msgid="4194969610343455380">"અંગ્રેજી (યુએસ), કોલેમેક શૈલી"</string>
     <string name="keyboard_layout_english_us_dvorak_label" msgid="793528923171145202">"અંગ્રેજી (યુએસ), ડ્વોરક શૈલી"</string>
-    <!-- no translation found for keyboard_layout_english_us_workman_label (2944541595262173111) -->
-    <skip />
+    <string name="keyboard_layout_english_us_workman_label" msgid="2944541595262173111">"અંગ્રેજી (યુએસ), વર્કમૅન શૈલી"</string>
     <string name="keyboard_layout_german_label" msgid="8451565865467909999">"જર્મન"</string>
     <string name="keyboard_layout_french_label" msgid="813450119589383723">"ફ્રેન્ચ"</string>
     <string name="keyboard_layout_french_ca_label" msgid="365352601060604832">"ફ્રેન્ચ (કેનેડા)"</string>
