@@ -22,6 +22,7 @@ import android.view.View;
 import android.view.animation.AnimationUtils;
 import android.view.animation.Interpolator;
 import com.android.systemui.R;
+import com.android.systemui.recents.Recents;
 import com.android.systemui.recents.RecentsActivityLaunchState;
 import com.android.systemui.recents.RecentsConfiguration;
 import com.android.systemui.recents.events.activity.DismissRecentsToHomeAnimationStarted;
@@ -31,7 +32,6 @@ import com.android.systemui.recents.events.activity.EnterRecentsWindowAnimationS
 public class SystemBarScrimViews {
 
     Context mContext;
-    RecentsConfiguration mConfig;
 
     View mStatusBarScrimView;
     View mNavBarScrimView;
@@ -48,7 +48,6 @@ public class SystemBarScrimViews {
 
     public SystemBarScrimViews(Activity activity) {
         mContext = activity;
-        mConfig = RecentsConfiguration.getInstance();
         mStatusBarScrimView = activity.findViewById(R.id.status_bar_scrim);
         mNavBarScrimView = activity.findViewById(R.id.nav_bar_scrim);
         mNavBarScrimEnterDuration = activity.getResources().getInteger(
@@ -64,7 +63,8 @@ public class SystemBarScrimViews {
      * the first draw.
      */
     public void prepareEnterRecentsAnimation() {
-        RecentsActivityLaunchState launchState = mConfig.getLaunchState();
+        RecentsConfiguration config = Recents.getConfiguration();
+        RecentsActivityLaunchState launchState = config.getLaunchState();
         mHasNavBarScrim = launchState.hasNavBarScrim();
         mShouldAnimateNavBarScrim = launchState.shouldAnimateNavBarScrim();
         mHasStatusBarScrim = launchState.hasStatusBarScrim();
@@ -82,7 +82,8 @@ public class SystemBarScrimViews {
      * Starts animating the scrim views when entering Recents.
      */
     public final void onBusEvent(EnterRecentsWindowAnimationStartedEvent event) {
-        RecentsActivityLaunchState launchState = mConfig.getLaunchState();
+        RecentsConfiguration config = Recents.getConfiguration();
+        RecentsActivityLaunchState launchState = config.getLaunchState();
         int transitionEnterFromAppDelay = mContext.getResources().getInteger(
                 R.integer.recents_enter_from_app_transition_duration);
         int transitionEnterFromHomeDelay = mContext.getResources().getInteger(

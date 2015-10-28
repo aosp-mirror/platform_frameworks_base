@@ -135,7 +135,6 @@ public class RecentsImpl extends IRecentsNonSystemUserCallbacks.Stub
     boolean mCanReuseTaskStackViews = true;
 
     // Task launching
-    RecentsConfiguration mConfig;
     Rect mSearchBarBounds = new Rect();
     Rect mTaskStackBounds = new Rect();
     Rect mLastTaskViewBounds = new Rect();
@@ -174,7 +173,6 @@ public class RecentsImpl extends IRecentsNonSystemUserCallbacks.Stub
         ssp.registerTaskStackListener(mTaskStackListener);
 
         // Initialize the static configuration resources
-        mConfig = RecentsConfiguration.initialize(mContext, ssp);
         mStatusBarHeight = res.getDimensionPixelSize(com.android.internal.R.dimen.status_bar_height);
         mNavBarHeight = res.getDimensionPixelSize(com.android.internal.R.dimen.navigation_bar_height);
         mNavBarWidth = res.getDimensionPixelSize(com.android.internal.R.dimen.navigation_bar_width);
@@ -205,7 +203,7 @@ public class RecentsImpl extends IRecentsNonSystemUserCallbacks.Stub
     public void onConfigurationChanged() {
         // Don't reuse task stack views if the configuration changes
         mCanReuseTaskStackViews = false;
-        mConfig.updateOnConfigurationChange();
+        Recents.getConfiguration().updateOnConfigurationChange();
     }
 
     /**
@@ -445,24 +443,25 @@ public class RecentsImpl extends IRecentsNonSystemUserCallbacks.Stub
      *                               is not already bound (can be expensive)
      */
     private void reloadHeaderBarLayout(boolean tryAndBindSearchWidget) {
+        RecentsConfiguration config = Recents.getConfiguration();
         SystemServicesProxy ssp = Recents.getSystemServices();
         Rect windowRect = ssp.getWindowRect();
 
         // Update the configuration for the current state
-        mConfig.update(mContext, ssp, ssp.getWindowRect());
+        config.update(mContext, ssp, ssp.getWindowRect());
 
         if (!Constants.DebugFlags.App.DisableSearchBar && tryAndBindSearchWidget) {
             // Try and pre-emptively bind the search widget on startup to ensure that we
             // have the right thumbnail bounds to animate to.
             // Note: We have to reload the widget id before we get the task stack bounds below
             if (ssp.getOrBindSearchAppWidget(mContext, mAppWidgetHost) != null) {
-                mConfig.getSearchBarBounds(windowRect, mStatusBarHeight, mSearchBarBounds);
+                config.getSearchBarBounds(windowRect, mStatusBarHeight, mSearchBarBounds);
             }
         }
         Rect systemInsets = new Rect(0, mStatusBarHeight,
-                (mConfig.hasTransposedNavBar ? mNavBarWidth : 0),
-                (mConfig.hasTransposedNavBar ? 0 : mNavBarHeight));
-        mConfig.getTaskStackBounds(windowRect, systemInsets.top, systemInsets.right,
+                (config.hasTransposedNavBar ? mNavBarWidth : 0),
+                (config.hasTransposedNavBar ? 0 : mNavBarHeight));
+        config.getTaskStackBounds(windowRect, systemInsets.top, systemInsets.right,
                 mSearchBarBounds, mTaskStackBounds);
 
         // Rebind the header bar and draw it for the transition
@@ -718,7 +717,8 @@ public class RecentsImpl extends IRecentsNonSystemUserCallbacks.Stub
         mStartAnimationTriggered = false;
 
         // Update the configuration based on the launch options
-        RecentsActivityLaunchState launchState = mConfig.getLaunchState();
+        RecentsConfiguration config = Recents.getConfiguration();
+        RecentsActivityLaunchState launchState = config.getLaunchState();
         launchState.launchedFromHome = fromSearchHome || fromHome;
         launchState.launchedFromSearchHome = fromSearchHome;
         launchState.launchedFromAppWithThumbnail = fromThumbnail;

@@ -175,7 +175,7 @@ public class TaskStackViewLayoutAlgorithm {
      * Computes the stack and task rects.
      */
     public void computeRects(Rect taskStackBounds) {
-        RecentsConfiguration config = RecentsConfiguration.getInstance();
+        RecentsConfiguration config = Recents.getConfiguration();
         int widthPadding = (int) (config.taskStackWidthPaddingPct * taskStackBounds.width());
         int heightPadding = mContext.getResources().getDimensionPixelSize(
                 R.dimen.recents_stack_top_padding);

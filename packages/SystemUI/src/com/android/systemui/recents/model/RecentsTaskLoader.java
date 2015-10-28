@@ -155,7 +155,7 @@ class BackgroundTaskLoader implements Runnable {
                     }
                 }
             } else {
-                RecentsConfiguration config = RecentsConfiguration.getInstance();
+                RecentsConfiguration config = Recents.getConfiguration();
                 SystemServicesProxy ssp = Recents.getSystemServices();
                 // If we've stopped the loader, then fall through to the above logic to wait on
                 // the load thread
@@ -320,8 +320,7 @@ public class RecentsTaskLoader {
 
     /** Creates a new plan for loading the recent tasks. */
     public RecentsTaskLoadPlan createLoadPlan(Context context) {
-        RecentsConfiguration config = RecentsConfiguration.getInstance();
-        RecentsTaskLoadPlan plan = new RecentsTaskLoadPlan(context, config);
+        RecentsTaskLoadPlan plan = new RecentsTaskLoadPlan(context);
         return plan;
     }
 
@@ -383,7 +382,7 @@ public class RecentsTaskLoader {
      * out of memory.
      */
     public void onTrimMemory(int level) {
-        RecentsConfiguration config = RecentsConfiguration.getInstance();
+        RecentsConfiguration config = Recents.getConfiguration();
         switch (level) {
             case ComponentCallbacks2.TRIM_MEMORY_UI_HIDDEN:
                 // Stop the loader immediately when the UI is no longer visible
@@ -528,7 +527,7 @@ public class RecentsTaskLoader {
         }
 
         if (loadIfNotCached) {
-            RecentsConfiguration config = RecentsConfiguration.getInstance();
+            RecentsConfiguration config = Recents.getConfiguration();
             if (config.svelteLevel < RecentsConfiguration.SVELTE_DISABLE_LOADING) {
                 // Load the thumbnail from the system
                 thumbnail = ssp.getTaskThumbnail(taskKey.id);

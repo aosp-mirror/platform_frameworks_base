@@ -19,6 +19,7 @@ package com.android.systemui.recents.views;
 import android.content.res.Configuration;
 import android.graphics.Point;
 import android.view.MotionEvent;
+import com.android.systemui.recents.Recents;
 import com.android.systemui.recents.RecentsConfiguration;
 import com.android.systemui.recents.events.EventBus;
 import com.android.systemui.recents.events.ui.dragndrop.DragDockStateChangedEvent;
@@ -73,7 +74,7 @@ class RecentsViewTouchHandler {
     public TaskStack.DockState[] getDockStatesForCurrentOrientation() {
         boolean isLandscape = mRv.getResources().getConfiguration().orientation ==
                 Configuration.ORIENTATION_LANDSCAPE;
-        RecentsConfiguration config = RecentsConfiguration.getInstance();
+        RecentsConfiguration config = Recents.getConfiguration();
         TaskStack.DockState[] dockStates = isLandscape ?
                 (config.isLargeScreen ? DockRegion.TABLET_LANDSCAPE : DockRegion.PHONE_LANDSCAPE) :
                 (config.isLargeScreen ? DockRegion.TABLET_PORTRAIT : DockRegion.PHONE_PORTRAIT);

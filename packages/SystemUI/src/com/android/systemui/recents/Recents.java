@@ -54,6 +54,7 @@ public class Recents extends SystemUI
 
     private static SystemServicesProxy sSystemServicesProxy;
     private static RecentsTaskLoader sTaskLoader;
+    private static RecentsConfiguration sConfiguration;
 
     private Handler mHandler;
     private RecentsImpl mImpl;
@@ -129,10 +130,15 @@ public class Recents extends SystemUI
         return sSystemServicesProxy;
     }
 
+    public static RecentsConfiguration getConfiguration() {
+        return sConfiguration;
+    }
+
     @Override
     public void start() {
         sSystemServicesProxy = new SystemServicesProxy(mContext);
         sTaskLoader = new RecentsTaskLoader(mContext);
+        sConfiguration = new RecentsConfiguration(mContext);
         mHandler = new Handler();
         mImpl = new RecentsImpl(mContext);
 

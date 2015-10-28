@@ -41,6 +41,7 @@ import java.util.List;
  *      options specified, such that we can transition into the Recents activity seamlessly
  */
 public class RecentsTaskLoadPlan {
+
     private static String TAG = "RecentsTaskLoadPlan";
     private static boolean DEBUG = false;
 
@@ -58,39 +59,50 @@ public class RecentsTaskLoadPlan {
     }
 
     Context mContext;
-    RecentsConfiguration mConfig;
 
     List<ActivityManager.RecentTaskInfo> mRawTasks;
     TaskStack mStack;
 
     /** Package level ctor */
-    RecentsTaskLoadPlan(Context context, RecentsConfiguration config) {
+    RecentsTaskLoadPlan(Context context) {
         mContext = context;
-        mConfig = config;
     }
 
     /**
-     * An optimization to preload the raw list of tasks.
+     * An optimization to preload the raw list of tasks.  The raw tasks are saved in least-recent
+     * to most-recent order.
      */
     public synchronized void preloadRawTasks(boolean isTopTaskHome) {
         SystemServicesProxy ssp = Recents.getSystemServices();
         mRawTasks = ssp.getRecentTasks(ActivityManager.getMaxRecentTasksStatic(),
                 UserHandle.CURRENT.getIdentifier(), isTopTaskHome);
+        // Since the raw tasks are given in most-recent to least-recent order, we need to reverse it
         Collections.reverse(mRawTasks);
 
-        if (DEBUG) Log.d(TAG, "preloadRawTasks, tasks: " + mRawTasks.size());
+        if (DEBUG) {
+            Log.d(TAG, "preloadRawTasks, tasks: " + mRawTasks.size());
+            for (ActivityManager.RecentTaskInfo info : mRawTasks) {
+                Log.d(TAG, "  " + info.baseIntent + ", " + info.lastActiveTime);
+            }
+        }
     }
 
     /**
      * Preloads the list of recent tasks from the system.  After this call, the TaskStack will
      * have a list of all the recent tasks with their metadata, not including icons or
      * thumbnails which were not cached and have to be loaded.
+     *
+     * The tasks will be ordered by:
+     * - least-recent to most-recent stack tasks
+     * - least-recent to most-recent freeform tasks
      */
     public synchronized void preloadPlan(RecentsTaskLoader loader, boolean isTopTaskHome) {
         if (DEBUG) Log.d(TAG, "preloadPlan");
 
+        RecentsConfiguration config = Recents.getConfiguration();
         SystemServicesProxy ssp = Recents.getSystemServices();
         Resources res = mContext.getResources();
+        ArrayList<Task> freeformTasks = new ArrayList<>();
         ArrayList<Task> stackTasks = new ArrayList<>();
         if (mRawTasks == null) {
             preloadRawTasks(isTopTaskHome);
@@ -113,16 +125,14 @@ public class RecentsTaskLoadPlan {
             int activityColor = loader.getActivityPrimaryColor(t.taskDescription);
 
             Bitmap icon = t.taskDescription != null
-                    ? t.taskDescription.getInMemoryIcon()
-                    : null;
+                    ? t.taskDescription.getInMemoryIcon() : null;
             String iconFilename = t.taskDescription != null
-                    ? t.taskDescription.getIconFilename()
-                    : null;
+                    ? t.taskDescription.getIconFilename() : null;
 
             // Add the task to the stack
             Task task = new Task(taskKey, (t.id != INVALID_TASK_ID), t.affiliatedTaskId,
                     t.affiliatedTaskColor, activityLabel, contentDescription, activityIcon,
-                    activityColor, (i == (taskCount - 1)), mConfig.lockToAppEnabled, icon,
+                    activityColor, (i == (taskCount - 1)), config.lockToAppEnabled, icon,
                     iconFilename);
             task.thumbnail = loader.getAndUpdateThumbnail(taskKey, ssp, false);
             if (DEBUG) Log.d(TAG, "\tthumbnail: " + taskKey + ", " + task.thumbnail);
@@ -145,6 +155,7 @@ public class RecentsTaskLoadPlan {
                 ", # thumbnails: " + opts.numVisibleTaskThumbnails +
                 ", running task id: " + opts.runningTaskId);
 
+        RecentsConfiguration config = Recents.getConfiguration();
         SystemServicesProxy ssp = Recents.getSystemServices();
         Resources res = mContext.getResources();
 
@@ -175,9 +186,9 @@ public class RecentsTaskLoadPlan {
             if (opts.loadThumbnails && (isRunningTask || isVisibleThumbnail)) {
                 if (task.thumbnail == null || isRunningTask) {
                     if (DEBUG) Log.d(TAG, "\tLoading thumbnail: " + taskKey);
-                    if (mConfig.svelteLevel <= RecentsConfiguration.SVELTE_LIMIT_CACHE) {
+                    if (config.svelteLevel <= RecentsConfiguration.SVELTE_LIMIT_CACHE) {
                         task.thumbnail = loader.getAndUpdateThumbnail(taskKey, ssp, true);
-                    } else if (mConfig.svelteLevel == RecentsConfiguration.SVELTE_DISABLE_CACHE) {
+                    } else if (config.svelteLevel == RecentsConfiguration.SVELTE_DISABLE_CACHE) {
                         loadQueue.addTask(task);
                     }
                 }
