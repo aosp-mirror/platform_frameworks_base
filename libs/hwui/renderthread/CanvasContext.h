@@ -130,6 +130,10 @@ public:
         mContentDrawBounds.set(left, top, right, bottom);
     }
 
+    RenderState& getRenderState() {
+        return mRenderThread.renderState();
+    }
+
 private:
     friend class RegisterFrameCallbackTask;
     // TODO: Replace with something better for layer & other GL object

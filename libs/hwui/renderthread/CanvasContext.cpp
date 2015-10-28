@@ -197,7 +197,6 @@ void CanvasContext::prepareTree(TreeInfo& info, int64_t* uiFrameInfo,
 
     info.damageAccumulator = &mDamageAccumulator;
     info.renderer = mCanvas;
-    info.canvasContext = this;
 
     mAnimationContext->startFrame(info.mode);
     for (const sp<RenderNode>& node : mRenderNodes) {
@@ -487,7 +486,7 @@ void CanvasContext::prepareAndDraw(RenderNode* node) {
         .setVsync(mRenderThread.timeLord().computeFrameTimeNanos(),
                 mRenderThread.timeLord().latestVsync());
 
-    TreeInfo info(TreeInfo::MODE_RT_ONLY, mRenderThread.renderState());
+    TreeInfo info(TreeInfo::MODE_RT_ONLY, *this);
     prepareTree(info, frameInfo, systemTime(CLOCK_MONOTONIC), node);
     if (info.out.canDrawThisFrame) {
         draw();
@@ -531,7 +530,7 @@ void CanvasContext::buildLayer(RenderNode* node) {
     // buildLayer() will leave the tree in an unknown state, so we must stop drawing
     stopDrawing();
 
-    TreeInfo info(TreeInfo::MODE_FULL, mRenderThread.renderState());
+    TreeInfo info(TreeInfo::MODE_FULL, *this);
     info.damageAccumulator = &mDamageAccumulator;
     info.renderer = mCanvas;
     info.runAnimations = false;

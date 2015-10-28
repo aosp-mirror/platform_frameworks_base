@@ -250,7 +250,8 @@ void RenderNode::pushLayerUpdate(TreeInfo& info) {
 
     bool transformUpdateNeeded = false;
     if (!mLayer) {
-        mLayer = LayerRenderer::createRenderLayer(info.renderState, getWidth(), getHeight());
+        mLayer = LayerRenderer::createRenderLayer(
+                info.canvasContext.getRenderState(), getWidth(), getHeight());
         applyLayerPropertiesToLayer(info);
         damageSelf(info);
         transformUpdateNeeded = true;
@@ -293,12 +294,10 @@ void RenderNode::pushLayerUpdate(TreeInfo& info) {
         info.renderer->pushLayerUpdate(mLayer);
     }
 
-    if (info.canvasContext) {
-        // There might be prefetched layers that need to be accounted for.
-        // That might be us, so tell CanvasContext that this layer is in the
-        // tree and should not be destroyed.
-        info.canvasContext->markLayerInUse(this);
-    }
+    // There might be prefetched layers that need to be accounted for.
+    // That might be us, so tell CanvasContext that this layer is in the
+    // tree and should not be destroyed.
+    info.canvasContext.markLayerInUse(this);
 }
 
 /**
@@ -419,7 +418,8 @@ void RenderNode::prepareSubTree(TreeInfo& info, bool functorsNeedLayer, DisplayL
         TextureCache& cache = Caches::getInstance().textureCache;
         info.out.hasFunctors |= subtree->getFunctors().size();
         for (auto&& bitmapResource : subtree->getBitmapResources()) {
-            info.prepareTextures = cache.prefetchAndMarkInUse(info.canvasContext, bitmapResource);
+            void* ownerToken = &info.canvasContext;
+            info.prepareTextures = cache.prefetchAndMarkInUse(ownerToken, bitmapResource);
         }
         for (auto&& op : subtree->getChildren()) {
             RenderNode* childNode = op->renderNode;
