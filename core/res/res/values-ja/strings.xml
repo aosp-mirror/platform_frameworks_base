@@ -1047,7 +1047,7 @@
     <string name="adb_active_notification_message" msgid="1016654627626476142">"タップしてUSBデバッグを無効化"</string>
     <string name="select_input_method" msgid="8547250819326693584">"キーボードの変更"</string>
     <string name="configure_input_methods" msgid="4769971288371946846">"キーボードの選択"</string>
-    <string name="show_ime" msgid="9157568568695230830">"入力方法を表示する"</string>
+    <string name="show_ime" msgid="9157568568695230830">"スクリーンキーボードを表示する"</string>
     <string name="hardware" msgid="7517821086888990278">"ハードウェア"</string>
     <string name="select_keyboard_layout_notification_title" msgid="1407367017263030773">"キーボードレイアウトの選択"</string>
     <string name="select_keyboard_layout_notification_message" msgid="4465907700449257063">"タップしてキーボードレイアウトを選択してください。"</string>
