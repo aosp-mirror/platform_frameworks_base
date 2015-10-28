@@ -487,6 +487,16 @@ public class UserManager {
     public static final String DISALLOW_RECORD_AUDIO = "no_record_audio";
 
     /**
+     * Specifies if a user is not allowed to use the camera.
+     *
+     * @see DevicePolicyManager#addUserRestriction(ComponentName, String)
+     * @see DevicePolicyManager#clearUserRestriction(ComponentName, String)
+     * @see #getUserRestrictions()
+     * @hide
+     */
+    public static final String DISALLOW_CAMERA = "no_camera";
+
+    /**
      * Allows apps in the parent profile to handle web links from the managed profile.
      *
      * This user restriction has an effect only in a managed profile.

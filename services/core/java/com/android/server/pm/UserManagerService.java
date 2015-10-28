@@ -742,10 +742,11 @@ public class UserManagerService extends IUserManager.Stub {
             mBaseUserRestrictions.put(userId, newRestrictions);
         }
 
-        mCachedEffectiveUserRestrictions.put(
-                userId, computeEffectiveUserRestrictionsRL(userId));
+        final Bundle effective = computeEffectiveUserRestrictionsRL(userId);
 
-        applyUserRestrictionsRL(userId, mBaseUserRestrictions.get(userId), prevRestrictions);
+        mCachedEffectiveUserRestrictions.put(userId, effective);
+
+        applyUserRestrictionsRL(userId, effective, prevRestrictions);
     }
 
     @GuardedBy("mRestrictionsLock")

@@ -2271,6 +2271,8 @@ public class DevicePolicyManager {
      * on the device, for this user. After setting this, no applications running as this user
      * will be able to access any cameras on the device.
      *
+     * <p>If the caller is device owner, then the restriction will be applied to all users.
+     *
      * <p>The calling device admin must have requested
      * {@link DeviceAdminInfo#USES_POLICY_DISABLE_CAMERA} to be able to call
      * this method; if it has not, a security exception will be thrown.
