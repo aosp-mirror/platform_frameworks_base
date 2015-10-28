@@ -28,48 +28,82 @@ struct Glop;
 class Layer;
 class RenderState;
 
+/**
+ * Lightweight alternative to Layer. Owns the persistent state of an offscreen render target, and
+ * encompasses enough information to draw it back on screen (minus paint properties, which are held
+ * by LayerOp).
+ */
+class OffscreenBuffer {
+public:
+    OffscreenBuffer(Caches& caches, uint32_t textureWidth, uint32_t textureHeight,
+            uint32_t viewportWidth, uint32_t viewportHeight);
+
+    Texture texture;
+    Rect texCoords;
+    Region region;
+};
+
+/**
+ * Main rendering manager for a collection of work - one frame + any contained FBOs.
+ *
+ * Manages frame and FBO lifecycle, binding the GL framebuffer as appropriate. This is the only
+ * place where FBOs are bound, created, and destroyed.
+ *
+ * All rendering operations will be sent by the Dispatcher, a collection of static methods,
+ * which has intentionally limited access to the renderer functionality.
+ */
 class BakedOpRenderer {
 public:
-    class Info {
-    public:
-        Info(Caches& caches, RenderState& renderState, bool opaque)
-                : renderState(renderState)
-                , caches(caches)
-                , opaque(opaque) {
-        }
+    BakedOpRenderer(Caches& caches, RenderState& renderState, bool opaque)
+            : mRenderState(renderState)
+            , mCaches(caches)
+            , mOpaque(opaque) {
+    }
 
-        void setViewport(uint32_t width, uint32_t height);
+    RenderState& renderState() { return mRenderState; }
+    Caches& caches() { return mCaches; }
 
-        Texture* getTexture(const SkBitmap* bitmap);
+    void startFrame(uint32_t width, uint32_t height);
+    void endFrame();
+    OffscreenBuffer* startLayer(uint32_t width, uint32_t height);
+    void endLayer();
 
-        void renderGlop(const BakedOpState& state, const Glop& glop);
-        RenderState& renderState;
-        Caches& caches;
+    Texture* getTexture(const SkBitmap* bitmap);
 
-        bool didDraw = false;
+    void renderGlop(const BakedOpState& state, const Glop& glop);
+    bool didDraw() { return mHasDrawn; }
+private:
+    void setViewport(uint32_t width, uint32_t height);
 
-        Layer* layer = nullptr;
+    RenderState& mRenderState;
+    Caches& mCaches;
+    bool mOpaque;
+    bool mHasDrawn = false;
 
-        // where should these live? layer state object?
-        bool opaque;
+    // render target state - setup by start/end layer/frame
+    // only valid to use in between start/end pairs.
+    struct {
+        GLuint frameBufferId = 0;
+        OffscreenBuffer* offscreenBuffer = nullptr;
         uint32_t viewportWidth = 0;
         uint32_t viewportHeight = 0;
         Matrix4 orthoMatrix;
-    };
+    } mRenderTarget;
+};
 
-    static Layer* startLayer(Info& info, uint32_t width, uint32_t height);
-    static void endLayer(Info& info);
-    static void startFrame(Info& info, uint32_t width, uint32_t height);
-    static void endFrame(Info& info);
-
-    /**
-     * Declare all "onBitmapOp(...)" style function for every op type.
-     *
-     * These functions will perform the actual rendering of the individual operations in OpenGL,
-     * given the transform/clip and other state built into the BakedOpState object passed in.
-     */
-    #define BAKED_OP_RENDERER_METHOD(Type) static void on##Type(Info& info, const Type& op, const BakedOpState& state);
-    MAP_OPS(BAKED_OP_RENDERER_METHOD);
+/**
+ * Provides all "onBitmapOp(...)" style static methods for every op type, which convert the
+ * RecordedOps and their state to Glops, and renders them with the provided BakedOpRenderer.
+ *
+ * This dispatcher is separate from the renderer so that the dispatcher / renderer interaction is
+ * minimal through public BakedOpRenderer APIs.
+ */
+class BakedOpDispatcher {
+public:
+    // Declares all "onBitmapOp(...)" style methods for every op type
+#define DISPATCH_METHOD(Type) \
+        static void on##Type(BakedOpRenderer& renderer, const Type& op, const BakedOpState& state);
+    MAP_OPS(DISPATCH_METHOD);
 };
 
 }; // namespace uirenderer

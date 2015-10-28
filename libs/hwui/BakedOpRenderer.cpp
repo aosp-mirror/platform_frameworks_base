@@ -25,190 +25,210 @@
 namespace android {
 namespace uirenderer {
 
-void BakedOpRenderer::Info::setViewport(uint32_t width, uint32_t height) {
-    viewportWidth = width;
-    viewportHeight = height;
-    orthoMatrix.loadOrtho(viewportWidth, viewportHeight);
+////////////////////////////////////////////////////////////////////////////////
+// OffscreenBuffer
+////////////////////////////////////////////////////////////////////////////////
 
-    renderState.setViewport(width, height);
-    renderState.blend().syncEnabled();
+OffscreenBuffer::OffscreenBuffer(Caches& caches, uint32_t textureWidth, uint32_t textureHeight,
+        uint32_t viewportWidth, uint32_t viewportHeight)
+        : texture(caches)
+        , texCoords(0, viewportHeight / float(textureHeight), viewportWidth / float(textureWidth), 0) {
+    texture.width = textureWidth;
+    texture.height = textureHeight;
+
+    caches.textureState().activateTexture(0);
+    glGenTextures(1, &texture.id);
+    caches.textureState().bindTexture(GL_TEXTURE_2D, texture.id);
+
+    texture.setWrap(GL_CLAMP_TO_EDGE, false, false, GL_TEXTURE_2D);
+    // not setting filter on texture, since it's set when drawing, based on transform
+
+    glPixelStorei(GL_UNPACK_ALIGNMENT, 4);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, texture.width, texture.height, 0,
+            GL_RGBA, GL_UNSIGNED_BYTE, nullptr);
 }
 
-Texture* BakedOpRenderer::Info::getTexture(const SkBitmap* bitmap) {
-    Texture* texture = renderState.assetAtlas().getEntryTexture(bitmap);
-    if (!texture) {
-        return caches.textureCache.get(bitmap);
-    }
-    return texture;
-}
+////////////////////////////////////////////////////////////////////////////////
+// BakedOpRenderer
+////////////////////////////////////////////////////////////////////////////////
 
-void BakedOpRenderer::Info::renderGlop(const BakedOpState& state, const Glop& glop) {
-    bool useScissor = state.computedState.clipSideFlags != OpClipSideFlags::None;
-    renderState.scissor().setEnabled(useScissor);
-    if (useScissor) {
-        const Rect& clip = state.computedState.clipRect;
-        renderState.scissor().set(clip.left, viewportHeight - clip.bottom,
-            clip.getWidth(), clip.getHeight());
-    }
-    renderState.render(glop, orthoMatrix);
-    didDraw = true;
-}
+OffscreenBuffer* BakedOpRenderer::startLayer(uint32_t width, uint32_t height) {
+    LOG_ALWAYS_FATAL_IF(mRenderTarget.offscreenBuffer, "already has layer...");
 
-Layer* BakedOpRenderer::startLayer(Info& info, uint32_t width, uint32_t height) {
-    info.caches.textureState().activateTexture(0);
-    Layer* layer = info.caches.layerCache.get(info.renderState, width, height);
-    LOG_ALWAYS_FATAL_IF(!layer, "need layer...");
+    // TODO: really should be caching these!
+    OffscreenBuffer* buffer = new OffscreenBuffer(mCaches, width, height, width, height);
+    mRenderTarget.offscreenBuffer = buffer;
 
-    info.layer = layer;
-    layer->texCoords.set(0.0f, width / float(layer->getHeight()),
-            height / float(layer->getWidth()), 0.0f);
-
-    layer->setFbo(info.renderState.genFramebuffer());
-    info.renderState.bindFramebuffer(layer->getFbo());
-    layer->bindTexture();
-
-    // Initialize the texture if needed
-    if (layer->isEmpty()) {
-        layer->allocateTexture();
-        layer->setEmpty(false);
-    }
+    // create and bind framebuffer
+    mRenderTarget.frameBufferId = mRenderState.genFramebuffer();
+    mRenderState.bindFramebuffer(mRenderTarget.frameBufferId);
 
     // attach the texture to the FBO
     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D,
-            layer->getTextureId(), 0);
+            buffer->texture.id, 0);
     LOG_ALWAYS_FATAL_IF(GLUtils::dumpGLErrors(), "startLayer FAILED");
     LOG_ALWAYS_FATAL_IF(glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE,
             "framebuffer incomplete!");
 
     // Clear the FBO
-    info.renderState.scissor().setEnabled(false);
+    mRenderState.scissor().setEnabled(false);
     glClear(GL_COLOR_BUFFER_BIT);
 
     // Change the viewport & ortho projection
-    info.setViewport(width, height);
-    return layer;
+    setViewport(width, height);
+    return buffer;
 }
 
-void BakedOpRenderer::endLayer(Info& info) {
-    Layer* layer = info.layer;
-    info.layer = nullptr;
+void BakedOpRenderer::endLayer() {
+    mRenderTarget.offscreenBuffer = nullptr;
 
     // Detach the texture from the FBO
     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, 0, 0);
     LOG_ALWAYS_FATAL_IF(GLUtils::dumpGLErrors(), "endLayer FAILED");
-    layer->removeFbo(false);
+    mRenderState.deleteFramebuffer(mRenderTarget.frameBufferId);
+    mRenderTarget.frameBufferId = -1;
 }
 
-void BakedOpRenderer::startFrame(Info& info, uint32_t width, uint32_t height) {
-    info.renderState.bindFramebuffer(0);
-    info.setViewport(width, height);
-    Caches::getInstance().clearGarbage();
+void BakedOpRenderer::startFrame(uint32_t width, uint32_t height) {
+    mRenderState.bindFramebuffer(0);
+    setViewport(width, height);
+    mCaches.clearGarbage();
 
-    if (!info.opaque) {
+    if (!mOpaque) {
         // TODO: partial invalidate!
-        info.renderState.scissor().setEnabled(false);
+        mRenderState.scissor().setEnabled(false);
         glClear(GL_COLOR_BUFFER_BIT);
-        info.didDraw = true;
+        mHasDrawn = true;
     }
 }
-void BakedOpRenderer::endFrame(Info& info) {
-    info.caches.pathCache.trim();
-    info.caches.tessellationCache.trim();
+
+void BakedOpRenderer::endFrame() {
+    mCaches.pathCache.trim();
+    mCaches.tessellationCache.trim();
 
 #if DEBUG_OPENGL
     GLUtils::dumpGLErrors();
 #endif
 
 #if DEBUG_MEMORY_USAGE
-    info.caches.dumpMemoryUsage();
+    mCaches.dumpMemoryUsage();
 #else
     if (Properties::debugLevel & kDebugMemory) {
-        info.caches.dumpMemoryUsage();
+        mCaches.dumpMemoryUsage();
     }
 #endif
 }
 
-void BakedOpRenderer::onRenderNodeOp(Info&, const RenderNodeOp&, const BakedOpState&) {
+void BakedOpRenderer::setViewport(uint32_t width, uint32_t height) {
+    mRenderTarget.viewportWidth = width;
+    mRenderTarget.viewportHeight = height;
+    mRenderTarget.orthoMatrix.loadOrtho(width, height);
+
+    mRenderState.setViewport(width, height);
+    mRenderState.blend().syncEnabled();
+}
+
+Texture* BakedOpRenderer::getTexture(const SkBitmap* bitmap) {
+    Texture* texture = mRenderState.assetAtlas().getEntryTexture(bitmap);
+    if (!texture) {
+        return mCaches.textureCache.get(bitmap);
+    }
+    return texture;
+}
+
+void BakedOpRenderer::renderGlop(const BakedOpState& state, const Glop& glop) {
+    bool useScissor = state.computedState.clipSideFlags != OpClipSideFlags::None;
+    mRenderState.scissor().setEnabled(useScissor);
+    if (useScissor) {
+        const Rect& clip = state.computedState.clipRect;
+        mRenderState.scissor().set(clip.left, mRenderTarget.viewportHeight - clip.bottom,
+            clip.getWidth(), clip.getHeight());
+    }
+    mRenderState.render(glop, mRenderTarget.orthoMatrix);
+    mHasDrawn = true;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+// static BakedOpDispatcher methods
+////////////////////////////////////////////////////////////////////////////////
+
+void BakedOpDispatcher::onRenderNodeOp(BakedOpRenderer&, const RenderNodeOp&, const BakedOpState&) {
     LOG_ALWAYS_FATAL("unsupported operation");
 }
 
-void BakedOpRenderer::onBitmapOp(Info& info, const BitmapOp& op, const BakedOpState& state) {
-    info.caches.textureState().activateTexture(0); // TODO: should this be automatic, and/or elsewhere?
-    Texture* texture = info.getTexture(op.bitmap);
+void BakedOpDispatcher::onBitmapOp(BakedOpRenderer& renderer, const BitmapOp& op, const BakedOpState& state) {
+    renderer.caches().textureState().activateTexture(0); // TODO: should this be automatic, and/or elsewhere?
+    Texture* texture = renderer.getTexture(op.bitmap);
     if (!texture) return;
     const AutoTexture autoCleanup(texture);
 
     const int textureFillFlags = (op.bitmap->colorType() == kAlpha_8_SkColorType)
             ? TextureFillFlags::IsAlphaMaskTexture : TextureFillFlags::None;
     Glop glop;
-    GlopBuilder(info.renderState, info.caches, &glop)
+    GlopBuilder(renderer.renderState(), renderer.caches(), &glop)
             .setRoundRectClipState(state.roundRectClipState)
             .setMeshTexturedUnitQuad(texture->uvMapper)
             .setFillTexturePaint(*texture, textureFillFlags, op.paint, state.alpha)
             .setTransform(state.computedState.transform, TransformFlags::None)
             .setModelViewMapUnitToRectSnap(Rect(0, 0, texture->width, texture->height))
             .build();
-    info.renderGlop(state, glop);
+    renderer.renderGlop(state, glop);
 }
 
-void BakedOpRenderer::onRectOp(Info& info, const RectOp& op, const BakedOpState& state) {
+void BakedOpDispatcher::onRectOp(BakedOpRenderer& renderer, const RectOp& op, const BakedOpState& state) {
     Glop glop;
-    GlopBuilder(info.renderState, info.caches, &glop)
+    GlopBuilder(renderer.renderState(), renderer.caches(), &glop)
             .setRoundRectClipState(state.roundRectClipState)
             .setMeshUnitQuad()
             .setFillPaint(*op.paint, state.alpha)
             .setTransform(state.computedState.transform, TransformFlags::None)
             .setModelViewMapUnitToRect(op.unmappedBounds)
             .build();
-    info.renderGlop(state, glop);
+    renderer.renderGlop(state, glop);
 }
 
-void BakedOpRenderer::onSimpleRectsOp(Info& info, const SimpleRectsOp& op, const BakedOpState& state) {
+void BakedOpDispatcher::onSimpleRectsOp(BakedOpRenderer& renderer, const SimpleRectsOp& op, const BakedOpState& state) {
     Glop glop;
-    GlopBuilder(info.renderState, info.caches, &glop)
+    GlopBuilder(renderer.renderState(), renderer.caches(), &glop)
             .setRoundRectClipState(state.roundRectClipState)
             .setMeshIndexedQuads(&op.vertices[0], op.vertexCount / 4)
             .setFillPaint(*op.paint, state.alpha)
             .setTransform(state.computedState.transform, TransformFlags::None)
             .setModelViewOffsetRect(0, 0, op.unmappedBounds)
             .build();
-    info.renderGlop(state, glop);
+    renderer.renderGlop(state, glop);
 }
 
-void BakedOpRenderer::onBeginLayerOp(Info& info, const BeginLayerOp& op, const BakedOpState& state) {
+void BakedOpDispatcher::onBeginLayerOp(BakedOpRenderer& renderer, const BeginLayerOp& op, const BakedOpState& state) {
     LOG_ALWAYS_FATAL("unsupported operation");
 }
 
-void BakedOpRenderer::onEndLayerOp(Info& info, const EndLayerOp& op, const BakedOpState& state) {
+void BakedOpDispatcher::onEndLayerOp(BakedOpRenderer& renderer, const EndLayerOp& op, const BakedOpState& state) {
     LOG_ALWAYS_FATAL("unsupported operation");
 }
 
-void BakedOpRenderer::onLayerOp(Info& info, const LayerOp& op, const BakedOpState& state) {
-    Layer* layer = *op.layerHandle;
+void BakedOpDispatcher::onLayerOp(BakedOpRenderer& renderer, const LayerOp& op, const BakedOpState& state) {
+    OffscreenBuffer* buffer = *op.layerHandle;
 
-    // TODO: make this work for HW layers
-    layer->setPaint(op.paint);
-    layer->setBlend(true);
-    float layerAlpha = (layer->getAlpha() / 255.0f) * state.alpha;
-
+    // TODO: extend this to handle HW layers & paint properties which
+    // reside in node.properties().layerProperties()
+    float layerAlpha = (op.paint->getAlpha() / 255.0f) * state.alpha;
     const bool tryToSnap = state.computedState.transform.isPureTranslate();
     Glop glop;
-    GlopBuilder(info.renderState, info.caches, &glop)
+    GlopBuilder(renderer.renderState(), renderer.caches(), &glop)
             .setRoundRectClipState(state.roundRectClipState)
-            .setMeshTexturedUvQuad(nullptr, layer->texCoords)
-            .setFillLayer(layer->getTexture(), layer->getColorFilter(), layerAlpha, layer->getMode(), Blend::ModeOrderSwap::NoSwap)
+            .setMeshTexturedUvQuad(nullptr, buffer->texCoords)
+            .setFillLayer(buffer->texture, op.paint->getColorFilter(), layerAlpha, PaintUtils::getXfermodeDirect(op.paint), Blend::ModeOrderSwap::NoSwap)
             .setTransform(state.computedState.transform, TransformFlags::None)
             .setModelViewMapUnitToRectOptionalSnap(tryToSnap, op.unmappedBounds)
             .build();
-    info.renderGlop(state, glop);
+    renderer.renderGlop(state, glop);
 
-    // return layer to cache, since each clipped savelayer is only drawn once.
-    layer->setConvexMask(nullptr);
-    if (!info.caches.layerCache.put(layer)) {
-        // Failing to add the layer to the cache should happen only if the layer is too large
-        LAYER_LOGD("Deleting layer");
-        layer->decStrong(nullptr);
-    }
+    // destroy and delete, since each clipped saveLayer is only drawn once.
+    buffer->texture.deleteTexture();
+
+    // TODO: return texture/offscreenbuffer to cache!
+    delete buffer;
 }
 
 } // namespace uirenderer

@@ -33,6 +33,7 @@ namespace uirenderer {
 class BakedOpState;
 class BatchBase;
 class MergingOpBatch;
+class OffscreenBuffer;
 class OpBatch;
 class Rect;
 
@@ -55,7 +56,7 @@ namespace OpBatchType {
 }
 
 class OpReorderer : public CanvasStateClient {
-    typedef std::function<void(void*, const RecordedOp&, const BakedOpState&)> BakedOpReceiver;
+    typedef std::function<void(void*, const RecordedOp&, const BakedOpState&)> BakedOpDispatcher;
 
     /**
      * Stores the deferred render operations and state used to compute ordering
@@ -79,7 +80,7 @@ class OpReorderer : public CanvasStateClient {
         void deferMergeableOp(LinearAllocator& allocator,
                 BakedOpState* op, batchid_t batchId, mergeid_t mergeId);
 
-        void replayBakedOpsImpl(void* arg, BakedOpReceiver* receivers) const;
+        void replayBakedOpsImpl(void* arg, BakedOpDispatcher* receivers) const;
 
         bool empty() const {
             return mBatches.empty();
@@ -91,7 +92,7 @@ class OpReorderer : public CanvasStateClient {
 
         void dump() const;
 
-        Layer* layer = nullptr;
+        OffscreenBuffer* offscreenBuffer = nullptr;
         const BeginLayerOp* beginLayerOp = nullptr;
         const uint32_t width;
         const uint32_t height;
@@ -127,15 +128,15 @@ public:
      *
      * For example a BitmapOp would resolve, via the lambda lookup, to calling:
      *
-     * StaticReceiver::onBitmapOp(Arg* arg, const BitmapOp& op, const BakedOpState& state);
+     * StaticDispatcher::onBitmapOp(Renderer& renderer, const BitmapOp& op, const BakedOpState& state);
      */
 #define BAKED_OP_RECEIVER(Type) \
-    [](void* internalArg, const RecordedOp& op, const BakedOpState& state) { \
-        StaticReceiver::on##Type(*(static_cast<Arg*>(internalArg)), static_cast<const Type&>(op), state); \
+    [](void* internalRenderer, const RecordedOp& op, const BakedOpState& state) { \
+        StaticDispatcher::on##Type(*(static_cast<Renderer*>(internalRenderer)), static_cast<const Type&>(op), state); \
     },
-    template <typename StaticReceiver, typename Arg>
-    void replayBakedOps(Arg& arg) {
-        static BakedOpReceiver receivers[] = {
+    template <typename StaticDispatcher, typename Renderer>
+    void replayBakedOps(Renderer& renderer) {
+        static BakedOpDispatcher receivers[] = {
             MAP_OPS(BAKED_OP_RECEIVER)
         };
 
@@ -144,16 +145,16 @@ public:
         for (int i = mLayerReorderers.size() - 1; i >= 1; i--) {
             LayerReorderer& layer = mLayerReorderers[i];
             if (!layer.empty()) {
-                layer.layer = StaticReceiver::startLayer(arg, layer.width, layer.height);
-                layer.replayBakedOpsImpl((void*)&arg, receivers);
-                StaticReceiver::endLayer(arg);
+                layer.offscreenBuffer = renderer.startLayer(layer.width, layer.height);
+                layer.replayBakedOpsImpl((void*)&renderer, receivers);
+                renderer.endLayer();
             }
         }
 
         const LayerReorderer& fbo0 = mLayerReorderers[0];
-        StaticReceiver::startFrame(arg, fbo0.width, fbo0.height);
-        fbo0.replayBakedOpsImpl((void*)&arg, receivers);
-        StaticReceiver::endFrame(arg);
+        renderer.startFrame(fbo0.width, fbo0.height);
+        fbo0.replayBakedOpsImpl((void*)&renderer, receivers);
+        renderer.endFrame();
     }
 
     void dump() const {
@@ -178,7 +179,7 @@ private:
 
     void deferImpl(const DisplayList& displayList);
 
-    void replayBakedOpsImpl(void* arg, BakedOpReceiver* receivers);
+    void replayBakedOpsImpl(void* arg, BakedOpDispatcher* receivers);
 
     /**
      * Declares all OpReorderer::onXXXXOp() methods for every RecordedOp type.
