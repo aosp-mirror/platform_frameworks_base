@@ -16545,7 +16545,7 @@ public class PackageManagerService extends IPackageManager.Stub {
      */
     private void removeUnusedPackagesLILPw(UserManagerService userManager, final int userHandle) {
         final boolean DEBUG_CLEAN_APKS = false;
-        int [] users = userManager.getUserIdsLPr();
+        int [] users = userManager.getUserIds();
         Iterator<PackageSetting> psit = mSettings.mPackages.values().iterator();
         while (psit.hasNext()) {
             PackageSetting ps = psit.next();
