@@ -26,6 +26,7 @@ import android.view.animation.Interpolator;
 /* The transform state for a task view */
 public class TaskViewTransform {
     public int startDelay = 0;
+    public int translationX = 0;
     public int translationY = 0;
     public float translationZ = 0;
     public float scale = 1f;
@@ -43,6 +44,7 @@ public class TaskViewTransform {
 
     public TaskViewTransform(TaskViewTransform o) {
         startDelay = o.startDelay;
+        translationX = o.translationX;
         translationY = o.translationY;
         translationZ = o.translationZ;
         scale = o.scale;
@@ -52,9 +54,12 @@ public class TaskViewTransform {
         p = o.p;
     }
 
-    /** Resets the current transform */
+    /**
+     * Resets the current transform.
+     */
     public void reset() {
         startDelay = 0;
+        translationX = 0;
         translationY = 0;
         translationZ = 0;
         scale = 1f;
@@ -70,6 +75,9 @@ public class TaskViewTransform {
     }
     public boolean hasScaleChangedFrom(float v) {
         return (Float.compare(scale, v) != 0);
+    }
+    public boolean hasTranslationXChangedFrom(float v) {
+        return (Float.compare(translationX, v) != 0);
     }
     public boolean hasTranslationYChangedFrom(float v) {
         return (Float.compare(translationY, v) != 0);
@@ -87,6 +95,9 @@ public class TaskViewTransform {
             boolean requiresLayers = false;
 
             // Animate to the final state
+            if (hasTranslationXChangedFrom(v.getTranslationX())) {
+                anim.translationX(translationX);
+            }
             if (hasTranslationYChangedFrom(v.getTranslationY())) {
                 anim.translationY(translationY);
             }
@@ -117,6 +128,9 @@ public class TaskViewTransform {
                     .start();
         } else {
             // Set the changed properties
+            if (hasTranslationXChangedFrom(v.getTranslationX())) {
+                v.setTranslationX(translationX);
+            }
             if (hasTranslationYChangedFrom(v.getTranslationY())) {
                 v.setTranslationY(translationY);
             }
@@ -147,7 +161,8 @@ public class TaskViewTransform {
 
     @Override
     public String toString() {
-        return "TaskViewTransform delay: " + startDelay + " y: " + translationY + " z: " + translationZ +
+        return "TaskViewTransform delay: " + startDelay +
+                " x: " + translationX + " y: " + translationY + " z: " + translationZ +
                 " scale: " + scale + " alpha: " + alpha + " visible: " + visible + " rect: " + rect +
                 " p: " + p;
     }

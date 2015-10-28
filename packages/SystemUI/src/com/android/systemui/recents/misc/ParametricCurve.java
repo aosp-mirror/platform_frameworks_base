@@ -48,6 +48,7 @@ public class ParametricCurve {
 
     float[] xp;
     float[] px;
+    float mLength;
 
     CurveFunction mFn;
     ParametricCurveFunction mScaleFn;
@@ -79,6 +80,7 @@ public class ParametricCurve {
             dx[xStep] = (float) Math.hypot(fx[xStep] - fx[xStep - 1], step);
             pLength += dx[xStep];
         }
+        mLength = pLength;
         // Approximate p(x), a function of cumulative progress with x, normalized to 0..1
         float p = 0;
         px[0] = 0f;
@@ -259,5 +261,12 @@ public class ParametricCurve {
             Log.d(TAG, "\t2t: " + (SystemClock.currentThreadTimeMicro() - t1) + "microsecs");
         }
         return 1f - xToP(maxX, bounds);
+    }
+
+    /**
+     * Returns the length of this curve.
+     */
+    public float getArcLength() {
+        return mLength;
     }
 }

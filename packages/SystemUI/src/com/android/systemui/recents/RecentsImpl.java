@@ -469,7 +469,7 @@ public class RecentsImpl extends IRecentsNonSystemUserCallbacks.Stub
         TaskStackViewLayoutAlgorithm algo = mDummyStackView.getStackAlgorithm();
         Rect taskStackBounds = new Rect(mTaskStackBounds);
         algo.setSystemInsets(systemInsets);
-        algo.computeRects(windowRect.width(), windowRect.height(), taskStackBounds);
+        algo.computeRects(taskStackBounds);
         Rect taskViewBounds = algo.getUntransformedTaskViewBounds();
         if (!taskViewBounds.equals(mLastTaskViewBounds)) {
             mLastTaskViewBounds.set(taskViewBounds);

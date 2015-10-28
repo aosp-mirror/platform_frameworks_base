@@ -21,6 +21,7 @@ import android.content.res.Resources;
 import android.graphics.Rect;
 import android.util.Log;
 import com.android.systemui.R;
+import com.android.systemui.recents.Recents;
 import com.android.systemui.recents.RecentsConfiguration;
 import com.android.systemui.recents.misc.ParametricCurve;
 import com.android.systemui.recents.misc.Utilities;
@@ -32,14 +33,15 @@ import java.util.HashMap;
 
 /**
  * The layout logic for a TaskStackView.
+ *
  */
 public class TaskStackViewLayoutAlgorithm {
 
-    private static final boolean DEBUG = false;
     private static final String TAG = "TaskStackViewLayoutAlgorithm";
+    private static final boolean DEBUG = false;
 
     // The min scale of the last task at the top of the curve
-    private static final float STACK_PEEK_MIN_SCALE = 0.75f;
+    private static final float STACK_PEEK_MIN_SCALE = 0.85f;
     // The scale of the last task
     private static final float SINGLE_TASK_SCALE = 0.95f;
     // The percentage of height of task to show between tasks
@@ -58,14 +60,17 @@ public class TaskStackViewLayoutAlgorithm {
     }
 
     Context mContext;
-    RecentsConfiguration mConfig;
 
     // This is the view bounds inset exactly by the search bar, but without the bottom inset
     // see RecentsConfiguration.getTaskStackBounds()
     public Rect mStackRect = new Rect();
+
     // This is the task view bounds for layout (untransformed), the rect is top-aligned to the top
     // of the stack rect
     public Rect mTaskRect = new Rect();
+
+    // The bounds of the freeform workspace, the rect is top-aligned to the top of the stack rect
+    public Rect mFreeformRect = new Rect();
     // This is the current system insets
     public Rect mSystemInsets = new Rect();
 
@@ -74,8 +79,13 @@ public class TaskStackViewLayoutAlgorithm {
     // The largest scroll progress, at this value, the front most task will be visible above the
     // navigation bar
     float mMaxScrollP;
+    // The scroll progress at which the stack scroll ends and the overscroll begins.  This serves
+    // as the point at which we can show the freeform space.
+    float mMaxStackScrollP;
     // The initial progress that the scroller is set
     float mInitialScrollP;
+    // The task progress for the front-most task in the stack
+    float mFrontMostTaskP;
 
     // The relative progress to ensure that the height between affiliated tasks is respected
     float mWithinAffiliationPOffset;
@@ -89,11 +99,21 @@ public class TaskStackViewLayoutAlgorithm {
     // The relative progress to ensure that the offset from the bottom of the stack to the bottom
     // of the task is respected
     float mTaskBottomPOffset;
+    // The relative progress to ensure that the freeform workspace height is respected
+    float mFreeformWorkspacePOffset;
     // The front-most task bottom offset
     int mTaskBottomOffset;
 
-    // The last computed task count
-    int mNumTasks;
+    // The number of cells in the freeform workspace
+    int mFreeformCellXCount;
+    int mFreeformCellYCount;
+    // The width and height of the cells in the freeform workspace
+    int mFreeformCellWidth;
+    int mFreeformCellHeight;
+
+    // The last computed task counts
+    int mNumStackTasks;
+    int mNumFreeformTasks;
     // The min/max z translations
     int mMinTranslationZ;
     int mMaxTranslationZ;
@@ -104,12 +124,11 @@ public class TaskStackViewLayoutAlgorithm {
     // Log function
     static ParametricCurve sCurve;
 
-    public TaskStackViewLayoutAlgorithm(Context context, RecentsConfiguration config) {
+    public TaskStackViewLayoutAlgorithm(Context context) {
         Resources res = context.getResources();
         mMinTranslationZ = res.getDimensionPixelSize(R.dimen.recents_task_view_z_min);
         mMaxTranslationZ = res.getDimensionPixelSize(R.dimen.recents_task_view_z_max);
         mContext = context;
-        mConfig = config;
         if (sCurve == null) {
             sCurve = new ParametricCurve(new ParametricCurve.CurveFunction() {
                 // The large the XScale, the longer the flat area of the curve
@@ -153,23 +172,25 @@ public class TaskStackViewLayoutAlgorithm {
     }
 
     /**
-     * Computes the stack and task rects
+     * Computes the stack and task rects.
      */
-    public void computeRects(int windowWidth, int windowHeight, Rect taskStackBounds) {
-        int widthPadding = (int) (mConfig.taskStackWidthPaddingPct * taskStackBounds.width());
+    public void computeRects(Rect taskStackBounds) {
+        RecentsConfiguration config = RecentsConfiguration.getInstance();
+        int widthPadding = (int) (config.taskStackWidthPaddingPct * taskStackBounds.width());
         int heightPadding = mContext.getResources().getDimensionPixelSize(
                 R.dimen.recents_stack_top_padding);
 
         // Compute the stack rect, inset from the given task stack bounds
         mStackRect.set(taskStackBounds.left + widthPadding, taskStackBounds.top + heightPadding,
-                taskStackBounds.right - widthPadding, windowHeight);
+                taskStackBounds.right - widthPadding, taskStackBounds.bottom);
         mTaskBottomOffset = mSystemInsets.bottom + heightPadding;
 
         // Compute the task rect, align it to the top-center square in the stack rect
-        int size = Math.min(mStackRect.width(), taskStackBounds.height() - mTaskBottomOffset);
+        int size = Math.min(mStackRect.width(), mStackRect.height() - mTaskBottomOffset);
         int xOffset = (mStackRect.width() - size) / 2;
         mTaskRect.set(mStackRect.left + xOffset, mStackRect.top,
                 mStackRect.right - xOffset, mStackRect.top + size);
+        mFreeformRect.set(mTaskRect);
 
         // Compute the progress offsets
         int withinAffiliationOffset = mContext.getResources().getDimensionPixelSize(
@@ -184,9 +205,12 @@ public class TaskStackViewLayoutAlgorithm {
         mTaskHalfHeightPOffset = sCurve.computePOffsetForScaledHeight(mTaskRect.height() / 2,
                 mStackRect);
         mTaskBottomPOffset = sCurve.computePOffsetForHeight(mTaskBottomOffset, mStackRect);
+        mFreeformWorkspacePOffset = sCurve.computePOffsetForHeight(mFreeformRect.height(),
+                mStackRect);
 
         if (DEBUG) {
             Log.d(TAG, "computeRects");
+            Log.d(TAG, "\tarclength: " + sCurve.getArcLength());
             Log.d(TAG, "\tmStackRect: " + mStackRect);
             Log.d(TAG, "\tmTaskRect: " + mTaskRect);
             Log.d(TAG, "\tmSystemInsets: " + mSystemInsets);
@@ -222,29 +246,38 @@ public class TaskStackViewLayoutAlgorithm {
 
         // Clear the progress map
         mTaskProgressMap.clear();
-        mNumTasks = tasks.size();
 
         // Return early if we have no tasks
         if (tasks.isEmpty()) {
-            mMinScrollP = mMaxScrollP = 0;
+            mMinScrollP = mMaxScrollP = mMaxStackScrollP = 0;
+            mNumStackTasks = mNumFreeformTasks = 0;
             return;
         }
 
-        // We calculate the progress by taking the progress of the element from the bottom of the
-        // screen
-        if (mNumTasks == 1) {
-            // Just center the task in the visible stack rect
-            mMinScrollP = mMaxScrollP = mInitialScrollP = 0f;
-            mTaskProgressMap.put(tasks.get(0).key, 0f);
-        } else {
-            // Update the tasks from back to front with the new progresses. We set the initial
-            // progress to the progress at which the top of the last task is near the center of the
-            // visible stack rect.
+        // Filter the set of freeform and stack tasks
+        ArrayList<Task> freeformTasks = new ArrayList<>();
+        ArrayList<Task> stackTasks = new ArrayList<>();
+        for (int i = 0; i < tasks.size(); i++) {
+            Task task = tasks.get(i);
+            if (task.isFreeformTask()) {
+                freeformTasks.add(task);
+            } else {
+                stackTasks.add(task);
+            }
+        }
+        mNumStackTasks = stackTasks.size();
+        mNumFreeformTasks = freeformTasks.size();
+
+        // TODO: In the case where there is only freeform tasks, then the scrolls should be set to
+        // zero
+
+        if (!stackTasks.isEmpty()) {
+            // Update the for each task from back to front.
             float pAtBackMostTaskTop = 0;
             float pAtFrontMostTaskTop = pAtBackMostTaskTop;
-            int taskCount = tasks.size();
+            int taskCount = stackTasks.size();
             for (int i = 0; i < taskCount; i++) {
-                Task task = tasks.get(i);
+                Task task = stackTasks.get(i);
                 mTaskProgressMap.put(task.key, pAtFrontMostTaskTop);
 
                 if (i < (taskCount - 1)) {
@@ -255,15 +288,47 @@ public class TaskStackViewLayoutAlgorithm {
                 }
             }
 
-            // Set the max scroll progress to the point at which the bottom of the front-most task
-            // is aligned to the bottom of the stack (including nav bar and stack padding)
-            mMaxScrollP = pAtFrontMostTaskTop - 1f + mTaskBottomPOffset + mTaskHeightPOffset;
+            mFrontMostTaskP = pAtFrontMostTaskTop;
+            // Set the max scroll progress to the point at which the top of the front-most task
+            // is aligned to the bottom of the stack (offset by nav bar, padding, and task height)
+            mMaxStackScrollP = getBottomAlignedScrollProgress(pAtFrontMostTaskTop,
+                    mTaskBottomPOffset + mTaskHeightPOffset);
             // Basically align the back-most task such that its progress is the same as the top of
-            // the front most task at the max scroll
-            mMinScrollP = pAtBackMostTaskTop - 1f + mTaskBottomPOffset + mTaskHeightPOffset;
-            // The offset the inital scroll position to the front of the stack, with half the front
-            // task height visible
-            mInitialScrollP = Math.max(mMinScrollP, mMaxScrollP - mTaskHalfHeightPOffset);
+            // the front most task at the max stack scroll
+            mMinScrollP = getBottomAlignedScrollProgress(pAtBackMostTaskTop,
+                    mTaskBottomPOffset + mTaskHeightPOffset);
+        }
+
+        if (!freeformTasks.isEmpty()) {
+            // Calculate the cell width/height depending on the number of freeform tasks
+            mFreeformCellXCount = Math.max(2, (int) Math.ceil(Math.sqrt(mNumFreeformTasks)));
+            mFreeformCellYCount = Math.max(2, (int) Math.ceil((float) mNumFreeformTasks / mFreeformCellXCount));
+            mFreeformCellWidth = mFreeformRect.width() / mFreeformCellXCount;
+            mFreeformCellHeight = mFreeformRect.height() / mFreeformCellYCount;
+
+            // Put each of the tasks in the progress map at a fixed index (does not need to actually
+            // map to a scroll position, just by index)
+            int taskCount = freeformTasks.size();
+            for (int i = 0; i < taskCount; i++) {
+                Task task = freeformTasks.get(i);
+                mTaskProgressMap.put(task.key, (mFrontMostTaskP + 1) + i);
+            }
+
+            // The max scroll includes the freeform workspace offset. As the scroll progress exceeds
+            // mMaxStackScrollP up to mMaxScrollP, the stack will translate upwards and the freeform
+            // workspace will be visible
+            mMaxScrollP = mMaxStackScrollP + mFreeformWorkspacePOffset;
+            mInitialScrollP = mMaxScrollP;
+        } else {
+            mMaxScrollP = mMaxStackScrollP;
+            mInitialScrollP = Math.max(mMinScrollP, mMaxStackScrollP - mTaskHalfHeightPOffset);
+        }
+        if (DEBUG) {
+            Log.d(TAG, "mNumStackTasks: " + mNumStackTasks);
+            Log.d(TAG, "mNumFreeformTasks: " + mNumFreeformTasks);
+            Log.d(TAG, "mMinScrollP: " + mMinScrollP);
+            Log.d(TAG, "mMaxStackScrollP: " + mMaxStackScrollP);
+            Log.d(TAG, "mMaxScrollP: " + mMaxScrollP);
         }
     }
 
@@ -272,11 +337,24 @@ public class TaskStackViewLayoutAlgorithm {
      * computeMinMaxScroll() is called first.
      */
     public VisibilityReport computeStackVisibilityReport(ArrayList<Task> tasks) {
+        // Ensure minimum visibility count
         if (tasks.size() <= 1) {
             return new VisibilityReport(1, 1);
         }
 
-        // Walk backwards in the task stack and count the number of tasks and visible thumbnails
+        // If there are freeform tasks, then they will be the only ones visible
+        int freeformTaskCount = 0;
+        for (Task t : tasks) {
+            if (t.isFreeformTask()) {
+                freeformTaskCount++;
+            }
+        }
+        if (freeformTaskCount > 0) {
+            return new VisibilityReport(freeformTaskCount, freeformTaskCount);
+        }
+
+        // Otherwise, walk backwards in the stack and count the number of tasks and visible
+        // thumbnails
         int taskHeight = mTaskRect.height();
         int taskBarHeight = mContext.getResources().getDimensionPixelSize(
                 R.dimen.recents_task_bar_height);
@@ -338,18 +416,38 @@ public class TaskStackViewLayoutAlgorithm {
     /** Update/get the transform */
     public TaskViewTransform getStackTransform(float taskProgress, float stackScroll,
             TaskViewTransform transformOut, TaskViewTransform prevTransform) {
-        if (DEBUG) {
-            Log.d(TAG, "getStackTransform: " + stackScroll);
+        float stackOverscroll = (stackScroll - mMaxStackScrollP) / mFreeformWorkspacePOffset;
+        int overscrollYOffset = 0;
+        if (mNumFreeformTasks > 0) {
+            overscrollYOffset = (int) (Math.max(0, stackOverscroll) * mFreeformRect.height());
         }
 
-        if (mNumTasks == 1) {
+        if ((mNumFreeformTasks > 0) && (stackScroll > mMaxStackScrollP) &&
+                (taskProgress > mFrontMostTaskP)) {
+            // This is a freeform task, so lay it out in the freeform workspace
+            int taskIndex = Math.round(taskProgress - (mFrontMostTaskP + 1));
+            int x = taskIndex % mFreeformCellXCount;
+            int y = taskIndex / mFreeformCellXCount;
+            int frontTaskBottom = mStackRect.height() - mTaskBottomOffset;
+            float scale = (float) mFreeformCellWidth / mTaskRect.width();
+            int scaleXOffset = (int) (((1f - scale) * mTaskRect.width()) / 2);
+            int scaleYOffset = (int) (((1f - scale) * mTaskRect.height()) / 2);
+            transformOut.scale = scale;
+            transformOut.translationX = x * mFreeformCellWidth - scaleXOffset;
+            transformOut.translationY = frontTaskBottom - overscrollYOffset +
+                    (y * mFreeformCellHeight) - scaleYOffset;
+            transformOut.visible = true;
+            return transformOut;
+
+        } else if (mNumStackTasks == 1) {
             // Center the task in the stack, changing the scale will not follow the curve, but just
             // modulate some values directly
-            float pTaskRelative = -stackScroll;
+            float pTaskRelative = mMinScrollP - stackScroll;
             float scale = SINGLE_TASK_SCALE;
             int topOffset = (mStackRect.height() - mTaskBottomOffset - mTaskRect.height()) / 2;
             transformOut.scale = scale;
-            transformOut.translationY = (int) (topOffset + (pTaskRelative * mStackRect.height()));
+            transformOut.translationY = (int) (topOffset + (pTaskRelative * mStackRect.height())) -
+                    overscrollYOffset;
             transformOut.translationZ = mMaxTranslationZ;
             transformOut.rect.set(mTaskRect);
             transformOut.rect.offset(0, transformOut.translationY);
@@ -357,8 +455,12 @@ public class TaskStackViewLayoutAlgorithm {
             transformOut.visible = true;
             transformOut.p = pTaskRelative;
             return transformOut;
+
         } else {
             float pTaskRelative = taskProgress - stackScroll;
+            if (mNumFreeformTasks > 0) {
+                pTaskRelative = Math.min(mMaxStackScrollP, pTaskRelative);
+            }
             float pBounded = Math.max(0, Math.min(pTaskRelative, 1f));
             // If the task top is outside of the bounds below the screen, then immediately reset it
             if (pTaskRelative > 1f) {
@@ -379,7 +481,7 @@ public class TaskStackViewLayoutAlgorithm {
             int scaleYOffset = (int) (((1f - scale) * mTaskRect.height()) / 2);
             transformOut.scale = scale;
             transformOut.translationY = sCurve.pToX(pBounded, mStackRect) - mStackRect.top -
-                    scaleYOffset;
+                    scaleYOffset - overscrollYOffset;
             transformOut.translationZ = Math.max(mMinTranslationZ,
                     mMinTranslationZ + (pBounded * (mMaxTranslationZ - mMinTranslationZ)));
             transformOut.rect.set(mTaskRect);
@@ -389,6 +491,27 @@ public class TaskStackViewLayoutAlgorithm {
             transformOut.p = pTaskRelative;
             return transformOut;
         }
+    }
+
+    /**
+     * Update/get the transform
+     */
+    public TaskViewTransform getFreeformWorkspaceBounds(float stackScroll,
+            TaskViewTransform transformOut) {
+        transformOut.reset();
+        if (mNumFreeformTasks == 0) {
+            return transformOut;
+        }
+
+        if (stackScroll > mMaxStackScrollP) {
+            float stackOverscroll = (stackScroll - mMaxStackScrollP) / mFreeformWorkspacePOffset;
+            int overscrollYOffset = (int) (stackOverscroll * mFreeformRect.height());
+            int frontTaskBottom = mStackRect.height() - mTaskBottomOffset;
+            transformOut.visible = true;
+            transformOut.alpha =
+            transformOut.translationY = frontTaskBottom - overscrollYOffset;
+        }
+        return transformOut;
     }
 
     /**
@@ -405,5 +528,30 @@ public class TaskStackViewLayoutAlgorithm {
     float getStackScrollForTask(Task t) {
         if (!mTaskProgressMap.containsKey(t.key)) return 0f;
         return mTaskProgressMap.get(t.key);
+    }
+
+    /**
+     * Maps a movement in screen y, relative to {@param downY}, to a movement in along the arc
+     * length of the curve.  We know the curve is mostly flat, so we just map the length of the
+     * screen along the arc-length proportionally (1/arclength).
+     */
+    public float getDeltaPForY(int downY, int y) {
+        float deltaP = (float) (y - downY) / mStackRect.height() * (1f / sCurve.getArcLength());
+        return -deltaP;
+    }
+
+    /**
+     * This is the inverse of {@link #getDeltaPForY}.  Given a movement along the arc length
+     * of the curve, map back to the screen y.
+     */
+    public int getYForDeltaP(float downScrollP, float p) {
+        int y = (int) ((p - downScrollP) * mStackRect.height() * sCurve.getArcLength());
+        return -y;
+    }
+
+    private float getBottomAlignedScrollProgress(float p, float pOffsetFromBottom) {
+        // At scroll progress == p, then p is at the top of the stack
+        // At scroll progress == p + 1, then p is at the bottom of the stack
+        return p - (1 - pOffsetFromBottom);
     }
 }

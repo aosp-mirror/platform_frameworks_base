@@ -124,7 +124,7 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
         mConfig = RecentsConfiguration.getInstance();
         mViewPool = new ViewPool<>(context, this);
         mInflater = LayoutInflater.from(context);
-        mLayoutAlgorithm = new TaskStackViewLayoutAlgorithm(context, mConfig);
+        mLayoutAlgorithm = new TaskStackViewLayoutAlgorithm(context);
         mFilterAlgorithm = new TaskStackViewFilterAlgorithm(this, mViewPool);
         mStackScroller = new TaskStackViewScroller(context, mLayoutAlgorithm);
         mStackScroller.setCallbacks(this);
@@ -633,10 +633,9 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
     }
 
     /** Computes the stack and task rects */
-    public void computeRects(int windowWidth, int windowHeight, Rect taskStackBounds,
-                             boolean launchedWithAltTab, boolean launchedFromHome) {
+    public void computeRects(Rect taskStackBounds) {
         // Compute the rects in the stack algorithm
-        mLayoutAlgorithm.computeRects(windowWidth, windowHeight, taskStackBounds);
+        mLayoutAlgorithm.computeRects(taskStackBounds);
 
         // Update the scroll bounds
         updateMinMaxScroll(false);
@@ -674,9 +673,7 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
         int height = MeasureSpec.getSize(heightMeasureSpec);
 
         // Compute our stack/task rects
-        RecentsActivityLaunchState launchState = mConfig.getLaunchState();
-        computeRects(width, height, mTaskStackBounds, launchState.launchedWithAltTab,
-                launchState.launchedFromHome);
+        computeRects(mTaskStackBounds);
 
         // If this is the first layout, then scroll to the front of the stack and synchronize the
         // stack views immediately to load all the views

@@ -21,6 +21,7 @@ import android.animation.AnimatorListenerAdapter;
 import android.animation.ObjectAnimator;
 import android.animation.ValueAnimator;
 import android.content.Context;
+import android.util.Log;
 import android.view.animation.AnimationUtils;
 import android.view.animation.Interpolator;
 import android.widget.OverScroller;
@@ -29,8 +30,12 @@ import com.android.systemui.recents.misc.Utilities;
 
 /* The scrolling logic for a TaskStackView */
 public class TaskStackViewScroller {
+
+    private static final String TAG = "TaskStackViewScroller";
+    private static final boolean DEBUG = false;
+
     public interface TaskStackViewScrollerCallbacks {
-        public void onScrollChanged(float p);
+        void onScrollChanged(float p);
     }
 
     Context mContext;
@@ -38,6 +43,8 @@ public class TaskStackViewScroller {
     TaskStackViewScrollerCallbacks mCb;
 
     float mStackScrollP;
+    float mFlingDownScrollP;
+    int mFlingDownY;
 
     OverScroller mScroller;
     ObjectAnimator mScrollAnimator;
@@ -77,11 +84,6 @@ public class TaskStackViewScroller {
         }
     }
 
-    /** Sets the current stack scroll without calling the callback. */
-    void setStackScrollRaw(float s) {
-        mStackScrollP = s;
-    }
-
     /**
      * Sets the current stack scroll to the initial state when you first enter recents.
      * @return whether the stack progress changed.
@@ -90,6 +92,20 @@ public class TaskStackViewScroller {
         float prevStackScrollP = mStackScrollP;
         setStackScroll(getBoundedStackScroll(mLayoutAlgorithm.mInitialScrollP));
         return Float.compare(prevStackScrollP, mStackScrollP) != 0;
+    }
+
+    /**
+     * Starts a fling that is coordinated with the {@link TaskStackViewTouchHandler}.
+     */
+    public void fling(float downScrollP, int downY, int y, int velY, int minY, int maxY,
+            int overscroll) {
+        if (DEBUG) {
+            Log.d(TAG, "fling: " + downScrollP + ", downY: " + downY + ", y: " + y +
+                    ", velY: " + velY + ", minY: " + minY + ", maxY: " + maxY);
+        }
+        mFlingDownScrollP = downScrollP;
+        mFlingDownY = downY;
+        mScroller.fling(0, y, 0, velY, 0, 0, minY, maxY, 0, overscroll);
     }
 
     /** Bounds the current scroll if necessary */
@@ -174,21 +190,20 @@ public class TaskStackViewScroller {
 
     /**** OverScroller ****/
 
+    // TODO: Remove
+    @Deprecated
     int progressToScrollRange(float p) {
         return (int) (p * mLayoutAlgorithm.mStackRect.height());
-    }
-
-    float scrollRangeToProgress(int s) {
-        return (float) s / mLayoutAlgorithm.mStackRect.height();
     }
 
     /** Called from the view draw, computes the next scroll. */
     boolean computeScroll() {
         if (mScroller.computeScrollOffset()) {
-            float scroll = scrollRangeToProgress(mScroller.getCurrY());
-            setStackScrollRaw(scroll);
-            if (mCb != null) {
-                mCb.onScrollChanged(scroll);
+            float deltaP = mLayoutAlgorithm.getDeltaPForY(mFlingDownY, mScroller.getCurrY());
+            float scroll = mFlingDownScrollP + deltaP;
+            setStackScroll(scroll);
+            if (DEBUG) {
+                Log.d(TAG, "computeScroll: " + scroll);
             }
             return true;
         }

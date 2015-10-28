@@ -170,6 +170,12 @@ public class Task {
         }
     }
 
+    public boolean isFreeformTask() {
+        // Temporarily disable:
+        return false;
+        // return SystemServicesProxy.isFreeformStack(key.stackId);
+    }
+
     /** Notifies the callback listeners that this task has been loaded */
     public void notifyTaskDataLoaded(Bitmap thumbnail, Drawable applicationIcon) {
         this.applicationIcon = applicationIcon;
