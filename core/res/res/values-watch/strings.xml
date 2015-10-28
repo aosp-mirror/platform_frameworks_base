@@ -26,47 +26,4 @@
 
     <!-- Title of a category of application permissions, listed so the user can choose whether they want to allow the application to do this. Override from base which says "Body Sensors". [CHAR_LIMIT=25] -->
     <string name="permgrouplab_sensors">Sensors</string>
-
-    <!-- Description of a  permissions, listed so the user can choose whether they want to allow the application to do this. [CHAR_LIMIT=100] -->
-    <string name="permgrouplab_contactswear">access your contacts</string>
-    <!-- Description of a  permissions, listed so the user can choose whether they want to allow the application to do this. [CHAR_LIMIT=100] -->
-    <string name="permgrouplab_locationwear">access this watch\'s location</string>
-    <!-- Description of a  permissions, listed so the user can choose whether they want to allow the application to do this. [CHAR_LIMIT=100] -->
-    <string name="permgrouplab_calendarwear">access your calendar</string>
-    <!-- Description of a  permissions, listed so the user can choose whether they want to allow the application to do this. [CHAR_LIMIT=100] -->
-    <string name="permgrouplab_smswear">send and view SMS messages</string>
-    <!-- Description of a  permissions, listed so the user can choose whether they want to allow the application to do this. [CHAR_LIMIT=100] -->
-    <string name="permgrouplab_storagewear">access photos, media, and files on your watch</string>
-    <!-- Description of a  permissions, listed so the user can choose whether they want to allow the application to do this. [CHAR_LIMIT=100] -->
-    <string name="permgrouplab_microphonewear">record audio</string>
-    <!-- Description of a  permissions, listed so the user can choose whether they want to allow the application to do this. [CHAR_LIMIT=100] -->
-    <string name="permgrouplab_camerawear">take pictures and record video</string>
-    <!-- Description of a  permissions, listed so the user can choose whether they want to allow the application to do this. [CHAR_LIMIT=100] -->
-    <string name="permgrouplab_phonewear">make and manage phone calls</string>
-    <!-- Description of a  permissions, listed so the user can choose whether they want to allow the application to do this. [CHAR_LIMIT=100] -->
-    <string name="permgrouplab_sensorswear">access sensor data about your vital signs</string>
-    <!-- Description of a  permissions, listed so the user can choose whether they want to allow the application to do this. [CHAR_LIMIT=100] -->
-    <string name="permlab_statusBarServicewear">be the status bar</string>
-    <!-- Description of a  permissions, listed so the user can choose whether they want to allow the application to do this. [CHAR_LIMIT=100] -->
-    <string name="permlab_bodySensorswear">access body sensors (like heart rate monitors)</string>
-    <!-- Description of a  permissions, listed so the user can choose whether they want to allow the application to do this. [CHAR_LIMIT=100] -->
-    <string name="permlab_accessFineLocationwear">access precise location (GPS and network-based)</string>
-    <!-- Description of a  permissions, listed so the user can choose whether they want to allow the application to do this. [CHAR_LIMIT=100] -->
-    <string name="permlab_accessCoarseLocationwear">access approximate location (network-based)</string>
-    <!-- Description of a  permissions, listed so the user can choose whether they want to allow the application to do this. [CHAR_LIMIT=100] -->
-    <string name="permlab_sim_communicationwear">send commands to the SIM</string>
-    <!-- Description of a  permissions, listed so the user can choose whether they want to allow the application to do this. [CHAR_LIMIT=100] -->
-    <string name="permlab_createNetworkSocketswear">have full network access</string>
-    <!-- Description of a  permissions, listed so the user can choose whether they want to allow the application to do this. [CHAR_LIMIT=100] -->
-    <string name="permlab_manageProfileAndDeviceOwnerswear">manage profile and device owners</string>
-    <!-- Description of a  permissions, listed so the user can choose whether they want to allow the application to do this. [CHAR_LIMIT=100] -->
-    <string name="permlab_changeWimaxStatewear">change WiMAX state</string>
-    <!-- Description of a  permissions, listed so the user can choose whether they want to allow the application to do this. [CHAR_LIMIT=100] -->
-    <string name="permlab_handoverStatuswear">receive Android Beam transfer status</string>
-    <!-- Description of a  permissions, listed so the user can choose whether they want to allow the application to do this. [CHAR_LIMIT=100] -->
-    <string name="permlab_route_media_outputwear">route media output</string>
-    <!-- Description of a  permissions, listed so the user can choose whether they want to allow the application to do this. [CHAR_LIMIT=100] -->
-    <string name="permlab_readInstallSessionswear">read install sessions</string>
-    <!-- Description of a  permissions, listed so the user can choose whether they want to allow the application to do this. [CHAR_LIMIT=100] -->
-    <string name="permlab_requestInstallPackageswear">request install packages</string>
 </resources>
