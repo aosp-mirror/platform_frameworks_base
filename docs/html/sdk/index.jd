@@ -5,28 +5,28 @@ page.image=images/cards/android-studio_2x.png
 header.hide=1
 page.metaDescription=Download the official Android IDE and developer tools to build apps for Android phones, tablets, wearables, TVs, and more.
 
-studio.version=1.4.0.10
+studio.version=1.4.1.0
 
-studio.linux_bundle_download=android-studio-ide-141.2288178-linux.zip
-studio.linux_bundle_bytes=380821638
-studio.linux_bundle_checksum=137e3734f2e8e285bd7c1d2fae2e8548d0f164bd
+studio.linux_bundle_download=android-studio-ide-141.2343393-linux.zip
+studio.linux_bundle_bytes=381078272
+studio.linux_bundle_checksum=c38eb7afec75fe529efecd2f05500f1715e82cfe
 
-studio.mac_bundle_download=android-studio-ide-141.2288178-mac.dmg
-studio.mac_bundle_bytes=364624965
-studio.mac_bundle_checksum=27068d59d5a78717d31bdedd054082b5c50d3897
+studio.mac_bundle_download=android-studio-ide-141.2343393-mac.dmg
+studio.mac_bundle_bytes=364890127
+studio.mac_bundle_checksum=f99f7e4916b39d0248ab7278765d105a7ce342fb
 
-studio.win_bundle_download=android-studio-ide-141.2288178-windows.zip
-studio.win_bundle_bytes=373492997
-studio.win_bundle_checksum=c0851dc9a506ba9f4c1379a3e9b4019c08478220
+studio.win_bundle_download=android-studio-ide-141.2343393-windows.zip
+studio.win_bundle_bytes=373749630
+studio.win_bundle_checksum=ac5eea9cdd0ec7f0321ad459c0420c5fa7e1b332
 
 
-studio.win_bundle_exe_download=android-studio-bundle-141.2288178-windows.exe
-studio.win_bundle_exe_bytes=1177811944
-studio.win_bundle_exe_checksum=a2f0141d35f8f0c24dad2ff390e7f6231c5f7625
+studio.win_bundle_exe_download=android-studio-bundle-141.2343393-windows.exe
+studio.win_bundle_exe_bytes=1192115784
+studio.win_bundle_exe_checksum=de9e6172533fa02051efabb9ed3a485995582e13
 
-studio.win_notools_exe_download=android-studio-ide-141.2288178-windows.exe
-studio.win_notools_exe_bytes=348295968
-studio.win_notools_exe_checksum=82d0d9c78ec23834956f941a07821be347fcb7bf
+studio.win_notools_exe_download=android-studio-ide-141.2343393-windows.exe
+studio.win_notools_exe_bytes=348552720
+studio.win_notools_exe_checksum=227160920052916e538512f8ccbf49296bb2b1f2
 
 
 
