@@ -774,17 +774,20 @@ public class UserManager {
     }
 
     /**
-     * This will no longer work.  Use {@link #setUserRestriction(String, boolean)} instead.
+     * This will no longer work.  Device owners and profile owners should use
+     * {@link DevicePolicyManager#addUserRestriction(ComponentName, String)} instead.
      */
+    // System apps should use UserManager.setUserRestriction() instead.
     @Deprecated
     public void setUserRestrictions(Bundle restrictions) {
         throw new UnsupportedOperationException("This method is no longer supported");
     }
 
     /**
-     * This will no longer work.  Use {@link #setUserRestriction(String, boolean, UserHandle)}
-     * instead.
+     * This will no longer work.  Device owners and profile owners should use
+     * {@link DevicePolicyManager#addUserRestriction(ComponentName, String)} instead.
      */
+    // System apps should use UserManager.setUserRestriction() instead.
     @Deprecated
     public void setUserRestrictions(Bundle restrictions, UserHandle userHandle) {
         throw new UnsupportedOperationException("This method is no longer supported");
