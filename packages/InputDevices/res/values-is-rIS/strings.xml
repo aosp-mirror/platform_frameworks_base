@@ -8,8 +8,7 @@
     <string name="keyboard_layout_english_us_intl" msgid="3705168594034233583">"Enskt (Bandaríkin), alþjóðlegt"</string>
     <string name="keyboard_layout_english_us_colemak_label" msgid="4194969610343455380">"Enskt (Bandaríkin), Colemak-stíll"</string>
     <string name="keyboard_layout_english_us_dvorak_label" msgid="793528923171145202">"Enskt (Bandaríkin), Dvorak-stíll"</string>
-    <!-- no translation found for keyboard_layout_english_us_workman_label (2944541595262173111) -->
-    <skip />
+    <string name="keyboard_layout_english_us_workman_label" msgid="2944541595262173111">"Enska (Bandaríkin), Workman-stíll"</string>
     <string name="keyboard_layout_german_label" msgid="8451565865467909999">"Þýskt"</string>
     <string name="keyboard_layout_french_label" msgid="813450119589383723">"Franskt"</string>
     <string name="keyboard_layout_french_ca_label" msgid="365352601060604832">"Franskt (Kanada)"</string>
