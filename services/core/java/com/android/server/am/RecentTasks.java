@@ -108,7 +108,7 @@ class RecentTasks extends ArrayList<TaskRecord> {
 
         final IPackageManager pm = AppGlobals.getPackageManager();
         final int[] users = (userId == UserHandle.USER_ALL)
-                ? mService.getUsersLocked() : new int[] { userId };
+                ? mService.mUserController.getUsers() : new int[] { userId };
         for (int userIdx = 0; userIdx < users.length; userIdx++) {
             final int user = users[userIdx];
             recentsCount = size() - 1;

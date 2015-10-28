@@ -337,7 +337,7 @@ public final class ActiveServices {
 
         ServiceRecord r = res.record;
 
-        if (!mAm.getUserManagerLocked().exists(r.userId)) {
+        if (!mAm.mUserController.exists(r.userId)) {
             Slog.d(TAG, "Trying to start service with non-existent user! " + r.userId);
             return null;
         }
@@ -1030,8 +1030,8 @@ public final class ActiveServices {
         if (DEBUG_SERVICE) Slog.v(TAG_SERVICE, "retrieveServiceLocked: " + service
                 + " type=" + resolvedType + " callingUid=" + callingUid);
 
-        userId = mAm.handleIncomingUser(callingPid, callingUid, userId,
-                false, ActivityManagerService.ALLOW_NON_FULL_IN_PROFILE, "service", null);
+        userId = mAm.mUserController.handleIncomingUser(callingPid, callingUid, userId, false,
+                ActivityManagerService.ALLOW_NON_FULL_IN_PROFILE, "service", null);
 
         ServiceMap smap = getServiceMap(userId);
         final ComponentName comp = service.getComponent();
@@ -2333,7 +2333,8 @@ public final class ActiveServices {
                 EventLog.writeEvent(EventLogTags.AM_SERVICE_CRASHED_TOO_MUCH,
                         sr.userId, sr.crashCount, sr.shortName, app.pid);
                 bringDownServiceLocked(sr);
-            } else if (!allowRestart || !mAm.isUserRunningLocked(sr.userId, false)) {
+            } else if (!allowRestart
+                    || !mAm.mUserController.isUserRunningLocked(sr.userId, false)) {
                 bringDownServiceLocked(sr);
             } else {
                 boolean canceled = scheduleServiceRestartLocked(sr, true);
@@ -2446,7 +2447,7 @@ public final class ActiveServices {
             if (ActivityManager.checkUidPermission(
                     android.Manifest.permission.INTERACT_ACROSS_USERS_FULL,
                     uid) == PackageManager.PERMISSION_GRANTED) {
-                int[] users = mAm.getUsersLocked();
+                int[] users = mAm.mUserController.getUsers();
                 for (int ui=0; ui<users.length && res.size() < maxNum; ui++) {
                     ArrayMap<ComponentName, ServiceRecord> alls = getServices(users[ui]);
                     for (int i=0; i<alls.size() && res.size() < maxNum; i++) {
@@ -2580,7 +2581,7 @@ public final class ActiveServices {
                 pw.print(mLastAnrDump);
                 pw.println();
             }
-            int[] users = mAm.getUsersLocked();
+            int[] users = mAm.mUserController.getUsers();
             for (int user : users) {
                 ServiceMap smap = getServiceMap(user);
                 boolean printed = false;
@@ -2817,7 +2818,7 @@ public final class ActiveServices {
         ArrayList<ServiceRecord> services = new ArrayList<ServiceRecord>();
 
         synchronized (mAm) {
-            int[] users = mAm.getUsersLocked();
+            int[] users = mAm.mUserController.getUsers();
             if ("all".equals(name)) {
                 for (int user : users) {
                     ServiceMap smap = mServiceMap.get(user);
