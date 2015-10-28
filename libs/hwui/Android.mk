@@ -113,7 +113,6 @@ $(call local-generated-sources-dir)/proto/$(LOCAL_PATH)
 endef
 
 hwui_c_includes += \
-    external/skia/include/private \
     external/skia/src/core
 
 hwui_shared_libraries := \

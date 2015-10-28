@@ -486,7 +486,7 @@ static bool computeAllocationSize(const SkBitmap& bitmap, size_t* size) {
 android::Bitmap* GraphicsJNI::allocateJavaPixelRef(JNIEnv* env, SkBitmap* bitmap,
                                              SkColorTable* ctable) {
     const SkImageInfo& info = bitmap->info();
-    if (info.colorType() == kUnknown_SkColorType) {
+    if (info.fColorType == kUnknown_SkColorType) {
         doThrowIAE(env, "unknown bitmap configuration");
         return NULL;
     }
@@ -538,7 +538,7 @@ static void allocatePixelsReleaseProc(void* ptr, void* ctx) {
 
 bool GraphicsJNI::allocatePixels(JNIEnv* env, SkBitmap* bitmap, SkColorTable* ctable) {
     const SkImageInfo& info = bitmap->info();
-    if (info.colorType() == kUnknown_SkColorType) {
+    if (info.fColorType == kUnknown_SkColorType) {
         doThrowIAE(env, "unknown bitmap configuration");
         return NULL;
     }
@@ -581,7 +581,7 @@ android::Bitmap* GraphicsJNI::allocateAshmemPixelRef(JNIEnv* env, SkBitmap* bitm
     int fd;
 
     const SkImageInfo& info = bitmap->info();
-    if (info.colorType() == kUnknown_SkColorType) {
+    if (info.fColorType == kUnknown_SkColorType) {
         doThrowIAE(env, "unknown bitmap configuration");
         return nullptr;
     }
@@ -625,7 +625,7 @@ android::Bitmap* GraphicsJNI::allocateAshmemPixelRef(JNIEnv* env, SkBitmap* bitm
 android::Bitmap* GraphicsJNI::mapAshmemPixelRef(JNIEnv* env, SkBitmap* bitmap,
         SkColorTable* ctable, int fd, void* addr, bool readOnly) {
     const SkImageInfo& info = bitmap->info();
-    if (info.colorType() == kUnknown_SkColorType) {
+    if (info.fColorType == kUnknown_SkColorType) {
         doThrowIAE(env, "unknown bitmap configuration");
         return nullptr;
     }
