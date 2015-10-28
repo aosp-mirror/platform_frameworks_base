@@ -25,10 +25,12 @@ import android.graphics.Rect;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IRemoteCallback;
+import android.os.Parcelable;
 import android.os.RemoteException;
 import android.os.ResultReceiver;
 import android.util.Pair;
 import android.util.Slog;
+import android.view.AppTransitionAnimationSpec;
 import android.view.View;
 import android.view.Window;
 
@@ -129,6 +131,11 @@ public class ActivityOptions {
     public static final String KEY_ANIM_START_LISTENER = "android:activity.animStartListener";
 
     /**
+     * Descriptions of app transition animations to be played during the activity launch.
+     */
+    private static final String KEY_ANIM_SPECS = "android:activity.animSpecs";
+
+    /**
      * Where the docked stack should be positioned.
      * @hide
      */
@@ -199,6 +206,7 @@ public class ActivityOptions {
     private int mExitCoordinatorIndex;
     private PendingIntent mUsageTimeReport;
     private int mDockCreateMode = DOCKED_STACK_CREATE_MODE_TOP_OR_LEFT;
+    private AppTransitionAnimationSpec mAnimSpecs[];
 
     /**
      * Create an ActivityOptions specifying a custom animation to run when
@@ -512,6 +520,18 @@ public class ActivityOptions {
         return opts;
     }
 
+    /** @hide */
+    public static ActivityOptions makeThumbnailAspectScaleDownAnimation(View source,
+            AppTransitionAnimationSpec[] specs, Handler handler,
+            OnAnimationStartedListener listener) {
+        ActivityOptions opts = new ActivityOptions();
+        opts.mPackageName = source.getContext().getPackageName();
+        opts.mAnimationType = ANIM_THUMBNAIL_ASPECT_SCALE_DOWN;
+        opts.mAnimSpecs = specs;
+        opts.setOnAnimationStartedListener(handler, listener);
+        return opts;
+    }
+
     /**
      * Create an ActivityOptions to transition between Activities using cross-Activity scene
      * animations. This method carries the position of one shared element to the started Activity.
@@ -698,6 +718,13 @@ public class ActivityOptions {
                 break;
         }
         mDockCreateMode = opts.getInt(KEY_DOCK_CREATE_MODE, DOCKED_STACK_CREATE_MODE_TOP_OR_LEFT);
+        if (opts.containsKey(KEY_ANIM_SPECS)) {
+            Parcelable[] specs = opts.getParcelableArray(KEY_ANIM_SPECS);
+            mAnimSpecs = new AppTransitionAnimationSpec[specs.length];
+            for (int i = specs.length - 1; i >= 0; i--) {
+                mAnimSpecs[i] = (AppTransitionAnimationSpec) specs[i];
+            }
+        }
     }
 
     /** @hide */
@@ -810,6 +837,9 @@ public class ActivityOptions {
     }
 
     /** @hide */
+    public AppTransitionAnimationSpec[] getAnimSpecs() { return mAnimSpecs; }
+
+    /** @hide */
     public static void abort(Bundle options) {
         if (options != null) {
             (new ActivityOptions(options)).abort();
@@ -898,6 +928,7 @@ public class ActivityOptions {
                 mExitCoordinatorIndex = otherOptions.mExitCoordinatorIndex;
                 break;
         }
+        mAnimSpecs = otherOptions.mAnimSpecs;
     }
 
     /**
@@ -964,6 +995,9 @@ public class ActivityOptions {
                 break;
         }
         b.putInt(KEY_DOCK_CREATE_MODE, mDockCreateMode);
+        if (mAnimSpecs != null) {
+            b.putParcelableArray(KEY_ANIM_SPECS, mAnimSpecs);
+        }
 
         return b;
     }

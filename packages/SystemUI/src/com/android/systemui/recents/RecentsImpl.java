@@ -16,6 +16,8 @@
 
 package com.android.systemui.recents;
 
+import static android.app.ActivityManager.FREEFORM_WORKSPACE_STACK_ID;
+
 import android.app.ActivityManager;
 import android.app.ActivityOptions;
 import android.app.ITaskStackListener;
@@ -31,8 +33,10 @@ import android.os.Handler;
 import android.os.SystemClock;
 import android.os.UserHandle;
 import android.util.MutableBoolean;
+import android.view.AppTransitionAnimationSpec;
 import android.view.LayoutInflater;
 import android.view.View;
+
 import com.android.internal.logging.MetricsLogger;
 import com.android.systemui.Prefs;
 import com.android.systemui.R;
@@ -557,12 +561,44 @@ public class RecentsImpl extends IRecentsNonSystemUserCallbacks.Stub
      */
     private ActivityOptions getThumbnailTransitionActivityOptions(
             ActivityManager.RunningTaskInfo topTask, TaskStack stack, TaskStackView stackView) {
+        if (topTask.stackId == FREEFORM_WORKSPACE_STACK_ID) {
+            ArrayList<AppTransitionAnimationSpec> specs = new ArrayList<>();
+            stackView.getScroller().setStackScrollToInitialState();
+            ArrayList<Task> tasks = stack.getTasks();
+            for (int i = tasks.size() - 1; i >= 0; i--) {
+                Task task = tasks.get(i);
+                if (SystemServicesProxy.isFreeformStack(task.key.stackId)) {
+                    mTmpTransform = stackView.getStackAlgorithm().getStackTransform(task,
+                            stackView.getScroller().getStackScroll(), mTmpTransform, null);
+                    Rect toTaskRect = new Rect();
+                    mTmpTransform.rect.round(toTaskRect);
+                    Bitmap thumbnail = getThumbnailBitmap(topTask, task, mTmpTransform);
+                    specs.add(new AppTransitionAnimationSpec(task.key.id, thumbnail, toTaskRect));
+                }
+            }
+            AppTransitionAnimationSpec[] specsArray = new AppTransitionAnimationSpec[specs.size()];
+            specs.toArray(specsArray);
+            return ActivityOptions.makeThumbnailAspectScaleDownAnimation(mDummyStackView,
+                    specsArray, mHandler, this);
+        } else {
+            // Update the destination rect
+            Task toTask = new Task();
+            TaskViewTransform toTransform = getThumbnailTransitionTransform(stack, stackView,
+                    topTask.id, toTask);
+            RectF toTaskRect = toTransform.rect;
+            Bitmap thumbnail = getThumbnailBitmap(topTask, toTask, toTransform);
+            if (thumbnail != null) {
+                return ActivityOptions.makeThumbnailAspectScaleDownAnimation(mDummyStackView,
+                        thumbnail, (int) toTaskRect.left, (int) toTaskRect.top,
+                        (int) toTaskRect.width(), (int) toTaskRect.height(), mHandler, this);
+            }
+            // If both the screenshot and thumbnail fails, then just fall back to the default transition
+            return getUnknownTransitionActivityOptions();
+        }
+    }
 
-        // Update the destination rect
-        Task toTask = new Task();
-        TaskViewTransform toTransform = getThumbnailTransitionTransform(stack, stackView,
-                topTask.id, toTask);
-        RectF toTaskRect = toTransform.rect;
+    private Bitmap getThumbnailBitmap(ActivityManager.RunningTaskInfo topTask, Task toTask,
+            TaskViewTransform toTransform) {
         Bitmap thumbnail;
         if (mThumbnailTransitionBitmapCacheKey != null
                 && mThumbnailTransitionBitmapCacheKey.key != null
@@ -574,14 +610,7 @@ public class RecentsImpl extends IRecentsNonSystemUserCallbacks.Stub
             preloadIcon(topTask);
             thumbnail = drawThumbnailTransitionBitmap(toTask, toTransform);
         }
-        if (thumbnail != null) {
-            return ActivityOptions.makeThumbnailAspectScaleDownAnimation(mDummyStackView,
-                    thumbnail, (int) toTaskRect.left, (int) toTaskRect.top,
-                    (int) toTaskRect.width(), (int) toTaskRect.height(), mHandler, this);
-        }
-
-        // If both the screenshot and thumbnail fails, then just fall back to the default transition
-        return getUnknownTransitionActivityOptions();
+        return thumbnail;
     }
 
     /**

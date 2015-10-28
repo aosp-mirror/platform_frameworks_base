@@ -64,7 +64,6 @@ import android.view.animation.Interpolator;
 import android.view.animation.PathInterpolator;
 import android.view.animation.ScaleAnimation;
 import android.view.animation.TranslateAnimation;
-import android.view.animation.TranslateYAnimation;
 
 import com.android.internal.util.DumpUtils.Dump;
 import com.android.server.AttributeCache;
@@ -175,7 +174,7 @@ public class AppTransition implements Dump {
     private Rect mTmpFromClipRect = new Rect();
     private Rect mTmpToClipRect = new Rect();
 
-    private final Rect mTmpStartRect = new Rect();
+    private final Rect mTmpRect = new Rect();
 
     private final static int APP_STATE_IDLE = 0;
     private final static int APP_STATE_READY = 1;
@@ -459,16 +458,16 @@ public class AppTransition implements Dump {
     private Animation createScaleUpAnimationLocked(int transit, boolean enter,
             Rect containingFrame) {
         Animation a;
-        getDefaultNextAppTransitionStartRect(mTmpStartRect);
+        getDefaultNextAppTransitionStartRect(mTmpRect);
         final int appWidth = containingFrame.width();
         final int appHeight = containingFrame.height();
         if (enter) {
             // Entering app zooms out from the center of the initial rect.
-            float scaleW = mTmpStartRect.width() / (float) appWidth;
-            float scaleH = mTmpStartRect.height() / (float) appHeight;
+            float scaleW = mTmpRect.width() / (float) appWidth;
+            float scaleH = mTmpRect.height() / (float) appHeight;
             Animation scale = new ScaleAnimation(scaleW, 1, scaleH, 1,
-                    computePivot(mTmpStartRect.left, scaleW),
-                    computePivot(mTmpStartRect.right, scaleH));
+                    computePivot(mTmpRect.left, scaleW),
+                    computePivot(mTmpRect.right, scaleH));
             scale.setInterpolator(mDecelerateInterpolator);
 
             Animation alpha = new AlphaAnimation(0, 1);
@@ -545,20 +544,20 @@ public class AppTransition implements Dump {
 
             final int appWidth = appFrame.width();
             final int appHeight = appFrame.height();
-            // mTmpStartRect will contain an area around the launcher icon that was pressed. We will
+            // mTmpRect will contain an area around the launcher icon that was pressed. We will
             // clip reveal from that area in the final area of the app.
-            getDefaultNextAppTransitionStartRect(mTmpStartRect);
+            getDefaultNextAppTransitionStartRect(mTmpRect);
 
             float t = 0f;
             if (appHeight > 0) {
-                t = (float) mTmpStartRect.left / appHeight;
+                t = (float) mTmpRect.left / appHeight;
             }
             int translationY = mClipRevealTranslationY + (int)(appHeight / 7f * t);
 
-            int centerX = mTmpStartRect.centerX();
-            int centerY = mTmpStartRect.centerY();
-            int halfWidth = mTmpStartRect.width() / 2;
-            int halfHeight = mTmpStartRect.height() / 2;
+            int centerX = mTmpRect.centerX();
+            int centerY = mTmpRect.centerY();
+            int halfWidth = mTmpRect.width() / 2;
+            int halfHeight = mTmpRect.height() / 2;
 
             // Clip third of the from size of launch icon, expand to full width/height
             Animation clipAnimLR = new ClipRectLRAnimation(
@@ -693,19 +692,19 @@ public class AppTransition implements Dump {
 
         float scaleW = appWidth / thumbWidth;
         float unscaledHeight = thumbHeight * scaleW;
-        getNextAppTransitionStartRect(taskId, mTmpStartRect);
-        float unscaledStartY = mTmpStartRect.top - (unscaledHeight - thumbHeight) / 2f;
+        getNextAppTransitionStartRect(taskId, mTmpRect);
+        float unscaledStartY = mTmpRect.top - (unscaledHeight - thumbHeight) / 2f;
         if (mNextAppTransitionScaleUp) {
             // Animation up from the thumbnail to the full screen
             Animation scale = new ScaleAnimation(1f, scaleW, 1f, scaleW,
-                    mTmpStartRect.left + (thumbWidth / 2f), mTmpStartRect.top + (thumbHeight / 2f));
+                    mTmpRect.left + (thumbWidth / 2f), mTmpRect.top + (thumbHeight / 2f));
             scale.setInterpolator(mTouchResponseInterpolator);
             scale.setDuration(THUMBNAIL_APP_TRANSITION_DURATION);
             Animation alpha = new AlphaAnimation(1, 0);
             alpha.setInterpolator(mThumbnailFadeOutInterpolator);
             alpha.setDuration(THUMBNAIL_APP_TRANSITION_ALPHA_DURATION);
             final float toX = appRect.left + appRect.width() / 2 -
-                    (mTmpStartRect.left + thumbWidth / 2);
+                    (mTmpRect.left + thumbWidth / 2);
             final float toY = appRect.top + mNextAppTransitionInsets.top + -unscaledStartY;
             Animation translate = new TranslateAnimation(0, toX, 0, toY);
             translate.setInterpolator(mTouchResponseInterpolator);
@@ -720,7 +719,7 @@ public class AppTransition implements Dump {
         } else {
             // Animation down from the full screen to the thumbnail
             Animation scale = new ScaleAnimation(scaleW, 1f, scaleW, 1f,
-                    mTmpStartRect.left + (thumbWidth / 2f), mTmpStartRect.top + (thumbHeight / 2f));
+                    mTmpRect.left + (thumbWidth / 2f), mTmpRect.top + (thumbHeight / 2f));
             scale.setInterpolator(mTouchResponseInterpolator);
             scale.setDuration(THUMBNAIL_APP_TRANSITION_DURATION);
             Animation alpha = new AlphaAnimation(0f, 1f);
@@ -753,10 +752,10 @@ public class AppTransition implements Dump {
         Animation a;
         final int appWidth = containingFrame.width();
         final int appHeight = containingFrame.height();
-        getDefaultNextAppTransitionStartRect(mTmpStartRect);
-        final int thumbWidthI = mTmpStartRect.width();
+        getDefaultNextAppTransitionStartRect(mTmpRect);
+        final int thumbWidthI = mTmpRect.width();
         final float thumbWidth = thumbWidthI > 0 ? thumbWidthI : 1;
-        final int thumbHeightI = mTmpStartRect.height();
+        final int thumbHeightI = mTmpRect.height();
         final float thumbHeight = thumbHeightI > 0 ? thumbHeightI : 1;
 
         // Used for the ENTER_SCALE_UP and EXIT_SCALE_DOWN transitions
@@ -766,7 +765,7 @@ public class AppTransition implements Dump {
         switch (thumbTransitState) {
             case THUMBNAIL_TRANSITION_ENTER_SCALE_UP: {
                 if (freeform) {
-                    a = createAspectScaledThumbnailEnterNonFullscreenAnimationLocked(
+                    a = createAspectScaledThumbnailEnterFreeformAnimationLocked(
                             containingFrame, surfaceInsets, taskId);
                 } else {
                     mTmpFromClipRect.set(containingFrame);
@@ -797,8 +796,8 @@ public class AppTransition implements Dump {
                     mNextAppTransitionInsets.set(contentInsets);
 
                     Animation scaleAnim = new ScaleAnimation(scale, 1, scale, 1,
-                            computePivot(mTmpStartRect.left, scale),
-                            computePivot(mTmpStartRect.top, scale));
+                            computePivot(mTmpRect.left, scale),
+                            computePivot(mTmpRect.top, scale));
                     Animation clipAnim = new ClipRectAnimation(mTmpFromClipRect, mTmpToClipRect);
                     Animation translateAnim = new TranslateAnimation(0, 0, -scaledTopDecor, 0);
 
@@ -834,44 +833,49 @@ public class AppTransition implements Dump {
             }
             case THUMBNAIL_TRANSITION_EXIT_SCALE_DOWN: {
                 // App window scaling down from full screen
-                mTmpFromClipRect.set(containingFrame);
-                mTmpToClipRect.set(containingFrame);
-                // exclude top screen decor (status bar) region from the destination clip.
-                mTmpToClipRect.top = contentInsets.top;
-                if (orientation == Configuration.ORIENTATION_PORTRAIT) {
-                    // In portrait, we scale the width and clip to the top/left square
-                    scale = thumbWidth / appWidth;
-                    scaledTopDecor = (int) (scale * contentInsets.top);
-                    int unscaledThumbHeight = (int) (thumbHeight / scale);
-                    mTmpToClipRect.bottom = mTmpToClipRect.top + unscaledThumbHeight;
+                if (freeform) {
+                    a = createAspectScaledThumbnailExitFreeformAnimationLocked(
+                            containingFrame, surfaceInsets, taskId);
                 } else {
-                    // In landscape, we scale the height and clip to the top/left square. We only
-                    // scale the part that is not covered by status bar and the nav bar.
-                    scale = thumbHeight / (appHeight - contentInsets.top - contentInsets.bottom);
-                    scaledTopDecor = (int) (scale * contentInsets.top);
-                    int unscaledThumbWidth = (int) (thumbWidth / scale);
-                    mTmpToClipRect.right = mTmpToClipRect.left + unscaledThumbWidth;
-                    // This removes the navigation bar from the last frame, so it better matches the
-                    // thumbnail. We need to do this explicitly in landscape, because in portrait we
-                    // already crop vertically.
-                    mTmpToClipRect.bottom = mTmpToClipRect.bottom - contentInsets.bottom;
+                    mTmpFromClipRect.set(containingFrame);
+                    mTmpToClipRect.set(containingFrame);
+                    // exclude top screen decor (status bar) region from the destination clip.
+                    mTmpToClipRect.top = contentInsets.top;
+                    if (orientation == Configuration.ORIENTATION_PORTRAIT) {
+                        // In portrait, we scale the width and clip to the top/left square
+                        scale = thumbWidth / appWidth;
+                        scaledTopDecor = (int) (scale * contentInsets.top);
+                        int unscaledThumbHeight = (int) (thumbHeight / scale);
+                        mTmpToClipRect.bottom = mTmpToClipRect.top + unscaledThumbHeight;
+                    } else {
+                        // In landscape, we scale the height and clip to the top/left square. We only
+                        // scale the part that is not covered by status bar and the nav bar.
+                        scale = thumbHeight / (appHeight - contentInsets.top - contentInsets.bottom);
+                        scaledTopDecor = (int) (scale * contentInsets.top);
+                        int unscaledThumbWidth = (int) (thumbWidth / scale);
+                        mTmpToClipRect.right = mTmpToClipRect.left + unscaledThumbWidth;
+                        // This removes the navigation bar from the last frame, so it better matches the
+                        // thumbnail. We need to do this explicitly in landscape, because in portrait we
+                        // already crop vertically.
+                        mTmpToClipRect.bottom = mTmpToClipRect.bottom - contentInsets.bottom;
+                    }
+
+                    mNextAppTransitionInsets.set(contentInsets);
+
+                    Animation scaleAnim = new ScaleAnimation(1, scale, 1, scale,
+                            computePivot(mTmpRect.left, scale),
+                            computePivot(mTmpRect.top, scale));
+                    Animation clipAnim = new ClipRectAnimation(mTmpFromClipRect, mTmpToClipRect);
+                    Animation translateAnim = new TranslateAnimation(0, 0, 0, -scaledTopDecor);
+
+                    AnimationSet set = new AnimationSet(true);
+                    set.addAnimation(clipAnim);
+                    set.addAnimation(scaleAnim);
+                    set.addAnimation(translateAnim);
+
+                    a = set;
+                    a.setZAdjustment(Animation.ZORDER_TOP);
                 }
-
-                mNextAppTransitionInsets.set(contentInsets);
-
-                Animation scaleAnim = new ScaleAnimation(1, scale, 1, scale,
-                        computePivot(mTmpStartRect.left, scale),
-                        computePivot(mTmpStartRect.top, scale));
-                Animation clipAnim = new ClipRectAnimation(mTmpFromClipRect, mTmpToClipRect);
-                Animation translateAnim = new TranslateAnimation(0, 0, 0, -scaledTopDecor);
-
-                AnimationSet set = new AnimationSet(true);
-                set.addAnimation(clipAnim);
-                set.addAnimation(scaleAnim);
-                set.addAnimation(translateAnim);
-
-                a = set;
-                a.setZAdjustment(Animation.ZORDER_TOP);
                 break;
             }
             default:
@@ -884,27 +888,48 @@ public class AppTransition implements Dump {
                 mTouchResponseInterpolator);
     }
 
-    private Animation createAspectScaledThumbnailEnterNonFullscreenAnimationLocked(
-            Rect frame, @Nullable Rect surfaceInsets, int taskId) {
-        getNextAppTransitionStartRect(taskId, mTmpStartRect);
-        float width = frame.width();
-        float height = frame.height();
-        float scaleWidth = mTmpStartRect.width() / width;
-        float scaleHeight = mTmpStartRect.height() / height;
+    private Animation createAspectScaledThumbnailEnterFreeformAnimationLocked(Rect frame,
+            @Nullable Rect surfaceInsets, int taskId) {
+        getNextAppTransitionStartRect(taskId, mTmpRect);
+        return createAspectScaledThumbnailFreeformAnimationLocked(mTmpRect, frame, surfaceInsets,
+                true);
+    }
+
+    private Animation createAspectScaledThumbnailExitFreeformAnimationLocked(Rect frame,
+            @Nullable Rect surfaceInsets, int taskId) {
+        getNextAppTransitionStartRect(taskId, mTmpRect);
+        return createAspectScaledThumbnailFreeformAnimationLocked(frame, mTmpRect, surfaceInsets,
+                false);
+    }
+
+    private AnimationSet createAspectScaledThumbnailFreeformAnimationLocked(Rect sourceFrame,
+            Rect destFrame, @Nullable Rect surfaceInsets, boolean enter) {
+        final float sourceWidth = sourceFrame.width();
+        final float sourceHeight = sourceFrame.height();
+        final float destWidth = destFrame.width();
+        final float destHeight = destFrame.height();
+        final float scaleH = enter ? sourceWidth / destWidth : destWidth / sourceWidth;
+        final float scaleV = enter ? sourceHeight / destHeight : destHeight / sourceHeight;
         AnimationSet set = new AnimationSet(true);
-        int surfaceInsetsHorizontal = surfaceInsets == null
+        final int surfaceInsetsH = surfaceInsets == null
                 ? 0 : surfaceInsets.left + surfaceInsets.right;
-        int surfaceInsetsVertical = surfaceInsets == null
+        final int surfaceInsetsV = surfaceInsets == null
                 ? 0 : surfaceInsets.top + surfaceInsets.bottom;
         // We want the scaling to happen from the center of the surface. In order to achieve that,
         // we need to account for surface insets that will be used to enlarge the surface.
-        ScaleAnimation scale = new ScaleAnimation(scaleWidth, 1, scaleHeight, 1,
-                (width + surfaceInsetsHorizontal) / 2, (height + surfaceInsetsVertical) / 2);
-        int fromX = mTmpStartRect.left + mTmpStartRect.width() / 2
-                - (frame.left + frame.width() / 2);
-        int fromY = mTmpStartRect.top + mTmpStartRect.height() / 2
-                - (frame.top + frame.height() / 2);
-        TranslateAnimation translation = new TranslateAnimation(fromX, 0, fromY, 0);
+        final float scaleHCenter = ((enter ? destWidth : sourceWidth) + surfaceInsetsH) / 2;
+        final float scaleVCenter = ((enter ? destHeight : sourceHeight) + surfaceInsetsV) / 2;
+        final ScaleAnimation scale = enter ?
+                new ScaleAnimation(scaleH, 1, scaleV, 1, scaleHCenter, scaleVCenter)
+                : new ScaleAnimation(1, scaleH, 1, scaleV, scaleHCenter, scaleVCenter);
+        final int sourceHCenter = sourceFrame.left + sourceFrame.width() / 2;
+        final int sourceVCenter = sourceFrame.top + sourceFrame.height() / 2;
+        final int destHCenter = destFrame.left + destFrame.width() / 2;
+        final int destVCenter = destFrame.top + destFrame.height() / 2;
+        final int fromX = enter ? sourceHCenter - destHCenter : destHCenter - sourceHCenter;
+        final int fromY = enter ? sourceVCenter - destVCenter : destVCenter - sourceVCenter;
+        final TranslateAnimation translation = enter ? new TranslateAnimation(fromX, 0, fromY, 0)
+                : new TranslateAnimation(0, fromX, 0, fromY);
         set.addAnimation(scale);
         set.addAnimation(translation);
         return set;
@@ -917,7 +942,7 @@ public class AppTransition implements Dump {
     Animation createThumbnailScaleAnimationLocked(int appWidth, int appHeight, int transit,
             Bitmap thumbnailHeader) {
         Animation a;
-        getDefaultNextAppTransitionStartRect(mTmpStartRect);
+        getDefaultNextAppTransitionStartRect(mTmpRect);
         final int thumbWidthI = thumbnailHeader.getWidth();
         final float thumbWidth = thumbWidthI > 0 ? thumbWidthI : 1;
         final int thumbHeightI = thumbnailHeader.getHeight();
@@ -928,8 +953,8 @@ public class AppTransition implements Dump {
             float scaleW = appWidth / thumbWidth;
             float scaleH = appHeight / thumbHeight;
             Animation scale = new ScaleAnimation(1, scaleW, 1, scaleH,
-                    computePivot(mTmpStartRect.left, 1 / scaleW),
-                    computePivot(mTmpStartRect.top, 1 / scaleH));
+                    computePivot(mTmpRect.left, 1 / scaleW),
+                    computePivot(mTmpRect.top, 1 / scaleH));
             scale.setInterpolator(mDecelerateInterpolator);
 
             Animation alpha = new AlphaAnimation(1, 0);
@@ -945,8 +970,8 @@ public class AppTransition implements Dump {
             float scaleW = appWidth / thumbWidth;
             float scaleH = appHeight / thumbHeight;
             a = new ScaleAnimation(scaleW, 1, scaleH, 1,
-                    computePivot(mTmpStartRect.left, 1 / scaleW),
-                    computePivot(mTmpStartRect.top, 1 / scaleH));
+                    computePivot(mTmpRect.left, 1 / scaleW),
+                    computePivot(mTmpRect.top, 1 / scaleH));
         }
 
         return prepareThumbnailAnimation(a, appWidth, appHeight, transit);
@@ -962,7 +987,7 @@ public class AppTransition implements Dump {
         final int appHeight = containingFrame.height();
         Bitmap thumbnailHeader = getAppTransitionThumbnailHeader(taskId);
         Animation a;
-        getDefaultNextAppTransitionStartRect(mTmpStartRect);
+        getDefaultNextAppTransitionStartRect(mTmpRect);
         final int thumbWidthI = thumbnailHeader != null ? thumbnailHeader.getWidth() : appWidth;
         final float thumbWidth = thumbWidthI > 0 ? thumbWidthI : 1;
         final int thumbHeightI = thumbnailHeader != null ? thumbnailHeader.getHeight() : appHeight;
@@ -974,8 +999,8 @@ public class AppTransition implements Dump {
                 float scaleW = thumbWidth / appWidth;
                 float scaleH = thumbHeight / appHeight;
                 a = new ScaleAnimation(scaleW, 1, scaleH, 1,
-                        computePivot(mTmpStartRect.left, scaleW),
-                        computePivot(mTmpStartRect.top, scaleH));
+                        computePivot(mTmpRect.left, scaleW),
+                        computePivot(mTmpRect.top, scaleH));
                 break;
             }
             case THUMBNAIL_TRANSITION_EXIT_SCALE_UP: {
@@ -1002,8 +1027,8 @@ public class AppTransition implements Dump {
                 float scaleW = thumbWidth / appWidth;
                 float scaleH = thumbHeight / appHeight;
                 Animation scale = new ScaleAnimation(1, scaleW, 1, scaleH,
-                        computePivot(mTmpStartRect.left, scaleW),
-                        computePivot(mTmpStartRect.top, scaleH));
+                        computePivot(mTmpRect.left, scaleW),
+                        computePivot(mTmpRect.top, scaleH));
 
                 Animation alpha = new AlphaAnimation(1, 0);
 
@@ -1492,15 +1517,15 @@ public class AppTransition implements Dump {
                         pw.print(Integer.toHexString(mNextAppTransitionInPlace));
                 break;
             case NEXT_TRANSIT_TYPE_SCALE_UP: {
-                getDefaultNextAppTransitionStartRect(mTmpStartRect);
+                getDefaultNextAppTransitionStartRect(mTmpRect);
                 pw.print(prefix); pw.print("mNextAppTransitionStartX=");
-                        pw.print(mTmpStartRect.left);
+                        pw.print(mTmpRect.left);
                         pw.print(" mNextAppTransitionStartY=");
-                        pw.println(mTmpStartRect.top);
+                        pw.println(mTmpRect.top);
                 pw.print(prefix); pw.print("mNextAppTransitionStartWidth=");
-                        pw.print(mTmpStartRect.width());
+                        pw.print(mTmpRect.width());
                         pw.print(" mNextAppTransitionStartHeight=");
-                        pw.println(mTmpStartRect.height());
+                        pw.println(mTmpRect.height());
                 break;
             }
             case NEXT_TRANSIT_TYPE_THUMBNAIL_SCALE_UP:

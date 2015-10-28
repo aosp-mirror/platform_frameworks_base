@@ -53,6 +53,7 @@ import android.util.EventLog;
 import android.util.Log;
 import android.util.Slog;
 import android.util.TimeUtils;
+import android.view.AppTransitionAnimationSpec;
 import android.view.IApplicationToken;
 import android.view.WindowManager;
 
@@ -863,17 +864,24 @@ final class ActivityRecord {
                     break;
                 case ActivityOptions.ANIM_THUMBNAIL_ASPECT_SCALE_UP:
                 case ActivityOptions.ANIM_THUMBNAIL_ASPECT_SCALE_DOWN:
-                    service.mWindowManager.overridePendingAppTransitionAspectScaledThumb(
-                            pendingOptions.getThumbnail(),
-                            pendingOptions.getStartX(), pendingOptions.getStartY(),
-                            pendingOptions.getWidth(), pendingOptions.getHeight(),
-                            pendingOptions.getOnAnimationStartListener(),
-                            (animationType == ActivityOptions.ANIM_THUMBNAIL_ASPECT_SCALE_UP));
-                    if (intent.getSourceBounds() == null) {
-                        intent.setSourceBounds(new Rect(pendingOptions.getStartX(),
-                                pendingOptions.getStartY(),
-                                pendingOptions.getStartX() + pendingOptions.getWidth(),
-                                pendingOptions.getStartY() + pendingOptions.getHeight()));
+                    final AppTransitionAnimationSpec[] specs = pendingOptions.getAnimSpecs();
+                    if (animationType == ActivityOptions.ANIM_THUMBNAIL_ASPECT_SCALE_DOWN
+                            && specs != null) {
+                        service.mWindowManager.overridePendingAppTransitionMultiThumb(
+                                specs, pendingOptions.getOnAnimationStartListener(), false);
+                    } else {
+                        service.mWindowManager.overridePendingAppTransitionAspectScaledThumb(
+                                pendingOptions.getThumbnail(),
+                                pendingOptions.getStartX(), pendingOptions.getStartY(),
+                                pendingOptions.getWidth(), pendingOptions.getHeight(),
+                                pendingOptions.getOnAnimationStartListener(),
+                                (animationType == ActivityOptions.ANIM_THUMBNAIL_ASPECT_SCALE_UP));
+                        if (intent.getSourceBounds() == null) {
+                            intent.setSourceBounds(new Rect(pendingOptions.getStartX(),
+                                    pendingOptions.getStartY(),
+                                    pendingOptions.getStartX() + pendingOptions.getWidth(),
+                                    pendingOptions.getStartY() + pendingOptions.getHeight()));
+                        }
                     }
                     break;
                 default:
