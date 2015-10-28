@@ -428,7 +428,7 @@
     <string name="tuner_toast" msgid="603429811084428439">"बधाईँ छ! सेटिङहरूमा प्रणाली UI ट्युनर थप गरिएको छ"</string>
     <string name="remove_from_settings" msgid="8389591916603406378">"सेटिङहरूबाट हटाउनुहोस्"</string>
     <string name="remove_from_settings_prompt" msgid="6069085993355887748">"प्रणाली UI ट्युनर सेटिङहरूबाट हटाउने र यसका सबै सुविधाहरू प्रयोग गर्न रोक्ने हो?"</string>
-    <string name="enable_bluetooth_title" msgid="5027037706500635269">"ब्लुटुथ सक्रिय पार्नुहुन्छ?"</string>
+    <string name="enable_bluetooth_title" msgid="5027037706500635269">"ब्लुटुथ सक्रिय पार्ने हो?"</string>
     <string name="enable_bluetooth_message" msgid="9106595990708985385">"आफ्नो ट्याब्लेटसँग किबोर्ड जोड्न, पहिले तपाईँले ब्लुटुथ सक्रिय गर्नुपर्छ।"</string>
     <string name="enable_bluetooth_confirmation_ok" msgid="6258074250948309715">"सक्रिय पार्नुहोस्"</string>
 </resources>
