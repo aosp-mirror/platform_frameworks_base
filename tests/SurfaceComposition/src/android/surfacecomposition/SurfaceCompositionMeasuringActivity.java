@@ -24,6 +24,7 @@ import android.app.Activity;
 import android.app.ActivityManager;
 import android.app.ActivityManager.MemoryInfo;
 import android.content.Context;
+import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.graphics.PixelFormat;
 import android.graphics.Rect;
@@ -95,11 +96,9 @@ public class SurfaceCompositionMeasuringActivity extends Activity implements OnC
     private boolean mResumed;
 
     // Drop one frame per half second.
-    // TODO(khmel)
-    // Add a feature flag and set the target FPS dependent on the target system as e.g.:
-    // 59FPS for MULTI_WINDOW and 54 otherwise (to satisfy the default lax Android requirements).
     private double mRefreshRate;
     private double mTargetFPS;
+    private boolean mAndromeda;
 
     private int mWidth;
     private int mHeight;
@@ -182,6 +181,10 @@ public class SurfaceCompositionMeasuringActivity extends Activity implements OnC
         return score;
     }
 
+    public boolean isAndromeda() {
+        return mAndromeda;
+    }
+
     @Override
     public void onClick(View view) {
         if (view == mMeasureCompositionButton) {
@@ -247,6 +250,9 @@ public class SurfaceCompositionMeasuringActivity extends Activity implements OnC
 
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 
+        // Detect Andromeda devices by having free-form window management feature.
+        mAndromeda = getPackageManager().hasSystemFeature(
+                PackageManager.FEATURE_FREEFORM_WINDOW_MANAGEMENT);
         detectRefreshRate();
 
         // To layouts in parent. First contains list of Surfaces and second
@@ -513,7 +519,8 @@ public class SurfaceCompositionMeasuringActivity extends Activity implements OnC
         }
 
         MemoryInfo memInfo = getMemoryInfo();
-        String info = "Available " +
+        String platformName = mAndromeda ? "Andromeda" : "Android";
+        String info = platformName + ": available " +
                 getReadableMemory(memInfo.availMem) + " from " +
                 getReadableMemory(memInfo.totalMem) + ".\nVisible " +
                 visibleCnt + " from " + mViews.size() + " " +
