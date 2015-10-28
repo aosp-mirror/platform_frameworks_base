@@ -4376,7 +4376,7 @@ final class ActivityStack {
 
             RunningTaskInfo ci = new RunningTaskInfo();
             ci.id = task.taskId;
-            ci.stackId = (task.stack == null) ? INVALID_STACK_ID : task.stack.getStackId();
+            ci.stackId = mStackId;
             ci.baseActivity = r.intent.getComponent();
             ci.topActivity = top.intent.getComponent();
             ci.lastActiveTime = task.lastActiveTime;
