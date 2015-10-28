@@ -9,12 +9,19 @@ tabbedList=1
 excludeFromSuggestions=true
 @jd:body
 
-<section class="dac-expand dac-hero dac-section-light">
+<section class="dac-expand dac-hero dac-section-light dac-invert" style="background-image: url(/images/tools/walking-threads-bg.jpg)">
   <div class="wrap">
     <div class="cols dac-hero-content">
       <div class="col-1of2 col-push-1of2 dac-hero-figure">
+
+        <iframe width="448" height="252"
+            src="//www.youtube.com/embed/Z98hXV9GmzY?autohide=1&amp;showinfo=0"
+            frameborder="0" allowfullscreen=""
+            style="float: right;"></iframe>
+        <!--
         <img class="dac-hero-image" src="{@docRoot}images/develop/hero_image_studio5_2x.png"
           srcset="/images/develop/hero_image_studio5.png 1x, /images/develop/hero_image_studio5_2x.png 2x" />
+        -->
       </div>
       <div class="col-1of2 col-pull-1of2">
         <h1 class="dac-hero-title">Get Started with Android Studio</h1>
@@ -97,7 +104,7 @@ excludeFromSuggestions=true
 <section class="dac-section dac-gray"><div class="wrap">
   <h1 class="dac-section-title">Ubiquitous computing on Android</h1>
   <div class="dac-section-subtitle">
-    A great experience for your users across devices. 
+    A great experience for your users across devices.
   </div>
   <div class="resource-widget resource-flow-layout col-16"
        data-query="collection:develop/landing/ubicomp"
