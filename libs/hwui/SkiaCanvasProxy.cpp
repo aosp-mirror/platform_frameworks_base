@@ -125,7 +125,7 @@ void SkiaCanvasProxy::onDrawBitmap(const SkBitmap& bitmap, SkScalar left, SkScal
 }
 
 void SkiaCanvasProxy::onDrawBitmapRect(const SkBitmap& bitmap, const SkRect* srcPtr,
-        const SkRect& dst, const SkPaint* paint, SrcRectConstraint) {
+        const SkRect& dst, const SkPaint* paint, DrawBitmapRectFlags) {
     SkRect src = (srcPtr) ? *srcPtr : SkRect::MakeWH(bitmap.width(), bitmap.height());
     // TODO: if bitmap is a subset, do we need to add pixelRefOrigin to src?
     mCanvas->drawBitmap(bitmap, src.fLeft, src.fTop, src.fRight, src.fBottom,

@@ -72,25 +72,29 @@ static struct {
 
 // FIXME: consider exporting this to share (e.g. android_view_Surface.cpp)
 static inline SkImageInfo convertPixelFormat(const ANativeWindow_Buffer& buffer) {
-    SkColorType ct = kUnknown_SkColorType;
-    SkAlphaType at = kOpaque_SkAlphaType;
+    SkImageInfo info;
+    info.fWidth = buffer.width;
+    info.fHeight = buffer.height;
     switch (buffer.format) {
         case WINDOW_FORMAT_RGBA_8888:
-            ct = kN32_SkColorType;
-            at = kPremul_SkAlphaType;
+            info.fColorType = kN32_SkColorType;
+            info.fAlphaType = kPremul_SkAlphaType;
             break;
         case WINDOW_FORMAT_RGBX_8888:
-            ct = kN32_SkColorType;
-            at = kOpaque_SkAlphaType;
+            info.fColorType = kN32_SkColorType;
+            info.fAlphaType = kOpaque_SkAlphaType;
             break;
         case WINDOW_FORMAT_RGB_565:
-            ct = kRGB_565_SkColorType;
-            at = kOpaque_SkAlphaType;
+            info.fColorType = kRGB_565_SkColorType;
+            info.fAlphaType = kOpaque_SkAlphaType;
             break;
         default:
+            info.fColorType = kUnknown_SkColorType;
+            // switch to kUnknown_SkAlphaType when its in skia
+            info.fAlphaType = kOpaque_SkAlphaType;
             break;
     }
-    return SkImageInfo::Make(buffer.width, buffer.height, ct, at);
+    return info;
 }
 
 /**

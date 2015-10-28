@@ -165,7 +165,7 @@ public:
 
     virtual bool allocPixelRef(SkBitmap* bitmap, SkColorTable* ctable) {
         const SkImageInfo& info = bitmap->info();
-        if (info.colorType() == kUnknown_SkColorType) {
+        if (info.fColorType == kUnknown_SkColorType) {
             ALOGW("unable to reuse a bitmap as the target has an unknown bitmap configuration");
             return false;
         }

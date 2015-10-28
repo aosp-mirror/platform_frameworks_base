@@ -138,36 +138,35 @@ static jobject nativeScreenshotBitmap(JNIEnv* env, jclass clazz,
         return NULL;
     }
 
-    SkColorType ct;
-    SkAlphaType at;
+    SkImageInfo screenshotInfo;
+    screenshotInfo.fWidth = screenshot->getWidth();
+    screenshotInfo.fHeight = screenshot->getHeight();
+
     switch (screenshot->getFormat()) {
         case PIXEL_FORMAT_RGBX_8888: {
-            ct = kRGBA_8888_SkColorType;
-            at = kOpaque_SkAlphaType;
+            screenshotInfo.fColorType = kRGBA_8888_SkColorType;
+            screenshotInfo.fAlphaType = kOpaque_SkAlphaType;
             break;
         }
         case PIXEL_FORMAT_RGBA_8888: {
-            ct = kRGBA_8888_SkColorType;
-            at = kPremul_SkAlphaType;
+            screenshotInfo.fColorType = kRGBA_8888_SkColorType;
+            screenshotInfo.fAlphaType = kPremul_SkAlphaType;
             break;
         }
         case PIXEL_FORMAT_RGB_565: {
-            ct = kRGB_565_SkColorType;
-            at = kOpaque_SkAlphaType;
+            screenshotInfo.fColorType = kRGB_565_SkColorType;
+            screenshotInfo.fAlphaType = kOpaque_SkAlphaType;
             break;
         }
         default: {
             return NULL;
         }
     }
-    SkImageInfo screenshotInfo = SkImageInfo::Make(screenshot->getWidth(),
-                                                   screenshot->getHeight(),
-                                                   ct, at);
 
     const size_t rowBytes =
             screenshot->getStride() * android::bytesPerPixel(screenshot->getFormat());
 
-    if (!screenshotInfo.width() || !screenshotInfo.height()) {
+    if (!screenshotInfo.fWidth || !screenshotInfo.fHeight) {
         return NULL;
     }
 
