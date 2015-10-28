@@ -249,7 +249,7 @@ public final class MediaBrowser {
      */
     public @NonNull String getRoot() {
         if (!isConnected()) {
-            throw new IllegalStateException("getSessionToken() called while not connected (state="
+            throw new IllegalStateException("getRoot() called while not connected (state="
                     + getStateLabel(mState) + ")");
         }
         return mRootId;
