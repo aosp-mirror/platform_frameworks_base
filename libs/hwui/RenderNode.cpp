@@ -20,6 +20,7 @@
 #include "Debug.h"
 #if HWUI_NEW_OPS
 #include "RecordedOp.h"
+#include "BakedOpRenderer.h"
 #endif
 #include "DisplayListOp.h"
 #include "LayerRenderer.h"
@@ -42,11 +43,15 @@ namespace android {
 namespace uirenderer {
 
 void RenderNode::debugDumpLayers(const char* prefix) {
+#if HWUI_NEW_OPS
+    LOG_ALWAYS_FATAL("TODO: dump layer");
+#else
     if (mLayer) {
         ALOGD("%sNode %p (%s) has layer %p (fbo = %u, wasBuildLayered = %s)",
                 prefix, this, getName(), mLayer, mLayer->getFbo(),
                 mLayer->wasBuildLayered ? "true" : "false");
     }
+#endif
     if (mDisplayList) {
         for (auto&& child : mDisplayList->getChildren()) {
             child->renderNode->debugDumpLayers(prefix);
@@ -60,18 +65,21 @@ RenderNode::RenderNode()
         , mDisplayList(nullptr)
         , mStagingDisplayList(nullptr)
         , mAnimatorManager(*this)
-        , mLayer(nullptr)
         , mParentCount(0) {
 }
 
 RenderNode::~RenderNode() {
     deleteDisplayList();
     delete mStagingDisplayList;
+#if HWUI_NEW_OPS
+    LOG_ALWAYS_FATAL_IF(mLayer, "layer missed detachment!");
+#else
     if (mLayer) {
         ALOGW("Memory Warning: Layer %p missed its detachment, held on to for far too long!", mLayer);
         mLayer->postDecStrong();
         mLayer = nullptr;
     }
+#endif
 }
 
 void RenderNode::setStagingDisplayList(DisplayList* displayList) {
@@ -240,13 +248,29 @@ void RenderNode::prepareLayer(TreeInfo& info, uint32_t dirtyMask) {
     }
 }
 
+layer_t* createLayer(RenderState& renderState, uint32_t width, uint32_t height) {
+#if HWUI_NEW_OPS
+    return BakedOpRenderer::createOffscreenBuffer(width, height);
+#else
+    return LayerRenderer::createRenderLayer(renderState, width, height);
+#endif
+}
+
+void destroyLayer(layer_t* layer) {
+#if HWUI_NEW_OPS
+    BakedOpRenderer::destroyOffscreenBuffer(layer);
+#else
+    LayerRenderer::destroyLayer(layer);
+#endif
+}
+
 void RenderNode::pushLayerUpdate(TreeInfo& info) {
     LayerType layerType = properties().effectiveLayerType();
     // If we are not a layer OR we cannot be rendered (eg, view was detached)
     // we need to destroy any Layers we may have had previously
     if (CC_LIKELY(layerType != LayerType::RenderLayer) || CC_UNLIKELY(!isRenderable())) {
         if (CC_UNLIKELY(mLayer)) {
-            LayerRenderer::destroyLayer(mLayer);
+            destroyLayer(mLayer);
             mLayer = nullptr;
         }
         return;
@@ -254,14 +278,18 @@ void RenderNode::pushLayerUpdate(TreeInfo& info) {
 
     bool transformUpdateNeeded = false;
     if (!mLayer) {
-        mLayer = LayerRenderer::createRenderLayer(
-                info.canvasContext.getRenderState(), getWidth(), getHeight());
-        applyLayerPropertiesToLayer(info);
-        damageSelf(info);
-        transformUpdateNeeded = true;
+            mLayer = createLayer(info.canvasContext.getRenderState(), getWidth(), getHeight());
+            damageSelf(info);
+            transformUpdateNeeded = true;
+#if HWUI_NEW_OPS
+    } else if (mLayer->viewportWidth != getWidth() || mLayer->viewportHeight != getHeight()) {
+        // TODO: allow it to grow larger
+        if (getWidth() > mLayer->texture.width || getHeight() > mLayer->texture.height) {
+#else
     } else if (mLayer->layer.getWidth() != getWidth() || mLayer->layer.getHeight() != getHeight()) {
         if (!LayerRenderer::resizeLayer(mLayer, getWidth(), getHeight())) {
-            LayerRenderer::destroyLayer(mLayer);
+#endif
+            destroyLayer(mLayer);
             mLayer = nullptr;
         }
         damageSelf(info);
@@ -276,7 +304,7 @@ void RenderNode::pushLayerUpdate(TreeInfo& info) {
         if (info.errorHandler) {
             std::ostringstream err;
             err << "Unable to create layer for " << getName();
-            const int maxTextureSize = Caches::getInstance().maxTextureSize;
+            const uint32_t  maxTextureSize = Caches::getInstance().maxTextureSize;
             if (getWidth() > maxTextureSize || getHeight() > maxTextureSize) {
                 err << ", size " << getWidth() << "x" << getHeight()
                         << " exceeds max size " << maxTextureSize;
@@ -292,9 +320,16 @@ void RenderNode::pushLayerUpdate(TreeInfo& info) {
         // update the transform in window of the layer to reset its origin wrt light source position
         Matrix4 windowTransform;
         info.damageAccumulator->computeCurrentTransform(&windowTransform);
+#if HWUI_NEW_OPS
+        // TODO: update layer transform (perhaps as part of enqueueLayerWithDamage)
+#else
         mLayer->setWindowTransform(windowTransform);
+#endif
     }
 
+#if HWUI_NEW_OPS
+    info.layerUpdateQueue->enqueueLayerWithDamage(this, dirty);
+#else
     if (dirty.intersect(0, 0, getWidth(), getHeight())) {
         dirty.roundOut(&dirty);
         mLayer->updateDeferred(this, dirty.fLeft, dirty.fTop, dirty.fRight, dirty.fBottom);
@@ -304,6 +339,7 @@ void RenderNode::pushLayerUpdate(TreeInfo& info) {
     if (info.renderer && mLayer->deferredUpdateScheduled) {
         info.renderer->pushLayerUpdate(mLayer);
     }
+#endif
 
     // There might be prefetched layers that need to be accounted for.
     // That might be us, so tell CanvasContext that this layer is in the
@@ -365,7 +401,9 @@ void RenderNode::pushStagingPropertiesChanges(TreeInfo& info) {
         damageSelf(info);
         info.damageAccumulator->popTransform();
         syncProperties();
+#if !HWUI_NEW_OPS
         applyLayerPropertiesToLayer(info);
+#endif
         // We could try to be clever and only re-damage if the matrix changed.
         // However, we don't need to worry about that. The cost of over-damaging
         // here is only going to be a single additional map rect of this node
@@ -376,6 +414,7 @@ void RenderNode::pushStagingPropertiesChanges(TreeInfo& info) {
     }
 }
 
+#if !HWUI_NEW_OPS
 void RenderNode::applyLayerPropertiesToLayer(TreeInfo& info) {
     if (CC_LIKELY(!mLayer)) return;
 
@@ -384,6 +423,7 @@ void RenderNode::applyLayerPropertiesToLayer(TreeInfo& info) {
     mLayer->setColorFilter(props.colorFilter());
     mLayer->setBlend(props.needsBlending());
 }
+#endif
 
 void RenderNode::syncDisplayList() {
     // Make sure we inc first so that we don't fluctuate between 0 and 1,
@@ -451,7 +491,7 @@ void RenderNode::prepareSubTree(TreeInfo& info, bool functorsNeedLayer, DisplayL
 
 void RenderNode::destroyHardwareResources() {
     if (mLayer) {
-        LayerRenderer::destroyLayer(mLayer);
+        destroyLayer(mLayer);
         mLayer = nullptr;
     }
     if (mDisplayList) {
@@ -978,7 +1018,11 @@ void RenderNode::issueOperations(OpenGLRenderer& renderer, T& handler) {
         return;
     }
 
+#if HWUI_NEW_OPS
+    const bool drawLayer = false;
+#else
     const bool drawLayer = (mLayer && (&renderer != mLayer->renderer.get()));
+#endif
     // If we are updating the contents of mLayer, we don't want to apply any of
     // the RenderNode's properties to this issueOperations pass. Those will all
     // be applied when the layer is drawn, aka when this is true.

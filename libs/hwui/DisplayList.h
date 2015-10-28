@@ -154,7 +154,11 @@ public:
         return allocator.usedSize();
     }
     bool isEmpty() {
+#if HWUI_NEW_OPS
+        return ops.empty();
+#else
         return !hasDrawOps;
+#endif
     }
 
 private:
@@ -179,7 +183,7 @@ private:
     // List of functors
     LsaVector<Functor*> functors;
 
-    bool hasDrawOps;
+    bool hasDrawOps; // only used if !HWUI_NEW_OPS
 
     void cleanupResources();
 };

@@ -18,9 +18,10 @@
 #define CANVASCONTEXT_H_
 
 #include "DamageAccumulator.h"
-#include "IContextFactory.h"
 #include "FrameInfo.h"
 #include "FrameInfoVisualizer.h"
+#include "IContextFactory.h"
+#include "LayerUpdateQueue.h"
 #include "RenderNode.h"
 #include "utils/RingBuffer.h"
 #include "renderthread/RenderTask.h"
@@ -83,7 +84,7 @@ public:
     void draw();
     void destroy();
 
-    // IFrameCallback, Chroreographer-driven frame callback entry point
+    // IFrameCallback, Choreographer-driven frame callback entry point
     virtual void doFrame() override;
     void prepareAndDraw(RenderNode* node);
 
@@ -118,7 +119,7 @@ public:
 
     void addRenderNode(RenderNode* node, bool placeFront) {
         int pos = placeFront ? 0 : static_cast<int>(mRenderNodes.size());
-        mRenderNodes.emplace( mRenderNodes.begin() + pos, node);
+        mRenderNodes.emplace(mRenderNodes.begin() + pos, node);
     }
 
     void removeRenderNode(RenderNode* node) {
@@ -166,6 +167,7 @@ private:
     OpenGLRenderer* mCanvas = nullptr;
     bool mHaveNewSurface = false;
     DamageAccumulator mDamageAccumulator;
+    LayerUpdateQueue mLayerUpdateQueue;
     std::unique_ptr<AnimationContext> mAnimationContext;
 
     std::vector< sp<RenderNode> > mRenderNodes;

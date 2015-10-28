@@ -89,15 +89,24 @@ public:
         return std::unique_ptr<DisplayList>(canvas.finishRecording());
     }
 
-    template<class CanvasType>
-    static sp<RenderNode> createNode(int left, int top, int right, int bottom,
-            std::function<void(CanvasType& canvas)> canvasCallback) {
+    static sp<RenderNode> createNode(int left, int top, int right, int bottom, bool onLayer = false) {
         sp<RenderNode> node = new RenderNode();
         node->mutateStagingProperties().setLeftTopRightBottom(left, top, right, bottom);
         node->setPropertyFieldsDirty(RenderNode::X | RenderNode::Y);
+        if (onLayer) {
+            node->mutateStagingProperties().mutateLayerProperties().setType(LayerType::RenderLayer);
+            node->setPropertyFieldsDirty(RenderNode::GENERIC);
+        }
+        return node;
+    }
 
-        CanvasType canvas(
-                node->stagingProperties().getWidth(), node->stagingProperties().getHeight());
+    template<class CanvasType>
+    static sp<RenderNode> createNode(int left, int top, int right, int bottom,
+            std::function<void(CanvasType& canvas)> canvasCallback, bool onLayer = false) {
+        sp<RenderNode> node = createNode(left, top, right, bottom, onLayer);
+
+        auto&& props = node->stagingProperties(); // staging, since not sync'd yet
+        CanvasType canvas(props.getWidth(), props.getHeight());
         canvasCallback(canvas);
         node->setStagingDisplayList(canvas.finishRecording());
         return node;
@@ -108,7 +117,7 @@ public:
         node->syncDisplayList();
     }
 
-    typedef std::function<void(RenderState& state, Caches& caches)> RtCallback;
+    typedef std::function<void(renderthread::RenderThread& thread)> RtCallback;
 
     class TestTask : public renderthread::RenderTask {
     public:
@@ -120,7 +129,7 @@ public:
             RenderState& renderState = renderthread::RenderThread::getInstance().renderState();
 
             renderState.onGLContextCreated();
-            rtCallback(renderState, Caches::getInstance());
+            rtCallback(renderthread::RenderThread::getInstance());
             renderState.onGLContextDestroyed();
         };
         RtCallback rtCallback;

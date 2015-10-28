@@ -44,12 +44,21 @@ namespace android {
 namespace uirenderer {
 
 class CanvasState;
-class DisplayListOp;
 class DisplayListCanvas;
+class DisplayListOp;
 class OpenGLRenderer;
+class OpReorderer;
 class Rect;
-class Layer;
 class SkiaShader;
+
+
+#if HWUI_NEW_OPS
+class OffscreenBuffer;
+typedef OffscreenBuffer layer_t;
+#else
+class Layer;
+typedef Layer layer_t;
+#endif
 
 class ClipRectOp;
 class SaveLayerOp;
@@ -162,11 +171,11 @@ public:
         return mStagingProperties;
     }
 
-    int getWidth() {
+    uint32_t getWidth() {
         return properties().getWidth();
     }
 
-    int getHeight() {
+    uint32_t getHeight() {
         return properties().getHeight();
     }
 
@@ -193,9 +202,13 @@ public:
     }
 
     // Only call if RenderNode has DisplayList...
-    const DisplayList& getDisplayList() const {
-        return *mDisplayList;
+    const DisplayList* getDisplayList() const {
+        return mDisplayList;
     }
+#if HWUI_NEW_OPS
+    OffscreenBuffer* getLayer() const { return mLayer; }
+    OffscreenBuffer** getLayerHandle() { return &mLayer; } // ugh...
+#endif
 
 private:
     typedef key_value_pair_t<float, DrawRenderNodeOp*> ZDrawRenderNodeOpPair;
@@ -262,7 +275,9 @@ private:
     void pushStagingPropertiesChanges(TreeInfo& info);
     void pushStagingDisplayListChanges(TreeInfo& info);
     void prepareSubTree(TreeInfo& info, bool functorsNeedLayer, DisplayList* subtree);
+#if !HWUI_NEW_OPS
     void applyLayerPropertiesToLayer(TreeInfo& info);
+#endif
     void prepareLayer(TreeInfo& info, uint32_t dirtyMask);
     void pushLayerUpdate(TreeInfo& info);
     void deleteDisplayList();
@@ -287,7 +302,7 @@ private:
 
     // Owned by RT. Lifecycle is managed by prepareTree(), with the exception
     // being in ~RenderNode() which may happen on any thread.
-    Layer* mLayer;
+    layer_t* mLayer = nullptr;
 
     /**
      * Draw time state - these properties are only set and used during rendering

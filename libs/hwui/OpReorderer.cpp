@@ -18,6 +18,7 @@
 
 #include "utils/PaintUtils.h"
 #include "RenderNode.h"
+#include "LayerUpdateQueue.h"
 
 #include "SkCanvas.h"
 #include "utils/Trace.h"
@@ -202,6 +203,14 @@ private:
     Rect mClipRect;
 };
 
+OpReorderer::LayerReorderer::LayerReorderer(uint32_t width, uint32_t height,
+        const BeginLayerOp* beginLayerOp, RenderNode* renderNode)
+        : width(width)
+        , height(height)
+        , offscreenBuffer(renderNode ? renderNode->getLayer() : nullptr)
+        , beginLayerOp(beginLayerOp)
+        , renderNode(renderNode) {}
+
 // iterate back toward target to see if anything drawn since should overlap the new op
 // if no target, merging ops still iterate to find similar batch to insert after
 void OpReorderer::LayerReorderer::locateInsertIndex(int batchId, const Rect& clippedBounds,
@@ -288,33 +297,48 @@ void OpReorderer::LayerReorderer::replayBakedOpsImpl(void* arg, BakedOpDispatche
 }
 
 void OpReorderer::LayerReorderer::dump() const {
+    ALOGD("LayerReorderer %p, %ux%u buffer %p, blo %p, rn %p",
+            this, width, height, offscreenBuffer, beginLayerOp, renderNode);
     for (const BatchBase* batch : mBatches) {
         batch->dump();
     }
 }
 
-OpReorderer::OpReorderer(const SkRect& clip, uint32_t viewportWidth, uint32_t viewportHeight,
+OpReorderer::OpReorderer(const LayerUpdateQueue& layers, const SkRect& clip,
+        uint32_t viewportWidth, uint32_t viewportHeight,
         const std::vector< sp<RenderNode> >& nodes)
         : mCanvasState(*this) {
     ATRACE_NAME("prepare drawing commands");
-
     mLayerReorderers.emplace_back(viewportWidth, viewportHeight);
-    mLayerStack.push_back(0);
+        mLayerStack.push_back(0);
 
     mCanvasState.initializeSaveStack(viewportWidth, viewportHeight,
             clip.fLeft, clip.fTop, clip.fRight, clip.fBottom,
             Vector3());
+
+    // Render all layers to be updated, in order. Defer in reverse order, so that they'll be
+    // updated in the order they're passed in (mLayerReorderers are issued to Renderer in reverse)
+    for (int i = layers.entries().size() - 1; i >= 0; i--) {
+        RenderNode* layerNode = layers.entries()[i].renderNode;
+        const Rect& layerDamage = layers.entries()[i].damage;
+
+        saveForLayer(layerNode->getWidth(), layerNode->getHeight(), nullptr, layerNode);
+        mCanvasState.writableSnapshot()->setClip(
+                layerDamage.left, layerDamage.top, layerDamage.right, layerDamage.bottom);
+
+        if (layerNode->getDisplayList()) {
+            deferImpl(*(layerNode->getDisplayList()));
+        }
+        restoreForLayer();
+    }
+
+    // Defer Fbo0
     for (const sp<RenderNode>& node : nodes) {
         if (node->nothingToDraw()) continue;
 
-        // TODO: dedupe this code with onRenderNode()
-        mCanvasState.save(SkCanvas::kClip_SaveFlag | SkCanvas::kMatrix_SaveFlag);
-        if (node->applyViewProperties(mCanvasState)) {
-            // not rejected do ops...
-            const DisplayList& displayList = node->getDisplayList();
-            deferImpl(displayList);
-        }
-        mCanvasState.restore();
+        int count = mCanvasState.save(SkCanvas::kClip_SaveFlag | SkCanvas::kMatrix_SaveFlag);
+        deferNodePropsAndOps(*node);
+        mCanvasState.restoreToCount(count);
     }
 }
 
@@ -333,6 +357,23 @@ OpReorderer::OpReorderer(int viewportWidth, int viewportHeight, const DisplayLis
 void OpReorderer::onViewportInitialized() {}
 
 void OpReorderer::onSnapshotRestored(const Snapshot& removed, const Snapshot& restored) {}
+
+void OpReorderer::deferNodePropsAndOps(RenderNode& node) {
+    if (node.applyViewProperties(mCanvasState)) {
+        // not rejected so render
+        if (node.getLayer()) {
+            // HW layer
+            LayerOp* drawLayerOp = new (mAllocator) LayerOp(node);
+            BakedOpState* bakedOpState = tryBakeOpState(*drawLayerOp);
+            if (bakedOpState) {
+                // Layer will be drawn into parent layer (which is now current, since we popped mLayerStack)
+                currentLayer().deferUnmergeableOp(mAllocator, bakedOpState, OpBatchType::Bitmap);
+            }
+        } else {
+            deferImpl(*(node.getDisplayList()));
+        }
+    }
+}
 
 /**
  * Used to define a list of lambdas referencing private OpReorderer::onXXXXOp() methods.
@@ -365,11 +406,9 @@ void OpReorderer::onRenderNodeOp(const RenderNodeOp& op) {
     mCanvasState.clipRect(op.localClipRect.left, op.localClipRect.top,
             op.localClipRect.right, op.localClipRect.bottom, SkRegion::kIntersect_Op);
 
-    // apply RenderProperties state
-    if (op.renderNode->applyViewProperties(mCanvasState)) {
-        // if node not rejected based on properties, do ops...
-        deferImpl(op.renderNode->getDisplayList());
-    }
+    // then apply state from node properties, and defer ops
+    deferNodePropsAndOps(*op.renderNode);
+
     mCanvasState.restoreToCount(count);
 }
 
@@ -400,10 +439,8 @@ void OpReorderer::onSimpleRectsOp(const SimpleRectsOp& op) {
     currentLayer().deferUnmergeableOp(mAllocator, bakedStateOp, OpBatchType::Vertices);
 }
 
-// TODO: test rejection at defer time, where the bounds become empty
-void OpReorderer::onBeginLayerOp(const BeginLayerOp& op) {
-    const uint32_t layerWidth = (uint32_t) op.unmappedBounds.getWidth();
-    const uint32_t layerHeight = (uint32_t) op.unmappedBounds.getHeight();
+void OpReorderer::saveForLayer(uint32_t layerWidth, uint32_t layerHeight,
+        const BeginLayerOp* beginLayerOp, RenderNode* renderNode) {
 
     mCanvasState.save(SkCanvas::kClip_SaveFlag | SkCanvas::kMatrix_SaveFlag);
     mCanvasState.writableSnapshot()->transform->loadIdentity();
@@ -412,18 +449,27 @@ void OpReorderer::onBeginLayerOp(const BeginLayerOp& op) {
 
     // create a new layer, and push its index on the stack
     mLayerStack.push_back(mLayerReorderers.size());
-    mLayerReorderers.emplace_back(layerWidth, layerHeight);
-    mLayerReorderers.back().beginLayerOp = &op;
+    mLayerReorderers.emplace_back(layerWidth, layerHeight, beginLayerOp, renderNode);
+}
+
+void OpReorderer::restoreForLayer() {
+    // restore canvas, and pop finished layer off of the stack
+    mCanvasState.restore();
+    mLayerStack.pop_back();
+}
+
+// TODO: test rejection at defer time, where the bounds become empty
+void OpReorderer::onBeginLayerOp(const BeginLayerOp& op) {
+    const uint32_t layerWidth = (uint32_t) op.unmappedBounds.getWidth();
+    const uint32_t layerHeight = (uint32_t) op.unmappedBounds.getHeight();
+    saveForLayer(layerWidth, layerHeight, &op, nullptr);
 }
 
 void OpReorderer::onEndLayerOp(const EndLayerOp& /* ignored */) {
-    mCanvasState.restore();
-
     const BeginLayerOp& beginLayerOp = *currentLayer().beginLayerOp;
-
-    // pop finished layer off of the stack
     int finishedLayerIndex = mLayerStack.back();
-    mLayerStack.pop_back();
+
+    restoreForLayer();
 
     // record the draw operation into the previous layer's list of draw commands
     // uses state from the associated beginLayerOp, since it has all the state needed for drawing

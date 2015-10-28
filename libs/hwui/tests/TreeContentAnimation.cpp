@@ -24,6 +24,7 @@
 #include <RenderNode.h>
 #include <renderthread/RenderProxy.h>
 #include <renderthread/RenderTask.h>
+#include <unit_tests/TestUtils.h>
 
 #include "Benchmark.h"
 #include "TestContext.h"
@@ -400,4 +401,28 @@ static Benchmark _SaveLayer(BenchmarkInfo{
     "A nested pair of clipped saveLayer operations. "
     "Tests the clipped saveLayer codepath. Draws content into offscreen buffers and back again.",
     TreeContentAnimation::run<SaveLayerAnimation>
+});
+
+
+class HwLayerAnimation : public TreeContentAnimation {
+public:
+    sp<RenderNode> card = TestUtils::createNode<TestCanvas>(0, 0, 200, 200, [] (TestCanvas& canvas) {
+        canvas.drawColor(0xFF0000FF, SkXfermode::kSrcOver_Mode);
+    }, true);
+    void createContent(int width, int height, TestCanvas* canvas) override {
+        canvas->drawColor(0xFFFFFFFF, SkXfermode::kSrcOver_Mode); // background
+        canvas->drawRenderNode(card.get());
+    }
+    void doFrame(int frameNr) override {
+        int curFrame = frameNr % 150;
+        card->mutateStagingProperties().setTranslationX(curFrame);
+        card->mutateStagingProperties().setTranslationY(curFrame);
+        card->setPropertyFieldsDirty(RenderNode::X | RenderNode::Y);
+    }
+};
+static Benchmark _HwLayer(BenchmarkInfo{
+    "hwlayer",
+    "A nested pair of nodes with LAYER_TYPE_HARDWARE set on each. "
+    "Tests the hardware layer codepath.",
+    TreeContentAnimation::run<HwLayerAnimation>
 });

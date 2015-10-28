@@ -37,7 +37,8 @@ class OffscreenBuffer {
 public:
     OffscreenBuffer(Caches& caches, uint32_t textureWidth, uint32_t textureHeight,
             uint32_t viewportWidth, uint32_t viewportHeight);
-
+    uint32_t viewportWidth;
+    uint32_t viewportHeight;
     Texture texture;
     Rect texCoords;
     Region region;
@@ -60,12 +61,16 @@ public:
             , mOpaque(opaque) {
     }
 
+    static OffscreenBuffer* createOffscreenBuffer(uint32_t width, uint32_t height);
+    static void destroyOffscreenBuffer(OffscreenBuffer*);
+
     RenderState& renderState() { return mRenderState; }
     Caches& caches() { return mCaches; }
 
     void startFrame(uint32_t width, uint32_t height);
     void endFrame();
-    OffscreenBuffer* startLayer(uint32_t width, uint32_t height);
+    OffscreenBuffer* createLayer(uint32_t width, uint32_t height);
+    void startLayer(OffscreenBuffer* offscreenBuffer);
     void endLayer();
 
     Texture* getTexture(const SkBitmap* bitmap);
