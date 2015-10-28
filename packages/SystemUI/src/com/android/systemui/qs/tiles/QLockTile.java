@@ -15,11 +15,14 @@
  */
 package com.android.systemui.qs.tiles;
 
+import android.content.Context;
 import com.android.internal.logging.MetricsLogger;
+import com.android.systemui.QSQuickTileView;
+import com.android.systemui.R;
 import com.android.systemui.qs.QSTile;
+import com.android.systemui.qs.QSTileBaseView;
 import com.android.systemui.qs.QSTileView;
 import com.android.systemui.statusbar.policy.KeyguardMonitor;
-import com.android.systemui.R;
 
 public class QLockTile extends QSTile<QSTile.State> implements KeyguardMonitor.Callback {
 
@@ -28,6 +31,11 @@ public class QLockTile extends QSTile<QSTile.State> implements KeyguardMonitor.C
     public QLockTile(Host host) {
         super(host);
         mKeyguard = host.getKeyguardMonitor();
+    }
+
+    @Override
+    public QSTileBaseView createTileView(Context context) {
+        return new QSQuickTileView(context);
     }
 
     @Override

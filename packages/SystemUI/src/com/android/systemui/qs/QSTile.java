@@ -98,7 +98,7 @@ public abstract class QSTile<TState extends State> implements Listenable {
         return mHost;
     }
 
-    public QSTileView createTileView(Context context) {
+    public QSTileBaseView createTileView(Context context) {
         return new QSTileView(context);
     }
 

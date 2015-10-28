@@ -19,6 +19,8 @@ package com.android.systemui.qs;
 import android.content.Context;
 import android.content.res.ColorStateList;
 import android.util.AttributeSet;
+import android.util.Log;
+import android.view.Gravity;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -58,6 +60,7 @@ public class QuickQSPanel extends QSPanel {
         ArrayList<QSTile<?>> quickTiles = new ArrayList<>();
         for (QSTile<?> tile : tiles) {
             if (tile.getTileType() == QSTileView.QS_TYPE_QUICK) {
+                Log.d("QSPanel", "Adding " + tile.getTileSpec());
                 quickTiles.add(tile);
             }
             if (quickTiles.size() == 2) {
@@ -71,16 +74,17 @@ public class QuickQSPanel extends QSPanel {
 
         public HeaderTileLayout(Context context) {
             super(context);
+            setGravity(Gravity.CENTER_VERTICAL);
             setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
-            int qsCompensation = (int)
-                    context.getResources().getDimension(R.dimen.qs_header_neg_padding);
-            setPadding(0, qsCompensation, 0, 0);
+
+            int padding =
+                    mContext.getResources().getDimensionPixelSize(R.dimen.qs_quick_tile_padding);
             ImageView downArrow = new ImageView(context);
             downArrow.setImageResource(R.drawable.ic_expand_more);
             downArrow.setImageTintList(ColorStateList.valueOf(context.getResources().getColor(
                     android.R.color.white, null)));
             downArrow.setLayoutParams(generateLayoutParams());
-            downArrow.setPadding(0, -qsCompensation, 0, 0);
+            downArrow.setPadding(padding, padding, padding, padding);
             addView(downArrow);
             setOrientation(LinearLayout.HORIZONTAL);
         }
@@ -95,7 +99,9 @@ public class QuickQSPanel extends QSPanel {
         }
 
         private LayoutParams generateLayoutParams() {
-            LayoutParams lp = new LayoutParams(0, LayoutParams.MATCH_PARENT);
+            int size =
+                    mContext.getResources().getDimensionPixelSize(R.dimen.qs_quick_tile_size);
+            LayoutParams lp = new LayoutParams(0, size);
             lp.weight = 1;
             return lp;
         }

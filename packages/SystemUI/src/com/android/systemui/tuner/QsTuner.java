@@ -46,6 +46,7 @@ import com.android.systemui.qs.QSPanel;
 import com.android.systemui.qs.QSTile;
 import com.android.systemui.qs.QSTile.Host.Callback;
 import com.android.systemui.qs.QSTile.ResourceIcon;
+import com.android.systemui.qs.QSTileBaseView;
 import com.android.systemui.qs.QSTileView;
 import com.android.systemui.qs.tiles.IntentTile;
 import com.android.systemui.statusbar.phone.QSTileHost;
@@ -381,7 +382,7 @@ public class QsTuner extends Fragment implements Callback {
     private static class DraggableTile extends QSTile<QSTile.State>
             implements DropListener {
         private String mSpec;
-        private QSTileView mView;
+        private QSTileBaseView mView;
 
         protected DraggableTile(QSTile.Host host, String tileSpec) {
             super(host);
@@ -390,7 +391,7 @@ public class QsTuner extends Fragment implements Callback {
         }
 
         @Override
-        public QSTileView createTileView(Context context) {
+        public QSTileBaseView createTileView(Context context) {
             mView = super.createTileView(context);
             return mView;
         }

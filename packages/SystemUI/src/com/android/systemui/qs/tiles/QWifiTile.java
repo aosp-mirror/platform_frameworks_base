@@ -16,6 +16,9 @@
 
 package com.android.systemui.qs.tiles;
 
+import android.content.Context;
+import com.android.systemui.QSQuickTileView;
+import com.android.systemui.qs.QSTileBaseView;
 import com.android.systemui.qs.QSTileView;
 import com.android.systemui.statusbar.policy.WifiIcons;
 
@@ -24,6 +27,11 @@ public class QWifiTile extends WifiTile {
 
     public QWifiTile(Host host) {
         super(host, false);
+    }
+
+    @Override
+    public QSTileBaseView createTileView(Context context) {
+        return new QSQuickTileView(context);
     }
 
     @Override

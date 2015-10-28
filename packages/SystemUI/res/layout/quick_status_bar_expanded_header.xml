@@ -35,18 +35,22 @@
     <com.android.systemui.qs.QuickQSPanel
         android:id="@+id/quick_qs_panel"
         android:background="#0000"
-        android:layout_width="142dp"
+        android:layout_width="144dp"
         android:layout_height="match_parent"
-        android:layout_alignParentEnd="true" />
+        android:layout_alignParentEnd="true"
+        android:layout_marginEnd="12dp" />
 
     <LinearLayout
         android:id="@+id/expanded_group"
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
+        android:gravity="center"
         android:clipChildren="false"
         android:clipToPadding="false"
         android:orientation="horizontal"
-        android:layout_alignParentEnd="true">
+        android:layout_alignParentEnd="true"
+        android:layout_marginEnd="10dp">
+
         <com.android.systemui.statusbar.AlphaOptimizedFrameLayout
             android:id="@+id/settings_button_container"
             android:layout_width="48dp"
@@ -74,7 +78,8 @@
 
         <ImageView
             android:layout_width="48dp"
-            android:layout_height="match_parent"
+            android:layout_height="48dp"
+            android:padding="12dp"
             android:src="@drawable/ic_expand_less"
             android:tint="@android:color/white" />
     </LinearLayout>

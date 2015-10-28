@@ -44,18 +44,13 @@ import com.android.systemui.qs.QSTile.State;
 import java.util.Objects;
 
 /** View that represents a standard quick settings tile. **/
-public class QSTileView extends ViewGroup {
+public class QSTileView extends QSTileBaseView {
     private static final Typeface CONDENSED = Typeface.create("sans-serif-condensed",
             Typeface.NORMAL);
-
-    public static final int QS_TYPE_NORMAL = 0;
-    public static final int QS_TYPE_DUAL   = 1;
-    public static final int QS_TYPE_QUICK  = 2;
 
     protected final Context mContext;
     private final View mIcon;
     private final View mDivider;
-    private final H mHandler = new H();
     private final int mIconSizePx;
     private final int mTileSpacingPx;
     private int mTilePaddingTopPx;
@@ -291,10 +286,6 @@ public class QSTileView extends ViewGroup {
         return MeasureSpec.EXACTLY;
     }
 
-    private static int exactly(int size) {
-        return MeasureSpec.makeMeasureSpec(size, MeasureSpec.EXACTLY);
-    }
-
     @Override
     protected void onLayout(boolean changed, int l, int t, int r, int b) {
         final int w = getMeasuredWidth();
@@ -334,10 +325,6 @@ public class QSTileView extends ViewGroup {
         mRipple.setHotspotBounds(cx - rad, cy - rad, cx + rad, cy + rad);
     }
 
-    private static void layout(View child, int left, int top) {
-        child.layout(left, top, left + child.getMeasuredWidth(), top + child.getMeasuredHeight());
-    }
-
     protected void handleStateChanged(QSTile.State state) {
         if (mIcon instanceof ImageView) {
             setIcon((ImageView) mIcon, state);
@@ -369,10 +356,6 @@ public class QSTileView extends ViewGroup {
         }
     }
 
-    public void onStateChanged(QSTile.State state) {
-        mHandler.obtainMessage(H.STATE_CHANGED, state).sendToTarget();
-    }
-
     /**
      * Update the accessibility order for this view.
      *
@@ -391,18 +374,5 @@ public class QSTileView extends ViewGroup {
         }
         firstView.setAccessibilityTraversalAfter(previousView.getId());
         return lastView;
-    }
-
-    private class H extends Handler {
-        private static final int STATE_CHANGED = 1;
-        public H() {
-            super(Looper.getMainLooper());
-        }
-        @Override
-        public void handleMessage(Message msg) {
-            if (msg.what == STATE_CHANGED) {
-                handleStateChanged((State) msg.obj);
-            }
-        }
     }
 }

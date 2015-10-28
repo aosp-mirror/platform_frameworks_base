@@ -566,7 +566,7 @@ public class QSPanel extends FrameLayout implements Tunable {
 
     public static final class TileRecord extends Record {
         public QSTile<?> tile;
-        public QSTileView tileView;
+        public QSTileBaseView tileView;
         public int row;
         public int col;
         public boolean scanState;

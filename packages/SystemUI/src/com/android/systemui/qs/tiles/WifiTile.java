@@ -30,6 +30,7 @@ import com.android.systemui.R;
 import com.android.systemui.qs.QSDetailItems;
 import com.android.systemui.qs.QSDetailItems.Item;
 import com.android.systemui.qs.QSTile;
+import com.android.systemui.qs.QSTileBaseView;
 import com.android.systemui.qs.QSTileView;
 import com.android.systemui.qs.SignalTileView;
 import com.android.systemui.statusbar.policy.NetworkController;
@@ -94,7 +95,7 @@ public class WifiTile extends QSTile<QSTile.SignalState> {
     }
 
     @Override
-    public QSTileView createTileView(Context context) {
+    public QSTileBaseView createTileView(Context context) {
         return new SignalTileView(context);
     }
 

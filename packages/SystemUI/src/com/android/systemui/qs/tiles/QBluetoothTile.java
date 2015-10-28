@@ -16,6 +16,9 @@
 
 package com.android.systemui.qs.tiles;
 
+import android.content.Context;
+import com.android.systemui.QSQuickTileView;
+import com.android.systemui.qs.QSTileBaseView;
 import com.android.systemui.qs.QSTileView;
 
 /** Quick settings tile: Bluetooth **/
@@ -23,6 +26,11 @@ public class QBluetoothTile extends BluetoothTile  {
 
     public QBluetoothTile(Host host) {
         super(host, false);
+    }
+
+    @Override
+    public QSTileBaseView createTileView(Context context) {
+        return new QSQuickTileView(context);
     }
 
     @Override
