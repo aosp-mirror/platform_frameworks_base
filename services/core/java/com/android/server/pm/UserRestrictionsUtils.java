@@ -18,10 +18,19 @@ package com.android.server.pm;
 
 import com.google.android.collect.Sets;
 
-import com.android.internal.util.Preconditions;
-
+import android.annotation.Nullable;
+import android.content.ContentResolver;
+import android.content.Context;
+import android.media.IAudioService;
+import android.net.Uri;
+import android.os.Binder;
 import android.os.Bundle;
+import android.os.RemoteException;
+import android.os.ServiceManager;
+import android.os.SystemProperties;
+import android.os.UserHandle;
 import android.os.UserManager;
+import android.util.Slog;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlSerializer;
@@ -31,6 +40,8 @@ import java.io.PrintWriter;
 import java.util.Set;
 
 public class UserRestrictionsUtils {
+    private static final String TAG = "UserRestrictionsUtils";
+
     private UserRestrictionsUtils() {
     }
 
@@ -112,6 +123,118 @@ public class UserRestrictionsUtils {
             if (in.getBoolean(key, false)) {
                 dest.putBoolean(key, true);
             }
+        }
+    }
+
+    /**
+     * Takes a new use restriction set and the previous set, and apply the restrictions that have
+     * changed.
+     */
+    public static void applyUserRestrictions(Context context, int userId,
+            @Nullable Bundle newRestrictions, @Nullable Bundle prevRestrictions) {
+        if (newRestrictions == null) {
+            newRestrictions = Bundle.EMPTY;
+        }
+        if (prevRestrictions == null) {
+            prevRestrictions = Bundle.EMPTY;
+        }
+        for (String key : USER_RESTRICTIONS) {
+            final boolean newValue = newRestrictions.getBoolean(key);
+            final boolean prevValue = prevRestrictions.getBoolean(key);
+
+            if (newValue != prevValue) {
+                applyUserRestriction(context, userId, key, newValue);
+            }
+        }
+    }
+
+    private static void applyUserRestriction(Context context, int userId, String key,
+            boolean newValue) {
+        // When certain restrictions are cleared, we don't update the system settings,
+        // because these settings are changeable on the Settings UI and we don't know the original
+        // value -- for example LOCATION_MODE might have been off already when the restriction was
+        // set, and in that case even if the restriction is lifted, changing it to ON would be
+        // wrong.  So just don't do anything in such a case.  If the user hopes to enable location
+        // later, they can do it on the Settings UI.
+
+        final ContentResolver cr = context.getContentResolver();
+        final long id = Binder.clearCallingIdentity();
+        try {
+            switch (key) {
+                case UserManager.DISALLOW_UNMUTE_MICROPHONE:
+                    IAudioService.Stub.asInterface(ServiceManager.getService(Context.AUDIO_SERVICE))
+                            .setMicrophoneMute(newValue, context.getPackageName(), userId);
+                    break;
+                case UserManager.DISALLOW_ADJUST_VOLUME:
+                    IAudioService.Stub.asInterface(ServiceManager.getService(Context.AUDIO_SERVICE))
+                            .setMasterMute(newValue, 0, context.getPackageName(), userId);
+                    break;
+                case UserManager.DISALLOW_CONFIG_WIFI:
+                    if (newValue) {
+                        android.provider.Settings.Secure.putIntForUser(cr,
+                                android.provider.Settings.Secure
+                                        .WIFI_NETWORKS_AVAILABLE_NOTIFICATION_ON, 0, userId);
+                    }
+                    break;
+                case UserManager.DISALLOW_SHARE_LOCATION:
+                    if (newValue) {
+                        android.provider.Settings.Secure.putIntForUser(cr,
+                                android.provider.Settings.Secure.LOCATION_MODE,
+                                android.provider.Settings.Secure.LOCATION_MODE_OFF,
+                                userId);
+                        android.provider.Settings.Secure.putStringForUser(cr,
+                                android.provider.Settings.Secure.LOCATION_PROVIDERS_ALLOWED, "",
+                                userId);
+                    }
+                    // Send out notifications as some clients may want to reread the
+                    // value which actually changed due to a restriction having been
+                    // applied.
+                    final String property =
+                            android.provider.Settings.Secure.SYS_PROP_SETTING_VERSION;
+                    long version = SystemProperties.getLong(property, 0) + 1;
+                    SystemProperties.set(property, Long.toString(version));
+
+                    final String name = android.provider.Settings.Secure.LOCATION_PROVIDERS_ALLOWED;
+                    final Uri url = Uri.withAppendedPath(
+                            android.provider.Settings.Secure.CONTENT_URI, name);
+                    context.getContentResolver().notifyChange(url, null, true, userId);
+
+                    break;
+                case UserManager.DISALLOW_DEBUGGING_FEATURES:
+                    if (newValue) {
+                        // Only disable adb if changing for system user, since it is global
+                        // TODO: should this be admin user?
+                        if (userId == UserHandle.USER_SYSTEM) {
+                            android.provider.Settings.Global.putStringForUser(cr,
+                                    android.provider.Settings.Global.ADB_ENABLED, "0",
+                                    userId);
+                        }
+                    }
+                    break;
+                case UserManager.ENSURE_VERIFY_APPS:
+                    if (newValue) {
+                        android.provider.Settings.Global.putStringForUser(
+                                context.getContentResolver(),
+                                android.provider.Settings.Global.PACKAGE_VERIFIER_ENABLE, "1",
+                                userId);
+                        android.provider.Settings.Global.putStringForUser(
+                                context.getContentResolver(),
+                                android.provider.Settings.Global.PACKAGE_VERIFIER_INCLUDE_ADB, "1",
+                                userId);
+                    }
+                    break;
+                case UserManager.DISALLOW_INSTALL_UNKNOWN_SOURCES:
+                    if (newValue) {
+                        android.provider.Settings.Secure.putIntForUser(cr,
+                                android.provider.Settings.Secure.INSTALL_NON_MARKET_APPS, 0,
+                                userId);
+                    }
+                    break;
+            }
+        } catch (RemoteException re) {
+            Slog.e(TAG, "Failed to talk to AudioService.", re);
+        } finally {
+            Binder.restoreCallingIdentity(id);
         }
     }
 

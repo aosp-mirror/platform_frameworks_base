@@ -199,6 +199,14 @@ public class UserManagerService extends IUserManager.Stub {
     @GuardedBy("mRestrictionsLock")
     private final SparseArray<Bundle> mCachedEffectiveUserRestrictions = new SparseArray<>();
 
+    /**
+     * User restrictions that have already been applied in {@link #applyUserRestrictionsRL}.  We
+     * use it to detect restrictions that have changed since the last
+     * {@link #applyUserRestrictionsRL} call.
+     */
+    @GuardedBy("mRestrictionsLock")
+    private final SparseArray<Bundle> mAppliedUserRestrictions = new SparseArray<>();
+
     private final Bundle mGuestRestrictions = new Bundle();
 
     /**
@@ -727,8 +735,6 @@ public class UserManagerService extends IUserManager.Stub {
             Log.d(LOG_TAG, "updateUserRestrictionsInternalLocked userId=" + userId
                     + " bundle=" + newRestrictions);
         }
-        final Bundle prevRestrictions = getEffectiveUserRestrictions(userId);
-
         // Update system restrictions.
         if (newRestrictions != null) {
             // If newRestrictions == the current one, it's probably a bug.
@@ -742,12 +748,18 @@ public class UserManagerService extends IUserManager.Stub {
 
         mCachedEffectiveUserRestrictions.put(userId, effective);
 
-        applyUserRestrictionsRL(userId, effective, prevRestrictions);
+        applyUserRestrictionsRL(userId, effective);
     }
 
     @GuardedBy("mRestrictionsLock")
-    private void applyUserRestrictionsRL(int userId,
-            Bundle newRestrictions, Bundle prevRestrictions) {
+    private void applyUserRestrictionsRL(int userId, Bundle newRestrictions) {
+        final Bundle prevRestrictions = mAppliedUserRestrictions.get(userId);
+
+        if (DBG) {
+            Log.d(LOG_TAG, "applyUserRestrictionsRL userId=" + userId
+                    + " new=" + newRestrictions + " prev=" + prevRestrictions);
+        }
+
         final long token = Binder.clearCallingIdentity();
         try {
             mAppOpsService.setUserRestrictions(newRestrictions, userId);
@@ -757,7 +769,10 @@ public class UserManagerService extends IUserManager.Stub {
             Binder.restoreCallingIdentity(token);
         }
 
-        // TODO Move the code from DPMS.setUserRestriction().
+        UserRestrictionsUtils.applyUserRestrictions(
+                mContext, userId, newRestrictions, prevRestrictions);
+
+        mAppliedUserRestrictions.put(userId, new Bundle(newRestrictions));
     }
 
     @GuardedBy("mRestrictionsLock")
@@ -768,9 +783,8 @@ public class UserManagerService extends IUserManager.Stub {
     @GuardedBy("mRestrictionsLock")
     private void updateEffectiveUserRestrictionsForAllUsersRL() {
         // First, invalidate all cached values.
-        synchronized (mRestrictionsLock) {
-            mCachedEffectiveUserRestrictions.clear();
-        }
+        mCachedEffectiveUserRestrictions.clear();
+
         // We don't want to call into ActivityManagerNative while taking a lock, so we'll call
         // it on a handler.
         final Runnable r = new Runnable() {

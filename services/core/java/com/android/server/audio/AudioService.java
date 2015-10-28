@@ -1756,7 +1756,8 @@ public class AudioService extends IAudioService.Stub {
         if (uid == android.os.Process.SYSTEM_UID) {
             uid = UserHandle.getUid(userId, UserHandle.getAppId(uid));
         }
-        if (mAppOps.noteOp(AppOpsManager.OP_AUDIO_MASTER_VOLUME, uid, callingPackage)
+        // If OP_AUDIO_MASTER_VOLUME is set, disallow unmuting.
+        if (!mute && mAppOps.noteOp(AppOpsManager.OP_AUDIO_MASTER_VOLUME, uid, callingPackage)
                 != AppOpsManager.MODE_ALLOWED) {
             return;
         }
@@ -1848,7 +1849,8 @@ public class AudioService extends IAudioService.Stub {
         if (uid == android.os.Process.SYSTEM_UID) {
             uid = UserHandle.getUid(userId, UserHandle.getAppId(uid));
         }
-        if (mAppOps.noteOp(AppOpsManager.OP_MUTE_MICROPHONE, uid, callingPackage)
+        // If OP_MUTE_MICROPHONE is set, disallow unmuting.
+        if (!on && mAppOps.noteOp(AppOpsManager.OP_MUTE_MICROPHONE, uid, callingPackage)
                 != AppOpsManager.MODE_ALLOWED) {
             return;
         }

@@ -5618,9 +5618,6 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
 
                 final long id = mInjector.binderClearCallingIdentity();
                 try {
-                    // Original value.
-                    final boolean alreadyRestricted = mUserManager.hasUserRestriction(key, user);
-
                     // Save the restriction to ActiveAdmin.
                     // TODO When DO sets a restriction, it'll always be treated as device-wide.
                     // If there'll be a policy that can be set by both, we'll need scoping support,
@@ -5629,85 +5626,12 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                     activeAdmin.ensureUserRestrictions().putBoolean(key, enabledFromThisOwner);
                     saveSettingsLocked(userHandle);
 
-                    // Tell UserManager the new value.  Note this needs to be done before calling
-                    // into AudioService, because AS will check AppOps that'll be updated by UM.
+                    // Tell UserManager the new value.
                     if (isDeviceOwner) {
                         mUserManagerInternal.updateEffectiveUserRestrictionsForAllUsersRL();
                     } else {
                         mUserManagerInternal.updateEffectiveUserRestrictionsRL(userHandle);
                     }
-
-                    // New value.
-                    final boolean enabled = mUserManager.hasUserRestriction(key, user);
-
-                    // TODO The rest of the code should move to UserManagerService.
-
-                    if (enabled && !alreadyRestricted) {
-                        if (UserManager.DISALLOW_UNMUTE_MICROPHONE.equals(key)) {
-                            mInjector.getIAudioService()
-                                    .setMicrophoneMute(true, mContext.getPackageName(), userHandle);
-                        } else if (UserManager.DISALLOW_ADJUST_VOLUME.equals(key)) {
-                            mInjector.getIAudioService()
-                                    .setMasterMute(true, 0, mContext.getPackageName(), userHandle);
-                        } else if (UserManager.DISALLOW_CONFIG_WIFI.equals(key)) {
-                            mInjector.settingsSecurePutIntForUser(
-                                    Settings.Secure.WIFI_NETWORKS_AVAILABLE_NOTIFICATION_ON, 0,
-                                    userHandle);
-                        } else if (UserManager.DISALLOW_SHARE_LOCATION.equals(key)) {
-                            mInjector.settingsSecurePutIntForUser(
-                                    Settings.Secure.LOCATION_MODE,
-                                    Settings.Secure.LOCATION_MODE_OFF,
-                                    userHandle);
-                            mInjector.settingsSecurePutStringForUser(
-                                    Settings.Secure.LOCATION_PROVIDERS_ALLOWED, "",
-                                    userHandle);
-                        } else if (UserManager.DISALLOW_DEBUGGING_FEATURES.equals(key)) {
-                            // Only disable adb if changing for system user, since it is global
-                            // TODO: should this be admin user?
-                            if (userHandle == UserHandle.USER_SYSTEM) {
-                                mInjector.settingsGlobalPutStringForUser(
-                                        Settings.Global.ADB_ENABLED, "0", userHandle);
-                            }
-                        } else if (UserManager.ENSURE_VERIFY_APPS.equals(key)) {
-                            mInjector.settingsGlobalPutStringForUser(
-                                    Settings.Global.PACKAGE_VERIFIER_ENABLE, "1",
-                                    userHandle);
-                            mInjector.settingsGlobalPutStringForUser(
-                                    Settings.Global.PACKAGE_VERIFIER_INCLUDE_ADB, "1",
-                                    userHandle);
-                        } else if (UserManager.DISALLOW_INSTALL_UNKNOWN_SOURCES.equals(key)) {
-                            mInjector.settingsSecurePutIntForUser(
-                                    Settings.Secure.INSTALL_NON_MARKET_APPS, 0,
-                                    userHandle);
-                        }
-                    }
-
-                    if (enabled != alreadyRestricted) {
-                        if (UserManager.DISALLOW_SHARE_LOCATION.equals(key)) {
-                            // Send out notifications however as some clients may want to reread the
-                            // value which actually changed due to a restriction having been
-                            // applied.
-                            final String property = Settings.Secure.SYS_PROP_SETTING_VERSION;
-                            long version = mInjector.systemPropertiesGetLong(property, 0) + 1;
-                            mInjector.systemPropertiesSet(property, Long.toString(version));
-
-                            final String name = Settings.Secure.LOCATION_PROVIDERS_ALLOWED;
-                            Uri url = Uri.withAppendedPath(Settings.Secure.CONTENT_URI, name);
-                            mContext.getContentResolver().notifyChange(url, null, true, userHandle);
-                        }
-                    }
-                    if (!enabled && alreadyRestricted) {
-                        if (UserManager.DISALLOW_UNMUTE_MICROPHONE.equals(key)) {
-                            mInjector.getIAudioService()
-                                    .setMicrophoneMute(false, mContext.getPackageName(),
-                                            userHandle);
-                        } else if (UserManager.DISALLOW_ADJUST_VOLUME.equals(key)) {
-                            mInjector.getIAudioService()
-                                    .setMasterMute(false, 0, mContext.getPackageName(), userHandle);
-                        }
-                    }
-                } catch (RemoteException re) {
-                    Slog.e(LOG_TAG, "Failed to talk to AudioService.", re);
                 } finally {
                     mInjector.binderRestoreCallingIdentity(id);
                 }
