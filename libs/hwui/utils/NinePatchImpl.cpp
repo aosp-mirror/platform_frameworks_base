@@ -61,7 +61,7 @@ static SkColor modAlpha(SkColor c, int alpha) {
     return SkColorSetA(c, a);
 }
 
-static void drawStretchyPatch(SkCanvas* canvas, SkIRect& src, const SkRect& dst,
+static void drawStretchyPatch(SkCanvas* canvas, SkIRect& isrc, const SkRect& dst,
                               const SkBitmap& bitmap, const SkPaint& paint,
                               SkColor initColor, uint32_t colorHint,
                               bool hasXfer) {
@@ -69,9 +69,9 @@ static void drawStretchyPatch(SkCanvas* canvas, SkIRect& src, const SkRect& dst,
         ((SkPaint*)&paint)->setColor(modAlpha(colorHint, paint.getAlpha()));
         canvas->drawRect(dst, paint);
         ((SkPaint*)&paint)->setColor(initColor);
-    } else if (src.width() == 1 && src.height() == 1) {
+    } else if (isrc.width() == 1 && isrc.height() == 1) {
         SkColor c;
-        if (!getColor(bitmap, src.fLeft, src.fTop, &c)) {
+        if (!getColor(bitmap, isrc.fLeft, isrc.fTop, &c)) {
             goto SLOW_CASE;
         }
         if (0 != c || hasXfer) {
@@ -82,7 +82,7 @@ static void drawStretchyPatch(SkCanvas* canvas, SkIRect& src, const SkRect& dst,
         }
     } else {
     SLOW_CASE:
-        canvas->drawBitmapRect(bitmap, &src, dst, &paint);
+        canvas->drawBitmapRect(bitmap, SkRect::Make(isrc), dst, &paint);
     }
 }
 
