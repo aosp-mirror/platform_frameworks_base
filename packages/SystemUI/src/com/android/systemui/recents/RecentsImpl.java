@@ -421,7 +421,7 @@ public class RecentsImpl extends IRecentsNonSystemUserCallbacks.Stub
     public void dockTopTask() {
         SystemServicesProxy ssp = Recents.getSystemServices();
         ActivityManager.RunningTaskInfo topTask = ssp.getTopMostTask();
-        if (topTask != null && !ssp.isInHomeStack(topTask.id)) {
+        if (topTask != null && !SystemServicesProxy.isHomeStack(topTask.stackId)) {
             ssp.startTaskInDockedMode(topTask.id,
                     ActivityManager.DOCKED_STACK_CREATE_MODE_TOP_OR_LEFT);
             showRecents(false /* triggeredFromAltTab */);
