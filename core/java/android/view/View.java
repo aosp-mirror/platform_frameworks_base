@@ -12889,6 +12889,10 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
 
             mPrivateFlags |= PFLAG_DIRTY;
 
+            // Release any resources in-case we don't end up drawing again
+            // as anything cached is no longer valid
+            resetDisplayList();
+
             if (invalidateCache) {
                 mPrivateFlags |= PFLAG_INVALIDATED;
                 mPrivateFlags &= ~PFLAG_DRAWING_CACHE_VALID;

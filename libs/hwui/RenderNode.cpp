@@ -79,6 +79,11 @@ void RenderNode::setStagingDisplayList(DisplayList* displayList) {
     mNeedsDisplayListSync = true;
     delete mStagingDisplayList;
     mStagingDisplayList = displayList;
+    // If mParentCount == 0 we are the sole reference to this RenderNode,
+    // so immediately free the old display list
+    if (!mParentCount && !mStagingDisplayList) {
+        deleteDisplayList();
+    }
 }
 
 /**
