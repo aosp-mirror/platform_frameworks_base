@@ -23,7 +23,7 @@ trainingnavtop=true
 
 <ul>
     <li>
-        <a href="{@docRoot}guide/topics/ui/actionbar.html">Action Bar</a> API Guide
+        <a href="{@docRoot}training/appbar/index.html">Adding the App Bar</a>
     </li>
     <li>
         <a href="{@docRoot}design/index.html">
@@ -198,7 +198,7 @@ insets (and hence your app's layout) however you want. </p>
  <h2 id="action-bar">Synchronize the Status Bar with Action Bar Transition</h2>
 
   <p>On Android 4.1 and higher, to avoid resizing your layout when the action bar hides and
-  shows, you can enable overlay mode for the <a href="{@docRoot}guide/topics/ui/actionbar.html">action bar</a>.
+  shows, you can enable overlay mode for the action bar.
   When in overlay mode, your activity layout uses all the
   space available as if the action bar is not there and the system draws the action bar in
   front of your layout. This obscures some of the layout at the top, but now when the
