@@ -68,6 +68,7 @@ public class SwipeHelper {
 
     private float mInitialTouchPos;
     private boolean mDragging;
+    private float mSnapBackTranslationX;
 
     private View mCurrView;
     private boolean mCanCurrViewBeDimissed;
@@ -90,6 +91,10 @@ public class SwipeHelper {
 
     public void setDensityScale(float densityScale) {
         mDensityScale = densityScale;
+    }
+
+    public void setSnapBackTranslationX(float translationX) {
+        mSnapBackTranslationX = translationX;
     }
 
     public void setPagingTouchSlop(float pagingTouchSlop) {
@@ -267,7 +272,7 @@ public class SwipeHelper {
 
     private void snapChild(final View view, float velocity) {
         final boolean canAnimViewBeDismissed = mCallback.canChildBeDismissed(view);
-        ValueAnimator anim = createTranslationAnimation(view, 0);
+        ValueAnimator anim = createTranslationAnimation(view, mSnapBackTranslationX);
         int duration = SNAP_ANIM_LEN;
         anim.setDuration(duration);
         anim.setInterpolator(mLinearOutSlowInInterpolator);

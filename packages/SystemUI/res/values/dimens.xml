@@ -232,6 +232,9 @@
     <!-- The size of the lock-to-app button icon. -->
     <dimen name="recents_lock_to_app_icon_size">28dp</dimen>
 
+    <!-- The amount to allow the stack to overscroll. -->
+    <dimen name="recents_stack_overscroll">24dp</dimen>
+
     <!-- Space reserved for the cards behind the top card in the top stack -->
     <dimen name="top_stack_peek_amount">12dp</dimen>
 
