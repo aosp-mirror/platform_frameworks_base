@@ -53,6 +53,7 @@ import android.os.RemoteException;
 import android.os.SystemClock;
 import android.os.UserHandle;
 import android.os.UserManager;
+import android.os.storage.StorageManager;
 import android.provider.Settings;
 import android.service.trust.TrustAgentService;
 import android.util.ArraySet;
@@ -102,6 +103,7 @@ public class TrustManagerService extends SystemService {
     private static final int MSG_START_USER = 7;
     private static final int MSG_CLEANUP_USER = 8;
     private static final int MSG_SWITCH_USER = 9;
+    private static final int MSG_SET_DEVICE_LOCKED = 10;
 
     private final ArraySet<AgentInfo> mActiveAgents = new ArraySet<>();
     private final ArrayList<ITrustListener> mTrustListeners = new ArrayList<>();
@@ -284,6 +286,19 @@ public class TrustManagerService extends SystemService {
                 updateTrustAll();
             } else {
                 updateTrust(userId, 0);
+            }
+        }
+    }
+
+    public void setDeviceLockedForUser(int userId, boolean locked) {
+        if (StorageManager.isFileBasedEncryptionEnabled()) {
+            UserInfo info = mUserManager.getUserInfo(userId);
+            if (info.isManagedProfile()) {
+                synchronized (mDeviceLockedForUser) {
+                    mDeviceLockedForUser.put(userId, locked);
+                }
+            } else {
+                Log.wtf(TAG, "Requested to change lock state for non-profile user " + userId);
             }
         }
     }
@@ -655,7 +670,9 @@ public class TrustManagerService extends SystemService {
         public boolean isDeviceLocked(int userId) throws RemoteException {
             userId = ActivityManager.handleIncomingUser(getCallingPid(), getCallingUid(), userId,
                     false /* allowAll */, true /* requireFull */, "isDeviceLocked", null);
-            userId = resolveProfileParent(userId);
+            if (!StorageManager.isFileBasedEncryptionEnabled()) {
+                userId = resolveProfileParent(userId);
+            }
 
             return isDeviceLockedInner(userId);
         }
@@ -762,6 +779,12 @@ public class TrustManagerService extends SystemService {
         private String dumpHex(int i) {
             return "0x" + Integer.toHexString(i);
         }
+
+        @Override
+        public void setDeviceLockedForUser(int userId, boolean value) {
+            mHandler.obtainMessage(MSG_SET_DEVICE_LOCKED, value ? 1 : 0, userId)
+                    .sendToTarget();
+        }
     };
 
     private int resolveProfileParent(int userId) {
@@ -805,6 +828,9 @@ public class TrustManagerService extends SystemService {
                 case MSG_SWITCH_USER:
                     mCurrentUser = msg.arg1;
                     refreshDeviceLockedForUser(UserHandle.USER_ALL);
+                    break;
+                case MSG_SET_DEVICE_LOCKED:
+                    setDeviceLockedForUser(msg.arg2, msg.arg1 != 0);
                     break;
             }
         }

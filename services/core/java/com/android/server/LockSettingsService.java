@@ -21,6 +21,8 @@ import android.app.AppGlobals;
 import android.app.admin.DevicePolicyManager;
 import android.app.backup.BackupManager;
 import android.app.trust.IStrongAuthTracker;
+import android.app.trust.ITrustManager;
+import android.app.trust.TrustManager;
 import android.content.BroadcastReceiver;
 import android.content.ContentResolver;
 import android.content.Context;
@@ -38,6 +40,7 @@ import android.os.Binder;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.storage.IMountService;
+import android.os.storage.StorageManager;
 import android.os.ServiceManager;
 import android.os.SystemProperties;
 import android.os.UserHandle;
@@ -675,6 +678,12 @@ public class LockSettingsService extends ILockSettings.Stub {
             // credential has matched
             unlockKeystore(credential, userId);
             unlockUser(userId, null);
+            UserInfo info = UserManager.get(mContext).getUserInfo(userId);
+            if (StorageManager.isFileBasedEncryptionEnabled() && info.isManagedProfile()) {
+                TrustManager trustManager =
+                        (TrustManager) mContext.getSystemService(Context.TRUST_SERVICE);
+                trustManager.setDeviceLockedForUser(userId, false);
+            }
             if (shouldReEnroll) {
                 credentialUtil.setCredential(credential, credential, userId);
             }

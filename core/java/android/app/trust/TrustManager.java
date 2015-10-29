@@ -51,6 +51,21 @@ public class TrustManager {
     }
 
     /**
+     * Changes the lock status for the given user. This is only applicable to Managed Profiles,
+     * other users should be handled by Keyguard.
+     *
+     * @param userId The id for the user to be locked/unlocked.
+     * @param locked The value for that user's locked state.
+     */
+    public void setDeviceLockedForUser(int userId, boolean locked) {
+        try {
+            mService.setDeviceLockedForUser(userId, locked);
+        } catch (RemoteException e) {
+            onError(e);
+        }
+    }
+
+    /**
      * Reports that user {@param userId} has tried to unlock the device.
      *
      * @param successful if true, the unlock attempt was successful.

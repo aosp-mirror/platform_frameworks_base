@@ -67,6 +67,7 @@ import android.app.IActivityManager.WaitResult;
 import android.app.ResultInfo;
 import android.app.StatusBarManager;
 import android.app.admin.IDevicePolicyManager;
+import android.app.trust.ITrustManager;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.IIntentSender;
@@ -1668,11 +1669,11 @@ public final class ActivityStackSupervisor implements DisplayListener {
         }
 
         UserInfo user = getUserInfo(userId);
-        // TODO: Timeout for work challenge
-        if (user.isManagedProfile() && StorageManager.isFileBasedEncryptionEnabled()) {
-            KeyguardManager km = (KeyguardManager) mService.mContext
-                    .getSystemService(Context.KEYGUARD_SERVICE);
-
+        KeyguardManager km = (KeyguardManager) mService.mContext
+                .getSystemService(Context.KEYGUARD_SERVICE);
+        if (user.isManagedProfile()
+                && StorageManager.isFileBasedEncryptionEnabled()
+                && km.isDeviceLocked(userId)) {
             IIntentSender target = mService.getIntentSenderLocked(
                     ActivityManager.INTENT_SENDER_ACTIVITY, callingPackage,
                     Binder.getCallingUid(), userId, null, null, 0, new Intent[]{ intent },

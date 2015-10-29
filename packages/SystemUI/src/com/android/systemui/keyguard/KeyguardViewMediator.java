@@ -32,6 +32,7 @@ import android.content.IntentFilter;
 import android.content.pm.UserInfo;
 import android.media.AudioManager;
 import android.media.SoundPool;
+import android.os.Binder;
 import android.os.Bundle;
 import android.os.DeadObjectException;
 import android.os.Handler;
@@ -43,6 +44,7 @@ import android.os.SystemClock;
 import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.os.UserManager;
+import android.os.storage.StorageManager;
 import android.provider.Settings;
 import android.telephony.SubscriptionManager;
 import android.telephony.TelephonyManager;
@@ -135,6 +137,8 @@ public class KeyguardViewMediator extends SystemUI {
 
     private static final String DELAYED_KEYGUARD_ACTION =
         "com.android.internal.policy.impl.PhoneWindowManager.DELAYED_KEYGUARD";
+    private static final String DELAYED_LOCK_PROFILE_ACTION =
+            "com.android.internal.policy.impl.PhoneWindowManager.DELAYED_LOCK";
 
     // used for handler messages
     private static final int SHOW = 2;
@@ -321,6 +325,8 @@ public class KeyguardViewMediator extends SystemUI {
 
     private boolean mWakeAndUnlocking;
     private IKeyguardDrawnCallback mDrawnCallback;
+
+    private boolean mIsPerUserLock;
 
     KeyguardUpdateMonitorCallback mUpdateCallback = new KeyguardUpdateMonitorCallback() {
 
@@ -565,6 +571,8 @@ public class KeyguardViewMediator extends SystemUI {
         mShowKeyguardWakeLock.setReferenceCounted(false);
 
         mContext.registerReceiver(mBroadcastReceiver, new IntentFilter(DELAYED_KEYGUARD_ACTION));
+        mContext.registerReceiver(
+                mBroadcastReceiver, new IntentFilter(DELAYED_LOCK_PROFILE_ACTION));
 
         mKeyguardDisplayManager = new KeyguardDisplayManager(mContext);
 
@@ -637,6 +645,7 @@ public class KeyguardViewMediator extends SystemUI {
             doKeyguardLocked(null);
             mUpdateMonitor.registerCallback(mUpdateCallback);
         }
+        mIsPerUserLock = StorageManager.isFileBasedEncryptionEnabled();
         // Most services aren't available until the system reaches the ready state, so we
         // send it here when the device first boots.
         maybeSendUserPresentBroadcast();
@@ -660,7 +669,7 @@ public class KeyguardViewMediator extends SystemUI {
             final boolean lockImmediately =
                     mLockPatternUtils.getPowerButtonInstantlyLocks(currentUser)
                             || !mLockPatternUtils.isSecure(currentUser);
-            long timeout = getLockTimeout();
+            long timeout = getLockTimeout(KeyguardUpdateMonitor.getCurrentUser());
 
             if (mExitSecureCallback != null) {
                 if (DEBUG) Log.d(TAG, "pending exit secure callback cancelled");
@@ -710,20 +719,17 @@ public class KeyguardViewMediator extends SystemUI {
                 mPendingLock = false;
             }
         }
+        doKeyguardLaterLockedForChildProfiles();
         KeyguardUpdateMonitor.getInstance(mContext).dispatchFinishedGoingToSleep(why);
     }
 
-    private long getLockTimeout() {
+    private long getLockTimeout(int userId) {
         // if the screen turned off because of timeout or the user hit the power button
         // and we don't need to lock immediately, set an alarm
         // to enable it a little bit later (i.e, give the user a chance
         // to turn the screen back on within a certain window without
         // having to unlock the screen)
         final ContentResolver cr = mContext.getContentResolver();
-
-        // From DisplaySettings
-        long displayTimeout = Settings.System.getInt(cr, SCREEN_OFF_TIMEOUT,
-                KEYGUARD_DISPLAY_TIMEOUT_DELAY_DEFAULT);
 
         // From SecuritySettings
         final long lockAfterTimeout = Settings.Secure.getInt(cr,
@@ -732,21 +738,28 @@ public class KeyguardViewMediator extends SystemUI {
 
         // From DevicePolicyAdmin
         final long policyTimeout = mLockPatternUtils.getDevicePolicyManager()
-                .getMaximumTimeToLock(null, KeyguardUpdateMonitor.getCurrentUser());
+                .getMaximumTimeToLock(null, userId);
 
         long timeout;
-        if (policyTimeout > 0) {
+
+        UserInfo user = UserManager.get(mContext).getUserInfo(userId);
+        if ((!user.isManagedProfile() && StorageManager.isFileBasedEncryptionEnabled())
+                || policyTimeout <= 0) {
+            timeout = lockAfterTimeout;
+        } else {
+            // From DisplaySettings
+            long displayTimeout = Settings.System.getInt(cr, SCREEN_OFF_TIMEOUT,
+                    KEYGUARD_DISPLAY_TIMEOUT_DELAY_DEFAULT);
+
             // policy in effect. Make sure we don't go beyond policy limit.
             displayTimeout = Math.max(displayTimeout, 0); // ignore negative values
             timeout = Math.min(policyTimeout - displayTimeout, lockAfterTimeout);
-        } else {
-            timeout = lockAfterTimeout;
         }
         return timeout;
     }
 
     private void doKeyguardLaterLocked() {
-        long timeout = getLockTimeout();
+        long timeout = getLockTimeout(KeyguardUpdateMonitor.getCurrentUser());
         if (timeout == 0) {
             doKeyguardLocked(null);
         } else {
@@ -764,6 +777,25 @@ public class KeyguardViewMediator extends SystemUI {
         mAlarmManager.set(AlarmManager.ELAPSED_REALTIME_WAKEUP, when, sender);
         if (DEBUG) Log.d(TAG, "setting alarm to turn off keyguard, seq = "
                          + mDelayedShowingSequence);
+        doKeyguardLaterLockedForChildProfiles();
+    }
+    
+    private void doKeyguardLaterLockedForChildProfiles() {
+        UserManager um = UserManager.get(mContext);
+        List<UserInfo> profiles = um.getEnabledProfiles(UserHandle.myUserId());
+        if (StorageManager.isFileBasedEncryptionEnabled() && profiles.size() > 1) {
+            for (UserInfo info : profiles) {
+                if (info.id != UserHandle.myUserId() && info.isManagedProfile()) {
+                    long userTimeout = getLockTimeout(info.id);
+                    long userWhen = SystemClock.elapsedRealtime() + userTimeout;
+                    Intent lockIntent = new Intent(DELAYED_LOCK_PROFILE_ACTION);
+                    lockIntent.putExtra(Intent.EXTRA_USER_ID, info.id);
+                    PendingIntent lockSender = PendingIntent.getBroadcast(
+                            mContext, 0, lockIntent, PendingIntent.FLAG_CANCEL_CURRENT);
+                    mAlarmManager.set(AlarmManager.ELAPSED_REALTIME_WAKEUP, userWhen, lockSender);
+                }
+            }
+        }
     }
 
     private void cancelDoKeyguardLaterLocked() {
@@ -1099,6 +1131,10 @@ public class KeyguardViewMediator extends SystemUI {
         showLocked(options);
     }
 
+    private void lockProfile(int userId) {
+        mTrustManager.setDeviceLockedForUser(userId, true);
+    }
+
     private boolean shouldWaitForProvisioning() {
         return !mUpdateMonitor.isDeviceProvisioned() && !isSecure();
     }
@@ -1213,8 +1249,13 @@ public class KeyguardViewMediator extends SystemUI {
                 if (DEBUG) Log.d(TAG, "received DELAYED_KEYGUARD_ACTION with seq = "
                         + sequence + ", mDelayedShowingSequence = " + mDelayedShowingSequence);
                 synchronized (KeyguardViewMediator.this) {
-                    if (mDelayedShowingSequence == sequence) {
-                        doKeyguardLocked(null);
+                    doKeyguardLocked(null);
+                }
+            } else if (DELAYED_LOCK_PROFILE_ACTION.equals(intent.getAction())) {
+                int userId = intent.getIntExtra(Intent.EXTRA_USER_ID, 0);
+                if (userId != 0) {
+                    synchronized (KeyguardViewMediator.this) {
+                        lockProfile(userId);
                     }
                 }
             }

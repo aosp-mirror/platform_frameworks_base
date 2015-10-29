@@ -248,8 +248,9 @@ public class KeyguardManager {
      * @hide
      */
     public boolean isDeviceLocked(int userId) {
+        ITrustManager trustManager = getTrustManager();
         try {
-            return mTrustManager.isDeviceLocked(userId);
+            return trustManager.isDeviceLocked(userId);
         } catch (RemoteException e) {
             return false;
         }
@@ -273,11 +274,20 @@ public class KeyguardManager {
      * @hide
      */
     public boolean isDeviceSecure(int userId) {
+        ITrustManager trustManager = getTrustManager();
         try {
-            return mTrustManager.isDeviceSecure(userId);
+            return trustManager.isDeviceSecure(userId);
         } catch (RemoteException e) {
             return false;
         }
+    }
+
+    private synchronized ITrustManager getTrustManager() {
+        if (mTrustManager == null) {
+            mTrustManager = ITrustManager.Stub.asInterface(
+                    ServiceManager.getService(Context.TRUST_SERVICE));
+        }
+        return mTrustManager;
     }
 
     /**
