@@ -715,6 +715,8 @@ public class UsbDeviceManager {
                         if (active && mCurrentUser != UserHandle.USER_NULL) {
                             Slog.v(TAG, "Current user switched to " + mCurrentUser
                                     + "; resetting USB host stack for MTP or PTP");
+                            // avoid leaking sensitive data from previous user
+                            mUsbDataUnlocked = false;
                             setEnabledFunctions(mCurrentFunctions, true);
                         }
                         mCurrentUser = msg.arg1;
