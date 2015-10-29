@@ -313,12 +313,11 @@ static jlong nativeLockCanvas(JNIEnv* env, jclass clazz,
         return 0;
     }
 
+
     SkImageInfo info = SkImageInfo::Make(outBuffer.width, outBuffer.height,
                                          convertPixelFormat(outBuffer.format),
-                                         kPremul_SkAlphaType);
-    if (outBuffer.format == PIXEL_FORMAT_RGBX_8888) {
-        info.fAlphaType = kOpaque_SkAlphaType;
-    }
+                                         outBuffer.format == PIXEL_FORMAT_RGBX_8888 ?
+                                         kOpaque_SkAlphaType : kPremul_SkAlphaType);
 
     SkBitmap bitmap;
     ssize_t bpr = outBuffer.stride * bytesPerPixel(outBuffer.format);
