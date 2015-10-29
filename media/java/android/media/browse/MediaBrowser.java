@@ -776,68 +776,88 @@ public final class MediaBrowser {
      */
     private class MediaServiceConnection implements ServiceConnection {
         @Override
-        public void onServiceConnected(ComponentName name, IBinder binder) {
-            if (DBG) {
-                Log.d(TAG, "MediaServiceConnection.onServiceConnected name=" + name
-                        + " binder=" + binder);
-                dump();
-            }
+        public void onServiceConnected(final ComponentName name, final IBinder binder) {
+            postOrRun(new Runnable() {
+                @Override
+                public void run() {
+                    if (DBG) {
+                        Log.d(TAG, "MediaServiceConnection.onServiceConnected name=" + name
+                                + " binder=" + binder);
+                        dump();
+                    }
 
-            // Make sure we are still the current connection, and that they haven't called
-            // disconnect().
-            if (!isCurrent("onServiceConnected")) {
-                return;
-            }
+                    // Make sure we are still the current connection, and that they haven't called
+                    // disconnect().
+                    if (!isCurrent("onServiceConnected")) {
+                        return;
+                    }
 
-            // Save their binder
-            mServiceBinder = IMediaBrowserService.Stub.asInterface(binder);
+                    // Save their binder
+                    mServiceBinder = IMediaBrowserService.Stub.asInterface(binder);
 
-            // We make a new mServiceCallbacks each time we connect so that we can drop
-            // responses from previous connections.
-            mServiceCallbacks = getNewServiceCallbacks();
-            mState = CONNECT_STATE_CONNECTING;
+                    // We make a new mServiceCallbacks each time we connect so that we can drop
+                    // responses from previous connections.
+                    mServiceCallbacks = getNewServiceCallbacks();
+                    mState = CONNECT_STATE_CONNECTING;
 
-            // Call connect, which is async. When we get a response from that we will
-            // say that we're connected.
-            try {
-                if (DBG) {
-                    Log.d(TAG, "ServiceCallbacks.onConnect...");
-                    dump();
+                    // Call connect, which is async. When we get a response from that we will
+                    // say that we're connected.
+                    try {
+                        if (DBG) {
+                            Log.d(TAG, "ServiceCallbacks.onConnect...");
+                            dump();
+                        }
+                        mServiceBinder.connect(mContext.getPackageName(), mRootHints,
+                                mServiceCallbacks);
+                    } catch (RemoteException ex) {
+                        // Connect failed, which isn't good. But the auto-reconnect on the service
+                        // will take over and we will come back.  We will also get the
+                        // onServiceDisconnected, which has all the cleanup code.  So let that do
+                        // it.
+                        Log.w(TAG, "RemoteException during connect for " + mServiceComponent);
+                        if (DBG) {
+                            Log.d(TAG, "ServiceCallbacks.onConnect...");
+                            dump();
+                        }
+                    }
                 }
-                mServiceBinder.connect(mContext.getPackageName(), mRootHints, mServiceCallbacks);
-            } catch (RemoteException ex) {
-                // Connect failed, which isn't good. But the auto-reconnect on the service
-                // will take over and we will come back.  We will also get the
-                // onServiceDisconnected, which has all the cleanup code.  So let that do it.
-                Log.w(TAG, "RemoteException during connect for " + mServiceComponent);
-                if (DBG) {
-                    Log.d(TAG, "ServiceCallbacks.onConnect...");
-                    dump();
-                }
-            }
+            });
         }
 
         @Override
-        public void onServiceDisconnected(ComponentName name) {
-            if (DBG) {
-                Log.d(TAG, "MediaServiceConnection.onServiceDisconnected name=" + name
-                        + " this=" + this + " mServiceConnection=" + mServiceConnection);
-                dump();
+        public void onServiceDisconnected(final ComponentName name) {
+            postOrRun(new Runnable() {
+                @Override
+                public void run() {
+                    if (DBG) {
+                        Log.d(TAG, "MediaServiceConnection.onServiceDisconnected name=" + name
+                                + " this=" + this + " mServiceConnection=" + mServiceConnection);
+                        dump();
+                    }
+
+                    // Make sure we are still the current connection, and that they haven't called
+                    // disconnect().
+                    if (!isCurrent("onServiceDisconnected")) {
+                        return;
+                    }
+
+                    // Clear out what we set in onServiceConnected
+                    mServiceBinder = null;
+                    mServiceCallbacks = null;
+
+                    // And tell the app that it's suspended.
+                    mState = CONNECT_STATE_SUSPENDED;
+                    mCallback.onConnectionSuspended();
+                }
+            });
+        }
+
+        private void postOrRun(Runnable r) {
+            if (Thread.currentThread() == mHandler.getLooper().getThread()) {
+                r.run();
+            } else {
+                mHandler.post(r);
             }
-
-            // Make sure we are still the current connection, and that they haven't called
-            // disconnect().
-            if (!isCurrent("onServiceDisconnected")) {
-                return;
-            }
-
-            // Clear out what we set in onServiceConnected
-            mServiceBinder = null;
-            mServiceCallbacks = null;
-
-            // And tell the app that it's suspended.
-            mState = CONNECT_STATE_SUSPENDED;
-            mCallback.onConnectionSuspended();
         }
 
         /**
