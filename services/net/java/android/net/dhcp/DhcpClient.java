@@ -417,9 +417,10 @@ public class DhcpClient extends BaseDhcpStateMachine {
                 encap, mTransactionId, getSecs(), clientAddress,
                 DO_UNICAST, mHwAddr, requestedAddress,
                 serverAddress, REQUESTED_PARAMS, null);
+        String serverStr = (serverAddress != null) ? serverAddress.getHostAddress() : null;
         String description = "DHCPREQUEST ciaddr=" + clientAddress.getHostAddress() +
                              " request=" + requestedAddress.getHostAddress() +
-                             " to=" + serverAddress.getHostAddress();
+                             " serverid=" + serverStr;
         return transmitPacket(packet, description, to);
     }
 
@@ -822,7 +823,8 @@ public class DhcpClient extends BaseDhcpStateMachine {
         public void enter() {
             super.enter();
             if (!setIpAddress(mDhcpLease.ipAddress) ||
-                    !connectUdpSock((mDhcpLease.serverAddress))) {
+                    (mDhcpLease.serverAddress != null &&
+                            !connectUdpSock((mDhcpLease.serverAddress)))) {
                 notifyFailure();
                 // There's likely no point in going into DhcpInitState here, we'll probably just
                 // repeat the transaction, get the same IP address as before, and fail.
@@ -878,11 +880,15 @@ public class DhcpClient extends BaseDhcpStateMachine {
         }
 
         protected boolean sendPacket() {
+            // Not specifying a SERVER_IDENTIFIER option is a violation of RFC 2131, but...
+            // http://b/25343517 . Try to make things work anyway by using broadcast renews.
+            Inet4Address to = (mDhcpLease.serverAddress != null) ?
+                    mDhcpLease.serverAddress : INADDR_BROADCAST;
             return sendRequestPacket(
                     (Inet4Address) mDhcpLease.ipAddress.getAddress(),  // ciaddr
                     INADDR_ANY,                                        // DHCP_REQUESTED_IP
-                    INADDR_ANY,                                        // DHCP_SERVER_IDENTIFIER
-                    (Inet4Address) mDhcpLease.serverAddress);          // packet destination address
+                    null,                                              // DHCP_SERVER_IDENTIFIER
+                    to);                                               // packet destination address
         }
 
         protected void receivePacket(DhcpPacket packet) {
