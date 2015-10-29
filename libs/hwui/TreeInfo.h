@@ -55,70 +55,46 @@ public:
         MODE_RT_ONLY,
     };
 
-    explicit TreeInfo(TraversalMode mode, RenderState& renderState)
-        : mode(mode)
-        , prepareTextures(mode == MODE_FULL)
-        , runAnimations(true)
-        , damageAccumulator(nullptr)
-        , renderState(renderState)
-        , renderer(nullptr)
-        , errorHandler(nullptr)
-        , canvasContext(nullptr)
-    {}
-
-    explicit TreeInfo(TraversalMode mode, const TreeInfo& clone)
-        : mode(mode)
-        , prepareTextures(mode == MODE_FULL)
-        , runAnimations(clone.runAnimations)
-        , damageAccumulator(clone.damageAccumulator)
-        , renderState(clone.renderState)
-        , renderer(clone.renderer)
-        , errorHandler(clone.errorHandler)
-        , canvasContext(clone.canvasContext)
+    TreeInfo(TraversalMode mode, renderthread::CanvasContext& canvasContext)
+            : mode(mode)
+            , prepareTextures(mode == MODE_FULL)
+            , canvasContext(canvasContext)
     {}
 
     TraversalMode mode;
     // TODO: Remove this? Currently this is used to signal to stop preparing
     // textures if we run out of cache space.
     bool prepareTextures;
+    renderthread::CanvasContext& canvasContext;
     // TODO: buildLayer uses this to suppress running any animations, but this
     // should probably be refactored somehow. The reason this is done is
     // because buildLayer is not setup for injecting the animationHook, as well
     // as this being otherwise wasted work as all the animators will be
     // re-evaluated when the frame is actually drawn
-    bool runAnimations;
+    bool runAnimations = true;
 
     // Must not be null during actual usage
-    DamageAccumulator* damageAccumulator;
-    RenderState& renderState;
+    DamageAccumulator* damageAccumulator = nullptr;
     // The renderer that will be drawing the next frame. Use this to push any
     // layer updates or similar. May be NULL.
-    OpenGLRenderer* renderer;
-    ErrorHandler* errorHandler;
-    // May be NULL (TODO: can it really?)
-    renderthread::CanvasContext* canvasContext;
+    OpenGLRenderer* renderer = nullptr;
+    ErrorHandler* errorHandler = nullptr;
 
     struct Out {
-        Out()
-            : hasFunctors(false)
-            , hasAnimations(false)
-            , requiresUiRedraw(false)
-            , canDrawThisFrame(true)
-        {}
-        bool hasFunctors;
+        bool hasFunctors = false;
         // This is only updated if evaluateAnimations is true
-        bool hasAnimations;
+        bool hasAnimations = false;
         // This is set to true if there is an animation that RenderThread cannot
         // animate itself, such as if hasFunctors is true
         // This is only set if hasAnimations is true
-        bool requiresUiRedraw;
+        bool requiresUiRedraw = false;
         // This is set to true if draw() can be called this frame
         // false means that we must delay until the next vsync pulse as frame
         // production is outrunning consumption
         // NOTE that if this is false CanvasContext will set either requiresUiRedraw
         // *OR* will post itself for the next vsync automatically, use this
         // only to avoid calling draw()
-        bool canDrawThisFrame;
+        bool canDrawThisFrame = true;
     } out;
 
     // TODO: Damage calculations
