@@ -1759,8 +1759,9 @@ public class PackageManagerService extends IPackageManager.Stub {
         synchronized (mPackages) {
             for (String permission : pkg.requestedPermissions) {
                 BasePermission bp = mSettings.mPermissions.get(permission);
-                if (bp != null && bp.isRuntime() && (grantedPermissions == null
-                        || ArrayUtils.contains(grantedPermissions, permission))) {
+                if (bp != null && (bp.isRuntime() || bp.isDevelopment())
+                        && (grantedPermissions == null
+                               || ArrayUtils.contains(grantedPermissions, permission))) {
                     final int flags = permissionsState.getPermissionFlags(permission, userId);
                     // Installer cannot change immutable permissions.
                     if ((flags & immutableFlags) == 0) {
@@ -3567,7 +3568,8 @@ public class PackageManagerService extends IPackageManager.Stub {
                             killUid(appId, userId, KILL_APP_REASON_GIDS_CHANGED);
                         }
                     });
-                } break;
+                }
+                break;
             }
 
             mOnPermissionChangeListeners.onPermissionsChanged(uid);
