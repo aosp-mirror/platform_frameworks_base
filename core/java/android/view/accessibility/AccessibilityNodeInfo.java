@@ -3083,8 +3083,32 @@ public class AccessibilityNodeInfo implements Parcelable {
                 return "ACTION_PASTE";
             case ACTION_SET_SELECTION:
                 return "ACTION_SET_SELECTION";
+            case ACTION_EXPAND:
+                return "ACTION_EXPAND";
+            case ACTION_COLLAPSE:
+                return "ACTION_COLLAPSE";
+            case ACTION_DISMISS:
+                return "ACTION_DISMISS";
+            case ACTION_SET_TEXT:
+                return "ACTION_SET_TEXT";
+            case R.id.accessibilityActionShowOnScreen:
+                return "ACTION_SHOW_ON_SCREEN";
+            case R.id.accessibilityActionScrollToPosition:
+                return "ACTION_SCROLL_TO_POSITION";
+            case R.id.accessibilityActionScrollUp:
+                return "ACTION_SCROLL_UP";
+            case R.id.accessibilityActionScrollLeft:
+                return "ACTION_SCROLL_LEFT";
+            case R.id.accessibilityActionScrollDown:
+                return "ACTION_SCROLL_DOWN";
+            case R.id.accessibilityActionScrollRight:
+                return "ACTION_SCROLL_RIGHT";
+            case R.id.accessibilityActionSetProgress:
+                return "ACTION_SET_PROGRESS";
+            case R.id.accessibilityActionContextClick:
+                return "ACTION_CONTEXT_CLICK";
             default:
-                return"ACTION_UNKNOWN";
+                return "ACTION_UNKNOWN";
         }
     }
 
