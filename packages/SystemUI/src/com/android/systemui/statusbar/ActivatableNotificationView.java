@@ -380,7 +380,7 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
         updateBackgroundTint();
     }
 
-    private void updateBackgroundTint() {
+    protected void updateBackgroundTint() {
         int color = getBgColor();
         int rippleColor = getRippleColor();
         if (color == mNormalColor) {

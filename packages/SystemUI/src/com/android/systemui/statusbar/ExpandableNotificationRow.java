@@ -16,6 +16,7 @@
 
 package com.android.systemui.statusbar;
 
+import android.app.Notification;
 import android.content.Context;
 import android.graphics.drawable.AnimatedVectorDrawable;
 import android.graphics.drawable.AnimationDrawable;
@@ -103,7 +104,6 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
     private boolean mJustClicked;
     private NotificationData.Entry mEntry;
     private boolean mShowNoBackground;
-    private boolean mChildInGroup;
     private ExpandableNotificationRow mNotificationParent;
 
     public NotificationContentView getPrivateLayout() {
@@ -218,7 +218,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
     }
 
     public boolean isChildInGroup() {
-        return mChildInGroup;
+        return mNotificationParent != null;
     }
 
     public ExpandableNotificationRow getNotificationParent() {
@@ -229,12 +229,11 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
      * @param isChildInGroup Is this notification now in a group
      * @param parent the new parent notification
      */
-    public void setIsChildInGroup(boolean isChildInGroup, ExpandableNotificationRow parent) {
-        mChildInGroup = BaseStatusBar.ENABLE_CHILD_NOTIFICATIONS && isChildInGroup;
-        mNotificationParent = isChildInGroup ? parent : null;
-        mShowNoBackground = mChildInGroup && hasSameBgColor(parent);
-        mPrivateLayout.setIsChildInGroup(mShowNoBackground);
-        updateBackground();
+    public void setIsChildInGroup(boolean isChildInGroup, ExpandableNotificationRow parent) {;
+        boolean childInGroup = BaseStatusBar.ENABLE_CHILD_NOTIFICATIONS && isChildInGroup;
+        mNotificationParent = childInGroup ? parent : null;
+        mPrivateLayout.setIsChildInGroup(childInGroup);
+        updateNoBackgroundState();
     }
 
     @Override
@@ -663,7 +662,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
             } else {
                 return Math.max(mRowMinHeight, mHeadsUpHeight);
             }
-        } else if (!inExpansionState || (mChildInGroup && !isGroupExpanded())) {
+        } else if (!inExpansionState || (isChildInGroup() && !isGroupExpanded())) {
             return getMinHeight();
         } else {
             return getMaxExpandHeight();
@@ -927,6 +926,25 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
         super.setShowingLegacyBackground(showing);
         mPrivateLayout.setShowingLegacyBackground(showing);
         mPublicLayout.setShowingLegacyBackground(showing);
+    }
+
+    @Override
+    protected void updateBackgroundTint() {
+        super.updateBackgroundTint();
+        updateNoBackgroundState();
+        if (mIsSummaryWithChildren) {
+            List<ExpandableNotificationRow> notificationChildren =
+                    mChildrenContainer.getNotificationChildren();
+            for (int i = 0; i < notificationChildren.size(); i++) {
+                ExpandableNotificationRow child = notificationChildren.get(i);
+                child.updateNoBackgroundState();
+            }
+        }
+    }
+
+    private void updateNoBackgroundState() {
+        mShowNoBackground = isChildInGroup() && hasSameBgColor(mNotificationParent);
+        updateBackground();
     }
 
     public void setExpansionLogger(ExpansionLogger logger, String key) {
