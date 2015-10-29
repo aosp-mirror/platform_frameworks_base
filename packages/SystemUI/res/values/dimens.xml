@@ -577,4 +577,8 @@
 
     <!-- TODO: Remove this -->
     <dimen name="qs_header_neg_padding">-8dp</dimen>
+
+    <!-- Distance from the edge of the screen when scrubbing the docked stack divider is considered
+         a dismissal -->
+    <dimen name="docked_stack_divider_dismiss_distance">100dp</dimen>
 </resources>

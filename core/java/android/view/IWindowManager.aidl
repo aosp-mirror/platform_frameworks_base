@@ -327,4 +327,16 @@ interface IWindowManager
      * @return The frame statistics or null if the window does not exist.
      */
     WindowContentFrameStats getWindowContentFrameStats(IBinder token);
+
+    /**
+     * @return the dock side the current docked stack is at; must be one of the
+     *         WindowManagerGlobal.DOCKED_* values
+     */
+    int getDockedStackSide();
+
+    /**
+     * Sets whether we are currently in a drag resize operation where we are changing the docked
+     * stack size.
+     */
+    void setDockedStackResizing(boolean resizing);
 }

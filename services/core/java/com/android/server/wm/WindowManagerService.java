@@ -22,6 +22,7 @@ import static android.app.ActivityManager.StackId.FREEFORM_WORKSPACE_STACK_ID;
 import static android.app.StatusBarManager.DISABLE_MASK;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_BEHIND;
+import static android.view.WindowManager.DOCKED_INVALID;
 import static android.view.WindowManager.LayoutParams.FIRST_APPLICATION_WINDOW;
 import static android.view.WindowManager.LayoutParams.FIRST_SUB_WINDOW;
 import static android.view.WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM;
@@ -1903,11 +1904,6 @@ public class WindowManagerService extends IWindowManager.Stub
                             + attrs.token + ".  Aborting.");
                     return WindowManagerGlobal.ADD_BAD_APP_TOKEN;
                 }
-            } else if (type == TYPE_DOCK_DIVIDER) {
-                if (displayContent.mDividerControllerLocked.hasDivider()) {
-                    Slog.w(TAG, "Attempted to add docked stack divider twice. Aborting.");
-                    return WindowManagerGlobal.ADD_MULTIPLE_SINGLETON;
-                }
             } else if (token.appWindowToken != null) {
                 Slog.w(TAG, "Non-null appWindowToken for system window of type=" + type);
                 // It is not valid to use an app token with other system types; we will
@@ -2004,6 +2000,10 @@ public class WindowManagerService extends IWindowManager.Stub
                     // wallpaper and its target.
                     displayContent.pendingLayoutChanges |= FINISH_LAYOUT_REDO_WALLPAPER;
                 }
+            }
+
+            if (type == TYPE_DOCK_DIVIDER) {
+                getDefaultDisplayContentLocked().getDockedDividerController().setWindow(win);
             }
 
             final WindowStateAnimator winAnimator = win.mWinAnimator;
@@ -3509,13 +3509,6 @@ public class WindowManagerService extends IWindowManager.Stub
                 mLastFinishedFreezeSource = "new-config";
             }
             mWindowPlacerLocked.performSurfacePlacement();
-            if (orientationChanged) {
-                for (int i = mDisplayContents.size() - 1; i >= 0; i--) {
-                    DisplayContent content = mDisplayContents.valueAt(i);
-                    Message.obtain(mH, H.UPDATE_DOCKED_STACK_DIVIDER, H.DOCK_DIVIDER_FORCE_UPDATE,
-                            H.UNUSED, content).sendToTarget();
-                }
-            }
         }
     }
 
@@ -7371,16 +7364,6 @@ public class WindowManagerService extends IWindowManager.Stub
         public static final int RESIZE_TASK = 44;
 
         /**
-         * Used to indicate in the message that the dock divider needs to be updated only if it's
-         * necessary.
-         */
-        static final int DOCK_DIVIDER_NO_FORCE_UPDATE = 0;
-        /**
-         * Used to indicate in the message that the dock divider should be force-removed before
-         * updating, so new configuration can be applied.
-         */
-        static final int DOCK_DIVIDER_FORCE_UPDATE = 1;
-        /**
          * Used to denote that an integer field in a message will not be used.
          */
         public static final int UNUSED = 0;
@@ -7923,12 +7906,10 @@ public class WindowManagerService extends IWindowManager.Stub
                         }
                     }
                 }
-                break;
                 case UPDATE_DOCKED_STACK_DIVIDER: {
-                    DisplayContent content = (DisplayContent) msg.obj;
-                    final boolean forceUpdate = msg.arg1 == DOCK_DIVIDER_FORCE_UPDATE;
                     synchronized (mWindowMap) {
-                        content.mDividerControllerLocked.update(mCurConfiguration, forceUpdate);
+                        getDefaultDisplayContentLocked().getDockedDividerController()
+                                .reevaluateVisibility();
                     }
                 }
                 break;
@@ -10117,6 +10098,22 @@ public class WindowManagerService extends IWindowManager.Stub
                     + " as replacing window.");
             appWindowToken.mWillReplaceWindow = true;
             appWindowToken.mAnimateReplacingWindow = animate;
+        }
+    }
+
+    @Override
+    public int getDockedStackSide() {
+        synchronized (mWindowMap) {
+            TaskStack dockedStack = getDefaultDisplayContentLocked().getDockedStackLocked();
+            return dockedStack == null ? DOCKED_INVALID : dockedStack.getDockSide();
+        }
+    }
+
+    @Override
+    public void setDockedStackResizing(boolean resizing) {
+        synchronized (mWindowMap) {
+            getDefaultDisplayContentLocked().getDockedDividerController().setResizing(resizing);
+            requestTraversal();
         }
     }
 

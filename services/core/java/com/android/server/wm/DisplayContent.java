@@ -154,6 +154,10 @@ class DisplayContent {
         return mDisplayMetrics;
     }
 
+    DockedStackDividerController getDockedDividerController() {
+        return mDividerControllerLocked;
+    }
+
     /**
      * Returns true if the specified UID has access to this display.
      */
@@ -192,7 +196,6 @@ class DisplayContent {
     void updateDisplayInfo() {
         mDisplay.getDisplayInfo(mDisplayInfo);
         mDisplay.getMetrics(mDisplayMetrics);
-        mDividerControllerLocked.updateDisplayInfo();
         for (int i = mStacks.size() - 1; i >= 0; --i) {
             mStacks.get(i).updateDisplayInfo(null);
         }

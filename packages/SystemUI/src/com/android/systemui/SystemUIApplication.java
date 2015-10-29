@@ -27,6 +27,8 @@ import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.util.Log;
 
+import com.android.systemui.stackdivider.DockedStackDivider;
+
 import java.util.HashMap;
 import java.util.Map;
 
@@ -51,6 +53,7 @@ public class SystemUIApplication extends Application {
             com.android.systemui.power.PowerUI.class,
             com.android.systemui.media.RingtonePlayer.class,
             com.android.systemui.keyboard.KeyboardUI.class,
+            DockedStackDivider.class
     };
 
     /**

@@ -15,7 +15,7 @@
 -->
 
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-        android:layout_width="@dimen/docked_stack_divider_thickness"
+        android:layout_width="@*android:dimen/docked_stack_divider_thickness"
         android:layout_height="match_parent"
         android:background="@android:color/black"
         />
