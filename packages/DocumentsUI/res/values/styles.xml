@@ -28,7 +28,7 @@
         <item name="android:colorPrimaryDark">@color/primary_dark</item>
         <item name="android:colorPrimary">@color/primary</item>
         <item name="android:colorAccent">@color/accent</item>
-        <item name="colorActionMode">@color/material_grey_800</item>
+        <item name="colorActionMode">@color/action_mode</item>
 
         <item name="android:listDivider">@*android:drawable/list_divider_material</item>
 
@@ -37,14 +37,17 @@
         <item name="android:windowNoTitle">true</item>
 
         <item name="android:windowSoftInputMode">stateUnspecified|adjustUnspecified</item>
-        <item name="android:alertDialogTheme">@android:style/Theme.Material.Light.Dialog.Alert</item>
     </style>
 
-    <style name="DocumentsBaseTheme.FullScreen" parent="@style/Theme.AppCompat.Light.DarkActionBar">
+    <style name="DocumentsFullScreenTheme" parent="@style/Theme.AppCompat.Light.DarkActionBar">
         <item name="actionBarWidgetTheme">@null</item>
         <item name="actionBarTheme">@style/ActionBarTheme</item>
         <item name="actionBarPopupTheme">@style/ActionBarPopupTheme</item>
-        <item name="colorActionMode">@color/material_grey_800</item>
+
+        <item name="android:colorPrimaryDark">@color/primary_dark</item>
+        <item name="android:colorPrimary">@color/primary</item>
+        <item name="android:colorAccent">@color/accent</item>
+        <item name="colorActionMode">@color/action_mode</item>
 
         <item name="android:listDivider">@*android:drawable/list_divider_material</item>
 
@@ -53,38 +56,6 @@
         <item name="android:windowNoTitle">true</item>
 
         <item name="android:windowSoftInputMode">stateUnspecified|adjustUnspecified</item>
-    </style>
-
-    <style name="DocumentsNonDialogTheme" parent="@style/DocumentsBaseTheme.FullScreen">
-        <item name="android:colorPrimaryDark">@color/primary_dark</item>
-        <item name="android:colorPrimary">@color/primary</item>
-        <item name="android:colorAccent">@color/accent</item>
-
-        <item name="android:actionModeStyle">@style/ActionModeStyle</item>
-
-        <item name="android:alertDialogTheme">@style/AlertDialogTheme</item>
-    </style>
-
-    <style name="ActionModeStyle" parent="@android:style/Widget.Material.Light.ActionMode">
-        <item name="android:background">@color/material_grey_600</item>
-    </style>
-
-    <style name="AlertDialogTheme" parent="@android:style/Theme.Material.Light.Dialog.Alert">
-        <item name="android:colorAccent">@color/platform_blue_700</item>
-    </style>
-
-    <style name="FilesTheme" parent="@style/DocumentsBaseTheme.FullScreen">
-        <item name="android:colorPrimaryDark">@color/platform_blue_700</item>
-        <item name="android:colorPrimary">@color/platform_blue_500</item>
-        <item name="android:colorAccent">@color/platform_blue_700</item>
-        <item name="colorControlActivated">@color/platform_blue_a100</item>
-        <item name="android:actionModeStyle">@style/FilesActionModeStyle</item>
-        <item name="colorActionMode">@color/platform_blue_700</item>
-        <item name="android:alertDialogTheme">@style/AlertDialogTheme</item>
-    </style>
-
-    <style name="FilesActionModeStyle" parent="@android:style/Widget.Material.Light.ActionMode">
-        <item name="android:background">@color/platform_blue_100</item>
     </style>
 
     <style name="TrimmedHorizontalProgressBar" parent="android:Widget.Material.ProgressBar.Horizontal">
