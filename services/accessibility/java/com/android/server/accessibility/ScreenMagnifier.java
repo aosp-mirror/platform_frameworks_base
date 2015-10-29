@@ -16,9 +16,6 @@
 
 package com.android.server.accessibility;
 
-import android.animation.ObjectAnimator;
-import android.animation.TypeEvaluator;
-import android.animation.ValueAnimator;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -31,14 +28,12 @@ import android.os.Handler;
 import android.os.Message;
 import android.provider.Settings;
 import android.text.TextUtils;
-import android.util.Property;
 import android.util.Slog;
 import android.util.TypedValue;
 import android.view.GestureDetector;
 import android.view.GestureDetector.SimpleOnGestureListener;
 import android.view.InputDevice;
 import android.view.KeyEvent;
-import android.view.MagnificationSpec;
 import android.view.MotionEvent;
 import android.view.MotionEvent.PointerCoords;
 import android.view.MotionEvent.PointerProperties;
@@ -48,7 +43,6 @@ import android.view.View;
 import android.view.ViewConfiguration;
 import android.view.WindowManagerInternal;
 import android.view.accessibility.AccessibilityEvent;
-import android.view.animation.DecelerateInterpolator;
 
 import com.android.internal.os.SomeArgs;
 import com.android.server.LocalServices;
@@ -101,10 +95,8 @@ public final class ScreenMagnifier implements WindowManagerInternal.Magnificatio
 
     private static final boolean DEBUG_STATE_TRANSITIONS = false;
     private static final boolean DEBUG_DETECTING = false;
-    private static final boolean DEBUG_SET_MAGNIFICATION_SPEC = false;
     private static final boolean DEBUG_PANNING = false;
     private static final boolean DEBUG_SCALING = false;
-    private static final boolean DEBUG_MAGNIFICATION_CONTROLLER = false;
 
     private static final int STATE_DELEGATING = 1;
     private static final int STATE_DETECTING = 2;
@@ -134,18 +126,12 @@ public final class ScreenMagnifier implements WindowManagerInternal.Magnificatio
     private final MagnifiedContentInteractonStateHandler mMagnifiedContentInteractonStateHandler;
     private final StateViewportDraggingHandler mStateViewportDraggingHandler;
 
-    private final AccessibilityManagerService mAms;
-
     private final int mUserId;
 
     private final int mTapTimeSlop = ViewConfiguration.getJumpTapTimeout();
     private final int mMultiTapTimeSlop;
     private final int mTapDistanceSlop;
     private final int mMultiTapDistanceSlop;
-
-    private final long mLongAnimationDuration;
-
-    private final Region mMagnifiedBounds = new Region();
 
     private EventStreamTransformation mNext;
 
@@ -194,13 +180,10 @@ public final class ScreenMagnifier implements WindowManagerInternal.Magnificatio
         mContext = context;
         mUserId = userId;
         mWindowManager = LocalServices.getService(WindowManagerInternal.class);
-        mAms = service;
 
         mMultiTapTimeSlop = ViewConfiguration.getDoubleTapTimeout()
                 + mContext.getResources().getInteger(
                 com.android.internal.R.integer.config_screen_magnification_multi_tap_adjustment);
-        mLongAnimationDuration = context.getResources().getInteger(
-                com.android.internal.R.integer.config_longAnimTime);
         mTapDistanceSlop = ViewConfiguration.get(context).getScaledTouchSlop();
         mMultiTapDistanceSlop = ViewConfiguration.get(context).getScaledDoubleTapSlop();
 
@@ -209,7 +192,7 @@ public final class ScreenMagnifier implements WindowManagerInternal.Magnificatio
         mMagnifiedContentInteractonStateHandler = new MagnifiedContentInteractonStateHandler(
                 context);
 
-        mMagnificationController = new MagnificationController(mLongAnimationDuration);
+        mMagnificationController = service.getMagnificationController();
         mScreenStateObserver = new ScreenStateObserver(context, mMagnificationController);
 
         mWindowManager.setMagnificationCallbacks(this);
@@ -230,19 +213,9 @@ public final class ScreenMagnifier implements WindowManagerInternal.Magnificatio
         // If there was a rotation we have to update the center of the magnified
         // region since the old offset X/Y may be out of its acceptable range for
         // the new display width and height.
-        if (mUpdateMagnificationSpecOnNextBoundsChange) {
-            mUpdateMagnificationSpecOnNextBoundsChange = false;
-            MagnificationSpec spec = mMagnificationController.getMagnificationSpec();
-            Rect magnifiedFrame = mTempRect;
-            mMagnifiedBounds.getBounds(magnifiedFrame);
-            final float scale = spec.scale;
-            final float centerX = (-spec.offsetX + magnifiedFrame.width() / 2) / scale;
-            final float centerY = (-spec.offsetY + magnifiedFrame.height() / 2) / scale;
-            mMagnificationController.setScaleAndMagnifiedRegionCenter(scale, centerX,
-                    centerY, false);
-        }
-        mMagnifiedBounds.set(bounds);
-        mAms.onMagnificationStateChanged();
+        mMagnificationController.setMagnifiedRegion(
+                bounds, mUpdateMagnificationSpecOnNextBoundsChange);
+        mUpdateMagnificationSpecOnNextBoundsChange = false;
     }
 
     @Override
@@ -257,7 +230,7 @@ public final class ScreenMagnifier implements WindowManagerInternal.Magnificatio
 
     private void handleOnRectangleOnScreenRequested(int left, int top, int right, int bottom) {
         Rect magnifiedFrame = mTempRect;
-        mMagnifiedBounds.getBounds(magnifiedFrame);
+        mMagnificationController.getMagnifiedBounds(magnifiedFrame);
         if (!magnifiedFrame.intersects(left, top, right, bottom)) {
             return;
         }
@@ -314,10 +287,12 @@ public final class ScreenMagnifier implements WindowManagerInternal.Magnificatio
     }
 
     private void getMagnifiedFrameInContentCoords(Rect rect) {
-        MagnificationSpec spec = mMagnificationController.getMagnificationSpec();
-        mMagnifiedBounds.getBounds(rect);
-        rect.offset((int) -spec.offsetX, (int) -spec.offsetY);
-        rect.scale(1.0f / spec.scale);
+        final float scale = mMagnificationController.getSentScale();
+        final float offsetX = mMagnificationController.getSentOffsetX();
+        final float offsetY = mMagnificationController.getSentOffsetY();
+        mMagnificationController.getMagnifiedBounds(rect);
+        rect.offset((int) -offsetX, (int) -offsetY);
+        rect.scale(1.0f / scale);
     }
 
     private void resetMagnificationIfNeeded() {
@@ -421,7 +396,7 @@ public final class ScreenMagnifier implements WindowManagerInternal.Magnificatio
             final float eventX = event.getX();
             final float eventY = event.getY();
             if (mMagnificationController.isMagnifying()
-                    && mMagnifiedBounds.contains((int) eventX, (int) eventY)) {
+                    && mMagnificationController.magnifiedRegionContains(eventX, eventY)) {
                 final float scale = mMagnificationController.getScale();
                 final float scaledOffsetX = mMagnificationController.getOffsetX();
                 final float scaledOffsetY = mMagnificationController.getOffsetY();
@@ -623,7 +598,7 @@ public final class ScreenMagnifier implements WindowManagerInternal.Magnificatio
                     }
                     final float eventX = event.getX();
                     final float eventY = event.getY();
-                    if (mMagnifiedBounds.contains((int) eventX, (int) eventY)) {
+                    if (mMagnificationController.magnifiedRegionContains(eventX, eventY)) {
                         if (mLastMoveOutsideMagnifiedRegion) {
                             mLastMoveOutsideMagnifiedRegion = false;
                             mMagnificationController.setMagnifiedRegionCenter(eventX,
@@ -696,8 +671,8 @@ public final class ScreenMagnifier implements WindowManagerInternal.Magnificatio
             switch (action) {
                 case MotionEvent.ACTION_DOWN: {
                     mHandler.removeMessages(MESSAGE_TRANSITION_TO_DELEGATING_STATE);
-                    if (!mMagnifiedBounds.contains((int) event.getX(),
-                            (int) event.getY())) {
+                    if (!mMagnificationController.magnifiedRegionContains(
+                            event.getX(), event.getY())) {
                         transitionToDelegatingStateAndClear();
                         return;
                     }
@@ -738,7 +713,8 @@ public final class ScreenMagnifier implements WindowManagerInternal.Magnificatio
                         return;
                     }
                     mHandler.removeMessages(MESSAGE_ON_ACTION_TAP_AND_HOLD);
-                    if (!mMagnifiedBounds.contains((int) event.getX(), (int) event.getY())) {
+                    if (!mMagnificationController.magnifiedRegionContains(
+                            event.getX(), event.getY())) {
                          transitionToDelegatingStateAndClear();
                          return;
                     }
@@ -944,184 +920,6 @@ public final class ScreenMagnifier implements WindowManagerInternal.Magnificatio
             mRawEvent.recycle();
             mRawEvent = null;
             mPolicyFlags = 0;
-        }
-    }
-
-    private final class MagnificationController {
-
-        private static final String PROPERTY_NAME_MAGNIFICATION_SPEC =
-                "magnificationSpec";
-
-        private final MagnificationSpec mSentMagnificationSpec = MagnificationSpec.obtain();
-
-        private final MagnificationSpec mCurrentMagnificationSpec = MagnificationSpec.obtain();
-
-        private final Rect mTempRect = new Rect();
-
-        private final ValueAnimator mTransformationAnimator;
-
-        public MagnificationController(long animationDuration) {
-            Property<MagnificationController, MagnificationSpec> property =
-                    Property.of(MagnificationController.class, MagnificationSpec.class,
-                    PROPERTY_NAME_MAGNIFICATION_SPEC);
-            TypeEvaluator<MagnificationSpec> evaluator = new TypeEvaluator<MagnificationSpec>() {
-                private final MagnificationSpec mTempTransformationSpec =
-                        MagnificationSpec.obtain();
-                @Override
-                public MagnificationSpec evaluate(float fraction, MagnificationSpec fromSpec,
-                        MagnificationSpec toSpec) {
-                    MagnificationSpec result = mTempTransformationSpec;
-                    result.scale = fromSpec.scale
-                            + (toSpec.scale - fromSpec.scale) * fraction;
-                    result.offsetX = fromSpec.offsetX + (toSpec.offsetX - fromSpec.offsetX)
-                            * fraction;
-                    result.offsetY = fromSpec.offsetY + (toSpec.offsetY - fromSpec.offsetY)
-                            * fraction;
-                    return result;
-                }
-            };
-            mTransformationAnimator = ObjectAnimator.ofObject(this, property,
-                    evaluator, mSentMagnificationSpec, mCurrentMagnificationSpec);
-            mTransformationAnimator.setDuration((long) (animationDuration));
-            mTransformationAnimator.setInterpolator(new DecelerateInterpolator(2.5f));
-        }
-
-        public boolean isMagnifying() {
-            return mCurrentMagnificationSpec.scale > 1.0f;
-        }
-
-        public void reset(boolean animate) {
-            if (mTransformationAnimator.isRunning()) {
-                mTransformationAnimator.cancel();
-            }
-            mCurrentMagnificationSpec.clear();
-            if (animate) {
-                animateMangificationSpec(mSentMagnificationSpec,
-                        mCurrentMagnificationSpec);
-            } else {
-                setMagnificationSpec(mCurrentMagnificationSpec);
-            }
-            Rect bounds = mTempRect;
-            bounds.setEmpty();
-            mAms.onMagnificationStateChanged();
-        }
-
-        public float getScale() {
-            return mCurrentMagnificationSpec.scale;
-        }
-
-        public float getOffsetX() {
-            return mCurrentMagnificationSpec.offsetX;
-        }
-
-        public float getOffsetY() {
-            return mCurrentMagnificationSpec.offsetY;
-        }
-
-        public void setScale(float scale, float pivotX, float pivotY, boolean animate) {
-            Rect magnifiedFrame = mTempRect;
-            mMagnifiedBounds.getBounds(magnifiedFrame);
-            MagnificationSpec spec = mCurrentMagnificationSpec;
-            final float oldScale = spec.scale;
-            final float oldCenterX = (-spec.offsetX + magnifiedFrame.width() / 2) / oldScale;
-            final float oldCenterY = (-spec.offsetY + magnifiedFrame.height() / 2) / oldScale;
-            final float normPivotX = (-spec.offsetX + pivotX) / oldScale;
-            final float normPivotY = (-spec.offsetY + pivotY) / oldScale;
-            final float offsetX = (oldCenterX - normPivotX) * (oldScale / scale);
-            final float offsetY = (oldCenterY - normPivotY) * (oldScale / scale);
-            final float centerX = normPivotX + offsetX;
-            final float centerY = normPivotY + offsetY;
-            setScaleAndMagnifiedRegionCenter(scale, centerX, centerY, animate);
-        }
-
-        public void setMagnifiedRegionCenter(float centerX, float centerY, boolean animate) {
-            setScaleAndMagnifiedRegionCenter(mCurrentMagnificationSpec.scale, centerX, centerY,
-                    animate);
-        }
-
-        public void offsetMagnifiedRegionCenter(float offsetX, float offsetY) {
-            final float nonNormOffsetX = mCurrentMagnificationSpec.offsetX - offsetX;
-            mCurrentMagnificationSpec.offsetX = Math.min(Math.max(nonNormOffsetX,
-                    getMinOffsetX()), 0);
-            final float nonNormOffsetY = mCurrentMagnificationSpec.offsetY - offsetY;
-            mCurrentMagnificationSpec.offsetY = Math.min(Math.max(nonNormOffsetY,
-                    getMinOffsetY()), 0);
-            setMagnificationSpec(mCurrentMagnificationSpec);
-        }
-
-        public void setScaleAndMagnifiedRegionCenter(float scale, float centerX, float centerY,
-                boolean animate) {
-            if (Float.compare(mCurrentMagnificationSpec.scale, scale) == 0
-                    && Float.compare(mCurrentMagnificationSpec.offsetX,
-                            centerX) == 0
-                    && Float.compare(mCurrentMagnificationSpec.offsetY,
-                            centerY) == 0) {
-                return;
-            }
-            if (mTransformationAnimator.isRunning()) {
-                mTransformationAnimator.cancel();
-            }
-            if (DEBUG_MAGNIFICATION_CONTROLLER) {
-                Slog.i(LOG_TAG, "scale: " + scale + " offsetX: " + centerX
-                        + " offsetY: " + centerY);
-            }
-            updateMagnificationSpec(scale, centerX, centerY);
-            if (animate) {
-                animateMangificationSpec(mSentMagnificationSpec,
-                        mCurrentMagnificationSpec);
-            } else {
-                setMagnificationSpec(mCurrentMagnificationSpec);
-            }
-            mAms.onMagnificationStateChanged();
-        }
-
-        public void updateMagnificationSpec(float scale, float magnifiedCenterX,
-                float magnifiedCenterY) {
-            Rect magnifiedFrame = mTempRect;
-            mMagnifiedBounds.getBounds(magnifiedFrame);
-            mCurrentMagnificationSpec.scale = scale;
-            final int viewportWidth = magnifiedFrame.width();
-            final float nonNormOffsetX = viewportWidth / 2 - magnifiedCenterX * scale;
-            mCurrentMagnificationSpec.offsetX = Math.min(Math.max(nonNormOffsetX,
-                    getMinOffsetX()), 0);
-            final int viewportHeight = magnifiedFrame.height();
-            final float nonNormOffsetY = viewportHeight / 2 - magnifiedCenterY * scale;
-            mCurrentMagnificationSpec.offsetY = Math.min(Math.max(nonNormOffsetY,
-                    getMinOffsetY()), 0);
-        }
-
-        private float getMinOffsetX() {
-            Rect magnifiedFrame = mTempRect;
-            mMagnifiedBounds.getBounds(magnifiedFrame);
-            final float viewportWidth = magnifiedFrame.width();
-            return viewportWidth - viewportWidth * mCurrentMagnificationSpec.scale;
-        }
-
-        private float getMinOffsetY() {
-            Rect magnifiedFrame = mTempRect;
-            mMagnifiedBounds.getBounds(magnifiedFrame);
-            final float viewportHeight = magnifiedFrame.height();
-            return viewportHeight - viewportHeight * mCurrentMagnificationSpec.scale;
-        }
-
-        private void animateMangificationSpec(MagnificationSpec fromSpec,
-                MagnificationSpec toSpec) {
-            mTransformationAnimator.setObjectValues(fromSpec, toSpec);
-            mTransformationAnimator.start();
-        }
-
-        public MagnificationSpec getMagnificationSpec() {
-            return mSentMagnificationSpec;
-        }
-
-        public void setMagnificationSpec(MagnificationSpec spec) {
-            if (DEBUG_SET_MAGNIFICATION_SPEC) {
-                Slog.i(LOG_TAG, "Sending: " + spec);
-            }
-            mSentMagnificationSpec.scale = spec.scale;
-            mSentMagnificationSpec.offsetX = spec.offsetX;
-            mSentMagnificationSpec.offsetY = spec.offsetY;
-            mWindowManager.setMagnificationSpec(MagnificationSpec.obtain(spec));
         }
     }
 
