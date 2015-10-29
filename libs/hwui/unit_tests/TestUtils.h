@@ -39,6 +39,24 @@ namespace uirenderer {
 
 class TestUtils {
 public:
+    class SignalingDtor {
+    public:
+        SignalingDtor()
+                : mSignal(nullptr) {}
+        SignalingDtor(int* signal)
+                : mSignal(signal) {}
+        void setSignal(int* signal) {
+            mSignal = signal;
+        }
+        ~SignalingDtor() {
+            if (mSignal) {
+                (*mSignal)++;
+            }
+        }
+    private:
+        int* mSignal;
+    };
+
     static bool matricesAreApproxEqual(const Matrix4& a, const Matrix4& b) {
         for (int i = 0; i < 16; i++) {
             if (!MathUtils::areEqual(a[i], b[i])) {
