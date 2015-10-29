@@ -5409,7 +5409,7 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
      * @Return Returns true if the window should show a non client decor.
      **/
     private static boolean hasNonClientDecor(int workspaceId) {
-        return workspaceId == FREEFORM_WORKSPACE_STACK_ID || workspaceId == PINNED_STACK_ID;
+        return workspaceId == FREEFORM_WORKSPACE_STACK_ID;
     }
 
     /**
