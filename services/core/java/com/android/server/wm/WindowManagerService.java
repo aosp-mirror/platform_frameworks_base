@@ -117,6 +117,7 @@ import android.view.DisplayInfo;
 import android.view.DropPermissionHolder;
 import android.view.Gravity;
 import android.view.IApplicationToken;
+import android.view.IAppTransitionAnimationSpecsFuture;
 import android.view.IInputFilter;
 import android.view.IOnKeyguardExitResult;
 import android.view.IRotationWatcher;
@@ -908,7 +909,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 PowerManager.PARTIAL_WAKE_LOCK, "SCREEN_FROZEN");
         mScreenFrozenLock.setReferenceCounted(false);
 
-        mAppTransition = new AppTransition(context, mH);
+        mAppTransition = new AppTransition(context, mH, mWindowMap, mWindowPlacerLocked);
         mAppTransition.registerListenerLocked(mActivityManagerAppTransitionNotifier);
 
         mActivityManager = ActivityManagerNative.getDefault();
@@ -3661,8 +3662,8 @@ public class WindowManagerService extends IWindowManager.Stub
             int startY, int targetWidth, int targetHeight, IRemoteCallback startedCallback,
             boolean scaleUp) {
         synchronized(mWindowMap) {
-            mAppTransition.overridePendingAppTransitionAspectScaledThumb(srcThumb, startX,
-                    startY, targetWidth, targetHeight, startedCallback, scaleUp);
+            mAppTransition.overridePendingAppTransitionAspectScaledThumb(srcThumb, startX, startY,
+                    targetWidth, targetHeight, startedCallback, scaleUp);
         }
     }
 
@@ -3698,6 +3699,16 @@ public class WindowManagerService extends IWindowManager.Stub
     public void overridePendingAppTransitionInPlace(String packageName, int anim) {
         synchronized(mWindowMap) {
             mAppTransition.overrideInPlaceAppTransition(packageName, anim);
+        }
+    }
+
+    @Override
+    public void overridePendingAppTransitionMultiThumbFuture(
+            IAppTransitionAnimationSpecsFuture specsFuture, IRemoteCallback callback,
+            boolean scaleUp) {
+        synchronized(mWindowMap) {
+            mAppTransition.overridePendingAppTransitionMultiThumbFuture(specsFuture, callback,
+                    scaleUp);
         }
     }
 

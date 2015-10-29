@@ -1260,6 +1260,12 @@ class WindowSurfacePlacer {
                 }
             }
 
+            // We also need to wait for the specs to be fetched, if needed.
+            if (mService.mAppTransition.isFetchingAppTransitionsSpecs()) {
+                if (DEBUG_APP_TRANSITIONS) Slog.v(TAG, "isFetchingAppTransitionSpecs=true");
+                return false;
+            }
+
             // If the wallpaper is visible, we need to check it's ready too.
             return !mWallpaperControllerLocked.isWallpaperVisible() ||
                     mWallpaperControllerLocked.wallpaperTransitionReady();

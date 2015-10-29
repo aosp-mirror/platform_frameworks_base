@@ -104,9 +104,6 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
     // Runnables to finish the Recents activity
     FinishRecentsRunnable mFinishLaunchHomeRunnable;
 
-    // Runnable to be executed after we paused ourselves
-    Runnable mAfterPauseRunnable;
-
     // The trigger to automatically launch the current task
     DozeTrigger mIterateTrigger = new DozeTrigger(500, new Runnable() {
         @Override
@@ -426,9 +423,10 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
     @Override
     protected void onPause() {
         super.onPause();
-        if (mAfterPauseRunnable != null) {
-            mRecentsView.post(mAfterPauseRunnable);
-            mAfterPauseRunnable = null;
+
+        if (Constants.DebugFlags.App.EnableFastToggleRecents) {
+            // Stop the fast-toggle dozer
+            mIterateTrigger.stopDozing();
         }
 
         if (Constants.DebugFlags.App.EnableFastToggleRecents) {
@@ -589,11 +587,6 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
     @Override
     public void onAllTaskViewsDismissed() {
         mFinishLaunchHomeRunnable.run();
-    }
-
-    @Override
-    public void runAfterPause(Runnable r) {
-        mAfterPauseRunnable = r;
     }
 
     /**** EventBus events ****/
