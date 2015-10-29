@@ -758,6 +758,22 @@ public interface IMountService extends IInterface {
                 return _result;
             }
 
+            public boolean isConvertibleToFBE() throws RemoteException {
+                Parcel _data = Parcel.obtain();
+                Parcel _reply = Parcel.obtain();
+                boolean _result;
+                try {
+                    _data.writeInterfaceToken(DESCRIPTOR);
+                    mRemote.transact(Stub.TRANSACTION_isConvertibleToFBE, _data, _reply, 0);
+                    _reply.readException();
+                    _result = _reply.readInt() != 0;
+                } finally {
+                    _reply.recycle();
+                    _data.recycle();
+                }
+                return _result;
+            }
+
             public StorageVolume[] getVolumeList(int uid, String packageName, int flags)
                     throws RemoteException {
                 Parcel _data = Parcel.obtain();
@@ -1330,6 +1346,8 @@ public interface IMountService extends IInterface {
 
         static final int TRANSACTION_deleteUserKey = IBinder.FIRST_CALL_TRANSACTION + 63;
 
+        static final int TRANSACTION_isConvertibleToFBE = IBinder.FIRST_CALL_TRANSACTION + 64;
+
         /**
          * Cast an IBinder object into an IMountService interface, generating a
          * proxy if needed.
@@ -1723,6 +1741,13 @@ public interface IMountService extends IInterface {
                     String contents = getField(field);
                     reply.writeNoException();
                     reply.writeString(contents);
+                    return true;
+                }
+                case TRANSACTION_isConvertibleToFBE: {
+                    data.enforceInterface(DESCRIPTOR);
+                    int resultCode = isConvertibleToFBE() ? 1 : 0;
+                    reply.writeNoException();
+                    reply.writeInt(resultCode);
                     return true;
                 }
                 case TRANSACTION_resizeSecureContainer: {
@@ -2168,6 +2193,8 @@ public interface IMountService extends IInterface {
      * @return contents of field
      */
     public String getField(String field) throws RemoteException;
+
+    public boolean isConvertibleToFBE() throws RemoteException;
 
     public int resizeSecureContainer(String id, int sizeMb, String key) throws RemoteException;
 
