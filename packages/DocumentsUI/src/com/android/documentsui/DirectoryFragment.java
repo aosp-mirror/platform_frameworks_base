@@ -17,7 +17,6 @@
 package com.android.documentsui;
 
 import static com.android.documentsui.Shared.DEBUG;
-import static com.android.documentsui.State.ACTION_BROWSE;
 import static com.android.documentsui.State.ACTION_CREATE;
 import static com.android.documentsui.State.ACTION_MANAGE;
 import static com.android.documentsui.State.MODE_GRID;
@@ -55,7 +54,6 @@ import android.os.CancellationSignal;
 import android.os.Looper;
 import android.os.OperationCanceledException;
 import android.os.Parcelable;
-import android.os.SystemProperties;
 import android.provider.DocumentsContract;
 import android.provider.DocumentsContract.Document;
 import android.support.annotation.Nullable;
@@ -95,6 +93,7 @@ import com.android.documentsui.BaseActivity.DocumentContext;
 import com.android.documentsui.MultiSelectManager.Selection;
 import com.android.documentsui.ProviderExecutor.Preemptable;
 import com.android.documentsui.RecentsProvider.StateColumns;
+import com.android.documentsui.dirlist.FragmentTuner;
 import com.android.documentsui.model.DocumentInfo;
 import com.android.documentsui.model.DocumentStack;
 import com.android.documentsui.model.RootInfo;
@@ -341,7 +340,7 @@ public class DirectoryFragment extends Fragment {
         mType = getArguments().getInt(EXTRA_TYPE);
         mStateKey = buildStateKey(root, doc);
 
-        mFragmentTuner = pickFragmentTuner(state);
+        mFragmentTuner = FragmentTuner.pick(state);
         mClipper = new DocumentClipper(context);
 
         if (mType == TYPE_RECENT_OPEN) {
@@ -429,7 +428,6 @@ public class DirectoryFragment extends Fragment {
         // Kick off loader at least once
         getLoaderManager().restartLoader(LOADER_ID, null, mCallbacks);
 
-        mFragmentTuner.afterActivityCreated(this);
         updateDisplayState();
     }
 
@@ -1638,21 +1636,6 @@ public class DirectoryFragment extends Fragment {
         }
     }
 
-    private FragmentTuner pickFragmentTuner(final State state) {
-        return state.action == ACTION_BROWSE
-                ? new FilesTuner()
-                : new DefaultTuner(state.action);
-    }
-
-    /**
-     * Interface for specializing the Fragment for the "host" Activity.
-     * Feel free to expand the role of this class to handle other specializations.
-     */
-    private interface FragmentTuner {
-        void updateActionMenu(Menu menu, int dirType, boolean canDelete);
-        void afterActivityCreated(DirectoryFragment fragment);
-    }
-
     /**
      * Abstract task providing support for loading documents *off*
      * the main thread. And if it isn't obvious, creating a list
@@ -1671,65 +1654,6 @@ public class DirectoryFragment extends Fragment {
         }
 
         abstract void onDocumentsReady(List<DocumentInfo> docs);
-    }
-
-    /**
-     * Provides support for Platform specific specializations of DirectoryFragment.
-     */
-    private static final class DefaultTuner implements FragmentTuner {
-
-        private final boolean mManaging;
-
-        public DefaultTuner(int action) {
-            mManaging = (action == ACTION_MANAGE);
-        }
-
-        @Override
-        public void updateActionMenu(Menu menu, int dirType, boolean canDelete) {
-            boolean copyEnabled = mManaging && dirType != TYPE_RECENT_OPEN;
-            // TODO: The selection needs to be deletable.
-            boolean moveEnabled =
-                    SystemProperties.getBoolean("debug.documentsui.enable_move", false);
-            menu.findItem(R.id.menu_copy_to_clipboard).setEnabled(copyEnabled);
-
-            final MenuItem open = menu.findItem(R.id.menu_open);
-            final MenuItem share = menu.findItem(R.id.menu_share);
-            final MenuItem delete = menu.findItem(R.id.menu_delete);
-            final MenuItem copyTo = menu.findItem(R.id.menu_copy_to);
-            final MenuItem moveTo = menu.findItem(R.id.menu_move_to);
-
-            open.setVisible(!mManaging);
-            share.setVisible(mManaging);
-            delete.setVisible(mManaging && canDelete);
-            copyTo.setVisible(copyEnabled);
-            copyTo.setEnabled(copyEnabled);
-            moveTo.setVisible(moveEnabled);
-            moveTo.setEnabled(moveEnabled);
-        }
-
-        @Override
-        public void afterActivityCreated(DirectoryFragment fragment) {}
-    }
-
-    /**
-     * Provides support for Files activity specific specializations of DirectoryFragment.
-     */
-    private static final class FilesTuner implements FragmentTuner {
-        @Override
-        public void updateActionMenu(Menu menu, int dirType, boolean canDelete) {
-
-            menu.findItem(R.id.menu_copy_to_clipboard).setEnabled(dirType != TYPE_RECENT_OPEN);
-
-            menu.findItem(R.id.menu_share).setVisible(true);
-            menu.findItem(R.id.menu_delete).setVisible(canDelete);
-
-            menu.findItem(R.id.menu_open).setVisible(false);
-            menu.findItem(R.id.menu_copy_to).setVisible(true);
-            menu.findItem(R.id.menu_move_to).setVisible(true);
-        }
-
-        @Override
-        public void afterActivityCreated(DirectoryFragment fragment) {}
     }
 
     boolean isSelected(int position) {

@@ -19,14 +19,14 @@ package com.android.documentsui;
 import android.view.Menu;
 import android.view.MenuItem;
 
-final class Menus {
+public final class Menus {
 
     private Menus() {}
 
     /**
      * Disables hidden menu items so that they are not invokable via command shortcuts
      */
-    static void disableHiddenItems(Menu menu, MenuItem... exclusions) {
+    public static void disableHiddenItems(Menu menu, MenuItem... exclusions) {
         for (int i = 0; i < menu.size(); i++) {
             MenuItem item = menu.getItem(i);
             if (item.isVisible()) {
