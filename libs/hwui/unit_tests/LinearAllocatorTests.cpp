@@ -17,33 +17,14 @@
 #include <gtest/gtest.h>
 #include <utils/LinearAllocator.h>
 
+#include <unit_tests/TestUtils.h>
+
 using namespace android;
 using namespace android::uirenderer;
 
 struct SimplePair {
     int one = 1;
     int two = 2;
-};
-
-class SignalingDtor {
-public:
-    SignalingDtor() {
-        mDestroyed = nullptr;
-    }
-    SignalingDtor(bool* destroyedSignal) {
-        mDestroyed = destroyedSignal;
-        *mDestroyed = false;
-    }
-    virtual ~SignalingDtor() {
-        if (mDestroyed) {
-            *mDestroyed = true;
-        }
-    }
-    void setSignal(bool* destroyedSignal) {
-        mDestroyed = destroyedSignal;
-    }
-private:
-    bool* mDestroyed;
 };
 
 TEST(LinearAllocator, alloc) {
@@ -62,31 +43,31 @@ TEST(LinearAllocator, alloc) {
 }
 
 TEST(LinearAllocator, dtor) {
-    bool destroyed[10];
+    int destroyed[10] = { 0 };
     {
         LinearAllocator la;
         for (int i = 0; i < 5; i++) {
-            la.alloc<SignalingDtor>()->setSignal(destroyed + i);
+            la.alloc<TestUtils::SignalingDtor>()->setSignal(destroyed + i);
             la.alloc<SimplePair>();
         }
         la.alloc(100);
         for (int i = 0; i < 5; i++) {
-            auto sd = new (la) SignalingDtor(destroyed + 5 + i);
+            auto sd = new (la) TestUtils::SignalingDtor(destroyed + 5 + i);
             la.autoDestroy(sd);
             new (la) SimplePair();
         }
         la.alloc(100);
         for (int i = 0; i < 10; i++) {
-            EXPECT_FALSE(destroyed[i]);
+            EXPECT_EQ(0, destroyed[i]);
         }
     }
     for (int i = 0; i < 10; i++) {
-        EXPECT_TRUE(destroyed[i]);
+        EXPECT_EQ(1, destroyed[i]);
     }
 }
 
 TEST(LinearAllocator, rewind) {
-    bool destroyed;
+    int destroyed = 0;
     {
         LinearAllocator la;
         auto addr = la.alloc(100);
@@ -94,17 +75,16 @@ TEST(LinearAllocator, rewind) {
         la.rewindIfLastAlloc(addr, 100);
         EXPECT_GT(16u, la.usedSize());
         size_t emptySize = la.usedSize();
-        auto sigdtor = la.alloc<SignalingDtor>();
+        auto sigdtor = la.alloc<TestUtils::SignalingDtor>();
         sigdtor->setSignal(&destroyed);
-        EXPECT_FALSE(destroyed);
+        EXPECT_EQ(0, destroyed);
         EXPECT_LE(emptySize, la.usedSize());
         la.rewindIfLastAlloc(sigdtor);
-        EXPECT_TRUE(destroyed);
+        EXPECT_EQ(1, destroyed);
         EXPECT_EQ(emptySize, la.usedSize());
-        destroyed = false;
     }
     // Checking for a double-destroy case
-    EXPECT_EQ(destroyed, false);
+    EXPECT_EQ(1, destroyed);
 }
 
 TEST(LinearStdAllocator, simpleAllocate) {

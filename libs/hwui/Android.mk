@@ -203,6 +203,7 @@ LOCAL_SRC_FILES += \
     unit_tests/CanvasStateTests.cpp \
     unit_tests/ClipAreaTests.cpp \
     unit_tests/DamageAccumulatorTests.cpp \
+    unit_tests/FatVectorTests.cpp \
     unit_tests/LinearAllocatorTests.cpp \
     unit_tests/StringUtilsTests.cpp
 
