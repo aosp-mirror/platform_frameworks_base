@@ -1,5 +1,5 @@
-page.title=&lt;uses-permission-sdk23&gt;
-page.tags="uses-permission-sdk23","permissions"
+page.title=&lt;uses-permission-sdk-23&gt;
+page.tags="uses-permission-sdk-23","permissions","uses-permission-sdk23"
 parent.title=The AndroidManifest.xml File
 parent.link=manifest-intro.html
 @jd:body
@@ -7,7 +7,7 @@ parent.link=manifest-intro.html
 <dl class="xml">
 
 <dt>syntax:</dt>
-<dd><pre class="stx">&lt;uses-permission-sdk23 android:<a href="#nm">name</a>="<i>string</i>"
+<dd><pre class="stx">&lt;uses-permission-sdk-23 android:<a href="#nm">name</a>="<i>string</i>"
         android:<a href="#maxSdk">maxSdkVersion</a>="<i>integer</i>" /&gt;</pre></dd>
 
 <dt>Contained in:</dt>
@@ -31,7 +31,7 @@ parent.link=manifest-intro.html
   update. If a new feature is minor enough, you may prefer to disable
   the feature altogether on those devices, so the user does not have to grant
   additional permissions to update the app. By using the
-  <code>&lt;uses-permission-sdk23&gt;</code> element instead of <a href=
+  <code>&lt;uses-permission-sdk-23&gt;</code> element instead of <a href=
   "uses-permission-element.html"><code>&lt;uses-permission&gt;</code></a>,
   you can request the permission <em>only</em> if the app is running on
   platforms that support the runtime permissions model, in which the user
