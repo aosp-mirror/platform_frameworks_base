@@ -256,6 +256,12 @@ public class TaskViewHeader extends FrameLayout {
 
     /** Unbinds the bar view from the task */
     void unbindFromTask() {
+        mBackground.jumpToCurrentState();
+
+        if (mFocusAnimator != null) {
+            mFocusAnimator.cancel();
+        }
+
         mApplicationIcon.setImageDrawable(null);
     }
 
