@@ -248,15 +248,19 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
                 mEmptyView = mEmptyViewStub.inflate();
             }
             mEmptyView.setVisibility(View.VISIBLE);
-            mRecentsView.setSearchBarVisibility(View.GONE);
+            if (Constants.DebugFlags.App.EnableSearchBar) {
+                mRecentsView.setSearchBarVisibility(View.GONE);
+            }
         } else {
             if (mEmptyView != null) {
                 mEmptyView.setVisibility(View.GONE);
             }
-            if (mRecentsView.hasValidSearchBar()) {
-                mRecentsView.setSearchBarVisibility(View.VISIBLE);
-            } else {
-                refreshSearchWidgetView();
+            if (Constants.DebugFlags.App.EnableSearchBar) {
+                if (mRecentsView.hasValidSearchBar()) {
+                    mRecentsView.setSearchBarVisibility(View.VISIBLE);
+                } else {
+                    refreshSearchWidgetView();
+                }
             }
         }
 
@@ -349,7 +353,9 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
         mConfig = RecentsConfiguration.reinitialize(this, ssp);
 
         // Initialize the widget host (the host id is static and does not change)
-        mAppWidgetHost = new RecentsAppWidgetHost(this, Constants.Values.App.AppWidgetHostId);
+        if (Constants.DebugFlags.App.EnableSearchBar) {
+            mAppWidgetHost = new RecentsAppWidgetHost(this, Constants.Values.App.AppWidgetHostId);
+        }
 
         // Set the Recents layout
         setContentView(R.layout.recents);
@@ -364,12 +370,16 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
         inflateDebugOverlay();
 
         // Bind the search app widget when we first start up
-        mSearchWidgetInfo = ssp.getOrBindSearchAppWidget(this, mAppWidgetHost);
+        if (Constants.DebugFlags.App.EnableSearchBar) {
+            mSearchWidgetInfo = ssp.getOrBindSearchAppWidget(this, mAppWidgetHost);
+        }
 
         // Register the broadcast receiver to handle messages when the screen is turned off
         IntentFilter filter = new IntentFilter();
         filter.addAction(Intent.ACTION_SCREEN_OFF);
-        filter.addAction(SearchManager.INTENT_GLOBAL_SEARCH_ACTIVITY_CHANGED);
+        if (Constants.DebugFlags.App.EnableSearchBar) {
+            filter.addAction(SearchManager.INTENT_GLOBAL_SEARCH_ACTIVITY_CHANGED);
+        }
         registerReceiver(mSystemBroadcastReceiver, filter);
     }
 
@@ -475,7 +485,9 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
         unregisterReceiver(mSystemBroadcastReceiver);
 
         // Stop listening for widget package changes if there was one bound
-        mAppWidgetHost.stopListening();
+        if (Constants.DebugFlags.App.EnableSearchBar) {
+            mAppWidgetHost.stopListening();
+        }
     }
 
     public void onEnterAnimationTriggered() {
@@ -484,20 +496,22 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
         ViewAnimation.TaskViewEnterContext ctx = new ViewAnimation.TaskViewEnterContext(t);
         mRecentsView.startEnterRecentsAnimation(ctx);
 
-        if (mSearchWidgetInfo != null) {
-            final WeakReference<RecentsAppWidgetHost.RecentsAppWidgetHostCallbacks> cbRef =
-                    new WeakReference<RecentsAppWidgetHost.RecentsAppWidgetHostCallbacks>(
-                            RecentsActivity.this);
-            ctx.postAnimationTrigger.addLastDecrementRunnable(new Runnable() {
-                @Override
-                public void run() {
-                    // Start listening for widget package changes if there is one bound
-                    RecentsAppWidgetHost.RecentsAppWidgetHostCallbacks cb = cbRef.get();
-                    if (cb != null) {
-                        mAppWidgetHost.startListening(cb);
+        if (Constants.DebugFlags.App.EnableSearchBar) {
+            if (mSearchWidgetInfo != null) {
+                final WeakReference<RecentsAppWidgetHost.RecentsAppWidgetHostCallbacks> cbRef =
+                        new WeakReference<RecentsAppWidgetHost.RecentsAppWidgetHostCallbacks>(
+                                RecentsActivity.this);
+                ctx.postAnimationTrigger.addLastDecrementRunnable(new Runnable() {
+                    @Override
+                    public void run() {
+                        // Start listening for widget package changes if there is one bound
+                        RecentsAppWidgetHost.RecentsAppWidgetHostCallbacks cb = cbRef.get();
+                        if (cb != null) {
+                            mAppWidgetHost.startListening(cb);
+                        }
                     }
-                }
-            });
+                });
+            }
         }
 
         // Animate the SystemUI scrim views
