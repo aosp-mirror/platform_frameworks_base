@@ -21,6 +21,8 @@ import com.android.internal.R;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 
+import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.content.res.Resources;
 import android.content.res.Resources.Theme;
 import android.content.res.TypedArray;
@@ -67,7 +69,7 @@ public class ScaleDrawable extends DrawableWrapper {
     private ScaleState mState;
 
     ScaleDrawable() {
-        this(new ScaleState(null), null);
+        this(new ScaleState(null, null), null);
     }
 
     /**
@@ -83,7 +85,7 @@ public class ScaleDrawable extends DrawableWrapper {
      *                    is at the maximum value, or -1 to not scale height
      */
     public ScaleDrawable(Drawable drawable, int gravity, float scaleWidth, float scaleHeight) {
-        this(new ScaleState(null), null);
+        this(new ScaleState(null, null), null);
 
         mState.mGravity = gravity;
         mState.mScaleWidth = scaleWidth;
@@ -93,20 +95,46 @@ public class ScaleDrawable extends DrawableWrapper {
     }
 
     @Override
-    public void inflate(Resources r, XmlPullParser parser, AttributeSet attrs, Theme theme)
+    public void inflate(@NonNull Resources r, @NonNull XmlPullParser parser,
+            @NonNull AttributeSet attrs, @Nullable Theme theme)
             throws XmlPullParserException, IOException {
+        final TypedArray a = obtainAttributes(r, theme, attrs, R.styleable.ScaleDrawable);
+
+        // Inflation will advance the XmlPullParser and AttributeSet.
         super.inflate(r, parser, attrs, theme);
 
-        final TypedArray a = obtainAttributes(r, theme, attrs, R.styleable.ScaleDrawable);
         updateStateFromTypedArray(a);
-        inflateChildDrawable(r, parser, attrs, theme);
         verifyRequiredAttributes(a);
         a.recycle();
 
         updateLocalState();
     }
 
-    private void verifyRequiredAttributes(TypedArray a) throws XmlPullParserException {
+    @Override
+    public void applyTheme(@NonNull Theme t) {
+        super.applyTheme(t);
+
+        final ScaleState state = mState;
+        if (state == null) {
+            return;
+        }
+
+        if (state.mThemeAttrs != null) {
+            final TypedArray a = t.resolveAttributes(state.mThemeAttrs, R.styleable.ScaleDrawable);
+            try {
+                updateStateFromTypedArray(a);
+                verifyRequiredAttributes(a);
+            } catch (XmlPullParserException e) {
+                throw new RuntimeException(e);
+            } finally {
+                a.recycle();
+            }
+        }
+
+        updateLocalState();
+    }
+
+    private void verifyRequiredAttributes(@NonNull TypedArray a) throws XmlPullParserException {
         // If we're not waiting on a theme, verify required attributes.
         if (getDrawable() == null && (mState.mThemeAttrs == null
                 || mState.mThemeAttrs[R.styleable.ScaleDrawable_drawable] == 0)) {
@@ -116,11 +144,18 @@ public class ScaleDrawable extends DrawableWrapper {
         }
     }
 
-    @Override
-    void updateStateFromTypedArray(TypedArray a) {
-        super.updateStateFromTypedArray(a);
-
+    private void updateStateFromTypedArray(@NonNull TypedArray a) {
         final ScaleState state = mState;
+        if (state == null) {
+            return;
+        }
+
+        // Account for any configuration changes.
+        state.mChangingConfigurations |= a.getChangingConfigurations();
+
+        // Extract the theme attributes, if any.
+        state.mThemeAttrs = a.extractThemeAttrs();
+
         state.mScaleWidth = getPercent(a,
                 R.styleable.ScaleDrawable_scaleWidth, state.mScaleWidth);
         state.mScaleHeight = getPercent(a,
@@ -131,11 +166,6 @@ public class ScaleDrawable extends DrawableWrapper {
                 R.styleable.ScaleDrawable_useIntrinsicSizeAsMinimum, state.mUseIntrinsicSizeAsMin);
         state.mInitialLevel = a.getInt(
                 R.styleable.ScaleDrawable_level, state.mInitialLevel);
-
-        final Drawable dr = a.getDrawable(R.styleable.ScaleDrawable_drawable);
-        if (dr != null) {
-            setDrawable(dr);
-        }
     }
 
     private static float getPercent(TypedArray a, int index, float defaultValue) {
@@ -154,33 +184,6 @@ public class ScaleDrawable extends DrawableWrapper {
         }
 
         return defaultValue;
-    }
-
-    @Override
-    public void applyTheme(Theme t) {
-        final ScaleState state = mState;
-        if (state == null) {
-            return;
-        }
-
-        if (state.mThemeAttrs != null) {
-            final TypedArray a = t.resolveAttributes(
-                    state.mThemeAttrs, R.styleable.ScaleDrawable);
-            try {
-                updateStateFromTypedArray(a);
-                verifyRequiredAttributes(a);
-            } catch (XmlPullParserException e) {
-                throw new RuntimeException(e);
-            } finally {
-                a.recycle();
-            }
-        }
-
-        // The drawable may have changed as a result of applying the theme, so
-        // apply the theme to the wrapped drawable last.
-        super.applyTheme(t);
-
-        updateLocalState();
     }
 
     @Override
@@ -243,7 +246,7 @@ public class ScaleDrawable extends DrawableWrapper {
 
     @Override
     DrawableWrapperState mutateConstantState() {
-        mState = new ScaleState(mState);
+        mState = new ScaleState(mState, null);
         return mState;
     }
 
@@ -251,14 +254,16 @@ public class ScaleDrawable extends DrawableWrapper {
         /** Constant used to disable scaling for a particular dimension. */
         private static final float DO_NOT_SCALE = -1.0f;
 
+        private int[] mThemeAttrs;
+
         float mScaleWidth = DO_NOT_SCALE;
         float mScaleHeight = DO_NOT_SCALE;
         int mGravity = Gravity.LEFT;
         boolean mUseIntrinsicSizeAsMin = false;
         int mInitialLevel = 0;
 
-        ScaleState(ScaleState orig) {
-            super(orig);
+        ScaleState(ScaleState orig, Resources res) {
+            super(orig, res);
 
             if (orig != null) {
                 mScaleWidth = orig.mScaleWidth;

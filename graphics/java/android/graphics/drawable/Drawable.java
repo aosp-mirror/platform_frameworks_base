@@ -55,6 +55,8 @@ import java.lang.ref.WeakReference;
 import java.util.Arrays;
 import java.util.Collection;
 
+import com.android.internal.R;
+
 /**
  * A Drawable is a general abstraction for "something that can be drawn."  Most
  * often you will deal with Drawable as the type of resource retrieved for
@@ -791,8 +793,10 @@ public abstract class Drawable {
 
     /**
      * Applies the specified theme to this Drawable and its children.
+     *
+     * @param t the theme to apply
      */
-    public void applyTheme(@SuppressWarnings("unused") Theme t) {
+    public void applyTheme(@NonNull @SuppressWarnings("unused") Theme t) {
     }
 
     public boolean canApplyTheme() {
@@ -1177,8 +1181,8 @@ public abstract class Drawable {
      *
      * @see #inflate(Resources, XmlPullParser, AttributeSet, Theme)
      */
-    public void inflate(Resources r, XmlPullParser parser, AttributeSet attrs)
-            throws XmlPullParserException, IOException {
+    public void inflate(@NonNull Resources r, @NonNull XmlPullParser parser,
+            @NonNull AttributeSet attrs) throws XmlPullParserException, IOException {
         inflate(r, parser, attrs, null);
     }
 
@@ -1192,17 +1196,11 @@ public abstract class Drawable {
      * @throws XmlPullParserException
      * @throws IOException
      */
-    public void inflate(Resources r, XmlPullParser parser, AttributeSet attrs, Theme theme)
+    public void inflate(@NonNull Resources r, @NonNull XmlPullParser parser,
+            @NonNull AttributeSet attrs, @Nullable Theme theme)
             throws XmlPullParserException, IOException {
-        final TypedArray a;
-        if (theme != null) {
-            a = theme.obtainStyledAttributes(
-                    attrs, com.android.internal.R.styleable.Drawable, 0, 0);
-        } else {
-            a = r.obtainAttributes(attrs, com.android.internal.R.styleable.Drawable);
-        }
-
-        inflateWithAttributes(r, parser, a, com.android.internal.R.styleable.Drawable_visible);
+        final TypedArray a = obtainAttributes(r, theme, attrs, R.styleable.Drawable);
+        mVisible = a.getBoolean(R.styleable.Drawable_visible, mVisible);
         a.recycle();
     }
 
@@ -1212,8 +1210,8 @@ public abstract class Drawable {
      * @throws XmlPullParserException
      * @throws IOException
      */
-    void inflateWithAttributes(Resources r, XmlPullParser parser, TypedArray attrs, int visibleAttr)
-            throws XmlPullParserException, IOException {
+    void inflateWithAttributes(@NonNull Resources r, @NonNull XmlPullParser parser,
+            @NonNull TypedArray attrs, int visibleAttr) throws XmlPullParserException, IOException {
         mVisible = attrs.getBoolean(visibleAttr, mVisible);
     }
 

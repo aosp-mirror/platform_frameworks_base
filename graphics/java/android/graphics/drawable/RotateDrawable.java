@@ -21,6 +21,8 @@ import com.android.internal.R;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 
+import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.graphics.Canvas;
 import android.graphics.Rect;
 import android.content.res.Resources;
@@ -58,22 +60,46 @@ public class RotateDrawable extends DrawableWrapper {
      * Creates a new rotating drawable with no wrapped drawable.
      */
     public RotateDrawable() {
-        this(new RotateState(null), null);
+        this(new RotateState(null, null), null);
     }
 
     @Override
-    public void inflate(Resources r, XmlPullParser parser, AttributeSet attrs, Theme theme)
+    public void inflate(@NonNull Resources r, @NonNull XmlPullParser parser,
+            @NonNull AttributeSet attrs, @Nullable Theme theme)
             throws XmlPullParserException, IOException {
         final TypedArray a = obtainAttributes(r, theme, attrs, R.styleable.RotateDrawable);
-        super.inflateWithAttributes(r, parser, a, R.styleable.RotateDrawable_visible);
+
+        // Inflation will advance the XmlPullParser and AttributeSet.
+        super.inflate(r, parser, attrs, theme);
 
         updateStateFromTypedArray(a);
-        inflateChildDrawable(r, parser, attrs, theme);
         verifyRequiredAttributes(a);
         a.recycle();
     }
 
-    private void verifyRequiredAttributes(TypedArray a) throws XmlPullParserException {
+    @Override
+    public void applyTheme(@NonNull Theme t) {
+        super.applyTheme(t);
+
+        final RotateState state = mState;
+        if (state == null) {
+            return;
+        }
+
+        if (state.mThemeAttrs != null) {
+            final TypedArray a = t.resolveAttributes(state.mThemeAttrs, R.styleable.RotateDrawable);
+            try {
+                updateStateFromTypedArray(a);
+                verifyRequiredAttributes(a);
+            } catch (XmlPullParserException e) {
+                throw new RuntimeException(e);
+            } finally {
+                a.recycle();
+            }
+        }
+    }
+
+    private void verifyRequiredAttributes(@NonNull TypedArray a) throws XmlPullParserException {
         // If we're not waiting on a theme, verify required attributes.
         if (getDrawable() == null && (mState.mThemeAttrs == null
                 || mState.mThemeAttrs[R.styleable.RotateDrawable_drawable] == 0)) {
@@ -83,11 +109,14 @@ public class RotateDrawable extends DrawableWrapper {
         }
     }
 
-    @Override
-    void updateStateFromTypedArray(TypedArray a) {
-        super.updateStateFromTypedArray(a);
-
+    private void updateStateFromTypedArray(@NonNull TypedArray a) {
         final RotateState state = mState;
+        if (state == null) {
+            return;
+        }
+
+        // Account for any configuration changes.
+        state.mChangingConfigurations |= a.getChangingConfigurations();
 
         // Extract the theme attributes, if any.
         state.mThemeAttrs = a.extractThemeAttrs();
@@ -109,35 +138,6 @@ public class RotateDrawable extends DrawableWrapper {
         state.mToDegrees = a.getFloat(
                 R.styleable.RotateDrawable_toDegrees, state.mToDegrees);
         state.mCurrentDegrees = state.mFromDegrees;
-
-        final Drawable dr = a.getDrawable(R.styleable.RotateDrawable_drawable);
-        if (dr != null) {
-            setDrawable(dr);
-        }
-    }
-
-    @Override
-    public void applyTheme(Theme t) {
-        final RotateState state = mState;
-        if (state == null) {
-            return;
-        }
-
-        if (state.mThemeAttrs != null) {
-            final TypedArray a = t.resolveAttributes(state.mThemeAttrs, R.styleable.RotateDrawable);
-            try {
-                updateStateFromTypedArray(a);
-                verifyRequiredAttributes(a);
-            } catch (XmlPullParserException e) {
-                throw new RuntimeException(e);
-            } finally {
-                a.recycle();
-            }
-        }
-
-        // The drawable may have changed as a result of applying the theme, so
-        // apply the theme to the wrapped drawable last.
-        super.applyTheme(t);
     }
 
     @Override
@@ -316,11 +316,13 @@ public class RotateDrawable extends DrawableWrapper {
 
     @Override
     DrawableWrapperState mutateConstantState() {
-        mState = new RotateState(mState);
+        mState = new RotateState(mState, null);
         return mState;
     }
 
     static final class RotateState extends DrawableWrapper.DrawableWrapperState {
+        private int[] mThemeAttrs;
+
         boolean mPivotXRel = true;
         float mPivotX = 0.5f;
         boolean mPivotYRel = true;
@@ -329,8 +331,8 @@ public class RotateDrawable extends DrawableWrapper {
         float mToDegrees = 360.0f;
         float mCurrentDegrees = 0.0f;
 
-        RotateState(RotateState orig) {
-            super(orig);
+        RotateState(RotateState orig, Resources res) {
+            super(orig, res);
 
             if (orig != null) {
                 mPivotXRel = orig.mPivotXRel;

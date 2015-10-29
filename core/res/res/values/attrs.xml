@@ -5018,6 +5018,12 @@ i
         <attr name="autoMirrored" format="boolean" />
     </declare-styleable>
 
+    <!-- Drawable class used to wrap other drawables. -->
+    <declare-styleable name="DrawableWrapper">
+        <!-- The wrapped drawable. -->
+        <attr name="drawable" />
+    </declare-styleable>
+
     <!-- Drawable used to render several states. Each state is represented by
          a child drawable. -->
     <declare-styleable name="StateListDrawable">
@@ -5385,6 +5391,7 @@ i
         <attr name="color" />
     </declare-styleable>
 
+    <!-- Drawable used to wrap and inset another drawable. -->
     <declare-styleable name="InsetDrawable">
         <attr name="visible" />
         <attr name="drawable" />
