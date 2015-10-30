@@ -29,10 +29,11 @@
         android:background="@drawable/non_client_decor_title"
         android:focusable="false"
         android:descendantFocusability="blocksDescendants" >
-        <TextView
+        <LinearLayout
+            android:id="@+id/client_decor_placeholder"
             android:layout_width="0dp"
             android:layout_height="match_parent"
-            android:layout_weight="1" />
+            android:layout_weight="1"/>
         <Button
             android:id="@+id/maximize_window"
             android:layout_width="32dp"

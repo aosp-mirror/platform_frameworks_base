@@ -428,8 +428,7 @@ public class NonClientDecorView extends LinearLayout
 
         // The render nodes for the multi threaded renderer.
         private ThreadedRenderer mRenderer;
-        private RenderNode mFrameNode;
-        private RenderNode mBackdropNode;
+        private RenderNode mFrameAndBackdropNode;
 
         private final Rect mOldTargetRect = new Rect();
         private final Rect mNewTargetRect = new Rect();
@@ -450,13 +449,11 @@ public class NonClientDecorView extends LinearLayout
             setName("ResizeFrame");
             mRenderer = renderer;
 
-            // Create the render nodes for our frame and backdrop which can be resized independently
-            // from the content.
-            mFrameNode = RenderNode.create("FrameNode", null);
-            mBackdropNode = RenderNode.create("BackdropNode", null);
+            // Create a render node for the content and frame backdrop
+            // which can be resized independently from the content.
+            mFrameAndBackdropNode = RenderNode.create("FrameAndBackdropNode", null);
 
-            mRenderer.addRenderNode(mFrameNode, false);
-            mRenderer.addRenderNode(mBackdropNode, true);
+            mRenderer.addRenderNode(mFrameAndBackdropNode, true);
 
             // Set the initial bounds and draw once so that we do not get a broken frame.
             mTargetRect.set(initialBounds);
@@ -504,10 +501,9 @@ public class NonClientDecorView extends LinearLayout
                     // Invalidate the current content bounds.
                     mRenderer.setContentDrawBounds(0, 0, 0, 0);
 
-                    // Remove the render nodes again
+                    // Remove the render node again
                     // (see comment above - better to do that only once).
-                    mRenderer.removeRenderNode(mFrameNode);
-                    mRenderer.removeRenderNode(mBackdropNode);
+                    mRenderer.removeRenderNode(mFrameAndBackdropNode);
 
                     mRenderer = null;
 
@@ -575,7 +571,7 @@ public class NonClientDecorView extends LinearLayout
 
                 mRenderer.setContentDrawBounds(
                         mLastXOffset,
-                        mLastYOffset + mLastCaptionHeight,
+                        mLastYOffset,
                         mLastXOffset + mLastContentWidth,
                         mLastYOffset + mLastCaptionHeight + mLastContentHeight);
                 // If this was the first call and changeWindowSizeLocked got already called prior
@@ -623,30 +619,20 @@ public class NonClientDecorView extends LinearLayout
             final int width = newBounds.width();
             final int height = newBounds.height();
 
-            // Produce the draw calls.
-            // TODO(skuhne): Create a separate caption view which draws this. If the shadow should
-            // be resized while the window resizes, this hierarchy needs to have the elevation.
-            // That said - it is probably no good idea to draw the shadow every time since it costs
-            // a considerable time which we should rather spend for resizing the content and it does
-            // barely show while the entire screen is moving.
-            mFrameNode.setLeftTopRightBottom(left, top, left + width, top + mLastCaptionHeight);
-            DisplayListCanvas canvas = mFrameNode.start(width, height);
+            mFrameAndBackdropNode.setLeftTopRightBottom(left, top, left + width, top + height);
+
+            // Draw the caption and content backdrops in to our render node.
+            DisplayListCanvas canvas = mFrameAndBackdropNode.start(width, height);
             mCaptionBackgroundDrawable.setBounds(0, 0, left + width, top + mLastCaptionHeight);
             mCaptionBackgroundDrawable.draw(canvas);
-            mFrameNode.end(canvas);
-
-            mBackdropNode.setLeftTopRightBottom(left, top + mLastCaptionHeight, left + width,
-                    top + height);
 
             // The backdrop: clear everything with the background. Clipping is done elsewhere.
-            canvas = mBackdropNode.start(width, height - mLastCaptionHeight);
-            mResizingBackgroundDrawable.setBounds(0, 0, left + width, top + height);
+            mResizingBackgroundDrawable.setBounds(0, mLastCaptionHeight, left + width, top + height);
             mResizingBackgroundDrawable.draw(canvas);
-            mBackdropNode.end(canvas);
+            mFrameAndBackdropNode.end(canvas);
 
-            // We need to render both rendered nodes explicitly.
-            mRenderer.drawRenderNode(mFrameNode);
-            mRenderer.drawRenderNode(mBackdropNode);
+            // We need to render the node explicitly
+            mRenderer.drawRenderNode(mFrameAndBackdropNode);
 
             reportDrawIfNeeded();
         }

@@ -345,22 +345,24 @@ void CanvasContext::draw() {
             dirty.fLeft, dirty.fTop, dirty.fRight, dirty.fBottom, mOpaque);
 
     Rect outBounds;
-    // It there are multiple render nodes, they are as follows:
-    // #0 - backdrop
+    // It there are multiple render nodes, they are laid out as follows:
+    // #0 - backdrop (content + caption)
     // #1 - content (positioned at (0,0) and clipped to - its bounds mContentDrawBounds)
-    // #2 - frame
+    // #2 - additional overlay nodes
     // Usually the backdrop cannot be seen since it will be entirely covered by the content. While
     // resizing however it might become partially visible. The following render loop will crop the
-    // backdrop against the content and draw the remaining part of it. It will then crop the content
-    // against the backdrop (since that indicates a shrinking of the window) and then the frame
-    // around everything.
+    // backdrop against the content and draw the remaining part of it. It will then draw the content
+    // cropped to the backdrop (since that indicates a shrinking of the window).
+    //
+    // Additional nodes will be drawn on top with no particular clipping semantics.
+
     // The bounds of the backdrop against which the content should be clipped.
     Rect backdropBounds = mContentDrawBounds;
     // Usually the contents bounds should be mContentDrawBounds - however - we will
     // move it towards the fixed edge to give it a more stable appearance (for the moment).
     Rect contentBounds;
     // If there is no content bounds we ignore the layering as stated above and start with 2.
-    int layer = (mContentDrawBounds.isEmpty() || mRenderNodes.size() <= 2) ? 2 : 0;
+    int layer = (mContentDrawBounds.isEmpty() || mRenderNodes.size() == 1) ? 2 : 0;
     // Draw all render nodes. Note that
     for (const sp<RenderNode>& node : mRenderNodes) {
         if (layer == 0) { // Backdrop.
@@ -437,6 +439,7 @@ void CanvasContext::draw() {
             const float dy = backdropBounds.top - top;
             const float width = backdropBounds.getWidth();
             const float height = backdropBounds.getHeight();
+
             mCanvas->translate(dx, dy);
             if (mCanvas->clipRect(left, top, left + width, top + height, SkRegion::kIntersect_Op)) {
                 mCanvas->drawRenderNode(node.get(), outBounds);
