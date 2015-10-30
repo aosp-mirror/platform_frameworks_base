@@ -35,7 +35,8 @@ import android.util.Log;
  * the {@link android.Manifest.permission#BIND_CONDITION_PROVIDER_SERVICE} permission
  * and include an intent filter with the {@link #SERVICE_INTERFACE} action. If you want users to be
  * able to create and update conditions for this service to monitor, include the
- * {@link #META_DATA_RULE_TYPE} and {@link #META_DATA_CONFIGURATION_ACTIVITY} tags. For example:</p>
+ * {@link #META_DATA_RULE_TYPE} and {@link #META_DATA_CONFIGURATION_ACTIVITY} tags and request the
+ * {@link android.Manifest.permission#ACCESS_NOTIFICATION_POLICY} permission. For example:</p>
  * <pre>
  * &lt;service android:name=".MyConditionProvider"
  *          android:label="&#64;string/service_name"
