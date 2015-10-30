@@ -345,20 +345,21 @@ abstract public class ManagedServices {
                 userId);
         if (DEBUG)
             Slog.v(TAG, mConfig.serviceInterface + " services: " + installedServices);
+        if (installedServices != null) {
+            for (int i = 0, count = installedServices.size(); i < count; i++) {
+                ResolveInfo resolveInfo = installedServices.get(i);
+                ServiceInfo info = resolveInfo.serviceInfo;
 
-        for (int i = 0, count = installedServices.size(); i < count; i++) {
-            ResolveInfo resolveInfo = installedServices.get(i);
-            ServiceInfo info = resolveInfo.serviceInfo;
-
-            ComponentName component = new ComponentName(info.packageName, info.name);
-            if (!mConfig.bindPermission.equals(info.permission)) {
-                Slog.w(TAG, "Skipping " + getCaption() + " service "
-                        + info.packageName + "/" + info.name
-                        + ": it does not require the permission "
-                        + mConfig.bindPermission);
-                continue;
+                ComponentName component = new ComponentName(info.packageName, info.name);
+                if (!mConfig.bindPermission.equals(info.permission)) {
+                    Slog.w(TAG, "Skipping " + getCaption() + " service "
+                            + info.packageName + "/" + info.name
+                            + ": it does not require the permission "
+                            + mConfig.bindPermission);
+                    continue;
+                }
+                installed.add(component);
             }
-            installed.add(component);
         }
         return installed;
     }
