@@ -145,7 +145,7 @@ page.tags="databinding", "layouts"
 &mdash; it's a support library, so you can use it with all Android platform
 versions back to <strong>Android 2.1</strong> (API level 7+).</p>
 
-<p>To use data binding, Android Plugin for Gradle <strong>1.3.0-beta4</strong>
+<p>To use data binding, Android Plugin for Gradle <strong>1.5.0-alpha1</strong>
 or higher is required.</p>
 
 <h4>Beta release</h4>
@@ -191,54 +191,22 @@ or higher is required.</p>
 <p>To get started with Data Binding, download the library from the Support
 repository in the Android SDK manager. </p>
 
-<p>The Data Binding plugin requires Android Plugin for Gradle <strong>1.3.0-beta4
-or higher</strong>, so update your build dependencies (in the top-level
-<code>build.gradle</code> file) as needed.</p>
+<p>
+To configure your app to use data binding, add the <code>dataBinding</code> element to your
+top-level <code>build.gradle</code> file with the following configuration: </p>
+
+<pre>
+android {
+    ....
+    dataBinding {
+        enabled = true
+    }
+}
+</pre>
 
 <p>Also, make sure you are using a compatible version of Android Studio.
 <strong>Android Studio 1.3</strong> adds the code-completion and layout-preview
 support for data binding.</p>
-
-<p>
-  <strong>Setting Up Work Environment:</strong>
-</p>
-
-<p>
-  To set up your application to use data binding, add data binding to the class
-  path of your top-level <code>build.gradle</code> file, right below "android".
-</p>
-
-<pre>
-   dependencies {
-       classpath <strong>"com.android.tools.build:gradle:1.3.0-beta4"</strong>
-       classpath <strong>"com.android.databinding:dataBinder:1.0-rc1"</strong>
-   }
-</pre>
-<p>
-  Then make sure jcenter is in the repositories list for your projects in the top-level
-  <code>build.gradle</code> file.
-</p>
-
-<pre>
-allprojects {
-   repositories {
-       jcenter()
-   }
-}
-</pre>
-<p>
-  In each module you want to use data binding, apply the plugin right after
-  android plugin
-</p>
-
-<pre>
-apply plugin: &apos;com.android.application&apos;
-apply plugin: &apos;com.android.databinding&apos;
-</pre>
-<p>
-  The data binding plugin is going to add necessary <strong>provided</strong>
-  and <strong>compile configuration</strong> dependencies to your project.
-</p>
 
 <h2 id="data_binding_layout_files">
   Data Binding Layout Files
