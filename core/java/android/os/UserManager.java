@@ -499,14 +499,9 @@ public class UserManager {
     /** @hide */
     public static final int PIN_VERIFICATION_SUCCESS = -1;
 
-    private static UserManager sInstance = null;
-
     /** @hide */
-    public synchronized static UserManager get(Context context) {
-        if (sInstance == null) {
-            sInstance = (UserManager) context.getSystemService(Context.USER_SERVICE);
-        }
-        return sInstance;
+    public static UserManager get(Context context) {
+        return (UserManager) context.getSystemService(Context.USER_SERVICE);
     }
 
     /** @hide */
