@@ -15,12 +15,19 @@
 ** limitations under the License.
 */
 -->
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
-    android:padding="0dp"
-    android:layout_margin="20dp"
-    android:elevation="2dp"
-    android:focusable="true"
-    android:focusableInTouchMode="true"
-    android:background="?attr/floatingToolbarPopupBackgroundDrawable"/>
+<set
+    xmlns:android="http://schemas.android.com/apk/res/android" >
+    <objectAnimator
+        android:duration="300"
+        android:propertyXName="translateX"
+        android:propertyYName="translateY"
+        android:pathData="M 0.0,6.0 c -1.08333,-1.0 -5.41667,-5.0 -6.5,-6.0"
+        android:interpolator="@android:interpolator/fast_out_slow_in" />
+    <objectAnimator
+        android:duration="400"
+        android:propertyName="rotation"
+        android:valueFrom="0.0"
+        android:valueTo="45.0"
+        android:valueType="floatType"
+        android:interpolator="@interpolator/ft_avd_toarrow_animation_interpolator_1" />
+</set>
