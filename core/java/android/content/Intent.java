@@ -1649,6 +1649,14 @@ public class Intent implements Parcelable, Cloneable {
             = "android.intent.extra.GET_PERMISSIONS_APP_LABEL_LIST_RESULT";
 
     /**
+     * Boolean list describing if the app is a system app for apps that have one or more runtime
+     * permissions.
+     * @hide
+     */
+    public static final String EXTRA_GET_PERMISSIONS_IS_SYSTEM_APP_LIST_RESULT
+            = "android.intent.extra.GET_PERMISSIONS_IS_SYSTEM_APP_LIST_RESULT";
+
+    /**
      * Required extra to be sent with {@link #ACTION_GET_PERMISSIONS_COUNT} broadcasts.
      * @hide
      */
