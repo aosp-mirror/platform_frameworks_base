@@ -4799,9 +4799,13 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         if (info.isGuest()) {
             throw new IllegalStateException("Cannot set a profile owner on a guest");
         }
-        if (getProfileOwner(userHandle) != null) {
+        if (mOwners.hasProfileOwner(userHandle)) {
             throw new IllegalStateException("Trying to set the profile owner, but profile owner "
                     + "is already set.");
+        }
+        if (mOwners.hasDeviceOwner() && mOwners.getDeviceOwnerUserId() == userHandle) {
+            throw new IllegalStateException("Trying to set the profile owner, but the user "
+                    + "already has a device owner.");
         }
         int callingUid = mInjector.binderGetCallingUid();
         if (callingUid == Process.SHELL_UID || callingUid == Process.ROOT_UID) {
@@ -4831,6 +4835,10 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         if (mOwners.hasDeviceOwner()) {
             throw new IllegalStateException("Trying to set the device owner, but device owner "
                     + "is already set.");
+        }
+        if (mOwners.hasProfileOwner(userId)) {
+            throw new IllegalStateException("Trying to set the device owner, but the user already "
+                    + "has a profile owner.");
         }
         if (!mUserManager.isUserRunning(new UserHandle(userId))) {
             throw new IllegalStateException("User not running: " + userId);
