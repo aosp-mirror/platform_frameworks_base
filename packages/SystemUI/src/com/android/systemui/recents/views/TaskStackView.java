@@ -1273,8 +1273,9 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
             // the next task
             RecentsConfiguration config = Recents.getConfiguration();
             RecentsActivityLaunchState launchState = config.getLaunchState();
-            setFocusedTask(taskIndex - 1,
-                    !mStack.getTasks().get(taskIndex - 1).isFreeformTask() /* scrollToTask */,
+            boolean isFreeformTask = taskIndex > 0 ?
+                    mStack.getTasks().get(taskIndex - 1).isFreeformTask() : false;
+            setFocusedTask(taskIndex - 1, !isFreeformTask /* scrollToTask */,
                     launchState.launchedWithAltTab);
         }
     }
