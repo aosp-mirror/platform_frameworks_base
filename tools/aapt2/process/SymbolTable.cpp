@@ -16,9 +16,11 @@
 
 #include "ConfigDescription.h"
 #include "Resource.h"
-#include "util/Util.h"
+#include "ValueVisitor.h"
 
 #include "process/SymbolTable.h"
+#include "util/Comparators.h"
+#include "util/Util.h"
 
 #include <androidfw/AssetManager.h>
 #include <androidfw/ResourceTypes.h>
@@ -34,7 +36,7 @@ const ISymbolTable::Symbol* SymbolTableWrapper::findByName(const ResourceName& n
     if (!result) {
         if (name.type == ResourceType::kAttr) {
             // Recurse and try looking up a private attribute.
-            return findByName(ResourceName{ name.package, ResourceType::kAttrPrivate, name.entry });
+            return findByName(ResourceName(name.package, ResourceType::kAttrPrivate, name.entry));
         }
         return {};
     }
@@ -48,28 +50,26 @@ const ISymbolTable::Symbol* SymbolTableWrapper::findByName(const ResourceName& n
     }
 
     std::shared_ptr<Symbol> symbol = std::make_shared<Symbol>();
-    symbol->id = ResourceId{
-            sr.package->id.value(), sr.type->id.value(), sr.entry->id.value() };
+    symbol->id = ResourceId(sr.package->id.value(), sr.type->id.value(), sr.entry->id.value());
 
     if (name.type == ResourceType::kAttr || name.type == ResourceType::kAttrPrivate) {
-        auto lt = [](ResourceConfigValue& lhs, const ConfigDescription& rhs) -> bool {
-            return lhs.config < rhs;
-        };
-
         const ConfigDescription kDefaultConfig;
         auto iter = std::lower_bound(sr.entry->values.begin(), sr.entry->values.end(),
-                                     kDefaultConfig, lt);
+                                     kDefaultConfig, cmp::lessThan);
 
         if (iter != sr.entry->values.end() && iter->config == kDefaultConfig) {
             // This resource has an Attribute.
-            symbol->attribute = util::make_unique<Attribute>(
-                    *static_cast<Attribute*>(iter->value.get()));
+            if (Attribute* attr = valueCast<Attribute>(iter->value.get())) {
+                symbol->attribute = std::unique_ptr<Attribute>(attr->clone(nullptr));
+            } else {
+                return {};
+            }
         }
     }
 
     if (name.type == ResourceType::kAttrPrivate) {
         // Masquerade this entry as kAttr.
-        mCache.put(ResourceName{ name.package, ResourceType::kAttr, name.entry }, symbol);
+        mCache.put(ResourceName(name.package, ResourceType::kAttr, name.entry), symbol);
     } else {
         mCache.put(name, symbol);
     }

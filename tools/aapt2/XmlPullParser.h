@@ -158,7 +158,6 @@ private:
         size_t depth;
         std::u16string data1;
         std::u16string data2;
-        std::u16string comment;
         std::vector<Attribute> attributes;
     };
 

@@ -15,10 +15,11 @@
  */
 
 #include "Resource.h"
-#include "flatten/ResourceTypeExtensions.h"
 #include "ResourceValues.h"
-#include "util/Util.h"
 #include "ValueVisitor.h"
+
+#include "util/Util.h"
+#include "flatten/ResourceTypeExtensions.h"
 
 #include <androidfw/ResourceTypes.h>
 #include <limits>
@@ -35,16 +36,8 @@ void BaseItem<Derived>::accept(RawValueVisitor* visitor) {
     visitor->visit(static_cast<Derived*>(this));
 }
 
-bool Value::isItem() const {
-    return false;
-}
-
 bool Value::isWeak() const {
     return false;
-}
-
-bool Item::isItem() const {
-    return true;
 }
 
 RawString::RawString(const StringPool::Ref& ref) : value(ref) {

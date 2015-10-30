@@ -266,13 +266,14 @@ struct LinkCommand {
                 for (const auto& type : package->types) {
                     for (const auto& entry : type->entries) {
                         for (const auto& configValue : entry->values) {
-                            mContext.getDiagnostics()->error(DiagMessage(configValue.source)
-                                                             << "defined resource '"
-                                                             << ResourceNameRef(package->name,
-                                                                                type->type,
-                                                                                entry->name)
-                                                             << "' for external package '"
-                                                             << package->name << "'");
+                            mContext.getDiagnostics()->error(
+                                    DiagMessage(configValue.value->getSource())
+                                                << "defined resource '"
+                                                << ResourceNameRef(package->name,
+                                                                   type->type,
+                                                                   entry->name)
+                                                << "' for external package '"
+                                                << package->name << "'");
                             error = true;
                         }
                     }
@@ -472,10 +473,11 @@ struct LinkCommand {
 
                         Maybe<ResourceName> mangledName = mContext.getNameMangler()->mangleName(
                                 exportedSymbol.name);
-                        if (!mergedTable.addResource(
+                        std::unique_ptr<Id> id = util::make_unique<Id>();
+                        id->setSource(f.source.withLine(exportedSymbol.line));
+                        if (!mergedTable.addResourceAllowMangled(
                                 mangledName ? mangledName.value() : exportedSymbol.name,
-                                {}, {}, f.source.withLine(exportedSymbol.line),
-                                util::make_unique<Id>(), mContext.getDiagnostics())) {
+                                {}, std::move(id), mContext.getDiagnostics())) {
                             error = true;
                         }
                     }

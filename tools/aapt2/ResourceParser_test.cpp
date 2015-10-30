@@ -379,18 +379,39 @@ TEST_F(ResourceParserTest, ParsePlural) {
 }
 
 TEST_F(ResourceParserTest, ParseCommentsWithResource) {
-    std::string input = "<!-- This is a comment -->\n"
+    std::string input = "<!--This is a comment-->\n"
                         "<string name=\"foo\">Hi</string>";
     ASSERT_TRUE(testParse(input));
 
-    Maybe<ResourceTable::SearchResult> result = mTable.findResource(
-            test::parseNameOrDie(u"@string/foo"));
-    AAPT_ASSERT_TRUE(result);
+    String* value = test::getValue<String>(&mTable, u"@string/foo");
+    ASSERT_NE(nullptr, value);
+    EXPECT_EQ(value->getComment(), u"This is a comment");
+}
 
-    ResourceEntry* entry = result.value().entry;
-    ASSERT_NE(entry, nullptr);
-    ASSERT_FALSE(entry->values.empty());
-    EXPECT_EQ(entry->values.front().comment, u"This is a comment");
+TEST_F(ResourceParserTest, DoNotCombineMultipleComments) {
+    std::string input = "<!--One-->\n"
+                        "<!--Two-->\n"
+                        "<string name=\"foo\">Hi</string>";
+
+    ASSERT_TRUE(testParse(input));
+
+    String* value = test::getValue<String>(&mTable, u"@string/foo");
+    ASSERT_NE(nullptr, value);
+    EXPECT_EQ(value->getComment(), u"Two");
+}
+
+TEST_F(ResourceParserTest, IgnoreCommentBeforeEndTag) {
+    std::string input = "<!--One-->\n"
+                        "<string name=\"foo\">\n"
+                        "  Hi\n"
+                        "<!--Two-->\n"
+                        "</string>";
+
+    ASSERT_TRUE(testParse(input));
+
+    String* value = test::getValue<String>(&mTable, u"@string/foo");
+    ASSERT_NE(nullptr, value);
+    EXPECT_EQ(value->getComment(), u"One");
 }
 
 /*

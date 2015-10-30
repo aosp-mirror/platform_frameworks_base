@@ -206,13 +206,13 @@ public:
 
                 if (!(typeMask & ResourceUtils::androidTypeToAttributeTypeMask(val.dataType))) {
                     // The actual type of this item is incompatible with the attribute.
-                    DiagMessage msg;
+                    DiagMessage msg(style->getSource());
                     buildAttributeMismatchMessage(&msg, s->attribute.get(), entry.value.get());
                     mContext->getDiagnostics()->error(msg);
                     mError = true;
                 }
             } else {
-                DiagMessage msg;
+                DiagMessage msg(style->getSource());
                 msg << "style attribute '";
                 if (entry.key.name) {
                     msg << entry.key.name.value().package << ":" << entry.key.name.value().entry;

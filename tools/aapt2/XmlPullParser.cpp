@@ -97,7 +97,7 @@ const std::string& XmlPullParser::getLastError() const {
 }
 
 const std::u16string& XmlPullParser::getComment() const {
-    return mEventQueue.front().comment;
+    return mEventQueue.front().data1;
 }
 
 size_t XmlPullParser::getLineNumber() const {

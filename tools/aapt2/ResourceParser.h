@@ -65,12 +65,13 @@ private:
                            StyleString* outStyleString);
 
     /*
-     * Parses the XML subtree and converts it to an Item. The type of Item that can be
-     * parsed is denoted by the `typeMask`. If `allowRawValue` is true and the subtree
-     * can not be parsed as a regular Item, then a RawString is returned. Otherwise
-     * this returns nullptr.
+     * Parses the XML subtree and returns an Item.
+     * The type of Item that can be parsed is denoted by the `typeMask`.
+     * If `allowRawValue` is true and the subtree can not be parsed as a regular Item, then a
+     * RawString is returned. Otherwise this returns false;
      */
-    std::unique_ptr<Item> parseXml(XmlPullParser* parser, uint32_t typeMask, bool allowRawValue);
+    std::unique_ptr<Item> parseXml(XmlPullParser* parser, const uint32_t typeMask,
+                                   const bool allowRawValue);
 
     bool parseResources(XmlPullParser* parser);
     bool parseString(XmlPullParser* parser, ParsedResource* outResource);

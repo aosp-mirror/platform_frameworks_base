@@ -20,21 +20,18 @@
 #include "ValueVisitor.h"
 
 #include "link/Linkers.h"
+#include "util/Comparators.h"
 
 #include <algorithm>
 #include <cassert>
 
 namespace aapt {
 
-static bool cmpConfigValue(const ResourceConfigValue& lhs, const ConfigDescription& config) {
-    return lhs.config < config;
-}
-
 bool shouldGenerateVersionedResource(const ResourceEntry* entry, const ConfigDescription& config,
                                      const int sdkVersionToGenerate) {
     assert(sdkVersionToGenerate > config.sdkVersion);
     const auto endIter = entry->values.end();
-    auto iter = std::lower_bound(entry->values.begin(), endIter, config, cmpConfigValue);
+    auto iter = std::lower_bound(entry->values.begin(), endIter, config, cmp::lessThan);
 
     // The source config came from this list, so it should be here.
     assert(iter != entry->values.end());
@@ -107,21 +104,16 @@ bool AutoVersioner::consume(IAaptContext* context, ResourceTable* table) {
                             // We found attributes from a higher SDK level. Check that
                             // there is no other defined resource for the version we want to
                             // generate.
-                            if (shouldGenerateVersionedResource(entry.get(), configValue.config,
+                            if (shouldGenerateVersionedResource(entry.get(),
+                                                                configValue.config,
                                                                 minSdkStripped.value())) {
                                 // Let's create a new Style for this versioned resource.
                                 ConfigDescription newConfig(configValue.config);
                                 newConfig.sdkVersion = minSdkStripped.value();
 
-                                ResourceConfigValue newValue = {
-                                        newConfig,
-                                        configValue.source,
-                                        configValue.comment,
-                                        std::unique_ptr<Value>(configValue.value->clone(
-                                                &table->stringPool))
-                                };
-
-                                Style* newStyle = static_cast<Style*>(newValue.value.get());
+                                std::unique_ptr<Style> newStyle(style->clone(&table->stringPool));
+                                newStyle->setComment(style->getComment());
+                                newStyle->setSource(style->getSource());
 
                                 // Move the previously stripped attributes into this style.
                                 newStyle->entries.insert(newStyle->entries.end(),
@@ -130,9 +122,13 @@ bool AutoVersioner::consume(IAaptContext* context, ResourceTable* table) {
 
                                 // Insert the new Resource into the correct place.
                                 auto iter = std::lower_bound(entry->values.begin(),
-                                                             entry->values.end(), newConfig,
-                                                             cmpConfigValue);
-                                entry->values.insert(iter, std::move(newValue));
+                                                             entry->values.end(),
+                                                             newConfig,
+                                                             cmp::lessThan);
+
+                                entry->values.insert(
+                                        iter,
+                                        ResourceConfigValue{ newConfig, std::move(newStyle) });
                             }
                         }
                     }

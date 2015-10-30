@@ -422,26 +422,24 @@ bool BinaryResourceParser::parsePublic(const ResourceTablePackage* package,
         const ResourceName name(package->name, *parsedType,
                                 util::getString(mKeyPool, entry->key.index).toString());
 
-        Source source;
+        Symbol symbol;
         if (mSourcePool.getError() == NO_ERROR) {
-            source.path = util::utf16ToUtf8(util::getString(
+            symbol.source.path = util::utf16ToUtf8(util::getString(
                     mSourcePool, util::deviceToHost32(entry->source.index)));
-            source.line = util::deviceToHost32(entry->sourceLine);
+            symbol.source.line = util::deviceToHost32(entry->sourceLine);
         }
 
-        SymbolState state = SymbolState::kUndefined;
         switch (util::deviceToHost16(entry->state)) {
         case Public_entry::kPrivate:
-            state = SymbolState::kPrivate;
+            symbol.state = SymbolState::kPrivate;
             break;
 
         case Public_entry::kPublic:
-            state = SymbolState::kPublic;
+            symbol.state = SymbolState::kPublic;
             break;
         }
 
-        if (!mTable->setSymbolStateAllowMangled(name, resId, source, state,
-                                                mContext->getDiagnostics())) {
+        if (!mTable->setSymbolStateAllowMangled(name, resId, symbol, mContext->getDiagnostics())) {
             return false;
         }
 
@@ -570,14 +568,17 @@ bool BinaryResourceParser::parseType(const ResourceTablePackage* package,
             source.line = util::deviceToHost32(sourceBlock->line);
         }
 
-        if (!mTable->addResourceAllowMangled(name, config, source, std::move(resourceValue),
+        resourceValue->setSource(source);
+        if (!mTable->addResourceAllowMangled(name, config, std::move(resourceValue),
                                              mContext->getDiagnostics())) {
             return false;
         }
 
         if ((entry->flags & ResTable_entry::FLAG_PUBLIC) != 0) {
-            if (!mTable->setSymbolStateAllowMangled(name, resId, mSource.withLine(0),
-                                                    SymbolState::kPublic,
+            Symbol symbol;
+            symbol.state = SymbolState::kPublic;
+            symbol.source = mSource.withLine(0);
+            if (!mTable->setSymbolStateAllowMangled(name, resId, symbol,
                                                     mContext->getDiagnostics())) {
                 return false;
             }
